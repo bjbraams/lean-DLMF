@@ -40,7 +40,9 @@ open scoped Topology Real
 
 noncomputable section
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 local notation "γ" => eulerMascheroniConstant
 
@@ -246,4 +248,4 @@ theorem digamma_three_div_four :
   rw [hsub, hcot] at href
   linarith [digamma_one_div_four, href]
 
-end Real
+end DLMF.Gamma.Real

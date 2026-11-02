@@ -137,7 +137,8 @@ private lemma neg_mul_cos_le_cos_odd_mul (k : ℕ) {t : ℝ} (ht0 : 0 ≤ t) (ht
   linarith [neg_abs_le ((-1 : ℝ) ^ k * Real.sin ((2 * (k : ℝ) + 1) * θ))]
 
 /-- Lower bound for `(-1)ⁿ E₂ₙ₋₁(t)` on `[0, 1/2]`, `n ≥ 2`. -/
-private lemma eulerFun_two_mul_sub_one_lower_bound {n : ℕ} (hn : 2 ≤ n) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1 / 2) :
+private lemma eulerFun_two_mul_sub_one_lower_bound {n : ℕ} (hn : 2 ≤ n) {t : ℝ} (ht0 : 0 ≤ t)
+    (ht1 : t ≤ 1 / 2) :
     4 * (2 * n - 1)! / π ^ (2 * n) * (1 - π ^ 2 / 24) * (1 - 2 * t) ≤
       (-1) ^ n * eulerFun (2 * n - 1) t := by
   set K : ℝ := 4 * (2 * n - 1)! / π ^ (2 * n)
@@ -186,7 +187,8 @@ private lemma eulerFun_two_mul_sub_one_lower_bound {n : ℕ} (hn : 2 ≤ n) {t :
         _ ≤ _ := by linarith
 
 /-- Bracketing the second entry of a sorted list whose least entry `a` is simple. -/
-private lemma getD_one_mem_Ioo_of_sorted {l : List ℝ} {a lo hi z : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
+private lemma getD_one_mem_Ioo_of_sorted {l : List ℝ} {a lo hi z : ℝ}
+    (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
     (hc : l.count a ≤ 1) (hge : ∀ y ∈ l, a ≤ y) (hgt : ∀ y ∈ l, y ≠ a → lo < y) (hz : z ∈ l)
     (hza : z ≠ a) (hzh : z < hi) : lo < l.getD (2 - 1) 0 ∧ l.getD (2 - 1) 0 < hi := by
   match l, hs, ha, hc, hge, hgt, hz with
@@ -234,7 +236,8 @@ private lemma count_half_eulerRealZerosGE_le_one {n : ℕ} (hn : 2 ≤ n) :
   exact hmult
 
 /-- `η (-1)^m E₂ₘ₋₁(t) ≥ 0.77 (1 - 2t)` on `[0, 1/2]`, `η = π^{2m}/(3 (2m-1)!)`, `m ≥ 2`. -/
-private lemma eulerFun_two_mul_sub_one_linear_lower_bound {m : ℕ} (hm : 2 ≤ m) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1 / 2) :
+private lemma eulerFun_two_mul_sub_one_linear_lower_bound {m : ℕ} (hm : 2 ≤ m) {t : ℝ} (ht0 : 0 ≤ t)
+    (ht1 : t ≤ 1 / 2) :
     77 / 100 * (1 - 2 * t) ≤
       π ^ (2 * m) / (3 * (2 * m - 1)!) * ((-1) ^ m * eulerFun (2 * m - 1) t) := by
   have h := eulerFun_two_mul_sub_one_lower_bound hm ht0 ht1
@@ -309,7 +312,8 @@ private lemma eulerRealZero_five_two_bounds :
     rw [lt_div_iff₀ (by positivity)]
     norm_num [Nat.factorial] at this ⊢; linarith
   refine getD_one_mem_Ioo_of_sorted (eulerRealZerosGE_sorted _) (a := 1 / 2) (z := gr) ?_
-    (count_half_eulerRealZerosGE_le_one (n := 3) (by norm_num)) (fun y hy => (mem_eulerRealZerosGE.mp hy).1)
+    (count_half_eulerRealZerosGE_le_one (n := 3) (by norm_num))
+        (fun y hy => (mem_eulerRealZerosGE.mp hy).1)
     (fun y hy hne => ?_) ?_ ?_ ?_
   · exact mem_eulerRealZerosGE.mpr ⟨le_rfl, by rw [h5]; ring⟩
   · obtain ⟨hy1, hy0⟩ := mem_eulerRealZerosGE.mp hy

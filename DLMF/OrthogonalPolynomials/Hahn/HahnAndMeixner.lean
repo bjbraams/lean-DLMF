@@ -127,14 +127,16 @@ theorem continuousHahn_eq_hahnSum (a b c d : ℂ) (n : ℕ) (x : ℝ) :
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ, continuousHahn a b (star
 a) (star b) m x * continuousHahn a b (star a) (star b) n x * continuousHahnWeight a b x = 0`. -/
 @[dlmf 18.19.E4]
-theorem continuousHahn_orthogonal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {m n : ℕ} (hmn : m ≠ n) :
+theorem continuousHahn_orthogonal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {m n : ℕ}
+    (hmn : m ≠ n) :
     ∫ x : ℝ, continuousHahn a b (star a) (star b) m x *
       continuousHahn a b (star a) (star b) n x * continuousHahnWeight a b x = 0 := by
   let C (k : ℕ) : ℂ := I ^ k * poch (a + star a) k * poch (a + star b) k / k.factorial
   have he (x : ℝ) : continuousHahn a b (star a) (star b) m x *
       continuousHahn a b (star a) (star b) n x * continuousHahnWeight a b x =
         (C m * C n) * (HahnMoments.hahnSum a b (star a) (star b) m x *
-          HahnMoments.hahnSum a b (star a) (star b) n x * HahnMoments.weight a b (star a) (star b) x) := by
+          HahnMoments.hahnSum a b (star a) (star b) n x *
+              HahnMoments.weight a b (star a) (star b) x) := by
     rw [continuousHahn_eq_hahnSum, continuousHahn_eq_hahnSum]
     dsimp only [C, continuousHahnWeight, HahnMoments.weight]
     ring
@@ -201,7 +203,8 @@ m x * meixnerPollaczek lam phi n x * meixnerPollaczekWeight lam phi x = if m = n
 Real.pi * Gamma (n + 2 * (lam : ℂ)) / ((2 * sin (phi : ℂ)) ^ (2 * (lam : ℂ)) * n.factorial)
 else 0`. -/
 @[dlmf 18.19.E9]
-theorem meixnerPollaczek_orthogonality {lam phi : ℝ} (hlam : 0 < lam) (hphi : 0 < phi) (hphiπ : phi < Real.pi) (m n : ℕ) :
+theorem meixnerPollaczek_orthogonality {lam phi : ℝ} (hlam : 0 < lam) (hphi : 0 < phi)
+    (hphiπ : phi < Real.pi) (m n : ℕ) :
     ∫ x : ℝ, meixnerPollaczek lam phi m x * meixnerPollaczek lam phi n x *
       meixnerPollaczekWeight lam phi x =
       if m = n then 2 * Real.pi * Gamma (n + 2 * (lam : ℂ)) /
@@ -268,7 +271,8 @@ n`. -/
 theorem meixner_duality (β c : ℂ) (n x : ℕ) : meixner β c n x = meixner β c x n := by
   exact terminatingHG_two_neg_nat_swap n x _ _
 
-/-- Identity under the stated parameter and domain assumptions: `charlier a n x = charlier a x n`. -/
+/-- Identity under the stated parameter and domain assumptions: `charlier a n x = charlier a x n`.
+-/
 @[dlmf 18.21.E2]
 theorem charlier_duality (a : ℂ) (n x : ℕ) : charlier a n x = charlier a x n := by
   exact terminatingHG_two_neg_nat_swap n x _ _
@@ -487,7 +491,8 @@ theorem terminatingHG_forward_difference (n : ℕ) (L B : List ℂ) (x z : ℂ) 
     terminatingHG (n + 1) (-((n + 1 : ℕ) : ℂ) :: (L ++ [-(x + 1)])) B z -
       terminatingHG (n + 1) (-((n + 1 : ℕ) : ℂ) :: (L ++ [-x])) B z =
     ((n + 1 : ℕ) : ℂ) * L.prod / B.prod * z *
-      terminatingHG n (-(n : ℂ) :: (L.map (fun t => t + 1) ++ [-x])) (B.map (fun t => t + 1)) z := by
+      terminatingHG n (-(n : ℂ) :: (L.map (fun t => t + 1) ++ [-x]))
+          (B.map (fun t => t + 1)) z := by
   unfold terminatingHG
   rw [← Finset.sum_sub_distrib, Finset.sum_range_succ', Finset.mul_sum]
   have h0 : (((-((n + 1 : ℕ) : ℂ) :: (L ++ [-(x + 1)])).map (fun t => poch t 0)).prod /
@@ -525,7 +530,8 @@ theorem poch_neg_nat_succ (n : ℕ) : poch (-(n : ℂ)) (n + 1) = 0 := by
 `terminatingHG_forward_difference` for the first numerator parameter. -/
 theorem terminatingHG_first_difference (n : ℕ) (L B : List ℂ) (z : ℂ) :
     terminatingHG (n + 1) (-((n + 1 : ℕ) : ℂ) :: L) B z - terminatingHG n (-(n : ℂ) :: L) B z =
-      -(L.prod / B.prod * z) * terminatingHG n (-(n : ℂ) :: L.map (fun t => t + 1)) (B.map (fun t => t + 1)) z := by
+      -(L.prod / B.prod * z) *
+          terminatingHG n (-(n : ℂ) :: L.map (fun t => t + 1)) (B.map (fun t => t + 1)) z := by
   unfold terminatingHG
   have hext : ∑ k ∈ Finset.range (n + 1), ((-(n : ℂ) :: L).map (fun t => poch t k)).prod /
         (B.map (fun t => poch t k)).prod * z ^ k / (k.factorial : ℂ) =
@@ -715,8 +721,10 @@ theorem meixnerPollaczek_recurrence {lam : ℂ} (hlam : 0 < lam.re) (phi : ℂ) 
 (x + I / 2) - meixnerPollaczek lam phi (n + 1) (x - I / 2)) / I = 2 * sin phi *
 meixnerPollaczek (lam + 1 / 2) phi n x`. -/
 @[dlmf 18.22.E29]
-theorem meixnerPollaczek_central_difference {lam : ℂ} (hlam : 0 < lam.re) (phi : ℂ) (n : ℕ) (x : ℂ) :
-    (meixnerPollaczek lam phi (n + 1) (x + I / 2) - meixnerPollaczek lam phi (n + 1) (x - I / 2)) / I =
+theorem meixnerPollaczek_central_difference {lam : ℂ} (hlam : 0 < lam.re) (phi : ℂ)
+    (n : ℕ) (x : ℂ) :
+    (meixnerPollaczek lam phi (n + 1) (x + I / 2) -
+        meixnerPollaczek lam phi (n + 1) (x - I / 2)) / I =
       2 * sin phi * meixnerPollaczek (lam + 1 / 2) phi n x := by
   have h2 : 0 < (2 * lam).re := by simp; linarith
   have h2l : 2 * lam ≠ 0 := fun h => by rw [h] at h2; simp at h2
@@ -837,7 +845,8 @@ theorem hasSum_poch_mul_poch_neg_nat {β z : ℂ} (hz : ‖z‖ < 1) (k : ℕ) :
 /-- The series with terms `(fun n : ℕ => poch β n / n.factorial * meixner β c n x * z ^ n)`
 converges to `((1 - z / c) ^ x * (1 - z) ^ (-(x : ℂ) - β))`. -/
 @[dlmf 18.23.E4]
-theorem meixner_generating_function {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (x : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem meixner_generating_function {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (x : ℕ) {z : ℂ}
+    (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => poch β n / n.factorial * meixner β c n x * z ^ n)
       ((1 - z / c) ^ x * (1 - z) ^ (-(x : ℂ) - β)) := by
   have hβk : ∀ k, poch β k ≠ 0 := poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hβ)

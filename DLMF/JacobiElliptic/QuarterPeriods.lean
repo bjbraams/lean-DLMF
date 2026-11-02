@@ -104,7 +104,8 @@ theorem jacobiThetaFourTau_zero_ne_zero {τ : ℂ} (hτ : 0 < τ.im) : jacobiThe
   have hQ' : ‖cexp (2 * π * I * τ)‖ < 1 := by
     simpa using norm_exp_mul_pi_I_mul_lt_one (c := 2) two_pos hτ
   rw [jacobiThetaFourTau, jacobiThetaThreeTau, zero_add,
-    show (π : ℂ) / 2 / π = 1 / 2 by field_simp [pi_ne_zero'], jacobiTheta₂_eq_qPochhammerInf_prod _ hτ]
+    show (π : ℂ) / 2 / π = 1 / 2 by field_simp [pi_ne_zero'],
+                                      jacobiTheta₂_eq_qPochhammerInf_prod _ hτ]
   have hw : -cexp (π * I * τ + 2 * π * I * (1 / 2)) = cexp (π * I * τ) := by
     rw [show π * I * τ + 2 * π * I * (1 / 2) = π * I * τ + π * I by ring, exp_add, exp_pi_mul_I]
     ring
@@ -121,7 +122,8 @@ theorem jacobiThetaTwoTau_zero_ne_zero {τ : ℂ} (hτ : 0 < τ.im) : jacobiThet
   have hQ' : ‖cexp (2 * π * I * τ)‖ < 1 := by
     simpa using norm_exp_mul_pi_I_mul_lt_one (c := 2) two_pos hτ
   rw [jacobiThetaTwoTau, jacobiThetaThreeTau, zero_add,
-    show (π : ℂ) * τ / 2 / π = τ / 2 by field_simp [pi_ne_zero'], jacobiTheta₂_eq_qPochhammerInf_prod _ hτ]
+    show (π : ℂ) * τ / 2 / π = τ / 2 by field_simp [pi_ne_zero'],
+                                          jacobiTheta₂_eq_qPochhammerInf_prod _ hτ]
   have hw : -cexp (π * I * τ + 2 * π * I * (τ / 2)) = -cexp (2 * π * I * τ) := by
     congr 2; ring
   have hQw : cexp (2 * π * I * τ) / -cexp (2 * π * I * τ) = -1 := by
@@ -234,7 +236,9 @@ private lemma re_sqrt_mul_conj_pos {m : ℂ} (hm : m.im ≠ 0 ∨ (m.im = 0 ∧ 
       rw [hmr]; push_cast; simp
     have hp1 : 0 < 1 - (1 - m.re) * s := by nlinarith
     have hp2 : 0 < 1 - m.re * t := by nlinarith
-    rw [hw1, hw2, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hp1.le, ← ofReal_cpow hp2.le, conj_ofReal, ← ofReal_mul,
+    rw [hw1, hw2, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hp1.le,
+                                                            ← ofReal_cpow hp2.le,
+                                                            conj_ofReal, ← ofReal_mul,
       ofReal_re]
     exact mul_pos (Real.rpow_pos_of_pos hp1 _) (Real.rpow_pos_of_pos hp2 _)
 

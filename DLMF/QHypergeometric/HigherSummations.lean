@@ -8,11 +8,13 @@ module
 public import DLMF.Bailey
 public import DLMF.QHypergeometric.Convergence
 public import DLMF.QHypergeometric.BasicSummations
+public import DLMF.QHypergeometric.TwoPhiTwoSums
 
 /-!
 # Higher basic summations (DLMF §17.7)
 
-This file proves the summation formulas of DLMF §17.7: `₂φ₂` sums, the `q`-Pfaff–Saalschütz
+This file proves the summation formulas of DLMF §17.7 (the `₂φ₂` sums 17.7.1–17.7.3 are in
+`DLMF.QHypergeometric.TwoPhiTwoSums`): the `q`-Pfaff–Saalschütz
 and `q`-Dixon sums, very-well-poised `₄φ₃`, `₆φ₅` and `₈φ₇` sums, the `q`-Karlsson–Minton
 formulas and bibasic sums, together with counterexamples to two printed formulas.
 
@@ -27,7 +29,6 @@ formulas and bibasic sums, together with counterexamples to two printed formulas
 
 ## Main results
 
-* `two_phi_two_sum`, `two_phi_two_square_sum`, `two_phi_two_even_sum`: DLMF 17.7.1–17.7.3.
 * `q_pfaff_saalschutz`, `nonterminating_saalschutz`: DLMF 17.7.4–17.7.5.
 * `q_dixon_terminating`: the terminating `q`-Dixon sum (DLMF 17.7.6).
 * `four_phi_three_sum`, `eight_phi_seven_quadratic_sum`, `four_phi_three_parity`,
@@ -77,29 +78,6 @@ def qFourPhiThreeValue (a b c q : ℂ) : ℂ :=
 /-- Pointwise definedness of integer shifted factorials before taking ratios. -/
 def QIntPochhammerListDefined (p : List ℂ) (q : ℂ) (k : ℤ) : Prop :=
   0≤k ∨ ∀ a∈p, qPochhammer (a*q^k) q (-k).toNat≠0
-/-- The `2φ2` summation `2φ2(a,q/a;-q,b;q,-b) = (ab,bq/a;q²)_∞/(b;q)_∞` (DLMF 17.7.E1). -/
-@[dlmf 17.7.E1]
-theorem two_phi_two_sum {a b q : ℂ} (ha : a≠0) (hq : ‖q‖<1) (hd : QDenominatorRegular [-q,b] q) :
-    qPhi [a,q/a] [-q,b] q (-b)=qPochhammerListInf [a*b,b*q/a] (q^2)/qPochhammerInf b q := by
-  sorry
-
-/-- The `2φ2` summation at argument `-q` with lower parameters `±ab√q` (DLMF 17.7.E2). -/
-@[dlmf 17.7.E2]
-theorem two_phi_two_square_sum {a b q : ℂ} (hq : ‖q‖<1)
-    (hd : QDenominatorRegular [a*b*Complex.sqrt q,-a*b*Complex.sqrt q] q) :
-    qPhi [a^2,b^2] [a*b*Complex.sqrt q,-a*b*Complex.sqrt q] q (-q)=
-      qPochhammerListInf [a^2*q,b^2*q] (q^2)/qPochhammerListInf [q,a^2*b^2*q] (q^2) := by
-  sorry
-
-/-- The cancelled product retains b=±q^(-m) whenever the lower parameters are regular. -/
-@[dlmf 17.7.E3]
-theorem two_phi_two_even_sum {b c q : ℂ} (hb : b≠0) (hq : ‖q‖<1) (hd : QDenominatorRegular [c,c*q] (q^2)) :
-    qPhi [c^2/b^2,b^2] [c,c*q] (q^2) q=
-      qPochhammerInf q (q^2)/(2*qPochhammerListInf [c,c*q] (q^2))*
-      (qPochhammerInf (-b) q*qPochhammerInf (c/b) q+
-       qPochhammerInf b q*qPochhammerInf (-c/b) q) := by
-  sorry
-
 attribute [local fun_prop] continuous_qPochhammer
 
 /-- `(q^{-n};q)_m ≠ 0` for `m ≤ n` when `0<‖q‖<1`. -/
@@ -141,13 +119,17 @@ private lemma prod_mul_sub_mul_pow_ne_zero {a b c q : ℂ} (hc : c≠0) (hq0 : q
   rw [sub_eq_zero.mp h]
   have : q^(1-(n:ℤ)) * q^(n-1-j) * q^j = 1 := by
     rw [← zpow_natCast, ← zpow_natCast, ← zpow_add₀ hq0, ← zpow_add₀ hq0]
-    rw [show (1-(n:ℤ)) + ((n-1-j : ℕ):ℤ) + (j:ℤ) = 0 by push_cast [Nat.sub_sub, show 1+j ≤ n by omega]; ring]
+    rw [show (1-(n:ℤ)) + ((n-1-j : ℕ):ℤ) + (j:ℤ) = 0 by
+                                                       push_cast [Nat.sub_sub, show 1+j ≤
+                                                         n by omega]; ring]
     simp
   field_simp
   linear_combination -this
 
-/-- The terminating q-Pfaff–Saalschütz sum for nonzero `a,b`, from `DLMF.QSeries.sum_saalschutz_div`. -/
-private lemma sum_saalschutz_of_ne_zero {a b c q : ℂ} (ha : a≠0) (hb : b≠0) (hc : c≠0) (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
+/-- The terminating q-Pfaff–Saalschütz sum for nonzero `a,b`, from
+`DLMF.QSeries.sum_saalschutz_div`. -/
+private lemma sum_saalschutz_of_ne_zero {a b c q : ℂ} (ha : a≠0) (hb : b≠0) (hc : c≠0) (hq0 : q≠0)
+    (hq : ‖q‖<1) (n : ℕ)
     (hX : qPochhammer (a*b*q^(1-(n:ℤ))/c) q n ≠ 0) (hC : qPochhammer c q n ≠ 0) :
     ∑ k ∈ range (n+1), qPochhammer a q k * qPochhammer b q k * qPochhammer (q^(-(n:ℤ))) q k /
       (qPochhammer c q k * qPochhammer (a*b*q^(1-(n:ℤ))/c) q k * qPochhammer q q k) * q^k =
@@ -167,7 +149,8 @@ private lemma sum_saalschutz_of_ne_zero {a b c q : ℂ} (ha : a≠0) (hb : b≠0
   have hXp : q^(1-(n:ℤ))/x = a*b*q^(1-(n:ℤ))/c := by rw [hx]; field_simp
   have hQp : q^(1-(n:ℤ))/q = q^(-(n:ℤ)) := by
     rw [zpow_sub₀ hq0, zpow_one, zpow_neg]; field_simp
-  have key : ∀ m ∈ range (n+1), qPochhammer a q m * qPochhammer b q m * qPochhammer (q^(-(n:ℤ))) q m /
+  have key : ∀ m ∈ range (n+1), qPochhammer a q m * qPochhammer b q m *
+      qPochhammer (q^(-(n:ℤ))) q m /
       (qPochhammer c q m * qPochhammer (a*b*q^(1-(n:ℤ))/c) q m * qPochhammer q q m) * q^m =
       qPochhammer q q n / qPochhammer x q n *
       (qPochhammer a q m * qPochhammer b q m * qPochhammer x q (n - m) * x ^ m /
@@ -184,7 +167,8 @@ private lemma sum_saalschutz_of_ne_zero {a b c q : ℂ} (ha : a≠0) (hb : b≠0
     rw [hQp] at h2
     rw [h1, h2]
     have hE : q^((m.choose 2:ℤ)-(n:ℤ)*m) ≠ 0 := zpow_ne_zero _ hq0
-    rw [show (-q/q) = -1 by field_simp, show (-q/x)^m = (-1)^m*(q^m/x^m) by rw [neg_div, neg_pow, div_pow]]
+    rw [show (-q/q) = -1 by field_simp, show (-q/x)^m =
+                              (-1)^m*(q^m/x^m) by rw [neg_div, neg_pow, div_pow]]
     have hm1 : ((-1:ℂ))^m ≠ 0 := pow_ne_zero _ (by norm_num)
     field_simp
   rw [sum_congr rfl key, ← mul_sum, hS]
@@ -201,7 +185,8 @@ def saalValue (a b c q : ℂ) (n : ℕ) : ℂ :=
         (qPochhammer c q n*((range n).prod (fun j => a*b-c*q^j)))
 
 /-- The cleared q-Pfaff–Saalschütz identity at nonzero `a,b`. -/
-private lemma sum_saalTerm_of_ne_zero {a b c q : ℂ} (ha : a≠0) (hb : b≠0) (hc : c≠0) (hq0 : q≠0) (hq : ‖q‖<1)
+private lemma sum_saalTerm_of_ne_zero {a b c q : ℂ} (ha : a≠0) (hb : b≠0) (hc : c≠0)
+    (hq0 : q≠0) (hq : ‖q‖<1)
     (n : ℕ) (hC : qPochhammer c q n ≠ 0) (hX : qPochhammer (a*b*q^(1-(n:ℤ))/c) q n ≠ 0) :
     ∑ k ∈ range (n+1), saalTerm a b c q n k = saalValue a b c q n := by
   have hxn : qPochhammer (c/(a*b)) q n ≠ 0 := by
@@ -209,7 +194,8 @@ private lemma sum_saalTerm_of_ne_zero {a b c q : ℂ} (ha : a≠0) (hb : b≠0) 
     rw [prod_sub_mul_pow_eq_pow_mul_qPochhammer (mul_ne_zero ha hb)] at h
     exact right_ne_zero_of_mul h
   simp only [saalTerm, saalValue]
-  rw [sum_saalschutz_of_ne_zero ha hb hc hq0 hq n hX hC, prod_sub_mul_pow_eq_pow_mul_qPochhammer ha, prod_sub_mul_pow_eq_pow_mul_qPochhammer hb,
+  rw [sum_saalschutz_of_ne_zero ha hb hc hq0 hq n hX hC, prod_sub_mul_pow_eq_pow_mul_qPochhammer ha,
+      prod_sub_mul_pow_eq_pow_mul_qPochhammer hb,
     prod_sub_mul_pow_eq_pow_mul_qPochhammer (mul_ne_zero ha hb)]
   field_simp
   ring
@@ -233,7 +219,8 @@ private lemma sum_saalTerm_of_punctured {b c q t0 : ℂ} (hq : ‖q‖<1) (hc : 
     simp only [g, saalTerm, saalValue]
     refine ContinuousAt.sub ?_ (by fun_prop (disch := exact h2))
     exact tendsto_finsetSum _ fun k hk => (by fun_prop (disch := exact hkd k hk) :
-      ContinuousAt (fun t : ℂ => qPochhammer t q k * qPochhammer b q k * qPochhammer (q^(-(n:ℤ))) q k /
+      ContinuousAt (fun t : ℂ => qPochhammer t q k * qPochhammer b q k *
+          qPochhammer (q^(-(n:ℤ))) q k /
         (qPochhammer c q k * qPochhammer (t*b*q^(1-(n:ℤ))/c) q k * qPochhammer q q k) * q^k) t0)
   have hXc : ContinuousAt (fun t : ℂ => qPochhammer (t*b*q^(1-(n:ℤ))/c) q n) t0 := by fun_prop
   have hev : g =ᶠ[𝓝[≠] t0] fun _ => 0 := by
@@ -336,11 +323,13 @@ theorem four_phi_three_sum {a b c q : ℂ} (hq : ‖q‖<1) (hz : ‖q*Complex.s
 @[dlmf 17.7.E8]
 theorem eight_phi_seven_quadratic_sum {a b c q ell : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc : c≠0)
     (hell : ell= -c*Complex.sqrt (a*b/q)) (hz : ‖ell*q‖<‖a*b‖)
-    (hd : QDenominatorRegular [Complex.sqrt ell,-Complex.sqrt ell,ell*q/a,ell*q/b,ell*q/c,-ell*q/c,c^2] q) :
+    (hd : QDenominatorRegular
+        [Complex.sqrt ell, -Complex.sqrt ell, ell*q/a, ell*q/b, ell*q/c, -ell*q/c, c^2] q) :
     qPhi [ell,q*Complex.sqrt ell,-q*Complex.sqrt ell,a,b,c,-c,ell*q/c^2]
       [Complex.sqrt ell,-Complex.sqrt ell,ell*q/a,ell*q/b,ell*q/c,-ell*q/c,c^2] q (-ell*q/(a*b))=
       qPochhammerListInf [ell*q,c^2/ell] q*qPochhammerListInf [a*q,b*q,c^2*q/a,c^2*q/b] (q^2)/
-        (qPochhammerListInf [ell*q/a,ell*q/b] q*qPochhammerListInf [q,a*b*q,c^2*q,c^2*q/(a*b)] (q^2)) := by
+        (qPochhammerListInf [ell*q/a, ell*q/b] q*qPochhammerListInf
+            [q, a*b*q, c^2*q, c^2*q/(a*b)] (q^2)) := by
   sorry
 
 /-- A terminating `4φ3` summation at argument `q` whose value depends on the parity of `n` (DLMF
@@ -370,7 +359,8 @@ products (DLMF 17.7.E11). -/
 theorem four_phi_three_infinite_product {c e q : ℂ} (he : e≠0) (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
     (hd : QDenominatorRegular [e,c^2*q/e,-q] q) :
     qPhi [q^(-(n:ℤ)),q^(n+1),c,-c] [e,c^2*q/e,-q] q q=
-      q^((n+1).choose 2)*qPochhammerListInf [e*q^(-(n:ℤ)),e*q^(n+1),c^2*q^(1-(n:ℤ))/e,c^2*q^(n+2)/e] (q^2)/
+      q^((n+1).choose 2)*qPochhammerListInf
+          [e*q^(-(n:ℤ)), e*q^(n+1), c^2*q^(1-(n:ℤ))/e, c^2*q^(n+2)/e] (q^2)/
         qPochhammerListInf [e,c^2*q/e] q := by
   sorry
 
@@ -485,7 +475,8 @@ private lemma jackson_sum_of_regular {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖
     field_simp
     field_simp at hbal
     linear_combination -hbal
-  have hW := DLMF.Bailey.watson_transformation_rational n ha hb hc hd he hq0 (fun m _ => qPochhammer_self_ne_zero hq m)
+  have hW := DLMF.Bailey.watson_transformation_rational n ha hb hc hd he hq0
+      (fun m _ => qPochhammer_self_ne_zero hq m)
     hB hC hD hE (by rw [hYeq]; exact hY) (by rw [show a*q*q^n = a*q^(n+1) by ring]; exact hN)
   rw [sum_congr rfl hA, hW]
   have hXeq : d*e*q^(1-(n:ℤ))/(a*q/b) = a*q/c := by
@@ -508,7 +499,8 @@ private lemma jackson_sum_of_regular {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖
   have e3 : a*q/b/(d*e) = c/a*q^(-(n:ℤ)) := by field_simp; linear_combination hbal
   have e4 : a*q/(d*e) = b*c/a*q^(-(n:ℤ)) := by field_simp; linear_combination hbal
   have e5 : a*q/e = b*c*d/a*q^(-(n:ℤ)) := by field_simp; linear_combination hbal
-  rw [prod_sub_mul_pow_eq_pow_mul_qPochhammer hd, prod_sub_mul_pow_eq_pow_mul_qPochhammer he, prod_sub_mul_pow_eq_pow_mul_qPochhammer (mul_ne_zero hd he), e2, e3, e4,
+  rw [prod_sub_mul_pow_eq_pow_mul_qPochhammer hd, prod_sub_mul_pow_eq_pow_mul_qPochhammer he,
+      prod_sub_mul_pow_eq_pow_mul_qPochhammer (mul_ne_zero hd he), e2, e3, e4,
     qPochhammer_shift_negative (div_ne_zero (mul_ne_zero hc hd) ha) hq0,
     qPochhammer_shift_negative (div_ne_zero hc ha) hq0,
     qPochhammer_shift_negative (div_ne_zero (mul_ne_zero hb hc) ha) hq0,
@@ -575,7 +567,8 @@ private lemma qPochhammerList_ne_zero_of_le {q : ℂ} {k n : ℕ} (hk : k ≤ n)
       (qPochhammerList_ne_zero_of_le hk l (right_ne_zero_of_mul h))
 
 /-- In Jackson's sum, `(aq/(bcd);q)_n ≠ 0` follows from `(aq/e;q)_n ≠ 0` by the balance. -/
-private lemma qPochhammer_div_mul_mul_ne_zero_of_balanced {a b c d e q : ℂ} (hq0 : q≠0) (n : ℕ) (ha : a≠0) (hb : b≠0) (hc : c≠0)
+private lemma qPochhammer_div_mul_mul_ne_zero_of_balanced {a b c d e q : ℂ} (hq0 : q≠0) (n : ℕ)
+    (ha : a≠0) (hb : b≠0) (hc : c≠0)
     (hd : d≠0) (he : e≠0) (hbal : a^2*q=b*c*d*e*q^(-(n:ℤ))) (hE : qPochhammer (a*q/e) q n ≠ 0) :
     qPochhammer (a*q/(b*c*d)) q n ≠ 0 := by
   have e5 : a*q/e = b*c*d/a*q^(-(n:ℤ)) := by field_simp; linear_combination hbal
@@ -587,7 +580,8 @@ private lemma qPochhammer_div_mul_mul_ne_zero_of_balanced {a b c d e q : ℂ} (h
 @[dlmf 17.7.E14]
 theorem jackson_eight_phi_seven {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
     (hbcd : b*c*d≠0) (he : e≠0) (hbal : a^2*q=b*c*d*e*q^(-(n:ℤ)))
-    (hd : QDenominatorRegularThrough [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d,a*q/e,a*q^(n+1)] q n) :
+    (hd : QDenominatorRegularThrough
+        [Complex.sqrt a, -Complex.sqrt a, a*q/b, a*q/c, a*q/d, a*q/e, a*q^(n+1)] q n) :
     qPhi [a,q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e,q^(-(n:ℤ))]
       [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d,a*q/e,a*q^(n+1)] q q=
       qPochhammerList [a*q,a*q/(b*c),a*q/(b*d),a*q/(c*d)] q n/
@@ -633,7 +627,8 @@ theorem jackson_eight_phi_seven {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<
       qPochhammer (a*q/(t*c)) q n ≠ 0 → g t = 0 := by
     intro t ht hBt hEt hYt
     simp only [hgdef, sub_eq_zero]
-    exact jackson_sum_of_regular hq0 hq n ht hc hd0 (hE0 t ht) (hbalE t ht) (mul_ne_zero hS1 hS2) hBt hC
+    exact jackson_sum_of_regular hq0 hq n ht hc hd0 (hE0 t ht) (hbalE t ht)
+        (mul_ne_zero hS1 hS2) hBt hC
       hD hEt hN hYt
   have hEc : ContinuousAt E b := by simp only [hEdef]; fun_prop (disch := exact hbcd')
   have hEb0 := hE0 b hb
@@ -700,7 +695,8 @@ def sixTerm (a b c q : ℂ) (n k : ℕ) : ℂ :=
       qPochhammer q q k) * (a*q^(n+1)/(b*c))^k
 
 /-- The terminating `₆φ₅` sum in rational form when `(aq;q)_{2n} ≠ 0`, from Bailey's lemma. -/
-private lemma sum_sixTerm_of_qPochhammer_two_mul_ne_zero {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ) (hb : b≠0) (hc : c≠0)
+private lemma sum_sixTerm_of_qPochhammer_two_mul_ne_zero {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
+    (n : ℕ) (hb : b≠0) (hc : c≠0)
     (hB : qPochhammer (a*q/b) q n ≠ 0) (hC : qPochhammer (a*q/c) q n ≠ 0)
     (haq : qPochhammer (a*q) q (n+n) ≠ 0) :
     ∑ k ∈ range (n+1), sixTerm a b c q n k =
@@ -804,7 +800,8 @@ lemma sum_sixTerm_eq {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ) (h
       show ContinuousAt (fun t => sixTerm t b c q n k) a
       simp only [sixTerm]
       fun_prop (disch := first | exact hden | exact hbc)
-    · fun_prop (disch := first | exact mul_ne_zero hB hC | exact hb | exact hc | exact mul_ne_zero hb hc)
+    · fun_prop (disch :=
+          first | exact mul_ne_zero hB hC | exact hb | exact hc | exact mul_ne_zero hb hc)
   have h1 : Tendsto g (𝓝[≠] a) (𝓝 (g a)) := hg.tendsto.mono_left nhdsWithin_le_nhds
   exact tendsto_nhds_unique h1 (tendsto_const_nhds.congr' hev.symm)
 
@@ -1043,7 +1040,8 @@ private lemma qMintonFactor_hasSum_gauss {a b q : ℂ} (ha : a ≠ 0) (hq0 : q �
 theorem q_karlsson_minton {a b q : ℂ} (ha : a ≠ 0) (hq0 : q ≠ 0) (hq : ‖q‖ < 1) (p : List (ℂ × ℕ))
     (hz : ‖a⁻¹ * q ^ (1 - (qMintonWeight p : ℤ))‖ < 1)
     (hd : QDenominatorRegular (b * q :: qMintonLower p) q) :
-    qPhi (a :: b :: qMintonUpper p q) (b * q :: qMintonLower p) q (a⁻¹ * q ^ (1 - (qMintonWeight p : ℤ))) =
+    qPhi (a :: b :: qMintonUpper p q) (b * q :: qMintonLower p) q
+        (a⁻¹ * q ^ (1 - (qMintonWeight p : ℤ))) =
       qPochhammerListInf [q, b * q / a] q / qPochhammerListInf [b * q, q / a] q *
       (p.map (fun x => (range x.2).prod (fun j => b - x.1 * q ^ j))).prod /
         (p.map fun x => qPochhammer x.1 q x.2).prod := by
@@ -1069,7 +1067,8 @@ theorem q_karlsson_minton {a b q : ℂ} (ha : a ≠ 0) (hq0 : q ≠ 0) (hq : ‖
         qPochhammer (b * q) q n * qPochhammerList (qMintonLower p) q n by
       simp [qPochhammerList]]
     rw [show qPochhammer a q n * qPochhammer b q n * qPochhammerList (qMintonUpper p q) q n /
-        (qPochhammer (b * q) q n * qPochhammerList (qMintonLower p) q n * qPochhammer q q n) * z ^ n =
+        (qPochhammer (b * q) q n * qPochhammerList (qMintonLower p) q n *
+            qPochhammer q q n) * z ^ n =
         (qPochhammer a q n * qPochhammer b q n /
           (qPochhammer (b * q) q n * qPochhammer q q n) * z ^ n) *
           (qPochhammerList (qMintonUpper p q) q n / qPochhammerList (qMintonLower p) q n) by ring,
@@ -1086,7 +1085,8 @@ theorem q_karlsson_minton {a b q : ℂ} (ha : a ≠ 0) (hq0 : q ≠ 0) (hq : ‖
 
 /-- The primary-source argument is q^(−Σm)/a; the printed extra q is disproved below. -/
 @[dlmf 17.7.E19]
-theorem q_karlsson_minton_zero_corrected {a q : ℂ} (ha : a ≠ 0) (hq0 : q ≠ 0) (hq : ‖q‖ < 1) (p : List (ℂ × ℕ))
+theorem q_karlsson_minton_zero_corrected {a q : ℂ} (ha : a ≠ 0) (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (p : List (ℂ × ℕ))
     (hz : ‖a⁻¹ * q ^ (-(qMintonWeight p : ℤ))‖ < 1) (hd : QDenominatorRegular (qMintonLower p) q) :
     qPhi (a :: qMintonUpper p q) (qMintonLower p) q (a⁻¹ * q ^ (-(qMintonWeight p : ℤ))) = 0 := by
   let z := a⁻¹ * q ^ (-(qMintonWeight p : ℤ))
@@ -1191,7 +1191,8 @@ theorem bibasic_bilateral_finite {a b c d p q : ℂ} (hbc : b*c≠0) (hp : p≠0
     (hP : d*(1-a*d)*(1-b/d)*(1-c/d)*(1-a*d/(b*c))≠0)
     (hF : ∀ k∈Finset.Icc (-(m:ℤ)) (n:ℤ),
       QIntPochhammerListDefined [a,b] p k ∧ QIntPochhammerListDefined [c,a*d^2/(b*c)] q k ∧
-      QIntPochhammerListDefined [d*q,a*d*q/b] q k ∧ QIntPochhammerListDefined [a*d*p/c,b*c*p/d] p k ∧
+      QIntPochhammerListDefined [d*q, a*d*q/b] q k ∧
+          QIntPochhammerListDefined [a*d*p/c, b*c*p/d] p k ∧
       qPochhammerListInt [d*q,a*d*q/b] q k*qPochhammerListInt [a*d*p/c,b*c*p/d] p k≠0)
     (hR : qPochhammerList [1/c,b*c/(a*d^2)] q (m+1)*qPochhammerList [1/a,1/b] p (m+1)≠0) :
     (∑ k∈Finset.Icc (-(m:ℤ)) (n:ℤ), (1-a*d*p^k*q^k)*(1-b*p^k/(d*q^k))/((1-a*d)*(1-b/d))*
@@ -1219,14 +1220,16 @@ theorem bibasic_difference_corrected {a b p q : ℂ} (hb : b≠0) (hp : p≠0) (
 @[dlmf 17.7.E19]
 theorem karlsson_printed_counter : qPhi [2] [] (1/2) (1/4)=(1/2:ℂ) := by
   have hzero (k : ℕ) (hk : 2≤k) : qPochhammer (2:ℂ) (1/2) k=0 := by
-    have h := qPochhammer_recip_pow_eq_zero (q := (1/2:ℂ)) (by norm_num) (n := 1) (k := k) (by omega)
+    have h := qPochhammer_recip_pow_eq_zero (q := (1/2:ℂ)) (by norm_num) (n := 1)
+        (k := k) (by omega)
     norm_num at h
     exact h
   rw [qPhi_eq_basicHG (by simp)]
   unfold basicHG
   rw [tsum_eq_sum (s := range 2) (fun k hk => by
     have h := hzero k (by simp only [Finset.mem_range, not_lt] at hk; exact hk)
-    simp only [List.map_cons,List.map_nil,List.prod_cons,List.prod_nil,mul_one,h,zero_div,zero_mul])]
+    simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, h,
+        zero_div, zero_mul])]
   norm_num [sum_range_succ, qPochhammer]
 
 /-- The expression printed in 17.7.23, before the primary-source corrections. -/

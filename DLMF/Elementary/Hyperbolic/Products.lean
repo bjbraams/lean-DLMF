@@ -50,7 +50,8 @@ namespace DLMF.Elementary
 /-- Identity under the stated parameter and domain assumptions: `Complex.tanh (u+v)=(Complex.tanh
 u+Complex.tanh v)/(1+Complex.tanh u*Complex.tanh v)`. -/
 @[dlmf 4.35.E3]
-theorem tanh_add {u v : ℂ} (hu : Complex.cosh u≠0) (hv : Complex.cosh v≠0) : Complex.tanh (u+v)=(Complex.tanh u+Complex.tanh v)/(1+Complex.tanh u*Complex.tanh v) := by
+theorem tanh_add {u v : ℂ} (hu : Complex.cosh u≠0) (hv : Complex.cosh v≠0) : Complex.tanh
+    (u+v)=(Complex.tanh u+Complex.tanh v)/(1+Complex.tanh u*Complex.tanh v) := by
   unfold Complex.tanh
   rw [Complex.sinh_add,Complex.cosh_add]
   field_simp <;> ring
@@ -58,13 +59,16 @@ theorem tanh_add {u v : ℂ} (hu : Complex.cosh u≠0) (hv : Complex.cosh v≠0)
 /-- Identity under the stated parameter and domain assumptions: `Complex.tanh (u-v)=(Complex.tanh
 u-Complex.tanh v)/(1-Complex.tanh u*Complex.tanh v)`. -/
 @[dlmf 4.35.E3]
-theorem tanh_sub {u v : ℂ} (hu : Complex.cosh u≠0) (hv : Complex.cosh v≠0) : Complex.tanh (u-v)=(Complex.tanh u-Complex.tanh v)/(1-Complex.tanh u*Complex.tanh v) := by
-  simpa [sub_eq_add_neg,Complex.tanh_neg] using tanh_add hu (show Complex.cosh (-v)≠0 by simpa using hv)
+theorem tanh_sub {u v : ℂ} (hu : Complex.cosh u≠0) (hv : Complex.cosh v≠0) : Complex.tanh
+    (u-v)=(Complex.tanh u-Complex.tanh v)/(1-Complex.tanh u*Complex.tanh v) := by
+  simpa [sub_eq_add_neg, Complex.tanh_neg] using tanh_add hu
+      (show Complex.cosh (-v)≠0 by simpa using hv)
 
 /-- Identity under the stated parameter and domain assumptions: `coth (u+v)=(coth u*coth
 v+1)/(coth u+coth v)`. -/
 @[dlmf 4.35.E4]
-theorem coth_add {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0) : coth (u+v)=(coth u*coth v+1)/(coth u+coth v) := by
+theorem coth_add {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0) : coth
+    (u+v)=(coth u*coth v+1)/(coth u+coth v) := by
   unfold coth
   rw [Complex.sinh_add,Complex.cosh_add]
   field_simp <;> ring
@@ -72,7 +76,8 @@ theorem coth_add {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0)
 /-- Identity under the stated parameter and domain assumptions: `coth (u-v)=(-coth u*coth
 v+1)/(coth u-coth v)`. -/
 @[dlmf 4.35.E4]
-theorem coth_sub {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0) : coth (u-v)=(-coth u*coth v+1)/(coth u-coth v) := by
+theorem coth_sub {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0) : coth
+    (u-v)=(-coth u*coth v+1)/(coth u-coth v) := by
   have hn:Complex.sinh (-v)≠0 := by simpa using hv
   have hh:=coth_add hu hn
   simpa [coth,sub_eq_add_neg,Complex.sinh_neg,Complex.cosh_neg,div_neg] using hh
@@ -80,7 +85,8 @@ theorem coth_sub {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0)
 /-- Identity under the stated parameter and domain assumptions: `Complex.sinh u+Complex.sinh
 v=2*Complex.sinh ((u+v)/2)*Complex.cosh ((u-v)/2)`. -/
 @[dlmf 4.35.E5]
-theorem sinh_add_sinh (u v : ℂ) : Complex.sinh u+Complex.sinh v=2*Complex.sinh ((u+v)/2)*Complex.cosh ((u-v)/2) := by
+theorem sinh_add_sinh (u v : ℂ) : Complex.sinh u+Complex.sinh v=2*Complex.sinh
+    ((u+v)/2)*Complex.cosh ((u-v)/2) := by
   have h1 := Complex.sinh_add ((u+v)/2) ((u-v)/2)
   have h2 := Complex.sinh_sub ((u+v)/2) ((u-v)/2)
   rw [show (u+v)/2+(u-v)/2=u by ring] at h1
@@ -90,7 +96,8 @@ theorem sinh_add_sinh (u v : ℂ) : Complex.sinh u+Complex.sinh v=2*Complex.sinh
 /-- Identity under the stated parameter and domain assumptions: `Complex.sinh u-Complex.sinh
 v=2*Complex.cosh ((u+v)/2)*Complex.sinh ((u-v)/2)`. -/
 @[dlmf 4.35.E6]
-theorem sinh_sub_sinh (u v : ℂ) : Complex.sinh u-Complex.sinh v=2*Complex.cosh ((u+v)/2)*Complex.sinh ((u-v)/2) := by
+theorem sinh_sub_sinh (u v : ℂ) : Complex.sinh u-Complex.sinh v=2*Complex.cosh
+    ((u+v)/2)*Complex.sinh ((u-v)/2) := by
   have h1 := Complex.sinh_add ((u+v)/2) ((u-v)/2)
   have h2 := Complex.sinh_sub ((u+v)/2) ((u-v)/2)
   rw [show (u+v)/2+(u-v)/2=u by ring] at h1
@@ -100,7 +107,8 @@ theorem sinh_sub_sinh (u v : ℂ) : Complex.sinh u-Complex.sinh v=2*Complex.cosh
 /-- Identity under the stated parameter and domain assumptions: `Complex.cosh u+Complex.cosh
 v=2*Complex.cosh ((u+v)/2)*Complex.cosh ((u-v)/2)`. -/
 @[dlmf 4.35.E7]
-theorem cosh_add_cosh (u v : ℂ) : Complex.cosh u+Complex.cosh v=2*Complex.cosh ((u+v)/2)*Complex.cosh ((u-v)/2) := by
+theorem cosh_add_cosh (u v : ℂ) : Complex.cosh u+Complex.cosh v=2*Complex.cosh
+    ((u+v)/2)*Complex.cosh ((u-v)/2) := by
   have h1 := Complex.cosh_add ((u+v)/2) ((u-v)/2)
   have h2 := Complex.cosh_sub ((u+v)/2) ((u-v)/2)
   rw [show (u+v)/2+(u-v)/2=u by ring] at h1
@@ -110,7 +118,8 @@ theorem cosh_add_cosh (u v : ℂ) : Complex.cosh u+Complex.cosh v=2*Complex.cosh
 /-- Identity under the stated parameter and domain assumptions: `Complex.cosh u-Complex.cosh
 v=2*Complex.sinh ((u+v)/2)*Complex.sinh ((u-v)/2)`. -/
 @[dlmf 4.35.E8]
-theorem cosh_sub_cosh (u v : ℂ) : Complex.cosh u-Complex.cosh v=2*Complex.sinh ((u+v)/2)*Complex.sinh ((u-v)/2) := by
+theorem cosh_sub_cosh (u v : ℂ) : Complex.cosh u-Complex.cosh v=2*Complex.sinh
+    ((u+v)/2)*Complex.sinh ((u-v)/2) := by
   have h1 := Complex.cosh_add ((u+v)/2) ((u-v)/2)
   have h2 := Complex.cosh_sub ((u+v)/2) ((u-v)/2)
   rw [show (u+v)/2+(u-v)/2=u by ring] at h1
@@ -120,28 +129,32 @@ theorem cosh_sub_cosh (u v : ℂ) : Complex.cosh u-Complex.cosh v=2*Complex.sinh
 /-- Identity under the stated parameter and domain assumptions: `Complex.tanh u+Complex.tanh
 v=Complex.sinh (u+v)/(Complex.cosh u*Complex.cosh v)`. -/
 @[dlmf 4.35.E9]
-theorem tanh_add_tanh {u v : ℂ} (hu : Complex.cosh u≠0) (hv : Complex.cosh v≠0) : Complex.tanh u+Complex.tanh v=Complex.sinh (u+v)/(Complex.cosh u*Complex.cosh v) := by
+theorem tanh_add_tanh {u v : ℂ} (hu : Complex.cosh u≠0) (hv : Complex.cosh v≠0) : Complex.tanh
+    u+Complex.tanh v=Complex.sinh (u+v)/(Complex.cosh u*Complex.cosh v) := by
   simp only [Complex.tanh_eq_sinh_div_cosh, Complex.sinh_add]
   field_simp <;> ring
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.tanh u-Complex.tanh
 v=Complex.sinh (u-v)/(Complex.cosh u*Complex.cosh v)`. -/
 @[dlmf 4.35.E9]
-theorem tanh_sub_tanh {u v : ℂ} (hu : Complex.cosh u≠0) (hv : Complex.cosh v≠0) : Complex.tanh u-Complex.tanh v=Complex.sinh (u-v)/(Complex.cosh u*Complex.cosh v) := by
+theorem tanh_sub_tanh {u v : ℂ} (hu : Complex.cosh u≠0) (hv : Complex.cosh v≠0) : Complex.tanh
+    u-Complex.tanh v=Complex.sinh (u-v)/(Complex.cosh u*Complex.cosh v) := by
   simp only [Complex.tanh_eq_sinh_div_cosh, Complex.sinh_sub]
   field_simp <;> ring
 
 /-- Identity under the stated parameter and domain assumptions: `coth u+coth v=Complex.sinh
 (v+u)/(Complex.sinh u*Complex.sinh v)`. -/
 @[dlmf 4.35.E10]
-theorem coth_add_coth {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0) : coth u+coth v=Complex.sinh (v+u)/(Complex.sinh u*Complex.sinh v) := by
+theorem coth_add_coth {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0) : coth u+coth
+    v=Complex.sinh (v+u)/(Complex.sinh u*Complex.sinh v) := by
   simp only [coth, Complex.sinh_add]
   field_simp <;> ring
 
 /-- Identity under the stated parameter and domain assumptions: `coth u-coth v=Complex.sinh
 (v-u)/(Complex.sinh u*Complex.sinh v)`. -/
 @[dlmf 4.35.E10]
-theorem coth_sub_coth {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0) : coth u-coth v=Complex.sinh (v-u)/(Complex.sinh u*Complex.sinh v) := by
+theorem coth_sub_coth {u v : ℂ} (hu : Complex.sinh u≠0) (hv : Complex.sinh v≠0) : coth u-coth
+    v=Complex.sinh (v-u)/(Complex.sinh u*Complex.sinh v) := by
   simp only [coth, Complex.sinh_sub]
   field_simp <;> ring
 
@@ -162,28 +175,32 @@ theorem csch_sq {z : ℂ} (hz : Complex.sinh z≠0) : csch z^2=coth z^2-1 := by
 /-- Identity under the stated parameter and domain assumptions: `2*Complex.sinh u*Complex.sinh
 v=Complex.cosh (u+v)-Complex.cosh (u-v)`. -/
 @[dlmf 4.35.E14]
-theorem two_sinh_mul_sinh (u v : ℂ) : 2*Complex.sinh u*Complex.sinh v=Complex.cosh (u+v)-Complex.cosh (u-v) := by
+theorem two_sinh_mul_sinh (u v : ℂ) : 2*Complex.sinh u*Complex.sinh v=Complex.cosh
+    (u+v)-Complex.cosh (u-v) := by
   rw [Complex.cosh_add, Complex.cosh_sub]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `2*Complex.cosh u*Complex.cosh
 v=Complex.cosh (u+v)+Complex.cosh (u-v)`. -/
 @[dlmf 4.35.E15]
-theorem two_cosh_mul_cosh (u v : ℂ) : 2*Complex.cosh u*Complex.cosh v=Complex.cosh (u+v)+Complex.cosh (u-v) := by
+theorem two_cosh_mul_cosh (u v : ℂ) : 2*Complex.cosh u*Complex.cosh v=Complex.cosh
+    (u+v)+Complex.cosh (u-v) := by
   rw [Complex.cosh_add, Complex.cosh_sub]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `2*Complex.sinh u*Complex.cosh
 v=Complex.sinh (u+v)+Complex.sinh (u-v)`. -/
 @[dlmf 4.35.E16]
-theorem two_sinh_mul_cosh (u v : ℂ) : 2*Complex.sinh u*Complex.cosh v=Complex.sinh (u+v)+Complex.sinh (u-v) := by
+theorem two_sinh_mul_cosh (u v : ℂ) : 2*Complex.sinh u*Complex.cosh v=Complex.sinh
+    (u+v)+Complex.sinh (u-v) := by
   rw [Complex.sinh_add, Complex.sinh_sub]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.sinh u^2-Complex.sinh
 v^2=Complex.sinh (u+v)*Complex.sinh (u-v)`. -/
 @[dlmf 4.35.E17]
-theorem sinh_sq_sub_sinh_sq (u v : ℂ) : Complex.sinh u^2-Complex.sinh v^2=Complex.sinh (u+v)*Complex.sinh (u-v) := by
+theorem sinh_sq_sub_sinh_sq (u v : ℂ) : Complex.sinh u^2-Complex.sinh v^2=Complex.sinh
+    (u+v)*Complex.sinh (u-v) := by
   rw [Complex.sinh_add, Complex.sinh_sub]
   linear_combination -(Complex.sinh u)^2*(Complex.cosh_sq_sub_sinh_sq v) +
     (Complex.sinh v)^2*(Complex.cosh_sq_sub_sinh_sq u)
@@ -191,14 +208,16 @@ theorem sinh_sq_sub_sinh_sq (u v : ℂ) : Complex.sinh u^2-Complex.sinh v^2=Comp
 /-- Identity under the stated parameter and domain assumptions: `Complex.cosh u^2-Complex.cosh
 v^2=Complex.sinh (u+v)*Complex.sinh (u-v)`. -/
 @[dlmf 4.35.E18]
-theorem cosh_sq_sub_cosh_sq (u v : ℂ) : Complex.cosh u^2-Complex.cosh v^2=Complex.sinh (u+v)*Complex.sinh (u-v) := by
+theorem cosh_sq_sub_cosh_sq (u v : ℂ) : Complex.cosh u^2-Complex.cosh v^2=Complex.sinh
+    (u+v)*Complex.sinh (u-v) := by
   linear_combination (Complex.cosh_sq_sub_sinh_sq u) -
     (Complex.cosh_sq_sub_sinh_sq v) + (sinh_sq_sub_sinh_sq u v)
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.sinh u^2+Complex.cosh
 v^2=Complex.cosh (u+v)*Complex.cosh (u-v)`. -/
 @[dlmf 4.35.E19]
-theorem sinh_sq_add_cosh_sq (u v : ℂ) : Complex.sinh u^2+Complex.cosh v^2=Complex.cosh (u+v)*Complex.cosh (u-v) := by
+theorem sinh_sq_add_cosh_sq (u v : ℂ) : Complex.sinh u^2+Complex.cosh v^2=Complex.cosh
+    (u+v)*Complex.cosh (u-v) := by
   rw [Complex.cosh_add, Complex.cosh_sub]
   linear_combination -(Complex.cosh v)^2*(Complex.cosh_sq_sub_sinh_sq u) -
     (Complex.sinh u)^2*(Complex.cosh_sq_sub_sinh_sq v)
@@ -222,7 +241,8 @@ theorem cosh_half_sq (z : ℂ) : Complex.cosh (z/2)^2=(Complex.cosh z+1)/2 := by
 /-- Identity under the stated parameter and domain assumptions: `Complex.tanh
 (z/2)^2=(Complex.cosh z-1)/(Complex.cosh z+1)`. -/
 @[dlmf 4.35.E22]
-theorem tanh_half_sq {z : ℂ} (hz : Complex.cosh (z/2)≠0) : Complex.tanh (z/2)^2=(Complex.cosh z-1)/(Complex.cosh z+1) := by
+theorem tanh_half_sq {z : ℂ} (hz : Complex.cosh (z/2)≠0) : Complex.tanh
+    (z/2)^2=(Complex.cosh z-1)/(Complex.cosh z+1) := by
   have hs:Complex.cosh z-1=2*Complex.sinh (z/2)^2 := by linear_combination -2*sinh_half_sq z
   have hc:Complex.cosh z+1=2*Complex.cosh (z/2)^2 := by linear_combination -2*cosh_half_sq z
   rw [hs,hc,Complex.tanh,div_pow]
@@ -231,7 +251,9 @@ theorem tanh_half_sq {z : ℂ} (hz : Complex.cosh (z/2)≠0) : Complex.tanh (z/2
 /-- Identity under the stated parameter and domain assumptions: `Complex.tanh (z/2)=(Complex.cosh
 z-1)/Complex.sinh z ∧ Complex.tanh (z/2)=Complex.sinh z/(Complex.cosh z+1)`. -/
 @[dlmf 4.35.E22]
-theorem tanh_half_ratios {z : ℂ} (hz : Complex.sinh z≠0) : Complex.tanh (z/2)=(Complex.cosh z-1)/Complex.sinh z ∧ Complex.tanh (z/2)=Complex.sinh z/(Complex.cosh z+1) := by
+theorem tanh_half_ratios {z : ℂ} (hz : Complex.sinh z≠0) : Complex.tanh
+    (z/2)=(Complex.cosh z-1)/Complex.sinh z ∧
+    Complex.tanh (z/2)=Complex.sinh z/(Complex.cosh z+1) := by
   have h2 : Complex.sinh z = 2*Complex.sinh (z/2)*Complex.cosh (z/2) := by
     rw [← Complex.sinh_two_mul]; ring_nf
   have hc : Complex.cosh z - 1 = 2*Complex.sinh (z/2)^2 := by linear_combination -2*sinh_half_sq z
@@ -244,7 +266,8 @@ theorem tanh_half_ratios {z : ℂ} (hz : Complex.sinh z≠0) : Complex.tanh (z/2
 /-- Identity under the stated parameter and domain assumptions: `Complex.sinh (2*z)=2*Complex.tanh
 z/(1-Complex.tanh z^2)`. -/
 @[dlmf 4.35.E26]
-theorem sinh_two_mul_tanh {z : ℂ} (hz : Complex.cosh z≠0) : Complex.sinh (2*z)=2*Complex.tanh z/(1-Complex.tanh z^2) := by
+theorem sinh_two_mul_tanh {z : ℂ} (hz : Complex.cosh z≠0) : Complex.sinh (2*z)=2*Complex.tanh
+    z/(1-Complex.tanh z^2) := by
   rw [Complex.tanh,Complex.sinh_two_mul]
   field_simp
   rw [Complex.cosh_sq]
@@ -253,7 +276,8 @@ theorem sinh_two_mul_tanh {z : ℂ} (hz : Complex.cosh z≠0) : Complex.sinh (2*
 /-- Identity under the stated parameter and domain assumptions: `Complex.cosh (2*z)=2*Complex.cosh
 z^2-1 ∧ Complex.cosh (2*z)=2*Complex.sinh z^2+1`. -/
 @[dlmf 4.35.E27]
-theorem cosh_two_mul_forms (z : ℂ) : Complex.cosh (2*z)=2*Complex.cosh z^2-1 ∧ Complex.cosh (2*z)=2*Complex.sinh z^2+1 := by
+theorem cosh_two_mul_forms (z : ℂ) : Complex.cosh (2*z)=2*Complex.cosh z^2-1 ∧
+    Complex.cosh (2*z)=2*Complex.sinh z^2+1 := by
   rw [Complex.cosh_two_mul]
   constructor
   · linear_combination -(Complex.cosh_sq_sub_sinh_sq z)
@@ -262,14 +286,16 @@ theorem cosh_two_mul_forms (z : ℂ) : Complex.cosh (2*z)=2*Complex.cosh z^2-1 �
 /-- Identity under the stated parameter and domain assumptions: `Complex.tanh (2*z)=2*Complex.tanh
 z/(1+Complex.tanh z^2)`. -/
 @[dlmf 4.35.E28]
-theorem tanh_two_mul {z : ℂ} (hz : Complex.cosh z≠0) : Complex.tanh (2*z)=2*Complex.tanh z/(1+Complex.tanh z^2) := by
+theorem tanh_two_mul {z : ℂ} (hz : Complex.cosh z≠0) : Complex.tanh (2*z)=2*Complex.tanh
+    z/(1+Complex.tanh z^2) := by
   have hh:=tanh_add hz hz
   simpa only [← two_mul,pow_two] using hh
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.sinh (4*z)=4*Complex.sinh
 z^3*Complex.cosh z+4*Complex.cosh z^3*Complex.sinh z`. -/
 @[dlmf 4.35.E31]
-theorem sinh_four_mul (z : ℂ) : Complex.sinh (4*z)=4*Complex.sinh z^3*Complex.cosh z+4*Complex.cosh z^3*Complex.sinh z := by
+theorem sinh_four_mul (z : ℂ) : Complex.sinh (4*z)=4*Complex.sinh z^3*Complex.cosh z+4*Complex.cosh
+    z^3*Complex.sinh z := by
   rw [show 4*z=2*(2*z) by ring, Complex.sinh_two_mul,
     Complex.sinh_two_mul, Complex.cosh_two_mul]
   ring
@@ -277,7 +303,8 @@ theorem sinh_four_mul (z : ℂ) : Complex.sinh (4*z)=4*Complex.sinh z^3*Complex.
 /-- Identity under the stated parameter and domain assumptions: `Complex.cosh (4*z)=Complex.cosh
 z^4+6*Complex.sinh z^2*Complex.cosh z^2+Complex.sinh z^4`. -/
 @[dlmf 4.35.E32]
-theorem cosh_four_mul (z : ℂ) : Complex.cosh (4*z)=Complex.cosh z^4+6*Complex.sinh z^2*Complex.cosh z^2+Complex.sinh z^4 := by
+theorem cosh_four_mul (z : ℂ) : Complex.cosh (4*z)=Complex.cosh z^4+6*Complex.sinh z^2*Complex.cosh
+    z^2+Complex.sinh z^4 := by
   rw [show 4*z=2*(2*z) by ring, Complex.cosh_two_mul,
     Complex.cosh_two_mul, Complex.sinh_two_mul]
   ring
@@ -286,15 +313,19 @@ theorem cosh_four_mul (z : ℂ) : Complex.cosh (4*z)=Complex.cosh z^4+6*Complex.
 ((n:ℂ)*z)+Complex.sinh ((n:ℂ)*z)=(Complex.cosh z+Complex.sinh z)^n ∧ Complex.cosh
 ((n:ℂ)*z)-Complex.sinh ((n:ℂ)*z)=(Complex.cosh z-Complex.sinh z)^n`. -/
 @[dlmf 4.35.E33]
-theorem cosh_add_sinh_int_mul (n : ℤ) (z : ℂ) : Complex.cosh ((n:ℂ)*z)+Complex.sinh ((n:ℂ)*z)=(Complex.cosh z+Complex.sinh z)^n ∧ Complex.cosh ((n:ℂ)*z)-Complex.sinh ((n:ℂ)*z)=(Complex.cosh z-Complex.sinh z)^n := by
+theorem cosh_add_sinh_int_mul (n : ℤ) (z : ℂ) : Complex.cosh ((n:ℂ)*z)+Complex.sinh
+    ((n:ℂ)*z)=(Complex.cosh z+Complex.sinh z)^n ∧
+    Complex.cosh ((n:ℂ)*z)-Complex.sinh ((n:ℂ)*z)=(Complex.cosh z-Complex.sinh z)^n := by
   constructor
   · rw [Complex.cosh_add_sinh, Complex.cosh_add_sinh, Complex.exp_int_mul]
-  · rw [Complex.cosh_sub_sinh, Complex.cosh_sub_sinh, show -((n:ℂ)*z)=(n:ℂ)*(-z) by ring, Complex.exp_int_mul]
+  · rw [Complex.cosh_sub_sinh, Complex.cosh_sub_sinh,
+        show -((n:ℂ)*z)=(n:ℂ)*(-z) by ring, Complex.exp_int_mul]
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.sinh z=Real.sinh
 z.re*Real.cos z.im+I*(Real.cosh z.re*Real.sin z.im)`. -/
 @[dlmf 4.35.E34]
-theorem sinh_cartesian (z : ℂ) : Complex.sinh z=Real.sinh z.re*Real.cos z.im+I*(Real.cosh z.re*Real.sin z.im) := by
+theorem sinh_cartesian (z : ℂ) : Complex.sinh z=Real.sinh z.re*Real.cos
+    z.im+I*(Real.cosh z.re*Real.sin z.im) := by
   conv_lhs => rw [← Complex.re_add_im z,Complex.sinh_add,Complex.sinh_mul_I,Complex.cosh_mul_I]
   simp only [← Complex.ofReal_sinh,← Complex.ofReal_cosh,← Complex.ofReal_sin,← Complex.ofReal_cos]
   push_cast
@@ -303,7 +334,8 @@ theorem sinh_cartesian (z : ℂ) : Complex.sinh z=Real.sinh z.re*Real.cos z.im+I
 /-- Identity under the stated parameter and domain assumptions: `Complex.cosh z=Real.cosh
 z.re*Real.cos z.im+I*(Real.sinh z.re*Real.sin z.im)`. -/
 @[dlmf 4.35.E35]
-theorem cosh_cartesian (z : ℂ) : Complex.cosh z=Real.cosh z.re*Real.cos z.im+I*(Real.sinh z.re*Real.sin z.im) := by
+theorem cosh_cartesian (z : ℂ) : Complex.cosh z=Real.cosh z.re*Real.cos
+    z.im+I*(Real.sinh z.re*Real.sin z.im) := by
   conv_lhs => rw [← Complex.re_add_im z,Complex.cosh_add,Complex.sinh_mul_I,Complex.cosh_mul_I]
   simp only [← Complex.ofReal_sinh,← Complex.ofReal_cosh,← Complex.ofReal_sin,← Complex.ofReal_cos]
   push_cast
@@ -312,7 +344,8 @@ theorem cosh_cartesian (z : ℂ) : Complex.cosh z=Real.cosh z.re*Real.cos z.im+I
 /-- Identity under the stated parameter and domain assumptions: `Complex.tanh z=((Real.sinh
 (2*z.re):ℂ)+I*Real.sin (2*z.im))/(Real.cosh (2*z.re)+Real.cos (2*z.im))`. -/
 @[dlmf 4.35.E36]
-theorem tanh_cartesian (z : ℂ) : Complex.tanh z=((Real.sinh (2*z.re):ℂ)+I*Real.sin (2*z.im))/(Real.cosh (2*z.re)+Real.cos (2*z.im)) := by
+theorem tanh_cartesian (z : ℂ) : Complex.tanh
+    z=((Real.sinh (2*z.re):ℂ)+I*Real.sin (2*z.im))/(Real.cosh (2*z.re)+Real.cos (2*z.im)) := by
   have hDr : Real.cosh (2*z.re)+Real.cos (2*z.im) = 2*((Real.sinh z.re)^2+(Real.cos z.im)^2) := by
     rw [Real.cosh_two_mul, Real.cos_two_mul]
     nlinarith [Real.cosh_sq z.re]
@@ -320,8 +353,12 @@ theorem tanh_cartesian (z : ℂ) : Complex.tanh z=((Real.sinh (2*z.re):ℂ)+I*Re
   rw [Complex.tanh_eq_sinh_div_cosh]
   by_cases h0 : (Real.sinh z.re)^2+(Real.cos z.im)^2 = 0
   · have hc : Complex.cosh z = 0 := by
-      have hs : Real.sinh z.re = 0 := by nlinarith [sq_nonneg (Real.sinh z.re), sq_nonneg (Real.cos z.im)]
-      have hc0 : Real.cos z.im = 0 := by nlinarith [sq_nonneg (Real.sinh z.re), sq_nonneg (Real.cos z.im)]
+      have hs : Real.sinh z.re = 0 := by
+                                        nlinarith [sq_nonneg (Real.sinh z.re),
+                                          sq_nonneg (Real.cos z.im)]
+      have hc0 : Real.cos z.im = 0 := by
+                                        nlinarith [sq_nonneg (Real.sinh z.re),
+                                          sq_nonneg (Real.cos z.im)]
       rw [cosh_cartesian, hs, hc0]; simp
     have : ((Real.cosh (2*z.re):ℂ)+Real.cos (2*z.im)) = 0 := by
       rw [← Complex.ofReal_add, hDr, h0]; simp
@@ -362,7 +399,8 @@ theorem tanh_cartesian (z : ℂ) : Complex.tanh z=((Real.sinh (2*z.re):ℂ)+I*Re
 /-- Identity under the stated parameter and domain assumptions: `coth z=((Real.sinh
 (2*z.re):ℂ)-I*Real.sin (2*z.im))/(Real.cosh (2*z.re)-Real.cos (2*z.im))`. -/
 @[dlmf 4.35.E37]
-theorem coth_cartesian (z : ℂ) : coth z=((Real.sinh (2*z.re):ℂ)-I*Real.sin (2*z.im))/(Real.cosh (2*z.re)-Real.cos (2*z.im)) := by
+theorem coth_cartesian (z : ℂ) : coth
+    z=((Real.sinh (2*z.re):ℂ)-I*Real.sin (2*z.im))/(Real.cosh (2*z.re)-Real.cos (2*z.im)) := by
   have hDr : Real.cosh (2*z.re)-Real.cos (2*z.im) = 2*((Real.sinh z.re)^2+(Real.sin z.im)^2) := by
     rw [Real.cosh_two_mul, Real.cos_two_mul]
     nlinarith [Real.cosh_sq z.re, Real.sin_sq_add_cos_sq z.im]
@@ -370,8 +408,12 @@ theorem coth_cartesian (z : ℂ) : coth z=((Real.sinh (2*z.re):ℂ)-I*Real.sin (
   rw [coth]
   by_cases h0 : (Real.sinh z.re)^2+(Real.sin z.im)^2 = 0
   · have hc : Complex.sinh z = 0 := by
-      have hs : Real.sinh z.re = 0 := by nlinarith [sq_nonneg (Real.sinh z.re), sq_nonneg (Real.sin z.im)]
-      have hc0 : Real.sin z.im = 0 := by nlinarith [sq_nonneg (Real.sinh z.re), sq_nonneg (Real.sin z.im)]
+      have hs : Real.sinh z.re = 0 := by
+                                        nlinarith [sq_nonneg (Real.sinh z.re),
+                                          sq_nonneg (Real.sin z.im)]
+      have hc0 : Real.sin z.im = 0 := by
+                                        nlinarith [sq_nonneg (Real.sinh z.re),
+                                          sq_nonneg (Real.sin z.im)]
       rw [sinh_cartesian, hs, hc0]; simp
     have : ((Real.cosh (2*z.re):ℂ)-Real.cos (2*z.im)) = 0 := by
       rw [← Complex.ofReal_sub, hDr, h0]; simp
@@ -413,28 +455,33 @@ theorem coth_cartesian (z : ℂ) : coth z=((Real.sinh (2*z.re):ℂ)-I*Real.sin (
 (Real.sinh z.re^2+Real.sin z.im^2) ∧ ‖Complex.sinh z‖=Real.sqrt ((Real.cosh (2*z.re)-Real.cos
 (2*z.im))/2)`. -/
 @[dlmf 4.35.E38]
-theorem norm_sinh_cartesian (z : ℂ) : ‖Complex.sinh z‖=Real.sqrt (Real.sinh z.re^2+Real.sin z.im^2) ∧ ‖Complex.sinh z‖=Real.sqrt ((Real.cosh (2*z.re)-Real.cos (2*z.im))/2) := by
+theorem norm_sinh_cartesian (z : ℂ) : ‖Complex.sinh z‖=Real.sqrt (Real.sinh z.re^2+Real.sin z.im^2)
+    ∧ ‖Complex.sinh z‖=Real.sqrt ((Real.cosh (2*z.re)-Real.cos (2*z.im))/2) := by
   have hn:‖Complex.sin (I*z)‖=‖Complex.sinh z‖ := by
     rw [mul_comm I z,Complex.sin_mul_I,norm_mul,Complex.norm_I,mul_one]
-  simpa [hn,Complex.I_mul_re,Complex.I_mul_im,Real.sin_neg,Real.cos_neg,add_comm] using norm_sin_explicit (I*z)
+  simpa [hn, Complex.I_mul_re, Complex.I_mul_im, Real.sin_neg, Real.cos_neg, add_comm] using
+      norm_sin_explicit (I*z)
 
 /-- Identity under the stated parameter and domain assumptions: `‖Complex.cosh z‖=Real.sqrt
 (Real.sinh z.re^2+Real.cos z.im^2) ∧ ‖Complex.cosh z‖=Real.sqrt ((Real.cosh (2*z.re)+Real.cos
 (2*z.im))/2)`. -/
 @[dlmf 4.35.E39]
-theorem norm_cosh_cartesian (z : ℂ) : ‖Complex.cosh z‖=Real.sqrt (Real.sinh z.re^2+Real.cos z.im^2) ∧ ‖Complex.cosh z‖=Real.sqrt ((Real.cosh (2*z.re)+Real.cos (2*z.im))/2) := by
+theorem norm_cosh_cartesian (z : ℂ) : ‖Complex.cosh z‖=Real.sqrt (Real.sinh z.re^2+Real.cos z.im^2)
+    ∧ ‖Complex.cosh z‖=Real.sqrt ((Real.cosh (2*z.re)+Real.cos (2*z.im))/2) := by
   have hn:Complex.cos (I*z)=Complex.cosh z := by rw [mul_comm I z,Complex.cos_mul_I]
   simpa [hn,Complex.I_mul_re,Complex.I_mul_im,Real.cos_neg,add_comm] using norm_cos_explicit (I*z)
 
 /-- Identity under the stated parameter and domain assumptions: `‖Complex.tanh z‖=Real.sqrt
 ((Real.cosh (2*z.re)-Real.cos (2*z.im))/(Real.cosh (2*z.re)+Real.cos (2*z.im)))`. -/
 @[dlmf 4.35.E40]
-theorem norm_tanh_cartesian (z : ℂ) : ‖Complex.tanh z‖=Real.sqrt ((Real.cosh (2*z.re)-Real.cos (2*z.im))/(Real.cosh (2*z.re)+Real.cos (2*z.im))) := by
+theorem norm_tanh_cartesian (z : ℂ) : ‖Complex.tanh z‖=Real.sqrt
+    ((Real.cosh (2*z.re)-Real.cos (2*z.im))/(Real.cosh (2*z.re)+Real.cos (2*z.im))) := by
   have hp:0≤(Real.cosh (2*z.re)-Real.cos (2*z.im))/2 := by
     rw [Real.cosh_two_mul,Real.cos_two_mul]
     nlinarith [Real.cosh_sq_sub_sinh_sq z.re,Real.sin_sq_add_cos_sq z.im,
       sq_nonneg (Real.sin z.im),sq_nonneg (Real.sinh z.re)]
-  rw [Complex.tanh_eq_sinh_div_cosh,norm_div,(norm_sinh_cartesian z).2,(norm_cosh_cartesian z).2,← Real.sqrt_div hp]
+  rw [Complex.tanh_eq_sinh_div_cosh, norm_div, (norm_sinh_cartesian z).2, (norm_cosh_cartesian z).2,
+      ← Real.sqrt_div hp]
   congr 1
   exact div_div_div_cancel_right₀ (two_ne_zero : (2:ℝ)≠0) _ _
 
@@ -512,7 +559,8 @@ theorem hasProd_sinh (z : ℂ) : HasProd (fun n : ℕ => 1+z^2/(((n+1:ℂ)^2)*π
 /-- Identity under the stated parameter and domain assumptions: `HasProd (fun n : ℕ =>
 1+4*z^2/(((2*n+1:ℂ)^2)*π^2)) (Complex.cosh z)`. -/
 @[dlmf 4.36.E2]
-theorem hasProd_cosh (z : ℂ) : HasProd (fun n : ℕ => 1+4*z^2/(((2*n+1:ℂ)^2)*π^2)) (Complex.cosh z) := by
+theorem hasProd_cosh (z : ℂ) : HasProd (fun n : ℕ => 1+4*z^2/(((2*n+1:ℂ)^2)*π^2))
+    (Complex.cosh z) := by
   exact Complex.hasProd_cosh_product z
 
 /-- Off the imaginary lattice `πiℤ`, the rotated point `iz/π` avoids the integers. -/
@@ -547,7 +595,8 @@ private lemma cotTerm_I_mul_div_pi {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I
 
 /-- hasSum coth. -/
 @[dlmf 4.36.E3]
-theorem hasSum_coth_partialFractions {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) : HasSum (fun n : ℕ => 1/(z^2+(n+1:ℂ)^2*π^2)) ((coth z-z⁻¹)/(2*z)) := by
+theorem hasSum_coth_partialFractions {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) : HasSum
+    (fun n : ℕ => 1/(z^2+(n+1:ℂ)^2*π^2)) ((coth z-z⁻¹)/(2*z)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have hz0 : z ≠ 0 := by simpa using hz 0
   have hs : Complex.sinh z ≠ 0 := fun h => by
@@ -563,7 +612,8 @@ theorem hasSum_coth_partialFractions {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π
 
 /-- The series with terms `(fun n : ℤ => 1/(z-(n:ℂ)*π*I)^2)` converges to `(csch z^2)`. -/
 @[dlmf 4.36.E4]
-theorem hasSum_csch_sq {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) : HasSum (fun n : ℤ => 1/(z-(n:ℂ)*π*I)^2) (csch z^2) := by
+theorem hasSum_csch_sq {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) : HasSum (fun n : ℤ => 1/(z-(n:ℂ)*π*I)^2)
+    (csch z^2) := by
   have hs : Complex.sinh z ≠ 0 := by
     intro he
     obtain ⟨n, hn⟩ := DLMF.Elementary.sinh_zeros z |>.mp he
@@ -586,12 +636,14 @@ theorem hasSum_csch_sq {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) : HasSum (
 
 /-- hasSum csch. -/
 @[dlmf 4.36.E5]
-theorem hasSum_csch_partialFractions {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) : HasSum (fun n : ℕ => (-1:ℂ)^(n+1)/(z^2+(n+1:ℂ)^2*π^2)) ((csch z-z⁻¹)/(2*z)) := by
+theorem hasSum_csch_partialFractions {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) : HasSum
+    (fun n : ℕ => (-1:ℂ)^(n+1)/(z^2+(n+1:ℂ)^2*π^2)) ((csch z-z⁻¹)/(2*z)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have hz0 : z ≠ 0 := by simpa using hz 0
   have hs : Complex.sinh z ≠ 0 := fun h => by
     obtain ⟨k, hk⟩ := (sinh_zeros z).mp h; exact hz k hk
-  have hc := (Complex.hasSum_csc_partial_fraction (I_mul_div_pi_mem_integerComplement hz)).div_const (-2*I*z*π)
+  have hc := (Complex.hasSum_csc_partial_fraction
+      (I_mul_div_pi_mem_integerComplement hz)).div_const (-2*I*z*π)
   have hk : (-2*I*z*π) ≠ 0 := by simp [hz0, hπ, Complex.I_ne_zero]
   convert hc using 1
   · funext n; rw [cotTerm_I_mul_div_pi hz n]; field_simp

@@ -89,7 +89,8 @@ theorem one_add_mem_slitPlane_of_norm_le_one {z : ℂ} (hz : ‖z‖≤1) (hne :
   left
   simpa using (show 0<1+z.re by linarith)
 
-/-- The complex log Taylor polynomials converge in natural order at every valid closed-disk point. -/
+/-- The complex log Taylor polynomials converge in natural order at every valid closed-disk point.
+-/
 theorem tendsto_logTaylor_closed {z : ℂ} (hz : ‖z‖≤1) (hne : z≠ -1) :
     Tendsto (fun n : ℕ => logTaylor (n+1) z) atTop (𝓝 (log (1+z))) := by
   obtain ⟨C,hC,hbound⟩ := exists_norm_log_sub_logTaylor_le

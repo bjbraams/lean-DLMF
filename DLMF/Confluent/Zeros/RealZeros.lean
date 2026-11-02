@@ -940,7 +940,8 @@ theorem kummerM_posZeros_b_le_neg_one {a b : ℝ} (ha : 0 < a) (hb : b ≤ -1)
 
 /-- DLMF 13.9.5. DLMF's hypothesis `a < 0` follows from the others and is omitted. -/
 @[dlmf 13.9.E5]
-theorem kummerM_posZeros_ceil {a b : ℝ} (hb : b < 0) (h : ⌈-a⌉ ≥ ⌈-b⌉) (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
+theorem kummerM_posZeros_ceil {a b : ℝ} (hb : b < 0) (h : ⌈-a⌉ ≥ ⌈-b⌉)
+    (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
     (kummerMPosZeros a b).encard = Int.toNat (⌈-a⌉ - ⌈-b⌉) := by
   obtain ⟨hc1, hl, hr⟩ := kumZ_ceil_bounds hb hbi
   obtain ⟨m, hm⟩ : ∃ m, ⌈-b⌉.toNat = m + 1 := ⟨⌈-b⌉.toNat - 1, by omega⟩
@@ -991,7 +992,8 @@ theorem kummerM_posZeros_ceil_swap_ne :
     omega
   have hbn := kumZ_not_neg_nat_real hbi
   have hg : KumZQ (kumZ_F ((-1 : ℝ) + 1) ((-3 / 2 : ℝ) + 1))
-      (fun x => ((-1 : ℝ) + 1) / ((-3 / 2 : ℝ) + 1) * kumZ_F ((-1 : ℝ) + 1 + 1) ((-3 / 2 : ℝ) + 1 + 1) x)
+      (fun x => ((-1 : ℝ) + 1) / ((-3 / 2 : ℝ) + 1) *
+          kumZ_F ((-1 : ℝ) + 1 + 1) ((-3 / 2 : ℝ) + 1 + 1) x)
       0 :=
     kumZ_Q_zero fun x _ => by
       norm_num [kumZ_F, kummerM_of_zero_param]
@@ -1017,7 +1019,8 @@ theorem kummerM_negZeros_eq {a b : ℝ} (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
   have heq : {x : ℝ | x < 0 ∧ kummerM a b x = 0} =
       (fun x : ℝ => -x) ⁻¹' kummerMPosZeros (b - a) b := by
     ext x
-    simp only [Set.mem_ofPred_eq, Set.mem_preimage, kummerMPosZeros, neg_pos, hz, ofReal_sub, ofReal_neg]
+    simp only [Set.mem_ofPred_eq, Set.mem_preimage, kummerMPosZeros, neg_pos, hz,
+        ofReal_sub, ofReal_neg]
   rw [heq]
   exact Set.encard_preimage_of_bijective (Equiv.neg ℝ).bijective _
 

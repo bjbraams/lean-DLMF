@@ -142,7 +142,8 @@ private lemma eulerNumber_eq_newton_series {m K : ℕ} (hmK : m ≤ K) :
   exact_mod_cast this
 
 /-- A rational `p a / 2ᴷ` with `a ∈ ℤ` and `p` an odd prime has numerator divisible by `p`. -/
-private lemma prime_dvd_num_of_eq_mul_div_two_pow {p : ℕ} (hp : p.Prime) (hp2 : p ≠ 2) {q : ℚ} {a : ℤ} (K : ℕ)
+private lemma prime_dvd_num_of_eq_mul_div_two_pow {p : ℕ} (hp : p.Prime) (hp2 : p ≠ 2) {q : ℚ}
+    {a : ℤ} (K : ℕ)
     (hq : q = p * a / 2 ^ K) : (p : ℤ) ∣ q.num := by
   have h1 : (q.num : ℚ) * 2 ^ K = p * a * q.den := by
     rw [← Rat.mul_den_eq_num, hq]; field_simp
@@ -175,7 +176,8 @@ theorem eulerNumber_modEq_add_prime_sub_one {p : ℕ} (hp : p.Prime) (hp2 : 2 < 
   have hE := eulerNumber_eq_newton_series (m := n) (K := K) (by omega)
   have hE' := eulerNumber_eq_newton_series (m := K) (K := K) le_rfl
   unfold RatModEq
-  refine prime_dvd_num_of_eq_mul_div_two_pow hp (by omega) K (a := -∑ k ∈ range (K + 1), 2 ^ (K - k) *
+  refine prime_dvd_num_of_eq_mul_div_two_pow hp (by omega) K
+      (a := -∑ k ∈ range (K + 1), 2 ^ (K - k) *
     ∑ j ∈ range (k + 1), (-1) ^ j * (k.choose j : ℤ) * e (2 * j + 1)) ?_
   rw [hE, hE', ← sum_sub_distrib]
   push_cast

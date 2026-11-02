@@ -407,7 +407,8 @@ theorem legFS_series_tendsto {ν μ : ℂ} (hr : LegendreQRegular ν μ) (hμ : 
     (legFS_coef_var_summable ν hμ)
   have ha : ∀ k : ℕ, ν+μ+1 ≠ -(k:ℂ) := fun k h => hr k (by linear_combination h)
   -- Abel's theorem
-  have hA := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt (f := fun k => legFS_coef ν μ k * w^k) hl
+  have hA := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt
+      (f := fun k => legFS_coef ν μ k * w^k) hl
   rw [tendsto_map'_iff] at hA
   -- the Abel means are the hypergeometric function inside the disk
   have hmean : ∀ x : ℝ, 0 ≤ x → x < 1 →
@@ -427,7 +428,8 @@ theorem legFS_series_tendsto {ν μ : ℂ} (hr : LegendreQRegular ν μ) (hμ : 
     rw [legFS_coef, hG', show ν+n+3/2 = ν+3/2+n by ring, mul_pow]
     simp only [poch, div_eq_mul_inv]
     ring
-  have hlim2 : Tendsto (fun x : ℝ => Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (w*x))
+  have hlim2 : Tendsto
+      (fun x : ℝ => Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (w*x))
       (𝓝[<] (1:ℝ)) (𝓝 (Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) w)) := by
     have hc : Tendsto (fun x : ℝ => w*(x:ℂ)) (𝓝[<] (1:ℝ)) (𝓝 w) := by
       have : Continuous (fun x : ℝ => w*(x:ℂ)) := by fun_prop
@@ -436,7 +438,8 @@ theorem legFS_series_tendsto {ν μ : ℂ} (hr : LegendreQRegular ν μ) (hμ : 
   have hev : ∀ᶠ x : ℝ in 𝓝[<] (1:ℝ),
       ((fun z : ℂ => ∑' n, legFS_coef ν μ n * w^n * z^n) ∘ ofReal) x =
         Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (w*x) := by
-    filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds (Ioi_mem_nhds (show (0:ℝ) < 1 by norm_num))]
+    filter_upwards [self_mem_nhdsWithin,
+        nhdsWithin_le_nhds (Ioi_mem_nhds (show (0:ℝ) < 1 by norm_num))]
       with x hx1 hx0
     exact hmean x (le_of_lt hx0) hx1
   have := tendsto_nhds_unique hA (hlim2.congr' (hev.mono fun x hx => hx.symm))
@@ -499,7 +502,8 @@ theorem legFS_nat_coef (n k : ℕ) :
   have hn0 : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos _).ne'
   have hp0 : poch ((n:ℂ)+3/2) k ≠ 0 := by
     show (ascPochhammer ℂ k).eval _ ≠ 0
-    rw [← h2]; exact div_ne_zero (Gamma_ne_zero (fun m h => hb (m+k) (by push_cast; linear_combination h))) hb0
+    rw [← h2]; exact div_ne_zero
+        (Gamma_ne_zero (fun m h => hb (m+k) (by push_cast; linear_combination h))) hb0
   have hr : (Real.sqrt π:ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpi : (π:ℂ) = (Real.sqrt π:ℂ)^2 := by
     rw [← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
@@ -522,14 +526,18 @@ theorem legFS_nat_coef (n k : ℕ) :
 
 /-- Integer degree and zero order are `Q`-regular. -/
 theorem legFS_nat_regular (n : ℕ) : LegendreQRegular (n:ℂ) 0 := fun m h => by
-  have := congrArg re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ) ≤ m), (n.cast_nonneg : (0:ℝ) ≤ n)]
+  have := congrArg re h; simp at this;
+      linarith [(m.cast_nonneg : (0:ℝ) ≤ m), (n.cast_nonneg : (0:ℝ) ≤ n)]
 
 /-- DLMF 14.13.1: for `0 < θ < π`, `Re μ < 1/2` and `ν + μ ∉ {−1, −2, …}`, `𝖯^μ_ν(cos θ) =
 (2^{μ+1}/π^{1/2}) sin^μ θ Σ_{k≥0} Γ(ν+μ+k+1)/Γ(ν+k+3/2) · (μ+1/2)_k/k! · sin((ν+μ+2k+1)θ)`, the
 series converging as the limit of its partial sums. -/
 @[dlmf 14.13.E1]
-theorem ferrersP_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, 2^(μ+1)/Real.sqrt π*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)) atTop (𝓝 (ferrersP ν μ (Real.cos θ))) := by
+theorem ferrersP_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ}
+    (h0 : 0 < θ) (hπ : θ < π) :
+    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N,
+        2^(μ+1)/Real.sqrt π*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2)
+        k/(k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)) atTop (𝓝 (ferrersP ν μ (Real.cos θ))) := by
   have hsin : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi h0 hπ
   have Ep := legFS_PQ_hyp ν μ hν h0 hπ (s := 1) (Or.inl rfl)
   have Em := legFS_PQ_hyp ν μ hν h0 hπ (s := -1) (Or.inr rfl)
@@ -572,7 +580,8 @@ theorem ferrersP_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h�
 
 /-- Absolute convergence in DLMF 14.13. -/
 theorem ferrersP_fourier_absolute {ν μ : ℂ} (hμ : μ.re < 0) {θ : ℝ} :
-    Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)‖) := by
+    Summable (fun k : ℕ =>
+        ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)‖) := by
   refine legFour_summable hμ _ (B := Real.exp |((ν+μ)*θ).im|) fun k => ?_
   have him : ((ν+μ+2*(k:ℂ)+1)*(θ:ℂ)).im = ((ν+μ)*θ).im := by simp [mul_im]
   exact (legFour_norm_sin_le _).trans_eq (by rw [him])
@@ -582,7 +591,10 @@ theorem ferrersP_fourier_absolute {ν μ : ℂ} (hμ : μ.re < 0) {θ : ℝ} :
 sums. -/
 @[dlmf 14.13.E3]
 theorem ferrersP_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, 2^(2*n+2)*(n.factorial:ℂ)^2/(π*((2*n+1).factorial:ℂ))*poch (1/2) k*poch (n+1) k/((k.factorial:ℂ)*poch (n+3/2) k)*sin ((n+2*k+1:ℂ)*θ)) atTop (𝓝 (ferrersP n 0 (Real.cos θ))) := by
+    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N,
+        2^(2*n+2)*(n.factorial:ℂ)^2/(π*((2*n+1).factorial:ℂ))*poch (1/2) k*poch (n+1)
+        k/((k.factorial:ℂ)*poch (n+3/2) k)*sin ((n+2*k+1:ℂ)*θ)) atTop
+        (𝓝 (ferrersP n 0 (Real.cos θ))) := by
   have h := ferrersP_fourier_series (legFS_nat_regular n) (by simp) h0 hπ
   refine h.congr fun N => Finset.sum_congr rfl fun k _ => ?_
   have e := legFS_nat_coef n k
@@ -597,8 +609,11 @@ theorem ferrersP_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) 
 2^μ sin^μ θ Σ_{k≥0} Γ(ν+μ+k+1)/Γ(ν+k+3/2) · (μ+1/2)_k/k! · cos((ν+μ+2k+1)θ)`, the series converging
 as the limit of its partial sums. -/
 @[dlmf 14.13.E2]
-theorem ferrersQ_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, Real.sqrt π*2^μ*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)) atTop (𝓝 (ferrersQ ν μ (Real.cos θ))) := by
+theorem ferrersQ_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ}
+    (h0 : 0 < θ) (hπ : θ < π) :
+    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N,
+        Real.sqrt π*2^μ*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2)
+        k/(k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)) atTop (𝓝 (ferrersQ ν μ (Real.cos θ))) := by
   have hsin : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi h0 hπ
   have Ep := legFS_PQ_hyp ν μ hν h0 hπ (s := 1) (Or.inl rfl)
   have Em := legFS_PQ_hyp ν μ hν h0 hπ (s := -1) (Or.inr rfl)
@@ -627,7 +642,8 @@ theorem ferrersQ_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h�
 
 /-- Absolute convergence in DLMF 14.13. -/
 theorem ferrersQ_fourier_absolute {ν μ : ℂ} (hμ : μ.re < 0) {θ : ℝ} :
-    Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)‖) := by
+    Summable (fun k : ℕ =>
+        ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)‖) := by
   refine legFour_summable hμ _ (B := Real.exp |((ν+μ)*θ).im|) fun k => ?_
   have him : ((ν+μ+2*(k:ℂ)+1)*(θ:ℂ)).im = ((ν+μ)*θ).im := by simp [mul_im]
   exact (legFour_norm_cos_le _).trans_eq (by rw [him])
@@ -681,7 +697,10 @@ theorem legFour_cos_pair {θ : ℝ} (x : ℝ) :
 (n+1)_k/(k! (n+3/2)_k) cos((n+2k+1)θ)`, the series converging as the limit of its partial sums. -/
 @[dlmf 14.13.E4]
 theorem ferrersQ_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, 2^(2*n+1)*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*poch (1/2) k*poch (n+1) k/((k.factorial:ℂ)*poch (n+3/2) k)*cos ((n+2*k+1:ℂ)*θ)) atTop (𝓝 (ferrersQ n 0 (Real.cos θ))) := by
+    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N,
+        2^(2*n+1)*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*poch (1/2) k*poch (n+1)
+        k/((k.factorial:ℂ)*poch (n+3/2) k)*cos ((n+2*k+1:ℂ)*θ)) atTop
+        (𝓝 (ferrersQ n 0 (Real.cos θ))) := by
   have h := ferrersQ_fourier_series (legFS_nat_regular n) (by simp) h0 hπ
   refine h.congr fun N => Finset.sum_congr rfl fun k _ => ?_
   have e := legFS_nat_coef n k
@@ -717,7 +736,9 @@ theorem legendreQPoly_convolution (n : ℕ) (z : ℂ) :
 (n−s)! (s!)²) (z−1)^s` of the polynomial `legendreQPoly n` (the `s = n` term of DLMF vanishes). -/
 @[dlmf 14.7.E3]
 theorem legendreQPoly_explicit (n : ℕ) (z : ℂ) :
-    (legendreQPoly n).eval z=∑ s ∈ Finset.range n, ((n+s).factorial:ℂ)*(digamma (n+1)-digamma (s+1))/(2^s*(n-s).factorial*(s.factorial:ℂ)^2)*(z-1)^s := by
+    (legendreQPoly n).eval z=∑ s ∈ Finset.range n,
+        ((n+s).factorial:ℂ)*(digamma (n+1)-digamma
+        (s+1))/(2^s*(n-s).factorial*(s.factorial:ℂ)^2)*(z-1)^s := by
   rw [← legSerW_eq, legSerW]
   refine Finset.sum_congr rfl fun s hs => ?_
   have hs : s < n := Finset.mem_range.mp hs
@@ -730,13 +751,15 @@ theorem legendreQPoly_explicit (n : ℕ) (z : ℂ) :
 (5/2)x² − 2/3`. -/
 @[dlmf 14.7.E5]
 theorem legendreQPoly_initial  :
-    legendreQPoly 1=1 ∧ legendreQPoly 2=Polynomial.C (3/2)*Polynomial.X ∧ legendreQPoly 3=Polynomial.C (5/2)*Polynomial.X^2-Polynomial.C (2/3) := by
+    legendreQPoly 1=1 ∧ legendreQPoly 2=Polynomial.C (3/2)*Polynomial.X ∧
+        legendreQPoly 3=Polynomial.C (5/2)*Polynomial.X^2-Polynomial.C (2/3) := by
   have h2 : legendreQPoly 2=Polynomial.C (3/2)*Polynomial.X := by
     norm_num [legendreQPoly, ← mul_assoc, ← Polynomial.C_mul]
   have h3 : legendreQPoly 3=Polynomial.C (5/2)*Polynomial.X^2-Polynomial.C (2/3) := by
     rw [legendreQPoly, h2]
     norm_num only [legendreQPoly, mul_one]
-    rw [show Polynomial.C (1/3:ℂ)*(Polynomial.C 5*Polynomial.X*(Polynomial.C (3/2)*Polynomial.X)-Polynomial.C 2) =
+    rw [show Polynomial.C
+        (1/3:ℂ)*(Polynomial.C 5*Polynomial.X*(Polynomial.C (3/2)*Polynomial.X)-Polynomial.C 2) =
       (Polynomial.C (1/3)*Polynomial.C 5*Polynomial.C (3/2))*Polynomial.X^2-
         Polynomial.C (1/3)*Polynomial.C 2 by ring]
     norm_num [← Polynomial.C_mul]
@@ -769,8 +792,10 @@ theorem ferrersQ_nat_logarithm (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
       have hn : (n : ℂ) + 2 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (n + 1)
       rw [show (n:ℂ)+2 = n+1+1 by ring] at hn ⊢
       have hinv : ((n:ℂ)+1+1)*((n:ℂ)+1+1)⁻¹ = 1 := mul_inv_cancel₀ hn
-      linear_combination ((n:ℂ)+1+1)⁻¹*(hQ - 1/2*log ((1+x)/(1-x):ℂ) * hP + (2 * (n : ℂ) + 3) * x * h1 -
-        ((n : ℂ) + 1) * h0) - (ferrersQ ((n:ℂ)+1+1) 0 x - 1/2*log ((1+x)/(1-x):ℂ)*ferrersP ((n:ℂ)+1+1) 0 x)*hinv
+      linear_combination ((n:ℂ)+1+1)⁻¹*(hQ - 1/2*log ((1+x)/(1-x):ℂ) * hP +
+          (2 * (n : ℂ) + 3) * x * h1 -
+        ((n : ℂ) + 1) * h0) -
+            (ferrersQ ((n:ℂ)+1+1) 0 x - 1/2*log ((1+x)/(1-x):ℂ)*ferrersP ((n:ℂ)+1+1) 0 x)*hinv
 
 /-- DLMF 14.7.6: for `n ∈ ℕ` and `z ∉ (−∞, 1]`, `Q_n(z) = n! 𝑸_n(z)`. -/
 @[dlmf 14.7.E6]
@@ -793,7 +818,8 @@ h²)^{−1/2}`. -/
 theorem ferrersP_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 1) :
     HasSum (fun n : ℕ => ferrersP n 0 x*(h:ℂ)^n) ((1-2*x*h+h^2:ℂ)^(-1/2:ℂ)) := by
   have hg := DLMF.OrthogonalPolynomials.legendre_generating_function (x := x)
-    (abs_le.mpr ⟨hx.1.le, hx.2.le⟩) (z := (h:ℂ)) (by rw [Complex.norm_real, Real.norm_eq_abs]; exact hh)
+    (abs_le.mpr ⟨hx.1.le, hx.2.le⟩) (z := (h:ℂ))
+        (by rw [Complex.norm_real, Real.norm_eq_abs]; exact hh)
   refine hg.congr_fun fun n => ?_
   have hs : 1+(x:ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
   rw [ferrersP_zero _ hx.1, legendreP_nat n hs]
@@ -802,7 +828,8 @@ theorem ferrersP_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 
 h + (1 − 2xh + h²)^{1/2})/(1−x²)^{1/2})`. -/
 @[dlmf 14.7.E20]
 theorem ferrersQ_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 1) :
-    HasSum (fun n : ℕ => ferrersQ n 0 x*(h:ℂ)^n) ((1-2*x*h+h^2:ℂ)^(-1/2:ℂ)*log ((x-h+(1-2*x*h+h^2:ℂ)^(1/2:ℂ))/(1-x^2:ℂ)^(1/2:ℂ))) := by
+    HasSum (fun n : ℕ => ferrersQ n 0 x*(h:ℂ)^n)
+        ((1-2*x*h+h^2:ℂ)^(-1/2:ℂ)*log ((x-h+(1-2*x*h+h^2:ℂ)^(1/2:ℂ))/(1-x^2:ℂ)^(1/2:ℂ))) := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   set w : ℝ := √(1-x^2)
   have hw2 : w^2 = 1 - x^2 := Real.sq_sqrt hx2.le
@@ -841,11 +868,13 @@ theorem ferrersQ_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 
     have hl0 := hl h hhr
     rw [mul_comm]
     congr 1
-    rw [show (1-2*x*h+h^2:ℂ) = ((1-2*x*h+h^2:ℝ):ℂ) by push_cast; ring, Carlson.ofReal_cpow_half hq0.le,
+    rw [show (1-2*x*h+h^2:ℂ) = ((1-2*x*h+h^2:ℝ):ℂ) by push_cast; ring,
+                                                        Carlson.ofReal_cpow_half hq0.le,
       show (1-x^2:ℂ) = ((1-x^2:ℝ):ℂ) by push_cast; ring, Carlson.ofReal_cpow_half hx2.le,
       show ((1+x)/(1-x):ℂ) = (((1+x)/(1-x):ℝ):ℂ) by push_cast; ring,
       ← Complex.ofReal_log (div_pos (by linarith [hx.1]) (by linarith [hx.2])).le,
-      show (x:ℂ) - h + ((√(1-2*x*h+h^2):ℝ):ℂ) = ((x - h + √(1-2*x*h+h^2) : ℝ) : ℂ) by push_cast; ring,
+      show (x:ℂ) - h + ((√(1-2*x*h+h^2):ℝ):ℂ) =
+          ((x - h + √(1-2*x*h+h^2) : ℝ) : ℂ) by push_cast; ring,
       ← Complex.ofReal_div, ← Complex.ofReal_log (div_pos hl0 (Real.sqrt_pos.mpr hx2)).le]
     have h1x : 0 < 1 + x := by linarith [hx.1]
     have h1x' : 0 < 1 - x := by linarith [hx.2]
@@ -858,7 +887,8 @@ theorem ferrersQ_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 
 h²)^{−1/2} ln((x − h + (1 − 2xh + h²)^{1/2})/(x²−1)^{1/2})`. -/
 @[dlmf 14.7.E22]
 theorem associatedQ_generating {x h : ℝ} (hx : 1 < x) (hh : |h| < x-Real.sqrt (x^2-1)) :
-    HasSum (fun n : ℕ => associatedQ n 0 x*(h:ℂ)^n) ((1-2*x*h+h^2:ℂ)^(-1/2:ℂ)*log ((x-h+(1-2*x*h+h^2:ℂ)^(1/2:ℂ))/(x^2-1:ℂ)^(1/2:ℂ))) := by
+    HasSum (fun n : ℕ => associatedQ n 0 x*(h:ℂ)^n)
+        ((1-2*x*h+h^2:ℂ)^(-1/2:ℂ)*log ((x-h+(1-2*x*h+h^2:ℂ)^(1/2:ℂ))/(x^2-1:ℂ)^(1/2:ℂ))) := by
   have hx2 : 0 < x^2 - 1 := by nlinarith
   set w : ℝ := √(x^2-1)
   have hw2 : w^2 = x^2 - 1 := Real.sq_sqrt hx2.le
@@ -900,12 +930,14 @@ theorem associatedQ_generating {x h : ℝ} (hx : 1 < x) (hh : |h| < x-Real.sqrt 
     have hl0 := hl h hhr
     rw [mul_comm]
     congr 1
-    rw [show (1-2*x*h+h^2:ℂ) = ((1-2*x*h+h^2:ℝ):ℂ) by push_cast; ring, Carlson.ofReal_cpow_half hq0.le,
+    rw [show (1-2*x*h+h^2:ℂ) = ((1-2*x*h+h^2:ℝ):ℂ) by push_cast; ring,
+                                                        Carlson.ofReal_cpow_half hq0.le,
       show (x^2-1:ℂ) = ((x^2-1:ℝ):ℂ) by push_cast; ring, Carlson.ofReal_cpow_half hx2.le,
       show (x:ℂ) + 1 = ((x+1:ℝ):ℂ) by push_cast; ring,
       show (x:ℂ) - 1 = ((x-1:ℝ):ℂ) by push_cast; ring,
       ← Complex.ofReal_log (by linarith), ← Complex.ofReal_log (by linarith),
-      show (x:ℂ) - h + ((√(1-2*x*h+h^2):ℝ):ℂ) = ((x - h + √(1-2*x*h+h^2) : ℝ) : ℂ) by push_cast; ring,
+      show (x:ℂ) - h + ((√(1-2*x*h+h^2):ℝ):ℂ) =
+          ((x - h + √(1-2*x*h+h^2) : ℝ) : ℂ) by push_cast; ring,
       ← Complex.ofReal_div, ← Complex.ofReal_log (div_pos hl0 hw0).le]
     have h1x : 0 < x + 1 := by linarith
     have h1x' : 0 < x - 1 := by linarith
@@ -916,7 +948,8 @@ theorem associatedQ_generating {x h : ℝ} (hx : 1 < x) (hh : |h| < x-Real.sqrt 
 /-- DLMF 14.7.19 (complex case): for `z ∉ (−∞, 1]` and `|h| < min |z ± (z²−1)^{1/2}|`, `Σ_{n≥0}
 P_n(z) hⁿ = (1 − 2zh + h²)^{−1/2}`. -/
 @[dlmf 14.7.E19]
-theorem associatedP_generating_complex {z h : ℂ} (hz : z-1 ∈ slitPlane) (hh : ‖h‖ < min ‖z+exp ((log (z-1)+log (z+1))/2)‖ ‖z-exp ((log (z-1)+log (z+1))/2)‖) :
+theorem associatedP_generating_complex {z h : ℂ} (hz : z-1 ∈ slitPlane)
+    (hh : ‖h‖ < min ‖z+exp ((log (z-1)+log (z+1))/2)‖ ‖z-exp ((log (z-1)+log (z+1))/2)‖) :
     HasSum (fun n : ℕ => associatedP n 0 z*h^n) ((1-2*z*h+h^2)^(-1/2:ℂ)) := by
   obtain ⟨hs, hp⟩ := legSer_roots hz
   set s := exp ((log (z-1)+log (z+1))/2)
@@ -940,9 +973,11 @@ theorem associatedP_generating_complex {z h : ℂ} (hz : z-1 ∈ slitPlane) (hh 
   refine (legSer_generating z (z+s) (z-s) h hs hp h1 h2).congr_fun fun n => ?_
   rw [associatedP_zero_order _ hz]; rfl
 
-/-- The exterior square root is normalized at infinity; principal sqrt of h squared would have the wrong sign for negative h. -/
+/-- The exterior square root is normalized at infinity; principal sqrt of h squared would have the
+wrong sign for negative h. -/
 @[dlmf 14.7.E21]
-theorem associatedP_exterior_generating {z h : ℂ} (hz : z-1 ∈ slitPlane) (hh : max ‖z+exp ((log (z-1)+log (z+1))/2)‖ ‖z-exp ((log (z-1)+log (z+1))/2)‖ < ‖h‖) :
+theorem associatedP_exterior_generating {z h : ℂ} (hz : z-1 ∈ slitPlane)
+    (hh : max ‖z+exp ((log (z-1)+log (z+1))/2)‖ ‖z-exp ((log (z-1)+log (z+1))/2)‖ < ‖h‖) :
     HasSum (fun n : ℕ => associatedP n 0 z*h^(-(n+1:ℤ))) (h⁻¹*(1-2*z/h+1/h^2)^(-1/2:ℂ)) := by
   obtain ⟨hs, hp⟩ := legSer_roots hz
   set s := exp ((log (z-1)+log (z+1))/2)
@@ -1023,7 +1058,8 @@ theorem legFS_wQ_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
   have h2 : ‖legFS_zeta x ^ 2‖ < 1 := by
     rw [norm_pow]; have := legFS_norm_zeta_lt_one hz
     nlinarith [norm_nonneg (legFS_zeta x)]
-  rw [legFS_wQ, legFS_olverQ_eq_G _ _ hz, legFS_G, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ h2]
+  rw [legFS_wQ, legFS_olverQ_eq_G _ _ hz, legFS_G,
+      regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ h2]
   congr 2 <;> ring_nf
 
 /-- Eventually `0 < Re (c + k)`. -/
@@ -1133,7 +1169,8 @@ theorem legFS_branch_neg_one {x : ℝ} (hx : 1 < x) :
     legendreBranchPower (-1) x = (((Real.sqrt (x^2-1))⁻¹ : ℝ) : ℂ) := by
   have hy : 0 < x^2 - 1 := by nlinarith
   have hl : log ((x:ℂ)-1) + log ((x:ℂ)+1) = ((Real.log (x^2-1) : ℝ) : ℂ) := by
-    rw [show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring, show (x:ℂ)+1 = ((x+1:ℝ):ℂ) by push_cast; ring,
+    rw [show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring, show (x:ℂ)+1 =
+                                        ((x+1:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log (by linarith), ← ofReal_log (by linarith), ← ofReal_add,
       ← Real.log_mul (by linarith) (by linarith)]
     congr 2; ring
@@ -1321,9 +1358,12 @@ Pfaff's transformation and the Tannery limit `legFS_tannery`, `-w_k/(a_{k+1}w_{k
 (x+1)/(x-1) > 1`, so Pincherle's criterion `GenContFract.pinch_cfConv_tendsto` applies; a
 vanishing partial numerator terminates the fraction at the same value. The hypothesis `hterm`
 is not needed (stronger than DLMF). -/
-@[dlmf 14.14.E1 "source erratum: the limit is the minimal-solution ratio (ν+μ)(ν-μ+1)P^{-μ}/P^{1-μ}"]
-theorem associatedP_continued_fraction (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (hnz : associatedP ν (1-μ) x ≠ 0) :
-    HasContinuedFraction (legendrePCFNum ν μ x) (legendrePCFDen μ x) (Real.sqrt (x^2-1)/2*((ν+μ)*(ν-μ+1))*associatedP ν (-μ) x/associatedP ν (1-μ) x) := by
+@[dlmf 14.14.E1 "source erratum: the limit is the minimal-solution ratio \
+    (ν+μ)(ν-μ+1)P^{-μ}/P^{1-μ}"]
+theorem associatedP_continued_fraction (ν μ : ℂ) {x : ℝ} (hx : 1 < x)
+    (hnz : associatedP ν (1-μ) x ≠ 0) :
+    HasContinuedFraction (legendrePCFNum ν μ x) (legendrePCFDen μ x)
+        (Real.sqrt (x^2-1)/2*((ν+μ)*(ν-μ+1))*associatedP ν (-μ) x/associatedP ν (1-μ) x) := by
   -- the hypothesis `hterm` is not needed (stronger than DLMF)
   have hw0 : legFS_wP ν μ x 0 ≠ 0 := by simpa [legFS_wP] using hnz
   have hval : legendrePCFNum ν μ x 0 * legFS_wP ν μ x 1 / legFS_wP ν μ x 0 =
@@ -1354,8 +1394,10 @@ limit `legFS_tannery`, `-w_k/(a_{k+1}w_{k+2}) → ζ^{-2} > 1`, so Pincherle's c
 fraction at the same value. The hypotheses `hr` and `hterm` are not needed (stronger than
 DLMF). -/
 @[dlmf 14.14.E3]
-theorem associatedQ_continued_fraction {ν μ : ℂ} (hne : ν ≠ μ) {x : ℝ} (hx : 1 < x) (hnz : associatedQ (ν-1) μ x ≠ 0) :
-    HasContinuedFraction (legendreQCFNum ν μ) (legendreQCFDen ν x) ((ν-μ)*associatedQ ν μ x/associatedQ (ν-1) μ x) := by
+theorem associatedQ_continued_fraction {ν μ : ℂ} (hne : ν ≠ μ) {x : ℝ} (hx : 1 < x)
+    (hnz : associatedQ (ν-1) μ x ≠ 0) :
+    HasContinuedFraction (legendreQCFNum ν μ) (legendreQCFDen ν x)
+        ((ν-μ)*associatedQ ν μ x/associatedQ (ν-1) μ x) := by
   -- the hypotheses `hr` and `hterm` are not needed (stronger than DLMF)
   have hz := legInt_one_lt_mem hx
   have hQ1 : associatedQ (ν-1) μ x = exp (μ*π*I) * Gamma (ν+μ) * olverQ (ν-1) μ x := by
@@ -1437,6 +1479,7 @@ theorem ferrersPQ_fourier_hypergeometric (ν μ : ℂ) (hr : LegendreQRegular ν
         regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp (s*2*I*θ)) := by
   rcases hs with rfl | rfl
   · have h := legFS_PQ_hyp ν μ hr h0 hπ (s := 1) (Or.inl rfl); simp only [ofReal_one] at h; exact h
-  · have h := legFS_PQ_hyp ν μ hr h0 hπ (s := -1) (Or.inr rfl); simp only [ofReal_one, ofReal_neg] at h; exact h
+  · have h := legFS_PQ_hyp ν μ hr h0 hπ (s := -1) (Or.inr rfl);
+        simp only [ofReal_one, ofReal_neg] at h; exact h
 
 end DLMF.Legendre

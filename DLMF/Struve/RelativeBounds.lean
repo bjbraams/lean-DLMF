@@ -104,7 +104,8 @@ private lemma norm_struve_term_two_lt {ν w : ℂ} (hν : ∀ n : ℕ, ν + 3 / 
 `H_ν(z)` is bounded by `(2/3) * (exp (‖z‖² / (4d)) - 1)`. Any positive lower bound `d` for
 `‖ν + 3/2 + n‖` suffices; it need not be the attained minimum. -/
 @[dlmf 11.4.E14, dlmf 11.4.E15]
-theorem struveH_relative_bound {ν z : ℂ} (hz : z ≠ 0) (d : ℝ) (hd : 0 < d) (hmin : ∀ n : ℕ, d ≤ ‖ν + 3 / 2 + n‖) :
+theorem struveH_relative_bound {ν z : ℂ} (hz : z ≠ 0) (d : ℝ) (hd : 0 < d)
+    (hmin : ∀ n : ℕ, d ≤ ‖ν + 3 / 2 + n‖) :
     ∃ θ : ℂ, struveH ν z = 2 * (z / 2) ^ (ν + 1) /
       (Real.sqrt π * Gamma (ν + 3 / 2)) * (1 + θ) ∧
       ‖θ‖ < 2 / 3 * (Real.exp (‖z‖ ^ 2 / (4 * d)) - 1) := by
@@ -143,7 +144,8 @@ theorem struveH_relative_bound {ν z : ℂ} (hz : z ≠ 0) (d : ℝ) (hd : 0 < d
     Summable.of_nonneg_of_le (fun _ => norm_nonneg _) hbound hm.summable
   have hstrict : ‖T (1 + 1)‖ <
       (2 / 3 : ℝ) * (‖w‖ / d) ^ (1 + 1) / ((1 + 1).factorial : ℝ) :=
-    norm_struve_term_two_lt hν (neg_ne_zero.mpr (pow_ne_zero _ (div_ne_zero hz two_ne_zero))) hd hmin
+    norm_struve_term_two_lt hν
+        (neg_ne_zero.mpr (pow_ne_zero _ (div_ne_zero hz two_ne_zero))) hd hmin
   have herr : ‖θ‖ < (2 / 3 : ℝ) * (Real.exp (‖w‖ / d) - 1) := by
     calc ‖θ‖ = ‖∑' n, T (n + 1)‖ := by rw [ht.tsum_eq]
       _ ≤ ∑' n, ‖T (n + 1)‖ := norm_tsum_le_tsum_norm hs

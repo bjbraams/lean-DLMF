@@ -17,9 +17,9 @@ public import DLMF.SphericalHarmonics.AdditionTools
 The spherical harmonics `Y_{l,m}(θ, φ)` of DLMF §14.30 are defined in
 `DLMF.Legendre.Basic.Harmonics` (`ferrersPNat`, `sphericalHarmonicNonneg`, `sphericalHarmonic`,
 `surfaceHarmonic`) through a polynomial form of the Ferrers functions of integer degree and order
-(DLMF 14.7.8), which extends them continuously to both endpoints `x = ±1`. This file proves the Rodrigues form, the values at the north
-pole and the equator, the symmetry relations, the orthonormality and the addition theorem, and
-the Herglotz generating function of DLMF §14.30(ii).
+(DLMF 14.7.8), which extends them continuously to both endpoints `x = ±1`. This file proves the
+Rodrigues form, the values at the north pole and the equator, the symmetry relations, the
+orthonormality and the addition theorem, and the Herglotz generating function of DLMF §14.30(ii).
 
 ## Main definitions
 
@@ -84,8 +84,11 @@ theorem star_ferrersPNat (l m : ℕ) (x : ℝ) : star (ferrersPNat l m x) = ferr
 /-- DLMF 14.30.1: for `|m| ≤ l` (`m` of either sign) and `0 < θ < π`, `Y_{l,m}(θ, φ) = √((l-m)!
 (2l+1)/(4π (l+m)!)) e^{imφ} 𝖯^m_l(cos θ)`. -/
 @[dlmf 14.30.E1]
-theorem sphericalHarmonic_ferrers (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (phi : ℝ) :
-    sphericalHarmonic l m θ phi=Real.sqrt ((((l:ℤ)-m).toNat.factorial:ℝ)*(2*l+1)/(4*π*((l:ℤ)+m).toNat.factorial))*exp (I*m*phi)*ferrersP l m (Real.cos θ) := by
+theorem sphericalHarmonic_ferrers (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {θ : ℝ} (h0 : 0 < θ)
+    (hπ : θ < π) (phi : ℝ) :
+    sphericalHarmonic l m θ phi=Real.sqrt
+        ((((l:ℤ)-m).toNat.factorial:ℝ)*(2*l+1)/(4*π*((l:ℤ)+m).toNat.factorial))*exp
+        (I*m*phi)*ferrersP l m (Real.cos θ) := by
   have hx : Real.cos θ ∈ Ioo (-1:ℝ) 1 := by
     constructor
     · rw [← Real.cos_pi]; exact Real.cos_lt_cos_of_nonneg_of_le_pi h0.le le_rfl hπ
@@ -107,7 +110,8 @@ theorem sphericalHarmonic_ferrers (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {θ 
     have e1 : (l:ℂ) - k + 1 = ((l - k : ℕ) : ℂ) + 1 := by push_cast [Nat.cast_sub hkl]; ring
     have e2 : (l:ℂ) + k + 1 = ((l + k : ℕ) : ℂ) + 1 := by push_cast; ring
     rw [e1, e2, Complex.Gamma_nat_eq_factorial, Complex.Gamma_nat_eq_factorial]
-    simp only [star_mul', star_ferrersPNat, Complex.star_def, Complex.conj_ofReal, ← Complex.exp_conj]
+    simp only [star_mul', star_ferrersPNat, Complex.star_def, Complex.conj_ofReal,
+        ← Complex.exp_conj]
     set a : ℝ := ((l-k).factorial : ℝ)
     set b : ℝ := ((l+k).factorial : ℝ)
     have ha : 0 < a := by positivity
@@ -161,7 +165,8 @@ private lemma rod_ode (n k : ℕ) (z : ℂ) :
   have h := legInt_ode n k z
   simp only [LegendreAddition.jet, iteratedDeriv_legendrePolyP_rodrigues] at h
   have hc : (2^n*(n.factorial:ℂ))⁻¹ ≠ 0 := by
-    apply inv_ne_zero; exact mul_ne_zero (pow_ne_zero _ two_ne_zero) (by exact_mod_cast n.factorial_ne_zero)
+    apply inv_ne_zero; exact mul_ne_zero (pow_ne_zero _ two_ne_zero)
+        (by exact_mod_cast n.factorial_ne_zero)
   rw [show k+2+n = n+k+2 by ring, show k+1+n = n+k+1 by ring, show k+n = n+k by ring] at h
   have h' := h
   apply mul_left_cancel₀ hc
@@ -189,11 +194,13 @@ private lemma rod_negative_order (n k : ℕ) (hk : k ≤ n) (z : ℂ) :
       have d2 := rod_hasDerivAt (a+(k+1)) a z
       have dp : HasDerivAt (fun z : ℂ => (z^2-1)^(k+1)) ((k+1:ℕ)*(z^2-1)^k*(2*z)) z :=
         (((hasDerivAt_pow 2 z).sub_const 1).fun_pow (k+1)).congr_deriv (by simp)
-      have hsum := ((dp.const_mul (a.factorial:ℂ)).mul d1).sub (d2.const_mul (((a+(k+1)+(k+1)).factorial:ℂ)))
+      have hsum := ((dp.const_mul (a.factorial:ℂ)).mul d1).sub
+          (d2.const_mul (((a+(k+1)+(k+1)).factorial:ℂ)))
       refine hsum.congr_deriv ?_
       have hode := rod_ode (a+(k+1)) k z
       have hi := ih' z
-      rw [show a+(k+1)+k+2 = a+(k+1)+(k+1)+1 by ring, show a+(k+1)+k+1 = a+(k+1)+(k+1) by ring] at hode
+      rw [show a+(k+1)+k+2 = a+(k+1)+(k+1)+1 by ring, show a+(k+1)+k+1 =
+                                                  a+(k+1)+(k+1) by ring] at hode
       have f1 : ((a+1).factorial:ℂ) = (a+1)*a.factorial := by push_cast [Nat.factorial_succ]; ring
       have f2 : ((a+(k+1)+(k+1)).factorial:ℂ) = (a+(k+1)+k+1)*((a+(k+1)+k).factorial) := by
         rw [show a+(k+1)+(k+1) = (a+(k+1)+k)+1 by ring, Nat.factorial_succ]; push_cast; ring
@@ -232,8 +239,12 @@ private lemma rod_iteratedDeriv_real (l j : ℕ) (x : ℝ) :
 /-- DLMF 14.30.3: for `|m| ≤ l` and `0 < θ < π`, `Y_{l,m}(θ, φ) = ((-1)^{l+m}/(2^l l!)) √((l-m)!
 (2l+1)/(4π (l+m)!)) e^{imφ} sin^m θ · d^{l+m}(1-x²)^l/dx^{l+m}` evaluated at `x = cos θ`. -/
 @[dlmf 14.30.E3]
-theorem sphericalHarmonic_rodrigues (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (phi : ℝ) :
-    sphericalHarmonic l m θ phi=(-1:ℂ)^((l:ℤ)+m)/(2^l*(l.factorial:ℂ))*Real.sqrt ((((l:ℤ)-m).toNat.factorial:ℝ)*(2*l+1)/(4*π*((l:ℤ)+m).toNat.factorial))*exp (I*m*phi)*(Real.sin θ:ℂ)^m*iteratedDeriv ((l:ℤ)+m).toNat (fun x : ℝ => (1-x^2:ℂ)^l) (Real.cos θ) := by
+theorem sphericalHarmonic_rodrigues (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {θ : ℝ} (h0 : 0 < θ)
+    (hπ : θ < π) (phi : ℝ) :
+    sphericalHarmonic l m θ phi=(-1:ℂ)^((l:ℤ)+m)/(2^l*(l.factorial:ℂ))*Real.sqrt
+        ((((l:ℤ)-m).toNat.factorial:ℝ)*(2*l+1)/(4*π*((l:ℤ)+m).toNat.factorial))*exp
+        (I*m*phi)*(Real.sin θ:ℂ)^m*iteratedDeriv ((l:ℤ)+m).toNat (fun x : ℝ => (1-x^2:ℂ)^l)
+        (Real.cos θ) := by
   have hx : Real.cos θ ∈ Ioo (-1:ℝ) 1 := by
     constructor
     · rw [← Real.cos_pi]; exact Real.cos_lt_cos_of_nonneg_of_le_pi h0.le le_rfl hπ
@@ -276,7 +287,8 @@ theorem sphericalHarmonic_rodrigues (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {�
     rw [hx2] at key
     rw [show k + l = l + k by ring]
     have hz1 : (-1:ℂ)^((l:ℤ) + -(k:ℤ)) = (-1)^l * (-1)^k := by
-      rw [zpow_add₀ (by norm_num), zpow_natCast, zpow_neg, zpow_natCast, ← inv_pow, inv_neg, inv_one]
+      rw [zpow_add₀ (by norm_num), zpow_natCast, zpow_neg, zpow_natCast, ← inv_pow,
+          inv_neg, inv_one]
     rw [hz1, zpow_neg, zpow_natCast]
     have hf1 : ((l+k).factorial : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
     have hs1 : ((-1:ℂ))^k * (-1)^k = 1 := by rw [← mul_pow]; norm_num
@@ -334,7 +346,11 @@ theorem Gamma_one_half_sub_nat_mul (s : ℕ) :
 (l+m)! (2l+1)/(4π))/(2^l ((l-m)/2)! ((l+m)/2)!)` when `l + m` is even, and `0` otherwise. -/
 @[dlmf 14.30.E5]
 theorem sphericalHarmonic_equator (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) (phi : ℝ) :
-    sphericalHarmonic l m (π/2) phi=if Even ((l:ℤ)+m) then (-1:ℂ)^(((l:ℤ)+m)/2)*exp (I*m*phi)/(2^l*((((l:ℤ)-m)/2).toNat.factorial:ℂ)*((((l:ℤ)+m)/2).toNat.factorial:ℂ))*Real.sqrt ((((l:ℤ)-m).toNat.factorial:ℝ)*((l:ℤ)+m).toNat.factorial*(2*l+1)/(4*π)) else 0 := by
+    sphericalHarmonic l m (π/2) phi=if Even ((l:ℤ)+m) then
+      (-1:ℂ)^(((l:ℤ)+m)/2)*exp (I*m*phi)
+        /(2^l*((((l:ℤ)-m)/2).toNat.factorial:ℂ)*((((l:ℤ)+m)/2).toNat.factorial:ℂ))
+        *Real.sqrt ((((l:ℤ)-m).toNat.factorial:ℝ)*((l:ℤ)+m).toNat.factorial*(2*l+1)/(4*π))
+      else 0 := by
   rw [sphericalHarmonic_ferrers l m hm (by positivity) (by linarith [Real.pi_pos]) phi,
     Real.cos_pi_div_two, ferrersP_zero_1]
   split_ifs with he
@@ -479,7 +495,8 @@ private lemma sphericalHarmonic_eq_sign_mul (l : ℕ) (m : ℤ) (hm : m.natAbs �
   rw [sphericalHarmonic, ite_eq_right (not_lt.2 hm), shSign]
   split_ifs with h
   · rw [sphericalHarmonicNonneg]
-    simp only [star_mul', star_ferrersPNat, Complex.star_def, Complex.conj_ofReal, ← Complex.exp_conj,
+    simp only [star_mul', star_ferrersPNat, Complex.star_def, Complex.conj_ofReal,
+        ← Complex.exp_conj,
       map_mul, conj_I, conj_natCast]
     have : ((m.natAbs : ℕ) : ℂ) = -(m:ℂ) := by
       have h' : (m.natAbs : ℤ) = -m := by omega
@@ -533,13 +550,20 @@ private lemma integral_exp_I_int (n : ℤ) :
 /-- DLMF 14.30.8: for `|m₁| ≤ l₁` and `|m₂| ≤ l₂`, `∫₀^{2π} ∫₀^π conj(Y_{l₁,m₁}(θ, φ)) Y_{l₂,m₂}(θ,
 φ) sin θ dθ dφ = δ_{l₁,l₂} δ_{m₁,m₂}`. -/
 @[dlmf 14.30.E8]
-theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : m₁.natAbs ≤ l₁) (h2 : m₂.natAbs ≤ l₂) :
-    (∫ phi : ℝ in 0..2*π, ∫ θ : ℝ in 0..π, star (sphericalHarmonic l₁ m₁ θ phi)*sphericalHarmonic l₂ m₂ θ phi*Real.sin θ)=if l₁=l₂ ∧ m₁=m₂ then 1 else 0 := by
-  set c₁ : ℂ := (Real.sqrt (((l₁-m₁.natAbs).factorial:ℝ)*(2*l₁+1)/(4*π*(l₁+m₁.natAbs).factorial)) : ℂ)
-  set c₂ : ℂ := (Real.sqrt (((l₂-m₂.natAbs).factorial:ℝ)*(2*l₂+1)/(4*π*(l₂+m₂.natAbs).factorial)) : ℂ)
-  have hpt : ∀ phi θ : ℝ, star (sphericalHarmonic l₁ m₁ θ phi)*sphericalHarmonic l₂ m₂ θ phi*Real.sin θ =
+theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : m₁.natAbs ≤ l₁)
+    (h2 : m₂.natAbs ≤ l₂) :
+    (∫ phi : ℝ in 0..2*π, ∫ θ : ℝ in 0..π,
+        star (sphericalHarmonic l₁ m₁ θ phi)*sphericalHarmonic l₂ m₂ θ phi*Real.sin θ)=if l₁=l₂ ∧
+        m₁=m₂ then 1 else 0 := by
+  set c₁ : ℂ := (Real.sqrt
+      (((l₁-m₁.natAbs).factorial:ℝ)*(2*l₁+1)/(4*π*(l₁+m₁.natAbs).factorial)) : ℂ)
+  set c₂ : ℂ := (Real.sqrt
+      (((l₂-m₂.natAbs).factorial:ℝ)*(2*l₂+1)/(4*π*(l₂+m₂.natAbs).factorial)) : ℂ)
+  have hpt : ∀ phi θ : ℝ,
+      star (sphericalHarmonic l₁ m₁ θ phi)*sphericalHarmonic l₂ m₂ θ phi*Real.sin θ =
       (shSign m₁ * shSign m₂ * c₁ * c₂ * exp (I*((m₂-m₁:ℤ):ℂ)*phi)) *
-        (ferrersPNat l₁ m₁.natAbs (Real.cos θ) * ferrersPNat l₂ m₂.natAbs (Real.cos θ) * Real.sin θ) := by
+        (ferrersPNat l₁ m₁.natAbs (Real.cos θ) * ferrersPNat l₂ m₂.natAbs (Real.cos θ) *
+            Real.sin θ) := by
     intro phi θ
     rw [sphericalHarmonic_eq_sign_mul l₁ m₁ h1, sphericalHarmonic_eq_sign_mul l₂ m₂ h2]
     simp only [star_mul', star_ferrersPNat, star_shSign, c₁, Complex.star_def, Complex.conj_ofReal,
@@ -547,7 +571,8 @@ theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : 
     have : exp (-I*m₁*phi) * exp (I*m₂*phi) = exp (I*((m₂-m₁:ℤ):ℂ)*phi) := by
       rw [← exp_add]; push_cast; ring_nf
     rw [← this]; ring
-  set J := ∫ θ : ℝ in 0..π, ferrersPNat l₁ m₁.natAbs (Real.cos θ) * ferrersPNat l₂ m₂.natAbs (Real.cos θ) * Real.sin θ with hJ
+  set J := ∫ θ : ℝ in 0..π, ferrersPNat l₁ m₁.natAbs (Real.cos θ) *
+      ferrersPNat l₂ m₂.natAbs (Real.cos θ) * Real.sin θ with hJ
   rw [intervalIntegral.integral_congr (g := fun phi : ℝ =>
       (shSign m₁ * shSign m₂ * c₁ * c₂) * exp (I*((m₂-m₁:ℤ):ℂ)*phi) * J) (fun phi _ => by
         simp only [hpt]; rw [intervalIntegral.integral_const_mul])]
@@ -561,7 +586,8 @@ theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : 
     · subst hl
       simp only [and_self, ite_true]
       have hss := shSign_mul_self m₂
-      have hX : 0 ≤ ((l₁-m₂.natAbs).factorial:ℝ)*(2*l₁+1)/(4*π*(l₁+m₂.natAbs).factorial) := by positivity
+      have hX : 0 ≤ ((l₁-m₂.natAbs).factorial:ℝ)*(2*l₁+1)/(4*π*(l₁+m₂.natAbs).factorial) :=
+          by positivity
       have hc : c₁ * c₁ = ((l₁-m₂.natAbs).factorial:ℂ)*(2*l₁+1)/(4*π*(l₁+m₂.natAbs).factorial) := by
         simp only [c₁]; rw [← ofReal_mul, Real.mul_self_sqrt hX]; push_cast; ring
       have hπ : (π:ℂ) ≠ 0 := by exact_mod_cast Real.pi_pos.ne'
@@ -590,10 +616,12 @@ theorem sum_Icc_neg_pair (g : ℤ → ℂ) (l : ℕ) :
     ring
 
 /-- Product of a conjugated and a plain nonnegative-order spherical harmonic. -/
-theorem star_mul_sphericalHarmonicNonneg (l k : ℕ) {θ₁ θ₂ : ℝ} (h1 : θ₁ ∈ Icc 0 π) (h2 : θ₂ ∈ Icc 0 π)
+theorem star_mul_sphericalHarmonicNonneg (l k : ℕ) {θ₁ θ₂ : ℝ} (h1 : θ₁ ∈ Icc 0 π)
+    (h2 : θ₂ ∈ Icc 0 π)
     (phi₁ phi₂ : ℝ) :
     star (sphericalHarmonicNonneg l k θ₁ phi₁) * sphericalHarmonicNonneg l k θ₂ phi₂ =
-      (2*l+1)/(4*π) * LegendreAddition.coeff l k (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁) (Real.sin θ₂) *
+      (2*l+1)/(4*π) * LegendreAddition.coeff l k (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁)
+          (Real.sin θ₂) *
         exp (I*k*(phi₂-phi₁)) := by
   have hsin : ∀ θ ∈ Icc 0 π, Real.sqrt (1 - Real.cos θ^2) = Real.sin θ := fun θ h =>
     (Real.sin_eq_sqrt_one_sub_cos_sq h.1 h.2).symm
@@ -614,33 +642,42 @@ theorem star_mul_sphericalHarmonicNonneg (l k : ℕ) {θ₁ θ₂ : ℝ} (h1 : �
   set Sq := (Real.sqrt (((l-k).factorial:ℝ)*(2*l+1)/(4*π*(l+k).factorial)) : ℂ)
   linear_combination
     ((-1:ℂ)^k*(-1)^k * (exp (-I*k*phi₁) * exp (I*k*phi₂) * (Real.sin θ₁:ℂ)^k * (Real.sin θ₂:ℂ)^k *
-      iteratedDeriv k (legendrePolyP l) (Real.cos θ₁) * iteratedDeriv k (legendrePolyP l) (Real.cos θ₂))) * hcC +
+      iteratedDeriv k (legendrePolyP l) (Real.cos θ₁) *
+          iteratedDeriv k (legendrePolyP l) (Real.cos θ₂))) * hcC +
     (((l-k).factorial:ℂ)*(2*l+1)/(4*π*(l+k).factorial) * (exp (-I*k*phi₁) * exp (I*k*phi₂) *
       (Real.sin θ₁:ℂ)^k * (Real.sin θ₂:ℂ)^k *
-      iteratedDeriv k (legendrePolyP l) (Real.cos θ₁) * iteratedDeriv k (legendrePolyP l) (Real.cos θ₂))) * hs
+      iteratedDeriv k (legendrePolyP l) (Real.cos θ₁) *
+          iteratedDeriv k (legendrePolyP l) (Real.cos θ₂))) * hs
 
 /-- DLMF 14.30.9 (addition theorem): for `θ₁, θ₂ ∈ [0, π]`, `P_l(cos θ₁ cos θ₂ + sin θ₁ sin θ₂
 cos(φ₁-φ₂)) = (4π/(2l+1)) Σ_{m=-l}^{l} conj(Y_{l,m}(θ₁, φ₁)) Y_{l,m}(θ₂, φ₂)`. -/
 @[dlmf 14.30.E9]
-theorem sphericalHarmonic_addition (l : ℕ) (θ₁ θ₂ phi₁ phi₂ : ℝ) (h1 : θ₁ ∈ Icc 0 π) (h2 : θ₂ ∈ Icc 0 π) :
-    legendrePolyP l (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos (phi₁-phi₂))=4*π/(2*l+1:ℂ)*∑ m ∈ Finset.Icc (-(l:ℤ)) l, star (sphericalHarmonic l m θ₁ phi₁)*sphericalHarmonic l m θ₂ phi₂ := by
+theorem sphericalHarmonic_addition (l : ℕ) (θ₁ θ₂ phi₁ phi₂ : ℝ) (h1 : θ₁ ∈ Icc 0 π)
+    (h2 : θ₂ ∈ Icc 0 π) :
+    legendrePolyP l (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos
+        (phi₁-phi₂))=4*π/(2*l+1:ℂ)*∑ m ∈ Finset.Icc (-(l:ℤ)) l,
+        star (sphericalHarmonic l m θ₁ phi₁)*sphericalHarmonic l m θ₂ phi₂ := by
   have hsin : ∀ θ ∈ Icc 0 π, Real.sqrt (1 - Real.cos θ^2) = Real.sin θ := fun θ h =>
     (Real.sin_eq_sqrt_one_sub_cos_sq h.1 h.2).symm
   have hk := LegendreAddition.legendre_eq_kernel l (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁)
-    (Real.sin θ₂) ((phi₁-phi₂:ℝ):ℂ) (by rw [← ofReal_pow, ← ofReal_pow, Real.sin_sq]; push_cast; ring)
+    (Real.sin θ₂) ((phi₁-phi₂:ℝ):ℂ)
+        (by rw [← ofReal_pow, ← ofReal_pow, Real.sin_sq]; push_cast; ring)
     (by rw [← ofReal_pow, ← ofReal_pow, Real.sin_sq]; push_cast; ring)
   push_cast at hk ⊢
   rw [hk, sum_Icc_neg_pair, LegendreAddition.kernel, mul_add, Finset.mul_sum, Finset.mul_sum]
   -- the term for each order
   have hT : ∀ k : ℕ, k ≤ l → star (sphericalHarmonic l k θ₁ phi₁) * sphericalHarmonic l k θ₂ phi₂ =
-      (2*l+1)/(4*π) * LegendreAddition.coeff l k (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁) (Real.sin θ₂) *
+      (2*l+1)/(4*π) * LegendreAddition.coeff l k (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁)
+          (Real.sin θ₂) *
         exp (I*k*(phi₂-phi₁)) := by
     intro k hkl
     have hY : ∀ θ phi, sphericalHarmonic l k θ phi = sphericalHarmonicNonneg l k θ phi := by
       intro θ phi; simp [sphericalHarmonic, not_lt.2 hkl]
     rw [hY, hY]; exact star_mul_sphericalHarmonicNonneg l k h1 h2 phi₁ phi₂
-  have hTn : ∀ k : ℕ, 0 < k → k ≤ l → star (sphericalHarmonic l (-(k:ℤ)) θ₁ phi₁) * sphericalHarmonic l (-(k:ℤ)) θ₂ phi₂ =
-      (2*l+1)/(4*π) * LegendreAddition.coeff l k (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁) (Real.sin θ₂) *
+  have hTn : ∀ k : ℕ, 0 < k → k ≤ l → star (sphericalHarmonic l (-(k:ℤ)) θ₁ phi₁) *
+      sphericalHarmonic l (-(k:ℤ)) θ₂ phi₂ =
+      (2*l+1)/(4*π) * LegendreAddition.coeff l k (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁)
+          (Real.sin θ₂) *
         exp (I*k*(phi₁-phi₂)) := by
     intro k hk0 hkl
     have hY : ∀ θ phi, sphericalHarmonic l (-(k:ℤ)) θ phi =
@@ -675,10 +712,12 @@ def herglotzNullVector (lam : ℂ) : ℂ × ℂ × ℂ :=
 
 /-- `(1-z²)P_n'(z) = (n+1)(z P_n(z) - P_{n+1}(z))`. -/
 private lemma herg_E0 (n : ℕ) (z : ℂ) :
-    (1 - z^2) * LegendreAddition.jet n 1 z = (n+1) * (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z) := by
+    (1 - z^2) * LegendreAddition.jet n 1 z = (n+1) *
+        (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z) := by
   have h := jacobi_raising_derivative (α := 0) (β := 0) (by norm_num) n z
   simp only [LegendreAddition.jet, iteratedDeriv_one, iteratedDeriv_zero]
-  change (1 - z^2) * deriv (jacobiPolyP 0 0 n) z = (n+1) * (z * jacobiPolyP 0 0 n z - jacobiPolyP 0 0 (n+1) z)
+  change (1 - z^2) * deriv (jacobiPolyP 0 0 n) z = (n+1) *
+      (z * jacobiPolyP 0 0 n z - jacobiPolyP 0 0 (n+1) z)
   have h2 : (2*(n:ℂ)+2) ≠ 0 := by exact_mod_cast (show (2*n+2:ℕ) ≠ 0 by omega)
   apply mul_left_cancel₀ h2
   simp only [add_zero, sub_self] at h
@@ -686,15 +725,19 @@ private lemma herg_E0 (n : ℕ) (z : ℂ) :
 
 /-- The `k`-fold differentiated form of `herg_E0`. -/
 private lemma herg_Ek (n k : ℕ) (z : ℂ) :
-    (1 - z^2) * LegendreAddition.jet n (k+2) z - 2*(k+1)*z*LegendreAddition.jet n (k+1) z - (k+1)*k*LegendreAddition.jet n k z =
-      (n+1) * (z * LegendreAddition.jet n (k+1) z + (k+1) * LegendreAddition.jet n k z - LegendreAddition.jet (n+1) (k+1) z) := by
+    (1 - z^2) * LegendreAddition.jet n (k+2) z - 2*(k+1)*z*LegendreAddition.jet n (k+1) z -
+        (k+1)*k*LegendreAddition.jet n k z =
+      (n+1) * (z * LegendreAddition.jet n (k+1) z + (k+1) * LegendreAddition.jet n k z -
+          LegendreAddition.jet (n+1) (k+1) z) := by
   induction k generalizing z with
   | zero =>
     have hd := ((((hasDerivAt_pow 2 z).const_sub 1).mul (legInt_hasDerivAt_D n 1 z)).sub
-      ((((hasDerivAt_id' z).mul (legInt_hasDerivAt_D n 0 z)).sub (legInt_hasDerivAt_D (n+1) 0 z)).const_mul ((n:ℂ)+1)))
+      ((((hasDerivAt_id' z).mul (legInt_hasDerivAt_D n 0 z)).sub
+          (legInt_hasDerivAt_D (n+1) 0 z)).const_mul ((n:ℂ)+1)))
     have h0 : HasDerivAt (fun z => (1 - z^2) * LegendreAddition.jet n 1 z -
         ((n:ℂ)+1) * (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z)) 0 z := by
-      rw [show (fun z => (1 - z^2) * LegendreAddition.jet n 1 z - ((n:ℂ)+1) * (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z))
+      rw [show (fun z => (1 - z^2) * LegendreAddition.jet n 1 z - ((n:ℂ)+1) *
+          (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z))
         = fun _ => 0 from funext fun w => by rw [herg_E0]; ring]
       exact hasDerivAt_const _ _
     have hu := hd.unique h0
@@ -705,13 +748,20 @@ private lemma herg_Ek (n k : ℕ) (z : ℂ) :
       (((hasDerivAt_id' z).const_mul (2*((k:ℂ)+1))).mul (legInt_hasDerivAt_D n (k+1) z))).sub
       ((legInt_hasDerivAt_D n k z).const_mul (((k:ℂ)+1)*k))).sub
       (((((hasDerivAt_id' z).mul (legInt_hasDerivAt_D n (k+1) z)).add
-        ((legInt_hasDerivAt_D n k z).const_mul ((k:ℂ)+1))).sub (legInt_hasDerivAt_D (n+1) (k+1) z)).const_mul ((n:ℂ)+1))
-    have h0 : HasDerivAt (fun z => (1 - z^2) * LegendreAddition.jet n (k+2) z - 2*((k:ℂ)+1)*z*LegendreAddition.jet n (k+1) z
-        - ((k:ℂ)+1)*k*LegendreAddition.jet n k z - ((n:ℂ)+1) * (z * LegendreAddition.jet n (k+1) z + ((k:ℂ)+1) * LegendreAddition.jet n k z
+        ((legInt_hasDerivAt_D n k z).const_mul ((k:ℂ)+1))).sub
+            (legInt_hasDerivAt_D (n+1) (k+1) z)).const_mul ((n:ℂ)+1))
+    have h0 : HasDerivAt
+        (fun z => (1 - z^2) * LegendreAddition.jet n (k+2) z -
+        2*((k:ℂ)+1)*z*LegendreAddition.jet n (k+1) z
+        - ((k:ℂ)+1)*k*LegendreAddition.jet n k z - ((n:ℂ)+1) *
+            (z * LegendreAddition.jet n (k+1) z + ((k:ℂ)+1) * LegendreAddition.jet n k z
           - LegendreAddition.jet (n+1) (k+1) z)) 0 z := by
-      rw [show (fun z => (1 - z^2) * LegendreAddition.jet n (k+2) z - 2*((k:ℂ)+1)*z*LegendreAddition.jet n (k+1) z
-        - ((k:ℂ)+1)*k*LegendreAddition.jet n k z - ((n:ℂ)+1) * (z * LegendreAddition.jet n (k+1) z + ((k:ℂ)+1) * LegendreAddition.jet n k z
-          - LegendreAddition.jet (n+1) (k+1) z)) = fun _ => 0 from funext fun w => by rw [sub_eq_zero]; exact ih w]
+      rw [show (fun z => (1 - z^2) * LegendreAddition.jet n (k+2) z -
+          2*((k:ℂ)+1)*z*LegendreAddition.jet n (k+1) z
+        - ((k:ℂ)+1)*k*LegendreAddition.jet n k z - ((n:ℂ)+1) *
+            (z * LegendreAddition.jet n (k+1) z + ((k:ℂ)+1) * LegendreAddition.jet n k z
+          - LegendreAddition.jet (n+1) (k+1) z)) = fun _ => 0 from funext fun w =>
+              by rw [sub_eq_zero]; exact ih w]
       exact hasDerivAt_const _ _
     have hu := hd.unique h0
     push_cast
@@ -721,7 +771,8 @@ private lemma herg_Ek (n k : ℕ) (z : ℂ) :
 private lemma herg_core (n k : ℕ) (z : ℂ) :
     (n+1) * LegendreAddition.jet (n+1) (k+1) z / ((n+k+2).factorial : ℂ) =
       z * LegendreAddition.jet n (k+1) z / ((n+k+1).factorial : ℂ) +
-        (LegendreAddition.jet n k z / ((n+k).factorial : ℂ) - (1 - z^2) * LegendreAddition.jet n (k+2) z / ((n+k+2).factorial : ℂ)) / 2 := by
+        (LegendreAddition.jet n k z / ((n+k).factorial : ℂ) - (1 - z^2) *
+            LegendreAddition.jet n (k+2) z / ((n+k+2).factorial : ℂ)) / 2 := by
   have hE := herg_Ek n k z
   have hO := legInt_ode n k z
   have f1 : ((n+k+2).factorial : ℂ) = (n+k+2) * (n+k+1) * (n+k).factorial := by
@@ -742,7 +793,8 @@ private lemma herg_D_eq_zero (n k : ℕ) (hk : n < k) (z : ℂ) : LegendreAdditi
   have hf : (fun z : ℂ => (z^2-1)^n) = fun z => Pc.eval z := by funext w; simp [Pc]
   rw [hf, iteratedDeriv_eval_polynomial]
   have hdeg : Pc.natDegree < k + n := by
-    calc Pc.natDegree ≤ n * (Polynomial.X^2 - 1 : Polynomial ℂ).natDegree := Polynomial.natDegree_pow_le
+    calc Pc.natDegree ≤ n * (Polynomial.X^2 - 1 : Polynomial ℂ).natDegree :=
+           Polynomial.natDegree_pow_le
       _ ≤ n * 2 := by
           gcongr
           exact (Polynomial.natDegree_sub_le _ _).trans (by simp)
@@ -751,7 +803,8 @@ private lemma herg_D_eq_zero (n k : ℕ) (hk : n < k) (z : ℂ) : LegendreAdditi
 
 /-- Normalized coefficient of `wᵏ` in the Herglotz expansion. -/
 private noncomputable def hergC (x s : ℂ) (n : ℕ) (k : ℤ) : ℂ :=
-  (if k < 0 then s^k.natAbs else (-s)^k.natAbs) * LegendreAddition.jet n k.natAbs x / ((n + k.natAbs).factorial : ℂ)
+  (if k < 0 then s^k.natAbs else (-s)^k.natAbs) * LegendreAddition.jet n k.natAbs x /
+      ((n + k.natAbs).factorial : ℂ)
 
 /-- Coefficients of nonnegative index. -/
 private lemma hergC_nat (x s : ℂ) (n k : ℕ) :
@@ -763,7 +816,8 @@ private lemma hergC_neg_nat (x s : ℂ) (n k : ℕ) :
     hergC x s n (-(k:ℤ)) = s^k * LegendreAddition.jet n k x / ((n+k).factorial : ℂ) := by
   rcases k with _ | k
   · simp [hergC]
-  · simp only [hergC, Int.natAbs_neg, Int.natAbs_natCast, show -((k+1:ℕ):ℤ) < 0 by omega, ↓reduceIte]
+  · simp only [hergC, Int.natAbs_neg, Int.natAbs_natCast, show -((k+1:ℕ):ℤ) <
+        0 by omega, ↓reduceIte]
 
 /-- Coefficients vanish outside `[-n, n]`. -/
 private lemma hergC_eq_zero (x s : ℂ) (n : ℕ) (k : ℤ) (hk : n < k.natAbs) : hergC x s n k = 0 := by
@@ -771,7 +825,8 @@ private lemma hergC_eq_zero (x s : ℂ) (n : ℕ) (k : ℤ) (hk : n < k.natAbs) 
 
 /-- Three-term recurrence of the coefficients in the degree. -/
 private lemma hergC_recurrence (x s : ℂ) (hs : s^2 = 1 - x^2) (n : ℕ) (j : ℤ) :
-    (n+1) * hergC x s (n+1) j = x * hergC x s n j + s/2 * (hergC x s n (j+1) - hergC x s n (j-1)) := by
+    (n+1) * hergC x s (n+1) j = x * hergC x s n j + s/2 *
+        (hergC x s n (j+1) - hergC x s n (j-1)) := by
   rcases lt_trichotomy j 0 with hj | rfl | hj
   · obtain ⟨k, rfl⟩ : ∃ k : ℕ, j = -((k+1:ℕ):ℤ) := ⟨j.natAbs - 1, by omega⟩
     have e1 : -((k+1:ℕ):ℤ) + 1 = -(k:ℤ) := by push_cast; ring
@@ -779,7 +834,8 @@ private lemma hergC_recurrence (x s : ℂ) (hs : s^2 = 1 - x^2) (n : ℕ) (j : �
     rw [e1, e2, hergC_neg_nat, hergC_neg_nat, hergC_neg_nat, hergC_neg_nat,
       show n+1+(k+1) = n+k+2 by ring, show n+(k+1) = n+k+1 by ring]
     have hc := herg_core n k x
-    linear_combination s^(k+1) * hc + (1/2) * s^(k+1) * LegendreAddition.jet n (k+2) x / ((n+k+2).factorial:ℂ) * hs
+    linear_combination s^(k+1) * hc + (1/2) * s^(k+1) * LegendreAddition.jet n (k+2) x /
+        ((n+k+2).factorial:ℂ) * hs
   · have e1 : (0:ℤ) + 1 = ((1:ℕ):ℤ) := by norm_num
     have e2 : (0:ℤ) - 1 = -((1:ℕ):ℤ) := by norm_num
     rw [e1, e2, hergC_nat, hergC_neg_nat, show (0:ℤ) = ((0:ℕ):ℤ) by norm_num, hergC_nat, hergC_nat]
@@ -797,7 +853,8 @@ private lemma hergC_recurrence (x s : ℂ) (hs : s^2 = 1 - x^2) (n : ℕ) (j : �
     rw [e1, e2, hergC_nat, hergC_nat, hergC_nat, hergC_nat,
       show n+1+(k+1) = n+k+2 by ring, show n+(k+1) = n+k+1 by ring]
     have hc := herg_core n k x
-    linear_combination (-s)^(k+1) * hc + (1/2) * (-s)^(k+1) * LegendreAddition.jet n (k+2) x / ((n+k+2).factorial:ℂ) * hs
+    linear_combination (-s)^(k+1) * hc + (1/2) * (-s)^(k+1) * LegendreAddition.jet n (k+2) x /
+        ((n+k+2).factorial:ℂ) * hs
 
 /-- Summing a function supported in `[-N, N]` over a larger window. -/
 private lemma herg_sum_window (f : ℤ → ℂ) (N : ℕ) (hf : ∀ k : ℤ, N < k.natAbs → f k = 0) {a b : ℤ}
@@ -829,14 +886,16 @@ private lemma herg_sum (x s : ℂ) (hs : s^2 = 1 - x^2) {w : ℂ} (hw : w ≠ 0)
         w⁻¹ * ∑ k ∈ Finset.Icc (-(n:ℤ)) n, hergC x s n k * w^k := by
       have := herg_sum_shift (fun i => hergC x s n i * w^(i-1)) (-((n+1:ℕ):ℤ)) (n+1:ℕ) 1
       simp only [add_sub_cancel_right] at this
-      rw [this, herg_sum_window _ n (hz _) (by push_cast; omega) (by push_cast; omega), Finset.mul_sum]
+      rw [this, herg_sum_window _ n (hz _) (by push_cast; omega) (by push_cast; omega),
+          Finset.mul_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [zpow_sub_one₀ hw]; ring
     have h3 : ∑ k ∈ Finset.Icc (-((n+1:ℕ):ℤ)) (n+1:ℕ), hergC x s n (k-1) * w^k =
         w * ∑ k ∈ Finset.Icc (-(n:ℤ)) n, hergC x s n k * w^k := by
       have := herg_sum_shift (fun i => hergC x s n i * w^(i+1)) (-((n+1:ℕ):ℤ)) (n+1:ℕ) (-1)
       simp only [← sub_eq_add_neg, sub_add_cancel] at this
-      rw [this, herg_sum_window _ n (hz _) (by push_cast; omega) (by push_cast; omega), Finset.mul_sum]
+      rw [this, herg_sum_window _ n (hz _) (by push_cast; omega) (by push_cast; omega),
+          Finset.mul_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [zpow_add_one₀ hw]; ring
     have hrec : ((n:ℂ)+1) * ∑ k ∈ Finset.Icc (-((n+1:ℕ):ℤ)) (n+1:ℕ), hergC x s (n+1) k * w^k =
@@ -844,7 +903,8 @@ private lemma herg_sum (x s : ℂ) (hs : s^2 = 1 - x^2) {w : ℂ} (hw : w ≠ 0)
       rw [Finset.mul_sum]
       simp_rw [← mul_assoc, hergC_recurrence x s hs n]
       have : ∀ k : ℤ, (x * hergC x s n k + s/2 * (hergC x s n (k+1) - hergC x s n (k-1))) * w^k =
-          x * (hergC x s n k * w^k) + s/2 * (hergC x s n (k+1) * w^k) - s/2 * (hergC x s n (k-1) * w^k) :=
+          x * (hergC x s n k * w^k) + s/2 * (hergC x s n (k+1) * w^k) - s/2 *
+              (hergC x s n (k-1) * w^k) :=
         fun k => by ring
       simp_rw [this]
       rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum,
@@ -858,7 +918,12 @@ private lemma herg_sum (x s : ℂ) (hs : s^2 = 1 - x^2) {w : ℂ} (hw : w ≠ 0)
 
 /-- Unnumbered Herglotz generating function in DLMF 14.30(ii). -/
 theorem herglotz_generating {lam : ℂ} (hlam : lam ≠ 0) (t : ℂ) (r θ phi : ℝ) (hθ : θ ∈ Icc 0 π) :
-    HasSum (fun n : ℕ => Real.sqrt (4*π)*∑ m ∈ Finset.Icc (-(n:ℤ)) n, t^n*(r:ℂ)^n*lam^m*sphericalHarmonic n m θ phi/Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial)) (let a:=herglotzNullVector lam; exp (t*(a.1*(r*Real.sin θ*Real.cos phi)+a.2.1*(r*Real.sin θ*Real.sin phi)+a.2.2*(r*Real.cos θ)))) := by
+    HasSum (fun n : ℕ => Real.sqrt (4*π)*∑ m ∈ Finset.Icc (-(n:ℤ)) n,
+        t^n*(r:ℂ)^n*lam^m*sphericalHarmonic n m θ phi/Real.sqrt
+        ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial))
+        (let a:=herglotzNullVector lam;
+        exp (t*(a.1*(r*Real.sin θ*Real.cos phi)+a.2.1*(r*Real.sin θ*Real.sin
+        phi)+a.2.2*(r*Real.cos θ)))) := by
   set x : ℂ := (Real.cos θ : ℂ) with hx
   set s : ℂ := (Real.sin θ : ℂ) with hsdef
   have hs : s^2 = 1 - x^2 := by
@@ -868,10 +933,13 @@ theorem herglotz_generating {lam : ℂ} (hlam : lam ≠ 0) (t : ℂ) (r θ phi :
   set A := x + s/2*(w⁻¹ - w) with hA
   have hsqrt : Real.sqrt (1 - Real.cos θ^2) = Real.sin θ :=
     (Real.sin_eq_sqrt_one_sub_cos_sq hθ.1 hθ.2).symm
-  have hterm : ∀ n : ℕ, Real.sqrt (4*π)*∑ m ∈ Finset.Icc (-(n:ℤ)) n, t^n*(r:ℂ)^n*lam^m*sphericalHarmonic n m θ phi/Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) =
+  have hterm : ∀ n : ℕ, Real.sqrt (4*π)*∑ m ∈ Finset.Icc (-(n:ℤ)) n,
+      t^n*(r:ℂ)^n*lam^m*sphericalHarmonic n m θ phi/Real.sqrt
+      ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) =
       (t*r*A)^n / n.factorial := by
     intro n
-    rw [mul_pow, mul_pow, mul_div_assoc, hA, ← herg_sum x s hs hw0 n, Finset.mul_sum, Finset.mul_sum]
+    rw [mul_pow, mul_pow, mul_div_assoc, hA, ← herg_sum x s hs hw0 n, Finset.mul_sum,
+        Finset.mul_sum]
     refine Finset.sum_congr rfl fun m hm => ?_
     have hmn : m.natAbs ≤ n := by simp only [Finset.mem_Icc] at hm; omega
     set k := m.natAbs with hk
@@ -881,11 +949,14 @@ theorem herglotz_generating {lam : ℂ} (hlam : lam ≠ 0) (t : ℂ) (r θ phi :
       · rw [show ((n:ℤ)+m).toNat = n+k by omega, show ((n:ℤ)-m).toNat = n-k by omega]
       · rw [show ((n:ℤ)+m).toNat = n-k by omega, show ((n:ℤ)-m).toNat = n+k by omega, mul_comm]
     have hnorm : Real.sqrt (4*π) * Real.sqrt (((n-k).factorial:ℝ)*(2*n+1)/(4*π*(n+k).factorial)) /
-        Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) = 1/(n+k).factorial := by
-      rw [mul_assoc (2*(n:ℝ)+1), hprod, ← Real.sqrt_mul (by positivity), ← Real.sqrt_div' _ (by positivity)]
+        Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) =
+            1/(n+k).factorial := by
+      rw [mul_assoc (2*(n:ℝ)+1), hprod, ← Real.sqrt_mul (by positivity),
+          ← Real.sqrt_div' _ (by positivity)]
       have hf1 : (0:ℝ) < (n+k).factorial := by positivity
       have hf2 : (0:ℝ) < (n-k).factorial := by positivity
-      rw [show 4*π*(((n-k).factorial:ℝ)*(2*n+1)/(4*π*(n+k).factorial)) / ((2*n+1)*((n+k).factorial*(n-k).factorial))
+      rw [show 4*π*(((n-k).factorial:ℝ)*(2*n+1)/(4*π*(n+k).factorial)) /
+          ((2*n+1)*((n+k).factorial*(n-k).factorial))
           = (1/(n+k).factorial)^2 by field_simp, Real.sqrt_sq (by positivity)]
     have hY := sphericalHarmonic_eq_sign_mul n m hmn θ phi
     rw [← hk] at hY
@@ -894,22 +965,29 @@ theorem herglotz_generating {lam : ℂ} (hlam : lam ≠ 0) (t : ℂ) (r θ phi :
       rw [ferrersPNat, hsqrt]; rfl
     have hW : w^m = lam^m * exp (I*m*phi) := by
       rw [hw, mul_zpow, ← exp_int_mul]; ring_nf
-    have hC : hergC x s n m = shSign m * (-1)^k * s^k * LegendreAddition.jet n k x / ((n+k).factorial:ℂ) := by
+    have hC : hergC x s n m = shSign m * (-1)^k * s^k * LegendreAddition.jet n k x /
+        ((n+k).factorial:ℂ) := by
       rw [hergC, shSign, ← hk]
       split_ifs
       · rw [← mul_pow]; norm_num
       · rw [neg_pow]; ring
     rw [hF, hW, hC]
-    have hnC : ((Real.sqrt (4*π) : ℝ) : ℂ) * ((Real.sqrt (((n-k).factorial:ℝ)*(2*n+1)/(4*π*(n+k).factorial)) : ℝ) : ℂ) /
-        ((Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) : ℝ) : ℂ) = 1/((n+k).factorial:ℂ) := by
+    have hnC : ((Real.sqrt (4*π) : ℝ) : ℂ) *
+        ((Real.sqrt (((n-k).factorial:ℝ)*(2*n+1)/(4*π*(n+k).factorial)) : ℝ) : ℂ) /
+        ((Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) : ℝ) : ℂ) =
+            1/((n+k).factorial:ℂ) := by
       rw [← ofReal_mul, ← ofReal_div, hnorm]; push_cast; ring
-    have hb : ((Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) : ℝ) : ℂ) ≠ 0 := by
-      have : 0 < Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) := by positivity
+    have hb : ((Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) :
+        ℝ) : ℂ) ≠ 0 := by
+      have : 0 < Real.sqrt
+          ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) := by positivity
       exact_mod_cast this.ne'
     have hf0 : ((n+k).factorial:ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
-    calc _ = (((Real.sqrt (4*π) : ℝ) : ℂ) * ((Real.sqrt (((n-k).factorial:ℝ)*(2*n+1)/(4*π*(n+k).factorial)) : ℝ) : ℂ) /
+    calc _ = (((Real.sqrt (4*π) : ℝ) : ℂ) *
+           ((Real.sqrt (((n-k).factorial:ℝ)*(2*n+1)/(4*π*(n+k).factorial)) : ℝ) : ℂ) /
         ((Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) : ℝ) : ℂ)) *
-          (t^n * (r:ℂ)^n * lam^m * shSign m * exp (I*m*phi) * ((-1)^k * s^k * LegendreAddition.jet n k x)) := by ring
+          (t^n * (r:ℂ)^n * lam^m * shSign m * exp (I*m*phi) *
+              ((-1)^k * s^k * LegendreAddition.jet n k x)) := by ring
       _ = _ := by rw [hnC]; ring
   have hexp : t*((herglotzNullVector lam).1*((r*Real.sin θ*Real.cos phi : ℝ) : ℂ) +
       (herglotzNullVector lam).2.1*((r*Real.sin θ*Real.sin phi : ℝ) : ℂ) +
@@ -1000,7 +1078,8 @@ theorem scaledOblate_real (n m : ℕ) {x : ℝ} (hx : 0 < x) :
     have hx0 : (x:ℂ) ≠ 0 := by exact_mod_cast hx.ne'
     have hT : I * exp (I*π*n/2) * (exp ((m:ℂ)*π*I) * Gamma ((n:ℂ)+(m:ℂ)+1) *
         (Real.sqrt π * ((rr:ℂ) * I^m) / (2^((n:ℂ)+1) * (I*(x:ℂ))^((n:ℂ)+(m:ℂ)+1)) * F)) =
-        (((-1)^m * ((n+m).factorial:ℝ) * Real.sqrt π * rr / (2^(n+1) * x^(n+m+1)) : ℝ) : ℂ) * F := by
+        (((-1)^m * ((n+m).factorial:ℝ) * Real.sqrt π * rr /
+            (2^(n+1) * x^(n+m+1)) : ℝ) : ℂ) * F := by
       rw [hE2, hE3, hG, h2, hN]
       push_cast
       field_simp

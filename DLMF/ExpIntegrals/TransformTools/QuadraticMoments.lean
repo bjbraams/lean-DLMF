@@ -54,7 +54,8 @@ theorem eiTr_tendsto_mul_cosInt_sq :
     rw [mul_pow, this, Real.cosInt]; ring
   have h1 : Tendsto (fun t => t * c t ^ 2) (𝓝[>] 0) (𝓝 (0 * c 0 ^ 2)) :=
     ((continuous_id.mul (hc.pow 2)).tendsto 0).mono_left nhdsWithin_le_nhds
-  have h2 : Tendsto (fun t => 2 * c t * (t * Real.log t)) (𝓝[>] 0) (𝓝 (2 * c 0 * (0 * Real.log 0))) :=
+  have h2 : Tendsto (fun t => 2 * c t * (t * Real.log t)) (𝓝[>] 0)
+      (𝓝 (2 * c 0 * (0 * Real.log 0))) :=
     (((continuous_const.mul hc).mul Real.continuous_mul_log).tendsto 0).mono_left nhdsWithin_le_nhds
   have h3 := (tendsto_log_mul_rpow_nhdsGT_zero (by norm_num : (0:ℝ) < 1/2)).pow 2
   have := (h1.add h2).add h3
@@ -178,7 +179,8 @@ theorem eiTr_integral_sinIntTail_sq : ∫ t in Ioi (0:ℝ), (Real.sinInt t - π 
 
 /-- The primitive of `cos t si(t) + sin t Ci(t)`, continuous at `0`. -/
 noncomputable def eiTr_H (t : ℝ) : ℝ :=
-  Real.sin t * (Real.sinInt t - π / 2) - Real.cos t * (-Real.cosIntCin t + Real.eulerMascheroniConstant) +
+  Real.sin t * (Real.sinInt t - π / 2) - Real.cos t *
+      (-Real.cosIntCin t + Real.eulerMascheroniConstant) +
     (-Real.cosIntCin (2 * t) + Real.eulerMascheroniConstant) + Real.log 2 +
     Real.sin (t / 2) * Real.sinc (t / 2) * (t * Real.log t)
 
@@ -428,7 +430,8 @@ theorem eiTr_integrableOn_e_sq : IntegrableOn (fun t => eiTr_e t ^ 2) (Ioi 0) :=
 theorem eiTr_integrableOn_exp_mul_e :
     IntegrableOn (fun t => Real.exp (-t) * eiTr_e t) (Ioi 0) := by
   refine eiTr_integrableOn_Ioi_of_bound (A := 2) (B := 4) (C := 1)
-    ((Real.continuous_exp.comp continuous_neg).measurable.mul eiTr_measurable_e).aestronglyMeasurable
+    ((Real.continuous_exp.comp continuous_neg).measurable.mul
+        eiTr_measurable_e).aestronglyMeasurable
     (fun t ht => ?_) (fun t ht => ?_)
   · have h := eiTr_abs_e_le_small ht.1 ht.2
     have h1 := eiTr_rpow_quarter_le ht.1 ht.2
@@ -461,7 +464,8 @@ theorem eiTr_tendsto_mul_sq_add_log {c : ℝ → ℝ} (hc : Continuous c) (σ : 
   have h2 : Tendsto (fun t => 2 * σ * c t * (t * Real.log t)) (𝓝[>] 0)
       (𝓝 (2 * σ * c 0 * (0 * Real.log 0))) :=
     (((continuous_const.mul hc).mul Real.continuous_mul_log).tendsto 0).mono_left nhdsWithin_le_nhds
-  have h3 := ((tendsto_log_mul_rpow_nhdsGT_zero (by norm_num : (0:ℝ) < 1/2)).pow 2).const_mul (σ ^ 2)
+  have h3 := ((tendsto_log_mul_rpow_nhdsGT_zero (by norm_num : (0:ℝ) < 1/2)).pow
+      2).const_mul (σ ^ 2)
   have := (h1.add h2).add h3
   simp only [zero_mul, mul_zero, add_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
     zero_pow] at this
@@ -473,7 +477,8 @@ theorem eiTr_tendsto_mul_sq_add_log {c : ℝ → ℝ} (hc : Continuous c) (σ : 
 theorem eiTr_integral_e_sq : ∫ t in Ioi (0:ℝ), eiTr_e t ^ 2 = 2 * Real.log 2 := by
   have hF0 : ContinuousWithinAt (fun t => t * eiTr_e t ^ 2) (Ici 0) 0 := by
     rw [← continuousWithinAt_Ioi_iff_Ici, ContinuousWithinAt]
-    have := eiTr_tendsto_mul_sq_add_log (c := fun t => Real.expIntEin t - Real.eulerMascheroniConstant)
+    have := eiTr_tendsto_mul_sq_add_log
+        (c := fun t => Real.expIntEin t - Real.eulerMascheroniConstant)
       (eiTr_continuous_expIntEin.sub continuous_const) (-1)
     simp only [zero_mul]
     refine this.congr' ?_
@@ -547,9 +552,11 @@ theorem eiTr_integrableOn_K {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
     have he : Real.exp (-(c / 2) * t) = (Real.exp (c * t / 2))⁻¹ := by
       rw [← Real.exp_neg]; ring_nf
     rw [he, div_le_iff₀ (by positivity)]
-    calc t = (1 / (c * x ^ 2)) * (Real.exp (c * t / 2))⁻¹ * (x ^ 2 * (c * t * Real.exp (c * t / 2))) := by
+    calc t = (1 / (c * x ^ 2)) * (Real.exp (c * t / 2))⁻¹ *
+           (x ^ 2 * (c * t * Real.exp (c * t / 2))) := by
           field_simp
-      _ ≤ (1 / (c * x ^ 2)) * (Real.exp (c * t / 2))⁻¹ * ((t ^ 2 + x ^ 2) * (Real.exp (c * t) - 1)) := by
+      _ ≤ (1 / (c * x ^ 2)) * (Real.exp (c * t / 2))⁻¹ *
+          ((t ^ 2 + x ^ 2) * (Real.exp (c * t) - 1)) := by
           gcongr
           · nlinarith
 
@@ -557,7 +564,7 @@ theorem eiTr_integrableOn_K {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
 theorem eiTr_K_eq {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
     ∫ t in Ioi (0:ℝ), t / ((t ^ 2 + x ^ 2) * (Real.exp (c * t) - 1)) =
       (Real.log (x * c / (2 * π)) - 1 / (2 * (x * c / (2 * π))) -
-        Real.digamma (x * c / (2 * π))) / 2 := by
+        Gamma.Real.digamma (x * c / (2 * π))) / 2 := by
   set y := x * c / (2 * π) with hy
   have hy0 : 0 < y := by positivity
   have hd := DLMF.Gamma.digamma_coth hy0
@@ -579,10 +586,10 @@ theorem eiTr_K_eq {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
   linarith
 
 /-- `ψ(2) = 1 - γ`. -/
-theorem eiTr_digamma_two : Real.digamma 2 = 1 - Real.eulerMascheroniConstant := by
-  have := Real.digamma_add_one (x := 1) one_pos
+theorem eiTr_digamma_two : Gamma.Real.digamma 2 = 1 - Real.eulerMascheroniConstant := by
+  have := Gamma.Real.digamma_add_one (x := 1) one_pos
   norm_num at this
-  rw [this, Real.digamma_one]; ring
+  rw [this, Gamma.Real.digamma_one]; ring
 
 /-- The real auxiliary function `g(x) = ∫₀^∞ u e^{-xu}/(u²+1) du`. -/
 noncomputable def eiTr_g (x : ℝ) : ℝ := ∫ u in Ioi (0:ℝ), u * Real.exp (-x * u) / (u ^ 2 + 1)
@@ -665,7 +672,8 @@ theorem eiTr_hasSum_g {c : ℝ} (hc : 0 < c) :
   set q := Real.exp (-(c * u)) with hq
   have hq0 : 0 < q := Real.exp_pos _
   have hq1 : q < 1 := Real.exp_lt_one_iff.2 (by nlinarith)
-  have hg := (hasSum_geometric_of_abs_lt_one (r := -q) (by rw [abs_neg, abs_of_pos hq0]; exact hq1)).mul_left
+  have hg := (hasSum_geometric_of_abs_lt_one (r := -q)
+      (by rw [abs_neg, abs_of_pos hq0]; exact hq1)).mul_left
     (u * q / (u ^ 2 + 1))
   have hterm : ∀ n : ℕ, F n u = u * q / (u ^ 2 + 1) * (-q) ^ n := fun n => by
     simp only [F]
@@ -823,8 +831,10 @@ theorem eiTr_integral_log_eq {c : ℝ} (hc : 0 < c) :
     have hp : Real.exp (-c * u) * Real.exp (c * u) = 1 := by rw [← Real.exp_add]; simp
     rw [Real.norm_eq_abs, abs_of_nonneg (by positivity), div_le_iff₀ (by positivity)]
     nlinarith [Real.exp_pos (-c * u), Real.exp_pos (c * u)]
-  have hd : ∀ x ∈ Ioi (0:ℝ), HasDerivAt (fun u => Real.arctan u * Real.log (1 + Real.exp (-(c * u))))
-      (Real.log (1 + Real.exp (-(c * x))) / (x ^ 2 + 1) - c * (Real.arctan x / (Real.exp (c * x) + 1))) x := by
+  have hd : ∀ x ∈ Ioi (0:ℝ),
+      HasDerivAt (fun u => Real.arctan u * Real.log (1 + Real.exp (-(c * u))))
+      (Real.log (1 + Real.exp (-(c * x))) / (x ^ 2 + 1) - c *
+          (Real.arctan x / (Real.exp (c * x) + 1))) x := by
     intro x _
     have h1 := Real.hasDerivAt_arctan x
     have hin : HasDerivAt (fun u => -(c * u)) (-c) x := by

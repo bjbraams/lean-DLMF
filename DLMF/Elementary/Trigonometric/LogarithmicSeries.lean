@@ -57,7 +57,8 @@ private lemma sin_div_gt_cos {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < π) :
   · have hh := hp (neg_pos.mpr hn) (by simpa [abs_of_neg hn] using hx)
     simpa using hh
   · exact hp hp' (by simpa [abs_of_pos hp'] using hx)
-/-- TauCeti’s hyperbolic tangent inequality bounds the hyperbolic sine secant slope by its derivative. -/
+/-- TauCeti’s hyperbolic tangent inequality bounds the hyperbolic sine secant slope by its
+derivative. -/
 private lemma sinh_div_le_cosh {y : ℝ} (hy : y ≠ 0) : Real.sinh y / y ≤ Real.cosh y := by
   have hp {t : ℝ} (ht : 0 < t) : Real.sinh t / t ≤ Real.cosh t := by
     have h := Real.tanh_le_self ht.le
@@ -66,7 +67,8 @@ private lemma sinh_div_le_cosh {y : ℝ} (hy : y ≠ 0) : Real.sinh y / y ≤ Re
   rcases lt_or_gt_of_ne hy with hn | hp'
   · simpa using hp (neg_pos.mpr hn)
   · exact hp hp'
-/-- Off the coordinate axes, the removable sine quotient cannot be real in its first vertical strip. -/
+/-- Off the coordinate axes, the removable sine quotient cannot be real in its first vertical strip.
+-/
 private lemma sine_quotient_im_ne {z : ℂ} (hx0 : z.re ≠ 0) (hy0 : z.im ≠ 0)
     (hx : |z.re| < π) : (Complex.sin z / z).im ≠ 0 := by
   have hs : 0 < Real.sin z.re / z.re := by
@@ -194,7 +196,8 @@ theorem hasSum_log_sinc_bernoulli {z : ℂ} (hz : ‖z‖<π) :
     · have he : f =ᶠ[𝓝 w] (fun v => Complex.sin v/v) := by
         filter_upwards [eventually_ne_nhds hw0] with v hv
         rw [heq]; simp [hv]
-      have hd := (((Complex.hasDerivAt_sin w).div (hasDerivAt_id w) hw0).congr_of_eventuallyEq he).clog
+      have hd := (((Complex.hasDerivAt_sin w).div (hasDerivAt_id w)
+          hw0).congr_of_eventuallyEq he).clog
         (hslit hw)
       have hs : Complex.sin w ≠ 0 := by
         have hh := Complex.slitPlane_ne_zero (hslit hw)
@@ -276,7 +279,9 @@ private lemma hasDerivAt_log_cos {z : ℂ} (hz : ‖z‖ < π/2) :
 /-- DLMF 4.19.E8: hasSum log cos bernoulli. -/
 @[dlmf 4.19.E8]
 theorem hasSum_log_cos_bernoulli {z : ℂ} (hz : ‖z‖<π/2) :
-    HasSum (fun n : ℕ => ((-1:ℂ)^(n+1)*2^(2*(n+1)-1)*(2^(2*(n+1))-1)*(bernoulli (2*(n+1)):ℂ)/((n+1)*(2*(n+1))!))*z^(2*(n+1))) (Complex.log (Complex.cos z)) := by
+    HasSum (fun n : ℕ =>
+        ((-1:ℂ)^(n+1)*2^(2*(n+1)-1)*(2^(2*(n+1))-1)*(bernoulli
+        (2*(n+1)):ℂ)/((n+1)*(2*(n+1))!))*z^(2*(n+1))) (Complex.log (Complex.cos z)) := by
   let b : ℕ → ℂ := fun n => (-1 : ℂ)^n * 2^(2*(n+1)) * (2^(2*(n+1))-1) *
       (bernoulli (2*(n+1)) : ℂ) / ((2*(n+1)).factorial : ℂ)
   let c : ℕ → ℂ := fun m => if Even m then 0 else -b (m/2)
@@ -381,9 +386,11 @@ private lemma tan_div_re_pos {z : ℂ} (hz0 : z ≠ 0) (hx : |z.re|<π/2) :
     nlinarith [mul_pos (hsh.2 hy0) (Real.cosh_pos z.im)]
   · nlinarith [mul_pos (hs.2 hx0) hc,
       mul_nonneg hsh.1 (Real.cosh_pos z.im).le]
-/-- Positive real parts of cosine and the tangent quotient permit subtraction of their principal logarithms. -/
+/-- Positive real parts of cosine and the tangent quotient permit subtraction of their principal
+logarithms. -/
 private lemma log_tan_div_eq {z : ℂ} (hz0 : z ≠ 0) (hz : ‖z‖<π/2) :
-    Complex.log (Complex.tan z/z) = Complex.log (Complex.sin z/z) - Complex.log (Complex.cos z) := by
+    Complex.log (Complex.tan z/z) = Complex.log (Complex.sin z/z) -
+        Complex.log (Complex.cos z) := by
   have hx := (Complex.abs_re_le_norm z).trans_lt hz
   have ht := tan_div_re_pos hz0 hx
   have hc : 0 < (Complex.cos z).re := by

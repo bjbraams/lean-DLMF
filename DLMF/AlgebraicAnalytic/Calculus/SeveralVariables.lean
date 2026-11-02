@@ -8,6 +8,7 @@ module
 public import DLMF.AlgebraicAnalytic.Calculus.Basic
 public import DLMFMathlib.Topology.Order.Compact
 public import Mathlib.Analysis.Calculus.Deriv.Pi
+public import Mathlib.Analysis.Calculus.ImplicitContDiff
 public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
 public import Mathlib.Analysis.Calculus.UniformLimitsDeriv
 public import Mathlib.Analysis.Calculus.Deriv.Prod
@@ -242,6 +243,23 @@ theorem hasDerivAt_comp_pi {n : ℕ} {f : (Fin n → ℝ) → ℝ} {c : ℝ → 
   refine h.congr_deriv (Finset.sum_congr rfl fun i _ => ?_)
   rw [map_smul, smul_eq_mul, partialDeriv_eq_fderiv i hf, mul_comm]
 
+/-- The partial derivatives of a function on `ℝ × ℝ` differentiable at `q` in terms of its
+Fréchet derivative. -/
+private theorem deriv_partial_fst {F : ℝ × ℝ → ℝ} {q : ℝ × ℝ} (hF : DifferentiableAt ℝ F q) :
+    deriv (fun t => F (t, q.2)) q.1 = fderiv ℝ F q (1, 0) := by
+  have h : HasDerivAt (fun t : ℝ => (t, q.2)) (1, 0) q.1 :=
+    (hasDerivAt_id q.1).prodMk (hasDerivAt_const q.1 q.2)
+  have := hF.hasFDerivAt.comp_hasDerivAt (x := q.1) (f := fun t : ℝ => (t, q.2)) h
+  exact this.deriv
+
+/-- The second partial derivative in terms of the Fréchet derivative. -/
+private theorem deriv_partial_snd {F : ℝ × ℝ → ℝ} {q : ℝ × ℝ} (hF : DifferentiableAt ℝ F q) :
+    deriv (fun t => F (q.1, t)) q.2 = fderiv ℝ F q (0, 1) := by
+  have h : HasDerivAt (fun t : ℝ => (q.1, t)) (0, 1) q.2 :=
+    (hasDerivAt_const q.2 q.1).prodMk (hasDerivAt_id q.2)
+  have := hF.hasFDerivAt.comp_hasDerivAt (x := q.2) (f := fun t : ℝ => (q.1, t)) h
+  exact this.deriv
+
 /-- DLMF §1.5(i) (implicit function theorem): if `F(x, y)` is continuously differentiable near
 `(a, b)`, `F(a, b) = 0` and `∂F/∂y ≠ 0` at `(a, b)`, then near `(a, b)` the equation `F = 0`
 defines a continuously differentiable `y = g(x)` with `F(x, g(x)) = 0`, `g(a) = b` and
@@ -253,7 +271,59 @@ theorem exists_implicitFunction {F : ℝ × ℝ → ℝ} {a b : ℝ} (hF : ContD
       (∀ᶠ x in 𝓝 a, HasDerivAt g
         (-(deriv (fun t => F (t, g x)) x) / deriv (fun t => F (x, t)) (g x)) x) ∧
       ∀ᶠ q in 𝓝 (a, b), F q = 0 → q.2 = g q.1 := by
-  sorry
+  have hdF : DifferentiableAt ℝ F (a, b) := hF.differentiableAt one_ne_zero
+  have hc : fderiv ℝ F (a, b) (0, 1) ≠ 0 := by
+    rw [← deriv_partial_snd hdF]; exact hy
+  have if₂ : (fderiv ℝ F (a, b) ∘L .inr ℝ ℝ ℝ).IsInvertible := by
+    refine ⟨ContinuousLinearEquiv.unitsEquivAut ℝ (Units.mk0 _ hc), ?_⟩
+    refine ContinuousLinearMap.ext_ring ?_
+    simp
+  set g := hF.implicitFunction one_ne_zero if₂ with hgdef
+  have hga : g a = b := hF.implicitFunction_apply_self one_ne_zero if₂
+  have hgc : ContDiffAt ℝ 1 g a := hF.contDiffAt_implicitFunction one_ne_zero if₂
+  have hzero : ∀ᶠ x in 𝓝 a, F (x, g x) = 0 := by
+    have := hF.eventually_apply_implicitFunction one_ne_zero if₂
+    simpa [h0] using this
+  have huniq : ∀ᶠ q in 𝓝 (a, b), F q = 0 → q.2 = g q.1 := by
+    filter_upwards [hF.eventually_apply_eq_iff_implicitFunction one_ne_zero if₂] with q hq h
+    rw [h0] at hq
+    exact (hq.1 h).symm
+  refine ⟨g, hga, hgc, hzero, ?_, huniq⟩
+  -- the derivative formula near `a`
+  have hgcont : Tendsto (fun x => (x, g x)) (𝓝 a) (𝓝 (a, b)) := by
+    have := (continuousAt_id.prodMk hgc.continuousAt).tendsto
+    simpa [hga] using this
+  have hFev : ∀ᶠ q in 𝓝 (a, b), ContDiffAt ℝ 1 F q := hF.eventually (by simp)
+  have hFy : ∀ᶠ q in 𝓝 (a, b), fderiv ℝ F q (0, 1) ≠ 0 := by
+    have hcont : ContinuousAt (fun q => fderiv ℝ F q (0, 1)) (a, b) :=
+      ((hF.fderiv_right (m := 0) (by norm_num)).continuousAt).clm_apply continuousAt_const
+    exact hcont.eventually_ne hc
+  filter_upwards [hgc.eventually (by simp), hgcont.eventually hFev, hgcont.eventually hFy,
+    hzero.eventually_nhds] with x hgx hFx hFyx hzx
+  have hgd : DifferentiableAt ℝ g x := hgx.differentiableAt one_ne_zero
+  have hFd : DifferentiableAt ℝ F (x, g x) := hFx.differentiableAt one_ne_zero
+  have hpath : HasDerivAt (fun x' => (x', g x')) (1, deriv g x) x :=
+    (hasDerivAt_id x).prodMk hgd.hasDerivAt
+  have hcomp := hFd.hasFDerivAt.comp_hasDerivAt (x := x) (f := fun x' => (x', g x')) hpath
+  have hd0 : deriv (fun x' => F (x', g x')) x = 0 := by
+    have hev : (fun x' => F (x', g x')) =ᶠ[𝓝 x] fun _ => (0 : ℝ) := hzx
+    rw [hev.deriv_eq]
+    simp
+  have hsplit : fderiv ℝ F (x, g x) (1, deriv g x) =
+      fderiv ℝ F (x, g x) (1, 0) + deriv g x * fderiv ℝ F (x, g x) (0, 1) := by
+    rw [← smul_eq_mul, ← map_smul, ← map_add]
+    congr 1
+    ext <;> simp
+  have hcd : deriv (fun x' => F (x', g x')) x = fderiv ℝ F (x, g x) (1, deriv g x) :=
+    hcomp.deriv
+  rw [hcd, hsplit] at hd0
+  have hfx := deriv_partial_fst (q := (x, g x)) hFd
+  have hfy := deriv_partial_snd (q := (x, g x)) hFd
+  simp only at hfx hfy
+  rw [hfx, hfy]
+  convert hgd.hasDerivAt using 1
+  field_simp
+  linarith
 
 /-! ### §1.5(ii) Coordinate systems -/
 

@@ -250,7 +250,8 @@ theorem compEllIntEk_eq_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
   have hg2s : ((g₀ : ℝ) : ℂ) ^ 2 ∈ slitPlane := hg2 ▸ hslit
   have h1s : ((1 : ℝ) : ℂ) ^ 2 ∈ slitPlane := by simp
   -- `E = (π/2) R_E(1, g₀²)` and `K = (π/2) R_K(1, g₀²)`
-  have hE : compEllIntEk k = (π / 2) * Carlson.carlsonRE (((1 : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) := by
+  have hE : compEllIntEk k = (π / 2) *
+      Carlson.carlsonRE (((1 : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) := by
     rw [(compEllIntEk_eq_symEllInt hslit).1, ← hg2,
       symEllIntRG_zero_eq_carlsonRE hg2s one_mem_slitPlane,
       carlsonRE_comm_of_mem_slitPlane hg2s one_mem_slitPlane]
@@ -297,7 +298,8 @@ theorem compEllIntEk_eq_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
     have h4 := Complex.reCLM.hasSum h3
     simp only [Complex.reCLM_apply, Complex.ofReal_re] at h4
     convert h4 using 1
-    rw [show (2 * ((NNReal.agm 1 g₀ : ℝ) : ℂ)) = ((2 * (NNReal.agm 1 g₀ : ℝ) : ℝ) : ℂ) by push_cast; ring,
+    rw [show (2 * ((NNReal.agm 1 g₀ : ℝ) : ℂ)) =
+        ((2 * (NNReal.agm 1 g₀ : ℝ) : ℝ) : ℂ) by push_cast; ring,
       show (π : ℂ) = ((π : ℝ) : ℂ) from rfl]
     rw [Complex.sub_re, Complex.one_re, Complex.div_ofReal_re, Complex.re_mul_ofReal]
   · have h := Carlson.carlsonRE_eq_agm (x := 1) (y := g₀) one_pos hgpos

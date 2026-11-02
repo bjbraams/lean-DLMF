@@ -128,7 +128,8 @@ private lemma cpow_one_sub_mul_sin_arctan_sinh_sq (b : ℂ) (u : ℝ) :
       (Real.cosh u : ℂ)⁻¹ * (1 + b * ((Real.sinh u : ℝ) : ℂ) ^ 2) ^ (1 / 2 : ℂ) := by
   have hc := Real.cosh_pos u
   rw [one_sub_mul_sin_arctan_sinh_sq, ofReal_mul_cpow_eq_of_pos (by positivity),
-    ofReal_mul_cpow_eq_of_pos (by positivity), (ofReal_inv_sq_cpow_half hc).1, (ofReal_inv_sq_cpow_half hc).2]
+    ofReal_mul_cpow_eq_of_pos (by positivity), (ofReal_inv_sq_cpow_half hc).1,
+        (ofReal_inv_sq_cpow_half hc).2]
   exact ⟨rfl, rfl⟩
 
 /-- Identity under the stated parameter and domain assumptions: `incEllIntFk (I * φ) k = I *
@@ -186,10 +187,12 @@ private lemma incEllIntEk_I_mul (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) 
     rw [incEllIntEk, segmentIntegral_I_mul, ← integral_arctan_sinh_subst hGc]
     congr 1
     refine intervalIntegral.integral_congr fun u _ => ?_
-    simp only [hG, ellDelta, hk'2, (cpow_one_sub_mul_sin_arctan_sinh_sq _ u).2, sin_I_mul_sq, real_smul,
+    simp only [hG, ellDelta, hk'2, (cpow_one_sub_mul_sin_arctan_sinh_sq _ u).2,
+        sin_I_mul_sq, real_smul,
       (sin_cos_arctan_sinh u).2]
     have hc0 : (Real.cosh u : ℂ) ≠ 0 := by exact_mod_cast (Real.cosh_pos u).ne'
-    have e : (1 - k ^ 2 * -((Real.sinh u : ℝ) : ℂ) ^ 2) = 1 + k ^ 2 * ((Real.sinh u : ℝ) : ℂ) ^ 2 := by
+    have e : (1 - k ^ 2 * -((Real.sinh u : ℝ) : ℂ) ^ 2) = 1 + k ^ 2 *
+        ((Real.sinh u : ℝ) : ℂ) ^ 2 := by
       ring
     rw [e, ofReal_inv]
     field_simp
@@ -253,7 +256,8 @@ private lemma exists_norm_lower_on_segment {g : ℂ → ℂ} (hg : Continuous g)
 /-- Identity under the stated parameter and domain assumptions: `incEllIntPik ψ β k = ∫ θ in (0 :
 ℝ)..ψ, ((1 - β * (Real.sin θ : ℂ) ^ 2)⁻¹ * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 :
 ℂ)))`. -/
-private lemma incEllIntPik_ofReal_eq_integral_of_slit (ψ : ℝ) {β : ℂ} (hβ : 1 - β ∈ slitPlane) (k : ℂ) :
+private lemma incEllIntPik_ofReal_eq_integral_of_slit (ψ : ℝ) {β : ℂ}
+    (hβ : 1 - β ∈ slitPlane) (k : ℂ) :
     incEllIntPik ψ β k = ∫ θ in (0 : ℝ)..ψ, ((1 - β * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
   obtain ⟨δ, hδ, hb⟩ := exists_le_norm_one_sub_mul_sin_sq hβ
@@ -269,7 +273,8 @@ private lemma incEllIntPik_ofReal_eq_integral_of_slit (ψ : ℝ) {β : ℂ} (hβ
 private lemma incEllIntPik_I_mul (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPlane) (hα : α2 ∈ slitPlane)
     (hα1 : α2 ≠ 1) :
     incEllIntPik (I * φ) α2 k = I * (incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) -
-        α2 * incEllIntPik (Real.arctan (Real.sinh φ)) (1 - α2) (jacobiComodulusk k)) / (1 - α2) := by
+        α2 * incEllIntPik (Real.arctan (Real.sinh φ)) (1 - α2) (jacobiComodulusk k))
+            / (1 - α2) := by
   set ψ := Real.arctan (Real.sinh φ) with hψ
   set k' := jacobiComodulusk k with hk'
   have hk'2 : k' ^ 2 = 1 - k ^ 2 := jacobiComodulusk_sq_eq_one_sub_sq k
@@ -287,7 +292,8 @@ private lemma incEllIntPik_I_mul (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPl
     incEllIntPik_ofReal_eq_integral_of_slit ψ (by rw [sub_sub_cancel]; exact hα),
     incEllIntFk_ofReal_eq_integral]
   set P : ℝ → ℂ := fun θ => 1 - (1 - α2) * (Real.sin θ : ℂ) ^ 2 with hP
-  have hPne : ∀ θ, P θ ≠ 0 := fun θ => slitPlane_ne_zero (one_sub_one_sub_mul_sin_sq_mem_slitPlane hα θ)
+  have hPne : ∀ θ, P θ ≠ 0 := fun θ =>
+      slitPlane_ne_zero (one_sub_one_sub_mul_sin_sq_mem_slitPlane hα θ)
   set H : ℝ → ℂ := fun θ => (Real.cos θ : ℂ) ^ 2 * (P θ)⁻¹ *
     (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) with hH
   have hQc : Continuous fun θ : ℝ => (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) :=
@@ -310,8 +316,10 @@ private lemma incEllIntPik_I_mul (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPl
     have hc0 : (Real.cosh u : ℂ) ≠ 0 := by exact_mod_cast (Real.cosh_pos u).ne'
     have hA : (1 + α2 * ((Real.sinh u : ℝ) : ℂ) ^ 2) ≠ 0 :=
       slitPlane_ne_zero (by
-        have := one_add_mul_ofReal_mem_slitPlane hα (sq_nonneg (Real.sinh u)); push_cast at this ⊢; exact this)
-    have e : (1 - k ^ 2 * -((Real.sinh u : ℝ) : ℂ) ^ 2) = 1 + k ^ 2 * ((Real.sinh u : ℝ) : ℂ) ^ 2 := by
+        have := one_add_mul_ofReal_mem_slitPlane hα (sq_nonneg (Real.sinh u));
+            push_cast at this ⊢; exact this)
+    have e : (1 - k ^ 2 * -((Real.sinh u : ℝ) : ℂ) ^ 2) = 1 + k ^ 2 *
+        ((Real.sinh u : ℝ) : ℂ) ^ 2 := by
       ring
     have e2 : (1 - α2 * -((Real.sinh u : ℝ) : ℂ) ^ 2) =
         1 + α2 * ((Real.sinh u : ℝ) : ℂ) ^ 2 := by ring

@@ -76,13 +76,15 @@ theorem hasDerivAt_symEllIntR_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
 theorem hasDerivAt_symEllIntRF_right {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
     HasDerivAt (fun w => symEllIntRF x y w) (-(1 / 6) * symEllIntRD x y z) z := by
-  have h := hasDerivAt_symEllIntR_update (1 / 2) (fun _ : Fin 3 => 1 / 2) (vec3_mem_carlsonRSlitDomain hx hy hz) 2
+  have h := hasDerivAt_symEllIntR_update (1 / 2) (fun _ : Fin 3 => 1 / 2)
+      (vec3_mem_carlsonRSlitDomain hx hy hz) 2
     (by simp)
   refine (h.congr_of_eventuallyEq ?_).congr_deriv ?_
   · filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
     rw [symEllIntRF_eq_symEllIntR hx hy hw]
     congr 1; funext i; fin_cases i <;> simp [Function.update]
-  · have hb : Dirichlet.addDirichletUnit (fun _ : Fin 3 => (1 / 2 : ℂ)) 2 = ![1 / 2, 1 / 2, 3 / 2] := by
+  · have hb : Dirichlet.addDirichletUnit (fun _ : Fin 3 => (1 / 2 : ℂ)) 2 =
+        ![1 / 2, 1 / 2, 3 / 2] := by
       unfold Dirichlet.addDirichletUnit
       funext i; fin_cases i <;> simp [Function.update]; norm_num
     rw [hb, show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, ← symEllIntRD_eq_symEllIntR hx hy hz]

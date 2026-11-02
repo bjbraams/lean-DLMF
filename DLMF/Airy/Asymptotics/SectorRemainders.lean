@@ -23,8 +23,8 @@ remainders 9.7.18–9.7.19 and their re-expansion in terminants (9.7.20–9.7.23
 
 * `airySt_ai_third`, `airySt_ai_boundary`: the third sector of DLMF 9.7.17 and the boundary
   rays `|arg z| = 2π/3`.
-* `airy_bi_real_error`, `airy_biDeriv_real_error`: first-neglected-term bounds for `Bi`, `Bi'`
-  (DLMF §9.7(iii)).
+* `airy_bi_real_error`: the first-neglected-term bound for `Bi` (DLMF §9.7(iii)); the `Bi'`
+  bound is in `DLMF.Airy.Asymptotics.DerivativeErrorBounds`.
 * `airy_ai_bound`, `airy_aiDeriv_bound`: DLMF 9.7.15.
 * `airy_bi_bound`, `airy_biDeriv_bound`: DLMF 9.7.16.
 * `airy_ai_complex_error`, `airy_aiDeriv_complex_error`: DLMF 9.7.17.
@@ -65,11 +65,13 @@ theorem airySt_F_norm_le {u : ℂ} (hu : u ≠ 0) (harg : |arg u| < π / 3) :
   have hL : ‖airyRot_lap (1 / 6) (-5 / 6) 0 V‖ ≤ Real.Gamma (1 / 6) * V.re ^ (-(1 / 6 : ℝ)) := by
     unfold airyRot_lap
     calc _ ≤ ∫ r in Ioi (0 : ℝ), r ^ ((1 / 6 : ℝ) - 1) * Real.exp (-(V.re * r)) := by
-          refine norm_integral_le_of_norm_le (stRem_integrableOn_rpow_exp (by norm_num) hV) ?_
+          refine norm_integral_le_of_norm_le
+              (StieltjesRemainder.integrableOn_rpow_exp (by norm_num) hV) ?_
           refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun r hr => ?_)
           have hr : (0 : ℝ) < r := hr
           simp only [airyRot_kernel, ofReal_zero, zero_mul, Complex.exp_zero, mul_one]
-          rw [norm_smul, norm_mul, norm_exp, show (1 : ℂ) + r = ((1 + r : ℝ) : ℂ) by push_cast; ring,
+          rw [norm_smul, norm_mul, norm_exp, show (1 : ℂ) + r =
+              ((1 + r : ℝ) : ℂ) by push_cast; ring,
             norm_cpow_eq_rpow_re_of_pos hr, norm_cpow_eq_rpow_re_of_pos (by linarith)]
           have h1 : (1 + r) ^ (((-5 / 6 : ℝ) : ℂ)).re ≤ 1 := by
             simp only [ofReal_re]
@@ -405,7 +407,8 @@ theorem airySt_bi_rem {x : ℝ} (hx : 0 < x) (N : ℕ) :
   set E := exp (((1 * (π / 6)) : ℝ) * I) with hE
   have e3 : exp (π * I / 6) = E := by rw [hE]; congr 1; push_cast; ring
   have e4 : exp (-(π * I / 6)) = E⁻¹ := by rw [hE, ← exp_neg]; congr 1; push_cast; ring
-  have e5 : exp ((((-1) * (π / 6)) : ℝ) * I) = E⁻¹ := by rw [hE, ← exp_neg]; congr 1; push_cast; ring
+  have e5 : exp ((((-1) * (π / 6)) : ℝ) * I) = E⁻¹ := by rw [hE, ← exp_neg]; congr 1;
+                                                         push_cast; ring
   rw [e1, e2, e3, e4] at hB
   rw [e5] at hq2
   have hE0 : E ≠ 0 := exp_ne_zero _
@@ -466,12 +469,6 @@ theorem airy_bi_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} :
         rw [norm_div, Complex.norm_two]; gcongr; exact norm_add_le _ _
     _ ≤ _ := by linarith [hT 1 (Or.inl rfl), hT (-1) (Or.inr rfl)]
 
-/-- First-neglected-term remainder bound and its sign, DLMF §9.7(iii). -/
-theorem airy_biDeriv_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} (hN : 1 ≤ N) :
-    ‖airyRemainder .biDeriv N x‖ ≤ (airyChi (N + 0) + 1) *
-      ‖airyExpansionCoeff .biDeriv N / airyZetaComplex x ^ N‖ := by
-  sorry
-
 /-- For `x > 0`, `Ai(x) ≤ e^{-ζ}/(2√π x^{1/4})` (DLMF 9.7.15). -/
 @[dlmf 9.7.E15]
 theorem airy_ai_bound {x : ℝ} (hx : 0 < x) :
@@ -491,7 +488,8 @@ theorem airy_ai_bound {x : ℝ} (hx : 0 < x) :
 /-- For `x > 0`, `|Ai'(x)| ≤ x^{1/4} e^{-ζ}/(2√π) (1 + 7/(72ζ))` (DLMF 9.7.15). -/
 @[dlmf 9.7.E15]
 theorem airy_aiDeriv_bound {x : ℝ} (hx : 0 < x) :
-    |airyAiDerivReal x| ≤ x ^ (1 / 4 : ℝ) * Real.exp (-airyZeta x) / (2 * Real.sqrt π) * (1 + 7 / (72 * airyZeta x)) := by
+    |airyAiDerivReal x| ≤ x ^ (1 / 4 : ℝ) * Real.exp (-airyZeta x) / (2 * Real.sqrt π) *
+        (1 + 7 / (72 * airyZeta x)) := by
   have h := (airyReal_pack (a := 7 / 6) (β := 1 / 6) (N := 1) (by norm_num) (by norm_num) hx
     (f := fun z => airyAiDeriv z / airyPrefactor .aiDeriv z) (airyReal_aiDeriv_repr hx)
     airyRot_coeff_aiDeriv).1
@@ -521,7 +519,8 @@ theorem airy_aiDeriv_bound {x : ℝ} (hx : 0 < x) :
 /-- For `x > 0`, `Bi(x) ≤ e^{ζ}/(√π x^{1/4}) (1 + (χ(7/6) + 1) · 5/(72ζ))` (DLMF 9.7.16). -/
 @[dlmf 9.7.E16]
 theorem airy_bi_bound {x : ℝ} (hx : 0 < x) :
-    airyBiReal x ≤ Real.exp (airyZeta x) / (Real.sqrt π * x ^ (1 / 4 : ℝ)) * (1 + (airyChi (7 / 6) + 1) * 5 / (72 * airyZeta x)) := by
+    airyBiReal x ≤ Real.exp (airyZeta x) / (Real.sqrt π * x ^ (1 / 4 : ℝ)) *
+        (1 + (airyChi (7 / 6) + 1) * 5 / (72 * airyZeta x)) := by
   have h := airy_bi_real_error hx (N := 1)
   have hz := airyZeta_pos hx
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
@@ -534,7 +533,8 @@ theorem airy_bi_bound {x : ℝ} (hx : 0 < x) :
   rw [hT, show ((1 : ℕ) : ℝ) + 1 / 6 = 7 / 6 by norm_num] at h
   have hS : airyExponentialSum .bi 1 x = 1 := by
     simp [airyExponentialSum, airyExpansionCoeff, airyReal_airyU_zero]
-  have h1 : ‖airyBi x / airyPrefactor .bi x‖ ≤ 1 + (airyChi (7 / 6) + 1) * 5 / (72 * airyZeta x) := by
+  have h1 : ‖airyBi x / airyPrefactor .bi x‖ ≤ 1 + (airyChi (7 / 6) + 1) * 5 /
+      (72 * airyZeta x) := by
     have he : airyBi x / airyPrefactor .bi x = 1 + airyRemainder .bi 1 x := by
       rw [airyRemainder, airyFunction, hS]; ring
     rw [he]
@@ -555,7 +555,8 @@ theorem airyDer_chi_le {s : ℝ} (hs : 1 ≤ s) : airyChi s ≤ π*s/2 := by
   have hChi : airySt_chi 1 = π/2 := by
     unfold airySt_chi
     have hG : Real.Gamma (3/2:ℝ) = Real.sqrt π/2 := by
-      rw [show (3/2:ℝ)=(1/2)+1 by norm_num, Real.Gamma_add_one (by norm_num), Real.Gamma_one_half_eq]
+      rw [show (3/2:ℝ)=(1/2)+1 by norm_num, Real.Gamma_add_one (by norm_num),
+                                    Real.Gamma_one_half_eq]
       ring
     norm_num only
     rw [hG, Real.Gamma_one]
@@ -646,7 +647,8 @@ theorem airyDer_initial_sq : airyBiDerivReal 0^2 ≤ (52/225:ℝ) := by
     rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
     norm_num
   have hroot : (3:ℝ)^(1/3:ℝ) ≤ 13/9 := by
-    apply (pow_le_pow_iff_left₀ (Real.rpow_nonneg (by norm_num) _) (by norm_num) (by omega : 3≠0)).mp
+    apply (pow_le_pow_iff_left₀ (Real.rpow_nonneg (by norm_num) _) (by norm_num)
+        (by omega : 3≠0)).mp
     rw [hr]; norm_num
   have hq : ((3:ℝ)^(1/6:ℝ))^2 = (3:ℝ)^(1/3:ℝ) := by
     rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; congr 1; norm_num
@@ -691,14 +693,16 @@ theorem airyDer_envelope_poly {u : ℝ} (hu : 0 ≤ u) :
       (2852020772397883/21064287309004800:ℝ)*u +
       (1058802953579899/15798215481753600:ℝ)
     have hq : 0 ≤ Q := by dsimp only [Q]; positivity
-    have hrem : 0 ≤ (1840275079998707/202217158166446080:ℝ)*u + (-8582440901337379/2274943029372518400:ℝ) := by linarith
+    have hrem : 0 ≤ (1840275079998707/202217158166446080:ℝ)*u +
+        (-8582440901337379/2274943029372518400:ℝ) := by linarith
     have he : (181/2916:ℝ)*u^12 +
       (2155529/13436928:ℝ)*u^9 +
       (1529993/5971968:ℝ)*u^6 +
       (-1144/1575:ℝ)*u^5 +
       (904457/3981312:ℝ)*u^3 +
       (278921/5308416:ℝ) =
-        (u-11/12)^2*Q+((1840275079998707/202217158166446080:ℝ)*u + (-8582440901337379/2274943029372518400:ℝ)) := by dsimp only [Q]; ring
+        (u-11/12)^2*Q+((1840275079998707/202217158166446080:ℝ)*u +
+            (-8582440901337379/2274943029372518400:ℝ)) := by dsimp only [Q]; ring
     rw [he]
     positivity
 
@@ -728,7 +732,9 @@ theorem airyDer_envelope_gap {x : ℝ} (hx : 0 < x) :
     dsimp only [T]
     nlinarith
   have hpoly := airyDer_envelope_poly hu.le
-  have he : T*u*D-(22/7:ℝ)*(52/225) = ((181/2916:ℝ)*u^12+(2155529/13436928:ℝ)*u^9+(1529993/5971968:ℝ)*u^6+(-1144/1575:ℝ)*u^5+(904457/3981312:ℝ)*u^3+(278921/5308416:ℝ))/u^5 := by
+  have he : T*u*D-(22/7:ℝ)*(52/225) = ((181/2916:ℝ)*u^12+(2155529/13436928:ℝ)*u^9
+      +(1529993/5971968:ℝ)*u^6+(-1144/1575:ℝ)*u^5+(904457/3981312:ℝ)*u^3
+      +(278921/5308416:ℝ))/u^5 := by
     dsimp only [T,D]
     rw [hzEq]
     field_simp
@@ -891,7 +897,8 @@ theorem airy_aiDeriv_exact_remainder {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
     have hπ : (Real.sqrt π : ℂ) ≠ 0 := by
       exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
     have hz' : z ^ (1 / 4 : ℂ) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hz)
-    exact div_ne_zero (mul_ne_zero (neg_ne_zero.mpr hz') (exp_ne_zero _)) (mul_ne_zero two_ne_zero hπ)
+    exact div_ne_zero (mul_ne_zero (neg_ne_zero.mpr hz') (exp_ne_zero _))
+        (mul_ne_zero two_ne_zero hπ)
   unfold airyRemainder
   field_simp
   ring

@@ -884,9 +884,9 @@ theorem binetW_mul_Gamma_nat_add {t : ℝ} (ht : 0 < t) (n : ℕ) :
 /-- `W(x) Γ(x) = (Γ(x)/stirlingGamma(x)) √(2π) (√x ∫₀^π e^(-x φ))` for `x > 0`. -/
 theorem binetW_mul_Gamma_eq_stirling {x : ℝ} (hx : 0 < x) :
     binetW x * Real.Gamma x =
-      Real.Gamma x / Real.stirlingGamma x * √(2 * π) * (√x * binetLaplace x) := by
-  have hS : Real.stirlingGamma x = √(2 * π) / √x * (x ^ x / Real.exp x) := by
-    rw [Real.stirlingGamma, Real.sqrt_div' _ hx.le, Real.div_rpow hx.le (Real.exp_pos 1).le,
+      Real.Gamma x / Gamma.Real.stirlingGamma x * √(2 * π) * (√x * binetLaplace x) := by
+  have hS : Gamma.Real.stirlingGamma x = √(2 * π) / √x * (x ^ x / Real.exp x) := by
+    rw [Gamma.Real.stirlingGamma, Real.sqrt_div' _ hx.le, Real.div_rpow hx.le (Real.exp_pos 1).le,
       Real.exp_one_rpow]
   have hsx : 0 < √x := Real.sqrt_pos.mpr hx
   have hxx : 0 < x ^ x := Real.rpow_pos_of_pos hx x
@@ -901,7 +901,7 @@ theorem binetW_mul_Gamma_of_le_one {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     binetW t * Real.Gamma t = π := by
   have hnat : Tendsto (fun n : ℕ => (n : ℝ) + t) atTop atTop :=
     tendsto_atTop_add_const_right _ t tendsto_natCast_atTop_atTop
-  have hlim := ((Real.tendsto_Gamma_add_nat_div_stirlingGamma ht ht1).mul_const √(2 * π)).mul
+  have hlim := ((Gamma.Real.tendsto_Gamma_add_nat_div_stirlingGamma ht ht1).mul_const √(2 * π)).mul
     (tendsto_sqrt_mul_binetLaplace.comp hnat)
   have hval : 1 * √(2 * π) * (√(π / (1 / 2)) / 2) = π := by
     rw [show π / (1 / 2) = 2 * π by ring, one_mul, mul_div_assoc', Real.mul_self_sqrt
@@ -909,12 +909,12 @@ theorem binetW_mul_Gamma_of_le_one {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     ring
   rw [hval] at hlim
   have hconst : (fun n : ℕ => binetW (n + t) * Real.Gamma (n + t)) =
-      fun n : ℕ => Real.Gamma (n + t) / Real.stirlingGamma (n + t) * √(2 * π) *
+      fun n : ℕ => Real.Gamma (n + t) / Gamma.Real.stirlingGamma (n + t) * √(2 * π) *
         (√(n + t) * binetLaplace (n + t)) := by
     funext n
     exact binetW_mul_Gamma_eq_stirling (by positivity)
   have h := hlim
-  rw [show (fun n : ℕ => Real.Gamma (n + t) / Real.stirlingGamma (n + t) * √(2 * π) *
+  rw [show (fun n : ℕ => Real.Gamma (n + t) / Gamma.Real.stirlingGamma (n + t) * √(2 * π) *
       ((fun x => √x * binetLaplace x) ∘ fun n : ℕ => (n : ℝ) + t) n) =
       fun n : ℕ => binetW (n + t) * Real.Gamma (n + t) from by rw [hconst]; rfl] at h
   simp only [binetW_mul_Gamma_nat_add ht] at h

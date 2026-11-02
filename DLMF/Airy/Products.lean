@@ -49,14 +49,16 @@ theorem airy_product_second_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f'
 `w''' - 4 z w' - 2 w = 0` (DLMF 9.11.1). -/
 @[dlmf 9.11.E1]
 theorem airy_product_ode {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
-    iteratedDeriv 3 (fun t => f t * g t) z - 4 * z * deriv (fun t => f t * g t) z - 2 * f z * g z = 0 := by
+    iteratedDeriv 3 (fun t => f t * g t) z - 4 * z * deriv (fun t => f t * g t) z - 2 *
+        f z * g z = 0 := by
   have h := ODE.product_third_deriv hf hg (fun z => hasDerivAt_id z) z
   linear_combination h
 
 /-- The Wronskian of `Ai², Ai Bi, Bi²` is `2/π³` (DLMF 9.11.2). -/
 @[dlmf 9.11.E2]
 theorem airy_product_wronskian (z : ℂ) :
-    airyWronskian3 (fun t => airyAi t ^ 2) (fun t => airyAi t * airyBi t) (fun t => airyBi t ^ 2) z = 2 / π ^ 3 := by
+    airyWronskian3 (fun t => airyAi t ^ 2) (fun t => airyAi t * airyBi t) (fun t => airyBi t ^ 2) z
+        = 2 / π ^ 3 := by
   have hA : (fun t => airyAi t ^ 2) = fun t => airyAi t * airyAi t := by funext t; ring
   have hB : (fun t => airyBi t ^ 2) = fun t => airyBi t * airyBi t := by funext t; ring
   unfold airyWronskian3
@@ -90,7 +92,8 @@ theorem airy_modulus_sq_exp_integral (z : ℂ) :
 
 /-- For Airy solutions `f, g`, an antiderivative of `f g` is `-f' g' + z f g` (DLMF 9.11.5). -/
 @[dlmf 9.11.E5]
-theorem airy_product_antiderivative_5 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
+theorem airy_product_antiderivative_5 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
+    (hg : IsAirySol g g') (z : ℂ) :
     HasDerivAt (fun t => -f' t * g' t + t * f t * g t) (f z * g z) z := by
   have h := ((hf z).2.neg.mul (hg z).2).add
     (((hasDerivAt_id z).mul (hf z).1).mul (hg z).1)
@@ -99,7 +102,8 @@ theorem airy_product_antiderivative_5 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g` with Wronskian `𝒲 = f g' - f' g`, an antiderivative of `f g'` is
 `(f g + 𝒲 z)/2` (DLMF 9.11.6). -/
 @[dlmf 9.11.E6]
-theorem airy_product_antiderivative_6 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
+theorem airy_product_antiderivative_6 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
+    (hg : IsAirySol g g') (z : ℂ) :
     HasDerivAt (fun t => (f t * g t + t * (f 0 * g' 0 - f' 0 * g 0)) / 2) (f z * g' z) z := by
   have h := (((hf z).1.mul (hg z).1).add
     ((hasDerivAt_id z).mul_const (f 0 * g' 0 - f' 0 * g 0))).div_const 2
@@ -109,8 +113,10 @@ theorem airy_product_antiderivative_6 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g`, an antiderivative of `f' g'` is `(f g' + f' g + z f' g' - z² f g)/3`
 (DLMF 9.11.7). -/
 @[dlmf 9.11.E7]
-theorem airy_product_antiderivative_7 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
-    HasDerivAt (fun t => (f t * g' t + f' t * g t + t * f' t * g' t - t ^ 2 * f t * g t) / 3) (f' z * g' z) z := by
+theorem airy_product_antiderivative_7 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
+    (hg : IsAirySol g g') (z : ℂ) :
+    HasDerivAt (fun t => (f t * g' t + f' t * g t + t * f' t * g' t - t ^ 2 * f t * g t) / 3)
+        (f' z * g' z) z := by
   have h := (((((hf z).1.mul (hg z).2).add ((hf z).2.mul (hg z).1)).add
     (((hasDerivAt_id z).mul (hf z).2).mul (hg z).2)).sub
       (((hasDerivAt_pow 2 z).mul (hf z).1).mul (hg z).1)).div_const 3
@@ -119,8 +125,10 @@ theorem airy_product_antiderivative_7 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g`, an antiderivative of `z f g` is
 `(f g' + f' g)/6 - (z f' g' - z² f g)/3` (DLMF 9.11.8). -/
 @[dlmf 9.11.E8]
-theorem airy_product_antiderivative_8 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
-    HasDerivAt (fun t => (f t * g' t + f' t * g t) / 6 - (t * f' t * g' t - t ^ 2 * f t * g t) / 3) (z * f z * g z) z := by
+theorem airy_product_antiderivative_8 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
+    (hg : IsAirySol g g') (z : ℂ) :
+    HasDerivAt (fun t => (f t * g' t + f' t * g t) / 6 - (t * f' t * g' t - t ^ 2 * f t * g t) / 3)
+        (z * f z * g z) z := by
   have h := ((((hf z).1.mul (hg z).2).add ((hf z).2.mul (hg z).1)).div_const 6).sub
     (((((hasDerivAt_id z).mul (hf z).2).mul (hg z).2).sub
       (((hasDerivAt_pow 2 z).mul (hf z).1).mul (hg z).1)).div_const 3)
@@ -129,8 +137,10 @@ theorem airy_product_antiderivative_8 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g` with Wronskian `𝒲`, an antiderivative of `z f g'` is
 `f' g'/2 + 𝒲 z²/4` (DLMF 9.11.9). -/
 @[dlmf 9.11.E9]
-theorem airy_product_antiderivative_9 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
-    HasDerivAt (fun t => f' t * g' t / 2 + t ^ 2 * (f 0 * g' 0 - f' 0 * g 0) / 4) (z * f z * g' z) z := by
+theorem airy_product_antiderivative_9 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
+    (hg : IsAirySol g g') (z : ℂ) :
+    HasDerivAt (fun t => f' t * g' t / 2 + t ^ 2 * (f 0 * g' 0 - f' 0 * g 0) / 4)
+        (z * f z * g' z) z := by
   have h := (((hf z).2.mul (hg z).2).div_const 2).add
     (((hasDerivAt_pow 2 z).mul_const (f 0 * g' 0 - f' 0 * g 0)).div_const 4)
   have hW := hf.wronskian_eq hg z
@@ -139,8 +149,10 @@ theorem airy_product_antiderivative_9 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g`, an antiderivative of `z f' g'` is
 `(3/10)(-f g + z f g' + z f' g) + (z² f' g' - z³ f g)/5` (DLMF 9.11.10). -/
 @[dlmf 9.11.E10]
-theorem airy_product_antiderivative_10 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
-    HasDerivAt (fun t => 3 / 10 * (-f t * g t + t * f t * g' t + t * f' t * g t) + (t ^ 2 * f' t * g' t - t ^ 3 * f t * g t) / 5) (z * f' z * g' z) z := by
+theorem airy_product_antiderivative_10 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
+    (hg : IsAirySol g g') (z : ℂ) :
+    HasDerivAt (fun t => 3 / 10 * (-f t * g t + t * f t * g' t + t * f' t * g t) +
+        (t ^ 2 * f' t * g' t - t ^ 3 * f t * g t) / 5) (z * f' z * g' z) z := by
   have h := (((((hf z).1.mul (hg z).1).neg.add
     (((hasDerivAt_id z).mul (hf z).1).mul (hg z).2)).add
       (((hasDerivAt_id z).mul (hf z).2).mul (hg z).1)).const_mul (3 / 10 : ℂ)).add
@@ -156,7 +168,8 @@ theorem airy_product_antiderivative_10 {f f' g g' : ℂ → ℂ} (hf : IsAirySol
 /-- For Airy solutions `f, g` with nonzero Wronskian `𝒲`, if `F` has derivative `F'` at `g(z)/f(z)`
 and `f(z) ≠ 0`, then `F(g/f)/𝒲` has derivative `F'/f(z)²` at `z` (DLMF 9.11.11). -/
 @[dlmf 9.11.E11]
-theorem airy_quotient_antiderivative {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') {F : ℂ → ℂ} {F' z : ℂ}
+theorem airy_quotient_antiderivative {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g')
+    {F : ℂ → ℂ} {F' z : ℂ}
     (hF : HasDerivAt F F' (g z / f z)) (hfz : f z ≠ 0)
     (hW : f 0 * g' 0 - f' 0 * g 0 ≠ 0) :
     HasDerivAt (fun t => F (g t / f t) / (f 0 * g' 0 - f' 0 * g 0)) (F' / f z ^ 2) z := by
@@ -254,7 +267,9 @@ theorem airyAi_sq_mellin {α : ℂ} (hα : 0 < α.re) :
   have key : ((airySq_c : ℝ) : ℂ) * exp (-(Real.log airySq_c : ℂ) * (α + 1 / 2)) *
       (12 : ℂ) ^ ((2 * α + 5) / 6) = 4 * (3 : ℂ) ^ ((2 * α + 5) / 6) := by
     rw [h12, h3, hc, ← Complex.exp_add, ← Complex.exp_add, hlc, hl12,
-      show (4 : ℂ) = exp ((Real.log 4 : ℂ)) by rw [← ofReal_exp, Real.exp_log (by norm_num)]; norm_num,
+      show (4 : ℂ) = exp ((Real.log 4 : ℂ)) by
+                                              rw [← ofReal_exp, Real.exp_log
+                                                (by norm_num)]; norm_num,
       ← Complex.exp_add, show Real.log 4 = 2 * Real.log 2 by
         rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]; push_cast; ring]
     congr 1; push_cast; ring
@@ -291,7 +306,8 @@ theorem airyAi_cube_integral  :
 /-- `∫_{-∞}^{∞} Ai(t)² Bi(t) dt = Γ(1/3)²/(4√3 π²)` (DLMF 9.11.17). -/
 @[dlmf 9.11.E17]
 theorem airyAi_sq_airyBi_integral  :
-    HasIntegralWholeLine (fun t => airyAi t ^ 2 * airyBi t) (Gamma (1 / 3) ^ 2 / (4 * Real.sqrt 3 * π ^ 2)) := by
+    HasIntegralWholeLine (fun t => airyAi t ^ 2 * airyBi t)
+        (Gamma (1 / 3) ^ 2 / (4 * Real.sqrt 3 * π ^ 2)) := by
   sorry
 
 /-- `∫₀^∞ Ai(t)⁴ dt = ln 3/(24π²)` (DLMF 9.11.18). -/
@@ -361,7 +377,8 @@ theorem tendsto_airyAiDeriv_div_airyBiDeriv :
 
 /-- `arctan(1/√3) = π/6`. -/
 theorem arctan_recip_sqrt_three : Real.arctan (1 / Real.sqrt 3) = π / 6 := by
-  rw [← Real.tan_pi_div_six, Real.arctan_tan (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])]
+  rw [← Real.tan_pi_div_six,
+      Real.arctan_tan (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])]
 
 /-- `Ai(0)/Bi(0) = 1/√3`. -/
 theorem airyReal_zero_ratio : airyAiReal 0 / airyBiReal 0 = 1 / Real.sqrt 3 := by
@@ -422,7 +439,8 @@ theorem hasDerivAt_arctan_airyDeriv_ratio {x : ℝ} (hx : 0 ≤ x) :
     HasDerivAt (fun t => π * Real.arctan (airyAiDerivReal t / airyBiDerivReal t))
       (x / (airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2)) x := by
   have hb := (airyBiDerivReal_zero_pos.trans_le (airyBiDerivReal_ge hx)).ne'
-  have h := (((hasDerivAt_airyAiDerivReal x).div (hasDerivAt_airyBiDerivReal x) hb).arctan).const_mul π
+  have h := (((hasDerivAt_airyAiDerivReal x).div (hasDerivAt_airyBiDerivReal x)
+      hb).arctan).const_mul π
   refine h.congr_deriv ?_
   have hW := wronskian_airyReal x
   have hπ := Real.pi_ne_zero

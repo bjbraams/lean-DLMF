@@ -109,7 +109,8 @@ noncomputable def altBinomialPowSum (k m : ℕ) : ℂ :=
 
 /-- `c(k, m) = 0` for `m < k`. -/
 
-private lemma altBinomialPowSum_eq_zero_of_lt {k m : ℕ} (h : m < k) : altBinomialPowSum k m = 0 := by
+private lemma altBinomialPowSum_eq_zero_of_lt {k m : ℕ} (h : m < k) :
+    altBinomialPowSum k m = 0 := by
   have := sum_alt_choose_mul_add_pow_eq_zero 0 h
   simpa [altBinomialPowSum] using this
 
@@ -198,7 +199,8 @@ private lemma sum_altBinomialPowSum_div (N : ℕ) (hN : 1 ≤ N) :
 
 private lemma sum_choose_mul_altBinomialPowSum (k N : ℕ) :
     ∑ m ∈ range N, (N.choose m : ℂ) * altBinomialPowSum k m = -altBinomialPowSum (k + 1) N := by
-  rw [show -altBinomialPowSum (k + 1) N = (altBinomialPowSum k N - altBinomialPowSum (k + 1) N) - altBinomialPowSum k N by ring,
+  rw [show -altBinomialPowSum (k + 1) N = (altBinomialPowSum k N - altBinomialPowSum (k + 1) N) -
+      altBinomialPowSum k N by ring,
     ← sum_alt_choose_mul_succ_pow_eq_sub]
   conv_lhs => simp only [altBinomialPowSum, mul_sum]
   rw [sum_comm, altBinomialPowSum, ← sum_sub_distrib]
@@ -210,7 +212,8 @@ private lemma sum_choose_mul_altBinomialPowSum (k N : ℕ) :
   exact sum_congr rfl fun m _ => by ring
 
 /-- The Newton-series values `β_m = ∑_{k ≤ m} c(k, m)/(k+1)`. -/
-noncomputable def newtonBernoulli (m : ℕ) : ℂ := ∑ k ∈ range (m + 1), altBinomialPowSum k m / (k + 1)
+noncomputable def newtonBernoulli (m : ℕ) : ℂ := ∑ k ∈ range (m + 1),
+    altBinomialPowSum k m / (k + 1)
 
 /-- The range of `β_m` may be extended. -/
 
@@ -256,7 +259,8 @@ private lemma newtonBernoulli_eq_bernoulli (n : ℕ) : newtonBernoulli n = berno
 /-- `∑_{k=0}^{n+1} (-1)ᵏ (n+1 choose k) Eₙ(x + k) = 0`. -/
 private lemma sum_alt_choose_mul_eulerPolyE_add (n : ℕ) (x : ℂ) :
     ∑ k ∈ range (n + 2), (-1 : ℂ) ^ k * ((n + 1).choose k : ℂ) * eulerPolyE n (x + k) = 0 := by
-  refine sum_alt_choose_mul_eq_zero_of_poly _ (fun i => (n.choose (n - i) : ℂ) * eulerPolyE (n - i) x)
+  refine sum_alt_choose_mul_eq_zero_of_poly _
+      (fun i => (n.choose (n - i) : ℂ) * eulerPolyE (n - i) x)
     (n + 1) fun j => ?_
   rw [eulerPolyE_add, ← sum_range_reflect]
   refine sum_congr rfl fun i hi => ?_
@@ -352,7 +356,8 @@ theorem bernoulli_two_mul_eq_explicit₁ {n : ℕ} (hn : 1 ≤ n) :
   set c : ℕ → ℚ := fun e => bernoulli (N - e) * ((N + 1).choose (N - e) : ℚ) / (N + 1)
   set F : ℕ → ℚ := fun k => ∑ e ∈ range (N + 1), c e * (k : ℚ) ^ e
   have hz : ∑ k ∈ range (N + 1 + 1), (-1 : ℚ) ^ k * ((N + 1).choose k : ℚ) * F k = 0 := by
-    have := sum_alt_choose_mul_eq_zero_of_poly (fun k => ((F k : ℚ) : ℂ)) (fun e => (c e : ℂ)) (N + 1)
+    have := sum_alt_choose_mul_eq_zero_of_poly (fun k => ((F k : ℚ) : ℂ))
+        (fun e => (c e : ℂ)) (N + 1)
       (fun k => by simp only [F]; push_cast; rfl)
     exact_mod_cast this
   have hF0 : F 0 = bernoulli N := by
@@ -671,7 +676,8 @@ private lemma sum_choose_mul_sub_pow_two_mul_eq_fold (n k : ℕ) (hn : 1 ≤ n) 
 
 
 /-- Reflected summation over a final segment: `∑_{k=n-m}^{n} G k = ∑_{i=0}^{m} G (n - i)`. -/
-private lemma sum_Icc_sub_eq_sum_range_reflect {M : Type*} [AddCommMonoid M] (G : ℕ → M) {m n : ℕ} (h : m ≤ n) :
+private lemma sum_Icc_sub_eq_sum_range_reflect {M : Type*} [AddCommMonoid M] (G : ℕ → M)
+    {m n : ℕ} (h : m ≤ n) :
     ∑ k ∈ Icc (n - m) n, G k = ∑ i ∈ range (m + 1), G (n - i) := by
   induction m with
   | zero => simp
@@ -914,7 +920,8 @@ private lemma eulerNumber_two_mul_eq_sum_Icc_choose_pow {n : ℕ} (hn : 1 ≤ n)
     sum_range_one, Nat.cast_zero, sub_zero, zero_pow (show 2 * n ≠ 0 by omega), mul_zero,
     add_zero]
   refine sum_congr rfl fun k _ => ?_
-  rw [sum_choose_mul_sub_pow_two_mul_eq_fold_half n (k + 1) hn (by omega), Nat.add_sub_cancel, pow_succ]
+  rw [sum_choose_mul_sub_pow_two_mul_eq_fold_half n (k + 1) hn (by omega),
+      Nat.add_sub_cancel, pow_succ]
   field_simp
   ring
 

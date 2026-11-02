@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Elementary.Hyperbolic.InverseIdentities
+public import DLMF.Elementary.OddContinuedFraction
 public import DLMF.Gamma.BetaFunction.Cosine
 public import DLMF.Gamma.IntegralRepresentations.DigammaAndBinet
 public import DLMF.Gamma.SeriesExpansions
@@ -62,8 +63,9 @@ namespace DLMF.Elementary
 => if n=0 then z else z^2) (fun n => (2*n+1:ℂ)) (Complex.tanh z)`. -/
 @[dlmf 4.39.E1]
 theorem tanh_continued_fraction {z : ℂ} (hz : Complex.cosh z≠0) :
-    DLMF.HasContinuedFraction (fun n => if n=0 then z else z^2) (fun n => (2*n+1:ℂ)) (Complex.tanh z) := by
-  sorry
+    DLMF.HasContinuedFraction (fun n => if n=0 then z else z^2) (fun n => (2*n+1:ℂ))
+        (Complex.tanh z) :=
+  hasContinuedFraction_tanh hz
 
 /-- Identity under the stated parameter and domain assumptions: `DLMF.HasContinuedFraction (fun n
 => if n=0 then z else ((2*((n+1)/2)-1:ℕ):ℂ)*(2*((n+1)/2):ℂ)*z^2) (fun n => (2*n+1:ℂ)) (arcsinh
@@ -85,13 +87,15 @@ theorem arctanh_continued_fraction {z : ℂ} (hz : z∈arctanhDomain) :
 
 /-- At `x`, the function `(fun t : ℝ => Real.log (Real.cosh t))` has derivative `(Real.tanh x)`. -/
 @[dlmf 4.40.E3]
-theorem antiderivative_tanh (x : ℝ) : HasDerivAt (fun t : ℝ => Real.log (Real.cosh t)) (Real.tanh x) x := by
+theorem antiderivative_tanh (x : ℝ) : HasDerivAt (fun t : ℝ => Real.log (Real.cosh t))
+    (Real.tanh x) x := by
   simpa only [Real.tanh_eq_sinh_div_cosh] using (Real.hasDerivAt_cosh x).log (Real.cosh_pos x).ne'
 
 /-- At `x`, the function `(fun t : ℝ => Real.log (Real.tanh (t/2)))` has derivative `(Real.sinh
 x)⁻¹`. -/
 @[dlmf 4.40.E4]
-theorem antiderivative_csch {x : ℝ} (hx : 0<x) : HasDerivAt (fun t : ℝ => Real.log (Real.tanh (t/2))) (Real.sinh x)⁻¹ x := by
+theorem antiderivative_csch {x : ℝ} (hx : 0<x) : HasDerivAt
+    (fun t : ℝ => Real.log (Real.tanh (t/2))) (Real.sinh x)⁻¹ x := by
   have hs : 0 < Real.sinh (x/2) := Real.sinh_pos_iff.mpr (by linarith)
   have hc : 0 < Real.cosh (x/2) := Real.cosh_pos _
   have hf : (fun t : ℝ => Real.log (Real.tanh (t/2))) =
@@ -113,7 +117,8 @@ theorem antiderivative_csch {x : ℝ} (hx : 0<x) : HasDerivAt (fun t : ℝ => Re
 /-- At `x`, the function `(fun t : ℝ => 2*Real.arctan (Real.exp t)-π/2)` has derivative
 `(Real.cosh x)⁻¹`. -/
 @[dlmf 4.40.E5]
-theorem antiderivative_sech (x : ℝ) : HasDerivAt (fun t : ℝ => 2*Real.arctan (Real.exp t)-π/2) (Real.cosh x)⁻¹ x := by
+theorem antiderivative_sech (x : ℝ) : HasDerivAt (fun t : ℝ => 2*Real.arctan (Real.exp t)-π/2)
+    (Real.cosh x)⁻¹ x := by
   have hd:=((Real.hasDerivAt_exp x).arctan.const_mul 2).sub_const (π/2)
   convert hd using 1
   rw [Real.cosh_eq,Real.exp_neg]
@@ -122,7 +127,8 @@ theorem antiderivative_sech (x : ℝ) : HasDerivAt (fun t : ℝ => 2*Real.arctan
 /-- At `x`, the function `(fun t : ℝ => Real.log (Real.sinh t))` has derivative `(Real.cosh
 x/Real.sinh x)`. -/
 @[dlmf 4.40.E6]
-theorem antiderivative_coth {x : ℝ} (hx : 0<x) : HasDerivAt (fun t : ℝ => Real.log (Real.sinh t)) (Real.cosh x/Real.sinh x) x := by
+theorem antiderivative_coth {x : ℝ} (hx : 0<x) : HasDerivAt (fun t : ℝ => Real.log (Real.sinh t))
+    (Real.cosh x/Real.sinh x) x := by
   exact (Real.hasDerivAt_sinh x).log (Real.sinh_pos_iff.mpr hx).ne'
 
 /-- The imaginary part of the complex exponential Laplace integral evaluates a damped sine. -/
@@ -153,7 +159,8 @@ private lemma exp_sin_term_integral_norm_bound (a : ℝ) (n : ℕ) :
       (Ioi 0) := by
     simpa [IntegrableOn, mul_assoc] using (laplace_sin (a:=a) hb).1.const_mul 2
   have hI := (DLMF.Gamma.integrableOn_exp_mul_pow hb 1).const_mul (2 * |a| )
-  have hlt : ∀ x ∈ Ioi (0:ℝ), ‖2*Real.exp (-(2*(n+1:ℝ))*x)*Real.sin (a*x)‖ ≤ 2 * |a|  * (Real.exp (-(2*(n+1:ℝ))*x)*x^1) := by
+  have hlt : ∀ x ∈ Ioi (0:ℝ), ‖2*Real.exp (-(2*(n+1:ℝ))*x)*Real.sin (a*x)‖ ≤ 2 * |a|  *
+      (Real.exp (-(2*(n+1:ℝ))*x)*x^1) := by
     intro x hx
     simp only [norm_mul, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _),
       abs_of_nonneg (by norm_num : (0:ℝ)≤2), pow_one]
@@ -195,7 +202,10 @@ private lemma integrable_exp_sin_div_sinh (a : ℝ) :
 (a*x)/Real.sinh x) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, Real.exp (-x)*Real.sin (a*x)/Real.sinh
 x)=π/2*(Real.cosh (π*a/2)/Real.sinh (π*a/2))-1/a`. -/
 @[dlmf 4.40.E7]
-theorem integral_exp_sin_div_sinh {a : ℝ} (ha : a≠0) : IntegrableOn (fun x : ℝ => Real.exp (-x)*Real.sin (a*x)/Real.sinh x) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, Real.exp (-x)*Real.sin (a*x)/Real.sinh x)=π/2*(Real.cosh (π*a/2)/Real.sinh (π*a/2))-1/a := by
+theorem integral_exp_sin_div_sinh {a : ℝ} (ha : a≠0) : IntegrableOn
+    (fun x : ℝ => Real.exp (-x)*Real.sin (a*x)/Real.sinh x) (Ioi 0) ∧
+    (∫ x : ℝ in Ioi 0, Real.exp (-x)*Real.sin (a*x)/Real.sinh x)=π/2*(Real.cosh (π*a/2)/Real.sinh
+    (π*a/2))-1/a := by
   let F : ℕ → ℝ → ℝ := fun n x => 2*Real.exp (-(2*(n+1:ℝ))*x)*Real.sin (a*x)
   have hb (n : ℕ) : 0<2*(n+1:ℝ) := by positivity
   have hi (n : ℕ) : IntegrableOn (F n) (Ioi 0) := by
@@ -243,7 +253,9 @@ theorem integral_exp_sin_div_sinh {a : ℝ} (ha : a≠0) : IntegrableOn (fun x :
 /-- Integrability on the specified set: `IntegrableOn (fun x : ℝ => Real.sinh (a*x)/Real.sinh
 (π*x)) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, Real.sinh (a*x)/Real.sinh (π*x))=Real.tan (a/2)/2`. -/
 @[dlmf 4.40.E8]
-theorem integral_sinh_div_sinh {a : ℝ} (ha : -π<a ∧ a<π) : IntegrableOn (fun x : ℝ => Real.sinh (a*x)/Real.sinh (π*x)) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, Real.sinh (a*x)/Real.sinh (π*x))=Real.tan (a/2)/2 := by
+theorem integral_sinh_div_sinh {a : ℝ} (ha : -π<a ∧ a<π) : IntegrableOn
+    (fun x : ℝ => Real.sinh (a*x)/Real.sinh (π*x)) (Ioi 0) ∧
+    (∫ x : ℝ in Ioi 0, Real.sinh (a*x)/Real.sinh (π*x))=Real.tan (a/2)/2 := by
   let p := (π-a)/(2*π)
   have hp : 0<p := div_pos (by linarith) (by positivity)
   have hp1 : p<1 := (div_lt_one (by positivity : 0<2*π)).mpr (by linarith)
@@ -257,14 +269,15 @@ theorem integral_sinh_div_sinh {a : ℝ} (ha : -π<a ∧ a<π) : IntegrableOn (f
       (DLMF.Gamma.integrableOn_digamma_add_euler hp),
       ← DLMF.Gamma.digamma_add_euler_Ioi (by linarith : 0<1-p),
       ← DLMF.Gamma.digamma_add_euler_Ioi hp]
-    have h := Real.digamma_one_sub hp hp1
+    have h := Gamma.Real.digamma_one_sub hp hp1
     dsimp only [H, F] at *
     linarith
   have he : EqOn (fun x : ℝ => H ((2*π)*x))
       (fun x : ℝ => Real.sinh (a*x)/Real.sinh (π*x)) (Ioi 0) := by
     intro x hx
     have hx0 : 0<x := hx
-    have hex : Real.exp (-(2*π*x)) ≠ 1 := ne_of_lt (Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos]))
+    have hex : Real.exp (-(2*π*x)) ≠ 1 :=
+        ne_of_lt (Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos]))
     have hs : Real.sinh (π*x) ≠ 0 := (Real.sinh_pos_iff.mpr (by positivity)).ne'
     dsimp only [H, F, p]
     rw [show -(1-(π-a)/(2*π))*((2*π)*x) = -π*x-a*x by field_simp; ring,
@@ -290,7 +303,9 @@ theorem integral_sinh_div_sinh {a : ℝ} (ha : -π<a ∧ a<π) : IntegrableOn (f
 (x/2))^2) ∧ (∫ x : ℝ, Real.exp (a*x)/(Real.cosh (x/2))^2)=(if a=0 then 4 else 4*π*a/Real.sin
 (π*a))`. -/
 @[dlmf 4.40.E9]
-theorem integral_exp_div_cosh_sq {a : ℝ} (ha : -1<a ∧ a<1) : Integrable (fun x : ℝ => Real.exp (a*x)/(Real.cosh (x/2))^2) ∧ (∫ x : ℝ, Real.exp (a*x)/(Real.cosh (x/2))^2)=(if a=0 then 4 else 4*π*a/Real.sin (π*a)) := by
+theorem integral_exp_div_cosh_sq {a : ℝ} (ha : -1<a ∧ a<1) : Integrable
+    (fun x : ℝ => Real.exp (a*x)/(Real.cosh (x/2))^2) ∧
+    (∫ x : ℝ, Real.exp (a*x)/(Real.cosh (x/2))^2)=(if a=0 then 4 else 4*π*a/Real.sin (π*a)) := by
   have habs : |a| < 1 := abs_lt.mpr ha
   obtain ⟨hi,hv⟩ := DLMF.Gamma.integral_exp_div_cosh_rpow (a := 1) habs
   have he : (fun t : ℝ => Real.exp (2*a*t)/Real.cosh t^(2*(1:ℝ))) =
@@ -342,7 +357,8 @@ private lemma norm_real_tanh_deriv_le (x : ℝ) :
     rw [show -2 * x = -(x + x) by ring, Real.exp_neg, Real.exp_add, mul_inv, pow_two]
   rw [hx]
   nlinarith [inv_pos.mpr hc, inv_pos.mpr he]
-/-- A mean-value bound for two scaled hyperbolic tangents cancels the Frullani kernel’s apparent singularity. -/
+/-- A mean-value bound for two scaled hyperbolic tangents cancels the Frullani kernel’s apparent
+singularity. -/
 private lemma norm_real_tanh_sub_le {a b t : ℝ} (ht : 0 ≤ t) :
     ‖Real.tanh (a*t) - Real.tanh (b*t)‖ ≤
       4 * Real.exp (-2 * min a b * t) * (|a-b| * t) := by
@@ -377,7 +393,9 @@ private lemma tendsto_real_tanh_atTop : Tendsto Real.tanh atTop (𝓝 1) := by
 /-- Integrability on the specified set: `IntegrableOn (fun x : ℝ => (Real.tanh (a*x)-Real.tanh
 (b*x))/x) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, (Real.tanh (a*x)-Real.tanh (b*x))/x)=Real.log (a/b)`. -/
 @[dlmf 4.40.E10]
-theorem integral_tanh_difference {a b : ℝ} (ha : 0<a) (hb : 0<b) : IntegrableOn (fun x : ℝ => (Real.tanh (a*x)-Real.tanh (b*x))/x) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, (Real.tanh (a*x)-Real.tanh (b*x))/x)=Real.log (a/b) := by
+theorem integral_tanh_difference {a b : ℝ} (ha : 0<a) (hb : 0<b) : IntegrableOn
+    (fun x : ℝ => (Real.tanh (a*x)-Real.tanh (b*x))/x) (Ioi 0) ∧
+    (∫ x : ℝ in Ioi 0, (Real.tanh (a*x)-Real.tanh (b*x))/x)=Real.log (a/b) := by
   -- TauCeti supplies continuity of the total real hyperbolic tangent.
   have hc := Real.continuous_tanh
   have hm : -2 * min a b < 0 := by nlinarith [lt_min ha hb]
@@ -408,7 +426,8 @@ theorem integral_tanh_difference {a b : ℝ} (ha : 0<a) (hb : 0<b) : IntegrableO
 /-- At `x`, the function `(fun t : ℝ => t*Real.arsinh t-Real.sqrt (1+t^2))` has derivative
 `(Real.arsinh x)`. -/
 @[dlmf 4.40.E11]
-theorem antiderivative_arcsinh (x : ℝ) : HasDerivAt (fun t : ℝ => t*Real.arsinh t-Real.sqrt (1+t^2)) (Real.arsinh x) x := by
+theorem antiderivative_arcsinh (x : ℝ) : HasDerivAt (fun t : ℝ => t*Real.arsinh t-Real.sqrt (1+t^2))
+    (Real.arsinh x) x := by
   have hp:0<1+x^2 := by positivity
   have hd:=((hasDerivAt_id x).mul (Real.hasDerivAt_arsinh x)).sub
     ((((hasDerivAt_id x).pow 2).const_add 1).sqrt hp.ne')
@@ -422,7 +441,8 @@ theorem antiderivative_arcsinh (x : ℝ) : HasDerivAt (fun t : ℝ => t*Real.ars
 /-- At `x`, the function `(fun t : ℝ => t*Real.arcosh t-Real.sqrt (t^2-1))` has derivative
 `(Real.arcosh x)`. -/
 @[dlmf 4.40.E12]
-theorem antiderivative_arccosh {x : ℝ} (hx : 1<x) : HasDerivAt (fun t : ℝ => t*Real.arcosh t-Real.sqrt (t^2-1)) (Real.arcosh x) x := by
+theorem antiderivative_arccosh {x : ℝ} (hx : 1<x) : HasDerivAt
+    (fun t : ℝ => t*Real.arcosh t-Real.sqrt (t^2-1)) (Real.arcosh x) x := by
   have hp:0<x^2-1 := by nlinarith
   have hd:=((hasDerivAt_id x).mul (Real.hasDerivAt_arcosh hx)).sub
     ((((hasDerivAt_id x).pow 2).sub_const 1).sqrt hp.ne')
@@ -436,7 +456,8 @@ theorem antiderivative_arccosh {x : ℝ} (hx : 1<x) : HasDerivAt (fun t : ℝ =>
 /-- At `x`, the function `(fun t : ℝ => t*Real.artanh t+Real.log (1-t^2)/2)` has derivative
 `(Real.artanh x)`. -/
 @[dlmf 4.40.E13]
-theorem antiderivative_arctanh {x : ℝ} (hx : |x|<1) : HasDerivAt (fun t : ℝ => t*Real.artanh t+Real.log (1-t^2)/2) (Real.artanh x) x := by
+theorem antiderivative_arctanh {x : ℝ} (hx : |x|<1) : HasDerivAt
+    (fun t : ℝ => t*Real.artanh t+Real.log (1-t^2)/2) (Real.artanh x) x := by
   have hx' : x ∈ Ioo (-1:ℝ) 1 := ⟨(abs_lt.mp hx).1, (abs_lt.mp hx).2⟩
   have hp : 0 < 1-x^2 := by nlinarith [(abs_lt.mp hx).1, (abs_lt.mp hx).2]
   have hd := ((hasDerivAt_id x).mul (Real.hasDerivAt_artanh hx')).add
@@ -450,7 +471,8 @@ theorem antiderivative_arctanh {x : ℝ} (hx : |x|<1) : HasDerivAt (fun t : ℝ 
 /-- At `x`, the function `(fun t : ℝ => t*Real.arsinh t⁻¹+Real.arsinh t)` has derivative
 `(Real.arsinh x⁻¹)`. -/
 @[dlmf 4.40.E14]
-theorem antiderivative_arccsch {x : ℝ} (hx : 0<x) : HasDerivAt (fun t : ℝ => t*Real.arsinh t⁻¹+Real.arsinh t) (Real.arsinh x⁻¹) x := by
+theorem antiderivative_arccsch {x : ℝ} (hx : 0<x) : HasDerivAt
+    (fun t : ℝ => t*Real.arsinh t⁻¹+Real.arsinh t) (Real.arsinh x⁻¹) x := by
   have hx0 : x ≠ 0 := hx.ne'
   have hd := ((hasDerivAt_id x).mul ((hasDerivAt_inv hx.ne').arsinh)).add (Real.hasDerivAt_arsinh x)
   convert hd using 1
@@ -467,13 +489,15 @@ theorem antiderivative_arccsch {x : ℝ} (hx : 0<x) : HasDerivAt (fun t : ℝ =>
 /-- At `x`, the function `(fun t : ℝ => t*Real.arcosh t⁻¹+Real.arcsin t)` has derivative
 `(Real.arcosh x⁻¹)`. -/
 @[dlmf 4.40.E15]
-theorem antiderivative_arcsech {x : ℝ} (hx : 0<x ∧ x<1) : HasDerivAt (fun t : ℝ => t*Real.arcosh t⁻¹+Real.arcsin t) (Real.arcosh x⁻¹) x := by
+theorem antiderivative_arcsech {x : ℝ} (hx : 0<x ∧ x<1) : HasDerivAt
+    (fun t : ℝ => t*Real.arcosh t⁻¹+Real.arcsin t) (Real.arcosh x⁻¹) x := by
   obtain ⟨h0,h1⟩ := hx
   have hx0 : x ≠ 0 := h0.ne'
   have hi : x⁻¹ ∈ Ioi (1:ℝ) := by
     show 1 < x⁻¹
     exact one_lt_inv₀ h0 |>.mpr h1
-  have hd := ((hasDerivAt_id x).mul ((Real.hasDerivAt_arcosh hi).comp x (hasDerivAt_inv h0.ne'))).add
+  have hd := ((hasDerivAt_id x).mul
+      ((Real.hasDerivAt_arcosh hi).comp x (hasDerivAt_inv h0.ne'))).add
     (Real.hasDerivAt_arcsin (by linarith) (by linarith : x ≠ 1))
   convert hd using 1
   · rfl
@@ -489,7 +513,8 @@ theorem antiderivative_arcsech {x : ℝ} (hx : 0<x ∧ x<1) : HasDerivAt (fun t 
 /-- At `x`, the function `(fun t : ℝ => t*Real.artanh t⁻¹+Real.log (t^2-1)/2)` has derivative
 `(Real.artanh x⁻¹)`. -/
 @[dlmf 4.40.E16]
-theorem antiderivative_arccoth {x : ℝ} (hx : 1<x) : HasDerivAt (fun t : ℝ => t*Real.artanh t⁻¹+Real.log (t^2-1)/2) (Real.artanh x⁻¹) x := by
+theorem antiderivative_arccoth {x : ℝ} (hx : 1<x) : HasDerivAt
+    (fun t : ℝ => t*Real.artanh t⁻¹+Real.log (t^2-1)/2) (Real.artanh x⁻¹) x := by
   have hi : x⁻¹ ∈ Ioo (-1:ℝ) 1 := ⟨by have := inv_pos.mpr (by linarith : (0:ℝ)<x); linarith,
     inv_lt_one_of_one_lt₀ hx⟩
   have hp : 0 < x^2-1 := by nlinarith
@@ -622,7 +647,8 @@ theorem complex_antiderivative_arctanh {z : ℂ} (hz : z∈arctanhDomain) :
       simp [pow_two, Complex.mul_re]
       nlinarith [abs_lt.mp hr, sq_nonneg z.im]
   have hq0 : 1-z^2 ≠ 0 := Complex.slitPlane_ne_zero hq
-  have dL := ((Complex.hasDerivAt_log hq).comp z (((hasDerivAt_id z).pow 2).const_sub 1)).div_const 2
+  have dL := ((Complex.hasDerivAt_log hq).comp z
+      (((hasDerivAt_id z).pow 2).const_sub 1)).div_const 2
   have hd := ((hasDerivAt_id z).mul (hyper_hasDerivAt_arctanh hz)).add dL
   convert hd using 1
   · funext w; simp [Function.comp_def]
@@ -869,7 +895,8 @@ theorem complex_antiderivative_arccoth {z : ℂ} (hz : z∈arccothDomain)
     HasDerivAt (fun w => w*arccoth w+Complex.log (w^2-1)/2) (arccoth z) z := by
   have hq0 : z^2-1 ≠ 0 := Complex.slitPlane_ne_zero hlog
   have h1 : 1-z^2 ≠ 0 := fun h => hq0 (by linear_combination -h)
-  have dL := ((Complex.hasDerivAt_log hlog).comp z (((hasDerivAt_id z).pow 2).sub_const 1)).div_const 2
+  have dL := ((Complex.hasDerivAt_log hlog).comp z
+      (((hasDerivAt_id z).pow 2).sub_const 1)).div_const 2
   have hd := ((hasDerivAt_id z).mul (hasDerivAt_arccoth hz)).add dL
   convert hd using 1
   · funext w; simp [Function.comp_def]
@@ -877,7 +904,8 @@ theorem complex_antiderivative_arccoth {z : ℂ} (hz : z∈arccothDomain)
     field_simp
     ring
 
-/-- One-sided imaginary pole directions in the exact-value table, without an assigned infinite complex value. -/
+/-- One-sided imaginary pole directions in the exact-value table, without an assigned infinite
+complex value. -/
 @[dlmf 4.31.T1]
 theorem hyperbolic_table_imaginary_pole_sides :
     Tendsto (fun y : ℝ => (Complex.tanh (I*y)).im) (𝓝[<] (π/2)) atTop ∧
@@ -1070,7 +1098,8 @@ theorem arctanh_transformed_boundary (z : ℂ) :
 theorem arccosh_one : arccosh 1=0 := by
   simp [arccosh]
 
-/-- At zero inverse coth has the finite half-period family; reciprocal zero is not totalized inside the inverse. -/
+/-- At zero inverse coth has the finite half-period family; reciprocal zero is not totalized inside
+the inverse. -/
 @[dlmf 4.37.E6, dlmf 4.37.E9]
 theorem arccoth_zero_values :
     arccothValues 0=Set.range (fun k : ℤ => ((k:ℂ)+1/2)*π*I) := by
@@ -1207,7 +1236,8 @@ theorem continued_antiderivative_arccoth {U : Set ℂ} (hU : IsOpen U) {z : ℂ}
   have dL := (hL z hz).differentiableAt.hasDerivAt
   have hs := hpole z hz
   have e1 := hasDerivAt_unique_of_eqOn hU hz ((hasDerivAt_coth hs).comp z dA) (hasDerivAt_id z) hinv
-  have e2 := hasDerivAt_unique_of_eqOn hU hz (dL.const_mul 2).cexp ((hasDerivAt_id z).pow 2 |>.sub_const 1) hlog
+  have e2 := hasDerivAt_unique_of_eqOn hU hz (dL.const_mul 2).cexp
+      ((hasDerivAt_id z).pow 2 |>.sub_const 1) hlog
   rw [hlog z hz] at e2
   have hcz := hinv z hz
   have hq : z^2-1 ≠ 0 := by rw [← hlog z hz]; exact Complex.exp_ne_zero _

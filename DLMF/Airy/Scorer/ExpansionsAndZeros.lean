@@ -45,9 +45,9 @@ macro "sqrt3_ring" : tactic =>
 
 /-! ### Asymptotic expansions of Hi, Hi', Gi, Gi' (DLMF 9.12(viii))
 
-The Laplace integrals `π Hi(z) = ∫₀^∞ e^{zt} e^{-t³/3} dt` and `π Hi'(z) = ∫₀^∞ e^{zt} t e^{-t³/3} dt`
-are rotated to rays `|arg t| < π/6` and expanded by Watson's lemma
-(`hasAsymptoticExpansion_integral_cexp_smul_rotate_comap`); two rotated rays cover the sector
+The Laplace integrals `π Hi(z) = ∫₀^∞ e^{zt} e^{-t³/3} dt` and
+`π Hi'(z) = ∫₀^∞ e^{zt} t e^{-t³/3} dt` are rotated to rays `|arg t| < π/6` and expanded by Watson's
+lemma (`hasAsymptoticExpansion_integral_cexp_smul_rotate_comap`); two rotated rays cover the sector
 `|arg(-z)| < 2π/3`. The expansions of `Gi`, `Gi'` follow from the rotation formula 9.12.12. -/
 
 /-- The cubic kernel `e^{-t³/3}` along the ray `t = r e^{iy}`. -/

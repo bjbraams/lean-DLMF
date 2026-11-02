@@ -635,7 +635,8 @@ theorem airyRot_tendsto_W (θ : ℝ) {γ : ℝ} (hγ0 : 0 ≤ γ) (hγ : γ < π
     simp only [Function.comp_apply]
     rw [hnorm z hz.1]
   · filter_upwards [airyRot_eventually_mem θ γ] with z hz
-    show Real.cos γ * ‖exp (log 2 + airyLogZeta z + θ * I)‖ ≤ (exp (log 2 + airyLogZeta z + θ * I)).re
+    show Real.cos γ * ‖exp (log 2 + airyLogZeta z + θ * I)‖ ≤
+        (exp (log 2 + airyLogZeta z + θ * I)).re
     rw [airyRot_re_W, Complex.norm_exp]
     have : Real.cos γ ≤ Real.cos (3 / 2 * arg z + θ) := by
       rw [← Real.cos_abs (3 / 2 * arg z + θ)]
@@ -649,7 +650,8 @@ theorem airyRot_W_cpow {z : ℂ} {θ γ : ℝ} (hγ : γ < π / 2) (hz : |3 / 2 
     exp (log 2 + airyLogZeta z + θ * I) ^ s = exp (s * (log 2 + airyLogZeta z + θ * I)) := by
   have him : (log 2 + airyLogZeta z + θ * I).im = 3 / 2 * arg z + θ := by
     rw [add_im, im_log_two_add_airyLogZeta]; simp
-  rw [cpow_def_of_ne_zero (exp_ne_zero _), log_exp (by rw [him]; linarith [abs_le.mp hz, Real.pi_pos])
+  rw [cpow_def_of_ne_zero (exp_ne_zero _),
+      log_exp (by rw [him]; linarith [abs_le.mp hz, Real.pi_pos])
     (by rw [him]; linarith [abs_le.mp hz, Real.pi_pos]), mul_comm]
 
 /-- **The generic Airy expansion on a closed rotated sector.** -/

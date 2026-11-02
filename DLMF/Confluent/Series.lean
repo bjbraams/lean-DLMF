@@ -59,7 +59,8 @@ noncomputable def kummerBesselISeriesCoeff (a b : ℂ) (k : ℕ) : ℂ :=
 
 /-- The coefficient identity behind DLMF 13.11.1: the Cauchy coefficients of the Bessel
 expansion reproduce `(a)_N 4^N / ((b)_N N!)`. -/
-theorem kummerBesselISeriesCoeff_sum {a b : ℂ} (hν : ∀ j : ℕ, a - 1 / 2 + j ≠ 0) (hb : ∀ k : ℕ, b ≠ -k)
+theorem kummerBesselISeriesCoeff_sum {a b : ℂ} (hν : ∀ j : ℕ, a - 1 / 2 + j ≠ 0)
+    (hb : ∀ k : ℕ, b ≠ -k)
     (N : ℕ) :
     Gamma (a - 1 / 2) * ∑ k ∈ Finset.range (N + 1), (if k ≤ N then kummerBesselISeriesCoeff a b k *
       (poch (2 * (a - 1 / 2 + k + 1) + ((N - k : ℕ) : ℂ) - 1) (N - k) /
@@ -85,7 +86,8 @@ theorem kummerBesselISeriesCoeff_sum {a b : ℂ} (hν : ∀ j : ℕ, a - 1 / 2 +
     simp only [show k ≤ N by omega, ↓reduceIte]
     obtain ⟨K, rfl⟩ := Nat.exists_eq_add_of_le (show k ≤ N by omega)
     simp only [kummerBesselISeriesCoeff, vwpTerm, Nat.add_sub_cancel_left]
-    rw [← hνdef, show 2 * (ν + k + 1) + (K : ℂ) - 1 = 2 * ν + ((k + K : ℕ) : ℂ) + k + 1 by push_cast; ring,
+    rw [← hνdef, show 2 * (ν + k + 1) + (K : ℂ) - 1 = 2 * ν + ((k + K : ℕ) : ℂ) + k +
+        1 by push_cast; ring,
       show ν + k + 1 + (K : ℂ) = ν + ((k + K : ℕ) : ℂ) + 1 by push_cast; ring,
       show 2 * ν + 1 - (2 * a - b) + k = b + k by rw [hνdef]; ring,
       show 2 * a - 1 = 2 * ν by rw [hνdef]; ring, poch_add b k K]
@@ -102,7 +104,8 @@ theorem kummerBesselISeriesCoeff_sum {a b : ℂ} (hν : ∀ j : ℕ, a - 1 / 2 +
     have hch : ((k + K).choose k : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.choose_pos (by omega)).ne'
     rw [← hfac']
     field_simp
-  rw [Finset.sum_congr rfl hterm, ← Finset.sum_div, sum_range_vwpTerm, poch_two_mul_two_mul_add_one, hGN,
+  rw [Finset.sum_congr rfl hterm, ← Finset.sum_div, sum_range_vwpTerm,
+      poch_two_mul_two_mul_add_one, hGN,
     show ν + 1 / 2 = a by rw [hνdef]; ring]
   have hN0 : (N ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have := hpb N

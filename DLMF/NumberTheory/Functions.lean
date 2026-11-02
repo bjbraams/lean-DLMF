@@ -239,7 +239,8 @@ def jordanArithmeticFunction (k : ℕ) : ArithmeticFunction ℤ :=
 /-- Möbius inversion of `∑_{d∣n} J_k(d) = n^k`: `J_k = μ * n^k`. -/
 private lemma jordanArithmeticFunction_eq_moebius_mul_pow (k : ℕ) :
     jordanArithmeticFunction k = (μ : ArithmeticFunction ℤ) * (pow k : ArithmeticFunction ℤ) := by
-  have h : (ζ : ArithmeticFunction ℤ) * jordanArithmeticFunction k = (pow k : ArithmeticFunction ℤ) := by
+  have h : (ζ : ArithmeticFunction ℤ) * jordanArithmeticFunction k =
+      (pow k : ArithmeticFunction ℤ) := by
     ext n
     rcases Nat.eq_zero_or_pos n with rfl | hn
     · simp
@@ -249,14 +250,16 @@ private lemma jordanArithmeticFunction_eq_moebius_mul_pow (k : ℕ) :
   rw [← h, ← mul_assoc, moebius_mul_coe_zeta, one_mul]
 
 /-- `J_k` is multiplicative. -/
-private lemma isMultiplicative_jordanArithmeticFunction (k : ℕ) : (jordanArithmeticFunction k).IsMultiplicative := by
+private lemma isMultiplicative_jordanArithmeticFunction (k : ℕ) :
+    (jordanArithmeticFunction k).IsMultiplicative := by
   rw [jordanArithmeticFunction_eq_moebius_mul_pow]
   exact isMultiplicative_moebius.mul isMultiplicative_pow.natCast
 
 /-- `J_k` is multiplicative (all `k`). -/
 private lemma isMultiplicativeFn_jordanTotient' (k : ℕ) :
     IsMultiplicativeFn (jordanTotient k) := by
-  have h := (isMultiplicative_iff_isMultiplicativeFn _).mp (isMultiplicative_jordanArithmeticFunction k)
+  have h := (isMultiplicative_iff_isMultiplicativeFn _).mp
+      (isMultiplicative_jordanArithmeticFunction k)
   refine ⟨?_, fun m n hm hn hmn ↦ ?_⟩
   · have h1 : ((jordanTotient k 1 : ℕ) : ℤ) = 1 := h.1
     exact_mod_cast h1

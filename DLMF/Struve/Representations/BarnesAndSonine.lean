@@ -234,10 +234,14 @@ theorem struveBar_rect_identity (ν : ℂ) {x c h : ℝ} (hx : 0 < x) (hc : -1 <
 (`struveBar_integrable_vertical`). A 30-digit numerical check (2026-10-22) is recorded in
 REVIEW.md. -/
 @[dlmf 11.5.E8]
-theorem struveH_barnes {ν : ℂ} {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0) (hv : -1 < ν.re+2*c) :
-    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(x^2/4:ℂ)^s) (-2*π*(x/2:ℂ)^(-ν-1)*struveH ν x) := by
+theorem struveH_barnes {ν : ℂ} {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
+    (hv : -1 < ν.re+2*c) :
+    HasIntegralWholeLine
+        (fun y : ℝ => let s : ℂ := c+y*I; π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(x^2/4:ℂ)^s)
+        (-2*π*(x/2:ℂ)^(-ν-1)*struveH ν x) := by
   set f : ℝ → ℂ := fun y => struveLoop_F ν (I * x) (c + y * I) with hfdef
-  have hfe : (fun y : ℝ => let s : ℂ := c+y*I; π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(x^2/4:ℂ)^s) = f := by
+  have hfe : (fun y : ℝ => let s : ℂ := c+y*I;
+      π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(x^2/4:ℂ)^s) = f := by
     funext y
     simp only [hfdef, struveLoop_F]
     congr 2
@@ -262,7 +266,8 @@ theorem struveH_barnes {ν : ℂ} {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : 
       (fun h t => struveBar_norm_F_neg ν hx t h)
       (fun h hh => struveLoop_continuous_line ν (mul_ne_zero I_ne_zero (ofReal_ne_zero.mpr hx.ne'))
         (by linarith))
-    have hlim := ((hM.sub hP).sub (tendsto_const_nhds (x := 2 * π * I * struveHCore ν x))).const_mul (-I)
+    have hlim := ((hM.sub hP).sub
+        (tendsto_const_nhds (x := 2 * π * I * struveHCore ν x))).const_mul (-I)
     have e : -I * ((0 : ℂ) - 0 - 2 * π * I * struveHCore ν x) = -2 * π * struveHCore ν x := by
       ring_nf; rw [I_sq]; ring
     rw [e] at hlim
@@ -321,10 +326,13 @@ lemma hasDerivAt_struveHPrimitive_aux {ν : ℂ} (hν1 : ν + 1 ≠ 0) {w : ℂ}
   rw [this]
   linear_combination (-(2*ν+1)*struveH ν w) * e1 + struveH (ν+1) w * e2
 
-/-- The power of z squared carries twice the argument of z, and is expressed using the inherited logarithm. -/
+/-- The power of z squared carries twice the argument of z, and is expressed using the inherited
+logarithm. -/
 @[dlmf 11.7.E6]
 theorem struveHPrimitive_recurrence {ν : ℂ} (hν : -1 < ν.re) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveHPrimitive (ν+1) z = (2*ν+1)*struveHPrimitive ν z-z^(ν+1)*struveH ν z+exp ((ν+1)*(2*log z-log 2))/((ν+1)*Real.sqrt π*Gamma (ν+3/2)) := by
+    struveHPrimitive (ν+1) z =
+        (2*ν+1)*struveHPrimitive ν z-z^(ν+1)*struveH ν z+exp
+        ((ν+1)*(2*log z-log 2))/((ν+1)*Real.sqrt π*Gamma (ν+3/2)) := by
   have hν1 : ν+1 ≠ 0 := fun h => by have := congrArg re h; simp at this; linarith
   have hν2 : 2*ν+2 ≠ 0 := fun h => hν1 (by linear_combination h/2)
   have hz0 := slitPlane_ne_zero hz
@@ -490,7 +498,8 @@ theorem trig_beta_integral {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
 (1/2-ν)*z^(ν-1)*(1-cos z)`. -/
 @[dlmf 11.7.E7]
 theorem struveH_sonine {ν : ℂ} (hν0 : -3/2 < ν.re) (hν1 : ν.re < 1/2) {z : ℂ} (hz : z ∈ slitPlane) :
-    (∫ θ : ℝ in 0..π/2, struveH ν (z*Real.sin θ)*(Real.sin θ:ℂ)^(ν+1)/(Real.cos θ:ℂ)^(2*ν)) = 2^(-ν)/Real.sqrt π*Gamma (1/2-ν)*z^(ν-1)*(1-cos z) := by
+    (∫ θ : ℝ in 0..π/2, struveH ν (z*Real.sin θ)*(Real.sin θ:ℂ)^(ν+1)/(Real.cos θ:ℂ)^(2*ν)) =
+        2^(-ν)/Real.sqrt π*Gamma (1/2-ν)*z^(ν-1)*(1-cos z) := by
   have hz0 := slitPlane_ne_zero hz
   have hz2 : z/2 ≠ 0 := div_ne_zero hz0 two_ne_zero
   have hb : 0 < (1/2-ν).re := by simp; linarith
@@ -601,7 +610,8 @@ theorem struveH_sonine {ν : ℂ} (hν0 : -3/2 < ν.re) (hν1 : ν.re < 1/2) {z 
   · ring
 
 /-- The sine integral `Si(x) = ∫₀ˣ sinc` is bounded on `[0,∞)`. -/
-theorem exists_bound_integral_sinc : ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → |∫ u in (0:ℝ)..x, Real.sinc u| ≤ C := by
+theorem exists_bound_integral_sinc : ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → |∫ u in (0:ℝ)..x,
+    Real.sinc u| ≤ C := by
   obtain ⟨X, hX⟩ := eventually_atTop.mp
     ((TauCeti.Contour.tendsto_integral_sinc_atTop).eventually (Metric.ball_mem_nhds (π/2) one_pos))
   refine ⟨max X (π/2 + 1), fun x hx => ?_⟩
@@ -649,7 +659,8 @@ theorem tendsto_integral_integral_mul_sinc {a b : ℝ} (hab : a ≤ b) {g : ℝ 
       rw [intervalIntegral.integral_const_mul]
       congr 1
       rw [intervalIntegral.integral_ofReal, integral_mul_sinc_mul]
-    · have hK : ContinuousOn (Function.uncurry fun t s => g s * ((c s * Real.sinc (t * c s) : ℝ) : ℂ))
+    · have hK : ContinuousOn
+          (Function.uncurry fun t s => g s * ((c s * Real.sinc (t * c s) : ℝ) : ℂ))
           (Icc 0 R ×ˢ Icc a b) := by
         have hm : MapsTo Prod.snd (Icc 0 R ×ˢ Icc a b) (Icc a b) := fun p hp => hp.2
         refine (hg.comp continuousOn_snd hm).mul ?_

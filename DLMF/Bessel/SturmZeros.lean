@@ -296,7 +296,8 @@ theorem besselI_sub_exp_isBigO {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k)
       fun x : ℝ => Real.exp x * x ^ (-(3 / 2) : ℝ) := by
   have ha : ∀ k : ℕ, ν + 1 / 2 ≠ -k := fun k h => hν (2 * k) (by
     push_cast; linear_combination 2 * h)
-  have hP := (DLMF.Confluent.regularizedHGFun_poincare_real (ν + 1 / 2) (2 * ν + 1) 1).comp_tendsto (tendsto_id.const_mul_atTop (by norm_num : (0 : ℝ) < 2))
+  have hP := (DLMF.Confluent.regularizedHGFun_poincare_real (ν + 1 / 2) (2 * ν + 1) 1).comp_tendsto
+      (tendsto_id.const_mul_atTop (by norm_num : (0 : ℝ) < 2))
   set c : ℝ → ℂ := fun x =>
     ((x : ℂ) / 2) ^ ν * exp (-(x : ℂ)) * Gamma (2 * ν + 1) / Gamma (ν + 1) with hc
   have hM := (isBigO_refl c atTop).mul hP

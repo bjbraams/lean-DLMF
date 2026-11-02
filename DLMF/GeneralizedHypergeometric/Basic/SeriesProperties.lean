@@ -33,7 +33,8 @@ Mathlib's `regularizedHGFun` is a totalized power-series sum, not an analytic co
 outside its convergence disk. `genRegularizedHG` uses a uniquely normalized principal
 continuation for `p = q + 1`, and `genHG` restores the Gamma factors when the lower parameters
 are regular. The existence of the continuation is stated separately in
-`DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties`; nothing here depends on it.
+`DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence`; nothing here depends
+on it.
 Finite inversion multiplies the scalar Pochhammer reflection identity `poch_one_sub_sub_mul`
 over the parameter multiset.
 -/

@@ -234,11 +234,13 @@ def legExtR (kf kg cf cg rf rg n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (cg*n + cg)*v 6
 
 /-- The boundary-form remainder `legExtR kf kg cf cg rf rg n l` is continuous in `v`. -/
-theorem legExt_continuous_R (kf kg cf cg rf rg n l : ℂ) : Continuous (legExtR kf kg cf cg rf rg n l) := by
+theorem legExt_continuous_R (kf kg cf cg rf rg n l : ℂ) : Continuous
+    (legExtR kf kg cf cg rf rg n l) := by
   unfold legExtR; fun_prop
 
 /-- Limit of the Green boundary form at an endpoint `x = 1 + 2τ`, `τ → 0⁺`, for expansions
-`f = -k_f ln τ + c_f + O(τ ln τ)` with `k_{f₁} = k_f`, `c_{f₁} = c_f + r_f`, `(ν+1) r_f = -2 k_f`. -/
+`f = -k_f ln τ + c_f + O(τ ln τ)` with `k_{f₁} = k_f`, `c_{f₁} = c_f + r_f`, `(ν+1) r_f = -2 k_f`.
+-/
 theorem legExt_bdry {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (𝓝[>] 0))
     (hx : ∀ᶠ x : ℝ in l, (x:ℂ) = 1 + 2*τ x) {f g g1 f1 : ℝ → ℂ} {ν lam kf kg cf cg rf rg : ℂ}
     (hf : (fun x => f x + kf * Real.log (τ x) - cf) =O[l] (fun x => τ x * Real.log (τ x)))
@@ -399,7 +401,8 @@ theorem legExt_olverQ_isBigO_atTop (ν : ℂ) :
   have := (hP.mul hG1).const_mul_left ((Real.sqrt π : ℂ) / 2^(ν+1))
   refine (this.congr' ?_ (by filter_upwards with x; simp)).trans (isBigO_refl _ _)
   filter_upwards [eventually_gt_atTop 0] with x hx
-  simp only [olverQ, legendreBranchPower, zero_div, zero_mul, Complex.exp_zero, mul_one, add_zero, G]
+  simp only [olverQ, legendreBranchPower, zero_div, zero_mul, Complex.exp_zero,
+      mul_one, add_zero, G]
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   have hxn : (x:ℂ)^(ν+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hx0)
   have h2n : (2:ℂ)^(ν+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
@@ -524,7 +527,8 @@ theorem legExt_isBigO_rpow_mono {f : ℝ → ℂ} {p q : ℝ} (hpq : p ≤ q)
 /-- `𝑄_λ(x) = Γ(λ+1) √π 2^{-λ-1} x^{-λ-1} 𝐅(λ/2+1, λ/2+1/2; λ+3/2; x^{-2})` for `x > 0`. -/
 theorem legPIU_associatedQ_ext (lam : ℂ) {x : ℝ} (hx0 : 0 < x) :
     associatedQ lam 0 x = Gamma (lam+1) * ((Real.sqrt π : ℂ) * ((2:ℂ)^(lam+1))⁻¹ *
-      ((x:ℂ)^(lam+1))⁻¹ * regularizedGaussHG ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2) (1/(x:ℂ)^2)) := by
+      ((x:ℂ)^(lam+1))⁻¹ * regularizedGaussHG ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2)
+          (1/(x:ℂ)^2)) := by
   simp only [associatedQ, olverQ, legendreBranchPower, zero_div, zero_mul, Complex.exp_zero,
     mul_one, add_zero, one_mul]
   have hx0' : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx0.ne'
@@ -543,7 +547,9 @@ theorem legPIU_bound_real (R : ℝ) : ∃ M : ℝ, 0 ≤ M ∧ ∀ a b : ℂ, �
   have hn : ‖(y:ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hy0]; exact hy1
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn]
   by_cases hyh : y ≤ 1/2
-  · have hn' : ‖(y:ℂ)‖ ≤ 1/2 := by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hy0]; exact hyh
+  · have hn' : ‖(y:ℂ)‖ ≤ 1/2 := by
+                                  rw [Complex.norm_real, Real.norm_eq_abs,
+                                    abs_of_nonneg hy0]; exact hyh
     have hab : ‖a+b‖ ≤ 2*|R|+1 := by
       calc ‖a+b‖ ≤ ‖a‖+‖b‖ := norm_add_le _ _
         _ ≤ 2*|R|+1 := by linarith
@@ -672,8 +678,10 @@ theorem legPIU_integrableOn_weight {p : ℝ} (hp : p < -1/2) :
       rw [integrableOn_Icc_iff_integrableOn_Ioc]
       exact (intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num)).1 hw
     refine (h1.mul_continuousOn ?_ isCompact_Icc).mono_set Ioc_subset_Icc_self
-    exact fun x hx => (Real.continuousAt_rpow_const _ _ (Or.inl (by linarith [hx.1]))).continuousWithinAt
-  · have hI := (integrableOn_Ioi_rpow_of_lt (a := p - 1/2) (by linarith) (by norm_num : (0:ℝ) < 2)).const_mul
+    exact fun x hx => (Real.continuousAt_rpow_const _ _
+        (Or.inl (by linarith [hx.1]))).continuousWithinAt
+  · have hI := (integrableOn_Ioi_rpow_of_lt (a := p - 1/2) (by linarith)
+        (by norm_num : (0:ℝ) < 2)).const_mul
       ((2:ℝ)^(1/2:ℝ))
     refine hI.mono' ?_ ?_
     · refine ContinuousOn.aestronglyMeasurable (fun x (hx : 2 < x) => ?_) measurableSet_Ioi
@@ -683,7 +691,8 @@ theorem legPIU_integrableOn_weight {p : ℝ} (hp : p < -1/2) :
     · refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun x (hx : 2 < x) => ?_)
       have hx0 : 0 < x := by linarith
       have hx1 : 0 ≤ x - 1 := by linarith
-      rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (Real.rpow_nonneg hx1 _) (Real.rpow_nonneg hx0.le _))]
+      rw [Real.norm_eq_abs,
+          abs_of_nonneg (mul_nonneg (Real.rpow_nonneg hx1 _) (Real.rpow_nonneg hx0.le _))]
       have h1 : (x-1)^(-(1/2:ℝ)) ≤ (x/2)^(-(1/2:ℝ)) :=
         Real.rpow_le_rpow_of_nonpos (by positivity) (by linarith) (by norm_num)
       have h2 : (x/2)^(-(1/2:ℝ)) * x^p = (2:ℝ)^(1/2:ℝ) * x^(p-1/2) := by
@@ -697,7 +706,8 @@ theorem legPIU_integrableOn_weight {p : ℝ} (hp : p < -1/2) :
 and equals `1/((λ-ν)(ν+λ+1))`. -/
 @[dlmf 14.17.E18]
 theorem legendre_product_integral_18 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (hlam : ν.re < lam.re) :
-    HasIntegralAtTop (fun x : ℝ => associatedP ν 0 x*associatedQ lam 0 x) 1 (1/((lam-ν)*(ν+lam+1))) := by
+    HasIntegralAtTop (fun x : ℝ => associatedP ν 0 x*associatedQ lam 0 x) 1
+        (1/((lam-ν)*(ν+lam+1))) := by
   have hl0 : 0 < lam.re := by linarith
   have hr := legPI_regular_of_re_pos hl0
   have hd1 : ν - lam ≠ 0 := fun h => by
@@ -714,7 +724,8 @@ theorem legendre_product_integral_18 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (h
     · have := legExt_associatedP_isBigO_atTop (ν := ν+1) (by simp; linarith)
       simpa using this
     · exact legExt_isBigO_rpow_mono (by simp) (legExt_associatedQ_isBigO_atTop (lam+1))
-  have h1 := legExt_bdry (ν := ν) legExt_tendsto_half legExt_hx (legExt_P_isBigO ν) (legExt_Q_isBigO hr)
+  have h1 := legExt_bdry (ν := ν) legExt_tendsto_half legExt_hx (legExt_P_isBigO ν)
+      (legExt_Q_isBigO hr)
     (legExt_Q_isBigO_succ hr) (legExt_P_isBigO_succ ν)
     (by rw [legPI_cpos_succ hr]; ring) (by ring)
   have := legExt_integral_green (legExt_differentiableOn_P ν) (legExt_differentiableOn_Q lam)
@@ -731,8 +742,10 @@ theorem legendre_product_integral_18 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (h
 /-- DLMF 14.17.19: for `Re(λ+ν) > -1`, `λ ≠ ν` and `ν, λ ∉ {-1,-2,…}`, the improper integral `∫₁^∞
 Q_ν(x) Q_λ(x) dx` converges and equals `(ψ(λ+1) - ψ(ν+1))/((λ-ν)(λ+ν+1))`. -/
 @[dlmf 14.17.E19]
-theorem legendre_product_integral_19 (ν : ℂ) (lam : ℂ) (h : -1 < (lam+ν).re) (hne : lam ≠ ν) (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
-    HasIntegralAtTop (fun x : ℝ => associatedQ ν 0 x*associatedQ lam 0 x) 1 ((digamma (lam+1)-digamma (ν+1))/((lam-ν)*(lam+ν+1))) := by
+theorem legendre_product_integral_19 (ν : ℂ) (lam : ℂ) (h : -1 < (lam+ν).re) (hne : lam ≠ ν)
+    (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
+    HasIntegralAtTop (fun x : ℝ => associatedQ ν 0 x*associatedQ lam 0 x) 1
+        ((digamma (lam+1)-digamma (ν+1))/((lam-ν)*(lam+ν+1))) := by
   have hd1 : lam - ν ≠ 0 := sub_ne_zero.mpr hne
   have hd2 : lam + ν + 1 ≠ 0 := fun h' => by
     have := congrArg Complex.re h'; simp at this h; linarith
@@ -746,7 +759,8 @@ theorem legendre_product_integral_19 (ν : ℂ) (lam : ℂ) (h : -1 < (lam+ν).r
       (legExt_associatedQ_isBigO_atTop ν) ?_ (legExt_associatedQ_isBigO_atTop lam) ?_
     · exact legExt_isBigO_rpow_mono (by simp) (legExt_associatedQ_isBigO_atTop (ν+1))
     · exact legExt_isBigO_rpow_mono (by simp) (legExt_associatedQ_isBigO_atTop (lam+1))
-  have h1 := legExt_bdry (ν := ν) legExt_tendsto_half legExt_hx (legExt_Q_isBigO hν) (legExt_Q_isBigO hlam)
+  have h1 := legExt_bdry (ν := ν) legExt_tendsto_half legExt_hx (legExt_Q_isBigO hν)
+      (legExt_Q_isBigO hlam)
     (legExt_Q_isBigO_succ hlam) (legExt_Q_isBigO_succ hν)
     (by rw [legPI_cpos_succ hlam]; ring) (by rw [legPI_cpos_succ hν]; ring)
   have := legExt_integral_green (legExt_differentiableOn_Q ν) (legExt_differentiableOn_Q lam)
@@ -800,13 +814,15 @@ theorem legendre_product_integral_20 (ν : ℂ) (hν : -1/2 < ν.re) :
     filter_upwards [Metric.closedBall_mem_nhds ν hr] with lam hl
     rwa [Metric.mem_closedBall, dist_eq_norm] at hl
   -- dominated convergence on `(1,∞)`
-  have hDCT : Tendsto (fun lam : ℂ => ∫ x : ℝ in Ioi 1, associatedQ ν 0 x * associatedQ lam 0 x) (𝓝 ν)
+  have hDCT : Tendsto (fun lam : ℂ => ∫ x : ℝ in Ioi 1, associatedQ ν 0 x *
+      associatedQ lam 0 x) (𝓝 ν)
       (𝓝 (∫ x : ℝ in Ioi 1, associatedQ ν 0 x * associatedQ ν 0 x)) := by
     refine tendsto_integral_filter_of_dominated_convergence g ?_ ?_ hgI ?_
     · exact Eventually.of_forall fun lam =>
         ((hQc ν).mul (hQc lam)).aestronglyMeasurable measurableSet_Ioi
     · filter_upwards [hnear] with lam hl
-      exact (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun x hx => hbd lam hl x hx)
+      exact (ae_restrict_iff' measurableSet_Ioi).2
+          (Eventually.of_forall fun x hx => hbd lam hl x hx)
     · refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun x (hx : 1 < x) => ?_)
       exact tendsto_const_nhds.mul (legPIU_continuousAt_Qext hreg hx).tendsto
   -- the off-diagonal value

@@ -50,7 +50,7 @@ open Set in
 /-- DLMF 5.9.12, Gauss: `ψ(x) = ∫₀^∞ (e^(-t)/t - e^(-xt)/(1 - e^(-t))) dt` for `x > 0`. -/
 @[dlmf 5.9.E12]
 theorem digamma_gauss {x : ℝ} (hx : 0 < x) :
-    Real.digamma x =
+    Gamma.Real.digamma x =
       ∫ t : ℝ in Set.Ioi 0,
         Real.exp (-t) / t - Real.exp (-x * t) / (1 - Real.exp (-t)) := by
   have hJ1 := integral_exp_mul_binetKernel_one
@@ -73,7 +73,7 @@ open Set in
 /-- DLMF 5.9.13: `ψ(x) = ln x + ∫₀^∞ (1/t - 1/(1 - e^(-t))) e^(-tx) dt` for `x > 0`. -/
 @[dlmf 5.9.E13]
 theorem digamma_binet {x : ℝ} (hx : 0 < x) :
-    Real.digamma x =
+    Gamma.Real.digamma x =
       Real.log x +
         ∫ t : ℝ in Set.Ioi 0,
           (1 / t - 1 / (1 - Real.exp (-t))) * Real.exp (-t * x) := by
@@ -344,10 +344,10 @@ theorem integral_rpow_sub_rpow_div_eq {x : ℝ} (hx : 0 < x) :
 /-- DLMF 5.9.14: `ψ(x) = ∫₀^∞ (e^(-t) - (1 + t)^(-x)) dt/t` for `x > 0`. -/
 @[dlmf 5.9.E14]
 theorem digamma_frullani {x : ℝ} (hx : 0 < x) :
-    Real.digamma x =
+    Gamma.Real.digamma x =
       ∫ t : ℝ in Set.Ioi 0, (Real.exp (-t) - (1 + t) ^ (-x)) / t := by
   obtain ⟨hint, heq⟩ := integral_rpow_sub_rpow_div_eq hx
-  have hψ : Real.digamma x = (Real.digamma x + Real.eulerMascheroniConstant) -
+  have hψ : Gamma.Real.digamma x = (Gamma.Real.digamma x + Real.eulerMascheroniConstant) -
       Real.eulerMascheroniConstant := by ring
   rw [hψ, digamma_add_euler_Ioi hx, ← heq]
   conv_lhs => rw [eulerMascheroni_eq_integral_recip_one_add]
@@ -380,7 +380,7 @@ open Set in
 /-- DLMF 5.9.15: `ψ(x) = ln x - 1/(2x) - 2 ∫₀^∞ t dt/((t² + x²)(e^(2πt) - 1))` for `x > 0`. -/
 @[dlmf 5.9.E15]
 theorem digamma_coth {x : ℝ} (hx : 0 < x) :
-    Real.digamma x =
+    Gamma.Real.digamma x =
       Real.log x - 1 / (2 * x) -
         2 * ∫ t : ℝ in Set.Ioi 0,
           t / ((t ^ 2 + x ^ 2) * (Real.exp (2 * π * t) - 1)) := by
@@ -470,10 +470,10 @@ theorem digamma_coth {x : ℝ} (hx : 0 < x) :
 for `x > 0`. -/
 @[dlmf 5.9.E16]
 theorem digamma_add_euler {x : ℝ} (hx : 0 < x) :
-    Real.digamma x + Real.eulerMascheroniConstant =
+    Gamma.Real.digamma x + Real.eulerMascheroniConstant =
       ∫ t : ℝ in Set.Ioi 0,
         (Real.exp (-t) - Real.exp (-x * t)) / (1 - Real.exp (-t)) ∧
-    Real.digamma x + Real.eulerMascheroniConstant =
+    Gamma.Real.digamma x + Real.eulerMascheroniConstant =
       ∫ t : ℝ in (0 : ℝ)..1, (1 - t ^ (x - 1)) / (1 - t) := by
   refine ⟨digamma_add_euler_Ioi hx, ?_⟩
   rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo]

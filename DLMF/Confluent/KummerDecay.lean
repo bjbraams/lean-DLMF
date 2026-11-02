@@ -280,7 +280,8 @@ theorem kumDec_bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β
   have hΓ : Gamma (σ : ℂ) * Gamma (τ : ℂ) ≠ 0 :=
     mul_ne_zero (Gamma_ne_zero_of_re_pos hσc) (Gamma_ne_zero_of_re_pos (by simpa using hτ0))
   have hI1eq : ∫ s : ℝ in (0 : ℝ)..1, kumDec_eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s =
-      Gamma (σ : ℂ) * Gamma (τ : ℂ) * regularizedHGFun {(σ : ℂ)} {((σ + τ : ℝ) : ℂ)} (-(t : ℂ)) := by
+      Gamma (σ : ℂ) * Gamma (τ : ℂ) *
+          regularizedHGFun {(σ : ℂ)} {((σ + τ : ℝ) : ℂ)} (-(t : ℂ)) := by
     rw [hM1, ← mul_assoc, one_div, mul_inv_cancel₀ hΓ, one_mul]
   have hpow : (1 + t) ^ (-σ) ≤ (1 + t) ^ (-α₀.re + ε) :=
     Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)

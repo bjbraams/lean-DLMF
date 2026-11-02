@@ -41,7 +41,9 @@ open scoped Topology
 
 noncomputable section
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 /-- The leading Stirling approximation to `Γ(x)` for `x > 0`: `√(2π/x) (x/e)^x`. -/
 def stirlingGamma (x : ℝ) : ℝ :=
@@ -324,4 +326,4 @@ theorem tendsto_Gamma_add_nat_div_stirlingGamma {t : ℝ} (ht : 0 < t) (ht1 : t 
     rw [heq]
     exact div_le_div_of_nonneg_right hineq hpos.le
 
-end Real
+end DLMF.Gamma.Real

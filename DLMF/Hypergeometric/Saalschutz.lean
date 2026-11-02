@@ -59,7 +59,8 @@ theorem regularized_saalschutz_convolution (a b c : ℂ) (n : ℕ) :
         (poch (c - a - b) (n - k) / (n - k)!))
     (d := fun n => poch (c - a) n * poch (c - b) n / (n ! * Gamma (c + n)))
     (fun z hz => by
-      have hconv := Complex.hasSum_powerSeries_convolution (hasSum_regularizedGaussHGFun_coeff a b c hz)
+      have hconv := Complex.hasSum_powerSeries_convolution
+          (hasSum_regularizedGaussHGFun_coeff a b c hz)
         (hasSum_poch_div_factorial (β := c - a - b) hz)
       rw [regularizedGaussHGFun_euler (c - a) (c - b) c hz,
         show c - (c - a) - (c - b) = -(c - a - b) by ring,

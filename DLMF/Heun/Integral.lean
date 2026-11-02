@@ -7,7 +7,11 @@ module
 
 public import DLMF.Heun.Basic
 public import DLMF.Heun.Basic.Equation
+public import DLMF.Heun.IntegralPath
 public import DLMF.Hypergeometric.Riemann
+public import DLMFMathlib.Analysis.Complex.BivariateCalculus
+public import DLMFMathlib.Analysis.Calculus.Deriv.CompCurve
+public import DLMFMathlib.MeasureTheory.Integral.PathParametric
 
 /-!
 # Solutions via quadratures, integral equations and representations (DLMF §31.8, §31.10)
@@ -25,11 +29,17 @@ public import DLMF.Hypergeometric.Riemann
   variables 31.10.7 (31.10.8, sign corrected) and its separable solutions 31.10.9.
 * `heun_kernel_example₁_pde`, `heun_integralEquation_example₁`, `heun_kernel_example₂_pde`:
   the kernels of Examples 1 and 2 (31.10.10, 31.10.11).
-* `heun_integral_typeII`: the Type II double-integral representation, DLMF 31.10.12–31.10.16.
+* `heun_integral_typeII`: the Type II double-integral representation, DLMF 31.10.12–31.10.16,
+  from `heun_integral_typeII'` (in `DLMF.Heun.IntegralPath`).
 * `heun_kernel_typeII_uvw`, `heun_kernel_typeII_cylinder`: the kernel equation in the variables
   31.10.17 (corrected) and 31.10.18, and its solutions 31.10.19 in cylinder functions.
 * `heun_kernel_typeII_spherical`, `heun_kernel_typeII_separable`: the spherical form
   31.10.20–31.10.21 and its separable solutions 31.10.22–31.10.23 (corrected).
+* `heun_integral_typeI'`: the Type I theorem without Fuchs's relation, by differentiation under
+  the integral sign and the Lagrange identity `integral_heunOperator_comp_path`.
+* `heun_kernel_typeII_uvw'`, `heun_kernel_typeII_spherical'`: the same changes of variables
+  without the superfluous hypotheses; both are proved by the second-order chain rule for
+  `(u, v, w) ↦ 𝒦(u, v, w)` along coordinate curves.
 
 ## Implementation notes
 
@@ -74,7 +84,7 @@ Example 31.8.5 follows the correction of DLMF 1.0.7.
 
 @[expose] public section
 
-open Complex Filter Set
+open Complex Filter Set MeasureTheory
 open scoped Topology Real
 
 noncomputable section
@@ -353,10 +363,12 @@ theorem heun_hermiteDarboux_example₂ {lam ν : ℂ}
 contour `C` (a `C¹` path in `V`) is such that the concomitant
 `p(t)(∂𝒦/∂t w(t) - 𝒦 dw/dt)`, `p(t) = t(t-1)(t-a)ρ(t)` (31.10.5–31.10.6), takes equal values at
 the two ends, then `W(z) = ∫_C 𝒦(z, t) w(t) ρ(t) dt` (31.10.1) is a solution of Heun's
-equation. -/
+equation.
+Stronger than DLMF: Fuchs's relation `α + β + 1 = γ + δ + ε` and the openness of `V` are not
+needed. -/
 @[dlmf 31.10.E1, dlmf 31.10.E2, dlmf 31.10.E3, dlmf 31.10.E5, dlmf 31.10.E6]
-theorem heun_integral_typeI (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (hU : IsOpen U)
-    (hV : IsOpen V) (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a)
+theorem heun_integral_typeI' {U V : Set ℂ} (hU : IsOpen U)
+    (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a)
     (hVs : ∀ t ∈ V, t ≠ 0 ∧ t ≠ 1 ∧ t ≠ a) {w ρ : ℂ → ℂ} {K : ℂ → ℂ → ℂ} {C : ℝ → ℂ}
     (hw : IsHeunSolOn a q α β γ δ ε w V)
     (hρ : ∀ t ∈ V, HasDerivAt ρ (ρ t * ((γ - 1) / t + (δ - 1) / (t - 1) + (ε - 1) / (t - a))) t)
@@ -371,7 +383,116 @@ theorem heun_integral_typeI (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (h
           K z (C 0) * deriv w (C 0))) :
     IsHeunSolOn a q α β γ δ ε
       (fun z => ∫ s in (0 : ℝ)..1, K z (C s) * w (C s) * ρ (C s) * deriv C s) U := by
-  sorry
+  set g : ℝ → ℂ := fun s => w (C s) * ρ (C s) * deriv C s with hg
+  have hfun : (fun z => ∫ s in (0 : ℝ)..1, K z (C s) * w (C s) * ρ (C s) * deriv C s) =
+      fun z => ∫ s in (0 : ℝ)..1, K z (C s) * g s := by
+    funext z; congr 1; funext s; simp only [hg]; ring
+  rw [hfun]
+  set K1 : ℂ → ℂ → ℂ := fun z t => deriv (fun z' => K z' t) z with hK1
+  set K2 : ℂ → ℂ → ℂ := fun z t => deriv (fun z' => K1 z' t) z with hK2
+  have hA1 : AnalyticOnNhd ℂ (fun x : ℂ × ℂ => K1 x.1 x.2) (U ×ˢ V) := fun x hx =>
+    Complex.analyticAt_deriv_fst (F := fun x : ℂ × ℂ => K x.1 x.2) (hK x hx)
+  have hA2 : AnalyticOnNhd ℂ (fun x : ℂ × ℂ => K2 x.1 x.2) (U ×ˢ V) := fun x hx =>
+    Complex.analyticAt_deriv_fst (F := fun x : ℂ × ℂ => K1 x.1 x.2) (hA1 x hx)
+  have hslz : ∀ {G : ℂ → ℂ → ℂ}, AnalyticOnNhd ℂ (fun x : ℂ × ℂ => G x.1 x.2) (U ×ˢ V) →
+      ∀ z ∈ U, ∀ t ∈ V, HasDerivAt (fun z' => G z' t) (deriv (fun z' => G z' t) z) z :=
+    fun {G} hG z hz t ht => (AnalyticAt.comp (g := fun x : ℂ × ℂ => G x.1 x.2)
+      (f := fun z' : ℂ => (z', t)) (hG (z, t) ⟨hz, ht⟩)
+      (analyticAt_id.prod analyticAt_const)).differentiableAt.hasDerivAt
+  have hslt : ∀ z ∈ U, ∀ t ∈ V, AnalyticAt ℂ (K z) t := fun z hz t ht =>
+    AnalyticAt.comp (g := fun x : ℂ × ℂ => K x.1 x.2) (f := fun t' : ℂ => (z, t'))
+      (hK (z, t) ⟨hz, ht⟩) (analyticAt_const.prod analyticAt_id)
+  obtain ⟨MC, hMC⟩ := hC.exists_bound_deriv_Icc_zero_one
+  have hCc : ContinuousOn C (Icc 0 1) := hC.continuousOn
+  have hwc : ContinuousOn w V := fun t ht => (hw.1 t ht).continuousAt.continuousWithinAt
+  have hρc : ContinuousOn ρ V := fun t ht => (hρ t ht).continuousAt.continuousWithinAt
+  have hwρC : ContinuousOn (fun s => w (C s) * ρ (C s)) (Icc 0 1) :=
+    (hwc.comp hCc hCV).mul (hρc.comp hCc hCV)
+  obtain ⟨Mw, hMw⟩ := isCompact_Icc.exists_bound_of_continuousOn hwρC
+  have hgm : AEStronglyMeasurable g (volume.restrict (uIoc (0 : ℝ) 1)) :=
+    (ContinuousOn.aestronglyMeasurable_uIoc_zero_one hwρC).mul
+      (measurable_deriv C).aestronglyMeasurable
+  have hgM : ∀ s ∈ Icc (0 : ℝ) 1, ‖g s‖ ≤ Mw * MC := fun s hs => by
+    simp only [hg]; rw [norm_mul]
+    exact mul_le_mul (hMw s hs) (hMC s hs) (norm_nonneg _) ((norm_nonneg _).trans (hMw s hs))
+  have hint : ∀ {G : ℂ → ℂ → ℂ}, ContinuousOn (fun x : ℂ × ℂ => G x.1 x.2) (U ×ˢ V) →
+      ∀ z ∈ U, IntervalIntegrable (fun s => G z (C s) * g s) volume 0 1 := by
+    intro G hG z hz
+    have hc : ContinuousOn (fun s => G z (C s)) (Icc 0 1) :=
+      hG.comp (continuousOn_const.prodMk hCc) fun s hs => ⟨hz, hCV s hs⟩
+    obtain ⟨B, hB⟩ := isCompact_Icc.exists_bound_of_continuousOn hc
+    refine intervalIntegrable_zero_one_of_bound
+      ((ContinuousOn.aestronglyMeasurable_uIoc_zero_one hc).mul hgm) (B := B * (Mw * MC))
+      fun s hs => ?_
+    rw [norm_mul]
+    exact mul_le_mul (hB s hs) (hgM s hs) (norm_nonneg _) ((norm_nonneg _).trans (hB s hs))
+  have hW1 : ∀ z ∈ U, HasDerivAt (fun z => ∫ s in (0 : ℝ)..1, K z (C s) * g s)
+      (∫ s in (0 : ℝ)..1, K1 z (C s) * g s) z := fun z hz =>
+    hasDerivAt_intervalIntegral_mul_comp_path hU hCc hCV hgm hgM hK.continuousOn hA1.continuousOn
+      (fun z hz t ht => hslz hK z hz t ht) hz
+  have hW2 : ∀ z ∈ U, HasDerivAt (fun z => ∫ s in (0 : ℝ)..1, K1 z (C s) * g s)
+      (∫ s in (0 : ℝ)..1, K2 z (C s) * g s) z := fun z hz =>
+    hasDerivAt_intervalIntegral_mul_comp_path hU hCc hCV hgm hgM hA1.continuousOn hA2.continuousOn
+      (fun z hz t ht => hslz hA1 z hz t ht) hz
+  refine ⟨fun z hz => (hW1 z hz).differentiableAt, fun z hz => ?_⟩
+  have hev : deriv (fun z => ∫ s in (0 : ℝ)..1, K z (C s) * g s) =ᶠ[𝓝 z]
+      fun z => ∫ s in (0 : ℝ)..1, K1 z (C s) * g s :=
+    eventually_of_mem (hU.mem_nhds hz) fun y hy => (hW1 y hy).deriv
+  refine ((hW2 z hz).congr_of_eventuallyEq hev).congr_deriv ?_
+  rw [(hW1 z hz).deriv]
+  obtain ⟨hz0, hz1, hza⟩ := hUs z hz
+  have hL : ∫ s in (0 : ℝ)..1, heunOperator a α β γ δ ε (K z) (C s) * g s =
+      q * ∫ s in (0 : ℝ)..1, K z (C s) * g s :=
+    integral_heunOperator_comp_path hVs hw hρ (hslt z hz) hC hCV (hbd z hz)
+  -- the key identity `𝒟_z W = q W`
+  have key : z * (z - 1) * (z - a) * (∫ s in (0 : ℝ)..1, K2 z (C s) * g s) +
+      (γ * (z - 1) * (z - a) + δ * z * (z - a) + ε * z * (z - 1)) *
+        (∫ s in (0 : ℝ)..1, K1 z (C s) * g s) + α * β * z * (∫ s in (0 : ℝ)..1, K z (C s) * g s) =
+      q * ∫ s in (0 : ℝ)..1, K z (C s) * g s := by
+    have i0 := hint hK.continuousOn z hz
+    have i1 := hint hA1.continuousOn z hz
+    have i2 := hint hA2.continuousOn z hz
+    rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul,
+      ← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_add (i2.const_mul _)
+        (i1.const_mul _), ← intervalIntegral.integral_add ((i2.const_mul _).add (i1.const_mul _))
+        (i0.const_mul _), ← hL]
+    refine intervalIntegral.integral_congr fun s hs => ?_
+    rw [uIcc_of_le zero_le_one] at hs
+    have hpde := hKpde z hz (C s) (hCV s hs)
+    simp only [heunOperator] at hpde
+    simp only [heunOperator]
+    linear_combination g s * hpde
+  simp only [heunCoeffP, heunCoeffR]
+  have h0 : z - 1 ≠ 0 := sub_ne_zero.2 hz1
+  have h1 : z - a ≠ 0 := sub_ne_zero.2 hza
+  field_simp
+  linear_combination key
+
+/-- DLMF 31.10.1–31.10.6: if `w` solves Heun's equation on `V`, the kernel `𝒦(z, t)` solves
+`(𝒟_z - 𝒟_t)𝒦 = 0` (31.10.3, Heun's operator 31.10.4), `ρ` is a branch on `V` of the weight
+`t^{γ-1}(t-1)^{δ-1}(t-a)^{ε-1}` (31.10.2, given by its logarithmic derivative), and the
+contour `C` (a `C¹` path in `V`) is such that the concomitant
+`p(t)(∂𝒦/∂t w(t) - 𝒦 dw/dt)`, `p(t) = t(t-1)(t-a)ρ(t)` (31.10.5–31.10.6), takes equal values at
+the two ends, then `W(z) = ∫_C 𝒦(z, t) w(t) ρ(t) dt` (31.10.1) is a solution of Heun's
+equation. -/
+@[dlmf 31.10.E1, dlmf 31.10.E2, dlmf 31.10.E3, dlmf 31.10.E5, dlmf 31.10.E6]
+theorem heun_integral_typeI (_hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (hU : IsOpen U)
+    (_hV : IsOpen V) (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a)
+    (hVs : ∀ t ∈ V, t ≠ 0 ∧ t ≠ 1 ∧ t ≠ a) {w ρ : ℂ → ℂ} {K : ℂ → ℂ → ℂ} {C : ℝ → ℂ}
+    (hw : IsHeunSolOn a q α β γ δ ε w V)
+    (hρ : ∀ t ∈ V, HasDerivAt ρ (ρ t * ((γ - 1) / t + (δ - 1) / (t - 1) + (ε - 1) / (t - a))) t)
+    (hK : AnalyticOnNhd ℂ (fun x : ℂ × ℂ => K x.1 x.2) (U ×ˢ V))
+    (hKpde : ∀ z ∈ U, ∀ t ∈ V,
+      heunOperator a α β γ δ ε (fun z' => K z' t) z = heunOperator a α β γ δ ε (K z) t)
+    (hC : ContDiffOn ℝ 1 C (Icc 0 1)) (hCV : ∀ s ∈ Icc (0 : ℝ) 1, C s ∈ V)
+    (hbd : ∀ z ∈ U,
+      C 1 * (C 1 - 1) * (C 1 - a) * ρ (C 1) * (deriv (K z) (C 1) * w (C 1) -
+          K z (C 1) * deriv w (C 1)) =
+        C 0 * (C 0 - 1) * (C 0 - a) * ρ (C 0) * (deriv (K z) (C 0) * w (C 0) -
+          K z (C 0) * deriv w (C 0))) :
+    IsHeunSolOn a q α β γ δ ε
+      (fun z => ∫ s in (0 : ℝ)..1, K z (C s) * w (C s) * ρ (C s) * deriv C s) U := by
+  exact heun_integral_typeI' hU hUs hVs hw hρ hK hKpde hC hCV hbd
 
 /-- DLMF 31.10.7–31.10.8 (**31.10.8 sign corrected**): with
 `cos²θ = zt/a`, `sin²θ cos²φ = -(z-a)(t-a)/(a(1-a))`, `sin²θ sin²φ = (z-1)(t-1)/(1-a)`
@@ -433,7 +554,8 @@ private lemma deriv_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) 
   ring
 
 /-- The normalized Riemann equation with `a₁ = 0`, cleared of denominators. -/
-private lemma riemannNormalOperator_zero_cleared {a₂ b₁ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
+private lemma riemannNormalOperator_zero_cleared {a₂ b₁ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0)
+    (hx1 : 1 - x ≠ 0)
     (h : DLMF.Hypergeometric.riemannNormalOperator 0 a₂ b₁ b₂ c₁ c₂ u x = 0) :
     x * (1 - x) ^ 2 * deriv (deriv u) x +
       ((1 - a₂) * (1 - x) ^ 2 - (1 - b₁ - b₂) * x * (1 - x)) * deriv u x +
@@ -447,7 +569,8 @@ private lemma riemannNormalOperator_zero_cleared {a₂ b₁ b₂ c₁ c₂ x : �
     _ = 0 := by rw [h, mul_zero]
 
 /-- The normalized Riemann equation with `a₁ = b₁ = 0`, cleared of denominators. -/
-private lemma riemannNormalOperator_zero_zero_cleared {a₂ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
+private lemma riemannNormalOperator_zero_zero_cleared {a₂ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0)
+    (hx1 : 1 - x ≠ 0)
     (h : DLMF.Hypergeometric.riemannNormalOperator 0 a₂ 0 b₂ c₁ c₂ u x = 0) :
     x * (1 - x) * deriv (deriv u) x + ((1 - a₂) * (1 - x) - (1 - b₂) * x) * deriv u x -
       c₁ * c₂ * u x = 0 := by
@@ -589,7 +712,7 @@ values at the ends of the paths (31.10.15–31.10.16, `p(t) = t(t-1)(t-a)ρ₁(t
 factor), then `W(z) = ∫_{C₁}∫_{C₂} 𝒦(z; s, t) w(s) w(t) ρ(s, t) dt ds` (31.10.12, `s` along
 `C₁`, `t` along `C₂`) is a solution of Heun's equation. -/
 @[dlmf 31.10.E12, dlmf 31.10.E13, dlmf 31.10.E14, dlmf 31.10.E15, dlmf 31.10.E16]
-theorem heun_integral_typeII (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (hU : IsOpen U)
+theorem heun_integral_typeII (_hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (hU : IsOpen U)
     (hV : IsOpen V) (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a)
     (hVs : ∀ t ∈ V, t ≠ 0 ∧ t ≠ 1 ∧ t ≠ a) {w ρ₁ : ℂ → ℂ} {K : ℂ → ℂ → ℂ → ℂ}
     {C₁ C₂ : ℝ → ℂ} (hw : IsHeunSolOn a q α β γ δ ε w V)
@@ -611,16 +734,75 @@ theorem heun_integral_typeII (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (
       (fun z => ∫ x in (0 : ℝ)..1, ∫ y in (0 : ℝ)..1,
         K z (C₁ x) (C₂ y) * w (C₁ x) * w (C₂ y) * ((C₁ x - C₂ y) * ρ₁ (C₁ x) * ρ₁ (C₂ y)) *
           deriv C₁ x * deriv C₂ y) U := by
-  sorry
+  exact heun_integral_typeII' hU hV hUs hVs hw hρ hK hKpde hC₁ hC₂ hC₁V hC₂V hbd₂ hbd₁
+
+/-- Derivatives of `σ ↦ (c(σ - b))^{1/2}`: the first derivative is `f^{1/2}/(2(σ - b))`, and the
+derivative of that at `s` is `-f(s)^{1/2}/(4(s - b)²)`. -/
+private lemma hasDerivAt_sqrt_affine {f : ℂ → ℂ} {c b s : ℂ} (hf : ∀ σ, f σ = c * (σ - b))
+    (hs : f s ∈ slitPlane) :
+    (∀ᶠ σ in 𝓝 s, HasDerivAt (fun σ => f σ ^ (1 / 2 : ℂ)) (f σ ^ (1 / 2 : ℂ) / (2 * (σ - b))) σ) ∧
+      HasDerivAt (fun σ => f σ ^ (1 / 2 : ℂ) / (2 * (σ - b)))
+        (-(f s ^ (1 / 2 : ℂ)) / (4 * (s - b) ^ 2)) s := by
+  have hfe : f = fun σ => c * (σ - b) := funext hf
+  have hfd : ∀ σ, HasDerivAt f c σ := fun σ => by
+    rw [hfe]; simpa using ((hasDerivAt_id σ).sub_const b).const_mul c
+  have hcont : Continuous f := by rw [hfe]; fun_prop
+  have hev : ∀ᶠ σ in 𝓝 s, f σ ∈ slitPlane :=
+    hcont.continuousAt.eventually_mem (isOpen_slitPlane.mem_nhds hs)
+  have hd : ∀ σ, f σ ∈ slitPlane →
+      HasDerivAt (fun σ => f σ ^ (1 / 2 : ℂ)) (f σ ^ (1 / 2 : ℂ) / (2 * (σ - b))) σ := by
+    intro σ hσ
+    have h0 : f σ ≠ 0 := slitPlane_ne_zero hσ
+    have hc0 : c ≠ 0 := fun h => h0 (by rw [hf, h, zero_mul])
+    have hb0 : σ - b ≠ 0 := fun h => h0 (by rw [hf, h, mul_zero])
+    refine ((hfd σ).cpow_const hσ).congr_deriv ?_
+    rw [cpow_sub _ _ h0, cpow_one]
+    rw [hf] at h0 ⊢
+    field_simp
+  refine ⟨hev.mono hd, ?_⟩
+  have h0 : f s ≠ 0 := slitPlane_ne_zero hs
+  have hb0 : s - b ≠ 0 := fun h => h0 (by rw [hf, h, mul_zero])
+  have h2 : HasDerivAt (fun σ : ℂ => 2 * (σ - b)) 2 s := by
+    simpa using ((hasDerivAt_id s).sub_const b).const_mul (2 : ℂ)
+  refine ((hd s hs).div h2 (mul_ne_zero two_ne_zero hb0)).congr_deriv ?_
+  field_simp
+  ring
+
+/-- Heun's operator along a curve `x ↦ (U, V, I W)` whose coordinates have the derivatives of
+`(c(x - b))^{1/2}` with `b = 0, 1, a`. -/
+private lemma heunOperator_sqrt_curve {a α β γ δ ε : ℂ} {f : ℂ → ℂ}
+    {x U V W H11 H22 H33 H12 H13 H23 g1 g2 g3 : ℂ}
+    (hx0 : x ≠ 0) (hx1 : x - 1 ≠ 0) (hxa : x - a ≠ 0)
+    (h1 : deriv f x = U / (2 * (x - 0)) * g1 + V / (2 * (x - 1)) * g2 +
+      I * (W / (2 * (x - a))) * g3)
+    (h2 : deriv (deriv f) x = (U / (2 * (x - 0))) ^ 2 * H11 + (V / (2 * (x - 1))) ^ 2 * H22 +
+      (I * (W / (2 * (x - a)))) ^ 2 * H33 + 2 * (U / (2 * (x - 0))) * (V / (2 * (x - 1))) * H12 +
+      2 * (U / (2 * (x - 0))) * (I * (W / (2 * (x - a)))) * H13 +
+      2 * (V / (2 * (x - 1))) * (I * (W / (2 * (x - a)))) * H23 +
+      -U / (4 * (x - 0) ^ 2) * g1 + -V / (4 * (x - 1) ^ 2) * g2 +
+      I * (-W / (4 * (x - a) ^ 2)) * g3) :
+    heunOperator a α β γ δ ε f x =
+      (x - 1) * (x - a) / (4 * x) * U ^ 2 * H11 + x * (x - a) / (4 * (x - 1)) * V ^ 2 * H22 +
+        x * (x - 1) / (4 * (x - a)) * (I * W) ^ 2 * H33 + (x - a) / 2 * U * V * H12 +
+        (x - 1) / 2 * U * (I * W) * H13 + x / 2 * V * (I * W) * H23 +
+        (U * (x - 1) * (x - a) * (2 * γ - 1) / (4 * x) + U * (δ * (x - a) + ε * (x - 1)) / 2) * g1 +
+        (V * x * (x - a) * (2 * δ - 1) / (4 * (x - 1)) + V * (γ * (x - a) + ε * x) / 2) * g2 +
+        ((I * W) * x * (x - 1) * (2 * ε - 1) / (4 * (x - a)) +
+          (I * W) * (γ * (x - 1) + δ * x) / 2) * g3 + α * β * x * f x := by
+  rw [heunOperator, h1, h2, sub_zero]
+  field_simp
+  ring
 
 /-- DLMF 31.10.17–31.10.18 (**31.10.17 corrected**: `u = (stz/a)^{1/2}`): with
 `u = (stz/a)^{1/2}`, `v = ((s-1)(t-1)(z-1)/(1-a))^{1/2}`, `w = i((s-a)(t-a)(z-a)/(a(1-a)))^{1/2}`
 (principal roots), a function `𝒦(u, v, w)` with
 `𝒦_uu + 𝒦_vv + 𝒦_ww + ((2γ-1)/u)𝒦_u + ((2δ-1)/v)𝒦_v + ((2ε-1)/w)𝒦_w = 0` (31.10.18) gives a
-kernel `𝒦(u, v, w)` satisfying 31.10.14, at points where the roots are analytic and nonzero. -/
+kernel `𝒦(u, v, w)` satisfying 31.10.14, at points where the roots are analytic and nonzero.
+Stronger than DLMF: the hypotheses `α + β + 1 = γ + δ + ε`, `a ≠ 0`, `a ≠ 1` and the
+openness of `Ω` are not needed. -/
 @[dlmf 31.10.E17, dlmf 31.10.E18, dlmf 31.10.E14]
-theorem heun_kernel_typeII_uvw (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 0) (ha1 : a ≠ 1)
-    {Ω : Set (ℂ × ℂ × ℂ)} (hΩ : IsOpen Ω) {𝒦 : ℂ → ℂ → ℂ → ℂ}
+theorem heun_kernel_typeII_uvw'
+    {Ω : Set (ℂ × ℂ × ℂ)} {𝒦 : ℂ → ℂ → ℂ → ℂ}
     (h𝒦 : AnalyticOnNhd ℂ (fun x : ℂ × ℂ × ℂ => 𝒦 x.1 x.2.1 x.2.2) Ω)
     (hpde : ∀ x ∈ Ω, let u := x.1; let v := x.2.1; let w := x.2.2
       deriv (deriv fun u' => 𝒦 u' v w) u + deriv (deriv fun v' => 𝒦 u v' w) v +
@@ -638,7 +820,156 @@ theorem heun_kernel_typeII_uvw (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 0)
     (t - z) * heunOperator a α β γ δ ε (fun s' => K z s' t) s +
       (z - s) * heunOperator a α β γ δ ε (K z s) t +
       (s - t) * heunOperator a α β γ δ ε (fun z' => K z' s t) z = 0 := by
-  sorry
+  intro K
+  obtain ⟨hp1, hp2, hp3⟩ := hpt
+  have hFp := (h𝒦 _ hΩpt).contDiffAt (n := 2)
+  -- the `s`-curve
+  have hUs := hasDerivAt_sqrt_affine (f := fun σ => σ * t * z / a) (c := t * z / a) (b := 0)
+    (s := s) (fun σ => by ring) hp1
+  have hVs := hasDerivAt_sqrt_affine (f := fun σ => (σ - 1) * (t - 1) * (z - 1) / (1 - a))
+    (c := (t - 1) * (z - 1) / (1 - a)) (b := 1) (s := s) (fun σ => by ring) hp2
+  have hWs := hasDerivAt_sqrt_affine (f := fun σ => (σ - a) * (t - a) * (z - a) / (a * (1 - a)))
+    (c := (t - a) * (z - a) / (a * (1 - a))) (b := a) (s := s) (fun σ => by ring) hp3
+  have Ds := Complex.deriv_comp_three (𝒦 := 𝒦) hFp hUs.1 hVs.1
+    (hWs.1.mono fun σ h => h.const_mul I) hUs.2 hVs.2 (hWs.2.const_mul I)
+  -- the `t`-curve
+  have hUt := hasDerivAt_sqrt_affine (f := fun σ => s * σ * z / a) (c := s * z / a) (b := 0)
+    (s := t) (fun σ => by ring) hp1
+  have hVt := hasDerivAt_sqrt_affine (f := fun σ => (s - 1) * (σ - 1) * (z - 1) / (1 - a))
+    (c := (s - 1) * (z - 1) / (1 - a)) (b := 1) (s := t) (fun σ => by ring) hp2
+  have hWt := hasDerivAt_sqrt_affine (f := fun σ => (s - a) * (σ - a) * (z - a) / (a * (1 - a)))
+    (c := (s - a) * (z - a) / (a * (1 - a))) (b := a) (s := t) (fun σ => by ring) hp3
+  have Dt := Complex.deriv_comp_three (𝒦 := 𝒦) hFp hUt.1 hVt.1
+    (hWt.1.mono fun σ h => h.const_mul I) hUt.2 hVt.2 (hWt.2.const_mul I)
+  -- the `z`-curve
+  have hUz := hasDerivAt_sqrt_affine (f := fun σ => s * t * σ / a) (c := s * t / a) (b := 0)
+    (s := z) (fun σ => by ring) hp1
+  have hVz := hasDerivAt_sqrt_affine (f := fun σ => (s - 1) * (t - 1) * (σ - 1) / (1 - a))
+    (c := (s - 1) * (t - 1) / (1 - a)) (b := 1) (s := z) (fun σ => by ring) hp2
+  have hWz := hasDerivAt_sqrt_affine (f := fun σ => (s - a) * (t - a) * (σ - a) / (a * (1 - a)))
+    (c := (s - a) * (t - a) / (a * (1 - a))) (b := a) (s := z) (fun σ => by ring) hp3
+  have Dz := Complex.deriv_comp_three (𝒦 := 𝒦) hFp hUz.1 hVz.1
+    (hWz.1.mono fun σ h => h.const_mul I) hUz.2 hVz.2 (hWz.2.const_mul I)
+  have Dc := Complex.deriv_coord_three hFp
+  have hP := hpde _ hΩpt
+  beta_reduce at Ds Dt Dz Dc hP
+  simp only [K]
+  dsimp only at hP
+  rw [Dc.1, Dc.2.1, Dc.2.2.1, Dc.2.2.2.1, Dc.2.2.2.2.1, Dc.2.2.2.2.2] at hP
+  have hsq : ∀ x : ℂ, (x ^ (1 / 2 : ℂ)) ^ 2 = x := fun x => by
+    rw [one_div]; exact cpow_ofNat_inv_pow x 2
+  have hU2 := hsq (s * t * z / a)
+  have hV2 := hsq ((s - 1) * (t - 1) * (z - 1) / (1 - a))
+  have hW2 : (I * ((s - a) * (t - a) * (z - a) / (a * (1 - a))) ^ (1 / 2 : ℂ)) ^ 2 =
+      -((s - a) * (t - a) * (z - a) / (a * (1 - a))) := by
+    rw [mul_pow, I_sq, hsq]; ring
+  have h1 := slitPlane_ne_zero hp1
+  have h2 := slitPlane_ne_zero hp2
+  have h3 := slitPlane_ne_zero hp3
+  simp only [ne_eq, div_eq_zero_iff, mul_eq_zero, not_or] at h1 h2 h3
+  obtain ⟨⟨⟨hs0, ht0⟩, hz0⟩, ha0⟩ := h1
+  obtain ⟨⟨⟨hs1, ht1⟩, hz1⟩, ha1⟩ := h2
+  obtain ⟨⟨⟨hsa, hta⟩, hza⟩, -, -⟩ := h3
+  rw [heunOperator_sqrt_curve hs0 hs1 hsa Ds.1 Ds.2, heunOperator_sqrt_curve ht0 ht1 hta Dt.1 Dt.2,
+    heunOperator_sqrt_curve hz0 hz1 hza Dz.1 Dz.2]
+  set F := fun x : ℂ × ℂ × ℂ => 𝒦 x.1 x.2.1 x.2.2 with hFdef
+  set p : ℂ × ℂ × ℂ := ((s * t * z / a) ^ (1 / 2 : ℂ),
+    ((s - 1) * (t - 1) * (z - 1) / (1 - a)) ^ (1 / 2 : ℂ),
+    I * ((s - a) * (t - a) * (z - a) / (a * (1 - a))) ^ (1 / 2 : ℂ)) with hpdef
+  set H11 := fderiv ℂ (fderiv ℂ F) p (1, 0, 0) (1, 0, 0)
+  set H22 := fderiv ℂ (fderiv ℂ F) p (0, 1, 0) (0, 1, 0)
+  set H33 := fderiv ℂ (fderiv ℂ F) p (0, 0, 1) (0, 0, 1)
+  set g1 := fderiv ℂ F p (1, 0, 0)
+  set g2 := fderiv ℂ F p (0, 1, 0)
+  set g3 := fderiv ℂ F p (0, 0, 1)
+  set U := (s * t * z / a) ^ (1 / 2 : ℂ)
+  set V := ((s - 1) * (t - 1) * (z - 1) / (1 - a)) ^ (1 / 2 : ℂ)
+  set W := ((s - a) * (t - a) * (z - a) / (a * (1 - a))) ^ (1 / 2 : ℂ)
+  have hU0 : U ≠ 0 := fun h => by
+    rw [h, zero_pow two_ne_zero] at hU2
+    exact div_ne_zero (mul_ne_zero (mul_ne_zero hs0 ht0) hz0) ha0 hU2.symm
+  have hV0 : V ≠ 0 := fun h => by
+    rw [h, zero_pow two_ne_zero] at hV2
+    exact div_ne_zero (mul_ne_zero (mul_ne_zero hs1 ht1) hz1) ha1 hV2.symm
+  have hW0 : W ≠ 0 := fun h => by
+    rw [h, mul_zero, zero_pow two_ne_zero] at hW2
+    have : (s - a) * (t - a) * (z - a) / (a * (1 - a)) = 0 := by linear_combination hW2
+    simp only [div_eq_zero_iff, mul_eq_zero] at this
+    rcases this with ((h | h) | h) | (h | h)
+    · exact hsa h
+    · exact hta h
+    · exact hza h
+    · exact ha0 h
+    · exact ha1 h
+  have hI : I ≠ 0 := I_ne_zero
+  have hIW : I * W ≠ 0 := mul_ne_zero hI hW0
+  set P := (s - t) * (t - z) * (z - s) with hPdef
+  have e11 : (t - z) * ((s - 1) * (s - a) / (4 * s) * U ^ 2) +
+      (z - s) * ((t - 1) * (t - a) / (4 * t) * U ^ 2) +
+      (s - t) * ((z - 1) * (z - a) / (4 * z) * U ^ 2) = -P / 4 := by
+    rw [hU2, hPdef]; field_simp; ring
+  have e22 : (t - z) * (s * (s - a) / (4 * (s - 1)) * V ^ 2) +
+      (z - s) * (t * (t - a) / (4 * (t - 1)) * V ^ 2) +
+      (s - t) * (z * (z - a) / (4 * (z - 1)) * V ^ 2) = -P / 4 := by
+    rw [hV2, hPdef]; field_simp; ring
+  have e33 : (t - z) * (s * (s - 1) / (4 * (s - a)) * (I * W) ^ 2) +
+      (z - s) * (t * (t - 1) / (4 * (t - a)) * (I * W) ^ 2) +
+      (s - t) * (z * (z - 1) / (4 * (z - a)) * (I * W) ^ 2) = -P / 4 := by
+    rw [hW2, hPdef]; field_simp; ring
+  have eg1 : (t - z) * (U * (s - 1) * (s - a) * (2 * γ - 1) / (4 * s) +
+        U * (δ * (s - a) + ε * (s - 1)) / 2) +
+      (z - s) * (U * (t - 1) * (t - a) * (2 * γ - 1) / (4 * t) +
+        U * (δ * (t - a) + ε * (t - 1)) / 2) +
+      (s - t) * (U * (z - 1) * (z - a) * (2 * γ - 1) / (4 * z) +
+        U * (δ * (z - a) + ε * (z - 1)) / 2) = -P / 4 * ((2 * γ - 1) / U) := by
+    rw [show (2 * γ - 1) / U = (2 * γ - 1) * U / U ^ 2 by field_simp, hU2, hPdef]
+    field_simp; ring
+  have eg2 : (t - z) * (V * s * (s - a) * (2 * δ - 1) / (4 * (s - 1)) +
+        V * (γ * (s - a) + ε * s) / 2) +
+      (z - s) * (V * t * (t - a) * (2 * δ - 1) / (4 * (t - 1)) +
+        V * (γ * (t - a) + ε * t) / 2) +
+      (s - t) * (V * z * (z - a) * (2 * δ - 1) / (4 * (z - 1)) +
+        V * (γ * (z - a) + ε * z) / 2) = -P / 4 * ((2 * δ - 1) / V) := by
+    rw [show (2 * δ - 1) / V = (2 * δ - 1) * V / V ^ 2 by field_simp, hV2, hPdef]
+    field_simp; ring
+  have eg3 : (t - z) * ((I * W) * s * (s - 1) * (2 * ε - 1) / (4 * (s - a)) +
+        (I * W) * (γ * (s - 1) + δ * s) / 2) +
+      (z - s) * ((I * W) * t * (t - 1) * (2 * ε - 1) / (4 * (t - a)) +
+        (I * W) * (γ * (t - 1) + δ * t) / 2) +
+      (s - t) * ((I * W) * z * (z - 1) * (2 * ε - 1) / (4 * (z - a)) +
+        (I * W) * (γ * (z - 1) + δ * z) / 2) = -P / 4 * ((2 * ε - 1) / (I * W)) := by
+    rw [show (2 * ε - 1) / (I * W) = (2 * ε - 1) * (I * W) / (I * W) ^ 2 by field_simp, hW2,
+      hPdef]
+    field_simp; ring
+  linear_combination (-P / 4) * hP + H11 * e11 + H22 * e22 + H33 * e33 + g1 * eg1 +
+    g2 * eg2 + g3 * eg3
+
+/-- DLMF 31.10.17–31.10.18 (**31.10.17 corrected**: `u = (stz/a)^{1/2}`): with
+`u = (stz/a)^{1/2}`, `v = ((s-1)(t-1)(z-1)/(1-a))^{1/2}`, `w = i((s-a)(t-a)(z-a)/(a(1-a)))^{1/2}`
+(principal roots), a function `𝒦(u, v, w)` with
+`𝒦_uu + 𝒦_vv + 𝒦_ww + ((2γ-1)/u)𝒦_u + ((2δ-1)/v)𝒦_v + ((2ε-1)/w)𝒦_w = 0` (31.10.18) gives a
+kernel `𝒦(u, v, w)` satisfying 31.10.14, at points where the roots are analytic and nonzero. -/
+@[dlmf 31.10.E17, dlmf 31.10.E18, dlmf 31.10.E14]
+theorem heun_kernel_typeII_uvw (_hF : α + β + 1 = γ + δ + ε) (_ha0 : a ≠ 0) (_ha1 : a ≠ 1)
+    {Ω : Set (ℂ × ℂ × ℂ)} (_hΩ : IsOpen Ω) {𝒦 : ℂ → ℂ → ℂ → ℂ}
+    (h𝒦 : AnalyticOnNhd ℂ (fun x : ℂ × ℂ × ℂ => 𝒦 x.1 x.2.1 x.2.2) Ω)
+    (hpde : ∀ x ∈ Ω, let u := x.1; let v := x.2.1; let w := x.2.2
+      deriv (deriv fun u' => 𝒦 u' v w) u + deriv (deriv fun v' => 𝒦 u v' w) v +
+        deriv (deriv (𝒦 u v)) w + (2 * γ - 1) / u * deriv (fun u' => 𝒦 u' v w) u +
+        (2 * δ - 1) / v * deriv (fun v' => 𝒦 u v' w) v +
+        (2 * ε - 1) / w * deriv (𝒦 u v) w = 0)
+    {z s t : ℂ}
+    (hpt : s * t * z / a ∈ slitPlane ∧ (s - 1) * (t - 1) * (z - 1) / (1 - a) ∈ slitPlane ∧
+      (s - a) * (t - a) * (z - a) / (a * (1 - a)) ∈ slitPlane)
+    (hΩpt : ((s * t * z / a) ^ (1 / 2 : ℂ), ((s - 1) * (t - 1) * (z - 1) / (1 - a)) ^ (1 / 2 : ℂ),
+      I * ((s - a) * (t - a) * (z - a) / (a * (1 - a))) ^ (1 / 2 : ℂ)) ∈ Ω) :
+    let K : ℂ → ℂ → ℂ → ℂ := fun z s t => 𝒦 ((s * t * z / a) ^ (1 / 2 : ℂ))
+      (((s - 1) * (t - 1) * (z - 1) / (1 - a)) ^ (1 / 2 : ℂ))
+      (I * ((s - a) * (t - a) * (z - a) / (a * (1 - a))) ^ (1 / 2 : ℂ))
+    (t - z) * heunOperator a α β γ δ ε (fun s' => K z s' t) s +
+      (z - s) * heunOperator a α β γ δ ε (K z s) t +
+      (s - t) * heunOperator a α β γ δ ε (fun z' => K z' s t) z = 0 := by
+  exact heun_kernel_typeII_uvw' h𝒦 hpde hpt hΩpt
 
 /-- A Bessel factor: if `𝒞` solves Bessel's equation of order `ν` near `xk`, then
 `F(y) = A y^ν 𝒞(yk)` satisfies `F'' + ((1-2ν)/x) F' = -k² F` at `x`. -/
@@ -742,9 +1073,10 @@ theorem heun_kernel_typeII_cylinder (σ₁ σ₂ : ℂ) {C₁ C₂ C₃ : ℂ �
 /-- DLMF 31.10.20–31.10.21: in spherical coordinates `u = r cos θ`, `v = r sin θ sin φ`,
 `w = r sin θ cos φ`, a solution of 31.10.18 satisfies
 `𝒦_rr + ((2(γ+δ+ε)-1)/r)𝒦_r + 𝒦_θθ/r² + ((2(δ+ε)-1)cot θ - (2γ-1)tan θ)𝒦_θ/r²
-+ 𝒦_φφ/(r² sin²θ) + ((2δ-1)cot φ - (2ε-1)tan φ)𝒦_φ/(r² sin²θ) = 0`. -/
++ 𝒦_φφ/(r² sin²θ) + ((2δ-1)cot φ - (2ε-1)tan φ)𝒦_φ/(r² sin²θ) = 0`.
+Stronger than DLMF: the openness of `Ω` is not needed. -/
 @[dlmf 31.10.E20, dlmf 31.10.E21]
-theorem heun_kernel_typeII_spherical {Ω : Set (ℂ × ℂ × ℂ)} (hΩ : IsOpen Ω)
+theorem heun_kernel_typeII_spherical' {Ω : Set (ℂ × ℂ × ℂ)}
     {𝒦 : ℂ → ℂ → ℂ → ℂ} (h𝒦 : AnalyticOnNhd ℂ (fun x : ℂ × ℂ × ℂ => 𝒦 x.1 x.2.1 x.2.2) Ω)
     (hpde : ∀ x ∈ Ω, let u := x.1; let v := x.2.1; let w := x.2.2
       deriv (deriv fun u' => 𝒦 u' v w) u + deriv (deriv fun v' => 𝒦 u v' w) v +
@@ -765,7 +1097,95 @@ theorem heun_kernel_typeII_spherical {Ω : Set (ℂ × ℂ × ℂ)} (hΩ : IsOpe
       deriv (deriv (L r θ)) φ / (r ^ 2 * Complex.sin θ ^ 2) +
       ((2 * δ - 1) * Complex.cot φ - (2 * ε - 1) * Complex.tan φ) / (r ^ 2 * Complex.sin θ ^ 2) *
         deriv (L r θ) φ = 0 := by
-  sorry
+  intro L
+  obtain ⟨hr, hsθ, hcθ, hsφ, hcφ⟩ := hreg
+  have hFp := (h𝒦 _ hpt.self_of_nhds).contDiffAt (n := 2)
+  have Dr := Complex.deriv_comp_three (𝒦 := 𝒦) (X := fun ρ => ρ * Complex.cos θ)
+    (Y := fun ρ => ρ * Complex.sin θ * Complex.sin φ)
+    (Z := fun ρ => ρ * Complex.sin θ * Complex.cos φ) (X' := fun _ => Complex.cos θ)
+    (Y' := fun _ => Complex.sin θ * Complex.sin φ) (Z' := fun _ => Complex.sin θ * Complex.cos φ)
+    (s := r) hFp (Eventually.of_forall fun ρ => hasDerivAt_mul_const _)
+    (Eventually.of_forall fun ρ => (hasDerivAt_mul_const _).mul_const _)
+    (Eventually.of_forall fun ρ => (hasDerivAt_mul_const _).mul_const _)
+    (hasDerivAt_const r _) (hasDerivAt_const r _) (hasDerivAt_const r _)
+  have Dθ := Complex.deriv_comp_three (𝒦 := 𝒦) (X := fun ϑ => r * Complex.cos ϑ)
+    (Y := fun ϑ => r * Complex.sin ϑ * Complex.sin φ)
+    (Z := fun ϑ => r * Complex.sin ϑ * Complex.cos φ) (s := θ) hFp
+    (Eventually.of_forall fun ϑ => (Complex.hasDerivAt_cos ϑ).const_mul r)
+    (Eventually.of_forall fun ϑ => ((Complex.hasDerivAt_sin ϑ).const_mul r).mul_const _)
+    (Eventually.of_forall fun ϑ => ((Complex.hasDerivAt_sin ϑ).const_mul r).mul_const _)
+    ((Complex.hasDerivAt_sin θ).neg.const_mul r)
+    (((Complex.hasDerivAt_cos θ).const_mul r).mul_const _)
+    (((Complex.hasDerivAt_cos θ).const_mul r).mul_const _)
+  have Dφ := Complex.deriv_comp_three (𝒦 := 𝒦) (X := fun _ => r * Complex.cos θ)
+    (Y := fun ϕ => r * Complex.sin θ * Complex.sin ϕ)
+    (Z := fun ϕ => r * Complex.sin θ * Complex.cos ϕ) (s := φ) hFp
+    (Eventually.of_forall fun ϕ => hasDerivAt_const ϕ _)
+    (Eventually.of_forall fun ϕ => (Complex.hasDerivAt_sin ϕ).const_mul _)
+    (Eventually.of_forall fun ϕ => (Complex.hasDerivAt_cos ϕ).const_mul _)
+    (hasDerivAt_const φ (0 : ℂ)) ((Complex.hasDerivAt_cos φ).const_mul _)
+    ((Complex.hasDerivAt_sin φ).neg.const_mul _)
+  have Dc := Complex.deriv_coord_three hFp
+  have hP := hpde _ hpt.self_of_nhds
+  beta_reduce at Dr Dθ Dφ Dc hP
+  dsimp only at hP
+  rw [Dc.1, Dc.2.1, Dc.2.2.1, Dc.2.2.2.1, Dc.2.2.2.2.1, Dc.2.2.2.2.2] at hP
+  simp only [L]
+  rw [Dr.1, Dr.2, Dθ.1, Dθ.2, Dφ.1, Dφ.2, Complex.tan_eq_sin_div_cos, Complex.cot_eq_cos_div_sin,
+    Complex.tan_eq_sin_div_cos, Complex.cot_eq_cos_div_sin]
+  set F := fun x : ℂ × ℂ × ℂ => 𝒦 x.1 x.2.1 x.2.2 with hFdef
+  set p : ℂ × ℂ × ℂ := (r * Complex.cos θ, r * Complex.sin θ * Complex.sin φ,
+    r * Complex.sin θ * Complex.cos φ) with hpdef
+  set H11 := fderiv ℂ (fderiv ℂ F) p (1, 0, 0) (1, 0, 0)
+  set H22 := fderiv ℂ (fderiv ℂ F) p (0, 1, 0) (0, 1, 0)
+  set H33 := fderiv ℂ (fderiv ℂ F) p (0, 0, 1) (0, 0, 1)
+  set H23 := fderiv ℂ (fderiv ℂ F) p (0, 1, 0) (0, 0, 1)
+  set g1 := fderiv ℂ F p (1, 0, 0)
+  set g2 := fderiv ℂ F p (0, 1, 0)
+  set g3 := fderiv ℂ F p (0, 0, 1)
+  set C := Complex.cos θ
+  set S := Complex.sin θ
+  set c := Complex.cos φ
+  set s := Complex.sin φ
+  have hθ : S ^ 2 + C ^ 2 = 1 := Complex.sin_sq_add_cos_sq θ
+  have hφ : s ^ 2 + c ^ 2 = 1 := Complex.sin_sq_add_cos_sq φ
+  linear_combination (norm := skip) hP +
+    (c * s * (C * H11 * S * r + C * H22 * S * r * s ^ 2 + 2 * C * H23 * S * c * r * s +
+      C * H33 * S * c ^ 2 * r + 2 * C * c * δ * g3 + 2 * C * c * ε * g3 - C * c * g3 +
+      2 * C * δ * g2 * s + 2 * C * ε * g2 * s - C * g2 * s + 2 * S * g1 * γ - S * g1) /
+      (C * S * c * r * s)) * hθ +
+    (C * (H22 * S * c * r * s + H33 * S * c * r * s + 2 * c * δ * g2 - c * g2 +
+      2 * ε * g3 * s - g3 * s) / (C * S * c * r * s)) * hφ
+  field_simp
+  ring
+
+/-- DLMF 31.10.20–31.10.21: in spherical coordinates `u = r cos θ`, `v = r sin θ sin φ`,
+`w = r sin θ cos φ`, a solution of 31.10.18 satisfies
+`𝒦_rr + ((2(γ+δ+ε)-1)/r)𝒦_r + 𝒦_θθ/r² + ((2(δ+ε)-1)cot θ - (2γ-1)tan θ)𝒦_θ/r²
++ 𝒦_φφ/(r² sin²θ) + ((2δ-1)cot φ - (2ε-1)tan φ)𝒦_φ/(r² sin²θ) = 0`. -/
+@[dlmf 31.10.E20, dlmf 31.10.E21]
+theorem heun_kernel_typeII_spherical {Ω : Set (ℂ × ℂ × ℂ)} (_hΩ : IsOpen Ω)
+    {𝒦 : ℂ → ℂ → ℂ → ℂ} (h𝒦 : AnalyticOnNhd ℂ (fun x : ℂ × ℂ × ℂ => 𝒦 x.1 x.2.1 x.2.2) Ω)
+    (hpde : ∀ x ∈ Ω, let u := x.1; let v := x.2.1; let w := x.2.2
+      deriv (deriv fun u' => 𝒦 u' v w) u + deriv (deriv fun v' => 𝒦 u v' w) v +
+        deriv (deriv (𝒦 u v)) w + (2 * γ - 1) / u * deriv (fun u' => 𝒦 u' v w) u +
+        (2 * δ - 1) / v * deriv (fun v' => 𝒦 u v' w) v +
+        (2 * ε - 1) / w * deriv (𝒦 u v) w = 0)
+    {r θ φ : ℂ} (hreg : r ≠ 0 ∧ Complex.sin θ ≠ 0 ∧ Complex.cos θ ≠ 0 ∧ Complex.sin φ ≠ 0 ∧
+      Complex.cos φ ≠ 0)
+    (hpt : ∀ᶠ y in 𝓝 (r, θ, φ), (y.1 * Complex.cos y.2.1,
+      y.1 * Complex.sin y.2.1 * Complex.sin y.2.2,
+      y.1 * Complex.sin y.2.1 * Complex.cos y.2.2) ∈ Ω) :
+    let L : ℂ → ℂ → ℂ → ℂ := fun r θ φ =>
+      𝒦 (r * Complex.cos θ) (r * Complex.sin θ * Complex.sin φ) (r * Complex.sin θ * Complex.cos φ)
+    deriv (deriv fun r' => L r' θ φ) r + (2 * (γ + δ + ε) - 1) / r * deriv (fun r' => L r' θ φ) r +
+      deriv (deriv fun θ' => L r θ' φ) θ / r ^ 2 +
+      ((2 * (δ + ε) - 1) * Complex.cot θ - (2 * γ - 1) * Complex.tan θ) / r ^ 2 *
+        deriv (fun θ' => L r θ' φ) θ +
+      deriv (deriv (L r θ)) φ / (r ^ 2 * Complex.sin θ ^ 2) +
+      ((2 * δ - 1) * Complex.cot φ - (2 * ε - 1) * Complex.tan φ) / (r ^ 2 * Complex.sin θ ^ 2) *
+        deriv (L r θ) φ = 0 := by
+  exact heun_kernel_typeII_spherical' h𝒦 hpde hreg hpt
 
 /-- First and second derivatives of `r ↦ r^m C` on the slit plane. -/
 private lemma deriv_cpow_mul_const {r : ℂ} (m C : ℂ) (hr : r ∈ slitPlane) :

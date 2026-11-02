@@ -201,7 +201,8 @@ theorem hermitePolyH_differential_equation (n : ℕ) :
 n)) - X * derivative (hermite n) + C (n : ℤ) * hermite n = 0`. -/
 @[dlmf 18.8.T1]
 theorem hermite_differential_equation (n : ℕ) :
-    derivative (derivative (hermite n)) - X * derivative (hermite n) + C (n : ℤ) * hermite n = 0 := by
+    derivative (derivative (hermite n)) - X * derivative (hermite n) + C (n : ℤ) *
+        hermite n = 0 := by
   have hd := congrArg derivative (hermite_succ n)
   rw [hermite_derivative] at hd
   simp only [derivative_sub, derivative_mul, derivative_X, one_mul] at hd
@@ -259,7 +260,8 @@ theorem analyticOnNhd_ultrasphPoly_param (n : ℕ) (x : ℂ) :
   refine Finset.analyticAt_fun_sum (Finset.range (n + 1)) fun k _ => ?_
   have hne : poch (lam + 1 / 2) k * k.factorial ≠ 0 :=
     mul_ne_zero (poch_ne_zero_of_not_neg_nat hc k) (Nat.cast_ne_zero.mpr k.factorial_ne_zero)
-  exact AnalyticAt.mul (AnalyticAt.fun_div (f := fun lam => poch (-(n : ℂ)) k * poch (n + 2 * lam) k)
+  exact AnalyticAt.mul
+      (AnalyticAt.fun_div (f := fun lam => poch (-(n : ℂ)) k * poch (n + 2 * lam) k)
     (g := fun lam => poch (lam + 1 / 2) k * k.factorial) (x := lam)
     (analyticAt_const.mul (hpoch k (fun lam => n + 2 * lam) (by fun_prop)))
     ((hpoch k (fun lam => lam + 1 / 2) (by fun_prop)).mul analyticAt_const) hne) analyticAt_const
@@ -517,7 +519,8 @@ theorem jacobi_raise_beta {α β : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
     · exact (analyticOnNhd_const.mul (analyticOnNhd_jacobiPolyP _ _ _)).add
         (analyticOnNhd_const.mul (analyticOnNhd_jacobiPolyP _ _ _))
     intro x hx
-    have hab := DLMF.Hypergeometric.contiguous_ab (a := -((n + 1 : ℕ) : ℂ)) (b := (n + 1 : ℕ) + α + β + 1)
+    have hab := DLMF.Hypergeometric.contiguous_ab (a := -((n + 1 : ℕ) : ℂ))
+        (b := (n + 1 : ℕ) + α + β + 1)
       (c := α + 1) hc hx
     rw [show -((n + 1 : ℕ) : ℂ) + 1 = -(n : ℂ) by push_cast; ring] at hab
     have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
@@ -733,7 +736,8 @@ theorem ultrasphPoly_raise_parameter_sq {lam : ℂ} (hlam : -1 / 2 < lam.re) (n 
     apply mul_right_cancel₀ hM
     set q := poch (2 * (lam + 1)) n with hq
     ring_nf at hrel' hP0 hP1 hP2 ⊢
-    linear_combination ((2 * lam + n) * (2 * lam + (n + 1)) * 4 * lam * (n + lam + 1) * (1 - x ^ 2)) *
+    linear_combination ((2 * lam + n) * (2 * lam + (n + 1)) * 4 * lam *
+        (n + lam + 1) * (1 - x ^ 2)) *
         hP1 + ((2 * lam + n) * (2 * lam + (n + 1)) * (n + 1) * (n + 2)) * hP0 -
       ((2 * lam + n) * (2 * lam + (n + 1))) * hP2 +
       ((2 * lam + n) * (2 * lam + (n + 1)) * (n + 1) * (n + 2) * q * 2 * lam) * hrel'

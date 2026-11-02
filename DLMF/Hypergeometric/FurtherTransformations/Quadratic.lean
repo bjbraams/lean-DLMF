@@ -62,8 +62,10 @@ regularizedGaussHGFun (c - a) (c - b) (c - a - b + 1) (1 - z)`. -/
 @[dlmf 15.8.E4]
 theorem regularized_connection_one_sub (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (ht : ‖1 - z‖ < 1) :
     sin (Real.pi * (c - a - b)) / Real.pi * regularizedGaussHGFun a b c z =
-      regularizedGaussHGFun a b (a + b - c + 1) (1 - z) / (Gamma (c - a) * Gamma (c - b)) - (1 - z) ^ (c - a
-        - b) / (Gamma a * Gamma b) * regularizedGaussHGFun (c - a) (c - b) (c - a - b + 1) (1 - z) := by
+      regularizedGaussHGFun a b (a + b - c + 1) (1 - z) / (Gamma (c - a) * Gamma (c - b)) -
+          (1 - z) ^ (c - a
+        - b) / (Gamma a * Gamma b) *
+            regularizedGaussHGFun (c - a) (c - b) (c - a - b + 1) (1 - z) := by
   have h := connLhs_eq_connRhs a b c (z := z) ⟨hz, ht⟩
   simp only [connLhs, connRhs] at h
   have hπ : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -83,8 +85,10 @@ theorem regularized_connection_one_div_one_sub
     (ht : ‖1 /
     (1 - z)‖ < 1) :
     sin (Real.pi * (b - a)) / Real.pi * regularizedGaussHGFun a b c z =
-      (1 - z) ^ (-a) / (Gamma b * Gamma (c - a)) * regularizedGaussHGFun a (c - b) (a - b + 1) (1 / (1 - z))
-        - (1 - z) ^ (-b) / (Gamma a * Gamma (c - b)) * regularizedGaussHGFun b (c - a) (b - a + 1) (1 / (1 -
+      (1 - z) ^ (-a) / (Gamma b * Gamma (c - a)) *
+          regularizedGaussHGFun a (c - b) (a - b + 1) (1 / (1 - z))
+        - (1 - z) ^ (-b) / (Gamma a * Gamma (c - b)) *
+            regularizedGaussHGFun b (c - a) (b - a + 1) (1 / (1 -
         z)) := by
   have h1z : 1 - z ≠ 0 := by
     intro h
@@ -138,8 +142,10 @@ theorem regularized_connection_one_sub_recip
     (hz : ‖z‖ < 1)
     (ht : ‖1 - 1 / z‖ < 1) :
     sin (Real.pi * (c - a - b)) / Real.pi * regularizedGaussHGFun a b c z =
-      z ^ (-a) / (Gamma (c - a) * Gamma (c - b)) * regularizedGaussHGFun a (a - c + 1) (a + b - c + 1) (1 -
-        1 / z) - (1 - z) ^ (c - a - b) * z ^ (a - c) / (Gamma a * Gamma b) * regularizedGaussHGFun (c - a)
+      z ^ (-a) / (Gamma (c - a) * Gamma (c - b)) *
+          regularizedGaussHGFun a (a - c + 1) (a + b - c + 1) (1 -
+        1 / z) - (1 - z) ^ (c - a - b) * z ^ (a - c) / (Gamma a * Gamma b) *
+            regularizedGaussHGFun (c - a)
         (1 - a) (c - a - b + 1) (1 - 1 / z) := by
   have hz0 : z ≠ 0 := by rintro rfl; simp at ht
   have hlt : ‖1 - z‖ < ‖z‖ := by
@@ -956,7 +962,8 @@ theorem quadratic_well_poised_plus
         show deriv P w = _ from deriv_affine_cpow (hslit w h1),
         show deriv (deriv P) w = _ from deriv_deriv_affine_cpow (hslit w h1),
         (hψd w h1).deriv, hψdd w h1]
-      have hode := gaussOperator_ordinaryHypergeometric (a := a / 2) (b := (a + 1) / 2) hc (hψs w h8)
+      have hode := gaussOperator_ordinaryHypergeometric (a := a / 2)
+          (b := (a + 1) / 2) hc (hψs w h8)
       simp only [gaussOperator] at hode
       have hw1 := h1w w h1
       have key : w * (1 - w) * (-a * (-a - 1) * 1 ^ 2 * (1 + 1 * w) ^ (-a) / (1 + 1 * w) ^ 2 *

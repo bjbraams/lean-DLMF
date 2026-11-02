@@ -133,7 +133,8 @@ private lemma exists_mathieuFourierA_ne_zero (n : ℕ) (q : ℝ) : ∃ m, mathie
   exact (mathieuCeZero_pos n q).ne' this
 
 /-- For `n ≥ 1`, some Fourier coefficient `B^n_m(q)` is nonzero (since `se_n'(0, q) > 0`). -/
-private lemma exists_mathieuFourierB_ne_zero {n : ℕ} (hn : n ≠ 0) (q : ℝ) : ∃ m, mathieuFourierB n m q ≠ 0 := by
+private lemma exists_mathieuFourierB_ne_zero {n : ℕ} (hn : n ≠ 0) (q : ℝ) : ∃ m,
+    mathieuFourierB n m q ≠ 0 := by
   by_contra h
   push Not at h
   have hs := (mathieuFourier_sign n q).2.1 hn
@@ -143,28 +144,32 @@ private lemma exists_mathieuFourierB_ne_zero {n : ℕ} (hn : n ≠ 0) (q : ℝ) 
   exact (mathieuSeDerivZero_pos n q).ne' this
 
 /-- Some coefficient `A^{2n}_{2i}(q)` is nonzero. -/
-theorem exists_mathieuFourierA_even_ne_zero (n : ℕ) (q : ℝ) : ∃ i, mathieuFourierA (2 * n) (2 * i) q ≠ 0 := by
+theorem exists_mathieuFourierA_even_ne_zero (n : ℕ) (q : ℝ) : ∃ i,
+    mathieuFourierA (2 * n) (2 * i) q ≠ 0 := by
   obtain ⟨m, hm⟩ := exists_mathieuFourierA_ne_zero (2 * n) q
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · exact ⟨j, hm⟩
   · exact absurd (mathieuFourierA_even_odd n j q) hm
 
 /-- Some coefficient `A^{2n+1}_{2i+1}(q)` is nonzero. -/
-theorem exists_mathieuFourierA_odd_ne_zero (n : ℕ) (q : ℝ) : ∃ i, mathieuFourierA (2 * n + 1) (2 * i + 1) q ≠ 0 := by
+theorem exists_mathieuFourierA_odd_ne_zero (n : ℕ) (q : ℝ) : ∃ i,
+    mathieuFourierA (2 * n + 1) (2 * i + 1) q ≠ 0 := by
   obtain ⟨m, hm⟩ := exists_mathieuFourierA_ne_zero (2 * n + 1) q
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · exact absurd (mathieuFourierA_odd_even n j q) hm
   · exact ⟨j, hm⟩
 
 /-- Some coefficient `B^{2n+1}_{2i+1}(q)` is nonzero. -/
-theorem exists_mathieuFourierB_odd_ne_zero (n : ℕ) (q : ℝ) : ∃ i, mathieuFourierB (2 * n + 1) (2 * i + 1) q ≠ 0 := by
+theorem exists_mathieuFourierB_odd_ne_zero (n : ℕ) (q : ℝ) : ∃ i,
+    mathieuFourierB (2 * n + 1) (2 * i + 1) q ≠ 0 := by
   obtain ⟨m, hm⟩ := exists_mathieuFourierB_ne_zero (n := 2 * n + 1) (by omega) q
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · exact absurd (mathieuFourierB_odd_even n j q) hm
   · exact ⟨j, hm⟩
 
 /-- Some coefficient `B^{2n+2}_{2i+2}(q)` is nonzero. -/
-theorem exists_mathieuFourierB_even_ne_zero (n : ℕ) (q : ℝ) : ∃ i, mathieuFourierB (2 * n + 2) (2 * i + 2) q ≠ 0 := by
+theorem exists_mathieuFourierB_even_ne_zero (n : ℕ) (q : ℝ) : ∃ i,
+    mathieuFourierB (2 * n + 2) (2 * i + 2) q ≠ 0 := by
   obtain ⟨m, hm⟩ := exists_mathieuFourierB_ne_zero (n := 2 * n + 2) (by omega) q
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · rcases j with _ | j
@@ -198,12 +203,14 @@ theorem tendsto_mathieuFourierA_odd (n : ℕ) (q : ℝ) :
 /-- `B^{2n+1}_{2i+1}(q) → 0` as `i → ∞`. -/
 theorem tendsto_mathieuFourierB_odd (n : ℕ) (q : ℝ) :
     Tendsto (fun i => mathieuFourierB (2 * n + 1) (2 * i + 1) q) atTop (𝓝 0) :=
-  tendsto_comp_of_norm_le_exp (exists_norm_mathieuFourierB_le_exp (by omega) q 1) (fun i => by omega)
+  tendsto_comp_of_norm_le_exp (exists_norm_mathieuFourierB_le_exp (by omega) q 1)
+      (fun i => by omega)
 
 /-- `B^{2n+2}_{2i+2}(q) → 0` as `i → ∞`. -/
 theorem tendsto_mathieuFourierB_even (n : ℕ) (q : ℝ) :
     Tendsto (fun i => mathieuFourierB (2 * n + 2) (2 * i + 2) q) atTop (𝓝 0) :=
-  tendsto_comp_of_norm_le_exp (exists_norm_mathieuFourierB_le_exp (by omega) q 1) (fun i => by omega)
+  tendsto_comp_of_norm_le_exp (exists_norm_mathieuFourierB_le_exp (by omega) q 1)
+      (fun i => by omega)
 
 /-- For real `x, y`, `‖(x : ℂ) - y‖ = |x - y|`. -/
 theorem norm_ofReal_sub_ofReal (x y : ℝ) : ‖(x : ℂ) - (y : ℂ)‖ = |x - y| := by
@@ -214,13 +221,17 @@ lies within `4|q|` of `k²` for some `k ≡ m (mod 2)`. -/
 private lemma exists_abs_mathieuA_sub_sq_le (m : ℕ) (q : ℝ) :
     ∃ k : ℕ, k % 2 = m % 2 ∧ |mathieuA m q - (k : ℝ) ^ 2| ≤ 4 * |q| := by
   obtain ⟨n, rfl | rfl⟩ := Nat.even_or_odd' m
-  · obtain ⟨i, hi⟩ := exists_norm_sub_diag_le_of_solvesRecurrence (by norm_num) (solvesRecurrence_mathieuFourierA_even n q) (tendsto_mathieuFourierA_even n q) (exists_mathieuFourierA_even_ne_zero n q)
+  · obtain ⟨i, hi⟩ := exists_norm_sub_diag_le_of_solvesRecurrence (by norm_num)
+        (solvesRecurrence_mathieuFourierA_even n q) (tendsto_mathieuFourierA_even n q)
+        (exists_mathieuFourierA_even_ne_zero n q)
     refine ⟨2 * i, by omega, ?_⟩
     rw [Complex.norm_real, Real.norm_eq_abs,
       show (4 * (i : ℂ) ^ 2) = (((2 * i : ℕ) : ℝ) ^ 2 : ℝ) by push_cast; ring,
       norm_ofReal_sub_ofReal] at hi
     linarith [abs_nonneg q]
-  · obtain ⟨i, hi⟩ := exists_norm_sub_diag_le_of_solvesRecurrence (by norm_num) (solvesRecurrence_mathieuFourierA_odd n q) (tendsto_mathieuFourierA_odd n q) (exists_mathieuFourierA_odd_ne_zero n q)
+  · obtain ⟨i, hi⟩ := exists_norm_sub_diag_le_of_solvesRecurrence (by norm_num)
+        (solvesRecurrence_mathieuFourierA_odd n q) (tendsto_mathieuFourierA_odd n q)
+        (exists_mathieuFourierA_odd_ne_zero n q)
     refine ⟨2 * i + 1, by omega, ?_⟩
     rw [Complex.norm_real, Real.norm_eq_abs] at hi
     have e : ((2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0) =
@@ -239,13 +250,17 @@ private lemma exists_abs_mathieuB_sub_sq_le {m : ℕ} (hm : m ≠ 0) (q : ℝ) :
   obtain ⟨n, rfl | rfl⟩ := Nat.even_or_odd' m
   · obtain ⟨n, rfl⟩ : ∃ j, n = j + 1 := ⟨n - 1, by omega⟩
     rw [show 2 * (n + 1) = 2 * n + 2 by ring]
-    obtain ⟨i, hi⟩ := exists_norm_sub_diag_le_of_solvesRecurrence (by norm_num) (solvesRecurrence_mathieuFourierB_even n q) (tendsto_mathieuFourierB_even n q) (exists_mathieuFourierB_even_ne_zero n q)
+    obtain ⟨i, hi⟩ := exists_norm_sub_diag_le_of_solvesRecurrence (by norm_num)
+        (solvesRecurrence_mathieuFourierB_even n q) (tendsto_mathieuFourierB_even n q)
+        (exists_mathieuFourierB_even_ne_zero n q)
     refine ⟨2 * i + 2, by omega, by omega, ?_⟩
     rw [Complex.norm_real, Real.norm_eq_abs,
       show ((2 * (i : ℂ) + 2) ^ 2) = (((2 * i + 2 : ℕ) : ℝ) ^ 2 : ℝ) by push_cast; ring,
       norm_ofReal_sub_ofReal] at hi
     linarith [abs_nonneg q]
-  · obtain ⟨i, hi⟩ := exists_norm_sub_diag_le_of_solvesRecurrence (by norm_num) (solvesRecurrence_mathieuFourierB_odd n q) (tendsto_mathieuFourierB_odd n q) (exists_mathieuFourierB_odd_ne_zero n q)
+  · obtain ⟨i, hi⟩ := exists_norm_sub_diag_le_of_solvesRecurrence (by norm_num)
+        (solvesRecurrence_mathieuFourierB_odd n q) (tendsto_mathieuFourierB_odd n q)
+        (exists_mathieuFourierB_odd_ne_zero n q)
     refine ⟨2 * i + 1, by omega, by omega, ?_⟩
     rw [Complex.norm_real, Real.norm_eq_abs] at hi
     have e : ((2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0) =
@@ -264,18 +279,22 @@ private lemma exists_abs_mathieuB_sub_sq_le {m : ℕ} (hm : m ≠ 0) (q : ℝ) :
 
 /-- **Interlacing** of the Neumann and Dirichlet spectra at `L` (same condition at `0`),
 in counting form. -/
-private lemma sturmSpectrum_interlace {V : ℝ → ℝ} {B L : ℝ} (hV : Continuous V) (hB : ∀ x, |V x| ≤ B)
+private lemma sturmSpectrum_interlace {V : ℝ → ℝ} {B L : ℝ} (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B)
     (hL : 0 < L) (odd0 : Bool) {e d : ℝ} (he : e ∈ ODE.separatedSpectrum V L odd0 false)
     (hd : d ∈ ODE.separatedSpectrum V L odd0 true) :
-    ((ODE.separatedSpectrum V L odd0 false ∩ Iio e).ncard ≤ (ODE.separatedSpectrum V L odd0 true ∩ Iio d).ncard →
+    ((ODE.separatedSpectrum V L odd0 false ∩ Iio e).ncard ≤
+        (ODE.separatedSpectrum V L odd0 true ∩ Iio d).ncard →
       e < d) ∧
-    ((ODE.separatedSpectrum V L odd0 true ∩ Iio d).ncard < (ODE.separatedSpectrum V L odd0 false ∩ Iio e).ncard →
+    ((ODE.separatedSpectrum V L odd0 true ∩ Iio d).ncard <
+        (ODE.separatedSpectrum V L odd0 false ∩ Iio e).ncard →
       d < e) := by
   have hfinD := ODE.separatedSpectrum_inter_Iio_finite hV hB hL odd0 true
   have hfinN := ODE.separatedSpectrum_inter_Iio_finite hV hB hL odd0 false
   rw [ODE.separatedSpectrum_true_eq hV] at hd hfinD ⊢
   rw [ODE.separatedSpectrum_false_eq hV] at he hfinN ⊢
-  have key := (ODE.basicSolutionZeroCount_eq_ncard_neumann_eigenvalues hV hB hL hfinD hfinN he).symm.trans
+  have key := (ODE.basicSolutionZeroCount_eq_ncard_neumann_eigenvalues hV hB hL hfinD
+      hfinN he).symm.trans
     (ODE.basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le hV hB hL hfinD e)
   set D := {e | ODE.basicSolution V odd0 e L = 0}
   set N := {e | deriv (ODE.basicSolution V odd0 e) L = 0}
@@ -330,30 +349,35 @@ private lemma mathieuA_lt_mathieuA_succ (m : ℕ) (q : ℝ) : mathieuA m q < mat
   · have h1 := mathieuA_mem_sturmSpectrum (2 * j) q
     have h2 := mathieuA_mem_sturmSpectrum (2 * j + 1) q
     simp only [even_two_mul, ↓reduceIte, Nat.not_even_bit1] at h1 h2
-    exact (sturmSpectrum_interlace (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) false h1.1 h2.1).1
+    exact (sturmSpectrum_interlace (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q)
+        (by positivity) false h1.1 h2.1).1
       (by rw [h1.2, h2.2]; omega)
   · have h1 := mathieuA_mem_sturmSpectrum (2 * j + 2) q
     have h2 := mathieuA_mem_sturmSpectrum (2 * j + 1) q
     have he : Even (2 * j + 2) := ⟨j + 1, by ring⟩
     simp only [he, ↓reduceIte, Nat.not_even_bit1] at h1 h2
-    exact (sturmSpectrum_interlace (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) false h1.1 h2.1).2
+    exact (sturmSpectrum_interlace (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q)
+        (by positivity) false h1.1 h2.1).2
       (by rw [h1.2, h2.2]; omega)
 
 /-- `b_m(q) < b_{m+1}(q)` for real `q`, `m ≥ 1`. -/
-private lemma mathieuB_lt_mathieuB_succ {m : ℕ} (hm : m ≠ 0) (q : ℝ) : mathieuB m q < mathieuB (m + 1) q := by
+private lemma mathieuB_lt_mathieuB_succ {m : ℕ} (hm : m ≠ 0) (q : ℝ) : mathieuB m q <
+    mathieuB (m + 1) q := by
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · obtain ⟨j, rfl⟩ : ∃ i, j = i + 1 := ⟨j - 1, by omega⟩
     have h1 := mathieuB_mem_sturmSpectrum (m := 2 * (j + 1) + 1) (by omega) q
     have h2 := mathieuB_mem_sturmSpectrum (m := 2 * (j + 1)) (by omega) q
     have he : Even (2 * (j + 1)) := even_two_mul _
     simp only [he, ↓reduceIte, Nat.not_even_bit1] at h1 h2
-    exact (sturmSpectrum_interlace (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) true h1.1 h2.1).2
+    exact (sturmSpectrum_interlace (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q)
+        (by positivity) true h1.1 h2.1).2
       (by rw [h1.2, h2.2]; omega)
   · have h1 := mathieuB_mem_sturmSpectrum (m := 2 * j + 1) (by omega) q
     have h2 := mathieuB_mem_sturmSpectrum (m := 2 * j + 2) (by omega) q
     have he : Even (2 * j + 2) := ⟨j + 1, by ring⟩
     simp only [he, ↓reduceIte, Nat.not_even_bit1] at h1 h2
-    exact (sturmSpectrum_interlace (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) true h1.1 h2.1).1
+    exact (sturmSpectrum_interlace (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q)
+        (by positivity) true h1.1 h2.1).1
       (by rw [h1.2, h2.2]; omega)
 
 /-! ### Identification of the window -/
@@ -377,7 +401,8 @@ private lemma eq_of_abs_sub_sq_le {k k' s : ℕ} {x c : ℝ} (hc : c < 1 / 8)
 sequence whose terms lie in windows of radius `4c` around `(k + s)²` (with `k` of the parity
 of the index) and which meets each of the first `m + 1` windows has its `m`-th term in the
 `m`-th window. -/
-private lemma abs_sub_sq_le_of_strictMono_windows {x : ℕ → ℝ} {c : ℝ} {s m : ℕ} (hc : c < 1 / 8) (hx : StrictMono x)
+private lemma abs_sub_sq_le_of_strictMono_windows {x : ℕ → ℝ} {c : ℝ} {s m : ℕ} (hc : c < 1 / 8)
+    (hx : StrictMono x)
     (hw : ∀ j, ∃ k : ℕ, k % 2 = j % 2 ∧ |x j - ((k + s : ℕ) : ℝ) ^ 2| ≤ 4 * c)
     (hE : ∀ k ≤ m, ∃ j, |x j - ((k + s : ℕ) : ℝ) ^ 2| ≤ 4 * c) :
     |x m - ((m + s : ℕ) : ℝ) ^ 2| ≤ 4 * c := by
@@ -420,7 +445,8 @@ private lemma abs_sub_sq_le_of_strictMono_windows {x : ℕ → ℝ} {c : ℝ} {s
   rwa [this] at h
 
 /-- Sign change at the ends of `[α, β]` at `q = 0` persists for small `q` and gives a zero. -/
-private lemma eventually_exists_zero_of_sign_change {G : ℝ → ℝ → ℝ} (hGa : ∀ q, Continuous fun a => G a q)
+private lemma eventually_exists_zero_of_sign_change {G : ℝ → ℝ → ℝ}
+    (hGa : ∀ q, Continuous fun a => G a q)
     (hGq : ∀ a, Continuous fun q => G a q) {α β : ℝ} (hαβ : α < β)
     (hs : G α 0 * G β 0 < 0) : ∀ᶠ q : ℝ in 𝓝 0, ∃ c ∈ Ioo α β, G c q = 0 := by
   have hc : Continuous fun q => G α q * G β q := (hGq α).mul (hGq β)
@@ -463,11 +489,13 @@ private lemma differentiable_mathieuWII_and_deriv_q (a z : ℂ) :
     (fun a q => (mathieuWII_spec a q).2.1) (fun a q => (mathieuWII_spec a q).2.2) a z
 
 /-- For an entire `f`, `x ↦ Re f(x)` is continuous on `ℝ`. -/
-private lemma continuous_re_comp_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) : Continuous fun x : ℝ => (f x).re :=
+private lemma continuous_re_comp_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) : Continuous fun x :
+    ℝ => (f x).re :=
   Complex.continuous_re.comp (hf.continuous.comp Complex.continuous_ofReal)
 
 /-- Cast identity `(s : ℂ) (π/2) = ((s π/2 : ℝ) : ℂ)`. -/
-private lemma ofReal_mul_pi_div_two (s : ℝ) : (s : ℂ) * ((π : ℂ) / 2) = ((s * (π / 2) : ℝ) : ℂ) := by
+private lemma ofReal_mul_pi_div_two (s : ℝ) : (s : ℂ) * ((π : ℂ) / 2) =
+    ((s * (π / 2) : ℝ) : ℂ) := by
   push_cast; ring
 
 /-- At `q = 0`, `a = s²`: `Re w_I'(π/2) = -s sin(sπ/2)`. -/
@@ -513,16 +541,19 @@ private lemma re_mathieuWII_half_pi_q_zero {s : ℝ} (hs : s ≠ 0) :
     Complex.ofReal_re]
 
 /-- `sin((2i+1)π/2) = (-1)^i`. -/
-private lemma sin_two_mul_add_one_mul_pi_div_two (i : ℕ) : Real.sin (((2 * i + 1 : ℕ) : ℝ) * (π / 2)) = (-1) ^ i := by
+private lemma sin_two_mul_add_one_mul_pi_div_two (i : ℕ) : Real.sin
+    (((2 * i + 1 : ℕ) : ℝ) * (π / 2)) = (-1) ^ i := by
   rw [show ((2 * i + 1 : ℕ) : ℝ) * (π / 2) = (i : ℝ) * π + π / 2 by push_cast; ring,
     Real.sin_add_pi_div_two, Real.cos_nat_mul_pi]
 
 /-- `cos(2i · π/2) = (-1)^i`. -/
-private lemma cos_two_mul_mul_pi_div_two (i : ℕ) : Real.cos (((2 * i : ℕ) : ℝ) * (π / 2)) = (-1) ^ i := by
+private lemma cos_two_mul_mul_pi_div_two (i : ℕ) : Real.cos (((2 * i : ℕ) : ℝ) * (π / 2))
+    = (-1) ^ i := by
   rw [show ((2 * i : ℕ) : ℝ) * (π / 2) = (i : ℝ) * π by push_cast; ring, Real.cos_nat_mul_pi]
 
 /-- A complex number fixed by conjugation with zero real part is `0`. -/
-private lemma eq_zero_of_conj_eq_of_re_eq_zero {z : ℂ} (hz : (starRingEnd ℂ) z = z) (h : z.re = 0) : z = 0 := by
+private lemma eq_zero_of_conj_eq_of_re_eq_zero {z : ℂ} (hz : (starRingEnd ℂ) z = z)
+    (h : z.re = 0) : z = 0 := by
   rw [← Complex.conj_eq_iff_re.1 hz, h, Complex.ofReal_zero]
 
 /-- For real `a, q`, `w_I'(π/2; a, q)` is real (fixed by conjugation). -/
@@ -549,12 +580,15 @@ private lemma conj_mathieuWII_half_pi (a q : ℝ) :
 
 /-- For small `q` the spectrum of the `a_k` contains a point between `(k-1)²` and `(k+1)²`
 (`-1` instead of `(k-1)²` for `k = 0`). -/
-private lemma eventually_exists_mem_mathieuSpecA_near_sq (k : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∃ c ∈ mathieuSpecA k q,
+private lemma eventually_exists_mem_mathieuSpecA_near_sq (k : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∃ c ∈
+    mathieuSpecA k q,
     (if k = 0 then (-1 : ℝ) else ((k : ℝ) - 1) ^ 2) < c ∧ c < ((k : ℝ) + 1) ^ 2 := by
   obtain ⟨i, rfl | rfl⟩ := Nat.even_or_odd' k
   · set G : ℝ → ℝ → ℝ := fun a q => (deriv (mathieuWI (a : ℂ) (q : ℂ)) ((π : ℂ) / 2)).re
-    have hGa : ∀ q, Continuous fun a => G a q := fun q => continuous_re_comp_ofReal (differentiable_mathieuWI_and_deriv_a q _).2
-    have hGq : ∀ a, Continuous fun q => G a q := fun a => continuous_re_comp_ofReal (differentiable_mathieuWI_and_deriv_q a _).2
+    have hGa : ∀ q, Continuous fun a => G a q := fun q =>
+        continuous_re_comp_ofReal (differentiable_mathieuWI_and_deriv_a q _).2
+    have hGq : ∀ a, Continuous fun q => G a q := fun a =>
+        continuous_re_comp_ofReal (differentiable_mathieuWI_and_deriv_q a _).2
     have hmem : ∀ q c, G c q = 0 → c ∈ mathieuSpecA (2 * i) q := fun q c h => by
       simp only [mathieuSpecA, even_two_mul, ↓reduceIte, mem_ofPred_eq]
       exact eq_zero_of_conj_eq_of_re_eq_zero (conj_deriv_mathieuWI_half_pi c q) h
@@ -569,14 +603,16 @@ private lemma eventually_exists_mem_mathieuSpecA_near_sq (k : ℕ) : ∀ᶠ q : 
         rw [Real.sin_pi_div_two]
         have := Real.sinh_pos_iff.2 (by positivity : (0 : ℝ) < π / 2)
         linarith
-      filter_upwards [eventually_exists_zero_of_sign_change hGa hGq (by norm_num) h0] with q ⟨c, hc, hz⟩
+      filter_upwards [eventually_exists_zero_of_sign_change hGa hGq (by norm_num) h0]
+          with q ⟨c, hc, hz⟩
       refine ⟨c, hmem q c hz, ?_, ?_⟩
       · simpa using hc.1
       · have := hc.2; push_cast at this ⊢; linarith
     · have h0 : G (((2 * j + 1 : ℕ) : ℝ) ^ 2) 0 * G (((2 * (j + 1) + 1 : ℕ) : ℝ) ^ 2) 0 < 0 := by
         have e1 : G (((2 * j + 1 : ℕ) : ℝ) ^ 2) 0 = _ := re_deriv_mathieuWI_half_pi_q_zero _
         have e2 : G (((2 * (j + 1) + 1 : ℕ) : ℝ) ^ 2) 0 = _ := re_deriv_mathieuWI_half_pi_q_zero _
-        rw [e1, e2, sin_two_mul_add_one_mul_pi_div_two, sin_two_mul_add_one_mul_pi_div_two, pow_succ]
+        rw [e1, e2, sin_two_mul_add_one_mul_pi_div_two,
+            sin_two_mul_add_one_mul_pi_div_two, pow_succ]
         have : ((-1 : ℝ) ^ j) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
         have hp : (0 : ℝ) < ((2 * j + 1 : ℕ) : ℝ) := by positivity
         have hp' : (0 : ℝ) < ((2 * (j + 1) + 1 : ℕ) : ℝ) := by positivity
@@ -589,8 +625,10 @@ private lemma eventually_exists_mem_mathieuSpecA_near_sq (k : ℕ) : ∀ᶠ q : 
         have := hc.1; push_cast at this ⊢; linarith
       · have := hc.2; push_cast at this ⊢; linarith
   · set G : ℝ → ℝ → ℝ := fun a q => (mathieuWI (a : ℂ) (q : ℂ) ((π : ℂ) / 2)).re
-    have hGa : ∀ q, Continuous fun a => G a q := fun q => continuous_re_comp_ofReal (differentiable_mathieuWI_and_deriv_a q _).1
-    have hGq : ∀ a, Continuous fun q => G a q := fun a => continuous_re_comp_ofReal (differentiable_mathieuWI_and_deriv_q a _).1
+    have hGa : ∀ q, Continuous fun a => G a q := fun q =>
+        continuous_re_comp_ofReal (differentiable_mathieuWI_and_deriv_a q _).1
+    have hGq : ∀ a, Continuous fun q => G a q := fun a =>
+        continuous_re_comp_ofReal (differentiable_mathieuWI_and_deriv_q a _).1
     have hmem : ∀ q c, G c q = 0 → c ∈ mathieuSpecA (2 * i + 1) q := fun q c h => by
       simp only [mathieuSpecA, Nat.not_even_bit1, ↓reduceIte, mem_ofPred_eq]
       exact eq_zero_of_conj_eq_of_re_eq_zero (conj_mathieuWI_half_pi c q) h
@@ -609,13 +647,16 @@ private lemma eventually_exists_mem_mathieuSpecA_near_sq (k : ℕ) : ∀ᶠ q : 
 
 /-- For small `q` the spectrum of the `b_k`, `k ≥ 1`, contains a point between `(k-1)²` and
 `(k+1)²`. -/
-private lemma eventually_exists_mem_mathieuSpecB_near_sq {k : ℕ} (hk : k ≠ 0) : ∀ᶠ q : ℝ in 𝓝 0, ∃ c ∈ mathieuSpecB k q,
+private lemma eventually_exists_mem_mathieuSpecB_near_sq {k : ℕ} (hk : k ≠ 0) : ∀ᶠ q : ℝ in 𝓝 0,
+    ∃ c ∈ mathieuSpecB k q,
     ((k : ℝ) - 1) ^ 2 < c ∧ c < ((k : ℝ) + 1) ^ 2 := by
   obtain ⟨i, rfl | rfl⟩ := Nat.even_or_odd' k
   · obtain ⟨i, rfl⟩ : ∃ j, i = j + 1 := ⟨i - 1, by omega⟩
     set G : ℝ → ℝ → ℝ := fun a q => (mathieuWII (a : ℂ) (q : ℂ) ((π : ℂ) / 2)).re
-    have hGa : ∀ q, Continuous fun a => G a q := fun q => continuous_re_comp_ofReal (differentiable_mathieuWII_and_deriv_a q _).1
-    have hGq : ∀ a, Continuous fun q => G a q := fun a => continuous_re_comp_ofReal (differentiable_mathieuWII_and_deriv_q a _).1
+    have hGa : ∀ q, Continuous fun a => G a q := fun q =>
+        continuous_re_comp_ofReal (differentiable_mathieuWII_and_deriv_a q _).1
+    have hGq : ∀ a, Continuous fun q => G a q := fun a =>
+        continuous_re_comp_ofReal (differentiable_mathieuWII_and_deriv_q a _).1
     have hmem : ∀ q c, G c q = 0 → c ∈ mathieuSpecB (2 * (i + 1)) q := fun q c h => by
       simp only [mathieuSpecB, even_two_mul, ↓reduceIte, mem_ofPred_eq]
       exact eq_zero_of_conj_eq_of_re_eq_zero (conj_mathieuWII_half_pi c q) h
@@ -624,7 +665,8 @@ private lemma eventually_exists_mem_mathieuSpecB_near_sq {k : ℕ} (hk : k ≠ 0
     have h0 : G (((2 * i + 1 : ℕ) : ℝ) ^ 2) 0 * G (((2 * (i + 1) + 1 : ℕ) : ℝ) ^ 2) 0 < 0 := by
       have e1 : G (((2 * i + 1 : ℕ) : ℝ) ^ 2) 0 = _ := re_mathieuWII_half_pi_q_zero hp.ne'
       have e2 : G (((2 * (i + 1) + 1 : ℕ) : ℝ) ^ 2) 0 = _ := re_mathieuWII_half_pi_q_zero hp'.ne'
-      rw [e1, e2, sin_two_mul_add_one_mul_pi_div_two, sin_two_mul_add_one_mul_pi_div_two, pow_succ, div_mul_div_comm]
+      rw [e1, e2, sin_two_mul_add_one_mul_pi_div_two, sin_two_mul_add_one_mul_pi_div_two, pow_succ,
+          div_mul_div_comm]
       have : ((-1 : ℝ) ^ i) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
       apply div_neg_of_neg_of_pos _ (mul_pos hp hp')
       nlinarith
@@ -634,8 +676,10 @@ private lemma eventually_exists_mem_mathieuSpecB_near_sq {k : ℕ} (hk : k ≠ 0
     · have := hc.1; push_cast at this ⊢; linarith
     · have := hc.2; push_cast at this ⊢; linarith
   · set G : ℝ → ℝ → ℝ := fun a q => (deriv (mathieuWII (a : ℂ) (q : ℂ)) ((π : ℂ) / 2)).re
-    have hGa : ∀ q, Continuous fun a => G a q := fun q => continuous_re_comp_ofReal (differentiable_mathieuWII_and_deriv_a q _).2
-    have hGq : ∀ a, Continuous fun q => G a q := fun a => continuous_re_comp_ofReal (differentiable_mathieuWII_and_deriv_q a _).2
+    have hGa : ∀ q, Continuous fun a => G a q := fun q =>
+        continuous_re_comp_ofReal (differentiable_mathieuWII_and_deriv_a q _).2
+    have hGq : ∀ a, Continuous fun q => G a q := fun a =>
+        continuous_re_comp_ofReal (differentiable_mathieuWII_and_deriv_q a _).2
     have hmem : ∀ q c, G c q = 0 → c ∈ mathieuSpecB (2 * i + 1) q := fun q c h => by
       simp only [mathieuSpecB, Nat.not_even_bit1, ↓reduceIte, mem_ofPred_eq]
       exact eq_zero_of_conj_eq_of_re_eq_zero (conj_deriv_mathieuWII_half_pi c q) h
@@ -656,7 +700,8 @@ private lemma exists_mathieuA_eq_of_mem_mathieuSpecA {k : ℕ} {q c : ℝ} (hc :
     ∃ m, m % 2 = k % 2 ∧ mathieuA m q = c := by
   have hfin : (mathieuSpecA k q ∩ Iio c).Finite := by
     rw [mathieuSpecA_eq_sturmSpectrum]
-    exact ODE.separatedSpectrum_inter_Iio_finite (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) _ _ c
+    exact ODE.separatedSpectrum_inter_Iio_finite (continuous_two_mul_cos_two_mul q)
+        (abs_two_mul_cos_two_mul_le q) (by positivity) _ _ c
   obtain ⟨j, hj⟩ := exists_eq_nthLeast hc hfin
   refine ⟨2 * j + k % 2, by omega, ?_⟩
   have hS : mathieuSpecA (2 * j + k % 2) q = mathieuSpecA k q := by
@@ -671,7 +716,8 @@ private lemma exists_mathieuB_eq_of_mem_mathieuSpecB {k : ℕ} {q c : ℝ} (hc :
     ∃ m, m ≠ 0 ∧ m % 2 = k % 2 ∧ mathieuB m q = c := by
   have hfin : (mathieuSpecB k q ∩ Iio c).Finite := by
     rw [mathieuSpecB_eq_sturmSpectrum]
-    exact ODE.separatedSpectrum_inter_Iio_finite (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) _ _ c
+    exact ODE.separatedSpectrum_inter_Iio_finite (continuous_two_mul_cos_two_mul q)
+        (abs_two_mul_cos_two_mul_le q) (by positivity) _ _ c
   obtain ⟨j, hj⟩ := exists_eq_nthLeast hc hfin
   refine ⟨2 * j + 2 - k % 2, by omega, by omega, ?_⟩
   have hS : mathieuSpecB (2 * j + 2 - k % 2) q = mathieuSpecB k q := by
@@ -684,7 +730,8 @@ private lemma exists_mathieuB_eq_of_mem_mathieuSpecB {k : ℕ} {q c : ℝ} (hc :
 
 /-- If `c` lies strictly between `(k-1)²` (or `-1` for `k = 0`) and `(k+1)²`, and is within
 `4x < 1/2` of `k'²` with `k' ≡ k (mod 2)`, then `k' = k`. -/
-private lemma eq_of_abs_sub_sq_le_of_mem_window {k k' : ℕ} {c x : ℝ} (hx : x < 1 / 8) (hpar : k' % 2 = k % 2)
+private lemma eq_of_abs_sub_sq_le_of_mem_window {k k' : ℕ} {c x : ℝ} (hx : x < 1 / 8)
+    (hpar : k' % 2 = k % 2)
     (hL : (if k = 0 then (-1 : ℝ) else ((k : ℝ) - 1) ^ 2) < c) (hR : c < ((k : ℝ) + 1) ^ 2)
     (h : |c - (k' : ℝ) ^ 2| ≤ 4 * x) : k' = k := by
   rw [abs_le] at h
@@ -704,10 +751,13 @@ theorem eventually_abs_lt_one_div_eight : ∀ᶠ q : ℝ in 𝓝 0, |q| < 1 / 8 
 
 /-- **`a_m(q)` near `q = 0`**: for small real `q`, `|a_m(q) - m²| ≤ 4|q|`. In particular
 `a_m` is continuous at `0` (DLMF 28.2.23 and §28.6). -/
-theorem eventually_abs_mathieuA_sub_sq_le (m : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, |mathieuA m q - (m : ℝ) ^ 2| ≤ 4 * |q| := by
-  filter_upwards [(Finset.range (m + 1)).eventually_all.2 (fun k _ => eventually_exists_mem_mathieuSpecA_near_sq k),
+theorem eventually_abs_mathieuA_sub_sq_le (m : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, |mathieuA m q -
+    (m : ℝ) ^ 2| ≤ 4 * |q| := by
+  filter_upwards [(Finset.range (m + 1)).eventually_all.2
+      (fun k _ => eventually_exists_mem_mathieuSpecA_near_sq k),
     eventually_abs_lt_one_div_eight] with q hE hq
-  have := abs_sub_sq_le_of_strictMono_windows (x := fun j => mathieuA j q) (c := |q|) (s := 0) (m := m) hq
+  have := abs_sub_sq_le_of_strictMono_windows (x := fun j => mathieuA j q) (c := |q|)
+      (s := 0) (m := m) hq
     (strictMono_nat_of_lt_succ fun j => mathieuA_lt_mathieuA_succ j q)
     (fun j => by simpa using exists_abs_mathieuA_sub_sq_le j q) (fun k hk => ?_)
   · simpa using this
@@ -723,8 +773,10 @@ theorem eventually_abs_mathieuB_sub_sq_le {m : ℕ} (hm : m ≠ 0) :
     ∀ᶠ q : ℝ in 𝓝 0, |mathieuB m q - (m : ℝ) ^ 2| ≤ 4 * |q| := by
   obtain ⟨m, rfl⟩ : ∃ j, m = j + 1 := ⟨m - 1, by omega⟩
   filter_upwards [(Finset.range (m + 2)).eventually_all.2
-    (fun k _ => eventually_exists_mem_mathieuSpecB_near_sq (k := k + 1) (by omega)), eventually_abs_lt_one_div_eight] with q hE hq
-  have := abs_sub_sq_le_of_strictMono_windows (x := fun j => mathieuB (j + 1) q) (c := |q|) (s := 1) (m := m) hq
+    (fun k _ => eventually_exists_mem_mathieuSpecB_near_sq (k := k + 1) (by omega)),
+        eventually_abs_lt_one_div_eight] with q hE hq
+  have := abs_sub_sq_le_of_strictMono_windows (x := fun j => mathieuB (j + 1) q) (c := |q|)
+      (s := 1) (m := m) hq
     (strictMono_nat_of_lt_succ fun j => mathieuB_lt_mathieuB_succ (by omega) q)
     (fun j => ?_) (fun k hk => ?_)
   · simpa using this
@@ -784,17 +836,21 @@ theorem isBigO_one_of_continuous {s : ℝ → ℂ} (hs : Continuous s) :
     s =O[𝓝 0] (fun _ => (1 : ℝ)) := (hs.tendsto 0).isBigO_one ℝ
 
 /-- Eigenvalue estimate for `a_{2n}(q)` from a trial vector (recurrence 28.4.5). -/
-theorem mathieuA_even_sub_isBigO_of_trial (n : ℕ) {N K : ℕ} (hnN : n < N) {p : ℝ → ℂ} {v : ℝ → ℕ → ℂ}
+theorem mathieuA_even_sub_isBigO_of_trial (n : ℕ) {N K : ℕ} (hnN : n < N) {p : ℝ → ℂ}
+    {v : ℝ → ℕ → ℂ}
     (hvN : ∀ q, v q N = 0) (hvN1 : ∀ q, v q (N + 1) = 0) (hvn : ∀ q, v q n = 1)
     (hv : ∀ i < N + 1, (fun q => v q i) =O[𝓝 0] (fun _ => (1 : ℝ)))
     (hr : ∀ i < N + 1, (fun q : ℝ => recurrenceOperator (fun i => 4 * (i : ℂ) ^ 2) 2 q (v q) i -
       p q * v q i) =O[𝓝 0] (fun q : ℝ => q ^ (K - Nat.dist i n))) :
     (fun q : ℝ => (mathieuA (2 * n) q : ℂ) - p q) =O[𝓝 0] (fun q : ℝ => q ^ K) := by
-  refine eigenvalue_sub_isBigO_of_trial (d := fun _ i => 4 * (i : ℂ) ^ 2) (β := 2) (by norm_num) (by norm_num)
+  refine eigenvalue_sub_isBigO_of_trial (d := fun _ i => 4 * (i : ℂ) ^ 2) (β := 2)
+      (by norm_num) (by norm_num)
     (A := fun q i => mathieuFourierA (2 * n) (2 * i) q) hnN
-    (Eventually.of_forall (solvesRecurrence_mathieuFourierA_even n)) (Eventually.of_forall (tendsto_mathieuFourierA_even n))
+    (Eventually.of_forall (solvesRecurrence_mathieuFourierA_even n))
+        (Eventually.of_forall (tendsto_mathieuFourierA_even n))
     (Eventually.of_forall (exists_mathieuFourierA_even_ne_zero n)) ?_ hvN hvN1 hvn hv hr
-  filter_upwards [eventually_abs_mathieuA_sub_sq_le (2 * n), eventually_abs_lt_one_div_eight] with q h1 h2
+  filter_upwards [eventually_abs_mathieuA_sub_sq_le (2 * n),
+      eventually_abs_lt_one_div_eight] with q h1 h2
   intro i hi
   rw [show (4 * (i : ℂ) ^ 2) = ((((2 * i + 0 : ℕ) : ℝ) ^ 2 + 0 : ℝ) : ℂ) by push_cast; ring,
     norm_ofReal_sub_ofReal]
@@ -808,17 +864,21 @@ theorem mathieuA_odd_sub_isBigO_of_trial (n : ℕ) {N K : ℕ} (hnN : n < N) {p 
       if i = 0 then (q : ℂ) else 0) 1 q (v q) i - p q * v q i) =O[𝓝 0]
       (fun q : ℝ => q ^ (K - Nat.dist i n))) :
     (fun q : ℝ => (mathieuA (2 * n + 1) q : ℂ) - p q) =O[𝓝 0] (fun q : ℝ => q ^ K) := by
-  refine eigenvalue_sub_isBigO_of_trial (d := fun q i => (2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0)
+  refine eigenvalue_sub_isBigO_of_trial
+      (d := fun q i => (2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0)
     (β := 1) (by norm_num) (by norm_num)
     (A := fun q i => mathieuFourierA (2 * n + 1) (2 * i + 1) q) hnN
-    (Eventually.of_forall (solvesRecurrence_mathieuFourierA_odd n)) (Eventually.of_forall (tendsto_mathieuFourierA_odd n))
+    (Eventually.of_forall (solvesRecurrence_mathieuFourierA_odd n))
+        (Eventually.of_forall (tendsto_mathieuFourierA_odd n))
     (Eventually.of_forall (exists_mathieuFourierA_odd_ne_zero n)) ?_ hvN hvN1 hvn hv hr
-  filter_upwards [eventually_abs_mathieuA_sub_sq_le (2 * n + 1), eventually_abs_lt_one_div_eight] with q h1 h2
+  filter_upwards [eventually_abs_mathieuA_sub_sq_le (2 * n + 1),
+      eventually_abs_lt_one_div_eight] with q h1 h2
   intro i hi
   rw [show ((2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0) =
       ((((2 * i + 1 : ℕ) : ℝ) ^ 2 + (if i = 0 then q else 0) : ℝ) : ℂ) by
       split_ifs <;> push_cast <;> ring, norm_ofReal_sub_ofReal]
-  exact one_le_abs_sub_add_of_gap h2 (by simpa using h1) (four_le_abs_sq_sub_sq hi 1) (by split_ifs <;> simp)
+  exact one_le_abs_sub_add_of_gap h2 (by simpa using h1) (four_le_abs_sq_sub_sq hi 1)
+      (by split_ifs <;> simp)
 
 /-- Eigenvalue estimate for `b_{2n+1}(q)` from a trial vector (recurrence 28.4.7). -/
 theorem mathieuB_odd_sub_isBigO_of_trial (n : ℕ) {N K : ℕ} (hnN : n < N) {p : ℝ → ℂ} {v : ℝ → ℕ → ℂ}
@@ -828,31 +888,40 @@ theorem mathieuB_odd_sub_isBigO_of_trial (n : ℕ) {N K : ℕ} (hnN : n < N) {p 
       if i = 0 then (q : ℂ) else 0) 1 q (v q) i - p q * v q i) =O[𝓝 0]
       (fun q : ℝ => q ^ (K - Nat.dist i n))) :
     (fun q : ℝ => (mathieuB (2 * n + 1) q : ℂ) - p q) =O[𝓝 0] (fun q : ℝ => q ^ K) := by
-  refine eigenvalue_sub_isBigO_of_trial (d := fun q i => (2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0)
+  refine eigenvalue_sub_isBigO_of_trial
+      (d := fun q i => (2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0)
     (β := 1) (by norm_num) (by norm_num)
     (A := fun q i => mathieuFourierB (2 * n + 1) (2 * i + 1) q) hnN
-    (Eventually.of_forall (solvesRecurrence_mathieuFourierB_odd n)) (Eventually.of_forall (tendsto_mathieuFourierB_odd n))
+    (Eventually.of_forall (solvesRecurrence_mathieuFourierB_odd n))
+        (Eventually.of_forall (tendsto_mathieuFourierB_odd n))
     (Eventually.of_forall (exists_mathieuFourierB_odd_ne_zero n)) ?_ hvN hvN1 hvn hv hr
-  filter_upwards [eventually_abs_mathieuB_sub_sq_le (m := 2 * n + 1) (by omega), eventually_abs_lt_one_div_eight]
+  filter_upwards [eventually_abs_mathieuB_sub_sq_le (m := 2 * n + 1) (by omega),
+      eventually_abs_lt_one_div_eight]
     with q h1 h2
   intro i hi
   rw [show ((2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0) =
       ((((2 * i + 1 : ℕ) : ℝ) ^ 2 + -(if i = 0 then q else 0) : ℝ) : ℂ) by
       split_ifs <;> push_cast <;> ring, norm_ofReal_sub_ofReal]
-  exact one_le_abs_sub_add_of_gap h2 (by simpa using h1) (four_le_abs_sq_sub_sq hi 1) (by split_ifs <;> simp)
+  exact one_le_abs_sub_add_of_gap h2 (by simpa using h1) (four_le_abs_sq_sub_sq hi 1)
+      (by split_ifs <;> simp)
 
 /-- Eigenvalue estimate for `b_{2n+2}(q)` from a trial vector (recurrence 28.4.8). -/
-theorem mathieuB_even_sub_isBigO_of_trial (n : ℕ) {N K : ℕ} (hnN : n < N) {p : ℝ → ℂ} {v : ℝ → ℕ → ℂ}
+theorem mathieuB_even_sub_isBigO_of_trial (n : ℕ) {N K : ℕ} (hnN : n < N) {p : ℝ → ℂ}
+    {v : ℝ → ℕ → ℂ}
     (hvN : ∀ q, v q N = 0) (hvN1 : ∀ q, v q (N + 1) = 0) (hvn : ∀ q, v q n = 1)
     (hv : ∀ i < N + 1, (fun q => v q i) =O[𝓝 0] (fun _ => (1 : ℝ)))
-    (hr : ∀ i < N + 1, (fun q : ℝ => recurrenceOperator (fun i => (2 * (i : ℂ) + 2) ^ 2) 1 q (v q) i -
+    (hr : ∀ i < N + 1, (fun q : ℝ =>
+        recurrenceOperator (fun i => (2 * (i : ℂ) + 2) ^ 2) 1 q (v q) i -
       p q * v q i) =O[𝓝 0] (fun q : ℝ => q ^ (K - Nat.dist i n))) :
     (fun q : ℝ => (mathieuB (2 * n + 2) q : ℂ) - p q) =O[𝓝 0] (fun q : ℝ => q ^ K) := by
-  refine eigenvalue_sub_isBigO_of_trial (d := fun _ i => (2 * (i : ℂ) + 2) ^ 2) (β := 1) (by norm_num)
+  refine eigenvalue_sub_isBigO_of_trial (d := fun _ i => (2 * (i : ℂ) + 2) ^ 2)
+      (β := 1) (by norm_num)
     (by norm_num) (A := fun q i => mathieuFourierB (2 * n + 2) (2 * i + 2) q) hnN
-    (Eventually.of_forall (solvesRecurrence_mathieuFourierB_even n)) (Eventually.of_forall (tendsto_mathieuFourierB_even n))
+    (Eventually.of_forall (solvesRecurrence_mathieuFourierB_even n))
+        (Eventually.of_forall (tendsto_mathieuFourierB_even n))
     (Eventually.of_forall (exists_mathieuFourierB_even_ne_zero n)) ?_ hvN hvN1 hvn hv hr
-  filter_upwards [eventually_abs_mathieuB_sub_sq_le (m := 2 * n + 2) (by omega), eventually_abs_lt_one_div_eight]
+  filter_upwards [eventually_abs_mathieuB_sub_sq_le (m := 2 * n + 2) (by omega),
+      eventually_abs_lt_one_div_eight]
     with q h1 h2
   intro i hi
   rw [show ((2 * (i : ℂ) + 2) ^ 2) = ((((2 * i + 2 : ℕ) : ℝ) ^ 2 + 0 : ℝ) : ℂ) by

@@ -115,7 +115,8 @@ theorem struveTP_angerJ_eq (ν : ℝ) :
     rw [exp_ofReal_mul_I_re]; push_cast; ring_nf
   have hr := intervalIntegral.intervalIntegral_re hint
   simp only [RCLike.re_to_complex] at hr
-  rw [angerJ, intervalIntegral.integral_congr (fun x _ => hpt x), intervalIntegral.integral_ofReal, hr]
+  rw [angerJ, intervalIntegral.integral_congr (fun x _ => hpt x),
+      intervalIntegral.integral_ofReal, hr]
   push_cast; ring
 
 /-- DLMF 11.10.2 at `z = ν` for real `ν`: `𝐄_ν(ν)` as the imaginary part of
@@ -131,7 +132,8 @@ theorem struveTP_weberE_eq (ν : ℝ) :
     rw [exp_ofReal_mul_I_im]; push_cast; ring_nf
   have hr := intervalIntegral.intervalIntegral_im hint
   simp only [RCLike.im_to_complex] at hr
-  rw [weberE, intervalIntegral.integral_congr (fun x _ => hpt x), intervalIntegral.integral_ofReal, hr]
+  rw [weberE, intervalIntegral.integral_congr (fun x _ => hpt x),
+      intervalIntegral.integral_ofReal, hr]
   push_cast; ring
 
 /-- Equivalence from a real limit: if `ν^{1/3} f(ν) → K` (real, `K ≠ 0`) then
@@ -140,7 +142,8 @@ theorem struveTP_isEquivalent_of_tendsto {f : ℝ → ℝ} {K : ℝ} (hK : K ≠
     (h : Tendsto (fun ν : ℝ => ν ^ (1 / 3 : ℝ) * f ν) atTop (𝓝 K)) :
     (fun ν : ℝ => (f ν : ℂ)) ~[atTop] (fun ν : ℝ => ((K / ν ^ (1 / 3 : ℝ) : ℝ) : ℂ)) := by
   refine isEquivalent_of_tendsto_one ?_
-  have h1 : Tendsto (fun ν : ℝ => ((ν ^ (1 / 3 : ℝ) * f ν / K : ℝ) : ℂ)) atTop (𝓝 ((K / K : ℝ) : ℂ)) :=
+  have h1 : Tendsto (fun ν : ℝ => ((ν ^ (1 / 3 : ℝ) * f ν / K : ℝ) : ℂ)) atTop
+      (𝓝 ((K / K : ℝ) : ℂ)) :=
     (continuous_ofReal.tendsto _).comp (h.div_const K)
   rw [div_self hK, ofReal_one] at h1
   refine h1.congr' ?_

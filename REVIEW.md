@@ -2087,7 +2087,7 @@ Mathlib's Mellin inversion. It also proves that `∫ A(y)/Γ(c+σ+iy) dy` is ent
 `∫ B(y) w^{σ+iy} dy` is holomorphic on `re w > 0`.
 
 New admission-free results for Temme's Chapter 5:
-* [Generalized.lean](DLMF/Hypergeometric/Generalized.lean): the generalized hypergeometric
+* [GeneralizedEquation.lean](DLMF/Hypergeometric/Basic/GeneralizedEquation.lean): the generalized hypergeometric
   differential equation `θ ∏(θ+bⱼ-1) w = z ∏(θ+aᵢ) w` (DLMF 16.8.3, Temme (5.30)) for Mathlib's
   regularized `ₚFq`, on the disc of convergence and for all parameters.
 * [LoopIntegral.lean](DLMF/Hypergeometric/LoopIntegral.lean): the loop integral 15.6.2 over an
@@ -2337,7 +2337,7 @@ Two name collisions surfaced and were resolved by renaming: `ultrasphPoly_param_
 `λ = 1` case in `Classical`) and `cpow_mul_cpow_of_re_pos` (in `Elementary`). The only remaining
 declarations outside `AAR` deliberately extend Mathlib namespaces (`Real.*`, `Complex.*` in the
 Gamma area, `HasFPowerSeriesOnBall.*`, `HasSum.*`, `MeasureTheory.*`, and
-`tendsto_ordinaryHypergeometric_nhdsWithin_one`); these are candidates for `ToMathlib`.
+`DLMF.Hypergeometric.tendsto_ordinaryHypergeometric_nhdsWithin_one`); these are candidates for `ToMathlib`.
 
 ## Bessel `J` from Mathlib (2026-10-16)
 
@@ -5231,7 +5231,7 @@ introduced.
 
 The reusable result is
 `DLMF.Hypergeometric.regularized1F2_one_inhomogeneous_ode` in
-[GeneralizedCalculus.lean](DLMF/Hypergeometric/GeneralizedCalculus.lean).
+[GeneralizedCalculus.lean](DLMF/Hypergeometric/Basic/GeneralizedCalculus.lean).
 For F(z) equal to the regularized 1F2 with upper parameter one, it proves
 
 `z² F'' + (b+c-1) z F' + ((b-1)(c-1)-z) F = 1/(Γ(b-1) Γ(c-1))`.
@@ -7078,7 +7078,7 @@ Earlier numerical totals in this document and the README are historical snapshot
   polynomial library. Both families retain their public names as adapters. The weighted Jacobi
   generating-function proof reuses Appell's Pochhammer norm bound, the existing duplication
   identity, and the earlier antidiagonal summation lemma. Continuation reuses the nonnegativity
-  and monotonicity results in `Hypergeometric/Series.lean`; Saalschütz reuses its binomial series.
+  and monotonicity results in `Hypergeometric/Basic/RealPochhammer.lean`; Saalschütz reuses its binomial series.
 - **Legendre from general Gauss theory:** add
   `DLMF.Hypergeometric.tendsto_regularizedGaussHG_left_one` in `Hypergeometric/Boundary.lean`.
   It applies Mathlib's Abel limit theorem to the existing regularized Gauss summation theorem.
@@ -9065,7 +9065,7 @@ moves, so the moves do not preserve several copies of the same foundation.
   lower file, with the more general square identity alongside it. Do not replace it by
   an unqualified `sqrt (z^2 - 1)`, whose principal-branch behavior can differ.
 - **Power-series uniqueness:**
-  [GeneralizedCalculus](DLMF/Hypergeometric/GeneralizedCalculus.lean), line 294,
+  [GeneralizedCalculus](DLMF/Hypergeometric/Basic/GeneralizedCalculus.lean), line 294,
   and [TrigR4SeriesExtension](DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean),
   line 27, contain the same 23-line proof. The newer
   `Complex.eq_of_hasSum_mul_pow_ball` in
@@ -9751,7 +9751,7 @@ to the similarly named `Real` functions. All 25 ledgers regenerate idempotently.
 
 ## Splitting the files at the length limit (2026-11-01)
 
-Following [the status review](reports/MathlibReview20261101.tex), the four files at or near the
+Following [the status review](reports/MathlibReview.tex), the four files at or near the
 1,500-line limit are split along their mathematical sections. Each original module is kept as
 an umbrella that imports its pieces and keeps the original module docstring, so no importer
 changes. Declarations, names, namespaces, statements and proofs are moved verbatim; each piece
@@ -9781,7 +9781,7 @@ ledgers is idempotent.
 
 ## Implicit binders, API generality and duplicates (2026-11-01)
 
-The follow-up work requested after [the status review](reports/MathlibReview20261101.tex).
+The follow-up work requested after [the status review](reports/MathlibReview.tex).
 
 - Binder cleanup. Explicit arguments that every caller can infer from a hypothesis or the goal
   are made implicit, and unused binders are removed, iterated to a fixpoint: two passes with
@@ -9854,7 +9854,7 @@ idempotent.
 
 ## The Basic layer as the entry point for TauCeti and Mathlib (2026-11-01)
 
-Following [the review of the Basic layer](reports/BasicLayerReview20261101.tex), the foundational
+Following [the review of the Basic layer](reports/BasicLayerReview.tex), the foundational
 files are reorganized so that they can be offered to the TauCeti and Mathlib communities on
 their own. AGENTS.md now states the purpose and the content of the layer: the central
 definitions of each chapter with their basic API (special values, symmetries, analyticity, the
@@ -10063,3 +10063,115 @@ Darboux items of Chapter 2 now that Laurent's theorem is proved; θ₃² as a La
 (sums of squares 27.13); cot-series Liouville infrastructure (Jacobi Fourier series 22.11, partial
 fractions 22.12); the Jordan curve theorem for the argument principle; Lambert W into the
 foundational layer (its construction is now Mathlib-only); the pfq continuation.
+
+## Stronger forms, line wrapping and Lambert W in the foundational layer (2026-11-02)
+
+- Where a proof used fewer hypotheses than its statement (`have _ := h` patterns), 34 theorems
+  `foo'` were added with the unneeded hypotheses dropped, the same tags and a "stronger than DLMF"
+  docstring; `foo` is proved from `foo'`, with unused binders prefixed by `_`. Rows of kind
+  `statement` in `reports/RenameMap20261101.tsv`. Points to note: the compEllInt/incEllInt bridges to
+  `R_F`/`R_D` without the modulus hypothesis (branch conventions), Hurwitz zeta at `a = -m`
+  (Lean's totalized function), Lerch without the admissibility hypothesis, and the spheroidal
+  eigenvalue for `m > n` (no longer DLMF's `λ^m_n`).
+- All Lean lines of `DLMF/`, `DLMFMathlib/` and the root files are at most 100 characters.
+  Statements written on one dense line still break at awkward places in some files.
+- Lambert W moved to the foundational layer: `Elementary/Basic/LambertWConstruction.lean` (was
+  `Elementary/LambertW/BranchConstruction.lean`) and `Elementary/Basic/LambertW.lean` (was
+  `BranchesAndCalculus.lean`); the asymptotic-coefficient definitions went to the theorem-layer file
+  `Elementary/LambertW/Asymptotics.lean`.
+- `reports/BasicSynopsis.tex`: a chapter-by-chapter mathematical synopsis of the
+  foundational layer.
+
+## Second project-wide proof round (2026-11-02)
+
+Ten agents with disjoint directories. Source admissions: 1,409 → 1,336. No statement was changed;
+all new theorems use only the standard axioms.
+
+- GeneralizedHypergeometric 93 → 86: `genPrincipalContinuation_exists` proved (new
+  `GeneralizedHypergeometric/Basic/PrincipalContinuationExistence.lean`: induction on `q` through Euler's
+  integral 16.5.2, contiguous relations for the other parameters, values on the cut by a rectangle
+  contour shift), with 16.8.3 and 16.8.5 (stronger forms without the lower-parameter hypothesis),
+  16.3.1, 16.3.7, 16.12.2 on the cut plane and analyticity on the cut plane.
+- AlgebraicAnalytic 167 → 152: Lagrange inversion, Lagrange–Bürmann and the extended inversion
+  formulas 1.10.12–17, the Weierstrass product 1.10.22, Mittag-Leffler 1.10.25, even and odd parts
+  1.12.23–24, kernel integrals 1.15.20, 1.15.23, 1.15.42–43, the implicit function theorem. New
+  `DLMFMathlib.Analysis.Complex.{LagrangeInversion, MittagLeffler}` and
+  `DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.OneSubCosIntegral`.
+- AsymptoticApproximations 89 → 79: residues at simple and double poles (new
+  `Mellin/Residues.lean`), 2.5.11, 2.5.14 (uniform Stirling on vertical lines), 2.5.25, 2.5.27,
+  2.5.46–47, the Laurent expansion and Darboux's method 2.10.25–29, 2.10.31, 2.10.34–35.
+- JacobiElliptic 28 → 19, Weierstrass 27 → 25: a cotangent Eisenstein series with a Liouville-type
+  uniqueness theorem (new `JacobiElliptic/EisensteinCotSeries.lean`) gives the partial fractions
+  22.12.4, 7, 10, 13, the Fourier series 22.11.3, 6, 9, 12, 22.16.9 and 23.8.3–4.
+- Elementary 34 → 26, Zeta 42 → 41: Lambert's continued fractions 4.25.1, 4.39.1, the exponential
+  fractions 4.9.3–4 (new `Elementary/OddContinuedFraction.lean`), 4.38.2–3, 25.11.42.
+- QHypergeometric 81 → 73: 17.6.5, Heine's second and third transformations 17.6.7–8, 17.7.1–2
+  (new `QHypergeometric/TwoPhiTwoSums.lean`, with 17.7.3 moved unchanged), 17.9.1, 17.9.19–20.
+- NumberTheory 36 → 32: θ² as a Lambert series from 1ψ1 and `r₂(n) = 4(δ₁(n) − δ₃(n))`
+  27.13.6–7 (new `NumberTheory/ThetaSquareLambert.lean`), the Möbius limits 27.11.13–14 (new
+  `NumberTheory/Asymptotics/MoebiusSums.lean`). `Chebyshev.psi_isEquivalent` and
+  `theta_isEquivalent` in `DLMFMathlib.NumberTheory.PrimeNumberTheorem` are now public.
+- Coulomb 42 → 38: 33.6.5 adapters, analyticity 33.2(ii)–(iii), and the pole-free forms
+  `hasSum_coulombHPlus_log_recipGamma`/`…Minus…` valid for all `η` (checked with mpmath).
+- Legendre 33 → 31, IncompleteGamma 36 → 35: 14.3.19, 14.20.9, §8.27(i).
+- Airy 36 → 34: 9.13.31 (new `Airy/GeneralizedFinitePart.lean`) and the Bi′ error bound of §9.7(iii)
+  (new `Airy/Asymptotics/DerivativeErrorBounds.lean`).
+
+Not covered this round: Mathieu, EllipticIntegrals, Painlevé, Lamé, Heun, Spheroidal.
+
+Leads: 2.5.41 contour shift (half done; unlocks 2.5.42–44, 2.5.15); 17.6.4 by a two-step
+continuation (proved with `|b| < 1`); analyticity of `gammaUniformC k` at 0 (three IncompleteGamma
+targets); 14.3.17 by the 14.3.19 template; Pincherle for 8.9.2/8.19.17 with complex `a`; Ai′ error
+bound 9.7.17 in the third sector; 23.10.11–12 and 23.17.3–5; the Lambert W series 4.13.6 needs a
+continuation of `w(t)` to the disk of radius `2√π`. Possible overlap to review:
+`DLMFMathlib.Analysis.Complex.LagrangeInversion` (residue form) against `LagrangeBurmann`
+(derivative form). The existence of the pFq continuation is now proved; whether the definition and
+existence can move to the foundational layer depends on the imports of the new file.
+
+## pFq existence in the foundational layer, namespace policy and upstream bridges (2026-11-02)
+
+- The existence and analyticity of the principal continuation of `q+1Fq` for all complex
+  parameters are now foundational:
+  `DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence` holds
+  `genPrincipalContinuation_exists`, `genRegularizedHG_eq_original` and
+  `analyticOnNhd_genRegularizedHG` (moved unchanged from the deleted
+  `ParameterAndSeriesProperties`). Its supporting modules moved with it:
+  `DLMF.Hypergeometric.{SeriesProperties, Series, Generalized, GeneralizedCalculus,
+  GeneralizedIntegral}` became `DLMF.Hypergeometric.Basic.{SpecialValues, RealPochhammer,
+  GeneralizedEquation, GeneralizedCalculus, GeneralizedIntegral}`.
+- Namespace policy recorded in AGENTS.md ("Namespaces and upstream functions"): every
+  declaration under `DLMF/` is in `DLMF.<Area>`; DLMFMathlib uses Mathlib namespaces; three
+  patterns for functions that exist upstream (checked pointer, own definition plus bridge,
+  thin wrapper). The survey of upstream namespaces is
+  [reports/UpstreamNamespaces.tex](reports/UpstreamNamespaces.tex).
+- The Gamma area (113 declarations in `Real`, `Complex`, `MeasureTheory`) moved into
+  `DLMF.Gamma` and `DLMF.Gamma.Real`; `tendsto_ordinaryHypergeometric_nhdsWithin_one` moved
+  into `DLMF.Hypergeometric`; the `stRem_*` and `dblZero_*` helpers in DLMFMathlib became the
+  namespaces `StieltjesRemainder` and `DoubleZeroSqrt` (the `AnalyticAt.dblZero_*` dot lemmas
+  keep their names). All renames are rows of `reports/RenameMap20261101.tsv`.
+- New bridges: `DLMF.Bessel.re_besselI_ofReal` and `besselI_ofReal` to TauCeti's
+  `Real.besselI` (foundational, `DLMF/Bessel/Basic/RealModified.lean`), and
+  `Real.logIntLi_eq_logIntLi_two_add_logIntegral` to `TauCeti.Real.logIntegral` (theorem
+  layer, `DLMF/ExpIntegrals/AnalyticProperties.lean`; a foundational proof needs the
+  derivative of `li` from foundational imports).
+- Full build green (15,304 jobs); tag dump unchanged (10,744 entries, no item lost).
+
+## Correction of `xPlusDistrib` and 1.16.21 (2026-11-02)
+
+The definition `DLMF.AlgebraicAnalytic.xPlusDistrib` and the statement
+`xPlusDistrib_eq_iterDeriv` (1.16.21) contained `(ascPochhammer ℝ n).eval (α + 1) ⁻¹`, which
+Lean parses as evaluation at `(α + 1)⁻¹`, not as the reciprocal `1/(α+1)ₙ` of DLMF (the two are
+equal by `rfl`). A counterexample at `α = -3/2`, `n = 2` showed the old statement false. Both
+now read `((ascPochhammer ℝ n).eval (α + 1))⁻¹`, names and tags unchanged, and 1.16.21 is
+proved (axioms: propext, Classical.choice, Quot.sound). The correction was approved by the
+user.
+
+## Correction of 25.11.37 (2026-11-02)
+
+`DLMF.Zeta.hasSum_hurwitzZeta_log_gamma` assumed real `a ≥ 1` and
+`exp_tsum_hurwitzZeta_eq_prod_gamma` assumed `Re a ≥ 1` (with a `Summable` claim). At `a = 1`
+each term of `∑ (-1)^{k+1}/(k+1) ζ(n(k+1), a)` has norm at least `1/(k+1)`, so the series
+converges only conditionally and Lean's unconditional `HasSum`/`Summable` fail; a compiled
+counterexample (`not_summable_hurwitzZeta_log_gamma_one`) is in the round-3 scratch notes. Both
+hypotheses are now strict (`1 < a`, `1 < a.re`), names and tags unchanged; both remain
+admitted. The correction was approved by the user.

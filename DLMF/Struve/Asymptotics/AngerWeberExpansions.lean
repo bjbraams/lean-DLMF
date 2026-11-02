@@ -149,7 +149,8 @@ DLMF prints the error as `O(ν⁻²)`, but the remainder inherits the size of `s
 form on the real axis. -/
 @[dlmf 11.11.E6 "different convention: error term e^{π|Im ν|} ν⁻², DLMF erratum"]
 theorem weberE_large_order (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
-    (fun ν : ℂ => π*ν/2*weberE ν z-(sin (π*ν/2))^2-ν*z/(ν^2-1)*(cos (π*ν/2))^2) =O[nonintegerOrderSector ε] (fun ν : ℂ => (Real.exp (π*|ν.im|) : ℂ)*ν^(-2:ℤ)) := by
+    (fun ν : ℂ => π*ν/2*weberE ν z-(sin (π*ν/2))^2-ν*z/(ν^2-1)*(cos (π*ν/2))^2)
+        =O[nonintegerOrderSector ε] (fun ν : ℂ => (Real.exp (π*|ν.im|) : ℂ)*ν^(-2:ℤ)) := by
   obtain ⟨K, hK⟩ := struveAs_S_tail_bound z hε
   have hev : ∀ᶠ ν : ℂ in nonintegerOrderSector ε, 4 ≤ ‖ν‖ ∧ ∀ n : ℤ, ε ≤ ‖ν - n‖ := by
     rw [nonintegerOrderSector, sector, eventually_inf_principal, eventually_inf_principal]
@@ -226,7 +227,8 @@ theorem integral_exp_mul_ibp {ω : ℂ} (hω : ω ≠ 0) {H H' : ℝ → ℂ}
     refine this.congr_deriv ?_
     simp only [id, ofReal_one, mul_one]; field_simp
   have hibp := intervalIntegral.integral_mul_deriv_eq_deriv_mul (fun θ _ => hd θ) hv
-    (hc.intervalIntegrable _ _) ((by fun_prop : Continuous fun θ : ℝ => exp (ω*θ)).intervalIntegrable _ _)
+    (hc.intervalIntegrable _ _)
+        ((by fun_prop : Continuous fun θ : ℝ => exp (ω*θ)).intervalIntegrable _ _)
   have e1 : (∫ θ : ℝ in 0..π, exp (ω*θ) * H θ) = ∫ θ : ℝ in 0..π, H θ * exp (ω*θ) :=
     intervalIntegral.integral_congr fun θ _ => by ring
   have e2 : (∫ θ : ℝ in 0..π, H' θ * (exp (ω*θ)/ω)) =
@@ -516,7 +518,8 @@ theorem weberE_even_bound (z : ℂ) : ∃ K : ℝ, 0 ≤ K ∧ ∀ n : ℤ, n �
 ~[comap (fun n : ℤ => |n|) atTop] (fun n => 2*z/((4*(n:ℂ)^2-1)*π))`. -/
 @[dlmf 11.11.E7]
 theorem weberE_large_integer_0 (z : ℂ) :
-    (fun n : ℤ => weberE (2*n+0) z) ~[comap (fun n : ℤ => |n|) atTop] (fun n => 2*z/((4*(n:ℂ)^2-1)*π)) := by
+    (fun n : ℤ => weberE (2*n+0) z) ~[comap (fun n : ℤ => |n|) atTop]
+        (fun n => 2*z/((4*(n:ℂ)^2-1)*π)) := by
   obtain ⟨K, hK, hb⟩ := weberE_even_bound z
   unfold IsEquivalent
   rw [isLittleO_iff]
@@ -599,7 +602,8 @@ theorem weberE_large_integer_0 (z : ℂ) :
 ~[comap (fun n : ℤ => |n|) atTop] (fun n => 2/((2*n+1:ℂ)*π))`. -/
 @[dlmf 11.11.E7]
 theorem weberE_large_integer_1 (z : ℂ) :
-    (fun n : ℤ => weberE (2*n+1) z) ~[comap (fun n : ℤ => |n|) atTop] (fun n => 2/((2*n+1:ℂ)*π)) := by
+    (fun n : ℤ => weberE (2*n+1) z) ~[comap (fun n : ℤ => |n|) atTop]
+        (fun n => 2/((2*n+1:ℂ)*π)) := by
   obtain ⟨M, hM⟩ := weberE_odd_bound z
   unfold IsEquivalent
   rw [isLittleO_iff]
@@ -642,7 +646,9 @@ theorem weberE_large_integer_1 (z : ℂ) :
 /-- Coefficients in the scaled Anger–Weber expansion. -/
 def angerScaledA : ℕ → ℂ → ℂ
   | 0 => fun lam => 1/(1+lam)
-  | k+1 => fun lam => limUnder (𝓝[≠] lam) (fun l : ℂ => l/(1-l^2)*(l*iteratedDeriv 2 (angerScaledA k) l+deriv (angerScaledA k) l)/((2*k+1:ℂ)*(2*k+2)))
+  | k+1 => fun lam => limUnder (𝓝[≠] lam)
+             (fun l : ℂ => l/(1-l^2)*(l*iteratedDeriv 2 (angerScaledA k) l+deriv (angerScaledA k)
+             l)/((2*k+1:ℂ)*(2*k+2)))
 
 /-- Derivative of a quadratic divided by a power of `1 + l`. -/
 theorem hasDerivAt_quadratic_div_pow (a b c : ℂ) (n : ℕ) {l : ℂ} (hl : 1+l ≠ 0) :
@@ -694,9 +700,11 @@ theorem angerScaledA_succ_eq (k : ℕ) {g d e G : ℂ → ℂ}
 -(225*lam^3-54*lam^2+lam)/(720*(1+lam)^10)`. -/
 @[dlmf 11.11.E9]
 theorem angerScaledA_initial (lam : ℂ) (h : lam ≠ -1) :
-    angerScaledA 1 lam = -lam/(2*(1+lam)^4) ∧ angerScaledA 2 lam = (9*lam^2-lam)/(24*(1+lam)^7) ∧ angerScaledA 3 lam = -(225*lam^3-54*lam^2+lam)/(720*(1+lam)^10) := by
+    angerScaledA 1 lam = -lam/(2*(1+lam)^4) ∧ angerScaledA 2 lam = (9*lam^2-lam)/(24*(1+lam)^7) ∧
+        angerScaledA 3 lam = -(225*lam^3-54*lam^2+lam)/(720*(1+lam)^10) := by
   have hlam : 1+lam ≠ 0 := fun h0 => h (by linear_combination h0)
-  have hc : ∀ (a b c : ℂ) (n : ℕ) l, 1+l ≠ 0 → ContinuousAt (fun l => (a*l^2+b*l+c)/(1+l)^(n+1)) l :=
+  have hc : ∀ (a b c : ℂ) (n : ℕ) l, 1+l ≠ 0 →
+      ContinuousAt (fun l => (a*l^2+b*l+c)/(1+l)^(n+1)) l :=
     fun a b c n l hl => (hasDerivAt_quadratic_div_pow a b c n hl).continuousAt
   have h1m : ∀ l : ℂ, 1+l ≠ 0 → l ≠ 1 → 1-l^2 ≠ 0 := fun l hl h1 => by
     have : 1-l ≠ 0 := sub_ne_zero.2 (Ne.symm h1)
@@ -741,7 +749,9 @@ theorem angerScaledA_initial (lam : ℂ) (h : lam ≠ -1) :
 =O[sector (π-δ)] (fun ν : ℂ => ν^(-(2*N+1:ℤ)))`. -/
 @[dlmf 11.11.E8]
 theorem angerA_scaled_8 {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
-    (fun ν : ℂ => angerA (1*ν) (lam*ν)-(1:ℂ)/π*∑ k ∈ Finset.range N, ((2*k).factorial:ℂ)*angerScaledA k (1*lam)/ν^(2*k+1)) =O[sector (π-δ)] (fun ν : ℂ => ν^(-(2*N+1:ℤ))) := by
+    (fun ν : ℂ => angerA (1*ν) (lam*ν)-(1:ℂ)/π*∑ k ∈ Finset.range N,
+        ((2*k).factorial:ℂ)*angerScaledA k (1*lam)/ν^(2*k+1)) =O[sector (π-δ)]
+        (fun ν : ℂ => ν^(-(2*N+1:ℤ))) := by
   sorry
 
 /-- Asymptotic bound with the indicated comparison function: `(fun ν : ℂ => angerA (-1*ν)
@@ -749,7 +759,9 @@ theorem angerA_scaled_8 {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ : 0 < δ) (
 =O[sector (π-δ)] (fun ν : ℂ => ν^(-(2*N+1:ℤ)))`. -/
 @[dlmf 11.11.E10]
 theorem angerA_scaled_10 {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
-    (fun ν : ℂ => angerA (-1*ν) (lam*ν)-(-1:ℂ)/π*∑ k ∈ Finset.range N, ((2*k).factorial:ℂ)*angerScaledA k (-1*lam)/ν^(2*k+1)) =O[sector (π-δ)] (fun ν : ℂ => ν^(-(2*N+1:ℤ))) := by
+    (fun ν : ℂ => angerA (-1*ν) (lam*ν)-(-1:ℂ)/π*∑ k ∈ Finset.range N,
+        ((2*k).factorial:ℂ)*angerScaledA k (-1*lam)/ν^(2*k+1)) =O[sector (π-δ)]
+        (fun ν : ℂ => ν^(-(2*N+1:ℤ))) := by
   sorry
 
 /-- The principal-branch phase `√(1-lam²) - log ((1+√(1-lam²))/lam)` of the scaled Anger
@@ -760,14 +772,17 @@ def angerMu (lam : ℂ) : ℂ :=
 
 /-- Coefficients of the saddle expansion, with existence provided by the expansion theorem. -/
 def angerScaledB (lam : ℝ) (k : ℕ) : ℂ :=
-  asymptoticCoeff (fun v : ℝ => ((π*v/2:ℂ)^(1/2:ℂ))*exp (v*angerMu lam)*angerA (-v) (lam*v)) k / poch (1/2) k
+  asymptoticCoeff (fun v : ℝ => ((π*v/2:ℂ)^(1/2:ℂ))*exp (v*angerMu lam)*angerA (-v) (lam*v))
+      k / poch (1/2) k
 
 /-- Asymptotic bound with the indicated comparison function: `(fun ν : ℂ => (π*ν/2)^(1/2:ℂ)*exp
 (ν*angerMu lam)*angerA (-ν) (lam*ν)-∑ k ∈ Finset.range N, poch (1/2) k*angerScaledB lam k/ν^k)
 =O[sector (π/2-δ)] (fun ν : ℂ => ν^(-(N:ℤ)))`. -/
 @[dlmf 11.11.E11]
-theorem angerA_scaled_saddle {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun ν : ℂ => (π*ν/2)^(1/2:ℂ)*exp (ν*angerMu lam)*angerA (-ν) (lam*ν)-∑ k ∈ Finset.range N, poch (1/2) k*angerScaledB lam k/ν^k) =O[sector (π/2-δ)] (fun ν : ℂ => ν^(-(N:ℤ))) := by
+theorem angerA_scaled_saddle {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (hδ : 0 < δ)
+    (hδπ : δ < π/2) (N : ℕ) :
+    (fun ν : ℂ => (π*ν/2)^(1/2:ℂ)*exp (ν*angerMu lam)*angerA (-ν) (lam*ν)-∑ k ∈ Finset.range N,
+        poch (1/2) k*angerScaledB lam k/ν^k) =O[sector (π/2-δ)] (fun ν : ℂ => ν^(-(N:ℤ))) := by
   sorry
 
 /-- Identity under the stated parameter and domain assumptions: `angerScaledB lam 0 =
@@ -775,7 +790,9 @@ theorem angerA_scaled_saddle {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ
 angerScaledB lam 2 = (4+300*lam^2+81*lam^4:ℂ)/(864*(1-lam^2:ℂ)^(13/4:ℂ))`. -/
 @[dlmf 11.11.E13]
 theorem angerScaledB_initial {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
-    angerScaledB lam 0 = (1-lam^2:ℂ)^(-1/4:ℂ) ∧ angerScaledB lam 1 = (2+3*lam^2:ℂ)/(12*(1-lam^2:ℂ)^(7/4:ℂ)) ∧ angerScaledB lam 2 = (4+300*lam^2+81*lam^4:ℂ)/(864*(1-lam^2:ℂ)^(13/4:ℂ)) := by
+    angerScaledB lam 0 = (1-lam^2:ℂ)^(-1/4:ℂ) ∧ angerScaledB lam 1 =
+        (2+3*lam^2:ℂ)/(12*(1-lam^2:ℂ)^(7/4:ℂ)) ∧ angerScaledB lam 2 =
+        (4+300*lam^2+81*lam^4:ℂ)/(864*(1-lam^2:ℂ)^(13/4:ℂ)) := by
   sorry
 
 end DLMF.Struve

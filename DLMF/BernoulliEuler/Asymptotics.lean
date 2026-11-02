@@ -261,7 +261,8 @@ private lemma abs_scaledBernoulliCoeff_two_mul_sub_le {k : ℕ} (hk : 1 ≤ k) :
       gcongr; nlinarith
 
 /-- `|cᵢ - dᵢ| ≤ 32 · 2⁻ⁱ` for all `i`. -/
-private lemma abs_scaledBernoulliCoeff_sub_le (i : ℕ) : |scaledBernoulliCoeff i - scaledBernoulliLimit i| ≤ 32 / 2 ^ i := by
+private lemma abs_scaledBernoulliCoeff_sub_le (i : ℕ) : |scaledBernoulliCoeff i -
+    scaledBernoulliLimit i| ≤ 32 / 2 ^ i := by
   rcases Nat.even_or_odd' i with ⟨k, rfl | rfl⟩
   · rcases Nat.eq_zero_or_pos k with rfl | hk
     · simp [scaledBernoulliCoeff, scaledBernoulliLimit]; norm_num
@@ -276,7 +277,8 @@ private lemma abs_scaledBernoulliCoeff_sub_le (i : ℕ) : |scaledBernoulliCoeff 
       positivity
 
 /-- For `n = 2m + p` (`p < 2`), `dᵢ = 2 (-1)^{m+1} a_p(n - i)`. -/
-private lemma scaledBernoulliLimit_eq_cosSinTaylorCoeff {p : ℕ} (hp : p < 2) (m i : ℕ) (hi : i ≤ 2 * m + p) :
+private lemma scaledBernoulliLimit_eq_cosSinTaylorCoeff {p : ℕ} (hp : p < 2) (m i : ℕ)
+    (hi : i ≤ 2 * m + p) :
     scaledBernoulliLimit i = 2 * (-1) ^ (m + 1) * cosSinTaylorCoeff p (2 * m + p - i) := by
   rcases Nat.even_or_odd' i with ⟨k, rfl | rfl⟩ <;> interval_cases p
   · obtain ⟨j, rfl⟩ := Nat.exists_eq_add_of_le (show k ≤ m by omega)
@@ -345,12 +347,14 @@ private lemma abs_cosSinTaylorCoeff_le_one (p j : ℕ) : |cosSinTaylorCoeff p j|
   unfold cosSinTaylorCoeff; split_ifs <;> simp
 
 /-- The exponential series of a real number. -/
-private lemma hasSum_pow_div_factorial_real_exp (R : ℝ) : HasSum (fun j => R ^ j / j !) (Real.exp R) := by
+private lemma hasSum_pow_div_factorial_real_exp (R : ℝ) : HasSum (fun j => R ^ j / j !)
+    (Real.exp R) := by
   rw [Real.exp_eq_exp_ℝ]; exact NormedSpace.expSeries_div_hasSum_exp R
 
 /-- The core estimate for 24.11.5: the normalized `Bₙ(x)`, `n = 2m + p`, differs from `cos`/`sin`
 by at most `16 · 2⁻ⁿ e^{2R} + (e^R - ∑_{j ≤ n} Rʲ/j!)` when `‖2πx‖ ≤ R`. -/
-private lemma norm_bernoulliPolyB_sub_cosSin_le {p : ℕ} (hp : p < 2) (m n : ℕ) (hn : n = 2 * m + p) (x : ℂ) {r : ℝ}
+private lemma norm_bernoulliPolyB_sub_cosSin_le {p : ℕ} (hp : p < 2) (m n : ℕ) (hn : n = 2 * m + p)
+    (x : ℂ) {r : ℝ}
     (hx : ‖x‖ ≤ r) {G : ℂ}
     (hG : HasSum (fun j => (cosSinTaylorCoeff p j : ℂ) * (2 * π * x) ^ j / j !) G) :
     ‖(-1 : ℂ) ^ ((m : ℤ) - 1) * (2 * π) ^ n / (2 * n !) * bernoulliPolyB n x - G‖ ≤
@@ -382,10 +386,12 @@ private lemma norm_bernoulliPolyB_sub_cosSin_le {p : ℕ} (hp : p < 2) (m n : �
       show 2 * m + p - (n - i) = i by omega]
     push_cast; ring
   have hsplit : s * (2 * π) ^ n / (2 * n !) * bernoulliPolyB n x - G =
-      s / 2 * ∑ i ∈ range (n + 1), ((scaledBernoulliCoeff i - scaledBernoulliLimit i : ℝ) : ℂ) * y ^ (n - i) / (n - i)! +
+      s / 2 * ∑ i ∈ range (n + 1), ((scaledBernoulliCoeff i - scaledBernoulliLimit i : ℝ) : ℂ) *
+          y ^ (n - i) / (n - i)! +
         (P - G) := by
     have hE := bernoulliPolyB_eq_sum_scaledBernoulliCoeff n x
-    have hcd : ∑ i ∈ range (n + 1), ((scaledBernoulliCoeff i - scaledBernoulliLimit i : ℝ) : ℂ) * y ^ (n - i) / (n - i)! =
+    have hcd : ∑ i ∈ range (n + 1), ((scaledBernoulliCoeff i - scaledBernoulliLimit i : ℝ) : ℂ) *
+        y ^ (n - i) / (n - i)! =
         ∑ i ∈ range (n + 1), (scaledBernoulliCoeff i : ℂ) * y ^ (n - i) / (n - i)! -
           ∑ i ∈ range (n + 1), (scaledBernoulliLimit i : ℂ) * y ^ (n - i) / (n - i)! := by
       rw [← sum_sub_distrib]; refine sum_congr rfl fun i _ => ?_; push_cast; ring
@@ -396,7 +402,8 @@ private lemma norm_bernoulliPolyB_sub_cosSin_le {p : ℕ} (hp : p < 2) (m n : �
   rw [hsplit]
   refine (norm_add_le _ _).trans (add_le_add ?_ ?_)
   · rw [norm_mul, norm_div, hsn, Complex.norm_ofNat]
-    calc 1 / 2 * ‖∑ i ∈ range (n + 1), ((scaledBernoulliCoeff i - scaledBernoulliLimit i : ℝ) : ℂ) * y ^ (n - i) / (n - i)!‖
+    calc 1 / 2 * ‖∑ i ∈ range (n + 1), ((scaledBernoulliCoeff i - scaledBernoulliLimit i : ℝ) : ℂ) *
+           y ^ (n - i) / (n - i)!‖
         ≤ 1 / 2 * ∑ i ∈ range (n + 1), 32 / 2 ^ i * (R ^ (n - i) / (n - i)!) := by
           gcongr
           refine (norm_sum_le _ _).trans (sum_le_sum fun i _ => ?_)
@@ -433,7 +440,8 @@ noncomputable def bernoulliCosSinError (p m : ℕ) (r : ℝ) : ℝ :=
     (Real.exp (2 * π * r) - ∑ j ∈ range (2 * m + p + 1), (2 * π * r) ^ j / j !)
 
 /-- The error bound tends to `0`. -/
-private lemma tendsto_bernoulliCosSinError (p : ℕ) (r : ℝ) : Tendsto (fun m => bernoulliCosSinError p m r) atTop (𝓝 0) := by
+private lemma tendsto_bernoulliCosSinError (p : ℕ) (r : ℝ) : Tendsto
+    (fun m => bernoulliCosSinError p m r) atTop (𝓝 0) := by
   have hn : Tendsto (fun m : ℕ => 2 * m + p) atTop atTop :=
     tendsto_atTop_atTop.mpr fun b => ⟨b, fun a ha => by omega⟩
   have h1 : Tendsto (fun m : ℕ => 16 / 2 ^ (2 * m + p) * Real.exp (2 * (2 * π * r))) atTop
@@ -451,7 +459,8 @@ private lemma tendsto_bernoulliCosSinError (p : ℕ) (r : ℝ) : Tendsto (fun m 
   simpa [bernoulliCosSinError] using h1.add h2
 
 /-- Uniform convergence from a uniform error bound tending to `0`. -/
-private lemma tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ} {K : Set ℂ} (e : ℕ → ℝ)
+private lemma tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
+    {K : Set ℂ} (e : ℕ → ℝ)
     (he : Tendsto e atTop (𝓝 0)) (h : ∀ m x, x ∈ K → ‖F m x - G x‖ ≤ e m) :
     TendstoUniformlyOn F G atTop K := by
   refine Metric.tendstoUniformlyOn_iff.mpr fun ε hε => ?_
@@ -463,13 +472,16 @@ private lemma tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero {F : ℕ → ℂ
 private lemma norm_bernoulliPolyB_two_mul_sub_cos_le (m : ℕ) (x : ℂ) {r : ℝ} (hx : ‖x‖ ≤ r) :
     ‖(-1 : ℂ) ^ ((m : ℤ) - 1) * (2 * π) ^ (2 * m) / (2 * (2 * m)!) * bernoulliPolyB (2 * m) x -
       Complex.cos (2 * π * x)‖ ≤ bernoulliCosSinError 0 m r :=
-  norm_bernoulliPolyB_sub_cosSin_le (p := 0) (by norm_num) m (2 * m) (by ring) x hx (hasSum_cosSinTaylorCoeff_cos _)
+  norm_bernoulliPolyB_sub_cosSin_le (p := 0) (by norm_num) m (2 * m) (by ring) x hx
+      (hasSum_cosSinTaylorCoeff_cos _)
 
 /-- The error bound for the odd Bernoulli limit (24.11.5). -/
-private lemma norm_bernoulliPolyB_two_mul_add_one_sub_sin_le (m : ℕ) (x : ℂ) {r : ℝ} (hx : ‖x‖ ≤ r) :
+private lemma norm_bernoulliPolyB_two_mul_add_one_sub_sin_le (m : ℕ) (x : ℂ) {r : ℝ}
+    (hx : ‖x‖ ≤ r) :
     ‖(-1 : ℂ) ^ ((m : ℤ) - 1) * (2 * π) ^ (2 * m + 1) / (2 * (2 * m + 1)!) *
         bernoulliPolyB (2 * m + 1) x - Complex.sin (2 * π * x)‖ ≤ bernoulliCosSinError 1 m r :=
-  norm_bernoulliPolyB_sub_cosSin_le (p := 1) (by norm_num) m (2 * m + 1) rfl x hx (hasSum_cosSinTaylorCoeff_sin _)
+  norm_bernoulliPolyB_sub_cosSin_le (p := 1) (by norm_num) m (2 * m + 1) rfl x hx
+      (hasSum_cosSinTaylorCoeff_sin _)
 
 /-- `Eₙ(x) = 2^{n+1} (B_{n+1}(x/2 + 1/2) - B_{n+1}(x/2))/(n+1)` at complex `x`. -/
 private lemma eulerPolyE_eq_two_pow_mul_bernoulliPolyB_sub_div (n : ℕ) (x : ℂ) :
@@ -506,7 +518,8 @@ theorem tendstoUniformlyOn_bernoulli_even {K : Set ℂ} (hK : IsCompact K) :
         bernoulliPolyB (2 * m) x)
       (fun x => Complex.cos (2 * π * x)) atTop K := by
   obtain ⟨r, hr⟩ := hK.isBounded.exists_norm_le
-  exact tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero _ (tendsto_bernoulliCosSinError 0 r) fun m x hx =>
+  exact tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero _
+      (tendsto_bernoulliCosSinError 0 r) fun m x hx =>
     norm_bernoulliPolyB_two_mul_sub_cos_le m x (hr x hx)
 
 /-- DLMF 24.11.5, odd `n = 2m + 1` (so `⌊n/2⌋ - 1 = m - 1`):
@@ -519,7 +532,8 @@ theorem tendstoUniformlyOn_bernoulli_odd {K : Set ℂ} (hK : IsCompact K) :
         (2 * (2 * m + 1)!) * bernoulliPolyB (2 * m + 1) x)
       (fun x => Complex.sin (2 * π * x)) atTop K := by
   obtain ⟨r, hr⟩ := hK.isBounded.exists_norm_le
-  exact tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero _ (tendsto_bernoulliCosSinError 1 r) fun m x hx =>
+  exact tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero _
+      (tendsto_bernoulliCosSinError 1 r) fun m x hx =>
     norm_bernoulliPolyB_two_mul_add_one_sub_sin_le m x (hr x hx)
 
 /-- DLMF 24.11.6, even `n = 2m` (so `⌊(n+1)/2⌋ = m`):
@@ -531,7 +545,8 @@ theorem tendstoUniformlyOn_euler_even {K : Set ℂ} (hK : IsCompact K) :
         eulerPolyE (2 * m) x)
       (fun x => Complex.sin (π * x)) atTop K := by
   obtain ⟨r, hr⟩ := hK.isBounded.exists_norm_le
-  refine tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero _ (tendsto_bernoulliCosSinError 1 (r + 1)) fun m x hx => ?_
+  refine tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero _
+      (tendsto_bernoulliCosSinError 1 (r + 1)) fun m x hx => ?_
   obtain ⟨h1, h2⟩ := norm_half_le_and_norm_half_add_half_le (hr x hx)
   have b1 := norm_bernoulliPolyB_two_mul_add_one_sub_sin_le m _ h2
   have b2 := norm_bernoulliPolyB_two_mul_add_one_sub_sin_le m _ h1
@@ -543,7 +558,8 @@ theorem tendstoUniformlyOn_euler_even {K : Set ℂ} (hK : IsCompact K) :
       Complex.sin (π * x) =
         -(1 / 2) * ((O (x / 2 + 1 / 2) - Complex.sin (2 * π * (x / 2 + 1 / 2))) -
         (O (x / 2) - Complex.sin (2 * π * (x / 2)))) := by
-    rw [eulerPolyE_eq_two_pow_mul_bernoulliPolyB_sub_div, show 2 * π * (x / 2 + 1 / 2) = π * x + π by ring,
+    rw [eulerPolyE_eq_two_pow_mul_bernoulliPolyB_sub_div, show 2 * π * (x / 2 + 1 / 2) =
+        π * x + π by ring,
       show (2 : ℂ) * π * (x / 2) = π * x by ring, Complex.sin_add_pi]
     simp only [O, hs]
     have hf : (((2 * m + 1)! : ℕ) : ℂ) = (2 * m + 1) * (2 * m)! := by
@@ -571,7 +587,8 @@ theorem tendstoUniformlyOn_euler_odd {K : Set ℂ} (hK : IsCompact K) :
         eulerPolyE (2 * m + 1) x)
       (fun x => Complex.cos (π * x)) atTop K := by
   obtain ⟨r, hr⟩ := hK.isBounded.exists_norm_le
-  refine tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero _ ((tendsto_bernoulliCosSinError 0 (r + 1)).comp
+  refine tendstoUniformlyOn_of_norm_sub_le_of_tendsto_zero _
+      ((tendsto_bernoulliCosSinError 0 (r + 1)).comp
     (tendsto_add_atTop_nat 1)) fun m x hx => ?_
   obtain ⟨h1, h2⟩ := norm_half_le_and_norm_half_add_half_le (hr x hx)
   have b1 := norm_bernoulliPolyB_two_mul_sub_cos_le (m + 1) _ h2
@@ -584,7 +601,8 @@ theorem tendstoUniformlyOn_euler_odd {K : Set ℂ} (hK : IsCompact K) :
       eulerPolyE (2 * m + 1) x - Complex.cos (π * x) =
       -(1 / 2) * ((N (x / 2 + 1 / 2) - Complex.cos (2 * π * (x / 2 + 1 / 2))) -
         (N (x / 2) - Complex.cos (2 * π * (x / 2)))) := by
-    rw [eulerPolyE_eq_two_pow_mul_bernoulliPolyB_sub_div, show 2 * π * (x / 2 + 1 / 2) = π * x + π by ring,
+    rw [eulerPolyE_eq_two_pow_mul_bernoulliPolyB_sub_div, show 2 * π * (x / 2 + 1 / 2) =
+        π * x + π by ring,
       show (2 : ℂ) * π * (x / 2) = π * x by ring, Complex.cos_add_pi]
     simp only [N, hs]
     have hf : (((2 * (m + 1))! : ℕ) : ℂ) = (2 * m + 2) * (2 * m + 1)! := by
@@ -598,7 +616,8 @@ theorem tendstoUniformlyOn_euler_odd {K : Set ℂ} (hK : IsCompact K) :
     ring
   rw [hF, norm_mul, norm_neg, norm_div, norm_one, Complex.norm_ofNat]
   calc 1 / 2 * ‖(N (x / 2 + 1 / 2) - Complex.cos (2 * π * (x / 2 + 1 / 2))) -
-        (N (x / 2) - Complex.cos (2 * π * (x / 2)))‖ ≤ 1 / 2 * (bernoulliCosSinError 0 (m + 1) (r + 1) +
+        (N (x / 2) - Complex.cos (2 * π * (x / 2)))‖ ≤ 1 / 2 *
+            (bernoulliCosSinError 0 (m + 1) (r + 1) +
           bernoulliCosSinError 0 (m + 1) (r + 1)) := by
         gcongr; exact (norm_sub_le _ _).trans (add_le_add b1 b2)
     _ = bernoulliCosSinError 0 (m + 1) (r + 1) := by ring

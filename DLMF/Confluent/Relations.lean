@@ -124,7 +124,8 @@ theorem kummerU_of_zero_param (b z : ℂ) : kummerU 0 b z = 1 :=
 @[dlmf 13.6.E4]
 theorem kummerU_shift_one (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     kummerU a (a + 1) z = z ^ (-a) := by
-  rw [kummerU_kummer_transform_all a _ (slitPlane_ne_zero hz), show a - (a + 1) + 1 = 0 by ring, kummerU_zero,
+  rw [kummerU_kummer_transform_all a _ (slitPlane_ne_zero hz), show a - (a + 1) + 1 =
+      0 by ring, kummerU_zero,
     show (1 : ℂ) - (a + 1) = -a by ring, mul_one]
 
 /-- Lower incomplete-Gamma identities with a regular denominator for Kummer M. -/
@@ -372,8 +373,10 @@ theorem kummerBesselCoeff_succ (ν : ℂ) (n k : ℕ) :
       2 * (ν + 1) + 1 + n + k by ring, pow_succ]
   have hp := hP
   linear_combination
-    -((-1 : ℂ) ^ k * (ν + (k + 1)) * (1 / Gamma (2 * (ν + 1) + 1 + n + k)) * (n.choose k : ℂ)) * hp -
-    ((-1 : ℂ) ^ k * (ν + (k + 1)) * (1 / Gamma (2 * (ν + 1) + 1 + n + k)) * poch (2 * ν) (k + 1)) * hcz
+    -((-1 : ℂ) ^ k * (ν + (k + 1)) * (1 / Gamma (2 * (ν + 1) + 1 + n + k)) *
+        (n.choose k : ℂ)) * hp -
+    ((-1 : ℂ) ^ k * (ν + (k + 1)) * (1 / Gamma (2 * (ν + 1) + 1 + n + k)) *
+        poch (2 * ν) (k + 1)) * hcz
 
 /-- The zero coefficient satisfies the same finite-sum recurrence. -/
 theorem kummerBesselCoeff_succ_zero (ν : ℂ) (n : ℕ) :
@@ -396,7 +399,8 @@ theorem regularizedConfluent_bessel_sum_pos (n : ℕ) {ν : ℂ} (hν : 0 < ν.r
     have h := kummerM_eq_exp_mul_regularized0F1 (ν := ν) (z := 2 * z) hb' hb
     rw [kummerM_eq_mul_regularizedHGFun hb] at h
     rw [Gamma_add_one ν hv] at h
-    simp only [Nat.zero_add, Nat.cast_zero, add_zero, Finset.sum_range_one, kummerBesselCoeff, pow_zero,
+    simp only [Nat.zero_add, Nat.cast_zero, add_zero, Finset.sum_range_one,
+        kummerBesselCoeff, pow_zero,
       Nat.choose_zero_right, Nat.cast_one, one_mul, poch_zero, mul_one]
     have hG : Gamma (2 * ν + 1) ≠ 0 := Gamma_ne_zero hb
     have hGν : Gamma ν ≠ 0 := Gamma_ne_zero_of_re_pos hν
@@ -449,7 +453,8 @@ theorem regularizedConfluent_bessel_sum_pos (n : ℕ) {ν : ℂ} (hν : 0 < ν.r
         ring
       rw [hleft, Finset.mul_sum, show (∑ k ∈ Finset.range (n + 1), f ν n (k + 1)) + f ν n 0 -
           (∑ k ∈ Finset.range (n + 1), ν * (2 * ν + 1) * z * f (ν + 1) n k) =
-          (∑ k ∈ Finset.range (n + 1), (f ν n (k + 1) - ν * (2 * ν + 1) * z * f (ν + 1) n k)) + f ν n 0 by
+          (∑ k ∈ Finset.range (n + 1),
+              (f ν n (k + 1) - ν * (2 * ν + 1) * z * f (ν + 1) n k)) + f ν n 0 by
         rw [Finset.sum_sub_distrib]; ring]
       simp_rw [hterm]
       rw [← Finset.mul_sum, hhead, ← mul_add, ← Finset.sum_range_succ']
@@ -472,7 +477,8 @@ theorem regularizedConfluent_bessel_sum_all (n : ℕ) (ν z : ℂ) :
     intro v hv
     convert! ((differentiable_regularizedConfluent_comp
       (A := fun v : ℂ => v + 1 / 2) (B := fun v : ℂ => 2 * v + 1 + n)
-      (by fun_prop) (by fun_prop) (2 * z)).mul differentiable_one_div_Gamma).analyticAt v using 1 <;> (funext v; simp only [one_div, Pi.mul_apply, Function.comp_apply, id_eq])
+      (by fun_prop) (by fun_prop) (2 * z)).mul differentiable_one_div_Gamma).analyticAt v using 1
+          <;> (funext v; simp only [one_div, Pi.mul_apply, Function.comp_apply, id_eq])
   have hR : AnalyticOnNhd ℂ (fun v : ℂ => exp z * ∑ k ∈ Finset.range (n + 1),
       kummerBesselCoeff v n k * (z / 2) ^ k *
         regularizedHGFun ∅ {v + k + 1} (z ^ 2 / 4)) Set.univ := by
@@ -483,7 +489,8 @@ theorem regularizedConfluent_bessel_sum_all (n : ℕ) (ν z : ℂ) :
       convert! (((hp.const_mul ((-1 : ℂ) ^ k * (n.choose k : ℂ))).mul
         (differentiable_id.add_const (k : ℂ))).mul
         (differentiable_one_div_Gamma.comp
-          (by fun_prop : Differentiable ℂ (fun v : ℂ => 2 * v + 1 + n + k)))) using 1 <;> (funext v; simp only [one_div, Pi.mul_apply, Function.comp_apply, id_eq])
+          (by fun_prop : Differentiable ℂ (fun v : ℂ => 2 * v + 1 + n + k)))) using 1 <;>
+              (funext v; simp only [one_div, Pi.mul_apply, Function.comp_apply, id_eq])
     have hd : Differentiable ℂ (fun v : ℂ => exp z * ∑ k ∈ Finset.range (n + 1),
         kummerBesselCoeff v n k * (z / 2) ^ k *
           regularizedHGFun ∅ {v + k + 1} (z ^ 2 / 4)) := by
@@ -501,7 +508,8 @@ theorem regularizedConfluent_bessel_sum_all (n : ℕ) (ν z : ℂ) :
       with v hv
     exact regularizedConfluent_bessel_sum_pos n hv z
   -- Mathlib’s complex identity principle extends the finite expansion in the order.
-  exact hL.eqOn_of_preconnected_of_eventuallyEq hR isPreconnected_univ (Set.mem_univ 1) he (Set.mem_univ ν)
+  exact hL.eqOn_of_preconnected_of_eventuallyEq hR isPreconnected_univ (Set.mem_univ 1) he
+      (Set.mem_univ ν)
 
 /-- Terminating Pochhammer coefficients as binomial coefficients, including zero tails. -/
 theorem poch_neg_nat_div_factorial_eq (n k : ℕ) :
@@ -805,7 +813,8 @@ theorem kummerU_hermite (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) (hre : 0 < z.
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have h4 : ∀ m : ℕ, (2 : ℂ) ^ (-((2 * m : ℕ) : ℂ)) = ((4 : ℂ) ^ m)⁻¹ := fun m => by
     rw [cpow_neg, cpow_natCast, pow_mul]; norm_num
-  have hf : ∀ k : ℕ, (k.factorial : ℂ) ≠ 0 := fun k => Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
+  have hf : ∀ k : ℕ, (k.factorial : ℂ) ≠ 0 := fun k =>
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hsq : ∀ m : ℕ, ((-1 : ℂ) ^ m) * (-1) ^ m = 1 := fun m => by rw [← mul_pow]; simp
   obtain ⟨m, rfl | rfl⟩ := Nat.even_or_odd' n
   · rw [kummerU_kummer_transform_all _ _
@@ -1004,7 +1013,8 @@ theorem whittakerW_upperIncGamma (μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       exp (z / 2) * z ^ (1 / 2 - μ) * upperIncGamma (2 * μ) z := by
   have hz0 := slitPlane_ne_zero hz
   unfold whittakerW upperIncGamma
-  rw [kummerU_kummer_transform_all (1 - 2 * μ) _ (slitPlane_ne_zero hz), show 1 / 2 + μ - (μ - 1 / 2) = 1 by ring,
+  rw [kummerU_kummer_transform_all (1 - 2 * μ) _ (slitPlane_ne_zero hz), show 1 / 2 + μ -
+      (μ - 1 / 2) = 1 by ring,
     show 1 - 2 * μ - (1 - 2 * μ) + 1 = 1 by ring, show (2 : ℂ) - (1 - 2 * μ) = 1 + 2 * μ by ring,
     show (1 : ℂ) - (1 - 2 * μ) = 2 * μ by ring]
   have hp : z ^ (1 / 2 - μ) * z ^ (2 * μ) = z ^ (1 / 2 + μ) := by

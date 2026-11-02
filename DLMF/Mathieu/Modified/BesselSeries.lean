@@ -86,7 +86,8 @@ theorem besselJExp_intCast_neg_parameter (k : ℤ) (h w : ℂ) :
   rw [besselJExp_intCast, besselJExp_intCast, neg_mul, besselJ_int_neg]
 
 /-- `e^{±πi/2} = ±i`. -/
-private lemma exp_sign_mul_pi_I_div_two {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) : Complex.exp (σ * π * I / 2) = σ * I := by
+private lemma exp_sign_mul_pi_I_div_two {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) : Complex.exp
+    (σ * π * I / 2) = σ * I := by
   rcases hσ with rfl | rfl
   · rw [show (1 : ℂ) * π * I / 2 = (π / 2 : ℂ) * I by ring, Complex.exp_mul_I]
     simp [← Complex.ofReal_ofNat, ← Complex.ofReal_div, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
@@ -119,7 +120,8 @@ theorem mathieuCylExp_add_pi_I_div_two (j : ℕ) (μ : ℂ) {h : ℝ} (hh : 0 < 
   rcases j with _ | _ | _ | _ | _ | j <;> simp [mathieuCylExp, hJ, hY]
 
 /-- A real noninteger is a complex noninteger. -/
-theorem intCast_ne_ofReal_of_not_int {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) : ∀ m : ℤ, (m : ℂ) ≠ ν := by
+theorem intCast_ne_ofReal_of_not_int {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) : ∀ m : ℤ,
+    (m : ℂ) ≠ ν := by
   intro m hm; exact hν m (by exact_mod_cast hm)
 
 /-- `ν + k` is not an integer when `ν` is not. -/
@@ -152,7 +154,8 @@ theorem sin_add_intCast_mul_pi (ν : ℂ) (k : ℤ) :
   rw [add_mul, Complex.sin_antiperiodic.add_int_mul_eq, Int.cast_negOnePow]
 
 /-- `e^{ix} = cos x + i sin x`. -/
-theorem exp_I_mul_eq_cos_add_I_mul_sin (x : ℂ) : Complex.exp (I * x) = Complex.cos x + I * Complex.sin x := by
+theorem exp_I_mul_eq_cos_add_I_mul_sin (x : ℂ) : Complex.exp (I * x) = Complex.cos x + I *
+    Complex.sin x := by
   rw [mul_comm, Complex.exp_mul_I]; ring
 
 /-- The continued cylinder functions agree with the principal-branch ones at `h e^z` for

@@ -143,14 +143,16 @@ theorem bessel_kummerU_M {a b ν x : ℂ} (hx : 0 < x.re)
     rw [MeasureTheory.integral_const_mul, (hL n).2, sub_self, regularizedGaussHG_zero_arg, hd,
       DLMF.Bessel.regularizedHGFunCoeff_empty, regularizedHGFunCoeff_singleton]
     have hp := (Gamma_add_nat_div_Gamma_eq (n := n) (ν - b + 2) (not_neg_nat_of_re_pos hc))
-    have hG1 : Gamma (ν + 1 + n) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
+    have hG1 : Gamma (ν + 1 + n) ≠ 0 :=
+        Gamma_ne_zero_of_re_pos (by simp; linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
     have hG2 : Gamma (ν - b + 2) ≠ 0 := Gamma_ne_zero_of_re_pos hc
     rw [show poch (ν - b + 2) n = Gamma (ν - b + 2 + n) / Gamma (ν - b + 2) from hp.symm,
       show ν + n + 1 = ν + 1 + n by ring, show ν + 1 + n - b + 1 = ν - b + 2 + n by ring,
       show a + (ν + 1 + n) - b + 1 = a - b + ν + 2 + n by ring]
     field_simp
   simp_rw [hterm] at hs
-  have hM := ((hasFPowerSeriesOnBall_regularizedConfluent (ν - b + 2) (a - b + ν + 2)).hasSum_mul_pow
+  have hM := ((hasFPowerSeriesOnBall_regularizedConfluent (ν - b + 2)
+      (a - b + ν + 2)).hasSum_mul_pow
     (z := -x) (by simp)).mul_left (x ^ (ν / 2) * Gamma (ν - b + 2))
   have hpt : ∀ t ∈ Ioi (0 : ℝ), exp (-(t : ℂ)) * (t : ℂ) ^ (ν / 2) * kummerU a b t *
       besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)) = ∑' n, F n t := by
@@ -158,7 +160,8 @@ theorem bessel_kummerU_M {a b ν x : ℂ} (hx : 0 < x.re)
     have ht0 : (0 : ℝ) < t := ht
     have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht0.ne'
     have h0 := ((DLMF.Bessel.hasFPowerSeriesOnBall_regularized0F1 (ν + 1)).hasSum_mul_pow
-      (z := -x * t) (by simp)).mul_left (x ^ (ν / 2) * (exp (-(t : ℂ)) * (t : ℂ) ^ ν * kummerU a b t))
+      (z := -x * t) (by simp)).mul_left
+          (x ^ (ν / 2) * (exp (-(t : ℂ)) * (t : ℂ) ^ ν * kummerU a b t))
     rw [besselJ_two_sqrt hx0 ht0]
     have hνt : (t : ℂ) ^ (ν / 2) * (t : ℂ) ^ (ν / 2) = (t : ℂ) ^ ν := by
       rw [← cpow_add _ _ htc]; ring_nf
@@ -480,7 +483,8 @@ theorem cosine_whittakerM {κ μ x : ℝ} (hx : 0 < x)
       1 + 2 * (μ : ℂ) - 1 / 2 by ring,
     show (1 : ℂ) + 2 * ((κ : ℂ) / 2 + (μ : ℂ) / 2) = (μ : ℂ) + κ + 1 / 2 + 1 / 2 by ring,
     show (1 : ℂ) / 2 + (μ : ℂ) + κ = (μ : ℂ) + κ + 1 / 2 by ring]
-  have hp : (x : ℂ) ^ ((μ : ℂ) + κ - 1) * ((x : ℂ) ^ 2) ^ ((1 : ℂ) / 2 + ((κ : ℂ) / 2 + (μ : ℂ) / 2)) =
+  have hp : (x : ℂ) ^ ((μ : ℂ) + κ - 1) *
+      ((x : ℂ) ^ 2) ^ ((1 : ℂ) / 2 + ((κ : ℂ) / 2 + (μ : ℂ) / 2)) =
       (x : ℂ) ^ (2 * ((μ : ℂ) + κ + 1 / 2) - 1) := by
     rw [sq, mul_cpow_ofReal_nonneg hx.le hx.le, ← cpow_add _ _ hx0, ← cpow_add _ _ hx0]
     ring_nf
@@ -489,9 +493,9 @@ theorem cosine_whittakerM {κ μ x : ℝ} (hx : 0 < x)
   rw [← hp, ← he]
   ring
 
-/-- A Hankel-type transform of regularized Whittaker M, for real `x > 0`. For non-real `x` the Bessel kernel
-grows like `exp (c √t)`; the parameter bound makes the integrand absolutely integrable, as
-required for Lean's integral. -/
+/-- A Hankel-type transform of regularized Whittaker M, for real `x > 0`. For non-real `x` the
+Bessel kernel grows like `exp (c √t)`; the parameter bound makes the integrand absolutely
+integrable, as required for Lean's integral. -/
 @[dlmf 13.23.E9]
 theorem bessel_whittakerM {κ μ ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
     (hμ : -1 / 2 < μ.re) (hμ' : μ.re < κ.re + ν.re / 2 - 1 / 4) :
@@ -511,7 +515,8 @@ theorem bessel_whittakerM {κ μ ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
     intro t ht
     have ht0 : (0:ℝ) < t := ht
     have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht0.ne'
-    have e1 : (t : ℂ) ^ (μ - (ν + 1) / 2) * (t : ℂ) ^ (μ + 1 / 2) = (t : ℂ) ^ (1 + 2 * μ - 1 - ν / 2) := by
+    have e1 : (t : ℂ) ^ (μ - (ν + 1) / 2) * (t : ℂ) ^ (μ + 1 / 2) =
+        (t : ℂ) ^ (1 + 2 * μ - 1 - ν / 2) := by
       rw [← cpow_add _ _ htc]; ring_nf
     have e2 : exp (-(t : ℂ) / 2) * exp (-(t : ℂ) / 2) = exp (-(t : ℂ)) := by
       rw [← Complex.exp_add]; ring_nf
@@ -525,13 +530,14 @@ theorem bessel_whittakerM {κ μ ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
     rw [← cpow_add _ _ hx0]; ring_nf
   have e2 : exp (-x / 2) * exp (-x / 2) = exp (-x) := by
     rw [← Complex.exp_add]; ring_nf
-  rw [show (κ - μ + ν - 1 / 2) / 2 - (κ + 3 * μ - ν + 1 / 2) / 2 + 1 / 2 = ν - (1 + 2 * μ) + 1 by ring,
+  rw [show (κ - μ + ν - 1 / 2) / 2 - (κ + 3 * μ - ν + 1 / 2) / 2 + 1 / 2 = ν -
+      (1 + 2 * μ) + 1 by ring,
     show 1 + 2 * ((κ - μ + ν - 1 / 2) / 2) = ν - (μ - κ + 1 / 2) + 1 by ring, ← e3, ← e2]
   ring
 
 open Set in
-/-- A Hankel-type transform of regularized Whittaker M in terms of W, for real `x > 0`. For non-real `x` the
-Bessel kernel grows like `exp (c √t)`; the parameter bound makes the integrand absolutely
+/-- A Hankel-type transform of regularized Whittaker M in terms of W, for real `x > 0`. For non-real
+`x` the Bessel kernel grows like `exp (c √t)`; the parameter bound makes the integrand absolutely
 integrable, as required for Lean's integral. -/
 @[dlmf 13.23.E10]
 theorem bessel_whittakerM_W {κ μ ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)

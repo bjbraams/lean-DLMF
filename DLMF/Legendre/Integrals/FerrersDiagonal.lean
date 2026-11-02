@@ -86,7 +86,8 @@ theorem legPIU_bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ ≤ R �
   obtain ⟨MF, hMF⟩ := legPIU_bound_F (R+2)
   have cK : Continuous fun p : ℂ × ℂ => legBdK p.1 p.2 := by
     unfold legBdK
-    exact (continuous_recip_Gamma.comp continuous_fst).mul (continuous_recip_Gamma.comp continuous_snd)
+    exact (continuous_recip_Gamma.comp continuous_fst).mul
+        (continuous_recip_Gamma.comp continuous_snd)
   have cK' : Continuous fun p : ℂ × ℂ => legBdK' p.1 p.2 := by
     unfold legBdK'
     have h1 := DLMF.Gamma.continuous_recipGammaDeriv 1
@@ -117,7 +118,8 @@ theorem legPIU_bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ ≤ R �
   have hd2 : ‖deriv (fun c => regularizedGaussHGFun (c-a) (c-b) (c-a-b+1) w) (a+b)‖ ≤ MF := by
     have hdiff : Differentiable ℂ (fun c => regularizedGaussHGFun (c-a) (c-b) (c-a-b+1) w) :=
       differentiable_regularizedGaussHGFun_of_differentiable (differentiable_id.sub_const _)
-        (differentiable_id.sub_const _) ((differentiable_id.sub_const _).sub_const _ |>.add_const 1) hw1
+        (differentiable_id.sub_const _)
+            ((differentiable_id.sub_const _).sub_const _ |>.add_const 1) hw1
     have := Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (c := a+b) (R := 1) one_pos
       hdiff.diffContOnCl (C := MF) fun c hc => by
         rw [mem_sphere_iff_norm] at hc
@@ -152,7 +154,8 @@ theorem legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R →
   obtain ⟨MH, hMH⟩ := legPIU_bound_H R1
   have cK : Continuous fun p : ℂ × ℂ => legBdK p.1 p.2 := by
     unfold legBdK
-    exact (continuous_recip_Gamma.comp continuous_fst).mul (continuous_recip_Gamma.comp continuous_snd)
+    exact (continuous_recip_Gamma.comp continuous_fst).mul
+        (continuous_recip_Gamma.comp continuous_snd)
   obtain ⟨MK, hMK⟩ := legPIU_bound_two cK R1
   set A := max MF 0
   set B := 4 * max MK 0 * max MF 0 + max MH 0
@@ -170,7 +173,8 @@ theorem legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R →
   rw [legPI_ferrersP_zero]
   by_cases hx0 : 0 ≤ x
   · have hn : ‖(1-(x:ℂ))/2‖ ≤ 1/2 := by
-      rw [show (1-(x:ℂ))/2 = (((1-x)/2:ℝ):ℂ) by push_cast; ring, Complex.norm_real, Real.norm_eq_abs,
+      rw [show (1-(x:ℂ))/2 = (((1-x)/2:ℝ):ℂ) by push_cast; ring, Complex.norm_real,
+                                                  Real.norm_eq_abs,
         abs_le]
       constructor <;> linarith [hx.2]
     rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by linarith)]
@@ -225,10 +229,12 @@ theorem legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R →
           nlinarith
 
 /-- `λ ↦ 𝖯_λ(x)` is entire for `x > -1`. -/
-theorem legPIU_continuous_degree {x : ℝ} (hx : -1 < x) : Continuous fun α : ℂ => ferrersP α 0 x := by
+theorem legPIU_continuous_degree {x : ℝ} (hx : -1 < x) : Continuous fun α : ℂ =>
+    ferrersP α 0 x := by
   simp only [legPI_ferrersP_zero]
   exact (differentiable_regularizedGaussHG_comp (A := fun α : ℂ => α+1) (B := fun α : ℂ => -α)
-    (C := fun _ => 1) (by fun_prop) (by fun_prop) (by fun_prop) (legInt_half_mem_cutPlane hx)).continuous
+    (C := fun _ => 1) (by fun_prop) (by fun_prop) (by fun_prop)
+        (legInt_half_mem_cutPlane hx)).continuous
 
 /-- Dominated convergence: `∫₋₁¹ 𝖯_ν 𝖯_λ → ∫₋₁¹ 𝖯_ν²` as `λ → ν`. -/
 theorem legPIU_tendsto_PP (ν : ℂ) :
@@ -313,7 +319,8 @@ theorem legPIU_bound_zb (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a
   obtain ⟨MH, hMH⟩ := legPIU_bound_H R1
   have cK : Continuous fun p : ℂ × ℂ => legBdK p.1 p.2 := by
     unfold legBdK
-    exact (continuous_recip_Gamma.comp continuous_fst).mul (continuous_recip_Gamma.comp continuous_snd)
+    exact (continuous_recip_Gamma.comp continuous_fst).mul
+        (continuous_recip_Gamma.comp continuous_snd)
   obtain ⟨MK, hMK⟩ := legPIU_bound_two cK R1
   refine ⟨4 * max MK 0 * max MF 0 + max MH 0, by positivity, fun a b ha hb t ht0 ht1 => ?_⟩
   have hR1 : R ≤ |R| := le_abs_self R
@@ -321,7 +328,8 @@ theorem legPIU_bound_zb (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a
   have hb' : ‖b‖ ≤ R1 := by simp only [R1]; linarith
   have hone : ‖(1:ℂ)‖ ≤ R1 := by simp only [norm_one, R1]; linarith [abs_nonneg R]
   have hzn : ‖1 - (t:ℂ)‖ < 1 := by
-    rw [show (1:ℂ) - t = ((1-t:ℝ):ℂ) by push_cast; ring, Complex.norm_real, Real.norm_eq_abs, abs_lt]
+    rw [show (1:ℂ) - t = ((1-t:ℝ):ℂ) by push_cast; ring, Complex.norm_real,
+                                          Real.norm_eq_abs, abs_lt]
     constructor <;> linarith
   have htn : ‖(1:ℂ) - (1 - (t:ℂ))‖ < 1 := by
     rw [sub_sub_cancel, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht0]; linarith
@@ -333,8 +341,10 @@ theorem legPIU_bound_zb (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a
   have hK := hMK _ _ ha' hb'
   have hlog := legPI_abs_log_le ht0 (by linarith)
   have hp : 1 ≤ t^(-(1/4:ℝ)) := legPI_rpow_ge_one ht0 (by linarith)
-  calc ‖-legBdK a b * ((Real.log t : ℝ) : ℂ) * regularizedGaussHGFun a b 1 (t:ℂ) + legBdZbH a b (t:ℂ)‖
-      ≤ ‖legBdK a b‖ * |Real.log t| * ‖regularizedGaussHGFun a b 1 (t:ℂ)‖ + ‖legBdZbH a b (t:ℂ)‖ := by
+  calc ‖-legBdK a b * ((Real.log t : ℝ) : ℂ) * regularizedGaussHGFun a b 1 (t:ℂ) +
+         legBdZbH a b (t:ℂ)‖
+      ≤ ‖legBdK a b‖ * |Real.log t| * ‖regularizedGaussHGFun a b 1 (t:ℂ)‖ +
+          ‖legBdZbH a b (t:ℂ)‖ := by
         refine le_trans (norm_add_le _ _) ?_
         rw [norm_mul, norm_mul, norm_neg, Complex.norm_real, Real.norm_eq_abs]
     _ ≤ max MK 0 * (4 * t^(-(1/4:ℝ))) * max MF 0 + max MH 0 := by
@@ -439,11 +449,13 @@ theorem legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0
         _ ≤ _ := by linarith
   have hO : ‖ferrersOdd lam 0 x‖ ≤ MS' * legPIw x := by
     unfold ferrersOdd
-    rw [show (1-lam-0)/2 = (1-lam)/2 by ring, show (lam-0+2)/2 = (lam+2)/2 by ring, neg_zero, zero_div,
+    rw [show (1-lam-0)/2 = (1-lam)/2 by ring, show (lam-0+2)/2 = (lam+2)/2 by ring,
+                                                                                neg_zero, zero_div,
       cpow_zero, one_mul, show (3/2:ℂ) = (1-lam)/2 + (lam+2)/2 by ring, norm_mul]
     have h := hMS ((1-lam)/2) ((lam+2)/2) ?_ ?_ x hx
     · calc ‖(x:ℂ)‖ * _ ≤ 1 * (MS * legPIw x) := mul_le_mul hxa h (norm_nonneg _) zero_le_one
-        _ ≤ MS' * legPIw x := by rw [one_mul]; exact mul_le_mul_of_nonneg_right (le_max_left _ _) hw0.le
+        _ ≤ MS' * legPIw x := by rw [one_mul];
+                                 exact mul_le_mul_of_nonneg_right (le_max_left _ _) hw0.le
     · calc ‖(1-lam)/2‖ ≤ ‖1-lam‖ := by rw [norm_div]; exact div_le_self (norm_nonneg _) (by simp)
         _ ≤ 1 + ‖lam‖ := by simpa using norm_sub_le (1:ℂ) lam
         _ ≤ _ := by linarith
@@ -501,8 +513,10 @@ theorem legPIU_tendsto_int {F : ℂ → ℝ → ℂ} {f : ℝ → ℂ} {ν : ℂ
 /-- DLMF 14.17.10: for `λ ≠ ν`, `λ ≠ -ν-1` and `ν, λ ∉ {-1,-2,…}`, `∫_{-1}^{1} 𝖯_ν(x) 𝖯_λ(x) dx =
 2(2 sin(νπ) sin(λπ)(ψ(ν+1) - ψ(λ+1)) + π sin((λ-ν)π))/(π² (λ-ν)(λ+ν+1))`. -/
 @[dlmf 14.17.E10]
-theorem ferrers_product_integral_10 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1 : lam ≠ -ν-1) (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
-    (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersP lam 0 x)=2*(2*sin (ν*π)*sin (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*sin ((lam-ν)*π))/(π^2*(lam-ν)*(lam+ν+1)) := by
+theorem ferrers_product_integral_10 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1 : lam ≠ -ν-1)
+    (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
+    (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersP lam 0 x)=2*(2*sin (ν*π)*sin
+        (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*sin ((lam-ν)*π))/(π^2*(lam-ν)*(lam+ν+1)) := by
   have hd1 : lam - ν ≠ 0 := sub_ne_zero.mpr h0
   have hd2 : lam + ν + 1 ≠ 0 := fun h => h1 (by linear_combination h)
   have hc : ν*(ν+1) - lam*(lam+1) ≠ 0 := by
@@ -520,12 +534,14 @@ theorem ferrers_product_integral_10 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1
 ψ'(ν+1))/(π² (ν+1/2))`. -/
 @[dlmf 14.17.E11]
 theorem ferrers_product_integral_11 (ν : ℂ) (hν : ν ≠ -1/2) (hr : LegendreQRegular ν 0) :
-    (∫ x : ℝ in -1..1, (ferrersP ν 0 x)^2)=(π^2-2*(sin (ν*π))^2*deriv digamma (ν+1))/(π^2*(ν+1/2)) := by
+    (∫ x : ℝ in -1..1, (ferrersP ν 0 x)^2)=(π^2-2*(sin (ν*π))^2*deriv digamma
+        (ν+1))/(π^2*(ν+1/2)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have h2ν : 2*ν+1 ≠ 0 := fun h => hν (by linear_combination h/2)
   have hν1 := legHyp_nu hr
   -- the off-diagonal formula near `ν`
-  set N : ℂ → ℂ := fun lam => 2*sin (ν*π)*sin (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*sin ((lam-ν)*π)
+  set N : ℂ → ℂ := fun lam =>
+      2*sin (ν*π)*sin (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*sin ((lam-ν)*π)
   have hψ := (DLMF.Gamma.differentiableAt_digamma hν1).hasDerivAt
   have hψ' : HasDerivAt (fun lam : ℂ => digamma (lam+1)) (deriv digamma (ν+1)) ν := by
     have := hψ.comp ν ((hasDerivAt_id' ν).add_const 1)
@@ -543,9 +559,11 @@ theorem ferrers_product_integral_11 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
   have hN0 : N ν = 0 := by simp [N]
   have hsl := hasDerivAt_iff_tendsto_slope.mp hN
   have hden : Tendsto (fun lam : ℂ => 2/(π^2*(lam+ν+1))) (𝓝[≠] ν) (𝓝 (2/(π^2*(ν+ν+1)))) := by
-    refine ((continuousAt_const.div (continuousAt_const.mul ((continuousAt_id.add continuousAt_const).add
+    refine ((continuousAt_const.div
+        (continuousAt_const.mul ((continuousAt_id.add continuousAt_const).add
       continuousAt_const)) ?_).tendsto).mono_left nhdsWithin_le_nhds
-    exact mul_ne_zero (pow_ne_zero 2 hπ) (by show ν + ν + 1 ≠ 0; rw [show ν+ν+1 = 2*ν+1 by ring]; exact h2ν)
+    exact mul_ne_zero (pow_ne_zero 2 hπ)
+        (by show ν + ν + 1 ≠ 0; rw [show ν+ν+1 = 2*ν+1 by ring]; exact h2ν)
   have hR := hsl.mul hden
   -- eventually the off-diagonal identity holds
   have hreg : ∀ᶠ lam in 𝓝 ν, LegendreQRegular lam 0 := by
@@ -564,7 +582,8 @@ theorem ferrers_product_integral_11 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
     have hd2 : lam + ν + 1 ≠ 0 := fun h => h1 (by linear_combination h)
     simp only [N]
     field_simp
-  have hu := tendsto_nhds_unique (((legPIU_tendsto_PP ν).mono_left nhdsWithin_le_nhds).congr' heq) hR
+  have hu := tendsto_nhds_unique
+      (((legPIU_tendsto_PP ν).mono_left nhdsWithin_le_nhds).congr' heq) hR
   simp only [pow_two]
   rw [hu]
   have h3 : ν + 1/2 ≠ 0 := fun h => h2ν (by linear_combination 2*h)
@@ -576,8 +595,11 @@ theorem ferrers_product_integral_11 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
 /-- DLMF 14.17.12: for `λ ≠ ν`, `λ ≠ -ν-1` and `ν, λ ∉ {-1,-2,…}`, `∫_{-1}^{1} 𝖰_ν(x) 𝖰_λ(x) dx =
 ((ψ(ν+1) - ψ(λ+1))(1 + cos(νπ) cos(λπ)) + (π/2) sin((λ-ν)π))/((λ-ν)(λ+ν+1))`. -/
 @[dlmf 14.17.E12]
-theorem ferrers_product_integral_12 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1 : lam ≠ -ν-1) (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
-    (∫ x : ℝ in -1..1, ferrersQ ν 0 x*ferrersQ lam 0 x)=((digamma (ν+1)-digamma (lam+1))*(1+cos (ν*π)*cos (lam*π))+π/2*sin ((lam-ν)*π))/((lam-ν)*(lam+ν+1)) := by
+theorem ferrers_product_integral_12 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1 : lam ≠ -ν-1)
+    (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
+    (∫ x : ℝ in -1..1, ferrersQ ν 0 x*ferrersQ lam 0
+        x)=((digamma (ν+1)-digamma (lam+1))*(1+cos (ν*π)*cos (lam*π))+π/2*sin
+        ((lam-ν)*π))/((lam-ν)*(lam+ν+1)) := by
   have hd1 : lam - ν ≠ 0 := sub_ne_zero.mpr h0
   have hd2 : lam + ν + 1 ≠ 0 := fun h => h1 (by linear_combination h)
   have hc : ν*(ν+1) - lam*(lam+1) ≠ 0 := by
@@ -593,7 +615,8 @@ theorem ferrers_product_integral_12 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1
 cos²(νπ)) ψ'(ν+1))/(2ν+1)`. -/
 @[dlmf 14.17.E13]
 theorem ferrers_product_integral_13 (ν : ℂ) (hν : ν ≠ -1/2) (hr : LegendreQRegular ν 0) :
-    (∫ x : ℝ in -1..1, (ferrersQ ν 0 x)^2)=(π^2-2*(1+(cos (ν*π))^2)*deriv digamma (ν+1))/(2*(2*ν+1)) := by
+    (∫ x : ℝ in -1..1, (ferrersQ ν 0 x)^2)=(π^2-2*(1+(cos (ν*π))^2)*deriv digamma
+        (ν+1))/(2*(2*ν+1)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have h2ν : 2*ν+1 ≠ 0 := fun h => hν (by linear_combination h/2)
   have hν1 := legHyp_nu hr
@@ -607,7 +630,8 @@ theorem ferrers_product_integral_13 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
     (fun lam => legPI_continuousOn_of_solution (legPI_ferrersQ_isFerrersSolution lam))
     (by filter_upwards [hnear] with lam hl using (hM lam hl).2)
     (fun x hx => continuousAt_ferrersQ_degree hr hx)
-  set N : ℂ → ℂ := fun lam => (digamma (ν+1)-digamma (lam+1))*(1+cos (ν*π)*cos (lam*π))+π/2*sin ((lam-ν)*π)
+  set N : ℂ → ℂ := fun lam =>
+      (digamma (ν+1)-digamma (lam+1))*(1+cos (ν*π)*cos (lam*π))+π/2*sin ((lam-ν)*π)
   have hψ := (DLMF.Gamma.differentiableAt_digamma hν1).hasDerivAt
   have hψ' : HasDerivAt (fun lam : ℂ => digamma (lam+1)) (deriv digamma (ν+1)) ν := by
     have := hψ.comp ν ((hasDerivAt_id' ν).add_const 1)
@@ -652,8 +676,10 @@ theorem ferrers_product_integral_13 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
 /-- DLMF 14.17.14: for `Re ν > 0`, `Re λ > 0` and `λ ≠ ν`, `∫_{-1}^{1} 𝖯_ν(x) 𝖰_λ(x) dx = (2 sin(νπ)
 cos(λπ)(ψ(ν+1) - ψ(λ+1)) + π cos((λ-ν)π) - π)/(π (λ-ν)(λ+ν+1))`. -/
 @[dlmf 14.17.E14]
-theorem ferrers_product_integral_14 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (hlam : 0 < lam.re) (hne : lam ≠ ν) :
-    (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersQ lam 0 x)=(2*sin (ν*π)*cos (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*cos ((lam-ν)*π)-π)/(π*(lam-ν)*(lam+ν+1)) := by
+theorem ferrers_product_integral_14 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (hlam : 0 < lam.re)
+    (hne : lam ≠ ν) :
+    (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersQ lam 0 x)=(2*sin (ν*π)*cos
+        (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*cos ((lam-ν)*π)-π)/(π*(lam-ν)*(lam+ν+1)) := by
   have hrν := legPI_regular_of_re_pos hν
   have hrl := legPI_regular_of_re_pos hlam
   have hd1 : lam - ν ≠ 0 := sub_ne_zero.mpr hne
@@ -675,7 +701,8 @@ theorem ferrers_product_integral_14 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (hl
 /-- DLMF 14.17.15: for `Re ν > 0`, `∫_{-1}^{1} 𝖯_ν(x) 𝖰_ν(x) dx = -sin(2νπ) ψ'(ν+1)/(π (2ν+1))`. -/
 @[dlmf 14.17.E15]
 theorem ferrers_product_integral_15 (ν : ℂ) (hν : 0 < ν.re) :
-    (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersQ ν 0 x)=-sin (2*ν*π)*deriv digamma (ν+1)/(π*(2*ν+1)) := by
+    (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersQ ν 0 x)=-sin (2*ν*π)*deriv digamma
+        (ν+1)/(π*(2*ν+1)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have hr := legPI_regular_of_re_pos hν
   have h2ν : 2*ν+1 ≠ 0 := fun h => by
@@ -691,7 +718,8 @@ theorem ferrers_product_integral_15 (ν : ℂ) (hν : 0 < ν.re) :
     (fun lam => legPI_continuousOn_of_solution (legPI_ferrersQ_isFerrersSolution lam))
     (by filter_upwards [hnear] with lam hl using (hM lam hl).2)
     (fun x hx => continuousAt_ferrersQ_degree hr hx)
-  set N : ℂ → ℂ := fun lam => 2*sin (ν*π)*cos (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*cos ((lam-ν)*π)-π
+  set N : ℂ → ℂ := fun lam =>
+      2*sin (ν*π)*cos (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*cos ((lam-ν)*π)-π
   have hψ := (DLMF.Gamma.differentiableAt_digamma hν1).hasDerivAt
   have hψ' : HasDerivAt (fun lam : ℂ => digamma (lam+1)) (deriv digamma (ν+1)) ν := by
     have := hψ.comp ν ((hasDerivAt_id' ν).add_const 1)
@@ -708,7 +736,8 @@ theorem ferrers_product_integral_15 (ν : ℂ) (hν : 0 < ν.re) :
   have hN0 : N ν = 0 := by simp [N]
   have hsl := hasDerivAt_iff_tendsto_slope.mp hN
   have hden : Tendsto (fun lam : ℂ => 1/(π*(lam+ν+1))) (𝓝[≠] ν) (𝓝 (1/(π*(ν+ν+1)))) := by
-    refine ((continuousAt_const.div (continuousAt_const.mul ((continuousAt_id.add continuousAt_const).add
+    refine ((continuousAt_const.div
+        (continuousAt_const.mul ((continuousAt_id.add continuousAt_const).add
       continuousAt_const)) ?_).tendsto).mono_left nhdsWithin_le_nhds
     exact mul_ne_zero hπ (by show ν + ν + 1 ≠ 0; rw [show ν+ν+1 = 2*ν+1 by ring]; exact h2ν)
   have hR := hsl.mul hden
@@ -771,7 +800,8 @@ theorem legPI_continuousOn_of_solution' {α μ : ℂ} {f : ℝ → ℂ} (hf : Is
   fun y hy => (hf y hy).1.continuousAt.continuousWithinAt
 
 /-- `(k+1)_j · k! = (k+j)!`. -/
-theorem legPI_poch_nat (k j : ℕ) : poch ((k:ℂ)+1) j * (k.factorial : ℂ) = ((k+j).factorial : ℂ) := by
+theorem legPI_poch_nat (k j : ℕ) : poch ((k:ℂ)+1) j * (k.factorial : ℂ) =
+    ((k+j).factorial : ℂ) := by
   induction j with
   | zero => simp [poch_zero]
   | succ j ih =>
@@ -845,8 +875,10 @@ theorem legPI_tendsto_PQ_neg_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
   refine h.congr' ?_
   filter_upwards [Ioo_mem_nhdsGT (show (-1:ℝ) < 1 by norm_num)] with x hx
   have hx' : -x ∈ Ioo (-1:ℝ) 1 := ⟨by linarith [hx.2], by linarith [hx.1]⟩
-  have hP := ferrersP_neg_of_add_eq_nat (ν := (k:ℂ)) (μ := (m:ℂ)) (N := k+m) (by push_cast; ring) hx'
-  have hQ := ferrersQ_neg_of_add_eq_nat (ν := (j:ℂ)) (μ := (m:ℂ)) (N := j+m) (by push_cast; ring) (-x)
+  have hP := ferrersP_neg_of_add_eq_nat (ν := (k:ℂ)) (μ := (m:ℂ)) (N := k+m)
+      (by push_cast; ring) hx'
+  have hQ := ferrersQ_neg_of_add_eq_nat (ν := (j:ℂ)) (μ := (m:ℂ)) (N := j+m)
+      (by push_cast; ring) (-x)
   rw [neg_neg] at hP hQ
   simp only [Function.comp_apply]
   rw [hP, hQ]
@@ -943,7 +975,8 @@ theorem legPI_PQ_nat_pos (l m n : ℕ) (hm : 0 < m) (h : l ≠ n) (hl : m ≤ l)
 (-1)^{l+n}) (l+m)!/((l-n)(l+n+1)(l-m)!)`. -/
 @[dlmf 14.17.E16]
 theorem ferrersPQ_nat_integral (l m n : ℕ) (h : l ≠ n) (hl : m ≤ l) :
-    (∫ x : ℝ in -1..1, ferrersP l m x*ferrersQ n m x)=(1-(-1)^(l+n))*((l+m).factorial:ℂ)/(((l:ℂ)-n)*(l+n+1:ℂ)*(l-m).factorial) := by
+    (∫ x : ℝ in -1..1, ferrersP l m x*ferrersQ n m
+        x)=(1-(-1)^(l+n))*((l+m).factorial:ℂ)/(((l:ℂ)-n)*(l+n+1:ℂ)*(l-m).factorial) := by
   rcases Nat.eq_zero_or_pos m with rfl | hm
   · have hreg : LegendreQRegular (n:ℂ) 0 := fun j hj => by
       have := congrArg Complex.re hj; simp at this
@@ -976,8 +1009,10 @@ theorem ferrersPQ_nat_integral (l m n : ℕ) (h : l ≠ n) (hl : m ≤ l) :
 /-- DLMF 14.17.17: for positive integers `l, m, n` such that either `|m-n| < l < m+n` or `l+m+n` is
 even, `∫₀^π 𝖰_l(cos θ) 𝖯_m(cos θ) 𝖯_n(cos θ) sin θ dθ = 0`. -/
 @[dlmf 14.17.E17]
-theorem ferrers_triple_integral (l m n : ℕ) (hl : 0 < l) (hm : 0 < m) (hn : 0 < n) (htri : (|((m:ℤ)-n)| < l ∧ l < m+n) ∨ Even (l+m+n)) :
-    (∫ θ : ℝ in 0..π, ferrersQ l 0 (Real.cos θ)*ferrersP m 0 (Real.cos θ)*ferrersP n 0 (Real.cos θ)*Real.sin θ)=0 := by
+theorem ferrers_triple_integral (l m n : ℕ) (hl : 0 < l) (hm : 0 < m) (hn : 0 < n)
+    (htri : (|((m:ℤ)-n)| < l ∧ l < m+n) ∨ Even (l+m+n)) :
+    (∫ θ : ℝ in 0..π, ferrersQ l 0 (Real.cos θ)*ferrersP m 0 (Real.cos θ)*ferrersP n 0
+        (Real.cos θ)*Real.sin θ)=0 := by
   sorry
 
 end DLMF.Legendre

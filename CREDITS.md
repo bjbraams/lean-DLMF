@@ -1302,6 +1302,8 @@ and natural-density Chebotarev theorem to ℚ:
 (`NumberField.Chebotarev.tendsto_primeCount_primesCongruent`), with Mathlib's
 `Rat.HeightOneSpectrum.primesEquiv`, `natGenerator`, `prime_natGenerator` and
 `Chebyshev.isBigO_psi_sub_theta_sqrt` (ψ(x) ~ x from θ(x) ~ x). No external proof body was copied.
+The Möbius limits 27.11.13–27.11.14 (DLMF/NumberTheory/Asymptotics/MoebiusSums.lean) are derived
+from `Chebyshev.psi_isEquivalent` there by Landau's elementary arguments.
 
 ## DLMF Chapters 1–2 admission proofs (2026-10-28)
 

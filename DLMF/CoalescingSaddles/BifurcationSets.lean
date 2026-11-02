@@ -76,11 +76,13 @@ private lemma deriv_sum_range_mul_pow (c : ℕ → ℂ) (N : ℕ) :
   funext t; exact (hasDerivAt_sum_range_mul_pow c N t).deriv
 
 /-- The second iterated derivative is `deriv ∘ deriv`. -/
-private lemma iteratedDeriv_two_eq_deriv_deriv (f : ℂ → ℂ) : iteratedDeriv 2 f = deriv (deriv f) := by
+private lemma iteratedDeriv_two_eq_deriv_deriv (f : ℂ → ℂ) : iteratedDeriv 2 f =
+    deriv (deriv f) := by
   rw [iteratedDeriv_succ, iteratedDeriv_one]
 
 /-- The third iterated derivative is `deriv ∘ deriv ∘ deriv`. -/
-private lemma iteratedDeriv_three_eq_deriv_deriv_deriv (f : ℂ → ℂ) : iteratedDeriv 3 f = deriv (deriv (deriv f)) := by
+private lemma iteratedDeriv_three_eq_deriv_deriv_deriv (f : ℂ → ℂ) : iteratedDeriv 3 f =
+    deriv (deriv (deriv f)) := by
   rw [iteratedDeriv_succ, iteratedDeriv_two_eq_deriv_deriv]
 
 /-! ### Cuspoid potentials of low codimension -/
@@ -119,7 +121,8 @@ private lemma deriv_cuspoidPotential_three (x : Fin 3 → ℝ) (t : ℂ) :
       (fun i : ℕ => if i = 1 then (x 0 : ℂ) else if i = 2 then (x 1 : ℂ) else
         if i = 3 then (x 2 : ℂ) else if i = 5 then 1 else 0) i * u ^ i := by
     funext u; simp [cuspoidPotential, Finset.sum_range_succ, Fin.sum_univ_three]; ring
-  rw [iteratedDeriv_two_eq_deriv_deriv, iteratedDeriv_three_eq_deriv_deriv_deriv, hf, deriv_sum_range_mul_pow, deriv_sum_range_mul_pow,
+  rw [iteratedDeriv_two_eq_deriv_deriv, iteratedDeriv_three_eq_deriv_deriv_deriv, hf,
+      deriv_sum_range_mul_pow, deriv_sum_range_mul_pow,
     deriv_sum_range_mul_pow]
   refine ⟨?_, ?_, ?_⟩ <;> simp [Finset.sum_range_succ] <;> ring
 
@@ -190,14 +193,16 @@ private lemma deriv_quadratic_poly (a b c : ℂ) :
 private lemma isCriticalPoint₂_ellipticUmbilicPotential_iff (s t : ℂ) (x y z : ℝ) :
     IsCriticalPoint₂ (fun s t => ellipticUmbilicPotential s t x y z) s t ↔
       3 * s ^ 2 - 3 * t ^ 2 + 2 * z * s + x = 0 ∧ -6 * s * t + 2 * z * t + y = 0 := by
-  simp only [IsCriticalPoint₂, deriv_ellipticUmbilicPotential_fst, deriv_ellipticUmbilicPotential_snd]
+  simp only [IsCriticalPoint₂, deriv_ellipticUmbilicPotential_fst,
+      deriv_ellipticUmbilicPotential_snd]
 
 /-- Critical points of the hyperbolic umbilic potential: `3s² + zt + x = 0` and `3t² + zs + y = 0`.
 -/
 private lemma isCriticalPoint₂_hyperbolicUmbilicPotential_iff (s t : ℂ) (x y z : ℝ) :
     IsCriticalPoint₂ (fun s t => hyperbolicUmbilicPotential s t x y z) s t ↔
       3 * s ^ 2 + z * t + x = 0 ∧ 3 * t ^ 2 + z * s + y = 0 := by
-  simp only [IsCriticalPoint₂, deriv_hyperbolicUmbilicPotential_fst, deriv_hyperbolicUmbilicPotential_snd]
+  simp only [IsCriticalPoint₂, deriv_hyperbolicUmbilicPotential_fst,
+      deriv_hyperbolicUmbilicPotential_snd]
 
 /-- The Hessian determinant of the elliptic umbilic potential is `4z² - 36(s² + t²)`. -/
 private lemma hessianDet₂_ellipticUmbilicPotential (s t : ℂ) (x y z : ℝ) :
@@ -218,7 +223,8 @@ private lemma hessianDet₂_ellipticUmbilicPotential (s t : ℂ) (x y z : ℝ) :
 /-- The Hessian determinant of the hyperbolic umbilic potential is `36st - z²`. -/
 private lemma hessianDet₂_hyperbolicUmbilicPotential (s t : ℂ) (x y z : ℝ) :
     hessianDet₂ (fun s t => hyperbolicUmbilicPotential s t x y z) s t = 36 * s * t - z ^ 2 := by
-  simp only [hessianDet₂, deriv_hyperbolicUmbilicPotential_fst, deriv_hyperbolicUmbilicPotential_snd]
+  simp only [hessianDet₂, deriv_hyperbolicUmbilicPotential_fst,
+      deriv_hyperbolicUmbilicPotential_snd]
   have h1 := deriv_quadratic_poly 3 0 (z * t + x)
   have h2 := deriv_quadratic_poly 3 0 (z * s + y)
   have h3 := deriv_affine_poly z (3 * t ^ 2 + y)
@@ -381,7 +387,8 @@ theorem cuspoidCuspLines_three :
       exact_mod_cast this
     · have hy0 : x 1 = 0 := by
         rw [hz] at hy; simpa using hy
-      obtain ⟨h1, h2⟩ := (swallowtail_degenerate_critical_iff x 0).2 ⟨by rw [hx, hz]; ring, by rw [hy0]; ring⟩
+      obtain ⟨h1, h2⟩ := (swallowtail_degenerate_critical_iff x 0).2
+          ⟨by rw [hx, hz]; ring, by rw [hy0]; ring⟩
       exact ⟨0, h1, h2, by simp [hz]⟩
 
 /-! ### Umbilic bifurcation sets (36.4.10–36.4.13) -/
@@ -392,7 +399,9 @@ private lemma mem_umbilicBifurcationSet_elliptic_iff (x y z : ℝ) :
     (x, y, z) ∈ umbilicBifurcationSet ellipticUmbilicPotential ↔
       ∃ s t : ℝ, 3 * s ^ 2 - 3 * t ^ 2 + 2 * z * s + x = 0 ∧ -6 * s * t + 2 * z * t + y = 0 ∧
         4 * z ^ 2 - 36 * (s ^ 2 + t ^ 2) = 0 := by
-  simp only [umbilicBifurcationSet, Set.mem_ofPred_eq, isCriticalPoint₂_ellipticUmbilicPotential_iff, hessianDet₂_ellipticUmbilicPotential, and_assoc]
+  simp only [umbilicBifurcationSet, Set.mem_ofPred_eq,
+      isCriticalPoint₂_ellipticUmbilicPotential_iff,
+      hessianDet₂_ellipticUmbilicPotential, and_assoc]
   norm_cast
 
 /-- Real description of the hyperbolic umbilic bifurcation set: a real critical point with vanishing
@@ -401,17 +410,21 @@ private lemma mem_umbilicBifurcationSet_hyperbolic_iff (x y z : ℝ) :
     (x, y, z) ∈ umbilicBifurcationSet hyperbolicUmbilicPotential ↔
       ∃ s t : ℝ, 3 * s ^ 2 + z * t + x = 0 ∧ 3 * t ^ 2 + z * s + y = 0 ∧
         36 * s * t - z ^ 2 = 0 := by
-  simp only [umbilicBifurcationSet, Set.mem_ofPred_eq, isCriticalPoint₂_hyperbolicUmbilicPotential_iff, hessianDet₂_hyperbolicUmbilicPotential, and_assoc]
+  simp only [umbilicBifurcationSet, Set.mem_ofPred_eq,
+      isCriticalPoint₂_hyperbolicUmbilicPotential_iff,
+      hessianDet₂_hyperbolicUmbilicPotential, and_assoc]
   norm_cast
 
 /-- The third derivative of the cubic `a l³ + b l² + c l + d` is the constant `6a`. -/
 private lemma iteratedDeriv_three_cubic_poly (a b c d : ℂ) :
     iteratedDeriv 3 (fun l : ℂ => a * l ^ 3 + b * l ^ 2 + c * l + d) = fun _ => 6 * a := by
-  rw [iteratedDeriv_three_eq_deriv_deriv_deriv, deriv_cubic_poly, deriv_quadratic_poly, deriv_affine_poly]
+  rw [iteratedDeriv_three_eq_deriv_deriv_deriv, deriv_cubic_poly, deriv_quadratic_poly,
+      deriv_affine_poly]
   funext l; ring
 
 /-- The derivative of `a u² + b u + c` at `0` is `b`. -/
-private lemma deriv_quadratic_poly_zero (a b c : ℂ) : deriv (fun u : ℂ => a * u ^ 2 + b * u + c) 0 = b := by
+private lemma deriv_quadratic_poly_zero (a b c : ℂ) : deriv
+    (fun u : ℂ => a * u ^ 2 + b * u + c) 0 = b := by
   rw [deriv_quadratic_poly]; ring
 
 /-- Real description of the elliptic umbilic cusp lines: a real critical point and a nonzero kernel
@@ -481,7 +494,8 @@ private lemma mem_umbilicCuspLines_hyperbolic_iff_exists (x y z : ℝ) :
               hyperbolicUmbilicPotential s t x y z from
           funext fun l => by simp only [hyperbolicUmbilicPotential]; ring,
         iteratedDeriv_three_cubic_poly]
-  simp only [umbilicCuspLines, Set.mem_ofPred_eq, isCriticalPoint₂_hyperbolicUmbilicPotential_iff, e]
+  simp only [umbilicCuspLines, Set.mem_ofPred_eq,
+      isCriticalPoint₂_hyperbolicUmbilicPotential_iff, e]
   norm_cast
 
 /-- The rib of the hyperbolic umbilic bifurcation set (DLMF 36.4.13): `x = y = -z²/4`. -/
@@ -736,7 +750,8 @@ theorem umbilicCuspLines_elliptic :
 
 /-- A set mapped injectively into the zero set of a nonzero complex polynomial of degree at
 most `n` is finite with at most `n` elements. -/
-private lemma finite_ncard_le_of_injOn_polynomial_roots {α : Type*} {S : Set α} (f : α → ℂ) (hf : InjOn f S)
+private lemma finite_ncard_le_of_injOn_polynomial_roots {α : Type*} {S : Set α} (f : α → ℂ)
+    (hf : InjOn f S)
     {p : ℂ[X]} (hp : p ≠ 0) {n : ℕ} (hdeg : p.natDegree ≤ n)
     (hS : ∀ a ∈ S, p.eval (f a) = 0) : S.Finite ∧ S.ncard ≤ n := by
   have hm : MapsTo f S (p.roots.toFinset : Set ℂ) := fun a ha => by
@@ -908,7 +923,8 @@ theorem cuspoidCriticalPoints_finite_ncard_le (K : ℕ) (x : Fin K → ℝ) :
     refine natDegree_add_le_of_degree_le (natDegree_C_mul_X_pow_le _ _) ?_
     refine natDegree_sum_le_of_forall_le _ _ fun m _ => ?_
     exact (natDegree_C_mul_X_pow_le _ _).trans (by have := m.isLt; omega)
-  refine finite_ncard_le_of_injOn_polynomial_roots (fun t : ℝ => (t : ℂ)) ofReal_injective.injOn hne hdeg ?_
+  refine finite_ncard_le_of_injOn_polynomial_roots (fun t : ℝ => (t : ℂ))
+      ofReal_injective.injOn hne hdeg ?_
   intro t ht
   have : deriv (fun u => cuspoidPotential K u x) (t : ℂ) = 0 := ht
   rwa [deriv_cuspoidPotential_eq_eval] at this
@@ -921,6 +937,9 @@ theorem umbilicCriticalPoints_finite_ncard_le (x y z : ℝ) :
       (umbilicCriticalPoints ellipticUmbilicPotential x y z).ncard ≤ 4 ∧
       (umbilicCriticalPoints hyperbolicUmbilicPotential x y z).Finite ∧
       (umbilicCriticalPoints hyperbolicUmbilicPotential x y z).ncard ≤ 4 :=
-  ⟨(umbilicCriticalPoints_elliptic_ncard_le_four x y z).1, (umbilicCriticalPoints_elliptic_ncard_le_four x y z).2, (umbilicCriticalPoints_hyperbolic_ncard_le_four x y z).1, (umbilicCriticalPoints_hyperbolic_ncard_le_four x y z).2⟩
+  ⟨(umbilicCriticalPoints_elliptic_ncard_le_four x y z).1,
+      (umbilicCriticalPoints_elliptic_ncard_le_four x y z).2,
+      (umbilicCriticalPoints_hyperbolic_ncard_le_four x y z).1,
+      (umbilicCriticalPoints_hyperbolic_ncard_le_four x y z).2⟩
 
 end DLMF.CoalescingSaddles

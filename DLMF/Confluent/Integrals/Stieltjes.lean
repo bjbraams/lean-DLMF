@@ -103,18 +103,22 @@ theorem kummerU_gauss_of_re_pos {a b c z : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) 
   obtain ⟨C, hC, N, hM⟩ := regularizedConfluent_ray_growth β c (-z)
   have hmax : max 0 (-z).re = 0 := by simp; linarith
   have hRc : Continuous (fun q : ℝ × ℝ => regularizedHGFun {β} {c} ((-z * q.1) * q.2)) :=
-    (continuous_regularizedConfluent.comp (show Continuous (fun w : ℂ => (β, c, w)) by fun_prop)).comp
+    (continuous_regularizedConfluent.comp
+        (show Continuous (fun w : ℂ => (β, c, w)) by fun_prop)).comp
       (show Continuous (fun q : ℝ × ℝ => (-z * (q.1 : ℂ)) * (q.2 : ℂ)) by fun_prop)
   have hRm := hRc.measurable
-  have hmeas : AEStronglyMeasurable (Function.uncurry F) ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioi (0:ℝ)))) := by
+  have hmeas : AEStronglyMeasurable (Function.uncurry F)
+      ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioi (0:ℝ)))) := by
     refine Measurable.aestronglyMeasurable ?_
     simp only [hF, Function.uncurry_def]
     fun_prop
   have hf1 := integrableOn_rpow_mul_one_add_pow_mul_exp (s := c.re - 1) (by linarith) hz N
   have hf2 := integrableOn_rpow_mul_one_add_pow_mul_exp (s := a.re - 1) (by linarith) hz N
-  have hFi : Integrable (Function.uncurry F) ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioi (0:ℝ)))) := by
+  have hFi : Integrable (Function.uncurry F)
+      ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioi (0:ℝ)))) := by
     refine ((hf1.mul_prod hf2).const_mul C).mono' hmeas ?_
-    have hset : ∀ᵐ q ∂((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioi (0:ℝ)))), q ∈ Ioi (0 : ℝ) ×ˢ Ioi (0 : ℝ) := by
+    have hset : ∀ᵐ q ∂((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioi (0:ℝ)))), q ∈
+        Ioi (0 : ℝ) ×ˢ Ioi (0 : ℝ) := by
       rw [Measure.prod_restrict]
       exact ae_restrict_mem (measurableSet_Ioi.prod measurableSet_Ioi)
     filter_upwards [hset] with q hq
@@ -144,7 +148,8 @@ theorem kummerU_gauss_of_re_pos {a b c z : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) 
     have harg : (-z * t) / z = -(t : ℂ) := by field_simp
     rw [harg] at hL
     have hF' : ∫ s : ℝ in Ioi 0, F t s = exp (-z * t) * (t : ℂ) ^ (c - 1) *
-        ∫ s : ℝ in Ioi 0, exp (-z * s) * (s : ℂ) ^ (a - 1) * regularizedHGFun {β} {c} ((-z * t) * s) := by
+        ∫ s : ℝ in Ioi 0, exp (-z * s) * (s : ℂ) ^ (a - 1) *
+            regularizedHGFun {β} {c} ((-z * t) * s) := by
       simp only [hF]; rw [integral_const_mul]
     rw [hF', hL, kummerUGaussKernel, ← hβ,
       regularizedGaussHG_symm _ _ _ (neg_ofReal_mem_cutPlane ht0.le)]
@@ -162,7 +167,8 @@ theorem kummerU_gauss_of_re_pos {a b c z : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) 
     have harg : (-z * s) / z = -(s : ℂ) := by field_simp
     rw [harg, regularizedGaussHG_self_right _ _ (neg_ofReal_mem_cutPlane hs0.le)] at hL
     have hF' : ∫ t : ℝ in Ioi 0, F t s = (exp (-z * s) * (s : ℂ) ^ (a - 1)) *
-        ∫ t : ℝ in Ioi 0, exp (-z * t) * (t : ℂ) ^ (c - 1) * regularizedHGFun {β} {c} ((-z * s) * t) := by
+        ∫ t : ℝ in Ioi 0, exp (-z * t) * (t : ℂ) ^ (c - 1) *
+            regularizedHGFun {β} {c} ((-z * s) * t) := by
       rw [← integral_const_mul]
       congr 1; funext t
       simp only [hF]
@@ -207,7 +213,8 @@ lemma kummerU_gauss_aux {a b c z : ℂ} (hc : 0 < c.re) (hz : 0 < z.re) :
         rw [regularizedGaussHG_symm _ _ _ hw, regularizedGaussHG_symm (a - b + 1) (a + 1) c hw,
           regularizedGaussHG_symm (a - b + 1 + 1) (a + 1) (c + 1) hw] at hg
         simp only [kummerUGaussKernel]
-        rw [show a + 1 - (b + 1) + 1 = a - b + 1 by ring, show a + 1 - b + 1 = a - b + 1 + 1 by ring,
+        rw [show a + 1 - (b + 1) + 1 = a - b + 1 by ring, show a + 1 - b + 1 = a -
+                                                      b + 1 + 1 by ring,
           show c + 1 - 1 = (c - 1) + 1 by ring, cpow_add _ _ ht0, cpow_one]
         linear_combination (exp (-z * t) * (t : ℂ) ^ (c - 1)) * hg
       have hi : IntegrableOn (kummerUGaussKernel a b c z) (Ioi 0) :=
@@ -248,7 +255,8 @@ theorem whittakerW_gauss {κ μ c z : ℂ} (hc : 0 < c.re) (hz : 0 < z.re) :
       exp (-z / 2) * z ^ (κ + c) *
         ∫ t : ℝ in Set.Ioi 0,
           exp (-z * t) * (t : ℂ) ^ (c - 1) *
-            DLMF.Hypergeometric.regularizedGaussHG (1 / 2 + μ - κ) (1 / 2 - μ - κ) c (-(t : ℂ)) := by
+            DLMF.Hypergeometric.regularizedGaussHG (1 / 2 + μ - κ) (1 / 2 - μ - κ) c
+                (-(t : ℂ)) := by
   have hz0 : z ≠ 0 := by intro h; simp [h] at hz
   rw [whittakerW, kummerU_gauss (b := 1 + 2 * μ) hc hz,
     show 1 / 2 + μ - κ - (1 + 2 * μ) + 1 = 1 / 2 - μ - κ by ring]
@@ -335,7 +343,8 @@ theorem kummerU_stieltjes_of_re_pos {a b z : ℂ} (hz : 0 < z.re)
   have hK := (laplace_kummerU_gauss (a := b - a) (b := a) (c := b) (z := 1) ha0 ha (by simp)).1
   set K := tricomiLaplaceKernel (b - a) a b 1 with hKdef
   set G : ℝ → ℝ → ℂ := fun t s => K t * exp (-((t : ℂ) + z) * s) with hG
-  have he : IntegrableOn (fun s : ℝ => Real.exp (-z.re * s)) (Ioi 0) := exp_neg_integrableOn_Ioi 0 hz
+  have he : IntegrableOn (fun s : ℝ => Real.exp (-z.re * s)) (Ioi 0) :=
+      exp_neg_integrableOn_Ioi 0 hz
   have hGi : Integrable (Function.uncurry G)
       ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioi (0:ℝ)))) := by
     refine (hK.norm.mul_prod he).mono' ?_ ?_
@@ -389,7 +398,8 @@ theorem kummerU_stieltjes_of_re_pos {a b z : ℂ} (hz : 0 < z.re)
     have hG' : ∀ t : ℝ, G t s = tricomiLaplaceKernel (b - a) a b (1 + s) t * exp (-z * s) := by
       intro t
       simp only [hG, hKdef, tricomiLaplaceKernel]
-      have : exp (-1 * (t : ℂ)) * exp (-((t : ℂ) + z) * s) = exp (-(1 + (s : ℂ)) * t) * exp (-z * s) := by
+      have : exp (-1 * (t : ℂ)) * exp (-((t : ℂ) + z) * s) = exp (-(1 + (s : ℂ)) * t) *
+          exp (-z * s) := by
         rw [← exp_add, ← exp_add]; ring_nf
       linear_combination ((t : ℂ) ^ (a - 1) * kummerU (b - a) b t) * this
     simp_rw [hG']
@@ -434,14 +444,16 @@ theorem kummerU_stieltjes {a b z : ℂ} (hz : z ∈ slitPlane)
     (differentiableOn_kummerU a b).analyticOnNhd isOpen_slitPlane
   have hha : AnalyticOnNhd ℂ h slitPlane := by
     refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) isOpen_slitPlane
-    exact (((differentiableAt_id.cpow (differentiableAt_const _) hw).div_const _).differentiableWithinAt).mul
+    exact (((differentiableAt_id.cpow (differentiableAt_const _) hw).div_const
+        _).differentiableWithinAt).mul
       (hS w hw)
   have heq : kummerU a b =ᶠ[𝓝 1] h := by
     have hnh : {w : ℂ | 0 < w.re} ∈ 𝓝 (1 : ℂ) :=
       (isOpen_lt continuous_const continuous_re).mem_nhds (by simp)
     filter_upwards [hnh] with w hw
     exact kummerU_stieltjes_of_re_pos hw ha ha0
-  exact hf.eqOn_of_preconnected_of_eventuallyEq hha ((starConvex_one_slitPlane.isPathConnected one_mem_slitPlane).isConnected.isPreconnected)
+  exact hf.eqOn_of_preconnected_of_eventuallyEq hha
+      ((starConvex_one_slitPlane.isPathConnected one_mem_slitPlane).isConnected.isPreconnected)
     one_mem_slitPlane heq hz
 
 /-- `1/(t+z)` is `O((1+t)^{-1})` on the positive half-line, for `z` in the slit plane. -/
@@ -563,7 +575,8 @@ theorem cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b
     have hpow : (s : ℂ) ^ (-b) * (1 - (-1 : ℂ) / s) ^ (-a) =
         (s : ℂ) ^ (a - b) * (1 + (s : ℂ)) ^ (-a) := by
       have hs' : (s : ℂ) ≠ 0 := ofReal_ne_zero.mpr hs0.ne'
-      rw [show (1 : ℂ) - (-1) / s = ((1 + s : ℝ) : ℂ) * ((s⁻¹ : ℝ) : ℂ) by push_cast; field_simp; ring,
+      rw [show (1 : ℂ) - (-1) / s = ((1 + s : ℝ) : ℂ) * ((s⁻¹ : ℝ) : ℂ) by push_cast;
+                                                                           field_simp; ring,
         mul_cpow_ofReal_nonneg (by positivity) (by positivity), ofReal_inv,
         inv_cpow _ _ (by rw [arg_ofReal_of_nonneg hs0.le]; exact Real.pi_ne_zero.symm),
         ← cpow_neg, neg_neg, sub_eq_add_neg, cpow_add _ _ hs']
@@ -648,7 +661,8 @@ theorem cfInt_stieltjes_zero {a b z : ℂ} (hz : z ∈ slitPlane) (hb : 0 < b.re
       slitPlane := by
     refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) isOpen_slitPlane
     exact ((((differentiableAt_id.cpow (differentiableAt_const _) hw).mul_const _).mul
-      ((differentiableOn_kummerU a b).differentiableAt (isOpen_slitPlane.mem_nhds hw)))).differentiableWithinAt
+      ((differentiableOn_kummerU a b).differentiableAt
+          (isOpen_slitPlane.mem_nhds hw)))).differentiableWithinAt
   have heq : (fun z => ∫ t : ℝ in Ioi 0,
       regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b - 1) / ((t : ℂ) + z)) =ᶠ[𝓝 1]
       fun z => z ^ (b - 1) * Gamma (1 + a - b) * kummerU a b z := by

@@ -205,7 +205,8 @@ theorem coulombf_zero_eq_besselJ (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
   congr 1
   rw [Complex.besselJ, show (2 * (ℓ : ℂ) + 1) = ((2 * ℓ + 1 : ℕ) : ℂ) by push_cast; ring,
     cpow_natCast, show ((Real.sqrt (8 * r) : ℝ) : ℂ) / 2 = ((Real.sqrt (8 * r) / 2 : ℝ) : ℂ) by
-      push_cast; ring, sqrt_eight_mul_div_two r, ← mul_assoc, ofReal_sqrt_mul_pow_odd (by positivity)]
+      push_cast; ring, sqrt_eight_mul_div_two r, ← mul_assoc,
+          ofReal_sqrt_mul_pow_odd (by positivity)]
   have hsq : ((Real.sqrt (2 * r) : ℝ) : ℂ) ^ 2 = 2 * r := by
     rw [← Complex.ofReal_pow, Real.sq_sqrt (by positivity)]; push_cast; ring
   rw [hsq, show (((2 * ℓ + 1 : ℕ) : ℂ)) + 1 = 2 * ℓ + 2 by push_cast; ring]

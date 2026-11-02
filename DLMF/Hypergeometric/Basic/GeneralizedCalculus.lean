@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Generalized
+public import DLMF.Hypergeometric.Basic.GeneralizedEquation
 public import DLMF.Hypergeometric.Basic.GaussSeries
 
 /-!

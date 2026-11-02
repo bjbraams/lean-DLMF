@@ -56,7 +56,8 @@ theorem summable_fresnel_coeff (ε : ℕ) (R : ℝ) :
 /-- The entire Dawson integral is the same Kummer specialization on the full complex plane. -/
 theorem dawsonF_eq_kummerM (z : ℂ) : dawsonF z=z*kummerM 1 (3/2) (-z^2) := by
   have hM : Differentiable ℂ (kummerM 1 (3/2)) := fun w =>
-    ((hasFPowerSeriesOnBall_kummerM (a:=1) Complex.three_div_two_ne_neg_natCast).analyticAt_of_mem (by simp)).differentiableAt
+    ((hasFPowerSeriesOnBall_kummerM (a:=1) Complex.three_div_two_ne_neg_natCast).analyticAt_of_mem
+        (by simp)).differentiableAt
   have he := Complex.eq_of_differentiable_of_eqOn_pos_reals dawsonF_entire
     (show Differentiable ℂ (fun w => w*kummerM 1 (3/2) (-w^2)) by fun_prop)
     (fun x hx => by rw [dawsonF_ofReal, Real.dawsonF_eq_kummerM])
@@ -360,7 +361,8 @@ theorem erf_sector_limit {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/4) :
 (fresnelTail z))` along `atTop`. -/
 @[dlmf 7.2.E6]
 theorem fresnelTail_horizontal_integral (z : ℂ) :
-    Tendsto (fun R : ℝ => segmentIntegral (fun t => exp (π*I*t^2/2)) z R) atTop (𝓝 (fresnelTail z)) := by
+    Tendsto (fun R : ℝ => segmentIntegral (fun t => exp (π*I*t^2/2)) z R) atTop
+        (𝓝 (fresnelTail z)) := by
   have hd (w : ℂ) : HasDerivAt (fun w => fresnelCosInt w + I*fresnelSinInt w)
       (exp (π*I*w^2/2)) w := by
     convert (hasDerivAt_fresnelCosInt_complex w).add
@@ -392,7 +394,8 @@ theorem goodwinStatonG_integrable {z : ℂ} (hz : z ∈ slitPlane) :
     · refine ⟨|z.im|, abs_pos.mpr h, fun t _ => ?_⟩
       have := Complex.abs_im_le_norm ((t:ℂ)+z)
       simpa using this
-  have hg : Integrable (fun t : ℝ => Real.exp (-1*t^2)/m) := (integrable_exp_neg_mul_sq one_pos).div_const m
+  have hg : Integrable (fun t : ℝ => Real.exp (-1*t^2)/m) :=
+      (integrable_exp_neg_mul_sq one_pos).div_const m
   refine Integrable.mono' hg.integrableOn ?_ ?_
   · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
     refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => ?_

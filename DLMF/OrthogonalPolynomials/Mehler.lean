@@ -163,7 +163,8 @@ theorem exists_coefficients (x y : ℂ) :
     (d := fun n => 2 * x * y * c n + (1 - 2 * (x ^ 2 + y ^ 2)) *
       (if 1 ≤ n then c (n - 1) else 0) + 2 * x * y * (if 2 ≤ n then c (n - 2) else 0) -
       (if 3 ≤ n then c (n - 3) else 0))
-    (f := fun z => (2 * x * y + (1 - 2 * (x ^ 2 + y ^ 2)) * z + 2 * x * y * z ^ 2 - z ^ 3) * kernel x y z)
+    (f := fun z => (2 * x * y + (1 - 2 * (x ^ 2 + y ^ 2)) * z + 2 * x * y * z ^ 2 - z ^ 3)
+        * kernel x y z)
     (fun z hz => by
       have ht := ((hds z hz).sub ((hasSum_scalar_shift (hds z hz) 2).mul_left 2)).add
         (hasSum_scalar_shift (hds z hz) 4)
@@ -205,8 +206,10 @@ def coeff (x y : ℂ) (n : ℕ) : ℂ :=
 theorem rec_coeff (x y : ℂ) (n : ℕ) : Rec x y (coeff x y) n := by
   rcases n with _ | _ | _ | n
   · norm_num [Rec, coeff, hermitePolyH_zero, hermitePolyH_one, map_ofNat]; ring
-  · norm_num [Rec, coeff, aeval_hermitePolyH_succ_succ, hermitePolyH_zero, hermitePolyH_one, map_ofNat]; ring
-  · norm_num [Rec, coeff, aeval_hermitePolyH_succ_succ, hermitePolyH_zero, hermitePolyH_one, map_ofNat]; ring
+  · norm_num [Rec, coeff, aeval_hermitePolyH_succ_succ, hermitePolyH_zero, hermitePolyH_one,
+        map_ofNat]; ring
+  · norm_num [Rec, coeff, aeval_hermitePolyH_succ_succ, hermitePolyH_zero, hermitePolyH_one,
+        map_ofNat]; ring
   · simp only [Rec, show 1 ≤ n + 3 by omega, show 2 ≤ n + 3 by omega,
       show 3 ≤ n + 3 by omega, ite_true, show n + 3 - 1 = n + 2 by omega,
       show n + 3 - 2 = n + 1 by omega, show n + 3 - 3 = n by omega]
@@ -229,7 +232,8 @@ theorem rec_coeff (x y : ℂ) (n : ℕ) : Rec x y (coeff x y) n := by
 theorem hasSum_kernel (x y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n => coeff x y n * z ^ n) (kernel x y z) := by
   obtain ⟨c, hc0, hc, hs⟩ := exists_coefficients x y
-  have he : c = coeff x y := rec_unique (by simpa [coeff, hermitePolyH_zero] using hc0) hc (rec_coeff x y)
+  have he : c = coeff x y :=
+      rec_unique (by simpa [coeff, hermitePolyH_zero] using hc0) hc (rec_coeff x y)
   rw [← he]
   exact hs z hz
 

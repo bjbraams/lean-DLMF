@@ -50,18 +50,22 @@ def linearOdeTaylorCoeff (P Q : ℕ → ℂ) (a b : ℂ) : ℕ → ℂ
   | n + 2 => ∑ i : Fin (n + 1), (n.choose i : ℂ) *
       (P i * linearOdeTaylorCoeff P Q a b (n - i + 1) + Q i * linearOdeTaylorCoeff P Q a b (n - i))
 
-/-- Formula under the stated hypotheses: `linearOdeTaylorCoeff P Q a b (n + 2) = ∑ i ∈ Finset.range (n +
-1), (n.choose i : ℂ) * (P i * linearOdeTaylorCoeff P Q a b (n - i + 1) + Q i * linearOdeTaylorCoeff P Q a b (n
+/-- Formula under the stated hypotheses:
+`linearOdeTaylorCoeff P Q a b (n + 2) = ∑ i ∈ Finset.range (n + 1), (n.choose i : ℂ) * (P i *
+linearOdeTaylorCoeff P Q a b (n - i + 1) + Q i * linearOdeTaylorCoeff P Q a b (n
 - i))`. -/
 private lemma linearOdeTaylorCoeff_add_two_eq_sum (P Q : ℕ → ℂ) (a b : ℂ) (n : ℕ) :
     linearOdeTaylorCoeff P Q a b (n + 2) = ∑ i ∈ Finset.range (n + 1), (n.choose i : ℂ) *
-      (P i * linearOdeTaylorCoeff P Q a b (n - i + 1) + Q i * linearOdeTaylorCoeff P Q a b (n - i)) := by
+      (P i * linearOdeTaylorCoeff P Q a b (n - i + 1) + Q i *
+          linearOdeTaylorCoeff P Q a b (n - i)) := by
   rw [linearOdeTaylorCoeff]
   exact Fin.sum_univ_eq_sum_range (fun i => (n.choose i : ℂ) *
-      (P i * linearOdeTaylorCoeff P Q a b (n - i + 1) + Q i * linearOdeTaylorCoeff P Q a b (n - i))) (n + 1)
+      (P i * linearOdeTaylorCoeff P Q a b (n - i + 1) + Q i *
+          linearOdeTaylorCoeff P Q a b (n - i))) (n + 1)
 
 /-- The majorant estimate: if `‖P i‖, ‖Q i‖ ≤ A i! (s/2)ⁱ`, then `‖d n‖ ≤ K n! sⁿ`. -/
-private lemma exists_norm_linearOdeTaylorCoeff_le {P Q : ℕ → ℂ} (a b : ℂ) {s A : ℝ} (hs : 0 < s) (hA : 0 ≤ A)
+private lemma exists_norm_linearOdeTaylorCoeff_le {P Q : ℕ → ℂ} (a b : ℂ) {s A : ℝ}
+    (hs : 0 < s) (hA : 0 ≤ A)
     (hP : ∀ i, ‖P i‖ ≤ A * i ! * (s / 2) ^ i) (hQ : ∀ i, ‖Q i‖ ≤ A * i ! * (s / 2) ^ i) :
     ∃ K, ∀ n, ‖linearOdeTaylorCoeff P Q a b n‖ ≤ K * n ! * s ^ n := by
   set d := linearOdeTaylorCoeff P Q a b
@@ -143,7 +147,8 @@ private lemma exists_norm_linearOdeTaylorCoeff_le {P Q : ℕ → ℂ} (a b : ℂ
 
 /-- Cauchy estimates for an entire function: for every `s > 0` there is `A ≥ 0` with
 `‖f⁽ⁱ⁾(z₀)‖ ≤ A i! (s/2)ⁱ` for all `i`. -/
-private lemma exists_norm_iteratedDeriv_le_factorial_mul_pow {f : ℂ → ℂ} (hf : Differentiable ℂ f) (z₀ : ℂ) {s : ℝ}
+private lemma exists_norm_iteratedDeriv_le_factorial_mul_pow {f : ℂ → ℂ} (hf : Differentiable ℂ f)
+    (z₀ : ℂ) {s : ℝ}
     (hs : 0 < s) : ∃ A, 0 ≤ A ∧ ∀ i, ‖iteratedDeriv i f z₀‖ ≤ A * i ! * (s / 2) ^ i := by
   have h1 := (hf.analyticAt z₀).hasFPowerSeriesAt
   have h2 := hf.hasFPowerSeriesOnBall z₀ one_pos
@@ -186,7 +191,8 @@ theorem exists_entire_solution_linear_ode {p q : ℂ → ℂ} (hp : Differentiab
     have hs : (0 : ℝ) < 1 / ((r : ℝ) + 1) := by positivity
     obtain ⟨A₁, hA₁, hP⟩ := exists_norm_iteratedDeriv_le_factorial_mul_pow hp z₀ hs
     obtain ⟨A₂, hA₂, hQ⟩ := exists_norm_iteratedDeriv_le_factorial_mul_pow hq z₀ hs
-    obtain ⟨K, hK⟩ := exists_norm_linearOdeTaylorCoeff_le (P := P) (Q := Q) w₀ w₁ hs (le_max_left 0 (max A₁ A₂))
+    obtain ⟨K, hK⟩ := exists_norm_linearOdeTaylorCoeff_le (P := P) (Q := Q) w₀ w₁ hs
+        (le_max_left 0 (max A₁ A₂))
       (fun i => (hP i).trans (by gcongr; exact (le_max_left _ _).trans (le_max_right _ _)))
       (fun i => (hQ i).trans (by gcongr; exact (le_max_right _ _).trans (le_max_right _ _)))
     refine S.le_radius_of_bound K fun n => ?_

@@ -154,10 +154,12 @@ theorem pcfInt_dom {c : ℂ} (p : ℂ) {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane)
       linarith [norm_le_norm_add_norm_sub' w w₀]
     calc ‖w + 2*t‖ ≤ ‖w‖ + ‖(2:ℂ)*t‖ := norm_add_le _ _
       _ = ‖w‖ + 2*t := by
-        rw [show (2:ℂ)*t = ((2*t:ℝ):ℂ) by push_cast; ring, norm_real, Real.norm_of_nonneg (by linarith)]
+        rw [show (2:ℂ)*t = ((2*t:ℝ):ℂ) by push_cast; ring, norm_real,
+                                            Real.norm_of_nonneg (by linarith)]
       _ ≤ _ := by linarith
   have hb := hK' _ t ht.le (hε' w hw t ht.le) hup
-  rw [norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht, show ((-(t:ℂ))) = ((-t:ℝ):ℂ) by push_cast; rfl,
+  rw [norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht, show ((-(t:ℂ))) =
+      ((-t:ℝ):ℂ) by push_cast; rfl,
     Complex.norm_exp_ofReal, Real.rpow_one]
   have hc := pcfInt_norm_cpow_le (w + 2*t) p
   have e : Real.exp (-t) = Real.exp (-(1/2)*t) * Real.exp (-(t/2)) := by
@@ -187,7 +189,8 @@ theorem pcfInt_continuousOn (c p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
   have h1 : ContinuousAt (fun t : ℝ => (t:ℂ)^(c-1)) t :=
     (continuous_ofReal.continuousAt (x := t)).cpow continuousAt_const ht'
   have h3 : ContinuousAt (fun t : ℝ => (w + 2*(t:ℂ))^p) t :=
-    (continuousAt_const.add (continuousAt_const.mul continuous_ofReal.continuousAt)).cpow continuousAt_const
+    (continuousAt_const.add (continuousAt_const.mul continuous_ofReal.continuousAt)).cpow
+        continuousAt_const
       (pcfInt_add_mem_slitPlane hw (le_of_lt ht))
   exact (h1.mul (continuous_ofReal.continuousAt.neg.cexp)).mul h3
 
@@ -257,7 +260,12 @@ lemma pcfInt_const_aux {x : ℝ} (hx : 0 < x) (e d : ℂ) :
   have hx2 : ((x^2:ℝ):ℂ) ≠ 0 := ofReal_ne_zero.mpr (by positivity)
   rw [show ((x^2/2:ℝ):ℂ) = ((x^2:ℝ):ℂ) * ((1/2:ℝ):ℂ) by push_cast; ring,
     mul_cpow_ofReal_nonneg (by positivity) (by norm_num),
-    show ((1/2:ℝ):ℂ) = (2:ℂ)⁻¹ by push_cast; ring, inv_cpow _ _ (by rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_cast, arg_ofReal_of_nonneg (by norm_num)]; exact Real.pi_ne_zero.symm),
+    show ((1/2:ℝ):ℂ) = (2:ℂ)⁻¹ by push_cast; ring,
+                                    inv_cpow _ _ (by rw [show (2:ℂ) =
+                                                       ((2:ℝ):ℂ) by norm_cast,
+                                                                      arg_ofReal_of_nonneg
+                                                                      (by norm_num)]; exact
+                                                       Real.pi_ne_zero.symm),
     ← cpow_neg, neg_neg, sub_eq_add_neg, cpow_add _ _ hx2]
   ring
 
@@ -287,7 +295,8 @@ theorem pcfInt_U_real_2 {a : ℂ} (ha : -1/2 < a.re) {x : ℝ} (hx : 0 < x) :
   have h2 : (2:ℂ)^(-(1/4:ℂ)-a/2) * (2:ℂ)^(a/2+1/4) = 1 := by
     rw [← cpow_add _ _ two_ne_zero, show -(1/4:ℂ)-a/2 + (a/2+1/4) = 0 by ring, cpow_zero]
   push_cast at key ⊢
-  linear_combination (exp (-(x:ℂ)^2/4) * (1 / Gamma (a/2+1/4)) * pcfInt_F (a/2+1/4) (-a/2-3/4) ((x:ℂ)^2)) *
+  linear_combination (exp (-(x:ℂ)^2/4) * (1 / Gamma (a/2+1/4)) *
+      pcfInt_F (a/2+1/4) (-a/2-3/4) ((x:ℂ)^2)) *
     ((2:ℂ)^(-(1/4:ℂ)-a/2) * key + x * h2)
 
 /-- DLMF 12.5.3 for real positive argument. -/
@@ -309,7 +318,8 @@ theorem pcfInt_U_real_3 {a : ℂ} (ha : -3/2 < a.re) {x : ℝ} (hx : 0 < x) :
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   push_cast at key ⊢
   have hk : (x:ℂ) * ((x:ℂ)⁻¹) = 1 := mul_inv_cancel₀ hx0
-  linear_combination (exp (-(x:ℂ)^2/4) * (1 / Gamma (a/2+3/4)) * pcfInt_F (a/2+3/4) (-a/2-1/4) ((x:ℂ)^2)) *
+  linear_combination (exp (-(x:ℂ)^2/4) * (1 / Gamma (a/2+3/4)) *
+      pcfInt_F (a/2+3/4) (-a/2-1/4) ((x:ℂ)^2)) *
     ((2:ℂ)^(-3/4-a/2) * x * key + (2:ℂ)^(-3/4-a/2) * (2:ℂ)^(a/2+3/4) * hk + h2)
 
 /-- Identity theorem on the right half-plane from agreement on the positive reals. -/
@@ -360,7 +370,8 @@ theorem pcfInt_sq_half_subst {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
     rw [show (2:ℝ) - 1 = 1 by norm_num, Real.rpow_one, Real.rpow_two,
       show (1/2:ℝ) * t^2 = t^2/2 by ring]
     push_cast; rw [abs_of_pos (by norm_num : (0:ℝ) < 2)]; push_cast; ring
-  refine ⟨((integrableOn_Ioi_comp_rpow_iff h two_ne_zero).mpr hhi).congr_fun heq measurableSet_Ioi, ?_⟩
+  refine ⟨((integrableOn_Ioi_comp_rpow_iff h two_ne_zero).mpr hhi).congr_fun heq
+      measurableSet_Ioi, ?_⟩
   rw [← setIntegral_congr_fun measurableSet_Ioi heq, integral_comp_rpow_Ioi h two_ne_zero, hh,
     integral_const_mul, integral_comp_mul_left_Ioi g 0 (by norm_num : (0:ℝ) < 1/2), mul_zero,
     real_smul]
@@ -380,7 +391,8 @@ theorem pcfInt_integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
         ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 1 (t^2/2)) := by
   have hre : 0 < (t:ℂ).re := by simpa using ht
   have ht0 : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
-  rw [pcfU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 = ((t^2/2:ℝ):ℂ) by push_cast; ring]
+  rw [pcfU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 =
+      ((t^2/2:ℝ):ℂ) by push_cast; ring]
   have key := pcfInt_const_aux ht (1-μ/2) 0
   rw [neg_zero, cpow_zero, mul_one, sub_zero, neg_sub, pcfInt_sq_cpow ht] at key
   rw [key]
@@ -401,7 +413,8 @@ theorem pcfInt_integrand_2 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
         ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 2 (t^2/2)) := by
   have hre : 0 < (t:ℂ).re := by simpa using ht
   have ht0 : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
-  rw [pcfU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 = ((t^2/2:ℝ):ℂ) by push_cast; ring]
+  rw [pcfU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 =
+      ((t^2/2:ℝ):ℂ) by push_cast; ring]
   have key := pcfInt_const_aux ht (1-μ/2) 0
   rw [neg_zero, cpow_zero, mul_one, sub_zero, neg_sub, pcfInt_sq_cpow ht] at key
   rw [key]
@@ -445,7 +458,8 @@ theorem pcfInt_laplace_two {b : ℂ} (hb : 0 < b.re) :
   rw [hsin] at hF
   have hg : Gamma (1/2:ℂ) = (Real.sqrt π : ℂ) := by
     rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, Complex.ofReal_cpow Real.pi_pos.le]; norm_num
-  rw [hF, show b - 1/2 + 1 = b + 1/2 by ring, hg, show 2 * b * ((π/4:ℝ):ℂ) = b * π/2 by push_cast; ring]
+  rw [hF, show b - 1/2 + 1 = b + 1/2 by ring, hg, show 2 * b * ((π/4:ℝ):ℂ) = b *
+                                          π/2 by push_cast; ring]
   ring
 
 
@@ -529,7 +543,8 @@ theorem pcfInt_B_real_pt (a : ℂ) {x : ℝ} (hx : 0 < x) (c y : ℝ) :
     rw [show ((x^2/2:ℝ):ℂ) = ((x^2:ℝ):ℂ) * ((1/2:ℝ):ℂ) by push_cast; ring,
       mul_cpow_ofReal_nonneg (by positivity) (by norm_num), pcfInt_sq_cpow hx,
       show ((1/2:ℝ):ℂ) = (2:ℂ)⁻¹ by push_cast; ring,
-      inv_cpow _ _ (by rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_cast, arg_ofReal_of_nonneg (by norm_num)]; exact Real.pi_ne_zero.symm), cpow_neg]
+      inv_cpow _ _ (by rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_cast, arg_ofReal_of_nonneg (by norm_num)];
+                       exact Real.pi_ne_zero.symm), cpow_neg]
   have h2 : (2:ℂ)^(1 - (1/2+1*a-2*t)) * (2:ℂ)^(-t) = (2:ℂ)^(1/2-a) * (2:ℂ)^t := by
     rw [← cpow_add _ _ two_ne_zero, ← cpow_add _ _ two_ne_zero]; ring_nf
   rw [hX]

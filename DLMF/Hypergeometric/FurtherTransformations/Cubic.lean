@@ -103,7 +103,8 @@ theorem isPreconnected_halfSum :
       rw [e, sq, mul_re]
       simp only [add_re, ofReal_re, mul_re, ofReal_im, zero_mul, sub_zero, add_im, mul_im,
         zero_add, add_zero]
-      have hpos : 0 < t ^ 2 / 2 + (1 - t) ^ 2 * ((1 - 2 * z).re ^ 2 - (1 - 2 * z).im ^ 2 - 1 / 2) := by
+      have hpos : 0 < t ^ 2 / 2 + (1 - t) ^ 2 *
+          ((1 - 2 * z).re ^ 2 - (1 - 2 * z).im ^ 2 - 1 / 2) := by
         rcases eq_or_lt_of_le ht with h | h
         · subst h; simp at hR ⊢; linarith
         · have : 0 < t ^ 2 / 2 := by positivity
@@ -125,7 +126,8 @@ theorem quadratic_half_sum
     (z - 1) /
     (1 - 2 * z) ^ 2‖ < 1) :
     ₂F₁ a b ((a + b + 1) / 2) z =
-      (1 - 2 * z) ^ (-a) * ₂F₁ (a / 2) ((a + 1) / 2) ((a + b + 1) / 2) (4 * z * (z - 1) / (1 - 2 * z) ^ 2) := by
+      (1 - 2 * z) ^ (-a) *
+          ₂F₁ (a / 2) ((a + 1) / 2) ((a + b + 1) / 2) (4 * z * (z - 1) / (1 - 2 * z) ^ 2) := by
   set C := (a + b + 1) / 2 with hC
   set H : ℂ → ℂ := ₂F₁ (a / 2) ((a + 1) / 2) C with hH
   set v : ℂ → ℂ := fun w => 4 * w * (w - 1) / (1 - 2 * w) ^ 2 with hvdef
@@ -205,7 +207,8 @@ theorem quadratic_complementary
     (z - 1) /
     (1 - 2 * z) ^ 2‖ < 1) :
     ₂F₁ a (1 - a) c z =
-      (1 - 2 * z) ^ (1 - a - c) * (1 - z) ^ (c - 1) * ₂F₁ ((a + c) / 2) ((a + c - 1) / 2) c (4 * z * (z - 1)
+      (1 - 2 * z) ^ (1 - a - c) * (1 - z) ^ (c - 1) *
+          ₂F₁ ((a + c) / 2) ((a + c - 1) / 2) c (4 * z * (z - 1)
         / (1 - 2 * z) ^ 2) := by
   have hc' : ∀ k : ℕ, (c + a - 1 + (c - a) + 1) / 2 ≠ -(k : ℂ) := by
     rw [show (c + a - 1 + (c - a) + 1) / 2 = c by ring]; exact hc
@@ -286,7 +289,8 @@ theorem quadratic_sqrt
     (1 + z ^
     (1 / 2 : ℂ)) ^ 2‖ < 1) :
     ₂F₁ a b (a - b + 1) z =
-      (1 + z ^ (1 / 2 : ℂ)) ^ (-2 * a) * ₂F₁ a (a - b + 1 / 2) (2 * a - 2 * b + 1) (4 * z ^ (1 / 2 : ℂ) / (1
+      (1 + z ^ (1 / 2 : ℂ)) ^ (-2 * a) *
+          ₂F₁ a (a - b + 1 / 2) (2 * a - 2 * b + 1) (4 * z ^ (1 / 2 : ℂ) / (1
         + z ^ (1 / 2 : ℂ)) ^ 2) := by
   set t := z ^ (1 / 2 : ℂ) with htdef
   have htre : 0 < t.re := Carlson.re_cpow_half_pos hs
@@ -356,7 +360,8 @@ theorem quadratic_reciprocal_sqrt
     (hx : -1 < x)
     (hx0 : x < 0) :
     ₂F₁ a b ((a + b + 1) / 2) (x : ℂ) =
-      ((((1 - 1 / x).sqrt - 1) / ((1 - 1 / x).sqrt + 1) : ℝ) : ℂ) ^ a * ₂F₁ a ((a + b) / 2) (a + b) ((4 * (1
+      ((((1 - 1 / x).sqrt - 1) / ((1 - 1 / x).sqrt + 1) : ℝ) : ℂ) ^ a *
+          ₂F₁ a ((a + b) / 2) (a + b) ((4 * (1
         - 1 / x).sqrt / ((1 - 1 / x).sqrt + 1) ^ 2 : ℝ) : ℂ) := by
   obtain ⟨hq, hr1, hrsq, hy⟩ := reciprocal_sqrt_data hx hx0
   set q := 1 - 1 / x with hqdef
@@ -427,8 +432,10 @@ theorem quadratic_reciprocal_sqrt_complementary
     (hx : -1 < x)
     (hx0 : x < 0) :
     ₂F₁ a (1 - a) c (x : ℂ) =
-      (((1 - 1 / x).sqrt - 1 : ℝ) : ℂ) ^ (1 - a) * (((1 - 1 / x).sqrt + 1 : ℝ) : ℂ) ^ (a - 2 * c + 1) * ((1
-        - 1 / x : ℝ) : ℂ) ^ (c - 1) * ₂F₁ (c - a) (c - 1 / 2) (2 * c - 1) ((4 * (1 - 1 / x).sqrt / ((1 - 1 /
+      (((1 - 1 / x).sqrt - 1 : ℝ) : ℂ) ^ (1 - a) *
+          (((1 - 1 / x).sqrt + 1 : ℝ) : ℂ) ^ (a - 2 * c + 1) * ((1
+        - 1 / x : ℝ) : ℂ) ^ (c - 1) *
+            ₂F₁ (c - a) (c - 1 / 2) (2 * c - 1) ((4 * (1 - 1 / x).sqrt / ((1 - 1 /
         x).sqrt + 1) ^ 2 : ℝ) : ℂ) := by
   obtain ⟨hq, hr1, hrsq, hy⟩ := reciprocal_sqrt_data hx hx0
   set q := 1 - 1 / x with hqdef
@@ -448,7 +455,8 @@ theorem quadratic_reciprocal_sqrt_complementary
   have hrm : 0 < r - 1 := by linarith
   have h1x : 0 < 1 - x := by linarith
   rw [show (1 : ℂ) - (x : ℂ) = ((1 - x : ℝ) : ℂ) by push_cast; ring,
-    Complex.ofReal_cpow_eq_exp h1x, Complex.ofReal_cpow_eq_exp (by positivity : (0 : ℝ) < (r - 1) / (r + 1)),
+    Complex.ofReal_cpow_eq_exp h1x,
+        Complex.ofReal_cpow_eq_exp (by positivity : (0 : ℝ) < (r - 1) / (r + 1)),
     Complex.ofReal_cpow_eq_exp hrm, Complex.ofReal_cpow_eq_exp (by positivity : (0 : ℝ) < r + 1),
     Complex.ofReal_cpow_eq_exp (by linarith : (0 : ℝ) < q), ← exp_add, ← exp_add, ← exp_add]
   congr 1
@@ -463,7 +471,8 @@ theorem quadratic_reciprocal_sqrt_complementary
   ring
 
 /-- `exp L` lies in the slit plane when `|Im L| < π`. -/
-theorem exp_mem_slitPlane_of_im_mem {L : ℂ} (h1 : -Real.pi < L.im) (h2 : L.im < Real.pi) : exp L ∈ slitPlane := by
+theorem exp_mem_slitPlane_of_im_mem {L : ℂ} (h1 : -Real.pi < L.im) (h2 : L.im < Real.pi) : exp L ∈
+    slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases hs : Real.sin L.im = 0
   · left
@@ -562,7 +571,8 @@ theorem cubic_transformation
     (z - 1) /
     (9 * z - 8) ^ 2‖ < 1) :
     ₂F₁ (3 * a) (3 * a + 1 / 2) (4 * a + 2 / 3) z =
-      (1 - 9 * z / 8) ^ (-2 * a) * ₂F₁ a (a + 1 / 2) (2 * a + 5 / 6) (27 * z ^ 2 * (z - 1) / (9 * z - 8) ^
+      (1 - 9 * z / 8) ^ (-2 * a) *
+          ₂F₁ a (a + 1 / 2) (2 * a + 5 / 6) (27 * z ^ 2 * (z - 1) / (9 * z - 8) ^
         2) := by
   set H : ℂ → ℂ := ₂F₁ a (a + 1 / 2) (2 * a + 5 / 6) with hH
   set P : ℂ → ℂ := fun w => (1 + (-9 / 8) * w) ^ (-2 * a) with hP
@@ -599,13 +609,15 @@ theorem cubic_transformation
   have hφa : ∀ w : ℂ, w.re < 8 / 9 → AnalyticAt ℂ φ w := fun w hw =>
     ((analyticAt_const.mul (analyticAt_id.pow 2)).mul (analyticAt_id.sub analyticAt_const)).div
       (((analyticAt_const.mul analyticAt_id).sub analyticAt_const).pow 2) (pow_ne_zero 2 (h98 w hw))
-  have hφd : ∀ w : ℂ, w.re < 8 / 9 → HasDerivAt φ (27 * w * (3 * w - 4) ^ 2 / (9 * w - 8) ^ 3) w := by
+  have hφd : ∀ w : ℂ, w.re < 8 / 9 →
+      HasDerivAt φ (27 * w * (3 * w - 4) ^ 2 / (9 * w - 8) ^ 3) w := by
     intro w hw
     have h := ((((hasDerivAt_id w).pow 2).const_mul 27).mul ((hasDerivAt_id w).sub_const 1)).div
       ((((hasDerivAt_id w).const_mul 9).sub_const 8).pow 2) (pow_ne_zero 2 (h98 w hw))
     refine h.congr_deriv ?_
     have := h98 w hw
-    simp only [id, Pi.pow_apply, Pi.mul_apply, Nat.cast_ofNat, show (2 : ℕ) - 1 = 1 from rfl, pow_one]
+    simp only [id, Pi.pow_apply, Pi.mul_apply, Nat.cast_ofNat, show (2 : ℕ) - 1 =
+        1 from rfl, pow_one]
     rw [div_eq_div_iff (pow_ne_zero _ (pow_ne_zero _ this)) (pow_ne_zero _ this)]
     ring
   have hφdd : ∀ w : ℂ, w.re < 8 / 9 → deriv (deriv φ) w = 864 * (3 * w - 4) / (9 * w - 8) ^ 4 := by
@@ -744,7 +756,8 @@ theorem norm_one_sub_lt_norm_one_add_two_mul {t : ℂ} (ht : 0 < t.re) : ‖1 - 
 /-- The cubic transformation of the Borweins for `₂F₁(1/3,2/3;1;·)`. -/
 theorem borwein_cubic {v : ℂ} (hv : ‖v‖ < 1) :
     ₂F₁ (1 / 3 : ℂ) (2 / 3) 1 v = 3 / (1 + 2 * (1 - v) ^ (1 / 3 : ℂ)) *
-      ₂F₁ (1 / 3 : ℂ) (2 / 3) 1 (((1 - (1 - v) ^ (1 / 3 : ℂ)) / (1 + 2 * (1 - v) ^ (1 / 3 : ℂ))) ^ 3) := by
+      ₂F₁ (1 / 3 : ℂ) (2 / 3) 1
+          (((1 - (1 - v) ^ (1 / 3 : ℂ)) / (1 + 2 * (1 - v) ^ (1 / 3 : ℂ))) ^ 3) := by
   set H : ℂ → ℂ := ₂F₁ (1 / 3 : ℂ) (2 / 3) 1 with hH
   set S : ℂ → ℂ := fun v => (1 - v) ^ (1 / 3 : ℂ) with hS
   set p : ℂ → ℂ := fun t => 3 / (1 + 2 * t) with hp
@@ -776,7 +789,8 @@ theorem borwein_cubic {v : ℂ} (hv : ‖v‖ < 1) :
   -- derivatives of `S`
   have hSd : ∀ w : ℂ, ‖w‖ < 1 → HasDerivAt S (-1 / (3 * S w ^ 2)) w := by
     intro w hw
-    have h := ((hasDerivAt_const w (1 : ℂ)).sub (hasDerivAt_id w)).cpow_const (c := 1 / 3) (h1v w hw)
+    have h := ((hasDerivAt_const w (1 : ℂ)).sub (hasDerivAt_id w)).cpow_const
+        (c := 1 / 3) (h1v w hw)
     refine h.congr_deriv ?_
     have h0 := hS0 w hw
     have h1 : (1 - w) ≠ 0 := slitPlane_ne_zero (h1v w hw)
@@ -828,7 +842,8 @@ theorem borwein_cubic {v : ℂ} (hv : ‖v‖ < 1) :
       filter_upwards [hopen12.mem_nhds ht] with u hu
       exact (hpd u hu).deriv
     rw [hev.deriv_eq]
-    have h := (hasDerivAt_const t (-6 : ℂ)).div ((((hasDerivAt_id t).const_mul 2).const_add 1).pow 2)
+    have h := (hasDerivAt_const t (-6 : ℂ)).div
+        ((((hasDerivAt_id t).const_mul 2).const_add 1).pow 2)
       (pow_ne_zero 2 ht)
     have h' : HasDerivAt (fun u => -6 / (1 + 2 * u) ^ 2) _ t := h
     rw [h'.deriv]
@@ -908,7 +923,8 @@ theorem borwein_cubic {v : ℂ} (hv : ‖v‖ < 1) :
     obtain ⟨u, hu', rfl⟩ : ∃ u : ℂ, u ≠ 0 ∧ t = (u - 1) / 2 := ⟨1 + 2 * t, hu, by ring⟩
     have hu1 : u - 1 ≠ 0 := by intro h; apply ht0'; rw [h]; ring
     rw [show 1 + 2 * ((u - 1) / 2) = u by ring] at hode ⊢
-    linear_combination (norm := skip) (3 * ((u - 1) / 2 - 1) ^ 2 / (((u - 1) / 2) ^ 2 * u ^ 3)) * hode
+    linear_combination (norm := skip)
+        (3 * ((u - 1) / 2 - 1) ^ 2 / (((u - 1) / 2) ^ 2 * u ^ 3)) * hode
     field_simp
     ring
   · simp [hQ, hp, hψ, hS, hH, ordinaryHypergeometric_zero]
@@ -926,7 +942,8 @@ theorem ramanujan_cubic {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
   have hr0 : 0 < r := div_pos (by linarith) h12
   have hr1 : r < 1 := by rw [hr, div_lt_one h12]; linarith
   have hv : ‖1 - (r : ℂ) ^ 3‖ < 1 := by
-    rw [show 1 - (r : ℂ) ^ 3 = ((1 - r ^ 3 : ℝ) : ℂ) by push_cast; ring, norm_real, Real.norm_eq_abs]
+    rw [show 1 - (r : ℂ) ^ 3 = ((1 - r ^ 3 : ℝ) : ℂ) by push_cast; ring, norm_real,
+                                                          Real.norm_eq_abs]
     have : r ^ 3 < 1 := by
       calc r ^ 3 < 1 ^ 3 := by gcongr
         _ = 1 := one_pow 3
@@ -935,7 +952,8 @@ theorem ramanujan_cubic {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
   have hroot : (1 - (1 - (r : ℂ) ^ 3)) ^ (1 / 3 : ℂ) = r := by
     rw [sub_sub_cancel, show (r : ℂ) ^ 3 = ((r ^ 3 : ℝ) : ℂ) by push_cast; ring,
       show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow (by positivity),
-      show (1 / 3 : ℝ) = ((3 : ℕ) : ℝ)⁻¹ by norm_num, Real.pow_rpow_inv_natCast hr0.le (by norm_num)]
+      show (1 / 3 : ℝ) = ((3 : ℕ) : ℝ)⁻¹ by norm_num,
+                                              Real.pow_rpow_inv_natCast hr0.le (by norm_num)]
   rw [borwein_cubic hv, hroot]
   have e1 : (3 : ℂ) / (1 + 2 * (r : ℂ)) = 1 + 2 * (x : ℂ) := by
     have : (1 + 2 * r) * (1 + 2 * x) = 3 := by rw [hr]; field_simp; ring

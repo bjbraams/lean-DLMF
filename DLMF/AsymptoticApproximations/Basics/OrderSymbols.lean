@@ -11,6 +11,7 @@ public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import DLMFMathlib.Analysis.Asymptotics.IntegralComparison
 public import DLMFMathlib.Analysis.Complex.Sector
+public import Mathlib.Analysis.Complex.LocallyUniformLimit
 
 /-!
 # Order symbols and asymptotic expansions (DLMF §2.1)
@@ -36,8 +37,9 @@ generalized expansions of §2.1(iii)–(v).
   `HasPoincareExpansion.pow`, `HasPoincareExpansion.unique`: the algebra and uniqueness of
   Poincaré expansions (§2.1(iii)), through the project's
   `Asymptotics.HasAsymptoticPowerSeries`.
-* `hasPoincareExpansion_zero`, `hasPoincareExpansion_cexp_neg`,
-  `exists_hasPoincareExpansion_sector`: null expansions (DLMF 2.1.17).
+* `hasPoincareExpansion_zero`, `hasPoincareExpansion_cexp_neg`: null expansions (DLMF 2.1.17).
+* `exists_hasPoincareExpansion_sector`, `exists_hasPoincareExpansion_sector'`: the Borel–Ritt
+  theorem in a sector (§2.1(iii)).
 * `hasUniformPoincareExpansion_iff`: the explicit form of uniformity (DLMF 2.1.18, §2.1(iv)).
 * `hasGeneralizedAsymptoticExpansion_convergent_ne`: generalized expansions (§2.1(v)).
 -/
@@ -366,7 +368,8 @@ theorem hasPoincareExpansion_of_hasSum {a : ℕ → ℂ} {f : ℂ → ℂ} {R : 
           rw [lt_inv_comm₀ hR' (norm_pos_iff.mpr hz0)]; exact hz
         linarith [le_max_left R 0]
       simpa using (hf z⁻¹ hlt).summable
-  have h8 := (tsum_tail_isBigO_pow hsum n).comp_tendsto (tendsto_inv_cobounded_inf_principal (𝕜 := ℂ) Set.univ)
+  have h8 := (tsum_tail_isBigO_pow hsum n).comp_tendsto
+      (tendsto_inv_cobounded_inf_principal (𝕜 := ℂ) Set.univ)
   refine (h8.congr' ?_ (Eventually.of_forall fun x => rfl))
   have hev : ∀ᶠ x in cobounded ℂ ⊓ 𝓟 Set.univ, R < ‖x‖ :=
     ((tendsto_norm_cobounded_atTop).eventually (eventually_gt_atTop R)).filter_mono inf_le_left
@@ -415,7 +418,8 @@ theorem HasPoincareExpansion.inv {X : Set 𝕜} {a : ℕ → 𝕜} {f : 𝕜 →
     HasPoincareExpansion X (fun n => PowerSeries.coeff n (PowerSeries.mk a)⁻¹)
       (fun x => (f x)⁻¹) := by
   rw [hasPoincareExpansion_iff_hasAsymptoticPowerSeries] at hf ⊢
-  rw [powerSeries_mk_coeff]; exact hf.recip (tendsto_inv_cobounded_inf_principal X) (by simpa using ha)
+  rw [powerSeries_mk_coeff];
+      exact hf.recip (tendsto_inv_cobounded_inf_principal X) (by simpa using ha)
 
 /-- DLMF §2.1(iii): natural powers of a Poincaré expansion. -/
 @[dlmf 2.1.iii]
@@ -437,7 +441,8 @@ theorem HasPoincareExpansion.unique {X : Set 𝕜} {a b : ℕ → E} {f : 𝕜 �
     have h := (isLittleO_one_iff 𝕜).mpr (tendsto_inv_cobounded_inf_principal (𝕜 := 𝕜) X)
     have := h.mul_isBigO (isBigO_refl (fun x : 𝕜 => x⁻¹ ^ n) (cobounded 𝕜 ⊓ 𝓟 X))
     simpa [pow_succ, mul_comm] using this
-  · exact ((eventually_ne_zero_cobounded_inf_principal X).mono fun x hx => pow_ne_zero n (inv_ne_zero hx)).frequently
+  · exact ((eventually_ne_zero_cobounded_inf_principal X).mono fun x hx =>
+        pow_ne_zero n (inv_ne_zero hx)).frequently
 
 /-- DLMF 2.1.16 (uniqueness, §2.1(iii)): expansions at a finite point `c` are unique when `c`
 is a limit point of `𝐗`. -/
@@ -541,14 +546,244 @@ theorem hasPoincareExpansion_cexp_neg_sqrt {δ : ℝ} (hδ : 0 < δ) :
     rw [inv_pow, pow_mul, hs, ← inv_pow]
   simpa only [Function.comp_def, g, one_div, l] using hc.trans hb
 
+/-- `‖1 - e^{-ζ}‖ ≤ 2‖ζ‖` for `ℜζ ≥ 0`. -/
+private lemma norm_one_sub_exp_neg_le {ζ : ℂ} (hζ : 0 ≤ ζ.re) :
+    ‖1 - exp (-ζ)‖ ≤ 2 * ‖ζ‖ ∧ ‖1 - exp (-ζ)‖ ≤ 2 := by
+  have h2 : ‖1 - exp (-ζ)‖ ≤ 2 := by
+    refine (norm_sub_le _ _).trans ?_
+    rw [norm_one, Complex.norm_exp, neg_re]
+    have := Real.exp_le_one_iff.2 (neg_nonpos.2 hζ)
+    linarith
+  refine ⟨?_, h2⟩
+  by_cases h : ‖ζ‖ ≤ 1
+  · rw [norm_sub_rev]
+    simpa using norm_exp_sub_one_le (x := -ζ) (by simpa using h)
+  · linarith
+
+/-- The real part of the principal `z^{1/4}` is at least `‖z‖^{1/4}/2`. -/
+private lemma re_cpow_quarter_ge {z : ℂ} (hz : z ≠ 0) :
+    ‖z‖ ^ (1 / 4 : ℝ) / 2 ≤ (z ^ (1 / 4 : ℂ)).re := by
+  rw [cpow_def_of_ne_zero hz, exp_re]
+  have hre : (log z * (1 / 4)).re = Real.log ‖z‖ / 4 := by
+    simp [log_re]; ring
+  have him : (log z * (1 / 4)).im = arg z / 4 := by
+    simp [log_im]; ring
+  rw [hre, him, show Real.log ‖z‖ / 4 = Real.log ‖z‖ * (1 / 4 : ℝ) by ring,
+    ← Real.rpow_def_of_pos (norm_pos_iff.2 hz)]
+  have hc : 1 / 2 ≤ Real.cos (arg z / 4) := by
+    have h1 := Real.one_sub_sq_div_two_le_cos (x := arg z / 4)
+    have ha : |arg z| ≤ π := abs_arg_le_pi z
+    have hsq : (arg z / 4) ^ 2 ≤ (π / 4) ^ 2 := by
+      rw [← sq_abs, abs_div, abs_of_pos (by norm_num : (0 : ℝ) < 4)]
+      gcongr
+    have hpi := Real.pi_le_four
+    have hpi0 := Real.pi_pos
+    have : (π / 4) ^ 2 ≤ 1 := by rw [div_pow]; rw [div_le_one (by norm_num)]; nlinarith
+    linarith
+  have hp : 0 ≤ ‖z‖ ^ (1 / 4 : ℝ) := Real.rpow_nonneg (norm_nonneg _) _
+  nlinarith
+
+/-- `e^{-c t^{1/4}} ≤ (4N)!/c^{4N} · t^{-N}` for `t > 0`. -/
+private lemma exp_neg_rpow_quarter_le {c t : ℝ} (hc : 0 < c) (ht : 0 < t) (N : ℕ) :
+    Real.exp (-(c * t ^ (1 / 4 : ℝ))) ≤ (4 * N).factorial / c ^ (4 * N) * (t ^ N)⁻¹ := by
+  have hr : 0 ≤ c * t ^ (1 / 4 : ℝ) := by positivity
+  have h := Real.pow_div_factorial_le_exp _ hr (4 * N)
+  have hpow : (c * t ^ (1 / 4 : ℝ)) ^ (4 * N) = c ^ (4 * N) * t ^ N := by
+    rw [mul_pow, ← Real.rpow_natCast (t ^ (1 / 4 : ℝ)), ← Real.rpow_mul ht.le,
+      show (1 / 4 : ℝ) * ((4 * N : ℕ) : ℝ) = (N : ℝ) by push_cast; ring, Real.rpow_natCast]
+  rw [hpow] at h
+  rw [Real.exp_neg]
+  have hpos : 0 < c ^ (4 * N) * t ^ N := by positivity
+  have hf : (0 : ℝ) < (4 * N).factorial := by positivity
+  rw [div_le_iff₀ hf] at h
+  rw [inv_le_iff_one_le_mul₀ (Real.exp_pos _)]
+  calc (1 : ℝ) = (4 * N).factorial / c ^ (4 * N) * (t ^ N)⁻¹ *
+        (c ^ (4 * N) * t ^ N / (4 * N).factorial) := by
+        field_simp
+    _ ≤ (4 * N).factorial / c ^ (4 * N) * (t ^ N)⁻¹ * Real.exp (c * t ^ (1 / 4 : ℝ)) := by
+        gcongr
+        rw [div_le_iff₀ hf]; linarith
+
+/-- The Borel–Ritt damping weights `bₛ = 1/((1 + ‖aₛ‖) 2^s)`. -/
+private noncomputable def borelRittWeight (a : ℕ → ℂ) (s : ℕ) : ℝ := 1 / ((1 + ‖a s‖) * 2 ^ s)
+
+/-- The terms `a_{k+1} z^{-(k+1)} (1 - exp(-b_{k+1} z^{1/4}))` of the Borel–Ritt sum. -/
+private noncomputable def borelRittTerm (a : ℕ → ℂ) (k : ℕ) (z : ℂ) : ℂ :=
+  a (k + 1) * z⁻¹ ^ (k + 1) * (1 - exp (-((borelRittWeight a (k + 1) : ℂ) * z ^ (1 / 4 : ℂ))))
+
+private lemma borelRittWeight_pos (a : ℕ → ℂ) (s : ℕ) : 0 < borelRittWeight a s := by
+  unfold borelRittWeight; positivity
+
+private lemma borelRittWeight_mul_le (a : ℕ → ℂ) (s : ℕ) :
+    borelRittWeight a s * ‖a s‖ ≤ (1 / 2) ^ s := by
+  unfold borelRittWeight
+  rw [one_div_pow, div_mul_eq_mul_div, one_mul, div_le_div_iff₀ (by positivity) (by positivity)]
+  nlinarith [norm_nonneg (a s), pow_pos (two_pos (α := ℝ)) s]
+
+private lemma re_weight_mul_cpow_quarter_nonneg (a : ℕ → ℂ) (s : ℕ) {z : ℂ} (hz : z ≠ 0) :
+    0 ≤ ((borelRittWeight a s : ℂ) * z ^ (1 / 4 : ℂ)).re := by
+  rw [re_ofReal_mul]
+  exact mul_nonneg (borelRittWeight_pos a s).le
+    ((by positivity : (0 : ℝ) ≤ ‖z‖ ^ (1 / 4 : ℝ) / 2).trans (re_cpow_quarter_ge hz))
+
+private lemma norm_exp_neg_weight_le (a : ℕ → ℂ) (s : ℕ) {z : ℂ} (hz : z ≠ 0) :
+    ‖exp (-((borelRittWeight a s : ℂ) * z ^ (1 / 4 : ℂ)))‖ ≤
+      Real.exp (-(borelRittWeight a s / 2 * ‖z‖ ^ (1 / 4 : ℝ))) := by
+  rw [Complex.norm_exp, neg_re, re_ofReal_mul]
+  refine Real.exp_le_exp.2 ?_
+  have := re_cpow_quarter_ge hz
+  have hw := borelRittWeight_pos a s
+  nlinarith
+
+private lemma norm_borelRittTerm_le (a : ℕ → ℂ) (k : ℕ) {z : ℂ} (hz : 1 ≤ ‖z‖) :
+    ‖borelRittTerm a k z‖ ≤ (1 / 2) ^ k * (‖z‖ ^ (1 / 4 : ℝ) * (‖z‖ ^ (k + 1))⁻¹) := by
+  have hz0 : z ≠ 0 := norm_pos_iff.1 (by linarith)
+  have h1 := (norm_one_sub_exp_neg_le (re_weight_mul_cpow_quarter_nonneg a (k + 1) hz0)).1
+  have hq : ‖z ^ (1 / 4 : ℂ)‖ = ‖z‖ ^ (1 / 4 : ℝ) := by
+    rw [show (1 / 4 : ℂ) = ((1 / 4 : ℝ) : ℂ) by norm_num, norm_cpow_real]
+  rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (borelRittWeight_pos a _).le, hq] at h1
+  have hw := borelRittWeight_mul_le a (k + 1)
+  rw [borelRittTerm, norm_mul, norm_mul, norm_pow, norm_inv, inv_pow]
+  calc ‖a (k + 1)‖ * (‖z‖ ^ (k + 1))⁻¹ *
+        ‖1 - exp (-((borelRittWeight a (k + 1) : ℂ) * z ^ (1 / 4 : ℂ)))‖
+      ≤ ‖a (k + 1)‖ * (‖z‖ ^ (k + 1))⁻¹ *
+        (2 * (borelRittWeight a (k + 1) * ‖z‖ ^ (1 / 4 : ℝ))) := by gcongr
+    _ = 2 * (borelRittWeight a (k + 1) * ‖a (k + 1)‖) *
+        (‖z‖ ^ (1 / 4 : ℝ) * (‖z‖ ^ (k + 1))⁻¹) := by ring
+    _ ≤ 2 * (1 / 2) ^ (k + 1) * (‖z‖ ^ (1 / 4 : ℝ) * (‖z‖ ^ (k + 1))⁻¹) := by gcongr
+    _ = _ := by rw [pow_succ]; ring
+
+private lemma norm_borelRittTerm_le' (a : ℕ → ℂ) (k : ℕ) {z : ℂ} (hz : 1 ≤ ‖z‖) :
+    ‖borelRittTerm a k z‖ ≤ (1 / 2) ^ k := by
+  refine (norm_borelRittTerm_le a k hz).trans ?_
+  have h1 : ‖z‖ ^ (1 / 4 : ℝ) ≤ ‖z‖ ^ (k + 1) := by
+    calc ‖z‖ ^ (1 / 4 : ℝ) ≤ ‖z‖ ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le hz (by norm_num)
+      _ = ‖z‖ ^ 1 := Real.rpow_one _ |>.trans (pow_one _).symm
+      _ ≤ ‖z‖ ^ (k + 1) := pow_le_pow_right₀ hz (by omega)
+  have h2 : ‖z‖ ^ (1 / 4 : ℝ) * (‖z‖ ^ (k + 1))⁻¹ ≤ 1 := by
+    rw [← div_eq_mul_inv, div_le_one (by positivity)]; exact h1
+  calc (1 / 2 : ℝ) ^ k * (‖z‖ ^ (1 / 4 : ℝ) * (‖z‖ ^ (k + 1))⁻¹) ≤ (1 / 2) ^ k * 1 := by
+        gcongr
+    _ = _ := mul_one _
+
+/-- DLMF §2.1(iii) (Borel–Ritt): for any coefficients `aₛ` and `θ ≤ π` there is a function
+analytic in `{|z| > 1, |ph z| < θ}` with the Poincaré expansion `∑ aₛ z⁻ˢ` there. Stronger than
+DLMF, which assumes `θ > 0`. The function is
+`a₀ + ∑_{k ≥ 0} a_{k+1} z^{-(k+1)} (1 - exp(-b_{k+1} z^{1/4}))` with `bₛ = 1/((1 + ‖aₛ‖) 2^s)`. -/
+@[dlmf 2.1.iii]
+theorem exists_hasPoincareExpansion_sector' (a : ℕ → ℂ) {θ : ℝ} (hθπ : θ ≤ π) :
+    ∃ f : ℂ → ℂ, DifferentiableOn ℂ f {z | 1 < ‖z‖ ∧ |arg z| < θ} ∧
+      HasPoincareExpansion {z | 1 < ‖z‖ ∧ |arg z| < θ} a f := by
+  set S : Set ℂ := {z | 1 < ‖z‖ ∧ |arg z| < θ} with hS
+  have hsum : ∀ z : ℂ, 1 ≤ ‖z‖ → Summable fun k => borelRittTerm a k z := fun z hz =>
+    Summable.of_norm_bounded summable_geometric_two fun k => norm_borelRittTerm_le' a k hz
+  refine ⟨fun z => a 0 + ∑' k, borelRittTerm a k z, ?_, ?_⟩
+  · -- holomorphy
+    set U : Set ℂ := {z | 1 < ‖z‖} ∩ slitPlane
+    have hU : IsOpen U := (isOpen_lt continuous_const continuous_norm).inter isOpen_slitPlane
+    have hSU : S ⊆ U := fun z hz => ⟨hz.1, mem_slitPlane_iff_arg.2
+      ⟨fun h => by have := hz.2; rw [h, abs_of_pos Real.pi_pos] at this; linarith,
+        norm_pos_iff.1 (by linarith [hz.1])⟩⟩
+    refine (DifferentiableOn.const_add (a 0) ?_).mono hSU
+    refine differentiableOn_tsum_of_summable_norm summable_geometric_two (fun k z hz => ?_) hU
+      (fun k z hz => norm_borelRittTerm_le' a k hz.1.le)
+    have hz0 : z ≠ 0 := norm_pos_iff.1 (by linarith [hz.1.out])
+    refine DifferentiableAt.differentiableWithinAt ?_
+    unfold borelRittTerm
+    refine (differentiableAt_const _).mul ((differentiableAt_inv hz0).pow _) |>.mul ?_
+    refine (differentiableAt_const _).sub (DifferentiableAt.cexp ?_)
+    exact ((differentiableAt_const _).mul
+      (differentiableAt_id.cpow (differentiableAt_const _) hz.2)).neg
+  · -- the expansion
+    have hev : ∀ᶠ z in cobounded ℂ ⊓ 𝓟 S, 1 ≤ ‖z‖ :=
+      (tendsto_norm_cobounded_atTop.eventually (eventually_ge_atTop 1)).filter_mono inf_le_left
+    intro N
+    rcases N with _ | M
+    · refine IsBigO.of_bound (‖a 0‖ + 2) ?_
+      filter_upwards [hev] with z hz
+      simp only [range_zero, sum_empty, sub_zero, pow_zero, norm_one, mul_one]
+      refine (norm_add_le _ _).trans ?_
+      have := tsum_of_norm_bounded hasSum_geometric_two fun k => norm_borelRittTerm_le' a k hz
+      linarith
+    · -- constants for the exponentially small terms
+      set K : ℝ := ∑ k ∈ range (M + 1), ‖a (k + 1)‖ *
+        ((4 * (M + 1)).factorial / (borelRittWeight a (k + 1) / 2) ^ (4 * (M + 1))) +
+          ‖a (M + 1)‖ + 2
+      refine IsBigO.of_bound K ?_
+      filter_upwards [hev] with z hz
+      have hz0 : z ≠ 0 := norm_pos_iff.1 (by linarith)
+      have hzp : 0 < ‖z‖ := by linarith
+      have hsplit := (hsum z hz).sum_add_tsum_nat_add (M + 1)
+      have heq : a 0 + ∑' k, borelRittTerm a k z - ∑ n ∈ range (M + 1), z⁻¹ ^ n • a n =
+          ∑ k ∈ range (M + 1), (borelRittTerm a k z - z⁻¹ ^ (k + 1) * a (k + 1)) +
+            z⁻¹ ^ (M + 1) * a (M + 1) + ∑' k, borelRittTerm a (k + (M + 1)) z := by
+        have e1 : ∑ n ∈ range (M + 1), z⁻¹ ^ n • a n =
+            a 0 + ∑ k ∈ range M, z⁻¹ ^ (k + 1) * a (k + 1) := by
+          rw [Finset.sum_range_succ']; simp [add_comm]
+        have e2 : ∑ k ∈ range (M + 1), (borelRittTerm a k z - z⁻¹ ^ (k + 1) * a (k + 1)) =
+            ∑ k ∈ range (M + 1), borelRittTerm a k z -
+              (∑ k ∈ range M, z⁻¹ ^ (k + 1) * a (k + 1) + z⁻¹ ^ (M + 1) * a (M + 1)) := by
+          rw [Finset.sum_sub_distrib, Finset.sum_range_succ (fun k => z⁻¹ ^ (k + 1) * a (k + 1))]
+        rw [e1, e2, ← hsplit]
+        ring
+      show ‖a 0 + ∑' k, borelRittTerm a k z - ∑ n ∈ range (M + 1), z⁻¹ ^ n • a n‖ ≤
+        K * ‖z⁻¹ ^ (M + 1)‖
+      rw [heq, norm_pow, norm_inv]
+      set X : ℝ := (‖z‖ ^ (M + 1))⁻¹ with hX
+      have hX' : ‖z‖⁻¹ ^ (M + 1) = X := by rw [inv_pow]
+      rw [hX']
+      -- the three pieces
+      have h1 : ‖∑ k ∈ range (M + 1), (borelRittTerm a k z - z⁻¹ ^ (k + 1) * a (k + 1))‖ ≤
+          (∑ k ∈ range (M + 1), ‖a (k + 1)‖ *
+            ((4 * (M + 1)).factorial / (borelRittWeight a (k + 1) / 2) ^ (4 * (M + 1)))) * X := by
+        rw [Finset.sum_mul]
+        refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun k _ => ?_)
+        have he : borelRittTerm a k z - z⁻¹ ^ (k + 1) * a (k + 1) = -(a (k + 1) *
+            z⁻¹ ^ (k + 1) * exp (-((borelRittWeight a (k + 1) : ℂ) * z ^ (1 / 4 : ℂ)))) := by
+          unfold borelRittTerm; ring
+        rw [he, norm_neg, norm_mul, norm_mul, norm_pow, norm_inv]
+        have hpow : (‖z‖⁻¹) ^ (k + 1) ≤ 1 := pow_le_one₀ (by positivity) (inv_le_one_of_one_le₀ hz)
+        have hexp := (norm_exp_neg_weight_le a (k + 1) hz0).trans
+          (exp_neg_rpow_quarter_le (c := borelRittWeight a (k + 1) / 2)
+            (by have := borelRittWeight_pos a (k + 1); positivity) hzp (M + 1))
+        calc ‖a (k + 1)‖ * ‖z‖⁻¹ ^ (k + 1) *
+              ‖exp (-((borelRittWeight a (k + 1) : ℂ) * z ^ (1 / 4 : ℂ)))‖
+            ≤ ‖a (k + 1)‖ * 1 * ((4 * (M + 1)).factorial / (borelRittWeight a (k + 1) / 2) ^
+              (4 * (M + 1)) * (‖z‖ ^ (M + 1))⁻¹) := by gcongr
+          _ = _ := by rw [hX]; ring
+      have h2 : ‖z⁻¹ ^ (M + 1) * a (M + 1)‖ = ‖a (M + 1)‖ * X := by
+        rw [norm_mul, norm_pow, norm_inv, hX, inv_pow, mul_comm]
+      have h3 : ‖∑' k, borelRittTerm a (k + (M + 1)) z‖ ≤ 2 * X := by
+        refine tsum_of_norm_bounded (hasSum_geometric_two.mul_right X) fun k => ?_
+        refine (norm_borelRittTerm_le a _ hz).trans ?_
+        have hq : ‖z‖ ^ (1 / 4 : ℝ) ≤ ‖z‖ := by
+          calc ‖z‖ ^ (1 / 4 : ℝ) ≤ ‖z‖ ^ (1 : ℝ) :=
+                Real.rpow_le_rpow_of_exponent_le hz (by norm_num)
+            _ = ‖z‖ := Real.rpow_one _
+        have hk : ‖z‖ ^ (1 / 4 : ℝ) * (‖z‖ ^ (k + (M + 1) + 1))⁻¹ ≤ X := by
+          calc ‖z‖ ^ (1 / 4 : ℝ) * (‖z‖ ^ (k + (M + 1) + 1))⁻¹
+              ≤ ‖z‖ * (‖z‖ ^ (k + (M + 1) + 1))⁻¹ := by gcongr
+            _ = (‖z‖ ^ (k + (M + 1)))⁻¹ := by rw [pow_succ]; field_simp
+            _ ≤ X := by
+                rw [hX]; exact inv_anti₀ (by positivity) (pow_le_pow_right₀ hz (by omega))
+        calc (1 / 2 : ℝ) ^ (k + (M + 1)) * (‖z‖ ^ (1 / 4 : ℝ) * (‖z‖ ^ (k + (M + 1) + 1))⁻¹)
+            ≤ (1 / 2) ^ k * X :=
+              mul_le_mul (pow_le_pow_of_le_one (by norm_num) (by norm_num) (by omega)) hk
+                (by positivity) (by positivity)
+          _ = _ := by ring
+      calc _ ≤ ‖∑ k ∈ range (M + 1), (borelRittTerm a k z - z⁻¹ ^ (k + 1) * a (k + 1))‖ +
+            ‖z⁻¹ ^ (M + 1) * a (M + 1)‖ + ‖∑' k, borelRittTerm a (k + (M + 1)) z‖ :=
+            norm_add₃_le
+        _ ≤ _ := by rw [h2]; nlinarith
+
 /-- DLMF §2.1(iii): for any coefficients `aₛ` and any open sector `|ph z| < θ` (`0 < θ ≤ π`)
 there is a function analytic in `{|z| > 1, |ph z| < θ}` with the Poincaré expansion `∑ aₛ z⁻ˢ`
 there (Borel–Ritt); adding `c e^{-z}`-type null terms (2.1.17) gives infinitely many. -/
 @[dlmf 2.1.iii]
-theorem exists_hasPoincareExpansion_sector (a : ℕ → ℂ) {θ : ℝ} (hθ : 0 < θ) (hθπ : θ ≤ π) :
+theorem exists_hasPoincareExpansion_sector (a : ℕ → ℂ) {θ : ℝ} (_hθ : 0 < θ) (hθπ : θ ≤ π) :
     ∃ f : ℂ → ℂ, DifferentiableOn ℂ f {z | 1 < ‖z‖ ∧ |arg z| < θ} ∧
-      HasPoincareExpansion {z | 1 < ‖z‖ ∧ |arg z| < θ} a f := by
-  sorry
+      HasPoincareExpansion {z | 1 < ‖z‖ ∧ |arg z| < θ} a f :=
+  exists_hasPoincareExpansion_sector' a hθπ
 
 /-! ### §2.1(iv): uniform expansions -/
 

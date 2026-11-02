@@ -56,7 +56,8 @@ section WeierstrassRelations
 open Filter Topology
 
 /-- `℘ - c` has a pole of order exactly `2` at every lattice point. -/
-theorem meromorphicOrderAt_weierstrassP_sub_of_mem (L : PeriodPair) {x : ℂ} (hx : x ∈ L.lattice) (c : ℂ) :
+theorem meromorphicOrderAt_weierstrassP_sub_of_mem (L : PeriodPair) {x : ℂ}
+    (hx : x ∈ L.lattice) (c : ℂ) :
     meromorphicOrderAt (fun z => ℘[L] z - c) x = -2 := by
   have hlt : meromorphicOrderAt ℘[L] x < meromorphicOrderAt (fun _ : ℂ => -c) x := by
     rw [L.order_weierstrassP x hx]
@@ -67,7 +68,8 @@ theorem meromorphicOrderAt_weierstrassP_sub_of_mem (L : PeriodPair) {x : ℂ} (h
   congr 1
 
 /-- An analytic function with `g x = g'(x) = 0` has order at least `2` at `x`. -/
-theorem two_le_meromorphicOrderAt_of_deriv_eq_zero {g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ g x) (h0 : g x = 0)
+theorem two_le_meromorphicOrderAt_of_deriv_eq_zero {g : ℂ → ℂ} {x : ℂ}
+    (hg : AnalyticAt ℂ g x) (h0 : g x = 0)
     (h1 : deriv g x = 0) : (2 : WithTop ℤ) ≤ meromorphicOrderAt g x := by
   have h2 : ((2 : ℕ) : ℕ∞) ≤ analyticOrderAt g x := by
     rw [natCast_le_analyticOrderAt_iff_iteratedDeriv_eq_zero hg]
@@ -84,7 +86,8 @@ theorem two_le_meromorphicOrderAt_of_deriv_eq_zero {g : ℂ → ℂ} {x : ℂ} (
     exact e
 
 /-- `-2 + o ≥ 0` for an order `o ≥ 2`. -/
-private lemma nonneg_neg_two_add_of_two_le {o : WithTop ℤ} (h : 2 ≤ o) : 0 ≤ (-2 : WithTop ℤ) + o := by
+private lemma nonneg_neg_two_add_of_two_le {o : WithTop ℤ} (h : 2 ≤ o) : 0 ≤
+    (-2 : WithTop ℤ) + o := by
   cases o with
   | top => simp
   | coe n =>
@@ -95,7 +98,8 @@ private lemma nonneg_neg_two_add_of_two_le {o : WithTop ℤ} (h : 2 ≤ o) : 0 �
 
 /-- Liouville for elliptic functions: a lattice-periodic meromorphic function with nonnegative
 order everywhere takes one constant value at every point where it is analytic. -/
-theorem exists_eq_const_of_periodic_of_order_nonneg (L : PeriodPair) {f : ℂ → ℂ} (hf : Meromorphic f)
+theorem exists_eq_const_of_periodic_of_order_nonneg (L : PeriodPair) {f : ℂ → ℂ}
+    (hf : Meromorphic f)
     (hper : ∀ z, ∀ l ∈ L.lattice, f (z + l) = f z)
     (hord : ∀ x, 0 ≤ meromorphicOrderAt f x) :
     ∃ c, ∀ x, AnalyticAt ℂ f x → f x = c := by
@@ -108,16 +112,20 @@ theorem exists_eq_const_of_periodic_of_order_nonneg (L : PeriodPair) {f : ℂ �
     rw [meromorphicOrderAt_congr (hfU.toMeromorphicNFOn_eq_self_on_nhdsNE (Set.mem_univ x))]
     exact hord x
   have hQd : Differentiable ℂ Q := fun x => (hQan x).differentiableAt
-  have hQf : ∀ x, Q =ᶠ[𝓝[≠] x] f := fun x => hfU.toMeromorphicNFOn_eq_self_on_nhdsNE (Set.mem_univ x)
+  have hQf : ∀ x, Q =ᶠ[𝓝[≠] x] f := fun x =>
+      hfU.toMeromorphicNFOn_eq_self_on_nhdsNE (Set.mem_univ x)
   have hper' : ∀ z w, w ∈ L.lattice → Q (z + w) = Q z := by
     intro z w hw
     have h1 : Tendsto (fun y => Q (y + w)) (𝓝[≠] z) (𝓝 (Q (z + w))) :=
-      ((hQd.continuous.comp (continuous_id.add continuous_const : Continuous fun y : ℂ => y + w)).tendsto z).mono_left nhdsWithin_le_nhds
+      ((hQd.continuous.comp
+          (continuous_id.add continuous_const : Continuous fun y : ℂ => y + w)).tendsto z).mono_left
+          nhdsWithin_le_nhds
     have h2 : Tendsto Q (𝓝[≠] z) (𝓝 (Q z)) :=
       (hQd.continuous.tendsto z).mono_left nhdsWithin_le_nhds
     have hmap : Tendsto (fun y => y + w) (𝓝[≠] z) (𝓝[≠] (z + w)) := by
       refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _
-        ((continuous_id.add continuous_const : Continuous fun y : ℂ => y + w).tendsto z |>.mono_left nhdsWithin_le_nhds) ?_
+        ((continuous_id.add continuous_const : Continuous fun y : ℂ => y + w).tendsto z |>.mono_left
+            nhdsWithin_le_nhds) ?_
       filter_upwards [self_mem_nhdsWithin] with y hy
       simpa using hy
     have hev : (fun y => Q (y + w)) =ᶠ[𝓝[≠] z] Q := by
@@ -140,7 +148,8 @@ theorem derivWeierstrassP_eq_zero_of_two_mul_mem (L : PeriodPair) {a : ℂ}
   exact CharZero.eq_neg_self_iff.mp h1.symm
 
 /-- For a half-lattice point `a` the product `(℘(z + a) - ℘(a))(℘(z) - ℘(a))` is constant. -/
-theorem exists_weierstrassP_sub_mul_eq_const_of_two_mul_mem (L : PeriodPair) {a : ℂ} (ha : a ∉ L.lattice)
+theorem exists_weierstrassP_sub_mul_eq_const_of_two_mul_mem (L : PeriodPair) {a : ℂ}
+    (ha : a ∉ L.lattice)
     (h2a : 2 * a ∈ L.lattice) :
     ∃ K, ∀ z, z ∉ L.lattice → z + a ∉ L.lattice →
       (℘[L] (z + a) - ℘[L] a) * (℘[L] z - ℘[L] a) = K := by
@@ -174,7 +183,8 @@ theorem exists_weierstrassP_sub_mul_eq_const_of_two_mul_mem (L : PeriodPair) {a 
     by_cases hx : x ∈ L.lattice
     · have hxa : x + a ∉ L.lattice := fun h => ha (by simpa using sub_mem h hx)
       rw [meromorphicOrderAt_weierstrassP_sub_of_mem L hx, add_comm]
-      refine nonneg_neg_two_add_of_two_le (two_le_meromorphicOrderAt_of_deriv_eq_zero (hA1 x hxa) ?_ ?_)
+      refine nonneg_neg_two_add_of_two_le
+          (two_le_meromorphicOrderAt_of_deriv_eq_zero (hA1 x hxa) ?_ ?_)
       · rw [add_comm, L.weierstrassP_add_coe a ⟨x, hx⟩, sub_self]
       · rw [deriv_sub_const, deriv_comp_add_const, deriv_weierstrassP, add_comm,
           L.derivWeierstrassP_add_coe a ⟨x, hx⟩, hP'a]
@@ -183,7 +193,8 @@ theorem exists_weierstrassP_sub_mul_eq_const_of_two_mul_mem (L : PeriodPair) {a 
           (f := fun w => ℘[L] w - ℘[L] a) (c := a) (x := x)
         rw [h1, meromorphicOrderAt_weierstrassP_sub_of_mem L hxa]
         have hx' : x = -a + ((⟨x + a, hxa⟩ : L.lattice) : ℂ) := by simp
-        refine nonneg_neg_two_add_of_two_le (two_le_meromorphicOrderAt_of_deriv_eq_zero (hA2 x hx) ?_ ?_)
+        refine nonneg_neg_two_add_of_two_le
+            (two_le_meromorphicOrderAt_of_deriv_eq_zero (hA2 x hx) ?_ ?_)
         · rw [hx', L.weierstrassP_add_coe, hneg, sub_self]
         · rw [deriv_sub_const, deriv_weierstrassP, hx', L.derivWeierstrassP_add_coe, hneg']
       · exact add_nonneg (hA1 x hxa).meromorphicOrderAt_nonneg
@@ -346,7 +357,8 @@ theorem weierstrassSigma_add_two_mul_halfPeriod (z : ℂ) {j : ℕ}
   have hmω : -ω ∉ H.lattice := fun h => hω (by simpa using neg_mem h)
   obtain ⟨a, ha, hfa⟩ := exists_weierstrassSigma_add_mem H.periodPair
     (H.two_mul_halfPeriod_mem hj) hmω
-  have hc : DLMF.Weierstrass.weierstrassZeta H.periodPair (-ω + 2 * ω) - DLMF.Weierstrass.weierstrassZeta H.periodPair (-ω) =
+  have hc : DLMF.Weierstrass.weierstrassZeta H.periodPair (-ω + 2 * ω) -
+      DLMF.Weierstrass.weierstrassZeta H.periodPair (-ω) =
       2 * H.eta j := by
     rw [show -ω + 2 * ω = ω by ring, DLMF.Weierstrass.weierstrassZeta_neg]
     simp only [eta, HalfPeriods.weierstrassZeta, ω]; ring
@@ -359,7 +371,8 @@ theorem weierstrassSigma_add_two_mul_halfPeriod (z : ℂ) {j : ℕ}
     have he : cexp (2 * H.eta j * -ω) * cexp (2 * H.eta j * ω) = 1 := by
       rw [← Complex.exp_add]; simp
     have : (a + cexp (2 * H.eta j * ω)) * DLMF.Weierstrass.weierstrassSigma H.periodPair ω = 0 := by
-      linear_combination (cexp (2 * H.eta j * ω)) * h1 - a * DLMF.Weierstrass.weierstrassSigma H.periodPair ω * he
+      linear_combination (cexp (2 * H.eta j * ω)) * h1 - a *
+          DLMF.Weierstrass.weierstrassSigma H.periodPair ω * he
     have := (mul_eq_zero.mp this).resolve_right hσω
     linear_combination this
   simp only [HalfPeriods.weierstrassSigma]
@@ -407,7 +420,8 @@ theorem e_isRoot (j : ℕ) (hj : j ∈ ({1, 2, 3} : Finset ℕ)) :
   H.e_root_cubic hj
 
 /-- `e_k ≠ e_j` whenever `ω_k + ω_j ∉ 𝕃`. -/
-private lemma e_ne_of_halfPeriod_add_not_mem {j k : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (hk : k ∈ ({1, 2, 3} : Finset ℕ))
+private lemma e_ne_of_halfPeriod_add_not_mem {j k : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ))
+    (hk : k ∈ ({1, 2, 3} : Finset ℕ))
     (hjk : H.halfPeriod k + H.halfPeriod j ∉ H.lattice) : H.e k ≠ H.e j :=
   weierstrassP_ne_of_halfLattice H.periodPair (H.halfPeriod_notMem hj)
     (H.two_mul_halfPeriod_mem hj) (H.halfPeriod_notMem hk) hjk
@@ -537,7 +551,8 @@ theorem invariants_roots_eq_of_lattice_eq (H' : HalfPeriods) (h : H.lattice = H'
   have hG : ∀ n, H.periodPair.G n = H'.periodPair.G n := by
     intro n
     simp only [PeriodPair.G]
-    rw [← (Equiv.subtypeEquivRight (fun x => by rw [show H.periodPair.lattice = H'.periodPair.lattice
+    rw [← (Equiv.subtypeEquivRight
+        (fun x => by rw [show H.periodPair.lattice = H'.periodPair.lattice
       from h]) : H.periodPair.lattice ≃ H'.periodPair.lattice).tsum_eq]
     rfl
   have h2 : H.g₂ = H'.g₂ := by simp only [HalfPeriods.g₂, PeriodPair.g₂, hG]

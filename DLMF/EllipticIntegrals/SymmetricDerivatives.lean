@@ -140,7 +140,8 @@ private lemma carlsonEulerPoissonOperator_congr {F G : (ι → ℂ) → ℂ} {z 
     h.eventually_nhds.mono fun w hw => SeveralComplexVariables.partialDeriv_congr hw j
   unfold Dirichlet.carlsonEulerPoissonOperator
   simp only [Dirichlet.carlsonPartialDeriv_eq_partialDeriv] at h' ⊢
-  rw [SeveralComplexVariables.partialDeriv_congr h' i, SeveralComplexVariables.partialDeriv_congr h j,
+  rw [SeveralComplexVariables.partialDeriv_congr h' i,
+      SeveralComplexVariables.partialDeriv_congr h j,
     SeveralComplexVariables.partialDeriv_congr h i]
 
 /-- DLMF 19.18.13: the Euler–Poisson system
@@ -259,12 +260,14 @@ theorem hasDerivAt_symEllIntRF_translate {x y z : ℂ} (hx : x ∈ slitPlane) (h
   · filter_upwards [hev] with s hs
     rw [← hs]; simp [symEllIntRFVec, add_comm]
   · have h3 : (1 / 2 : ℂ) + 1 = ∑ _i : Fin 3, (1 / 2 : ℂ) := by simp; norm_num
-    have hv' : (![x, y, z] : Fin 3 → ℂ) ∈ Carlson.carlsonRSlitDomain := vec3_mem_carlsonRSlitDomain hx hy hz
+    have hv' : (![x, y, z] : Fin 3 → ℂ) ∈ Carlson.carlsonRSlitDomain :=
+        vec3_mem_carlsonRSlitDomain hx hy hz
     simp only [zero_add]
     rw [h3, symEllIntR_sum _ hv' (Complex.Gamma_ne_zero_of_re_pos (by simp))]
     simp only [Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
       Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
-    rw [show -(1 / 2 : ℂ) = -1 / 2 by ring, ← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
+    rw [show -(1 / 2 : ℂ) = -1 / 2 by ring, ← inv_cpow_half_eq_cpow_neg_half,
+                                        ← inv_cpow_half_eq_cpow_neg_half,
       ← inv_cpow_half_eq_cpow_neg_half]
     have h1 : x ^ (1 / 2 : ℂ) ≠ 0 := (cpow_ne_zero_iff_of_exponent_ne_zero (by norm_num)).mpr
       (slitPlane_ne_zero hx)
@@ -324,12 +327,14 @@ private lemma hasDerivAt_comp_line [DecidableEq ι] {H : (ι → ℂ) → ℂ} {
   have h : HasDerivAt (fun t : ℝ => H (c + (t : ℂ) • d)) _ r :=
     (hH.hasFDerivAt.restrictScalars ℝ).comp_hasDerivAt r (hasDerivAt_add_smul_line c d r)
   refine h.congr_deriv ?_
-  rw [ContinuousLinearMap.coe_restrictScalars', SeveralComplexVariables.fderiv_eq_sum_partialDeriv hH d]
+  rw [ContinuousLinearMap.coe_restrictScalars',
+      SeveralComplexVariables.fderiv_eq_sum_partialDeriv hH d]
   simp [smul_eq_mul]
 
 /-- Second derivative of `t ↦ H(c + t d)` along a real line, for `H` holomorphic on an open set
 `U` containing `c + r d`; `G` agrees with `H` on `U`. -/
-private lemma deriv_deriv_comp_line [DecidableEq ι] {H G : (ι → ℂ) → ℂ} {U : Set (ι → ℂ)} (hH : AnalyticOnNhd ℂ H U)
+private lemma deriv_deriv_comp_line [DecidableEq ι] {H G : (ι → ℂ) → ℂ} {U : Set (ι → ℂ)}
+    (hH : AnalyticOnNhd ℂ H U)
     (hU : IsOpen U) (hGH : EqOn G H U) {c d : ι → ℂ} {r : ℝ} (hr : c + (r : ℂ) • d ∈ U) :
     deriv (fun t : ℝ => G (c + (t : ℂ) • d)) r =
         ∑ i, d i * SeveralComplexVariables.partialDeriv i H (c + (r : ℂ) • d) ∧
@@ -414,7 +419,8 @@ theorem eulerPoissonDarboux_symEllIntR (a : ℂ) {x y : ℝ} (hxy : |y| < x) (hy
   have hEP' : 2 * (y : ℂ) * SeveralComplexVariables.partialDeriv 0
         (SeveralComplexVariables.partialDeriv 1 (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])) p +
       1 / 2 * SeveralComplexVariables.partialDeriv 1 (Carlson.carlsonR (-a) ![1 / 2, 1 / 2]) p -
-      1 / 2 * SeveralComplexVariables.partialDeriv 0 (Carlson.carlsonR (-a) ![1 / 2, 1 / 2]) p = 0 := by
+      1 / 2 * SeveralComplexVariables.partialDeriv 0
+          (Carlson.carlsonR (-a) ![1 / 2, 1 / 2]) p = 0 := by
     convert hEP using 5; congr; exact Subsingleton.elim _ _
   linear_combination (2 / (y : ℂ)) * hEP' - 2 * hc -
     4 * SeveralComplexVariables.partialDeriv 0
@@ -473,7 +479,8 @@ private lemma sum_deriv2_comp_sqrt_sq_add {f : ℝ → ℂ} {x y : ℝ} (hr : 0 
   have hfun : (fun q => f (Real.sqrt (x ^ 2 + q ^ 2))) =
       fun q => f (Real.sqrt (q ^ 2 + x ^ 2)) := by funext q; rw [add_comm]
   rw [deriv_deriv_comp_sqrt_sq_add hr hf, hfun,
-    deriv_deriv_comp_sqrt_sq_add (by linarith : 0 < y ^ 2 + x ^ 2) (by simpa only [add_comm] using hf)]
+    deriv_deriv_comp_sqrt_sq_add (by linarith : 0 < y ^ 2 + x ^ 2)
+        (by simpa only [add_comm] using hf)]
   simp only [add_comm (y ^ 2) (x ^ 2)]
   let r := Real.sqrt (x ^ 2 + y ^ 2)
   have hr0 : 0 < r := Real.sqrt_pos.mpr hr
@@ -509,10 +516,12 @@ theorem wave_symEllIntR (a : ℂ) {t x y : ℝ} (hr : 0 < x ^ 2 + y ^ 2)
       symEllIntR a ![1 / 2, 1 / 2]
         ![(t + Real.sqrt (x ^ 2 + y ^ 2) : ℝ), (t - Real.sqrt (x ^ 2 + y ^ 2) : ℝ)]
     deriv (fun s => deriv (fun r => W r x y) s) t =
-      deriv (fun s => deriv (fun r => W t r y) s) x + deriv (fun s => deriv (fun r => W t x r) s) y := by
+      deriv (fun s => deriv (fun r => W t r y) s) x +
+          deriv (fun s => deriv (fun r => W t x r) s) y := by
   intro W
   let r := Real.sqrt (x ^ 2 + y ^ 2)
-  let w : ℝ → ℝ → ℂ := fun t r => symEllIntR a ![1 / 2, 1 / 2] ![((t + r : ℝ) : ℂ), ((t - r : ℝ) : ℂ)]
+  let w : ℝ → ℝ → ℂ := fun t r =>
+      symEllIntR a ![1 / 2, 1 / 2] ![((t + r : ℝ) : ℂ), ((t - r : ℝ) : ℂ)]
   have hr0 : 0 < r := Real.sqrt_pos.mpr hr
   have hH := analyticOnNhd_carlsonR_slitDomain (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
   have hU := Carlson.isOpen_carlsonRSlitDomain (ι := Fin 2)

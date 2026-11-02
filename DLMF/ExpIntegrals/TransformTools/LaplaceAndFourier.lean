@@ -182,7 +182,8 @@ theorem eiTr_integral_recip_mul {a : ℂ} (ha : -1 < a.re) :
       ring
     have hl : Tendsto (fun u : ℝ => (log u - log (a + u)) / a) atTop (𝓝 0) := by
       have h1 : Tendsto (fun u : ℝ => 1 + a * ((u⁻¹ : ℝ) : ℂ)) atTop (𝓝 (1 + a * ((0:ℝ):ℂ))) :=
-        tendsto_const_nhds.add (((continuous_ofReal.tendsto 0).comp tendsto_inv_atTop_zero).const_mul a)
+        tendsto_const_nhds.add
+            (((continuous_ofReal.tendsto 0).comp tendsto_inv_atTop_zero).const_mul a)
       simp only [ofReal_zero, mul_zero, add_zero] at h1
       have h2 := ((continuousAt_clog (by simp : (1:ℂ) ∈ slitPlane)).tendsto.comp h1).neg.div_const a
       simp only [log_one, neg_zero, zero_div] at h2
@@ -346,7 +347,8 @@ theorem eiTr_laplace_sin {a : ℂ} (ha : 0 < a.re) (u : ℝ) :
       show -(a - ↑u * I) * ↑t = -a * ↑t + ↑t * ↑u * I by ring, Complex.exp_add, Complex.exp_add]
     ring_nf
   simp_rw [he]
-  rw [integral_const_mul, integral_sub (eiTr_integrableOn_exp_neg h1) (eiTr_integrableOn_exp_neg h2),
+  rw [integral_const_mul,
+      integral_sub (eiTr_integrableOn_exp_neg h1) (eiTr_integrableOn_exp_neg h2),
     eiTr_integral_exp_neg h1, eiTr_integral_exp_neg h2]
   have n1 : a + u * I ≠ 0 := fun h => by rw [h] at h1; simp at h1
   have n2 : a - u * I ≠ 0 := fun h => by rw [h] at h2; simp at h2
@@ -369,7 +371,8 @@ theorem eiTr_laplace_cos {a : ℂ} (ha : 0 < a.re) (u : ℝ) :
       show -(a - ↑u * I) * ↑t = -a * ↑t + ↑t * ↑u * I by ring, Complex.exp_add, Complex.exp_add]
     ring_nf
   simp_rw [he]
-  rw [integral_const_mul, integral_add (eiTr_integrableOn_exp_neg h2) (eiTr_integrableOn_exp_neg h1),
+  rw [integral_const_mul,
+      integral_add (eiTr_integrableOn_exp_neg h2) (eiTr_integrableOn_exp_neg h1),
     eiTr_integral_exp_neg h1, eiTr_integral_exp_neg h2]
   have n1 : a + u * I ≠ 0 := fun h => by rw [h] at h1; simp at h1
   have n2 : a - u * I ≠ 0 := fun h => by rw [h] at h2; simp at h2
@@ -445,7 +448,8 @@ theorem eiTr_laplace_sinInt {a : ℂ} (ha : 0 < a.re) :
     ∫ t in Ioi (0:ℝ), cexp (-a * t) * (Real.sinInt t : ℂ) = (π / 2 - arctan a) / a := by
   constructor
   · refine (laplace_nat_pow ha 1).1.norm.mono'
-      ((Continuous.mul (by fun_prop) (continuous_ofReal.comp eiTr_continuous_sinInt)).aestronglyMeasurable) ?_
+      ((Continuous.mul (by fun_prop)
+          (continuous_ofReal.comp eiTr_continuous_sinInt)).aestronglyMeasurable) ?_
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     have ht0 : (0:ℝ) < t := ht
     rw [norm_mul, norm_mul, Complex.norm_real, pow_one, Complex.norm_real]
@@ -665,14 +669,18 @@ theorem eiTr_intervalIntegrable_cos_mul_cosInt (R : ℝ) :
         Real.cos t * Real.log t := by
     funext t; rw [Real.cosInt]; ring
   rw [h]
-  exact ((Real.continuous_cos.mul (eiTr_continuous_cosIntCin.neg.add continuous_const)).intervalIntegrable
-    _ _).add (intervalIntegral.intervalIntegrable_log'.continuousOn_mul Real.continuous_cos.continuousOn)
+  exact ((Real.continuous_cos.mul
+      (eiTr_continuous_cosIntCin.neg.add continuous_const)).intervalIntegrable
+    _ _).add (intervalIntegral.intervalIntegrable_log'.continuousOn_mul
+        Real.continuous_cos.continuousOn)
 
 /-- `∫₀^R cos t Ci(t) dt = sin R Ci(R) - Si(2R)/2` for `R ≥ 0`. -/
 theorem eiTr_integral_cos_mul_cosInt {R : ℝ} (hR : 0 ≤ R) :
-    ∫ t in (0:ℝ)..R, Real.cos t * Real.cosInt t = Real.sin R * Real.cosInt R - Real.sinInt (2 * R) / 2 := by
+    ∫ t in (0:ℝ)..R, Real.cos t * Real.cosInt t = Real.sin R * Real.cosInt R -
+        Real.sinInt (2 * R) / 2 := by
   have hc : Continuous fun t => Real.sin t * Real.cosInt t - Real.sinInt (2 * t) / 2 :=
-    eiTr_continuous_sin_mul_cosInt.sub ((eiTr_continuous_sinInt.comp (continuous_const.mul continuous_id)).div_const 2)
+    eiTr_continuous_sin_mul_cosInt.sub
+        ((eiTr_continuous_sinInt.comp (continuous_const.mul continuous_id)).div_const 2)
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hR hc.continuousOn ?_
     (eiTr_intervalIntegrable_cos_mul_cosInt R)]
   · simp [Real.sinInt]
@@ -692,7 +700,8 @@ theorem eiTr_tendsto_integral_cos_mul_cosInt :
     refine squeeze_zero_norm (a := fun R => ‖Real.cosInt R‖) (fun R => ?_)
       (by simpa using eiTr_tendsto_cosInt_real.norm)
     rw [norm_mul, Real.norm_eq_abs]
-    simpa [Real.norm_eq_abs] using mul_le_of_le_one_left (abs_nonneg (Real.cosInt R)) (Real.abs_sin_le_one R)
+    simpa [Real.norm_eq_abs] using mul_le_of_le_one_left (abs_nonneg (Real.cosInt R))
+        (Real.abs_sin_le_one R)
   have h2 : Tendsto (fun R : ℝ => Real.sinInt (2 * R) / 2) atTop (𝓝 (π / 2 / 2)) :=
     (Real.tendsto_sinInt_atTop.comp (tendsto_id.const_mul_atTop two_pos)).div_const 2
   have := h1.sub h2
@@ -708,7 +717,8 @@ theorem eiTr_integral_sin_mul_sinIntTail (R : ℝ) :
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (f := fun t =>
       -Real.cos t * (Real.sinInt t - π / 2) + Real.sinInt (2 * t) / 2)
       (f' := fun t => Real.sin t * (Real.sinInt t - π / 2)) ?_
-    ((Real.continuous_sin.mul (eiTr_continuous_sinInt.sub continuous_const)).intervalIntegrable _ _)]
+    ((Real.continuous_sin.mul
+        (eiTr_continuous_sinInt.sub continuous_const)).intervalIntegrable _ _)]
   · simp [Real.sinInt]
   · intro x _
     have h1 := ((Real.hasDerivAt_cos x).neg).mul ((Real.hasDerivAt_sinInt x).sub_const (π / 2))
@@ -716,7 +726,8 @@ theorem eiTr_integral_sin_mul_sinIntTail (R : ℝ) :
     refine (h1.add h2).congr_deriv ?_
     rcases eq_or_ne x 0 with rfl | hx
     · simp
-    rw [Real.sinc_of_ne_zero (by positivity : (2:ℝ) * x ≠ 0), Real.sinc_of_ne_zero hx, Real.sin_two_mul]
+    rw [Real.sinc_of_ne_zero (by positivity : (2:ℝ) * x ≠ 0), Real.sinc_of_ne_zero hx,
+        Real.sin_two_mul]
     simp only [Pi.neg_apply]
     field_simp
     ring
@@ -755,7 +766,8 @@ theorem eiTr_one_le_rpow {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) : 1 ≤ t ^ (-(1
   Real.one_le_rpow_of_pos_of_le_one_of_nonpos ht ht1 (by norm_num)
 
 /-- A function bounded by `A + B t^{-1/2}` on `(0,1]` and by `C/t²` on `(1,∞)` is integrable. -/
-theorem eiTr_integrableOn_Ioi_of_bound {h : ℝ → ℝ} (hm : AEStronglyMeasurable h (volume.restrict (Ioi 0)))
+theorem eiTr_integrableOn_Ioi_of_bound {h : ℝ → ℝ}
+    (hm : AEStronglyMeasurable h (volume.restrict (Ioi 0)))
     {A B C : ℝ} (h1 : ∀ t ∈ Ioc (0:ℝ) 1, |h t| ≤ A + B * t ^ (-(1/2:ℝ)))
     (h2 : ∀ t : ℝ, 1 < t → |h t| ≤ C / t ^ 2) : IntegrableOn h (Ioi 0) := by
   rw [← Ioc_union_Ioi_eq_Ioi zero_le_one]

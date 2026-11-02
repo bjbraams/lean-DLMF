@@ -182,7 +182,8 @@ private lemma exists_mathieuMe_ofReal_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m 
   exact Real.pi_ne_zero (by exact_mod_cast this.symm)
 
 /-- A pseudoperiodic `w` with `|μ| < 1` and `w(x₀) ≠ 0` is unbounded on the negative axis. -/
-private lemma unbounded_neg_of_pseudoperiodic_norm_lt_one {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : ‖μ‖ < 1)
+private lemma unbounded_neg_of_pseudoperiodic_norm_lt_one {w : ℂ → ℂ} {μ : ℂ}
+    (h : ∀ z, w (z + π) = μ * w z) (hμ : ‖μ‖ < 1)
     {x₀ : ℝ} (hx₀ : w x₀ ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → ‖w (-x)‖ ≤ C := by
   rintro ⟨C, hC⟩
   obtain ⟨N, hN⟩ := exists_nat_ge (x₀ / π)
@@ -204,7 +205,8 @@ private lemma unbounded_neg_of_pseudoperiodic_norm_lt_one {w : ℂ → ℂ} {μ 
   exact hx₀ (norm_le_zero_iff.mp this)
 
 /-- A pseudoperiodic `w` with `|μ| > 1` and `w(x₀) ≠ 0` is unbounded on the positive axis. -/
-private lemma unbounded_pos_of_pseudoperiodic_one_lt_norm {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : 1 < ‖μ‖)
+private lemma unbounded_pos_of_pseudoperiodic_one_lt_norm {w : ℂ → ℂ} {μ : ℂ}
+    (h : ∀ z, w (z + π) = μ * w z) (hμ : 1 < ‖μ‖)
     {x₀ : ℝ} (hx₀ : w x₀ ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → ‖w x‖ ≤ C := by
   have hμ0 : μ ≠ 0 := by rintro rfl; norm_num at hμ
   have hv : ∀ z, w (-(z + π)) = μ⁻¹ * w (-z) := by
@@ -213,7 +215,8 @@ private lemma unbounded_pos_of_pseudoperiodic_one_lt_norm {w : ℂ → ℂ} {μ 
     rw [show -(z + π) + π = -z by ring] at this
     rw [this, ← mul_assoc, inv_mul_cancel₀ hμ0, one_mul]
   have hμ' : ‖μ⁻¹‖ < 1 := by rw [norm_inv]; exact inv_lt_one_of_one_lt₀ hμ
-  have := unbounded_neg_of_pseudoperiodic_norm_lt_one (w := fun z => w (-z)) hv hμ' (x₀ := -x₀) (by simpa using hx₀)
+  have := unbounded_neg_of_pseudoperiodic_norm_lt_one (w := fun z => w (-z)) hv hμ' (x₀ := -x₀)
+      (by simpa using hx₀)
   simpa using this
 
 /-- **Stable pairs from real noninteger exponents** (DLMF §28.17): for real `ν ∉ ℤ` and real
@@ -291,7 +294,8 @@ theorem mathieuMe_tendsto_or {q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (h�
   · right
     have h1 : 1 < ‖Complex.exp (π * I * ν)‖ := by
       rw [hμ]; exact Real.one_lt_exp_iff.mpr (by nlinarith [Real.pi_pos])
-    refine ⟨?_, unbounded_pos_of_pseudoperiodic_one_lt_norm (w := fun z => mathieuMe ν z q) hper h1 hx₀⟩
+    refine ⟨?_, unbounded_pos_of_pseudoperiodic_one_lt_norm
+        (w := fun z => mathieuMe ν z q) hper h1 hx₀⟩
     have hb : ∀ x : ℝ, ‖mathieuMe ν (-(x : ℂ)) q‖ ≤ B * Real.exp (ν.im * x) := by
       intro x
       have := norm_mathieuMe_ofReal_le hν hq (-x)
@@ -303,14 +307,16 @@ theorem mathieuMe_tendsto_or {q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (h�
   · left
     have h1 : ‖Complex.exp (π * I * ν)‖ < 1 := by
       rw [hμ]; exact Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos])
-    refine ⟨?_, unbounded_neg_of_pseudoperiodic_norm_lt_one (w := fun z => mathieuMe ν z q) hper h1 hx₀⟩
+    refine ⟨?_, unbounded_neg_of_pseudoperiodic_norm_lt_one
+        (w := fun z => mathieuMe ν z q) hper h1 hx₀⟩
     refine squeeze_zero_norm (norm_mathieuMe_ofReal_le hν hq) ?_
     have : Tendsto (fun x : ℝ => -(ν.im * x)) atTop atBot :=
       tendsto_neg_atTop_atBot.comp (tendsto_id.const_mul_atTop hpos)
     simpa using (Real.tendsto_exp_atBot.comp this).const_mul B
 
 /-- A nontrivial solution of Mathieu's equation does not vanish identically on `ℝ`. -/
-private lemma exists_ofReal_ne_zero_of_isMathieuSolution {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
+private lemma exists_ofReal_ne_zero_of_isMathieuSolution {a q : ℂ} {w : ℂ → ℂ}
+    (hw : IsMathieuSolution a q w)
     (hw0 : w ≠ 0) : ∃ x : ℝ, w x ≠ 0 := by
   by_contra h
   push Not at h
@@ -327,7 +333,8 @@ private lemma exists_ofReal_ne_zero_of_isMathieuSolution {a q : ℂ} {w : ℂ �
   exact hw0 (by rw [this]; funext z; simp)
 
 /-- A Floquet solution with respect to `ν` with `ℑν ≠ 0` is unbounded on `ℝ`. -/
-private lemma unbounded_of_isFloquetSolution_im_ne_zero {a q ν : ℂ} {w : ℂ → ℂ} (hw : IsFloquetSolution a q ν w)
+private lemma unbounded_of_isFloquetSolution_im_ne_zero {a q ν : ℂ} {w : ℂ → ℂ}
+    (hw : IsFloquetSolution a q ν w)
     (hν : ν.im ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, ‖w x‖ ≤ C := by
   rintro ⟨C, hC⟩
   obtain ⟨hs, hw0, hper⟩ := hw
@@ -340,7 +347,8 @@ private lemma unbounded_of_isFloquetSolution_im_ne_zero {a q ν : ℂ} {w : ℂ 
     exact unbounded_pos_of_pseudoperiodic_one_lt_norm hper h1 hx₀ ⟨C, fun x _ => hC x⟩
   · have h1 : ‖Complex.exp (π * I * ν)‖ < 1 := by
       rw [hμ]; exact Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos])
-    exact unbounded_neg_of_pseudoperiodic_norm_lt_one hper h1 hx₀ ⟨C, fun x _ => by simpa using hC (-x)⟩
+    exact unbounded_neg_of_pseudoperiodic_norm_lt_one hper h1 hx₀
+        ⟨C, fun x _ => by simpa using hC (-x)⟩
 
 /-- **Unstable pairs** (DLMF §28.17): if `a` has a characteristic exponent `ν` with
 `ℑν ≠ 0`, then `(a, q)` is unstable; indeed every nontrivial solution of 28.2.1 is unbounded
@@ -372,7 +380,8 @@ theorem not_isMathieuStable_of_im_ne_zero {a q ν : ℂ} (hc : IsMathieuCharExp 
   simp at this
 
 /-- A continuous `π`-pseudoperiodic function with multiplier of modulus `1` is bounded on `ℝ`. -/
-private lemma bounded_of_pseudoperiodic_norm_eq_one {w : ℂ → ℂ} (hw : Continuous w) {μ : ℂ} (hμ : ‖μ‖ = 1)
+private lemma bounded_of_pseudoperiodic_norm_eq_one {w : ℂ → ℂ} (hw : Continuous w)
+    {μ : ℂ} (hμ : ‖μ‖ = 1)
     (h : ∀ z, w (z + π) = μ * w z) : ∃ C : ℝ, ∀ x : ℝ, ‖w x‖ ≤ C := by
   set g : ℝ → ℝ := fun x => ‖w x‖
   have hg : Continuous g := continuous_norm.comp (hw.comp Complex.continuous_ofReal)
@@ -478,7 +487,8 @@ private lemma isMathieuStable_iff_norm_mathieuWI_pi_lt_one {a q : ℝ} (hq : q �
         intro z; rw [mathieuWII_add_pi, hD]; ring
       by_cases hB : B = 0
       · by_cases hC : C = 0
-        · refine not_mathieuWI_mathieuWII_two_pi_periodic (a := (a : ℂ)) hq' (fun z => ?_) (fun z => ?_)
+        · refine not_mathieuWI_mathieuWII_two_pi_periodic (a := (a : ℂ)) hq'
+              (fun z => ?_) (fun z => ?_)
           · rw [show z + 2 * π = z + π + π by ring, eI, eI, hB]
             linear_combination (mathieuWI (a : ℂ) (q : ℂ) z) * hs
           · rw [show z + 2 * π = z + π + π by ring, eII, eII, hC]
@@ -488,7 +498,8 @@ private lemma isMathieuStable_iff_norm_mathieuWI_pi_lt_one {a q : ℝ} (hq : q �
       · have hC : C = 0 := (mul_eq_zero.mp hBC).resolve_left hB
         obtain ⟨x₀, hx₀⟩ := exists_ofReal_ne_zero_of_isMathieuSolution h2 (fun h => by
           have := congrArg (fun f => deriv f 0) h; simp [h21] at this)
-        exact unbounded_of_pseudoperiodic_jordan hs (fun z => by rw [eII, hC]; ring) eI hB hx₀ (hst _ h1)
+        exact unbounded_of_pseudoperiodic_jordan hs (fun z => by rw [eII, hC]; ring) eI
+            hB hx₀ (hst _ h1)
   · intro hlt
     set r := c.re
     have hr : |r| < 1 := by rw [hcr, Complex.norm_real, Real.norm_eq_abs] at hlt; exact hlt
@@ -552,9 +563,10 @@ private lemma isMathieuStable_iff_norm_mathieuWI_pi_lt_one {a q : ℝ} (hq : q �
 
 /-- **The stability chart** (DLMF §28.17, Figure 28.17.1): for real `a` and real `q ≠ 0` the
 stable pairs form an open set whose boundary consists of points on the characteristic curves
-`a = a_n(q)` and `a = b_n(q)`. Proved from `isMathieuStable_iff_norm_mathieuWI_pi_lt_one` (stability iff `|w_I(π)| < 1`, by
-Ince's theorem), the continuity of `(a, q) ↦ w_I(π; a, q)` (`differentiable_mathieuWI_mathieuWII`)
-and Table 28.2.1 (`exists_solution_neumann_iff` and its analogues). -/
+`a = a_n(q)` and `a = b_n(q)`. Proved from `isMathieuStable_iff_norm_mathieuWI_pi_lt_one` (stability
+iff `|w_I(π)| < 1`, by Ince's theorem), the continuity of `(a, q) ↦ w_I(π; a, q)`
+(`differentiable_mathieuWI_mathieuWII`) and Table 28.2.1 (`exists_solution_neumann_iff` and its
+analogues). -/
 @[dlmf 28.17]
 theorem isOpen_mathieuStable_and_frontier :
     IsOpen {p : ℝ × ℝ | p.2 ≠ 0 ∧ IsMathieuStable p.1 p.2} ∧

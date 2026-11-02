@@ -359,7 +359,8 @@ private lemma inversionNumber_inv {n : ℕ} (σ : Perm (Fin n)) :
     exact ⟨by simpa using h.2, by simpa using h.1⟩
 
 /-- An adjacent transposition is an involution. -/
-private lemma inv_eq_self_of_isAdjacentSwap {n : ℕ} {τ : Perm (Fin n)} (h : IsAdjacentSwap τ) : τ⁻¹ = τ := by
+private lemma inv_eq_self_of_isAdjacentSwap {n : ℕ} {τ : Perm (Fin n)}
+    (h : IsAdjacentSwap τ) : τ⁻¹ = τ := by
   obtain ⟨a, b, -, rfl⟩ := h
   exact swap_inv a b
 
@@ -451,21 +452,24 @@ private lemma insertMinEquiv_apply_self {n : ℕ} (p : Fin (n + 2)) (σ : Perm (
   simp [insertMinEquiv]
 
 /-- The other letters are those of `σ`, shifted up by one. -/
-private lemma insertMinEquiv_apply_succAbove {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1))) (m : Fin (n + 1)) :
+private lemma insertMinEquiv_apply_succAbove {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1)))
+    (m : Fin (n + 1)) :
     insertMinEquiv (p, σ) (p.succAbove m) = (σ m).succ := by
   have := Perm.decomposeFin'Symm_symm_succAbove p σ⁻¹ (σ m)
   rw [show σ⁻¹ (σ m) = m from σ.symm_apply_apply m] at this
   simpa [insertMinEquiv] using this
 
 /-- Letters before the insertion position. -/
-private lemma insertMinEquiv_apply_of_lt {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1))) {j : ℕ} (hj : j < p) :
+private lemma insertMinEquiv_apply_of_lt {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1)))
+    {j : ℕ} (hj : j < p) :
     insertMinEquiv (p, σ) ⟨j, by omega⟩ = (σ ⟨j, by omega⟩).succ := by
   have h : (⟨j, by omega⟩ : Fin (n + 2)) = p.succAbove ⟨j, by omega⟩ := by
     rw [Fin.succAbove_of_castSucc_lt _ _ (by simp [Fin.lt_def, hj])]; rfl
   rw [h, insertMinEquiv_apply_succAbove]
 
 /-- Letters after the insertion position. -/
-private lemma insertMinEquiv_apply_of_gt {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1))) {j : ℕ} (hj : p < j)
+private lemma insertMinEquiv_apply_of_gt {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1)))
+    {j : ℕ} (hj : p < j)
     (hjn : j < n + 2) :
     insertMinEquiv (p, σ) ⟨j, hjn⟩ = (σ ⟨j - 1, by omega⟩).succ := by
   have h : (⟨j, hjn⟩ : Fin (n + 2)) = p.succAbove ⟨j - 1, by omega⟩ := by
@@ -474,7 +478,8 @@ private lemma insertMinEquiv_apply_of_gt {n : ℕ} (p : Fin (n + 2)) (σ : Perm 
   rw [h, insertMinEquiv_apply_succAbove]
 
 /-- The letter at the insertion position. -/
-private lemma insertMinEquiv_apply_of_eq {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1))) {j : ℕ} (hj : j = p)
+private lemma insertMinEquiv_apply_of_eq {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1)))
+    {j : ℕ} (hj : j = p)
     (hjn : j < n + 2) : insertMinEquiv (p, σ) ⟨j, hjn⟩ = 0 := by
   have h : (⟨j, hjn⟩ : Fin (n + 2)) = p := Fin.ext hj
   rw [h, insertMinEquiv_apply_self]
@@ -483,7 +488,8 @@ private lemma insertMinEquiv_apply_of_eq {n : ℕ} (p : Fin (n + 2)) (σ : Perm 
 def descentIndicator {N : ℕ} (w : Fin N → ℕ) (j : ℕ) : ℕ := if j ∈ wordDescentSet w then 1 else 0
 
 /-- The descent indicator after inserting the minimum at position `p`. -/
-private lemma descentIndicator_insertMinEquiv {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1))) (j : ℕ) :
+private lemma descentIndicator_insertMinEquiv {n : ℕ} (p : Fin (n + 2))
+    (σ : Perm (Fin (n + 1))) (j : ℕ) :
     descentIndicator (fun i => (insertMinEquiv (p, σ) i : ℕ)) j =
       if j + 1 < p then descentIndicator (fun i => (σ i : ℕ)) j else if j + 1 = p then 1
       else if j = p then 0 else descentIndicator (fun i => (σ i : ℕ)) (j - 1) := by
@@ -497,10 +503,12 @@ private lemma descentIndicator_insertMinEquiv {n : ℕ} (p : Fin (n + 2)) (σ : 
     constructor
     · rintro ⟨h, h'⟩
       refine ⟨by omega, ?_⟩
-      rwa [insertMinEquiv_apply_of_lt p σ h1, insertMinEquiv_apply_of_lt p σ (by omega), Fin.succ_lt_succ_iff] at h'
+      rwa [insertMinEquiv_apply_of_lt p σ h1, insertMinEquiv_apply_of_lt p σ (by omega),
+          Fin.succ_lt_succ_iff] at h'
     · rintro ⟨h, h'⟩
       refine ⟨by omega, ?_⟩
-      rwa [insertMinEquiv_apply_of_lt p σ h1, insertMinEquiv_apply_of_lt p σ (by omega), Fin.succ_lt_succ_iff]
+      rwa [insertMinEquiv_apply_of_lt p σ h1, insertMinEquiv_apply_of_lt p σ (by omega),
+          Fin.succ_lt_succ_iff]
   rw [ite_eq_right h1]
   by_cases h2 : j + 1 = p
   · rw [ite_eq_left h2, descentIndicator, ite_eq_left]
@@ -524,11 +532,13 @@ private lemma descentIndicator_insertMinEquiv {n : ℕ} (p : Fin (n + 2)) (σ : 
   constructor
   · rintro ⟨h, h'⟩
     refine ⟨by omega, ?_⟩
-    rwa [insertMinEquiv_apply_of_gt p σ (by omega) h, insertMinEquiv_apply_of_gt p σ (by omega), Fin.succ_lt_succ_iff]
+    rwa [insertMinEquiv_apply_of_gt p σ (by omega) h, insertMinEquiv_apply_of_gt p σ (by omega),
+        Fin.succ_lt_succ_iff]
       at h'
   · rintro ⟨h, h'⟩
     refine ⟨by omega, ?_⟩
-    rwa [insertMinEquiv_apply_of_gt p σ (by omega) (by omega), insertMinEquiv_apply_of_gt p σ (by omega),
+    rwa [insertMinEquiv_apply_of_gt p σ (by omega) (by omega),
+        insertMinEquiv_apply_of_gt p σ (by omega),
       Fin.succ_lt_succ_iff]
 
 /-- Descent positions of a word of length `N` are below `N - 1`. -/
@@ -539,7 +549,8 @@ lemma wordDescentSet_subset_range {N : ℕ} (w : Fin N → ℕ) : wordDescentSet
   simp only [mem_range]; omega
 
 /-- A weighted sum over the descent set as a sum of indicators. -/
-private lemma sum_wordDescentSet_eq_sum_descentIndicator {N M : ℕ} (w : Fin N → ℕ) (hM : N ≤ M + 1) (f : ℕ → ℕ) :
+private lemma sum_wordDescentSet_eq_sum_descentIndicator {N M : ℕ} (w : Fin N → ℕ)
+    (hM : N ≤ M + 1) (f : ℕ → ℕ) :
     ∑ j ∈ wordDescentSet w, f j = ∑ j ∈ range M, descentIndicator w j * f j := by
   have hsub : wordDescentSet w ⊆ range M :=
     (wordDescentSet_subset_range w).trans (range_subset_range.mpr (by omega))
@@ -550,20 +561,23 @@ private lemma sum_wordDescentSet_eq_sum_descentIndicator {N M : ℕ} (w : Fin N 
     simp [descentIndicator, hj]
 
 /-- No descent at or beyond the last position. -/
-private lemma descentIndicator_eq_zero_of_le {N : ℕ} (w : Fin N → ℕ) {j : ℕ} (hj : N ≤ j + 1) : descentIndicator w j = 0 := by
+private lemma descentIndicator_eq_zero_of_le {N : ℕ} (w : Fin N → ℕ) {j : ℕ} (hj : N ≤ j + 1) :
+    descentIndicator w j = 0 := by
   have : j ∉ wordDescentSet w := fun h => by
     have := mem_range.mp (wordDescentSet_subset_range w h); omega
   simp [descentIndicator, this]
 
 /-- Weighted descent sums under insertion of the minimum. -/
-private lemma sum_wordDescentSet_insertMinEquiv {n : ℕ} (p : Fin (n + 2)) (σ : Perm (Fin (n + 1))) (f : ℕ → ℕ) :
+private lemma sum_wordDescentSet_insertMinEquiv {n : ℕ} (p : Fin (n + 2))
+    (σ : Perm (Fin (n + 1))) (f : ℕ → ℕ) :
     ∑ j ∈ wordDescentSet (fun i => (insertMinEquiv (p, σ) i : ℕ)), f j +
         (if 1 ≤ (p : ℕ) then descentIndicator (fun i => (σ i : ℕ)) (p - 1) * f (p - 1) else 0) =
       ∑ j ∈ wordDescentSet (fun i => (σ i : ℕ)), (if j < p then f j else f (j + 1)) +
         (if 1 ≤ (p : ℕ) then f (p - 1) else 0) := by
   have hp := p.isLt
   set d := descentIndicator (fun i => (σ i : ℕ))
-  rw [sum_wordDescentSet_eq_sum_descentIndicator _ (M := n + 2) (by omega), sum_wordDescentSet_eq_sum_descentIndicator _ (M := n + 1) (by omega)]
+  rw [sum_wordDescentSet_eq_sum_descentIndicator _ (M := n + 2) (by omega),
+      sum_wordDescentSet_eq_sum_descentIndicator _ (M := n + 1) (by omega)]
   have e1 : ∀ j, descentIndicator (fun i => (insertMinEquiv (p, σ) i : ℕ)) j * f j =
       (if j + 1 < p then d j * f j else 0) + (if j = p - 1 ∧ 1 ≤ (p : ℕ) then f j else 0) +
         (if p < j then d (j - 1) * f j else 0) := by
@@ -598,7 +612,8 @@ private lemma sum_wordDescentSet_insertMinEquiv {n : ℕ} (p : Fin (n + 2)) (σ 
   split_ifs <;> ring
 
 /-- The descent indicator is `0` or `1`. -/
-private lemma descentIndicator_le_one {N : ℕ} (w : Fin N → ℕ) (j : ℕ) : descentIndicator w j ≤ 1 := by
+private lemma descentIndicator_le_one {N : ℕ} (w : Fin N → ℕ) (j : ℕ) :
+    descentIndicator w j ≤ 1 := by
   unfold descentIndicator; split_ifs <;> omega
 
 /-- The descent number after inserting the minimum at position `p`. -/
@@ -614,7 +629,8 @@ private lemma descentNumber_insertMinEquiv {n : ℕ} (p : Fin (n + 2)) (σ : Per
 /-- The descent number as a sum of descent indicators. -/
 private lemma sum_descentIndicator_eq_descentNumber {n : ℕ} (σ : Perm (Fin n)) :
     ∑ j ∈ range n, descentIndicator (fun i => (σ i : ℕ)) j = descentNumber σ := by
-  have := sum_wordDescentSet_eq_sum_descentIndicator (fun i => (σ i : ℕ)) (M := n) (by omega) (fun _ => 1)
+  have := sum_wordDescentSet_eq_sum_descentIndicator (fun i => (σ i : ℕ)) (M := n)
+      (by omega) (fun _ => 1)
   simp only [sum_const, smul_eq_mul, mul_one] at this
   exact this.symm
 

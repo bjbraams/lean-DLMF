@@ -7,6 +7,7 @@ module
 
 public import DLMF.Legendre.Basic.Associated
 public import DLMF.Legendre.Toroidal
+public import DLMF.Legendre.IntegralRepresentations.Ferrers
 
 /-!
 # Conical functions, Mehler–Fock transforms and special identities
@@ -50,7 +51,8 @@ namespace DLMF.Legendre
 w'' - 2x w' - (τ² + 1/4 + μ²/(1-x²)) w = 0` on `-1 < x < 1`. -/
 @[dlmf 14.20.E1]
 theorem conical_ode (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    (1-x^2:ℂ)*iteratedDeriv 2 (conicalP τ μ) x-2*x*deriv (conicalP τ μ) x-(τ^2+1/4+μ^2/(1-x^2):ℂ)*conicalP τ μ x=0 := by
+    (1-x^2:ℂ)*iteratedDeriv 2 (conicalP τ μ) x-2*x*deriv (conicalP τ μ)
+        x-(τ^2+1/4+μ^2/(1-x^2):ℂ)*conicalP τ μ x=0 := by
   have h := ferrersP_ode (-1/2+I*τ) (-(μ:ℂ)) hx
   have e : conicalP τ μ = ferrersP (-1/2+I*τ) (-(μ:ℂ)) := rfl
   rw [e]
@@ -76,12 +78,17 @@ theorem conicalP_differentiableAt (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:�
     ).differentiableAt.congr_of_eventuallyEq
     ((ferrersP_eqOn_even_odd _ _).eventuallyEq_of_mem (isOpen_Ioo.mem_nhds hx))
 
-/-- DLMF 14.20.3: for real `τ` and `μ ≥ 0` (DLMF: `τ ≥ 0`; excluding `τ = 0` with `μ` a positive half-odd integer) and `-1 <
-x < 1`, `𝖰̂^{-μ}_{-1/2+iτ}(x) = (π e^{-τπ} sin(μπ) sinh(τπ) 𝖯^{-μ}_{-1/2+iτ}(x) + π (e^{-τπ}
-cos²(μπ) + sinh(τπ)) 𝖯^{-μ}_{-1/2+iτ}(-x))/(2(cosh²(τπ) - sin²(μπ)))`. -/
+/-- DLMF 14.20.3: for real `τ` and `μ ≥ 0` (DLMF: `τ ≥ 0`; excluding `τ = 0` with `μ` a positive
+half-odd integer) and `-1 < x < 1`,
+`𝖰̂^{-μ}_{-1/2+iτ}(x) = (π e^{-τπ} sin(μπ) sinh(τπ) 𝖯^{-μ}_{-1/2+iτ}(x) + π (e^{-τπ} cos²(μπ) +
+sinh(τπ)) 𝖯^{-μ}_{-1/2+iτ}(-x))/(2(cosh²(τπ) - sin²(μπ)))`. -/
 @[dlmf 14.20.E3]
-theorem conicalQHat_connection {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    conicalQHat τ μ x=π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))*conicalP τ μ x+π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))*conicalP τ μ (-x) := by
+theorem conicalQHat_connection {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    conicalQHat τ μ x=π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh
+        (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))*conicalP τ μ
+        x+π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh
+        (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))*conicalP τ μ (-x) := by
   have hxm : -x ∈ Ioo (-1:ℝ) 1 := ⟨by linarith [hx.2], by linarith [hx.1]⟩
   set ν : ℂ := -1/2+I*τ with hν
   have hreg1 : LegendreQRegular ν (μ:ℂ) := by
@@ -99,11 +106,13 @@ theorem conicalQHat_connection {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 �
     · exact h n (by linarith)
   have h10 := ferrers_connection_10 ν (μ:ℂ) hreg1 hreg2 hx
   have hw : (ν-μ)*π = ((-(μ*π) - π/2 : ℝ):ℂ) + ((τ*π:ℝ):ℂ)*I := by rw [hν]; push_cast; ring
-  have hsw : sin ((ν-μ)*π) = ((-(Real.cos (μ*π)*Real.cosh (τ*π))):ℝ) + (-(Real.sin (μ*π)*Real.sinh (τ*π)):ℝ)*I := by
+  have hsw : sin ((ν-μ)*π) = ((-(Real.cos (μ*π)*Real.cosh (τ*π))):ℝ) +
+      (-(Real.sin (μ*π)*Real.sinh (τ*π)):ℝ)*I := by
     rw [hw, Complex.sin_add_mul_I, ← ofReal_sin, ← ofReal_cos, ← ofReal_sinh, ← ofReal_cosh,
       Real.sin_sub_pi_div_two, Real.cos_sub_pi_div_two, Real.cos_neg, Real.sin_neg]
     simp only [ofReal_neg, ofReal_mul]; ring
-  have hcw : cos ((ν-μ)*π) = (-(Real.sin (μ*π)*Real.cosh (τ*π)):ℝ) + (Real.cos (μ*π)*Real.sinh (τ*π):ℝ)*I := by
+  have hcw : cos ((ν-μ)*π) = (-(Real.sin (μ*π)*Real.cosh (τ*π)):ℝ) +
+      (Real.cos (μ*π)*Real.sinh (τ*π):ℝ)*I := by
     rw [hw, Complex.cos_add_mul_I, ← ofReal_sin, ← ofReal_cos, ← ofReal_sinh, ← ofReal_cosh,
       Real.sin_sub_pi_div_two, Real.cos_sub_pi_div_two, Real.cos_neg, Real.sin_neg]
     simp only [ofReal_neg, ofReal_mul]; ring
@@ -149,20 +158,27 @@ theorem conicalQHat_connection {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 �
   have hPi : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have key : (((-(c*C)):ℝ) + (-(s*S):ℝ)*I) * ((-(c*C):ℝ) - (-(s*S):ℝ)*I) = ((C^2-s^2:ℝ):ℂ) := by
     have e : ((c*C)^2 + (s*S)^2 : ℝ) = C^2-s^2 := by linear_combination C^2*pyth - s^2*hyp
-    rw [← e]; apply Complex.ext <;> simp only [mul_re, mul_im, add_re, add_im, sub_re, sub_im, ofReal_re, ofReal_im, I_re, I_im] <;> ring
-  have h2 : (2/π*(C^2-s^2:ℝ):ℂ) * Q = (((-(s*C):ℝ) + (c*S:ℝ)*I) * p - q) * ((-(c*C):ℝ) - (-(s*S):ℝ)*I) := by
+    rw [← e]; apply Complex.ext <;>
+        simp only [mul_re, mul_im, add_re, add_im, sub_re, sub_im, ofReal_re, ofReal_im,
+        I_re, I_im] <;> ring
+  have h2 : (2/π*(C^2-s^2:ℝ):ℂ) * Q = (((-(s*C):ℝ) + (c*S:ℝ)*I) * p - q) *
+      ((-(c*C):ℝ) - (-(s*S):ℝ)*I) := by
     linear_combination ((-(c*C):ℝ) - (-(s*S):ℝ)*I) * h10 - (2/π*Q) * key
-  have hQ : Q = ((π/2/(C^2-s^2) : ℝ):ℂ) * ((((-(s*C):ℝ) + (c*S:ℝ)*I) * p - q) * ((-(c*C):ℝ) - (-(s*S):ℝ)*I)) := by
+  have hQ : Q = ((π/2/(C^2-s^2) : ℝ):ℂ) *
+      ((((-(s*C):ℝ) + (c*S:ℝ)*I) * p - q) * ((-(c*C):ℝ) - (-(s*S):ℝ)*I)) := by
     rw [← h2]
     have : ((C^2-s^2:ℝ):ℂ) ≠ 0 := ofReal_ne_zero.mpr hD.ne'
     push_cast at this ⊢
     field_simp
-  have hre : (((c:ℂ) + (s:ℂ)*I) * Q).re = π/2/(C^2-s^2) * ((-(c^2*C+s^2*S))*(-(s*C*p)-q) - c*s*(S-C)*(c*S*p)) := by
-    rw [hQ]; simp only [mul_re, mul_im, add_re, add_im, sub_re, sub_im, ofReal_re, ofReal_im, I_re, I_im]; ring
+  have hre : (((c:ℂ) + (s:ℂ)*I) * Q).re = π/2/(C^2-s^2) *
+      ((-(c^2*C+s^2*S))*(-(s*C*p)-q) - c*s*(S-C)*(c*S*p)) := by
+    rw [hQ]; simp only [mul_re, mul_im, add_re, add_im, sub_re, sub_im, ofReal_re, ofReal_im,
+        I_re, I_im]; ring
   rw [hre]
   have hfin : π/2/(C^2-s^2) * ((-(c^2*C+s^2*S))*(-(s*C*p)-q) - c*s*(S-C)*(c*S*p)) - π/2*s*p
       - (π*(C-S)*s*S/(2*(C^2-s^2))*p + π*((C-S)*c^2+S)/(2*(C^2-s^2))*q)
-      = π/(2*(C^2-s^2)) * (p*((s*S*C+s)*(s^2+c^2-1) + s*(c^2-1)*(C^2-S^2-1)) + q*(S*(s^2+c^2-1))) := by
+      = π/(2*(C^2-s^2)) * (p*((s*S*C+s)*(s^2+c^2-1) + s*(c^2-1)*(C^2-S^2-1)) +
+          q*(S*(s^2+c^2-1))) := by
     field_simp; ring
   rw [show s^2+c^2-1 = 0 by linarith, show C^2-S^2-1 = 0 by linarith] at hfin
   have : π/2/(C^2-s^2) * ((-(c^2*C+s^2*S))*(-(s*C*p)-q) - c*s*(S-C)*(c*S*p)) - π/2*s*p
@@ -172,11 +188,12 @@ theorem conicalQHat_connection {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 �
   push_cast at h3 ⊢
   linear_combination h3
 
-/-- DLMF 14.20.4: for real `τ, μ` (DLMF: `τ, μ ≥ 0`) and `-1 < x < 1`, `𝒲{𝖯^{-μ}_{-1/2+iτ}(x), 𝖯^{-μ}_{-1/2+iτ}(-x)} =
-2/(|Γ(μ+1/2+iτ)|² (1-x²))`. -/
+/-- DLMF 14.20.4: for real `τ, μ` (DLMF: `τ, μ ≥ 0`) and `-1 < x < 1`,
+`𝒲{𝖯^{-μ}_{-1/2+iτ}(x), 𝖯^{-μ}_{-1/2+iτ}(-x)} = 2/(|Γ(μ+1/2+iτ)|² (1-x²))`. -/
 @[dlmf 14.20.E4]
 theorem conical_wronskian (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ODE.wronskian (conicalP τ μ) (fun x => conicalP τ μ (-x)) x=2/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*(1-x^2)) := by
+    ODE.wronskian (conicalP τ μ) (fun x => conicalP τ μ (-x))
+        x=2/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*(1-x^2)) := by
   show ODE.wronskian (fun x => ferrersP (-1/2+I*τ) (-(μ:ℂ)) x)
     (fun x => ferrersP (-1/2+I*τ) (-(μ:ℂ)) (-x)) x = _
   rw [ferrers_wronskian_3 _ _ hx]
@@ -186,14 +203,20 @@ theorem conical_wronskian (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     normSq_eq_norm_sq]
   push_cast; ring
 
-/-- DLMF 14.20.5: for real `τ` and `μ ≥ 0` (DLMF: `τ ≥ 0`; excluding `τ = 0` with `μ` a positive half-odd integer) and `-1 <
-x < 1`, `𝒲{𝖯^{-μ}_{-1/2+iτ}, 𝖰̂^{-μ}_{-1/2+iτ}}(x) = π (e^{-τπ} cos²(μπ) + sinh(τπ))/(|Γ(μ+1/2+iτ)|²
+/-- DLMF 14.20.5: for real `τ` and `μ ≥ 0` (DLMF: `τ ≥ 0`; excluding `τ = 0` with `μ` a positive
+half-odd integer) and `-1 < x < 1`,
+`𝒲{𝖯^{-μ}_{-1/2+iτ}, 𝖰̂^{-μ}_{-1/2+iτ}}(x) = π (e^{-τπ} cos²(μπ) + sinh(τπ))/(|Γ(μ+1/2+iτ)|²
 (cosh²(τπ) - sin²(μπ)) (1-x²))`. -/
 @[dlmf 14.20.E5]
-theorem conicalQHat_wronskian {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ODE.wronskian (conicalP τ μ) (conicalQHat τ μ) x=π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(1-x^2)) := by
-  set A : ℂ := π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
-  set B : ℂ := π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
+theorem conicalQHat_wronskian {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    ODE.wronskian (conicalP τ μ) (conicalQHat τ μ)
+        x=π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh
+        (τ*π))/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(1-x^2)) := by
+  set A : ℂ := π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh
+      (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
+  set B : ℂ := π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh
+      (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
   have hev : conicalQHat τ μ =ᶠ[nhds x] fun y => A*conicalP τ μ y+B*conicalP τ μ (-y) := by
     filter_upwards [isOpen_Ioo.mem_nhds hx] with y hy
     exact conicalQHat_connection hμ hex hy
@@ -207,10 +230,12 @@ theorem conicalQHat_wronskian {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨
       A*deriv (conicalP τ μ) x + B*deriv (fun y => conicalP τ μ (-y)) x :=
     ((hd1.hasDerivAt.const_mul A).add (hd2.hasDerivAt.const_mul B)).deriv
   rw [hev.deriv_eq, hev.eq_of_nhds, hder]
-  have hW' : conicalP τ μ x * deriv (fun x => conicalP τ μ (-x)) x - conicalP τ μ (-x) * deriv (conicalP τ μ) x =
+  have hW' : conicalP τ μ x * deriv (fun x => conicalP τ μ (-x)) x - conicalP τ μ (-x) *
+      deriv (conicalP τ μ) x =
       2 / (↑‖Gamma (↑μ + 1 / 2 + I * ↑τ)‖ ^ 2 * (1 - ↑x ^ 2)) := hW
   have hfin : B * (2 / (↑‖Gamma (↑μ + 1 / 2 + I * ↑τ)‖ ^ 2 * (1 - ↑x ^ 2))) =
-      π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(1-x^2)) := by
+      π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh
+          (τ*π))/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(1-x^2)) := by
     simp only [B]
     generalize ((Real.cosh (τ*π):ℂ)^2-(Real.sin (μ*π):ℂ)^2) = D
     generalize ((‖Gamma (μ+1/2+I*τ)‖:ℂ)^2) = G
@@ -223,7 +248,9 @@ theorem conicalQHat_wronskian {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨
 |Γ(μ+1/2+iτ)|²) (Q^μ_{-1/2+iτ}(x) - Q^μ_{-1/2-iτ}(x))`. -/
 @[dlmf 14.20.E6]
 theorem conical_associated_connection {τ μ : ℝ} (hτ : 0 < τ) {x : ℝ} (hx : 1 < x) :
-    associatedP (-1/2+I*τ) (-μ) x=I*exp (-μ*π*I)/(Real.sinh (τ*π)*(‖Gamma (μ+1/2+I*τ)‖^2:ℂ))*(associatedQ (-1/2+I*τ) μ x-associatedQ (-1/2-I*τ) μ x) := by
+    associatedP (-1/2+I*τ) (-μ) x=I*exp
+        (-μ*π*I)/(Real.sinh (τ*π)*(‖Gamma (μ+1/2+I*τ)‖^2:ℂ))*(associatedQ (-1/2+I*τ) μ x-associatedQ
+        (-1/2-I*τ) μ x) := by
   have hz : (x:ℂ)-1 ∈ slitPlane := by
     rw [show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring]; exact Or.inl (by simp; linarith)
   have h12 := associated_connection_12 (-1/2+I*τ) μ hz
@@ -243,12 +270,14 @@ theorem conical_associated_connection {τ μ : ℝ} (hτ : 0 < τ) {x : ℝ} (hx
     have := congrArg Complex.im hn; simp at this; exact hτ.ne' this)
   have hG2 : Gamma (μ+1/2-I*τ) ≠ 0 := Gamma_ne_zero (fun n hn => by
     have := congrArg Complex.im hn; simp at this; exact hτ.ne' this)
-  have hsh : (Real.sinh (τ*π):ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sinh_pos_iff.mpr (by positivity)).ne'
+  have hsh : (Real.sinh (τ*π):ℂ) ≠ 0 :=
+      ofReal_ne_zero.mpr (Real.sinh_pos_iff.mpr (by positivity)).ne'
   rw [hcos] at h12
   have hn' : (‖Gamma (μ+1/2+I*τ)‖^2:ℂ) = Gamma (μ+1/2+I*τ)*Gamma (μ+1/2-I*τ) := by
     rw [← hn]; push_cast; ring
   rw [hn', div_mul_eq_mul_div, eq_div_iff (mul_ne_zero hsh (mul_ne_zero hG1 hG2))]
-  have h12' : I*(Real.sinh (τ*π):ℂ)*associatedP (-1/2+I*τ) (-μ) x*(Gamma (μ+1/2+I*τ)*Gamma (μ+1/2-I*τ)) =
+  have h12' : I*(Real.sinh (τ*π):ℂ)*associatedP (-1/2+I*τ) (-μ)
+      x*(Gamma (μ+1/2+I*τ)*Gamma (μ+1/2-I*τ)) =
       exp (-μ*π*I)*(associatedQ (-1/2-I*τ) μ x-associatedQ (-1/2+I*τ) μ x) := by
     rw [h12]
     generalize Gamma (μ+1/2+I*τ) = G1 at hG1 ⊢
@@ -332,8 +361,10 @@ theorem legCon_tendsto_P_neg (ν : ℂ) {μ : ℝ} (hμ : 0 < μ) :
   rw [show (1-((-x:ℝ):ℂ))/2 = (((1+x)/2:ℝ):ℂ) by push_cast; ring,
     show (1 + -x) / (1 - -x) = (1-x)/(1+x) by ring, ← mul_assoc]
   congr 1
-  rw [show (1-(x:ℂ)^2) = ((1-x^2:ℝ):ℂ) by push_cast; ring, show (1:ℂ)+x = ((1+x:ℝ):ℂ) by push_cast; ring,
-    Complex.ofReal_cpow_eq_exp h0, Complex.ofReal_cpow_eq_exp (by nlinarith), Complex.ofReal_cpow_eq_exp (by positivity), ← exp_add,
+  rw [show (1-(x:ℂ)^2) = ((1-x^2:ℝ):ℂ) by push_cast; ring, show (1:ℂ)+x =
+                                            ((1+x:ℝ):ℂ) by push_cast; ring,
+    Complex.ofReal_cpow_eq_exp h0, Complex.ofReal_cpow_eq_exp (by nlinarith),
+        Complex.ofReal_cpow_eq_exp (by positivity), ← exp_add,
     show 1-x^2 = (1-x)*(1+x) by ring, Real.log_mul h2.ne' h0.ne', Real.log_div h2.ne' h0.ne']
   congr 1; push_cast; ring
 
@@ -341,7 +372,8 @@ theorem legCon_tendsto_P_neg (ν : ℂ) {μ : ℝ} (hμ : 0 < μ) :
 `𝖰̂^{μ}_{-1/2+iτ}(x) ~ (Γ(μ)/2) (2/(1-x))^{μ/2}` as `x → 1⁻`. -/
 @[dlmf 14.20.E7]
 theorem conical_singular_7 {τ μ : ℝ} (hμ : 0 < μ) :
-    (fun x : ℝ => conicalQHat τ (-1*μ) x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => Gamma (μ:ℂ)/2*(2/(1-x):ℂ)^((μ:ℂ)/2)) := by
+    (fun x : ℝ => conicalQHat τ (-1*μ) x) ~[𝓝[<] (1:ℝ)]
+        (fun x : ℝ => Gamma (μ:ℂ)/2*(2/(1-x):ℂ)^((μ:ℂ)/2)) := by
   set ν : ℂ := -1/2+I*τ with hνdef
   have hreg : LegendreQRegular ν (μ:ℂ) := fun n hn => by
     have := congrArg Complex.re hn; simp [hνdef] at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
@@ -364,7 +396,8 @@ theorem conical_singular_7 {τ μ : ℝ} (hμ : 0 < μ) :
       rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
     have e4 : cos ((μ:ℂ)*π) = ((Real.cos (μ*π):ℝ):ℂ) := by push_cast; ring_nf
     rw [e1, e2, e3, e4, Complex.Gamma_ofReal, show (((2:ℝ)^(μ-1):ℝ):ℂ) * ((Real.Gamma μ:ℝ):ℂ) *
-      ((Real.cos (μ*π):ℝ):ℂ) = (((2:ℝ)^(μ-1) * Real.Gamma μ * Real.cos (μ*π):ℝ):ℂ) by push_cast; ring,
+      ((Real.cos (μ*π):ℝ):ℂ) =
+          (((2:ℝ)^(μ-1) * Real.Gamma μ * Real.cos (μ*π):ℝ):ℂ) by push_cast; ring,
       mul_comm E, re_ofReal_mul, exp_ofReal_mul_I_re]
     have h2 : (2:ℝ)^μ = 2 * 2^(μ-1) := by
       rw [show μ = (μ-1)+1 by ring, Real.rpow_add (by norm_num), Real.rpow_one]; ring_nf
@@ -401,7 +434,8 @@ theorem conical_singular_7 {τ μ : ℝ} (hμ : 0 < μ) :
   have := legBd_isEquivalent_of_tendsto hu (legBd_tendsto_weight_left (μ:ℂ)) hK (by simp)
   refine this.congr_right (Eventually.of_forall fun x => ?_)
   simp only
-  rw [show (2:ℂ)^((μ:ℂ)-1) * Gamma (μ:ℂ) / 2^(μ:ℂ) = (2:ℂ)^((μ:ℂ)-1) / 2^(μ:ℂ) * Gamma (μ:ℂ) by ring,
+  rw [show (2:ℂ)^((μ:ℂ)-1) * Gamma (μ:ℂ) / 2^(μ:ℂ) = (2:ℂ)^((μ:ℂ)-1) / 2^(μ:ℂ) *
+      Gamma (μ:ℂ) by ring,
     legBd_two_cpow_sub_one_div]
   ring
 
@@ -410,10 +444,16 @@ theorem conical_singular_7 {τ μ : ℝ} (hμ : 0 < μ) :
 |Γ(μ+1/2+iτ)|²) (2/(1-x))^{μ/2}` as `x → 1⁻`. -/
 @[dlmf 14.20.E8]
 theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) :
-    (fun x : ℝ => conicalQHat τ (1*μ) x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => π*Gamma (μ:ℂ)*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(‖Gamma (μ+1/2+I*τ)‖^2:ℂ))*(2/(1-x):ℂ)^((μ:ℂ)/2)) := by
+    (fun x : ℝ => conicalQHat τ (1*μ) x) ~[𝓝[<] (1:ℝ)]
+        (fun x : ℝ => π*Gamma
+        (μ:ℂ)*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh
+        (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(‖Gamma
+        (μ+1/2+I*τ)‖^2:ℂ))*(2/(1-x):ℂ)^((μ:ℂ)/2)) := by
   set ν : ℂ := -1/2+I*τ with hνdef
-  set A : ℂ := π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
-  set B : ℂ := π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
+  set A : ℂ := π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh
+      (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
+  set B : ℂ := π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh
+      (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
   -- first term tends to zero
   have h1 : Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^((μ:ℂ)/2) * conicalP τ μ x) (𝓝[<] 1) (𝓝 0) := by
     have hP := legCon_tendsto_P ν (-(μ:ℂ))
@@ -435,7 +475,8 @@ theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : 
     congr 1; ring
   have h2 := legCon_tendsto_P_neg ν hμ
   have hsum : Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^((μ:ℂ)/2) * conicalQHat τ (1*μ) x) (𝓝[<] 1)
-      (𝓝 (A*0 + B*((2:ℂ)^(μ:ℂ) * (Gamma (μ:ℂ) * ((Gamma ((μ:ℂ)-ν))⁻¹ * (Gamma ((μ:ℂ)+ν+1))⁻¹))))) := by
+      (𝓝 (A*0 + B*((2:ℂ)^(μ:ℂ) *
+          (Gamma (μ:ℂ) * ((Gamma ((μ:ℂ)-ν))⁻¹ * (Gamma ((μ:ℂ)+ν+1))⁻¹))))) := by
     refine ((h1.const_mul A).add (h2.const_mul B)).congr' ?_
     filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
     rw [one_mul, conicalQHat_connection hμ.le hex hx]
@@ -449,10 +490,12 @@ theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : 
     have hh : ∀ n : ℕ, μ ≠ n+1/2 := hex.resolve_left (fun h => h h0)
     have := legBd_cos_ne_zero (μ := (μ:ℂ)) (by simpa using hμ)
       (fun n hn => hh n (by have := congrArg Complex.re hn; simpa using this))
-    intro hc; apply this; rw [show (μ:ℂ)*π = ((μ*π:ℝ):ℂ) by push_cast; ring, ← ofReal_cos, hc, ofReal_zero]
+    intro hc; apply this;
+        rw [show (μ:ℂ)*π = ((μ*π:ℝ):ℂ) by push_cast; ring, ← ofReal_cos, hc, ofReal_zero]
   have hN : 0 < N := by
     rcases eq_or_lt_of_le hτ with h0 | hpos
-    · rw [hNdef, ← h0]; simp only [zero_mul, neg_zero, Real.exp_zero, one_mul, Real.sinh_zero, add_zero]
+    · rw [hNdef, ← h0]; simp only
+          [zero_mul, neg_zero, Real.exp_zero, one_mul, Real.sinh_zero, add_zero]
       have := hcos h0.symm
       positivity
     · have := Real.sinh_pos_iff.mpr (mul_pos hpos Real.pi_pos)
@@ -475,7 +518,8 @@ theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : 
   have hG1 := Gamma_ne_zero_of_re_pos hre1
   have hG2 := Gamma_ne_zero_of_re_pos hre2
   have hGm : Gamma (μ:ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by simpa using hμ)
-  have hK : B*((2:ℂ)^(μ:ℂ) * (Gamma (μ:ℂ) * ((Gamma ((μ:ℂ)-ν))⁻¹ * (Gamma ((μ:ℂ)+ν+1))⁻¹))) ≠ 0 := by
+  have hK : B*((2:ℂ)^(μ:ℂ) *
+      (Gamma (μ:ℂ) * ((Gamma ((μ:ℂ)-ν))⁻¹ * (Gamma ((μ:ℂ)+ν+1))⁻¹))) ≠ 0 := by
     refine mul_ne_zero hB0 (mul_ne_zero (by simp) (mul_ne_zero hGm (mul_ne_zero ?_ ?_))) <;>
       exact inv_ne_zero (by assumption)
   have := legBd_isEquivalent_of_tendsto hsum (legBd_tendsto_weight_left (μ:ℂ)) hK (by simp)
@@ -501,8 +545,45 @@ theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : 
 cosh(τt)/√(2(cos t - cos θ)) dt`. -/
 @[dlmf 14.20.E9]
 theorem conical_mehler_integral (τ : ℝ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    conicalP τ 0 (Real.cos θ)=2/π*∫ t : ℝ in 0..θ, (Real.cosh (τ*t)/Real.sqrt (2*(Real.cos t-Real.cos θ)):ℂ) := by
-  sorry
+    conicalP τ 0 (Real.cos θ)=2/π*∫ t : ℝ in 0..θ,
+        (Real.cosh (τ*t)/Real.sqrt (2*(Real.cos t-Real.cos θ)):ℂ) := by
+  have h := ferrersP_mehler_dirichlet (μ := 0) (by norm_num) (-1/2+I*τ) h0 hπ
+  rw [conicalP, show -((0:ℝ):ℂ) = 0 by simp, h]
+  have hG : Gamma (1/2) = (Real.sqrt π : ℂ) := by
+    rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, ofReal_cpow Real.pi_pos.le]; push_cast; rfl
+  rw [show (1:ℂ)/2 - 0 = 1/2 by ring, hG]
+  simp only [cpow_zero, one_div, zero_add, mul_one]
+  have hint : ∫ t : ℝ in 0..θ, cos ((-1/2+I*τ+2⁻¹)*t)/(Real.cos t-Real.cos θ:ℂ)^(2⁻¹:ℂ) =
+      ∫ t : ℝ in 0..θ, (Real.sqrt 2 : ℂ) *
+        (Real.cosh (τ*t)/Real.sqrt (2*(Real.cos t-Real.cos θ)):ℂ) := by
+    refine intervalIntegral.integral_congr fun t ht => ?_
+    rw [uIcc_of_le h0.le] at ht
+    have hc : 0 ≤ Real.cos t - Real.cos θ := by
+      have := Real.cos_le_cos_of_nonneg_of_le_pi ht.1 hπ.le ht.2; linarith
+    have e1 : (-1/2+I*τ+2⁻¹)*(t:ℂ) = (τ*t:ℂ)*I := by ring
+    have e2 : ((Real.cos t - Real.cos θ : ℝ):ℂ)^(2⁻¹:ℂ) =
+        ((Real.sqrt (Real.cos t - Real.cos θ) : ℝ) : ℂ) := by
+      rw [Real.sqrt_eq_rpow, ofReal_cpow hc]; push_cast; ring_nf
+    rw [e1, Complex.cos_mul_I, show (Real.cos t:ℂ) - Real.cos θ = ((Real.cos t - Real.cos θ:ℝ):ℂ)
+      by push_cast; ring, e2, Real.sqrt_mul (by norm_num : (0:ℝ) ≤ 2)]
+    push_cast
+    rw [← Complex.ofReal_mul, ← Complex.ofReal_cosh]
+    rcases hc.eq_or_lt with h | h
+    · rw [← h]; simp
+    · have h2 : (Real.sqrt 2 : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr two_pos).ne'
+      have h3 : (Real.sqrt (Real.cos t - Real.cos θ) : ℂ) ≠ 0 := by
+        exact_mod_cast (Real.sqrt_pos.mpr h).ne'
+      field_simp
+  rw [hint, intervalIntegral.integral_const_mul]
+  set J := ∫ t : ℝ in 0..θ, (Real.cosh (τ*t)/Real.sqrt (2*(Real.cos t-Real.cos θ)):ℂ)
+  have hs : (Real.sqrt 2 : ℂ) * Real.sqrt 2 = 2 := by
+    rw [← ofReal_mul, Real.mul_self_sqrt (by norm_num)]; norm_num
+  have hp : (Real.sqrt π : ℂ) * Real.sqrt π = π := by
+    rw [← ofReal_mul, Real.mul_self_sqrt Real.pi_pos.le]
+  have hp0 : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
+  have hπ0 : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_pos.ne'
+  field_simp
+  linear_combination J * (π:ℂ) * hs - 2 * J * hp
 
 /-- The conical Pochhammer product `(1/2+iτ)ₖ(1/2-iτ)ₖ = ∏ (4τ²+(2j+1)²)/4ᵏ`. -/
 theorem poch_conical (τ : ℝ) (k : ℕ) :
@@ -520,7 +601,10 @@ theorem poch_conical (τ : ℝ) (k : ℕ) :
 /-- The singular endpoint θ=π is excluded from a finite-valued convergence assertion. -/
 @[dlmf 14.20.E10]
 theorem conical_power_series (τ : ℝ) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < π) :
-    HasSum (fun k : ℕ => (∏ j ∈ Finset.range k, (4*τ^2+(2*j+1)^2:ℂ))/(4^k*(k.factorial:ℂ)^2)*(Real.sin (θ/2):ℂ)^(2*k)) (conicalP τ 0 (Real.cos θ)) := by
+    HasSum (fun k : ℕ =>
+        (∏ j ∈ Finset.range k,
+        (4*τ^2+(2*j+1)^2:ℂ))/(4^k*(k.factorial:ℂ)^2)*(Real.sin (θ/2):ℂ)^(2*k))
+        (conicalP τ 0 (Real.cos θ)) := by
   have hs : (1-(Real.cos θ:ℂ))/2 = (Real.sin (θ/2):ℂ)^2 := by
     have h1 := Real.cos_two_mul (θ/2)
     have h2 := Real.sin_sq_add_cos_sq (θ/2)
@@ -536,7 +620,8 @@ theorem conical_power_series (τ : ℝ) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < �
     have h2 : 0 ≤ Real.sin (θ/2) := Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
     nlinarith
   have h := hasSum_regularizedGaussHGFun_coeff (1/2+I*τ) (1/2-I*τ) 1 hw
-  have e : conicalP τ 0 (Real.cos θ) = regularizedGaussHGFun (1/2+I*τ) (1/2-I*τ) 1 ((Real.sin (θ/2):ℂ)^2) := by
+  have e : conicalP τ 0 (Real.cos θ) =
+      regularizedGaussHGFun (1/2+I*τ) (1/2-I*τ) 1 ((Real.sin (θ/2):ℂ)^2) := by
     unfold conicalP ferrersP
     rw [hs, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw]
     simp only [ofReal_zero, neg_zero, zero_div, cpow_zero, one_mul, sub_zero]
@@ -552,7 +637,8 @@ theorem conical_positive (τ : ℝ) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < π) :
   have h := Complex.reCLM.hasSum (conical_power_series τ h0 hπ)
   set g : ℕ → ℝ := fun k => (∏ j ∈ Finset.range k, (4*τ^2+(2*j+1)^2))/(4^k*(k.factorial:ℝ)^2)*
     (Real.sin (θ/2))^(2*k) with hg
-  have he : ∀ k : ℕ, Complex.reCLM ((∏ j ∈ Finset.range k, (4*τ^2+(2*j+1)^2:ℂ))/(4^k*(k.factorial:ℂ)^2)*
+  have he : ∀ k : ℕ, Complex.reCLM
+      ((∏ j ∈ Finset.range k, (4*τ^2+(2*j+1)^2:ℂ))/(4^k*(k.factorial:ℂ)^2)*
       (Real.sin (θ/2):ℂ)^(2*k)) = g k := by
     intro k
     have : ((∏ j ∈ Finset.range k, (4*τ^2+(2*j+1)^2:ℂ))/(4^k*(k.factorial:ℂ)^2)*
@@ -571,7 +657,8 @@ theorem conical_positive (τ : ℝ) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < π) :
 Γ(1/2-μ-iτ) ∫₁^∞ P^μ_{-1/2+iτ}(x) g(x) dx`, taken as an improper integral at `+∞`. -/
 @[dlmf 14.20.E11]
 def mehlerFockTransform (μ : ℝ) (g : ℝ → ℂ) (τ : ℝ) : ℂ :=
-  τ/π*Real.sinh (τ*π)*Gamma (1/2-μ+I*τ)*Gamma (1/2-μ-I*τ)*improperAtTop (fun x : ℝ => associatedP (-1/2+I*τ) μ x*g x) 1
+  τ/π*Real.sinh (τ*π)*Gamma (1/2-μ+I*τ)*Gamma (1/2-μ-I*τ)*improperAtTop
+      (fun x : ℝ => associatedP (-1/2+I*τ) μ x*g x) 1
 
 /-- DLMF 14.20.12: the inverse Mehler–Fock transform `g(x) = ∫₀^∞ P^μ_{-1/2+iτ}(x) f(τ) dτ`, taken
 as an improper integral at `+∞`. -/
@@ -583,14 +670,17 @@ def mehlerFockInverse (μ : ℝ) (f : ℝ → ℂ) (x : ℝ) : ℂ :=
 P_{-1/2+iτ}(t)/(x+t) dt` converges to `P_{-1/2+iτ}(x)`. -/
 @[dlmf 14.20.E13]
 theorem conical_stieltjes_integral (τ : ℝ) {x : ℝ} (hx : 1 < x) :
-    HasIntegralAtTop (fun t : ℝ => Real.cosh (τ*π)/π*associatedP (-1/2+I*τ) 0 t/(x+t)) 1 (associatedP (-1/2+I*τ) 0 x) := by
+    HasIntegralAtTop (fun t : ℝ => Real.cosh (τ*π)/π*associatedP (-1/2+I*τ) 0 t/(x+t)) 1
+        (associatedP (-1/2+I*τ) 0 x) := by
   sorry
 
 /-- DLMF 14.20.14: for `x, y > 1`, the improper integral `∫₀^∞ π τ tanh(τπ)/cosh(τπ) P_{-1/2+iτ}(x)
 P_{-1/2+iτ}(y) dτ` converges to `1/(x+y)`. -/
 @[dlmf 14.20.E14]
 theorem conical_product_transform {x y : ℝ} (hx : 1 < x) (hy : 1 < y) :
-    HasIntegralAtTop (fun τ : ℝ => π*τ*Real.tanh (τ*π)/Real.cosh (τ*π)*associatedP (-1/2+I*τ) 0 x*associatedP (-1/2+I*τ) 0 y) 0 (1/(y+x:ℂ)) := by
+    HasIntegralAtTop (fun τ : ℝ =>
+        π*τ*Real.tanh (τ*π)/Real.cosh (τ*π)*associatedP (-1/2+I*τ) 0 x*associatedP (-1/2+I*τ) 0 y) 0
+        (1/(y+x:ℂ)) := by
   sorry
 
 end DLMF.Legendre

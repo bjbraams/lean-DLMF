@@ -304,7 +304,8 @@ theorem mathieuFe_ge_zero_eq_joinG (m : ℕ) {h : ℝ} (hh : 0 < h) :
     linear_combination hW / 2 - mathieuGe m 0 (h ^ 2) * hP
 
 /-- A Floquet solution with multiplier `ρ`, `ρ² ≠ 1`, vanishing at `0` is identically zero. -/
-private lemma isMathieuSolution_eq_zero_of_floquet {a q ρ : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
+private lemma isMathieuSolution_eq_zero_of_floquet {a q ρ : ℂ} {w : ℂ → ℂ}
+    (hw : IsMathieuSolution a q w)
     (h0 : w 0 = 0) (hρ : ∀ t, w (t + π) = ρ * w t) (hρ0 : ρ ≠ 0) (hρ1 : ρ ^ 2 ≠ 1) :
     w = 0 := by
   have hneg := hw.comp_neg
@@ -341,9 +342,11 @@ theorem modMathieuM_one_eq_modMathieuMe {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ)
       modMathieuM 1 ν 0 h / mathieuMe ν 0 ((h : ℂ) ^ 2) * modMathieuMe ν z ((h : ℂ) ^ 2) := by
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
   have hM := isMathieuSolution_comp_mul_of_isModMathieuSolution
-    (isModMathieuSolution_modMathieuM 1 le_rfl (by norm_num) (modMathieuAdmissible_ofReal_of_not_int hν h) hh')
+    (isModMathieuSolution_modMathieuM 1 le_rfl (by norm_num)
+        (modMathieuAdmissible_ofReal_of_not_int hν h) hh')
     (c := I) I_sq
-  have hF := (isFloquetSolution_mathieuMe (intCast_ne_ofReal_of_not_int hν) (mathieuNormalSegment_ofReal hν h)).1
+  have hF := (isFloquetSolution_mathieuMe (intCast_ne_ofReal_of_not_int hν)
+      (mathieuNormalSegment_ofReal hν h)).1
   set K := modMathieuM 1 ν 0 h / mathieuMe ν 0 ((h : ℂ) ^ 2)
   have hW := hM.add (hF.1.const_mul (-K))
   have hW0 := isMathieuSolution_eq_zero_of_floquet hW (ρ := Complex.exp (π * I * ν))
@@ -372,7 +375,8 @@ theorem modMathieuM_one_eq_modMathieuMe {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ)
   linear_combination this
 
 /-- Term-wise form of 28.22.14 (with the `-ν` series reindexed by `ℓ ↦ -ℓ`). -/
-private lemma modMathieuTerm_two_eq_cot_sub {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (z h : ℂ) (n ℓ : ℤ) :
+private lemma modMathieuTerm_two_eq_cot_sub {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν)
+    (z h : ℂ) (n ℓ : ℤ) :
     modMathieuTerm 2 ν z h n ℓ = Complex.cot (ν * π) * modMathieuTerm 1 ν z h n ℓ -
       modMathieuTerm 1 (-(ν : ℂ)) z h (-n) (-ℓ) / Complex.sin (ν * π) := by
   have hk := not_exists_ofReal_add_intCast_eq_intCast hν (n + ℓ)
@@ -408,7 +412,8 @@ theorem modMathieuM_two_eq {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) {h :
       modMathieuM 1 (-(ν : ℂ)) z h / Complex.sin (ν * π) := by
   have hadm := modMathieuAdmissible_ofReal_of_not_int hν h
   have hadm' : ModMathieuAdmissible (-(ν : ℂ)) h := by
-    have := modMathieuAdmissible_ofReal_of_not_int (intCast_ne_neg_real_of_not_int hν) h; push_cast at this; exact this
+    have := modMathieuAdmissible_ofReal_of_not_int (intCast_ne_neg_real_of_not_int hν) h;
+        push_cast at this; exact this
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
   have hc := mathieuMeCoeff_modMathieuIndex_ne_zero hν h
   set n := modMathieuIndex ν h

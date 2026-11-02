@@ -116,7 +116,8 @@ theorem exp_neg_pi_I_quarter_mul : exp (-π*I/4) * exp (π*I/4) = 1 := by
 (1/4+I*a/2) (1/2) (-I*z^2/2)`. -/
 @[dlmf 12.14.E15]
 theorem pcfWEven_kummer (a z : ℂ) :
-    pcfWEven a z = exp (-I*z^2/4)*kummerM (1/4-I*a/2) (1/2) (I*z^2/2) ∧ pcfWEven a z = exp (I*z^2/4)*kummerM (1/4+I*a/2) (1/2) (-I*z^2/2) := by
+    pcfWEven a z = exp (-I*z^2/4)*kummerM (1/4-I*a/2) (1/2) (I*z^2/2) ∧ pcfWEven a z =
+        exp (I*z^2/4)*kummerM (1/4+I*a/2) (1/2) (-I*z^2/2) := by
   constructor
   · rw [pcfWEven, pcfEven, mul_pow, exp_pi_I_quarter_sq, show -I*a/2 + 1/4 = 1/4-I*a/2 by ring,
       show -(I*z^2)/4 = -I*z^2/4 by ring]
@@ -128,7 +129,8 @@ theorem pcfWEven_kummer (a z : ℂ) :
 (3/4+I*a/2) (3/2) (-I*z^2/2)`. -/
 @[dlmf 12.14.E16]
 theorem pcfWOdd_kummer (a z : ℂ) :
-    pcfWOdd a z = z*exp (-I*z^2/4)*kummerM (3/4-I*a/2) (3/2) (I*z^2/2) ∧ pcfWOdd a z = z*exp (I*z^2/4)*kummerM (3/4+I*a/2) (3/2) (-I*z^2/2) := by
+    pcfWOdd a z = z*exp (-I*z^2/4)*kummerM (3/4-I*a/2) (3/2) (I*z^2/2) ∧ pcfWOdd a z =
+        z*exp (I*z^2/4)*kummerM (3/4+I*a/2) (3/2) (-I*z^2/2) := by
   have h1 := exp_neg_pi_I_quarter_mul
   constructor
   · rw [pcfWOdd, pcfOdd, mul_pow, exp_pi_I_quarter_sq, show -I*a/2 + 3/4 = 3/4-I*a/2 by ring,
@@ -157,7 +159,8 @@ theorem IsWeberSol.hasDerivAt_rot {b : ℂ} {f f' : ℂ → ℂ} (hf : IsWeberSo
 theorem hasDerivAt_pcfW (a : ℝ) (z : ℂ) : HasDerivAt (pcfW a) (pcfWDeriv a z) z := by
   have he := ((isWeberSol_pcfEven (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).1
   have ho := ((isWeberSol_pcfOdd (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).1
-  have h := (he.const_mul (pcfWZero a : ℂ)).add ((ho.const_mul (exp (-π*I/4))).const_mul (pcfWDerivZero a : ℂ))
+  have h := (he.const_mul (pcfWZero a : ℂ)).add
+      ((ho.const_mul (exp (-π*I/4))).const_mul (pcfWDerivZero a : ℂ))
   convert h using 1
   · funext w; simp [pcfW, pcfWEven, pcfWOdd]
   · rw [pcfWDeriv, ← mul_assoc (exp (-π*I/4)), exp_neg_pi_I_quarter_mul, one_mul]
@@ -167,7 +170,8 @@ theorem hasDerivAt_pcfWDeriv (a : ℝ) (z : ℂ) :
     HasDerivAt (pcfWDeriv a) ((a - z^2/4) * pcfW a z) z := by
   have he := ((isWeberSol_pcfEven (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).2
   have ho := ((isWeberSol_pcfOdd (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).2
-  have h := (he.const_mul (pcfWZero a : ℂ)).add ((ho.const_mul (exp (-π*I/4))).const_mul (pcfWDerivZero a : ℂ))
+  have h := (he.const_mul (pcfWZero a : ℂ)).add
+      ((ho.const_mul (exp (-π*I/4))).const_mul (pcfWDerivZero a : ℂ))
   have h1 := exp_neg_pi_I_quarter_mul
   have h2 := exp_pi_I_quarter_sq
   convert h using 1
@@ -221,10 +225,12 @@ lemma pcfW_wronskian_aux (a : ℝ) (z : ℂ) :
     pcfW a z*(-pcfWDeriv a (-z))-pcfW a (-z)*pcfWDeriv a z = -2 * pcfWZero a * pcfWDerivZero a := by
   have hn : ∀ w : ℂ, HasDerivAt (fun w => pcfW a (-w)) (-pcfWDeriv a (-w)) w := fun w => by
     exact ((hasDerivAt_pcfW a (-w)).comp w (hasDerivAt_neg w)).congr_deriv (by ring)
-  have hn' : ∀ w : ℂ, HasDerivAt (fun w => -pcfWDeriv a (-w)) ((a - (-w)^2/4) * pcfW a (-w)) w := fun w => by
+  have hn' : ∀ w : ℂ, HasDerivAt (fun w => -pcfWDeriv a (-w)) ((a - (-w)^2/4) * pcfW a (-w))
+      w := fun w => by
     exact ((hasDerivAt_pcfWDeriv a (-w)).comp w (hasDerivAt_neg w)).neg.congr_deriv (by ring)
   have hd : ∀ w, HasDerivAt (fun w => pcfW a w*(-pcfWDeriv a (-w))-pcfW a (-w)*pcfWDeriv a w) 0 w :=
-    fun w => (((hasDerivAt_pcfW a w).mul (hn' w)).sub ((hn w).mul (hasDerivAt_pcfWDeriv a w))).congr_deriv
+    fun w => (((hasDerivAt_pcfW a w).mul (hn' w)).sub
+        ((hn w).mul (hasDerivAt_pcfWDeriv a w))).congr_deriv
       (by ring)
   have := is_const_of_deriv_eq_zero (fun w => (hd w).differentiableAt) (fun w => (hd w).deriv) z 0
   rw [this, neg_zero]
@@ -240,7 +246,8 @@ theorem pcfWZero_mul_pcfWDerivZero (a : ℝ) : pcfWZero a * pcfWDerivZero a = -1
   have hinv : ‖Gamma (3/4+I*a/2)/Gamma (1/4+I*a/2)‖ = ‖Gamma (1/4+I*a/2)/Gamma (3/4+I*a/2)‖⁻¹ := by
     rw [← norm_inv, inv_div]
   rw [pcfWZero, pcfWDerivZero, hinv]
-  have hs : Real.sqrt ‖Gamma (1/4+I*a/2)/Gamma (3/4+I*a/2)‖ * Real.sqrt ‖Gamma (1/4+I*a/2)/Gamma (3/4+I*a/2)‖⁻¹ = 1 := by
+  have hs : Real.sqrt ‖Gamma (1/4+I*a/2)/Gamma (3/4+I*a/2)‖ *
+      Real.sqrt ‖Gamma (1/4+I*a/2)/Gamma (3/4+I*a/2)‖⁻¹ = 1 := by
     rw [← Real.sqrt_mul hpos.le, mul_inv_cancel₀ hpos.ne', Real.sqrt_one]
   have h2 : (2:ℝ)^(-3/4:ℝ) * 2^(-1/4:ℝ) = 1/2 := by
     rw [← Real.rpow_add (by norm_num)]; norm_num
@@ -321,10 +328,12 @@ theorem pcfGammaPhase_spec (a : ℝ) :
     exact hd.comp x hl
   have hhd (x : ℝ) : HasDerivAt h 0 x := by
     have h1 := hGd x
-    have h2 : HasDerivAt (fun x : ℝ => exp (-I*Ph x)) (exp (-I*Ph x)*(-I*(Complex.digamma (1/2+I*x)).re)) x := by
+    have h2 : HasDerivAt (fun x : ℝ => exp (-I*Ph x))
+        (exp (-I*Ph x)*(-I*(Complex.digamma (1/2+I*x)).re)) x := by
       have := ((hPhd x).ofReal_comp.const_mul (-I)).cexp
       simpa using this
-    have h3 : HasDerivAt (fun x : ℝ => exp ((Th x : ℂ))) (exp (Th x)*(Complex.digamma (1/2+I*x)).im) x := by
+    have h3 : HasDerivAt (fun x : ℝ => exp ((Th x : ℂ)))
+        (exp (Th x)*(Complex.digamma (1/2+I*x)).im) x := by
       have := ((hThd x).ofReal_comp).cexp
       simpa using this
     have hd := (h1.mul h2).mul h3
@@ -382,7 +391,8 @@ lemma pcfW_aux_T (a : ℝ) :
   have h2 := exp_pi_I_quarter_sq
   push_cast
   rw [show (-(π:ℂ)*a/2) = -π*a/2 by ring]
-  linear_combination (I * exp (-π*a/2) / 2) * h1 - (I * exp (π*a/2) / 2) * h2 - (exp (π*a/2) / 2) * I_sq
+  linear_combination (I * exp (-π*a/2) / 2) * h1 - (I * exp (π*a/2) / 2) * h2 -
+      (exp (π*a/2) / 2) * I_sq
 
 /-- Algebraic core of `pcfW_aux_V_sq`. -/
 lemma pcfW_aux_alg {e4 eφ s S g g1 g3 c3 W2 W' p : ℂ} {ng n3 : ℝ} (P : g = ng * eφ)
@@ -390,7 +400,8 @@ lemma pcfW_aux_alg {e4 eφ s S g g1 g3 c3 W2 W' p : ℂ} {ng n3 : ℝ} (P : g = 
     (h2 : W2 * W' = 2) (hS : S ≠ 0) (hg3 : g3 ≠ 0) (hW2 : W2 ≠ 0) (hs0 : s ≠ 0) (hW' : W' ≠ 0) :
     e4 * eφ * (s^2 / (W2 * g3^2)) * S * (2 * ng * n3^2) = e4 * p * s := by
   have Rf' : g1 * c3 * S = p := by rw [Rf]; field_simp
-  have key : e4 * eφ * s^2 * S * 2 * ng * n3^2 * (W' * s) = e4 * p * s * (W2 * g3^2) * (W' * s) := by
+  have key : e4 * eφ * s^2 * S * 2 * ng * n3^2 * (W' * s) = e4 * p * s *
+      (W2 * g3^2) * (W' * s) := by
     linear_combination (-(e4*s^2*S*2*W'*s*n3^2)) * P - (e4*s^2*S*2*W'*s*g) * N3
       - (e4*s^2*S*2*g3*c3) * D + (2*e4*s^2*g3^2) * Rf' - (e4*p*s^2*g3^2) * h2
   rw [show e4 * eφ * (s^2 / (W2 * g3^2)) * S * (2 * ng * n3^2) =
@@ -413,7 +424,9 @@ lemma pcfW_aux_V_sq (a : ℝ) :
   rw [show 1/4+I*(a:ℂ)/2+1/2 = 3/4+I*a/2 by ring, show 2*(1/4+I*(a:ℂ)/2) = 1/2+I*a by ring,
     show (1:ℂ)-(1/2+I*a) = 1/2-I*a by ring] at D
   have Rf := Complex.Gamma_mul_Gamma_one_sub (1/4+I*a/2)
-  rw [show 1-(1/4+I*(a:ℂ)/2) = conj (3/4+I*a/2) by simp [map_add, map_mul, map_div₀, map_ofNat]; ring,
+  rw [show 1-(1/4+I*(a:ℂ)/2) = conj (3/4+I*a/2) by
+                                                  simp [map_add, map_mul, map_div₀,
+                                                    map_ofNat]; ring,
     Complex.Gamma_conj] at Rf
   have N3 := Complex.mul_conj' (Gamma (3/4+I*a/2))
   have hs : ((Real.sqrt π : ℝ) : ℂ)^2 = π := by
@@ -426,7 +439,8 @@ lemma pcfW_aux_V_sq (a : ℝ) :
   have hW : (2:ℂ)^(I*a/2+1/4) ≠ 0 := by simp
   rw [pcfU_zero, show I*(a:ℂ)/2+1/4 = I*a/2+1/4 by ring, show 3/4+I*(a:ℂ)/2 = 3/4+I*a/2 by ring,
     mul_pow, div_pow, mul_pow, hρ, hw]
-  exact pcfW_aux_alg P D Rf N3 h2 hS hg3 (by rw [← hw]; exact pow_ne_zero 2 hW) (by simp [Real.sqrt_ne_zero', Real.pi_pos]) (by simp)
+  exact pcfW_aux_alg P D Rf N3 h2 hS hg3 (by rw [← hw]; exact pow_ne_zero 2 hW)
+      (by simp [Real.sqrt_ne_zero', Real.pi_pos]) (by simp)
 
 /-- Algebraic core of `pcfW_aux_V'_sq`. -/
 lemma pcfW_aux_alg' {e4 eφ s cS g g1 g3 c1 W2 W' p : ℂ} {ng n1 : ℝ} (P : g = ng * eφ)
@@ -451,7 +465,8 @@ lemma pcfW_aux_V'_sq (a : ℝ) :
   have hq : exp (-π*I/4)^2 = -I := by
     have h1 := exp_neg_pi_I_quarter_mul
     have h2 := exp_pi_I_quarter_sq
-    linear_combination I * exp (-π*I/4)^2 * h2 - I * (exp (-π*I/4) * exp (π*I/4) + 1) * h1 + exp (-π*I/4)^2 * I_sq
+    linear_combination I * exp (-π*I/4)^2 * h2 - I * (exp (-π*I/4) * exp (π*I/4) + 1) * h1 +
+        exp (-π*I/4)^2 * I_sq
   have hw : ((2:ℂ)^(I*a/2-1/4))^2 = (2:ℂ)^(I*a-1/2) := by
     rw [← cpow_nat_mul]; congr 1; push_cast; ring
   have h2 : (2:ℂ)^(I*a-1/2) * (2:ℂ)^(1/2-I*a) = 1 := by
@@ -461,7 +476,9 @@ lemma pcfW_aux_V'_sq (a : ℝ) :
   rw [show 1/4+I*(a:ℂ)/2+1/2 = 3/4+I*a/2 by ring, show 2*(1/4+I*(a:ℂ)/2) = 1/2+I*a by ring,
     show (1:ℂ)-(1/2+I*a) = 1/2-I*a by ring] at D
   have Rf := Complex.Gamma_mul_Gamma_one_sub (1/4+I*a/2)
-  rw [show 1-(1/4+I*(a:ℂ)/2) = conj (3/4+I*a/2) by simp [map_add, map_mul, map_div₀, map_ofNat]; ring,
+  rw [show 1-(1/4+I*(a:ℂ)/2) = conj (3/4+I*a/2) by
+                                                  simp [map_add, map_mul, map_div₀,
+                                                    map_ofNat]; ring,
     Complex.Gamma_conj] at Rf
   have Rfc : Gamma (3/4+I*a/2) * conj (Gamma (1/4+I*a/2)) = π / conj (sin (π*(1/4+I*a/2))) := by
     have := congrArg conj Rf
@@ -474,9 +491,11 @@ lemma pcfW_aux_V'_sq (a : ℝ) :
       ((map_ne_zero _).mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))) Rfc
   have hg1 : Gamma (1/4+I*a/2) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by norm_num)
   have hW : (2:ℂ)^(I*a/2-1/4) ≠ 0 := by simp
-  rw [pcfUDeriv_zero, show I*(a:ℂ)/2-1/4 = I*a/2-1/4 by ring, show 1/4+I*(a:ℂ)/2 = 1/4+I*a/2 by ring,
+  rw [pcfUDeriv_zero, show I*(a:ℂ)/2-1/4 = I*a/2-1/4 by ring, show 1/4+I*(a:ℂ)/2 =
+                                                          1/4+I*a/2 by ring,
     mul_pow, mul_pow, div_pow, neg_pow, mul_pow, hρ, hq, hw]
-  have := pcfW_aux_alg' (e4 := exp (π*I/4)) P D Rfc N1 h2 hS hg1 (by rw [← hw]; exact pow_ne_zero 2 hW)
+  have := pcfW_aux_alg' (e4 := exp (π*I/4)) P D Rfc N1 h2 hS hg1
+      (by rw [← hw]; exact pow_ne_zero 2 hW)
     (by simp [Real.sqrt_ne_zero', Real.pi_pos]) (by simp)
   rw [← this]; ring
 
@@ -486,8 +505,10 @@ lemma pcfW_aux_V_sq_pos (a : ℝ) : ∃ r : ℝ, 0 < r ∧
       r * (((Real.exp (π*a/2) : ℝ) + I * (Real.exp (-π*a/2) : ℝ)) / 2) := by
   have h := pcfW_aux_V_sq a
   have hT := pcfW_aux_T a
-  have hng : 0 < ‖Gamma (1/2+I*a)‖ := norm_pos_iff.mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))
-  have hn3 : 0 < ‖Gamma (3/4+I*a/2)‖ := norm_pos_iff.mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))
+  have hng : 0 < ‖Gamma (1/2+I*a)‖ :=
+      norm_pos_iff.mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))
+  have hn3 : 0 < ‖Gamma (3/4+I*a/2)‖ :=
+      norm_pos_iff.mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))
   rw [← hT]
   generalize sin (π*(1/4+I*a/2)) = S at h ⊢
   generalize ‖Gamma (1/2+I*a)‖ = ng at h hng ⊢
@@ -521,8 +542,10 @@ lemma pcfW_aux_V'_sq_pos (a : ℝ) : ∃ r : ℝ, 0 < r ∧
       r * conj (((Real.exp (π*a/2) : ℝ) + I * (Real.exp (-π*a/2) : ℝ)) / 2) := by
   have h := pcfW_aux_V'_sq a
   have hT := pcfW_aux_T a
-  have hng : 0 < ‖Gamma (1/2+I*a)‖ := norm_pos_iff.mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))
-  have hn1 : 0 < ‖Gamma (1/4+I*a/2)‖ := norm_pos_iff.mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))
+  have hng : 0 < ‖Gamma (1/2+I*a)‖ :=
+      norm_pos_iff.mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))
+  have hn1 : 0 < ‖Gamma (1/4+I*a/2)‖ :=
+      norm_pos_iff.mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))
   have he : conj (exp (π*I/4)) = -I * exp (π*I/4) := by
     rw [← Complex.exp_conj, ← exp_neg_pi_I_quarter_eq]; congr 1
     simp [map_div₀, map_ofNat]
@@ -580,7 +603,8 @@ lemma pcfW_aux_signs (a : ℝ) :
   have hVc : Continuous fun a : ℝ => exp (I*pcfWRho a) * pcfU (I*a) 0 := by
     have hG := pcfW_aux_continuous_Gamma (s := 3/4) (by norm_num)
     have : (fun a : ℝ => exp (I*pcfWRho a) * pcfU (I*a) 0) = fun a : ℝ =>
-        exp (I*pcfWRho a) * ((Real.sqrt π : ℂ) / ((2:ℂ)^(I*a/2+1/4) * Gamma ((3/4:ℝ) + I*a/2))) := by
+        exp (I*pcfWRho a) * ((Real.sqrt π : ℂ) /
+            ((2:ℂ)^(I*a/2+1/4) * Gamma ((3/4:ℝ) + I*a/2))) := by
       funext a; rw [pcfU_zero]; push_cast; ring_nf
     rw [this]
     refine hρc.mul (continuous_const.div (Continuous.mul ?_ hG) fun a => mul_ne_zero (by simp)
@@ -623,7 +647,8 @@ lemma pcfW_aux_signs (a : ℝ) :
     rw [hR] at this
     nlinarith
   have hρ0 : pcfWRho 0 = π/8 := by simp [pcfWRho, pcfGammaPhase]
-  have hc8 : 0 < Real.cos (π/8) := Real.cos_pos_of_mem_Ioo ⟨by linarith [Real.pi_pos], by linarith [Real.pi_pos]⟩
+  have hc8 : 0 < Real.cos (π/8) :=
+      Real.cos_pos_of_mem_Ioo ⟨by linarith [Real.pi_pos], by linarith [Real.pi_pos]⟩
   have hG3 : Gamma (3/4:ℂ) = (Real.Gamma (3/4) : ℂ) := by
     rw [← Complex.Gamma_ofReal]; push_cast; rfl
   have hG1 : Gamma (1/4:ℂ) = (Real.Gamma (1/4) : ℂ) := by
@@ -654,7 +679,8 @@ lemma pcfW_aux_signs (a : ℝ) :
   have hre : ∀ a : ℝ, 0 < (exp (I*pcfWRho a) * pcfU (I*a) 0).re :=
     pcfW_aux_pos_of_continuous (f := fun a : ℝ => (exp (I*pcfWRho a) * pcfU (I*a) 0).re)
       (Complex.continuous_re.comp hVc) (fun a h => by
-        have := hprod a; rw [show (exp (I*pcfWRho a) * pcfU (I*a) 0).re = 0 from h, zero_mul] at this
+        have := hprod a; rw [show (exp (I*pcfWRho a) * pcfU (I*a) 0).re = 0 from h,
+            zero_mul] at this
         exact lt_irrefl _ this) hV0
   have hre' : ∀ a : ℝ, 0 < -(exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)).re :=
     pcfW_aux_pos_of_continuous
@@ -675,11 +701,14 @@ lemma pcfW_aux_norms (a : ℝ) :
       Real.sqrt π * (2:ℝ)^(1/4:ℝ) / ‖Gamma (1/4+I*a/2)‖ ∧
     ‖Gamma (1/4+I*a/2)‖ * ‖Gamma (3/4+I*a/2)‖ *
       ‖((Real.exp (π*a/2) : ℝ) + I * (Real.exp (-π*a/2) : ℝ)) / 2‖ = π := by
-  have he : ∀ x : ℝ, ‖exp (I*x)‖ = 1 := fun x => by rw [mul_comm]; exact Complex.norm_exp_ofReal_mul_I x
+  have he : ∀ x : ℝ, ‖exp (I*x)‖ = 1 := fun x => by rw [mul_comm];
+                                                    exact Complex.norm_exp_ofReal_mul_I x
   have he4 : ‖exp (-π*I/4)‖ = 1 := by
-    rw [show -(π:ℂ)*I/4 = ((-π/4 : ℝ) : ℂ) * I by push_cast; ring]; exact Complex.norm_exp_ofReal_mul_I _
+    rw [show -(π:ℂ)*I/4 = ((-π/4 : ℝ) : ℂ) * I by push_cast; ring];
+        exact Complex.norm_exp_ofReal_mul_I _
   have he4' : ‖exp (π*I/4)‖ = 1 := by
-    rw [show (π:ℂ)*I/4 = ((π/4 : ℝ) : ℂ) * I by push_cast; ring]; exact Complex.norm_exp_ofReal_mul_I _
+    rw [show (π:ℂ)*I/4 = ((π/4 : ℝ) : ℂ) * I by push_cast; ring];
+        exact Complex.norm_exp_ofReal_mul_I _
   have h2 : ∀ w : ℂ, ‖(2:ℂ)^w‖ = (2:ℝ)^w.re := fun w => by
     rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.norm_cpow_eq_rpow_re_of_pos two_pos]
   have hsq : ‖(Real.sqrt π : ℂ)‖ = Real.sqrt π := by
@@ -694,7 +723,9 @@ lemma pcfW_aux_norms (a : ℝ) :
     field_simp
   · rw [← pcfW_aux_T, norm_mul, he4', one_mul, Complex.norm_conj]
     have Rf := Complex.Gamma_mul_Gamma_one_sub (1/4+I*a/2)
-    rw [show 1-(1/4+I*(a:ℂ)/2) = conj (3/4+I*a/2) by simp [map_add, map_mul, map_div₀, map_ofNat]; ring,
+    rw [show 1-(1/4+I*(a:ℂ)/2) = conj (3/4+I*a/2) by
+                                                    simp [map_add, map_mul, map_div₀,
+                                                      map_ofNat]; ring,
       Complex.Gamma_conj] at Rf
     have := congrArg norm Rf
     rw [norm_mul, Complex.norm_conj, norm_div, Complex.norm_real,

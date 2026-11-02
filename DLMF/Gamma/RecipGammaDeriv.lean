@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.SeriesProperties
+public import DLMF.Hypergeometric.Basic.SpecialValues
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
 

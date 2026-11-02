@@ -54,7 +54,8 @@ def pcfVTerm (a z : ℂ) (s : ℕ) : ℂ :=
 ℂ => z^(-(2*N:ℤ)))`. -/
 @[dlmf 12.9.E1]
 theorem pcfU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (N : ℕ) :
-    (fun z : ℂ => exp (z^2/4)*z^(a+1/2)*pcfU a z-∑ s ∈ Finset.range N, pcfUTerm a z s) =O[sector (3*π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
+    (fun z : ℂ => exp (z^2/4)*z^(a+1/2)*pcfU a z-∑ s ∈ Finset.range N, pcfUTerm a z s)
+        =O[sector (3*π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
   exact pcfSect_U_sector a hδ N
 
 /-- Asymptotic bound with the indicated comparison function: `(fun z : ℂ => (Real.sqrt
@@ -62,15 +63,24 @@ theorem pcfU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (N : ℕ) :
 (π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ)))`. -/
 @[dlmf 12.9.E2]
 theorem pcfV_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/4) (N : ℕ) :
-    (fun z : ℂ => (Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*pcfV a z-∑ s ∈ Finset.range N, pcfVTerm a z s) =O[sector (π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
+    (fun z : ℂ => (Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*pcfV a z-∑ s ∈ Finset.range N,
+        pcfVTerm a z s) =O[sector (π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
   exact pcfSect_V_sector a hδ hδπ N
 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E3]
 theorem pcfU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun w : ℂ => pcfU a (exp w)-(exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)+(1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(1:ℂ)*I*π*a)*exp (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j))) =O[pcfLogWedge (π/4+δ) (5*π/4-δ)] (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ)) := by
-  have h1 := pcfSect_U_logWedge a hδ (-π) (lo := π/4+δ) (hi := 5*π/4-δ) (by linarith) (by linarith) N
-  have h2 := pcfSect_U_logWedge (-a) hδ (-(π/2)) (lo := π/4+δ) (hi := 5*π/4-δ) (by linarith) (by linarith) N
+    (fun w : ℂ => pcfU a
+        (exp w)-(exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N,
+        pcfUTerm a (exp w) j)+(1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(1:ℂ)*I*π*a)*exp
+        (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)))
+        =O[pcfLogWedge (π/4+δ) (5*π/4-δ)]
+        (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp
+        (-2*N*w.re):ℝ)) := by
+  have h1 := pcfSect_U_logWedge a hδ (-π) (lo := π/4+δ) (hi := 5*π/4-δ) (by linarith)
+      (by linarith) N
+  have h2 := pcfSect_U_logWedge (-a) hδ (-(π/2)) (lo := π/4+δ) (hi := 5*π/4-δ) (by linarith)
+      (by linarith) N
   set C1 : ℂ := (-1:ℂ)*I*exp ((-1:ℂ)*I*π*a)
   set C2 : ℂ := (Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((-1:ℂ)*I*π*(a/2-1/4))
   have e2a : ∀ w : ℂ, exp (2 * (w + ((-π : ℝ) : ℂ) * I)) = exp (2 * w) := fun w => by
@@ -90,13 +100,16 @@ theorem pcfU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     rw [hC1, e2a, ← Complex.exp_add]
     exact pcfSect_exp_eq_of_eq_add 1 (by push_cast; ring)
   have hB : ∀ w, C2 * exp (-exp (2 * (w + ((-(π/2) : ℝ) : ℂ) * I)) / 4 -
-      (-a + 1 / 2) * (w + ((-(π/2) : ℝ) : ℂ) * I)) = (1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(1:ℂ)*I*π*a) * exp (exp (2*w)/4+(a-1/2)*w) := fun w => by
+      (-a + 1 / 2) * (w + ((-(π/2) : ℝ) : ℂ) * I)) =
+          (1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(1:ℂ)*I*π*a) *
+          exp (exp (2*w)/4+(a-1/2)*w) := fun w => by
     have h1 : C2 * exp (-exp (2 * (w + ((-(π/2) : ℝ) : ℂ) * I)) / 4 -
         (-a + 1 / 2) * (w + ((-(π/2) : ℝ) : ℂ) * I)) = (Real.sqrt (2*π):ℂ)/Gamma (1/2+a) *
         exp ((-1:ℂ)*I*π*(a/2-1/4) + (-exp (2 * (w + ((-(π/2) : ℝ) : ℂ) * I)) / 4 -
         (-a + 1 / 2) * (w + ((-(π/2) : ℝ) : ℂ) * I))) := by
       simp only [C2]; rw [Complex.exp_add]; ring
-    have h2 : (1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(1:ℂ)*I*π*a) * exp (exp (2*w)/4+(a-1/2)*w) = (Real.sqrt (2*π):ℂ)/Gamma (1/2+a) *
+    have h2 : (1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(1:ℂ)*I*π*a) *
+        exp (exp (2*w)/4+(a-1/2)*w) = (Real.sqrt (2*π):ℂ)/Gamma (1/2+a) *
         exp (π / 2 * I + (-(1:ℂ)*I*π*a) + (exp (2*w)/4+(a-1/2)*w)) := by
       rw [Complex.exp_add (π / 2 * I + (-(1:ℂ)*I*π*a)), Complex.exp_add (π / 2 * I),
         Complex.exp_pi_div_two_mul_I]; ring
@@ -137,9 +150,17 @@ theorem pcfU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E3]
 theorem pcfU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun w : ℂ => pcfU a (exp w)-(exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)+(-1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(-1:ℂ)*I*π*a)*exp (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j))) =O[pcfLogWedge (-(5*π/4-δ)) (-(π/4+δ))] (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ)) := by
-  have h1 := pcfSect_U_logWedge a hδ π (lo := -(5*π/4-δ)) (hi := -(π/4+δ)) (by linarith) (by linarith) N
-  have h2 := pcfSect_U_logWedge (-a) hδ (π/2) (lo := -(5*π/4-δ)) (hi := -(π/4+δ)) (by linarith) (by linarith) N
+    (fun w : ℂ => pcfU a
+        (exp w)-(exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N,
+        pcfUTerm a (exp w) j)+(-1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(-1:ℂ)*I*π*a)*exp
+        (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)))
+        =O[pcfLogWedge (-(5*π/4-δ)) (-(π/4+δ))]
+        (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp
+        (-2*N*w.re):ℝ)) := by
+  have h1 := pcfSect_U_logWedge a hδ π (lo := -(5*π/4-δ)) (hi := -(π/4+δ)) (by linarith)
+      (by linarith) N
+  have h2 := pcfSect_U_logWedge (-a) hδ (π/2) (lo := -(5*π/4-δ)) (hi := -(π/4+δ)) (by linarith)
+      (by linarith) N
   set C1 : ℂ := (1:ℂ)*I*exp ((1:ℂ)*I*π*a)
   set C2 : ℂ := (Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((1:ℂ)*I*π*(a/2-1/4))
   have e2a : ∀ w : ℂ, exp (2 * (w + ((π : ℝ) : ℂ) * I)) = exp (2 * w) := fun w => by
@@ -159,13 +180,16 @@ theorem pcfU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     rw [hC1, e2a, ← Complex.exp_add]
     exact pcfSect_exp_eq_of_eq_add 0 (by push_cast; ring)
   have hB : ∀ w, C2 * exp (-exp (2 * (w + ((π/2 : ℝ) : ℂ) * I)) / 4 -
-      (-a + 1 / 2) * (w + ((π/2 : ℝ) : ℂ) * I)) = (-1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(-1:ℂ)*I*π*a) * exp (exp (2*w)/4+(a-1/2)*w) := fun w => by
+      (-a + 1 / 2) * (w + ((π/2 : ℝ) : ℂ) * I)) =
+          (-1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(-1:ℂ)*I*π*a) *
+          exp (exp (2*w)/4+(a-1/2)*w) := fun w => by
     have h1 : C2 * exp (-exp (2 * (w + ((π/2 : ℝ) : ℂ) * I)) / 4 -
         (-a + 1 / 2) * (w + ((π/2 : ℝ) : ℂ) * I)) = (Real.sqrt (2*π):ℂ)/Gamma (1/2+a) *
         exp ((1:ℂ)*I*π*(a/2-1/4) + (-exp (2 * (w + ((π/2 : ℝ) : ℂ) * I)) / 4 -
         (-a + 1 / 2) * (w + ((π/2 : ℝ) : ℂ) * I))) := by
       simp only [C2]; rw [Complex.exp_add]; ring
-    have h2 : (-1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(-1:ℂ)*I*π*a) * exp (exp (2*w)/4+(a-1/2)*w) = (Real.sqrt (2*π):ℂ)/Gamma (1/2+a) *
+    have h2 : (-1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(-1:ℂ)*I*π*a) *
+        exp (exp (2*w)/4+(a-1/2)*w) = (Real.sqrt (2*π):ℂ)/Gamma (1/2+a) *
         exp (-(π / 2 * I) + (-(-1:ℂ)*I*π*a) + (exp (2*w)/4+(a-1/2)*w)) := by
       rw [Complex.exp_add (-(π / 2 * I) + (-(-1:ℂ)*I*π*a)), Complex.exp_add (-(π / 2 * I)),
         Complex.exp_neg, Complex.exp_pi_div_two_mul_I, Complex.inv_I]; ring
@@ -206,9 +230,16 @@ theorem pcfU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E4]
 theorem pcfV_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun w : ℂ => pcfV a (exp w)-((Real.sqrt (2/π):ℂ)*exp (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)+(1:ℂ)*I/Gamma (1/2-a)*exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j))) =O[pcfLogWedge (-π/4+δ) (3*π/4-δ)] (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ)) := by
+    (fun w : ℂ => pcfV a
+        (exp w)-((Real.sqrt (2/π):ℂ)*exp
+        (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)+(1:ℂ)*I/Gamma
+        (1/2-a)*exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)))
+        =O[pcfLogWedge (-π/4+δ) (3*π/4-δ)]
+        (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp
+        (-2*N*w.re):ℝ)) := by
   have h1 := pcfSect_U_logWedge a hδ 0 (lo := -π/4+δ) (hi := 3*π/4-δ) (by linarith) (by linarith) N
-  have h2 := pcfSect_U_logWedge (-a) hδ (-(π/2)) (lo := -π/4+δ) (hi := 3*π/4-δ) (by linarith) (by linarith) N
+  have h2 := pcfSect_U_logWedge (-a) hδ (-(π/2)) (lo := -π/4+δ) (hi := 3*π/4-δ) (by linarith)
+      (by linarith) N
   set C1 : ℂ := (1:ℂ)*I/Gamma (1/2-a)
   set C2 : ℂ := (Real.sqrt (2/π):ℂ)*exp (I*π*(a/2-1/4))
   have z1 : ∀ w : ℂ, w + ((0:ℝ):ℂ)*I = w := fun w => by simp
@@ -260,9 +291,17 @@ theorem pcfV_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E4]
 theorem pcfV_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun w : ℂ => pcfV a (exp w)-((Real.sqrt (2/π):ℂ)*exp (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)+(-1:ℂ)*I/Gamma (1/2-a)*exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j))) =O[pcfLogWedge (-(3*π/4-δ)) (-(-π/4+δ))] (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ)) := by
-  have h1 := pcfSect_U_logWedge a hδ 0 (lo := -(3*π/4-δ)) (hi := -(-π/4+δ)) (by linarith) (by linarith) N
-  have h2 := pcfSect_U_logWedge (-a) hδ (π/2) (lo := -(3*π/4-δ)) (hi := -(-π/4+δ)) (by linarith) (by linarith) N
+    (fun w : ℂ => pcfV a
+        (exp w)-((Real.sqrt (2/π):ℂ)*exp
+        (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)+(-1:ℂ)*I/Gamma
+        (1/2-a)*exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)))
+        =O[pcfLogWedge (-(3*π/4-δ)) (-(-π/4+δ))]
+        (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp
+        (-2*N*w.re):ℝ)) := by
+  have h1 := pcfSect_U_logWedge a hδ 0 (lo := -(3*π/4-δ)) (hi := -(-π/4+δ)) (by linarith)
+      (by linarith) N
+  have h2 := pcfSect_U_logWedge (-a) hδ (π/2) (lo := -(3*π/4-δ)) (hi := -(-π/4+δ)) (by linarith)
+      (by linarith) N
   set C1 : ℂ := (-1:ℂ)*I/Gamma (1/2-a)
   set C2 : ℂ := (Real.sqrt (2/π):ℂ)*exp (-I*π*(a/2-1/4))
   have z1 : ∀ w : ℂ, w + ((0:ℝ):ℂ)*I = w := fun w => by simp
@@ -318,22 +357,26 @@ theorem integral_Ioi_ofReal_ne_zero {g : ℝ → ℝ} (hpos : ∀ t ∈ Ioi (0:�
   rw [integral_complex_ofReal, Complex.ofReal_ne_zero]
   refine (ne_of_gt ((setIntegral_pos_iff_support_of_nonneg_ae
     (ae_restrict_of_forall_mem measurableSet_Ioi fun t ht => (hpos t ht).le) hg).2 ?_))
-  refine lt_of_lt_of_le (by simp [Real.volume_Ioi]) (measure_mono (s := Ioi (0:ℝ)) fun t ht => ⟨(hpos t ht).ne', ht⟩)
+  refine lt_of_lt_of_le (by simp [Real.volume_Ioi])
+      (measure_mono (s := Ioi (0:ℝ)) fun t ht => ⟨(hpos t ht).ne', ht⟩)
 
 /-- DLMF 12.11(i): absence of real zeros. -/
 theorem pcfU_no_real_zero {a : ℝ} (ha : -1/2 ≤ a) (x : ℝ) :
     pcfU a x ≠ 0 := by
   rcases ha.eq_or_lt with h | h
-  · rw [← h, show ((-1/2:ℝ):ℂ) = -1/2 by push_cast; ring, pcfU_neg_half]; exact Complex.exp_ne_zero _
+  · rw [← h, show ((-1/2:ℝ):ℂ) = -1/2 by push_cast; ring, pcfU_neg_half];
+        exact Complex.exp_ne_zero _
   · rw [pcfU_eq_integral (by simpa using h)]
     refine mul_ne_zero (div_ne_zero (Complex.exp_ne_zero _)
       (Complex.Gamma_ne_zero_of_re_pos (by simp; linarith))) ?_
     have hc : -1 < ((a:ℂ) - 1/2).re := by simp; linarith
     have heq : ∀ t ∈ Ioi (0:ℝ), (t:ℂ)^((a:ℂ) - 1/2) * exp (-(t:ℂ)^2/2 - x*t) =
         ((t^(a-1/2) * Real.exp (-t^2/2 - x*t) : ℝ) : ℂ) := fun t ht => by
-      rw [Complex.ofReal_mul, Complex.ofReal_cpow (le_of_lt ht), Complex.ofReal_exp]; push_cast; ring_nf
+      rw [Complex.ofReal_mul, Complex.ofReal_cpow (le_of_lt ht), Complex.ofReal_exp];
+          push_cast; ring_nf
     rw [setIntegral_congr_fun measurableSet_Ioi heq]
-    refine integral_Ioi_ofReal_ne_zero (fun t ht => mul_pos (Real.rpow_pos_of_pos ht _) (Real.exp_pos _)) ?_
+    refine integral_Ioi_ofReal_ne_zero
+        (fun t ht => mul_pos (Real.rpow_pos_of_pos ht _) (Real.exp_pos _)) ?_
     exact (integrableOn_pcfIntegrand hc x).congr_fun heq measurableSet_Ioi
 
 /-- DLMF 12.11(i): the first real zero lies on the negative axis. -/
@@ -348,19 +391,22 @@ theorem pcfU_no_positive_zero {a : ℝ} (h0 : -3/2 < a) {x : ℝ} (hx : 0 < x) :
   · exact Complex.cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
   · have heq : ∀ t ∈ Ioi (0:ℝ), exp (-((x:ℂ)^2/2) * t) * (t:ℂ)^((a:ℂ)/2+3/4-1) *
         (1+(t:ℂ))^((3/2:ℂ)-((a:ℂ)/2+3/4)-1) =
-        ((Real.exp (-(x^2/2)*t) * t^((a/2+3/4)-1) * (1+t)^(3/2-(a/2+3/4)-1) : ℝ) : ℂ) := fun t ht => by
+        ((Real.exp (-(x^2/2)*t) * t^((a/2+3/4)-1) * (1+t)^(3/2-(a/2+3/4)-1) : ℝ) :
+            ℂ) := fun t ht => by
       have ht0 : (0:ℝ) ≤ 1 + t := by linarith [show (0:ℝ) < t from ht]
       rw [Complex.ofReal_mul, Complex.ofReal_mul, Complex.ofReal_cpow (le_of_lt ht),
         Complex.ofReal_cpow ht0, Complex.ofReal_exp]
       push_cast; ring_nf
     rw [setIntegral_congr_fun measurableSet_Ioi heq]
     refine integral_Ioi_ofReal_ne_zero (fun t ht => mul_pos (mul_pos (Real.exp_pos _)
-      (Real.rpow_pos_of_pos ht _)) (Real.rpow_pos_of_pos (by linarith [show (0:ℝ) < t from ht]) _)) ?_
+      (Real.rpow_pos_of_pos ht _))
+          (Real.rpow_pos_of_pos (by linarith [show (0:ℝ) < t from ht]) _)) ?_
     exact (kummerU_laplace_integrable (b := 3/2) hα hz).congr_fun heq measurableSet_Ioi
 
 /-- Hermite specialization and enclosure of all real zeros. -/
 theorem pcfU_hermite_zero_count (n : ℕ) :
-    Set.Finite {x : ℝ | pcfU (-n-1/2) x=0} ∧ ({x : ℝ | pcfU (-n-1/2) x=0}:Set ℝ).ncard=n ∧ ∀ x : ℝ, pcfU (-n-1/2) x=0 → |x| ≤ 2*Real.sqrt (n+1/2) := by
+    Set.Finite {x : ℝ | pcfU (-n-1/2) x=0} ∧ ({x : ℝ | pcfU (-n-1/2) x=0}:Set ℝ).ncard=n ∧ ∀ x : ℝ,
+        pcfU (-n-1/2) x=0 → |x| ≤ 2*Real.sqrt (n+1/2) := by
   obtain ⟨r, hr, hb, hz⟩ := DLMF.OrthogonalPolynomials.hermitePolyH_zeros_bound n
   have hs : (0 : ℝ) < Real.sqrt 2 := Real.sqrt_pos.mpr (by norm_num)
   have hs0 : (Real.sqrt 2 : ℂ) ≠ 0 := by exact_mod_cast hs.ne'
@@ -406,7 +452,8 @@ theorem pcfPZ_kummerM_continuous {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
   have hs : IsOpen s := (isOpen_lt (continuous_fst.norm) continuous_const).inter
     (isOpen_lt (continuous_snd.norm) continuous_const)
   have hmem : (a₀, z₀) ∈ s := ⟨by simp [α], by simp [R]⟩
-  have hc' : ContinuousOn (fun p : ℂ × ℂ => ∑' n : ℕ, poch p.1 n / (poch c n * n !) * p.2 ^ n) s := by
+  have hc' : ContinuousOn
+      (fun p : ℂ × ℂ => ∑' n : ℕ, poch p.1 n / (poch c n * n !) * p.2 ^ n) s := by
     refine continuousOn_tsum (fun n => ?_) hsum ?_
     · have : Continuous fun p : ℂ × ℂ => poch p.1 n :=
         (Polynomial.continuous _).comp continuous_fst
@@ -453,7 +500,8 @@ theorem pcfPZ_pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) 
 theorem pcfPZ_pcfUDeriv_continuous : Continuous (fun p : ℂ × ℂ => pcfUDeriv p.1 p.2) := by
   have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := Complex.one_div_two_ne_neg_natCast
   have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := Complex.three_div_two_ne_neg_natCast
-  have hb3' : ∀ k : ℕ, (1 / 2 + 1 : ℂ) ≠ -k := by norm_num; exact Complex.three_div_two_ne_neg_natCast
+  have hb3' : ∀ k : ℕ, (1 / 2 + 1 : ℂ) ≠ -k := by norm_num;
+                                                  exact Complex.three_div_two_ne_neg_natCast
   have hb5 : ∀ k : ℕ, (3 / 2 + 1 : ℂ) ≠ -k := by norm_num; exact five_halves_ne_neg_nat
   unfold pcfUDeriv pcfEvenDeriv pcfOddDeriv
   have k1 := pcfPZ_kummerM_comp hb1 (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4)
@@ -568,7 +616,8 @@ theorem pcfPZ_eq_re (t x : ℝ) : pcfU t x = ((pcfU t x).re : ℂ) :=
 
 /-- `U'(t,x)` is real for real `t, x`. -/
 theorem pcfPZ_deriv_eq_re (t x : ℝ) : pcfUDeriv t x = ((pcfUDeriv t x).re : ℂ) := by
-  have h1 : HasDerivAt (fun y : ℝ => pcfU t y) (pcfUDeriv t x) x := (hasDerivAt_pcfU t x).comp_ofReal
+  have h1 : HasDerivAt (fun y : ℝ => pcfU t y) (pcfUDeriv t x) x :=
+      (hasDerivAt_pcfU t x).comp_ofReal
   have h2 : HasDerivAt (fun y : ℝ => (((pcfU t y).re : ℝ) : ℂ)) ((pcfUDeriv t x).re : ℂ) x :=
     (pcfPZ_hasDerivAt_re t x).ofReal_comp
   have he : (fun y : ℝ => (((pcfU t y).re : ℝ) : ℂ)) = fun y : ℝ => pcfU t y :=
@@ -600,7 +649,8 @@ theorem pcfPZ_far {t : ℝ} {X : ℝ} (hX : ∀ x, X ≤ x → 0 ≤ x ^ 2 / 4 +
   pcfPZ_no_zero_of_decay (f := fun y : ℝ => (pcfU t y).re) (f' := fun y : ℝ => (pcfUDeriv t y).re)
     (q := fun y => y ^ 2 / 4 + t) (fun x _ => pcfPZ_hasDerivAt_re t x)
     (fun x _ => pcfPZ_hasDerivAt_deriv_re t x) hX
-    (by have h := (Complex.continuous_re.tendsto 0).comp (pcfPZ_tendsto_pcfU t); rw [Complex.zero_re] at h; exact h)
+    (by have h := (Complex.continuous_re.tendsto 0).comp (pcfPZ_tendsto_pcfU t);
+        rw [Complex.zero_re] at h; exact h)
     (fun x _ h => pcfPZ_simple t x h)
 
 /-- Vanishing of `U(t,x)` through its real part. -/
@@ -667,7 +717,8 @@ theorem pcfPZ_base (n : ℕ) :
   omega
 
 /-- Exact positive real zero count in DLMF 12.11(i). -/
-theorem pcfU_positive_zero_count {a : ℝ} (n : ℕ) (hn : 0 < n) (h0 : -2*n-3/2 < a) (h1 : a < -2*n+1/2) :
+theorem pcfU_positive_zero_count {a : ℝ} (n : ℕ) (hn : 0 < n) (h0 : -2*n-3/2 < a)
+    (h1 : a < -2*n+1/2) :
     Set.Finite {x : ℝ | 0 < x ∧ pcfU a x=0} ∧ ({x : ℝ | 0 < x ∧ pcfU a x=0}:Set ℝ).ncard=n := by
   set S : Set ℝ := Ioo (-2 * n - 3 / 2) (-2 * n + 1 / 2) with hS
   set Y : ℝ → ℝ → ℝ := fun t x => (pcfU t x).re with hY
@@ -767,10 +818,12 @@ theorem pcfV_integer_zero (n : ℤ) :
   rw [pcfV_zero', pcfVZero]
   rcases le_or_gt 1 n with hn | hn
   · obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = m + 1 := ⟨(n-1).toNat, by omega⟩
-    rw [show (1/4:ℂ) + (3/2 - 2*((m+1:ℤ):ℂ))/2 = -(m:ℂ) by push_cast; ring, Complex.Gamma_neg_nat_eq_zero]
+    rw [show (1/4:ℂ) + (3/2 - 2*((m+1:ℤ):ℂ))/2 = -(m:ℂ) by push_cast; ring,
+                                                             Complex.Gamma_neg_nat_eq_zero]
     simp
   · obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = -m := ⟨(-n).toNat, by omega⟩
-    rw [show (3/4:ℂ) - (3/2 - 2*((-(m:ℤ):ℤ):ℂ))/2 = -(m:ℂ) by push_cast; ring, Complex.Gamma_neg_nat_eq_zero]
+    rw [show (3/4:ℂ) - (3/2 - 2*((-(m:ℤ):ℤ):ℂ))/2 = -(m:ℂ) by push_cast; ring,
+                                                                Complex.Gamma_neg_nat_eq_zero]
     simp
 
 /-- The leading complex phase coordinate for the `s`th large cylinder zero, including the
@@ -792,7 +845,11 @@ s)^2-8*a^2*pcfZeroLambda a s+4*a^2+3)/(16*(pcfZeroTau a s)^2)) =O[atTop] (fun s 
 (pcfZeroLambda a s)^3/(pcfZeroTau a s)^3)`. -/
 @[dlmf 12.11.E1]
 theorem pcfU_complex_zero_strings {a : ℝ} (ha : -1/2 < a) :
-    ∃ Z : ℕ → ℂ, (∀ᶠ s in atTop, pcfU a (Z s)=0 ∧ pcfU a (star (Z s))=0 ∧ 0 < (Z s).im) ∧ (fun s => Z s/(exp (3*π*I/4)*(2*pcfZeroTau a s)^(1/2:ℂ))-1+I*a*pcfZeroLambda a s/(2*pcfZeroTau a s)-(2*a^2*(pcfZeroLambda a s)^2-8*a^2*pcfZeroLambda a s+4*a^2+3)/(16*(pcfZeroTau a s)^2)) =O[atTop] (fun s => (pcfZeroLambda a s)^3/(pcfZeroTau a s)^3) := by
+    ∃ Z : ℕ → ℂ, (∀ᶠ s in atTop, pcfU a (Z s)=0 ∧ pcfU a (star (Z s))=0 ∧ 0 < (Z s).im) ∧
+        (fun s => Z s/(exp (3*π*I/4)*(2*pcfZeroTau a s)^(1/2:ℂ))-1+I*a*pcfZeroLambda a
+        s/(2*pcfZeroTau a s)-(2*a^2*(pcfZeroLambda a s)^2-8*a^2*pcfZeroLambda a
+        s+4*a^2+3)/(16*(pcfZeroTau a s)^2)) =O[atTop]
+        (fun s => (pcfZeroLambda a s)^3/(pcfZeroTau a s)^3) := by
   sorry
 
 end DLMF.Confluent

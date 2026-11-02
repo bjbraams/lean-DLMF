@@ -380,7 +380,8 @@ theorem gzero_mono_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
 /-- Identity under the stated parameter and domain assumptions: `StrictAntiOn (fun t : ℝ =>
 Real.Gamma a * ((-t) ^ a * Real.exp (-t) * gzero_U a t)) (Iio 0)`. -/
 theorem gzero_mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
-    StrictAntiOn (fun t : ℝ => Real.Gamma a * ((-t) ^ a * Real.exp (-t) * gzero_U a t)) (Iio 0) := by
+    StrictAntiOn (fun t : ℝ => Real.Gamma a *
+        ((-t) ^ a * Real.exp (-t) * gzero_U a t)) (Iio 0) := by
   have ha' := gzero_nonint ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
   set g := fun t : ℝ => Real.Gamma a * ((-t) ^ a * Real.exp (-t) * gzero_U a t)
@@ -459,12 +460,15 @@ theorem gzero_exp_series (y : ℝ) : HasSum (fun k : ℕ => y ^ k / (k ! : ℝ))
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.scIncGammaNegativeZero a < 0
 ∧ ∀ x : ℝ, scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a`. -/
-theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1-2*(n : ℝ) < a) (ha1 : a < 2-2*(n : ℝ)) :
-    Real.scIncGammaNegativeZero a < 0 ∧ ∀ x : ℝ, scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a := by
+theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1-2*(n : ℝ) < a)
+    (ha1 : a < 2-2*(n : ℝ)) :
+    Real.scIncGammaNegativeZero a < 0 ∧ ∀ x : ℝ, scIncGamma a x=0 ↔
+        x=Real.scIncGammaNegativeZero a := by
   have ha : ∀ m : ℤ, a ≠ m := gzero_nonint_of_Ioo (m := 1 - 2 * n) (by push_cast; linarith)
     (by push_cast; linarith)
   have hG : Real.Gamma a < 0 := by
-    have h := gzero_Gamma_sign (2 * n - 2) (x := a) (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
+    have h := gzero_Gamma_sign (2 * n - 2) (x := a)
+        (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
       (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
     rw [show 2 * n - 2 + 1 = 2 * (n - 1) + 1 by omega, pow_succ, pow_mul] at h
     norm_num at h; linarith
@@ -501,12 +505,15 @@ theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1
 /-- Estimate under the stated parameter and domain assumptions: `Real.scIncGammaNegativeZero a < 0
 ∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ, scIncGamma a x=0 ↔
 x=Real.scIncGammaNegativeZero a ∨ x=Real.scIncGammaPositiveZero a`. -/
-theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(n : ℝ) < a) (ha1 : a < 1-2*(n : ℝ)) :
-    Real.scIncGammaNegativeZero a < 0 ∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ, scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a ∨ x=Real.scIncGammaPositiveZero a := by
+theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(n : ℝ) < a)
+    (ha1 : a < 1-2*(n : ℝ)) :
+    Real.scIncGammaNegativeZero a < 0 ∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ,
+        scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a ∨ x=Real.scIncGammaPositiveZero a := by
   have ha : ∀ m : ℤ, a ≠ m := gzero_nonint_of_Ioo (m := -2 * n) (by push_cast; linarith)
     (by push_cast; linarith)
   have hG : 0 < Real.Gamma a := by
-    have h := gzero_Gamma_sign (2 * n - 1) (x := a) (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
+    have h := gzero_Gamma_sign (2 * n - 1) (x := a)
+        (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
       (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
     rw [show 2 * n - 1 + 1 = 2 * n by omega, pow_mul] at h
     norm_num at h; linarith
@@ -557,7 +564,8 @@ theorem Real.scIncGammaNegativeZero_strictAnti  :
     exact ⟨hneg, (gzero_scIncGamma_eq_zero a _).mp ((hiff _).mpr rfl)⟩
   have hG : ∀ a ∈ Ioo (-1 : ℝ) 0, Real.Gamma a < 0 := by
     intro a ha
-    have h := gzero_Gamma_sign 0 (x := a) (by norm_num; linarith [ha.1]) (by norm_num; linarith [ha.2])
+    have h := gzero_Gamma_sign 0 (x := a) (by norm_num; linarith [ha.1])
+        (by norm_num; linarith [ha.2])
     norm_num at h; linarith
   obtain ⟨hx1, hU1⟩ := hz a1 ha1
   obtain ⟨hx2, hU2⟩ := hz a2 ha2
@@ -574,7 +582,8 @@ theorem Real.scIncGammaNegativeZero_strictAnti  :
     have hU : 0 < gzero_U a2 x1 := by
       have := Real.exp_pos (-x1)
       by_contra hc; push Not at hc
-      nlinarith [mul_nonneg (mul_nonneg (neg_nonneg.mpr (hG a2 ha2).le) this.le) (neg_nonneg.mpr hc)]
+      nlinarith [mul_nonneg (mul_nonneg (neg_nonneg.mpr (hG a2 ha2).le) this.le)
+          (neg_nonneg.mpr hc)]
     by_contra hle
     push Not at hle
     rcases hle.lt_or_eq with hlt' | heq
@@ -702,7 +711,8 @@ theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0
 
 /-- The double parameter-zero pair (a_n*,x_n*). -/
 def scIncGammaDoubleZero (n : ℕ) : ℝ × ℝ :=
-  Classical.epsilon (fun p : ℝ × ℝ => -2*(n : ℝ) < p.1 ∧ p.1 < 1-2*(n : ℝ) ∧ 0 < p.2 ∧ scIncGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => scIncGamma a p.2) p.1=0)
+  Classical.epsilon (fun p : ℝ × ℝ => -2*(n : ℝ) < p.1 ∧ p.1 < 1-2*(n : ℝ) ∧ 0 < p.2 ∧
+      scIncGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => scIncGamma a p.2) p.1=0)
 
 /-- Estimate under the stated parameter and domain assumptions: `({a : ℝ | -2*(n : ℝ) < a ∧ a <
 2-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2`. -/
@@ -712,13 +722,17 @@ theorem scIncGamma_two_parameter_zeros_negative_x {n : ℕ} (hn : 1 ≤ n) {x : 
 
 /-- Estimate under the stated parameter and domain assumptions: `({a : ℝ | -2*(n : ℝ) < a ∧ a <
 1-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2`. -/
-theorem scIncGamma_two_parameter_zeros_positive_x {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) (hx1 : x < (scIncGammaDoubleZero n).2) :
+theorem scIncGamma_two_parameter_zeros_positive_x {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < (scIncGammaDoubleZero n).2) :
     ({a : ℝ | -2*(n : ℝ) < a ∧ a < 1-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2 := by
   sorry
 
 /-- At coalescence the two zeros are counted with multiplicity, not as distinct points. -/
 theorem scIncGamma_double_parameter_zero {n : ℕ} (hn : 1 ≤ n) :
-    let p := scIncGammaDoubleZero n; -2*(n : ℝ) < p.1 ∧ p.1 < 1-2*(n : ℝ) ∧ 0 < p.2 ∧ scIncGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => scIncGamma a p.2) p.1=0 ∧ iteratedDeriv 2 (fun a : ℂ => scIncGamma a p.2) p.1 ≠ 0 ∧ ({a : ℝ | -2*(n : ℝ) < a ∧ a < 1-2*(n : ℝ) ∧ scIncGamma a p.2=0} : Set ℝ).ncard=1 := by
+    let p := scIncGammaDoubleZero n; -2*(n : ℝ) < p.1 ∧ p.1 < 1-2*(n : ℝ) ∧ 0 < p.2 ∧
+        scIncGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => scIncGamma a p.2) p.1=0 ∧
+        iteratedDeriv 2 (fun a : ℂ => scIncGamma a p.2) p.1 ≠ 0 ∧
+        ({a : ℝ | -2*(n : ℝ) < a ∧ a < 1-2*(n : ℝ) ∧ scIncGamma a p.2=0} : Set ℝ).ncard=1 := by
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `scIncGamma a 0=0 ↔ ∃ n : ℕ, 1 ≤ n
@@ -748,7 +762,11 @@ ContinuousOn f (Icc (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ)) 
 ((scIncGammaDoubleZero n).2+δ), 0 < (f x).im ∧ scIncGamma (f x) x=0 ∧ scIncGamma (star (f x))
 x=0`. -/
 theorem scIncGamma_conjugate_zero_trajectories {n : ℕ} (hn : 1 ≤ n) :
-    ∃ δ : ℝ, 0 < δ ∧ ∃ f : ℝ → ℂ, ContinuousOn f (Icc (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ)) ∧ f (scIncGammaDoubleZero n).2=(scIncGammaDoubleZero n).1 ∧ ∀ x ∈ Ioo (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ), 0 < (f x).im ∧ scIncGamma (f x) x=0 ∧ scIncGamma (star (f x)) x=0 := by
+    ∃ δ : ℝ, 0 < δ ∧ ∃ f : ℝ → ℂ,
+        ContinuousOn f (Icc (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ)) ∧
+        f (scIncGammaDoubleZero n).2=(scIncGammaDoubleZero n).1 ∧ ∀ x ∈
+        Ioo (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ), 0 < (f x).im ∧
+        scIncGamma (f x) x=0 ∧ scIncGamma (star (f x)) x=0 := by
   sorry
 
 /-- The lower Gamma in the exponentially weighted regularized Kummer normalization. -/
@@ -784,7 +802,8 @@ theorem normIncGammaP_laplace {a b : ℂ} (ha : 0 < a.re) (hb : -1 < b.re) :
 b*(1-(1+a)^(-b))/a`. -/
 @[dlmf 8.14.E2]
 theorem upperIncGamma_laplace {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
-    (∫ x : ℝ in Ioi 0, exp (-a*x)*upperIncGamma b x)=if a=0 then Gamma (b+1) else if b=0 then log (1+a)/a else Gamma b*(1-(1+a)^(-b))/a := by
+    (∫ x : ℝ in Ioi 0, exp (-a*x)*upperIncGamma b x)=if a=0 then Gamma (b+1) else if b=0 then
+        log (1+a)/a else Gamma b*(1-(1+a)^(-b))/a := by
   have hm := (laplace_kummerU_gauss (a:=1-b) (b:=1) (c:=1-b) (z:=1+a)
     (by simp) (by simp only [sub_re,one_re]; linarith) (by simp; linarith)).2
   have hi : (∫ x : ℝ in Ioi 0, exp (-a*x)*upperIncGamma b x)=
@@ -813,7 +832,8 @@ theorem upperIncGamma_laplace {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
       nlinarith
   have hcont : ContinuousOn (fun t : ℝ => (1+a*(t:ℂ))^(-(b+1))) (Icc (0:ℝ) 1) :=
     (by fun_prop : Continuous (fun t : ℝ => 1+a*(t:ℂ))).continuousOn.cpow_const hslit
-  have hint : IntervalIntegrable (fun t : ℝ => (1+a*(t:ℂ))^(-(b+1))) volume 0 1 := hcont.intervalIntegrable_of_Icc (by norm_num : (0:ℝ)≤1)
+  have hint : IntervalIntegrable (fun t : ℝ => (1+a*(t:ℂ))^(-(b+1))) volume 0 1 :=
+      hcont.intervalIntegrable_of_Icc (by norm_num : (0:ℝ)≤1)
   by_cases ha0 : a=0
   · subst a
     simp
@@ -899,8 +919,10 @@ theorem upperIncGamma_mellin {a b : ℂ} (ha : 0 < a.re) (hab : 0 < (a+b).re) :
 ℂ)^(a-1)*exp (-s*x)*lowerIncGamma b x)=Gamma (a+b)/(b*(1+s)^(a+b))*Gamma
 (1+b)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+b) (1/(1+s))`. -/
 @[dlmf 8.14.E5]
-theorem lowerIncGamma_mellin_laplace {a b s : ℂ} (hs : 0 < s.re) (hab : 0 < (a+b).re) (hb : ∀ n : ℕ, b ≠ -n) :
-    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*lowerIncGamma b x)=Gamma (a+b)/(b*(1+s)^(a+b))*Gamma (1+b)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+b) (1/(1+s)) := by
+theorem lowerIncGamma_mellin_laplace {a b s : ℂ} (hs : 0 < s.re) (hab : 0 < (a+b).re)
+    (hb : ∀ n : ℕ, b ≠ -n) :
+    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*lowerIncGamma b x)=Gamma (a+b)/(b*(1+s)^(a+b))*Gamma
+        (1+b)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+b) (1/(1+s)) := by
   have hm := laplace_regularizedHGFun (a:=1) (b:=a+b) (c:=b+1) (k:=1) (z:=1+s)
     hab (by simp; linarith) (by simp; linarith)
   have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*exp (-s*x)*lowerIncGamma b x)=Gamma b*
@@ -915,7 +937,8 @@ theorem lowerIncGamma_mellin_laplace {a b s : ℂ} (hs : 0 < s.re) (hab : 0 < (a
     have he : exp (-s*x)*exp (-(x:ℂ))=exp (-(1+s)*x) := by rw [← Complex.exp_add]; congr 1; ring
     simp only [one_mul]
     calc
-      _ = Gamma b*((x:ℂ)^(a-1)*(x:ℂ)^b)*(exp (-s*x)*exp (-(x:ℂ)))*regularizedHGFun {1} {b+1} x := by ring
+      _ = Gamma b*((x:ℂ)^(a-1)*(x:ℂ)^b)*(exp (-s*x)*exp (-(x:ℂ)))*regularizedHGFun {1}
+          {b+1} x := by ring
       _ = _ := by rw [hp,he]; ring
   rw [hi,hm,show (1:ℂ)+b=b+1 by ring, Gamma_add_one b (by simpa using hb 0), cpow_neg]
   field_simp [show b≠0 by simpa using hb 0]
@@ -924,8 +947,10 @@ theorem lowerIncGamma_mellin_laplace {a b s : ℂ} (hs : 0 < s.re) (hab : 0 < (a
 ℂ)^(a-1)*exp (-s*x)*upperIncGamma b x)=Gamma (a+b)/(a*(1+s)^(a+b))*Gamma
 (1+a)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+a) (s/(1+s))`. -/
 @[dlmf 8.14.E6]
-theorem upperIncGamma_mellin_laplace {a b s : ℂ} (hs : -1 < s.re) (hab : 0 < (a+b).re) (ha : 0 < a.re) :
-    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*upperIncGamma b x)=Gamma (a+b)/(a*(1+s)^(a+b))*Gamma (1+a)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+a) (s/(1+s)) := by
+theorem upperIncGamma_mellin_laplace {a b s : ℂ} (hs : -1 < s.re) (hab : 0 < (a+b).re)
+    (ha : 0 < a.re) :
+    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*upperIncGamma b x)=Gamma (a+b)/(a*(1+s)^(a+b))*Gamma
+        (1+a)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+a) (s/(1+s)) := by
   have hm := (laplace_kummerU_gauss (a:=1) (b:=a+b) (c:=b+1) (z:=1+s)
     hab (by simp only [add_re,sub_re,one_re]; linarith) (by simp; linarith)).2
   have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*exp (-s*x)*upperIncGamma b x)=
@@ -958,7 +983,8 @@ theorem upperIncGamma_mellin_laplace {a b s : ℂ} (hs : -1 < s.re) (hab : 0 < (
 v)^k/(k.factorial : ℂ))` converges to `(lowerIncGammaOnLog a (u+v))`. -/
 @[dlmf 8.15.E1]
 theorem lowerIncGamma_multiplication_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (u v : ℂ) :
-    HasSum (fun k : ℕ => exp (a*v)*lowerIncGammaOnLog (a+k) u*(1-exp v)^k/(k.factorial : ℂ)) (lowerIncGammaOnLog a (u+v)) := by
+    HasSum (fun k : ℕ => exp (a*v)*lowerIncGammaOnLog (a+k) u*(1-exp v)^k/(k.factorial : ℂ))
+        (lowerIncGammaOnLog a (u+v)) := by
   have hsc (b z : ℂ) : scIncGamma b z = regularizedHGFun {b} {b+1} (-z) := by
     simpa only [add_comm 1 b] using (scIncGamma_regularized_pair b z).2
   have hf : Differentiable ℂ (regularizedHGFun {a} {a+1}) :=
@@ -999,8 +1025,12 @@ theorem hurwitzZetaComplex_mathlib {x : ℝ} (hx : 0 < x) (hx1 : x ≤ 1) {s : �
 
 /-- Inherited logarithms and a right-half-plane convergence domain are explicit. -/
 @[dlmf 8.15.E2]
-theorem incompleteGamma_hurwitz_fourier_sum {a z : ℂ} (ha : a ≠ -1) (hz : 0 < z.re) {h : ℝ} (hh0 : 0 ≤ h) (hh1 : h ≤ 1) :
-    HasSum (fun k : ℕ => let j : ℂ := k+1; a*(exp (2*π*I*j*(z+h))/(2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)+π*I/2)+exp (-2*π*I*j*(z+h))/(-2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)-π*I/2))) (DLMF.Zeta.hurwitzZetaComplex (-a) (z+h)+z^(a+1)/(a+1)+(h-1/2)*z^a) := by
+theorem incompleteGamma_hurwitz_fourier_sum {a z : ℂ} (ha : a ≠ -1) (hz : 0 < z.re) {h : ℝ}
+    (hh0 : 0 ≤ h) (hh1 : h ≤ 1) :
+    HasSum (fun k : ℕ => let j : ℂ := k+1;
+        a*(exp (2*π*I*j*(z+h))/(2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)+π*I/2)+exp
+        (-2*π*I*j*(z+h))/(-2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)-π*I/2)))
+        (DLMF.Zeta.hurwitzZetaComplex (-a) (z+h)+z^(a+1)/(a+1)+(h-1/2)*z^a) := by
   sorry
 
 /-- The function F(p,x) approximated in DLMF §8.27(i). -/
@@ -1013,7 +1043,8 @@ def Real.gammaDiDonatoH (p x : ℝ) : ℝ :=
 
 /-- The change of variable mentioned in DLMF §8.27(i). -/
 theorem Real.gammaDiDonato_gamma (p : ℝ) {x : ℝ} (hx : 0 < x) :
-    (Real.gammaDiDonatoF p x : ℂ)=(x : ℂ)^(-(p : ℂ))*Real.exp (x^2/2)*(2 : ℂ)^(((p : ℂ)-1)/2)*upperIncGamma ((p+1)/2) (x^2/2) := by
+    (Real.gammaDiDonatoF p x : ℂ)=(x : ℂ)^(-(p : ℂ))*Real.exp
+        (x^2/2)*(2 : ℂ)^(((p : ℂ)-1)/2)*upperIncGamma ((p+1)/2) (x^2/2) := by
   have hx2 : 0 < x^2/2 := by positivity
   have hU := upperIncGamma_eq_integral (((p:ℂ)+1)/2) hx2
   push_cast at hU
@@ -1066,13 +1097,290 @@ theorem Real.gammaDiDonato_gamma (p : ℝ) {x : ℝ} (hx : 0 < x) :
     push_cast
     rw [show -(t:ℂ)^2/2 = -((t:ℂ)^2/2) by ring]
     field_simp
-  rw [Real.gammaDiDonatoF, ofReal_mul, ofReal_mul, ← integral_complex_ofReal, ofReal_cpow hx.le, key]
+  rw [Real.gammaDiDonatoF, ofReal_mul, ofReal_mul, ← integral_complex_ofReal,
+      ofReal_cpow hx.le, key]
   push_cast
   ring
 
+/-- Integrability of `exp (-t²/2) t^q` on `(x, ∞)`, `x > 0`. -/
+private lemma dd_integrableOn (q : ℝ) {x : ℝ} (hx : 0 < x) :
+    IntegrableOn (fun t : ℝ => Real.exp (-t^2/2) * t^q) (Ioi x) := by
+  rcases le_or_gt 0 q with hq | hq
+  · have h := (integrableOn_rpow_mul_exp_neg_mul_sq (b := 1/2) (by norm_num) (s := q)
+      (by linarith)).mono_set (Ioi_subset_Ioi hx.le)
+    refine h.congr_fun (fun t _ => ?_) measurableSet_Ioi
+    simp only; rw [mul_comm]; congr 1; ring_nf
+  · have h : IntegrableOn (fun t : ℝ => x^q * Real.exp (-(1/2) * t^2)) (Ioi x) :=
+      ((integrable_exp_neg_mul_sq (b := 1/2) (by norm_num)).const_mul (x^q)).integrableOn
+    refine h.mono' ?_ ?_
+    · refine ContinuousOn.aestronglyMeasurable (fun t ht => ?_) measurableSet_Ioi
+      have ht0 : 0 < t := lt_trans hx ht
+      exact ((by fun_prop : Continuous fun t : ℝ => Real.exp (-t^2/2)).continuousAt.mul
+        (Real.continuousAt_rpow_const _ _ (Or.inl ht0.ne'))).continuousWithinAt
+    · refine (ae_restrict_iff' measurableSet_Ioi).mpr (ae_of_all _ fun t ht => ?_)
+      have ht0 : 0 < t := lt_trans hx ht
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity), mul_comm]
+      refine mul_le_mul (Real.rpow_le_rpow_of_nonpos hx (le_of_lt ht) hq.le) (le_of_eq ?_)
+        (by positivity) (by positivity)
+      congr 1; ring
+
+/-- The integral `∫_x^∞ exp (-t²/2) t^q dt`. -/
+private noncomputable def ddG (q x : ℝ) : ℝ := ∫ t : ℝ in Ioi x, Real.exp (-t^2/2) * t^q
+
+private lemma ddG_nonneg (q : ℝ) {x : ℝ} (hx : 0 < x) : 0 ≤ ddG q x :=
+  setIntegral_nonneg measurableSet_Ioi fun t ht => by
+    have : 0 < t := lt_trans hx ht
+    positivity
+
+/-- Integration by parts: `G(p) = x^{p-1} e^{-x²/2} + (p-1) G(p-2)`. -/
+private lemma ddG_rec (p : ℝ) {x : ℝ} (hx : 0 < x) :
+    ddG p x = x^(p-1) * Real.exp (-x^2/2) + (p-1) * ddG (p-2) x := by
+  set f : ℝ → ℝ := fun t => -(t^(p-1) * Real.exp (-t^2/2))
+  have hderiv : ∀ t ∈ Ioi x, HasDerivAt f
+      (Real.exp (-t^2/2) * t^p - (p-1) * (Real.exp (-t^2/2) * t^(p-2))) t := by
+    intro t ht
+    have ht0 : 0 < t := lt_trans hx ht
+    have h1 := Real.hasDerivAt_rpow_const (x := t) (p := p-1) (Or.inl ht0.ne')
+    have h2 : HasDerivAt (fun t : ℝ => Real.exp (-t^2/2)) (Real.exp (-t^2/2) * (-t)) t := by
+      have h3 : HasDerivAt (fun t : ℝ => -t^2/2) (-t) t := by
+        convert (hasDerivAt_pow 2 t).const_mul (-1/2 : ℝ) using 1
+        · funext s; ring
+        · push_cast; ring
+      exact h3.exp
+    convert (h1.mul h2).neg using 1
+    have e1 : t^(p-1-1) = t^(p-2) := by ring_nf
+    have e2 : t^p = t^(p-1) * t := by
+      rw [← Real.rpow_add_one ht0.ne']; ring_nf
+    rw [e1, e2]; ring
+  have hcont : ContinuousWithinAt f (Ici x) x := by
+    refine ContinuousAt.continuousWithinAt ?_
+    exact ((Real.continuousAt_rpow_const _ _ (Or.inl hx.ne')).mul
+      (by fun_prop : Continuous fun t : ℝ => Real.exp (-t^2/2)).continuousAt).neg
+  have hint : IntegrableOn
+      (fun t => Real.exp (-t^2/2) * t^p - (p-1) * (Real.exp (-t^2/2) * t^(p-2))) (Ioi x) :=
+    (dd_integrableOn p hx).sub ((dd_integrableOn (p-2) hx).const_mul _)
+  have hlim : Tendsto f atTop (𝓝 0) := by
+    have h := (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero ((p-1)/2) (1/2) (by norm_num)).comp
+      (tendsto_pow_atTop (n := 2) (by norm_num) : Tendsto (fun t : ℝ => t^2) atTop atTop)
+    have h' := h.neg
+    rw [neg_zero] at h'
+    refine h'.congr' ?_
+    filter_upwards [eventually_gt_atTop 0] with t ht
+    simp only [Function.comp, f]
+    rw [← Real.rpow_natCast t 2, ← Real.rpow_mul ht.le]
+    congr 2
+    · ring_nf
+    · congr 1; push_cast; ring
+  have h := integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv hint hlim
+  rw [integral_sub (dd_integrableOn p hx) ((dd_integrableOn (p-2) hx).const_mul _),
+    integral_const_mul] at h
+  simp only [ddG, f] at h ⊢
+  linarith
+
+/-- `G(1) = e^{-x²/2}`. -/
+private lemma ddG_one {x : ℝ} (hx : 0 < x) : ddG 1 x = Real.exp (-x^2/2) := by
+  rw [ddG_rec 1 hx]; simp
+
+/-- For `q ≤ 1`, `G(q) ≤ x^{q-1} e^{-x²/2}`. -/
+private lemma ddG_le {q : ℝ} (hq : q ≤ 1) {x : ℝ} (hx : 0 < x) :
+    ddG q x ≤ x^(q-1) * Real.exp (-x^2/2) := by
+  rw [← ddG_one hx, ddG, ddG, ← integral_const_mul]
+  refine setIntegral_mono_on (dd_integrableOn q hx) ((dd_integrableOn 1 hx).const_mul _)
+    measurableSet_Ioi fun t ht => ?_
+  have ht0 : 0 < t := lt_trans hx ht
+  have e : t^q = t^(q-1) * t := by rw [← Real.rpow_add_one ht0.ne']; ring_nf
+  rw [e, Real.rpow_one]
+  have := Real.rpow_le_rpow_of_nonpos hx (le_of_lt ht) (by linarith : q - 1 ≤ 0)
+  have h0 : 0 ≤ Real.exp (-t^2/2) * t := by positivity
+  nlinarith [h0, this]
+
+private lemma dd_F_eq (p x : ℝ) :
+    Real.gammaDiDonatoF p x = x^(-p) * Real.exp (x^2/2) * ddG p x := rfl
+
+/-- `F(p) = 1/x + (p-1) x^{-2} F(p-2)`. -/
+private lemma dd_F_rec (p : ℝ) {x : ℝ} (hx : 0 < x) :
+    Real.gammaDiDonatoF p x = x⁻¹ + (p-1) * x⁻¹^2 * Real.gammaDiDonatoF (p-2) x := by
+  rw [dd_F_eq p x, dd_F_eq (p-2) x, ddG_rec p hx]
+  have e1 : x^(-p) * x^(p-1) = x⁻¹ := by
+    rw [← Real.rpow_add hx, show -p + (p-1) = -1 by ring, Real.rpow_neg_one]
+  have e2 : x^(-p) = x⁻¹^2 * x^(-(p-2)) := by
+    rw [show -p = -2 + -(p-2) by ring, Real.rpow_add hx, Real.rpow_neg hx.le,
+      Real.rpow_two, inv_pow]
+  have e3 : Real.exp (x^2/2) * Real.exp (-x^2/2) = 1 := by
+    rw [← Real.exp_add, show x^2/2 + -x^2/2 = (0:ℝ) by ring, Real.exp_zero]
+  calc x^(-p) * Real.exp (x^2/2) * (x^(p-1) * Real.exp (-x^2/2) + (p-1) * ddG (p-2) x)
+      = (x^(-p) * x^(p-1)) * (Real.exp (x^2/2) * Real.exp (-x^2/2))
+        + (p-1) * x^(-p) * Real.exp (x^2/2) * ddG (p-2) x := by ring
+    _ = _ := by rw [e1, e3, e2]; ring
+
+/-- For `q ≤ 1`, `0 ≤ F(q, x) ≤ 1/x`. -/
+private lemma dd_F_le {q : ℝ} (hq : q ≤ 1) {x : ℝ} (hx : 0 < x) :
+    0 ≤ Real.gammaDiDonatoF q x ∧ Real.gammaDiDonatoF q x ≤ x⁻¹ := by
+  rw [dd_F_eq q x]
+  refine ⟨by have := ddG_nonneg q hx; positivity, ?_⟩
+  have h := ddG_le hq hx
+  have hpos : 0 ≤ x^(-q) * Real.exp (x^2/2) := by positivity
+  calc x^(-q) * Real.exp (x^2/2) * ddG q x
+      ≤ x^(-q) * Real.exp (x^2/2) * (x^(q-1) * Real.exp (-x^2/2)) :=
+        mul_le_mul_of_nonneg_left h hpos
+    _ = (x^(-q) * x^(q-1)) * (Real.exp (x^2/2) * Real.exp (-x^2/2)) := by ring
+    _ = x⁻¹ := by
+      rw [← Real.rpow_add hx, show -q + (q-1) = -1 by ring, Real.rpow_neg_one, ← Real.exp_add,
+        show x^2/2 + -x^2/2 = (0:ℝ) by ring, Real.exp_zero, mul_one]
+
+/-- `F(q, x) = O(1/x)` as `x → ∞`, for every real `q`. -/
+private lemma dd_F_isBigO_aux (n : ℕ) : ∀ q : ℝ, q ≤ 1 + 2*n →
+    (fun x => Real.gammaDiDonatoF q x) =O[atTop] (fun x : ℝ => x⁻¹) := by
+  induction n with
+  | zero =>
+    intro q hq
+    refine IsBigO.of_bound 1 ?_
+    filter_upwards [eventually_gt_atTop 0] with x hx
+    have h := dd_F_le (by simpa using hq) hx
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg h.1, abs_of_pos (inv_pos.mpr hx),
+      one_mul]
+    exact h.2
+  | succ n ih =>
+    intro q hq
+    have h2 := ih (q-2) (by push_cast at hq; linarith)
+    have hx2 : (fun x : ℝ => (q-1) * x⁻¹^2) =O[atTop] (fun _ : ℝ => (1:ℝ)) := by
+      refine IsBigO.const_mul_left ?_ _
+      refine IsBigO.of_bound 1 ?_
+      filter_upwards [eventually_ge_atTop 1] with x hx
+      have : x⁻¹ ≤ 1 := inv_le_one_of_one_le₀ hx
+      have h0 : 0 ≤ x⁻¹ := by positivity
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity), norm_one, one_mul]
+      nlinarith
+    have hm := (hx2.mul h2).congr_right (fun x => one_mul _)
+    refine ((isBigO_refl (fun x : ℝ => x⁻¹) atTop).add hm).congr' ?_ EventuallyEq.rfl
+    filter_upwards [eventually_gt_atTop 0] with x hx
+    rw [dd_F_rec q hx]
+
+private lemma dd_F_isBigO (q : ℝ) :
+    (fun x => Real.gammaDiDonatoF q x) =O[atTop] (fun x : ℝ => x⁻¹) := by
+  obtain ⟨n, hn⟩ := exists_nat_ge q
+  exact dd_F_isBigO_aux n q (by nlinarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
+
+
+/-- The polynomial `q` with `D P² - R² = u³ q(u)` in the proof of DLMF §8.27(i). -/
+private noncomputable def ddQ (p u : ℝ) : ℝ :=
+  (104 - 168*p + 72*p^2 - 8*p^3) + u*(24*p^3 - 168*p^2 + 264*p - 120)
+    + u^2*(-24*p^4 + 96*p^3 - 48*p^2 - 96*p + 72)
+    + u^3*(-8*p^6 + 72*p^5 - 240*p^4 + 368*p^3 - 264*p^2 + 72*p)
+
+private noncomputable def ddP (p u : ℝ) : ℝ := 1 + (p-1)*u + (p-1)*(p-3)*u^2
+private noncomputable def ddD (p u : ℝ) : ℝ := (1 - p*u)^2 + 8*u + 8*p*u^2
+private noncomputable def ddR (p u : ℝ) : ℝ := 4 - 3*(1 - p*u)*ddP p u
+private noncomputable def ddGu (p u : ℝ) : ℝ := 3*(1 - p*u) + Real.sqrt (ddD p u)
+private noncomputable def ddW (p u : ℝ) : ℝ := Real.sqrt (ddD p u) * ddP p u + ddR p u
+
+private lemma dd_poly (p u : ℝ) :
+    ddD p u * ddP p u^2 - ddR p u^2 = u^3 * ddQ p u := by
+  simp only [ddD, ddP, ddR, ddQ]; ring
+
+private lemma dd_continuous_D (p : ℝ) : Continuous (ddD p) := by
+  unfold ddD; fun_prop
+
+private lemma dd_tendsto (p : ℝ) :
+    Tendsto (fun x : ℝ => x⁻¹^2) atTop (𝓝[≥] 0) ∧
+    Tendsto (fun u => ddQ p u / (ddGu p u * ddW p u)) (𝓝 0)
+      (𝓝 (ddQ p 0 / (ddGu p 0 * ddW p 0))) ∧ ddGu p 0 = 4 ∧ ddW p 0 = 2 := by
+  have hD0 : ddD p 0 = 1 := by simp [ddD]
+  have hG0 : ddGu p 0 = 4 := by rw [ddGu, hD0]; norm_num
+  have hW0 : ddW p 0 = 2 := by rw [ddW, ddR, hD0]; norm_num [ddP]
+  refine ⟨?_, ?_, hG0, hW0⟩
+  · refine tendsto_nhdsWithin_iff.mpr ⟨?_, Eventually.of_forall fun x => ?_⟩
+    · simpa using ((tendsto_inv_atTop_zero (𝕜 := ℝ)).pow 2 :
+        Tendsto (fun x : ℝ => x⁻¹^2) atTop (𝓝 (0^2)))
+    · exact sq_nonneg (x⁻¹)
+  · have hc : ContinuousAt (fun u => ddQ p u / (ddGu p u * ddW p u)) 0 := by
+      refine ContinuousAt.div ?_ ?_ (by rw [hG0, hW0]; norm_num)
+      · unfold ddQ; fun_prop
+      · have hs : Continuous fun u => Real.sqrt (ddD p u) :=
+          (dd_continuous_D p).sqrt
+        unfold ddGu ddW ddR ddP
+        exact (Continuous.mul (by fun_prop) (by fun_prop)).continuousAt
+    exact hc.tendsto
+
+/-- The algebraic identity behind the `O(x^{-7})` estimate, in the variable `y = 1/x`. -/
+private lemma dd_identity_y (p y s : ℝ) (hy : y ≠ 0) (hs2 : s^2 = ddD p (y^2))
+    (hG : 3*(1-p*y^2)+s ≠ 0) (hW : s*ddP p (y^2) + ddR p (y^2) ≠ 0) :
+    y + (p-1)*y^3 + (p-1)*(p-3)*y^5 - 4*y/(3*(1-p*y^2)+s) =
+      y^7 * (ddQ p (y^2) / ((3*(1-p*y^2)+s) * (s*ddP p (y^2) + ddR p (y^2)))) := by
+  have hpoly := dd_poly p (y^2)
+  rw [← hs2] at hpoly
+  set G := 3*(1-p*y^2)+s
+  set W := s*ddP p (y^2) + ddR p (y^2) with hWdef
+  have hnum : y^7 * ddQ p (y^2) - ((y + (p-1)*y^3 + (p-1)*(p-3)*y^5) * G - 4*y) * W = 0 := by
+    simp only [G, hWdef, ddP, ddR] at hpoly ⊢
+    linear_combination (-y) * hpoly
+  rw [eq_comm, ← sub_eq_zero]
+  have e : y^7 * (ddQ p (y^2) / (G * W)) - (y + (p-1)*y^3 + (p-1)*(p-3)*y^5 - 4*y/G) =
+      (y^7 * ddQ p (y^2) - ((y + (p-1)*y^3 + (p-1)*(p-3)*y^5) * G - 4*y) * W) / (G * W) := by
+    field_simp
+  rw [e, hnum, zero_div]
+
+private lemma dd_H_eq (p : ℝ) {x : ℝ} (hx : 0 < x) :
+    Real.gammaDiDonatoH p x = x^2 * ddGu p (x⁻¹^2) := by
+  have hDx : (x^2-p)^2+8*(x^2+p) = (x^2)^2 * ddD p (x⁻¹^2) := by
+    simp only [ddD]; field_simp; ring
+  rw [Real.gammaDiDonatoH, hDx, Real.sqrt_mul (by positivity), Real.sqrt_sq (by positivity),
+    ddGu]
+  field_simp
+
 /-- The explicit O(x^-7) approximation theorem in DLMF §8.27(i). -/
 theorem Real.gammaDiDonato_approximation (p : ℝ) :
-    IsBigO atTop (fun x : ℝ => Real.gammaDiDonatoF p x-4*x/Real.gammaDiDonatoH p x) (fun x => x^(-7 : ℤ)) := by
-  sorry
+    IsBigO atTop (fun x : ℝ => Real.gammaDiDonatoF p x-4*x/Real.gammaDiDonatoH p x)
+        (fun x => x^(-7 : ℤ)) := by
+  obtain ⟨hu, hφ, hG0, hW0⟩ := dd_tendsto p
+  have hu' : Tendsto (fun x : ℝ => x⁻¹^2) atTop (𝓝 0) := tendsto_nhdsWithin_iff.mp hu |>.1
+  have hDc : Continuous (ddD p) := dd_continuous_D p
+  have hD0 : ddD p 0 = 1 := by simp [ddD]
+  have hGc : Continuous (ddGu p) := by
+    have := hDc.sqrt; unfold ddGu; fun_prop
+  have hWc : Continuous (ddW p) := by
+    have := hDc.sqrt; unfold ddW ddR ddP; fun_prop
+  have hGl : Tendsto (fun x : ℝ => ddGu p (x⁻¹^2)) atTop (𝓝 4) := by
+    rw [← hG0]; exact (hGc.tendsto 0).comp hu'
+  have hWl : Tendsto (fun x : ℝ => ddW p (x⁻¹^2)) atTop (𝓝 2) := by
+    rw [← hW0]; exact (hWc.tendsto 0).comp hu'
+  have hDl : Tendsto (fun x : ℝ => ddD p (x⁻¹^2)) atTop (𝓝 1) := by
+    rw [← hD0]; exact (hDc.tendsto 0).comp hu'
+  have hz : (fun x : ℝ => x^(-7 : ℤ)) = fun x => x⁻¹^7 := by
+    funext x; rw [zpow_neg, inv_pow]; norm_cast
+  rw [hz]
+  -- the series part
+  have hA : (fun x : ℝ => Real.gammaDiDonatoF p x -
+      (x⁻¹ + (p-1)*x⁻¹^3 + (p-1)*(p-3)*x⁻¹^5)) =O[atTop] (fun x : ℝ => x⁻¹^7) := by
+    have h6 := ((isBigO_refl (fun x : ℝ => x⁻¹^6) atTop).mul (dd_F_isBigO (p-6))).const_mul_left
+      ((p-1)*(p-3)*(p-5))
+    refine (h6.congr' ?_ ?_)
+    · filter_upwards [eventually_gt_atTop 0] with x hx
+      have r1 := dd_F_rec p hx
+      have r2 := dd_F_rec (p-2) hx
+      have r3 := dd_F_rec (p-4) hx
+      rw [show p-2-2 = p-4 by ring] at r2
+      rw [show p-4-2 = p-6 by ring] at r3
+      rw [r1, r2, r3]; ring
+    · filter_upwards with x; ring
+  have hB : (fun x : ℝ => (x⁻¹ + (p-1)*x⁻¹^3 + (p-1)*(p-3)*x⁻¹^5) -
+      4*x/Real.gammaDiDonatoH p x) =O[atTop] (fun x : ℝ => x⁻¹^7) := by
+    have hb := (isBigO_refl (fun x : ℝ => x⁻¹^7) atTop).mul
+      ((hφ.comp hu').isBigO_one ℝ)
+    refine (hb.congr' ?_ ?_)
+    · filter_upwards [eventually_gt_atTop 0, hGl.eventually (lt_mem_nhds (by norm_num : (0:ℝ) < 4)),
+        hWl.eventually (lt_mem_nhds (by norm_num : (0:ℝ) < 2)),
+        hDl.eventually (lt_mem_nhds (by norm_num : (0:ℝ) < 1))] with x hx hG hW hD
+      have hy : x⁻¹ ≠ 0 := inv_ne_zero hx.ne'
+      have h := dd_identity_y p x⁻¹ (Real.sqrt (ddD p (x⁻¹^2))) hy (Real.sq_sqrt hD.le)
+        hG.ne' hW.ne'
+      have hH : 4*x/Real.gammaDiDonatoH p x = 4*x⁻¹/ddGu p (x⁻¹^2) := by
+        rw [dd_H_eq p hx]; field_simp
+      simp only [Function.comp]
+      rw [hH]
+      exact h.symm
+    · filter_upwards with x; simp
+  exact (hA.add hB).congr_left (fun x => by ring)
+
 
 end DLMF.Confluent

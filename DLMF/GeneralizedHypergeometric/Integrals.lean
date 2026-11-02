@@ -5,7 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
+public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence
+public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import DLMF.Hypergeometric.ArgumentContinuation
+public import DLMF.Hypergeometric.Solutions
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
 public import Mathlib.MeasureTheory.Function.AbsolutelyContinuous
 
@@ -76,7 +81,8 @@ theorem genHG_barnes_right (a b : Multiset ℂ) (ha : GenDenRegular a) (hb : Gen
     GenHasBarnesValueLog a b L w (genHG a b (-Complex.exp w)) := by
   sorry
 
-/-- The full vertical convergence sector; for p=q or p=q+1 it gives the principal continued function. -/
+/-- The full vertical convergence sector; for p=q or p=q+1 it gives the principal continued
+function. -/
 @[dlmf 16.5.E1]
 theorem genHG_barnes_vertical (a b : Multiset ℂ) (ha : GenDenRegular a) (hb : GenDenRegular b)
     (L : ℝ → ℂ) (hL : GenVerticalBarnesContour a L) (w : ℂ)
@@ -86,9 +92,11 @@ theorem genHG_barnes_vertical (a b : Multiset ℂ) (ha : GenDenRegular a) (hb : 
     (a.card ≤ b.card + 1 → genBarnesHGLog a b L w = genHG a b (-Complex.exp w)) := by
   sorry
 
-/-- For p>q+1 the divergent formal series is the Barnes value asymptotic on every closed proper logarithmic sector. -/
+/-- For p>q+1 the divergent formal series is the Barnes value asymptotic on every closed proper
+logarithmic sector. -/
 @[dlmf 16.5.E1]
-theorem genHG_barnes_formal_asymptotic (a b : Multiset ℂ) (ha : GenDenRegular a) (hb : GenDenRegular b)
+theorem genHG_barnes_formal_asymptotic (a b : Multiset ℂ) (ha : GenDenRegular a)
+    (hb : GenDenRegular b)
     (hpq : b.card + 1 < a.card) (L : ℝ → ℂ) (hL : GenVerticalBarnesContour a L)
     (N : ℕ) {δ : ℝ} (hδ : 0 < δ) (hδpq : δ < a.card + 1 - b.card) :
     Asymptotics.IsBigO (genZeroLogSector ((a.card + 1 - b.card - δ) * Real.pi / 2))

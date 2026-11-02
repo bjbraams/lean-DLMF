@@ -26,9 +26,12 @@ public import DLMFMathlib.Analysis.Complex.BarnesResidue
 public import DLMFMathlib.Analysis.Complex.BivariateCalculus
 public import DLMFMathlib.Analysis.Complex.BivariateDerivatives
 public import DLMFMathlib.Analysis.Complex.BivariateSeries
+public import DLMFMathlib.Analysis.Complex.EntireFiniteZeros
 public import DLMFMathlib.Analysis.Complex.FactorialSeries
 public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
 public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
+public import DLMFMathlib.Analysis.Complex.LagrangeInversion
+public import DLMFMathlib.Analysis.Complex.MittagLeffler
 public import DLMFMathlib.Analysis.Complex.MellinBarnesSeries
 public import DLMFMathlib.Analysis.Complex.ParameterContinuity
 public import DLMFMathlib.Analysis.Complex.RoucheFilledHull
@@ -49,6 +52,7 @@ public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
 public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.Analysis.Fourier.AddCircle
+public import DLMFMathlib.Analysis.Fourier.DirichletKernel
 public import DLMFMathlib.Analysis.Fourier.GaussianSeries
 public import DLMFMathlib.Analysis.Fourier.L1Inversion
 public import DLMFMathlib.Analysis.Fourier.L2Compatibility
@@ -71,6 +75,7 @@ public import DLMFMathlib.Analysis.ODE.LiouvilleGreenVolterra
 public import DLMFMathlib.Analysis.ODE.EntireLinear
 public import DLMFMathlib.Analysis.ODE.LinearGlobal
 public import DLMFMathlib.Analysis.ODE.ParamHolomorphic
+public import DLMFMathlib.Analysis.ODE.PerturbedOscillator
 public import DLMFMathlib.Analysis.ODE.BallLinear
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMFMathlib.Analysis.ODE.SoninePolya
@@ -81,12 +86,16 @@ public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 public import DLMFMathlib.Analysis.ODE.Volterra
 public import DLMFMathlib.Analysis.ODE.Wronskian
 public import DLMFMathlib.Analysis.SpecialFunctions.ChebyshevSeries
+public import DLMFMathlib.Analysis.SpecialFunctions.ChebyshevSeriesDecay
 public import DLMFMathlib.Analysis.SpecialFunctions.Complex.LogBoundary
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.PartialFractions
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.OneSubCosIntegral
 public import DLMFMathlib.Analysis.SpecificLimits.Oscillation
+public import DLMFMathlib.Analysis.SpecificLimits.PowMulPowChoose
 public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
 public import DLMFMathlib.MeasureTheory.Function.L2Space
 public import DLMFMathlib.MeasureTheory.Integral.HalfLine
+public import DLMFMathlib.MeasureTheory.Integral.PathParametric
 public import DLMFMathlib.MeasureTheory.Integral.Trigonometric
 public import DLMFMathlib.NumberTheory.BernoulliTaylor
 public import DLMFMathlib.NumberTheory.EulerNumbers
@@ -103,6 +112,7 @@ public import DLMFMathlib.Algebra.BigOperators
 public import DLMFMathlib.Algebra.Polynomial.OfReal
 public import DLMFMathlib.Analysis.Analytic.OfScalarsDeriv
 public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
+public import DLMFMathlib.Analysis.Calculus.Deriv.CompCurve
 public import DLMFMathlib.Analysis.Calculus.Deriv.Sign
 public import DLMFMathlib.Analysis.Complex.NonInteger
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
@@ -152,20 +162,25 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.SpecificLimits.Oscillation`: a periodic phase excludes a nonzero limit.
 * `DLMFMathlib.MeasureTheory.Integral.HalfLine`: reflection, even extensions and half-line
   integrals.
-* `DLMFMathlib.Analysis.Complex.SegmentPrimitive`: straight-segment primitives and their derivatives.
+* `DLMFMathlib.Analysis.Complex.SegmentPrimitive`: straight-segment primitives and their
+  derivatives.
 * `DLMFMathlib.Analysis.Complex.StarPrimitive`: primitives of holomorphic functions on star-convex
   open sets.
 * `DLMFMathlib.Analysis.Complex.BarnesResidue`: shifting a vertical-line integral across a simple
   pole (one-pole residue theorem on a strip).
 * `DLMFMathlib.Analysis.Complex.ZeroLocalization`: existence and uniqueness of a zero near an
   approximate zero (contraction form of Newton–Kantorovich), with a filter version.
-* `DLMFMathlib.Analysis.ContinuedFraction.Convergence`: convergence of generalized continued fractions
-  through three-term recurrences (Pincherle, a ratio criterion, bracketing for positive elements).
-* `DLMFMathlib.Analysis.SpecificLimits.Pincherle`: divergence of sums with ratio limit outside the unit
-  disc, and convergence of a continued fraction from a backward solution with such a ratio limit.
-* `DLMFMathlib.Analysis.Complex.FactorialSeries`: convergence and entireness of sparse factorial series.
-* `DLMFMathlib.Analysis.Complex.TrigSeriesExtension`: uniqueness of power-series coefficients on a ball,
-  extension of a power-series identity to the full disc of holomorphy, and even/odd coefficient criteria.
+* `DLMFMathlib.Analysis.ContinuedFraction.Convergence`: convergence of generalized continued
+  fractions through three-term recurrences (Pincherle, a ratio criterion, bracketing for positive
+  elements).
+* `DLMFMathlib.Analysis.SpecificLimits.Pincherle`: divergence of sums with ratio limit outside the
+  unit disc, and convergence of a continued fraction from a backward solution with such a ratio
+  limit.
+* `DLMFMathlib.Analysis.Complex.FactorialSeries`: convergence and entireness of sparse factorial
+  series.
+* `DLMFMathlib.Analysis.Complex.TrigSeriesExtension`: uniqueness of power-series coefficients on a
+  ball, extension of a power-series identity to the full disc of holomorphy, and even/odd
+  coefficient criteria.
 * `DLMFMathlib.Analysis.Complex.ParametricHolomorphy`: holomorphy of dominated parametric series and
   integrals in finite-dimensional complex parameters, and the continuous Osgood lemma.
 * `DLMFMathlib.Topology.Order.ZeroEnumeration`: unique zeros of strictly monotone functions and the
@@ -210,7 +225,8 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Combinatorics.Finpartition`: finpartitions as fibres of surjections; surjections
   onto `Fin k` with a fibre-size condition number `k!` times the finpartitions with `k` parts.
 * `DLMFMathlib.Combinatorics.QuadraticSeries`: the Catalan series and the solution of
-  `F = 1 + aXF + X^eF²` with its coefficients (Touchard, large Schröder numbers), binomial inversion.
+  `F = 1 + aXF + X^eF²` with its coefficients (Touchard, large Schröder numbers), binomial
+  inversion.
 * `DLMFMathlib.Combinatorics.SeriesTransform`: summing `Σ c_k x^{ek} (1 - bx)^{-(2k+1)}` by
   diagonals; the central binomial series `Σ C(2k, k) y^k = 1/√(1 - 4y)`.
 * `DLMFMathlib.RingTheory.PowerSeriesEvaluation`: absolutely convergent evaluation of integer power
@@ -227,4 +243,21 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.Complex.ParameterContinuity`: continuity and analyticity in parameters of
   slopes and dominated series.
 * `DLMFMathlib.Analysis.SpecialFunctions.Gamma.Bounds`: bounds for `1/Γ(a + n)`.
+* `DLMFMathlib.Analysis.Complex.LagrangeInversion`: the Lagrange inversion series via residues.
+* `DLMFMathlib.Analysis.Complex.MittagLeffler`: holomorphy of Mittag-Leffler sums of principal
+  parts.
+* `DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.OneSubCosIntegral`: `∫ (1 - cos x)/x² = π`.
+* `DLMFMathlib.Analysis.SpecificLimits.PowMulPowChoose`: summability of `xⁿ q^(n choose 2)`.
+* `DLMFMathlib.Analysis.SpecialFunctions.ChebyshevSeriesDecay`: `O(1/n²)` decay and
+  summability of Chebyshev coefficients of functions with bounded derivative.
+* `DLMFMathlib.Analysis.Complex.EntireFiniteZeros`: an entire function of order below one with
+  finitely many zeros is a polynomial.
+* `DLMFMathlib.Analysis.ODE.PerturbedOscillator`: energy comparison of `y'' = -(k² + Q) y` with
+  the free oscillator.
+* `DLMFMathlib.Analysis.Fourier.DirichletKernel`: Dirichlet's pointwise theorem for the sine
+  kernel `sin(η(t-u))/(π(t-u))`.
+* `DLMFMathlib.Analysis.Calculus.Deriv.CompCurve`: derivatives of compositions with curves and
+  of functions of three complex variables along a curve.
+* `DLMFMathlib.MeasureTheory.Integral.PathParametric`: differentiation under interval integrals
+  along parametrized paths and swapping iterated integrals over `[0, 1]²`.
 -/

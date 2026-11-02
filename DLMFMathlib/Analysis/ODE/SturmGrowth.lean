@@ -34,7 +34,8 @@ namespace ODE
 /-- **Complex energy estimate.** Let `y'' = P y` on `ℝ` (complex values) with `‖P x‖ ≤ M + k²`
 on `[0, L]`, `0 ≤ M`, `1 ≤ k`. Then `‖y'‖² + k² ‖y‖² ≤ (‖y'(0)‖² + k² ‖y(0)‖²) e^{(M + 2k) x}`
 on `[0, L]`. -/
-theorem norm_deriv_sq_add_sq_mul_norm_sq_le_exp {P y y' : ℝ → ℂ} {M L k : ℝ} (hM : 0 ≤ M) (hk : 1 ≤ k)
+theorem norm_deriv_sq_add_sq_mul_norm_sq_le_exp {P y y' : ℝ → ℂ} {M L k : ℝ}
+    (hM : 0 ≤ M) (hk : 1 ≤ k)
     (hP : ∀ x ∈ Icc 0 L, ‖P x‖ ≤ M + k ^ 2) (hy : ∀ x, HasDerivAt y (y' x) x)
     (hy' : ∀ x, HasDerivAt y' (P x * y x) x) {x : ℝ} (hx : x ∈ Icc 0 L) :
     ‖y' x‖ ^ 2 + k ^ 2 * ‖y x‖ ^ 2 ≤
@@ -81,7 +82,8 @@ private lemma le_of_hasDerivAt_nonneg_Ioo {F F' : ℝ → ℝ} {L : ℝ} (hF : �
   exact hmono ⟨le_rfl, hx.1.trans hx.2⟩ hx hx.1
 
 /-- A continuous function with `f(0) = 1` and `f² ≥ 1` on `[0, L]` satisfies `f ≥ 1` there. -/
-private lemma one_le_of_one_le_sq_of_continuous {f : ℝ → ℝ} {L : ℝ} (hf : Continuous f) (h0 : f 0 = 1)
+private lemma one_le_of_one_le_sq_of_continuous {f : ℝ → ℝ} {L : ℝ}
+    (hf : Continuous f) (h0 : f 0 = 1)
     (h : ∀ x ∈ Icc 0 L, 1 ≤ f x ^ 2) {x : ℝ} (hx : x ∈ Icc 0 L) : 1 ≤ f x := by
   by_contra hlt
   push Not at hlt
@@ -94,7 +96,8 @@ private lemma one_le_of_one_le_sq_of_continuous {f : ℝ → ℝ} {L : ℝ} (hf 
 
 /-- `y y'` is nondecreasing on `[0, L]` when `y'' = p y` with `p ≥ 0` there; with `y y' = 0` at
 `0` it is nonnegative. -/
-private lemma mul_deriv_nonneg_of_coeff_nonneg {p y y' : ℝ → ℝ} {L : ℝ} (hp : ∀ x ∈ Icc 0 L, 0 ≤ p x)
+private lemma mul_deriv_nonneg_of_coeff_nonneg {p y y' : ℝ → ℝ} {L : ℝ}
+    (hp : ∀ x ∈ Icc 0 L, 0 ≤ p x)
     (hy : ∀ x, HasDerivAt y (y' x) x) (hy' : ∀ x, HasDerivAt y' (p x * y x) x)
     (h0 : y 0 * y' 0 = 0) {x : ℝ} (hx : x ∈ Icc 0 L) : 0 ≤ y x * y' x := by
   have := le_of_hasDerivAt_nonneg_Ioo (F := fun x => y x * y' x) (L := L)
@@ -110,7 +113,8 @@ theorem exp_mul_div_two_le_of_initial_one_zero {p y y' : ℝ → ℝ} {L s : ℝ
     (hy' : ∀ x, HasDerivAt y' (p x * y x) x) (h0 : y 0 = 1) (h1 : y' 0 = 0) :
     exp (s * L) / 2 ≤ y L := by
   have hp0 : ∀ x ∈ Icc 0 L, 0 ≤ p x := fun x hx => (sq_nonneg s).trans (hp x hx)
-  have hu := fun x (hx : x ∈ Icc 0 L) => mul_deriv_nonneg_of_coeff_nonneg hp0 hy hy' (by simp [h1]) hx
+  have hu := fun x (hx : x ∈ Icc 0 L) =>
+      mul_deriv_nonneg_of_coeff_nonneg hp0 hy hy' (by simp [h1]) hx
   -- `y² ≥ 1`
   have hsq : ∀ x ∈ Icc 0 L, 1 ≤ y x ^ 2 := by
     intro x hx
@@ -173,7 +177,8 @@ theorem one_le_deriv_of_initial_zero_one {p y y' : ℝ → ℝ} {L s : ℝ} (hL 
     (hy' : ∀ x, HasDerivAt y' (p x * y x) x) (h0 : y 0 = 0) (h1 : y' 0 = 1) :
     1 ≤ y' L := by
   have hp0 : ∀ x ∈ Icc 0 L, 0 ≤ p x := fun x hx => (sq_nonneg s).trans (hp x hx)
-  have hu := fun x (hx : x ∈ Icc 0 L) => mul_deriv_nonneg_of_coeff_nonneg hp0 hy hy' (by simp [h0]) hx
+  have hu := fun x (hx : x ∈ Icc 0 L) =>
+      mul_deriv_nonneg_of_coeff_nonneg hp0 hy hy' (by simp [h0]) hx
   have hsq : ∀ x ∈ Icc 0 L, 1 ≤ y' x ^ 2 := by
     intro x hx
     have := le_of_hasDerivAt_nonneg_Ioo (F := fun x => y' x ^ 2 - s ^ 2 * y x ^ 2)

@@ -80,15 +80,18 @@ theorem volume_real_eq_green_area {γ : ℝ → ℂ} {a b : ℝ} (hab : a < b)
   have hr2 (z : ℂ) : HasFDerivAt (fun z : ℂ => z.re / 2) ((2 : ℝ)⁻¹ • Complex.reCLM) z := by
     simp only [div_eq_mul_inv]; exact (hre z).mul_const _
   refine ⟨?_, ?_, ?_⟩
-  · have h := volume_filledHull_eq_integral_of_curl_eq_one hab hγ hclosed hindex (P := fun z => -z.im) (Q := fun _ => 0)
+  · have h := volume_filledHull_eq_integral_of_curl_eq_one hab hγ hclosed hindex
+        (P := fun z => -z.im) (Q := fun _ => 0)
       cim.neg contDiff_const (fun z => by
         rw [TauCeti.Green.curl, (hn z).fderiv, (h0 z).fderiv]; simp)
     simpa using h
-  · have h := volume_filledHull_eq_integral_of_curl_eq_one hab hγ hclosed hindex (P := fun _ => 0) (Q := fun z => z.re)
+  · have h := volume_filledHull_eq_integral_of_curl_eq_one hab hγ hclosed hindex (P := fun _ => 0)
+        (Q := fun z => z.re)
       contDiff_const cre (fun z => by
         rw [TauCeti.Green.curl, (hre z).fderiv, (h0 z).fderiv]; simp)
     simpa using h
-  · have h := volume_filledHull_eq_integral_of_curl_eq_one hab hγ hclosed hindex (P := fun z => -z.im / 2)
+  · have h := volume_filledHull_eq_integral_of_curl_eq_one hab hγ hclosed hindex
+        (P := fun z => -z.im / 2)
       (Q := fun z => z.re / 2) (cim.neg.div_const 2) (cre.div_const 2) (fun z => by
         rw [TauCeti.Green.curl, (hn2 z).fderiv, (hr2 z).fderiv]; simp; norm_num)
     exact h

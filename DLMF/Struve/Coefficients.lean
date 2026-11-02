@@ -33,9 +33,11 @@ def angerDebyePoly : ℕ → Polynomial ℂ
   | k+1 => C (1/2)*X^2*(1-X^2)*derivative (angerDebyePoly k) +
       C (1/8)*((1-C 5*X^2)*angerDebyePoly k).sum (fun n a => C (a/(n+1))*X^(n+1))
 
-/-- Unnumbered general coefficient formula in DLMF 11.11(iii), with the Debye normalization from 10.41(ii). -/
+/-- Unnumbered general coefficient formula in DLMF 11.11(iii), with the Debye normalization from
+10.41(ii). -/
 theorem angerScaledB_debye {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (k : ℕ) :
-    poch (1/2) k*angerScaledB lam k=(-1)^k/(1-lam^2:ℂ)^(1/4:ℂ)*(angerDebyePoly k).eval (1/(1-lam^2:ℂ)^(1/2:ℂ)) := by
+    poch (1/2) k*angerScaledB lam k=(-1)^k/(1-lam^2:ℂ)^(1/4:ℂ)*(angerDebyePoly k).eval
+        (1/(1-lam^2:ℂ)^(1/2:ℂ)) := by
   sorry
 
 end DLMF.Struve

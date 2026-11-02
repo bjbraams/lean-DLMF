@@ -7,8 +7,9 @@ module
 
 public import DLMF.Elementary.Basic.Gudermannian
 public import DLMF.Elementary.LogExpAnalysis
+public import DLMF.Elementary.OddContinuedFraction
 public import DLMF.Elementary.Trigonometric.InverseBranches
-public import DLMF.Hypergeometric.SeriesProperties
+public import DLMF.Hypergeometric.Basic.SpecialValues
 public import DLMFMathlib.Analysis.Complex.Sqrt
 public import Mathlib.Analysis.Normed.Group.FunctionSeries
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
@@ -150,7 +151,8 @@ private lemma inverseTrigAlpha_inverseTrigBeta_identities (z : ℂ) :
 @[dlmf 4.23.E34]
 theorem arcsin_real_imag {z : ℂ} (hz : z.im≠0 ∨ |z.re|≤1) :
     arcsinPrincipal z=(Real.arcsin (inverseTrigBeta z):ℂ)+
-      I*(trigRealSign z.im:ℂ)*Real.log (inverseTrigAlpha z+Real.sqrt ((inverseTrigAlpha z)^2-1)) := by
+      I*(trigRealSign z.im:ℂ)*Real.log
+          (inverseTrigAlpha z+Real.sqrt ((inverseTrigAlpha z)^2-1)) := by
   obtain ⟨hab, hsq, ha1, hb1⟩ := inverseTrigAlpha_inverseTrigBeta_identities z
   set a := inverseTrigAlpha z
   set b := inverseTrigBeta z
@@ -245,12 +247,14 @@ theorem arcsin_real_imag {z : ℂ} (hz : z.im≠0 ∨ |z.re|≤1) :
 @[dlmf 4.23.E35]
 theorem arccos_real_imag {z : ℂ} (hz : z.im≠0 ∨ |z.re|≤1) :
     arccosPrincipal z=(Real.arccos (inverseTrigBeta z):ℂ)-
-      I*(trigRealSign z.im:ℂ)*Real.log (inverseTrigAlpha z+Real.sqrt ((inverseTrigAlpha z)^2-1)) := by
+      I*(trigRealSign z.im:ℂ)*Real.log
+          (inverseTrigAlpha z+Real.sqrt ((inverseTrigAlpha z)^2-1)) := by
   rw [arccosPrincipal, arcsin_real_imag hz, Real.arccos_eq_pi_div_two_sub_arcsin]
   push_cast; ring
 
 /-- On the arcsine cut plane the half-difference of distances lies strictly inside `(-1,1)`. -/
-private lemma abs_inverseTrigBeta_lt_one {z : ℂ} (hz : z∈arcsinCutPlane) : |inverseTrigBeta z|<1 := by
+private lemma abs_inverseTrigBeta_lt_one {z : ℂ}
+    (hz : z∈arcsinCutPlane) : |inverseTrigBeta z|<1 := by
   obtain ⟨hab, hsq, ha1, hb1⟩ := inverseTrigAlpha_inverseTrigBeta_identities z
   rcases lt_or_eq_of_le hb1 with h | h
   · exact h
@@ -316,7 +320,8 @@ theorem arccos_principal_log_half {z : ℂ} (hz : z∈arcsinCutPlane) :
   · simp; linarith
 
 /-- In the open right half-plane the argument is the arctangent of the slope. -/
-private lemma arg_eq_arctan_div_of_re_pos {w : ℂ} (hw : 0<w.re) : Complex.arg w=Real.arctan (w.im/w.re) := by
+private lemma arg_eq_arctan_div_of_re_pos {w : ℂ} (hw : 0<w.re) : Complex.arg w=Real.arctan
+    (w.im/w.re) := by
   have h := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hw)
   rw [← Complex.tan_arg, Real.arctan_tan (abs_lt.mp h).1 (abs_lt.mp h).2]
 
@@ -336,11 +341,13 @@ theorem arctan_real_imag {z : ℂ} (hz : ‖z‖<1) :
   have hN : 0 < x^2+(y-1)^2 := by nlinarith
   have hzI : 1 - (⟨x, y⟩ : ℂ)*I ≠ 0 := by
     intro h; have := congrArg Complex.re h; simp at this; nlinarith
-  have hw : (1+(⟨x, y⟩ : ℂ)*I)/(1-(⟨x, y⟩ : ℂ)*I) = ⟨(1-x^2-y^2)/(x^2+(y+1)^2), 2*x/(x^2+(y+1)^2)⟩ := by
+  have hw : (1+(⟨x, y⟩ : ℂ)*I)/(1-(⟨x, y⟩ : ℂ)*I) =
+      ⟨(1-x^2-y^2)/(x^2+(y+1)^2), 2*x/(x^2+(y+1)^2)⟩ := by
     rw [div_eq_iff hzI]
     have hD' : x^2+(y+1)^2 ≠ 0 := hD.ne'
     apply Complex.ext <;> simp <;> field_simp <;> ring
-  have hre : 0 < ((1+(⟨x, y⟩ : ℂ)*I)/(1-(⟨x, y⟩ : ℂ)*I)).re := by rw [hw]; exact div_pos (by linarith) hD
+  have hre : 0 < ((1+(⟨x, y⟩ : ℂ)*I)/(1-(⟨x, y⟩ : ℂ)*I)).re := by rw [hw];
+                                                                  exact div_pos (by linarith) hD
   have hnorm : ‖(1+(⟨x, y⟩ : ℂ)*I)/(1-(⟨x, y⟩ : ℂ)*I)‖^2 = (x^2+(y-1)^2)/(x^2+(y+1)^2) := by
     rw [norm_div, div_pow, ← Complex.normSq_eq_norm_sq, ← Complex.normSq_eq_norm_sq,
       Complex.normSq_apply, Complex.normSq_apply]
@@ -360,7 +367,8 @@ theorem arctan_real_imag {z : ℂ} (hz : ‖z‖<1) :
     simp [Complex.log_re, -Complex.norm_div]
     ring
 
-/-- The half-parameter binomial coefficient is a scaled central binomial coefficient; duplication uses lean-codes. -/
+/-- The half-parameter binomial coefficient is a scaled central binomial coefficient; duplication
+uses lean-codes. -/
 private lemma half_poch_coefficient (n : ℕ) :
     (ascPochhammer ℂ n).eval (1/2:ℂ)/(n.factorial:ℂ) = ((2*n).choose n:ℂ)/(4:ℂ)^n := by
   have hd := ascPochhammer_eval_double (1/2:ℂ) n
@@ -412,7 +420,8 @@ private lemma arcsin_series_open {z : ℂ} (hz : ‖z‖<1) :
     rw [(trig_hasDerivAt_arcsin (hdom hw)).deriv]
     simpa only [Complex.sqrt, one_div] using h
   have h := Complex.hasSum_even_primitive_on_ball (by norm_num : (0:ℝ)<1)
-    (fun w hw => (trig_hasDerivAt_arcsin (hdom (by simpa using hw))).differentiableAt.differentiableWithinAt)
+    (fun w hw => (trig_hasDerivAt_arcsin
+        (hdom (by simpa using hw))).differentiableAt.differentiableWithinAt)
     (by simp [arcsinPrincipal]) hb hz
   convert h using 1
   ext n
@@ -430,7 +439,8 @@ theorem hasSum_arcsin_principal {z : ℂ} (hz : ‖z‖≤1) :
     rw [norm_mul,norm_pow]
     exact mul_le_of_le_one_right (norm_nonneg _) (pow_le_one₀ (norm_nonneg _) hw)
   have hc : ContinuousOn S (Metric.closedBall (0:ℂ) 1) :=
-    continuousOn_tsum (fun n => (by fun_prop : Continuous (fun w : ℂ => c n*w^(2*n+1))).continuousOn)
+    continuousOn_tsum (fun n =>
+        (by fun_prop : Continuous (fun w : ℂ => c n*w^(2*n+1))).continuousOn)
       hsum (fun n w hw => hbound (by simpa using hw) n)
   have ha : ContinuousOn arcsinPrincipal (Metric.closedBall (0:ℂ) 1) := fun w hw =>
     (continuousAt_arcsin_principal_of_norm_le_one (by simpa using hw)).continuousWithinAt
@@ -487,7 +497,8 @@ private lemma arccos_half_positive_cut {x : ℝ} (hx : 1<x) (hx3 : x≤3) :
     simp only [Complex.sub_im, Complex.ofReal_im, Complex.div_im, Complex.I_im,
       Complex.I_re, Complex.add_re, Complex.natCast_re, Complex.one_re, Complex.add_im,
       Complex.natCast_im, Complex.one_im, zero_add, zero_mul, zero_sub]
-    have hn : 0 < Complex.normSq (n+1:ℂ) := Complex.normSq_pos.mpr (by exact_mod_cast Nat.succ_ne_zero n)
+    have hn : 0 < Complex.normSq (n+1:ℂ) :=
+        Complex.normSq_pos.mpr (by exact_mod_cast Nat.succ_ne_zero n)
     have hn' : 0 < (n+1:ℝ) := by positivity
     simpa using neg_neg_of_pos (div_pos hn' hn)
   have hseq : Tendsto z atTop (𝓝 (x:ℂ)) := by
@@ -554,7 +565,8 @@ private lemma sqrt_four_mul (w : ℂ) : Complex.sqrt (4*w) = 2*Complex.sqrt w :=
   norm_num at h
   exact h
 
-/-- Arccosine series after factoring its square root, with the removable center handled separately. -/
+/-- Arccosine series after factoring its square root, with the removable center handled separately.
+-/
 @[dlmf 4.24.E2]
 theorem hasSum_arccos_principal {z : ℂ} (hz : ‖1-z‖≤2) :
     HasSum (fun n : ℕ => Complex.sqrt (2*(1-z))*((2*n).choose n:ℂ)*(1-z)^n/(8^n*(2*n+1)))
@@ -716,7 +728,8 @@ private lemma euler_kernel_series {w : ℂ} (hw : ‖w‖<1) :
     nlinarith [(hb ht).2, norm_nonneg w]
   have hbound (n : ℕ) (t : ℝ) (ht : t ∈ uIoc (0:ℝ) 1) : ‖F n t‖ ≤ ‖w‖^n := by
     rw [norm_pow]
-    exact pow_le_pow_left₀ (norm_nonneg _) (hnorm ⟨by simpa using le_of_lt ht.1, by simpa using ht.2⟩) n
+    exact pow_le_pow_left₀ (norm_nonneg _)
+        (hnorm ⟨by simpa using le_of_lt ht.1, by simpa using ht.2⟩) n
   have hsum := intervalIntegral.hasSum_integral_of_dominated_convergence
     (μ := volume) (a := (0:ℝ)) (b := 1) (fun n _ => ‖w‖^n)
     (fun n => (by fun_prop : Continuous (F n)).aestronglyMeasurable)
@@ -724,13 +737,15 @@ private lemma euler_kernel_series {w : ℂ} (hw : ‖w‖<1) :
     (Eventually.of_forall fun t ht => summable_geometric_of_lt_one (norm_nonneg _) hw)
     (intervalIntegrable_const : IntervalIntegrable (fun _ : ℝ => ∑' n : ℕ, ‖w‖^n) volume 0 1)
     (Eventually.of_forall fun t ht =>
-      hasSum_geometric_of_norm_lt_one ((hnorm ⟨by simpa using le_of_lt ht.1, by simpa using ht.2⟩).trans_lt hw))
+      hasSum_geometric_of_norm_lt_one
+          ((hnorm ⟨by simpa using le_of_lt ht.1, by simpa using ht.2⟩).trans_lt hw))
   convert hsum using 1
   ext n
   dsimp only [F]
   simp_rw [mul_pow]
   rw [intervalIntegral.integral_mul_const, euler_beta_moment]
-/-- The parabolic convergence domain remains in the principal arctangent cut plane under real contractions. -/
+/-- The parabolic convergence domain remains in the principal arctangent cut plane under real
+contractions. -/
 private lemma arctan_scaled_cut {z : ℂ} (hz : -(1/2:ℝ)<(z^2).re)
     {u : ℝ} (hu : |u|≤1) : (u:ℂ)*z ∈ arctanCutPlane := by
   by_cases hu0 : u=0
@@ -746,7 +761,8 @@ private lemma arctan_scaled_cut {z : ℂ} (hz : -(1/2:ℝ)<(z^2).re)
     exact (mul_le_mul_of_nonneg_right hu (abs_nonneg _)).trans_lt (by simpa using hh)
   · left
     simpa using mul_ne_zero hu0 hx0
-/-- The arctangent derivative evaluates the Euler kernel along the symmetric segment from `-z` to `z`. -/
+/-- The arctangent derivative evaluates the Euler kernel along the symmetric segment from `-z` to
+`z`. -/
 private lemma euler_arctan_integral {z : ℂ} (hz : -(1/2:ℝ)<(z^2).re) :
     (∫ t : ℝ in (0:ℝ)..1, z/(1+z^2*((2*t-1:ℝ):ℂ)^2)) = Complex.arctan z := by
   have hdom {t : ℝ} (ht : t ∈ uIcc (0:ℝ) 1) : ((2*t-1:ℝ):ℂ)*z ∈ arctanCutPlane := by
@@ -780,7 +796,8 @@ private lemma euler_arctan_integral {z : ℂ} (hz : -(1/2:ℝ)<(z^2).re) :
   norm_num [arctan_principal_neg hzdom]
   ring
 
-/-- Euler’s transformed arctangent series on `Re (z²) > -1/2`, including the removable value at zero. -/
+/-- Euler’s transformed arctangent series on `Re (z²) > -1/2`, including the removable value at
+zero. -/
 @[dlmf 4.24.E5]
 theorem hasSum_arctan_euler {z : ℂ} (hz : -(1/2:ℝ)<(z^2).re) :
     HasSum (fun n : ℕ => z/(1+z^2)*(4:ℂ)^n*(n.factorial:ℂ)^2/(2*n+1)!*(z^2/(1+z^2))^n)
@@ -823,17 +840,20 @@ theorem arctan_euler_domain (z : ℂ) : -(1/2:ℝ)<(z^2).re ↔ -(1/2:ℝ)<z.re^
 
 /-- DLMF 4.24.E7: hasDerivAt arcsin principal. -/
 @[dlmf 4.24.E7]
-theorem hasDerivAt_arcsin_principal {z : ℂ} (hz : z∈arcsinCutPlane) : HasDerivAt arcsinPrincipal ((Complex.sqrt (1-z^2))⁻¹) z := by
+theorem hasDerivAt_arcsin_principal {z : ℂ} (hz : z∈arcsinCutPlane) : HasDerivAt arcsinPrincipal
+    ((Complex.sqrt (1-z^2))⁻¹) z := by
   exact trig_hasDerivAt_arcsin hz
 
 /-- DLMF 4.24.E8: hasDerivAt arccos principal. -/
 @[dlmf 4.24.E8]
-theorem hasDerivAt_arccos_principal {z : ℂ} (hz : z∈arcsinCutPlane) : HasDerivAt arccosPrincipal (-(Complex.sqrt (1-z^2))⁻¹) z := by
+theorem hasDerivAt_arccos_principal {z : ℂ} (hz : z∈arcsinCutPlane) : HasDerivAt arccosPrincipal
+    (-(Complex.sqrt (1-z^2))⁻¹) z := by
   exact (trig_hasDerivAt_arcsin hz).const_sub ((π:ℂ)/2)
 
 /-- DLMF 4.24.E9: hasDerivAt arctan principal. -/
 @[dlmf 4.24.E9]
-theorem hasDerivAt_arctan_principal {z : ℂ} (hz : z∈arctanCutPlane) : HasDerivAt Complex.arctan ((1+z^2)⁻¹) z := by
+theorem hasDerivAt_arctan_principal {z : ℂ} (hz : z∈arctanCutPlane) : HasDerivAt Complex.arctan
+    ((1+z^2)⁻¹) z := by
   exact trig_hasDerivAt_arctan hz
 
 /-- Real and imaginary parts of the principal square root. -/
@@ -863,7 +883,8 @@ private lemma im_sqrt_pos {a : ℂ} (h : 0 < a.im) : 0 < (Complex.sqrt a).im := 
 
 /-- The principal square root preserves a negative imaginary part. -/
 private lemma im_sqrt_neg {a : ℂ} (h : a.im < 0) : (Complex.sqrt a).im < 0 := by
-  rw [(re_sqrt_and_im_sqrt a).2, ite_eq_right_of_eq_false _ _ (eq_false (not_le.mpr h)), neg_one_mul,
+  rw [(re_sqrt_and_im_sqrt a).2,
+      ite_eq_right_of_eq_false _ _ (eq_false (not_le.mpr h)), neg_one_mul,
     neg_lt_zero]
   apply Real.sqrt_pos.mpr
   have := (Complex.abs_re_lt_norm).mpr h.ne
@@ -871,7 +892,8 @@ private lemma im_sqrt_neg {a : ℂ} (h : a.im < 0) : (Complex.sqrt a).im < 0 := 
   linarith
 
 /-- The reciprocal square-root branch identity off the reciprocal cuts. -/
-private lemma mul_sqrt_one_sub_inv_sq_eq_sign_mul_sqrt {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.re≠0) :
+private lemma mul_sqrt_one_sub_inv_sq_eq_sign_mul_sqrt {z : ℂ} (hz : z∈arccscCutPlane)
+    (hr : z.re≠0) :
     z*Complex.sqrt (1-(z⁻¹)^2) = (if 0<z.re then 1 else -1)*Complex.sqrt (z^2-1) := by
   obtain ⟨hz0, hc⟩ := hz
   have hN : 0 < Complex.normSq z := Complex.normSq_pos.mpr hz0
@@ -936,7 +958,8 @@ private lemma mul_sqrt_one_sub_inv_sq_eq_sign_mul_sqrt {z : ℂ} (hz : z∈arccs
           rw [ha]; apply im_sqrt_pos; rw [hw1]; apply div_pos _ hN2; linarith
         have h2 : 0 < b.im := by rw [hb]; apply im_sqrt_pos; rw [hw2im]; linarith
         rw [hs, ite_eq_right_of_eq_false _ _ (eq_false (not_lt.mpr hx.le))] at him
-        simp at him; linarith [mul_pos_of_neg_of_neg hx (neg_neg_of_pos h1), mul_neg_of_neg_of_pos hy' hapos]
+        simp at him; linarith
+            [mul_pos_of_neg_of_neg hx (neg_neg_of_pos h1), mul_neg_of_neg_of_pos hy' hapos]
       · -- x<0, y>0
         have hxy : z.re*z.im < 0 := mul_neg_of_neg_of_pos hx hy'
         have h1 : a.im < 0 := by
@@ -963,7 +986,8 @@ private lemma mul_sqrt_one_sub_inv_sq_eq_sign_mul_sqrt {z : ℂ} (hz : z∈arccs
 
 /-- DLMF 4.24.E10: hasDerivAt arccsc principal. -/
 @[dlmf 4.24.E10]
-theorem hasDerivAt_arccsc_principal {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.re≠0) : HasDerivAt arccscPrincipal (-(if 0<z.re then 1 else -1)/(z*Complex.sqrt (z^2-1))) z := by
+theorem hasDerivAt_arccsc_principal {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.re≠0) : HasDerivAt
+    arccscPrincipal (-(if 0<z.re then 1 else -1)/(z*Complex.sqrt (z^2-1))) z := by
   have hb := mul_sqrt_one_sub_inv_sq_eq_sign_mul_sqrt hz hr
   have hz0 := hz.1
   have hd := (hasDerivAt_arcsin_principal hz.2).comp z (hasDerivAt_inv hz0)
@@ -981,7 +1005,8 @@ theorem hasDerivAt_arccsc_principal {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.
 
 /-- DLMF 4.24.E11: hasDerivAt arcsec principal. -/
 @[dlmf 4.24.E11]
-theorem hasDerivAt_arcsec_principal {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.re≠0) : HasDerivAt arcsecPrincipal ((if 0<z.re then 1 else -1)/(z*Complex.sqrt (z^2-1))) z := by
+theorem hasDerivAt_arcsec_principal {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.re≠0) : HasDerivAt
+    arcsecPrincipal ((if 0<z.re then 1 else -1)/(z*Complex.sqrt (z^2-1))) z := by
   have h := (hasDerivAt_arccsc_principal hz hr).const_sub ((π:ℂ)/2)
   convert h using 1
   · funext w; rw [arcsec_principal_complement]
@@ -989,7 +1014,8 @@ theorem hasDerivAt_arcsec_principal {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.
 
 /-- DLMF 4.24.E12: hasDerivAt arccot principal. -/
 @[dlmf 4.24.E12]
-theorem hasDerivAt_arccot_principal {z : ℂ} (hz : z∈arccotCutPlane) : HasDerivAt arccotPrincipal (-(1+z^2)⁻¹) z := by
+theorem hasDerivAt_arccot_principal {z : ℂ} (hz : z∈arccotCutPlane) : HasDerivAt arccotPrincipal
+    (-(1+z^2)⁻¹) z := by
   have hd:=(trig_hasDerivAt_arctan hz.2).comp z ((hasDerivAt_id z).inv hz.1)
   convert hd using 1
   · rfl
@@ -1008,7 +1034,8 @@ theorem arcsin_general_add (u v a b σ : ℂ) (hσ : σ=1 ∨ σ= -1)
     a+σ*b∈arcsinGeneral (u*Complex.cos b+σ*v*Complex.cos a) := by
   simp only [arcsinGeneral,mem_setOf_eq] at ha hb ⊢
   rcases hσ with rfl | rfl <;>
-    simp_all [Complex.cos_sq',Complex.sin_add,Complex.sin_neg,Complex.cos_neg,mul_comm,mul_left_comm,mul_assoc]
+    simp_all [Complex.cos_sq', Complex.sin_add, Complex.sin_neg, Complex.cos_neg, mul_comm,
+        mul_left_comm, mul_assoc]
 
 /-- DLMF 4.24.E14: arccos general add. -/
 @[dlmf 4.24.E14]
@@ -1045,7 +1072,8 @@ theorem arccos_general_add (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1) :
       · rcases hσ with rfl|rfl <;> ring
 
 /-- The principal arctangent is a general arctangent value off the branch points `±i`. -/
-private lemma arctan_mem_arctanGeneral {u : ℂ} (h1 : u≠I) (h2 : u≠ -I) : Complex.arctan u∈arctanGeneral u := by
+private lemma arctan_mem_arctanGeneral {u : ℂ} (h1 : u≠I) (h2 : u≠ -I) : Complex.arctan
+    u∈arctanGeneral u := by
   refine ⟨fun h => ?_, Complex.tan_arctan h1 h2⟩
   have ht := Complex.tan_arctan h1 h2
   rw [Complex.tan_eq_sin_div_cos, h, div_zero] at ht
@@ -1105,7 +1133,8 @@ theorem arctan_general_add (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1)
       intro h0
       apply hu2
       linear_combination (1-σ*u*v)*h0 - u*ht'
-    refine ⟨a, ⟨ca, by rw [Complex.tan_eq_sin_div_cos, div_eq_iff ca]; exact ta⟩, σ*(w-a), ⟨?_, ?_⟩, ?_⟩
+    refine ⟨a, ⟨ca, by rw [Complex.tan_eq_sin_div_cos, div_eq_iff ca]; exact ta⟩,
+        σ*(w-a), ⟨?_, ?_⟩, ?_⟩
     · have hc : Complex.cos (σ*(w-a)) = Complex.cos w*Complex.cos a*(1+t*u) := by
         rcases hσ with rfl | rfl
         · rw [one_mul, Complex.cos_sub, ta, tw]; ring
@@ -1220,8 +1249,8 @@ theorem arctan_arccot_general_add (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1)
 @[dlmf 4.25.E1]
 theorem tan_continued_fraction {z : ℂ} (hz : Complex.cos z≠0) :
     DLMF.HasContinuedFraction (fun k => if k=0 then z else -z^2)
-      (fun k => 2*k+1) (Complex.tan z) := by
-  sorry
+      (fun k => 2*k+1) (Complex.tan z) :=
+  hasContinuedFraction_tan hz
 
 /-- DLMF 4.25.E2: tan scaled continued fraction. -/
 @[dlmf 4.25.E2]

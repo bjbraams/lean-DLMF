@@ -295,7 +295,8 @@ theorem hasDerivAt_angerHalfDefectG {x : ℝ} (hx : 0 < x) :
 
 /-- Continuity of the defect `F`. -/
 theorem continuous_angerHalfDefectF : Continuous angerHalfDefectF := by
-  have h1 : Continuous fun x : ℝ => angerJ (1/2) x := (angerJ_entire _).continuous.comp continuous_ofReal
+  have h1 : Continuous fun x : ℝ => angerJ (1/2) x :=
+      (angerJ_entire _).continuous.comp continuous_ofReal
   have hw : Continuous fun x : ℝ => ((Real.sqrt (2 * x / π) : ℝ) : ℂ) :=
     continuous_ofReal.comp (by fun_prop)
   have hC := fresnelCosInt_entire.continuous.comp hw
@@ -422,10 +423,12 @@ theorem isPreconnected_slitPlane' : IsPreconnected slitPlane :=
 ((2*z/π)^(1/2:ℂ))*sin z)`. -/
 @[dlmf 11.10.E19]
 theorem angerJ_half_19 {z : ℂ} (hz : z ∈ slitPlane) :
-    angerJ (-1/2) z = (π*z/2)^(-1/2:ℂ)*(angerFresnelPlus ((2*z/π)^(1/2:ℂ))*cos z-angerFresnelMinus ((2*z/π)^(1/2:ℂ))*sin z) := by
+    angerJ (-1/2) z = (π*z/2)^(-1/2:ℂ)*(angerFresnelPlus ((2*z/π)^(1/2:ℂ))*cos z-angerFresnelMinus
+        ((2*z/π)^(1/2:ℂ))*sin z) := by
   have hf : AnalyticOnNhd ℂ (angerJ (-1/2)) slitPlane :=
     (analyticOnNhd_univ_iff_differentiable.2 (angerJ_entire _)).mono (subset_univ _)
-  have hg := (differentiableOn_angerHalf_rhs cos sin differentiable_cos differentiable_sin).analyticOnNhd
+  have hg := (differentiableOn_angerHalf_rhs cos sin differentiable_cos
+      differentiable_sin).analyticOnNhd
     isOpen_slitPlane
   refine hf.eqOn_of_preconnected_of_frequently_eq hg isPreconnected_slitPlane' one_mem_slitPlane
     (frequently_ofReal_pos fun x hx => ?_) hz
@@ -444,7 +447,8 @@ theorem angerJ_half_19 {z : ℂ} (hz : z ∈ slitPlane) :
 ((2*z/π)^(1/2:ℂ))*cos z)`. -/
 @[dlmf 11.10.E20]
 theorem angerJ_half_20 {z : ℂ} (hz : z ∈ slitPlane) :
-    angerJ (1/2) z = (π*z/2)^(-1/2:ℂ)*(angerFresnelPlus ((2*z/π)^(1/2:ℂ))*sin z+angerFresnelMinus ((2*z/π)^(1/2:ℂ))*cos z) := by
+    angerJ (1/2) z = (π*z/2)^(-1/2:ℂ)*(angerFresnelPlus ((2*z/π)^(1/2:ℂ))*sin z+angerFresnelMinus
+        ((2*z/π)^(1/2:ℂ))*cos z) := by
   have hf : AnalyticOnNhd ℂ (angerJ (1/2)) slitPlane :=
     (analyticOnNhd_univ_iff_differentiable.2 (angerJ_entire _)).mono (subset_univ _)
   have hg := (differentiableOn_angerHalf_rhs sin (fun z => -cos z) differentiable_sin
@@ -626,7 +630,8 @@ theorem weberE_neg_nat_even (m : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     rw [show π*(-((2*m:ℕ):ℂ))/2 = -((m:ℂ)*π) by push_cast; ring, Complex.sin_neg,
       Complex.sin_nat_mul_pi, neg_zero]
   have hc : cos (π*(-((2*m:ℕ):ℂ))/2) = (-1)^m := by
-    rw [show π*(-((2*m:ℕ):ℂ))/2 = -((m:ℂ)*π) by push_cast; ring, Complex.cos_neg, cos_nat_mul_pi_complex]
+    rw [show π*(-((2*m:ℕ):ℂ))/2 = -((m:ℂ)*π) by push_cast; ring, Complex.cos_neg,
+                                                  cos_nat_mul_pi_complex]
   rw [hs, hc, zero_mul, zero_sub]
   set h : ℕ → ℂ := fun j => (-1)^j*(z/2)^(2*(j:ℤ)+1-2*m)/(Gamma (j+3/2)*Gamma (j-((2*m:ℕ):ℂ)+3/2))
   have hH : HasSum h (struveH (-((2*m:ℕ):ℂ)) z) := by
@@ -740,7 +745,8 @@ theorem weberE_neg_nat_odd (m : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
 (weberM1 n), Gamma (k+1/2)/Gamma (n+1/2-k)*(z/2)^((n:ℤ)-2*k-1)`. -/
 @[dlmf 11.10.E22]
 theorem weberE_nat (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
-    weberE n z = -struveH n z+1/π*∑ k ∈ Finset.range (weberM1 n), Gamma (k+1/2)/Gamma (n+1/2-k)*(z/2)^((n:ℤ)-2*k-1) := by
+    weberE n z = -struveH n z+1/π*∑ k ∈ Finset.range (weberM1 n),
+        Gamma (k+1/2)/Gamma (n+1/2-k)*(z/2)^((n:ℤ)-2*k-1) := by
   obtain ⟨m, rfl | rfl⟩ := Nat.even_or_odd' n
   · rw [show weberM1 (2*m) = m by simp only [weberM1]; omega]
     exact weberE_nat_even m hz
@@ -751,7 +757,8 @@ theorem weberE_nat (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
 Finset.range (weberM2 n), Gamma (n-k-1/2)/Gamma (k+3/2)*(z/2)^(-(n:ℤ)+2*k+1)`. -/
 @[dlmf 11.10.E23]
 theorem weberE_neg_nat (n : ℕ) (hn : 0 < n) {z : ℂ} (hz : z ∈ slitPlane) :
-    weberE (-n) z = -struveH (-n) z+(-1)^(n+1)/π*∑ k ∈ Finset.range (weberM2 n), Gamma (n-k-1/2)/Gamma (k+3/2)*(z/2)^(-(n:ℤ)+2*k+1) := by
+    weberE (-n) z = -struveH (-n) z+(-1)^(n+1)/π*∑ k ∈ Finset.range (weberM2 n),
+        Gamma (n-k-1/2)/Gamma (k+3/2)*(z/2)^(-(n:ℤ)+2*k+1) := by
   obtain ⟨m, rfl | rfl⟩ := Nat.even_or_odd' n
   · rw [show weberM2 (2*m) = m by simp only [weberM2]; omega]
     exact weberE_neg_nat_even m hz
@@ -893,7 +900,8 @@ theorem weberE_order_deriv_zero (z : ℂ) :
   have hsplit : (∫ x in (0:ℝ)..π, cos (0*((π-x:ℝ):ℂ)-z*Real.sin x)*((π-x:ℝ):ℂ)) =
       π*(∫ x in (0:ℝ)..π, cos (z*sin x)) - ∫ x in (0:ℝ)..π, cos (0*(x:ℂ)-z*Real.sin x)*x := by
     rw [← intervalIntegral.integral_const_mul,
-      ← intervalIntegral.integral_sub (intervalIntegrable_zero_pi _ (by fun_prop)) (intervalIntegrable_zero_pi _ (by fun_prop))]
+      ← intervalIntegral.integral_sub (intervalIntegrable_zero_pi _ (by fun_prop))
+          (intervalIntegrable_zero_pi _ (by fun_prop))]
     apply intervalIntegral.integral_congr
     intro θ _
     simp only
@@ -961,7 +969,10 @@ theorem angerFold_sin (ν z : ℂ) (ψ : ℝ) :
 (k+ν/2) (z/2))` converges to `(angerJ ν z)`. -/
 @[dlmf 11.10.E30]
 theorem angerJ_bessel_products (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    HasSum (fun k : ℕ => 2*sin (ν*π/2)*(-1)^k*besselJ (k-ν/2+1/2) (z/2)*besselJ (k+ν/2+1/2) (z/2)+2*cos (ν*π/2)*(if k=0 then 1/2 else 1)*(-1)^k*besselJ (k-ν/2) (z/2)*besselJ (k+ν/2) (z/2)) (angerJ ν z) := by
+    HasSum (fun k : ℕ =>
+        2*sin (ν*π/2)*(-1)^k*besselJ (k-ν/2+1/2) (z/2)*besselJ (k+ν/2+1/2) (z/2)+2*cos
+        (ν*π/2)*(if k=0 then 1/2 else 1)*(-1)^k*besselJ (k-ν/2) (z/2)*besselJ (k+ν/2) (z/2))
+        (angerJ ν z) := by
   convert hasSum_besselJ_products_integral (2 * sin (ν * π / 2)) (2 * cos (ν * π / 2)) ν hz
     using 1
   rw [angerJ, integral_zero_pi_fold (by fun_prop)]
@@ -974,7 +985,10 @@ theorem angerJ_bessel_products (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 (k+ν/2) (z/2))` converges to `(weberE ν z)`. -/
 @[dlmf 11.10.E31]
 theorem weberE_bessel_products (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    HasSum (fun k : ℕ => -2*cos (ν*π/2)*(-1)^k*besselJ (k-ν/2+1/2) (z/2)*besselJ (k+ν/2+1/2) (z/2)+2*sin (ν*π/2)*(if k=0 then 1/2 else 1)*(-1)^k*besselJ (k-ν/2) (z/2)*besselJ (k+ν/2) (z/2)) (weberE ν z) := by
+    HasSum (fun k : ℕ =>
+        -2*cos (ν*π/2)*(-1)^k*besselJ (k-ν/2+1/2) (z/2)*besselJ (k+ν/2+1/2) (z/2)+2*sin
+        (ν*π/2)*(if k=0 then 1/2 else 1)*(-1)^k*besselJ (k-ν/2) (z/2)*besselJ (k+ν/2) (z/2))
+        (weberE ν z) := by
   convert hasSum_besselJ_products_integral (-2 * cos (ν * π / 2)) (2 * sin (ν * π / 2)) ν hz
     using 1
   rw [weberE, integral_zero_pi_fold (by fun_prop)]
@@ -1008,7 +1022,8 @@ theorem angerJ_weighted_deriv_add (ν z : ℂ) :
     · subst h; simp
     · field_simp
   · have := angerJ_recurrence_aux ν hz
-    rw [show angerJ (ν+1) z = 2*ν/z*angerJ ν z-2/(π*z)*(sin (π*ν))-angerJ (ν-1) z by linear_combination this]
+    rw [show angerJ (ν+1) z =
+        2*ν/z*angerJ ν z-2/(π*z)*(sin (π*ν))-angerJ (ν-1) z by linear_combination this]
     field_simp
     ring
 
@@ -1025,7 +1040,8 @@ theorem angerJ_weighted_deriv_sub (ν z : ℂ) :
     · subst h; simp
     · field_simp
   · have := angerJ_recurrence_aux ν hz
-    rw [show angerJ (ν-1) z = 2*ν/z*angerJ ν z-2/(π*z)*(sin (π*ν))-angerJ (ν+1) z by linear_combination this]
+    rw [show angerJ (ν-1) z =
+        2*ν/z*angerJ ν z-2/(π*z)*(sin (π*ν))-angerJ (ν+1) z by linear_combination this]
     field_simp
     ring
 
@@ -1055,7 +1071,8 @@ theorem weberE_weighted_deriv_add (ν z : ℂ) :
     · subst h; simp
     · field_simp
   · have := weberE_recurrence_aux ν hz
-    rw [show weberE (ν+1) z = 2*ν/z*weberE ν z-2/(π*z)*(1-cos (π*ν))-weberE (ν-1) z by linear_combination this]
+    rw [show weberE (ν+1) z =
+        2*ν/z*weberE ν z-2/(π*z)*(1-cos (π*ν))-weberE (ν-1) z by linear_combination this]
     field_simp
     ring
 
@@ -1063,7 +1080,8 @@ theorem weberE_weighted_deriv_add (ν z : ℂ) :
 z+(-1:ℂ)*ν*weberE ν z = (-1:ℂ)*z*weberE (ν-(-1)) z+(-1:ℂ)*(1-cos (π*ν))/π`. -/
 @[dlmf 11.10.E37]
 theorem weberE_weighted_deriv_sub (ν z : ℂ) :
-    z*deriv (weberE ν) z+(-1:ℂ)*ν*weberE ν z = (-1:ℂ)*z*weberE (ν-(-1)) z+(-1:ℂ)*(1-cos (π*ν))/π := by
+    z*deriv (weberE ν) z+(-1:ℂ)*ν*weberE ν z =
+        (-1:ℂ)*z*weberE (ν-(-1)) z+(-1:ℂ)*(1-cos (π*ν))/π := by
   rw [(hasDerivAt_weberE_shift ν z).deriv, sub_neg_eq_add]
   rcases eq_or_ne z 0 with rfl | hz
   · simp only [zero_mul, zero_add, mul_zero]
@@ -1072,7 +1090,8 @@ theorem weberE_weighted_deriv_sub (ν z : ℂ) :
     · subst h; simp
     · field_simp
   · have := weberE_recurrence_aux ν hz
-    rw [show weberE (ν-1) z = 2*ν/z*weberE ν z-2/(π*z)*(1-cos (π*ν))-weberE (ν+1) z by linear_combination this]
+    rw [show weberE (ν-1) z =
+        2*ν/z*weberE ν z-2/(π*z)*(1-cos (π*ν))-weberE (ν+1) z by linear_combination this]
     field_simp
     ring
 

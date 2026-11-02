@@ -138,7 +138,8 @@ theorem rookNumber_diagonalBoard (n j : ℕ) : rookNumber (diagonalBoard n) j = 
   exact ⟨hab, hab⟩
 
 /-- A nonattacking placement has at most `n` rooks. -/
-private lemma card_le_of_isNonattacking {n : ℕ} {C : Finset (Fin n × Fin n)} (hC : IsNonattacking C) :
+private lemma card_le_of_isNonattacking {n : ℕ} {C : Finset (Fin n × Fin n)}
+    (hC : IsNonattacking C) :
     #C ≤ n := by
   have : #(C.image Prod.fst) = #C := card_image_of_injOn fun x hx y hy h => by
     by_contra hne; exact (hC x hx y hy hne).1 h
@@ -293,7 +294,8 @@ private lemma card_perm_fixing {n : ℕ} (R : Finset (Fin n)) :
   rw [Fintype.card_perm, Fintype.card_subtype_compl, Fintype.card_fin, Fintype.card_coe]
 
 /-- The number of permutations containing a nonattacking placement `C` is `(n - #C)!`. -/
-private lemma card_perm_extending_isNonattacking {n : ℕ} {C : Finset (Fin n × Fin n)} (hC : IsNonattacking C) :
+private lemma card_perm_extending_isNonattacking {n : ℕ} {C : Finset (Fin n × Fin n)}
+    (hC : IsNonattacking C) :
     #{σ : Perm (Fin n) | ∀ x ∈ C, σ x.1 = x.2} = (n - #C).factorial := by
   classical
   have hinj1 : Function.Injective fun x : C => x.1.1 := by

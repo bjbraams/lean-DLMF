@@ -51,7 +51,9 @@ namespace DLMF.Confluent
 
 /-- The selected upper-half-plane error-function zeros, indexed from one. -/
 def errorFunctionZero (complement : Bool) (k : ℕ) : ℂ :=
-  orderedZero (if complement then erfc else erf) (if complement then {z : ℂ | π/2 < arg z ∧ arg z < 3*π/4} else {z : ℂ | 0 < z.re ∧ 0 < z.im}) k
+  orderedZero (if complement then erfc else erf)
+      (if complement then {z : ℂ | π/2 < arg z ∧ arg z < 3*π/4} else
+      {z : ℂ | 0 < z.re ∧ 0 < z.im}) k
 
 /-- Fresnel representatives in the first octant; the other octants follow by symmetry. -/
 def fresnelFunctionZero (sine : Bool) (k : ℕ) : ℂ :=
@@ -67,7 +69,8 @@ theorem erf_zero_simple  :
 
 /-- The simple C zero and triple S zero at the origin. -/
 theorem fresnel_zero_orders  :
-    fresnelCosInt 0=0 ∧ deriv fresnelCosInt 0=1 ∧ fresnelSinInt 0=0 ∧ deriv fresnelSinInt 0=0 ∧ iteratedDeriv 2 fresnelSinInt 0=0 ∧ iteratedDeriv 3 fresnelSinInt 0=π := by
+    fresnelCosInt 0=0 ∧ deriv fresnelCosInt 0=1 ∧ fresnelSinInt 0=0 ∧ deriv fresnelSinInt 0=0 ∧
+        iteratedDeriv 2 fresnelSinInt 0=0 ∧ iteratedDeriv 3 fresnelSinInt 0=π := by
   have hS1 : deriv fresnelSinInt = fun z => sin (π*z^2/2) :=
     funext fun z => (hasDerivAt_fresnelSinInt_complex z).deriv
   have hd2 (z : ℂ) : HasDerivAt (fun z : ℂ => sin (π*z^2/2)) (cos (π*z^2/2)*(π*z)) z := by
@@ -92,7 +95,11 @@ theorem fresnel_zero_orders  :
 
 /-- The stated relation follows from the given hypotheses: `let f`. -/
 theorem errorFunctionZero_spec (complement : Bool) {k : ℕ} (hk : 1 ≤ k) :
-    let f := if complement then erfc else erf; let S := if complement then {z : ℂ | π/2 < arg z ∧ arg z < 3*π/4} else {z : ℂ | 0 < z.re ∧ 0 < z.im}; errorFunctionZero complement k ∈ S ∧ f (errorFunctionZero complement k)=0 ∧ ({z : ℂ | z ∈ S ∧ f z=0 ∧ ‖z‖ < ‖errorFunctionZero complement k‖} : Set ℂ).ncard=k-1 := by
+    let f := if complement then erfc else erf
+    let S := if complement then {z : ℂ | π/2 < arg z ∧ arg z < 3*π/4}
+      else {z : ℂ | 0 < z.re ∧ 0 < z.im}
+    errorFunctionZero complement k ∈ S ∧ f (errorFunctionZero complement k)=0 ∧
+      ({z : ℂ | z ∈ S ∧ f z=0 ∧ ‖z‖ < ‖errorFunctionZero complement k‖} : Set ℂ).ncard=k-1 := by
   sorry
 
 /-- The enumeration `errorFunctionZero` is well defined for every index exactly when the zeros of
@@ -100,10 +107,12 @@ theorem errorFunctionZero_spec (complement : Bool) {k : ℕ} (hk : 1 ≤ k) :
 and are infinitely many. This isolates the analytic content of `errorFunctionZero_spec`. -/
 theorem errorFunctionZero_spec_iff (complement : Bool) :
     let f := if complement then erfc else erf
-    let S := if complement then {z : ℂ | π/2 < arg z ∧ arg z < 3*π/4} else {z : ℂ | 0 < z.re ∧ 0 < z.im}
+    let S := if complement then {z : ℂ | π/2 < arg z ∧ arg z < 3*π/4} else
+        {z : ℂ | 0 < z.re ∧ 0 < z.im}
     (∀ k : ℕ, 1 ≤ k → errorFunctionZero complement k ∈ S ∧ f (errorFunctionZero complement k)=0 ∧
       ({z : ℂ | z ∈ S ∧ f z=0 ∧ ‖z‖ < ‖errorFunctionZero complement k‖} : Set ℂ).ncard=k-1) ↔
-    (Set.InjOn (fun z : ℂ => ‖z‖) {z : ℂ | z ∈ S ∧ f z = 0} ∧ {z : ℂ | z ∈ S ∧ f z = 0}.Infinite) := by
+    (Set.InjOn (fun z : ℂ => ‖z‖) {z : ℂ | z ∈ S ∧ f z = 0} ∧
+        {z : ℂ | z ∈ S ∧ f z = 0}.Infinite) := by
   cases complement
   · exact zcnt_orderedZero_spec_iff
       (zcnt_finite_zeros_lt differentiable_erf_complex (zcnt_erf_ofReal_ne_zero one_ne_zero) _)
@@ -125,7 +134,8 @@ theorem errorFunctionZero_ordered (complement : Bool) :
 /-- Estimate under the stated parameter and domain assumptions: `erf z=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧
 let u`. -/
 theorem erf_zero_classification (z : ℂ) :
-    erf z=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧ let u := errorFunctionZero false k; z=u ∨ z = -u ∨ z=star u ∨ z = -star u := by
+    erf z=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧ let u := errorFunctionZero false k; z=u ∨ z = -u ∨ z=star u ∨
+        z = -star u := by
   set Q : Set ℂ := {z : ℂ | 0 < z.re ∧ 0 < z.im}
   have hfin := zcnt_finite_zeros_lt differentiable_erf_complex
     (zcnt_erf_ofReal_ne_zero one_ne_zero) Q
@@ -174,7 +184,8 @@ theorem erf_zero_classification (z : ℂ) :
 /-- Estimate under the stated parameter and domain assumptions: `erfc z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧
 (z=errorFunctionZero true k ∨ z=star (errorFunctionZero true k))`. -/
 theorem erfc_zero_classification (z : ℂ) :
-    erfc z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧ (z=errorFunctionZero true k ∨ z=star (errorFunctionZero true k)) := by
+    erfc z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+        (z=errorFunctionZero true k ∨ z=star (errorFunctionZero true k)) := by
   set S : Set ℂ := {z : ℂ | π/2 < arg z ∧ arg z < 3*π/4}
   have hfin := zcnt_finite_zeros_lt zcnt_differentiable_erfc (x := 0)
     (by simp [erfc, erf_zero]) S
@@ -198,7 +209,8 @@ theorem erfc_zero_classification (z : ℂ) :
 /-- Estimate under the stated parameter and domain assumptions: `faddeevaW z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧
 (z=I*errorFunctionZero true k ∨ z=I*star (errorFunctionZero true k))`. -/
 theorem faddeevaW_zero_classification (z : ℂ) :
-    faddeevaW z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧ (z=I*errorFunctionZero true k ∨ z=I*star (errorFunctionZero true k)) := by
+    faddeevaW z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+        (z=I*errorFunctionZero true k ∨ z=I*star (errorFunctionZero true k)) := by
   have hI : ∀ w : ℂ, -I * z = w ↔ z = I * w := fun w => by
     constructor
     · rintro rfl; ring_nf; rw [I_sq]; ring
@@ -209,7 +221,10 @@ theorem faddeevaW_zero_classification (z : ℂ) :
 
 /-- The stated relation follows from the given hypotheses: `let f`. -/
 theorem fresnelFunctionZero_spec (sine : Bool) {k : ℕ} (hk : 1 ≤ k) :
-    let f := if sine then fresnelSinInt else fresnelCosInt; 0 < arg (fresnelFunctionZero sine k) ∧ arg (fresnelFunctionZero sine k) < π/4 ∧ f (fresnelFunctionZero sine k)=0 ∧ ({z : ℂ | 0 < arg z ∧ arg z < π/4 ∧ f z=0 ∧ ‖z‖ < ‖fresnelFunctionZero sine k‖} : Set ℂ).ncard=k-1 := by
+    let f := if sine then fresnelSinInt else fresnelCosInt; 0 < arg (fresnelFunctionZero sine k) ∧
+        arg (fresnelFunctionZero sine k) < π/4 ∧ f (fresnelFunctionZero sine k)=0 ∧
+        ({z : ℂ | 0 < arg z ∧ arg z < π/4 ∧ f z=0 ∧ ‖z‖ < ‖fresnelFunctionZero sine k‖} : Set
+        ℂ).ncard=k-1 := by
   sorry
 
 /-- Identity under the stated parameter and domain assumptions: `StrictMonoOn (fun k =>
@@ -253,7 +268,9 @@ theorem fresnelFunctionZero_ordered (sine : Bool) :
 /-- Estimate under the stated parameter and domain assumptions: `(if sine then fresnelSinInt z
 else fresnelCosInt z)=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧ let u`. -/
 theorem fresnel_zero_classification (sine : Bool) (z : ℂ) :
-    (if sine then fresnelSinInt z else fresnelCosInt z)=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧ let u := fresnelFunctionZero sine k; z=u ∨ z = -u ∨ z=star u ∨ z = -star u ∨ z=I*u ∨ z = -I*u ∨ z=I*star u ∨ z = -I*star u := by
+    (if sine then fresnelSinInt z else fresnelCosInt z)=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧
+        let u := fresnelFunctionZero sine k; z=u ∨ z = -u ∨ z=star u ∨ z = -star u ∨ z=I*u ∨ z =
+        -I*u ∨ z=I*star u ∨ z = -I*star u := by
   obtain ⟨hC0, hC1, hS0, -, -, hS3⟩ := fresnel_zero_orders
   have hspec : ∀ k : ℕ, 1 ≤ k →
       let f := if sine then fresnelSinInt else fresnelCosInt
@@ -286,7 +303,8 @@ theorem fresnel_zero_classification (sine : Bool) (z : ℂ) :
       (hspec · ·) hS0
       (fun w => by rw [zcnt_fresnelSinInt_neg, neg_eq_zero])
       (fun w => by rw [hstar, zcnt_fresnelSinInt_conj, map_eq_zero])
-      (fun w => by rw [zcnt_fresnelSinInt_I_mul, mul_eq_zero, or_iff_right (neg_ne_zero.mpr I_ne_zero)])
+      (fun w => by rw [zcnt_fresnelSinInt_I_mul, mul_eq_zero,
+                     or_iff_right (neg_ne_zero.mpr I_ne_zero)])
       (fun x hx => zcnt_fresnelSinInt_ofReal_ne_zero hx)
       (fun x hx => zcnt_fresnelSinInt_diag_ne_zero hx) z
 
@@ -324,7 +342,18 @@ def errorZeroMu (complement : Bool) (k : ℕ) : ℝ :=
 /-- All-order polynomial-logarithmic expansions of both coordinates. -/
 @[dlmf 7.13.E1, dlmf 7.13.E3]
 theorem errorFunctionZero_asymptotic (complement : Bool) :
-    ∃ p q : ℕ → Polynomial ℝ, (∀ μ : ℝ, (p 0).eval μ=(if complement then -1 else 1) ∧ (q 0).eval μ=1 ∧ (p 1).eval μ=(if complement then 1 else -1)*μ/4 ∧ (q 1).eval μ=μ/4 ∧ (p 2).eval μ=(if complement then -1 else 1)*(1-μ+μ^2/2)/16 ∧ (q 2).eval μ=(1-μ+μ^2/2)/16) ∧ ∀ N : ℕ, (IsBigO atTop (fun k : ℕ => (errorFunctionZero complement (k+1)).re-∑ n ∈ Finset.range N, (p n).eval (errorZeroMu complement (k+1))*errorZeroLambda (k+1)^((1 : ℤ)-2*n)) (fun k : ℕ => errorZeroLambda (k+1)^((1 : ℤ)-2*N)*(1+|errorZeroMu complement (k+1)|)^N)) ∧ (IsBigO atTop (fun k : ℕ => (errorFunctionZero complement (k+1)).im-∑ n ∈ Finset.range N, (q n).eval (errorZeroMu complement (k+1))*errorZeroLambda (k+1)^((1 : ℤ)-2*n)) (fun k : ℕ => errorZeroLambda (k+1)^((1 : ℤ)-2*N)*(1+|errorZeroMu complement (k+1)|)^N)) := by
+    ∃ p q : ℕ → Polynomial ℝ,
+        (∀ μ : ℝ, (p 0).eval μ=(if complement then -1 else 1) ∧ (q 0).eval μ=1 ∧
+        (p 1).eval μ=(if complement then 1 else -1)*μ/4 ∧ (q 1).eval μ=μ/4 ∧
+        (p 2).eval μ=(if complement then -1 else 1)*(1-μ+μ^2/2)/16 ∧ (q 2).eval μ=(1-μ+μ^2/2)/16) ∧
+        ∀ N : ℕ, (IsBigO atTop
+        (fun k : ℕ => (errorFunctionZero complement (k+1)).re-∑ n ∈ Finset.range N,
+        (p n).eval (errorZeroMu complement (k+1))*errorZeroLambda (k+1)^((1 : ℤ)-2*n))
+        (fun k : ℕ => errorZeroLambda (k+1)^((1 : ℤ)-2*N)*(1+|errorZeroMu complement (k+1)|)^N)) ∧
+        (IsBigO atTop (fun k : ℕ => (errorFunctionZero complement (k+1)).im-∑ n ∈ Finset.range N,
+        (q n).eval (errorZeroMu complement (k+1))*errorZeroLambda (k+1)^((1 : ℤ)-2*n))
+        (fun k : ℕ => errorZeroLambda
+        (k+1)^((1 : ℤ)-2*N)*(1+|errorZeroMu complement (k+1)|)^N)) := by
   sorry
 
 /-- Fresnel zero variable λ. -/
@@ -340,7 +369,16 @@ def fresnelZeroAlpha (sine : Bool) (k : ℕ) : ℝ :=
 /-- All-order Fresnel zero expansions with logarithmic-polynomial coefficients. -/
 @[dlmf 7.13.E5]
 theorem fresnelFunctionZero_asymptotic (sine : Bool) :
-    ∃ p q : ℕ → Polynomial ℝ, (∀ α : ℝ, (p 0).eval α=1 ∧ (p 1).eval α=α*(α*π-4)/(8*π) ∧ (q 0).eval α=α/2) ∧ ∀ N : ℕ, (IsBigO atTop (fun k : ℕ => (fresnelFunctionZero sine (k+1)).re-∑ n ∈ Finset.range N, (p n).eval (fresnelZeroAlpha sine (k+1))*fresnelZeroLambda sine (k+1)^((1 : ℤ)-4*n)) (fun k : ℕ => fresnelZeroLambda sine (k+1)^((1 : ℤ)-4*N)*(1+|fresnelZeroAlpha sine (k+1)|)^(2*N))) ∧ (IsBigO atTop (fun k : ℕ => (fresnelFunctionZero sine (k+1)).im-∑ n ∈ Finset.range N, (q n).eval (fresnelZeroAlpha sine (k+1))*fresnelZeroLambda sine (k+1)^((-1 : ℤ)-4*n)) (fun k : ℕ => fresnelZeroLambda sine (k+1)^((-1 : ℤ)-4*N)*(1+|fresnelZeroAlpha sine (k+1)|)^(2*N+1))) := by
+    ∃ p q : ℕ → Polynomial ℝ,
+        (∀ α : ℝ, (p 0).eval α=1 ∧ (p 1).eval α=α*(α*π-4)/(8*π) ∧ (q 0).eval α=α/2) ∧ ∀ N : ℕ,
+        (IsBigO atTop (fun k : ℕ => (fresnelFunctionZero sine (k+1)).re-∑ n ∈ Finset.range N,
+        (p n).eval (fresnelZeroAlpha sine (k+1))*fresnelZeroLambda sine (k+1)^((1 : ℤ)-4*n))
+        (fun k : ℕ => fresnelZeroLambda sine
+        (k+1)^((1 : ℤ)-4*N)*(1+|fresnelZeroAlpha sine (k+1)|)^(2*N))) ∧
+        (IsBigO atTop (fun k : ℕ => (fresnelFunctionZero sine (k+1)).im-∑ n ∈ Finset.range N,
+        (q n).eval (fresnelZeroAlpha sine (k+1))*fresnelZeroLambda sine (k+1)^((-1 : ℤ)-4*n))
+        (fun k : ℕ => fresnelZeroLambda sine
+        (k+1)^((-1 : ℤ)-4*N)*(1+|fresnelZeroAlpha sine (k+1)|)^(2*N+1))) := by
   sorry
 
 end DLMF.Confluent

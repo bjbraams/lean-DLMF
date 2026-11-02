@@ -130,7 +130,8 @@ theorem sum_choose_mul_two_pow_mul_eulerNumber (n : ℕ) :
 /-! ### Helpers for §§24.5(ii)–(iii) -/
 
 /-- Splitting off the first two terms of a sum over `range (n+1)`. -/
-private lemma first_two_add_sum_Icc_two {M : Type*} [AddCommMonoid M] (f : ℕ → M) {n : ℕ} (hn : 1 ≤ n) :
+private lemma first_two_add_sum_Icc_two {M : Type*} [AddCommMonoid M] (f : ℕ → M)
+    {n : ℕ} (hn : 1 ≤ n) :
     f 0 + f 1 + ∑ k ∈ Icc 2 n, f k = ∑ k ∈ range (n + 1), f k := by
   induction n, hn using Nat.le_induction with
   | base => simp [sum_range_succ]
@@ -209,7 +210,8 @@ private lemma sum_range_half_eq_sum_even (g : ℕ → ℂ) (n : ℕ) :
 
 /-- `sech t · cosh t = 1` as formal power series. -/
 private lemma egfComplex_eulerNumber_mul_even :
-    egfComplex (fun n => (eulerNumber n : ℂ)) * egfComplex (fun n => if Even n then 1 else 0) = 1 := by
+    egfComplex (fun n => (eulerNumber n : ℂ)) *
+        egfComplex (fun n => if Even n then 1 else 0) = 1 := by
   ext n
   rw [coeff_egfComplex_mul, PowerSeries.coeff_one]
   have h := sum_choose_mul_eulerNumber n
@@ -263,7 +265,8 @@ theorem sum_choose_sub_two_mul_bernoulli_div {n : ℕ} (hn : 2 ≤ n) :
       (bernoulli (j + 2) * (j + 1)) * hB'
   rw [sum_congr rfl hterm, ← sum_div]
   -- `T = ∑_{k=2}^{n} (k-1)(n+2 choose k)Bₖ = 1 - (n+1)(n+2)Bₙ₊₁`
-  have hsplit := first_two_add_sum_Icc_two (fun k => ((k : ℚ) - 1) * (((n + 2).choose k : ℚ) * bernoulli k))
+  have hsplit := first_two_add_sum_Icc_two
+      (fun k => ((k : ℚ) - 1) * (((n + 2).choose k : ℚ) * bernoulli k))
     (by omega : 1 ≤ n)
   simp only [Nat.cast_zero, zero_sub, Nat.choose_zero_right, bernoulli_zero, Nat.cast_one,
     sub_self, zero_mul] at hsplit
@@ -384,7 +387,8 @@ theorem euler_inversion (a b : ℕ → ℂ) :
   have hSC := egfComplex_eulerNumber_mul_even
   constructor
   · intro h; rw [h, ← mul_assoc, hSC, one_mul]
-  · intro h; rw [h, ← mul_assoc, mul_comm (egfComplex _) (egfComplex (fun n => (eulerNumber n : ℂ))),
+  · intro h; rw [h, ← mul_assoc,
+        mul_comm (egfComplex _) (egfComplex (fun n => (eulerNumber n : ℂ))),
       hSC, one_mul]
 
 end DLMF.BernoulliEuler

@@ -42,7 +42,8 @@ def Finpartition.fiber {k : ℕ} (f : α → Fin k) (j : Fin k) : Finset α := {
 /-- The finpartition of `univ` into the nonempty fibres of `f`. -/
 def Finpartition.ofFun {k : ℕ} (f : α → Fin k) : Finpartition (univ : Finset α) :=
   Finpartition.ofExistsUnique (univ.image fun x => Finpartition.fiber f (f x)) (by simp)
-    (fun a _ => ⟨Finpartition.fiber f (f a), ⟨mem_image_of_mem _ (mem_univ a), by simp [Finpartition.fiber]⟩,
+    (fun a _ => ⟨Finpartition.fiber f (f a),
+        ⟨mem_image_of_mem _ (mem_univ a), by simp [Finpartition.fiber]⟩,
       by
         rintro t ⟨ht, hat⟩
         obtain ⟨x, -, rfl⟩ := mem_image.mp ht
@@ -54,15 +55,16 @@ def Finpartition.ofFun {k : ℕ} (f : α → Fin k) : Finpartition (univ : Finse
       have : x ∈ Finpartition.fiber f (f x) := by simp [Finpartition.fiber]
       rw [hx] at this; simp at this)
 
-/-- Identity under the stated parameter and domain assumptions: `(Finpartition.ofFun f).parts = univ.image
-fun x => Finpartition.fiber f (f x)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`(Finpartition.ofFun f).parts = univ.image fun x => Finpartition.fiber f (f x)`. -/
 private lemma Finpartition.ofFun_parts {k : ℕ} (f : α → Fin k) :
     (Finpartition.ofFun f).parts = univ.image fun x => Finpartition.fiber f (f x) := rfl
 
 /-- `f` induces `P`: the part of `x` is the fibre of `f` through `x`. -/
 private lemma Finpartition.part_ofFun {k : ℕ} (f : α → Fin k) (x : α) :
     (Finpartition.ofFun f).part x = Finpartition.fiber f (f x) :=
-  (Finpartition.ofFun f).part_eq_of_mem (by rw [Finpartition.ofFun_parts]; exact mem_image_of_mem _ (mem_univ x))
+  (Finpartition.ofFun f).part_eq_of_mem
+      (by rw [Finpartition.ofFun_parts]; exact mem_image_of_mem _ (mem_univ x))
     (by simp [Finpartition.fiber])
 
 /-- Identity under the stated parameter and domain assumptions: `P = Q`. -/
@@ -77,8 +79,8 @@ private lemma Finpartition.ext_of_part_eq {P Q : Finpartition (univ : Finset α)
     obtain ⟨x, hx⟩ := Q.nonempty_of_mem_parts ht
     rw [← Q.part_eq_of_mem ht hx, ← h]; simp
 
-/-- Identity under the stated parameter and domain assumptions: `(Finpartition.ofFun f).parts = univ.image
-(Finpartition.fiber f)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`(Finpartition.ofFun f).parts = univ.image (Finpartition.fiber f)`. -/
 private lemma Finpartition.ofFun_parts_of_surjective {k : ℕ} {f : α → Fin k} (hf : Surjective f) :
     (Finpartition.ofFun f).parts = univ.image (Finpartition.fiber f) := by
   ext t
@@ -97,21 +99,26 @@ private lemma Finpartition.fiber_injective {k : ℕ} {f : α → Fin k} (hf : Su
   rw [hij] at this
   simpa [Finpartition.fiber] using this
 
-/-- Identity under the stated parameter and domain assumptions: `#(Finpartition.ofFun f).parts = k`. -/
+/-- Identity under the stated parameter and domain assumptions: `#(Finpartition.ofFun f).parts = k`.
+-/
 private lemma Finpartition.card_parts_ofFun {k : ℕ} {f : α → Fin k} (hf : Surjective f) :
     #(Finpartition.ofFun f).parts = k := by
-  rw [Finpartition.ofFun_parts_of_surjective hf, card_image_of_injective _ (Finpartition.fiber_injective hf), card_univ,
+  rw [Finpartition.ofFun_parts_of_surjective hf,
+      card_image_of_injective _ (Finpartition.fiber_injective hf), card_univ,
     Fintype.card_fin]
 
-/-- Identity under the stated parameter and domain assumptions: `(Finpartition.ofFun f).parts.val.map card
-= univ.val.map fun j => #(Finpartition.fiber f j)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`(Finpartition.ofFun f).parts.val.map card = univ.val.map fun j => #(Finpartition.fiber f j)`. -/
 private lemma Finpartition.map_card_parts_ofFun {k : ℕ} {f : α → Fin k} (hf : Surjective f) :
-    (Finpartition.ofFun f).parts.val.map card = univ.val.map fun j => #(Finpartition.fiber f j) := by
-  rw [Finpartition.ofFun_parts_of_surjective hf, image_val_of_injOn (Finpartition.fiber_injective hf).injOn, Multiset.map_map]
+    (Finpartition.ofFun f).parts.val.map card = univ.val.map fun j =>
+        #(Finpartition.fiber f j) := by
+  rw [Finpartition.ofFun_parts_of_surjective hf,
+      image_val_of_injOn (Finpartition.fiber_injective hf).injOn, Multiset.map_map]
   rfl
 
 /-- For a finpartition `P` with `k` parts, the surjections inducing `P` are counted by `k!`. -/
-private lemma Finpartition.card_filter_ofFun_eq (k : ℕ) (P : Finpartition (univ : Finset α)) (hP : #P.parts = k) :
+private lemma Finpartition.card_filter_ofFun_eq (k : ℕ) (P : Finpartition (univ : Finset α))
+    (hP : #P.parts = k) :
     #{f : α → Fin k | Surjective f ∧ Finpartition.ofFun f = P} = k.factorial := by
   classical
   have hcard : Fintype.card (P.parts ≃ Fin k) = k.factorial := by
@@ -129,7 +136,8 @@ private lemma Finpartition.card_filter_ofFun_eq (k : ℕ) (P : Finpartition (uni
     refine ⟨hsurj, Finpartition.ext_of_part_eq fun x => ?_⟩
     rw [Finpartition.part_ofFun]
     ext y
-    simp only [Finpartition.fiber, mem_filter, mem_univ, true_and, e.apply_eq_iff_eq, Subtype.mk.injEq]
+    simp only [Finpartition.fiber, mem_filter, mem_univ, true_and, e.apply_eq_iff_eq,
+        Subtype.mk.injEq]
     rw [P.mem_part_iff_part_eq_part (mem_univ _) (mem_univ _)]
   · intro e _ e' _ h
     ext ⟨t, ht⟩ : 2
@@ -141,7 +149,8 @@ private lemma Finpartition.card_filter_ofFun_eq (k : ℕ) (P : Finpartition (uni
   · intro f hf
     simp only [mem_filter, mem_univ, true_and] at hf
     obtain ⟨hs, rfl⟩ := hf
-    have key : ∀ (t : (Finpartition.ofFun f).parts) x, x ∈ t.1 → t.1 = Finpartition.fiber f (f x) := by
+    have key : ∀ (t : (Finpartition.ofFun f).parts) x, x ∈ t.1 → t.1 =
+        Finpartition.fiber f (f x) := by
       intro t x hx
       rw [← (Finpartition.ofFun f).part_eq_of_mem t.2 hx, Finpartition.part_ofFun]
     let g : (Finpartition.ofFun f).parts → Fin k := fun t =>
@@ -167,12 +176,14 @@ private lemma Finpartition.card_filter_ofFun_eq (k : ℕ) (P : Finpartition (uni
     exact hgx _ x (by simp)
 /-- Surjections `α → Fin k` whose fibre sizes satisfy `R`, against finpartitions with `k` parts
 whose block sizes satisfy `R`: each finpartition comes from `k!` surjections. -/
-theorem Finpartition.card_filter_surjective_eq_factorial_mul (k : ℕ) (R : Multiset ℕ → Prop) [DecidablePred R] :
+theorem Finpartition.card_filter_surjective_eq_factorial_mul (k : ℕ) (R : Multiset ℕ → Prop)
+    [DecidablePred R] :
     #{f : α → Fin k | Surjective f ∧ R (univ.val.map fun j => #{x | f x = j})} =
       k.factorial * #{P : Finpartition (univ : Finset α) | #P.parts = k ∧
         R (P.parts.val.map card)} := by
   classical
-  rw [card_eq_sum_card_fiberwise (f := Finpartition.ofFun) (t := {P : Finpartition (univ : Finset α) |
+  rw [card_eq_sum_card_fiberwise (f := Finpartition.ofFun)
+      (t := {P : Finpartition (univ : Finset α) |
     #P.parts = k ∧ R (P.parts.val.map card)})]
   · rw [sum_const_nat (m := k.factorial) ?_, mul_comm]
     intro P hP

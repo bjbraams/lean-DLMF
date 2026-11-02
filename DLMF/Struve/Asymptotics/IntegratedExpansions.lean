@@ -47,7 +47,8 @@ theorem struvePrim_Gamma_half_sub_nat (s : ℕ) :
     rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, ofReal_cpow Real.pi_pos.le]
     push_cast; ring_nf
   | succ s ih =>
-    have h1 : Gamma (1 / 2 - s) = (1 / 2 - ((s + 1 : ℕ) : ℂ)) * Gamma (1 / 2 - ((s + 1 : ℕ) : ℂ)) := by
+    have h1 : Gamma (1 / 2 - s) = (1 / 2 - ((s + 1 : ℕ) : ℂ)) *
+        Gamma (1 / 2 - ((s + 1 : ℕ) : ℂ)) := by
       rw [← Gamma_add_one]
       · push_cast; ring_nf
       · intro h
@@ -96,7 +97,8 @@ theorem struvePrim_term_hasDerivAt (j : ℕ) {z : ℂ} (hz : z ≠ 0) :
   have hpow : (z / 2) ^ ((0 : ℂ) - 2 * ((j + 1 : ℕ) : ℂ) - 1) = ((z / 2) ^ (n + 1))⁻¹ := by
     rw [show (0 : ℂ) - 2 * ((j + 1 : ℕ) : ℂ) - 1 = -((n + 1 : ℕ) : ℂ) by rw [hn]; push_cast; ring,
       cpow_neg, cpow_natCast]
-  have hfac : ((2 * (j + 1)).factorial : ℂ) = (2 * (j + 1) : ℕ) * ((2 * (j + 1) - 1).factorial) := by
+  have hfac : ((2 * (j + 1)).factorial : ℂ) = (2 * (j + 1) : ℕ) *
+      ((2 * (j + 1) - 1).factorial) := by
     rw [show 2 * (j + 1) = (2 * j + 1) + 1 by ring, Nat.factorial_succ]; push_cast; simp
   rw [struveAsymptoticTerm, zero_add, hpow, hA,
     show (-(n : ℤ) - 1) = -((n + 1 : ℕ) : ℤ) by push_cast; ring, zpow_neg, zpow_natCast]
@@ -106,7 +108,8 @@ theorem struvePrim_term_hasDerivAt (j : ℕ) {z : ℂ} (hz : z ≠ 0) :
       ((2 * (j + 1)).factorial : ℂ) * Real.sqrt π / (((j + 1).factorial : ℂ) * 4 ^ (j + 1)) := by
     rw [eq_div_iff (mul_ne_zero hk (pow_ne_zero _ (by norm_num))), ← hG1]; ring
   have e2 : Gamma (1 / 2 - ((j + 1 : ℕ) : ℂ)) =
-      (-4 : ℂ) ^ (j + 1) * ((j + 1).factorial : ℂ) * Real.sqrt π / ((2 * (j + 1)).factorial : ℂ) := by
+      (-4 : ℂ) ^ (j + 1) * ((j + 1).factorial : ℂ) * Real.sqrt π /
+          ((2 * (j + 1)).factorial : ℂ) := by
     rw [eq_div_iff h2k, ← hG2]
   rw [e1, e2, hfac, hn]
   have hz' : z / 2 ≠ 0 := div_ne_zero hz two_ne_zero
@@ -136,11 +139,17 @@ k:=j+1; (-1)^(k+1)*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*
 =O[sector (π-δ)] (fun z : ℂ => z^(-(2*(N+1):ℤ)))`. -/
 @[dlmf 11.6.E3]
 theorem struveK_primitive_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
-    (fun z : ℂ => DLMF.primitive (struveK 0) z - 2/π*(log (2*z)+Real.eulerMascheroniConstant)-2/π*∑ j ∈ Finset.range N, let k:=j+1; (-1)^(k+1)*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*(2*z)^(2*k))) =O[sector (π-δ)] (fun z : ℂ => z^(-(2*(N+1):ℤ))) := by
+    (fun z : ℂ => DLMF.primitive (struveK 0) z -
+        2/π*(log (2*z)+Real.eulerMascheroniConstant)-2/π*∑ j ∈ Finset.range N, let k:=j+1;
+        (-1)^(k+1)*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*(2*z)^(2*k)))
+        =O[sector (π-δ)] (fun z : ℂ => z^(-(2*(N+1):ℤ))) := by
   set c : ℕ → ℂ → ℂ := fun j w => 2 / π * ((-1) ^ (j + 1 + 1) * ((2 * (j + 1)).factorial : ℂ) *
       (2 * (j + 1) - 1).factorial / (((j + 1).factorial : ℂ) ^ 2 * (2 * w) ^ (2 * (j + 1)))) with hc
-  have hGeq : (fun z : ℂ => DLMF.primitive (struveK 0) z - 2/π*(log (2*z)+Real.eulerMascheroniConstant)-2/π*∑ j ∈ Finset.range N, let k:=j+1; (-1)^(k+1)*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*(2*z)^(2*k))) =
-      fun z => (DLMF.primitive (struveK 0) z - 2 / π * (log (2 * z) + Real.eulerMascheroniConstant)) -
+  have hGeq : (fun z : ℂ => DLMF.primitive (struveK 0) z -
+      2/π*(log (2*z)+Real.eulerMascheroniConstant)-2/π*∑ j ∈ Finset.range N, let k:=j+1;
+      (-1)^(k+1)*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*(2*z)^(2*k))) =
+      fun z => (DLMF.primitive (struveK 0) z - 2 / π *
+          (log (2 * z) + Real.eulerMascheroniConstant)) -
         ∑ j ∈ Finset.range N, c j z := by
     funext z
     simp only [hc, Finset.mul_sum]
@@ -156,7 +165,8 @@ theorem struveK_primitive_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π)
     rw [norm_cpow_of_ne_zero hz]
     have him : ((0 : ℂ) - 2 * ((N + 1 : ℕ) : ℂ) - 1).im = 0 := by simp
     rw [him, mul_zero, Real.exp_zero, div_one]
-    have : ((0 : ℂ) - 2 * ((N + 1 : ℕ) : ℂ) - 1).re = ((-(((2 * (N + 1) : ℕ) : ℤ) + 1) : ℤ) : ℝ) := by
+    have : ((0 : ℂ) - 2 * ((N + 1 : ℕ) : ℂ) - 1).re =
+        ((-(((2 * (N + 1) : ℕ) : ℤ) + 1) : ℤ) : ℝ) := by
       simp; ring
     rw [this, Real.rpow_intCast]
   have hmain := struvePrim_isBigO_of_deriv (G := fun z => (DLMF.primitive (struveK 0) z -
@@ -213,7 +223,8 @@ theorem struveK_primitive_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π)
 /-- `(1 - t²)^{-1/2}` is integrable on `(0, 1]`. -/
 theorem struvePrim_integrableOn_w :
     IntegrableOn (fun t : ℝ => 1 / Real.sqrt (1 - t ^ 2)) (Ioc 0 1) := by
-  refine intervalIntegral.integrableOn_deriv_of_nonneg (g := Real.arcsin) Real.continuous_arcsin.continuousOn
+  refine intervalIntegral.integrableOn_deriv_of_nonneg (g := Real.arcsin)
+      Real.continuous_arcsin.continuousOn
     (fun t ht => Real.hasDerivAt_arcsin (by linarith [ht.1]) (by linarith [ht.2]))
     (fun t _ => by positivity)
 
@@ -295,7 +306,8 @@ theorem struvePrim_integral_g_Ioi_one :
       simp only [hH]
       rw [Real.log_div (by positivity) ht.ne']; ring
     have h1 : Tendsto (fun t : ℝ => (1 + Real.sqrt (1 + t ^ 2)) / t) atTop (𝓝 1) := by
-      have h2 : Tendsto (fun t : ℝ => 1 / t + Real.sqrt (1 / t ^ 2 + 1)) atTop (𝓝 (0 + Real.sqrt (0 + 1))) := by
+      have h2 : Tendsto (fun t : ℝ => 1 / t + Real.sqrt (1 / t ^ 2 + 1)) atTop
+          (𝓝 (0 + Real.sqrt (0 + 1))) := by
         refine (tendsto_const_nhds.div_atTop tendsto_id).add ?_
         refine (Real.continuous_sqrt.tendsto _).comp ?_
         exact (tendsto_const_nhds.div_atTop (tendsto_pow_atTop two_ne_zero)).add tendsto_const_nhds
@@ -347,7 +359,8 @@ theorem struvePrim_primitive_M_ofReal {x : ℝ} (hx : 0 < x) :
   set k : ℝ → ℝ := fun u => -(2 / π) * ∫ t in Ioc (0 : ℝ) 1, Real.exp (-(u * t)) * g t with hk
   have hP : DLMF.primitive (struveM 0) x = ((∫ u in (0 : ℝ)..x, k u : ℝ) : ℂ) := by
     simp only [DLMF.primitive, segmentIntegral, sub_zero, zero_add]
-    have h1 : ∫ t in (0 : ℝ)..1, struveM 0 (↑t * ↑x) = ∫ t in (0 : ℝ)..1, ((k (x * t) : ℝ) : ℂ) := by
+    have h1 : ∫ t in (0 : ℝ)..1, struveM 0 (↑t * ↑x) = ∫ t in (0 : ℝ)..1,
+        ((k (x * t) : ℝ) : ℂ) := by
       refine intervalIntegral.integral_congr_ae (Eventually.of_forall fun t ht => ?_)
       rw [uIoc_of_le zero_le_one] at ht
       rw [← ofReal_mul, mul_comm t x, struvePrim_struveM_zero_ofReal (by nlinarith [ht.1])]
@@ -359,7 +372,8 @@ theorem struvePrim_primitive_M_ofReal {x : ℝ} (hx : 0 < x) :
   congr 1
   set f : ℝ → ℝ → ℝ := fun u t => Real.exp (-(u * t)) * g t with hf
   have hg0 : ∀ t, 0 ≤ g t := fun t => by simp only [hg]; positivity
-  have hinner : ∀ t ∈ Ioc (0 : ℝ) 1, ∫ u in Ioc 0 x, f u t = g t * ((1 - Real.exp (-(x * t))) / t) := by
+  have hinner : ∀ t ∈ Ioc (0 : ℝ) 1, ∫ u in Ioc 0 x, f u t = g t *
+      ((1 - Real.exp (-(x * t))) / t) := by
     intro t ht
     rw [← intervalIntegral.integral_of_le hx.le]
     simp only [hf]
@@ -480,7 +494,8 @@ theorem struvePrim_tendsto_Phi :
   have hsmall : ∀ x : ℝ, 0 < x → IntegrableOn (fun t => g t * (E x t / t)) (Ioc 0 1) := by
     intro x hx
     refine Measure.integrableOn_of_bounded (M := x) (by simp)
-      ((hgm.mul ((by fun_prop : Measurable fun t : ℝ => E x t).div measurable_id)).aestronglyMeasurable) ?_
+      ((hgm.mul ((by fun_prop : Measurable fun t : ℝ => E x t).div
+          measurable_id)).aestronglyMeasurable) ?_
     refine (ae_restrict_iff' measurableSet_Ioc).mpr (Eventually.of_forall fun t ht => ?_)
     have he1 : 1 - Real.exp (-(x * t)) ≤ x * t := by
       have := Real.add_one_le_exp (-(x * t)); linarith
@@ -572,12 +587,17 @@ k:=j+1; 1*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*(2*z)^(2*
 (π/2-δ)] (fun z : ℂ => z^(-(2*(N+1):ℤ)))`. -/
 @[dlmf 11.6.E4]
 theorem struveM_primitive_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun z : ℂ => DLMF.primitive (struveM 0) z + 2/π*(log (2*z)+Real.eulerMascheroniConstant)-2/π*∑ j ∈ Finset.range N, let k:=j+1; 1*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*(2*z)^(2*k))) =O[sector (π/2-δ)] (fun z : ℂ => z^(-(2*(N+1):ℤ))) := by
+    (fun z : ℂ => DLMF.primitive (struveM 0) z +
+        2/π*(log (2*z)+Real.eulerMascheroniConstant)-2/π*∑ j ∈ Finset.range N, let k:=j+1;
+        1*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*(2*z)^(2*k))) =O[sector (π/2-δ)]
+        (fun z : ℂ => z^(-(2*(N+1):ℤ))) := by
   set c : ℕ → ℂ → ℂ := fun j w => 2 / π * ((-1) ^ (j + 1 + 1) * ((2 * (j + 1)).factorial : ℂ) *
       (2 * (j + 1) - 1).factorial / (((j + 1).factorial : ℂ) ^ 2 * (2 * w) ^ (2 * (j + 1)))) with hc
   have hsq : ∀ j : ℕ, ((-1 : ℂ) ^ (j + 1 + 1)) * (-1) ^ (j + 1 + 1) = 1 := fun j => by
     rw [← mul_pow]; norm_num
-  have hGeq : (fun z : ℂ => DLMF.primitive (struveM 0) z + 2/π*(log (2*z)+Real.eulerMascheroniConstant)-2/π*∑ j ∈ Finset.range N, let k:=j+1; 1*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*(2*z)^(2*k))) =
+  have hGeq : (fun z : ℂ => DLMF.primitive (struveM 0) z +
+      2/π*(log (2*z)+Real.eulerMascheroniConstant)-2/π*∑ j ∈ Finset.range N, let k:=j+1;
+      1*((2*k).factorial:ℂ)*(2*k-1).factorial/((k.factorial:ℂ)^2*(2*z)^(2*k))) =
       fun z => (DLMF.primitive (struveM 0) z +
         2 / π * (log (2 * z) + Real.eulerMascheroniConstant)) -
         ∑ j ∈ Finset.range N, (-1) ^ (j + 1 + 1) * c j z := by
@@ -599,7 +619,8 @@ theorem struveM_primitive_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/
     rw [norm_cpow_of_ne_zero hz]
     have him : ((0 : ℂ) - 2 * ((N + 1 : ℕ) : ℂ) - 1).im = 0 := by simp
     rw [him, mul_zero, Real.exp_zero, div_one]
-    have : ((0 : ℂ) - 2 * ((N + 1 : ℕ) : ℂ) - 1).re = ((-(((2 * (N + 1) : ℕ) : ℤ) + 1) : ℤ) : ℝ) := by
+    have : ((0 : ℂ) - 2 * ((N + 1 : ℕ) : ℂ) - 1).re =
+        ((-(((2 * (N + 1) : ℕ) : ℤ) + 1) : ℤ) : ℝ) := by
       simp; ring
     rw [this, Real.rpow_intCast]
   have hmain := struvePrim_isBigO_of_deriv (G := fun z => (DLMF.primitive (struveM 0) z +
@@ -644,7 +665,8 @@ theorem struveM_primitive_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/
       rw [mul_zero] at this
       refine this.congr fun t => ?_
       simp only [hc]
-      rw [mul_assoc, mul_assoc, div_mul_eq_div_div, div_eq_mul_inv _ ((2 * (t : ℂ)) ^ (2 * (j + 1)))]
+      rw [mul_assoc, mul_assoc, div_mul_eq_div_div,
+          div_eq_mul_inv _ ((2 * (t : ℂ)) ^ (2 * (j + 1)))]
     have := struvePrim_tendsto_M_ofReal.sub
       (tendsto_finsetSum (Finset.range N) fun j _ => hterm j)
     simpa using this

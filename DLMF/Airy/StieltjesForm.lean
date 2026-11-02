@@ -94,7 +94,8 @@ theorem airySt_binom_disc {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 
     (1 + t) ^ (-(a : ℂ)) = (1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) *
       ∫ τ in Ioo (0 : ℝ) 1, (airySt_w a τ : ℂ) * (1 + t * τ)⁻¹ := by
   have h1 := ordinaryHypergeometric_eq_one_sub_neg_cpow (a := (a : ℂ)) (c := 1) (z := -t)
-    (fun k hk => by have := congrArg Complex.re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)])
+    (fun k hk => by have := congrArg Complex.re hk; simp at this;
+                    linarith [(k.cast_nonneg : (0:ℝ) ≤ k)])
     (by simpa using ht)
   rw [sub_neg_eq_add] at h1
   rw [← h1, ordinaryHypergeometric_symm,
@@ -172,7 +173,8 @@ theorem airySt_binom {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 + t
       · intro h; exact ⟨1 + u, h, by ring⟩
       · rintro ⟨w, hw, rfl⟩; simpa using hw
     rw [this]
-    exact (Complex.starConvex_one_slitPlane.isPathConnected one_mem_slitPlane).isConnected.isPreconnected.image _
+    exact (Complex.starConvex_one_slitPlane.isPathConnected
+        one_mem_slitPlane).isConnected.isPreconnected.image _
       (by fun_prop : Continuous fun w : ℂ => w - 1).continuousOn
   have hf : AnalyticOnNhd ℂ (fun u : ℂ => (1 + u) ^ (-(a : ℂ))) U := by
     refine DifferentiableOn.analyticOnNhd (fun u hu => ?_) hUo
@@ -207,7 +209,7 @@ theorem airySt_binom_rem {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1
       ∑ k ∈ range N, ((τ ^ k * airySt_w a τ : ℝ) : ℂ) * (-t) ^ k +
         (-t) ^ N * (((τ ^ N * airySt_w a τ : ℝ) : ℂ) * (1 + t * τ)⁻¹) := by
     intro τ hτ
-    have hg := stRem_geom (t * τ) (hne τ hτ) N
+    have hg := StieltjesRemainder.geom (t * τ) (hne τ hτ) N
     conv_lhs => rw [← one_div, hg]
     rw [mul_add, Finset.mul_sum]
     congr 1
@@ -368,7 +370,8 @@ theorem airySt_term_eq {b W θ : ℝ} (hθ : |θ| < π) (k : ℕ) {r : ℝ} (hr 
 theorem airySt_term_integrableOn {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| < π) (k : ℕ) :
     IntegrableOn (fun r : ℝ => Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
       ((r : ℂ) * exp (θ * I)) ^ k)) (Ioi 0) := by
-  have h := ((stRem_integrableOn_rpow_exp (m := (b + k) - 1) (by have := k.cast_nonneg (α := ℝ); linarith) hW).ofReal
+  have h := ((StieltjesRemainder.integrableOn_rpow_exp (m := (b + k) - 1)
+      (by have := k.cast_nonneg (α := ℝ); linarith) hW).ofReal
     (𝕜 := ℂ)).const_mul (exp (θ * I * ((b : ℂ) - 1 + k)))
   exact IntegrableOn.congr_fun h (fun r hr => (airySt_term_eq hθ k hr).symm) measurableSet_Ioi
 
@@ -463,7 +466,7 @@ theorem airySt_rem_le_M {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b
   have hb' : 0 < b + N := by positivity
   calc _ ≤ ∫ r in Ioi (0 : ℝ), r ^ ((b + N) - 1) * Real.exp (-(W * r)) * (airySt_M θ * C) := by
         refine norm_integral_le_of_norm_le
-          ((stRem_integrableOn_rpow_exp (by linarith) hW).mul_const _) ?_
+          ((StieltjesRemainder.integrableOn_rpow_exp (by linarith) hW).mul_const _) ?_
         refine (ae_restrict_iff' measurableSet_Ioi).mpr (Filter.Eventually.of_forall fun r hr => ?_)
         have hr : (0 : ℝ) < r := hr
         rw [airySt_norm_integrand hθ N hr]
@@ -570,7 +573,8 @@ theorem airySt_rem_succ_le {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 
     field_simp [hτ.1.ne']
   have hgi : IntegrableOn (fun τ => g τ / τ) (Ioo 0 1) :=
     (airySt_integrableOn_w ha0 ha1 N).congr_fun (fun τ hτ => (hgτ τ hτ).symm) measurableSet_Ioo
-  have hmix := stRem_mix_chi hm hW hβ hσ hsin hg0 (airySt_integrableOn_w ha0 ha1 (N + 1)) hgi
+  have hmix := StieltjesRemainder.mix_chi hm hW hβ hσ hsin hg0
+      (airySt_integrableOn_w ha0 ha1 (N + 1)) hgi
   rw [setIntegral_congr_fun measurableSet_Ioo hgτ, airySt_moment ha0 ha1,
     airySt_chi_integral hm hW] at hmix
   rw [airySt_norm_T hb ha0 hW]
@@ -605,7 +609,7 @@ theorem laplaceChi_kernel {m W X θ : ℝ} (hm : 0 < m) (hW : 0 < W)
       (X + r * exp (θ * I))‖ ≤
       airySt_chi m * ∫ r in Ioi (0 : ℝ), r ^ (m - 1) * Real.exp (-(W * r)) := by
   obtain ⟨β, hβ, hσ⟩ := airySt_exists_rotation hsin
-  have h := stRem_chi_ray hm hW hX hβ hσ
+  have h := StieltjesRemainder.chi_ray hm hW hX hβ hσ
   rw [airySt_chi_integral hm hW] at h
   rw [Real.integral_rpow_mul_exp_neg_mul_Ioi hm hW]
   convert h using 1
@@ -669,7 +673,8 @@ theorem laplaceChi_mixture {m X θ : ℝ} (hm : 0 < m) (hX : 0 < X)
   have hHi : Integrable (Function.uncurry H)
       ((volume.restrict (Ioi (0 : ℝ))).prod (volume.restrict (Ioi (0 : ℝ)))) := by
     refine (hprod.div_const |Real.sin θ|).mono' ?_ ?_
-    · have hc := (Complex.continuous_ofReal.comp_aestronglyMeasurable hprod.aestronglyMeasurable).mul hkcont.aestronglyMeasurable.comp_fst
+    · have hc := (Complex.continuous_ofReal.comp_aestronglyMeasurable
+          hprod.aestronglyMeasurable).mul hkcont.aestronglyMeasurable.comp_fst
       refine hc.congr ?_
       change ∀ᵐ p ∂((volume.restrict (Ioi (0 : ℝ))).prod (volume.restrict (Ioi (0 : ℝ)))),
         (f p.1 p.2 : ℂ) * ((p.1 : ℂ) / (X + p.1 * exp (θ * I))) = H p.1 p.2
@@ -678,7 +683,8 @@ theorem laplaceChi_mixture {m X θ : ℝ} (hm : 0 < m) (hX : 0 < X)
     · rw [Measure.prod_restrict, ae_restrict_iff' (measurableSet_Ioi.prod measurableSet_Ioi)]
       refine Eventually.of_forall fun p hp => ?_
       have hf0 : 0 ≤ f p.1 p.2 := by
-        dsimp [f]; exact mul_nonneg (mul_nonneg (Real.rpow_nonneg hp.1.le _) (Real.exp_pos _).le) (hg0 p.2 hp.2)
+        dsimp [f]; exact mul_nonneg
+            (mul_nonneg (Real.rpow_nonneg hp.1.le _) (Real.exp_pos _).le) (hg0 p.2 hp.2)
       change ‖H p.1 p.2‖ ≤ f p.1 p.2 / |Real.sin θ|
       rw [hH_eq p.1 p.2 hp.1, norm_mul,
         Complex.norm_real, Real.norm_of_nonneg hf0]
@@ -718,7 +724,8 @@ theorem laplaceChi_mixture {m X θ : ℝ} (hm : 0 < m) (hX : 0 < X)
       rw [integral_const_mul, integral_integral_swap hswap]
       congr 1
       apply integral_congr_ae
-      exact Eventually.of_forall fun r => by dsimp [f]; rw [← integral_const_mul]; congr 1; funext v; ring
+      exact Eventually.of_forall fun r => by dsimp [f]; rw [← integral_const_mul];
+                                             congr 1; funext v; ring
 
 /-- A finite moment of a nonnegative Laplace density supplies product integrability. -/
 theorem laplaceChi_prod_integrable {m : ℝ} (hm : 0 < m) (g : ℝ → ℝ)
@@ -744,7 +751,8 @@ theorem laplaceChi_prod_integrable {m : ℝ} (hm : 0 < m) (g : ℝ → ℝ)
     exact ((hLap r hr).const_mul (r ^ (m - 1) * Real.exp (-r))).congr
       ((ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun v _ => (heq r v).symm))
   · have hAtom : IntegrableOn (fun r : ℝ => r ^ (m - 1) * Real.exp (-r)) (Ioi 0) := by
-      simpa using stRem_integrableOn_rpow_exp (m := m - 1) (by linarith) (show (0 : ℝ) < 1 by norm_num)
+      simpa using StieltjesRemainder.integrableOn_rpow_exp (m := m - 1) (by linarith)
+          (show (0 : ℝ) < 1 by norm_num)
     refine (hMom.sub hAtom).congr_fun (fun r hr => ?_) measurableSet_Ioi
     have hnonneg (v : ℝ) (hv : v ∈ Ioi (0 : ℝ)) : 0 ≤ f (r, v) := by
       dsimp [f]

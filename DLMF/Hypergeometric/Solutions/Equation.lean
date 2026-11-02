@@ -52,7 +52,8 @@ def logarithmicSecond (a b : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
   ₂F₁ a b (n : ℂ) z * log z -
     (∑ j ∈ Finset.range (n - 1),
       ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-        (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) * ((-z)⁻¹) ^ (j + 1)) +
+        (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) *
+            ((-z)⁻¹) ^ (j + 1)) +
     ∑' k : ℕ, gaussHGCoeff a b n k * z ^ k *
       (digamma (a + k) + digamma (b + k) - digamma (1 + k) - digamma (n + k))
 
@@ -62,7 +63,8 @@ def logarithmicSecondTerminating (b : ℂ) (m n : ℕ) (z : ℂ) : ℂ :=
   ₂F₁ (-m : ℂ) b (n : ℂ) z * log z -
     (∑ j ∈ Finset.range (n - 1),
       ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-        (((n - j - 2).factorial : ℂ) * poch (m + 1) (j + 1) * poch (1 - b) (j + 1)) * ((-z)⁻¹) ^ (j + 1)) +
+        (((n - j - 2).factorial : ℂ) * poch (m + 1) (j + 1) * poch (1 - b) (j + 1)) *
+            ((-z)⁻¹) ^ (j + 1)) +
     (∑ k ∈ Finset.range (m + 1), gaussHGCoeff (-m) b n k * z ^ k *
       (digamma (1 + m - k) + digamma (b + k) - digamma (1 + k) - digamma (n + k))) +
     (-1 : ℂ) ^ m * (m.factorial : ℂ) * ∑' j : ℕ,
@@ -75,7 +77,8 @@ def logarithmicSecondBothTerminating (m l n : ℕ) (z : ℂ) : ℂ :=
   ₂F₁ (-m : ℂ) (-l) (n : ℂ) z * log z -
     (∑ j ∈ Finset.range (n - 1),
       ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-        (((n - j - 2).factorial : ℂ) * poch (m + 1) (j + 1) * poch (l + 1) (j + 1)) * ((-z)⁻¹) ^ (j + 1)) +
+        (((n - j - 2).factorial : ℂ) * poch (m + 1) (j + 1) * poch (l + 1) (j + 1)) *
+            ((-z)⁻¹) ^ (j + 1)) +
     (∑ k ∈ Finset.range (l + 1), gaussHGCoeff (-m) (-l) n k * z ^ k *
       (digamma (1 + m - k) + digamma (1 + l - k) - digamma (1 + k) - digamma (n + k))) +
     (-1 : ℂ) ^ l * (l.factorial : ℂ) * ∑ j ∈ Finset.range (m - l),

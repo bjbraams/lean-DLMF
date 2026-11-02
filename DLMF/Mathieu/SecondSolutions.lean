@@ -127,7 +127,8 @@ private lemma casoratian_eq_zero_of_tendsto {q : ℂ} (hq : q ≠ 0) {e x y : �
   exact tendsto_nhds_unique tendsto_const_nhds hlim'
 
 /-- Shift of a sum: if each term at `w` is `s` times the term at `z`, so is the sum. -/
-private lemma eq_mul_of_hasSum_term_eq_mul {F : ℂ → ℂ} {t : ℕ → ℂ → ℂ} (h : ∀ z, HasSum (fun m => t m z) (F z))
+private lemma eq_mul_of_hasSum_term_eq_mul {F : ℂ → ℂ} {t : ℕ → ℂ → ℂ}
+    (h : ∀ z, HasSum (fun m => t m z) (F z))
     {s z w : ℂ} (ht : ∀ m, t m w = s * t m z) : F w = s * F z := by
   have h2 := (h z).mul_left s
   rw [← funext ht] at h2
@@ -169,11 +170,13 @@ theorem not_mathieuWI_mathieuWII_two_pi_periodic {a q : ℂ} (hq : q ≠ 0)
   have hye : ∀ m : ℕ, (∫ t in (0 : ℝ)..2 * π, g t * Complex.sin ((m : ℂ) * t)) = y m := by
     intro m; simp [y, β]
   have hx0 : Tendsto x atTop (𝓝 0) := by
-    have := (summable_cos_coeff_of_differentiable_periodic_even h1.differentiable hI (mathieuWI_neg a q)).tendsto_atTop_zero
+    have := (summable_cos_coeff_of_differentiable_periodic_even h1.differentiable hI
+        (mathieuWI_neg a q)).tendsto_atTop_zero
     simp only [hxe] at this
     exact tendsto_zero_iff_norm_tendsto_zero.mpr this
   have hy0 : Tendsto y atTop (𝓝 0) := by
-    have := (summable_sin_coeff_of_differentiable_periodic_odd h2.differentiable hII (mathieuWII_neg a q)).tendsto_atTop_zero
+    have := (summable_sin_coeff_of_differentiable_periodic_odd h2.differentiable hII
+        (mathieuWII_neg a q)).tendsto_atTop_zero
     simp only [hye] at this
     exact tendsto_zero_iff_norm_tendsto_zero.mpr this
   -- low indices
@@ -223,10 +226,12 @@ theorem not_mathieuWI_mathieuWII_two_pi_periodic {a q : ℂ} (hq : q ≠ 0)
   -- the Fourier series
   have sf : ∀ z, HasSum (fun m : ℕ => (if m = 0 then 1 / (2 * π) else 1 / π : ℂ) * x m *
       Complex.cos (m * z)) (f z) := by
-    intro z; have := hasSum_cos_of_differentiable_periodic_even h1.differentiable hI (mathieuWI_neg a q) z
+    intro z; have := hasSum_cos_of_differentiable_periodic_even h1.differentiable hI
+        (mathieuWI_neg a q) z
     simpa only [hxe] using this
   have sg : ∀ z, HasSum (fun m : ℕ => (1 / π : ℂ) * y m * Complex.sin (m * z)) (g z) := by
-    intro z; have := hasSum_sin_of_differentiable_periodic_odd h2.differentiable hII (mathieuWII_neg a q) z
+    intro z; have := hasSum_sin_of_differentiable_periodic_odd h2.differentiable hII
+        (mathieuWII_neg a q) z
     simpa only [hye] using this
   have sg' := hasSum_mul_sin_coeff_deriv_zero h2.differentiable hII (mathieuWII_neg a q)
   simp only [hye] at sg'
@@ -282,7 +287,8 @@ theorem not_mathieuWI_mathieuWII_two_pi_periodic {a q : ℂ} (hq : q ≠ 0)
     rw [h21] at this; exact one_ne_zero this
 
 /-- Two solutions with vanishing Wronskian at `0`, the first nontrivial, are proportional. -/
-theorem exists_eq_const_mul_of_wronskian_eq_zero {a q : ℂ} {w v : ℂ → ℂ} (hw : IsMathieuSolution a q w)
+theorem exists_eq_const_mul_of_wronskian_eq_zero {a q : ℂ} {w v : ℂ → ℂ}
+    (hw : IsMathieuSolution a q w)
     (hw0 : w ≠ 0) (hv : IsMathieuSolution a q v)
     (hW : w 0 * deriv v 0 - deriv w 0 * v 0 = 0) : ∃ c : ℂ, v = fun z => c * w z := by
   have hwc := congrFun hw.eq_combination
@@ -358,7 +364,8 @@ theorem mathieuGe_eq {n : ℕ} {q : ℝ} (hS : mathieuGeS n q ≠ 0) (z : ℂ) :
 
 /-- If `w_I(z + π) = ε w_I(z)`, then `u = w_II - μ z w_I` with `μ = w_I(π) w_II(π)/π`
 satisfies `u(z + π) = ε u(z)`. -/
-private lemma mathieuWII_sub_linear_mul_mathieuWI_add_pi {a q ε : ℂ} (hε : ∀ z, mathieuWI a q (z + π) = ε * mathieuWI a q z)
+private lemma mathieuWII_sub_linear_mul_mathieuWI_add_pi {a q ε : ℂ}
+    (hε : ∀ z, mathieuWI a q (z + π) = ε * mathieuWI a q z)
     (z : ℂ) :
     mathieuWII a q (z + π) -
         mathieuWI a q π * mathieuWII a q π / π * (z + π) * mathieuWI a q (z + π) =
@@ -379,7 +386,8 @@ private lemma mathieuWII_sub_linear_mul_mathieuWI_add_pi {a q ε : ℂ} (hε : �
 
 /-- If `w_II(z + π) = ε w_II(z)`, then `u = w_I - μ z w_II` with `μ = w_I'(π) w_II'(π)/π`
 satisfies `u(z + π) = ε u(z)`. -/
-private lemma mathieuWI_sub_linear_mul_mathieuWII_add_pi {a q ε : ℂ} (hε : ∀ z, mathieuWII a q (z + π) = ε * mathieuWII a q z)
+private lemma mathieuWI_sub_linear_mul_mathieuWII_add_pi {a q ε : ℂ}
+    (hε : ∀ z, mathieuWII a q (z + π) = ε * mathieuWII a q z)
     (z : ℂ) :
     mathieuWI a q (z + π) - deriv (mathieuWI a q) π * deriv (mathieuWII a q) π / π * (z + π) *
         mathieuWII a q (z + π) =
@@ -403,7 +411,8 @@ private lemma mathieuWI_sub_linear_mul_mathieuWII_add_pi {a q ε : ℂ} (hε : �
 private lemma mathieuWI_mathieuA_add_pi (n : ℕ) (q : ℝ) (z : ℂ) :
     mathieuWI (mathieuA n q) q (z + π) = (-1) ^ n * mathieuWI (mathieuA n q) q z := by
   rcases Nat.even_or_odd' n with ⟨k, rfl | rfl⟩
-  · rw [mathieuWI_add_pi_of_deriv_half_pi_eq_zero (deriv_mathieuWI_half_pi_mathieuA_even k q), pow_mul]; simp
+  · rw [mathieuWI_add_pi_of_deriv_half_pi_eq_zero
+        (deriv_mathieuWI_half_pi_mathieuA_even k q), pow_mul]; simp
   · rw [mathieuWI_add_pi_of_half_pi_eq_zero (mathieuWI_half_pi_mathieuA_odd k q), pow_succ, pow_mul]
     simp
 
@@ -413,10 +422,12 @@ private lemma mathieuWII_mathieuB_add_pi {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z :
   rcases Nat.even_or_odd' n with ⟨k, rfl | rfl⟩
   · obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 := ⟨k - 1, by omega⟩
     rw [show 2 * (j + 1) = 2 * j + 2 by ring,
-      mathieuWII_add_pi_of_half_pi_eq_zero (mathieuWII_half_pi_mathieuB_even j q), pow_succ, pow_succ,
+      mathieuWII_add_pi_of_half_pi_eq_zero (mathieuWII_half_pi_mathieuB_even j q),
+          pow_succ, pow_succ,
       pow_mul]
     simp
-  · rw [mathieuWII_add_pi_of_deriv_half_pi_eq_zero (deriv_mathieuWII_half_pi_mathieuB_odd k q), pow_succ,
+  · rw [mathieuWII_add_pi_of_deriv_half_pi_eq_zero
+        (deriv_mathieuWII_half_pi_mathieuB_odd k q), pow_succ,
       pow_mul]
     simp
 
@@ -443,7 +454,8 @@ private lemma mathieuGeU_neg (n : ℕ) (q : ℝ) (z : ℂ) :
   simp only [mathieuGeU, mathieuWI_neg, mathieuWII_neg]; ring
 
 /-- For `q ≠ 0` and `C_n(q) ≠ 0`: `f_n = (ce_n(0)/μ) u` and `C_n f_n = fe_n'(0) u`. -/
-private lemma mathieuFeF_eq_div_mul_mathieuFeU {n : ℕ} {q : ℝ} (hq : q ≠ 0) (hC : mathieuFeC n q ≠ 0) (z : ℂ) :
+private lemma mathieuFeF_eq_div_mul_mathieuFeU {n : ℕ} {q : ℝ} (hq : q ≠ 0)
+    (hC : mathieuFeC n q ≠ 0) (z : ℂ) :
     mathieuFeF n z q = mathieuCeZero n q / mathieuFeMu n q * mathieuFeU n z q ∧
       mathieuFeC n q * mathieuFeF n z q = mathieuFeDerivZero n q * mathieuFeU n z q := by
   have hnq : ¬ (n = 0 ∧ q = 0) := fun h => hq h.2
@@ -480,25 +492,29 @@ private lemma mathieuGeG_eq_div_mul_mathieuGeU {n : ℕ} {q : ℝ} (hS : mathieu
 /-- Helper for §28.5 (`mathieuFeF_add_pi`). -/
 theorem mathieuFeF_add_pi {n : ℕ} {q : ℝ} (hq : q ≠ 0) (hC : mathieuFeC n q ≠ 0) (z : ℂ) :
     mathieuFeF n (z + π) q = (-1) ^ n * mathieuFeF n z q := by
-  rw [(mathieuFeF_eq_div_mul_mathieuFeU hq hC _).1, (mathieuFeF_eq_div_mul_mathieuFeU hq hC _).1, mathieuFeU_add_pi]
+  rw [(mathieuFeF_eq_div_mul_mathieuFeU hq hC _).1, (mathieuFeF_eq_div_mul_mathieuFeU hq hC _).1,
+      mathieuFeU_add_pi]
   ring
 
 /-- Helper for §28.5 (`mathieuFeF_neg`). -/
 theorem mathieuFeF_neg {n : ℕ} {q : ℝ} (hq : q ≠ 0) (hC : mathieuFeC n q ≠ 0) (z : ℂ) :
     mathieuFeF n (-z) q = -mathieuFeF n z q := by
-  rw [(mathieuFeF_eq_div_mul_mathieuFeU hq hC _).1, (mathieuFeF_eq_div_mul_mathieuFeU hq hC _).1, mathieuFeU_neg]
+  rw [(mathieuFeF_eq_div_mul_mathieuFeU hq hC _).1, (mathieuFeF_eq_div_mul_mathieuFeU hq hC _).1,
+      mathieuFeU_neg]
   ring
 
 /-- Helper for §28.5 (`mathieuGeG_add_pi`). -/
 theorem mathieuGeG_add_pi {n : ℕ} (hn : n ≠ 0) {q : ℝ} (hS : mathieuGeS n q ≠ 0)
     (z : ℂ) : mathieuGeG n (z + π) q = (-1) ^ n * mathieuGeG n z q := by
-  rw [(mathieuGeG_eq_div_mul_mathieuGeU hS _).1, (mathieuGeG_eq_div_mul_mathieuGeU hS _).1, mathieuGeU_add_pi hn]
+  rw [(mathieuGeG_eq_div_mul_mathieuGeU hS _).1, (mathieuGeG_eq_div_mul_mathieuGeU hS _).1,
+      mathieuGeU_add_pi hn]
   ring
 
 /-- Helper for §28.5 (`mathieuGeG_neg`). -/
 private lemma mathieuGeG_neg {n : ℕ} {q : ℝ} (hS : mathieuGeS n q ≠ 0) (z : ℂ) :
     mathieuGeG n (-z) q = mathieuGeG n z q := by
-  rw [(mathieuGeG_eq_div_mul_mathieuGeU hS _).1, (mathieuGeG_eq_div_mul_mathieuGeU hS _).1, mathieuGeU_neg]
+  rw [(mathieuGeG_eq_div_mul_mathieuGeU hS _).1, (mathieuGeG_eq_div_mul_mathieuGeU hS _).1,
+      mathieuGeU_neg]
 
 /-- The normalizing integral of `u` is positive once `fe_n'(0) ≠ 0`. -/
 private lemma integral_norm_sq_pos_of_sqrt_ne_zero {f : ℂ → ℂ}
@@ -509,19 +525,22 @@ private lemma integral_norm_sq_pos_of_sqrt_ne_zero {f : ℂ → ℂ}
   exact h (Real.sqrt_eq_zero'.mpr (div_nonpos_of_nonneg_of_nonpos Real.pi_pos.le hle))
 
 /-- Helper for §28.5 (`conj_mathieuFeU_ofReal`). -/
-private lemma conj_mathieuFeU_ofReal (n : ℕ) (q x : ℝ) : conj (mathieuFeU n x q) = mathieuFeU n x q := by
+private lemma conj_mathieuFeU_ofReal (n : ℕ) (q x : ℝ) : conj (mathieuFeU n x q) =
+    mathieuFeU n x q := by
   simp only [mathieuFeU, mathieuFeMu, map_sub, map_mul, map_div₀, Complex.conj_ofReal]
   rw [conj_mathieuWI_ofReal _ _ x, conj_mathieuWII_ofReal _ _ x, conj_mathieuWI_ofReal _ _ π,
     conj_mathieuWII_ofReal _ _ π]
 
 /-- Helper for §28.5 (`conj_mathieuGeU_ofReal`). -/
-private lemma conj_mathieuGeU_ofReal (n : ℕ) (q x : ℝ) : conj (mathieuGeU n x q) = mathieuGeU n x q := by
+private lemma conj_mathieuGeU_ofReal (n : ℕ) (q x : ℝ) : conj (mathieuGeU n x q) =
+    mathieuGeU n x q := by
   simp only [mathieuGeU, mathieuGeMu, map_sub, map_mul, map_div₀, Complex.conj_ofReal]
   rw [conj_mathieuWI_ofReal _ _ x, conj_mathieuWII_ofReal _ _ x, conj_deriv_mathieuWI_ofReal _ _ π,
     conj_deriv_mathieuWII_ofReal _ _ π]
 
 /-- Helper for §28.5 (`mathieuFeC_sq_mul_integral_mathieuFeF_sq`). -/
-private lemma mathieuFeC_sq_mul_integral_mathieuFeF_sq {n : ℕ} {q : ℝ} (hq : q ≠ 0) (hC : mathieuFeC n q ≠ 0) :
+private lemma mathieuFeC_sq_mul_integral_mathieuFeF_sq {n : ℕ} {q : ℝ} (hq : q ≠ 0)
+    (hC : mathieuFeC n q ≠ 0) :
     mathieuFeC n q ^ 2 * ∫ x in (0 : ℝ)..2 * π, mathieuFeF n x q ^ 2 = π := by
   have key : ∀ x : ℝ, mathieuFeC n q ^ 2 * mathieuFeF n x q ^ 2 =
       ((mathieuFeDerivZero n q : ℂ) * mathieuFeU n x q) ^ 2 := fun x => by
@@ -565,7 +584,8 @@ private lemma sqrt_pi_div_sq_mul {k I : ℝ} (hk : 0 < k) :
   rw [mul_comm, ← div_div, Real.sqrt_div' _ (sq_nonneg k), Real.sqrt_sq hk.le]
 
 /-- For real `A`, `B'` with `A B' = 1`: `A ‖B'‖ / ‖A‖ = B'`. -/
-private lemma mul_norm_div_norm_eq_of_real {A B : ℂ} (hA : conj A = A) (hB : conj B = B) (h : A * B = 1) :
+private lemma mul_norm_div_norm_eq_of_real {A B : ℂ} (hA : conj A = A) (hB : conj B = B)
+    (h : A * B = 1) :
     A * ‖B‖ / ‖A‖ = B := by
   obtain ⟨r, rfl⟩ := Complex.conj_eq_iff_real.mp hA
   obtain ⟨s, rfl⟩ := Complex.conj_eq_iff_real.mp hB
@@ -604,8 +624,10 @@ private lemma mathieuCeZero_even_neg_q (m : ℕ) (q : ℝ) :
       push_cast; rw [mathieuWI_mathieuA_add_pi, norm_mul]; simp; rfl),
     sqrt_pi_div_sq_mul hB]
 
-/-- Helper for §28.5 (`mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWI_half_pi_eq_zero`). -/
-private lemma mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWI_half_pi_eq_zero {a q : ℂ} (hA' : deriv (mathieuWI a q) (π / 2) = 0) (z : ℂ) :
+/-- Helper for §28.5
+(`mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWI_half_pi_eq_zero`). -/
+private lemma mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWI_half_pi_eq_zero {a q : ℂ}
+    (hA' : deriv (mathieuWI a q) (π / 2) = 0) (z : ℂ) :
     mathieuWII a (-q) z - mathieuWI a (-q) π * mathieuWII a (-q) π / π * z * mathieuWI a (-q) z =
       mathieuWI a q (π / 2) * (mathieuWII a q (z + π / 2) -
         mathieuWI a q π * mathieuWII a q π / π * (z + π / 2) * mathieuWI a q (z + π / 2)) := by
@@ -634,7 +656,9 @@ private lemma mathieuFeDerivZero_even_neg_q (m : ℕ) (q : ℝ) :
       ‖mathieuWI a q (π / 2)‖ ^ 2 * ‖mathieuFeU (2 * m) ((x + π / 2 : ℝ) : ℂ) q‖ ^ 2 := by
     intro x
     simp only [mathieuFeU, mathieuFeMu]
-    rw [mathieuA_even_neg, Complex.ofReal_neg, mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWI_half_pi_eq_zero hA', norm_mul, mul_pow]
+    rw [mathieuA_even_neg, Complex.ofReal_neg,
+        mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWI_half_pi_eq_zero hA',
+        norm_mul, mul_pow]
     push_cast; rfl
   rw [mathieuFeDerivZero, mathieuFeDerivZero]
   simp_rw [e]
@@ -643,8 +667,10 @@ private lemma mathieuFeDerivZero_even_neg_q (m : ℕ) (q : ℝ) :
       push_cast; rw [mathieuFeU_add_pi, norm_mul]; simp),
     sqrt_pi_div_sq_mul hA]
 
-/-- Helper for §28.5 (`mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWII_half_pi_eq_zero`). -/
-private lemma mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWII_half_pi_eq_zero {a q : ℂ} (hB' : deriv (mathieuWII a q) (π / 2) = 0) (z : ℂ) :
+/-- Helper for §28.5
+(`mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWII_half_pi_eq_zero`). -/
+private lemma mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWII_half_pi_eq_zero
+    {a q : ℂ} (hB' : deriv (mathieuWII a q) (π / 2) = 0) (z : ℂ) :
     mathieuWII a (-q) z - mathieuWI a (-q) π * mathieuWII a (-q) π / π * z * mathieuWI a (-q) z =
       -mathieuWII a q (π / 2) * (mathieuWI a q (z + π / 2) -
         deriv (mathieuWI a q) π * deriv (mathieuWII a q) π / π * (z + π / 2) *
@@ -662,7 +688,8 @@ private lemma mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWII_half
       deriv (mathieuWI a q) (π / 2) ^ 2) * hππ
 
 /-- Helper for §28.5 (`mathieuWI_sub_linear_mul_mathieuWII_neg_q_of_mathieuWII_half_pi_eq_zero`). -/
-private lemma mathieuWI_sub_linear_mul_mathieuWII_neg_q_of_mathieuWII_half_pi_eq_zero {a q : ℂ} (hB : mathieuWII a q (π / 2) = 0) (z : ℂ) :
+private lemma mathieuWI_sub_linear_mul_mathieuWII_neg_q_of_mathieuWII_half_pi_eq_zero {a q : ℂ}
+    (hB : mathieuWII a q (π / 2) = 0) (z : ℂ) :
     mathieuWI a (-q) z - deriv (mathieuWI a (-q)) π * deriv (mathieuWII a (-q)) π / π * z *
         mathieuWII a (-q) z =
       deriv (mathieuWII a q) (π / 2) * (mathieuWI a q (z + π / 2) -
@@ -718,7 +745,9 @@ private lemma mathieuFeDerivZero_odd_neg_q (m : ℕ) (q : ℝ) :
       ‖mathieuWII b q (π / 2)‖ ^ 2 * ‖mathieuGeU (2 * m + 1) ((x + π / 2 : ℝ) : ℂ) q‖ ^ 2 := by
     intro x
     simp only [mathieuFeU, mathieuFeMu, mathieuGeU, mathieuGeMu]
-    rw [mathieuA_odd_neg, Complex.ofReal_neg, mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWII_half_pi_eq_zero hB', norm_mul, norm_neg,
+    rw [mathieuA_odd_neg, Complex.ofReal_neg,
+        mathieuWII_sub_linear_mul_mathieuWI_neg_q_of_deriv_mathieuWII_half_pi_eq_zero hB',
+        norm_mul, norm_neg,
       mul_pow]
     push_cast; rfl
   rw [mathieuFeDerivZero, mathieuGeZero]
@@ -765,7 +794,9 @@ private lemma mathieuGeZero_even_neg_q (m : ℕ) (q : ℝ) :
         ‖mathieuGeU (2 * m + 2) ((x + π / 2 : ℝ) : ℂ) q‖ ^ 2 := by
     intro x
     simp only [mathieuGeU, mathieuGeMu]
-    rw [mathieuB_even_neg, Complex.ofReal_neg, mathieuWI_sub_linear_mul_mathieuWII_neg_q_of_mathieuWII_half_pi_eq_zero hB, norm_mul, mul_pow]
+    rw [mathieuB_even_neg, Complex.ofReal_neg,
+        mathieuWI_sub_linear_mul_mathieuWII_neg_q_of_mathieuWII_half_pi_eq_zero hB,
+        norm_mul, mul_pow]
     push_cast; rfl
   rw [mathieuGeZero, mathieuGeZero]
   simp_rw [e]
@@ -871,7 +902,8 @@ theorem mathieuFeC_ne_zero (n : ℕ) {q : ℝ} (hq : q ≠ 0) : mathieuFeC n q �
       (by
         intro h0
         apply hq'
-        refine q_eq_zero_of_mathieuWII_eq_mul_mathieuWI (a := a) (μ := mathieuFeMu n q) (fun z => ?_)
+        refine q_eq_zero_of_mathieuWII_eq_mul_mathieuWI (a := a)
+            (μ := mathieuFeMu n q) (fun z => ?_)
         have := congrFun h0 z
         simp only [mathieuFeU, Pi.zero_apply] at this
         linear_combination this)

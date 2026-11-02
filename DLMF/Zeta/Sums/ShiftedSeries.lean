@@ -71,7 +71,8 @@ theorem hasSum_riemannZeta_sub_one :
   have hS : Summable F := (summable_prod_of_nonneg hF0).mpr
     ⟨fun n => (hasSum_one_div_add_two_pow_add_two n).summable, by
       simp only [hF]
-      exact hasSum_one_div_add_two_mul_add_one.summable.congr fun n => (hasSum_one_div_add_two_pow_add_two n).tsum_eq.symm⟩
+      exact hasSum_one_div_add_two_mul_add_one.summable.congr fun n =>
+          (hasSum_one_div_add_two_pow_add_two n).tsum_eq.symm⟩
   have h1 : HasSum F 1 := by
     have := hS.hasSum.prod_fiberwise fun n => hasSum_one_div_add_two_pow_add_two n
     rw [hasSum_one_div_add_two_mul_add_one.unique this]; exact hS.hasSum
@@ -119,7 +120,8 @@ private lemma hasSum_ascPochhammer_div_factorial_mul_pow (a : ℂ) {x : ℂ} (hx
   rw [e, hm, mul_comm]
 
 /-- `(t)_k ≥ 0` for `t ≥ 0`. -/
-private lemma ascPochhammer_eval_nonneg {t : ℝ} (ht : 0 ≤ t) (k : ℕ) : 0 ≤ (ascPochhammer ℝ k).eval t := by
+private lemma ascPochhammer_eval_nonneg {t : ℝ} (ht : 0 ≤ t) (k : ℕ) : 0 ≤
+    (ascPochhammer ℝ k).eval t := by
   induction k with
   | zero => simp
   | succ k ih => rw [ascPochhammer_succ_eval]; positivity
@@ -168,7 +170,8 @@ private lemma isPreconnected_complOneSubNat : IsPreconnected complOneSubNat :=
   ((Set.countable_range _).isConnected_compl_of_one_lt_rank
     (by rw [Complex.rank_real_complex]; norm_num)).isPreconnected
 
-/-- Estimate under the stated parameter and domain assumptions: `{s : ℂ | 1 < s.re} ⊆ complOneSubNat`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`{s : ℂ | 1 < s.re} ⊆ complOneSubNat`. -/
 private lemma setOf_one_lt_re_subset_complOneSubNat : {s : ℂ | 1 < s.re} ⊆ complOneSubNat := by
   intro s hs
   have hs' : 1 < s.re := hs
@@ -224,7 +227,8 @@ private lemma exists_norm_riemannZeta_sub_one_le : ∃ C : ℝ, 0 ≤ C ∧ ∀ 
     _ = _ := tsum_mul_left
 
 /-- The real Pochhammer series `∑ (t)_k/k! x^k` converges for `0 ≤ x < 1`. -/
-private lemma summable_ascPochhammer_div_factorial_mul_pow_real (t : ℝ) {x : ℝ} (hx0 : 0 ≤ x) (hx : x < 1) :
+private lemma summable_ascPochhammer_div_factorial_mul_pow_real (t : ℝ) {x : ℝ}
+    (hx0 : 0 ≤ x) (hx : x < 1) :
     Summable fun k : ℕ => (ascPochhammer ℝ k).eval t / k ! * x ^ k := by
   have h := (hasSum_ascPochhammer_div_factorial_mul_pow (t : ℂ) (x := (x : ℂ)) (by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hx0]; exact hx)).summable
@@ -239,7 +243,8 @@ private lemma summable_ascPochhammer_div_factorial_mul_pow_real (t : ℝ) {x : �
   exact Complex.summable_ofReal.mp h
 
 /-- DLMF 25.8.3 for `Re s > 1`. -/
-private lemma hasSum_ascPochhammer_mul_riemannZeta_div_two_pow_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
+private lemma hasSum_ascPochhammer_mul_riemannZeta_div_two_pow_of_one_lt_re {s : ℂ}
+    (hs : 1 < s.re) :
     HasSum (fun k : ℕ => (ascPochhammer ℂ k).eval s * riemannZeta (s + k) / (k ! * 2 ^ (s + k)))
       ((1 - 2 ^ (-s)) * riemannZeta s) := by
   set b : ℕ → ℝ := fun m => 2 * ((m : ℝ) + 1) with hb
@@ -260,7 +265,8 @@ private lemma hasSum_ascPochhammer_mul_riemannZeta_div_two_pow_of_one_lt_re {s :
       simp only [hb]
       rw [Real.mul_rpow (by norm_num) (by positivity)]
       push_cast; ring_nf
-    have hh := summable_ascPochhammer_div_factorial_mul_pow_real ‖s‖ (x := 1 / 2) (by norm_num) (by norm_num)
+    have hh := summable_ascPochhammer_div_factorial_mul_pow_real ‖s‖ (x := 1 / 2)
+        (by norm_num) (by norm_num)
     refine Summable.of_norm_bounded (hh.mul_of_nonneg hg
       (fun k => by have := ascPochhammer_eval_nonneg (norm_nonneg s) k; positivity)
       (fun m => by have := hb0 m; positivity)) fun p => ?_
@@ -374,7 +380,8 @@ private lemma ascPochhammer_eval_mono {t u : ℝ} (ht : 0 ≤ t) (htu : t ≤ u)
 
 /-- Local data for the dominations: near `x`, `‖y‖ ≤ R` and, for `n ≥ N`, `Re(y+n) ≥ 2` and
 `‖2^{-(y+n)}‖ ≤ 2^R 2^{-n}`. -/
-private lemma exists_nhds_bound_inv_two_cpow (x : ℂ) : ∃ V ∈ 𝓝 x, ∃ R : ℝ, 0 ≤ R ∧ ∃ N : ℕ, ∀ y ∈ V, ‖y‖ ≤ R ∧
+private lemma exists_nhds_bound_inv_two_cpow (x : ℂ) : ∃ V ∈ 𝓝 x, ∃ R : ℝ, 0 ≤ R ∧ ∃ N : ℕ,
+    ∀ y ∈ V, ‖y‖ ≤ R ∧
     ∀ n : ℕ, N ≤ n → 2 ≤ (y + n).re ∧ ‖(2 : ℂ) ^ (y + n)‖⁻¹ ≤ 2 ^ R * (1 / 2) ^ n := by
   refine ⟨Metric.ball x 1, Metric.ball_mem_nhds x one_pos, ‖x‖ + 1, by positivity,
     ⌈‖x‖ + 1⌉₊ + 2, fun y hy => ?_⟩
@@ -400,7 +407,8 @@ private lemma exists_nhds_bound_inv_two_cpow (x : ℂ) : ∃ V ∈ 𝓝 x, ∃ R
   linarith
 
 /-- The terms of 25.8.3 are holomorphic on `ℂ ∖ {1, 0, -1, …}`. -/
-private lemma differentiableOn_ascPochhammer_mul_riemannZeta_div_two_pow (k : ℕ) : DifferentiableOn ℂ (fun s : ℂ =>
+private lemma differentiableOn_ascPochhammer_mul_riemannZeta_div_two_pow (k : ℕ) : DifferentiableOn
+    ℂ (fun s : ℂ =>
     (ascPochhammer ℂ k).eval s * riemannZeta (s + k) / (k ! * 2 ^ (s + k))) complOneSubNat := by
   intro s hs
   have hs' := mem_complOneSubNat.mp hs
@@ -415,7 +423,8 @@ private lemma differentiableOn_ascPochhammer_mul_riemannZeta_div_two_pow (k : �
       (cpow_ne_zero_iff.mpr (Or.inl two_ne_zero))
 
 /-- `∑_k (s)_k x^k/(k+1)! = ((1-x)^{1-s} - 1)/((s-1)x)` for `0 < ‖x‖ < 1`, `s ≠ 1`. -/
-private lemma hasSum_ascPochhammer_div_factorial_succ_mul_pow {s x : ℂ} (hs : s ≠ 1) (hx0 : x ≠ 0) (hx : ‖x‖ < 1) :
+private lemma hasSum_ascPochhammer_div_factorial_succ_mul_pow {s x : ℂ} (hs : s ≠ 1) (hx0 : x ≠ 0)
+    (hx : ‖x‖ < 1) :
     HasSum (fun k : ℕ => (ascPochhammer ℂ k).eval s / (k + 1) ! * x ^ k)
       ((1 / (1 - x) ^ (s - 1) - 1) / ((s - 1) * x)) := by
   have h := (hasSum_nat_add_iff' 1).mpr (hasSum_ascPochhammer_div_factorial_mul_pow (s - 1) hx)
@@ -453,7 +462,8 @@ private lemma hasSum_ascPochhammer_mul_riemannZeta_sub_one_of_one_lt_re {s : ℂ
         linarith))
       refine this.congr fun m => ?_
       simp only [hc]; push_cast; ring_nf
-    have hh := summable_ascPochhammer_div_factorial_mul_pow_real ‖s‖ (x := 1 / 2) (by norm_num) (by norm_num)
+    have hh := summable_ascPochhammer_div_factorial_mul_pow_real ‖s‖ (x := 1 / 2)
+        (by norm_num) (by norm_num)
     refine Summable.of_norm_bounded (hh.mul_of_nonneg hg
       (fun k => by have := ascPochhammer_eval_nonneg (norm_nonneg s) k; positivity)
       (fun m => by have := hc0 m; positivity)) fun p => ?_
@@ -555,7 +565,8 @@ private lemma hasSum_ascPochhammer_mul_riemannZeta_sub_one_of_one_lt_re {s : ℂ
   exact hA
 
 /-- The terms of the 25.8.2 core series are holomorphic on `ℂ ∖ {1, 0, -1, …}`. -/
-private lemma differentiableOn_ascPochhammer_mul_riemannZeta_sub_one (k : ℕ) : DifferentiableOn ℂ (fun s : ℂ =>
+private lemma differentiableOn_ascPochhammer_mul_riemannZeta_sub_one (k : ℕ) : DifferentiableOn
+    ℂ (fun s : ℂ =>
     (ascPochhammer ℂ k).eval s / (k + 1) ! * (riemannZeta (s + k) - 1)) complOneSubNat := by
   intro s hs
   have hs' := mem_complOneSubNat.mp hs
@@ -571,7 +582,8 @@ private lemma hasSum_ascPochhammer_mul_riemannZeta_sub_one {s : ℂ} (hs : s ∈
       (1 / (s - 1)) := by
   obtain ⟨C, hC0, hC⟩ := exists_norm_riemannZeta_sub_one_le
   refine hasSum_on_complOneSubNat_of_one_lt_re (fun k s => (ascPochhammer ℂ k).eval s / (k + 1) ! *
-      (riemannZeta (s + k) - 1)) (fun s => 1 / (s - 1)) differentiableOn_ascPochhammer_mul_riemannZeta_sub_one ?_ ?_
+      (riemannZeta (s + k) - 1)) (fun s => 1 / (s - 1))
+          differentiableOn_ascPochhammer_mul_riemannZeta_sub_one ?_ ?_
     (fun s hs => hasSum_ascPochhammer_mul_riemannZeta_sub_one_of_one_lt_re hs) s hs
   · intro z hz
     have hz1 : z - 1 ≠ 0 := by
@@ -582,7 +594,8 @@ private lemma hasSum_ascPochhammer_mul_riemannZeta_sub_one {s : ℂ} (hs : s ∈
   · intro x _
     obtain ⟨V, hV, R, hR, N, hloc⟩ := exists_nhds_bound_inv_two_cpow x
     refine ⟨V, hV, N, fun n => (ascPochhammer ℝ n).eval R / n ! * (1 / 2) ^ n * (4 * 2 ^ R * C),
-      (summable_ascPochhammer_div_factorial_mul_pow_real R (by norm_num) (by norm_num)).mul_right _, ?_⟩
+      (summable_ascPochhammer_div_factorial_mul_pow_real R (by norm_num)
+          (by norm_num)).mul_right _, ?_⟩
     intro n hn y hy
     obtain ⟨hyR, hy2⟩ := hloc y hy
     obtain ⟨hre, h2⟩ := hy2 n hn
@@ -639,8 +652,10 @@ theorem hasSum_pochhammer_mul_riemannZeta {s : ℂ} (hs1 : s ≠ 1) (hs : ∀ n 
     rcases n with _ | m
     · simpa using hs1
     · have := hs m; push_cast; intro h; exact this (by linear_combination h)
-  refine hasSum_on_complOneSubNat_of_one_lt_re (fun k s => (ascPochhammer ℂ k).eval s * riemannZeta (s + k) /
-      (k ! * 2 ^ (s + k))) (fun s => (1 - 2 ^ (-s)) * riemannZeta s) differentiableOn_ascPochhammer_mul_riemannZeta_div_two_pow ?_ ?_
+  refine hasSum_on_complOneSubNat_of_one_lt_re
+      (fun k s => (ascPochhammer ℂ k).eval s * riemannZeta (s + k) /
+      (k ! * 2 ^ (s + k))) (fun s => (1 - 2 ^ (-s)) * riemannZeta s)
+          differentiableOn_ascPochhammer_mul_riemannZeta_div_two_pow ?_ ?_
     (fun s hs => hasSum_ascPochhammer_mul_riemannZeta_div_two_pow_of_one_lt_re hs) s hU
   · intro z hz
     have hz1 : z ≠ 1 := by have := mem_complOneSubNat.mp hz 0; simpa using this
@@ -650,7 +665,8 @@ theorem hasSum_pochhammer_mul_riemannZeta {s : ℂ} (hs1 : s ≠ 1) (hs : ∀ n 
   · intro x _
     obtain ⟨V, hV, R, hR, N, hloc⟩ := exists_nhds_bound_inv_two_cpow x
     refine ⟨V, hV, N, fun n => (ascPochhammer ℝ n).eval R / n ! * (1 / 2) ^ n * ((1 + C) * 2 ^ R),
-      (summable_ascPochhammer_div_factorial_mul_pow_real R (by norm_num) (by norm_num)).mul_right _, ?_⟩
+      (summable_ascPochhammer_div_factorial_mul_pow_real R (by norm_num)
+          (by norm_num)).mul_right _, ?_⟩
     intro n hn y hy
     obtain ⟨hyR, hy2⟩ := hloc y hy
     obtain ⟨hre, h2⟩ := hy2 n hn

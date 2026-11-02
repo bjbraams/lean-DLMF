@@ -521,7 +521,8 @@ theorem gaussCF_uR_le {a b c x : ℝ} (ha : 0 < a) (hca : a < c) (hcb : b < c)
 theorem gauss_continued_fraction_limit {a b c x : ℝ} (ha : 0 < a) (hb : 0 < b)
     (hca : a < c) (hcb : b < c) (hx : 0 < x) (hx1 : x < 1 / 2) :
     Tendsto (gaussContinuedFraction a b c x).convs atTop
-      (𝓝 (regularizedGaussHGFun a b c (x : ℂ) / regularizedGaussHGFun a (b + 1) (c + 1) (x : ℂ))) := by
+      (𝓝 (regularizedGaussHGFun a b c (x : ℂ) /
+          regularizedGaussHGFun a (b + 1) (c + 1) (x : ℂ))) := by
   have hx1' : x < 1 := by linarith
   have hxa : |x| < 1 := by rw [abs_of_pos hx]; exact hx1'
   set w := gaussCF_wR a b c x with hwdef
@@ -580,7 +581,8 @@ c (x : ℂ) / regularizedGaussHGFun a (b + 1) (c + 1) (x : ℂ)))` along `atTop`
 theorem contiguous_continued_fraction_limit {a b c x : ℝ} (ha : 0 < a) (hb : 0 < b)
     (hca : a < c) (hcb : b < c) (hx : 0 < x) (hx1 : x < 1 / 2) :
     Tendsto (contiguousContinuedFraction a b c x).convs atTop
-      (𝓝 (regularizedGaussHGFun a b c (x : ℂ) / regularizedGaussHGFun a (b + 1) (c + 1) (x : ℂ))) := by
+      (𝓝 (regularizedGaussHGFun a b c (x : ℂ) /
+          regularizedGaussHGFun a (b + 1) (c + 1) (x : ℂ))) := by
   have hx1' : x < 1 := by linarith
   have hxa : |x| < 1 := by rw [abs_of_pos hx]; exact hx1'
   set v := gaussCF_vR a b c x with hvdef
@@ -666,7 +668,8 @@ c (x : ℂ) / regularizedGaussHGFun (a + 1) (b + 1) (c + 1) (x : ℂ)))` along `
 theorem derivative_continued_fraction_limit {a b c x : ℝ} (ha : 0 < a) (hb : 0 < b)
     (hca : a < c) (hcb : b < c) (hx : 0 < x) (hx1 : x < 1 / 2) :
     Tendsto (derivativeContinuedFraction a b c x).convs atTop
-      (𝓝 (regularizedGaussHGFun a b c (x : ℂ) / regularizedGaussHGFun (a + 1) (b + 1) (c + 1) (x : ℂ))) := by
+      (𝓝 (regularizedGaussHGFun a b c (x : ℂ) /
+          regularizedGaussHGFun (a + 1) (b + 1) (c + 1) (x : ℂ))) := by
   have hx1' : x < 1 := by linarith
   have hxa : |x| < 1 := by rw [abs_of_pos hx]; exact hx1'
   have hc : 0 < c := by linarith

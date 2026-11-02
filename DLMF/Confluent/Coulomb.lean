@@ -65,7 +65,8 @@ theorem hasDerivAt_coulombWave (ℓ : ℕ) (η z : ℂ) :
     exact this.congr_deriv (by simp only [mul_one, id]; ring)
   have h := ((hasDerivAt_pow (ℓ + 1) z).mul hE).mul
     (hasDerivAt_kummerM_two_I_mul (α := ℓ + 1 - I * η) (two_mul_nat_add_two_ne_neg_nat ℓ) z)
-  exact h.congr_deriv (by unfold coulombWaveDeriv; simp only [Nat.add_sub_cancel, Pi.mul_apply]; ring)
+  exact h.congr_deriv (by unfold coulombWaveDeriv;
+                          simp only [Nat.add_sub_cancel, Pi.mul_apply]; ring)
 
 /-- **The Coulomb wave equation** (DLMF 33.2.1, Temme 7.19), multiplied by `z²`:
 `z² w'' + (z² - 2ηz - ℓ(ℓ+1)) w = 0` for the regular solution. -/

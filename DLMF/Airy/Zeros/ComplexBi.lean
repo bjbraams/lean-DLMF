@@ -128,7 +128,8 @@ theorem airyZ_zeta_recip_tendsto (α : ℝ) :
     norm_num
   simp only [hn]
   exact ((((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 3 / 2)).comp
-    (tendsto_comap.mono_left inf_le_left)).const_mul_atTop (by norm_num : (0 : ℝ) < 2 / 3))).inv_tendsto_atTop
+    (tendsto_comap.mono_left inf_le_left)).const_mul_atTop
+        (by norm_num : (0 : ℝ) < 2 / 3))).inv_tendsto_atTop
 
 /-- The leading-order part of a normalized expansion, in quantitative form. -/
 theorem airyZ_small {F : ℂ → ℂ} {c : ℕ → ℂ} {α : ℝ}
@@ -151,7 +152,8 @@ theorem airyZ_exp_neg_pi_half : exp (-(π * I / 6)) * exp (-(π * I / 3)) = -I :
 
 /-- `Bi(z) = 2 e^{-πi/6} Ai(z e^{-2πi/3}) + i Ai(z)`, a rearranged connection formula. -/
 theorem airyZ_bi_eq (z : ℂ) :
-    airyBi z = 2 * exp (-(π * I / 6)) * airyAi (z * exp (-(2 * π * I / 3))) + I * airyAi (z * 1) := by
+    airyBi z = 2 * exp (-(π * I / 6)) * airyAi (z * exp (-(2 * π * I / 3))) + I *
+        airyAi (z * 1) := by
   rw [airyAi_mul_omega_recip, mul_one]
   have h := airyZ_exp_neg_pi_half
   linear_combination (-(airyAi z + I * airyBi z)) * h + airyBi z * I_sq
@@ -236,7 +238,8 @@ theorem airyZ_Fbid_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) 
   have hu2 : exp u = a * a := by rw [← exp_add]; congr 1; ring
   have hb' : exp (-(L / 6)) = (exp (L / 6))⁻¹ := by rw [exp_neg]
   have hq : exp (-(π * I / 6)) * exp (-(π * I / 6)) * exp (-(2 * π * I / 3)) = -1 := by
-    rw [← exp_add, ← exp_add, show -(π * I / 6) + -(π * I / 6) + -(2 * π * I / 3) = -(π * I) by ring,
+    rw [← exp_add, ← exp_add, show -(π * I / 6) + -(π * I / 6) + -(2 * π * I / 3) =
+        -(π * I) by ring,
       exp_neg, exp_pi_mul_I]; norm_num
   have hq0 : exp (-(π * I / 6)) ≠ 0 := exp_ne_zero _
   have ha0 : a ≠ 0 := exp_ne_zero _
@@ -581,7 +584,8 @@ theorem airyBiZero_value {k : ℕ} (hk : 1 ≤ k) :
 /-- `Ai(a'_k) = (-1)^{k-1}/(π N(a'_k))` (DLMF 9.9.4). -/
 @[dlmf 9.9.E4]
 theorem airyAiDerivZero_value {k : ℕ} (hk : 1 ≤ k) :
-    airyAi (airyAiDerivZero k) = (-1 : ℂ) ^ (k - 1) / (π * airyDerivModulus (airyAiDerivZero k)) := by
+    airyAi (airyAiDerivZero k) = (-1 : ℂ) ^ (k - 1) /
+        (π * airyDerivModulus (airyAiDerivZero k)) := by
   obtain ⟨-, h0, -, hθ⟩ := phaseZeroData_airyAiDeriv.spec hk
   set x := airyRealZero airyAiDerivReal k
   change airyAi x = _
@@ -639,7 +643,8 @@ theorem hasDerivAt_phaseLevel {g : ℝ → ℝ} {g' d t₀ : ℝ} (hgc : Continu
     continuous_const)
   have hex : ∀ t ∈ U, ∃ x ≤ 0, g x = (t + d) * π := by
     intro t ht
-    obtain ⟨x0, hx0⟩ := (htend.eventually (eventually_ge_atTop ((t + d) * π))).exists_forall_of_atBot
+    obtain ⟨x0, hx0⟩ := (htend.eventually
+        (eventually_ge_atTop ((t + d) * π))).exists_forall_of_atBot
     obtain ⟨x, hx, hgx⟩ := intermediate_value_Icc' (min_le_right x0 0) hgc.continuousOn
       (mem_Icc.mpr ⟨(ht : g 0 < _).le, hx0 _ (min_le_left _ _)⟩)
     exact ⟨x, hx.2, hgx⟩
@@ -763,37 +768,52 @@ theorem airyAiDerivZeroContinuous_derivative_value {k : ℕ} (hk : 1 ≤ k) :
   rw [← hfun, hε] at hd
   rw [hd.deriv, airyAiDerivZero_value hk]
   have hM := airyDerivModulus_pos (airyAiDerivZero k)
-  rw [show airyAiDerivZero k * (π / (airyAiDerivZero k / (π * airyDerivModulus (airyAiDerivZero k) ^ 2))) =
+  rw [show airyAiDerivZero k *
+      (π / (airyAiDerivZero k / (π * airyDerivModulus (airyAiDerivZero k) ^ 2))) =
       (π * airyDerivModulus (airyAiDerivZero k)) ^ 2 by
         have := hneg.ne; field_simp,
     ofReal_sq_cpow_neg_half (by positivity)]
   push_cast
   ring
 
-/-- The common all-order T,U,V,W expansions, including every printed coefficient and real/complex zero family in DLMF 9.9.6–9.9.21 (DLMF 9.9.18). -/
-@[dlmf 9.9.E6, dlmf 9.9.E7, dlmf 9.9.E8, dlmf 9.9.E9, dlmf 9.9.E10, dlmf 9.9.E11, dlmf 9.9.E12, dlmf 9.9.E13, dlmf 9.9.E14, dlmf 9.9.E15, dlmf 9.9.E16, dlmf 9.9.E17, dlmf 9.9.E18, dlmf 9.9.E19, dlmf 9.9.E20, dlmf 9.9.E21]
+/-- The common all-order T,U,V,W expansions, including every printed coefficient and real/complex
+zero family in DLMF 9.9.6–9.9.21 (DLMF 9.9.18). -/
+@[dlmf 9.9.E6, dlmf 9.9.E7, dlmf 9.9.E8, dlmf 9.9.E9, dlmf 9.9.E10, dlmf 9.9.E11, dlmf 9.9.E12,
+    dlmf 9.9.E13, dlmf 9.9.E14, dlmf 9.9.E15, dlmf 9.9.E16, dlmf 9.9.E17, dlmf 9.9.E18,
+    dlmf 9.9.E19, dlmf 9.9.E20, dlmf 9.9.E21]
 theorem airy_zero_common_asymptotic_coefficients :
     ∃ cT cU cV cW : ℕ → ℂ,
-      (∀ n < 6, cT n = ([1, 5/48, -5/36, 77125/82944, -108056875/6967296, 162375596875/334430208] : List ℂ)[n]! ∧
-      ∀ n < 6, cU n = ([1, -7/48, 35/288, -181223/207360, 18683371/1244160, -91145884361/191102976] : List ℂ)[n]! ∧
-      ∀ n < 6, cV n = ([1, 5/48, -1525/4608, 2397875/663552, -74898940625/891813888, 144198303734375/42807066624] : List ℂ)[n]! ∧
-      ∀ n < 6, cW n = ([1, -7/96, 1673/6144, -84394709/26542080, 780277135421/10192158720, -204449051051945/65229815808] : List ℂ)[n]!) ∧
+      (∀ n < 6, cT n = ([1, 5/48, -5/36, 77125/82944, -108056875/6967296,
+          162375596875/334430208] : List ℂ)[n]! ∧
+      ∀ n < 6, cU n = ([1, -7/48, 35/288, -181223/207360, 18683371/1244160,
+          -91145884361/191102976] : List ℂ)[n]! ∧
+      ∀ n < 6, cV n = ([1, 5/48, -1525/4608, 2397875/663552, -74898940625/891813888,
+          144198303734375/42807066624] : List ℂ)[n]! ∧
+      ∀ n < 6, cW n = ([1, -7/96, 1673/6144, -84394709/26542080, 780277135421/10192158720,
+          -204449051051945/65229815808] : List ℂ)[n]!) ∧
       HasAiryZeroExpansion (2 / 3) (fun k => -(airyAiZero (k + 1) : ℂ)) (airyZeroArgument 1) cT ∧
-      HasAiryZeroExpansion (2 / 3) (fun k => -(airyAiDerivZero (k + 1) : ℂ)) (airyZeroArgument 3) cU ∧
+      HasAiryZeroExpansion (2 / 3) (fun k => -(airyAiDerivZero (k + 1) : ℂ))
+          (airyZeroArgument 3) cU ∧
       HasAiryZeroExpansion (2 / 3) (fun k => -(airyBiZero (k + 1) : ℂ)) (airyZeroArgument 3) cT ∧
-      HasAiryZeroExpansion (2 / 3) (fun k => -(airyBiDerivZero (k + 1) : ℂ)) (airyZeroArgument 1) cU ∧
+      HasAiryZeroExpansion (2 / 3) (fun k => -(airyBiDerivZero (k + 1) : ℂ))
+          (airyZeroArgument 1) cU ∧
       HasAiryZeroExpansion (1 / 6)
-        (fun k => Real.sqrt π * (-1 : ℂ) ^ (k) * airyAiDeriv (airyAiZero (k + 1))) (airyZeroArgument 1) cV ∧
+        (fun k => Real.sqrt π * (-1 : ℂ) ^ (k) * airyAiDeriv (airyAiZero (k + 1)))
+            (airyZeroArgument 1) cV ∧
       HasAiryZeroExpansion (-1 / 6)
-        (fun k => Real.sqrt π * (-1 : ℂ) ^ (k) * airyAi (airyAiDerivZero (k + 1))) (airyZeroArgument 3) cW ∧
+        (fun k => Real.sqrt π * (-1 : ℂ) ^ (k) * airyAi (airyAiDerivZero (k + 1)))
+            (airyZeroArgument 3) cW ∧
       HasAiryZeroExpansion (1 / 6)
-        (fun k => Real.sqrt π * (-1 : ℂ) ^ (k) * airyBiDeriv (airyBiZero (k + 1))) (airyZeroArgument 3) cV ∧
+        (fun k => Real.sqrt π * (-1 : ℂ) ^ (k) * airyBiDeriv (airyBiZero (k + 1)))
+            (airyZeroArgument 3) cV ∧
       HasAiryZeroExpansion (-1 / 6)
-        (fun k => Real.sqrt π * (-1 : ℂ) ^ (k + 1) * airyBi (airyBiDerivZero (k + 1))) (airyZeroArgument 1) cW ∧
+        (fun k => Real.sqrt π * (-1 : ℂ) ^ (k + 1) * airyBi (airyBiDerivZero (k + 1)))
+            (airyZeroArgument 1) cW ∧
       HasAiryZeroExpansion (2 / 3)
         (fun k => exp (-π * I / 3) * airyBiComplexZero (k + 1)) (airyComplexZeroArgument 1) cT ∧
       HasAiryZeroExpansion (2 / 3)
-        (fun k => exp (-π * I / 3) * airyBiDerivComplexZero (k + 1)) (airyComplexZeroArgument 3) cU ∧
+        (fun k => exp (-π * I / 3) * airyBiDerivComplexZero (k + 1))
+            (airyComplexZeroArgument 3) cU ∧
       HasAiryZeroExpansion (1 / 6)
         (fun k => Real.sqrt π / Real.sqrt 2 * (-1 : ℂ) ^ (k + 1) * exp (π * I / 6) *
           airyBiDeriv (airyBiComplexZero (k + 1))) (airyComplexZeroArgument 1) cV ∧

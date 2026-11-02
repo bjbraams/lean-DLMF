@@ -130,7 +130,8 @@ private lemma integral_pi_eq_zero_of_reflect {f : ℝ → ℂ} (hf : ∀ x, f (�
   linear_combination h1 / 2
 
 /-- Doubling the interval for a `π`-periodic integrand. -/
-private lemma integral_two_pi_eq_two_mul_of_periodic_pi {f : ℝ → ℂ} (hc : Continuous f) (hf : ∀ x, f (x + π) = f x) :
+private lemma integral_two_pi_eq_two_mul_of_periodic_pi {f : ℝ → ℂ} (hc : Continuous f)
+    (hf : ∀ x, f (x + π) = f x) :
     ∫ x in (0 : ℝ)..2 * π, f x = 2 * ∫ x in (0 : ℝ)..π, f x := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := π) (hc.intervalIntegrable _ _)
     (hc.intervalIntegrable _ _)]
@@ -439,7 +440,8 @@ theorem mathieuMeCoeff_neg_natCast_eq_integral {N : ℕ} (hN0 : N ≠ 0) (q : �
       ∫ x in (0 : ℝ)..2 * π, mathieuSe N x q * Complex.sin (((-(N : ℤ) + 2 * k : ℤ) : ℂ) * x) := by
   set K : ℤ := -(N : ℤ) + 2 * k
   have hex : ∃ k' : ℤ, (k' : ℂ) = ((-(N : ℤ) : ℤ) : ℂ) := ⟨-(N : ℤ), rfl⟩
-  have hNK : (-1 : ℂ) ^ N * (-1 : ℂ) ^ K = 1 := neg_one_pow_mul_neg_one_zpow_eq_one ⟨k - N, by simp [K]; ring⟩
+  have hNK : (-1 : ℂ) ^ N * (-1 : ℂ) ^ K = 1 :=
+      neg_one_pow_mul_neg_one_zpow_eq_one ⟨k - N, by simp [K]; ring⟩
   have hse := (isMathieuSolution_mathieuSe N q).differentiable
   have hsc : Continuous fun x : ℝ => mathieuSe N x q :=
     hse.continuous.comp Complex.continuous_ofReal

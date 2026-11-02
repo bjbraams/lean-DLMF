@@ -209,7 +209,8 @@ theorem Real.lameEck_odd_hasSum_fourierC
     simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.24: `(β₀ - H)C₀ + α₀C₁ = 0` for the recurrence `C1`.
-Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
+Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
+`integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E24]
 theorem Real.lameEck_odd_fourierC_rec_zero
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -229,7 +230,8 @@ theorem Real.lameEck_odd_fourierC_rec_zero
   linear_combination key
 
 /-- DLMF 29.6.25: `γ_p C_{p-1} + (β_p - H)C_p + α_p C_{p+1} = 0`, `p ≥ 1`, for the recurrence `C1`.
-Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
+Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
+`integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E25]
 theorem Real.lameEck_odd_fourierC_rec
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -282,7 +284,8 @@ theorem Real.lameEck_odd_fourierC_normalization
   rw [show 4 / π * (π / 4) = 1 by field_simp] at h2
   have hCs : Summable fun p => |C p| := by
     have hs := summable_abs_lameCosCoeff hk0 hk1
-      (contDiff_two_of_isLameSolution hk (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m + 1)).1)
+      (contDiff_two_of_isLameSolution hk
+          (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m + 1)).1)
       (fun x => (Real.lameEck_parity hk0 hk1 _ x).2.2.2.2)
       (fun x => (Real.lameEck_parity hk0 hk1 _ x).2.1)
       (fun x => (Real.lameEck_parity hk0 hk1 _ x).1) false
@@ -510,7 +513,8 @@ theorem Real.lameEsk_odd_hasSum_fourierD
     simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.39: `(β₀ - H)D₀ + α₀D₁ = 0` for the recurrence `D1`.
-Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
+Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
+`integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E39]
 theorem Real.lameEsk_odd_fourierD_rec_zero
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -530,7 +534,8 @@ theorem Real.lameEsk_odd_fourierD_rec_zero
   linear_combination key
 
 /-- DLMF 29.6.40: `γ_p D_{p-1} + (β_p - H)D_p + α_p D_{p+1} = 0`, `p ≥ 1`, for the recurrence `D1`.
-Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
+Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
+`integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E40]
 theorem Real.lameEsk_odd_fourierD_rec
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -583,7 +588,8 @@ theorem Real.lameEsk_odd_fourierD_normalization
   rw [show 4 / π * (π / 4) = 1 by field_simp] at h2
   have hCs : Summable fun p => |D p| := by
     have hs := summable_abs_lameSinCoeff hk0 hk1
-      (contDiff_two_of_isLameSolution hk (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m + 1)).1)
+      (contDiff_two_of_isLameSolution hk
+          (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m + 1)).1)
       (fun x => (Real.lameEsk_parity hk0 hk1 _ x).2.2.2.2)
       (fun x => (Real.lameEsk_parity hk0 hk1 _ x).2.1)
       (fun x => (Real.lameEsk_parity hk0 hk1 _ x).1) false
@@ -833,7 +839,8 @@ theorem Real.lameEsk_even_hasSum_fourierD
     simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.54: `(β₀ - H)D₀ + α₀D₁ = 0` for the recurrence `D2`.
-Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
+Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
+`integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E54]
 theorem Real.lameEsk_even_fourierD_rec_zero
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -853,7 +860,8 @@ theorem Real.lameEsk_even_fourierD_rec_zero
   linear_combination key
 
 /-- DLMF 29.6.55: `γ_p D_{p-1} + (β_p - H)D_p + α_p D_{p+1} = 0`, `p ≥ 1`, for the recurrence `D2`.
-Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
+Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
+`integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E55]
 theorem Real.lameEsk_even_fourierD_rec
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -906,7 +914,8 @@ theorem Real.lameEsk_even_fourierD_normalization
   rw [show 4 / π * (π / 4) = 1 by field_simp] at h2
   have hCs : Summable fun p => |D p| := by
     have hs := summable_abs_lameSinCoeff hk0 hk1
-      (contDiff_two_of_isLameSolution hk (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m + 2)).1)
+      (contDiff_two_of_isLameSolution hk
+          (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m + 2)).1)
       (fun x => (Real.lameEsk_parity hk0 hk1 _ x).2.2.2.2)
       (fun x => (Real.lameEsk_parity hk0 hk1 _ x).2.1)
       (fun x => (Real.lameEsk_parity hk0 hk1 _ x).1) false

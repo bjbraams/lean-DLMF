@@ -472,7 +472,8 @@ theorem kummerU_addition (a b : ℂ) {x y : ℂ} (hx : 0 < x.re)
       ∑' n : ℕ, poch a n * (-y) ^ n / n.factorial * kummerU (a + n) (b + n) x := by
   have hx' : x ∈ slitPlane := Or.inl hx
   have hd : DifferentiableOn ℂ (kummerU a b) (Metric.ball x ‖x‖) :=
-    fun w hw => (differentiableAt_kummerU a b (ball_norm_subset_slitPlane hx hw)).differentiableWithinAt
+    fun w hw => (differentiableAt_kummerU a b
+        (ball_norm_subset_slitPlane hx hw)).differentiableWithinAt
   rw [← Complex.taylorSeries_eq_on_ball' (c := x) (z := x + y)
     (by simpa [mem_ball_iff_norm] using hyx) hd]
   congr 1

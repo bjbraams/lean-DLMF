@@ -179,7 +179,9 @@ theorem ultrasphPoly_connection {lam μ : ℂ} (hlam : 0 < lam.re) (hμ : -1 / 2
       have href := DLMF.Confluent.poch_sub_nat_self (lam + 1 + (n - r : ℕ)) j
       rw [show lam + 1 + (n - r : ℕ) - j = lam + 1 + (n - r - j : ℕ) by
         rw [Nat.cast_sub hjn]; ring,
-        show 1 - (lam + 1 + (n - r : ℕ)) = -lam - n + r by rw [Nat.cast_sub (by omega : r ≤ n)]; ring] at href
+        show 1 - (lam + 1 + (n - r : ℕ)) = -lam - n + r by
+                                                          rw [Nat.cast_sub (by omega : r ≤
+                                                                                 n)]; ring] at href
       rw [href] at hh
       exact hh
     have hnum : poch μ (n - j) = poch μ (n - r) * poch (μ + (n - r : ℕ)) (r - j) := by
@@ -194,7 +196,8 @@ theorem ultrasphPoly_connection {lam μ : ℂ} (hlam : 0 < lam.re) (hμ : -1 / 2
     rw [show n - 2 * j - (r - j) = n - r - j by omega,
       show n - 2 * j - 2 * (r - j) = n - 2 * r by omega,
       show (lam + ((n - 2 * j : ℕ) : ℂ) - 2 * ((r - j : ℕ) : ℂ)) = lam + n - 2 * r by
-        rw [Nat.cast_sub (by omega : 2 * j ≤ n), Nat.cast_sub hjr, Nat.cast_mul, Nat.cast_ofNat]; ring,
+        rw [Nat.cast_sub (by omega : 2 * j ≤ n), Nat.cast_sub hjr, Nat.cast_mul,
+            Nat.cast_ofNat]; ring,
       hnum, hden, Nat.cast_choose ℂ hjr]
     have hsgn : ((-1 : ℂ) ^ j) ^ 2 = 1 := by
       rw [← pow_mul, Nat.mul_comm, pow_mul]; norm_num
@@ -366,7 +369,8 @@ theorem hermitePolyH_linearization (m n : ℕ) (x : ℂ) :
 theorem mehler_formula (x y : ℝ) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => (aeval (x : ℂ) (hermitePolyH n) : ℂ) * aeval (y : ℂ) (hermitePolyH n) /
       (2 ^ n * (n.factorial : ℂ)) * z ^ n)
-      ((1 - z ^ 2) ^ (-1 / 2 : ℂ) * exp ((2 * x * y * z - (x ^ 2 + y ^ 2) * z ^ 2) / (1 - z ^ 2))) := by
+      ((1 - z ^ 2) ^ (-1 / 2 : ℂ) *
+          exp ((2 * x * y * z - (x ^ 2 + y ^ 2) * z ^ 2) / (1 - z ^ 2))) := by
   exact Mehler.hasSum_kernel (x : ℂ) (y : ℂ) hz
 
 /-- Formula under the stated hypotheses: `legendrePolyP n (Real.cos θ * Real.cos ψ + Real.sin θ *
@@ -453,7 +457,8 @@ theorem gegenbauerProductCoeff_recurrence {lam : ℂ} (hlam : 0 < lam.re) (a b k
   have h21 : 2 * lam + a + b + 1 ≠ 0 := by
     intro he; have hh := congrArg Complex.re he; simp at hh
     linarith [Nat.cast_nonneg (α := ℝ) a, Nat.cast_nonneg (α := ℝ) b]
-  simp only [add_comm, add_left_comm, add_assoc, one_add_one_eq_two] at h0 h1 h2 hs0 hs1 hs2 h20 h21 ⊢
+  simp only [add_comm, add_left_comm, add_assoc, one_add_one_eq_two]
+      at h0 h1 h2 hs0 hs1 hs2 h20 h21 ⊢
   field_simp [hp, hp2, hf, h0, h1, h2, hs0, hs1, hs2, h20, h21]
   ring
 
@@ -702,7 +707,8 @@ theorem ultrasphPoly_linearization {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) (x :
       exact ultrasphPoly_product_eq_sum_of_le hl m n hnm x
     · rw [min_eq_left hmn, mul_comm]
       have hh := ultrasphPoly_product_eq_sum_of_le hl n m hmn x
-      simpa only [gegenbauerLinearizationSum, gegenbauerProductCoeff_swap (lam : ℂ), Nat.add_comm n m] using hh
+      simpa only [gegenbauerLinearizationSum, gegenbauerProductCoeff_swap (lam : ℂ),
+          Nat.add_comm n m] using hh
   rw [he]
   apply Finset.sum_congr rfl
   intro k hk

@@ -207,7 +207,7 @@ private lemma integrableOn_rpow_mul_log_one_sub {μ : ℝ} (hμ : 0 < μ) :
 /-- `∫₀¹ v^{μ-1} ln(1 - v) dv = -(ψ(μ+1) + γ)/μ`, by parts and DLMF 5.9.16. -/
 private lemma integral_rpow_mul_log_one_sub {μ : ℝ} (hμ : 0 < μ) :
     ∫ v in (0 : ℝ)..1, v ^ (μ - 1) * Real.log (1 - v) =
-      -(Real.digamma (μ + 1) + Real.eulerMascheroniConstant) / μ := by
+      -(Gamma.Real.digamma (μ + 1) + Real.eulerMascheroniConstant) / μ := by
   set P : ℝ → ℝ := fun v => (v ^ μ - 1) * Real.log (1 - v) with hP
   set P' : ℝ → ℝ := fun v => μ * (v ^ (μ - 1) * Real.log (1 - v)) + (1 - v ^ μ) / (1 - v)
     with hP'
@@ -275,7 +275,7 @@ private lemma integral_rpow_mul_log_one_sub {μ : ℝ} (hμ : 0 < μ) :
 /-- `∫₀ˣ (x-t)^{μ-1} ln t dt = μ⁻¹ x^μ (ln x - γ - ψ(μ+1))`. -/
 private lemma integral_rpow_sub_mul_log {μ : ℝ} (hμ : 0 < μ) {x : ℝ} (hx : 0 < x) :
     ∫ t in (0 : ℝ)..x, (x - t) ^ (μ - 1) * Real.log t =
-      μ⁻¹ * (x ^ μ * (Real.log x - Real.eulerMascheroniConstant - Real.digamma (μ + 1))) := by
+      μ⁻¹ * (x ^ μ * (Real.log x - Real.eulerMascheroniConstant - Gamma.Real.digamma (μ + 1))) := by
   have h1 := intervalIntegral.integral_comp_sub_left
     (fun t => (x - t) ^ (μ - 1) * Real.log t) x (a := 0) (b := x)
   simp only [sub_sub_cancel, sub_self, sub_zero] at h1

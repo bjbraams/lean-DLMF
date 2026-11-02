@@ -101,7 +101,8 @@ private noncomputable def gegAdd_coef (lam : ℝ) (n j : ℕ) : ℂ :=
 private lemma gegAdd_coef_succ {lam : ℝ} (hlam : 1 / 2 < lam) (n i : ℕ) :
     gegAdd_coef lam (n + 1) (i + 1) * (2 * lam - 1) = 2 * lam * gegAdd_coef (lam + 1) n i := by
   simp only [gegAdd_coef]
-  have h1 : Gamma (2 * ((lam + 1 : ℝ) : ℂ) - 1) = 2 * lam * (2 * lam - 1) * Gamma (2 * lam - 1) := by
+  have h1 : Gamma (2 * ((lam + 1 : ℝ) : ℂ) - 1) = 2 * lam * (2 * lam - 1) *
+      Gamma (2 * lam - 1) := by
     rw [show 2 * ((lam + 1 : ℝ) : ℂ) - 1 = (2 * lam - 1 + 1) + 1 by push_cast; ring,
       Complex.Gamma_add_one _ (by
         intro h; have := congrArg Complex.re h; simp at this; linarith),
@@ -296,7 +297,8 @@ private lemma gegAdd_integral_L {lam : ℝ} (hlam : 1 / 2 < lam) (m : ℕ) (θ �
 /-- Gegenbauer's addition theorem with `cos ψ` replaced by an arbitrary real `t`. -/
 private lemma gegAdd_main (n : ℕ) : ∀ lam : ℝ, 1 / 2 < lam → ∀ θ φ t : ℝ,
     ultrasphPoly lam n ((Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ * t : ℝ)) =
-      ∑ j ∈ Finset.range (n + 1), gegAdd_term lam n j θ φ * ultrasphPoly ((lam : ℂ) - 1 / 2) j t := by
+      ∑ j ∈ Finset.range (n + 1), gegAdd_term lam n j θ φ *
+          ultrasphPoly ((lam : ℂ) - 1 / 2) j t := by
   induction n with
   | zero =>
     intro lam hlam θ φ t
@@ -335,7 +337,8 @@ private lemma gegAdd_main (n : ℕ) : ∀ lam : ℝ, 1 / 2 < lam → ∀ θ φ t
     refine HasDerivAt.fun_sum fun j _ => ?_
     exact ((analyticAt_ultrasphPoly _ _ _).differentiableAt.hasDerivAt.comp_ofReal).const_mul _
   have hderiv : ∀ t : ℝ, 2 * lam * ultrasphPoly ((lam : ℂ) + 1) n ((A + B * t : ℝ)) * B =
-      ∑ j ∈ Finset.range (n + 1 + 1), gegAdd_term lam (n + 1) j θ φ * deriv (ultrasphPoly μ j) t := by
+      ∑ j ∈ Finset.range (n + 1 + 1), gegAdd_term lam (n + 1) j θ φ *
+          deriv (ultrasphPoly μ j) t := by
     intro t
     have h0 : deriv (ultrasphPoly μ 0) (t : ℂ) = 0 := by
       rw [show ultrasphPoly μ 0 = fun _ => 1 from funext fun x => ultrasphPoly_zero μ x]
@@ -374,7 +377,8 @@ private lemma gegAdd_main (n : ℕ) : ∀ lam : ℝ, 1 / 2 < lam → ∀ θ φ t
   have hLint : ∫ s : ℝ in (0 : ℝ)..π, L (Real.cos s) * ρ s =
       mC * ultrasphPoly lam (n + 1) (Real.cos θ) * ultrasphPoly lam (n + 1) (Real.cos φ) /
         ultrasphPoly lam (n + 1) 1 := gegAdd_integral_L hlam (n + 1) θ φ
-  have hRint : ∫ s : ℝ in (0 : ℝ)..π, R (Real.cos s) * ρ s = gegAdd_term lam (n + 1) 0 θ φ * mC := by
+  have hRint : ∫ s : ℝ in (0 : ℝ)..π, R (Real.cos s) * ρ s =
+      gegAdd_term lam (n + 1) 0 θ φ * mC := by
     simp only [hR, Finset.sum_mul]
     rw [intervalIntegral.integral_finsetSum (f := fun j s => gegAdd_term lam (n + 1) j θ φ *
         ultrasphPoly μ j (Real.cos s) * ρ s) fun j _ =>
@@ -389,11 +393,13 @@ private lemma gegAdd_main (n : ℕ) : ∀ lam : ℝ, 1 / 2 < lam → ∀ θ φ t
       (L 0 - R 0) * mC := by
     simp only [hconst, intervalIntegral.integral_const_mul, hmρ]
   have hsplit : ∫ s : ℝ in (0 : ℝ)..π, (L (Real.cos s) - R (Real.cos s)) * ρ s =
-      (∫ s : ℝ in (0 : ℝ)..π, L (Real.cos s) * ρ s) - ∫ s : ℝ in (0 : ℝ)..π, R (Real.cos s) * ρ s := by
+      (∫ s : ℝ in (0 : ℝ)..π, L (Real.cos s) * ρ s) - ∫ s : ℝ in (0 : ℝ)..π,
+          R (Real.cos s) * ρ s := by
     rw [← intervalIntegral.integral_sub]
     · exact intervalIntegral.integral_congr fun s _ => by ring
     · exact (((gegAdd_continuous _ _).comp (Complex.continuous_ofReal.comp
-        (continuous_const.add (continuous_const.mul Real.continuous_cos)))).mul hρc).intervalIntegrable _ _
+        (continuous_const.add (continuous_const.mul Real.continuous_cos)))).mul
+            hρc).intervalIntegrable _ _
     · exact ((continuous_finsetSum _ fun j _ => continuous_const.mul ((gegAdd_continuous _ _).comp
         (Complex.continuous_ofReal.comp Real.continuous_cos))).mul hρc).intervalIntegrable _ _
   have h0 : gegAdd_term lam (n + 1) 0 θ φ = ultrasphPoly lam (n + 1) (Real.cos θ) *
@@ -439,7 +445,8 @@ theorem ballPoissonIntegral_reproduces {n : ℕ} (hn : n ≠ 0)
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
     (hf : HarmonicOnNhd f (ball 0 1)) (hcont : ContinuousOn f (closedBall 0 1))
     {x : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ < 1) :
-    TauCeti.ballPoissonIntegral (fun y : sphere (0 : EuclideanSpace ℝ (Fin n)) 1 => f y) x = f x := by
+    TauCeti.ballPoissonIntegral
+        (fun y : sphere (0 : EuclideanSpace ℝ (Fin n)) 1 => f y) x = f x := by
   exact zonal_poisson hn hf hcont hx
 
 /-- The unnormalized AAR kernel is sphere area times the Tau Ceti kernel. -/
@@ -472,7 +479,8 @@ theorem poissonKernelBall_reproduces {n : ℕ} (hn : 2 ≤ n)
       volume.toSphere.real (univ : Set (sphere (0 : EuclideanSpace ℝ (Fin n)) 1)) * f x := by
   have hn0 : n ≠ 0 := by omega
   simp_rw [poissonKernelBall_eq_area_mul hn0 x, mul_assoc]
-  rw [MeasureTheory.integral_const_mul, ← TauCeti.ballPoissonIntegral_def, ballPoissonIntegral_reproduces hn0 hf hcont hx]
+  rw [MeasureTheory.integral_const_mul, ← TauCeti.ballPoissonIntegral_def,
+      ballPoissonIntegral_reproduces hn0 hf hcont hx]
 
 /-- Special unitary group `SU(2)`. -/
 abbrev SU2 := specialUnitaryGroup (Fin 2) ℂ
@@ -499,7 +507,8 @@ theorem realSpinThreeEquivSpecialUnitary_negOne :
   rw [coe_realSpinThreeEquivSpecialUnitary_apply, coe_realSpinThreeEquivQuaternionUnitary_apply]
   have he : evenUnitaryGroupEvenPart (realCliffordForm 3 0)
       (spinGroupToEvenUnitary (realCliffordForm 3 0)
-        (spinGroup.negOne (realCliffordForm 3 0) (nondegenerate_realCliffordForm 3 0).ne_zero)) = -1 := by
+        (spinGroup.negOne (realCliffordForm 3 0)
+            (nondegenerate_realCliffordForm 3 0).ne_zero)) = -1 := by
     apply Subtype.ext
     simp
   rw [he, map_neg, map_one, map_neg, map_one]

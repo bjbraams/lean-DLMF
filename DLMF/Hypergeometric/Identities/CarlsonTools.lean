@@ -112,7 +112,8 @@ theorem kummer_theorem {a b : ℂ}
     rw [show (1 : ℂ) - ((-1 : ℝ) : ℂ) = 2 by push_cast; ring] at h1
     exact (continuousAt_cpow_const (b := -a) h2).tendsto.comp h1
   have heq : ∀ᶠ x : ℝ in nhdsWithin (-1) (Set.Ioi (-1)), ₂F₁ a b C (x : ℂ) =
-      (1 - (x : ℂ)) ^ (-a) * ₂F₁ (a / 2) (a / 2 - b + 1 / 2) C ((-4 * x / (1 - x) ^ 2 : ℝ) : ℂ) := by
+      (1 - (x : ℂ)) ^ (-a) *
+          ₂F₁ (a / 2) (a / 2 - b + 1 / 2) C ((-4 * x / (1 - x) ^ 2 : ℝ) : ℂ) := by
     filter_upwards [Ioo_mem_nhdsGT (show (-1 : ℝ) < 0 by norm_num)] with x hx
     have hxn : ‖(x : ℂ)‖ < 1 := by
       rw [Complex.norm_real, Real.norm_eq_abs, abs_lt]; constructor <;> linarith [hx.1, hx.2]

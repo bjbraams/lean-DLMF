@@ -51,7 +51,8 @@ theorem addTools_conj_regularizedGaussHG (a b c : ℂ) {z : ℂ} (hz : z ∈ cut
     have h := (differentiableAt_regularizedGaussHG a b c (hconjCut w hw)).conj_conj
     rw [conj_conj] at h
     exact h.differentiableWithinAt
-  have hEq := eqOn_cutPlane_of_eqOn_ball hg (analyticOnNhd_regularizedGaussHG (conj a) (conj b) (conj c))
+  have hEq := eqOn_cutPlane_of_eqOn_ball hg
+      (analyticOnNhd_regularizedGaussHG (conj a) (conj b) (conj c))
     one_pos (fun w hw => by
       have hw' : ‖conj w‖ < 1 := by rw [RCLike.norm_conj]; simpa using hw
       simp only [Function.comp, regularizedGaussHG_conj hw', conj_conj])
@@ -77,10 +78,12 @@ theorem addTools_iteratedDeriv_even_neg {f : ℂ → ℂ} (hf : ∀ z, f (-z) = 
 theorem addTools_log_I_mul (x : ℝ) (hx : 0 < x) :
     log (I*x - 1) + log (I*x + 1) = Real.log (1 + x^2) + π * I := by
   have hn : ‖(I*x+1 : ℂ)‖ = Real.sqrt (1 + x^2) := by
-    rw [show (I*x+1 : ℂ) = ⟨1, x⟩ by apply Complex.ext <;> simp, Complex.norm_def, Complex.normSq_mk]
+    rw [show (I*x+1 : ℂ) = ⟨1, x⟩ by apply Complex.ext <;> simp, Complex.norm_def,
+                                       Complex.normSq_mk]
     congr 1; ring
   have hn' : ‖(I*x-1 : ℂ)‖ = Real.sqrt (1 + x^2) := by
-    rw [show (I*x-1 : ℂ) = ⟨-1, x⟩ by apply Complex.ext <;> simp, Complex.norm_def, Complex.normSq_mk]
+    rw [show (I*x-1 : ℂ) = ⟨-1, x⟩ by apply Complex.ext <;> simp, Complex.norm_def,
+                                        Complex.normSq_mk]
     congr 1; ring
   have hw : (I*x - 1 : ℂ) = -conj (I*x+1) := by simp; ring
   have him : (conj (I*x+1 : ℂ)).im < 0 := by simp [hx]
@@ -99,7 +102,8 @@ theorem addTools_log_I_mul (x : ℝ) (hx : 0 < x) :
 theorem addTools_legendreBranchPower_I_mul (m : ℕ) (x : ℝ) (hx : 0 < x) :
     legendreBranchPower m (I*x) = (Real.exp (m/2 * Real.log (1+x^2)) : ℂ) * I^m := by
   rw [legendreBranchPower, addTools_log_I_mul x hx,
-    show (m:ℂ)/2 * ((Real.log (1+x^2):ℂ) + π*I) = ((m/2 * Real.log (1+x^2) : ℝ) : ℂ) + m * (π/2*I) by
+    show (m:ℂ)/2 * ((Real.log (1+x^2):ℂ) + π*I) =
+        ((m/2 * Real.log (1+x^2) : ℝ) : ℂ) + m * (π/2*I) by
       push_cast; ring,
     exp_add, exp_nat_mul, exp_pi_div_two_mul_I, ofReal_exp]
 

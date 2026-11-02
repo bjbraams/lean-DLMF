@@ -103,7 +103,8 @@ theorem statPh_norm_integral_le {a b : ℝ} (hab : a ≤ b) {φ φ' ψ ψ' : ℝ
           ‖∫ x in a..b, (ψ' x : ℂ) * (-I * exp (φ x * I))‖ := by
           refine (norm_sub_le _ _).trans ?_; gcongr; exact norm_sub_le _ _
     _ ≤ ψ b + ψ a + (ψ a - ψ b) := by
-        rw [norm_mul (ψ b : ℂ), norm_mul (ψ a : ℂ), hnv, hnv, mul_one, mul_one, norm_real, norm_real,
+        rw [norm_mul (ψ b : ℂ), norm_mul (ψ a : ℂ), hnv, hnv, mul_one, mul_one,
+            norm_real, norm_real,
           Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hψb,
           abs_of_nonneg (hψb.trans hab')]
         linarith
@@ -274,7 +275,8 @@ theorem statPh_norm_integral_exp_cube_sub_le {R : ℝ} (hR : 0 < R) :
       intro S hS
       have hii : ∀ a b : ℝ, IntervalIntegrable g volume a b := fun a b =>
         (by fun_prop : Continuous g).intervalIntegrable a b
-      rw [← intervalIntegral.integral_add_adjacent_intervals (hii 0 R) (hii R S), add_sub_cancel_left]
+      rw [← intervalIntegral.integral_add_adjacent_intervals (hii 0 R) (hii R S),
+          add_sub_cancel_left]
       have := statPh_norm_integral_damped_cube hs.le (by linarith : 0 < c) hR hS
       simp only [hg]
       refine this.trans ?_
@@ -311,7 +313,8 @@ theorem statPh_tendsto_integral_exp_cube :
   field_simp
 
 
-/-- Rescaling of the model integral: `λ^{1/3} ∫₀^δ e^{iλc x³} dx = c^{-1/3} ∫₀^{(λc)^{1/3} δ} e^{it³} dt`. -/
+/-- Rescaling of the model integral:
+`λ^{1/3} ∫₀^δ e^{iλc x³} dx = c^{-1/3} ∫₀^{(λc)^{1/3} δ} e^{it³} dt`. -/
 theorem statPh_integral_model {lam c δ : ℝ} (hlam : 0 < lam) (hc : 0 < c) :
     ((lam ^ (1 / 3 : ℝ) : ℝ) : ℂ) * ∫ x in (0 : ℝ)..δ, exp (((lam * (c * x ^ 3) : ℝ) : ℂ) * I) =
       ((c ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) *
@@ -342,7 +345,8 @@ theorem statPh_integral_model {lam c δ : ℝ} (hlam : 0 < lam) (hc : 0 < c) :
 /-- `‖e^{ia} - e^{ib}‖ ≤ |a - b|` for real `a`, `b`. -/
 theorem statPh_norm_exp_sub_exp_le (a b : ℝ) :
     ‖exp ((a : ℂ) * I) - exp ((b : ℂ) * I)‖ ≤ |a - b| := by
-  have : exp ((a : ℂ) * I) - exp ((b : ℂ) * I) = exp ((b : ℂ) * I) * (exp (I * ((a - b : ℝ) : ℂ)) - 1) := by
+  have : exp ((a : ℂ) * I) - exp ((b : ℂ) * I) = exp ((b : ℂ) * I) *
+      (exp (I * ((a - b : ℝ) : ℂ)) - 1) := by
     rw [mul_sub, ← exp_add]; push_cast; ring_nf
   rw [this, norm_mul, norm_exp_ofReal_mul_I, one_mul]
   simpa using Real.norm_exp_I_mul_ofReal_sub_one_le (x := a - b)
@@ -358,7 +362,8 @@ theorem statPh_tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 <
     (hφK : ∀ x ∈ Icc 0 b, |φ x - c * x ^ 3| ≤ K * x ^ 4) :
     Tendsto (fun lam : ℝ => ((lam ^ (1 / 3 : ℝ) : ℝ) : ℂ) *
         ∫ x in (0 : ℝ)..b, exp (((lam * φ x : ℝ) : ℂ) * I)) atTop
-      (𝓝 (((c ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) * ((Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I)))) := by
+      (𝓝 (((c ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) *
+          ((Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I)))) := by
   have hK : 0 ≤ K := by
     have := (abs_nonneg _).trans (hφK b ⟨hb.le, le_rfl⟩)
     exact nonneg_of_mul_nonneg_left this (by positivity)
@@ -372,7 +377,8 @@ theorem statPh_tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 <
   set C : ℝ → ℂ := fun lam => ((lam ^ (1 / 3 : ℝ) : ℝ) : ℂ) *
     ∫ x in δ lam..b, exp (((lam * φ x : ℝ) : ℂ) * I)
   have hev : ∀ᶠ lam : ℝ in atTop, 0 < lam ∧ δ lam < b :=
-    (eventually_gt_atTop 0).and ((tendsto_rpow_neg_atTop (by norm_num)).eventually (Iio_mem_nhds hb))
+    (eventually_gt_atTop 0).and
+        ((tendsto_rpow_neg_atTop (by norm_num)).eventually (Iio_mem_nhds hb))
   -- decomposition
   have hdec : ∀ᶠ lam : ℝ in atTop, A lam + B lam + C lam = ((lam ^ (1 / 3 : ℝ) : ℝ) : ℂ) *
       ∫ x in (0 : ℝ)..b, exp (((lam * φ x : ℝ) : ℂ) * I) := by
@@ -385,8 +391,10 @@ theorem statPh_tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 <
       fun hu huv hvb => ContinuousOn.intervalIntegrable
         ((continuous_ofReal.comp_continuousOn ((hφc.mono (hsub hu huv hvb)).const_smul lam)).mul
           continuousOn_const).cexp
-    have i2 : IntervalIntegrable (fun x : ℝ => exp (((lam * (c * x ^ 3) : ℝ) : ℂ) * I)) volume 0 (δ lam) :=
-      (by fun_prop : Continuous fun x : ℝ => exp (((lam * (c * x ^ 3) : ℝ) : ℂ) * I)).intervalIntegrable _ _
+    have i2 : IntervalIntegrable (fun x : ℝ => exp (((lam * (c * x ^ 3) : ℝ) : ℂ) * I))
+        volume 0 (δ lam) :=
+      (by fun_prop : Continuous fun x : ℝ =>
+            exp (((lam * (c * x ^ 3) : ℝ) : ℂ) * I)).intervalIntegrable _ _
     simp only [A, B, C]
     rw [← statPh_integral_model hl hc, intervalIntegral.integral_sub (i1 le_rfl hδ0.le hδb.le) i2,
       ← intervalIntegral.integral_add_adjacent_intervals (i1 le_rfl hδ0.le hδb.le)
@@ -394,7 +402,8 @@ theorem statPh_tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 <
     ring
   -- the model part
   have hA : Tendsto A atTop
-      (𝓝 (((c ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) * ((Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I)))) := by
+      (𝓝 (((c ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) *
+          ((Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I)))) := by
     refine (statPh_tendsto_integral_exp_cube.comp ?_).const_mul _
     have h30 : Tendsto (fun lam : ℝ => c ^ (1 / 3 : ℝ) * lam ^ (1 / 30 : ℝ)) atTop atTop :=
       (tendsto_rpow_atTop (by norm_num)).const_mul_atTop (by positivity)

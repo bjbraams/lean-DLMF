@@ -587,7 +587,8 @@ theorem isBigO_kummerU_at_zero_re_ge_two (a b : ℂ) (hb : 2 ≤ b.re) (hb2 : b 
         show p + 1 - 1 - 0 = p by omega, ← mul_assoc, ← pow_add,
         show p + 1 + 1 + p = 2 * (p + 1) by ring, pow_mul]
       simp
-    have hM := ((differentiableAt_regularizedConfluent a ((m : ℂ) + 1) 0).continuousAt.tendsto.isBigO_one ℝ).mono
+    have hM := ((differentiableAt_regularizedConfluent a ((m : ℂ) + 1)
+        0).continuousAt.tendsto.isBigO_one ℝ).mono
       (nhdsWithin_le_nhds (s := {0}ᶜ))
     have hT := ((analyticAt_tricomiLogSeries a m ha).continuousAt.tendsto.isBigO_one ℝ).mono
       (nhdsWithin_le_nhds (s := {0}ᶜ))
@@ -630,7 +631,8 @@ theorem isBigO_kummerU_at_zero_b_two (a : ℂ) :
       (fun z => kummerU a 2 z - 1 / Gamma a * z⁻¹)
       (fun z => log z) := by
   by_cases ha : ∀ k : ℕ, a - (1 : ℕ) ≠ -(k : ℂ)
-  · have hM := ((differentiableAt_regularizedConfluent a ((1 : ℂ) + 1) 0).continuousAt.tendsto.isBigO_one ℂ).mono
+  · have hM := ((differentiableAt_regularizedConfluent a ((1 : ℂ) + 1)
+        0).continuousAt.tendsto.isBigO_one ℂ).mono
       (nhdsWithin_le_nhds (s := {0}ᶜ))
     have hT := ((analyticAt_tricomiLogSeries a 1 ha).continuousAt.tendsto.isBigO_one ℂ).mono
       (nhdsWithin_le_nhds (s := {0}ᶜ))

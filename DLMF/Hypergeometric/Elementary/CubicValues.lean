@@ -41,7 +41,8 @@ theorem value_sixth_root
     (hconv : a.re < 1 / 6)
     (hg : ∀ k : ℕ, 5 / 6 + a ≠ -(k : ℂ)) :
     ₂F₁ (3 * a) (1 / 3 + a) (2 / 3 + 2 * a) (exp (I * Real.pi / 3)) =
-      (Real.sqrt Real.pi : ℂ) * exp (I * Real.pi * a / 2) * (16 / 27 : ℂ) ^ ((3 * a + 1) / 6) * Gamma (5 / 6
+      (Real.sqrt Real.pi : ℂ) * exp (I * Real.pi * a / 2) *
+          (16 / 27 : ℂ) ^ ((3 * a + 1) / 6) * Gamma (5 / 6
         + a) / (Gamma (2 / 3 + a) * Gamma (2 / 3)) := by
   set ω : ℂ := exp (I * Real.pi / 3) with hωdef
   have hs3 : (Real.sqrt 3 : ℝ) ^ 2 = 3 := Real.sq_sqrt (by norm_num)
@@ -98,7 +99,8 @@ theorem value_sixth_root
       rw [norm_mul, hωn, mul_one, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr.1]; exact hr.2
     rw [show (2 / 3 + 2 * a : ℂ) = 2 * (1 / 3 + a) by ring,
       quadratic_double_denominator hb hb' hrn, hG,
-      show 3 * a / 2 = 3 * A by rw [hA]; ring, show (3 * a + 1) / 2 = 3 * A + 1 / 2 by rw [hA]; ring,
+      show 3 * a / 2 = 3 * A by rw [hA]; ring, show (3 * a + 1) / 2 = 3 * A + 1 /
+                                  2 by rw [hA]; ring,
       show 1 / 3 + a + 1 / 2 = 2 * A + 5 / 6 by rw [hA]; ring]
   have hlim := tendsto_nhds_unique hL (hR.congr' (by
     filter_upwards [heq] with r hr
@@ -115,7 +117,8 @@ theorem value_sixth_root
       Gamma_mul_Gamma_add_half, show 2 * (A + 1 / 3) = 2 / 3 + a by rw [hA]; ring]
   have hrefl : Gamma (1 / 3) * Gamma (2 / 3) = 2 * Real.pi / Real.sqrt 3 := by
     have := Gamma_mul_Gamma_one_sub (1 / 3)
-    rw [show (1 : ℂ) - 1 / 3 = 2 / 3 by norm_num, show (Real.pi : ℂ) * (1 / 3) = ((Real.pi / 3 : ℝ) : ℂ)
+    rw [show (1 : ℂ) - 1 / 3 = 2 / 3 by norm_num, show (Real.pi : ℂ) * (1 / 3) =
+                                          ((Real.pi / 3 : ℝ) : ℂ)
       by push_cast; ring, ← ofReal_sin, Real.sin_pi_div_three] at this
     rw [this]
     have h3 : ((Real.sqrt 3 : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr (by positivity)
@@ -147,7 +150,8 @@ theorem value_sixth_root
       have := Complex.ofReal_cpow_eq_exp (q := 16 / 27) (by norm_num) ((3 * a + 1) / 6)
       push_cast at this; exact this
     have e2 : (4 : ℂ) ^ (-2 * A) = exp (Real.log 4 * (-2 * A)) := by
-      have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-2 * A); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-2 * A);
+          push_cast at this; exact this
     have e3 : (2 : ℂ) ^ (1 - 2 * (A + 1 / 3)) = exp (Real.log 2 * (1 - 2 * (A + 1 / 3))) := by
       have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (1 - 2 * (A + 1 / 3))
       push_cast at this; exact this
@@ -169,7 +173,8 @@ theorem value_sixth_root
     ring
   rw [hdup, show 2 * A + 5 / 6 - A - (A + 1 / 2) = 1 / 3 by ring,
     show 2 * A + 5 / 6 = 5 / 6 + a by rw [hA]; ring, hΓ13, hpowω, hnum,
-    show exp ((Real.log 2 : ℝ) : ℂ) = 2 by rw [← ofReal_exp, Real.exp_log (by norm_num)]; push_cast; ring]
+    show exp ((Real.log 2 : ℝ) : ℂ) = 2 by rw [← ofReal_exp, Real.exp_log (by norm_num)];
+                                           push_cast; ring]
   generalize exp (I * Real.pi * a / 2) = E2
   generalize exp ((Lr : ℂ) * (-(3 * a))) = E1
   rw [← hsqπ]
@@ -220,7 +225,8 @@ private lemma value_sixth_root_contiguous_pow₁ (a A : ℂ) (hA : A = 1 / 3 + a
     have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (1 - 2 * (A + 1 / 3))
     push_cast at this; exact this
   have e3 : (4 : ℂ) ^ (-2 * A) = exp (Real.log 4 * (-2 * A)) := by
-    have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-2 * A); push_cast at this; exact this
+    have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-2 * A);
+        push_cast at this; exact this
   have e4 : (3 : ℂ) ^ ((3 * a + 1) / 2) = exp (Real.log 3 * ((3 * a + 1) / 2)) := by
     have := Complex.ofReal_cpow_eq_exp (q := 3) (by norm_num) ((3 * a + 1) / 2)
     push_cast at this; exact this
@@ -247,7 +253,8 @@ private lemma value_sixth_root_contiguous_pow₂ (A : ℂ) :
     have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (1 - 2 * A)
     push_cast at this; exact this
   have e3 : (4 : ℂ) ^ (-(2 / 3) : ℂ) = exp (Real.log 4 * (-(2 / 3))) := by
-    have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-(2 / 3)); push_cast at this; exact this
+    have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-(2 / 3));
+        push_cast at this; exact this
   have e4 : (4 : ℂ) = exp (Real.log 4) := by
     rw [← ofReal_exp, Real.exp_log (by norm_num)]; push_cast; ring
   rw [e2, e2', e3]
@@ -271,8 +278,10 @@ theorem value_sixth_root_contiguous
     (hconv : a.re < 0)
     (hg : ∀ k : ℕ, 1 / 2 + a ≠ -(k : ℂ)) :
     ₂F₁ (3 * a) a (2 * a) (exp (I * Real.pi / 3)) =
-      (Real.sqrt Real.pi : ℂ) * exp (I * Real.pi * a / 2) * (2 : ℂ) ^ (2 * a) * Gamma (1 / 2 + a) / (3 : ℂ)
-        ^ ((3 * a + 1) / 2) * (1 / (Gamma (1 / 3 + a) * Gamma (2 / 3)) + 1 / (Gamma (2 / 3 + a) * Gamma (1 /
+      (Real.sqrt Real.pi : ℂ) * exp (I * Real.pi * a / 2) * (2 : ℂ) ^ (2 * a) *
+          Gamma (1 / 2 + a) / (3 : ℂ)
+        ^ ((3 * a + 1) / 2) *
+            (1 / (Gamma (1 / 3 + a) * Gamma (2 / 3)) + 1 / (Gamma (2 / 3 + a) * Gamma (1 /
         3))) := by
   set ω : ℂ := exp (I * Real.pi / 3) with hωdef
   have hs3 : (Real.sqrt 3 : ℝ) ^ 2 = 3 := Real.sq_sqrt (by norm_num)
@@ -427,7 +436,8 @@ theorem value_sixth_root_contiguous
       exp ((Lr : ℂ) * (-(3 * a))) * (4 : ℂ) ^ (-2 * A) * exp ((Real.log 2 : ℝ) : ℂ) *
         (3 : ℂ) ^ ((3 * a + 1) / 2) :=
     value_sixth_root_contiguous_pow₁ a A hA Lr hLr
-  have hN2 : 4 * (4 : ℂ) ^ (-(2 / 3) : ℂ) * (2 : ℂ) ^ (1 - 2 * (A + 1 / 3)) = (2 : ℂ) ^ (1 - 2 * A) :=
+  have hN2 : 4 * (4 : ℂ) ^ (-(2 / 3) : ℂ) * (2 : ℂ) ^ (1 - 2 * (A + 1 / 3)) =
+      (2 : ℂ) ^ (1 - 2 * A) :=
     value_sixth_root_contiguous_pow₂ A
   have hPne : (4 / 3 : ℂ) ^ (2 * a) ≠ 0 := by rw [Ne, cpow_eq_zero_iff]; norm_num
   have hT1ne : (2 : ℂ) ^ (1 - 2 * (A + 1 / 3)) ≠ 0 := by rw [Ne, cpow_eq_zero_iff]; norm_num
@@ -441,9 +451,11 @@ theorem value_sixth_root_contiguous
     rw [eq_div_iff (mul_ne_zero h3ne hT1ne), ← hN1]; ring
   have hΓ13' : Gamma (1 / 3) = Real.pi / (((Real.sqrt 3 : ℝ) : ℂ) / 2) / Gamma (2 / 3) := by
     rw [← hsin, ← hrefl]; field_simp
-  rw [show (1 : ℂ) / (Gamma (1 / 3 + a) * Gamma (2 / 3)) = (Gamma (1 / 3 + a))⁻¹ * (Gamma (2 / 3))⁻¹ by
+  rw [show (1 : ℂ) / (Gamma (1 / 3 + a) * Gamma (2 / 3)) = (Gamma (1 / 3 + a))⁻¹ *
+      (Gamma (2 / 3))⁻¹ by
       rw [one_div, mul_inv],
-    show (1 : ℂ) / (Gamma (2 / 3 + a) * Gamma (1 / 3)) = (Gamma (2 / 3 + a))⁻¹ * (Gamma (1 / 3))⁻¹ by
+    show (1 : ℂ) / (Gamma (2 / 3 + a) * Gamma (1 / 3)) = (Gamma (2 / 3 + a))⁻¹ *
+        (Gamma (1 / 3))⁻¹ by
       rw [one_div, mul_inv], hinv]
   rw [show (4 / 3 : ℂ) ^ (2 * a + 1) = (4 / 3) ^ (2 * a) * (4 / 3) by
       rw [cpow_add _ _ (by norm_num), cpow_one], hpowω,
@@ -452,7 +464,8 @@ theorem value_sixth_root_contiguous
     hB, ← hN2, hΓ13']
   generalize exp (I * Real.pi * a / 2) = E
   generalize exp ((Lr : ℂ) * (-(3 * a))) = Ex
-  rw [show exp ((Real.log 2 : ℝ) : ℂ) = 2 by rw [← ofReal_exp, Real.exp_log (by norm_num)]; push_cast; ring,
+  rw [show exp ((Real.log 2 : ℝ) : ℂ) = 2 by rw [← ofReal_exp, Real.exp_log (by norm_num)];
+                                             push_cast; ring,
     ← hsqπ]
   rw [hA]
   have h12 : (1 + a * 2 : ℂ) ≠ 0 := by
@@ -477,9 +490,10 @@ theorem altPair_eq (a : ℂ) (j : ℕ) (h1 : a + 2 * j ≠ 0) (h2 : a + 2 * j + 
   unfold altPair; field_simp; ring
 
 /-- Complex digamma at a positive real is the real digamma. -/
-theorem digamma_ofReal_eq {x : ℝ} (hx : 0 < x) : Complex.digamma x = (Real.digamma x : ℂ) := by
+theorem digamma_ofReal_eq {x : ℝ} (hx : 0 < x) : Complex.digamma x =
+    (Gamma.Real.digamma x : ℂ) := by
   apply Complex.ext
-  · simp [Real.digamma_eq_re_digamma hx]
+  · simp [Gamma.Real.digamma_eq_re_digamma hx]
   · have h := DLMF.Gamma.digamma_conj (x : ℂ)
     rw [Complex.conj_ofReal] at h
     have := congrArg Complex.im h
@@ -488,9 +502,10 @@ theorem digamma_ofReal_eq {x : ℝ} (hx : 0 < x) : Complex.digamma x = (Real.dig
 
 /-- The real case: `∑ⱼ (x/(x+2j) - x/(x+2j+1)) = (x/2)(ψ((x+1)/2) - ψ(x/2))`. -/
 theorem hasSum_altPair_ofReal {x : ℝ} (hx : 0 < x) :
-    HasSum (altPair x) ((x / 2 : ℂ) * (Complex.digamma ((x + 1) / 2) - Complex.digamma (x / 2))) := by
-  have h1 := Real.tendsto_deriv_log_GammaSeq (x := (x + 1) / 2) (by positivity)
-  have h2 := Real.tendsto_deriv_log_GammaSeq (x := x / 2) (by positivity)
+    HasSum (altPair x) ((x / 2 : ℂ) *
+        (Complex.digamma ((x + 1) / 2) - Complex.digamma (x / 2))) := by
+  have h1 := Gamma.Real.tendsto_deriv_log_GammaSeq (x := (x + 1) / 2) (by positivity)
+  have h2 := Gamma.Real.tendsto_deriv_log_GammaSeq (x := x / 2) (by positivity)
   have hd := (h1.sub h2).const_mul (x / 2)
   have hpartial : ∀ n : ℕ, x / 2 * ((Real.log n - ∑ k ∈ Finset.range (n + 1), ((x + 1) / 2 + k)⁻¹) -
       (Real.log n - ∑ k ∈ Finset.range (n + 1), (x / 2 + k)⁻¹)) =
@@ -503,7 +518,7 @@ theorem hasSum_altPair_ofReal {x : ℝ} (hx : 0 < x) :
     ring
   simp_rw [hpartial] at hd
   have hreal : HasSum (fun j : ℕ => x / (x + 2 * j) - x / (x + 2 * j + 1))
-      (x / 2 * (Real.digamma ((x + 1) / 2) - Real.digamma (x / 2))) := by
+      (x / 2 * (Gamma.Real.digamma ((x + 1) / 2) - Gamma.Real.digamma (x / 2))) := by
     rw [hasSum_iff_tendsto_nat_of_nonneg]
     · exact (hd.comp (tendsto_sub_atTop_nat 1)).congr' (by
         filter_upwards [eventually_ge_atTop 1] with n hn
@@ -587,7 +602,8 @@ theorem hasSum_altPair {a : ℂ} (ha : 0 < a.re) :
         simp; nlinarith
       have hpos : 0 < m * ((j : ℝ) + 1) := by positivity
       rw [div_le_div_iff₀ (mul_pos (hpos.trans_le hA) (hpos.trans_le hB)) (by positivity)]
-      calc ‖b‖ * (m ^ 2 * ((j : ℝ) + 1) ^ 2) = ‖b‖ * ((m * ((j : ℝ) + 1)) * (m * ((j : ℝ) + 1))) := by
+      calc ‖b‖ * (m ^ 2 * ((j : ℝ) + 1) ^ 2) = ‖b‖ *
+             ((m * ((j : ℝ) + 1)) * (m * ((j : ℝ) + 1))) := by
             ring
         _ ≤ R * (‖b + 2 * j‖ * ‖b + 2 * j + 1‖) := by
             gcongr
@@ -761,7 +777,8 @@ theorem half_argument_digamma {a : ℂ} (ha : 0 < a.re) :
       norm_num at this
       exact this.mono_left nhdsWithin_le_nhds
     have h2 : Tendsto (fun x : ℝ => (x : ℂ) / (1 + x)) (𝓝[<] 1) (𝓝 (1 / 2)) := by
-      have : Tendsto (fun x : ℝ => (x : ℂ) / (1 + x)) (𝓝 1) (𝓝 (((1 : ℝ) : ℂ) / (1 + ((1 : ℝ) : ℂ)))) :=
+      have : Tendsto (fun x : ℝ => (x : ℂ) / (1 + x)) (𝓝 1)
+          (𝓝 (((1 : ℝ) : ℂ) / (1 + ((1 : ℝ) : ℂ)))) :=
         (continuous_ofReal.tendsto 1).div ((continuous_const.add continuous_ofReal).tendsto 1)
           (by norm_num)
       norm_num at this

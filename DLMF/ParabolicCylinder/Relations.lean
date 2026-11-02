@@ -49,7 +49,8 @@ open DLMF.Bessel
 (2/π):ℂ)*exp (z^2/4)*(-I)^n*Polynomial.aeval (I*z) (Polynomial.hermite n)`. -/
 @[dlmf 12.7.E3]
 theorem pcfV_nat_add_half (n : ℕ) (z : ℂ) :
-    pcfV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*Polynomial.aeval (I*z) (Polynomial.hermite n) := by
+    pcfV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*Polynomial.aeval (I*z)
+        (Polynomial.hermite n) := by
   rw [pcfV_eq_mul_I]
   rw [show (1/2:ℂ)-(n+1/2)=-(n:ℂ) by ring, Gamma_neg_nat_eq_zero]
   simp only [div_zero, zero_mul, zero_add]
@@ -70,7 +71,8 @@ theorem pcfV_nat_add_half (n : ℕ) (z : ℂ) :
 theorem pcfV_neg_half (z : ℂ) :
     pcfV (-1/2) z=2/Real.sqrt π*exp (z^2/4)*dawsonF (z/Real.sqrt 2) := by
   have hs : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
-  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
+  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by
+                                      exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   have hp0 : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpp : (Real.sqrt π:ℂ)^2 = π := by exact_mod_cast Real.sq_sqrt Real.pi_pos.le
   have h2 : (2:ℂ)^((-1/2:ℂ)/2 + 3/4) = Real.sqrt 2 := by
@@ -88,7 +90,8 @@ theorem pcfV_neg_half (z : ℂ) :
 (z/Real.sqrt 2)) z`. -/
 @[dlmf 12.7.E6]
 theorem pcfU_nat_add_half_deriv (n : ℕ) (z : ℂ) :
-    pcfU (n+1/2) z=(Real.sqrt (π/2):ℂ)*(-1)^n/(n.factorial:ℂ)*exp (-z^2/4)*iteratedDeriv n (fun z : ℂ => exp (z^2/2)*erfc (z/Real.sqrt 2)) z := by
+    pcfU (n+1/2) z=(Real.sqrt (π/2):ℂ)*(-1)^n/(n.factorial:ℂ)*exp (-z^2/4)*iteratedDeriv n
+        (fun z : ℂ => exp (z^2/2)*erfc (z/Real.sqrt 2)) z := by
   have h := pcfU_iterated_deriv_9 (1/2) z n
   have hf : (fun w : ℂ => exp (1*w^2/4)*pcfU (1/2) w)=
       (fun w => (Real.sqrt (π/2):ℂ)*(exp (w^2/2)*erfc (w/Real.sqrt 2))) := by
@@ -100,7 +103,9 @@ theorem pcfU_nat_add_half_deriv (n : ℕ) (z : ℂ) :
   rw [hf,iteratedDeriv_const_mul_field,show (1/2:ℂ)+1/2=1 by norm_num,
     poch_nat_one,show (1/2:ℂ)+n=n+1/2 by ring] at h
   simp only [one_mul] at h
-  have he : exp (-z^2/4)*exp (z^2/4)=1 := by rw [← Complex.exp_add,show -z^2/4+z^2/4=(0:ℂ) by ring,Complex.exp_zero]
+  have he : exp (-z^2/4)*exp (z^2/4)=1 := by
+                                            rw [← Complex.exp_add,
+                                              show -z^2/4+z^2/4=(0:ℂ) by ring, Complex.exp_zero]
   have hn : ((-1:ℂ)^n)^2=1 := by rw [← pow_mul,mul_comm n 2,pow_mul]; simp
   have hn0 : (n.factorial:ℂ)≠0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   calc
@@ -117,14 +122,16 @@ theorem pcfU_nat_add_half_deriv (n : ℕ) (z : ℂ) :
 Gaussian itself. -/
 @[dlmf 12.7.E7]
 def hhFunction (n : ℤ) (z : ℂ) : ℂ :=
-  if n = -1 then exp (-z^2/2) else (∫ t : ℝ in Ioi 0, (t:ℂ)^n.toNat/(n.toNat.factorial:ℂ)*exp (-(z+t)^2/2))
+  if n = -1 then exp (-z^2/2) else
+      (∫ t : ℝ in Ioi 0, (t:ℂ)^n.toNat/(n.toNat.factorial:ℂ)*exp (-(z+t)^2/2))
 
 /-- Identity under the stated parameter and domain assumptions: `pcfU (n+1/2) z=exp
 (z^2/4)*hhFunction n z ∧ pcfU (n+1/2) z=Real.sqrt π*2^(((n:ℂ)-1)/2)*exp (z^2/4)*iteratedErfc n
 (z/Real.sqrt 2)`. -/
 @[dlmf 12.7.E7]
 theorem pcfU_hh (n : ℤ) (hn : -1 ≤ n) (z : ℂ) :
-    pcfU (n+1/2) z=exp (z^2/4)*hhFunction n z ∧ pcfU (n+1/2) z=Real.sqrt π*2^(((n:ℂ)-1)/2)*exp (z^2/4)*iteratedErfc n (z/Real.sqrt 2) := by
+    pcfU (n+1/2) z=exp (z^2/4)*hhFunction n z ∧
+        pcfU (n+1/2) z=Real.sqrt π*2^(((n:ℂ)-1)/2)*exp (z^2/4)*iteratedErfc n (z/Real.sqrt 2) := by
   have hs : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   have hs0 : (Real.sqrt 2:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   have hπ0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -140,12 +147,14 @@ theorem pcfU_hh (n : ℤ) (hn : -1 ≤ n) (z : ℂ) :
       rw [hhFunction,if_neg (by omega)]
       simp only [Int.toNat_natCast,Int.cast_natCast]
       change pcfU (m+1/2) z=exp (z^2/4)*gaussianProbabilityHh m z
-      rw [gaussianProbabilityHh_eq_pcfU,←mul_assoc,←Complex.exp_add,show z^2/4 + -z^2/4=(0:ℂ) by ring]
+      rw [gaussianProbabilityHh_eq_pcfU, ←mul_assoc, ←Complex.exp_add, show z^2/4 +
+          -z^2/4=(0:ℂ) by ring]
       simp
   · rw [show ((n:ℂ)-1)/2=((n-1:ℤ):ℂ)/2 by push_cast; ring,two_cpow_int_half,
       iteratedErfc_eq_pcfU_int n hn]
     rw [show (Real.sqrt 2:ℂ)*(z/(Real.sqrt 2:ℂ))=z by field_simp]
-    have hc : (Real.sqrt π:ℂ)*(Real.sqrt 2:ℂ)^(n-1)*(2/((Real.sqrt π:ℂ)*(Real.sqrt 2:ℂ)^(n+1)))=1 := by
+    have hc : (Real.sqrt π:ℂ)*(Real.sqrt
+        2:ℂ)^(n-1)*(2/((Real.sqrt π:ℂ)*(Real.sqrt 2:ℂ)^(n+1)))=1 := by
       rw [show n+1=(n-1)+2 by ring,zpow_add₀ hs0,zpow_ofNat,hs]
       field_simp
     have he : exp (z^2/4)*exp (-(z/(Real.sqrt 2:ℂ))^2/2)=1 := by
@@ -222,7 +231,8 @@ theorem pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
     rw [sq_div_two_cpow hz, two_cpow_eq_exp, Complex.cpow_def_of_ne_zero hz0, h2,
       ← Complex.exp_add, ← Complex.exp_add]; congr 1; ring
   have hp0 : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
-  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
+  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by
+                                      exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   rw [pcfU_eq_kummerU 0 hz, hK, ← key, hsq]
   calc _ = ((2:ℂ)^(-(1/4)-0/2:ℂ) * (z^2/2)^(1/4:ℂ) * Real.sqrt 2) * (exp (-z^2/4) * exp (z^2/4)) *
         besselK (1/4) (z^2/4) / (Real.sqrt 2 * Real.sqrt π) := by field_simp
@@ -251,10 +261,12 @@ theorem deriv_pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
   field_simp at hrec ⊢
   linear_combination z^(1/2:ℂ) * hrec
 
-/-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z squared. -/
+/-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z
+squared. -/
 @[dlmf 12.7.E8]
 theorem pcfU_bessel_8 {z : ℂ} (hz : 0 < z.re) :
-    pcfU (-2) z=z^(5/2:ℂ)/(4*Real.sqrt (2*π))*(2*besselK (1/4) (z^2/4)+3*besselK (3/4) (z^2/4)-besselK (5/4) (z^2/4)) := by
+    pcfU (-2) z=z^(5/2:ℂ)/(4*Real.sqrt (2*π))*(2*besselK (1/4) (z^2/4)+3*besselK (3/4)
+        (z^2/4)-besselK (5/4) (z^2/4)) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have hw := sq_div_four_mem_slitPlane hz
   have hrec := besselK_add_sub (1/4) hw
@@ -269,7 +281,8 @@ theorem pcfU_bessel_8 {z : ℂ} (hz : 0 < z.re) :
   field_simp at hrec
   linear_combination -h + z*h1 - (z^(1/2:ℂ)/(4*Real.sqrt (2*π))) * hrec
 
-/-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z squared. -/
+/-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z
+squared. -/
 @[dlmf 12.7.E9]
 theorem pcfU_bessel_9 {z : ℂ} (hz : 0 < z.re) :
     pcfU (-1) z=z^(3/2:ℂ)/(2*Real.sqrt (2*π))*(besselK (1/4) (z^2/4)+besselK (3/4) (z^2/4)) := by
@@ -282,14 +295,16 @@ theorem pcfU_bessel_9 {z : ℂ} (hz : 0 < z.re) :
   field_simp at h ⊢
   linear_combination h
 
-/-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z squared. -/
+/-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z
+squared. -/
 @[dlmf 12.7.E10]
 theorem pcfU_bessel_10 {z : ℂ} (hz : 0 < z.re) :
     pcfU (0) z=(z/(2*π))^(1/2:ℂ)*besselK (1/4) (z^2/4) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   rw [pcfU_zero_eq_besselK hz, div_two_pi_cpow_half hz0]
 
-/-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z squared. -/
+/-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z
+squared. -/
 @[dlmf 12.7.E11]
 theorem pcfU_bessel_11 {z : ℂ} (hz : 0 < z.re) :
     pcfU (1) z=z^(3/2:ℂ)/Real.sqrt (2*π)*(besselK (3/4) (z^2/4)-besselK (1/4) (z^2/4)) := by
@@ -312,7 +327,8 @@ theorem pcfU_kummerU_odd (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
     rw [sq_div_two_cpow hz, two_cpow_eq_exp, two_cpow_eq_exp]
     conv_rhs => rw [← Complex.exp_log hz0]
     rw [← Complex.exp_add, ← Complex.exp_add]; congr 1; ring
-  rw [pcfU_eq_kummerU a hz, kummerU_kummer_transform_all _ _ (div_ne_zero (pow_ne_zero 2 hz0) two_ne_zero),
+  rw [pcfU_eq_kummerU a hz,
+      kummerU_kummer_transform_all _ _ (div_ne_zero (pow_ne_zero 2 hz0) two_ne_zero),
     show a/2+1/4-1/2+1 = a/2+3/4 by ring, show (2:ℂ)-1/2 = 3/2 by norm_num]
   linear_combination (exp (-z^2/4) * kummerU (a/2+3/4) (3/2) (z^2/2)) * key
 
@@ -321,7 +337,8 @@ z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (1/4) (z^2/2) ∧ pcfU a
 z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (-1/4) (z^2/2)`. -/
 @[dlmf 12.7.E14]
 theorem pcfU_whittaker (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    pcfU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (1/4) (z^2/2) ∧ pcfU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (-1/4) (z^2/2) := by
+    pcfU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (1/4) (z^2/2) ∧
+        pcfU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (-1/4) (z^2/2) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have key1 : (2:ℂ)^(-a/2) * z^(-1/2:ℂ) * (z^2/2)^(1/2 + 1/4:ℂ) = 2^(-3/4-a/2) * z := by
     rw [sq_div_two_cpow hz, two_cpow_eq_exp, two_cpow_eq_exp, Complex.cpow_def_of_ne_zero hz0]
@@ -342,7 +359,8 @@ theorem pcfU_whittaker (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
 x)` converges to `(pcfU a (x+y))`. -/
 @[dlmf 12.13.E1]
 theorem pcfU_addition_1 (a x y : ℂ) :
-    HasSum (fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-y)^m/(m.factorial:ℂ))*pcfU (a-m) x) (pcfU a (x+y)) := by
+    HasSum (fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-y)^m/(m.factorial:ℂ))*pcfU (a-m) x)
+        (pcfU a (x+y)) := by
   have hf : Differentiable ℂ (fun w => exp (-1*w^2/4) * pcfU a w) :=
     (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (-1*w^2/4))).mul (pcfU_entire a)
   have h := (Complex.hasSum_taylorSeries_of_entire hf x (x+y)).mul_left (exp ((x+y)^2/4))
@@ -358,7 +376,9 @@ theorem pcfU_addition_1 (a x y : ℂ) :
 m*y^m/(m.factorial:ℂ))*pcfU (a+m) x)` converges to `(pcfU a (x+y))`. -/
 @[dlmf 12.13.E2]
 theorem pcfU_addition_2 (a x y : ℂ) :
-    HasSum (fun m : ℕ => exp (-1*(x*y/2+y^2/4))*((-1)^m*poch (a+1/2) m*y^m/(m.factorial:ℂ))*pcfU (a+m) x) (pcfU a (x+y)) := by
+    HasSum (fun m : ℕ =>
+        exp (-1*(x*y/2+y^2/4))*((-1)^m*poch (a+1/2) m*y^m/(m.factorial:ℂ))*pcfU (a+m) x)
+        (pcfU a (x+y)) := by
   have hf : Differentiable ℂ (fun w => exp (1*w^2/4) * pcfU a w) :=
     (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (1*w^2/4))).mul (pcfU_entire a)
   have h := (Complex.hasSum_taylorSeries_of_entire hf x (x+y)).mul_left (exp (-1*(x+y)^2/4))
@@ -374,7 +394,9 @@ theorem pcfU_addition_2 (a x y : ℂ) :
 m*y^m/(m.factorial:ℂ))*pcfV (a-m) x)` converges to `(pcfV a (x+y))`. -/
 @[dlmf 12.13.E3]
 theorem pcfV_addition_3 (a x y : ℂ) :
-    HasSum (fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-1)^m*poch (1/2-a) m*y^m/(m.factorial:ℂ))*pcfV (a-m) x) (pcfV a (x+y)) := by
+    HasSum (fun m : ℕ =>
+        exp (1*(x*y/2+y^2/4))*((-1)^m*poch (1/2-a) m*y^m/(m.factorial:ℂ))*pcfV (a-m) x)
+        (pcfV a (x+y)) := by
   have hf : Differentiable ℂ (fun w => exp (-1*w^2/4) * pcfV a w) :=
     (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (-1*w^2/4))).mul (pcfV_entire a)
   have h := (Complex.hasSum_taylorSeries_of_entire hf x (x+y)).mul_left (exp ((x+y)^2/4))
@@ -390,7 +412,8 @@ theorem pcfV_addition_3 (a x y : ℂ) :
 x)` converges to `(pcfV a (x+y))`. -/
 @[dlmf 12.13.E4]
 theorem pcfV_addition_4 (a x y : ℂ) :
-    HasSum (fun m : ℕ => exp (-1*(x*y/2+y^2/4))*(y^m/(m.factorial:ℂ))*pcfV (a+m) x) (pcfV a (x+y)) := by
+    HasSum (fun m : ℕ => exp (-1*(x*y/2+y^2/4))*(y^m/(m.factorial:ℂ))*pcfV (a+m) x)
+        (pcfV a (x+y)) := by
   have hf : Differentiable ℂ (fun w => exp (1*w^2/4) * pcfV a w) :=
     (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (1*w^2/4))).mul (pcfV_entire a)
   have h := (Complex.hasSum_taylorSeries_of_entire hf x (x+y)).mul_left (exp (-1*(x+y)^2/4))
@@ -406,8 +429,12 @@ theorem pcfV_addition_4 (a x y : ℂ) :
 m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*pcfU (m+a) x*pcfU (-m-1/2) y)` converges to `(pcfU a
 (x*Real.cos t+y*Real.sin t))`. -/
 @[dlmf 12.13.E5]
-theorem pcfU_rotational_addition {a : ℂ} (ha : a.re ≤ -1/2) (x y : ℂ) {t : ℝ} (ht : 0 ≤ t) (htπ : t ≤ π/4) (hend : t = π/4 → |y.im| ≤ x.re) :
-    HasSum (fun m : ℕ => exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*poch (a+1/2) m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*pcfU (m+a) x*pcfU (-m-1/2) y) (pcfU a (x*Real.cos t+y*Real.sin t)) := by
+theorem pcfU_rotational_addition {a : ℂ} (ha : a.re ≤ -1/2) (x y : ℂ) {t : ℝ} (ht : 0 ≤ t)
+    (htπ : t ≤ π/4) (hend : t = π/4 → |y.im| ≤ x.re) :
+    HasSum (fun m : ℕ =>
+        exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*poch (a+1/2)
+        m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*pcfU (m+a) x*pcfU (-m-1/2) y)
+        (pcfU a (x*Real.cos t+y*Real.sin t)) := by
   sorry
 
 /- DLMF 12.13.6 as printed fails at n = 0, z = 0: the left side is

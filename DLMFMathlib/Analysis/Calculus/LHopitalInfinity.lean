@@ -135,7 +135,8 @@ private lemma punctured_increment_bound_or {f g : ℝ → ℝ} {a δ l η x : �
       intro z hz
       refine ⟨abs_lt.mpr ⟨by linarith [hz.1], by linarith [hz.2]⟩, by linarith [hz.2]⟩
     have hh (z) (hz : z ∈ uIcc (a - δ / 2) x) := hlocal z (hset z hz).1 (hset z hz).2
-    exact abs_increment_sub_mul_le_of_deriv_div_bound_uIcc (fun z hz => (hh z hz).1) (fun z hz => (hh z hz).2.1)
+    exact abs_increment_sub_mul_le_of_deriv_div_bound_uIcc (fun z hz => (hh z hz).1)
+        (fun z hz => (hh z hz).2.1)
       (fun z hz => (hh z hz).2.2.1) (fun z hz => (hh z hz).2.2.2)
   · right
     have hset : ∀ z ∈ uIcc (a + δ / 2) x, |z - a| < δ ∧ z ≠ a := by
@@ -143,7 +144,8 @@ private lemma punctured_increment_bound_or {f g : ℝ → ℝ} {a δ l η x : �
       intro z hz
       refine ⟨abs_lt.mpr ⟨by linarith [hz.1], by linarith [hz.2]⟩, by linarith [hz.1]⟩
     have hh (z) (hz : z ∈ uIcc (a + δ / 2) x) := hlocal z (hset z hz).1 (hset z hz).2
-    exact abs_increment_sub_mul_le_of_deriv_div_bound_uIcc (fun z hz => (hh z hz).1) (fun z hz => (hh z hz).2.1)
+    exact abs_increment_sub_mul_le_of_deriv_div_bound_uIcc (fun z hz => (hh z hz).1)
+        (fun z hz => (hh z hz).2.1)
       (fun z hz => (hh z hz).2.2.1) (fun z hz => (hh z hz).2.2.2)
 
 /-- L’Hôpital’s rule at a punctured finite point when the denominator is unbounded in
@@ -172,8 +174,10 @@ theorem lhopital_infty_nhdsNE {f g : ℝ → ℝ} {a l : ℝ}
     tendsto_id.mono_left nhdsWithin_le_nhds
   have hnear : ∀ᶠ x in 𝓝[≠] a, |x - a| < δ / 2 := by
     simpa only [Real.dist_eq] using (Metric.tendsto_nhds.mp hid) (δ / 2) (by positivity)
-  have hminus := eventually_quotient_anchor_bounds (F := f (a - δ / 2)) (G := g (a - δ / 2)) (l := l) hgtop hε
-  have hplus := eventually_quotient_anchor_bounds (F := f (a + δ / 2)) (G := g (a + δ / 2)) (l := l) hgtop hε
+  have hminus := eventually_quotient_anchor_bounds (F := f (a - δ / 2)) (G := g (a - δ / 2))
+      (l := l) hgtop hε
+  have hplus := eventually_quotient_anchor_bounds (F := f (a + δ / 2)) (G := g (a + δ / 2))
+      (l := l) hgtop hε
   filter_upwards [hnear, hminus, hplus, self_mem_nhdsWithin] with x hx hm hp hxne
   rw [Real.dist_eq]
   rcases punctured_increment_bound_or hlocal hx hxne with hm' | hp'

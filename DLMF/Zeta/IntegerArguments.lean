@@ -891,7 +891,8 @@ private lemma riemannZeta_two_mul_mul_riemannZeta_two_mul_sub {n k : ℕ} (hk : 
 theorem riemannZeta_two_mul_recursion {n : ℕ} (hn : 2 ≤ n) :
     (n + 1 / 2 : ℂ) * riemannZeta (2 * n) =
       ∑ k ∈ Finset.Ico 1 n, riemannZeta (2 * k) * riemannZeta (2 * n - 2 * k) := by
-  rw [sum_congr rfl fun k hk => riemannZeta_two_mul_mul_riemannZeta_two_mul_sub (mem_Ico.mp hk).1 (mem_Ico.mp hk).2,
+  rw [sum_congr rfl fun k hk =>
+      riemannZeta_two_mul_mul_riemannZeta_two_mul_sub (mem_Ico.mp hk).1 (mem_Ico.mp hk).2,
     ← mul_sum]
   have h := sum_choose_mul_bernoulli_mul_bernoulli hn
   have h' : (∑ k ∈ Finset.Ico 1 n, ((((2 * n).choose (2 * k) : ℚ) * bernoulli (2 * k) *
@@ -985,7 +986,8 @@ private lemma sum_bernoulli_convolution_half {n : ℕ} (hn : 2 ≤ n) :
       (bernoulli (2 * k) : ℝ) * (bernoulli (2 * n - 2 * k) : ℝ) =
       -(2 * n : ℝ) * (2 / 2 ^ (2 * n) - 1) * bernoulli (2 * n) - bernoulli (2 * n) := by
   have h := DLMF.BernoulliEuler.sum_choose_bernoulli_mul_bernoulli (A := ℝ) (2 * n) 2⁻¹ 0
-  simp only [aeval_bernoulli_eq_bernoulliFun, add_zero, bernoulliFun_eval_half, bernoulliFun_eval_zero,
+  simp only [aeval_bernoulli_eq_bernoulliFun, add_zero, bernoulliFun_eval_half,
+      bernoulliFun_eval_zero,
     nsmul_eq_mul] at h
   have hodd : bernoulli (2 * n - 1) = 0 :=
     bernoulli_eq_zero_of_odd ⟨n - 1, by omega⟩ (by omega)
@@ -1053,7 +1055,8 @@ theorem riemannZeta_two_mul_recursion_pow_two {n : ℕ} (hn : 2 ≤ n) :
         ((((2 * n).choose (2 * k) : ℚ) * bernoulli (2 * k) * bernoulli (2 * n - 2 * k) : ℚ) : ℝ)
           : ℝ) : ℂ) := by
     intro k hk
-    rw [mul_assoc, mul_comm (riemannZeta _), riemannZeta_two_mul_mul_riemannZeta_two_mul_sub (mem_Ico.mp hk).1
+    rw [mul_assoc, mul_comm (riemannZeta _),
+        riemannZeta_two_mul_mul_riemannZeta_two_mul_sub (mem_Ico.mp hk).1
       (mem_Ico.mp hk).2]
     push_cast; ring
   rw [sum_congr rfl e, ← mul_sum, ← ofReal_sum, sum_two_pow_sub_one_bernoulli_convolution hn,

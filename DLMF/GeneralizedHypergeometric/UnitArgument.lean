@@ -6,7 +6,12 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.GeneralizedHypergeometric.AnalyticProperties
-public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
+public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence
+public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import DLMF.Hypergeometric.ArgumentContinuation
+public import DLMF.Hypergeometric.Solutions
 public import DLMF.Hypergeometric.Identities
 public import DLMF.Hypergeometric.Saalschutz
 public import DLMF.QHypergeometric.HigherSummations
@@ -74,13 +79,15 @@ theorem genHG_finite_ratio_sum (n : ℕ) (a c : ℂ) (hc : GenDenRegular {c}) :
       exact mul_ne_zero (pow_ne_zero _ (by norm_num))
         (Nat.cast_ne_zero.mpr ((Nat.descFactorial_pos.mpr hkn).ne'))
     have hf : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
-    simp only [genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons, Multiset.map_singleton,
+    simp only [genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
+        Multiset.map_singleton,
       Multiset.prod_cons, Multiset.prod_singleton, one_pow, mul_one, poch_nat_one]
     field_simp [hn, hf, hc' k]
   · induction n with
     | zero =>
       have hc0 : c ≠ 0 := by simpa using hc c (by simp) 0
-      simp only [sum_range_one, poch_zero, poch_one, div_one, Nat.cast_zero, add_zero, zero_add, mul_one]
+      simp only [sum_range_one, poch_zero, poch_one, div_one, Nat.cast_zero, add_zero,
+          zero_add, mul_one]
       field_simp [hc0]
       ring
     | succ n ih =>
@@ -152,20 +159,232 @@ theorem genHG_finite_ratio_sum_limit (n : ℕ) (a : ℂ) (ha : GenDenRegular {a}
 
 /-- The removable limiting value at a=0,c=1. -/
 @[dlmf 16.4.E2_5]
-theorem genHG_finite_ratio_sum_zero (n : ℕ) : (∑ k ∈ range (n + 1), poch (0 : ℂ) k / poch 1 k) = 1 := by
+theorem genHG_finite_ratio_sum_zero (n : ℕ) :
+    (∑ k ∈ range (n + 1), poch (0 : ℂ) k / poch 1 k) = 1 := by
   induction n with
   | zero => simp [poch_zero]
   | succ n ih =>
     rw [Finset.sum_range_succ, ih, poch_zero_succ, zero_div, add_zero]
 
-/-- Dixon even terminating evaluation with all removable Gamma ratios replaced by finite products. -/
+section DixonDegenerate
+
+open Polynomial
+
+/-- `1/Γ(y) = (y)_r / Γ(y + r)` for every `y` and every `r`. -/
+private lemma recip_Gamma_eq_poch_mul_recip (y : ℂ) (r : ℕ) :
+    (Gamma y)⁻¹ = poch y r * (Gamma (y + r))⁻¹ := by
+  rcases r with _ | p
+  · simp [poch_zero]
+  · exact recip_Gamma_eq_poch_mul p y
+
+/-- The polynomial side of the even degenerate Dixon sum. -/
+private def dixonEvenT (k : ℕ) (b c : ℂ) : ℂ :=
+  ∑ n ∈ range (2 * k + 1), gaussHGCoeff (-(2 * k : ℂ)) b (1 - 2 * k - b) n * poch c n *
+    poch (1 - 2 * k + n - c) (2 * k - n)
+
+/-- The product side of the even degenerate Dixon sum. -/
+private def dixonEvenQ (k : ℕ) (b c : ℂ) : ℂ :=
+  (2 * k).factorial / (k.factorial * poch (b + k) k) * poch c k * poch (c + (b + k)) k
+
+/-- The Dixon terms with `a = -2k` vanish beyond `2k`. -/
+private lemma gaussHGCoeff_neg_two_mul_eq_zero (k : ℕ) (b c : ℂ) {n : ℕ} (hn : 2 * k < n) :
+    gaussHGCoeff (-(2 * k : ℂ)) b c n = 0 := by
+  have : poch (-((2 * k : ℕ) : ℂ)) n = 0 := poch_neg_nat_eq_zero hn
+  push_cast at this
+  simp [gaussHGCoeff, this]
+
+/-- The normalized Dixon series with `a = -2k` is a finite sum. -/
+private lemma normalizedSeries_neg_two_mul (k : ℕ) (b c : ℂ) :
+    DixonAux.normalizedSeries (-(2 * k : ℂ)) b c =
+      ∑ n ∈ range (2 * k + 1), DixonAux.s (-(2 * k : ℂ)) b c n := by
+  unfold DixonAux.normalizedSeries
+  refine tsum_eq_sum fun n hn => ?_
+  have : 2 * k < n := by simpa using hn
+  simp [DixonAux.s, gaussHGCoeff_neg_two_mul_eq_zero k b _ this]
+
+/-- The WZ recurrence in `c` for the degenerate Dixon series `a = -2k`, valid for every `c`. -/
+private lemma normalizedSeries_neg_two_mul_recurrence (k : ℕ) (b : ℂ)
+    (hb : ∀ n : ℕ, 1 - 2 * k - b ≠ -n) (c : ℂ) :
+    (1 - k - b - c) * DixonAux.normalizedSeries (-(2 * k : ℂ)) b c =
+      (1 - k - c) * (1 - 2 * k - b - c) * DixonAux.normalizedSeries (-(2 * k : ℂ)) b (c - 1) := by
+  have hsum : ∀ c', Summable (DixonAux.s (-(2 * k : ℂ)) b c') := fun c' =>
+    summable_of_ne_finset_zero (s := range (2 * k + 1)) fun n hn => by
+      have : 2 * k < n := by simpa using hn
+      simp [DixonAux.s, gaussHGCoeff_neg_two_mul_eq_zero k b _ this]
+  have hH : Tendsto (DixonAux.wzCertificate (-(2 * k : ℂ)) b c) atTop (𝓝 0) := by
+    refine tendsto_const_nhds.congr' ?_
+    filter_upwards [eventually_gt_atTop (2 * k)] with n hn
+    simp [DixonAux.wzCertificate, gaussHGCoeff_neg_two_mul_eq_zero k b _ hn]
+  have hb' : ∀ n : ℕ, 1 + -(2 * k : ℂ) - b ≠ -n := fun n h => hb n (by linear_combination h)
+  have h := DixonAux.recurrence hb' (hsum c) (hsum (c - 1)) hH
+  convert h using 2 <;> ring
+
+/-- At `c = -m` the polynomial side is `m!` times the normalized series. -/
+private lemma dixonEvenT_neg_nat (k : ℕ) (b : ℂ) (m : ℕ) :
+    dixonEvenT k b (-(m : ℂ)) = m.factorial *
+      DixonAux.normalizedSeries (-(2 * k : ℂ)) b (-(m : ℂ)) := by
+  rw [normalizedSeries_neg_two_mul, mul_sum]
+  refine sum_congr rfl fun n hn => ?_
+  have hn' : n ≤ 2 * k := Nat.lt_succ_iff.mp (mem_range.mp hn)
+  have hr := recip_Gamma_eq_poch_mul_recip (1 + -(2 * k : ℂ) - -(m : ℂ) + n) (2 * k - n)
+  rw [show 1 + -(2 * k : ℂ) - -(m : ℂ) + n + ((2 * k - n : ℕ) : ℂ) = (m : ℂ) + 1 by
+    push_cast [hn']; ring, Complex.Gamma_nat_eq_factorial] at hr
+  simp only [DixonAux.s]
+  rw [show (1 : ℂ) - 2 * k - b = 1 + -(2 * k : ℂ) - b by ring, hr,
+    show (1 : ℂ) - 2 * k + n - -(m : ℂ) = 1 + -(2 * k : ℂ) - -(m : ℂ) + n by ring]
+  have hf : (m.factorial : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero
+  field_simp
+
+/-- The recurrence of the polynomial side at the negative integers. -/
+private lemma dixonEvenT_recurrence (k : ℕ) (b : ℂ) (hb : ∀ n : ℕ, 1 - 2 * k - b ≠ -n)
+    (m : ℕ) :
+    (1 + m) * (1 - k - b + m) * dixonEvenT k b (-(m : ℂ)) =
+      (1 - k + m) * (1 - 2 * k - b + m) * dixonEvenT k b (-((m + 1 : ℕ) : ℂ)) := by
+  have h := normalizedSeries_neg_two_mul_recurrence k b hb (-(m : ℂ))
+  rw [dixonEvenT_neg_nat, dixonEvenT_neg_nat, show -(m : ℂ) - 1 = -((m + 1 : ℕ) : ℂ) by
+    push_cast; ring] at *
+  rw [Nat.factorial_succ]
+  push_cast at h ⊢
+  linear_combination ((m : ℂ) + 1) * m.factorial * h
+
+/-- The recurrence of the product side, for every `c`. -/
+private lemma dixonEvenQ_recurrence (k : ℕ) (b c : ℂ) :
+    (1 - c) * (1 - k - b - c) * dixonEvenQ k b c =
+      (1 - k - c) * (1 - 2 * k - b - c) * dixonEvenQ k b (c - 1) := by
+  unfold dixonEvenQ
+  have h1 : poch (c - 1) k * (c - 1 + k) = (c - 1) * poch c k := by
+    rw [← poch_succ, poch_succ_left, sub_add_cancel]
+  have h2 : poch (c - 1 + (b + k)) k * (c - 1 + (b + k) + k) =
+      (c - 1 + (b + k)) * poch (c + (b + k)) k := by
+    rw [← poch_succ, poch_succ_left]; ring_nf
+  linear_combination ((2 * k).factorial / (k.factorial * poch (b + k) k)) *
+    (-((c - 1 + (b + k)) * poch (c + (b + k)) k) * h1 - poch (c - 1) k * (c - 1 + k) * h2)
+
+/-- The two sides agree at `c = -k`, where only one term survives. -/
+private lemma dixonEvenT_neg_self (k : ℕ) (b : ℂ) (hb : ∀ n : ℕ, 1 - 2 * k - b ≠ -n) :
+    dixonEvenT k b (-(k : ℂ)) = dixonEvenQ k b (-(k : ℂ)) := by
+  unfold dixonEvenT dixonEvenQ
+  rw [sum_eq_single k]
+  · have hP : poch (1 - 2 * k - b) k ≠ 0 := poch_ne_zero_of_not_neg_nat hb k
+    have hR : poch (1 - 2 * k - b) k = (-1) ^ k * poch (b + k) k := by
+      rw [← poch_reflect]; ring_nf
+    have hA : poch (-(2 * k : ℂ)) k = (-1) ^ k * ((2 * k).factorial / k.factorial) := by
+      have h1 := poch_reflect ((k : ℂ) + 1) k
+      have h2 := Complex.Gamma_add_nat_div_Gamma_eq (n := k) ((k : ℂ) + 1)
+        (fun m hm => by
+          have : ((k + 1 + m : ℕ) : ℂ) = 0 := by push_cast; linear_combination hm
+          exact absurd (by exact_mod_cast this) (Nat.succ_ne_zero (k + m) ∘ by omega))
+      rw [show (k : ℂ) + 1 + k = ((2 * k : ℕ) : ℂ) + 1 by push_cast; ring,
+        show (k : ℂ) + 1 = ((k : ℕ) : ℂ) + 1 from rfl, Complex.Gamma_nat_eq_factorial,
+        Complex.Gamma_nat_eq_factorial] at h2
+      rw [show (1 : ℂ) - (k + 1) - k = -(2 * k) by ring] at h1
+      rw [h1, poch, ← h2]
+    have hk : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
+    have hp1 : poch (1 - 2 * k + k - -(k : ℂ)) (2 * k - k) = k.factorial := by
+      rw [show (1 : ℂ) - 2 * k + k - -(k : ℂ) = 1 by ring, show 2 * k - k = k by omega,
+        poch, ascPochhammer_eval_one]
+    rw [hp1, gaussHGCoeff, hA, hR]
+    have hB : poch (b + k) k ≠ 0 := fun h0 => hP (by rw [hR, h0, mul_zero])
+    field_simp
+    rw [show -(k : ℂ) + (b + k) = b by ring]
+  · intro n hn hnk
+    rcases lt_or_gt_of_ne hnk with hlt | hgt
+    · have : poch (1 - 2 * k + n - -(k : ℂ)) (2 * k - n) = 0 := by
+        have := poch_neg_nat_eq_zero (n := k - 1 - n) (k := 2 * k - n) (by omega)
+        rwa [show -(((k - 1 - n : ℕ) : ℂ)) = 1 - 2 * k + n - -(k : ℂ) by
+          push_cast [show n ≤ k - 1 by omega, show 1 ≤ k by omega]; ring] at this
+      rw [this, mul_zero]
+    · have := poch_neg_nat_eq_zero (n := k) (k := n) hgt
+      rw [this, mul_zero, zero_mul]
+  · intro h; exact absurd (Finset.mem_range.mpr (by omega)) h
+
+/-- The two sides agree at every `c = -m` with `m ≥ k`. -/
+private lemma dixonEvenT_neg_add (k : ℕ) (b : ℂ) (hb : ∀ n : ℕ, 1 - 2 * k - b ≠ -n) (i : ℕ) :
+    dixonEvenT k b (-((k + i : ℕ) : ℂ)) = dixonEvenQ k b (-((k + i : ℕ) : ℂ)) := by
+  induction i with
+  | zero => simpa using dixonEvenT_neg_self k b hb
+  | succ i ih =>
+    have hT := dixonEvenT_recurrence k b hb (k + i)
+    have hQ := dixonEvenQ_recurrence k b (-((k + i : ℕ) : ℂ))
+    rw [show -((k + i : ℕ) : ℂ) - 1 = -((k + i + 1 : ℕ) : ℂ) by push_cast; ring] at hQ
+    have h1 : (1 - k + ((k + i : ℕ) : ℂ)) ≠ 0 := by
+      push_cast; rw [show (1 : ℂ) - k + (k + i) = ((i + 1 : ℕ) : ℂ) by push_cast; ring]
+      exact_mod_cast i.succ_ne_zero
+    have h2 : (1 - 2 * k - b + ((k + i : ℕ) : ℂ)) ≠ 0 := fun h0 =>
+      hb (k + i) (by linear_combination h0)
+    have h3 := mul_ne_zero h1 h2
+    rw [show k + (i + 1) = k + i + 1 by ring]
+    apply mul_left_cancel₀ h3
+    rw [← hT, ih]
+    linear_combination hQ
+
+/-- The polynomial and product sides of the even degenerate Dixon sum agree for every `c`. -/
+private lemma dixonEvenT_eq_dixonEvenQ (k : ℕ) (b : ℂ) (hb : ∀ n : ℕ, 1 - 2 * k - b ≠ -n)
+    (c : ℂ) : dixonEvenT k b c = dixonEvenQ k b c := by
+  let Tp : ℂ[X] := ∑ n ∈ range (2 * k + 1),
+    (C (gaussHGCoeff (-(2 * k : ℂ)) b (1 - 2 * k - b) n) : ℂ[X]) * ascPochhammer ℂ n *
+      (ascPochhammer ℂ (2 * k - n)).comp ((C (1 - 2 * k + n : ℂ) : ℂ[X]) - X)
+  let Qp : ℂ[X] := (C ((2 * k).factorial / (k.factorial * poch (b + k) k) : ℂ) : ℂ[X]) *
+    ascPochhammer ℂ k * (ascPochhammer ℂ k).comp (X + (C (b + k) : ℂ[X]))
+  have hT : ∀ c, Tp.eval c = dixonEvenT k b c := fun c => by
+    simp [Tp, dixonEvenT, Polynomial.eval_finsetSum, poch]
+  have hQ : ∀ c, Qp.eval c = dixonEvenQ k b c := fun c => by
+    simp [Qp, dixonEvenQ, poch]
+  have h0 : Tp - Qp = 0 := by
+    refine Polynomial.eq_zero_of_infinite_isRoot _ (Set.infinite_of_injective_forall_mem
+      (f := fun i : ℕ => -((k + i : ℕ) : ℂ)) (fun i j hij => by simpa using hij) fun i => ?_)
+    simp only [Set.mem_ofPred_eq, IsRoot.def, eval_sub, hT, hQ]
+    rw [dixonEvenT_neg_add k b hb i, sub_self]
+  rw [← hT, ← hQ, sub_eq_zero.mp h0]
+
+/-- Dixon even terminating evaluation with all removable Gamma ratios replaced by finite products.
+-/
 @[dlmf 16.4.E5]
-theorem genHG_dixon_terminating_even (k : ℕ) (b c : ℂ) (hb : GenDenRegular {1 - b - 2 * k, 1 - c - 2 * k}) :
+theorem genHG_dixon_terminating_even (k : ℕ) (b c : ℂ)
+    (hb : GenDenRegular {1 - b - 2 * k, 1 - c - 2 * k}) :
     genFiniteHG (2 * k) {(-(2 * k) : ℂ), b, c}
       {1 - b - 2 * k, 1 - c - 2 * k} 1 =
       (2 * k).factorial * poch (b + c + k) k /
         (k.factorial * poch (b + k) k * poch (c + k) k) := by
-  sorry
+  have hb1 : ∀ n : ℕ, 1 - b - 2 * k ≠ -n := hb _ (by simp)
+  have hc1 : ∀ n : ℕ, 1 - c - 2 * k ≠ -n := hb _ (by simp)
+  have hb2 : ∀ n : ℕ, 1 - 2 * k - b ≠ -n := fun n h => hb1 n (by linear_combination h)
+  have hpc : poch (1 - c - 2 * k) (2 * k) ≠ 0 := poch_ne_zero_of_not_neg_nat hc1 _
+  have hrc : poch (1 - c - 2 * k) (2 * k) = poch c k * poch (c + k) k := by
+    have := poch_reflect c (2 * k)
+    push_cast at this
+    rw [this, show 2 * k = k + k by ring, poch_add, pow_add, ← pow_mul_pow_sub (-1 : ℂ) le_rfl]
+    simp [← sq, ← pow_mul]
+  have hck : poch (c + k) k ≠ 0 := fun h0 => hpc (by rw [hrc, h0, mul_zero])
+  have hrb : poch (1 - 2 * k - b) k = (-1) ^ k * poch (b + k) k := by
+    rw [← poch_reflect]; ring_nf
+  have hbk : poch (b + k) k ≠ 0 := fun h0 =>
+    poch_ne_zero_of_not_neg_nat hb2 k (by rw [hrb, h0, mul_zero])
+  apply mul_right_cancel₀ hpc
+  have hL : genFiniteHG (2 * k) {(-(2 * k) : ℂ), b, c} {1 - b - 2 * k, 1 - c - 2 * k} 1 *
+      poch (1 - c - 2 * k) (2 * k) = dixonEvenT k b c := by
+    unfold genFiniteHG dixonEvenT
+    rw [sum_mul]
+    refine sum_congr rfl fun n hn => ?_
+    have hn' : n ≤ 2 * k := Nat.lt_succ_iff.mp (mem_range.mp hn)
+    have hsplit : poch (1 - c - 2 * k) (2 * k) =
+        poch (1 - c - 2 * k) n * poch (1 - 2 * k + n - c) (2 * k - n) := by
+      rw [← show 1 - c - 2 * k + n = 1 - 2 * k + n - c by ring, ← poch_add,
+        Nat.add_sub_cancel' hn']
+    have h1 := poch_ne_zero_of_not_neg_nat hb1 n
+    have h2 := poch_ne_zero_of_not_neg_nat hc1 n
+    have h3 : poch (1 - 2 * k - b) n = poch (1 - b - 2 * k) n := by ring_nf
+    have hf : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
+    simp only [genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
+      Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton, one_pow, mul_one,
+      gaussHGCoeff, hsplit, h3]
+    field_simp
+  rw [hL, dixonEvenT_eq_dixonEvenQ k b hb2, dixonEvenQ, hrc]
+  have hk : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
+  rw [show c + (b + k) = b + c + k by ring]
+  field_simp
+
+end DixonDegenerate
 
 /-- Dixon odd terminating evaluation, retaining every regular lower-parameter case. -/
 @[dlmf 16.4.E5]
@@ -175,7 +394,8 @@ theorem genHG_dixon_terminating_odd (k : ℕ) (b c : ℂ)
       {1 - b - (2 * k + 1), 1 - c - (2 * k + 1)} 1 = 0 := by
   let N := 2 * k + 1
   have hB : genPoch {1 - b - N, 1 - c - N} N ≠ 0 := by
-    simpa only [N, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one] using genPoch_ne_zero hb N
+    simpa only [N, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one] using
+        genPoch_ne_zero hb N
   have hs : (-1 : ℂ) ^ N = -1 := by simp [N, pow_add, pow_mul]
   have hp : genPoch {1 - b - N, 1 - c - N} N = genPoch {b, c} N := by
     simp only [genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
@@ -203,7 +423,8 @@ theorem genHG_dixon_terminating_odd (k : ℕ) (b c : ℂ)
   norm_num [Multiset.insert_eq_cons, Multiset.card_cons, Multiset.card_singleton] at hi
   have hzero : genFiniteHG N ((-(N : ℂ)) ::ₘ {b, c}) {1 - b - N, 1 - c - N} 1 = 0 := by
     linear_combination hi / 2
-  simpa only [N, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, Multiset.insert_eq_cons] using hzero
+  simpa only [N, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one,
+      Multiset.insert_eq_cons] using hzero
 
 /-- Watson sum in the full absolute convergence half-space. -/
 @[dlmf 16.4.E6]
@@ -218,7 +439,8 @@ theorem genHG_watson_sum (a b c : ℂ) (hb : GenDenRegular {(a + b + 1) / 2, 2 *
 
 /-- Watson even terminating evaluation without extra Gamma-pole exclusions. -/
 @[dlmf 16.4.E6]
-theorem genHG_watson_terminating_even (k : ℕ) (b c : ℂ) (hb : GenDenRegular {(b - 2 * k + 1) / 2, 2 * c}) :
+theorem genHG_watson_terminating_even (k : ℕ) (b c : ℂ)
+    (hb : GenDenRegular {(b - 2 * k + 1) / 2, 2 * c}) :
     genFiniteHG (2 * k) {(-(2 * k) : ℂ), b, c}
       {(b - 2 * k + 1) / 2, 2 * c} 1 =
       poch (1 / 2) k * poch (c + (1 - b) / 2) k /
@@ -227,7 +449,8 @@ theorem genHG_watson_terminating_even (k : ℕ) (b c : ℂ) (hb : GenDenRegular 
 
 /-- Watson odd terminating evaluation for every regular displayed lower parameter. -/
 @[dlmf 16.4.E6]
-theorem genHG_watson_terminating_odd (k : ℕ) (b c : ℂ) (hb : GenDenRegular {(b - (2 * k + 1) + 1) / 2, 2 * c}) :
+theorem genHG_watson_terminating_odd (k : ℕ) (b c : ℂ)
+    (hb : GenDenRegular {(b - (2 * k + 1) + 1) / 2, 2 * c}) :
     genFiniteHG (2 * k + 1) {(-(2 * k + 1) : ℂ), b, c}
       {(b - (2 * k + 1) + 1) / 2, 2 * c} 1 = 0 := by
   sorry
@@ -252,7 +475,8 @@ theorem genHG_whipple_3F2_terminating (n : ℕ) (a d : ℂ) (hb : GenDenRegular 
 
 /-- Dougall very well-poised 5F4 in its full absolute convergence half-space. -/
 @[dlmf 16.4.E9]
-theorem genHG_dougall_5F4_sum (a b c d : ℂ) (hb : GenDenRegular {a / 2, a - b + 1, a - c + 1, a - d + 1})
+theorem genHG_dougall_5F4_sum (a b c d : ℂ)
+    (hb : GenDenRegular {a / 2, a - b + 1, a - c + 1, a - d + 1})
     (hconv : (b + c + d - a).re < 1) :
     genHG {a, a / 2 + 1, b, c, d} {a / 2, a - b + 1, a - c + 1, a - d + 1} 1 =
       Gamma (a - b + 1) * Gamma (a - c + 1) * Gamma (a - d + 1) *
@@ -732,10 +956,12 @@ private lemma genCoeff_first_unit_recurrence_telescope (a b c d e : ℂ)
         n * (e + n - 1) * genCoeff {a, b, c} {d, e} n) := by
   have hb0 : GenDenRegular {d, e} := by
     intro z hz
-    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton]
+                     at hz ⊢; tauto)
   have hbm : GenDenRegular {d - 1, e} := by
     intro z hz
-    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton]
+                     at hz ⊢; tauto)
   have hRaise := genCoeff_lower_add_one a b c d e hb0 n
   have hLower := genCoeff_lower_add_one a b c (d - 1) e hbm n
   rw [show d - 1 + 1 = d by ring] at hLower
@@ -780,13 +1006,16 @@ theorem genHG_3F2_unit_recurrence (a b c d e : ℂ) (hb : GenDenRegular {d - 1, 
       (genHG {a, b, c} {d, e} 1 - genHG {a, b, c} {d - 1, e} 1) := by
   have hb0 : GenDenRegular {d, e} := by
     intro z hz
-    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton]
+                     at hz ⊢; tauto)
   have hbp : GenDenRegular {d + 1, e} := by
     intro z hz
-    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton]
+                     at hz ⊢; tauto)
   have hbm : GenDenRegular {d - 1, e} := by
     intro z hz
-    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton]
+                     at hz ⊢; tauto)
   have hc0 : 0 < (d + e - a - b - c).re ∨ GenTerminates {a, b, c} := by
     rcases hconv with h | h
     · exact Or.inl (by linarith)
@@ -891,7 +1120,8 @@ theorem genHG_3F2_unit_recurrence_two (a b c d e : ℂ) (hb : GenDenRegular {d, 
 
 /-- The balanced terminating 4F3 transformation. -/
 @[dlmf 16.4.E14]
-theorem genHG_balanced_4F3_transformation (n : ℕ) (a b c d e f : ℂ) (hbal : a + b + c - n + 1 = d + e + f)
+theorem genHG_balanced_4F3_transformation (n : ℕ) (a b c d e f : ℂ)
+    (hbal : a + b + c - n + 1 = d + e + f)
     (hb : GenDenRegular {d, e, f, a - e - n + 1, a - f - n + 1}) :
     genFiniteHG n {(-n : ℂ), a, b, c} {d, e, f} 1 =
       poch (e - a) n * poch (f - a) n / (poch e n * poch f n) *
@@ -899,7 +1129,8 @@ theorem genHG_balanced_4F3_transformation (n : ℕ) (a b c d e f : ℂ) (hbal : 
           {d, a - e - n + 1, a - f - n + 1} 1 := by
   sorry
 
-/-- Whipple transformation when the right side terminates through the transformed first upper parameter and the left converges absolutely. -/
+/-- Whipple transformation when the right side terminates through the transformed first upper
+parameter and the left converges absolutely. -/
 @[dlmf 16.4.E15]
 theorem genHG_whipple_nonterminating_left (n : ℕ) (a b c d e f : ℂ) (hn : a - b - c + 1 = -n)
     (hb : GenDenRegular {a / 2, a - b + 1, a - c + 1, a - d + 1, a - e + 1, a - f + 1,

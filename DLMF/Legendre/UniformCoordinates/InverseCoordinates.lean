@@ -32,7 +32,8 @@ open DLMF.Bessel DLMF.Confluent
 `LegendreYRelation α x` and is its unique solution. -/
 @[dlmf 14.15.E21, dlmf 14.15.E22]
 theorem legendreDegreeY_spec {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 0 ≤ x) :
-    LegendreYRelation α x (legendreDegreeY α x) ∧ ∀ y : ℝ, LegendreYRelation α x y → y=legendreDegreeY α x := by
+    LegendreYRelation α x (legendreDegreeY α x) ∧ ∀ y : ℝ, LegendreYRelation α x y →
+        y=legendreDegreeY α x := by
   obtain ⟨hex, huniq⟩ := legY_existsUnique hα hα1 hx
   have hs := Classical.epsilon_spec hex
   exact ⟨hs, fun y hy => huniq y _ hy hs⟩
@@ -217,7 +218,9 @@ def legendreDegreeAmplitude (α x : ℝ) : ℝ :=
 
 /-- Exact Bessel envelopes from DLMF 2.8.33–34, used in 14.15. -/
 def legendreBesselEnvelope (second : Bool) (ν x : ℝ) : ℝ :=
-  if x ≤ AsymptoticApproximations.besselEnvCrit ν then Real.sqrt 2*(if second then ‖besselY ν x‖ else (besselJ ν x).re) else Real.sqrt (‖besselJ ν x‖^2+‖besselY ν x‖^2)
+  if x ≤ AsymptoticApproximations.besselEnvCrit ν then
+      Real.sqrt 2*(if second then ‖besselY ν x‖ else (besselJ ν x).re) else
+      Real.sqrt (‖besselJ ν x‖^2+‖besselY ν x‖^2)
 
 /-- DLMF 14.15.23: the crossing point `X_c`, the largest positive root of `U(−c, x) = Ū(−c, x)`,
 that separates the two branches of the parabolic-cylinder envelopes. -/
@@ -230,7 +233,8 @@ equal to `(U(−c,x)² + Ū(−c,x)²)^{1/2}` for `x ≤ X_c` and to `√2 U(−
 for `x > X_c`. -/
 @[dlmf 14.15.E23]
 def legendreCylinderEnvelope (barred : Bool) (c x : ℝ) : ℝ :=
-  if x ≤ cylinderEnvelopeCross c then Real.sqrt (‖pcfU (-c) x‖^2+‖pcfUBar (-c) x‖^2) else Real.sqrt 2*(if barred then (pcfUBar (-c) x).re else (pcfU (-c) x).re)
+  if x ≤ cylinderEnvelopeCross c then Real.sqrt (‖pcfU (-c) x‖^2+‖pcfUBar (-c) x‖^2) else
+      Real.sqrt 2*(if barred then (pcfUBar (-c) x).re else (pcfU (-c) x).re)
 
 /-- DLMF 14.15.26: the turning-point parameter `a = ((ν+μ+1/2)|ν−μ+1/2|)^{1/2}/(ν+1/2)` of the
 parabolic-cylinder expansions 14.15.24–14.15.31. -/
@@ -249,7 +253,14 @@ parabolic-cylinder variable, with branches for `a = 0` (`ζ² = −ln(1−x²)`,
 with `x ≥ a` (14.15.27) or `|x| < a` (14.15.28), and for `μ > ν+1/2` (14.15.31). -/
 @[dlmf 14.15.E27, dlmf 14.15.E28, dlmf 14.15.E29, dlmf 14.15.E31]
 def LegendreCylinderRelation (ν μ x ζ : ℝ) : Prop :=
-  let a:=legendreCylinderA ν μ; let α:=legendreCylinderAlpha ν μ; if a=0 then ζ^2=-Real.log (1-x^2) ∧ 0 ≤ x*ζ else if μ ≤ ν+1/2 then if x = -a then ζ = -α else if a ≤ x then α ≤ ζ ∧ ζ*Real.sqrt (ζ^2-α^2)/2-α^2/2*Real.arcosh (ζ/α)=Real.sqrt (1-a^2)*Real.artanh (Real.sqrt ((x^2-a^2)/(1-a^2))/x)-Real.arcosh (x/a) else |ζ| ≤ α ∧ α^2/2*Real.arcsin (ζ/α)+ζ/2*Real.sqrt (α^2-ζ^2)=Real.arcsin (x/a)-Real.sqrt (1-a^2)*Real.arctan (x*Real.sqrt ((1-a^2)/(a^2-x^2))) else ζ*Real.sqrt (ζ^2+α^2)/2+α^2/2*Real.arsinh (ζ/α)=Real.sqrt (1+a^2)*Real.artanh (x*Real.sqrt ((1+a^2)/(x^2+a^2)))-Real.arsinh (x/a)
+  let a:=legendreCylinderA ν μ; let α:=legendreCylinderAlpha ν μ; if a=0 then
+      ζ^2=-Real.log (1-x^2) ∧ 0 ≤ x*ζ else if μ ≤ ν+1/2 then if x = -a then ζ = -α else if a ≤
+      x then α ≤ ζ ∧ ζ*Real.sqrt (ζ^2-α^2)/2-α^2/2*Real.arcosh (ζ/α)=Real.sqrt (1-a^2)*Real.artanh
+      (Real.sqrt ((x^2-a^2)/(1-a^2))/x)-Real.arcosh (x/a) else |ζ| ≤ α ∧
+      α^2/2*Real.arcsin (ζ/α)+ζ/2*Real.sqrt (α^2-ζ^2)=Real.arcsin (x/a)-Real.sqrt
+      (1-a^2)*Real.arctan (x*Real.sqrt ((1-a^2)/(a^2-x^2))) else
+      ζ*Real.sqrt (ζ^2+α^2)/2+α^2/2*Real.arsinh (ζ/α)=Real.sqrt (1+a^2)*Real.artanh
+      (x*Real.sqrt ((1+a^2)/(x^2+a^2)))-Real.arsinh (x/a)
 
 /-- DLMF 14.15.27–14.15.29, 14.15.31: the variable `ζ`, chosen as a solution of
 `LegendreCylinderRelation ν μ x ζ` (unique under the hypotheses of `legendreCylinderZeta_spec`). -/
@@ -436,7 +447,8 @@ theorem legC_G_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo
     have : HasDerivAt (fun y : ℝ => y^2-a^2) (2*x) x := by
       simpa using (hasDerivAt_pow 2 x).sub_const (a^2)
     exact this.sqrt hw2p.ne'
-  have hvd : HasDerivAt (fun y => Real.sqrt (y^2-a^2)/(c*y)) ((2*x/(2*w)*(c*x) - w*(c*1))/(c*x)^2) x :=
+  have hvd : HasDerivAt (fun y => Real.sqrt (y^2-a^2)/(c*y))
+      ((2*x/(2*w)*(c*x) - w*(c*1))/(c*x)^2) x :=
     hwd.div ((hasDerivAt_id x).const_mul c) (by positivity)
   have hv : w/(c*x) ∈ Ioo (-1:ℝ) 1 := by
     have hpos : 0 < w/(c*x) := by positivity
@@ -693,8 +705,10 @@ theorem legC_A_eq_zero {ν μ : ℝ} (h : μ = ν+1/2) :
 ν+1/2`, `legendreCylinderZeta ν μ x` satisfies `LegendreCylinderRelation ν μ x` and is its unique
 solution. -/
 @[dlmf 14.15.E27, dlmf 14.15.E28, dlmf 14.15.E29, dlmf 14.15.E31]
-theorem legendreCylinderZeta_spec {ν μ x : ℝ} (hν : -1/2 < ν) (hμ : 0 < μ) (hx : x ∈ Ioo (-1:ℝ) 1) (hdom : μ ≤ ν+1/2 → -legendreCylinderA ν μ ≤ x) :
-    LegendreCylinderRelation ν μ x (legendreCylinderZeta ν μ x) ∧ ∀ ζ : ℝ, LegendreCylinderRelation ν μ x ζ → ζ=legendreCylinderZeta ν μ x := by
+theorem legendreCylinderZeta_spec {ν μ x : ℝ} (hν : -1/2 < ν) (hμ : 0 < μ) (hx : x ∈ Ioo (-1:ℝ) 1)
+    (hdom : μ ≤ ν+1/2 → -legendreCylinderA ν μ ≤ x) :
+    LegendreCylinderRelation ν μ x (legendreCylinderZeta ν μ x) ∧ ∀ ζ : ℝ,
+        LegendreCylinderRelation ν μ x ζ → ζ=legendreCylinderZeta ν μ x := by
   suffices key : (∃ ζ, LegendreCylinderRelation ν μ x ζ) ∧
       ∀ ζ₁ ζ₂, LegendreCylinderRelation ν μ x ζ₁ → LegendreCylinderRelation ν μ x ζ₂ → ζ₁ = ζ₂ by
     have hs := Classical.epsilon_spec key.1
@@ -709,7 +723,8 @@ theorem legendreCylinderZeta_spec {ν μ x : ℝ} (hν : -1/2 < ν) (hμ : 0 < �
       have h1 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
       have h2 : 1 - x^2 ≤ 1 := by nlinarith
       linarith [Real.log_nonpos h1.le h2]
-    refine ⟨⟨if 0 ≤ x then Real.sqrt (-Real.log (1 - x^2)) else -Real.sqrt (-Real.log (1 - x^2)), ?_, ?_⟩, ?_⟩
+    refine ⟨⟨if 0 ≤ x then Real.sqrt (-Real.log (1 - x^2)) else
+        -Real.sqrt (-Real.log (1 - x^2)), ?_, ?_⟩, ?_⟩
     · split_ifs <;> simp [Real.sq_sqrt hc]
     · split_ifs with h
       · exact mul_nonneg h (Real.sqrt_nonneg _)
@@ -749,17 +764,21 @@ theorem legendreCylinderZeta_spec {ν μ x : ℝ} (hν : -1/2 < ν) (hμ : 0 < �
             (show legC_K a x ∈ Icc (legC_H α (-α)) (legC_H α α) from by
               rw [legC_H_left hα0, legC_H_right hα0]; constructor <;> linarith)
           refine ⟨⟨ζ, abs_le.2 hζ, h⟩, fun ζ₁ ζ₂ h1 h2 => ?_⟩
-          exact (legC_H_strictMonoOn hα0).injOn (abs_le.1 h1.1) (abs_le.1 h2.1) (h1.2.trans h2.2.symm)
+          exact (legC_H_strictMonoOn hα0).injOn (abs_le.1 h1.1) (abs_le.1 h2.1)
+              (h1.2.trans h2.2.symm)
     · simp only [hle, ↓reduceIte]
       have hα0 := legC_alpha_pos_of_gt hν (not_le.1 hle)
-      obtain ⟨ζ, h⟩ := legC_P_surj hα0 (Real.sqrt (1+a^2)*Real.artanh (x*Real.sqrt ((1+a^2)/(x^2+a^2)))-Real.arsinh (x/a))
+      obtain ⟨ζ, h⟩ := legC_P_surj hα0
+          (Real.sqrt (1+a^2)*Real.artanh (x*Real.sqrt ((1+a^2)/(x^2+a^2)))-Real.arsinh (x/a))
       exact ⟨⟨ζ, h⟩, fun ζ₁ ζ₂ h1 h2 => (legC_P_strictMono hα0).injective (h1.trans h2.symm)⟩
 
 /-- The amplitude `((ζ²−α²)/(x²−a²))^{1/4}` (for `μ ≤ ν+1/2`) or `((ζ²+α²)/(x²+a²))^{1/4}` (for `μ >
 ν+1/2`) in DLMF 14.15.24, 14.15.25 and 14.15.30, defined as a punctured limit so that the removable
 singularity at the turning point `x = a` is filled in. -/
 def legendreCylinderAmplitude (ν μ x : ℝ) : ℝ :=
-  limUnder (𝓝[≠] x) (fun t : ℝ => let a:=legendreCylinderA ν μ; let α:=legendreCylinderAlpha ν μ; let ζ:=legendreCylinderZeta ν μ t; if μ ≤ ν+1/2 then ((ζ^2-α^2)/(t^2-a^2))^(1/4:ℝ) else ((ζ^2+α^2)/(t^2+a^2))^(1/4:ℝ))
+  limUnder (𝓝[≠] x) (fun t : ℝ => let a:=legendreCylinderA ν μ; let α:=legendreCylinderAlpha ν μ;
+      let ζ:=legendreCylinderZeta ν μ t; if μ ≤ ν+1/2 then ((ζ^2-α^2)/(t^2-a^2))^(1/4:ℝ) else
+      ((ζ^2+α^2)/(t^2+a^2))^(1/4:ℝ))
 
 /-- Uniform approach in the large first parameter, with both other parameters varying. -/
 def legendreUniformFilter (S : Set (ℝ × ℝ × ℝ)) : Filter (ℝ × ℝ × ℝ) :=
@@ -866,7 +885,8 @@ theorem legBes_large (ν : ℝ) (X : ℝ) :
     have := le_abs_self C
     nlinarith
   set z := besselJ ν x + besselY ν x
-  have e : besselJ ν x - (Real.sqrt (2 / (π * x)) : ℂ) + besselY ν x = z - (Real.sqrt (2 / (π * x)) : ℂ) := by
+  have e : besselJ ν x - (Real.sqrt (2 / (π * x)) : ℂ) + besselY ν x = z -
+      (Real.sqrt (2 / (π * x)) : ℂ) := by
     simp only [z]; ring
   rw [e] at hb
   have hre : |z.re - Real.sqrt (2 / (π * x))| ≤ ‖z - (Real.sqrt (2 / (π * x)) : ℂ)‖ := by
@@ -976,8 +996,10 @@ theorem legBes_small {ν : ℝ} (hν : 0 ≤ ν) :
 /-- Existence of the first positive Bessel crossing used by the envelopes. -/
 theorem besselEnvelopeCross_spec {ν : ℝ} (hν : 0 ≤ ν) :
     0 < AsymptoticApproximations.besselEnvCrit ν ∧
-      besselJ ν (AsymptoticApproximations.besselEnvCrit ν)+DLMF.Bessel.besselY ν (AsymptoticApproximations.besselEnvCrit ν)=0 ∧
-      ∀ x : ℝ, 0 < x → x < AsymptoticApproximations.besselEnvCrit ν → besselJ ν x+DLMF.Bessel.besselY ν x ≠ 0 := by
+      besselJ ν (AsymptoticApproximations.besselEnvCrit ν)+DLMF.Bessel.besselY ν
+          (AsymptoticApproximations.besselEnvCrit ν)=0 ∧
+      ∀ x : ℝ, 0 < x → x < AsymptoticApproximations.besselEnvCrit ν →
+          besselJ ν x+DLMF.Bessel.besselY ν x ≠ 0 := by
   obtain ⟨ε, hε, hsmall⟩ := legBes_small hν
   set f : ℝ → ℝ := fun x => (besselJ ν x + besselY ν x).re with hf
   set Z := {x : ℝ | 0 < x ∧ besselJ ν x + besselY ν x = 0} with hZ
@@ -1019,8 +1041,10 @@ is asserted only for `c > 0` (corrected 2026-10-22). -/
 @[dlmf 14.15.E23]
 theorem cylinderEnvelopeCross_spec {c : ℝ} (hc : 0 ≤ c) :
     (0 < c → 0 < cylinderEnvelopeCross c) ∧
-      DLMF.Confluent.pcfU (-c) (cylinderEnvelopeCross c)=DLMF.Confluent.pcfUBar (-c) (cylinderEnvelopeCross c) ∧
-      ∀ x : ℝ, cylinderEnvelopeCross c < x → DLMF.Confluent.pcfU (-c) x ≠ DLMF.Confluent.pcfUBar (-c) x := by
+      DLMF.Confluent.pcfU (-c) (cylinderEnvelopeCross c)=DLMF.Confluent.pcfUBar (-c)
+          (cylinderEnvelopeCross c) ∧
+      ∀ x : ℝ, cylinderEnvelopeCross c < x → DLMF.Confluent.pcfU (-c) x ≠
+          DLMF.Confluent.pcfUBar (-c) x := by
   sorry
 
 end DLMF.Legendre

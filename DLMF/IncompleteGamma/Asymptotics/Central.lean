@@ -236,7 +236,8 @@ theorem igCen_U : ∃ (U : ℝ → ℝ) (w₀ C₂ : ℝ), 0 < w₀ ∧ w₀ ≤
   have hr : ∀ v : ℝ, |v| < ε → |U v - v - v^2/3| ≤ c * |v|^3 := by
     intro v hv
     have := hball (by simpa [Real.dist_eq] using hv)
-    simp only [Finset.sum_range_succ, Finset.sum_range_zero, hc0, hc1, hc2, Real.norm_eq_abs] at this
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero, hc0, hc1, hc2,
+        Real.norm_eq_abs] at this
     rw [abs_of_nonneg (pow_nonneg (abs_nonneg v) 3)] at this
     convert this using 2
     ring
@@ -693,7 +694,8 @@ theorem igCen_core {B : ℝ} (hB : 0 < B) : ∃ C s₀ : ℝ, 0 < s₀ ∧ s₀ 
     rw [igCen_integral_gauss hs, neg_div, TauCeti.Real.erf_neg]; ring
   have hG₁ : ∫ v in (-w₀)..v₁, v * Real.exp (-v^2/s^2) = s^2/2 * (eM - eT) := by
     rw [igCen_integral_mul_gauss hs, neg_sq]
-  have hJ : ∫ u in (-1:ℝ)..u₁, g u = J₁ + s * (π'/2) * (rT + rM) + 2/3 * (s^2/2 * (eM - eT)) + E := by
+  have hJ : ∫ u in (-1:ℝ)..u₁, g u = J₁ + s * (π'/2) * (rT + rM) + 2/3 *
+      (s^2/2 * (eM - eT)) + E := by
     rw [hsplit, hchange, hdec, hG₀, hG₁]; ring
   -- bounds on the pieces
   have hUw : -1 < U (-w₀) := by linarith [(hU (-w₀) ⟨le_rfl, by linarith⟩).2.2.1]
@@ -704,7 +706,8 @@ theorem igCen_core {B : ℝ} (hB : 0 < B) : ∃ C s₀ : ℝ, 0 < s₀ ∧ s₀ 
     rw [ha_def]; field_simp
   rw [hφw, haw] at hJ₁1
   have hEb : |E| ≤ 6 * C₂ * s^3 :=
-    igCen_err_bound hs hC₂ hv₁.1 fun v hv => (hU v (hIcc1 (by rw [uIcc_of_le hv₁.1]; exact hv))).2.2.2.2.2
+    igCen_err_bound hs hC₂ hv₁.1 fun v hv =>
+        (hU v (hIcc1 (by rw [uIcc_of_le hv₁.1]; exact hv))).2.2.2.2.2
   have hM : 0 < w₀/s := by positivity
   have hrM1 : 1 - rM ≤ eM / (w₀/s) := by
     have := igCen_one_sub_erf_le hM
@@ -835,7 +838,10 @@ def gammaCentralFilter (B : ℝ) : Filter (ℝ × ℝ) :=
 (`igCen_core`). -/
 @[dlmf 8.11.E10]
 theorem normIncGammaP_central_expansion {B : ℝ} (hB : 0 < B) :
-    IsBigO (gammaCentralFilter B) (fun p : ℝ × ℝ => normIncGammaPContinued (p.1+1) (p.1+Real.sqrt (2*p.1)*p.2)-erfc (-p.2)/2+((Real.sqrt (2/(π*p.1))/3*(1+p.2^2)*Real.exp (-p.2^2) : ℝ) : ℂ)) (fun p => p.1⁻¹) := by
+    IsBigO (gammaCentralFilter B)
+        (fun p : ℝ × ℝ => normIncGammaPContinued (p.1+1) (p.1+Real.sqrt (2*p.1)*p.2)-erfc
+        (-p.2)/2+((Real.sqrt (2/(π*p.1))/3*(1+p.2^2)*Real.exp (-p.2^2) : ℝ) : ℂ))
+        (fun p => p.1⁻¹) := by
   obtain ⟨C, s₀, hs₀, -, hcore⟩ := igCen_core hB
   set s₁ := min s₀ (1/(2*B)) with hs₁
   have hs₁0 : 0 < s₁ := by positivity
@@ -869,7 +875,8 @@ theorem normIncGammaP_central_expansion {B : ℝ} (hB : 0 < B) :
       congr 1; field_simp
     rw [this]; push_cast; ring
   have hxpos : 0 < a*(1+s*y) := by
-    have : -(s*|y|) ≤ s*y := by rw [← mul_neg]; exact mul_le_mul_of_nonneg_left (neg_abs_le y) hs0.le
+    have : -(s*|y|) ≤ s*y := by rw [← mul_neg];
+                                exact mul_le_mul_of_nonneg_left (neg_abs_le y) hs0.le
     have : 0 < 1 + s*y := by linarith
     positivity
   rw [hx, igCen_normIncGammaP_eq ha hxpos, show -(y:ℂ) = ((-y:ℝ):ℂ) by push_cast; ring,
@@ -893,7 +900,11 @@ theorem normIncGammaP_central_expansion {B : ℝ} (hB : 0 < B) :
 (2*π/p.1)*(1-p.2^2) : ℝ))*Real.exp (p.2^2)) (fun p => p.1⁻¹)`. -/
 @[dlmf 8.11.E11]
 theorem scIncGamma_central_expansion {B : ℝ} (hB : 0 < B) :
-    IsBigO (gammaCentralFilter B) (fun p : ℝ × ℝ => let x := p.1+Real.sqrt (2*p.1)*p.2; (x : ℂ)^(1-(p.1 : ℂ))*scIncGamma (1-p.1) (-x)+Real.cos (π*p.1)-Real.sin (π*p.1)/π*(2*Real.sqrt π*dawsonF p.2+(2/3*Real.sqrt (2*π/p.1)*(1-p.2^2) : ℝ))*Real.exp (p.2^2)) (fun p => p.1⁻¹) := by
+    IsBigO (gammaCentralFilter B)
+        (fun p : ℝ × ℝ => let x := p.1+Real.sqrt (2*p.1)*p.2;
+        (x : ℂ)^(1-(p.1 : ℂ))*scIncGamma (1-p.1) (-x)+Real.cos (π*p.1)-Real.sin
+        (π*p.1)/π*(2*Real.sqrt π*dawsonF p.2+(2/3*Real.sqrt (2*π/p.1)*(1-p.2^2) : ℝ))*Real.exp
+        (p.2^2)) (fun p => p.1⁻¹) := by
   sorry
 
 end DLMF.Confluent

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Series
+public import DLMF.Hypergeometric.Basic.RealPochhammer
 public import DLMFMathlib.Analysis.ODE.SturmLiouville
 public import DLMFMathlib.Analysis.ODE.SturmSpectrum
 
@@ -47,7 +47,7 @@ and `g(-z)` it gives `Y(0) Y'(0) = 0`. Conversely, if `Y(0) = 0` (`Y'(0) = 0`), 
 `∓Y(-z)` agree on the lens between the discs about `±1` and glue to a solution on `|z| ≤ 6/5`;
 its Taylor coefficients at `0` satisfy a three-term recurrence and decay geometrically, hence
 superexponentially, so the solution is entire. The power-series helpers come from
-`DLMF.Hypergeometric.Series`.
+`DLMF.Hypergeometric.Basic.RealPochhammer`.
 -/
 
 @[expose] public noncomputable section
@@ -64,7 +64,8 @@ def frobeniusShiftedCoeff {K : Type*} [Field K] (m : ℕ) (γ2 c : K) : ℕ → 
   | 1 => 0
   | 2 => 1
   | k + 3 => ((c - (k : K) * (k + 2 * m + 1)) * frobeniusShiftedCoeff m γ2 c (k + 2) -
-      2 * γ2 * frobeniusShiftedCoeff m γ2 c (k + 1) - γ2 * frobeniusShiftedCoeff m γ2 c k) / (2 * ((k : K) + 1) * (k + m + 1))
+      2 * γ2 * frobeniusShiftedCoeff m γ2 c (k + 1) - γ2 * frobeniusShiftedCoeff m γ2 c k) /
+          (2 * ((k : K) + 1) * (k + m + 1))
 
 /-- The coefficients commute with ring homomorphisms. -/
 lemma map_frobeniusShiftedCoeff {K L : Type*} [Field K] [Field L] (f : K →+* L) (m : ℕ) (γ2 c : K)
@@ -76,7 +77,8 @@ lemma map_frobeniusShiftedCoeff {K L : Type*} [Field K] [Field L] (f : K →+* L
     | 1, _ => simp [frobeniusShiftedCoeff]
     | 2, _ => simp [frobeniusShiftedCoeff]
     | k + 3, ih =>
-      simp only [frobeniusShiftedCoeff, map_div₀, map_sub, map_mul, map_add, map_natCast, map_ofNat, map_one]
+      simp only [frobeniusShiftedCoeff, map_div₀, map_sub, map_mul, map_add, map_natCast,
+          map_ofNat, map_one]
       rw [ih (k + 2) (by omega), ih (k + 1) (by omega), ih k (by omega)]
 
 /-- Majorant of the Frobenius coefficients for `‖c‖ ≤ K`, `‖γ2‖ = G`. -/
@@ -85,7 +87,8 @@ def frobeniusMajorant (m : ℕ) (G K : ℝ) : ℕ → ℝ
   | 1 => 0
   | 2 => 1
   | k + 3 => ((K + (k : ℝ) * (k + 2 * m + 1)) * frobeniusMajorant m G K (k + 2) +
-      2 * G * frobeniusMajorant m G K (k + 1) + G * frobeniusMajorant m G K k) / (2 * ((k : ℝ) + 1) * (k + m + 1))
+      2 * G * frobeniusMajorant m G K (k + 1) + G * frobeniusMajorant m G K k) /
+          (2 * ((k : ℝ) + 1) * (k + m + 1))
 
 /-- The majorant is nonnegative. -/
 private lemma frobeniusMajorant_nonneg (m : ℕ) {G K : ℝ} (hG : 0 ≤ G) (hK : 0 ≤ K) (k : ℕ) :
@@ -102,7 +105,8 @@ private lemma frobeniusMajorant_nonneg (m : ℕ) {G K : ℝ} (hG : 0 ≤ G) (hK 
       positivity
 
 /-- The majorant bounds the coefficients for `‖c‖ ≤ K`. -/
-private lemma norm_frobeniusShiftedCoeff_le_majorant (m : ℕ) {γ2 c : ℂ} {K : ℝ} (hc : ‖c‖ ≤ K) (k : ℕ) :
+private lemma norm_frobeniusShiftedCoeff_le_majorant (m : ℕ) {γ2 c : ℂ} {K : ℝ}
+    (hc : ‖c‖ ≤ K) (k : ℕ) :
     ‖frobeniusShiftedCoeff m γ2 c k‖ ≤ frobeniusMajorant m ‖γ2‖ K k := by
   have hK : 0 ≤ K := (norm_nonneg _).trans hc
   induction k using Nat.strong_induction_on with
@@ -125,10 +129,12 @@ private lemma norm_frobeniusShiftedCoeff_le_majorant (m : ℕ) {γ2 c : ℂ} {K 
         rw [show (k : ℂ) * (k + 2 * m + 1) = (((k : ℝ) * (k + 2 * m + 1) : ℝ) : ℂ) by
             push_cast; ring,
           Complex.norm_real, Real.norm_of_nonneg (by positivity)]
-      calc ‖(c - (k : ℂ) * (k + 2 * m + 1)) * frobeniusShiftedCoeff m γ2 c (k + 2) - 2 * γ2 * frobeniusShiftedCoeff m γ2 c (k + 1) -
+      calc ‖(c - (k : ℂ) * (k + 2 * m + 1)) * frobeniusShiftedCoeff m γ2 c (k + 2) - 2 * γ2 *
+             frobeniusShiftedCoeff m γ2 c (k + 1) -
             γ2 * frobeniusShiftedCoeff m γ2 c k‖
           ≤ ‖c - (k : ℂ) * (k + 2 * m + 1)‖ * ‖frobeniusShiftedCoeff m γ2 c (k + 2)‖ +
-            2 * ‖γ2‖ * ‖frobeniusShiftedCoeff m γ2 c (k + 1)‖ + ‖γ2‖ * ‖frobeniusShiftedCoeff m γ2 c k‖ := by
+            2 * ‖γ2‖ * ‖frobeniusShiftedCoeff m γ2 c (k + 1)‖ + ‖γ2‖ *
+                ‖frobeniusShiftedCoeff m γ2 c k‖ := by
             refine (norm_sub_le _ _).trans (add_le_add ((norm_sub_le _ _).trans ?_) ?_)
             · rw [norm_mul, norm_mul, norm_mul]; norm_num
             · rw [norm_mul]
@@ -198,7 +204,8 @@ def odeSeriesCoeff (a0 a1 a2 b0 b1 b2 c0 c1 c2 : ℂ) (b : ℕ → ℂ) (n : ℕ
     c1 * coeffShift b n + c2 * coeffShift (coeffShift b) n
 
 /-- The power series of `A f'' + B f' + C f` on the disc of convergence of `f`. -/
-private lemma hasSum_secondOrderOperator_coeff_mul_pow {a0 a1 a2 b0 b1 b2 c0 c1 c2 : ℂ} {b : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ≥0∞}
+private lemma hasSum_secondOrderOperator_coeff_mul_pow {a0 a1 a2 b0 b1 b2 c0 c1 c2 : ℂ} {b : ℕ → ℂ}
+    {f : ℂ → ℂ} {r : ℝ≥0∞}
     (h : HasFPowerSeriesOnBall f (ofScalars ℂ b) 0 r) {z : ℂ} (hz : z ∈ Metric.eball 0 r) :
     HasSum (fun n => odeSeriesCoeff a0 a1 a2 b0 b1 b2 c0 c1 c2 b n * z ^ n)
       ((a0 + a1 * z + a2 * z ^ 2) * deriv (deriv f) z +
@@ -271,7 +278,8 @@ def frobeniusSeries (m : ℕ) (γ2 c : ℂ) (u : ℂ) : ℂ := ∑' n, frobenius
 def frobeniusSolution (m : ℕ) (γ2 c : ℂ) (z : ℂ) : ℂ := frobeniusSeries m γ2 c (z - 1)
 
 /-- A geometric bound `C ρⁿ` gives radius at least `ρ⁻¹`. -/
-private lemma ofReal_inv_le_radius_ofScalars {b : ℕ → ℂ} {C ρ : ℝ} (hρ : 0 < ρ) (hb : ∀ n, ‖b n‖ ≤ C * ρ ^ n) :
+private lemma ofReal_inv_le_radius_ofScalars {b : ℕ → ℂ} {C ρ : ℝ} (hρ : 0 < ρ)
+    (hb : ∀ n, ‖b n‖ ≤ C * ρ ^ n) :
     ENNReal.ofReal ρ⁻¹ ≤ (ofScalars ℂ b).radius := by
   rw [ENNReal.ofReal_eq_coe_nnreal (inv_nonneg.2 hρ.le)]
   refine (ofScalars ℂ b).le_radius_of_bound C fun n => ?_
@@ -281,11 +289,13 @@ private lemma ofReal_inv_le_radius_ofScalars {b : ℕ → ℂ} {C ρ : ℝ} (hρ
 
 /-- The Frobenius series converges on the disc of radius `5/3`. -/
 lemma hasFPowerSeriesOnBall_frobeniusSeries (m : ℕ) (γ2 c : ℂ) :
-    HasFPowerSeriesOnBall (frobeniusSeries m γ2 c) (ofScalars ℂ (frobeniusCoeff m γ2 c)) 0 (ENNReal.ofReal (5 / 3)) := by
+    HasFPowerSeriesOnBall (frobeniusSeries m γ2 c) (ofScalars ℂ (frobeniusCoeff m γ2 c)) 0
+        (ENNReal.ofReal (5 / 3)) := by
   obtain ⟨C, -, hC⟩ := exists_norm_frobeniusCoeff_le_geometric m γ2 (norm_nonneg c)
   set p := ofScalars ℂ (frobeniusCoeff m γ2 c)
   have hrad : ENNReal.ofReal (5 / 3) ≤ p.radius := by
-    have := ofReal_inv_le_radius_ofScalars (b := frobeniusCoeff m γ2 c) (ρ := 3 / 5) (by norm_num) (hC c le_rfl)
+    have := ofReal_inv_le_radius_ofScalars (b := frobeniusCoeff m γ2 c) (ρ := 3 / 5)
+        (by norm_num) (hC c le_rfl)
     norm_num at this ⊢
     exact this
   have hpos : (0 : ℝ≥0∞) < ENNReal.ofReal (5 / 3) := by norm_num
@@ -303,15 +313,18 @@ private lemma frobeniusCoeff_recurrence (m : ℕ) (γ2 c : ℂ) (n : ℕ) :
     rcases n with _ | n
     · simp [coeffShift, frobeniusShiftedCoeff]
     · simp [coeffShift, frobeniusCoeff]
-  have hs2 : coeffShift (coeffShift (frobeniusCoeff m γ2 c)) n = frobeniusShiftedCoeff m γ2 c n := by
+  have hs2 : coeffShift (coeffShift (frobeniusCoeff m γ2 c)) n =
+      frobeniusShiftedCoeff m γ2 c n := by
     rcases n with _ | _ | n
     · simp [coeffShift, frobeniusShiftedCoeff]
     · simp [coeffShift, frobeniusShiftedCoeff]
     · simp [coeffShift, frobeniusCoeff]
   simp only [odeSeriesCoeff, hs1, hs2]
   simp only [frobeniusCoeff]
-  have hrec : frobeniusShiftedCoeff m γ2 c (n + 1 + 2) = ((c - (n : ℂ) * (n + 2 * m + 1)) * frobeniusShiftedCoeff m γ2 c (n + 2) -
-      2 * γ2 * frobeniusShiftedCoeff m γ2 c (n + 1) - γ2 * frobeniusShiftedCoeff m γ2 c n) / (2 * ((n : ℂ) + 1) * (n + m + 1)) := rfl
+  have hrec : frobeniusShiftedCoeff m γ2 c (n + 1 + 2) =
+      ((c - (n : ℂ) * (n + 2 * m + 1)) * frobeniusShiftedCoeff m γ2 c (n + 2) -
+      2 * γ2 * frobeniusShiftedCoeff m γ2 c (n + 1) - γ2 * frobeniusShiftedCoeff m γ2 c n) /
+          (2 * ((n : ℂ) + 1) * (n + m + 1)) := rfl
   have hD : (2 * ((n : ℂ) + 1) * (n + m + 1)) ≠ 0 := by
     have : (2 * ((n : ℝ) + 1) * (n + m + 1)) ≠ 0 := by positivity
     exact_mod_cast this
@@ -328,7 +341,8 @@ private lemma frobeniusSeries_ode (m : ℕ) (γ2 c : ℂ) {u : ℂ} (hu : ‖u�
       (c - 2 * γ2 * u - γ2 * u ^ 2) * frobeniusSeries m γ2 c u = 0 := by
   have hz : u ∈ Metric.eball (0 : ℂ) (ENNReal.ofReal (5 / 3)) := by
     rw [Metric.eball_ofReal, mem_ball_zero_iff]; exact hu
-  have h := hasSum_secondOrderOperator_coeff_mul_pow (a0 := 0) (a1 := -2) (a2 := -1) (b0 := -2 * ((m : ℂ) + 1))
+  have h := hasSum_secondOrderOperator_coeff_mul_pow (a0 := 0) (a1 := -2) (a2 := -1)
+      (b0 := -2 * ((m : ℂ) + 1))
     (b1 := -2 * ((m : ℂ) + 1)) (b2 := 0) (c0 := c) (c1 := -2 * γ2) (c2 := -γ2)
     (hasFPowerSeriesOnBall_frobeniusSeries m γ2 c) hz
   simp only [frobeniusCoeff_recurrence, zero_mul] at h
@@ -341,11 +355,13 @@ lemma deriv_comp_sub_one {f : ℂ → ℂ} (z : ℂ) : deriv (fun w => f (w - 1)
 
 /-- The Frobenius solution solves the factor equation on the disc `|z - 1| < 5/3`. -/
 private lemma frobeniusSolution_ode (m : ℕ) (γ2 c : ℂ) {z : ℂ} (hz : ‖z - 1‖ < 5 / 3) :
-    (1 - z ^ 2) * deriv (deriv (frobeniusSolution m γ2 c)) z - 2 * ((m : ℂ) + 1) * z * deriv (frobeniusSolution m γ2 c) z +
+    (1 - z ^ 2) * deriv (deriv (frobeniusSolution m γ2 c)) z - 2 * ((m : ℂ) + 1) * z *
+        deriv (frobeniusSolution m γ2 c) z +
       (c + γ2 * (1 - z ^ 2)) * frobeniusSolution m γ2 c z = 0 := by
   have e1 : deriv (frobeniusSolution m γ2 c) = fun w => deriv (frobeniusSeries m γ2 c) (w - 1) := by
     funext w; exact deriv_comp_sub_one (f := frobeniusSeries m γ2 c) w
-  have e2 : deriv (deriv (frobeniusSolution m γ2 c)) z = deriv (deriv (frobeniusSeries m γ2 c)) (z - 1) := by
+  have e2 : deriv (deriv (frobeniusSolution m γ2 c)) z =
+      deriv (deriv (frobeniusSeries m γ2 c)) (z - 1) := by
     rw [e1]; exact deriv_comp_sub_one (f := deriv (frobeniusSeries m γ2 c)) z
   rw [e2, e1]
   have h := frobeniusSeries_ode m γ2 c hz
@@ -358,7 +374,8 @@ def IsFactorSolution (m : ℕ) (γ2 c : ℂ) (U : Set ℂ) (f : ℂ → ℂ) : P
     (c + γ2 * (1 - z ^ 2)) * f z = 0
 
 /-- The Frobenius solution solves the factor equation on `|z - 1| < 5/3`. -/
-lemma frobeniusSolution_isFactorSolution (m : ℕ) (γ2 c : ℂ) : IsFactorSolution m γ2 c (Metric.ball 1 (5 / 3)) (frobeniusSolution m γ2 c) :=
+lemma frobeniusSolution_isFactorSolution (m : ℕ) (γ2 c : ℂ) : IsFactorSolution m γ2 c
+    (Metric.ball 1 (5 / 3)) (frobeniusSolution m γ2 c) :=
   fun z hz => frobeniusSolution_ode m γ2 c (by simpa [dist_eq_norm] using hz)
 
 /-- `F(0) = 1`. -/
@@ -390,7 +407,8 @@ def factorNormalP (m : ℕ) (z : ℂ) : ℂ := 2 * ((m : ℂ) + 1) * z / (1 - z 
 def factorNormalQ (γ2 c : ℂ) (z : ℂ) : ℂ := -(c + γ2 * (1 - z ^ 2)) / (1 - z ^ 2)
 
 /-- The factor equation in the normalized form `f'' = p f' + q f`. -/
-private lemma isFactorSolution_normal_form {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} {f : ℂ → ℂ} (hf : IsFactorSolution m γ2 c U f)
+private lemma isFactorSolution_normal_form {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} {f : ℂ → ℂ}
+    (hf : IsFactorSolution m γ2 c U f)
     {z : ℂ} (hz : z ∈ U) (h1 : 1 - z ^ 2 ≠ 0) :
     deriv (deriv f) z = factorNormalP m z * deriv f z + factorNormalQ γ2 c z * f z := by
   have := hf z hz
@@ -399,7 +417,8 @@ private lemma isFactorSolution_normal_form {m : ℕ} {γ2 c : ℂ} {U : Set ℂ}
   linear_combination this
 
 /-- Smoothness of `p` away from `±1`. -/
-private lemma contDiffAt_factorNormalP (m : ℕ) {z : ℂ} (h1 : 1 - z ^ 2 ≠ 0) : ContDiffAt ℂ ∞ (factorNormalP m) z := by
+private lemma contDiffAt_factorNormalP (m : ℕ) {z : ℂ} (h1 : 1 - z ^ 2 ≠ 0) : ContDiffAt ℂ ∞
+    (factorNormalP m) z := by
   unfold factorNormalP
   exact ContDiffAt.div (by fun_prop) (by fun_prop) h1
 
@@ -410,16 +429,20 @@ private lemma contDiffAt_factorNormalQ (γ2 c : ℂ) {z : ℂ} (h1 : 1 - z ^ 2 �
   exact ContDiffAt.div (by fun_prop) (by fun_prop) h1
 
 /-- Uniqueness for the factor equation on a preconnected open set avoiding `±1`. -/
-private lemma isFactorSolution_eqOn_of_eq_of_deriv_eq {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} (hU : IsOpen U) (hU' : IsPreconnected U)
+private lemma isFactorSolution_eqOn_of_eq_of_deriv_eq {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} (hU : IsOpen U)
+    (hU' : IsPreconnected U)
     (h1 : ∀ z ∈ U, 1 - z ^ 2 ≠ 0) {f g : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f U)
-    (hg : AnalyticOnNhd ℂ g U) (hfs : IsFactorSolution m γ2 c U f) (hgs : IsFactorSolution m γ2 c U g) {x₀ : ℂ}
+    (hg : AnalyticOnNhd ℂ g U) (hfs : IsFactorSolution m γ2 c U f)
+        (hgs : IsFactorSolution m γ2 c U g) {x₀ : ℂ}
     (hx₀ : x₀ ∈ U) (h₀ : f x₀ = g x₀) (h₁ : deriv f x₀ = deriv g x₀) : EqOn f g U :=
   ODE.eqOn_of_ode hU hU' hf hg hx₀ (contDiffAt_factorNormalP m (h1 x₀ hx₀))
-    (contDiffAt_factorNormalQ γ2 c (h1 x₀ hx₀)) (fun z hz => isFactorSolution_normal_form hfs hz (h1 z hz))
+    (contDiffAt_factorNormalQ γ2 c (h1 x₀ hx₀))
+        (fun z hz => isFactorSolution_normal_form hfs hz (h1 z hz))
     (fun z hz => isFactorSolution_normal_form hgs hz (h1 z hz)) h₀ h₁
 
 /-- Local uniqueness at a regular point. -/
-lemma isFactorSolution_eventuallyEq_of_eq_of_deriv_eq {m : ℕ} {γ2 c x₀ : ℂ} {U : Set ℂ} (hU : U ∈ 𝓝 x₀)
+lemma isFactorSolution_eventuallyEq_of_eq_of_deriv_eq {m : ℕ} {γ2 c x₀ : ℂ} {U : Set ℂ}
+    (hU : U ∈ 𝓝 x₀)
     (h1 : 1 - x₀ ^ 2 ≠ 0) {f g : ℂ → ℂ} (hf : AnalyticAt ℂ f x₀)
     (hg : AnalyticAt ℂ g x₀) (hfs : IsFactorSolution m γ2 c U f) (hgs : IsFactorSolution m γ2 c U g)
     (h₀ : f x₀ = g x₀) (h₁ : deriv f x₀ = deriv g x₀) : f =ᶠ[𝓝 x₀] g := by
@@ -435,7 +458,8 @@ private lemma deriv_comp_neg_eq (f : ℂ → ℂ) (z : ℂ) :
     deriv (fun w => f (-w)) z = -deriv f (-z) := deriv_comp_neg (f := f) (x := z)
 
 /-- The reflection `z ↦ s f(-z)` preserves the factor equation. -/
-private lemma isFactorSolution_reflect {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} {f : ℂ → ℂ} (hf : IsFactorSolution m γ2 c U f)
+private lemma isFactorSolution_reflect {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} {f : ℂ → ℂ}
+    (hf : IsFactorSolution m γ2 c U f)
     (s : ℂ) : IsFactorSolution m γ2 c ((fun z => -z) ⁻¹' U) (fun z => s * f (-z)) := by
   intro z hz
   have e1 : deriv (fun w => s * f (-w)) = fun w => -(s * deriv f (-w)) := by
@@ -459,7 +483,8 @@ private lemma one_sub_sq_ne_zero_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : 1
   nlinarith [norm_nonneg z]
 
 /-- An entire solution vanishing to first order at `0` vanishes. -/
-theorem isFactorSolution_eq_zero_of_data_zero {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+theorem isFactorSolution_eq_zero_of_data_zero {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ}
+    (hg : Differentiable ℂ g)
     (hgs : IsFactorSolution m γ2 c univ g) (h0 : g 0 = 0) (h1 : deriv g 0 = 0) : g = 0 := by
   have hA : AnalyticOnNhd ℂ g univ := fun z _ => hg.analyticAt z
   have hB : EqOn g (fun _ => 0) (Metric.ball 0 1) := by
@@ -475,7 +500,8 @@ theorem isFactorSolution_eq_zero_of_data_zero {m : ℕ} {γ2 c : ℂ} {g : ℂ �
     (mem_univ z)
 
 /-- The Wronskian of an entire solution with the Frobenius solution vanishes at `0`. -/
-theorem isFactorSolution_wronskian_frobeniusSolution_zero {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+theorem isFactorSolution_wronskian_frobeniusSolution_zero {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ}
+    (hg : Differentiable ℂ g)
     (hgs : IsFactorSolution m γ2 c univ g) :
     g 0 * deriv (frobeniusSolution m γ2 c) 0 = deriv g 0 * frobeniusSolution m γ2 c 0 := by
   set Y := frobeniusSolution m γ2 c
@@ -510,7 +536,8 @@ theorem isFactorSolution_wronskian_frobeniusSolution_zero {m : ℕ} {γ2 c : ℂ
   linear_combination hc
 
 /-- **Entire solutions force `Y(0) Y'(0) = 0`.** -/
-theorem frobeniusSolution_mul_deriv_zero_eq_zero {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+theorem frobeniusSolution_mul_deriv_zero_eq_zero {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ}
+    (hg : Differentiable ℂ g)
     (hgs : IsFactorSolution m γ2 c univ g) (hne : g ≠ 0) :
     frobeniusSolution m γ2 c 0 * deriv (frobeniusSolution m γ2 c) 0 = 0 := by
   have h1 := isFactorSolution_wronskian_frobeniusSolution_zero hg hgs
@@ -533,7 +560,8 @@ theorem frobeniusSolution_mul_deriv_zero_eq_zero {m : ℕ} {γ2 c : ℂ} {g : �
 /-! ### Superexponential decay from a backward recurrence -/
 
 /-- Iterating a backward recurrence improves a geometric bound by `θ = Aσ² + B/σ²`. -/
-private lemma le_geometric_of_backward_recurrence_iterate {a : ℕ → ℝ} {A B D σ : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B) (hσ : 0 < σ) {J : ℕ}
+private lemma le_geometric_of_backward_recurrence_iterate {a : ℕ → ℝ} {A B D σ : ℝ} (hA : 0 ≤ A)
+    (hB : 0 ≤ B) (hσ : 0 < σ) {J : ℕ}
     (hJ : 2 ≤ J) (hrec : ∀ k ≥ J, a k ≤ A * a (k + 2) + B * a (k - 2))
     (hD : ∀ j, a j ≤ D * σ ^ j) :
     ∀ n k, J + 2 * n ≤ k → a k ≤ D * (A * σ ^ 2 + B / σ ^ 2) ^ n * σ ^ k := by
@@ -568,7 +596,8 @@ private lemma exists_le_geometric_improved {a : ℕ → ℝ} (ha : ∀ n, 0 ≤ 
   set q := (1 + σ ^ 2) / 2
   have hθ : (1 + (1 - σ ^ 2) / (4 * σ ^ 2)) * σ ^ 2 + σ ^ 2 * (1 - σ ^ 2) / 4 / σ ^ 2 = q := by
     simp only [q]; field_simp; ring
-  have hL := le_geometric_of_backward_recurrence_iterate (by positivity) (by positivity) hσ0 hJ hJr hD
+  have hL := le_geometric_of_backward_recurrence_iterate (by positivity)
+      (by positivity) hσ0 hJ hJr hD
   rw [hθ] at hL
   set t := Real.sqrt q
   have hq0 : 0 < q := by positivity
@@ -597,7 +626,8 @@ private lemma exists_le_geometric_improved {a : ℕ → ℝ} (ha : ∀ n, 0 ≤ 
 /-- **Superexponential decay.** A nonnegative sequence with a geometric bound of ratio `σ < 1`
 satisfying `a_k ≤ (1+ε) a_{k+2} + η a_{k-2}` eventually, for all `ε, η > 0`, is bounded by
 `C τⁿ` for every `τ > 0`. -/
-lemma exists_le_mul_pow_of_superexp_recurrence {a : ℕ → ℝ} (ha : ∀ n, 0 ≤ a n) {σ₀ D₀ : ℝ} (hσ0 : 0 < σ₀)
+lemma exists_le_mul_pow_of_superexp_recurrence {a : ℕ → ℝ} (ha : ∀ n, 0 ≤ a n)
+    {σ₀ D₀ : ℝ} (hσ0 : 0 < σ₀)
     (hσ1 : σ₀ < 1) (hD : ∀ n, a n ≤ D₀ * σ₀ ^ n)
     (hrec : ∀ ε > 0, ∀ η > 0, ∃ J, 2 ≤ J ∧ ∀ k ≥ J, a k ≤ (1 + ε) * a (k + 2) + η * a (k - 2)) :
     ∀ τ > 0, ∃ C, ∀ n, a n ≤ C * τ ^ n := by
@@ -757,7 +787,8 @@ private lemma exists_entire_factorSolution_of_ball {m : ℕ} {γ2 c : ℂ} {G : 
         _ ≤ (1 + ε) * (K ^ 2 - L) * ‖a (j + 2 + 2)‖ + η * (K ^ 2 - L) * ‖a j‖ := by gcongr
         _ = _ := by ring
     exact le_of_mul_le_mul_left this hpos
-  have hsup := exists_le_mul_pow_of_superexp_recurrence (fun n => norm_nonneg (a n)) (by norm_num) (by norm_num) hD hrec
+  have hsup := exists_le_mul_pow_of_superexp_recurrence (fun n => norm_nonneg (a n)) (by norm_num)
+      (by norm_num) hD hrec
   -- infinite radius
   have hinf : (ofScalars ℂ a).radius = ⊤ := by
     refine ENNReal.eq_top_of_forall_nnreal_le fun r => ?_
@@ -806,7 +837,8 @@ private lemma norm_sub_one_sq (z : ℂ) : ‖z - 1‖ ^ 2 = ‖z‖ ^ 2 - 2 * z.
   ring
 
 /-- Points of the closed disc of radius `6/5` with `Re z ≥ 0` lie in `|z - 1| < 5/3`. -/
-private lemma norm_sub_one_lt_five_thirds {z : ℂ} (hz : ‖z‖ ≤ 6 / 5) (hre : 0 ≤ z.re) : ‖z - 1‖ < 5 / 3 := by
+private lemma norm_sub_one_lt_five_thirds {z : ℂ} (hz : ‖z‖ ≤ 6 / 5) (hre : 0 ≤ z.re) : ‖z -
+    1‖ < 5 / 3 := by
   have h := norm_sub_one_sq z
   by_contra hc
   push Not at hc
@@ -814,7 +846,8 @@ private lemma norm_sub_one_lt_five_thirds {z : ℂ} (hz : ‖z‖ ≤ 6 / 5) (hr
   nlinarith [norm_nonneg z]
 
 /-- Membership in the reflected disc. -/
-private lemma mem_neg_preimage_ball_one_iff {z : ℂ} : z ∈ (fun w : ℂ => -w) ⁻¹' Metric.ball 1 (5 / 3) ↔
+private lemma mem_neg_preimage_ball_one_iff {z : ℂ} : z ∈
+    (fun w : ℂ => -w) ⁻¹' Metric.ball 1 (5 / 3) ↔
     ‖z + 1‖ < 5 / 3 := by
   simp [dist_eq_norm]
 
@@ -862,8 +895,10 @@ theorem exists_entire_factorSolution {m : ℕ} {γ2 c : ℂ}
     beta_reduce
     rw [deriv_comp_neg_eq]; simp
   have heq : EqOn Y Yt W :=
-    isFactorSolution_eqOn_of_eq_of_deriv_eq hWo hWc hW1 (fun z hz => hYa z hz.1) (fun z hz => hYta z hz.2)
-      (isFactorSolution_mono inter_subset_left hYs) (isFactorSolution_mono inter_subset_right hYts) h0W
+    isFactorSolution_eqOn_of_eq_of_deriv_eq hWo hWc hW1 (fun z hz => hYa z hz.1)
+        (fun z hz => hYta z hz.2)
+      (isFactorSolution_mono inter_subset_left hYs)
+          (isFactorSolution_mono inter_subset_right hYts) h0W
       (by simp [Yt, hs0]) (by rw [hdYt, hs1])
   set G : ℂ → ℂ := fun z => if 0 ≤ z.re then Y z else Yt z
   have hGW : EqOn G Y W := by

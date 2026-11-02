@@ -45,7 +45,8 @@ theorem sturmDef_finite {f f' : ℝ → ℝ} {a b : ℝ} (hd : ∀ x ∈ Icc a b
     (hs : ∀ x ∈ Icc a b, f x = 0 → f' x ≠ 0) : {x | x ∈ Icc a b ∧ f x = 0}.Finite := by
   have hc : ContinuousOn f (Icc a b) := fun x hx => (hd x hx).continuousAt.continuousWithinAt
   have hK : IsCompact {x | x ∈ Icc a b ∧ f x = 0} :=
-    isCompact_Icc.of_isClosed_subset (hc.preimage_isClosed_of_isClosed isClosed_Icc isClosed_singleton)
+    isCompact_Icc.of_isClosed_subset
+        (hc.preimage_isClosed_of_isClosed isClosed_Icc isClosed_singleton)
       fun x hx => hx.1
   by_contra hinf
   obtain ⟨z, hz, hne⟩ := exists_nhds_ne_inf_principal_neBot hK hinf
@@ -86,7 +87,8 @@ theorem sturmDef_local_pos (hΛ : IsOpen Λ) (hU : IsOpen U)
   have hmono : ∀ t ∈ u, StrictMonoOn (Y t) (Icc (z - δ) (z + δ)) := by
     intro t ht
     refine strictMonoOn_of_hasDerivWithinAt_pos (convex_Icc _ _)
-      (fun x hx => ((hd t (hgood t ht x hx).1 x (hgood t ht x hx).2.1).continuousAt).continuousWithinAt)
+      (fun x hx => ((hd t (hgood t ht x hx).1 x
+          (hgood t ht x hx).2.1).continuousAt).continuousWithinAt)
       (fun x hx => (hd t (hgood t ht x (interior_subset hx)).1 x
         (hgood t ht x (interior_subset hx)).2.1).hasDerivWithinAt)
       fun x hx => (hgood t ht x (interior_subset hx)).2.2

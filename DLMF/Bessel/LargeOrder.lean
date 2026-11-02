@@ -78,7 +78,8 @@ theorem gammaShiftRatio_le_one {ν : ℝ} (hν : 0 ≤ ν) (n : ℕ) : gammaShif
     have h1 : 1 ≤ ν + 1 + n := by have := (Nat.cast_nonneg n : (0 : ℝ) ≤ n); linarith
     exact (div_le_self (gammaShiftRatio_nonneg (by linarith) n) h1).trans ih
 
-/-- Estimate under the stated parameter and domain assumptions: `gammaShiftRatio ν n * ν ^ n ≤ 1`. -/
+/-- Estimate under the stated parameter and domain assumptions: `gammaShiftRatio ν n * ν ^ n ≤ 1`.
+-/
 theorem gammaShiftRatio_mul_pow_le_one {ν : ℝ} (hν : 0 < ν) (n : ℕ) :
     gammaShiftRatio ν n * ν ^ n ≤ 1 := by
   induction n with

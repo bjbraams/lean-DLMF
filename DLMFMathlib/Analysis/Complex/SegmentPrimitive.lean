@@ -43,7 +43,8 @@ theorem eq_of_differentiable_of_eqOn_pos_reals {f g : ℂ → ℂ}
     · simpa using (Complex.continuous_ofReal.tendsto 0).mono_left nhdsWithin_le_nhds
     · filter_upwards [self_mem_nhdsWithin] with x hx
       exact Complex.ofReal_ne_zero.mpr (ne_of_gt hx)
-  apply (hf.differentiableOn.analyticOnNhd isOpen_univ).eq_of_frequently_eq (hg.differentiableOn.analyticOnNhd isOpen_univ)
+  apply (hf.differentiableOn.analyticOnNhd isOpen_univ).eq_of_frequently_eq
+      (hg.differentiableOn.analyticOnNhd isOpen_univ)
   apply ht.frequently
   have he : ∀ᶠ x : ℝ in nhdsWithin 0 (Ioi 0), f x=g x := by
     filter_upwards [self_mem_nhdsWithin] with x hx

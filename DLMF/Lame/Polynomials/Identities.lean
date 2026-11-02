@@ -158,16 +158,19 @@ theorem lamePolyEk_re_eq_lameEigenfunction {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
       have hb := hbc.2
       cases hK : lamePolyOddK t
       · simp only [hK, Bool.false_eq_true, ite_false] at h0 hb
-        exact ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero (continuous_lamePotential hk) hsol h0 hb
+        exact ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero
+            (continuous_lamePotential hk) hsol h0 hb
       · simp only [hK, ite_true, neg_eq_zero] at h0 hb
-        exact ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero (continuous_lamePotential hk) hsol hb h0
+        exact ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero
+            (continuous_lamePotential hk) hsol hb h0
     cases hK : lamePolyOddK t
     · simp only [hK, Bool.false_eq_true, ite_false] at hge hne0 ⊢
       exact lt_of_le_of_ne hge (Ne.symm hne0)
     · simp only [hK, ite_true] at hge hne0 ⊢
       have := lt_of_le_of_ne hge (Ne.symm hne0)
       linarith
-  have hnorm : Real.IsNormalizedLameEigenfunction (t.order n : ℝ) k (lamePolyOddZero t) (lamePolyOddK t)
+  have hnorm : Real.IsNormalizedLameEigenfunction (t.order n : ℝ) k (lamePolyOddZero t)
+      (lamePolyOddK t)
       m w := ⟨⟨hre, hbc, hne⟩, by rw [hN, hn1, mul_one], hsign⟩
   exact (Real.lameEigenfunction_spec hk0 hk1 _ _ m).unique hnorm
     (Real.isNormalizedLameEigenfunction_lameEigenfunction hk0 hk1 _ _ m)
@@ -301,7 +304,8 @@ theorem sum_Ioc_zero_eq_sum_range_succ (f : ℕ → ℝ) (n : ℕ) :
   | succ n ih => rw [Finset.sum_Ioc_succ_top (Nat.zero_le _), ih, Finset.sum_range_succ]
 
 /-- The normalization integral of a finite cosine series in `φ = π/2 - am(x, k)`. -/
-theorem integral_cos_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) {e : ℕ → ℕ}
+theorem integral_cos_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
+    (b : ℕ → ℝ) {e : ℕ → ℕ}
     (he : Function.Injective e) (hpar : ∀ p q, Even (e p + e q)) {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.cos (e p * Real.lamePhi y k)) :
     ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 =
@@ -317,7 +321,8 @@ theorem integral_cos_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N 
   · simp [h, he.ne h]
 
 /-- The normalization integral of a finite sine series in `φ = π/2 - am(x, k)`. -/
-theorem integral_sin_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) {e : ℕ → ℕ}
+theorem integral_sin_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
+    (b : ℕ → ℝ) {e : ℕ → ℕ}
     (he : Function.Injective e) (hpar : ∀ p q, Even (e p + e q)) {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k)) :
     ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 =
@@ -333,14 +338,16 @@ theorem integral_sin_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N 
   · simp [h, he.ne h]
 
 /-- The value at `K` of a finite cosine series in `φ` (`φ(K) = 0`). -/
-theorem cos_series_lamePhi_eval_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
+theorem cos_series_lamePhi_eval_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
+    (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.cos (e p * Real.lamePhi y k)) :
     w (Real.compEllIntKm (k ^ 2)) = ∑ p ∈ Finset.range N, b p := by
   rw [hw, lamePhi_K hk0 hk1]; simp
 
 /-- Minus the derivative at `K` of a finite sine series in `φ`: `dn(K) ∑ eₚ bₚ`. -/
-theorem deriv_sin_series_lamePhi_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
+theorem deriv_sin_series_lamePhi_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
+    (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k)) :
     -deriv w (Real.compEllIntKm (k ^ 2)) =
@@ -448,7 +455,8 @@ private lemma integral_cos_two_mul_sin_mul_sin (a b : ℕ) (hab : Even (a + b)) 
 
 /-- The normalization integral of `dn` times a finite series in `φ`: with
 `dn² = 1 - k² cos² φ = (1 - k²/2) - (k²/2) cos 2φ`. -/
-private lemma integral_dn_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (f : ℕ → ℝ → ℝ)
+private lemma integral_dn_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ)
+    (f : ℕ → ℝ → ℝ)
     (hf : ∀ p, Continuous (f p)) {w : ℝ → ℝ}
     (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * f p (Real.lamePhi y k)) :
@@ -508,7 +516,8 @@ private lemma sum_sum_mul_adjacent_indicator (N : ℕ) (b : ℕ → ℝ) (hb : b
   rw [Finset.sum_congr rfl h1, h2]; ring
 
 /-- Bookkeeping for the `dn`-type normalization integrals. -/
-private lemma dnNorm_double_sum_eq (k : ℝ) (N : ℕ) (b : ℕ → ℝ) (α : ℝ) (I : ℕ → ℝ) (X : ℕ → ℕ → ℝ) (hb : b N = 0) :
+private lemma dnNorm_double_sum_eq (k : ℝ) (N : ℕ) (b : ℕ → ℝ) (α : ℝ) (I : ℕ → ℝ) (X : ℕ → ℕ → ℝ)
+    (hb : b N = 0) :
     ∑ p ∈ Finset.range N, ∑ q ∈ Finset.range N, b p * b q * (α * if p = q then I p else 0) -
       k ^ 2 / 2 * ∑ p ∈ Finset.range N, ∑ q ∈ Finset.range N, b p * b q *
         (π / 8 * (((if q = p + 1 then 1 else 0) + (if p = q + 1 then 1 else 0)) + X p q)) =
@@ -532,7 +541,8 @@ private lemma dnNorm_double_sum_eq (k : ℝ) (N : ℕ) (b : ℕ → ℝ) (α : �
   rw [A, B]; ring
 
 /-- The `dn`-type normalization integral for a cosine series `∑ bₚ cos((2p+δ)φ)`. -/
-theorem integral_dn_cos_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (δ : ℕ)
+theorem integral_dn_cos_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
+    (b : ℕ → ℝ) (δ : ℕ)
     (hb : b N = 0) {w : ℝ → ℝ}
     (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.cos (((2 * p + δ : ℕ) : ℝ) * Real.lamePhi y k)) :
@@ -560,10 +570,12 @@ theorem integral_dn_cos_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) 
     have e2 : (2 * p + δ = 2 * q + δ + 2) ↔ p = q + 1 := by omega
     simp only [e1, e2]
   simp_rw [hI, hJ]
-  exact dnNorm_double_sum_eq k N b _ _ (fun p q => (if 2 * p + δ + (2 * q + δ) = 2 then 1 else 0)) hb
+  exact dnNorm_double_sum_eq k N b _ _
+      (fun p q => (if 2 * p + δ + (2 * q + δ) = 2 then 1 else 0)) hb
 
 /-- The `dn`-type normalization integral for a sine series `∑ bₚ sin((2p+δ)φ)`. -/
-theorem integral_dn_sin_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (δ : ℕ)
+theorem integral_dn_sin_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
+    (b : ℕ → ℝ) (δ : ℕ)
     (hb : b N = 0) {w : ℝ → ℝ}
     (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.sin (((2 * p + δ : ℕ) : ℝ) * Real.lamePhi y k)) :
@@ -591,7 +603,8 @@ theorem integral_dn_sin_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) 
     have e2 : (2 * p + δ = 2 * q + δ + 2) ↔ p = q + 1 := by omega
     simp only [e1, e2]
   simp_rw [hI, hJ]
-  exact dnNorm_double_sum_eq k N b _ _ (fun p q => -(if 2 * p + δ + (2 * q + δ) = 2 then 1 else 0)) hb
+  exact dnNorm_double_sum_eq k N b _ _
+      (fun p q => -(if 2 * p + δ + (2 * q + δ) = 2 then 1 else 0)) hb
 
 /-- The extra term of the `dn`-type normalization for `δ = 0`. -/
 theorem dnNorm_extraTerm_zero (b : ℕ → ℝ) (M : ℕ) (hb : b (M + 1) = 0) :
@@ -625,7 +638,8 @@ theorem dnNorm_extraTerm_two (b : ℕ → ℝ) (N : ℕ) :
   simp [key]
 
 /-- The value at `K` of `dn` times a finite cosine series in `φ`. -/
-theorem dn_cos_series_lamePhi_eval_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
+theorem dn_cos_series_lamePhi_eval_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
+    (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.cos (e p * Real.lamePhi y k)) :
@@ -634,7 +648,8 @@ theorem dn_cos_series_lamePhi_eval_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : 
   rw [hw, lamePhi_K hk0 hk1]; simp
 
 /-- Minus the derivative at `K` of `dn` times a finite sine series in `φ`. -/
-theorem deriv_dn_sin_series_lamePhi_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
+theorem deriv_dn_sin_series_lamePhi_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
+    (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k)) :

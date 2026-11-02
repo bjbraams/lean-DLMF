@@ -43,18 +43,24 @@ open scoped Topology ENNReal ContDiff
 namespace DLMF.Spheroidal
 
 /-- The value `Y(0)` as an entire function of `λ`. -/
-def frobeniusValueAtZero (m : ℕ) (γr : ℝ) (w : ℂ) : ℂ := frobeniusSeries m (γr : ℂ) (w - (m : ℂ) * ((m : ℂ) + 1)) (-1)
+def frobeniusValueAtZero (m : ℕ) (γr : ℝ) (w : ℂ) : ℂ :=
+    frobeniusSeries m (γr : ℂ) (w - (m : ℂ) * ((m : ℂ) + 1)) (-1)
 
 /-- The derivative `Y'(0)` as an entire function of `λ`. -/
-def frobeniusDerivAtZero (m : ℕ) (γr : ℝ) (w : ℂ) : ℂ := frobeniusSeriesDeriv m (γr : ℂ) (w - (m : ℂ) * ((m : ℂ) + 1)) (-1)
+def frobeniusDerivAtZero (m : ℕ) (γr : ℝ) (w : ℂ) : ℂ :=
+    frobeniusSeriesDeriv m (γr : ℂ) (w - (m : ℂ) * ((m : ℂ) + 1)) (-1)
 
 /-- `λ ↦ Y(0)` is entire. -/
-private lemma differentiable_frobeniusValueAtZero (m : ℕ) (γr : ℝ) : Differentiable ℂ (frobeniusValueAtZero m γr) :=
-  (differentiable_frobeniusSeries_and_deriv_param m (γr : ℂ) (u := -1) (by simp)).1.comp (differentiable_id.sub_const _)
+private lemma differentiable_frobeniusValueAtZero (m : ℕ) (γr : ℝ) : Differentiable ℂ
+    (frobeniusValueAtZero m γr) :=
+  (differentiable_frobeniusSeries_and_deriv_param m (γr : ℂ) (u := -1) (by simp)).1.comp
+      (differentiable_id.sub_const _)
 
 /-- `λ ↦ Y'(0)` is entire. -/
-private lemma differentiable_frobeniusDerivAtZero (m : ℕ) (γr : ℝ) : Differentiable ℂ (frobeniusDerivAtZero m γr) :=
-  (differentiable_frobeniusSeries_and_deriv_param m (γr : ℂ) (u := -1) (by simp)).2.comp (differentiable_id.sub_const _)
+private lemma differentiable_frobeniusDerivAtZero (m : ℕ) (γr : ℝ) : Differentiable ℂ
+    (frobeniusDerivAtZero m γr) :=
+  (differentiable_frobeniusSeries_and_deriv_param m (γr : ℂ) (u := -1) (by simp)).2.comp
+      (differentiable_id.sub_const _)
 
 /-- `y(0)` for real `λ` is the real part of `frobeniusValueAtZero`. -/
 private lemma frobeniusReal_zero_eq_re (m : ℕ) (γr lam : ℝ) :
@@ -81,7 +87,8 @@ private lemma hasDerivAt_frobeniusRealDeriv_zero_param (m : ℕ) (γr lam : ℝ)
   exact h.congr_of_eventuallyEq (Eventually.of_forall fun t => p3lyR'_zero_eq m γr t)
 
 /-- Points of `[0, 1]` lie within `5/3` of `1`. -/
-private lemma abs_sub_one_lt_five_thirds_of_mem_Icc {x : ℝ} (hx : x ∈ Icc (0 : ℝ) 1) : |x - 1| < 5 / 3 := by
+private lemma abs_sub_one_lt_five_thirds_of_mem_Icc {x : ℝ} (hx : x ∈ Icc (0 : ℝ) 1) : |x -
+    1| < 5 / 3 := by
   rw [abs_lt]; constructor <;> linarith [hx.1, hx.2]
 
 /-- **Green's identity in the parameter**:
@@ -104,10 +111,12 @@ private lemma frobeniusReal_green_identity (m : ℕ) (γr l₁ l₂ : ℝ) :
   have hc : ContinuousOn (fun x => (l₁ - l₂) * ((1 - x ^ 2) ^ m * y₁ x * y₂ x)) (uIcc 0 1) := by
     have c1 : ContinuousOn y₁ (uIcc 0 1) := fun x hx => by
       rw [uIcc_of_le zero_le_one] at hx
-      exact (hasDerivAt_frobeniusReal m γr l₁ (abs_sub_one_lt_five_thirds_of_mem_Icc hx)).continuousAt.continuousWithinAt
+      exact (hasDerivAt_frobeniusReal m γr l₁
+          (abs_sub_one_lt_five_thirds_of_mem_Icc hx)).continuousAt.continuousWithinAt
     have c2 : ContinuousOn y₂ (uIcc 0 1) := fun x hx => by
       rw [uIcc_of_le zero_le_one] at hx
-      exact (hasDerivAt_frobeniusReal m γr l₂ (abs_sub_one_lt_five_thirds_of_mem_Icc hx)).continuousAt.continuousWithinAt
+      exact (hasDerivAt_frobeniusReal m γr l₂
+          (abs_sub_one_lt_five_thirds_of_mem_Icc hx)).continuousAt.continuousWithinAt
     exact continuousOn_const.mul (((by fun_prop : Continuous fun x : ℝ =>
       (1 - x ^ 2) ^ m).continuousOn.mul c1).mul c2)
   have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt hW hc.intervalIntegrable
@@ -124,14 +133,16 @@ private lemma continuous_unitIntervalClamp : Continuous unitIntervalClamp :=
   continuous_const.max (continuous_id.min continuous_const)
 
 /-- The clamp takes values in `(-1/2, 3/2)`. -/
-private lemma unitIntervalClamp_mem_Ioo (x : ℝ) : unitIntervalClamp x ∈ Ioo (-1 / 2 : ℝ) (3 / 2) := by
+private lemma unitIntervalClamp_mem_Ioo (x : ℝ) : unitIntervalClamp x ∈
+    Ioo (-1 / 2 : ℝ) (3 / 2) := by
   simp only [unitIntervalClamp, mem_Ioo]
   constructor
   · exact lt_of_lt_of_le (by norm_num) (le_max_left _ _)
   · exact lt_of_le_of_lt (max_le (by norm_num) (min_le_right _ _)) (by norm_num)
 
 /-- The clamp is the identity on `[0, 1]`. -/
-private lemma unitIntervalClamp_eq_self {x : ℝ} (hx : x ∈ Icc (0 : ℝ) 1) : unitIntervalClamp x = x := by
+private lemma unitIntervalClamp_eq_self {x : ℝ} (hx : x ∈ Icc (0 : ℝ) 1) :
+    unitIntervalClamp x = x := by
   simp [unitIntervalClamp, hx.1, hx.2]
 
 /-- The Green integral is continuous in the second parameter. -/
@@ -142,7 +153,8 @@ private lemma continuous_frobeniusReal_greenIntegral (m : ℕ) (γr l₁ : ℝ) 
     (continuousOn_frobeniusReal_and_deriv m γr).1.comp_continuous
       (continuous_fst.prodMk (continuous_unitIntervalClamp.comp continuous_snd))
       (fun p => ⟨mem_univ _, unitIntervalClamp_mem_Ioo _⟩)
-  set F : ℝ → ℝ → ℝ := fun l x => (1 - unitIntervalClamp x ^ 2) ^ m * p3lyR m γr l₁ (unitIntervalClamp x) *
+  set F : ℝ → ℝ → ℝ := fun l x => (1 - unitIntervalClamp x ^ 2) ^ m *
+      p3lyR m γr l₁ (unitIntervalClamp x) *
     p3lyR m γr l (unitIntervalClamp x)
   have hF : Continuous (Function.uncurry F) := by
     have h1 : Continuous fun p : ℝ × ℝ => p3lyR m γr l₁ (unitIntervalClamp p.2) :=
@@ -157,7 +169,8 @@ private lemma continuous_frobeniusReal_greenIntegral (m : ℕ) (γr l₁ : ℝ) 
 
 /-- Positivity of the integral of a continuous nonnegative function that is nonzero at an
 interior point. -/
-private lemma intervalIntegral_pos_of_nonneg_of_ne_zero {f : ℝ → ℝ} {a b x₀ : ℝ} (hab : a < b) (hf : ContinuousOn f (Icc a b))
+private lemma intervalIntegral_pos_of_nonneg_of_ne_zero {f : ℝ → ℝ} {a b x₀ : ℝ} (hab : a < b)
+    (hf : ContinuousOn f (Icc a b))
     (h0 : ∀ x ∈ Icc a b, 0 ≤ f x) (hx₀ : x₀ ∈ Ioo a b) (hne : f x₀ ≠ 0) :
     0 < ∫ x in a..b, f x := by
   have hfi : IntervalIntegrable f volume a b :=
@@ -184,7 +197,8 @@ private lemma frobeniusReal_greenIntegral_self_pos (m : ℕ) (γr lam : ℝ) :
       (Ioo_mem_nhdsLT (by norm_num))
   obtain ⟨x₀, hx₀, hx₀'⟩ := hev.exists
   have hc : ContinuousOn (p3lyR m γr lam) (Icc 0 1) := fun x hx =>
-    (hasDerivAt_frobeniusReal m γr lam (abs_sub_one_lt_five_thirds_of_mem_Icc hx)).continuousAt.continuousWithinAt
+    (hasDerivAt_frobeniusReal m γr lam
+        (abs_sub_one_lt_five_thirds_of_mem_Icc hx)).continuousAt.continuousWithinAt
   refine intervalIntegral_pos_of_nonneg_of_ne_zero zero_lt_one
     (((by fun_prop : Continuous fun x : ℝ => (1 - x ^ 2) ^ m).continuousOn.mul hc).mul hc)
     (fun x hx => ?_) hx₀' ?_
@@ -204,11 +218,13 @@ private lemma frobeniusReal_paramWronskian_pos (m : ℕ) (γr lam : ℝ) :
   have hfe : ∀ μ, f μ = (μ - lam) * Φ μ := fun μ => frobeniusReal_green_identity m γr lam μ
   have hf : HasDerivAt f (p3lyR m γr lam 0 * (deriv (frobeniusDerivAtZero m γr) lam).re -
       (deriv (frobeniusValueAtZero m γr) lam).re * p3lyR' m γr lam 0) lam :=
-    ((hasDerivAt_frobeniusRealDeriv_zero_param m γr lam).const_mul _).sub ((hasDerivAt_frobeniusReal_zero_param m γr lam).mul_const _)
+    ((hasDerivAt_frobeniusRealDeriv_zero_param m γr lam).const_mul _).sub
+        ((hasDerivAt_frobeniusReal_zero_param m γr lam).mul_const _)
   have hg : HasDerivAt f (Φ lam) lam := by
     rw [hasDerivAt_iff_tendsto_slope]
     have : Tendsto Φ (𝓝[≠] lam) (𝓝 (Φ lam)) :=
-      (continuous_frobeniusReal_greenIntegral m γr lam).continuousAt.tendsto.mono_left nhdsWithin_le_nhds
+      (continuous_frobeniusReal_greenIntegral m γr lam).continuousAt.tendsto.mono_left
+          nhdsWithin_le_nhds
     refine this.congr' ?_
     filter_upwards [self_mem_nhdsWithin] with μ hμ
     rw [slope_def_field, hfe, hfe, sub_self, zero_mul, sub_zero]
@@ -218,7 +234,8 @@ private lemma frobeniusReal_paramWronskian_pos (m : ℕ) (γr lam : ℝ) :
   linarith
 
 /-- For `λ - m(m+1) < -|γ²|`, `Y(0) Y'(0) < 0`. -/
-private lemma frobeniusReal_mul_deriv_zero_neg (m : ℕ) (γr lam : ℝ) (hc : lam - (m : ℝ) * (m + 1) < -|γr|) :
+private lemma frobeniusReal_mul_deriv_zero_neg (m : ℕ) (γr lam : ℝ)
+    (hc : lam - (m : ℝ) * (m + 1) < -|γr|) :
     p3lyR m γr lam 0 * p3lyR' m γr lam 0 < 0 := by
   refine lt_of_le_of_ne ?_ (frobeniusReal_mul_deriv_zero_ne_zero m γr lam hc)
   set y := p3lyR m γr lam
@@ -268,12 +285,14 @@ private lemma mem_factorSpectrum_iff (m : ℕ) (γr lam : ℝ) :
     rw [frobeniusSolution_mul_deriv_zero_eq_ofReal, h, Complex.ofReal_zero]
 
 /-- **The lowest eigenvalue is even**: at the smallest element of the spectrum, `Y'(0) = 0`. -/
-private lemma frobeniusRealDeriv_zero_eq_zero_of_lowest (m : ℕ) (γr lam : ℝ) (hS : lam ∈ factorSpectrum m γr)
+private lemma frobeniusRealDeriv_zero_eq_zero_of_lowest (m : ℕ) (γr lam : ℝ)
+    (hS : lam ∈ factorSpectrum m γr)
     (hmin : factorSpectrum m γr ∩ Iio lam = ∅) : p3lyR' m γr lam 0 = 0 := by
   set f : ℝ → ℝ := fun l => p3lyR m γr l 0 * p3lyR' m γr l 0
   have hfd : ∀ l : ℝ, HasDerivAt f ((deriv (frobeniusValueAtZero m γr) l).re * p3lyR' m γr l 0 +
       p3lyR m γr l 0 * (deriv (frobeniusDerivAtZero m γr) l).re) l := fun l =>
-    (hasDerivAt_frobeniusReal_zero_param m γr l).mul (hasDerivAt_frobeniusRealDeriv_zero_param m γr l)
+    (hasDerivAt_frobeniusReal_zero_param m γr l).mul
+        (hasDerivAt_frobeniusRealDeriv_zero_param m γr l)
   have hfc : Continuous f := continuous_iff_continuousAt.2 fun l => (hfd l).continuousAt
   have hnz : ∀ l < lam, f l ≠ 0 := fun l hl h0 =>
     (Set.eq_empty_iff_forall_notMem.1 hmin) l ⟨(mem_factorSpectrum_iff m γr l).2 h0, hl⟩
@@ -297,17 +316,21 @@ private lemma frobeniusRealDeriv_zero_eq_zero_of_lowest (m : ℕ) (γr lam : ℝ
   linarith
 
 /-- **Alternation**: consecutive elements of the spectrum have opposite parity. -/
-private lemma frobeniusRealDeriv_zero_alternate (m : ℕ) (γr : ℝ) {μ lam : ℝ} (hμ : μ ∈ factorSpectrum m γr)
-    (hl : lam ∈ factorSpectrum m γr) (hlt : μ < lam) (hgap : ∀ x ∈ Ioo μ lam, x ∉ factorSpectrum m γr) :
+private lemma frobeniusRealDeriv_zero_alternate (m : ℕ) (γr : ℝ) {μ lam : ℝ}
+    (hμ : μ ∈ factorSpectrum m γr)
+    (hl : lam ∈ factorSpectrum m γr) (hlt : μ < lam)
+        (hgap : ∀ x ∈ Ioo μ lam, x ∉ factorSpectrum m γr) :
     ¬ (p3lyR' m γr μ 0 = 0 ↔ p3lyR' m γr lam 0 = 0) := by
   have hw : ∀ x ∈ Icc μ lam, 0 < p3lyR m γr x 0 * (deriv (frobeniusDerivAtZero m γr) x).re -
-      p3lyR' m γr x 0 * (deriv (frobeniusValueAtZero m γr) x).re := fun x _ => frobeniusReal_paramWronskian_pos m γr x
+      p3lyR' m γr x 0 * (deriv (frobeniusValueAtZero m γr) x).re := fun x _ =>
+          frobeniusReal_paramWronskian_pos m γr x
   intro hiff
   by_cases hq : p3lyR' m γr μ 0 = 0
   · have hq' := hiff.1 hq
     obtain ⟨e, he, he0⟩ := (ODE.sturmCount_existsUnique_zero_between
       (p := fun l => p3lyR' m γr l 0) (q := fun l => -p3lyR m γr l 0) hlt
-      (fun x _ => hasDerivAt_frobeniusRealDeriv_zero_param m γr x) (fun x _ => (hasDerivAt_frobeniusReal_zero_param m γr x).neg)
+      (fun x _ => hasDerivAt_frobeniusRealDeriv_zero_param m γr x)
+          (fun x _ => (hasDerivAt_frobeniusReal_zero_param m γr x).neg)
       (fun x hx => by have := hw x hx; linarith) hq hq'
       (fun x hx h0 => hgap x hx ((mem_factorSpectrum_iff m γr x).2 (by rw [h0, mul_zero])))).exists
     exact hgap e he ((mem_factorSpectrum_iff m γr e).2 (by rw [neg_eq_zero.1 he0, zero_mul]))
@@ -316,13 +339,15 @@ private lemma frobeniusRealDeriv_zero_alternate (m : ℕ) (γr : ℝ) {μ lam : 
     have hp' := (mul_eq_zero.1 ((mem_factorSpectrum_iff m γr lam).1 hl)).resolve_right hq'
     obtain ⟨e, he, he0⟩ := (ODE.sturmCount_existsUnique_zero_between
       (p := fun l => p3lyR m γr l 0) (q := fun l => p3lyR' m γr l 0) hlt
-      (fun x _ => hasDerivAt_frobeniusReal_zero_param m γr x) (fun x _ => hasDerivAt_frobeniusRealDeriv_zero_param m γr x) hw hp hp'
+      (fun x _ => hasDerivAt_frobeniusReal_zero_param m γr x)
+          (fun x _ => hasDerivAt_frobeniusRealDeriv_zero_param m γr x) hw hp hp'
       (fun x hx h0 => hgap x hx ((mem_factorSpectrum_iff m γr x).2 (by rw [h0, zero_mul])))).exists
     exact hgap e he ((mem_factorSpectrum_iff m γr e).2 (by rw [he0, mul_zero]))
 
 /-- **Parity of the eigenfunctions**: the element of the spectrum with exactly `k` smaller
 elements has `Y'(0) = 0` (even eigenfunction) iff `k` is even. -/
-theorem frobeniusRealDeriv_zero_eq_zero_iff_even (m : ℕ) (γr : ℝ) : ∀ k : ℕ, ∀ lam ∈ factorSpectrum m γr,
+theorem frobeniusRealDeriv_zero_eq_zero_iff_even (m : ℕ) (γr : ℝ) : ∀ k : ℕ, ∀ lam ∈
+    factorSpectrum m γr,
     (factorSpectrum m γr ∩ Iio lam).encard = k → (p3lyR' m γr lam 0 = 0 ↔ Even k) := by
   intro k
   induction k with
@@ -366,8 +391,10 @@ theorem frobeniusRealDeriv_zero_eq_zero_iff_even (m : ℕ) (γr : ℝ) : ∀ k :
 /-! ### Real normalized eigenfunctions -/
 
 /-- Linear combinations of entire solutions are entire solutions. -/
-theorem isFactorSolution_linear_combination {m : ℕ} {γ2 c : ℂ} {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
-    (hg : Differentiable ℂ g) (hfs : IsFactorSolution m γ2 c univ f) (hgs : IsFactorSolution m γ2 c univ g)
+theorem isFactorSolution_linear_combination {m : ℕ} {γ2 c : ℂ} {f g : ℂ → ℂ}
+    (hf : Differentiable ℂ f)
+    (hg : Differentiable ℂ g) (hfs : IsFactorSolution m γ2 c univ f)
+        (hgs : IsFactorSolution m γ2 c univ g)
     (a b : ℂ) :
     Differentiable ℂ (fun z => a * f z + b * g z) ∧
       IsFactorSolution m γ2 c univ (fun z => a * f z + b * g z) ∧
@@ -385,9 +412,11 @@ theorem isFactorSolution_linear_combination {m : ℕ} {γ2 c : ℂ} {f g : ℂ �
   linear_combination a * hfs z trivial + b * hgs z trivial
 
 /-- Reflection in the real axis preserves the factor equation with real parameters. -/
-private lemma isFactorSolution_conj_comp_conj {m : ℕ} {γr cr : ℝ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+private lemma isFactorSolution_conj_comp_conj {m : ℕ} {γr cr : ℝ} {g : ℂ → ℂ}
+    (hg : Differentiable ℂ g)
     (hs : IsFactorSolution m (γr : ℂ) (cr : ℂ) univ g) :
-    Differentiable ℂ (conj ∘ g ∘ conj) ∧ IsFactorSolution m (γr : ℂ) (cr : ℂ) univ (conj ∘ g ∘ conj) := by
+    Differentiable ℂ (conj ∘ g ∘ conj) ∧
+        IsFactorSolution m (γr : ℂ) (cr : ℂ) univ (conj ∘ g ∘ conj) := by
   refine ⟨fun z => by simpa using (hg (conj z)).conj_conj, fun z _ => ?_⟩
   rw [deriv_conj_conj, deriv_conj_conj]
   have := congrArg conj (hs (conj z) trivial)
@@ -396,8 +425,10 @@ private lemma isFactorSolution_conj_comp_conj {m : ℕ} {γr cr : ℝ} {g : ℂ 
   linear_combination this
 
 /-- An entire solution with real data at `0` is real on the real axis. -/
-private lemma im_eq_zero_of_isFactorSolution_real_data {m : ℕ} {γr cr : ℝ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
-    (hs : IsFactorSolution m (γr : ℂ) (cr : ℂ) univ g) (h0 : (g 0).im = 0) (h1 : (deriv g 0).im = 0) :
+private lemma im_eq_zero_of_isFactorSolution_real_data {m : ℕ} {γr cr : ℝ} {g : ℂ → ℂ}
+    (hg : Differentiable ℂ g)
+    (hs : IsFactorSolution m (γr : ℂ) (cr : ℂ) univ g) (h0 : (g 0).im = 0)
+        (h1 : (deriv g 0).im = 0) :
     ∀ x : ℝ, (g x).im = 0 := by
   obtain ⟨hcd, hcs⟩ := isFactorSolution_conj_comp_conj hg hs
   obtain ⟨hdd, hds, hde⟩ := isFactorSolution_linear_combination hg hcd hs hcs 1 (-1)
@@ -412,7 +443,8 @@ private lemma im_eq_zero_of_isFactorSolution_real_data {m : ℕ} {γr cr : ℝ} 
   linear_combination -this
 
 /-- The derivative of an entire function real on the real axis is real there. -/
-private lemma im_deriv_eq_zero_of_im_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g) (hr : ∀ x : ℝ, (g x).im = 0)
+private lemma im_deriv_eq_zero_of_im_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+    (hr : ∀ x : ℝ, (g x).im = 0)
     (x : ℝ) : (deriv g x).im = 0 := by
   have h := ((hg x).hasDerivAt.const_mul (-I)).real_of_complex
   have hev : (fun t : ℝ => (-I * g t).re) = fun _ => 0 := funext fun t => by simp [hr t]
@@ -421,7 +453,8 @@ private lemma im_deriv_eq_zero_of_im_eq_zero {g : ℂ → ℂ} (hg : Differentia
   simpa using this
 
 /-- The Wronskian with the Frobenius solution, in real form. -/
-private lemma isFactorSolution_wronskian_frobeniusReal {m : ℕ} {γr lam : ℝ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+private lemma isFactorSolution_wronskian_frobeniusReal {m : ℕ} {γr lam : ℝ} {g : ℂ → ℂ}
+    (hg : Differentiable ℂ g)
     (hs : IsFactorSolution m (γr : ℂ) (shiftedEigenvalue m lam) univ g) :
     g 0 * (p3lyR' m γr lam 0 : ℂ) = deriv g 0 * (p3lyR m γr lam 0 : ℂ) := by
   have h := isFactorSolution_wronskian_frobeniusSolution_zero hg hs
@@ -432,13 +465,15 @@ private lemma isFactorSolution_wronskian_frobeniusReal {m : ℕ} {γr lam : ℝ}
 
 /-- Entire solutions at an even eigenvalue (`Y'(0) = 0`) have `g'(0) = 0`; at an odd one,
 `g(0) = 0`. -/
-theorem isFactorSolution_data_of_parity {m : ℕ} {γr lam : ℝ} {g : ℂ → ℂ} (hl : lam ∈ factorSpectrum m γr)
+theorem isFactorSolution_data_of_parity {m : ℕ} {γr lam : ℝ} {g : ℂ → ℂ}
+    (hl : lam ∈ factorSpectrum m γr)
     (hg : Differentiable ℂ g) (hs : IsFactorSolution m (γr : ℂ) (shiftedEigenvalue m lam) univ g) :
     (p3lyR' m γr lam 0 = 0 → deriv g 0 = 0) ∧ (p3lyR' m γr lam 0 ≠ 0 → g 0 = 0) := by
   have hW := isFactorSolution_wronskian_frobeniusReal hg hs
   constructor
   · intro hq
-    have hp : p3lyR m γr lam 0 ≠ 0 := fun hp => frobeniusRealDeriv_ne_zero_of_frobeniusReal_eq_zero m γr lam (by norm_num) hp hq
+    have hp : p3lyR m γr lam 0 ≠ 0 := fun hp =>
+        frobeniusRealDeriv_ne_zero_of_frobeniusReal_eq_zero m γr lam (by norm_num) hp hq
     rw [hq, Complex.ofReal_zero, mul_zero] at hW
     exact (mul_eq_zero.1 hW.symm).resolve_right (by exact_mod_cast hp)
   · intro hq
@@ -502,7 +537,8 @@ theorem integral_weight_mul_re_sq_pos (m : ℕ) {g : ℂ → ℂ} (hg : Differen
 /-- **Uniqueness of the normalized eigenfunction**: two entire solutions, real on `ℝ`, with
 vanishing Wronskian at `0`, equal weighted norms and the same sign of the leading datum agree. -/
 theorem factorSolution_unique {m : ℕ} {γ2 c : ℂ} {g₁ g₂ : ℂ → ℂ} (hd₁ : Differentiable ℂ g₁)
-    (hs₁ : IsFactorSolution m γ2 c univ g₁) (hd₂ : Differentiable ℂ g₂) (hs₂ : IsFactorSolution m γ2 c univ g₂)
+    (hs₁ : IsFactorSolution m γ2 c univ g₁) (hd₂ : Differentiable ℂ g₂)
+        (hs₂ : IsFactorSolution m γ2 c univ g₂)
     (hr₁ : ∀ x : ℝ, (g₁ x).im = 0) (hr₂ : ∀ x : ℝ, (g₂ x).im = 0)
     (hW : g₁ 0 * deriv g₂ 0 = g₂ 0 * deriv g₁ 0)
     (hint : ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (g₁ x).re ^ 2 =
@@ -512,19 +548,24 @@ theorem factorSolution_unique {m : ℕ} {γ2 c : ℂ} {g₁ g₂ : ℂ → ℂ} 
     (by simp [h])
   have e₁ : ((g₁ 0).re : ℂ) = g₁ 0 := hre (by simpa using hr₁ 0)
   have e₂ : ((g₂ 0).re : ℂ) = g₂ 0 := hre (by simpa using hr₂ 0)
-  have f₁ : ((deriv g₁ 0).re : ℂ) = deriv g₁ 0 := hre (by simpa using im_deriv_eq_zero_of_im_eq_zero hd₁ hr₁ 0)
-  have f₂ : ((deriv g₂ 0).re : ℂ) = deriv g₂ 0 := hre (by simpa using im_deriv_eq_zero_of_im_eq_zero hd₂ hr₂ 0)
+  have f₁ : ((deriv g₁ 0).re : ℂ) = deriv g₁ 0 :=
+      hre (by simpa using im_deriv_eq_zero_of_im_eq_zero hd₁ hr₁ 0)
+  have f₂ : ((deriv g₂ 0).re : ℂ) = deriv g₂ 0 :=
+      hre (by simpa using im_deriv_eq_zero_of_im_eq_zero hd₂ hr₂ 0)
   obtain ⟨a, b, hab, hprop⟩ : ∃ a b : ℝ, 0 < a * b ∧ ∀ z, (a : ℂ) * g₂ z = b * g₁ z := by
     rcases hsg with h | h
     · refine ⟨(g₁ 0).re, (g₂ 0).re, h, fun z => ?_⟩
       obtain ⟨dd, ds, de⟩ := isFactorSolution_linear_combination hd₂ hd₁ hs₂ hs₁ (g₁ 0) (-g₂ 0)
-      have hz := isFactorSolution_eq_zero_of_data_zero dd ds (by ring) (by rw [de]; linear_combination hW)
+      have hz := isFactorSolution_eq_zero_of_data_zero dd ds (by ring)
+          (by rw [de]; linear_combination hW)
       have := congrFun hz z
       simp only [Pi.zero_apply] at this
       rw [e₁, e₂]; linear_combination this
     · refine ⟨(deriv g₁ 0).re, (deriv g₂ 0).re, h, fun z => ?_⟩
-      obtain ⟨dd, ds, de⟩ := isFactorSolution_linear_combination hd₂ hd₁ hs₂ hs₁ (deriv g₁ 0) (-deriv g₂ 0)
-      have hz := isFactorSolution_eq_zero_of_data_zero dd ds (by linear_combination -hW) (by rw [de]; ring)
+      obtain ⟨dd, ds, de⟩ :=
+          isFactorSolution_linear_combination hd₂ hd₁ hs₂ hs₁ (deriv g₁ 0) (-deriv g₂ 0)
+      have hz := isFactorSolution_eq_zero_of_data_zero dd ds (by linear_combination -hW)
+          (by rw [de]; ring)
       have := congrFun hz z
       simp only [Pi.zero_apply] at this
       rw [f₁, f₂]; linear_combination this

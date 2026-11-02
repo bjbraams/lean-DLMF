@@ -100,7 +100,9 @@ a/2):ℂ)*exp (π*a/4)*(exp (I*pcfWRho a)*pcfU (I*a) (z*exp (-π*I/4))+exp (-I*p
 (-I*a) (z*exp (π*I/4)))`. -/
 @[dlmf 12.14.E4]
 theorem pcfW_connection (a : ℝ) (z : ℂ) :
-    pcfW a z=(Real.sqrt (pcfWK a/2):ℂ)*exp (π*a/4)*(exp (I*pcfWRho a)*pcfU (I*a) (z*exp (-π*I/4))+exp (-I*pcfWRho a)*pcfU (-I*a) (z*exp (π*I/4))) := by
+    pcfW a z=(Real.sqrt (pcfWK a/2):ℂ)*exp
+        (π*a/4)*(exp (I*pcfWRho a)*pcfU (I*a) (z*exp (-π*I/4))+exp (-I*pcfWRho a)*pcfU (-I*a)
+        (z*exp (π*I/4))) := by
   set K : ℂ := (Real.sqrt (pcfWK a/2):ℂ)*exp (π*a/4)
   set eρ := exp (I*pcfWRho a)
   set eρ' := exp (-I*pcfWRho a)
@@ -142,7 +144,9 @@ theorem pcfW_connection (a : ℝ) (z : ℂ) :
 
 /-- Unnumbered companion connection formula in DLMF 12.14(iv). -/
 theorem pcfW_connection_neg (a : ℝ) (z : ℂ) :
-    pcfW a (-z)=-I/Real.sqrt (2*pcfWK a)*exp (π*a/4)*(exp (I*pcfWRho a)*pcfU (I*a) (z*exp (-π*I/4))-exp (-I*pcfWRho a)*pcfU (-I*a) (z*exp (π*I/4))) := by
+    pcfW a (-z)=-I/Real.sqrt (2*pcfWK a)*exp
+        (π*a/4)*(exp (I*pcfWRho a)*pcfU (I*a) (z*exp (-π*I/4))-exp (-I*pcfWRho a)*pcfU (-I*a)
+        (z*exp (π*I/4))) := by
   obtain ⟨-, -, s3, s4⟩ := pcfW_aux_scalar a
   set K : ℂ := -I/Real.sqrt (2*pcfWK a)*exp (π*a/4)
   set eρ := exp (I*pcfWRho a)
@@ -299,7 +303,8 @@ theorem pcfWOdd_iteratedDeriv (a : ℂ) (n : ℕ) :
 @[dlmf 12.14.E9, dlmf 12.14.E11, dlmf 12.14.E12]
 theorem pcfWEven_series (a z : ℂ) :
     HasSum (fun n : ℕ => pcfWAlpha a n*z^(2*n)/((2*n).factorial:ℂ)) (pcfWEven a z) := by
-  have hd : Differentiable ℂ (pcfWEven a) := fun w => (pcfWEven_hasDerivAt_two a w).1.differentiableAt
+  have hd : Differentiable ℂ (pcfWEven a) := fun w =>
+      (pcfWEven_hasDerivAt_two a w).1.differentiableAt
   have hT := Complex.hasSum_taylorSeries_of_entire hd 0 z
   have hinj : Function.Injective (fun n : ℕ => 2*n) := fun m n h => by simpa using h
   rw [← hinj.hasSum_iff] at hT
@@ -344,22 +349,26 @@ theorem real_Gamma_quarter_mul : Real.Gamma (1/4) * Real.Gamma (3/4) = π * Real
   rw [Real.sq_sqrt (by norm_num)]
 
 /-- `W(0,0) = 2^{-3/4} √(Γ(1/4)/Γ(3/4))`. -/
-theorem pcfWZero_zero : pcfWZero 0 = 2^(-3/4:ℝ) * Real.sqrt (Real.Gamma (1/4) / Real.Gamma (3/4)) := by
+theorem pcfWZero_zero : pcfWZero 0 = 2^(-3/4:ℝ) *
+    Real.sqrt (Real.Gamma (1/4) / Real.Gamma (3/4)) := by
   rw [pcfWZero]
   congr 2
   simp only [Complex.ofReal_zero, mul_zero, zero_div, add_zero]
   rw [show (1/4:ℂ) = ((1/4:ℝ):ℂ) by push_cast; ring, show (3/4:ℂ) = ((3/4:ℝ):ℂ) by push_cast; ring,
     Complex.Gamma_ofReal, Complex.Gamma_ofReal, ← Complex.ofReal_div, Complex.norm_real,
-    Real.norm_of_nonneg (div_nonneg (Real.Gamma_pos_of_pos (by norm_num)).le (Real.Gamma_pos_of_pos (by norm_num)).le)]
+    Real.norm_of_nonneg (div_nonneg (Real.Gamma_pos_of_pos (by norm_num)).le
+        (Real.Gamma_pos_of_pos (by norm_num)).le)]
 
 /-- `W'(0,0) = -2^{-1/4} √(Γ(3/4)/Γ(1/4))`. -/
-theorem pcfWDerivZero_zero : pcfWDerivZero 0 = -2^(-1/4:ℝ) * Real.sqrt (Real.Gamma (3/4) / Real.Gamma (1/4)) := by
+theorem pcfWDerivZero_zero : pcfWDerivZero 0 = -2^(-1/4:ℝ) *
+    Real.sqrt (Real.Gamma (3/4) / Real.Gamma (1/4)) := by
   rw [pcfWDerivZero]
   congr 2
   simp only [Complex.ofReal_zero, mul_zero, zero_div, add_zero]
   rw [show (1/4:ℂ) = ((1/4:ℝ):ℂ) by push_cast; ring, show (3/4:ℂ) = ((3/4:ℝ):ℂ) by push_cast; ring,
     Complex.Gamma_ofReal, Complex.Gamma_ofReal, ← Complex.ofReal_div, Complex.norm_real,
-    Real.norm_of_nonneg (div_nonneg (Real.Gamma_pos_of_pos (by norm_num)).le (Real.Gamma_pos_of_pos (by norm_num)).le)]
+    Real.norm_of_nonneg (div_nonneg (Real.Gamma_pos_of_pos (by norm_num)).le
+        (Real.Gamma_pos_of_pos (by norm_num)).le)]
 
 /-- Identity under the stated parameter and domain assumptions: `(y^(r/4))^4 = y^r`. -/
 theorem rpow_quarter_pow_four {y : ℝ} (hy : 0 ≤ y) (r : ℝ) : (y^(r/4))^4 = y^r := by
@@ -377,10 +386,13 @@ theorem pcfW_zero_coeffA {x : ℝ} (hx : 0 < x) :
   rw [pcfWZero_zero]
   apply eq_of_pow_four_eq (by positivity) (by positivity)
   rw [mul_pow, mul_pow, mul_pow, mul_pow, show (-3/4:ℝ) = -3/4 by ring, show (1/4:ℝ) = 1/4 by ring,
-    show (-3/4:ℝ) = (-3)/4 by ring, rpow_quarter_pow_four (by norm_num), show (1/4:ℝ) = 1/4 from rfl,
-    rpow_quarter_pow_four (by positivity) 1, show (-5/4:ℝ) = (-5)/4 by ring, rpow_quarter_pow_four (by norm_num),
+    show (-3/4:ℝ) = (-3)/4 by ring, rpow_quarter_pow_four (by norm_num),
+                                show (1/4:ℝ) = 1/4 from rfl,
+    rpow_quarter_pow_four (by positivity) 1, show (-5/4:ℝ) =
+        (-5)/4 by ring, rpow_quarter_pow_four (by norm_num),
     show (1/2:ℝ) = 2/4 by norm_num, rpow_quarter_pow_four (by positivity),
-    show (Real.sqrt (Real.Gamma (1/4) / Real.Gamma (3/4)))^4 = (Real.Gamma (1/4) / Real.Gamma (3/4))^2 by
+    show (Real.sqrt (Real.Gamma (1/4) / Real.Gamma (3/4)))^4 =
+        (Real.Gamma (1/4) / Real.Gamma (3/4))^2 by
       rw [show 4 = 2*2 by rfl, pow_mul, Real.sq_sqrt (by positivity)]]
   have hq := real_Gamma_quarter_mul
   have hs := Real.sq_sqrt (show (0:ℝ) ≤ 2 by norm_num)
@@ -400,9 +412,11 @@ theorem pcfW_zero_coeffB {x : ℝ} (hx : 0 < x) :
   apply eq_of_pow_four_eq (by positivity) (by positivity)
   rw [mul_pow, mul_pow, mul_pow, mul_pow, mul_pow,
     show (-1/4:ℝ) = (-1)/4 by ring, rpow_quarter_pow_four (by norm_num),
-    rpow_quarter_pow_four (by positivity) (-1), show (-5/4:ℝ) = (-5)/4 by ring, rpow_quarter_pow_four (by norm_num),
+    rpow_quarter_pow_four (by positivity) (-1), show (-5/4:ℝ) =
+        (-5)/4 by ring, rpow_quarter_pow_four (by norm_num),
     show (1/2:ℝ) = 2/4 by norm_num, rpow_quarter_pow_four (by positivity),
-    show (Real.sqrt (Real.Gamma (3/4) / Real.Gamma (1/4)))^4 = (Real.Gamma (3/4) / Real.Gamma (1/4))^2 by
+    show (Real.sqrt (Real.Gamma (3/4) / Real.Gamma (1/4)))^4 =
+        (Real.Gamma (3/4) / Real.Gamma (1/4))^2 by
       rw [show 4 = 2*2 by rfl, pow_mul, Real.sq_sqrt (by positivity)]]
   have hq := real_Gamma_quarter_mul
   have hs := Real.sq_sqrt (show (0:ℝ) ≤ 2 by norm_num)
@@ -419,18 +433,22 @@ theorem ofReal_cpow_real {y : ℝ} (hy : 0 ≤ y) (r : ℝ) : (y:ℂ)^(r:ℂ) = 
 theorem pcfWEven_zero_besselJ {t : ℝ} (ht : 0 < t) :
     pcfWEven 0 t = Gamma (3/4) * (((t^2/8)^(1/4:ℝ) : ℝ) : ℂ) * besselJ (-1/4) ((t:ℂ)^2/4) := by
   have hν : ∀ k : ℕ, (-1/4:ℂ) + 1 ≠ -k := fun k h => by
-    have := congrArg Complex.re h; simp at this; norm_num at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
+    have := congrArg Complex.re h; simp at this; norm_num at this;
+        linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have h2ν : ∀ k : ℕ, 2*(-1/4:ℂ) + 1 ≠ -k := fun k h => by
-    have := congrArg Complex.re h; simp at this; norm_num at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
+    have := congrArg Complex.re h; simp at this; norm_num at this;
+        linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hy : (0:ℝ) < t^2/8 := by positivity
   rw [besselJ_eq_kummerM hν h2ν, (pcfWEven_kummer _ _).1,
-    show (t:ℂ)^2/4/2 = ((t^2/8 : ℝ) : ℂ) by push_cast; ring, show (-1/4:ℂ) = ((-1/4:ℝ):ℂ) by push_cast; ring,
+    show (t:ℂ)^2/4/2 = ((t^2/8 : ℝ) : ℂ) by push_cast; ring, show (-1/4:ℂ) =
+                                              ((-1/4:ℝ):ℂ) by push_cast; ring,
     ofReal_cpow_real hy.le]
   have hG : Gamma (3/4:ℂ) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by norm_num)
   have hm : ((t^2/8)^(1/4:ℝ) : ℝ) * (t^2/8)^(-1/4:ℝ) = 1 := by
     rw [← Real.rpow_add hy]; norm_num
   have hm' : (((t^2/8)^(1/4:ℝ) : ℝ) : ℂ) * (((t^2/8)^(-1/4:ℝ) : ℝ) : ℂ) = 1 := by exact_mod_cast hm
-  rw [show ((-1/4:ℝ):ℂ) + 1 = 3/4 by push_cast; ring, show ((-1/4:ℝ):ℂ) + 1/2 = 1/4 by push_cast; ring,
+  rw [show ((-1/4:ℝ):ℂ) + 1 = 3/4 by push_cast; ring, show ((-1/4:ℝ):ℂ) + 1/2 =
+                                       1/4 by push_cast; ring,
     show 2*((-1/4:ℝ):ℂ) + 1 = 1/2 by push_cast; ring, show 2*I*((t:ℂ)^2/4) = I*(t:ℂ)^2/2 by ring,
     show -I*((t:ℂ)^2/4) = -I*(t:ℂ)^2/4 by ring]
   simp only [mul_zero, zero_div, sub_zero]
@@ -443,18 +461,22 @@ theorem pcfWEven_zero_besselJ {t : ℝ} (ht : 0 < t) :
 theorem pcfWOdd_zero_besselJ {t : ℝ} (ht : 0 < t) :
     pcfWOdd 0 t = t * Gamma (5/4) * (((t^2/8)^(-1/4:ℝ) : ℝ) : ℂ) * besselJ (1/4) ((t:ℂ)^2/4) := by
   have hν : ∀ k : ℕ, (1/4:ℂ) + 1 ≠ -k := fun k h => by
-    have := congrArg Complex.re h; simp at this; norm_num at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
+    have := congrArg Complex.re h; simp at this; norm_num at this;
+        linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have h2ν : ∀ k : ℕ, 2*(1/4:ℂ) + 1 ≠ -k := fun k h => by
-    have := congrArg Complex.re h; simp at this; norm_num at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
+    have := congrArg Complex.re h; simp at this; norm_num at this;
+        linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hy : (0:ℝ) < t^2/8 := by positivity
   rw [besselJ_eq_kummerM hν h2ν, (pcfWOdd_kummer _ _).1,
-    show (t:ℂ)^2/4/2 = ((t^2/8 : ℝ) : ℂ) by push_cast; ring, show (1/4:ℂ) = ((1/4:ℝ):ℂ) by push_cast; ring,
+    show (t:ℂ)^2/4/2 = ((t^2/8 : ℝ) : ℂ) by push_cast; ring, show (1/4:ℂ) =
+                                              ((1/4:ℝ):ℂ) by push_cast; ring,
     ofReal_cpow_real hy.le]
   have hG : Gamma (5/4:ℂ) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by norm_num)
   have hm : ((t^2/8)^(1/4:ℝ) : ℝ) * (t^2/8)^(-1/4:ℝ) = 1 := by
     rw [← Real.rpow_add hy]; norm_num
   have hm' : (((t^2/8)^(1/4:ℝ) : ℝ) : ℂ) * (((t^2/8)^(-1/4:ℝ) : ℝ) : ℂ) = 1 := by exact_mod_cast hm
-  rw [show ((1/4:ℝ):ℂ) + 1 = 5/4 by push_cast; ring, show ((1/4:ℝ):ℂ) + 1/2 = 3/4 by push_cast; ring,
+  rw [show ((1/4:ℝ):ℂ) + 1 = 5/4 by push_cast; ring, show ((1/4:ℝ):ℂ) + 1/2 =
+                                      3/4 by push_cast; ring,
     show 2*((1/4:ℝ):ℂ) + 1 = 3/2 by push_cast; ring, show 2*I*((t:ℂ)^2/4) = I*(t:ℂ)^2/2 by ring,
     show -I*((t:ℂ)^2/4) = -I*(t:ℂ)^2/4 by ring]
   simp only [mul_zero, zero_div, sub_zero]
@@ -482,7 +504,8 @@ theorem pcfW_zero_coeffA' {x : ℝ} (hx : 0 < x) :
 
 /-- Complex form of the `J_{1/4}` coefficient. -/
 theorem pcfW_zero_coeffB' {x : ℝ} (hx : 0 < x) :
-    -(pcfWDerivZero 0 : ℂ) * x * Gamma (5/4) * (((x^2/8)^(-1/4:ℝ) : ℝ) : ℂ) = 2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ) := by
+    -(pcfWDerivZero 0 : ℂ) * x * Gamma (5/4) * (((x^2/8)^(-1/4:ℝ) : ℝ) : ℂ) =
+        2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ) := by
   have h := congrArg (fun r : ℝ => (r:ℂ)) (pcfW_zero_coeffB hx)
   simp only [Complex.ofReal_mul, Complex.ofReal_neg] at h
   rw [show (5/4:ℂ) = ((5/4:ℝ):ℂ) by push_cast; ring, Complex.Gamma_ofReal, h,
@@ -491,7 +514,8 @@ theorem pcfW_zero_coeffB' {x : ℝ} (hx : 0 < x) :
 
 /-- Derivative of the complex Bessel form of `W(0, ±w)`. -/
 lemma pcfW_zero_bessel_hasDerivAt_aux (ε : ℂ) {x : ℝ} (hx : 0 < x) :
-    HasDerivAt (fun w : ℂ => 2^(-5/4:ℂ)*(π*w)^(1/2:ℂ)*(besselJ (-1/4) (w^2/4)-ε*besselJ (1/4) (w^2/4)))
+    HasDerivAt (fun w : ℂ =>
+        2^(-5/4:ℂ)*(π*w)^(1/2:ℂ)*(besselJ (-1/4) (w^2/4)-ε*besselJ (1/4) (w^2/4)))
       (-2^(-9/4:ℂ)*x*(π*x:ℂ)^(1/2:ℂ)*(besselJ (3/4) (x^2/4)+ε*besselJ (-3/4) (x^2/4))) (x:ℂ) := by
   have hz : ((x:ℂ)^2/4) ∈ slitPlane := by
     rw [show (x:ℂ)^2/4 = ((x^2/4:ℝ):ℂ) by push_cast; ring]
@@ -521,7 +545,8 @@ lemma pcfW_zero_bessel_hasDerivAt_aux (ε : ℂ) {x : ℝ} (hx : 0 < x) :
 (1*x)=2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ)*(besselJ (-1/4) (x^2/4)-(1:ℂ)*besselJ (1/4) (x^2/4))`. -/
 @[dlmf 12.14.E13]
 theorem pcfW_zero_bessel_1 {x : ℝ} (hx : 0 < x) :
-    pcfW 0 (1*x)=2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ)*(besselJ (-1/4) (x^2/4)-(1:ℂ)*besselJ (1/4) (x^2/4)) := by
+    pcfW 0 (1*x)=2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ)*(besselJ (-1/4) (x^2/4)-(1:ℂ)*besselJ
+        (1/4) (x^2/4)) := by
   rw [one_mul, pcfW, Complex.ofReal_zero, pcfWEven_zero_besselJ hx, pcfWOdd_zero_besselJ hx]
   linear_combination besselJ (-1/4) ((x:ℂ)^2/4) * pcfW_zero_coeffA' hx
     - besselJ (1/4) ((x:ℂ)^2/4) * pcfW_zero_coeffB' hx
@@ -530,7 +555,8 @@ theorem pcfW_zero_bessel_1 {x : ℝ} (hx : 0 < x) :
 `(-2^(-9/4:ℂ)*x*(π*x:ℂ)^(1/2:ℂ)*(besselJ (3/4) (x^2/4)+(1:ℂ)*besselJ (-3/4) (x^2/4)))`. -/
 @[dlmf 12.14.E14]
 theorem pcfW_zero_bessel_deriv_1 {x : ℝ} (hx : 0 < x) :
-    HasDerivAt (fun t : ℝ => pcfW 0 (1*t)) (-2^(-9/4:ℂ)*x*(π*x:ℂ)^(1/2:ℂ)*(besselJ (3/4) (x^2/4)+(1:ℂ)*besselJ (-3/4) (x^2/4))) x := by
+    HasDerivAt (fun t : ℝ => pcfW 0 (1*t))
+        (-2^(-9/4:ℂ)*x*(π*x:ℂ)^(1/2:ℂ)*(besselJ (3/4) (x^2/4)+(1:ℂ)*besselJ (-3/4) (x^2/4))) x := by
   refine (pcfW_zero_bessel_hasDerivAt_aux 1 hx).comp_ofReal.congr_of_eventuallyEq ?_
   filter_upwards [lt_mem_nhds hx] with t ht
   exact pcfW_zero_bessel_1 ht
@@ -539,7 +565,8 @@ theorem pcfW_zero_bessel_deriv_1 {x : ℝ} (hx : 0 < x) :
 (-1*x)=2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ)*(besselJ (-1/4) (x^2/4)-(-1:ℂ)*besselJ (1/4) (x^2/4))`. -/
 @[dlmf 12.14.E13]
 theorem pcfW_zero_bessel_2 {x : ℝ} (hx : 0 < x) :
-    pcfW 0 (-1*x)=2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ)*(besselJ (-1/4) (x^2/4)-(-1:ℂ)*besselJ (1/4) (x^2/4)) := by
+    pcfW 0 (-1*x)=2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ)*(besselJ (-1/4) (x^2/4)-(-1:ℂ)*besselJ
+        (1/4) (x^2/4)) := by
   rw [neg_one_mul, pcfW, Complex.ofReal_zero, pcfWEven_neg, pcfWOdd_neg, pcfWEven_zero_besselJ hx,
     pcfWOdd_zero_besselJ hx]
   linear_combination besselJ (-1/4) ((x:ℂ)^2/4) * pcfW_zero_coeffA' hx
@@ -549,7 +576,9 @@ theorem pcfW_zero_bessel_2 {x : ℝ} (hx : 0 < x) :
 `(-2^(-9/4:ℂ)*x*(π*x:ℂ)^(1/2:ℂ)*(besselJ (3/4) (x^2/4)+(-1:ℂ)*besselJ (-3/4) (x^2/4)))`. -/
 @[dlmf 12.14.E14]
 theorem pcfW_zero_bessel_deriv_2 {x : ℝ} (hx : 0 < x) :
-    HasDerivAt (fun t : ℝ => pcfW 0 (-1*t)) (-2^(-9/4:ℂ)*x*(π*x:ℂ)^(1/2:ℂ)*(besselJ (3/4) (x^2/4)+(-1:ℂ)*besselJ (-3/4) (x^2/4))) x := by
+    HasDerivAt (fun t : ℝ => pcfW 0 (-1*t))
+        (-2^(-9/4:ℂ)*x*(π*x:ℂ)^(1/2:ℂ)*(besselJ (3/4) (x^2/4)+(-1:ℂ)*besselJ (-3/4)
+        (x^2/4))) x := by
   refine (pcfW_zero_bessel_hasDerivAt_aux (-1) hx).comp_ofReal.congr_of_eventuallyEq ?_
   filter_upwards [lt_mem_nhds hx] with t ht
   exact pcfW_zero_bessel_2 ht
@@ -573,7 +602,8 @@ theorem pcfW_one_ne (a : ℝ) (z : ℂ) (h1 : pcfW a z = 0) (h2 : pcfW a (-z) = 
   exact zero_ne_one this
 
 /-- `W'(a,z)` and `W'(a,-z)` do not vanish together. -/
-theorem pcfWDeriv_one_ne (a : ℝ) (z : ℂ) (h1 : pcfWDeriv a z = 0) (h2 : pcfWDeriv a (-z) = 0) : False := by
+theorem pcfWDeriv_one_ne (a : ℝ) (z : ℂ) (h1 : pcfWDeriv a z = 0)
+    (h2 : pcfWDeriv a (-z) = 0) : False := by
   have hw := pcfW_wronskian_aux a z
   have := pcfWZero_mul_pcfWDerivZero a
   have : (pcfWZero a : ℂ) * pcfWDerivZero a = -1/2 := by exact_mod_cast this
@@ -592,7 +622,11 @@ a (-x)=Real.sqrt (2/(pcfWK a*x))*((pcfWS a x).re*Real.sin (pcfWOmega a x)+(pcfWS
 x).im*Real.cos (pcfWOmega a x))`. -/
 @[dlmf 12.14.E17, dlmf 12.14.E18]
 theorem pcfW_amplitude (a : ℝ) {x : ℝ} (hx : 0 < x) :
-    pcfW a x=Real.sqrt (2*pcfWK a/x)*((pcfWS a x).re*Real.cos (pcfWOmega a x)-(pcfWS a x).im*Real.sin (pcfWOmega a x)) ∧ pcfW a (-x)=Real.sqrt (2/(pcfWK a*x))*((pcfWS a x).re*Real.sin (pcfWOmega a x)+(pcfWS a x).im*Real.cos (pcfWOmega a x)) := by
+    pcfW a x=Real.sqrt (2*pcfWK a/x)*((pcfWS a x).re*Real.cos
+        (pcfWOmega a x)-(pcfWS a x).im*Real.sin (pcfWOmega a x)) ∧
+        pcfW a (-x)=Real.sqrt
+        (2/(pcfWK a*x))*((pcfWS a x).re*Real.sin (pcfWOmega a x)+(pcfWS a x).im*Real.cos
+        (pcfWOmega a x)) := by
   have h1r := pcfW_ofReal_im a x
   have h2r := pcfW_ofReal_im a (-x)
   push_cast at h2r
@@ -602,7 +636,8 @@ theorem pcfW_amplitude (a : ℝ) {x : ℝ} (hx : 0 < x) :
   set p := Real.sqrt (x/(2*k))
   set q := Real.sqrt (k*x/2)
   have hT : exp (I*ω) * pcfWS a x = p * pcfW a x + I * (q * pcfW a (-x)) := by
-    rw [pcfWS, ← mul_assoc, ← Complex.exp_add, show I*ω + -I*ω = 0 by ring, Complex.exp_zero, one_mul]
+    rw [pcfWS, ← mul_assoc, ← Complex.exp_add, show I*ω + -I*ω = 0 by ring,
+                                                                        Complex.exp_zero, one_mul]
     ring
   have hre := congrArg Complex.re hT
   have him := congrArg Complex.im hT
@@ -616,11 +651,13 @@ theorem pcfW_amplitude (a : ℝ) {x : ℝ} (hx : 0 < x) :
   have e2 : pcfW a (-x) = ((pcfW a (-x)).re : ℂ) := (Complex.ext (by simp) (by simp [h2r]))
   constructor
   · rw [e1]
-    have : (pcfW a x).re = Real.sqrt (2*k/x) * ((pcfWS a x).re * Real.cos ω - (pcfWS a x).im * Real.sin ω) := by
+    have : (pcfW a x).re = Real.sqrt (2*k/x) *
+        ((pcfWS a x).re * Real.cos ω - (pcfWS a x).im * Real.sin ω) := by
       linear_combination (-Real.sqrt (2*k/x)) * hre - (pcfW a x).re * hp
     rw [this]; push_cast; ring
   · rw [e2]
-    have : (pcfW a (-x)).re = Real.sqrt (2/(k*x)) * ((pcfWS a x).re * Real.sin ω + (pcfWS a x).im * Real.cos ω) := by
+    have : (pcfW a (-x)).re = Real.sqrt (2/(k*x)) *
+        ((pcfWS a x).re * Real.sin ω + (pcfWS a x).im * Real.cos ω) := by
       linear_combination (-Real.sqrt (2/(k*x))) * him - (pcfW a (-x)).re * hq
     rw [this]; push_cast; ring
 
@@ -697,7 +734,9 @@ Finset.range N, (-I)^r*pcfWCoeff a r/(2^r*(r.factorial:ℂ)*(x:ℂ)^(2*r))) =O[a
 => (x:ℂ)^(-(2*N:ℤ)))`. -/
 @[dlmf 12.14.E20, dlmf 12.14.E21, dlmf 12.14.E23]
 theorem pcfWS_asymptotic (a : ℝ) (N : ℕ) :
-    (fun x : ℝ => pcfWS a x-∑ r ∈ Finset.range N, (-I)^r*pcfWCoeff a r/(2^r*(r.factorial:ℂ)*(x:ℂ)^(2*r))) =O[atTop] (fun x : ℝ => (x:ℂ)^(-(2*N:ℤ))) := by
+    (fun x : ℝ => pcfWS a x-∑ r ∈ Finset.range N,
+        (-I)^r*pcfWCoeff a r/(2^r*(r.factorial:ℂ)*(x:ℂ)^(2*r))) =O[atTop]
+        (fun x : ℝ => (x:ℂ)^(-(2*N:ℤ))) := by
   have hT : Tendsto (fun x : ℝ => (Real.log x : ℂ)) atTop (pcfLogWedge 0 0) := by
     refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr ?_, tendsto_principal.mpr
       (Eventually.of_forall fun x => by simp)⟩
@@ -744,7 +783,8 @@ def pcfWTheta (a x : ℝ) : ℝ :=
 (pcfWK a)*(pcfW a) x+I*Real.sqrt (pcfWK a)*(pcfW a) (-x)=(pcfWF a x*exp (I*pcfWTheta a x))`. -/
 @[dlmf 12.14.E37]
 theorem pcfWF_phase (a x : ℝ) :
-    0 < pcfWF a x ∧ 1/Real.sqrt (pcfWK a)*(pcfW a) x+I*Real.sqrt (pcfWK a)*(pcfW a) (-x)=(pcfWF a x*exp (I*pcfWTheta a x)) := by
+    0 < pcfWF a x ∧ 1/Real.sqrt (pcfWK a)*(pcfW a) x+I*Real.sqrt (pcfWK a)*(pcfW a)
+        (-x)=(pcfWF a x*exp (I*pcfWTheta a x)) := by
   have hk := (pcfWK_recip a).1
   have hs : (Real.sqrt (pcfWK a) : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr hk).ne'
   have hne : 1/Real.sqrt (pcfWK a)*(pcfW a) x+I*Real.sqrt (pcfWK a)*(pcfW a) (-x) ≠ 0 := by
@@ -756,7 +796,8 @@ theorem pcfWF_phase (a x : ℝ) :
     · rintro ⟨h1, h2⟩
       exact pcfW_one_ne a x (by simpa [hs] using h1) (by simpa [hs] using h2)
   refine ⟨norm_pos_iff.mpr hne, ?_⟩
-  have h := norm_mul_exp_arg_mul_I (1/Real.sqrt (pcfWK a)*(pcfW a) x+I*Real.sqrt (pcfWK a)*(pcfW a) (-x))
+  have h := norm_mul_exp_arg_mul_I
+      (1/Real.sqrt (pcfWK a)*(pcfW a) x+I*Real.sqrt (pcfWK a)*(pcfW a) (-x))
   rw [mul_comm ((arg _ : ℝ) : ℂ) I] at h
   exact h.symm
 
@@ -776,10 +817,12 @@ def pcfWPsi (a x : ℝ) : ℝ :=
 (I*pcfWPsi a x))`. -/
 @[dlmf 12.14.E38]
 theorem pcfWG_phase (a x : ℝ) :
-    0 < pcfWG a x ∧ 1/Real.sqrt (pcfWK a)*(deriv (pcfW a)) x+I*Real.sqrt (pcfWK a)*(deriv (pcfW a)) (-x)=-(pcfWG a x*exp (I*pcfWPsi a x)) := by
+    0 < pcfWG a x ∧ 1/Real.sqrt (pcfWK a)*(deriv (pcfW a)) x+I*Real.sqrt (pcfWK a)*(deriv (pcfW a))
+        (-x)=-(pcfWG a x*exp (I*pcfWPsi a x)) := by
   have hk := (pcfWK_recip a).1
   have hs : (Real.sqrt (pcfWK a) : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr hk).ne'
-  have hne : 1/Real.sqrt (pcfWK a)*(deriv (pcfW a)) x+I*Real.sqrt (pcfWK a)*(deriv (pcfW a)) (-x) ≠ 0 := by
+  have hne : 1/Real.sqrt (pcfWK a)*(deriv (pcfW a)) x+I*Real.sqrt
+      (pcfWK a)*(deriv (pcfW a)) (-x) ≠ 0 := by
     rw [mul_assoc I, deriv_pcfW]
     refine add_I_mul_ne_zero_of_real ?_ ?_ ?_
     · rw [map_mul, conj_pcfWDeriv_ofReal]; simp
@@ -788,7 +831,8 @@ theorem pcfWG_phase (a x : ℝ) :
     · rintro ⟨h1, h2⟩
       exact pcfWDeriv_one_ne a x (by simpa [hs] using h1) (by simpa [hs] using h2)
   refine ⟨norm_pos_iff.mpr hne, ?_⟩
-  have h := norm_mul_exp_arg_mul_I (-(1/Real.sqrt (pcfWK a)*(deriv (pcfW a)) x+I*Real.sqrt (pcfWK a)*(deriv (pcfW a)) (-x)))
+  have h := norm_mul_exp_arg_mul_I
+      (-(1/Real.sqrt (pcfWK a)*(deriv (pcfW a)) x+I*Real.sqrt (pcfWK a)*(deriv (pcfW a)) (-x)))
   rw [mul_comm ((arg _ : ℝ) : ℂ) I, norm_neg] at h
   rw [pcfWG, pcfWPsi, h, neg_neg]
 

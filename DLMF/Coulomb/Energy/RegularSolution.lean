@@ -16,9 +16,9 @@ public import Mathlib.Algebra.Order.Ring.Star
 # The regular Coulomb function `f(ε,ℓ;r)` as an entire function (DLMF 33.14.1, 33.19.1)
 
 For every real `ε` the function `f(ε,ℓ;·)` is the restriction to `ℝ` of the real part of an
-entire function `coulombfComplex ε ℓ` (the Kummer form 33.14.5 with `κ = coulombKappa ε 1` for `ε ≠ 0`,
-the confluent form `(2z)^{ℓ+1} ₀F̃₁(;2ℓ+2;-2z)` for `ε = 0`). This entire function satisfies
-the Coulomb equation 33.14.1 (from the Coulomb wave equation 33.2.1 by the substitution
+entire function `coulombfComplex ε ℓ` (the Kummer form 33.14.5 with `κ = coulombKappa ε 1` for
+`ε ≠ 0`, the confluent form `(2z)^{ℓ+1} ₀F̃₁(;2ℓ+2;-2z)` for `ε = 0`). This entire function
+satisfies the Coulomb equation 33.14.1 (from the Coulomb wave equation 33.2.1 by the substitution
 `ρ = -iz/κ`, `η = -iκ`, resp. from the `₀F₁` equation), and its Taylor coefficients satisfy the
 recurrence 33.19.2, which gives the power series 33.19.1.
 
@@ -26,12 +26,12 @@ recurrence 33.19.2, which gives the power series 33.19.1.
 
 * `coulombf_eq_re_coulombfComplex`: `f(ε,ℓ;r) = Re coulombfComplex ε ℓ r`.
 * `hasDerivAt_deriv_coulombfComplex`: the equation 33.14.1 for `coulombfComplex ε ℓ` at `z ≠ 0`.
-* `hasSum_coulombAlpha_of_ode`: an entire solution `z^{ℓ+1} ψ(z)` of 33.14.1 with `ψ(0) = α₀` has the
-  power series `∑ α_k z^{k+ℓ+1}`.
+* `hasSum_coulombAlpha_of_ode`: an entire solution `z^{ℓ+1} ψ(z)` of 33.14.1 with `ψ(0) = α₀` has
+  the power series `∑ α_k z^{k+ℓ+1}`.
 * `hasSum_coulombfComplex`: the complex power series 33.19.1.
-* `coulombAlpha_succ_raise`, `coulombAlpha_lower`: ladder relations between the coefficients `α_k` for
-  consecutive `ℓ`; `coulombfComplex_raise`, `coulombfComplex_three_term`: the recurrences 33.17.3 and 33.17.1
-  for `coulombfComplex`, proved by comparing Taylor coefficients.
+* `coulombAlpha_succ_raise`, `coulombAlpha_lower`: ladder relations between the coefficients `α_k`
+  for consecutive `ℓ`; `coulombfComplex_raise`, `coulombfComplex_three_term`: the recurrences
+  33.17.3 and 33.17.1 for `coulombfComplex`, proved by comparing Taylor coefficients.
 -/
 
 @[expose] public section
@@ -107,8 +107,10 @@ theorem coulombfKummer_neg (κ : ℂ) (ℓ : ℕ) (r : ℝ) :
 def coulombfKummerComplex (κ : ℂ) (ℓ : ℕ) (z : ℂ) : ℂ :=
   (2 * z) ^ (ℓ + 1) * exp (-z / κ) * kummerM (ℓ + 1 - κ) (2 * ℓ + 2) (2 * z / κ) / (2 * ℓ + 1)!
 
-/-- The Kummer form of `f(ε,ℓ;r)` is the restriction of its complex extension `coulombfKummerComplex`. -/
-private lemma coulombfKummer_eq_coulombfKummerComplex (κ : ℂ) (ℓ : ℕ) (r : ℝ) : coulombfKummer κ ℓ r = coulombfKummerComplex κ ℓ r :=
+/-- The Kummer form of `f(ε,ℓ;r)` is the restriction of its complex extension
+`coulombfKummerComplex`. -/
+private lemma coulombfKummer_eq_coulombfKummerComplex (κ : ℂ) (ℓ : ℕ) (r : ℝ) : coulombfKummer κ ℓ r
+    = coulombfKummerComplex κ ℓ r :=
   rfl
 
 /-- `M(a, 2ℓ+2, ·)` is entire. -/
@@ -159,7 +161,8 @@ private lemma deriv_coulombfKummerComplex {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ
 
 /-- For `κ ≠ 0`, `ε = -1/κ²` and `z ≠ 0`, the complex Kummer form solves `Φ'' + (ε + 2/z -
 ℓ(ℓ+1)/z²) Φ = 0` (DLMF 33.14.1). -/
-private lemma hasDerivAt_deriv_coulombfKummerComplex {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) {ε : ℂ} (hε : ε = -1 / κ ^ 2) {z : ℂ}
+private lemma hasDerivAt_deriv_coulombfKummerComplex {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) {ε : ℂ}
+    (hε : ε = -1 / κ ^ 2) {z : ℂ}
     (hz : z ≠ 0) :
     HasDerivAt (deriv (coulombfKummerComplex κ ℓ))
       (-(ε + 2 / z - ℓ * (ℓ + 1) / z ^ 2) * coulombfKummerComplex κ ℓ z) z := by
@@ -201,7 +204,8 @@ private lemma hasDerivAt_coulombfZeroEnergyComplex (ℓ : ℕ) (z : ℂ) :
     HasDerivAt (coulombfZeroEnergyComplex ℓ) (2 * (ℓ + 1) * (2 * z) ^ ℓ *
       regularizedHGFun 0 {(2 * ℓ + 2 : ℂ)} (-(2 * z)) -
       2 * (2 * z) ^ (ℓ + 1) * regularizedHGFun 0 {(2 * ℓ + 2 : ℂ) + 1} (-(2 * z))) z := by
-  have h := (hasDerivAt_two_mul_pow (ℓ + 1) z).mul (hasDerivAt_regularizedHGFun_zero_one_neg_two_mul (2 * ℓ + 2) z)
+  have h := (hasDerivAt_two_mul_pow (ℓ + 1) z).mul
+      (hasDerivAt_regularizedHGFun_zero_one_neg_two_mul (2 * ℓ + 2) z)
   refine h.congr_deriv ?_
   simp only [Nat.add_sub_cancel]; push_cast; ring
 
@@ -221,9 +225,11 @@ private lemma hasDerivAt_deriv_coulombfZeroEnergyComplex (ℓ : ℕ) {z : ℂ} (
   have h : HasDerivAt (fun w : ℂ => 2 * ((ℓ : ℂ) + 1) * ((2 * w) ^ ℓ *
       regularizedHGFun 0 {(2 * ℓ + 2 : ℂ)} (-(2 * w))) - 2 * ((2 * w) ^ (ℓ + 1) *
       regularizedHGFun 0 {(2 * ℓ + 2 : ℂ) + 1} (-(2 * w)))) _ z :=
-    (((hasDerivAt_two_mul_pow ℓ z).mul (hasDerivAt_regularizedHGFun_zero_one_neg_two_mul (2 * ℓ + 2) z)).const_mul
+    (((hasDerivAt_two_mul_pow ℓ z).mul
+        (hasDerivAt_regularizedHGFun_zero_one_neg_two_mul (2 * ℓ + 2) z)).const_mul
       (2 * ((ℓ : ℂ) + 1))).sub
-      (((hasDerivAt_two_mul_pow (ℓ + 1) z).mul (hasDerivAt_regularizedHGFun_zero_one_neg_two_mul (2 * ℓ + 2 + 1) z)).const_mul 2)
+      (((hasDerivAt_two_mul_pow (ℓ + 1) z).mul
+          (hasDerivAt_regularizedHGFun_zero_one_neg_two_mul (2 * ℓ + 2 + 1) z)).const_mul 2)
   convert h using 1
   · funext w; ring
   symm
@@ -244,13 +250,15 @@ private lemma hasDerivAt_deriv_coulombfZeroEnergyComplex (ℓ : ℕ) {z : ℂ} (
 
 
 /-- The second derivative of an entire function is smooth. -/
-private lemma contDiffAt_deriv_deriv_of_differentiable {Φ : ℂ → ℂ} (hΦd : Differentiable ℂ Φ) (n : ℕ) (x : ℂ) :
+private lemma contDiffAt_deriv_deriv_of_differentiable {Φ : ℂ → ℂ} (hΦd : Differentiable ℂ Φ)
+    (n : ℕ) (x : ℂ) :
     ContDiffAt ℂ n (deriv (deriv Φ)) x :=
   ((hΦd.contDiff (n := ((n : ℕ) : WithTop ℕ∞) + 1 + 1)).deriv'.deriv').contDiffAt
 
 /-- The Taylor coefficients of a solution `z^{ℓ+1} ψ(z)` of 33.14.1 that is entire satisfy the
 recurrence 33.19.2: `Φ⁽ⁿ⁾(0) = 0` for `n ≤ ℓ` and `Φ⁽ℓ⁺¹⁺ʲ⁾(0) = (ℓ+1+j)! α_j`. -/
-private lemma iteratedDeriv_zero_of_coulomb_ode {ε : ℝ} {ℓ : ℕ} {Φ ψ : ℂ → ℂ} (hψ : Differentiable ℂ ψ)
+private lemma iteratedDeriv_zero_of_coulomb_ode {ε : ℝ} {ℓ : ℕ} {Φ ψ : ℂ → ℂ}
+    (hψ : Differentiable ℂ ψ)
     (hΦ : Φ = fun z => z ^ (ℓ + 1) * ψ z)
     (hode : ∀ z : ℂ, z ≠ 0 → HasDerivAt (deriv Φ)
       (-((ε : ℂ) + 2 / z - ℓ * (ℓ + 1) / z ^ 2) * Φ z) z)
@@ -374,13 +382,15 @@ def coulombfReducedComplex (ε : ℝ) (ℓ : ℕ) (z : ℂ) : ℂ :=
     kummerM (ℓ + 1 - coulombKappa ε 1) (2 * ℓ + 2) (2 * z / coulombKappa ε 1) / (2 * ℓ + 1)!
 
 /-- `Φ(ε,ℓ;z) = z^{ℓ+1} Ψ(ε,ℓ;z)`. -/
-private lemma coulombfComplex_eq_pow_mul_coulombfReducedComplex (ε : ℝ) (ℓ : ℕ) : coulombfComplex ε ℓ = fun z => z ^ (ℓ + 1) * coulombfReducedComplex ε ℓ z := by
+private lemma coulombfComplex_eq_pow_mul_coulombfReducedComplex (ε : ℝ) (ℓ : ℕ) : coulombfComplex ε
+    ℓ = fun z => z ^ (ℓ + 1) * coulombfReducedComplex ε ℓ z := by
   funext z
   unfold coulombfComplex coulombfReducedComplex coulombfZeroEnergyComplex coulombfKummerComplex
   split_ifs <;> ring
 
 /-- The reduced function `Ψ(ε,ℓ;·)` is entire. -/
-private lemma differentiable_coulombfReducedComplex (ε : ℝ) (ℓ : ℕ) : Differentiable ℂ (coulombfReducedComplex ε ℓ) := by
+private lemma differentiable_coulombfReducedComplex (ε : ℝ) (ℓ : ℕ) : Differentiable ℂ
+    (coulombfReducedComplex ε ℓ) := by
   unfold coulombfReducedComplex
   split_ifs with hε
   · have h : Differentiable ℂ (regularizedHGFun (∅ : Multiset ℂ) {(2 * ℓ + 2 : ℂ)}) :=
@@ -394,7 +404,8 @@ private lemma differentiable_coulombfReducedComplex (ε : ℝ) (ℓ : ℕ) : Dif
     exact ((((differentiable_id.neg.div_const _).cexp).const_mul _).mul h1).div_const _
 
 /-- `Ψ(ε,ℓ;0) = α₀(ε,ℓ)`, the leading power-series coefficient. -/
-private lemma coulombfReducedComplex_zero (ε : ℝ) (ℓ : ℕ) : coulombfReducedComplex ε ℓ 0 = coulombAlpha ε ℓ 0 := by
+private lemma coulombfReducedComplex_zero (ε : ℝ) (ℓ : ℕ) : coulombfReducedComplex ε ℓ 0 =
+    coulombAlpha ε ℓ 0 := by
   have hG : Gamma (2 * ℓ + 2 : ℂ) = (2 * ℓ + 1)! := by
     rw [show (2 * ℓ + 2 : ℂ) = ((2 * ℓ + 1 : ℕ) : ℂ) + 1 by push_cast; ring,
       Complex.Gamma_nat_eq_factorial]
@@ -411,7 +422,8 @@ theorem hasDerivAt_deriv_coulombfComplex (ε : ℝ) (ℓ : ℕ) {z : ℂ} (hz : 
     HasDerivAt (deriv (coulombfComplex ε ℓ))
       (-((ε : ℂ) + 2 / z - ℓ * (ℓ + 1) / z ^ 2) * coulombfComplex ε ℓ z) z := by
   by_cases hε : ε = 0
-  · have h : coulombfComplex ε ℓ = coulombfZeroEnergyComplex ℓ := funext fun w => by simp [coulombfComplex, hε]
+  · have h : coulombfComplex ε ℓ = coulombfZeroEnergyComplex ℓ := funext fun w =>
+        by simp [coulombfComplex, hε]
     rw [h, hε]
     simpa using hasDerivAt_deriv_coulombfZeroEnergyComplex ℓ hz
   · have h : coulombfComplex ε ℓ = coulombfKummerComplex (coulombKappa ε 1) ℓ := funext fun w => by
@@ -424,12 +436,15 @@ theorem hasDerivAt_deriv_coulombfComplex (ε : ℝ) (ℓ : ℕ) {z : ℂ} (hz : 
 /-- **The power series 33.19.1 in `ℂ`.** -/
 theorem hasSum_coulombfComplex (ε : ℝ) (ℓ : ℕ) (z : ℂ) :
     HasSum (fun k => (coulombAlpha ε ℓ k : ℂ) * z ^ (k + ℓ + 1)) (coulombfComplex ε ℓ z) :=
-  hasSum_coulombAlpha_of_ode (differentiable_coulombfReducedComplex ε ℓ) (coulombfComplex_eq_pow_mul_coulombfReducedComplex ε ℓ)
+  hasSum_coulombAlpha_of_ode (differentiable_coulombfReducedComplex ε ℓ)
+      (coulombfComplex_eq_pow_mul_coulombfReducedComplex ε ℓ)
     (fun _ hz => hasDerivAt_deriv_coulombfComplex ε ℓ hz) (coulombfReducedComplex_zero ε ℓ) z
 
 /-- `Φ(ε,ℓ;·)` is entire. -/
-theorem differentiable_coulombfComplex (ε : ℝ) (ℓ : ℕ) : Differentiable ℂ (coulombfComplex ε ℓ) := by
-  rw [coulombfComplex_eq_pow_mul_coulombfReducedComplex]; exact (differentiable_id.pow _).mul (differentiable_coulombfReducedComplex ε ℓ)
+theorem differentiable_coulombfComplex (ε : ℝ) (ℓ : ℕ) : Differentiable ℂ
+    (coulombfComplex ε ℓ) := by
+  rw [coulombfComplex_eq_pow_mul_coulombfReducedComplex];
+      exact (differentiable_id.pow _).mul (differentiable_coulombfReducedComplex ε ℓ)
 
 /-- `f(ε,ℓ;r) = Re coulombfComplex ε ℓ r`. -/
 theorem coulombf_eq_re_coulombfComplex (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
@@ -440,12 +455,14 @@ theorem coulombf_eq_re_coulombfComplex (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
   · rw [coulombfKummer_eq_coulombfKummerComplex]
     rcases coulombKappa_eq_or_eq_neg ε r with h | h
     · rw [h]
-    · rw [h, ← coulombfKummer_eq_coulombfKummerComplex, coulombfKummer_neg, coulombfKummer_eq_coulombfKummerComplex]
+    · rw [h, ← coulombfKummer_eq_coulombfKummerComplex, coulombfKummer_neg,
+          coulombfKummer_eq_coulombfKummerComplex]
 
 /-- The derivative of `f(ε,ℓ;·)` is the real part of the derivative of `coulombfComplex ε ℓ`. -/
 theorem hasDerivAt_coulombf (ε : ℝ) (ℓ : ℕ) (x : ℝ) :
     HasDerivAt (coulombf ε ℓ) (deriv (coulombfComplex ε ℓ) x).re x := by
-  rw [show coulombf ε ℓ = fun x : ℝ => (coulombfComplex ε ℓ x).re from funext (coulombf_eq_re_coulombfComplex ε ℓ)]
+  rw [show coulombf ε ℓ = fun x : ℝ =>
+      (coulombfComplex ε ℓ x).re from funext (coulombf_eq_re_coulombfComplex ε ℓ)]
   exact ((differentiable_coulombfComplex ε ℓ x).hasDerivAt).real_of_complex
 
 /-! ### Taylor coefficients, ladder relations -/
@@ -455,7 +472,9 @@ otherwise. -/
 private lemma iteratedDeriv_coulombfComplex_zero (ε : ℝ) (ℓ n : ℕ) :
     iteratedDeriv n (coulombfComplex ε ℓ) 0 =
       if n < ℓ + 1 then 0 else (n ! : ℂ) * coulombAlpha ε ℓ (n - (ℓ + 1)) := by
-  obtain ⟨hlow, hmain⟩ := iteratedDeriv_zero_of_coulomb_ode (differentiable_coulombfReducedComplex ε ℓ) (coulombfComplex_eq_pow_mul_coulombfReducedComplex ε ℓ)
+  obtain ⟨hlow, hmain⟩ :=
+      iteratedDeriv_zero_of_coulomb_ode (differentiable_coulombfReducedComplex ε ℓ)
+      (coulombfComplex_eq_pow_mul_coulombfReducedComplex ε ℓ)
     (fun _ hz => hasDerivAt_deriv_coulombfComplex ε ℓ hz) (coulombfReducedComplex_zero ε ℓ)
   split_ifs with h
   · exact hlow n h
@@ -470,7 +489,8 @@ private lemma eq_zero_of_iteratedDeriv_zero_eq_zero {Q : ℂ → ℂ} (hQ : Diff
   exact hT.unique hasSum_zero
 
 /-- `(z^m Φ)⁽ⁿ⁾(0) = n^{(m)} Φ^{(n-m)}(0)` with the falling factorial `n^{(m)}`. -/
-private lemma iteratedDeriv_pow_mul_zero_of_differentiable {Φ : ℂ → ℂ} (hΦ : Differentiable ℂ Φ) (m n : ℕ) :
+private lemma iteratedDeriv_pow_mul_zero_of_differentiable {Φ : ℂ → ℂ}
+    (hΦ : Differentiable ℂ Φ) (m n : ℕ) :
     iteratedDeriv n (fun z => z ^ m * Φ z) 0 = n.descFactorial m * iteratedDeriv (n - m) Φ 0 :=
   ODE.iteratedDeriv_pow_mul_zero (hΦ.contDiff).contDiffAt m
 
@@ -628,8 +648,10 @@ theorem coulombfComplex_raise (ε : ℝ) (ℓ : ℕ) (z : ℂ) :
       iteratedDeriv_fun_add (hc _ (by fun_prop)) (hc _ (by fun_prop)),
       iteratedDeriv_fun_sub (hc _ (by fun_prop)) (hc _ (by fun_prop)),
       iteratedDeriv_const_mul_field, iteratedDeriv_const_mul_field,
-      iteratedDeriv_const_mul_field, iteratedDeriv_pow_mul_zero_of_differentiable hΦ', iteratedDeriv_pow_mul_zero_of_differentiable hΦ,
-      iteratedDeriv_pow_mul_zero_of_differentiable hΦ, iteratedDeriv_pow_mul_zero_of_differentiable hΦ1]
+      iteratedDeriv_const_mul_field, iteratedDeriv_pow_mul_zero_of_differentiable hΦ',
+          iteratedDeriv_pow_mul_zero_of_differentiable hΦ,
+      iteratedDeriv_pow_mul_zero_of_differentiable hΦ,
+          iteratedDeriv_pow_mul_zero_of_differentiable hΦ1]
     rcases n with _ | n
     · simp [iteratedDeriv_coulombfComplex_zero]
     rw [Nat.add_sub_cancel, ← iteratedDeriv_succ', Nat.descFactorial_one, Nat.descFactorial_zero,
@@ -669,7 +691,8 @@ theorem coulombfComplex_raise (ε : ℝ) (ℓ : ℕ) (z : ℂ) :
   simp only [pow_one, pow_zero, one_mul] at h
   linear_combination h
 
-/-- **The three-term recurrence 33.17.1 for the entire functions** `coulombfComplex` (with `ℓ = m+1`). -/
+/-- **The three-term recurrence 33.17.1 for the entire functions** `coulombfComplex` (with
+`ℓ = m+1`). -/
 theorem coulombfComplex_three_term (ε : ℝ) (m : ℕ) (z : ℂ) :
     ((m : ℂ) + 2) * z * coulombfComplex ε m z -
       (2 * m + 3) * ((m + 1) * (m + 2) - z) * coulombfComplex ε (m + 1) z +
@@ -689,8 +712,11 @@ theorem coulombfComplex_three_term (ε : ℝ) (m : ℕ) (z : ℂ) :
       iteratedDeriv_fun_add (hc _ (by fun_prop)) (hc _ (by fun_prop)),
       iteratedDeriv_fun_sub (hc _ (by fun_prop)) (hc _ (by fun_prop)),
       iteratedDeriv_const_mul_field, iteratedDeriv_const_mul_field,
-      iteratedDeriv_const_mul_field, iteratedDeriv_const_mul_field, iteratedDeriv_pow_mul_zero_of_differentiable hΦ,
-      iteratedDeriv_pow_mul_zero_of_differentiable hΦ1, iteratedDeriv_pow_mul_zero_of_differentiable hΦ1, iteratedDeriv_pow_mul_zero_of_differentiable hΦ2]
+      iteratedDeriv_const_mul_field, iteratedDeriv_const_mul_field,
+          iteratedDeriv_pow_mul_zero_of_differentiable hΦ,
+      iteratedDeriv_pow_mul_zero_of_differentiable hΦ1,
+          iteratedDeriv_pow_mul_zero_of_differentiable hΦ1,
+          iteratedDeriv_pow_mul_zero_of_differentiable hΦ2]
     rcases n with _ | n
     · simp [iteratedDeriv_coulombfComplex_zero]
     rw [Nat.add_sub_cancel, Nat.descFactorial_one, Nat.descFactorial_zero, Nat.sub_zero]

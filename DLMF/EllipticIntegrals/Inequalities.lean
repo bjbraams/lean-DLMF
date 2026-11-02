@@ -104,16 +104,19 @@ private lemma cos_sq_le_one_sub_mul_sin_sq {m : ℝ} (hm : m ≤ 1) (θ : ℝ) :
   nlinarith [sq_nonneg (Real.sin θ)]
 
 /-- `1 - m sin²θ ≥ 1 - m sin²φ` for `0 ≤ m` and `0 ≤ θ ≤ φ ≤ π/2`. -/
-private lemma one_sub_mul_sin_sq_le_of_le {m θ φ : ℝ} (hm : 0 ≤ m) (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ ≤ π / 2) :
+private lemma one_sub_mul_sin_sq_le_of_le {m θ φ : ℝ} (hm : 0 ≤ m) (h0 : 0 ≤ θ) (hθ : θ ≤ φ)
+    (hφ : φ ≤ π / 2) :
     1 - m * Real.sin φ ^ 2 ≤ 1 - m * Real.sin θ ^ 2 := by
   nlinarith [sin_sq_le_sin_sq h0 hθ hφ]
 
 /-- `1 - m sin²θ ≤ 1` for `m ≥ 0`. -/
-private lemma one_sub_mul_sin_sq_le_one {m : ℝ} (hm : 0 ≤ m) (θ : ℝ) : 1 - m * Real.sin θ ^ 2 ≤ 1 := by
+private lemma one_sub_mul_sin_sq_le_one {m : ℝ} (hm : 0 ≤ m) (θ : ℝ) : 1 - m *
+    Real.sin θ ^ 2 ≤ 1 := by
   nlinarith [sq_nonneg (Real.sin θ)]
 
 /-- The third-kind factor `(1 - n sin²θ)⁻¹` is positive for `n < 1`. -/
-private lemma inv_one_sub_mul_sin_sq_pos {n : ℝ} (hn : n < 1) (θ : ℝ) : 0 < (1 - n * Real.sin θ ^ 2)⁻¹ :=
+private lemma inv_one_sub_mul_sin_sq_pos {n : ℝ} (hn : n < 1) (θ : ℝ) : 0 <
+    (1 - n * Real.sin θ ^ 2)⁻¹ :=
   inv_pos.mpr (DLMF.Elliptic.one_sub_mul_sin_sq_pos hn θ)
 
 /-! ### Real forms of the integrals -/
@@ -134,7 +137,8 @@ private lemma re_incEllIntPik_ofReal {φ α2 k : ℝ} (hα : α2 < 1) (hk : k ^ 
   rw [incEllIntPik_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk hα φ, ofReal_re]
 
 /-- `E(k) = E(π/2, k)` with a real amplitude cast. -/
-private lemma compEllIntEk_eq_incEllIntEk (k : ℂ) : compEllIntEk k = incEllIntEk ((π / 2 : ℝ) : ℂ) k := by
+private lemma compEllIntEk_eq_incEllIntEk (k : ℂ) : compEllIntEk k =
+    incEllIntEk ((π / 2 : ℝ) : ℂ) k := by
   rw [compEllIntEk]; push_cast; rfl
 
 /-- `Π(α², k) = Π(π/2, α², k)` with a real amplitude cast. -/
@@ -492,7 +496,8 @@ theorem incEllIntFk_div_sin_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
     intro he
     nlinarith [Real.sin_sq_add_cos_sq φ, sq_pos_of_pos hs]
   have hF : (incEllIntFk φ k).re / Real.sin φ =
-      (Carlson.carlsonRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1).re := by
+      (Carlson.carlsonRF ((Real.cos φ ^ 2 : ℝ) : ℂ)
+          ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1).re := by
     have h := congrArg Complex.re (Carlson.Real.incEllIntFk_eq hφ0 hφ1 hk)
     have he := incEllIntFk_eq_ofReal (m:=k ^ 2) (k:=(k : ℂ)) (by push_cast; rfl) hk.le φ
     rw [he, ofReal_re]
@@ -519,10 +524,12 @@ theorem incEllIntFk_div_sin_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
     have hh := (Carlson.carlsonRReal_bounds_between_neg_sum_zero hb hv hn
       (by norm_num : (-1 / 2 : ℝ) < 0) (by norm_num [b, Fin.sum_univ_succ])).2
     have he := Carlson.ofReal_carlsonRReal (-1 / 2) hb hv
-    have he' : (Carlson.carlsonRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1).re =
+    have he' : (Carlson.carlsonRF ((Real.cos φ ^ 2 : ℝ) : ℂ)
+        ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1).re =
         Carlson.carlsonRReal (-1 / 2) b v := by
       unfold Carlson.carlsonRF
-      have ev : (fun i => (v i : ℂ)) = ![((Real.cos φ ^ 2 : ℝ) : ℂ), ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ), 1] := by
+      have ev : (fun i => (v i : ℂ)) =
+          ![((Real.cos φ ^ 2 : ℝ) : ℂ), ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ), 1] := by
         ext i; fin_cases i <;> simp [v]
       norm_num only [b, ofReal_neg, ofReal_div, ofReal_one, ofReal_ofNat, ev] at he
       rw [neg_div, ←he, ofReal_re]
@@ -532,7 +539,8 @@ theorem incEllIntFk_div_sin_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
     rw [←Real.exp_mul, Real.rpow_def_of_pos (mul_pos (Real.sqrt_pos.mpr hy) hc)]
     congr 1
     simp only [b, v, Fin.sum_univ_succ, Matrix.cons_val_zero, Matrix.cons_val_succ,
-      Matrix.cons_val_fin_one, Real.log_one, mul_zero, Real.log_mul (Real.sqrt_pos.mpr hy).ne' hc.ne',
+      Matrix.cons_val_fin_one, Real.log_one, mul_zero,
+          Real.log_mul (Real.sqrt_pos.mpr hy).ne' hc.ne',
       Real.log_sqrt hy.le, Real.log_pow]
     ring
 
@@ -586,7 +594,8 @@ private lemma hasDerivAt_artanh_of_mem_Ioo {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 
 
 /-- Identity under the stated parameter and domain assumptions: `∫ θ in (0 : ℝ)..φ, Real.cos θ /
 (1 - q ^ 2 * Real.sin θ ^ 2) = q⁻¹ * Real.artanh (q * Real.sin φ)`. -/
-private lemma integral_cos_div_one_sub_sq_mul_sin_sq {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ) (hφ1 : φ < π / 2)
+private lemma integral_cos_div_one_sub_sq_mul_sin_sq {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ)
+    (hφ1 : φ < π / 2)
     (hqs : q * Real.sin φ < 1) :
     ∫ θ in (0 : ℝ)..φ, Real.cos θ / (1 - q ^ 2 * Real.sin θ ^ 2) =
       q⁻¹ * Real.artanh (q * Real.sin φ) := by
@@ -775,7 +784,8 @@ theorem incEllIntFk_arctanh_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
     refine ⟨IccExtend hφ0 (domRestrict (Icc 0 φ) A), ?_, fun θ hθ => ?_⟩
     · exact continuous_IccExtend_iff.2 (hAc.domRestrict)
     · rw [IccExtend_of_mem hφ0 _ hθ]; rfl
-  have hint_eq : ∀ {f g : ℝ → ℝ}, EqOn f g (Icc 0 φ) → ∫ θ in (0 : ℝ)..φ, f θ = ∫ θ in (0 : ℝ)..φ, g θ :=
+  have hint_eq : ∀ {f g : ℝ → ℝ}, EqOn f g (Icc 0 φ) → ∫ θ in (0 : ℝ)..φ, f θ =
+      ∫ θ in (0 : ℝ)..φ, g θ :=
     fun h => intervalIntegral.integral_congr (by rw [uIcc_of_le hφ0]; exact h)
   have hUA' : U = ∫ θ in (0 : ℝ)..φ, A' θ := by rw [hU]; exact (hint_eq hA'eq).symm
   have hcs := sq_integral_sqrt_mul_sqrt_le hφ0 hA'c hGc (fun θ hθ => (hA'eq hθ).symm ▸ hA0 θ hθ) hG0

@@ -597,7 +597,8 @@ theorem whittakerW_contiguous_mixed (κ μ : ℂ) {z : ℂ} (hz : z ∈ slitPlan
     show 1 + 2 * (μ + 1 / 2) = 1 + 2 * μ + 1 by ring,
     show 1 + 2 * (μ - 1 / 2) = 1 + 2 * μ - 1 by ring, p1, p2, p3]
   linear_combination (-(exp (-z / 2) * z ^ (1 / 2 : ℂ) * z ^ μ)) * (h14 + h10) +
-    (κ - μ - 1 / 2) * exp (-z / 2) * z ^ (1 / 2 : ℂ) * z ^ μ * kummerU (1 / 2 + μ - κ + 1) (1 + 2 * μ + 1) z * hzz
+    (κ - μ - 1 / 2) * exp (-z / 2) * z ^ (1 / 2 : ℂ) * z ^ μ *
+        kummerU (1 / 2 + μ - κ + 1) (1 + 2 * μ + 1) z * hzz
 
 /-- Identity under the stated parameter and domain assumptions: `(κ + μ - 1 / 2) * z ^ (1 / 2 : ℂ)
 * whittakerW (κ - 1 / 2) (μ - 1 / 2) z - (z + 2 * μ) * whittakerW κ μ z + z ^ (1 / 2 : ℂ) *
@@ -639,7 +640,8 @@ theorem whittakerW_contiguous_diff (κ μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane
     show 1 + 2 * (μ + 1 / 2) = 1 + 2 * μ + 1 by ring,
     show 1 + 2 * (μ - 1 / 2) = 1 + 2 * μ - 1 by ring, p1, p2, p3]
   linear_combination (-(exp (-z / 2) * z ^ (1 / 2 : ℂ) * z ^ μ)) * h14 +
-    (κ - μ - 1 / 2) * exp (-z / 2) * z ^ (1 / 2 : ℂ) * z ^ μ * kummerU (1 / 2 + μ - κ + 1) (1 + 2 * μ + 1) z * hzz
+    (κ - μ - 1 / 2) * exp (-z / 2) * z ^ (1 / 2 : ℂ) * z ^ μ *
+        kummerU (1 / 2 + μ - κ + 1) (1 + 2 * μ + 1) z * hzz
 
 /-- Iterates of `mulDerivMul` only depend on the function near the point. -/
 private lemma iterate_mulDerivMul_congr {U : Set ℂ} (hU : IsOpen U) {f g : ℂ → ℂ}
@@ -649,7 +651,8 @@ private lemma iterate_mulDerivMul_congr {U : Set ℂ} (hU : IsOpen U) {f g : ℂ
   | zero => intro w hw; simpa using h w hw
   | succ n ih =>
     intro w hw
-    rw [Function.iterate_succ_apply', Function.iterate_succ_apply', mulDerivMul_eq_mul, mulDerivMul_eq_mul]
+    rw [Function.iterate_succ_apply', Function.iterate_succ_apply', mulDerivMul_eq_mul,
+        mulDerivMul_eq_mul]
     congr 1
     apply Filter.EventuallyEq.deriv_eq
     filter_upwards [hU.mem_nhds hw] with t ht

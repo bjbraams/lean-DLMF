@@ -93,7 +93,8 @@ private lemma ordinaryHypergeometricCoefficient_succ_mul (hγ : ∀ n : ℕ, γ 
 
 /-- Helper for 31.7.1: if `q = aαβ` and `Q_{j+1} + q - (j+1)(j+γ) = a(j+1+α)(j+1+β)` for all
 `j`, the Maclaurin coefficients of `Hl` are the hypergeometric coefficients. -/
-private lemma heunLocalCoeff_eq_ordinaryHypergeometricCoefficient (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (hq : q = a * α * β)
+private lemma heunLocalCoeff_eq_ordinaryHypergeometricCoefficient (ha : a ≠ 0)
+    (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (hq : q = a * α * β)
     (hQ : ∀ j : ℕ, heunRecQ a α β γ δ (j + 1) + q - ((j : ℂ) + 1) * ((j : ℂ) + γ) =
       a * ((j : ℂ) + 1 + α) * ((j : ℂ) + 1 + β)) (j : ℕ) :
     heunLocalCoeff a q α β γ δ j = ordinaryHypergeometricCoefficient α β γ j := by
@@ -444,6 +445,71 @@ theorem heunLocal_four_eq_hypergeometric {z : ℂ} (hz : ‖z‖ < 1)
     rw [hu, one_mul]
   exact hHl.eqOn_of_preconnected_of_eventuallyEq hGa hDconn h0D hev' ⟨hz, hz'⟩
 
+/-- The domain of 31.7.4 is the image of the disk `‖v - 1‖ < 1` under
+`v ↦ (1 - v^{1/3}) / c`. -/
+private lemma cubic_domain_eq_image {c : ℂ} (hc : ‖c‖ = Real.sqrt 3) :
+    {u : ℂ | ‖u‖ < 1 ∧ ‖1 - (1 - c * u) ^ 3‖ < 1 ∧ |Complex.arg (1 - c * u)| < π / 6} =
+      (fun v : ℂ => (1 - v ^ ((3 : ℂ)⁻¹)) / c) '' Metric.ball 1 1 := by
+  have hc0 : c ≠ 0 := by
+    intro h; rw [h, norm_zero] at hc
+    have : (0:ℝ) < Real.sqrt 3 := Real.sqrt_pos.2 (by norm_num)
+    linarith
+  ext u
+  simp only [mem_ofPred_eq, mem_image, Metric.mem_ball, dist_eq_norm]
+  constructor
+  · rintro ⟨-, h2, h3⟩
+    refine ⟨(1 - c * u) ^ 3, by rw [norm_sub_rev]; exact h2, ?_⟩
+    rw [pow_cpow_ofNat_inv (by linarith [abs_lt.1 h3, Real.pi_pos])
+      (by linarith [abs_lt.1 h3, Real.pi_pos])]
+    field_simp; ring
+  · rintro ⟨v, hv, rfl⟩
+    set w := v ^ ((3 : ℂ)⁻¹) with hw
+    have hw3 : w ^ 3 = v := cpow_ofNat_inv_pow v 3
+    have hv0 : v ≠ 0 := by
+      rintro rfl; simp at hv
+    have hvre : 0 < v.re := by
+      have := (abs_re_le_norm (v - 1)).trans_lt hv
+      rw [sub_re, one_re] at this
+      linarith [(abs_lt.1 this).1]
+    have hargv : |v.arg| < π / 2 := abs_arg_lt_pi_div_two_iff.2 (Or.inl hvre)
+    have hargw : w.arg = v.arg / 3 := by
+      have hl : log w = log v * (3 : ℂ)⁻¹ := by
+        rw [hw, cpow_def_of_ne_zero hv0]
+        refine log_exp ?_ ?_
+        · have : (log v * (3 : ℂ)⁻¹).im = v.arg / 3 := by
+            simp [log_im]; ring
+          rw [this]; linarith [abs_lt.1 hargv, Real.pi_pos]
+        · have : (log v * (3 : ℂ)⁻¹).im = v.arg / 3 := by
+            simp [log_im]; ring
+          rw [this]; linarith [abs_lt.1 hargv, Real.pi_pos]
+      rw [← log_im, hl]; simp [log_im]; ring
+    have hargw' : |w.arg| < π / 6 := by
+      rw [hargw, abs_div, abs_of_pos (by norm_num : (0:ℝ) < 3)]; linarith
+    have hw0 : w ≠ 0 := by rintro h; rw [h] at hw3; exact hv0 (by simpa using hw3.symm)
+    have hwre : 0 < w.re := by
+      rcases abs_arg_lt_pi_div_two_iff.1 (by linarith [Real.pi_pos] : |w.arg| < π / 2) with h | h
+      · exact h
+      · exact absurd h hw0
+    have hcu : 1 - c * ((1 - w) / c) = w := by field_simp; ring
+    rw [hcu, hw3]
+    refine ⟨?_, by rw [norm_sub_rev]; exact hv, hargw'⟩
+    have hvn : ‖v‖ < 2 := by
+      have := norm_le_insert' v 1
+      rw [norm_one] at this
+      linarith
+    have hwn3 : ‖w‖ ^ 3 < 2 := by rw [← norm_pow, hw3]; exact hvn
+    have hwn2 : ‖w‖ ^ 2 < 2 := by
+      by_contra hcon
+      push Not at hcon
+      have h1 : 1 ≤ ‖w‖ := by nlinarith [norm_nonneg w]
+      nlinarith [norm_nonneg w]
+    have hsq : ‖1 - w‖ ^ 2 = 1 - 2 * w.re + ‖w‖ ^ 2 := by
+      rw [Complex.sq_norm, Complex.sq_norm, Complex.normSq_apply, Complex.normSq_apply]
+      simp; ring
+    rw [norm_div, hc, div_lt_one (Real.sqrt_pos.2 (by norm_num))]
+    rw [← abs_of_nonneg (norm_nonneg (1 - w)), ← Real.sqrt_sq_eq_abs]
+    exact Real.sqrt_lt_sqrt (sq_nonneg _) (by linarith)
+
 /-- DLMF 31.7.4: with `a = 1/2 + i√3/2`,
 `Hl(a, αβ(1/2 + i√3/6); α, β, (α+β+1)/3, (α+β+1)/3; z)
 = ₂F₁(α/3, β/3; (α+β+1)/3; 1 - (1 - (3/2 - i√3/2) z)³)` where both series converge and
@@ -464,7 +530,156 @@ theorem heunLocal_cubic_eq_hypergeometric
         ((α + β + 1) / 3) ((α + β + 1) / 3) z =
       ordinaryHypergeometric (α / 3) (β / 3) ((α + β + 1) / 3)
         (1 - (1 - (3 / 2 - I * Real.sqrt 3 / 2) * z) ^ 3) := by
-  sorry
+  set a : ℂ := 1 / 2 + I * Real.sqrt 3 / 2 with ha
+  set b : ℂ := 1 / 2 + I * Real.sqrt 3 / 6 with hb
+  set c : ℂ := 3 / 2 - I * Real.sqrt 3 / 2 with hc
+  set g : ℂ := (α + β + 1) / 3 with hg
+  have hs : (Real.sqrt 3 : ℂ) ^ 2 = 3 := by
+    rw [← ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num
+  set sq : ℂ := (Real.sqrt 3 : ℂ) with hsq
+  have h1 : c * (1 + a) = 3 := by
+    simp only [hc, ha]; linear_combination (-sq ^ 2 / 4) * I_sq + 1 / 4 * hs
+  have h2 : c ^ 2 * a = 3 := by
+    simp only [hc, ha]
+    linear_combination (I * sq ^ 3 / 8 - 5 * sq ^ 2 / 8) * I_sq + (-I * sq / 8 + 5 / 8) * hs
+  have hbc : c * b = 1 := by
+    simp only [hc, hb]; linear_combination (-sq ^ 2 / 12) * I_sq + 1 / 12 * hs
+  have hc0 : c ≠ 0 := by rintro h; rw [h] at hbc; simp at hbc
+  have h3 : (Real.sqrt 3) ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have hnorma : ‖a‖ = 1 := by
+    rw [norm_eq_sqrt_sq_add_sq]
+    have e1 : a.re = 1 / 2 := by simp [ha, hsq]
+    have e2 : a.im = Real.sqrt 3 / 2 := by simp [ha, hsq]
+    rw [e1, e2]; simp only [div_pow, h3]; norm_num
+  have hnormc : ‖c‖ = Real.sqrt 3 := by
+    rw [norm_eq_sqrt_sq_add_sq]
+    have e1 : c.re = 3 / 2 := by simp [hc, hsq]
+    have e2 : c.im = -(Real.sqrt 3 / 2) := by simp [hc, hsq]
+    rw [e1, e2, neg_sq]; simp only [div_pow, h3]; norm_num
+  have ha0 : a ≠ 0 := by rintro h; rw [h, norm_zero] at hnorma; norm_num at hnorma
+  have hq : α * β * b = α * β / c := by field_simp; linear_combination α * β * hbc
+  set F : ℂ → ℂ := ordinaryHypergeometric (α / 3) (β / 3) g with hF
+  set ψ : ℂ → ℂ := fun u => 1 - (1 - c * u) ^ 3 with hψ
+  set G : ℂ → ℂ := fun u => F (ψ u) with hG
+  set D : Set ℂ := {u : ℂ | ‖u‖ < 1 ∧ ‖1 - (1 - c * u) ^ 3‖ < 1 ∧
+    |Complex.arg (1 - c * u)| < π / 6} with hD
+  have hψfac : ∀ u, ψ u = c ^ 3 * (u * (u - 1) * (u - a)) := fun u => by
+    simp only [hψ]; linear_combination (u ^ 2 * c ^ 2) * h1 - (u * c) * h2
+  have hrad : heunLocalRadius a = 1 := by simp [heunLocalRadius, hnorma]
+  have hDopen : IsOpen D := by
+    refine isOpen_iff_mem_nhds.2 fun u hu => ?_
+    have hw0 : 1 - c * u ≠ 0 := fun h => by
+      have := hu.2.1; rw [h] at this; norm_num at this
+    have hre : 0 < (1 - c * u).re := by
+      rcases abs_arg_lt_pi_div_two_iff.1 (by linarith [hu.2.2, Real.pi_pos] :
+        |(1 - c * u).arg| < π / 2) with h | h
+      · exact h
+      · exact absurd h hw0
+    have hcA : ContinuousAt (fun x : ℂ => |Complex.arg (1 - c * x)|) u :=
+      ((continuousAt_arg (Or.inl hre)).comp (f := fun x : ℂ => 1 - c * x)
+        (by fun_prop)).abs
+    have hc1 : Continuous fun x : ℂ => ‖x‖ := continuous_norm
+    have hc2 : Continuous fun x : ℂ => ‖1 - (1 - c * x) ^ 3‖ := by fun_prop
+    filter_upwards [hc1.continuousAt.eventually (isOpen_Iio.mem_nhds hu.1),
+      hc2.continuousAt.eventually (isOpen_Iio.mem_nhds hu.2.1),
+      hcA.eventually (isOpen_Iio.mem_nhds hu.2.2)] with x h1 h2 h3
+    exact ⟨h1, h2, h3⟩
+  have h0D : (0 : ℂ) ∈ D := ⟨by simp, by simp, by simp [Real.pi_pos]⟩
+  have hDconn : IsPreconnected D := by
+    rw [hD, cubic_domain_eq_image hnormc]
+    refine (convex_ball (1 : ℂ) 1).isPreconnected.image _ fun v hv => ?_
+    have hvre : 0 < v.re := by
+      have := (abs_re_le_norm (v - 1)).trans_lt (by simpa [dist_eq_norm] using hv)
+      rw [sub_re, one_re] at this
+      linarith [(abs_lt.1 this).1]
+    have hca : ContinuousAt (fun x : ℂ => x ^ ((3 : ℂ)⁻¹)) v :=
+      continuousAt_cpow_const (Or.inl hvre)
+    have h' : ContinuousAt (fun x : ℂ => (1 - x ^ ((3 : ℂ)⁻¹)) / c) v :=
+      (hca.const_sub 1).div_const c
+    exact h'.continuousWithinAt
+  have hHH := heunLocal_isHeunSolOn (a := a) (q := α * β * b) (α := α) (β := β) (γ := g)
+    (δ := g) ha0 hγ
+  rw [hrad] at hHH
+  have hHl : AnalyticOnNhd ℂ (heunLocal a (α * β * b) α β g g) D := fun u hu =>
+    hHH.1 u (mem_ball_zero_iff.2 hu.1)
+  have hGa : AnalyticOnNhd ℂ G D := fun u hu => by
+    have h1 : AnalyticAt ℂ ψ u := by simp only [hψ]; fun_prop
+    have h2 : AnalyticAt ℂ F (ψ u) :=
+      DLMF.Hypergeometric.analyticAt_ordinaryHypergeometric hu.2.1
+    exact AnalyticAt.comp (g := F) (f := ψ) h2 h1
+  have hFsol := hypergeometric_isHeunSolOn_zero (α := α / 3) (β := β / 3) hγ
+  have hε : heunEps α β g g = g := by simp only [heunEps, hg]; ring
+  have hfacts : ∀ u ∈ D \ {0}, u ≠ 0 ∧ u - 1 ≠ 0 ∧ u - a ≠ 0 ∧ 1 - c * u ≠ 0 := by
+    rintro u ⟨hu, hu0⟩
+    have h1 : ‖u‖ < 1 := hu.1
+    have hne : ∀ c : ℂ, 1 ≤ ‖c‖ → u - c ≠ 0 := fun c hc h => by
+      rw [sub_eq_zero] at h; rw [h] at h1; linarith
+    refine ⟨hu0, hne 1 (by simp), hne a hnorma.ge, fun h => ?_⟩
+    have := hu.2.1
+    rw [h] at this; norm_num at this
+  have hsol : IsHeunSolOn a (α * β * b) α β g g (heunEps α β g g) G (D \ {0}) := by
+    rw [hε]
+    refine isLinearODE2On_comp («φ» := ψ) (φ₁ := fun u => 3 * c * (1 - c * u) ^ 2)
+      (φ₂ := fun u => -6 * c ^ 2 * (1 - c * u))
+      (hDopen.sdiff isClosed_singleton) (fun u _ => ?_) (fun u _ => ?_) (fun u hu => ?_)
+      (fun u hu => ?_) (fun u hu => ?_) hFsol
+    · show HasDerivAt (fun x : ℂ => 1 - (1 - c * x) ^ 3) (3 * c * (1 - c * u) ^ 2) u
+      have h := ((((hasDerivAt_id u).const_mul c).const_sub (1 : ℂ)).pow 3).const_sub (1 : ℂ)
+      exact h.congr_deriv (by simp; ring)
+    · show HasDerivAt (fun x : ℂ => 3 * c * (1 - c * x) ^ 2) (-6 * c ^ 2 * (1 - c * u)) u
+      have h := ((((hasDerivAt_id u).const_mul c).const_sub (1 : ℂ)).pow 2).const_mul (3 * c)
+      exact h.congr_deriv (by simp; ring)
+    · obtain ⟨h0, h1', ha', -⟩ := hfacts u hu
+      refine ⟨mem_ball_zero_iff.2 hu.1.2.1, ?_⟩
+      simp only [mem_singleton_iff]
+      rw [hψfac]
+      exact mul_ne_zero (pow_ne_zero _ hc0) (mul_ne_zero (mul_ne_zero h0 h1') ha')
+    · obtain ⟨h0, h1', ha', hw⟩ := hfacts u hu
+      have hP : heunCoeffP a g g g u = g * (3 * c * (1 - c * u) ^ 2) / ψ u := by
+        rw [hψfac, show 3 * c * (1 - c * u) ^ 2 =
+          c ^ 3 * (3 * u ^ 2 - 2 * (1 + a) * u + a) by
+            linear_combination (2 * c ^ 2 * u) * h1 - c * h2]
+        simp only [heunCoeffP]
+        field_simp
+        ring
+      have hψ0 : ψ u ≠ 0 := by
+        rw [hψfac]
+        exact mul_ne_zero (pow_ne_zero _ hc0) (mul_ne_zero (mul_ne_zero h0 h1') ha')
+      rw [hP]
+      simp only [hψ] at hψ0 ⊢
+      simp only [heunCoeffP, hg]
+      have hw3 : 1 - (1 - c * u) ^ 3 - 1 ≠ 0 := by
+        rw [show 1 - (1 - c * u) ^ 3 - 1 = -((1 - c * u) ^ 3) by ring]
+        exact neg_ne_zero.2 (pow_ne_zero _ hw)
+      rw [sub_zero]
+      field_simp
+      ring
+    · obtain ⟨h0, h1', ha', hw⟩ := hfacts u hu
+      have hψ0 : ψ u ≠ 0 := by
+        rw [hψfac]
+        exact mul_ne_zero (pow_ne_zero _ hc0) (mul_ne_zero (mul_ne_zero h0 h1') ha')
+      have hR : heunCoeffR a (α * β * b) α β u = -(α * β * c ^ 2 * (1 - c * u)) / ψ u := by
+        rw [hψfac]
+        simp only [heunCoeffR, hq]
+        field_simp
+        ring
+      rw [hR]
+      simp only [hψ] at hψ0 ⊢
+      simp only [heunCoeffR]
+      have hw3 : 1 - (1 - c * u) ^ 3 - 1 ≠ 0 := by
+        rw [show 1 - (1 - c * u) ^ 3 - 1 = -((1 - c * u) ^ 3) by ring]
+        exact neg_ne_zero.2 (pow_ne_zero _ hw)
+      rw [sub_zero]
+      field_simp
+      ring
+  have hev := eventuallyEq_heunLocal_of_analyticAt ha0 hγ (hDopen.mem_nhds h0D)
+    (hGa 0 h0D) hsol
+  have hG0 : G 0 = 1 := by simp [hG, hψ, hF, ordinaryHypergeometric_zero]
+  rw [hG0] at hev
+  have hev' : heunLocal a (α * β * b) α β g g =ᶠ[𝓝 0] G := by
+    filter_upwards [hev] with u hu
+    rw [hu, one_mul]
+  exact hHl.eqOn_of_preconnected_of_eventuallyEq hGa hDconn h0D hev' ⟨hz, hz', hph⟩
 
 /-! ### Expansions in series of hypergeometric functions (§31.11) -/
 

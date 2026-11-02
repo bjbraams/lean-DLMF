@@ -107,7 +107,8 @@ theorem signed_integrable {f : ℝ → ℂ} (hf : Continuous f) {x : ℝ} (hx : 
 theorem integral_signed {f : ℝ → ℂ} (hf : Continuous f) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
     (∫ t : ℝ in (-1)..1, signKernel x t*f t) =
       (∫ t : ℝ in (-1)..x, f t) - ∫ t : ℝ in x..1, f t := by
-  rw [← intervalIntegral.integral_add_adjacent_intervals (signed_integrable hf hx).1 (signed_integrable hf hx).2]
+  rw [← intervalIntegral.integral_add_adjacent_intervals (signed_integrable hf hx).1
+      (signed_integrable hf hx).2]
   have hL : (∫ t : ℝ in (-1)..x, signKernel x t*f t) = ∫ t : ℝ in (-1)..x, f t := by
     apply intervalIntegral.integral_congr_uIoo
     intro t ht
@@ -163,8 +164,10 @@ theorem integral_signed_legendre (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
   have hc : Continuous (fun t : ℝ => legendrePolyP (n+1) t) :=
     (LegendreAddition.diff_jet (n+1) 0).continuous.comp continuous_ofReal
   rw [integral_signed hc hx,
-    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hasDerivAt_primitive n t) (hc.intervalIntegrable _ _),
-    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hasDerivAt_primitive n t) (hc.intervalIntegrable _ _),
+    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hasDerivAt_primitive n t)
+        (hc.intervalIntegrable _ _),
+    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hasDerivAt_primitive n t)
+        (hc.intervalIntegrable _ _),
     (primitive_endpoints n).1, (primitive_endpoints n).2, primitive]
   ring
 
@@ -210,7 +213,8 @@ theorem singular_integral (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
         ← intervalIntegral.integral_const_mul,
         ← intervalIntegral.integral_add ((hI (n+1)).const_mul _) hS,
         ← intervalIntegral.integral_const_mul,
-        ← intervalIntegral.integral_sub (((hI (n+1)).const_mul _ |>.add hS).const_mul _) ((hI n).const_mul _)]
+        ← intervalIntegral.integral_sub (((hI (n+1)).const_mul _ |>.add hS).const_mul _)
+            ((hI n).const_mul _)]
       apply intervalIntegral.integral_congr
       intro t _
       exact dq_recurrence n x t

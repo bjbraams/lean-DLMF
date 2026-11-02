@@ -33,7 +33,8 @@ open scoped Real Topology
 namespace DLMF.Airy
 
 /-- A big-O relation on `airySector α` gives an explicit radius beyond which the bound holds. -/
-theorem airyErr_bound_of_isBigO {α : ℝ} {E F : Type*} [Norm E] [SeminormedAddCommGroup F] {f : ℂ → E} {g : ℂ → F}
+theorem airyErr_bound_of_isBigO {α : ℝ} {E F : Type*} [Norm E] [SeminormedAddCommGroup F]
+    {f : ℂ → E} {g : ℂ → F}
     (h : f =O[airySector α] g) :
     ∃ C R : ℝ, 0 ≤ C ∧ ∀ z : ℂ, R ≤ ‖z‖ → z ≠ 0 → |arg z| ≤ α → ‖f z‖ ≤ C * ‖g z‖ := by
   obtain ⟨C, hC0, hC⟩ := h.exists_nonneg
@@ -174,7 +175,8 @@ theorem airyErr_far_pos : ∃ R B : ℝ, ∀ x : ℝ, R ≤ x →
     · exact le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hx
     · exact le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hx
     · exact le_trans (le_trans (le_max_left _ _) (le_trans (le_max_left _ _) (le_max_right _ _))) hx
-    · exact le_trans (le_trans (le_max_right _ _) (le_trans (le_max_left _ _) (le_max_right _ _))) hx
+    · exact le_trans (le_trans (le_max_right _ _)
+          (le_trans (le_max_left _ _) (le_max_right _ _))) hx
   have ha : |arg (x : ℂ)| ≤ π - π / 2 := by rw [hza, abs_zero]; linarith
   have hb : |arg (x : ℂ)| ≤ π / 3 - π / 6 := by rw [hza, abs_zero]; linarith
   have e1 := hb1 x (hR _ (by tauto)) hz0 ha
@@ -220,7 +222,8 @@ theorem airyErr_far_neg : ∃ R B : ℝ, ∀ x : ℝ, R ≤ x →
     · exact le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hx
     · exact le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hx
     · exact le_trans (le_trans (le_max_left _ _) (le_trans (le_max_left _ _) (le_max_right _ _))) hx
-    · exact le_trans (le_trans (le_max_right _ _) (le_trans (le_max_left _ _) (le_max_right _ _))) hx
+    · exact le_trans (le_trans (le_max_right _ _)
+          (le_trans (le_max_left _ _) (le_max_right _ _))) hx
   have ha : |arg (x : ℂ)| ≤ 2 * π / 3 - π / 3 := by rw [hza, abs_zero]; linarith
   have e1 := (hb1 x (hR _ (by tauto)) hz0 ha).trans
     (mul_le_mul_of_nonneg_left (airyErr_oscError_le .ai hx2) hC1)
@@ -276,7 +279,8 @@ theorem airyErr_norm_pref_ai (w : ℂ) :
 
 /-- The norm of the `Ai'` prefactor. -/
 theorem airyErr_norm_pref_aiDeriv (w : ℂ) :
-    ‖airyPrefactor .aiDeriv w‖ = ‖w‖ ^ (1 / 4 : ℝ) * ‖exp (-airyZetaComplex w)‖ / (2 * Real.sqrt π) := by
+    ‖airyPrefactor .aiDeriv w‖ = ‖w‖ ^ (1 / 4 : ℝ) * ‖exp (-airyZetaComplex w)‖ /
+        (2 * Real.sqrt π) := by
   rw [airyPrefactor, norm_div, norm_mul, norm_neg, norm_mul, airyErr_norm_quarter,
     Complex.norm_ofNat, Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
@@ -424,7 +428,8 @@ theorem airyErr_far_sector : ∃ R B : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → z ≠
 
 /-- The imaginary part of `2ζ`. -/
 theorem airyErr_im_two_zeta {z : ℂ} (hz : z ≠ 0) :
-    (2 * airyZetaComplex z).im = Real.exp (log 2 + airyLogZeta z).re * Real.sin (3 / 2 * arg z) := by
+    (2 * airyZetaComplex z).im = Real.exp (log 2 + airyLogZeta z).re *
+        Real.sin (3 / 2 * arg z) := by
   rw [← exp_log_two_add_airyLogZeta hz, Complex.exp_im, im_log_two_add_airyLogZeta]
 
 /-- `|ζ(z)| = (2/3)|z|^{3/2}`. -/

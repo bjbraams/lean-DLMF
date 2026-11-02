@@ -32,11 +32,11 @@ are in `DLMF.BernoulliEuler.Basic.RelatedNumbers`.
 ## Implementation notes
 
 DLMF's `S(n, m)` (§26.8) is Mathlib's `Nat.stirlingSecond`; DLMF's signed
-`s(n, m) = (-1)^{n-m} |s(n, m)|` is written with Mathlib's unsigned `Nat.stirlingFirst`. The congruences 24.15.9, 24.15.10 between rationals are
-stated with the `p`-adic norm: `a ≡ b (mod pᵏ)` means `padicNorm p (a - b) ≤ p^{-k}`, i.e.
-`a - b ∈ pᵏ ℤ_(p)`. Fibonacci numbers `uₙ` are Mathlib's `Nat.fib`. In 24.15.11 the term
-`(n/6) v_{n-1}` has the factor `n`, so the value of `v_{n-1}` at `n = 0` is immaterial (natural
-subtraction); `1/2^{n-1}` in 24.15.12 is `2/2ⁿ`.
+`s(n, m) = (-1)^{n-m} |s(n, m)|` is written with Mathlib's unsigned `Nat.stirlingFirst`. The
+congruences 24.15.9, 24.15.10 between rationals are stated with the `p`-adic norm: `a ≡ b (mod pᵏ)`
+means `padicNorm p (a - b) ≤ p^{-k}`, i.e. `a - b ∈ pᵏ ℤ_(p)`. Fibonacci numbers `uₙ` are Mathlib's
+`Nat.fib`. In 24.15.11 the term `(n/6) v_{n-1}` has the factor `n`, so the value of `v_{n-1}` at
+`n = 0` is immaterial (natural subtraction); `1/2^{n-1}` in 24.15.12 is `2/2ⁿ`.
 
 24.15.6 and 24.15.8 are proved with the umbral functional `Xⁿ ↦ Bₙ` (`umbralBernoulliRat`)
 applied to the expansion of `Xⁿ` in falling factorials (Stirling numbers of the second kind,
@@ -66,10 +66,12 @@ section Umbral
 open Polynomial
 
 /-- The umbral functional `L(Xⁿ) = Bₙ` on `ℚ[X]`. -/
-def umbralBernoulliRat : ℚ[X] →ₗ[ℚ] ℚ := Polynomial.lsum fun i => (_root_.bernoulli i) • LinearMap.id
+def umbralBernoulliRat : ℚ[X] →ₗ[ℚ] ℚ := Polynomial.lsum fun i =>
+    (_root_.bernoulli i) • LinearMap.id
 
 /-- `L` on monomials. -/
-private lemma umbralBernoulliRat_monomial (n : ℕ) (a : ℚ) : umbralBernoulliRat (monomial n a) = a * _root_.bernoulli n := by
+private lemma umbralBernoulliRat_monomial (n : ℕ) (a : ℚ) : umbralBernoulliRat (monomial n a) = a *
+    _root_.bernoulli n := by
   simp [umbralBernoulliRat]; ring
 
 /-- `L(p(X+1)) - L(p) = p'(0)`. -/
@@ -84,7 +86,8 @@ private lemma umbralBernoulliRat_comp_add_one_sub (p : ℚ[X]) :
       refine sum_congr rfl fun k _ => ?_
       rw [one_pow, mul_one, ← C_mul_X_pow_eq_monomial, map_mul, ← C_eq_natCast]; ring
     rw [h1, map_sum, sum_range_succ]
-    simp only [umbralBernoulliRat_monomial, Nat.choose_self, Nat.cast_one, mul_one, add_sub_cancel_right]
+    simp only [umbralBernoulliRat_monomial, Nat.choose_self, Nat.cast_one, mul_one,
+        add_sub_cancel_right]
     have h2 := _root_.sum_bernoulli n
     rw [show ∑ k ∈ range n, a * (n.choose k : ℚ) * _root_.bernoulli k =
       a * ∑ k ∈ range n, (n.choose k : ℚ) * _root_.bernoulli k by rw [mul_sum]; ring_nf, h2]
@@ -123,7 +126,8 @@ private lemma umbralBernoulliRat_descPochhammer (k : ℕ) :
 private lemma bernoulli_eq_sum_factorial_stirlingSecond (n : ℕ) :
     _root_.bernoulli n = ∑ k ∈ range (n + 1),
       (-1) ^ k * (k ! * Nat.stirlingSecond n k : ℚ) / (k + 1) := by
-  have h := congrArg umbralBernoulliRat (DLMF.Combinatorics.X_pow_eq_sum_stirlingSecond_mul_descPochhammer ℚ n)
+  have h := congrArg umbralBernoulliRat
+      (DLMF.Combinatorics.X_pow_eq_sum_stirlingSecond_mul_descPochhammer ℚ n)
   rw [← monomial_one_right_eq_X_pow, umbralBernoulliRat_monomial, one_mul, map_sum] at h
   rw [h]
   refine sum_congr rfl fun k _ => ?_
@@ -446,7 +450,8 @@ theorem sum_choose_bernoulli_fib (n : ℕ) :
     intro k
     simp only [hg, pow_mul, ha, div_pow, hs]; norm_num
   simp_rw [hL]
-  have key := sum_range_half_eq_of_odd_eq_zero (m + 1) (fun j => if j = 1 then 0 else g j) (fun j hj => by
+  have key := sum_range_half_eq_of_odd_eq_zero (m + 1) (fun j => if j = 1 then 0 else g j)
+      (fun j hj => by
     by_cases h1 : j = 1
     · simp [h1]
     · simp only [h1, ite_false, hg]
@@ -469,7 +474,8 @@ theorem sum_choose_bernoulli_fib (n : ℕ) :
   rw [hsplit]
   have hsum : ∑ j ∈ range (m + 1 + 1), g j = (a ^ (m + 1) * (bernoulliPolyB (m + 1) (P / a) -
       bernoulliPolyB (m + 1) (Q / a))) / s := by
-    rw [mul_sub, ← sum_choose_pow_mul_bernoulli_eq_bernoulliPolyB _ ha0, ← sum_choose_pow_mul_bernoulli_eq_bernoulliPolyB _ ha0,
+    rw [mul_sub, ← sum_choose_pow_mul_bernoulli_eq_bernoulliPolyB _ ha0,
+        ← sum_choose_pow_mul_bernoulli_eq_bernoulliPolyB _ ha0,
       ← sum_sub_distrib, sum_div]
     refine sum_congr rfl fun j _ => ?_
     simp only [hg]; ring
@@ -511,14 +517,16 @@ theorem sum_choose_eulerNumber_lucas (n : ℕ) :
   have hs := sqrtFive_sq
   have hs0 := sqrtFive_ne_zero
   have key := sum_range_half_eq_of_odd_eq_zero n (fun j => (n.choose j : ℂ) * (sqrtFive / 2) ^ j *
-    eulerNumber j * (((1 + sqrtFive) / 2) ^ (n - j) + ((1 - sqrtFive) / 2) ^ (n - j))) (fun j hj => by
+    eulerNumber j * (((1 + sqrtFive) / 2) ^ (n - j) + ((1 - sqrtFive) / 2) ^ (n - j)))
+        (fun j hj => by
       simp [eulerNumber_eq_zero_of_odd hj])
   have hL : ∀ k, (n.choose (2 * k) : ℂ) * (5 / 4) ^ k * (eulerNumber (2 * k) : ℂ) *
       (lucasNumber (n - 2 * k) : ℂ) = (n.choose (2 * k) : ℂ) * (sqrtFive / 2) ^ (2 * k) *
       eulerNumber (2 * k) *
         (((1 + sqrtFive) / 2) ^ (n - 2 * k) + ((1 - sqrtFive) / 2) ^ (n - 2 * k)) := by
     intro k
-    rw [lucasNumber_eq_binet, pow_mul, show (sqrtFive / 2) ^ 2 = 5 / 4 by rw [div_pow, hs]; norm_num]
+    rw [lucasNumber_eq_binet, pow_mul, show (sqrtFive / 2) ^ 2 = 5 /
+        4 by rw [div_pow, hs]; norm_num]
   simp_rw [hL]
   rw [key]
   simp_rw [mul_add, sum_add_distrib]

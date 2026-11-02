@@ -157,7 +157,8 @@ theorem Real.jacobiDnm_eq_iff (hm0 : 0 < m) (hm : m < 1) {x ζ : ℝ} (hx0 : √
   set s0 := √((1 - x ^ 2) / m) with hs0
   have hs0sq : s0 ^ 2 = (1 - x ^ 2) / m := Real.sq_sqrt hq0
   have hs1 : s0 ≤ 1 := Real.sqrt_le_one.mpr hq1
-  have hsn : sin (arcsin s0) = s0 := Real.sin_arcsin (by linarith [Real.sqrt_nonneg ((1 - x ^ 2) / m)]) hs1
+  have hsn : sin (arcsin s0) = s0 :=
+      Real.sin_arcsin (by linarith [Real.sqrt_nonneg ((1 - x ^ 2) / m)]) hs1
   have key : ∀ (n : ℤ) (σ : ℝ), (σ = 1 ∨ σ = -1) →
       σ * Real.jacobiArcdnm x m + 2 * n * Real.compEllIntKm m =
       Real.incEllIntFm (σ * arcsin s0 + n * π) m := by
@@ -254,9 +255,11 @@ private lemma integral_comp_strictAntiOn_eq {f f' g h : ℝ → ℝ} {a b : ℝ}
   rw [hc.image_Ioo_of_strictAntiOn hab ha] at hcv
   rw [intervalIntegral.integral_of_le hfab, integral_Ioc_eq_integral_Ioo, hcv,
     intervalIntegral.integral_of_le hab, integral_Ioc_eq_integral_Ioo]
-  exact setIntegral_congr_fun measurableSet_Ioo fun θ hθ => by simp only [smul_eq_mul]; exact hg θ hθ
+  exact setIntegral_congr_fun measurableSet_Ioo fun θ hθ =>
+      by simp only [smul_eq_mul]; exact hg θ hθ
 
-/-- DLMF 22.15.13: `arccn(x, k) = ∫ₓ¹ dt/√((1 - t²)(k'² + k²t²))` for `-1 ≤ x ≤ 1` (substitution `t = cos θ`). -/
+/-- DLMF 22.15.13: `arccn(x, k) = ∫ₓ¹ dt/√((1 - t²)(k'² + k²t²))` for `-1 ≤ x ≤ 1` (substitution
+`t = cos θ`). -/
 @[dlmf 22.15.E13 "special case: real parameter m = k² < 1"]
 theorem Real.jacobiArccnm_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
     Real.jacobiArccnm x m = ∫ t in x..1, 1 / √((1 - t ^ 2) * ((1 - m) + m * t ^ 2)) := by
@@ -278,7 +281,8 @@ theorem Real.jacobiArccnm_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (h
       Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq hs.le, Real.rpow_neg hp.le, ← Real.sqrt_eq_rpow]
     field_simp
 
-/-- DLMF 22.15.14: `arcdn(x, k) = ∫ₓ¹ dt/√((1 - t²)(t² - k'²))` for `k' ≤ x ≤ 1` (substitution `t = dn`). -/
+/-- DLMF 22.15.14: `arcdn(x, k) = ∫ₓ¹ dt/√((1 - t²)(t² - k'²))` for `k' ≤ x ≤ 1` (substitution
+`t = dn`). -/
 @[dlmf 22.15.E14 "special case: real parameter 0 < m = k² < 1"]
 theorem Real.jacobiArcdnm_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 : √(1 - m) ≤ x)
     (hx1 : x ≤ 1) :
@@ -300,8 +304,10 @@ theorem Real.jacobiArcdnm_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 
   have hpos := fun θ => one_sub_mul_sin_sq_pos hm θ
   have hanti : StrictAntiOn (fun θ => √(1 - m * sin θ ^ 2)) (Set.Icc 0 b) := by
     intro u hu v hv huv
-    have hsu : 0 ≤ sin u := Real.sin_nonneg_of_nonneg_of_le_pi hu.1 (by linarith [hu.2, Real.pi_pos])
-    have hsuv : sin u < sin v := Real.strictMonoOn_sin ⟨by linarith [hu.1, Real.pi_pos], by linarith [hu.2]⟩
+    have hsu : 0 ≤ sin u :=
+        Real.sin_nonneg_of_nonneg_of_le_pi hu.1 (by linarith [hu.2, Real.pi_pos])
+    have hsuv : sin u < sin v :=
+        Real.strictMonoOn_sin ⟨by linarith [hu.1, Real.pi_pos], by linarith [hu.2]⟩
       ⟨by linarith [hv.1, Real.pi_pos], by linarith [hv.2]⟩ huv
     apply Real.sqrt_lt_sqrt (hpos v).le
     have h2 : sin u ^ 2 < sin v ^ 2 := pow_lt_pow_left₀ hsuv hsu (by norm_num)
@@ -320,7 +326,8 @@ theorem Real.jacobiArcdnm_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 
     convert hd.sqrt (hpos θ).ne' using 1
     simp; ring
   · have hs : 0 < sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
-    have hc : 0 < cos θ := Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], by linarith [hθ.2]⟩
+    have hc : 0 < cos θ :=
+        Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], by linarith [hθ.2]⟩
     have hp := hpos θ
     have hsq : 0 < √(1 - m * sin θ ^ 2) := Real.sqrt_pos.mpr hp
     rw [Real.sq_sqrt hp.le,
@@ -333,7 +340,8 @@ theorem Real.jacobiArcdnm_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 
 open Set in
 /-- `∫_{t₀}^{f φ} g = F(φ|m)` for an increasing substitution `t = f θ` with `f 0 = t₀` and
 `f' · g ∘ f = (1 - m sin²)^{-1/2}`. -/
-private lemma integral_eq_incEllIntFm_of_subst {m : ℝ} {f f' g : ℝ → ℝ} {a b φ : ℝ} (ha : a ≤ 0) (hb : 0 ≤ b)
+private lemma integral_eq_incEllIntFm_of_subst {m : ℝ} {f f' g : ℝ → ℝ} {a b φ : ℝ}
+    (ha : a ≤ 0) (hb : 0 ≤ b)
     (hφ : φ ∈ Icc a b) (hc : ContinuousOn f (Icc a b))
     (hd : ∀ θ ∈ Ioo a b, HasDerivAt f (f' θ) θ) (hpos : ∀ θ ∈ Ioo a b, 0 < f' θ)
     {t0 : ℝ} (f0 : f 0 = t0)
@@ -357,7 +365,8 @@ private lemma integral_eq_incEllIntFm_of_subst {m : ℝ} {f f' g : ℝ → ℝ} 
     rw [f0] at this
     rw [intervalIntegral.integral_symm, this, ← intervalIntegral.integral_symm]
 
-/-- DLMF 22.15.15: `arccd` inverts `cd`: `cd(arccd(x,k), k) = x` for `-1 ≤ x ≤ 1` (substitution `t = cos θ`). -/
+/-- DLMF 22.15.15: `arccd` inverts `cd`: `cd(arccd(x,k), k) = x` for `-1 ≤ x ≤ 1` (substitution
+`t = cos θ`). -/
 @[dlmf 22.15.E15 "special case: real parameter m = k² < 1"]
 theorem Real.jacobiCdm_jacobiArccdm (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
     Real.jacobiCnm (Real.jacobiArccdm x m) m / Real.jacobiDnm (Real.jacobiArccdm x m) m = x := by
@@ -418,7 +427,8 @@ theorem Real.jacobiSdm_jacobiArcsdm (hm : m < 1) {x : ℝ} (hx : |x| ≤ 1 / √
     rw [hsinφ, hy2, show 1 - m * (x ^ 2 / (1 + m * x ^ 2)) = 1 / (1 + m * x ^ 2) by
       field_simp; ring, Real.sqrt_div' _ hD.le, Real.sqrt_one, hy, div_div_eq_mul_div, div_one,
       div_mul_cancel₀ x hsD.ne']
-  have key := integral_eq_incEllIntFm_of_subst (m := m) (t0 := 0) (f := fun θ => sin θ / √(1 - m * sin θ ^ 2))
+  have key := integral_eq_incEllIntFm_of_subst (m := m) (t0 := 0)
+      (f := fun θ => sin θ / √(1 - m * sin θ ^ 2))
     (f' := fun θ => cos θ / √(1 - m * sin θ ^ 2) ^ 3)
     (g := fun t => 1 / √((1 - (1 - m) * t ^ 2) * (1 + m * t ^ 2)))
     (a := -(π / 2)) (b := π / 2) (φ := φ) (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])
@@ -459,7 +469,8 @@ open Set in
 private lemma integral_one_div_subst {g h : ℝ → ℝ} {x : ℝ} (hx : 1 ≤ x)
     (hg : ∀ t ∈ Ioo 1 x, 1 / t ^ 2 * g (1 / t) = h t) :
     ∫ s in (1 / x)..1, g s = ∫ t in (1 : ℝ)..x, h t := by
-  have h := integral_comp_strictAntiOn_eq (f := fun t : ℝ => 1 / t) (f' := fun t => -(1 / t ^ 2)) (g := g)
+  have h := integral_comp_strictAntiOn_eq (f := fun t : ℝ => 1 / t)
+      (f' := fun t => -(1 / t ^ 2)) (g := g)
     (h := h) hx ?_ ?_ ?_ ?_
   · simpa using h
   · exact continuousOn_const.div continuousOn_id fun t ht => by linarith [ht.1]
@@ -608,7 +619,8 @@ theorem Real.jacobiNsm_jacobiArcnsm (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
     have hs1 : s < 1 := lt_of_lt_of_le hs.2 hy1
     have h1 : 0 < 1 - s ^ 2 := by nlinarith
     have h2 : 0 < 1 - m * s ^ 2 := by nlinarith
-    have e : ((1 / s) ^ 2 - 1) * ((1 / s) ^ 2 - m) = ((1 - s ^ 2) * (1 - m * s ^ 2)) / (s ^ 2) ^ 2 := by
+    have e : ((1 / s) ^ 2 - 1) * ((1 / s) ^ 2 - m) = ((1 - s ^ 2) * (1 - m * s ^ 2)) /
+        (s ^ 2) ^ 2 := by
       field_simp; try ring
     rw [e, Real.sqrt_div' _ (by positivity), Real.sqrt_sq (by positivity)]
     have := Real.sqrt_pos.mpr (mul_pos h1 h2)
@@ -652,10 +664,12 @@ theorem Real.jacobiDsm_jacobiArcdsm (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx : �
 theorem Real.jacobiScm_jacobiArcscm (hm : m < 1) (x : ℝ) :
     Real.jacobiSnm (Real.jacobiArcscm x m) m / Real.jacobiCnm (Real.jacobiArcscm x m) m = x := by
   set φ := arctan x with hφ
-  have hb : |φ| < π / 2 := by rw [abs_lt]; exact ⟨Real.neg_pi_div_two_lt_arctan x, Real.arctan_lt_pi_div_two x⟩
+  have hb : |φ| < π / 2 := by rw [abs_lt];
+                              exact ⟨Real.neg_pi_div_two_lt_arctan x, Real.arctan_lt_pi_div_two x⟩
   have hcos : ∀ θ ∈ Set.Icc (-|φ|) |φ|, 0 < cos θ := fun θ hθ =>
     Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1], by linarith [hθ.2]⟩
-  have key := integral_eq_incEllIntFm_of_subst (m := m) (t0 := 0) (f := tan) (f' := fun θ => 1 / cos θ ^ 2)
+  have key := integral_eq_incEllIntFm_of_subst (m := m) (t0 := 0) (f := tan)
+      (f' := fun θ => 1 / cos θ ^ 2)
     (g := fun t => 1 / √((1 + t ^ 2) * (1 + (1 - m) * t ^ 2)))
     (a := -|φ|) (b := |φ|) (φ := φ) (by simp) (abs_nonneg _) ⟨neg_abs_le φ, le_abs_self φ⟩
     (fun θ hθ => (Real.continuousAt_tan.mpr (hcos θ hθ).ne').continuousWithinAt)

@@ -43,7 +43,8 @@ theorem pcfU_half_zero_ne_one  :
   rw [← he] at hs2
   linarith
 
-/-- Counterexample to the printed formula, using only the pre-existing cylinder and error-function theory. -/
+/-- Counterexample to the printed formula, using only the pre-existing cylinder and error-function
+theory. -/
 theorem dlmf_12_13_6_counterexample  :
     pcfU (1/2) 0 ≠ exp (-(0:ℂ)^2/2)*erfc (0/Real.sqrt 2)*pcfU (-1/2) (I*0) := by
   simpa [erfc,erf_zero,pcfU_neg_half] using pcfU_half_zero_ne_one

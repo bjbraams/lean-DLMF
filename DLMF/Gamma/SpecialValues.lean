@@ -181,8 +181,8 @@ theorem deriv_Gamma_one : deriv Complex.Gamma 1 = -Real.eulerMascheroniConstant 
 
 /-- DLMF 5.4.12: `ψ'(1) = π²/6`. -/
 @[dlmf 5.4.E12]
-theorem trigamma_one : Real.trigamma 1 = π ^ 2 / 6 := by
-  rw [Real.trigamma_eq_tsum (by positivity : (0 : ℝ) < 1)]
+theorem trigamma_one : Gamma.Real.trigamma 1 = π ^ 2 / 6 := by
+  rw [Gamma.Real.trigamma_eq_tsum (by positivity : (0 : ℝ) < 1)]
   have hshift : HasSum (fun n : ℕ => (1 : ℝ) / ((n + 1 : ℝ) ^ 2)) (π ^ 2 / 6) := by
     have hiff :=
       hasSum_nat_add_iff' (f := fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2) (g := π ^ 2 / 6) 1
@@ -192,8 +192,8 @@ theorem trigamma_one : Real.trigamma 1 = π ^ 2 / 6 := by
 
 /-- DLMF 5.4.13: `ψ'(1/2) = π²/2`. -/
 @[dlmf 5.4.E13]
-theorem trigamma_one_div_two : Real.trigamma (1 / 2) = π ^ 2 / 2 := by
-  rw [Real.trigamma_eq_tsum (by positivity : (0 : ℝ) < 1 / 2)]
+theorem trigamma_one_div_two : Gamma.Real.trigamma (1 / 2) = π ^ 2 / 2 := by
+  rw [Gamma.Real.trigamma_eq_tsum (by positivity : (0 : ℝ) < 1 / 2)]
   set f : ℕ → ℝ := fun n => (1 : ℝ) / (n : ℝ) ^ 2 with hf
   have hall : HasSum f (π ^ 2 / 6) := hasSum_zeta_two
   have heven : HasSum (fun k : ℕ => f (2 * k)) (π ^ 2 / 24) := by
@@ -224,11 +224,11 @@ theorem trigamma_one_div_two : Real.trigamma (1 / 2) = π ^ 2 / 2 := by
 /-- DLMF 5.4.15: `ψ(n + 1/2) = -γ - 2 ln 2 + 2 ∑_{k<n} 1/(2k + 1)`. -/
 @[dlmf 5.4.E15]
 theorem digamma_nat_add_half (n : ℕ) :
-    Real.digamma (n + 1 / 2) =
+    Gamma.Real.digamma (n + 1 / 2) =
       -Real.eulerMascheroniConstant - 2 * Real.log 2 +
         2 * ∑ k ∈ Finset.range n, (1 / (2 * (k : ℝ) + 1)) := by
-  have h := Real.digamma_add_nat (by norm_num : (0 : ℝ) < 1 / 2) n
-  rw [add_comm (1 / 2 : ℝ), Real.digamma_one_div_two] at h
+  have h := Gamma.Real.digamma_add_nat (by norm_num : (0 : ℝ) < 1 / 2) n
+  rw [add_comm (1 / 2 : ℝ), Gamma.Real.digamma_one_div_two] at h
   rw [h, Finset.mul_sum]
   congr 1
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -556,7 +556,7 @@ theorem tendsto_harmonic_sub_harmonic_mul {q : ℕ} (hq : 0 < q) :
 /-- Complex form of Gauss's digamma theorem:
 `ψ(p/q) + γ = -log q + ∑_{k=1}^{q-1} ω^{-kp} log(1 - ωᵏ)`, `ω = e^{2πi/q}`. -/
 theorem digamma_rat_complex (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
-    ((Real.digamma (p / q) + Real.eulerMascheroniConstant : ℝ) : ℂ) =
+    ((Gamma.Real.digamma (p / q) + Real.eulerMascheroniConstant : ℝ) : ℂ) =
       -(Real.log q : ℂ) + ∑ k ∈ Icc 1 (q - 1),
         gaussRoot q ^ (k * (q - p)) * Complex.log (1 - gaussRoot q ^ k) := by
   have hq : 0 < q := by omega
@@ -568,11 +568,13 @@ theorem digamma_rat_complex (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
   let S : ℕ → ℕ → ℂ := fun k M => ∑ m ∈ range M, (ω ^ k) ^ (m + 1) / ((m : ℂ) + 1)
   have hI : Icc 1 (q - 1) = Ico 1 q := by ext k; simp; omega
   -- the partial sums
-  let T : ℕ → ℂ := fun N => ((∑ n ∈ range N, Real.digammaSeriesTerm x n : ℝ) : ℂ)
-  have hT1 : Tendsto T atTop (𝓝 ((Real.digamma x + Real.eulerMascheroniConstant : ℝ) : ℂ)) := by
-    have hs := (Real.summable_digammaSeriesTerm hx).hasSum.tendsto_sum_nat
-    have : Real.digamma x + Real.eulerMascheroniConstant = ∑' n, Real.digammaSeriesTerm x n := by
-      rw [Real.digamma_eq_tsum hx]; ring
+  let T : ℕ → ℂ := fun N => ((∑ n ∈ range N, Gamma.Real.digammaSeriesTerm x n : ℝ) : ℂ)
+  have hT1 : Tendsto T atTop
+      (𝓝 ((Gamma.Real.digamma x + Real.eulerMascheroniConstant : ℝ) : ℂ)) := by
+    have hs := (Gamma.Real.summable_digammaSeriesTerm hx).hasSum.tendsto_sum_nat
+    have : Gamma.Real.digamma x + Real.eulerMascheroniConstant = ∑' n,
+        Gamma.Real.digammaSeriesTerm x n := by
+      rw [Gamma.Real.digamma_eq_tsum hx]; ring
     rw [this]
     exact (Complex.continuous_ofReal.tendsto _).comp hs
   have hTeq : ∀ N, T N = ((harmonic N : ℝ) - harmonic (q * N) : ℝ) -
@@ -590,7 +592,7 @@ theorem digamma_rat_complex (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
         rw [add_comm 1 k]
     have key : T N = ((harmonic N : ℝ) : ℂ) - ∑ n ∈ range N, (q : ℂ) / (q * n + p) := by
       simp only [T]
-      push_cast [Real.digammaSeriesTerm, harmonic]
+      push_cast [Gamma.Real.digammaSeriesTerm, harmonic]
       rw [← sum_sub_distrib]
       refine sum_congr rfl fun n _ => ?_
       simp only [hxdef]
@@ -668,7 +670,7 @@ theorem log_one_sub_gaussRoot_pow_re (q k : ℕ) :
 ∑_{k=1}^{q-1} cos(2πkp/q) ln(2 - 2 cos(2πk/q))` for `0 < p < q`. -/
 @[dlmf 5.4.E19]
 theorem digamma_rat (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
-    Real.digamma (p / q) =
+    Gamma.Real.digamma (p / q) =
       -Real.eulerMascheroniConstant - Real.log q -
         π / 2 * Real.cot (π * p / q) +
         (1 / 2) * ∑ k ∈ Finset.Icc 1 (q - 1),
@@ -686,7 +688,7 @@ theorem digamma_rat (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
   simp_rw [← add_mul, gaussRoot_pow_add_pow hq hpq.le] at hsum
   simp only [Complex.add_re, Complex.ofReal_re, Complex.neg_re, Complex.re_sum,
     Complex.re_ofReal_mul, log_one_sub_gaussRoot_pow_re] at hsum
-  have hrefl := Real.digamma_one_sub (x := p / q) (div_pos (by exact_mod_cast hp) hq0)
+  have hrefl := Gamma.Real.digamma_one_sub (x := p / q) (div_pos (by exact_mod_cast hp) hq0)
     ((div_lt_one hq0).mpr (by exact_mod_cast hpq))
   have hcot : π * (p / q : ℝ) = π * p / q := by ring
   rw [hcot] at hrefl

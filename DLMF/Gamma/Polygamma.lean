@@ -55,9 +55,9 @@ def polygamma (n : ℕ) (z : ℂ) : ℂ :=
 
 /-- The trigamma recurrence `ψ'(x+1) = ψ'(x) - 1/x²` for `x > 0`. -/
 theorem trigamma_add_one {x : ℝ} (hx : 0 < x) :
-    Real.trigamma (x + 1) = Real.trigamma x - x⁻¹ ^ 2 := by
-  rw [Real.trigamma_eq_tsum hx, Real.trigamma_eq_tsum (by linarith),
-    (Real.summable_trigamma hx).tsum_eq_zero_add]
+    Gamma.Real.trigamma (x + 1) = Gamma.Real.trigamma x - x⁻¹ ^ 2 := by
+  rw [Gamma.Real.trigamma_eq_tsum hx, Gamma.Real.trigamma_eq_tsum (by linarith),
+    (Gamma.Real.summable_trigamma hx).tsum_eq_zero_add]
   have h : ∀ n : ℕ, (x + ((n + 1 : ℕ) : ℝ))⁻¹ ^ 2 = (x + 1 + n)⁻¹ ^ 2 := by
     intro n; push_cast; ring_nf
   simp only [h, Nat.cast_zero, add_zero]
@@ -66,7 +66,7 @@ theorem trigamma_add_one {x : ℝ} (hx : 0 < x) :
 /-- DLMF 5.15.4: `ψ'(n - 1/2) = π²/2 - 4 ∑_{k=1}^{n-1} 1/(2k - 1)²` for `n ≥ 1`. -/
 @[dlmf 5.15.E4]
 theorem trigamma_nat_sub_half (n : ℕ) (hn : 1 ≤ n) :
-    Real.trigamma (n - 1 / 2) =
+    Gamma.Real.trigamma (n - 1 / 2) =
       π ^ 2 / 2 - 4 * ∑ k ∈ Finset.range (n - 1), (1 / (2 * (k : ℝ) + 1) ^ 2) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   clear hn
@@ -203,7 +203,7 @@ theorem ofReal_mem_notNegNat {x : ℝ} (hx : 0 < x) : (x : ℂ) ∈ notNegNat :=
   linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]
 
 /-- The complex digamma function extends the real one. -/
-theorem digamma_ofReal {x : ℝ} (hx : 0 < x) : Complex.digamma x = Real.digamma x := by
+theorem digamma_ofReal {x : ℝ} (hx : 0 < x) : Complex.digamma x = Gamma.Real.digamma x := by
   have hG : DifferentiableAt ℂ Complex.Gamma x :=
     Complex.differentiableAt_Gamma _ (ofReal_mem_notNegNat hx)
   have hGr : DifferentiableAt ℝ Real.Gamma x :=
@@ -214,16 +214,16 @@ theorem digamma_ofReal {x : ℝ} (hx : 0 < x) : Complex.digamma x = Real.digamma
   have h2 : HasDerivAt (fun y : ℝ => (Real.Gamma y : ℂ)) ((deriv Real.Gamma x : ℝ) : ℂ) x :=
     hGr.hasDerivAt.ofReal_comp
   simp_rw [← Complex.Gamma_ofReal] at h2
-  rw [Complex.digamma_def, logDeriv_apply, h1.unique h2, Complex.Gamma_ofReal, Real.digamma]
+  rw [Complex.digamma_def, logDeriv_apply, h1.unique h2, Complex.Gamma_ofReal, Gamma.Real.digamma]
   push_cast; rfl
 
 /-- The complex digamma series extends the real one. -/
-theorem cDigammaSeries_ofReal {x : ℝ} (hx : 0 < x) : cDigammaSeries x = Real.digamma x := by
-  rw [Real.digamma_eq_tsum hx, cDigammaSeries]
+theorem cDigammaSeries_ofReal {x : ℝ} (hx : 0 < x) : cDigammaSeries x = Gamma.Real.digamma x := by
+  rw [Gamma.Real.digamma_eq_tsum hx, cDigammaSeries]
   push_cast
   congr 2
   funext n
-  simp [cDigammaTerm, Real.digammaSeriesTerm]
+  simp [cDigammaTerm, Gamma.Real.digammaSeriesTerm]
 
 /-- The digamma series, DLMF 5.7.6, for all complex arguments that are not poles. -/
 theorem digamma_eq_cDigammaSeries {z : ℂ} (hz : z ∈ notNegNat) :
@@ -671,7 +671,7 @@ theorem isBigO_recip_add_pow {x : ℝ} (hx : 0 < x) (N : ℕ) (C : ℝ) :
 @[dlmf 5.15.E8]
 theorem trigamma_asymptotic (n : ℕ) {x : ℝ} (hx : 1 < x) :
     Asymptotics.IsBigO atTop
-      (fun t : ℝ => Real.trigamma (t + x) -
+      (fun t : ℝ => Gamma.Real.trigamma (t + x) -
         (1 / (t + x) + 1 / (2 * (t + x) ^ 2) +
           ∑ k ∈ Finset.Icc 1 n, bernoulli (2 * k) / (t + x) ^ (2 * k + 1)))
       (fun t : ℝ => (t : ℝ) ^ (-(2 * n : ℝ) - 3)) := by
@@ -693,8 +693,8 @@ theorem trigamma_asymptotic (n : ℕ) {x : ℝ} (hx : 1 < x) :
     field_simp
   rw [hsum] at hb
   simp only [show (1 : ℕ) + 1 = 2 from rfl, show 2 * n + 2 + 1 = 2 * n + 3 by ring] at hb
-  have htri : Real.trigamma (t + x) = ∑' k : ℕ, ((t + x + k) ^ 2)⁻¹ := by
-    rw [Real.trigamma_eq_tsum hz]; simp_rw [inv_pow]
+  have htri : Gamma.Real.trigamma (t + x) = ∑' k : ℕ, ((t + x + k) ^ 2)⁻¹ := by
+    rw [Gamma.Real.trigamma_eq_tsum hz]; simp_rw [inv_pow]
   have hS : 0 ≤ binetRemConst n := tsum_nonneg fun m => by positivity
   rw [htri, one_mul, Real.norm_eq_abs, Real.norm_eq_abs,
     abs_of_nonneg (by positivity : (0 : ℝ) ≤ 2 * binetRemConst n *

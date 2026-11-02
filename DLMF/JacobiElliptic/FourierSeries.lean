@@ -42,8 +42,10 @@ convention; 22.11.14 is a `HasSum` over `ℤ` away from the poles of `sn`.
 The `sn, cn, cd, sd, ns, ds, dc, nc` series are proved from the partial-fraction expansions of
 §22.12 by expanding each `π/sin` term geometrically and interchanging the double series
 (`hasSum_fourier_of_hasSum_pi_div_sin`); `cd, sd, dc, nc` follow from `sn, cn, ns, ds` by
-`z ↦ z + K`. The statements 22.11.3, 6, 9, 12, 13 and 14 have been checked numerically
-(mpmath), also for complex `k` in `jacobiModulusDomain`.
+`z ↦ z + K`. The `cs` and `dn` series come in the same way from the cotangent series of
+`DLMF.JacobiElliptic.EisensteinCotSeries` (`hasSum_fourier_eisensteinCotSeries` and its
+half-shifted form), and `sc`, `nd` follow by `z ↦ z + K`. The statements 22.11.13 and 22.11.14
+have been checked numerically (mpmath), also for complex `k` in `jacobiModulusDomain`.
 -/
 
 @[expose] public section
@@ -58,6 +60,34 @@ namespace DLMF.JacobiElliptic
 open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
 
 variable {k : ℂ}
+
+/-- A point of the strip `|Im t| < Im τ` with `sin(πt) ≠ 0` is off the lattice. -/
+private lemma not_mem_eisensteinSinLattice_of_abs_im_lt {τ t : ℂ} (hτ : 0 < τ.im)
+    (ht : |t.im| < τ.im) (hs : sin (π * t) ≠ 0) : t ∉ eisensteinSinLattice τ := by
+  rintro ⟨m, n, rfl⟩
+  have him : ((m : ℂ) + n * τ).im = n * τ.im := by simp
+  rw [him, abs_mul, abs_of_pos hτ] at ht
+  have hn : |(n : ℝ)| < 1 := by nlinarith
+  have hn0 : n = 0 := by
+    have : |n| < 1 := by exact_mod_cast hn
+    exact Int.abs_lt_one_iff.mp this
+  subst hn0
+  apply hs
+  rw [Complex.sin_eq_zero_iff]
+  exact ⟨m, by push_cast; ring⟩
+
+/-- `1 + q^{2m} ≠ 0`, written with `q^{2m} = e^{2πiτm}`, `Im τ > 0`. -/
+private lemma one_add_exp_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (j : ℕ) :
+    1 + cexp (2 * π * I * τ * (j + 1)) ≠ 0 := by
+  intro h0
+  have hQ : ‖cexp (2 * π * I * τ * (j + 1))‖ = 1 := by
+    rw [show cexp (2 * π * I * τ * (j + 1)) = -1 by linear_combination h0]; simp
+  rw [Complex.norm_exp] at hQ
+  have : (2 * π * I * τ * ((j : ℂ) + 1)).re = -(2 * π * τ.im * (j + 1)) := by
+    simp [Complex.mul_re, Complex.mul_im]
+  rw [this, Real.exp_eq_one_iff] at hQ
+  have : 0 < 2 * π * τ.im * (j + 1) := by positivity
+  linarith
 
 /-- DLMF 22.11.1: `sn(z,k) = (2π/(Kk)) ∑_{n≥0} q^{n+1/2} sin((2n+1)ζ)/(1 - q^{2n+1})`, for `k ∈
 jacobiModulusDomain` and
@@ -75,8 +105,10 @@ theorem jacobiSnk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   obtain ⟨t, rfl⟩ : ∃ t, z = 2 * compEllIntKk k * t := ⟨z / (2 * compEllIntKk k), by field_simp⟩
   have hs := abs_im_lt_of_norm_jacobiNomek_mul_exp_lt hk (c := 2) two_pos hq
   rw [jacobiZetak_two_mul_compEllIntKk_mul hk]
-  have h1 := (jacobiSnk_partialFractions hk (sub_intCast_sub_half_mul_ne_zero hτ hs)).1.nat_add_neg_add_one
-  have h2 := hasSum_fourier_of_hasSum_pi_div_sin (ε := 1) (c := 1 / 2) (a := 1) (b := 1) (Or.inl rfl) hτ
+  have h1 := (jacobiSnk_partialFractions hk
+      (sub_intCast_sub_half_mul_ne_zero hτ hs)).1.nat_add_neg_add_one
+  have h2 := hasSum_fourier_of_hasSum_pi_div_sin (ε := 1) (c := 1 / 2) (a := 1) (b := 1)
+      (Or.inl rfl) hτ
     (by simpa using hs) (by simp) (by simp) (S := _) (by
       convert h1 using 1; funext n; push_cast; ring_nf)
   have hnome : ∀ j : ℕ, cexp (-(π * compEllIntKpk k / compEllIntKk k) * (j + 1 / 2)) =
@@ -107,8 +139,10 @@ theorem jacobiCnk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   obtain ⟨t, rfl⟩ : ∃ t, z = 2 * compEllIntKk k * t := ⟨z / (2 * compEllIntKk k), by field_simp⟩
   have hs := abs_im_lt_of_norm_jacobiNomek_mul_exp_lt hk (c := 2) two_pos hq
   rw [jacobiZetak_two_mul_compEllIntKk_mul hk]
-  have h1 := (jacobiCnk_partialFractions hk (sub_intCast_sub_half_mul_ne_zero hτ hs)).1.nat_add_neg_add_one
-  have h2 := hasSum_fourier_of_hasSum_pi_div_sin (ε := -1) (c := 1 / 2) (a := 1) (b := -1) (Or.inr rfl) hτ
+  have h1 := (jacobiCnk_partialFractions hk
+      (sub_intCast_sub_half_mul_ne_zero hτ hs)).1.nat_add_neg_add_one
+  have h2 := hasSum_fourier_of_hasSum_pi_div_sin (ε := -1) (c := 1 / 2) (a := 1) (b := -1)
+      (Or.inr rfl) hτ
     (by simpa using hs) (by simp) (by simp) (S := _) (by
       convert h1 using 1; funext n
       rw [zpow_neg, show ((n : ℤ) + 1) = ((n + 1 : ℕ) : ℤ) by push_cast; ring]
@@ -130,14 +164,52 @@ theorem jacobiCnk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF 22.11.3: `dn(z,k) = π/(2K) + (2π/K) ∑_{n≥1} qⁿ cos(2nζ)/(1 + q^{2n})`, for `k ∈
 jacobiModulusDomain` and
-`|q| e^{2|Im ζ|} < 1`. Admitted. -/
+`|q| e^{2|Im ζ|} < 1`. -/
 @[dlmf 22.11.E3 "domain: k ∈ jacobiModulusDomain, |q| < 1 form of the strip condition"]
 theorem jacobiDnk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     (hq : ‖jacobiNomek k‖ * Real.exp (2 * |(jacobiZetak z k).im|) < 1) :
     HasSum (fun n : ℕ => 2 * π / compEllIntKk k * jacobiNomek k ^ (n + 1) * cos (2 * (n + 1) *
         jacobiZetak z k) / (1 + jacobiNomek k ^ (2 * (n + 1))))
       (jacobiDnk z k - π / (2 * compEllIntKk k)) := by
-  sorry
+  have hK := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
+  have hτ := jacobiTauk_im_pos hk
+  obtain ⟨t, rfl⟩ : ∃ t, z = 2 * compEllIntKk k * t := ⟨z / (2 * compEllIntKk k), by field_simp⟩
+  have hs := abs_im_lt_of_norm_jacobiNomek_mul_exp_lt hk (c := 2) two_pos hq
+  have hab := abs_lt.mp hs
+  rw [jacobiZetak_two_mul_compEllIntKk_mul hk]
+  have hl : t - jacobiTauk k / 2 ∉ eisensteinSinLattice (jacobiTauk k) := by
+    rintro ⟨m, n, hmn⟩
+    have him := congrArg Complex.im hmn
+    simp at him
+    rcases le_or_gt n (-1) with hn | hn
+    · have : (n : ℝ) ≤ -1 := by exact_mod_cast hn
+      nlinarith
+    · have : (0 : ℝ) ≤ n := by exact_mod_cast (show (0 : ℤ) ≤ n by omega)
+      nlinarith
+  have h := hasSum_fourier_eisensteinCotSeries_sub_half (ε := -1) (Or.inr rfl) hτ (t := t)
+    (by linarith)
+  rw [← jacobiCsk_eq_eisensteinCotSeries hk hl] at h
+  have h2 := two_mul_compEllIntKk_mul_jacobiTauk hk
+  have hv : 2 * compEllIntKk k * jacobiCsk (2 * compEllIntKk k * (t - jacobiTauk k / 2)) k =
+      2 * I * compEllIntKk k * jacobiDnk (2 * compEllIntKk k * t) k := by
+    rw [show 2 * compEllIntKk k * t =
+      2 * compEllIntKk k * (t - jacobiTauk k / 2) + I * compEllIntKpk k by
+      linear_combination h2 / 2, (jacobiDnk_shift hk _).2.2.1]
+    ring_nf; rw [I_sq]; ring
+  rw [hv] at h
+  convert h.div_const (2 * I * compEllIntKk k) using 1
+  · funext j
+    have h1 := one_add_exp_ne_zero hτ j
+    rw [jacobiNomek_eq_exp_jacobiTauk hk, ← Complex.exp_nat_mul, ← Complex.exp_nat_mul,
+      show (2 * π * I * ((j : ℂ) + 1) * t) = π * I * (2 * (j + 1)) * t by ring,
+      show ∀ x y : ℂ, x - -1 * y = x + y by intros; ring, exp_neg_add_exp_eq_two_mul_cos]
+    simp only [neg_one_mul, sub_neg_eq_add]
+    push_cast
+    rw [show ((j : ℂ) + 1) * (π * I * jacobiTauk k) = π * I * jacobiTauk k * (j + 1) by ring,
+      show (2 * ((j : ℂ) + 1)) * (π * I * jacobiTauk k) = 2 * π * I * jacobiTauk k * (j + 1) by
+        ring]
+    field_simp
+  · field_simp
 
 /-- DLMF 22.11.4: `cd(z,k) = (2π/(Kk)) ∑_{n≥0} (-1)ⁿ q^{n+1/2} cos((2n+1)ζ)/(1 - q^{2n+1})`, for `k
 ∈ jacobiModulusDomain` and
@@ -150,7 +222,8 @@ theorem jacobiCdk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
         jacobiNomek k ^ (2 * n + 1)))
       (jacobiCdk z k) := by
   have h := jacobiSnk_hasSum_fourier hk (z := z + compEllIntKk k)
-    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im = (jacobiZetak z k).im by simp])
+    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im =
+          (jacobiZetak z k).im by simp])
   rw [(jacobiSnk_shift hk z).1] at h
   convert h using 2 with n
   rw [jacobiZetak_add_compEllIntKk hk, sin_odd_mul_add_pi_div_two]; ring
@@ -167,7 +240,8 @@ theorem jacobiSdk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
       (jacobiSdk z k) := by
   have hk' := jacobiComodulusk_ne_zero hk
   have h := jacobiCnk_hasSum_fourier hk (z := z + compEllIntKk k)
-    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im = (jacobiZetak z k).im by simp])
+    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im =
+          (jacobiZetak z k).im by simp])
   rw [(jacobiCnk_shift hk z).1] at h
   convert h.div_const (-jacobiComodulusk k) using 1
   · funext n
@@ -176,7 +250,7 @@ theorem jacobiSdk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF 22.11.6: `nd(z,k) = π/(2Kk') + (2π/(Kk')) ∑_{n≥1} (-1)ⁿ qⁿ cos(2nζ)/(1 + q^{2n})`, for `k
 ∈ jacobiModulusDomain` and
-`|q| e^{2|Im ζ|} < 1`. Admitted. -/
+`|q| e^{2|Im ζ|} < 1`. -/
 @[dlmf 22.11.E6 "domain: k ∈ jacobiModulusDomain, |q| < 1 form of the strip condition"]
 theorem jacobiNdk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     (hq : ‖jacobiNomek k‖ * Real.exp (2 * |(jacobiZetak z k).im|) < 1) :
@@ -184,7 +258,18 @@ theorem jacobiNdk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
         jacobiNomek k ^ (n + 1) * cos (2 * (n + 1) * jacobiZetak z k) / (1 + jacobiNomek k ^ (2 *
         (n + 1))))
       (jacobiNdk z k - π / (2 * compEllIntKk k * jacobiComodulusk k)) := by
-  sorry
+  have hk' := jacobiComodulusk_ne_zero hk
+  have h := jacobiDnk_hasSum_fourier hk (z := z + compEllIntKk k)
+    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im =
+          (jacobiZetak z k).im by simp])
+  rw [(jacobiDnk_shift hk z).1, jacobiZetak_add_compEllIntKk hk] at h
+  convert h.div_const (jacobiComodulusk k) using 1
+  · funext n
+    rw [show 2 * ((n : ℂ) + 1) * (jacobiZetak z k + π / 2) =
+      2 * (n + 1) * jacobiZetak z k + ((n + 1 : ℕ) : ℂ) * π by push_cast; ring,
+      (sin_cos_add_nat_mul_pi _ _).2]
+    field_simp
+  · field_simp
 
 /-- DLMF 22.11.7: `ns(z,k) - (π/(2K)) csc ζ = (2π/K) ∑_{n≥0} q^{2n+1} sin((2n+1)ζ)/(1 - q^{2n+1})`,
 for `k ∈ jacobiModulusDomain` and
@@ -261,7 +346,8 @@ theorem jacobiDsk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     rw [show (π : ℂ) * ((m : ℂ) + ((0 : ℤ) : ℂ) * jacobiTauk k) = m * π by push_cast; ring]
     exact Complex.sin_int_mul_pi m
   have h1 := hasSum_nat_add_neg_succ_of_hasSum (hasSum_neg_one_zpow_pi_div_sin_jacobiDsk hk hlat)
-  have h2 := hasSum_fourier_of_hasSum_pi_div_sin (ε := -1) (c := 1) (a := -1) (b := -1) (Or.inr rfl) hτ
+  have h2 := hasSum_fourier_of_hasSum_pi_div_sin (ε := -1) (c := 1) (a := -1) (b := -1)
+      (Or.inr rfl) hτ
     (by simpa using hs) (by simp) (by simp) (S := _) (by
       convert h1 using 1; funext n
       rw [zpow_neg, show ((n : ℤ) + 1) = ((n + 1 : ℕ) : ℤ) by push_cast; ring, zpow_natCast,
@@ -271,7 +357,8 @@ theorem jacobiDsk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   convert h2.div_const (2 * compEllIntKk k) using 1
   · funext j
     rw [jacobiNomek_eq_exp_jacobiTauk hk]
-    rw [show ∀ x y : ℂ, -1 * x - -1 * y = -(x - y) by intros; ring, exp_neg_sub_exp_eq_neg_two_mul_I_mul_sin,
+    rw [show ∀ x y : ℂ, -1 * x - -1 * y = -(x - y) by intros; ring,
+                                                        exp_neg_sub_exp_eq_neg_two_mul_I_mul_sin,
       ← Complex.exp_nat_mul]
     push_cast
     rw [show (π : ℂ) * I * jacobiTauk k * (2 * j + 1) * 1 = (2 * j + 1) * (π * I * jacobiTauk k) by
@@ -282,7 +369,7 @@ theorem jacobiDsk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF 22.11.9: `cs(z,k) - (π/(2K)) cot ζ = -(2π/K) ∑_{n≥1} q^{2n} sin(2nζ)/(1 + q^{2n})`, for `k
 ∈ jacobiModulusDomain` and
-`|q| e^{|Im ζ|} < 1` (and `ζ` not a zero of the trigonometric denominator). Admitted. -/
+`|q| e^{|Im ζ|} < 1` (and `ζ` not a zero of the trigonometric denominator). -/
 @[dlmf 22.11.E9 "domain: k ∈ jacobiModulusDomain, |q| < 1 form of the strip condition"]
 theorem jacobiCsk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     (hq : ‖jacobiNomek k‖ * Real.exp |(jacobiZetak z k).im| < 1)
@@ -291,7 +378,29 @@ theorem jacobiCsk_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
         1) * jacobiZetak z k) / (1 + jacobiNomek k ^ (2 * (n + 1))))
       (jacobiCsk z k - π / (2 * compEllIntKk k) * (cos (jacobiZetak z k) /
           sin (jacobiZetak z k))) := by
-  sorry
+  have hK := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
+  have hτ := jacobiTauk_im_pos hk
+  obtain ⟨t, rfl⟩ : ∃ t, z = 2 * compEllIntKk k * t := ⟨z / (2 * compEllIntKk k), by field_simp⟩
+  have hs := abs_im_lt_of_norm_jacobiNomek_mul_exp_lt hk (c := 1) one_pos (by simpa using hq)
+  rw [div_one, one_mul] at hs
+  rw [jacobiZetak_two_mul_compEllIntKk_mul hk] at hζ ⊢
+  have hl := not_mem_eisensteinSinLattice_of_abs_im_lt hτ hs hζ
+  have h := hasSum_fourier_eisensteinCotSeries (ε := -1) (Or.inr rfl) hτ hs
+  rw [← jacobiCsk_eq_eisensteinCotSeries hk hl] at h
+  convert h.div_const (2 * compEllIntKk k) using 1
+  · funext j
+    rw [jacobiNomek_eq_exp_jacobiTauk hk, ← Complex.exp_nat_mul,
+      show (2 * π * I * ((j : ℂ) + 1) * t) = π * I * (2 * (j + 1)) * t by ring,
+      exp_neg_sub_exp_eq_neg_two_mul_I_mul_sin]
+    have h1 : ((2 * (j + 1) : ℕ) : ℂ) * (π * I * jacobiTauk k) =
+        2 * π * I * jacobiTauk k * (j + 1) := by
+      push_cast; ring
+    rw [h1]
+    have h2 := one_add_exp_ne_zero hτ j
+    simp only [neg_one_mul, sub_neg_eq_add]
+    field_simp
+    ring_nf; rw [I_sq]; ring_nf
+  · rw [Complex.cot_eq_cos_div_sin]; field_simp
 
 /-- DLMF 22.11.10: `dc(z,k) - (π/(2K)) sec ζ = (2π/K) ∑_{n≥0} (-1)ⁿ q^{2n+1} cos((2n+1)ζ)/(1 -
 q^{2n+1})`, for `k ∈ jacobiModulusDomain` and
@@ -304,7 +413,8 @@ theorem jacobiDck_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
         cos ((2 * n + 1) * jacobiZetak z k) / (1 - jacobiNomek k ^ (2 * n + 1)))
       (jacobiDck z k - π / (2 * compEllIntKk k) / cos (jacobiZetak z k)) := by
   have h := jacobiNsk_hasSum_fourier hk (z := z + compEllIntKk k)
-    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im = (jacobiZetak z k).im by simp])
+    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im =
+          (jacobiZetak z k).im by simp])
     (by rwa [jacobiZetak_add_compEllIntKk hk, Complex.sin_add_pi_div_two])
   rw [(jacobiNsk_shift hk z).1, jacobiZetak_add_compEllIntKk hk, Complex.sin_add_pi_div_two] at h
   convert h using 2 with n
@@ -323,7 +433,8 @@ theorem jacobiNck_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
       (jacobiNck z k - π / (2 * compEllIntKk k * jacobiComodulusk k) / cos (jacobiZetak z k)) := by
   have hk' := jacobiComodulusk_ne_zero hk
   have h := jacobiDsk_hasSum_fourier hk (z := z + compEllIntKk k)
-    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im = (jacobiZetak z k).im by simp])
+    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im =
+          (jacobiZetak z k).im by simp])
     (by rwa [jacobiZetak_add_compEllIntKk hk, Complex.sin_add_pi_div_two])
   rw [(jacobiDsk_shift hk z).1, jacobiZetak_add_compEllIntKk hk, Complex.sin_add_pi_div_two] at h
   convert h.div_const (jacobiComodulusk k) using 1
@@ -333,7 +444,7 @@ theorem jacobiNck_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF 22.11.12: `sc(z,k) - (π/(2Kk')) tan ζ = (2π/(Kk')) ∑_{n≥1} (-1)ⁿ q^{2n} sin(2nζ)/(1 +
 q^{2n})`, for `k ∈ jacobiModulusDomain` and
-`|q| e^{|Im ζ|} < 1` (and `ζ` not a zero of the trigonometric denominator). Admitted. -/
+`|q| e^{|Im ζ|} < 1` (and `ζ` not a zero of the trigonometric denominator). -/
 @[dlmf 22.11.E12 "domain: k ∈ jacobiModulusDomain, |q| < 1 form of the strip condition"]
 theorem jacobiSck_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     (hq : ‖jacobiNomek k‖ * Real.exp |(jacobiZetak z k).im| < 1)
@@ -343,7 +454,21 @@ theorem jacobiSck_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
         jacobiNomek k ^ (2 * (n + 1))))
       (jacobiSck z k - π / (2 * compEllIntKk k * jacobiComodulusk k) * (sin (jacobiZetak z k) /
           cos (jacobiZetak z k))) := by
-  sorry
+  have hk' := jacobiComodulusk_ne_zero hk
+  have h := jacobiCsk_hasSum_fourier hk (z := z + compEllIntKk k)
+    (by rwa [jacobiZetak_add_compEllIntKk hk, show (jacobiZetak z k + π / 2).im =
+          (jacobiZetak z k).im by simp])
+    (by rwa [jacobiZetak_add_compEllIntKk hk, Complex.sin_add_pi_div_two])
+  rw [(jacobiCsk_shift hk z).1, jacobiZetak_add_compEllIntKk hk, Complex.sin_add_pi_div_two,
+    Complex.cos_add_pi_div_two] at h
+  convert h.div_const (-jacobiComodulusk k) using 1
+  · funext n
+    rw [show 2 * ((n : ℂ) + 1) * (jacobiZetak z k + π / 2) =
+      2 * (n + 1) * jacobiZetak z k + ((n + 1 : ℕ) : ℂ) * π by push_cast; ring,
+      (sin_cos_add_nat_mul_pi _ _).1]
+    field_simp
+  · field_simp
+    ring
 
 /-- DLMF 22.11.13: `sn²(z,k) = (1 - E/K)/k² - (2π²/(k²K²)) ∑_{n≥1} n qⁿ cos(2nζ)/(1 - q^{2n})`,
 for real `0 < k < 1`, `E = E(k)`, and `q e^{2|Im ζ|} < 1`. Admitted. -/

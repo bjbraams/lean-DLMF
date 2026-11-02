@@ -67,7 +67,8 @@ private lemma isSturmLiouvilleSolution_re {V : ℝ → ℝ} {μ : ℝ} {g : ℝ 
   rwa [Complex.re_ofReal_mul] at this
 
 /-- The real part of a constant multiple of a complex solution is a real solution. -/
-private lemma isSturmLiouvilleSolution_re_const_mul {V : ℝ → ℝ} {μ : ℝ} {g : ℝ → ℂ} (hd : Differentiable ℝ g)
+private lemma isSturmLiouvilleSolution_re_const_mul {V : ℝ → ℝ} {μ : ℝ} {g : ℝ → ℂ}
+    (hd : Differentiable ℝ g)
     (hG : ∀ x, HasDerivAt (deriv g) (((V x - μ : ℝ) : ℂ) * g x) x) (c : ℂ) :
     ODE.IsSturmLiouvilleSolution V μ (fun x => (c * g x).re) ∧
       deriv (fun x => (c * g x).re) = fun x => (c * deriv g x).re := by
@@ -83,13 +84,15 @@ private lemma isSturmLiouvilleSolution_re_const_mul {V : ℝ → ℝ} {μ : ℝ}
 (real potential) with separated boundary conditions is a constant multiple of a real
 eigenfunction: `μ` is an eigenvalue and `g` has as many zeros in `(0, L)` as there are
 eigenvalues below `μ`. -/
-private lemma encard_zeros_of_complex_solution {V : ℝ → ℝ} {B L μ : ℝ} (hV : Continuous V) (hB : ∀ x, |V x| ≤ B)
+private lemma encard_zeros_of_complex_solution {V : ℝ → ℝ} {B L μ : ℝ} (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B)
     (hL : 0 < L) (odd0 oddK : Bool) {g : ℝ → ℂ} (hd : Differentiable ℝ g)
     (hG : ∀ x, HasDerivAt (deriv g) (((V x - μ : ℝ) : ℂ) * g x) x)
     (h0 : if odd0 then g 0 = 0 else deriv g 0 = 0)
     (hL' : if oddK then g L = 0 else deriv g L = 0) (hne : g ≠ 0) :
     μ ∈ ODE.separatedSpectrum V L odd0 oddK ∧
-      {x | x ∈ Ioo 0 L ∧ g x = 0}.encard = (ODE.separatedSpectrum V L odd0 oddK ∩ Iio μ).encard := by
+      {x | x ∈ Ioo 0 L ∧ g x = 0}.encard =
+          (ODE.separatedSpectrum V L odd0 oddK ∩ Iio μ).encard := by
   have b0 : ∀ c : ℂ, if odd0 then (fun x => (c * g x).re) 0 = 0 else
       deriv (fun x => (c * g x).re) 0 = 0 := by
     intro c
@@ -100,8 +103,10 @@ private lemma encard_zeros_of_complex_solution {V : ℝ → ℝ} {B L μ : ℝ} 
     intro c
     rw [(isSturmLiouvilleSolution_re_const_mul hd hG c).2]
     cases oddK <;> simp_all
-  have hu := ODE.isSturmLiouvilleSolution_eq_mul_basicSolution hV (isSturmLiouvilleSolution_re_const_mul hd hG 1).1 (b0 1)
-  have hv := ODE.isSturmLiouvilleSolution_eq_mul_basicSolution hV (isSturmLiouvilleSolution_re_const_mul hd hG (-I)).1 (b0 (-I))
+  have hu := ODE.isSturmLiouvilleSolution_eq_mul_basicSolution hV
+      (isSturmLiouvilleSolution_re_const_mul hd hG 1).1 (b0 1)
+  have hv := ODE.isSturmLiouvilleSolution_eq_mul_basicSolution hV
+      (isSturmLiouvilleSolution_re_const_mul hd hG (-I)).1 (b0 (-I))
   set Y := ODE.basicSolution V odd0 μ
   set a := if odd0 then deriv (fun x => (1 * g x).re) 0 else (fun x => (1 * g x).re) 0
   set b := if odd0 then deriv (fun x => (-I * g x).re) 0 else (fun x => (-I * g x).re) 0
@@ -123,7 +128,8 @@ private lemma encard_zeros_of_complex_solution {V : ℝ → ℝ} {B L μ : ℝ} 
     rw [hw x] at this
     rw [hrep x, this]; simp
   have sw := (isSturmLiouvilleSolution_re_const_mul hd hG c⁻¹).1
-  have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution hV hB hL odd0 oddK sw ⟨b0 c⁻¹, bL c⁻¹⟩ hwne
+  have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution hV
+      hB hL odd0 oddK sw ⟨b0 c⁻¹, bL c⁻¹⟩ hwne
   refine ⟨⟨_, sw, ⟨b0 c⁻¹, bL c⁻¹⟩, hwne⟩, ?_⟩
   rw [← hosc]
   congr 1
@@ -226,10 +232,12 @@ private lemma injOn_jacobiDnm_comodulus_sq (hk0 : 0 < k) (hk1 : k < 1) :
   linarith
 
 /-- The potential `-ν(ν+1) k² sn²(K + iy, k) = -ν(ν+1) k²/dn²(y, k')` along the vertical side. -/
-def verticalPotential (ν k y : ℝ) : ℝ := -(ν * (ν + 1) * k ^ 2 * (Real.jacobiDnm y (1 - k ^ 2) ^ 2)⁻¹)
+def verticalPotential (ν k y : ℝ) : ℝ :=
+    -(ν * (ν + 1) * k ^ 2 * (Real.jacobiDnm y (1 - k ^ 2) ^ 2)⁻¹)
 
 /-- The vertical potential is continuous. -/
-private lemma continuous_verticalPotential (hk0 : 0 < k) (ν : ℝ) : Continuous (verticalPotential ν k) := by
+private lemma continuous_verticalPotential (hk0 : 0 < k) (ν : ℝ) : Continuous
+    (verticalPotential ν k) := by
   have hm : 1 - k ^ 2 < 1 := by nlinarith
   have hc : Continuous fun y => Real.jacobiDnm y (1 - k ^ 2) :=
     continuous_iff_continuousAt.2 fun y => (Real.hasDerivAt_jacobiDnm hm y).continuousAt
@@ -237,7 +245,8 @@ private lemma continuous_verticalPotential (hk0 : 0 < k) (ν : ℝ) : Continuous
     (pow_pos (Real.jacobiDnm_pos hm y) 2).ne'))).neg
 
 /-- The vertical potential is bounded. -/
-private lemma abs_verticalPotential_le (hk0 : 0 < k) (hk1 : k < 1) (ν y : ℝ) : |verticalPotential ν k y| ≤ |ν * (ν + 1)| := by
+private lemma abs_verticalPotential_le (hk0 : 0 < k) (hk1 : k < 1) (ν y : ℝ) : |verticalPotential ν
+    k y| ≤ |ν * (ν + 1)| := by
   obtain ⟨hp, hl, -⟩ := jacobiDnm_comodulus_bounds hk0 hk1 y
   have hd : 0 < Real.jacobiDnm y (1 - k ^ 2) ^ 2 := by positivity
   have h1 : k ^ 2 * (Real.jacobiDnm y (1 - k ^ 2) ^ 2)⁻¹ ≤ 1 := by
@@ -255,7 +264,8 @@ def lamePolyOddKiK : LamePolyType → Bool
 
 /-- **Lamé's equation along the vertical side.** `g(y) = E(K + iy)` solves
 `g'' = (V(y) + h) g` with the potential `verticalPotential`. -/
-private lemma lamePolyEk_vertical_ode (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n j : ℕ} (hj : j ≤ n) :
+private lemma lamePolyEk_vertical_ode (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n j : ℕ} (hj : j ≤ n) :
     Differentiable ℝ (fun y : ℝ => lamePolyEk t n j ((Real.compEllIntKm (k ^ 2) : ℂ) + I * y) k) ∧
       (∀ y : ℝ, deriv (fun y : ℝ =>
         lamePolyEk t n j ((Real.compEllIntKm (k ^ 2) : ℂ) + I * y) k) y =
@@ -291,7 +301,8 @@ private lemma lamePolyEk_vertical_ode (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyT
 
 /-- The boundary conditions along the vertical side, at `K` (type of `cn`) and at `K + iK'`
 (type of `dn`). -/
-private lemma lamePolyEk_vertical_boundary (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n j : ℕ} (hj : j ≤ n) :
+private lemma lamePolyEk_vertical_boundary (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n j : ℕ} (hj : j ≤ n) :
     (if lamePolyOddK t then
         (fun y : ℝ => lamePolyEk t n j ((Real.compEllIntKm (k ^ 2) : ℂ) + I * y) k) 0 = 0
       else deriv (fun y : ℝ =>
@@ -309,7 +320,8 @@ private lemma lamePolyEk_vertical_boundary (hk0 : 0 < k) (hk1 : k < 1) (t : Lame
   have r0 := reg 0
   simp only [Complex.ofReal_zero, mul_zero, add_zero] at r0
   have v2 := eq_zero_or_deriv_eq_zero_of_reflection (hsol.differentiableAt _ r0) s2
-  have v3 := eq_zero_or_deriv_eq_zero_of_reflection (hsol.differentiableAt _ (reg (Real.compEllIntKm (1 - k ^ 2)))) s3
+  have v3 := eq_zero_or_deriv_eq_zero_of_reflection
+      (hsol.differentiableAt _ (reg (Real.compEllIntKm (1 - k ^ 2)))) s3
   have eK : lamePolySignCn t = if lamePolyOddK t then -1 else 1 := by cases t <;> rfl
   have eD : lamePolySignDn t = if lamePolyOddKiK t then -1 else 1 := by cases t <;> rfl
   refine ⟨?_, ?_⟩
@@ -336,7 +348,8 @@ private lemma eval_ofReal_map_ofReal (P : ℝ[X]) (x : ℝ) :
 /-- **Zeros on the vertical side**: `E(K + iy) = 0` (`0 < y < K'`) iff `1/dn²(y, k')` is a
 root of the polynomial `P` of 29.12.10; there are at most `n` zeros, and `E` does not vanish
 identically there. -/
-private lemma lamePolyEk_vertical_zeros (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n j : ℕ} (hj : j ≤ n) :
+private lemma lamePolyEk_vertical_zeros (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n j : ℕ} (hj : j ≤ n) :
     {y | y ∈ Ioo 0 (Real.compEllIntKm (1 - k ^ 2)) ∧
         lamePolyEk t n j ((Real.compEllIntKm (k ^ 2) : ℂ) + I * y) k = 0}.Finite ∧
       {y | y ∈ Ioo 0 (Real.compEllIntKm (1 - k ^ 2)) ∧
@@ -404,7 +417,8 @@ zeros on the open segment from `K` to `K + iK'`. Along `y ↦ K + iy` the Lamé 
 a Sturm–Liouville problem in `y` with eigenvalue parameter `-h`; the `n + 1` Lamé polynomials of
 type `t` have at most `n` zeros there and strictly decreasing parameters, so by Sturm's
 oscillation theorem the `m`th has `n - m` zeros. -/
-theorem ncard_zeros_lamePolyEk_vertical (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ} (hm : m ≤ n) :
+theorem ncard_zeros_lamePolyEk_vertical (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n m : ℕ} (hm : m ≤ n) :
     {y : ℝ | y ∈ Ioo 0 (Real.compEllIntKm (1 - k ^ 2)) ∧
       lamePolyEk t n m ((Real.compEllIntKm (k ^ 2) : ℂ) + I * y) k = 0}.ncard = n - m := by
   set ν : ℝ := (t.order n : ℝ)
@@ -414,7 +428,8 @@ theorem ncard_zeros_lamePolyEk_vertical (hk0 : 0 < k) (hk1 : k < 1) (t : LamePol
   have hB := abs_verticalPotential_le hk0 hk1 ν
   set hv : ℕ → ℝ := fun j => (lamePolyH t n j k + ν * (ν + 1) * k ^ 2) / 2
   set Sp := ODE.separatedSpectrum (verticalPotential ν k) L (lamePolyOddK t) (lamePolyOddKiK t)
-  have hfin : ∀ c, (Sp ∩ Iio c).Finite := fun c => ODE.separatedSpectrum_inter_Iio_finite hV hB hL _ _ c
+  have hfin : ∀ c, (Sp ∩ Iio c).Finite := fun c =>
+      ODE.separatedSpectrum_inter_Iio_finite hV hB hL _ _ c
   have key : ∀ j ≤ n, -hv j ∈ Sp ∧ {y : ℝ | y ∈ Ioo 0 L ∧
       lamePolyEk t n j ((Real.compEllIntKm (k ^ 2) : ℂ) + I * y) k = 0}.ncard =
         (Sp ∩ Iio (-hv j)).ncard := by
@@ -440,20 +455,25 @@ theorem ncard_zeros_lamePolyEk_vertical (hk0 : 0 < k) (hk1 : k < 1) (t : LamePol
   exact eq_sub_of_strictAnti hlt hle m hm
 
 /-- **Zeros on `(0, K)`** (§29.12(i)): `lamePolyEk t n m` has exactly `m` zeros in `(0, K)`. -/
-theorem ncard_zeros_lamePolyEk_real (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ} (hm : m ≤ n) :
+theorem ncard_zeros_lamePolyEk_real (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n m : ℕ} (hm : m ≤ n) :
     {x : ℝ | x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2)) ∧ lamePolyEk t n m x k = 0}.ncard = m := by
   have hk : k ^ 2 < 1 := by nlinarith
   have hK : 0 < Real.compEllIntKm (k ^ 2) := Real.compEllIntKm_pos hk
   set ν : ℝ := (t.order n : ℝ)
-  have hS := lameSpectrum_eq_separatedSpectrum (ν := ν) (k := k) (lamePolyOddZero t) (lamePolyOddK t)
+  have hS := lameSpectrum_eq_separatedSpectrum (ν := ν) (k := k) (lamePolyOddZero t)
+      (lamePolyOddK t)
   obtain ⟨hre, hbc, hne⟩ := isLameEigenfunction_lamePolyEk_re hk0 hk1 t hm
   obtain ⟨hZf, -, -⟩ := lamePolyEk_zeros_finite_le hk0 hk1 t hm
-  have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution (continuous_lamePotential hk) abs_lamePotential_le hK
-    (lamePolyOddZero t) (lamePolyOddK t) ((isLameSolution_iff_isSturmLiouvilleSolution).mp hre) hbc hne
+  have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution
+      (continuous_lamePotential hk) abs_lamePotential_le hK
+    (lamePolyOddZero t) (lamePolyOddK t)
+        ((isLameSolution_iff_isSturmLiouvilleSolution).mp hre) hbc hne
   rw [← hS] at hosc
   have hν : -1 / 2 ≤ ν := by
     simp only [ν]; have := Nat.cast_nonneg (α := ℝ) (t.order n); linarith
-  have hnth := Real.isNthLameEigenvalue_lameEigenvalue (ν := ν) hk0 hk1 (lamePolyOddZero t) (lamePolyOddK t) m
+  have hnth := Real.isNthLameEigenvalue_lameEigenvalue (ν := ν) hk0 hk1 (lamePolyOddZero t)
+      (lamePolyOddK t) m
   rw [lameEigenvalue_lamePolyType_eq hk0 hk1 t hm] at hnth
   obtain ⟨-, hfin, hcard⟩ := hnth
   have hset : {x : ℝ | x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2)) ∧ lamePolyEk t n m x k = 0} =
@@ -466,21 +486,23 @@ theorem ncard_zeros_lamePolyEk_real (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyTyp
   exact (ENat.natCast_inj.1 hosc).trans hcard
 
 /-- The prefactor of 29.12.9 does not vanish where `sn, cn, dn ≠ 0`. -/
-private lemma prefactor_mul_jacobiSnk_ne_zero (t : LamePolyType) {z : ℂ} {k : ℂ} (hs : jacobiSnk z k ≠ 0)
+private lemma prefactor_mul_jacobiSnk_ne_zero (t : LamePolyType) {z : ℂ} {k : ℂ}
+    (hs : jacobiSnk z k ≠ 0)
     (hc : jacobiCnk z k ≠ 0) (hd : jacobiDnk z k ≠ 0) :
     t.prefactor z k * (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) ≠
       0 := by
   cases t <;> simp [LamePolyType.prefactor, hs, hc, hd]
 
 /-- For a multiset without duplicates, filtering commutes with `toFinset` on cardinalities. -/
-private lemma card_filter_eq_card_filter_toFinset {s : Multiset ℝ} (hs : s.Nodup) (q : ℝ → Prop) [DecidablePred q] :
+private lemma card_filter_eq_card_filter_toFinset {s : Multiset ℝ} (hs : s.Nodup) (q : ℝ → Prop)
+    [DecidablePred q] :
     (s.filter q).card = (s.toFinset.filter q).card := by
   rw [← Multiset.toFinset_filter, Multiset.toFinset_card_of_nodup (hs.filter q)]
 
 /-- **29.12.9–29.12.10**: in `E = pre · sn^ρ · P(sn²)` the polynomial `P` of degree `n` has `n`
 simple zeros, `m` of them in `(0, 1)` and `n - m` in `(1, k⁻²)`. The zeros of `E` on `(0, K)`
-and on `K + i(0, K')` (`ncard_zeros_lamePolyEk_real`, `ncard_zeros_lamePolyEk_vertical`) give `m` and `n - m` distinct roots
-`sn²(x) ∈ (0, 1)` and `1/dn²(y, k') ∈ (1, k⁻²)`. -/
+and on `K + i(0, K')` (`ncard_zeros_lamePolyEk_real`, `ncard_zeros_lamePolyEk_vertical`) give `m`
+and `n - m` distinct roots `sn²(x) ∈ (0, 1)` and `1/dn²(y, k') ∈ (1, k⁻²)`. -/
 theorem exists_poly_roots_lamePolyEk (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
     {n m : ℕ} (hm : m ≤ n) :
     ∃ P : ℝ[X], P.natDegree = n ∧ P.roots.Nodup ∧ P.roots.card = n ∧

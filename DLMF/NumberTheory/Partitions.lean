@@ -232,7 +232,8 @@ private lemma summable_partitionFunction_mul_pow {t : ℝ} (ht0 : 0 ≤ t) (ht :
   have hx : ‖(t : ℂ)‖ < 1 := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg ht0]; exact ht
   have hQ : PowerSeries.HasSumAt Q (t : ℂ) (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹) :=
-    PowerSeries.HasSumAt.prod _ fun i _ ↦ PowerSeries.hasSumAt_geomSeriesOnMultiples (Nat.succ_pos i) hx
+    PowerSeries.HasSumAt.prod _ fun i _ ↦ PowerSeries.hasSumAt_geomSeriesOnMultiples
+        (Nat.succ_pos i) hx
   have hre := Complex.hasSum_re (PowerSeries.hasSumAt_int_iff.mp hQ)
   have hv : (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹).re = ∏ i ∈ range N, (1 - t ^ (i + 1))⁻¹ := by
     rw [show (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹) =
@@ -311,7 +312,8 @@ private lemma partitionFunction_eq_sum_pentagonal {n : ℕ} (hn : 1 ≤ n) :
 /-- `X g_k' = g_k (k X^k g_k)` for the geometric series `g_k = 1/(1 - X^k)`. -/
 private lemma X_mul_derivative_geomSeriesOnMultiples {k : ℕ} (hk : 0 < k) :
     X * d⁄dX (PowerSeries.geomSeriesOnMultiples k) =
-      PowerSeries.geomSeriesOnMultiples k * ((k : PowerSeries ℤ) * X ^ k * PowerSeries.geomSeriesOnMultiples k) := by
+      PowerSeries.geomSeriesOnMultiples k *
+          ((k : PowerSeries ℤ) * X ^ k * PowerSeries.geomSeriesOnMultiples k) := by
   have h := PowerSeries.geomSeriesOnMultiples_mul_one_sub_X_pow hk
   have hd := congrArg (fun f : PowerSeries ℤ ↦ d⁄dX f) h
   rw [Derivation.leibniz, derivative_one, map_sub, derivative_one, derivative_pow,
@@ -324,22 +326,26 @@ private lemma X_mul_derivative_geomSeriesOnMultiples {k : ℕ} (hk : 0 < k) :
   have hXk : X * X ^ (k - 1) = (X ^ k : PowerSeries ℤ) := by
     rw [← pow_succ']; congr 1; omega
   calc X * d⁄dX (PowerSeries.geomSeriesOnMultiples k)
-      = X * (PowerSeries.geomSeriesOnMultiples k * (1 - X ^ k)) * d⁄dX (PowerSeries.geomSeriesOnMultiples k) := by rw [h]; ring
-    _ = X * PowerSeries.geomSeriesOnMultiples k * ((1 - X ^ k) * d⁄dX (PowerSeries.geomSeriesOnMultiples k)) := by ring
+      = X * (PowerSeries.geomSeriesOnMultiples k * (1 - X ^ k)) *
+          d⁄dX (PowerSeries.geomSeriesOnMultiples k) := by rw [h]; ring
+    _ = X * PowerSeries.geomSeriesOnMultiples k *
+        ((1 - X ^ k) * d⁄dX (PowerSeries.geomSeriesOnMultiples k)) := by ring
     _ = _ := by rw [key, ← hXk]; ring
 
 /-- Logarithmic derivative of a finite product of geometric series. -/
 private lemma X_mul_derivative_prod_geomSeriesOnMultiples (N : ℕ) :
     X * d⁄dX (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) =
       (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) *
-        ∑ i ∈ range N, (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) * PowerSeries.geomSeriesOnMultiples (i + 1)) := by
+        ∑ i ∈ range N, (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
+            PowerSeries.geomSeriesOnMultiples (i + 1)) := by
   induction N with
   | zero => simp
   | succ N ih =>
     have hg := X_mul_derivative_geomSeriesOnMultiples (Nat.succ_pos N)
     rw [prod_range_succ, sum_range_succ, Derivation.leibniz, smul_eq_mul, smul_eq_mul]
     simp only [Nat.succ_eq_add_one] at hg ⊢
-    linear_combination (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) * hg + PowerSeries.geomSeriesOnMultiples (N + 1) * ih
+    linear_combination (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) * hg +
+        PowerSeries.geomSeriesOnMultiples (N + 1) * ih
 
 /-- Coefficients of `∑_{k ≤ N} k X^k/(1 - X^k)`: `σ₁(m)` for `1 ≤ m ≤ N`. -/
 private lemma coeff_sum_mul_X_pow_mul_geomSeriesOnMultiples {m N : ℕ} (hm : 1 ≤ m) (hmN : m ≤ N) :
@@ -347,9 +353,11 @@ private lemma coeff_sum_mul_X_pow_mul_geomSeriesOnMultiples {m N : ℕ} (hm : 1 
       PowerSeries.geomSeriesOnMultiples (i + 1))) = (σ 1 m : ℤ) := by
   rw [map_sum]
   have : ∀ i ∈ range N, coeff m (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
-      PowerSeries.geomSeriesOnMultiples (i + 1)) = if (i + 1) ∣ m then ((i + 1 : ℕ) : ℤ) else 0 := by
+      PowerSeries.geomSeriesOnMultiples (i + 1)) = if (i + 1) ∣ m then
+          ((i + 1 : ℕ) : ℤ) else 0 := by
     intro i _
-    rw [← map_natCast (C (R := ℤ)), mul_assoc, coeff_C_mul, coeff_X_pow_mul', PowerSeries.geomSeriesOnMultiples]
+    rw [← map_natCast (C (R := ℤ)), mul_assoc, coeff_C_mul, coeff_X_pow_mul',
+        PowerSeries.geomSeriesOnMultiples]
     split_ifs with h1 h2 h2
     · simp [coeff_mk, (Nat.dvd_sub_iff_left h1 dvd_rfl).mpr h2]
     · have h3 : ¬ (i + 1) ∣ m - (i + 1) := fun h ↦ h2 ((Nat.dvd_sub_iff_left h1 dvd_rfl).mp h)
@@ -452,10 +460,12 @@ theorem partitionFunction_sigma_recursion (n : ℕ) :
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  rw [coeff_succ_X_mul, coeff_derivative, coeff_prod_geomSeriesOnMultiples le_rfl, mul_comm _ (∑ i ∈ _, _),
+  rw [coeff_succ_X_mul, coeff_derivative, coeff_prod_geomSeriesOnMultiples le_rfl,
+      mul_comm _ (∑ i ∈ _, _),
     coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ
       (fun i j ↦ coeff i (∑ i ∈ range (m + 1), (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
-        PowerSeries.geomSeriesOnMultiples (i + 1))) * coeff j (∏ i ∈ range (m + 1), PowerSeries.geomSeriesOnMultiples (i + 1))),
+        PowerSeries.geomSeriesOnMultiples (i + 1))) *
+            coeff j (∏ i ∈ range (m + 1), PowerSeries.geomSeriesOnMultiples (i + 1))),
     sum_range_succ'] at h
   have h0 : coeff 0 (∑ i ∈ range (m + 1), (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
       PowerSeries.geomSeriesOnMultiples (i + 1))) = 0 := by
@@ -470,7 +480,8 @@ theorem partitionFunction_sigma_recursion (n : ℕ) :
     Nat.add_sub_cancel]
   refine sum_congr rfl fun k hk ↦ ?_
   rw [mem_range] at hk
-  rw [coeff_sum_mul_X_pow_mul_geomSeriesOnMultiples (by omega) (by omega), coeff_prod_geomSeriesOnMultiples (by omega),
+  rw [coeff_sum_mul_X_pow_mul_geomSeriesOnMultiples (by omega) (by omega),
+      coeff_prod_geomSeriesOnMultiples (by omega),
     add_comm 1 k]
 
 /-! ### §27.14(iii) Asymptotic formulas -/
@@ -669,7 +680,8 @@ private lemma coeff_qExpansion_e12SubE6Sq (n : ℕ) (hn : n ≠ 0) :
   simp [hn, coeff_qExpansion_E6]
 
 /-- `E₁₂ - E₆² = c Δ`, coefficientwise. -/
-private lemma exists_coeff_e12SubE6Sq_eq_mul_ramanujanTau : ∃ c : ℂ, ∀ n, (qExpansion 1 e12SubE6Sq).coeff n =
+private lemma exists_coeff_e12SubE6Sq_eq_mul_ramanujanTau : ∃ c : ℂ, ∀ n,
+    (qExpansion 1 e12SubE6Sq).coeff n =
     c * (ramanujanTau n : ℂ) := by
   obtain ⟨g, hg⟩ := isCuspForm_e12SubE6Sq
   obtain ⟨c, hc⟩ := CuspForm.exists_smul_discriminant_of_weight_eq_twelve g

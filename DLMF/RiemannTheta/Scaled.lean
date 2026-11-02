@@ -109,7 +109,8 @@ private lemma exists_bound_tsum_exp_neg_sq_shift {c : ℝ} (hc : 0 < c) :
 theorem riemannThetaScaled_bounded [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     (hΩ : Ω ∈ siegelUpperHalfSpace ι) : ∃ C : ℝ, ∀ z : ι → ℂ, ‖riemannThetaScaled z Ω‖ ≤ C := by
   set Y := Ω.map Complex.im with hYdef
-  obtain ⟨c, hc, hlow⟩ := exists_pos_mul_sum_sq_le_dotProduct_mulVec (posIm_of_mem_siegelUpperHalfSpace hΩ)
+  obtain ⟨c, hc, hlow⟩ :=
+      exists_pos_mul_sum_sq_le_dotProduct_mulVec (posIm_of_mem_siegelUpperHalfSpace hΩ)
   obtain ⟨M, hM⟩ := exists_bound_tsum_exp_neg_sq_shift hc
   refine ⟨M ^ Fintype.card ι, fun z => ?_⟩
   set y : ι → ℝ := fun i => (z i).im
@@ -190,7 +191,8 @@ private lemma riemannThetaTerm_ofReal (Ω : Matrix ι ι ℂ) (n : ι → ℤ) (
 
 /-- `∫_{[0,1]^g}` of a theta term is `δ_{n0}`. -/
 private lemma integral_riemannThetaTerm_unitCube (Ω : Matrix ι ι ℂ) (n : ι → ℤ) :
-    ∫ x, riemannThetaTerm (fun i => (x i : ℂ)) Ω n ∂(unitCubeMeasure ι) = if n = 0 then 1 else 0 := by
+    ∫ x, riemannThetaTerm (fun i => (x i : ℂ)) Ω n ∂(unitCubeMeasure ι) = if n =
+        0 then 1 else 0 := by
   simp_rw [riemannThetaTerm_ofReal]
   rw [integral_const_mul]
   rw [integral_fintype_prod_eq_prod (f := fun i (t : ℝ) => cexp (2 * π * I * (n i) * t))]
@@ -225,7 +227,8 @@ private lemma integral_riemannTheta_unitCube {Ω : Matrix ι ι ℂ} (hΩ : Ω �
     refine Continuous.aestronglyMeasurable ?_
     simp only [riemannThetaTerm, dotProduct]
     fun_prop
-  have hsum : Summable fun n => ∫ x, ‖riemannThetaTerm (fun i => (x i : ℂ)) Ω n‖ ∂(unitCubeMeasure ι) := by
+  have hsum : Summable fun n => ∫ x,
+      ‖riemannThetaTerm (fun i => (x i : ℂ)) Ω n‖ ∂(unitCubeMeasure ι) := by
     simp_rw [norm_riemannThetaTerm_ofReal, integral_const, smul_eq_mul]
     exact (summable_norm_riemannThetaTerm 0 hΩ).mul_left _
   simp only [riemannTheta]

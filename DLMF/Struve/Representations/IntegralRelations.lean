@@ -251,7 +251,8 @@ theorem cpow_half_sq_sub_one {a : ℂ} (ha : 1 < a.re) :
       continuousAt_const.sub (continuousAt_const.div (by fun_prop) (pow_ne_zero 2 (hz0 z hz)))
     exact (continuousAt_id.mul (h1.cpow continuousAt_const
       (one_sub_recip_sq_mem_slitPlane hz))).continuousWithinAt
-  have hsq : EqOn ((fun z : ℂ => (z^2-1)^(1/2:ℂ))^2) ((fun z : ℂ => z * (1-1/z^2)^(1/2:ℂ))^2) S := by
+  have hsq : EqOn ((fun z : ℂ => (z^2-1)^(1/2:ℂ))^2)
+      ((fun z : ℂ => z * (1-1/z^2)^(1/2:ℂ))^2) S := by
     intro z hz
     simp only [Pi.pow_apply, mul_pow, Carlson.cpow_half_sq]
     field_simp [hz0 z hz]
@@ -513,7 +514,8 @@ lemma struveL_zero_laplace_aux {a : ℂ} (ha : 1 < a.re) :
 t) 0 (2/(π*((1+a^2)^(1/2:ℂ)))*log ((1+((1+a^2)^(1/2:ℂ)))/a))`. -/
 @[dlmf 11.7.E13]
 theorem struve_laplace_13 {a : ℂ} (ha : 0 < a.re) :
-    HasIntegralAtTop (fun t : ℝ => exp (-a*t)*struveH 0 t) 0 (2/(π*((1+a^2)^(1/2:ℂ)))*log ((1+((1+a^2)^(1/2:ℂ)))/a)) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-a*t)*struveH 0 t) 0
+        (2/(π*((1+a^2)^(1/2:ℂ)))*log ((1+((1+a^2)^(1/2:ℂ)))/a)) := by
   set w : ℝ → ℂ := fun s => (1-(s:ℂ)^2)^(-1/2:ℂ)
   have hH : ∀ t : ℝ, 0 < t → struveH 0 t = 2/π * ∫ s : ℝ in 0..1, w s * sin ((t:ℂ)*s) := by
     intro t ht
@@ -553,7 +555,8 @@ theorem struve_laplace_13 {a : ℂ} (ha : 0 < a.re) :
 t) 0 (2/(π*a)-2*a/(π*((1+a^2)^(1/2:ℂ)))*log ((1+((1+a^2)^(1/2:ℂ)))/a))`. -/
 @[dlmf 11.7.E14]
 theorem struve_laplace_14 {a : ℂ} (ha : 0 < a.re) :
-    HasIntegralAtTop (fun t : ℝ => exp (-a*t)*struveH 1 t) 0 (2/(π*a)-2*a/(π*((1+a^2)^(1/2:ℂ)))*log ((1+((1+a^2)^(1/2:ℂ)))/a)) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-a*t)*struveH 1 t) 0
+        (2/(π*a)-2*a/(π*((1+a^2)^(1/2:ℂ)))*log ((1+((1+a^2)^(1/2:ℂ)))/a)) := by
   set L : ℂ := 2/(π*((1+a^2)^(1/2:ℂ)))*log ((1+((1+a^2)^(1/2:ℂ)))/a)
   have h13 : Tendsto (fun R : ℝ => ∫ t in (0:ℝ)..R, exp (-a*t)*struveH 0 t) atTop (𝓝 L) :=
     struve_laplace_13 ha
@@ -627,7 +630,8 @@ theorem struve_laplace_14 {a : ℂ} (ha : 0 < a.re) :
 t) 0 (2/(π*((a^2-1)^(1/2:ℂ)))*(-I*log (I/a+(1-1/a^2)^(1/2:ℂ))))`. -/
 @[dlmf 11.7.E15]
 theorem struve_laplace_15 {a : ℂ} (ha : 1 < a.re) :
-    HasIntegralAtTop (fun t : ℝ => exp (-a*t)*struveL 0 t) 0 (2/(π*((a^2-1)^(1/2:ℂ)))*(-I*log (I/a+(1-1/a^2)^(1/2:ℂ)))) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-a*t)*struveL 0 t) 0
+        (2/(π*((a^2-1)^(1/2:ℂ)))*(-I*log (I/a+(1-1/a^2)^(1/2:ℂ)))) := by
   have h := struveL_zero_laplace_aux ha
   rw [integral_recip_sq_sub_one_add_sq_log ha] at h
   convert h using 1
@@ -637,7 +641,8 @@ theorem struve_laplace_15 {a : ℂ} (ha : 1 < a.re) :
 t) 0 (2*a/(π*((a^2-1)^(1/2:ℂ)))*arctan (1/((a^2-1)^(1/2:ℂ)))-2/(π*a))`. -/
 @[dlmf 11.7.E16]
 theorem struve_laplace_16 {a : ℂ} (ha : 1 < a.re) :
-    HasIntegralAtTop (fun t : ℝ => exp (-a*t)*struveL 1 t) 0 (2*a/(π*((a^2-1)^(1/2:ℂ)))*arctan (1/((a^2-1)^(1/2:ℂ)))-2/(π*a)) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-a*t)*struveL 1 t) 0
+        (2*a/(π*((a^2-1)^(1/2:ℂ)))*arctan (1/((a^2-1)^(1/2:ℂ)))-2/(π*a)) := by
   set L : ℂ := 2/π * (arctan (1/((a^2-1)^(1/2:ℂ))) / (a^2-1)^(1/2:ℂ))
   have h15 : Tendsto (fun R : ℝ => ∫ t in (0:ℝ)..R, exp (-a*t)*struveL 0 t) atTop (𝓝 L) := by
     have h := struveL_zero_laplace_aux ha

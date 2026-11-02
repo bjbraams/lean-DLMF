@@ -65,7 +65,8 @@ private lemma hasIntegralOn_of_cholesky {m : ℕ} {F : Matrix (Fin m) (Fin m) �
       exact mul_nonneg (by positivity)
         (Finset.prod_nonneg fun i _ =>
           pow_nonneg ((TauCeti.mem_posDiagLowerRegion m).mp hx i).le _)
-    rw [enorm_mul, TauCeti.choleskyJacobianDensity_def, ← enorm_norm (((choleskyJacobian x : ℝ) : ℂ)),
+    rw [enorm_mul, TauCeti.choleskyJacobianDensity_def,
+        ← enorm_norm (((choleskyJacobian x : ℝ) : ℂ)),
       Complex.norm_real, enorm_norm, Real.enorm_of_nonneg hj, TauCeti.coe_lowerTriangleGram,
       choleskyJacobian]
   · rw [← hI]
@@ -76,7 +77,8 @@ private lemma hasIntegralOn_of_cholesky {m : ℕ} {F : Matrix (Fin m) (Fin m) �
     simp [choleskyJacobian, Complex.real_smul]
 
 /-- Leading minors of a Gram matrix `L Lᵀ` of a lower-triangular `L`. -/
-lemma leadingMinor_lowerTriangleMatrix_mul_transpose {m : ℕ} (x : TauCeti.lowerTriangle m → ℝ) (j : Fin m) :
+lemma leadingMinor_lowerTriangleMatrix_mul_transpose {m : ℕ}
+    (x : TauCeti.lowerTriangle m → ℝ) (j : Fin m) :
     leadingMinor (TauCeti.lowerTriangleMatrix m x * (TauCeti.lowerTriangleMatrix m x)ᵀ)
       (j.1 + 1) = ∏ i : Fin m, if i ≤ j then x ⟨(i, i), le_rfl⟩ ^ 2 else 1 := by
   have hj : j.1 + 1 ≤ m := j.2
@@ -108,8 +110,8 @@ def choleskyDiagFactor (c : ℂ) (t : ℝ) : ℂ :=
   (Ioi (0 : ℝ)).indicator
     (fun t : ℝ => ((2 * t : ℝ) : ℂ) * ((Real.exp (-t ^ 2) : ℂ) * ((t ^ 2 : ℝ) : ℂ) ^ (c - 1))) t
 
-/-- Integrability of the indicated kernel: `Integrable (choleskyDiagFactor c) ∧ ∫ t, choleskyDiagFactor c
-t = Complex.Gamma c`. -/
+/-- Integrability of the indicated kernel:
+`Integrable (choleskyDiagFactor c) ∧ ∫ t, choleskyDiagFactor c t = Complex.Gamma c`. -/
 private lemma integrable_and_integral_choleskyDiagFactor {c : ℂ} (hc : 0 < c.re) :
     Integrable (choleskyDiagFactor c) ∧ ∫ t, choleskyDiagFactor c t = Complex.Gamma c := by
   have hcongr : EqOn (fun t : ℝ => ((2 * t : ℝ) : ℂ) * ((Real.exp (-t ^ 2) : ℂ) *
@@ -172,19 +174,24 @@ def multivariateGammaVecExponent {m : ℕ} (s : Fin m → ℂ) (j : Fin m) : ℂ
 
 /-- The integrand of 35.3.2. -/
 def multivariateGammaVecIntegrand {m : ℕ} (s : Fin m → ℂ) (X : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
-  (etr (-X) : ℂ) * ∏ j : Fin m, ((leadingMinor X (j.1 + 1) : ℝ) : ℂ) ^ (multivariateGammaVecExponent s j)
+  (etr (-X) : ℂ) * ∏ j : Fin m,
+      ((leadingMinor X (j.1 + 1) : ℝ) : ℂ) ^ (multivariateGammaVecExponent s j)
 
 /-- The one-dimensional factors of 35.3.2 in Cholesky coordinates. -/
-def multivariateGammaVecCholeskyFactor {m : ℕ} (s : Fin m → ℂ) (ij : TauCeti.lowerTriangle m) (t : ℝ) : ℂ :=
+def multivariateGammaVecCholeskyFactor {m : ℕ} (s : Fin m → ℂ)
+    (ij : TauCeti.lowerTriangle m) (t : ℝ) : ℂ :=
   if ij.1.1 = ij.1.2 then choleskyDiagFactor (s ij.1.1 - (ij.1.1 : ℂ) / 2) t
   else ((Real.exp (-t ^ 2) : ℝ) : ℂ)
 
 /-- Identity under the stated parameter and domain assumptions: `(TauCeti.posDiagLowerRegion
-m).indicator (fun x => ((choleskyJacobian x : ℝ) : ℂ) * multivariateGammaVecIntegrand s (TauCeti.lowerTriangleMatrix m
-x * (TauCeti.lowerTriangleMatrix m x)ᵀ)) x = ∏ ij, multivariateGammaVecCholeskyFactor s ij (x ij)`. -/
-private lemma indicator_choleskyJacobian_mul_integrand_eq_prod {m : ℕ} (s : Fin m → ℂ) (x : TauCeti.lowerTriangle m → ℝ) :
+m).indicator (fun x => ((choleskyJacobian x : ℝ) : ℂ) * multivariateGammaVecIntegrand s
+(TauCeti.lowerTriangleMatrix m x * (TauCeti.lowerTriangleMatrix m x)ᵀ)) x = ∏ ij,
+multivariateGammaVecCholeskyFactor s ij (x ij)`. -/
+private lemma indicator_choleskyJacobian_mul_integrand_eq_prod {m : ℕ} (s : Fin m → ℂ)
+    (x : TauCeti.lowerTriangle m → ℝ) :
     (TauCeti.posDiagLowerRegion m).indicator (fun x => ((choleskyJacobian x : ℝ) : ℂ) *
-      multivariateGammaVecIntegrand s (TauCeti.lowerTriangleMatrix m x * (TauCeti.lowerTriangleMatrix m x)ᵀ)) x
+      multivariateGammaVecIntegrand s
+          (TauCeti.lowerTriangleMatrix m x * (TauCeti.lowerTriangleMatrix m x)ᵀ)) x
       = ∏ ij, multivariateGammaVecCholeskyFactor s ij (x ij) := by
   by_cases hx : x ∈ TauCeti.posDiagLowerRegion m
   · rw [Set.indicator_of_mem hx]
@@ -201,8 +208,10 @@ private lemma indicator_choleskyJacobian_mul_integrand_eq_prod {m : ℕ} (s : Fi
       split_ifs with h
       · have hij : ij = ⟨(ij.1.1, ij.1.1), le_rfl⟩ := Subtype.ext (Prod.ext rfl h.symm)
         have hxij : x ij = d ij.1.1 := by rw [hd]; exact congrArg x hij
-        rw [choleskyDiagFactor, Set.indicator_of_mem (show x ij ∈ Set.Ioi 0 by rw [hxij]; exact hpos _),
-          Complex.ofReal_cpow_eq_exp (by rw [hxij]; exact pow_pos (hpos _) 2), hxij, Real.log_pow, hdexp]
+        rw [choleskyDiagFactor,
+            Set.indicator_of_mem (show x ij ∈ Set.Ioi 0 by rw [hxij]; exact hpos _),
+          Complex.ofReal_cpow_eq_exp (by rw [hxij]; exact pow_pos (hpos _) 2), hxij,
+              Real.log_pow, hdexp]
         push_cast
         rw [Real.log_exp]
         have : Complex.exp (ℓ ij.1.1) * Complex.exp (2 * ℓ ij.1.1 * (s ij.1.1 - ij.1.1 / 2 - 1))
@@ -217,10 +226,13 @@ private lemma indicator_choleskyJacobian_mul_integrand_eq_prod {m : ℕ} (s : Fi
     simp only [one_pow, mul_one]
     -- the left side
     have hminor : ∀ j : Fin m, ((leadingMinor (TauCeti.lowerTriangleMatrix m x *
-        (TauCeti.lowerTriangleMatrix m x)ᵀ) (j.1 + 1) : ℝ) : ℂ) ^ (multivariateGammaVecExponent s j) =
-        Complex.exp ((∑ i : Fin m, if i ≤ j then 2 * (ℓ i : ℂ) else 0) * multivariateGammaVecExponent s j) := by
+        (TauCeti.lowerTriangleMatrix m x)ᵀ) (j.1 + 1) : ℝ) : ℂ) ^
+            (multivariateGammaVecExponent s j) =
+        Complex.exp ((∑ i : Fin m, if i ≤ j then 2 * (ℓ i : ℂ) else 0) *
+            multivariateGammaVecExponent s j) := by
       intro j
-      rw [leadingMinor_lowerTriangleMatrix_mul_transpose, Complex.ofReal_cpow_eq_exp (Finset.prod_pos fun i _ => by
+      rw [leadingMinor_lowerTriangleMatrix_mul_transpose,
+          Complex.ofReal_cpow_eq_exp (Finset.prod_pos fun i _ => by
         split_ifs <;> [exact pow_pos (hpos i) 2; exact one_pos]), Real.log_prod (fun i _ => by
         split_ifs <;> [exact (pow_pos (hpos i) 2).ne'; exact one_ne_zero])]
       push_cast
@@ -228,7 +240,8 @@ private lemma indicator_choleskyJacobian_mul_integrand_eq_prod {m : ℕ} (s : Fi
       refine Finset.sum_congr rfl fun i _ => ?_
       split_ifs <;> simp [Real.log_pow, hℓ, hd]
     have hsum : (∑ j : Fin m, (∑ i : Fin m, if i ≤ j then 2 * (ℓ i : ℂ) else 0) *
-        multivariateGammaVecExponent s j) = ∑ i : Fin m, 2 * (ℓ i : ℂ) * (s i - ((m : ℂ) + 1) / 2) := by
+        multivariateGammaVecExponent s j) = ∑ i : Fin m, 2 * (ℓ i : ℂ) *
+            (s i - ((m : ℂ) + 1) / 2) := by
       simp_rw [Finset.sum_mul, ite_mul, zero_mul]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun i _ => ?_
@@ -304,9 +317,12 @@ lemma hasIntegralOn_multivariateGammaVecIntegrand {m : ℕ} {s : Fin m → ℂ}
     norm_num
     linarith
   have hind : (TauCeti.posDiagLowerRegion m).indicator (fun x => ((choleskyJacobian x : ℝ) : ℂ) *
-      multivariateGammaVecIntegrand s (TauCeti.lowerTriangleMatrix m x * (TauCeti.lowerTriangleMatrix m x)ᵀ))
-      = fun x => ∏ ij, multivariateGammaVecCholeskyFactor s ij (x ij) := funext (indicator_choleskyJacobian_mul_integrand_eq_prod s)
-  have hfacint : ∀ ij : TauCeti.lowerTriangle m, Integrable (multivariateGammaVecCholeskyFactor s ij) := by
+      multivariateGammaVecIntegrand s
+          (TauCeti.lowerTriangleMatrix m x * (TauCeti.lowerTriangleMatrix m x)ᵀ))
+      = fun x => ∏ ij, multivariateGammaVecCholeskyFactor s ij (x ij) :=
+          funext (indicator_choleskyJacobian_mul_integrand_eq_prod s)
+  have hfacint : ∀ ij : TauCeti.lowerTriangle m,
+      Integrable (multivariateGammaVecCholeskyFactor s ij) := by
     intro ij
     unfold multivariateGammaVecCholeskyFactor
     split_ifs

@@ -57,7 +57,8 @@ theorem tendsto_legendre_singular_factor (a b c p K : ℂ) (hK : K * regularized
       l (𝓝 1) := by
   have hc : ContinuousAt (fun x : ℝ => ((1+(x:ℂ))/2)^p *
       (K * regularizedGaussHG a b c ((1-(x:ℂ))/2))) 1 := by
-    refine ContinuousAt.mul ?_ (continuousAt_const.mul (continuousAt_regularizedGaussHG_half_one _ _ _))
+    refine ContinuousAt.mul ?_
+        (continuousAt_const.mul (continuousAt_regularizedGaussHG_half_one _ _ _))
     exact ContinuousAt.cpow (by fun_prop) continuousAt_const (by norm_num)
   have h1 : ((1+((1:ℝ):ℂ))/2)^p * (K * regularizedGaussHG a b c ((1-((1:ℝ):ℂ))/2)) = 1 := by
     rw [show (1-((1:ℝ):ℂ))/2 = 0 by simp, hK]
@@ -84,7 +85,8 @@ theorem one_sub_sq_cpow_half_div (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1)
         congr 1; push_cast; ring
     _ = _ := by rw [ofReal_mul, mul_cpow_ofReal_nonneg h1 h2]; push_cast; rfl
 
-/-- For `x > 1`, `(x²-1)^(m/2)/2^m = ((x-1)/2)^(m/2) ((1+x)/2)^(m/2)` through the inherited branch. -/
+/-- For `x > 1`, `(x²-1)^(m/2)/2^m = ((x-1)/2)^(m/2) ((1+x)/2)^(m/2)` through the inherited branch.
+-/
 theorem legendreBranchPower_div_two_pow (m : ℕ) {x : ℝ} (hx : 1 < x) :
     legendreBranchPower m x / 2^m = (((x:ℂ)-1)/2)^((m:ℂ)/2) * ((1+(x:ℂ))/2)^((m:ℂ)/2) := by
   have h1 : (0:ℝ) < x-1 := by linarith
@@ -125,11 +127,12 @@ theorem legendre_singular_1 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
   push_cast
   field_simp
 
-/-- DLMF 14.8.2: for `m ∈ ℕ` (DLMF: `m ≥ 1`) with `(ν−m+1)_{2m} ≠ 0`, `𝖯^m_ν(x) ~ (−1)^m (ν−m+1)_{2m}/m! ·
-((1−x)/2)^{m/2}` as `x → 1⁻`. -/
+/-- DLMF 14.8.2: for `m ∈ ℕ` (DLMF: `m ≥ 1`) with `(ν−m+1)_{2m} ≠ 0`,
+`𝖯^m_ν(x) ~ (−1)^m (ν−m+1)_{2m}/m! · ((1−x)/2)^{m/2}` as `x → 1⁻`. -/
 @[dlmf 14.8.E2]
 theorem legendre_singular_2 (ν : ℂ) (m : ℕ) (hν : poch (ν-m+1) (2*m) ≠ 0) :
-    (fun x : ℝ => ferrersP ν m x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => (-1)^m*poch (ν-m+1) (2*m)/(m.factorial:ℂ)*((1-x)/2:ℂ)^((m:ℂ)/2)) := by
+    (fun x : ℝ => ferrersP ν m x) ~[𝓝[<] (1:ℝ)]
+        (fun x : ℝ => (-1)^m*poch (ν-m+1) (2*m)/(m.factorial:ℂ)*((1-x)/2:ℂ)^((m:ℂ)/2)) := by
   have hf : (m.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hc : ∀ n : ℕ, (m:ℂ)+1 ≠ -n := fun n hn => by
     have := congrArg re hn; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
@@ -148,8 +151,10 @@ theorem legendre_singular_2 (ν : ℂ) (m : ℕ) (hν : poch (ν-m+1) (2*m) ≠ 
 /-- DLMF 14.8.4: for `Re μ > 0`, `μ ∉ {1/2, 3/2, …}` and `ν + μ ∉ {−1, −2, …}`, `𝖰^μ_ν(x) ~ ½
 cos(μπ) Γ(μ) (2/(1−x))^{μ/2}` as `x → 1⁻`. -/
 @[dlmf 14.8.E4]
-theorem legendre_singular_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) (hμ : 0 < μ.re) (hh : ∀ n : ℕ, μ ≠ n+1/2) :
-    (fun x : ℝ => ferrersQ ν μ x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => 1/2*cos (μ*π)*Gamma μ*(2/(1-x):ℂ)^(μ/2)) := by
+theorem legendre_singular_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) (hμ : 0 < μ.re)
+    (hh : ∀ n : ℕ, μ ≠ n+1/2) :
+    (fun x : ℝ => ferrersQ ν μ x) ~[𝓝[<] (1:ℝ)]
+        (fun x : ℝ => 1/2*cos (μ*π)*Gamma μ*(2/(1-x):ℂ)^(μ/2)) := by
   have hcos := legBd_cos_ne_zero hμ hh
   have hΓ : Gamma μ ≠ 0 := Gamma_ne_zero_of_re_pos hμ
   have hK : (2:ℂ)^(μ-1) * Gamma μ * cos (μ*π) ≠ 0 :=
@@ -158,7 +163,8 @@ theorem legendre_singular_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) (hμ : 0 
     hK (by simp)
   refine this.congr_right (Eventually.of_forall fun x => ?_)
   simp only
-  rw [show (2:ℂ)^(μ-1) * Gamma μ * cos (μ*π) / 2^μ = (2:ℂ)^(μ-1) / 2^μ * Gamma μ * cos (μ*π) by ring,
+  rw [show (2:ℂ)^(μ-1) * Gamma μ * cos (μ*π) / 2^μ = (2:ℂ)^(μ-1) / 2^μ * Gamma μ *
+      cos (μ*π) by ring,
     legBd_two_cpow_sub_one_div μ]
   ring
 
@@ -166,7 +172,9 @@ theorem legendre_singular_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) (hμ : 0 
 Γ(ν+n+3/2)/(2 Γ(n+3/2) Γ(ν−n+1/2)) · ((1−x)/2)^{n/2+1/4}` as `x → 1⁻`. -/
 @[dlmf 14.8.E5]
 theorem legendre_singular_5 (ν : ℂ) (n : ℕ) (hp : LegendreQRegular ν (n+1/2)) :
-    (fun x : ℝ => ferrersQ ν (n+1/2) x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => (-1)^(n+1)*π*Gamma (ν+n+3/2)/(2*Gamma (n+3/2)*Gamma (ν-n+1/2))*((1-x)/2:ℂ)^((n+1/2:ℂ)/2)) := by
+    (fun x : ℝ => ferrersQ ν (n+1/2) x) ~[𝓝[<] (1:ℝ)]
+        (fun x : ℝ => (-1)^(n+1)*π*Gamma
+        (ν+n+3/2)/(2*Gamma (n+3/2)*Gamma (ν-n+1/2))*((1-x)/2:ℂ)^((n+1/2:ℂ)/2)) := by
   set μ : ℂ := n+1/2 with hμdef
   have hμ : ∀ k : ℤ, μ ≠ k := fun k hk => by
     have h2 : (2*n+1 : ℂ) = 2*k := by rw [← show (2:ℂ)*μ = 2*n+1 by rw [hμdef]; ring, hk]
@@ -210,8 +218,10 @@ theorem legendre_singular_5 (ν : ℂ) (n : ℕ) (hp : LegendreQRegular ν (n+1/
 /-- DLMF 14.8.6: for `Re μ > 0` and `ν ± μ ∉ {−1, −2, …}`, `𝖰^{−μ}_ν(x) ~ Γ(μ) Γ(ν−μ+1)/(2 Γ(ν+μ+1))
 · (2/(1−x))^{μ/2}` as `x → 1⁻`. -/
 @[dlmf 14.8.E6]
-theorem legendre_singular_6 (ν μ : ℂ) (hμ : 0 < μ.re) (hp : LegendreQRegular ν μ) (hm : LegendreQRegular ν (-μ)) :
-    (fun x : ℝ => ferrersQ ν (-μ) x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => Gamma μ*Gamma (ν-μ+1)/(2*Gamma (ν+μ+1))*(2/(1-x):ℂ)^(μ/2)) := by
+theorem legendre_singular_6 (ν μ : ℂ) (hμ : 0 < μ.re) (hp : LegendreQRegular ν μ)
+    (hm : LegendreQRegular ν (-μ)) :
+    (fun x : ℝ => ferrersQ ν (-μ) x) ~[𝓝[<] (1:ℝ)]
+        (fun x : ℝ => Gamma μ*Gamma (ν-μ+1)/(2*Gamma (ν+μ+1))*(2/(1-x):ℂ)^(μ/2)) := by
   have hΓ : Gamma μ ≠ 0 := Gamma_ne_zero_of_re_pos hμ
   have hG1 : Gamma (ν-μ+1) ≠ 0 := Gamma_ne_zero fun n hn => hm n (by linear_combination hn)
   have hG2 : Gamma (ν+μ+1) ≠ 0 := Gamma_ne_zero fun n hn => hp n (by linear_combination hn)
@@ -229,7 +239,8 @@ theorem legendre_singular_6 (ν μ : ℂ) (hμ : 0 < μ.re) (hp : LegendreQRegul
 /-- DLMF 14.8.7: for `μ ∉ {1, 2, 3, …}`, `P^μ_ν(x) ~ (2/(x−1))^{μ/2}/Γ(1−μ)` as `x → 1⁺`. -/
 @[dlmf 14.8.E7]
 theorem legendre_singular_7 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
-    (fun x : ℝ => associatedP ν μ x) ~[𝓝[>] (1:ℝ)] (fun x : ℝ => 1/Gamma (1-μ)*(2/(x-1):ℂ)^(μ/2)) := by
+    (fun x : ℝ => associatedP ν μ x) ~[𝓝[>] (1:ℝ)]
+        (fun x : ℝ => 1/Gamma (1-μ)*(2/(x-1):ℂ)^(μ/2)) := by
   have hΓ : Gamma (1-μ) ≠ 0 := Gamma_ne_zero fun n hn => hμ n (by linear_combination -hn)
   refine legBd_isEquivalent_of_eventuallyEq_mul ?_ (tendsto_legendre_singular_factor (ν+1) (-ν)
       (1-μ)
@@ -247,7 +258,8 @@ theorem legendre_singular_7 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
   have hr : (((x+1)/(x-1):ℝ):ℂ) ≠ 0 := ofReal_ne_zero.mpr (by positivity)
   have key : exp (μ/2*(log ((x:ℂ)+1) - log ((x:ℂ)-1))) =
       (2/((x:ℂ)-1))^(μ/2) * ((1+(x:ℂ))/2)^(μ/2) := by
-    have := mul_cpow_ofReal_nonneg (a := 2/(x-1)) (b := (1+x)/2) (by positivity) (by positivity) (μ/2)
+    have := mul_cpow_ofReal_nonneg (a := 2/(x-1)) (b := (1+x)/2) (by positivity)
+        (by positivity) (μ/2)
     push_cast at this e
     rw [← this, e, hlog, cpow_def_of_ne_zero (by push_cast at hr ⊢; exact hr)]
     push_cast; ring_nf
@@ -259,7 +271,8 @@ theorem legendre_singular_7 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
 ((x−1)/2)^{m/2}` as `x → 1⁺`. -/
 @[dlmf 14.8.E8]
 theorem legendre_singular_8 (ν : ℂ) (m : ℕ) (hn : LegendreQRegular ν (-m)) :
-    (fun x : ℝ => associatedP ν m x) ~[𝓝[>] (1:ℝ)] (fun x : ℝ => Gamma (ν+m+1)/((m.factorial:ℂ)*Gamma (ν-m+1))*((x-1)/2:ℂ)^((m:ℂ)/2)) := by
+    (fun x : ℝ => associatedP ν m x) ~[𝓝[>] (1:ℝ)]
+        (fun x : ℝ => Gamma (ν+m+1)/((m.factorial:ℂ)*Gamma (ν-m+1))*((x-1)/2:ℂ)^((m:ℂ)/2)) := by
   have hf : (m.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hc : ∀ n : ℕ, (m:ℂ)+1 ≠ -n := fun n hn => by
     have := congrArg re hn; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
@@ -285,7 +298,8 @@ theorem legendre_singular_8 (ν : ℂ) (m : ℕ) (hn : LegendreQRegular ν (-m))
 (2/(x−1))^{μ/2}` as `x → 1⁺`. -/
 @[dlmf 14.8.E11]
 theorem legendre_singular_11 (ν μ : ℂ) (hμ : 0 < μ.re) (hp : LegendreQRegular ν μ) :
-    (fun x : ℝ => olverQ ν μ x) ~[𝓝[>] (1:ℝ)] (fun x : ℝ => Gamma μ/(2*Gamma (ν+μ+1))*(2/(x-1):ℂ)^(μ/2)) := by
+    (fun x : ℝ => olverQ ν μ x) ~[𝓝[>] (1:ℝ)]
+        (fun x : ℝ => Gamma μ/(2*Gamma (ν+μ+1))*(2/(x-1):ℂ)^(μ/2)) := by
   have hΓ : Gamma μ ≠ 0 := Gamma_ne_zero_of_re_pos hμ
   have hG2 : Gamma (ν+μ+1) ≠ 0 := Gamma_ne_zero fun n hn => hp n (by linear_combination hn)
   have hK : (2:ℂ)^(μ-1) * Gamma μ * (Gamma (ν+μ+1))⁻¹ ≠ 0 :=
@@ -303,7 +317,8 @@ theorem legendre_singular_11 (ν μ : ℂ) (hμ : 0 < μ.re) (hp : LegendreQRegu
 Γ(ν−μ+1)) · (2x)^ν` as `x → ∞`. -/
 @[dlmf 14.8.E12]
 theorem legendre_singular_12 (ν μ : ℂ) (hν : -1/2 < ν.re) (hμ : ∀ n : ℕ, μ-ν ≠ n+1) :
-    (fun x : ℝ => associatedP ν μ x) ~[atTop] (fun x : ℝ => Gamma (ν+1/2)/(Real.sqrt π*Gamma (ν-μ+1))*(2*x:ℂ)^ν) := by
+    (fun x : ℝ => associatedP ν μ x) ~[atTop]
+        (fun x : ℝ => Gamma (ν+1/2)/(Real.sqrt π*Gamma (ν-μ+1))*(2*x:ℂ)^ν) := by
   have hΓ : Gamma (ν+1/2) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
   have hG : Gamma (ν-μ+1) ≠ 0 := Gamma_ne_zero fun n hn => hμ n (by linear_combination -hn)
   have hsq : (Real.sqrt π:ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -327,8 +342,10 @@ theorem legendre_singular_12 (ν μ : ℂ) (hν : -1/2 < ν.re) (hμ : ∀ n : �
 Γ(−μ−ν) (2x)^{ν+1})` as `x → ∞`. -/
 @[dlmf 14.8.E13]
 theorem legendre_singular_13 (ν μ : ℂ) (hν : ν.re < -1/2) (hμ : ∀ n : ℕ, ν+μ ≠ n) :
-    (fun x : ℝ => associatedP ν μ x) ~[atTop] (fun x : ℝ => Gamma (-ν-1/2)/(Real.sqrt π*Gamma (-μ-ν)*(2*x:ℂ)^(ν+1))) := by
-  have h := legendre_singular_12 (-ν-1) μ (by simp; linarith) (fun n hn => hμ n (by linear_combination hn))
+    (fun x : ℝ => associatedP ν μ x) ~[atTop]
+        (fun x : ℝ => Gamma (-ν-1/2)/(Real.sqrt π*Gamma (-μ-ν)*(2*x:ℂ)^(ν+1))) := by
+  have h := legendre_singular_12 (-ν-1) μ (by simp; linarith)
+      (fun n hn => hμ n (by linear_combination hn))
   refine (h.congr_left ?_).congr_right ?_
   · filter_upwards [eventually_gt_atTop 1] with x hx
     exact associatedP_reflect_degree ν μ (Or.inl (by simp; linarith))
@@ -341,7 +358,8 @@ theorem legendre_singular_13 (ν μ : ℂ) (hν : ν.re < -1/2) (hμ : ∀ n : �
 → ∞`. -/
 @[dlmf 14.8.E14]
 theorem legendre_singular_14 (μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2) :
-    (fun x : ℝ => associatedP (-1/2) μ x) ~[atTop] (fun x : ℝ => 1/Gamma (1/2-μ)*(2/(π*x):ℂ)^(1/2:ℂ)*Real.log x) := by
+    (fun x : ℝ => associatedP (-1/2) μ x) ~[atTop]
+        (fun x : ℝ => 1/Gamma (1/2-μ)*(2/(π*x):ℂ)^(1/2:ℂ)*Real.log x) := by
   have hG : Gamma (1/2-μ) ≠ 0 := Gamma_ne_zero fun n hn => hμ n (by linear_combination -hn)
   have hsq : (Real.sqrt π:ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hK : (2:ℂ)^(1/2:ℂ) * (Gamma (1/2-μ))⁻¹ / (Real.sqrt π : ℂ) ≠ 0 :=
@@ -371,14 +389,16 @@ theorem legendre_singular_14 (μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2) :
 theorem tendsto_one_div_sq_atTop : Tendsto (fun x : ℝ => 1/(x:ℂ)^2) atTop (𝓝 0) := by
   have h : Tendsto (fun x : ℝ => ((1/x^2 : ℝ) : ℂ)) atTop (𝓝 ((0:ℝ):ℂ)) :=
     (continuous_ofReal.tendsto 0).comp (by
-      simpa [Function.comp_def] using (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero))))
+      simpa [Function.comp_def] using
+          (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero))))
   simpa using h
 
 /-- DLMF 14.8.15: for `ν ∉ {−3/2, −5/2, …}`, `𝑸^μ_ν(x) ~ π^{1/2}/(Γ(ν+3/2) (2x)^{ν+1})` as `x →
 ∞`. -/
 @[dlmf 14.8.E15]
 theorem legendre_singular_15 (ν μ : ℂ) (hν : ∀ n : ℕ, ν ≠ -n-3/2) :
-    (fun x : ℝ => olverQ ν μ x) ~[atTop] (fun x : ℝ => Real.sqrt π/(Gamma (ν+3/2)*(2*x:ℂ)^(ν+1))) := by
+    (fun x : ℝ => olverQ ν μ x) ~[atTop]
+        (fun x : ℝ => Real.sqrt π/(Gamma (ν+3/2)*(2*x:ℂ)^(ν+1))) := by
   have hc : ∀ k : ℕ, ν+3/2 ≠ -k := fun k hk => hν k (by linear_combination hk)
   have hΓ : Gamma (ν+3/2) ≠ 0 := Gamma_ne_zero hc
   set G := regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2)
@@ -387,7 +407,8 @@ theorem legendre_singular_15 (ν μ : ℂ) (hν : ∀ n : ℕ, ν ≠ -n-3/2) :
       (analyticAt_regularizedGaussHG _ _ _ zero_mem_cutPlane).continuousAt)
     exact ContinuousAt.cpow (by fun_prop) continuousAt_const (by norm_num)
   have h1 : (1-(0:ℂ))^(μ/2) * (Gamma (ν+3/2) * G 0) = 1 := by
-    simp only [G, sub_zero, one_cpow, one_mul]; rw [regularizedGaussHG_zero_of_regular hc, mul_one_div_cancel hΓ]
+    simp only [G, sub_zero, one_cpow, one_mul];
+        rw [regularizedGaussHG_zero_of_regular hc, mul_one_div_cancel hΓ]
   have hg := hcont.tendsto.comp tendsto_one_div_sq_atTop
   rw [h1] at hg
   refine legBd_isEquivalent_of_eventuallyEq_mul ?_ hg
@@ -414,7 +435,9 @@ theorem legendre_singular_15 (ν μ : ℂ) (hν : ∀ n : ℕ, ν ≠ -n-3/2) :
 Γ(μ+n+1/2)/(n! Γ(μ−n+1/2) (2x)^{n+1/2})` as `x → ∞`. -/
 @[dlmf 14.8.E16]
 theorem legendre_singular_16 (μ : ℂ) (n : ℕ) (hn : 0 < n) (hμ : ∀ k : ℕ, μ-n+1/2 ≠ -k) :
-    (fun x : ℝ => olverQ (-n-1/2) μ x) ~[atTop] (fun x : ℝ => Real.sqrt π*Gamma (μ+n+1/2)/((n.factorial:ℂ)*Gamma (μ-n+1/2)*(2*x:ℂ)^(n+1/2:ℂ))) := by
+    (fun x : ℝ => olverQ (-n-1/2) μ x) ~[atTop]
+        (fun x : ℝ => Real.sqrt π*Gamma
+        (μ+n+1/2)/((n.factorial:ℂ)*Gamma (μ-n+1/2)*(2*x:ℂ)^(n+1/2:ℂ))) := by
   obtain ⟨k, rfl⟩ : ∃ k, n = k+1 := ⟨n-1, by omega⟩
   have hf : ((k+1).factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (k+1).factorial_ne_zero
   have hc : ∀ j : ℕ, ((k+1:ℕ):ℂ)+1 ≠ -j := fun j hj => by
@@ -477,21 +500,27 @@ theorem legendre_singular_16 (μ : ℂ) (n : ℕ) (hn : 0 < n) (hμ : ∀ k : �
 `x → 1⁻`. -/
 @[dlmf 14.8.E3]
 theorem ferrersQ_log_singular {ν : ℂ} (hν : LegendreQRegular ν 0) :
-    (fun x : ℝ => ferrersQ ν 0 x-1/2*log (2/(1-x):ℂ)+Real.eulerMascheroniConstant+digamma (ν+1)) =O[𝓝[<] (1:ℝ)] (fun x : ℝ => (1-x)*Real.log (1-x)) :=
+    (fun x : ℝ => ferrersQ ν 0 x-1/2*log (2/(1-x):ℂ)+Real.eulerMascheroniConstant+digamma (ν+1))
+        =O[𝓝[<] (1:ℝ)] (fun x : ℝ => (1-x)*Real.log (1-x)) :=
   legBd_ferrersQ_log_isBigO hν
 
 /-- DLMF 14.8.9 with `ψ(ν+1)/Γ(ν+1)` written as `-(1/Γ)'(ν+1)`. Stronger than DLMF: valid for
 all `ν`, including `ν = -1, -2, …`. -/
 @[dlmf 14.8.E9]
 theorem olverQ_log_singular_recipGamma (ν : ℂ) :
-    (fun x : ℝ => olverQ ν 0 x+log (x-1:ℂ)/(2*Gamma (ν+1))-(log 2/2-Real.eulerMascheroniConstant)/Gamma (ν+1)-DLMF.Gamma.recipGammaDeriv 1 (ν+1)) =O[𝓝[>] (1:ℝ)] (fun x : ℝ => (x-1)*Real.log (x-1)) :=
+    (fun x : ℝ => olverQ ν 0 x+log
+        (x-1:ℂ)/(2*Gamma (ν+1))-(log 2/2-Real.eulerMascheroniConstant)/Gamma
+        (ν+1)-DLMF.Gamma.recipGammaDeriv 1 (ν+1)) =O[𝓝[>] (1:ℝ)]
+        (fun x : ℝ => (x-1)*Real.log (x-1)) :=
   legBd_olverQ_log_isBigO ν
 
 /-- DLMF 14.8.9: for `ν ∉ {−1, −2, …}`, `𝑸_ν(x) = −ln(x−1)/(2Γ(ν+1)) + (½ ln 2 − γ − ψ(ν+1))/Γ(ν+1)
 + O((x−1) ln(x−1))` as `x → 1⁺`. -/
 @[dlmf 14.8.E9]
 theorem olverQ_log_singular {ν : ℂ} (hν : LegendreQRegular ν 0) :
-    (fun x : ℝ => olverQ ν 0 x+log (x-1:ℂ)/(2*Gamma (ν+1))-(log 2/2-Real.eulerMascheroniConstant-digamma (ν+1))/Gamma (ν+1)) =O[𝓝[>] (1:ℝ)] (fun x : ℝ => (x-1)*Real.log (x-1)) := by
+    (fun x : ℝ => olverQ ν 0 x+log
+        (x-1:ℂ)/(2*Gamma (ν+1))-(log 2/2-Real.eulerMascheroniConstant-digamma (ν+1))/Gamma (ν+1))
+        =O[𝓝[>] (1:ℝ)] (fun x : ℝ => (x-1)*Real.log (x-1)) := by
   have hp : ∀ m : ℕ, ν + 1 ≠ -(m : ℂ) := fun m h => hν m (by linear_combination h)
   refine (olverQ_log_singular_recipGamma ν).congr_left fun x => ?_
   rw [DLMF.Gamma.recipGammaDeriv_one_eq hp]
@@ -505,7 +534,8 @@ theorem olverQ_negative_degree_singular (n : ℕ) (hn : 0 < n) :
   have hG : (Gamma ((-((m+1:ℕ):ℂ)) + 1))⁻¹ = 0 := by
     rw [show (-((m+1:ℕ):ℂ)) + 1 = -(m:ℂ) by push_cast; ring, inv_eq_zero]
     exact Complex.Gamma_neg_nat_eq_zero m
-  have hD : DLMF.Gamma.recipGammaDeriv 1 ((-((m+1:ℕ):ℂ)) + 1) = (-1)^(m+1+1)*((m+1-1).factorial:ℂ) := by
+  have hD : DLMF.Gamma.recipGammaDeriv 1 ((-((m+1:ℕ):ℂ)) + 1) =
+      (-1)^(m+1+1)*((m+1-1).factorial:ℂ) := by
     rw [show (-((m+1:ℕ):ℂ)) + 1 = -(m:ℂ) by push_cast; ring, DLMF.Gamma.recipGammaDeriv_one_neg_nat,
       Nat.add_sub_cancel, pow_succ, pow_succ]
     ring

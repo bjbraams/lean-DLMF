@@ -170,7 +170,8 @@ theorem exists_norm_erfc_mul_le {b : ℂ} (hb0 : b ≠ 0) (hb : |arg b| < π/4) 
   · refine (norm_erfc_le h1 h2).trans ?_
     rw [Complex.norm_exp, neg_re, hre]
     have hs : Real.sqrt (π*β) ≤ Real.sqrt (π*(β*t^2)) :=
-      Real.sqrt_le_sqrt (by have := Real.pi_pos; nlinarith [mul_pos hb2 (show 0 < t^2-1 by nlinarith)])
+      Real.sqrt_le_sqrt (by have := Real.pi_pos;
+                            nlinarith [mul_pos hb2 (show 0 < t^2-1 by nlinarith)])
     have hs0 : 0 < Real.sqrt (π*β) := Real.sqrt_pos.mpr (by positivity)
     calc Real.exp (-(β*t^2))/Real.sqrt (π*(β*t^2)) ≤ Real.exp (-(β*t^2))/Real.sqrt (π*β) := by
           gcongr
@@ -180,7 +181,8 @@ theorem exists_norm_erfc_mul_le {b : ℂ} (hb0 : b ≠ 0) (hb : |arg b| < π/4) 
 
 /-- The Gaussian quadratic tail integral (used before DLMF 7.7.6 is stated). -/
 lemma gaussian_quadratic_tail_aux {a : ℂ} (ha : 0 < a.re) (b c : ℂ) (x : ℝ) :
-    (∫ t : ℝ in Ioi x, exp (-(a*(t : ℂ)^2+2*b*t+c)))=(π/a)^(1/2 : ℂ)/2*exp ((b^2-a*c)/a)*erfc (a^(1/2 : ℂ)*x+b/a^(1/2 : ℂ)) := by
+    (∫ t : ℝ in Ioi x, exp (-(a*(t : ℂ)^2+2*b*t+c)))=(π/a)^(1/2 : ℂ)/2*exp ((b^2-a*c)/a)*erfc
+        (a^(1/2 : ℂ)*x+b/a^(1/2 : ℂ)) := by
   have hint : IntegrableOn (fun t : ℝ => exp (-(a*(t : ℂ)^2+2*b*t+c))) (Ioi x) := by
     have := integrable_cexp_quadratic ha (-2*b) (-c)
     refine this.integrableOn.congr_fun (fun t _ => ?_) measurableSet_Ioi
@@ -283,7 +285,8 @@ theorem erfc_rational_gaussian_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
   have hF : Tendsto (fun ε : ℝ => F (z+ε)) (𝓝[>] 0) (𝓝 (F z)) := by
     refine tendsto_integral_filter_of_dominated_convergence (fun t => (1+t^2)⁻¹) ?_ ?_
       integrable_inv_one_add_sq.integrableOn ?_
-    · refine Eventually.of_forall fun ε => ContinuousOn.aestronglyMeasurable (fun t _ => ?_) measurableSet_Ioi
+    · refine Eventually.of_forall fun ε =>
+          ContinuousOn.aestronglyMeasurable (fun t _ => ?_) measurableSet_Ioi
       have h1 : ((t:ℂ)^2+1) ≠ 0 := by
         have : (0:ℝ) < 1+t^2 := by positivity
         rw [show ((t:ℂ)^2+1) = ((1+t^2:ℝ):ℂ) by push_cast; ring]; exact_mod_cast this.ne'
@@ -454,7 +457,8 @@ theorem erfInt_faddeeva_cauchy_both {z : ℂ} (hz : 0 < z.im) :
 ℂ)^2-z^2))=π*I/(2*z)*faddeevaW z`. -/
 @[dlmf 7.7.E2]
 theorem faddeevaW_cauchy_integral {z : ℂ} (hz : 0 < z.im) :
-    (∫ t : ℝ, exp (-(t : ℂ)^2)/(t-z))=π*I*faddeevaW z ∧ (∫ t : ℝ in Ioi 0, exp (-(t : ℂ)^2)/((t : ℂ)^2-z^2))=π*I/(2*z)*faddeevaW z :=
+    (∫ t : ℝ, exp (-(t : ℂ)^2)/(t-z))=π*I*faddeevaW z ∧
+        (∫ t : ℝ in Ioi 0, exp (-(t : ℂ)^2)/((t : ℂ)^2-z^2))=π*I/(2*z)*faddeevaW z :=
   erfInt_faddeeva_cauchy_both hz
 
 /-- The Gaussian rational integral with numerator `2t` is an exponential integral. -/
@@ -540,7 +544,8 @@ theorem erfInt_goodwin_log_neg_sq {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     (fun h => hi.ne' (arg_eq_zero_iff.mp h.symm).2)
   have hb : arg z < π/2 := arg_lt_pi_div_two_iff.mpr (Or.inl hr)
   have he : exp (2*log z-π*I) = -z^2 := by
-    rw [Complex.exp_sub, show (2:ℂ)*log z=(2:ℕ)*log z by norm_num, Complex.exp_nat_mul, Complex.exp_log hz, Complex.exp_pi_mul_I]
+    rw [Complex.exp_sub, show (2:ℂ)*log z=(2:ℕ)*log z by norm_num, Complex.exp_nat_mul,
+                                                           Complex.exp_log hz, Complex.exp_pi_mul_I]
     ring
   rw [← he, Complex.log_exp]
   · simp [mul_im, log_im]; linarith
@@ -551,7 +556,8 @@ theorem goodwinStatonG_eq_Ein_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi 
     goodwinStatonG z = Real.sqrt π*dawsonF z - exp (-z^2)/2*
       (Real.eulerMascheroniConstant+2*log z-expIntEin (-z^2)) := by
   have hz : z ≠ 0 := fun h => by simp [h] at hr
-  rw [goodwinStatonG_eq_E1_of_re_pos_of_im_pos hr hi, expIntE1_eq_Ein_complex (neg_ne_zero.mpr (pow_ne_zero 2 hz)),
+  rw [goodwinStatonG_eq_E1_of_re_pos_of_im_pos hr hi,
+      expIntE1_eq_Ein_complex (neg_ne_zero.mpr (pow_ne_zero 2 hz)),
     erfInt_goodwin_log_neg_sq hr hi, (dawsonF_faddeeva z).1]
   have hsq : (Real.sqrt π:ℂ)^2 = π := by exact_mod_cast Real.sq_sqrt Real.pi_pos.le
   linear_combination -(I/2*(exp (-z^2)-faddeevaW z))*hsq
@@ -574,7 +580,8 @@ theorem tendsto_goodwinStatonG_vertical {x : ℝ} (hx : 0 < x) :
     rw [norm_div, Complex.norm_exp]
     simp only [← ofReal_pow, neg_re, ofReal_re]
     exact div_le_div_of_nonneg_left (Real.exp_pos _).le hx hb
-  · convert ((integrable_exp_neg_mul_sq one_pos).div_const x).integrableOn (s := Ioi (0:ℝ)) using 1; norm_num [IntegrableOn]
+  · convert ((integrable_exp_neg_mul_sq one_pos).div_const x).integrableOn (s := Ioi (0:ℝ)) using 1;
+        norm_num [IntegrableOn]
   · refine (ae_restrict_iff' measurableSet_Ioi).mpr (ae_of_all _ fun t ht => ?_)
     have ht : 0 < t := ht
     have hn : (t:ℂ)+(x:ℂ) ≠ 0 := by exact_mod_cast (show t+x ≠ 0 by linarith)
@@ -631,7 +638,8 @@ theorem goodwinStatonG_dawson {x : ℝ} (hx : 0 < x) :
 ℂ)^2+2*I*z*t))=(π/a)^(1/2 : ℂ)/2*exp (-z^2/a)+I/a^(1/2 : ℂ)*dawsonF (z/a^(1/2 : ℂ))`. -/
 @[dlmf 7.7.E3]
 theorem gaussian_fourier_halfLine {a : ℂ} (ha : 0 < a.re) (z : ℂ) :
-    (∫ t : ℝ in Ioi 0, exp (-a*(t : ℂ)^2+2*I*z*t))=(π/a)^(1/2 : ℂ)/2*exp (-z^2/a)+I/a^(1/2 : ℂ)*dawsonF (z/a^(1/2 : ℂ)) := by
+    (∫ t : ℝ in Ioi 0, exp (-a*(t : ℂ)^2+2*I*z*t))=(π/a)^(1/2 : ℂ)/2*exp
+        (-z^2/a)+I/a^(1/2 : ℂ)*dawsonF (z/a^(1/2 : ℂ)) := by
   have h := gaussian_quadratic_tail_aux ha (-I*z) 0 0
   have hi : (fun t : ℝ => exp (-a*(t : ℂ)^2+2*I*z*t)) =
       fun t : ℝ => exp (-(a*(t : ℂ)^2+2*(-I*z)*t+0)) := by
@@ -659,7 +667,8 @@ theorem gaussian_fourier_halfLine {a : ℂ} (ha : 0 < a.re) (z : ℂ) :
 (-a*t)/(t+z^2)^(1/2 : ℂ))=(π/a)^(1/2 : ℂ)*exp (a*z^2)*erfc (a^(1/2 : ℂ)*z)`. -/
 @[dlmf 7.7.E4]
 theorem gaussian_sqrt_laplace {a z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)/(t+z^2)^(1/2 : ℂ))=(π/a)^(1/2 : ℂ)*exp (a*z^2)*erfc (a^(1/2 : ℂ)*z) := by
+    (∫ t : ℝ in Ioi 0, exp (-a*t)/(t+z^2)^(1/2 : ℂ))=(π/a)^(1/2 : ℂ)*exp (a*z^2)*erfc
+        (a^(1/2 : ℂ)*z) := by
   set w := z^2 with hw
   set q := a^(1/2 : ℂ) with hq
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
@@ -811,7 +820,8 @@ theorem integral_exp_neg_mul_sq_zero_one {w : ℂ} (hw : w ≠ 0) :
     simp [primitive, segmentIntegral]
   rw [hp] at h
   have hsp : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
-  have he : (∫ t : ℝ in (0:ℝ)..1, exp (-((t:ℂ)*w)^2)) = ∫ t : ℝ in (0:ℝ)..1, exp (-w^2*(t:ℂ)^2) := by
+  have he : (∫ t : ℝ in (0:ℝ)..1, exp (-((t:ℂ)*w)^2)) = ∫ t : ℝ in (0:ℝ)..1,
+      exp (-w^2*(t:ℂ)^2) := by
     congr 1; funext t; congr 1; ring
   rw [he] at h
   rw [h]; field_simp
@@ -856,7 +866,8 @@ theorem erf_squared_integral {a : ℂ} (ha : 0 < a.re) :
     ring
   have hU : IsOpen U := isOpen_lt continuous_const Complex.continuous_re
   have hUc : IsPreconnected U := (convex_halfSpace_re_gt 0).isPreconnected
-  have hdiff : DifferentiableOn ℂ Φ U := fun b hb => (hΦd b hb).differentiableAt.differentiableWithinAt
+  have hdiff : DifferentiableOn ℂ Φ U := fun b hb =>
+      (hΦd b hb).differentiableAt.differentiableWithinAt
   have hderiv : U.EqOn (deriv Φ) 0 := fun b hb => (hΦd b hb).deriv
   have hconst : ∀ ε : ℝ, 0 < ε → Φ ε = Φ a := fun ε hε =>
     hU.is_const_of_deriv_eq_zero hUc hdiff hderiv (by simp [U, hε]) ha
@@ -899,15 +910,18 @@ theorem erf_squared_integral {a : ℂ} (ha : 0 < a.re) :
 ℂ)^2+2*b*t+c)))=(π/a)^(1/2 : ℂ)/2*exp ((b^2-a*c)/a)*erfc (a^(1/2 : ℂ)*x+b/a^(1/2 : ℂ))`. -/
 @[dlmf 7.7.E6]
 theorem gaussian_quadratic_tail {a : ℂ} (ha : 0 < a.re) (b c : ℂ) (x : ℝ) :
-    (∫ t : ℝ in Ioi x, exp (-(a*(t : ℂ)^2+2*b*t+c)))=(π/a)^(1/2 : ℂ)/2*exp ((b^2-a*c)/a)*erfc (a^(1/2 : ℂ)*x+b/a^(1/2 : ℂ)) := by
+    (∫ t : ℝ in Ioi x, exp (-(a*(t : ℂ)^2+2*b*t+c)))=(π/a)^(1/2 : ℂ)/2*exp ((b^2-a*c)/a)*erfc
+        (a^(1/2 : ℂ)*x+b/a^(1/2 : ℂ)) := by
   exact gaussian_quadratic_tail_aux ha b c x
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi x, exp (-a^2*(t :
 ℂ)^2-b^2/(t : ℂ)^2))=Real.sqrt π/(4*a)*(exp (2*a*b)*erfc (a*x+b/x)+exp (-2*a*b)*erfc
 (a*x-b/x))`. -/
 @[dlmf 7.7.E7]
-theorem gaussian_reciprocal_tail {a : ℂ} (ha0 : a ≠ 0) (ha : |arg a| < π/4) (b : ℂ) {x : ℝ} (hx : 0 < x) :
-    (∫ t : ℝ in Ioi x, exp (-a^2*(t : ℂ)^2-b^2/(t : ℂ)^2))=Real.sqrt π/(4*a)*(exp (2*a*b)*erfc (a*x+b/x)+exp (-2*a*b)*erfc (a*x-b/x)) := by
+theorem gaussian_reciprocal_tail {a : ℂ} (ha0 : a ≠ 0) (ha : |arg a| < π/4) (b : ℂ)
+    {x : ℝ} (hx : 0 < x) :
+    (∫ t : ℝ in Ioi x, exp (-a^2*(t : ℂ)^2-b^2/(t : ℂ)^2))=Real.sqrt
+        π/(4*a)*(exp (2*a*b)*erfc (a*x+b/x)+exp (-2*a*b)*erfc (a*x-b/x)) := by
   have ha2 := re_sq_pos_of_abs_arg_lt ha0 ha
   have har : 0 < a.re := re_pos_of_abs_arg_lt ha0 (by linarith [Real.pi_pos])
   have hp0 : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -985,7 +999,8 @@ theorem gaussian_reciprocal_tail {a : ℂ} (ha0 : a ≠ 0) (ha : |arg a| < π/4)
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi 0, exp (-a^2*(t :
 ℂ)^2-b^2/(t : ℂ)^2))=Real.sqrt π/(2*a)*exp (-2*a*b)`. -/
 @[dlmf 7.7.E8]
-theorem gaussian_reciprocal_integral {a b : ℂ} (ha0 : a ≠ 0) (hb0 : b ≠ 0) (ha : |arg a| < π/4) (hb : |arg b| < π/4) :
+theorem gaussian_reciprocal_integral {a b : ℂ} (ha0 : a ≠ 0) (hb0 : b ≠ 0) (ha : |arg a| < π/4)
+    (hb : |arg b| < π/4) :
     (∫ t : ℝ in Ioi 0, exp (-a^2*(t : ℂ)^2-b^2/(t : ℂ)^2))=Real.sqrt π/(2*a)*exp (-2*a*b) := by
   have ha2 := re_sq_pos_of_abs_arg_lt ha0 ha
   have hb2 := re_sq_pos_of_abs_arg_lt hb0 hb
@@ -1062,7 +1077,8 @@ theorem erf_primitive (z : ℂ) :
 z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(-1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1))`. -/
 @[dlmf 7.7.E10]
 theorem fresnelAuxFComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
-    fresnelAuxFComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(-1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1)) := by
+    fresnelAuxFComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
+        (t : ℂ)^(-1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1)) := by
   have h := erfInt_fresnelAux_laplace false hz
   simp only [Bool.false_eq_true, ite_false, Nat.cast_zero, zero_sub] at h
   rw [h]; congr 1
@@ -1073,7 +1089,8 @@ theorem fresnelAuxFComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
 z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1))`. -/
 @[dlmf 7.7.E11]
 theorem fresnelAuxGComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
-    fresnelAuxGComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1)) := by
+    fresnelAuxGComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
+        (t : ℂ)^(1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1)) := by
   have h := erfInt_fresnelAux_laplace true hz
   simp only [ite_true, Nat.cast_one] at h
   rw [h]; congr 1
@@ -1084,7 +1101,8 @@ theorem fresnelAuxGComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
 to `(𝓝 (fresnelAuxGComplex z+I*fresnelAuxFComplex z))` along `atTop`. -/
 @[dlmf 7.7.E12]
 theorem fresnelAux_contour_tail (z : ℂ) :
-    Tendsto (fun R : ℝ => exp (-π*I*z^2/2)*segmentIntegral (fun t => exp (π*I*t^2/2)) z R) atTop (𝓝 (fresnelAuxGComplex z+I*fresnelAuxFComplex z)) := by
+    Tendsto (fun R : ℝ => exp (-π*I*z^2/2)*segmentIntegral (fun t => exp (π*I*t^2/2)) z R) atTop
+        (𝓝 (fresnelAuxGComplex z+I*fresnelAuxFComplex z)) := by
   have h := (fresnelTail_horizontal_integral z).const_mul (exp (-π*I*z^2/2))
   convert h using 2
   have he : exp (-π*I*z^2/2) = cos (π*z^2/2) - sin (π*z^2/2)*I := by

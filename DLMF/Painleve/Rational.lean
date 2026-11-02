@@ -79,7 +79,8 @@ def rationalStepDenom (p q : ℂ[X]) : ℂ[X] :=
 theorem backlundDenom_neg_rationalFn (p q : ℂ[X]) {x : ℂ} (hx : q.eval x ≠ 0) :
     backlundDenom (fun x => -rationalFn p q x) x =
       (rationalStepDenom p q).eval x / q.eval x ^ 2 := by
-  rw [backlundDenom, show deriv (fun x => -rationalFn p q x) x = -deriv (rationalFn p q) x from deriv.neg,
+  rw [backlundDenom, show deriv (fun x => -rationalFn p q x) x =
+      -deriv (rationalFn p q) x from deriv.neg,
     (hasDerivAt_rationalFn p q hx).deriv]
   simp only [rationalFn, rationalStepDenom, eval_add, eval_sub, eval_mul, eval_pow, eval_X, eval_C]
   field_simp
@@ -148,11 +149,13 @@ theorem rationalPIIPair_spec (n : ℕ) :
     let q := (rationalPIIPair n).2
     let r := rationalStepDenom p q
     have hr : r ≠ 0 := rationalStepDenom_ne_zero hq n hsol
-    change q * r ≠ 0 ∧ IsPIIOn _ (rationalFn (-p * r + C (1 + 2 * (n : ℂ)) * q ^ 3) (q * r)) (polynomialDomain (q * r))
+    change q * r ≠ 0 ∧ IsPIIOn _ (rationalFn (-p * r + C (1 + 2 * (n : ℂ)) * q ^ 3) (q * r))
+        (polynomialDomain (q * r))
     refine ⟨mul_ne_zero hq hr, ?_⟩
     have hsub : polynomialDomain (q * r) ⊆ polynomialDomain q := by
       intro x hx
-      exact (mul_ne_zero_iff.mp (by simpa only [polynomialDomain, mem_ofPred_eq, eval_mul] using hx)).1
+      exact (mul_ne_zero_iff.mp
+          (by simpa only [polynomialDomain, mem_ofPred_eq, eval_mul] using hx)).1
     have hD : ∀ x ∈ polynomialDomain (q * r), backlundDenom (fun x => -rationalFn p q x) x ≠ 0 := by
       intro x hx
       have hqr : q.eval x ≠ 0 ∧ r.eval x ≠ 0 :=

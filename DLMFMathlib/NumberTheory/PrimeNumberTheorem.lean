@@ -221,12 +221,12 @@ private lemma tauCetiPrimeTheta_rat_univ (x : ℝ) : TauCeti.primeTheta ℚ Set.
   simpa using Nat.sum_tauCetiPrimesLE_absNorm (fun n ↦ Real.log n) x
 
 /-- **The prime number theorem** for Chebyshev's `θ`: `θ(x) ~ x`. -/
-private lemma theta_isEquivalent : θ ~[atTop] fun x : ℝ ↦ x :=
+theorem theta_isEquivalent : θ ~[atTop] fun x : ℝ ↦ x :=
   (TauCeti.primeIdealTheorem ℚ).2.1.congr_left
     (Eventually.of_forall tauCetiPrimeTheta_rat_univ)
 
 /-- **The prime number theorem** for Chebyshev's `ψ`: `ψ(x) ~ x`. -/
-private lemma psi_isEquivalent : ψ ~[atTop] fun x : ℝ ↦ x := by
+theorem psi_isEquivalent : ψ ~[atTop] fun x : ℝ ↦ x := by
   refine IsLittleO.isEquivalent ?_
   have hs : Real.sqrt =o[atTop] fun x : ℝ ↦ x := by
     refine isLittleO_iff.mpr fun c hc ↦ ?_

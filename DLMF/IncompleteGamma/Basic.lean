@@ -43,7 +43,8 @@ def upperIncGammaOnLog (a w : ℂ) : ℂ :=
 def lowerIncGammaOnLog (a w : ℂ) : ℂ :=
   Gamma a*exp (a*w)*scIncGamma a (exp w)
 
-/-- Analytically continued P; at nonpositive integral a it differs from the old totalized quotient. -/
+/-- Analytically continued P; at nonpositive integral a it differs from the old totalized quotient.
+-/
 @[dlmf 8.2.E4]
 def normIncGammaPContinued (a z : ℂ) : ℂ :=
   z^a*scIncGamma a z

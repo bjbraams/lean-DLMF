@@ -148,10 +148,12 @@ private lemma polylog_slitContinuation_spec (s : ℂ) :
 
 /-- On the cut plane, `Li_s(z) = z Φ(z, s, 1)` for any continuation `Φ(·, s, 1)` of Lerch's
 series. -/
-private lemma polylog_eq_mul_of_isLerchContinuation {s : ℂ} {F : ℂ → ℂ} (hF : IsLerchContinuation s 1 F) {z : ℂ}
+private lemma polylog_eq_mul_of_isLerchContinuation {s : ℂ} {F : ℂ → ℂ}
+    (hF : IsLerchContinuation s 1 F) {z : ℂ}
     (hz : z ∈ slitOne) : polylog s z = z * F z := by
   simp only [polylog, hz, ↓reduceIte]
-  refine eqOn_slitOne_of_eq_on_ball (polylog_slitContinuation_spec s).1 (analyticOnNhd_id.mul hF.1) (fun w hw => ?_) hz
+  refine eqOn_slitOne_of_eq_on_ball (polylog_slitContinuation_spec s).1 (analyticOnNhd_id.mul hF.1)
+      (fun w hw => ?_) hz
   rw [(polylog_slitContinuation_spec s).2 w hw]
   exact (hasSum_polylogSeries_of_hasSum_lerch (hF.2 w hw)).tsum_eq
 
@@ -314,7 +316,8 @@ theorem polylog_natCast_eq_polylogSeries {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz 
 
 /-- Real points accumulate: a property holding near `x₀` on `ℝ` holds frequently near `x₀`
 in `ℂ`. -/
-private lemma frequently_ofReal_of_eventually {P : ℂ → Prop} {x₀ : ℝ} (h : ∀ᶠ x : ℝ in 𝓝 x₀, P (x : ℂ)) :
+private lemma frequently_ofReal_of_eventually {P : ℂ → Prop} {x₀ : ℝ}
+    (h : ∀ᶠ x : ℝ in 𝓝 x₀, P (x : ℂ)) :
     ∃ᶠ z in 𝓝[≠] (x₀ : ℂ), P z := by
   have ht : Tendsto (fun x : ℝ => (x : ℂ)) (𝓝[≠] x₀) (𝓝[≠] (x₀ : ℂ)) :=
     tendsto_nhdsWithin_iff.mpr ⟨(continuous_ofReal.tendsto x₀).mono_left nhdsWithin_le_nhds,

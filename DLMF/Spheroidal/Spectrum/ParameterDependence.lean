@@ -68,19 +68,22 @@ private lemma differentiable_frobeniusShiftedCoeff (m : ℕ) (γ2 : ℂ) (k : �
         (h0.const_mul _)).div_const _
 
 /-- The derivative series `∑ (n+1) f_{n+1} uⁿ`. -/
-def frobeniusSeriesDeriv (m : ℕ) (γ2 c : ℂ) (u : ℂ) : ℂ := ∑' n : ℕ, ((n : ℂ) + 1) * frobeniusCoeff m γ2 c (n + 1) * u ^ n
+def frobeniusSeriesDeriv (m : ℕ) (γ2 c : ℂ) (u : ℂ) : ℂ := ∑' n : ℕ, ((n : ℂ) + 1) *
+    frobeniusCoeff m γ2 c (n + 1) * u ^ n
 
 /-- The derivative of the Frobenius series is the derivative series. -/
 private lemma deriv_frobeniusSeries (m : ℕ) (γ2 c : ℂ) {u : ℂ} (hu : ‖u‖ < 5 / 3) :
     deriv (frobeniusSeries m γ2 c) u = frobeniusSeriesDeriv m γ2 c u := by
   have hz : u ∈ Metric.eball (0 : ℂ) (ENNReal.ofReal (5 / 3)) := by
     rw [Metric.eball_ofReal, mem_ball_zero_iff]; exact hu
-  exact ((hasFPowerSeriesOnBall_frobeniusSeries m γ2 c).deriv_ofScalars.hasSum_mul_pow hz).tsum_eq.symm
+  exact ((hasFPowerSeriesOnBall_frobeniusSeries m γ2 c).deriv_ofScalars.hasSum_mul_pow
+      hz).tsum_eq.symm
 
 /-- The derivative of the Frobenius solution. -/
 theorem deriv_frobeniusSolution (m : ℕ) (γ2 c : ℂ) {z : ℂ} (hz : ‖z - 1‖ < 5 / 3) :
     deriv (frobeniusSolution m γ2 c) z = frobeniusSeriesDeriv m γ2 c (z - 1) := by
-  rw [show frobeniusSolution m γ2 c = fun w => frobeniusSeries m γ2 c (w - 1) from rfl, deriv_comp_sub_one]
+  rw [show frobeniusSolution m γ2 c = fun w => frobeniusSeries m γ2 c (w - 1) from rfl,
+      deriv_comp_sub_one]
   exact deriv_frobeniusSeries m γ2 c hz
 
 /-- Summability of `(n+1) rⁿ` for `0 ≤ r < 1`. -/
@@ -93,13 +96,15 @@ private lemma summable_succ_mul_pow {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
 /-- Joint continuity of the Frobenius series and its derivative series in `(c, u)`. -/
 private lemma continuousOn_frobeniusSeries_and_deriv (m : ℕ) (γ2 : ℂ) :
     ContinuousOn (fun p : ℂ × ℂ => frobeniusSeries m γ2 p.1 p.2) (univ ×ˢ Metric.ball 0 (3 / 2)) ∧
-    ContinuousOn (fun p : ℂ × ℂ => frobeniusSeriesDeriv m γ2 p.1 p.2) (univ ×ˢ Metric.ball 0 (3 / 2)) := by
+    ContinuousOn (fun p : ℂ × ℂ => frobeniusSeriesDeriv m γ2 p.1 p.2)
+        (univ ×ˢ Metric.ball 0 (3 / 2)) := by
   have key : ∀ p₀ : ℂ × ℂ, p₀ ∈ univ ×ˢ Metric.ball (0 : ℂ) (3 / 2) →
       ContinuousAt (fun p : ℂ × ℂ => frobeniusSeries m γ2 p.1 p.2) p₀ ∧
       ContinuousAt (fun p : ℂ × ℂ => frobeniusSeriesDeriv m γ2 p.1 p.2) p₀ := by
     rintro ⟨c₀, u₀⟩ ⟨-, hu₀⟩
     set K := ‖c₀‖ + 1
-    obtain ⟨C, hC0, hC⟩ := exists_norm_frobeniusCoeff_le_geometric m γ2 (by positivity : (0 : ℝ) ≤ K)
+    obtain ⟨C, hC0, hC⟩ :=
+        exists_norm_frobeniusCoeff_le_geometric m γ2 (by positivity : (0 : ℝ) ≤ K)
     set s : Set (ℂ × ℂ) := Metric.ball 0 K ×ˢ Metric.ball 0 (3 / 2)
     have hs : s ∈ 𝓝 (c₀, u₀) :=
       prod_mem_nhds (Metric.isOpen_ball.mem_nhds (by simp [K])) (Metric.isOpen_ball.mem_nhds hu₀)
@@ -146,12 +151,14 @@ private lemma continuousOn_frobeniusSeries_and_deriv (m : ℕ) (γ2 : ℂ) :
 
 /-- `c ↦ F(c, u)` and `c ↦ D(c, u)` are entire for `‖u‖ ≤ 1`. -/
 theorem differentiable_frobeniusSeries_and_deriv_param (m : ℕ) (γ2 : ℂ) {u : ℂ} (hu : ‖u‖ ≤ 1) :
-    Differentiable ℂ (fun c => frobeniusSeries m γ2 c u) ∧ Differentiable ℂ (fun c => frobeniusSeriesDeriv m γ2 c u) := by
+    Differentiable ℂ (fun c => frobeniusSeries m γ2 c u) ∧
+        Differentiable ℂ (fun c => frobeniusSeriesDeriv m γ2 c u) := by
   have key : ∀ c₀ : ℂ, DifferentiableAt ℂ (fun c => frobeniusSeries m γ2 c u) c₀ ∧
       DifferentiableAt ℂ (fun c => frobeniusSeriesDeriv m γ2 c u) c₀ := by
     intro c₀
     set K := ‖c₀‖ + 1
-    obtain ⟨C, hC0, hC⟩ := exists_norm_frobeniusCoeff_le_geometric m γ2 (by positivity : (0 : ℝ) ≤ K)
+    obtain ⟨C, hC0, hC⟩ :=
+        exists_norm_frobeniusCoeff_le_geometric m γ2 (by positivity : (0 : ℝ) ≤ K)
     have hs : Metric.ball (0 : ℂ) K ∈ 𝓝 c₀ := Metric.isOpen_ball.mem_nhds (by simp [K])
     have hdB : ∀ n, Differentiable ℂ fun c => frobeniusCoeff m γ2 c n :=
       fun n => differentiable_frobeniusShiftedCoeff m γ2 (n + 2)
@@ -194,10 +201,12 @@ theorem differentiable_frobeniusSeries_and_deriv_param (m : ℕ) (γ2 : ℂ) {u 
 def shiftedEigenvalue (m : ℕ) (lam : ℝ) : ℂ := ((lam - (m : ℝ) * (m + 1) : ℝ) : ℂ)
 
 /-- The real Frobenius solution `x ↦ Y(x)` for real `λ`, `γ²`. -/
-def p3lyR (m : ℕ) (γr lam x : ℝ) : ℝ := (frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam) (x : ℂ)).re
+def p3lyR (m : ℕ) (γr lam x : ℝ) : ℝ :=
+    (frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam) (x : ℂ)).re
 
 /-- Its derivative. -/
-def p3lyR' (m : ℕ) (γr lam x : ℝ) : ℝ := (deriv (frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam)) (x : ℂ)).re
+def p3lyR' (m : ℕ) (γr lam x : ℝ) : ℝ :=
+    (deriv (frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam)) (x : ℂ)).re
 
 /-- The coefficients are real for real parameters. -/
 private lemma frobeniusCoeff_ofReal (m : ℕ) (γr cr : ℝ) (n : ℕ) :
@@ -205,7 +214,8 @@ private lemma frobeniusCoeff_ofReal (m : ℕ) (γr cr : ℝ) (n : ℕ) :
   (map_frobeniusShiftedCoeff Complex.ofRealHom m γr cr (n + 2)).symm
 
 /-- `‖x - 1‖ = |x - 1|` for real `x`. -/
-private lemma norm_ofReal_sub_one_lt_five_thirds {x : ℝ} (hx : |x - 1| < 5 / 3) : ‖(x : ℂ) - 1‖ < 5 / 3 := by
+private lemma norm_ofReal_sub_one_lt_five_thirds {x : ℝ} (hx : |x - 1| < 5 / 3) : ‖(x : ℂ) -
+    1‖ < 5 / 3 := by
   rw [show (x : ℂ) - 1 = ((x - 1 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
     Real.norm_eq_abs]; exact hx
 
@@ -213,7 +223,8 @@ private lemma norm_ofReal_sub_one_lt_five_thirds {x : ℝ} (hx : |x - 1| < 5 / 3
 theorem frobeniusSolution_ofReal (m : ℕ) (γr lam x : ℝ) :
     frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam) (x : ℂ) = (p3lyR m γr lam x : ℂ) := by
   have e : frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam) (x : ℂ) =
-      ((∑' n, frobeniusShiftedCoeff m γr (lam - (m : ℝ) * (m + 1)) (n + 2) * (x - 1) ^ n : ℝ) : ℂ) := by
+      ((∑' n, frobeniusShiftedCoeff m γr (lam - (m : ℝ) * (m + 1)) (n + 2) *
+          (x - 1) ^ n : ℝ) : ℂ) := by
     rw [Complex.ofReal_tsum]
     simp only [frobeniusSolution, frobeniusSeries, shiftedEigenvalue, frobeniusCoeff_ofReal]
     push_cast; rfl
@@ -221,7 +232,8 @@ theorem frobeniusSolution_ofReal (m : ℕ) (γr lam x : ℝ) :
 
 /-- Its derivative is real on the real axis for real parameters. -/
 theorem deriv_frobeniusSolution_ofReal (m : ℕ) (γr lam : ℝ) {x : ℝ} (hx : |x - 1| < 5 / 3) :
-    deriv (frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam)) (x : ℂ) = (p3lyR' m γr lam x : ℂ) := by
+    deriv (frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam)) (x : ℂ) =
+        (p3lyR' m γr lam x : ℂ) := by
   have e : deriv (frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam)) (x : ℂ) =
       ((∑' n : ℕ, ((n : ℝ) + 1) * frobeniusShiftedCoeff m γr (lam - (m : ℝ) * (m + 1)) (n + 1 + 2) *
         (x - 1) ^ n : ℝ) : ℂ) := by
@@ -268,7 +280,8 @@ theorem hasDerivAt_frobeniusReal_flux (m : ℕ) (γr lam : ℝ) {x : ℝ} (hx : 
   have e2 : ((m + 1 : ℕ) : ℂ) * (1 - (x : ℂ) ^ 2) ^ m * (-(2 * (x : ℂ))) * deriv Y x +
       (1 - (x : ℂ) ^ 2) ^ (m + 1) * deriv (deriv Y) x =
       (((-((lam - (m : ℝ) * (m + 1) + γr * (1 - x ^ 2)) * (1 - x ^ 2) ^ m)) : ℝ) : ℂ) * Y x := by
-    have hc : shiftedEigenvalue m lam = (lam : ℂ) - (m : ℂ) * ((m : ℂ) + 1) := by simp [shiftedEigenvalue]
+    have hc : shiftedEigenvalue m lam = (lam : ℂ) - (m : ℂ) * ((m : ℂ) + 1) :=
+        by simp [shiftedEigenvalue]
     push_cast
     linear_combination (1 - (x : ℂ) ^ 2) ^ m * eY - (1 - (x : ℂ) ^ 2) ^ m * Y x * hc
   rw [e2, Complex.re_ofReal_mul]
@@ -276,7 +289,8 @@ theorem hasDerivAt_frobeniusReal_flux (m : ℕ) (γr lam : ℝ) {x : ℝ} (hx : 
   ring
 
 /-- Zeros of the real Frobenius solution in `(-1/2, 3/2)` are simple. -/
-theorem frobeniusRealDeriv_ne_zero_of_frobeniusReal_eq_zero (m : ℕ) (γr lam : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1 / 2 : ℝ) (3 / 2))
+theorem frobeniusRealDeriv_ne_zero_of_frobeniusReal_eq_zero (m : ℕ) (γr lam : ℝ) {x : ℝ}
+    (hx : x ∈ Ioo (-1 / 2 : ℝ) (3 / 2))
     (h0 : p3lyR m γr lam x = 0) : p3lyR' m γr lam x ≠ 0 := by
   intro h1
   have hx' : |x - 1| < 5 / 3 := by rw [abs_lt]; constructor <;> linarith [hx.1, hx.2]
@@ -294,15 +308,18 @@ theorem frobeniusRealDeriv_ne_zero_of_frobeniusReal_eq_zero (m : ℕ) (γr lam :
       rw [frobeniusReal_one] at h0; exact one_ne_zero h0
     · linarith [hx.1]
   have hev : frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam) =ᶠ[𝓝 (x : ℂ)] fun _ => 0 :=
-    isFactorSolution_eventuallyEq_of_eq_of_deriv_eq (Metric.isOpen_ball.mem_nhds hxb) hx1 (hYa _ hxb) analyticAt_const
+    isFactorSolution_eventuallyEq_of_eq_of_deriv_eq (Metric.isOpen_ball.mem_nhds hxb) hx1
+        (hYa _ hxb) analyticAt_const
       (frobeniusSolution_isFactorSolution m _ _) (fun z _ => by simp)
-      (by rw [frobeniusSolution_ofReal, h0]; simp) (by rw [deriv_frobeniusSolution_ofReal m γr lam hx', h1]; simp)
+      (by rw [frobeniusSolution_ofReal, h0]; simp)
+          (by rw [deriv_frobeniusSolution_ofReal m γr lam hx', h1]; simp)
   have := hYa.eqOn_zero_of_preconnected_of_eventuallyEq_zero (convex_ball _ _).isPreconnected
     hxb hev (Metric.mem_ball_self (by norm_num) : (1 : ℂ) ∈ Metric.ball 1 (5 / 3))
   simp [frobeniusSolution_one] at this
 
 /-- Points of `(-1/2, 3/2)` lie within `3/2` of `1`. -/
-private lemma abs_sub_one_lt_three_halves_of_mem_Ioo {x : ℝ} (hx : x ∈ Ioo (-1 / 2 : ℝ) (3 / 2)) : |x - 1| < 3 / 2 := by
+private lemma abs_sub_one_lt_three_halves_of_mem_Ioo {x : ℝ}
+    (hx : x ∈ Ioo (-1 / 2 : ℝ) (3 / 2)) : |x - 1| < 3 / 2 := by
   rw [abs_lt]; constructor <;> linarith [hx.1, hx.2]
 
 /-- Joint continuity of the real solution and its derivative in `(λ, x)`. -/
@@ -330,7 +347,8 @@ theorem continuousOn_frobeniusReal_and_deriv (m : ℕ) (γr : ℝ) :
     rw [deriv_frobeniusSolution _ _ _ hx']
 
 /-- **Lower bound.** For `λ - m(m+1) < -|γ²|`, `Y(0) Y'(0) ≠ 0`. -/
-theorem frobeniusReal_mul_deriv_zero_ne_zero (m : ℕ) (γr lam : ℝ) (hc : lam - (m : ℝ) * (m + 1) < -|γr|) :
+theorem frobeniusReal_mul_deriv_zero_ne_zero (m : ℕ) (γr lam : ℝ)
+    (hc : lam - (m : ℝ) * (m + 1) < -|γr|) :
     p3lyR m γr lam 0 * p3lyR' m γr lam 0 ≠ 0 := by
   set y := p3lyR m γr lam
   set y' := p3lyR' m γr lam
@@ -341,7 +359,8 @@ theorem frobeniusReal_mul_deriv_zero_ne_zero (m : ℕ) (γr lam : ℝ) (hc : lam
   have hψ : ∀ t ∈ Icc (0 : ℝ) 1,
       HasDerivAt ψ ((1 - t ^ 2) ^ (m + 1) * y' t ^ 2 - q t * y t ^ 2) t := by
     intro t ht
-    have := (hasDerivAt_frobeniusReal m γr lam (hI t ht)).mul (hasDerivAt_frobeniusReal_flux m γr lam (hI t ht))
+    have := (hasDerivAt_frobeniusReal m γr lam (hI t ht)).mul
+        (hasDerivAt_frobeniusReal_flux m γr lam (hI t ht))
     exact this.congr_deriv (by simp only [q, y, y']; ring)
   have hq : ∀ t ∈ Icc (0 : ℝ) 1, q t ≤ 0 := by
     intro t ht
@@ -492,7 +511,8 @@ private lemma exists_strictMono_zeros_frobeniusReal (m : ℕ) (γr lam : ℝ) {J
     simp only [u]; ring
   have hv := fun x (hx : x ∈ Icc (0 : ℝ) (1 / 2)) => hasDerivAt_frobeniusReal m γr lam (x := x) (by
     rw [abs_lt]; constructor <;> linarith [hx.1, hx.2])
-  have hpv := fun x (hx : x ∈ Icc (0 : ℝ) (1 / 2)) => hasDerivAt_frobeniusReal_flux m γr lam (x := x) (by
+  have hpv := fun x (hx : x ∈ Icc (0 : ℝ) (1 / 2)) =>
+      hasDerivAt_frobeniusReal_flux m γr lam (x := x) (by
     rw [abs_lt]; constructor <;> linarith [hx.1, hx.2])
   have hzero : ∀ j : ℕ, j < J → ∃ x ∈ Ioo (xs j) (xs (j + 1)), p3lyR m γr lam x = 0 := by
     intro j hj
@@ -511,7 +531,8 @@ private lemma exists_strictMono_zeros_frobeniusReal (m : ℕ) (γr lam : ℝ) {J
     · have hx' := hsub (Ioo_subset_Icc_self hx)
       have hx0 : (0 : ℝ) < 1 - x ^ 2 := by nlinarith [hx'.1, hx'.2]
       have h34 : (3 / 4 : ℝ) ≤ 1 - x ^ 2 := by nlinarith [hx'.1, hx'.2]
-      have hρx := clampedWeight_mul_eq_one (m := m) (t := x) ⟨by linarith [hx'.1], by linarith [hx'.2]⟩
+      have hρx := clampedWeight_mul_eq_one (m := m) (t := x)
+          ⟨by linarith [hx'.1], by linarith [hx'.2]⟩
       have hPpos : 0 < (1 - x ^ 2) ^ (m + 1) := by positivity
       show w0 ^ 2 * ρ x < _
       have hρ' : ρ x = 1 / (1 - x ^ 2) ^ (m + 1) := by
@@ -579,12 +600,14 @@ private lemma exists_strictMono_zeros_frobeniusReal (m : ℕ) (γr lam : ℝ) {J
     linarith
 
 /-- Points of `(-1/2, 3/2)` lie within `5/3` of `1`. -/
-private lemma abs_sub_one_lt_five_thirds_of_mem_Ioo {x : ℝ} (hx : x ∈ Ioo (-1 / 2 : ℝ) (3 / 2)) : |x - 1| < 5 / 3 := by
+private lemma abs_sub_one_lt_five_thirds_of_mem_Ioo {x : ℝ} (hx : x ∈ Ioo (-1 / 2 : ℝ) (3 / 2)) : |x
+    - 1| < 5 / 3 := by
   have := abs_sub_one_lt_three_halves_of_mem_Ioo hx; linarith
 
 /-- **Odd eigenvalues are unbounded** (Sturm oscillation and deformation): `Y(0) = 0` for
 arbitrarily large `λ`. -/
-private lemma exists_frobeniusReal_zero_eq_zero_gt (m : ℕ) (γr Λ₀ : ℝ) : ∃ lam > Λ₀, p3lyR m γr lam 0 = 0 := by
+private lemma exists_frobeniusReal_zero_eq_zero_gt (m : ℕ) (γr Λ₀ : ℝ) : ∃ lam > Λ₀,
+    p3lyR m γr lam 0 = 0 := by
   by_contra hcon
   push Not at hcon
   set U := Ioo (-1 / 2 : ℝ) (3 / 2)
@@ -621,11 +644,13 @@ private lemma exists_frobeniusReal_zero_eq_zero_gt (m : ℕ) (γr Λ₀ : ℝ) :
 
 /-- The spectrum of the factor equation with real parameters. -/
 def factorSpectrum (m : ℕ) (γr : ℝ) : Set ℝ :=
-  {lam | ∃ g : ℂ → ℂ, Differentiable ℂ g ∧ IsFactorSolution m (γr : ℂ) (shiftedEigenvalue m lam) univ g ∧ g ≠ 0}
+  {lam | ∃ g : ℂ → ℂ, Differentiable ℂ g ∧
+      IsFactorSolution m (γr : ℂ) (shiftedEigenvalue m lam) univ g ∧ g ≠ 0}
 
 /-- `Y(0) Y'(0)` is the real number `y(0) y'(0)`. -/
 theorem frobeniusSolution_mul_deriv_zero_eq_ofReal (m : ℕ) (γr lam : ℝ) :
-    frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam) 0 * deriv (frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam)) 0 =
+    frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam) 0 *
+        deriv (frobeniusSolution m (γr : ℂ) (shiftedEigenvalue m lam)) 0 =
       ((p3lyR m γr lam 0 * p3lyR' m γr lam 0 : ℝ) : ℂ) := by
   have h1 := frobeniusSolution_ofReal m γr lam 0
   have h2 := deriv_frobeniusSolution_ofReal m γr lam (x := 0) (by norm_num)
@@ -643,7 +668,8 @@ theorem factorSpectrum_infinite (m : ℕ) (γr : ℝ) : (factorSpectrum m γr).I
   exact absurd (hM hmem) (not_le.2 hlam)
 
 /-- The spectrum meets every `(-∞, x)` in a finite set (lower bound and analyticity in `λ`). -/
-theorem factorSpectrum_inter_Iio_finite (m : ℕ) (γr x : ℝ) : (factorSpectrum m γr ∩ Iio x).Finite := by
+theorem factorSpectrum_inter_Iio_finite (m : ℕ) (γr x : ℝ) :
+    (factorSpectrum m γr ∩ Iio x).Finite := by
   set L₀ := (m : ℝ) * (m + 1) - |γr|
   set g : ℝ → ℝ := fun lam => p3lyR m γr lam 0 * p3lyR' m γr lam 0
   set Gc : ℂ → ℂ := fun w => frobeniusSeries m (γr : ℂ) (w - (m : ℂ) * ((m : ℂ) + 1)) (-1) *

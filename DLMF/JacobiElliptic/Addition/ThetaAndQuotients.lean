@@ -87,7 +87,8 @@ private lemma jacobiThetaThreeTau_mul_jacobiThetaFourTau_eq_two_mul (z w τ : �
   have h := DLMF.Theta.jacobiThetaThreeTau_mul_jacobiThetaThreeTau z (w + π / 2) τ hτ
   rw [jacobiThetaThreeTau_add_pi_div_two, show z + (w + π / 2) = (z + w) + π / 2 by ring,
     show z - (w + π / 2) = (z - w) - π / 2 by ring, jacobiThetaThreeTau_add_pi_div_two,
-    jacobiThetaThreeTau_sub_pi_div_two, jacobiThetaTwoTau_add_pi_div_two, jacobiThetaTwoTau_sub_pi_div_two] at h
+    jacobiThetaThreeTau_sub_pi_div_two, jacobiThetaTwoTau_add_pi_div_two,
+        jacobiThetaTwoTau_sub_pi_div_two] at h
   linear_combination h
 
 /-- Mixed addition identity (pairs `{3,4}`, `{1,2}`). -/
@@ -176,8 +177,10 @@ theorem jacobiThetaTwoTau_add_mul_jacobiThetaThreeTau_sub (x y τ : ℂ) (hτ : 
   have h := jacobiThetaOneTau_add_mul_jacobiThetaFourTau_sub x (y + π / 2) τ hτ
   rw [show x + (y + π / 2) = (x + y) + π / 2 by ring,
     show x - (y + π / 2) = (x - y) - π / 2 by ring,
-    jacobiThetaOneTau_add_pi_div_two, jacobiThetaFourTau_sub_pi_div_two, jacobiThetaOneTau_add_pi_div_two,
-    jacobiThetaTwoTau_add_pi_div_two, jacobiThetaThreeTau_add_pi_div_two, jacobiThetaFourTau_add_pi_div_two] at h
+    jacobiThetaOneTau_add_pi_div_two, jacobiThetaFourTau_sub_pi_div_two,
+        jacobiThetaOneTau_add_pi_div_two,
+    jacobiThetaTwoTau_add_pi_div_two, jacobiThetaThreeTau_add_pi_div_two,
+        jacobiThetaFourTau_add_pi_div_two] at h
   linear_combination h
 
 /-- Identity under the stated parameter and domain assumptions: `θ₂ 0 τ * θ₃ 0 τ * (θ₃ (x + y) τ *
@@ -218,8 +221,10 @@ theorem jacobiThetaOneTau_add_mul_jacobiThetaThreeTau_sub (x y τ : ℂ) (hτ : 
   have h := jacobiThetaTwoTau_add_mul_jacobiThetaFourTau_sub x (y + π / 2) τ hτ
   rw [show x + (y + π / 2) = (x + y) + π / 2 by ring,
     show x - (y + π / 2) = (x - y) - π / 2 by ring,
-    jacobiThetaTwoTau_add_pi_div_two, jacobiThetaFourTau_sub_pi_div_two, jacobiThetaOneTau_add_pi_div_two,
-    jacobiThetaTwoTau_add_pi_div_two, jacobiThetaThreeTau_add_pi_div_two, jacobiThetaFourTau_add_pi_div_two] at h
+    jacobiThetaTwoTau_add_pi_div_two, jacobiThetaFourTau_sub_pi_div_two,
+        jacobiThetaOneTau_add_pi_div_two,
+    jacobiThetaTwoTau_add_pi_div_two, jacobiThetaThreeTau_add_pi_div_two,
+        jacobiThetaFourTau_add_pi_div_two] at h
   linear_combination -h
 
 /-- Identity under the stated parameter and domain assumptions: `θ₂ 0 τ * θ₄ 0 τ * (θ₃ (x + y) τ *
@@ -245,7 +250,8 @@ private lemma jacobiThetaFourTau_add_mul_jacobiThetaThreeTau_sub (x y τ : ℂ) 
 /-- Identity under the stated parameter and domain assumptions: `jacobiThetaShiftFactor (x + y) τ *
 jacobiThetaShiftFactor (x - y) τ = jacobiThetaShiftFactor x τ ^ 2`. -/
 private lemma jacobiThetaShiftFactor_add_mul_sub (x y τ : ℂ) :
-    jacobiThetaShiftFactor (x + y) τ * jacobiThetaShiftFactor (x - y) τ = jacobiThetaShiftFactor x τ ^ 2 := by
+    jacobiThetaShiftFactor (x + y) τ * jacobiThetaShiftFactor (x - y) τ =
+        jacobiThetaShiftFactor x τ ^ 2 := by
   simp only [jacobiThetaShiftFactor, sq, ← exp_add]; congr 1; ring
 
 /-- Identity under the stated parameter and domain assumptions: `θ₃ 0 τ * θ₄ 0 τ * (θ₂ (x + y) τ *
@@ -256,7 +262,8 @@ lemma jacobiThetaTwoTau_add_mul_jacobiThetaOneTau_sub (x y τ : ℂ) (hτ : 0 < 
   have h := jacobiThetaThreeTau_add_mul_jacobiThetaFourTau_sub (x + π * τ / 2) y τ hτ
   rw [show x + π * τ / 2 + y = (x + y) + π * τ / 2 by ring,
     show x + π * τ / 2 - y = (x - y) + π * τ / 2 by ring, jacobiThetaThreeTau_add_pi_mul_div_two,
-    jacobiThetaFourTau_add_pi_mul_div_two, jacobiThetaThreeTau_add_pi_mul_div_two, jacobiThetaFourTau_add_pi_mul_div_two,
+    jacobiThetaFourTau_add_pi_mul_div_two, jacobiThetaThreeTau_add_pi_mul_div_two,
+        jacobiThetaFourTau_add_pi_mul_div_two,
     jacobiThetaOneTau_add_pi_mul_div_two, jacobiThetaTwoTau_add_pi_mul_div_two] at h
   have hm := jacobiThetaShiftFactor_add_mul_sub x y τ
   have hS : I * jacobiThetaShiftFactor x τ ^ 2 ≠ 0 :=
@@ -290,7 +297,8 @@ theorem jacobiThetaTau_zero_ne_zero_and_pow_four :
 
 /-- Identity under the stated parameter and domain assumptions: `θ₃ 0 τ ^ 2 * (θ₃ (x + y) τ * θ₃
 (x - y) τ) = θ₃ x τ ^ 2 * θ₃ y τ ^ 2 + θ₁ x τ ^ 2 * θ₁ y τ ^ 2`. -/
-theorem jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub : θ₃ 0 τ ^ 2 * (θ₃ (x + y) τ * θ₃ (x - y) τ) =
+theorem jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub : θ₃ 0 τ ^ 2 *
+    (θ₃ (x + y) τ * θ₃ (x - y) τ) =
     θ₃ x τ ^ 2 * θ₃ y τ ^ 2 + θ₁ x τ ^ 2 * θ₁ y τ ^ 2 := by
   have h := DLMF.Theta.jacobiThetaThreeTau_add_mul_sub x y τ hτ
   have ex := DLMF.Theta.jacobiTheta_sq_three_four x τ hτ
@@ -303,7 +311,8 @@ theorem jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub : θ₃ 0 τ ^ 2 * (
 
 /-- Identity under the stated parameter and domain assumptions: `θ₂ 0 τ ^ 2 * (θ₂ (x + y) τ * θ₂
 (x - y) τ) = θ₂ x τ ^ 2 * θ₂ y τ ^ 2 - θ₁ x τ ^ 2 * θ₁ y τ ^ 2`. -/
-theorem jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub : θ₂ 0 τ ^ 2 * (θ₂ (x + y) τ * θ₂ (x - y) τ) =
+theorem jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub : θ₂ 0 τ ^ 2 *
+    (θ₂ (x + y) τ * θ₂ (x - y) τ) =
     θ₂ x τ ^ 2 * θ₂ y τ ^ 2 - θ₁ x τ ^ 2 * θ₁ y τ ^ 2 := by
   have h := DLMF.Theta.jacobiThetaTwoTau_add_mul_sub x y τ hτ
   have ex := DLMF.Theta.jacobiTheta_sq_two_four x τ hτ
@@ -316,7 +325,8 @@ theorem jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub : θ₂ 0 τ ^ 2 * (θ�
 
 /-- Identity under the stated parameter and domain assumptions: `θ₂ 0 τ ^ 2 * (θ₁ (x + y) τ * θ₁
 (x - y) τ) = θ₁ x τ ^ 2 * θ₂ y τ ^ 2 - θ₂ x τ ^ 2 * θ₁ y τ ^ 2`. -/
-private lemma jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two : θ₂ 0 τ ^ 2 * (θ₁ (x + y) τ * θ₁ (x - y) τ) =
+private lemma jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two : θ₂ 0 τ ^ 2 *
+    (θ₁ (x + y) τ * θ₁ (x - y) τ) =
     θ₁ x τ ^ 2 * θ₂ y τ ^ 2 - θ₂ x τ ^ 2 * θ₁ y τ ^ 2 := by
   have h := DLMF.Theta.jacobiThetaOneTau_add_mul_sub x y τ hτ
   have ex := DLMF.Theta.jacobiTheta_sq_two_three x τ hτ
@@ -329,7 +339,8 @@ private lemma jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two : θ₂ 0 τ ^
 
 /-- Identity under the stated parameter and domain assumptions: `θ₄ 0 τ ^ 2 * (θ₁ (x + y) τ * θ₁
 (x - y) τ) = θ₁ x τ ^ 2 * θ₄ y τ ^ 2 - θ₄ x τ ^ 2 * θ₁ y τ ^ 2`. -/
-lemma jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_four : θ₄ 0 τ ^ 2 * (θ₁ (x + y) τ * θ₁ (x - y) τ) =
+lemma jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_four : θ₄ 0 τ ^ 2 *
+    (θ₁ (x + y) τ * θ₁ (x - y) τ) =
     θ₁ x τ ^ 2 * θ₄ y τ ^ 2 - θ₄ x τ ^ 2 * θ₁ y τ ^ 2 := by
   have h := jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ
   have ex := DLMF.Theta.jacobiTheta_sq_two_four x τ hτ
@@ -343,7 +354,8 @@ lemma jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_four : θ₄ 0 τ ^ 2 * (�
 /-- Identity under the stated parameter and domain assumptions: `θ₄ 0 τ ^ 4 * (θ₂ (x + y) τ * θ₂
 (x - y) τ) = θ₂ 0 τ ^ 2 * (θ₄ x τ ^ 2 * θ₄ y τ ^ 2) - θ₃ 0 τ ^ 2 * (θ₁ x τ ^ 2 * θ₄ y τ ^ 2 +
 θ₄ x τ ^ 2 * θ₁ y τ ^ 2) + θ₂ 0 τ ^ 2 * (θ₁ x τ ^ 2 * θ₁ y τ ^ 2)`. -/
-lemma jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub_four : θ₄ 0 τ ^ 4 * (θ₂ (x + y) τ * θ₂ (x - y) τ) =
+lemma jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub_four : θ₄ 0 τ ^ 4 *
+    (θ₂ (x + y) τ * θ₂ (x - y) τ) =
     θ₂ 0 τ ^ 2 * (θ₄ x τ ^ 2 * θ₄ y τ ^ 2) -
       θ₃ 0 τ ^ 2 * (θ₁ x τ ^ 2 * θ₄ y τ ^ 2 + θ₄ x τ ^ 2 * θ₁ y τ ^ 2) +
       θ₂ 0 τ ^ 2 * (θ₁ x τ ^ 2 * θ₁ y τ ^ 2) := by
@@ -498,10 +510,12 @@ theorem jacobiCdk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
   have hD : (θ₃ (x + y) τ * θ₃ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination -jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ + θ₃ 0 τ ^ 2 * h0
+    linear_combination -jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ +
+        θ₃ 0 τ ^ 2 * h0
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₂ (x + y) τ * θ₂ 0 τ)) * jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ +
+  linear_combination (-(θ₂ (x + y) τ * θ₂ 0 τ)) *
+      jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ +
     (θ₃ (x + y) τ * θ₃ 0 τ) * jacobiThetaTwoTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ
 
 /-- DLMF 22.8.5: an addition theorem for `sd`, at points `u`, `v` where the functions
@@ -534,10 +548,12 @@ theorem jacobiSdk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
   have hD : (θ₃ (x + y) τ * θ₃ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination -jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ + θ₃ 0 τ ^ 2 * h0
+    linear_combination -jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ +
+        θ₃ 0 τ ^ 2 * h0
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₂ 0 τ * θ₄ 0 τ * θ₁ (x + y) τ)) * jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ +
+  linear_combination (-(θ₂ 0 τ * θ₄ 0 τ * θ₁ (x + y) τ)) *
+      jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ +
     (θ₃ 0 τ ^ 2 * θ₃ (x + y) τ) * jacobiThetaOneTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ
 
 /-- DLMF 22.8.6: an addition theorem for `nd`, at points `u`, `v` where the functions
@@ -570,10 +586,12 @@ theorem jacobiNdk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
   have hD : (θ₃ (x + y) τ * θ₃ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination -jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ + θ₃ 0 τ ^ 2 * h0
+    linear_combination -jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ +
+        θ₃ 0 τ ^ 2 * h0
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₄ (x + y) τ * θ₄ 0 τ)) * jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ +
+  linear_combination (-(θ₄ (x + y) τ * θ₄ 0 τ)) *
+      jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ +
     (θ₃ (x + y) τ * θ₃ 0 τ) * jacobiThetaFourTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ
 
 /-- DLMF 22.8.7: an addition theorem for `dc`, at points `u`, `v` where the functions
@@ -609,7 +627,8 @@ theorem jacobiDck_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     linear_combination -jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ + θ₂ 0 τ ^ 2 * h0
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₃ (x + y) τ * θ₃ 0 τ)) * jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
+  linear_combination (-(θ₃ (x + y) τ * θ₃ 0 τ)) *
+      jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
     (θ₂ (x + y) τ * θ₂ 0 τ) * jacobiThetaThreeTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ
 
 /-- DLMF 22.8.8: an addition theorem for `nc`, at points `u`, `v` where the functions
@@ -644,7 +663,8 @@ theorem jacobiNck_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     linear_combination -jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ + θ₂ 0 τ ^ 2 * h0
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₄ (x + y) τ * θ₄ 0 τ)) * jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
+  linear_combination (-(θ₄ (x + y) τ * θ₄ 0 τ)) *
+      jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
     (θ₂ (x + y) τ * θ₂ 0 τ) * jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ
 
 /-- DLMF 22.8.9: an addition theorem for `sc`, at points `u`, `v` where the functions
@@ -679,7 +699,8 @@ theorem jacobiSck_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     linear_combination -jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ + θ₂ 0 τ ^ 2 * h0
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₃ 0 τ * θ₄ 0 τ * θ₁ (x + y) τ)) * jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
+  linear_combination (-(θ₃ 0 τ * θ₄ 0 τ * θ₁ (x + y) τ)) *
+      jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
     (θ₂ 0 τ ^ 2 * θ₂ (x + y) τ) * jacobiThetaOneTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ
 
 /-- DLMF 22.8.10: an addition theorem for `ns`, at points `u`, `v` where the functions
@@ -710,10 +731,12 @@ theorem jacobiNsk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
   have hD : (θ₁ (x + y) τ * θ₁ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination θ₄ 0 τ ^ 2 * (-jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ + θ₂ 0 τ ^ 2 * h0)
+    linear_combination θ₄ 0 τ ^ 2 *
+        (-jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ + θ₂ 0 τ ^ 2 * h0)
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₄ (x + y) τ * θ₃ 0 τ)) * jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ +
+  linear_combination (-(θ₄ (x + y) τ * θ₃ 0 τ)) *
+      jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ +
     (θ₂ 0 τ * θ₁ (x + y) τ) * jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ
 
 /-- DLMF 22.8.11: an addition theorem for `ds`, at points `u`, `v` where the functions
@@ -744,10 +767,12 @@ theorem jacobiDsk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
   have hD : (θ₁ (x + y) τ * θ₁ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination θ₄ 0 τ ^ 2 * (-jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ + θ₂ 0 τ ^ 2 * h0)
+    linear_combination θ₄ 0 τ ^ 2 *
+        (-jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ + θ₂ 0 τ ^ 2 * h0)
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₃ (x + y) τ * θ₄ 0 τ)) * jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ +
+  linear_combination (-(θ₃ (x + y) τ * θ₄ 0 τ)) *
+      jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ +
     (θ₂ 0 τ * θ₁ (x + y) τ) * jacobiThetaThreeTau_add_mul_jacobiThetaOneTau_sub x y τ hτ
 
 /-- DLMF 22.8.12: an addition theorem for `cs`, at points `u`, `v` where the functions
@@ -778,10 +803,12 @@ theorem jacobiCsk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
   have hD : (θ₁ (x + y) τ * θ₁ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination θ₄ 0 τ ^ 2 * (-jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ + θ₂ 0 τ ^ 2 * h0)
+    linear_combination θ₄ 0 τ ^ 2 *
+        (-jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ + θ₂ 0 τ ^ 2 * h0)
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₂ (x + y) τ * θ₃ 0 τ * θ₄ 0 τ)) * jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ +
+  linear_combination (-(θ₂ (x + y) τ * θ₃ 0 τ * θ₄ 0 τ)) *
+      jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_two x y τ hτ +
     (θ₂ 0 τ ^ 2 * θ₁ (x + y) τ) * jacobiThetaTwoTau_add_mul_jacobiThetaOneTau_sub x y τ hτ
 
 end DLMF.JacobiElliptic

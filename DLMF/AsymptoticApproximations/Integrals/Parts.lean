@@ -122,10 +122,11 @@ private theorem laplace_derivatives_exp_bound {q : ℝ → ℂ} {n : ℕ} {σ α
   obtain ⟨M, _, hb⟩ := hdown (n - k) k (by omega)
   exact ⟨M, hb⟩
 
-/-- DLMF 2.3.3 and the bound after it: let `q` be infinitely differentiable on `[0, ∞)`, and let `σ` bound `t⁻¹ ln|q^{(n)}(t)/q^{(n)}(0)|` on `(0, ∞)`, that is,
-`|q^{(n)}(t)| ≤ |q^{(n)}(0)| e^{σt}` (DLMF's `σₙ` of 2.3.3 is the least such `σ`). Then for
-`x > max(0, σ)` the `n`th error term of 2.3.2 is bounded by `|q^{(n)}(0)/(xⁿ(x - σ))|`. DLMF assumes `q^{(n)}(0) ≠ 0`; the bound holds
-without it (stronger than DLMF). -/
+/-- DLMF 2.3.3 and the bound after it: let `q` be infinitely differentiable on `[0, ∞)`, and let `σ`
+bound `t⁻¹ ln|q^{(n)}(t)/q^{(n)}(0)|` on `(0, ∞)`, that is, `|q^{(n)}(t)| ≤ |q^{(n)}(0)| e^{σt}`
+(DLMF's `σₙ` of 2.3.3 is the least such `σ`). Then for `x > max(0, σ)` the `n`th error term of 2.3.2
+is bounded by `|q^{(n)}(0)/(xⁿ(x - σ))|`. DLMF assumes `q^{(n)}(0) ≠ 0`; the bound holds without it
+(stronger than DLMF). -/
 @[dlmf 2.3.E3, dlmf 2.3.i]
 theorem laplace_error_bound {q : ℝ → ℂ} {n : ℕ} {σ x : ℝ} (hq : ContDiffOn ℝ ∞ q (Ici 0))
     (hσ : ∀ t, 0 < t →

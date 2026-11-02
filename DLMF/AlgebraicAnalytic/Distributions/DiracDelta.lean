@@ -105,7 +105,8 @@ theorem tendsto_gaussian_integral {φ : ℝ → ℂ} {a : ℝ} (hφ : Integrable
     (ha : ContinuousAt φ a) :
     Tendsto (fun n : ℕ => ∫ x, gaussianDeltaSeq n (x - a) * φ x) atTop (𝓝 (φ a)) := by
   have hmain := tendsto_integral_comp_smul_smul_of_integrable' (μ := volume)
-    (fun x => by unfold normalizedGaussian; positivity) integral_normalizedGaussian tendsto_norm_pow_mul_normalizedGaussian hφ ha
+    (fun x => by unfold normalizedGaussian; positivity) integral_normalizedGaussian
+        tendsto_norm_pow_mul_normalizedGaussian hφ ha
   have hs : Tendsto (fun n : ℕ => Real.sqrt n) atTop atTop :=
     Real.tendsto_sqrt_atTop.comp tendsto_natCast_atTop_atTop
   refine (hmain.comp hs).congr fun n => ?_

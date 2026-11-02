@@ -9,6 +9,10 @@ public import DLMF.Coulomb.Basic.AuxiliaryData
 public import DLMF.Coulomb.Basic.Properties
 public import DLMF.Confluent.CoulombIrregular
 public import DLMF.Confluent.Whittaker
+public import DLMF.Confluent.Regularized
+public import DLMF.Confluent.BasicProperties.Wronskians
+public import DLMF.Confluent.Integrals.HankelKernels
+public import DLMF.Gamma.Polygamma
 
 /-!
 # Coulomb functions `F_ℓ(η,ρ)`, `G_ℓ(η,ρ)`, `H^±_ℓ(η,ρ)`: basic properties
@@ -117,13 +121,93 @@ theorem ofReal_coulombF_eq_whittakerM_neg (ℓ : ℕ) (η ρ : ℝ) :
   linear_combination (coulombC ℓ η * exp (I * ρ) *
     kummerM (ℓ + 1 + I * η) (2 * ℓ + 2) (-(2 * I * ρ))) * hI.symm
 
+/-- `b = 2ℓ + 2` is not a nonpositive integer. -/
+private lemma two_mul_add_two_ne_neg_nat (ℓ : ℕ) : ∀ k : ℕ, (2 * (ℓ : ℂ) + 2) ≠ -(k : ℂ) := by
+  intro k hk
+  have := congrArg re hk
+  simp at this
+  linarith [(Nat.cast_nonneg ℓ : (0 : ℝ) ≤ ℓ), (Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
+
+/-- `ρ ↦ F_ℓ(η, ρ)` is real-analytic on `ℝ`. -/
+private lemma analyticAt_coulombF_rho (ℓ : ℕ) (η ρ : ℝ) : AnalyticAt ℝ (coulombF ℓ η) ρ := by
+  have hW : AnalyticAt ℂ (coulombWave ℓ (η : ℂ)) (ρ : ℂ) := by
+    unfold coulombWave
+    have hM := analyticOnNhd_kummerM (a := (ℓ : ℂ) + 1 - I * η) (two_mul_add_two_ne_neg_nat ℓ)
+      (2 * I * ρ) (mem_univ _)
+    have hM' : AnalyticAt ℂ (fun z : ℂ => kummerM ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) (2 * I * z))
+        (ρ : ℂ) := hM.comp (by fun_prop)
+    exact ((analyticAt_id.pow _).mul (by fun_prop)).mul hM'
+  have h1 : AnalyticAt ℝ (fun x : ℝ => coulombWave ℓ (η : ℂ) (x : ℂ)) ρ :=
+    hW.restrictScalars.comp (ofRealCLM.analyticAt ρ)
+  have h2 := (reCLM.analyticAt _).comp
+    ((analyticAt_const (v := ((coulombC ℓ η : ℝ) : ℂ))).mul h1)
+  refine h2.congr (Eventually.of_forall fun x => ?_)
+  simp [coulombF]
+
+/-- `η ↦ |Γ(ℓ+1+iη)|` is real-analytic on `ℝ`. -/
+private lemma analyticAt_norm_Gamma (ℓ : ℕ) (η : ℝ) :
+    AnalyticAt ℝ (fun x : ℝ => ‖Gamma ((ℓ : ℂ) + 1 + I * x)‖) η := by
+  have hre : ∀ x : ℝ, 0 < ((ℓ : ℂ) + 1 + I * x).re := by
+    intro x; simp; linarith [(Nat.cast_nonneg ℓ : (0 : ℝ) ≤ ℓ)]
+  have hs : ∀ m : ℕ, (ℓ : ℂ) + 1 + I * η ≠ -(m : ℂ) := by
+    intro m hm
+    have := hre η
+    rw [hm] at this
+    simp at this
+    linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]
+  set f : ℝ → ℂ := fun x => Gamma ((ℓ : ℂ) + 1 + I * x) with hf_def
+  have hf : AnalyticAt ℝ f η :=
+    (DLMF.Gamma.analyticAt_Gamma hs).restrictScalars.comp (f := fun x : ℝ => (ℓ : ℂ) + 1 + I * x)
+      (analyticAt_const.add (analyticAt_const.mul (ofRealCLM.analyticAt η)))
+  have hN : AnalyticAt ℝ (fun x => (f x).re ^ 2 + (f x).im ^ 2) η :=
+    (((reCLM.analyticAt _).comp hf).pow 2).add (((imCLM.analyticAt _).comp hf).pow 2)
+  have hpos : ∀ x : ℝ, 0 < (f x).re ^ 2 + (f x).im ^ 2 := by
+    intro x
+    have h0 : f x ≠ 0 := Gamma_ne_zero_of_re_pos (hre x)
+    have : 0 < ‖f x‖ ^ 2 := by positivity
+    rwa [Complex.sq_norm, normSq_apply, ← sq, ← sq] at this
+  have h := analyticAt_rexp.comp ((hN.log (hpos η)).div_const (c := 2))
+  refine h.congr (Eventually.of_forall fun x => ?_)
+  simp only [Function.comp_apply]
+  have h0 : f x ≠ 0 := Gamma_ne_zero_of_re_pos (hre x)
+  rw [show (f x).re ^ 2 + (f x).im ^ 2 = ‖f x‖ ^ 2 by
+    rw [Complex.sq_norm, normSq_apply, ← sq, ← sq], Real.log_pow,
+    show ((2 : ℕ) : ℝ) * Real.log ‖f x‖ / 2 = Real.log ‖f x‖ by push_cast; ring,
+    Real.exp_log (norm_pos_iff.mpr h0)]
+
+/-- `η ↦ F_ℓ(η, ρ)` is real-analytic on `ℝ`. -/
+private lemma analyticAt_coulombF_eta (ℓ : ℕ) (η ρ : ℝ) :
+    AnalyticAt ℝ (fun x => coulombF ℓ x ρ) η := by
+  have hb := two_mul_add_two_ne_neg_nat ℓ
+  have hW : AnalyticAt ℂ (fun e : ℂ => coulombWave ℓ e (ρ : ℂ)) (η : ℂ) := by
+    have hR := analyticOnNhd_regularizedConfluent_a (2 * (ℓ : ℂ) + 2) (2 * I * ρ)
+      ((ℓ : ℂ) + 1 - I * η) (mem_univ _)
+    have hR' : AnalyticAt ℂ (fun e : ℂ =>
+        regularizedHGFun {(ℓ : ℂ) + 1 - I * e} {2 * (ℓ : ℂ) + 2} (2 * I * ρ)) (η : ℂ) :=
+      hR.comp (f := fun e : ℂ => (ℓ : ℂ) + 1 - I * e) (by fun_prop)
+    refine ((analyticAt_const (v := (ρ : ℂ) ^ (ℓ + 1) * exp (-I * ρ))).mul
+      ((analyticAt_const (v := Gamma (2 * (ℓ : ℂ) + 2))).mul hR')).congr
+      (Eventually.of_forall fun e => ?_)
+    simp only [coulombWave]
+    rw [kummerM_eq_mul_regularizedHGFun hb]
+    simp only [Pi.mul_apply]
+  have h1 : AnalyticAt ℝ (fun x : ℝ => coulombWave ℓ (x : ℂ) (ρ : ℂ)) η :=
+    hW.restrictScalars.comp (ofRealCLM.analyticAt η)
+  have hC : AnalyticAt ℝ (fun x => coulombC ℓ x) η := by
+    unfold coulombC
+    have he : AnalyticAt ℝ (fun x : ℝ => Real.exp (-π * x / 2)) η :=
+      analyticAt_rexp.comp (f := fun x : ℝ => -π * x / 2) (by fun_prop)
+    exact ((analyticAt_const.mul he).mul (analyticAt_norm_Gamma ℓ η)).div_const
+  refine (hC.mul ((reCLM.analyticAt _).comp h1)).congr (Eventually.of_forall fun x => ?_)
+  simp [coulombF]
+
 /-- **Analyticity of `F_ℓ`** (DLMF §33.2(ii)): `F_ℓ(η,ρ)` is real (by definition here, see
 `ofReal_coulombF`) and analytic in `ρ` on `0 < ρ < ∞` and in `η ∈ ℝ`. -/
 @[dlmf 33.2.ii]
 theorem analytic_coulombF (ℓ : ℕ) :
     (∀ η : ℝ, AnalyticOnNhd ℝ (coulombF ℓ η) (Ioi 0)) ∧
-      ∀ ρ : ℝ, 0 < ρ → AnalyticOnNhd ℝ (fun η => coulombF ℓ η ρ) univ := by
-  sorry
+      ∀ ρ : ℝ, 0 < ρ → AnalyticOnNhd ℝ (fun η => coulombF ℓ η ρ) univ :=
+  ⟨fun η ρ _ => analyticAt_coulombF_rho ℓ η ρ, fun ρ _ η _ => analyticAt_coulombF_eta ℓ η ρ⟩
 
 /-! ### §33.2(iii) The irregular solutions -/
 
@@ -181,7 +265,8 @@ theorem coulombHMinus_eq_whittakerW (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 <
     exp (-I * ρ) * kummerU ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) (2 * I * ρ)) * hpow
 
 /-- `0 ≤ x - arctan x ≤ x³` for `x ≥ 0`. -/
-private lemma sub_arctan_le_pow_three_of_nonneg {x : ℝ} (hx : 0 ≤ x) : x - Real.arctan x ≤ x ^ 3 := by
+private lemma sub_arctan_le_pow_three_of_nonneg {x : ℝ} (hx : 0 ≤ x) : x -
+    Real.arctan x ≤ x ^ 3 := by
   let g : ℝ → ℝ := fun y => y ^ 3 - y + Real.arctan y
   have hd : ∀ y, HasDerivAt g (3 * y ^ 2 - 1 + 1 / (1 + y ^ 2)) y := by
     intro y
@@ -228,7 +313,8 @@ private lemma norm_div_succ_sub_arctan_le (η : ℝ) (n : ℕ) :
 /-- The series in the Weierstrass form of `phaseShift` converges. -/
 lemma summable_div_succ_sub_arctan (η : ℝ) :
     Summable (fun n : ℕ => η / ((n : ℝ) + 1) - Real.arctan (η / ((n : ℝ) + 1))) :=
-  Summable.of_norm_bounded (summable_pow_three_div_succ_pow_three |η|) (norm_div_succ_sub_arctan_le η)
+  Summable.of_norm_bounded (summable_pow_three_div_succ_pow_three |η|)
+      (norm_div_succ_sub_arctan_le η)
 
 /-- The series in the Weierstrass form of `phaseShift` is continuous in `η`. -/
 private lemma continuous_tsum_div_succ_sub_arctan :
@@ -397,6 +483,105 @@ theorem coulombHMinus_eq_conj_coulombHPlus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (h�
     coulombHMinus ℓ η ρ = conj (coulombHPlus ℓ η ρ) :=
   coulombHMinus_eq_conj ℓ η hρ
 
+/-- `z ↦ z^a U(a, b, z)` is analytic on the slit plane. -/
+private lemma analyticAt_cpow_mul_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    AnalyticAt ℂ (fun w => w ^ a * kummerU a b w) z := by
+  refine DifferentiableOn.analyticAt (s := slitPlane) ?_ (isOpen_slitPlane.mem_nhds hz)
+  exact (DifferentiableOn.cpow_const differentiableOn_id fun w hw => hw).mul
+    (differentiableOn_kummerU a b)
+
+/-- `ρ ↦ e^{iθ_ℓ(η,ρ)}` is real-analytic on `0 < ρ`. -/
+private lemma analyticAt_exp_coulombTheta (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) (s : ℂ) :
+    AnalyticAt ℝ (fun x : ℝ => exp (s * coulombTheta ℓ η x)) ρ := by
+  have hθ : AnalyticAt ℝ (fun x : ℝ => coulombTheta ℓ η x) ρ := by
+    unfold coulombTheta
+    have hl : AnalyticAt ℝ (fun x : ℝ => Real.log (2 * x)) ρ :=
+      (_root_.analyticAt_log (by positivity)).comp (f := fun x : ℝ => 2 * x) (by fun_prop)
+    exact (((analyticAt_id.sub (analyticAt_const.mul hl)).sub analyticAt_const).add
+      analyticAt_const)
+  exact analyticAt_cexp.restrictScalars.comp
+    (analyticAt_const.mul ((ofRealCLM.analyticAt _).comp hθ))
+
+/-- `x ↦ c x` is real-analytic as a map `ℝ → ℂ`. -/
+private lemma analyticAt_const_mul_ofReal (c : ℂ) (ρ : ℝ) :
+    AnalyticAt ℝ (fun x : ℝ => c * (x : ℂ)) ρ :=
+  analyticAt_const.mul (ofRealCLM.analyticAt ρ)
+
+/-- `ρ ↦ H^+_ℓ(η, ρ)` is real-analytic on `0 < ρ`. -/
+private lemma analyticAt_coulombHPlus_rho (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+    AnalyticAt ℝ (fun x : ℝ => coulombHPlus ℓ η x) ρ := by
+  have hz : -2 * I * (ρ : ℂ) ∈ slitPlane := Or.inr (by simp; exact hρ.ne')
+  have h1 := (analyticAt_cpow_mul_kummerU ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) hz).restrictScalars.comp
+    (f := fun x : ℝ => -2 * I * (x : ℂ)) (analyticAt_const_mul_ofReal (-2 * I) ρ)
+  refine ((analyticAt_exp_coulombTheta ℓ η hρ I).mul h1).congr
+    (Eventually.of_forall fun x => ?_)
+  simp only [coulombHPlus, Function.comp_apply, Pi.mul_apply]
+  ring
+
+/-- `ρ ↦ H^-_ℓ(η, ρ)` is real-analytic on `0 < ρ`. -/
+private lemma analyticAt_coulombHMinus_rho (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+    AnalyticAt ℝ (fun x : ℝ => coulombHMinus ℓ η x) ρ := by
+  have hz : 2 * I * (ρ : ℂ) ∈ slitPlane := Or.inr (by simp; exact hρ.ne')
+  have h1 := (analyticAt_cpow_mul_kummerU ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) hz).restrictScalars.comp
+    (f := fun x : ℝ => 2 * I * (x : ℂ)) (analyticAt_const_mul_ofReal (2 * I) ρ)
+  refine ((analyticAt_exp_coulombTheta ℓ η hρ (-I)).mul h1).congr
+    (Eventually.of_forall fun x => ?_)
+  simp only [coulombHMinus, Function.comp_apply, Pi.mul_apply]
+  ring
+
+/-- `η ↦ e^{-iσ_ℓ(η)} H^+_ℓ(η, ρ)` is real-analytic. -/
+private lemma analyticAt_exp_mul_coulombHPlus_eta (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) (η : ℝ) :
+    AnalyticAt ℝ (fun x : ℝ => exp (-(I * phaseShift ℓ x)) * coulombHPlus ℓ x ρ) η := by
+  have hz0 : -2 * I * (ρ : ℂ) ≠ 0 := by simp; exact hρ.ne'
+  set g : ℂ → ℂ := fun e => exp (I * (ρ - e * Real.log (2 * ρ) - ℓ * π / 2)) *
+    (-2 * I * (ρ : ℂ)) ^ ((ℓ : ℂ) + 1 + I * e) *
+      kummerU ((ℓ : ℂ) + 1 + I * e) (2 * ℓ + 2) (-2 * I * ρ) with hg_def
+  have hg : Differentiable ℂ g := by
+    have h1 : Differentiable ℂ fun e : ℂ => exp (I * (ρ - e * Real.log (2 * ρ) - ℓ * π / 2)) := by
+      fun_prop
+    have h2 : Differentiable ℂ fun e : ℂ => (-2 * I * (ρ : ℂ)) ^ ((ℓ : ℂ) + 1 + I * e) :=
+      (by fun_prop : Differentiable ℂ fun e : ℂ => (ℓ : ℂ) + 1 + I * e).const_cpow (Or.inl hz0)
+    have h3 : Differentiable ℂ fun e : ℂ =>
+        kummerU ((ℓ : ℂ) + 1 + I * e) (2 * ℓ + 2) (-2 * I * ρ) :=
+      (cfInt_differentiable_kummerU_fst (2 * ℓ + 2) hz0).comp
+        (f := fun e : ℂ => (ℓ : ℂ) + 1 + I * e) (by fun_prop)
+    exact (h1.mul h2).mul h3
+  refine ((hg.analyticAt (η : ℂ)).restrictScalars.comp (ofRealCLM.analyticAt η)).congr
+    (Eventually.of_forall fun x => ?_)
+  simp only [Function.comp_apply, hg_def, coulombHPlus, coulombTheta,
+    exp_neg, exp_I_phaseShift]
+  push_cast
+  rw [show I * (ρ - x * Real.log (2 * ρ) - ℓ * π / 2 + coulombSigma ℓ x) =
+    I * (ρ - x * Real.log (2 * ρ) - ℓ * π / 2) + I * coulombSigma ℓ x by ring, exp_add]
+  field_simp
+
+/-- `η ↦ e^{iσ_ℓ(η)} H^-_ℓ(η, ρ)` is real-analytic. -/
+private lemma analyticAt_exp_mul_coulombHMinus_eta (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) (η : ℝ) :
+    AnalyticAt ℝ (fun x : ℝ => exp (I * phaseShift ℓ x) * coulombHMinus ℓ x ρ) η := by
+  have hz0 : 2 * I * (ρ : ℂ) ≠ 0 := by simp; exact hρ.ne'
+  set g : ℂ → ℂ := fun e => exp (-I * (ρ - e * Real.log (2 * ρ) - ℓ * π / 2)) *
+    (2 * I * (ρ : ℂ)) ^ ((ℓ : ℂ) + 1 - I * e) *
+      kummerU ((ℓ : ℂ) + 1 - I * e) (2 * ℓ + 2) (2 * I * ρ) with hg_def
+  have hg : Differentiable ℂ g := by
+    have h1 : Differentiable ℂ fun e : ℂ =>
+        exp (-I * (ρ - e * Real.log (2 * ρ) - ℓ * π / 2)) := by
+      fun_prop
+    have h2 : Differentiable ℂ fun e : ℂ => (2 * I * (ρ : ℂ)) ^ ((ℓ : ℂ) + 1 - I * e) :=
+      (by fun_prop : Differentiable ℂ fun e : ℂ => (ℓ : ℂ) + 1 - I * e).const_cpow (Or.inl hz0)
+    have h3 : Differentiable ℂ fun e : ℂ =>
+        kummerU ((ℓ : ℂ) + 1 - I * e) (2 * ℓ + 2) (2 * I * ρ) :=
+      (cfInt_differentiable_kummerU_fst (2 * ℓ + 2) hz0).comp
+        (f := fun e : ℂ => (ℓ : ℂ) + 1 - I * e) (by fun_prop)
+    exact (h1.mul h2).mul h3
+  refine ((hg.analyticAt (η : ℂ)).restrictScalars.comp (ofRealCLM.analyticAt η)).congr
+    (Eventually.of_forall fun x => ?_)
+  simp only [Function.comp_apply, hg_def, coulombHMinus, coulombTheta, exp_I_phaseShift]
+  push_cast
+  rw [show -I * (ρ - x * Real.log (2 * ρ) - ℓ * π / 2 + coulombSigma ℓ x) =
+    -I * (ρ - x * Real.log (2 * ρ) - ℓ * π / 2) + -(I * coulombSigma ℓ x) by ring, exp_add,
+    exp_neg]
+  field_simp
+
 /-- **Analyticity of the irregular solutions** (DLMF §33.2(iii)): `H^±_ℓ` and `G_ℓ` are
 analytic in `ρ` on `0 < ρ < ∞`, and `e^{∓iσ_ℓ(η)} H^±_ℓ(η,ρ)` are analytic in `η ∈ ℝ`. -/
 @[dlmf 33.2.iii]
@@ -406,8 +591,12 @@ theorem analytic_coulombH (ℓ : ℕ) :
       AnalyticOnNhd ℝ (coulombG ℓ η) (Ioi 0)) ∧
     ∀ ρ : ℝ, 0 < ρ →
       AnalyticOnNhd ℝ (fun η : ℝ => exp (-(I * phaseShift ℓ η)) * coulombHPlus ℓ η ρ) univ ∧
-      AnalyticOnNhd ℝ (fun η : ℝ => exp (I * phaseShift ℓ η) * coulombHMinus ℓ η ρ) univ := by
-  sorry
+      AnalyticOnNhd ℝ (fun η : ℝ => exp (I * phaseShift ℓ η) * coulombHMinus ℓ η ρ) univ :=
+  ⟨fun η => ⟨fun _ hρ => analyticAt_coulombHPlus_rho ℓ η hρ,
+      fun _ hρ => analyticAt_coulombHMinus_rho ℓ η hρ,
+      fun _ hρ => (reCLM.analyticAt _).comp (analyticAt_coulombHPlus_rho ℓ η hρ)⟩,
+    fun _ hρ => ⟨fun η _ => analyticAt_exp_mul_coulombHPlus_eta ℓ hρ η,
+      fun η _ => analyticAt_exp_mul_coulombHMinus_eta ℓ hρ η⟩⟩
 
 /-! ### §33.4 Recurrence relations and derivatives -/
 
@@ -552,7 +741,8 @@ theorem deriv_coulombHPlus_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ
   have hz : (-2 * I * ρ : ℂ) ≠ 0 := slitPlane_ne_zero (neg_two_I_mul_mem_slitPlane hρ)
   have hr := kummerU_add_mul_kummerU_succ_succ ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) hz
   have hA := recurrenceR_mul_coulombAPlus_succ ℓ η
-  rw [(hasDerivAt_coulombHPlus_kummerU ℓ η hρ).deriv, coulombHPlus_eq ℓ η hρ, coulombHPlus_eq (ℓ + 1) η hρ,
+  rw [(hasDerivAt_coulombHPlus_kummerU ℓ η hρ).deriv, coulombHPlus_eq ℓ η hρ,
+      coulombHPlus_eq (ℓ + 1) η hρ,
     show ((ℓ + 1 : ℕ) : ℂ) + 1 + I * η = (ℓ : ℂ) + 1 + I * η + 1 by push_cast; ring,
     show 2 * ((ℓ + 1 : ℕ) : ℂ) + 2 = 2 * ℓ + 2 + 2 by push_cast; ring, recurrenceS]
   have hρ0 : (ρ : ℂ) ≠ 0 := by exact_mod_cast hρ.ne'

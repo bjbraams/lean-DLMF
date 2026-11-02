@@ -323,7 +323,8 @@ lemma X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int (n : ℕ) :
 theorem X_pow_eq_sum_stirlingSecond_mul_descPochhammer (R : Type*) [CommRing R] (n : ℕ) :
     (X : R[X]) ^ n =
       ∑ k ∈ range (n + 1), C (Nat.stirlingSecond n k : R) * descPochhammer R k := by
-  have := congrArg (Polynomial.map (Int.castRingHom R)) (X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int n)
+  have := congrArg (Polynomial.map (Int.castRingHom R))
+      (X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int n)
   simpa [Polynomial.map_sum, descPochhammer_map] using this
 
 /-- DLMF 26.8.10, `k = 0` form: `∑_{k=0}^n S(n, k) (x-k+1)_k = xⁿ` for all `n ≥ 0`. -/
@@ -354,7 +355,8 @@ theorem sum_Icc_stirlingSecond_mul_ascPochhammer {R : Type*} [CommRing R] {n : �
 /-! #### Helpers for 26.8.8–9 (agent p26a) -/
 
 /-- Coefficients of an everywhere absolutely convergent real power series are unique. -/
-private lemma eq_of_tsum_mul_pow_eq {a b : ℕ → ℝ} (ha : ∀ r : NNReal, Summable fun k => |a k| * (r : ℝ) ^ k)
+private lemma eq_of_tsum_mul_pow_eq {a b : ℕ → ℝ}
+    (ha : ∀ r : NNReal, Summable fun k => |a k| * (r : ℝ) ^ k)
     (hb : ∀ r : NNReal, Summable fun k => |b k| * (r : ℝ) ^ k)
     (h : ∀ y : ℝ, ∑' k, a k * y ^ k = ∑' k, b k * y ^ k) : a = b := by
   have hrad : ∀ c : ℕ → ℝ, (∀ r : NNReal, Summable fun k => |c k| * (r : ℝ) ^ k) →

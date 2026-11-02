@@ -11,6 +11,7 @@ public import DLMF.Weierstrass.Relations.ThetaIdentities
 public import DLMF.Theta.Products.InfiniteProducts
 public import DLMF.Theta.Products.LogDerivativesAndDoubleProducts
 public import DLMF.Elementary.Trigonometric.DirectIdentities
+public import DLMF.JacobiElliptic.EisensteinCotSeries
 
 /-!
 # Fourier series, series of cosecants, products and Laurent series of Weierstrass functions
@@ -98,7 +99,8 @@ theorem weierstrassZeta_fourier {z : ℂ} (hz : z ∉ H.lattice)
 
 
 
-/-- Compact subsets of the convergence strip admit a common summable bound for the zeta Fourier terms. -/
+/-- Compact subsets of the convergence strip admit a common summable bound for the zeta Fourier
+terms. -/
 private lemma weierstrassZeta_fourier_bound (H : HalfPeriods) {K : Set ℂ} (hK : IsCompact K)
     (hstrip : ∀ w ∈ K, |(w / H.ω₁).im| < 2 * H.tau.im) :
     ∃ u : ℕ → ℝ, Summable u ∧ ∀ n : ℕ, ∀ w ∈ K,
@@ -176,7 +178,8 @@ theorem weierstrassP_fourier {z : ℂ} (hz : z ∉ H.lattice) (hzi : |(z / H.ω�
         π / (2 * H.ω₁) * Complex.cot (π * w / (2 * H.ω₁)) := by
     filter_upwards [Metric.ball_mem_nhds z hε2] with w hw
     simpa only [T, mul_assoc] using (weierstrassZeta_fourier H
-      (hK w (Metric.ball_subset_closedBall hw)).1 (hK w (Metric.ball_subset_closedBall hw)).2).tsum_eq
+      (hK w (Metric.ball_subset_closedBall hw)).1
+          (hK w (Metric.ball_subset_closedBall hw)).2).tsum_eq
   have hsin := sin_fourierArgument_ne_zero H hz
   have hlin := ((hasDerivAt_id z).const_mul (π : ℂ)).div_const (2 * H.ω₁)
   have hcot := ((DLMF.Elementary.hasDerivAt_cot hsin).comp z hlin).const_mul
@@ -206,14 +209,122 @@ theorem weierstrassP_fourier {z : ℂ} (hz : z ∉ H.lattice) (hzi : |(z / H.ω�
 
 /-! ### Series of cosecants and cotangents (§23.8(ii)) -/
 
+open DLMF.JacobiElliptic in
+/-- `2ω₁t ∈ 𝕃` iff `t = m + nτ`. -/
+private lemma two_mul_ω₁_mul_mem_lattice_iff (t : ℂ) :
+    2 * H.ω₁ * t ∈ H.lattice ↔ t ∈ eisensteinSinLattice H.tau := by
+  have hω := H.ω₁_ne_zero
+  rw [PeriodPair.mem_lattice]
+  simp only [periodPair_ω₁, periodPair_ω₂, eisensteinSinLattice, Set.mem_ofPred_eq, tau]
+  constructor
+  · rintro ⟨m, n, h⟩; exact ⟨m, n, by field_simp; linear_combination -h / 2⟩
+  · rintro ⟨m, n, h⟩; exact ⟨m, n, by rw [h]; field_simp⟩
+
+/-- Meromorphy of `ζ`. -/
+private lemma meromorphicAt_weierstrassZeta' (L : PeriodPair) (a : ℂ) :
+    MeromorphicAt (DLMF.Weierstrass.weierstrassZeta L) a := by
+  by_cases ha : a ∈ L.lattice
+  · have h := (analyticAt_weierstrassZeta_sub L ha).meromorphicAt.add
+      ((MeromorphicAt.id a).sub (MeromorphicAt.const a a)).inv
+    convert h using 1; funext z; simp
+  · exact (analyticOnNhd_weierstrassZeta L a ha).meromorphicAt
+
+
+open DLMF.JacobiElliptic in
+/-- Off the lattice, `2ω₁ζ(2ω₁t) - 4ω₁η₁t` is the cotangent series `∑ₙ π cot(π(t - nτ))`
+(regularized), by the Liouville argument. -/
+private lemma weierstrassZeta_eq_eisensteinCotSeries {t : ℂ}
+    (ht : t ∉ eisensteinSinLattice H.tau) :
+    2 * H.ω₁ * H.weierstrassZeta (2 * H.ω₁ * t) - 4 * H.ω₁ * H.eta 1 * t =
+      eisensteinCotSeries 1 H.tau t := by
+  have hω := H.ω₁_ne_zero
+  have hω2 : 2 * H.ω₁ ≠ 0 := mul_ne_zero two_ne_zero hω
+  have hτ := H.tau_im_pos
+  set f : ℂ → ℂ := fun t => 2 * H.ω₁ * H.weierstrassZeta (2 * H.ω₁ * t) - 4 * H.ω₁ * H.eta 1 * t
+    with hfdef
+  have hlin : ∀ t, AnalyticAt ℂ (fun t : ℂ => 2 * H.ω₁ * t) t := fun t => by fun_prop
+  have key := eq_eisensteinCotSeries_of_quasiPeriodic_off_lattice (ε := 1) (Or.inl rfl) hτ
+    (f := f)
+    (fun t => by
+      refine ((MeromorphicAt.const _ _).mul ?_).sub (by fun_prop : AnalyticAt ℂ
+        (fun t : ℂ => 4 * H.ω₁ * H.eta 1 * t) t).meromorphicAt
+      exact (meromorphicAt_weierstrassZeta' H.periodPair _).comp_analyticAt (hlin t))
+    (fun t ht => by
+      have ht' : 2 * H.ω₁ * t ∉ H.lattice := fun h => ht ((H.two_mul_ω₁_mul_mem_lattice_iff t).mp h)
+      have := H.weierstrassZeta_add_two_mul_halfPeriod ht' (j := 1) (by simp)
+      simp only [hfdef, show 2 * H.ω₁ * (t + 1) = 2 * H.ω₁ * t + 2 * H.halfPeriod 1 by simp; ring,
+        this]
+      ring)
+    (fun t ht => by
+      have ht' : 2 * H.ω₁ * t ∉ H.lattice := fun h => ht ((H.two_mul_ω₁_mul_mem_lattice_iff t).mp h)
+      have := H.weierstrassZeta_add_two_mul_halfPeriod ht' (j := 3) (by simp)
+      have hL := H.legendre_relation.2.2
+      simp only [hfdef, show 2 * H.ω₁ * (t + H.tau) = 2 * H.ω₁ * t + 2 * H.halfPeriod 3 by
+        simp [tau]; field_simp, this]
+      have : H.ω₁ * H.tau = H.ω₃ := by simp [tau]; field_simp
+      simp only [halfPeriod_three] at *
+      linear_combination -4 * hL - 4 * H.eta 1 * this)
+    (fun t _ => by
+      simp only [hfdef, show 2 * H.ω₁ * -t = -(2 * H.ω₁ * t) by ring]
+      rw [HalfPeriods.weierstrassZeta, DLMF.Weierstrass.weierstrassZeta_neg]; ring)
+    (fun t ht => by
+      have ht' : 2 * H.ω₁ * t ∉ H.lattice := fun h => ht ((H.two_mul_ω₁_mul_mem_lattice_iff t).mp h)
+      exact (analyticAt_const.mul ((analyticOnNhd_weierstrassZeta H.periodPair _ ht').comp
+        (hlin t))).sub (by fun_prop))
+    (by
+      obtain ⟨B, hB, hevB⟩ := exists_analyticAt_pi_mul_cot_sub_one_div
+      have hA := analyticAt_weierstrassZeta_sub H.periodPair (w := 0) (zero_mem _)
+      refine ⟨fun t => 2 * H.ω₁ * (H.weierstrassZeta (2 * H.ω₁ * t) - 1 / (2 * H.ω₁ * t - 0)) -
+        4 * H.ω₁ * H.eta 1 * t - B t, ?_, ?_⟩
+      · exact ((analyticAt_const.mul (hA.comp_of_eq (hlin 0) (by simp))).sub
+          (by fun_prop)).sub hB
+      · filter_upwards [hevB, self_mem_nhdsWithin] with t h1 h2
+        have h2' : t ≠ 0 := h2
+        simp only [hfdef]
+        rw [← h1]
+        field_simp
+        ring)
+  exact key t ht
+
 /-- DLMF 23.8.3: `℘(z) = -η₁/ω₁ + (π²/(4ω₁²)) ∑_{n ∈ ℤ} csc²(π(z + 2nω₃)/(2ω₁))`, `z ∉ 𝕃`. -/
 @[dlmf 23.8.E3]
 theorem weierstrassP_csc_series {z : ℂ} (hz : z ∉ H.lattice) :
     HasSum (fun n : ℤ ↦ π ^ 2 / (4 * H.ω₁ ^ 2) *
         (1 / Complex.sin (π * (z + 2 * n * H.ω₃) / (2 * H.ω₁)) ^ 2))
       (H.weierstrassP z + H.eta 1 / H.ω₁) := by
-  sorry
+  have hω := H.ω₁_ne_zero
+  have hτ := H.tau_im_pos
+  obtain ⟨t, rfl⟩ : ∃ t, z = 2 * H.ω₁ * t := ⟨z / (2 * H.ω₁), by field_simp⟩
+  have ht : t ∉ DLMF.JacobiElliptic.eisensteinSinLattice H.tau := fun h =>
+    hz ((H.two_mul_ω₁_mul_mem_lattice_iff t).mpr h)
+  have hopen : IsOpen {s : ℂ | 2 * H.ω₁ * s ∉ H.lattice} :=
+    (H.periodPair.isClosed_lattice.isOpen_compl).preimage (by fun_prop)
+  have hev : (fun s => 2 * H.ω₁ * H.weierstrassZeta (2 * H.ω₁ * s) - 4 * H.ω₁ * H.eta 1 * s) =ᶠ[𝓝 t]
+      DLMF.JacobiElliptic.eisensteinCotSeries 1 H.tau := by
+    filter_upwards [hopen.mem_nhds hz] with s hs
+    exact H.weierstrassZeta_eq_eisensteinCotSeries fun h =>
+      hs ((H.two_mul_ω₁_mul_mem_lattice_iff s).mpr h)
+  have hd : HasDerivAt (fun s => 2 * H.ω₁ * H.weierstrassZeta (2 * H.ω₁ * s) -
+      4 * H.ω₁ * H.eta 1 * s) (2 * H.ω₁ * (-H.weierstrassP (2 * H.ω₁ * t) * (2 * H.ω₁)) -
+        4 * H.ω₁ * H.eta 1) t := by
+    have h1 := (hasDerivAt_weierstrassZeta H.periodPair hz).comp t
+      ((hasDerivAt_id t).const_mul (2 * H.ω₁))
+    simp only [mul_one] at h1
+    exact (h1.const_mul (2 * H.ω₁)).sub (by
+      simpa using (hasDerivAt_id t).const_mul (4 * H.ω₁ * H.eta 1))
+  have h := DLMF.JacobiElliptic.hasSum_pi_sq_div_sin_sq (ε := 1) (Or.inl rfl) hτ ht
+  rw [← hev.deriv_eq, hd.deriv] at h
+  rw [← (Equiv.neg ℤ).hasSum_iff] at h
+  convert h.div_const (4 * H.ω₁ ^ 2) using 1
+  · funext n
+    simp only [Function.comp_apply, Equiv.neg_apply, one_zpow, one_mul]
+    rw [show π * (2 * H.ω₁ * t + 2 * n * H.ω₃) / (2 * H.ω₁) =
+        π * (t - ((-n : ℤ) : ℂ) * H.tau) by push_cast; simp only [tau]; field_simp; ring]
+    field_simp
+  · field_simp
+    ring
 
+open DLMF.JacobiElliptic in
 /-- DLMF 23.8.4: `ζ(z) = η₁z/ω₁ + (π/(2ω₁)) ∑_{n ∈ ℤ} cot(π(z + 2nω₃)/(2ω₁))` with the terms
 `n` and `-n` bracketed (Eisenstein summation), `z ∉ 𝕃`. -/
 @[dlmf 23.8.E4]
@@ -223,7 +334,36 @@ theorem weierstrassZeta_cot_series {z : ℂ} (hz : z ∉ H.lattice) :
           Complex.cot (π * (z - 2 * (n + 1) * H.ω₃) / (2 * H.ω₁))))
       (H.weierstrassZeta z - H.eta 1 * z / H.ω₁ -
         π / (2 * H.ω₁) * Complex.cot (π * z / (2 * H.ω₁))) := by
-  sorry
+  have hω := H.ω₁_ne_zero
+  have hτ := H.tau_im_pos
+  obtain ⟨t, rfl⟩ : ∃ t, z = 2 * H.ω₁ * t := ⟨z / (2 * H.ω₁), by field_simp⟩
+  have ht : t ∉ eisensteinSinLattice H.tau := fun h =>
+    hz ((H.two_mul_ω₁_mul_mem_lattice_iff t).mpr h)
+  have hft := H.weierstrassZeta_eq_eisensteinCotSeries ht
+  have hN := hasSum_nat_add_neg_succ_of_hasSum
+    (summable_eisensteinCotTerm (ε := 1) (Or.inl rfl) hτ t).hasSum
+  rw [show (∑' n : ℤ, eisensteinCotTerm 1 H.tau n t) = eisensteinCotSeries 1 H.tau t from rfl,
+    ← hft] at hN
+  have hτω : H.ω₁ * H.tau = H.ω₃ := by simp [tau]; field_simp
+  convert hN.div_const (2 * H.ω₁) using 1
+  · funext n
+    have hs1 : Int.sign ((n : ℤ) + 1) = 1 := Int.sign_eq_one_of_pos (by omega)
+    have hs2 : Int.sign (-((n : ℤ) + 1)) = -1 := Int.sign_eq_neg_one_of_neg (by omega)
+    simp only [eisensteinCotTerm, one_zpow, one_mul, hs1, hs2]
+    rw [show π * (2 * H.ω₁ * t + 2 * (n + 1) * H.ω₃) / (2 * H.ω₁) =
+        π * (t - ((-((n : ℤ) + 1) : ℤ) : ℂ) * H.tau) by
+          push_cast; rw [← hτω]; field_simp; ring,
+      show π * (2 * H.ω₁ * t - 2 * (n + 1) * H.ω₃) / (2 * H.ω₁) =
+        π * (t - (((n : ℤ) + 1 : ℤ) : ℂ) * H.tau) by
+          push_cast; rw [← hτω]; field_simp]
+    push_cast
+    field_simp
+    ring
+  · simp only [eisensteinCotTerm, zpow_zero, one_mul, Int.cast_zero, zero_mul, sub_zero,
+      Int.sign_zero, mul_zero]
+    rw [show π * (2 * H.ω₁ * t) / (2 * H.ω₁) = π * t by field_simp]
+    field_simp
+    ring
 
 /-- The reciprocal sine square in exponential coordinates, away from its poles. -/
 private lemma inv_sin_sq_eq_exp {v : ℂ} (hv : 1 - cexp (2 * I * v) ≠ 0) :

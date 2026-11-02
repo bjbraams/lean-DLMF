@@ -66,7 +66,8 @@ theorem rayIntegral_airy_eq_reidRay (z : ℂ) (θ : ℝ) {r : ℝ} (hr : 0 ≤ r
 /-- Airy arcs are Reid arcs (p = 0) rotated by `π`. -/
 theorem arcIntegral_airy_eq_reidArc (z : ℂ) (α β : ℝ) :
     arcIntegral (fun t => exp (t ^ 3 / 3 - z * t)) α β = -reidArc z 0 (α + π) (β + π) := by
-  rw [arcIntegral, reidArc, ← intervalIntegral.integral_comp_add_right, ← intervalIntegral.integral_neg]
+  rw [arcIntegral, reidArc, ← intervalIntegral.integral_comp_add_right,
+      ← intervalIntegral.integral_neg]
   refine intervalIntegral.integral_congr fun θ _ => ?_
   rw [reidKernel_zero_eq_airyIntegrand z _ (u := exp (θ * I)), exp_add_pi_mul_I]
   · ring
@@ -96,7 +97,8 @@ theorem reidContour_add_adjacent (z p : ℂ) (a b c : ℝ) :
 `∞ e^{πi/3}` (DLMF 9.5.4). -/
 @[dlmf 9.5.E4]
 theorem airyAi_contour_integral (z : ℂ) :
-    airyAi z = contourIntegral (fun t => exp (t ^ 3 / 3 - z * t)) (-π / 3) (π / 3) / (2 * π * I) := by
+    airyAi z = contourIntegral (fun t => exp (t ^ 3 / 3 - z * t)) (-π / 3) (π / 3) /
+        (2 * π * I) := by
   rw [contourIntegral_swap, contourIntegral_airy_eq_reidContour, ← reidAiryA_zero_parameter,
     show π / 3 + π = 4 * π / 3 by ring, show -π / 3 + π = 2 * π / 3 by ring]
   simp only [reidAiryA, Fin.val_zero]
@@ -110,7 +112,8 @@ theorem airyBi_contour_integral (z : ℂ) :
       contourIntegral (fun t => exp (t ^ 3 / 3 - z * t)) π (-π / 3)) / (2 * π) := by
   rw [contourIntegral_airy_eq_reidContour, contourIntegral_airy_eq_reidContour,
     show π + π = 2 * π by ring, show π / 3 + π = 4 * π / 3 by ring,
-    show -π / 3 + π = 2 * π / 3 by ring, ← reidContour_add_adjacent z 0 (2 * π) (4 * π / 3) (2 * π / 3)]
+    show -π / 3 + π = 2 * π / 3 by ring,
+                                     ← reidContour_add_adjacent z 0 (2 * π) (4 * π / 3) (2 * π / 3)]
   have h0 : reidContour z 0 (4 * π / 3) (2 * π / 3) = 2 * π * I * airyAi z := by
     rw [← reidAiryA_zero_parameter]; simp only [reidAiryA, Fin.val_zero]
     field_simp
@@ -126,7 +129,8 @@ theorem airyBi_contour_integral (z : ℂ) :
   rw [exp_two_pi_I_div_three, exp_pi_I_div_six, exp_neg_pi_I_div_six]
   have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   field_simp
-  linear_combination 2 * I * hs + 2 * (((Real.sqrt 3 / 2 : ℝ) : ℂ) * c + ((Real.sqrt 3 / 2 : ℝ) : ℂ) * b) * I_sq
+  linear_combination 2 * I * hs + 2 *
+      (((Real.sqrt 3 / 2 : ℝ) : ℂ) * c + ((Real.sqrt 3 / 2 : ℝ) : ℂ) * b) * I_sq
 
 /-! ### The oscillatory integrals 9.5.1–9.5.3
 
@@ -146,7 +150,8 @@ theorem airyInt_hasDerivAt_ray {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f 
 
 /-- Derivative of a primitive along the circle `y ↦ R e^{iy}`. -/
 theorem airyInt_hasDerivAt_arc {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w) (R y : ℝ) :
-    HasDerivAt (fun y : ℝ => g (R * exp (y * I))) (I * R * exp (y * I) * f (R * exp (y * I))) y := by
+    HasDerivAt (fun y : ℝ => g (R * exp (y * I)))
+        (I * R * exp (y * I) * f (R * exp (y * I))) y := by
   have h1 : HasDerivAt (fun w : ℂ => (R : ℂ) * exp (w * I)) (R * (exp (y * I) * I)) (y : ℂ) :=
     ((hasDerivAt_id (y : ℂ)).mul_const I).cexp.const_mul (R : ℂ) |>.congr_deriv (by simp)
   have h2 : HasDerivAt (fun w : ℂ => g (R * exp (w * I)))
@@ -161,7 +166,8 @@ theorem airyInt_integral_segment {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (
     (hf : Continuous f) (c : ℂ) (a b : ℝ) :
     ∫ r in a..b, c * f (r * c) = g (b * c) - g (a * c) :=
   intervalIntegral.integral_eq_sub_of_hasDerivAt (fun r _ => airyInt_hasDerivAt_ray hg c r)
-    ((continuous_const.mul (hf.comp (continuous_ofReal.mul continuous_const))).intervalIntegrable _ _)
+    ((continuous_const.mul
+        (hf.comp (continuous_ofReal.mul continuous_const))).intervalIntegrable _ _)
 
 /-- Integral of an entire function along an arc of the circle of radius `R`, via a primitive. -/
 theorem airyInt_integral_arc {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
@@ -173,7 +179,8 @@ theorem airyInt_integral_arc {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w)
 
 
 
-/-- A ray integral from the origin splits into the segment `[0, e^{iθ}]` and the ray from radius one. -/
+/-- A ray integral from the origin splits into the segment `[0, e^{iθ}]` and the ray from radius
+one. -/
 theorem airyInt_rayIntegral_zero {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
     (hf : Continuous f) (θ : ℝ)
     (hint : IntegrableOn (fun t : ℝ => exp (θ * I) * f (t * exp (θ * I))) (Ioi 0)) :
@@ -184,7 +191,8 @@ theorem airyInt_rayIntegral_zero {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (
     ← intervalIntegral.integral_of_le zero_le_one, airyInt_integral_segment hg hf]
   simp
 
-/-- For an entire integrand, a contour integral is the difference of two ray integrals from the origin. -/
+/-- For an entire integrand, a contour integral is the difference of two ray integrals from the
+origin. -/
 theorem airyInt_contourIntegral_eq_rays {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
     (hf : Continuous f) (α β : ℝ)
     (hα : IntegrableOn (fun t : ℝ => exp (α * I) * f (t * exp (α * I))) (Ioi 0))
@@ -238,7 +246,8 @@ theorem airyInt_continuous_kernel (x : ℝ) : Continuous (airyInt_kernel x) := b
 
 /-- Complex conjugation reflects the Airy ray integrals for real `x`. -/
 theorem airyInt_conj_rayIntegral (x θ : ℝ) (r : ℝ) :
-    (starRingEnd ℂ) (rayIntegral (airyInt_kernel x) θ r) = rayIntegral (airyInt_kernel x) (-θ) r := by
+    (starRingEnd ℂ) (rayIntegral (airyInt_kernel x) θ r) =
+        rayIntegral (airyInt_kernel x) (-θ) r := by
   rw [rayIntegral, rayIntegral, ← integral_conj]
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
   have he : (starRingEnd ℂ) (exp (θ * I)) = exp (((-θ : ℝ) : ℂ) * I) := by
@@ -313,7 +322,8 @@ theorem airyInt_pi_airyBi (x : ℝ) : (π : ℂ) * airyBi x -
   have hw : (starRingEnd ℂ) (airyInt_w x) + airyInt_w x = 2 * ((airyInt_w x).re : ℂ) := by
     apply Complex.ext <;> simp; ring
   rw [neg_neg]
-  calc (π : ℂ) * (((∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 + x * t)) + (starRingEnd ℂ) (airyInt_w x) +
+  calc (π : ℂ) * (((∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 + x * t)) +
+         (starRingEnd ℂ) (airyInt_w x) +
         ((∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 + x * t)) + airyInt_w x)) / (2 * π)) -
         ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 + x * t) =
         ((starRingEnd ℂ) (airyInt_w x) + airyInt_w x) / 2 := by field_simp; ring
@@ -333,7 +343,8 @@ theorem airyInt_exp_sixth_cube : exp (((π / 6 : ℝ) : ℂ) * I) ^ 3 = I := by
     exp_pi_div_two_mul_I]
 
 /-- `e^{-iπ/3} = -i e^{iπ/6}`. -/
-theorem airyInt_exp_neg_third : exp (((-π / 3 : ℝ) : ℂ) * I) = -I * exp (((π / 6 : ℝ) : ℂ) * I) := by
+theorem airyInt_exp_neg_third : exp (((-π / 3 : ℝ) : ℂ) * I) = -I *
+    exp (((π / 6 : ℝ) : ℂ) * I) := by
   rw [show (((-π / 3 : ℝ) : ℂ) * I) = ((π / 6 : ℝ) : ℂ) * I - π / 2 * I by push_cast; ring,
     exp_sub, exp_pi_div_two_mul_I, div_I]
   ring
@@ -358,9 +369,11 @@ theorem airyInt_osc_rotate (x r : ℝ) :
 /-- `∫₀^b e^{-ay} dy ≤ 1/a`. -/
 theorem airyInt_integral_exp_neg_le {a : ℝ} (ha : 0 < a) (b : ℝ) :
     ∫ y in (0 : ℝ)..b, Real.exp (-(a * y)) ≤ 1 / a := by
-  have hd : ∀ y ∈ uIcc 0 b, HasDerivAt (fun y => -Real.exp (-(a * y)) / a) (Real.exp (-(a * y))) y := by
+  have hd : ∀ y ∈ uIcc 0 b,
+      HasDerivAt (fun y => -Real.exp (-(a * y)) / a) (Real.exp (-(a * y))) y := by
     intro y _
-    have h1 : HasDerivAt (fun y : ℝ => -(a * y)) (-(a * 1)) y := ((hasDerivAt_id' y).const_mul a).neg
+    have h1 : HasDerivAt (fun y : ℝ => -(a * y)) (-(a * 1)) y :=
+        ((hasDerivAt_id' y).const_mul a).neg
     have := (h1.exp.neg).div_const a
     refine this.congr_deriv ?_
     field_simp
@@ -405,8 +418,10 @@ theorem airyInt_arc_bound (x : ℝ) {R : ℝ} (hR : 1 ≤ R) (hRx : 6 * |x| ≤ 
       exact Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith) (by linarith) hy.2
     have h3 : Real.sin y ≤ Real.sin (3 * y) := by
       have hsq : Real.sin y ^ 2 ≤ 1 / 4 := by nlinarith
-      rw [Real.sin_three_mul]; nlinarith [mul_nonneg hs (by linarith : (0 : ℝ) ≤ 1 / 4 - Real.sin y ^ 2)]
-    have hj : 2 / π * (3 * y) ≤ Real.sin (3 * y) := Real.mul_le_sin (by linarith) (by linarith [hy.2])
+      rw [Real.sin_three_mul];
+          nlinarith [mul_nonneg hs (by linarith : (0 : ℝ) ≤ 1 / 4 - Real.sin y ^ 2)]
+    have hj : 2 / π * (3 * y) ≤ Real.sin (3 * y) :=
+        Real.mul_le_sin (by linarith) (by linarith [hy.2])
     have hxr : -(x * R * Real.sin y) ≤ R ^ 3 / 6 * Real.sin (3 * y) := by
       have h1 : -(x * R * Real.sin y) ≤ |x| * R * Real.sin (3 * y) := by
         have : -(x * R * Real.sin y) ≤ |x| * R * Real.sin y := by
@@ -840,7 +855,8 @@ theorem airyInt_cubic_real {x : ℝ} (hx : 0 < x) :
             exp (-(t : ℂ) ^ 3 / 3 - (x : ℂ) ^ 3 / (3 * (t : ℂ) ^ 3)) :=
           setIntegral_congr_fun measurableSet_Ioi hpt
       _ = _ := integral_const_mul _ _
-  have hhalf : ((X : ℂ) / 2) ^ (-1 / 3 : ℂ) = ((((3 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.sqrt x)⁻¹ : ℝ) : ℂ) := by
+  have hhalf : ((X : ℂ) / 2) ^ (-1 / 3 : ℂ) =
+      ((((3 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.sqrt x)⁻¹ : ℝ) : ℂ) := by
     rw [show (-1 / 3 : ℂ) = ((-(1 / 3) : ℝ) : ℂ) by push_cast; ring, hXdef,
       half_airyZeta_cpow hx.le, Real.rpow_neg (by unfold airyZeta; positivity),
       half_airyZeta_rpow_third hx.le]
@@ -1019,7 +1035,8 @@ theorem airyAi_gaussian_cos_integral {z : ℂ} (hz : z ∈ slitPlane) :
         continuous_re.continuousAt.comp
           (differentiableAt_id.cpow (differentiableAt_const _) hz0).continuousAt
       refine ⟨(fun w : ℂ => (w ^ (1 / 2 : ℂ)).re) ⁻¹' Ioi δ,
-        hc.preimage_mem_nhds (Ioi_mem_nhds (half_lt_self (Carlson.re_cpow_half_pos hz0))), fun t => Real.exp (-δ * t ^ 2),
+        hc.preimage_mem_nhds (Ioi_mem_nhds (half_lt_self (Carlson.re_cpow_half_pos hz0))), fun t =>
+            Real.exp (-δ * t ^ 2),
         (integrable_exp_neg_mul_sq hδ).integrableOn, Eventually.of_forall fun t w hw => ?_⟩
       refine (airyInt_norm_gauss_cos_le _ t).trans (Real.exp_le_exp.mpr ?_)
       have hw' : δ < (w ^ (1 / 2 : ℂ)).re := hw
@@ -1028,7 +1045,8 @@ theorem airyAi_gaussian_cos_integral {z : ℂ} (hz : z ∈ slitPlane) :
       ∫ t : ℝ in Ioi 0, Φ z t) slitPlane := fun w hw =>
     ((((airyRot_differentiableAt_zeta hw).neg.cexp).div_const _).differentiableWithinAt).mul
       (hint w hw)
-  have h := airyInt_eqOn_of_pos_real isOpen_slitPlane (starConvex_one_slitPlane.isPathConnected one_mem_slitPlane).isConnected.isPreconnected
+  have h := airyInt_eqOn_of_pos_real isOpen_slitPlane
+      (starConvex_one_slitPlane.isPathConnected one_mem_slitPlane).isConnected.isPreconnected
     one_mem_slitPlane differentiable_airyAi.differentiableOn hg
     (fun x hx _ => by
       rw [airyInt_gauss_real hx, airyInt_zeta_ofReal hx.le]

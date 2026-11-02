@@ -99,9 +99,11 @@ theorem hcub_subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
   have hc : ((1 - Real.exp (-t) : ℝ) : ℂ) ^ (a - 1) =
       exp (-(t : ℂ) * (a - 1)) * ((t : ℂ) ^ (a - 1) * (E : ℂ) ^ (a - 1)) := by
     rw [hs, Complex.ofReal_mul, mul_cpow_ofReal_nonneg (Real.exp_pos _).le
-      (by positivity), Complex.ofReal_mul, mul_cpow_ofReal_nonneg ht.le hE0.le, TauCeti.ofReal_exp_cpow]
+      (by positivity), Complex.ofReal_mul, mul_cpow_ofReal_nonneg ht.le hE0.le,
+          TauCeti.ofReal_exp_cpow]
     push_cast; ring_nf
-  rw [hc, show (1 : ℂ) - ((1 - Real.exp (-t) : ℝ) : ℂ) = ((Real.exp (-t) : ℝ) : ℂ) by push_cast; ring,
+  rw [hc, show (1 : ℂ) - ((1 - Real.exp (-t) : ℝ) : ℂ) =
+      ((Real.exp (-t) : ℝ) : ℂ) by push_cast; ring,
     TauCeti.ofReal_exp_cpow, abs_of_pos (Real.exp_pos _), Complex.real_smul,
     Complex.real_smul, largeBGenerating, hEc]
   push_cast
@@ -277,7 +279,8 @@ theorem hcub_largeB_mix (a z : ℂ) (n : ℕ) :
     intro s _
     have h := DLMF.Gamma.poch_mul_recip_Gamma_add_nat (b : ℂ) s
     have hp : poch (b : ℂ) s ≠ 0 := poch_ne_zero_of_not_neg_nat hb' s
-    have hGs : Gamma ((b : ℂ) + s) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos (by simp; positivity))
+    have hGs : Gamma ((b : ℂ) + s) ≠ 0 :=
+        Gamma_ne_zero (not_neg_nat_of_re_pos (by simp; positivity))
     have hf : (s ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     field_simp at h
     rw [← h]

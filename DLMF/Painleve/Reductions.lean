@@ -52,7 +52,8 @@ namespace DLMF.Painleve
 
 /-- The third derivative of a solution of a second-order equation, from the derivative of
 the right-hand side along the solution. -/
-private lemma deriv_deriv_deriv_eq_of_isODE2SolutionOn {F : ℂ → ℂ → ℂ → ℂ} {W : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma deriv_deriv_deriv_eq_of_isODE2SolutionOn {F : ℂ → ℂ → ℂ → ℂ} {W : ℂ → ℂ} {U : Set ℂ}
+    (hU : IsOpen U)
     (h : IsODE2SolutionOn F W U) {y G : ℂ} (hy : y ∈ U)
     (hG : HasDerivAt (fun y => F y (W y) (deriv W y)) G y) :
     deriv (deriv (deriv W)) y = G := by
@@ -61,7 +62,8 @@ private lemma deriv_deriv_deriv_eq_of_isODE2SolutionOn {F : ℂ → ℂ → ℂ 
   rw [he.deriv_eq, hG.deriv]
 
 /-- Solutions of a second-order equation on an open set are smooth there. -/
-private lemma contDiffAt_of_isODE2SolutionOn {F : ℂ → ℂ → ℂ → ℂ} {W : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma contDiffAt_of_isODE2SolutionOn {F : ℂ → ℂ → ℂ → ℂ} {W : ℂ → ℂ} {U : Set ℂ}
+    (hU : IsOpen U)
     (h : IsODE2SolutionOn F W U) {y : ℂ} (hy : y ∈ U) (n : ℕ) : ContDiffAt ℂ n W y :=
   (DifferentiableOn.contDiffOn (fun x hx => (h.differentiableAt x hx).differentiableWithinAt)
     hU).contDiffAt (hU.mem_nhds hy)
@@ -88,7 +90,8 @@ private lemma hasDerivAt_three_mul_cpow_neg_third {t : ℂ} (ht : 3 * t ∈ slit
   rw [show (-1 / 3 : ℂ) - 1 = ((4 : ℕ) : ℂ) * (-1 / 3) by push_cast; ring, cpow_nat_mul]
   ring
 /-- Scaling the variable of a function with a derivative. -/
-private lemma hasDerivAt_const_mul_comp_mul {A A' : ℂ → ℂ} {R K x : ℂ} (h : HasDerivAt A (A' (x * R)) (x * R)) :
+private lemma hasDerivAt_const_mul_comp_mul {A A' : ℂ → ℂ} {R K x : ℂ}
+    (h : HasDerivAt A (A' (x * R)) (x * R)) :
     HasDerivAt (fun x => K * A (x * R)) (K * R * A' (x * R)) x := by
   have := (h.comp x (hasDerivAt_mul_const R)).const_mul K
   exact this.congr_deriv (by ring)
@@ -111,7 +114,8 @@ theorem mKdV_scalingReduction {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (hU : I
   refine ⟨fun p hp => ?_, fun p hp => ?_, fun p hp => ?_⟩
   · exact contDiffAt_const.mul (((hd.contDiffOn hU).contDiffAt (hU.mem_nhds hp.2)).comp p.1
       (contDiffAt_id.mul contDiffAt_const))
-  · exact (hasDerivAt_three_mul_cpow_neg_third hp.1).differentiableAt.mul ((hw.differentiableAt _ hp.2).comp p.2
+  · exact (hasDerivAt_three_mul_cpow_neg_third hp.1).differentiableAt.mul
+        ((hw.differentiableAt _ hp.2).comp p.2
       (((hasDerivAt_three_mul_cpow_neg_third hp.1).const_mul p.1).differentiableAt))
   · obtain ⟨hp1, hp2⟩ := hp
     set R := (3 * p.2) ^ (-1 / 3 : ℂ) with hR
@@ -226,7 +230,8 @@ theorem kdV_similarityReduction {lam C : ℂ} {W : ℂ → ℂ} {U : Set ℂ} (h
     IsKdVOn (fun x t => W (x + 3 * lam * t ^ 2) - lam * t)
       {p | p.1 + 3 * lam * p.2 ^ 2 ∈ U} := by
   refine ⟨fun p hp => ?_, fun p hp => ?_, fun p hp => ?_⟩
-  · exact ((contDiffAt_of_isODE2SolutionOn hU hW hp 3).comp p.1 (contDiffAt_id.add contDiffAt_const)).sub
+  · exact ((contDiffAt_of_isODE2SolutionOn hU hW hp 3).comp p.1
+        (contDiffAt_id.add contDiffAt_const)).sub
       contDiffAt_const
   · exact ((hW.differentiableAt _ hp).comp p.2 (by fun_prop)).sub (by fun_prop)
   · have hin : HasDerivAt (fun t => p.1 + 3 * lam * t ^ 2) (6 * lam * p.2) p.2 := by
@@ -345,7 +350,8 @@ theorem boussinesq_travellingWave {c A B : ℂ} {v : ℂ → ℂ} {U : Set ℂ} 
       (c ^ 2 - 1))).add ((hasDerivAt_id y).const_mul A) |>.add_const B
     exact this.congr_deriv (by simp; ring)
   have h3 : deriv (deriv (deriv v)) =ᶠ[𝓝 y0] fun y => (12 * v y + (c ^ 2 - 1)) * deriv v y + A := by
-    filter_upwards [hU.mem_nhds hp] with y hy using deriv_deriv_deriv_eq_of_isODE2SolutionOn hU hv hy (hF y hy)
+    filter_upwards [hU.mem_nhds hp] with y hy using deriv_deriv_deriv_eq_of_isODE2SolutionOn hU
+        hv hy (hF y hy)
   have hv2 : deriv (deriv v) y0 = 6 * v y0 ^ 2 + (c ^ 2 - 1) * v y0 + A * y0 + B := hv.ode hp
   have hdd := hv.hasDerivAt_deriv y0 hp
   rw [← hv2] at hdd

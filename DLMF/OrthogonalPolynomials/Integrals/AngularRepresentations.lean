@@ -152,7 +152,8 @@ theorem hermitePolyHR_natDegree_coeff (n : ℕ) :
           exact (natDegree_C_mul_le 2 X).trans natDegree_X_le
         omega
       · exact (natDegree_derivative_le _).trans (by omega)
-    · rw [coeff_sub, show (2 * X : ℝ[X]) = C 2 * X by rw [← map_ofNat C 2], mul_assoc, coeff_C_mul, coeff_X_mul,
+    · rw [coeff_sub, show (2 * X : ℝ[X]) = C 2 * X by rw [← map_ofNat C 2], mul_assoc,
+                                                        coeff_C_mul, coeff_X_mul,
         hc, coeff_derivative, coeff_eq_zero_of_natDegree_lt (by omega)]
       ring
 
@@ -315,7 +316,8 @@ theorem jacobi_norm_shift {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ
     zero_cpow ha0, zero_cpow hb0, zero_mul, mul_zero] at he
   rw [intervalIntegral.integral_add (f := fun t => -2 * (n + 1 : ℂ) * f α β (n + 1) t)
     (g := fun t => (n + α + β + 2 : ℂ) / 2 * f (α + 1) (β + 1) n t)
-    ((hf α β hα hβ (n + 1)).const_mul _) ((hf (α + 1) (β + 1) (by linarith) (by linarith) n).const_mul _),
+    ((hf α β hα hβ (n + 1)).const_mul _)
+        ((hf (α + 1) (β + 1) (by linarith) (by linarith) n).const_mul _),
     intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul] at he
   dsimp [f, w] at he
   push_cast at he ⊢
@@ -355,7 +357,8 @@ theorem jacobi_norm_all {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) 
           (n.factorial * Gamma ((α : ℂ) + β + 2 * n + 2)) := by
   induction n generalizing α β with
   | zero => simpa only [jacobiPolyP_zero, one_pow, one_mul, Nat.cast_zero, add_zero, mul_zero,
-      poch_zero, mul_one, Nat.factorial_zero, Nat.cast_one, mul_div_assoc, mul_assoc] using integral_jacobi_weight hα hβ
+      poch_zero, mul_one, Nat.factorial_zero, Nat.cast_one, mul_div_assoc,
+          mul_assoc] using integral_jacobi_weight hα hβ
   | succ n ih =>
     have h := jacobi_norm_shift hα hβ n
     have hih := ih (by linarith : -1 < α + 1) (by linarith : -1 < β + 1)
@@ -588,7 +591,8 @@ private lemma ultrasphPoly_norm_constant {lam : ℝ} (hlam : 0 < lam) :
   have hG2 : Gamma (2 * (lam : ℂ)) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
   have hd := Gamma_mul_Gamma_add_half (lam : ℂ)
   have hh : Gamma ((lam : ℂ) + 1 / 2) =
-      Gamma (2 * (lam : ℂ)) * (2 : ℂ) ^ (1 - 2 * (lam : ℂ)) * Real.sqrt Real.pi / Gamma (lam : ℂ) := by
+      Gamma (2 * (lam : ℂ)) * (2 : ℂ) ^ (1 - 2 * (lam : ℂ)) * Real.sqrt Real.pi /
+          Gamma (lam : ℂ) := by
     apply (eq_div_iff hG).mpr
     linear_combination hd
   have hs : (Real.sqrt Real.pi : ℂ) ^ 2 = (Real.pi : ℂ) := by
@@ -748,7 +752,8 @@ theorem iteratedDeriv_laguerrePolyL_weight {α : ℝ} (hα : -1 < α) (n : ℕ) 
   induction n generalizing α x with
   | zero => simp
   | succ n ih =>
-    have heq : iteratedDeriv n (fun t : ℝ => exp (-(t : ℂ)) * (t : ℂ) ^ ((α : ℂ) + ((n + 1 : ℕ) : ℂ)))
+    have heq : iteratedDeriv n
+        (fun t : ℝ => exp (-(t : ℂ)) * (t : ℂ) ^ ((α : ℂ) + ((n + 1 : ℕ) : ℂ)))
         =ᶠ[𝓝 x] (fun t : ℝ => (n.factorial : ℂ) *
           (exp (-(t : ℂ)) * (t : ℂ) ^ (α + 1 : ℂ) * laguerrePolyL (α + 1) n t)) := by
       filter_upwards [Ioi_mem_nhds hx] with t ht
@@ -853,7 +858,8 @@ theorem ultrasphPoly_rodrigues {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) {x : 
     rw [← Real.rpow_add (by nlinarith)]; norm_num
   have hw0 : (((1 - x ^ 2) ^ (lam - 1 / 2) : ℝ) : ℂ) ≠ 0 :=
     Complex.ofReal_ne_zero.mpr (Real.rpow_pos_of_pos (by nlinarith) _).ne'
-  have hwC : (((1 - x ^ 2) ^ (1 / 2 - lam) : ℝ) : ℂ) = ((((1 - x ^ 2) ^ (lam - 1 / 2) : ℝ) : ℂ))⁻¹ := by
+  have hwC : (((1 - x ^ 2) ^ (1 / 2 - lam) : ℝ) : ℂ) =
+      ((((1 - x ^ 2) ^ (lam - 1 / 2) : ℝ) : ℂ))⁻¹ := by
     refine eq_inv_of_mul_eq_one_left ?_
     rw [← Complex.ofReal_mul, hw']; simp
   rw [mul_assoc ((-2 : ℂ) ^ n * n.factorial), hw, hwC]
@@ -1134,7 +1140,8 @@ theorem ultrasphPoly_dirichlet_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
 @[dlmf 18.10.E2]
 theorem legendre_dirichlet_mehler (n : ℕ) {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < Real.pi) :
     legendrePolyP n (Real.cos θ) = (Real.sqrt 2 / Real.pi *
-      ∫ phi : ℝ in (0 : ℝ)..θ, Real.cos ((n + 1 / 2) * phi) / Real.sqrt (Real.cos phi - Real.cos θ) : ℝ) := by
+      ∫ phi : ℝ in (0 : ℝ)..θ, Real.cos ((n + 1 / 2) * phi) /
+          Real.sqrt (Real.cos phi - Real.cos θ) : ℝ) := by
   have h := ultrasphPoly_dirichlet_integral (lam := 1 / 2) (by norm_num) n hθ hθπ
   have h1 : ultrasphPoly ((1 / 2 : ℝ) : ℂ) n 1 = 1 := by
     rw [ultrasphPoly_at_one]

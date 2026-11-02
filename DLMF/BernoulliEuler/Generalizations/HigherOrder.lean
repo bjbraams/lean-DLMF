@@ -208,7 +208,8 @@ private lemma bernoulliOrder_succ_self (n : ℕ) :
 def integralUnitInterval : ℚ[X] →ₗ[ℚ] ℚ := lsum fun k => (1 / ((k : ℚ) + 1)) • LinearMap.id
 
 /-- `I(c Xᵐ) = c/(m+1)`. -/
-private lemma integralUnitInterval_C_mul_X_pow (c : ℚ) (m : ℕ) : integralUnitInterval (C c * X ^ m) = c / (m + 1) := by
+private lemma integralUnitInterval_C_mul_X_pow (c : ℚ) (m : ℕ) : integralUnitInterval (C c * X ^ m)
+    = c / (m + 1) := by
   rw [C_mul_X_pow_eq_monomial, integralUnitInterval, lsum_apply, sum_monomial_index]
   · simp; ring
   · simp
@@ -256,7 +257,8 @@ local notation "D" => @PowerSeries.derivative ℚ _
 def logOneAddDivSeries : PowerSeries ℚ := PowerSeries.mk fun m => (-1) ^ m / (m + 1)
 
 /-- `(1 + t) (ln(1+t))' = 1`. -/
-private lemma one_add_X_mul_derivative_X_mul_logOneAddDivSeries : (1 + T) * D (T * logOneAddDivSeries) = 1 := by
+private lemma one_add_X_mul_derivative_X_mul_logOneAddDivSeries : (1 + T) *
+    D (T * logOneAddDivSeries) = 1 := by
   ext n
   rw [add_mul, one_mul, map_add]
   rcases n with _ | n
@@ -285,7 +287,8 @@ private lemma X_mul_derivative_logOneAddDivSeries_pow (k : ℕ) :
 private lemma coeff_logOneAddDivSeries_pow (n k : ℕ) :
     (n ! : ℚ) * PowerSeries.coeff n (logOneAddDivSeries ^ (k + 1)) =
       (k + 1) * bernoulliNumberOrder (k + 1 + n) n / (k + 1 + n) := by
-  have hrec : ∀ k n : ℕ, ((n : ℚ) + k + 2) * PowerSeries.coeff (n + 1) (logOneAddDivSeries ^ (k + 1)) +
+  have hrec : ∀ k n : ℕ, ((n : ℚ) + k + 2) *
+      PowerSeries.coeff (n + 1) (logOneAddDivSeries ^ (k + 1)) +
       ((n : ℚ) + k + 1) * PowerSeries.coeff n (logOneAddDivSeries ^ (k + 1)) =
       (k + 1) * PowerSeries.coeff (n + 1) (logOneAddDivSeries ^ k) := by
     intro k n
@@ -509,7 +512,8 @@ theorem factorial_mul_bernoulliSecondKind {n : ℕ} (hn : 2 ≤ n) :
   have h1 : integralUnitInterval ((descPochhammer ℚ (m + 1)).comp (X - 1)) =
       bernoulliNumberOrder (m + 1) (m + 1) := by
     rw [← bernoulliOrder_succ_self, integralUnitInterval_bernoulliOrder]
-  have h2 : integralUnitInterval ((descPochhammer ℚ m).comp (X - 1)) = bernoulliNumberOrder m m := by
+  have h2 : integralUnitInterval ((descPochhammer ℚ m).comp (X - 1)) =
+      bernoulliNumberOrder m m := by
     rw [← bernoulliOrder_succ_self, integralUnitInterval_bernoulliOrder]
   have hrec := eval_bernoulliOrder_succ_succ m m 0
   simp only [bernoulliOrder_eval_zero] at hrec
@@ -630,7 +634,8 @@ private lemma norm_aeval_coeff_invOfUnit_degenerateExpSeries_le (lam : ℂ) (n :
         ≤ ∑ j ∈ range (n + 1), (2 * A) ^ j * A ^ (n + 1 - j) := by
           refine (norm_sum_le _ _).trans (sum_le_sum fun j hj => ?_)
           rw [norm_mul]
-          exact mul_le_mul (ih j (by simp at hj; omega)) (norm_aeval_coeff_degenerateExpSeries_le lam _)
+          exact mul_le_mul (ih j (by simp at hj; omega))
+              (norm_aeval_coeff_degenerateExpSeries_le lam _)
             (norm_nonneg _) (by positivity)
       _ ≤ ∑ j ∈ range (n + 1), (2 * A) ^ (n + 1) / 2 ^ (n + 1 - j) := by
           refine sum_le_sum fun j hj => ?_
@@ -709,7 +714,8 @@ theorem hasSum_degenerateBernoulli {lam : ℂ} (hlam : lam ≠ 0) :
     refine (summable_geometric_of_lt_one (by positivity : 0 ≤ 2 * A * ‖t‖)
       (by linarith)).of_nonneg_of_le (fun _ => norm_nonneg _) fun k => ?_
     rw [norm_mul, norm_pow, mul_pow]
-    exact mul_le_mul_of_nonneg_right (norm_aeval_coeff_invOfUnit_degenerateExpSeries_le lam k) (by positivity)
+    exact mul_le_mul_of_nonneg_right (norm_aeval_coeff_invOfUnit_degenerateExpSeries_le lam k)
+        (by positivity)
   have hmul := PowerSeries.invOfUnit_mul degenerateExpSeries 1
     (by rw [constantCoeff_degenerateExpSeries]; rfl)
   have hprod := hasSum_sum_range_mul_of_summable_norm hHs hGs

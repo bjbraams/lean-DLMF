@@ -108,7 +108,8 @@ private lemma exists_norm_appF1Coeff_le (a b b' c : ℂ) (hc : AppellRegular c) 
         gcongr
 
 /-- Binomially weighted subexponential bound for the F2 coefficients. -/
-private lemma exists_norm_appF2Coeff_le (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c')
+private lemma exists_norm_appF2Coeff_le (a b b' c c' : ℂ) (hc : AppellRegular c)
+    (hc' : AppellRegular c')
     {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF2Coeff a b b' c c' q.1 q.2‖ ≤
       C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ) := by
@@ -140,7 +141,8 @@ private lemma exists_norm_appF2Coeff_le (a b b' c c' : ℂ) (hc : AppellRegular 
         gcongr
 
 /-- Subexponential bound for the F3 coefficients. -/
-private lemma exists_norm_appF3Coeff_le (a a' b b' c : ℂ) (hc : AppellRegular c) {σ : ℝ} (hσ : 1 < σ) :
+private lemma exists_norm_appF3Coeff_le (a a' b b' c : ℂ) (hc : AppellRegular c)
+    {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF3Coeff a a' b b' c q.1 q.2‖ ≤ C * σ ^ (q.1 + q.2) := by
   obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 3
   obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hτ
@@ -154,7 +156,8 @@ private lemma exists_norm_appF3Coeff_le (a a' b b' c : ℂ) (hc : AppellRegular 
   have hn : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
   have hτ0 : 0 ≤ τ := by linarith
   have hfac : (m ! : ℝ) * n ! ≤ (m + n) ! := by
-    exact_mod_cast Nat.le_of_dvd (Nat.factorial_pos _) (Nat.factorial_mul_factorial_dvd_factorial_add m n)
+    exact_mod_cast Nat.le_of_dvd (Nat.factorial_pos _)
+        (Nat.factorial_mul_factorial_dvd_factorial_add m n)
   have h6 : (m ! : ℝ) * n ! ≤ C5 * τ ^ (m + n) * ‖poch c (m + n)‖ := hfac.trans (h5 _)
   simp only [appF3Coeff, norm_div, norm_mul, Complex.norm_natCast]
   rw [div_le_iff₀ (by positivity)]
@@ -212,7 +215,8 @@ lemma exists_norm_appF4Coeff_le (a b c c' : ℂ) (hc : AppellRegular c) (hc' : A
 theorem hasSum_appF1 (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
     HasSum (fun p : ℕ × ℕ => appF1Coeff a b b' c p.1 p.2*x^p.1*y^p.2) (appF1 a b b' c x y) := by
   exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF1Coeff a b b' c q.1 q.2) appellBidisc
-    (fun _ hp => exists_summable_doubleSeries_of_bidisc _ (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ)
+    (fun _ hp => exists_summable_doubleSeries_of_bidisc _
+        (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ)
       hp.1 hp.2)).1 (x, y) hxy
 
 /-- 16.13: analytic appF1. -/
@@ -220,13 +224,16 @@ theorem hasSum_appF1 (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : 
 theorem analytic_appF1 (a b b' c : ℂ) (hc : AppellRegular c) :
     AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF1 a b b' c p.1 p.2) appellBidisc := by
   exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF1Coeff a b b' c q.1 q.2) appellBidisc
-    (fun _ hp => exists_summable_doubleSeries_of_bidisc _ (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ)
+    (fun _ hp => exists_summable_doubleSeries_of_bidisc _
+        (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ)
       hp.1 hp.2)).2
 
 /-- 16.13.E2: hasSum appF2. -/
 @[dlmf 16.13.E2]
-theorem hasSum_appF2 (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ} (hxy : (x,y)∈appellDiamond) :
-    HasSum (fun p : ℕ × ℕ => appF2Coeff a b b' c c' p.1 p.2*x^p.1*y^p.2) (appF2 a b b' c c' x y) := by
+theorem hasSum_appF2 (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
+    (hxy : (x, y)∈appellDiamond) :
+    HasSum (fun p : ℕ × ℕ => appF2Coeff a b b' c c' p.1 p.2*x^p.1*y^p.2)
+        (appF2 a b b' c c' x y) := by
   exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF2Coeff a b b' c c' q.1 q.2)
     appellDiamond (fun _ hp => exists_summable_doubleSeries_of_diamond _
       (fun _ hσ => exists_norm_appF2Coeff_le a b b' c c' hc hc' hσ) hp)).1 (x, y) hxy
@@ -242,7 +249,8 @@ theorem analytic_appF2 (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellR
 /-- 16.13.E3: hasSum appF3. -/
 @[dlmf 16.13.E3]
 theorem hasSum_appF3 (a a' b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
-    HasSum (fun p : ℕ × ℕ => appF3Coeff a a' b b' c p.1 p.2*x^p.1*y^p.2) (appF3 a a' b b' c x y) := by
+    HasSum (fun p : ℕ × ℕ => appF3Coeff a a' b b' c p.1 p.2*x^p.1*y^p.2)
+        (appF3 a a' b b' c x y) := by
   exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF3Coeff a a' b b' c q.1 q.2)
     appellBidisc (fun _ hp => exists_summable_doubleSeries_of_bidisc _
       (fun _ hσ => exists_norm_appF3Coeff_le a a' b b' c hc hσ) hp.1 hp.2)).1 (x, y) hxy
@@ -257,7 +265,8 @@ theorem analytic_appF3 (a a' b b' c : ℂ) (hc : AppellRegular c) :
 
 /-- 16.13.E4: hasSum appF4. -/
 @[dlmf 16.13.E4]
-theorem hasSum_appF4 (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ} (hxy : (x,y)∈appellF4Domain) :
+theorem hasSum_appF4 (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
+    (hxy : (x, y)∈appellF4Domain) :
     HasSum (fun p : ℕ × ℕ => appF4Coeff a b c c' p.1 p.2*x^p.1*y^p.2) (appF4 a b c c' x y) := by
   exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF4Coeff a b c c' q.1 q.2)
     appellF4Domain (fun _ hp => exists_summable_doubleSeries_of_sqrt_add_sqrt _
@@ -455,8 +464,10 @@ on the open unit bidisc (DLMF 16.14.1). -/
 @[dlmf 16.14.E1]
 theorem appF1_pde (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
     let f := appF1 a b b' c
-    x*(1-x)*appellDx (appellDx f) x y+y*(1-x)*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x y-b*y*appellDy f x y-a*b*f x y=0 ∧
-    y*(1-y)*appellDy (appellDy f) x y+x*(1-y)*appellDx (appellDy f) x y+(c-(a+b'+1)*y)*appellDy f x y-b'*x*appellDx f x y-a*b'*f x y=0 := by
+    x*(1-x)*appellDx (appellDx f) x y+y*(1-x)*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x
+        y-b*y*appellDy f x y-a*b*f x y=0 ∧
+    y*(1-y)*appellDy (appellDy f) x y+x*(1-y)*appellDx (appellDy f) x y+(c-(a+b'+1)*y)*appellDy f x
+        y-b'*x*appellDx f x y-a*b'*f x y=0 := by
   obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_bidisc _
     (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ) hxy.1 hxy.2
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 1 1 0 1 a b c
@@ -473,10 +484,13 @@ theorem appF1_pde (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,
 /-- With both lower parameters regular, Appell F2 satisfies its paired second order PDEs
 on the convergence diamond `‖x‖ + ‖y‖ < 1` (DLMF 16.14.2). -/
 @[dlmf 16.14.E2]
-theorem appF2_pde (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ} (hxy : (x,y)∈appellDiamond) :
+theorem appF2_pde (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
+    (hxy : (x, y)∈appellDiamond) :
     let f := appF2 a b b' c c'
-    x*(1-x)*appellDx (appellDx f) x y-x*y*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x y-b*y*appellDy f x y-a*b*f x y=0 ∧
-    y*(1-y)*appellDy (appellDy f) x y-x*y*appellDx (appellDy f) x y+(c'-(a+b'+1)*y)*appellDy f x y-b'*x*appellDx f x y-a*b'*f x y=0 := by
+    x*(1-x)*appellDx (appellDx f) x y-x*y*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x
+        y-b*y*appellDy f x y-a*b*f x y=0 ∧
+    y*(1-y)*appellDy (appellDy f) x y-x*y*appellDx (appellDy f) x y+(c'-(a+b'+1)*y)*appellDy f x
+        y-b'*x*appellDx f x y-a*b'*f x y=0 := by
   obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_diamond _
     (fun _ hσ => exists_norm_appF2Coeff_le a b b' c c' hc hc' hσ) hxy
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 0 1 0 1 a b c
@@ -495,8 +509,10 @@ on the open unit bidisc (DLMF 16.14.3). -/
 @[dlmf 16.14.E3]
 theorem appF3_pde (a a' b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
     let f := appF3 a a' b b' c
-    x*(1-x)*appellDx (appellDx f) x y+y*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x y-a*b*f x y=0 ∧
-    y*(1-y)*appellDy (appellDy f) x y+x*appellDx (appellDy f) x y+(c-(a'+b'+1)*y)*appellDy f x y-a'*b'*f x y=0 := by
+    x*(1-x)*appellDx (appellDx f) x y+y*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x
+        y-a*b*f x y=0 ∧
+    y*(1-y)*appellDy (appellDy f) x y+x*appellDx (appellDy f) x y+(c-(a'+b'+1)*y)*appellDy f x
+        y-a'*b'*f x y=0 := by
   obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_bidisc _
     (fun _ hσ => exists_norm_appF3Coeff_le a a' b b' c hc hσ) hxy.1 hxy.2
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 1 0 0 1 a b c
@@ -513,10 +529,13 @@ theorem appF3_pde (a a' b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : 
 /-- With both lower parameters regular, Appell F4 satisfies its paired second order PDEs
 on the domain `√‖x‖ + √‖y‖ < 1` of absolute convergence (DLMF 16.14.4). -/
 @[dlmf 16.14.E4]
-theorem appF4_pde (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ} (hxy : (x,y)∈appellF4Domain) :
+theorem appF4_pde (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
+    (hxy : (x, y)∈appellF4Domain) :
     let f := appF4 a b c c'
-    x*(1-x)*appellDx (appellDx f) x y-2*x*y*appellDx (appellDy f) x y-y^2*appellDy (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x y-(a+b+1)*y*appellDy f x y-a*b*f x y=0 ∧
-    y*(1-y)*appellDy (appellDy f) x y-2*x*y*appellDx (appellDy f) x y-x^2*appellDx (appellDx f) x y+(c'-(a+b+1)*y)*appellDy f x y-(a+b+1)*x*appellDx f x y-a*b*f x y=0 := by
+    x*(1-x)*appellDx (appellDx f) x y-2*x*y*appellDx (appellDy f) x y-y^2*appellDy (appellDy f) x
+        y+(c-(a+b+1)*x)*appellDx f x y-(a+b+1)*y*appellDy f x y-a*b*f x y=0 ∧
+    y*(1-y)*appellDy (appellDy f) x y-2*x*y*appellDx (appellDy f) x y-x^2*appellDx (appellDx f) x
+        y+(c'-(a+b+1)*y)*appellDy f x y-(a+b+1)*x*appellDx f x y-a*b*f x y=0 := by
   obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_sqrt_add_sqrt _
     (fun _ hσ => exists_norm_appF4Coeff_le a b c c' hc hc' hσ) hxy
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 0 1 1 1 a b c
@@ -542,7 +561,8 @@ private lemma Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat {b : ℂ} (hb : ∀ 
   exact h
 
 /-- `Γ(b+j)Γ(b'-j) = (-1)^j (b)ⱼ/(1-b')ⱼ · Γ(b)Γ(b')` for non-integral `b, b'`. -/
-private lemma Gamma_add_nat_mul_Gamma_sub_nat {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k) (hb' : ∀ k : ℤ, b' ≠ k) (j : ℕ) :
+private lemma Gamma_add_nat_mul_Gamma_sub_nat {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k)
+    (hb' : ∀ k : ℤ, b' ≠ k) (j : ℕ) :
     Gamma (b + j) * Gamma (b' - j) =
       (-1) ^ j * poch b j / poch (1 - b') j * (Gamma b * Gamma b') := by
   have hbr := ne_neg_nat_of_ne_int hb
@@ -564,7 +584,8 @@ private lemma Gamma_add_nat_mul_Gamma_sub_nat {b b' : ℂ} (hb : ∀ k : ℤ, b 
   linear_combination (-(poch b j * Gamma b * Gamma b')) * hs
 
 /-- Subexponential bound for the Horn G2 Gamma pair `Γ(b+n-m)Γ(b'+m-n)`. -/
-private lemma exists_norm_Gamma_add_sub_mul_Gamma_le {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k) (hb' : ∀ k : ℤ, b' ≠ k)
+private lemma exists_norm_Gamma_add_sub_mul_Gamma_le {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k)
+    (hb' : ∀ k : ℤ, b' ≠ k)
     {σ : ℝ} (hσ : 1 < σ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ m n : ℕ,
       ‖Gamma (b + n - m) * Gamma (b' + m - n)‖ ≤ C * σ ^ (m + n) * ‖Gamma b * Gamma b'‖ := by
   have h1b' : ∀ k : ℕ, 1 - b' ≠ -k := fun k h => hb' (k + 1) (by push_cast; linear_combination -h)
@@ -627,7 +648,8 @@ theorem hornG2_summable (a a' b b' : ℂ) (ha : AppellRegular a) (ha' : AppellRe
     have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
     have hn : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
     have hτ0 : 0 ≤ τ := by linarith
-    rw [Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat ha m, Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat ha' n]
+    rw [Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat ha m,
+        Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat ha' n]
     have e : poch a m * Gamma a * (poch a' n * Gamma a') * Gamma (b + n - m) * Gamma (b' + m - n) /
         (Gamma a * Gamma a' * Gamma b * Gamma b' * (m ! * n !)) =
         poch a m * poch a' n * (Gamma (b + n - m) * Gamma (b' + m - n)) /
@@ -658,7 +680,8 @@ theorem hornG2_summable (a a' b b' : ℂ) (ha : AppellRegular a) (ha' : AppellRe
   gcongr
 
 /-- Gamma bounds at forward and backward integer shifts of a non-integral parameter. -/
-private lemma exists_norm_Gamma_add_nat_le_and_sub_nat_le {a : ℂ} (ha : ∀ k : ℤ, a ≠ k) {σ : ℝ} (hσ : 1 < σ) :
+private lemma exists_norm_Gamma_add_nat_le_and_sub_nat_le {a : ℂ} (ha : ∀ k : ℤ, a ≠ k)
+    {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ j : ℕ, ‖Gamma (a + j)‖ ≤ C * σ ^ j * j ! ∧
       ‖Gamma (a - j)‖ * j ! ≤ C * σ ^ j := by
   have har := ne_neg_nat_of_ne_int ha
@@ -689,10 +712,12 @@ private lemma exists_norm_Gamma_add_nat_le_and_sub_nat_le {a : ℂ} (ha : ∀ k 
         nlinarith
 
 /-- `(A+B)! ≤ 2^(A+B) A! B!`. -/
-private lemma factorial_add_le_two_pow_mul {A B : ℕ} : ((A + B) ! : ℝ) ≤ 2 ^ (A + B) * (A ! * B !) := by
+private lemma factorial_add_le_two_pow_mul {A B : ℕ} : ((A + B) ! : ℝ) ≤ 2 ^ (A + B) *
+    (A ! * B !) := by
   have h := Nat.add_choose_mul_factorial_mul_factorial A B
   rw [← Nat.choose_symm_add] at h
-  have h2 : (((A + B).choose A : ℕ) : ℝ) ≤ 2 ^ (A + B) := by exact_mod_cast Nat.choose_le_two_pow _ _
+  have h2 : (((A + B).choose A : ℕ) : ℝ) ≤ 2 ^ (A + B) := by
+                                                            exact_mod_cast Nat.choose_le_two_pow _ _
   calc ((A + B) ! : ℝ) = ((A + B).choose A : ℕ) * (A ! * B !) := by
         rw [← h]; push_cast; ring
     _ ≤ _ := by gcongr
@@ -726,7 +751,8 @@ private lemma gamma_mixed_bound {σ C1 C2 : ℝ} (hσ : 1 < σ) (hC1 : 0 ≤ C1)
 
 /-- Gamma bound for the Horn G3 pair:
 `|Γ(a+2n-m) Γ(a'+2m-n)| ≤ C σ^{4(m+n)} 4^{m+n} (m+n)!` for non-integral `a, a'`. -/
-private lemma exists_norm_Gamma_hornG3_pair_le {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k : ℤ, a' ≠ k)
+private lemma exists_norm_Gamma_hornG3_pair_le {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k)
+    (ha' : ∀ k : ℤ, a' ≠ k)
     {σ : ℝ} (hσ : 1 < σ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ m n : ℕ,
       ‖Gamma (a + 2 * n - m) * Gamma (a' + 2 * m - n)‖ ≤
         C * σ ^ (4 * (m + n)) * 4 ^ (m + n) * (m + n) ! := by
@@ -829,7 +855,8 @@ private lemma gamma_mixed_bound_five {σ C1 C2 : ℝ} (hσ : 1 < σ) (hC1 : 0 �
     (hx : ‖x‖ ≤ C1 * σ ^ k * k !) (hy : ‖y‖ * r ! ≤ C2 * σ ^ r) :
     ‖x‖ * ‖y‖ ≤ C1 * C2 * σ ^ (4 * (m + n)) * 5 ^ (m + n) * (m ! * n !) := by
   have hf : ((k !:ℕ) : ℝ) ≤ 5 ^ (m + n) * (r ! * n ! * m !) := by
-    simpa only [hk, hn, show m + (r + 2 * m)=r + 3 * m by omega] using factorial_two_mul_add_three_mul_le r m
+    simpa only [hk, hn, show m + (r + 2 * m)=r + 3 * m by omega] using
+        factorial_two_mul_add_three_mul_le r m
   have hr0 : (0 : ℝ)<r ! := by exact_mod_cast r.factorial_pos
   have hy' : ‖y‖ ≤ C2 * σ ^ r / r ! := by rw [le_div_iff₀ hr0]; exact hy
   calc ‖x‖ * ‖y‖ ≤ (C1 * σ ^ k * k !) * (C2 * σ ^ r / r !) :=
@@ -846,7 +873,8 @@ private lemma gamma_mixed_bound_five {σ C1 C2 : ℝ} (hσ : 1 < σ) (hC1 : 0 �
 the diamond `|x|+|y|<1/4`. -/
 lemma hornG3_gammaPair_bound_five {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k : ℤ, a' ≠ k)
     {σ : ℝ} (hσ : 1 < σ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ m n : ℕ,
-      ‖Gamma (a + 2 * n - m) * Gamma (a' + 2 * m - n)‖ ≤ C * σ ^ (4 * (m + n)) * 5 ^ (m + n) * (m ! * n !) := by
+      ‖Gamma (a + 2 * n - m) * Gamma (a' + 2 * m - n)‖ ≤ C * σ ^ (4 * (m + n)) * 5 ^ (m + n) *
+          (m ! * n !) := by
   obtain ⟨C1, hC1, h1⟩ := exists_norm_Gamma_add_nat_le_and_sub_nat_le ha hσ
   obtain ⟨C2, hC2, h2⟩ := exists_norm_Gamma_add_nat_le_and_sub_nat_le ha' hσ
   refine ⟨C1 * C2, by positivity, fun m n => ?_⟩
@@ -985,7 +1013,8 @@ theorem hornG3_nonmaximal_region (a a' : ℂ) (ha : ∀ k : ℤ,a≠k) (ha' : �
   have hx : ‖5 * x‖<1 := by norm_num [x, norm_div]
   obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_bidisc c hbound hx hx
   refine ⟨x, x, by norm_num [x, norm_div], Summable.of_norm_bounded hS fun q => ?_⟩
-  have e : Gamma (a + 2 * q.2 - q.1) * Gamma (a' + 2 * q.1 - q.2) / (Gamma a * Gamma a' * (q.1 ! * q.2 !)) * x ^ q.1 * x ^ q.2 =
+  have e : Gamma (a + 2 * q.2 - q.1) * Gamma (a' + 2 * q.1 - q.2) /
+      (Gamma a * Gamma a' * (q.1 ! * q.2 !)) * x ^ q.1 * x ^ q.2 =
       c q * (5 * x) ^ q.1 * (5 * x) ^ q.2 := by
     simp only [hc, mul_pow, pow_add]
     field_simp
@@ -1022,7 +1051,8 @@ theorem appell_continuation_unique {F G : ℝ→(ℂ × ℂ→ℂ)} {γ : ℝ→
   have hloc : ∀ t ∈ Icc (0:ℝ) 1, ∀ᶠ u in 𝓝[Icc 0 1] t,
       ((F u =ᶠ[𝓝 (γ u)] G u) ↔ (F t =ᶠ[𝓝 (γ t)] G t)) := by
     intro t ht
-    have hball := eventually_eventuallyEq_iff_of_analyticAt_prod (hF.analyticAt t ht) (hG.analyticAt t ht)
+    have hball := eventually_eventuallyEq_iff_of_analyticAt_prod (hF.analyticAt t ht)
+        (hG.analyticAt t ht)
     filter_upwards [(hF.continuousOn t ht).eventually hball, hF.locallyEq t ht,
       hG.locallyEq t ht] with u hiff hfu hgu
     exact ⟨fun h => hiff.mp (hfu.symm.trans (h.trans hgu)),

@@ -28,7 +28,8 @@ dlmf_upstream 21.1 Matrix.PosDef
 dlmf_upstream 21.1 Matrix.J "different convention: Mathlib's J is -J_{2g} of DLMF"
 
 dlmf_upstream 21.2.E1 jacobiTheta₂
-  "special case g = 1: jacobiTheta₂ z τ = θ(z|τ); see DLMF.RiemannTheta.riemannTheta_fin_one_eq_jacobiTheta₂"
+  "special case g = 1: jacobiTheta₂ z τ = θ(z|τ); see \
+      DLMF.RiemannTheta.riemannTheta_fin_one_eq_jacobiTheta₂"
 
 dlmf_upstream 21.2.i hasSum_jacobiTheta₂_term "special case g = 1: convergence for 0 < Im τ"
 

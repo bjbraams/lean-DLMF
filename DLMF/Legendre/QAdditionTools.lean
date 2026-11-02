@@ -66,7 +66,8 @@ open scoped Real Topology Nat ComplexConjugate
 
 namespace DLMF.Legendre
 
-/-- Shifting a `2π`-periodic function by `π` multiplies its `m`-th Fourier coefficient by `(-1)^m`. -/
+/-- Shifting a `2π`-periodic function by `π` multiplies its `m`-th Fourier coefficient by `(-1)^m`.
+-/
 theorem legQAdd_coeff_shift_pi {g : ℝ → ℂ} (hper : Function.Periodic g (2 * π)) (m : ℕ) :
     legAdd_coeff (fun t => g (t + π)) m = (-1) ^ m * legAdd_coeff g m := by
   simp only [legAdd_coeff]
@@ -173,10 +174,12 @@ theorem legQAdd_ferrersQ_bound {ν₀ : ℂ} (hr : LegendreQRegular ν₀ 0) {a 
   set g2 : ℂ → ℂ := fun ν => cos (ν * π / 2) * Gamma ((ν + 2) / 2) * (Gamma ((ν + 1) / 2))⁻¹
   have hg1 : ContinuousAt g1 ν₀ :=
     (((by fun_prop : Continuous fun ν : ℂ => -sin (ν * π / 2)).continuousAt.mul c1).mul
-      (continuous_recip_Gamma.comp (by fun_prop : Continuous fun ν : ℂ => (ν + 2) / 2)).continuousAt)
+      (continuous_recip_Gamma.comp
+          (by fun_prop : Continuous fun ν : ℂ => (ν + 2) / 2)).continuousAt)
   have hg2 : ContinuousAt g2 ν₀ :=
     (((by fun_prop : Continuous fun ν : ℂ => cos (ν * π / 2)).continuousAt.mul c2).mul
-      (continuous_recip_Gamma.comp (by fun_prop : Continuous fun ν : ℂ => (ν + 1) / 2)).continuousAt)
+      (continuous_recip_Gamma.comp
+          (by fun_prop : Continuous fun ν : ℂ => (ν + 1) / 2)).continuousAt)
   obtain ⟨E, hE⟩ := legQAdd_hg_sq_bound (A := fun ν => -ν / 2) (B := fun ν => (ν + 1) / 2)
     (by fun_prop) (by fun_prop) (1 / 2) ν₀ ha hb
   obtain ⟨O, hO⟩ := legQAdd_hg_sq_bound (A := fun ν => (1 - ν) / 2) (B := fun ν => (ν + 2) / 2)
@@ -196,7 +199,8 @@ theorem legQAdd_ferrersQ_bound {ν₀ : ℂ} (hr : LegendreQRegular ν₀ 0) {a 
   calc ‖(π:ℂ) / 2 * (g1 ν * regularizedGaussHG (-ν / 2) ((ν + 1) / 2) (1 / 2) ((x:ℂ) ^ 2) +
         g2 ν * ((x:ℂ) * regularizedGaussHG ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) ((x:ℂ) ^ 2)))‖
       ≤ π / 2 * (‖g1 ν‖ * ‖regularizedGaussHG (-ν / 2) ((ν + 1) / 2) (1 / 2) ((x:ℂ) ^ 2)‖ +
-        ‖g2 ν‖ * (‖(x:ℂ)‖ * ‖regularizedGaussHG ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) ((x:ℂ) ^ 2)‖)) := by
+        ‖g2 ν‖ * (‖(x:ℂ)‖ * ‖regularizedGaussHG ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2)
+            ((x:ℂ) ^ 2)‖)) := by
         rw [norm_mul, hπ]
         gcongr
         refine (norm_add_le _ _).trans ?_
@@ -360,7 +364,8 @@ theorem legQAdd_ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ�
 /-- **The combined argument avoids the cut.** If `Re z₁, Re z₂ > 0`, `sᵢ² = zᵢ² - 1` (any square
 roots) and `-1 ≤ c ≤ 1`, then `1 + z₁ z₂ - s₁ s₂ c` lies in the slit plane. Writing
 `zᵢ ± 1 = bᵢ², aᵢ²` with `aᵢ bᵢ = sᵢ`, `1 + z₁z₂ - c s₁s₂ = (1+c)/4 X² + (1-c)/4 Y²` with
-`X, Y = b₁b₂ ∓ a₁a₂`, and `Re (X Ȳ) = |z₁+1||z₂+1| - |z₁-1||z₂-1| > 0`, `Re (XY) = 2 Re (z₁+z₂) > 0`. -/
+`X, Y = b₁b₂ ∓ a₁a₂`, and `Re (X Ȳ) = |z₁+1||z₂+1| - |z₁-1||z₂-1| > 0`,
+`Re (XY) = 2 Re (z₁+z₂) > 0`. -/
 theorem legQAdd_one_add_mem_slitPlane {z₁ z₂ s₁ s₂ : ℂ} (hz₁ : 0 < z₁.re) (hz₂ : 0 < z₂.re)
     (hs₁ : s₁ ^ 2 = z₁ ^ 2 - 1) (hs₂ : s₂ ^ 2 = z₂ ^ 2 - 1) {c : ℝ} (hc1 : -1 ≤ c) (hc2 : c ≤ 1) :
     1 + (z₁ * z₂ - s₁ * s₂ * c) ∈ slitPlane := by
@@ -382,11 +387,13 @@ theorem legQAdd_one_add_mem_slitPlane {z₁ z₂ s₁ s₂ : ℂ} (hz₁ : 0 < z
   have hab₂ : a₂ * b₂ = s₂ := by simp only [a₂]; field_simp
   set X := b₁ * b₂ - a₁ * a₂
   set Y := b₁ * b₂ + a₁ * a₂
-  have hW : 1 + (z₁ * z₂ - s₁ * s₂ * c) = ((1 + c) / 4 : ℝ) * X ^ 2 + ((1 - c) / 4 : ℝ) * Y ^ 2 := by
+  have hW : 1 + (z₁ * z₂ - s₁ * s₂ * c) = ((1 + c) / 4 : ℝ) * X ^ 2 +
+      ((1 - c) / 4 : ℝ) * Y ^ 2 := by
     rw [← hab₁, ← hab₂]
     simp only [X, Y]
     push_cast
-    linear_combination (-(1:ℂ)/2) * ((b₂ ^ 2) * hb₁ + (z₁ + 1) * hb₂) + (-(1:ℂ)/2) * ((a₂ ^ 2) * ha₁ + (z₁ - 1) * ha₂)
+    linear_combination (-(1:ℂ)/2) * ((b₂ ^ 2) * hb₁ + (z₁ + 1) * hb₂) + (-(1:ℂ)/2) *
+        ((a₂ ^ 2) * ha₁ + (z₁ - 1) * ha₂)
   -- the two real parts
   have hXY : 0 < (X * Y).re := by
     have : X * Y = 2 * (z₁ + z₂) := by
@@ -399,7 +406,8 @@ theorem legQAdd_one_add_mem_slitPlane {z₁ z₂ s₁ s₂ : ℂ} (hz₁ : 0 < z
     simp only [normSq_apply, sub_re, add_re, one_re, sub_im, add_im, one_im]; nlinarith
   have hXcY : 0 < (X * conj Y).re := by
     have e : (X * conj Y).re = normSq b₁ * normSq b₂ - normSq a₁ * normSq a₂ := by
-      simp only [X, Y, mul_re, conj_re, conj_im, add_re, add_im, sub_re, sub_im, mul_im, normSq_apply]
+      simp only [X, Y, mul_re, conj_re, conj_im, add_re, add_im, sub_re, sub_im,
+          mul_im, normSq_apply]
       ring
     rw [e]
     have p1 := hnorm _ _ hb₁
@@ -544,7 +552,8 @@ theorem legQAdd_continuousOn_joint (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈ leg
   unfold legQAdd_Z
   exact (continuousOn_const.sub ((continuous_fst.continuousOn.mul continuousOn_const).sub
     ((hs.mul continuousOn_const).mul
-      (by fun_prop : Continuous fun p : ℂ × ℝ => ((Real.cos p.2 : ℝ) : ℂ)).continuousOn))).div_const 2
+      (by fun_prop : Continuous fun p : ℂ × ℝ =>
+            ((Real.cos p.2 : ℝ) : ℂ)).continuousOn))).div_const 2
 
 /-- The Fourier coefficients of `t ↦ P_ν(legQAdd_Z z z₂ t)` are holomorphic in `z ∈ D`. -/
 theorem legQAdd_coeff_differentiableOn (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈ legQAdd_D) (m : ℤ) :
@@ -570,7 +579,8 @@ theorem legQAdd_coeff_differentiableOn (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈
       have hsd : DifferentiableOn ℂ legQAdd_sq legQAdd_D := fun z hz =>
         (legQAdd_differentiableAt_sq hz).differentiableWithinAt
       unfold legQAdd_Z
-      exact ((differentiableOn_const _).sub ((differentiableOn_id.mul (differentiableOn_const _)).sub
+      exact ((differentiableOn_const _).sub
+          ((differentiableOn_id.mul (differentiableOn_const _)).sub
         ((hsd.mul (differentiableOn_const _)).mul (differentiableOn_const _)))).div_const 2
     · intro z₀ hz₀
       obtain ⟨r, hr, hball⟩ := Metric.isOpen_iff.1 isOpen_legQAdd_D z₀ hz₀
@@ -600,7 +610,8 @@ theorem legQAdd_U_props {κ σ : ℝ} (hκ : 0 < κ) :
         (by fun_prop) (by fun_prop))
   refine ⟨ho, ?_, ?_, ?_⟩
   · intro x hx y hy a b ha hb hab
-    simp only [mem_ofPred_eq, add_re, add_im, Complex.real_smul, re_ofReal_mul, im_ofReal_mul] at hx hy ⊢
+    simp only [mem_ofPred_eq, add_re, add_im, Complex.real_smul, re_ofReal_mul,
+        im_ofReal_mul] at hx hy ⊢
     constructor
     · rcases eq_or_lt_of_le ha with h | h
       · subst h; simp at hab; subst hab; simpa using hy.1
@@ -626,7 +637,8 @@ theorem legQAdd_U_props {κ σ : ℝ} (hκ : 0 < κ) :
 theorem legQAdd_extend {F G : ℂ → ℂ} (hF : DifferentiableOn ℂ F legQAdd_D)
     (hG : DifferentiableOn ℂ G legQAdd_D) (h : ∀ ξ : ℝ, 0 < ξ → F (Real.cosh ξ) = G (Real.cosh ξ))
     {z : ℂ} (hz : z ∈ legQAdd_D) : F z = G z := by
-  obtain ⟨κ, σ, hκ, hzU⟩ : ∃ κ σ : ℝ, 0 < κ ∧ z ∈ {w : ℂ | 0 < w.re ∧ κ * (1 - w.re) < σ * w.im} := by
+  obtain ⟨κ, σ, hκ, hzU⟩ : ∃ κ σ : ℝ, 0 < κ ∧ z ∈
+      {w : ℂ | 0 < w.re ∧ κ * (1 - w.re) < σ * w.im} := by
     by_cases him : z.im = 0
     · refine ⟨1, 1, one_pos, hz.1, ?_⟩
       have h2 := hz.2
@@ -652,7 +664,8 @@ theorem legQAdd_extend {F G : ℂ → ℂ} (hF : DifferentiableOn ℂ F legQAdd_
       (𝓝[≠] ((Real.cosh 1 : ℝ) : ℂ)) := by
     apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
     · exact ((continuous_ofReal.comp Real.continuous_cosh).tendsto _).mono_left nhdsWithin_le_nhds
-    · filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds (Ioi_mem_nhds zero_lt_one)] with ξ hξ hξ0
+    · filter_upwards [self_mem_nhdsWithin,
+          nhdsWithin_le_nhds (Ioi_mem_nhds zero_lt_one)] with ξ hξ hξ0
       simp only [mem_compl_iff, mem_singleton_iff, ofReal_inj]
       intro he
       apply hξ
@@ -749,7 +762,8 @@ theorem legQAdd_complex_coeff_eq (ν : ℂ) {z₁ z₂ : ℂ} (hz₁ : z₁ ∈ 
   have hsym : ∀ w : ℂ, (fun t => associatedP ν 0 (legQAdd_Z z₁ w t)) =
       fun t => associatedP ν 0 (legQAdd_Z w z₁ t) := fun w => by
     funext t; rw [legQAdd_Z_comm]
-  have := legQAdd_extend (F := fun w => legAdd_coeff (fun t => associatedP ν 0 (legQAdd_Z w z₁ t)) m)
+  have := legQAdd_extend
+      (F := fun w => legAdd_coeff (fun t => associatedP ν 0 (legQAdd_Z w z₁ t)) m)
     (G := fun w => (-1:ℂ) ^ m / poch (ν - m + 1) (2 * m) * associatedP ν m z₁ * associatedP ν m w)
     (legQAdd_coeff_differentiableOn ν hz₁ m) ((differentiableOn_const _).mul hP)
     (fun ξ₂ h2 => by

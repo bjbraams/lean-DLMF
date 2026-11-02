@@ -61,7 +61,8 @@ def qBilateralThreeValue (b c d q : ℂ) : ℂ :=
 def qBilateralFourValue (a b c d q : ℂ) : ℂ :=
   let r := Complex.sqrt a
   let t := Complex.sqrt q
-  qPochhammerListInf [r*t,-r*t,-r*q,t/r,-t/r,-q/r,a*q/(b*c),a*q/(b*d),a*q/(c*d),q*r/b,q*r/c,q*r/d,q] q/
+  qPochhammerListInf [r*t, -r*t, -r*q, t/r, -t/r, -q/r, a*q/(b*c), a*q/(b*d), a*q/(c*d), q*r/b,
+      q*r/c, q*r/d, q] q/
     qPochhammerListInf [a*q/b,a*q/c,a*q/d,q/b,q/c,q/d,q*a*r/(b*c*d)] q
 /-- Bailey's six-psi-six product quotient. -/
 def qBilateralSixValue (a b c d e q : ℂ) : ℂ :=
@@ -130,7 +131,8 @@ theorem bilateral_six_sum {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha
       (q*a^2/(b*c*d*e))=qBilateralSixValue a b c d e q := by
   sorry
 
-/-- The actual series identity uses the full bilateral annulus; the continuation below covers the larger printed region. -/
+/-- The actual series identity uses the full bilateral annulus; the continuation below covers the
+larger printed region. -/
 @[dlmf 17.8.E8]
 theorem bilateral_even_sum {b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hb : b≠0) (hc : c≠0)
     (hz : ‖c/b^2‖<1)
@@ -186,7 +188,8 @@ theorem bilateral_two_continues {a₀ b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1
     (hz : ‖q*a₀‖<‖b*c‖) (hreg : QBilateralRegular [b,c] [a₀*q/b,a₀*q/c] q) :
     let U : Set ℂ := {a | a≠0 ∧ qPochhammerListInf [a*q/b,a*q/c,q/b,q/c,-a*q/(b*c)] q≠0}
     AnalyticOnNhd ℂ (fun a => qBilateralTwoValue a b c q) U ∧
-    ((fun a => qPsi [b,c] [a*q/b,a*q/c] q (-a*q/(b*c)))=ᶠ[𝓝 a₀] (fun a => qBilateralTwoValue a b c q)) ∧
+    ((fun a => qPsi [b, c] [a*q/b, a*q/c] q (-a*q/(b*c)))=ᶠ[𝓝 a₀]
+        (fun a => qBilateralTwoValue a b c q)) ∧
     TauCeti.ContinuesInside (fun a => qPsi [b,c] [a*q/b,a*q/c] q (-a*q/(b*c))) U a₀ := by
   sorry
 
@@ -196,7 +199,8 @@ theorem bilateral_three_continues {b c d₀ q : ℂ} (hq0 : q≠0) (hq : ‖q‖
     (hz : ‖q‖<‖b*c*d₀‖) (hreg : QBilateralRegular [b,c,d₀] [q/b,q/c,q/d₀] q) :
     let U : Set ℂ := {d | d≠0 ∧ qPochhammerListInf [q/b,q/c,q/d,q/(b*c*d)] q≠0}
     AnalyticOnNhd ℂ (fun d => qBilateralThreeValue b c d q) U ∧
-    ((fun d => qPsi [b,c,d] [q/b,q/c,q/d] q (q/(b*c*d)))=ᶠ[𝓝 d₀] (fun d => qBilateralThreeValue b c d q)) ∧
+    ((fun d => qPsi [b, c, d] [q/b, q/c, q/d] q (q/(b*c*d)))=ᶠ[𝓝 d₀]
+        (fun d => qBilateralThreeValue b c d q)) ∧
     TauCeti.ContinuesInside (fun d => qPsi [b,c,d] [q/b,q/c,q/d] q (q/(b*c*d))) U d₀ := by
   sorry
 
@@ -205,10 +209,15 @@ series. -/
 theorem bilateral_four_continues {a b c d₀ q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
     (hz : ‖q*a*Complex.sqrt a‖<‖b*c*d₀‖)
     (hreg : QBilateralRegular [-q*Complex.sqrt a,b,c,d₀] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d₀] q) :
-    let U : Set ℂ := {d | d≠0 ∧ qPochhammerListInf [a*q/b,a*q/c,a*q/d,q/b,q/c,q/d,q*a*Complex.sqrt a/(b*c*d)] q≠0}
+    let U : Set ℂ := {d | d≠0 ∧
+                        qPochhammerListInf [a*q/b, a*q/c, a*q/d, q/b, q/c, q/d,
+                        q*a*Complex.sqrt a/(b*c*d)] q≠0}
     AnalyticOnNhd ℂ (fun d => qBilateralFourValue a b c d q) U ∧
-    ((fun d => qPsi [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q (q*a*Complex.sqrt a/(b*c*d)))=ᶠ[𝓝 d₀] (fun d => qBilateralFourValue a b c d q)) ∧
-    TauCeti.ContinuesInside (fun d => qPsi [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q (q*a*Complex.sqrt a/(b*c*d))) U d₀ := by
+    ((fun d => qPsi [-q*Complex.sqrt a, b, c, d] [-Complex.sqrt a, a*q/b, a*q/c, a*q/d] q
+        (q*a*Complex.sqrt a/(b*c*d)))=ᶠ[𝓝 d₀] (fun d => qBilateralFourValue a b c d q)) ∧
+    TauCeti.ContinuesInside
+        (fun d => qPsi [-q*Complex.sqrt a, b, c, d] [-Complex.sqrt a, a*q/b, a*q/c, a*q/d] q
+        (q*a*Complex.sqrt a/(b*c*d))) U d₀ := by
   sorry
 
 /-- The product side of the `6ψ6` sum, as a function of `e`, analytically continues the bilateral
@@ -217,10 +226,17 @@ theorem bilateral_six_continues {a b c d e₀ q : ℂ} (hq0 : q≠0) (hq : ‖q�
     (hz : ‖q*a^2‖<‖b*c*d*e₀‖)
     (hreg : QBilateralRegular [q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e₀]
       [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d,a*q/e₀] q) :
-    let U : Set ℂ := {e | e≠0 ∧ qPochhammerListInf [a*q/b,a*q/c,a*q/d,a*q/e,q/b,q/c,q/d,q/e,q*a^2/(b*c*d*e)] q≠0}
+    let U : Set ℂ := {e | e≠0 ∧
+                        qPochhammerListInf [a*q/b, a*q/c, a*q/d, a*q/e, q/b, q/c, q/d, q/e,
+                        q*a^2/(b*c*d*e)] q≠0}
     AnalyticOnNhd ℂ (fun e => qBilateralSixValue a b c d e q) U ∧
-    ((fun e => qPsi [q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e] [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d,a*q/e] q (q*a^2/(b*c*d*e)))=ᶠ[𝓝 e₀] (fun e => qBilateralSixValue a b c d e q)) ∧
-    TauCeti.ContinuesInside (fun e => qPsi [q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e] [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d,a*q/e] q (q*a^2/(b*c*d*e))) U e₀ := by
+    ((fun e => qPsi [q*Complex.sqrt a, -q*Complex.sqrt a, b, c, d, e]
+        [Complex.sqrt a, -Complex.sqrt a, a*q/b, a*q/c, a*q/d, a*q/e] q (q*a^2/(b*c*d*e)))=ᶠ[𝓝 e₀]
+        (fun e => qBilateralSixValue a b c d e q)) ∧
+    TauCeti.ContinuesInside
+        (fun e => qPsi [q*Complex.sqrt a, -q*Complex.sqrt a, b, c, d, e]
+        [Complex.sqrt a, -Complex.sqrt a, a*q/b, a*q/c, a*q/d, a*q/e] q
+        (q*a^2/(b*c*d*e))) U e₀ := by
   sorry
 
 /-- The product side of the base-`q²` bilateral sum, as a function of `c`, analytically continues
@@ -229,7 +245,8 @@ theorem bilateral_even_continues {b c₀ q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hz : ‖c₀/b^2‖<1) (hreg : QBilateralRegular [b^2,b^2/c₀] [q,c₀*q] (q^2)) :
     let U : Set ℂ := {c | qPochhammerListInf [c*q,c*q^2/b^2,q^2/b^2,c/b^2] (q^2)≠0}
     AnalyticOnNhd ℂ (fun c => qBilateralEvenValue b c q) U ∧
-    ((fun c => qPsi [b^2,b^2/c] [q,c*q] (q^2) (c*q^2/b^2))=ᶠ[𝓝 c₀] (fun c => qBilateralEvenValue b c q)) ∧
+    ((fun c => qPsi [b^2, b^2/c] [q, c*q] (q^2) (c*q^2/b^2))=ᶠ[𝓝 c₀]
+        (fun c => qBilateralEvenValue b c q)) ∧
     TauCeti.ContinuesInside (fun c => qPsi [b^2,b^2/c] [q,c*q] (q^2) (c*q^2/b^2)) U c₀ := by
   sorry
 

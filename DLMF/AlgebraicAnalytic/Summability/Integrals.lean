@@ -7,6 +7,7 @@ module
 
 public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.OneSubCosIntegral
 
 /-!
 # Summability of integrals and of Fourier integrals (DLMF §1.15(iv)–(v))
@@ -117,13 +118,307 @@ theorem hasCesaroIntegral_of_integrable {f : ℝ → ℂ} (hf : Integrable f) :
   exact (tendsto_integral_filter_of_dominated_convergence (fun t => ‖f t‖)
     (Eventually.of_forall hmeas) hbound hf.norm hlim).congr' (hEq.mono fun R h => h.symm)
 
+/-- `u ↦ ∫_{-u}^u f` is continuous for locally integrable `f`. -/
+private lemma continuous_integral_neg_self {f : ℝ → ℂ} (hf : LocallyIntegrable f) :
+    Continuous fun u : ℝ => ∫ t in -u..u, f t := by
+  have hii : ∀ a b : ℝ, IntervalIntegrable f volume a b := fun a b =>
+    (intervalIntegrable_iff.mpr
+      ((hf.integrableOn_isCompact isCompact_uIcc).mono_set uIoc_subset_uIcc))
+  have h1 := intervalIntegral.continuous_primitive hii 0
+  have h2 : (fun u : ℝ => ∫ t in -u..u, f t) =
+      fun u => (∫ t in (0 : ℝ)..u, f t) - ∫ t in (0 : ℝ)..(-u), f t := by
+    ext u
+    rw [intervalIntegral.integral_interval_sub_left (hii 0 u) (hii 0 (-u))]
+  rw [h2]
+  exact h1.sub (h1.comp continuous_neg)
+
+/-- Fubini for the Fejér weight: `∫_{-R}^R (1 - |t|/R) f = R⁻¹ ∫_0^R ∫_{-u}^u f`. -/
+private lemma integral_fejer_weight_eq {f : ℝ → ℂ} (hf : LocallyIntegrable f) {R : ℝ}
+    (hR : 0 < R) :
+    ∫ t in -R..R, ((1 - |t| / R : ℝ) : ℂ) * f t =
+      (R : ℂ)⁻¹ * ∫ u in (0 : ℝ)..R, ∫ t in -u..u, f t := by
+  set μ := volume.restrict (Ioc (-R) R)
+  set ν := volume.restrict (Ioc (0 : ℝ) R)
+  set g : ℝ → ℝ → ℂ := fun t u => (Ioi |t|).indicator (fun _ => f t) u with hg
+  have hfi : Integrable f μ :=
+    (hf.integrableOn_isCompact isCompact_Icc).mono_set Ioc_subset_Icc_self
+  have hint : Integrable (Function.uncurry g) (μ.prod ν) := by
+    refine Integrable.mono' ((hfi.norm).comp_fst ν) ?_ ?_
+    · have hm : MeasurableSet {p : ℝ × ℝ | |p.1| < p.2} :=
+        measurableSet_lt (measurable_fst.norm) measurable_snd
+      have : Function.uncurry g = {p : ℝ × ℝ | |p.1| < p.2}.indicator (fun p => f p.1) := by
+        ext ⟨t, u⟩
+        simp [hg, Set.indicator]
+      rw [this]
+      exact (hfi.aestronglyMeasurable.comp_fst).indicator hm
+    · refine Eventually.of_forall fun ⟨t, u⟩ => ?_
+      simp only [Function.uncurry_apply_pair, hg]
+      by_cases h : u ∈ Ioi |t|
+      · simp [indicator_of_mem h]
+      · simp [indicator_of_notMem h]
+  have hswap := integral_integral_swap hint
+  -- inner integrals
+  have hin1 : ∀ t ∈ Ioc (-R) R, ∫ u, g t u ∂ν = ((R - |t| : ℝ) : ℂ) * f t := by
+    intro t ht
+    have hta : |t| ≤ R := abs_le.mpr ⟨ht.1.le, ht.2⟩
+    simp only [hg, ν]
+    rw [integral_indicator measurableSet_Ioi, Measure.restrict_restrict measurableSet_Ioi,
+      setIntegral_const, Set.inter_comm, Ioc_inter_Ioi, max_eq_right (abs_nonneg t),
+      Real.volume_real_Ioc, max_eq_left (by linarith),
+      Complex.real_smul]
+  have hin2 : ∀ u ∈ Ioc (0 : ℝ) R, ∫ t, g t u ∂μ = ∫ t in -u..u, f t := by
+    intro u hu
+    have hset : ∀ t, g t u = (Ioo (-u) u).indicator f t := by
+      intro t
+      simp only [hg, Set.indicator, mem_Ioi, mem_Ioo, abs_lt]
+    simp only [hset, μ]
+    rw [integral_indicator measurableSet_Ioo, Measure.restrict_restrict measurableSet_Ioo,
+      Set.inter_eq_left.mpr (Ioo_subset_Ioc_self.trans (Ioc_subset_Ioc (by linarith [hu.2])
+        hu.2)), intervalIntegral.integral_of_le (by linarith [hu.1]), integral_Ioc_eq_integral_Ioo]
+  rw [intervalIntegral.integral_of_le (by linarith), intervalIntegral.integral_of_le hR.le]
+  have e1 : ∫ t in Ioc (-R) R, ((1 - |t| / R : ℝ) : ℂ) * f t =
+      (R : ℂ)⁻¹ * ∫ t, ∫ u, g t u ∂ν ∂μ := by
+    rw [← integral_const_mul]
+    refine setIntegral_congr_fun measurableSet_Ioc fun t ht => ?_
+    rw [hin1 t ht]
+    have hR' : (R : ℂ) ≠ 0 := by exact_mod_cast hR.ne'
+    push_cast
+    field_simp
+  have e2 : ∫ u, ∫ t, g t u ∂μ ∂ν = ∫ u in Ioc (0 : ℝ) R, ∫ t in -u..u, f t :=
+    setIntegral_congr_fun measurableSet_Ioc fun u hu => hin2 u hu
+  rw [e1, hswap, e2]
+
+/-- Cesàro means of a continuous function with a limit: `R⁻¹ ∫_0^R F → L`. -/
+private lemma tendsto_inv_mul_integral_of_tendsto {F : ℝ → ℂ} (hF : Continuous F) {L : ℂ}
+    (h : Tendsto F atTop (𝓝 L)) :
+    Tendsto (fun R : ℝ => (R : ℂ)⁻¹ * ∫ u in (0 : ℝ)..R, F u) atTop (𝓝 L) := by
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  obtain ⟨U₀, hU₀⟩ := Metric.tendsto_atTop.mp h (ε / 2) (half_pos hε)
+  set U := max U₀ 0
+  set C := ‖∫ u in (0 : ℝ)..U, (F u - L)‖
+  have hint : ∀ a b : ℝ, IntervalIntegrable (fun u => F u - L) volume a b := fun a b =>
+    (hF.sub continuous_const).intervalIntegrable a b
+  refine ⟨max (U + 1) (2 * C / ε + 1), fun R hR => ?_⟩
+  have hRU : U + 1 ≤ R := le_trans (le_max_left _ _) hR
+  have hRC : 2 * C / ε + 1 ≤ R := le_trans (le_max_right _ _) hR
+  have hU0 : 0 ≤ U := le_max_right _ _
+  have hR0 : 0 < R := by linarith
+  have hR' : (R : ℂ) ≠ 0 := by exact_mod_cast hR0.ne'
+  have hsplit : ((R : ℂ)⁻¹ * ∫ u in (0 : ℝ)..R, F u) - L =
+      (R : ℂ)⁻¹ * ((∫ u in (0 : ℝ)..U, (F u - L)) + ∫ u in U..R, (F u - L)) := by
+    rw [intervalIntegral.integral_add_adjacent_intervals (hint 0 U) (hint U R),
+      intervalIntegral.integral_sub (hF.intervalIntegrable 0 R) intervalIntegrable_const,
+      intervalIntegral.integral_const, sub_zero, Complex.real_smul]
+    field_simp
+  have htail : ‖∫ u in U..R, (F u - L)‖ ≤ ε / 2 * (R - U) := by
+    have := intervalIntegral.norm_integral_le_of_norm_le_const (a := U) (b := R)
+      (C := ε / 2) (f := fun u => F u - L) (fun u hu => by
+        rw [uIoc_of_le (by linarith)] at hu
+        have := hU₀ u (le_trans (le_max_left _ _) hu.1.le)
+        rw [dist_eq_norm] at this
+        exact this.le)
+    rwa [abs_of_nonneg (by linarith)] at this
+  rw [dist_eq_norm, hsplit, norm_mul, norm_inv, Complex.norm_real, Real.norm_of_nonneg hR0.le]
+  calc R⁻¹ * ‖(∫ u in (0 : ℝ)..U, (F u - L)) + ∫ u in U..R, (F u - L)‖
+      ≤ R⁻¹ * (C + ε / 2 * (R - U)) := by
+        gcongr
+        exact (norm_add_le _ _).trans (add_le_add le_rfl htail)
+    _ = C / R + ε / 2 * ((R - U) / R) := by field_simp
+    _ ≤ C / R + ε / 2 * 1 := by
+        gcongr
+        rw [div_le_one hR0]; linarith
+    _ < ε / 2 + ε / 2 := by
+        have hCR : C / R < ε / 2 := by
+          rw [div_lt_iff₀ hR0]
+          have : 2 * C / ε < R := by linarith
+          rw [div_lt_iff₀ hε] at this
+          linarith
+        linarith
+    _ = ε := by ring
+
 /-- DLMF §1.15(iv), improper case: if `f` is locally integrable and the improper integral
 `lim_{a→-∞, b→∞} ∫_a^b f` equals `L`, then `∫ f = L (C,1)`. -/
 @[dlmf 1.15.iv]
 theorem hasCesaroIntegral_of_tendsto {f : ℝ → ℂ} (hf : LocallyIntegrable f) {L : ℂ}
     (h : Tendsto (fun p : ℝ × ℝ => ∫ t in p.1..p.2, f t) (atBot ×ˢ atTop) (𝓝 L)) :
     HasCesaroIntegral f L := by
-  sorry
+  have hFc := continuous_integral_neg_self hf
+  have hF : Tendsto (fun u : ℝ => ∫ t in -u..u, f t) atTop (𝓝 L) :=
+    h.comp (tendsto_neg_atTop_atBot.prodMk tendsto_id)
+  refine (tendsto_inv_mul_integral_of_tendsto hFc hF).congr' ?_
+  filter_upwards [eventually_gt_atTop 0] with R hR
+  exact (integral_fejer_weight_eq hf hR).symm
+
+/-- Fubini for the Abel weight: `∫ e^{-ε|t|} f = ε ∫_0^∞ e^{-εu} ∫_{-u}^u f`. -/
+private lemma integral_exp_neg_abs_mul_eq {f : ℝ → ℂ} (hf : LocallyIntegrable f)
+    (hint : ∀ ε : ℝ, 0 < ε → Integrable fun t => (Real.exp (-ε * |t|) : ℂ) * f t)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∫ t, (Real.exp (-ε * |t|) : ℂ) * f t =
+      (ε : ℂ) * ∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) * ∫ t in -u..u, f t := by
+  set ν := volume.restrict (Ioi (0 : ℝ))
+  set g : ℝ → ℝ → ℂ := fun t u => (Ioi |t|).indicator (fun u => (Real.exp (-ε * u) : ℂ) * f t) u
+    with hg
+  have hε2 : 0 < ε / 2 := half_pos hε
+  have hintg : Integrable (Function.uncurry g) (volume.prod ν) := by
+    have hdom := Integrable.mul_prod (hint (ε / 2) hε2).norm
+      (integrableOn_exp_mul_Ioi (a := -(ε / 2)) (by linarith) 0)
+    refine Integrable.mono' hdom ?_ ?_
+    · have hm : MeasurableSet {p : ℝ × ℝ | |p.1| < p.2} :=
+        measurableSet_lt (measurable_fst.norm) measurable_snd
+      have : Function.uncurry g = {p : ℝ × ℝ | |p.1| < p.2}.indicator
+          (fun p => (Real.exp (-ε * p.2) : ℂ) * f p.1) := by
+        ext ⟨t, u⟩
+        simp [hg, Set.indicator]
+      rw [this]
+      refine AEStronglyMeasurable.indicator ?_ hm
+      exact ((Complex.continuous_ofReal.comp (Real.continuous_exp.comp
+        (continuous_const.mul continuous_snd))).aestronglyMeasurable).mul
+        hf.aestronglyMeasurable.comp_fst
+    · refine Eventually.of_forall fun ⟨t, u⟩ => ?_
+      simp only [Function.uncurry_apply_pair, hg]
+      by_cases h : u ∈ Ioi |t|
+      · rw [indicator_of_mem h, norm_mul, norm_mul, Complex.norm_real, Complex.norm_real,
+          Real.norm_of_nonneg (Real.exp_pos _).le, Real.norm_of_nonneg (Real.exp_pos _).le]
+        have hu : |t| < u := h
+        have : Real.exp (-ε * u) ≤ Real.exp (-(ε / 2) * |t|) * Real.exp (-(ε / 2) * u) := by
+          rw [← Real.exp_add]; exact Real.exp_le_exp.mpr (by nlinarith)
+        calc Real.exp (-ε * u) * ‖f t‖
+            ≤ Real.exp (-(ε / 2) * |t|) * Real.exp (-(ε / 2) * u) * ‖f t‖ :=
+              mul_le_mul_of_nonneg_right this (norm_nonneg _)
+          _ = _ := by ring
+      · rw [indicator_of_notMem h, norm_zero]
+        positivity
+  have hswap := integral_integral_swap hintg
+  have hin1 : ∀ t, ∫ u, g t u ∂ν = ((Real.exp (-ε * |t|) / ε : ℝ) : ℂ) * f t := by
+    intro t
+    simp only [hg, ν]
+    rw [integral_indicator measurableSet_Ioi, Measure.restrict_restrict measurableSet_Ioi,
+      Ioi_inter_Ioi, max_eq_left (abs_nonneg t), integral_mul_const, integral_complex_ofReal,
+      integral_exp_mul_Ioi (by linarith)]
+    congr 2
+    field_simp
+  have hin2 : ∀ u ∈ Ioi (0 : ℝ), ∫ t, g t u = (Real.exp (-ε * u) : ℂ) * ∫ t in -u..u, f t := by
+    intro u hu
+    have hset : ∀ t, g t u = (Ioo (-u) u).indicator
+        (fun t => (Real.exp (-ε * u) : ℂ) * f t) t := by
+      intro t
+      simp only [hg, Set.indicator, mem_Ioi, mem_Ioo, abs_lt]
+    simp only [hset]
+    rw [integral_indicator measurableSet_Ioo, integral_const_mul,
+      intervalIntegral.integral_of_le (by linarith [show (0 : ℝ) < u from hu]),
+      integral_Ioc_eq_integral_Ioo]
+  have e1 : ∫ t, (Real.exp (-ε * |t|) : ℂ) * f t = (ε : ℂ) * ∫ t, ∫ u, g t u ∂ν := by
+    rw [← integral_const_mul]
+    refine integral_congr_ae (Eventually.of_forall fun t => ?_)
+    simp only [hin1]
+    have hε' : (ε : ℂ) ≠ 0 := by exact_mod_cast hε.ne'
+    push_cast
+    field_simp
+  have e2 : ∫ u, ∫ t, g t u ∂volume ∂ν =
+      ∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) * ∫ t in -u..u, f t :=
+    setIntegral_congr_fun measurableSet_Ioi fun u hu => hin2 u hu
+  rw [e1, hswap, e2]
+
+/-- Abel means of a continuous function with a limit: `ε ∫_0^∞ e^{-εu} F(u) du → L`
+as `ε → 0⁺`. -/
+private lemma tendsto_mul_integral_exp_neg_of_tendsto {F : ℝ → ℂ} (hF : Continuous F) {L : ℂ}
+    (h : Tendsto F atTop (𝓝 L)) :
+    Tendsto (fun ε : ℝ => (ε : ℂ) * ∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) * F u)
+      (𝓝[>] 0) (𝓝 L) := by
+  rw [Metric.tendsto_nhdsWithin_nhds]
+  intro η hη
+  obtain ⟨U₀, hU₀⟩ := Metric.tendsto_atTop.mp h (η / 2) (half_pos hη)
+  set U := max U₀ 0
+  have hU0 : 0 ≤ U := le_max_right _ _
+  obtain ⟨B, hB⟩ := isCompact_Icc.exists_bound_of_continuousOn
+    ((hF.sub continuous_const).continuousOn (s := Icc 0 U))
+  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB 0 ⟨le_rfl, hU0⟩)
+  have hbd : ∀ u, 0 ≤ u → ‖F u - L‖ ≤ max B (η / 2) := by
+    intro u hu
+    rcases le_or_gt u U with h | h
+    · exact (hB u ⟨hu, h⟩).trans (le_max_left _ _)
+    · have := hU₀ u (le_trans (le_max_left _ _) h.le)
+      rw [dist_eq_norm] at this
+      exact this.le.trans (le_max_right _ _)
+  refine ⟨η / (2 * (B * U + 1)), by positivity, fun ε hε hεδ => ?_⟩
+  have hε0 : 0 < ε := hε
+  rw [dist_zero_right, Real.norm_of_nonneg hε0.le] at hεδ
+  have hexp_int : IntegrableOn (fun u : ℝ => Real.exp (-ε * u)) (Ioi 0) :=
+    integrableOn_exp_mul_Ioi (by linarith) 0
+  have hint : IntegrableOn (fun u : ℝ => (Real.exp (-ε * u) : ℂ) * (F u - L)) (Ioi 0) := by
+    refine Integrable.mono' (hexp_int.mul_const (max B (η / 2))) ?_ ?_
+    · exact ((Complex.continuous_ofReal.comp (Real.continuous_exp.comp
+        (continuous_const.mul continuous_id))).mul
+        (hF.sub continuous_const)).aestronglyMeasurable
+    · refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun u hu => ?_)
+      rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (Real.exp_pos _).le]
+      exact mul_le_mul_of_nonneg_left (hbd u (le_of_lt hu)) (Real.exp_pos _).le
+  have hone : (ε : ℂ) * ∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) = 1 := by
+    rw [integral_complex_ofReal, integral_exp_mul_Ioi (by linarith), mul_zero, Real.exp_zero]
+    have hε' : (ε : ℂ) ≠ 0 := by exact_mod_cast hε0.ne'
+    push_cast
+    field_simp
+  have hFint : IntegrableOn (fun u : ℝ => (Real.exp (-ε * u) : ℂ) * F u) (Ioi 0) := by
+    have h2 : IntegrableOn (fun u : ℝ => (Real.exp (-ε * u) : ℂ) * L) (Ioi 0) :=
+      (hexp_int.ofReal).mul_const L
+    refine (hint.add h2).congr_fun (fun u _ => by simp only [Pi.add_apply]; ring)
+      measurableSet_Ioi
+  have hdiff : (ε : ℂ) * (∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) * F u) - L =
+      (ε : ℂ) * ∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) * (F u - L) := by
+    have h2 : ∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) * (F u - L) =
+        (∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) * F u) -
+          (∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ)) * L := by
+      have hL : IntegrableOn (fun u : ℝ => (Real.exp (-ε * u) : ℂ) * L) (Ioi 0) :=
+        (hexp_int.ofReal).mul_const L
+      calc ∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) * (F u - L)
+          = ∫ u in Ioi (0 : ℝ), ((Real.exp (-ε * u) : ℂ) * F u - (Real.exp (-ε * u) : ℂ) * L) :=
+            setIntegral_congr_fun measurableSet_Ioi fun u _ => by ring
+        _ = _ := integral_sub hFint hL
+        _ = _ := by rw [integral_mul_const]
+    rw [h2, mul_sub, ← mul_assoc, hone, one_mul]
+  -- split the integral at `U`
+  have hsplit : ∫ u in Ioi (0 : ℝ), (Real.exp (-ε * u) : ℂ) * (F u - L) =
+      (∫ u in Ioc 0 U, (Real.exp (-ε * u) : ℂ) * (F u - L)) +
+        ∫ u in Ioi U, (Real.exp (-ε * u) : ℂ) * (F u - L) := by
+    rw [← setIntegral_union (Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi
+      (hint.mono_set Ioc_subset_Ioi_self) (hint.mono_set (Ioi_subset_Ioi hU0)),
+      Ioc_union_Ioi_eq_Ioi hU0]
+  have h1 : ‖∫ u in Ioc 0 U, (Real.exp (-ε * u) : ℂ) * (F u - L)‖ ≤ B * U := by
+    have := norm_setIntegral_le_of_norm_le_const (μ := volume) (s := Ioc 0 U) (C := B)
+      (f := fun u => (Real.exp (-ε * u) : ℂ) * (F u - L)) measure_Ioc_lt_top (fun u hu => by
+        rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (Real.exp_pos _).le]
+        calc Real.exp (-ε * u) * ‖F u - L‖ ≤ 1 * B := by
+              refine mul_le_mul ?_ (hB u ⟨hu.1.le, hu.2⟩) (norm_nonneg _) zero_le_one
+              rw [Real.exp_le_one_iff]; nlinarith [hu.1]
+          _ = B := one_mul B)
+    rwa [Real.volume_real_Ioc, sub_zero, max_eq_left hU0] at this
+  have h2 : ‖∫ u in Ioi U, (Real.exp (-ε * u) : ℂ) * (F u - L)‖ ≤ η / 2 / ε := by
+    have hle := norm_integral_le_of_norm_le
+      (f := fun u => (Real.exp (-ε * u) : ℂ) * (F u - L))
+      ((integrableOn_exp_mul_Ioi (a := -ε) (by linarith) U).mul_const (η / 2))
+      ((ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun u hu => by
+        rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (Real.exp_pos _).le]
+        have := hU₀ u (le_trans (le_max_left _ _) (le_of_lt hu))
+        rw [dist_eq_norm] at this
+        exact mul_le_mul_of_nonneg_left this.le (Real.exp_pos _).le))
+    rw [integral_mul_const, integral_exp_mul_Ioi (by linarith)] at hle
+    refine hle.trans ?_
+    rw [neg_div_neg_eq, div_mul_eq_mul_div, mul_comm, div_le_div_iff_of_pos_right hε0]
+    have : Real.exp (-ε * U) ≤ 1 := by rw [Real.exp_le_one_iff]; nlinarith
+    nlinarith
+  rw [dist_eq_norm, hdiff, hsplit, norm_mul, Complex.norm_real, Real.norm_of_nonneg hε0.le]
+  have hBU : ε * (B * U) < η / 2 := by
+    have hpos : 0 < 2 * (B * U + 1) := by positivity
+    rw [lt_div_iff₀ hpos] at hεδ
+    nlinarith [mul_nonneg hB0 hU0]
+  calc ε * ‖(∫ u in Ioc 0 U, (Real.exp (-ε * u) : ℂ) * (F u - L)) +
+        ∫ u in Ioi U, (Real.exp (-ε * u) : ℂ) * (F u - L)‖
+      ≤ ε * (B * U + η / 2 / ε) := by
+        gcongr
+        exact (norm_add_le _ _).trans (add_le_add h1 h2)
+    _ = ε * (B * U) + η / 2 := by field_simp
+    _ < η := by linarith
 
 /-- DLMF §1.15(iv), improper case: if `f` is locally integrable, the improper integral
 `lim_{a→-∞, b→∞} ∫_a^b f` equals `L`, and `e^{-ε|t|} f(t)` is absolutely integrable for each
@@ -133,7 +428,12 @@ theorem hasAbelIntegral_of_tendsto {f : ℝ → ℂ} (hf : LocallyIntegrable f) 
     (h : Tendsto (fun p : ℝ × ℝ => ∫ t in p.1..p.2, f t) (atBot ×ˢ atTop) (𝓝 L))
     (hint : ∀ ε : ℝ, 0 < ε → Integrable fun t => (Real.exp (-ε * |t|) : ℂ) * f t) :
     HasAbelIntegral f L := by
-  sorry
+  have hFc := continuous_integral_neg_self hf
+  have hF : Tendsto (fun u : ℝ => ∫ t in -u..u, f t) atTop (𝓝 L) :=
+    h.comp (tendsto_neg_atTop_atBot.prodMk tendsto_id)
+  refine ⟨hint, (tendsto_mul_integral_exp_neg_of_tendsto hFc hF).congr' ?_⟩
+  filter_upwards [self_mem_nhdsWithin] with ε hε
+  exact (integral_exp_neg_abs_mul_eq hf hint hε).symm
 
 /-! ### Poisson kernel of the half-plane (§1.15(v)) -/
 
@@ -196,7 +496,8 @@ theorem tendsto_integral_halfPlanePoissonKernel_tail {δ : ℝ} (hδ : 0 < δ) :
       (𝓝[>] 0) (𝓝 0) := by
     have ht : ContinuousAt (fun y : ℝ => (2 * y * C) * ∫ x in S, (1 + x ^ 2)⁻¹) 0 := by fun_prop
     simpa using ht.tendsto.mono_left nhdsWithin_le_nhds
-  exact squeeze_zero_norm' (by filter_upwards [self_mem_nhdsWithin] with y hy using hbound y hy) hlim
+  exact squeeze_zero_norm'
+      (by filter_upwards [self_mem_nhdsWithin] with y hy using hbound y hy) hlim
 
 /-- DLMF 1.15.37: for `f` absolutely integrable and `y > 0`, the Abel mean 1.15.36 of the
 Fourier integral is the Poisson integral `h(x, y) = (1/2π) ∫ f(t) P(x - t, y) dt`. -/
@@ -214,7 +515,8 @@ theorem tendsto_integral_norm_fourierAbelMean_sub {f : ℝ → ℂ} (hf : Integr
   sorry
 
 /-- The integrand of 1.15.39 is integrable for integrable `f` and `y > 0`. -/
-private lemma integrable_poissonCauchy_integrand {f : ℝ → ℝ} (hf : Integrable f) (x y : ℝ) (hy : 0 < y) :
+private lemma integrable_poissonCauchy_integrand {f : ℝ → ℝ} (hf : Integrable f)
+    (x y : ℝ) (hy : 0 < y) :
     Integrable fun t : ℝ => (f t : ℂ) / ((x - t : ℝ) + I * y) := by
   have hne : ∀ t : ℝ, ((x - t : ℝ) : ℂ) + I * y ≠ 0 := by
     intro t h
@@ -268,7 +570,8 @@ theorem re_poissonCauchyIntegral {f : ℝ → ℝ} (hf : Integrable f) (x : ℝ)
     (poissonCauchyIntegral (fun t => (f t : ℂ)) (x + y * I)).re =
       (2 * Real.pi)⁻¹ * ∫ t, f t * halfPlanePoissonKernel (x - t) y := by
   have hI := (integrable_poissonCauchy_integrand hf x y hy).const_mul (I / Real.pi)
-  rw [poissonCauchyIntegral_ofReal_eq, ← RCLike.re_to_complex, ← integral_re hI, ← integral_const_mul]
+  rw [poissonCauchyIntegral_ofReal_eq, ← RCLike.re_to_complex, ← integral_re hI,
+      ← integral_const_mul]
   congr 1
   funext t
   rw [RCLike.re_to_complex, poissonCauchy_integrand_split _ _ _ hy]
@@ -287,7 +590,8 @@ theorem im_poissonCauchyIntegral {f : ℝ → ℝ} (hf : Integrable f) (x : ℝ)
     (poissonCauchyIntegral (fun t => (f t : ℂ)) (x + y * I)).im =
       Real.pi⁻¹ * ∫ t, f t * ((x - t) / ((x - t) ^ 2 + y ^ 2)) := by
   have hI := (integrable_poissonCauchy_integrand hf x y hy).const_mul (I / Real.pi)
-  rw [poissonCauchyIntegral_ofReal_eq, ← RCLike.im_to_complex, ← integral_im hI, ← integral_const_mul]
+  rw [poissonCauchyIntegral_ofReal_eq, ← RCLike.im_to_complex, ← integral_im hI,
+      ← integral_const_mul]
   congr 1
   funext t
   rw [RCLike.im_to_complex, poissonCauchy_integrand_split _ _ _ hy]
@@ -321,7 +625,8 @@ theorem differentiableOn_poissonCauchyIntegral {f : ℝ → ℝ} (hf : Integrabl
         (differentiableAt_id.sub_const (t : ℂ)) (hne z hz t) |>.differentiableWithinAt
     · intro z hz
       refine ⟨{w : ℂ | z.im / 2 < w.im},
-        (isOpen_lt continuous_const Complex.continuous_im).mem_nhds (by simpa using half_lt_self hz),
+        (isOpen_lt continuous_const Complex.continuous_im).mem_nhds
+            (by simpa using half_lt_self hz),
         fun t => (z.im / 2)⁻¹ * ‖f t‖, hf.norm.const_mul _, ?_⟩
       filter_upwards [] with t w hw
       have hw0 : 0 < w.im := lt_trans (half_pos hz) hw
@@ -357,16 +662,87 @@ theorem tendsto_im_poissonCauchyIntegral {f : ℝ → ℝ} (hf : Integrable f) :
 
 /-! ### Fejér kernel of Fourier integrals (§1.15(v)) -/
 
+/-- `K_R(s) = (R/π) (1 - cos(Rs))/(Rs)²`. -/
+private theorem fejerKernelLine_eq {R : ℝ} (s : ℝ) :
+    fejerKernelLine R s = R / Real.pi * ((1 - Real.cos (R * s)) / (R * s) ^ 2) := by
+  unfold fejerKernelLine
+  rcases eq_or_ne R 0 with rfl | hR
+  · simp
+  rcases eq_or_ne s 0 with rfl | hs
+  · simp
+  field_simp
+
+/-- `K_R ≥ 0` for `R ≥ 0`. -/
+private theorem fejerKernelLine_nonneg {R : ℝ} (hR : 0 ≤ R) (s : ℝ) : 0 ≤ fejerKernelLine R s := by
+  unfold fejerKernelLine
+  exact mul_nonneg (by positivity) (div_nonneg (by linarith [Real.cos_le_one (R * s)])
+    (sq_nonneg s))
+
+/-- `K_R(s) ≤ 2/(πRs²)`. -/
+private theorem fejerKernelLine_le {R s : ℝ} (hR : 0 < R) (hs : s ≠ 0) :
+    fejerKernelLine R s ≤ 2 / (Real.pi * R * s ^ 2) := by
+  unfold fejerKernelLine
+  rw [div_mul_div_comm, one_mul]
+  exact div_le_div_of_nonneg_right (by linarith [Real.neg_one_le_cos (R * s)]) (by positivity)
+
 /-- DLMF 1.15.42: `∫ K_R(s) ds = 1` for `R > 0`. -/
 @[dlmf 1.15.E42]
 theorem integral_fejerKernelLine {R : ℝ} (hR : 0 < R) : ∫ s, fejerKernelLine R s = 1 := by
-  sorry
+  simp_rw [fejerKernelLine_eq]
+  rw [integral_const_mul, Measure.integral_comp_mul_left (fun u => (1 - Real.cos u) / u ^ 2) R,
+    Real.integral_one_sub_cos_div_sq, smul_eq_mul, abs_inv, abs_of_pos hR]
+  field_simp
 
 /-- DLMF 1.15.43: `∫_{|s| ≥ δ} K_R(s) ds → 0` as `R → ∞`, for `δ > 0`. -/
 @[dlmf 1.15.E43]
 theorem tendsto_integral_fejerKernelLine_tail {δ : ℝ} (hδ : 0 < δ) :
     Tendsto (fun R => ∫ s in {s : ℝ | δ ≤ |s|}, fejerKernelLine R s) atTop (𝓝 0) := by
-  sorry
+  set S : Set ℝ := {s : ℝ | δ ≤ |s|} with hSdef
+  have hS : MeasurableSet S := measurableSet_le measurable_const continuous_abs.measurable
+  simp_rw [← integral_indicator hS]
+  set D : ℝ → ℝ := fun s => 2 * (1 + δ⁻¹ ^ 2) / Real.pi * (1 + s ^ 2)⁻¹ with hDdef
+  have hD : Integrable D := integrable_inv_one_add_sq.const_mul _
+  have hS0 : ∀ s ∈ S, s ≠ 0 := fun s hs h => by
+    have hs' : δ ≤ |s| := hs
+    rw [h, abs_zero] at hs'; linarith
+  have hmeas : ∀ R, Measurable (fejerKernelLine R) := fun R => by
+    unfold fejerKernelLine; fun_prop
+  suffices h : Tendsto (fun R => ∫ s, S.indicator (fejerKernelLine R) s) atTop
+      (𝓝 (∫ _ : ℝ, (0 : ℝ))) by simpa using h
+  refine tendsto_integral_filter_of_dominated_convergence D ?_ ?_ hD ?_
+  · exact Eventually.of_forall fun R => ((hmeas R).indicator hS).aestronglyMeasurable
+  · filter_upwards [eventually_ge_atTop 1] with R hR
+    refine Eventually.of_forall fun s => ?_
+    by_cases hs : s ∈ S
+    · rw [indicator_of_mem hs, Real.norm_of_nonneg (fejerKernelLine_nonneg (by linarith) s)]
+      have hs' : δ ≤ |s| := hs
+      have hs0 := hS0 s hs
+      have hsq : δ ^ 2 ≤ s ^ 2 := by rw [← sq_abs s]; gcongr
+      have hs2 : 0 < s ^ 2 := by positivity
+      refine (fejerKernelLine_le (by linarith) hs0).trans ?_
+      have h2 : 2 / (Real.pi * R * s ^ 2) ≤ 2 / (Real.pi * s ^ 2) :=
+        div_le_div_of_nonneg_left (by norm_num) (by positivity)
+          (by nlinarith [mul_pos Real.pi_pos hs2])
+      refine h2.trans (le_of_eq_of_le (by ring : 2 / (Real.pi * s ^ 2) =
+        2 / Real.pi * (s ^ 2)⁻¹) ?_)
+      simp only [hDdef, mul_div_right_comm 2 (1 + δ⁻¹ ^ 2), mul_assoc]
+      refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+      rw [inv_pow, ← div_eq_mul_inv, le_div_iff₀ (by positivity)]
+      calc (s ^ 2)⁻¹ * (1 + s ^ 2) = (s ^ 2)⁻¹ + 1 := by field_simp
+        _ ≤ (δ ^ 2)⁻¹ + 1 := by gcongr
+        _ = 1 + (δ ^ 2)⁻¹ := by ring
+    · rw [indicator_of_notMem hs, norm_zero]; positivity
+  · refine Eventually.of_forall fun s => ?_
+    by_cases hs : s ∈ S
+    · simp only [indicator_of_mem hs]
+      have hs0 := hS0 s hs
+      have hlim : Tendsto (fun R : ℝ => 2 / (Real.pi * R * s ^ 2)) atTop (𝓝 0) := by
+        refine tendsto_const_nhds.div_atTop ?_
+        exact (tendsto_id.const_mul_atTop Real.pi_pos).atTop_mul_const (by positivity)
+      refine squeeze_zero' ?_ ?_ hlim
+      · filter_upwards [eventually_ge_atTop 0] with R hR using fejerKernelLine_nonneg hR s
+      · filter_upwards [eventually_gt_atTop 0] with R hR using fejerKernelLine_le hR hs0
+    · simp only [indicator_of_notMem hs]; exact tendsto_const_nhds
 
 /-- DLMF 1.15.45: for `f` absolutely integrable and `R > 0`, the Cesàro mean 1.15.44 of the
 Fourier integral is `σ_R(θ) = ∫ f(t) K_R(θ - t) dt`. -/

@@ -30,7 +30,8 @@ open Complex Filter Set MeasureTheory
 open scoped Real Topology
 namespace Complex
 
-/-- Euler's product for hyperbolic sine divided by its argument, with its removable value at zero. -/
+/-- Euler's product for hyperbolic sine divided by its argument, with its removable value at zero.
+-/
 theorem hasProd_sinh_div (z : ℂ) :
     HasProd (fun n : ℕ => 1+z^2/(((n+1:ℂ)^2)*π^2)) (if z=0 then 1 else Complex.sinh z/z) := by
   let sinhc : ℂ → ℂ := fun z => if z=0 then 1 else Complex.sinh z/z
@@ -51,7 +52,8 @@ theorem hasProd_sinh_div (z : ℂ) :
   field_simp
 
 /-- Euler’s product for complex hyperbolic cosine over the odd positive integers. -/
-theorem hasProd_cosh_product (z : ℂ) : HasProd (fun n : ℕ => 1+4*z^2/(((2*n+1:ℂ)^2)*π^2)) (Complex.cosh z) := by
+theorem hasProd_cosh_product (z : ℂ) : HasProd (fun n : ℕ => 1+4*z^2/(((2*n+1:ℂ)^2)*π^2))
+    (Complex.cosh z) := by
   let sinhc : ℂ → ℂ := fun z => if z=0 then 1 else Complex.sinh z/z
   have hasProd_sinh (w : ℂ) : HasProd (fun n : ℕ => 1+w^2/(((n+1:ℂ)^2)*π^2)) (sinhc w) := by
     simpa [sinhc] using Complex.hasProd_sinh_div w

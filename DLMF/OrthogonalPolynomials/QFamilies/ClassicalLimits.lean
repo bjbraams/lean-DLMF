@@ -254,7 +254,8 @@ theorem dqh_algebra (Pn Pm Gk A x u v s : ℂ) (m k : ℕ) (hu : u ≠ 0) (hv : 
 to `(𝓝 (hahn α β N n x))` along `(𝓝[<] 1)`. -/
 @[dlmf 18.27.E4_2]
 theorem qHahn_limit_hahn {α β : ℝ} (hα : -1 < α) {N n : ℕ} (hn : n ≤ N) (x : ℝ) :
-    Tendsto (fun q : ℝ => qHahn (Real.rpow q α) (Real.rpow q β) q N n (Real.rpow q (-x))) (𝓝[<] 1) (𝓝 (hahn α β N n x)) := by
+    Tendsto (fun q : ℝ => qHahn (Real.rpow q α) (Real.rpow q β) q N n (Real.rpow q (-x))) (𝓝[<] 1)
+        (𝓝 (hahn α β N n x)) := by
   have hα' : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   unfold qHahn hahn terminatingBasicHG terminatingHG
@@ -336,7 +337,8 @@ theorem littleQJacobi_limit_jacobi {α β : ℝ} (hα : -1 < α) (n : ℕ) (x : 
   · filter_upwards [eventually_pos_nhdsWithin_lt_one] with q hq
     simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one,
       List.length_cons, List.length_nil]
-    rw [ofReal_recip_pow_eq_rpow hq, show (Real.rpow q α : ℂ) * (Real.rpow q β : ℂ) * (q : ℂ) ^ (n + 1)
+    rw [ofReal_recip_pow_eq_rpow hq, show (Real.rpow q α : ℂ) * (Real.rpow q β : ℂ) *
+        (q : ℂ) ^ (n + 1)
       = ((q ^ (α + β + (n + 1 : ℕ)) : ℝ) : ℂ) by
         rw [ofReal_pow_eq_rpow, Real.rpow_eq_pow, Real.rpow_eq_pow, ofReal_rpow_eq_cpow_aux hq,
           ofReal_rpow_eq_cpow_aux hq],
@@ -459,8 +461,12 @@ theorem qLaguerre_limit_laguerrePolyL {α : ℝ} (hα : -1 < α) (n : ℕ) (x : 
 q d) q n (1 - x * (1 - q : ℂ) ^ 2 / 2) / (1 - q : ℂ) ^ (3 * n))` tends to `(𝓝 (wilson a b c d
 n x))` along `(𝓝[<] 1)`. -/
 @[dlmf 18.28.E29]
-theorem askeyWilson_limit_wilson {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) (hd : 0 < d) (n : ℕ) (x : ℂ) :
-    Tendsto (fun q : ℝ => askeyWilson (Real.rpow q a) (Real.rpow q b) (Real.rpow q c) (Real.rpow q d) q n (1 - x * (1 - q : ℂ) ^ 2 / 2) / (1 - q : ℂ) ^ (3 * n)) (𝓝[<] 1) (𝓝 (wilson a b c d n x)) := by
+theorem askeyWilson_limit_wilson {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) (hd : 0 < d)
+    (n : ℕ) (x : ℂ) :
+    Tendsto (fun q : ℝ =>
+        askeyWilson (Real.rpow q a) (Real.rpow q b) (Real.rpow q c) (Real.rpow q d) q n
+        (1 - x * (1 - q : ℂ) ^ 2 / 2) /
+        (1 - q : ℂ) ^ (3 * n)) (𝓝[<] 1) (𝓝 (wilson a b c d n x)) := by
   have hpos : ∀ (u : ℝ), 0 < u → ∀ k : ℕ, poch (u : ℂ) k ≠ 0 := fun u hu k =>
     poch_ne_zero_of_not_neg_nat (fun j h => by
       have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]) k
@@ -578,7 +584,8 @@ theorem discreteQHermiteI_limit_hermite (n : ℕ) (x : ℂ) :
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 * k := ⟨n - 2 * k, by omega⟩
   rw [show m + 2 * k - 2 * k = m by omega]
   have hq := tendsto_ofReal_nhdsWithin_lt_one
-  have hv : Tendsto (fun q : ℝ => ((1 + (q : ℂ))⁻¹) ^ (2 * k)) (𝓝[<] 1) (𝓝 ((2 : ℂ)⁻¹ ^ (2 * k))) := by
+  have hv : Tendsto (fun q : ℝ => ((1 + (q : ℂ))⁻¹) ^ (2 * k)) (𝓝[<] 1)
+      (𝓝 ((2 : ℂ)⁻¹ ^ (2 * k))) := by
     have := ((hq.const_add 1).inv₀ (by norm_num)).pow (2 * k)
     norm_num at this ⊢
     exact this
@@ -623,7 +630,8 @@ theorem discreteQHermiteII_limit_hermite (n : ℕ) (x : ℂ) :
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 * k := ⟨n - 2 * k, by omega⟩
   rw [show m + 2 * k - 2 * k = m by omega]
   have hq := tendsto_ofReal_nhdsWithin_lt_one
-  have hv : Tendsto (fun q : ℝ => ((1 + (q : ℂ))⁻¹) ^ (2 * k)) (𝓝[<] 1) (𝓝 ((2 : ℂ)⁻¹ ^ (2 * k))) := by
+  have hv : Tendsto (fun q : ℝ => ((1 + (q : ℂ))⁻¹) ^ (2 * k)) (𝓝[<] 1)
+      (𝓝 ((2 : ℂ)⁻¹ ^ (2 * k))) := by
     have := ((hq.const_add 1).inv₀ (by norm_num)).pow (2 * k)
     norm_num at this ⊢
     exact this
@@ -868,7 +876,8 @@ theorem askeyWilson_asymptotic {a b c d q : ℝ} (hq : 0 < q) (hq1 : q < 1)
     {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < Real.pi) :
     Tendsto (fun n : ℕ => askeyWilson a b c d q n (Real.cos θ) -
       (exp (I * n * θ) * askeyWilsonAsymptoticCoefficient a b c d q (exp (I * θ)) +
-       exp (-I * n * θ) * askeyWilsonAsymptoticCoefficient a b c d q (exp (-I * θ)))) atTop (𝓝 0) := by
+       exp (-I * n * θ) * askeyWilsonAsymptoticCoefficient a b c d q (exp (-I * θ))))
+           atTop (𝓝 0) := by
   sorry
 
 end DLMF.OrthogonalPolynomials

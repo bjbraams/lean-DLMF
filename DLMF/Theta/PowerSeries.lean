@@ -85,7 +85,8 @@ theorem jacobiThetaFourTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
   sorry
 
 /-- Absolute convergence of the (doubled, shifted) lattice sums for `k ≥ 3` (helper). -/
-private lemma summable_norm_inv_shifted_lattice_pow {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ) {k : ℕ} (hk : 3 ≤ k) :
+private lemma summable_norm_inv_shifted_lattice_pow {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ)
+    {k : ℕ} (hk : 3 ≤ k) :
     Summable (fun p : ℤ × ℤ =>
       (‖(((2 * p.1 + a : ℤ) : ℂ) + ((2 * p.2 + b : ℤ) : ℂ) * τ)‖⁻¹) ^ k) := by
   set z : UpperHalfPlane := ⟨τ, hτ⟩
@@ -120,11 +121,13 @@ private lemma summable_norm_inv_shifted_lattice_pow {τ : ℂ} (hτ : 0 < τ.im)
     exact inv_anti₀ (by positivity) hb
 
 /-- Summability of `g^{-k}` when `2g` runs over a shifted lattice (helper). -/
-private lemma summable_zpow_neg_of_two_mul_eq_lattice {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ) {k : ℕ} (hk : 3 ≤ k)
+private lemma summable_zpow_neg_of_two_mul_eq_lattice {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ)
+    {k : ℕ} (hk : 3 ≤ k)
     {g : ℤ × ℤ → ℂ}
     (hg : ∀ p : ℤ × ℤ, 2 * g p = ((2 * p.1 + a : ℤ) : ℂ) + ((2 * p.2 + b : ℤ) : ℂ) * τ) :
     Summable (fun p : ℤ × ℤ => g p ^ (-(k : ℤ))) := by
-  refine Summable.of_norm_bounded ((summable_norm_inv_shifted_lattice_pow hτ a b hk).mul_left (2 ^ k))
+  refine Summable.of_norm_bounded
+      ((summable_norm_inv_shifted_lattice_pow hτ a b hk).mul_left (2 ^ k))
     (fun p => ?_)
   have hgp : g p = (((2 * p.1 + a : ℤ) : ℂ) + ((2 * p.2 + b : ℤ) : ℂ) * τ) / 2 := by
     rw [← hg p]; ring
@@ -400,9 +403,12 @@ theorem thetaDelta_hasSum_lattice {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj : 2
       split_ifs <;> simp
       positivity
     exact hasSum_iterated_tsum hs'
-  · exact hasSum_iterated_tsum (summable_zpow_neg_of_two_mul_eq_lattice hτ (-1) 0 hk (fun p => by push_cast; ring))
-  · exact hasSum_iterated_tsum (summable_zpow_neg_of_two_mul_eq_lattice hτ (-1) (-1) hk (fun p => by push_cast; ring))
-  · exact hasSum_iterated_tsum (summable_zpow_neg_of_two_mul_eq_lattice hτ 0 (-1) hk (fun p => by push_cast; ring))
+  · exact hasSum_iterated_tsum
+        (summable_zpow_neg_of_two_mul_eq_lattice hτ (-1) 0 hk (fun p => by push_cast; ring))
+  · exact hasSum_iterated_tsum
+        (summable_zpow_neg_of_two_mul_eq_lattice hτ (-1) (-1) hk (fun p => by push_cast; ring))
+  · exact hasSum_iterated_tsum
+        (summable_zpow_neg_of_two_mul_eq_lattice hτ 0 (-1) hk (fun p => by push_cast; ring))
 
 /-- DLMF §20.6: for `j = 1` the order matters: the double series for `δ₂` is not absolutely
 summable. -/

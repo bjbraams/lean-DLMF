@@ -96,7 +96,8 @@ private lemma LSeriesHasSum_powC_riemannZeta_sub (α : ℂ) {s : ℂ} (hs : 1 + 
 /-! ### Helpers for §27.4 (proof round 2) -/
 
 /-- Dirichlet convolution at a prime power. -/
-theorem arithmeticFunction_mul_apply_prime_pow {R : Type*} [Semiring R] (f g : ArithmeticFunction R) {p : ℕ}
+theorem arithmeticFunction_mul_apply_prime_pow {R : Type*} [Semiring R]
+    (f g : ArithmeticFunction R) {p : ℕ}
     (hp : p.Prime) (e : ℕ) :
     (f * g) (p ^ e) = ∑ i ∈ range (e + 1), f (p ^ i) * g (p ^ (e - i)) := by
   rw [mul_apply, Nat.sum_divisorsAntidiagonal (fun a b ↦ f a * g b), Nat.divisors_prime_pow hp,
@@ -106,7 +107,8 @@ theorem arithmeticFunction_mul_apply_prime_pow {R : Type*} [Semiring R] (f g : A
   rw [Nat.pow_div (by simpa [Nat.lt_succ_iff] using hi) hp.pos]
 
 /-- The Dirichlet series of the unit `δ` is `1`. -/
-private lemma LSeriesHasSum_arithmeticFunction_one {s : ℂ} : LSeriesHasSum ↗(1 : ArithmeticFunction ℂ) s 1 := by
+private lemma LSeriesHasSum_arithmeticFunction_one {s : ℂ} : LSeriesHasSum
+    ↗(1 : ArithmeticFunction ℂ) s 1 := by
   rw [one_eq_delta]
   unfold LSeriesHasSum
   simp_rw [funext (LSeries.term_delta s)]
@@ -258,7 +260,8 @@ private lemma liouville_mul_absMoebius :
     isMultiplicative_one).mpr fun p i hp ↦ ?_
   rcases i with _ | e
   · simp [absMoebius_apply, liouville_apply_one]
-  rw [arithmeticFunction_mul_apply_prime_pow _ _ hp, one_apply_ne (Nat.one_lt_pow (Nat.succ_ne_zero e)
+  rw [arithmeticFunction_mul_apply_prime_pow _ _ hp,
+      one_apply_ne (Nat.one_lt_pow (Nat.succ_ne_zero e)
     hp.one_lt).ne', sum_range_succ, sum_range_succ, sum_eq_zero]
   · simp only [absMoebius_prime_pow hp, liouville_apply (pow_ne_zero _ hp.ne_zero),
       cardFactors_apply_prime_pow hp]
@@ -277,10 +280,12 @@ private lemma zeta_mul_absMoebius_prime_pow_succ {p : ℕ} (hp : p.Prime) (e : �
     rw [absMoebius_prime_pow hp, ite_eq_right (by omega)]
 
 /-- `2^{ω(n)}` as an integer-valued arithmetic function. -/
-def twoPowCardDistinctFactors : ArithmeticFunction ℤ := ⟨fun n ↦ if n = 0 then 0 else 2 ^ ω n, by simp⟩
+def twoPowCardDistinctFactors : ArithmeticFunction ℤ :=
+    ⟨fun n ↦ if n = 0 then 0 else 2 ^ ω n, by simp⟩
 
 /-- `2^{ω(n)} = ∑_{d∣n} |μ(d)|`. -/
-private lemma twoPowCardDistinctFactors_eq_zeta_mul_absMoebius : twoPowCardDistinctFactors = (ζ : ArithmeticFunction ℤ) * absMoebius := by
+private lemma twoPowCardDistinctFactors_eq_zeta_mul_absMoebius : twoPowCardDistinctFactors =
+    (ζ : ArithmeticFunction ℤ) * absMoebius := by
   have hmul : twoPowCardDistinctFactors.IsMultiplicative := by
     refine ⟨by simp [twoPowCardDistinctFactors], fun {m n} hmn ↦ ?_⟩
     change (if m * n = 0 then 0 else 2 ^ ω (m * n) : ℤ) =

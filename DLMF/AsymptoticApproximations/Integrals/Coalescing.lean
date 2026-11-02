@@ -24,9 +24,9 @@ of variable of Chester, Friedman and Ursell.
 * `bleistein_quadratic`: `p(α,t) = ½w² - aw + b` (DLMF 2.3.25) with `a = bleisteinA p α`,
   `b = bleisteinB p α` (2.3.26) and `w = bleisteinW p α t` (2.3.27).
 * `bleisteinW_zero`, `bleisteinW_self`: `t = 0` corresponds to `w = 0` and `t = α` to `w = a`.
-* `bleisteinW_hasDerivAt`, `bleisteinW_hasDerivAt_self`: the derivative 2.3.28 and regularity
-  of `t ↦ w`.
-* `bleistein_transform`: the transformation 2.3.24, 2.3.29–2.3.30.
+* `bleisteinW_hasDerivAt`, `bleisteinW_hasDerivAt_self`, `bleisteinW_hasDerivAt_self'`: the
+  derivative 2.3.28 and regularity of `t ↦ w`.
+* `bleistein_transform`, `bleistein_transform'`: the transformation 2.3.24, 2.3.29–2.3.30.
 * `bleistein_uniform`: Bleistein's uniform expansion (DLMF 2.3.31–2.3.33).
 * `cfu_deriv`, `cfu_airy_form`: the cubic change of variable 2.4.18–2.4.20 and the reduction
   2.4.21 to Airy form.
@@ -111,14 +111,12 @@ theorem bleisteinW_hasDerivAt {p' : ℝ} (hd : HasDerivAt (p α) p' t) (hpt : p 
 /-- DLMF §2.3(v), after 2.3.28: the map `t ↦ w` is free from singularity at `t = α`: if
 `p(α, ·)` is twice differentiable near `α` with `∂p/∂t(α,α) = 0` and `∂²p/∂t²(α,α) > 0`, and the
 minimum of `p(α, ·)` is at `α`, then `w` is differentiable at `t = α` with
-`dw/dt = (∂²p/∂t²(α,α))^{1/2}`. -/
+`dw/dt = (∂²p/∂t²(α,α))^{1/2}`. This is stronger than DLMF, which assumes `∂²p/∂t²(α,α) > 0`. -/
 @[dlmf 2.3.v]
-theorem bleisteinW_hasDerivAt_self {p₂ : ℝ} (hp : ContDiffAt ℝ 2 (p α) α)
-    (hd1 : deriv (p α) α = 0) (hd2 : deriv (deriv (p α)) α = p₂) (hp₂ : 0 < p₂)
+theorem bleisteinW_hasDerivAt_self' {p₂ : ℝ} (hp : ContDiffAt ℝ 2 (p α) α)
+    (hd1 : deriv (p α) α = 0) (hd2 : deriv (deriv (p α)) α = p₂)
     (hmin : ∀ s, p α α ≤ p α s) :
     HasDerivAt (bleisteinW p α) (Real.sqrt p₂) α := by
-  -- the positivity of `p₂` is not needed for the derivative
-  have _ := hp₂
   set P := p α with hP
   have hev : ∀ᶠ y in 𝓝 α, DifferentiableAt ℝ P y :=
     (hp.eventually (by simp)).mono fun y hy => hy.differentiableAt (by norm_num)
@@ -167,24 +165,32 @@ theorem bleisteinW_hasDerivAt_self {p₂ : ℝ} (hp : ContDiffAt ℝ 2 (p α) α
     field_simp
     ring
 
+/-- DLMF §2.3(v), after 2.3.28: the map `t ↦ w` is free from singularity at `t = α`: if
+`p(α, ·)` is twice differentiable near `α` with `∂p/∂t(α,α) = 0` and `∂²p/∂t²(α,α) > 0`, and the
+minimum of `p(α, ·)` is at `α`, then `w` is differentiable at `t = α` with
+`dw/dt = (∂²p/∂t²(α,α))^{1/2}`. -/
+@[dlmf 2.3.v]
+theorem bleisteinW_hasDerivAt_self {p₂ : ℝ} (hp : ContDiffAt ℝ 2 (p α) α)
+    (hd1 : deriv (p α) α = 0) (hd2 : deriv (deriv (p α)) α = p₂) (_hp₂ : 0 < p₂)
+    (hmin : ∀ s, p α α ≤ p α s) :
+    HasDerivAt (bleisteinW p α) (Real.sqrt p₂) α :=
+  bleisteinW_hasDerivAt_self' hp hd1 hd2 hmin
+
 /-- DLMF 2.3.24, 2.3.29–2.3.30: for finite `k`, if `t ↦ w = W(t)` maps `[0, k]` onto `[0, κ]`
 with inverse `T` (`W(T(w)) = w`) of class `C¹`, `T(0) = 0`, `T(κ) = k`, `T' > 0`, and
 `p(α, T(w)) = ½w² - aw + b`, then
 `I(α,x) = ∫₀ᵏ e^{-xp(α,t)} q(α,t) t^{λ-1} dt
 = e^{-xp(α,0)} ∫₀^κ exp(-x(½w² - aw)) f(α,w) w^{λ-1} dw`,
-`f(α, w) = q(α, t)(t/w)^{λ-1} dt/dw` (2.3.30), for `λ > 0` and `q(α, ·)` continuous. -/
+`f(α, w) = q(α, t)(t/w)^{λ-1} dt/dw` (2.3.30), for `λ > 0` and `q(α, ·)` continuous. This is
+stronger than DLMF, which assumes `λ > 0` and the continuity of `q(α, ·)`. -/
 @[dlmf 2.3.E24, dlmf 2.3.E29, dlmf 2.3.E30]
-theorem bleistein_transform {q : ℝ → ℝ → ℝ} {T : ℝ → ℝ} {k κ lam a b x : ℝ} (hk : 0 < k)
-    (hκ : 0 < κ) (hlam : 0 < lam) (hq : ContinuousOn (q α) (Icc 0 k))
-    (hT : ContDiffOn ℝ 1 T (Icc 0 κ)) (hT0 : T 0 = 0) (hTκ : T κ = k)
+theorem bleistein_transform' {q : ℝ → ℝ → ℝ} {T : ℝ → ℝ} {k κ lam a b x : ℝ} (hk : 0 < k)
+    (hκ : 0 < κ) (hT : ContDiffOn ℝ 1 T (Icc 0 κ)) (hT0 : T 0 = 0) (hTκ : T κ = k)
     (hT' : ∀ w ∈ Icc 0 κ, 0 < derivWithin T (Icc 0 κ) w)
     (hpT : ∀ w ∈ Icc 0 κ, p α (T w) = w ^ 2 / 2 - a * w + b) (hb : b = p α 0) :
     ∫ t in (0 : ℝ)..k, Real.exp (-x * p α t) * q α t * t ^ (lam - 1) =
       Real.exp (-x * p α 0) * ∫ w in (0 : ℝ)..κ, Real.exp (-x * (w ^ 2 / 2 - a * w)) *
         (q α (T w) * (T w / w) ^ (lam - 1) * derivWithin T (Icc 0 κ) w) * w ^ (lam - 1) := by
-  -- the change of variables needs neither `λ > 0` nor the continuity of `q`
-  have _ := hlam
-  have _ := hq
   set T' := derivWithin T (Icc 0 κ) with hT'def
   have hdiff : DifferentiableOn ℝ T (Icc 0 κ) := hT.differentiableOn one_ne_zero
   have hcont : ContinuousOn T (Icc 0 κ) := hdiff.continuousOn
@@ -215,6 +221,23 @@ theorem bleistein_transform {q : ℝ → ℝ → ℝ} {T : ℝ → ℝ} {k κ la
     rw [← Real.exp_add]; ring_nf
   rw [he]
   field_simp
+
+/-- DLMF 2.3.24, 2.3.29–2.3.30: for finite `k`, if `t ↦ w = W(t)` maps `[0, k]` onto `[0, κ]`
+with inverse `T` (`W(T(w)) = w`) of class `C¹`, `T(0) = 0`, `T(κ) = k`, `T' > 0`, and
+`p(α, T(w)) = ½w² - aw + b`, then
+`I(α,x) = ∫₀ᵏ e^{-xp(α,t)} q(α,t) t^{λ-1} dt
+= e^{-xp(α,0)} ∫₀^κ exp(-x(½w² - aw)) f(α,w) w^{λ-1} dw`,
+`f(α, w) = q(α, t)(t/w)^{λ-1} dt/dw` (2.3.30), for `λ > 0` and `q(α, ·)` continuous. -/
+@[dlmf 2.3.E24, dlmf 2.3.E29, dlmf 2.3.E30]
+theorem bleistein_transform {q : ℝ → ℝ → ℝ} {T : ℝ → ℝ} {k κ lam a b x : ℝ} (hk : 0 < k)
+    (hκ : 0 < κ) (_hlam : 0 < lam) (_hq : ContinuousOn (q α) (Icc 0 k))
+    (hT : ContDiffOn ℝ 1 T (Icc 0 κ)) (hT0 : T 0 = 0) (hTκ : T κ = k)
+    (hT' : ∀ w ∈ Icc 0 κ, 0 < derivWithin T (Icc 0 κ) w)
+    (hpT : ∀ w ∈ Icc 0 κ, p α (T w) = w ^ 2 / 2 - a * w + b) (hb : b = p α 0) :
+    ∫ t in (0 : ℝ)..k, Real.exp (-x * p α t) * q α t * t ^ (lam - 1) =
+      Real.exp (-x * p α 0) * ∫ w in (0 : ℝ)..κ, Real.exp (-x * (w ^ 2 / 2 - a * w)) *
+        (q α (T w) * (T w / w) ^ (lam - 1) * derivWithin T (Icc 0 κ) w) * w ^ (lam - 1) :=
+  bleistein_transform' hk hκ hT hT0 hTκ hT' hpT hb
 
 /-- DLMF 2.3.31–2.3.33 (**Bleistein's uniform expansion**): let `λ > 0`, `κ > 0`, and for `α` in
 `[α₁, α₂]` let `a(α) ≤ a₂ < κ`. Suppose that `f(α, w)` (measurable in `w`) has the expansion

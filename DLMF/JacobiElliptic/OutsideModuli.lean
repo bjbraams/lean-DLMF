@@ -61,12 +61,14 @@ theorem jacobiPQk_neg_modulus (p q : JacobiLetter) (z k : ℂ) :
   simp only [jacobiPQk, jacobiZetak, jacobiTauk, compEllIntKk, compEllIntKpk, neg_sq]
 
 /-- DLMF 22.17.2–22.17.4 jointly (reciprocal modulus). -/
-private lemma jacobiSnCnDnk_inv {k : ℂ} (hk : k ∈ jacobiModulusDomain) (hk' : k⁻¹ ∈ jacobiModulusDomain) :
+private lemma jacobiSnCnDnk_inv {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (hk' : k⁻¹ ∈ jacobiModulusDomain) :
     (fun z => jacobiSnk z k⁻¹) = (fun z => k * jacobiSnk (z / k) k) ∧
       (fun z => jacobiCnk z k⁻¹) = (fun z => 1 * jacobiDnk (z / k) k) ∧
       (fun z => jacobiDnk z k⁻¹) = (fun z => 1 * jacobiCnk (z / k) k) := by
   have hk0 : k ≠ 0 := by rintro rfl; simp [jacobiModulusDomain] at hk
-  have r1 := eventually_jacobiLetterTheta_ne_zero hk' (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk' (q := .n) (by decide))
+  have r1 := eventually_jacobiLetterTheta_ne_zero hk'
+      (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk' (q := .n) (by decide))
   have r2 := eventually_jacobiLetterTheta_div_ne_zero hk (q := .n) (by decide) k
   have hdiv : ∀ w : ℂ, HasDerivAt (fun w : ℂ => w / k) (1 / k) w := fun w =>
     (hasDerivAt_id w).div_const k
@@ -165,7 +167,8 @@ private lemma jacobiSnCnDnk_I_mul {k : ℂ} (hk : I * k ∈ jacobiModulusDomain)
     field_simp; ring
   have hk₁'0 : k₁' ≠ 0 := by
     intro h; rw [h] at hs2; simp at hs2; exact hk1 (by simpa using hs2.symm)
-  have r1 := eventually_jacobiLetterTheta_ne_zero hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (q := .n) (by decide))
+  have r1 := eventually_jacobiLetterTheta_ne_zero hk
+      (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (q := .n) (by decide))
   have r2 := eventually_jacobiLetterTheta_div_ne_zero hk₁ (q := .d) (by decide) k₁'
   have hdiv : ∀ w : ℂ, HasDerivAt (fun w : ℂ => w / k₁') (1 / k₁') w := fun w =>
     (hasDerivAt_id w).div_const k₁'

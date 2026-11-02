@@ -300,7 +300,8 @@ theorem hermite_fourier_eigenfunction (n : ℕ) (y : ℝ) :
     rw [he]
     ring
   simp_rw [hx] at hscale
-  rw [integral_const_mul, hermiteFunction_integral, abs_of_pos (inv_pos.mpr hr), Complex.real_smul] at hscale
+  rw [integral_const_mul, hermiteFunction_integral, abs_of_pos (inv_pos.mpr hr),
+      Complex.real_smul] at hscale
   have hrs : (r : ℂ) * (Real.sqrt (2 * Real.pi) : ℂ) = 2 * (Real.sqrt Real.pi : ℂ) := by
     norm_cast
     rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 2)]
@@ -308,14 +309,16 @@ theorem hermite_fourier_eigenfunction (n : ℕ) (y : ℝ) :
     rw [← mul_assoc, ← pow_two, hr2]
   rw [show I ^ n * exp (-(y : ℂ) ^ 2 / 4) * aeval (y : ℂ) (hermite n) =
     I ^ n * (exp (-(y : ℂ) ^ 2 / 4) * aeval (y : ℂ) (hermite n)) by ring, hermite_envelope]
-  change (∫ x, F x) / (2 * ↑(Real.sqrt Real.pi)) = I ^ n * ((c : ℂ) * ↑(TauCeti.hermiteFunction n (y / r)))
+  change (∫ x, F x) / (2 * ↑(Real.sqrt Real.pi)) = I ^ n *
+      ((c : ℂ) * ↑(TauCeti.hermiteFunction n (y / r)))
   have hr0c : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr0
   have hp0 : (Real.sqrt Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr (by positivity)
   rw [ofReal_inv] at hscale
   field_simp [hr0c] at hscale
   apply (div_eq_iff (mul_ne_zero two_ne_zero hp0)).mpr
   calc
-    _ = (c : ℂ) * (r * ↑(Real.sqrt (2 * Real.pi))) * I ^ n * ↑(TauCeti.hermiteFunction n (y / r)) := by
+    _ = (c : ℂ) * (r * ↑(Real.sqrt (2 * Real.pi))) * I ^ n *
+        ↑(TauCeti.hermiteFunction n (y / r)) := by
       linear_combination -hscale
     _ = _ := by rw [hrs]; ring
 
@@ -436,7 +439,8 @@ theorem sqrt_two_pi_div_two : Real.sqrt (2 * π) / 2 = Real.sqrt (π / 2) := by
 (Real.pi / 2) * y ^ (2 * n) * Real.exp (-(y ^ 2) / 2)`. -/
 @[dlmf 18.17.E23]
 theorem hermite_even_cosine_transform (n : ℕ) (y : ℝ) :
-    ∫ x : ℝ in Set.Ioi 0, Real.exp (-(x ^ 2) / 2) * (aeval x (hermite (2 * n)) : ℝ) * Real.cos (x * y) =
+    ∫ x : ℝ in Set.Ioi 0, Real.exp (-(x ^ 2) / 2) * (aeval x (hermite (2 * n)) : ℝ) *
+        Real.cos (x * y) =
       (-1 : ℝ) ^ n * Real.sqrt (Real.pi / 2) * y ^ (2 * n) * Real.exp (-(y ^ 2) / 2) := by
   set f : ℝ → ℝ := fun x => Real.exp (-(x ^ 2) / 2) * (aeval x (hermite (2 * n)) : ℝ) *
     Real.cos (x * y) with hf
@@ -466,7 +470,8 @@ theorem hermite_even_cosine_transform (n : ℕ) (y : ℝ) :
 Real.sqrt (Real.pi / 2) * y ^ (2 * n + 1) * Real.exp (-(y ^ 2) / 2)`. -/
 @[dlmf 18.17.E27]
 theorem hermite_odd_sine_transform (n : ℕ) (y : ℝ) :
-    ∫ x : ℝ in Set.Ioi 0, Real.exp (-(x ^ 2) / 2) * (aeval x (hermite (2 * n + 1)) : ℝ) * Real.sin (x * y) =
+    ∫ x : ℝ in Set.Ioi 0, Real.exp (-(x ^ 2) / 2) * (aeval x (hermite (2 * n + 1)) : ℝ) *
+        Real.sin (x * y) =
       (-1 : ℝ) ^ n * Real.sqrt (Real.pi / 2) * y ^ (2 * n + 1) * Real.exp (-(y ^ 2) / 2) := by
   set f : ℝ → ℝ := fun x => Real.exp (-(x ^ 2) / 2) * (aeval x (hermite (2 * n + 1)) : ℝ) *
     Real.sin (x * y) with hf
@@ -800,7 +805,8 @@ theorem scaled_polynomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < 
       simp only [Pi.add_apply, eval_add]
       ring
     | monomial n c =>
-      simpa only [IntegrableOn, eval_monomial, mul_assoc] using ((laguerrePolyL_weight_moment hα n).1.const_mul c)
+      simpa only [IntegrableOn, eval_monomial, mul_assoc] using
+          ((laguerrePolyL_weight_moment hα n).1.const_mul c)
   -- Mathlib's monomial induction reduces complex scaling to the Gamma moments.
   induction p using Polynomial.induction_on' with
   | add p q hp hq =>
@@ -813,7 +819,8 @@ theorem scaled_polynomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < 
       rw [integral_add hp.1 hq.1, integral_add (hi1 p) (hi1 q), hp.2, hq.2]
       ring
   | monomial n c =>
-    refine ⟨by simpa only [IntegrableOn, eval_monomial, mul_assoc] using (scaled_monomial_moment hα hw n).1.const_mul c, ?_⟩
+    refine ⟨by simpa only [IntegrableOn, eval_monomial, mul_assoc] using
+                 (scaled_monomial_moment hα hw n).1.const_mul c, ?_⟩
     simp only [eval_monomial, mul_assoc]
     rw [integral_const_mul, integral_const_mul]
     have h1 := (scaled_monomial_moment hα hw n).2

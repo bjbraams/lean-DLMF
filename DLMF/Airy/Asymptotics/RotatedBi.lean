@@ -200,7 +200,8 @@ theorem airyRot_airyBiDeriv_rot_pos (z : ℂ) :
 /-- `Bi'(z e^{-iπ/3}) = -2 e^{-iπ/6} Ai'(z e^{iπ/3}) - i Ai'(z e^{-iπ/3})`. -/
 theorem airyRot_airyBiDeriv_rot_neg (z : ℂ) :
     airyBiDeriv (z * exp (-(π * I / 3))) = -2 * exp (-π * I / 6) *
-      airyAiDeriv (z * exp ((π / 3 : ℝ) * I)) + -I * airyAiDeriv (z * exp ((-(π / 3) : ℝ) * I)) := by
+      airyAiDeriv (z * exp ((π / 3 : ℝ) * I)) + -I *
+          airyAiDeriv (z * exp ((-(π / 3) : ℝ) * I)) := by
   have hc : ∀ z, airyBi (z * exp (-(π * I / 3))) = 2 * exp (π * I / 6) *
       airyAi (z * exp ((π / 3 : ℝ) * I)) + -I * airyAi (z * exp ((-(π / 3) : ℝ) * I)) := fun z => by
     rw [airyRot_airyBi_rot_neg]; ring

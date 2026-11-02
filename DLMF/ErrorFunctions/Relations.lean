@@ -7,7 +7,7 @@ module
 
 public import DLMF.Confluent.ExpIntegral
 public import DLMF.ErrorFunctions.AnalyticProperties
-public import DLMF.Hypergeometric.GeneralizedCalculus
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
 
 /-!
 # Symmetries, derivatives and interrelations of error functions (DLMF §§7.4–7.5, 7.10–7.11)
@@ -92,14 +92,16 @@ theorem fresnel_mul_I (z : ℂ) :
   · have he : (fun t : ℝ => cos (π*((t:ℂ)*(I*z))^2/2)) =
         (fun t : ℝ => cos (π*((t:ℂ)*z)^2/2)) := by
       funext t
-      rw [show π*((t:ℂ)*(I*z))^2/2=-(π*((t:ℂ)*z)^2/2) by simp [mul_pow, I_sq]; ring, Complex.cos_neg]
+      rw [show π*((t:ℂ)*(I*z))^2/2=-(π*((t:ℂ)*z)^2/2) by simp [mul_pow, I_sq]; ring,
+                                                           Complex.cos_neg]
     simp only [fresnelCosInt, primitive, segmentIntegral, sub_zero, zero_add]
     rw [he]
     ring
   · have he : (fun t : ℝ => sin (π*((t:ℂ)*(I*z))^2/2)) =
         (fun t : ℝ => -sin (π*((t:ℂ)*z)^2/2)) := by
       funext t
-      rw [show π*((t:ℂ)*(I*z))^2/2=-(π*((t:ℂ)*z)^2/2) by simp [mul_pow, I_sq]; ring, Complex.sin_neg]
+      rw [show π*((t:ℂ)*(I*z))^2/2=-(π*((t:ℂ)*z)^2/2) by simp [mul_pow, I_sq]; ring,
+                                                           Complex.sin_neg]
     simp only [fresnelSinInt, primitive, segmentIntegral, sub_zero, zero_add]
     rw [he, intervalIntegral.integral_neg]
     ring
@@ -109,7 +111,8 @@ theorem fresnel_mul_I (z : ℂ) :
 (-π*I/4-π*I*z^2/2)/Real.sqrt 2+I*fresnelAuxGComplex z`. -/
 @[dlmf 7.4.E7]
 theorem fresnelAux_mul_I (z : ℂ) :
-    fresnelAuxFComplex (I*z)=exp (π*I/4-π*I*z^2/2)/Real.sqrt 2-I*fresnelAuxFComplex z ∧ fresnelAuxGComplex (I*z)=exp (-π*I/4-π*I*z^2/2)/Real.sqrt 2+I*fresnelAuxGComplex z := by
+    fresnelAuxFComplex (I*z)=exp (π*I/4-π*I*z^2/2)/Real.sqrt 2-I*fresnelAuxFComplex z ∧
+        fresnelAuxGComplex (I*z)=exp (-π*I/4-π*I*z^2/2)/Real.sqrt 2+I*fresnelAuxGComplex z := by
   have hc : cos ((π:ℂ)/4)=(Real.sqrt 2:ℂ)/2 := by exact_mod_cast Real.cos_pi_div_four
   have hs : sin ((π:ℂ)/4)=(Real.sqrt 2:ℂ)/2 := by exact_mod_cast Real.sin_pi_div_four
   have hsq : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
@@ -125,12 +128,14 @@ theorem fresnelAux_mul_I (z : ℂ) :
     simp only [Complex.sin_neg,Complex.cos_neg]
     ring
   constructor <;> simp only [fresnelAuxFComplex,fresnelAuxGComplex]
-  · rw [hp.1,hp.2,hE,show π*(I*z)^2/2= -(π*z^2/2) by simp [mul_pow,I_sq]; ring,Complex.cos_neg,Complex.sin_neg]
+  · rw [hp.1, hp.2, hE, show π*(I*z)^2/2= -(π*z^2/2) by simp [mul_pow, I_sq]; ring, Complex.cos_neg,
+                                                          Complex.sin_neg]
     field_simp [hs0]
     ring_nf
     simp [I_sq]
     ring
-  · rw [hp.1,hp.2,hE',show π*(I*z)^2/2= -(π*z^2/2) by simp [mul_pow,I_sq]; ring,Complex.cos_neg,Complex.sin_neg]
+  · rw [hp.1, hp.2, hE', show π*(I*z)^2/2= -(π*z^2/2) by simp [mul_pow, I_sq]; ring,
+                                                           Complex.cos_neg, Complex.sin_neg]
     field_simp [hs0]
     ring_nf
     simp [I_sq]
@@ -141,7 +146,8 @@ theorem fresnelAux_mul_I (z : ℂ) :
 (π/4+π*z^2/2)-fresnelAuxGComplex z`. -/
 @[dlmf 7.4.E8]
 theorem fresnelAux_negative (z : ℂ) :
-    fresnelAuxFComplex (-z)=Real.sqrt 2*cos (π/4+π*z^2/2)-fresnelAuxFComplex z ∧ fresnelAuxGComplex (-z)=Real.sqrt 2*sin (π/4+π*z^2/2)-fresnelAuxGComplex z := by
+    fresnelAuxFComplex (-z)=Real.sqrt 2*cos (π/4+π*z^2/2)-fresnelAuxFComplex z ∧
+        fresnelAuxGComplex (-z)=Real.sqrt 2*sin (π/4+π*z^2/2)-fresnelAuxGComplex z := by
   have hc : cos ((π:ℂ)/4)=(Real.sqrt 2:ℂ)/2 := by exact_mod_cast Real.cos_pi_div_four
   have hs : sin ((π:ℂ)/4)=(Real.sqrt 2:ℂ)/2 := by exact_mod_cast Real.sin_pi_div_four
   have hsq : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
@@ -160,7 +166,8 @@ theorem fresnelAux_negative (z : ℂ) :
 (-z^2)-faddeevaW z) ∧ dawsonF z = -I*Real.sqrt π/2*exp (-z^2)*erf (I*z)`. -/
 @[dlmf 7.5.E1]
 theorem dawsonF_faddeeva (z : ℂ) :
-    dawsonF z = I*Real.sqrt π/2*(exp (-z^2)-faddeevaW z) ∧ dawsonF z = -I*Real.sqrt π/2*exp (-z^2)*erf (I*z) := by
+    dawsonF z = I*Real.sqrt π/2*(exp (-z^2)-faddeevaW z) ∧ dawsonF z =
+        -I*Real.sqrt π/2*exp (-z^2)*erf (I*z) := by
   have he : erf (I*z)=2/Real.sqrt π*I*primitive (fun t => exp (t^2)) z := by
     rw [erf_complex_segment_integral]
     simp only [primitive, segmentIntegral, sub_zero, zero_add]
@@ -209,7 +216,8 @@ theorem fresnelSinInt_aux (z : ℂ) :
 z+ε*I*fresnelSinInt z)`. -/
 @[dlmf 7.5.E6]
 theorem fresnel_signed_tail (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
-    exp (ε*π*I*z^2/2)*(fresnelAuxGComplex z+ε*I*fresnelAuxFComplex z)=(1+ε*I)/2-(fresnelCosInt z+ε*I*fresnelSinInt z) := by
+    exp (ε*π*I*z^2/2)*(fresnelAuxGComplex z+ε*I*fresnelAuxFComplex z)=(1+ε*I)/2-(fresnelCosInt
+        z+ε*I*fresnelSinInt z) := by
   have he : exp (ε*π*I*z^2/2)=cos (π*z^2/2)+ε*I*sin (π*z^2/2) := by
     rw [show (ε:ℂ)*π*I*z^2/2=(ε*(π*z^2/2))*I by ring, Complex.exp_mul_I]
     rcases hε with rfl | rfl <;> simp [mul_comm]
@@ -217,8 +225,10 @@ theorem fresnel_signed_tail (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
   rw [he]
   unfold fresnelAuxFComplex fresnelAuxGComplex
   rcases hε with rfl | rfl <;> norm_num
-  · linear_combination (norm := ring_nf) (-(fresnelCosInt z-1/2)-I*(fresnelSinInt z-1/2))*ht <;> simp [I_sq]
-  · linear_combination (norm := ring_nf) (-(fresnelCosInt z-1/2)+I*(fresnelSinInt z-1/2))*ht <;> simp [I_sq]
+  · linear_combination (norm := ring_nf) (-(fresnelCosInt z-1/2)-I*(fresnelSinInt z-1/2))*ht
+        <;> simp [I_sq]
+  · linear_combination (norm := ring_nf) (-(fresnelCosInt z-1/2)+I*(fresnelSinInt z-1/2))*ht
+        <;> simp [I_sq]
 
 /-- Identity under the stated parameter and domain assumptions: `exp (-π*I*z^2/2)*fresnelTail
 z=fresnelAuxGComplex z+I*fresnelAuxFComplex z`. -/
@@ -274,7 +284,8 @@ theorem fresnel_signed_erf (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     refine ((hf.sub hg).congr_of_eventuallyEq (Eventually.of_forall fun w => rfl)).congr_deriv ?_
     rw [hα, hE]
     linear_combination -exp (ε*π*I*w^2/2)*hβα
-  have he := is_const_of_deriv_eq_zero (fun w => (hd w).differentiableAt) (fun w => (hd w).deriv) z 0
+  have he := is_const_of_deriv_eq_zero (fun w => (hd w).differentiableAt)
+      (fun w => (hd w).deriv) z 0
   have he' : fresnelCosInt z+ε*I*fresnelSinInt z-β*erf (α*z)=0 := by
     simpa [fresnelCosInt,fresnelSinInt,erf_zero,primitive_zero] using he
   change fresnelCosInt z+ε*I*fresnelSinInt z=β*erf (α*z)
@@ -284,11 +295,13 @@ theorem fresnel_signed_erf (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
 z=(1+ε*I)/2*(1-exp (ε*π*I*z^2/2)*faddeevaW (I*fresnelZetaComplex ε z))`. -/
 @[dlmf 7.5.E9]
 theorem fresnel_signed_faddeeva (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
-    fresnelCosInt z+ε*I*fresnelSinInt z=(1+ε*I)/2*(1-exp (ε*π*I*z^2/2)*faddeevaW (I*fresnelZetaComplex ε z)) := by
+    fresnelCosInt z+ε*I*fresnelSinInt
+        z=(1+ε*I)/2*(1-exp (ε*π*I*z^2/2)*faddeevaW (I*fresnelZetaComplex ε z)) := by
   rw [fresnel_signed_erf z hε]
   have hz : (fresnelZetaComplex ε z)^2 = -ε*π*I*z^2/2 := by
     unfold fresnelZetaComplex
-    rw [mul_pow, mul_pow, div_pow, show (Real.sqrt π:ℂ)^2=π by exact_mod_cast Real.sq_sqrt Real.pi_pos.le]
+    rw [mul_pow, mul_pow, div_pow,
+        show (Real.sqrt π:ℂ)^2=π by exact_mod_cast Real.sq_sqrt Real.pi_pos.le]
     simp only [sub_sq, mul_pow, I_sq]
     rcases hε with rfl | rfl <;> norm_num <;> ring
   unfold faddeevaW
@@ -305,12 +318,14 @@ z+ε*I*fresnelAuxFComplex z=(1+ε*I)/2*exp ((fresnelZetaComplex ε z)^2)*erfc (f
 ε z)`. -/
 @[dlmf 7.5.E10]
 theorem fresnelAux_signed_erfc (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
-    fresnelAuxGComplex z+ε*I*fresnelAuxFComplex z=(1+ε*I)/2*exp ((fresnelZetaComplex ε z)^2)*erfc (fresnelZetaComplex ε z) := by
+    fresnelAuxGComplex z+ε*I*fresnelAuxFComplex z=(1+ε*I)/2*exp ((fresnelZetaComplex ε z)^2)*erfc
+        (fresnelZetaComplex ε z) := by
   have h := fresnel_signed_tail z hε
   rw [fresnel_signed_erf z hε] at h
   have hz : (fresnelZetaComplex ε z)^2 = -(ε*π*I*z^2/2) := by
     unfold fresnelZetaComplex
-    rw [mul_pow, mul_pow, div_pow, show (Real.sqrt π:ℂ)^2=π by exact_mod_cast Real.sq_sqrt Real.pi_pos.le]
+    rw [mul_pow, mul_pow, div_pow,
+        show (Real.sqrt π:ℂ)^2=π by exact_mod_cast Real.sq_sqrt Real.pi_pos.le]
     simp only [sub_sq, mul_pow, I_sq]
     rcases hε with rfl | rfl <;> norm_num <;> ring
   rw [hz, Complex.exp_neg]
@@ -343,7 +358,8 @@ theorem fresnelTail_norm_sq_nonneg {x : ℝ} :
 2*Real.cos (π/4-π*x^2/2)*fresnelAuxG (-x)`. -/
 @[dlmf 7.5.E12]
 theorem fresnelTail_norm_sq_nonpos {x : ℝ} :
-    ‖fresnelTail x‖^2 = 2+fresnelAuxF (-x)^2+fresnelAuxG (-x)^2-2*Real.sqrt 2*Real.cos (π/4+π*x^2/2)*fresnelAuxF (-x)-2*Real.sqrt 2*Real.cos (π/4-π*x^2/2)*fresnelAuxG (-x) := by
+    ‖fresnelTail x‖^2 = 2+fresnelAuxF (-x)^2+fresnelAuxG (-x)^2-2*Real.sqrt 2*Real.cos
+        (π/4+π*x^2/2)*fresnelAuxF (-x)-2*Real.sqrt 2*Real.cos (π/4-π*x^2/2)*fresnelAuxG (-x) := by
   have h := fresnelAux_negative ((-x:ℝ):ℂ)
   rw [fresnelAuxFComplex_ofReal (-x), fresnelAuxGComplex_ofReal (-x)] at h
   have hF : fresnelAuxF x=Real.sqrt 2*Real.cos (π/4+π*x^2/2)-fresnelAuxF (-x) := by
@@ -405,7 +421,8 @@ theorem hasDerivAt_faddeevaW (z : ℂ) :
 z+2*z*iteratedDeriv (n+1) faddeevaW z+2*(n+1)*iteratedDeriv n faddeevaW z=0`. -/
 @[dlmf 7.10.E3]
 theorem iteratedDeriv_faddeevaW_recurrence (n : ℕ) (z : ℂ) :
-    iteratedDeriv (n+2) faddeevaW z+2*z*iteratedDeriv (n+1) faddeevaW z+2*(n+1)*iteratedDeriv n faddeevaW z=0 := by
+    iteratedDeriv (n+2) faddeevaW z+2*z*iteratedDeriv (n+1) faddeevaW z+2*(n+1)*iteratedDeriv n
+        faddeevaW z=0 := by
   have hcd : ContDiff ℂ ⊤ faddeevaW :=
     contDiffOn_univ.mp (faddeevaW_entire.differentiableOn.contDiffOn isOpen_univ)
   have hd (k : ℕ) (w : ℂ) : HasDerivAt (iteratedDeriv k faddeevaW)
@@ -444,7 +461,8 @@ theorem iteratedDeriv_faddeevaW_recurrence (n : ℕ) (z : ℂ) :
 (-π*z*fresnelAuxGComplex z) z ∧ HasDerivAt fresnelAuxGComplex (π*z*fresnelAuxFComplex z-1) z`. -/
 @[dlmf 7.10.E4]
 theorem hasDerivAt_fresnelAux (z : ℂ) :
-    HasDerivAt fresnelAuxFComplex (-π*z*fresnelAuxGComplex z) z ∧ HasDerivAt fresnelAuxGComplex (π*z*fresnelAuxFComplex z-1) z := by
+    HasDerivAt fresnelAuxFComplex (-π*z*fresnelAuxGComplex z) z ∧
+        HasDerivAt fresnelAuxGComplex (π*z*fresnelAuxFComplex z-1) z := by
   have hC := hasDerivAt_fresnelCosInt_complex z
   have hS := hasDerivAt_fresnelSinInt_complex z
   have ht : HasDerivAt (fun w : ℂ => π*w^2/2) (π*z) z := by
@@ -468,7 +486,8 @@ theorem hasDerivAt_fresnelAux (z : ℂ) :
 π*kummerU (1/2) (1/2) (z^2) ∧ erfc z=z/Real.sqrt π*exp (-z^2)*kummerU 1 (3/2) (z^2)`. -/
 @[dlmf 7.11.E5]
 theorem erfc_kummerU_pair {z : ℂ} (hz : 0 < z.re) :
-    erfc z=exp (-z^2)/Real.sqrt π*kummerU (1/2) (1/2) (z^2) ∧ erfc z=z/Real.sqrt π*exp (-z^2)*kummerU 1 (3/2) (z^2) := by
+    erfc z=exp (-z^2)/Real.sqrt π*kummerU (1/2) (1/2) (z^2) ∧
+        erfc z=z/Real.sqrt π*exp (-z^2)*kummerU 1 (3/2) (z^2) := by
   have hs : z∈slitPlane := Or.inl hz
   have hz0 := slitPlane_ne_zero hs
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -499,7 +518,8 @@ theorem erfc_upperIncGamma {z : ℂ} (hz : 0 < z.re) :
 theorem erf_lowerIncGamma {z : ℂ} (hz : 0 < z.re) :
     erf z=lowerIncGamma (1/2) (z^2)/Real.sqrt π := by
   have hz0 : z≠0 := ne_zero_of_re_pos hz
-  have h := lowerIncGamma_add_upperIncGamma (a:=1/2) Complex.one_div_two_ne_neg_natCast (pow_ne_zero 2 hz0)
+  have h := lowerIncGamma_add_upperIncGamma (a:=1/2) Complex.one_div_two_ne_neg_natCast
+      (pow_ne_zero 2 hz0)
   rw [Complex.Gamma_one_half_eq_sqrt] at h
   have hu := erfc_upperIncGamma hz
   unfold erfc at hu
@@ -521,7 +541,8 @@ theorem erfc_genExpIntE {z : ℂ} (hz : 0 < z.re) :
 (1/2) (3/2) (-z^2) ∧ erf z=2*z/Real.sqrt π*exp (-z^2)*kummerM 1 (3/2) (z^2)`. -/
 @[dlmf 7.11.E4]
 theorem erf_kummerM_pair (z : ℂ) :
-    erf z=2*z/Real.sqrt π*kummerM (1/2) (3/2) (-z^2) ∧ erf z=2*z/Real.sqrt π*exp (-z^2)*kummerM 1 (3/2) (z^2) := by
+    erf z=2*z/Real.sqrt π*kummerM (1/2) (3/2) (-z^2) ∧
+        erf z=2*z/Real.sqrt π*exp (-z^2)*kummerM 1 (3/2) (z^2) := by
   constructor
   · unfold erf
     ring
@@ -534,7 +555,8 @@ z=z*kummerM (1/2) (3/2) (π*I*z^2/2) ∧ fresnelCosInt z+I*fresnelSinInt z=z*exp
 (π*I*z^2/2)*kummerM 1 (3/2) (-π*I*z^2/2)`. -/
 @[dlmf 7.11.E6]
 theorem fresnel_kummerM_pair (z : ℂ) :
-    fresnelCosInt z+I*fresnelSinInt z=z*kummerM (1/2) (3/2) (π*I*z^2/2) ∧ fresnelCosInt z+I*fresnelSinInt z=z*exp (π*I*z^2/2)*kummerM 1 (3/2) (-π*I*z^2/2) := by
+    fresnelCosInt z+I*fresnelSinInt z=z*kummerM (1/2) (3/2) (π*I*z^2/2) ∧
+        fresnelCosInt z+I*fresnelSinInt z=z*exp (π*I*z^2/2)*kummerM 1 (3/2) (-π*I*z^2/2) := by
   have h := fresnel_signed_erf z (ε:=1) (Or.inl rfl)
   simp only [Complex.ofReal_one,one_mul] at h
   have hzeta : -(fresnelZetaComplex 1 z)^2=π*I*z^2/2 := by
@@ -556,7 +578,8 @@ theorem fresnel_kummerM_pair (z : ℂ) :
   norm_num
   ring
 
-/-- The adjacent upper/lower Gamma ratio in a 1F2 coefficient, on the positive parameter half-planes. -/
+/-- The adjacent upper/lower Gamma ratio in a 1F2 coefficient, on the positive parameter
+half-planes. -/
 lemma regularized1F2_gamma_coeff {a c : ℂ} (ha : 0<a.re) (hc : 0<c.re) (n : ℕ) :
     Gamma (a+1)*Gamma c*regularizedHGFunCoeff {a} {a+1,c} n=
       a*Gamma c/((a+n)*(n.factorial:ℂ)*Gamma (c+n)) := by
@@ -617,13 +640,15 @@ theorem fresnelCosInt_hypergeometric (z : ℂ) :
           neg_pow,← pow_mul,mul_pow,← pow_mul]
         ring
       simp only [Nat.add_zero]
-      linear_combination (norm := (simp only [div_eq_mul_inv,mul_inv_rev]; ring)) (z/((4*n+1)*(2*n).factorial))*hscale
+      linear_combination (norm := (simp only [div_eq_mul_inv, mul_inv_rev]; ring))
+          (z/((4*n+1)*(2*n).factorial))*hscale
 
 /-- Identity under the stated parameter and domain assumptions: `fresnelSinInt z=π*z^3/6*Gamma
 (7/4)*Gamma (3/2)*regularizedHGFun {3/4} {7/4,3/2} (-π^2*z^4/16)`. -/
 @[dlmf 7.11.E8]
 theorem fresnelSinInt_hypergeometric (z : ℂ) :
-    fresnelSinInt z=π*z^3/6*Gamma (7/4)*Gamma (3/2)*regularizedHGFun {3/4} {7/4,3/2} (-π^2*z^4/16) := by
+    fresnelSinInt z=π*z^3/6*Gamma (7/4)*Gamma (3/2)*regularizedHGFun {3/4} {7/4, 3/2}
+        (-π^2*z^4/16) := by
   apply (fresnelSinInt_hasSum z).unique
   have hs := (hasSum_regularized1F2 (3/4) (7/4) (3/2) (-π^2*z^4/16)).mul_left
     (π*z^3/6*Gamma (7/4)*Gamma (3/2))
@@ -641,6 +666,7 @@ theorem fresnelSinInt_hypergeometric (z : ℂ) :
         rw [← mul_pow,show (4:ℂ)*(-π^2*z^4/16)= -((π/2)*z^2)^2 by ring,
           neg_pow,← pow_mul,mul_pow,← pow_mul]
         ring
-      linear_combination (norm := (simp only [div_eq_mul_inv,mul_inv_rev]; ring)) (π*z^3/(2*((4*n+3)*(2*n+1).factorial)))*hscale
+      linear_combination (norm := (simp only [div_eq_mul_inv, mul_inv_rev]; ring))
+          (π*z^3/(2*((4*n+3)*(2*n+1).factorial)))*hscale
 
 end DLMF.Confluent

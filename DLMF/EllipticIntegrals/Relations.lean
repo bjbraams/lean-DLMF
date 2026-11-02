@@ -142,7 +142,8 @@ theorem log_div_eq_mul_symEllIntRC {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
   have hxu : x = y * u := by rw [hu]; field_simp
   have e1 : (x + y) ^ 2 / 4 = y ^ 2 * (((u + 1) / 2) ^ 2) := by rw [hxu]; ring
   have e2 : x * y = y ^ 2 * u := by rw [hxu]; ring
-  rw [e1, e2, symEllIntRC_sq_mul_eq_carlsonRC hy (by positivity) hu0, log_eq_sub_one_mul_carlsonRC hu0, hxu]
+  rw [e1, e2, symEllIntRC_sq_mul_eq_carlsonRC hy (by positivity) hu0,
+      log_eq_sub_one_mul_carlsonRC hu0, hxu]
   have : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
   push_cast
   field_simp

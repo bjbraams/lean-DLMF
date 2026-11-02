@@ -66,7 +66,8 @@ namespace DLMF.Painleve
 /-! ## Helpers -/
 
 /-- A Hamiltonian system with explicitly known partial derivatives along the solution. -/
-private lemma isHamiltonianSystemOn_iff {H : ℂ → ℂ → ℂ → ℂ} {q p : ℂ → ℂ} {U : Set ℂ} {Hp Hq : ℂ → ℂ}
+private lemma isHamiltonianSystemOn_iff {H : ℂ → ℂ → ℂ → ℂ} {q p : ℂ → ℂ} {U : Set ℂ}
+    {Hp Hq : ℂ → ℂ}
     (hHp : ∀ z ∈ U, HasDerivAt (fun p' => H (q z) p' z) (Hp z) (p z))
     (hHq : ∀ z ∈ U, HasDerivAt (fun q' => H q' (p z) z) (Hq z) (q z)) :
     IsHamiltonianSystemOn H q p U ↔

@@ -102,7 +102,8 @@ theorem symEllIntRF_zero_connection {z : ℂ} (hz : z.im ≠ 0) :
 theorem symEllIntRG_zero_connection {z : ℂ} (hz : z.im ≠ 0) :
     2 * symEllIntRG 0 (z - 1) z =
       2 * symEllIntRG 0 (1 - z) 1 + (SignType.sign z.im : ℂ) * I * (2 * symEllIntRG 0 z 1) +
-        (z - 1) * symEllIntRF 0 (1 - z) 1 - (SignType.sign z.im : ℂ) * I * z * symEllIntRF 0 z 1 := by
+        (z - 1) * symEllIntRF 0 (1 - z) 1 - (SignType.sign z.im : ℂ) * I * z *
+            symEllIntRF 0 z 1 := by
   sorry
 
 /-- DLMF 19.21.6: for positive distinct `y, z, p` with `y` not between `z` and `p`,
@@ -149,7 +150,8 @@ theorem symEllIntRD_cyclic_mul_sum {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y 
 @[dlmf 19.21.E10]
 theorem two_mul_symEllIntRG_eq {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    2 * symEllIntRG x y z = z * symEllIntRF x y z - (1 / 3) * (x - z) * (y - z) * symEllIntRD x y z +
+    2 * symEllIntRG x y z = z * symEllIntRF x y z - (1 / 3) * (x - z) * (y - z) *
+        symEllIntRD x y z +
       x ^ (1 / 2 : ℂ) * y ^ (1 / 2 : ℂ) * z ^ (-1 / 2 : ℂ) :=
   two_mul_symEllIntRG (Or.inl hx) hy hz
 

@@ -93,7 +93,8 @@ theorem mobius_taylor (F : ℕ → ℂ → ℂ) (C : ℕ → ℂ) (s x : ℂ)
     | succ n ih =>
       intro w hw
       have he : iteratedDeriv n (G 0) =ᶠ[𝓝 w] G n := by
-        filter_upwards [Metric.isOpen_ball.mem_nhds (show w ∈ Metric.ball 0 1 by simpa using hw)] with u hu
+        filter_upwards [Metric.isOpen_ball.mem_nhds
+            (show w ∈ Metric.ball 0 1 by simpa using hw)] with u hu
         exact ih u (by simpa using hu)
       rw [iteratedDeriv_succ, he.deriv_eq, (hG n w hw).deriv]
   have ht := Complex.taylorSeries_eq_on_ball'
@@ -115,7 +116,8 @@ theorem kummerM_mobius_taylor {a b x v : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hv :
       ∑' n : ℕ, poch a n * kummerM (a + n) b x / n.factorial * v ^ n := by
   simpa only [Nat.cast_zero, add_zero] using
     (mobius_taylor (fun n => kummerM (a + n) b) (poch a) a x (poch_zero a)
-      (fun n w _ => ((analyticOnNhd_kummerM (a := a + n) hb) _ (Set.mem_univ _)).differentiableAt) (by
+      (fun n w _ => ((analyticOnNhd_kummerM (a := a + n) hb) _
+          (Set.mem_univ _)).differentiableAt) (by
         intro n w hw
         rw [poch_succ]
         have h := z_mul_deriv_kummerM_eq_shift_a (a := a + n) hb (x / (1 - w))
@@ -130,7 +132,8 @@ theorem kummerU_mobius_taylor (a b : ℂ) {x v : ℂ} (hx : 0 < x.re) (hv : ‖v
   simpa only [Nat.cast_zero, add_zero] using
     (mobius_taylor (fun n => kummerU (a + n) b)
       (fun n => poch a n * poch (1 + a - b) n) a x (by simp [poch_zero])
-      (fun n w hw => (hasDerivAt_kummerU _ _ (div_one_sub_mem_slitPlane hx hw)).differentiableAt) (by
+      (fun n w hw => (hasDerivAt_kummerU _ _
+          (div_one_sub_mem_slitPlane hx hw)).differentiableAt) (by
         intro n w hw
         have hz := div_one_sub_mem_slitPlane hx hw
         rw [deriv_kummerU _ _ hz, poch_succ, poch_succ]

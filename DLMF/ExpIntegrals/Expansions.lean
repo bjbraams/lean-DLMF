@@ -42,9 +42,11 @@ namespace DLMF.Confluent
 `(Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x)`. -/
 @[dlmf 6.6.E1]
 theorem Real.hasSum_expIntEi {x : ℝ} (hx : 0 < x) :
-    HasSum (fun k : ℕ => x^(k+1)/((k+1).factorial*(k+1 : ℝ))) (Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x) := by
+    HasSum (fun k : ℕ => x^(k+1)/((k+1).factorial*(k+1 : ℝ)))
+        (Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x) := by
   have h := (DLMF.Confluent.Real.hasSum_expIntEin (-x)).neg
-  have he : Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x = -DLMF.Confluent.Real.expIntEin (-x) := by
+  have he : Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x =
+      -DLMF.Confluent.Real.expIntEin (-x) := by
     rw [Real.expIntEi, abs_of_pos hx, show -(x:ℂ) = ((-x:ℝ):ℂ) by push_cast; ring,
       DLMF.Confluent.expIntEin_ofReal, Complex.ofReal_re]
     ring
@@ -67,7 +69,8 @@ theorem expIntE1_digamma_series {z : ℂ} (hz : z ≠ 0) :
 `(-genExpIntE 1 z - Real.eulerMascheroniConstant - log z)`. -/
 @[dlmf 6.6.E2]
 theorem expIntE1_hasSum {z : ℂ} (hz : z ≠ 0) :
-    HasSum (fun k : ℕ => (-z)^(k+1)/((k+1).factorial*(k+1 : ℂ))) (-genExpIntE 1 z - Real.eulerMascheroniConstant - log z) := by
+    HasSum (fun k : ℕ => (-z)^(k+1)/((k+1).factorial*(k+1 : ℂ)))
+        (-genExpIntE 1 z - Real.eulerMascheroniConstant - log z) := by
   have h := (hasSum_Ein_complex z).neg
   rw [expIntE1_eq_Ein_complex hz]
   convert h using 1
@@ -80,7 +83,8 @@ theorem expIntE1_hasSum {z : ℂ} (hz : z ≠ 0) :
 ℂ)))` converges to `(cosInt z-Real.eulerMascheroniConstant-log z)`. -/
 @[dlmf 6.6.E6]
 theorem hasSum_Ci_complex (z : ℂ) :
-    HasSum (fun k : ℕ => (-1 : ℂ)^(k+1)*z^(2*k+2)/((2*k+2).factorial*(2*k+2 : ℂ))) (cosInt z-Real.eulerMascheroniConstant-log z) := by
+    HasSum (fun k : ℕ => (-1 : ℂ)^(k+1)*z^(2*k+2)/((2*k+2).factorial*(2*k+2 : ℂ)))
+        (cosInt z-Real.eulerMascheroniConstant-log z) := by
   have hs := (summable_factorial_div_nat (c := fun k => (-1:ℂ)^k)
     (d := fun k => 2*k+2) (by intro k; simp)
     (by intro i j hij; dsimp at hij; omega) (by intro k; omega) z).hasSum.neg
@@ -263,7 +267,8 @@ theorem recipFac_mul_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
   · have h := recipFac_mul_abs_g_le_of_ceil_le ht k hk.le
     nlinarith
 
-/-- Estimate under the stated parameter and domain assumptions: `|recipFac_g k t| ≤ recipFac_B t`. -/
+/-- Estimate under the stated parameter and domain assumptions: `|recipFac_g k t| ≤ recipFac_B t`.
+-/
 theorem recipFac_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) : |recipFac_g k t| ≤ recipFac_B t := by
   rcases k with _ | k
   · rw [recipFac_g_zero, abs_one]
@@ -296,7 +301,8 @@ theorem recipFac_exp_mul_B (t : ℝ) :
 theorem recipFac_integrable_B : IntegrableOn (fun t => Real.exp (-t) * recipFac_B t) (Ioi 0) := by
   have hb := recipFac_b_pos
   have h1 : IntegrableOn (fun t : ℝ => t * Real.exp (-(1 - Real.log 2) * t)) (Ioi 0) := by
-    refine (integrableOn_rpow_mul_exp_neg_mul_rpow (s := 1) (p := 1) (by norm_num) one_pos hb).congr_fun
+    refine (integrableOn_rpow_mul_exp_neg_mul_rpow (s := 1) (p := 1) (by norm_num)
+        one_pos hb).congr_fun
       (fun t ht => ?_) measurableSet_Ioi
     simp [Real.rpow_one]
   have h2 := exp_neg_integrableOn_Ioi 0 hb
@@ -347,7 +353,8 @@ theorem recipFac_d_succ (k : ℕ) :
     rw [mul_neg, Finset.mul_sum]
     simp only [mul_div_assoc]
     ring
-  have hint : ∀ i, IntegrableOn (fun t => Real.exp (-t) * recipFac_g i t / ((k:ℝ) + 1 - i)) (Ioi 0) :=
+  have hint : ∀ i, IntegrableOn
+      (fun t => Real.exp (-t) * recipFac_g i t / ((k:ℝ) + 1 - i)) (Ioi 0) :=
     fun i => (recipFac_integrable_g i).div_const _
   have f'int : IntegrableOn f' (Ioi 0) :=
     (recipFac_integrable_g (k+1)).add (integrable_finsetSum _ fun i _ => hint i)
@@ -524,14 +531,16 @@ theorem recipFac_hasSum_F {z : ℂ} (hz : 0 < z.re) {t : ℝ} (ht : 0 ≤ t) :
 z (k+1))` converges to `(exp z*genExpIntE 1 z)`. -/
 @[dlmf 6.10.E1]
 theorem expIntE1_reciprocal_factorial_series {z : ℂ} (hz : 0 < z.re) :
-    HasSum (fun k : ℕ => (k.factorial : ℂ)*expIntReciprocalFactorialCoeff k / poch z (k+1)) (exp z*genExpIntE 1 z) := by
+    HasSum (fun k : ℕ => (k.factorial : ℂ)*expIntReciprocalFactorialCoeff k / poch z (k+1))
+        (exp z*genExpIntE 1 z) := by
   obtain ⟨C, hC0, hC⟩ := recipFac_poch_bound hz
   have hint : ∀ k, Integrable (recipFac_F z k) (volume.restrict (Ioi 0)) := fun k =>
     ((recipFac_integrable_g k).ofReal).mul_const _
   have hnorm : Summable (fun k => ∫ t in Ioi 0, ‖recipFac_F z k t‖) := by
     rw [← summable_nat_add_iff 1]
     refine Summable.of_nonneg_of_le (fun k => integral_nonneg fun t => norm_nonneg _)
-      (fun k => ?_) ((recipFac_summable_u hz C).mul_left (∫ t in Ioi 0, Real.exp (-t) * recipFac_B t))
+      (fun k => ?_) ((recipFac_summable_u hz C).mul_left
+          (∫ t in Ioi 0, Real.exp (-t) * recipFac_B t))
     rw [← integral_mul_const]
     refine integral_mono_of_nonneg (Eventually.of_forall fun t => norm_nonneg _)
       (recipFac_integrable_B.mul_const _) ?_
@@ -543,7 +552,8 @@ theorem expIntE1_reciprocal_factorial_series {z : ℂ} (hz : 0 < z.re) :
     setIntegral_congr_fun measurableSet_Ioi fun t ht => (recipFac_hasSum_F hz (le_of_lt ht)).tsum_eq
   rw [hI] at h
   have hE : exp z * genExpIntE 1 z = ∫ t : ℝ in Ioi 0, exp (-t : ℂ)/(t+z) := by
-    rw [expIntE1_stieltjes (Complex.mem_slitPlane_iff.2 (Or.inl hz)), ← mul_assoc, ← Complex.exp_add,
+    rw [expIntE1_stieltjes (Complex.mem_slitPlane_iff.2 (Or.inl hz)), ← mul_assoc,
+        ← Complex.exp_add,
       add_neg_cancel, Complex.exp_zero, one_mul]
   rw [hE]
   refine h.congr_fun fun k => ?_
@@ -897,7 +907,8 @@ theorem cosIntCin_spherical_series (z : ℂ) :
 (x/2)^2)` converges to `((Real.expIntEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|)`. -/
 @[dlmf 6.10.E6]
 theorem expIntEi_spherical_series {x : ℝ} :
-    HasSum (fun n : ℕ => (-1 : ℂ)^n*((x : ℂ)-expIntSphericalCoeff n)*sphericalI n (x/2)^2) ((Real.expIntEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|) := by
+    HasSum (fun n : ℕ => (-1 : ℂ)^n*((x : ℂ)-expIntSphericalCoeff n)*sphericalI n (x/2)^2)
+        ((Real.expIntEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|) := by
   have hE : ((Real.expIntEi x : ℂ) - Real.eulerMascheroniConstant - Real.log |x|) =
       -cosIntCin (I*x) - I*sinInt (I*x) := by
     have h := expIntEin_mul_I (I*x)
@@ -926,7 +937,8 @@ theorem expIntEi_spherical_series {x : ℝ} :
 (n+1) (z/2))` converges to `(expIntEin z-z*exp (-z/2)*sphericalI 0 (z/2))`. -/
 @[dlmf 6.10.E8]
 theorem Ein_spherical_series (z : ℂ) :
-    HasSum (fun n : ℕ => z*exp (-z/2)*(2*(n+1)+1 : ℂ)/((n+1 : ℂ)*(n+2))*sphericalI (n+1) (z/2)) (expIntEin z-z*exp (-z/2)*sphericalI 0 (z/2)) := by
+    HasSum (fun n : ℕ => z*exp (-z/2)*(2*(n+1)+1 : ℂ)/((n+1 : ℂ)*(n+2))*sphericalI (n+1) (z/2))
+        (expIntEin z-z*exp (-z/2)*sphericalI 0 (z/2)) := by
   have hx : ∀ w : ℂ, HasDerivAt (fun w : ℂ => w/2) (1/2) w := fun w => by
     simpa using (hasDerivAt_id w).div_const 2
   have he : ∀ w : ℂ, HasDerivAt (fun w : ℂ => exp (-w/2)) (exp (-w/2) * (-1/2)) w := fun w => by

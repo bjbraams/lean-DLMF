@@ -64,7 +64,8 @@ lemma integrable_abs_pow_mul_exp_neg_half_sq (p : ℕ) :
   simp only [Real.rpow_natCast, norm_mul, Real.norm_eq_abs, abs_pow,
     abs_of_pos (Real.exp_pos _)]
 
-/-- The constant of the Gaussian bound `norm_cuspoidContourIntegrand_le`, monotone in `C ≥ ∑ |xₘ|`. -/
+/-- The constant of the Gaussian bound `norm_cuspoidContourIntegrand_le`, monotone in `C ≥ ∑ |xₘ|`.
+-/
 private lemma exp_gaussianBoundConst_mono (K : ℕ) {S C : ℝ} (hS : 0 ≤ S) (hSC : S ≤ C) :
     Real.exp (1 / 2 + S + S * (1 + 2 * S) ^ K) ≤ Real.exp (1 / 2 + C + C * (1 + 2 * C) ^ K) := by
   apply Real.exp_le_exp.mpr
@@ -151,7 +152,8 @@ private lemma sum_abs_update_le_add_one (K : ℕ) (x : Fin K → ℝ) (m : Fin K
 
 /-- Derivative of the cuspoid moment integrand in the coordinate `x_m`: it multiplies by `i
 t^{m+1}`. -/
-private lemma hasDerivAt_cuspoidMomentIntegrand_update (K : ℕ) (x : Fin K → ℝ) (m : Fin K) (p : ℕ) (r s : ℝ) :
+private lemma hasDerivAt_cuspoidMomentIntegrand_update (K : ℕ) (x : Fin K → ℝ) (m : Fin K)
+    (p : ℕ) (r s : ℝ) :
     HasDerivAt (fun s' : ℝ => cuspoidContourDir K r * cuspoidContour K r ^ p *
         exp (I * cuspoidPotential K (cuspoidContour K r) (update x m s')))
       (I * (cuspoidContourDir K r * cuspoidContour K r ^ (p + ((m : ℕ) + 1)) *
@@ -269,7 +271,8 @@ theorem iteratedDeriv_cuspoidIntegral_odd {K : ℕ} (hK : ¬ Even K) (h0 : 0 < K
   have e2 : I ^ p * ((-1) ^ p * exp (-(cuspoidAngle K : ℂ) * I) ^ (p + 1)) =
       exp (-(α : ℂ) * I) := by
     rw [show -(cuspoidAngle K : ℂ) * I = ((-1 * cuspoidAngle K : ℝ) : ℂ) * I by push_cast; ring,
-      exp_mul_cuspoidAngle_pow_succ, ← mul_assoc, mul_comm (I ^ p), neg_one_pow_mul_I_pow_eq_exp, ← exp_add]
+      exp_mul_cuspoidAngle_pow_succ, ← mul_assoc, mul_comm (I ^ p),
+          neg_one_pow_mul_I_pow_eq_exp, ← exp_add]
     congr 1; rw [hα]; push_cast; field_simp; ring
   rw [ofReal_cos, Complex.cos]
   push_cast
@@ -328,7 +331,8 @@ private lemma cuspoidContourDir_of_nonneg_eq_one (K : ℕ) {y : ℝ} (hy : 0 ≤
   rw [cuspoidContourDir_of_nonneg K hy, cuspoidContourDir_of_nonneg K zero_le_one]
 
 /-- Chain rule for `r ↦ exp(i P(r ω))` along the line `r ω`. -/
-private lemma hasDerivAt_exp_I_mul_comp_line {P P' : ℂ → ℂ} (hP : ∀ u, HasDerivAt P (P' u) u) (ω : ℂ)
+private lemma hasDerivAt_exp_I_mul_comp_line {P P' : ℂ → ℂ}
+    (hP : ∀ u, HasDerivAt P (P' u) u) (ω : ℂ)
     (r : ℝ) :
     HasDerivAt (fun r : ℝ => exp (I * P ((r : ℂ) * ω)))
       (I * (ω * P' ((r : ℂ) * ω) * exp (I * P ((r : ℂ) * ω)))) r := by
@@ -340,14 +344,16 @@ private lemma hasDerivAt_exp_I_mul_comp_line {P P' : ℂ → ℂ} (hP : ∀ u, H
   ring
 
 /-- `r ↦ exp(i P(r ω))` is continuous for differentiable `P`. -/
-private lemma continuous_exp_I_mul_comp_line {P P' : ℂ → ℂ} (hP : ∀ u, HasDerivAt P (P' u) u) (ω : ℂ) :
+private lemma continuous_exp_I_mul_comp_line {P P' : ℂ → ℂ}
+    (hP : ∀ u, HasDerivAt P (P' u) u) (ω : ℂ) :
     Continuous fun r : ℝ => exp (I * P ((r : ℂ) * ω)) :=
   continuous_exp.comp (continuous_const.mul
     ((continuous_iff_continuousAt.mpr fun u => (hP u).continuousAt).comp
       (continuous_ofReal.mul continuous_const)))
 
 /-- The integrand `exp(iΦ_K(t(r); x))` tends to `0` along any filter on which `-r²/2 → -∞`. -/
-private lemma tendsto_exp_I_mul_cuspoidPotential_cuspoidContour (K : ℕ) (x : Fin K → ℝ) {l : Filter ℝ}
+private lemma tendsto_exp_I_mul_cuspoidPotential_cuspoidContour (K : ℕ)
+    (x : Fin K → ℝ) {l : Filter ℝ}
     (hl : Tendsto (fun r : ℝ => -(1 / 2) * r ^ 2) l atBot) :
     Tendsto (fun r => exp (I * cuspoidPotential K (cuspoidContour K r) x)) l (𝓝 0) := by
   set A := Real.exp (1 / 2 + ∑ m, |x m| + (∑ m, |x m|) * (1 + 2 * ∑ m, |x m|) ^ K)
@@ -372,7 +378,8 @@ lemma tendsto_neg_half_mul_sq_atBot : Tendsto (fun r : ℝ => -(1 / 2) * r ^ 2) 
 /-- Integration by parts along the rotated contour of `cuspoidIntegral K`, for an entire phase
 `P`: if `exp(iP(t))` tends to `0` at both ends of the contour and `P'(t) exp(iP(t))` is
 integrable along it, then `∫ P'(t) exp(iP(t)) dt = 0` (the integrand is `-i d/dt exp(iP)`). -/
-lemma integral_cuspoidContour_deriv_mul_exp_eq_zero (K : ℕ) {P P' : ℂ → ℂ} (hP : ∀ u, HasDerivAt P (P' u) u)
+lemma integral_cuspoidContour_deriv_mul_exp_eq_zero (K : ℕ) {P P' : ℂ → ℂ}
+    (hP : ∀ u, HasDerivAt P (P' u) u)
     (hint : Integrable fun r : ℝ => cuspoidContourDir K r * P' (cuspoidContour K r) *
       exp (I * P (cuspoidContour K r)))
     (htop : Tendsto (fun r : ℝ => exp (I * P (cuspoidContour K r))) atTop (𝓝 0))
@@ -406,7 +413,8 @@ lemma integral_cuspoidContour_deriv_mul_exp_eq_zero (K : ℕ) {P P' : ℂ → �
   have hcontR : ContinuousWithinAt G (Ici 0) 0 := by
     refine ((continuous_exp_I_mul_comp_line hP (cuspoidContourDir K 1)).continuousWithinAt).congr
       (fun y hy => ?_) ?_
-    · simp only [hG, cuspoidContour, cuspoidContourDir_of_nonneg_eq_one K (show (0 : ℝ) ≤ y from hy)]
+    · simp only [hG, cuspoidContour,
+          cuspoidContourDir_of_nonneg_eq_one K (show (0 : ℝ) ≤ y from hy)]
     · simp only [hG, cuspoidContour, cuspoidContourDir_of_nonneg_eq_one K le_rfl]
   have hcontL : ContinuousWithinAt G (Iic 0) 0 := by
     refine ((continuous_exp_I_mul_comp_line hP (cuspoidContourDir K (-1))).continuousWithinAt).congr
@@ -467,7 +475,8 @@ theorem cuspoidMoment_ibp (K : ℕ) (x : Fin K → ℝ) :
 /-! ### §36.10(i): equations for `Ψ_K` -/
 
 /-- The `n`-th derivative of `Ψ_K` in `x_m` is `iⁿ` times the moment of order `n(m+1)`. -/
-private lemma iteratedDeriv_of_eq_cuspoidIntegral_update (K : ℕ) (v : Fin K → ℝ) (m : Fin K) (n : ℕ) {g : ℝ → ℂ}
+private lemma iteratedDeriv_of_eq_cuspoidIntegral_update (K : ℕ) (v : Fin K → ℝ) (m : Fin K)
+    (n : ℕ) {g : ℝ → ℂ}
     (hg : ∀ s, g s = cuspoidIntegral K (update v m s)) :
     iteratedDeriv n g (v m) = I ^ n * cuspoidMoment K v (n * ((m : ℕ) + 1)) := by
   rw [show g = fun s => cuspoidIntegral K (update v m s) from funext hg]
@@ -625,9 +634,11 @@ theorem cuspoidIntegral_iteratedDeriv_swap (K : ℕ) (x : Fin K → ℝ) (m l : 
 theorem cuspoidIntegral_two_iteratedDeriv (x y : ℝ) (n : ℕ) :
     iteratedDeriv (2 * n) (fun s => cuspoidIntegral 2 ![s, y]) x =
       I ^ n * iteratedDeriv n (fun s => cuspoidIntegral 2 ![x, s]) y := by
-  have hx := iteratedDeriv_of_eq_cuspoidIntegral_update 2 ![x, y] 0 (2 * n) (g := fun s => cuspoidIntegral 2 ![s, y])
+  have hx := iteratedDeriv_of_eq_cuspoidIntegral_update 2 ![x, y] 0 (2 * n)
+      (g := fun s => cuspoidIntegral 2 ![s, y])
     fun s => by congr 1; funext i; fin_cases i <;> rfl
-  have hy := iteratedDeriv_of_eq_cuspoidIntegral_update 2 ![x, y] 1 n (g := fun s => cuspoidIntegral 2 ![x, s])
+  have hy := iteratedDeriv_of_eq_cuspoidIntegral_update 2 ![x, y] 1 n
+      (g := fun s => cuspoidIntegral 2 ![x, s])
     fun s => by congr 1; funext i; fin_cases i <;> rfl
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one, Fin.val_zero,
     Fin.val_one] at hx hy

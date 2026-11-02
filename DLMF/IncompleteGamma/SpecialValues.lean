@@ -49,7 +49,8 @@ open DLMF.Statistical
 (z^2)=2*primitive (fun t => exp (-t^2)) z ∧ lowerIncGamma (1/2) (z^2)=Real.sqrt π*erf z`. -/
 @[dlmf 8.4.E1]
 theorem lowerIncGamma_half_square {z : ℂ} (hz : 0 < z.re) :
-    lowerIncGamma (1/2) (z^2)=2*primitive (fun t => exp (-t^2)) z ∧ lowerIncGamma (1/2) (z^2)=Real.sqrt π*erf z := by
+    lowerIncGamma (1/2) (z^2)=2*primitive (fun t => exp (-t^2)) z ∧
+        lowerIncGamma (1/2) (z^2)=Real.sqrt π*erf z := by
   have hz0 := ne_zero_of_re_pos hz
   have he : lowerIncGamma (1/2) (z^2)=(Real.sqrt π:ℂ)*erf z := by
     rw [lowerIncGamma, sq_cpow_of_re_pos hz]
@@ -145,7 +146,8 @@ theorem upperIncGamma_one_minus_nat (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
 (-z^2)/Real.sqrt π*(∑ k ∈ Finset.range n, z^(2*k+1)/poch (1/2) (k+1))`. -/
 @[dlmf 8.4.E14]
 theorem normIncGammaQ_half_nat (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
-    normIncGammaQContinued (n+1/2) (z^2)=erfc z+exp (-z^2)/Real.sqrt π*(∑ k ∈ Finset.range n, z^(2*k+1)/poch (1/2) (k+1)) := by
+    normIncGammaQContinued (n+1/2) (z^2)=erfc z+exp (-z^2)/Real.sqrt
+        π*(∑ k ∈ Finset.range n, z^(2*k+1)/poch (1/2) (k+1)) := by
   have hz0 := ne_zero_of_re_pos hz
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have he := normIncGammaQContinued_shift_up n (1/2) (pow_ne_zero 2 hz0)
@@ -173,7 +175,8 @@ theorem normIncGammaQ_half_nat (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
 1 z-exp (-z)*∑ k ∈ Finset.range n, (-1 : ℂ)^k*(k.factorial : ℂ)/z^(k+1))`. -/
 @[dlmf 8.4.E15]
 theorem upperIncGamma_neg_nat_finite (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    upperIncGamma (-n) z=(-1 : ℂ)^n/n.factorial*(genExpIntE 1 z-exp (-z)*∑ k ∈ Finset.range n, (-1 : ℂ)^k*(k.factorial : ℂ)/z^(k+1)) := by
+    upperIncGamma (-n) z=(-1 : ℂ)^n/n.factorial*(genExpIntE 1 z-exp (-z)*∑ k ∈ Finset.range n,
+        (-1 : ℂ)^k*(k.factorial : ℂ)/z^(k+1)) := by
   induction n with
   | zero => simp [genExpIntE]
   | succ n ih =>
@@ -196,7 +199,8 @@ theorem upperIncGamma_neg_nat_finite (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
 (-n) z))`. -/
 @[dlmf 8.4.E15]
 theorem upperIncGamma_neg_nat_hasSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    HasSum (fun k : ℕ => if k=n then 0 else (-z)^k/((k.factorial : ℂ)*((k : ℂ)-n))) (z^(n : ℤ)*((-1 : ℂ)^n/n.factorial*(digamma (n+1)-log z)-upperIncGamma (-n) z)) := by
+    HasSum (fun k : ℕ => if k=n then 0 else (-z)^k/((k.factorial : ℂ)*((k : ℂ)-n)))
+        (z^(n : ℤ)*((-1 : ℂ)^n/n.factorial*(digamma (n+1)-log z)-upperIncGamma (-n) z)) := by
   induction n with
   | zero =>
     rw [← hasSum_nat_add_iff' 1]
@@ -243,7 +247,8 @@ theorem upperIncGamma_neg_nat_hasSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
         have h2 := congrArg Complex.re this
         simp at h2; linarith [(Nat.cast_nonneg m : (0:ℝ) ≤ m)])
       have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
-      simp only [Finset.sum_range_one, Nat.factorial_succ, zpow_natCast, Nat.cast_zero, Nat.factorial_zero]
+      simp only [Finset.sum_range_one, Nat.factorial_succ, zpow_natCast, Nat.cast_zero,
+          Nat.factorial_zero]
       push_cast
       rw [show -((n:ℂ)+1) = -(n:ℂ)-1 by ring, hd, he]
       have hzn : z ^ n ≠ 0 := pow_ne_zero _ hz
@@ -255,7 +260,8 @@ theorem upperIncGamma_neg_nat_hasSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
 (-z)*kummerM 1 (1+a) z ∧ lowerIncGamma a z=z^a/a*kummerM a (1+a) (-z)`. -/
 @[dlmf 8.5.E1]
 theorem lowerIncGamma_kummerM_pair {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
-    lowerIncGamma a z=z^a/a*exp (-z)*kummerM 1 (1+a) z ∧ lowerIncGamma a z=z^a/a*kummerM a (1+a) (-z) := by
+    lowerIncGamma a z=z^a/a*exp (-z)*kummerM 1 (1+a) z ∧
+        lowerIncGamma a z=z^a/a*kummerM a (1+a) (-z) := by
   have ha1 := add_one_ne_neg_nat ha
   constructor
   · rw [lowerIncGamma, kummerM_kummer_transform ha1]
@@ -268,7 +274,8 @@ theorem lowerIncGamma_kummerM_pair {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : �
 (-z)*regularizedHGFun {1} {1+a} z ∧ scIncGamma a z=regularizedHGFun {a} {1+a} (-z)`. -/
 @[dlmf 8.5.E2]
 theorem scIncGamma_regularized_pair (a z : ℂ) :
-    scIncGamma a z=exp (-z)*regularizedHGFun {1} {1+a} z ∧ scIncGamma a z=regularizedHGFun {a} {1+a} (-z) := by
+    scIncGamma a z=exp (-z)*regularizedHGFun {1} {1+a} z ∧
+        scIncGamma a z=regularizedHGFun {a} {1+a} (-z) := by
   constructor
   · simp [scIncGamma, add_comm]
   · have h := regularizedConfluent_kummer_transform a (1+a) (-z)
@@ -278,7 +285,8 @@ theorem scIncGamma_regularized_pair (a z : ℂ) :
 (-z)*kummerU (1-a) (1-a) z ∧ upperIncGamma a z=z^a*exp (-z)*kummerU 1 (1+a) z`. -/
 @[dlmf 8.5.E3]
 theorem upperIncGamma_kummerU_pair (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
-    upperIncGamma a z=exp (-z)*kummerU (1-a) (1-a) z ∧ upperIncGamma a z=z^a*exp (-z)*kummerU 1 (1+a) z := by
+    upperIncGamma a z=exp (-z)*kummerU (1-a) (1-a) z ∧
+        upperIncGamma a z=z^a*exp (-z)*kummerU 1 (1+a) z := by
   constructor
   · rfl
   · simpa [add_comm] using upperIncGamma_eq_cpow_mul_kummerU a hz
@@ -348,11 +356,13 @@ theorem upperIncGammaOnLog_half (w : ℂ) :
     rw [lowerIncGammaOnLog,Complex.exp_log (Complex.exp_ne_zero _)]
     rw [show exp ((1/2:ℂ)*log (exp w))=(exp w)^(1/2:ℂ) by
       rw [cpow_def_of_ne_zero (Complex.exp_ne_zero _)]; congr 1; ring]
-    rw [mul_assoc,← normIncGammaPContinued,normIncGammaPContinued_eq Complex.one_div_two_ne_neg_natCast,normIncGammaP]
+    rw [mul_assoc, ← normIncGammaPContinued,
+        normIncGammaPContinued_eq Complex.one_div_two_ne_neg_natCast, normIncGammaP]
     rw [Complex.Gamma_one_half_eq_sqrt]
     field_simp
   rw [lowerIncGammaOnLog_half] at hl
-  have hc := lowerIncGamma_add_upperIncGamma Complex.one_div_two_ne_neg_natCast (Complex.exp_ne_zero w)
+  have hc := lowerIncGamma_add_upperIncGamma Complex.one_div_two_ne_neg_natCast
+      (Complex.exp_ne_zero w)
   rw [Complex.Gamma_one_half_eq_sqrt] at hc
   rw [upperIncGammaOnLog,hi]
   simp only [erfc]
@@ -380,7 +390,8 @@ theorem erfc_upperIncGammaOnLog_square {z : ℂ} (hz : z ≠ 0) :
 (2*log z)`. -/
 @[dlmf 7.11.E5]
 theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
-    erfc z=exp (-z^2)/Real.sqrt π*kummerUOnLog (1/2) (1/2) (2*log z) ∧ erfc z=z/Real.sqrt π*exp (-z^2)*kummerUOnLog 1 (3/2) (2*log z) := by
+    erfc z=exp (-z^2)/Real.sqrt π*kummerUOnLog (1/2) (1/2) (2*log z) ∧
+        erfc z=z/Real.sqrt π*exp (-z^2)*kummerUOnLog 1 (3/2) (2*log z) := by
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hGm : Gamma (-(1/2):ℂ)= -2*(Real.sqrt π:ℂ) := by
     have h := Gamma_add_one (-(1/2):ℂ) (by norm_num)
@@ -388,14 +399,17 @@ theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
     linear_combination 2*h
   have he : exp (2*log z)=z^2 := by
     rw [show (2:ℂ)*log z=((2:ℕ):ℂ)*log z by norm_num,Complex.exp_nat_mul,Complex.exp_log hz]
-  have hp : exp ((1/2:ℂ)*(2*log z))=z := by rw [show (1/2:ℂ)*(2*log z)=log z by ring,Complex.exp_log hz]
+  have hp : exp ((1/2:ℂ)*(2*log z))=z := by
+                                           rw [show (1/2:ℂ)*(2*log z)=log z
+                                             by ring, Complex.exp_log hz]
   have hm : exp ((-(1/2):ℂ)*(2*log z))=z⁻¹ := by
     rw [show (-(1/2):ℂ)*(2*log z)= -log z by ring,Complex.exp_neg,Complex.exp_log hz]
   have hhalf : kummerUOnLog (1/2) (1/2) (2*log z)=
       (Real.sqrt π:ℂ)*exp (z^2)*erfc z := by
     unfold kummerUOnLog
     norm_num only
-    rw [he,hp,kummerM_self Complex.one_div_two_ne_neg_natCast,Gamma_one,hGm,Complex.Gamma_one_half_eq_sqrt,
+    rw [he, hp, kummerM_self Complex.one_div_two_ne_neg_natCast, Gamma_one, hGm,
+        Complex.Gamma_one_half_eq_sqrt,
       kummerM_kummer_transform Complex.three_div_two_ne_neg_natCast]
     norm_num only
     rw [kummerM_erf hz]
@@ -406,7 +420,8 @@ theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
       kummerUOnLog (1/2) (1/2) (2*log z)/z := by
     unfold kummerUOnLog
     norm_num only
-    rw [he,hp,hm,Gamma_one,hGm,Complex.Gamma_one_half_eq_sqrt,kummerM_self Complex.one_div_two_ne_neg_natCast]
+    rw [he, hp, hm, Gamma_one, hGm, Complex.Gamma_one_half_eq_sqrt,
+        kummerM_self Complex.one_div_two_ne_neg_natCast]
     field_simp
     ring
   have hexp : exp (-z^2)*exp (z^2)=1 := by rw [← Complex.exp_add]; simp

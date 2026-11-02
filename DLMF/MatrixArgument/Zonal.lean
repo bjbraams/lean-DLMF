@@ -306,7 +306,8 @@ def HasContinuousCoeffs {G σ : Type*} [TopologicalSpace G] (F : G → MvPolynom
 section CoeffCont
 variable {G σ : Type*} [TopologicalSpace G]
 
-/-- Identity under the stated parameter and domain assumptions: `HasContinuousCoeffs (fun _ : G => p)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`HasContinuousCoeffs (fun _ : G => p)`. -/
 theorem HasContinuousCoeffs.const (p : MvPolynomial σ ℝ) : HasContinuousCoeffs (fun _ : G => p) :=
   fun _ => continuous_const
 
@@ -321,16 +322,16 @@ theorem HasContinuousCoeffs.C {f : G → ℝ} (hf : Continuous f) :
   · exact hf
   · exact continuous_const
 
-/-- Identity under the stated parameter and domain assumptions: `HasContinuousCoeffs (fun g => F₁ g + F₂
-g)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`HasContinuousCoeffs (fun g => F₁ g + F₂ g)`. -/
 theorem HasContinuousCoeffs.add {F₁ F₂ : G → MvPolynomial σ ℝ} (h₁ : HasContinuousCoeffs F₁)
     (h₂ : HasContinuousCoeffs F₂) : HasContinuousCoeffs (fun g => F₁ g + F₂ g) := fun α => by
   have : ∀ g, (F₁ g + F₂ g).coeff α = (F₁ g).coeff α + (F₂ g).coeff α :=
     fun g => (MvPolynomial.lcoeff ℝ α).map_add _ _
   simp only [this]; exact (h₁ α).add (h₂ α)
 
-/-- Identity under the stated parameter and domain assumptions: `HasContinuousCoeffs (fun g => F₁ g * F₂
-g)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`HasContinuousCoeffs (fun g => F₁ g * F₂ g)`. -/
 theorem HasContinuousCoeffs.mul {F₁ F₂ : G → MvPolynomial σ ℝ} (h₁ : HasContinuousCoeffs F₁)
     (h₂ : HasContinuousCoeffs F₂) : HasContinuousCoeffs (fun g => F₁ g * F₂ g) := fun α => by
   classical
@@ -339,7 +340,8 @@ theorem HasContinuousCoeffs.mul {F₁ F₂ : G → MvPolynomial σ ℝ} (h₁ : 
 
 /-- Formula under the stated hypotheses: `HasContinuousCoeffs (fun g => ∑ i ∈ s, F i g)`. -/
 theorem HasContinuousCoeffs.sum {ι : Type*} (s : Finset ι) {F : ι → G → MvPolynomial σ ℝ}
-    (h : ∀ i ∈ s, HasContinuousCoeffs (F i)) : HasContinuousCoeffs (fun g => ∑ i ∈ s, F i g) := fun α => by
+    (h : ∀ i ∈ s, HasContinuousCoeffs (F i)) : HasContinuousCoeffs
+        (fun g => ∑ i ∈ s, F i g) := fun α => by
   simp only [MvPolynomial.coeff_sum]
   exact continuous_finsetSum _ fun i hi => h i hi α
 
@@ -370,8 +372,8 @@ theorem HasContinuousCoeffs.det {n : Type*} [Fintype n] [DecidableEq n]
   exact HasContinuousCoeffs.sum _ fun σ' _ => (HasContinuousCoeffs.const _).mul
     (HasContinuousCoeffs.prod _ fun i _ => h _ _)
 
-/-- Identity under the stated parameter and domain assumptions: `HasContinuousCoeffs fun g => (A g * B
-g) a b`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`HasContinuousCoeffs fun g => (A g * B g) a b`. -/
 theorem HasContinuousCoeffs.matMul {n : Type*} [Fintype n]
     {A B : G → Matrix n n (MvPolynomial σ ℝ)} (hA : ∀ a b, HasContinuousCoeffs fun g => A g a b)
     (hB : ∀ a b, HasContinuousCoeffs fun g => B g a b) (a b : n) :
@@ -422,8 +424,9 @@ private lemma map_leadingMinor {R S : Type*} [CommRing R] [CommRing S] (f : R �
   · rw [RingHom.map_det]; rfl
   · exact map_zero f
 
-/-- Identity under the stated parameter and domain assumptions: `eval t (zonalIntegrandPoly κ H) = ∏ j
-: Fin m, leadingMinor (H * diagonal t * Hᵀ) (j.1 + 1) ^ (κ j - nextPart κ j)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`eval t (zonalIntegrandPoly κ H) = ∏ j : Fin m, leadingMinor (H * diagonal t * Hᵀ) (j.1 + 1) ^ (κ j
+- nextPart κ j)`. -/
 private lemma eval_zonalIntegrandPoly {m : ℕ} (κ : Fin m → ℕ) (H : Matrix (Fin m) (Fin m) ℝ)
     (t : Fin m → ℝ) : eval t (zonalIntegrandPoly κ H) =
       ∏ j : Fin m, leadingMinor (H * diagonal t * Hᵀ) (j.1 + 1) ^ (κ j - nextPart κ j) := by
@@ -449,7 +452,8 @@ private lemma coeffCont_zonalIntegrandPoly {m : ℕ} (κ : Fin m → ℕ) :
     have hHc : ∀ a b, HasContinuousCoeffs fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
         ((H : Matrix (Fin m) (Fin m) ℝ).map
           (MvPolynomial.C : ℝ →+* MvPolynomial (Fin m) ℝ)) a b := fun a b =>
-      HasContinuousCoeffs.C ((continuous_apply b).comp ((continuous_apply a).comp continuous_subtype_val))
+      HasContinuousCoeffs.C
+          ((continuous_apply b).comp ((continuous_apply a).comp continuous_subtype_val))
     have hHt : ∀ a b, HasContinuousCoeffs fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
         ((H : Matrix (Fin m) (Fin m) ℝ).map
           (MvPolynomial.C : ℝ →+* MvPolynomial (Fin m) ℝ))ᵀ a b := fun a b => hHc b a
@@ -458,7 +462,8 @@ private lemma coeffCont_zonalIntegrandPoly {m : ℕ} (κ : Fin m → ℕ) :
     exact HasContinuousCoeffs.matMul (A := fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
       (H : Matrix (Fin m) (Fin m) ℝ).map (MvPolynomial.C : ℝ →+* MvPolynomial (Fin m) ℝ))
       (B := fun _ => diagonal (fun i => (X i : MvPolynomial (Fin m) ℝ))) hHc
-      (fun a b => HasContinuousCoeffs.const (diagonal (fun i => (X i : MvPolynomial (Fin m) ℝ)) a b))
+      (fun a b => HasContinuousCoeffs.const
+          (diagonal (fun i => (X i : MvPolynomial (Fin m) ℝ)) a b))
       a b
   unfold zonalIntegrandPoly
   refine HasContinuousCoeffs.prod _ fun j _ => HasContinuousCoeffs.pow ?_ _
@@ -467,8 +472,8 @@ private lemma coeffCont_zonalIntegrandPoly {m : ℕ} (κ : Fin m → ℕ) :
   simp only [hj, dite_true]
   exact HasContinuousCoeffs.det fun a b => hent _ _
 
-/-- The stated relation follows from the given hypotheses: `(zonalIntegrandPoly κ H).IsHomogeneous (∑
-j, κ j)`. -/
+/-- The stated relation follows from the given hypotheses:
+`(zonalIntegrandPoly κ H).IsHomogeneous (∑ j, κ j)`. -/
 private lemma isHomogeneous_zonalIntegrandPoly {m : ℕ} (κ : Fin m → ℕ) (hκ : Antitone κ)
     (H : Matrix (Fin m) (Fin m) ℝ) : (zonalIntegrandPoly κ H).IsHomogeneous (∑ j, κ j) := by
   have hC : ∀ a b, ((H.map (MvPolynomial.C : ℝ →+* MvPolynomial (Fin m) ℝ)) a b).IsHomogeneous 0 :=
@@ -492,7 +497,8 @@ private lemma isHomogeneous_zonalIntegrandPoly {m : ℕ} (κ : Fin m → ℕ) (h
   have hj : j.1 + 1 ≤ m := j.2
   unfold leadingMinor
   simp only [hj, dite_true]
-  have := isHomogeneous_det_of_isHomogeneous_one (M := (diagonalConjPoly H).submatrix (Fin.castLE hj) (Fin.castLE hj))
+  have := isHomogeneous_det_of_isHomogeneous_one
+      (M := (diagonalConjPoly H).submatrix (Fin.castLE hj) (Fin.castLE hj))
     fun a b => hent _ _
   simpa using this
 
@@ -566,7 +572,8 @@ private lemma zonalPolynomial_diagonal_comp_perm {m : ℕ} (κ : Fin m → ℕ) 
   exact h
 
 /-- Reduction of a symmetric matrix to the diagonal matrix of its eigenvalues. -/
-private lemma zonalPolynomial_eq_diagonal_eigenvalues {m : ℕ} (κ : Fin m → ℕ) {T : Matrix (Fin m) (Fin m) ℝ}
+private lemma zonalPolynomial_eq_diagonal_eigenvalues {m : ℕ} (κ : Fin m → ℕ)
+    {T : Matrix (Fin m) (Fin m) ℝ}
     (hT : T.IsHermitian) : zonalPolynomial κ T = zonalPolynomial κ (diagonal hT.eigenvalues) := by
   set U := hT.eigenvectorUnitary
   have h := hT.spectral_theorem
@@ -663,12 +670,14 @@ private lemma measurable_etr_neg_mul_det_cpow {m : ℕ} (T : Matrix (Fin m) (Fin
     (continuous_const.matrix_mul continuous_subtype_val).neg.matrix_trace.measurable
 
 /-- The inner integral of 35.4.8 at a fixed `H ∈ O(m)`. -/
-private lemma hasIntegralOn_laplace_leadingMinorPowProd_orthogonal_conj {m : ℕ} (κ : Fin m → ℕ) (hκ : Antitone κ)
+private lemma hasIntegralOn_laplace_leadingMinorPowProd_orthogonal_conj {m : ℕ} (κ : Fin m → ℕ)
+    (hκ : Antitone κ)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re)
     (H : Matrix.orthogonalGroup (Fin m) ℝ) :
     HasIntegralOn (posDefCone m) (fun X => (etr (-(T * X)) : ℂ) *
       ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
-        (leadingMinorPowProd κ ((H : Matrix (Fin m) (Fin m) ℝ) * X * (H : Matrix (Fin m) (Fin m) ℝ)ᵀ) : ℂ))
+        (leadingMinorPowProd κ
+            ((H : Matrix (Fin m) (Fin m) ℝ) * X * (H : Matrix (Fin m) (Fin m) ℝ)ᵀ) : ℂ))
       (multivariateGammaVec m (fun j => a + κ j) * (T.det : ℂ) ^ (-a) *
         (leadingMinorPowProd κ ((H : Matrix (Fin m) (Fin m) ℝ) * T⁻¹ *
           (H : Matrix (Fin m) (Fin m) ℝ)ᵀ) : ℂ)) := by
@@ -687,13 +696,15 @@ private lemma hasIntegralOn_laplace_leadingMinorPowProd_orthogonal_conj {m : ℕ
   have hF : Measurable fun X : SymMatrix m => (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
       (leadingMinorPowProd κ (K * (X : Matrix (Fin m) (Fin m) ℝ) * Kᵀ) : ℂ) :=
-    (measurable_etr_neg_mul_det_cpow T _).mul (Complex.measurable_ofReal.comp ((continuous_leadingMinorPowProd κ).comp
+    (measurable_etr_neg_mul_det_cpow T _).mul
+        (Complex.measurable_ofReal.comp ((continuous_leadingMinorPowProd κ).comp
       ((continuous_const.matrix_mul continuous_subtype_val).matrix_mul
         continuous_const)).measurable)
   have h2 : HasIntegralOn (posDefCone m) (fun Y => (etr (-(T * ((C : Matrix (Fin m) (Fin m) ℝ) *
       Y * (C : Matrix (Fin m) (Fin m) ℝ)ᵀ))) : ℂ) * ((((C : Matrix (Fin m) (Fin m) ℝ) * Y *
         (C : Matrix (Fin m) (Fin m) ℝ)ᵀ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
-      (leadingMinorPowProd κ (K * ((C : Matrix (Fin m) (Fin m) ℝ) * Y * (C : Matrix (Fin m) (Fin m) ℝ)ᵀ) *
+      (leadingMinorPowProd κ
+          (K * ((C : Matrix (Fin m) (Fin m) ℝ) * Y * (C : Matrix (Fin m) (Fin m) ℝ)ᵀ) *
         Kᵀ) : ℂ))
       (multivariateGammaVec m (fun j => a + κ j) * ((K * T * Kᵀ).det : ℂ) ^ (-a) *
         (leadingMinorPowProd κ (K * T * Kᵀ)⁻¹ : ℂ)) := by

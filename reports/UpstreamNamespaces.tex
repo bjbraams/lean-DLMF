@@ -1,0 +1,211 @@
+% UpstreamNamespaces.tex -- namespaces of special functions in Mathlib and TauCeti,
+% and the namespace policy of lean-DLMF.
+% Compile with LuaLaTeX: latexmk -lualatex UpstreamNamespaces.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage{leanreport}
+\hypersetup{pdftitle={lean-DLMF: namespaces of special functions upstream, 2026-11-02}}
+
+\begin{document}
+
+\title{Namespaces of Special Functions\\in Mathlib and TauCeti}
+\author{Bastiaan J. Braams}
+\date{2026-11-02}
+\maketitle
+
+\begin{abstract}
+  Many functions of the NIST Digital Library of Mathematical Functions (DLMF) already exist
+  in Mathlib or TauCeti, and \texttt{lean-DLMF} either uses them directly or proves bridge
+  theorems to them. This report surveys the namespaces in which Mathlib and TauCeti place
+  special functions, polynomial families and number-theoretic functions. Mathlib follows a
+  consistent rule: a declaration lives in the namespace of the object it is defined on or
+  of the structure it belongs to. TauCeti mixes a \lean{TauCeti} prefix with bare Mathlib
+  namespaces. Neither library has a \lean{SpecialFunctions} namespace. The report closes with
+  the namespace policy of \texttt{lean-DLMF} and its consequences for bridges.
+\end{abstract}
+
+\section{Scope and method}
+
+The survey covers Mathlib at revision \texttt{911003dd6d} and TauCeti at revision
+\texttt{a049b4264d}, the versions pinned in \file{lake-manifest.json} of \texttt{lean-DLMF}
+(Lean \texttt{v4.36.0-rc1}). Public definitions were collected from
+\file{Mathlib/Analysis/SpecialFunctions}, \file{Mathlib/NumberTheory} (L-series, modular
+forms, Bernoulli numbers, harmonic numbers, arithmetic functions, Dirichlet characters),
+\file{Mathlib/RingTheory/Polynomial}, \file{Mathlib/Combinatorics/Enumerative}, and from
+\file{TauCeti/Analysis/SpecialFunctions} and \file{TauCeti/NumberTheory}. The full name of
+each definition was computed from the enclosing \texttt{namespace} blocks.
+
+A preliminary remark: \file{Analysis/SpecialFunctions} is a directory, so it appears in
+module names such as \module{Mathlib.Analysis.SpecialFunctions.Gamma.Basic}, but no
+declaration in either library is in a namespace called \lean{SpecialFunctions}. Module paths
+and declaration names are independent in Lean, and Mathlib chooses them independently.
+
+\section{Mathlib}
+
+\subsection{Analytic functions: the namespace of the domain}
+
+A function of a real or complex variable lives in \lean{Real} or \lean{Complex}. When both
+versions exist, each has its own namespace, and the real version is usually derived from the
+complex one.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}l>{\RaggedRight\arraybackslash}X@{}}
+  \toprule
+  Namespace & Examples \\
+  \midrule
+  \lean{Complex} & \lean{Complex.Gamma}, \lean{Complex.digamma}, \lean{Complex.betaIntegral},
+    \lean{Complex.GammaSeq}, \lean{Complex.Gammaℝ}, \lean{Complex.Gammaℂ},
+    \lean{Complex.besselJ}, \lean{Complex.log}, \lean{Complex.cpow}, \lean{Complex.arctan},
+    \lean{Complex.sinh}, \lean{Complex.regularizedHGFun} \\
+  \lean{Real} & \lean{Real.Gamma}, \lean{Real.GammaSeq}, \lean{Real.doublingGamma},
+    \lean{Real.arsinh}, \lean{Real.arcosh}, \lean{Real.artanh}, \lean{Real.logb},
+    \lean{Real.arctan}, \lean{Real.eulerMascheroniConstant}, \lean{Real.binEntropy},
+    \lean{Real.sigmoid} \\
+  \lean{NNReal} & \lean{NNReal.agm} (arithmetic--geometric mean) \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Functions at the root}
+
+Several classical functions have no namespace at all. Most of them come from number theory,
+where Mathlib treats the function as a mathematical object in its own right:
+\lean{riemannZeta}, \lean{completedRiemannZeta}, \lean{hardyZ}, \lean{riemannZetaZeros},
+\lean{jacobiTheta}, \lean{jacobiTheta₂}, \lean{ordinaryHypergeometric} (the Gauss series
+$_2F_1$), \lean{bernoulli} (the Bernoulli numbers), \lean{bernoulliFun},
+\lean{periodizedBernoulli}, \lean{harmonic}, \lean{catalan}, \lean{legendreSym},
+\lean{jacobiSym} and \lean{gaussSum}.
+
+\subsection{Functions attached to a structure or a theory}
+
+When a function depends on a structure, it lives in the namespace of that structure:
+\begin{itemize}
+  \item \lean{PeriodPair.weierstrassP}: the Weierstrass $\wp$ function of a lattice given by a
+    pair of periods;
+  \item \lean{HurwitzZeta.hurwitzZeta} and \lean{HurwitzZeta.expZeta}, written as
+    \lean{hurwitzZeta} after \texttt{open HurwitzZeta};
+  \item \lean{ModularForm.eta} (Dedekind's $\eta$) and the \lean{EisensteinSeries} namespace;
+  \item \lean{LSeries}, \lean{DirichletCharacter.LFunction}, \lean{ZMod.LFunction};
+  \item \lean{Stirling.stirlingSeq}.
+\end{itemize}
+
+\subsection{Polynomial families}
+
+Orthogonal and Appell polynomials are elements of a polynomial ring and live in
+\lean{Polynomial}: \lean{Polynomial.Chebyshev.T} and \lean{Polynomial.Chebyshev.U},
+\lean{Polynomial.hermite} (probabilists' normalization $\mathit{He}_n$) and
+\lean{Polynomial.bernoulli}. The classical Jacobi, Gegenbauer and Laguerre families are not
+in Mathlib.
+
+\subsection{Number-theoretic and combinatorial functions}
+
+These live in the namespace of the type they act on, or of their algebraic structure.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}l>{\RaggedRight\arraybackslash}X@{}}
+  \toprule
+  Namespace & Examples \\
+  \midrule
+  \lean{Nat} & \lean{Nat.totient}, \lean{Nat.primeCounting}, \lean{Nat.fib},
+    \lean{Nat.centralBinom}, the Stirling numbers of both kinds \\
+  \lean{ArithmeticFunction} & \lean{ArithmeticFunction.moebius},
+    \lean{ArithmeticFunction.sigma}, \lean{ArithmeticFunction.vonMangoldt},
+    \lean{ArithmeticFunction.liouville}, \lean{ArithmeticFunction.carmichael}; Dirichlet
+    convolution is the ring multiplication \\
+  \lean{Chebyshev} & \lean{Chebyshev.psi}, \lean{Chebyshev.theta} \\
+  \lean{DirichletCharacter} & \lean{DirichletCharacter}, its conductor and primitivity \\
+  \lean{Multiset} & \lean{Multiset.bell} \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\section{TauCeti}
+
+TauCeti's own guideline is to put new material under a \lean{TauCeti} prefix, so that it
+cannot collide with Mathlib. In practice three styles occur side by side.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}l>{\RaggedRight\arraybackslash}X@{}}
+  \toprule
+  Style & Examples \\
+  \midrule
+  \lean{TauCeti.} prefix & \lean{TauCeti.regularizedIncompleteBeta},
+    \lean{TauCeti.inverseRegularizedIncompleteBeta}, \lean{TauCeti.lowerIncompleteGamma},
+    \lean{TauCeti.regularizedGamma}, \lean{TauCeti.multivariateGamma},
+    \lean{TauCeti.hermiteFunction}, \lean{TauCeti.chebyshevTHilbertBasis},
+    \lean{TauCeti.hurwitzClassNumber}, \lean{TauCeti.BinaryQuadraticForm},
+    \lean{TauCeti.Supernatural} \\
+  \lean{TauCeti.Real.} prefix & \lean{TauCeti.Real.erf}, \lean{TauCeti.Real.erfc},
+    \lean{TauCeti.Real.logIntegral} \\
+  bare Mathlib namespace & \lean{Real.besselI}, \lean{Real.owensT}, \lean{Real.erfInv},
+    \lean{DirichletCharacter.gaussSumOfPrimitiveRoot},
+    \lean{DirichletCharacter.generalizedBernoulli}, \lean{QuadraticForm.finiteHasse},
+    \lean{MonoidHom.cpowCharacter} \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The error function shows the mixture within one file: \lean{TauCeti.Real.erf} carries the
+prefix, while its inverse \lean{Real.erfInv} does not. Declarations of the third style can
+collide with a later Mathlib declaration of the same name, which is the situation the prefix
+is meant to prevent. Most of TauCeti's number theory (binary quadratic forms, class numbers,
+quadratic forms over number fields) uses the prefix; additions to existing Mathlib theories,
+such as Dirichlet characters and quadratic forms, often do not.
+
+\section{Consequences for \texttt{lean-DLMF}}
+
+\subsection{The namespace policy}
+
+The policy recorded in \file{AGENTS.md} on 2026-11-02 is the collision-free form of
+TauCeti's guideline:
+\begin{itemize}
+  \item every declaration under \file{DLMF/} lives in \lean{DLMF.<Area>}, with real-variable
+    forms in the \lean{Real} sub-namespace of the area, for example
+    \lean{DLMF.Gamma.Real.digamma} beside Mathlib's \lean{Complex.digamma}; the only exception
+    is a dot-notation lemma whose namespace is fixed by the head symbol of its conclusion;
+  \item results in \file{DLMFMathlib/} extend Mathlib APIs, are not specific to DLMF, and use
+    the Mathlib namespace of that API with Mathlib-style names, as candidates for
+    upstreaming.
+\end{itemize}
+To bring the code into line, the Gamma area (112 declarations formerly in \lean{Real},
+\lean{Complex} and \lean{MeasureTheory}) was moved into \lean{DLMF.Gamma} and
+\lean{DLMF.Gamma.Real}, one root-level theorem was moved into \lean{DLMF.Hypergeometric}, and
+two families of abbreviated root-level helpers in \file{DLMFMathlib/} were given the
+descriptive namespaces \lean{StieltjesRemainder} and \lean{DoubleZeroSqrt}. All renames are
+recorded in \file{reports/RenameMap20261101.tsv}.
+
+\subsection{Functions that exist upstream}
+
+When Mathlib or TauCeti already has a DLMF function, one of three patterns applies.
+\begin{enumerate}
+  \item The upstream definition matches DLMF in normalization, domain and branch. The project
+    uses it directly, defines nothing locally, and records each DLMF item it covers with a
+    checked pointer \texttt{dlmf\_upstream REF decl "relation: comment"}. Examples are
+    \lean{Complex.besselJ}, \lean{riemannZeta}, \lean{PeriodPair.weierstrassP} and
+    \lean{Complex.digamma}. There are about 1{,}000 such pointers.
+  \item The upstream definition differs: real only, a series instead of the continuation,
+    another normalization or another totalization. The project defines the DLMF function in
+    \lean{DLMF.<Area>} and proves a bridge in the foundational layer. Examples are
+    \lean{DLMF.Confluent.erf_ofReal} (to \lean{TauCeti.Real.erf}),
+    \lean{DLMF.Bessel.besselI_ofReal} (to \lean{Real.besselI}), the Jacobi theta functions
+    $\theta_j(z\,|\,\tau)$ defined from \lean{jacobiTheta₂}, and
+    \lean{DLMF.Statistical.normIncBetaI_ofReal} (to
+    \lean{TauCeti.regularizedIncompleteBeta}). The logarithmic integral is bridged by
+    $\operatorname{li}(x) = \operatorname{li}(2) + \operatorname{Li}(x)$ for $x > 1$, since
+    \lean{TauCeti.Real.logIntegral} integrates from $2$ rather than taking DLMF's principal
+    value from $0$.
+  \item A thin wrapper \texttt{def X := upstream} is used only when a \texttt{@[dlmf]} tag
+    needs a home that the upstream declaration cannot give, as for
+    \lean{DLMF.Confluent.Real.invErf}.
+\end{enumerate}
+
+\subsection{Stability of bridges}
+
+Bridges and pointers name the upstream declaration exactly as it is, so their statements
+inherit the mixture described above: \lean{TauCeti.Real.erf}, \lean{Real.besselI} and
+\lean{PeriodPair.weierstrassP} appear side by side. When TauCeti material moves into
+Mathlib, its namespace is likely to change (\lean{TauCeti.Real.erf} would become
+\lean{Real.erf}). The affected pointers and bridges then fail to compile, because
+\texttt{dlmf\_upstream} checks that its target exists. This is the intended behaviour: the
+build names every place that needs updating, and no pointer silently goes stale.
+
+\end{document}

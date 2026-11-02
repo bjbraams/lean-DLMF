@@ -138,13 +138,16 @@ theorem laplaceTransform_integrableOn_analyticOnNhd {m : ℕ} (f : Matrix (Fin m
   · intro Z _ hZ; exact integrableOn_exp_neg_trace_mul_of_lt_etr hf hX₀ hbound hZ
   · let R := fun z : TauCeti.upperTriangle m → ℂ =>
       (TauCeti.symmetricCoordinates m).symm (fun ij => (z ij).re) - ⟨X₀, hX₀.isHermitian⟩
-    have hR z : (R z : Matrix (Fin m) (Fin m) ℝ) = (complexSymmetricOfCoords z).map Complex.re - X₀ := by
+    have hR z : (R z : Matrix (Fin m) (Fin m) ℝ) =
+        (complexSymmetricOfCoords z).map Complex.re - X₀ := by
       ext i j; by_cases hij : i ≤ j
-      · simp [R, complexSymmetricOfCoords, hij, TauCeti.coe_symmetricCoordinates_symm_apply_of_le m _ hij]
+      · simp [R, complexSymmetricOfCoords, hij,
+            TauCeti.coe_symmetricCoordinates_symm_apply_of_le m _ hij]
       · simp [R, complexSymmetricOfCoords, hij,
           TauCeti.coe_symmetricCoordinates_symm_apply_of_ge m _ (le_of_not_ge hij)]
     have hC : Continuous R := ((TauCeti.symmetricCoordinates m).symm.continuous.comp
-      (continuous_pi fun ij => Complex.continuous_re.comp (continuous_apply ij))).sub continuous_const
+      (continuous_pi fun ij => Complex.continuous_re.comp (continuous_apply ij))).sub
+          continuous_const
     have hU : IsOpen {z | ((complexSymmetricOfCoords z).map Complex.re - X₀).PosDef} := by
       have h := (TauCeti.isOpen_setOfPred_posDefMatrix m).preimage hC
       change IsOpen {z | (R z : Matrix (Fin m) (Fin m) ℝ).PosDef} at h
@@ -152,7 +155,8 @@ theorem laplaceTransform_integrableOn_analyticOnNhd {m : ℕ} (f : Matrix (Fin m
     refine DifferentiableOn.analyticOnNhd_of_finiteDimensional ?_ hU
     change DifferentiableOn ℂ (fun z => ∫ X : SymMatrix m,
       Complex.exp (-(complexSymmetricOfCoords z * (X : Matrix (Fin m) (Fin m) ℝ).map
-        (fun x : ℝ => (x : ℂ))).trace) * f X ∂((TauCeti.symmetricLebesgue m).restrict (posDefCone m))) _
+        (fun x : ℝ => (x : ℂ))).trace) *
+            f X ∂((TauCeti.symmetricLebesgue m).restrict (posDefCone m))) _
     apply Complex.differentiableOn_integral_of_locally_dominated hU
     · intro z _; exact (continuous_exp_neg_trace_mul _).aestronglyMeasurable.mul hf
     · refine Filter.Eventually.of_forall fun X => Differentiable.differentiableOn ?_
@@ -171,11 +175,13 @@ theorem laplaceTransform_integrableOn_analyticOnNhd {m : ℕ} (f : Matrix (Fin m
       have htrace : 0 ≤ ((complexSymmetricOfCoords y).map Complex.re *
           (X : Matrix (Fin m) (Fin m) ℝ)).trace := by
         rw [← hX.posSemidef.trace_sqrt_mul_mul_sqrt]
-        have hsq := (Matrix.LE.le.posSemidef (CFC.sqrt_nonneg (X : Matrix (Fin m) (Fin m) ℝ))).isHermitian
+        have hsq := (Matrix.LE.le.posSemidef
+            (CFC.sqrt_nonneg (X : Matrix (Fin m) (Fin m) ℝ))).isHermitian
         simpa only [hsq.eq] using (hY.posSemidef.mul_mul_conjTranspose_same
           (CFC.sqrt (X : Matrix (Fin m) (Fin m) ℝ))).trace_nonneg
       rw [norm_mul, norm_exp_neg_trace_mul, etr, Matrix.trace_neg]
-      apply (mul_le_of_le_one_left (norm_nonneg _) (Real.exp_le_one_iff.mpr (neg_nonpos.mpr htrace))).trans
+      apply (mul_le_of_le_one_left (norm_nonneg _)
+          (Real.exp_le_one_iff.mpr (neg_nonpos.mpr htrace))).trans
       simpa only [etr, Matrix.trace_neg] using (hbound X hX).le
 
 /-- DLMF 35.2.2 (**corrected**): the inversion formula. Let `f` satisfy the bound of
@@ -231,9 +237,11 @@ theorem laplaceTransform_matrixConvolution {m : ℕ} (f₁ f₂ : Matrix (Fin m)
   have hg₁m : Measurable g₁ := (hem.mul (hf₁.comp measurable_subtype_coe)).indicator hmc
   have hg₂m : Measurable g₂ := (hem.mul (hf₂.comp measurable_subtype_coe)).indicator hmc
   have hg₁ : Integrable g₁ Λ := (integrable_indicator_iff hmc).mpr
-    (integrableOn_exp_neg_trace_mul_of_lt_etr (hf₁.comp measurable_subtype_coe).aestronglyMeasurable hX₀ hb₁ hZX)
+    (integrableOn_exp_neg_trace_mul_of_lt_etr
+        (hf₁.comp measurable_subtype_coe).aestronglyMeasurable hX₀ hb₁ hZX)
   have hg₂ : Integrable g₂ Λ := (integrable_indicator_iff hmc).mpr
-    (integrableOn_exp_neg_trace_mul_of_lt_etr (hf₂.comp measurable_subtype_coe).aestronglyMeasurable hX₀ hb₂ hZX)
+    (integrableOn_exp_neg_trace_mul_of_lt_etr
+        (hf₂.comp measurable_subtype_coe).aestronglyMeasurable hX₀ hb₂ hZX)
   have hL : ∀ f : Matrix (Fin m) (Fin m) ℝ → ℂ, laplaceTransform f Z =
       ∫ X, (posDefCone m).indicator (fun X : SymMatrix m => e X * f X) X ∂Λ :=
     fun f => (integral_indicator hmc).symm

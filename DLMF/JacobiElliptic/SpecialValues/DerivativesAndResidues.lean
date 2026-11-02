@@ -61,7 +61,8 @@ private lemma hasDerivAt_of_add_eq_mul {f g : ℂ → ℂ} {c p g' : ℂ} (hfg :
   exact (hg'.comp_sub_const p p).const_mul c
 
 /-- The map `(fun w => (w - p) * f w)` tends to `(𝓝 c)` along `(𝓝[≠] p)`. -/
-private lemma tendsto_sub_mul_of_add_eq_mul_inv {f s : ℂ → ℂ} {c p : ℂ} (hfs : ∀ z, f (z + p) = c * (1 / s z))
+private lemma tendsto_sub_mul_of_add_eq_mul_inv {f s : ℂ → ℂ} {c p : ℂ}
+    (hfs : ∀ z, f (z + p) = c * (1 / s z))
     (hs : HasDerivAt s 1 0) (hs0 : s 0 = 0) :
     Tendsto (fun w => (w - p) * f w) (𝓝[≠] p) (𝓝 c) := by
   have h1 := hs.tendsto_slope_zero
@@ -87,7 +88,8 @@ private lemma tendsto_sub_mul_of_add_eq_mul_inv {f s : ℂ → ℂ} {c p : ℂ} 
 
 /-- Nonvanishing under the stated hypotheses: `jacobiLetterTheta q (jacobiZetak 0 k) (jacobiTauk
 k) ≠ 0`. -/
-theorem jacobiLetterTheta_jacobiZetak_zero_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) {q : JacobiLetter} (hq : q ≠ .s) :
+theorem jacobiLetterTheta_jacobiZetak_zero_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    {q : JacobiLetter} (hq : q ≠ .s) :
     jacobiLetterTheta q (jacobiZetak 0 k) (jacobiTauk k) ≠ 0 := by
   have : jacobiZetak 0 k = 0 := by simp [jacobiZetak]
   rw [this, jacobiLetterTheta_zero (jacobiTauk_im_pos hk)]
@@ -109,14 +111,16 @@ theorem jacobiSnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have hfg : ∀ z, jacobiSnk (z + (0)) k = 1 * jacobiSnk z k :=
       fun z => by rw [add_zero, one_mul]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiSnk (z + (compEllIntKk k)) k = 1 * jacobiCdk z k :=
       fun z => by
         rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiSnk_shift hk z).1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiCdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiSnk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
         ((k)⁻¹) * jacobiDck z k :=
@@ -124,7 +128,8 @@ theorem jacobiSnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
             z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiSnk_shift hk z).2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiDck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiSnk (z + (I * compEllIntKpk k)) k = ((k)⁻¹) * jacobiNsk z k :=
       fun z => by
@@ -133,7 +138,8 @@ theorem jacobiSnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiSnk (z + (I * compEllIntKpk k)) k = ((k)⁻¹) * (1 / jacobiSnk z k) := by
       intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiSnk w k) hfs
-      ((hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
       (by simp [jacobiSnk_zero hk])
     convert h using 2
@@ -143,7 +149,8 @@ theorem jacobiSnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiSnk_shift hk z).2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiSnk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
         -1 * jacobiSnk z k :=
@@ -153,7 +160,8 @@ theorem jacobiSnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
                 (jacobiSnk_shift hk z).2.2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiSnk (z + (2 * (I * compEllIntKpk k))) k = 1 * jacobiSnk z k :=
       fun z => by
@@ -161,7 +169,8 @@ theorem jacobiSnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiSnk_shift hk z).2.2.2.2.2]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
 
 /-- Table 22.5.1, row `cn`: the `z`-derivative of `cn(z, k)` at the regular
@@ -180,13 +189,15 @@ theorem jacobiCnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have hfg : ∀ z, jacobiCnk (z + (0)) k = 1 * jacobiCnk z k :=
       fun z => by rw [add_zero, one_mul]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiCnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiCnk (z + (compEllIntKk k)) k = (-jacobiComodulusk k) * jacobiSdk z k :=
       fun z => by
         rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiCnk_shift hk z).1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiCnk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
         (-(I * jacobiComodulusk k / k)) * jacobiNck z k :=
@@ -194,7 +205,8 @@ theorem jacobiCnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
             z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiCnk_shift hk z).2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiNck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiCnk (z + (I * compEllIntKpk k)) k = (-(I / k)) * jacobiDsk z k :=
       fun z => by
@@ -203,7 +215,8 @@ theorem jacobiCnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiCnk (z + (I * compEllIntKpk k)) k = (-(I / k)) * (1 / jacobiSdk z k) := by
       intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCnk w k) hfs
-      ((hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
       (by simp [jacobiSdk_zero hk])
     convert h using 2
@@ -214,7 +227,8 @@ theorem jacobiCnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiCnk_shift hk z).2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiCnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiCnk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
         1 * jacobiCnk z k :=
@@ -224,7 +238,8 @@ theorem jacobiCnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
                 (jacobiCnk_shift hk z).2.2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiCnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiCnk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiCnk z k :=
       fun z => by
@@ -232,7 +247,8 @@ theorem jacobiCnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiCnk_shift hk z).2.2.2.2.2]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiCnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
 
 /-- Table 22.5.1, row `dn`: the `z`-derivative of `dn(z, k)` at the regular
@@ -252,13 +268,15 @@ theorem jacobiDnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have hfg : ∀ z, jacobiDnk (z + (0)) k = 1 * jacobiDnk z k :=
       fun z => by rw [add_zero, one_mul]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiDnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
   · have hfg : ∀ z, jacobiDnk (z + (compEllIntKk k)) k = (jacobiComodulusk k) * jacobiNdk z k :=
       fun z => by
         rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiDnk_shift hk z).1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiNdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
   · have hfg : ∀ z, jacobiDnk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
         (I * jacobiComodulusk k) * jacobiSck z k :=
@@ -266,7 +284,8 @@ theorem jacobiDnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
             z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiDnk_shift hk z).2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
   · have hfg : ∀ z, jacobiDnk (z + (I * compEllIntKpk k)) k = (-I) * jacobiCsk z k :=
       fun z => by
@@ -275,7 +294,8 @@ theorem jacobiDnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiDnk (z + (I * compEllIntKpk k)) k = (-I) * (1 / jacobiSck z k) := by
       intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDnk w k) hfs
-      ((hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
       (by simp [jacobiSck_zero hk])
     convert h using 2
@@ -285,7 +305,8 @@ theorem jacobiDnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiDnk_shift hk z).2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiDnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
   · have hfg : ∀ z, jacobiDnk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
         -1 * jacobiDnk z k :=
@@ -295,7 +316,8 @@ theorem jacobiDnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
                 (jacobiDnk_shift hk z).2.2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiDnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
   · have hfg : ∀ z, jacobiDnk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiDnk z k :=
       fun z => by
@@ -303,7 +325,8 @@ theorem jacobiDnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiDnk_shift hk z).2.2.2.2.2]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiDnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
 
 /-- Table 22.5.1, row `cd`: the `z`-derivative of `cd(z, k)` at the regular
@@ -323,14 +346,16 @@ theorem jacobiCdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have hfg : ∀ z, jacobiCdk (z + (0)) k = 1 * jacobiCdk z k :=
       fun z => by rw [add_zero, one_mul]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiCdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiCdk (z + (compEllIntKk k)) k = -1 * jacobiSnk z k :=
       fun z => by
         rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiCdk_shift hk z).1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiCdk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
         (-(k)⁻¹) * jacobiNsk z k :=
@@ -341,7 +366,8 @@ theorem jacobiCdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         (-(k)⁻¹) * (1 / jacobiSnk z k) := by
       intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCdk w k) hfs
-      ((hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
       (by simp [jacobiSnk_zero hk])
     convert h using 2
@@ -350,7 +376,8 @@ theorem jacobiCdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
             (jacobiCdk_shift hk z).2.2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiDck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiCdk (z + (2 * compEllIntKk k)) k = -1 * jacobiCdk z k :=
       fun z => by
@@ -358,7 +385,8 @@ theorem jacobiCdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiCdk_shift hk z).2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiCdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiCdk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
         -1 * jacobiCdk z k :=
@@ -368,7 +396,8 @@ theorem jacobiCdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
                 (jacobiCdk_shift hk z).2.2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiCdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiCdk (z + (2 * (I * compEllIntKpk k))) k = 1 * jacobiCdk z k :=
       fun z => by
@@ -376,7 +405,8 @@ theorem jacobiCdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiCdk_shift hk z).2.2.2.2.2]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiCdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
 
 /-- Table 22.5.1, row `sd`: the `z`-derivative of `sd(z, k)` at the regular
@@ -396,13 +426,15 @@ theorem jacobiSdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have hfg : ∀ z, jacobiSdk (z + (0)) k = 1 * jacobiSdk z k :=
       fun z => by rw [add_zero, one_mul]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiSdk (z + (compEllIntKk k)) k = ((jacobiComodulusk k)⁻¹) * jacobiCnk z k :=
       fun z => by
         rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiSdk_shift hk z).1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiCnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiSdk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
         (-(I / (k * jacobiComodulusk k))) * jacobiDsk z k :=
@@ -413,7 +445,8 @@ theorem jacobiSdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         (-(I / (k * jacobiComodulusk k))) * (1 / jacobiSdk z k) := by
       intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiSdk w k) hfs
-      ((hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
       (by simp [jacobiSdk_zero hk])
     convert h using 2
@@ -423,7 +456,8 @@ theorem jacobiSdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
             (jacobiSdk_shift hk z).2.2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiNck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiSdk (z + (2 * compEllIntKk k)) k = -1 * jacobiSdk z k :=
       fun z => by
@@ -431,7 +465,8 @@ theorem jacobiSdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiSdk_shift hk z).2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiSdk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
         1 * jacobiSdk z k :=
@@ -441,7 +476,8 @@ theorem jacobiSdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
                 (jacobiSdk_shift hk z).2.2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiSdk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiSdk z k :=
       fun z => by
@@ -449,7 +485,8 @@ theorem jacobiSdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiSdk_shift hk z).2.2.2.2.2]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
 
 /-- Table 22.5.1, row `nd`: the `z`-derivative of `nd(z, k)` at the regular
@@ -469,13 +506,15 @@ theorem jacobiNdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have hfg : ∀ z, jacobiNdk (z + (0)) k = 1 * jacobiNdk z k :=
       fun z => by rw [add_zero, one_mul]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiNdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
   · have hfg : ∀ z, jacobiNdk (z + (compEllIntKk k)) k = ((jacobiComodulusk k)⁻¹) * jacobiDnk z k :=
       fun z => by
         rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiNdk_shift hk z).1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiDnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
   · have hfg : ∀ z, jacobiNdk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
         (-(I / jacobiComodulusk k)) * jacobiCsk z k :=
@@ -486,7 +525,8 @@ theorem jacobiNdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         (-(I / jacobiComodulusk k)) * (1 / jacobiSck z k) := by
       intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNdk w k) hfs
-      ((hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
       (by simp [jacobiSck_zero hk])
     convert h using 2
@@ -496,7 +536,8 @@ theorem jacobiNdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
             (jacobiNdk_shift hk z).2.2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
   · have hfg : ∀ z, jacobiNdk (z + (2 * compEllIntKk k)) k = 1 * jacobiNdk z k :=
       fun z => by
@@ -504,7 +545,8 @@ theorem jacobiNdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiNdk_shift hk z).2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiNdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
   · have hfg : ∀ z, jacobiNdk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
         -1 * jacobiNdk z k :=
@@ -514,7 +556,8 @@ theorem jacobiNdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
                 (jacobiNdk_shift hk z).2.2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiNdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
   · have hfg : ∀ z, jacobiNdk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiNdk z k :=
       fun z => by
@@ -522,7 +565,8 @@ theorem jacobiNdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiNdk_shift hk z).2.2.2.2.2]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiNdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
 
 /-- Table 22.5.1, row `dc`: the `z`-derivative of `dc(z, k)` at the regular
@@ -543,7 +587,8 @@ theorem jacobiDck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have hfg : ∀ z, jacobiDck (z + (0)) k = 1 * jacobiDck z k :=
       fun z => by rw [add_zero, one_mul]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiDck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiDck (z + (compEllIntKk k)) k = -1 * jacobiNsk z k :=
       fun z => by
@@ -552,7 +597,8 @@ theorem jacobiDck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiDck (z + (compEllIntKk k)) k = -1 * (1 / jacobiSnk z k) := by
       intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDck w k) hfs
-      ((hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
       (by simp [jacobiSnk_zero hk])
     convert h using 2
@@ -562,14 +608,16 @@ theorem jacobiDck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
             z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiDck_shift hk z).2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiDck (z + (I * compEllIntKpk k)) k = (k) * jacobiCdk z k :=
       fun z => by
         rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
             (jacobiDck_shift hk z).2.2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiCdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiDck (z + (2 * compEllIntKk k)) k = -1 * jacobiDck z k :=
       fun z => by
@@ -577,7 +625,8 @@ theorem jacobiDck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiDck_shift hk z).2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiDck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiDck (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
         -1 * jacobiDck z k :=
@@ -587,7 +636,8 @@ theorem jacobiDck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
                 (jacobiDck_shift hk z).2.2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiDck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiDck (z + (2 * (I * compEllIntKpk k))) k = 1 * jacobiDck z k :=
       fun z => by
@@ -595,7 +645,8 @@ theorem jacobiDck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiDck_shift hk z).2.2.2.2.2]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiDck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
 
 /-- Table 22.5.1, row `nc`: the `z`-derivative of `nc(z, k)` at the regular
@@ -614,7 +665,8 @@ theorem jacobiNck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have hfg : ∀ z, jacobiNck (z + (0)) k = 1 * jacobiNck z k :=
       fun z => by rw [add_zero, one_mul]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiNck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiNck (z + (compEllIntKk k)) k =
         (-(jacobiComodulusk k)⁻¹) * jacobiDsk z k :=
@@ -624,7 +676,8 @@ theorem jacobiNck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         (-(jacobiComodulusk k)⁻¹) * (1 / jacobiSdk z k) := by
       intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNck w k) hfs
-      ((hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
       (by simp [jacobiSdk_zero hk])
     convert h using 2
@@ -635,14 +688,16 @@ theorem jacobiNck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
             z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiNck_shift hk z).2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiCnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiNck (z + (I * compEllIntKpk k)) k = (I * k) * jacobiSdk z k :=
       fun z => by
         rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
             (jacobiNck_shift hk z).2.2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiNck (z + (2 * compEllIntKk k)) k = -1 * jacobiNck z k :=
       fun z => by
@@ -650,7 +705,8 @@ theorem jacobiNck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiNck_shift hk z).2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiNck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiNck (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
         1 * jacobiNck z k :=
@@ -660,7 +716,8 @@ theorem jacobiNck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
                 (jacobiNck_shift hk z).2.2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiNck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiNck (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiNck z k :=
       fun z => by
@@ -668,7 +725,8 @@ theorem jacobiNck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiNck_shift hk z).2.2.2.2.2]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiNck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
 
 /-- Table 22.5.1, row `sc`: the `z`-derivative of `sc(z, k)` at the regular
@@ -687,7 +745,8 @@ theorem jacobiSck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have hfg : ∀ z, jacobiSck (z + (0)) k = 1 * jacobiSck z k :=
       fun z => by rw [add_zero, one_mul]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
   · have hfg : ∀ z, jacobiSck (z + (compEllIntKk k)) k =
         (-(jacobiComodulusk k)⁻¹) * jacobiCsk z k :=
@@ -697,7 +756,8 @@ theorem jacobiSck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         (-(jacobiComodulusk k)⁻¹) * (1 / jacobiSck z k) := by
       intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiSck w k) hfs
-      ((hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
       (by simp [jacobiSck_zero hk])
     convert h using 2
@@ -708,14 +768,16 @@ theorem jacobiSck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
             z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiSck_shift hk z).2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiDnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
   · have hfg : ∀ z, jacobiSck (z + (I * compEllIntKpk k)) k = (I) * jacobiNdk z k :=
       fun z => by
         rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
             (jacobiSck_shift hk z).2.2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiNdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
   · have hfg : ∀ z, jacobiSck (z + (2 * compEllIntKk k)) k = 1 * jacobiSck z k :=
       fun z => by
@@ -723,7 +785,8 @@ theorem jacobiSck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiSck_shift hk z).2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
   · have hfg : ∀ z, jacobiSck (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
         -1 * jacobiSck z k :=
@@ -733,7 +796,8 @@ theorem jacobiSck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
                 (jacobiSck_shift hk z).2.2.2.2.1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
   · have hfg : ∀ z, jacobiSck (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiSck z k :=
       fun z => by
@@ -741,7 +805,8 @@ theorem jacobiSck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
             (jacobiSck_shift hk z).2.2.2.2.2]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
 
 /-- Table 22.5.1, row `ns`: the `z`-derivative of `ns(z, k)` at the regular
@@ -767,7 +832,8 @@ theorem jacobiNsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiNsk (z + (0)) k = 1 * (1 / jacobiSnk z k) := by
       intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNsk w k) hfs
-      ((hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
       (by simp [jacobiSnk_zero hk])
     convert h using 2
@@ -776,7 +842,8 @@ theorem jacobiNsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiNsk_shift hk z).1]
         try ring
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNsk w k) hfg
-      (hasDerivAt_jacobiDck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiNsk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
         (k) * jacobiCdk z k :=
@@ -784,14 +851,16 @@ theorem jacobiNsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
             z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiNsk_shift hk z).2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNsk w k) hfg
-      (hasDerivAt_jacobiCdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiNsk (z + (I * compEllIntKpk k)) k = (k) * jacobiSnk z k :=
       fun z => by
         rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
             (jacobiNsk_shift hk z).2.2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNsk w k) hfg
-      (hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiNsk (z + (2 * compEllIntKk k)) k = -1 * jacobiNsk z k :=
       fun z => by
@@ -801,7 +870,8 @@ theorem jacobiNsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiNsk (z + (2 * compEllIntKk k)) k = -1 * (1 / jacobiSnk z k) := by
       intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNsk w k) hfs
-      ((hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
       (by simp [jacobiSnk_zero hk])
     convert h using 2
@@ -816,7 +886,8 @@ theorem jacobiNsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         -1 * (1 / jacobiSnk z k) := by
       intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNsk w k) hfs
-      ((hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
       (by simp [jacobiSnk_zero hk])
     convert h using 2
@@ -828,7 +899,8 @@ theorem jacobiNsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiNsk (z + (2 * (I * compEllIntKpk k))) k = 1 * (1 / jacobiSnk z k) := by
       intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNsk w k) hfs
-      ((hasDerivAt_jacobiSnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
       (by simp [jacobiSnk_zero hk])
     convert h using 2
@@ -857,7 +929,8 @@ theorem jacobiDsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiDsk (z + (0)) k = 1 * (1 / jacobiSdk z k) := by
       intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDsk w k) hfs
-      ((hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
       (by simp [jacobiSdk_zero hk])
     convert h using 2
@@ -865,7 +938,8 @@ theorem jacobiDsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
       fun z => by
         rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiDsk_shift hk z).1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDsk w k) hfg
-      (hasDerivAt_jacobiNck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
   · have hfg : ∀ z, jacobiDsk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
         (I * k * jacobiComodulusk k) * jacobiSdk z k :=
@@ -873,14 +947,16 @@ theorem jacobiDsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
             z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiDsk_shift hk z).2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDsk w k) hfg
-      (hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
   · have hfg : ∀ z, jacobiDsk (z + (I * compEllIntKpk k)) k = (-(I * k)) * jacobiCnk z k :=
       fun z => by
         rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
             (jacobiDsk_shift hk z).2.2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDsk w k) hfg
-      (hasDerivAt_jacobiCnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiCnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
   · have hfg : ∀ z, jacobiDsk (z + (2 * compEllIntKk k)) k = -1 * jacobiDsk z k :=
       fun z => by
@@ -890,7 +966,8 @@ theorem jacobiDsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiDsk (z + (2 * compEllIntKk k)) k = -1 * (1 / jacobiSdk z k) := by
       intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDsk w k) hfs
-      ((hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
       (by simp [jacobiSdk_zero hk])
     convert h using 2
@@ -905,7 +982,8 @@ theorem jacobiDsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         1 * (1 / jacobiSdk z k) := by
       intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDsk w k) hfs
-      ((hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
       (by simp [jacobiSdk_zero hk])
     convert h using 2
@@ -917,7 +995,8 @@ theorem jacobiDsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiDsk (z + (2 * (I * compEllIntKpk k))) k = -1 * (1 / jacobiSdk z k) := by
       intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDsk w k) hfs
-      ((hasDerivAt_jacobiSdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
       (by simp [jacobiSdk_zero hk])
     convert h using 2
@@ -945,7 +1024,8 @@ theorem jacobiCsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiCsk (z + (0)) k = 1 * (1 / jacobiSck z k) := by
       intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCsk w k) hfs
-      ((hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
       (by simp [jacobiSck_zero hk])
     convert h using 2
@@ -953,7 +1033,8 @@ theorem jacobiCsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
       fun z => by
         rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiCsk_shift hk z).1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCsk w k) hfg
-      (hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
   · have hfg : ∀ z, jacobiCsk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
         (-(I * jacobiComodulusk k)) * jacobiNdk z k :=
@@ -961,14 +1042,16 @@ theorem jacobiCsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
             z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiCsk_shift hk z).2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCsk w k) hfg
-      (hasDerivAt_jacobiNdk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiNdk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
   · have hfg : ∀ z, jacobiCsk (z + (I * compEllIntKpk k)) k = (-I) * jacobiDnk z k :=
       fun z => by
         rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
             (jacobiCsk_shift hk z).2.2.1]
     exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCsk w k) hfg
-      (hasDerivAt_jacobiDnk hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
+      (hasDerivAt_jacobiDnk hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
           (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
   · have hfg : ∀ z, jacobiCsk (z + (2 * compEllIntKk k)) k = 1 * jacobiCsk z k :=
       fun z => by
@@ -978,7 +1061,8 @@ theorem jacobiCsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiCsk (z + (2 * compEllIntKk k)) k = 1 * (1 / jacobiSck z k) := by
       intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCsk w k) hfs
-      ((hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
       (by simp [jacobiSck_zero hk])
     convert h using 2
@@ -993,7 +1077,8 @@ theorem jacobiCsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         -1 * (1 / jacobiSck z k) := by
       intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCsk w k) hfs
-      ((hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
       (by simp [jacobiSck_zero hk])
     convert h using 2
@@ -1005,7 +1090,8 @@ theorem jacobiCsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     have hfs : ∀ z, jacobiCsk (z + (2 * (I * compEllIntKpk k))) k = -1 * (1 / jacobiSck z k) := by
       intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
     have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCsk w k) hfs
-      ((hasDerivAt_jacobiSck hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
+      ((hasDerivAt_jacobiSck hk
+          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
           (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
       (by simp [jacobiSck_zero hk])
     convert h using 2

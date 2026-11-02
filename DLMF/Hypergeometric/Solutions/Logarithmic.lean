@@ -109,7 +109,8 @@ theorem hasDerivAt_recip_pow (p : ℕ) {v : ℂ} (hv : v ≠ 0) :
 def logSing (a b : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
   ∑ j ∈ Finset.range (n - 1),
     ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-      (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) * ((-z)⁻¹) ^ (j + 1)
+      (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) *
+          ((-z)⁻¹) ^ (j + 1)
 
 
 
@@ -131,8 +132,10 @@ theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)
     intro v hv
     rw [hS]
     exact HasDerivAt.fun_sum fun j _ => (hasDerivAt_recip_pow (j + 1) hv).const_mul (σ j)
-  have hS2 : HasDerivAt (fun v => ∑ j ∈ Finset.range (n - 1), σ j * (-((j + 1 : ℕ) : ℂ) * v⁻¹ ^ (j + 2)))
-      (∑ j ∈ Finset.range (n - 1), σ j * (-((j + 1 : ℕ) : ℂ) * (-((j + 2 : ℕ) : ℂ) * z⁻¹ ^ (j + 3))))
+  have hS2 : HasDerivAt
+      (fun v => ∑ j ∈ Finset.range (n - 1), σ j * (-((j + 1 : ℕ) : ℂ) * v⁻¹ ^ (j + 2)))
+      (∑ j ∈ Finset.range (n - 1), σ j *
+          (-((j + 1 : ℕ) : ℂ) * (-((j + 2 : ℕ) : ℂ) * z⁻¹ ^ (j + 3))))
       z :=
     HasDerivAt.fun_sum fun j _ => ((hasDerivAt_recip_pow (j + 2) hz).const_mul _).const_mul (σ j)
   have hev : deriv (logSing a b n) =ᶠ[𝓝 z]
@@ -225,7 +228,8 @@ theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)
     ring
 
 /-- The pole part `logSing` is analytic away from `0`. -/
-theorem analyticAt_logSing (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) : AnalyticAt ℂ (logSing a b n) z := by
+theorem analyticAt_logSing (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) : AnalyticAt ℂ
+    (logSing a b n) z := by
   unfold logSing
   have h : ∀ j ∈ Finset.range (n - 1), AnalyticAt ℂ (fun v : ℂ => ((n - 1).factorial : ℂ) *
       (j.factorial : ℂ) / (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) *
@@ -307,8 +311,10 @@ theorem logSing_eq (a b : ℂ) (n : ℕ) (v : ℂ) :
 /-- Termwise derivative of the pole part `logSing` away from `0`. -/
 theorem hasDerivAt_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
     HasDerivAt (logSing a b n)
-      (∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j * (-((j + 1 : ℕ) : ℂ) * v⁻¹ ^ (j + 2))) v := by
-  have h : logSing a b n = fun v => ∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j * v⁻¹ ^ (j + 1) :=
+      (∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j *
+          (-((j + 1 : ℕ) : ℂ) * v⁻¹ ^ (j + 2))) v := by
+  have h : logSing a b n = fun v => ∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j *
+      v⁻¹ ^ (j + 1) :=
     funext (logSing_eq a b n)
   rw [h]
   exact HasDerivAt.fun_sum fun j _ => (hasDerivAt_recip_pow (j + 1) hv).const_mul _
@@ -795,7 +801,8 @@ theorem logarithmic_second_terminating_fundamental
       Complex.norm_natCast]
     have hQ : (0 : ℝ) < ‖poch (n : ℂ) k‖ := lt_of_lt_of_le hfk hpn
     rw [div_le_iff₀ (mul_pos hQ hfk)]
-    have e : (m.factorial : ℝ) * (k + 1) * (‖poch b k‖ / k.factorial) * (‖poch (n : ℂ) k‖ * k.factorial)
+    have e : (m.factorial : ℝ) * (k + 1) * (‖poch b k‖ / k.factorial) *
+        (‖poch (n : ℂ) k‖ * k.factorial)
         = m.factorial * ‖poch b k‖ * ((k + 1) * ‖poch (n : ℂ) k‖) := by
       field_simp
     rw [e]
@@ -833,7 +840,8 @@ theorem logarithmic_second_terminating_fundamental
       have hmk : ((m - k - 1 : ℕ) : ℂ) + 1 = (m : ℂ) - k := by
         rw [Nat.cast_sub (by omega), Nat.cast_sub (by omega)]; push_cast; ring
       have hdm : digamma (1 + m - k) = digamma (1 + m - ((k + 1 : ℕ) : ℂ)) + ((m : ℂ) - k)⁻¹ := by
-        rw [show (1 : ℂ) + m - ((k + 1 : ℕ) : ℂ) = ((m - k - 1 : ℕ) : ℂ) + 1 by rw [hmk]; push_cast; ring,
+        rw [show (1 : ℂ) + m - ((k + 1 : ℕ) : ℂ) = ((m - k - 1 : ℕ) : ℂ) + 1 by rw [hmk];
+                                                                                push_cast; ring,
           show (1 : ℂ) + m - k = ((m - k - 1 : ℕ) : ℂ) + 1 + 1 by rw [hmk]; ring,
           digamma_apply_add_one _ hxpos, hmk]
       have hx : ((m : ℂ) - k) * ((m : ℂ) - k)⁻¹ = 1 :=
@@ -841,12 +849,14 @@ theorem logarithmic_second_terminating_fundamental
       rw [hshift b hb', hshift 1 h1c, hshift n hnc,
         show digamma (1 + m - ((k + 1 : ℕ) : ℂ)) = digamma (1 + m - k) - ((m : ℂ) - k)⁻¹ by
           rw [hdm]; ring]
-      linear_combination (digamma (1 + m - k) + digamma (b + k) - digamma (1 + k) - digamma (n + k) -
+      linear_combination (digamma (1 + m - k) + digamma (b + k) - digamma (1 + k) -
+          digamma (n + k) -
           ((m : ℂ) - k)⁻¹ + (b + k)⁻¹) * hrec0 +
         (b + k) * f k * hx + (-(m : ℂ) + k) * f k * hne b hb' -
         (n + k) * f (k + 1) * hne 1 h1c - (k + 1) * f (k + 1) * hne n hnc
     · -- the transition `k = m`
-      simp only [hh, ite_eq_left_iff.mpr (fun h => absurd le_rfl h), ite_eq_right_iff.mpr (fun h => absurd h (by omega : ¬ k + 1 ≤ k)),
+      simp only [hh, ite_eq_left_iff.mpr (fun h => absurd le_rfl h),
+          ite_eq_right_iff.mpr (fun h => absurd h (by omega : ¬ k + 1 ≤ k)),
         hf0 (k + 1) (by omega), show k + 1 - k - 1 = 0 by omega, Nat.factorial_zero]
       have hfm : f k = (-1) ^ k * poch b k / poch (n : ℂ) k := by
         rw [hf, gaussHGCoeff_neg_nat, Nat.choose_self]; simp
@@ -946,7 +956,8 @@ theorem logarithmic_second_both_terminating_fundamental
     (hz : ‖z‖ < 1)
     (hs : z ∈ slitPlane) :
     gaussOperator (-m) (-l) n (logarithmicSecondBothTerminating m l n) z = 0 ∧
-      solutionWronskian (₂F₁ (-m : ℂ) (-l : ℂ) (n : ℂ)) (logarithmicSecondBothTerminating m l n) z ≠ 0 := by
+      solutionWronskian (₂F₁ (-m : ℂ) (-l : ℂ) (n : ℂ))
+          (logarithmicSecondBothTerminating m l n) z ≠ 0 := by
   have hnc := natCast_not_neg_nat hn
   have h1c : ∀ m : ℕ, (1 : ℂ) ≠ -(m : ℂ) := fun m => by
     simpa using natCast_not_neg_nat (n := 1) one_pos m
@@ -1009,7 +1020,8 @@ theorem logarithmic_second_both_terminating_fundamental
         ite_eq_right_iff.mpr (fun h => absurd h hk), hf0 k hkl, hf0 (k + 1) (by omega)]
       obtain ⟨j, rfl⟩ : ∃ j, k = l + 1 + j := ⟨k - l - 1, by omega⟩
       rw [show l + 1 + j + 1 - l - 1 = j + 1 by omega, show l + 1 + j - l - 1 = j by omega,
-        poch_succ (-(m : ℂ)), poch_succ (n : ℂ), Nat.factorial_succ (l + 1 + j), Nat.factorial_succ j]
+        poch_succ (-(m : ℂ)), poch_succ (n : ℂ), Nat.factorial_succ (l + 1 + j),
+            Nat.factorial_succ j]
       have hpn : poch (n : ℂ) (l + 1 + j) ≠ 0 := poch_ne_zero_of_not_neg_nat hnc _
       have hnk : (n : ℂ) + ((l + 1 + j : ℕ) : ℂ) ≠ 0 := by
         simpa using not_neg_nat_add_nat hnc (l + 1 + j) 0

@@ -101,7 +101,8 @@ private lemma sqrt_mul_mul_of_nonneg {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
 
 /-- Identity under the stated parameter and domain assumptions: `(b ^ 2 + m) * l ^ 2 = (B * a * c
 + b * A * C) ^ 2 ∧ (c ^ 2 + m) * l ^ 2 = (C * a * b + c * A * B) ^ 2`. -/
-private lemma addition_algebra_perm {a b c A B C l m : ℝ} (hA : A ^ 2 = a ^ 2 + l) (hB : B ^ 2 = b ^ 2 + l)
+private lemma addition_algebra_perm {a b c A B C l m : ℝ} (hA : A ^ 2 = a ^ 2 + l)
+    (hB : B ^ 2 = b ^ 2 + l)
     (hC : C ^ 2 = c ^ 2 + l) (h : (a ^ 2 + m) * l ^ 2 = (A * b * c + a * B * C) ^ 2) :
     (b ^ 2 + m) * l ^ 2 = (B * a * c + b * A * C) ^ 2 ∧
       (c ^ 2 + m) * l ^ 2 = (C * a * b + c * A * B) ^ 2 := by
@@ -218,7 +219,8 @@ theorem symEllInt_addition_note (x y z l m : ℝ) :
   ring
 
 /-- `R_F(0, y, z) = (π/2) R_K(y, z)` with `lean-codes`' `Carlson.TwoVariable.carlsonRK`. -/
-theorem symEllIntRF_zero_eq_pi_div_two_mul_carlsonRK {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+theorem symEllIntRF_zero_eq_pi_div_two_mul_carlsonRK {y z : ℂ} (hy : y ∈ slitPlane)
+    (hz : z ∈ slitPlane) :
     symEllIntRF 0 y z = (π / 2 : ℂ) * Carlson.TwoVariable.carlsonRK y z := by
   rw [symEllIntRF_zero_left hy hz, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz)]
   unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair
@@ -244,7 +246,8 @@ theorem symEllIntRF_addition_zero {y z l m : ℝ} (hy : 0 < y) (hz : 0 < z) (hl 
 /-- Identity under the stated parameter and domain assumptions: `l * (l * m - (x * y + x * z + y *
 z)) = 2 * √(x * y * z) * (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ∧ l ^ 2 * (l + m + x
 + y + z) = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2`. -/
-private lemma addition_parameter_identities {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) (hl : 0 < l)
+private lemma addition_parameter_identities {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y)
+    (hz : 0 ≤ z) (hl : 0 < l)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
     l * (l * m - (x * y + x * z + y * z)) =
         2 * √(x * y * z) * (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ∧
@@ -314,7 +317,8 @@ theorem symEllInt_addition_quadratic {x y z l m : ℝ} (h : CarlsonNonnegDomain 
 /-- Identity under the stated parameter and domain assumptions: `symEllIntRF ((x + l : ℝ) : ℂ) ((y
 + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) + symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ)
 : ℂ) = symEllIntRF x y z`. -/
-private lemma symEllIntRF_addition_of_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) (hl : 0 < l)
+private lemma symEllIntRF_addition_of_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0 < y)
+    (hz : 0 < z) (hl : 0 < l)
     (hm : 0 < m)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
     symEllIntRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
@@ -339,7 +343,8 @@ private lemma symEllIntRF_addition_of_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0
 /-- Identity under the stated parameter and domain assumptions: `symEllIntRF ((x + l : ℝ) : ℂ) ((y
 + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) + symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ)
 : ℂ) = symEllIntRF x y z`. -/
-private lemma symEllIntRF_addition_of_nonneg_left {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z)
+private lemma symEllIntRF_addition_of_nonneg_left {x y z l m : ℝ} (hx : 0 ≤ x)
+    (hy : 0 < y) (hz : 0 < z)
     (hl : 0 < l) (hm : 0 < m)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
     symEllIntRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
@@ -419,14 +424,16 @@ lemma hasDerivAt_symEllIntRF_right_real {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
           (Dirichlet.addDirichletUnit (![1 / 2, 1 / 2] : Fin 2 → ℂ) 1) ![(y : ℂ), z])) (z : ℂ) := by
       apply H.congr_of_eventuallyEq
       filter_upwards [isOpen_slitPlane.mem_nhds hzc] with w hw
-      rw [symEllIntRF_zero_left hyc hw, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hyc hw), Carlson.carlsonR]
+      rw [symEllIntRF_zero_left hyc hw, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hyc hw),
+          Carlson.carlsonR]
       simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
       norm_num
       congr 2
       funext i; fin_cases i <;> simp [Function.update]
     refine H'.comp_ofReal.congr_deriv ?_
     simp only [ofReal_zero]
-    rw [he, symEllIntRD_zero_left hyc hzc, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hyc hzc), Carlson.carlsonR]
+    rw [he, symEllIntRD_zero_left hyc hzc,
+        symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hyc hzc), Carlson.carlsonR]
     simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
     norm_num [Carlson.Gamma_two']
     ring
@@ -446,7 +453,8 @@ lemma hasDerivAt_carlsonRF_translate_right {x y z l' : ℝ} {l : ℝ → ℝ}
   let v : Fin 3 → ℂ := fun _ => 1
   let e : Fin 3 → ℂ := ![0, 0, 1]
   have hp : p ∈ Carlson.carlsonRSlitDomain :=
-    vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
+    vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
+        (ofReal_mem_slitPlane.mpr hz)
   have hF : DifferentiableAt ℂ F p := by
     have HF : AnalyticAt ℂ F p := by
       unfold F Carlson.carlsonR
@@ -508,7 +516,8 @@ formula, including a possible zero first argument. -/
 lemma symEllIntRD_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z)
     (hl : 0 < l) (hm : 0 < m)
     (hmu : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
-    symEllIntRD (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) + symEllIntRD (x + m : ℝ) (y + m : ℝ) (z + m : ℝ) =
+    symEllIntRD (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) +
+        symEllIntRD (x + m : ℝ) (y + m : ℝ) (z + m : ℝ) =
       symEllIntRD x y z - ((3 / √(z * (z + l) * (z + m)) : ℝ) : ℂ) := by
   let u := √(x + l) * √y
   let v := √x * √(y + l)
@@ -557,7 +566,8 @@ lemma symEllIntRD_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
   have HE := ((hasDerivAt_symEllIntRF_right_real hx hy hz).congr_of_eventuallyEq hev.symm).unique
     (HL.add HM)
   simp only [ofReal_zero, mul_zero, zero_mul, zero_sub, heq] at HE
-  rw [← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
+  rw [← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
+      ← inv_cpow_half_eq_cpow_neg_half,
     Carlson.ofReal_cpow_half hxM.le, Carlson.ofReal_cpow_half hyM.le,
     Carlson.ofReal_cpow_half hzM.le] at HE
   have hU := sqrt_add_mul_eq_of_shifted_sq hx hy.le hz.le hl hm hmu
@@ -634,7 +644,8 @@ lemma symEllIntRG_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
   have hp := symEllInt_addition_mu_perm hdom hl hmu
   have hV := sqrt_add_mul_eq_of_shifted_sq hy.le hx hz.le hl hm hp.1
   have hW := sqrt_add_mul_eq_of_shifted_sq hz.le hx hy.le hl hm hp.2
-  have hsum := (addition_parameter_identities hx hy.le hz.le hl ((symEllInt_addition_mu_iff hdom hl).mp hmu)).2
+  have hsum := (addition_parameter_identities hx hy.le hz.le hl
+      ((symEllInt_addition_mu_iff hdom hl).mp hmu)).2
   rw [sqrt_mul_mul_of_nonneg hx hy.le, sqrt_mul_mul_of_nonneg hxL.le hyL.le] at hsum
   have hS : √(l + m + x + y + z) * l = √x * √y * √z + √(x + l) * √(y + l) * √(z + l) := by
     apply (sq_eq_sq₀ (by positivity) (by positivity)).mp
@@ -657,7 +668,8 @@ lemma symEllIntRG_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
     have hB : √(y + l) ^ 2 = √y ^ 2 + l := by rw [Real.sq_sqrt hyL.le, Real.sq_sqrt hy.le]
     have hC : √(z + l) ^ 2 = √z ^ 2 + l := by rw [Real.sq_sqrt hzL.le, Real.sq_sqrt hz.le]
     have H := rg_addition_root_algebra hA hB hC
-    linear_combination H + (√(z + l) ^ 2 * √x ^ 2 * √y ^ 2 - √z ^ 2 * √(x + l) ^ 2 * √(y + l) ^ 2) * hC
+    linear_combination H +
+        (√(z + l) ^ 2 * √x ^ 2 * √y ^ 2 - √z ^ 2 * √(x + l) ^ 2 * √(y + l) ^ 2) * hC
   have hxC : SymEllIntArg (x : ℂ) := by
     by_cases hh : x = 0
     · exact Or.inr (by simp [hh])
@@ -771,7 +783,8 @@ theorem symEllIntRC_add_symEllIntRC {x y l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) 
       Real.sqrt_mul hx, Real.sqrt_mul_self (by linarith)]
   have h := symEllIntRF_add_symEllIntRF (x := x) (y := y) (z := y)
     ⟨hx, hy.le, hy.le, fun _ => ⟨hy, hy⟩, fun h0 => absurd h0 hy.ne'⟩ hl hm hμ'
-  rw [symEllIntRC_eq_symEllIntRF _ (hnn _ (by linarith)), symEllIntRC_eq_symEllIntRF _ (hnn _ (by linarith)),
+  rw [symEllIntRC_eq_symEllIntRF _ (hnn _ (by linarith)),
+      symEllIntRC_eq_symEllIntRF _ (hnn _ (by linarith)),
     symEllIntRC_eq_symEllIntRF _ (hnn _ hy.le)]
   exact h
 
@@ -994,7 +1007,8 @@ lemma symEllIntRD_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
     have hyc := ofReal_mem_slitPlane.mpr hy
     have hscale : symEllIntDupLambda x y w = ((l w : ℝ) : ℂ) := by
       unfold symEllIntDupLambda
-      rw [Carlson.ofReal_cpow_half hx, Carlson.ofReal_cpow_half hy.le, Carlson.ofReal_cpow_half hw.le]
+      rw [Carlson.ofReal_cpow_half hx, Carlson.ofReal_cpow_half hy.le,
+          Carlson.ofReal_cpow_half hw.le]
       dsimp only [l]; push_cast; ring
     have H : symEllIntRF x y w = 2 * symEllIntRF (x + l w : ℝ) (y + l w : ℝ) (w + l w : ℝ) := by
       by_cases hx0 : x = 0
@@ -1008,10 +1022,13 @@ lemma symEllIntRD_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
         rw [hscale] at H
         simpa only [← ofReal_add] using H
     rw [H, symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr (by linarith [hl w hw]))
-      (ofReal_mem_slitPlane.mpr (by linarith [hl w hw])) (ofReal_mem_slitPlane.mpr (by linarith [hl w hw]))]
+      (ofReal_mem_slitPlane.mpr (by linarith [hl w hw]))
+          (ofReal_mem_slitPlane.mpr (by linarith [hl w hw]))]
   have HE := ((hasDerivAt_symEllIntRF_right_real hx hy hz).congr_of_eventuallyEq hev.symm).unique HC
-  rw [← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
-    Carlson.ofReal_cpow_half hX.le, Carlson.ofReal_cpow_half hY.le, Carlson.ofReal_cpow_half hZ.le] at HE
+  rw [← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
+      ← inv_cpow_half_eq_cpow_neg_half,
+    Carlson.ofReal_cpow_half hX.le, Carlson.ofReal_cpow_half hY.le,
+        Carlson.ofReal_cpow_half hZ.le] at HE
   have HR : symEllIntRD x y z = 2 * symEllIntRD (x + l z : ℝ) (y + l z : ℝ) (z + l z : ℝ) +
       ((6 * d * (√(x + l z) * √(y + l z) * √(z + l z))⁻¹ : ℝ) : ℂ) := by
     push_cast at HE ⊢
@@ -1105,7 +1122,8 @@ lemma symEllIntRG_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
     (ofReal_mem_slitPlane.mpr hY) (ofReal_mem_slitPlane.mpr hZ)
   rw [← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hx, Carlson.ofReal_cpow_half hy.le,
     Carlson.ofReal_cpow_half hz.le] at hG
-  rw [← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hX.le, Carlson.ofReal_cpow_half hY.le,
+  rw [← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hX.le,
+      Carlson.ofReal_cpow_half hY.le,
     Carlson.ofReal_cpow_half hZ.le] at hGs
   have hscale : symEllIntDupLambda x y z = (l : ℂ) := by
     unfold symEllIntDupLambda
@@ -1114,7 +1132,8 @@ lemma symEllIntRG_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
   have hRF : symEllIntRF x y z = 2 * symEllIntRF (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) := by
     by_cases hx0 : x = 0
     · subst x
-      have H := symEllIntRF_duplication_zero (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
+      have H := symEllIntRF_duplication_zero (ofReal_mem_slitPlane.mpr hy)
+          (ofReal_mem_slitPlane.mpr hz)
       simp only [ofReal_zero] at hscale
       rw [hscale] at H
       simpa only [ofReal_zero, zero_add, ← ofReal_add] using H
@@ -1155,7 +1174,8 @@ theorem symEllIntRG_duplication {x y z : ℝ} (h : CarlsonNonnegDomain x y z) :
     have H := symEllIntRG_duplication_of_nonneg (x := (0 : ℝ)) (by norm_num) hx' hy'
     simp only [Real.sqrt_zero, zero_mul, mul_zero, zero_add, add_zero] at H ⊢
     simpa only [ofReal_zero, sub_zero, symEllIntRG_comm_left, symEllIntRG_comm_right,
-      symEllIntRF_comm_left, symEllIntRF_comm_right, add_comm, add_left_comm, add_assoc, mul_comm] using H
+      symEllIntRF_comm_left, symEllIntRF_comm_right, add_comm, add_left_comm, add_assoc,
+          mul_comm] using H
   · have hz' : 0 < z := lt_of_le_of_ne hz (Ne.symm hz0)
     by_cases hyz : y = 0
     · subst y
@@ -1287,7 +1307,8 @@ theorem symEllIntRC_sq_eq {x y : ℂ} (hx : x = 0 ∨ 0 < x.re) (hy : 0 < y.re) 
   have hy2 : y ^ 2 ∈ slitPlane := by
     simpa only [pow_two] using Carlson.mul_mem_slitPlane_of_re_pos hy hy
   have hy0 : y ≠ 0 := slitPlane_ne_zero (Or.inl hy)
-  have ha : 0 < ((x + y) / 2).re := by rcases hx with rfl | hx <;> simp only [add_re, div_ofNat_re, zero_re] <;> linarith
+  have ha : 0 < ((x + y) / 2).re := by rcases hx with rfl | hx <;>
+                                       simp only [add_re, div_ofNat_re, zero_re] <;> linarith
   have ha2 : ((x + y) / 2) ^ 2 ∈ slitPlane := by
     simpa only [pow_two] using Carlson.mul_mem_slitPlane_of_re_pos ha ha
   have hay : (x + y) / 2 * y ∈ slitPlane := Carlson.mul_mem_slitPlane_of_re_pos ha hy
@@ -1320,7 +1341,9 @@ theorem symEllIntRC_sq_eq {x y : ℂ} (hx : x = 0 ∨ 0 < x.re) (hy : 0 < y.re) 
       symEllIntRC_eq_carlsonRC one_mem_slitPlane htwo] at H
     have hconst := Carlson.TwoVariable.pi_eq_four_mul_carlsonRC.1
     have hhalf : ((y / 2) ^ 2) ^ (-(1 / 2) : ℂ) = (y / 2)⁻¹ := by
-      rw [show -(1 / 2 : ℂ) = -(2⁻¹) by norm_num, cpow_neg, sq_cpow_two_inv (by simpa only [div_ofNat_re] using (half_pos hy))]
+      rw [show -(1 / 2 : ℂ) = -(2⁻¹) by norm_num, cpow_neg,
+                                          sq_cpow_two_inv (by simpa only [div_ofNat_re] using
+                                                                (half_pos hy))]
     rw [hhalf] at H
     rw [hleft, H]
     field_simp

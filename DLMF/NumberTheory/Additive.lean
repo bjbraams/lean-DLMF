@@ -6,6 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.NumberTheory.Basic.GeneratingFunctions
+public import DLMF.NumberTheory.ThetaSquareLambert
+public import DLMF.NumberTheory.ThetaFourthPowerLambert
+public import DLMFMathlib.Analysis.Complex.ScalarSeries
 public import DLMFMathlib.RingTheory.PowerSeriesEvaluation
 public import Mathlib.CategoryTheory.Category.Init
 public import Mathlib.Combinatorics.Matroid.Init
@@ -240,7 +243,8 @@ def boxSquaresCount (k B : ℕ) (m : ℤ) : ℤ :=
   ∑ v ∈ Fintype.piFinset (fun _ : Fin k ↦ Icc (-(B : ℤ)) B), if ∑ i, v i ^ 2 = m then 1 else 0
 
 /-- `cnt₀(m) = [m = 0]`. -/
-private lemma boxSquaresCount_zero (B : ℕ) (m : ℤ) : boxSquaresCount 0 B m = if 0 = m then 1 else 0 := by
+private lemma boxSquaresCount_zero (B : ℕ) (m : ℤ) : boxSquaresCount 0 B m = if 0 =
+    m then 1 else 0 := by
   simp [boxSquaresCount]
 
 /-- Recursion for the representation counts. -/
@@ -277,7 +281,8 @@ private lemma sumSquaresCount_eq_boxSquaresCount (k n B : ℕ) (hB : n ≤ B) :
     constructor <;> [linarith [neg_abs_le (v i)]; linarith [le_abs_self (v i)]]
 
 /-- No representations of negative numbers. -/
-private lemma boxSquaresCount_of_neg (k B : ℕ) {m : ℤ} (hm : m < 0) : boxSquaresCount k B m = 0 := by
+private lemma boxSquaresCount_of_neg (k B : ℕ) {m : ℤ} (hm : m < 0) : boxSquaresCount
+    k B m = 0 := by
   rw [boxSquaresCount]
   refine sum_eq_zero fun v _ ↦ ?_
   have : 0 ≤ ∑ i, v i ^ 2 := sum_nonneg fun i _ ↦ sq_nonneg _
@@ -295,7 +300,8 @@ private lemma coeff_thetaPowerSeries_pow (k n : ℕ) :
     rw [pow_zero, coeff_one, sumSquaresCount_eq_boxSquaresCount 0 n n le_rfl, boxSquaresCount_zero]
     by_cases h : n = 0 <;> simp [h, eq_comm]
   | succ k ih =>
-    rw [pow_succ, coeff_mul, sumSquaresCount_eq_boxSquaresCount (k + 1) n n le_rfl, boxSquaresCount_succ]
+    rw [pow_succ, coeff_mul, sumSquaresCount_eq_boxSquaresCount (k + 1) n n le_rfl,
+        boxSquaresCount_succ]
     have h1 : ∀ p ∈ antidiagonal n, coeff p.1 (thetaPowerSeries ^ k) * coeff p.2 thetaPowerSeries =
         ∑ a ∈ Icc (-(n : ℤ)) n, boxSquaresCount k n p.1 * (if (p.2 : ℤ) = a ^ 2 then 1 else 0) := by
       intro p hp
@@ -442,19 +448,83 @@ theorem jacobiThetaSeries_sq_divisors {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ 4 * ((((n + 1).divisors.filter (· % 4 = 1)).card : ℂ) -
         ((n + 1).divisors.filter (· % 4 = 3)).card) * x ^ (n + 1))
       (jacobiThetaSeries x ^ 2 - 1) := by
-  sorry
+  rcases eq_or_ne x 0 with rfl | hx0
+  · have h0 : jacobiThetaSeries 0 = 1 := by simp [jacobiThetaSeries]
+    simp [h0]
+  obtain ⟨A, hA1, hA2⟩ := exists_hasSum_lambert_divisors hx
+  have hθ := (hasSum_jacobiThetaSeries_sq_lambert hx0 hx).unique (hA1.mul_left 4)
+  rw [hθ]
+  convert hA2.mul_left 4 using 2 with n
+  ring
 
 /-- DLMF 27.13.7 (Jacobi): `r₂(n) = 4(δ₁(n) - δ₃(n))`, `n ≥ 1`. -/
 @[dlmf 27.13.E7]
 theorem sumSquaresCount_two {n : ℕ} (hn : 1 ≤ n) :
     (sumSquaresCount 2 n : ℤ) =
       4 * (((n.divisors.filter (· % 4 = 1)).card : ℤ) - (n.divisors.filter (· % 4 = 3)).card) := by
-  sorry
+  have key : ∀ (c : ℕ → ℂ), c 0 = 0 → ∀ z : ℂ,
+      HasSum (fun m : ℕ ↦ c (m + 1) * z ^ (m + 1)) (jacobiThetaSeries z ^ 2 - 1) →
+      HasSum (fun m : ℕ ↦ c m * z ^ m) (jacobiThetaSeries z ^ 2 - 1) := by
+    intro c hc0 z h
+    have h' := HasSum.zero_add (f := fun m ↦ c m * z ^ m) h
+    rwa [hc0, zero_mul, zero_add] at h'
+  have hcd := Complex.powerSeries_coefficients_unique
+    (c := fun m ↦ if m = 0 then 0 else (sumSquaresCount 2 m : ℂ))
+    (d := fun m ↦ if m = 0 then 0 else
+      4 * (((m.divisors.filter (· % 4 = 1)).card : ℂ) - (m.divisors.filter (· % 4 = 3)).card))
+    (f := fun z ↦ jacobiThetaSeries z ^ 2 - 1)
+    (fun z hz ↦ key _ (by simp) z (by
+      simp only [Nat.add_one_ne_zero, ↓reduceIte]; exact jacobiThetaSeries_sq hz))
+    (fun z hz ↦ key _ (by simp) z (by
+      simp only [Nat.add_one_ne_zero, ↓reduceIte]; exact jacobiThetaSeries_sq_divisors hz))
+  have h := congrFun hcd n
+  simp only [show n ≠ 0 by omega, ↓reduceIte] at h
+  exact_mod_cast h
 
 /-- §27.13(iv) after 27.13.7: `r₂(5) = 8`. -/
 @[dlmf 27.13.E7]
 theorem sumSquaresCount_two_five : sumSquaresCount 2 5 = 8 := by
   rfl
+
+/-- The odd divisors of `2m` are the odd divisors of `m`. -/
+private lemma filter_odd_divisors_two_mul (m : ℕ) :
+    (2 * m).divisors.filter Odd = m.divisors.filter Odd := by
+  ext d
+  simp only [mem_filter, Nat.mem_divisors]
+  constructor
+  · rintro ⟨⟨hd, hm⟩, ho⟩
+    have hc : Nat.Coprime d 2 := Nat.coprime_two_right.mpr ho
+    exact ⟨⟨hc.dvd_of_dvd_mul_left hd, by omega⟩, ho⟩
+  · rintro ⟨⟨hd, hm⟩, ho⟩
+    exact ⟨⟨hd.mul_left 2, by omega⟩, ho⟩
+
+/-- `σ₁(2m) = ∑_{d ∣ m, d odd} d + 2σ₁(m)`. -/
+private lemma sigma_two_mul (m : ℕ) :
+    σ 1 (2 * m) = (∑ d ∈ m.divisors.filter Odd, d) + 2 * σ 1 m := by
+  rw [sigma_one_apply, sigma_one_apply, ← sum_filter_add_sum_filter_not _ Odd,
+    filter_odd_divisors_two_mul]
+  congr 1
+  have : (2 * m).divisors.filter (fun d => ¬ Odd d) =
+      m.divisors.map ⟨(2 * ·), mul_right_injective₀ two_ne_zero⟩ := by
+    ext d
+    simp only [mem_filter, Nat.mem_divisors, Finset.mem_map, Function.Embedding.coeFn_mk,
+      Nat.not_odd_iff_even]
+    constructor
+    · rintro ⟨⟨hd, hm⟩, ⟨e, rfl⟩⟩
+      refine ⟨e, ⟨?_, by omega⟩, by ring⟩
+      have : 2 * e ∣ 2 * m := by rwa [two_mul]
+      exact Nat.dvd_of_mul_dvd_mul_left two_pos this
+    · rintro ⟨e, ⟨he, hm⟩, rfl⟩
+      exact ⟨⟨mul_dvd_mul_left 2 he, by omega⟩, even_two_mul e⟩
+  rw [this, sum_map, mul_sum]
+  rfl
+
+/-- For odd `m`, `σ₁(m)` is the sum of the odd divisors of `m`. -/
+private lemma sigma_of_odd {m : ℕ} (hm : Odd m) :
+    σ 1 m = ∑ d ∈ m.divisors.filter Odd, d := by
+  rw [sigma_one_apply, filter_true_of_mem]
+  intro d hd
+  exact hm.of_dvd_nat (Nat.dvd_of_mem_divisors hd)
 
 /-- §27.13(iv) (Jacobi): `r₄(n) = 8σ₁(n)` for odd `n`, and `r₄(n) = 24 ∑_{d∣n, d odd} d` for
 even `n ≥ 2`. -/
@@ -462,6 +532,40 @@ even `n ≥ 2`. -/
 theorem sumSquaresCount_four {n : ℕ} (hn : 1 ≤ n) :
     (Odd n → sumSquaresCount 4 n = 8 * σ 1 n) ∧
       (Even n → sumSquaresCount 4 n = 24 * ∑ d ∈ n.divisors.filter Odd, d) := by
-  sorry
+  have hcd := Complex.powerSeries_coefficients_unique
+    (c := fun N => (sumSquaresCount 4 N : ℂ))
+    (d := fun N => (if N = 0 then 1 else 0) + 8 * (σ 1 N : ℂ) -
+        32 * (if 4 ∣ N then (σ 1 (N / 4) : ℂ) else 0))
+    (f := fun z => jacobiThetaSeries z ^ 4)
+    (fun z hz => jacobiThetaSeries_pow 4 hz) (fun z hz => hasSum_jacobiThetaSeries_pow_four hz)
+  have h := congrFun hcd n
+  simp only [show n ≠ 0 by omega, ↓reduceIte, zero_add] at h
+  constructor
+  · intro ho
+    have h4 : ¬ 4 ∣ n := fun h4 => by
+      obtain ⟨k, rfl⟩ := h4
+      exact (Nat.not_even_iff_odd.mpr ho) ⟨2 * k, by ring⟩
+    simp only [h4, ↓reduceIte, mul_zero, sub_zero] at h
+    exact_mod_cast h
+  · rintro ⟨m, rfl⟩
+    rw [← two_mul] at h ⊢
+    rw [filter_odd_divisors_two_mul]
+    rcases Nat.even_or_odd m with ⟨l, rfl⟩ | hmo
+    · rw [← two_mul] at h ⊢
+      have h4 : 4 ∣ 2 * (2 * l) := ⟨l, by ring⟩
+      rw [ite_eq_left h4, show 2 * (2 * l) / 4 = l by omega] at h
+      rw [sigma_two_mul, sigma_two_mul, filter_odd_divisors_two_mul] at h
+      rw [filter_odd_divisors_two_mul]
+      have : (sumSquaresCount 4 (2 * (2 * l)) : ℂ) =
+          ((24 * ∑ d ∈ l.divisors.filter Odd, d : ℕ) : ℂ) := by
+        rw [h]; push_cast; ring
+      exact_mod_cast this
+    · have h4 : ¬ 4 ∣ 2 * m := fun ⟨k, hk⟩ => by
+        obtain ⟨j, rfl⟩ := hmo; omega
+      rw [ite_eq_right h4, sigma_two_mul, ← sigma_of_odd hmo] at h
+      have : (sumSquaresCount 4 (2 * m) : ℂ) = ((24 * σ 1 m : ℕ) : ℂ) := by
+        rw [h]; push_cast; ring
+      rw [← sigma_of_odd hmo]
+      exact_mod_cast this
 
 end DLMF.NumberTheory

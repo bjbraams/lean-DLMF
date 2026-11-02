@@ -25,7 +25,8 @@ the values at `s = 0`.
 * `LFunction_one_sub_of_isPrimitive`: the functional equation DLMF 25.15.5.
 * `LFunction_neg_two_mul_nat_eq_zero`: the trivial zeros for even characters (DLMF 25.15.7).
 * `eq_trivial_zero_of_LFunction_eq_zero`, `infinite_LFunction_zeros_criticalStrip`,
-  `LFunction_one_sub_conj_eq_zero`: the zeros of primitive `L`-functions (DLMF §25.15(ii)).
+  `LFunction_one_sub_conj_eq_zero`, `LFunction_one_sub_conj_eq_zero'`: the zeros of primitive
+  `L`-functions (DLMF §25.15(ii)).
 * `LFunction_zero_of_ne_one`, `LFunction_one_zero`: DLMF 25.15.10.
 
 ## Implementation notes
@@ -63,7 +64,8 @@ variable {N : ℕ} [NeZero N]
 
 omit [NeZero N] in
 /-- Identity under the stated parameter and domain assumptions: `χ 0 = 0`. -/
-private lemma dirichletCharacter_map_zero_of_ne_one {χ : DirichletCharacter ℂ N} (hN : N ≠ 1) : χ 0 = 0 := by
+private lemma dirichletCharacter_map_zero_of_ne_one {χ : DirichletCharacter ℂ N} (hN : N ≠ 1) : χ 0
+    = 0 := by
   have := ZMod.nontrivial_iff.mpr hN
   exact MulChar.map_zero χ
 
@@ -104,7 +106,8 @@ theorem LFunction_eq_sum_hurwitzZeta (χ : DirichletCharacter ℂ N) (hN : N ≠
   simp only [DirichletCharacter.LFunction, ZMod.LFunction]
   rw [sum_zmod_eq_sum_range (fun j => χ j * hurwitzZeta (ZMod.toAddCircle j) s),
     Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot (Nat.pos_of_ne_zero (NeZero.ne N))]
-  simp only [Nat.cast_zero, dirichletCharacter_map_zero_of_ne_one hN, zero_mul, zero_add, ZMod.toAddCircle_natCast]
+  simp only [Nat.cast_zero, dirichletCharacter_map_zero_of_ne_one hN, zero_mul, zero_add,
+      ZMod.toAddCircle_natCast]
 
 /-- **The Gauss sum** (DLMF 25.15.6): for `k ≥ 2`, Mathlib's `gaussSum χ ZMod.stdAddChar` is
 `G(χ) = ∑_{r=1}^{k-1} χ(r) e^{2πir/k}`. -/
@@ -173,7 +176,8 @@ theorem LFunction_neg_two_mul_nat_eq_zero {χ : DirichletCharacter ℂ N} (hχ :
     exact hχ.LFunction_neg_two_mul_nat n
 
 /-- The Gauss sum of a primitive character does not vanish (Fourier inversion on `ZMod N`). -/
-private lemma gaussSum_stdAddChar_ne_zero_of_isPrimitive {χ : DirichletCharacter ℂ N} (hχ : χ.IsPrimitive) :
+private lemma gaussSum_stdAddChar_ne_zero_of_isPrimitive {χ : DirichletCharacter ℂ N}
+    (hχ : χ.IsPrimitive) :
     gaussSum χ ZMod.stdAddChar ≠ 0 := by
   intro hG
   have hF : 𝓕 (χ : ZMod N → ℂ) = 0 := by
@@ -295,13 +299,13 @@ theorem infinite_LFunction_zeros_criticalStrip {χ : DirichletCharacter ℂ N}
 `ρ ≠ 0` is a zero in the closed critical strip then so is `1 - ρ̄`. (Not necessarily symmetric
 about the real axis: `ρ̄` is a zero of `L(s, χ̄)`.) Correction: DLMF states the symmetry for all
 zeros in `0 ≤ ℜ s ≤ 1`, but for even `χ` the trivial zero `s = 0` lies in that strip while
-`L(1, χ) ≠ 0`; see `LFunction_zero_eq_zero_and_LFunction_one_sub_conj_zero_ne_zero`. -/
+`L(1, χ) ≠ 0`; see `LFunction_zero_eq_zero_and_LFunction_one_sub_conj_zero_ne_zero`. This is
+stronger than DLMF, which assumes `ρ` in the closed critical strip `0 ≤ ℜ ρ ≤ 1`; the bound
+`ℜ ρ ≤ 1` is not needed. -/
 @[dlmf 25.15.ii]
-theorem LFunction_one_sub_conj_eq_zero {χ : DirichletCharacter ℂ N} (hχ : χ.IsPrimitive)
-    (hN : N ≠ 1) {ρ : ℂ} (h0 : 0 ≤ ρ.re) (h1 : ρ.re ≤ 1) (hρ0 : ρ ≠ 0)
-    (hρ : LFunction χ ρ = 0) :
+theorem LFunction_one_sub_conj_eq_zero' {χ : DirichletCharacter ℂ N} (hχ : χ.IsPrimitive)
+    (hN : N ≠ 1) {ρ : ℂ} (h0 : 0 ≤ ρ.re) (hρ0 : ρ ≠ 0) (hρ : LFunction χ ρ = 0) :
     LFunction χ (1 - (starRingEnd ℂ) ρ) = 0 := by
-  have _ := h1
   have hχ1 : χ ≠ 1 := by
     rintro rfl
     apply hN
@@ -317,12 +321,25 @@ theorem LFunction_one_sub_conj_eq_zero {χ : DirichletCharacter ℂ N} (hχ : χ
   rw [LFunction_one_sub_of_isPrimitive hχ hs (Or.inl hN), LFunction_star_conj hχ1, hρ,
     map_zero, mul_zero]
 
+/-- **Symmetry about the critical line** (DLMF §25.15(ii)): for primitive `χ (mod k)`, `k ≥ 2`, if
+`ρ ≠ 0` is a zero in the closed critical strip then so is `1 - ρ̄`. (Not necessarily symmetric
+about the real axis: `ρ̄` is a zero of `L(s, χ̄)`.) Correction: DLMF states the symmetry for all
+zeros in `0 ≤ ℜ s ≤ 1`, but for even `χ` the trivial zero `s = 0` lies in that strip while
+`L(1, χ) ≠ 0`; see `LFunction_zero_eq_zero_and_LFunction_one_sub_conj_zero_ne_zero`. -/
+@[dlmf 25.15.ii]
+theorem LFunction_one_sub_conj_eq_zero {χ : DirichletCharacter ℂ N} (hχ : χ.IsPrimitive)
+    (hN : N ≠ 1) {ρ : ℂ} (h0 : 0 ≤ ρ.re) (_h1 : ρ.re ≤ 1) (hρ0 : ρ ≠ 0)
+    (hρ : LFunction χ ρ = 0) :
+    LFunction χ (1 - (starRingEnd ℂ) ρ) = 0 :=
+  LFunction_one_sub_conj_eq_zero' hχ hN h0 hρ0 hρ
+
 /-- **Evidence that `LFunction_one_sub_conj_eq_zero` needs `ρ ≠ 0`** (DLMF's closed-strip
 wording is too broad): for an even character
 `χ ≠ χ₁ (mod k)`, `k ≥ 2` (e.g. a primitive even character such as the quadratic character
 mod 5), `ρ = 0` is a zero with `0 ≤ Re ρ ≤ 1`, but `L(1 - ρ̄, χ) = L(1, χ) ≠ 0`. (The trivial zero
 at `s = 0` lies on the boundary of the closed critical strip; hence the hypothesis `ρ ≠ 0`.) -/
-private lemma LFunction_zero_eq_zero_and_LFunction_one_sub_conj_zero_ne_zero {χ : DirichletCharacter ℂ N} (hχ : χ.Even)
+private lemma LFunction_zero_eq_zero_and_LFunction_one_sub_conj_zero_ne_zero
+    {χ : DirichletCharacter ℂ N} (hχ : χ.Even)
     (hN : N ≠ 1) (h1 : χ ≠ 1) :
     LFunction χ 0 = 0 ∧ LFunction χ (1 - (starRingEnd ℂ) 0) ≠ 0 := by
   refine ⟨by simpa using LFunction_neg_two_mul_nat_eq_zero hχ hN 0, ?_⟩

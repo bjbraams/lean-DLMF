@@ -69,9 +69,11 @@ theorem quadratic_connection_well_poised
     (hw : ‖((z + 1) /
     (z - 1)) ^ 2‖ < 1) :
     ₂F₁ a b (a - b + 1) z =
-      (1 - z) ^ (-a) * Gamma (a - b + 1) * Gamma (1 / 2) / (Gamma ((a + 1) / 2) * Gamma (a / 2 - b + 1)) *
+      (1 - z) ^ (-a) * Gamma (a - b + 1) * Gamma (1 / 2) /
+          (Gamma ((a + 1) / 2) * Gamma (a / 2 - b + 1)) *
         ₂F₁ (a / 2) (a / 2 - b + 1 / 2) (1 / 2) (((z + 1) / (z - 1)) ^ 2) +
-      (1 + z) * (1 - z) ^ (-a - 1) * Gamma (a - b + 1) * Gamma (-1 / 2) / (Gamma (a / 2) * Gamma (a / 2 - b
+      (1 + z) * (1 - z) ^ (-a - 1) * Gamma (a - b + 1) * Gamma (-1 / 2) /
+          (Gamma (a / 2) * Gamma (a / 2 - b
         + 1 / 2)) * ₂F₁ ((a + 1) / 2) (a / 2 - b + 1) (3 / 2) (((z + 1) / (z - 1)) ^ 2) := by
   set C := a - b + 1 with hCdef
   set q : ℂ → ℂ := fun z => ((z + 1) / (z - 1)) ^ 2 with hqdef
@@ -224,9 +226,11 @@ theorem quadratic_connection_half_sum
     (hz : ‖z‖ < 1)
     (hw : ‖(1 - 2 * z) ^ 2‖ < 1) :
     ₂F₁ a b ((a + b + 1) / 2) z =
-      Gamma ((a + b + 1) / 2) * Gamma (1 / 2) / (Gamma ((a + 1) / 2) * Gamma ((b + 1) / 2)) * ₂F₁ (a / 2) (b
+      Gamma ((a + b + 1) / 2) * Gamma (1 / 2) /
+          (Gamma ((a + 1) / 2) * Gamma ((b + 1) / 2)) * ₂F₁ (a / 2) (b
         / 2) (1 / 2) ((1 - 2 * z) ^ 2) +
-      (1 - 2 * z) * Gamma ((a + b + 1) / 2) * Gamma (-1 / 2) / (Gamma (a / 2) * Gamma (b / 2)) * ₂F₁ ((a +
+      (1 - 2 * z) * Gamma ((a + b + 1) / 2) * Gamma (-1 / 2) /
+          (Gamma (a / 2) * Gamma (b / 2)) * ₂F₁ ((a +
         1) / 2) ((b + 1) / 2) (3 / 2) ((1 - 2 * z) ^ 2) := by
   set C := (a + b + 1) / 2 with hCdef
   set E : ℂ → ℂ := fun z => Gamma C * Gamma (1 / 2) / (Gamma ((a + 1) / 2) * Gamma ((b + 1) / 2)) *
@@ -335,13 +339,16 @@ theorem quadratic_connection_complementary
     (hz : ‖z‖ < 1)
     (hw : ‖(1 - 2 * z) ^ 2‖ < 1) :
     ₂F₁ a (1 - a) c z =
-      (1 - z) ^ (c - 1) * Gamma c * Gamma (1 / 2) / (Gamma ((c - a + 1) / 2) * Gamma ((c + a) / 2)) * ₂F₁
+      (1 - z) ^ (c - 1) * Gamma c * Gamma (1 / 2) /
+          (Gamma ((c - a + 1) / 2) * Gamma ((c + a) / 2)) * ₂F₁
         ((c - a) / 2) ((c + a - 1) / 2) (1 / 2) ((1 - 2 * z) ^ 2) +
-      (1 - 2 * z) * (1 - z) ^ (c - 1) * Gamma c * Gamma (-1 / 2) / (Gamma ((c - a) / 2) * Gamma ((c + a - 1)
+      (1 - 2 * z) * (1 - z) ^ (c - 1) * Gamma c * Gamma (-1 / 2) /
+          (Gamma ((c - a) / 2) * Gamma ((c + a - 1)
         / 2)) * ₂F₁ ((c - a + 1) / 2) ((c + a) / 2) (3 / 2) ((1 - 2 * z) ^ 2) := by
   have h := quadratic_connection_half_sum (a := c - a) (b := c + a - 1)
     (by rw [show (c - a + (c + a - 1) + 1) / 2 = c by ring]; exact hc) hz hw
-  rw [show (c - a + (c + a - 1) + 1) / 2 = c by ring, show (c + a - 1 + 1) / 2 = (c + a) / 2 by ring]
+  rw [show (c - a + (c + a - 1) + 1) / 2 = c by ring, show (c + a - 1 + 1) / 2 =
+                                                  (c + a) / 2 by ring]
     at h
   rw [euler_transformation_of_ne_neg_nat hc hz, show c - a - (1 - a) = c - 1 by ring,
     show c - (1 - a) = c + a - 1 by ring, h]
@@ -379,10 +386,12 @@ theorem regularized_quadratic_connection_complementary (a c : ℂ) {z : ℂ}
   have h4 : Differentiable ℂ (fun c : ℂ=>1/Gamma ((c+a-1)/2)) := by
     simpa only [Function.comp_def, one_div] using differentiable_one_div_Gamma.comp
       (show Differentiable ℂ (fun c : ℂ=>(c+a-1)/2) by fun_prop)
-  have hG1 : Differentiable ℂ (fun c : ℂ=>regularizedGaussHGFun ((c-a)/2) ((c+a-1)/2) (1/2) ((1-2*z)^2)) :=
+  have hG1 : Differentiable ℂ
+      (fun c : ℂ=>regularizedGaussHGFun ((c-a)/2) ((c+a-1)/2) (1/2) ((1-2*z)^2)) :=
     fun c=>(analyticOnNhd_regularizedGaussHGFun_comp (by fun_prop) (by fun_prop)
       (differentiable_const (1/2)) hw c (Set.mem_univ c)).differentiableAt
-  have hG2 : Differentiable ℂ (fun c : ℂ=>regularizedGaussHGFun ((c-a+1)/2) ((c+a)/2) (3/2) ((1-2*z)^2)) :=
+  have hG2 : Differentiable ℂ
+      (fun c : ℂ=>regularizedGaussHGFun ((c-a+1)/2) ((c+a)/2) (3/2) ((1-2*z)^2)) :=
     fun c=>(analyticOnNhd_regularizedGaussHGFun_comp (by fun_prop) (by fun_prop)
       (differentiable_const (3/2)) hw c (Set.mem_univ c)).differentiableAt
   have he := Complex.eq_of_differentiable_of_eqOn_pos_reals
@@ -428,9 +437,11 @@ theorem quadratic_even_connection
     (hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -(k : ℂ))
     (hx : 0 < x)
     (hx1 : x < 1) :
-    2 * Gamma (1 / 2) * Gamma (a + b + 1 / 2) / (Gamma (a + 1 / 2) * Gamma (b + 1 / 2)) * ₂F₁ a b (1 / 2) (x
+    2 * Gamma (1 / 2) * Gamma (a + b + 1 / 2) / (Gamma (a + 1 / 2) * Gamma (b + 1 / 2)) *
+        ₂F₁ a b (1 / 2) (x
       : ℂ) =
-      ₂F₁ (2 * a) (2 * b) (a + b + 1 / 2) ((1 - Real.sqrt x) / 2 : ℂ) + ₂F₁ (2 * a) (2 * b) (a + b + 1 / 2)
+      ₂F₁ (2 * a) (2 * b) (a + b + 1 / 2) ((1 - Real.sqrt x) / 2 : ℂ) +
+          ₂F₁ (2 * a) (2 * b) (a + b + 1 / 2)
         ((1 + Real.sqrt x) / 2 : ℂ) := by
   have hs0 : 0 < Real.sqrt x := Real.sqrt_pos.mpr hx
   have hs1 : Real.sqrt x < 1 := by
@@ -474,9 +485,11 @@ theorem quadratic_odd_connection
     (hc : ∀ k : ℕ, a + b - 1 / 2 ≠ -(k : ℂ))
     (hx : 0 < x)
     (hx1 : x < 1) :
-    2 * (Real.sqrt x : ℂ) * Gamma (-1 / 2) * Gamma (a + b - 1 / 2) / (Gamma (a - 1 / 2) * Gamma (b - 1 / 2))
+    2 * (Real.sqrt x : ℂ) * Gamma (-1 / 2) * Gamma (a + b - 1 / 2) /
+        (Gamma (a - 1 / 2) * Gamma (b - 1 / 2))
       * ₂F₁ a b (3 / 2) (x : ℂ) =
-      ₂F₁ (2 * a - 1) (2 * b - 1) (a + b - 1 / 2) ((1 - Real.sqrt x) / 2 : ℂ) - ₂F₁ (2 * a - 1) (2 * b - 1)
+      ₂F₁ (2 * a - 1) (2 * b - 1) (a + b - 1 / 2) ((1 - Real.sqrt x) / 2 : ℂ) -
+          ₂F₁ (2 * a - 1) (2 * b - 1)
         (a + b - 1 / 2) ((1 + Real.sqrt x) / 2 : ℂ) := by
   have hs0 : 0 < Real.sqrt x := Real.sqrt_pos.mpr hx
   have hs1 : Real.sqrt x < 1 := by
@@ -523,7 +536,8 @@ theorem hasDerivAt_recip_Gamma {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
 /-- `(1/Γ)'(-p) = (-1)^p p!`. -/
 theorem hasDerivAt_recip_Gamma_neg_nat (p : ℕ) :
     HasDerivAt (fun y => (Gamma y)⁻¹) ((-1 : ℂ) ^ p * (p.factorial : ℂ)) (-(p : ℂ)) := by
-  have heq : (fun y => (Gamma y)⁻¹) = fun y => poch y p * (y + p) * (Gamma (y + (p + 1 : ℕ)))⁻¹ := by
+  have heq : (fun y => (Gamma y)⁻¹) = fun y => poch y p * (y + p) *
+      (Gamma (y + (p + 1 : ℕ)))⁻¹ := by
     funext y; rw [recip_Gamma_eq_poch_mul p y, poch_succ]
   rw [heq]
   have hp := (Polynomial.hasDerivAt (ascPochhammer ℂ p) (-(p : ℂ)))
@@ -778,7 +792,8 @@ theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
         ((fun y => (Gamma y)⁻¹) ∘ fun c : ℂ => c - a - b + 1 + n) c) _ c₀ := h
     rw [show (fun c => poch ((fun c => c - a) c) n * poch ((fun c => c - b) c) n *
       w ^ n / n.factorial * (Gamma ((fun c => c - a - b + 1) c + n))⁻¹) =
-      fun c => ((fun y => poch y n) ∘ fun c : ℂ => c - a) c * ((fun y => poch y n) ∘ fun c : ℂ => c - b) c *
+      fun c => ((fun y => poch y n) ∘ fun c : ℂ => c - a) c *
+          ((fun y => poch y n) ∘ fun c : ℂ => c - b) c *
         w ^ n / n.factorial * ((fun y => (Gamma y)⁻¹) ∘ fun c : ℂ => c - a - b + 1 + n) c from rfl,
       h'.deriv]
     simp only [Pi.mul_apply, Function.comp_apply, e1, e2]
@@ -786,11 +801,13 @@ theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
   -- derivative of the right side of the connection formula
   have e1 : c₀ - a = b + m := by rw [hc₀]; ring
   have e2 : c₀ - b = a + m := by rw [hc₀]; ring
-  have hG1 : HasDerivAt (fun c : ℂ => (Gamma (c - a))⁻¹) (-(digamma (b + m)) * (Gamma (b + m))⁻¹) c₀ := by
+  have hG1 : HasDerivAt (fun c : ℂ => (Gamma (c - a))⁻¹)
+      (-(digamma (b + m)) * (Gamma (b + m))⁻¹) c₀ := by
     have h1 : HasDerivAt (fun y => (Gamma y)⁻¹) (-(digamma (b + m)) * (Gamma (b + m))⁻¹)
         (c₀ - a) := by rw [e1]; exact hasDerivAt_recip_Gamma hbm
     simpa [Function.comp_def] using h1.comp c₀ ((hasDerivAt_id c₀).sub_const a)
-  have hG2 : HasDerivAt (fun c : ℂ => (Gamma (c - b))⁻¹) (-(digamma (a + m)) * (Gamma (a + m))⁻¹) c₀ := by
+  have hG2 : HasDerivAt (fun c : ℂ => (Gamma (c - b))⁻¹)
+      (-(digamma (a + m)) * (Gamma (a + m))⁻¹) c₀ := by
     have h1 : HasDerivAt (fun y => (Gamma y)⁻¹) (-(digamma (a + m)) * (Gamma (a + m))⁻¹)
         (c₀ - b) := by rw [e2]; exact hasDerivAt_recip_Gamma ham
     simpa [Function.comp_def] using h1.comp c₀ ((hasDerivAt_id c₀).sub_const b)
@@ -861,7 +878,8 @@ theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
     simp only [hsS, show 1 - (m : ℂ) + ((k + m : ℕ) : ℂ) = (k : ℂ) + 1 by push_cast; ring]
     ring
   have hdt_low : ∀ n : ℕ, n < m → dt n =
-      -(poch a n * poch b n * w ^ n / n.factorial) * ((-1) ^ (m - 1 - n) * ((m - 1 - n).factorial : ℂ)) := by
+      -(poch a n * poch b n * w ^ n / n.factorial) *
+          ((-1) ^ (m - 1 - n) * ((m - 1 - n).factorial : ℂ)) := by
     intro n hn
     simp only [hdt]
     rw [htd, hpole n hn, hD, deriv_recip_Gamma_neg_nat]
@@ -871,13 +889,15 @@ theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
       digamma (a + m + k) + digamma (b + m + k))))
       (P * w ^ m * (log w + ψs) * Q c₀ + P * w ^ m * deriv Q c₀ -
         (deriv S c₀ - ∑ i ∈ Finset.range m, dt i)) := by
-    have h := ((hQ0.mul_left (P * w ^ m * (log w + ψs))).add (hQsum.mul_left (P * w ^ m))).sub hSshift
+    have h := ((hQ0.mul_left (P * w ^ m * (log w + ψs))).add
+        (hQsum.mul_left (P * w ^ m))).sub hSshift
     convert h using 1
     funext k
     rw [hqd k, hdt_shift k]
     simp only [hψs]
     ring
-  have htsum : (∑' k : ℕ, poch (a + m) k * poch (b + m) k / ((k.factorial : ℂ) * ((k + m).factorial : ℂ)) *
+  have htsum : (∑' k : ℕ, poch (a + m) k * poch (b + m) k /
+      ((k.factorial : ℂ) * ((k + m).factorial : ℂ)) *
       w ^ k * (log w - digamma (k + 1) - digamma (k + m + 1) + digamma (a + k + m) +
         digamma (b + k + m))) = ∑' k : ℕ, q k * (log w - digamma (k + 1) - digamma (m + 1 + k) +
       digamma (a + m + k) + digamma (b + m + k)) := by
@@ -920,7 +940,8 @@ theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
       rw [show z - 1 = -w by rw [hwdef]; ring, neg_pow]
     rw [show m - k - 1 = j by omega, hzk, hj]
     have hj2 : ((-1 : ℂ) ^ j) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul, neg_one_sq, one_pow]
-    linear_combination (poch a k * poch b k * w ^ k / k.factorial * (j.factorial : ℂ) * (-1) ^ k) * hj2
+    linear_combination (poch a k * poch b k * w ^ k / k.factorial * (j.factorial : ℂ) *
+        (-1) ^ k) * hj2
   rw [hψs] at hEval
   rw [one_div, mul_inv, div_eq_mul_inv]
   linear_combination (-1 : ℂ) ^ m * hkey +
@@ -948,7 +969,8 @@ theorem logarithmic_connection_one_div_one_sub {a c z : ℂ} (m : ℕ)
       (-1 : ℂ) ^ m * (1 - z) ^ (-a - m) / (Gamma a * Gamma (c - a - m)) *
         ∑' k : ℕ, poch (a + m) k * poch (c - a) k /
           ((k.factorial : ℂ) * ((k + m).factorial : ℂ)) * ((1 - z)⁻¹) ^ k *
-          (log (1 - z) + digamma (k + 1) + digamma (k + m + 1) - digamma (a + k + m) - digamma (c - a + k))
+          (log (1 - z) + digamma (k + 1) + digamma (k + m + 1) - digamma (a + k + m) -
+              digamma (c - a + k))
             := by
   have h1z : 1 - z ≠ 0 := by
     intro h; rw [h, norm_zero] at hw; linarith
@@ -1118,7 +1140,8 @@ theorem logarithmic_connection_one_sub_recip {a b z : ℂ} (m : ℕ)
           ((k.factorial : ℂ) * Gamma (b + m - k)) * (1 - 1 / z) ^ k) -
       z ^ (-a) / Gamma a * ∑' k : ℕ,
         poch (a + m) k / ((k.factorial : ℂ) * ((k + m).factorial : ℂ) * Gamma (b - k)) *
-          (-1 : ℂ) ^ k * (1 - 1 / z) ^ (k + m) * (log ((1 - z) / z) - digamma (k + 1) - digamma (k + m + 1)+
+          (-1 : ℂ) ^ k * (1 - 1 / z) ^ (k + m) *
+              (log ((1 - z) / z) - digamma (k + 1) - digamma (k + m + 1)+
             digamma (a + k + m) + digamma (b - k)) := by
   set c₀ := a + b + m with hc₀
   set D : ℂ → ℂ := deriv (fun y : ℂ => (Gamma y)⁻¹) with hD
@@ -1219,17 +1242,20 @@ theorem logarithmic_connection_one_sub_recip {a b z : ℂ} (m : ℕ)
     simp only [Function.comp_apply, e2, e3]
     ring
   -- derivative of the right side
-  have hG1 : HasDerivAt (fun c : ℂ => (Gamma (c - a))⁻¹) (-(digamma (b + m)) * (Gamma (b + m))⁻¹) c₀ := by
+  have hG1 : HasDerivAt (fun c : ℂ => (Gamma (c - a))⁻¹)
+      (-(digamma (b + m)) * (Gamma (b + m))⁻¹) c₀ := by
     have h1 : HasDerivAt (fun y => (Gamma y)⁻¹) (-(digamma (b + m)) * (Gamma (b + m))⁻¹)
         (c₀ - a) := by rw [e1]; exact hasDerivAt_recip_Gamma hbm
     simpa [Function.comp_def] using h1.comp c₀ ((hasDerivAt_id c₀).sub_const a)
-  have hG2 : HasDerivAt (fun c : ℂ => (Gamma (c - b))⁻¹) (-(digamma (a + m)) * (Gamma (a + m))⁻¹) c₀ := by
+  have hG2 : HasDerivAt (fun c : ℂ => (Gamma (c - b))⁻¹)
+      (-(digamma (a + m)) * (Gamma (a + m))⁻¹) c₀ := by
     have h1 : HasDerivAt (fun y => (Gamma y)⁻¹) (-(digamma (a + m)) * (Gamma (a + m))⁻¹)
         (c₀ - b) := by rw [e2]; exact hasDerivAt_recip_Gamma ham
     simpa [Function.comp_def] using h1.comp c₀ ((hasDerivAt_id c₀).sub_const b)
   have hU : HasDerivAt (fun c : ℂ => ((1 - z) / z) ^ (c - a - b))
       (((1 - z) / z) ^ (m : ℂ) * log ((1 - z) / z) * 1) c₀ := by
-    have h := (((hasDerivAt_id c₀).sub_const a).sub_const b).const_cpow (c := (1 - z) / z) (Or.inl hq0)
+    have h := (((hasDerivAt_id c₀).sub_const a).sub_const b).const_cpow
+        (c := (1 - z) / z) (Or.inl hq0)
     rw [show _root_.id c₀ - a - b = (m : ℂ) by simp only [_root_.id]; rw [hc₀]; ring] at h
     exact h
   have hR := (hSa.hasDerivAt.mul ((hG1.mul hG2).const_mul (z ^ (-a)))).sub
@@ -1323,7 +1349,8 @@ theorem logarithmic_connection_one_sub_recip {a b z : ℂ} (m : ℕ)
   have htsum : (∑' k : ℕ, poch (a + m) k / ((k.factorial : ℂ) * ((k + m).factorial : ℂ) *
       Gamma (b - k)) * (-1 : ℂ) ^ k * v ^ (k + m) * (L - digamma (k + 1) - digamma (k + m + 1) +
         digamma (a + k + m) + digamma (b - k))) = v ^ m * (Gamma b)⁻¹ * ∑' k : ℕ,
-      q k * (L - digamma (k + 1) - digamma (m + 1 + k) + digamma (a + m + k) + digamma (b - k)) := by
+      q k * (L - digamma (k + 1) - digamma (m + 1 + k) + digamma (a + m + k) +
+          digamma (b - k)) := by
     rw [← tsum_mul_left]
     refine tsum_congr fun k => ?_
     have hbk : Gamma (b - k) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_not_int_sub hb k)
@@ -1383,10 +1410,12 @@ theorem logarithmic_connection_one_sub_recip {a b z : ℂ} (m : ℕ)
       Z * ψ * v ^ m * Q c₀ * K - Z * K * v ^ m * SE +
       Z * K * v ^ m * ((L + ψ) * Q c₀ + deriv Q c₀)) * hσ +
     (-σ * Z * G0 * ψ) * hS0eq + (σ ^ 2 * K * Z * (L * Q c₀ + deriv Q c₀)) * hvU +
-    (-σ * Z * ψ * v ^ m * Q c₀ - σ * Z * v ^ m * SE + σ * Z * v ^ m * ((L + ψ) * Q c₀ + deriv Q c₀)) * hGP +
+    (-σ * Z * ψ * v ^ m * Q c₀ - σ * Z * v ^ m * SE + σ * Z * v ^ m *
+        ((L + ψ) * Q c₀ + deriv Q c₀)) * hGP +
     (σ * Z * G0) * hEval + (Z * G0) * hFin +
     (Z * (Gamma (a + m))⁻¹ * ∑ k ∈ Finset.range m,
-      poch a k * ((m - k - 1).factorial : ℂ) / ((k.factorial : ℂ) * Gamma (b + m - k)) * v ^ k) * hgb'
+      poch a k * ((m - k - 1).factorial : ℂ) /
+          ((k.factorial : ℂ) * Gamma (b + m - k)) * v ^ k) * hgb'
 
 /-- DLMF 15.8.32 on the ray `x < -1`, for all `a` with `2a + 2/3, a + 1/3 ∉ -ℕ`. -/
 @[dlmf 15.8.E32]
@@ -1396,10 +1425,12 @@ theorem cubic_connection {a : ℂ} {x : ℝ} (hx : x < -1)
     let ζ := exp (2 * Real.pi * I / 3) * (1 - z) / (z - exp (4 * Real.pi * I / 3))
     (1 - z ^ 3) ^ a / (-z) ^ (3 * a) *
       (₂F₁ a (a + 1 / 3) (2 / 3) ((z⁻¹) ^ 3) / (Gamma (a + 2 / 3) * Gamma (2 / 3)) +
-        exp (Real.pi * I / 3) / (z * Gamma a * Gamma (4 / 3)) * ₂F₁ (a + 1 / 3) (a + 2 / 3) (4 / 3) ((z⁻¹) ^
+        exp (Real.pi * I / 3) / (z * Gamma a * Gamma (4 / 3)) *
+            ₂F₁ (a + 1 / 3) (a + 2 / 3) (4 / 3) ((z⁻¹) ^
           3)) =
       (3 : ℂ) ^ (3 * a / 2 + 1 / 2) * exp (a * Real.pi * I / 2) * Gamma (a + 1 / 3) * (1 - ζ) ^ a /
-        (2 * Real.pi * Gamma (2 * a + 2 / 3) * (-ζ) ^ (2 * a)) * ₂F₁ (a + 1 / 3) (3 * a) (2 * a + 2 / 3) (1
+        (2 * Real.pi * Gamma (2 * a + 2 / 3) * (-ζ) ^ (2 * a)) *
+            ₂F₁ (a + 1 / 3) (3 * a) (2 * a + 2 / 3) (1
           / ζ) := by
   intro z ζ
   simp only [ζ, z, hcub_exp_two_third, hcub_exp_four_third]

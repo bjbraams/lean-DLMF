@@ -69,7 +69,8 @@ theorem incBeta_ofReal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {x : ℝ} (hx
   have hxpos : 0 < x := lt_of_le_of_ne hx.1 (Ne.symm hx0)
   have hxlt : x < 1 := lt_of_le_of_ne hx.2 hx1
   have hxn : ‖(x:ℂ)‖ < 1 := by simpa [Complex.norm_real, Real.norm_of_nonneg hx.1] using hxlt
-  rw [incBeta, if_neg (by exact_mod_cast hx1), Real.incBeta_eq_ordinaryHypergeometric ha b hxpos hxlt,
+  rw [incBeta, if_neg (by exact_mod_cast hx1),
+      Real.incBeta_eq_ordinaryHypergeometric ha b hxpos hxlt,
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hxn,
     regularizedGaussHGFun_eq_div_Gamma ha1, Gamma_add_one a ha0]
   field_simp [Gamma_ne_zero_of_re_pos ha]
@@ -77,7 +78,8 @@ theorem incBeta_ofReal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {x : ℝ} (hx
 /-- Identity under the stated parameter and domain assumptions: `normIncBetaI a b
 x=Real.normIncBetaI a b x`. -/
 @[dlmf 8.17.E2]
-theorem normIncBetaI_ofReal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {x : ℝ} (hx : x ∈ Icc (0 : ℝ) 1) :
+theorem normIncBetaI_ofReal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {x : ℝ}
+    (hx : x ∈ Icc (0 : ℝ) 1) :
     normIncBetaI a b x=Real.normIncBetaI a b x := by
   by_cases hx1 : x=1
   · subst x
@@ -143,7 +145,8 @@ theorem integral_beta_quadratic_subst {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 �
       simp only [hf]; nlinarith [ht.1, ht.2]
     refine ContinuousAt.continuousWithinAt ?_
     exact (Real.continuousAt_rpow_const _ _ (Or.inl hu0)).mul
-      ((Real.continuousAt_rpow_const _ _ (Or.inl hu1)).comp (continuousAt_const.sub continuousAt_id))
+      ((Real.continuousAt_rpow_const _ _ (Or.inl hu1)).comp
+          (continuousAt_const.sub continuousAt_id))
   · have h01 : IntervalIntegrable g volume 0 1 :=
       TauCeti.intervalIntegrable_rpow_mul_one_sub_rpow ha (by norm_num : (0:ℝ) < 1/2)
         ⟨le_rfl, zero_le_one⟩ ⟨zero_le_one, le_rfl⟩
@@ -197,7 +200,8 @@ theorem normIncBetaI_quadratic {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) (
 ℂ)*(1-x : ℂ)^(b : ℂ)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG (a+b) 1 (a+1) x`. -/
 @[dlmf 8.17.E8]
 theorem incBeta_hypergeometric_euler {a b : ℝ} (ha : 0 < a) {x : ℝ} (hx1 : x < 1) :
-    incBeta a b x=(x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG (a+b) 1 (a+1) x := by
+    incBeta a b x=(x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ)/a*Gamma
+        (a+1)*DLMF.Hypergeometric.regularizedGaussHG (a+b) 1 (a+1) x := by
   have hc : (x:ℂ) ∈ cutPlane := by
     change 1-(x:ℂ) ∈ slitPlane
     left
@@ -217,7 +221,8 @@ theorem incBeta_hypergeometric_euler {a b : ℝ} (ha : 0 < a) {x : ℝ} (hx1 : x
 (x/(x-1))`. -/
 @[dlmf 8.17.E9]
 theorem incBeta_hypergeometric_pfaff {a b : ℝ} (ha : 0 < a) {x : ℝ} (hx1 : x < 1) :
-    incBeta a b x=(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG 1 (1-b) (a+1) (x/(x-1)) := by
+    incBeta a b x=(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)/a*Gamma
+        (a+1)*DLMF.Hypergeometric.regularizedGaussHG 1 (1-b) (a+1) (x/(x-1)) := by
   have hc : (x:ℂ) ∈ cutPlane := by
     change 1-(x:ℂ) ∈ slitPlane
     left
@@ -236,8 +241,10 @@ theorem incBeta_hypergeometric_pfaff {a b : ℝ} (ha : 0 < a) {x : ℝ} (hx1 : x
 => let s : ℂ := c+y*I; s^(-(a : ℂ))*(1-s)^(-(b : ℂ))/(s-x)) (2*π*normIncBetaI a b x/((x :
 ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ)))`. -/
 @[dlmf 8.17.E10]
-theorem normIncBetaI_mellinBarnes {a b x c : ℝ} (ha : 0 < a) (hb : 0 < b) (hx : 0 < x) (hxc : x < c) (hc1 : c < 1) :
-    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; s^(-(a : ℂ))*(1-s)^(-(b : ℂ))/(s-x)) (2*π*normIncBetaI a b x/((x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ))) := by
+theorem normIncBetaI_mellinBarnes {a b x c : ℝ} (ha : 0 < a) (hb : 0 < b) (hx : 0 < x) (hxc : x < c)
+    (hc1 : c < 1) :
+    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; s^(-(a : ℂ))*(1-s)^(-(b : ℂ))/(s-x))
+        (2*π*normIncBetaI a b x/((x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ))) := by
   sorry
 
 /-- The complementary argument x prime. -/
@@ -416,7 +423,8 @@ theorem normIncBetaI_contiguous_complex {a b z : ℂ} (ha : 0<a.re) (hb : 0<b.re
 /-- Identity under the stated parameter and domain assumptions: `normIncBetaI (a) (b) x=(x :
 ℂ)*normIncBetaI (a-1) (b) x+(1-x : ℂ)*normIncBetaI (a) (b-1) x`. -/
 @[dlmf 8.17.E12]
-theorem normIncBetaI_contiguous_12 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) (hab : a+b ≠ 1) :
+theorem normIncBetaI_contiguous_12 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) (hab : a+b ≠ 1) :
     normIncBetaI (a) (b) x=(x : ℂ)*normIncBetaI (a-1) (b) x+(1-x : ℂ)*normIncBetaI (a) (b-1) x := by
   have h := (normIncBetaI_contiguous_complex (a:=(a:ℂ)) (b:=(b:ℂ)) ha hb
     (by exact_mod_cast hab) (by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1)
@@ -427,8 +435,10 @@ theorem normIncBetaI_contiguous_12 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
 /-- Identity under the stated parameter and domain assumptions: `((a+b : ℝ) : ℂ)*normIncBetaI (a)
 (b) x=(a : ℂ)*normIncBetaI (a+1) (b) x+(b : ℂ)*normIncBetaI (a) (b+1) x`. -/
 @[dlmf 8.17.E13]
-theorem normIncBetaI_contiguous_13 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
-    ((a+b : ℝ) : ℂ)*normIncBetaI (a) (b) x=(a : ℂ)*normIncBetaI (a+1) (b) x+(b : ℂ)*normIncBetaI (a) (b+1) x := by
+theorem normIncBetaI_contiguous_13 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) :
+    ((a+b : ℝ) : ℂ)*normIncBetaI (a) (b) x=(a : ℂ)*normIncBetaI (a+1) (b) x+(b : ℂ)*normIncBetaI
+        (a) (b+1) x := by
   have ha' : 0 < (a:ℂ).re := ha
   have hb' : 0 < (b:ℂ).re := hb
   have hxx : x ∈ Icc (0:ℝ) 1 := ⟨hx.le,hx1.le⟩
@@ -446,37 +456,45 @@ theorem normIncBetaI_contiguous_13 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
 /-- Identity under the stated parameter and domain assumptions: `((a+b*x : ℝ) : ℂ)*normIncBetaI
 (a) (b) x=(x : ℂ)*b*normIncBetaI (a-1) (b+1) x+(a : ℂ)*normIncBetaI (a+1) (b) x`. -/
 @[dlmf 8.17.E14]
-theorem normIncBetaI_contiguous_14 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
-    ((a+b*x : ℝ) : ℂ)*normIncBetaI (a) (b) x=(x : ℂ)*b*normIncBetaI (a-1) (b+1) x+(a : ℂ)*normIncBetaI (a+1) (b) x := by
+theorem normIncBetaI_contiguous_14 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) :
+    ((a+b*x : ℝ) : ℂ)*normIncBetaI (a) (b) x=(x : ℂ)*b*normIncBetaI (a-1) (b+1)
+        x+(a : ℂ)*normIncBetaI (a+1) (b) x := by
   have h := normIncBetaI_neighbors (a:=(a:ℂ)) (b:=(b:ℂ)) (z:=(x:ℂ)) ha hb
     (by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1)
     (Complex.ofReal_ne_zero.mpr hx.ne')
   dsimp only at h
   push_cast
   rw [h.2.2.2,h.1]
-  field_simp [Complex.ofReal_ne_zero.mpr ha.ne', Complex.ofReal_ne_zero.mpr hb.ne', Complex.ofReal_ne_zero.mpr hx.ne']
+  field_simp [Complex.ofReal_ne_zero.mpr ha.ne', Complex.ofReal_ne_zero.mpr hb.ne',
+      Complex.ofReal_ne_zero.mpr hx.ne']
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `((b+a*(1-x) : ℝ) :
 ℂ)*normIncBetaI (a) (b) x=(a : ℂ)*(1-x)*normIncBetaI (a+1) (b-1) x+(b : ℂ)*normIncBetaI (a)
 (b+1) x`. -/
 @[dlmf 8.17.E15]
-theorem normIncBetaI_contiguous_15 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
-    ((b+a*(1-x) : ℝ) : ℂ)*normIncBetaI (a) (b) x=(a : ℂ)*(1-x)*normIncBetaI (a+1) (b-1) x+(b : ℂ)*normIncBetaI (a) (b+1) x := by
+theorem normIncBetaI_contiguous_15 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) :
+    ((b+a*(1-x) : ℝ) : ℂ)*normIncBetaI (a) (b) x=(a : ℂ)*(1-x)*normIncBetaI (a+1) (b-1)
+        x+(b : ℂ)*normIncBetaI (a) (b+1) x := by
   have h := normIncBetaI_neighbors (a:=(a:ℂ)) (b:=(b:ℂ)) (z:=(x:ℂ)) ha hb
     (by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1)
     (Complex.ofReal_ne_zero.mpr hx.ne')
   dsimp only at h
   push_cast
   rw [h.2.2.1,h.2.1]
-  field_simp [Complex.ofReal_ne_zero.mpr ha.ne', Complex.ofReal_ne_zero.mpr hb.ne', show (1:ℂ)-x≠0 by exact_mod_cast (sub_pos.mpr hx1).ne']
+  field_simp [Complex.ofReal_ne_zero.mpr ha.ne', Complex.ofReal_ne_zero.mpr hb.ne',
+      show (1:ℂ)-x≠0 by exact_mod_cast (sub_pos.mpr hx1).ne']
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `(a : ℂ)*normIncBetaI (a+1) (b)
 x=((a : ℂ)+(a+b-1)*x)*normIncBetaI (a) (b) x-((a+b-1 : ℝ) : ℂ)*x*normIncBetaI (a-1) (b) x`. -/
 @[dlmf 8.17.E16]
-theorem normIncBetaI_contiguous_16 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) (hab : a+b ≠ 1) :
-    (a : ℂ)*normIncBetaI (a+1) (b) x=((a : ℂ)+(a+b-1)*x)*normIncBetaI (a) (b) x-((a+b-1 : ℝ) : ℂ)*x*normIncBetaI (a-1) (b) x := by
+theorem normIncBetaI_contiguous_16 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) (hab : a+b ≠ 1) :
+    (a : ℂ)*normIncBetaI (a+1) (b) x=((a : ℂ)+(a+b-1)*x)*normIncBetaI (a) (b)
+        x-((a+b-1 : ℝ) : ℂ)*x*normIncBetaI (a-1) (b) x := by
   have h := (normIncBetaI_contiguous_complex (a:=(a:ℂ)) (b:=(b:ℂ)) ha hb
     (by exact_mod_cast hab) (by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1)
     (Complex.ofReal_ne_zero.mpr hx.ne')).2.1
@@ -487,8 +505,10 @@ theorem normIncBetaI_contiguous_16 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
 x=((b : ℂ)+(a+b-1)*(1-x))*normIncBetaI (a) (b) x-((a+b-1 : ℝ) : ℂ)*(1-x)*normIncBetaI (a)
 (b-1) x`. -/
 @[dlmf 8.17.E17]
-theorem normIncBetaI_contiguous_17 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) (hab : a+b ≠ 1) :
-    (b : ℂ)*normIncBetaI (a) (b+1) x=((b : ℂ)+(a+b-1)*(1-x))*normIncBetaI (a) (b) x-((a+b-1 : ℝ) : ℂ)*(1-x)*normIncBetaI (a) (b-1) x := by
+theorem normIncBetaI_contiguous_17 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) (hab : a+b ≠ 1) :
+    (b : ℂ)*normIncBetaI (a) (b+1) x=((b : ℂ)+(a+b-1)*(1-x))*normIncBetaI (a) (b)
+        x-((a+b-1 : ℝ) : ℂ)*(1-x)*normIncBetaI (a) (b-1) x := by
   have h := (normIncBetaI_contiguous_complex (a:=(a:ℂ)) (b:=(b:ℂ)) ha hb
     (by exact_mod_cast hab) (by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1)
     (Complex.ofReal_ne_zero.mpr hx.ne')).2.2
@@ -498,8 +518,10 @@ theorem normIncBetaI_contiguous_17 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
 /-- Identity under the stated parameter and domain assumptions: `normIncBetaI (a) (b)
 x=normIncBetaI (a+1) (b-1) x+(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)/(a*betaIntegral a b)`. -/
 @[dlmf 8.17.E18]
-theorem normIncBetaI_contiguous_18 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
-    normIncBetaI (a) (b) x=normIncBetaI (a+1) (b-1) x+(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)/(a*betaIntegral a b) := by
+theorem normIncBetaI_contiguous_18 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) :
+    normIncBetaI (a) (b) x=normIncBetaI (a+1) (b-1)
+        x+(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)/(a*betaIntegral a b) := by
   have h := normIncBetaI_neighbors (a:=(a:ℂ)) (b:=(b:ℂ)) (z:=(x:ℂ)) ha hb
     (by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1)
     (Complex.ofReal_ne_zero.mpr hx.ne')
@@ -511,8 +533,10 @@ theorem normIncBetaI_contiguous_18 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
 /-- Identity under the stated parameter and domain assumptions: `normIncBetaI (a) (b)
 x=normIncBetaI (a-1) (b+1) x-(x : ℂ)^((a : ℂ)-1)*(1-x : ℂ)^(b : ℂ)/(b*betaIntegral a b)`. -/
 @[dlmf 8.17.E19]
-theorem normIncBetaI_contiguous_19 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
-    normIncBetaI (a) (b) x=normIncBetaI (a-1) (b+1) x-(x : ℂ)^((a : ℂ)-1)*(1-x : ℂ)^(b : ℂ)/(b*betaIntegral a b) := by
+theorem normIncBetaI_contiguous_19 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) :
+    normIncBetaI (a) (b) x=normIncBetaI (a-1) (b+1)
+        x-(x : ℂ)^((a : ℂ)-1)*(1-x : ℂ)^(b : ℂ)/(b*betaIntegral a b) := by
   have h := normIncBetaI_neighbors (a:=(a:ℂ)) (b:=(b:ℂ)) (z:=(x:ℂ)) ha hb
     (by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1)
     (Complex.ofReal_ne_zero.mpr hx.ne')
@@ -536,10 +560,12 @@ theorem continuousAt_normIncBetaI_left {a b z : ℂ} (ha : 0<a.re) (hb : 0<b.re)
     simp_rw [cpow_def_of_ne_zero hz0]
     fun_prop
   have hF := ((analyticOnNhd_regularizedGaussHGFun_comp
-    (A:=id) (B:=fun _ => 1-b) (C:=fun w=>w+1) (by fun_prop) (by fun_prop) (by fun_prop) hz) a (mem_univ _)).continuousAt
+    (A:=id) (B:=fun _ => 1-b) (C:=fun w=>w+1) (by fun_prop) (by fun_prop) (by fun_prop) hz) a
+        (mem_univ _)).continuousAt
   exact ((hG.div_const (Gamma b)).mul hP).mul hF
 
-/-- Along a punctured perturbation, the three contiguous whole expressions agree with unshifted values. -/
+/-- Along a punctured perturbation, the three contiguous whole expressions agree with unshifted
+values. -/
 theorem eventually_normIncBetaI_contiguous {a b z : ℂ} (ha : 0<a.re) (hb : 0<b.re)
     (hz : ‖z‖<1) (hz0 : z≠0) :
     ∀ᶠ ε : ℂ in 𝓝[≠] 0,
@@ -549,7 +575,8 @@ theorem eventually_normIncBetaI_contiguous {a b z : ℂ} (ha : 0<a.re) (hb : 0<b
       b*normIncBetaI (a+ε) (b+1) z=(b+(a+ε+b-1)*(1-z))*normIncBetaI (a+ε) b z-
         (a+ε+b-1)*(1-z)*normIncBetaI (a+ε) (b-1) z := by
   have hp : ∀ᶠ ε : ℂ in 𝓝 0, 0<(a+ε).re :=
-    (isOpen_lt continuous_const (by fun_prop : Continuous (fun ε : ℂ => (a+ε).re))).mem_nhds (by simpa using ha)
+    (isOpen_lt continuous_const (by fun_prop : Continuous (fun ε : ℂ => (a+ε).re))).mem_nhds
+        (by simpa using ha)
   have hsum : ∀ᶠ ε : ℂ in 𝓝[≠] 0, a+ε+b≠1 := by
     by_cases h : a+b=1
     · filter_upwards [self_mem_nhdsWithin] with ε hε
@@ -566,8 +593,11 @@ theorem eventually_normIncBetaI_contiguous {a b z : ℂ} (ha : 0<a.re) (hb : 0<b
 
 /-- Limiting interpretation at the otherwise singular a+b=1 recurrence. -/
 @[dlmf 8.17.E12]
-theorem normIncBetaI_contiguous_limit_12 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
-    Tendsto (fun ε : ℂ => (x : ℂ)*normIncBetaI (((a : ℂ)+ε)-1) (b) x+(1-x : ℂ)*normIncBetaI (((a : ℂ)+ε)) (b-1) x) (𝓝[≠] 0) (𝓝 (normIncBetaI (a) (b) x)) := by
+theorem normIncBetaI_contiguous_limit_12 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) :
+    Tendsto (fun ε : ℂ =>
+        (x : ℂ)*normIncBetaI (((a : ℂ)+ε)-1) (b) x+(1-x : ℂ)*normIncBetaI (((a : ℂ)+ε)) (b-1) x)
+        (𝓝[≠] 0) (𝓝 (normIncBetaI (a) (b) x)) := by
   have hnorm : ‖(x:ℂ)‖<1 := by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1
   have hx0 := Complex.ofReal_ne_zero.mpr hx.ne'
   have he := eventually_normIncBetaI_contiguous (a:=(a:ℂ)) (b:=(b:ℂ)) ha hb hnorm hx0
@@ -582,8 +612,12 @@ theorem normIncBetaI_contiguous_limit_12 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {
 
 /-- Limiting interpretation at the otherwise singular a+b=1 recurrence. -/
 @[dlmf 8.17.E16]
-theorem normIncBetaI_contiguous_limit_16 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
-    Tendsto (fun ε : ℂ => ((((a : ℂ)+ε) : ℂ)+(((a : ℂ)+ε)+b-1)*x)*normIncBetaI (((a : ℂ)+ε)) (b) x-((((a : ℂ)+ε)+b-1 : ℂ) : ℂ)*x*normIncBetaI (((a : ℂ)+ε)-1) (b) x) (𝓝[≠] 0) (𝓝 ((a : ℂ)*normIncBetaI (a+1) (b) x)) := by
+theorem normIncBetaI_contiguous_limit_16 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) :
+    Tendsto (fun ε : ℂ =>
+        ((((a : ℂ)+ε) : ℂ)+(((a : ℂ)+ε)+b-1)*x)*normIncBetaI (((a : ℂ)+ε)) (b)
+        x-((((a : ℂ)+ε)+b-1 : ℂ) : ℂ)*x*normIncBetaI (((a : ℂ)+ε)-1) (b) x) (𝓝[≠] 0)
+        (𝓝 ((a : ℂ)*normIncBetaI (a+1) (b) x)) := by
   have hnorm : ‖(x:ℂ)‖<1 := by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1
   have hx0 := Complex.ofReal_ne_zero.mpr hx.ne'
   have he := eventually_normIncBetaI_contiguous (a:=(a:ℂ)) (b:=(b:ℂ)) ha hb hnorm hx0
@@ -591,7 +625,8 @@ theorem normIncBetaI_contiguous_limit_16 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {
     (by simp; linarith) hb hnorm hx0).comp_of_eq
     (by fun_prop : ContinuousAt (fun ε:ℂ=>(a:ℂ)+ε+1) 0) (by simp)
   have hv := (continuousAt_const.add continuousAt_id : ContinuousAt (fun ε:ℂ=>(a:ℂ)+ε) 0).mul hc
-  have ht : Tendsto (fun ε:ℂ=>((a:ℂ)+ε)*normIncBetaI ((a:ℂ)+ε+1) b x) (𝓝[≠] 0) (𝓝 ((a:ℂ)*normIncBetaI ((a:ℂ)+1) b x)) := by
+  have ht : Tendsto (fun ε:ℂ=>((a:ℂ)+ε)*normIncBetaI ((a:ℂ)+ε+1) b x) (𝓝[≠] 0)
+      (𝓝 ((a:ℂ)*normIncBetaI ((a:ℂ)+1) b x)) := by
     convert hv.tendsto.mono_left (nhdsWithin_le_nhds : (𝓝[≠] (0:ℂ))≤𝓝 0) using 1 <;>
       first | (funext ε; rfl) | simp [Function.comp_apply,Pi.add_apply,Pi.mul_apply,id_eq]
   apply ht.congr'
@@ -600,15 +635,21 @@ theorem normIncBetaI_contiguous_limit_16 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {
 
 /-- Limiting interpretation at the otherwise singular a+b=1 recurrence. -/
 @[dlmf 8.17.E17]
-theorem normIncBetaI_contiguous_limit_17 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
-    Tendsto (fun ε : ℂ => ((b : ℂ)+(((a : ℂ)+ε)+b-1)*(1-x))*normIncBetaI (((a : ℂ)+ε)) (b) x-((((a : ℂ)+ε)+b-1 : ℂ) : ℂ)*(1-x)*normIncBetaI (((a : ℂ)+ε)) (b-1) x) (𝓝[≠] 0) (𝓝 ((b : ℂ)*normIncBetaI (a) (b+1) x)) := by
+theorem normIncBetaI_contiguous_limit_17 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x)
+    (hx1 : x < 1) :
+    Tendsto (fun ε : ℂ =>
+        ((b : ℂ)+(((a : ℂ)+ε)+b-1)*(1-x))*normIncBetaI (((a : ℂ)+ε)) (b)
+        x-((((a : ℂ)+ε)+b-1 : ℂ) : ℂ)*(1-x)*normIncBetaI (((a : ℂ)+ε)) (b-1) x) (𝓝[≠] 0)
+        (𝓝 ((b : ℂ)*normIncBetaI (a) (b+1) x)) := by
   have hnorm : ‖(x:ℂ)‖<1 := by simpa [Complex.norm_real, Real.norm_of_nonneg hx.le] using hx1
   have hx0 := Complex.ofReal_ne_zero.mpr hx.ne'
   have he := eventually_normIncBetaI_contiguous (a:=(a:ℂ)) (b:=(b:ℂ)) ha hb hnorm hx0
-  have hc := (continuousAt_normIncBetaI_left (a:=(a:ℂ)) (b:=((b:ℂ)+1)) ha (by simp; linarith) hnorm hx0).comp_of_eq
+  have hc := (continuousAt_normIncBetaI_left (a:=(a:ℂ)) (b:=((b:ℂ)+1)) ha (by simp; linarith) hnorm
+      hx0).comp_of_eq
     (continuousAt_const.add continuousAt_id : ContinuousAt (fun ε:ℂ=>(a:ℂ)+ε) 0) (by simp)
   have hv := hc.const_mul (b:ℂ)
-  have ht : Tendsto (fun ε:ℂ=>(b:ℂ)*normIncBetaI ((a:ℂ)+ε) ((b:ℂ)+1) x) (𝓝[≠] 0) (𝓝 ((b:ℂ)*normIncBetaI a ((b:ℂ)+1) x)) := by
+  have ht : Tendsto (fun ε:ℂ=>(b:ℂ)*normIncBetaI ((a:ℂ)+ε) ((b:ℂ)+1) x) (𝓝[≠] 0)
+      (𝓝 ((b:ℂ)*normIncBetaI a ((b:ℂ)+1) x)) := by
     convert hv.tendsto.mono_left (nhdsWithin_le_nhds : (𝓝[≠] (0:ℂ))≤𝓝 0) using 1 <;>
       first | (funext ε; rfl) | simp [Function.comp_apply,Pi.add_apply,Pi.mul_apply,id_eq]
   apply ht.congr'
@@ -618,13 +659,16 @@ theorem normIncBetaI_contiguous_limit_17 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {
 /-- The Gauss continued-fraction numerators d_k. -/
 @[dlmf 8.17.E23]
 def incBetaFractionD (a b x : ℝ) (k : ℕ) : ℂ :=
-  if Even k then let m : ℂ := (k/2 : ℕ); m*(b-m)*x/((a+2*m-1)*(a+2*m)) else let m : ℂ := ((k-1)/2 : ℕ); -(a+m)*(a+b+m)*x/((a+2*m)*(a+2*m+1))
+  if Even k then let m : ℂ := (k/2 : ℕ); m*(b-m)*x/((a+2*m-1)*(a+2*m)) else
+      let m : ℂ := ((k-1)/2 : ℕ); -(a+m)*(a+b+m)*x/((a+2*m)*(a+2*m+1))
 
 /-- The N-level scaled continued fraction; N=1 is the initial prefactor. -/
 def incBetaFractionConvergent (a b x : ℝ) (N : ℕ) : ℂ :=
-  (x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ)/(a*betaIntegral a b)*cfTail (fun k => if k=0 then 1 else incBetaFractionD a b x k) (fun _ => 1) 0 N
+  (x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ)/(a*betaIntegral a b)*cfTail
+      (fun k => if k=0 then 1 else incBetaFractionD a b x k) (fun _ => 1) 0 N
 
-/-- The map `(incBetaFractionConvergent a b x)` tends to `(𝓝 (normIncBetaI a b x))` along `atTop`. -/
+/-- The map `(incBetaFractionConvergent a b x)` tends to `(𝓝 (normIncBetaI a b x))` along `atTop`.
+-/
 @[dlmf 8.17.E22]
 theorem incBeta_continuedFraction {a b x : ℝ} (ha : 0 < a) (hb : 0 < b) (hx : 0 ≤ x) (hx1 : x < 1) :
     Tendsto (incBetaFractionConvergent a b x) atTop (𝓝 (normIncBetaI a b x)) := by
@@ -641,9 +685,12 @@ theorem incBeta_continuedFraction_endpoint_limit {a b : ℝ} (ha : 0 < a) (hb : 
     filter_upwards [Ioo_mem_nhdsLT (show (0:ℝ)<1 by norm_num)] with x hx
     rw [normIncBetaI_ofReal ha hb ⟨hx.1.le,hx.2.le⟩,
       Real.normIncBetaI_ofReal ha hb ⟨hx.1.le,hx.2.le⟩]
-  simpa only [Function.comp_apply, TauCeti.regularizedIncompleteBeta_eq_one_of_one_le ha.le hb le_rfl, Complex.ofReal_one] using (hc.mono_left nhdsWithin_le_nhds).congr' he.symm
+  simpa only [Function.comp_apply,
+      TauCeti.regularizedIncompleteBeta_eq_one_of_one_le ha.le hb le_rfl,
+      Complex.ofReal_one] using (hc.mono_left nhdsWithin_le_nhds).congr' he.symm
 
-/-- Counterexample to the unqualified upper-convergent claim following 8.17.23: the second convergent is sqrt(2)/5. -/
+/-- Counterexample to the unqualified upper-convergent claim following 8.17.23: the second
+convergent is sqrt(2)/5. -/
 theorem incBeta_cf_upper_bound_counterexample  :
     (Real.normIncBetaI 1 (1/2) (1/2)).re > Real.sqrt 2/5 := by
   have h := Real.normIncBetaI_symm (a := 1) (b := 1/2) (x := 1/2)
@@ -677,15 +724,18 @@ theorem incBeta_cf_second_counterexample_value  :
     have hh := Complex.ofReal_cpow (by norm_num : 0 ≤ (1/2 : ℝ)) (1/2)
     rw [← Real.sqrt_eq_rpow, hs] at hh
     simpa using hh.symm
-  norm_num [incBetaFractionConvergent, cfTail, cfContinuants, GenContFract.nextConts, GenContFract.nextNum, GenContFract.nextDen, incBetaFractionD, hb, hp]
+  norm_num [incBetaFractionConvergent, cfTail, cfContinuants, GenContFract.nextConts,
+      GenContFract.nextNum, GenContFract.nextDen, incBetaFractionD, hb, hp]
   push_cast
   ring
 
 /-- The series with terms `(fun j : ℕ => if m ≤ j then (1-x : ℂ)^n*((n+j-1).choose j : ℂ)*(x :
 ℂ)^j else 0)` converges to `(normIncBetaI m n x)`. -/
 @[dlmf 8.17.E24]
-theorem normIncBetaI_negative_binomial_sum {m n : ℕ} (hm : 1 ≤ m) (hn : 1 ≤ n) {x : ℝ} (hx : 0 ≤ x) (hx1 : x < 1) :
-    HasSum (fun j : ℕ => if m ≤ j then (1-x : ℂ)^n*((n+j-1).choose j : ℂ)*(x : ℂ)^j else 0) (normIncBetaI m n x) := by
+theorem normIncBetaI_negative_binomial_sum {m n : ℕ} (hm : 1 ≤ m) (hn : 1 ≤ n) {x : ℝ} (hx : 0 ≤ x)
+    (hx1 : x < 1) :
+    HasSum (fun j : ℕ => if m ≤ j then (1-x : ℂ)^n*((n+j-1).choose j : ℂ)*(x : ℂ)^j else 0)
+        (normIncBetaI m n x) := by
   have hmpos : 0<(m:ℂ).re := by exact_mod_cast hm
   have hnpos : 0<(n:ℂ).re := by exact_mod_cast hn
   have hz : ‖(x:ℂ)‖<1 := by simpa [Complex.norm_real,Real.norm_of_nonneg hx] using hx1
@@ -724,7 +774,8 @@ theorem normIncBetaI_negative_binomial_sum {m n : ℕ} (hm : 1 ≤ m) (hn : 1 �
         ((n+(k+m)-1).factorial:ℂ) := by
       exact_mod_cast (by simpa [show n+(k+m)-1-(k+m)=n-1 by omega] using hc)
     rw [Nat.add_comm m k]
-    field_simp [hGmn,Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n-1)),Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (k+m))]
+    field_simp [hGmn, Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n-1)),
+        Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (k+m))]
     linear_combination -hc'
   let F : ℕ → ℂ := fun j => if m≤j then (1-x:ℂ)^n*((n+j-1).choose j:ℂ)*(x:ℂ)^j else 0
   have htail : HasSum (fun k => F (k+m)) (normIncBetaI m n x) := by
@@ -780,7 +831,8 @@ theorem incBeta_cf_third_counterexample_value  :
     have hh := Complex.ofReal_cpow (by norm_num : 0 ≤ (1/2 : ℝ)) (1/2)
     rw [← Real.sqrt_eq_rpow, hs] at hh
     simpa using hh.symm
-  norm_num [incBetaFractionConvergent, cfTail, cfContinuants, GenContFract.nextConts, GenContFract.nextNum, GenContFract.nextDen, incBetaFractionD, hb, hp]
+  norm_num [incBetaFractionConvergent, cfTail, cfContinuants, GenContFract.nextConts,
+      GenContFract.nextNum, GenContFract.nextDen, incBetaFractionD, hb, hp]
   push_cast
   ring
 

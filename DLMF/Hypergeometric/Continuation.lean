@@ -172,7 +172,8 @@ theorem regularizedGaussHGFun_contiguous_a_pred_c_pred (a b c : ℂ) {z : ℂ} (
   have h₂ := regularizedGaussHGFun_contiguous_a_succ_c_pred a b c hz
   linear_combination h₁ + (1 - z) * h₂
 
-/-- 15.5.18 (`contiguous_c_three`): `contiguous_a_c_succ - contiguous_a + contiguous_a_pred_c_pred`. -/
+/-- 15.5.18 (`contiguous_c_three`): `contiguous_a_c_succ - contiguous_a + contiguous_a_pred_c_pred`.
+-/
 theorem regularizedGaussHGFun_contiguous_c_three (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     (z - 1) * regularizedGaussHGFun a b (c - 1) z +
         (c - 1 - (2 * c - a - b - 1) * z) * regularizedGaussHGFun a b c z +
@@ -326,7 +327,7 @@ theorem euler_transformation_of_ne_neg_nat {a b c : ℂ} (hc : ∀ k : ℕ, c �
 `(1-x)^(a+b-c) F(a,b;c;x) = F(c-a,c-b;c;x)`, which tends to `F(c-a,c-b;c;1)` by Abel's
 theorem; Gauss's summation theorem evaluates the limit. -/
 @[dlmf 15.4.E23]
-theorem _root_.tendsto_ordinaryHypergeometric_nhdsWithin_one {a b c : ℂ}
+theorem tendsto_ordinaryHypergeometric_nhdsWithin_one {a b c : ℂ}
     (hc : ∀ k : ℕ, c ≠ -k) (h : (c - a - b).re < 0) :
     Tendsto (fun x : ℝ => (1 - x : ℂ) ^ (a + b - c) * ₂F₁ a b c (x : ℂ))
       (𝓝[<] (1 : ℝ)) (𝓝 (Gamma (a + b - c) * Gamma c / (Gamma a * Gamma b))) := by
@@ -380,7 +381,8 @@ theorem poch_ne_zero_of_lt (c : ℂ) (k : ℕ) (hc : ∀ j : ℕ, j < k → c �
 
 /-- The terminating `₂F₁(-n, b; c; z)` is analytic in `c` off `{0, -1, …, -(n-1)}`. -/
 theorem analyticOnNhd_gauss_neg_nat_param (n : ℕ) (b z : ℂ) :
-    AnalyticOnNhd ℂ (fun c : ℂ => ₂F₁ (-(n : ℂ)) b c z) {c : ℂ | ∀ j : ℕ, j < n → c ≠ -(j : ℂ)} := by
+    AnalyticOnNhd ℂ (fun c : ℂ => ₂F₁ (-(n : ℂ)) b c z)
+        {c : ℂ | ∀ j : ℕ, j < n → c ≠ -(j : ℂ)} := by
   intro c hc
   have heq : (fun c : ℂ => ₂F₁ (-(n : ℂ)) b c z) = fun c => ∑ k ∈ Finset.range (n + 1),
       poch (-(n : ℂ)) k * poch b k / (poch c k * k.factorial) * z ^ k := by

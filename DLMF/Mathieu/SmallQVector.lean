@@ -47,7 +47,8 @@ private lemma recurrenceLower_smul (β c : ℂ) (A : ℕ → ℂ) (i : ℕ) :
   rcases i with _ | _ | i <;> simp [recurrenceLower]; ring
 
 /-- A scalar multiple of a solution of the recurrence `L A = a A` is again a solution. -/
-theorem SolvesRecurrence.smul {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (h : SolvesRecurrence d β q a A) (c : ℂ) :
+theorem SolvesRecurrence.smul {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ}
+    (h : SolvesRecurrence d β q a A) (c : ℂ) :
     SolvesRecurrence d β q a (fun i => c * A i) := by
   intro i
   have := h i
@@ -60,8 +61,8 @@ private lemma exists_nonneg_eventually_norm_le_of_isBigO {f : ℝ → ℂ} {g : 
   obtain ⟨C, hC⟩ := h.exists_nonneg
   exact ⟨C, hC.1, hC.2.bound⟩
 
-/-- **Eigenvector estimate.** Under the hypotheses of `eigenvalue_sub_isBigO_of_trial`, with residuals
-`O(q^K)` in every row, the normalized solution `α_i = A_i / A_n` satisfies
+/-- **Eigenvector estimate.** Under the hypotheses of `eigenvalue_sub_isBigO_of_trial`, with
+residuals `O(q^K)` in every row, the normalized solution `α_i = A_i / A_n` satisfies
 `|α_i - v_i| ≤ C |q|^K` uniformly in `i`, and `|α_i| ≤ (3|q|)^{|i-n|}`. -/
 private lemma eigenvector_sub_trial_le {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ : ‖β‖ ≤ 2) (hβ0 : β ≠ 0)
     {a : ℝ → ℂ} {A : ℝ → ℕ → ℂ} {n N K : ℕ} (hnN : n < N)
@@ -77,12 +78,15 @@ private lemma eigenvector_sub_trial_le {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ
     ∃ C, ∀ᶠ q : ℝ in 𝓝 0, A q n ≠ 0 ∧
       (∀ i, ‖A q i / A q n‖ ≤ (3 * |q|) ^ Nat.dist i n) ∧
       ∀ i, ‖A q i / A q n - v q i‖ ≤ C * |q| ^ K := by
-  have hap := eigenvalue_sub_isBigO_of_trial (K := K) hβ hβ0 hnN hrec hA hne hgap (fun q => hvN q N le_rfl)
+  have hap := eigenvalue_sub_isBigO_of_trial (K := K) hβ hβ0 hnN hrec hA hne hgap
+      (fun q => hvN q N le_rfl)
     (fun q => hvN q (N + 1) (by omega)) hvn hv
     (fun i hi => (hr i hi).trans (pow_isBigO_pow_of_le (by omega)))
   obtain ⟨C₁, hC₁0, hC₁⟩ := exists_nonneg_eventually_norm_le_of_isBigO hap
-  choose! Cr hCr0 hCr using fun i (hi : i < N + 1) => exists_nonneg_eventually_norm_le_of_isBigO (hr i hi)
-  choose! Cv hCv0 hCv using fun i (hi : i < N + 1) => exists_nonneg_eventually_norm_le_of_isBigO (hv i hi)
+  choose! Cr hCr0 hCr using fun i (hi : i < N + 1) =>
+      exists_nonneg_eventually_norm_le_of_isBigO (hr i hi)
+  choose! Cv hCv0 hCv using fun i (hi : i < N + 1) =>
+      exists_nonneg_eventually_norm_le_of_isBigO (hv i hi)
   set C₂ := ∑ i ∈ Finset.range (N + 1), Cr i
   set C₃ := ∑ i ∈ Finset.range (N + 1), Cv i
   have hC₂ : ∀ i < N + 1, Cr i ≤ C₂ := fun i hi =>
@@ -96,7 +100,8 @@ private lemma eigenvector_sub_trial_le {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ
   have hR0 : ∀ q i, N + 1 ≤ i → recurrenceOperator (d q) β q (v q) i - p q * v q i = 0 := by
     intro q i hi
     obtain ⟨j, rfl⟩ : ∃ j, i = j + 2 := ⟨i - 2, by omega⟩
-    simp only [recurrenceOperator, recurrenceLower, hvN q (j + 2) (by omega), hvN q (j + 1) (by omega),
+    simp only [recurrenceOperator, recurrenceLower, hvN q (j + 2) (by omega),
+        hvN q (j + 1) (by omega),
       hvN q (j + 2 + 1) (by omega)]
     ring
   have hq4 : ∀ᶠ q : ℝ in 𝓝 0, |q| ≤ 1 / 4 := by
@@ -132,7 +137,8 @@ private lemma eigenvector_sub_trial_le {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ
       tendsto_const_nhds.congr' (by
         filter_upwards [eventually_ge_atTop N] with i hi using (hvN q i hi).symm)
     simpa using hαt.sub hv0
-  obtain ⟨i₀, -, hmax⟩ := exists_max_on_tail_of_tendsto_zero (f := fun i => ‖e i‖) (by simpa using het.norm)
+  obtain ⟨i₀, -, hmax⟩ :=
+      exists_max_on_tail_of_tendsto_zero (f := fun i => ‖e i‖) (by simpa using het.norm)
     (fun _ => norm_nonneg _) 0
   have hM : ∀ i, ‖e i‖ ≤ ‖e i₀‖ := fun i => hmax i (Nat.zero_le _)
   have hqK : ‖((q : ℝ) ^ K)‖ = |q| ^ K := by rw [norm_pow, Real.norm_eq_abs]
@@ -196,7 +202,8 @@ private lemma eventually_abs_le_nhds_zero (ε : ℝ) (hε : 0 < ε) : ∀ᶠ q :
 
 /-- **Tail bound.** If `|α_i| ≤ (3|q|)^{|i-n|}`, `|α_i - v_i| ≤ C|q|^K`, `v_i = 0` for
 `i ≥ n + K`, and `|g_i| ≤ B R^i`, then `|(α_i - v_i) g_i| ≤ |q|^K D 2^{-i}` for small `q`. -/
-private lemma eventually_norm_tail_le {α v g : ℝ → ℕ → ℂ} {n K : ℕ} {C B R : ℝ} (hC : 0 ≤ C) (hB : 0 ≤ B)
+private lemma eventually_norm_tail_le {α v g : ℝ → ℕ → ℂ} {n K : ℕ} {C B R : ℝ}
+    (hC : 0 ≤ C) (hB : 0 ≤ B)
     (hR : 1 ≤ R)
     (hα : ∀ᶠ q : ℝ in 𝓝 0, ∀ i, ‖α q i‖ ≤ (3 * |q|) ^ Nat.dist i n)
     (hv : ∀ᶠ q : ℝ in 𝓝 0, ∀ i, n + K ≤ i → v q i = 0)
@@ -274,8 +281,8 @@ private lemma isBigO_sub_one_of_sq_sub_one {r : ℝ → ℂ} {k : ℝ → ℝ}
     linarith
   nlinarith [norm_nonneg (r q - 1)]
 
-/-- **Expansion of the normalized eigenvector.** Under the hypotheses of `eigenvector_sub_trial_le`, with
-the normalization `∑ w_i A_i² = 1`, the sign condition `∑ u_i A_i > 0` (`u_n = 1`), and a
+/-- **Expansion of the normalized eigenvector.** Under the hypotheses of `eigenvector_sub_trial_le`,
+with the normalization `∑ w_i A_i² = 1`, the sign condition `∑ u_i A_i > 0` (`u_n = 1`), and a
 normalizing function `c(q) → c₀ > 0` with `c² ∑_{i<N} w_i v_i² = 1 + O(q^K)`, every series
 `∑ A_i g_i` with `|g_i| ≤ B R^i` equals `c ∑_{i<N} v_i g_i + O(q^K)`. -/
 lemma tsum_eigenvector_mul_sub_trial_isBigO {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ : ‖β‖ ≤ 2) (hβ0 : β ≠ 0)
@@ -335,7 +342,8 @@ lemma tsum_eigenvector_mul_sub_trial_isBigO {d : ℝ → ℕ → ℂ} {β : ℂ}
     filter_upwards [hdec, hsmall] with q h1 h2 i
     exact (h1 i).trans (pow_le_one₀ (by positivity) h2.1)
   -- (T2) the normalization
-  obtain ⟨D₂, hD₂, hT2⟩ := eventually_norm_tail_le (g := fun q i => w i * (α q i + v q i)) (B := 6) (R := 1)
+  obtain ⟨D₂, hD₂, hT2⟩ :=
+      eventually_norm_tail_le (g := fun q i => w i * (α q i + v q i)) (B := 6) (R := 1)
     hC (by norm_num) le_rfl hdec hvK hunif (by
       filter_upwards [hαle, hunif, hsmall] with q h1 h2 h3 i
       rw [one_pow, mul_one, norm_mul]
@@ -363,7 +371,8 @@ lemma tsum_eigenvector_mul_sub_trial_isBigO {d : ℝ → ℕ → ℂ} {β : ℂ}
     congr 1; ext i; ring
   -- (T3) the sign
   set δ : ℝ → ℕ → ℂ := fun _ i => if i = n then 1 else 0 with hδ
-  obtain ⟨D₃, hD₃, hT3⟩ := eventually_norm_tail_le (α := α) (v := δ) (g := fun _ i => u i) (K := 1) (C := 3)
+  obtain ⟨D₃, hD₃, hT3⟩ :=
+      eventually_norm_tail_le (α := α) (v := δ) (g := fun _ i => u i) (K := 1) (C := 3)
     (by norm_num) hBu hRu hdec (Eventually.of_forall fun q i hi => by
       simp only [hδ, show i ≠ n by omega, ↓reduceIte]) (by
       filter_upwards [hdec, hsmall, hAn] with q h1 h2 h3 i
@@ -474,7 +483,8 @@ lemma tsum_eigenvector_mul_sub_trial_isBigO {d : ℝ → ℕ → ℂ} {β : ℂ}
 /-- For small `q`, `a_{2n}(q)` is at distance `≥ 1` from every diagonal entry `4i²`, `i ≠ n`. -/
 private lemma one_le_norm_mathieuA_even_sub_diag (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
     1 ≤ ‖(mathieuA (2 * n) q : ℂ) - 4 * (i : ℂ) ^ 2‖ := by
-  filter_upwards [eventually_abs_mathieuA_sub_sq_le (2 * n), eventually_abs_lt_one_div_eight] with q h1 h2
+  filter_upwards [eventually_abs_mathieuA_sub_sq_le (2 * n),
+      eventually_abs_lt_one_div_eight] with q h1 h2
   intro i hi
   rw [show (4 * (i : ℂ) ^ 2) = ((((2 * i + 0 : ℕ) : ℝ) ^ 2 + 0 : ℝ) : ℂ) by push_cast; ring,
     norm_ofReal_sub_ofReal]
@@ -485,30 +495,35 @@ other than the `n`-th. -/
 private lemma one_le_norm_mathieuA_odd_sub_diag (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
     1 ≤ ‖(mathieuA (2 * n + 1) q : ℂ) -
       ((2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0)‖ := by
-  filter_upwards [eventually_abs_mathieuA_sub_sq_le (2 * n + 1), eventually_abs_lt_one_div_eight] with q h1 h2
+  filter_upwards [eventually_abs_mathieuA_sub_sq_le (2 * n + 1),
+      eventually_abs_lt_one_div_eight] with q h1 h2
   intro i hi
   rw [show ((2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0) =
       ((((2 * i + 1 : ℕ) : ℝ) ^ 2 + (if i = 0 then q else 0) : ℝ) : ℂ) by
       split_ifs <;> push_cast <;> ring, norm_ofReal_sub_ofReal]
-  exact one_le_abs_sub_add_of_gap h2 (by simpa using h1) (four_le_abs_sq_sub_sq hi 1) (by split_ifs <;> simp)
+  exact one_le_abs_sub_add_of_gap h2 (by simpa using h1) (four_le_abs_sq_sub_sq hi 1)
+      (by split_ifs <;> simp)
 
 /-- For small `q`, `b_{2n+1}(q)` is at distance `≥ 1` from every diagonal entry of 28.4.7
 other than the `n`-th. -/
 private lemma one_le_norm_mathieuB_odd_sub_diag (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
     1 ≤ ‖(mathieuB (2 * n + 1) q : ℂ) -
       ((2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0)‖ := by
-  filter_upwards [eventually_abs_mathieuB_sub_sq_le (m := 2 * n + 1) (by omega), eventually_abs_lt_one_div_eight]
+  filter_upwards [eventually_abs_mathieuB_sub_sq_le (m := 2 * n + 1) (by omega),
+      eventually_abs_lt_one_div_eight]
     with q h1 h2
   intro i hi
   rw [show ((2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0) =
       ((((2 * i + 1 : ℕ) : ℝ) ^ 2 + -(if i = 0 then q else 0) : ℝ) : ℂ) by
       split_ifs <;> push_cast <;> ring, norm_ofReal_sub_ofReal]
-  exact one_le_abs_sub_add_of_gap h2 (by simpa using h1) (four_le_abs_sq_sub_sq hi 1) (by split_ifs <;> simp)
+  exact one_le_abs_sub_add_of_gap h2 (by simpa using h1) (four_le_abs_sq_sub_sq hi 1)
+      (by split_ifs <;> simp)
 
 /-- For small `q`, `b_{2n+2}(q)` is at distance `≥ 1` from every `(2i+2)²`, `i ≠ n`. -/
 private lemma one_le_norm_mathieuB_even_sub_diag (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
     1 ≤ ‖(mathieuB (2 * n + 2) q : ℂ) - (2 * (i : ℂ) + 2) ^ 2‖ := by
-  filter_upwards [eventually_abs_mathieuB_sub_sq_le (m := 2 * n + 2) (by omega), eventually_abs_lt_one_div_eight]
+  filter_upwards [eventually_abs_mathieuB_sub_sq_le (m := 2 * n + 2) (by omega),
+      eventually_abs_lt_one_div_eight]
     with q h1 h2
   intro i hi
   rw [show ((2 * (i : ℂ) + 2) ^ 2) = ((((2 * i + 2 : ℕ) : ℝ) ^ 2 + 0 : ℝ) : ℂ) by
@@ -596,10 +611,13 @@ theorem mathieuCe_even_sub_trial_isBigO (n : ℕ) {N K : ℕ} (hnN : n < N) (hNK
     (fun q : ℝ => mathieuCe (2 * n) z q -
       c q * ∑ i ∈ Finset.range N, v q i * Complex.cos (2 * (i : ℂ) * z)) =O[𝓝 0]
       (fun q : ℝ => q ^ K) := by
-  have h := tsum_eigenvector_mul_sub_trial_isBigO (d := fun _ i => 4 * (i : ℂ) ^ 2) (β := 2) (by norm_num) (by norm_num)
+  have h := tsum_eigenvector_mul_sub_trial_isBigO (d := fun _ i => 4 * (i : ℂ) ^ 2) (β := 2)
+      (by norm_num) (by norm_num)
     (a := fun q => (mathieuA (2 * n) q : ℂ)) (A := fun q i => mathieuFourierA (2 * n) (2 * i) q)
-    hnN hNK hK (Eventually.of_forall (solvesRecurrence_mathieuFourierA_even n)) (Eventually.of_forall (tendsto_mathieuFourierA_even n))
-    (Eventually.of_forall (exists_mathieuFourierA_even_ne_zero n)) (one_le_norm_mathieuA_even_sub_diag n) hvN hvn hv hr
+    hnN hNK hK (Eventually.of_forall (solvesRecurrence_mathieuFourierA_even n))
+        (Eventually.of_forall (tendsto_mathieuFourierA_even n))
+    (Eventually.of_forall (exists_mathieuFourierA_even_ne_zero n))
+        (one_le_norm_mathieuA_even_sub_diag n) hvN hvn hv hr
     (w := fun i => if i = 0 then 2 else 1) (fun i => by split_ifs <;> norm_num)
     (Eventually.of_forall (hasSum_mathieuFourierA_even_sq n))
     (u := fun _ => 1) (Bu := 1) (Ru := 1) zero_le_one le_rfl (fun i => by simp) rfl
@@ -629,11 +647,15 @@ theorem mathieuCe_zero_sub_trial_isBigO {N K : ℕ} (hnN : 0 < N) (hNK : N ≤ K
     rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num
   have hs0 : ((Real.sqrt 2 : ℝ) : ℂ) ≠ 0 := by
     rw [Complex.ofReal_ne_zero]; positivity
-  have h := tsum_eigenvector_mul_sub_trial_isBigO (d := fun _ i => 4 * (i : ℂ) ^ 2) (β := 2) (by norm_num) (by norm_num)
+  have h := tsum_eigenvector_mul_sub_trial_isBigO (d := fun _ i => 4 * (i : ℂ) ^ 2) (β := 2)
+      (by norm_num) (by norm_num)
     (a := fun q => (mathieuA (2 * 0) q : ℂ))
     (A := fun q i => (Real.sqrt 2 : ℂ) * mathieuFourierA (2 * 0) (2 * i) q) (n := 0)
-    hnN (by omega) hK (Eventually.of_forall fun q => (solvesRecurrence_mathieuFourierA_even 0 q).smul _)
-    (Eventually.of_forall fun q => by simpa using (tendsto_mathieuFourierA_even 0 q).const_mul (Real.sqrt 2 : ℂ))
+    hnN (by omega) hK (Eventually.of_forall fun q =>
+        (solvesRecurrence_mathieuFourierA_even 0 q).smul _)
+    (Eventually.of_forall fun q => by
+                                     simpa using (tendsto_mathieuFourierA_even 0 q).const_mul
+                                       (Real.sqrt 2 : ℂ))
     (Eventually.of_forall fun q => by
       obtain ⟨i, hi⟩ := exists_mathieuFourierA_even_ne_zero 0 q
       exact ⟨i, mul_ne_zero hs0 hi⟩) (one_le_norm_mathieuA_even_sub_diag 0) hvN hvn hv hr
@@ -674,8 +696,10 @@ theorem mathieuCe_odd_sub_trial_isBigO (n : ℕ) {N K : ℕ} (hnN : n < N) (hNK 
     (by norm_num) (by norm_num)
     (a := fun q => (mathieuA (2 * n + 1) q : ℂ))
     (A := fun q i => mathieuFourierA (2 * n + 1) (2 * i + 1) q)
-    hnN hNK hK (Eventually.of_forall (solvesRecurrence_mathieuFourierA_odd n)) (Eventually.of_forall (tendsto_mathieuFourierA_odd n))
-    (Eventually.of_forall (exists_mathieuFourierA_odd_ne_zero n)) (one_le_norm_mathieuA_odd_sub_diag n) hvN hvn hv hr
+    hnN hNK hK (Eventually.of_forall (solvesRecurrence_mathieuFourierA_odd n))
+        (Eventually.of_forall (tendsto_mathieuFourierA_odd n))
+    (Eventually.of_forall (exists_mathieuFourierA_odd_ne_zero n))
+        (one_le_norm_mathieuA_odd_sub_diag n) hvN hvn hv hr
     (w := fun _ => 1) (fun i => by norm_num)
     (Eventually.of_forall fun q => by simpa using hasSum_mathieuFourierA_odd_sq n q)
     (u := fun _ => 1) (Bu := 1) (Ru := 1) zero_le_one le_rfl (fun i => by simp) rfl
@@ -707,8 +731,10 @@ theorem mathieuSe_odd_sub_trial_isBigO (n : ℕ) {N K : ℕ} (hnN : n < N) (hNK 
     (by norm_num) (by norm_num)
     (a := fun q => (mathieuB (2 * n + 1) q : ℂ))
     (A := fun q i => mathieuFourierB (2 * n + 1) (2 * i + 1) q)
-    hnN hNK hK (Eventually.of_forall (solvesRecurrence_mathieuFourierB_odd n)) (Eventually.of_forall (tendsto_mathieuFourierB_odd n))
-    (Eventually.of_forall (exists_mathieuFourierB_odd_ne_zero n)) (one_le_norm_mathieuB_odd_sub_diag n) hvN hvn hv hr
+    hnN hNK hK (Eventually.of_forall (solvesRecurrence_mathieuFourierB_odd n))
+        (Eventually.of_forall (tendsto_mathieuFourierB_odd n))
+    (Eventually.of_forall (exists_mathieuFourierB_odd_ne_zero n))
+        (one_le_norm_mathieuB_odd_sub_diag n) hvN hvn hv hr
     (w := fun _ => 1) (fun i => by norm_num)
     (Eventually.of_forall fun q => by simpa using hasSum_mathieuFourierB_odd_sq n q)
     (u := fun i => ((2 * i + 1 : ℕ) : ℂ) / ((2 * n + 1 : ℕ) : ℂ)) (Bu := 2) (Ru := 2)
@@ -731,7 +757,8 @@ theorem mathieuSe_even_sub_trial_isBigO (n : ℕ) {N K : ℕ} (hnN : n < N) (hNK
     (hK : 1 ≤ K) {p : ℝ → ℂ} {v : ℝ → ℕ → ℂ} (hvN : ∀ q i, N ≤ i → v q i = 0)
     (hvn : ∀ q, v q n = 1)
     (hv : ∀ i < N + 1, (fun q => v q i) =O[𝓝 0] (fun _ => (1 : ℝ)))
-    (hr : ∀ i < N + 1, (fun q : ℝ => recurrenceOperator (fun i => (2 * (i : ℂ) + 2) ^ 2) 1 q (v q) i -
+    (hr : ∀ i < N + 1, (fun q : ℝ =>
+        recurrenceOperator (fun i => (2 * (i : ℂ) + 2) ^ 2) 1 q (v q) i -
       p q * v q i) =O[𝓝 0] (fun q : ℝ => q ^ K))
     {c : ℝ → ℂ} (hc : Tendsto c (𝓝 0) (𝓝 1))
     (hcn : (fun q => c q ^ 2 * ∑ i ∈ Finset.range N, 1 * v q i ^ 2 - 1)
@@ -744,8 +771,10 @@ theorem mathieuSe_even_sub_trial_isBigO (n : ℕ) {N K : ℕ} (hnN : n < N) (hNK
     (d := fun _ i => (2 * (i : ℂ) + 2) ^ 2) (β := 1) (by norm_num) (by norm_num)
     (a := fun q => (mathieuB (2 * n + 2) q : ℂ))
     (A := fun q i => mathieuFourierB (2 * n + 2) (2 * i + 2) q)
-    hnN hNK hK (Eventually.of_forall (solvesRecurrence_mathieuFourierB_even n)) (Eventually.of_forall (tendsto_mathieuFourierB_even n))
-    (Eventually.of_forall (exists_mathieuFourierB_even_ne_zero n)) (one_le_norm_mathieuB_even_sub_diag n) hvN hvn hv hr
+    hnN hNK hK (Eventually.of_forall (solvesRecurrence_mathieuFourierB_even n))
+        (Eventually.of_forall (tendsto_mathieuFourierB_even n))
+    (Eventually.of_forall (exists_mathieuFourierB_even_ne_zero n))
+        (one_le_norm_mathieuB_even_sub_diag n) hvN hvn hv hr
     (w := fun _ => 1) (fun i => by norm_num)
     (Eventually.of_forall fun q => by simpa using hasSum_mathieuFourierB_even_sq n q)
     (u := fun i => ((2 * i + 2 : ℕ) : ℂ) / ((2 * n + 2 : ℕ) : ℂ)) (Bu := 2) (Ru := 2)

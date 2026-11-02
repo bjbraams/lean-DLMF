@@ -117,7 +117,8 @@ theorem hasSum_generalizedDawsonIntegral {p x : ℝ} (hp : 0 < p) (hx : 0 < x) :
   have hexp (y : ℝ) : HasSum (fun n : ℕ => y^n/(n ! : ℝ)) (Real.exp y) := by
     rw [Real.exp_eq_exp_ℝ]; exact NormedSpace.expSeries_div_hasSum_exp y
   have hc : Continuous fun t : ℝ => t^p := Real.continuous_rpow_const hp.le
-  have h := intervalIntegral.hasSum_integral_of_dominated_convergence (μ := volume) (a := 0) (b := x)
+  have h := intervalIntegral.hasSum_integral_of_dominated_convergence (μ := volume)
+      (a := 0) (b := x)
     (F := fun (n : ℕ) (t : ℝ) => (t^p)^n/(n ! : ℝ)) (f := fun t => Real.exp (t^p))
     (fun n t => (t^p)^n/(n ! : ℝ))
     (fun n => ((hc.pow n).div_const _).aestronglyMeasurable)
@@ -216,7 +217,8 @@ theorem invErfSeriesCoeff_initial  :
 
 /-- The unnumbered inverse-erf coefficient recurrence. -/
 theorem invErfSeriesCoeff_recurrence (m : ℕ) :
-    invErfSeriesCoeff (m+1)=(∑ n ∈ Finset.range (m+1), (2*n+1 : ℝ)/(m-n+1 : ℕ)*invErfSeriesCoeff n*invErfSeriesCoeff (m-n))/(2*m+3) := by
+    invErfSeriesCoeff (m+1)=(∑ n ∈ Finset.range (m+1),
+        (2*n+1 : ℝ)/(m-n+1 : ℕ)*invErfSeriesCoeff n*invErfSeriesCoeff (m-n))/(2*m+3) := by
   rw [invErfSeriesCoeff]
   congr 1
   refine Finset.sum_congr rfl fun n hn => ?_
@@ -460,7 +462,8 @@ private lemma invErfTaylor_recurrence {n : ℕ} (hn : 0 < n) :
   have h := he.iteratedDeriv_eq n
   rw [iteratedDeriv_const_add hn] at h
   have hc := congrArg (fun z : ℝ => z/(n.factorial : ℝ)) h
-  change erfInvTC (deriv Real.invErf) n = erfInvTC (fun x => deriv Real.invErf x*erfInvAuxH x) n at hc
+  change erfInvTC (deriv Real.invErf) n =
+      erfInvTC (fun x => deriv Real.invErf x*erfInvAuxH x) n at hc
   have ha := invErf_analyticAt (x := 0) (by norm_num)
   have hH : AnalyticAt ℝ erfInvAuxH 0 := analyticAt_const.sub (ha.pow 2).neg.rexp'
   rw [erfInvTC_deriv, erfInvTC_mul ha.deriv.contDiffAt hH.contDiffAt] at hc
@@ -562,7 +565,8 @@ theorem hasSum_invErf {x : ℝ} (hx : |x| < 1) :
       change 2*m+1=2*n+1 at h
       omega)
   have heven : HasSum (fun m : ℕ => invErfTaylorCoeff (2*m)*x^(2*m)) 0 := by
-    simpa only [invErfTaylorCoeff_even, zero_mul] using (hasSum_zero : HasSum (fun _ : ℕ => (0 : ℝ)) 0)
+    simpa only [invErfTaylorCoeff_even, zero_mul] using
+        (hasSum_zero : HasSum (fun _ : ℕ => (0 : ℝ)) 0)
   have he := hfull.unique (heven.even_add_odd hodd.hasSum)
   rw [zero_add] at he
   have ho : HasSum (fun m : ℕ => invErfTaylorCoeff (2*m+1)*x^(2*m+1)) (Real.invErf x) := by
@@ -587,7 +591,13 @@ def invErfcAsymptoticV (x : ℝ) : ℝ :=
 /-- All-order expansion with polynomial logarithmic coefficients. -/
 @[dlmf 7.17.E3, dlmf 7.17.E4]
 theorem invErfc_asymptotic  :
-    ∃ c : ℕ → Polynomial ℝ, (∀ v : ℝ, (c 0).eval v=1 ∧ (c 1).eval v=0 ∧ (c 2).eval v=v/8 ∧ (c 3).eval v = -(v^2+6*v-6)/32 ∧ (c 4).eval v=(4*v^3+27*v^2+108*v-300)/384) ∧ ∀ N : ℕ, IsBigO (𝓝[>] (0 : ℝ)) (fun x => Real.invErfc x-∑ n ∈ Finset.range N, (c n).eval (invErfcAsymptoticV x)*(invErfcAsymptoticU x)^((n : ℝ)-1/2)) (fun x => (invErfcAsymptoticU x)^((N : ℝ)-1/2)*(1+|invErfcAsymptoticV x|)^N) := by
+    ∃ c : ℕ → Polynomial ℝ,
+        (∀ v : ℝ, (c 0).eval v=1 ∧ (c 1).eval v=0 ∧ (c 2).eval v=v/8 ∧ (c 3).eval v =
+        -(v^2+6*v-6)/32 ∧ (c 4).eval v=(4*v^3+27*v^2+108*v-300)/384) ∧ ∀ N : ℕ,
+        IsBigO (𝓝[>] (0 : ℝ))
+        (fun x => Real.invErfc x-∑ n ∈ Finset.range N,
+        (c n).eval (invErfcAsymptoticV x)*(invErfcAsymptoticU x)^((n : ℝ)-1/2))
+        (fun x => (invErfcAsymptoticU x)^((N : ℝ)-1/2)*(1+|invErfcAsymptoticV x|)^N) := by
   sorry
 
 end DLMF.Confluent

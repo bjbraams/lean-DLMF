@@ -81,16 +81,20 @@ variable {τ : ℂ} (hτ : 0 < τ.im)
 include hτ
 
 /-- At `z`, the function `(fun w => θ₁ w τ)` has derivative `(deriv (fun w => θ₁ w τ) z)`. -/
-private lemma hasDerivAt_jacobiThetaOneTau (z : ℂ) : HasDerivAt (fun w => θ₁ w τ) (deriv (fun w => θ₁ w τ) z) z :=
+private lemma hasDerivAt_jacobiThetaOneTau (z : ℂ) : HasDerivAt (fun w => θ₁ w τ)
+    (deriv (fun w => θ₁ w τ) z) z :=
   ((DLMF.Theta.differentiable_jacobiThetaTau 1 hτ) z).hasDerivAt
 /-- At `z`, the function `(fun w => θ₂ w τ)` has derivative `(deriv (fun w => θ₂ w τ) z)`. -/
-private lemma hasDerivAt_jacobiThetaTwoTau (z : ℂ) : HasDerivAt (fun w => θ₂ w τ) (deriv (fun w => θ₂ w τ) z) z :=
+private lemma hasDerivAt_jacobiThetaTwoTau (z : ℂ) : HasDerivAt (fun w => θ₂ w τ)
+    (deriv (fun w => θ₂ w τ) z) z :=
   ((DLMF.Theta.differentiable_jacobiThetaTau 2 hτ) z).hasDerivAt
 /-- At `z`, the function `(fun w => θ₃ w τ)` has derivative `(deriv (fun w => θ₃ w τ) z)`. -/
-private lemma hasDerivAt_jacobiThetaThreeTau (z : ℂ) : HasDerivAt (fun w => θ₃ w τ) (deriv (fun w => θ₃ w τ) z) z :=
+private lemma hasDerivAt_jacobiThetaThreeTau (z : ℂ) : HasDerivAt (fun w => θ₃ w τ)
+    (deriv (fun w => θ₃ w τ) z) z :=
   ((DLMF.Theta.differentiable_jacobiThetaTau 3 hτ) z).hasDerivAt
 /-- At `z`, the function `(fun w => θ₄ w τ)` has derivative `(deriv (fun w => θ₄ w τ) z)`. -/
-theorem hasDerivAt_jacobiThetaFourTau (z : ℂ) : HasDerivAt (fun w => θ₄ w τ) (deriv (fun w => θ₄ w τ) z) z :=
+theorem hasDerivAt_jacobiThetaFourTau (z : ℂ) : HasDerivAt (fun w => θ₄ w τ)
+    (deriv (fun w => θ₄ w τ) z) z :=
   ((DLMF.Theta.differentiable_jacobiThetaTau 4 hτ) z).hasDerivAt
 
 /-- Identity under the stated parameter and domain assumptions: `deriv (fun w => θ₂ w τ) 0 = 0`. -/
@@ -117,9 +121,12 @@ private lemma jacobiThetaTau_wronskian_one_four (x : ℂ) :
   have h := wronskian_eq_of_mul_sub_eq_add (f := fun w => θ₁ w τ) (g := fun w => θ₄ w τ)
     (A := fun w => θ₁ w τ * θ₄ w τ) (B := fun w => θ₂ w τ * θ₃ w τ)
     (C := fun w => θ₂ w τ * θ₃ w τ) (E := fun w => θ₁ w τ * θ₄ w τ) (θ₂ 0 τ * θ₃ 0 τ) x
-    (fun y => jacobiThetaOneTau_add_mul_jacobiThetaFourTau_sub x y τ hτ) (hasDerivAt_jacobiThetaOneTau hτ x) (hasDerivAt_jacobiThetaFourTau hτ x)
-    ((hasDerivAt_jacobiThetaTwoTau hτ 0).mul (hasDerivAt_jacobiThetaThreeTau hτ 0)) ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0))
-  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ, deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
+    (fun y => jacobiThetaOneTau_add_mul_jacobiThetaFourTau_sub x y τ hτ)
+        (hasDerivAt_jacobiThetaOneTau hτ x) (hasDerivAt_jacobiThetaFourTau hτ x)
+    ((hasDerivAt_jacobiThetaTwoTau hτ 0).mul (hasDerivAt_jacobiThetaThreeTau hτ 0))
+        ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0))
+  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ,
+      deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
     jacobiThetaOneTau_zero] at h
   obtain ⟨h2, h3, -, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   apply mul_left_cancel₀ (mul_ne_zero h2 h3)
@@ -133,10 +140,13 @@ private lemma jacobiThetaTau_wronskian_two_four (x : ℂ) :
   have h := wronskian_eq_of_mul_sub_eq_add (f := fun w => θ₂ w τ) (g := fun w => θ₄ w τ)
     (A := fun w => θ₂ w τ * θ₄ w τ) (B := fun w => θ₂ w τ * θ₄ w τ)
     (C := fun w => -(θ₁ w τ * θ₃ w τ)) (E := fun w => θ₁ w τ * θ₃ w τ) (θ₂ 0 τ * θ₄ 0 τ) x
-    (fun y => by have := jacobiThetaTwoTau_add_mul_jacobiThetaFourTau_sub x y τ hτ; linear_combination this)
+    (fun y => by have := jacobiThetaTwoTau_add_mul_jacobiThetaFourTau_sub x y τ hτ;
+                 linear_combination this)
     (hasDerivAt_jacobiThetaTwoTau hτ x) (hasDerivAt_jacobiThetaFourTau hτ x)
-    ((hasDerivAt_jacobiThetaTwoTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0)) ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaThreeTau hτ 0))
-  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ, deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
+    ((hasDerivAt_jacobiThetaTwoTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0))
+        ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaThreeTau hτ 0))
+  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ,
+      deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
     jacobiThetaOneTau_zero] at h
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   apply mul_left_cancel₀ (mul_ne_zero h2 h4)
@@ -150,10 +160,13 @@ private lemma jacobiThetaTau_wronskian_three_four (x : ℂ) :
   have h := wronskian_eq_of_mul_sub_eq_add (f := fun w => θ₃ w τ) (g := fun w => θ₄ w τ)
     (A := fun w => θ₃ w τ * θ₄ w τ) (B := fun w => θ₃ w τ * θ₄ w τ)
     (C := fun w => -(θ₁ w τ * θ₂ w τ)) (E := fun w => θ₁ w τ * θ₂ w τ) (θ₃ 0 τ * θ₄ 0 τ) x
-    (fun y => by have := jacobiThetaThreeTau_add_mul_jacobiThetaFourTau_sub x y τ hτ; linear_combination this)
+    (fun y => by have := jacobiThetaThreeTau_add_mul_jacobiThetaFourTau_sub x y τ hτ;
+                 linear_combination this)
     (hasDerivAt_jacobiThetaThreeTau hτ x) (hasDerivAt_jacobiThetaFourTau hτ x)
-    ((hasDerivAt_jacobiThetaThreeTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0)) ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaTwoTau hτ 0))
-  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ, deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
+    ((hasDerivAt_jacobiThetaThreeTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0))
+        ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaTwoTau hτ 0))
+  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ,
+      deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
     jacobiThetaOneTau_zero] at h
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   apply mul_left_cancel₀ (mul_ne_zero h3 h4)
@@ -167,10 +180,13 @@ private lemma jacobiThetaTau_wronskian_two_three (x : ℂ) :
   have h := wronskian_eq_of_mul_sub_eq_add (f := fun w => θ₂ w τ) (g := fun w => θ₃ w τ)
     (A := fun w => θ₂ w τ * θ₃ w τ) (B := fun w => θ₂ w τ * θ₃ w τ)
     (C := fun w => -(θ₁ w τ * θ₄ w τ)) (E := fun w => θ₁ w τ * θ₄ w τ) (θ₂ 0 τ * θ₃ 0 τ) x
-    (fun y => by have := jacobiThetaTwoTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ; linear_combination this)
+    (fun y => by have := jacobiThetaTwoTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ;
+                 linear_combination this)
     (hasDerivAt_jacobiThetaTwoTau hτ x) (hasDerivAt_jacobiThetaThreeTau hτ x)
-    ((hasDerivAt_jacobiThetaTwoTau hτ 0).mul (hasDerivAt_jacobiThetaThreeTau hτ 0)) ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0))
-  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ, deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
+    ((hasDerivAt_jacobiThetaTwoTau hτ 0).mul (hasDerivAt_jacobiThetaThreeTau hτ 0))
+        ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0))
+  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ,
+      deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
     jacobiThetaOneTau_zero] at h
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   apply mul_left_cancel₀ (mul_ne_zero h2 h3)
@@ -184,10 +200,13 @@ private lemma jacobiThetaTau_wronskian_one_three (x : ℂ) :
   have h := wronskian_eq_of_mul_sub_eq_add (f := fun w => θ₁ w τ) (g := fun w => θ₃ w τ)
     (A := fun w => θ₂ w τ * θ₄ w τ) (B := fun w => θ₁ w τ * θ₃ w τ)
     (C := fun w => θ₁ w τ * θ₃ w τ) (E := fun w => θ₂ w τ * θ₄ w τ) (θ₂ 0 τ * θ₄ 0 τ) x
-    (fun y => by have := jacobiThetaOneTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ; linear_combination this)
+    (fun y => by have := jacobiThetaOneTau_add_mul_jacobiThetaThreeTau_sub x y τ hτ;
+                 linear_combination this)
     (hasDerivAt_jacobiThetaOneTau hτ x) (hasDerivAt_jacobiThetaThreeTau hτ x)
-    ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaThreeTau hτ 0)) ((hasDerivAt_jacobiThetaTwoTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0))
-  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ, deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
+    ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaThreeTau hτ 0))
+        ((hasDerivAt_jacobiThetaTwoTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0))
+  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ,
+      deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
     jacobiThetaOneTau_zero] at h
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   apply mul_left_cancel₀ (mul_ne_zero h2 h4)
@@ -201,10 +220,13 @@ private lemma jacobiThetaTau_wronskian_one_two (x : ℂ) :
   have h := wronskian_eq_of_mul_sub_eq_add (f := fun w => θ₁ w τ) (g := fun w => θ₂ w τ)
     (A := fun w => θ₁ w τ * θ₂ w τ) (B := fun w => θ₃ w τ * θ₄ w τ)
     (C := fun w => θ₃ w τ * θ₄ w τ) (E := fun w => θ₁ w τ * θ₂ w τ) (θ₃ 0 τ * θ₄ 0 τ) x
-    (fun y => by have := jacobiThetaOneTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ; linear_combination this)
+    (fun y => by have := jacobiThetaOneTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ;
+                 linear_combination this)
     (hasDerivAt_jacobiThetaOneTau hτ x) (hasDerivAt_jacobiThetaTwoTau hτ x)
-    ((hasDerivAt_jacobiThetaThreeTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0)) ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaTwoTau hτ 0))
-  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ, deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
+    ((hasDerivAt_jacobiThetaThreeTau hτ 0).mul (hasDerivAt_jacobiThetaFourTau hτ 0))
+        ((hasDerivAt_jacobiThetaOneTau hτ 0).mul (hasDerivAt_jacobiThetaTwoTau hτ 0))
+  simp only [deriv_jacobiThetaOneTau_zero hτ, deriv_jacobiThetaTwoTau_zero hτ,
+      deriv_jacobiThetaThreeTau_zero hτ, deriv_jacobiThetaFourTau_zero hτ,
     jacobiThetaOneTau_zero] at h
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   apply mul_left_cancel₀ (mul_ne_zero h3 h4)
@@ -268,8 +290,8 @@ noncomputable def jacobiLetterThetaRaw : JacobiLetter → ℂ → ℂ → ℂ
   | .d => θ₃
   | .n => θ₄
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiLetterTheta p ζ τ = jacobiLetterThetaConst
-p τ * jacobiLetterThetaRaw p ζ τ`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiLetterTheta p ζ τ = jacobiLetterThetaConst p τ * jacobiLetterThetaRaw p ζ τ`. -/
 theorem jacobiLetterTheta_eq_const_mul_raw (p : JacobiLetter) (ζ τ : ℂ) :
     jacobiLetterTheta p ζ τ = jacobiLetterThetaConst p τ * jacobiLetterThetaRaw p ζ τ := by
   cases p <;> simp [jacobiLetterTheta, jacobiLetterThetaConst, jacobiLetterThetaRaw] <;> ring
@@ -284,15 +306,17 @@ theorem differentiable_jacobiLetterThetaRaw (p : JacobiLetter) {τ : ℂ} (hτ :
   · exact DLMF.Theta.differentiable_jacobiThetaTau 3 hτ
   · exact DLMF.Theta.differentiable_jacobiThetaTau 4 hτ
 
-/-- At `z`, the function `(fun z => jacobiPQk p q z k)` has derivative `(jacobiLetterThetaConst p (jacobiTauk k)
-/ jacobiLetterThetaConst q (jacobiTauk k) * (π / (2 * compEllIntKk k)) * (deriv (fun w => jacobiLetterThetaRaw p w
-(jacobiTauk k)) (jacobiZetak z k) * jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) - jacobiLetterThetaRaw p
-(jacobiZetak z k) (jacobiTauk k) * deriv (fun w => jacobiLetterThetaRaw q w (jacobiTauk k)) (jacobiZetak z
-k)) / jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) ^ 2)`. -/
+/-- At `z`, the function `(fun z => jacobiPQk p q z k)` has derivative
+`(jacobiLetterThetaConst p (jacobiTauk k) / jacobiLetterThetaConst q (jacobiTauk k) * (π / (2 *
+compEllIntKk k)) * (deriv (fun w => jacobiLetterThetaRaw p w (jacobiTauk k)) (jacobiZetak z k) *
+jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) - jacobiLetterThetaRaw p (jacobiZetak z k)
+(jacobiTauk k) * deriv (fun w => jacobiLetterThetaRaw q w (jacobiTauk k)) (jacobiZetak z k)) /
+jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) ^ 2)`. -/
 theorem hasDerivAt_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
     (hpq : p ≠ q) {z : ℂ} (hz : jacobiLetterTheta q (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
     HasDerivAt (fun z => jacobiPQk p q z k)
-      (jacobiLetterThetaConst p (jacobiTauk k) / jacobiLetterThetaConst q (jacobiTauk k) * (π / (2 * compEllIntKk k)) *
+      (jacobiLetterThetaConst p (jacobiTauk k) / jacobiLetterThetaConst q (jacobiTauk k) *
+          (π / (2 * compEllIntKk k)) *
         (deriv (fun w => jacobiLetterThetaRaw p w (jacobiTauk k)) (jacobiZetak z k) *
             jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) -
           jacobiLetterThetaRaw p (jacobiZetak z k) (jacobiTauk k) *
@@ -301,8 +325,10 @@ theorem hasDerivAt_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : J
   have hτ := jacobiTauk_im_pos hk
   have hK := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
   have hfun : (fun z => jacobiPQk p q z k) = fun z =>
-      (jacobiLetterThetaConst p (jacobiTauk k) * jacobiLetterThetaRaw p (jacobiZetak z k) (jacobiTauk k)) /
-        (jacobiLetterThetaConst q (jacobiTauk k) * jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k)) := by
+      (jacobiLetterThetaConst p (jacobiTauk k) *
+          jacobiLetterThetaRaw p (jacobiZetak z k) (jacobiTauk k)) /
+        (jacobiLetterThetaConst q (jacobiTauk k) *
+            jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k)) := by
     funext w; simp [jacobiPQk, jacobiGlaisher, hpq, jacobiLetterTheta_eq_const_mul_raw]
   rw [hfun]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
@@ -464,7 +490,8 @@ lemma jacobiDsk_sq_sub_jacobiCsk_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- Nonvanishing under the stated hypotheses: `∀ᶠ w in 𝓝 z, jacobiLetterTheta p (jacobiZetak w k)
 (jacobiTauk k) ≠ 0`. -/
-theorem eventually_jacobiLetterTheta_ne_zero (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter} {z : ℂ}
+theorem eventually_jacobiLetterTheta_ne_zero (hk : k ∈ jacobiModulusDomain)
+    {p : JacobiLetter} {z : ℂ}
     (hz : jacobiLetterTheta p (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
     ∀ᶠ w in 𝓝 z, jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k) ≠ 0 := by
   have hτ := jacobiTauk_im_pos hk
@@ -486,7 +513,8 @@ theorem hasDerivAt_jacobiSnk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_one_four hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -508,7 +536,8 @@ theorem hasDerivAt_jacobiCnk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiDnk, jacobiSnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiDnk, jacobiSnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_two_four hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -530,7 +559,8 @@ theorem hasDerivAt_jacobiDnk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCnk, jacobiSnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiCnk, jacobiSnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_three_four hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -555,7 +585,8 @@ theorem hasDerivAt_jacobiCdk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   rw [← (jacobi_inversion_k hk).2.2]
   rw [← (jacobi_inversion_k hk).2.1]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiNdk, jacobiSdk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiNdk, jacobiSdk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       jacobiComodulusTau, reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_two_three hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -577,7 +608,8 @@ theorem hasDerivAt_jacobiSdk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCdk, jacobiNdk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiCdk, jacobiNdk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_one_three hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -599,7 +631,8 @@ theorem hasDerivAt_jacobiNdk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCdk, jacobiSdk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiCdk, jacobiSdk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_four_three hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -624,7 +657,8 @@ theorem hasDerivAt_jacobiDck (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   rw [← (jacobi_inversion_k hk).2.2]
   rw [← (jacobi_inversion_k hk).2.1]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiNck, jacobiSck, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiNck, jacobiSck, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       jacobiComodulusTau, reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_three_two hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -646,7 +680,8 @@ theorem hasDerivAt_jacobiNck (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiDck, jacobiSck, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiDck, jacobiSck, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_four_two hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -668,7 +703,8 @@ theorem hasDerivAt_jacobiSck (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiDck, jacobiNck, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiDck, jacobiNck, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_one_two hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -691,7 +727,8 @@ theorem hasDerivAt_jacobiNsk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCsk, jacobiDsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiCsk, jacobiDsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_four_one hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -713,7 +750,8 @@ theorem hasDerivAt_jacobiDsk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCsk, jacobiNsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiCsk, jacobiNsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_three_one hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod
@@ -735,7 +773,8 @@ theorem hasDerivAt_jacobiCsk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiDsk, jacobiNsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw, jacobiLetterThetaConst, jacobiLetterThetaRaw,
+  simp only [jacobiDsk, jacobiNsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+      jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
   rw [jacobiThetaTau_wronskian_two_one hτ, compEllIntKTau]
   rw [jacobiModulusTau] at hmod

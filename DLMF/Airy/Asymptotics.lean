@@ -12,6 +12,7 @@ public import DLMF.Airy.Asymptotics.RealRemainders
 public import DLMF.Airy.Asymptotics.SectorRemainders
 public import DLMF.Airy.Asymptotics.OscillatoryRemainders
 public import DLMF.Airy.Asymptotics.DerivativeRemainders
+public import DLMF.Airy.Asymptotics.DerivativeErrorBounds
 
 /-!
 # Airy asymptotic expansions and error bounds (DLMF §9.7)

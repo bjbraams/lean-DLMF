@@ -58,7 +58,8 @@ theorem integrable_weight {a b c d : ℂ}
       apply Complex.ext <;> simp
     rwa [he] at h
   have hpair := DLMF.Gamma.integrable_Gamma_add_mul_Gamma_sub ha hc
-  apply Integrable.mono' (f := weight a b c d) (hpair.norm.const_mul (|Real.Gamma b.re| * |Real.Gamma d.re|))
+  apply Integrable.mono' (f := weight a b c d)
+      (hpair.norm.const_mul (|Real.Gamma b.re| * |Real.Gamma d.re|))
     (Measurable.aestronglyMeasurable (by
       change Measurable (fun x : ℝ => Gamma (a + I * x) * Gamma (b + I * x) *
         Gamma (c - I * x) * Gamma (d - I * x))
@@ -104,7 +105,8 @@ theorem poch_mul_weight {a b c d : ℂ} (ha : 0 < a.re) (hd : 0 < d.re) (k j : �
 theorem mixed_moment {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (k j : ℕ) :
     Integrable (fun x : ℝ => poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) ∧
-      (∫ x : ℝ, poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) = moment a b c d k j := by
+      (∫ x : ℝ, poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) =
+          moment a b c d k j := by
   have hak : 0 < (a + k).re := by simp; positivity
   have hdj : 0 < (d + j).re := by simp; positivity
   refine ⟨(integrable_weight hak hb hc hdj).congr
@@ -136,7 +138,8 @@ def hahnSum (a b c d : ℂ) (n : ℕ) (x : ℝ) : ℂ :=
     (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k /
       (poch (a + c) k * poch (a + d) k * k.factorial)) * poch (a + I * x) k
 
-/-- Every continuous Hahn sum times a reversed rising factorial has an absolutely integrable weight. -/
+/-- Every continuous Hahn sum times a reversed rising factorial has an absolutely integrable weight.
+-/
 theorem integrable_hahnSum_basis {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (n j : ℕ) :
     Integrable (fun x : ℝ => hahnSum a b c d n x * poch (d - I * x) j * weight a b c d x) := by

@@ -103,7 +103,8 @@ theorem exp_I_mul_add_recip (phi : ℂ) :
 /-- The series with terms `(fun n : ℕ => meixnerPollaczek lam phi n x * z ^ n)` converges to `((1
 - exp (I * phi) * z) ^ (-lam + I * x) * (1 - exp (-I * phi) * z) ^ (-lam - I * x))`. -/
 @[dlmf 18.23.E7]
-theorem meixnerPollaczek_generating_function {lam : ℂ} (hlam : 0 < lam.re) (phi x : ℝ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem meixnerPollaczek_generating_function {lam : ℂ} (hlam : 0 < lam.re) (phi x : ℝ) {z : ℂ}
+    (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => meixnerPollaczek lam phi n x * z ^ n)
       ((1 - exp (I * phi) * z) ^ (-lam + I * x) * (1 - exp (-I * phi) * z) ^ (-lam - I * x)) := by
   set u := exp (I * phi) with hu
@@ -201,7 +202,8 @@ theorem hahn_limit_krawtchouk {p : ℝ} (hp : 0 < p) (N n : ℕ) (x : ℂ) :
 jacobiPolyP α β n 1))` along `atTop`. -/
 @[dlmf 18.21.E5]
 theorem hahn_limit_jacobi {α β : ℝ} (hα : -1 < α) (n : ℕ) (x : ℂ) :
-    Tendsto (fun N : ℕ => hahn α β N n (N * x)) atTop (𝓝 (jacobiPolyP α β n (1 - 2 * x) / jacobiPolyP α β n 1)) := by
+    Tendsto (fun N : ℕ => hahn α β N n (N * x)) atTop
+        (𝓝 (jacobiPolyP α β n (1 - 2 * x) / jacobiPolyP α β n 1)) := by
   have hα' : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hP1 : poch ((α : ℂ) + 1) n / (n ! : ℂ) ≠ 0 :=
@@ -324,7 +326,9 @@ theorem charlier_recurrence {a : ℂ} (ha : a ≠ 0) (n : ℕ) (x : ℂ) :
 + a))` tends to `(𝓝 ((-1 : ℂ) ^ n * aeval x (hermitePolyH n)))` along `atTop`. -/
 @[dlmf 18.21.E9]
 theorem charlier_limit_hermite (n : ℕ) (x : ℂ) :
-    Tendsto (fun a : ℝ => (Real.sqrt (2 * a) : ℂ) ^ n * charlier a n ((Real.sqrt (2 * a) : ℂ) * x + a)) atTop (𝓝 ((-1 : ℂ) ^ n * aeval x (hermitePolyH n))) := by
+    Tendsto (fun a : ℝ => (Real.sqrt (2 * a) : ℂ) ^ n *
+        charlier a n ((Real.sqrt (2 * a) : ℂ) * x + a)) atTop
+        (𝓝 ((-1 : ℂ) ^ n * aeval x (hermitePolyH n))) := by
   set f : ℕ → ℝ → ℂ := fun n a =>
     (Real.sqrt (2 * a) : ℂ) ^ n * charlier a n ((Real.sqrt (2 * a) : ℂ) * x + a) with hf
   -- the scaled recurrence coefficient `√(2a)/a`
@@ -516,7 +520,8 @@ theorem meixnerPollaczek_limit_laguerrePolyL {α : ℝ} (n : ℕ) (x : ℂ) :
 @[dlmf 18.21.E13]
 theorem meixnerPollaczek_limit_hermite (n : ℕ) (x : ℂ) :
     Tendsto (fun lam : ℝ => n.factorial * (Real.sqrt lam : ℂ)⁻¹ ^ n *
-      meixnerPollaczek lam (Real.pi / 2) n (x * Real.sqrt lam)) atTop (𝓝 (aeval x (hermitePolyH n))) := by
+      meixnerPollaczek lam (Real.pi / 2) n (x * Real.sqrt lam)) atTop
+          (𝓝 (aeval x (hermitePolyH n))) := by
   have hsc : sin ((Real.pi : ℂ) / 2) = 1 := Complex.sin_pi_div_two
   have hcc : cos ((Real.pi : ℂ) / 2) = 0 := Complex.cos_pi_div_two
   refine tendsto_of_three_term (f := fun n lam => (n ! : ℂ) * (Real.sqrt lam : ℂ)⁻¹ ^ n *
@@ -565,7 +570,8 @@ x) + (x - I * a) * (x - I * b) * (continuousHahn a b (star a) (star b) n (x - I)
 continuousHahn a b (star a) (star b) n x) + n * (n + a + b + star a + star b - 1) *
 continuousHahn a b (star a) (star b) n x = 0`. -/
 @[dlmf 18.22.E14]
-theorem continuousHahn_difference_equation {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (n : ℕ) (x : ℂ) :
+theorem continuousHahn_difference_equation {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+    (n : ℕ) (x : ℂ) :
     (x + I * star a) * (x + I * star b) *
       (continuousHahn a b (star a) (star b) n (x + I) - continuousHahn a b (star a) (star b) n x) +
     (x - I * a) * (x - I * b) *
@@ -651,9 +657,12 @@ theorem continuousHahn_difference_equation {a b : ℂ} (ha : 0 < a.re) (hb : 0 <
 * lam) * (meixnerPollaczek lam phi n (x - I) - meixnerPollaczek lam phi n x) + 2 * n * sin phi
 * meixnerPollaczek lam phi n x = 0`. -/
 @[dlmf 18.22.E17]
-theorem meixnerPollaczek_difference_equation {lam : ℂ} (hlam : 0 < lam.re) (phi : ℂ) (n : ℕ) (x : ℂ) :
-    exp (I * phi) * (x + I * lam) * (meixnerPollaczek lam phi n (x + I) - meixnerPollaczek lam phi n x) +
-    exp (-I * phi) * (x - I * lam) * (meixnerPollaczek lam phi n (x - I) - meixnerPollaczek lam phi n x) +
+theorem meixnerPollaczek_difference_equation {lam : ℂ} (hlam : 0 < lam.re) (phi : ℂ)
+    (n : ℕ) (x : ℂ) :
+    exp (I * phi) * (x + I * lam) *
+        (meixnerPollaczek lam phi n (x + I) - meixnerPollaczek lam phi n x) +
+    exp (-I * phi) * (x - I * lam) *
+        (meixnerPollaczek lam phi n (x - I) - meixnerPollaczek lam phi n x) +
     2 * n * sin phi * meixnerPollaczek lam phi n x = 0 := by
   have hp : ∀ k : ℕ, poch (2 * lam) k ≠ 0 := fun k => poch_ne_zero_of_re_pos (by simp; linarith) k
   have h2k : ∀ k : ℕ, 2 * lam + k ≠ 0 := fun k h => by
@@ -722,7 +731,8 @@ theorem meixnerPollaczek_difference_equation {lam : ℂ} (hlam : 0 < lam.re) (ph
 (x + I / 2) - continuousHahn a b c d (n + 1) (x - I / 2)) / I = (n + a + b + c + d) *
 continuousHahn (a + 1 / 2) (b + 1 / 2) (c + 1 / 2) (d + 1 / 2) n x`. -/
 @[dlmf 18.22.E27]
-theorem continuousHahn_central_difference {a b c d : ℂ} (hac : 0 < (a + c).re) (had : 0 < (a + d).re) (n : ℕ) (x : ℂ) :
+theorem continuousHahn_central_difference {a b c d : ℂ} (hac : 0 < (a + c).re)
+    (had : 0 < (a + d).re) (n : ℕ) (x : ℂ) :
     (continuousHahn a b c d (n + 1) (x + I / 2) - continuousHahn a b c d (n + 1) (x - I / 2)) / I =
       (n + a + b + c + d) * continuousHahn (a + 1 / 2) (b + 1 / 2) (c + 1 / 2) (d + 1 / 2) n x := by
   have h0 : ∀ z : ℂ, 0 < z.re → z ≠ 0 := fun z hz h => by rw [h] at hz; simp at hz
@@ -742,7 +752,8 @@ theorem continuousHahn_central_difference {a b c d : ℂ} (hac : 0 < (a + c).re)
     poch_succ_left (a + c) k, poch_succ_left (a + d) k,
     poch_succ_left (-((n + 1 : ℕ) : ℂ)), poch_succ_left (((n + 1 : ℕ) : ℂ) + a + b + c + d - 1),
     Nat.factorial_succ, Nat.factorial_succ,
-    show a + 1 / 2 + (c + 1 / 2) = a + c + 1 by ring, show a + 1 / 2 + (d + 1 / 2) = a + d + 1 by ring,
+    show a + 1 / 2 + (c + 1 / 2) = a + c + 1 by ring, show a + 1 / 2 + (d + 1 / 2) =
+                                                  a + d + 1 by ring,
     show -((n + 1 : ℕ) : ℂ) + 1 = -(n : ℂ) by push_cast; ring,
     show ((n + 1 : ℕ) : ℂ) + a + b + c + d - 1 + 1 = (n : ℂ) + (a + 1 / 2) + (b + 1 / 2) +
       (c + 1 / 2) + (d + 1 / 2) - 1 by push_cast; ring,
@@ -817,7 +828,8 @@ star a) n * poch (b + star b) n) * z ^ n)` converges to `(kummerM (a + I * x) (a
 theorem continuousHahn_generating_function {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (x z : ℂ) :
     HasSum (fun n : ℕ => continuousHahn a b (star a) (star b) n x /
       (poch (a + star a) n * poch (b + star b) n) * z ^ n)
-      (kummerM (a + I * x) (a + star a) (-I * z) * kummerM (star b - I * x) (b + star b) (I * z)) := by
+      (kummerM (a + I * x) (a + star a) (-I * z) *
+          kummerM (star b - I * x) (b + star b) (I * z)) := by
   have hac : 0 < (a + star a).re := by simp; linarith
   have had : 0 < (a + star b).re := by simp; linarith
   have hbd : 0 < (b + star b).re := by simp; linarith

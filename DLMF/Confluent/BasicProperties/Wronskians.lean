@@ -317,8 +317,8 @@ theorem tendsto_regularizedConfluent_param (A B : ℂ → ℂ) (hA : Continuous 
     (f := fun c => (A c, B c, z)) (by fun_prop)
   exact (h.continuousAt.tendsto).mono_left hl
 
-/-- Identity under the stated parameter and domain assumptions: `ODE.wronskian (kummerM a b) (fun w =>
-w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) z ≠ 0`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`ODE.wronskian (kummerM a b) (fun w => w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) z ≠ 0`. -/
 @[dlmf 13.2.E26]
 theorem wronskian_kummerM_pair {a b z : ℂ} (hb : ∀ n : ℤ, b ≠ n)
     (hz : z ∈ slitPlane) :
@@ -571,9 +571,9 @@ theorem wronskian_shifted_regularized_kummerU_all (a b : ℂ) {z : ℂ} (hz : z 
   rw [← key]
   exact (wronskian_shifted_kummerU_of_mem a hc hz).symm
 
-/-- Identity under the stated parameter and domain assumptions: `ODE.wronskian (fun w => w ^ (1 - b) *
-regularizedHGFun {a - b + 1} {2 - b} w) (kummerU a b) z = -(z ^ (-b) * exp z) / Gamma (a - b +
-1)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`ODE.wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w) (kummerU a b) z = -(z
+^ (-b) * exp z) / Gamma (a - b + 1)`. -/
 @[dlmf 13.2.E36]
 theorem wronskian_shifted_regularized_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     ODE.wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)

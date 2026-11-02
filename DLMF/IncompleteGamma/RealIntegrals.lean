@@ -129,13 +129,15 @@ theorem incG_integral_mul_exp_neg (x : ℝ) :
     have hB : HasDerivAt (fun t:ℝ => Real.exp (-t)) (-Real.exp (-t)) t := by
       simpa using (hasDerivAt_neg t).exp
     convert hA.mul hB using 1; ring
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd (by apply Continuous.intervalIntegrable; fun_prop)]
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd
+      (by apply Continuous.intervalIntegrable; fun_prop)]
   simp; ring
 
 /-- The two-sided comparison behind DLMF 8.10.2. -/
 theorem incG_lowerIncGamma_compare {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 < x) :
     a*(lowerIncGamma a x).re = (∫ t in (0:ℝ)..x, t^a*Real.exp (-t)) + x^a*Real.exp (-x) ∧
-    x^(a-1)*(1-Real.exp (-x)) = (∫ t in (0:ℝ)..x, x^(a-1)*(t*Real.exp (-t))) + x^a*Real.exp (-x) := by
+    x^(a-1)*(1-Real.exp (-x)) = (∫ t in (0:ℝ)..x, x^(a-1)*(t*Real.exp (-t))) +
+        x^a*Real.exp (-x) := by
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   have ha' : ∀ k : ℕ, (a:ℂ) ≠ -k := fun k hk => by
     have := congrArg Complex.re hk; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
@@ -158,8 +160,10 @@ theorem incG_lowerIncGamma_bound_ge {a x : ℝ} (ha : 0 < a) (ha1 : a ≤ 1) (hx
     (lowerIncGamma a x).re ≥ x^(a-1)/a*(1-Real.exp (-x)) := by
   obtain ⟨h1, h2⟩ := incG_lowerIncGamma_compare ha hx
   have hm : (∫ t in (0:ℝ)..x, x^(a-1)*(t*Real.exp (-t))) ≤ ∫ t in (0:ℝ)..x, t^a*Real.exp (-t) := by
-    refine intervalIntegral.integral_mono_on hx.le (by apply Continuous.intervalIntegrable; fun_prop)
-      (by apply Continuous.intervalIntegrable; exact (Real.continuous_rpow_const ha.le).mul (by fun_prop))
+    refine intervalIntegral.integral_mono_on hx.le
+        (by apply Continuous.intervalIntegrable; fun_prop)
+      (by apply Continuous.intervalIntegrable;
+          exact (Real.continuous_rpow_const ha.le).mul (by fun_prop))
       fun t ht => ?_
     rcases ht.1.eq_or_lt with h0 | h0
     · subst h0; simp [Real.zero_rpow ha.ne']
@@ -178,7 +182,8 @@ theorem incG_lowerIncGamma_bound_le {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
   obtain ⟨h1, h2⟩ := incG_lowerIncGamma_compare ha0 hx
   have hm : (∫ t in (0:ℝ)..x, t^a*Real.exp (-t)) ≤ ∫ t in (0:ℝ)..x, x^(a-1)*(t*Real.exp (-t)) := by
     refine intervalIntegral.integral_mono_on hx.le
-      (by apply Continuous.intervalIntegrable; exact (Real.continuous_rpow_const ha0.le).mul (by fun_prop))
+      (by apply Continuous.intervalIntegrable;
+          exact (Real.continuous_rpow_const ha0.le).mul (by fun_prop))
       (by apply Continuous.intervalIntegrable; fun_prop)
       fun t ht => ?_
     rcases ht.1.eq_or_lt with h0 | h0

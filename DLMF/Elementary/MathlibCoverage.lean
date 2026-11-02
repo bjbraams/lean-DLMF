@@ -67,12 +67,14 @@ contributors.
 
 dlmf_upstream 4.2.E3 Complex.log "exact off the cut: real part log norm and imaginary part arg"
 
-dlmf_upstream 4.2.E3 Complex.mem_slitPlane_iff_arg "exact branch domain: argument strictly between -pi and pi"
+dlmf_upstream 4.2.E3 Complex.mem_slitPlane_iff_arg
+    "exact branch domain: argument strictly between -pi and pi"
 
 dlmf_upstream 4.2.E5 Complex.log
   "exact: ln z = ln|z| + i ph z with -π < ph z ≤ π, z ≠ 0; Mathlib's log 0 = 0 is totalized"
 
-dlmf_upstream 4.2.E12 Real.log_exp "exact at x=1: log(exp 1)=1; exp 1 is the unique positive such number"
+dlmf_upstream 4.2.E12 Real.log_exp
+    "exact at x=1: log(exp 1)=1; exp 1 is the unique positive such number"
 
 dlmf_upstream 4.2.E13 integral_one_div_of_pos "exact after a=1,b=exp 1 and Real.log_exp"
 
@@ -88,13 +90,15 @@ dlmf_upstream 4.2.E21 Complex.exp_neg "exact"
 
 dlmf_upstream 4.2.E22 Complex.norm_exp "exact"
 
-dlmf_upstream 4.2.E23 Complex.arg_exp "exact phase modulo 2 pi; the general phase adds arbitrary integer periods"
+dlmf_upstream 4.2.E23 Complex.arg_exp
+    "exact phase modulo 2 pi; the general phase adds arbitrary integer periods"
 
 dlmf_upstream 4.2.E24 Complex.exp_eq_exp_re_mul_sin_add_cos "exact: x = Re z, y = Im z"
 
 dlmf_upstream 4.2.E27 Complex.cpow_intCast "exact integer-power bridge"
 
-dlmf_upstream 4.2.E27 Complex.cpow_natCast "partial: nonnegative integer powers agree with repeated multiplication"
+dlmf_upstream 4.2.E27 Complex.cpow_natCast
+    "partial: nonnegative integer powers agree with repeated multiplication"
 
 dlmf_upstream 4.2.E27 Complex.cpow_neg "exact reciprocal identity"
 
@@ -103,13 +107,16 @@ dlmf_upstream 4.2.E28 Complex.cpow_def
 
 dlmf_upstream 4.2.E29 Complex.norm_cpow_of_ne_zero "exact: norm^Re a divided by exp(arg z Im a)"
 
-dlmf_upstream 4.2.E31 Complex.norm_cpow_real "exact magnitude; unreduced phase also follows from power_phase"
+dlmf_upstream 4.2.E31 Complex.norm_cpow_real
+    "exact magnitude; unreduced phase also follows from power_phase"
 
-dlmf_upstream 4.2.E34 NormedSpace.expSeries_div_hasSum_exp "exact at 1, together with Real.exp_eq_exp_\u211d"
+dlmf_upstream 4.2.E34 NormedSpace.expSeries_div_hasSum_exp
+    "exact at 1, together with Real.exp_eq_exp_\u211d"
 
 dlmf_upstream 4.2.E34 Real.exp_eq_exp_ℝ "exact bridge for the real exponential series at 1"
 
-dlmf_upstream 4.2.E37 Complex.zero_cpow "partial: zero base and nonzero exponent gives the exact origin square-root value"
+dlmf_upstream 4.2.E37 Complex.zero_cpow
+    "partial: zero base and nonzero exponent gives the exact origin square-root value"
 
 dlmf_upstream 4.4.E1 Complex.log_one "exact"
 
@@ -129,11 +136,13 @@ dlmf_upstream 4.4.E6 Complex.exp_pi_div_two_mul_I "partial: positive sign"
 
 dlmf_upstream 4.4.E7 Complex.exp_eq_one_iff "exact: integer multiples of 2 pi i"
 
-dlmf_upstream 4.4.E17 Complex.tendsto_one_add_div_pow_exp "exact: complex parameter z, natural n tends to infinity"
+dlmf_upstream 4.4.E17 Complex.tendsto_one_add_div_pow_exp
+    "exact: complex parameter z, natural n tends to infinity"
 
 dlmf_upstream 4.4.E18 Real.tendsto_one_add_div_pow_exp "exact at parameter 1"
 
-dlmf_upstream 4.4.E19 Real.tendsto_harmonic_sub_log "exact limit defining Euler constant; decimal excluded: numerical"
+dlmf_upstream 4.4.E19 Real.tendsto_harmonic_sub_log
+    "exact limit defining Euler constant; decimal excluded: numerical"
 
 dlmf_upstream 4.5.E1 Real.log_lt_sub_one_of_pos
   "partial: right inequality ln(1+x) < x, in the form ln y < y - 1 for y = 1 + x > 0, y ≠ 1"
@@ -142,23 +151,29 @@ dlmf_upstream 4.5.E4 Real.log_le_sub_one_of_pos "exact: x > 0"
 
 dlmf_upstream 4.5.E8 Real.add_one_lt_exp "exact: x ≠ 0 (equality at x = 0)"
 
-dlmf_upstream 4.6.E1 Complex.hasSum_taylorSeries_log "partial: open unit disk only; closed boundary acquired locally"
+dlmf_upstream 4.6.E1 Complex.hasSum_taylorSeries_log
+    "partial: open unit disk only; closed boundary acquired locally"
 
-dlmf_upstream 4.6.E2 Complex.hasSum_taylorSeries_neg_log "partial: transformed open disk only; half-plane boundary acquired locally"
+dlmf_upstream 4.6.E2 Complex.hasSum_taylorSeries_neg_log
+    "partial: transformed open disk only; half-plane boundary acquired locally"
 
 dlmf_upstream 4.7.E1 Complex.hasDerivAt_log "exact principal branch on the slit plane"
 
-dlmf_upstream 4.7.E3 iteratedDeriv_succ_log "exact for every positive derivative order on the slit plane"
+dlmf_upstream 4.7.E3 iteratedDeriv_succ_log
+    "exact for every positive derivative order on the slit plane"
 
 dlmf_upstream 4.7.E7 Complex.hasDerivAt_exp "exact"
 
-dlmf_upstream 4.7.E9 Complex.hasStrictDerivAt_const_cpow "exact principal-power derivative for nonzero base"
+dlmf_upstream 4.7.E9 Complex.hasStrictDerivAt_const_cpow
+    "exact principal-power derivative for nonzero base"
 
 dlmf_upstream 4.7.E10 Complex.hasStrictDerivAt_cpow_const "exact on the principal slit domain"
 
-dlmf_upstream 4.8.E2 Complex.log_mul "special case: -pi < arg x+arg y <= pi; closed lower edge needs closedLogValues"
+dlmf_upstream 4.8.E2 Complex.log_mul
+    "special case: -pi < arg x+arg y <= pi; closed lower edge needs closedLogValues"
 
-dlmf_upstream 4.8.E7 Complex.log_inv "special case: arg z != pi; closed cut identity exchanges sides"
+dlmf_upstream 4.8.E7 Complex.log_inv
+    "special case: arg z != pi; closed cut identity exchanges sides"
 
 dlmf_upstream 4.8.E9 Complex.log_exp
   "special case: -π < Im z ≤ π; the printed bound Im z = -π fails for the principal branch"
@@ -171,9 +186,11 @@ dlmf_upstream 4.8.E14 Complex.cpow_add "exact: a ≠ 0, principal powers"
 
 dlmf_upstream 4.8.E16 Complex.exp_add "exact"
 
-dlmf_upstream 4.10.E11 integral_gaussian_complex "exact: complex c with positive real part; principal square root"
+dlmf_upstream 4.10.E11 integral_gaussian_complex
+    "exact: complex c with positive real part; principal square root"
 
-dlmf_upstream 4.14.E3 Complex.cos_sub_sin_I "partial: lower sign; order of the product i z is immaterial"
+dlmf_upstream 4.14.E3 Complex.cos_sub_sin_I
+    "partial: lower sign; order of the product i z is immaterial"
 
 dlmf_upstream 4.14.E3 Complex.exp_mul_I "partial: upper sign, cos z + i sin z = e^{iz}"
 
@@ -190,7 +207,8 @@ dlmf_upstream 4.14 Complex.differentiable_cos "prose: cosine is entire"
 
 dlmf_upstream 4.14 Complex.differentiable_sin "prose: sine is entire"
 
-dlmf_upstream 4.14 Complex.meromorphic_tan "prose: tangent is meromorphic, with totalized values at its poles"
+dlmf_upstream 4.14 Complex.meromorphic_tan
+    "prose: tangent is meromorphic, with totalized values at its poles"
 
 dlmf_upstream 4.14 Complex.sin_eq_zero_iff "prose: all complex zeros of sine"
 
@@ -214,35 +232,50 @@ dlmf_upstream 4.16.T2 Complex.sin_add_pi_div_two "partial: quarter-period sine t
 
 dlmf_upstream 4.17.E1 Complex.tendsto_sin_div_nhdsNE_zero "exact"
 
-dlmf_upstream 4.17.T1 Real.cos_pi "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.cos_pi
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.cos_pi_div_four "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.cos_pi_div_four
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.cos_pi_div_six "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.cos_pi_div_six
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.cos_pi_div_three "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.cos_pi_div_three
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.cos_pi_div_two "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.cos_pi_div_two
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.cos_zero "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.cos_zero
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.sin_pi "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.sin_pi
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.sin_pi_div_four "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.sin_pi_div_four
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.sin_pi_div_six "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.sin_pi_div_six
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.sin_pi_div_three "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.sin_pi_div_three
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.sin_pi_div_two "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.sin_pi_div_two
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.sin_zero "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.sin_zero
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.tan_pi_div_four "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.tan_pi_div_four
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.tan_pi_div_six "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.tan_pi_div_six
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.17.T1 Real.tan_pi_div_three "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.17.T1 Real.tan_pi_div_three
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
 dlmf_upstream 4.17.E2 Complex.tendsto_tan_div_nhdsNE_zero "exact"
 
@@ -280,9 +313,11 @@ dlmf_upstream 4.21.E3 Complex.cos_add "partial: upper sign"
 
 dlmf_upstream 4.21.E3 Complex.cos_sub "partial: lower sign"
 
-dlmf_upstream 4.21.E4 Complex.tan_add "partial: upper sign, with all necessary denominator hypotheses"
+dlmf_upstream 4.21.E4 Complex.tan_add
+    "partial: upper sign, with all necessary denominator hypotheses"
 
-dlmf_upstream 4.21.E4 Complex.tan_sub "partial: lower sign, with all necessary denominator hypotheses"
+dlmf_upstream 4.21.E4 Complex.tan_sub
+    "partial: lower sign, with all necessary denominator hypotheses"
 
 dlmf_upstream 4.21.E6 Complex.sin_add_sin "exact"
 
@@ -294,11 +329,14 @@ dlmf_upstream 4.21.E9 Complex.cos_sub_cos "exact"
 
 dlmf_upstream 4.21.E12 Complex.sin_sq_add_cos_sq "exact"
 
-dlmf_upstream 4.21.E15 Real.two_mul_sin_mul_sin "special case: real arguments; complex identity acquired locally"
+dlmf_upstream 4.21.E15 Real.two_mul_sin_mul_sin
+    "special case: real arguments; complex identity acquired locally"
 
-dlmf_upstream 4.21.E16 Real.two_mul_cos_mul_cos "special case: real arguments; complex identity acquired locally"
+dlmf_upstream 4.21.E16 Real.two_mul_cos_mul_cos
+    "special case: real arguments; complex identity acquired locally"
 
-dlmf_upstream 4.21.E17 Real.two_mul_sin_mul_cos "special case: real arguments; complex identity acquired locally"
+dlmf_upstream 4.21.E17 Real.two_mul_sin_mul_cos
+    "special case: real arguments; complex identity acquired locally"
 
 dlmf_upstream 4.21.E21 Real.sin_half_eq_sqrt "special case: nonnegative real half-angle branch"
 
@@ -336,25 +374,35 @@ dlmf_upstream 4.22.E1 Complex.tendsto_euler_sin_prod "exact: argument rescaled b
 
 dlmf_upstream 4.22.E3 cot_series_rep "exact: argument rescaled by pi, away from sine zeros"
 
-dlmf_upstream 4.23.T1 Real.arccos_neg_one "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.arccos_neg_one
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.23.T1 Real.arccos_one "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.arccos_one
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.23.T1 Real.arccos_zero "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.arccos_zero
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.23.T1 Real.arcsin_neg_one "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.arcsin_neg_one
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.23.T1 Real.arcsin_one "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.arcsin_one
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.23.T1 Real.arcsin_zero "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.arcsin_zero
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.23.T1 Real.arctan_one "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.arctan_one
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.23.T1 Real.arctan_zero "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.arctan_zero
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.23.T1 Real.tendsto_arctan_atBot "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.tendsto_arctan_atBot
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
-dlmf_upstream 4.23.T1 Real.tendsto_arctan_atTop "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
+dlmf_upstream 4.23.T1 Real.tendsto_arctan_atTop
+    "partial: exact table entry or exact limit at infinity; reciprocal rows acquired locally"
 
 dlmf_upstream 4.23.E10 Real.arcsin_neg "special case: real principal arcsine"
 
@@ -382,7 +430,8 @@ dlmf_upstream 4.26.E1 Real.hasDerivAt_cos "exact: negative cosine is an antideri
 
 dlmf_upstream 4.26.E2 Real.hasDerivAt_sin "exact: sine is an antiderivative of cosine"
 
-dlmf_upstream 4.26.E9 TauCeti.integral_sin_nat_mul_mul_sin_nat_mul "special case: natural frequencies; integer statement needs m != -n too"
+dlmf_upstream 4.26.E9 TauCeti.integral_sin_nat_mul_mul_sin_nat_mul
+    "special case: natural frequencies; integer statement needs m != -n too"
 
 dlmf_upstream 4.26.E11 integral_cos_sq "partial: cosine square, general finite interval"
 
@@ -422,7 +471,8 @@ dlmf_upstream 4.35.E2 Complex.cosh_add "partial: upper sign"
 
 dlmf_upstream 4.35.E2 Complex.cosh_sub "partial: lower sign"
 
-dlmf_upstream 4.35.E3 Real.tanh_add "special case: real arguments; proved in pinned TauCeti.Analysis.SpecialFunctions.Hyperbolic"
+dlmf_upstream 4.35.E3 Real.tanh_add
+    "special case: real arguments; proved in pinned TauCeti.Analysis.SpecialFunctions.Hyperbolic"
 
 dlmf_upstream 4.35.E11 Complex.cosh_sq_sub_sinh_sq "exact"
 
@@ -442,23 +492,31 @@ dlmf_upstream 4.35.E30 Complex.cosh_three_mul "exact"
 
 dlmf_upstream 4.37.E10 Real.arsinh_neg "special case: real arguments"
 
-dlmf_upstream 4.37.E12 Real.artanh_neg_eq_neg_artanh "special case: real arguments; pinned TauCeti.Analysis.SpecialFunctions.Artanh"
+dlmf_upstream 4.37.E12 Real.artanh_neg_eq_neg_artanh
+    "special case: real arguments; pinned TauCeti.Analysis.SpecialFunctions.Artanh"
 
-dlmf_upstream 4.37.E16 Real.arsinh "special case: real arguments; complex principal branches acquired locally"
+dlmf_upstream 4.37.E16 Real.arsinh
+    "special case: real arguments; complex principal branches acquired locally"
 
 dlmf_upstream 4.37.E19 Real.arcosh "special case: real arguments at least one"
 
-dlmf_upstream 4.37.E24 Real.artanh_eq_half_log "special case: real arguments in [-1,1], endpoint totalizations distinguished"
+dlmf_upstream 4.37.E24 Real.artanh_eq_half_log
+    "special case: real arguments in [-1,1], endpoint totalizations distinguished"
 
 dlmf_upstream 4.38.E9 Real.hasDerivAt_arsinh "special case: real arguments"
 
 dlmf_upstream 4.38.E10 Real.hasDerivAt_arcosh "special case: real arguments greater than one"
 
-dlmf_upstream 4.38.E11 Real.hasDerivAt_artanh "special case: real arguments in (-1,1); pinned TauCeti.Analysis.SpecialFunctions.Artanh"
+dlmf_upstream 4.38.E11 Real.hasDerivAt_artanh
+    "special case: real arguments in (-1,1); pinned TauCeti.Analysis.SpecialFunctions.Artanh"
 
-dlmf_upstream 4.38.E17 Real.artanh_add "special case: real principal inverses in (-1,1); pinned TauCeti.Analysis.SpecialFunctions.Artanh"
+dlmf_upstream 4.38.E17 Real.artanh_add
+    "special case: real principal inverses in (-1,1); pinned \
+    TauCeti.Analysis.SpecialFunctions.Artanh"
 
-dlmf_upstream 4.38.E17 Real.artanh_sub "special case: real principal inverses in (-1,1); pinned TauCeti.Analysis.SpecialFunctions.Artanh"
+dlmf_upstream 4.38.E17 Real.artanh_sub
+    "special case: real principal inverses in (-1,1); pinned \
+    TauCeti.Analysis.SpecialFunctions.Artanh"
 
 dlmf_upstream 4.40.E1 Real.hasDerivAt_cosh "exact: antiderivative interpretation"
 
@@ -489,7 +547,8 @@ dlmf_upstream 4.45.E11 Real.arctan_inv_of_pos
   "partial: complementary-angle identity converting the reciprocal-argument series to arctan x, x>1"
 
 dlmf_upstream 4.45.E11 Real.hasSum_arctan
-  "partial: convergent alternating series at 1/x for x>1; its sum is pi/2-arctan x by arctan_inv_of_pos"
+  "partial: convergent alternating series at 1/x for x>1; its sum is pi/2-arctan x by \
+      arctan_inv_of_pos"
 
 dlmf_upstream 4.45.E15 Complex.log
   "exact: log z=log|z|+i arg z; principal value -pi<arg z<=pi, log 0 totalized"

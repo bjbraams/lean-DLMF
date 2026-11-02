@@ -37,7 +37,7 @@ complex DLMF integrals `incEllIntFk`, `incEllIntEk`, `incEllIntPik` (and `compEl
   `incEllIntPik_eq_compEllIntPik_sub`: the complete-integral cases DLMF 19.11.7–19.11.11.
 * `incEllIntFk_duplication`, `incEllIntEk_duplication`, `incEllIntPik_duplication`: the
   duplication formulas DLMF 19.11.12–19.11.13 and 19.11.16–19.11.17.
-* `duplication_half_angle`: the remaining formulas of DLMF 19.11.15.
+* `duplication_half_angle`, `duplication_half_angle'`: the remaining formulas of DLMF 19.11.15.
 
 ## Implementation notes
 
@@ -317,7 +317,8 @@ private lemma complement_subst_integrand_F {m θ : ℝ} (hm : m < 1) (hcos : 0 <
 
 /-- Real form of (19.11.7): `F(φ | m) = K(m) - F(π/2 - arctan(√(1-m) tan φ) | m)` for `m < 1`
 and `0 ≤ φ < π/2`. -/
-private lemma incEllIntFm_eq_compEllIntKm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
+private lemma incEllIntFm_eq_compEllIntKm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ)
+    (hφ : φ < π / 2) :
     DLMF.Elliptic.Real.incEllIntFm φ m = DLMF.Elliptic.Real.compEllIntKm m -
       DLMF.Elliptic.Real.incEllIntFm (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m := by
   set c := Real.sqrt (1 - m) with hcdef
@@ -446,7 +447,8 @@ private lemma integral_one_sub_div_sqrt_cube {m : ℝ} (hm : m < 1) (φ : ℝ) :
 
 /-- Real form of (19.11.8): `E(φ | m) = E(m) - E(θ | m) + m sin θ sin φ` with
 `θ = π/2 - arctan(√(1-m) tan φ)`, for `m < 1` and `0 ≤ φ < π/2`. -/
-private lemma incEllIntEm_eq_compEllIntEm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
+private lemma incEllIntEm_eq_compEllIntEm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ)
+    (hφ : φ < π / 2) :
     DLMF.Elliptic.Real.incEllIntEm φ m = DLMF.Elliptic.Real.compEllIntEm m -
       DLMF.Elliptic.Real.incEllIntEm (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m +
       m * Real.sin (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) * Real.sin φ := by
@@ -590,7 +592,8 @@ private lemma duplicationCos_eq_additionCos {k : ℝ} (hk : k ^ 2 < 1) (θ : ℝ
 given by (19.11.14) and the first formula of (19.11.15). -/
 @[dlmf 19.11.E12, dlmf 19.11.E14]
 theorem incEllIntFk_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
-    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ) (hc : Real.cos ψ = duplicationCos k θ) :
+    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ)
+        (hc : Real.cos ψ = duplicationCos k θ) :
     incEllIntFk ψ k = 2 * incEllIntFk θ k := by
   rw [duplicationSin_eq_additionSin] at hs
   rw [duplicationCos_eq_additionCos hk] at hc
@@ -600,7 +603,8 @@ theorem incEllIntFk_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ I
 /-- DLMF 19.11.13: `E(ψ, k) = 2E(θ, k) - k² sin²θ sin ψ`, hypotheses as in (19.11.12). -/
 @[dlmf 19.11.E13, dlmf 19.11.E14]
 theorem incEllIntEk_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
-    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ) (hc : Real.cos ψ = duplicationCos k θ) :
+    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ)
+        (hc : Real.cos ψ = duplicationCos k θ) :
     incEllIntEk ψ k = 2 * incEllIntEk θ k - k ^ 2 * Real.sin θ ^ 2 * Real.sin ψ := by
   rw [duplicationSin_eq_additionSin] at hs
   rw [duplicationCos_eq_additionCos hk] at hc
@@ -628,17 +632,16 @@ private lemma tan_half_eq_sin_div_one_add_cos {ψ : ℝ} (h : 1 + Real.cos ψ �
 /-- DLMF 19.11.15 (remaining formulas): for `ψ ∈ [0, π]` with `sin ψ`, `cos ψ` given by
 (19.11.14) and the first formula of (19.11.15), real `k² < 1` and `θ ∈ [0, π/2)`:
 `tan(ψ/2) = (tan θ) Δ(θ)`, `sin θ = (sin ψ)/√((1 + cos ψ)(1 + Δ(ψ)))`,
-`cos θ = √((cos ψ + Δ(ψ))/(1 + Δ(ψ)))`, `tan θ = tan(ψ/2) √((1 + cos ψ)/(cos ψ + Δ(ψ)))`. -/
+`cos θ = √((cos ψ + Δ(ψ))/(1 + Δ(ψ)))`, `tan θ = tan(ψ/2) √((1 + cos ψ)/(cos ψ + Δ(ψ)))`. This is
+stronger than DLMF, which assumes `ψ ∈ [0, π]`. -/
 @[dlmf 19.11.E15]
-theorem duplication_half_angle {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ico 0 (π / 2))
-    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ) (hc : Real.cos ψ = duplicationCos k θ) :
+theorem duplication_half_angle' {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ico 0 (π / 2))
+    (hs : Real.sin ψ = duplicationSin k θ) (hc : Real.cos ψ = duplicationCos k θ) :
     Real.tan (ψ / 2) = Real.tan θ * ellDeltaReal k θ ∧
       Real.sin θ = Real.sin ψ / Real.sqrt ((1 + Real.cos ψ) * (1 + ellDeltaReal k ψ)) ∧
       Real.cos θ = Real.sqrt ((Real.cos ψ + ellDeltaReal k ψ) / (1 + ellDeltaReal k ψ)) ∧
       Real.tan θ =
         Real.tan (ψ / 2) * Real.sqrt ((1 + Real.cos ψ) / (Real.cos ψ + ellDeltaReal k ψ)) := by
-  -- `ψ ∈ [0, π]` is not needed: `sin ψ`, `cos ψ` already determine all four identities.
-  have _ := hψ
   set s := Real.sin θ with hs_def
   set c := Real.cos θ with hc_def
   have hsc : s ^ 2 + c ^ 2 = 1 := Real.sin_sq_add_cos_sq θ
@@ -695,6 +698,21 @@ theorem duplication_half_angle {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ic
     rw [show 2 * c ^ 2 / Q / (2 * c ^ 2 * D ^ 2 / Q) = (1 / D) ^ 2 by field_simp,
       Real.sqrt_sq (by positivity)]
     field_simp
+
+/-- DLMF 19.11.15 (remaining formulas): for `ψ ∈ [0, π]` with `sin ψ`, `cos ψ` given by
+(19.11.14) and the first formula of (19.11.15), real `k² < 1` and `θ ∈ [0, π/2)`:
+`tan(ψ/2) = (tan θ) Δ(θ)`, `sin θ = (sin ψ)/√((1 + cos ψ)(1 + Δ(ψ)))`,
+`cos θ = √((cos ψ + Δ(ψ))/(1 + Δ(ψ)))`, `tan θ = tan(ψ/2) √((1 + cos ψ)/(cos ψ + Δ(ψ)))`. -/
+@[dlmf 19.11.E15]
+theorem duplication_half_angle {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ico 0 (π / 2))
+    (_hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ)
+    (hc : Real.cos ψ = duplicationCos k θ) :
+    Real.tan (ψ / 2) = Real.tan θ * ellDeltaReal k θ ∧
+      Real.sin θ = Real.sin ψ / Real.sqrt ((1 + Real.cos ψ) * (1 + ellDeltaReal k ψ)) ∧
+      Real.cos θ = Real.sqrt ((Real.cos ψ + ellDeltaReal k ψ) / (1 + ellDeltaReal k ψ)) ∧
+      Real.tan θ =
+        Real.tan (ψ / 2) * Real.sqrt ((1 + Real.cos ψ) / (Real.cos ψ + ellDeltaReal k ψ)) :=
+  duplication_half_angle' hk hθ hs hc
 
 /-- DLMF 19.11.16–19.11.17: `Π(ψ, α², k) = 2Π(θ, α², k) + α² R_C(γ - δ, γ)`,
 `γ = (csc²θ - α²)²(csc²ψ - α²)`, `δ = α²(1 - α²)(α² - k²)`, for real `k² < 1`,

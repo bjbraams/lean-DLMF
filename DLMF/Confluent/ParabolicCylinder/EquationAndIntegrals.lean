@@ -84,7 +84,8 @@ theorem pcfU_eq_kummerU (a : ℂ) {z : ℂ} (hre : 0 < z.re) :
     show (1 : ℂ) - 1 / 2 = 1 / 2 by ring, show a / 2 + 1 / 4 - 1 / 2 + 1 = 3 / 4 + a / 2 by ring,
     show (1 / 2 : ℂ) - 1 = -1 / 2 by ring, show (2 : ℂ) - 1 / 2 = 3 / 2 by ring,
     show a / 2 + 3 / 4 = 3 / 4 + a / 2 by ring, show a / 2 + 1 / 4 = 1 / 4 + a / 2 by ring,
-    hsqrt, hGm, Complex.Gamma_one_half_eq_sqrt, h2pow, show -(1 / 4 + a / 2) = -(1 / 4) - a / 2 by ring]
+    hsqrt, hGm, Complex.Gamma_one_half_eq_sqrt, h2pow, show -(1 / 4 + a / 2) =
+        -(1 / 4) - a / 2 by ring]
   have hπ : (Real.sqrt π : ℂ) ≠ 0 :=
     Complex.ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   generalize kummerM (3 / 4 + a / 2) (3 / 2) (z ^ 2 / 2) = N

@@ -81,7 +81,8 @@ lemma hasSum_lameEck_cos (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (weighted : Bool)
         Real.cos (j * Real.lamePhi x k))
       (Real.lameEck ν m x k / (if weighted then 1 else Real.jacobiDnm x (k ^ 2))) :=
   hasSum_lameCosCoeff hk0 hk1
-    (contDiff_two_of_isLameSolution (modulus_sq_lt_one hk0 hk1) (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
+    (contDiff_two_of_isLameSolution (modulus_sq_lt_one hk0 hk1)
+        (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
     (fun x => (Real.lameEck_parity hk0 hk1 m x).2.2.2.2)
     (fun x => (Real.lameEck_parity hk0 hk1 m x).2.1)
     (fun x => (Real.lameEck_parity hk0 hk1 m x).1) weighted x
@@ -94,7 +95,8 @@ lemma hasSum_lameEsk_sin (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (weighted : Bool)
         Real.sin (j * Real.lamePhi x k))
       (Real.lameEsk ν m x k / (if weighted then 1 else Real.jacobiDnm x (k ^ 2))) :=
   hasSum_lameSinCoeff hk0 hk1
-    (contDiff_two_of_isLameSolution (modulus_sq_lt_one hk0 hk1) (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
+    (contDiff_two_of_isLameSolution (modulus_sq_lt_one hk0 hk1)
+        (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
     (fun x => (Real.lameEsk_parity hk0 hk1 m x).2.2.2.2)
     (fun x => (Real.lameEsk_parity hk0 hk1 m x).2.1)
     (fun x => (Real.lameEsk_parity hk0 hk1 m x).1) weighted x
@@ -439,7 +441,8 @@ lemma deriv_phiTransform_pos (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Differenti
 /-! ### Fourier recurrences from Green's identity (helpers) -/
 
 /-- Green's identity for a solution of 29.2.1 against a `C²` test function `F`. -/
-private lemma integral_lame_green_test {h : ℝ} {w F F1 F2 : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k w)
+private lemma integral_lame_green_test {h : ℝ} {w F F1 F2 : ℝ → ℝ} (hk : k ^ 2 < 1)
+    (hw : Real.IsLameSolution h ν k w)
     (hF : ∀ x, HasDerivAt F (F1 x) x) (hF1 : ∀ x, HasDerivAt F1 (F2 x) x)
     (hF2 : Continuous F2) (a b : ℝ) :
     ∫ x in a..b, w x * (F2 x + (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * F x) =
@@ -471,11 +474,13 @@ private lemma lamePhi_zero (hk : k ^ 2 < 1) : Real.lamePhi 0 k = π / 2 := by
   simp [Real.lamePhi, Real.jacobiAmm_zero hk]
 
 /-- `φ(K) = 0`, since `am(K, k) = π/2`. -/
-private lemma lamePhi_K_of_sq_lt_one (hk : k ^ 2 < 1) : Real.lamePhi (Real.compEllIntKm (k ^ 2)) k = 0 := by
+private lemma lamePhi_K_of_sq_lt_one (hk : k ^ 2 < 1) : Real.lamePhi
+    (Real.compEllIntKm (k ^ 2)) k = 0 := by
   rw [Real.lamePhi, Real.jacobiAmm_compEllIntKm hk, sub_self]
 
 /-- `cn(K, k) = 0` for `k² < 1`. -/
-private lemma jacobiCnm_K (hk : k ^ 2 < 1) : Real.jacobiCnm (Real.compEllIntKm (k ^ 2)) (k ^ 2) = 0 := by
+private lemma jacobiCnm_K (hk : k ^ 2 < 1) : Real.jacobiCnm (Real.compEllIntKm (k ^ 2))
+    (k ^ 2) = 0 := by
   simp [Real.jacobiCnm, Real.jacobiAmm_compEllIntKm hk]
 
 /-- The integral identity behind the Fourier recurrences of §29.6, for a real index `j` and a
@@ -640,9 +645,10 @@ lemma integral_lame_weighted_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^
     2 * j * Real.jacobiDnm 0 (k ^ 2) ^ 2 * h0 + 2 * Real.jacobiDnm K (k ^ 2) * hK' -
     2 * Real.jacobiDnm 0 (k ^ 2) * h0'
 
-/-- The integral identity of `integral_lame_kernel`/`integral_lame_weighted_kernel` for the cosine kernel, as an identity
-between the (real-index) Fourier coefficients `(4/π)∫₀^K w cos(jφ) ρ dx`. -/
-lemma integral_cos_lamePhi_recurrence {h j : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k w)
+/-- The integral identity of `integral_lame_kernel`/`integral_lame_weighted_kernel` for the cosine
+kernel, as an identity between the (real-index) Fourier coefficients `(4/π)∫₀^K w cos(jφ) ρ dx`. -/
+lemma integral_cos_lamePhi_recurrence {h j : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1)
+    (hw : Real.IsLameSolution h ν k w)
     (b : Bool) (h0 : w 0 * Real.sin (j * (π / 2)) = 0)
     (h0' : deriv w 0 * Real.cos (j * (π / 2)) = 0)
     (hK' : deriv w (Real.compEllIntKm (k ^ 2)) = 0) :
@@ -674,7 +680,8 @@ lemma integral_cos_lamePhi_recurrence {h j : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 
     linear_combination (4 / π) * this
 
 /-- The sine-kernel analogue of `integral_cos_lamePhi_recurrence`. -/
-lemma integral_sin_lamePhi_recurrence {h j : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k w)
+lemma integral_sin_lamePhi_recurrence {h j : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1)
+    (hw : Real.IsLameSolution h ν k w)
     (b : Bool) (h0 : w 0 * Real.cos (j * (π / 2)) = 0)
     (h0' : deriv w 0 * Real.sin (j * (π / 2)) = 0)
     (hK : w (Real.compEllIntKm (k ^ 2)) = 0) :
@@ -831,7 +838,8 @@ theorem Real.lameEck_even_hasSum_fourierC
       Real.cos (((2 * p : ℕ) : ℝ) * Real.lamePhi x k))) (Real.lameEck ν (2 * m) x k) := by
   intro x
   have hd := (Real.jacobiDnm_pos (modulus_sq_lt_one hk0 hk1) x).ne'
-  have hs := (hasSum_lameEck_cos (ν := ν) hk0 hk1 (2 * m) false x).mul_left (Real.jacobiDnm x (k ^ 2))
+  have hs := (hasSum_lameEck_cos (ν := ν) hk0 hk1 (2 * m) false x).mul_left
+      (Real.jacobiDnm x (k ^ 2))
   simp only [Bool.false_eq_true, ↓reduceIte, mul_div_cancel₀ _ hd] at hs
   convert hasSum_two_mul_add_of_mod_two 0 (fun j hj => ?_) hs using 1
   · funext p
@@ -840,7 +848,8 @@ theorem Real.lameEck_even_hasSum_fourierC
     simp [pow_mul, this]
 
 /-- DLMF 29.6.9: `(β₀ - H)C₀ + α₀C₁ = 0` for the recurrence `C0`.
-Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
+Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
+`integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E9]
 theorem Real.lameEck_even_fourierC_rec_zero
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -860,7 +869,8 @@ theorem Real.lameEck_even_fourierC_rec_zero
   linear_combination key
 
 /-- DLMF 29.6.10: `γ_p C_{p-1} + (β_p - H)C_p + α_p C_{p+1} = 0`, `p ≥ 1`, for the recurrence `C0`.
-Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
+Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
+`integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E10]
 theorem Real.lameEck_even_fourierC_rec
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -913,7 +923,8 @@ theorem Real.lameEck_even_fourierC_normalization
   rw [show 4 / π * (π / 4) = 1 by field_simp] at h2
   have hCs : Summable fun p => |C p| := by
     have hs := summable_abs_lameCosCoeff hk0 hk1
-      (contDiff_two_of_isLameSolution hk (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)).1)
+      (contDiff_two_of_isLameSolution hk
+          (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)).1)
       (fun x => (Real.lameEck_parity hk0 hk1 _ x).2.2.2.2)
       (fun x => (Real.lameEck_parity hk0 hk1 _ x).2.1)
       (fun x => (Real.lameEck_parity hk0 hk1 _ x).1) false

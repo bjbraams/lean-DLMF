@@ -117,7 +117,8 @@ private lemma integral_eq_of_eq_linear_div_deriv {x y z α β : ℂ} (hx : x ∈
           (continuousAt_ofReal_add_cpow_half (h0 y hy))).mul
           (continuousAt_ofReal_add_cpow_half (h0 z hz))).inv₀ ?_))
       exact mul_ne_zero (mul_ne_zero (cpow_half_ne_zero_of_mem_slitPlane (h0 x hx))
-        (cpow_half_ne_zero_of_mem_slitPlane (h0 y hy))) (cpow_half_ne_zero_of_mem_slitPlane (h0 z hz))
+        (cpow_half_ne_zero_of_mem_slitPlane (h0 y hy)))
+            (cpow_half_ne_zero_of_mem_slitPlane (h0 z hz))
     · obtain rfl := hβ rfl
       have h00 : h 0 = 0 := by simp [hh]
       rw [ContinuousWithinAt, h00]
@@ -156,10 +157,12 @@ abbrev linearDivSqrtProductDeriv (t u v w x y z α β : ℂ) : ℂ :=
 /-- Identity under the stated parameter and domain assumptions: `(3 / 2) * (x * (u * v * w * (t +
 x))⁻¹ + y * (u * v * w * (t + y))⁻¹ + z * (u * v * w * (t + z))⁻¹ - (u * v * w)⁻¹) =
 linearDivSqrtProductDeriv t u v w x y z 3 0`. -/
-private lemma linearDivSqrtProductDeriv_three_zero (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
+private lemma linearDivSqrtProductDeriv_three_zero (t u v w x y z : ℂ) (hu : u ^ 2 = t + x)
+    (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (3 / 2) * (x * (u * v * w * (t + x))⁻¹ + y * (u * v * w * (t + y))⁻¹ +
-      z * (u * v * w * (t + z))⁻¹ - (u * v * w)⁻¹) = linearDivSqrtProductDeriv t u v w x y z 3 0 := by
+      z * (u * v * w * (t + z))⁻¹ - (u * v * w)⁻¹) =
+          linearDivSqrtProductDeriv t u v w x y z 3 0 := by
   obtain rfl : x = u ^ 2 - t := by linear_combination -hu
   obtain rfl : y = v ^ 2 - t := by linear_combination -hv
   obtain rfl : z = w ^ 2 - t := by linear_combination -hw
@@ -168,9 +171,10 @@ private lemma linearDivSqrtProductDeriv_three_zero (t u v w x y z : ℂ) (hu : u
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `(3 / 2) * ((u * v * w * (t +
-x))⁻¹ + (u * v * w * (t + y))⁻¹ + (u * v * w * (t + z))⁻¹) = linearDivSqrtProductDeriv t u v w x y z 0
-(-3)`. -/
-private lemma linearDivSqrtProductDeriv_zero_neg_three (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
+x))⁻¹ + (u * v * w * (t + y))⁻¹ + (u * v * w * (t + z))⁻¹) = linearDivSqrtProductDeriv t u v w x y z
+0 (-3)`. -/
+private lemma linearDivSqrtProductDeriv_zero_neg_three (t u v w x y z : ℂ) (hu : u ^ 2 = t + x)
+    (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (3 / 2) * ((u * v * w * (t + x))⁻¹ + (u * v * w * (t + y))⁻¹ +
       (u * v * w * (t + z))⁻¹) = linearDivSqrtProductDeriv t u v w x y z 0 (-3) := by
@@ -182,9 +186,10 @@ private lemma linearDivSqrtProductDeriv_zero_neg_three (t u v w x y z : ℂ) (hu
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `(3 / 2) * ((x - y) * (u * v * w *
-(t + x))⁻¹ + (z - y) * (u * v * w * (t + z))⁻¹ - (u * v * w)⁻¹) = linearDivSqrtProductDeriv t u v w x y
-z 3 (3 * y)`. -/
-private lemma linearDivSqrtProductDeriv_three_three_mul (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
+(t + x))⁻¹ + (z - y) * (u * v * w * (t + z))⁻¹ - (u * v * w)⁻¹) = linearDivSqrtProductDeriv t u v w
+x y z 3 (3 * y)`. -/
+private lemma linearDivSqrtProductDeriv_three_three_mul (t u v w x y z : ℂ) (hu : u ^ 2 = t + x)
+    (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (3 / 2) * ((x - y) * (u * v * w * (t + x))⁻¹ + (z - y) * (u * v * w * (t + z))⁻¹ -
       (u * v * w)⁻¹) = linearDivSqrtProductDeriv t u v w x y z 3 (3 * y) := by
@@ -219,13 +224,15 @@ private lemma symEllIntRD_rotate_two_eq_integral (x y z : ℂ) (hy : SymEllIntAr
 `x R_D(y, z, x) + y R_D(z, x, y) + z R_D(x, y, z) = 3 R_F(x, y, z)` for admissible `x` and
 `y, z ∈ ℂ \ (-∞, 0]` (at `x = 0` the first term is `0`). -/
 @[dlmf 19.21.E9]
-theorem symEllIntRD_cyclic_mul_sum_of_symEllIntArg {x y z : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane)
+theorem symEllIntRD_cyclic_mul_sum_of_symEllIntArg {x y z : ℂ} (hx : SymEllIntArg x)
+    (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
     x * symEllIntRD y z x + y * symEllIntRD z x y + z * symEllIntRD x y z =
       3 * symEllIntRF x y z := by
   set S : ℝ → ℂ := fun t => ((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y) ^ (1 / 2 : ℂ) *
     ((t : ℂ) + z) ^ (1 / 2 : ℂ) with hS
-  have iF : IntegrableOn (fun t : ℝ => (S t)⁻¹) (Ioi 0) := integrableOn_symEllIntRF_integrand hx hy hz
+  have iF : IntegrableOn (fun t : ℝ => (S t)⁻¹) (Ioi 0) :=
+      integrableOn_symEllIntRF_integrand hx hy hz
   have iDy : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + y))⁻¹) (Ioi 0) :=
     integrableOn_symEllIntRJ_integrand hx hy hz hy
   have iDz : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + z))⁻¹) (Ioi 0) :=
@@ -244,9 +251,11 @@ theorem symEllIntRD_cyclic_mul_sum_of_symEllIntArg {x y z : ℂ} (hx : SymEllInt
     i2.sub iF
   have key := integral_eq_of_eq_linear_div_deriv (α := 3) (β := 0) hx hy hz (fun _ => rfl)
     (i3.const_mul (3 / 2 : ℂ)) fun t ht => by
-      have := linearDivSqrtProductDeriv_three_zero (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _) (Carlson.cpow_half_sq _)
+      have := linearDivSqrtProductDeriv_three_zero (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _)
+          (Carlson.cpow_half_sq _)
         (Carlson.cpow_half_sq _) (ofReal_pos_add_cpow_half_ne_zero ht hx)
-        (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hy)) (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz))
+        (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hy))
+            (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz))
       simp only [linearDivSqrtProductDeriv] at this
       simp only [hS]
       rw [← this]
@@ -278,14 +287,17 @@ theorem symEllIntRD_cyclic_sum' {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈
   have key := integral_eq_of_eq_linear_div_deriv (α := 0) (β := -3) (Or.inl hx) hy hz
     (fun h => absurd h (slitPlane_ne_zero hx))
     (i2.const_mul (3 / 2 : ℂ)) fun t ht => by
-      have := linearDivSqrtProductDeriv_zero_neg_three (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _) (Carlson.cpow_half_sq _)
+      have := linearDivSqrtProductDeriv_zero_neg_three (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _)
+          (Carlson.cpow_half_sq _)
         (Carlson.cpow_half_sq _) (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hx))
-        (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hy)) (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz))
+        (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hy))
+            (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz))
       simp only [linearDivSqrtProductDeriv] at this
       simp only [hS]
       rw [← this]
   rw [integral_const_mul, integral_add i1 iDz, integral_add iDx iDy] at key
-  rw [symEllIntRD_rotate_eq_integral x y z (Or.inl hx), symEllIntRD_rotate_two_eq_integral x y z (Or.inl hy),
+  rw [symEllIntRD_rotate_eq_integral x y z (Or.inl hx),
+      symEllIntRD_rotate_two_eq_integral x y z (Or.inl hy),
     symEllIntRD_eq_integral (not_isNegReal_of_mem_slitPlane hz)]
   simp only [symEllIntS]
   have e : ∀ w : ℂ, w ^ (-1 / 2 : ℂ) = (w ^ (1 / 2 : ℂ))⁻¹ := fun w => by
@@ -316,9 +328,11 @@ theorem symEllIntRD_two_term_relation {x y z : ℂ} (hx : x ∈ slitPlane) (hy :
   have key := integral_eq_of_eq_linear_div_deriv (α := 3) (β := 3 * y) (Or.inl hx) hy hz
     (fun h => absurd h (slitPlane_ne_zero hx))
     (i2.const_mul (3 / 2 : ℂ)) fun t ht => by
-      have := linearDivSqrtProductDeriv_three_three_mul (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _) (Carlson.cpow_half_sq _)
+      have := linearDivSqrtProductDeriv_three_three_mul (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _)
+          (Carlson.cpow_half_sq _)
         (Carlson.cpow_half_sq _) (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hx))
-        (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hy)) (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz))
+        (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hy))
+            (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz))
       simp only [linearDivSqrtProductDeriv] at this
       simp only [hS]
       rw [← this]
@@ -378,14 +392,16 @@ theorem six_mul_symEllIntRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ sli
       integral_sub (iF.const_mul _) i2, integral_add i1 (iDz.const_mul _),
       integral_add (iDx.const_mul _) (iDy.const_mul _), integral_const_mul, integral_const_mul,
       integral_const_mul, integral_const_mul]
-  rw [hG, symEllIntRD_rotate_eq_integral x y z (Or.inl hx), symEllIntRD_rotate_two_eq_integral x y z (Or.inl hy),
+  rw [hG, symEllIntRD_rotate_eq_integral x y z (Or.inl hx),
+      symEllIntRD_rotate_two_eq_integral x y z (Or.inl hy),
     symEllIntRD_eq_integral (not_isNegReal_of_mem_slitPlane hz), symEllIntRF]
   simp only [symEllIntS, hS]
   ring
 
 /-- Integrability of `R_C`'s integrand `((t + x)^{1/2} (t + y))⁻¹`: `x` admissible, `y` in the
 slit plane. -/
-private lemma integrableOn_symEllIntRC_integrand {x y : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane) :
+private lemma integrableOn_symEllIntRC_integrand {x y : ℂ} (hx : SymEllIntArg x)
+    (hy : y ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) (Ioi 0) := by
   obtain ⟨c1, hc1, h1⟩ := exists_mul_sqrt_le_norm_cpow_half hx
   obtain ⟨c2, hc2, h2⟩ := exists_mul_add_one_le_norm_ofReal_add hy
@@ -406,7 +422,8 @@ private lemma integrableOn_symEllIntRC_integrand {x y : ℂ} (hx : SymEllIntArg 
 /-- DLMF 19.20.8 (third), **stronger than DLMF** in allowing `x = 0`:
 `R_J(x, y, y, p) = 3/(p - y) (R_C(x, y) - R_C(x, p))`, `p ≠ y`, `x` admissible,
 `y, p ∈ ℂ \ (-∞, 0]`. Partial fractions in the integrand. -/
-theorem symEllIntRJ_self_right_eq_sub_symEllIntRC {x y p : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane)
+theorem symEllIntRJ_self_right_eq_sub_symEllIntRC {x y p : ℂ} (hx : SymEllIntArg x)
+    (hy : y ∈ slitPlane)
     (hp : p ∈ slitPlane) (hpy : p ≠ y) :
     symEllIntRJ x y y p = 3 / (p - y) * (symEllIntRC x y - symEllIntRC x p) := by
   have iy := integrableOn_symEllIntRC_integrand hx hy
@@ -515,7 +532,8 @@ private lemma norm_ofReal_add_le_one_add_norm {w : ℂ} {t : ℝ} (ht : 0 ≤ t)
     _ ≤ 1 + ‖w‖ := by rw [Complex.norm_real, Real.norm_of_nonneg ht]; linarith
 
 /-- The integrand `(s(t) (t + p))⁻¹` with two zero variables is not integrable at `0`. -/
-theorem not_integrableOn_symEllIntRJ_integrand_zero_zero {z p : ℂ} (hz : z ∈ slitPlane) (hp : p ∈ slitPlane) :
+theorem not_integrableOn_symEllIntRJ_integrand_zero_zero {z p : ℂ} (hz : z ∈ slitPlane)
+    (hp : p ∈ slitPlane) :
     ¬ IntegrableOn (fun t => (symEllIntS 0 0 z t * ((t : ℂ) + p))⁻¹) (Ioi 0) := by
   have hA : 0 < Real.sqrt (1 + ‖z‖) := Real.sqrt_pos.mpr (by positivity)
   refine not_integrableOn_Ioi_of_inv_le_norm (M := (Real.sqrt (1 + ‖z‖) * (1 + ‖p‖))⁻¹)

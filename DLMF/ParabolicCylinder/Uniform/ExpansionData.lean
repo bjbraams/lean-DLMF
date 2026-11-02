@@ -59,12 +59,14 @@ namespace DLMF.Confluent
 
 open Polynomial
 
-/-- The exterior uniform coefficient U divided by `(t²-1)^(3s/2)` on the principal complex branch. -/
+/-- The exterior uniform coefficient U divided by `(t²-1)^(3s/2)` on the principal complex branch.
+-/
 @[dlmf 12.10.E8]
 def pcfOlverA (s : ℕ) (t : ℝ) : ℂ :=
   (((pcfOlverU s).eval t:ℝ):ℂ)/(t^2-1:ℂ)^(3*(s:ℂ)/2)
 
-/-- The interior uniform coefficient U divided by `(1-t²)^(3s/2)` on the principal complex branch. -/
+/-- The interior uniform coefficient U divided by `(1-t²)^(3s/2)` on the principal complex branch.
+-/
 @[dlmf 12.10.E24]
 def pcfOlverATilde (s : ℕ) (t : ℝ) : ℂ :=
   (((pcfOlverU s).eval t:ℝ):ℂ)/(1-t^2:ℂ)^(3*(s:ℂ)/2)
@@ -98,19 +100,36 @@ def pcfUniformFilter (S : Set ℝ) : Filter (ℝ × ℝ) :=
 /-- A cylinder expansion in even reciprocal powers of `μ`, with the remainder after every
 truncation bounded uniformly for `t ∈ S`. -/
 def HasCylinderUniformExpansion (F : ℝ → ℝ → ℂ) (C : ℕ → ℝ → ℂ) (S : Set ℝ) : Prop :=
-  ∀ N : ℕ, (fun p : ℝ × ℝ => F p.1 p.2-∑ s ∈ Finset.range N, C s p.2/(p.1:ℂ)^(2*s)) =O[pcfUniformFilter S] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ)))
+  ∀ N : ℕ, (fun p : ℝ × ℝ => F p.1 p.2-∑ s ∈ Finset.range N, C s p.2/(p.1:ℂ)^(2*s))
+      =O[pcfUniformFilter S] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ)))
 
 /-- The normalization condition for the negative-parameter cylinder expansion, with the prescribed
 Gamma coefficient series relative to `pcfH`. -/
 @[dlmf 12.10.E14]
 def IsCylinderGNormalizer (g : ℝ → ℂ) : Prop :=
-  ∀ N : ℕ, (fun μ : ℝ => g μ/pcfH μ-1-1/2*∑ j ∈ Finset.range N, pcfGammaCoeff (j+1)/(μ^2/2:ℂ)^(j+1)) =O[atTop] (fun μ : ℝ => (μ:ℂ)^(-(2*(N+1):ℤ)))
+  ∀ N : ℕ, (fun μ : ℝ => g μ/pcfH μ-1-1/2*∑ j ∈ Finset.range N, pcfGammaCoeff (j+1)/(μ^2/2:ℂ)^(j+1))
+      =O[atTop] (fun μ : ℝ => (μ:ℂ)^(-(2*(N+1):ℤ)))
 
 /-- There is a cylinder normalizer for which U and its derivative have full uniform
 reciprocal-power expansions in the exterior region `t ≥ 1+δ`. -/
 @[dlmf 12.10.E3, dlmf 12.10.E4, dlmf 12.10.E5, dlmf 12.10.E6, dlmf 12.10.E14]
 theorem pcf_negative_parameter_uniform  :
-    ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ → HasCylinderUniformExpansion (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ))) (fun s t => pcfOlverA s t) (Ici (1+δ)) ∧ HasCylinderUniformExpansion (fun μ t => pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*g μ*(t^2-1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXi t))) (fun s t => pcfOlverB s t) (Ici (1+δ)) ∧ HasCylinderUniformExpansion (fun μ t => pcfV (-μ^2/2) (μ*t*Real.sqrt 2)/(2*g μ/Gamma (1/2+μ^2/2)*exp (μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ))) (fun s t => (-1)^s*pcfOlverA s t) (Ici (1+δ)) ∧ HasCylinderUniformExpansion (fun μ t => pcfVDeriv (-μ^2/2) (μ*t*Real.sqrt 2)/(Real.sqrt 2*μ*g μ/Gamma (1/2+μ^2/2)*(t^2-1:ℂ)^(1/4:ℂ)*exp (μ^2*pcfXi t))) (fun s t => (-1)^s*pcfOlverB s t) (Ici (1+δ)) := by
+    ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ →
+        HasCylinderUniformExpansion
+        (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+        (fun s t => pcfOlverA s t) (Ici (1+δ)) ∧
+        HasCylinderUniformExpansion
+        (fun μ t => pcfUDeriv (-μ^2/2)
+        (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*g μ*(t^2-1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXi t)))
+        (fun s t => pcfOlverB s t) (Ici (1+δ)) ∧
+        HasCylinderUniformExpansion
+        (fun μ t => pcfV (-μ^2/2)
+        (μ*t*Real.sqrt 2)/(2*g μ/Gamma (1/2+μ^2/2)*exp (μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+        (fun s t => (-1)^s*pcfOlverA s t) (Ici (1+δ)) ∧
+        HasCylinderUniformExpansion
+        (fun μ t => pcfVDeriv (-μ^2/2)
+        (μ*t*Real.sqrt 2)/(Real.sqrt 2*μ*g μ/Gamma (1/2+μ^2/2)*(t^2-1:ℂ)^(1/4:ℂ)*exp (μ^2*pcfXi t)))
+        (fun s t => (-1)^s*pcfOlverB s t) (Ici (1+δ)) := by
   sorry
 
 /-- The oscillatory cylinder phase `μ² η(t) - π/4`. -/
@@ -127,14 +146,30 @@ def pcfChi (μ t : ℝ) : ℝ :=
 their derivatives, uniformly on closed subintervals of `(-1,1)`. -/
 @[dlmf 12.10.E18, dlmf 12.10.E19, dlmf 12.10.E20, dlmf 12.10.E21]
 theorem pcf_oscillatory_parameter_uniform  :
-    ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ → δ < 1 → ∀ N : ℕ, (fun p : ℝ × ℝ => pcfU (-p.1^2/2) (p.1*p.2*Real.sqrt 2)/(2*g p.1/(1-p.2^2:ℂ)^(1/4:ℂ))-∑ s ∈ Finset.range N, Real.cos (pcfKappa p.1 p.2+s*π/2)*pcfOlverATilde s p.2/(p.1:ℂ)^(2*s)) =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) ∧ (fun p : ℝ × ℝ => pcfUDeriv (-p.1^2/2) (p.1*p.2*Real.sqrt 2)/(p.1*Real.sqrt 2*g p.1*(1-p.2^2:ℂ)^(1/4:ℂ))-∑ s ∈ Finset.range N, Real.sin (pcfKappa p.1 p.2+s*π/2)*pcfOlverBTilde s p.2/(p.1:ℂ)^(2*s)) =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) ∧ (fun p : ℝ × ℝ => pcfV (-p.1^2/2) (p.1*p.2*Real.sqrt 2)/(2*g p.1/(Gamma (1/2+p.1^2/2)*(1-p.2^2:ℂ)^(1/4:ℂ)))-∑ s ∈ Finset.range N, Real.cos (pcfChi p.1 p.2+s*π/2)*pcfOlverATilde s p.2/(p.1:ℂ)^(2*s)) =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) ∧ (fun p : ℝ × ℝ => pcfVDeriv (-p.1^2/2) (p.1*p.2*Real.sqrt 2)/(p.1*Real.sqrt 2*g p.1*(1-p.2^2:ℂ)^(1/4:ℂ)/Gamma (1/2+p.1^2/2))-∑ s ∈ Finset.range N, Real.sin (pcfChi p.1 p.2+s*π/2)*pcfOlverBTilde s p.2/(p.1:ℂ)^(2*s)) =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) := by
+    ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ → δ < 1 → ∀ N : ℕ,
+        (fun p : ℝ × ℝ => pcfU (-p.1^2/2) (p.1*p.2*Real.sqrt 2)/(2*g p.1/(1-p.2^2:ℂ)^(1/4:ℂ))-∑ s ∈
+        Finset.range N, Real.cos (pcfKappa p.1 p.2+s*π/2)*pcfOlverATilde s p.2/(p.1:ℂ)^(2*s))
+        =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) ∧
+        (fun p : ℝ × ℝ => pcfUDeriv (-p.1^2/2)
+        (p.1*p.2*Real.sqrt 2)/(p.1*Real.sqrt 2*g p.1*(1-p.2^2:ℂ)^(1/4:ℂ))-∑ s ∈ Finset.range N,
+        Real.sin (pcfKappa p.1 p.2+s*π/2)*pcfOlverBTilde s p.2/(p.1:ℂ)^(2*s))
+        =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) ∧
+        (fun p : ℝ × ℝ => pcfV (-p.1^2/2)
+        (p.1*p.2*Real.sqrt 2)/(2*g p.1/(Gamma (1/2+p.1^2/2)*(1-p.2^2:ℂ)^(1/4:ℂ)))-∑ s ∈
+        Finset.range N, Real.cos (pcfChi p.1 p.2+s*π/2)*pcfOlverATilde s p.2/(p.1:ℂ)^(2*s))
+        =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) ∧
+        (fun p : ℝ × ℝ => pcfVDeriv (-p.1^2/2)
+        (p.1*p.2*Real.sqrt 2)/(p.1*Real.sqrt 2*g p.1*(1-p.2^2:ℂ)^(1/4:ℂ)/Gamma (1/2+p.1^2/2))-∑ s ∈
+        Finset.range N, Real.sin (pcfChi p.1 p.2+s*π/2)*pcfOlverBTilde s p.2/(p.1:ℂ)^(2*s))
+        =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) := by
   sorry
 
 /-- The positive-parameter cylinder normalizer condition, with the alternating Gamma coefficient
 expansion of `g(μ) μ√2 H(μ)`. -/
 @[dlmf 12.10.E28]
 def IsCylinderGBarNormalizer (g : ℝ → ℂ) : Prop :=
-  ∀ N : ℕ, (fun μ : ℝ => g μ*μ*Real.sqrt 2*pcfH μ-1-1/2*∑ j ∈ Finset.range N, (-1)^(j+1)*pcfGammaCoeff (j+1)/(μ^2/2:ℂ)^(j+1)) =O[atTop] (fun μ : ℝ => (μ:ℂ)^(-(2*(N+1):ℤ)))
+  ∀ N : ℕ, (fun μ : ℝ => g μ*μ*Real.sqrt 2*pcfH μ-1-1/2*∑ j ∈ Finset.range N,
+      (-1)^(j+1)*pcfGammaCoeff (j+1)/(μ^2/2:ℂ)^(j+1)) =O[atTop] (fun μ : ℝ => (μ:ℂ)^(-(2*(N+1):ℤ)))
 
 -- `pcf_positive_parameter_uniform` (DLMF 12.10.25, 12.10.29) is stated and proved in
 -- `DLMF/ParabolicCylinder/UniformLG2.lean`.
@@ -152,7 +187,8 @@ def pcfPolyPrimitive (p : Polynomial ℝ) : Polynomial ℝ :=
 /-- Temme polynomials, with an explicit derivative-integral recursion. -/
 def pcfTemmePoly : ℕ → Polynomial ℝ
   | 0 => 1
-  | s+1 => -C 4*X^2*(X+1)^2*derivative (pcfTemmePoly s)-C (1/4:ℝ)*pcfPolyPrimitive ((C 20*X^2+C 20*X+C 3)*pcfTemmePoly s)
+  | s+1 => -C 4*X^2*(X+1)^2*derivative (pcfTemmePoly s)-C (1/4:ℝ)*pcfPolyPrimitive
+             ((C 20*X^2+C 20*X+C 3)*pcfTemmePoly s)
 
 /-- Real polynomials with equal derivatives and equal values at `0` are equal. -/
 theorem pcfPoly_eq_of_derivative_eq {P Q : Polynomial ℝ} (hd : derivative P = derivative Q)
@@ -160,7 +196,8 @@ theorem pcfPoly_eq_of_derivative_eq {P Q : Polynomial ℝ} (hd : derivative P = 
   have hc : ∀ x : ℝ, HasDerivAt (fun x => (P - Q).eval x) 0 x := fun x => by
     have := (P - Q).hasDerivAt x
     rwa [derivative_sub, hd, sub_self, eval_zero] at this
-  have := fun x => is_const_of_deriv_eq_zero (fun x => (hc x).differentiableAt) (fun x => (hc x).deriv) x 0
+  have := fun x => is_const_of_deriv_eq_zero (fun x => (hc x).differentiableAt)
+      (fun x => (hc x).deriv) x 0
   refine sub_eq_zero.mp (Polynomial.funext fun x => ?_)
   rw [this x, eval_sub, h0, sub_self, eval_zero]
 
@@ -168,7 +205,8 @@ theorem pcfPoly_eq_of_derivative_eq {P Q : Polynomial ℝ} (hd : derivative P = 
 theorem pcfPolyPrimitive_add (p q : Polynomial ℝ) :
     pcfPolyPrimitive (p + q) = pcfPolyPrimitive p + pcfPolyPrimitive q := by
   unfold pcfPolyPrimitive
-  exact Polynomial.sum_add_index _ _ _ (fun n => by simp) (fun n a b => by rw [add_div, C_add, add_mul])
+  exact Polynomial.sum_add_index _ _ _ (fun n => by simp)
+      (fun n a b => by rw [add_div, C_add, add_mul])
 
 /-- The primitive of a monomial. -/
 theorem pcfPolyPrimitive_monomial (n : ℕ) (c : ℝ) :
@@ -194,14 +232,16 @@ theorem eval_zero_pcfPolyPrimitive (p : Polynomial ℝ) : (pcfPolyPrimitive p).e
 /-- Characterization of the primitive. -/
 theorem pcfPolyPrimitive_eq {p P : Polynomial ℝ} (hd : derivative P = p) (h0 : P.eval 0 = 0) :
     pcfPolyPrimitive p = P :=
-  pcfPoly_eq_of_derivative_eq (by rw [derivative_pcfPolyPrimitive, hd]) (by rw [eval_zero_pcfPolyPrimitive, h0])
+  pcfPoly_eq_of_derivative_eq (by rw [derivative_pcfPolyPrimitive, hd])
+      (by rw [eval_zero_pcfPolyPrimitive, h0])
 
 /-- Identity under the stated parameter and domain assumptions: `pcfTemmePoly 1=-C (1/12:ℝ)*X*(C
 20*X^2+C 30*X+C 9) ∧ pcfTemmePoly 2=C (1/288:ℝ)*X^2*(C 6160*X^4+C 18480*X^3+C 19404*X^2+C
 8028*X+C 945)`. -/
 @[dlmf 12.10.E34]
 theorem pcfTemmePoly_initial  :
-    pcfTemmePoly 1=-C (1/12:ℝ)*X*(C 20*X^2+C 30*X+C 9) ∧ pcfTemmePoly 2=C (1/288:ℝ)*X^2*(C 6160*X^4+C 18480*X^3+C 19404*X^2+C 8028*X+C 945) := by
+    pcfTemmePoly 1=-C (1/12:ℝ)*X*(C 20*X^2+C 30*X+C 9) ∧
+        pcfTemmePoly 2=C (1/288:ℝ)*X^2*(C 6160*X^4+C 18480*X^3+C 19404*X^2+C 8028*X+C 945) := by
   have h1 : pcfTemmePoly 1 = -C (1/12:ℝ)*X*(C 20*X^2+C 30*X+C 9) := by
     rw [pcfTemmePoly, pcfTemmePoly, pcfPolyPrimitive_eq (P := C (20/3:ℝ)*X^3 + C 10*X^2 + C 3*X)]
     · apply Polynomial.funext; intro r; simp; ring
@@ -209,7 +249,8 @@ theorem pcfTemmePoly_initial  :
     · simp
   refine ⟨h1, ?_⟩
   rw [show (2:ℕ) = 1 + 1 from rfl, pcfTemmePoly, h1,
-    pcfPolyPrimitive_eq (P := -C (1/12:ℝ) * (C (400/6:ℝ)*X^6 + C 200*X^5 + C 210*X^4 + C 90*X^3 + C (27/2:ℝ)*X^2))]
+    pcfPolyPrimitive_eq (P := -C (1/12:ℝ) *
+        (C (400/6:ℝ)*X^6 + C 200*X^5 + C 210*X^4 + C 90*X^3 + C (27/2:ℝ)*X^2))]
   · apply Polynomial.funext; intro r; simp; ring
   · apply Polynomial.funext; intro r; simp; ring
   · simp
@@ -219,9 +260,11 @@ theorem pcfTemmePoly_initial  :
 (20*u^2+20*u+3)*(pcfTemmePoly s).eval u`. -/
 @[dlmf 12.10.E33]
 theorem pcfTemmePoly_recurrence (s : ℕ) (τ : ℝ) :
-    (pcfTemmePoly (s+1)).eval τ=-4*τ^2*(τ+1)^2*(derivative (pcfTemmePoly s)).eval τ-1/4*∫ u : ℝ in 0..τ, (20*u^2+20*u+3)*(pcfTemmePoly s).eval u := by
+    (pcfTemmePoly (s+1)).eval τ=-4*τ^2*(τ+1)^2*(derivative (pcfTemmePoly s)).eval τ-1/4*∫ u : ℝ in
+        0..τ, (20*u^2+20*u+3)*(pcfTemmePoly s).eval u := by
   set q := (C 20*X^2+C 20*X+C 3)*pcfTemmePoly s
-  have hint : ∫ u : ℝ in 0..τ, (20*u^2+20*u+3)*(pcfTemmePoly s).eval u = (pcfPolyPrimitive q).eval τ := by
+  have hint : ∫ u : ℝ in 0..τ, (20*u^2+20*u+3)*(pcfTemmePoly s).eval u =
+      (pcfPolyPrimitive q).eval τ := by
     have : ∀ u : ℝ, (20*u^2+20*u+3)*(pcfTemmePoly s).eval u = q.eval u := fun u => by simp [q]
     simp_rw [this]
     rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (f := fun u => (pcfPolyPrimitive q).eval u)
@@ -254,7 +297,8 @@ theorem pcfZ_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
     simpa using (hasDerivAt_pow 2 t).sub_const 1
   have hs : HasDerivAt (fun t : ℝ => Real.sqrt (t^2-1)) (2*t / (2 * r)) t := h1.sqrt hy.ne'
   have htr : 0 < t + r := by linarith
-  have hl : HasDerivAt (fun t : ℝ => Real.log (t + Real.sqrt (t^2-1))) ((1 + 2*t/(2*r)) / (t + r)) t :=
+  have hl : HasDerivAt (fun t : ℝ => Real.log (t + Real.sqrt (t^2-1)))
+      ((1 + 2*t/(2*r)) / (t + r)) t :=
     ((hasDerivAt_id t).add hs).log htr.ne'
   have := (((hasDerivAt_id t).mul hs).sub hl).div_const 2
   have e : pcfXi = fun x => ((((id : ℝ → ℝ) * fun t : ℝ => Real.sqrt (t^2-1)) -
@@ -279,7 +323,8 @@ theorem pcfZ_hasDerivAt_eta {t : ℝ} (ht : -1 < t) (ht1 : t < 1) :
   have hs : HasDerivAt (fun t : ℝ => Real.sqrt (1-t^2)) (-(2*t) / (2 * r)) t := h1.sqrt hy.ne'
   have ha := Real.hasDerivAt_arccos ht.ne' ht1.ne
   have := ((ha.sub ((hasDerivAt_id t).mul hs))).div_const 2
-  have e : pcfEta = fun x => (Real.arccos x - ((id : ℝ → ℝ) * fun t : ℝ => Real.sqrt (1-t^2)) x) / 2 := by
+  have e : pcfEta = fun x =>
+      (Real.arccos x - ((id : ℝ → ℝ) * fun t : ℝ => Real.sqrt (1-t^2)) x) / 2 := by
     funext x; simp [pcfEta]
   rw [e]
   convert this using 1
@@ -329,17 +374,17 @@ theorem pcfZ_eta_eq_integral {t : ℝ} (ht : -1 ≤ t) (ht1 : t ≤ 1) :
 /-- On `[-1, ∞)` the turning-point coordinate of DLMF 12.10.39 is the Airy coordinate of
 `t² - 1 = (t - 1)(t + 1)`. -/
 theorem pcfZ_eq_airyCoord {t : ℝ} (ht : -1 ≤ t) :
-    pcfZeta t = dblZero_airyCoord (fun s => s + 1) 1 t := by
+    pcfZeta t = DoubleZeroSqrt.airyCoord (fun s => s + 1) 1 t := by
   rcases lt_trichotomy t 1 with h | h | h
-  · rw [dblZero_airyCoord_of_gt _ h, pcfZeta, pcfZ_eta_eq_integral ht h.le]
+  · rw [DoubleZeroSqrt.airyCoord_of_gt _ h, pcfZeta, pcfZ_eta_eq_integral ht h.le]
     simp only [not_le.2 h, ↓reduceIte]
-  · subst h; simp [pcfZeta, pcfXi, dblZero_airyCoord]
-  · rw [dblZero_airyCoord_of_lt _ h, pcfZeta, pcfZ_xi_eq_integral h.le]
+  · subst h; simp [pcfZeta, pcfXi, DoubleZeroSqrt.airyCoord]
+  · rw [DoubleZeroSqrt.airyCoord_of_lt _ h, pcfZeta, pcfZ_xi_eq_integral h.le]
     simp only [h.le, ↓reduceIte]
 
 /-- `ζ` is continuous on `[-1, ∞)`. -/
 theorem pcfZ_continuousOn_zeta : ContinuousOn pcfZeta (Ici (-1)) :=
-  (dblZero_continuous_airyCoord (continuous_id.add continuous_const) 1).continuousOn.congr
+  (DoubleZeroSqrt.continuous_airyCoord (continuous_id.add continuous_const) 1).continuousOn.congr
     fun _ ht => pcfZ_eq_airyCoord ht
 
 /-- `η` decreases strictly on `[-1, 1]`. -/
@@ -456,7 +501,8 @@ theorem pcfZ_hasDerivAt_zeta {t : ℝ} (ht : -1 < t) (ht1 : t ≠ 1) :
 (pcfInverseZeta ζ)=ζ ∧ ∀ t : ℝ, -1 < t → pcfZeta t=ζ → t=pcfInverseZeta ζ`. -/
 @[dlmf 12.10.E39]
 theorem pcfInverseZeta_spec {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) :
-    -1 < pcfInverseZeta ζ ∧ pcfZeta (pcfInverseZeta ζ)=ζ ∧ ∀ t : ℝ, -1 < t → pcfZeta t=ζ → t=pcfInverseZeta ζ := by
+    -1 < pcfInverseZeta ζ ∧ pcfZeta (pcfInverseZeta ζ)=ζ ∧ ∀ t : ℝ, -1 < t → pcfZeta t=ζ →
+        t=pcfInverseZeta ζ := by
   have hex : ∃ t : ℝ, -1 < t ∧ pcfZeta t = ζ := by
     obtain ⟨T, hT1, hT⟩ : ∃ T : ℝ, 1 ≤ T ∧ ζ ≤ pcfZeta T := by
       rcases le_or_gt ζ 0 with h | h
@@ -527,7 +573,7 @@ def pcfPhi (ζ : ℝ) : ℝ :=
 /-- The turning-point coordinate is analytic at the turning point. -/
 theorem pcfZeta_analytic_at_one  :
     AnalyticAt ℝ pcfZeta 1 := by
-  have h := dblZero_analyticAt_airyCoord (p := fun s : ℝ => s + 1) (x₀ := 1)
+  have h := DoubleZeroSqrt.analyticAt_airyCoord (p := fun s : ℝ => s + 1) (x₀ := 1)
     (analyticAt_id.add analyticAt_const) (by norm_num)
   refine h.congr ?_
   filter_upwards [Ioi_mem_nhds (show (-1:ℝ) < 1 by norm_num)] with t ht
@@ -568,7 +614,7 @@ theorem pcfTay_integral_pow (k : ℕ) :
   ring
 
 /-- The Airy average of `p(s) = s+1` at `1+u`. -/
-noncomputable def pcfTay_K (u : ℝ) : ℝ := dblZero_airyAvg (fun s => s + 1) 1 (1 + u)
+noncomputable def pcfTay_K (u : ℝ) : ℝ := DoubleZeroSqrt.airyAvg (fun s => s + 1) 1 (1 + u)
 
 /-- Degree-4 Taylor polynomial of `K/√2`. -/
 noncomputable def pcfTay_Kp (u : ℝ) : ℝ := 2/3 + u/10 - u^2/112 + u^3/576 - 5*u^4/11264
@@ -576,7 +622,7 @@ noncomputable def pcfTay_Kp (u : ℝ) : ℝ := 2/3 + u/10 - u^2/112 + u^3/576 - 
 /-- `K(1+u) = ∫₀¹ τ^{1/2} √(2+uτ) dτ`. -/
 theorem pcfTay_K_eq (u : ℝ) :
     pcfTay_K u = ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * Real.sqrt (2 + u*τ) := by
-  unfold pcfTay_K dblZero_airyAvg
+  unfold pcfTay_K DoubleZeroSqrt.airyAvg
   refine intervalIntegral.integral_congr fun τ _ => ?_
   simp only
   congr 2; ring
@@ -650,11 +696,11 @@ noncomputable def pcfTay_R (u : ℝ) : ℝ :=
 /-- `K(1+u) → (2/3)√2` as `u → 0`. -/
 theorem pcfTay_K_tendsto : Tendsto pcfTay_K (𝓝 0) (𝓝 ((2/3) * Real.sqrt 2)) := by
   have hp : AnalyticAt ℝ (fun s : ℝ => s + 1) 1 := analyticAt_id.add analyticAt_const
-  have h := (dblZero_analyticAt_airyAvg hp (by norm_num)).continuousAt
+  have h := (DoubleZeroSqrt.analyticAt_airyAvg hp (by norm_num)).continuousAt
   have h2 : Tendsto (fun u : ℝ => 1 + u) (𝓝 0) (𝓝 1) := by
     simpa using (by fun_prop : Continuous fun u : ℝ => 1 + u).tendsto 0
   have := h.tendsto.comp h2
-  rw [dblZero_airyAvg_self] at this
+  rw [DoubleZeroSqrt.airyAvg_self] at this
   norm_num at this
   exact this
 
@@ -663,7 +709,7 @@ theorem pcfTay_Z_expansion :
     (fun u => ((3/2) * pcfTay_K u)^(2/3:ℝ) - (2:ℝ)^(1/3:ℝ) * pcfTay_R u) =O[𝓝 0]
       (fun u => u^5) := by
   have hc : (0:ℝ) < (2:ℝ)^(1/3:ℝ) := by positivity
-  have hK0 : ∀ u, 0 ≤ pcfTay_K u := fun u => dblZero_airyAvg_nonneg _ _ _
+  have hK0 : ∀ u, 0 ≤ pcfTay_K u := fun u => DoubleZeroSqrt.airyAvg_nonneg _ _ _
   refine invSer_isBigO_sub_of_pow_sub (n := 3) three_ne_zero hc.ne' ?_ ?_ ?_
   · have h1 := (pcfTay_K_tendsto.const_mul (3/2)).rpow_const (p := 2/3)
       (Or.inl (by positivity))
@@ -678,13 +724,22 @@ theorem pcfTay_Z_expansion :
       rw [← Real.rpow_natCast, ← Real.rpow_mul (by have := hK0 u; positivity),
         show (2/3:ℝ) * ((3:ℕ):ℝ) = ((2:ℕ):ℝ) by norm_num, Real.rpow_natCast]; ring
     have hA := (pcfTay_K_expansion.mul ((pcfTay_K_tendsto.add
-      ((by unfold pcfTay_Kp; fun_prop : Continuous fun u => Real.sqrt 2 * pcfTay_Kp u).tendsto 0)).isBigO_one ℝ)).const_mul_left (9/4)
+      ((by unfold pcfTay_Kp; fun_prop : Continuous fun u => Real.sqrt 2 * pcfTay_Kp u).tendsto
+          0)).isBigO_one ℝ)).const_mul_left (9/4)
     have hB := invSer_isBigO_pow_of_eq_mul (l := 𝓝 (0:ℝ)) (y := id) 5
       (f := fun u => (9/2) * pcfTay_Kp u ^ 2 - 2 * pcfTay_R u ^ 3)
-      (q := fun u : ℝ => 12642726098*u^7/27869801526123046875 - 126495637*u^6/24129698291015625 + 441062309*u^5/9651879316406250 - 29489287*u^4/66184315312500 + 316335933107*u^3/257034387456000000 - 188911973*u^2/57953280000000 + 111563237*u/26078976000000 + 3059827/10348800000)
-      (((by fun_prop : Continuous fun u : ℝ => 12642726098*u^7/27869801526123046875 - 126495637*u^6/24129698291015625 + 441062309*u^5/9651879316406250 - 29489287*u^4/66184315312500 + 316335933107*u^3/257034387456000000 - 188911973*u^2/57953280000000 + 111563237*u/26078976000000 + 3059827/10348800000).tendsto 0).isBigO_one ℝ)
+      (q := fun u : ℝ => 12642726098*u^7/27869801526123046875 - 126495637*u^6/24129698291015625 +
+          441062309*u^5/9651879316406250 - 29489287*u^4/66184315312500 +
+          316335933107*u^3/257034387456000000 - 188911973*u^2/57953280000000 +
+          111563237*u/26078976000000 + 3059827/10348800000)
+      (((by fun_prop : Continuous fun u : ℝ => 12642726098*u^7/27869801526123046875 -
+              126495637*u^6/24129698291015625 + 441062309*u^5/9651879316406250 -
+              29489287*u^4/66184315312500 + 316335933107*u^3/257034387456000000 -
+              188911973*u^2/57953280000000 + 111563237*u/26078976000000 +
+              3059827/10348800000).tendsto 0).isBigO_one ℝ)
       (Eventually.of_forall fun u => by simp only [pcfTay_Kp, pcfTay_R, id]; ring)
-    have hA' : _ =O[𝓝 (0:ℝ)] (fun u : ℝ => u^5) := hA.trans (by simpa using isBigO_refl (fun u : ℝ => u^5) _)
+    have hA' : _ =O[𝓝 (0:ℝ)] (fun u : ℝ => u^5) :=
+        hA.trans (by simpa using isBigO_refl (fun u : ℝ => u^5) _)
     refine ((hA'.add hB).congr' (Eventually.of_forall fun u => ?_)
       (Eventually.of_forall fun u => by simp)).trans (isBigO_refl _ _)
     simp only [e1, mul_pow, pcfTay_c_cube]
@@ -694,7 +749,7 @@ theorem pcfTay_Z_expansion :
 /-- `ζ(1+u) = u ((3/2)K(1+u))^{2/3}` (DLMF 12.10.39 as an Airy coordinate). -/
 theorem pcfTay_zeta_eq {u : ℝ} (hu : -2 ≤ u) :
     pcfZeta (1 + u) = u * ((3/2) * pcfTay_K u)^(2/3:ℝ) := by
-  rw [pcfZ_eq_airyCoord (by linarith), dblZero_airyCoord, pcfTay_K]
+  rw [pcfZ_eq_airyCoord (by linarith), DoubleZeroSqrt.airyCoord, pcfTay_K]
   ring_nf
 
 /-- Forward expansion `ζ(1+u) = 2^{1/3} u R(u) + O(u⁶)`. -/
@@ -711,7 +766,21 @@ noncomputable def pcfTay_v (w : ℝ) : ℝ :=
 
 /-- The residual of the inversion, `(v R(v) - w)/w⁶`. -/
 noncomputable def pcfTay_q (w : ℝ) : ℝ :=
-  w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(783876931167548774559650287/13221689470271539282265625000000000000000 - 143491386769361756420091123557*w/25451752230272713118361328125000000000000000) - 47119937620258209964619261/120197177002468538929687500000000000000) + 82288713654128684005237699/37776255629347255092187500000000000000) - 30517117985044689320850841/2158643178819843148125000000000000000) + 3043919389270844484453637/39248057796724420875000000000000000) - 392955749776850760448801/1090223827686789468750000000000000) + 3200410982445578048767/2076616814641503750000000000000) - 1444810931500592024107/207661681464150375000000000000) + 18399562789495057631/647257188979170000000000000) - 16908374496178801/160530056790468750000000) + 3148285199483107/8561603028825000000000) - 42209311381812853/32106011358093750000000) + 7972127151497/1853160828750000000) - 6165851047/463290207187500) + 146438784931/3529830150000000) - 14538540377/117661005000000) + 41220257/122245200000) - 90737/97453125) + 20917/6930000
+  w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(
+    783876931167548774559650287/13221689470271539282265625000000000000000
+    - 143491386769361756420091123557*w/25451752230272713118361328125000000000000000)
+    - 47119937620258209964619261/120197177002468538929687500000000000000)
+    + 82288713654128684005237699/37776255629347255092187500000000000000)
+    - 30517117985044689320850841/2158643178819843148125000000000000000)
+    + 3043919389270844484453637/39248057796724420875000000000000000)
+    - 392955749776850760448801/1090223827686789468750000000000000)
+    + 3200410982445578048767/2076616814641503750000000000000)
+    - 1444810931500592024107/207661681464150375000000000000)
+    + 18399562789495057631/647257188979170000000000000)
+    - 16908374496178801/160530056790468750000000) + 3148285199483107/8561603028825000000000)
+    - 42209311381812853/32106011358093750000000) + 7972127151497/1853160828750000000)
+    - 6165851047/463290207187500) + 146438784931/3529830150000000) - 14538540377/117661005000000)
+    + 41220257/122245200000) - 90737/97453125) + 20917/6930000
 
 /-- The printed inverse polynomial inverts `w ↦ w R(w)` to order `w⁵`. -/
 theorem pcfTay_inversion_identity (w : ℝ) :
@@ -723,7 +792,9 @@ pcfInverseZeta ζ-(1+w-w^2/10+11*w^3/350-823*w^4/63000+150653*w^5/24255000)) =O[
 => ζ^6)`. -/
 @[dlmf 12.10.E41]
 theorem pcfInverseZeta_taylor  :
-    (fun ζ : ℝ => let w:=2^(-1/3:ℝ)*ζ; pcfInverseZeta ζ-(1+w-w^2/10+11*w^3/350-823*w^4/63000+150653*w^5/24255000)) =O[𝓝 0] (fun ζ : ℝ => ζ^6) := by
+    (fun ζ : ℝ => let w:=2^(-1/3:ℝ)*ζ;
+        pcfInverseZeta ζ-(1+w-w^2/10+11*w^3/350-823*w^4/63000+150653*w^5/24255000)) =O[𝓝 0]
+        (fun ζ : ℝ => ζ^6) := by
   set k : ℝ := (2:ℝ)^(-1/3:ℝ) with hk
   set c : ℝ := (2:ℝ)^(1/3:ℝ) with hc
   have hck : c * k = 1 := by
@@ -756,10 +827,11 @@ theorem pcfInverseZeta_taylor  :
   -- the analytic inverse
   have hp : AnalyticAt ℝ (fun s : ℝ => s + 1) 1 := analyticAt_id.add analyticAt_const
   obtain ⟨g, hga, -, hg1, hgl, hgr⟩ :=
-    dblZero_exists_analytic_inverse_airyCoord hp (by norm_num : (0:ℝ) < 1 + 1)
-  have hf0 : dblZero_airyCoord (fun s : ℝ => s + 1) 1 1 = 0 := by simp [dblZero_airyCoord]
-  have hfc : ContinuousAt (dblZero_airyCoord (fun s : ℝ => s + 1) 1) 1 :=
-    (dblZero_continuous_airyCoord (continuous_id.add continuous_const) 1).continuousAt
+    DoubleZeroSqrt.exists_analytic_inverse_airyCoord hp (by norm_num : (0:ℝ) < 1 + 1)
+  have hf0 : DoubleZeroSqrt.airyCoord (fun s : ℝ => s + 1) 1 1 = 0 := by
+      simp [DoubleZeroSqrt.airyCoord]
+  have hfc : ContinuousAt (DoubleZeroSqrt.airyCoord (fun s : ℝ => s + 1) 1) 1 :=
+    (DoubleZeroSqrt.continuous_airyCoord (continuous_id.add continuous_const) 1).continuousAt
   have hP : Tendsto (fun ζ => 1 + v ζ) (𝓝 0) (𝓝 1) := by
     simpa using hv0.const_add 1
   have hmain := invSer_isBigO_sub_of_leftInverse (hf0 ▸ hga.hasStrictDerivAt) hgl hfc hP
@@ -775,13 +847,13 @@ theorem pcfInverseZeta_taylor  :
     have h2' : (-1:ℝ) < g ζ := h2
     refine (pcfInverseZeta_spec h3).2.2 (g ζ) h2' ?_
     rw [pcfZ_eq_airyCoord h2'.le, h1]
-  have hfP : ∀ᶠ ζ in 𝓝 (0:ℝ), dblZero_airyCoord (fun s : ℝ => s + 1) 1 (1 + v ζ) =
+  have hfP : ∀ᶠ ζ in 𝓝 (0:ℝ), DoubleZeroSqrt.airyCoord (fun s : ℝ => s + 1) 1 (1 + v ζ) =
       pcfZeta (1 + v ζ) := by
     filter_upwards [hP.eventually (Ioi_mem_nhds (show (-1:ℝ) < 1 by norm_num))] with ζ h
     exact (pcfZ_eq_airyCoord (le_of_lt h)).symm
   have h3 := (hmain.congr' (hgP.mono fun ζ h =>
       show 1 + v ζ - g (id ζ) = 1 + v ζ - pcfInverseZeta ζ by simp only [id, h])
-    (hfP.mono fun ζ h => show dblZero_airyCoord (fun s : ℝ => s + 1) 1 (1 + v ζ) - id ζ =
+    (hfP.mono fun ζ h => show DoubleZeroSqrt.airyCoord (fun s : ℝ => s + 1) 1 (1 + v ζ) - id ζ =
       pcfZeta (1 + v ζ) - ζ by simp only [id, h])).trans hE
   refine h3.neg_left.congr (fun ζ => ?_) (fun _ => rfl)
   simp only [hv, pcfTay_v, hk]
@@ -801,53 +873,75 @@ def pcfAiryBeta (m : ℕ) : ℝ :=
 /-- Continuous coefficient at zero is supplied by a removable limit. -/
 @[dlmf 12.10.E42]
 def pcfAiryA (s : ℕ) (ζ : ℝ) : ℝ :=
-  limUnder (𝓝[≠] ζ) (fun u : ℝ => (∑ m ∈ Finset.range (2*s+1), pcfAiryBeta m*(pcfPhi u)^(6*(2*s-m))*(pcfOlverU (2*s-m)).eval (pcfInverseZeta u))/u^(3*s+0))
+  limUnder (𝓝[≠] ζ) (fun u : ℝ =>
+      (∑ m ∈ Finset.range (2*s+1),
+      pcfAiryBeta m*(pcfPhi u)^(6*(2*s-m))*(pcfOlverU (2*s-m)).eval (pcfInverseZeta u))/u^(3*s+0))
 
 /-- The map `(fun u : ℝ => (∑ m ∈ Finset.range (2*s+1), pcfAiryBeta m*(pcfPhi
 u)^(6*(2*s-m))*(pcfOlverU (2*s-m)).eval (pcfInverseZeta u))/u^(3*s+0))` tends to `(𝓝 (pcfAiryA
 s ζ))` along `(𝓝[≠] ζ)`. -/
 @[dlmf 12.10.E42]
 theorem pcfAiryA_limit (s : ℕ) {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) :
-    Tendsto (fun u : ℝ => (∑ m ∈ Finset.range (2*s+1), pcfAiryBeta m*(pcfPhi u)^(6*(2*s-m))*(pcfOlverU (2*s-m)).eval (pcfInverseZeta u))/u^(3*s+0)) (𝓝[≠] ζ) (𝓝 (pcfAiryA s ζ)) := by
+    Tendsto (fun u : ℝ =>
+        (∑ m ∈ Finset.range (2*s+1),
+        pcfAiryBeta m*(pcfPhi u)^(6*(2*s-m))*(pcfOlverU (2*s-m)).eval (pcfInverseZeta u))/u^(3*s+0))
+        (𝓝[≠] ζ) (𝓝 (pcfAiryA s ζ)) := by
   sorry
 
 /-- Continuous coefficient at zero is supplied by a removable limit. -/
 @[dlmf 12.10.E42]
 def pcfAiryB (s : ℕ) (ζ : ℝ) : ℝ :=
-  limUnder (𝓝[≠] ζ) (fun u : ℝ => -(∑ m ∈ Finset.range (2*s+1+1), pcfAiryAlpha m*(pcfPhi u)^(6*(2*s+1-m))*(pcfOlverU (2*s+1-m)).eval (pcfInverseZeta u))/u^(3*s+2))
+  limUnder (𝓝[≠] ζ) (fun u : ℝ =>
+      -(∑ m ∈ Finset.range (2*s+1+1),
+      pcfAiryAlpha m*(pcfPhi u)^(6*(2*s+1-m))*(pcfOlverU (2*s+1-m)).eval
+      (pcfInverseZeta u))/u^(3*s+2))
 
 /-- The map `(fun u : ℝ => -(∑ m ∈ Finset.range (2*s+1+1), pcfAiryAlpha m*(pcfPhi
 u)^(6*(2*s+1-m))*(pcfOlverU (2*s+1-m)).eval (pcfInverseZeta u))/u^(3*s+2))` tends to `(𝓝
 (pcfAiryB s ζ))` along `(𝓝[≠] ζ)`. -/
 @[dlmf 12.10.E42]
 theorem pcfAiryB_limit (s : ℕ) {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) :
-    Tendsto (fun u : ℝ => -(∑ m ∈ Finset.range (2*s+1+1), pcfAiryAlpha m*(pcfPhi u)^(6*(2*s+1-m))*(pcfOlverU (2*s+1-m)).eval (pcfInverseZeta u))/u^(3*s+2)) (𝓝[≠] ζ) (𝓝 (pcfAiryB s ζ)) := by
+    Tendsto (fun u : ℝ =>
+        -(∑ m ∈ Finset.range (2*s+1+1),
+        pcfAiryAlpha m*(pcfPhi u)^(6*(2*s+1-m))*(pcfOlverU (2*s+1-m)).eval
+        (pcfInverseZeta u))/u^(3*s+2)) (𝓝[≠] ζ) (𝓝 (pcfAiryB s ζ)) := by
   sorry
 
 /-- Continuous coefficient at zero is supplied by a removable limit. -/
 @[dlmf 12.10.E46]
 def pcfAiryC (s : ℕ) (ζ : ℝ) : ℝ :=
-  limUnder (𝓝[≠] ζ) (fun u : ℝ => -(∑ m ∈ Finset.range (2*s+1+1), pcfAiryBeta m*(pcfPhi u)^(6*(2*s+1-m))*(pcfOlverV (2*s+1-m)).eval (pcfInverseZeta u))/u^(3*s+1))
+  limUnder (𝓝[≠] ζ) (fun u : ℝ =>
+      -(∑ m ∈ Finset.range (2*s+1+1),
+      pcfAiryBeta m*(pcfPhi u)^(6*(2*s+1-m))*(pcfOlverV (2*s+1-m)).eval
+      (pcfInverseZeta u))/u^(3*s+1))
 
 /-- The map `(fun u : ℝ => -(∑ m ∈ Finset.range (2*s+1+1), pcfAiryBeta m*(pcfPhi
 u)^(6*(2*s+1-m))*(pcfOlverV (2*s+1-m)).eval (pcfInverseZeta u))/u^(3*s+1))` tends to `(𝓝
 (pcfAiryC s ζ))` along `(𝓝[≠] ζ)`. -/
 @[dlmf 12.10.E46]
 theorem pcfAiryC_limit (s : ℕ) {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) :
-    Tendsto (fun u : ℝ => -(∑ m ∈ Finset.range (2*s+1+1), pcfAiryBeta m*(pcfPhi u)^(6*(2*s+1-m))*(pcfOlverV (2*s+1-m)).eval (pcfInverseZeta u))/u^(3*s+1)) (𝓝[≠] ζ) (𝓝 (pcfAiryC s ζ)) := by
+    Tendsto (fun u : ℝ =>
+        -(∑ m ∈ Finset.range (2*s+1+1),
+        pcfAiryBeta m*(pcfPhi u)^(6*(2*s+1-m))*(pcfOlverV (2*s+1-m)).eval
+        (pcfInverseZeta u))/u^(3*s+1)) (𝓝[≠] ζ) (𝓝 (pcfAiryC s ζ)) := by
   sorry
 
 /-- Continuous coefficient at zero is supplied by a removable limit. -/
 @[dlmf 12.10.E46]
 def pcfAiryD (s : ℕ) (ζ : ℝ) : ℝ :=
-  limUnder (𝓝[≠] ζ) (fun u : ℝ => (∑ m ∈ Finset.range (2*s+1), pcfAiryAlpha m*(pcfPhi u)^(6*(2*s-m))*(pcfOlverV (2*s-m)).eval (pcfInverseZeta u))/u^(3*s+0))
+  limUnder (𝓝[≠] ζ) (fun u : ℝ =>
+      (∑ m ∈ Finset.range (2*s+1),
+      pcfAiryAlpha m*(pcfPhi u)^(6*(2*s-m))*(pcfOlverV (2*s-m)).eval (pcfInverseZeta u))/u^(3*s+0))
 
 /-- The map `(fun u : ℝ => (∑ m ∈ Finset.range (2*s+1), pcfAiryAlpha m*(pcfPhi
 u)^(6*(2*s-m))*(pcfOlverV (2*s-m)).eval (pcfInverseZeta u))/u^(3*s+0))` tends to `(𝓝 (pcfAiryD
 s ζ))` along `(𝓝[≠] ζ)`. -/
 @[dlmf 12.10.E46]
 theorem pcfAiryD_limit (s : ℕ) {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) :
-    Tendsto (fun u : ℝ => (∑ m ∈ Finset.range (2*s+1), pcfAiryAlpha m*(pcfPhi u)^(6*(2*s-m))*(pcfOlverV (2*s-m)).eval (pcfInverseZeta u))/u^(3*s+0)) (𝓝[≠] ζ) (𝓝 (pcfAiryD s ζ)) := by
+    Tendsto (fun u : ℝ =>
+        (∑ m ∈ Finset.range (2*s+1),
+        pcfAiryAlpha m*(pcfPhi u)^(6*(2*s-m))*(pcfOlverV (2*s-m)).eval
+        (pcfInverseZeta u))/u^(3*s+0)) (𝓝[≠] ζ) (𝓝 (pcfAiryD s ζ)) := by
   sorry
 
 /-- The logarithmic derivative of the cylinder Airy amplitude `pcfPhi` in the zeta coordinate. -/
@@ -894,7 +988,8 @@ theorem pcfAiryChi_formula {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) (hz : ζ 
 ζ+pcfAiryChi ζ*pcfAiryB s ζ+deriv (pcfAiryB s) ζ`. -/
 @[dlmf 12.10.E44]
 theorem pcfAiryCD_derivative (s : ℕ) {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) :
-    pcfAiryC s ζ=pcfAiryChi ζ*pcfAiryA s ζ+deriv (pcfAiryA s) ζ+ζ*pcfAiryB s ζ ∧ pcfAiryD (s+1) ζ=pcfAiryA (s+1) ζ+pcfAiryChi ζ*pcfAiryB s ζ+deriv (pcfAiryB s) ζ := by
+    pcfAiryC s ζ=pcfAiryChi ζ*pcfAiryA s ζ+deriv (pcfAiryA s) ζ+ζ*pcfAiryB s ζ ∧
+        pcfAiryD (s+1) ζ=pcfAiryA (s+1) ζ+pcfAiryChi ζ*pcfAiryB s ζ+deriv (pcfAiryB s) ζ := by
   sorry
 
 end DLMF.Confluent

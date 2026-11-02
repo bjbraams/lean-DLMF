@@ -77,7 +77,8 @@ private lemma differentiableAt_div_prod {f g : ℂ × ℂ → ℂ} {x : ℂ × �
     (Filter.Eventually.of_forall fun y => by simp [div_eq_mul_inv])
 
 /-- `(ζ, τ) ↦ θ₃(f(ζ, τ)|τ)` is holomorphic where `f` is and `Im τ > 0`. -/
-private lemma differentiableAt_jacobiThetaThreeTau_comp {f : ℂ × ℂ → ℂ} {x : ℂ × ℂ} (hf : DifferentiableAt ℂ f x)
+private lemma differentiableAt_jacobiThetaThreeTau_comp {f : ℂ × ℂ → ℂ} {x : ℂ × ℂ}
+    (hf : DifferentiableAt ℂ f x)
     (hx : 0 < x.2.im) : DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiThetaThreeTau (f y) y.2) x := by
   have h1 := (hasFDerivAt_jacobiTheta₂ (f x / π) hx).differentiableAt
   have h2 : DifferentiableAt ℂ (fun y : ℂ × ℂ => (f y / π, y.2)) x :=
@@ -87,7 +88,8 @@ private lemma differentiableAt_jacobiThetaThreeTau_comp {f : ℂ × ℂ → ℂ}
 
 /-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun y : ℂ × ℂ =>
 jacobiThetaTwoTau (f y) y.2) x`. -/
-private lemma differentiableAt_jacobiThetaTwoTau_comp {f : ℂ × ℂ → ℂ} {x : ℂ × ℂ} (hf : DifferentiableAt ℂ f x)
+private lemma differentiableAt_jacobiThetaTwoTau_comp {f : ℂ × ℂ → ℂ} {x : ℂ × ℂ}
+    (hf : DifferentiableAt ℂ f x)
     (hx : 0 < x.2.im) : DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiThetaTwoTau (f y) y.2) x := by
   have h := differentiableAt_jacobiThetaThreeTau_comp (f := fun y => f y + π * y.2 / 2)
     (hf.add (differentiableAt_div_prod (differentiableAt_snd.const_mul (π : ℂ))
@@ -98,14 +100,16 @@ private lemma differentiableAt_jacobiThetaTwoTau_comp {f : ℂ × ℂ → ℂ} {
   exact he.mul h
 
 /-- The normalized theta functions are jointly holomorphic in `(ζ, τ)` for `Im τ > 0`. -/
-theorem differentiableAt_jacobiLetterTheta_uncurry (p : JacobiLetter) {x : ℂ × ℂ} (hx : 0 < x.2.im) :
+theorem differentiableAt_jacobiLetterTheta_uncurry (p : JacobiLetter) {x : ℂ × ℂ}
+    (hx : 0 < x.2.im) :
     DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiLetterTheta p y.1 y.2) x := by
   have c2 : DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiThetaTwoTau 0 y.2) x :=
     differentiableAt_jacobiThetaTwoTau_comp (f := fun _ => 0) (differentiableAt_const _) hx
   have c3 : DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiThetaThreeTau 0 y.2) x :=
     differentiableAt_jacobiThetaThreeTau_comp (f := fun _ => 0) (differentiableAt_const _) hx
   have c4 : DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiThetaFourTau 0 y.2) x :=
-    differentiableAt_jacobiThetaThreeTau_comp (f := fun _ => 0 + π / 2) (differentiableAt_const _) hx
+    differentiableAt_jacobiThetaThreeTau_comp (f := fun _ => 0 + π / 2)
+        (differentiableAt_const _) hx
   have d2 : DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiThetaTwoTau y.1 y.2) x :=
     differentiableAt_jacobiThetaTwoTau_comp (f := fun y => y.1) differentiableAt_fst hx
   have d3 : DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiThetaThreeTau y.1 y.2) x :=
@@ -235,7 +239,8 @@ private lemma conj_jacobiLetterTheta (p : JacobiLetter) (ζ τ : ℂ) :
     (starRingEnd ℂ) (jacobiLetterTheta p ζ τ) =
       jacobiLetterTheta p ((starRingEnd ℂ) ζ) (-(starRingEnd ℂ) τ) := by
   have h0 : (starRingEnd ℂ) (0 : ℂ) = 0 := map_zero _
-  cases p <;> simp only [jacobiLetterTheta, map_mul, map_div₀, conj_jacobiThetaOneTau, conj_jacobiThetaTwoTau,
+  cases p <;> simp only
+      [jacobiLetterTheta, map_mul, map_div₀, conj_jacobiThetaOneTau, conj_jacobiThetaTwoTau,
     conj_jacobiThetaThreeTau, conj_jacobiThetaFourTau, h0]
 
 /-- Conjugation of Glaisher's quotients. -/

@@ -65,7 +65,8 @@ theorem legendre_near_one_bounds {x : ℝ} (h1 : 1 < x) (h2 : x^2 < 2) :
     constructor <;> linarith
 
 /-- DLMF 14.3.18-type quadratic representation near `x = 1⁺`. -/
-theorem regularizedGaussHG_legendre_quadratic (ν c : ℂ) (hc : ∀ k : ℕ, c ≠ -(k:ℂ)) {x : ℝ} (h1 : 1 < x)
+theorem regularizedGaussHG_legendre_quadratic (ν c : ℂ) (hc : ∀ k : ℕ, c ≠ -(k:ℂ))
+    {x : ℝ} (h1 : 1 < x)
     (h2 : x^2 < 2) :
     regularizedGaussHG (ν+1) (-ν) c ((1-x)/2) =
       (x:ℂ)^(1+ν-c)*((1+x)/2:ℂ)^(c-1)*regularizedGaussHG ((c-ν)/2) ((c-ν-1)/2) c (1-1/(x:ℂ)^2) := by
@@ -77,7 +78,8 @@ theorem regularizedGaussHG_legendre_quadratic (ν c : ℂ) (hc : ∀ k : ℕ, c 
   rw [harg, show (1:ℂ)-2*((1-x)/2) = x by ring, show (1:ℂ)-((1-x)/2) = (1+x)/2 by ring,
     show (1:ℂ)-(-ν) = ν+1 by ring, show ν+1-c = 1+ν-c by ring,
     show (-ν+c)/2 = (c-ν)/2 by ring, show (-ν+c-1)/2 = (c-ν-1)/2 by ring] at hq
-  rw [congrFun (ordinaryHypergeometric_symm (-ν) (ν+1) c), ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHG hc hw,
+  rw [congrFun (ordinaryHypergeometric_symm (-ν) (ν+1) c),
+      ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHG hc hw,
     ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHG hc hy] at hq
   have hG := Complex.Gamma_ne_zero hc
   apply mul_left_cancel₀ hG
@@ -111,7 +113,8 @@ theorem regularizedGaussHG_olver_connection (ν μ : ℂ) {x : ℝ} (h1 : 1 < x)
 
 /-- Powers of two as exponentials. -/
 theorem legendre_two_cpow_exp (s : ℂ) : (2:ℂ)^s = exp ((Real.log 2:ℂ)*s) := by
-  rw [cpow_def_of_ne_zero two_ne_zero, show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, ← ofReal_log (by norm_num)]
+  rw [cpow_def_of_ne_zero two_ne_zero, show (2:ℂ) = ((2:ℝ):ℂ) by norm_num,
+                                                                   ← ofReal_log (by norm_num)]
 
 /-- `2 = exp (log 2)`. -/
 theorem legendre_two_eq_exp : (2:ℂ) = exp (Real.log 2:ℂ) := by
@@ -120,7 +123,8 @@ theorem legendre_two_eq_exp : (2:ℂ) = exp (Real.log 2:ℂ) := by
 /-- Scalar identity behind the `P^{-μ}` coefficient in DLMF 14.9.15. -/
 theorem legendre_connection_scalar_minus (ν μ : ℂ) {x : ℝ} (h1 : 1 < x) :
     2*(1/(x:ℂ)^2)^(-ν-1/2)*(legendreBranchPower μ x/(2^(ν+1)*(x:ℂ)^(ν+μ+1))) =
-      exp (-μ/2*(log ((x:ℂ)+1)-log ((x:ℂ)-1)))*((x:ℂ)^(1+ν-(1+μ))*((1+x)/2:ℂ)^(1+μ-1))*2^(-(ν-μ)) := by
+      exp (-μ/2*(log ((x:ℂ)+1)-log
+          ((x:ℂ)-1)))*((x:ℂ)^(1+ν-(1+μ))*((1+x)/2:ℂ)^(1+μ-1))*2^(-(ν-μ)) := by
   have hx : (0:ℝ) < x := by linarith
   have hp : (0:ℝ) < x+1 := by linarith
   have hm : (0:ℝ) < x-1 := by linarith
@@ -130,7 +134,8 @@ theorem legendre_connection_scalar_minus (ν μ : ℂ) {x : ℝ} (h1 : 1 < x) :
   have e5 : (x:ℂ)-1 = ((x-1:ℝ):ℂ) := by push_cast; ring
   unfold legendreBranchPower
   rw [e1, e2, e4, e5, Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1/x^2),
-    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (x+1)/2), Complex.ofReal_cpow_eq_exp hx, Complex.ofReal_cpow_eq_exp hx,
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (x+1)/2), Complex.ofReal_cpow_eq_exp hx,
+        Complex.ofReal_cpow_eq_exp hx,
     legendre_two_cpow_exp, legendre_two_cpow_exp, ← ofReal_log hp.le, ← ofReal_log hm.le,
     Real.log_div (by positivity : x+1 ≠ 0) (by norm_num : (2:ℝ) ≠ 0),
     Real.log_div (by norm_num : (1:ℝ) ≠ 0) (by positivity : x^2 ≠ 0), Real.log_one, Real.log_pow]
@@ -143,7 +148,8 @@ theorem legendre_connection_scalar_minus (ν μ : ℂ) {x : ℝ} (h1 : 1 < x) :
 /-- Scalar identity behind the `P^{μ}` coefficient in DLMF 14.9.15. -/
 theorem legendre_connection_scalar_plus (ν μ : ℂ) {x : ℝ} (h1 : 1 < x) :
     2*(1-1/(x:ℂ)^2)^(-μ)*(1/(x:ℂ)^2)^(-ν-1/2)*(legendreBranchPower μ x/(2^(ν+1)*(x:ℂ)^(ν+μ+1))) =
-      exp (μ/2*(log ((x:ℂ)+1)-log ((x:ℂ)-1)))*((x:ℂ)^(1+ν-(1-μ))*((1+x)/2:ℂ)^(1-μ-1))*2^(-(ν+μ)) := by
+      exp (μ/2*(log ((x:ℂ)+1)-log
+          ((x:ℂ)-1)))*((x:ℂ)^(1+ν-(1-μ))*((1+x)/2:ℂ)^(1-μ-1))*2^(-(ν+μ)) := by
   have hx : (0:ℝ) < x := by linarith
   have hp : (0:ℝ) < x+1 := by linarith
   have hm : (0:ℝ) < x-1 := by linarith
@@ -157,7 +163,8 @@ theorem legendre_connection_scalar_plus (ν μ : ℂ) {x : ℝ} (h1 : 1 < x) :
   unfold legendreBranchPower
   rw [e0, e1, e2, e4, e5, Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (x-1)*(x+1)/x^2),
     Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1/x^2),
-    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (x+1)/2), Complex.ofReal_cpow_eq_exp hx, Complex.ofReal_cpow_eq_exp hx,
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (x+1)/2), Complex.ofReal_cpow_eq_exp hx,
+        Complex.ofReal_cpow_eq_exp hx,
     legendre_two_cpow_exp, legendre_two_cpow_exp, ← ofReal_log hp.le, ← ofReal_log hm.le,
     Real.log_div (by positivity : x+1 ≠ 0) (by norm_num : (2:ℝ) ≠ 0),
     Real.log_div (by norm_num : (1:ℝ) ≠ 0) (by positivity : x^2 ≠ 0), Real.log_one, Real.log_pow,
@@ -170,8 +177,10 @@ theorem legendre_connection_scalar_plus (ν μ : ℂ) {x : ℝ} (h1 : 1 < x) :
   ring
 
 /-- DLMF 14.9.15 on `(1,√2)` for non-integer order. -/
-theorem associated_connection_15_real (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {x : ℝ} (h1 : 1 < x) (h2 : x^2 < 2) :
-    2*sin (μ*π)/π*olverQ ν μ x=associatedP ν μ x/Gamma (ν+μ+1)-associatedP ν (-μ) x/Gamma (ν-μ+1) := by
+theorem associated_connection_15_real (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {x : ℝ} (h1 : 1 < x)
+    (h2 : x^2 < 2) :
+    2*sin (μ*π)/π*olverQ ν μ x=associatedP ν μ x/Gamma (ν+μ+1)-associatedP ν (-μ)
+        x/Gamma (ν-μ+1) := by
   have hc1 : ∀ k : ℕ, 1-μ ≠ -(k:ℂ) := fun k hk => hμ (k+1) (by push_cast; linear_combination -hk)
   have hc2 : ∀ k : ℕ, 1+μ ≠ -(k:ℂ) := fun k hk => hμ (-(k+1)) (by push_cast; linear_combination hk)
   have hT := regularizedGaussHG_olver_connection ν μ h1 h2
@@ -192,13 +201,17 @@ theorem associated_connection_15_real (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n
         (Gamma ((ν+μ+1)/2))⁻¹*(Gamma ((ν+μ+2)/2))⁻¹)*I2
 
 /-- DLMF 14.9.15 on the cut plane for non-integer order. -/
-theorem associated_connection_15_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ) z/Gamma (ν-μ+1) := by
+theorem associated_connection_15_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
+    2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ)
+        z/Gamma (ν-μ+1) := by
   have hf : AnalyticOnNhd ℂ (fun w => 2*sin (μ*π)/π*olverQ ν μ w) {z : ℂ | z-1 ∈ slitPlane} :=
     fun w hw => analyticAt_const.mul (olverQ_analytic ν μ w hw)
-  have hg : AnalyticOnNhd ℂ (fun w => associatedP ν μ w/Gamma (ν+μ+1)-associatedP ν (-μ) w/Gamma (ν-μ+1))
+  have hg : AnalyticOnNhd ℂ
+      (fun w => associatedP ν μ w/Gamma (ν+μ+1)-associatedP ν (-μ) w/Gamma (ν-μ+1))
       {z : ℂ | z-1 ∈ slitPlane} :=
-    fun w hw => ((associatedP_analytic ν μ w hw).div_const).sub ((associatedP_analytic ν (-μ) w hw).div_const)
+    fun w hw => ((associatedP_analytic ν μ w hw).div_const).sub
+        ((associatedP_analytic ν (-μ) w hw).div_const)
   set x₀ : ℝ := 6/5
   have h2 : ((x₀:ℝ):ℂ) ∈ {z : ℂ | z-1 ∈ slitPlane} := by
     show ((x₀:ℝ):ℂ) - 1 ∈ slitPlane
@@ -218,7 +231,8 @@ theorem associated_connection_15_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠
 
 /-- DLMF 14.9.15: `2 sin(μπ)/π · 𝑸^μ_ν = P^μ_ν/Γ(ν+μ+1) - P^{-μ}_ν/Γ(ν-μ+1)` on the cut plane. -/
 theorem olverQ_connection (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ) z/Gamma (ν-μ+1) := by
+    2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ)
+        z/Gamma (ν-μ+1) := by
   by_cases hμ : ∀ n : ℤ, μ ≠ n
   · exact associated_connection_15_nonint ν μ hμ hz
   push Not at hμ
@@ -261,7 +275,8 @@ theorem regularizedGaussHG_at_zero (a b c : ℂ) : regularizedGaussHG a b c 0 = 
   simp
 
 /-- Abel's identity for two solutions of the associated Legendre equation of orders `±μ`. -/
-theorem associatedP_wronskian_const (ν μ : ℂ) {z w : ℂ} (hz : z-1 ∈ slitPlane) (hw : w-1 ∈ slitPlane) :
+theorem associatedP_wronskian_const (ν μ : ℂ) {z w : ℂ} (hz : z-1 ∈ slitPlane)
+    (hw : w-1 ∈ slitPlane) :
     (1-z^2)*ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) z =
       (1-w^2)*ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) w := by
   set G : ℂ → ℂ := fun y => (1-y^2)*ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) y
@@ -269,7 +284,8 @@ theorem associatedP_wronskian_const (ν μ : ℂ) {z w : ℂ} (hz : z-1 ∈ slit
     intro y hy
     have hfa := associatedP_analytic ν (-μ) y hy
     have hga := associatedP_analytic ν μ y hy
-    have hf2 : HasDerivAt (deriv (associatedP ν (-μ))) (iteratedDeriv 2 (associatedP ν (-μ)) y) y := by
+    have hf2 : HasDerivAt (deriv (associatedP ν (-μ)))
+        (iteratedDeriv 2 (associatedP ν (-μ)) y) y := by
       rw [iteratedDeriv_succ, iteratedDeriv_one]
       exact ((associatedP_analytic ν (-μ)).deriv y hy).differentiableAt.hasDerivAt
     have hg2 : HasDerivAt (deriv (associatedP ν μ)) (iteratedDeriv 2 (associatedP ν μ) y) y := by
@@ -284,8 +300,10 @@ theorem associatedP_wronskian_const (ν μ : ℂ) {z w : ℂ} (hz : z-1 ∈ slit
       (hga.differentiableAt.hasDerivAt.mul hf2))).congr_deriv ?_
     simp only [Pi.mul_apply, Pi.sub_apply]
     linear_combination (associatedP ν (-μ) y)*eg-(associatedP ν μ y)*ef
-  have := isOpen_sub_one_mem_slitPlane.is_const_of_deriv_eq_zero isPreconnected_sub_one_mem_slitPlane
-    (fun y hy => (hd y hy).differentiableAt.differentiableWithinAt) (fun y hy => (hd y hy).deriv) hz hw
+  have := isOpen_sub_one_mem_slitPlane.is_const_of_deriv_eq_zero
+      isPreconnected_sub_one_mem_slitPlane
+    (fun y hy => (hd y hy).differentiableAt.differentiableWithinAt)
+        (fun y hy => (hd y hy).deriv) hz hw
   simpa [G] using this
 
 /-- DLMF 14.2.7: for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `𝒲{P^{-μ}_ν(z), P^μ_ν(z)} = 2
@@ -295,8 +313,10 @@ theorem associated_wronskian_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
     ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) z=2*sin (μ*π)/(π*(1-z^2)) := by
   set H : ℂ → ℂ := fun y => 2*μ*regularizedGaussHG (ν+1) (-ν) (1-(-μ)) ((1-y)/2)*
       regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-y)/2) + (1-y^2)*(ν*(ν+1)/2)*
-      (regularizedGaussHG (ν+1) (-ν) (1-(-μ)) ((1-y)/2)*regularizedGaussHG (ν+1+1) (-ν+1) (1-μ+1) ((1-y)/2)
-       - regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-y)/2)*regularizedGaussHG (ν+1+1) (-ν+1) (1-(-μ)+1) ((1-y)/2))
+      (regularizedGaussHG (ν+1) (-ν) (1-(-μ)) ((1-y)/2)*regularizedGaussHG (ν+1+1) (-ν+1)
+          (1-μ+1) ((1-y)/2)
+       - regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-y)/2)*regularizedGaussHG (ν+1+1) (-ν+1)
+           (1-(-μ)+1) ((1-y)/2))
   have hne : ∀ y : ℂ, y-1 ∈ slitPlane → 1-y^2 ≠ 0 := by
     intro y hy h
     have hp := slitPlane_ne_zero (one_add_mem_slitPlane_of_sub_one hy)
@@ -305,7 +325,8 @@ theorem associated_wronskian_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
   have hGH : ∀ y : ℂ, y-1 ∈ slitPlane →
       (1-y^2)*ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) y = H y := by
     intro y hy
-    have hf : HasDerivAt (associatedP ν (-μ)) _ y := hasDerivAt_associatedP_aux (ν+1) (-ν) (1-(-μ)) (-μ) hy
+    have hf : HasDerivAt (associatedP ν (-μ)) _ y :=
+        hasDerivAt_associatedP_aux (ν+1) (-ν) (1-(-μ)) (-μ) hy
     have hg : HasDerivAt (associatedP ν μ) _ y := hasDerivAt_associatedP_aux (ν+1) (-ν) (1-μ) μ hy
     have hE : exp (-μ/2*(log (y+1)-log (y-1)))*exp (μ/2*(log (y+1)-log (y-1))) = 1 := by
       rw [← exp_add]; ring_nf; exact exp_zero
@@ -362,17 +383,20 @@ theorem associated_wronskian_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
 theorem hasDerivAt_olverQ (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     HasDerivAt (olverQ ν μ) ((Real.sqrt π:ℂ)*legendreBranchPower μ z/(2^(ν+1)*z^(ν+μ+1))*
       ((μ*z/(z^2-1)-(ν+μ+1)/z)*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/z^2) +
-        (ν+μ+2)/2*((ν+μ+1)/2)*regularizedGaussHG ((ν+μ+2)/2+1) ((ν+μ+1)/2+1) (ν+3/2+1) (1/z^2)*(-2/z^3))) z := by
+        (ν+μ+2)/2*((ν+μ+1)/2)*regularizedGaussHG ((ν+μ+2)/2+1) ((ν+μ+1)/2+1) (ν+3/2+1)
+            (1/z^2)*(-2/z^3))) z := by
   have hz0 := slitPlane_ne_zero (mem_slitPlane_of_sub_one hz)
   have hm := slitPlane_ne_zero hz
   have hp' : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
   have hp := slitPlane_ne_zero hp'
   have hB : HasDerivAt (legendreBranchPower μ) _ z :=
-    ((((hasDerivAt_id z).sub_const 1).clog hz).add (((hasDerivAt_id z).add_const 1).clog hp')).const_mul (μ/2)
+    ((((hasDerivAt_id z).sub_const 1).clog hz).add
+        (((hasDerivAt_id z).add_const 1).clog hp')).const_mul (μ/2)
       |>.cexp
   have hP := (hasDerivAt_id z).cpow_const (c := ν+μ+1) (mem_slitPlane_of_sub_one hz)
   have hcut := recip_sq_mem_cutPlane hz
-  have hFd := (analyticAt_regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) hcut).differentiableAt.hasDerivAt
+  have hFd := (analyticAt_regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2)
+      hcut).differentiableAt.hasDerivAt
   rw [deriv_regularizedGaussHG _ _ _ hcut] at hFd
   have hu : HasDerivAt (fun w : ℂ => 1/w^2) (-2/z^3) z := by
     have := (hasDerivAt_pow 2 z).inv (pow_ne_zero 2 hz0)
@@ -399,7 +423,8 @@ theorem hasDerivAt_olverQ (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     ring
 
 /-- Two continuous functions that agree off a countable set agree everywhere. -/
-theorem legendre_eq_of_continuous_off_countable {f g : ℂ → ℂ} (hf : Continuous f) (hg : Continuous g)
+theorem legendre_eq_of_continuous_off_countable {f g : ℂ → ℂ} (hf : Continuous f)
+    (hg : Continuous g)
     {S : Set ℂ} (hS : S.Countable) (h : ∀ μ ∉ S, f μ = g μ) (μ : ℂ) : f μ = g μ :=
   congrFun (Continuous.ext_on (hS.dense_compl ℂ) hf hg h) μ
 
@@ -450,7 +475,8 @@ theorem deriv_olverQ_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ
 ((z+1)/(z-1))^{μ/2} 𝐅(ν+2, 1-ν; 2-μ; (1-z)/2)`. -/
 theorem deriv_associatedP (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     deriv (associatedP ν μ) z = μ/(1-z^2)*associatedP ν μ z-
-      (ν+1)*(-ν)/2*(exp (μ/2*(log (z+1)-log (z-1)))*regularizedGaussHG (ν+1+1) (-ν+1) (1-μ+1) ((1-z)/2)) :=
+      (ν+1)*(-ν)/2*(exp (μ/2*(log (z+1)-log (z-1)))*regularizedGaussHG (ν+1+1) (-ν+1)
+          (1-μ+1) ((1-z)/2)) :=
   (hasDerivAt_associatedP_aux (ν+1) (-ν) (1-μ) μ hz).deriv
 
 /-- For `z - 1` in the slit plane, the derivative `(P^μ_ν)'(z)` is continuous in the order `μ`. -/
@@ -460,7 +486,8 @@ theorem continuous_deriv_associatedP_order (ν : ℂ) {z : ℂ} (hz : z-1 ∈ sl
   have e := funext fun μ => deriv_associatedP ν μ hz
   rw [e]
   have hP := (associatedP_entire_order ν z hz).continuous
-  have hG := (differentiable_regularizedGaussHG_comp (A := fun _ : ℂ => ν+1+1) (B := fun _ : ℂ => -ν+1)
+  have hG := (differentiable_regularizedGaussHG_comp (A := fun _ : ℂ => ν+1+1)
+      (B := fun _ : ℂ => -ν+1)
     (C := fun μ : ℂ => 1-μ+1) (by fun_prop) (by fun_prop) (by fun_prop) hw).continuous
   exact ((continuous_id.div_const _).mul hP).sub (continuous_const.mul
     ((by fun_prop : Continuous fun μ : ℂ => exp (μ/2*(log (z+1)-log (z-1)))).mul hG))
@@ -478,14 +505,17 @@ theorem continuous_deriv_olverQ_order (ν : ℂ) {z : ℂ} (hz : z-1 ∈ slitPla
   have hP : Continuous fun μ : ℂ => z^(ν+μ+1) := (differentiable_const_cpow_of_neZero z |>.comp
     (by fun_prop : Differentiable ℂ fun μ : ℂ => ν+μ+1)).continuous
   have hG1 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (ν+μ+2)/2)
-    (B := fun μ : ℂ => (ν+μ+1)/2) (C := fun _ : ℂ => ν+3/2) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
+    (B := fun μ : ℂ => (ν+μ+1)/2) (C := fun _ : ℂ => ν+3/2) (by fun_prop) (by fun_prop)
+        (by fun_prop) hc).continuous
   have hG2 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (ν+μ+2)/2+1)
-    (B := fun μ : ℂ => (ν+μ+1)/2+1) (C := fun _ : ℂ => ν+3/2+1) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
+    (B := fun μ : ℂ => (ν+μ+1)/2+1) (C := fun _ : ℂ => ν+3/2+1) (by fun_prop) (by fun_prop)
+        (by fun_prop) hc).continuous
   have hD : ∀ μ : ℂ, (2:ℂ)^(ν+1)*z^(ν+μ+1) ≠ 0 := fun μ =>
     mul_ne_zero (cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)) (cpow_ne_zero_iff.mpr (Or.inl hz0))
   exact ((continuous_const.mul hB).div (continuous_const.mul hP) hD).mul
     (((by fun_prop : Continuous fun μ : ℂ => μ*z/(z^2-1)-(ν+μ+1)/z).mul hG1).add
-      (((by fun_prop : Continuous fun μ : ℂ => (ν+μ+2)/2*((ν+μ+1)/2)).mul hG2).mul continuous_const))
+      (((by fun_prop : Continuous fun μ : ℂ => (ν+μ+2)/2*((ν+μ+1)/2)).mul hG2).mul
+          continuous_const))
 
 /-- If `z - 1` lies in the slit plane, then `z² - 1 ≠ 0`. -/
 theorem legendre_sq_sub_one_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) : z^2-1 ≠ 0 := by
@@ -502,7 +532,8 @@ theorem continuous_legendreWronskian_order {f g : ℂ → ℂ → ℂ} {z : ℂ}
 
 /-- For non-integer `μ` and `z - 1` in the slit plane, the Wronskian `W{P^{-μ}_ν, 𝑸^μ_ν}(z) =
 -1/(Γ(ν+μ+1) (z²-1))`; the non-integer case of DLMF 14.2.8. -/
-theorem associated_wronskian_8_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem associated_wronskian_8_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
     ODE.wronskian (associatedP ν (-μ)) (olverQ ν μ) z = -(Gamma (ν+μ+1))⁻¹*(z^2-1)⁻¹ := by
   have h7 := associated_wronskian_7 ν μ hz
   unfold ODE.wronskian at h7 ⊢
@@ -578,7 +609,8 @@ theorem olverQ_wronskian_pos (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 `𝒲{P^μ_ν(z), Q^μ_ν(z)} = -e^{μπi} Γ(ν+μ+1)/(Γ(ν-μ+1) (z²-1))`. -/
 @[dlmf 14.2.E10]
 theorem associated_wronskian_10 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    ODE.wronskian (associatedP ν μ) (associatedQ ν μ) z=-exp (μ*π*I)*Gamma (ν+μ+1)/(Gamma (ν-μ+1)*(z^2-1)) := by
+    ODE.wronskian (associatedP ν μ) (associatedQ ν μ) z=-exp (μ*π*I)*Gamma
+        (ν+μ+1)/(Gamma (ν-μ+1)*(z^2-1)) := by
   have hW := olverQ_wronskian_pos ν μ hz
   have hd : deriv (associatedQ ν μ) z = exp (μ*π*I)*Gamma (ν+μ+1)*deriv (olverQ ν μ) z :=
     deriv_const_mul _ (olverQ_analytic ν μ z hz).differentiableAt
@@ -590,7 +622,8 @@ theorem associated_wronskian_10 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane)
 
 /-- For non-integer `μ` and `z - 1` in the slit plane, near `z` the function `𝑸^μ_{-ν-1}` equals
 `π/(2 sin(μπ)) (P^μ_ν/Γ(μ-ν) - P^{-μ}_ν/Γ(-ν-μ))`, using `P^{±μ}_{-ν-1} = P^{±μ}_ν`. -/
-theorem olverQ_reflect_eventuallyEq_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem olverQ_reflect_eventuallyEq_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
     olverQ (-ν-1) μ =ᶠ[𝓝 z] fun w => π/(2*sin (μ*π))*(associatedP ν μ w*(Gamma (-ν-1+μ+1))⁻¹-
       associatedP ν (-μ) w*(Gamma (-ν-1-μ+1))⁻¹) := by
   filter_upwards [olverQ_eventuallyEq_nonint (-ν-1) μ hμ hz,
@@ -599,11 +632,13 @@ theorem olverQ_reflect_eventuallyEq_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ 
 
 /-- For non-integer `μ` and `z - 1` in the slit plane, the Wronskian `W{𝑸^μ_ν, 𝑸^μ_{-ν-1}}(z) =
 cos(νπ)/(z²-1)`; the non-integer case of DLMF 14.2.9. -/
-theorem associated_wronskian_9_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem associated_wronskian_9_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
     ODE.wronskian (olverQ ν μ) (olverQ (-ν-1) μ) z=cos (ν*π)*(z^2-1)⁻¹ := by
   have h7 := associated_wronskian_7 ν μ hz
   have he := olverQ_reflect_eventuallyEq_nonint ν μ hμ hz
-  have hd2 : deriv (olverQ (-ν-1) μ) z = π/(2*sin (μ*π))*(deriv (associatedP ν μ) z*(Gamma (-ν-1+μ+1))⁻¹-
+  have hd2 : deriv (olverQ (-ν-1) μ) z =
+      π/(2*sin (μ*π))*(deriv (associatedP ν μ) z*(Gamma (-ν-1+μ+1))⁻¹-
       deriv (associatedP ν (-μ)) z*(Gamma (-ν-1-μ+1))⁻¹) := by
     rw [he.deriv_eq]
     have h1 := (associatedP_analytic ν μ z hz).differentiableAt.hasDerivAt
@@ -618,7 +653,8 @@ theorem associated_wronskian_9_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n
   have t2 : sin (π*(ν-μ+1)) = -(sin (ν*π)*cos (μ*π)-cos (ν*π)*sin (μ*π)) := by
     rw [show (π:ℂ)*(ν-μ+1) = ν*π-μ*π+π by ring, sin_add_pi, sin_sub]
   unfold ODE.wronskian at h7 ⊢
-  rw [hd2, he.eq_of_nhds, deriv_olverQ_nonint ν μ hμ hz, (olverQ_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds]
+  rw [hd2, he.eq_of_nhds, deriv_olverQ_nonint ν μ hμ hz,
+      (olverQ_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds]
   generalize (Gamma (ν+μ+1))⁻¹ = g1 at r1 ⊢
   generalize (Gamma (ν-μ+1))⁻¹ = g2 at r2 ⊢
   generalize (Gamma (-ν-1+μ+1))⁻¹ = h1 at r2 ⊢
@@ -660,7 +696,8 @@ def IsGeneralizedLegendreSolution (ν μ₁ μ₂ : ℂ) (f : ℂ → ℂ) (z : 
 associated Legendre equation `(1-z²) f'' - 2z f' + (ν(ν+1) - μ²/(1-z²)) f = 0`. -/
 @[dlmf 14.29.E1]
 theorem generalizedLegendre_equal_orders (ν μ : ℂ) (f : ℂ → ℂ) {z : ℂ} (hz : z ≠ 1) (hzm : z ≠ -1) :
-    IsGeneralizedLegendreSolution ν μ μ f z ↔ (1-z^2)*iteratedDeriv 2 f z-2*z*deriv f z+(ν*(ν+1)-μ^2/(1-z^2))*f z=0 := by
+    IsGeneralizedLegendreSolution ν μ μ f z ↔
+        (1-z^2)*iteratedDeriv 2 f z-2*z*deriv f z+(ν*(ν+1)-μ^2/(1-z^2))*f z=0 := by
   unfold IsGeneralizedLegendreSolution
   have h1 : 1-z ≠ 0 := sub_ne_zero.mpr (Ne.symm hz)
   have h2 : 1+z ≠ 0 := by intro h; apply hzm; linear_combination h

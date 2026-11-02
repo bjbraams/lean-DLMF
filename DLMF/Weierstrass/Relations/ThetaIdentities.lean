@@ -61,7 +61,8 @@ def thetaOneTripleDerivNull (τ : ℂ) : ℂ := iteratedDeriv 3 (fun z ↦ jacob
 
 /-! ### Helpers (p23R1): `σ` in terms of `θ₁`, Legendre's relation, `℘` in theta form -/
 /-- A function periodic in `2ω₁` and `2ω₃` is periodic for the whole lattice. -/
-private lemma periodic_lattice_of_periodic_two_mul {F : Type*} {g : ℂ → F} (h1 : ∀ z, g (z + 2 * H.ω₁) = g z)
+private lemma periodic_lattice_of_periodic_two_mul {F : Type*} {g : ℂ → F}
+    (h1 : ∀ z, g (z + 2 * H.ω₁) = g z)
     (h3 : ∀ z, g (z + 2 * H.ω₃) = g z) : ∀ z w, w ∈ H.lattice → g (z + w) = g z := by
   intro z w hw
   obtain ⟨m, n, rfl⟩ := H.mem_lattice_iff.mp hw
@@ -72,7 +73,8 @@ private lemma periodic_lattice_of_periodic_two_mul {F : Type*} {g : ℂ → F} (
 
 /-- An entire nonvanishing `Q` with `Q(z + 2ω₁) = Q(z)` and
 `Q(z + 2ω₃) = e^{2c(z + ω₃)} Q(z)` has `c = 0` and is constant. -/
-private lemma eq_const_of_quasiPeriodic_ne_zero {Q : ℂ → ℂ} (hQ : Differentiable ℂ Q) (hne : ∀ z, Q z ≠ 0)
+private lemma eq_const_of_quasiPeriodic_ne_zero {Q : ℂ → ℂ} (hQ : Differentiable ℂ Q)
+    (hne : ∀ z, Q z ≠ 0)
     (h1 : ∀ z, Q (z + 2 * H.ω₁) = Q z) (c : ℂ)
     (h3 : ∀ z, Q (z + 2 * H.ω₃) = cexp (2 * c * (z + H.ω₃)) * Q z) :
     c = 0 ∧ ∀ z, Q z = Q 0 := by
@@ -182,12 +184,14 @@ private lemma weierstrassSigma_eq_of_zeros_quasiPeriodic {f : ℂ → ℂ} (hf :
     rw [meromorphicOrderAt_mul (hσd.analyticAt x).meromorphicAt
       (hf.analyticAt x).meromorphicAt.inv, meromorphicOrderAt_inv,
       H.meromorphicOrderAt_of_simple_zeros_lattice hf hz hd x,
-      H.meromorphicOrderAt_of_simple_zeros_lattice hσd hσz (fun x hx => deriv_weierstrassSigma_ne_zero _ hx) x]
+      H.meromorphicOrderAt_of_simple_zeros_lattice hσd hσz
+          (fun x hx => deriv_weierstrassSigma_ne_zero _ hx) x]
     split_ifs <;> rfl
   set Q := toMeromorphicNFOn g Set.univ with hQ
   have hQnf : ∀ x, MeromorphicNFAt Q x := fun x =>
     meromorphicNFOn_toMeromorphicNFOn g Set.univ (Set.mem_univ x)
-  have hQg : ∀ x, Q =ᶠ[𝓝[≠] x] g := fun x => hgm.toMeromorphicNFOn_eq_self_on_nhdsNE (Set.mem_univ x)
+  have hQg : ∀ x, Q =ᶠ[𝓝[≠] x] g := fun x =>
+      hgm.toMeromorphicNFOn_eq_self_on_nhdsNE (Set.mem_univ x)
   have hQord : ∀ x, meromorphicOrderAt Q x = 0 := fun x => by
     rw [meromorphicOrderAt_congr (hQg x)]; exact hord x
   have hQan : ∀ x, AnalyticAt ℂ Q x := fun x =>
@@ -229,7 +233,8 @@ private lemma weierstrassSigma_eq_of_zeros_quasiPeriodic {f : ℂ → ℂ} (hf :
     ring
   have hQ1 := htrans _ _ continuous_const hg1
   have hQ3 := htrans _ _ (by fun_prop) hg3
-  obtain ⟨hc, hQc⟩ := H.eq_const_of_quasiPeriodic_ne_zero hQd hQne (fun z => by simpa using hQ1 z) _ hQ3
+  obtain ⟨hc, hQc⟩ := H.eq_const_of_quasiPeriodic_ne_zero hQd hQne
+      (fun z => by simpa using hQ1 z) _ hQ3
   -- the value at `0`
   have hT1 : Tendsto (fun w => σ w / w) (𝓝[≠] (0 : ℂ)) (𝓝 1) := by
     have := (hasDerivAt_iff_tendsto_slope.mp (hasDerivAt_weierstrassSigma_zero H.periodPair))
@@ -275,7 +280,8 @@ lemma jacobiThetaOneDerivNullTau_tau_ne_zero : jacobiThetaOneDerivNullTau H.tau 
   exact mul_ne_zero (mul_ne_zero a b) c
 
 /-- `θ₁(·|τ)` is entire. -/
-private lemma differentiable_jacobiThetaOneTau_tau : Differentiable ℂ (fun w => jacobiThetaOneTau w H.tau) := by
+private lemma differentiable_jacobiThetaOneTau_tau : Differentiable ℂ
+    (fun w => jacobiThetaOneTau w H.tau) := by
   simpa [jacobiThetaTau] using differentiable_jacobiThetaTau 1 H.tau_im_pos
 
 /-- The theta expression of 23.6.9 is entire. -/
@@ -306,7 +312,8 @@ private lemma weierstrassSigmaTheta_add_lattice (m n : ℤ) (z : ℂ) :
   ring
 
 /-- Zeros of the theta expression: exactly the lattice. -/
-lemma weierstrassSigmaTheta_eq_zero_iff (x : ℂ) : H.weierstrassSigmaTheta x = 0 ↔ x ∈ H.lattice := by
+lemma weierstrassSigmaTheta_eq_zero_iff (x : ℂ) : H.weierstrassSigmaTheta x = 0 ↔ x ∈
+    H.lattice := by
   have hω := H.ω₁_ne_zero
   have hD := H.jacobiThetaOneDerivNullTau_tau_ne_zero
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -356,8 +363,10 @@ private lemma deriv_weierstrassSigmaTheta_ne_zero (x : ℂ) (hx : x ∈ H.lattic
   have e : (fun z => H.weierstrassSigmaTheta (z + l)) = fun z => U z * H.weierstrassSigmaTheta z :=
     funext fun z => H.weierstrassSigmaTheta_add_lattice m n z
   have h0 := H.hasDerivAt_weierstrassSigmaTheta_zero
-  have hF0 : H.weierstrassSigmaTheta 0 = 0 := (H.weierstrassSigmaTheta_eq_zero_iff 0).mpr (zero_mem _)
-  have hA : HasDerivAt (fun z => H.weierstrassSigmaTheta (z + l)) (deriv H.weierstrassSigmaTheta l) 0 := by
+  have hF0 : H.weierstrassSigmaTheta 0 = 0 :=
+      (H.weierstrassSigmaTheta_eq_zero_iff 0).mpr (zero_mem _)
+  have hA : HasDerivAt (fun z => H.weierstrassSigmaTheta (z + l))
+      (deriv H.weierstrassSigmaTheta l) 0 := by
     have := (H.differentiable_weierstrassSigmaTheta (0 + l)).hasDerivAt.comp_add_const 0 l
     simpa using this
   rw [e] at hA
@@ -374,7 +383,8 @@ theorem weierstrassSigma_eq_weierstrassSigmaTheta_and_eta_three :
     (∀ z, H.weierstrassSigma z = H.weierstrassSigmaTheta z) ∧
       H.eta 1 * H.ω₃ / H.ω₁ - π * I / (2 * H.ω₁) = H.eta 3 := by
   have hω := H.ω₁_ne_zero
-  refine H.weierstrassSigma_eq_of_zeros_quasiPeriodic H.differentiable_weierstrassSigmaTheta H.weierstrassSigmaTheta_eq_zero_iff
+  refine H.weierstrassSigma_eq_of_zeros_quasiPeriodic H.differentiable_weierstrassSigmaTheta
+      H.weierstrassSigmaTheta_eq_zero_iff
     H.deriv_weierstrassSigmaTheta_ne_zero H.hasDerivAt_weierstrassSigmaTheta_zero.deriv ?_ _ ?_
   · intro z
     have := H.weierstrassSigmaTheta_add_lattice 1 0 z
@@ -411,7 +421,8 @@ theorem legendre_relation :
   refine ⟨?_, ?_, h3⟩ <;> rw [he, ω₂] <;> linear_combination h3
 
 /-- `σ(z + 2mω_j) = (-1)^m e^{2mη_j(z + mω_j)} σ(z)` for `m ∈ ℤ`. -/
-private lemma weierstrassSigma_add_two_mul_int_mul_halfPeriod {j : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (m : ℤ) :
+private lemma weierstrassSigma_add_two_mul_int_mul_halfPeriod {j : ℕ}
+    (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (m : ℤ) :
     ∀ z, H.weierstrassSigma (z + 2 * m * H.halfPeriod j) =
       (-1 : ℂ) ^ m * cexp (2 * m * H.eta j * (z + m * H.halfPeriod j)) *
         H.weierstrassSigma z := by
@@ -470,7 +481,8 @@ theorem weierstrassSigma_add_lattice (z : ℂ) {j k : ℕ} (hj : j ∈ ({1, 2, 3
     · rw [← hpi]; congr 1; linear_combination (2 : ℂ) * l3
     · rw [← hpi']; congr 1; linear_combination (-2 : ℂ) * l1
   have hm1 : (-1 : ℂ) ≠ 0 := by norm_num
-  rw [H.weierstrassSigma_add_two_mul_int_mul_halfPeriod hk n, H.weierstrassSigma_add_two_mul_int_mul_halfPeriod hj m,
+  rw [H.weierstrassSigma_add_two_mul_int_mul_halfPeriod hk n,
+      H.weierstrassSigma_add_two_mul_int_mul_halfPeriod hj m,
     zpow_add₀ hm1, zpow_add₀ hm1]
   have hmn : (-1 : ℂ) ^ (m * n) =
       cexp (((m * n : ℤ) : ℂ) * (2 * (H.eta k * H.halfPeriod j - H.eta j * H.halfPeriod k))) := by
@@ -590,7 +602,8 @@ lemma weierstrassZeta_eq_jacobiThetaOneTau_logDeriv {u : ℂ} (hu : u ∉ H.latt
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have hσ : Weierstrass.weierstrassSigma H.periodPair = H.weierstrassSigmaTheta :=
     funext H.weierstrassSigma_eq_weierstrassSigmaTheta_and_eta_three.1
-  have hne : H.weierstrassSigmaTheta u ≠ 0 := fun h => hu ((H.weierstrassSigmaTheta_eq_zero_iff u).mp h)
+  have hne : H.weierstrassSigmaTheta u ≠ 0 := fun h =>
+      hu ((H.weierstrassSigmaTheta_eq_zero_iff u).mp h)
   have hθ : jacobiThetaOneTau (π * u / (2 * H.ω₁)) H.tau ≠ 0 := by
     intro h; apply hne; simp [weierstrassSigmaTheta, h]
   rw [HalfPeriods.weierstrassZeta, weierstrassZeta_eq_deriv_div _ hu, hσ,
@@ -617,7 +630,8 @@ lemma weierstrassP_eq_neg_deriv_jacobiThetaOneTau_logDeriv {u : ℂ} (hu : u ∉
   have hopen : IsOpen (H.latticeᶜ : Set ℂ) := H.periodPair.isClosed_lattice.isOpen_compl
   have hev : Weierstrass.weierstrassZeta H.periodPair =ᶠ[𝓝 u] fun v => H.eta 1 / H.ω₁ * v +
       π / (2 * H.ω₁) * (deriv θ (π * v / (2 * H.ω₁)) / θ (π * v / (2 * H.ω₁))) := by
-    filter_upwards [hopen.mem_nhds hu] with v hv using H.weierstrassZeta_eq_jacobiThetaOneTau_logDeriv hv
+    filter_upwards [hopen.mem_nhds hu] with v hv using
+        H.weierstrassZeta_eq_jacobiThetaOneTau_logDeriv hv
   have hL : HasDerivAt (fun z => deriv θ z / θ z)
       (deriv (fun z => deriv θ z / θ z) (π * u / (2 * H.ω₁))) (π * u / (2 * H.ω₁)) :=
     (((hθ'd _).div (hθd _) (hθne u hu))).hasDerivAt
@@ -678,7 +692,8 @@ lemma eta_one_eq_thetaOneTripleDerivNull :
 
 /-- `℘(z) - ℘(a) = -(πθ₁'(0))²/(4ω₁²) · θ₁(w+b)θ₁(w-b)/(θ₁(w)²θ₁(b)²)`, `w = πz/(2ω₁)`,
 `b = πa/(2ω₁)`, for `z, a ∉ 𝕃`. -/
-private lemma weierstrassP_sub_weierstrassP_eq_jacobiThetaOneTau {z a : ℂ} (hz : z ∉ H.lattice) (ha : a ∉ H.lattice) :
+private lemma weierstrassP_sub_weierstrassP_eq_jacobiThetaOneTau {z a : ℂ} (hz : z ∉ H.lattice)
+    (ha : a ∉ H.lattice) :
     H.weierstrassP z - H.weierstrassP a =
       -((π * jacobiThetaOneDerivNullTau H.tau) ^ 2 / (4 * H.ω₁ ^ 2)) *
         (jacobiThetaOneTau (π * z / (2 * H.ω₁) + π * a / (2 * H.ω₁)) H.tau *

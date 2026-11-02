@@ -42,7 +42,8 @@ theorem intervalIntegral_neg_one_one_congr_Ioo {E : Type*} [NormedAddCommGroup E
   exact h x ⟨hxI.1, lt_of_le_of_ne hxI.2 hx⟩
 
 /-- A continuous nonnegative function on `[-1, 1]` with zero integral vanishes on `(-1, 1)`. -/
-private lemma eqOn_zero_of_integral_neg_one_one_eq_zero {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1))
+private lemma eqOn_zero_of_integral_neg_one_one_eq_zero {f : ℝ → ℝ}
+    (hf : ContinuousOn f (Icc (-1) 1))
     (h0 : ∀ x ∈ Icc (-1 : ℝ) 1, 0 ≤ f x) (hint : ∫ x in (-1 : ℝ)..1, f x = 0) :
     ∀ x ∈ Ioo (-1 : ℝ) 1, f x = 0 := by
   intro c hc
@@ -76,7 +77,8 @@ private lemma eqOn_zero_of_integral_neg_one_one_eq_zero {f : ℝ → ℝ} (hf : 
 
 /-- **Completeness of the monomials** in `L²((1-x²)^m dx)` on `[-1, 1]`: a continuous `H` all of
 whose weighted moments vanish is zero on `(-1, 1)` (Weierstrass approximation). -/
-private lemma eqOn_zero_of_weighted_moments_eq_zero {H : ℝ → ℝ} (hH : ContinuousOn H (Icc (-1) 1)) (m : ℕ)
+private lemma eqOn_zero_of_weighted_moments_eq_zero {H : ℝ → ℝ}
+    (hH : ContinuousOn H (Icc (-1) 1)) (m : ℕ)
     (h : ∀ i : ℕ, ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i = 0) :
     ∀ x ∈ Ioo (-1 : ℝ) 1, H x = 0 := by
   have hw : ContinuousOn (fun x : ℝ => (1 - x ^ 2) ^ m * H x) (Icc (-1) 1) :=
@@ -161,7 +163,8 @@ private lemma eqOn_zero_of_weighted_moments_eq_zero {H : ℝ → ℝ} (hH : Cont
 private lemma jet_three_term_recurrence (m ν : ℕ) (hν : m ≤ ν) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     (2 * (ν : ℝ) + 1) * x * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re =
       ((ν : ℝ) - m + 1) * (OrthogonalPolynomials.LegendreAddition.jet (ν + 1) m x).re +
-        ((ν : ℝ) + m) * (if m < ν then (OrthogonalPolynomials.LegendreAddition.jet (ν - 1) m x).re else 0) := by
+        ((ν : ℝ) + m) * (if m < ν then
+            (OrthogonalPolynomials.LegendreAddition.jet (ν - 1) m x).re else 0) := by
   have R := ferrersP_recurrence_3 ((ν : ℂ) - 1) m hx
   rw [show (ν : ℂ) - 1 + 2 = ((ν + 1 : ℕ) : ℂ) by push_cast; ring,
     show (ν : ℂ) - 1 + 1 = (ν : ℂ) by ring] at R
@@ -184,11 +187,15 @@ private lemma jet_three_term_recurrence (m ν : ℕ) (hν : m ≤ ν) {x : ℝ} 
   rw [hlow, legInt_ferrersP_nat_nat _ _ hx, legInt_ferrersP_nat_nat _ _ hx] at R
   have hsq : ((-1 : ℂ) ^ m) * (-1) ^ m = 1 := by rw [← mul_pow]; norm_num
   have hsc : (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hs.ne'
-  have R' : ((ν : ℂ) - m + 1) * OrthogonalPolynomials.LegendreAddition.jet (ν + 1) m x - (2 * ν + 1) * x * OrthogonalPolynomials.LegendreAddition.jet ν m x +
-      ((ν : ℂ) + m) * (if m < ν then OrthogonalPolynomials.LegendreAddition.jet (ν - 1) m x else 0) = 0 := by
+  have R' : ((ν : ℂ) - m + 1) * OrthogonalPolynomials.LegendreAddition.jet (ν + 1) m x -
+      (2 * ν + 1) * x * OrthogonalPolynomials.LegendreAddition.jet ν m x +
+      ((ν : ℂ) + m) * (if m < ν then
+          OrthogonalPolynomials.LegendreAddition.jet (ν - 1) m x else 0) = 0 := by
     have : ((-1 : ℂ) ^ m * (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ)) *
-        (((ν : ℂ) - m + 1) * OrthogonalPolynomials.LegendreAddition.jet (ν + 1) m x - (2 * ν + 1) * x * OrthogonalPolynomials.LegendreAddition.jet ν m x +
-          ((ν : ℂ) + m) * (if m < ν then OrthogonalPolynomials.LegendreAddition.jet (ν - 1) m x else 0)) = 0 := by
+        (((ν : ℂ) - m + 1) * OrthogonalPolynomials.LegendreAddition.jet (ν + 1) m x - (2 * ν + 1) *
+            x * OrthogonalPolynomials.LegendreAddition.jet ν m x +
+          ((ν : ℂ) + m) * (if m < ν then
+              OrthogonalPolynomials.LegendreAddition.jet (ν - 1) m x else 0)) = 0 := by
       split_ifs at R ⊢
       · linear_combination R
       · linear_combination R
@@ -210,13 +217,16 @@ private lemma jet_three_term_recurrence (m ν : ℕ) (hν : m ≤ ν) {x : ℝ} 
     linarith
 
 /-- `P_m^{(m)}` is a nonzero constant. -/
-private lemma exists_jet_self_eq_const (m : ℕ) : ∃ c : ℝ, c ≠ 0 ∧ ∀ x : ℝ, (OrthogonalPolynomials.LegendreAddition.jet m m x).re = c := by
+private lemma exists_jet_self_eq_const (m : ℕ) : ∃ c : ℝ, c ≠ 0 ∧ ∀ x : ℝ,
+    (OrthogonalPolynomials.LegendreAddition.jet m m x).re = c := by
   set q := legendrePolyR m with hq
   have hf : OrthogonalPolynomials.legendrePolyP m =
       fun z => ((legendrePolyR m).map ofRealHom).eval z := funext (legendrePolyP_eq_eval m)
-  have hD : ∀ x : ℝ, (OrthogonalPolynomials.LegendreAddition.jet m m x).re = (Polynomial.derivative^[m] q).eval x := by
+  have hD : ∀ x : ℝ, (OrthogonalPolynomials.LegendreAddition.jet m m x).re =
+      (Polynomial.derivative^[m] q).eval x := by
     intro x
-    rw [OrthogonalPolynomials.LegendreAddition.jet, hf, iteratedDeriv_eval_polynomial, Polynomial.iterate_derivative_map]
+    rw [OrthogonalPolynomials.LegendreAddition.jet, hf, iteratedDeriv_eval_polynomial,
+        Polynomial.iterate_derivative_map]
     dsimp only
     rw [eval_ofReal_map_ofRealHom, ofReal_re]
   have hlin : (Polynomial.C (1 / 2 : ℝ) * (1 - Polynomial.X)).natDegree = 1 := by
@@ -255,8 +265,10 @@ private lemma exists_jet_self_eq_const (m : ℕ) : ∃ c : ℝ, c ≠ 0 ∧ ∀ 
 
 /-- **Ferrers moments determine the monomial moments**: if `∫ (1-x²)^m H P_ν^{(m)} = 0` for every
 `ν ≥ m`, then `∫ (1-x²)^m H x^i = 0` for every `i`. -/
-private lemma weighted_moments_eq_zero_of_jet_moments {H : ℝ → ℝ} (hH : ContinuousOn H (Icc (-1) 1)) (m : ℕ)
-    (h : ∀ ν : ℕ, m ≤ ν → ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re = 0) :
+private lemma weighted_moments_eq_zero_of_jet_moments {H : ℝ → ℝ}
+    (hH : ContinuousOn H (Icc (-1) 1)) (m : ℕ)
+    (h : ∀ ν : ℕ, m ≤ ν → ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x *
+        (OrthogonalPolynomials.LegendreAddition.jet ν m x).re = 0) :
     ∀ i : ℕ, ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i = 0 := by
   have hc : ∀ (i ν : ℕ), ContinuousOn (fun x : ℝ => (1 - x ^ 2) ^ m * H x * x ^ i *
       (OrthogonalPolynomials.LegendreAddition.jet ν m x).re) (Icc (-1) 1) := fun i ν =>
@@ -267,7 +279,8 @@ private lemma weighted_moments_eq_zero_of_jet_moments {H : ℝ → ℝ} (hH : Co
       (OrthogonalPolynomials.LegendreAddition.jet ν m x).re) volume (-1) 1 := fun i ν =>
     (hc i ν).intervalIntegrable_of_Icc (by norm_num)
   have key : ∀ i : ℕ, ∀ ν : ℕ, m ≤ ν →
-      ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re = 0 := by
+      ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i *
+          (OrthogonalPolynomials.LegendreAddition.jet ν m x).re = 0 := by
     intro i
     induction i with
     | zero =>
@@ -277,11 +290,14 @@ private lemma weighted_moments_eq_zero_of_jet_moments {H : ℝ → ℝ} (hH : Co
       intro ν hν
       have h2 : (2 * (ν : ℝ) + 1) ≠ 0 := by positivity
       have e : (2 * (ν : ℝ) + 1) *
-          ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ (i + 1) * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re =
+          ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ (i + 1) *
+              (OrthogonalPolynomials.LegendreAddition.jet ν m x).re =
           ((ν : ℝ) - m + 1) *
-            (∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i * (OrthogonalPolynomials.LegendreAddition.jet (ν + 1) m x).re) +
+            (∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i *
+                (OrthogonalPolynomials.LegendreAddition.jet (ν + 1) m x).re) +
           ((ν : ℝ) + m) * (if m < ν then
-            ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i * (OrthogonalPolynomials.LegendreAddition.jet (ν - 1) m x).re
+            ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i *
+                (OrthogonalPolynomials.LegendreAddition.jet (ν - 1) m x).re
             else 0) := by
         rw [← intervalIntegral.integral_const_mul]
         split_ifs with hm
@@ -312,17 +328,20 @@ private lemma weighted_moments_eq_zero_of_jet_moments {H : ℝ → ℝ} (hH : Co
 
 /-- `P_N^{(m)}(x)` is real for real `x`. -/
 theorem jet_ofReal_eq_re (N m : ℕ) (x : ℝ) :
-    (OrthogonalPolynomials.LegendreAddition.jet N m x) = ((OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℂ) := by
+    (OrthogonalPolynomials.LegendreAddition.jet N m x) =
+        ((OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℂ) := by
   have hf : OrthogonalPolynomials.legendrePolyP N =
       fun z => ((legendrePolyR N).map ofRealHom).eval z := funext (legendrePolyP_eq_eval N)
-  rw [OrthogonalPolynomials.LegendreAddition.jet, hf, iteratedDeriv_eval_polynomial, Polynomial.iterate_derivative_map]
+  rw [OrthogonalPolynomials.LegendreAddition.jet, hf, iteratedDeriv_eval_polynomial,
+      Polynomial.iterate_derivative_map]
   dsimp only
   rw [eval_ofReal_map_ofRealHom]
   simp
 
 /-- Parity of `P_ν^{(m)}`: `P_ν^{(m)}(-x) = (-1)^{ν+m} P_ν^{(m)}(x)`. -/
 theorem re_jet_neg (ν m : ℕ) (x : ℝ) :
-    (OrthogonalPolynomials.LegendreAddition.jet ν m ((-x : ℝ) : ℂ)).re = (-1) ^ (ν + m) * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re := by
+    (OrthogonalPolynomials.LegendreAddition.jet ν m ((-x : ℝ) : ℂ)).re = (-1) ^ (ν + m) *
+        (OrthogonalPolynomials.LegendreAddition.jet ν m x).re := by
   have hP : OrthogonalPolynomials.legendrePolyP ν =
       fun z => (-1 : ℂ) ^ ν * OrthogonalPolynomials.legendrePolyP ν (-z) := by
     funext z
@@ -346,10 +365,12 @@ theorem re_jet_neg (ν m : ℕ) (x : ℝ) :
 /-- **Orthogonality** of `P_ν^{(m)}` with weight `(1-x²)^m` on `[-1, 1]`, with the norm
 `2(ν+m)!/((2ν+1)(ν-m)!)`. -/
 theorem integral_weight_mul_jet_mul_jet {m ν : ℕ} (hν : m ≤ ν) (μ : ℕ) :
-    ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re =
+    ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re *
+        (OrthogonalPolynomials.LegendreAddition.jet μ m x).re =
       if ν = μ then 2 * ((ν + m).factorial : ℝ) / ((2 * ν + 1) * (ν - m).factorial) else 0 := by
   have e : legInt_I m ν μ = ((∫ x in (-1 : ℝ)..1,
-      (1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re : ℝ) : ℂ) := by
+      (1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re *
+          (OrthogonalPolynomials.LegendreAddition.jet μ m x).re : ℝ) : ℂ) := by
     rw [legInt_I, ← intervalIntegral.integral_ofReal]
     refine intervalIntegral.integral_congr fun x _ => ?_
     rw [jet_ofReal_eq_re ν m x, jet_ofReal_eq_re μ m x]
@@ -378,7 +399,9 @@ theorem exists_abs_jet_le (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ ν : ℕ, m �
   refine ⟨|c|, abs_nonneg c, ?_⟩
   set L : ℝ := 2 * (m : ℝ) + 3 with hL
   have hL0 : 0 ≤ L := by positivity
-  have key : ∀ t : ℕ, ∀ s ≤ t, ∀ x ∈ Ioo (-1 : ℝ) 1, |(OrthogonalPolynomials.LegendreAddition.jet (m + s) m x).re| ≤ |c| * L ^ s := by
+  have key : ∀ t : ℕ, ∀ s ≤ t, ∀ x ∈
+      Ioo (-1 : ℝ) 1, |(OrthogonalPolynomials.LegendreAddition.jet (m + s) m
+      x).re| ≤ |c| * L ^ s := by
     intro t
     induction t with
     | zero =>
@@ -403,7 +426,8 @@ theorem exists_abs_jet_le (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ ν : ℕ, m �
         simp only [lt_irrefl, ↓reduceIte, mul_zero, add_zero, Nat.cast_zero,
           zero_add, one_mul, pow_one] at hr h0 ⊢
         rw [← hr]
-        have : |(2 * (m : ℝ) + 1) * x * (OrthogonalPolynomials.LegendreAddition.jet m m x).re| ≤ (2 * (m : ℝ) + 1) * |c| := by
+        have : |(2 * (m : ℝ) + 1) * x * (OrthogonalPolynomials.LegendreAddition.jet m m x).re| ≤
+            (2 * (m : ℝ) + 1) * |c| := by
           rw [abs_mul, abs_mul, hc, abs_of_pos (by positivity : (0 : ℝ) < 2 * m + 1)]
           nlinarith [mul_le_mul_of_nonneg_left hx1
             (mul_nonneg (by positivity : (0 : ℝ) ≤ 2 * m + 1) (abs_nonneg c))]
@@ -416,12 +440,16 @@ theorem exists_abs_jet_le (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ ν : ℕ, m �
         rw [show m + (t - 1) = m + t - 1 by omega] at h1
         obtain ⟨u, rfl⟩ : ∃ u, t = u + 1 := ⟨t - 1, by omega⟩
         simp only [Nat.add_sub_cancel] at h1
-        have e : (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1 + 1)) m x).re = ((2 * ((m + (u + 1) : ℕ) : ℝ) + 1) * x *
-            (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1)) m x).re - (((m + (u + 1) : ℕ) : ℝ) + m) *
-              (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1) - 1) m x).re) / ((u + 1 : ℕ) + 1 : ℝ) := by
+        have e : (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1 + 1)) m x).re =
+            ((2 * ((m + (u + 1) : ℕ) : ℝ) + 1) * x *
+            (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1)) m x).re -
+                (((m + (u + 1) : ℕ) : ℝ) + m) *
+              (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1) - 1) m x).re) /
+                  ((u + 1 : ℕ) + 1 : ℝ) := by
           rw [eq_div_iff ht1.ne']; linarith
         rw [e, abs_div, abs_of_pos ht1, div_le_iff₀ ht1]
-        have hb1 : |(2 * ((m + (u + 1) : ℕ) : ℝ) + 1) * x * (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1)) m x).re| ≤
+        have hb1 : |(2 * ((m + (u + 1) : ℕ) : ℝ) + 1) * x *
+            (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1)) m x).re| ≤
             (2 * ((m + (u + 1) : ℕ) : ℝ) + 1) * (|c| * L ^ (u + 1)) := by
           rw [abs_mul, abs_mul, abs_of_pos (by positivity), mul_assoc]
           refine mul_le_mul_of_nonneg_left ?_ (by positivity)
@@ -429,7 +457,8 @@ theorem exists_abs_jet_le (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ ν : ℕ, m �
               ≤ 1 * |(OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1)) m x).re| :=
                 mul_le_mul_of_nonneg_right hx1 (abs_nonneg _)
             _ ≤ _ := by rw [one_mul]; exact h0
-        have hb2 : |(((m + (u + 1) : ℕ) : ℝ) + m) * (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1) - 1) m x).re| ≤
+        have hb2 : |(((m + (u + 1) : ℕ) : ℝ) + m) *
+            (OrthogonalPolynomials.LegendreAddition.jet (m + (u + 1) - 1) m x).re| ≤
             (((m + (u + 1) : ℕ) : ℝ) + m) * (|c| * L ^ u) := by
           rw [abs_mul, abs_of_nonneg (by positivity)]
           exact mul_le_mul_of_nonneg_left h1 (by positivity)
@@ -453,7 +482,8 @@ theorem exists_abs_jet_le (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ ν : ℕ, m �
           _ ≤ _ := hfin
   -- extend from `(-1, 1)` to `[-1, 1]` by continuity
   intro ν hν x hx
-  have hcl : closure (Ioo (-1 : ℝ) 1) ⊆ {x : ℝ | |(OrthogonalPolynomials.LegendreAddition.jet ν m x).re| ≤ |c| * L ^ (ν - m)} := by
+  have hcl : closure (Ioo (-1 : ℝ) 1) ⊆
+      {x : ℝ | |(OrthogonalPolynomials.LegendreAddition.jet ν m x).re| ≤ |c| * L ^ (ν - m)} := by
     refine (isClosed_le ?_ continuous_const).closure_subset_iff.mpr ?_
     · exact (Complex.continuous_re.comp (legInt_cont_D ν m)).abs
     · intro y hy
@@ -469,24 +499,30 @@ sequence on `[-1, 1]`, is the sum of that series on `(-1, 1)`. -/
 theorem hasSum_jet_expansion {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)) {m ν₀ : ℕ}
     (hν₀ : m ≤ ν₀)
     (hpar : ∀ μ : ℕ, m ≤ μ → (∀ j : ℕ, μ ≠ ν₀ + 2 * j) →
-      ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * G x * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re = 0)
+      ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * G x *
+          (OrthogonalPolynomials.LegendreAddition.jet μ m x).re = 0)
     {u : ℕ → ℝ} (hu : Summable u)
     (hb : ∀ j : ℕ, ∀ x ∈ Icc (-1 : ℝ) 1,
       |(2 * ((ν₀ + 2 * j : ℕ) : ℝ) + 1) * ((ν₀ + 2 * j - m).factorial : ℝ) /
           (2 * ((ν₀ + 2 * j + m).factorial : ℝ)) *
-        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * G y * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m y).re) *
+        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * G y *
+            (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m y).re) *
           (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re| ≤ u j) :
     ∀ x ∈ Ioo (-1 : ℝ) 1, HasSum (fun j : ℕ =>
       (2 * ((ν₀ + 2 * j : ℕ) : ℝ) + 1) * ((ν₀ + 2 * j - m).factorial : ℝ) /
           (2 * ((ν₀ + 2 * j + m).factorial : ℝ)) *
-        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * G y * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m y).re) *
+        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * G y *
+            (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m y).re) *
           (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re) (G x) := by
   set c : ℕ → ℝ := fun j => (2 * ((ν₀ + 2 * j : ℕ) : ℝ) + 1) *
     ((ν₀ + 2 * j - m).factorial : ℝ) / (2 * ((ν₀ + 2 * j + m).factorial : ℝ)) with hc
-  set b : ℕ → ℝ := fun μ => ∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * G y * (OrthogonalPolynomials.LegendreAddition.jet μ m y).re
+  set b : ℕ → ℝ := fun μ => ∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * G y *
+      (OrthogonalPolynomials.LegendreAddition.jet μ m y).re
     with hbdef
-  set f : ℕ → ℝ → ℝ := fun j x => c j * b (ν₀ + 2 * j) * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re with hf
-  have hD : ∀ μ : ℕ, Continuous fun x : ℝ => (OrthogonalPolynomials.LegendreAddition.jet μ m x).re := fun μ =>
+  set f : ℕ → ℝ → ℝ := fun j x => c j * b (ν₀ + 2 * j) *
+      (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re with hf
+  have hD : ∀ μ : ℕ, Continuous fun x : ℝ =>
+      (OrthogonalPolynomials.LegendreAddition.jet μ m x).re := fun μ =>
     Complex.continuous_re.comp (legInt_cont_D μ m)
   have hw : Continuous fun x : ℝ => (1 - x ^ 2) ^ m := by fun_prop
   have hsum : ∀ x ∈ Icc (-1 : ℝ) 1, Summable fun j => f j x := fun x hx =>
@@ -497,22 +533,28 @@ theorem hasSum_jet_expansion {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)
       fun j x hx => by rw [Real.norm_eq_abs]; exact hb j x hx
   have hH : ContinuousOn (fun x => G x - S x) (Icc (-1) 1) := hG.sub hSc
   have horth : ∀ μ : ℕ, m ≤ μ →
-      ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (G x - S x) * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re = 0 := by
+      ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (G x - S x) *
+          (OrthogonalPolynomials.LegendreAddition.jet μ m x).re = 0 := by
     intro μ hμ
     obtain ⟨B, hB⟩ := (isCompact_Icc.image_of_continuousOn
       ((hw.mul (hD μ)).continuousOn (s := Icc (-1 : ℝ) 1))).isBounded.exists_norm_le
-    have hB' : ∀ x ∈ Icc (-1 : ℝ) 1, |(1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re| ≤ B :=
+    have hB' : ∀ x ∈ Icc (-1 : ℝ) 1, |(1 - x ^ 2) ^ m *
+        (OrthogonalPolynomials.LegendreAddition.jet μ m x).re| ≤ B :=
       fun x hx => hB _ ⟨x, hx, rfl⟩
     have hint : HasSum (fun j => ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * f j x *
-        (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) (∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * S x * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) := by
+        (OrthogonalPolynomials.LegendreAddition.jet μ m x).re)
+            (∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * S x *
+            (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) := by
       refine intervalIntegral.hasSum_integral_of_dominated_convergence (fun j _ => u j * B)
         (fun j => ((hw.mul (continuous_const.mul (hD _))).mul (hD μ)).aestronglyMeasurable)
         (fun j => ?_) ?_ intervalIntegrable_const ?_
       · refine Filter.Eventually.of_forall fun x hx => ?_
         rw [uIoc_of_le (by norm_num)] at hx
         have hx' : x ∈ Icc (-1 : ℝ) 1 := ⟨hx.1.le, hx.2⟩
-        rw [Real.norm_eq_abs, show (1 - x ^ 2) ^ m * f j x * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re =
-          f j x * ((1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) by ring, abs_mul]
+        rw [Real.norm_eq_abs, show (1 - x ^ 2) ^ m * f j x *
+            (OrthogonalPolynomials.LegendreAddition.jet μ m x).re =
+          f j x * ((1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re)
+              by ring, abs_mul]
         exact mul_le_mul (hb j x hx') (hB' x hx') (abs_nonneg _)
           ((abs_nonneg _).trans (hb j x hx'))
       · exact Filter.Eventually.of_forall fun x _ => hu.mul_right B
@@ -521,11 +563,14 @@ theorem hasSum_jet_expansion {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)
         have h := ((hsum x ⟨hx.1.le, hx.2⟩).hasSum.mul_left ((1 - x ^ 2) ^ m)).mul_right
           (OrthogonalPolynomials.LegendreAddition.jet μ m x).re
         simpa only [hS] using h
-    have hterm : ∀ j, ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * f j x * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re =
+    have hterm : ∀ j, ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * f j x *
+        (OrthogonalPolynomials.LegendreAddition.jet μ m x).re =
         if ν₀ + 2 * j = μ then b μ else 0 := by
       intro j
-      have e : (fun x : ℝ => (1 - x ^ 2) ^ m * f j x * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) = fun x : ℝ =>
-          c j * b (ν₀ + 2 * j) * ((1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re *
+      have e : (fun x : ℝ => (1 - x ^ 2) ^ m * f j x *
+          (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) = fun x : ℝ =>
+          c j * b (ν₀ + 2 * j) *
+              ((1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re *
             (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) := by
         funext x; simp only [hf]; ring
       rw [e, intervalIntegral.integral_const_mul, integral_weight_mul_jet_mul_jet (by omega) μ]
@@ -538,7 +583,8 @@ theorem hasSum_jet_expansion {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)
         field_simp
       · rw [mul_zero]
     simp_rw [hterm] at hint
-    have hSμ : ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * S x * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re =
+    have hSμ : ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * S x *
+        (OrthogonalPolynomials.LegendreAddition.jet μ m x).re =
         b μ := by
       by_cases hex : ∃ j, μ = ν₀ + 2 * j
       · obtain ⟨j0, rfl⟩ := hex
@@ -555,16 +601,19 @@ theorem hasSum_jet_expansion {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)
         simp_rw [h0] at hint
         rw [hint.unique hasSum_zero]
         exact (hpar μ hμ hex).symm
-    have e2 : (fun x : ℝ => (1 - x ^ 2) ^ m * (G x - S x) * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) = fun x : ℝ =>
+    have e2 : (fun x : ℝ => (1 - x ^ 2) ^ m * (G x - S x) *
+        (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) = fun x : ℝ =>
         (1 - x ^ 2) ^ m * G x * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re -
-          (1 - x ^ 2) ^ m * S x * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re := by funext x; ring
+          (1 - x ^ 2) ^ m * S x * (OrthogonalPolynomials.LegendreAddition.jet μ m x).re :=
+              by funext x; ring
     rw [e2, intervalIntegral.integral_sub, hSμ]
     · simp [hbdef]
     · exact ((hw.continuousOn.mul hG).mul (hD μ).continuousOn).intervalIntegrable_of_Icc
         (by norm_num)
     · exact ((hw.continuousOn.mul hSc).mul (hD μ).continuousOn).intervalIntegrable_of_Icc
         (by norm_num)
-  have hz := eqOn_zero_of_weighted_moments_eq_zero hH m (weighted_moments_eq_zero_of_jet_moments hH m horth)
+  have hz := eqOn_zero_of_weighted_moments_eq_zero hH m
+      (weighted_moments_eq_zero_of_jet_moments hH m horth)
   intro x hx
   have hGS : G x = S x := sub_eq_zero.mp (hz x hx)
   rw [hGS]

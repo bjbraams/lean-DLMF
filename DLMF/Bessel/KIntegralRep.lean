@@ -171,7 +171,8 @@ theorem hasDerivAt_besselKMoment (j : ℕ) (ν : ℂ) {z : ℂ} (hz : 0 < z.re) 
   have h := hasDerivAt_integral_of_dominated_loc_of_deriv_le (μ := volume)
     (F := fun w t => (Real.cosh t : ℂ) ^ j * besselKKernel ν w t)
     (F' := fun w t => -((Real.cosh t : ℂ) ^ (j + 1) * besselKKernel ν w t))
-    (x₀ := z) (bound := fun t => Real.exp (-(z.re / 2 * Real.cosh t) + (|ν.re| + (j + 1 : ℕ)) * |t|))
+    (x₀ := z) (bound := fun t =>
+        Real.exp (-(z.re / 2 * Real.cosh t) + (|ν.re| + (j + 1 : ℕ)) * |t|))
     (Metric.ball_mem_nhds z hε) (Eventually.of_forall fun w => by unfold besselKKernel; fun_prop)
     (integrable_cosh_pow_mul_besselKKernel hz j)
     (by unfold besselKKernel; fun_prop)
@@ -326,10 +327,12 @@ theorem besselKMoment_ode (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
 abbrev kIntRightHalfPlane : Set ℂ := {z : ℂ | 0 < z.re}
 
 /-- The indicated domain is open: `IsOpen kIntRightHalfPlane`. -/
-theorem isOpen_kIntRightHalfPlane : IsOpen kIntRightHalfPlane := isOpen_lt continuous_const continuous_re
+theorem isOpen_kIntRightHalfPlane : IsOpen kIntRightHalfPlane :=
+    isOpen_lt continuous_const continuous_re
 
 /-- The stated relation follows from the given hypotheses: `kIntRightHalfPlane ⊆ slitPlane`. -/
-theorem kIntRightHalfPlane_subset_slitPlane : kIntRightHalfPlane ⊆ slitPlane := fun _ hz => Or.inl hz
+theorem kIntRightHalfPlane_subset_slitPlane : kIntRightHalfPlane ⊆ slitPlane :=
+    fun _ hz => Or.inl hz
 
 /-- The Wronskian-type combination `z (Φ g' - Φ' g)` of the moment integral `Φ = Ψ₀` with a
 solution `g` of the modified Bessel equation. -/
@@ -362,7 +365,8 @@ theorem besselKMomentWronskian_const (ν : ℂ) {g : ℂ → ℂ} (hg : Differen
     simp only [id, Pi.add_apply, Pi.mul_apply, zero_add, Nat.reduceAdd]
     refine mul_left_cancel₀ hu0 ?_
     linear_combination besselKMoment 0 ν u * hode' - g u * hmom
-  exact isOpen_kIntRightHalfPlane.is_const_of_deriv_eq_zero (convex_halfSpace_re_gt 0).isPreconnected
+  exact isOpen_kIntRightHalfPlane.is_const_of_deriv_eq_zero
+      (convex_halfSpace_re_gt 0).isPreconnected
     (fun u hu => (hderiv u hu).differentiableAt.differentiableWithinAt)
     (fun u hu => (hderiv u hu).deriv) hz hw
 
@@ -377,7 +381,8 @@ theorem besselKMoment_neg_order (j : ℕ) (ν z : ℂ) :
   ring_nf
 
 /-- The pointwise identity behind the shift `t ↦ t - log(x/2)` and the substitution `v = e^t`:
-`e^u g(e^u) = (x/2)^ν e^{-x cosh(u - log(x/2)) + ν(u - log(x/2))}` for the Schläfli integrand `g`. -/
+`e^u g(e^u) = (x/2)^ν e^{-x cosh(u - log(x/2)) + ν(u - log(x/2))}` for the Schläfli integrand `g`.
+-/
 theorem exp_smul_kSchlafli_eq {x : ℝ} (hx : 0 < x) (ν : ℂ) (u : ℝ) :
     Real.exp u • (exp (-((Real.exp u : ℝ) : ℂ) - (x : ℂ) ^ 2 / (4 * ((Real.exp u : ℝ) : ℂ))) *
       ((Real.exp u : ℝ) : ℂ) ^ (ν - 1)) =
@@ -527,11 +532,13 @@ theorem tendsto_cpow_mul_besselI {ν : ℂ} (hν : 0 < ν.re) :
   unfold besselI
   rw [← mul_assoc, ← cpow_add _ _ (div_ne_zero (by exact_mod_cast hx'.ne') two_ne_zero), two_mul]
 
-/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ (besselK ν) slitPlane`. -/
+/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ (besselK ν) slitPlane`.
+-/
 theorem differentiableOn_besselK_slitPlane (ν : ℂ) : DifferentiableOn ℂ (besselK ν) slitPlane :=
   fun _ hz => (hasDerivAt_besselK ν hz).differentiableAt.differentiableWithinAt
 
-/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ (besselI ν) slitPlane`. -/
+/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ (besselI ν) slitPlane`.
+-/
 theorem differentiableOn_besselI_slitPlane (ν : ℂ) : DifferentiableOn ℂ (besselI ν) slitPlane :=
   fun _ hz => (analyticAt_besselI ν hz).differentiableAt.differentiableWithinAt
 
@@ -541,7 +548,8 @@ theorem besselKMoment_eq_wronskian_combination (ν : ℂ) {z : ℂ} (hz : 0 < z.
       besselKMomentWronskian ν (besselK ν) 1 * besselI ν z := by
   have h1 : (0 : ℝ) < (1 : ℂ).re := by simp
   have hzs : z ∈ slitPlane := Or.inl hz
-  rw [← besselKMomentWronskian_const ν (differentiableOn_besselI_slitPlane ν) (fun w hw => besselI_ode hw)
+  rw [← besselKMomentWronskian_const ν (differentiableOn_besselI_slitPlane ν)
+      (fun w hw => besselI_ode hw)
       hz h1, ← besselKMomentWronskian_const ν (differentiableOn_besselK_slitPlane ν)
       (fun w hw => besselK_ode_all ν hw) hz h1]
   have hW := wronskian_besselK_besselI ν hzs
@@ -900,7 +908,8 @@ theorem re_pos_of_mem_kIntQuarterSector {z : ℂ} (hz : z ∈ kIntQuarterSector)
   (abs_nonneg _).trans_lt hz
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < (z ^ 2).re`. -/
-theorem re_sq_pos_of_mem_kIntQuarterSector {z : ℂ} (hz : z ∈ kIntQuarterSector) : 0 < (z ^ 2).re := by
+theorem re_sq_pos_of_mem_kIntQuarterSector {z : ℂ} (hz : z ∈ kIntQuarterSector) : 0 <
+    (z ^ 2).re := by
   have h : |z.im| < z.re := hz
   have h0 := (abs_nonneg z.im).trans_lt h
   rw [sq, mul_re]
@@ -926,7 +935,8 @@ theorem differentiableOn_kSchlafli_integral (ν : ℂ) :
         (hc.cpow continuousAt_const hts)) measurableSet_Ioi
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     have ht' : (0 : ℝ) < t := ht
-    have hne : (4 * (t : ℂ)) ≠ 0 := mul_ne_zero (by norm_num : (4 : ℂ) ≠ 0) (by exact_mod_cast ht'.ne')
+    have hne : (4 * (t : ℂ)) ≠ 0 :=
+        mul_ne_zero (by norm_num : (4 : ℂ) ≠ 0) (by exact_mod_cast ht'.ne')
     exact (((differentiable_const _).sub ((differentiable_pow 2).div_const _)).cexp.mul
       (differentiable_const _)).differentiableOn
   · change 0 < (z₀ ^ 2).re at hz₀
@@ -958,7 +968,8 @@ theorem differentiableOn_kSchlafli_integral (ν : ℂ) :
       linarith
 
 /-- **Schläfli-type integral for `K_ν`** (DLMF 10.32.10), with the sector `|ph z| < π/4` written
-as `|Im z| < Re z`: `K_ν(z) = ½ (z/2)^ν ∫₀^∞ e^{-t - z²/(4t)} t^{-ν-1} dt`, for every complex `ν`. -/
+as `|Im z| < Re z`: `K_ν(z) = ½ (z/2)^ν ∫₀^∞ e^{-t - z²/(4t)} t^{-ν-1} dt`, for every complex `ν`.
+-/
 theorem besselK_eq_integral_schlafli (ν : ℂ) {z : ℂ} (hz : |z.im| < z.re) :
     besselK ν z = 1 / 2 * (z / 2) ^ ν *
       ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) - z ^ 2 / (4 * t)) * (t : ℂ) ^ (-ν - 1) := by

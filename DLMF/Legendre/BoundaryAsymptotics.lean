@@ -125,7 +125,8 @@ theorem legBd_ferrersQ_tendsto {ν μ : ℂ} (h : LegendreQRegular ν μ) (hμ :
   rw [show (1/2:ℂ)-(-(ν+μ)/2)-((ν-μ+1)/2) = μ by ring,
     show (1/2:ℂ)-(-(ν+μ)/2) = (ν+μ+1)/2 by ring, show (1/2:ℂ)-((ν-μ+1)/2) = -(ν-μ)/2 by ring] at h1
   rw [show (3/2:ℂ)-((1-ν-μ)/2)-((ν-μ+2)/2) = μ by ring,
-    show (3/2:ℂ)-((1-ν-μ)/2) = (ν+μ+2)/2 by ring, show (3/2:ℂ)-((ν-μ+2)/2) = (1-(ν-μ))/2 by ring] at h2
+    show (3/2:ℂ)-((1-ν-μ)/2) = (ν+μ+2)/2 by ring, show (3/2:ℂ)-((ν-μ+2)/2) =
+                                              (1-(ν-μ))/2 by ring] at h2
   have hx : Tendsto (fun x : ℝ => (x:ℂ)) (𝓝[<] 1) (𝓝 1) := by
     have := (continuous_ofReal.tendsto (1:ℝ)).mono_left (nhdsWithin_le_nhds (s := Iio 1))
     simpa using this
@@ -202,7 +203,8 @@ theorem legBd_ferrersQ_neg_tendsto {ν μ : ℂ} (hp : LegendreQRegular ν μ)
   have hx : Tendsto (fun x : ℝ => (x:ℂ)) (𝓝[<] 1) (𝓝 1) := by
     have := (continuous_ofReal.tendsto (1:ℝ)).mono_left (nhdsWithin_le_nhds (s := Iio 1))
     simpa using this
-  have hT := ((h1.const_mul (-π/2*sin ((ν+-μ)*π/2)*(2^(-μ)*Gamma ((ν+-μ+1)/2)/Gamma ((ν-(-μ)+2)/2)))).add
+  have hT := ((h1.const_mul
+      (-π/2*sin ((ν+-μ)*π/2)*(2^(-μ)*Gamma ((ν+-μ+1)/2)/Gamma ((ν-(-μ)+2)/2)))).add
     ((hx.mul h2).const_mul (π/2*cos ((ν+-μ)*π/2)*(2^(-μ)*Gamma ((ν+-μ+2)/2)/Gamma ((ν-(-μ)+1)/2)))))
   have eL : -π/2*sin ((ν+-μ)*π/2)*(2^(-μ)*Gamma ((ν+-μ+1)/2)/Gamma ((ν-(-μ)+2)/2)) *
       (Gamma μ * ((Gamma (-(ν-μ)/2))⁻¹ * (Gamma ((ν+μ+1)/2))⁻¹)) +
@@ -327,7 +329,8 @@ theorem legBd_cos_ne_zero {μ : ℂ} (hμ : 0 < μ.re) (hh : ∀ n : ℕ, μ ≠
 theorem legBd_tendsto_recip_sq_nhdsGT :
     Tendsto (fun x : ℝ => 1/x^2) (𝓝[>] (1:ℝ)) (𝓝[<] 1) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
-  · have := ((by fun_prop (disch := norm_num) : ContinuousAt (fun x : ℝ => 1/x^2) 1).tendsto).mono_left
+  · have := ((by fun_prop (disch := norm_num) : ContinuousAt (fun x : ℝ => 1/x^2)
+                   1).tendsto).mono_left
       (nhdsWithin_le_nhds (s := Ioi 1))
     simpa using this
   · filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
@@ -339,7 +342,8 @@ theorem legBd_tendsto_one_sub_recip_sq_atTop :
     Tendsto (fun x : ℝ => 1-1/x^2) atTop (𝓝[<] 1) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun x : ℝ => 1/x^2) atTop (𝓝 0) := by
-      simpa [Function.comp_def] using (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero)))
+      simpa [Function.comp_def] using
+          (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero)))
     simpa using (tendsto_const_nhds (x := (1:ℝ))).sub h
   · filter_upwards [eventually_gt_atTop 0] with x hx
     simp only [mem_Iio]
@@ -466,7 +470,8 @@ theorem legBd_associatedP_tendsto_atTop {ν : ℂ} (hν : -1/2 < ν.re) (μ : �
     have h0 : Tendsto (fun x : ℝ => 1/(x:ℂ)^2) atTop (𝓝 0) := by
       have h : Tendsto (fun x : ℝ => ((1/x^2 : ℝ) : ℂ)) atTop (𝓝 ((0:ℝ):ℂ)) :=
         (continuous_ofReal.tendsto 0).comp (by
-          simpa [Function.comp_def] using (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero))))
+          simpa [Function.comp_def] using
+              (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero))))
       simpa using h
     have := hc.tendsto.comp h0
     simpa [Function.comp_def] using this
@@ -556,7 +561,8 @@ theorem legBd_associatedP_half_tendsto_atTop (μ : ℂ) :
     have h0 : Tendsto (fun x : ℝ => 1/(x:ℂ)^2) atTop (𝓝 0) := by
       have h : Tendsto (fun x : ℝ => ((1/x^2 : ℝ) : ℂ)) atTop (𝓝 ((0:ℝ):ℂ)) :=
         (continuous_ofReal.tendsto 0).comp (by
-          simpa [Function.comp_def] using (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero))))
+          simpa [Function.comp_def] using
+              (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero))))
       simpa using h
     have := hc.tendsto.comp h0
     simpa [Function.comp_def] using this
@@ -588,7 +594,8 @@ theorem legBd_associatedP_half_tendsto_atTop (μ : ℂ) :
   have hc : (1/2-μ)/2 + (3/2-μ)/2 = -μ+1 := by ring
   have hlc : (Real.log x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hlog.ne'
   push_cast
-  rw [show ((-μ - -1/2)/2 : ℂ) = (1/2-μ)/2 by ring, show ((-μ - -1/2 + 1)/2 : ℂ) = (3/2-μ)/2 by ring,
+  rw [show ((-μ - -1/2)/2 : ℂ) = (1/2-μ)/2 by ring, show ((-μ - -1/2 + 1)/2 : ℂ) =
+                                                (3/2-μ)/2 by ring,
     show (-μ + 1 : ℂ) = (1/2-μ)/2 + (3/2-μ)/2 by ring]
   linear_combination (-(2:ℂ)^μ * ((1-1/(x:ℂ)^2)^((-μ)/2)) *
     regularizedGaussHG ((1/2-μ)/2) ((3/2-μ)/2) ((1/2-μ)/2 + (3/2-μ)/2) (1-1/(x:ℂ)^2) /
@@ -880,11 +887,13 @@ theorem legBd_duplication_deriv (s : ℂ) :
   have hL : HasDerivAt (fun u : ℂ => (Gamma (u+1))⁻¹) (recipGammaDeriv 1 (s+1)) s := by
     have := (hasDerivAt_recip_Gamma' (s+1)).comp s ((hasDerivAt_id s).add_const 1)
     simpa [Function.comp_def] using this
-  have h1 : HasDerivAt (fun u : ℂ => (Gamma ((u+1)/2))⁻¹) (recipGammaDeriv 1 ((s+1)/2) * (1/2)) s := by
+  have h1 : HasDerivAt (fun u : ℂ => (Gamma ((u+1)/2))⁻¹)
+      (recipGammaDeriv 1 ((s+1)/2) * (1/2)) s := by
     have hi : HasDerivAt (fun u : ℂ => (u+1)/2) (1/2) s := by
       simpa using ((hasDerivAt_id s).add_const (1:ℂ)).div_const 2
     exact (hasDerivAt_recip_Gamma' _).comp s hi
-  have h2 : HasDerivAt (fun u : ℂ => (Gamma ((u+2)/2))⁻¹) (recipGammaDeriv 1 ((s+2)/2) * (1/2)) s := by
+  have h2 : HasDerivAt (fun u : ℂ => (Gamma ((u+2)/2))⁻¹)
+      (recipGammaDeriv 1 ((s+2)/2) * (1/2)) s := by
     have hi : HasDerivAt (fun u : ℂ => (u+2)/2) (1/2) s := by
       simpa using ((hasDerivAt_id s).add_const (2:ℂ)).div_const 2
     exact (hasDerivAt_recip_Gamma' _).comp s hi
@@ -941,7 +950,8 @@ theorem legBd_tendsto_sub_one_nhdsGT :
 theorem legBd_tendsto_one_sub_recip_sq_nhdsGT :
     Tendsto (fun x : ℝ => 1 - 1/x^2) (𝓝[>] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
-  · have := ((by fun_prop (disch := norm_num) : ContinuousAt (fun x : ℝ => 1 - 1/x^2) 1).tendsto).mono_left
+  · have := ((by fun_prop (disch := norm_num) : ContinuousAt (fun x : ℝ => 1 - 1/x^2)
+                   1).tendsto).mono_left
       (nhdsWithin_le_nhds (s := Ioi 1))
     simpa using this
   · filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
@@ -950,7 +960,10 @@ theorem legBd_tendsto_one_sub_recip_sq_nhdsGT :
 
 /-- DLMF 14.8.9 with `ψ(ν+1)/Γ(ν+1)` written as `-(1/Γ)'(ν+1)`, for all `ν`. -/
 theorem legBd_olverQ_log_isBigO (ν : ℂ) :
-    (fun x : ℝ => olverQ ν 0 x+log (x-1:ℂ)/(2*Gamma (ν+1))-(log 2/2-Real.eulerMascheroniConstant)/Gamma (ν+1)-DLMF.Gamma.recipGammaDeriv 1 (ν+1)) =O[𝓝[>] (1:ℝ)] (fun x : ℝ => (x-1)*Real.log (x-1)) := by
+    (fun x : ℝ => olverQ ν 0 x+log
+        (x-1:ℂ)/(2*Gamma (ν+1))-(log 2/2-Real.eulerMascheroniConstant)/Gamma
+        (ν+1)-DLMF.Gamma.recipGammaDeriv 1 (ν+1)) =O[𝓝[>] (1:ℝ)]
+        (fun x : ℝ => (x-1)*Real.log (x-1)) := by
   set a : ℂ := (ν+0+2)/2 with ha
   set b : ℂ := (ν+0+1)/2 with hb
   set K := legBdK a b with hK
@@ -974,7 +987,8 @@ theorem legBd_olverQ_log_isBigO (ν : ℂ) :
     exact this
   -- the pieces
   have hZ := ((legBd_zeroBalanced_isBigO a b).comp_tendsto legBd_tendsto_one_sub_recip_sq_nhdsGT)
-  have hcmp := legBd_log_comparison (l := 𝓝[>] (1:ℝ)) (s := fun x => x - 1) (t := fun x => 1 - 1/x^2)
+  have hcmp := legBd_log_comparison (l := 𝓝[>] (1:ℝ)) (s := fun x => x - 1)
+      (t := fun x => 1 - 1/x^2)
     (by
       filter_upwards [self_mem_nhdsWithin, Ioo_mem_nhdsGT (show (1:ℝ) < 3/2 by norm_num)] with x
         (hx : 1 < x) hx2
@@ -1170,7 +1184,8 @@ theorem legBd_tendsto_one_sub_sq_nhdsLT :
 
 /-- DLMF 14.8.3: `𝖰_ν(x) = ½ ln(2/(1-x)) - γ - ψ(ν+1) + O((1-x) ln(1-x))` as `x → 1⁻`. -/
 theorem legBd_ferrersQ_log_isBigO {ν : ℂ} (hν : LegendreQRegular ν 0) :
-    (fun x : ℝ => ferrersQ ν 0 x-1/2*log (2/(1-x):ℂ)+Real.eulerMascheroniConstant+digamma (ν+1)) =O[𝓝[<] (1:ℝ)] (fun x : ℝ => (1-x)*Real.log (1-x)) := by
+    (fun x : ℝ => ferrersQ ν 0 x-1/2*log (2/(1-x):ℂ)+Real.eulerMascheroniConstant+digamma (ν+1))
+        =O[𝓝[<] (1:ℝ)] (fun x : ℝ => (1-x)*Real.log (1-x)) := by
   obtain ⟨hc1, hc2⟩ := legBd_ferrersQ_consts hν
   set a1 : ℂ := -ν/2 with ha1
   set b1 : ℂ := (ν+1)/2 with hb1
@@ -1227,7 +1242,8 @@ theorem legBd_ferrersQ_log_isBigO {ν : ℂ} (hν : LegendreQRegular ν 0) :
   have t3 : (fun x => A2 * (((x-1:ℝ):ℂ) * (-K2 * L x))) =O[l] R :=
     ((hxm.mul (hcmp.1.const_mul_left (-K2))).const_mul_left A2)
   have t4 : (fun x => A2 * (((x-1:ℝ):ℂ) * (K2' - 2*γ*K2))) =O[l] R :=
-    (((hxm.const_mul_left (K2' - 2*γ*K2)).congr_left (fun x => mul_comm _ _)).trans hS').const_mul_left A2
+    (((hxm.const_mul_left (K2' - 2*γ*K2)).congr_left (fun x => mul_comm _ _)).trans
+        hS').const_mul_left A2
   have t5 : (fun x => A2 * (((x-1:ℝ):ℂ) * E2 x)) =O[l] R :=
     ((hxb.mul hZ2).congr_right (fun x => one_mul _)).const_mul_left A2
   have t6 : (fun x => (1/2:ℂ) * (g x - Real.log 2)) =O[l] R := (hgO.const_mul_left _).trans hS'

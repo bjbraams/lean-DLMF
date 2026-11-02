@@ -382,7 +382,8 @@ theorem lzt_lower_left_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     have hya := lzt_nonneg_right (hy z hz).1.continuousAt hz.1 ypos
     have hwa := lzt_deriv_nonpos_left (hw z hz).1 wz hz.1 wpos
     simp only [lzt_W, wz, zero_mul, sub_zero]
-    exact mul_nonpos_of_nonneg_of_nonpos (lzt_p_pos hz).le (by nlinarith [mul_nonneg hya (neg_nonneg.mpr hwa)])
+    exact mul_nonpos_of_nonneg_of_nonpos (lzt_p_pos hz).le
+        (by nlinarith [mul_nonneg hya (neg_nonneg.mpr hwa)])
   set s₁ := (-1 + min z s₀) / 2 with hs₁
   have hm : -1 < min z s₀ := lt_min hz.1 hs₀
   have hzs : s₁ < z := by have := min_le_left z s₀; linarith
@@ -719,7 +720,8 @@ theorem lzt_ferrersP_base {m : ℝ} (hm : 0 ≤ m) (j : ℕ) {x : ℝ} (hx : x �
   have e3 : (1:ℂ) - ((-m:ℝ):ℂ) - -((m + j:ℝ):ℂ) = (j:ℂ) + 2 * ((m + 1/2 : ℝ) : ℂ) := by
     push_cast; ring
   have e4 : (1:ℂ) - ((-m:ℝ):ℂ) = ((m + 1/2 : ℝ) : ℂ) + 1/2 := by push_cast; ring
-  rw [e1, e2, e3, e4, regularizedGaussHGFun_eq_div_Gamma (by rw [← e4]; push_cast; simpa [sub_neg_eq_add] using hc)]
+  rw [e1, e2, e3, e4, regularizedGaussHGFun_eq_div_Gamma
+      (by rw [← e4]; push_cast; simpa [sub_neg_eq_add] using hc)]
   have hg := ferrers_quadratic_gauge ((-m:ℝ):ℂ) hx
   rw [show (1:ℂ) - (1 - (x:ℂ)) / 2 = (1 + (x:ℂ)) / 2 by ring]
   rw [show 2 * ((m + 1/2 : ℝ) : ℂ) = ((2 * m + 1 : ℝ) : ℂ) by push_cast; ring,

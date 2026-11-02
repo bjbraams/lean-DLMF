@@ -8,6 +8,7 @@ module
 public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 public import Mathlib.Analysis.Complex.AbelLimit
+public import Mathlib.RingTheory.PowerSeries.Basic
 
 /-!
 # Summability of series: regularity and Tauberian theorems (DLMF §1.15(ii), §1.15(viii))
@@ -76,13 +77,163 @@ theorem hasCesaroSum_of_tendsto {a : ℕ → ℂ} {s : ℂ}
   push_cast
   ring
 
+/-- Abel summation for the Cesàro means: `∑ A_k a_{n-k} = ∑ B_k s_{n-k}` when
+`∑_{k ≤ m} B_k = A_m` for every `m`. -/
+private theorem sum_mul_sub_eq_sum_mul_partialSum {A B : ℕ → ℂ} (a : ℕ → ℂ)
+    (hB : ∀ m, ∑ k ∈ range (m + 1), B k = A m) (n : ℕ) :
+    ∑ k ∈ range (n + 1), A k * a (n - k) =
+      ∑ k ∈ range (n + 1), B k * seriesPartialSum a (n - k) := by
+  have hA : PowerSeries.mk A = PowerSeries.mk B * PowerSeries.mk (fun _ => (1 : ℂ)) := by
+    ext m
+    rw [PowerSeries.coeff_mk, PowerSeries.coeff_mul,
+      Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j =>
+        PowerSeries.coeff i (PowerSeries.mk B) * PowerSeries.coeff j
+          (PowerSeries.mk (fun _ => (1 : ℂ))))]
+    simp [hB]
+  have hs : PowerSeries.mk (seriesPartialSum a) =
+      PowerSeries.mk a * PowerSeries.mk (fun _ => (1 : ℂ)) := by
+    ext m
+    rw [PowerSeries.coeff_mk, PowerSeries.coeff_mul,
+      Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j =>
+        PowerSeries.coeff i (PowerSeries.mk a) * PowerSeries.coeff j
+          (PowerSeries.mk (fun _ => (1 : ℂ))))]
+    simp [seriesPartialSum]
+  have key : PowerSeries.coeff n (PowerSeries.mk A * PowerSeries.mk a) =
+      PowerSeries.coeff n (PowerSeries.mk B * PowerSeries.mk (seriesPartialSum a)) := by
+    rw [hA, hs]; ring_nf
+  rw [PowerSeries.coeff_mul, PowerSeries.coeff_mul,
+    Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j =>
+      PowerSeries.coeff i (PowerSeries.mk A) * PowerSeries.coeff j (PowerSeries.mk a)),
+    Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j =>
+      PowerSeries.coeff i (PowerSeries.mk B) * PowerSeries.coeff j
+        (PowerSeries.mk (seriesPartialSum a)))] at key
+  simpa only [PowerSeries.coeff_mk, Nat.succ_eq_add_one] using key
+
 /-- DLMF §1.15(ii) (regularity of general Cesàro summation): for `α ≥ 0`,
 a series with convergent partial sums is `(C,α)`-summable to the same sum. Negative orders
 are not regular, despite the larger range in which the means are defined. -/
 @[dlmf 1.15.ii]
 theorem hasCesaroSumOfOrder_of_tendsto {α : ℝ} (hα : 0 ≤ α) {a : ℕ → ℂ} {s : ℂ}
     (h : Tendsto (seriesPartialSum a) atTop (𝓝 s)) : HasCesaroSumOfOrder α a s := by
-  sorry
+  rcases hα.eq_or_lt with rfl | hα
+  · unfold HasCesaroSumOfOrder
+    rwa [show cesaroMeanOfOrder 0 a = seriesPartialSum a from funext (cesaroMeanOfOrder_zero a)]
+  set A : ℕ → ℝ := fun k => (ascPochhammer ℝ k).eval (α + 1) / (k.factorial : ℝ) with hAdef
+  have hApos : ∀ k, 0 < A k := fun k =>
+    div_pos (ascPochhammer_pos k _ (by linarith)) (by positivity)
+  have hAsucc : ∀ k, A (k + 1) = A k * ((α + 1 + k) / (k + 1)) := by
+    intro k
+    simp only [hAdef, ascPochhammer_succ_eval, Nat.factorial_succ, Nat.cast_mul]
+    push_cast
+    field_simp
+  have hAmono : Monotone A := by
+    refine monotone_nat_of_le_succ fun k => ?_
+    rw [hAsucc]
+    refine le_mul_of_one_le_right (hApos k).le ?_
+    rw [one_le_div (by positivity)]
+    linarith
+  set B : ℕ → ℝ := fun k => A k * (α / (α + k)) with hBdef
+  have hBnn : ∀ k, 0 ≤ B k := fun k => mul_nonneg (hApos k).le (by positivity)
+  have hBsum : ∀ m, ∑ k ∈ range (m + 1), B k = A m := by
+    intro m
+    induction m with
+    | zero => simp [hBdef, hα.ne']
+    | succ m ih =>
+      rw [sum_range_succ, ih, hBdef]
+      simp only
+      rw [hAsucc]
+      push_cast
+      field_simp
+      ring
+  have hmean : ∀ n, cesaroMeanOfOrder α a n - s =
+      ((A n)⁻¹ : ℂ) * ∑ k ∈ range (n + 1), (B k : ℂ) * (seriesPartialSum a (n - k) - s) := by
+    intro n
+    have hconv := sum_mul_sub_eq_sum_mul_partialSum (A := fun k => (A k : ℂ))
+      (B := fun k => (B k : ℂ)) a (fun m => by exact_mod_cast hBsum m) n
+    have hc : (((n.factorial : ℝ) / (ascPochhammer ℝ n).eval (α + 1) : ℝ) : ℂ) =
+        ((A n)⁻¹ : ℂ) := by
+      simp only [hAdef]; rw [← Complex.ofReal_inv, inv_div]
+    have hsumB : ∑ k ∈ range (n + 1), (B k : ℂ) = A n := by exact_mod_cast hBsum n
+    unfold cesaroMeanOfOrder
+    rw [hc]
+    simp only [mul_sub, sum_sub_distrib, ← sum_mul, hsumB]
+    rw [← hconv]
+    have : (A n : ℂ) ≠ 0 := by exact_mod_cast (hApos n).ne'
+    field_simp
+    simp [hAdef]
+  rw [HasCesaroSumOfOrder, Metric.tendsto_atTop]
+  intro ε hε
+  obtain ⟨K, hK⟩ := Metric.tendsto_atTop.mp h (ε / 2) (half_pos hε)
+  obtain ⟨C, hC⟩ := (h.sub_const s).norm.bddAbove_range
+  have hC' : ∀ j, ‖seriesPartialSum a j - s‖ ≤ C := fun j => hC ⟨j, rfl⟩
+  have hC0 : 0 ≤ C := (norm_nonneg _).trans (hC' 0)
+  obtain ⟨M, hM⟩ := exists_nat_gt (2 * K * C * α / ε)
+  have hbad : K * (C * (α / (α + M))) < ε / 2 := by
+    have hpos : 0 < α + M := by positivity
+    rw [show K * (C * (α / (α + M))) = K * C * α / (α + M) by ring, div_lt_iff₀ hpos]
+    rw [div_lt_iff₀ hε] at hM
+    nlinarith
+  refine ⟨K + M, fun n hn => ?_⟩
+  rw [dist_eq_norm, hmean n]
+  have hterm : ∀ k ∈ range (n + 1), (A n)⁻¹ * (B k * ‖seriesPartialSum a (n - k) - s‖) ≤
+      (A n)⁻¹ * B k * (ε / 2) + (if n - k < K then C * (α / (α + M)) else 0) := by
+    intro k hk
+    have hkn : k ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hk)
+    split_ifs with hnk
+    · -- a bad index: `k` is large, so `B_k / A_n` is small
+      have hkM : M ≤ k := by omega
+      have hBA : (A n)⁻¹ * B k ≤ α / (α + M) := by
+        rw [hBdef]
+        simp only
+        rw [← mul_assoc]
+        calc (A n)⁻¹ * A k * (α / (α + k)) ≤ 1 * (α / (α + M)) := by
+              refine mul_le_mul ?_ ?_ (by positivity) zero_le_one
+              · rw [inv_mul_le_one₀ (hApos n)]; exact hAmono hkn
+              · exact div_le_div_of_nonneg_left hα.le (by positivity)
+                  (by exact_mod_cast (by linarith [(Nat.cast_le (α := ℝ)).mpr hkM]))
+          _ = α / (α + M) := one_mul _
+      have := hC' (n - k)
+      calc (A n)⁻¹ * (B k * ‖seriesPartialSum a (n - k) - s‖)
+          = ((A n)⁻¹ * B k) * ‖seriesPartialSum a (n - k) - s‖ := by ring
+        _ ≤ (α / (α + M)) * C := mul_le_mul hBA this (norm_nonneg _) (by positivity)
+        _ ≤ (A n)⁻¹ * B k * (ε / 2) + C * (α / (α + M)) := by
+          have : 0 ≤ (A n)⁻¹ * B k * (ε / 2) :=
+            mul_nonneg (mul_nonneg (inv_nonneg.mpr (hApos n).le) (hBnn k)) (by positivity)
+          linarith
+    · have := hK (n - k) (by omega)
+      rw [dist_eq_norm] at this
+      rw [add_zero, mul_assoc ((A n)⁻¹) (B k)]
+      exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left this.le (hBnn k))
+        (inv_nonneg.mpr (hApos n).le)
+  have hcard : ((range (n + 1)).filter fun k => n - k < K).card ≤ K := by
+    calc ((range (n + 1)).filter fun k => n - k < K).card
+        ≤ (Finset.Ico (n + 1 - K) (n + 1)).card := by
+          refine card_le_card fun k hk => ?_
+          simp only [Finset.mem_filter, Finset.mem_range] at hk
+          simp only [Finset.mem_Ico]
+          omega
+      _ = K := by simp; omega
+  calc ‖((A n)⁻¹ : ℂ) * ∑ k ∈ range (n + 1), (B k : ℂ) * (seriesPartialSum a (n - k) - s)‖
+      ≤ (A n)⁻¹ * ∑ k ∈ range (n + 1), B k * ‖seriesPartialSum a (n - k) - s‖ := by
+        rw [norm_mul]
+        have h1 : ‖((A n)⁻¹ : ℂ)‖ = (A n)⁻¹ := by
+          rw [← Complex.ofReal_inv, Complex.norm_real, Real.norm_of_nonneg
+            (inv_nonneg.mpr (hApos n).le)]
+        rw [h1]
+        refine mul_le_mul_of_nonneg_left ((norm_sum_le _ _).trans (le_of_eq ?_))
+          (inv_nonneg.mpr (hApos n).le)
+        refine sum_congr rfl fun k _ => ?_
+        rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (hBnn k)]
+    _ = ∑ k ∈ range (n + 1), (A n)⁻¹ * (B k * ‖seriesPartialSum a (n - k) - s‖) := by
+        rw [mul_sum]
+    _ ≤ ∑ k ∈ range (n + 1), ((A n)⁻¹ * B k * (ε / 2) +
+          (if n - k < K then C * (α / (α + M)) else 0)) := sum_le_sum hterm
+    _ = ε / 2 + ((range (n + 1)).filter fun k => n - k < K).card * (C * (α / (α + M))) := by
+        rw [sum_add_distrib, ← sum_mul, ← mul_sum, hBsum n, inv_mul_cancel₀ (hApos n).ne',
+          one_mul, sum_ite, sum_const_zero, add_zero, sum_const, nsmul_eq_mul]
+    _ ≤ ε / 2 + K * (C * (α / (α + M))) := by
+        gcongr
+    _ < ε := by linarith
 
 /-- DLMF §1.15(ii) (regularity of Borel summation): if `∑ a_n = s` then `∑ a_n = s (B)`. -/
 @[dlmf 1.15.ii]

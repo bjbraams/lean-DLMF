@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AsymptoticApproximations.Mellin.Basic
+public import DLMF.AsymptoticApproximations.Mellin.Residues
 public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMF.Gamma.Asymptotics
 public import Mathlib.Analysis.SpecialFunctions.Bessel
@@ -49,7 +50,7 @@ strip crossed by the contour (and `b₀ = -A'(0)` is not zero in general; it is 
 
 @[expose] public noncomputable section
 
-open MeasureTheory Set Filter Finset Asymptotics Complex
+open MeasureTheory Set Filter Finset Asymptotics Complex Metric
 open scoped Topology Real
 
 namespace DLMF.AsymptoticApproximations
@@ -96,6 +97,27 @@ theorem mellin_besselJ_sq_eq_kernel {ν : ℝ} (hν : -1 / 2 < ν) {z : ℂ} (h0
   simp only [div_eq_mul_inv, mul_inv, inv_pow]
   ring
 
+/-- `Γ` is holomorphic at points of positive real part. -/
+private lemma differentiableAt_Gamma_of_re_pos {s : ℂ} (hs : 0 < s.re) :
+    DifferentiableAt ℂ Gamma s :=
+  Complex.differentiableAt_Gamma s fun m h => by
+    rw [h] at hs; simp at hs; linarith [(m.cast_nonneg : (0 : ℝ) ≤ m)]
+
+/-- The kernel `A(z)` is holomorphic where `ℜ(ν + z/2) > 0`. -/
+private lemma besselSqMellinKernel_differentiableAt (ν : ℝ) {z : ℂ}
+    (hz : 0 < (ν + z / 2 : ℂ).re) : DifferentiableAt ℂ (besselSqMellinKernel ν) z := by
+  unfold besselSqMellinKernel
+  have h1 : DifferentiableAt ℂ (fun z : ℂ => Gamma (ν + z / 2)) z :=
+    (differentiableAt_Gamma_of_re_pos hz).comp z (by fun_prop)
+  have hi : ∀ w : ℂ → ℂ, DifferentiableAt ℂ w z →
+      DifferentiableAt ℂ (fun z => (Gamma (w z))⁻¹) z := fun w hw =>
+    (differentiable_one_div_Gamma (w z)).comp z hw |>.congr_of_eventuallyEq
+      (Eventually.of_forall fun _ => by simp)
+  have h2 : DifferentiableAt ℂ (fun z : ℂ => (2 : ℂ) ^ (z - 1)) z :=
+    ((differentiableAt_id.sub_const 1).const_cpow (Or.inl (by norm_num)))
+  exact (((h2.mul h1).mul ((hi _ (by fun_prop)).pow 2)).mul (hi _ (by fun_prop))).mul
+    (hi _ differentiableAt_id)
+
 /-- DLMF 2.5.11 (corrected sign; see the module docstring): for `ν > -½`, `x > 0` and
 `n ≥ 1`, the residue of `x^{-z} 𝓜f(1 - z) 𝓜h(z) = x^{-z} (π/sin(πz)) A(z) (π/sin(πz))` at the
 double pole `z = n` is `-(aₙ ln x + bₙ) x^{-n}`; DLMF prints `+(aₙ ln x + bₙ) x^{-n}`. -/
@@ -105,7 +127,36 @@ theorem residueAt_besselSq {ν : ℝ} (hν : -1 / 2 < ν) {x : ℝ} (hx : 0 < x)
     DLMF.AlgebraicAnalytic.residueAt (fun z => (x : ℂ) ^ (-z) *
         ((π / Complex.sin (π * z)) * (besselSqMellinKernel ν z * (π / Complex.sin (π * z))))) n =
       -(besselSqMellinA ν n * Real.log x + besselSqMellinB ν n) * ((x : ℂ) ^ n)⁻¹ := by
-  sorry
+  set R : ℝ := ν + 1 / 2 with hR
+  have hR0 : 0 < R := by rw [hR]; linarith
+  have hxne : (x : ℂ) ≠ 0 := ofReal_ne_zero.2 hx.ne'
+  have hA : ∀ z ∈ ball ((n : ℤ) : ℂ) R, DifferentiableAt ℂ (besselSqMellinKernel ν) z := by
+    intro z hz
+    apply besselSqMellinKernel_differentiableAt
+    rw [mem_ball, dist_eq_norm] at hz
+    have hre : |(z - ((n : ℤ) : ℂ)).re| < R := (abs_re_le_norm _).trans_lt hz
+    have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast hn
+    simp only [add_re, ofReal_re, div_ofNat_re]
+    simp only [sub_re, Int.cast_natCast, natCast_re] at hre
+    rw [abs_lt] at hre
+    linarith
+  have hu : DifferentiableOn ℂ (fun z => (x : ℂ) ^ (-z) * besselSqMellinKernel ν z)
+      (ball ((n : ℤ) : ℂ) R) := fun z hz =>
+    ((differentiableAt_id.neg.const_cpow (Or.inl hxne)).mul (hA z hz)).differentiableWithinAt
+  have h := residueAt_mul_pi_div_sin_sq_add (f := fun z => (x : ℂ) ^ (-z) *
+        ((π / Complex.sin (π * z)) * (besselSqMellinKernel ν z * (π / Complex.sin (π * z)))))
+    (v := fun _ => 0) hR0 hu (differentiableOn_const 0) fun z _ _ => by
+      simp only [zero_div, add_zero]; ring
+  simp only [Int.cast_natCast, add_zero] at h
+  rw [h]
+  have hAn := hA _ (mem_ball_self hR0)
+  simp only [Int.cast_natCast] at hAn
+  have hd : HasDerivAt (fun z => (x : ℂ) ^ (-z) * besselSqMellinKernel ν z)
+      ((x : ℂ) ^ (-(n : ℂ)) * Complex.log x * (-1) * besselSqMellinKernel ν n +
+        (x : ℂ) ^ (-(n : ℂ)) * deriv (besselSqMellinKernel ν) n) n :=
+    ((hasDerivAt_neg' (n : ℂ)).const_cpow (Or.inl hxne)).mul hAn.hasDerivAt
+  rw [hd.deriv, besselSqMellinA, besselSqMellinB, ← ofReal_log hx.le, cpow_neg, cpow_natCast]
+  ring
 
 /-- Differentiating the Mellin kernel away from Gamma poles gives its value times
 the sum of the logarithmic derivatives of its five factors. -/
@@ -252,6 +303,27 @@ theorem norm_Gamma_vertical_atBot (x : ℝ) :
       apply Complex.ext <;> simp, Complex.Gamma_conj, Complex.norm_conj]
   · simp [abs_neg]
 
+/-- The Stirling ratio on a vertical line as one exponential (Binet's formula), `y > 0`. -/
+private lemma norm_Gamma_vertical_ratio_eq (x : ℝ) {y : ℝ} (hy : 0 < y) :
+    ‖Complex.Gamma (x + I * y)‖ /
+        (Real.sqrt (2 * π) * |y| ^ (x - 1 / 2) * Real.exp (-π * |y| / 2)) =
+      Real.exp ((x - 1 / 2) * Real.log (‖(x : ℂ) + I * y‖ / y) +
+        (π * y / 2 - x - y * arg ((x : ℂ) + I * y)) +
+        (DLMF.Gamma.binetMu ((x : ℂ) + I * y)).re) := by
+  set z : ℂ := (x : ℂ) + I * y with hz
+  have hre : z.re = x := by simp [hz]
+  have him : z.im = y := by simp [hz]
+  have hzs : z ∈ slitPlane := mem_slitPlane_iff.2 (Or.inr (by rw [him]; exact hy.ne'))
+  have hr : 0 < ‖z‖ := norm_pos_iff.2 (slitPlane_ne_zero hzs)
+  rw [DLMF.Gamma.norm_Gamma_eq_binet hzs, hre, him, abs_of_pos hy,
+    Real.rpow_def_of_pos hr, Real.rpow_def_of_pos hy, Real.log_div hr.ne' hy.ne']
+  have hs : 0 < Real.sqrt (2 * π) := by positivity
+  rw [div_eq_iff (by positivity)]
+  simp only [mul_assoc, ← Real.exp_add]
+  rw [mul_left_comm, ← Real.exp_add]
+  congr 1
+  ring_nf
+
 /-- DLMF 2.5.14 (uniform form): `|Γ(x + iy)| = √(2π) e^{-π|y|/2} |y|^{x-1/2}(1 + o(1))` as
 `y → ±∞`, uniformly for `x` in a bounded interval `[a, b]`. -/
 @[dlmf 2.5.E14]
@@ -259,7 +331,128 @@ theorem norm_Gamma_vertical_uniform (a b : ℝ) {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ y : ℝ in cocompact ℝ, ∀ x ∈ Icc a b,
       |‖Complex.Gamma (x + I * y)‖ /
         (Real.sqrt (2 * π) * |y| ^ (x - 1 / 2) * Real.exp (-π * |y| / 2)) - 1| < ε := by
-  sorry
+  set M : ℝ := |a| + |b| + 1 with hM
+  have hM0 : 0 < M := by positivity
+  have hxM : ∀ x ∈ Icc a b, |x| ≤ M := fun x hx => by
+    rw [abs_le]; constructor <;> cases abs_cases a <;> cases abs_cases b <;>
+      linarith [hx.1, hx.2, abs_nonneg a, abs_nonneg b]
+  set δ0 : ℝ := min 1 (ε / 2) with hδ0
+  have hδ0p : 0 < δ0 := lt_min one_pos (by positivity)
+  -- the `arcsin` estimate
+  have hd : HasDerivAt Real.arcsin 1 0 := by
+    simpa using Real.hasDerivAt_arcsin (x := 0) (by norm_num) (by norm_num)
+  have ho := hasDerivAt_iff_isLittleO_nhds_zero.1 hd
+  simp only [zero_add, Real.arcsin_zero, sub_zero, smul_eq_mul, mul_one] at ho
+  set δ' : ℝ := δ0 / (4 * M) with hδ'
+  have hδ'p : 0 < δ' := by positivity
+  obtain ⟨η, hη, hηs⟩ := Metric.eventually_nhds_iff.1 (ho.def hδ'p)
+  -- the bound for `y → +∞`
+  have hpos : ∀ᶠ y : ℝ in atTop, ∀ x ∈ Icc a b,
+      |‖Complex.Gamma (x + I * y)‖ /
+        (Real.sqrt (2 * π) * |y| ^ (x - 1 / 2) * Real.exp (-π * |y| / 2)) - 1| < ε := by
+    have t1 : Tendsto (fun y : ℝ => (M + 1) * M ^ 2 / y ^ 2 + M ^ 3 / y ^ 2) atTop (𝓝 0) := by
+      have h2 : Tendsto (fun y : ℝ => y ^ 2) atTop atTop :=
+        tendsto_pow_atTop (by norm_num)
+      simpa using (tendsto_const_nhds.div_atTop h2).add (tendsto_const_nhds.div_atTop h2)
+    have t2 : Tendsto (fun y : ℝ => 1 / (6 * (y - M))) atTop (𝓝 0) :=
+      tendsto_const_nhds.div_atTop (Tendsto.const_mul_atTop (by norm_num)
+        (tendsto_atTop_add_const_right _ _ tendsto_id))
+    have t3 : Tendsto (fun y : ℝ => M / y) atTop (𝓝 0) := tendsto_const_nhds.div_atTop tendsto_id
+    filter_upwards [eventually_gt_atTop (M + 1), t1.eventually (gt_mem_nhds (by positivity :
+      (0 : ℝ) < δ0 / 2)), t2.eventually (gt_mem_nhds (by positivity : (0 : ℝ) < δ0 / 4)),
+      t3.eventually (gt_mem_nhds hη)] with y hyM h1 h2 h3 x hx
+    have hy : 0 < y := by linarith
+    have hx' := hxM x hx
+    set z : ℂ := (x : ℂ) + I * y with hz
+    set r : ℝ := ‖z‖ with hr
+    have hre : z.re = x := by simp [hz]
+    have him : z.im = y := by simp [hz]
+    have hr2 : r ^ 2 = x ^ 2 + y ^ 2 := by
+      rw [hr, ← Complex.normSq_eq_norm_sq, Complex.normSq_apply, hre, him]; ring
+    have hry : y ≤ r := by
+      have := abs_im_le_norm z; rw [him, abs_of_pos hy] at this; exact this
+    have hrp : 0 < r := hy.trans_le hry
+    have hrmy : r - y = x ^ 2 / (r + y) := by
+      field_simp; nlinarith [hr2]
+    have hx2 : x ^ 2 ≤ M ^ 2 := by nlinarith [abs_nonneg x, sq_abs x]
+    have hrmy' : r - y ≤ M ^ 2 / y := by
+      rw [hrmy]
+      calc x ^ 2 / (r + y) ≤ M ^ 2 / (r + y) := by gcongr
+        _ ≤ M ^ 2 / y := by gcongr; linarith
+    rw [norm_Gamma_vertical_ratio_eq x hy]
+    set T := (x - 1 / 2) * Real.log (r / y) + (π * y / 2 - x - y * arg z) +
+      (DLMF.Gamma.binetMu z).re with hT
+    -- the three pieces
+    have hlog0 : 0 ≤ Real.log (r / y) := Real.log_nonneg ((one_le_div hy).2 hry)
+    have hlog1 : Real.log (r / y) ≤ M ^ 2 / y ^ 2 := by
+      refine (Real.log_le_sub_one_of_pos (by positivity)).trans ?_
+      rw [div_sub_one hy.ne', show M ^ 2 / y ^ 2 = (M ^ 2 / y) / y by ring]
+      gcongr
+    have hA : |(x - 1 / 2) * Real.log (r / y)| ≤ (M + 1) * M ^ 2 / y ^ 2 := by
+      rw [abs_mul, abs_of_nonneg hlog0, mul_div_assoc]
+      have : |x - 1 / 2| ≤ M + 1 := by
+        refine (abs_sub _ _).trans ?_; norm_num; linarith
+      exact mul_le_mul this hlog1 hlog0 (by positivity)
+    set u : ℝ := x / r with hu
+    have hu1 : |u| ≤ M / y := by
+      rw [hu, abs_div, abs_of_pos hrp]
+      calc |x| / r ≤ M / r := by gcongr
+        _ ≤ M / y := by gcongr
+    have heq : π * y / 2 - x - y * arg z = y * (Real.arcsin u - u) + x * (y / r - 1) := by
+      rw [arg_of_im_pos (by rw [him]; exact hy), Real.arccos_eq_pi_div_two_sub_arcsin, hre]
+      simp only [hu]
+      field_simp
+      ring
+    have hB1 : |y * (Real.arcsin u - u)| ≤ δ0 / 4 := by
+      have hs := hηs (show dist u 0 < η by rw [dist_zero_right]; exact lt_of_le_of_lt hu1 h3)
+      simp only [Real.norm_eq_abs] at hs
+      rw [abs_mul, abs_of_pos hy]
+      calc y * |Real.arcsin u - u| ≤ y * (δ' * |u|) := by gcongr
+        _ = δ' * (y * |u|) := by ring
+        _ ≤ δ' * M := by
+          gcongr
+          rw [hu, abs_div, abs_of_pos hrp, mul_div_assoc']
+          rw [div_le_iff₀ hrp]; nlinarith [abs_nonneg x]
+        _ = δ0 / 4 := by rw [hδ']; field_simp
+    have hB2 : |x * (y / r - 1)| ≤ M ^ 3 / y ^ 2 := by
+      have hyr : |y / r - 1| = (r - y) / r := by
+        rw [abs_sub_comm, show 1 - y / r = (r - y) / r by field_simp,
+          abs_of_nonneg (div_nonneg (by linarith) hrp.le)]
+      rw [abs_mul, hyr]
+      calc |x| * ((r - y) / r) ≤ M * ((M ^ 2 / y) / y) := by
+            gcongr
+          _ = M ^ 3 / y ^ 2 := by ring
+    have hC : |(DLMF.Gamma.binetMu z).re| ≤ 1 / (6 * (y - M)) := by
+      have hzs : z ∈ slitPlane := mem_slitPlane_iff.2 (Or.inr (by rw [him]; exact hy.ne'))
+      refine (abs_re_le_norm _).trans ((DLMF.Gamma.norm_binetMu_le hzs).trans ?_)
+      rw [hre]
+      have : y - M ≤ r + x := by linarith [neg_abs_le x]
+      gcongr
+      linarith
+    have hTb : |T| < δ0 := by
+      rw [hT, heq]
+      calc |(x - 1 / 2) * Real.log (r / y) + (y * (Real.arcsin u - u) + x * (y / r - 1)) +
+            (DLMF.Gamma.binetMu z).re|
+          ≤ |(x - 1 / 2) * Real.log (r / y)| + (|y * (Real.arcsin u - u)| +
+            |x * (y / r - 1)|) + |(DLMF.Gamma.binetMu z).re| := by
+            refine (abs_add_le _ _).trans ?_
+            gcongr
+            refine (abs_add_le _ _).trans ?_
+            gcongr
+            exact abs_add_le _ _
+        _ < δ0 := by linarith
+    have hT1 : |T| ≤ 1 := hTb.le.trans (min_le_left _ _)
+    calc |Real.exp T - 1| ≤ 2 * |T| := Real.abs_exp_sub_one_le hT1
+      _ < 2 * δ0 := by linarith
+      _ ≤ ε := by have := min_le_right 1 (ε / 2); linarith
+  rw [cocompact_eq_atBot_atTop, eventually_sup]
+  refine ⟨?_, hpos⟩
+  have hneg := tendsto_neg_atBot_atTop.eventually hpos
+  filter_upwards [hneg] with y hy x hx
+  have h := hy x hx
+  rw [show (x : ℂ) + I * ((-y : ℝ) : ℂ) = (starRingEnd ℂ) ((x : ℂ) + I * y) by
+    apply Complex.ext <;> simp, Complex.Gamma_conj, Complex.norm_conj, abs_neg] at h
+  exact h
 
 /-- DLMF 2.5.8 and 2.5.15 (corrected sign; see the module docstring): for `ν > -½`,
 `I(x) = ∫₀^∞ J_ν²(xt)/(1 + t) dt` satisfies, for `n = 0, 1, 2, …` and `0 < ε < 1`,

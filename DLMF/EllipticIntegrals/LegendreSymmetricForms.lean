@@ -65,7 +65,8 @@ private lemma ofReal_mul_cpow_of_pos {r : ℝ} (hr : 0 < r) (w s : ℂ) :
 `∫₀^∞ G(t) dt = ∫₀^φ (2 cos θ / sin³ θ) G(csc² θ - csc² φ) dθ` (no integrability needed). -/
 lemma integral_Ioi_eq_integral_Ioo_csc_sq_subst {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (G : ℝ → ℂ) :
     ∫ t in Ioi (0 : ℝ), G t = ∫ θ in Ioo (0 : ℝ) φ,
-      ((2 * Real.cos θ / Real.sin θ ^ 3 : ℝ) : ℂ) * G (1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2) := by
+      ((2 * Real.cos θ / Real.sin θ ^ 3 : ℝ) : ℂ) *
+          G (1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2) := by
   set f : ℝ → ℝ := fun θ => 1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2 with hf
   have hsinpos : ∀ θ ∈ Ioo (0 : ℝ) φ, 0 < Real.sin θ := fun θ hθ =>
     Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
@@ -182,7 +183,8 @@ theorem symEllIntRF_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π 
     symEllIntRF (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
         ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) =
       ∫ θ in (0 : ℝ)..φ, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  rw [symEllIntRF, integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1, intervalIntegral.integral_of_le h0.le,
+  rw [symEllIntRF, integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1,
+      intervalIntegral.integral_of_le h0.le,
     integral_Ioc_eq_integral_Ioo, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun θ hθ => ?_
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
@@ -330,7 +332,8 @@ theorem incEllIntEk_eq_incEllIntFk_sub {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ �
 
 /-- For real `0 ≤ φ ≤ π/2` and `1 - α² sin² φ ∈ ℂ \ (-∞, 0]`, the principal value in `Π` is not
 needed: `Π(φ, α², k) = ∫₀^φ (1 - α² sin²θ)⁻¹ (1 - k² sin²θ)^{-1/2} dθ`. -/
-private lemma incEllIntPik_eq_integral_of_mem_slitPlane {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {α2 : ℂ}
+private lemma incEllIntPik_eq_integral_of_mem_slitPlane {φ : ℝ} (h0 : 0 ≤ φ)
+    (h1 : φ ≤ π / 2) {α2 : ℂ}
     (hα : 1 - α2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) (k : ℂ) :
     incEllIntPik φ α2 k = ∫ θ in (0 : ℝ)..φ, ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
@@ -349,7 +352,8 @@ private lemma incEllIntPik_eq_integral_of_mem_slitPlane {φ : ℝ} (h0 : 0 ≤ �
     simp only [hg] at this
     simpa [← Complex.ofReal_sin, ← Complex.ofReal_mul] using this
 
-/-- The function `(fun θ : ℝ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹)` is continuous on `(uIcc 0 φ)`. -/
+/-- The function `(fun θ : ℝ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹)` is continuous on `(uIcc 0 φ)`.
+-/
 private lemma continuousOn_inv_one_sub_mul_sin_sq {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {α2 : ℂ}
     (hα : 1 - α2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
     ContinuousOn (fun θ : ℝ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹) (uIcc 0 φ) := by
@@ -376,7 +380,8 @@ theorem incEllIntPik_sub_incEllIntFk_eq_integral {φ : ℝ} (h0 : 0 ≤ φ) (h1 
     field_simp
     ring
   · refine ContinuousOn.intervalIntegrable ?_
-    exact (continuousOn_inv_one_sub_mul_sin_sq h0 h1 hα).mul (continuousOn_one_sub_mul_sin_sq_cpow h0 h1 hk _)
+    exact (continuousOn_inv_one_sub_mul_sin_sq h0 h1 hα).mul
+        (continuousOn_one_sub_mul_sin_sq_cpow h0 h1 hk _)
   · exact (continuousOn_one_sub_mul_sin_sq_cpow h0 h1 hk _).intervalIntegrable
 
 /-- `c = csc² φ ≥ 1` for `0 < φ ≤ π/2`. -/
@@ -449,7 +454,8 @@ theorem incEllIntDk_eq_one_third_symEllIntRD {φ : ℝ} (h0 : 0 < φ) (h1 : φ �
   ring
 
 /-- DLMF 19.25.9 with explicit `c = csc² φ`. -/
-theorem incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) {k : ℂ}
+theorem incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD {φ : ℝ} (h0 : 0 < φ)
+    (h1 : φ ≤ π / 2) {k : ℂ}
     (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
     incEllIntEk φ k = symEllIntRF (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
         (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2) ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) -
@@ -521,7 +527,8 @@ theorem incEllIntPik_eq_symEllIntR_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π
     Gamma_one, mul_one]
   rw [show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, Carlson.Gamma_three_halves,
     mul_div_assoc, div_self Gamma_one_half_ne_zero, mul_one]
-  rw [integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1.le, incEllIntPik_eq_integral_of_mem_slitPlane h0.le h1.le hα,
+  rw [integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1.le,
+      incEllIntPik_eq_integral_of_mem_slitPlane h0.le h1.le hα,
     intervalIntegral.integral_of_le h0.le, integral_Ioc_eq_integral_Ioo, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun θ hθ => ?_
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
@@ -563,14 +570,16 @@ theorem compEllIntPik_eq_pi_div_two_mul_symEllIntR {k α2 : ℂ} (hk : 1 - k ^ 2
   have hα' : 1 - α2 * (Real.sin (π / 2) : ℂ) ^ 2 ∈ slitPlane := by
     simpa [Real.sin_pi_div_two] using hα
   rw [symEllIntR_eq_integral (a' := 1 / 2) (by norm_num) (by norm_num)
-    (by simp [Fin.sum_univ_three]; try norm_num) (vec3_mem_carlsonRSlitDomain hk one_mem_slitPlane hα),
+    (by simp [Fin.sum_univ_three]; try norm_num)
+        (vec3_mem_carlsonRSlitDomain hk one_mem_slitPlane hα),
     inv_betaIntegral (by norm_num) (by norm_num)]
   simp only [Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
     Matrix.head_cons, Matrix.tail_cons]
   rw [show (1 / 2 : ℂ) + 1 / 2 = 1 by norm_num, Gamma_one, Complex.Gamma_one_half_eq,
     cpow_half_mul_cpow_half]
   rw [compEllIntPik, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-    incEllIntPik_eq_integral_of_mem_slitPlane hp.le le_rfl hα', integral_Ioi_eq_integral_Ioo_csc_sq_subst hp le_rfl,
+    incEllIntPik_eq_integral_of_mem_slitPlane hp.le le_rfl hα',
+        integral_Ioi_eq_integral_Ioo_csc_sq_subst hp le_rfl,
     intervalIntegral.integral_of_le hp.le, integral_Ioc_eq_integral_Ioo, ← integral_const_mul,
     ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun θ hθ => ?_
@@ -626,7 +635,8 @@ private lemma symEllIntS_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) (s : ℝ) :
   rw [e, e, e, ofReal_mul_cpow_of_pos hl, ofReal_mul_cpow_of_pos hl, ofReal_mul_cpow_of_pos hl]
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `((l : ℂ) ^ (1 / 2 : ℂ)) ^ 2 = l`. -/
+/-- Identity under the stated parameter and domain assumptions: `((l : ℂ) ^ (1 / 2 : ℂ)) ^ 2 = l`.
+-/
 theorem ofReal_cpow_half_sq {l : ℝ} : ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 2 = l := by
   rw [sq, cpow_half_mul_cpow_half]
 
@@ -752,7 +762,8 @@ theorem ofReal_sqrt_eq_cpow_half {r : ℝ} (hr : 0 ≤ r) : ((√r : ℝ) : ℂ)
 
 /-- The data of §19.25(iii) as complex scalings: `x = (z - x)(c - 1)`, `y = (z - x)(c - k²)`,
 `z = (z - x) c`, with `c = csc² φ`, plus `sin² φ = (z - x)/z` and `1 - k² sin² φ = y/z`. -/
-theorem real_symmetric_legendre_parametrization {x y z : ℝ} (hx : 0 ≤ x) (hyz : y ≤ z) (hxz : x < z) :
+theorem real_symmetric_legendre_parametrization {x y z : ℝ} (hx : 0 ≤ x) (hyz : y ≤ z)
+    (hxz : x < z) :
     let φ := Real.arccos √(x / z)
     let k := √((z - y) / (z - x))
     let c : ℂ := ((1 / Real.sin φ ^ 2 : ℝ) : ℂ)
@@ -851,7 +862,8 @@ theorem bulirschEl1_eq_symEllIntRF_of_pos {x : ℝ} (hx : 0 < x) (kc : ℂ) :
 
 /-- Formula under the stated hypotheses: `1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin φ : ℂ)
 ^ 2 ∈ slitPlane`. -/
-private lemma one_sub_bulirsch_mul_sin_sq_mem_slitPlane {φ : ℝ} {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) :
+private lemma one_sub_bulirsch_mul_sin_sq_mem_slitPlane {φ : ℝ} {kc : ℂ}
+    (hkc : kc ^ 2 ∈ slitPlane) :
     1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
   rw [sq ((1 - kc ^ 2) ^ (1 / 2 : ℂ)), cpow_half_mul_cpow_half]
   have h := starConvex_one_slitPlane.add_smul_mem (y := kc ^ 2 - 1) (by simpa using hkc)
@@ -905,7 +917,8 @@ private lemma bulirschEl1_eq_integral {x : ℝ} (kc : ℂ) :
 /-- Identity under the stated parameter and domain assumptions: `bulirschEl2 x kc a b = a *
 bulirschEl1 x kc + (1 / 3) * ((b - a : ℝ) : ℂ) * symEllIntRD ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^
 2 : ℝ) : ℂ) + kc ^ 2) (((1 / x ^ 2 : ℝ) : ℂ) + 1)`. -/
-theorem bulirschEl2_eq_symEllIntRD {x : ℝ} (hx : 0 < x) {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) (a b : ℝ) :
+theorem bulirschEl2_eq_symEllIntRD {x : ℝ} (hx : 0 < x) {kc : ℂ}
+    (hkc : kc ^ 2 ∈ slitPlane) (a b : ℝ) :
     bulirschEl2 x kc a b = a * bulirschEl1 x kc + (1 / 3) * ((b - a : ℝ) : ℂ) *
       symEllIntRD ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2)
         (((1 / x ^ 2 : ℝ) : ℂ) + 1) := by

@@ -93,19 +93,25 @@ lemma trig_sqrt_inverse {x:ℝ} (hx:1<x) :
 
 /-- Identity under the stated parameter and domain assumptions: `‖Complex.sin z‖^2=(Real.sin
 z.re)^2+(Real.sinh z.im)^2`. -/
-private lemma trig_norm_sq_sin (z : ℂ) : ‖Complex.sin z‖^2=(Real.sin z.re)^2+(Real.sinh z.im)^2 := by
+private lemma trig_norm_sq_sin (z : ℂ) : ‖Complex.sin
+    z‖^2=(Real.sin z.re)^2+(Real.sinh z.im)^2 := by
   rw [Complex.sq_norm]
   conv_lhs => rw [← Complex.re_add_im z,Complex.sin_add_mul_I]
-  simp [Complex.normSq,← Complex.ofReal_sin,← Complex.ofReal_cos,← Complex.ofReal_sinh,← Complex.ofReal_cosh]
-  linear_combination (Real.sinh z.im)^2*(Real.sin_sq_add_cos_sq z.re) + (Real.sin z.re)^2*(Real.cosh_sq_sub_sinh_sq z.im)
+  simp [Complex.normSq, ← Complex.ofReal_sin, ← Complex.ofReal_cos, ← Complex.ofReal_sinh,
+      ← Complex.ofReal_cosh]
+  linear_combination (Real.sinh z.im)^2*(Real.sin_sq_add_cos_sq z.re) +
+      (Real.sin z.re)^2*(Real.cosh_sq_sub_sinh_sq z.im)
 
 /-- Identity under the stated parameter and domain assumptions: `‖Complex.cos z‖^2=(Real.cos
 z.re)^2+(Real.sinh z.im)^2`. -/
-private lemma trig_norm_sq_cos (z : ℂ) : ‖Complex.cos z‖^2=(Real.cos z.re)^2+(Real.sinh z.im)^2 := by
+private lemma trig_norm_sq_cos (z : ℂ) : ‖Complex.cos
+    z‖^2=(Real.cos z.re)^2+(Real.sinh z.im)^2 := by
   rw [Complex.sq_norm]
   conv_lhs => rw [← Complex.re_add_im z,Complex.cos_add_mul_I]
-  simp [Complex.normSq,← Complex.ofReal_sin,← Complex.ofReal_cos,← Complex.ofReal_sinh,← Complex.ofReal_cosh]
-  linear_combination (Real.sinh z.im)^2*(Real.sin_sq_add_cos_sq z.re) + (Real.cos z.re)^2*(Real.cosh_sq_sub_sinh_sq z.im)
+  simp [Complex.normSq, ← Complex.ofReal_sin, ← Complex.ofReal_cos, ← Complex.ofReal_sinh,
+      ← Complex.ofReal_cosh]
+  linear_combination (Real.sinh z.im)^2*(Real.sin_sq_add_cos_sq z.re) +
+      (Real.cos z.re)^2*(Real.cosh_sq_sub_sinh_sq z.im)
 
 /-- Real sign, including zero, used in the DLMF branch and table formulas. -/
 def trigRealSign (x : ℝ) : ℝ := if 0<x then 1 else if x<0 then -1 else 0
@@ -117,7 +123,8 @@ theorem cos_le_sinc_le_one {x : ℝ} (hx : 0≤x) (hπ : x≤π) :
   refine ⟨?_,Real.sinc_le_one x⟩
   by_cases h : x<π/2
   · exact Real.cos_le_sinc (by rwa [abs_of_nonneg hx])
-  · have hcos : Real.cos x≤0 := Real.cos_nonpos_of_pi_div_two_le_of_le (le_of_not_gt h) (by linarith [Real.pi_pos])
+  · have hcos : Real.cos x≤0 :=
+        Real.cos_nonpos_of_pi_div_two_le_of_le (le_of_not_gt h) (by linarith [Real.pi_pos])
     have hsinc : 0≤Real.sinc x := by
       by_cases hx0 : x=0
       · simp [hx0]
@@ -329,7 +336,8 @@ theorem hasSum_sec_euler {z : ℂ} (hz : ‖z‖<π/2) :
   have hf : DifferentiableOn ℂ sec (Metric.ball 0 (π/2)) := by
     intro w hw
     have hw' : ‖w‖ < π/2 := by simpa using hw
-    exact ((Complex.differentiableAt_cos).inv (cos_ne_zero_of_norm_lt_pi_div_two hw')).differentiableWithinAt
+    exact ((Complex.differentiableAt_cos).inv
+        (cos_ne_zero_of_norm_lt_pi_div_two hw')).differentiableWithinAt
   have hsmall : ∀ w : ℂ, ‖w‖ < 1/2 → HasSum (fun m => c m * w^m) (sec w) := by
     intro w hw
     rw [hconv]
@@ -339,7 +347,8 @@ theorem hasSum_sec_euler {z : ℂ} (hz : ‖z‖<π/2) :
   exact Complex.hasSum_ite_even_iff.mp h
 
 /-- Solutions of `f' = c f` on a preconnected open set are multiples of `exp (c z)`. -/
-private lemma exists_eq_mul_exp_of_hasDerivAt_eq_mul {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U) {f : ℂ → ℂ} {c : ℂ}
+private lemma exists_eq_mul_exp_of_hasDerivAt_eq_mul {U : Set ℂ} (hU : IsOpen U)
+    (hc : IsPreconnected U) {f : ℂ → ℂ} {c : ℂ}
     (hf : ∀ z∈U, HasDerivAt f (c*f z) z) : ∃ C : ℂ, ∀ z∈U, f z = C*Complex.exp (c*z) := by
   have hk : ∀ z∈U, HasDerivAt (fun z => f z*Complex.exp (-(c*z))) 0 z := by
     intro z hz
@@ -356,7 +365,8 @@ private lemma exists_eq_mul_exp_of_hasDerivAt_eq_mul {U : Set ℂ} (hU : IsOpen 
   rw [← this, mul_assoc, ← Complex.exp_add]; simp
 
 /-- On a preconnected open set, a product of analytic functions vanishes only if a factor does. -/
-private lemma eqOn_zero_or_eqOn_zero_of_mul_eq_zero {U : Set ℂ} (hc : IsPreconnected U) {z₀ : ℂ} (hz₀ : z₀∈U)
+private lemma eqOn_zero_or_eqOn_zero_of_mul_eq_zero {U : Set ℂ} (hc : IsPreconnected U)
+    {z₀ : ℂ} (hz₀ : z₀∈U)
     {f g : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f U) (hg : AnalyticOnNhd ℂ g U) (hU : IsOpen U)
     (h : ∀ z∈U, f z*g z=0) : (∀ z∈U, f z=0) ∨ (∀ z∈U, g z=0) := by
   have hev : (f*g) =ᶠ[𝓝 z₀] 0 := by
@@ -400,18 +410,21 @@ private lemma eqOn_zero_of_deriv_eq_mul {U : Set ℂ} (hU : IsOpen U) (hc : IsPr
 /-- DLMF 4.20.E12: trig linear ode general. -/
 @[dlmf 4.20.E12]
 theorem trig_linear_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
-    {a : ℂ} (ha : a≠0) {w : ℂ→ℂ} (hw : AnalyticOnNhd ℂ w U) (h : ∀ z∈U,deriv (deriv w) z+a^2*w z=0) :
+    {a : ℂ} (ha : a≠0) {w : ℂ→ℂ} (hw : AnalyticOnNhd ℂ w U)
+        (h : ∀ z∈U, deriv (deriv w) z+a^2*w z=0) :
     ∃ A B : ℂ,∀ z∈U,w z=A*Complex.cos (a*z)+B*Complex.sin (a*z) := by
   have hw' := hw.deriv
   have d0 : ∀ z∈U, HasDerivAt w (deriv w z) z := fun z hz => (hw z hz).differentiableAt.hasDerivAt
   have d1 : ∀ z∈U, HasDerivAt (deriv w) (-(a^2*w z)) z := fun z hz => by
     have := (hw' z hz).differentiableAt.hasDerivAt
     rwa [show deriv (deriv w) z = -(a^2*w z) by linear_combination h z hz] at this
-  obtain ⟨C₁, hC₁⟩ := exists_eq_mul_exp_of_hasDerivAt_eq_mul hU hc (f := fun z => deriv w z + I*a*w z) (c := I*a)
+  obtain ⟨C₁, hC₁⟩ := exists_eq_mul_exp_of_hasDerivAt_eq_mul hU hc
+      (f := fun z => deriv w z + I*a*w z) (c := I*a)
     (fun z hz => by
       convert (d1 z hz).add ((d0 z hz).const_mul (I*a)) using 1
       linear_combination (a^2)*(w z)*Complex.I_sq)
-  obtain ⟨C₂, hC₂⟩ := exists_eq_mul_exp_of_hasDerivAt_eq_mul hU hc (f := fun z => deriv w z - I*a*w z) (c := -(I*a))
+  obtain ⟨C₂, hC₂⟩ := exists_eq_mul_exp_of_hasDerivAt_eq_mul hU hc
+      (f := fun z => deriv w z - I*a*w z) (c := -(I*a))
     (fun z hz => by
       convert (d1 z hz).sub ((d0 z hz).const_mul (I*a)) using 1
       linear_combination (a^2)*(w z)*Complex.I_sq)
@@ -453,8 +466,10 @@ private lemma exists_cos_eq_sin_eq_of_sq_add_sq_eq_one {p q : ℂ} (h : p^2+q^2=
 
 /-- The energy equation has the displayed sine family and two singular constant solutions. -/
 @[dlmf 4.20.E13]
-theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U) (hne : U.Nonempty)
-    {a : ℂ} (ha : a≠0) {w : ℂ→ℂ} (hw : AnalyticOnNhd ℂ w U) (h : ∀ z∈U,(deriv w z)^2+a^2*(w z)^2=1) :
+theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
+    (hne : U.Nonempty)
+    {a : ℂ} (ha : a≠0) {w : ℂ→ℂ} (hw : AnalyticOnNhd ℂ w U)
+        (h : ∀ z∈U, (deriv w z)^2+a^2*(w z)^2=1) :
     (∃ c : ℂ,∀ z∈U,w z=Complex.sin (a*z+c)/a) ∨
       (∀ z∈U,w z=a⁻¹) ∨ (∀ z∈U,w z= -a⁻¹) := by
   obtain ⟨z₀, hz₀⟩ := hne
@@ -471,7 +486,8 @@ theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnect
     have := hE.unique hE0
     simp only [Nat.cast_ofNat] at this
     linear_combination this/2
-  rcases eqOn_zero_or_eqOn_zero_of_mul_eq_zero hc hz₀ hw' (hw''.add (analyticOnNhd_const.mul hw)) hU hprod
+  rcases eqOn_zero_or_eqOn_zero_of_mul_eq_zero hc hz₀ hw'
+      (hw''.add (analyticOnNhd_const.mul hw)) hU hprod
     with h0 | h0
   · right
     obtain ⟨k, hk⟩ := hU.exists_is_const_of_deriv_eq_zero hc hw.differentiableOn
@@ -507,7 +523,8 @@ theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnect
 
 /-- The Riccati equation has the displayed tangent family and two omitted constant solutions. -/
 @[dlmf 4.20.E14]
-theorem trig_riccati_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U) (hne : U.Nonempty)
+theorem trig_riccati_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
+    (hne : U.Nonempty)
     {a : ℂ} (ha : a≠0) {w : ℂ→ℂ} (hw : AnalyticOnNhd ℂ w U) (h : ∀ z∈U,deriv w z-a^2*(w z)^2=1) :
     (∃ c : ℂ,∀ z∈U,Complex.cos (a*z+c)≠0 ∧ w z=Complex.tan (a*z+c)/a) ∨
       (∀ z∈U,w z=I/a) ∨ (∀ z∈U,w z= -I/a) := by
@@ -518,8 +535,10 @@ theorem trig_riccati_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnec
     have := (hw z hz).differentiableAt.hasDerivAt
     convert this using 1
     linear_combination (-(h z hz)) - a^2*(w z)^2*Complex.I_sq
-  have hg1 : AnalyticOnNhd ℂ (fun z => 1-I*a*w z) U := analyticOnNhd_const.sub (analyticOnNhd_const.mul hw)
-  have hg2 : AnalyticOnNhd ℂ (fun z => 1+I*a*w z) U := analyticOnNhd_const.add (analyticOnNhd_const.mul hw)
+  have hg1 : AnalyticOnNhd ℂ (fun z => 1-I*a*w z) U :=
+      analyticOnNhd_const.sub (analyticOnNhd_const.mul hw)
+  have hg2 : AnalyticOnNhd ℂ (fun z => 1+I*a*w z) U :=
+      analyticOnNhd_const.add (analyticOnNhd_const.mul hw)
   have dg1 : ∀ z∈U, HasDerivAt (fun z => 1-I*a*w z) ((-I*a*(1+I*a*w z))*(1-I*a*w z)) z := by
     intro z hz
     convert ((hd z hz).const_mul (I*a)).const_sub 1 using 1; ring
@@ -578,7 +597,8 @@ theorem trig_riccati_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnec
   have hu : (Complex.cos θ + Complex.sin θ*I)*(Complex.cos θ - Complex.sin θ*I) = 1 := by
     linear_combination hsc - (Complex.sin θ)^2*Complex.I_sq
   have hu0 : Complex.cos θ + Complex.sin θ*I ≠ 0 := left_ne_zero_of_mul_eq_one hu
-  have main : (2*I*(Complex.cos θ + Complex.sin θ*I))*(a*w z*Complex.cos θ - Complex.sin θ) = 0 := by
+  have main : (2*I*(Complex.cos θ + Complex.sin θ*I))*(a*w z*Complex.cos θ -
+      Complex.sin θ) = 0 := by
     have hP1 : 1 + (Complex.cos θ + Complex.sin θ*I)^2 =
         2*Complex.cos θ*(Complex.cos θ + Complex.sin θ*I) := by
       linear_combination -hsc + (Complex.sin θ)^2*Complex.I_sq
@@ -670,38 +690,44 @@ theorem cot_add_sub_values {u v : ℂ} (hu : Complex.sin u≠0) (hv : Complex.si
 
 /-- DLMF 4.21.E15: two sin mul sin. -/
 @[dlmf 4.21.E15]
-theorem two_sin_mul_sin (u v : ℂ) : 2*Complex.sin u*Complex.sin v=Complex.cos (u-v)-Complex.cos (u+v) := by
+theorem two_sin_mul_sin (u v : ℂ) : 2*Complex.sin u*Complex.sin v=Complex.cos
+    (u-v)-Complex.cos (u+v) := by
   rw [Complex.cos_sub,Complex.cos_add]
   ring
 
 /-- DLMF 4.21.E16: two cos mul cos. -/
 @[dlmf 4.21.E16]
-theorem two_cos_mul_cos (u v : ℂ) : 2*Complex.cos u*Complex.cos v=Complex.cos (u-v)+Complex.cos (u+v) := by
+theorem two_cos_mul_cos (u v : ℂ) : 2*Complex.cos u*Complex.cos v=Complex.cos
+    (u-v)+Complex.cos (u+v) := by
   rw [Complex.cos_sub,Complex.cos_add]
   ring
 
 /-- DLMF 4.21.E17: two sin mul cos. -/
 @[dlmf 4.21.E17]
-theorem two_sin_mul_cos (u v : ℂ) : 2*Complex.sin u*Complex.cos v=Complex.sin (u-v)+Complex.sin (u+v) := by
+theorem two_sin_mul_cos (u v : ℂ) : 2*Complex.sin u*Complex.cos v=Complex.sin
+    (u-v)+Complex.sin (u+v) := by
   rw [Complex.sin_sub,Complex.sin_add]
   ring
 
 /-- DLMF 4.21.E18: sin sq sub sin sq. -/
 @[dlmf 4.21.E18]
-theorem sin_sq_sub_sin_sq (u v : ℂ) : (Complex.sin u)^2-(Complex.sin v)^2=Complex.sin (u+v)*Complex.sin (u-v) := by
+theorem sin_sq_sub_sin_sq (u v : ℂ) : (Complex.sin u)^2-(Complex.sin v)^2=Complex.sin
+    (u+v)*Complex.sin (u-v) := by
   rw [Complex.sin_add,Complex.sin_sub]
   linear_combination -(Complex.sin u)^2*(Complex.sin_sq_add_cos_sq v)+
     (Complex.sin v)^2*(Complex.sin_sq_add_cos_sq u)
 
 /-- DLMF 4.21.E19: cos sq sub cos sq. -/
 @[dlmf 4.21.E19]
-theorem cos_sq_sub_cos_sq (u v : ℂ) : (Complex.cos u)^2-(Complex.cos v)^2= -Complex.sin (u+v)*Complex.sin (u-v) := by
+theorem cos_sq_sub_cos_sq (u v : ℂ) : (Complex.cos u)^2-(Complex.cos v)^2=
+    -Complex.sin (u+v)*Complex.sin (u-v) := by
   rw [Complex.cos_sq',Complex.cos_sq']
   linear_combination -(sin_sq_sub_sin_sq u v)
 
 /-- DLMF 4.21.E20: cos sq sub sin sq. -/
 @[dlmf 4.21.E20]
-theorem cos_sq_sub_sin_sq (u v : ℂ) : (Complex.cos u)^2-(Complex.sin v)^2=Complex.cos (u+v)*Complex.cos (u-v) := by
+theorem cos_sq_sub_sin_sq (u v : ℂ) : (Complex.cos u)^2-(Complex.sin v)^2=Complex.cos
+    (u+v)*Complex.cos (u-v) := by
   rw [Complex.cos_add,Complex.cos_sub]
   linear_combination -(Complex.cos u)^2*(Complex.sin_sq_add_cos_sq v)+
     (Complex.sin v)^2*(Complex.sin_sq_add_cos_sq u)
@@ -817,8 +843,10 @@ theorem de_moivre_complex {z : ℂ} (hlo : -π<z.re) (hhi : z.re≤π) (n : ℂ)
   · simpa using hlo
   · simpa using hhi
 
-/-- Factorization of `x^n-y^n` over the powers of a primitive root of unity, indexed by `range n`. -/
-private lemma pow_sub_pow_eq_prod_range_sub_primitiveRoot_mul {ζ : ℂ} {n : ℕ} (hn : 0<n) (h : IsPrimitiveRoot ζ n)
+/-- Factorization of `x^n-y^n` over the powers of a primitive root of unity, indexed by `range n`.
+-/
+private lemma pow_sub_pow_eq_prod_range_sub_primitiveRoot_mul {ζ : ℂ} {n : ℕ} (hn : 0<n)
+    (h : IsPrimitiveRoot ζ n)
     (x y : ℂ) : x^n-y^n = ∏ k∈Finset.range n, (x-ζ^k*y) := by
   classical
   rw [h.pow_sub_pow_eq_prod_sub_mul x y hn]
@@ -851,7 +879,8 @@ theorem sin_multiple_product (z : ℂ) {n : ℕ} (hn : 0<n) :
       rw [← Complex.exp_nat_mul, ← Complex.exp_add, ← Complex.exp_neg]; congr 1; field_simp; ring
     have h2 : ζ^k*u = E^2 := by
       simp only [ζ, u, E]
-      rw [← Complex.exp_nat_mul, ← Complex.exp_add, ← Complex.exp_nat_mul]; congr 1; field_simp; ring
+      rw [← Complex.exp_nat_mul, ← Complex.exp_add, ← Complex.exp_nat_mul]; congr 1;
+          field_simp; ring
     have h3 : Complex.exp (-((z+k*π/n)*I)) = E⁻¹ := Complex.exp_neg _
     rw [Complex.sin, neg_mul, h3, h1, h2, show Complex.exp ((z+k*π/n)*I) = E from rfl]
     field_simp
@@ -861,7 +890,8 @@ theorem sin_multiple_product (z : ℂ) {n : ℕ} (hn : 0<n) :
       | linear_combination (2 - 2*E^2)*Complex.I_sq
       | linear_combination (2*E^2 - 2)*Complex.I_sq
   simp_rw [hs]
-  rw [Finset.prod_mul_distrib, Finset.prod_mul_distrib, Finset.prod_const, Finset.prod_pow_eq_pow_sum,
+  rw [Finset.prod_mul_distrib, Finset.prod_mul_distrib, Finset.prod_const,
+      Finset.prod_pow_eq_pow_sum,
     Finset.prod_div_distrib, Finset.prod_const, Finset.card_range, Finset.prod_mul_distrib,
     Finset.prod_const, Finset.card_range]
   have hprod : ∏ k∈Finset.range n, (1-ζ^k*u) = 1-u^n := by

@@ -254,7 +254,8 @@ private lemma gegProd_ibp {lam : ℝ} (hlam : 0 < lam) (a v : ℝ) {f f' : ℂ �
   have h1 : IntervalIntegrable (fun t => ρ t * (f' (w t) * (-(v : ℂ) * Real.sin t) * Real.sin t))
       volume 0 π := hρi.mul_continuousOn (hU ▸ (by
         have : Continuous fun t => f' (w t) := hf'.comp hwc
-        fun_prop : Continuous fun t => f' (w t) * (-(v : ℂ) * Real.sin t) * Real.sin t).continuousOn)
+        fun_prop : Continuous fun t => f' (w t) * (-(v : ℂ) * Real.sin t) *
+            Real.sin t).continuousOn)
   have h2 : IntervalIntegrable (fun t => ρ t * (f (w t) * (2 * lam * Real.cos t)))
       volume 0 π := hρi.mul_continuousOn (hU ▸ (by
         have : Continuous fun t => f (w t) := hfc.comp hwc
@@ -405,7 +406,8 @@ private lemma gegProd_main (n : ℕ) : ∀ lam : ℝ, 0 < lam → ∀ θ ψ : �
   · -- degree one
     simp only [ultrasphPoly_one_eq hlre]
     have hsplit : ∀ t : ℝ, 2 * (lam : ℂ) * ((a + v * Real.cos t : ℝ) : ℂ) *
-        ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ) = 2 * lam * a * ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ)
+        ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ) = 2 * lam * a *
+            ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ)
         + 2 * lam * v * ((Real.cos t : ℂ) * ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ)) := by
       intro t; push_cast; ring
     have i1 : IntervalIntegrable (fun t : ℝ => 2 * (lam : ℂ) * a *
@@ -581,7 +583,8 @@ theorem ultrasphPoly_product_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ) (θ
         ((Real.cos θ * Real.cos ψ + Real.sin θ * Real.sin ψ * Real.cos phi : ℝ)) *
           ((Real.sin phi ^ (2 * lam - 1) : ℝ) : ℂ)) =
       ((Real.sqrt π * Real.Gamma lam / Real.Gamma (lam + 1 / 2) : ℝ) : ℂ) *
-        ultrasphPoly lam n (Real.cos θ) * ultrasphPoly lam n (Real.cos ψ) / ultrasphPoly lam n 1 := by
+        ultrasphPoly lam n (Real.cos θ) * ultrasphPoly lam n (Real.cos ψ) /
+            ultrasphPoly lam n 1 := by
     rw [eq_div_iff h1, mul_comm]; exact hmain
   rw [hGG, hint, hI]
   generalize ((Real.sqrt π * Real.Gamma lam / Real.Gamma (lam + 1 / 2) : ℝ) : ℂ) = M at hm0 ⊢

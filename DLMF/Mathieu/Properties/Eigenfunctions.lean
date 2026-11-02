@@ -142,7 +142,8 @@ private lemma integral_norm_sq_mathieuWI_pos (a q : ℂ) :
   have hev : ∀ᶠ x : ℝ in 𝓝 0, mathieuWI a q x ≠ 0 :=
     (h.differentiable.continuous.comp Complex.continuous_ofReal).continuousAt.eventually_ne
       (by simp [h0])
-  exact integral_norm_sq_pos_of_eventually_ne_zero h.differentiable.continuous (nhdsWithin_le_nhds hev)
+  exact integral_norm_sq_pos_of_eventually_ne_zero h.differentiable.continuous
+      (nhdsWithin_le_nhds hev)
 
 /-- `∫₀^{2π} ‖w_II(x; a, q)‖² > 0`. -/
 private lemma integral_norm_sq_mathieuWII_pos (a q : ℂ) :
@@ -214,7 +215,8 @@ theorem mathieuWII_natCast_sq_q_zero {n : ℕ} (hn : n ≠ 0) :
 
 /-- **Orthogonality** (Sturm–Liouville): `2π`-periodic solutions of Mathieu's equation for
 distinct `a₁ ≠ a₂` (same `q`) are orthogonal on `[0, 2π]`. -/
-private lemma integral_mul_eq_zero_of_two_pi_periodic {a₁ a₂ q : ℂ} {u v : ℂ → ℂ} (hu : IsMathieuSolution a₁ q u)
+private lemma integral_mul_eq_zero_of_two_pi_periodic {a₁ a₂ q : ℂ} {u v : ℂ → ℂ}
+    (hu : IsMathieuSolution a₁ q u)
     (hv : IsMathieuSolution a₂ q v) (hup : ∀ z, u (z + 2 * π) = u z)
     (hvp : ∀ z, v (z + 2 * π) = v z) (hne : a₁ ≠ a₂) :
     ∫ x in (0 : ℝ)..2 * π, u x * v x = 0 := by
@@ -278,7 +280,8 @@ theorem mathieuCe_zero_zero (z : ℂ) : mathieuCe 0 z 0 = 1 / Real.sqrt 2 := by
 theorem mathieuCe_q_zero {n : ℕ} (hn : n ≠ 0) (z : ℂ) :
     mathieuCe n z 0 = Complex.cos (n * z) := by
   rw [mathieuCe, mathieuCeZero, mathieuA_zero n, mathieuWI_natCast_sq_q_zero n]
-  simp only [norm_cos_natCast_mul_ofReal_sq, integral_cos_natCast_mul_sq hn, div_self Real.pi_ne_zero,
+  simp only [norm_cos_natCast_mul_ofReal_sq, integral_cos_natCast_mul_sq hn,
+      div_self Real.pi_ne_zero,
     Real.sqrt_one, Complex.ofReal_one, one_mul]
 
 /-- **DLMF 28.2.29**: `se_n(z, 0) = sin nz`, `n = 1, 2, 3, …`. -/
@@ -313,7 +316,8 @@ theorem integral_mathieuSe_sq {n : ℕ} (q : ℝ) :
 @[dlmf 28.2.E31]
 theorem integral_mathieuCe_mul_mathieuCe {m n : ℕ} (hmn : m ≠ n) (q : ℝ) :
     ∫ x in (0 : ℝ)..2 * π, mathieuCe m x q * mathieuCe n x q = 0 :=
-  integral_mul_eq_zero_of_two_pi_periodic (isMathieuSolution_mathieuCe m q) (isMathieuSolution_mathieuCe n q)
+  integral_mul_eq_zero_of_two_pi_periodic (isMathieuSolution_mathieuCe m q)
+      (isMathieuSolution_mathieuCe n q)
     (fun z => mathieuCe_add_two_pi m z q) (fun z => mathieuCe_add_two_pi n z q)
     (fun h => hmn (mathieuA_injective q (by exact_mod_cast h)))
 
@@ -321,7 +325,8 @@ theorem integral_mathieuCe_mul_mathieuCe {m n : ℕ} (hmn : m ≠ n) (q : ℝ) :
 @[dlmf 28.2.E32]
 theorem integral_mathieuSe_mul_mathieuSe {m n : ℕ} (hm : m ≠ 0) (hn : n ≠ 0) (hmn : m ≠ n)
     (q : ℝ) : ∫ x in (0 : ℝ)..2 * π, mathieuSe m x q * mathieuSe n x q = 0 :=
-  integral_mul_eq_zero_of_two_pi_periodic (isMathieuSolution_mathieuSe m q) (isMathieuSolution_mathieuSe n q)
+  integral_mul_eq_zero_of_two_pi_periodic (isMathieuSolution_mathieuSe m q)
+      (isMathieuSolution_mathieuSe n q)
     (fun z => mathieuSe_add_two_pi hm z q) (fun z => mathieuSe_add_two_pi hn z q)
     (fun h => hmn (eq_of_mathieuB_eq hm hn q (by exact_mod_cast h)))
 
@@ -375,7 +380,8 @@ theorem integral_mathieuCe_mul_mathieuSe (m n : ℕ) (hn : n ≠ 0) (q : ℝ) :
 /-- The normalization step of 28.2.34–28.2.37: if `G(z) = c F(π/2 - z)` with `F` continuous and
 `2π`-periodic and `(-1)ⁿ c > 0`, then the normalized `G` is `(-1)ⁿ` times the normalized
 `F(π/2 - ·)`. -/
-private lemma normalized_comp_pi_div_two_sub {F G : ℂ → ℂ} {c : ℝ} {n : ℕ} (hper : ∀ z, F (z + 2 * π) = F z)
+private lemma normalized_comp_pi_div_two_sub {F G : ℂ → ℂ} {c : ℝ} {n : ℕ}
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (hFG : ∀ z, G z = c * F (π / 2 - z)) (hs : 0 < (-1) ^ n * c) (z : ℂ) :
     (Real.sqrt (π / ∫ x in (0 : ℝ)..2 * π, ‖G x‖ ^ 2) : ℂ) * G z =
       (-1) ^ n * ((Real.sqrt (π / ∫ x in (0 : ℝ)..2 * π, ‖F x‖ ^ 2) : ℂ) * F (π / 2 - z)) := by

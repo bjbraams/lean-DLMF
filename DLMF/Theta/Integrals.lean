@@ -49,7 +49,8 @@ namespace DLMF.Theta
 open DLMF.Elliptic
 
 /-- Integrability of a pointwise sum with summable integrals of norms (helper). -/
-private lemma integrableOn_of_hasSum_of_summable_norm {ι : Type*} [Countable ι] {F : ι → ℝ → ℂ} {G : ℝ → ℂ}
+private lemma integrableOn_of_hasSum_of_summable_norm {ι : Type*} [Countable ι]
+    {F : ι → ℝ → ℂ} {G : ℝ → ℂ}
     {S : Set ℝ} (hS : MeasurableSet S) (hGm : AEStronglyMeasurable G (volume.restrict S))
     (hF : ∀ i, IntegrableOn (F i) S) (hsum : Summable fun i => ∫ x in S, ‖F i x‖)
     (hpt : ∀ x ∈ S, HasSum (fun i => F i x) (G x)) : IntegrableOn G S := by
@@ -67,7 +68,8 @@ private lemma integrableOn_of_hasSum_of_summable_norm {ι : Type*} [Countable ι
     _ < ⊤ := ENNReal.ofReal_lt_top
 
 /-- Mellin transform of a Dirichlet-type exponential series, with convergence (helper). -/
-private lemma hasSum_mellin_exp_series {a : ℕ → ℂ} {q : ℕ → ℝ} {F : ℝ → ℂ} {s : ℂ} (hq : ∀ n, 0 < q n)
+private lemma hasSum_mellin_exp_series {a : ℕ → ℂ} {q : ℕ → ℝ} {F : ℝ → ℂ} {s : ℂ}
+    (hq : ∀ n, 0 < q n)
     (hs : 0 < s.re) (hFc : ContinuousOn F (Set.Ioi 0))
     (hF : ∀ t ∈ Set.Ioi (0 : ℝ), HasSum (fun n => a n * Real.exp (-π * q n * t)) (F t))
     (h_sum : Summable fun n => ‖a n‖ / q n ^ s.re) :
@@ -132,7 +134,8 @@ private lemma ofReal_sq_cpow_half (x : ℝ) (hx : 0 < x) (s : ℂ) :
 
 /-- The Mellin transform in `x²` (helper for 20.10.1–20.10.3): for `g` continuous on `(0,∞)` with
 `g t = ∑ aₙ e^{-π qₙ t}`, `∫₀^∞ x^{s-1} g(x²) dx = ½ ∑ π^{-s/2} Γ(s/2) aₙ / qₙ^{s/2}`. -/
-private lemma hasSum_mellin_sq_exp_series {a : ℕ → ℂ} {q : ℕ → ℝ} {g : ℝ → ℂ} {s : ℂ} (hq : ∀ n, 0 < q n)
+private lemma hasSum_mellin_sq_exp_series {a : ℕ → ℂ} {q : ℕ → ℝ} {g : ℝ → ℂ} {s : ℂ}
+    (hq : ∀ n, 0 < q n)
     (hs : 0 < s.re) (hgc : ContinuousOn g (Set.Ioi 0))
     (hg : ∀ t ∈ Set.Ioi (0 : ℝ), HasSum (fun n => a n * Real.exp (-π * q n * t)) (g t))
     (h_sum : Summable fun n => ‖a n‖ / q n ^ (s / 2).re) :
@@ -157,7 +160,8 @@ private lemma hasSum_mellin_sq_exp_series {a : ℕ → ℂ} {q : ℕ → ℝ} {g
     ring
 
 /-- Continuity of `t ↦ θ(0|it)`-type functions (helper). -/
-private lemma continuousOn_jacobiThetaThreeTau_I_mul (c : ℂ) : ContinuousOn (fun t : ℝ => jacobiThetaThreeTau c (I * t))
+private lemma continuousOn_jacobiThetaThreeTau_I_mul (c : ℂ) : ContinuousOn
+    (fun t : ℝ => jacobiThetaThreeTau c (I * t))
     (Set.Ioi 0) := by
   intro t ht
   have ht' : (0 : ℝ) < t := ht
@@ -253,7 +257,8 @@ theorem mellin_jacobiThetaTwoNullTau {s : ℂ} (hs : 1 < s.re) :
     have e : (((n : ℝ) + 1 / 2 : ℝ) : ℂ) = ((2 * (n : ℝ) + 1 : ℝ) : ℂ) * (((2 : ℝ)⁻¹ : ℝ) : ℂ) := by
       push_cast; ring
     rw [e, mul_cpow_ofReal_nonneg (by positivity) (by norm_num), ofReal_inv,
-      inv_cpow _ _ (by rw [show ((2 : ℝ) : ℂ) = (2 : ℂ) by norm_num]; simpa using Real.pi_ne_zero.symm)]
+      inv_cpow _ _ (by rw [show ((2 : ℝ) : ℂ) = (2 : ℂ) by norm_num];
+                       simpa using Real.pi_ne_zero.symm)]
     push_cast
     have h1 : ((2 * (n : ℂ) + 1)) ^ s ≠ 0 := by
       rw [Ne, cpow_eq_zero_iff]; intro h
@@ -325,12 +330,14 @@ private lemma jacobiThetaFourNullTau_I_mul_eq_cosKernel (t : ℝ) :
   push_cast; field_simp
 
 /-- `1 - θ₄(0|it)` decays exponentially as `t → ∞`. -/
-private lemma oneSubJacobiThetaFourNullI_isBigO_atTop : ∃ p : ℝ, 0 < p ∧ oneSubJacobiThetaFourNullI =O[atTop] fun t => Real.exp (-p * t) := by
+private lemma oneSubJacobiThetaFourNullI_isBigO_atTop : ∃ p : ℝ, 0 < p ∧
+    oneSubJacobiThetaFourNullI =O[atTop] fun t => Real.exp (-p * t) := by
   obtain ⟨p, hp, h⟩ := HurwitzZeta.isBigO_atTop_cosKernel_sub (((1 / 2 : ℝ)) : UnitAddCircle)
   refine ⟨p, hp, ?_⟩
   have h2 := (Complex.isBigO_ofReal_left.mpr h).neg_left
   refine h2.congr_left fun t => ?_
-  simp only [oneSubJacobiThetaFourNullI, jacobiThetaFourNullTau_I_mul_eq_cosKernel, ofReal_sub, ofReal_one, neg_sub]
+  simp only [oneSubJacobiThetaFourNullI, jacobiThetaFourNullTau_I_mul_eq_cosKernel, ofReal_sub,
+      ofReal_one, neg_sub]
 
 /-- `θ₄(0|it) → 0` as `t → 0⁺` (functional equation). -/
 private lemma tendsto_cosKernel_half_zero :
@@ -350,7 +357,8 @@ private lemma tendsto_cosKernel_half_zero :
   rw [mul_inv_cancel_left₀ this]
 
 /-- `1 - θ₄(0|it)` is bounded as `t → 0⁺`. -/
-private lemma oneSubJacobiThetaFourNullI_isBigO_zero : oneSubJacobiThetaFourNullI =O[𝓝[>] 0] fun t : ℝ => t ^ (-(0 : ℝ)) := by
+private lemma oneSubJacobiThetaFourNullI_isBigO_zero : oneSubJacobiThetaFourNullI =O[𝓝[>] 0] fun t :
+    ℝ => t ^ (-(0 : ℝ)) := by
   have h : Tendsto oneSubJacobiThetaFourNullI (𝓝[>] 0) (𝓝 1) := by
     have := (continuous_ofReal.tendsto 0).comp tendsto_cosKernel_half_zero
     have h2 := tendsto_const_nhds (x := (1 : ℂ)) |>.sub this
@@ -361,33 +369,40 @@ private lemma oneSubJacobiThetaFourNullI_isBigO_zero : oneSubJacobiThetaFourNull
   exact h.isBigO_one ℝ
 
 /-- Continuity of `1 - θ₄(0|it)` on `(0, ∞)`. -/
-private lemma continuousOn_oneSubJacobiThetaFourNullI : ContinuousOn oneSubJacobiThetaFourNullI (Set.Ioi 0) := by
+private lemma continuousOn_oneSubJacobiThetaFourNullI : ContinuousOn oneSubJacobiThetaFourNullI
+    (Set.Ioi 0) := by
   have := (HurwitzZeta.continuousOn_cosKernel (((1 / 2 : ℝ)) : UnitAddCircle))
   have h2 := continuousOn_const (c := (1 : ℂ)).sub (continuous_ofReal.comp_continuousOn this)
   refine h2.congr fun t _ => ?_
   simp [oneSubJacobiThetaFourNullI, jacobiThetaFourNullTau_I_mul_eq_cosKernel]
 
 /-- The Mellin transform of `1 - θ₄(0|it)` converges for `Re w > 0`. -/
-private lemma mellinConvergent_oneSubJacobiThetaFourNullI {w : ℂ} (hw : 0 < w.re) : MellinConvergent oneSubJacobiThetaFourNullI w := by
+private lemma mellinConvergent_oneSubJacobiThetaFourNullI {w : ℂ} (hw : 0 < w.re) : MellinConvergent
+    oneSubJacobiThetaFourNullI w := by
   obtain ⟨p, hp, h⟩ := oneSubJacobiThetaFourNullI_isBigO_atTop
   exact mellinConvergent_of_isBigO_rpow_exp hp
-    (continuousOn_oneSubJacobiThetaFourNullI.locallyIntegrableOn measurableSet_Ioi) h oneSubJacobiThetaFourNullI_isBigO_zero hw
+    (continuousOn_oneSubJacobiThetaFourNullI.locallyIntegrableOn measurableSet_Ioi) h
+        oneSubJacobiThetaFourNullI_isBigO_zero hw
 
 /-- The Mellin transform of `1 - θ₄(0|it)` is holomorphic on `Re w > 0`. -/
-private lemma differentiableAt_mellin_oneSubJacobiThetaFourNullI {w : ℂ} (hw : 0 < w.re) : DifferentiableAt ℂ (mellin oneSubJacobiThetaFourNullI) w := by
+private lemma differentiableAt_mellin_oneSubJacobiThetaFourNullI {w : ℂ} (hw : 0 < w.re) :
+    DifferentiableAt ℂ (mellin oneSubJacobiThetaFourNullI) w := by
   obtain ⟨p, hp, h⟩ := oneSubJacobiThetaFourNullI_isBigO_atTop
   exact mellin_differentiableAt_of_isBigO_rpow_exp hp
-    (continuousOn_oneSubJacobiThetaFourNullI.locallyIntegrableOn measurableSet_Ioi) h oneSubJacobiThetaFourNullI_isBigO_zero hw
+    (continuousOn_oneSubJacobiThetaFourNullI.locallyIntegrableOn measurableSet_Ioi) h
+        oneSubJacobiThetaFourNullI_isBigO_zero hw
 
 
 /-- The `x²`-form of the Mellin transform of `1 - θ₄(0|it)`. -/
 private lemma integral_cpow_mul_oneSubJacobiThetaFourNullI_sq {s : ℂ} (hs : 0 < s.re) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ (s - 1) * oneSubJacobiThetaFourNullI (x ^ 2)) (Set.Ioi 0) ∧
-      ∫ x in Set.Ioi (0 : ℝ), (x : ℂ) ^ (s - 1) * oneSubJacobiThetaFourNullI (x ^ 2) = mellin oneSubJacobiThetaFourNullI (s / 2) / 2 := by
+      ∫ x in Set.Ioi (0 : ℝ), (x : ℂ) ^ (s - 1) * oneSubJacobiThetaFourNullI (x ^ 2) =
+          mellin oneSubJacobiThetaFourNullI (s / 2) / 2 := by
   have hs2 : 0 < (s / 2).re := by rw [div_ofNat_re]; positivity
   have hM := mellinConvergent_oneSubJacobiThetaFourNullI hs2
   have hcongr : Set.EqOn (fun x : ℝ => (x : ℂ) ^ (s - 1) * oneSubJacobiThetaFourNullI (x ^ 2))
-      (fun x : ℝ => (x : ℂ) ^ (s - 1) • (fun t => oneSubJacobiThetaFourNullI (t ^ (2 : ℝ))) x) (Set.Ioi 0) := by
+      (fun x : ℝ => (x : ℂ) ^ (s - 1) • (fun t => oneSubJacobiThetaFourNullI (t ^ (2 : ℝ))) x)
+          (Set.Ioi 0) := by
     intro x _
     simp only [smul_eq_mul, Real.rpow_two]
   refine ⟨?_, ?_⟩
@@ -401,7 +416,8 @@ private lemma integral_cpow_mul_oneSubJacobiThetaFourNullI_sq {s : ℂ} (hs : 0 
     ring
 
 /-- Unfolding `oneSubJacobiThetaFourNullI` at `x²`. -/
-private lemma oneSubJacobiThetaFourNullI_sq (x : ℝ) : oneSubJacobiThetaFourNullI (x ^ 2) = 1 - jacobiThetaFourNullTau (I * x ^ 2) := by
+private lemma oneSubJacobiThetaFourNullI_sq (x : ℝ) : oneSubJacobiThetaFourNullI (x ^ 2) = 1 -
+    jacobiThetaFourNullTau (I * x ^ 2) := by
   simp [oneSubJacobiThetaFourNullI]
 
 /-- `∑ (-1)ⁿ (n+1)^{-s} = (1 - 2^{1-s}) ζ(s)` for `Re s > 1`. -/
@@ -460,7 +476,8 @@ private lemma mellin_oneSubJacobiThetaFourNullI_of_one_lt_re {s : ℂ} (hs : 1 <
       ← Real.rpow_natCast, ← Real.rpow_mul (by positivity)]
     push_cast
     rw [show (2 : ℝ) * (s.re / 2) = s.re by ring, div_eq_mul_inv]; norm_num
-  obtain ⟨-, hS⟩ := hasSum_mellin_sq_exp_series (fun n => by positivity) hs0 continuousOn_oneSubJacobiThetaFourNullI hg hsum
+  obtain ⟨-, hS⟩ := hasSum_mellin_sq_exp_series (fun n => by positivity) hs0
+      continuousOn_oneSubJacobiThetaFourNullI hg hsum
   rw [(integral_cpow_mul_oneSubJacobiThetaFourNullI_sq hs0).2] at hS
   have hE := (hasSum_neg_one_pow_div_cpow hs).mul_left ((π : ℂ) ^ (-(s / 2)) * Gamma (s / 2))
   have heq : (fun n : ℕ => (π : ℂ) ^ (-(s / 2)) * Gamma (s / 2) * (2 * (-1 : ℂ) ^ n) /
@@ -476,7 +493,8 @@ private lemma mellin_oneSubJacobiThetaFourNullI_of_one_lt_re {s : ℂ} (hs : 1 <
 
 
 /-- The right side of 20.10.3 is holomorphic on `Re s > 0`, `s ≠ 1`. -/
-private lemma differentiableAt_one_sub_two_cpow_mul_gamma_zeta {s : ℂ} (hs : 0 < s.re) (hs1 : s ≠ 1) :
+private lemma differentiableAt_one_sub_two_cpow_mul_gamma_zeta {s : ℂ} (hs : 0 < s.re)
+    (hs1 : s ≠ 1) :
     DifferentiableAt ℂ (fun s : ℂ =>
       (1 - 2 ^ (1 - s)) * (π : ℂ) ^ (-s / 2) * Gamma (s / 2) * riemannZeta s) s := by
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -501,16 +519,19 @@ private lemma differentiableAt_mellin_oneSubJacobiThetaFourNullI_half {s : ℂ} 
     (differentiableAt_mellin_oneSubJacobiThetaFourNullI hs2) (by fun_prop)).div_const 2
 
 /-- Analytic continuation of 20.10.3 over a convex open set. -/
-private lemma eqOn_mellin_oneSubJacobiThetaFourNullI_of_convex {V : Set ℂ} (hV : Convex ℝ V) (hVo : IsOpen V)
+private lemma eqOn_mellin_oneSubJacobiThetaFourNullI_of_convex {V : Set ℂ} (hV : Convex ℝ V)
+    (hVo : IsOpen V)
     (hV0 : ∀ s ∈ V, 0 < s.re ∧ s ≠ 1) {z₀ : ℂ} (hz₀ : z₀ ∈ V) (hz₀' : 1 < z₀.re) :
     Set.EqOn (fun s : ℂ => mellin oneSubJacobiThetaFourNullI (s / 2) / 2)
       (fun s : ℂ => (1 - 2 ^ (1 - s)) * (π : ℂ) ^ (-s / 2) * Gamma (s / 2) * riemannZeta s)
       V := by
-  have hF : DifferentiableOn ℂ (fun s : ℂ => mellin oneSubJacobiThetaFourNullI (s / 2) / 2) V := fun s hs =>
+  have hF : DifferentiableOn ℂ (fun s : ℂ => mellin oneSubJacobiThetaFourNullI (s / 2) / 2)
+      V := fun s hs =>
     (differentiableAt_mellin_oneSubJacobiThetaFourNullI_half (hV0 s hs).1).differentiableWithinAt
   have hR : DifferentiableOn ℂ (fun s : ℂ =>
       (1 - 2 ^ (1 - s)) * (π : ℂ) ^ (-s / 2) * Gamma (s / 2) * riemannZeta s) V := fun s hs =>
-    (differentiableAt_one_sub_two_cpow_mul_gamma_zeta (hV0 s hs).1 (hV0 s hs).2).differentiableWithinAt
+    (differentiableAt_one_sub_two_cpow_mul_gamma_zeta (hV0 s hs).1
+        (hV0 s hs).2).differentiableWithinAt
   refine (hF.analyticOnNhd hVo).eqOn_of_preconnected_of_eventuallyEq (hR.analyticOnNhd hVo)
     hV.isPreconnected hz₀ ?_
   filter_upwards [(isOpen_lt continuous_const Complex.continuous_re).mem_nhds hz₀'] with s hs
@@ -527,13 +548,15 @@ private lemma mellin_oneSubJacobiThetaFourNullI_eq {s : ℂ} (hs : 0 < s.re) (hs
   have hc1 : Continuous fun s : ℂ => s.im - s.re := by fun_prop
   have hc2 : Continuous fun s : ℂ => s.im + s.re := by fun_prop
   by_cases h1 : s.re - 1 < s.im
-  · refine eqOn_mellin_oneSubJacobiThetaFourNullI_of_convex (V := {s : ℂ | 0 < s.re} ∩ {s : ℂ | -1 < s.im - s.re})
+  · refine eqOn_mellin_oneSubJacobiThetaFourNullI_of_convex
+        (V := {s : ℂ | 0 < s.re} ∩ {s : ℂ | -1 < s.im - s.re})
       ((convex_halfSpace_re_gt 0).inter (convex_halfSpace_gt hlin1 (-1)))
       ((isOpen_lt continuous_const Complex.continuous_re).inter (isOpen_lt continuous_const hc1))
       (fun w hw => ⟨hw.1, fun h => by subst h; norm_num at hw⟩)
       (z₀ := 2 + 2 * I) ⟨by norm_num, by norm_num⟩ (by norm_num) ⟨hs, by simp; linarith⟩
   by_cases h2 : s.im < 1 - s.re
-  · refine eqOn_mellin_oneSubJacobiThetaFourNullI_of_convex (V := {s : ℂ | 0 < s.re} ∩ {s : ℂ | s.im + s.re < 1})
+  · refine eqOn_mellin_oneSubJacobiThetaFourNullI_of_convex
+        (V := {s : ℂ | 0 < s.re} ∩ {s : ℂ | s.im + s.re < 1})
       ((convex_halfSpace_re_gt 0).inter (convex_halfSpace_lt hlin2 1))
       ((isOpen_lt continuous_const Complex.continuous_re).inter (isOpen_lt hc2 continuous_const))
       (fun w hw => ⟨hw.1, fun h => by subst h; norm_num at hw⟩)
@@ -608,8 +631,10 @@ theorem mellin_one_sub_jacobiThetaFourNullTau_one :
   refine ⟨hI, hE.trans ?_⟩
   have hF : Tendsto (fun s : ℂ => mellin oneSubJacobiThetaFourNullI (s / 2) / 2) (𝓝[≠] 1)
       (𝓝 (mellin oneSubJacobiThetaFourNullI (1 / 2) / 2)) :=
-    (differentiableAt_mellin_oneSubJacobiThetaFourNullI_half (s := 1) (by norm_num)).continuousAt.tendsto.mono_left nhdsWithin_le_nhds
-  have hR : Tendsto (fun s : ℂ => mellin oneSubJacobiThetaFourNullI (s / 2) / 2) (𝓝[≠] 1) (𝓝 (Real.log 2 : ℂ)) := by
+    (differentiableAt_mellin_oneSubJacobiThetaFourNullI_half (s := 1)
+        (by norm_num)).continuousAt.tendsto.mono_left nhdsWithin_le_nhds
+  have hR : Tendsto (fun s : ℂ => mellin oneSubJacobiThetaFourNullI (s / 2) / 2) (𝓝[≠] 1)
+      (𝓝 (Real.log 2 : ℂ)) := by
     refine tendsto_one_sub_two_cpow_mul_gamma_zeta_one.congr' ?_
     have hre : ∀ᶠ s : ℂ in 𝓝[≠] 1, 0 < s.re :=
       nhdsWithin_le_nhds ((isOpen_lt continuous_const Complex.continuous_re).mem_nhds

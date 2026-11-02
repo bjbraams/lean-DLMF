@@ -47,7 +47,8 @@ namespace DLMF.Confluent
 open Polynomial
 
 /-- A truncated series `∑_{s<N} a_s(t)/u^s`. -/
-noncomputable def pcfLG2_ser (a : ℕ → ℝ → ℝ) (N : ℕ) (u t : ℝ) : ℝ := ∑ s ∈ Finset.range N, a s t / u^s
+noncomputable def pcfLG2_ser (a : ℕ → ℝ → ℝ) (N : ℕ) (u t : ℝ) : ℝ := ∑ s ∈
+    Finset.range N, a s t / u^s
 
 /-- The Liouville–Green series with coefficients `(-1)^s a_s` is `pcfLG2_ser`. -/
 lemma pcfLG2_lgSeries_eq (a : ℕ → ℝ → ℝ) (N : ℕ) (u t : ℝ) :
@@ -86,11 +87,12 @@ lemma pcfLG2_hasDerivAt_ser {b : ℝ} {a ad : ℕ → ℝ → ℝ} {N : ℕ}
   exact HasDerivAt.fun_sum fun s hs => (ha s (Finset.mem_range.1 hs) t ht).div_const _
 
 /-- **General recessive core.** Let `A > 0` on `(b, ∞)` with `ξ' = A⁻²`, `A → 0`, and let
-coefficients `a_s` satisfy the Liouville–Green recursion `A² a_s'' + 2AA' a_s' + AA'' a_s = 2 a_{s+1}'`
-with `a_0 = 1`, uniform bounds on `(b, ∞)` and limits `l_s` at `+∞`. Let `U` solve
-`U'' = μ⁴ A⁻⁴ U` with `U/(A e^{-μ²ξ}) → H(μ)`. Then for `μ ≥ μ₀` (explicitly), with `u = μ²`,
-`U = (H/L) A e^{-uξ} (∑_{s<N} a_s/u^s + ε)`, `L = ∑_{s<N} l_s/u^s`, where
-`|ε| ≤ C u^{-N}` and `|A² ε'| ≤ 2 C u^{1-N}`, together with the corresponding formula for `U'`. -/
+coefficients `a_s` satisfy the Liouville–Green recursion
+`A² a_s'' + 2AA' a_s' + AA'' a_s = 2 a_{s+1}'` with `a_0 = 1`, uniform bounds on `(b, ∞)` and limits
+`l_s` at `+∞`. Let `U` solve `U'' = μ⁴ A⁻⁴ U` with `U/(A e^{-μ²ξ}) → H(μ)`. Then for `μ ≥ μ₀`
+(explicitly), with `u = μ²`, `U = (H/L) A e^{-uξ} (∑_{s<N} a_s/u^s + ε)`, `L = ∑_{s<N} l_s/u^s`,
+where `|ε| ≤ C u^{-N}` and `|A² ε'| ≤ 2 C u^{1-N}`, together with the corresponding formula for
+`U'`. -/
 lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
     (hA : ∀ t, b < t → 0 < A t) (hA1 : ∀ t, b < t → HasDerivAt A (A1 t) t)
     (hA2 : ∀ t, b < t → HasDerivAt A1 (A2 t) t) (hA2c : ContinuousOn A2 (Ioi b))
@@ -477,7 +479,8 @@ lemma pcfLG2_continuousOn_Tad2 (s : ℕ) : ContinuousOn (pcfLG2_Tad2 s) (Ioi 1) 
   exact (((hP _).mul ((hp.pow 6).div_const 4)).add
     ((hP _).mul (hl.mul (hp.pow 5)))).continuousWithinAt
 
-/-- **The Liouville–Green recursion for Temme's coefficients** `φ_s(τ(t))`, with `A = (t²-1)^{-1/4}`. -/
+/-- **The Liouville–Green recursion for Temme's coefficients** `φ_s(τ(t))`, with
+`A = (t²-1)^{-1/4}`. -/
 lemma pcfLG2_temme_rec (s : ℕ) {t : ℝ} (ht : 1 < t) :
     pcfLG_A t ^ 2 * pcfLG2_Tad2 s t + 2 * pcfLG_A t * pcfLG_A1 t * pcfLG2_Tad s t +
       pcfLG_A t * pcfLG_A2 t * pcfLG2_Ta s t = 2 * pcfLG2_Tad (s+1) t := by
@@ -531,7 +534,9 @@ lemma pcfLG2_abs_Tad_le {N : ℕ} {M K' : ℝ}
 recessive core with coefficients `φ_s(τ(t))`. -/
 @[dlmf 12.10.E31]
 theorem pcfU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
-    HasCylinderUniformExpansion (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(pcfH μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ))) (fun s t => (((pcfTemmePoly s).eval (pcfTau t):ℝ):ℂ)) (Ici (1+δ)) := by
+    HasCylinderUniformExpansion
+        (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(pcfH μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+        (fun s t => (((pcfTemmePoly s).eval (pcfTau t):ℝ):ℂ)) (Ici (1+δ)) := by
   set b : ℝ := 1 + δ/2 with hbdef
   have hb : 1 < b := by linarith
   have key : ∀ N : ℕ, 1 ≤ N → (fun p : ℝ × ℝ => pcfU (-p.1^2/2) (p.1*p.2*Real.sqrt 2) /

@@ -689,7 +689,8 @@ theorem kummerU_barnes_exp {a b : ℂ} {x σ : ℝ}
         ring
       rw [integral_congr_ae (ae_of_all _ hpt), integral_add hi1 (hi2.const_mul _),
         MeasureTheory.integral_const_mul]
-      have hUa : kummerU a b x = x * kummerU (a + 1) (b + 1) x + (a + 1 - b) * kummerU (a + 1) b x := by
+      have hUa : kummerU a b x = x * kummerU (a + 1) (b + 1) x + (a + 1 - b) *
+          kummerU (a + 1) b x := by
         linear_combination hU
       have hxp : (x : ℂ) ^ (1 - b) = x * (x : ℂ) ^ (1 - (b + 1)) := by
         rw [show 1 - b = 1 + (1 - (b + 1)) by ring, cpow_add _ _ hx0, cpow_one]
@@ -752,10 +753,12 @@ theorem whittakerM_euler {κ μ z : ℂ}
       rw [htcast]; ring
     have hp' : ((1 + (t : ℂ)) / 2) ^ (a - 1) =
         (1 + (t : ℂ)) ^ (a - 1) / (2 : ℂ) ^ (a - 1) := by
-      convert div_cpow_ofReal_nonneg (a := 1 + t) (b := 2) hp (by norm_num) (a - 1) using 1 <;> push_cast <;> rfl
+      convert div_cpow_ofReal_nonneg (a := 1 + t) (b := 2) hp (by norm_num) (a - 1) using 1 <;>
+          push_cast <;> rfl
     have hm' : ((1 - (t : ℂ)) / 2) ^ (d - 1) =
         (1 - (t : ℂ)) ^ (d - 1) / (2 : ℂ) ^ (d - 1) := by
-      convert div_cpow_ofReal_nonneg (a := 1 - t) (b := 2) hm (by norm_num) (d - 1) using 1 <;> push_cast <;> rfl
+      convert div_cpow_ofReal_nonneg (a := 1 - t) (b := 2) hm (by norm_num) (d - 1) using 1 <;>
+          push_cast <;> rfl
     rw [htcast', htcast, hp', hm']
     have htwo : (1 / 2 : ℂ) / ((2 : ℂ) ^ (a - 1) * (2 : ℂ) ^ (d - 1)) =
         (2 : ℂ) ^ (-(2 * μ)) := by
@@ -1146,7 +1149,8 @@ theorem whittakerW_barnes_exp {κ μ : ℂ} {x σ : ℝ} (hx : 0 < x)
   simp only [hpt] at hU
   rw [MeasureTheory.integral_const_mul] at hU
   rw [whittakerW, hU]
-  have hxx : (x : ℂ) ^ (1 / 2 + μ) * (x : ℂ) ^ (1 - (1 + 2 * μ)) * (x : ℂ) ^ (-(1 / 2 - μ)) = 1 := by
+  have hxx : (x : ℂ) ^ (1 / 2 + μ) * (x : ℂ) ^ (1 - (1 + 2 * μ)) *
+      (x : ℂ) ^ (-(1 / 2 - μ)) = 1 := by
     rw [← cpow_add _ _ hx0, ← cpow_add _ _ hx0]; ring_nf; exact cpow_zero _
   have hee : exp (-(x : ℂ) / 2) * exp (x : ℂ) = exp ((x : ℂ) / 2) := by
     rw [← exp_add]; ring_nf

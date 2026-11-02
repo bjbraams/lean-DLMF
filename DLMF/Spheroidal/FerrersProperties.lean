@@ -337,10 +337,9 @@ existence theorem, proved by `exists_isSpheroidalQs_of_le`, which does not need 
 uniqueness holds by the parity argument. -/
 @[dlmf 30.5.E1]
 theorem exists_isSpheroidalQs {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
-    (hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) :
-    ∃ f, IsSpheroidalQs n m γ2 f := by
-  have _ := hf
-  exact exists_isSpheroidalQs_of_le hmn γ2
+    (_hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) :
+    ∃ f, IsSpheroidalQs n m γ2 f :=
+  exists_isSpheroidalQs_of_le hmn γ2
 
 /-- **Existence and uniqueness of `𝑄s^m_n`** (DLMF §30.6), under the hypotheses of
 `exists_isSpheroidalQs`. Flagged existence theorem (admitted). -/

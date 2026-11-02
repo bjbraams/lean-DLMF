@@ -9,6 +9,7 @@ public import DLMF.Elementary.Basic
 public import DLMF.Elementary.LogExpAnalysis
 public import DLMF.Elementary.LogExpIntegrals
 public import DLMF.Elementary.Generalized
+public import DLMF.Elementary.PathLifts
 public import DLMF.Elementary.LambertW
 public import DLMF.Elementary.Trigonometric
 public import DLMF.Elementary.Hyperbolic

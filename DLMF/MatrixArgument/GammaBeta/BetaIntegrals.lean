@@ -88,7 +88,8 @@ private lemma posDef_mul_mul_transpose_iff {m : ℕ} (C : Matrix.GeneralLinearGr
     IsUnit.posDef_star_right_conjugate_iff (Units.isUnit C)]
 
 /-- The beta integrand on `0 < X < T`, extended by zero. -/
-private lemma integrable_indicator_matrixInterval_beta_iff {m : ℕ} {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) (a b : ℂ) :
+private lemma integrable_indicator_matrixInterval_beta_iff {m : ℕ} {T : Matrix (Fin m) (Fin m) ℝ}
+    (hT : T.PosDef) (a b : ℂ) :
     (Integrable (fun X : SymMatrix m => (matrixInterval 0 T).indicator (fun X : SymMatrix m =>
         (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
         (((T - (X : Matrix (Fin m) (Fin m) ℝ)).det : ℂ) ^ (b - ((m : ℂ) + 1) / 2))) X)
@@ -212,8 +213,10 @@ private lemma measurableSet_matrixInterval_zero {m : ℕ} (T : SymMatrix m) :
   rw [this]
   exact hmc.inter (hmc.preimage (measurable_const.sub measurable_id))
 
-/-- Identity under the stated parameter and domain assumptions: `matrixInterval (m := m) 0 T = ∅`. -/
-private lemma matrixInterval_zero_eq_empty_of_not_posDef {m : ℕ} {T : Matrix (Fin m) (Fin m) ℝ} (hT : ¬ T.PosDef) :
+/-- Identity under the stated parameter and domain assumptions: `matrixInterval (m := m) 0 T = ∅`.
+-/
+private lemma matrixInterval_zero_eq_empty_of_not_posDef {m : ℕ} {T : Matrix (Fin m) (Fin m) ℝ}
+    (hT : ¬ T.PosDef) :
     matrixInterval (m := m) 0 T = ∅ := by
   ext X
   simp only [Set.mem_empty_iff_false, iff_false]
@@ -224,7 +227,8 @@ private lemma matrixInterval_zero_eq_empty_of_not_posDef {m : ℕ} {T : Matrix (
   rwa [add_sub_cancel] at this
 
 /-- DLMF 35.3.3 for `m ≥ 1`. -/
-private lemma hasIntegralOn_matrixInterval_multivariateBeta {m : ℕ} (hm : 1 ≤ m) {a b : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re)
+private lemma hasIntegralOn_matrixInterval_multivariateBeta {m : ℕ} (hm : 1 ≤ m) {a b : ℂ}
+    (ha : ((m : ℝ) - 1) / 2 < a.re)
     (hb : ((m : ℝ) - 1) / 2 < b.re) :
     HasIntegralOn (m := m) (matrixInterval 0 1)
       (fun X => ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
@@ -309,7 +313,8 @@ private lemma hasIntegralOn_matrixInterval_multivariateBeta {m : ℕ} (hm : 1 �
     refine this.congr (Filter.Eventually.of_forall fun X => ?_)
     simp only [Function.uncurry_apply_pair]
     rw [hKβ, ← mul_assoc, inv_mul_cancel₀ he, one_mul]
-  have hβ1 : Integrable (β 1) Λ := ((integrable_indicator_matrixInterval_beta_iff hTpos a b).1).mp hβT
+  have hβ1 : Integrable (β 1) Λ :=
+      ((integrable_indicator_matrixInterval_beta_iff hTpos a b).1).mp hβT
   -- the value
   set J := ∫ X, β 1 X ∂Λ
   have hleft : ∫ X, ∫ T, K X T ∂Λ ∂Λ = multivariateGamma m a * multivariateGamma m b := by

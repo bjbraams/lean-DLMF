@@ -92,7 +92,8 @@ theorem abs_lamePotential_le (x : ℝ) : |lamePotential ν k x| ≤ |ν * (ν + 
     _ = _ := mul_one _
 
 /-- For `k² < 1` the Lamé potential is even in `x`. -/
-private lemma lamePotential_neg (hk : k ^ 2 < 1) (x : ℝ) : lamePotential ν k (-x) = lamePotential ν k x := by
+private lemma lamePotential_neg (hk : k ^ 2 < 1) (x : ℝ) : lamePotential ν k (-x) =
+    lamePotential ν k x := by
   simp only [lamePotential, (jacobi_neg hk x).1, neg_sq]
 
 /-- `w` solves the real Lamé equation 29.2.1 iff it solves the Hill-type equation
@@ -120,7 +121,8 @@ theorem lameSpectrum_eq_separatedSpectrum (odd0 oddK : Bool) :
 each boundary type of Table 29.3.2, the eigenvalues form an infinite, unbounded, strictly
 increasing sequence `h₀ < h₁ < ⋯` exhausting the spectrum, and the `j`th one is
 characterized by `IsNthLameEigenvalue`. Proved by regular Sturm–Liouville theory on `[0, K]`
-(`ODE.separatedSpectrum_inter_Iio_finite`, `ODE.not_bddAbove_separatedSpectrum`, `ODE.discrete_spectrum_enumeration`). -/
+(`ODE.separatedSpectrum_inter_Iio_finite`, `ODE.not_bddAbove_separatedSpectrum`,
+`ODE.discrete_spectrum_enumeration`). -/
 @[dlmf 29.3.i]
 theorem Real.lameEigenvalue_spec (hk0 : 0 < k) (hk1 : k < 1)
     (odd0 oddK : Bool) :
@@ -132,9 +134,11 @@ theorem Real.lameEigenvalue_spec (hk0 : 0 < k) (hk1 : k < 1)
   have hK := Real.compEllIntKm_pos hk
   have hS := lameSpectrum_eq_separatedSpectrum (ν := ν) (k := k) odd0 oddK
   have hinf : ¬BddAbove (Real.lameSpectrum ν k odd0 oddK) := hS ▸
-    ODE.not_bddAbove_separatedSpectrum (continuous_lamePotential hk) abs_lamePotential_le (lamePotential_neg hk) hK odd0 oddK
+    ODE.not_bddAbove_separatedSpectrum (continuous_lamePotential hk) abs_lamePotential_le
+        (lamePotential_neg hk) hK odd0 oddK
   have hfin : ∀ c, (Real.lameSpectrum ν k odd0 oddK ∩ Iio c).Finite := fun c => hS ▸
-    ODE.separatedSpectrum_inter_Iio_finite (continuous_lamePotential hk) abs_lamePotential_le hK odd0 oddK c
+    ODE.separatedSpectrum_inter_Iio_finite (continuous_lamePotential hk)
+        abs_lamePotential_le hK odd0 oddK c
   obtain ⟨h1, h2⟩ := ODE.discrete_spectrum_enumeration hinf hfin
   have hj : ∀ j, ∃! h, Real.IsNthLameEigenvalue ν k odd0 oddK j h := h1
   have he : ∀ j, Real.IsNthLameEigenvalue ν k odd0 oddK j (Real.lameEigenvalue ν k odd0 oddK j) :=
@@ -170,7 +174,8 @@ private lemma integral_jacobiDnm_mul_sq_pos (hk : k ^ 2 < 1) {h : ℝ} {w : ℝ 
       filter_upwards [Ioo_mem_nhds hm.1 hm.2] with x hx using hno x hx
     have hd := (hw.hasDerivAt (K / 2)).unique
       ((hasDerivAt_const (K / 2) (0 : ℝ)).congr_of_eventuallyEq hev)
-    exact hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero (continuous_lamePotential hk) hw (hno _ hm) hd)
+    exact hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero
+        (continuous_lamePotential hk) hw (hno _ hm) hd)
   rw [intervalIntegral.integral_pos_iff_support_of_nonneg_ae'
     (Filter.Eventually.of_forall hf0) (hf.intervalIntegrable 0 K)]
   refine ⟨hK, ?_⟩
@@ -182,7 +187,8 @@ private lemma integral_jacobiDnm_mul_sq_pos (hk : k ^ 2 < 1) {h : ℝ} {w : ℝ 
 /-- **Existence and uniqueness of the normalized Lamé eigenfunctions** (DLMF §§29.3(iv)–(v)):
 the eigenvalue `lameEigenvalue ν k odd0 oddK j` is simple, so there is exactly one
 eigenfunction with the normalization 29.3.18 and the sign rule of §29.3(v). Every eigenfunction
-is a multiple of the basic solution `ODE.basicSolution` (`ODE.isSturmLiouvilleSolution_eq_mul_basicSolution`). -/
+is a multiple of the basic solution `ODE.basicSolution`
+(`ODE.isSturmLiouvilleSolution_eq_mul_basicSolution`). -/
 @[dlmf 29.3.v]
 theorem Real.lameEigenfunction_spec (hk0 : 0 < k) (hk1 : k < 1)
     (odd0 oddK : Bool) (j : ℕ) :
@@ -471,7 +477,8 @@ private lemma ite_bodd_eq_neg_one_pow (m : ℕ) : (if m.bodd then (-1 : ℝ) els
     simp [Nat.bodd_mul, pow_succ, pow_mul]
 
 /-- `(if m is even then -1 else 1) = (-1)^(m+1)`. -/
-private lemma ite_not_bodd_eq_neg_one_pow (m : ℕ) : (if (!m.bodd) then (-1 : ℝ) else 1) = (-1) ^ (m + 1) := by
+private lemma ite_not_bodd_eq_neg_one_pow (m : ℕ) : (if (!m.bodd) then (-1 : ℝ) else 1) =
+    (-1) ^ (m + 1) := by
   rw [← ite_bodd_eq_neg_one_pow (m + 1), Nat.bodd_succ]
 
 /-- Table 29.3.2, `Ec^m_ν`: `Ec^m_ν(-x) = (-1)^m Ec^m_ν(x)`, `Ec^m_ν(2K - x) = Ec^m_ν(x)`,
@@ -489,7 +496,8 @@ theorem Real.lameEck_parity (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (x : ℝ) :
   have P := fun y => Real.IsLameEigenfunction.parity hk0 hk1 hw y
   obtain ⟨p1, p2, p3, p4⟩ := P x
   have p5 := (P (x + 2 * Real.compEllIntKm (k ^ 2))).2.2.2
-  simp only [ite_bodd_eq_neg_one_pow, Bool.false_eq_true, ↓reduceIte, mul_one, one_mul] at p1 p2 p3 p4 p5
+  simp only [ite_bodd_eq_neg_one_pow, Bool.false_eq_true, ↓reduceIte, mul_one, one_mul]
+      at p1 p2 p3 p4 p5
   refine ⟨p1, p2, p3, p4, ?_⟩
   rw [show x + 4 * Real.compEllIntKm (k ^ 2) =
     x + 2 * Real.compEllIntKm (k ^ 2) + 2 * Real.compEllIntKm (k ^ 2) by ring, p5, p4,
@@ -534,7 +542,8 @@ private lemma encard_zeros_lameEigenfunction (hk0 : 0 < k) (hk1 : k < 1)
     Real.isNormalizedLameEigenfunction_lameEigenfunction hk0 hk1 odd0 oddK j
   have hN := Real.isNthLameEigenvalue_lameEigenvalue (ν := ν) hk0 hk1 odd0 oddK j
   rw [isLameSolution_iff_isSturmLiouvilleSolution] at hw
-  rw [ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution (continuous_lamePotential hk) abs_lamePotential_le hK odd0 oddK hw hbc hne,
+  rw [ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution
+      (continuous_lamePotential hk) abs_lamePotential_le hK odd0 oddK hw hbc hne,
     ← lameSpectrum_eq_separatedSpectrum, ← hN.2.1.cast_ncard_eq, hN.2.2]
 
 /-- A set of reals with extended cardinality `n` is finite with `ncard = n`. -/
@@ -613,9 +622,11 @@ private lemma lameEigenvalue_interlace (hk0 : 0 < k) (hk1 : k < 1) (odd0 : Bool)
   have hN : Real.lameSpectrum ν k odd0 false = Nset := by
     rw [lameSpectrum_eq_separatedSpectrum, ODE.separatedSpectrum_false_eq hV]
   have hfinD : ∀ c, (Dset ∩ Iio c).Finite := fun c => by
-    rw [← hD, lameSpectrum_eq_separatedSpectrum]; exact ODE.separatedSpectrum_inter_Iio_finite hV hB hK odd0 true c
+    rw [← hD, lameSpectrum_eq_separatedSpectrum];
+        exact ODE.separatedSpectrum_inter_Iio_finite hV hB hK odd0 true c
   have hfinN : ∀ c, (Nset ∩ Iio c).Finite := fun c => by
-    rw [← hN, lameSpectrum_eq_separatedSpectrum]; exact ODE.separatedSpectrum_inter_Iio_finite hV hB hK odd0 false c
+    rw [← hN, lameSpectrum_eq_separatedSpectrum];
+        exact ODE.separatedSpectrum_inter_Iio_finite hV hB hK odd0 false c
   have hfinDc : ∀ c, (Dset ∩ Iic c).Finite := fun c =>
     (hfinD (c + 1)).subset fun x hx => ⟨hx.1, lt_of_le_of_lt (mem_Iic.1 hx.2) (lt_add_one c)⟩
   have cnt : ∀ i, (Dset ∩ Iic (Real.lameEigenvalue ν k odd0 false i)).ncard = i := fun i => by
@@ -657,7 +668,8 @@ private lemma lameEigenvalue_interlace (hk0 : 0 < k) (hk1 : k < 1) (odd0 : Bool)
       rw [hN] at hNe
       have hDe : ODE.basicSolution V odd0 e K = 0 := heq ▸ hDj.1
       exact ODE.basicSolution_ne_zero hV odd0 e
-        (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV (ODE.basicSolution_initial_and_isSol hV odd0 e).2.2 hDe hNe)
+        (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV
+            (ODE.basicSolution_initial_and_isSol hV odd0 e).2.2 hDe hNe)
 
 /-- Zeros in `(0, 2K)` of a function symmetric about `K` up to a factor. -/
 private lemma encard_zeros_Ioo_of_reflection {w : ℝ → ℝ} {K : ℝ} (hK : 0 < K) {s : ℝ}
@@ -722,7 +734,8 @@ private lemma encard_zeros_comp_sub {w : ℝ → ℝ} {K s : ℝ} (hpar : ∀ x,
   exact Set.InjOn.encard_image fun a _ b _ hab => by simpa using hab
 
 /-- The Lamé equation shifted by `K`. -/
-private lemma isSturmLiouvilleSolution_comp_sub {V : ℝ → ℝ} {h K : ℝ} {w : ℝ → ℝ} (hw : ODE.IsSturmLiouvilleSolution V h w) :
+private lemma isSturmLiouvilleSolution_comp_sub {V : ℝ → ℝ} {h K : ℝ} {w : ℝ → ℝ}
+    (hw : ODE.IsSturmLiouvilleSolution V h w) :
     ODE.IsSturmLiouvilleSolution (fun x => V (x - K)) h (fun x => w (x - K)) := by
   have hd : deriv (fun x => w (x - K)) = fun x => deriv w (x - K) :=
     funext fun x => deriv_comp_sub_const (f := w) (a := K) (x := x)
@@ -742,7 +755,8 @@ private lemma deriv_neg_eq_zero_of_parity {w : ℝ → ℝ} {K s : ℝ} (hw : Di
 /-- In the problem on `[0, 2K]` with potential `V(x - K)` and Neumann conditions at both ends,
 `a^m_ν` is an eigenvalue with exactly `m` smaller eigenvalues. -/
 private lemma lameAk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    Real.lameAk ν m k ∈ ODE.separatedSpectrum (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
+    Real.lameAk ν m k ∈ ODE.separatedSpectrum
+        (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
       (2 * Real.compEllIntKm (k ^ 2)) false false ∧
     (ODE.separatedSpectrum (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
       (2 * Real.compEllIntKm (k ^ 2)) false false ∩ Iio (Real.lameAk ν m k)).encard = m := by
@@ -763,10 +777,12 @@ private lemma lameAk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) (m 
     exact ⟨deriv_neg_eq_zero_of_parity hw.1 (fun x => (hpar x).1) hb.2, hb.2⟩
   have hune : u ≠ 0 := fun h0 => hne (funext fun y => by
     have := congrFun h0 (y + K); simpa [u] using this)
-  have hmem : Real.lameAk ν m k ∈ ODE.separatedSpectrum (fun x => lamePotential ν k (x - K)) (2 * K) false false :=
+  have hmem : Real.lameAk ν m k ∈
+      ODE.separatedSpectrum (fun x => lamePotential ν k (x - K)) (2 * K) false false :=
     ⟨u, hus, hbc, hune⟩
   refine ⟨hmem, ?_⟩
-  have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution (V := fun x => lamePotential ν k (x - K))
+  have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution
+      (V := fun x => lamePotential ν k (x - K))
     ((continuous_lamePotential hk).comp (by fun_prop))
     (fun x => abs_lamePotential_le (x - K)) (by linarith) false false hus hbc hune
   rw [← hosc]
@@ -780,7 +796,8 @@ private lemma lameAk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) (m 
   refine hZ.trans ?_
   simp only [u, sub_self]
   have hnz : deriv E 0 = 0 → E 0 ≠ 0 :=
-    fun hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero (continuous_lamePotential hk) hw h0 hd)
+    fun hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero
+        (continuous_lamePotential hk) hw h0 hd)
   have hmod := Nat.mod_two_of_bodd m
   cases hbo : m.bodd <;> rw [hbo] at hmod <;>
     simp only [hbo, Bool.false_eq_true, ↓reduceIte] at hb <;> simp at hmod
@@ -792,7 +809,8 @@ private lemma lameAk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) (m 
 /-- In the problem on `[0, 2K]` with potential `V(x - K)` and Dirichlet conditions at both ends,
 `b^m_ν` (`m ≥ 1`) is an eigenvalue with exactly `m - 1` smaller eigenvalues. -/
 private lemma lameBk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ} (hm : 1 ≤ m) :
-    Real.lameBk ν m k ∈ ODE.separatedSpectrum (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
+    Real.lameBk ν m k ∈ ODE.separatedSpectrum
+        (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
       (2 * Real.compEllIntKm (k ^ 2)) true true ∧
     (ODE.separatedSpectrum (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
       (2 * Real.compEllIntKm (k ^ 2)) true true ∩ Iio (Real.lameBk ν m k)).encard =
@@ -815,10 +833,12 @@ private lemma lameBk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) {m 
     rw [(hpar K).1, show Real.lameEsk ν m K k = 0 from hb.2, mul_zero]
   have hune : u ≠ 0 := fun h0 => hne (funext fun y => by
     have := congrFun h0 (y + K); simpa [u] using this)
-  have hmem : Real.lameBk ν m k ∈ ODE.separatedSpectrum (fun x => lamePotential ν k (x - K)) (2 * K) true true :=
+  have hmem : Real.lameBk ν m k ∈
+      ODE.separatedSpectrum (fun x => lamePotential ν k (x - K)) (2 * K) true true :=
     ⟨u, hus, hbc, hune⟩
   refine ⟨hmem, ?_⟩
-  have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution (V := fun x => lamePotential ν k (x - K))
+  have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution
+      (V := fun x => lamePotential ν k (x - K))
     ((continuous_lamePotential hk).comp (by fun_prop))
     (fun x => abs_lamePotential_le (x - K)) (by linarith) true true hus hbc hune
   rw [← hosc]
@@ -832,7 +852,8 @@ private lemma lameBk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) {m 
   refine hZ.trans ?_
   simp only [u, sub_self]
   have hnz : deriv E 0 = 0 → E 0 ≠ 0 :=
-    fun hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero (continuous_lamePotential hk) hw h0 hd)
+    fun hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero
+        (continuous_lamePotential hk) hw h0 hd)
   have hmod := Nat.mod_two_of_bodd m
   cases hbo : m.bodd <;> rw [hbo] at hmod <;>
     simp only [hbo, Bool.not_false, Bool.not_true, Bool.false_eq_true, ↓reduceIte] at hb <;>
@@ -868,7 +889,8 @@ theorem Real.lameEck_zeros_Ico (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
   obtain ⟨hw, hb, hne⟩ := Real.lameEck_isLameEigenfunction hk0 hk1 m
   rw [isLameSolution_iff_isSturmLiouvilleSolution] at hw
   have hnz : ∀ x, deriv (fun x => Real.lameEck ν m x k) x = 0 → Real.lameEck ν m x k ≠ 0 :=
-    fun x hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero (continuous_lamePotential hk) hw h0 hd)
+    fun x hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero
+        (continuous_lamePotential hk) hw h0 hd)
   refine finite_and_ncard_of_encard_eq ?_
   have hZ := encard_zeros_Ico_of_reflection (w := fun x => Real.lameEck ν m x k) hK (s := 1)
     (fun x => by rw [one_mul]; exact (Real.lameEck_parity hk0 hk1 m x).2.1)
@@ -895,7 +917,8 @@ theorem Real.lameEsk_zeros_Ico (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
   obtain ⟨hw, hb, hne⟩ := Real.lameEsk_isLameEigenfunction hk0 hk1 m
   rw [isLameSolution_iff_isSturmLiouvilleSolution] at hw
   have hnz : ∀ x, deriv (fun x => Real.lameEsk ν m x k) x = 0 → Real.lameEsk ν m x k ≠ 0 :=
-    fun x hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero (continuous_lamePotential hk) hw h0 hd)
+    fun x hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero
+        (continuous_lamePotential hk) hw h0 hd)
   refine finite_and_ncard_of_encard_eq ?_
   have hZ := encard_zeros_Ico_of_reflection (w := fun x => Real.lameEsk ν m x k) hK (s := -1)
     (fun x => by rw [neg_one_mul]; exact (Real.lameEsk_parity hk0 hk1 m x).2.1)

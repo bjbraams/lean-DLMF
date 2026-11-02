@@ -14,9 +14,9 @@ public import Mathlib.Analysis.Complex.LocallyUniformLimit
 # Theta functions: natural boundary and zeros (DLMF §20.2(ii), §20.2(iv))
 
 The natural boundary `Im τ = 0`, the `z`-zeros of the four theta functions, from Jacobi's
-triple product, and the nonvanishing of the theta constants. The nome forms, Fourier series, quasi-periodicity, half-period
-translations and analyticity of DLMF §20.2(i)–(iii) are in `DLMF.Theta.Basic.Series`,
-`DLMF.Theta.Basic.Periodicity` and `DLMF.Theta.Basic.Analytic`.
+triple product, and the nonvanishing of the theta constants. The nome forms, Fourier series,
+quasi-periodicity, half-period translations and analyticity of DLMF §20.2(i)–(iii) are in
+`DLMF.Theta.Basic.Series`, `DLMF.Theta.Basic.Periodicity` and `DLMF.Theta.Basic.Analytic`.
 
 ## Main results
 
@@ -80,12 +80,14 @@ theorem jacobiThetaThreeTau_eq_qPochhammerInf (z : ℂ) {τ : ℂ} (hτ : 0 < τ
     exact_mod_cast TripleProduct.tri_mul_two n
   have hsq : cexp (π * I * τ) ^ 2 = cexp (2 * (π * I * τ)) := by
     rw [← exp_nat_mul]; norm_num
-  rw [hE, hw, hsq, exp_zpow_eq_exp_intCast_mul, exp_zpow_eq_exp_intCast_mul, exp_zpow_eq_exp_intCast_mul, ← exp_add, ← exp_add]
+  rw [hE, hw, hsq, exp_zpow_eq_exp_intCast_mul, exp_zpow_eq_exp_intCast_mul,
+      exp_zpow_eq_exp_intCast_mul, ← exp_add, ← exp_add]
   congr 1
   linear_combination (-(π * I * τ)) * ht
 
 /-- A `q`-Pochhammer product with a vanishing factor vanishes. -/
-private lemma qPochhammerInf_eq_zero_of_factor {a q : ℂ} (hq : ‖q‖ < 1) {k : ℕ} (hk : 1 - a * q ^ k = 0) :
+private lemma qPochhammerInf_eq_zero_of_factor {a q : ℂ} (hq : ‖q‖ < 1) {k : ℕ}
+    (hk : 1 - a * q ^ k = 0) :
     qPochhammerInf a q = 0 := by
   have ht := tendsto_qPochhammer (w := a) hq
   have hev : ∀ᶠ n in atTop, qPochhammer a q n = 0 := by
@@ -111,7 +113,8 @@ theorem hasProd_congr_of_eq {f g : ℕ → ℂ} {a : ℂ} (h : HasProd f a) (hfg
   exact this ▸ h
 
 /-- `e^{2iz} + e^{-2iz} = 2 cos 2z`. -/
-theorem exp_two_I_mul_add_inv (z : ℂ) : cexp (2 * I * z) + (cexp (2 * I * z))⁻¹ = 2 * cos (2 * z) := by
+theorem exp_two_I_mul_add_inv (z : ℂ) : cexp (2 * I * z) + (cexp (2 * I * z))⁻¹ = 2 *
+    cos (2 * z) := by
   rw [← exp_neg, cos, show 2 * z * I = 2 * I * z by ring, show -(2 * z) * I = -(2 * I * z) by ring]
   ring
 
@@ -192,7 +195,8 @@ theorem jacobiThetaTau_eq_zero_iff {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
     (jacobiThetaThreeTau z τ = 0 ↔ ∃ m n : ℤ, z = (m + 1 / 2 + (n + 1 / 2) * τ) * π) ∧
     (jacobiThetaFourTau z τ = 0 ↔ ∃ m n : ℤ, z = (m + (n + 1 / 2) * τ) * π) := by
   have h3 : ∀ z : ℂ, jacobiThetaThreeTau z τ = 0 ↔
-      ∃ m n : ℤ, z = (m + 1 / 2 + (n + 1 / 2) * τ) * π := fun z => jacobiThetaThreeTau_eq_zero_iff hτ z
+      ∃ m n : ℤ, z = (m + 1 / 2 + (n + 1 / 2) * τ) * π := fun z =>
+          jacobiThetaThreeTau_eq_zero_iff hτ z
   refine ⟨?_, ?_, h3 z, ?_⟩
   · rw [jacobiThetaOneTau, neg_eq_zero, jacobiThetaTwoTau, mul_eq_zero, h3]
     simp only [exp_ne_zero, false_or]
@@ -207,7 +211,8 @@ theorem jacobiThetaTau_eq_zero_iff {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
     constructor <;> intro h <;> linear_combination h
 
 /-- A lattice-type point `(a + bτ)π` with real `a, b` vanishes only if `a = b = 0` (`Im τ > 0`). -/
-theorem eq_zero_of_lattice_point_eq_zero {τ : ℂ} (hτ : 0 < τ.im) {a b : ℝ} (h : 0 = ((a : ℂ) + b * τ) * π) :
+theorem eq_zero_of_lattice_point_eq_zero {τ : ℂ} (hτ : 0 < τ.im) {a b : ℝ}
+    (h : 0 = ((a : ℂ) + b * τ) * π) :
     a = 0 ∧ b = 0 := by
   have h' : (a : ℂ) + b * τ = 0 := by
     rcases mul_eq_zero.mp h.symm with h | h
@@ -236,7 +241,8 @@ theorem jacobiThetaNullTau_ne_zero {τ : ℂ} (hτ : 0 < τ.im) :
     have h2 : (2 * m + 1 : ℝ) = 0 := by linarith [this.1]
     exact absurd (by exact_mod_cast h2 : (2 * m + 1 : ℤ) = 0) (by omega)
   · obtain ⟨m, n, hmn⟩ := hz.2.2.1.mp h
-    have := eq_zero_of_lattice_point_eq_zero hτ (a := m + 1 / 2) (b := n + 1 / 2) (by push_cast; exact hmn)
+    have := eq_zero_of_lattice_point_eq_zero hτ (a := m + 1 / 2) (b := n + 1 / 2)
+        (by push_cast; exact hmn)
     have h2 : (2 * m + 1 : ℝ) = 0 := by linarith [this.1]
     exact absurd (by exact_mod_cast h2 : (2 * m + 1 : ℤ) = 0) (by omega)
   · obtain ⟨m, n, hmn⟩ := hz.2.2.2.mp h

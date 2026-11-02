@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.SeriesProperties
+public import DLMF.Hypergeometric.Basic.SpecialValues
 public import DLMF.Zeta.Basic.Hurwitz
 
 /-!
@@ -14,5 +14,5 @@ public import DLMF.Zeta.Basic.Hurwitz
 The definition of `DLMF.Zeta.hurwitzZetaComplex` by Euler–Maclaurin continuation, the
 existence of the limit, its holomorphy and the bridge to Mathlib's `hurwitzZeta` are in the
 foundational module `DLMF.Zeta.Basic.Hurwitz`. This module re-exports it, together with
-`DLMF.Hypergeometric.SeriesProperties`, for `DLMF.IncompleteGamma.ZerosIntegrals`.
+`DLMF.Hypergeometric.Basic.SpecialValues`, for `DLMF.IncompleteGamma.ZerosIntegrals`.
 -/

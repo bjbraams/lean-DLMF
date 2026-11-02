@@ -200,7 +200,8 @@ theorem pcfCt_vertical_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {c : ℝ} (h
   have hEn : ∀ y, ‖E y‖ ≤ pcfCt_dom ‖z‖ 0 c y := fun y => by
     have := pcfCt_vert_le (z := z) (p := 0) (P := 0) hc le_rfl (by simp) y
     simpa [hE, hT] using this
-  have hSi : Integrable (fun s : ℝ => s^(a.re - 1/2) * Real.exp (-c*s)) (volume.restrict (Ioi 0)) := by
+  have hSi : Integrable (fun s : ℝ => s^(a.re - 1/2) * Real.exp (-c*s))
+      (volume.restrict (Ioi 0)) := by
     have := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := a.re - 1/2) (b := c)
       (by linarith) one_pos hc
     simpa only [Real.rpow_one, IntegrableOn] using this
@@ -221,7 +222,8 @@ theorem pcfCt_vertical_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {c : ℝ} (h
         h1, h2]
       exact mul_le_mul_of_nonneg_right (hEn q.1) (by positivity)
   have hG0 : Gamma (a+1/2) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos hs
-  have hL : Gamma (a+1/2) * ∫ y : ℝ, E y * (T y)^(-a-1/2) = ∫ y : ℝ, ∫ s in Ioi (0:ℝ), F (y, s) := by
+  have hL : Gamma (a+1/2) * ∫ y : ℝ, E y * (T y)^(-a-1/2) = ∫ y : ℝ,
+      ∫ s in Ioi (0:ℝ), F (y, s) := by
     rw [← integral_const_mul]
     refine integral_congr_ae (Eventually.of_forall fun y => ?_)
     simp only [hF]
@@ -398,7 +400,8 @@ theorem pcfCt_ofReal_cpow {t : ℝ} (ht : 0 < t) (w : ℂ) : (t:ℂ)^w = exp (w 
 
 /-- `F` on the two edges `x ± iπ` of the logarithmic strip. -/
 theorem pcfCt_F_edge (a z : ℂ) (x : ℝ) (s : ℝ) (hs : s = 1 ∨ s = -1) :
-    pcfCt_F a z (x + (s*π:ℝ)*I) = -exp (s*(a-1/2)*π*I) * (Real.exp x * pcfCt_g a z (Real.exp x)) := by
+    pcfCt_F a z (x + (s*π:ℝ)*I) = -exp (s*(a-1/2)*π*I) *
+        (Real.exp x * pcfCt_g a z (Real.exp x)) := by
   have he : exp (((s*π:ℝ):ℂ)*I) = -1 := by
     rcases hs with rfl | rfl
     · simp [exp_pi_mul_I]
@@ -408,7 +411,8 @@ theorem pcfCt_F_edge (a z : ℂ) (x : ℝ) (s : ℝ) (hs : s = 1 ∨ s = -1) :
   have h2 : (-(exp (x:ℂ)))^2 = exp (x:ℂ)^2 := by ring
   rw [mul_neg_one, h2]
   rw [show (exp (x:ℂ):ℂ) = exp (x:ℂ) from rfl]
-  rw [show -exp (↑s*(a-1/2)*↑π*I) * (exp (x:ℂ) * (exp ((a-1/2)*x) * exp (-exp (x:ℂ)^2/2 - z*exp x))) =
+  rw [show -exp (↑s*(a-1/2)*↑π*I) *
+      (exp (x:ℂ) * (exp ((a-1/2)*x) * exp (-exp (x:ℂ)^2/2 - z*exp x))) =
       -exp (↑s*(a-1/2)*↑π*I) * exp (x + (a-1/2)*x + (-exp (x:ℂ)^2/2 - z*exp x)) by
     rw [Complex.exp_add, Complex.exp_add]; ring]
   rw [show -exp (↑s*(a-1/2)*↑π*I) = exp (↑s*(a-1/2)*↑π*I) * exp (((s*π:ℝ):ℂ)*I) by rw [he]; ring,
@@ -479,7 +483,8 @@ theorem pcfCt_loop_eq (a z : ℂ) {r R : ℝ} (hr : 0 < r) (hR : 0 < R) :
     simp only [pcfCt_g]
     rw [pcfCt_ofReal_cpow (hpos t ht), ← Complex.exp_add, ← Complex.exp_add, ← Complex.exp_add]
     congr 1; ring
-  have h2 : (∫ θ : ℝ in -π..π, let t := r*exp (I*θ); exp (z*t-t^2/2)*exp ((a-1/2)*(Real.log r+I*θ))*I*t) =
+  have h2 : (∫ θ : ℝ in -π..π, let t := r*exp (I*θ);
+      exp (z*t-t^2/2)*exp ((a-1/2)*(Real.log r+I*θ))*I*t) =
       pcfCt_C a z r := by
     unfold pcfCt_C
     refine intervalIntegral.integral_congr fun θ _ => ?_
@@ -624,10 +629,12 @@ theorem pcfCt_g_le {a z : ℂ} {Q Z r : ℝ} (hr : 0 < r) (hQ : ‖a-1/2‖ ≤ 
   nlinarith [sq_nonneg (Q + Z - t/2)]
 
 /-- `pcfCt_g` is integrable on `(r, ∞)` for every parameter. -/
-theorem pcfCt_g_integrableOn (a z : ℂ) {r : ℝ} (hr : 0 < r) : IntegrableOn (pcfCt_g a z) (Ioi r) := by
+theorem pcfCt_g_integrableOn (a z : ℂ) {r : ℝ} (hr : 0 < r) : IntegrableOn
+    (pcfCt_g a z) (Ioi r) := by
   refine Integrable.mono' (((integrable_exp_neg_mul_sq (by norm_num : (0:ℝ) < 1/4)).const_mul
     (Real.exp (‖a-1/2‖*|Real.log r| + (‖a-1/2‖+‖z‖)^2))).integrableOn)
-    (((pcfCt_g_continuousOn a z).mono (Ioi_subset_Ioi hr.le)).aestronglyMeasurable measurableSet_Ioi) ?_
+    (((pcfCt_g_continuousOn a z).mono (Ioi_subset_Ioi hr.le)).aestronglyMeasurable
+        measurableSet_Ioi) ?_
   filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
   exact pcfCt_g_le hr le_rfl le_rfl (le_of_lt ht)
 
@@ -666,7 +673,8 @@ theorem pcfCt_C_differentiable (z : ℂ) {r : ℝ} (hr : 0 < r) :
   · refine Eventually.of_forall fun θ a _ => ?_
     unfold pcfCt_F
     exact (by fun_prop : DifferentiableAt ℂ (fun a : ℂ => I * exp (z * exp ((Real.log r:ℂ) + θ*I) -
-      exp ((Real.log r:ℂ) + θ*I) ^ 2 / 2 + (a + 1/2) * ((Real.log r:ℂ) + θ*I))) a).differentiableWithinAt
+      exp ((Real.log r:ℂ) + θ*I) ^ 2 / 2 + (a + 1/2) *
+          ((Real.log r:ℂ) + θ*I))) a).differentiableWithinAt
   · intro a0 _
     refine ⟨ball a0 1, ball_mem_nhds _ one_pos,
       fun _ => Real.exp (‖z‖*r + r^2/2 + (‖a0 + 1/2‖ + 1)*(|Real.log r| + π)),
@@ -861,7 +869,8 @@ theorem pcfCt_Phi_real_integrable {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2)
     refine Continuous.div (by fun_prop) (by fun_prop) fun u => ?_
     have : (x:ℂ)^2 + exp (u:ℂ)^2 = ((x^2 + Real.exp u^2 : ℝ) : ℂ) := by push_cast; rfl
     rw [this]; exact ofReal_ne_zero.mpr (by positivity)
-  refine ((TauCeti.integrable_exp_neg_mul_abs (a := min μ.re (2 - μ.re)) (lt_min hm0 (by linarith))).const_mul
+  refine ((TauCeti.integrable_exp_neg_mul_abs (a := min μ.re (2 - μ.re))
+      (lt_min hm0 (by linarith))).const_mul
     (1 + 1/x^2)).mono' hc.aestronglyMeasurable (Eventually.of_forall fun u => ?_)
   rw [pcfCt_norm_Phi_real]; exact pcfCt_line_bound μ.re hx u
 
@@ -974,7 +983,8 @@ theorem pcfCt_kernel_shift {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : �
       pcfCt_Phi μ x σ ((-y:ℝ):ℂ) := by
     intro y
     have hw : I*(((0:ℝ):ℂ) + y*I) = ((-y:ℝ):ℂ) := by push_cast; ring_nf; rw [I_sq]; ring
-    rw [key _ (by rw [hw]; intro h; have := congrArg Complex.im h; simp [hpim] at this; linarith [Real.pi_pos]),
+    rw [key _ (by rw [hw]; intro h; have := congrArg Complex.im h; simp [hpim] at this;
+                  linarith [Real.pi_pos]),
       hw]
   have hlπ : ∀ y : ℝ, φ ((π:ℂ) + y*I) / ((π:ℂ) + y*I - q) =
       exp (μ*π*I) * pcfCt_Phi μ x (-σ) ((-y:ℝ):ℂ) := by
@@ -993,7 +1003,8 @@ theorem pcfCt_kernel_shift {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : �
   have hx2 : ∀ T : ℝ, T ≠ -Real.log x → x^2 ≠ Real.exp (2*(-T)) := by
     intro T hT h
     rw [show x^2 = Real.exp (2*Real.log x) by
-      rw [show 2*Real.log x = Real.log x + Real.log x by ring, Real.exp_add, Real.exp_log hx]; ring] at h
+      rw [show 2*Real.log x = Real.log x + Real.log x by ring, Real.exp_add,
+                                                           Real.exp_log hx]; ring] at h
     exact hT (by linarith [Real.exp_injective h])
   have hcross : ∀ T : ℝ, T ≠ -Real.log x →
       ‖∫ x' in (0:ℝ)..π, φ (x' + T*I) / (x' + T*I - q)‖ ≤
@@ -1009,12 +1020,14 @@ theorem pcfCt_kernel_shift {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : �
       (by simp; exact hx'.2) (by simpa using hx2 T hT)
     simpa using this
   obtain ⟨hB1, hB2⟩ := pcfCt_cross_bound_tendsto hm0 hm2 hx (|μ.im| * π)
-  have htop : Tendsto (fun T : ℝ => ∫ x' in (0:ℝ)..π, φ (x' + T*I) / (x' + T*I - q)) atTop (𝓝 0) := by
+  have htop : Tendsto (fun T : ℝ => ∫ x' in (0:ℝ)..π, φ (x' + T*I) / (x' + T*I - q))
+      atTop (𝓝 0) := by
     have hl := (hB1.comp tendsto_neg_atTop_atBot).mul_const |π - 0|
     rw [zero_mul] at hl
     refine squeeze_zero_norm' ?_ hl
     filter_upwards [eventually_ne_atTop (-Real.log x)] with T hT using hcross T hT
-  have hbot : Tendsto (fun T : ℝ => ∫ x' in (0:ℝ)..π, φ (x' + T*I) / (x' + T*I - q)) atBot (𝓝 0) := by
+  have hbot : Tendsto (fun T : ℝ => ∫ x' in (0:ℝ)..π, φ (x' + T*I) / (x' + T*I - q))
+      atBot (𝓝 0) := by
     have hl := (hB2.comp tendsto_neg_atBot_atTop).mul_const |π - 0|
     rw [zero_mul] at hl
     refine squeeze_zero_norm' ?_ hl
@@ -1036,7 +1049,8 @@ theorem pcfCt_kernel {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (h
       π/2 * (x:ℂ)^(μ-2) * exp (-(x*σ:ℂ)) := by
   have hA : ∀ s : ℝ, IntegrableOn (pcfCt_gs μ x s) (Ioi 0) ∧
       ∫ t in Ioi (0:ℝ), pcfCt_gs μ x s t = ∫ u : ℝ, pcfCt_Phi μ x s u := fun s => by
-    have hf : (fun u : ℝ => pcfCt_Phi μ x s u) = fun u => Real.exp u • pcfCt_gs μ x s (Real.exp u) :=
+    have hf : (fun u : ℝ => pcfCt_Phi μ x s u) = fun u => Real.exp u •
+        pcfCt_gs μ x s (Real.exp u) :=
       funext fun u => pcfCt_Phi_real μ x s u
     refine ⟨(integrable_comp_exp _).mp (hf ▸ pcfCt_Phi_real_integrable hm0 hm2 hx s), ?_⟩
     rw [hf, integral_comp_exp]
@@ -1047,7 +1061,8 @@ theorem pcfCt_kernel {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (h
       fun t => (exp (c*I) * pcfCt_gs μ x σ t + exp (-(c*I)) * pcfCt_gs μ x (-σ) t) / 2 := by
     funext t
     simp only [pcfCt_gs, Complex.cos]
-    rw [show ((t:ℂ)*σ + c)*I = I*σ*t + c*I by ring, show -((t:ℂ)*σ + c)*I = I*((-σ:ℝ):ℂ)*t + -(c*I) by
+    rw [show ((t:ℂ)*σ + c)*I = I*σ*t + c*I by ring, show -((t:ℂ)*σ + c)*I =
+                                                I*((-σ:ℝ):ℂ)*t + -(c*I) by
       push_cast; ring, Complex.exp_add, Complex.exp_add]
     ring
   rw [hfun]
@@ -1087,7 +1102,8 @@ theorem pcfCt_U_decay (P : ℝ) : ∃ M : ℝ, ∀ a : ℂ, ‖-a-1/2‖ ≤ P �
         Real.sqrt (2*π) := by
     rw [hV]; field_simp
   rw [hval, norm_div, norm_real, Real.norm_of_nonneg hs.le]
-  rw [div_le_iff₀ hs, show (∫ y, pcfCt_dom 0 P 1 y) / Real.sqrt (2*π) * Real.exp (-t) * Real.sqrt (2*π)
+  rw [div_le_iff₀ hs, show (∫ y, pcfCt_dom 0 P 1 y) / Real.sqrt (2*π) * Real.exp (-t) *
+      Real.sqrt (2*π)
     = ∫ y, Real.exp (-t) * pcfCt_dom 0 P 1 y by
       rw [integral_const_mul]; field_simp]
   refine norm_integral_le_of_norm_le ((pcfCt_dom_integrable 0 P 1).const_mul _)

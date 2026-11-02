@@ -68,7 +68,8 @@ theorem incRep_Gamma_bound (X : ℝ) :
     refine this.trans ?_
     gcongr
     exact le_max_left _ _
-  have h2 := (Complex.barnesRes_norm_Gamma_mul_sin_le (x + I*y)).trans (mul_le_mul_of_nonneg_left h1 Real.pi_pos.le)
+  have h2 := (Complex.barnesRes_norm_Gamma_mul_sin_le (x + I*y)).trans
+      (mul_le_mul_of_nonneg_left h1 Real.pi_pos.le)
   have hw : (π:ℂ)*(x + I*y) = ((π*x:ℝ):ℂ) + ((π*y:ℝ):ℂ)*I := by push_cast; ring
   rw [hw] at h2
   have hcosh : E*E/2 ≤ Real.cosh (π*y) := by
@@ -167,7 +168,8 @@ theorem incRep_norm_f_le {a w : ℂ} (x y : ℝ) {C S : ℝ} {K : ℕ} (hC : 0 �
         gcongr
         exact g.trans (by gcongr)
     _ = C * (1+|a.im|)^K * Real.exp (π*|a.im|/2) * (π/S) * Real.exp (-(x*w.re)) *
-          ((1+|y|)^K * (Real.exp (-(π*|y|)/2) * Real.exp (-(π*|y|)) * Real.exp (|w.im| * |y|))) := by
+          ((1+|y|)^K * (Real.exp (-(π*|y|)/2) * Real.exp (-(π*|y|)) *
+              Real.exp (|w.im| * |y|))) := by
         ring
     _ = _ := by rw [← Real.exp_add, ← Real.exp_add]; ring_nf
 
@@ -178,14 +180,17 @@ theorem incRep_f_differentiableAt {a w s : ℂ} (hs : Complex.sin (π*s) ≠ 0)
   exact ((((differentiableAt_Gamma _ hA).comp s (by fun_prop)).mul_const _).div
     ((Complex.differentiable_sin _).comp s (by fun_prop)) hs).mul (by fun_prop)
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun a => incRep_f a w s) a`. -/
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun a => incRep_f a w s) a`.
+-/
 theorem incRep_f_differentiableAt_param {a w s : ℂ} (hA : ∀ m : ℕ, s+1-a ≠ -m) :
     DifferentiableAt ℂ (fun a => incRep_f a w s) a := by
   unfold incRep_f
   exact ((((differentiableAt_Gamma _ hA).comp a (by fun_prop)).mul_const _).div_const _).mul_const _
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun w => incRep_f a w s) w`. -/
-theorem incRep_f_differentiableAt_w {a w s : ℂ} : DifferentiableAt ℂ (fun w => incRep_f a w s) w := by
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun w => incRep_f a w s) w`.
+-/
+theorem incRep_f_differentiableAt_w {a w s : ℂ} : DifferentiableAt ℂ
+    (fun w => incRep_f a w s) w := by
   unfold incRep_f; fun_prop
 
 /-- Nonvanishing under the stated hypotheses: `∀ m : ℕ, (x:ℂ) + y*I + 1 - a ≠ -m`. -/
@@ -197,7 +202,8 @@ theorem incRep_ne_pole {a : ℂ} {x : ℝ} (hav : ∀ n : ℕ, a.re - 1 - n ≠ 
 theorem incRep_f_continuous {a w : ℂ} {c : ℝ} (hs : Real.sin (π*c) ≠ 0)
     (hav : ∀ n : ℕ, a.re - 1 - n ≠ c) : Continuous fun y : ℝ => incRep_f a w (c + y*I) :=
   continuous_iff_continuousAt.mpr fun y => by
-    have h := (incRep_f_differentiableAt (w := w) (Complex.barnesRes_sin_ne_zero_of_re (by simpa using hs))
+    have h := (incRep_f_differentiableAt (w := w)
+        (Complex.barnesRes_sin_ne_zero_of_re (by simpa using hs))
       (incRep_ne_pole hav y)).continuousAt
     exact h.comp (f := fun y : ℝ => (c:ℂ) + y*I) (by fun_prop)
 
@@ -208,7 +214,8 @@ theorem incRep_f_integrable {a w : ℂ} (hw : |w.im| < 3*π/2) {c : ℝ} (hs : R
   have hS : 0 < |Real.sin (π*c)|/2 := by positivity
   refine ((DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (c := 3*π/2 - |w.im|)
     (by linarith) K).const_mul _).mono' (incRep_f_continuous hs hav).aestronglyMeasurable
-    (Eventually.of_forall fun y => incRep_norm_f_le c y hC hS (h _) (Complex.barnesRes_sin_lower_line c y))
+    (Eventually.of_forall fun y =>
+        incRep_norm_f_le c y hC hS (h _) (Complex.barnesRes_sin_lower_line c y))
 
 open scoped Interval in
 /-- Horizontal cross-sections of the 8.6.12 integrand vanish at `±i∞`. -/
@@ -273,7 +280,8 @@ theorem incRep_shift_none {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (
     (incRep_f_integrable hw (hsin c₁ h1I) (hav c₁ h1I))
     (incRep_f_integrable hw (hsin c₂ h2I) (hav c₂ h2I)) ht hb
   have htS' : t.re ∈ Icc c₁ c₂ := htS
-  refine (incRep_f_differentiableAt (Complex.barnesRes_sin_ne_zero_of_re (hsin _ htS')) fun m h => ?_
+  refine (incRep_f_differentiableAt
+      (Complex.barnesRes_sin_ne_zero_of_re (hsin _ htS')) fun m h => ?_
     ).differentiableWithinAt
   have := congrArg re h; simp at this
   exact hno m (by rw [show a.re - 1 - m = t.re by linarith]; exact htS')
@@ -836,7 +844,8 @@ theorem incRep_G_differentiableAt {w : ℂ} (hw : |w.im| < 3*π/2) {a₀ : ℂ}
 
 /-- Finitely many residues recording indentation past right-hand Gamma poles. -/
 def gammaBarnesResidueSum (a w : ℂ) (c : ℝ) : ℂ :=
-  ∑ n ∈ Finset.range ⌈a.re-1-c⌉₊, limUnder (𝓝[≠] (a-1-n)) (fun s : ℂ => (s-(a-1-n))*Gamma (s+1-a)*π/sin (π*s)*exp (-s*w))
+  ∑ n ∈ Finset.range ⌈a.re-1-c⌉₊,
+      limUnder (𝓝[≠] (a-1-n)) (fun s : ℂ => (s-(a-1-n))*Gamma (s+1-a)*π/sin (π*s)*exp (-s*w))
 
 /-- Formula under the stated hypotheses: `gammaBarnesResidueSum a w c = ∑ n ∈ Finset.range
 ⌈a.re-1-c⌉₊, incRep_res a w n`. -/
@@ -848,8 +857,11 @@ theorem incRep_residueSum_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) (w : ℂ) {
 
 /-- Logarithmic-plane formula with explicit separating-contour residues. -/
 @[dlmf 8.6.E12]
-theorem upperIncGamma_mellinBarnes_continued {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) (w : ℂ) (hw : |w.im| < 3*π/2) {c : ℝ} (hc0 : -1 < c) (hc1 : c < 0) (hca : ∀ n : ℕ, a.re-1-n ≠ c) :
-    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma (s+1-a)*π/sin (π*s)*exp (-s*w)) (2*π*(-Gamma (1-a)*exp ((1-a)*w+exp w)*upperIncGammaOnLog a w-gammaBarnesResidueSum a w c)) := by
+theorem upperIncGamma_mellinBarnes_continued {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) (w : ℂ)
+    (hw : |w.im| < 3*π/2) {c : ℝ} (hc0 : -1 < c) (hc1 : c < 0) (hca : ∀ n : ℕ, a.re-1-n ≠ c) :
+    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma (s+1-a)*π/sin (π*s)*exp (-s*w))
+        (2*π*(-Gamma (1-a)*exp ((1-a)*w+exp w)*upperIncGammaOnLog a
+        w-gammaBarnesResidueSum a w c)) := by
   set D : Set ℂ := {a : ℂ | ∀ n : ℕ, a ≠ n+1}
   set E : Set ℂ := {b : ℂ | ∀ n : ℕ, b ≠ 0 - n}
   have hDE : D = (fun a : ℂ => 1 - a) ⁻¹' E := by

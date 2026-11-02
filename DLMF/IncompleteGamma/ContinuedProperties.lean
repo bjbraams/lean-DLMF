@@ -91,7 +91,8 @@ theorem scIncGamma_recurrence (a z : ℂ) :
     ring
   have htail := (hasSum_nat_add_iff' 1).mpr hs
   simp only [Finset.sum_range_one, pow_zero, mul_one, Nat.cast_zero, add_zero] at htail
-  have ht' : HasSum (fun k : ℕ => exp (-z)*z^(k+1)/Gamma (a+((k+1:ℕ):ℂ)+1)) (z*scIncGamma (a+1) z) :=
+  have ht' : HasSum (fun k : ℕ => exp (-z)*z^(k+1)/Gamma (a+((k+1:ℕ):ℂ)+1))
+      (z*scIncGamma (a+1) z) :=
     ht.congr_fun fun k => hg k
   exact ht'.unique htail
 
@@ -99,7 +100,8 @@ theorem scIncGamma_recurrence (a z : ℂ) :
 z - z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1))`. -/
 @[dlmf 8.8.E11]
 theorem normIncGammaPContinued_shift_up (n : ℕ) (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
-    normIncGammaPContinued (a+n) z=normIncGammaPContinued a z - z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1)) := by
+    normIncGammaPContinued (a+n) z=normIncGammaPContinued a z -
+        z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1)) := by
   have hstep (b : ℂ) : normIncGammaPContinued (b+1) z =
       normIncGammaPContinued b z-z^b*exp (-z)/Gamma (b+1) := by
     unfold normIncGammaPContinued
@@ -116,7 +118,8 @@ theorem normIncGammaPContinued_shift_up (n : ℕ) (a : ℂ) {z : ℂ} (hz : z �
 z + z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1))`. -/
 @[dlmf 8.8.E12]
 theorem normIncGammaQContinued_shift_up (n : ℕ) (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
-    normIncGammaQContinued (a+n) z=normIncGammaQContinued a z + z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1)) := by
+    normIncGammaQContinued (a+n) z=normIncGammaQContinued a z +
+        z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1)) := by
   rw [normIncGammaQContinued, normIncGammaQContinued, normIncGammaPContinued_shift_up n a hz]
   ring
 
@@ -180,19 +183,22 @@ theorem scIncGamma_joint_entire  :
   have hc : Continuous fun p : ℂ × ℂ => scIncGamma p.1 p.2 := by
     unfold scIncGamma
     exact (by fun_prop : Continuous fun p : ℂ × ℂ => exp (-p.2)).mul
-      (continuous_regularizedConfluent.comp (f := fun p : ℂ × ℂ => ((1:ℂ), p.1+1, p.2)) (by fun_prop))
+      (continuous_regularizedConfluent.comp
+          (f := fun p : ℂ × ℂ => ((1:ℂ), p.1+1, p.2)) (by fun_prop))
   have h1 : ∀ p ∈ (univ : Set (ℂ × ℂ)), DifferentiableAt ℂ (fun a => scIncGamma a p.2) p.1 := by
     intro p _
     unfold scIncGamma
     exact (differentiableAt_const _).mul (analyticAt_regularizedConfluent_comp
-      (A := fun _ => (1:ℂ)) (B := fun b => b+1) (differentiable_const _) (by fun_prop) p.2 p.1).differentiableAt
+      (A := fun _ => (1:ℂ)) (B := fun b => b+1) (differentiable_const _) (by fun_prop) p.2
+          p.1).differentiableAt
   have h2 : ∀ p ∈ (univ : Set (ℂ × ℂ)), DifferentiableAt ℂ (fun z => scIncGamma p.1 z) p.2 := by
     intro p _
     unfold scIncGamma
     exact (by fun_prop : DifferentiableAt ℂ (fun z : ℂ => exp (-z)) p.2).mul
       (differentiableAt_regularizedConfluent 1 (p.1+1) p.2)
   intro p
-  exact ((Complex.differentiableOn_prod_of_continuousOn_of_separately isOpen_univ hc.continuousOn h1 h2)
+  exact ((Complex.differentiableOn_prod_of_continuousOn_of_separately isOpen_univ
+      hc.continuousOn h1 h2)
     p trivial).differentiableAt univ_mem
 
 /-- Meromorphic parameter dependence away from the listed poles. -/
@@ -249,12 +255,15 @@ theorem tendsto_add_nat_mul_Gamma (n : ℕ) :
         push_cast
         linear_combination h
     have hinv : Tendsto (fun a : ℂ => a⁻¹) (𝓝[≠] (-((n+1:ℕ) : ℂ))) (𝓝 (-((n+1:ℕ) : ℂ))⁻¹) :=
-      ((continuousAt_inv₀ (by push_cast; exact neg_ne_zero.mpr (by exact_mod_cast n.succ_ne_zero))).tendsto).mono_left
+      ((continuousAt_inv₀ (by push_cast;
+                              exact neg_ne_zero.mpr
+                                (by exact_mod_cast n.succ_ne_zero))).tendsto).mono_left
         nhdsWithin_le_nhds
     have h := (ih.comp hshift).mul hinv
     have hne0 : ∀ᶠ a in 𝓝[≠] (-((n+1:ℕ) : ℂ)), a ≠ 0 :=
       (hinv.eventually_ne (by
-        exact inv_ne_zero (by push_cast; exact neg_ne_zero.mpr (by exact_mod_cast n.succ_ne_zero)))).mono
+        exact inv_ne_zero (by push_cast;
+                              exact neg_ne_zero.mpr (by exact_mod_cast n.succ_ne_zero)))).mono
         fun a ha h0 => ha (by rw [h0, inv_zero])
     have hlim : (-1 : ℂ)^n/n.factorial * (-((n+1:ℕ) : ℂ))⁻¹ =
         (-1 : ℂ)^(n+1)/(n+1).factorial := by
@@ -325,7 +334,8 @@ theorem upperIncGamma_parameter_entire {z : ℂ} (hz : z ≠ 0) :
 
 /-- Simple parameter poles and their residues in DLMF §8.2(ii). -/
 theorem lowerIncGamma_parameter_residue (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    Tendsto (fun a : ℂ => (a+n)*lowerIncGamma a z) (𝓝[≠] (-(n : ℂ))) (𝓝 ((-1 : ℂ)^n/n.factorial)) := by
+    Tendsto (fun a : ℂ => (a+n)*lowerIncGamma a z) (𝓝[≠] (-(n : ℂ)))
+        (𝓝 ((-1 : ℂ)^n/n.factorial)) := by
   have hc : Tendsto (fun a : ℂ => z^a*scIncGamma a z) (𝓝[≠] (-(n : ℂ)))
       (𝓝 (z^(-(n:ℂ))*scIncGamma (-n) z)) :=
     (((continuous_const_cpow' hz).mul (continuous_scIncGamma_param z)).tendsto _).mono_left
@@ -353,7 +363,8 @@ theorem hasDerivAt_lowerIncGammaOnLog {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w 
   have ha0 : a ≠ 0 := by simpa using ha 0
   have hsc : HasDerivAt (fun u => scIncGamma a (exp u))
       (-(a*scIncGamma (a+1) (exp w))*exp w) w := by
-    have h := (hasDerivAt_regularizedConfluent_neg a (a+1) (exp w)).comp w (Complex.hasDerivAt_exp w)
+    have h := (hasDerivAt_regularizedConfluent_neg a (a+1) (exp w)).comp w
+        (Complex.hasDerivAt_exp w)
     rw [show a+1+1=(a+1)+1 by ring, regularizedConfluent_self_succ_neg] at h
     simpa only [Function.comp_def, regularizedConfluent_self_succ_neg] using h
   have h := ((((hasDerivAt_id w).const_mul a).cexp).mul hsc).const_mul (Gamma a)
@@ -364,7 +375,8 @@ theorem hasDerivAt_lowerIncGammaOnLog {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w 
   have hG0 : Gamma a ≠ 0 := Gamma_ne_zero ha
   simp only [id, mul_one]
   rw [show a*w-exp w=a*w+(-exp w) by ring, Complex.exp_add]
-  have hr' : exp w*scIncGamma (a+1) (exp w)*(a*Gamma a)=scIncGamma a (exp w)*(a*Gamma a)-exp (-exp w) := by
+  have hr' : exp w*scIncGamma (a+1) (exp w)*(a*Gamma a)=scIncGamma a
+      (exp w)*(a*Gamma a)-exp (-exp w) := by
     rw [hr, hG]; field_simp
   linear_combination (-exp (a*w))*hr'
 
@@ -396,7 +408,8 @@ theorem continuous_upperIncGammaOnLog_param (w : ℂ) :
 /-- The upper Gamma continuation is entire in its parameter. -/
 theorem upperIncGammaOnLog_parameter_entire (w : ℂ) :
     Differentiable ℂ (fun a => upperIncGammaOnLog a w) := by
-  have hA : ∀ b : ℂ, (∀ m : ℕ, b ≠ -m) → DifferentiableAt ℂ (fun a => upperIncGammaOnLog a w) b := by
+  have hA : ∀ b : ℂ, (∀ m : ℕ, b ≠ -m) →
+      DifferentiableAt ℂ (fun a => upperIncGammaOnLog a w) b := by
     intro b hb
     have hev : ∀ᶠ c : ℂ in 𝓝 b, ∀ m : ℕ, c≠-m := by
       filter_upwards [(differentiable_one_div_Gamma b).continuousAt.eventually_ne
@@ -487,7 +500,8 @@ theorem lowerIncGammaOnLog_monodromy (w : ℂ) (m : ℤ) {a : ℂ} :
 (w+2*π*m*I)=exp (2*π*m*I*a)*upperIncGammaOnLog a w+(1-exp (2*π*m*I*a))*Gamma a`. -/
 @[dlmf 8.2.E9]
 theorem upperIncGammaOnLog_monodromy (w : ℂ) (m : ℤ) {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
-    upperIncGammaOnLog a (w+2*π*m*I)=exp (2*π*m*I*a)*upperIncGammaOnLog a w+(1-exp (2*π*m*I*a))*Gamma a := by
+    upperIncGammaOnLog a (w+2*π*m*I)=exp (2*π*m*I*a)*upperIncGammaOnLog a
+        w+(1-exp (2*π*m*I*a))*Gamma a := by
   have he : exp (2*π*m*I)=1 := by
     rw [show (2:ℂ)*π*m*I=m*(2*π*I) by ring, exp_int_mul_two_pi_mul_I]
   rw [upperIncGammaOnLog_eq_Gamma_sub ha, upperIncGammaOnLog_eq_Gamma_sub ha, lowerIncGammaOnLog,
@@ -499,15 +513,18 @@ theorem upperIncGammaOnLog_monodromy (w : ℂ) (m : ℤ) {a : ℂ} (ha : ∀ n :
 tends to `(𝓝 (upperIncGammaOnLog (-n) (w+2*π*m*I)))` along `(𝓝[≠] (-(n : ℂ)))`. -/
 @[dlmf 8.2.E9]
 theorem upperIncGammaOnLog_monodromy_limit (w : ℂ) (m : ℤ) (n : ℕ) :
-    Tendsto (fun a : ℂ => exp (2*π*m*I*a)*upperIncGammaOnLog a w+(1-exp (2*π*m*I*a))*Gamma a) (𝓝[≠] (-(n : ℂ))) (𝓝 (upperIncGammaOnLog (-n) (w+2*π*m*I))) := by
-  refine (((continuous_upperIncGammaOnLog_param _).tendsto _).mono_left nhdsWithin_le_nhds).congr' ?_
+    Tendsto (fun a : ℂ => exp (2*π*m*I*a)*upperIncGammaOnLog a w+(1-exp (2*π*m*I*a))*Gamma a)
+        (𝓝[≠] (-(n : ℂ))) (𝓝 (upperIncGammaOnLog (-n) (w+2*π*m*I))) := by
+  refine (((continuous_upperIncGammaOnLog_param _).tendsto _).mono_left
+      nhdsWithin_le_nhds).congr' ?_
   filter_upwards [eventually_nhdsNE_neg_nat_ne n] with a ha
   exact upperIncGammaOnLog_monodromy w m ha
 
 /-- Identity under the stated parameter and domain assumptions: `upperIncGammaOnLog a
 (w+ε*π*I)=Gamma a*(1-exp (a*w+ε*π*I*a)*scIncGamma a (-exp w))`. -/
 @[dlmf 8.2.E11]
-theorem upperIncGammaOnLog_halfTurn (w : ℂ) {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
+theorem upperIncGammaOnLog_halfTurn (w : ℂ) {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {ε : ℝ}
+    (hε : ε=1 ∨ ε = -1) :
     upperIncGammaOnLog a (w+ε*π*I)=Gamma a*(1-exp (a*w+ε*π*I*a)*scIncGamma a (-exp w)) := by
   rw [upperIncGammaOnLog_eq_Gamma_sub ha, lowerIncGammaOnLog, Complex.exp_add w, exp_eps_pi_I hε]
   ring_nf
@@ -516,10 +533,14 @@ theorem upperIncGammaOnLog_halfTurn (w : ℂ) {a : ℂ} (ha : ∀ n : ℕ, a ≠
 (w+π*I)-exp (π*I*a)*upperIncGammaOnLog a (w-π*I) = -2*π*I/Gamma (1-a)`. -/
 @[dlmf 8.2.E10]
 theorem upperIncGammaOnLog_jump (a w : ℂ) :
-    exp (-π*I*a)*upperIncGammaOnLog a (w+π*I)-exp (π*I*a)*upperIncGammaOnLog a (w-π*I) = -2*π*I/Gamma (1-a) := by
-  have hc1 : Continuous fun a : ℂ => exp (-π*I*a)*upperIncGammaOnLog a (w+π*I)-exp (π*I*a)*upperIncGammaOnLog a (w-π*I) :=
-    ((by fun_prop : Continuous fun a : ℂ => exp (-π*I*a)).mul (continuous_upperIncGammaOnLog_param _)).sub
-      ((by fun_prop : Continuous fun a : ℂ => exp (π*I*a)).mul (continuous_upperIncGammaOnLog_param _))
+    exp (-π*I*a)*upperIncGammaOnLog a (w+π*I)-exp (π*I*a)*upperIncGammaOnLog a (w-π*I) =
+        -2*π*I/Gamma (1-a) := by
+  have hc1 : Continuous fun a : ℂ =>
+      exp (-π*I*a)*upperIncGammaOnLog a (w+π*I)-exp (π*I*a)*upperIncGammaOnLog a (w-π*I) :=
+    ((by fun_prop : Continuous fun a : ℂ => exp (-π*I*a)).mul
+        (continuous_upperIncGammaOnLog_param _)).sub
+      ((by fun_prop : Continuous fun a : ℂ => exp (π*I*a)).mul
+          (continuous_upperIncGammaOnLog_param _))
   have hc2 : Continuous fun a : ℂ => -2*π*I/Gamma (1-a) := by
     have h := differentiable_one_div_Gamma.continuous.comp
       (continuous_const.sub continuous_id : Continuous fun a : ℂ => 1 - a)
@@ -550,7 +571,8 @@ theorem upperIncGammaOnLog_jump (a w : ℂ) :
   have hs' : exp (-π*I*b) - exp (π*I*b) ≠ 0 := by
     rw [e3, e4] at hs; intro h; apply hs; rw [h]; ring
   have hr' : Gamma b*Gamma (1-b)*((exp (-π*I*b)-exp (π*I*b))*I)=2*π := by
-    rw [hr, div_mul_eq_mul_div, div_eq_iff (div_ne_zero (mul_ne_zero hs' I_ne_zero) two_ne_zero)]; ring
+    rw [hr, div_mul_eq_mul_div,
+        div_eq_iff (div_ne_zero (mul_ne_zero hs' I_ne_zero) two_ne_zero)]; ring
   rw [eq_div_iff hG1]
   linear_combination (Gamma (1-b))*scIncGamma b (-exp w)*Gamma b*(e2-e1) + (-I)*hr'
     + (exp (-π*I*b)-exp (π*I*b))*Gamma b*Gamma (1-b)*I_sq
@@ -584,14 +606,16 @@ theorem upperIncGamma_horizontal_integral (a : ℂ) {z : ℂ} (hz : z ∈ slitPl
     refine ContinuousOn.mul (fun t ht => ?_) (by fun_prop)
     exact ((continuousAt_const.add continuous_ofReal.continuousAt).cpow continuousAt_const
       (add_ofReal_mem_slitPlane hz ht)).continuousWithinAt
-  have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc (tendsto_upperIncGamma_add_ofReal a z).neg
+  have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc
+      (tendsto_upperIncGamma_add_ofReal a z).neg
   simpa using h
 
 /-- Derivative formula at the specified argument: `HasDerivAt (lowerIncGamma a) (z^(a-1)*exp (-z))
 z ∧ HasDerivAt (upperIncGamma a) (-z^(a-1)*exp (-z)) z`. -/
 @[dlmf 8.8.E13]
 theorem hasDerivAt_incompleteGamma {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ∈ slitPlane) :
-    HasDerivAt (lowerIncGamma a) (z^(a-1)*exp (-z)) z ∧ HasDerivAt (upperIncGamma a) (-z^(a-1)*exp (-z)) z := by
+    HasDerivAt (lowerIncGamma a) (z^(a-1)*exp (-z)) z ∧
+        HasDerivAt (upperIncGamma a) (-z^(a-1)*exp (-z)) z := by
   have hu := hasDerivAt_upperIncGamma_complex a hz
   refine ⟨?_,hu⟩
   have he : lowerIncGamma a =ᶠ[𝓝 z] fun w => Gamma a-upperIncGamma a w := by
@@ -603,7 +627,8 @@ theorem hasDerivAt_incompleteGamma {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : �
 ℂ)), deriv (deriv f) z+(1+(1-a)/z)*deriv f z=0)`. -/
 @[dlmf 8.2.E12]
 theorem lower_upperIncGamma_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ∈ slitPlane) :
-    (∀ f ∈ ({lowerIncGamma a,upperIncGamma a} : Set (ℂ → ℂ)), deriv (deriv f) z+(1+(1-a)/z)*deriv f z=0) := by
+    (∀ f ∈ ({lowerIncGamma a, upperIncGamma a} : Set (ℂ → ℂ)),
+        deriv (deriv f) z+(1+(1-a)/z)*deriv f z=0) := by
   have hz0 := slitPlane_ne_zero hz
   have hg : HasDerivAt (fun w : ℂ => w^(a-1)*exp (-w))
       ((a-1)*z^(a-1-1)*exp (-z) - z^(a-1)*exp (-z)) z := by
@@ -637,7 +662,8 @@ theorem lower_upperIncGamma_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ}
 /-- The stated relation follows from the given hypotheses: `let w`. -/
 @[dlmf 8.2.E13]
 theorem upperIncGamma_scaled_ode (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    let w := fun t => exp t*t^(1-a)*upperIncGamma a t; deriv (deriv w) z-(1+(1-a)/z)*deriv w z+(1-a)/z^2*w z=0 := by
+    let w := fun t => exp t*t^(1-a)*upperIncGamma a t;
+        deriv (deriv w) z-(1+(1-a)/z)*deriv w z+(1-a)/z^2*w z=0 := by
   intro w
   have hw : ∀ t ∈ slitPlane, HasDerivAt w ((1+(1-a)/t)*w t - 1) t := by
     intro t ht
@@ -680,7 +706,8 @@ theorem scIncGamma_ode (a z : ℂ) :
     funext w
     rw [he]
     exact (hasDerivAt_regularizedConfluent_neg _ _ w).deriv
-  have hd2 : deriv (deriv (scIncGamma a)) z = a*((a+1)*regularizedHGFun {a+1+1} {a+1+1+1} (-z)) := by
+  have hd2 : deriv (deriv (scIncGamma a)) z =
+      a*((a+1)*regularizedHGFun {a+1+1} {a+1+1+1} (-z)) := by
     rw [hd1]
     have := (((hasDerivAt_regularizedConfluent_neg (a+1) (a+1+1) z).const_mul a).neg)
     rw [show (fun w => -(a*regularizedHGFun {a+1} {a+1+1} (-w))) =

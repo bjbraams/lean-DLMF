@@ -178,7 +178,7 @@ theorem airyDer_ray_ratio {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| <
   have hqre : ∀ r : ℝ, 0 ≤ r → 0 ≤ (q r).re ∧ (q r).re ≤ C := fun r hr =>
     (airyDer_inner_bounds hgm hg0 hgi hcos hr).2
   -- integrability of ρ q
-  have hρi : IntegrableOn ρ (Ioi 0) := stRem_integrableOn_rpow_exp (by linarith) hW
+  have hρi : IntegrableOn ρ (Ioi 0) := StieltjesRemainder.integrableOn_rpow_exp (by linarith) hW
   have hqm : AEStronglyMeasurable q (volume.restrict (Ioi 0)) := by
     have hG : StronglyMeasurable (Function.uncurry fun (r τ : ℝ) =>
         (g τ : ℂ) * (1 + ((r : ℂ) * exp (θ * I)) * τ)⁻¹) := by
@@ -186,7 +186,8 @@ theorem airyDer_ray_ratio {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| <
       fun_prop
     exact (hG.integral_prod_right (ν := volume.restrict (Ioo 0 1))).aestronglyMeasurable
   have hJi : IntegrableOn (fun r => (ρ r : ℂ) * q r) (Ioi 0) := by
-    refine Integrable.mono' (hρi.mul_const C) ((hρi.ofReal (𝕜 := ℂ)).aestronglyMeasurable.mul hqm) ?_
+    refine Integrable.mono' (hρi.mul_const C)
+        ((hρi.ofReal (𝕜 := ℂ)).aestronglyMeasurable.mul hqm) ?_
     refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun r hr => ?_)
     have hr : (0 : ℝ) < r := hr
     rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (by positivity)]
@@ -471,7 +472,8 @@ theorem airyDer_sum_odd (c : ℕ → ℂ) {Z : ℂ} (hZ : Z ≠ 0) (N : ℕ) :
       field_simp
       linear_combination (-(2 * c (2 * N + 1) * Z ^ 2 * Z ^ (2 * N))) * hm +
         (2 * c (2 * N + 1) * Z ^ 2 * Z ^ (2 * N) * (-1) ^ N * (-1) ^ N) * I_sq
-    rw [hs, hs, Finset.sum_range_succ (fun j => -((-1 : ℂ) ^ j * c (2 * j + 1)) / Z ^ (2 * j + 1)) N]
+    rw [hs, hs, Finset.sum_range_succ
+        (fun j => -((-1 : ℂ) ^ j * c (2 * j + 1)) / Z ^ (2 * j + 1)) N]
     linear_combination ih + key
 
 /-- The normalized `Ai`. -/
@@ -534,7 +536,8 @@ theorem airyDer_oscSum_im (derivative : Bool) (parity N : ℕ) {x : ℝ} (hx : 0
   unfold airyOscSum
   rw [airyReal_zeta_ofReal hx, Complex.im_sum]
   refine Finset.sum_eq_zero fun k _ => ?_
-  rw [show (-1 : ℂ) ^ k * ((if derivative then airyV (2 * k + parity) else airyU (2 * k + parity) : ℝ) : ℂ)
+  rw [show (-1 : ℂ) ^ k *
+      ((if derivative then airyV (2 * k + parity) else airyU (2 * k + parity) : ℝ) : ℂ)
       / ((airyZeta x : ℝ) : ℂ) ^ (2 * k + parity) = (((-1) ^ k *
         (if derivative then airyV (2 * k + parity) else airyU (2 * k + parity)) /
           airyZeta x ^ (2 * k + parity) : ℝ) : ℂ) by push_cast; rfl]
@@ -559,7 +562,8 @@ theorem airyDer_coeff_ai (j : ℕ) :
 /-- Rotating `x > 0` by `±π/3`. -/
 theorem airyDer_rot_data {x : ℝ} (hx : 0 < x) :
     (x : ℂ) * exp ((π / 3 : ℝ) * I) ≠ 0 ∧ |arg ((x : ℂ) * exp ((π / 3 : ℝ) * I))| ≤ π / 3 ∧
-    (x : ℂ) * exp ((-(π / 3) : ℝ) * I) ≠ 0 ∧ |arg ((x : ℂ) * exp ((-(π / 3) : ℝ) * I))| ≤ π / 3 := by
+    (x : ℂ) * exp ((-(π / 3) : ℝ) * I) ≠
+        0 ∧ |arg ((x : ℂ) * exp ((-(π / 3) : ℝ) * I))| ≤ π / 3 := by
   have hπ := Real.pi_pos
   refine ⟨airyRot_ofReal_mul_exp_ne_zero hx _, ?_, airyRot_ofReal_mul_exp_ne_zero hx _, ?_⟩
   · rw [airyRot_arg hx (by linarith) (by linarith), abs_of_pos (by positivity)]
@@ -768,7 +772,8 @@ theorem airyDer_d_succ (k : ℕ) :
     airyDer_d (k + 1) = airySt_coef (5 / 6) (k + 1) + airySt_coef (5 / 6) k := by
   rw [airyDer_c_eq, airyDer_c_eq]
   unfold airyDer_d
-  have h1 : (ascPochhammer ℝ (k + 1)).eval (-1 / 6) = (-1 / 6) * (ascPochhammer ℝ k).eval (5 / 6) := by
+  have h1 : (ascPochhammer ℝ (k + 1)).eval (-1 / 6) = (-1 / 6) *
+      (ascPochhammer ℝ k).eval (5 / 6) := by
     rw [ascPochhammer_succ_left, Polynomial.eval_mul, Polynomial.eval_X, Polynomial.eval_comp,
       Polynomial.eval_add, Polynomial.eval_X, Polynomial.eval_one]
     norm_num
@@ -786,7 +791,8 @@ theorem airyDer_sum_id (t : ℂ) (N : ℕ) :
   induction N with
   | zero => simp [airyDer_d_zero, airyDer_c_zero]
   | succ N ih =>
-    rw [Finset.sum_range_succ, ih, Finset.sum_range_succ (fun k => (airySt_coef (5 / 6) k : ℂ) * t ^ k)
+    rw [Finset.sum_range_succ, ih,
+        Finset.sum_range_succ (fun k => (airySt_coef (5 / 6) k : ℂ) * t ^ k)
       (N + 1), airyDer_d_succ]
     push_cast; ring
 
@@ -978,7 +984,8 @@ theorem airyDer_rem_repr {W θ : ℝ} (hW : 0 < W) (hθ : |θ| < π) (N : ℕ) :
     ring
   simp_rw [hT]
   rw [← integral_finsetSum _ (fun k _ => (airySt_term_integrableOn hb hW hθ k).const_mul _),
-    airyDer_L, ← integral_neg, ← integral_sub (airyDer_hint hθ hW) (integrable_finsetSum _ fun k _ =>
+    airyDer_L, ← integral_neg,
+        ← integral_sub (airyDer_hint hθ hW) (integrable_finsetSum _ fun k _ =>
       (airySt_term_integrableOn hb hW hθ k).const_mul _)]
   refine setIntegral_congr_fun measurableSet_Ioi (fun r hr => ?_)
   have hr : (0 : ℝ) ≤ r := le_of_lt hr
@@ -1322,13 +1329,18 @@ theorem airyDer_airyV_two_neg : airyV 2 < 0 := by
 The hypothesis explicitly retains the source's condition on the following term. -/
 theorem airy_oscillatory_real_error (derivative : Bool) (parity : Fin 2)
     {x : ℝ} (hx : 0 < x) (N : ℕ)
-    (hopposite : ((-1 : ℝ) ^ N * (if derivative then airyV (2 * N + parity.val) else airyU (2 * N + parity.val))) *
-      ((-1 : ℝ) ^ (N + 1) * (if derivative then airyV (2 * (N + 1) + parity.val) else airyU (2 * (N + 1) + parity.val))) < 0) :
+    (hopposite : ((-1 : ℝ) ^ N *
+        (if derivative then airyV (2 * N + parity.val) else airyU (2 * N + parity.val))) *
+      ((-1 : ℝ) ^ (N + 1) *
+          (if derivative then airyV (2 * (N + 1) + parity.val) else
+          airyU (2 * (N + 1) + parity.val))) < 0) :
     ‖airyOscComponent derivative parity x - airyOscSum derivative parity.val N x‖ ≤
-      ‖(-1 : ℂ) ^ N * (if derivative then airyV (2 * N + parity.val) else airyU (2 * N + parity.val)) /
+      ‖(-1 : ℂ) ^ N * (if derivative then airyV (2 * N + parity.val) else
+          airyU (2 * N + parity.val)) /
         airyZetaComplex x ^ (2 * N + parity.val)‖ ∧
     0 ≤ (airyOscComponent derivative parity x - airyOscSum derivative parity.val N x).re *
-      ((-1 : ℝ) ^ N * (if derivative then airyV (2 * N + parity.val) else airyU (2 * N + parity.val))) := by
+      ((-1 : ℝ) ^ N * (if derivative then airyV (2 * N + parity.val) else
+          airyU (2 * N + parity.val))) := by
   cases derivative
   · fin_cases parity
     · simpa using airyDer_osc_even hx N

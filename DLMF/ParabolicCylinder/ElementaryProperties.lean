@@ -46,7 +46,9 @@ namespace DLMF.Confluent
 /-- Identity under the stated parameter and domain assumptions: `IsQuadraticCylinderSolution a b c
 (fun z => f (s*(z+b/(2*a))))`. -/
 @[dlmf 12.2.E1]
-theorem quadraticCylinder_transform {a b c s : ℂ} (ha : a ≠ 0) (hs : s^4 = -4*a) (f : ℂ → ℂ) (hf : Differentiable ℂ f) (hf2 : Differentiable ℂ (deriv f)) (hode : ∀ z, iteratedDeriv 2 f z-(z^2/4+(b^2/(4*a)-c)/s^2)*f z=0) :
+theorem quadraticCylinder_transform {a b c s : ℂ} (ha : a ≠ 0) (hs : s^4 = -4*a) (f : ℂ → ℂ)
+    (hf : Differentiable ℂ f) (hf2 : Differentiable ℂ (deriv f))
+    (hode : ∀ z, iteratedDeriv 2 f z-(z^2/4+(b^2/(4*a)-c)/s^2)*f z=0) :
     IsQuadraticCylinderSolution a b c (fun z => f (s*(z+b/(2*a)))) := by
   intro z
   have hs0 : s ≠ 0 := by
@@ -63,7 +65,8 @@ theorem quadraticCylinder_transform {a b c s : ℂ} (ha : a ≠ 0) (hs : s^4 = -
   rw [e2, d1, d2]
   have h := hode (s*(z+b/(2*a)))
   rw [e2] at h
-  have : deriv (deriv f) (s*(z+b/(2*a))) = ((s*(z+b/(2*a)))^2/4+(b^2/(4*a)-c)/s^2) * f (s*(z+b/(2*a))) := by
+  have : deriv (deriv f) (s*(z+b/(2*a))) = ((s*(z+b/(2*a)))^2/4+(b^2/(4*a)-c)/s^2) *
+      f (s*(z+b/(2*a))) := by
     linear_combination h
   rw [this]
   simp only []
@@ -82,7 +85,10 @@ z+(ν+1/2-z^2/4)*pcfD ν z=0`. -/
 theorem pcfD_ode (ν z : ℂ) :
     iteratedDeriv 2 (pcfD ν) z+(ν+1/2-z^2/4)*pcfD ν z=0 := by
   unfold pcfD
-  rw [show iteratedDeriv 2 (pcfU (-ν-1/2)) z = deriv (deriv (pcfU (-ν-1/2))) z by rw [show 2=1+1 by rfl, iteratedDeriv_succ, iteratedDeriv_one],
+  rw [show iteratedDeriv 2 (pcfU (-ν-1/2)) z =
+      deriv (deriv (pcfU (-ν-1/2))) z by
+                                        rw [show 2=1+1 by rfl, iteratedDeriv_succ,
+                                                            iteratedDeriv_one],
     deriv_deriv_pcfU]
   ring
 
@@ -124,7 +130,9 @@ theorem pcfU_entire_order (z : ℂ) :
 
 /-- Powers of two commute with complex conjugation of the exponent. -/
 theorem conj_two_cpow (w : ℂ) : conj ((2:ℂ) ^ w) = (2:ℂ) ^ (conj w) := by
-  rw [Complex.cpow_conj _ _ (by rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.arg_ofReal_of_nonneg (by norm_num)]; exact Real.pi_ne_zero.symm),
+  rw [Complex.cpow_conj _ _
+      (by rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.arg_ofReal_of_nonneg (by norm_num)];
+          exact Real.pi_ne_zero.symm),
     map_ofNat]
 
 /-- The even Kummer basis commutes with complex conjugation. -/
@@ -218,7 +226,8 @@ theorem pcfF_phase {a : ℝ} (ha : ∀ n : ℕ, a ≠ n+1/2) (x : ℝ) :
     ha n (Complex.ofReal_injective (by push_cast; linear_combination -h))
   have hne : pcfU a x + I*pcfUBar a x ≠ 0 := by
     refine add_I_mul_ne_zero_of_real (by simp [conj_pcfU])
-      (by simp only [pcfUBar, map_mul, conj_Gamma_half_sub_ofReal, conj_pcfV, Complex.conj_ofReal]) ?_
+      (by simp only [pcfUBar, map_mul, conj_Gamma_half_sub_ofReal, conj_pcfV,
+            Complex.conj_ofReal]) ?_
     rintro ⟨hu, hv⟩
     have hV : pcfV a x = 0 := (mul_eq_zero.mp hv).resolve_left hΓ
     have hW := pcfV_wronskian a x
@@ -239,7 +248,8 @@ theorem pcfG_phase {a : ℝ} (ha : ∀ n : ℕ, a ≠ n+1/2) (x : ℝ) :
     ha n (Complex.ofReal_injective (by push_cast; linear_combination -h))
   have hne : pcfUDeriv a x + I*pcfUBarDeriv a x ≠ 0 := by
     refine add_I_mul_ne_zero_of_real (by simp [conj_pcfUDeriv])
-      (by simp only [pcfUBarDeriv, map_mul, conj_Gamma_half_sub_ofReal, conj_pcfVDeriv, Complex.conj_ofReal]) ?_
+      (by simp only [pcfUBarDeriv, map_mul, conj_Gamma_half_sub_ofReal, conj_pcfVDeriv,
+            Complex.conj_ofReal]) ?_
     rintro ⟨hu, hv⟩
     have hV : pcfVDeriv a x = 0 := (mul_eq_zero.mp hv).resolve_left hΓ
     have hW := pcfV_wronskian a x
@@ -256,11 +266,15 @@ z=Gamma (1/2-a)*(exp (-(1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((1:ℂ)*I*z)+exp
 ((1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) (-(1:ℂ)*I*z))`. -/
 @[dlmf 12.2.E18]
 theorem pcfU_rotated_connection_pos {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ) :
-    (Real.sqrt (2*π):ℂ)*pcfU a z=Gamma (1/2-a)*(exp (-(1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((1:ℂ)*I*z)+exp ((1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) (-(1:ℂ)*I*z)) := by
+    (Real.sqrt (2*π):ℂ)*pcfU a z=Gamma
+        (1/2-a)*(exp (-(1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((1:ℂ)*I*z)+exp ((1:ℂ)*I*π*(a/2+1/4))*pcfU
+        (-a) (-(1:ℂ)*I*z)) := by
   have ha' : ∀ n : ℕ, 1/2 + -a ≠ -n := fun n h => ha n (by linear_combination -h)
   have h := pcfU_connection_mul_I ha' (-I*z)
-  rw [neg_neg, show I*(-I*z) = z by rw [← mul_assoc, mul_neg, I_mul_I]; ring, show (1/2 + -a) = 1/2-a by ring,
-    show -I*π*(-a/2-1/4) = (1:ℂ)*I*π*(a/2+1/4) by ring, show I*π*(-a/2-1/4) = -(1:ℂ)*I*π*(a/2+1/4) by ring,
+  rw [neg_neg, show I*(-I*z) = z by rw [← mul_assoc, mul_neg, I_mul_I]; ring,
+                                      show (1/2 + -a) = 1/2-a by ring,
+    show -I*π*(-a/2-1/4) = (1:ℂ)*I*π*(a/2+1/4) by ring, show I*π*(-a/2-1/4) =
+                                                    -(1:ℂ)*I*π*(a/2+1/4) by ring,
     show -(-I*z) = (1:ℂ)*I*z by ring, show -I*z = -(1:ℂ)*I*z by ring] at h
   rw [h, add_comm]
 
@@ -269,7 +283,8 @@ theorem pcfU_rotated_connection_pos {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z
 (-a) ((1:ℂ)*I*z)`. -/
 @[dlmf 12.2.E19]
 theorem pcfU_rotated_connection_entire_pos (a z : ℂ) :
-    pcfU a z=(1:ℂ)*I*exp ((1:ℂ)*I*π*a)*pcfU a (-z)+(Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((1:ℂ)*I*π*(a/2-1/4))*pcfU (-a) ((1:ℂ)*I*z) := by
+    pcfU a z=(1:ℂ)*I*exp ((1:ℂ)*I*π*a)*pcfU a (-z)+(Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp
+        ((1:ℂ)*I*π*(a/2-1/4))*pcfU (-a) ((1:ℂ)*I*z) := by
   by_cases hp : ∃ n : ℕ, 1/2 + a = -n
   · obtain ⟨n, hn⟩ := hp
     have ha : a = -n - 1/2 := by linear_combination hn
@@ -294,7 +309,8 @@ theorem pcfU_rotated_connection_entire_pos (a z : ℂ) :
     have hk : (Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp (I*π*(a/2-1/4))*pcfU (-a) (I*z) =
         exp (I*π*(a/2-1/4)) * (exp (-I * π * (a / 2 - 1 / 4)) * pcfU a z +
         exp (I * π * (a / 2 - 1 / 4)) * pcfU a (-z)) := by
-      rw [div_mul_eq_mul_div, div_mul_eq_mul_div, div_eq_iff hΓ]; linear_combination exp (I*π*(a/2-1/4)) * h
+      rw [div_mul_eq_mul_div, div_mul_eq_mul_div, div_eq_iff hΓ];
+          linear_combination exp (I*π*(a/2-1/4)) * h
     simp only [one_mul]
     rw [hk]
     linear_combination (-(pcfU a (-z))) * h2 - pcfU a z * h3
@@ -304,11 +320,15 @@ z=Gamma (1/2-a)*(exp (-(-1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((-1:ℂ)*I*z)+exp
 ((-1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) (-(-1:ℂ)*I*z))`. -/
 @[dlmf 12.2.E18]
 theorem pcfU_rotated_connection_neg {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ) :
-    (Real.sqrt (2*π):ℂ)*pcfU a z=Gamma (1/2-a)*(exp (-(-1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((-1:ℂ)*I*z)+exp ((-1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) (-(-1:ℂ)*I*z)) := by
+    (Real.sqrt (2*π):ℂ)*pcfU a z=Gamma
+        (1/2-a)*(exp (-(-1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((-1:ℂ)*I*z)+exp ((-1:ℂ)*I*π*(a/2+1/4))*pcfU
+        (-a) (-(-1:ℂ)*I*z)) := by
   have ha' : ∀ n : ℕ, 1/2 + -a ≠ -n := fun n h => ha n (by linear_combination -h)
   have h := pcfU_connection_mul_I ha' (-I*z)
-  rw [neg_neg, show I*(-I*z) = z by rw [← mul_assoc, mul_neg, I_mul_I]; ring, show (1/2 + -a) = 1/2-a by ring,
-    show -I*π*(-a/2-1/4) = -(-1:ℂ)*I*π*(a/2+1/4) by ring, show I*π*(-a/2-1/4) = (-1:ℂ)*I*π*(a/2+1/4) by ring,
+  rw [neg_neg, show I*(-I*z) = z by rw [← mul_assoc, mul_neg, I_mul_I]; ring,
+                                      show (1/2 + -a) = 1/2-a by ring,
+    show -I*π*(-a/2-1/4) = -(-1:ℂ)*I*π*(a/2+1/4) by ring, show I*π*(-a/2-1/4) =
+                                                      (-1:ℂ)*I*π*(a/2+1/4) by ring,
     show -(-I*z) = -(-1:ℂ)*I*z by ring, show -I*z = (-1:ℂ)*I*z by ring] at h
   exact h
 
@@ -317,7 +337,8 @@ theorem pcfU_rotated_connection_neg {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z
 (-a) ((-1:ℂ)*I*z)`. -/
 @[dlmf 12.2.E19]
 theorem pcfU_rotated_connection_entire_neg (a z : ℂ) :
-    pcfU a z=(-1:ℂ)*I*exp ((-1:ℂ)*I*π*a)*pcfU a (-z)+(Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((-1:ℂ)*I*π*(a/2-1/4))*pcfU (-a) ((-1:ℂ)*I*z) := by
+    pcfU a z=(-1:ℂ)*I*exp ((-1:ℂ)*I*π*a)*pcfU a (-z)+(Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp
+        ((-1:ℂ)*I*π*(a/2-1/4))*pcfU (-a) ((-1:ℂ)*I*z) := by
   by_cases hp : ∃ n : ℕ, 1/2 + a = -n
   · obtain ⟨n, hn⟩ := hp
     have ha : a = -n - 1/2 := by linear_combination hn
@@ -341,7 +362,8 @@ theorem pcfU_rotated_connection_entire_neg (a z : ℂ) :
     have hk : (Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp (-I*π*(a/2-1/4))*pcfU (-a) (-I*z) =
         exp (-I*π*(a/2-1/4)) * (exp (-I * π * (a / 2 - 1 / 4)) * pcfU a (-z) +
         exp (I * π * (a / 2 - 1 / 4)) * pcfU a z) := by
-      rw [div_mul_eq_mul_div, div_mul_eq_mul_div, div_eq_iff hΓ]; linear_combination exp (-I*π*(a/2-1/4)) * h
+      rw [div_mul_eq_mul_div, div_mul_eq_mul_div, div_eq_iff hΓ];
+          linear_combination exp (-I*π*(a/2-1/4)) * h
     simp only [neg_mul, one_mul] at hk h2 h3 ⊢
     rw [hk]
     linear_combination (-(pcfU a (-z))) * h2 - pcfU a z * h3
@@ -401,9 +423,12 @@ theorem factorial_two_mul_add_one_eq_poch (k : ℕ) :
 (a+1/2+2*r))*z^(2*k)/((2*k).factorial:ℂ))` converges to `(pcfEven a z)`. -/
 @[dlmf 12.4.E3]
 theorem pcfEven_series_3 (a z : ℂ) :
-    HasSum (fun k : ℕ => exp (-1*z^2/4)*(∏ r ∈ Finset.range k, (a+1/2+2*r))*z^(2*k)/((2*k).factorial:ℂ)) (pcfEven a z) := by
+    HasSum (fun k : ℕ =>
+        exp (-1*z^2/4)*(∏ r ∈ Finset.range k, (a+1/2+2*r))*z^(2*k)/((2*k).factorial:ℂ))
+        (pcfEven a z) := by
   rw [pcfEven]
-  convert (hasSum_kummerM Complex.one_div_two_ne_neg_natCast (z^2/2)).mul_left (exp (-z^2/4)) using 2 with k
+  convert (hasSum_kummerM Complex.one_div_two_ne_neg_natCast (z^2/2)).mul_left
+      (exp (-z^2/4)) using 2 with k
   have hp := poch_ne_zero_of_not_neg_nat Complex.one_div_two_ne_neg_natCast k
   have hf : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [show (fun r : ℕ => a+1/2+2*(r:ℂ)) = fun r : ℕ => 2 * ((a/2+1/4) + r) by funext r; ring,
@@ -415,13 +440,17 @@ theorem pcfEven_series_3 (a z : ℂ) :
 (a-1/2-2*r))*z^(2*k)/((2*k).factorial:ℂ))` converges to `(pcfEven a z)`. -/
 @[dlmf 12.4.E5]
 theorem pcfEven_series_5 (a z : ℂ) :
-    HasSum (fun k : ℕ => exp (1*z^2/4)*(∏ r ∈ Finset.range k, (a-1/2-2*r))*z^(2*k)/((2*k).factorial:ℂ)) (pcfEven a z) := by
+    HasSum (fun k : ℕ =>
+        exp (1*z^2/4)*(∏ r ∈ Finset.range k, (a-1/2-2*r))*z^(2*k)/((2*k).factorial:ℂ))
+        (pcfEven a z) := by
   rw [pcfEven_kummer_alternative]
-  convert (hasSum_kummerM Complex.one_div_two_ne_neg_natCast (-z^2/2)).mul_left (exp (z^2/4)) using 2 with k
+  convert (hasSum_kummerM Complex.one_div_two_ne_neg_natCast (-z^2/2)).mul_left
+      (exp (z^2/4)) using 2 with k
   have hp := poch_ne_zero_of_not_neg_nat Complex.one_div_two_ne_neg_natCast k
   have hf : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [show (fun r : ℕ => a-1/2-2*(r:ℂ)) = fun r : ℕ => (-2) * ((-a/2+1/4) + r) by funext r; ring,
-    prod_range_mul_add_eq_poch, factorial_two_mul_eq_poch, kummerMCoeff, pow_mul, div_pow, neg_pow (z^2),
+    prod_range_mul_add_eq_poch, factorial_two_mul_eq_poch, kummerMCoeff, pow_mul,
+        div_pow, neg_pow (z^2),
     show (4:ℂ)^k = 2^k*2^k by rw [← mul_pow]; norm_num, neg_pow (2:ℂ)]
   field_simp
 
@@ -429,13 +458,17 @@ theorem pcfEven_series_5 (a z : ℂ) :
 (a+3/2+2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ))` converges to `(pcfOdd a z)`. -/
 @[dlmf 12.4.E4]
 theorem pcfOdd_series_4 (a z : ℂ) :
-    HasSum (fun k : ℕ => exp (-1*z^2/4)*(∏ r ∈ Finset.range k, (a+3/2+2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ)) (pcfOdd a z) := by
+    HasSum (fun k : ℕ =>
+        exp (-1*z^2/4)*(∏ r ∈ Finset.range k, (a+3/2+2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ))
+        (pcfOdd a z) := by
   rw [pcfOdd]
-  convert (hasSum_kummerM Complex.three_div_two_ne_neg_natCast (z^2/2)).mul_left (z * exp (-z^2/4)) using 2 with k
+  convert (hasSum_kummerM Complex.three_div_two_ne_neg_natCast (z^2/2)).mul_left
+      (z * exp (-z^2/4)) using 2 with k
   have hp := poch_ne_zero_of_not_neg_nat Complex.three_div_two_ne_neg_natCast k
   have hf : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [show (fun r : ℕ => a+3/2+2*(r:ℂ)) = fun r : ℕ => 2 * ((a/2+3/4) + r) by funext r; ring,
-    prod_range_mul_add_eq_poch, factorial_two_mul_add_one_eq_poch, kummerMCoeff, show z^(2*k+1) = z * (z^2)^k by rw [pow_succ, pow_mul]; ring, div_pow,
+    prod_range_mul_add_eq_poch, factorial_two_mul_add_one_eq_poch, kummerMCoeff, show z^(2*k+1) =
+        z * (z^2)^k by rw [pow_succ, pow_mul]; ring, div_pow,
     show (4:ℂ)^k = 2^k*2^k by rw [← mul_pow]; norm_num]
   field_simp
 
@@ -443,13 +476,17 @@ theorem pcfOdd_series_4 (a z : ℂ) :
 (a-3/2-2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ))` converges to `(pcfOdd a z)`. -/
 @[dlmf 12.4.E6]
 theorem pcfOdd_series_6 (a z : ℂ) :
-    HasSum (fun k : ℕ => exp (1*z^2/4)*(∏ r ∈ Finset.range k, (a-3/2-2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ)) (pcfOdd a z) := by
+    HasSum (fun k : ℕ =>
+        exp (1*z^2/4)*(∏ r ∈ Finset.range k, (a-3/2-2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ))
+        (pcfOdd a z) := by
   rw [pcfOdd_kummer_alternative]
-  convert (hasSum_kummerM Complex.three_div_two_ne_neg_natCast (-z^2/2)).mul_left (z * exp (z^2/4)) using 2 with k
+  convert (hasSum_kummerM Complex.three_div_two_ne_neg_natCast (-z^2/2)).mul_left
+      (z * exp (z^2/4)) using 2 with k
   have hp := poch_ne_zero_of_not_neg_nat Complex.three_div_two_ne_neg_natCast k
   have hf : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [show (fun r : ℕ => a-3/2-2*(r:ℂ)) = fun r : ℕ => (-2) * ((-a/2+3/4) + r) by funext r; ring,
-    prod_range_mul_add_eq_poch, factorial_two_mul_add_one_eq_poch, kummerMCoeff, show z^(2*k+1) = z * (z^2)^k by rw [pow_succ, pow_mul]; ring, div_pow, neg_pow (z^2),
+    prod_range_mul_add_eq_poch, factorial_two_mul_add_one_eq_poch, kummerMCoeff, show z^(2*k+1) =
+        z * (z^2)^k by rw [pow_succ, pow_mul]; ring, div_pow, neg_pow (z^2),
     show (4:ℂ)^k = 2^k*2^k by rw [← mul_pow]; norm_num, neg_pow (2:ℂ)]
   field_simp
 
@@ -460,7 +497,8 @@ theorem pcfU_half (z : ℂ) :
     pcfU (1/2) z=(Real.sqrt (π/2):ℂ)*exp (z^2/4)*erfc (z/Real.sqrt 2) := by
   have hs : (Real.sqrt 2:ℂ)^2=2 := by
     exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
-  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
+  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by
+                                      exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   have hp0 : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hc : (Real.sqrt (π/2):ℂ)=(Real.sqrt π:ℂ)/(Real.sqrt 2:ℂ) := by
     exact_mod_cast Real.sqrt_div Real.pi_pos.le 2
@@ -490,7 +528,8 @@ theorem pcfU_half (z : ℂ) :
 (1*z^2/4)*pcfU a z) z = (-1)^m*poch (1/2+a) m*exp (1*z^2/4)*pcfU (a+m) z`. -/
 @[dlmf 12.8.E9]
 theorem pcfU_iterated_deriv_9 (a z : ℂ) (m : ℕ) :
-    iteratedDeriv m (fun z : ℂ => exp (1*z^2/4)*pcfU a z) z = (-1)^m*poch (1/2+a) m*exp (1*z^2/4)*pcfU (a+m) z := by
+    iteratedDeriv m (fun z : ℂ => exp (1*z^2/4)*pcfU a z) z =
+        (-1)^m*poch (1/2+a) m*exp (1*z^2/4)*pcfU (a+m) z := by
   induction m generalizing a with
   | zero => simp [poch_zero]
   | succ m ih =>
@@ -514,7 +553,8 @@ theorem pcfU_iterated_deriv_9 (a z : ℂ) (m : ℕ) :
 (-1*z^2/4)*pcfU a z) z = (-1)^m*exp (-1*z^2/4)*pcfU (a-m) z`. -/
 @[dlmf 12.8.E10]
 theorem pcfU_iterated_deriv_10 (a z : ℂ) (m : ℕ) :
-    iteratedDeriv m (fun z : ℂ => exp (-1*z^2/4)*pcfU a z) z = (-1)^m*exp (-1*z^2/4)*pcfU (a-m) z := by
+    iteratedDeriv m (fun z : ℂ => exp (-1*z^2/4)*pcfU a z) z =
+        (-1)^m*exp (-1*z^2/4)*pcfU (a-m) z := by
   induction m generalizing a with
   | zero => simp [poch_zero]
   | succ m ih =>
@@ -562,7 +602,8 @@ theorem pcfV_iterated_deriv_11 (a z : ℂ) (m : ℕ) :
 (-1*z^2/4)*pcfV a z) z = (-1)^m*poch (1/2-a) m*exp (-1*z^2/4)*pcfV (a-m) z`. -/
 @[dlmf 12.8.E12]
 theorem pcfV_iterated_deriv_12 (a z : ℂ) (m : ℕ) :
-    iteratedDeriv m (fun z : ℂ => exp (-1*z^2/4)*pcfV a z) z = (-1)^m*poch (1/2-a) m*exp (-1*z^2/4)*pcfV (a-m) z := by
+    iteratedDeriv m (fun z : ℂ => exp (-1*z^2/4)*pcfV a z) z =
+        (-1)^m*poch (1/2-a) m*exp (-1*z^2/4)*pcfV (a-m) z := by
   induction m generalizing a with
   | zero => simp [poch_zero]
   | succ m ih =>
@@ -584,7 +625,10 @@ theorem pcfV_iterated_deriv_12 (a z : ℂ) (m : ℕ) :
 
 /-- The barred solution satisfies the U recurrences on its parameter domain. -/
 theorem pcfUBar_recurrences {a : ℂ} (ha : ∀ n : ℤ, a ≠ n+1/2) (z : ℂ) :
-    z*pcfUBar a z-pcfUBar (a-1) z+(a+1/2)*pcfUBar (a+1) z=0 ∧ pcfUBarDeriv a z+z/2*pcfUBar a z+(a+1/2)*pcfUBar (a+1) z=0 ∧ pcfUBarDeriv a z-z/2*pcfUBar a z+pcfUBar (a-1) z=0 ∧ 2*pcfUBarDeriv a z+pcfUBar (a-1) z+(a+1/2)*pcfUBar (a+1) z=0 := by
+    z*pcfUBar a z-pcfUBar (a-1) z+(a+1/2)*pcfUBar (a+1) z=0 ∧
+        pcfUBarDeriv a z+z/2*pcfUBar a z+(a+1/2)*pcfUBar (a+1) z=0 ∧
+        pcfUBarDeriv a z-z/2*pcfUBar a z+pcfUBar (a-1) z=0 ∧
+        2*pcfUBarDeriv a z+pcfUBar (a-1) z+(a+1/2)*pcfUBar (a+1) z=0 := by
   have h0 : (1/2:ℂ) - a ≠ 0 := fun h => ha 0 (by push_cast; linear_combination -h)
   have h1 : (-1/2:ℂ) - a ≠ 0 := fun h => ha (-1) (by push_cast; linear_combination -h)
   have gA : Gamma (1/2-a) = (-1/2-a) * Gamma (1/2-(a+1)) := by

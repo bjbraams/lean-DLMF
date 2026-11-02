@@ -115,7 +115,7 @@ def xPlusDistrib (α : ℝ) : 𝓓'((⊤ : TopologicalSpace.Opens ℝ), ℝ) :=
     ((-1 : ℝ) ^ ⌊-1 - α⌋₊ / (⌊-1 - α⌋₊).factorial) •
       distribIterDeriv (⌊-1 - α⌋₊ + 1) (lineDistrib logPlus)
   else
-    (ascPochhammer ℝ ⌊-α⌋₊).eval (α + 1) ⁻¹ •
+    ((ascPochhammer ℝ ⌊-α⌋₊).eval (α + 1))⁻¹ •
       distribIterDeriv ⌊-α⌋₊ (lineDistrib (xPlusRpow (α + ⌊-α⌋₊)))
 
 /-! ## §1.16(vii): DLMF Fourier transform on Schwartz space and on `𝓢'` -/

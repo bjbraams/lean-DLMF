@@ -124,7 +124,8 @@ theorem mathieu_zeros_large_q_odd (n : ℕ) {t : ℝ} (ht : 0 < t)
 
 /-- Along the imaginary axis a solution of Mathieu's equation solves the modified equation:
 `f(y) = c w(iy)` has `f'(y) = i c w'(iy)` and `f'' = -(2q cosh 2y - a) f`. -/
-private lemma hasDerivAt_along_imaginary_axis {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) (c : ℂ)
+private lemma hasDerivAt_along_imaginary_axis {a q : ℂ} {w : ℂ → ℂ}
+    (h : IsMathieuSolution a q w) (c : ℂ)
     (y : ℝ) :
     HasDerivAt (fun y : ℝ => c * w (y * I)) (c * (I * deriv w (y * I))) y ∧
       HasDerivAt (fun y : ℝ => c * (I * deriv w (y * I)))
@@ -189,7 +190,8 @@ theorem mathieu_imaginary_zeros (m : ℕ) {q : ℝ} (hq : 0 < q) :
       (m ≠ 0 → {y : ℝ | 0 < y ∧ mathieuSe m (y * I) q = 0}.Infinite) := by
   refine ⟨?_, fun _ => ?_⟩
   · obtain ⟨hs, h0, h1⟩ := mathieuWI_spec (mathieuA m q) q
-    exact infinite_zeros_imaginary_axis hq hs (mathieuCeZero m q) (by simp [h0, Complex.conj_ofReal])
+    exact infinite_zeros_imaginary_axis hq hs (mathieuCeZero m q)
+        (by simp [h0, Complex.conj_ofReal])
       (by simp [h1])
   · obtain ⟨hs, h0, h1⟩ := mathieuWII_spec (mathieuB m q) q
     set d : ℂ := (mathieuSeDerivZero m q : ℂ)

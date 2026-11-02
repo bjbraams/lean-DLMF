@@ -59,7 +59,8 @@ def discRetract (R : ℝ) (hR : 0 < R) : ℂ →ᵇ ℂ :=
         _ ≤ R * max 1 (‖z‖ / R) := by gcongr)
 
 /-- Identity under the stated parameter and domain assumptions: `discRetract R hR z = z`. -/
-private lemma discRetract_apply_of_mem_closedBall {R : ℝ} (hR : 0 < R) {z : ℂ} (hz : z ∈ closedBall (0 : ℂ) R) :
+private lemma discRetract_apply_of_mem_closedBall {R : ℝ} (hR : 0 < R) {z : ℂ}
+    (hz : z ∈ closedBall (0 : ℂ) R) :
     discRetract R hR z = z := by
   have : ‖z‖ / R ≤ 1 := by
     rw [div_le_one hR]; simpa using hz
@@ -81,7 +82,8 @@ def boundedHolomorphicOnBall (R : ℝ) : Submodule ℂ (ℂ →ᵇ ℂ) where
     exact hf.const_smul c
 
 /-- Formula under the stated hypotheses: `f * g ∈ boundedHolomorphicOnBall R`. -/
-lemma mul_mem_boundedHolomorphicOnBall {R : ℝ} {f g : ℂ →ᵇ ℂ} (hf : f ∈ boundedHolomorphicOnBall R) (hg : g ∈ boundedHolomorphicOnBall R) :
+lemma mul_mem_boundedHolomorphicOnBall {R : ℝ} {f g : ℂ →ᵇ ℂ} (hf : f ∈ boundedHolomorphicOnBall R)
+    (hg : g ∈ boundedHolomorphicOnBall R) :
     f * g ∈ boundedHolomorphicOnBall R := by
   change DifferentiableOn ℂ (⇑(f * g)) _
   rw [coe_mul]
@@ -94,17 +96,20 @@ lemma one_mem_boundedHolomorphicOnBall (R : ℝ) : (1 : ℂ →ᵇ ℂ) ∈ boun
   exact differentiableOn_const 1
 
 /-- Formula under the stated hypotheses: `discRetract R hR ∈ boundedHolomorphicOnBall R`. -/
-lemma discRetract_mem_boundedHolomorphicOnBall {R : ℝ} (hR : 0 < R) : discRetract R hR ∈ boundedHolomorphicOnBall R := by
+lemma discRetract_mem_boundedHolomorphicOnBall {R : ℝ} (hR : 0 < R) : discRetract R hR ∈
+    boundedHolomorphicOnBall R := by
   change DifferentiableOn ℂ (⇑(discRetract R hR)) _
   exact differentiableOn_id.congr fun z hz =>
     discRetract_apply_of_mem_closedBall hR (ball_subset_closedBall hz)
 
-/-- The stated relation follows from the given hypotheses: `IsClosed (boundedHolomorphicOnBall R : Set (ℂ →ᵇ
-ℂ))`. -/
-private lemma isClosed_boundedHolomorphicOnBall (R : ℝ) : IsClosed (boundedHolomorphicOnBall R : Set (ℂ →ᵇ ℂ)) := by
+/-- The stated relation follows from the given hypotheses:
+`IsClosed (boundedHolomorphicOnBall R : Set (ℂ →ᵇ ℂ))`. -/
+private lemma isClosed_boundedHolomorphicOnBall (R : ℝ) : IsClosed
+    (boundedHolomorphicOnBall R : Set (ℂ →ᵇ ℂ)) := by
   refine isClosed_of_closure_subset fun f hf => ?_
   have hne := mem_closure_iff_nhdsWithin_neBot.mp hf
-  have ht : Tendsto (fun g : ℂ →ᵇ ℂ => g) (𝓝[(boundedHolomorphicOnBall R : Set (ℂ →ᵇ ℂ))] f) (𝓝 f) :=
+  have ht : Tendsto (fun g : ℂ →ᵇ ℂ => g)
+      (𝓝[(boundedHolomorphicOnBall R : Set (ℂ →ᵇ ℂ))] f) (𝓝 f) :=
     tendsto_nhdsWithin_of_tendsto_nhds tendsto_id
   have hu := (tendsto_iff_tendstoUniformly.mp ht).tendstoUniformlyOn (s := ball 0 R)
   exact hu.tendstoLocallyUniformlyOn.differentiableOn
@@ -112,7 +117,8 @@ private lemma isClosed_boundedHolomorphicOnBall (R : ℝ) : IsClosed (boundedHol
 
 /-- The bounded holomorphic-function subspace is closed in the space of bounded continuous
 functions. -/
-instance (R : ℝ) : IsClosed (boundedHolomorphicOnBall R : Set (ℂ →ᵇ ℂ)) := isClosed_boundedHolomorphicOnBall R
+instance (R : ℝ) : IsClosed (boundedHolomorphicOnBall R : Set (ℂ →ᵇ ℂ)) :=
+    isClosed_boundedHolomorphicOnBall R
 
 /-- The bounded holomorphic-function subspace is complete in the supremum norm. -/
 instance (R : ℝ) : CompleteSpace (boundedHolomorphicOnBall R) :=
@@ -120,19 +126,22 @@ instance (R : ℝ) : CompleteSpace (boundedHolomorphicOnBall R) :=
 
 /-- The coefficient `c₀ + c₁ λ` (with `λ` retracted onto the closed disc) in `H_R`. -/
 def affineParamCoeff (R : ℝ) (hR : 0 < R) (c₀ c₁ : ℂ) : boundedHolomorphicOnBall R :=
-  ⟨c₀ • 1 + c₁ • discRetract R hR, add_mem (Submodule.smul_mem _ _ (one_mem_boundedHolomorphicOnBall R))
+  ⟨c₀ • 1 + c₁ • discRetract R hR,
+      add_mem (Submodule.smul_mem _ _ (one_mem_boundedHolomorphicOnBall R))
     (Submodule.smul_mem _ _ (discRetract_mem_boundedHolomorphicOnBall hR))⟩
 
 /-- The first-order field `(U, V) ↦ (V, (p₀ + λ p₁) V + (q₀ + λ q₁) U)` on `H_R × H_R`. -/
 def paramVectorField (R : ℝ) (hR : 0 < R) (p₀ p₁ q₀ q₁ : ℝ → ℂ) (t : ℝ)
-    (y : boundedHolomorphicOnBall R × boundedHolomorphicOnBall R) : boundedHolomorphicOnBall R × boundedHolomorphicOnBall R :=
-  (y.2, ⟨(affineParamCoeff R hR (p₀ t) (p₁ t) : ℂ →ᵇ ℂ) * y.2 + (affineParamCoeff R hR (q₀ t) (q₁ t) : ℂ →ᵇ ℂ) * y.1,
+    (y : boundedHolomorphicOnBall R × boundedHolomorphicOnBall R) : boundedHolomorphicOnBall R ×
+        boundedHolomorphicOnBall R :=
+  (y.2, ⟨(affineParamCoeff R hR (p₀ t) (p₁ t) : ℂ →ᵇ ℂ) * y.2 +
+      (affineParamCoeff R hR (q₀ t) (q₁ t) : ℂ →ᵇ ℂ) * y.1,
     add_mem (mul_mem_boundedHolomorphicOnBall (affineParamCoeff R hR _ _).2 y.2.2)
       (mul_mem_boundedHolomorphicOnBall (affineParamCoeff R hR _ _).2 y.1.2)⟩)
 
-/-- The stated relation follows from the given hypotheses: `LipschitzWith ⟨1 + ‖(affineParamCoeff R hR (p₀
-t) (p₁ t) : ℂ →ᵇ ℂ)‖ + ‖(affineParamCoeff R hR (q₀ t) (q₁ t) : ℂ →ᵇ ℂ)‖, by positivity⟩ (paramVectorField R hR
-p₀ p₁ q₀ q₁ t)`. -/
+/-- The stated relation follows from the given hypotheses:
+`LipschitzWith ⟨1 + ‖(affineParamCoeff R hR (p₀ t) (p₁ t) : ℂ →ᵇ ℂ)‖ + ‖(affineParamCoeff R hR (q₀
+t) (q₁ t) : ℂ →ᵇ ℂ)‖, by positivity⟩ (paramVectorField R hR p₀ p₁ q₀ q₁ t)`. -/
 private lemma lipschitzWith_paramVectorField (R : ℝ) (hR : 0 < R) (p₀ p₁ q₀ q₁ : ℝ → ℂ) (t : ℝ) :
     LipschitzWith ⟨1 + ‖(affineParamCoeff R hR (p₀ t) (p₁ t) : ℂ →ᵇ ℂ)‖ +
         ‖(affineParamCoeff R hR (q₀ t) (q₁ t) : ℂ →ᵇ ℂ)‖, by positivity⟩
@@ -162,7 +171,8 @@ private lemma lipschitzWith_paramVectorField (R : ℝ) (hR : 0 < R) (p₀ p₁ q
 
 variable {p₀ p₁ q₀ q₁ : ℝ → ℂ}
 
-/-- The function `(fun t => (affineParamCoeff R hR (c₀ t) (c₁ t) : ℂ →ᵇ ℂ))` is continuous on `s`. -/
+/-- The function `(fun t => (affineParamCoeff R hR (c₀ t) (c₁ t) : ℂ →ᵇ ℂ))` is continuous on `s`.
+-/
 private lemma continuousOn_affineParamCoeff {R : ℝ} (hR : 0 < R) {s : Set ℝ} {c₀ c₁ : ℝ → ℂ}
     (h₀ : ContinuousOn c₀ s) (h₁ : ContinuousOn c₁ s) :
     ContinuousOn (fun t => (affineParamCoeff R hR (c₀ t) (c₁ t) : ℂ →ᵇ ℂ)) s :=
@@ -181,8 +191,10 @@ private lemma exists_holomorphic_param_solution_Icc {a b R : ℝ} (hab : a ≤ b
         HasDerivWithinAt (fun t => f t μ) (f' t μ) (Icc a b) t ∧
         HasDerivWithinAt (fun t => f' t μ)
           ((p₀ t + μ * p₁ t) * f' t μ + (q₀ t + μ * q₁ t) * f t μ) (Icc a b) t := by
-  obtain ⟨Bp, hBp⟩ := isCompact_Icc.exists_bound_of_continuousOn (continuousOn_affineParamCoeff hR hp₀ hp₁)
-  obtain ⟨Bq, hBq⟩ := isCompact_Icc.exists_bound_of_continuousOn (continuousOn_affineParamCoeff hR hq₀ hq₁)
+  obtain ⟨Bp, hBp⟩ := isCompact_Icc.exists_bound_of_continuousOn
+      (continuousOn_affineParamCoeff hR hp₀ hp₁)
+  obtain ⟨Bq, hBq⟩ := isCompact_Icc.exists_bound_of_continuousOn
+      (continuousOn_affineParamCoeff hR hq₀ hq₁)
   have ha : a ∈ Icc a b := ⟨le_rfl, hab⟩
   have hBp0 : 0 ≤ Bp := (norm_nonneg _).trans (hBp a ha)
   have hBq0 : 0 ≤ Bq := (norm_nonneg _).trans (hBq a ha)
@@ -192,7 +204,8 @@ private lemma exists_holomorphic_param_solution_Icc {a b R : ℝ} (hab : a ≤ b
       change 1 + _ + _ ≤ 1 + Bp + Bq
       linarith [hBp t ht, hBq t ht])
   have h0 : ∀ t ∈ Icc a b, paramVectorField R hR p₀ p₁ q₀ q₁ t 0 = 0 := fun t _ => by
-    simp only [paramVectorField, Prod.fst_zero, Prod.snd_zero, ZeroMemClass.coe_zero, mul_zero, add_zero]
+    simp only [paramVectorField, Prod.fst_zero, Prod.snd_zero, ZeroMemClass.coe_zero,
+        mul_zero, add_zero]
     rfl
   have hcont : ∀ y, ContinuousOn (fun t => paramVectorField R hR p₀ p₁ q₀ q₁ t y) (Icc a b) := by
     intro y
@@ -227,7 +240,8 @@ private lemma differentiableOn_param_of_le (hp₀ : Continuous p₀) (hp₁ : Co
       HasDerivAt (fun t => F' t μ) ((p₀ t + μ * p₁ t) * F' t μ + (q₀ t + μ * q₁ t) * F t μ) t)
     (h₀ : ∀ μ, F t₀ μ = y₀) (h₁ : ∀ μ, F' t₀ μ = y₁) {t : ℝ} (ht : t₀ ≤ t) {R : ℝ}
     (hR : 0 < R) : DifferentiableOn ℂ (F t) (ball 0 R) ∧ DifferentiableOn ℂ (F' t) (ball 0 R) := by
-  obtain ⟨f, f', hdiff, hsol⟩ := exists_holomorphic_param_solution_Icc ht hR hp₀.continuousOn hp₁.continuousOn
+  obtain ⟨f, f', hdiff, hsol⟩ :=
+      exists_holomorphic_param_solution_Icc ht hR hp₀.continuousOn hp₁.continuousOn
     hq₀.continuousOn hq₁.continuousOn y₀ y₁
   have heq : ∀ μ ∈ ball (0 : ℂ) R, F t μ = f t μ ∧ F' t μ = f' t μ := by
     intro μ hμ

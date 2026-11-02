@@ -19,7 +19,8 @@ Mathlib defines `ordinaryHypergeometric` (`₂F₁`) as the sum of the Gauss ser
 its radius of convergence is `1`, or `⊤` when the series terminates. This file collects the
 series facts used throughout DLMF Chapter 15: the power-series representation on the disk, the
 terminating case and absolute convergence on the unit circle. The scalar power-series calculus
-behind the hypergeometric differential equations is in `DLMFMathlib.Analysis.Analytic.OfScalarsDeriv`.
+behind the hypergeometric differential equations is in
+`DLMFMathlib.Analysis.Analytic.OfScalarsDeriv`.
 
 ## Main results
 
@@ -40,7 +41,7 @@ behind the hypergeometric differential equations is in `DLMFMathlib.Analysis.Ana
 
 The value at zero is Mathlib's `ordinaryHypergeometric_zero` and the numerator symmetry of the
 series is `ordinaryHypergeometricSeries_symm`. Further special values (DLMF §15.4) are in
-`DLMF.Hypergeometric.SeriesProperties`.
+`DLMF.Hypergeometric.Basic.SpecialValues`.
 -/
 
 @[expose] public section

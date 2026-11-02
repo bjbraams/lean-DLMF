@@ -275,7 +275,14 @@ Liouville–Green expansion (`pcfLG2_pos_core`) gives both expansions, and the f
 `IsCylinderGBarNormalizer g`. -/
 @[dlmf 12.10.E25, dlmf 12.10.E29]
 theorem pcf_positive_parameter_uniform :
-    ∃ g : ℝ → ℂ, IsCylinderGBarNormalizer g ∧ HasCylinderUniformExpansion (fun μ t => pcfU (μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXiBar t)/(t^2+1:ℂ)^(1/4:ℂ))) (fun s t => pcfOlverUBar s t/(t^2+1:ℂ)^(3*(s:ℂ)/2)) univ ∧ HasCylinderUniformExpansion (fun μ t => pcfUDeriv (μ^2/2) (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*g μ*(t^2+1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXiBar t))) (fun s t => pcfOlverVBar s t/(t^2+1:ℂ)^(3*(s:ℂ)/2)) univ := by
+    ∃ g : ℝ → ℂ, IsCylinderGBarNormalizer g ∧
+        HasCylinderUniformExpansion
+        (fun μ t => pcfU (μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXiBar t)/(t^2+1:ℂ)^(1/4:ℂ)))
+        (fun s t => pcfOlverUBar s t/(t^2+1:ℂ)^(3*(s:ℂ)/2)) univ ∧
+        HasCylinderUniformExpansion
+        (fun μ t => pcfUDeriv (μ^2/2)
+        (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*g μ*(t^2+1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXiBar t)))
+        (fun s t => pcfOlverVBar s t/(t^2+1:ℂ)^(3*(s:ℂ)/2)) univ := by
   obtain ⟨Φ, hΦ⟩ := pcfLG_exists_asymptotic pcfLG2_cbar
   have hc0 : pcfLG2_cbar 0 = 1 := by rw [pcfLG2_cbar, pcfLG2_Q_coeff]; simp [pcfLG_c_zero]
   obtain ⟨μ₁, hμ₁, hΦb⟩ := borel_sum_bounds_near_one hc0 hΦ
@@ -494,7 +501,8 @@ theorem pcf_positive_parameter_uniform :
         by linarith only [e1.2, e2.1, e3.1, e4.1, e5.1]⟩
     have hWb : |W| ≤ KW := by
       rw [hW]
-      have hSa3 : |Sa| ≤ 3/2 := abs_le.2 ⟨by linarith [(abs_le.1 hS).1], by linarith [(abs_le.1 hS).2]⟩
+      have hSa3 : |Sa| ≤ 3/2 :=
+          abs_le.2 ⟨by linarith [(abs_le.1 hS).1], by linarith [(abs_le.1 hS).2]⟩
       have c1 : |a*a1/μ^2 * pcfLG2_ser pcfLG2_Pa M (μ^2) t| ≤ ∑ s ∈ Finset.range M, K s := by
         rw [abs_mul, abs_div, abs_of_pos hu0]
         have := pcfLG2_abs_ser_le hK M hu1 t
@@ -512,7 +520,8 @@ theorem pcf_positive_parameter_uniform :
       have f1 := abs_le.1 hSa3
       have f2 := abs_le.1 c1
       have f3 := abs_le.1 c2
-      exact abs_le.2 ⟨by linarith only [f1.1, f2.2, f3.2, hKW], by linarith only [f1.2, f2.1, f3.1, hKW]⟩
+      exact abs_le.2 ⟨by linarith only [f1.1, f2.2, f3.2, hKW],
+                           by linarith only [f1.2, f2.1, f3.1, hKW]⟩
     have hLp : 0 < L := by linarith only [hLpos]
     have hΦp : 0 < Φ (μ^2) := by linarith only [hΦl]
     have hq1 : Φ (μ^2) / L ≤ 4 := by rw [div_le_iff₀ hLp]; linarith only [hLpos, hΦu]
@@ -540,7 +549,8 @@ lemma pcfLG2_neg_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C
       |e| ≤ C / (μ^2)^N ∧ |pcfLG_A t ^ 2 * e'| ≤ 2 * C / (μ^2)^(N-1) ∧
       pcfU (-μ^2/2) (μ*t*Real.sqrt 2) = pcfH μ /
         (pcfLG2_ser (fun s _ => pcfLG_c s) N (μ^2) 0 : ℂ) *
-        ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) * (pcfLG2_ser pcfLG_hatA N (μ^2) t + e) : ℝ) : ℂ) ∧
+        ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) *
+            (pcfLG2_ser pcfLG_hatA N (μ^2) t + e) : ℝ) : ℂ) ∧
       (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2) =
         pcfH μ / (pcfLG2_ser (fun s _ => pcfLG_c s) N (μ^2) 0 : ℂ) *
         ((Real.exp (-(μ^2 * pcfXi t)) * ((pcfLG_A1 t - μ^2 * (pcfLG_A t)⁻¹) *
@@ -729,10 +739,14 @@ lemma pcfLG2_neg_sum_olverB_eq (N : ℕ) (μ : ℝ) {t : ℝ} (ht : 1 < t) :
 
 /-- The `U`-expansion of DLMF 12.10.3 with the normalizer `h(μ)/Φ(μ²)`, `Φ` a Borel sum of
 `∑ c_s u^{-s}`. -/
-lemma pcfLG2_neg_U_expansion {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ, (fun u : ℝ => Φ u - ∑ s ∈ Finset.range N, pcfLG_c s / u^s) =O[atTop]
+lemma pcfLG2_neg_U_expansion {Φ : ℝ → ℝ}
+    (hΦ : ∀ N : ℕ, (fun u : ℝ => Φ u - ∑ s ∈ Finset.range N, pcfLG_c s / u^s) =O[atTop]
       (fun u : ℝ => (u^N)⁻¹)) {μ₁ : ℝ} (hΦb : ∀ μ, μ₁ ≤ μ → 1/2 ≤ Φ (μ^2) ∧ Φ (μ^2) ≤ 2)
     {δ : ℝ} (hδ : 0 < δ) :
-    HasCylinderUniformExpansion (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/((pcfH μ / (Φ (μ^2) : ℂ))*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ))) (fun s t => pcfOlverA s t) (Ici (1+δ)) := by
+    HasCylinderUniformExpansion
+        (fun μ t => pcfU (-μ^2/2)
+        (μ*t*Real.sqrt 2)/((pcfH μ / (Φ (μ^2) : ℂ))*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+        (fun s t => pcfOlverA s t) (Ici (1+δ)) := by
   -- the expansion of `U`
   refine pcfLG2_expansion_of_one_le (fun t => by
     simp [pcfOlverA, pcfOlverU, pcfOlverPair]) fun N hN => ?_
@@ -785,10 +799,14 @@ lemma pcfLG2_neg_U_expansion {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ, (fun u : ℝ
 
 /-- The `U'`-expansion of DLMF 12.10.4 with the normalizer `h(μ)/Φ(μ²)`, `Φ` a Borel sum of
 `∑ c_s u^{-s}`. -/
-lemma pcfLG2_neg_UDeriv_expansion {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ, (fun u : ℝ => Φ u - ∑ s ∈ Finset.range N, pcfLG_c s / u^s) =O[atTop]
+lemma pcfLG2_neg_UDeriv_expansion {Φ : ℝ → ℝ}
+    (hΦ : ∀ N : ℕ, (fun u : ℝ => Φ u - ∑ s ∈ Finset.range N, pcfLG_c s / u^s) =O[atTop]
       (fun u : ℝ => (u^N)⁻¹)) {μ₁ : ℝ} (hΦb : ∀ μ, μ₁ ≤ μ → 1/2 ≤ Φ (μ^2) ∧ Φ (μ^2) ≤ 2)
     {δ : ℝ} (hδ : 0 < δ) :
-    HasCylinderUniformExpansion (fun μ t => pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*(pcfH μ / (Φ (μ^2) : ℂ))*(t^2-1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXi t))) (fun s t => pcfOlverB s t) (Ici (1+δ)) := by
+    HasCylinderUniformExpansion
+        (fun μ t => pcfUDeriv (-μ^2/2)
+        (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*(pcfH μ / (Φ (μ^2) : ℂ))*(t^2-1:ℂ)^(1/4:ℂ)*exp
+        (-μ^2*pcfXi t))) (fun s t => pcfOlverB s t) (Ici (1+δ)) := by
   have hΦ' := hΦ
   -- the expansion of `U'`
   refine pcfLG2_expansion_of_one_le (fun t => by
@@ -899,7 +917,8 @@ lemma pcfLG2_neg_UDeriv_expansion {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ, (fun u 
       by linarith only [e1.2, e2.1, e3.1, e4.1, e5.1]⟩
   have hWb : |W| ≤ KW := by
     rw [hW]
-    have hSa3 : |Sa| ≤ 3/2 := abs_le.2 ⟨by linarith [(abs_le.1 hS).1], by linarith [(abs_le.1 hS).2]⟩
+    have hSa3 : |Sa| ≤ 3/2 :=
+        abs_le.2 ⟨by linarith [(abs_le.1 hS).1], by linarith [(abs_le.1 hS).2]⟩
     have c1 : |a*a1/μ^2 * pcfLG2_ser pcfLG_hatA M (μ^2) t| ≤ Q1 * ∑ s ∈ Finset.range M, K s := by
       rw [abs_mul, abs_div, abs_of_pos hu0]
       have : |pcfLG2_ser pcfLG_hatA M (μ^2) t| ≤ ∑ s ∈ Finset.range M, K s := by
@@ -923,7 +942,8 @@ lemma pcfLG2_neg_UDeriv_expansion {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ, (fun u 
     have f1 := abs_le.1 hSa3
     have f2 := abs_le.1 c1
     have f3 := abs_le.1 c2
-    exact abs_le.2 ⟨by linarith only [f1.1, f2.2, f3.2, hKW], by linarith only [f1.2, f2.1, f3.1, hKW]⟩
+    exact abs_le.2 ⟨by linarith only [f1.1, f2.2, f3.2, hKW],
+                         by linarith only [f1.2, f2.1, f3.1, hKW]⟩
   have hLp : 0 < L := by linarith only [hLpos]
   have hΦp : 0 < Φ (μ^2) := by linarith only [hΦl]
   have hq1 : Φ (μ^2) / L ≤ 4 := by rw [div_le_iff₀ hLp]; linarith only [hLpos, hΦu]
@@ -948,7 +968,14 @@ Liouville–Green core `pcfLG2_core` (via `pcfLG2_neg_core`), with
 `B_s = A_s - AA'A_{s-1} - A²A_{s-1}'` (DLMF 12.10.13). -/
 @[dlmf 12.10.E3, dlmf 12.10.E4, dlmf 12.10.E14]
 theorem pcf_negative_parameter_uniform_U_UDeriv :
-    ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ → HasCylinderUniformExpansion (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ))) (fun s t => pcfOlverA s t) (Ici (1+δ)) ∧ HasCylinderUniformExpansion (fun μ t => pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*g μ*(t^2-1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXi t))) (fun s t => pcfOlverB s t) (Ici (1+δ)) := by
+    ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ →
+        HasCylinderUniformExpansion
+        (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+        (fun s t => pcfOlverA s t) (Ici (1+δ)) ∧
+        HasCylinderUniformExpansion
+        (fun μ t => pcfUDeriv (-μ^2/2)
+        (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*g μ*(t^2-1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXi t)))
+        (fun s t => pcfOlverB s t) (Ici (1+δ)) := by
   obtain ⟨Φ, hΦ⟩ := pcfLG_exists_asymptotic pcfLG_c
   have hΦ' : ∀ N : ℕ, (fun u : ℝ => Φ u - ∑ s ∈ Finset.range N, pcfLG_c s / u^s) =O[atTop]
       (fun u : ℝ => (u^N)⁻¹) := hΦ

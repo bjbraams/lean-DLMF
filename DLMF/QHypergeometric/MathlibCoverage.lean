@@ -24,7 +24,8 @@ full-domain statements.
 -/
 
 dlmf_upstream 17.2.E6_1 ModularForm.eta_comp_eq_csqrt_I_inv
-  "equivalent: complex modular transformation after tau=i*t/(2*pi), Re(t)>0; compatible principal square root"
+  "equivalent: complex modular transformation after tau=i*t/(2*pi), Re(t)>0; compatible principal \
+      square root"
 dlmf_upstream 17.2.i ModularForm.eta
   "exact product definition of Dedekind eta underlying the unnumbered f(q) identity"
 dlmf_upstream 17.2.E28 Nat.choose_eq_factorial_div_factorial

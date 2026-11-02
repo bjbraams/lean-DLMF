@@ -47,7 +47,8 @@ def legendreSinSqTrigamma (ν : ℂ) : ℂ :=
   limUnder (𝓝[≠] ν) (fun v => (sin (π*v))^2*deriv digamma (v+1))
 
 /-- Reflection in the form `Γ(-v)⁻¹ = -sin(πv) Γ(v+1) / π`, valid when `Γ(-v)` is finite. -/
-theorem recip_Gamma_neg_eq_of_sin_ne_zero {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : ℂ)) (hs : sin (π * v) ≠ 0) :
+theorem recip_Gamma_neg_eq_of_sin_ne_zero {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : ℂ))
+    (hs : sin (π * v) ≠ 0) :
     (Gamma (-v))⁻¹ = -(sin (π * v) * Gamma (v + 1)) / π := by
   have h := Complex.Gamma_mul_Gamma_one_sub (v + 1)
   rw [show 1 - (v + 1) = -v by ring, show (π : ℂ) * (v + 1) = π * v + π by ring, sin_add_pi] at h
@@ -83,7 +84,8 @@ theorem sin_mul_digamma_add_one_eq {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : 
 /-- `sin²(πv) ψ'(v+1) = π² (((1/Γ)')² - (1/Γ)(1/Γ)'')(v+1) / Γ(-v)²` off the negative integers. -/
 theorem sin_sq_mul_deriv_digamma_add_one_eq {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : ℂ)) :
     sin (π * v) ^ 2 * deriv digamma (v + 1) =
-      π ^ 2 * (DLMF.Gamma.recipGammaDeriv 1 (v + 1) ^ 2 - (Gamma (v + 1))⁻¹ * DLMF.Gamma.recipGammaDeriv 2 (v + 1)) *
+      π ^ 2 * (DLMF.Gamma.recipGammaDeriv 1 (v + 1) ^ 2 - (Gamma (v + 1))⁻¹ *
+          DLMF.Gamma.recipGammaDeriv 2 (v + 1)) *
         ((Gamma (-v))⁻¹) ^ 2 := by
   by_cases hs : sin (π * v) = 0
   · obtain ⟨k, hk⟩ := Complex.sin_eq_zero_iff.mp hs
@@ -150,7 +152,8 @@ theorem legendreSinDigamma_limit (ν : ℂ) :
 /-- `sin²(πv) ψ'(v+1)` tends to `legendreSinSqTrigamma ν` as `v → ν`, `v ≠ ν`, for every complex `ν`
 (the singularities at negative integers are removable). -/
 theorem legendreSinSqTrigamma_limit (ν : ℂ) :
-    Tendsto (fun v => (sin (π*v))^2*deriv digamma (v+1)) (𝓝[≠] ν) (𝓝 (legendreSinSqTrigamma ν)) := by
+    Tendsto (fun v => (sin (π*v))^2*deriv digamma (v+1)) (𝓝[≠] ν)
+        (𝓝 (legendreSinSqTrigamma ν)) := by
   rw [legendreSinSqTrigamma_eq]; exact tendsto_sin_sq_mul_deriv_digamma_add_one ν
 
 /-- DLMF 14.17.10: for `λ ≠ ν` and `λ ≠ -ν-1`, `∫_{-1}^{1} 𝖯_ν(x) 𝖯_λ(x) dx = 2(2(sin(πλ) sin(πν)
@@ -158,7 +161,9 @@ theorem legendreSinSqTrigamma_limit (ν : ℂ) :
 taken by continuity at negative integers. -/
 @[dlmf 14.17.E10]
 theorem ferrersPP_integral_all_degrees (ν lam : ℂ) (h0 : lam ≠ ν) (h1 : lam ≠ -ν-1) :
-    (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersP lam 0 x)=2*(2*(sin (π*lam)*legendreSinDigamma ν-sin (π*ν)*legendreSinDigamma lam)+π*sin ((lam-ν)*π))/(π^2*(lam-ν)*(lam+ν+1)) := by
+    (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersP lam 0
+        x)=2*(2*(sin (π*lam)*legendreSinDigamma ν-sin (π*ν)*legendreSinDigamma lam)+π*sin
+        ((lam-ν)*π))/(π^2*(lam-ν)*(lam+ν+1)) := by
   have hd1 : lam - ν ≠ 0 := sub_ne_zero.mpr h0
   have hd2 : lam + ν + 1 ≠ 0 := fun h => h1 (by linear_combination h)
   have hc : ν*(ν+1) - lam*(lam+1) ≠ 0 := by
@@ -198,13 +203,15 @@ theorem ferrersP_sq_integral_all_degrees {ν : ℂ} (hν : ν ≠ -1/2) :
 𝖯^{-m}_ν(x)` as `v → ν`, `v ≠ ν`; this covers the degrees where the Gamma quotient is singular. -/
 @[dlmf 14.9.E3]
 theorem ferrersP_negative_order_parameter_limit (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Tendsto (fun v : ℂ => (-1)^m*Gamma (v-m+1)/Gamma (v+m+1)*ferrersP v m x) (𝓝[≠] ν) (𝓝 (ferrersP ν (-m) x)) := by
+    Tendsto (fun v : ℂ => (-1)^m*Gamma (v-m+1)/Gamma (v+m+1)*ferrersP v m x) (𝓝[≠] ν)
+        (𝓝 (ferrersP ν (-m) x)) := by
   have ht : ((1:ℂ)-x)/2 ∈ cutPlane := by
     rw [mem_cutPlane, show (1:ℂ) - (1-(x:ℂ))/2 = (((1+x)/2 : ℝ) : ℂ) by push_cast; ring]
     exact Or.inl (by simp only [ofReal_re]; linarith [hx.1])
   have hc : Continuous fun v : ℂ => ferrersP v (-m) x := by
     unfold ferrersP
-    exact continuous_const.mul (differentiable_regularizedGaussHG_comp (A := fun v => v+1) (B := fun v => -v)
+    exact continuous_const.mul
+        (differentiable_regularizedGaussHG_comp (A := fun v => v+1) (B := fun v => -v)
       (C := fun _ => 1-(-(m:ℂ))) (by fun_prop) (by fun_prop) (by fun_prop) ht).continuous
   refine ((hc.tendsto ν).mono_left nhdsWithin_le_nhds).congr' ?_
   filter_upwards [eventually_affine_ne_neg_nat one_ne_zero (-(m:ℂ)+1) ν] with v hv
@@ -214,11 +221,13 @@ theorem ferrersP_negative_order_parameter_limit (ν : ℂ) (m : ℕ) {x : ℝ} (
 P^{-m}_ν(z)` as `v → ν`, `v ≠ ν`; this covers the degrees where the Gamma quotient is singular. -/
 @[dlmf 14.9.E13]
 theorem associatedP_negative_order_parameter_limit (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    Tendsto (fun v : ℂ => Gamma (v-m+1)/Gamma (v+m+1)*associatedP v m z) (𝓝[≠] ν) (𝓝 (associatedP ν (-m) z)) := by
+    Tendsto (fun v : ℂ => Gamma (v-m+1)/Gamma (v+m+1)*associatedP v m z) (𝓝[≠] ν)
+        (𝓝 (associatedP ν (-m) z)) := by
   have ht := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   have hc : Continuous fun v : ℂ => associatedP v (-m) z := by
     unfold associatedP
-    exact continuous_const.mul (differentiable_regularizedGaussHG_comp (A := fun v => v+1) (B := fun v => -v)
+    exact continuous_const.mul
+        (differentiable_regularizedGaussHG_comp (A := fun v => v+1) (B := fun v => -v)
       (C := fun _ => 1-(-(m:ℂ))) (by fun_prop) (by fun_prop) (by fun_prop) ht).continuous
   refine ((hc.tendsto ν).mono_left nhdsWithin_le_nhds).congr' ?_
   filter_upwards [eventually_affine_ne_neg_nat one_ne_zero (-(m:ℂ)+1) ν] with v hv

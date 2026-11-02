@@ -40,7 +40,8 @@ open scoped Real Topology Nat ComplexConjugate
 
 namespace DLMF.Legendre
 
-/-! ### Helpers for DLMF 14.24.1 and 14.24.4: continuity and linearity of the transport (prefix `legTr_`) -/
+/-! ### Helpers for DLMF 14.24.1 and 14.24.4: continuity and linearity of the transport (prefix
+`legTr_`) -/
 
 /-- Gronwall step for `legTr_transport_tendsto`: the second component of the difference system. -/
 theorem legTr_diff_bound {g γ q α β α0 β0 ux vx u v : ℂ} {G Γ0 Qi A B U : ℝ}
@@ -91,8 +92,10 @@ theorem legTr_transport_tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (h
     · exact (hreg t ht).2 (by linear_combination h)
   have hγc : Continuous γ := hγ.continuous
   have hγ'c : Continuous (deriv γ) := hγ.continuous_deriv le_rfl
-  obtain ⟨G, hG⟩ := isCompact_Icc.exists_bound_of_continuousOn (hγ'c.continuousOn (s := Icc (0:ℝ) 1))
-  obtain ⟨Γ0, hΓ⟩ := isCompact_Icc.exists_bound_of_continuousOn (hγc.continuousOn (s := Icc (0:ℝ) 1))
+  obtain ⟨G, hG⟩ := isCompact_Icc.exists_bound_of_continuousOn
+      (hγ'c.continuousOn (s := Icc (0:ℝ) 1))
+  obtain ⟨Γ0, hΓ⟩ := isCompact_Icc.exists_bound_of_continuousOn
+      (hγc.continuousOn (s := Icc (0:ℝ) 1))
   obtain ⟨Qi, hQ⟩ := isCompact_Icc.exists_bound_of_continuousOn
     (((continuous_const.sub (hγc.pow 2)).continuousOn (s := Icc (0:ℝ) 1)).inv₀ hne)
   have hQ' : ∀ t ∈ Icc (0:ℝ) 1, ‖(1-(γ t)^2)⁻¹‖ ≤ Qi := fun t ht => hQ t ht
@@ -154,7 +157,8 @@ theorem legTr_transport_tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (h
       intro t ht
       have htI : t ∈ Icc (0:ℝ) 1 := Ico_subset_Icc_self ht
       have hm := Icc_mem_nhdsGE_of_mem ht
-      exact ((((hd t htI).1.sub (hd0 t htI).1)).prodMk ((hd t htI).2.sub (hd0 t htI).2)).mono_of_mem_nhdsWithin hm
+      exact ((((hd t htI).1.sub (hd0 t htI).1)).prodMk
+          ((hd t htI).2.sub (hd0 t htI).2)).mono_of_mem_nhdsWithin hm
     have hf0 : ‖((ux x 0 - u 0, vx x 0 - v 0) : ℂ × ℂ)‖ ≤ max ‖af x - a‖ ‖bf x - b‖ := by
       rw [hu0, hv0, hu0', hv0', Prod.norm_def]
     have hfb : ∀ t ∈ Ico (0:ℝ) 1, ‖((deriv γ t*vx x t - deriv γ t*v t,
@@ -180,7 +184,8 @@ theorem legTr_transport_tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (h
           (ux := ux x t) (vx := vx x t) (u := u t) (v := v t)
           (hG' t htI) (hΓ' t htI) (hQ' t htI) hAx hBx (hU t htI) hG0 hQ0 hΓ0 hA0 hB0
         rw [← hεd] at h
-        refine h.trans (add_le_add_left (mul_le_mul_of_nonneg_right hK2 hM) ε |>.trans_eq' ?_ |>.trans_eq ?_)
+        refine h.trans (add_le_add_left (mul_le_mul_of_nonneg_right hK2 hM) ε |>.trans_eq'
+            ?_ |>.trans_eq ?_)
         · ring
         · ring
     have hgr := norm_le_gronwallBound_of_norm_deriv_right_le hfc hfd hf0 hfb 1 ⟨zero_le_one, le_rfl⟩
@@ -229,12 +234,14 @@ theorem legTr_loop_reg {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     refine ⟨fun h1 => by rw [h1] at hn; simp at hn, fun h1 => by rw [h1] at hn; simp at hn⟩
 
 /-- DLMF 14.24.4 for non-integer order, from 14.24.3 for `P^{±μ}_ν` and the connection formula. -/
-theorem legTr_one_olverQ_nonint (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
+theorem legTr_one_olverQ_nonint (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) (s : ℤ) :
     legendreOneContinued (olverQ ν m) ν m z s = exp (-s*m*π*I)*olverQ ν m z-
       π*I*sin (s*m*π)/(sin (m*π)*Gamma (ν-m+1))*associatedP ν (-m) z := by
   have hγ := legTr_contDiff_loop z s
   have hreg := legTr_loop_reg hz s
-  have hP : legendreTransport ν m (legendreOneLoop z s) (associatedP ν m z) (deriv (associatedP ν m) z) =
+  have hP : legendreTransport ν m (legendreOneLoop z s) (associatedP ν m z)
+      (deriv (associatedP ν m) z) =
       exp (-s*m*π*I) * associatedP ν m z := by
     have h := associatedP_one_continuation ν (-m) hz s
     rw [neg_neg] at h
@@ -266,7 +273,8 @@ theorem legTr_one_olverQ_nonint (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : �
   ring
 
 /-- The transport depends on the degree only through `ν(ν+1)`. -/
-theorem legTr_transport_degree_eq {ν ν' : ℂ} (h : ν'*(ν'+1) = ν*(ν+1)) (μ : ℂ) (γ : ℝ → ℂ) (a b : ℂ) :
+theorem legTr_transport_degree_eq {ν ν' : ℂ} (h : ν'*(ν'+1) = ν*(ν+1)) (μ : ℂ)
+    (γ : ℝ → ℂ) (a b : ℂ) :
     legendreTransport ν' μ γ a b = legendreTransport ν μ γ a b := by
   simp only [legendreTransport, IsLegendreTransport, h]
 
@@ -287,13 +295,15 @@ theorem legTr_continuous_deriv_associatedP_degree (μ : ℂ) {z : ℂ} (hz : z-1
   have e := funext fun ν => deriv_associatedP ν (-μ) hz
   rw [e]
   have hP := (associatedP_entire_degree (-μ) z hz).continuous
-  have hG := (differentiable_regularizedGaussHG_comp (A := fun ν : ℂ => ν+1+1) (B := fun ν : ℂ => -ν+1)
+  have hG := (differentiable_regularizedGaussHG_comp (A := fun ν : ℂ => ν+1+1)
+      (B := fun ν : ℂ => -ν+1)
     (C := fun _ : ℂ => 1-(-μ)+1) (by fun_prop) (by fun_prop) (by fun_prop) hw).continuous
   exact (continuous_const.mul hP).sub ((by fun_prop : Continuous fun ν : ℂ => (ν+1)*(-ν)/2).mul
     (continuous_const.mul hG))
 
 /-- DLMF 14.24.1 off the zeros of `cos νπ`, from 14.24.2 for `𝑸^μ_ν`, `𝑸^μ_{-ν-1}` and 14.9.12. -/
-theorem legTr_ellipse_associatedP_generic (ν μ : ℂ) (hc : cos (ν*π) ≠ 0) {z : ℂ} (hz : z-1 ∈ slitPlane)
+theorem legTr_ellipse_associatedP_generic (ν μ : ℂ) (hc : cos (ν*π) ≠ 0) {z : ℂ}
+    (hz : z-1 ∈ slitPlane)
     (s : ℤ) :
     legendreEllipseContinued (associatedP ν (-μ)) ν μ z s = exp (s*ν*π*I)*associatedP ν (-μ) z+
       2*I*sin ((ν+1/2)*s*π)*exp (-s*π*I/2)/(cos (ν*π)*Gamma (μ-ν))*olverQ ν μ z := by
@@ -309,7 +319,8 @@ theorem legTr_ellipse_associatedP_generic (ν μ : ℂ) (hc : cos (ν*π) ≠ 0)
     have h := associated_connection_12 ν μ hw
     simp only [div_eq_mul_inv] at h
     rw [hcdef]; field_simp; linear_combination h
-  have hev : associatedP ν (-μ) =ᶠ[𝓝 z] fun w => (-c*g1)*olverQ ν μ w + (c*g2)*olverQ (-ν-1) μ w := by
+  have hev : associatedP ν (-μ) =ᶠ[𝓝 z] fun w => (-c*g1)*olverQ ν μ w +
+      (c*g2)*olverQ (-ν-1) μ w := by
     filter_upwards [isOpen_sub_one_mem_slitPlane.mem_nhds hz] with w hw using hconn w hw
   have hd : deriv (associatedP ν (-μ)) z =
       (-c*g1)*deriv (olverQ ν μ) z + (c*g2)*deriv (olverQ (-ν-1) μ) z := by
@@ -351,7 +362,10 @@ identity follows from 14.24.2 for `𝑸^μ_ν`, `𝑸^μ_{-ν-1}` and 14.9.12
 degree (`legTr_transport_tendsto`). -/
 @[dlmf 14.24.E1]
 theorem associatedP_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
-    Tendsto (fun v : ℂ => exp (s*v*π*I)*associatedP v (-μ) z+2*I*sin ((v+1/2)*s*π)*exp (-s*π*I/2)/(cos (v*π)*Gamma (μ-v))*olverQ v μ z) (𝓝[≠] ν) (𝓝 (legendreEllipseContinued (associatedP ν (-μ)) ν μ z s)) := by
+    Tendsto (fun v : ℂ =>
+        exp (s*v*π*I)*associatedP v (-μ) z+2*I*sin ((v+1/2)*s*π)*exp
+        (-s*π*I/2)/(cos (v*π)*Gamma (μ-v))*olverQ v μ z) (𝓝[≠] ν)
+        (𝓝 (legendreEllipseContinued (associatedP ν (-μ)) ν μ z s)) := by
 
   have hγ := legTr_contDiff_ellipse z s
   have hreg : ∀ t ∈ Icc (0:ℝ) 1, legendreEllipsePath z s t ≠ 1 ∧ legendreEllipsePath z s t ≠ -1 :=
@@ -383,7 +397,9 @@ For non-integer order the identity follows from 14.24.3 for `P^{±μ}_ν` and th
 (`legTr_transport_tendsto`). -/
 @[dlmf 14.24.E4]
 theorem olverQ_one_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
-    Tendsto (fun m : ℂ => exp (-s*m*π*I)*olverQ ν m z-π*I*sin (s*m*π)/(sin (m*π)*Gamma (ν-m+1))*associatedP ν (-m) z) (𝓝[≠] μ) (𝓝 (legendreOneContinued (olverQ ν μ) ν μ z s)) := by
+    Tendsto (fun m : ℂ =>
+        exp (-s*m*π*I)*olverQ ν m z-π*I*sin (s*m*π)/(sin (m*π)*Gamma (ν-m+1))*associatedP ν (-m) z)
+        (𝓝[≠] μ) (𝓝 (legendreOneContinued (olverQ ν μ) ν μ z s)) := by
 
   have hγ := legTr_contDiff_loop z s
   have hreg := legTr_loop_reg hz s

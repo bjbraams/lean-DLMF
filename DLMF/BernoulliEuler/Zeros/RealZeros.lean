@@ -184,7 +184,8 @@ section ZeroHelpers
 open Finset
 
 /-- Rolle for `Bₖ₊₁`: two zeros give a zero of `Bₖ` between them. -/
-private lemma exists_bernoulliFun_eq_zero_of_succ {k : ℕ} {a b : ℝ} (hab : a < b) (ha : bernoulliFun (k + 1) a = 0)
+private lemma exists_bernoulliFun_eq_zero_of_succ {k : ℕ} {a b : ℝ} (hab : a < b)
+    (ha : bernoulliFun (k + 1) a = 0)
     (hb : bernoulliFun (k + 1) b = 0) : ∃ c ∈ Set.Ioo a b, bernoulliFun k c = 0 := by
   obtain ⟨c, hc, h⟩ := exists_hasDerivAt_eq_zero hab
     (continuous_bernoulliFun (k + 1)).continuousOn (ha.trans hb.symm)
@@ -196,7 +197,8 @@ private lemma exists_bernoulliFun_eq_zero_of_succ {k : ℕ} {a b : ℝ} (hab : a
   · exact h
 
 /-- Rolle for `Eₖ₊₁`. -/
-private lemma exists_eulerFun_eq_zero_of_succ {k : ℕ} {a b : ℝ} (hab : a < b) (ha : eulerFun (k + 1) a = 0)
+private lemma exists_eulerFun_eq_zero_of_succ {k : ℕ} {a b : ℝ} (hab : a < b)
+    (ha : eulerFun (k + 1) a = 0)
     (hb : eulerFun (k + 1) b = 0) : ∃ c ∈ Set.Ioo a b, eulerFun k c = 0 := by
   obtain ⟨c, hc, h⟩ := exists_hasDerivAt_eq_zero hab
     (continuous_eulerFun (k + 1)).continuousOn (ha.trans hb.symm)
@@ -391,7 +393,8 @@ lemma exists_Ioo_eq_zero_of_mul_neg {f : ℝ → ℝ} (hf : Continuous f) {a b :
     exact ⟨c, hc, hfc⟩
 
 /-- A real polynomial of degree `≤ n` with `n` distinct real zeros has exactly `n` roots. -/
-lemma card_roots_eq_of_strictly_sorted_zeros {p : ℝ[X]} {n : ℕ} (hdeg : p.natDegree ≤ n) (l : List ℝ)
+lemma card_roots_eq_of_strictly_sorted_zeros {p : ℝ[X]} {n : ℕ}
+    (hdeg : p.natDegree ≤ n) (l : List ℝ)
     (hl : l.Pairwise (· < ·)) (hlen : l.length = n) (hr : ∀ x ∈ l, p.eval x = 0)
     (hp : p ≠ 0) : p.roots.card = n := by
   refine le_antisymm ((card_roots' p).trans hdeg) ?_
@@ -512,7 +515,8 @@ private lemma bernoulliRealZero_one_mem_Ioo {n : ℕ} {lo hi : ℝ} (hlh : lo < 
   exact hne _ ⟨h1, hle⟩ h2
 
 /-- Tail bound for the Fourier series of `B₂ₖ`, `k ≥ 2`, after the first five terms. -/
-private lemma abs_bernoulliFun_two_mul_sub_fourier_five_le {k : ℕ} (hk : 2 ≤ k) {x : ℝ} (hx : x ∈ Set.Icc (0 : ℝ) 1) :
+private lemma abs_bernoulliFun_two_mul_sub_fourier_five_le {k : ℕ} (hk : 2 ≤ k) {x : ℝ}
+    (hx : x ∈ Set.Icc (0 : ℝ) 1) :
     |(-1 : ℝ) ^ (k + 1) * (2 * π) ^ (2 * k) / 2 / (2 * k)! * bernoulliFun (2 * k) x -
       ∑ m ∈ Finset.range 5, 1 / (m : ℝ) ^ (2 * k) * Real.cos (2 * π * m * x)| ≤
       625 * (π ^ 4 / 90 - (1 + 1 / 16 + 1 / 81 + 1 / 256)) * (1 / 5) ^ (2 * k) := by
@@ -610,7 +614,8 @@ private lemma half_pow_two_mul_bounds_of_three_le {k : ℕ} (hk : 3 ≤ k) :
       _ ≤ 6 / 10 := by norm_num
 
 /-- `|g(θ) - main(θ)| ≤ 0.6 A²` on `[-3π/2, π/2]`, `A = 2^{-2k}`, `k ≥ 3`. -/
-private lemma abs_normalizedBernoulliShift_sub_le {k : ℕ} (hk : 3 ≤ k) {θ : ℝ} (h1 : -(3 * π / 2) ≤ θ) (h2 : θ ≤ π / 2) :
+private lemma abs_normalizedBernoulliShift_sub_le {k : ℕ} (hk : 3 ≤ k) {θ : ℝ}
+    (h1 : -(3 * π / 2) ≤ θ) (h2 : θ ≤ π / 2) :
     |normalizedBernoulliShift k θ - (Real.sin θ - (1 / 2) ^ (2 * k) * Real.cos (2 * θ) -
       (1 / 3) ^ (2 * k) * Real.sin (3 * θ) + (1 / 4) ^ (2 * k) * Real.cos (4 * θ))| ≤
       6 / 10 * ((1 / 2) ^ (2 * k)) ^ 2 := by
@@ -626,7 +631,8 @@ private lemma abs_normalizedBernoulliShift_sub_le {k : ℕ} (hk : 3 ≤ k) {θ :
   exact ht.trans (half_pow_two_mul_bounds_of_three_le hk).2.2.2
 
 /-- `g(A) > 0` for `A = 2^{-2k}`, `k ≥ 3`. -/
-private lemma normalizedBernoulliShift_pos {k : ℕ} (hk : 3 ≤ k) : 0 < normalizedBernoulliShift k ((1 / 2) ^ (2 * k)) := by
+private lemma normalizedBernoulliShift_pos {k : ℕ} (hk : 3 ≤ k) : 0 <
+    normalizedBernoulliShift k ((1 / 2) ^ (2 * k)) := by
   obtain ⟨hA0, hA1, hB, -⟩ := half_pow_two_mul_bounds_of_three_le hk
   set A : ℝ := (1 / 2) ^ (2 * k) with hAd
   set B : ℝ := (1 / 3) ^ (2 * k) with hBd
@@ -696,7 +702,8 @@ private lemma normalizedBernoulliShift_neg {k : ℕ} (hk : 3 ≤ k) {c θ : ℝ}
 
 /-- For `k ≥ 3`, `0 ≤ c < 1` and `c + 2A ≤ 1` (`A = 2^{-2k}`):
 `3/4 + cA/(2π) < x_1^{(2k)} < 3/4 + A/(2π)`. -/
-private lemma bernoulliRealZero_two_mul_one_bounds {k : ℕ} (hk : 3 ≤ k) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c < 1)
+private lemma bernoulliRealZero_two_mul_one_bounds {k : ℕ} (hk : 3 ≤ k) {c : ℝ}
+    (hc0 : 0 ≤ c) (hc1 : c < 1)
     (hc : c + 2 * (1 / 2) ^ (2 * k) ≤ 1) :
     3 / 4 + c * (1 / 2) ^ (2 * k) / (2 * π) < bernoulliRealZero (2 * k) 1 ∧
       bernoulliRealZero (2 * k) 1 < 3 / 4 + (1 / 2) ^ (2 * k) / (2 * π) := by
@@ -708,7 +715,8 @@ private lemma bernoulliRealZero_two_mul_one_bounds {k : ℕ} (hk : 3 ≤ k) {c :
   have hK : K ≠ 0 := by
     have : (2 * k)! ≠ 0 := Nat.factorial_ne_zero _
     simp only [K]; positivity
-  have hg : ∀ θ, normalizedBernoulliShift k θ = K * bernoulliFun (2 * k) (3 / 4 + θ / (2 * π)) := fun _ => rfl
+  have hg : ∀ θ, normalizedBernoulliShift k θ = K *
+      bernoulliFun (2 * k) (3 / 4 + θ / (2 * π)) := fun _ => rfl
   have hx : ∀ x : ℝ, 3 / 4 + 2 * π * (x - 3 / 4) / (2 * π) = x := by
     intro x; field_simp; ring
   refine bernoulliRealZero_one_mem_Ioo ?_ (fun x hx' => ?_) ?_ ?_

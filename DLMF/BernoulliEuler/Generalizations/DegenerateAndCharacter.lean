@@ -199,9 +199,11 @@ noncomputable def degenerateBernoulliCorrection (l : ℝ) : ℕ → ℝ
 
 /-- For `0 < λ < 1/4` and `0 < |t| < 1`, with `u = ln(1+λt)/λ`,
 `t/(eᵘ - 1) = ∑ₙ (bₙ λⁿ + eₙ) tⁿ`. -/
-private lemma hasSum_bernoulliSecondKind_add_correction {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : |t| < 1)
+private lemma hasSum_bernoulliSecondKind_add_correction {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4)
+    {t : ℝ} (ht : |t| < 1)
     (ht0 : t ≠ 0) :
-    HasSum (fun n : ℕ => ((bernoulliSecondKind n : ℝ) * l ^ n + degenerateBernoulliCorrection l n) * t ^ n)
+    HasSum (fun n : ℕ =>
+        ((bernoulliSecondKind n : ℝ) * l ^ n + degenerateBernoulliCorrection l n) * t ^ n)
       (t / (Real.exp (Real.log (1 + l * t) / l) - 1)) := by
   have hl' : l ≠ 0 := hl0.ne'
   set y := l * t with hy
@@ -293,7 +295,8 @@ private lemma hasSum_bernoulliSecondKind_add_correction {l : ℝ} (hl0 : 0 < l) 
       rw [hF]; dsimp only
       rw [signedStirlingFirst_eq_zero_of_lt (by simp at hm; omega)]; simp
   have hC2 := hC.prod_fiberwise fun j => hcol j
-  have hGj : ∀ j : ℕ, ∑ m ∈ range (j + 1), F (m, j) = degenerateBernoulliCorrection l (j + 1) * t ^ (j + 1) := by
+  have hGj : ∀ j : ℕ, ∑ m ∈ range (j + 1), F (m, j) = degenerateBernoulliCorrection l (j + 1) *
+      t ^ (j + 1) := by
     intro j
     simp only [degenerateBernoulliCorrection, sum_div, sum_mul]
     refine sum_congr rfl fun m hm => ?_
@@ -399,11 +402,13 @@ private lemma sum_bernoulli_stirlingFirst_reindex {j : ℕ} (hj : 1 ≤ j) (l : 
       simp [bernoulli_eq_zero_of_odd hodd (by omega)]
 
 /-- The coefficient identity behind 24.16.8, for real `0 < λ < 1/4`. -/
-private lemma aeval_degenerateBernoulli_div_factorial {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) (n : ℕ) :
+private lemma aeval_degenerateBernoulli_div_factorial {l : ℝ} (hl0 : 0 < l)
+    (hl : l < 1 / 4) (n : ℕ) :
     aeval l (degenerateBernoulli n) / n ! =
       (bernoulliSecondKind n : ℝ) * l ^ n + degenerateBernoulliCorrection l n := by
   have hm : ∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum
-      (fun n : ℕ => ((bernoulliSecondKind n : ℝ) * l ^ n + degenerateBernoulliCorrection l n) * t ^ n)
+      (fun n : ℕ => ((bernoulliSecondKind n : ℝ) * l ^ n +
+          degenerateBernoulliCorrection l n) * t ^ n)
       (t / (Real.exp (Real.log (1 + l * t) / l) - 1)) := by
     have hball : Metric.ball (0 : ℝ) 1 ∈ 𝓝[≠] (0 : ℝ) :=
       mem_nhdsWithin_of_mem_nhds (Metric.ball_mem_nhds _ one_pos)
@@ -468,16 +473,18 @@ private lemma exp_sub_one_ne_zero_of_norm_lt {t : ℂ} (ht : ‖t‖ < 2 * π) (
     rw [← Int.cast_abs]; exact_mod_cast Int.one_le_abs hn0
   nlinarith [Real.pi_pos]
 
-/-- Identity under the stated parameter and domain assumptions: `bernoulliGenFun t = t / (Complex.exp t -
-1)`. -/
-private lemma bernoulliGenFun_of_ne_zero {t : ℂ} (ht0 : t ≠ 0) : bernoulliGenFun t = t / (Complex.exp t - 1) :=
+/-- Identity under the stated parameter and domain assumptions:
+`bernoulliGenFun t = t / (Complex.exp t - 1)`. -/
+private lemma bernoulliGenFun_of_ne_zero {t : ℂ} (ht0 : t ≠ 0) : bernoulliGenFun t = t /
+    (Complex.exp t - 1) :=
   Function.update_of_ne ht0 _ _
 
 /-- Identity under the stated parameter and domain assumptions: `bernoulliGenFun 0 = 1`. -/
 private lemma bernoulliGenFun_zero : bernoulliGenFun 0 = 1 := Function.update_self _ _ _
 
 /-- The map `(fun t : ℂ => t / (Complex.exp t - 1))` tends to `(𝓝 1)` along `(𝓝[≠] 0)`. -/
-private lemma tendsto_div_exp_sub_one_nhdsNE_zero : Tendsto (fun t : ℂ => t / (Complex.exp t - 1)) (𝓝[≠] 0) (𝓝 1) := by
+private lemma tendsto_div_exp_sub_one_nhdsNE_zero : Tendsto (fun t : ℂ => t / (Complex.exp t - 1))
+    (𝓝[≠] 0) (𝓝 1) := by
   have h := (Complex.hasDerivAt_exp 0).tendsto_slope_zero
   simp only [zero_add, Complex.exp_zero, smul_eq_mul] at h
   have h2 := h.inv₀ one_ne_zero
@@ -485,9 +492,10 @@ private lemma tendsto_div_exp_sub_one_nhdsNE_zero : Tendsto (fun t : ℂ => t / 
   refine h2.congr' (eventually_nhdsWithin_of_forall fun t ht => ?_)
   simp [div_eq_mul_inv, mul_comm]
 
-/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ bernoulliGenFun (ball 0 (2 *
-π))`. -/
-private lemma differentiableOn_bernoulliGenFun : DifferentiableOn ℂ bernoulliGenFun (ball 0 (2 * π)) := by
+/-- Differentiability throughout the specified domain:
+`DifferentiableOn ℂ bernoulliGenFun (ball 0 (2 * π))`. -/
+private lemma differentiableOn_bernoulliGenFun : DifferentiableOn ℂ bernoulliGenFun
+    (ball 0 (2 * π)) := by
   rw [← Complex.differentiableOn_compl_singleton_and_continuousAt_iff
     (ball_mem_nhds _ (by positivity))]
   refine ⟨fun t ht => ?_, ?_⟩
@@ -504,7 +512,8 @@ private lemma differentiableOn_bernoulliGenFun : DifferentiableOn ℂ bernoulliG
 private lemma bernoulliGenFun_ne_zero {t : ℂ} (ht : ‖t‖ < 2 * π) : bernoulliGenFun t ≠ 0 := by
   by_cases ht0 : t = 0
   · rw [ht0, bernoulliGenFun_zero]; exact one_ne_zero
-  · rw [bernoulliGenFun_of_ne_zero ht0]; exact div_ne_zero ht0 (exp_sub_one_ne_zero_of_norm_lt ht ht0)
+  · rw [bernoulliGenFun_of_ne_zero ht0];
+        exact div_ne_zero ht0 (exp_sub_one_ne_zero_of_norm_lt ht ht0)
 
 /-- Estimate under the stated parameter and domain assumptions: `6 ^ (n + 1) ≤ (2 * n + 3)!`. -/
 private lemma six_pow_succ_le_factorial (n : ℕ) : 6 ^ (n + 1) ≤ (2 * n + 3)! := by
@@ -536,7 +545,9 @@ private lemma norm_sinh_sub_self_lt {w : ℂ} (hw0 : w ≠ 0) (hw : ‖w‖ < π
     rw [norm_div, norm_pow, Complex.norm_natCast, ← hr,
       show 2 * (n + 1) + 1 = 2 * n + 3 by ring]
     rw [div_le_iff₀ (by positivity)]
-    have h6 : ((6 : ℝ) ^ (n + 1)) ≤ ((2 * n + 3)! : ℝ) := by exact_mod_cast six_pow_succ_le_factorial n
+    have h6 : ((6 : ℝ) ^ (n + 1)) ≤ ((2 * n + 3)! : ℝ) := by
+                                                            exact_mod_cast six_pow_succ_le_factorial
+                                                              n
     have : r * ρ * ρ ^ n = r ^ (2 * n + 3) / 6 ^ (n + 1) := by
       rw [hρ, div_pow, ← pow_mul]; field_simp; ring
     rw [this, div_mul_eq_mul_div, le_div_iff₀ (by positivity)]
@@ -549,7 +560,8 @@ private lemma norm_sinh_sub_self_lt {w : ℂ} (hw0 : w ≠ 0) (hw : ‖w‖ < π
       rw [← div_eq_mul_inv, div_lt_one (by linarith)]; linarith
 
 /-- Formula under the stated hypotheses: `bernoulliGenFun t ∈ Complex.slitPlane`. -/
-private lemma bernoulliGenFun_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : bernoulliGenFun t ∈ Complex.slitPlane := by
+private lemma bernoulliGenFun_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : bernoulliGenFun t ∈
+    Complex.slitPlane := by
   by_cases ht0 : t = 0
   · rw [ht0, bernoulliGenFun_zero]; exact Complex.one_mem_slitPlane
   rw [bernoulliGenFun_of_ne_zero ht0]
@@ -591,9 +603,10 @@ private lemma bernoulliGenFun_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : bern
 /-- The logarithmic derivative `H'/H`. -/
 noncomputable def bernoulliGenFunLogDeriv (t : ℂ) : ℂ := deriv bernoulliGenFun t / bernoulliGenFun t
 
-/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ bernoulliGenFunLogDeriv (ball 0 (2 *
-π))`. -/
-private lemma differentiableOn_bernoulliGenFunLogDeriv : DifferentiableOn ℂ bernoulliGenFunLogDeriv (ball 0 (2 * π)) :=
+/-- Differentiability throughout the specified domain:
+`DifferentiableOn ℂ bernoulliGenFunLogDeriv (ball 0 (2 * π))`. -/
+private lemma differentiableOn_bernoulliGenFunLogDeriv : DifferentiableOn ℂ bernoulliGenFunLogDeriv
+    (ball 0 (2 * π)) :=
   (differentiableOn_bernoulliGenFun.deriv isOpen_ball).div differentiableOn_bernoulliGenFun
     fun t ht => bernoulliGenFun_ne_zero (by simpa using ht)
 
@@ -607,21 +620,23 @@ lemma exists_hasDerivAt_bernoulliGenFunLogDeriv : ∃ L : ℂ → ℂ, L 0 = 0 �
 noncomputable def bernoulliGenFunLog : ℂ → ℂ := exists_hasDerivAt_bernoulliGenFunLogDeriv.choose
 
 /-- Identity under the stated parameter and domain assumptions: `bernoulliGenFunLog 0 = 0`. -/
-private lemma bernoulliGenFunLog_zero : bernoulliGenFunLog 0 = 0 := exists_hasDerivAt_bernoulliGenFunLogDeriv.choose_spec.1
+private lemma bernoulliGenFunLog_zero : bernoulliGenFunLog 0 = 0 :=
+    exists_hasDerivAt_bernoulliGenFunLogDeriv.choose_spec.1
 
 /-- At `t`, the function `bernoulliGenFunLog` has derivative `(bernoulliGenFunLogDeriv t)`. -/
 private lemma hasDerivAt_bernoulliGenFunLog {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
     HasDerivAt bernoulliGenFunLog (bernoulliGenFunLogDeriv t) t :=
   exists_hasDerivAt_bernoulliGenFunLogDeriv.choose_spec.2 t ht
 
-/-- Identity under the stated parameter and domain assumptions: `Complex.exp (bernoulliGenFunLog t) = bernoulliGenFun
-t`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`Complex.exp (bernoulliGenFunLog t) = bernoulliGenFun t`. -/
 private lemma exp_bernoulliGenFunLog {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
     Complex.exp (bernoulliGenFunLog t) = bernoulliGenFun t := by
   set g := fun z => bernoulliGenFun z * Complex.exp (-bernoulliGenFunLog z)
   have hd : ∀ z ∈ ball (0 : ℂ) (2 * π), HasDerivAt g 0 z := by
     intro z hz
-    have hH := (differentiableOn_bernoulliGenFun.differentiableAt (isOpen_ball.mem_nhds hz)).hasDerivAt
+    have hH := (differentiableOn_bernoulliGenFun.differentiableAt
+        (isOpen_ball.mem_nhds hz)).hasDerivAt
     have hE := ((hasDerivAt_bernoulliGenFunLog hz).neg).cexp
     convert hH.mul hE using 1
     have := bernoulliGenFun_ne_zero (by simpa using hz : ‖z‖ < 2 * π)
@@ -637,11 +652,13 @@ private lemma exp_bernoulliGenFunLog {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * �
 (x * bernoulliGenFunLog z)) (ball 0 (2 * π))`. -/
 private lemma differentiableOn_exp_mul_bernoulliGenFunLog (x : ℂ) :
     DifferentiableOn ℂ (fun z => Complex.exp (x * bernoulliGenFunLog z)) (ball 0 (2 * π)) :=
-  fun _ hz => (((hasDerivAt_bernoulliGenFunLog hz).differentiableAt.const_mul x).cexp).differentiableWithinAt
+  fun _ hz => (((hasDerivAt_bernoulliGenFunLog hz).differentiableAt.const_mul
+      x).cexp).differentiableWithinAt
 
 /-- Formula under the stated hypotheses: `∃ c : ℕ → ℂ → ℂ, (∀ k, DifferentiableOn ℂ (c k) (ball 0
 (2 * π))) ∧ ∀ x : ℂ, ∀ t ∈ ball (0 : ℂ) (2 * π), iteratedDeriv n (fun z => Complex.exp (x *
-bernoulliGenFunLog z)) t = (∑ k ∈ range (n + 1), x ^ k * c k t) * Complex.exp (x * bernoulliGenFunLog t)`. -/
+bernoulliGenFunLog z)) t = (∑ k ∈ range (n + 1), x ^ k * c k t) * Complex.exp (x *
+bernoulliGenFunLog t)`. -/
 private lemma iteratedDeriv_exp_mul_bernoulliGenFunLog_eq_sum (n : ℕ) : ∃ c : ℕ → ℂ → ℂ,
     (∀ k, DifferentiableOn ℂ (c k) (ball 0 (2 * π))) ∧
     ∀ x : ℂ, ∀ t ∈ ball (0 : ℂ) (2 * π),
@@ -662,7 +679,8 @@ private lemma iteratedDeriv_exp_mul_bernoulliGenFunLog_eq_sum (n : ℕ) : ∃ c 
         · exact differentiableOn_bernoulliGenFunLogDeriv.mul (hc (k - 1))
     · rw [iteratedDeriv_succ]
       have hev : iteratedDeriv n (fun z => Complex.exp (x * bernoulliGenFunLog z)) =ᶠ[𝓝 t]
-          fun z => (∑ k ∈ range (n + 1), x ^ k * c k z) * Complex.exp (x * bernoulliGenFunLog z) := by
+          fun z => (∑ k ∈ range (n + 1), x ^ k * c k z) *
+              Complex.exp (x * bernoulliGenFunLog z) := by
         filter_upwards [isOpen_ball.mem_nhds ht] with z hz using hF x z hz
       rw [hev.deriv_eq]
       have hS : HasDerivAt (fun z => ∑ k ∈ range (n + 1), x ^ k * c k z)
@@ -688,11 +706,13 @@ private lemma iteratedDeriv_exp_mul_bernoulliGenFunLog_eq_sum (n : ℕ) : ∃ c 
       rw [key]; ring
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun z =>
-Complex.exp ((ℓ : ℂ) * bernoulliGenFunLog z)) 0 = (((norlundPolynomial n).eval (ℓ : ℚ) : ℚ) : ℂ)`. -/
+Complex.exp ((ℓ : ℂ) * bernoulliGenFunLog z)) 0 = (((norlundPolynomial n).eval (ℓ : ℚ) : ℚ) :
+ℂ)`. -/
 private lemma iteratedDeriv_exp_natCast_mul_bernoulliGenFunLog_zero (ℓ n : ℕ) :
     iteratedDeriv n (fun z => Complex.exp ((ℓ : ℂ) * bernoulliGenFunLog z)) 0 =
       (((norlundPolynomial n).eval (ℓ : ℚ) : ℚ) : ℂ) := by
-  have hev : (fun z => Complex.exp ((ℓ : ℂ) * bernoulliGenFunLog z)) =ᶠ[𝓝 0] fun z => bernoulliGenFun z ^ ℓ := by
+  have hev : (fun z => Complex.exp ((ℓ : ℂ) * bernoulliGenFunLog z)) =ᶠ[𝓝 0] fun z =>
+      bernoulliGenFun z ^ ℓ := by
     filter_upwards [isOpen_ball.mem_nhds (mem_ball_self (show (0 : ℝ) < 2 * π by positivity))]
       with z hz
     rw [Complex.exp_nat_mul, exp_bernoulliGenFunLog hz]
@@ -746,12 +766,14 @@ private lemma iteratedDeriv_exp_natCast_mul_bernoulliGenFunLog_zero (ℓ n : ℕ
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun z =>
 Complex.exp (x * bernoulliGenFunLog z)) 0 = aeval x (norlundPolynomial n)`. -/
 private lemma iteratedDeriv_exp_mul_bernoulliGenFunLog_zero (x : ℂ) (n : ℕ) :
-    iteratedDeriv n (fun z => Complex.exp (x * bernoulliGenFunLog z)) 0 = aeval x (norlundPolynomial n) := by
+    iteratedDeriv n (fun z => Complex.exp (x * bernoulliGenFunLog z)) 0 =
+        aeval x (norlundPolynomial n) := by
   obtain ⟨c, -, hF⟩ := iteratedDeriv_exp_mul_bernoulliGenFunLog_eq_sum n
   have h0 : ∀ y : ℂ, iteratedDeriv n (fun z => Complex.exp (y * bernoulliGenFunLog z)) 0 =
       ∑ k ∈ range (n + 1), y ^ k * c k 0 := by
     intro y
-    rw [hF y 0 (mem_ball_self (by positivity)), bernoulliGenFunLog_zero, mul_zero, Complex.exp_zero, mul_one]
+    rw [hF y 0 (mem_ball_self (by positivity)), bernoulliGenFunLog_zero, mul_zero,
+        Complex.exp_zero, mul_one]
   set P : ℂ[X] := ∑ k ∈ range (n + 1), C (c k 0) * X ^ k
   have hP : ∀ y, P.eval y = ∑ k ∈ range (n + 1), y ^ k * c k 0 := by
     intro y
@@ -767,8 +789,8 @@ private lemma iteratedDeriv_exp_mul_bernoulliGenFunLog_zero (x : ℂ) (n : ℕ) 
     rfl
   rw [h0, ← hP, hQ, eval_map_algebraMap]
 
-/-- Identity under the stated parameter and domain assumptions: `bernoulliGenFunLog t = Complex.log (bernoulliGenFun
-t)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`bernoulliGenFunLog t = Complex.log (bernoulliGenFun t)`. -/
 private lemma bernoulliGenFunLog_eq_log {t : ℂ} (ht : ‖t‖ < 2 * π)
     (hs : ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 → bernoulliGenFun (s * t) ∈ Complex.slitPlane) :
     bernoulliGenFunLog t = Complex.log (bernoulliGenFun t) := by
@@ -781,8 +803,10 @@ private lemma bernoulliGenFunLog_eq_log {t : ℂ} (ht : ‖t‖ < 2 * π)
   have hd : ∀ s ∈ Set.Icc (0 : ℝ) 1, HasDerivAt ψ 0 s := by
     intro s hs'
     have hz := hball s hs'
-    have hH := (differentiableOn_bernoulliGenFun.differentiableAt (isOpen_ball.mem_nhds hz)).hasDerivAt
-    have e : HasDerivAt (fun z : ℂ => bernoulliGenFunLog (z * t) - Complex.log (bernoulliGenFun (z * t))) 0
+    have hH := (differentiableOn_bernoulliGenFun.differentiableAt
+        (isOpen_ball.mem_nhds hz)).hasDerivAt
+    have e : HasDerivAt (fun z : ℂ => bernoulliGenFunLog (z * t) -
+        Complex.log (bernoulliGenFun (z * t))) 0
         (s : ℂ) := by
       have hm : HasDerivAt (fun z : ℂ => z * t) t (s : ℂ) := by
         simpa using (hasDerivAt_id (s : ℂ)).mul_const t
@@ -840,13 +864,15 @@ theorem hasSum_norlundPolynomial_real (x : ℝ) {t : ℝ} (ht : |t| < 2 * π) (h
     rw [bernoulliGenFun_of_ne_zero (Complex.ofReal_ne_zero.mpr hr)]; push_cast; rfl
   have htn : ‖(t : ℂ)‖ < 2 * π := by rwa [Complex.norm_real, Real.norm_eq_abs]
   have hb : (t : ℂ) ∈ Metric.ball (0 : ℂ) (2 * π) := by rwa [mem_ball_zero_iff]
-  have hT := Complex.hasSum_taylorSeries_on_ball (differentiableOn_exp_mul_bernoulliGenFunLog (x : ℂ)) hb
+  have hT := Complex.hasSum_taylorSeries_on_ball
+      (differentiableOn_exp_mul_bernoulliGenFunLog (x : ℂ)) hb
   have hL := bernoulliGenFunLog_eq_log htn fun s hs => by
     rw [← Complex.ofReal_mul]
     by_cases h0 : s * t = 0
     · rw [h0, Complex.ofReal_zero, bernoulliGenFun_zero]; exact Complex.one_mem_slitPlane
     · rw [hHr _ h0, Complex.ofReal_mem_slitPlane]; exact hpos _ h0
-  have hR : Complex.exp ((x : ℂ) * bernoulliGenFunLog t) = (((t / (Real.exp t - 1)) ^ x : ℝ) : ℂ) := by
+  have hR : Complex.exp ((x : ℂ) * bernoulliGenFunLog t) =
+      (((t / (Real.exp t - 1)) ^ x : ℝ) : ℂ) := by
     rw [hL, hHr t ht0, ← Complex.ofReal_log (hpos t ht0).le, ← Complex.ofReal_mul,
       ← Complex.ofReal_exp, Real.rpow_def_of_pos (hpos t ht0), mul_comm]
   simp only [sub_zero, iteratedDeriv_exp_mul_bernoulliGenFunLog_zero, smul_eq_mul, hR] at hT

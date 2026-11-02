@@ -41,7 +41,8 @@ namespace DLMF.Confluent
 ℂ)*(2*n+1)))` converges to `(erf z)`. -/
 @[dlmf 7.6.E1]
 theorem hasSum_erf_complex (z : ℂ) :
-    HasSum (fun n : ℕ => 2/Real.sqrt π*(-1 : ℂ)^n*z^(2*n+1)/((n.factorial : ℂ)*(2*n+1))) (erf z) := by
+    HasSum (fun n : ℕ =>
+        2/Real.sqrt π*(-1 : ℂ)^n*z^(2*n+1)/((n.factorial : ℂ)*(2*n+1))) (erf z) := by
   have hs (w : ℂ) : HasSum (fun n : ℕ => ((-1:ℂ)^n/n.factorial)*w^(2*n)) (exp (-w^2)) := by
     have he := NormedSpace.expSeries_div_hasSum_exp (-w^2)
     rw [← Complex.exp_eq_exp_ℂ] at he
@@ -100,7 +101,8 @@ theorem Gamma_nat_add_three_half_mul_two_pow (m : ℕ) :
     rw [h]; ring
   | succ m ih =>
     have hne : (m:ℂ)+3/2 ≠ 0 := by
-      intro h0; have := congrArg Complex.re h0; simp at this; linarith [(Nat.cast_nonneg m : (0:ℝ) ≤ m)]
+      intro h0; have := congrArg Complex.re h0; simp at this;
+          linarith [(Nat.cast_nonneg m : (0:ℝ) ≤ m)]
     rw [show ((m+1:ℕ):ℂ)+3/2 = ((m:ℂ)+3/2)+1 by push_cast; ring, Complex.Gamma_add_one _ hne,
       oddProduct, Finset.prod_range_succ, ← oddProduct, pow_succ]
     rw [show ((m:ℂ)+3/2)*Gamma ((m:ℂ)+3/2)*((2:ℂ)^m*2) =
@@ -145,7 +147,8 @@ theorem hasSum_faddeevaW (z : ℂ) :
 
 /-- Convergent auxiliary series of DLMF 7.6.5 and 7.6.7. -/
 def fresnelAlternateSeries (odd : Bool) (z : ℂ) : ℂ :=
-  ∑' n : ℕ, (-1 : ℂ)^n*π^(2*n+if odd then 1 else 0)*z^(4*n+if odd then 3 else 1)/oddProduct (2*n+if odd then 1 else 0)
+  ∑' n : ℕ, (-1 : ℂ)^n*π^(2*n+if odd then 1 else 0)*z^(4*n+if odd then 3 else 1)/oddProduct
+      (2*n+if odd then 1 else 0)
 
 /-- The odd product dominates the factorial: `k! ≤ 1·3···(2k+1)`. -/
 theorem factorial_le_norm_oddProduct (k : ℕ) : (k ! : ℝ) ≤ ‖oddProduct k‖ := by
@@ -162,7 +165,9 @@ theorem factorial_le_norm_oddProduct (k : ℕ) : (k ! : ℝ) ≤ ‖oddProduct k
 /-- The series with terms `(fun n : ℕ => (-1 : ℂ)^n*π^(2*n+if odd then 1 else 0)*z^(4*n+if odd
 then 3 else 1)/oddProduct (2*n+if odd then 1 else 0))` is summable. -/
 theorem fresnelAlternateSeries_summable (odd : Bool) (z : ℂ) :
-    Summable (fun n : ℕ => (-1 : ℂ)^n*π^(2*n+if odd then 1 else 0)*z^(4*n+if odd then 3 else 1)/oddProduct (2*n+if odd then 1 else 0)) := by
+    Summable (fun n : ℕ =>
+        (-1 : ℂ)^n*π^(2*n+if odd then 1 else 0)*z^(4*n+if odd then 3 else 1)/oddProduct
+        (2*n+if odd then 1 else 0)) := by
   set e : ℕ := if odd then 1 else 0 with he
   have h4 : (4*· + if odd then 3 else 1) = fun n : ℕ => 2*(2*n+e)+1 := by
     funext n; cases odd <;> simp [he] <;> ring
@@ -178,7 +183,8 @@ theorem fresnelAlternateSeries_summable (odd : Bool) (z : ℂ) :
     one_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos Real.pi_pos]
   rw [mul_pow, ← pow_mul, pow_succ, show 2*(2*n+e) = (2*n+e)*2 by ring]
   rw [div_le_iff₀ (lt_of_lt_of_le hpos hk)]
-  calc π^(2*n+e)*(‖z‖^((2*n+e)*2)*‖z‖) = ‖z‖*(π^(2*n+e)*‖z‖^((2*n+e)*2)/((2*n+e) ! : ℝ))*((2*n+e) ! : ℝ) := by
+  calc π^(2*n+e)*(‖z‖^((2*n+e)*2)*‖z‖) =
+         ‖z‖*(π^(2*n+e)*‖z‖^((2*n+e)*2)/((2*n+e) ! : ℝ))*((2*n+e) ! : ℝ) := by
         field_simp
     _ ≤ _ := by gcongr
 
@@ -217,7 +223,8 @@ theorem fresnel_signed_alternate (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
     linear_combination (-((1+ε*I)/2*(2/Real.sqrt π)*ζ*X^n/oddProduct n))*hE - (X^n/oddProduct n)*hz1
   have hA := (fresnelAlternateSeries_summable false z).hasSum
   have hB := ((fresnelAlternateSeries_summable true z).hasSum).mul_left (-(ε*I))
-  have hsplit : HasSum c (fresnelAlternateSeries false z + -(ε*I)*fresnelAlternateSeries true z) := by
+  have hsplit : HasSum c
+      (fresnelAlternateSeries false z + -(ε*I)*fresnelAlternateSeries true z) := by
     refine HasSum.even_add_odd (f := c) ?_ ?_
     · refine hA.congr_fun fun m => ?_
       simp only [hc, Bool.false_eq_true, ite_false, add_zero]
@@ -242,7 +249,8 @@ theorem fresnel_signed_alternate (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
 (π*z^2/2)*fresnelAlternateSeries false z+sin (π*z^2/2)*fresnelAlternateSeries true z`. -/
 @[dlmf 7.6.E5]
 theorem fresnelCosInt_alternate_series (z : ℂ) :
-    fresnelCosInt z=cos (π*z^2/2)*fresnelAlternateSeries false z+sin (π*z^2/2)*fresnelAlternateSeries true z := by
+    fresnelCosInt z=cos (π*z^2/2)*fresnelAlternateSeries false z+sin
+        (π*z^2/2)*fresnelAlternateSeries true z := by
   have h1 := fresnel_signed_alternate z (Or.inl rfl)
   have h2 := fresnel_signed_alternate z (Or.inr rfl)
   push_cast at h1 h2
@@ -255,7 +263,8 @@ theorem fresnelCosInt_alternate_series (z : ℂ) :
 (π*z^2/2)*fresnelAlternateSeries true z+sin (π*z^2/2)*fresnelAlternateSeries false z`. -/
 @[dlmf 7.6.E7]
 theorem fresnelSinInt_alternate_series (z : ℂ) :
-    fresnelSinInt z = -cos (π*z^2/2)*fresnelAlternateSeries true z+sin (π*z^2/2)*fresnelAlternateSeries false z := by
+    fresnelSinInt z = -cos (π*z^2/2)*fresnelAlternateSeries true z+sin
+        (π*z^2/2)*fresnelAlternateSeries false z := by
   have h1 := fresnel_signed_alternate z (Or.inl rfl)
   have h2 := fresnel_signed_alternate z (Or.inr rfl)
   push_cast at h1 h2
@@ -269,7 +278,8 @@ theorem fresnelSinInt_alternate_series (z : ℂ) :
 (z^2)-sphericalI (2*n+1) (z^2)))` converges to `(erf z)`. -/
 @[dlmf 7.6.E8]
 theorem erf_spherical_series (z : ℂ) :
-    HasSum (fun n : ℕ => 2*z/Real.sqrt π*(-1 : ℂ)^n*(sphericalI (2*n) (z^2)-sphericalI (2*n+1) (z^2))) (erf z) := by
+    HasSum (fun n : ℕ =>
+        2*z/Real.sqrt π*(-1 : ℂ)^n*(sphericalI (2*n) (z^2)-sphericalI (2*n+1) (z^2))) (erf z) := by
   set K : ℂ := 2/Real.sqrt π with hK
   have hA0 (w : ℂ) : HasDerivAt (fun w => w * sphericalI 0 (w^2))
       (cosh (w^2) + w^2 * sphericalI 1 (w^2)) w := by
@@ -487,7 +497,8 @@ theorem erfCheb_hasSum (z b : ℂ) :
   · -- `gₙ → 0`
     set ρ : ℝ := (2*‖c‖+1)^2 with hρ
     have hρ1 : 1 ≤ ρ := one_le_pow₀ (by linarith [norm_nonneg c])
-    have ha := (erfCheb_summable_pow_mul_sphericalI (by positivity : (0:ℝ) ≤ ρ) w).tendsto_atTop_zero
+    have ha := (erfCheb_summable_pow_mul_sphericalI (by positivity : (0:ℝ) ≤ ρ)
+        w).tendsto_atTop_zero
     have ha1 := ha.comp (tendsto_add_atTop_nat 1)
     rw [← tendsto_add_atTop_iff_nat 1]
     have hlim : Tendsto (fun n : ℕ => ‖K*exp ((1/2-c^2)*z^2)*w‖ *
@@ -565,7 +576,9 @@ theorem erfCheb_hasSum (z b : ℂ) :
 `(erf (a*z))`. -/
 @[dlmf 7.6.E9]
 theorem erf_chebyshev_spherical_series {a : ℝ} (z : ℂ) :
-    HasSum (fun n : ℕ => 2*z/Real.sqrt π*exp ((1/2-(a : ℂ)^2)*z^2)*(Polynomial.Chebyshev.T ℝ (2*n+1 : ℤ)).eval a*sphericalI n (z^2/2)) (erf (a*z)) := by
+    HasSum (fun n : ℕ =>
+        2*z/Real.sqrt π*exp ((1/2-(a : ℂ)^2)*z^2)*(Polynomial.Chebyshev.T ℝ (2*n+1 : ℤ)).eval
+        a*sphericalI n (z^2/2)) (erf (a*z)) := by
   have hT : ∀ m : ℤ, (((Polynomial.Chebyshev.T ℝ m).eval a : ℝ) : ℂ) =
       (Polynomial.Chebyshev.T ℂ m).eval (a:ℂ) := by
     intro m

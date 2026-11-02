@@ -104,7 +104,8 @@ theorem Real.lameUEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ) :
         (if p = 0 then 1 / 2 else 1) * lamePolyCoeff .uE n m k p *
         Real.cos ((2 * p) * Real.lamePhi x k) : ℝ) : ℂ) := by
   rw [lameUEk, lamePolyEk]
-  simp only [LamePolyType.prefactor, LamePolyType.basis, one_mul, jacobiSnk_ofReal_eq_cos_lamePhi hk0 hk1]
+  simp only [LamePolyType.prefactor, LamePolyType.basis, one_mul,
+      jacobiSnk_ofReal_eq_cos_lamePhi hk0 hk1]
   push_cast
   refine Finset.sum_congr rfl fun p _ => ?_
   have := chebyshevT_cos (2 * p) (Real.lamePhi x k)
@@ -114,7 +115,8 @@ theorem Real.lameUEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ) :
 
 /-- 29.12.1: the Lamé polynomial `uE^m_{2n}(x, k²)` is the Lamé function
 `Ec^{2m}_{2n}(x, k²)` of §29.3 (real `x`, `0 ≤ m ≤ n`). Proved
-from the eigenvalue identification and the normalization 29.3.18 (`lamePolyEk_re_eq_lameEigenfunction`). -/
+from the eigenvalue identification and the normalization 29.3.18
+(`lamePolyEk_re_eq_lameEigenfunction`). -/
 @[dlmf 29.12.E1]
 theorem Real.lameUEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) (x : ℝ) :
     lameUEk n m x k = (Real.lameEck ((2 * n : ℕ) : ℝ) (2 * m) x k : ℂ) := by
@@ -169,7 +171,8 @@ theorem Real.lameSEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ) :
         lamePolyCoeff .sE n m k p *
         Real.cos ((2 * p + 1) * Real.lamePhi x k) : ℝ) : ℂ) := by
   rw [lameSEk, lamePolyEk]
-  simp only [LamePolyType.prefactor, LamePolyType.basis, one_mul, jacobiSnk_ofReal_eq_cos_lamePhi hk0 hk1]
+  simp only [LamePolyType.prefactor, LamePolyType.basis, one_mul,
+      jacobiSnk_ofReal_eq_cos_lamePhi hk0 hk1]
   push_cast
   refine Finset.sum_congr rfl fun p _ => ?_
   have := chebyshevT_cos (2 * p + 1) (Real.lamePhi x k)
@@ -178,7 +181,8 @@ theorem Real.lameSEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ) :
 
 /-- 29.12.2: the Lamé polynomial `sE^m_{2n+1}(x, k²)` is the Lamé function
 `Ec^{2m+1}_{2n+1}(x, k²)` of §29.3 (real `x`, `0 ≤ m ≤ n`). Proved
-from the eigenvalue identification and the normalization 29.3.18 (`lamePolyEk_re_eq_lameEigenfunction`). -/
+from the eigenvalue identification and the normalization 29.3.18
+(`lamePolyEk_re_eq_lameEigenfunction`). -/
 @[dlmf 29.12.E2]
 theorem Real.lameSEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) (x : ℝ) :
     lameSEk n m x k = (Real.lameEck ((2 * n + 1 : ℕ) : ℝ) (2 * m + 1) x k : ℂ) := by
@@ -238,7 +242,8 @@ theorem Real.lameCEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ) :
 
 /-- 29.12.3: the Lamé polynomial `cE^m_{2n+1}(x, k²)` is the Lamé function
 `Es^{2m+1}_{2n+1}(x, k²)` of §29.3 (real `x`, `0 ≤ m ≤ n`). Proved
-from the eigenvalue identification and the normalization 29.3.18 (`lamePolyEk_re_eq_lameEigenfunction`). -/
+from the eigenvalue identification and the normalization 29.3.18
+(`lamePolyEk_re_eq_lameEigenfunction`). -/
 @[dlmf 29.12.E3]
 theorem Real.lameCEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) (x : ℝ) :
     lameCEk n m x k = (Real.lameEsk ((2 * n + 1 : ℕ) : ℝ) (2 * m + 1) x k : ℂ) := by
@@ -301,7 +306,8 @@ theorem Real.lameDEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ) :
 
 /-- 29.12.4: the Lamé polynomial `dE^m_{2n+1}(x, k²)` is the Lamé function
 `Ec^{2m}_{2n+1}(x, k²)` of §29.3 (real `x`, `0 ≤ m ≤ n`). Proved
-from the eigenvalue identification and the normalization 29.3.18 (`lamePolyEk_re_eq_lameEigenfunction`). -/
+from the eigenvalue identification and the normalization 29.3.18
+(`lamePolyEk_re_eq_lameEigenfunction`). -/
 @[dlmf 29.12.E4]
 theorem Real.lameDEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) (x : ℝ) :
     lameDEk n m x k = (Real.lameEck ((2 * n + 1 : ℕ) : ℝ) (2 * m) x k : ℂ) := by
@@ -376,7 +382,8 @@ theorem Real.lameSCEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ) 
 
 /-- 29.12.5: the Lamé polynomial `scE^m_{2n+2}(x, k²)` is the Lamé function
 `Es^{2m+2}_{2n+2}(x, k²)` of §29.3 (real `x`, `0 ≤ m ≤ n`). Proved
-from the eigenvalue identification and the normalization 29.3.18 (`lamePolyEk_re_eq_lameEigenfunction`). -/
+from the eigenvalue identification and the normalization 29.3.18
+(`lamePolyEk_re_eq_lameEigenfunction`). -/
 @[dlmf 29.12.E5]
 theorem Real.lameSCEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) (x : ℝ) :
     lameSCEk n m x k = (Real.lameEsk ((2 * n + 2 : ℕ) : ℝ) (2 * m + 2) x k : ℂ) := by
@@ -438,7 +445,8 @@ theorem Real.lameSDEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ) 
 
 /-- 29.12.6: the Lamé polynomial `sdE^m_{2n+2}(x, k²)` is the Lamé function
 `Ec^{2m+1}_{2n+2}(x, k²)` of §29.3 (real `x`, `0 ≤ m ≤ n`). Proved
-from the eigenvalue identification and the normalization 29.3.18 (`lamePolyEk_re_eq_lameEigenfunction`). -/
+from the eigenvalue identification and the normalization 29.3.18
+(`lamePolyEk_re_eq_lameEigenfunction`). -/
 @[dlmf 29.12.E6]
 theorem Real.lameSDEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) (x : ℝ) :
     lameSDEk n m x k = (Real.lameEck ((2 * n + 2 : ℕ) : ℝ) (2 * m + 1) x k : ℂ) := by
@@ -461,7 +469,8 @@ theorem Real.lameSDEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) 
   · rw [integral_dn_cos_series_lamePhi_sq hk0 hk1 (n + 1) _ 1 (by simp [lamePolyCoeff]) hw]
     set c := lamePolyCoeff .sdE n m k with hc
     have hc1 : c (n + 1) = 0 := by simp [hc, lamePolyCoeff]
-    rw [dnNorm_extraTerm_one _ n, Finset.sum_range_succ (fun p => c p * c (p + 1)), hc1, mul_zero, add_zero]
+    rw [dnNorm_extraTerm_one _ n, Finset.sum_range_succ (fun p => c p * c (p + 1)), hc1,
+        mul_zero, add_zero]
     have h0 : ∀ p : ℕ, (2 * p + 1 = 0) = False := fun p => eq_false (by omega)
     simp only [LamePolyType.normForm, h0, ↓reduceIte, ← Finset.sum_mul]
     ring
@@ -503,7 +512,8 @@ theorem Real.lameCDEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ) 
 
 /-- 29.12.7: the Lamé polynomial `cdE^m_{2n+2}(x, k²)` is the Lamé function
 `Es^{2m+1}_{2n+2}(x, k²)` of §29.3 (real `x`, `0 ≤ m ≤ n`). Proved
-from the eigenvalue identification and the normalization 29.3.18 (`lamePolyEk_re_eq_lameEigenfunction`). -/
+from the eigenvalue identification and the normalization 29.3.18
+(`lamePolyEk_re_eq_lameEigenfunction`). -/
 @[dlmf 29.12.E7]
 theorem Real.lameCDEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) (x : ℝ) :
     lameCDEk n m x k = (Real.lameEsk ((2 * n + 2 : ℕ) : ℝ) (2 * m + 1) x k : ℂ) := by
@@ -528,7 +538,8 @@ theorem Real.lameCDEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) 
     set c := lamePolyCoeff .cdE n m k with hc
     have hc1 : c (n + 1) = 0 := by simp [hc, lamePolyCoeff]
     simp only [mul_neg, Finset.sum_neg_distrib]
-    rw [dnNorm_extraTerm_one _ n, Finset.sum_range_succ (fun p => c p * c (p + 1)), hc1, mul_zero, add_zero]
+    rw [dnNorm_extraTerm_one _ n, Finset.sum_range_succ (fun p => c p * c (p + 1)), hc1,
+        mul_zero, add_zero]
     have h0 : ∀ p : ℕ, (2 * p + 1 = 0) = False := fun p => eq_false (by omega)
     simp only [LamePolyType.normForm, h0, ↓reduceIte, ← Finset.sum_mul]
     ring
@@ -571,7 +582,8 @@ theorem Real.lameSCDEk_fourier (hk0 : 0 < k) (hk1 : k < 1) (n m : ℕ) (x : ℝ)
 
 /-- 29.12.8: the Lamé polynomial `scdE^m_{2n+3}(x, k²)` is the Lamé function
 `Es^{2m+2}_{2n+3}(x, k²)` of §29.3 (real `x`, `0 ≤ m ≤ n`). Proved
-from the eigenvalue identification and the normalization 29.3.18 (`lamePolyEk_re_eq_lameEigenfunction`). -/
+from the eigenvalue identification and the normalization 29.3.18
+(`lamePolyEk_re_eq_lameEigenfunction`). -/
 @[dlmf 29.12.E8]
 theorem Real.lameSCDEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) (x : ℝ) :
     lameSCDEk n m x k = (Real.lameEsk ((2 * n + 3 : ℕ) : ℝ) (2 * m + 2) x k : ℂ) := by
@@ -596,7 +608,8 @@ theorem Real.lameSCDEk_eq (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n)
     set c := lamePolyCoeff .scdE n m k with hc
     have hc1 : c (n + 1) = 0 := by simp [hc, lamePolyCoeff]
     simp only [mul_neg, Finset.sum_neg_distrib]
-    rw [dnNorm_extraTerm_two _ (n + 1), Finset.sum_range_succ (fun p => c p * c (p + 1)), hc1, mul_zero,
+    rw [dnNorm_extraTerm_two _ (n + 1),
+        Finset.sum_range_succ (fun p => c p * c (p + 1)), hc1, mul_zero,
       add_zero]
     have h0 : ∀ p : ℕ, (2 * p + 2 = 0) = False := fun p => eq_false (by omega)
     simp only [LamePolyType.normForm, h0, ↓reduceIte, ← Finset.sum_mul]

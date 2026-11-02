@@ -31,15 +31,16 @@ defining series and recurrences (DLMF 25.11.1–25.11.4), the Euler–Maclaurin 
 
 ## Main results
 
-* `tendsto_hurwitzZetaComplex`: the defining limit exists (DLMF §25.11(i)).
+* `tendsto_hurwitzZetaComplex`, `tendsto_hurwitzZetaComplex'`: the defining limit exists (DLMF
+  §25.11(i)).
 * `differentiableAt_hurwitzZetaComplex`, `hurwitzZetaComplex_residue_one`,
   `differentiableOn_hurwitzZetaComplex_param`: holomorphy in `s ≠ 1`, the simple pole with
   residue `1`, and analyticity in `a` on `Re a > 0`.
-* `hasSum_hurwitzZetaComplex`: the defining series DLMF 25.11.1.
+* `hasSum_hurwitzZetaComplex`, `hasSum_hurwitzZetaComplex'`: the defining series DLMF 25.11.1.
 * `hurwitzZetaComplex_one`: DLMF 25.11.2, `ζ(s, 1) = ζ(s)`.
 * `hurwitzZetaComplex_eq_add_one`, `hurwitzZetaComplex_eq_add_nat`: DLMF 25.11.3–25.11.4.
 * `hurwitzZetaComplex_eulerMaclaurin_one`, `hurwitzZetaComplex_eulerMaclaurin_two`,
-  `hurwitzZetaComplex_eulerMaclaurin`: DLMF 25.11.5–25.11.7.
+  `hurwitzZetaComplex_eulerMaclaurin`, `hurwitzZetaComplex_eulerMaclaurin'`: DLMF 25.11.5–25.11.7.
 * `hurwitzZeta_half_eq_add_alternating`: DLMF 25.11.8.
 * `hurwitzZeta_one_sub_fourier`: Hurwitz's Fourier series, DLMF 25.11.9.
 * `hasSum_hurwitzZetaComplex_taylor`: the Taylor series in `a` about `1`, DLMF 25.11.10
@@ -117,7 +118,8 @@ private lemma tendsto_hurwitzEMSeq_of_one_lt_re {s : ℂ} (hs : 1 < s.re) (a : �
     have := hsum.hasSum.tendsto_sum_nat
     simpa only [cpow_neg, one_div] using this
   have h1 : Tendsto (fun N : ℕ => (a + N) ^ (1 - s) / (s - 1)) atTop (𝓝 0) := by
-    simpa using (tendsto_add_natCast_cpow_of_re_neg a (w := 1 - s) (by simp; linarith)).div_const (s - 1)
+    simpa using (tendsto_add_natCast_cpow_of_re_neg a (w := 1 - s) (by simp; linarith)).div_const
+        (s - 1)
   have h2 : Tendsto (fun N : ℕ => (a + N) ^ (-s) / 2) atTop (𝓝 0) := by
     simpa using (tendsto_add_natCast_cpow_of_re_neg a (w := -s) (by simp; linarith)).div_const 2
   have h3 : Tendsto (fun N : ℕ => ∑ k ∈ Finset.range (⌈(1 - s.re) / 2⌉₊ + 1),
@@ -132,11 +134,11 @@ private lemma tendsto_hurwitzEMSeq_of_one_lt_re {s : ℂ} (hs : 1 < s.re) (a : �
   exact this
 
 /-- **Continuation of `ζ(s, a)`** (DLMF §25.11(i), first paragraph after 25.11.1): for `s ≠ 1` and
-`a ≠ 0, -1, -2, …` the Euler–Maclaurin limit defining `hurwitzZetaComplex s a` exists. -/
+`a ≠ 0, -1, -2, …` the Euler–Maclaurin limit defining `hurwitzZetaComplex s a` exists. This is
+stronger than DLMF, which assumes `a ≠ 0, -1, -2, …`. -/
 @[dlmf 25.11.i]
-theorem tendsto_hurwitzZetaComplex {s a : ℂ} (hs : s ≠ 1) (ha : ∀ m : ℕ, a ≠ -m) :
+theorem tendsto_hurwitzZetaComplex' {s a : ℂ} (hs : s ≠ 1) :
     Tendsto (hurwitzEMSeq s a) atTop (𝓝 (hurwitzZetaComplex s a)) := by
-  have _ := ha
   have h : hurwitzEMSeq s a = eulerMaclaurinSeq (⌈(1 - s.re) / 2⌉₊ + 1) s a := by
     funext N
     unfold hurwitzEMSeq eulerMaclaurinSeq eulerMaclaurinTail eulerMaclaurinCoeff
@@ -146,12 +148,20 @@ theorem tendsto_hurwitzZetaComplex {s a : ℂ} (hs : s ≠ 1) (ha : ∀ m : ℕ,
   have := Nat.le_ceil ((1 - s.re) / 2)
   push_cast; linarith
 
+/-- **Continuation of `ζ(s, a)`** (DLMF §25.11(i), first paragraph after 25.11.1): for `s ≠ 1` and
+`a ≠ 0, -1, -2, …` the Euler–Maclaurin limit defining `hurwitzZetaComplex s a` exists. -/
+@[dlmf 25.11.i]
+theorem tendsto_hurwitzZetaComplex {s a : ℂ} (hs : s ≠ 1) (_ha : ∀ m : ℕ, a ≠ -m) :
+    Tendsto (hurwitzEMSeq s a) atTop (𝓝 (hurwitzZetaComplex s a)) :=
+  tendsto_hurwitzZetaComplex' hs
+
 /-- **Meromorphy in `s`** (DLMF §25.11(i)): for `a ≠ 0, -1, -2, …`, `ζ(s, a)` is holomorphic in `s`
 on `ℂ \ {1}`. -/
 @[dlmf 25.11.i]
 theorem differentiableAt_hurwitzZetaComplex {s a : ℂ} (hs : s ≠ 1) (ha : ∀ m : ℕ, a ≠ -m) :
     DifferentiableAt ℂ (fun t => hurwitzZetaComplex t a) s :=
-  differentiableAt_hurwitzZetaComplex_of_add_natCast_ne_zero' hs fun n h => ha n (by linear_combination h)
+  differentiableAt_hurwitzZetaComplex_of_add_natCast_ne_zero' hs fun n h => ha n
+      (by linear_combination h)
 
 /-- **The pole at `s = 1`** (DLMF §25.11(i)): a simple pole with residue `1`. -/
 @[dlmf 25.11.i]
@@ -168,14 +178,23 @@ theorem differentiableOn_hurwitzZetaComplex_param {s : ℂ} (hs : s ≠ 1) :
 
 /-- **Defining series** (DLMF 25.11.1) for complex `a ≠ 0, -1, -2, …` and `Re s > 1`, principal
 powers. (Mathlib's real-parameter case `0 ≤ a ≤ 1` is
-`HurwitzZeta.hasSum_hurwitzZeta_of_one_lt_re`.) -/
+`HurwitzZeta.hasSum_hurwitzZeta_of_one_lt_re`.) This is stronger than DLMF, which assumes
+`a ≠ 0, -1, -2, …`. -/
 @[dlmf 25.11.E1]
-theorem hasSum_hurwitzZetaComplex {s a : ℂ} (hs : 1 < s.re) (ha : ∀ m : ℕ, a ≠ -m) :
+theorem hasSum_hurwitzZetaComplex' {s a : ℂ} (hs : 1 < s.re) :
     HasSum (fun n : ℕ => 1 / (n + a) ^ s) (hurwitzZetaComplex s a) := by
-  have _ := ha
-  rw [hurwitzZetaComplex_eq_limUnder_hurwitzEMSeq, (tendsto_hurwitzEMSeq_of_one_lt_re hs a).limUnder_eq]
+  rw [hurwitzZetaComplex_eq_limUnder_hurwitzEMSeq,
+      (tendsto_hurwitzEMSeq_of_one_lt_re hs a).limUnder_eq]
   simp_rw [add_comm (_ : ℂ) a]
   exact (summable_one_div_add_natCast_cpow hs a).hasSum
+
+/-- **Defining series** (DLMF 25.11.1) for complex `a ≠ 0, -1, -2, …` and `Re s > 1`, principal
+powers. (Mathlib's real-parameter case `0 ≤ a ≤ 1` is
+`HurwitzZeta.hasSum_hurwitzZeta_of_one_lt_re`.) -/
+@[dlmf 25.11.E1]
+theorem hasSum_hurwitzZetaComplex {s a : ℂ} (hs : 1 < s.re) (_ha : ∀ m : ℕ, a ≠ -m) :
+    HasSum (fun n : ℕ => 1 / (n + a) ^ s) (hurwitzZetaComplex s a) :=
+  hasSum_hurwitzZetaComplex' hs
 
 /-- **`ζ(s, 1) = ζ(s)`** (DLMF 25.11.2) for `s ≠ 1`, for the complex-parameter function (from the
 bridge to Mathlib). -/
@@ -213,7 +232,8 @@ theorem hurwitzZetaComplex_eq_add_nat {s a : ℂ} (hs : s ≠ 1) (ha : ∀ m : �
 /-! ### §25.11(iii) Representations by the Euler–Maclaurin formula -/
 
 /-- The tail of the Euler–Maclaurin sequence as a convergent series of increments. -/
-private lemma hasSum_eulerMaclaurinIncrement {M : ℕ} {s : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2 * M) (z : ℂ) (N₀ : ℕ) :
+private lemma hasSum_eulerMaclaurinIncrement {M : ℕ} {s : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2 * M)
+    (z : ℂ) (N₀ : ℕ) :
     HasSum (fun m : ℕ => eulerMaclaurinIncrement M s (z + (N₀ + m : ℕ)))
       (hurwitzZetaComplex s z - eulerMaclaurinSeq M s z N₀) := by
   have hK : ∀ q ∈ ({(s, z)} : Set (ℂ × ℂ)), ‖q.1‖ ≤ max ‖s‖ ‖z‖ ∧ ‖q.2‖ ≤ max ‖s‖ ‖z‖ ∧
@@ -222,7 +242,8 @@ private lemma hasSum_eulerMaclaurinIncrement {M : ℕ} {s : ℂ} (hs : s ≠ 1) 
     rw [Set.mem_singleton_iff] at hq
     subst hq
     exact ⟨le_max_left _ _, le_max_right _ _, le_rfl, hs⟩
-  obtain ⟨u, hu, -, hb⟩ := exists_summable_bound_eulerMaclaurinIncrement (le_max_of_le_left (norm_nonneg _)) hM hK
+  obtain ⟨u, hu, -, hb⟩ := exists_summable_bound_eulerMaclaurinIncrement
+      (le_max_of_le_left (norm_nonneg _)) hM hK
   set c := ⌈max ‖s‖ ‖z‖⌉₊ + 1
   set f : ℕ → ℂ := fun m => eulerMaclaurinIncrement M s (z + m)
   have h1 : Summable fun m => f (m + c) :=
@@ -243,7 +264,8 @@ private lemma hasSum_eulerMaclaurinIncrement {M : ℕ} {s : ℂ} (hs : s ≠ 1) 
   ring
 
 /-- The Euler–Maclaurin increment at a real point as an integral against `B̃_{2M+1}`. -/
-private lemma eulerMaclaurinIncrement_eq_integral (M : ℕ) {s : ℂ} (hs : s ≠ 1) {a : ℝ} (ha : 0 < a) (k : ℕ) :
+private lemma eulerMaclaurinIncrement_eq_integral (M : ℕ) {s : ℂ} (hs : s ≠ 1) {a : ℝ} (ha : 0 < a)
+    (k : ℕ) :
     eulerMaclaurinIncrement M s ((a : ℂ) + k) = -(poch s (2 * M + 1) / (2 * M + 1 : ℕ)!) *
       ∫ x in (k : ℝ)..(k + 1), ((periodicBernoulli (2 * M + 1) x : ℝ) : ℂ) /
         (((x + a : ℝ)) : ℂ) ^ (s + (2 * M + 1 : ℕ)) := by
@@ -269,7 +291,8 @@ private lemma eulerMaclaurinIncrement_eq_integral (M : ℕ) {s : ℂ} (hs : s �
   · ring
 
 /-- Splitting an integral over `(N₀, ∞)` into unit intervals. -/
-private lemma hasSum_intervalIntegral_unit_Ioi {g : ℝ → ℂ} {N₀ : ℕ} (hg : IntegrableOn g (Ioi (N₀ : ℝ))) :
+private lemma hasSum_intervalIntegral_unit_Ioi {g : ℝ → ℂ} {N₀ : ℕ}
+    (hg : IntegrableOn g (Ioi (N₀ : ℝ))) :
     HasSum (fun m : ℕ => ∫ x in ((N₀ + m : ℕ) : ℝ)..((N₀ + m : ℕ) + 1), g x)
       (∫ x in Ioi (N₀ : ℝ), g x) := by
   have hU : (⋃ m : ℕ, Ioc ((N₀ + m : ℕ) : ℝ) ((N₀ + m : ℕ) + 1)) = Ioi (N₀ : ℝ) := by
@@ -481,7 +504,8 @@ theorem hurwitzZetaComplex_eulerMaclaurin_one {s : ℂ} (hs : s ≠ 1) (hs0 : 0 
   have hval := tendsto_nhds_unique hT hU0
   rw [sub_eq_iff_eq_add, sub_eq_iff_eq_add] at hval
   rw [hval]
-  simp only [u, eulerMaclaurinSeq, eulerMaclaurinTail, Finset.range_zero, Finset.sum_empty, add_zero,
+  simp only [u, eulerMaclaurinSeq, eulerMaclaurinTail, Finset.range_zero, Finset.sum_empty,
+      add_zero,
     Finset.sum_range_succ]
   simp only [one_div, ← cpow_neg]
   have hc : ∀ x : ℕ, (x : ℂ) + a = a + x := fun x => add_comm _ _
@@ -490,7 +514,8 @@ theorem hurwitzZetaComplex_eulerMaclaurin_one {s : ℂ} (hs : s ≠ 1) (hs0 : 0 
 
 /-- The `M = 0` Euler–Maclaurin increment via `B₂(t) - B₂`:
 `emD₀(s, w) = -(s(s+1)/2) ∫_0^1 (B₂(t) - B₂)(w+t)^{-s-2} dt`. -/
-private lemma eulerMaclaurinIncrement_zero_eq_integral_bernoulliFun {s w : ℂ} (hs : s ≠ 1) (hw : 0 < w.re) :
+private lemma eulerMaclaurinIncrement_zero_eq_integral_bernoulliFun {s w : ℂ} (hs : s ≠ 1)
+    (hw : 0 < w.re) :
     eulerMaclaurinIncrement 0 s w = -(s * (s + 1) / 2) *
       ∫ t in (0 : ℝ)..1, (w + t) ^ (-s - 2) * ((bernoulliFun 2 t : ℂ) - bernoulli 2) := by
   have EM := integral_eq_sum_bernoulliFun_add_integral (cpowDerivFamily s w)
@@ -518,7 +543,8 @@ private lemma eulerMaclaurinIncrement_zero_eq_integral_bernoulliFun {s w : ℂ} 
       exact (hasDerivAt_cpowDerivFamily hw 0 (by rw [uIcc_of_le zero_le_one] at hx; exact hx.1)
         ).continuousAt.continuousWithinAt
   -- `∫_0^1 f₂ = f₁(1) - f₁(0)`
-  have hint2 : ∫ t in (0 : ℝ)..1, cpowDerivFamily s w 2 t = cpowDerivFamily s w 1 1 - cpowDerivFamily s w 1 0 := by
+  have hint2 : ∫ t in (0 : ℝ)..1, cpowDerivFamily s w 2 t = cpowDerivFamily s w 1 1 -
+      cpowDerivFamily s w 1 0 := by
     rw [intervalIntegral.integral_eq_sub_of_hasDerivAt]
     · intro x hx
       rw [uIcc_of_le zero_le_one] at hx
@@ -553,8 +579,11 @@ private lemma eulerMaclaurinIncrement_zero_eq_integral_bernoulliFun {s w : ℂ} 
   simp only [bernoulliFun_one, hb1, hb0, zero_add, pow_zero, pow_one, Nat.factorial_one,
     Nat.factorial_two, Nat.cast_one, Nat.cast_ofNat, div_one, one_mul, even_two, Even.neg_pow,
     one_pow] at EM
-  have h0 : cpowDerivFamily s w 0 1 = (w + 1) ^ (-s) := by simp [cpowDerivFamily, DLMF.Hypergeometric.poch_zero]
-  have h0' : cpowDerivFamily s w 0 0 = w ^ (-s) := by simp [cpowDerivFamily, DLMF.Hypergeometric.poch_zero]
+  have h0 : cpowDerivFamily s w 0 1 = (w + 1) ^ (-s) := by
+                                                          simp [cpowDerivFamily,
+                                                            DLMF.Hypergeometric.poch_zero]
+  have h0' : cpowDerivFamily s w 0 0 = w ^ (-s) := by
+      simp [cpowDerivFamily, DLMF.Hypergeometric.poch_zero]
   rw [h0, h0'] at EM
   rw [hint2] at hsplit
   unfold eulerMaclaurinIncrement eulerMaclaurinTail
@@ -569,7 +598,8 @@ private lemma eulerMaclaurinIncrement_zero_eq_integral_bernoulliFun {s w : ℂ} 
   linear_combination (-1 : ℂ) * EM + (1 / 2 : ℂ) * hsplit
 
 /-- The `M = 0` increment at a real point as an integral against `B̃₂ - B₂`. -/
-private lemma eulerMaclaurinIncrement_zero_eq_integral_periodicBernoulli {s : ℂ} (hs : s ≠ 1) {a : ℝ} (ha : 0 < a) (k : ℕ) :
+private lemma eulerMaclaurinIncrement_zero_eq_integral_periodicBernoulli {s : ℂ} (hs : s ≠ 1)
+    {a : ℝ} (ha : 0 < a) (k : ℕ) :
     eulerMaclaurinIncrement 0 s ((a : ℂ) + k) = -(s * (s + 1) / 2) *
       ∫ x in (k : ℝ)..(k + 1),
         ((periodicBernoulli 2 x - bernoulli 2 : ℝ) : ℂ) / (((x + a : ℝ)) : ℂ) ^ (s + 2) := by
@@ -599,7 +629,8 @@ theorem hurwitzZetaComplex_eulerMaclaurin_two {s : ℂ} (hs : s ≠ 1) (hs0 : -1
         ((periodicBernoulli 2 x - bernoulli 2 : ℝ) : ℂ) / (((x + a : ℝ)) : ℂ) ^ (s + 2) := by
   -- the `M = 0` sequence converges for `Re s > -1`
   have hT0 : Tendsto (eulerMaclaurinSeq 0 s a) atTop (𝓝 (hurwitzZetaComplex s a)) := by
-    have h1 := tendsto_eulerMaclaurinSeq_hurwitzZetaComplex (M := 1) (z := (a : ℂ)) hs (by simp; linarith)
+    have h1 := tendsto_eulerMaclaurinSeq_hurwitzZetaComplex (M := 1) (z := (a : ℂ)) hs
+        (by simp; linarith)
     have h2 := (tendsto_add_natCast_cpow_atTop (a : ℂ) (w := -s - (2 * ((0 : ℕ) : ℂ) + 1))
       (by simp; linarith)).const_mul (eulerMaclaurinCoeff s 0)
     rw [mul_zero] at h2
@@ -607,7 +638,8 @@ theorem hurwitzZetaComplex_eulerMaclaurin_two {s : ℂ} (hs : s ≠ 1) (hs0 : -1
     rw [sub_zero] at this
     refine this.congr fun N => ?_
     rw [eulerMaclaurinSeq_succ_left]; ring
-  have hP : Tendsto (fun K : ℕ => ∑ m ∈ Finset.range K, eulerMaclaurinIncrement 0 s ((a : ℂ) + (0 + m : ℕ)))
+  have hP : Tendsto (fun K : ℕ => ∑ m ∈ Finset.range K, eulerMaclaurinIncrement 0 s
+      ((a : ℂ) + (0 + m : ℕ)))
       atTop (𝓝 (hurwitzZetaComplex s a - eulerMaclaurinSeq 0 s a 0)) := by
     refine (hT0.sub_const _).congr fun K => ?_
     rw [← zero_add K, eulerMaclaurinSeq_add, zero_add]; ring
@@ -631,7 +663,8 @@ theorem hurwitzZetaComplex_eulerMaclaurin_two {s : ℂ} (hs : s ≠ 1) (hs0 : -1
   have hval := tendsto_nhds_unique hP h2
   rw [sub_eq_iff_eq_add] at hval
   rw [hval, Nat.cast_zero]
-  simp only [eulerMaclaurinSeq, eulerMaclaurinTail, Finset.range_zero, Finset.sum_empty, Nat.cast_zero, add_zero,
+  simp only [eulerMaclaurinSeq, eulerMaclaurinTail, Finset.range_zero, Finset.sum_empty,
+      Nat.cast_zero, add_zero,
     zero_add]
   have ha0 : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
   have hp : (a : ℂ) ^ (1 - s) = a * a ^ (-s) := by
@@ -642,16 +675,16 @@ theorem hurwitzZetaComplex_eulerMaclaurin_two {s : ℂ} (hs : s ≠ 1) (hs0 : -1
 /-- **Euler–Maclaurin of order `2n+1`** (DLMF 25.11.7): for `s ≠ 1`, real `a > 0`, `n ≥ 1` and
 `Re s > -2n`,
 `ζ(s,a) = a^{-s} + (1+a)^{-s}(1/2 + (1+a)/(s-1)) + ∑_{k=1}^{n} C(s+2k-2, 2k-1) (B_{2k}/2k)
-(1+a)^{-(s+2k-1)} - C(s+2n, 2n+1) ∫_1^∞ B̃_{2n+1}(x)/(x+a)^{s+2n+1} dx`. -/
+(1+a)^{-(s+2k-1)} - C(s+2n, 2n+1) ∫_1^∞ B̃_{2n+1}(x)/(x+a)^{s+2n+1}
+dx`. This is stronger than DLMF, which assumes `n ≥ 1`. -/
 @[dlmf 25.11.E7]
-theorem hurwitzZetaComplex_eulerMaclaurin {s : ℂ} (hs : s ≠ 1) {a : ℝ} (ha : 0 < a) {n : ℕ}
-    (hn : 1 ≤ n) (hsn : -(2 * n : ℝ) < s.re) :
+theorem hurwitzZetaComplex_eulerMaclaurin' {s : ℂ} (hs : s ≠ 1) {a : ℝ} (ha : 0 < a) {n : ℕ}
+    (hsn : -(2 * n : ℝ) < s.re) :
     hurwitzZetaComplex s a = (a : ℂ) ^ (-s) + (1 + (a : ℂ)) ^ (-s) * (1 / 2 + (1 + a) / (s - 1)) +
       (∑ k ∈ Finset.Icc 1 n, Ring.choose (s + 2 * k - 2) (2 * k - 1) *
         ((bernoulli (2 * k) : ℂ) / (2 * k)) * (1 + (a : ℂ)) ^ (-(s + 2 * k - 1))) -
       Ring.choose (s + 2 * n) (2 * n + 1) * ∫ x in Ioi (1 : ℝ),
         ((periodicBernoulli (2 * n + 1) x : ℝ) : ℂ) / (((x + a : ℝ)) : ℂ) ^ (s + 2 * n + 1) := by
-  have _ := hn
   have hM : 0 < s.re + 2 * (n : ℝ) := by linarith
   have h1 := hasSum_eulerMaclaurinIncrement (M := n) hs hM (a : ℂ) 1
   simp_rw [eulerMaclaurinIncrement_eq_integral n hs ha] at h1
@@ -693,11 +726,26 @@ theorem hurwitzZetaComplex_eulerMaclaurin {s : ℂ} (hs : s ≠ 1) {a : ℝ} (ha
     push_cast at hk0 ⊢
     field_simp
   rw [hI, hc, hsum]
-  simp only [eulerMaclaurinSeq, eulerMaclaurinTail, Finset.sum_range_one, Nat.cast_zero, add_zero, Nat.cast_one]
+  simp only [eulerMaclaurinSeq, eulerMaclaurinTail, Finset.sum_range_one, Nat.cast_zero, add_zero,
+      Nat.cast_one]
   rw [add_comm (a : ℂ) 1, hp]
   have hs1 : s - 1 ≠ 0 := sub_ne_zero.mpr hs
   field_simp
   ring
+
+/-- **Euler–Maclaurin of order `2n+1`** (DLMF 25.11.7): for `s ≠ 1`, real `a > 0`, `n ≥ 1` and
+`Re s > -2n`,
+`ζ(s,a) = a^{-s} + (1+a)^{-s}(1/2 + (1+a)/(s-1)) + ∑_{k=1}^{n} C(s+2k-2, 2k-1) (B_{2k}/2k)
+(1+a)^{-(s+2k-1)} - C(s+2n, 2n+1) ∫_1^∞ B̃_{2n+1}(x)/(x+a)^{s+2n+1} dx`. -/
+@[dlmf 25.11.E7]
+theorem hurwitzZetaComplex_eulerMaclaurin {s : ℂ} (hs : s ≠ 1) {a : ℝ} (ha : 0 < a) {n : ℕ}
+    (_hn : 1 ≤ n) (hsn : -(2 * n : ℝ) < s.re) :
+    hurwitzZetaComplex s a = (a : ℂ) ^ (-s) + (1 + (a : ℂ)) ^ (-s) * (1 / 2 + (1 + a) / (s - 1)) +
+      (∑ k ∈ Finset.Icc 1 n, Ring.choose (s + 2 * k - 2) (2 * k - 1) *
+        ((bernoulli (2 * k) : ℂ) / (2 * k)) * (1 + (a : ℂ)) ^ (-(s + 2 * k - 1))) -
+      Ring.choose (s + 2 * n) (2 * n + 1) * ∫ x in Ioi (1 : ℝ),
+        ((periodicBernoulli (2 * n + 1) x : ℝ) : ℂ) / (((x + a : ℝ)) : ℂ) ^ (s + 2 * n + 1) :=
+  hurwitzZetaComplex_eulerMaclaurin' hs ha hsn
 
 /-! ### §25.11(iv) Series representations -/
 
@@ -886,7 +934,8 @@ theorem hasSum_hurwitzZetaComplex_taylor {s a : ℂ} (hs : s ≠ 1) (hs' : ∀ m
   have hT := Complex.hasSum_taylorSeries_on_ball hd
     (show a ∈ Metric.ball (1 : ℂ) 1 by simpa [Metric.mem_ball, dist_eq_norm] using ha)
   refine hT.congr_fun fun n => ?_
-  rw [iteratedDeriv_hurwitzZetaComplex_param hs hs' (by simp) n, hurwitzZetaComplex_one (hurwitz_shift_ne_one hs hs' n)]
+  rw [iteratedDeriv_hurwitzZetaComplex_param hs hs' (by simp) n, hurwitzZetaComplex_one
+      (hurwitz_shift_ne_one hs hs' n)]
   simp only [smul_eq_mul]
   rw [show (1 - a) ^ n = (-1 : ℂ) ^ n * (a - 1) ^ n by rw [← mul_pow]; congr 1; ring,
     add_comm s (n : ℂ)]

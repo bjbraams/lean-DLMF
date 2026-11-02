@@ -95,7 +95,8 @@ private lemma norm_one_div_sin_le {w : ℂ} {a : ℝ} (ha : 0 < a) (hw : a ≤ |
     _ ≤ _ := by gcongr
 
 /-- Iterating a quasi-periodicity `g(t + a) = s g(t)` over the integers. -/
-private lemma add_intCast_mul_eq_zpow_mul_of_quasiPeriodic {g : ℂ → ℂ} {a s : ℂ} (hs : s ≠ 0) (h : ∀ t, g (t + a) = s * g t) (m : ℤ)
+lemma add_intCast_mul_eq_zpow_mul_of_quasiPeriodic {g : ℂ → ℂ} {a s : ℂ} (hs : s ≠ 0)
+    (h : ∀ t, g (t + a) = s * g t) (m : ℤ)
     (t : ℂ) : g (t + m * a) = s ^ m * g t := by
   induction m using Int.induction_on generalizing t with
   | zero => simp
@@ -120,17 +121,17 @@ def eisensteinSinSeries (ε τ t : ℂ) : ℂ := ∑' n : ℤ, eisensteinSinTerm
 def eisensteinSinLattice (τ : ℂ) : Set ℂ := {t | ∃ m n : ℤ, t = m + n * τ}
 
 /-- `ε = ±1` is nonzero. -/
-private lemma sign_ne_zero_of_eq_one_or_eq_neg_one {ε : ℂ} (hε : ε = 1 ∨ ε = -1) : ε ≠ 0 := by
+lemma sign_ne_zero_of_eq_one_or_eq_neg_one {ε : ℂ} (hε : ε = 1 ∨ ε = -1) : ε ≠ 0 := by
   rcases hε with rfl | rfl <;> norm_num
 
 /-- `ε⁻ⁿ = εⁿ` for `ε = ±1`. -/
-private lemma sign_zpow_neg {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (n : ℤ) : ε ^ (-n) = ε ^ n := by
+lemma sign_zpow_neg {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (n : ℤ) : ε ^ (-n) = ε ^ n := by
   rcases hε with rfl | rfl
   · simp
   · rw [zpow_neg, ← inv_zpow, inv_neg, inv_one]
 
 /-- `‖εⁿ‖ = 1` for `ε = ±1`. -/
-private lemma norm_sign_zpow {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (n : ℤ) : ‖ε ^ n‖ = 1 := by
+lemma norm_sign_zpow {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (n : ℤ) : ‖ε ^ n‖ = 1 := by
   rcases hε with rfl | rfl <;> simp [norm_zpow]
 
 /-- Shifting `t` by `jτ` reindexes the terms. -/
@@ -156,7 +157,8 @@ private lemma eisensteinSinTerm_neg {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (τ : 
     Complex.sin_neg, div_neg]
 
 /-- Exponential bound on the terms with `n ≠ 0` in the strip `|Im t| ≤ 3 Im τ/4`. -/
-private lemma norm_eisensteinSinTerm_le {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) {n : ℤ} (hn : n ≠ 0)
+lemma norm_eisensteinSinTerm_le {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im)
+    {n : ℤ} (hn : n ≠ 0)
     {t : ℂ} (ht : |t.im| ≤ 3 / 4 * τ.im) :
     ‖eisensteinSinTerm ε τ n t‖ ≤ π * (2 / (1 - Real.exp (-(2 * (π * τ.im / 4))))) *
       Real.exp (-(π * τ.im / 4)) ^ n.natAbs := by
@@ -197,17 +199,18 @@ private lemma norm_eisensteinSinTerm_le {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1)
   exact hs.trans (mul_le_mul_of_nonneg_left he hC)
 
 /-- `∑_{n ∈ ℤ} r^{|n|}` converges for `0 ≤ r < 1`. -/
-private lemma summable_pow_natAbs {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
+lemma summable_pow_natAbs {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
     Summable fun n : ℤ => r ^ n.natAbs := by
   apply Summable.of_nat_of_neg
   · simpa using summable_geometric_of_lt_one hr0 hr
   · simpa using summable_geometric_of_lt_one hr0 hr
 
 /-- The series without its `n = 0` term. -/
-def eisensteinSinRegularPart (ε τ t : ℂ) : ℂ := ∑' n : ℤ, if n = 0 then 0 else eisensteinSinTerm ε τ n t
+def eisensteinSinRegularPart (ε τ t : ℂ) : ℂ := ∑' n : ℤ, if n = 0 then 0 else
+    eisensteinSinTerm ε τ n t
 
 /-- The geometric ratio `exp(-π Im τ/4)` lies in `[0, 1)`. -/
-private lemma exp_neg_pi_im_div_four_mem_Ico {τ : ℂ} (hτ : 0 < τ.im) :
+lemma exp_neg_pi_im_div_four_mem_Ico {τ : ℂ} (hτ : 0 < τ.im) :
     0 ≤ Real.exp (-(π * τ.im / 4)) ∧ Real.exp (-(π * τ.im / 4)) < 1 := by
   refine ⟨(Real.exp_pos _).le, ?_⟩
   have := Real.exp_lt_exp.mpr (show -(π * τ.im / 4) < 0 by
@@ -215,9 +218,11 @@ private lemma exp_neg_pi_im_div_four_mem_Ico {τ : ℂ} (hτ : 0 < τ.im) :
   simpa using this
 
 /-- Geometric bound for the terms with `n ≠ 0` on the strip. -/
-private lemma norm_ite_eisensteinSinTerm_le {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) (n : ℤ) {t : ℂ}
+private lemma norm_ite_eisensteinSinTerm_le {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im)
+    (n : ℤ) {t : ℂ}
     (ht : |t.im| ≤ 3 / 4 * τ.im) :
-    ‖(if n = 0 then 0 else eisensteinSinTerm ε τ n t)‖ ≤ π * (2 / (1 - Real.exp (-(2 * (π * τ.im / 4))))) *
+    ‖(if n = 0 then 0 else eisensteinSinTerm ε τ n t)‖ ≤ π *
+        (2 / (1 - Real.exp (-(2 * (π * τ.im / 4))))) *
       Real.exp (-(π * τ.im / 4)) ^ n.natAbs := by
   split_ifs with hn
   · rw [norm_zero]
@@ -230,16 +235,21 @@ private lemma norm_ite_eisensteinSinTerm_le {ε τ : ℂ} (hε : ε = 1 ∨ ε =
   · exact norm_eisensteinSinTerm_le hε hτ hn ht
 
 /-- The terms with `n ≠ 0` are summable on the strip. -/
-private lemma summable_eisensteinSinTerm_ne_zero {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) {t : ℂ}
+private lemma summable_eisensteinSinTerm_ne_zero {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1)
+    (hτ : 0 < τ.im) {t : ℂ}
     (ht : |t.im| ≤ 3 / 4 * τ.im) :
     Summable fun n : ℤ => if n = 0 then 0 else eisensteinSinTerm ε τ n t :=
-  Summable.of_norm_bounded (((summable_pow_natAbs (exp_neg_pi_im_div_four_mem_Ico hτ).1 (exp_neg_pi_im_div_four_mem_Ico hτ).2).mul_left _))
+  Summable.of_norm_bounded
+      (((summable_pow_natAbs (exp_neg_pi_im_div_four_mem_Ico hτ).1
+      (exp_neg_pi_im_div_four_mem_Ico hτ).2).mul_left _))
     fun n => norm_ite_eisensteinSinTerm_le hε hτ n ht
 
 /-- On the strip the series is `π/sin(πt)` plus the regular part `eisensteinSinRegularPart`. -/
-private lemma hasSum_eisensteinSinTerm_of_strip {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) {t : ℂ}
+private lemma hasSum_eisensteinSinTerm_of_strip {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1)
+    (hτ : 0 < τ.im) {t : ℂ}
     (ht : |t.im| ≤ 3 / 4 * τ.im) :
-    HasSum (fun n => eisensteinSinTerm ε τ n t) (π / sin (π * t) + eisensteinSinRegularPart ε τ t) := by
+    HasSum (fun n => eisensteinSinTerm ε τ n t)
+        (π / sin (π * t) + eisensteinSinRegularPart ε τ t) := by
   have h1 := (summable_eisensteinSinTerm_ne_zero hε hτ ht).hasSum
   have h2 := hasSum_ite_eq (0 : ℤ) (eisensteinSinTerm ε τ 0 t)
   have := h2.add h1
@@ -248,7 +258,7 @@ private lemma hasSum_eisensteinSinTerm_of_strip {ε τ : ℂ} (hε : ε = 1 ∨ 
   · simp [eisensteinSinTerm, eisensteinSinRegularPart]
 
 /-- Every point can be translated by a multiple of `τ` into the strip `|Im t| ≤ Im τ/2`. -/
-private lemma exists_abs_im_sub_intCast_mul_le {τ : ℂ} (hτ : 0 < τ.im) (t : ℂ) :
+lemma exists_abs_im_sub_intCast_mul_le {τ : ℂ} (hτ : 0 < τ.im) (t : ℂ) :
     ∃ j : ℤ, |(t - j * τ).im| ≤ 1 / 2 * τ.im := by
   refine ⟨round (t.im / τ.im), ?_⟩
   have h := abs_sub_round (t.im / τ.im)
@@ -258,13 +268,14 @@ private lemma exists_abs_im_sub_intCast_mul_le {τ : ℂ} (hτ : 0 < τ.im) (t :
   nlinarith
 
 /-- The series converges for every `t`. -/
-private lemma summable_eisensteinSinTerm {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) (t : ℂ) :
+lemma summable_eisensteinSinTerm {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) (t : ℂ) :
     Summable fun n => eisensteinSinTerm ε τ n t := by
   obtain ⟨j, hj⟩ := exists_abs_im_sub_intCast_mul_le hτ t
   have hs := (hasSum_eisensteinSinTerm_of_strip hε hτ (t := t - j * τ) (by linarith)).summable
   have e : ∀ n, eisensteinSinTerm ε τ n t = ε ^ j * eisensteinSinTerm ε τ (n - j) (t - j * τ) := by
     intro n
-    rw [← eisensteinSinTerm_add_intCast_mul ε τ (sign_ne_zero_of_eq_one_or_eq_neg_one hε), sub_add_cancel]
+    rw [← eisensteinSinTerm_add_intCast_mul ε τ (sign_ne_zero_of_eq_one_or_eq_neg_one hε),
+        sub_add_cancel]
   simp_rw [e]
   refine Summable.mul_left _ ?_
   exact (Equiv.subRight j).summable_iff.mpr hs
@@ -272,16 +283,20 @@ private lemma summable_eisensteinSinTerm {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1
 /-- `G(t + jτ) = εʲ G(t)`. -/
 private lemma eisensteinSinSeries_add_intCast_mul {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (j : ℤ) (t : ℂ) :
     eisensteinSinSeries ε τ (t + j * τ) = ε ^ j * eisensteinSinSeries ε τ t := by
-  simp only [eisensteinSinSeries, eisensteinSinTerm_add_intCast_mul ε τ (sign_ne_zero_of_eq_one_or_eq_neg_one hε), tsum_mul_left]
+  simp only [eisensteinSinSeries,
+      eisensteinSinTerm_add_intCast_mul ε τ
+      (sign_ne_zero_of_eq_one_or_eq_neg_one hε), tsum_mul_left]
   congr 1
   exact (Equiv.subRight j).tsum_eq fun n => eisensteinSinTerm ε τ n t
 
 /-- `G(t + 1) = -G(t)`. -/
-private lemma eisensteinSinSeries_add_one (ε τ t : ℂ) : eisensteinSinSeries ε τ (t + 1) = -eisensteinSinSeries ε τ t := by
+private lemma eisensteinSinSeries_add_one (ε τ t : ℂ) : eisensteinSinSeries ε τ (t + 1) =
+    -eisensteinSinSeries ε τ t := by
   simp only [eisensteinSinSeries, eisensteinSinTerm_add_one, tsum_neg]
 
 /-- `G` is odd. -/
-private lemma eisensteinSinSeries_neg {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (τ t : ℂ) : eisensteinSinSeries ε τ (-t) = -eisensteinSinSeries ε τ t := by
+private lemma eisensteinSinSeries_neg {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (τ t : ℂ) : eisensteinSinSeries
+    ε τ (-t) = -eisensteinSinSeries ε τ t := by
   simp only [eisensteinSinSeries, eisensteinSinTerm_neg hε, tsum_neg]
   congr 1
   exact (Equiv.neg ℤ).tsum_eq fun n => eisensteinSinTerm ε τ n t
@@ -290,11 +305,11 @@ private lemma eisensteinSinSeries_neg {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (τ 
 def eisensteinSinStrip (τ : ℂ) : Set ℂ := {t | |t.im| < 3 / 4 * τ.im}
 
 /-- The strip is open. -/
-private lemma isOpen_eisensteinSinStrip (τ : ℂ) : IsOpen (eisensteinSinStrip τ) :=
+lemma isOpen_eisensteinSinStrip (τ : ℂ) : IsOpen (eisensteinSinStrip τ) :=
   isOpen_lt (continuous_abs.comp continuous_im) continuous_const
 
 /-- No term with `n ≠ 0` has a pole on the strip. -/
-private lemma sin_pi_mul_sub_ne_zero_of_strip {τ : ℂ} (hτ : 0 < τ.im) {n : ℤ} (hn : n ≠ 0) {t : ℂ}
+lemma sin_pi_mul_sub_ne_zero_of_strip {τ : ℂ} (hτ : 0 < τ.im) {n : ℤ} (hn : n ≠ 0) {t : ℂ}
     (ht : |t.im| ≤ 3 / 4 * τ.im) : sin (π * (t - n * τ)) ≠ 0 := by
   intro h0
   have := norm_eisensteinSinTerm_le (ε := 1) (Or.inl rfl) hτ hn ht
@@ -315,11 +330,14 @@ private lemma sin_pi_mul_sub_ne_zero_of_strip {τ : ℂ} (hτ : 0 < τ.im) {n : 
   linarith
 
 /-- The regular part is holomorphic on the strip. -/
-private lemma differentiableOn_eisensteinSinRegularPart {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) :
+private lemma differentiableOn_eisensteinSinRegularPart {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1)
+    (hτ : 0 < τ.im) :
     DifferentiableOn ℂ (eisensteinSinRegularPart ε τ) (eisensteinSinStrip τ) := by
   refine differentiableOn_tsum_of_summable_norm
-    ((summable_pow_natAbs (exp_neg_pi_im_div_four_mem_Ico hτ).1 (exp_neg_pi_im_div_four_mem_Ico hτ).2).mul_left _) (fun n => ?_)
-    (isOpen_eisensteinSinStrip τ) (fun n w hw => norm_ite_eisensteinSinTerm_le hε hτ n (le_of_lt hw))
+    ((summable_pow_natAbs (exp_neg_pi_im_div_four_mem_Ico hτ).1
+        (exp_neg_pi_im_div_four_mem_Ico hτ).2).mul_left _) (fun n => ?_)
+    (isOpen_eisensteinSinStrip τ)
+        (fun n w hw => norm_ite_eisensteinSinTerm_le hε hτ n (le_of_lt hw))
   by_cases hn : n = 0
   · simp only [hn, ite_true]; exact differentiableOn_const _
   · simp only [hn, ite_false, eisensteinSinTerm]
@@ -327,7 +345,8 @@ private lemma differentiableOn_eisensteinSinRegularPart {ε τ : ℂ} (hε : ε 
     exact sin_pi_mul_sub_ne_zero_of_strip hτ hn (le_of_lt hw)
 
 /-- Local form of the series near a point, after translating into the strip. -/
-private lemma eisensteinSinSeries_eventuallyEq_translate {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) (t₀ : ℂ) :
+private lemma eisensteinSinSeries_eventuallyEq_translate {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1)
+    (hτ : 0 < τ.im) (t₀ : ℂ) :
     ∃ j : ℤ, |(t₀ - j * τ).im| ≤ 1 / 2 * τ.im ∧ eisensteinSinSeries ε τ =ᶠ[𝓝 t₀]
       fun s => ε ^ j * (π / sin (π * (s - j * τ)) + eisensteinSinRegularPart ε τ (s - j * τ)) := by
   obtain ⟨j, hj⟩ := exists_abs_im_sub_intCast_mul_le hτ t₀
@@ -340,10 +359,12 @@ private lemma eisensteinSinSeries_eventuallyEq_translate {ε τ : ℂ} (hε : ε
   filter_upwards [hU] with s hs
   have e := eisensteinSinSeries_add_intCast_mul (τ := τ) hε j (s - j * τ)
   rw [sub_add_cancel] at e
-  rw [e, eisensteinSinSeries, (hasSum_eisensteinSinTerm_of_strip hε hτ (t := s - j * τ) (le_of_lt hs)).tsum_eq]
+  rw [e, eisensteinSinSeries,
+      (hasSum_eisensteinSinTerm_of_strip hε hτ (t := s - j * τ) (le_of_lt hs)).tsum_eq]
 
 /-- `G` is meromorphic. -/
-private lemma meromorphicAt_eisensteinSinSeries {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) (t₀ : ℂ) :
+private lemma meromorphicAt_eisensteinSinSeries {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1)
+    (hτ : 0 < τ.im) (t₀ : ℂ) :
     MeromorphicAt (eisensteinSinSeries ε τ) t₀ := by
   obtain ⟨j, hj, he⟩ := eisensteinSinSeries_eventuallyEq_translate hε hτ t₀
   have hR : AnalyticAt ℂ (fun s => eisensteinSinRegularPart ε τ (s - j * τ)) t₀ := by
@@ -360,7 +381,8 @@ private lemma meromorphicAt_eisensteinSinSeries {ε τ : ℂ} (hε : ε = 1 ∨ 
   exact hm.congr (he.symm.filter_mono nhdsWithin_le_nhds)
 
 /-- `G` is analytic off the lattice. -/
-private lemma analyticAt_eisensteinSinSeries {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) {t₀ : ℂ}
+private lemma analyticAt_eisensteinSinSeries {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1)
+    (hτ : 0 < τ.im) {t₀ : ℂ}
     (ht : t₀ ∉ eisensteinSinLattice τ) : AnalyticAt ℂ (eisensteinSinSeries ε τ) t₀ := by
   obtain ⟨j, hj, he⟩ := eisensteinSinSeries_eventuallyEq_translate hε hτ t₀
   have hR : AnalyticAt ℂ (fun s => eisensteinSinRegularPart ε τ (s - j * τ)) t₀ := by
@@ -391,7 +413,8 @@ private lemma eq_mul_dslope_zero {S : ℂ → ℂ} (hS : S 0 = 0) (t : ℂ) : S 
   · rw [dslope_of_ne _ ht, slope_def_field, hS, sub_zero, sub_zero]; field_simp
 
 /-- The slope function of an analytic function at `0` is analytic. -/
-private lemma analyticAt_dslope_zero {S : ℂ → ℂ} (hS : AnalyticAt ℂ S 0) : AnalyticAt ℂ (dslope S 0) 0 := by
+private lemma analyticAt_dslope_zero {S : ℂ → ℂ} (hS : AnalyticAt ℂ S 0) : AnalyticAt ℂ
+    (dslope S 0) 0 := by
   obtain ⟨U, hU, hUo, h0U⟩ := mem_nhds_iff.mp hS.eventually_analyticAt
   have hd : DifferentiableOn ℂ S U := fun z hz => (hU hz).differentiableAt.differentiableWithinAt
   have := (Complex.differentiableOn_dslope (hUo.mem_nhds h0U)).mpr hd
@@ -399,7 +422,8 @@ private lemma analyticAt_dslope_zero {S : ℂ → ℂ} (hS : AnalyticAt ℂ S 0)
 
 /-- Two quotients with simple poles at `0` and equal residues differ by a function with a
 removable singularity. -/
-private lemma exists_analyticAt_eq_div_sub_div_of_residue_eq {a b c₁ c₂ : ℂ} {N₁ S₁ N₂ S₂ : ℂ → ℂ} (hN₁ : AnalyticAt ℂ N₁ 0)
+lemma exists_analyticAt_eq_div_sub_div_of_residue_eq {a b c₁ c₂ : ℂ} {N₁ S₁ N₂ S₂ : ℂ → ℂ}
+    (hN₁ : AnalyticAt ℂ N₁ 0)
     (hN₂ : AnalyticAt ℂ N₂ 0) (hS₁ : AnalyticAt ℂ S₁ 0) (hS₂ : AnalyticAt ℂ S₂ 0)
     (h0₁ : S₁ 0 = 0) (h0₂ : S₂ 0 = 0) (hn₁ : N₁ 0 = 1) (hn₂ : N₂ 0 = 1)
     (hd₁ : HasDerivAt S₁ c₁ 0) (hd₂ : HasDerivAt S₂ c₂ 0) (hc₁ : c₁ ≠ 0) (hc₂ : c₂ ≠ 0)
@@ -436,7 +460,8 @@ private lemma exists_analyticAt_eq_div_sub_div_of_residue_eq {a b c₁ c₂ : �
 
 /-- Liouville core for the Eisenstein-type series: a function with the same quasi-periods,
 oddness, poles and residue at `0` as `∑ₙ εⁿ π/sin(π(t - nτ))` equals it off the lattice. -/
-private lemma eq_eisensteinSinSeries_of_quasiPeriodic {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) {f : ℂ → ℂ}
+private lemma eq_eisensteinSinSeries_of_quasiPeriodic {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1)
+    (hτ : 0 < τ.im) {f : ℂ → ℂ}
     (hf : HasPoleDichotomy f) (hf1 : ∀ t, f (t + 1) = -f t) (hfτ : ∀ t, f (t + τ) = ε * f t)
     (hfodd : ∀ t, f (-t) = -f t) (hfan : ∀ t ∉ eisensteinSinLattice τ, AnalyticAt ℂ f t)
     (hf0 : ∃ A : ℂ → ℂ, AnalyticAt ℂ A 0 ∧
@@ -455,7 +480,8 @@ private lemma eq_eisensteinSinSeries_of_quasiPeriodic {ε τ : ℂ} (hε : ε = 
     simp only [hH, hfτ, this]; ring
   have hHmn : ∀ (m n : ℤ) t, H (t + (m + n * τ)) = (-1) ^ m * ε ^ n * H t := by
     intro m n t
-    rw [← add_assoc, add_intCast_mul_eq_zpow_mul_of_quasiPeriodic hε0 hHτ n, show (t + (m : ℂ)) = t + m * 1 by ring,
+    rw [← add_assoc, add_intCast_mul_eq_zpow_mul_of_quasiPeriodic hε0 hHτ n, show (t + (m : ℂ)) =
+        t + m * 1 by ring,
       add_intCast_mul_eq_zpow_mul_of_quasiPeriodic (by norm_num) hH1 m]
     ring
   -- the lattice `⟨2, 2τ⟩`
@@ -486,9 +512,11 @@ private lemma eq_eisensteinSinSeries_of_quasiPeriodic {ε τ : ℂ} (hε : ε = 
     obtain ⟨A, hA, hfA⟩ := hf0
     obtain ⟨j, hj, he⟩ := eisensteinSinSeries_eventuallyEq_translate hε hτ 0
     have hR : AnalyticAt ℂ (eisensteinSinRegularPart ε τ) 0 :=
-      (differentiableOn_eisensteinSinRegularPart hε hτ).analyticAt ((isOpen_eisensteinSinStrip τ).mem_nhds (by
+      (differentiableOn_eisensteinSinRegularPart hε hτ).analyticAt
+          ((isOpen_eisensteinSinStrip τ).mem_nhds (by
         show |(0 : ℂ).im| < 3 / 4 * τ.im; simp; linarith))
-    have hG0 : eisensteinSinSeries ε τ =ᶠ[𝓝 0] fun s => π / sin (π * s) + eisensteinSinRegularPart ε τ s := by
+    have hG0 : eisensteinSinSeries ε τ =ᶠ[𝓝 0] fun s => π / sin (π * s) +
+        eisensteinSinRegularPart ε τ s := by
       have hU : eisensteinSinStrip τ ∈ 𝓝 (0 : ℂ) := (isOpen_eisensteinSinStrip τ).mem_nhds (by
         show |(0 : ℂ).im| < 3 / 4 * τ.im; simp; linarith)
       filter_upwards [hU] with s hs
@@ -543,11 +571,12 @@ private lemma eq_eisensteinSinSeries_of_quasiPeriodic {ε τ : ℂ} (hε : ε = 
   exact sub_eq_zero.mp this
 
 /-- Membership in the integer complement from a non-integrality hypothesis. -/
-private lemma mem_integerComplement_of_sub_intCast_ne_zero {w : ℂ} (hw : ∀ m : ℤ, w - m ≠ 0) : w ∈ integerComplement := by
+lemma mem_integerComplement_of_sub_intCast_ne_zero {w : ℂ} (hw : ∀ m : ℤ, w - m ≠ 0) : w ∈
+    integerComplement := by
   rintro ⟨m, rfl⟩; exact hw m (sub_self _)
 
 /-- Mittag-Leffler for the cotangent as a `HasSum` over `ℕ`. -/
-private lemma hasSum_cotTerm' {x : ℂ} (hx : x ∈ integerComplement) :
+lemma hasSum_cotTerm' {x : ℂ} (hx : x ∈ integerComplement) :
     HasSum (fun n : ℕ => cotTerm x n) (π * cot (π * x) - 1 / x) := by
   rw [cot_series_rep' hx]; exact (summable_cotTerm hx).hasSum
 
@@ -629,7 +658,7 @@ theorem tendsto_sum_Icc_neg_one_zpow_div_sub {w : ℂ} (hw : ∀ m : ℤ, w - m 
   ring
 
 /-- `2Kτ = 2iK'`. -/
-private lemma two_mul_compEllIntKk_mul_jacobiTauk {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+lemma two_mul_compEllIntKk_mul_jacobiTauk {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     2 * compEllIntKk k * jacobiTauk k = 2 * (I * compEllIntKpk k) := by
   have := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
   rw [jacobiTauk]; field_simp
@@ -654,13 +683,16 @@ lemma analyticAt_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : Jac
     (hpq : p ≠ q) {z : ℂ} (hz : jacobiLetterTheta q (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
     AnalyticAt ℂ (fun w => jacobiPQk p q w k) z :=
   Complex.analyticAt_iff_eventually_differentiableAt.mpr
-    ((eventually_jacobiLetterTheta_ne_zero hk hz).mono fun _ hw => (hasDerivAt_jacobiPQk hk hpq hw).differentiableAt)
+    ((eventually_jacobiLetterTheta_ne_zero hk hz).mono fun _ hw =>
+        (hasDerivAt_jacobiPQk hk hpq hw).differentiableAt)
 
 /-- The Eisenstein-type series identity for `ns` (`ε = 1`) and `ds` (`ε = -1`):
 `2K · ps(2Kt) = ∑ₙ εⁿ π/sin(π(t - nτ))` off the lattice. -/
-lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter} {ε : ℂ}
+lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    {p : JacobiLetter} {ε : ℂ}
     (hp : p = .n ∧ ε = 1 ∨ p = .d ∧ ε = -1) {t : ℂ} (ht : t ∉ eisensteinSinLattice (jacobiTauk k)) :
-    2 * compEllIntKk k * jacobiPQk p .s (2 * compEllIntKk k * t) k = eisensteinSinSeries ε (jacobiTauk k) t := by
+    2 * compEllIntKk k * jacobiPQk p .s (2 * compEllIntKk k * t) k =
+        eisensteinSinSeries ε (jacobiTauk k) t := by
   have hτ := jacobiTauk_im_pos hk
   have hK := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
   have hK2 : 2 * compEllIntKk k ≠ 0 := mul_ne_zero two_ne_zero hK
@@ -677,7 +709,8 @@ lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDoma
     apply mul_left_cancel₀ hK2
     rw [hmn]; linear_combination (-(n : ℂ)) * h2
   have hdich : HasPoleDichotomy f := by
-    have := (poleDichotomy_jacobiPQk hk (p := p) (q := .s) hps).comp (a := (2 * K)⁻¹) (inv_ne_zero hK2) hK2
+    have := (poleDichotomy_jacobiPQk hk (p := p) (q := .s) hps).comp (a := (2 * K)⁻¹)
+        (inv_ne_zero hK2) hK2
     convert this using 2 with w
     rw [div_inv_eq_mul, mul_comm w]
   have hf1 : ∀ t, f (t + 1) = -f t := by
@@ -692,7 +725,8 @@ lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDoma
       rw [hs]; ring
   have hfτ : ∀ t, f (t + jacobiTauk k) = ε * f t := by
     intro t
-    have h2 : 2 * K * jacobiTauk k = 2 * (I * compEllIntKpk k) := two_mul_compEllIntKk_mul_jacobiTauk hk
+    have h2 : 2 * K * jacobiTauk k = 2 * (I * compEllIntKpk k) :=
+        two_mul_compEllIntKk_mul_jacobiTauk hk
     simp only [hfdef, show 2 * K * (t + jacobiTauk k) = 2 * K * t + 2 * K * jacobiTauk k by ring,
       h2]
     rcases hp with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
@@ -723,7 +757,8 @@ lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDoma
       · exact (analyticAt_jacobiPQk hk (by decide) (by simpa using hreg)).comp_of_eq hlin
           (by simp)
     have hS₁ : AnalyticAt ℂ S₁ 0 :=
-      (analyticAt_jacobiPQk hk (p := .s) (q := .n) (by decide) (by simpa using hreg)).comp_of_eq hlin
+      (analyticAt_jacobiPQk hk (p := .s) (q := .n) (by decide)
+          (by simpa using hreg)).comp_of_eq hlin
         (by simp)
     have hn₁ : N₁ 0 = 1 := by
       rcases hp with ⟨rfl, -⟩ | ⟨rfl, -⟩
@@ -739,7 +774,8 @@ lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDoma
       have := ((hasDerivAt_id (0 : ℂ)).const_mul (π : ℂ)).csin
       simpa using this
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
-    obtain ⟨A, hA, hev⟩ := exists_analyticAt_eq_div_sub_div_of_residue_eq (a := 2 * K) (b := π) (N₂ := fun _ => 1)
+    obtain ⟨A, hA, hev⟩ :=
+        exists_analyticAt_eq_div_sub_div_of_residue_eq (a := 2 * K) (b := π) (N₂ := fun _ => 1)
       (S₂ := fun t => sin (π * t)) hN₁ analyticAt_const hS₁ (by fun_prop) h0₁ (by simp) hn₁ rfl
       hd₁ hd₂ hK2 hπ (by ring)
     refine ⟨A, hA, ?_⟩
@@ -795,7 +831,8 @@ lemma exists_analyticAt_jacobiPQk_s_sub_one_div {k : ℂ} (hk : k ∈ jacobiModu
   rw [← h1, h2]; ring
 
 /-- A point avoiding all `m + nτ` is off the lattice. -/
-theorem not_mem_eisensteinSinLattice {τ t : ℂ} (h : ∀ m n : ℤ, t - m - n * τ ≠ 0) : t ∉ eisensteinSinLattice τ := by
+theorem not_mem_eisensteinSinLattice {τ t : ℂ} (h : ∀ m n : ℤ, t - m - n * τ ≠ 0) : t ∉
+    eisensteinSinLattice τ := by
   rintro ⟨m, n, rfl⟩; exact h m n (by ring)
 
 /-- DLMF 22.12.11 (outer series): `∑ₙ π/sin(π(t - nτ)) = 2K ns(2Kt)`. -/
@@ -871,22 +908,11 @@ private lemma hasSum_pi_div_sin_of_im_pos {x : ℂ} (hx : 0 < x.im) :
   · funext j; ring_nf
   · rw [show π * -x = -(π * x) by ring, Complex.sin_neg, div_neg, neg_neg]
 
-/-- `‖sin w‖ ≤ exp |Im w|`. -/
-private lemma Complex.norm_sin_le_exp_abs_im (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
-  rw [Complex.sin]
-  have h1 : ‖cexp (-w * I)‖ ≤ Real.exp |w.im| := by
-    rw [Complex.norm_exp]; apply Real.exp_le_exp.mpr; simp; exact le_abs_self _
-  have h2 : ‖cexp (w * I)‖ ≤ Real.exp |w.im| := by
-    rw [Complex.norm_exp]; apply Real.exp_le_exp.mpr; simp; exact neg_le_abs _
-  rw [norm_div, norm_mul, Complex.norm_I, mul_one]
-  simp only [Complex.norm_ofNat]
-  have := norm_sub_le (cexp (-w * I)) (cexp (w * I))
-  linarith
-
 /-- Core double-series interchange for the Fourier expansions: if
 `∑ₙ εⁿ (a π/sin(π(t-(n+c)τ)) + b π/sin(π(t+(n+c)τ))) = S` with `|Im t| < c Im τ`, then
 `S = ∑ⱼ 2πi (a e^{-πimt} - b e^{πimt}) e^{πiτmc}/(1 - ε qᵐ)`, `m = 2j+1`, `q = e^{πiτ}`. -/
-theorem hasSum_fourier_of_hasSum_pi_div_sin {ε τ t : ℂ} {c : ℝ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im)
+theorem hasSum_fourier_of_hasSum_pi_div_sin {ε τ t : ℂ} {c : ℝ} (hε : ε = 1 ∨ ε = -1)
+    (hτ : 0 < τ.im)
     (ht : |t.im| < c * τ.im) {a b : ℂ} (ha : ‖a‖ ≤ 1) (hb : ‖b‖ ≤ 1) {S : ℂ}
     (hS : HasSum (fun n : ℕ => ε ^ n * (a * (π / sin (π * (t - (n + c) * τ))) +
       b * (π / sin (π * (t + (n + c) * τ))))) S) :
@@ -1042,10 +1068,12 @@ theorem jacobiZetak_two_mul_compEllIntKk_mul {k : ℂ} (hk : k ∈ jacobiModulus
   rw [jacobiZetak]; field_simp
 
 /-- The strip condition `‖q‖ e^{c'|Im ζ|} < 1` in terms of `t`. -/
-theorem abs_im_lt_of_norm_jacobiNomek_mul_exp_lt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ} {c : ℝ} (hc : 0 < c)
+theorem abs_im_lt_of_norm_jacobiNomek_mul_exp_lt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ}
+    {c : ℝ} (hc : 0 < c)
     (h : ‖jacobiNomek k‖ * Real.exp (c * |(jacobiZetak (2 * compEllIntKk k * t) k).im|) < 1) :
     |t.im| < 1 / c * (jacobiTauk k).im := by
-  rw [jacobiNomek_eq_exp_jacobiTauk hk, Complex.norm_exp, jacobiZetak_two_mul_compEllIntKk_mul hk, ← Real.exp_add, Real.exp_lt_one_iff] at h
+  rw [jacobiNomek_eq_exp_jacobiTauk hk, Complex.norm_exp, jacobiZetak_two_mul_compEllIntKk_mul hk,
+      ← Real.exp_add, Real.exp_lt_one_iff] at h
   have e1 : (π * I * jacobiTauk k).re = -(π * (jacobiTauk k).im) := by
     simp [Complex.mul_re, Complex.mul_im]
   have e2 : (π * t).im = π * t.im := by simp
@@ -1063,7 +1091,8 @@ theorem hasSum_nat_add_neg_succ_of_hasSum {F : ℤ → ℂ} {S : ℂ} (h : HasSu
   · simp
 
 /-- `k' ≠ 0` on `jacobiModulusDomain`. -/
-theorem jacobiComodulusk_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) : jacobiComodulusk k ≠ 0 := by
+theorem jacobiComodulusk_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    jacobiComodulusk k ≠ 0 := by
   rw [jacobiComodulusk]
   intro h
   rw [Complex.cpow_eq_zero_iff] at h
@@ -1075,7 +1104,8 @@ theorem jacobiComodulusk_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) : ja
     have h3 := hk.1; rw [e] at h3; norm_num at h3
 
 /-- The strip `|Im t| < Im τ/2` avoids the half-shifted lattice. -/
-theorem sub_intCast_sub_half_mul_ne_zero {τ t : ℂ} (hτ : 0 < τ.im) (hs : |t.im| < 1 / 2 * τ.im) (n m : ℤ) :
+theorem sub_intCast_sub_half_mul_ne_zero {τ t : ℂ} (hτ : 0 < τ.im)
+    (hs : |t.im| < 1 / 2 * τ.im) (n m : ℤ) :
     t - m - (n + 1 / 2) * τ ≠ 0 := by
   intro h
   have him := congrArg Complex.im h
@@ -1091,7 +1121,7 @@ theorem sub_intCast_sub_half_mul_ne_zero {τ t : ℂ} (hτ : 0 < τ.im) (hs : |t
   omega
 
 /-- `sin(A + jπ) = (-1)ʲ sin A` and `cos(A + jπ) = (-1)ʲ cos A`. -/
-private lemma sin_cos_add_nat_mul_pi (A : ℂ) (j : ℕ) :
+lemma sin_cos_add_nat_mul_pi (A : ℂ) (j : ℕ) :
     sin (A + j * π) = (-1) ^ j * sin A ∧ cos (A + j * π) = (-1) ^ j * cos A := by
   induction j with
   | zero => simp

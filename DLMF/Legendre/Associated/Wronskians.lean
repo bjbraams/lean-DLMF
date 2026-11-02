@@ -69,7 +69,8 @@ theorem IsFerrersSolution.wronskian_const {ν μ : ℂ} {f g : ℝ → ℂ} (hf 
     linear_combination (f y)*eg-(g y)*ef
   have h0 : (0:ℝ) ∈ Ioo (-1:ℝ) 1 := by norm_num
   have := isOpen_Ioo.is_const_of_deriv_eq_zero isPreconnected_Ioo
-    (fun y hy => (hF y hy).differentiableAt.differentiableWithinAt) (fun y hy => (hF y hy).deriv) hx h0
+    (fun y hy => (hF y hy).differentiableAt.differentiableWithinAt)
+        (fun y hy => (hF y hy).deriv) hx h0
   simpa [F] using this
 
 /-- Linear combinations of Ferrers solutions are Ferrers solutions. -/
@@ -104,7 +105,8 @@ theorem IsFerrersSolution.congr {ν μ : ℂ} {f g : ℝ → ℂ} (hf : IsFerrer
 /-- Reflection `x ↦ -x` preserves Ferrers solutions. -/
 theorem IsFerrersSolution.comp_neg {ν μ : ℂ} {f : ℝ → ℂ} (hf : IsFerrersSolution ν μ f) :
     IsFerrersSolution ν μ (fun y => f (-y)) := by
-  have hm : ∀ y ∈ Ioo (-1:ℝ) 1, -y ∈ Ioo (-1:ℝ) 1 := fun y hy => ⟨by linarith [hy.2], by linarith [hy.1]⟩
+  have hm : ∀ y ∈ Ioo (-1:ℝ) 1, -y ∈ Ioo (-1:ℝ) 1 := fun y hy =>
+      ⟨by linarith [hy.2], by linarith [hy.1]⟩
   have hd : ∀ y ∈ Ioo (-1:ℝ) 1, HasDerivAt (fun y => f (-y)) (-deriv f (-y)) y := fun y hy => by
     exact ((hf (-y) (hm y hy)).1.hasDerivAt.scomp y (hasDerivAt_neg y)).congr_deriv (by simp)
   intro y hy
@@ -143,7 +145,8 @@ theorem ferrersEven_isFerrersSolution (ν μ : ℂ) : IsFerrersSolution ν μ (f
   have heq : deriv (ferrersEven ν μ)=ᶠ[𝓝 x] E1 := by
     filter_upwards [isOpen_Ioo.mem_nhds hx] with y hy
     exact (hE y hy).deriv
-  have hE2 := (quadratic_gauss_gauge_jets a b (1/2) μ (ferrers_one_sub_sq_mem_slitPlane hx)).2.comp_ofReal
+  have hE2 := (quadratic_gauss_gauge_jets a b (1/2) μ
+      (ferrers_one_sub_sq_mem_slitPlane hx)).2.comp_ofReal
   refine ⟨(hE x hx).differentiableAt, _, hE2.congr_of_eventuallyEq heq, ?_⟩
   have he := regularizedGaussHG_ode_sq a b (1/2) hx
   rw [(hE x hx).deriv]
@@ -171,7 +174,8 @@ theorem ferrersOdd_isFerrersSolution (ν μ : ℂ) : IsFerrersSolution ν μ (fe
   have heq : deriv (ferrersOdd ν μ)=ᶠ[𝓝 x] fun y=>O y+y*O1 y := by
     filter_upwards [isOpen_Ioo.mem_nhds hx] with y hy
     exact (hd y hy).deriv
-  have hO2 := (quadratic_gauss_gauge_jets A B (3/2) μ (ferrers_one_sub_sq_mem_slitPlane hx)).2.comp_ofReal
+  have hO2 := (quadratic_gauss_gauge_jets A B (3/2) μ
+      (ferrers_one_sub_sq_mem_slitPlane hx)).2.comp_ofReal
   have hsecond := (hO x hx).add ((hasDerivAt_id x).ofReal_comp.mul hO2)
   refine ⟨(hd x hx).differentiableAt, _, hsecond.congr_of_eventuallyEq heq, ?_⟩
   have ho := regularizedGaussHG_ode_sq A B (3/2) hx
@@ -185,10 +189,13 @@ theorem ferrersOdd_isFerrersSolution (ν μ : ℂ) : IsFerrersSolution ν μ (fe
 theorem ferrers_even_odd_wronskian (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersEven ν μ x*deriv (ferrersOdd ν μ) x-ferrersOdd ν μ x*deriv (ferrersEven ν μ) x =
       2/(π*(1-(x:ℂ)^2)) := by
-  have hw := (ferrersEven_isFerrersSolution ν μ).wronskian_const (ferrersOdd_isFerrersSolution ν μ) hx
+  have hw := (ferrersEven_isFerrersSolution ν μ).wronskian_const
+      (ferrersOdd_isFerrersSolution ν μ) hx
   have hE0 : ferrersEven ν μ 0 = 1/(Real.sqrt π:ℂ) := by
     unfold ferrersEven
-    rw [ofReal_zero, show (0:ℂ)^2 = 0 by norm_num, regularizedGaussHG_zero_of_regular Complex.one_div_two_ne_neg_natCast,
+    rw [ofReal_zero, show (0:ℂ)^2 = 0 by norm_num,
+                                           regularizedGaussHG_zero_of_regular
+                                           Complex.one_div_two_ne_neg_natCast,
       legendre_Gamma_one_half]
     simp
   have hO0 : ferrersOdd ν μ 0 = 0 := by simp [ferrersOdd]
@@ -228,7 +235,8 @@ theorem ferrersP_conical_real (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   rw [← conj_eq_iff_im, ferrersP_conj _ _ hx, conj_ofReal,
     show conj (-1/2+I*(τ:ℂ)) = -(-1/2+I*τ)-1 by simp [map_div₀, map_ofNat]; ring]
   unfold ferrersP
-  rw [show -(-(-1/2+I*(τ:ℂ))-1) = (-1/2+I*τ)+1 by ring, show -(-1/2+I*(τ:ℂ))-1+1 = -(-1/2+I*τ) by ring,
+  rw [show -(-(-1/2+I*(τ:ℂ))-1) = (-1/2+I*τ)+1 by ring, show -(-1/2+I*(τ:ℂ))-1+1 =
+                                                    -(-1/2+I*τ) by ring,
     regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add hp)]
 
 /-- The Wronskian of two combinations of the even and odd solutions. -/
@@ -264,7 +272,8 @@ theorem ferrersP_neg_eqOn_even_odd (ν μ : ℂ) : EqOn (ferrersP ν (-μ)) (fun
   fun y hy => by rw [ferrersP_neg_even_odd ν μ hy]; ring
 
 /-- `𝖯^{-μ}_ν(-x)` as a combination of the even and odd solutions on `(-1,1)`. -/
-theorem ferrersP_neg_reflect_eqOn_even_odd (ν μ : ℂ) : EqOn (fun x => ferrersP ν (-μ) (-x)) (fun y =>
+theorem ferrersP_neg_reflect_eqOn_even_odd (ν μ : ℂ) : EqOn
+    (fun x => ferrersP ν (-μ) (-x)) (fun y =>
     2^(-μ)*π*((Gamma ((1-ν+μ)/2))⁻¹*(Gamma ((ν+μ+2)/2))⁻¹)*ferrersEven ν μ y+
       2^(-μ)*π*((Gamma ((μ-ν)/2))⁻¹*(Gamma ((ν+μ+1)/2))⁻¹)*ferrersOdd ν μ y) (Ioo (-1:ℝ) 1) :=
   fun y hy => by
@@ -299,12 +308,15 @@ theorem ferrersP_regular_eqOn {ν μ : ℂ} (h : LegendreQRegular ν μ) : EqOn 
 `𝒲{f,g} = f g' - g f'`. -/
 @[dlmf 14.2.E3]
 theorem ferrers_wronskian_3 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ODE.wronskian (ferrersP ν (-μ)) (fun x => ferrersP ν (-μ) (-x)) x=2/(Gamma (μ-ν)*Gamma (ν+μ+1)*(1-x^2:ℂ)) := by
+    ODE.wronskian (ferrersP ν (-μ)) (fun x => ferrersP ν (-μ) (-x))
+        x=2/(Gamma (μ-ν)*Gamma (ν+μ+1)*(1-x^2:ℂ)) := by
   rw [ferrersWronskian_of_even_odd (ferrersP_neg_eqOn_even_odd ν μ)
     (ferrersP_neg_reflect_eqOn_even_odd ν μ) hx,
     show (2:ℂ)/(Gamma (μ-ν)*Gamma (ν+μ+1)*(1-x^2:ℂ)) =
-      (Gamma (μ-ν))⁻¹*(Gamma (ν+μ+1))⁻¹*(2/(1-x^2:ℂ)) by rw [div_eq_mul_inv, mul_inv, mul_inv]; ring,
-    legendre_recip_Gamma_sub, legendre_recip_duplication (ν+μ), cpow_neg, cpow_neg, cpow_add _ _ two_ne_zero]
+      (Gamma (μ-ν))⁻¹*(Gamma (ν+μ+1))⁻¹*(2/(1-x^2:ℂ)) by
+                                                        rw [div_eq_mul_inv, mul_inv, mul_inv]; ring,
+    legendre_recip_Gamma_sub, legendre_recip_duplication (ν+μ), cpow_neg, cpow_neg,
+        cpow_add _ _ two_ne_zero]
   have hne : 1-(x:ℂ)^2≠0 := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hx)
   have hs2 : (Real.sqrt π:ℂ)^2 = π := by rw [← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
   have hP : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero

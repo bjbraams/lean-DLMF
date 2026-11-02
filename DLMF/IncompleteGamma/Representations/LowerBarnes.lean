@@ -68,7 +68,8 @@ theorem hasSum_integral_exp_circle {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : �
         funext t
         rw [tsum_mul_left, Real.exp_eq_exp_ℝ, ← NormedSpace.expSeries_div_hasSum_exp ‖z‖ |>.tsum_eq]
       rw [this]
-      exact (by fun_prop : Continuous fun t : ℝ => ‖exp (a*I*(t:ℂ))‖*Real.exp ‖z‖).intervalIntegrable _ _)
+      exact (by fun_prop : Continuous fun t : ℝ =>
+                  ‖exp (a*I*(t:ℂ))‖*Real.exp ‖z‖).intervalIntegrable _ _)
     (Eventually.of_forall fun θ _ => by
       have h : HasSum (fun n : ℕ => (z*exp (I*θ))^n/(n.factorial : ℂ)) (exp (z*exp (I*θ))) := by
         simpa only [Complex.exp_eq_exp_ℂ] using NormedSpace.expSeries_div_hasSum_exp (z*exp (I*θ))
@@ -99,7 +100,8 @@ theorem hasSum_integral_exp_circle {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : �
 (π*a)*(∫ t : ℝ in 0..π, exp (z*Real.cos t)*cos (a*t+z*Real.sin t))`. -/
 @[dlmf 8.6.E1]
 theorem lowerIncGamma_trigonometric_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ n) (z : ℂ) :
-    lowerIncGamma a z=z^a/sin (π*a)*(∫ t : ℝ in 0..π, exp (z*Real.cos t)*cos (a*t+z*Real.sin t)) := by
+    lowerIncGamma a z=z^a/sin
+        (π*a)*(∫ t : ℝ in 0..π, exp (z*Real.cos t)*cos (a*t+z*Real.sin t)) := by
   have ha' : ∀ n : ℕ, a ≠ -n := fun n h => ha (-n) (by push_cast; exact h)
   have hsin : sin (π*a) ≠ 0 := by
     rw [Complex.sin_ne_zero_iff]
@@ -180,7 +182,8 @@ theorem lgJ_norm_Gamma_ge {a : ℂ} (ha : 0 < a.re) (k : ℕ) :
 ℝ in Ioi 0, exp (-t : ℂ)*(t : ℂ)^(a/2-1)*besselJ a (2*(z*t)^(1/2 : ℂ)))`. -/
 @[dlmf 8.6.E2]
 theorem lowerIncGamma_besselJ_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz : z ∈ slitPlane) :
-    lowerIncGamma a z=z^(a/2)*(∫ t : ℝ in Ioi 0, exp (-t : ℂ)*(t : ℂ)^(a/2-1)*besselJ a (2*(z*t)^(1/2 : ℂ))) := by
+    lowerIncGamma a z=z^(a/2)*(∫ t : ℝ in Ioi 0,
+        exp (-t : ℂ)*(t : ℂ)^(a/2-1)*besselJ a (2*(z*t)^(1/2 : ℂ))) := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have ha' : ∀ n : ℕ, a ≠ -n := fun n h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
@@ -336,7 +339,8 @@ theorem lowerIncGamma_logarithmic_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} :
 (-z)/Gamma (1-a)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(-a)*exp (-t : ℂ)/(z+t))`. -/
 @[dlmf 8.6.E4]
 theorem upperIncGamma_stieltjes_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz : z ∈ slitPlane) :
-    upperIncGamma a z=z^a*exp (-z)/Gamma (1-a)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(-a)*exp (-t : ℂ)/(z+t)) := by
+    upperIncGamma a z=z^a*exp (-z)/Gamma
+        (1-a)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(-a)*exp (-t : ℂ)/(z+t)) := by
   -- Tricomi's Stieltjes representation 13.4.5 at `a = b = 1 - a`, where `U(0,b,t) = 1`.
   have h := kummerU_stieltjes (a := 1 - a) (b := 1 - a) hz (by simp) (by simp; linarith)
   rw [upperIncGamma, h, show 1 - (1 - a) = a by ring, show (1 : ℂ) + (1 - a) - (1 - a) = 1 by ring,
@@ -364,7 +368,9 @@ theorem upperIncGamma_laplace_integral_complex (a : ℂ) {z : ℂ} (hz : 0 < z.r
 (2*(z*t)^(1/2 : ℂ)))`. -/
 @[dlmf 8.6.E6]
 theorem upperIncGamma_besselK_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz : z ∈ slitPlane) :
-    upperIncGamma a z=2*z^(a/2)*exp (-z)/Gamma (1-a)*(∫ t : ℝ in Ioi 0, exp (-t : ℂ)*(t : ℂ)^(-a/2)*DLMF.Bessel.besselK a (2*(z*t)^(1/2 : ℂ))) := by
+    upperIncGamma a z=2*z^(a/2)*exp (-z)/Gamma
+        (1-a)*(∫ t : ℝ in Ioi 0,
+        exp (-t : ℂ)*(t : ℂ)^(-a/2)*DLMF.Bessel.besselK a (2*(z*t)^(1/2 : ℂ))) := by
   -- DLMF 13.4.7 at `a = b = 1 - a`, with `K_{-a} = K_a`.
   have h := kummerU_eq_integral_besselK (a := 1 - a) (b := 1 - a) hz (by simp) (by simp; linarith)
   rw [show (1 - (1 - a)) / 2 = a / 2 by ring, show 1 - a - (1 - a) + 1 = (1 : ℂ) by ring,
@@ -432,7 +438,9 @@ theorem lowerIncGamma_circle_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ n) {z :
 
 /-- Symmetric principal value underlying the indented contour of 8.6.9. -/
 def upperGammaIndentPV (a z : ℂ) : ℂ :=
-  limUnder (𝓝[>] (0 : ℝ)) (fun ε => (∫ t : ℝ in 0..(1-ε), (t : ℂ)^a*exp (-z*t)/(t-1)) + improperAtTop (fun t : ℝ => (t : ℂ)^a*exp (-z*t)/(t-1)) (1+ε))
+  limUnder (𝓝[>] (0 : ℝ))
+      (fun ε => (∫ t : ℝ in 0..(1-ε), (t : ℂ)^a*exp (-z*t)/(t-1)) +
+      improperAtTop (fun t : ℝ => (t : ℂ)^a*exp (-z*t)/(t-1)) (1+ε))
 
 /-- A symmetric principal value on `[a, ∞)` at `c` exists when `f t - A/(t - c)` is integrable
 near `c` and `f` is integrable on every half-line `(d, ∞)`, `d > c`. -/
@@ -470,7 +478,8 @@ theorem ugPV_hasPrincipalValueIoi {f : ℝ → ℂ} {a b c : ℝ} (A : ℂ) (hac
 => (t : ℂ)^a*exp (-z*t)/(t-1)) 0 1 (upperGammaIndentPV a z)`. -/
 @[dlmf 8.6.E9]
 theorem upperGammaIndentPV_converges {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re) :
-    HasPrincipalValueIoi (fun t : ℝ => (t : ℂ)^a*exp (-z*t)/(t-1)) 0 1 (upperGammaIndentPV a z) := by
+    HasPrincipalValueIoi (fun t : ℝ => (t : ℂ)^a*exp (-z*t)/(t-1)) 0 1
+        (upperGammaIndentPV a z) := by
   set g : ℝ → ℂ := fun t => (t : ℂ)^a*exp (-z*t)
   have hgi : IntegrableOn g (Icc 0 2) := by
     have h1 := intervalIntegral.intervalIntegrable_cpow' (a := 0) (b := 2) ha
@@ -519,8 +528,10 @@ theorem upperGammaIndentPV_converges {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re
 /-- Identity under the stated parameter and domain assumptions: `upperIncGammaOnLog (-a) (log
 z+ε*π*I)=exp z*exp (-ε*π*I*a)/Gamma (1+a)*(upperGammaIndentPV a z-ε*π*I*exp (-z))`. -/
 @[dlmf 8.6.E9]
-theorem upperIncGamma_indented_integral {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
-    upperIncGammaOnLog (-a) (log z+ε*π*I)=exp z*exp (-ε*π*I*a)/Gamma (1+a)*(upperGammaIndentPV a z-ε*π*I*exp (-z)) := by
+theorem upperIncGamma_indented_integral {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re) {ε : ℝ}
+    (hε : ε=1 ∨ ε = -1) :
+    upperIncGammaOnLog (-a) (log z+ε*π*I)=exp z*exp (-ε*π*I*a)/Gamma
+        (1+a)*(upperGammaIndentPV a z-ε*π*I*exp (-z)) := by
   sorry
 
 /-- The Mellin–Barnes integrand `Γ(s+a) z^{-s}/s`, `s = c+iy`, of DLMF 8.6.11. -/
@@ -534,7 +545,8 @@ theorem continuous_upperIncGammaMBIntegrand (a : ℂ) {z : ℂ} (hz : z ≠ 0) {
   unfold upperIncGammaMBIntegrand
   refine ContinuousAt.div (ContinuousAt.mul ?_ ?_) (by fun_prop) ?_
   · exact (DLMF.Gamma.continuousAt_Gamma_of_re_pos (by simp; linarith)).comp (by fun_prop)
-  · exact (Continuous.const_cpow (f := fun y : ℝ => -((c:ℂ)+y*I)) (by fun_prop) (Or.inl hz)).continuousAt
+  · exact (Continuous.const_cpow (f := fun y : ℝ => -((c:ℂ)+y*I)) (by fun_prop)
+        (Or.inl hz)).continuousAt
   · intro h; have := congrArg re h; simp at this; linarith
 
 /-- Uniform bound for the Mellin–Barnes integrand on `‖z‖ ≥ ρ`, `|arg z| ≤ θ`. -/
@@ -603,7 +615,8 @@ theorem differentiableOn_integral_upperIncGammaMBIntegrand (a : ℂ) {c : ℝ} (
   · intro z0 hz0
     have hz00 : z0 ≠ 0 := fun h => by rw [h] at hz0; simp at hz0
     have hθ : |arg z0| < π/2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz0)
-    obtain ⟨θ, hθ1, hθ2⟩ : ∃ θ : ℝ, |arg z0| < θ ∧ θ < π/2 := ⟨(|arg z0| + π/2)/2, by linarith, by linarith⟩
+    obtain ⟨θ, hθ1, hθ2⟩ : ∃ θ : ℝ, |arg z0| < θ ∧ θ < π/2 :=
+        ⟨(|arg z0| + π/2)/2, by linarith, by linarith⟩
     have hρ : 0 < ‖z0‖/2 := by have := norm_pos_iff.mpr hz00; linarith
     have harg : ∀ᶠ z in 𝓝 z0, |arg z| < θ :=
       ((continuousAt_arg (Or.inl hz0)).abs).eventually_lt continuousAt_const hθ1
@@ -655,8 +668,10 @@ theorem integral_upperIncGammaMBIntegrand_ofReal (a : ℂ) {x : ℝ} (hx : 0 < x
 /-- Identity under the stated parameter and domain assumptions: `HasIntegralWholeLine (fun y : ℝ
 => let s : ℂ := c+y*I; Gamma (s+a)*z^(-s)/s) (2*π*upperIncGamma a z)`. -/
 @[dlmf 8.6.E11]
-theorem upperIncGamma_mellinBarnes (a : ℂ) {z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hca : 0 < c+a.re) :
-    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma (s+a)*z^(-s)/s) (2*π*upperIncGamma a z) := by
+theorem upperIncGamma_mellinBarnes (a : ℂ) {z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
+    (hca : 0 < c+a.re) :
+    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma (s+a)*z^(-s)/s)
+        (2*π*upperIncGamma a z) := by
   set U : Set ℂ := {z : ℂ | 0 < z.re}
   have hUo : IsOpen U := isOpen_lt continuous_const continuous_re
   have hF := (differentiableOn_integral_upperIncGammaMBIntegrand a hc hca).analyticOnNhd hUo
@@ -666,7 +681,8 @@ theorem upperIncGamma_mellinBarnes (a : ℂ) {z : ℂ} (hz : 0 < z.re) {c : ℝ}
     exact ((differentiableAt_neg_iff.mpr differentiableAt_id |>.cexp).mul
       (differentiableAt_kummerU _ _ (Or.inl hz))).const_mul _ |>.differentiableWithinAt
   have h1 : (1:ℂ) ∈ U := by simp [U]
-  have hfreq : ∃ᶠ w in 𝓝[≠] (1:ℂ), (∫ y, upperIncGammaMBIntegrand a w c y) = 2*π*upperIncGamma a w := by
+  have hfreq : ∃ᶠ w in 𝓝[≠] (1:ℂ), (∫ y, upperIncGammaMBIntegrand a w c y) =
+      2*π*upperIncGamma a w := by
     have hmap : Tendsto (fun x : ℝ => (x:ℂ)) (𝓝[≠] (1:ℝ)) (𝓝[≠] (1:ℂ)) := by
       have := continuous_ofReal.continuousWithinAt.tendsto_nhdsWithin (s := {(1:ℝ)}ᶜ)
         (t := {(1:ℂ)}ᶜ) (x := 1) (fun x hx h => hx (by simp at h ⊢; exact_mod_cast h))
@@ -730,7 +746,8 @@ theorem incRep_integral_right {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
   have hv' : ∫ y, upperIncGammaMBIntegrand a z (c - a.re) y = 2*π*upperIncGamma a z :=
     incRep_integral_eq hint hv
   refine ⟨hfun ▸ (hint.comp_sub_right a.im).neg, ?_⟩
-  rw [hfun, integral_neg, integral_sub_right_eq_self (fun y => upperIncGammaMBIntegrand a z (c - a.re) y) a.im, hv']
+  rw [hfun, integral_neg,
+      integral_sub_right_eq_self (fun y => upperIncGammaMBIntegrand a z (c - a.re) y) a.im, hv']
 
 /-- Pointwise bound for the 8.6.10 integrand. -/
 theorem incRep_norm_L_le (a : ℂ) {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
@@ -834,7 +851,8 @@ theorem incRep_horizontal {a z : ℂ} (hz : 0 < z.re) {c c' : ℝ} (hc : 0 < c) 
   have hz0 : z ≠ 0 := fun h => by rw [h] at hz; simp at hz
   have hθ : |arg z| < π/2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz)
   have hc' : 0 < c' := hc.trans_le hcc
-  obtain ⟨G, hG⟩ := (isCompact_Icc (a := c) (b := c')).exists_bound_of_continuousOn (f := Real.Gamma)
+  obtain ⟨G, hG⟩ := (isCompact_Icc (a := c) (b := c')).exists_bound_of_continuousOn
+      (f := Real.Gamma)
     (fun x hx => (Real.differentiableAt_Gamma (fun m h => by
       have : (0:ℝ) < x := hc.trans_le hx.1
       linarith [(m.cast_nonneg : (0:ℝ) ≤ m)])).continuousAt.continuousWithinAt)
@@ -930,14 +948,17 @@ theorem incRep_integral_value {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 <
       (show a.re < c' by simp only [c']; linarith) hΦ
       (by rw [e c]; exact incRep_integrable hz hc hca) (by rw [e c']; exact hR.1) hH.1 hH.2
     rw [show (fun y : ℝ => Φ ((c':ℂ) + y*I) / ((c':ℂ)+y*I - a)) = incRep_L a z c' from e c',
-      show (fun y : ℝ => Φ ((c:ℂ) + y*I) / ((c:ℂ)+y*I - a)) = incRep_L a z c from e c, hR.2] at hshift
+      show (fun y : ℝ => Φ ((c:ℂ) + y*I) / ((c:ℂ)+y*I - a)) = incRep_L a z c from e c,
+          hR.2] at hshift
     simp only [hΦdef, sub_self, cpow_zero, mul_one] at hshift
     linear_combination -hshift - 2*π*hsum
 
 /-- The separating contour expressed by a vertical line and its crossed-pole residue. -/
 @[dlmf 8.6.E10]
-theorem lowerIncGamma_mellinBarnes {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hca : c ≠ a.re) :
-    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma s/(a-s)*z^(a-s)) (2*π*(lowerIncGamma a z-(if a.re < c then Gamma a else 0))) := by
+theorem lowerIncGamma_mellinBarnes {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 < z.re) {c : ℝ}
+    (hc : 0 < c) (hca : c ≠ a.re) :
+    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma s/(a-s)*z^(a-s))
+        (2*π*(lowerIncGamma a z-(if a.re < c then Gamma a else 0))) := by
   have hfun : (fun y : ℝ => let s : ℂ := c+y*I; Gamma s/(a-s)*z^(a-s)) = incRep_L a z c := rfl
   rw [hfun, ← incRep_integral_value ha hz hc hca]
   exact incRep_hasIntegralWholeLine (incRep_integrable hz hc hca)

@@ -433,7 +433,9 @@ theorem opIneq_gegenbauer_sonine {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) {n : ℕ}
     rcases le_total 0 x with h0 | h0
     · have hanti : AntitoneOn f (Icc 0 x) := by
         refine antitoneOn_of_hasDerivWithinAt_nonpos (f' := f') (convex_Icc 0 x)
-          (fun t ht => (hderiv t (abs_lt.mpr ⟨by linarith [ht.1], by linarith [ht.2]⟩)).continuousAt.continuousWithinAt)
+          (fun t ht => (hderiv t
+              (abs_lt.mpr ⟨by linarith [ht.1], by
+                                linarith [ht.2]⟩)).continuousAt.continuousWithinAt)
           (fun t ht => ?_) (fun t ht => ?_)
         · rw [interior_Icc] at ht
           exact (hderiv t (abs_lt.mpr ⟨by linarith [ht.1], by linarith [ht.2]⟩)).hasDerivWithinAt
@@ -442,7 +444,9 @@ theorem opIneq_gegenbauer_sonine {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) {n : ℕ}
       exact hanti ⟨le_rfl, h0⟩ ⟨h0, le_rfl⟩ h0
     · have hmono : MonotoneOn f (Icc x 0) := by
         refine monotoneOn_of_hasDerivWithinAt_nonneg (f' := f') (convex_Icc x 0)
-          (fun t ht => (hderiv t (abs_lt.mpr ⟨by linarith [ht.1], by linarith [ht.2]⟩)).continuousAt.continuousWithinAt)
+          (fun t ht => (hderiv t
+              (abs_lt.mpr ⟨by linarith [ht.1], by
+                                linarith [ht.2]⟩)).continuousAt.continuousWithinAt)
           (fun t ht => ?_) (fun t ht => ?_)
         · rw [interior_Icc] at ht
           exact (hderiv t (abs_lt.mpr ⟨by linarith [ht.1], by linarith [ht.2]⟩)).hasDerivWithinAt

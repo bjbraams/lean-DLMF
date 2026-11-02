@@ -755,7 +755,7 @@ theorem exists_norm_circRHS_le {n : ℕ} (hn : 0 < n) :
   refine ⟨‖(2 * π : ℂ) ^ ((1 - n : ℂ) / 2)‖ * Real.sqrt n * ∏ k, K k,
     mul_nonneg (by positivity) (Finset.prod_nonneg fun k _ => hK0 k), fun w hw => ?_⟩
   have hnC : (n : ℂ) ≠ 0 := by exact_mod_cast hn.ne'
-  have hmul := Complex.Gamma_mul_nat hn (w + 1 / n)
+  have hmul := Gamma.Gamma_mul_nat hn (w + 1 / n)
   rw [show (n : ℂ) * (w + 1 / n) = 1 + w * n by field_simp; ring] at hmul
   have hprod : ∏ k ∈ Finset.range n, Complex.Gamma (w + 1 / n + k / n) =
       ∏ k ∈ Finset.range n, Complex.Gamma (w + (((k : ℝ) + 1) / n : ℝ)) :=

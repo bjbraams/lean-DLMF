@@ -97,7 +97,8 @@ theorem ellipticIntegrand_elliptic_part {F : Type*} [Field F] (p₁ p₂ p₃ p�
 /-! ### §19.2(ii) Legendre's integrals -/
 
 /-- `x^{1/2} = x · x^{-1/2}` for every complex `x` (both sides vanish at `0`). -/
-private lemma cpow_half_eq_mul_cpow_neg_half (x : ℂ) : x ^ (1 / 2 : ℂ) = x * x ^ (-(1 / 2 : ℂ)) := by
+private lemma cpow_half_eq_mul_cpow_neg_half (x : ℂ) : x ^ (1 / 2 : ℂ) = x *
+    x ^ (-(1 / 2 : ℂ)) := by
   rcases eq_or_ne x 0 with rfl | hx
   · simp
   · conv_lhs => rw [show (1 / 2 : ℂ) = 1 + (-(1 / 2 : ℂ)) by ring]
@@ -289,7 +290,8 @@ theorem circular_hyperbolic_alternate {k2 α2 : ℝ} (hk0 : 0 < k2) (hk1 : k2 < 
 
 /-- A continuous, `π`-periodic, even function integrates over `[0, π]` to twice its integral
 over `[0, π/2]`. -/
-private lemma integral_zero_pi_eq_two_mul {g : ℝ → ℂ} (hc : Continuous g) (hp : Function.Periodic g π)
+private lemma integral_zero_pi_eq_two_mul {g : ℝ → ℂ} (hc : Continuous g)
+    (hp : Function.Periodic g π)
     (he : ∀ x, g (-x) = g x) :
     ∫ x in (0 : ℝ)..π, g x = 2 * ∫ x in (0 : ℝ)..(π / 2), g x := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := π / 2)
@@ -329,7 +331,8 @@ private lemma integral_zero_neg_of_even {g : ℝ → ℂ} (he : ∀ x, g (-x) = 
 
 /-- The Legendre integrands `sin^{2j}θ (1 - k² sin²θ)^{p}` are continuous in real `θ` in the
 principal domain, `π`-periodic and even. -/
-private lemma legendre_integrand_continuous_periodic_even {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (j : ℕ) (p : ℂ) :
+private lemma legendre_integrand_continuous_periodic_even {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane)
+    (j : ℕ) (p : ℂ) :
     let g : ℝ → ℂ := fun θ => (Real.sin θ : ℂ) ^ (2 * j) * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ p
     Continuous g ∧ Function.Periodic g π ∧ ∀ x, g (-x) = g x := by
   refine ⟨?_, fun x => ?_, fun x => ?_⟩
@@ -414,7 +417,8 @@ theorem compEllInt_eq_bulirschCel (k : ℂ) (α2 : ℝ) :
     have hg : ∀ θ : ℂ, Complex.cos θ ^ 2 + ((1 - α2 : ℝ) : ℂ) * Complex.sin θ ^ 2 =
         1 - α2 * Complex.sin θ ^ 2 := fun θ => by
       push_cast; linear_combination Complex.cos_sq_add_sin_sq θ
-    simp only [hg, jacobiComodulusk_sq_eq_one_sub_sq, cos_sq_add_one_sub_sq_mul_sin_sq, ofReal_one, one_mul,
+    simp only [hg, jacobiComodulusk_sq_eq_one_sub_sq, cos_sq_add_one_sub_sq_mul_sin_sq,
+        ofReal_one, one_mul,
       Complex.cos_sq_add_sin_sq, div_eq_inv_mul, mul_one]
 
 /-- DLMF 19.2.14: `E(k) = cel(k_c, 1, 1, k_c²)` for every real `k` (`k_c² = 1 - k²` is real, as
@@ -443,7 +447,8 @@ theorem compEllIntEk_sub_eq_bulirschCel {k : ℂ} (hk : k ≠ 0) (hk1 : 1 - k ^ 
   have hE : Continuous fun θ : ℝ => (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) :=
     Continuous.cpow (by fun_prop) continuous_const fun θ =>
       one_sub_sq_mul_sin_sq_mem_slitPlane hk1 θ
-  rw [div_eq_iff (pow_ne_zero 2 hk), bulirschCel_one_eq_segmentIntegral, hpi, segmentIntegral_ofReal,
+  rw [div_eq_iff (pow_ne_zero 2 hk), bulirschCel_one_eq_segmentIntegral, hpi,
+      segmentIntegral_ofReal,
     compEllIntEk_eq_integral, compEllIntKk, jacobiComodulusk_sq_eq_one_sub_sq,
     ← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_sub
       (hE.intervalIntegrable _ _) ((hc.intervalIntegrable _ _).const_mul (1 - k ^ 2)),
@@ -463,7 +468,47 @@ theorem incEllIntFk_eq_bulirschEl1 (k : ℂ) {φ : ℝ} (h0 : -(π / 2) < φ) (h
   congr 1; funext θ
   rw [jacobiComodulusk_sq_eq_one_sub_sq, cos_sq_add_one_sub_sq_mul_sin_sq]
 
-/-- **Admitted.** DLMF 19.2.15: `F(φ, k) = el2(x, k_c, 1, 1)`, `E(φ, k) = el2(x, k_c, 1, k_c²)`,
+/-- `r^{-1/2} = (√r)⁻¹` for real `r ≥ 0`. -/
+private lemma ofReal_cpow_neg_half_eq {r : ℝ} (hr : 0 ≤ r) :
+    (r : ℂ) ^ (-(1 / 2 : ℂ)) = (((√r)⁻¹ : ℝ) : ℂ) := by
+  rw [cpow_neg, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hr,
+    ← Real.sqrt_eq_rpow, ofReal_inv]
+
+/-- `r^{1/2} = √r` for real `r ≥ 0`. -/
+private lemma ofReal_cpow_half_eq {r : ℝ} (hr : 0 ≤ r) :
+    (r : ℂ) ^ (1 / 2 : ℂ) = ((√r : ℝ) : ℂ) := by
+  rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hr,
+    ← Real.sqrt_eq_rpow]
+
+/-- The integrand of `el2(tan φ, k', a, b)` at real `θ` with `cos θ > 0`:
+`(a + b tan²θ)((1 + tan²θ)(1 + k'² tan²θ))^{-1/2} = (a cos²θ + b sin²θ)/√(1 - k² sin²θ)`. -/
+private lemma bulirschEl2_integrand_ofReal {k θ : ℝ} (hk : k ^ 2 < 1) (hc : 0 < Real.cos θ)
+    (a b : ℝ) :
+    ((a : ℂ) + b * Complex.tan θ ^ 2) * ((1 + Complex.tan θ ^ 2) *
+      (1 + jacobiComodulusk k ^ 2 * Complex.tan θ ^ 2)) ^ (-(1 / 2 : ℂ)) =
+      (((a * Real.cos θ ^ 2 + b * Real.sin θ ^ 2) / √(1 - k ^ 2 * Real.sin θ ^ 2) : ℝ) : ℂ) := by
+  have hD : 0 < 1 - k ^ 2 * Real.sin θ ^ 2 := by nlinarith [Real.sin_sq_le_one θ]
+  have hsc := Real.sin_sq_add_cos_sq θ
+  set T := Real.tan θ with hT
+  have hTe : T = Real.sin θ / Real.cos θ := Real.tan_eq_sin_div_cos θ
+  have e : ((a : ℂ) + b * Complex.tan θ ^ 2) * ((1 + Complex.tan θ ^ 2) *
+      (1 + jacobiComodulusk k ^ 2 * Complex.tan θ ^ 2)) ^ (-(1 / 2 : ℂ)) =
+      (((a + b * T ^ 2) : ℝ) : ℂ) * ((((1 + T ^ 2) * (1 + (1 - k ^ 2) * T ^ 2)) : ℝ) : ℂ) ^
+        (-(1 / 2 : ℂ)) := by
+    rw [jacobiComodulusk_sq_eq_one_sub_sq, ← ofReal_tan, ← hT]
+    push_cast; ring
+  have e2 : (1 + T ^ 2) * (1 + (1 - k ^ 2) * T ^ 2) =
+      (√(1 - k ^ 2 * Real.sin θ ^ 2) / Real.cos θ ^ 2) ^ 2 := by
+    rw [div_pow, Real.sq_sqrt hD.le, hTe]
+    field_simp
+    linear_combination (Real.cos θ ^ 2 - k ^ 2 * Real.sin θ ^ 2 + 1 + Real.sin θ ^ 2) * hsc
+  rw [e, e2, ofReal_cpow_neg_half_eq (sq_nonneg _), Real.sqrt_sq (by positivity), ← ofReal_mul]
+  congr 1
+  rw [hTe]
+  have h1 : 0 < √(1 - k ^ 2 * Real.sin θ ^ 2) := Real.sqrt_pos.mpr hD
+  field_simp
+
+/-- DLMF 19.2.15: `F(φ, k) = el2(x, k_c, 1, 1)`, `E(φ, k) = el2(x, k_c, 1, k_c²)`,
 `D(φ, k) = el2(x, k_c, 0, 1)` with `x = tan φ`, `k_c = k'`, for real `k` with `k² < 1` and real
 `|φ| < π/2`. -/
 @[dlmf 19.2.E15]
@@ -472,7 +517,46 @@ theorem incEllInt_eq_bulirschEl2 {k φ : ℝ} (hk : k ^ 2 < 1) (h0 : -(π / 2) <
     incEllIntFk φ k = bulirschEl2 (Real.tan φ) (jacobiComodulusk k) 1 1 ∧
       incEllIntEk φ k = bulirschEl2 (Real.tan φ) (jacobiComodulusk k) 1 (1 - k ^ 2) ∧
       incEllIntDk φ k = bulirschEl2 (Real.tan φ) (jacobiComodulusk k) 0 1 := by
-  sorry
+  have hc : ∀ θ ∈ uIcc 0 φ, 0 < Real.cos θ := fun θ hθ => by
+    refine Real.cos_pos_of_mem_Ioo ⟨?_, ?_⟩
+    · rcases le_total 0 φ with h | h
+      · rw [uIcc_of_le h] at hθ; linarith [hθ.1, Real.pi_pos]
+      · rw [uIcc_of_ge h] at hθ; linarith [hθ.1]
+    · rcases le_total 0 φ with h | h
+      · rw [uIcc_of_le h] at hθ; linarith [hθ.2]
+      · rw [uIcc_of_ge h] at hθ; linarith [hθ.2, Real.pi_pos]
+  have hD : ∀ θ : ℝ, 0 < 1 - k ^ 2 * Real.sin θ ^ 2 := fun θ => by
+    nlinarith [Real.sin_sq_le_one θ]
+  have hcast : ∀ θ : ℝ, (1 - (k : ℂ) ^ 2 * (Real.sin θ : ℂ) ^ 2) =
+      ((1 - k ^ 2 * Real.sin θ ^ 2 : ℝ) : ℂ) := fun θ => by push_cast; ring
+  have hel2 : ∀ a b : ℝ, bulirschEl2 (Real.tan φ) (jacobiComodulusk k) a b =
+      ∫ θ in (0 : ℝ)..φ, (((a * Real.cos θ ^ 2 + b * Real.sin θ ^ 2) /
+        √(1 - k ^ 2 * Real.sin θ ^ 2) : ℝ) : ℂ) := fun a b => by
+    rw [bulirschEl2, ← Complex.ofReal_arctan, Real.arctan_tan h0 h1, segmentIntegral_ofReal]
+    exact intervalIntegral.integral_congr fun θ hθ =>
+      bulirschEl2_integrand_ofReal hk (hc θ hθ) a b
+  refine ⟨?_, ?_, ?_⟩
+  · rw [hel2, incEllIntFk_ofReal_eq_integral]
+    refine intervalIntegral.integral_congr fun θ _ => ?_
+    rw [hcast, ofReal_cpow_neg_half_eq (hD θ).le]
+    congr 1
+    have := Real.sin_sq_add_cos_sq θ
+    have h1 : 0 < √(1 - k ^ 2 * Real.sin θ ^ 2) := Real.sqrt_pos.mpr (hD θ)
+    field_simp
+    linarith
+  · rw [hel2, incEllIntEk_ofReal_eq_integral]
+    refine intervalIntegral.integral_congr fun θ _ => ?_
+    rw [hcast, ofReal_cpow_half_eq (hD θ).le]
+    congr 1
+    have := Real.sin_sq_add_cos_sq θ
+    have h1 : 0 < √(1 - k ^ 2 * Real.sin θ ^ 2) := Real.sqrt_pos.mpr (hD θ)
+    rw [eq_div_iff h1.ne', Real.mul_self_sqrt (hD θ).le]
+    linear_combination -this
+  · rw [hel2, incEllIntDk_ofReal_eq_integral]
+    refine intervalIntegral.integral_congr fun θ _ => ?_
+    rw [hcast, ofReal_cpow_neg_half_eq (hD θ).le]
+    push_cast
+    ring
 
 /-- DLMF 19.2.16: `el3(x, k_c, p) = Π(arctan x, 1 - p, k)` with `k_c = k'`, for every complex `x`
 and `k` and real `p` (both sides are principal values at an interior singularity). -/
@@ -485,7 +569,37 @@ theorem bulirschEl3_eq_incEllIntPik (x k : ℂ) (p : ℝ) :
     linear_combination Complex.cos_sq_add_sin_sq θ
   simp only [hg, jacobiComodulusk_sq_eq_one_sub_sq, cos_sq_add_one_sub_sq_mul_sin_sq]
 
-/-- **Admitted.** DLMF §19.2(iii): the integrals are complete if `x = ∞`: as real `x → +∞`,
+/-- `(r w)^s = r^s w^s` for real `r > 0`. -/
+private lemma ofReal_mul_cpow_of_pos' {r : ℝ} (hr : 0 < r) (w s : ℂ) :
+    ((r : ℂ) * w) ^ s = (r : ℂ) ^ s * w ^ s := by
+  have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
+  by_cases hw : w = 0
+  · subst hw
+    by_cases hs : s = 0
+    · simp [hs]
+    · simp [zero_cpow hs]
+  · rw [cpow_def_of_ne_zero (mul_ne_zero hr0 hw), log_ofReal_mul hr hw, cpow_def_of_ne_zero hr0,
+      cpow_def_of_ne_zero hw, ← Complex.exp_add, ← ofReal_log hr.le]
+    congr 1; ring
+
+/-- `cos²θ + k_c² sin²θ ∈ ℂ \ (-∞, 0]` for real `θ` when `k_c² ∈ ℂ \ (-∞, 0]`. -/
+private lemma cos_sq_add_mul_sin_sq_mem_slitPlane {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) (θ : ℝ) :
+    Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2 ∈ slitPlane := by
+  have h := starConvex_one_slitPlane.add_smul_mem (y := kc ^ 2 - 1) (by simpa using hkc)
+    (sq_nonneg (Real.sin θ)) (Real.sin_sq_le_one θ)
+  convert h using 1
+  rw [real_smul, ofReal_pow, ofReal_sin]
+  linear_combination Complex.sin_sq_add_cos_sq (θ : ℂ)
+
+/-- `∫₀^{arctan x} G → ∫₀^{π/2} G` as `x → +∞`, for continuous `G`. -/
+private lemma tendsto_integral_arctan {G : ℝ → ℂ} (hG : Continuous G) :
+    Tendsto (fun x : ℝ => ∫ θ in (0 : ℝ)..Real.arctan x, G θ) atTop
+      (𝓝 (∫ θ in (0 : ℝ)..(π / 2), G θ)) := by
+  have hc : Continuous fun u : ℝ => ∫ θ in (0 : ℝ)..u, G θ :=
+    intervalIntegral.continuous_primitive (fun a b => hG.intervalIntegrable a b) 0
+  exact (hc.tendsto _).comp (Real.tendsto_arctan_atTop.mono_right nhdsWithin_le_nhds)
+
+/-- DLMF §19.2(iii): the integrals are complete if `x = ∞`: as real `x → +∞`,
 `el1(x, k_c) → cel(k_c, 1, 1, 1)`, `el2(x, k_c, a, b) → cel(k_c, 1, a, b)` and, for `p > 0`,
 `el3(x, k_c, p) → cel(k_c, p, 1, 1)`, when `k_c² ∈ ℂ \ (-∞, 0]`. -/
 @[dlmf 19.2.iii]
@@ -493,7 +607,90 @@ theorem tendsto_bulirsch_atTop {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) (a b : �
     Tendsto (fun x : ℝ => bulirschEl1 x kc) atTop (𝓝 (bulirschCel kc 1 1 1)) ∧
       Tendsto (fun x : ℝ => bulirschEl2 x kc a b) atTop (𝓝 (bulirschCel kc 1 a b)) ∧
       Tendsto (fun x : ℝ => bulirschEl3 x kc p) atTop (𝓝 (bulirschCel kc p 1 1)) := by
-  sorry
+  set w : ℝ → ℂ := fun θ => Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2 with hw
+  have hwS : ∀ θ : ℝ, w θ ∈ slitPlane := cos_sq_add_mul_sin_sq_mem_slitPlane hkc
+  have hwc : Continuous fun θ : ℝ => w θ ^ (-(1 / 2 : ℂ)) :=
+    Continuous.cpow (by fun_prop) continuous_const hwS
+  have hpi : ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) := by push_cast; ring
+  have harc : ∀ x : ℝ, Complex.arctan (x : ℂ) = ((Real.arctan x : ℝ) : ℂ) := fun x =>
+    (ofReal_arctan x).symm
+  -- the real form of `cos² + p sin²`
+  have hg : ∀ θ : ℝ, Complex.cos θ ^ 2 + (p : ℂ) * Complex.sin θ ^ 2 =
+      ((Real.cos θ ^ 2 + p * Real.sin θ ^ 2 : ℝ) : ℂ) := fun θ => by push_cast; ring
+  have hgpos : ∀ θ : ℝ, min 1 p ≤ Real.cos θ ^ 2 + p * Real.sin θ ^ 2 := fun θ => by
+    have := Real.sin_sq_add_cos_sq θ
+    have h1 : min 1 p ≤ 1 := min_le_left _ _
+    have h2 : min 1 p ≤ p := min_le_right _ _
+    nlinarith [sq_nonneg (Real.sin θ), sq_nonneg (Real.cos θ)]
+  have hmin : 0 < min 1 p := lt_min one_pos hp
+  have hpv : ∀ (f : ℂ → ℂ) (u : ℝ),
+      pvSegmentIntegral (fun θ => Complex.cos θ ^ 2 + (p : ℂ) * Complex.sin θ ^ 2) f u =
+        ∫ θ in (0 : ℝ)..u, f θ := fun f u => by
+    rw [pvSegmentIntegral_eq_segmentIntegral (δ := min 1 p) hmin, segmentIntegral_ofReal]
+    intro t _
+    rw [← ofReal_mul, hg, Complex.norm_real, Real.norm_eq_abs]
+    exact (hgpos _).trans (le_abs_self _)
+  refine ⟨?_, ?_, ?_⟩
+  · have e : ∀ x : ℝ, bulirschEl1 x kc = ∫ θ in (0 : ℝ)..Real.arctan x, w θ ^ (-(1 / 2 : ℂ)) :=
+      fun x => by rw [bulirschEl1, harc, segmentIntegral_ofReal]
+    simp only [e]
+    convert tendsto_integral_arctan hwc using 2
+    rw [bulirschCel_one_eq_segmentIntegral, hpi, segmentIntegral_ofReal]
+    refine intervalIntegral.integral_congr fun θ _ => ?_
+    simp only [hw]
+    rw [ofReal_one, one_mul, one_mul, Complex.cos_sq_add_sin_sq, one_mul]
+  · have hint : ∀ θ : ℝ, 0 < Real.cos θ → ((a : ℂ) + b * Complex.tan θ ^ 2) *
+        ((1 + Complex.tan θ ^ 2) * (1 + kc ^ 2 * Complex.tan θ ^ 2)) ^ (-(1 / 2 : ℂ)) =
+        (a * Complex.cos θ ^ 2 + b * Complex.sin θ ^ 2) * w θ ^ (-(1 / 2 : ℂ)) := by
+      intro θ hc
+      have hc0 : Complex.cos (θ : ℂ) ≠ 0 := by
+        rw [← ofReal_cos]; exact ofReal_ne_zero.mpr hc.ne'
+      have hsc := Complex.sin_sq_add_cos_sq (θ : ℂ)
+      have e1 : (1 + Complex.tan θ ^ 2) * (1 + kc ^ 2 * Complex.tan θ ^ 2) =
+          (((1 / Real.cos θ ^ 2) ^ 2 : ℝ) : ℂ) * w θ := by
+        simp only [hw]
+        rw [Complex.tan_eq_sin_div_cos]
+        push_cast
+        field_simp
+        linear_combination (kc ^ 2 * Complex.sin θ ^ 2 + Complex.cos (θ : ℂ) ^ 2) * hsc
+      rw [e1, ofReal_mul_cpow_of_pos' (by positivity), ofReal_cpow_neg_half_eq (by positivity),
+        Real.sqrt_sq (by positivity), Complex.tan_eq_sin_div_cos, ← mul_assoc]
+      congr 1
+      push_cast
+      field_simp
+    have e : ∀ x : ℝ, bulirschEl2 x kc a b = ∫ θ in (0 : ℝ)..Real.arctan x,
+        (a * Complex.cos θ ^ 2 + b * Complex.sin θ ^ 2) * w θ ^ (-(1 / 2 : ℂ)) := fun x => by
+      rw [bulirschEl2, harc, segmentIntegral_ofReal]
+      refine intervalIntegral.integral_congr fun θ hθ => hint θ ?_
+      have h1 := Real.arctan_lt_pi_div_two x
+      have h2 := Real.neg_pi_div_two_lt_arctan x
+      refine Real.cos_pos_of_mem_Ioo ⟨?_, ?_⟩
+      · rcases le_total 0 (Real.arctan x) with h | h
+        · rw [uIcc_of_le h] at hθ; linarith [hθ.1, Real.pi_pos]
+        · rw [uIcc_of_ge h] at hθ; linarith [hθ.1]
+      · rcases le_total 0 (Real.arctan x) with h | h
+        · rw [uIcc_of_le h] at hθ; linarith [hθ.2]
+        · rw [uIcc_of_ge h] at hθ; linarith [hθ.2, Real.pi_pos]
+    simp only [e]
+    have hc : Continuous fun θ : ℝ =>
+        ((a : ℂ) * Complex.cos θ ^ 2 + b * Complex.sin θ ^ 2) * w θ ^ (-(1 / 2 : ℂ)) :=
+      Continuous.mul (by fun_prop) hwc
+    convert tendsto_integral_arctan hc using 2
+    rw [bulirschCel_one_eq_segmentIntegral, hpi, segmentIntegral_ofReal]
+  · have e : ∀ x : ℝ, bulirschEl3 x kc p =
+        ∫ θ in (0 : ℝ)..Real.arctan x, (Complex.cos θ ^ 2 + (p : ℂ) * Complex.sin θ ^ 2)⁻¹ *
+          w θ ^ (-(1 / 2 : ℂ)) := fun x => by
+      rw [bulirschEl3, harc, hpv]
+    simp only [e]
+    have hc : Continuous fun θ : ℝ => (Complex.cos θ ^ 2 + (p : ℂ) * Complex.sin θ ^ 2)⁻¹ *
+        w θ ^ (-(1 / 2 : ℂ)) := by
+      refine Continuous.mul (Continuous.inv₀ (by fun_prop) fun θ => ?_) hwc
+      rw [hg]; exact ofReal_ne_zero.mpr (hmin.trans_le (hgpos θ)).ne'
+    convert tendsto_integral_arctan hc using 2
+    rw [bulirschCel, hpi, hpv]
+    refine intervalIntegral.integral_congr fun θ _ => ?_
+    simp only [hw]
+    rw [ofReal_one, one_mul, one_mul, Complex.cos_sq_add_sin_sq, one_div]
 
 /-! ### §19.2(iv) The function `R_C(x, y)` -/
 
@@ -608,7 +805,8 @@ theorem symEllIntRC_of_gt {x y : ℝ} (hy : 0 < y) (hxy : y < x) :
   exact ⟨by rw [h, artanh_sqrt_eq_log hy hxy], h⟩
 
 /-- The logarithmic primitive of the real RC kernel away from its pole. -/
-private lemma hasDerivAt_rcNeg_primitive {x y t : ℝ} (hx : 0 ≤ x) (hy : y < 0) (ht : 0 < t) (h : t + y ≠ 0) :
+private lemma hasDerivAt_rcNeg_primitive {x y t : ℝ} (hx : 0 ≤ x) (hy : y < 0) (ht : 0 < t)
+    (h : t + y ≠ 0) :
     HasDerivAt (fun u : ℝ => (Real.log (u + y) -
       2 * Real.log (Real.sqrt (u + x) + Real.sqrt (x - y))) / Real.sqrt (x - y))
       (Real.sqrt (t + x) * (t + y))⁻¹ t := by
@@ -636,7 +834,8 @@ private lemma tendsto_rcNeg_primitive_atTop {x y : ℝ} (hx : 0 ≤ x) (hy : y <
     tendsto_const_nhds.div_atTop ht
   have hr : Tendsto (fun t : ℝ =>
       (1 - a / Real.sqrt (t + x)) / (1 + a / Real.sqrt (t + x))) atTop (𝓝 1) := by
-    convert ((tendsto_const_nhds.sub hi).div (tendsto_const_nhds.add hi) (by norm_num : (1 : ℝ) + 0 ≠ 0)) using 1; norm_num
+    convert ((tendsto_const_nhds.sub hi).div (tendsto_const_nhds.add hi)
+        (by norm_num : (1 : ℝ) + 0 ≠ 0)) using 1; norm_num
   have hl := (Real.continuousAt_log (by norm_num : (1 : ℝ) ≠ 0)).tendsto.comp hr
   have hld := hl.div_const a
   simp only [Real.log_one, zero_div] at hld
@@ -673,8 +872,10 @@ private lemma continuousAt_rcNeg_primitive {x y t : ℝ} (hx : 0 ≤ x) (hy : y 
     apply ContinuousAt.log
     · fun_prop
     · positivity
-/-- The real RC integral with a symmetric interval removed is the sum of its two primitive differences. -/
-private lemma integral_rcNeg_kernel_truncated {x y ε : ℝ} (hx : 0 ≤ x) (hy : y < 0) (he : 0 < ε) (hec : ε < -y) :
+/-- The real RC integral with a symmetric interval removed is the sum of its two primitive
+differences. -/
+private lemma integral_rcNeg_kernel_truncated {x y ε : ℝ} (hx : 0 ≤ x) (hy : y < 0) (he : 0 < ε)
+    (hec : ε < -y) :
     let F := fun u : ℝ => (Real.log (u + y) -
       2 * Real.log (Real.sqrt (u + x) + Real.sqrt (x - y))) / Real.sqrt (x - y)
     (∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε), (Real.sqrt (t + x) * (t + y))⁻¹) =
@@ -697,7 +898,8 @@ private lemma integral_rcNeg_kernel_truncated {x y ε : ℝ} (hx : 0 ≤ x) (hy 
       have : t + y < 0 := by linarith [ht.2]
       exact neg_nonneg.mpr (inv_nonpos.mpr (by nlinarith [Real.sqrt_nonneg (t + x)]))
   have hleftval : (∫ t in Ioo 0 (-y - ε), f t) = F (-y - ε) - F 0 := by
-    rw [← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le (by linarith : 0 ≤ -y - ε)]
+    rw [← integral_Ioc_eq_integral_Ioo,
+        ← intervalIntegral.integral_of_le (by linarith : 0 ≤ -y - ε)]
     apply intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le (by linarith) hleftcont
       (fun t ht => hD t ht.1 (by linarith [ht.2]))
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by linarith)]
@@ -713,9 +915,11 @@ private lemma integral_rcNeg_kernel_truncated {x y ε : ℝ} (hx : 0 ≤ x) (hy 
     have : 0 < t + y := by linarith [ht]
     positivity
   have hright := integrableOn_Ioi_deriv_of_nonneg
-    (hF (-y + ε) (by linarith)).continuousWithinAt hrightD hrightpos (tendsto_rcNeg_primitive_atTop hx hy)
+    (hF (-y + ε) (by linarith)).continuousWithinAt hrightD hrightpos
+        (tendsto_rcNeg_primitive_atTop hx hy)
   have hrightval := integral_Ioi_of_hasDerivAt_of_nonneg
-    (hF (-y + ε) (by linarith)).continuousWithinAt hrightD hrightpos (tendsto_rcNeg_primitive_atTop hx hy)
+    (hF (-y + ε) (by linarith)).continuousWithinAt hrightD hrightpos
+        (tendsto_rcNeg_primitive_atTop hx hy)
   have hset : Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε) = Ioo 0 (-y - ε) ∪ Ioi (-y + ε) := by
     ext t
     simp only [Set.mem_sdiff, mem_Ioi, mem_Icc, mem_union, mem_Ioo]
@@ -788,7 +992,8 @@ private lemma tendsto_integral_rcNeg_kernel_truncated_complex {x y : ℝ} (hx : 
     rw [hpow]
     push_cast
     rfl
-  have hl := Complex.continuous_ofReal.tendsto _ |>.comp (tendsto_integral_rcNeg_kernel_truncated hx hy)
+  have hl := Complex.continuous_ofReal.tendsto _ |>.comp
+      (tendsto_integral_rcNeg_kernel_truncated hx hy)
   simpa only [Function.comp_def, hcast] using hl
 
 /-- For real `x ≥ 0 > y`, the symmetric truncations of `∫₀^∞ dt/(√(t+x)(t+y))` about `t = -y`

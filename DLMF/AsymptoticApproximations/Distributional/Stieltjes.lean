@@ -27,7 +27,7 @@ derivation of the asymptotic expansion of a Stieltjes transform (§2.6(ii)).
 * `functionPairing_eq_of_lt_one`, `functionPairing_eq_of_eq_one`: the distributional
   identities 2.6.17 (`0 < α < 1`) and 2.6.20 (`α = 1`).
 * `tendsto_powPairing_stieltjesTestFunction`, `tendsto_logPowPairing_stieltjesTestFunction`,
-  `tendsto_functionPairing_stieltjesTestFunction`,
+  `tendsto_functionPairing_stieltjesTestFunction`, `tendsto_functionPairing_stieltjesTestFunction'`,
   `tendsto_remainderPairing_stieltjesTestFunction`: the limits 2.6.23–2.6.26.
 * `stieltjesTransform_eq_of_lt_one`, `stieltjesTransform_eq_of_eq_one`: the expansions with
   exact remainder 2.6.27–2.6.30.
@@ -159,7 +159,8 @@ in the form: for every `n`, the remainder after the terms with `s < n` in the fi
 `|ph x| ≤ π - δ`; the real case is formalized.) -/
 @[dlmf 2.6.E7, dlmf 2.6.E1]
 theorem stieltjesCubeRootExample_expansion (n : ℕ) :
-    (fun x : ℝ => stieltjesCubeRootExample x - ((stieltjesCubeRootNaiveSum n x - stieltjesCubeRootMissingSum n x : ℝ) : ℂ))
+    (fun x : ℝ => stieltjesCubeRootExample x -
+        ((stieltjesCubeRootNaiveSum n x - stieltjesCubeRootMissingSum n x : ℝ) : ℂ))
       =O[atTop] (fun x : ℝ => x ^ (-(n : ℝ) - 1 / 3)) := by
   sorry
 
@@ -223,15 +224,12 @@ theorem tendsto_logPowPairing_stieltjesTestFunction {z : ℂ} (hz : z ∈ Comple
   sorry
 
 /-- DLMF 2.6.25: `lim_{ε → 0+} ⟨f, φ_ε⟩ = 𝒮f(z)` whenever `f(t)/(t+z)` is integrable on
-`(0, ∞)` (dominated convergence). -/
+`(0, ∞)` (dominated convergence). This is stronger than DLMF, which assumes `z ∈ ℂ \ (-∞, 0]`. -/
 @[dlmf 2.6.E25]
-theorem tendsto_functionPairing_stieltjesTestFunction {f : ℝ → ℂ} {z : ℂ}
-    (hz : z ∈ Complex.slitPlane)
+theorem tendsto_functionPairing_stieltjesTestFunction' {f : ℝ → ℂ} {z : ℂ}
     (hf : IntegrableOn (fun t : ℝ => f t / ((t : ℂ) + z)) (Ioi 0)) :
     Tendsto (fun ε : ℝ => functionPairing f (stieltjesTestFunction ε z)) (𝓝[>] 0)
       (𝓝 (stieltjesTransform f z)) := by
-  -- dominated convergence; the condition on `z` is not needed
-  have _ := hz
   unfold functionPairing stieltjesTestFunction stieltjesTransform
   refine tendsto_integral_filter_of_dominated_convergence (fun t => ‖f t / ((t : ℂ) + z)‖)
     ?_ ?_ hf.norm ?_
@@ -259,6 +257,16 @@ theorem tendsto_functionPairing_stieltjesTestFunction {f : ℝ → ℂ} {z : ℂ
       fun_prop
     have := (hc.tendsto 0).mono_left (nhdsWithin_le_nhds (s := Ioi 0))
     simpa [mul_div_assoc', div_eq_mul_inv] using this
+
+/-- DLMF 2.6.25: `lim_{ε → 0+} ⟨f, φ_ε⟩ = 𝒮f(z)` whenever `f(t)/(t+z)` is integrable on
+`(0, ∞)` (dominated convergence). -/
+@[dlmf 2.6.E25]
+theorem tendsto_functionPairing_stieltjesTestFunction {f : ℝ → ℂ} {z : ℂ}
+    (_hz : z ∈ Complex.slitPlane)
+    (hf : IntegrableOn (fun t : ℝ => f t / ((t : ℂ) + z)) (Ioi 0)) :
+    Tendsto (fun ε : ℝ => functionPairing f (stieltjesTestFunction ε z)) (𝓝[>] 0)
+      (𝓝 (stieltjesTransform f z)) :=
+  tendsto_functionPairing_stieltjesTestFunction' hf
 
 /-- DLMF 2.6.26 and the display following it: under the hypotheses of §2.6(ii),
 `lim_{ε → 0+} ⟨f_n, φ_ε⟩ = n! ∫₀^∞ f_{n,n}(t)/(t+z)^{n+1} dt`, and interchanging the order of

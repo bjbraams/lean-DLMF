@@ -133,9 +133,11 @@ private lemma jackson_error_bound {f : ℝ → ℂ} {a q ε : ℝ}
     field_simp
   apply (hsJ.sub hsI).norm_le_of_bounded hgv
   intro n
-  have he : ((a * (1 - q) * q ^ n : ℝ) : ℂ) * f (a * q ^ n) - (∫ x in a * q ^ (n + 1)..a * q ^ n, f x) =
+  have he : ((a * (1 - q) * q ^ n : ℝ) : ℂ) * f (a * q ^ n) -
+      (∫ x in a * q ^ (n + 1)..a * q ^ n, f x) =
       ∫ x in a * q ^ (n + 1)..a * q ^ n, f (a * q ^ n) - f x := by
-    rw [intervalIntegral.integral_sub intervalIntegrable_const (hi n), intervalIntegral.integral_const]
+    rw [intervalIntegral.integral_sub intervalIntegrable_const (hi n),
+        intervalIntegral.integral_const]
     push_cast
     rw [real_smul]
     congr 1
@@ -199,7 +201,8 @@ theorem jackson_bilateral_limit {q : ℝ} (hq0 : 0<q) {f : ℂ → ℂ}
   · refine Eventually.of_forall fun n k => ?_
     split_ifs <;> simp; positivity
 
-/-- The same improper-integral identity for two naturally convergent tails, without assuming absolute summability. -/
+/-- The same improper-integral identity for two naturally convergent tails, without assuming
+absolute summability. -/
 @[dlmf 17.2.E48]
 theorem jackson_bilateral_natural_limit {q : ℝ} (hq0 : 0<q) {f : ℂ → ℂ} {v : ℂ}
     (hf : HasNaturalJacksonBilateral q f v) :
@@ -212,7 +215,8 @@ theorem jackson_bilateral_natural_limit {q : ℝ} (hq0 : 0<q) {f : ℂ → ℂ} 
   · intro n
     unfold HasNaturalJacksonIntegral
     have ht : Tendsto (fun N : ℕ => N-n) atTop atTop := tendsto_sub_atTop_nat n
-    have h := ((hp.comp ht).const_add (∑ i∈range n, (q:ℂ)^(-(i:ℤ)-1)*f ((q:ℂ)^(-(i:ℤ)-1)))).const_mul
+    have h := ((hp.comp ht).const_add
+        (∑ i∈range n, (q:ℂ)^(-(i:ℤ)-1)*f ((q:ℂ)^(-(i:ℤ)-1)))).const_mul
       (1-(q:ℂ))
     refine h.congr' ?_
     filter_upwards [eventually_ge_atTop n] with N hN

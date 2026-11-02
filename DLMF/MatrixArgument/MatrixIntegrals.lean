@@ -84,7 +84,8 @@ theorem setIntegral_posDefCone_inv {m : ℕ} {g : SymMatrix m → ℂ} (hg : Mea
         rfl
 
 /-- `|I + X| = ∏ (1 + λ_i)` for real symmetric `X`. -/
-theorem det_one_add_eq_prod_eigenvalues {m : ℕ} {X : Matrix (Fin m) (Fin m) ℝ} (hX : X.IsHermitian) :
+theorem det_one_add_eq_prod_eigenvalues {m : ℕ} {X : Matrix (Fin m) (Fin m) ℝ}
+    (hX : X.IsHermitian) :
     (1 + X).det = ∏ i, (1 + hX.eigenvalues i) := by
   set U := hX.eigenvectorUnitary
   have h := hX.spectral_theorem

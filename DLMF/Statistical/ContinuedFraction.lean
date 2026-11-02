@@ -566,7 +566,8 @@ theorem gammaIncCFTail_rec {α x : ℝ} (hx : 0 < x) (k : ℕ) :
     linear_combination h
 
 /-- The partial numerators are positive for `a < 1`, `x > 0`. -/
-theorem gammaIncCFNum_pos {α x : ℝ} (hα : α < 1) (hx : 0 < x) (k : ℕ) : 0 < gammaIncCFNum α x k := by
+theorem gammaIncCFNum_pos {α x : ℝ} (hα : α < 1) (hx : 0 < x) (k : ℕ) : 0 <
+    gammaIncCFNum α x k := by
   simp only [gammaIncCFNum]
   split_ifs with h0 h1
   · positivity

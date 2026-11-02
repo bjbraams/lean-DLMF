@@ -318,7 +318,8 @@ theorem lzero_regGauss_pos_mono {a b c w w' : ℝ} (ha : 0 < a) (hb : 0 < b) (hc
   have hG : ∀ n : ℕ, 0 < Real.Gamma (c + n) := fun n => Real.Gamma_pos_of_pos (by positivity)
   let f : ℝ → ℕ → ℝ := fun w n => (ascPochhammer ℝ n).eval a *
     (ascPochhammer ℝ n).eval b * w ^ n / n.factorial * (Real.Gamma (c + n))⁻¹
-  have hsum : ∀ w : ℝ, 0 ≤ w → w < 1 → HasSum (fun n => (f w n : ℂ)) (regularizedGaussHG a b c w) := by
+  have hsum : ∀ w : ℝ, 0 ≤ w → w < 1 →
+      HasSum (fun n => (f w n : ℂ)) (regularizedGaussHG a b c w) := by
     intro w hw0 hw1
     have hw : ‖(w : ℂ)‖ < 1 := by rw [norm_real, Real.norm_eq_abs, abs_of_nonneg hw0]; exact hw1
     rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw]
@@ -515,7 +516,8 @@ theorem lzero_assocP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
   have hu1 : (1:ℝ) < u := hu
   set M := ‖g 1‖ + 1 with hM
   have hM1 : 1 ≤ M := by have := norm_nonneg (g 1); linarith
-  refine ⟨(1 + u) / 2, by linarith, ((1 + u) / 2 + 1) * M ^ 2, mul_pos (by linarith) (pow_pos (by linarith) 2), fun x hx => ?_⟩
+  refine ⟨(1 + u) / 2, by linarith, ((1 + u) / 2 + 1) * M ^ 2,
+                            mul_pos (by linarith) (pow_pos (by linarith) 2), fun x hx => ?_⟩
   have hx1 : 1 < x := hx.1
   obtain ⟨hgr, hgn⟩ := hsub ⟨hx1, by linarith [hx.2]⟩
   set E := Real.exp ((-m) / 2 * (Real.log (x + 1) - Real.log (x - 1))) with hE
@@ -714,8 +716,11 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
         · rintro ⟨-, h, -⟩; exact absurd hn (h n)
 
 /-- Exactly one or no exterior zeros, excluding an identically zero solution. -/
-theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hnondeg : ∃ x : ℝ, 1 < x ∧ associatedP ν μ x ≠ 0) :
-    Set.Finite {x : ℝ | 1 < x ∧ associatedP ν μ x=0} ∧ ({x : ℝ | 1 < x ∧ associatedP ν μ x=0}:Set ℝ).ncard=if AssociatedPOneZero ν μ then 1 else 0 := by
+theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν)
+    (hnondeg : ∃ x : ℝ, 1 < x ∧ associatedP ν μ x ≠ 0) :
+    Set.Finite {x : ℝ | 1 < x ∧ associatedP ν μ x=0} ∧
+        ({x : ℝ | 1 < x ∧ associatedP ν μ x=0}:Set ℝ).ncard=if AssociatedPOneZero ν μ
+        then 1 else 0 := by
   set P : ℂ → ℂ := associatedP (ν : ℂ) (μ : ℂ) with hP
   set Qc : ℂ → ℂ := olverQ (ν : ℂ) (μ : ℂ) with hQc
   set f : ℝ → ℝ := fun x => (P x).re with hf

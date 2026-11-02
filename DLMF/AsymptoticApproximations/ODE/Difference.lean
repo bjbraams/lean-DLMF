@@ -19,9 +19,10 @@ Asymptotic solutions of the three-term recurrence `w(n+2) + f(n) w(n+1) + g(n) w
 
 * `recurrence_eq_difference`, `recurrence_iff_difference`: 2.9.1 is equivalent to the
   difference equation 2.9.2.
-* `difference_distinct_roots_solution`, `difference_distinct_roots_independent`: the solutions
-  2.9.8 with the formal series 2.9.4–2.9.7 when the roots of the characteristic equation 2.9.5
-  are distinct, and their independence (§2.9(i)).
+* `difference_distinct_roots_solution`, `difference_distinct_roots_independent`,
+  `difference_distinct_roots_independent'`: the solutions 2.9.8 with the formal series 2.9.4–2.9.7
+  when the roots of the characteristic equation 2.9.5 are distinct, and their independence
+  (§2.9(i)).
 * `difference_recessive`: recessive and dominant solutions (§2.9(i)).
 * `difference_coincident_sqrt`, `difference_coincident_power`,
   `difference_coincident_power_int`, `difference_coincident_log`: coincident characteristic
@@ -131,11 +132,11 @@ private lemma tendsto_div_geomCpowScale {ρ α : ℂ} (hρ : ρ ≠ 0) {a : ℕ 
 
 /-- DLMF §2.9(i) (independence of the two solutions of 2.9.8): solutions with the expansions
 2.9.8 for the two distinct roots `ρ₁ ≠ ρ₂` of 2.9.5 are linearly independent; their
-Casoratian `w₁(n) w₂(n+1) - w₁(n+1) w₂(n)` is eventually nonzero. -/
+Casoratian `w₁(n) w₂(n+1) - w₁(n+1) w₂(n)` is eventually nonzero. This is stronger than DLMF, which
+also assumes the expansions (2.9.3) of `f` and `g`; here `fs`, `gs` are arbitrary sequences with
+`gs 0 ≠ 0`. -/
 @[dlmf 2.9.i]
-theorem difference_distinct_roots_independent {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
-    (hf : HasAsymptoticExpansion atTop invPowScale fs f)
-    (hg : HasAsymptoticExpansion atTop invPowScale gs g) (hg0 : gs 0 ≠ 0)
+theorem difference_distinct_roots_independent' {fs gs : ℕ → ℂ} (hg0 : gs 0 ≠ 0)
     {ρ₁ ρ₂ : ℂ} (h12 : ρ₁ ≠ ρ₂) (hρ₁ : ρ₁ ^ 2 + fs 0 * ρ₁ + gs 0 = 0)
     (hρ₂ : ρ₂ ^ 2 + fs 0 * ρ₂ + gs 0 = 0) {w₁ w₂ : ℕ → ℂ}
     (hw₁ : HasAsymptoticExpansion atTop (geomCpowScale ρ₁ (differenceExponent fs gs ρ₁))
@@ -144,8 +145,6 @@ theorem difference_distinct_roots_independent {f g : ℕ → ℂ} {fs gs : ℕ �
       (differenceCoeff fs gs ρ₂) w₂) :
     ∀ᶠ n in atTop, w₁ n * w₂ (n + 1) - w₁ (n + 1) * w₂ n ≠ 0 := by
   -- only the leading terms of the two expansions are needed
-  have _ := hf
-  have _ := hg
   have hρne : ∀ ρ : ℂ, ρ ^ 2 + fs 0 * ρ + gs 0 = 0 → ρ ≠ 0 := fun ρ h h0 =>
     hg0 (by subst h0; simpa using h)
   set α₁ := differenceExponent fs gs ρ₁
@@ -179,6 +178,22 @@ theorem difference_distinct_roots_independent {f g : ℕ → ℂ} {fs gs : ℕ �
   field_simp
   rw [pow_succ, pow_succ]
   linear_combination (ρ₁ * ρ₂ * ρ₁ ^ n * ρ₂ ^ n) * hz
+
+/-- DLMF §2.9(i) (independence of the two solutions of 2.9.8): solutions with the expansions
+2.9.8 for the two distinct roots `ρ₁ ≠ ρ₂` of 2.9.5 are linearly independent; their
+Casoratian `w₁(n) w₂(n+1) - w₁(n+1) w₂(n)` is eventually nonzero. -/
+@[dlmf 2.9.i]
+theorem difference_distinct_roots_independent {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
+    (_hf : HasAsymptoticExpansion atTop invPowScale fs f)
+    (_hg : HasAsymptoticExpansion atTop invPowScale gs g) (hg0 : gs 0 ≠ 0)
+    {ρ₁ ρ₂ : ℂ} (h12 : ρ₁ ≠ ρ₂) (hρ₁ : ρ₁ ^ 2 + fs 0 * ρ₁ + gs 0 = 0)
+    (hρ₂ : ρ₂ ^ 2 + fs 0 * ρ₂ + gs 0 = 0) {w₁ w₂ : ℕ → ℂ}
+    (hw₁ : HasAsymptoticExpansion atTop (geomCpowScale ρ₁ (differenceExponent fs gs ρ₁))
+      (differenceCoeff fs gs ρ₁) w₁)
+    (hw₂ : HasAsymptoticExpansion atTop (geomCpowScale ρ₂ (differenceExponent fs gs ρ₂))
+      (differenceCoeff fs gs ρ₂) w₂) :
+    ∀ᶠ n in atTop, w₁ n * w₂ (n + 1) - w₁ (n + 1) * w₂ n ≠ 0 :=
+  difference_distinct_roots_independent' hg0 h12 hρ₁ hρ₂ hw₁ hw₂
 
 /-- DLMF §2.9(i) (recessive and dominant solutions): in the situation of
 `difference_distinct_roots_solution`, if `|ρ₂| > |ρ₁|`, or `|ρ₂| = |ρ₁|` and

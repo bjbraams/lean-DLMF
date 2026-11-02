@@ -76,7 +76,8 @@ theorem root_isEquivalent {f : ℝ → ℝ} {a : ℝ} (hmono : StrictMonoOn f (I
 
 /-- The function `f(x) = x - ½ ln x` of the example 2.2.3 (with `x = t²`) is strictly
 increasing on `[½, ∞)`. -/
-theorem strictMonoOn_sub_half_log : StrictMonoOn (fun x : ℝ => x - Real.log x / 2) (Ici (1 / 2)) := by
+theorem strictMonoOn_sub_half_log : StrictMonoOn (fun x : ℝ => x - Real.log x / 2)
+    (Ici (1 / 2)) := by
   refine strictMonoOn_of_deriv_pos (convex_Ici _) ?_ fun x hx => ?_
   · refine (continuousOn_id.sub ((Real.continuousOn_log.mono fun x hx => ?_).div_const 2))
     exact ne_of_gt (lt_of_lt_of_le (by norm_num) (mem_Ici.mp hx))

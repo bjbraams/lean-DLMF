@@ -267,7 +267,8 @@ theorem surfaceArea_graph {f : ℝ × ℝ → ℝ} {D : Set (ℝ × ℝ)}
   setIntegral_congr_fun hD fun p hp => vecNorm_tangent_cross_graph (hx p hp) (hy p hp)
 
 /-- An integral over `(a, b) × (0, c)` of a function of the first coordinate. -/
-private lemma setIntegral_Ioo_prod_Ioo_fst (g : ℝ → ℝ) {a b : ℝ} (hab : a ≤ b) {c : ℝ} (hc : 0 ≤ c) :
+private lemma setIntegral_Ioo_prod_Ioo_fst (g : ℝ → ℝ) {a b : ℝ} (hab : a ≤ b)
+    {c : ℝ} (hc : 0 ≤ c) :
     ∫ p in Ioo a b ×ˢ Ioo 0 c, g p.1 = c * ∫ x in a..b, g x := by
   rw [Measure.volume_eq_prod, ← Measure.prod_restrict]
   have := integral_prod_mul (μ := volume.restrict (Ioo a b)) (ν := volume.restrict (Ioo 0 c))

@@ -25,7 +25,8 @@ Lamé polynomials have the polynomial form, periods and parities of Table 29.12.
 
 * `lamePolyType_alpha_mul_gamma_pos`: the products `α_p γ_{p+1}`, `p < n`, are positive for all
   eight types.
-* `lamePolyH_strictMono`: DLMF 29.15.3, by symmetrization and Mathlib's spectral theorem.
+* `lamePolyH_strictMono`, `lamePolyH_strictMono'`: DLMF 29.15.3, by symmetrization and Mathlib's
+  spectral theorem.
 * `eval_lamePolyH_charpoly`: `H_m` is a root of the characteristic polynomial.
 * `lameRecVec_zero`, `lameRecVec_succ`: the forward recursion for the eigenvector.
 * `lamePolyEk_polynomial_form`: each Lamé polynomial is `sn^a cn^b dn^c P(sn²)` with
@@ -92,7 +93,8 @@ private lemma tridiagMatrixSymm_apply (a b c : ℕ → ℝ) (n : ℕ) (i j : Fin
 
 /-- The symmetrized tridiagonal matrix `D M D⁻¹` has the same characteristic
 polynomial as `M`, when `a_p c_{p+1} > 0`. -/
-private lemma charpoly_tridiagMatrixSymm {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 < a p * c (p + 1)) :
+private lemma charpoly_tridiagMatrixSymm {a b c : ℕ → ℝ} {n : ℕ}
+    (h : ∀ p < n, 0 < a p * c (p + 1)) :
     (tridiagMatrixSymm a b c n).charpoly = (tridiagMatrix a b c n).charpoly := by
   rw [tridiagMatrixSymm, charpoly_mul_comm, ← mul_assoc, diagonal_mul_diagonal]
   congr 1
@@ -103,7 +105,8 @@ private lemma charpoly_tridiagMatrixSymm {a b c : ℕ → ℝ} {n : ℕ} (h : �
   exact inv_mul_cancel₀ (tridiagSymmetrizer_pos h i (by omega)).ne'
 
 /-- If `a_p c_{p+1} > 0` for `p < n`, the symmetrized tridiagonal matrix is symmetric. -/
-private lemma tridiagMatrixSymm_isHermitian {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 < a p * c (p + 1)) :
+private lemma tridiagMatrixSymm_isHermitian {a b c : ℕ → ℝ} {n : ℕ}
+    (h : ∀ p < n, 0 < a p * c (p + 1)) :
     (tridiagMatrixSymm a b c n).IsHermitian := by
   refine IsHermitian.ext fun i j => ?_
   simp only [star_trivial, tridiagMatrixSymm_apply, tridiagMatrix, of_apply]
@@ -118,7 +121,8 @@ private lemma tridiagMatrixSymm_isHermitian {a b c : ℕ → ℝ} {n : ℕ} (h :
       positivity
     have h0 := hd p (by omega)
     have h1' := hd (p + 1) (by omega)
-    have hsq : tridiagSymmetrizer a c (p + 1) ^ 2 = tridiagSymmetrizer a c p ^ 2 * (a p / c (p + 1)) := by
+    have hsq : tridiagSymmetrizer a c (p + 1) ^ 2 = tridiagSymmetrizer a c p ^ 2 *
+        (a p / c (p + 1)) := by
       rw [tridiagSymmetrizer, mul_pow, Real.sq_sqrt hpos]
     rw [div_eq_mul_inv] at hsq
     field_simp
@@ -169,7 +173,8 @@ theorem eigenvector_eq_zero_of_head_eq_zero {n : ℕ} {A : Matrix (Fin (n + 1)) 
 
 /-- The tridiagonal matrix with `0 < a p * c (p+1)` for `p < n` has `n + 1` distinct real
 eigenvalues. -/
-private lemma tridiagMatrix_charpoly_roots {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 < a p * c (p + 1)) :
+private lemma tridiagMatrix_charpoly_roots {a b c : ℕ → ℝ} {n : ℕ}
+    (h : ∀ p < n, 0 < a p * c (p + 1)) :
     (tridiagMatrix a b c n).charpoly.roots.card = n + 1 ∧
       (tridiagMatrix a b c n).charpoly.roots.Nodup := by
   have hS := tridiagMatrixSymm_isHermitian (b := b) h
@@ -229,13 +234,12 @@ theorem lamePolyType_alpha_mul_gamma_pos {k : ℝ} (hk0 : 0 < k) (t : LamePolyTy
 /-- 29.15.3: the eigenvalues of the tridiagonal matrix 29.15.2 (for any of the eight types)
 are real and simple, `H₀ < H₁ < ⋯ < Hₙ`: the characteristic polynomial has `n + 1` distinct
 real roots, and `lamePolyH` lists them increasingly. Proved by symmetrizing the matrix
-(`α_p γ_{p+1} > 0`) and the spectral theorem. -/
+(`α_p γ_{p+1} > 0`) and the spectral theorem. This is stronger than DLMF, which assumes `k < 1`. -/
 @[dlmf 29.15.E3]
-theorem lamePolyH_strictMono (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n : ℕ) :
+theorem lamePolyH_strictMono' (hk0 : 0 < k) (t : LamePolyType) (n : ℕ) :
     (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.card = n + 1 ∧
       (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.Nodup ∧
       ∀ m < n, lamePolyH t n m k < lamePolyH t n (m + 1) k := by
-  have _ := hk1
   obtain ⟨hc, hn⟩ := tridiagMatrix_charpoly_roots (b := t.recurrence.beta (t.order n) k)
     (lamePolyType_alpha_mul_gamma_pos hk0 t n)
   refine ⟨hc, hn, fun m hm => ?_⟩
@@ -250,6 +254,17 @@ theorem lamePolyH_strictMono (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n :
   rw [← hL, List.getD_eq_getElem _ _ (by omega), List.getD_eq_getElem _ _ (by omega)]
   exact List.pairwise_iff_getElem.mp hpw m (m + 1) (by omega) (by omega) (by omega)
 
+/-- 29.15.3: the eigenvalues of the tridiagonal matrix 29.15.2 (for any of the eight types)
+are real and simple, `H₀ < H₁ < ⋯ < Hₙ`: the characteristic polynomial has `n + 1` distinct
+real roots, and `lamePolyH` lists them increasingly. Proved by symmetrizing the matrix
+(`α_p γ_{p+1} > 0`) and the spectral theorem. -/
+@[dlmf 29.15.E3]
+theorem lamePolyH_strictMono (hk0 : 0 < k) (_hk1 : k < 1) (t : LamePolyType) (n : ℕ) :
+    (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.card = n + 1 ∧
+      (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.Nodup ∧
+      ∀ m < n, lamePolyH t n m k < lamePolyH t n (m + 1) k :=
+  lamePolyH_strictMono' hk0 t n
+
 
 /-! ### Polynomial form, periods and parities (Table 29.12.1) -/
 
@@ -262,7 +277,8 @@ def vecExtendZero {n : ℕ} (u : Fin (n + 1) → ℝ) (q : ℕ) : ℝ :=
 
 /-- Row `p` of `M u` for the tridiagonal `M`: `a_p u_{p+1} + b_p u_p + c_p u_{p-1}`, with `u`
 extended by zero and the last term absent for `p = 0`. -/
-theorem tridiagMatrix_mulVec_apply (a b c : ℕ → ℝ) {n : ℕ} (u : Fin (n + 1) → ℝ) {p : ℕ} (hp : p < n + 1) :
+theorem tridiagMatrix_mulVec_apply (a b c : ℕ → ℝ) {n : ℕ} (u : Fin (n + 1) → ℝ) {p : ℕ}
+    (hp : p < n + 1) :
     (tridiagMatrix a b c n *ᵥ u) ⟨p, hp⟩ =
       a p * vecExtendZero u (p + 1) + b p * vecExtendZero u p +
         (if p = 0 then 0 else c p * vecExtendZero u (p - 1)) := by
@@ -324,12 +340,15 @@ private lemma lameRecVec_last_ne_zero {r : LameRecurrence} {ν k H : ℝ} {n : �
       (if p = 0 then 0 else r.gamma ν k p * U (p - 1)) = H * U p := by
     intro p hp
     have h1 := congrFun hMu ⟨p, by omega⟩
-    have h2 := tridiagMatrix_mulVec_apply (r.alpha ν k) (r.beta ν k) (r.gamma ν k) u (p := p) (by omega)
+    have h2 := tridiagMatrix_mulVec_apply (r.alpha ν k) (r.beta ν k) (r.gamma ν k) u (p := p)
+        (by omega)
     rw [show lameMatrix r ν k n = tridiagMatrix (r.alpha ν k) (r.beta ν k) (r.gamma ν k) n
       from rfl, h2] at h1
     rw [h1]
     simp [hU, vecExtendZero, show p < n + 1 by omega]
-  have hUgt : ∀ q, n < q → U q = 0 := fun q hq => by simp [hU, vecExtendZero, show ¬ q < n + 1 by omega]
+  have hUgt : ∀ q, n < q → U q = 0 := fun q hq => by simp
+                                                       [hU, vecExtendZero, show ¬ q < n + 1 by
+      omega]
   -- the first entry is nonzero
   have hU0 : U 0 ≠ 0 := by
     intro h0
@@ -411,7 +430,8 @@ private lemma sum_sq_sub_sum_mul_succ (c : ℕ → ℝ) (n : ℕ) :
     linear_combination ih
 
 /-- The normalization forms 29.15.5, … are positive at a vector with `c₀ = 1`. -/
-private lemma lamePolyType_normForm_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n : ℕ)
+private lemma lamePolyType_normForm_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    (n : ℕ)
     {c : ℕ → ℝ} (hc : c 0 = 1) : 0 < t.normForm k n c := by
   have hid := sum_sq_sub_sum_mul_succ c n
   have hnn : 0 ≤ (∑ p ∈ Finset.range n, (c p - c (p + 1)) ^ 2) / 2 + c n ^ 2 / 2 := by
@@ -435,7 +455,8 @@ def chebyshevParityPair (e o : ℝ) : ℕ → ℝ[X] × ℝ[X]
   | 0 => (C e, C o)
   | p + 1 =>
     (2 * X * (chebyshevParityPair e o p).2 - (chebyshevParityPair e o p).1,
-      2 * (2 * X * (chebyshevParityPair e o p).2 - (chebyshevParityPair e o p).1) - (chebyshevParityPair e o p).2)
+      2 * (2 * X * (chebyshevParityPair e o p).2 - (chebyshevParityPair e o p).1) -
+          (chebyshevParityPair e o p).2)
 
 /-- For `e, o ≠ 0`, both polynomials `E_p`, `O_p` of the Chebyshev-type pair have degree `p`. -/
 private lemma chebyshevParityPair_degree {e o : ℝ} (he : e ≠ 0) (ho : o ≠ 0) (p : ℕ) :
@@ -521,7 +542,8 @@ def lameBasisSqPoly : LamePolyType → ℕ → ℝ[X]
   | .scdE, p => (chebyshevParityPair 1 2 p).2
 
 /-- The polynomial `Q_p` of each Lamé polynomial type has degree `p`. -/
-private lemma lameBasisSqPoly_degree (t : LamePolyType) (p : ℕ) : (lameBasisSqPoly t p).degree = p := by
+private lemma lameBasisSqPoly_degree (t : LamePolyType) (p : ℕ) : (lameBasisSqPoly t p).degree =
+    p := by
   have hT := chebyshevParityPair_degree (e := 1) (o := 1) one_ne_zero one_ne_zero p
   have hU := chebyshevParityPair_degree (e := 1) (o := 2) one_ne_zero two_ne_zero p
   have hc : (if p = 0 then (1 / 2 : ℝ) else 1) ≠ 0 := by split_ifs <;> norm_num
@@ -534,7 +556,8 @@ private lemma lamePolyType_basis_eq (t : LamePolyType) (p : ℕ) (s : ℂ) :
       ((lameBasisSqPoly t p).map (algebraMap ℝ ℂ)).eval (s ^ 2) := by
   have hT := chebyshevT_eval_chebyshevParityPair p s
   have hU := chebyshevU_eval_chebyshevParityPair p s
-  cases t <;> simp only [LamePolyType.basis, lameBasisSqPoly, hT.1, hT.2, hU.1, hU.2, Polynomial.map_mul,
+  cases t <;> simp only
+      [LamePolyType.basis, lameBasisSqPoly, hT.1, hT.2, hU.1, hU.2, Polynomial.map_mul,
     map_C, eval_mul, eval_C, reduceCtorEq, or_false, or_true, ite_true, ite_false,
     one_mul] <;> split_ifs <;> simp
 
@@ -633,7 +656,8 @@ theorem jacobiSnk_cnk_dnk_add_periods (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
 
 
 /-- The polynomial form with `deg P = n` (in particular `P ≠ 0`). -/
-theorem lamePolyEk_eq_prefactor_mul_eval (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ} (hm : m ≤ n) :
+theorem lamePolyEk_eq_prefactor_mul_eval (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
+    (hm : m ≤ n) :
     ∃ P : ℝ[X], P.degree = n ∧ ∀ z : ℂ,
       lamePolyEk t n m z k = t.prefactor z k *
         (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
@@ -695,14 +719,16 @@ theorem lamePolyEk_periods (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n m :
         (if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then -1 else 1) *
         (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 1 else 1) * lamePolyEk t n m w k :=
     fun w => lamePolyEk_of_jacobi_scale t n m (Or.inr rfl)
-      (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).1.1]; ring) (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).1.2.1]; ring)
+      (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).1.1]; ring)
+          (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).1.2.1]; ring)
       (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).1.2.2]; ring)
   have h2i : ∀ w, lamePolyEk t n m (w + 2 * I * K') k =
       (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then 1 else 1) *
         (if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then -1 else 1) *
         (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then -1 else 1) * lamePolyEk t n m w k :=
     fun w => lamePolyEk_of_jacobi_scale t n m (Or.inl rfl)
-      (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.1]; ring) (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.2.1]; ring)
+      (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.1]; ring)
+          (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.2.1]; ring)
       (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.2.2]; ring)
   have h4 : lamePolyEk t n m (z + 4 * K) k = lamePolyEk t n m z k := by
     rw [show z + 4 * K = z + 2 * K + 2 * K by ring, h2, h2]
@@ -732,7 +758,8 @@ theorem lamePolyEk_parities (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n m 
       := by
   obtain ⟨-, -, h1, h2, h3⟩ := jacobiSnk_cnk_dnk_add_periods hk0 hk1 z
   refine ⟨?_, ?_, ?_⟩
-  · rw [lamePolyEk_of_jacobi_scale t n m (z' := -z) (z := z) (ε := -1) (a := 1) (b := 1) (Or.inr rfl)
+  · rw [lamePolyEk_of_jacobi_scale t n m (z' := -z) (z := z) (ε := -1) (a := 1) (b := 1)
+        (Or.inr rfl)
       (by rw [h1.1]; ring) (by rw [h1.2.1]; ring) (by rw [h1.2.2]; ring)]
     cases t <;> simp
   · rw [lamePolyEk_of_jacobi_scale t n m (z' := _ - z) (z := _ + z) (ε := 1) (a := -1) (b := 1)

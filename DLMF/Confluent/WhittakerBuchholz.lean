@@ -195,7 +195,8 @@ theorem whittakerBesselGenerating_joint_continuousAt (μ : ℂ) {z t : ℂ} (ht 
   have ht' : t ∈ Metric.ball (0:ℂ) 1 := by simpa using ht
   have h := whittakerBessel_core_analytic
   have hA : ContinuousAt (fun p : ℂ × ℂ => cosh p.2/sinh p.2-p.2⁻¹) (z,t) :=
-    (h.1.differentiableAt (Metric.isOpen_ball.mem_nhds ht')).continuousAt.comp (x:=(z,t)) continuousAt_snd
+    (h.1.differentiableAt (Metric.isOpen_ball.mem_nhds ht')).continuousAt.comp (x:=(z, t))
+        continuousAt_snd
   have hBc : ContinuousAt whittakerBesselBase t :=
     (h.2.1.differentiableAt (Metric.isOpen_ball.mem_nhds ht')).continuousAt
   have hB : ContinuousAt (fun p : ℂ × ℂ => whittakerBesselBase p.2) (z,t) :=
@@ -395,7 +396,8 @@ private lemma whittakerTaylorD_recurrence (μ z : ℂ) (s : ℕ) :
         z/2*whittakerTaylorD μ 0 z s := by
   let G := whittakerBesselGenerating μ z
   have hG : AnalyticAt ℂ G 0 := by
-    exact (whittakerBesselGenerating_differentiableOn μ z).analyticOnNhd Metric.isOpen_ball 0 (by simp)
+    exact (whittakerBesselGenerating_differentiableOn μ z).analyticOnNhd
+        Metric.isOpen_ball 0 (by simp)
   have hF (j : ℕ) : AnalyticAt ℂ (whittakerGenD μ j z) 0 :=
     whittakerGenD_analyticAt μ j z (by simp)
   have hX (j : ℕ) : AnalyticAt ℂ (fun t : ℂ => t*whittakerGenD μ j z t) 0 :=
@@ -579,7 +581,8 @@ theorem whittakerBessel_term_eq_regularized {κ z : ℂ} (hκ : κ ≠ 0) (hz : 
       besselJ (2*μ+s) (2*(κ*z)^(1/2:ℂ)) =
     1/(2:ℂ)^s * regularizedHGFun (∅ : Multiset ℂ) {2*μ+s+1} (-(κ*z)) := by
   set x := 2*(κ*z)^(1/2:ℂ)
-  have hx0 : x ≠ 0 := mul_ne_zero two_ne_zero (Complex.cpow_ne_zero_iff.mpr (Or.inl (mul_ne_zero hκ hz)))
+  have hx0 : x ≠ 0 := mul_ne_zero two_ne_zero
+      (Complex.cpow_ne_zero_iff.mpr (Or.inl (mul_ne_zero hκ hz)))
   have hx2 : x^2/4 = κ*z := by
     dsimp only [x]
     rw [mul_pow, one_div, cpow_ofNat_inv_pow]
@@ -908,7 +911,8 @@ private lemma buchholz_normalized_ode_jet {f : ℂ → ℂ} (hf : Differentiable
     ((analyticAt_const (v := b)).fun_mul hda).contDiffAt
   simp only [id_eq] at hs ha ha'
   rw [hs,ha,ha'] at h
-  simp only [iteratedDeriv_const_mul_field,buchholz_iteratedDeriv_id_mul_zero hdda,buchholz_iteratedDeriv_id_mul_zero hfa,
+  simp only [iteratedDeriv_const_mul_field, buchholz_iteratedDeriv_id_mul_zero hdda,
+      buchholz_iteratedDeriv_id_mul_zero hfa,
     iteratedDeriv_const,Nat.add_eq_zero_iff,Nat.one_ne_zero,and_false,↓reduceIte,
     ← iteratedDeriv_succ',show n+1+1=n+2 by omega] at h
   linear_combination h

@@ -98,7 +98,8 @@ theorem struveSc_inner_rhs {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {n θ : ℝ
     rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; rfl, ← ofReal_cpow (by positivity),
       Real.sqrt_eq_rpow]
   have hu : 0 < Real.sqrt (1 - lam ^ 2) := Real.sqrt_pos.2 (by nlinarith)
-  have r3 : (1 - (lam : ℂ) ^ 2) ^ (1 / 4 : ℂ) = ((Real.sqrt (Real.sqrt (1 - lam ^ 2)) : ℝ) : ℂ) := by
+  have r3 : (1 - (lam : ℂ) ^ 2) ^ (1 / 4 : ℂ) =
+      ((Real.sqrt (Real.sqrt (1 - lam ^ 2)) : ℝ) : ℂ) := by
     rw [show 1 - (lam : ℂ) ^ 2 = ((1 - lam ^ 2 : ℝ) : ℂ) by push_cast; ring,
       show (1 / 4 : ℂ) = ((1 / 4 : ℝ) : ℂ) by push_cast; rfl, ← ofReal_cpow (by nlinarith),
       Real.sqrt_eq_rpow, Real.sqrt_eq_rpow, ← Real.rpow_mul (by nlinarith)]
@@ -231,7 +232,8 @@ theorem struveSc_angerA_shift (ν : ℝ) {z : ℂ} (hz : 0 < z.re) :
 theorem struveSc_lead_cube {τ : ℝ} (hτ : 0 < τ) (a : ℂ) :
     ∫ s in Ioi (0 : ℝ), exp (-(((τ ^ 3 : ℝ) : ℂ) * (s : ℂ) ^ 3 / 6) - a * τ * s) =
       (((2 : ℝ) ^ (1 / 3 : ℝ) / τ : ℝ) : ℂ) *
-        ∫ t in Ioi (0 : ℝ), exp (-(t : ℂ) ^ 3 / 3 + (-(((2 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) * a) * t) := by
+        ∫ t in Ioi (0 : ℝ), exp
+            (-(t : ℂ) ^ 3 / 3 + (-(((2 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) * a) * t) := by
   set c : ℝ := (2 : ℝ) ^ (1 / 3 : ℝ) / τ with hc
   have hc0 : 0 < c := by positivity
   have h23 : ((2 : ℝ) ^ (1 / 3 : ℝ)) ^ 3 = 2 := by
@@ -302,13 +304,15 @@ theorem struveSc_turnU_est {M : ℝ} (hM : 0 ≤ M) {τ : ℝ} (hτ1 : 1 ≤ τ)
       nlinarith
     have hB : (-((ν : ℂ) * (s : ℂ) ^ 3 / 6) - a * τ * s).re ≤
         -(ν * (s ^ 3 / (12 * (1 + s ^ 2)))) + M * τ * s := by
-      rw [sub_eq_add_neg, add_re, show -((ν : ℂ) * (s : ℂ) ^ 3 / 6) = ((-(ν * s ^ 3 / 6) : ℝ) : ℂ) by
+      rw [sub_eq_add_neg, add_re, show -((ν : ℂ) * (s : ℂ) ^ 3 / 6) =
+          ((-(ν * s ^ 3 / 6) : ℝ) : ℂ) by
         push_cast; ring, ofReal_re]
       have := hare s hs.le
       have h1 : s ^ 3 / (12 * (1 + s ^ 2)) ≤ s ^ 3 / 6 := by
         rw [div_le_div_iff₀ (by positivity) (by norm_num)]
         nlinarith [pow_nonneg hs.le 3, mul_nonneg (pow_nonneg hs.le 3) (sq_nonneg s)]
-      have : ν * (s ^ 3 / (12 * (1 + s ^ 2))) ≤ ν * (s ^ 3 / 6) := mul_le_mul_of_nonneg_left h1 hν0.le
+      have : ν * (s ^ 3 / (12 * (1 + s ^ 2))) ≤ ν * (s ^ 3 / 6) :=
+          mul_le_mul_of_nonneg_left h1 hν0.le
       linarith
     have hsplit : F s - G s = exp (-((ν : ℂ) * ((struveSc_phiR 1 s : ℝ) : ℂ)) - a * τ * s) *
         ((((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) - 1) +
@@ -510,8 +514,10 @@ theorem angerA_scaled_outer_equiv {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
 (lam*ν)) ~[sector (π/2-δ)] (fun ν => (2/(π*ν))^(1/2:ℂ)*exp (-ν*angerMu
 lam)/(1-lam^2:ℂ)^(1/4:ℂ))`. -/
 @[dlmf 11.11.E15]
-theorem angerA_scaled_inner_equiv {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) :
-    (fun ν : ℂ => angerA (-ν) (lam*ν)) ~[sector (π/2-δ)] (fun ν => (2/(π*ν))^(1/2:ℂ)*exp (-ν*angerMu lam)/(1-lam^2:ℂ)^(1/4:ℂ)) := by
+theorem angerA_scaled_inner_equiv {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (hδ : 0 < δ)
+    (hδπ : δ < π/2) :
+    (fun ν : ℂ => angerA (-ν) (lam*ν)) ~[sector (π/2-δ)]
+        (fun ν => (2/(π*ν))^(1/2:ℂ)*exp (-ν*angerMu lam)/(1-lam^2:ℂ)^(1/4:ℂ)) := by
   obtain ⟨C, n₀, hn₀, hC⟩ := struveSc_inner_est h0 h1 hδ hδπ
   set φ₀ := struveSc_phiR lam (struveSc_s0 lam) with hφ₀
   set Q0 := struveSc_Q0 lam with hQ0
@@ -609,7 +615,8 @@ theorem angerA_scaled_inner_equiv {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ 
 ~[sector (π-δ)] (fun ν => 2^(4/3:ℂ)/(3^(7/6:ℂ)*Gamma (2/3)*ν^(1/3:ℂ)))`. -/
 @[dlmf 11.11.E16]
 theorem angerA_turning_equiv {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
-    (fun ν : ℂ => angerA (-ν) ν) ~[sector (π-δ)] (fun ν => 2^(4/3:ℂ)/(3^(7/6:ℂ)*Gamma (2/3)*ν^(1/3:ℂ))) := by
+    (fun ν : ℂ => angerA (-ν) ν) ~[sector (π-δ)]
+        (fun ν => 2^(4/3:ℂ)/(3^(7/6:ℂ)*Gamma (2/3)*ν^(1/3:ℂ))) := by
   obtain ⟨K, hK0, hK⟩ := struveSc_q_bounds hδ
   set s0 : ℝ := Real.sin (δ / 2) with hs0
   have hs : 0 < s0 := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
@@ -711,7 +718,8 @@ term grows like `e^{π|Im ν|}/|ν|`: at `ph ν = 0.3` the ratio to the leading 
 `10¹⁴`, `10³⁰` for `|ν| = 20, 40, 80`. The original DLMF condition `ν → +∞` is kept. -/
 @[dlmf 11.11.E18 "special case: ν → +∞ (the complex sector of DLMF 1.1.2 fails), DLMF erratum"]
 theorem angerJ_turning_equiv :
-    (fun ν : ℝ => angerJ ν ν) ~[atTop] (fun ν : ℝ => 2^(1/3:ℂ)/(3^(2/3:ℂ)*Gamma (2/3)*(ν:ℂ)^(1/3:ℂ))) := by
+    (fun ν : ℝ => angerJ ν ν) ~[atTop]
+        (fun ν : ℝ => 2^(1/3:ℂ)/(3^(2/3:ℂ)*Gamma (2/3)*(ν:ℂ)^(1/3:ℂ))) := by
   have hK : (2 : ℝ) ^ (1 / 3 : ℝ) / (3 ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) ≠ 0 := by
     have := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 2 / 3); positivity
   have hlim : Tendsto (fun ν : ℝ => ν ^ (1 / 3 : ℝ) * ((1 / π) * (∫ x in (0 : ℝ)..π,
@@ -738,7 +746,8 @@ As for 11.11.18, the complex sector `|ph ν| ≤ π - δ` of DLMF 1.1.2 fails: b
 `e^{π|Im ν|}/|ν|` off the real axis. The original DLMF condition `ν → +∞` is kept. -/
 @[dlmf 11.11.E19 "special case: ν → +∞ (the complex sector of DLMF 1.1.2 fails), DLMF erratum"]
 theorem weberE_turning_equiv :
-    (fun ν : ℝ => weberE ν ν) ~[atTop] (fun ν : ℝ => 2^(1/3:ℂ)/(3^(7/6:ℂ)*Gamma (2/3)*(ν:ℂ)^(1/3:ℂ))) := by
+    (fun ν : ℝ => weberE ν ν) ~[atTop]
+        (fun ν : ℝ => 2^(1/3:ℂ)/(3^(7/6:ℂ)*Gamma (2/3)*(ν:ℂ)^(1/3:ℂ))) := by
   have hK : (2 : ℝ) ^ (1 / 3 : ℝ) / (3 ^ (7 / 6 : ℝ) * Real.Gamma (2 / 3)) ≠ 0 := by
     have := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 2 / 3); positivity
   have hlim : Tendsto (fun ν : ℝ => ν ^ (1 / 3 : ℝ) * ((1 / π) * (∫ x in (0 : ℝ)..π,
@@ -758,10 +767,13 @@ theorem weberE_turning_equiv :
   rw [this]
   push_cast; ring
 
-/-- Turning-point approximation uniform on bounded complex transition parameters; positive real order. -/
+/-- Turning-point approximation uniform on bounded complex transition parameters; positive real
+order. -/
 @[dlmf 11.11.E17]
 theorem angerA_turning_uniform (M : ℝ) (hM : 0 < M) :
-    (fun p : ℝ × ℂ => angerA (-p.1) (p.1+p.2*(p.1:ℂ)^(1/3:ℂ))-2^(1/3:ℂ)*(p.1:ℂ)^(-1/3:ℂ)*scorerHi (-2^(1/3:ℂ)*p.2)) =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℂ | ‖p.2‖ ≤ M}] (fun p : ℝ × ℂ => (p.1:ℂ)^(-1:ℤ)) := by
+    (fun p : ℝ × ℂ => angerA (-p.1) (p.1+p.2*(p.1:ℂ)^(1/3:ℂ))-2^(1/3:ℂ)*(p.1:ℂ)^(-1/3:ℂ)*scorerHi
+        (-2^(1/3:ℂ)*p.2)) =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℂ | ‖p.2‖ ≤ M}]
+        (fun p : ℝ × ℂ => (p.1:ℂ)^(-1:ℤ)) := by
   set CU : ℝ := Real.exp (M * (48 * M + 1) / 2) * (16 + 3 / 10 * 768) + 2 * 48 ^ 3 +
     3 / 10 * 120 * 48 ^ 6 with hCU
   refine IsBigO.of_bound (CU / π) ?_
@@ -807,7 +819,8 @@ theorem angerA_turning_uniform (M : ℝ) (hM : 0 < M) :
   set Fi := ∫ s in Ioi (0 : ℝ), exp (-((ν : ℂ) * ((struveSc_phiR 1 s : ℝ) : ℂ)) - a * τ * s) *
         (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) with hFi
   set Gi := ∫ s in Ioi (0 : ℝ), exp (-((ν : ℂ) * (s : ℂ) ^ 3 / 6) - a * τ * s) with hGi
-  set Ti := ∫ t in Ioi (0 : ℝ), exp (-(t : ℂ) ^ 3 / 3 + (-(((2 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) * a) * t)
+  set Ti := ∫ t in Ioi (0 : ℝ),
+      exp (-(t : ℂ) ^ 3 / 3 + (-(((2 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) * a) * t)
     with hTi
   have hint : ∫ s in Ioi (0 : ℝ), exp (-((ν : ℂ) * ((struveSc_phiR 1 s : ℝ) : ℂ)) -
       ((ν : ℂ) + a * τ - ν) * s) * (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) = Fi := by
@@ -838,7 +851,8 @@ theorem struveLO_quotient_eq {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : Stru
   have hd1 : ∀ l ∈ Metric.ball lam₀ ε, HasDerivAt (angerScaledA k)
       (c * (-(n : ℂ) * struveLO_I r (fun t => 1 * sinh t) (n + 1) l)) l := by
     intro l hl
-    refine ((struveLO_hasDerivAt_I hr hG continuous_const n hl).const_mul c).congr_of_eventuallyEq ?_
+    refine ((struveLO_hasDerivAt_I hr hG continuous_const n hl).const_mul
+        c).congr_of_eventuallyEq ?_
     filter_upwards [hU.mem_nhds hl] with x hx using hA x hx
   have hd2 : HasDerivAt (fun l => c * (-(n : ℂ) * struveLO_I r (fun t => 1 * sinh t) (n + 1) l))
       (c * (-(n : ℂ) * (-((n + 1 : ℕ) : ℂ) *
@@ -917,7 +931,9 @@ theorem struveLO_angerScaledA_eq {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : 
 Proof: `A_k(λ) = (2πi)⁻¹ ∮ (t + λ sinh t)^{-(2k+1)} dt` near every `λ ≠ -1`
 (`struveLO_angerScaledA_eq`), and the circle integrals are holomorphic in `λ`. -/
 theorem angerScaledA_removable (k : ℕ) {lam : ℂ} (hlam : lam ≠ -1) :
-    Tendsto (fun l : ℂ => l/(1-l^2)*(l*iteratedDeriv 2 (angerScaledA k) l+deriv (angerScaledA k) l)/((2*k+1:ℂ)*(2*k+2)))
+    Tendsto (fun l : ℂ =>
+        l/(1-l^2)*(l*iteratedDeriv 2 (angerScaledA k) l+deriv (angerScaledA k)
+        l)/((2*k+1:ℂ)*(2*k+2)))
       (𝓝[≠] lam) (𝓝 (angerScaledA (k+1) lam)) := by
   have h1 : 1 + lam ≠ 0 := fun h => hlam (by linear_combination h)
   obtain ⟨r, hr, ε, hε, hG⟩ := struveLO_good_exists h1

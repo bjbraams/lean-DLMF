@@ -89,7 +89,8 @@ private lemma jacobiCnm_pos (hm : m < 1) {x : ℝ} (hx0 : -Real.compEllIntKm m <
   exact Real.cos_pos_of_mem_Ioo ⟨h0, h1⟩
 
 /-- `|sn| ≤ 1` and `|cn| ≤ 1` (helper). -/
-theorem abs_jacobiSnm_le_one_and_abs_jacobiCnm_le_one (u : ℝ) : |Real.jacobiSnm u m| ≤ 1 ∧ |Real.jacobiCnm u m| ≤ 1 :=
+theorem abs_jacobiSnm_le_one_and_abs_jacobiCnm_le_one (u : ℝ) : |Real.jacobiSnm u m| ≤
+    1 ∧ |Real.jacobiCnm u m| ≤ 1 :=
   ⟨Real.abs_sin_le_one _, Real.abs_cos_le_one _⟩
 
 end Helpers

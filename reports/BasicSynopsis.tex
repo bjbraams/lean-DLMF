@@ -1,0 +1,418 @@
+% BasicSynopsis.tex -- mathematical synopsis of the foundational (Basic) layer of lean-DLMF.
+% Compile with LuaLaTeX: latexmk -lualatex BasicSynopsis.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage{leanreport}
+\hypersetup{pdftitle={lean-DLMF: mathematical synopsis of the Basic layer, 2026-11-02}}
+
+\newcommand{\dlmf}{\repofile{lean-DLMF}}
+\newcommand{\F}{\mathbf{F}}
+
+\begin{document}
+
+\title{The Basic Layer of \texttt{lean-DLMF}:\\a Mathematical Synopsis}
+\author{Bastiaan J. Braams}
+\date{2026-11-02}
+\maketitle
+
+\begin{abstract}
+  The foundational layer of \texttt{lean-DLMF} consists of every \file{Basic.lean} and every
+  file below a \file{Basic/} directory, with \module{DLMF.Basic} as its entry point. It is
+  meant as the starting point for bringing the special functions of the NIST Digital Library
+  of Mathematical Functions (DLMF) into TauCeti and later Mathlib. This synopsis describes,
+  chapter by chapter, which functions are defined there, in which normalization and on which
+  domain, and which basic properties are proved. Everything in the layer is fully proved, and
+  its imports are confined to Mathlib, TauCeti, \module{DLMFMathlib} and other foundational
+  files.
+\end{abstract}
+
+\section{Overview}
+
+On 2026-11-02 the layer has 235 files with 49{,}068 lines, 1{,}559 definitions and
+2{,}000 theorems; 1{,}618 of its declarations carry 1{,}769 DLMF tags, covering 1{,}324
+distinct DLMF items. No declaration in the layer is admitted. For each central
+function or family of a DLMF chapter it contains:
+\begin{itemize}
+  \item the definition, with a docstring that states the domain, branch and normalization;
+  \item unfolding lemmas and values at the origin, at integer parameters and at exceptional
+    parameters;
+  \item symmetries, parity and behaviour under conjugation;
+  \item continuity, differentiability or analyticity on the stated domain;
+  \item the defining differential equation, recurrence or functional equation, and the
+    Wronskian where DLMF gives one;
+  \item the bridge to the corresponding Mathlib or TauCeti function, where one exists.
+\end{itemize}
+Asymptotics, zeros, integral representations, expansions, inequalities and transformations
+are in the theorem layer and are not described here.
+
+\paragraph{Conventions.} Functions are \emph{totalized}, as in Mathlib. A function defined by
+a series is the sum of that series where it converges, and is given a junk value elsewhere;
+a multivalued function is its principal branch on a cut plane. The theorems state the domain
+on which a property holds. Where Lean's totalized statement holds without DLMF's exclusion
+of poles or exceptional parameters, the stronger statement is proved. Complex powers are the
+principal powers $z^a=\exp(a\log z)$ with $\operatorname{ph}z\in(-\pi,\pi]$, which agrees with
+DLMF \S4.2 and with Mathlib's \lean{Complex.cpow}.
+
+\paragraph{Shared framework.} \module{DLMF.Core.Basic} fixes the conventions used across
+chapters: improper integrals on half-lines and on the whole line, Cauchy principal values,
+the straight-segment integral $\int_a^b f$ and the primitive $\int_0^z f$, the sector filters
+$|\operatorname{ph}z|\le\alpha$, $|z|\to\infty$ (also on the logarithmic plane), finite and
+infinite continued fractions with their continuants, the spherical Bessel functions, the
+$k$th zero of a function in a region ordered by modulus, and successively extracted
+asymptotic coefficients.
+
+\section{Methods (DLMF Chapters 1 and 2)}
+
+\paragraph{Algebraic and analytic methods (Ch.~1).} Most of Chapter 1 is upstream; the Basic
+files define what Mathlib and TauCeti lack, and record the upstream names for the rest.
+\begin{itemize}
+  \item Means, tridiagonal matrices and infinite determinants (\S\S1.2--1.3).
+  \item Calculus and vector calculus: the few notions of \S\S1.4--1.6 not in Mathlib
+    (Mathlib supplies derivatives, $C^n$, convexity, total variation and $L^p$).
+  \item Complex variables (\S\S1.9--1.10): the principal phase is \lean{Complex.arg} with
+    values in $(-\pi,\pi]$; contours, winding numbers and residues are TauCeti's.
+  \item Zeros of polynomials (\S1.11), on Mathlib's \lean{Polynomial}, its discriminant and
+    Descartes sign changes.
+  \item Continued fractions $b_0+a_1/(b_1+a_2/(b_2+\cdots))$ in DLMF indexing (\S1.12),
+    bridged to Mathlib's \lean{GenContFract}.
+  \item Linear second-order ODEs (\S1.13): solution predicates, Wronskians, the standard
+    forms.
+  \item Integral transforms in DLMF normalization (\S1.14): Fourier, cosine, sine, Laplace,
+    Mellin, Hilbert and Stieltjes.
+  \item Summability (\S1.15): Abel and Ces\`aro means, the Poisson and Fej\'er kernels, and
+    the Riemann--Liouville fractional integrals and derivatives.
+  \item Distributions (\S\S1.16--1.17) on Mathlib's $\mathcal D'$ and $\mathcal S'$, and delta
+    sequences.
+  \item Fourier coefficients and Lebesgue constants (\S1.8), and the Sturm--Liouville
+    operators, eigenfunctions and spectral notions of \S1.18 (on Mathlib's Hilbert spaces and
+    unbounded operators).
+\end{itemize}
+
+\paragraph{Asymptotic approximations (Ch.~2).} The order symbols are Mathlib's
+\lean{IsBigO}, \lean{IsLittleO} and \lean{IsEquivalent} along a filter. Asymptotic scales and
+expansions with respect to a scale are \lean{Asymptotics.IsAsymptoticScale} and
+\lean{Asymptotics.HasAsymptoticExpansion} from \module{DLMFMathlib}. The Basic files add the
+data used by \S\S2.3--2.11: the integrals and phase functions of the Laplace, saddle-point and
+Bleistein methods, the Mellin-transform method (with Mathlib's \lean{mellin} and
+\lean{mellinInv}), the Liouville--Green and difference-equation data, the comparison sums of
+\S2.10 and the remainder and Stokes functions of \S2.11.
+
+\section{Elementary functions and the Gamma function (DLMF Chapters 4 and 5)}
+
+\paragraph{Elementary functions (Ch.~4).}
+\begin{itemize}
+  \item Logarithms and powers (\S4.2): the multivalued and the closed principal logarithm
+    and power, the path-integral characterization of $\log$, base changes, modulus and phase
+    formulas, and the mapping properties of $\exp$.
+  \item The cosecant and secant (\S4.14) with zeros, poles, meromorphy, derivatives and the
+    Pythagorean identities; the reciprocal hyperbolic functions (\S4.28).
+  \item The principal inverse trigonometric and hyperbolic functions on their cut planes
+    (\S\S4.23, 4.37): the inverse equations, analyticity on the open cut domains, the branch
+    points, agreement with Mathlib's real inverses, oddness, and the symmetry and complement
+    relations.
+  \item The Gudermannian and its inverse (\S4.23(viii)), defined by integrals, with closed
+    forms and the inverse relation.
+  \item The Lambert $W$ function (\S4.13). The map $w\mapsto w+\log w$ is shown to be a
+    biholomorphism from the slit plane onto the plane with the half-lines
+    $\Im\zeta=\pm\pi$, $\Re\zeta\le-1$ removed. Its inverse (Wright's $\omega$ off its cuts)
+    gives $W_k(z)=\omega(\log z+2\pi\iu k)$ on the slit plane, and upper-side limits on the
+    negative axis; on $[-1/\eu,0)$ the branches $k=0,-1$ are the real inverses of $y\eu^y$.
+    The Basic files prove the inverse equations $W_k(z)\eu^{W_k(z)}=z$, special values, the
+    real branches, analyticity and derivatives, and define Wright's $\omega$ and the tree
+    function $T$. The existence of the normalized branch family is a theorem, proved from
+    Mathlib alone.
+\end{itemize}
+
+\paragraph{Gamma function (Ch.~5).} $\Gamma$ and $\psi$ are Mathlib's. The Basic files prove
+Weierstrass's product for $1/\Gamma$ and define the real digamma function
+\lean{DLMF.Gamma.Real.digamma} (with the bridge to Mathlib's \lean{Complex.digamma}, values at the integers, recurrence and reflection), the scaled Gamma
+function $\Gamma^*(z)=\Gamma(z)/(\eu^{-z}z^z(2\pi/z)^{1/2})$ (5.11.3), and Barnes' $G$ by its
+Weierstrass product (5.17.3), with the functional equation, values at the integers and the
+Glaisher--Kinkelin constant.
+
+\section{Functions defined by integrals (DLMF Chapters 6--8)}
+
+\paragraph{Exponential, sine and cosine integrals (Ch.~6).} The complex $E_1$, $\mathrm{Ein}$,
+$\mathrm{Si}$, $\mathrm{Ci}$, $\mathrm{Shi}$, $\mathrm{Chi}$, the real $\mathrm{Ei}$ and
+logarithmic integral, and the auxiliary functions $f$, $g$, with the generalized exponential
+integral $E_p$ defined through the confluent functions. Proved: power series, entireness of
+$\mathrm{Ein}$, $\mathrm{Si}$, $\mathrm{Cin}$, symmetries, the segment-integral forms of \S6.2,
+derivatives, and the limits at infinity of the real functions.
+
+\paragraph{Error functions (Ch.~7).} $\operatorname{erf}$ and $\operatorname{erfc}$ are defined
+through Kummer's function (7.2.1 via 13.6.7); further the Faddeeva function $w$, Dawson's
+integral, the complex Fresnel integrals and auxiliary functions, the Goodwin--Staton integral,
+the alternative normalizations of \S7.1, the repeated integrals $\mathrm{i}^n\operatorname{erfc}$
+(\S7.18), the Voigt functions (\S7.19) and the inverse error functions (7.17.1). Proved:
+values, derivatives, entireness, power series and the real restrictions.
+
+\paragraph{Incomplete Gamma and Beta functions (Ch.~8).} $\gamma(a,z)$, $\Gamma(a,z)$ and the
+normalized $P$, $Q$, $\gamma^*$ are defined through the confluent functions on the logarithmic
+plane, with the real normalized functions in \module{DLMF.Statistical.Basic}. The incomplete
+Beta function $B_x(a,b)$ and $I_x(a,b)$ are defined by the integral for complex $a,b$ with
+positive real parts, and continued to complex $z$ through the principal-branch regularized
+Gauss function (8.17.8); TauCeti's real function is bridged.
+
+\section{Bessel-type functions (DLMF Chapters 9--12)}
+
+The regularized series $\,{}_0\tilde F_1(;c;w)=\sum w^n/(n!\,\Gamma(c+n))$ of Mathlib is entire
+in $w$ for every complex $c$, including the nonpositive integers. Its calculus, collected in
+\module{DLMF.Bessel.Basic.RegularizedSeries}, underlies Chapters 9 and 10.
+
+\paragraph{Airy functions (Ch.~9).} With $f(z)={}_0\tilde F_1(;2/3;z^3/9)$ and
+$g(z)=z\,{}_0\tilde F_1(;4/3;z^3/9)$,
+\[
+  \operatorname{Ai}(z)=3^{-2/3}f(z)-3^{-4/3}g(z),\qquad
+  \operatorname{Bi}(z)=\sqrt3\bigl(3^{-2/3}f(z)+3^{-4/3}g(z)\bigr)
+\]
+(9.4.1, 9.4.3). Proved: entireness, Airy's equation $w''=zw$, values at the origin, the
+Maclaurin series, the rotated solutions $\operatorname{Ai}(z\eu^{\mp2\pi\iu/3})$, the Wronskians
+and connection formulas of \S9.2. Also defined: the modulus and phase functions $M,\theta,N,\phi$
+of \S9.8, and Scorer's $\operatorname{Hi}$ (by its Maclaurin series, 9.12.17) and
+$\operatorname{Gi}=\operatorname{Bi}-\operatorname{Hi}$, which solve $w''=zw\pm1/\pi$.
+
+\paragraph{Bessel functions (Ch.~10).} $J_\nu$ is Mathlib's \lean{Complex.besselJ}. The Basic
+files define $Y_\nu$, $H^{(1)}_\nu$, $H^{(2)}_\nu$, $I_\nu$, $K_\nu$, with integer orders as
+limits in the order, and prove Bessel's equation and the modified equation at every order, the
+derivatives and basic recurrences, continuity in the order and the Wronskians. On the real
+line $I_\nu$ is identified with TauCeti's \lean{Real.besselI}
+(\lean{DLMF.Bessel.besselI_ofReal}).
+
+\paragraph{Struve and related functions (Ch.~11).} The Struve functions $\mathbf H_\nu$,
+$\mathbf L_\nu$ (and $\mathbf K_\nu$, $\mathbf M_\nu$) by their power series, with the
+inhomogeneous Bessel equations (\S11.2); the Lommel functions (\S11.9); the Anger and Weber
+functions $\mathbf J_\nu(z)=\pi^{-1}\int_0^\pi\cos(\nu\theta-z\sin\theta)\,\dd\theta$,
+$\mathbf E_\nu$ (11.10.1--2) with their calculus.
+
+\paragraph{Parabolic cylinder functions (Ch.~12).} Weber's $U(a,z)$ and $V(a,z)$, Whittaker's
+$D_\nu(z)$ and the even and odd solutions $u_1$, $u_2$ of $w''=(z^2/4+a)w$; the cylinder
+equations of \S\S12.2, 12.15, the second solution $\bar U$ and the modulus and phase on the real
+axis (12.2.22--23). Proved: derivatives, Weber's equation, initial values, uniqueness for given
+initial data, the recurrences of $U$, the Hermite specializations, the Wronskians of $U$ with
+its rotations and the connection formula 12.2.17; $V$ is entire in $a$ and $z$.
+
+\section{Confluent hypergeometric, Legendre and hypergeometric functions (DLMF Chapters 13--16)}
+
+\paragraph{Confluent hypergeometric functions (Ch.~13).} Kummer's $M(a,c,z)={}_1F_1(a;c;z)$ is
+a totalized power series (13.2.2), related to Mathlib's regularized series; Tricomi's $U(a,b,z)$
+is defined on the principal branch through the connection formula 13.2.42. Proved: infinite
+radius of convergence, Kummer's equation, uniqueness of entire solutions, Kummer's
+transformation, the derivative, the contiguous relations of \S13.3(i), conjugation, and the
+value of $U$ at zero first parameter. Whittaker's $M_{\kappa,\mu}$, $W_{\kappa,\mu}$ are defined
+from $M$ and $U$, with Whittaker's equation, and the coefficients of the Whittaker--Buchholz
+expansion (\S13.24) by a generating function.
+
+\paragraph{Legendre functions (Ch.~14).} $P_\nu(z)=F(-\nu,\nu+1;1;(1-z)/2)$, $Q_\nu$, the
+Ferrers function $\mathsf P^\mu_\nu$, the associated $P^\mu_\nu$, $Q^\mu_\nu$,
+$\boldsymbol Q^\mu_\nu$, $\mathsf Q^\mu_\nu$ and the conical functions, all in the
+hypergeometric normalization of \S14.3 through the continued Gauss function, so that $P_\nu$ is
+analytic on $\CC\setminus(-\infty,-1]$ for every complex $\nu$. Proved: $P_\nu(1)=1$,
+derivatives and Legendre's equation for $P_\nu$ and $\mathsf P^\mu_\nu$. The spherical and
+surface harmonics of \S14.30 are defined as functions of angles.
+
+\paragraph{Hypergeometric function (Ch.~15).} ${}_2F_1$ is Mathlib's \lean{ordinaryHypergeometric}
+on the unit disk, and the regularized $\F(a,b;c;z)$ is Mathlib's
+\lean{regularizedGaussHGFun}. The Basic files contain Pochhammer identities and the Gauss
+coefficients; the power series on the disk, the terminating case and absolute convergence on the
+circle; analyticity of $\F$ in its parameters for $|z|<1$ (used with the identity principle to
+remove parameter restrictions); the derivative
+$\tfrac{\dd}{\dd z}F=\tfrac{ab}{c}F(a+1,b+1;c+1;z)$, the hypergeometric equation and its standard
+local solutions at $0$, $1$, $\infty$ with their Wronskians. The continuation to the cut plane
+$\CC\setminus[1,\infty)$ (\lean{regularizedGaussHG}) is built from Euler's integral and contiguous
+shifts and proved to be the analytic continuation of Mathlib's function. Appell's $F_4$
+coefficients and series are defined here.
+
+\paragraph{Generalized hypergeometric functions (Ch.~16).} Parameter multisets, coefficients,
+finite and terminating series ${}_pF_q$, the normalized principal continuation of
+${}_{q+1}F_q$ (defined by a choice from its characterizing properties; its existence and
+analyticity on the cut plane, for all complex parameters, are proved here by induction on $q$
+through Euler's integral 16.5.2, together with the termwise calculus, the differential
+equation and the Euler integrals of the series), bilateral series and logarithmic Barnes integrals, the series facts of
+\S16.2, and Meijer's $G$ function with its contours (\S16.17). The Appell and Horn double series
+are totalized, with their convergence domains and differential operators; their Euler-integral
+branches (\S16.15) use principal powers on stated domains.
+
+\section{$q$-Series and orthogonal polynomials (DLMF Chapters 17 and 18)}
+
+\paragraph{$q$-Hypergeometric functions (Ch.~17).} Finite and infinite $q$-Pochhammer symbols,
+integer-index shifted factorials, Gaussian $q$-binomial coefficients, $q$-numbers, Jackson's
+$q$-derivative (with DLMF's value at the origin) and its iterates, the Jackson integral and
+its bilateral form, and the $q$-Gamma function with its functional equation (5.18). The general
+unilateral $\,{}_r\phi_s$ and bilateral $\,{}_r\psi_s$ are defined with DLMF's phase factors,
+together with the parameter conditions used in the chapter (regularity, termination, balance,
+well-poise). The identities of \S17.2 for shifted factorials (negative indices, base inversion,
+reversal, index shifts, multiple and root products, parameter limits) are proved, as are the
+Euler-type relations and parity of the $q$-exponentials, $q$-sines and $q$-cosines (\S17.3),
+and the product rule and $q\to1$ limit of the $q$-derivative. The four $q$-Appell functions are
+defined by their double series.
+
+\paragraph{Orthogonal polynomials (Ch.~18).} A sequence of polynomials orthogonal with respect to a
+Borel measure on $\RR$ is defined; it forms a basis, every polynomial is square integrable, and
+the three-term recurrence and the Christoffel--Darboux formula are proved. Squared norms,
+Christoffel--Darboux and Poisson kernels, moments and Hankel determinants are defined with their
+basic identities. The classical families (Jacobi, Laguerre, physicists' Hermite, Legendre,
+Gegenbauer, Chebyshev $V,W$; Chebyshev $T,U$ are Mathlib's) are defined, with initial values,
+explicit sums, endpoint values, parity and the bridges to Mathlib's Hermite, shifted Legendre and
+Chebyshev polynomials. Also defined: the Hahn class and Wilson class of the Askey scheme
+(\S\S18.19--18.26), their $q$-analogues (\S\S18.27--18.28), and the associated, Bessel and Pollaczek
+polynomials (\S\S18.30, 18.34, 18.35).
+
+\section{Elliptic integrals and elliptic functions (DLMF Chapters 19--23)}
+
+\paragraph{Elliptic integrals (Ch.~19).} The real Legendre integrals $F(\phi|m)$, $E(\phi|m)$,
+$\Pi$ and their complete forms for real $m$; Legendre's integrals of complex amplitude, modulus
+and characteristic as integrals along the line segment from $0$ to $\phi$ with principal square
+roots (\S19.2), bridged to the real ones; the complete $K(k)$ and $K'(k)$ for complex modulus;
+Bulirsch's integrals. Carlson's symmetric integrals $R_F$, $R_J$, $R_G$, $R_D$, $R_C$ are defined
+by their literal principal-power integrals with admissible-domain predicates and Cauchy principal
+values (\S\S19.15--19.16); their elementary symmetries and homogeneity are proved from the
+integrals. (The comparison with Carlson's $R$-function needs \texttt{lean-codes} and is in the
+theorem layer.)
+
+\paragraph{Theta functions (Ch.~20).} $\theta_j(z|\tau)$, $j=1,\dots,4$, in DLMF's convention
+(period $\pi$ in $z$, nome $q=\eu^{\iu\pi\tau}$), defined from Mathlib's \lean{jacobiTheta\_2}
+and totalized to $0$ for $\Im\tau\le0$. Also the nome forms $\theta_j(z,q)$, theta constants and
+lattice data. Proved: the Fourier series 20.2.1--4, quasi-periodicity under $(m+n\tau)\pi$ and the
+half-period translations, parity, analyticity in $z$ and $\tau$, the entire quotients
+$\theta_1/\sin z$ and $\theta_2/\cos z$, and the radii of convergence of the theta power series
+(\S20.6).
+
+\paragraph{Riemann theta functions (Ch.~21).} For a finite index type $\iota$ (genus
+$g=|\iota|$), Riemann matrices are complex symmetric matrices with positive definite imaginary
+part (the Siegel upper half-space). The theta series $\theta(z|\Omega)$, its scaled form and the
+theta functions with real characteristics are lattice sums over $\ZZ^\iota$. Proved: absolute and
+locally uniform convergence on $\CC^\iota\times\mathfrak S_\iota$, continuity and holomorphy in each
+variable, the relations for characteristics and half-period characteristics, and the reduction
+for $g=1$ to Chapter 20.
+
+\paragraph{Jacobian elliptic functions (Ch.~22).} The twelve functions $\mathrm{pq}(z,k)$,
+$\mathrm p,\mathrm q\in\{\mathrm s,\mathrm c,\mathrm d,\mathrm n\}$, defined as theta quotients
+with nome $q=\exp(-\pi K'/K)$ and argument $\zeta=\pi z/(2K)$, in lattice form (parameter $\tau$)
+and in DLMF's modulus form. Proved for all complex $z$, $k$: Glaisher's relations, parity, and the
+theta quarter-period shifts that correspond to $K$ and $\iu K'$. The real Jacobi amplitude
+$\operatorname{am}(u|m)$ is the inverse of the order isomorphism $\phi\mapsto F(\phi|m)$ for
+$m<1$, with $\mathrm{sn}=\sin\circ\operatorname{am}$, $\mathrm{cn}$, $\mathrm{dn}$, their
+derivatives, periodicity and special values, and $\operatorname{arcsn}$. The inverse functions of
+\S22.15 with principal ranges, and Jacobi's $\mathcal E(x,k)$ and $Z(x|k)$ (\S22.16) are defined.
+
+\paragraph{Weierstrass functions and modular functions (Ch.~23).} DLMF describes a lattice by
+half-periods $\omega_1,\omega_3$ with $\Im(\omega_3/\omega_1)>0$; this is bridged to Mathlib's
+\lean{PeriodPair} and its $\wp$. Defined: $\zeta$ and $\sigma$ by their lattice series and product
+(\S23.2), the lattice roots $e_j$, the constants $\eta_j$, the invariants $g_2,g_3$, and
+$\wp,\zeta,\sigma$ of given invariants (\S23.3(i)). Proved: convergence, parity, analyticity, zeros
+and poles of $\zeta$ and $\sigma$, and their relations with $\wp$. Also defined: the action of
+$\mathrm{SL}(2,\ZZ)$, modular functions, modular forms and cusp forms, the modular function
+$\lambda(\tau)$, the Dedekind sum and the eta multiplier; Klein's $J$ is
+\lean{ModularForm.kleinJ}.
+
+\section{Number-theoretic functions (DLMF Chapters 24--27)}
+
+\paragraph{Bernoulli and Euler polynomials (Ch.~24).} $B_n$ is Mathlib's \lean{bernoulli} (DLMF's
+convention $B_1=-1/2$), $B_n(x)$ is \lean{Polynomial.bernoulli}; the Euler numbers $E_n=2^nE_n(1/2)$
+and polynomials are in \module{DLMFMathlib}. The Basic files give complex evaluation, the Appell
+property, derivatives, the generating functions, vanishing and signs, explicit sums, integrality of
+$E_n$, the periodic functions and the first entries of Tables 24.2.1--2; the higher-order and
+N\"orlund polynomials (\S24.16(i)) with their generating function; and the Genocchi and tangent
+numbers (\S24.15).
+
+\paragraph{Zeta and related functions (Ch.~25).} $\zeta$ is Mathlib's \lean{riemannZeta}; the
+Dirichlet series, residue, Euler product and functional equation are Mathlib theorems. Defined:
+the Stieltjes constants, Riemann's $\xi$, the factor $\chi$ of the functional equation, the
+Riemann--Siegel $\theta$ and $Z$ (bridged to Mathlib's \lean{hardyZ}). Proved: the Laurent expansion
+at $s=1$, the Dirichlet series of the derivatives and the properties of $\xi$. The Hurwitz zeta
+function $\zeta(s,z)$ for complex $z$ is the limit of the Euler--Maclaurin sequence, with existence
+of the limit, holomorphy in $s$ and the bridge to Mathlib's \lean{hurwitzZeta}. The polylogarithm
+$\mathrm{Li}_s(z)$ and Lerch's $\Phi(z,s,a)$ are the analytic continuations of their power series to
+$\CC\setminus[1,\infty)$; the Fermi--Dirac and Bose--Einstein integrals are defined. The polylog
+series of natural order, the real dilogarithm as an integral (with its derivative and agreement with
+$\mathrm{Li}_2$ on $[-1,1]$) and Catalan's constant $G=\beta(2)$ complete the chapter.
+
+\paragraph{Combinatorial analysis (Ch.~26).} Rising and falling factorials, permutations, set and
+integer partitions, lattice paths; the Delannoy, Motzkin and Narayana numbers with their
+recurrences (Catalan and Schr\"oder numbers are Mathlib's); restricted partition and composition
+counts on Mathlib's \lean{Nat.Partition} and \lean{Composition}; plane partitions as finite
+down-closed sets, $pp(n)$ and the symmetry classes; permutation statistics, rook and hit numbers
+and $q$-multinomials; DLMF's signed Stirling numbers $s(n,k)$ (Mathlib's $S(n,k)$ is used as is).
+
+\paragraph{Functions of number theory (Ch.~27).} Most arithmetic functions are Mathlib's
+($\varphi$, $\sigma_k$, $\mu$, $\lambda$, $\Lambda$, $\omega$, $\Omega$, $\pi$); the Basic files
+define the others with their formulas, DLMF's notions of multiplicative and completely
+multiplicative functions, Dirichlet characters in DLMF's form with Ramanujan sums and Gauss sums
+(bridged to \lean{DirichletCharacter} and \lean{gaussSum}), Lambert series, the representation
+numbers $r_k(n)$ and Jacobi's theta series, Euler's product $\prod(1-x^m)$, the discriminant and
+Ramanujan's $\tau$.
+
+\section{Functions defined by differential equations (DLMF Chapters 28--32)}
+
+\paragraph{Mathieu functions (Ch.~28).} Mathieu's equation $w''+(a-2q\cos2z)w=0$ with complex
+$z,a,q$; its solutions form a space of entire functions determined by initial data at one point,
+with existence for arbitrary data. The basic solutions $w_{\mathrm I}$, $w_{\mathrm{II}}$ (28.2.5)
+are characterized, with their symmetries 28.2.4, parity, Wronskian, half-period relations
+28.2.7--13, separate analyticity in $a$ and $q$, and behaviour under $q\mapsto-q$. Floquet's theorem,
+the characteristic equation, the connection formula and the Floquet dichotomy are proved. The
+characteristic values $a_n(q)$, $b_n(q)$ for real $q$ are ordered roots of the boundary conditions
+of Table 28.2.1; $\mathrm{ce}_n$, $\mathrm{se}_n$ are normalized with DLMF's signs and parity
+(Table 28.2.2), with second solutions $\mathrm{fe}_n$, $\mathrm{ge}_n$, Fourier coefficients and
+truncated continued fractions. Also defined: the noninteger-order eigenvalues $\lambda_\nu(q)$ and
+Floquet solutions $\mathrm{me}_\nu$; the modified Mathieu functions, radial functions and joining
+factors (\S\S28.20--28.24); the data of the large-argument and Goldstein expansions and of the
+integral relations (\S\S28.25--28.28); Hill's equation and the Whittaker--Hill and Ince equations.
+
+\paragraph{Lam\'e functions (Ch.~29).} Lam\'e's equation
+$w''+(h-\nu(\nu+1)k^2\mathrm{sn}^2(z,k))w=0$ and its other forms, the Lam\'e wave equation, and
+the Heun form; the four Sturm--Liouville problems of Table 29.3.2 on $[0,K]$, the eigenvalues
+$a^m_\nu$, $b^m_\nu$ and normalized eigenfunctions $\mathrm{Ec}^m_\nu$, $\mathrm{Es}^m_\nu$; the
+recurrence coefficients, continued fractions, Fourier coefficients, stability notions and
+asymptotic coefficients. For integer order the Lam\'e polynomials of the eight types of Table 29.12.1
+are constructed explicitly (\S29.15(i)), with the inner product of \S29.14.
+
+\paragraph{Spheroidal wave functions (Ch.~30).} The spheroidal equation and its variants, its
+transformed forms, the indicial exponents at $z=1$, the Mathieu special case and the factorization
+$(1-x^2)^{m/2}g(x)$; the spectrum and eigenvalues, the normalized angular functions of the first
+kind, and the coefficients of continued fractions, recurrences and expansions; the Ferrers-based
+objects: functions of the second kind, radial functions and Flammer's normalization.
+
+\paragraph{Heun functions (Ch.~31).} Heun's equation
+$w''+(\gamma/z+\delta/(z-1)+\epsilon/(z-a))w'+(\alpha\beta z-q)w/(z(z-1)(z-a))=0$ with
+$\epsilon=\alpha+\beta+1-\gamma-\delta$, its normal form and its automorphisms (\S31.2).
+
+\paragraph{Painlev\'e transcendents (Ch.~32).} The six equations PI--PVI and $\mathrm P'_{\mathrm{III}}$
+in DLMF's parameter normalization; the B\"acklund maps $T^\pm$ of PII; the Hamiltonian systems
+(\S32.6) and Lax pairs (\S32.4); the renormalizations, alternative and symmetric forms
+(\S32.2(ii)--(v)); the coalescence cascade PII$\to$PI, \dots, PVI$\to$PV (32.2.24--37), proved as
+limits; Painlev\'e II in the Beals--Wong normalization $u''=2u^3+xu-c$ (parameter $c=-\alpha$),
+bridged to DLMF's; definitions for special solutions, reductions and applications (\S\S32.8--32.15).
+
+\section{Physical and multivariable functions (DLMF Chapters 33--36)}
+
+\paragraph{Coulomb functions (Ch.~33).} $F_\ell(\eta,\rho)$, $G_\ell$, $H^\pm_\ell$, the
+normalizing constant $C_\ell(\eta)$, the Coulomb phase shift $\sigma_\ell(\eta)$ and $\theta_\ell$,
+defined through Kummer's and Tricomi's functions (\S33.2), with the elementary properties of the
+turning point and $C_\ell$; the auxiliary data of \S\S33.4--33.13; and the functions
+$f(\epsilon,\ell;r)$, $h$, $s$, $c$ in the variables $r=-\eta\rho$, $\epsilon=1/\eta^2$ (\S33.14).
+
+\paragraph{$3j$, $6j$, $9j$ symbols (Ch.~34).} On rational angular momenta: triads, admissibility,
+the $3j$ symbol by Racah's sum (with the Clebsch--Gordan coefficient), the $6j$ symbol by its Racah
+sum, the $9j$ symbol as a sum of products of three $6j$ symbols; the triangle conditions and vanishing
+outside the admissible range are proved.
+
+\paragraph{Functions of matrix argument (Ch.~35).} The space of real symmetric $m\times m$ matrices,
+the positive definite cone, matrix intervals and integrals over them, $\operatorname{etr}$, the Haar
+measure on $\mathrm O(m)$, partitions and partitional shifted factorials, zonal polynomials, the
+multivariate Gamma and Beta functions, the Laplace transform and convolution, and the Bessel
+functions and ${}_pF_q$ of matrix argument.
+
+\paragraph{Integrals with coalescing saddles (Ch.~36).} The canonical cuspoid and umbilic integrals
+with their phase functions and rotated contours, catastrophe sets and scaling data; proved:
+integrability of the contour integrands, the elementary special values 36.2.12, 36.2.15, 36.2.18 and
+the symmetries 36.2.22--27. The auxiliary moments, series coefficients, approximate zero loci and the
+stationary-phase sum used in \S\S36.7--36.11 are defined.
+
+\section{Material from other sources}
+
+Three areas come from Andrews--Askey--Roy and have no DLMF counterpart: Selberg's integral (the
+integrands, the unit cube, Aomoto's integrals, and the right-hand side of Selberg's formula with its
+convergence domain), harmonic polynomials on $\RR^n$ (their surface inner product, dimension and
+orthogonality between degrees), and the real normalized incomplete Gamma and Beta functions of the
+statistical area.
+
+\end{document}

@@ -42,7 +42,8 @@ namespace DLMF.Confluent
 ℂ)^k*poch p k/z^k)+(-1 : ℂ)^N*poch p N/z^N*genExpIntE (N+p) z`. -/
 @[dlmf 8.20.E1]
 theorem genExpIntE_exact_remainder (p : ℂ) {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
-    genExpIntE p z=exp (-z)/z*(∑ k ∈ Finset.range N, (-1 : ℂ)^k*poch p k/z^k)+(-1 : ℂ)^N*poch p N/z^N*genExpIntE (N+p) z := by
+    genExpIntE p z=exp (-z)/z*(∑ k ∈ Finset.range N, (-1 : ℂ)^k*poch p k/z^k)+(-1 : ℂ)^N*poch p
+        N/z^N*genExpIntE (N+p) z := by
   induction N with
   | zero => simp [poch]
   | succ N ih =>
@@ -392,7 +393,8 @@ theorem logSector_le_sup_logStripAtTop {δ : ℝ} (hδ : 0 < δ) :
 (genExpIntEOnLog p)`. -/
 @[dlmf 8.20.E2]
 theorem genExpIntE_log_sector_asymptotic (p : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
-    HasAsymptoticExpansion (logSector (3*π/2-δ)) (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k) (genExpIntEOnLog p) := by
+    HasAsymptoticExpansion (logSector (3*π/2-δ)) (fun k w => exp (-exp w-(k+1 : ℂ)*w))
+        (fun k => (-1 : ℂ)^k*poch p k) (genExpIntEOnLog p) := by
   have hd0 : 0 < min δ 1 / 4 := by have := lt_min hδ one_pos; positivity
   have hd1 : min δ 1 ≤ 1 := min_le_right _ _
   have hθ : |π - min δ 1 / 2| < π := by
@@ -467,8 +469,12 @@ theorem genExpIntEOnLog_sub_connection (p w : ℂ) {m : ℤ} (hm : m = 1 ∨ m =
 => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k) (fun w => genExpIntEOnLog p
 w-ε*2*π*I/Gamma p*exp (-ε*p*π*I+(p-1)*w))`. -/
 @[dlmf 8.20.E3]
-theorem genExpIntE_extended_sector_asymptotic (p : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
-    HasAsymptoticExpansion (comap (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | π/2+δ ≤ ε*w.im ∧ ε*w.im ≤ 7*π/2-δ}) (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k) (fun w => genExpIntEOnLog p w-ε*2*π*I/Gamma p*exp (-ε*p*π*I+(p-1)*w)) := by
+theorem genExpIntE_extended_sector_asymptotic (p : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) {δ : ℝ}
+    (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
+    HasAsymptoticExpansion
+        (comap (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | π/2+δ ≤ ε*w.im ∧ ε*w.im ≤ 7*π/2-δ})
+        (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k)
+        (fun w => genExpIntEOnLog p w-ε*2*π*I/Gamma p*exp (-ε*p*π*I+(p-1)*w)) := by
   obtain ⟨m, hm, hεm⟩ : ∃ m : ℤ, (m = 1 ∨ m = -1) ∧ ε = m := by
     rcases hε with rfl | rfl
     · exact ⟨1, Or.inl rfl, by norm_num⟩
@@ -522,8 +528,10 @@ expIntLargeOrderPolynomial 2=1-2*Polynomial.X ∧ expIntLargeOrderPolynomial
 3=1-8*Polynomial.X+6*Polynomial.X^2`. -/
 @[dlmf 8.20.E5]
 theorem expIntLargeOrderPolynomial_initial  :
-    expIntLargeOrderPolynomial 1=1 ∧ expIntLargeOrderPolynomial 2=1-2*Polynomial.X ∧ expIntLargeOrderPolynomial 3=1-8*Polynomial.X+6*Polynomial.X^2 := by
-  norm_num [expIntLargeOrderPolynomial, Polynomial.derivative_mul, Polynomial.derivative_X, Polynomial.C_ofNat]
+    expIntLargeOrderPolynomial 1=1 ∧ expIntLargeOrderPolynomial 2=1-2*Polynomial.X ∧
+        expIntLargeOrderPolynomial 3=1-8*Polynomial.X+6*Polynomial.X^2 := by
+  norm_num [expIntLargeOrderPolynomial, Polynomial.derivative_mul, Polynomial.derivative_X,
+      Polynomial.C_ofNat]
   ring
 
 open Polynomial in
@@ -589,7 +597,10 @@ p.1 (p.2*p.1)-∑ k ∈ Finset.range N, (expIntLargeOrderPolynomial k).eval (p.2
 ℂ)^(2*k))*(p.1 : ℂ)^k)) (fun p => p.1^(-(N : ℤ)))`. -/
 @[dlmf 8.20.E6]
 theorem genExpIntE_large_order_uniform (N : ℕ) :
-    IsBigO (comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 1 < p.1 ∧ 0 ≤ p.2}) (fun p => exp (p.1*p.2 : ℂ)*(p.2+1)*p.1*genExpIntEExtended p.1 (p.2*p.1)-∑ k ∈ Finset.range N, (expIntLargeOrderPolynomial k).eval (p.2 : ℂ)/(((p.2+1 : ℂ)^(2*k))*(p.1 : ℂ)^k)) (fun p => p.1^(-(N : ℤ))) := by
+    IsBigO (comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 1 < p.1 ∧ 0 ≤ p.2})
+        (fun p => exp (p.1*p.2 : ℂ)*(p.2+1)*p.1*genExpIntEExtended p.1 (p.2*p.1)-∑ k ∈
+        Finset.range N, (expIntLargeOrderPolynomial k).eval
+        (p.2 : ℂ)/(((p.2+1 : ℂ)^(2*k))*(p.1 : ℂ)^k)) (fun p => p.1^(-(N : ℤ))) := by
   sorry
 
 end DLMF.Confluent

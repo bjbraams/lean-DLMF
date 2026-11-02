@@ -96,7 +96,8 @@ private lemma prod_GammaSeq_two_sub_exp_odd_roots {n : ℕ} (hn : 2 ≤ n) {N : 
       (N : ℂ) ^ (2 * n) * (N ! : ℂ) ^ n / ∏ k ∈ range (N + 1), (((k : ℂ) + 2) ^ n + 1) := by
   have hN0 : (N : ℂ) ≠ 0 := by exact_mod_cast (show N ≠ 0 by omega)
   simp only [GammaSeq]
-  rw [prod_div_distrib, prod_mul_distrib, prod_cpow_eq_cpow_sum hN0, sum_sub_distrib, sum_exp_odd_roots hn,
+  rw [prod_div_distrib, prod_mul_distrib, prod_cpow_eq_cpow_sum hN0, sum_sub_distrib,
+      sum_exp_odd_roots hn,
     prod_const, card_range, Finset.prod_comm]
   congr 1
   · congr 1
@@ -177,7 +178,8 @@ private lemma exists_hasSum_riemannZeta_mul_sub_one_and_neg_log {n : ℕ} (hn : 
   exact hswap.prod_fiberwise fun m => hm m
 
 /-- `∏_{k≤N} (k+2) = (N+2)!`. -/
-private lemma prod_range_add_two_eq_factorial (N : ℕ) : ∏ k ∈ range (N + 1), ((k : ℝ) + 2) = ((N + 2) ! : ℝ) := by
+private lemma prod_range_add_two_eq_factorial (N : ℕ) : ∏ k ∈ range (N + 1), ((k : ℝ) + 2) =
+    ((N + 2) ! : ℝ) := by
   induction N with
   | zero => simp [Nat.factorial]
   | succ N ih =>
@@ -415,7 +417,8 @@ private lemma norm_sq_div_succ_sq_le {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
   nlinarith [norm_nonneg z]
 
 /-- `‖z²/(m+1)²‖ < 1` for `‖z‖ < 1`. -/
-private lemma norm_sq_div_succ_sq_lt_one {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) : ‖z ^ 2 / ((m : ℂ) + 1) ^ 2‖ < 1 := by
+private lemma norm_sq_div_succ_sq_lt_one {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) : ‖z ^ 2 /
+    ((m : ℂ) + 1) ^ 2‖ < 1 := by
   rw [norm_div, norm_pow, norm_pow, show ((m : ℂ) + 1) = ((m + 1 : ℕ) : ℂ) by push_cast; ring,
     Complex.norm_natCast, div_lt_one (by positivity)]
   have : ‖z‖ ^ 2 < 1 := by nlinarith [norm_nonneg z]
@@ -528,7 +531,8 @@ theorem hasSum_riemannZeta_two_mul_div_mul_pow {z : ℂ} (hz : ‖z‖ < 1) :
   · simp
   obtain ⟨F, h1, h2⟩ := exists_hasSum_riemannZeta_two_mul_and_neg_log hz
   have him := abs_im_lt_pi_of_hasSum_neg_log hz h2
-  rw [← exp_eq_pi_mul_div_sin_of_hasSum_neg_log hz hz0 h2, Complex.log_exp (by linarith [(abs_lt.mp him).1])
+  rw [← exp_eq_pi_mul_div_sin_of_hasSum_neg_log hz hz0 h2,
+      Complex.log_exp (by linarith [(abs_lt.mp him).1])
     (by linarith [(abs_lt.mp him).2])]
   exact h1
 

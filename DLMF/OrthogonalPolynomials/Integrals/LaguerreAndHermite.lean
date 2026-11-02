@@ -255,7 +255,8 @@ theorem hermiteFunction_integral (n : ℕ) (y : ℝ) :
     ring
   simp_rw [hphase, smul_eq_mul, TauCeti.twoPiHermiteFunction_def, ofReal_mul] at he
   have harg : s * (-y / s) = -y := by field_simp
-  change (∫ x : ℝ, exp (I * (s * x) * y) * ((Real.sqrt s : ℂ) * ↑(TauCeti.hermiteFunction n (s * x)))) =
+  change (∫ x : ℝ, exp (I * (s * x) * y) *
+      ((Real.sqrt s : ℂ) * ↑(TauCeti.hermiteFunction n (s * x)))) =
     (-I) ^ n * ((Real.sqrt s : ℂ) * ↑(TauCeti.hermiteFunction n (s * (-y / s)))) at he
   rw [harg, TauCeti.hermiteFunction_neg, ofReal_mul, ofReal_pow, ofReal_neg, ofReal_one] at he
   have hmul : (-I) ^ n * ((Real.sqrt s : ℂ) * ((-1) ^ n * ↑(TauCeti.hermiteFunction n y))) =
@@ -263,11 +264,14 @@ theorem hermiteFunction_integral (n : ℕ) (y : ℝ) :
     rw [show (-I) ^ n = (-1 : ℂ) ^ n * I ^ n by rw [← mul_pow]; congr 1; ring]
     have hn : (-1 : ℂ) ^ n * (-1) ^ n = 1 := by rw [← mul_pow]; simp
     calc
-      _ = (Real.sqrt s : ℂ) * (I ^ n * ↑(TauCeti.hermiteFunction n y)) * ((-1) ^ n * (-1) ^ n) := by ring
+      _ = (Real.sqrt s : ℂ) * (I ^ n * ↑(TauCeti.hermiteFunction n y)) *
+          ((-1) ^ n * (-1) ^ n) := by ring
       _ = _ := by rw [hn, mul_one]
   rw [hmul] at he
-  have hleft : (∫ x : ℝ, exp (I * (s * x) * y) * ((Real.sqrt s : ℂ) * ↑(TauCeti.hermiteFunction n (s * x)))) =
-      (Real.sqrt s : ℂ) * (s : ℂ)⁻¹ * ∫ x : ℝ, exp (I * x * y) * ↑(TauCeti.hermiteFunction n x) := by
+  have hleft : (∫ x : ℝ, exp (I * (s * x) * y) *
+      ((Real.sqrt s : ℂ) * ↑(TauCeti.hermiteFunction n (s * x)))) =
+      (Real.sqrt s : ℂ) * (s : ℂ)⁻¹ * ∫ x : ℝ, exp (I * x * y) *
+          ↑(TauCeti.hermiteFunction n x) := by
     simp_rw [mul_left_comm (exp _)]
     simp_rw [← ofReal_mul s]
     rw [integral_const_mul, Measure.integral_comp_mul_left
@@ -367,7 +371,8 @@ theorem integral_finite_sum_mellin_laplace {a : ℝ} (ha : 0 < a) {z : ℂ}
     integral_finsetSum _ (fun k _ =>
       (integrableOn_cpow_mul_cexp_neg (hs k) (by simpa using ha)).const_mul _)]
   simp_rw [integral_const_mul,
-    DLMF.Gamma.integral_cpow_mul_exp_neg_mul_Ioi (z := (a : ℂ)) (hs _) (by simpa using ha), cpow_neg,
+    DLMF.Gamma.integral_cpow_mul_exp_neg_mul_Ioi (z := (a : ℂ)) (hs _)
+        (by simpa using ha), cpow_neg,
     div_eq_mul_inv, mul_assoc]
 
 /-- The Laplace transform of `e^{-x} x^α L_n^{(α)}(x)` on `(0, ∞)` (DLMF 18.17.34). -/
@@ -399,14 +404,17 @@ theorem laguerrePolyL_laplace_transform {α : ℝ} (hα : -1 < α) (n : ℕ) {z 
   rw [integral_finsetSum _ fun k _ =>
     ((integrableOn_cpow_mul_cexp_neg (hs k) hw).const_mul _)]
   simp_rw [integral_const_mul]
-  rw [Finset.sum_congr rfl fun k _ => by rw [DLMF.Gamma.integral_cpow_mul_exp_neg_mul_Ioi (hs k) hw]]
+  rw [Finset.sum_congr rfl fun k _ => by
+                                        rw [DLMF.Gamma.integral_cpow_mul_exp_neg_mul_Ioi (hs k) hw]]
   -- resum with the binomial theorem
   have hz1 : z = (z + 1) - 1 := by ring
-  have hpowz : z ^ n = ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * (-1) ^ k * (z + 1) ^ (n - k) := by
+  have hpowz : z ^ n = ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * (-1) ^ k *
+      (z + 1) ^ (n - k) := by
     conv_lhs => rw [hz1]
     rw [sub_eq_add_neg, add_comm, add_pow]
     refine Finset.sum_congr rfl fun k _ => by ring
-  have hS : ∀ k ∈ Finset.range (n + 1), poch (α + 1 + k) (n - k) / ((n - k).factorial * k.factorial : ℂ) *
+  have hS : ∀ k ∈ Finset.range (n + 1), poch (α + 1 + k) (n - k) /
+      ((n - k).factorial * k.factorial : ℂ) *
       (-1) ^ k * (Gamma ((α : ℂ) + k + 1) * (z + 1) ^ (-((α : ℂ) + k + 1))) =
       Gamma ((α : ℂ) + n + 1) / (n ! * (z + 1) ^ ((α : ℂ) + n + 1)) *
         ((n.choose k : ℂ) * (-1) ^ k * (z + 1) ^ (n - k)) := by
@@ -483,7 +491,8 @@ theorem intervalIntegrable_jacobi_weight_cpow {a b : ℂ} (ha : -1 < a.re) (hb :
 Gamma z * Gamma (1 + (β : ℂ) + n) * poch (1 + α - z) n / (n.factorial * Gamma (1 + β + z +
 n))`. -/
 @[dlmf 18.17.E36]
-theorem jacobi_mellin_transform {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
+theorem jacobi_mellin_transform {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {z : ℂ}
+    (hz : 0 < z.re) (n : ℕ) :
     ∫ x : ℝ in (-1 : ℝ)..1,
         (1 - (x : ℂ)) ^ (z - 1) * (1 + (x : ℂ)) ^ (β : ℂ) * jacobiPolyP α β n x =
       (2 : ℂ) ^ ((β : ℂ) + z) * Gamma z * Gamma (1 + (β : ℂ) + n) * poch (1 + α - z) n /

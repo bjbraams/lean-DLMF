@@ -66,10 +66,14 @@ theorem lameProduct_orthogonal (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
     (lamePoly_eigenvalue_ne hk0 hk1 hm hm' (by simpa using hne) rfl rfl)
   simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
   rcases hz with rfl | rfl | rfl | rfl
-  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_ofReal hk0 hk1 0) cs s1 s1'
-  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
-  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
-  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (jacobiRegulark_K_add_I_mul hk0 hk1 _) cd s3 s3'
+  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+        (by simpa using jacobiRegulark_ofReal hk0 hk1 0) cs s1 s1'
+  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+        (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
+  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+        (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
+  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+        (jacobiRegulark_K_add_I_mul hk0 hk1 _) cd s3 s3'
 
 /-- 29.14.1–29.14.10, completeness: for each type `t`, a function `g` continuous on
 `[0, K] × [0, K']` that is orthogonal (29.14.2) to every `lameProduct t n m`, `m ≤ n`,
@@ -109,16 +113,19 @@ theorem lameProduct_orthogonal_all (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyT
         (lamePoly_eigenvalue_ne hk0 hk1 hm hm' hne hs hc)
       simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
       rcases hz with rfl | rfl | rfl | rfl
-      · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_ofReal hk0 hk1 0) cs s1 s1'
+      · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+            (by simpa using jacobiRegulark_ofReal hk0 hk1 0) cs s1 s1'
       · have hr := jacobiRegulark_ofReal hk0 hk1 (4 * Real.compEllIntKm (k ^ 2))
         push_cast at hr ⊢
         exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' hr cs s5 s5'
-      · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
+      · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+            (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
       · have hr := jacobiRegulark_K_add_I_mul hk0 hk1 (2 * Real.compEllIntKm (1 - k ^ 2))
         push_cast at hr ⊢
         exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' hr cc s6 s6'
     · have hmul := sign_mul_eq_neg_one_of_ne cc cc' hc
-      obtain ⟨h0, h1⟩ := integral_lamePolyEk_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t') (n := n) (m := m)
+      obtain ⟨h0, h1⟩ := integral_lamePolyEk_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t')
+          (n := n) (m := m)
         (n' := n') (m' := m') _ (Or.inr rfl) fun z => by
           have a := s2 z
           have b := s2' z
@@ -127,7 +134,8 @@ theorem lameProduct_orthogonal_all (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyT
             lamePolyEk t' n' m' (_ + z) k) * hmul
       rw [lameInner_lameProduct_eq hk0 hk1 hm hm', h0, h1]; ring
   · have hmul := sign_mul_eq_neg_one_of_ne cs cs' hs
-    obtain ⟨h0, h1⟩ := integral_lamePolyEk_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t') (n := n) (m := m)
+    obtain ⟨h0, h1⟩ := integral_lamePolyEk_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t')
+        (n := n) (m := m)
       (n' := n') (m' := m') 0 (Or.inl rfl) fun z => by
         have a := s1 z
         have b := s1' z

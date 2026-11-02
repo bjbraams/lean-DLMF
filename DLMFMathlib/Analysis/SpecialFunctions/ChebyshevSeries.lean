@@ -232,7 +232,8 @@ theorem norm_complexCoeff_le {f : ℝ → ℂ} {F : ℂ → ℂ} {s M : ℝ} (hs
     rw [intervalIntegral.integral_congr fun x _ => hreal x]
     exact_mod_cast integral_exp_mul_comp_cos_complex hcf n
   rw [hB] at hrect
-  have hbound : ∀ x ∈ uIoc (0 : ℝ) (2 * π), ‖G (x + ((-s : ℝ) : ℂ) * I)‖ ≤ M * Real.exp (-(n * s)) := by
+  have hbound : ∀ x ∈ uIoc (0 : ℝ) (2 * π), ‖G (x + ((-s : ℝ) : ℂ) * I)‖ ≤ M *
+      Real.exp (-(n * s)) := by
     intro x _
     have him : |((x : ℂ) + ((-s : ℝ) : ℂ) * I).im| ≤ s := by simp [abs_of_nonneg hs]
     simp only [hG]

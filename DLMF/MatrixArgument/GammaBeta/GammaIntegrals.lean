@@ -27,8 +27,9 @@ the scaled Laplace integrals over `Ω` used for 35.3.8 and 35.4.8.
 * `multivariateGamma_ofReal`, `multivariateGamma_one`: the bridge to Tau Ceti's real `Γ_m` and
   the case `m = 1` (35.3.4).
 * `multivariateGamma_eq_integral`, `multivariateGammaVec_eq_integral`: 35.3.1 and 35.3.2.
-* `hasIntegralOn_laplace_leadingMinorPowProd`: `∫_Ω etr(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)`
-  for the leading-minor product `φ_κ`.
+* `hasIntegralOn_laplace_leadingMinorPowProd`:
+  `∫_Ω etr(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)` for the leading-minor
+  product `φ_κ`.
 * `hasIntegralOn_posDefCone_multivariateBeta`: the double integral over `Ω × Ω` behind 35.3.8.
 -/
 
@@ -169,19 +170,22 @@ def leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ) (Y : Matrix (Fin m) (Fin 
   ∏ j : Fin m, leadingMinor Y (j.1 + 1) ^ (κ j - nextPart κ j)
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < leadingMinor X (j.1 + 1)`. -/
-private lemma leadingMinor_pos_of_posDef {m : ℕ} {X : Matrix (Fin m) (Fin m) ℝ} (hX : X.PosDef) (j : Fin m) :
+private lemma leadingMinor_pos_of_posDef {m : ℕ} {X : Matrix (Fin m) (Fin m) ℝ}
+    (hX : X.PosDef) (j : Fin m) :
     0 < leadingMinor X (j.1 + 1) := by
   have hj : j.1 + 1 ≤ m := j.2
   rw [leadingMinor, dite_eq_left hj]
   exact (hX.submatrix (Fin.castLE_injective hj)).det_pos
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < leadingMinorPowProd κ X`. -/
-theorem leadingMinorPowProd_pos {m : ℕ} (κ : Fin m → ℕ) {X : Matrix (Fin m) (Fin m) ℝ} (hX : X.PosDef) :
+theorem leadingMinorPowProd_pos {m : ℕ} (κ : Fin m → ℕ) {X : Matrix (Fin m) (Fin m) ℝ}
+    (hX : X.PosDef) :
     0 < leadingMinorPowProd κ X :=
   Finset.prod_pos fun j _ => pow_pos (leadingMinor_pos_of_posDef hX j) _
 
 /-- 35.3.2 with `s_j = a + k_j`: `∫_Ω etr(-X) |X|^{a-(m+1)/2} φ_κ(X) dX = Γ_m(a + κ)`. -/
-private lemma hasIntegralOn_etr_neg_mul_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ) (hκ : Antitone κ) {a : ℂ}
+private lemma hasIntegralOn_etr_neg_mul_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ)
+    (hκ : Antitone κ) {a : ℂ}
     (ha : ((m : ℝ) - 1) / 2 < a.re) :
     HasIntegralOn (posDefCone m) (fun Z => (etr (-Z) : ℂ) * ((Z.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2))
       * (leadingMinorPowProd κ Z : ℂ)) (multivariateGammaVec m (fun j => a + κ j)) := by
@@ -191,7 +195,8 @@ private lemma hasIntegralOn_etr_neg_mul_leadingMinorPowProd {m : ℕ} (κ : Fin 
     simp only [Complex.add_re, Complex.natCast_re]
     have := (κ j).cast_nonneg (α := ℝ)
     linarith
-  refine hasIntegralOn_posDefCone_congr (hasIntegralOn_multivariateGammaVecIntegrand hs) fun Z hZ => ?_
+  refine hasIntegralOn_posDefCone_congr
+      (hasIntegralOn_multivariateGammaVecIntegrand hs) fun Z hZ => ?_
   have hZ : (Z : Matrix (Fin m) (Fin m) ℝ).PosDef := hZ
   unfold multivariateGammaVecIntegrand leadingMinorPowProd
   rw [mul_assoc]
@@ -240,17 +245,20 @@ private lemma hasIntegralOn_etr_neg_mul_leadingMinorPowProd {m : ℕ} (κ : Fin 
 
 /-- Estimate under the stated parameter and domain assumptions: `leadingMinor (L * Lᵀ) (j.1 + 1) =
 ∏ i ∈ Finset.univ.filter (· ≤ j), L i i ^ 2`. -/
-private lemma leadingMinor_mul_transpose_of_isLowerTriangular {m : ℕ} {L : Matrix (Fin m) (Fin m) ℝ} (hL : L.IsLowerTriangular)
+private lemma leadingMinor_mul_transpose_of_isLowerTriangular {m : ℕ} {L : Matrix (Fin m) (Fin m) ℝ}
+    (hL : L.IsLowerTriangular)
     (j : Fin m) : leadingMinor (L * Lᵀ) (j.1 + 1) =
       ∏ i ∈ Finset.univ.filter (· ≤ j), L i i ^ 2 := by
-  have h := leadingMinor_lowerTriangleMatrix_mul_transpose (fun ij : TauCeti.lowerTriangle m => L ij.1.1 ij.1.2) j
+  have h := leadingMinor_lowerTriangleMatrix_mul_transpose
+      (fun ij : TauCeti.lowerTriangle m => L ij.1.1 ij.1.2) j
   rw [TauCeti.lowerTriangleMatrix_entries hL] at h
   rw [h, Finset.prod_ite, Finset.prod_const_one, mul_one]
 
 /-- `φ_κ(L Z Lᵀ) = φ_κ(L Lᵀ) φ_κ(Z)` for lower-triangular `L` and `Z ∈ Ω`. -/
 private lemma leadingMinorPowProd_lower_conj {m : ℕ} (κ : Fin m → ℕ) {L : Matrix (Fin m) (Fin m) ℝ}
     (hL : L.IsLowerTriangular) {Z : Matrix (Fin m) (Fin m) ℝ} (hZ : Z.PosDef) :
-    leadingMinorPowProd κ (L * Z * Lᵀ) = leadingMinorPowProd κ (L * Lᵀ) * leadingMinorPowProd κ Z := by
+    leadingMinorPowProd κ (L * Z * Lᵀ) = leadingMinorPowProd κ (L * Lᵀ) *
+        leadingMinorPowProd κ Z := by
   set A : TauCeti.PosDefMatrix m :=
     ⟨⟨Z, Matrix.isHermitian_iff_isSelfAdjoint.mp hZ.isHermitian⟩, hZ⟩
   set M := (TauCeti.cholesky A).1
@@ -262,14 +270,15 @@ private lemma leadingMinorPowProd_lower_conj {m : ℕ} (κ : Fin m → ℕ) {L :
   unfold leadingMinorPowProd
   rw [← Finset.prod_mul_distrib]
   refine Finset.prod_congr rfl fun j _ => ?_
-  rw [← mul_pow, hconj, leadingMinor_mul_transpose_of_isLowerTriangular hLM, leadingMinor_mul_transpose_of_isLowerTriangular hL, ← hMM,
+  rw [← mul_pow, hconj, leadingMinor_mul_transpose_of_isLowerTriangular hLM,
+      leadingMinor_mul_transpose_of_isLowerTriangular hL, ← hMM,
     leadingMinor_mul_transpose_of_isLowerTriangular hM, ← Finset.prod_mul_distrib]
   congr 1
   refine Finset.prod_congr rfl fun i _ => ?_
   rw [Matrix.mul_apply_diag_of_isLowerTriangular hL hM, mul_pow]
 
-/-- Continuity of the indicated function: `Continuous fun Y : Matrix (Fin m) (Fin m) ℝ => leadingMinorPowProd
-κ Y`. -/
+/-- Continuity of the indicated function:
+`Continuous fun Y : Matrix (Fin m) (Fin m) ℝ => leadingMinorPowProd κ Y`. -/
 theorem continuous_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ) :
     Continuous fun Y : Matrix (Fin m) (Fin m) ℝ => leadingMinorPowProd κ Y := by
   unfold leadingMinorPowProd
@@ -315,11 +324,13 @@ theorem hasIntegralOn_laplace_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ)
     exact Real.measurable_exp.comp
       (continuous_const.matrix_mul continuous_subtype_val).neg.matrix_trace.measurable
   set c : ℂ := ((S.det⁻¹ : ℝ) : ℂ) ^ (a - ((m : ℂ) + 1) / 2) * (leadingMinorPowProd κ S⁻¹ : ℂ)
-  have h1 := hasIntegralOn_posDefCone_const_mul (hasIntegralOn_etr_neg_mul_leadingMinorPowProd κ hκ ha) c
+  have h1 := hasIntegralOn_posDefCone_const_mul
+      (hasIntegralOn_etr_neg_mul_leadingMinorPowProd κ hκ ha) c
   have h2 : HasIntegralOn (posDefCone m) (fun Z => (etr (-(S * ((C : Matrix (Fin m) (Fin m) ℝ) *
       Z * (C : Matrix (Fin m) (Fin m) ℝ)ᵀ))) : ℂ) * ((((C : Matrix (Fin m) (Fin m) ℝ) * Z *
         (C : Matrix (Fin m) (Fin m) ℝ)ᵀ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
-      (leadingMinorPowProd κ ((C : Matrix (Fin m) (Fin m) ℝ) * Z * (C : Matrix (Fin m) (Fin m) ℝ)ᵀ) : ℂ))
+      (leadingMinorPowProd κ
+          ((C : Matrix (Fin m) (Fin m) ℝ) * Z * (C : Matrix (Fin m) (Fin m) ℝ)ᵀ) : ℂ))
       (c * multivariateGammaVec m (fun j => a + κ j)) := by
     refine hasIntegralOn_posDefCone_congr h1 fun Z hZ => ?_
     have hZ : (Z : Matrix (Fin m) (Fin m) ℝ).PosDef := hZ
@@ -366,8 +377,10 @@ theorem hasIntegralOn_laplace_det_cpow {m : ℕ} {S : Matrix (Fin m) (Fin m) ℝ
     {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re) :
     HasIntegralOn (posDefCone m) (fun Y => (etr (-(S * Y)) : ℂ) *
       ((Y.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2))) (multivariateGamma m a * (S.det : ℂ) ^ (-a)) := by
-  have h := hasIntegralOn_laplace_leadingMinorPowProd (fun _ : Fin m => 0) (fun _ _ _ => le_rfl) hS ha
-  have h1 : ∀ Y, leadingMinorPowProd (fun _ : Fin m => 0) Y = 1 := fun Y => by simp [leadingMinorPowProd]
+  have h := hasIntegralOn_laplace_leadingMinorPowProd (fun _ : Fin m => 0)
+      (fun _ _ _ => le_rfl) hS ha
+  have h1 : ∀ Y, leadingMinorPowProd (fun _ : Fin m => 0) Y = 1 := fun Y =>
+      by simp [leadingMinorPowProd]
   simp only [h1, Complex.ofReal_one, mul_one, Nat.cast_zero, add_zero] at h
   exact h
 

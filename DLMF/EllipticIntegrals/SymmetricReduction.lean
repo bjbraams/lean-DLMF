@@ -229,20 +229,149 @@ theorem ellRedU5Sq_eq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (α β �
   linear_combination h1 + key
 
 /-- Polynomial identity behind (19.29.9) (coefficients found by Gröbner reduction). -/
-private lemma ellRed_five_factor_identity (Xa Xb Xc Xd X5 Ya Yb Yc Yd Y5 aa ab ac ad a5 ba bb bc bd b5 x y : ℂ)
+private lemma ellRed_five_factor_identity
+    (Xa Xb Xc Xd X5 Ya Yb Yc Yd Y5 aa ab ac ad a5 ba bb bc bd b5 x y : ℂ)
     (hxy : x - y ≠ 0) (hXa0 : Xa ≠ 0) (hYa0 : Ya ≠ 0) (h5 : aa * b5 - a5 * ba ≠ 0)
-    (hXa : Xa ^ 2 = aa + ba * x) (hYa : Ya ^ 2 = aa + ba * y) (hXb : Xb ^ 2 = ab + bb * x) (hYb : Yb ^ 2 = ab + bb * y) (hXc : Xc ^ 2 = ac + bc * x) (hYc : Yc ^ 2 = ac + bc * y) (hXd : Xd ^ 2 = ad + bd * x) (hYd : Yd ^ 2 = ad + bd * y) (hX5 : X5 ^ 2 = a5 + b5 * x) (hY5 : Y5 ^ 2 = a5 + b5 * y) :
+    (hXa : Xa ^ 2 = aa + ba * x) (hYa : Ya ^ 2 = aa + ba * y) (hXb : Xb ^ 2 = ab + bb * x)
+        (hYb : Yb ^ 2 = ab + bb * y) (hXc : Xc ^ 2 = ac + bc * x) (hYc : Yc ^ 2 = ac + bc * y)
+        (hXd : Xd ^ 2 = ad + bd * x) (hYd : Yd ^ 2 = ad + bd * y) (hX5 : X5 ^ 2 = a5 + b5 * x)
+        (hY5 : Y5 ^ 2 = a5 + b5 * y) :
     ((Xb * Xc * Xd / Xa * Y5 ^ 2 + Yb * Yc * Yd / Ya * X5 ^ 2) / (x - y)) ^ 2 -
       (X5 * Y5 / (Xa * Ya)) ^ 2 * (((Xa * Xb * Yc * Yd + Ya * Yb * Xc * Xd) / (x - y)) ^ 2 -
         (aa * bc - ac * ba) * (aa * bd - ad * ba) * (ab * b5 - a5 * bb) / (aa * b5 - a5 * ba)) =
       (ab * b5 - a5 * bb) * (ac * b5 - a5 * bc) * (ad * b5 - a5 * bd) / (aa * b5 - a5 * ba) := by
   have hN : (aa * b5 - a5 * ba) * ((Xb * Xc * Xd * Y5 ^ 2 * Ya + Yb * Yc * Yd * X5 ^ 2 * Xa) ^ 2 -
       X5 ^ 2 * Y5 ^ 2 * (Xa * Xb * Yc * Yd + Ya * Yb * Xc * Xd) ^ 2) +
-      X5 ^ 2 * Y5 ^ 2 * (x - y) ^ 2 * ((aa * bc - ac * ba) * (aa * bd - ad * ba) * (ab * b5 - a5 * bb)) -
-      Xa ^ 2 * Ya ^ 2 * (x - y) ^ 2 * ((ab * b5 - a5 * bb) * (ac * b5 - a5 * bc) * (ad * b5 - a5 * bd)) = 0 := by
-    linear_combination (-X5^4*Yb^2*Yc^2*Yd^2*a5*ba + X5^4*Yb^2*Yc^2*Yd^2*aa*b5 + X5^2*Xb^2*Y5^2*Yc^2*Yd^2*a5*ba - X5^2*Xb^2*Y5^2*Yc^2*Yd^2*aa*b5 + Ya^2*a5^3*bb*bc*bd*x^2 - 2*Ya^2*a5^3*bb*bc*bd*x*y + Ya^2*a5^3*bb*bc*bd*y^2 - Ya^2*a5^2*ab*b5*bc*bd*x^2 + 2*Ya^2*a5^2*ab*b5*bc*bd*x*y - Ya^2*a5^2*ab*b5*bc*bd*y^2 - Ya^2*a5^2*ac*b5*bb*bd*x^2 + 2*Ya^2*a5^2*ac*b5*bb*bd*x*y - Ya^2*a5^2*ac*b5*bb*bd*y^2 - Ya^2*a5^2*ad*b5*bb*bc*x^2 + 2*Ya^2*a5^2*ad*b5*bb*bc*x*y - Ya^2*a5^2*ad*b5*bb*bc*y^2 + Ya^2*a5*ab*ac*b5^2*bd*x^2 - 2*Ya^2*a5*ab*ac*b5^2*bd*x*y + Ya^2*a5*ab*ac*b5^2*bd*y^2 + Ya^2*a5*ab*ad*b5^2*bc*x^2 - 2*Ya^2*a5*ab*ad*b5^2*bc*x*y + Ya^2*a5*ab*ad*b5^2*bc*y^2 + Ya^2*a5*ac*ad*b5^2*bb*x^2 - 2*Ya^2*a5*ac*ad*b5^2*bb*x*y + Ya^2*a5*ac*ad*b5^2*bb*y^2 - Ya^2*ab*ac*ad*b5^3*x^2 + 2*Ya^2*ab*ac*ad*b5^3*x*y - Ya^2*ab*ac*ad*b5^3*y^2) * hXa + (X5^2*Xc^2*Xd^2*Y5^2*Yb^2*a5*ba - X5^2*Xc^2*Xd^2*Y5^2*Yb^2*aa*b5 - Xb^2*Xc^2*Xd^2*Y5^4*a5*ba + Xb^2*Xc^2*Xd^2*Y5^4*aa*b5 + a5^3*aa*bb*bc*bd*x^2 - 2*a5^3*aa*bb*bc*bd*x*y + a5^3*aa*bb*bc*bd*y^2 + a5^3*ba*bb*bc*bd*x^3 - 2*a5^3*ba*bb*bc*bd*x^2*y + a5^3*ba*bb*bc*bd*x*y^2 - a5^2*aa*ab*b5*bc*bd*x^2 + 2*a5^2*aa*ab*b5*bc*bd*x*y - a5^2*aa*ab*b5*bc*bd*y^2 - a5^2*aa*ac*b5*bb*bd*x^2 + 2*a5^2*aa*ac*b5*bb*bd*x*y - a5^2*aa*ac*b5*bb*bd*y^2 - a5^2*aa*ad*b5*bb*bc*x^2 + 2*a5^2*aa*ad*b5*bb*bc*x*y - a5^2*aa*ad*b5*bb*bc*y^2 - a5^2*ab*b5*ba*bc*bd*x^3 + 2*a5^2*ab*b5*ba*bc*bd*x^2*y - a5^2*ab*b5*ba*bc*bd*x*y^2 - a5^2*ac*b5*ba*bb*bd*x^3 + 2*a5^2*ac*b5*ba*bb*bd*x^2*y - a5^2*ac*b5*ba*bb*bd*x*y^2 - a5^2*ad*b5*ba*bb*bc*x^3 + 2*a5^2*ad*b5*ba*bb*bc*x^2*y - a5^2*ad*b5*ba*bb*bc*x*y^2 + a5*aa*ab*ac*b5^2*bd*x^2 - 2*a5*aa*ab*ac*b5^2*bd*x*y + a5*aa*ab*ac*b5^2*bd*y^2 + a5*aa*ab*ad*b5^2*bc*x^2 - 2*a5*aa*ab*ad*b5^2*bc*x*y + a5*aa*ab*ad*b5^2*bc*y^2 + a5*aa*ac*ad*b5^2*bb*x^2 - 2*a5*aa*ac*ad*b5^2*bb*x*y + a5*aa*ac*ad*b5^2*bb*y^2 + a5*ab*ac*b5^2*ba*bd*x^3 - 2*a5*ab*ac*b5^2*ba*bd*x^2*y + a5*ab*ac*b5^2*ba*bd*x*y^2 + a5*ab*ad*b5^2*ba*bc*x^3 - 2*a5*ab*ad*b5^2*ba*bc*x^2*y + a5*ab*ad*b5^2*ba*bc*x*y^2 + a5*ac*ad*b5^2*ba*bb*x^3 - 2*a5*ac*ad*b5^2*ba*bb*x^2*y + a5*ac*ad*b5^2*ba*bb*x*y^2 - aa*ab*ac*ad*b5^3*x^2 + 2*aa*ab*ac*ad*b5^3*x*y - aa*ab*ac*ad*b5^3*y^2 - ab*ac*ad*b5^3*ba*x^3 + 2*ab*ac*ad*b5^3*ba*x^2*y - ab*ac*ad*b5^3*ba*x*y^2) * hYa + (Y5^2*(a5*ba - aa*b5)*(X5^2*Yc^2*Yd^2*aa + X5^2*Yc^2*Yd^2*ba*x - Xc^2*Xd^2*Y5^2*aa - Xc^2*Xd^2*Y5^2*ba*y)) * hXb + (-X5^2*(a5*ba - aa*b5)*(X5^2*Yc^2*Yd^2*aa + X5^2*Yc^2*Yd^2*ba*x - Xc^2*Xd^2*Y5^2*aa - Xc^2*Xd^2*Y5^2*ba*y)) * hYb + (-Xd^2*Y5^2*(aa + ba*y)*(a5*ba - aa*b5)*(-X5^2*ab - X5^2*bb*y + Y5^2*ab + Y5^2*bb*x)) * hXc + (X5^2*Yd^2*(aa + ba*x)*(a5*ba - aa*b5)*(-X5^2*ab - X5^2*bb*y + Y5^2*ab + Y5^2*bb*x)) * hYc + (-Y5^2*(aa + ba*y)*(ac + bc*x)*(a5*ba - aa*b5)*(-X5^2*ab - X5^2*bb*y + Y5^2*ab + Y5^2*bb*x)) * hXd + (X5^2*(aa + ba*x)*(ac + bc*y)*(a5*ba - aa*b5)*(-X5^2*ab - X5^2*bb*y + Y5^2*ab + Y5^2*bb*x)) * hYd + (-X5^2*a5*aa*ab*ac*ad*ba - X5^2*a5*aa*ab*ac*ba*bd*y - X5^2*a5*aa*ab*ad*ba*bc*y - X5^2*a5*aa*ab*ba*bc*bd*y^2 - X5^2*a5*aa*ac*ad*ba*bb*y - X5^2*a5*aa*ac*ba*bb*bd*y^2 - X5^2*a5*aa*ad*ba*bb*bc*y^2 - X5^2*a5*aa*ba*bb*bc*bd*y^3 - X5^2*a5*ab*ac*ad*ba^2*x - X5^2*a5*ab*ac*ba^2*bd*x*y - X5^2*a5*ab*ad*ba^2*bc*x*y - X5^2*a5*ab*ba^2*bc*bd*x*y^2 - X5^2*a5*ac*ad*ba^2*bb*x*y - X5^2*a5*ac*ba^2*bb*bd*x*y^2 - X5^2*a5*ad*ba^2*bb*bc*x*y^2 - X5^2*a5*ba^2*bb*bc*bd*x*y^3 + X5^2*aa^2*ab*ac*ad*b5 + X5^2*aa^2*ab*ac*b5*bd*y + X5^2*aa^2*ab*ad*b5*bc*y + X5^2*aa^2*ab*b5*bc*bd*y^2 + X5^2*aa^2*ac*ad*b5*bb*y + X5^2*aa^2*ac*b5*bb*bd*y^2 + X5^2*aa^2*ad*b5*bb*bc*y^2 + X5^2*aa^2*b5*bb*bc*bd*y^3 + X5^2*aa*ab*ac*ad*b5*ba*x + X5^2*aa*ab*ac*b5*ba*bd*x*y + X5^2*aa*ab*ad*b5*ba*bc*x*y + X5^2*aa*ab*b5*ba*bc*bd*x*y^2 + X5^2*aa*ac*ad*b5*ba*bb*x*y + X5^2*aa*ac*b5*ba*bb*bd*x*y^2 + X5^2*aa*ad*b5*ba*bb*bc*x*y^2 + X5^2*aa*b5*ba*bb*bc*bd*x*y^3 - Y5^2*a5*aa^2*bb*bc*bd*x^2 + 2*Y5^2*a5*aa^2*bb*bc*bd*x*y - Y5^2*a5*aa^2*bb*bc*bd*y^2 + 2*Y5^2*a5*aa*ab*ac*ad*ba + Y5^2*a5*aa*ab*ac*ba*bd*x + Y5^2*a5*aa*ab*ac*ba*bd*y + Y5^2*a5*aa*ab*ad*ba*bc*x + Y5^2*a5*aa*ab*ad*ba*bc*y + Y5^2*a5*aa*ab*ba*bc*bd*x^2 + Y5^2*a5*aa*ab*ba*bc*bd*y^2 + Y5^2*a5*aa*ac*ad*ba*bb*x + Y5^2*a5*aa*ac*ad*ba*bb*y + Y5^2*a5*aa*ac*ba*bb*bd*x^2 + Y5^2*a5*aa*ac*ba*bb*bd*y^2 + Y5^2*a5*aa*ad*ba*bb*bc*x^2 + Y5^2*a5*aa*ad*ba*bb*bc*y^2 + Y5^2*a5*aa*ba*bb*bc*bd*x^2*y + Y5^2*a5*aa*ba*bb*bc*bd*x*y^2 + Y5^2*a5*ab*ac*ad*ba^2*x + Y5^2*a5*ab*ac*ad*ba^2*y + 2*Y5^2*a5*ab*ac*ba^2*bd*x*y + 2*Y5^2*a5*ab*ad*ba^2*bc*x*y + Y5^2*a5*ab*ba^2*bc*bd*x^2*y + Y5^2*a5*ab*ba^2*bc*bd*x*y^2 + 2*Y5^2*a5*ac*ad*ba^2*bb*x*y + Y5^2*a5*ac*ba^2*bb*bd*x^2*y + Y5^2*a5*ac*ba^2*bb*bd*x*y^2 + Y5^2*a5*ad*ba^2*bb*bc*x^2*y + Y5^2*a5*ad*ba^2*bb*bc*x*y^2 + 2*Y5^2*a5*ba^2*bb*bc*bd*x^2*y^2 - 2*Y5^2*aa^2*ab*ac*ad*b5 - Y5^2*aa^2*ab*ac*b5*bd*x - Y5^2*aa^2*ab*ac*b5*bd*y - Y5^2*aa^2*ab*ad*b5*bc*x - Y5^2*aa^2*ab*ad*b5*bc*y - 2*Y5^2*aa^2*ab*b5*bc*bd*x*y - Y5^2*aa^2*ac*ad*b5*bb*x - Y5^2*aa^2*ac*ad*b5*bb*y - 2*Y5^2*aa^2*ac*b5*bb*bd*x*y - 2*Y5^2*aa^2*ad*b5*bb*bc*x*y - Y5^2*aa^2*b5*bb*bc*bd*x^2*y - Y5^2*aa^2*b5*bb*bc*bd*x*y^2 - Y5^2*aa*ab*ac*ad*b5*ba*x - Y5^2*aa*ab*ac*ad*b5*ba*y - Y5^2*aa*ab*ac*b5*ba*bd*x^2 - Y5^2*aa*ab*ac*b5*ba*bd*y^2 - Y5^2*aa*ab*ad*b5*ba*bc*x^2 - Y5^2*aa*ab*ad*b5*ba*bc*y^2 - Y5^2*aa*ab*b5*ba*bc*bd*x^2*y - Y5^2*aa*ab*b5*ba*bc*bd*x*y^2 - Y5^2*aa*ac*ad*b5*ba*bb*x^2 - Y5^2*aa*ac*ad*b5*ba*bb*y^2 - Y5^2*aa*ac*b5*ba*bb*bd*x^2*y - Y5^2*aa*ac*b5*ba*bb*bd*x*y^2 - Y5^2*aa*ad*b5*ba*bb*bc*x^2*y - Y5^2*aa*ad*b5*ba*bb*bc*x*y^2 - 2*Y5^2*aa*b5*ba*bb*bc*bd*x^2*y^2 + Y5^2*ab*ac*ad*b5*ba^2*x^2 - 2*Y5^2*ab*ac*ad*b5*ba^2*x*y + Y5^2*ab*ac*ad*b5*ba^2*y^2 - a5^2*aa*ab*ac*ad*ba - a5^2*aa*ab*ac*ba*bd*y - a5^2*aa*ab*ad*ba*bc*y - a5^2*aa*ab*ba*bc*bd*y^2 - a5^2*aa*ac*ad*ba*bb*y - a5^2*aa*ac*ba*bb*bd*y^2 - a5^2*aa*ad*ba*bb*bc*y^2 - a5^2*aa*ba*bb*bc*bd*y^3 - a5^2*ab*ac*ad*ba^2*x - a5^2*ab*ac*ba^2*bd*x*y - a5^2*ab*ad*ba^2*bc*x*y - a5^2*ab*ba^2*bc*bd*x*y^2 - a5^2*ac*ad*ba^2*bb*x*y - a5^2*ac*ba^2*bb*bd*x*y^2 - a5^2*ad*ba^2*bb*bc*x*y^2 - a5^2*ba^2*bb*bc*bd*x*y^3 + a5*aa^2*ab*ac*ad*b5 + a5*aa^2*ab*ac*b5*bd*y + a5*aa^2*ab*ad*b5*bc*y + a5*aa^2*ab*b5*bc*bd*y^2 + a5*aa^2*ac*ad*b5*bb*y + a5*aa^2*ac*b5*bb*bd*y^2 + a5*aa^2*ad*b5*bb*bc*y^2 + a5*aa^2*b5*bb*bc*bd*y^3 - a5*ab*ac*ad*b5*ba^2*x^2 - a5*ab*ac*b5*ba^2*bd*x^2*y - a5*ab*ad*b5*ba^2*bc*x^2*y - a5*ab*b5*ba^2*bc*bd*x^2*y^2 - a5*ac*ad*b5*ba^2*bb*x^2*y - a5*ac*b5*ba^2*bb*bd*x^2*y^2 - a5*ad*b5*ba^2*bb*bc*x^2*y^2 - a5*b5*ba^2*bb*bc*bd*x^2*y^3 + aa^2*ab*ac*ad*b5^2*x + aa^2*ab*ac*b5^2*bd*x*y + aa^2*ab*ad*b5^2*bc*x*y + aa^2*ab*b5^2*bc*bd*x*y^2 + aa^2*ac*ad*b5^2*bb*x*y + aa^2*ac*b5^2*bb*bd*x*y^2 + aa^2*ad*b5^2*bb*bc*x*y^2 + aa^2*b5^2*bb*bc*bd*x*y^3 + aa*ab*ac*ad*b5^2*ba*x^2 + aa*ab*ac*b5^2*ba*bd*x^2*y + aa*ab*ad*b5^2*ba*bc*x^2*y + aa*ab*b5^2*ba*bc*bd*x^2*y^2 + aa*ac*ad*b5^2*ba*bb*x^2*y + aa*ac*b5^2*ba*bb*bd*x^2*y^2 + aa*ad*b5^2*ba*bb*bc*x^2*y^2 + aa*b5^2*ba*bb*bc*bd*x^2*y^3) * hX5 + (-Y5^2*a5*aa*ab*ac*ad*ba - Y5^2*a5*aa*ab*ac*ba*bd*x - Y5^2*a5*aa*ab*ad*ba*bc*x - Y5^2*a5*aa*ab*ba*bc*bd*x^2 - Y5^2*a5*aa*ac*ad*ba*bb*x - Y5^2*a5*aa*ac*ba*bb*bd*x^2 - Y5^2*a5*aa*ad*ba*bb*bc*x^2 - Y5^2*a5*aa*ba*bb*bc*bd*x^3 - Y5^2*a5*ab*ac*ad*ba^2*y - Y5^2*a5*ab*ac*ba^2*bd*x*y - Y5^2*a5*ab*ad*ba^2*bc*x*y - Y5^2*a5*ab*ba^2*bc*bd*x^2*y - Y5^2*a5*ac*ad*ba^2*bb*x*y - Y5^2*a5*ac*ba^2*bb*bd*x^2*y - Y5^2*a5*ad*ba^2*bb*bc*x^2*y - Y5^2*a5*ba^2*bb*bc*bd*x^3*y + Y5^2*aa^2*ab*ac*ad*b5 + Y5^2*aa^2*ab*ac*b5*bd*x + Y5^2*aa^2*ab*ad*b5*bc*x + Y5^2*aa^2*ab*b5*bc*bd*x^2 + Y5^2*aa^2*ac*ad*b5*bb*x + Y5^2*aa^2*ac*b5*bb*bd*x^2 + Y5^2*aa^2*ad*b5*bb*bc*x^2 + Y5^2*aa^2*b5*bb*bc*bd*x^3 + Y5^2*aa*ab*ac*ad*b5*ba*y + Y5^2*aa*ab*ac*b5*ba*bd*x*y + Y5^2*aa*ab*ad*b5*ba*bc*x*y + Y5^2*aa*ab*b5*ba*bc*bd*x^2*y + Y5^2*aa*ac*ad*b5*ba*bb*x*y + Y5^2*aa*ac*b5*ba*bb*bd*x^2*y + Y5^2*aa*ad*b5*ba*bb*bc*x^2*y + Y5^2*aa*b5*ba*bb*bc*bd*x^3*y - a5^2*aa^2*bb*bc*bd*x^2 + 2*a5^2*aa^2*bb*bc*bd*x*y - a5^2*aa^2*bb*bc*bd*y^2 + a5^2*aa*ab*ac*ad*ba + a5^2*aa*ab*ac*ba*bd*y + a5^2*aa*ab*ad*ba*bc*y + a5^2*aa*ab*ba*bc*bd*y^2 + a5^2*aa*ac*ad*ba*bb*y + a5^2*aa*ac*ba*bb*bd*y^2 + a5^2*aa*ad*ba*bb*bc*y^2 - a5^2*aa*ba*bb*bc*bd*x^3 + a5^2*aa*ba*bb*bc*bd*x^2*y + a5^2*aa*ba*bb*bc*bd*x*y^2 + a5^2*ab*ac*ad*ba^2*x + a5^2*ab*ac*ba^2*bd*x*y + a5^2*ab*ad*ba^2*bc*x*y + a5^2*ab*ba^2*bc*bd*x*y^2 + a5^2*ac*ad*ba^2*bb*x*y + a5^2*ac*ba^2*bb*bd*x*y^2 + a5^2*ad*ba^2*bb*bc*x*y^2 - a5^2*ba^2*bb*bc*bd*x^3*y + 2*a5^2*ba^2*bb*bc*bd*x^2*y^2 - a5*aa^2*ab*ac*ad*b5 - a5*aa^2*ab*ac*b5*bd*y - a5*aa^2*ab*ad*b5*bc*y + a5*aa^2*ab*b5*bc*bd*x^2 - 2*a5*aa^2*ab*b5*bc*bd*x*y - a5*aa^2*ac*ad*b5*bb*y + a5*aa^2*ac*b5*bb*bd*x^2 - 2*a5*aa^2*ac*b5*bb*bd*x*y + a5*aa^2*ad*b5*bb*bc*x^2 - 2*a5*aa^2*ad*b5*bb*bc*x*y + a5*aa^2*b5*bb*bc*bd*x^2*y - 2*a5*aa^2*b5*bb*bc*bd*x*y^2 + a5*aa*ab*ac*ad*b5*ba*x - a5*aa*ab*ac*ad*b5*ba*y + a5*aa*ab*ac*b5*ba*bd*x*y - a5*aa*ab*ac*b5*ba*bd*y^2 + a5*aa*ab*ad*b5*ba*bc*x*y - a5*aa*ab*ad*b5*ba*bc*y^2 + a5*aa*ab*b5*ba*bc*bd*x^3 - a5*aa*ab*b5*ba*bc*bd*x^2*y + a5*aa*ac*ad*b5*ba*bb*x*y - a5*aa*ac*ad*b5*ba*bb*y^2 + a5*aa*ac*b5*ba*bb*bd*x^3 - a5*aa*ac*b5*ba*bb*bd*x^2*y + a5*aa*ad*b5*ba*bb*bc*x^3 - a5*aa*ad*b5*ba*bb*bc*x^2*y + a5*aa*b5*ba*bb*bc*bd*x^3*y - a5*aa*b5*ba*bb*bc*bd*x^2*y^2 + 2*a5*ab*ac*ad*b5*ba^2*x^2 - a5*ab*ac*ad*b5*ba^2*x*y + 2*a5*ab*ac*b5*ba^2*bd*x^2*y - a5*ab*ac*b5*ba^2*bd*x*y^2 + 2*a5*ab*ad*b5*ba^2*bc*x^2*y - a5*ab*ad*b5*ba^2*bc*x*y^2 + a5*ab*b5*ba^2*bc*bd*x^3*y + 2*a5*ac*ad*b5*ba^2*bb*x^2*y - a5*ac*ad*b5*ba^2*bb*x*y^2 + a5*ac*b5*ba^2*bb*bd*x^3*y + a5*ad*b5*ba^2*bb*bc*x^3*y + a5*b5*ba^2*bb*bc*bd*x^3*y^2 - 2*aa^2*ab*ac*ad*b5^2*x + aa^2*ab*ac*ad*b5^2*y - aa^2*ab*ac*b5^2*bd*x^2 - aa^2*ab*ad*b5^2*bc*x^2 - aa^2*ab*b5^2*bc*bd*x^2*y - aa^2*ac*ad*b5^2*bb*x^2 - aa^2*ac*b5^2*bb*bd*x^2*y - aa^2*ad*b5^2*bb*bc*x^2*y - aa^2*b5^2*bb*bc*bd*x^2*y^2 - aa*ab*ac*ad*b5^2*ba*x^2 - aa*ab*ac*ad*b5^2*ba*x*y + aa*ab*ac*ad*b5^2*ba*y^2 - aa*ab*ac*b5^2*ba*bd*x^3 - aa*ab*ad*b5^2*ba*bc*x^3 - aa*ab*b5^2*ba*bc*bd*x^3*y - aa*ac*ad*b5^2*ba*bb*x^3 - aa*ac*b5^2*ba*bb*bd*x^3*y - aa*ad*b5^2*ba*bb*bc*x^3*y - aa*b5^2*ba*bb*bc*bd*x^3*y^2 + ab*ac*ad*b5^2*ba^2*x^3 - 2*ab*ac*ad*b5^2*ba^2*x^2*y + ab*ac*ad*b5^2*ba^2*x*y^2) * hY5
+      X5 ^ 2 * Y5 ^ 2 * (x - y) ^ 2 *
+          ((aa * bc - ac * ba) * (aa * bd - ad * ba) * (ab * b5 - a5 * bb)) -
+      Xa ^ 2 * Ya ^ 2 * (x - y) ^ 2 *
+          ((ab * b5 - a5 * bb) * (ac * b5 - a5 * bc) * (ad * b5 - a5 * bd)) = 0 := by
+    linear_combination (-X5^4*Yb^2*Yc^2*Yd^2*a5*ba + X5^4*Yb^2*Yc^2*Yd^2*aa*b5 +
+        X5^2*Xb^2*Y5^2*Yc^2*Yd^2*a5*ba - X5^2*Xb^2*Y5^2*Yc^2*Yd^2*aa*b5 + Ya^2*a5^3*bb*bc*bd*x^2 -
+        2*Ya^2*a5^3*bb*bc*bd*x*y + Ya^2*a5^3*bb*bc*bd*y^2 - Ya^2*a5^2*ab*b5*bc*bd*x^2 +
+        2*Ya^2*a5^2*ab*b5*bc*bd*x*y - Ya^2*a5^2*ab*b5*bc*bd*y^2 - Ya^2*a5^2*ac*b5*bb*bd*x^2 +
+        2*Ya^2*a5^2*ac*b5*bb*bd*x*y - Ya^2*a5^2*ac*b5*bb*bd*y^2 - Ya^2*a5^2*ad*b5*bb*bc*x^2 +
+        2*Ya^2*a5^2*ad*b5*bb*bc*x*y - Ya^2*a5^2*ad*b5*bb*bc*y^2 + Ya^2*a5*ab*ac*b5^2*bd*x^2 -
+        2*Ya^2*a5*ab*ac*b5^2*bd*x*y + Ya^2*a5*ab*ac*b5^2*bd*y^2 + Ya^2*a5*ab*ad*b5^2*bc*x^2 -
+        2*Ya^2*a5*ab*ad*b5^2*bc*x*y + Ya^2*a5*ab*ad*b5^2*bc*y^2 + Ya^2*a5*ac*ad*b5^2*bb*x^2 -
+        2*Ya^2*a5*ac*ad*b5^2*bb*x*y + Ya^2*a5*ac*ad*b5^2*bb*y^2 - Ya^2*ab*ac*ad*b5^3*x^2 +
+        2*Ya^2*ab*ac*ad*b5^3*x*y - Ya^2*ab*ac*ad*b5^3*y^2) * hXa +
+        (X5^2*Xc^2*Xd^2*Y5^2*Yb^2*a5*ba - X5^2*Xc^2*Xd^2*Y5^2*Yb^2*aa*b5 -
+        Xb^2*Xc^2*Xd^2*Y5^4*a5*ba + Xb^2*Xc^2*Xd^2*Y5^4*aa*b5 + a5^3*aa*bb*bc*bd*x^2 -
+        2*a5^3*aa*bb*bc*bd*x*y + a5^3*aa*bb*bc*bd*y^2 + a5^3*ba*bb*bc*bd*x^3 -
+        2*a5^3*ba*bb*bc*bd*x^2*y + a5^3*ba*bb*bc*bd*x*y^2 - a5^2*aa*ab*b5*bc*bd*x^2 +
+        2*a5^2*aa*ab*b5*bc*bd*x*y - a5^2*aa*ab*b5*bc*bd*y^2 - a5^2*aa*ac*b5*bb*bd*x^2 +
+        2*a5^2*aa*ac*b5*bb*bd*x*y - a5^2*aa*ac*b5*bb*bd*y^2 - a5^2*aa*ad*b5*bb*bc*x^2 +
+        2*a5^2*aa*ad*b5*bb*bc*x*y - a5^2*aa*ad*b5*bb*bc*y^2 - a5^2*ab*b5*ba*bc*bd*x^3 +
+        2*a5^2*ab*b5*ba*bc*bd*x^2*y - a5^2*ab*b5*ba*bc*bd*x*y^2 - a5^2*ac*b5*ba*bb*bd*x^3 +
+        2*a5^2*ac*b5*ba*bb*bd*x^2*y - a5^2*ac*b5*ba*bb*bd*x*y^2 - a5^2*ad*b5*ba*bb*bc*x^3 +
+        2*a5^2*ad*b5*ba*bb*bc*x^2*y - a5^2*ad*b5*ba*bb*bc*x*y^2 + a5*aa*ab*ac*b5^2*bd*x^2 -
+        2*a5*aa*ab*ac*b5^2*bd*x*y + a5*aa*ab*ac*b5^2*bd*y^2 + a5*aa*ab*ad*b5^2*bc*x^2 -
+        2*a5*aa*ab*ad*b5^2*bc*x*y + a5*aa*ab*ad*b5^2*bc*y^2 + a5*aa*ac*ad*b5^2*bb*x^2 -
+        2*a5*aa*ac*ad*b5^2*bb*x*y + a5*aa*ac*ad*b5^2*bb*y^2 + a5*ab*ac*b5^2*ba*bd*x^3 -
+        2*a5*ab*ac*b5^2*ba*bd*x^2*y + a5*ab*ac*b5^2*ba*bd*x*y^2 + a5*ab*ad*b5^2*ba*bc*x^3 -
+        2*a5*ab*ad*b5^2*ba*bc*x^2*y + a5*ab*ad*b5^2*ba*bc*x*y^2 + a5*ac*ad*b5^2*ba*bb*x^3 -
+        2*a5*ac*ad*b5^2*ba*bb*x^2*y + a5*ac*ad*b5^2*ba*bb*x*y^2 - aa*ab*ac*ad*b5^3*x^2 +
+        2*aa*ab*ac*ad*b5^3*x*y - aa*ab*ac*ad*b5^3*y^2 - ab*ac*ad*b5^3*ba*x^3 +
+        2*ab*ac*ad*b5^3*ba*x^2*y - ab*ac*ad*b5^3*ba*x*y^2) * hYa +
+        (Y5^2*(a5*ba - aa*b5)*(X5^2*Yc^2*Yd^2*aa + X5^2*Yc^2*Yd^2*ba*x - Xc^2*Xd^2*Y5^2*aa -
+        Xc^2*Xd^2*Y5^2*ba*y)) * hXb +
+        (-X5^2*(a5*ba - aa*b5)*(X5^2*Yc^2*Yd^2*aa + X5^2*Yc^2*Yd^2*ba*x - Xc^2*Xd^2*Y5^2*aa -
+        Xc^2*Xd^2*Y5^2*ba*y)) * hYb +
+        (-Xd^2*Y5^2*(aa + ba*y)*(a5*ba - aa*b5)*(-X5^2*ab - X5^2*bb*y + Y5^2*ab + Y5^2*bb*x)) *
+        hXc + (X5^2*Yd^2*(aa + ba*x)*(a5*ba - aa*b5)*(-X5^2*ab - X5^2*bb*y + Y5^2*ab + Y5^2*bb*x)) *
+        hYc + (-Y5^2*(aa + ba*y)*(ac + bc*x)*(a5*ba - aa*b5)*(-X5^2*ab - X5^2*bb*y + Y5^2*ab +
+        Y5^2*bb*x)) * hXd + (X5^2*(aa + ba*x)*(ac + bc*y)*(a5*ba - aa*b5)*(-X5^2*ab - X5^2*bb*y +
+        Y5^2*ab + Y5^2*bb*x)) * hYd +
+        (-X5^2*a5*aa*ab*ac*ad*ba - X5^2*a5*aa*ab*ac*ba*bd*y - X5^2*a5*aa*ab*ad*ba*bc*y -
+        X5^2*a5*aa*ab*ba*bc*bd*y^2 - X5^2*a5*aa*ac*ad*ba*bb*y - X5^2*a5*aa*ac*ba*bb*bd*y^2 -
+        X5^2*a5*aa*ad*ba*bb*bc*y^2 - X5^2*a5*aa*ba*bb*bc*bd*y^3 - X5^2*a5*ab*ac*ad*ba^2*x -
+        X5^2*a5*ab*ac*ba^2*bd*x*y - X5^2*a5*ab*ad*ba^2*bc*x*y - X5^2*a5*ab*ba^2*bc*bd*x*y^2 -
+        X5^2*a5*ac*ad*ba^2*bb*x*y - X5^2*a5*ac*ba^2*bb*bd*x*y^2 - X5^2*a5*ad*ba^2*bb*bc*x*y^2 -
+        X5^2*a5*ba^2*bb*bc*bd*x*y^3 + X5^2*aa^2*ab*ac*ad*b5 + X5^2*aa^2*ab*ac*b5*bd*y +
+        X5^2*aa^2*ab*ad*b5*bc*y + X5^2*aa^2*ab*b5*bc*bd*y^2 + X5^2*aa^2*ac*ad*b5*bb*y +
+        X5^2*aa^2*ac*b5*bb*bd*y^2 + X5^2*aa^2*ad*b5*bb*bc*y^2 + X5^2*aa^2*b5*bb*bc*bd*y^3 +
+        X5^2*aa*ab*ac*ad*b5*ba*x + X5^2*aa*ab*ac*b5*ba*bd*x*y + X5^2*aa*ab*ad*b5*ba*bc*x*y +
+        X5^2*aa*ab*b5*ba*bc*bd*x*y^2 + X5^2*aa*ac*ad*b5*ba*bb*x*y + X5^2*aa*ac*b5*ba*bb*bd*x*y^2 +
+        X5^2*aa*ad*b5*ba*bb*bc*x*y^2 + X5^2*aa*b5*ba*bb*bc*bd*x*y^3 - Y5^2*a5*aa^2*bb*bc*bd*x^2 +
+        2*Y5^2*a5*aa^2*bb*bc*bd*x*y - Y5^2*a5*aa^2*bb*bc*bd*y^2 + 2*Y5^2*a5*aa*ab*ac*ad*ba +
+        Y5^2*a5*aa*ab*ac*ba*bd*x + Y5^2*a5*aa*ab*ac*ba*bd*y + Y5^2*a5*aa*ab*ad*ba*bc*x +
+        Y5^2*a5*aa*ab*ad*ba*bc*y + Y5^2*a5*aa*ab*ba*bc*bd*x^2 + Y5^2*a5*aa*ab*ba*bc*bd*y^2 +
+        Y5^2*a5*aa*ac*ad*ba*bb*x + Y5^2*a5*aa*ac*ad*ba*bb*y + Y5^2*a5*aa*ac*ba*bb*bd*x^2 +
+        Y5^2*a5*aa*ac*ba*bb*bd*y^2 + Y5^2*a5*aa*ad*ba*bb*bc*x^2 + Y5^2*a5*aa*ad*ba*bb*bc*y^2 +
+        Y5^2*a5*aa*ba*bb*bc*bd*x^2*y + Y5^2*a5*aa*ba*bb*bc*bd*x*y^2 + Y5^2*a5*ab*ac*ad*ba^2*x +
+        Y5^2*a5*ab*ac*ad*ba^2*y + 2*Y5^2*a5*ab*ac*ba^2*bd*x*y + 2*Y5^2*a5*ab*ad*ba^2*bc*x*y +
+        Y5^2*a5*ab*ba^2*bc*bd*x^2*y + Y5^2*a5*ab*ba^2*bc*bd*x*y^2 + 2*Y5^2*a5*ac*ad*ba^2*bb*x*y +
+        Y5^2*a5*ac*ba^2*bb*bd*x^2*y + Y5^2*a5*ac*ba^2*bb*bd*x*y^2 + Y5^2*a5*ad*ba^2*bb*bc*x^2*y +
+        Y5^2*a5*ad*ba^2*bb*bc*x*y^2 + 2*Y5^2*a5*ba^2*bb*bc*bd*x^2*y^2 - 2*Y5^2*aa^2*ab*ac*ad*b5 -
+        Y5^2*aa^2*ab*ac*b5*bd*x - Y5^2*aa^2*ab*ac*b5*bd*y - Y5^2*aa^2*ab*ad*b5*bc*x -
+        Y5^2*aa^2*ab*ad*b5*bc*y - 2*Y5^2*aa^2*ab*b5*bc*bd*x*y - Y5^2*aa^2*ac*ad*b5*bb*x -
+        Y5^2*aa^2*ac*ad*b5*bb*y - 2*Y5^2*aa^2*ac*b5*bb*bd*x*y - 2*Y5^2*aa^2*ad*b5*bb*bc*x*y -
+        Y5^2*aa^2*b5*bb*bc*bd*x^2*y - Y5^2*aa^2*b5*bb*bc*bd*x*y^2 - Y5^2*aa*ab*ac*ad*b5*ba*x -
+        Y5^2*aa*ab*ac*ad*b5*ba*y - Y5^2*aa*ab*ac*b5*ba*bd*x^2 - Y5^2*aa*ab*ac*b5*ba*bd*y^2 -
+        Y5^2*aa*ab*ad*b5*ba*bc*x^2 - Y5^2*aa*ab*ad*b5*ba*bc*y^2 - Y5^2*aa*ab*b5*ba*bc*bd*x^2*y -
+        Y5^2*aa*ab*b5*ba*bc*bd*x*y^2 - Y5^2*aa*ac*ad*b5*ba*bb*x^2 - Y5^2*aa*ac*ad*b5*ba*bb*y^2 -
+        Y5^2*aa*ac*b5*ba*bb*bd*x^2*y - Y5^2*aa*ac*b5*ba*bb*bd*x*y^2 - Y5^2*aa*ad*b5*ba*bb*bc*x^2*y -
+        Y5^2*aa*ad*b5*ba*bb*bc*x*y^2 - 2*Y5^2*aa*b5*ba*bb*bc*bd*x^2*y^2 +
+        Y5^2*ab*ac*ad*b5*ba^2*x^2 - 2*Y5^2*ab*ac*ad*b5*ba^2*x*y + Y5^2*ab*ac*ad*b5*ba^2*y^2 -
+        a5^2*aa*ab*ac*ad*ba - a5^2*aa*ab*ac*ba*bd*y - a5^2*aa*ab*ad*ba*bc*y -
+        a5^2*aa*ab*ba*bc*bd*y^2 - a5^2*aa*ac*ad*ba*bb*y - a5^2*aa*ac*ba*bb*bd*y^2 -
+        a5^2*aa*ad*ba*bb*bc*y^2 - a5^2*aa*ba*bb*bc*bd*y^3 - a5^2*ab*ac*ad*ba^2*x -
+        a5^2*ab*ac*ba^2*bd*x*y - a5^2*ab*ad*ba^2*bc*x*y - a5^2*ab*ba^2*bc*bd*x*y^2 -
+        a5^2*ac*ad*ba^2*bb*x*y - a5^2*ac*ba^2*bb*bd*x*y^2 - a5^2*ad*ba^2*bb*bc*x*y^2 -
+        a5^2*ba^2*bb*bc*bd*x*y^3 + a5*aa^2*ab*ac*ad*b5 + a5*aa^2*ab*ac*b5*bd*y +
+        a5*aa^2*ab*ad*b5*bc*y + a5*aa^2*ab*b5*bc*bd*y^2 + a5*aa^2*ac*ad*b5*bb*y +
+        a5*aa^2*ac*b5*bb*bd*y^2 + a5*aa^2*ad*b5*bb*bc*y^2 + a5*aa^2*b5*bb*bc*bd*y^3 -
+        a5*ab*ac*ad*b5*ba^2*x^2 - a5*ab*ac*b5*ba^2*bd*x^2*y - a5*ab*ad*b5*ba^2*bc*x^2*y -
+        a5*ab*b5*ba^2*bc*bd*x^2*y^2 - a5*ac*ad*b5*ba^2*bb*x^2*y - a5*ac*b5*ba^2*bb*bd*x^2*y^2 -
+        a5*ad*b5*ba^2*bb*bc*x^2*y^2 - a5*b5*ba^2*bb*bc*bd*x^2*y^3 + aa^2*ab*ac*ad*b5^2*x +
+        aa^2*ab*ac*b5^2*bd*x*y + aa^2*ab*ad*b5^2*bc*x*y + aa^2*ab*b5^2*bc*bd*x*y^2 +
+        aa^2*ac*ad*b5^2*bb*x*y + aa^2*ac*b5^2*bb*bd*x*y^2 + aa^2*ad*b5^2*bb*bc*x*y^2 +
+        aa^2*b5^2*bb*bc*bd*x*y^3 + aa*ab*ac*ad*b5^2*ba*x^2 + aa*ab*ac*b5^2*ba*bd*x^2*y +
+        aa*ab*ad*b5^2*ba*bc*x^2*y + aa*ab*b5^2*ba*bc*bd*x^2*y^2 + aa*ac*ad*b5^2*ba*bb*x^2*y +
+        aa*ac*b5^2*ba*bb*bd*x^2*y^2 + aa*ad*b5^2*ba*bb*bc*x^2*y^2 + aa*b5^2*ba*bb*bc*bd*x^2*y^3) *
+        hX5 + (-Y5^2*a5*aa*ab*ac*ad*ba - Y5^2*a5*aa*ab*ac*ba*bd*x - Y5^2*a5*aa*ab*ad*ba*bc*x -
+        Y5^2*a5*aa*ab*ba*bc*bd*x^2 - Y5^2*a5*aa*ac*ad*ba*bb*x - Y5^2*a5*aa*ac*ba*bb*bd*x^2 -
+        Y5^2*a5*aa*ad*ba*bb*bc*x^2 - Y5^2*a5*aa*ba*bb*bc*bd*x^3 - Y5^2*a5*ab*ac*ad*ba^2*y -
+        Y5^2*a5*ab*ac*ba^2*bd*x*y - Y5^2*a5*ab*ad*ba^2*bc*x*y - Y5^2*a5*ab*ba^2*bc*bd*x^2*y -
+        Y5^2*a5*ac*ad*ba^2*bb*x*y - Y5^2*a5*ac*ba^2*bb*bd*x^2*y - Y5^2*a5*ad*ba^2*bb*bc*x^2*y -
+        Y5^2*a5*ba^2*bb*bc*bd*x^3*y + Y5^2*aa^2*ab*ac*ad*b5 + Y5^2*aa^2*ab*ac*b5*bd*x +
+        Y5^2*aa^2*ab*ad*b5*bc*x + Y5^2*aa^2*ab*b5*bc*bd*x^2 + Y5^2*aa^2*ac*ad*b5*bb*x +
+        Y5^2*aa^2*ac*b5*bb*bd*x^2 + Y5^2*aa^2*ad*b5*bb*bc*x^2 + Y5^2*aa^2*b5*bb*bc*bd*x^3 +
+        Y5^2*aa*ab*ac*ad*b5*ba*y + Y5^2*aa*ab*ac*b5*ba*bd*x*y + Y5^2*aa*ab*ad*b5*ba*bc*x*y +
+        Y5^2*aa*ab*b5*ba*bc*bd*x^2*y + Y5^2*aa*ac*ad*b5*ba*bb*x*y + Y5^2*aa*ac*b5*ba*bb*bd*x^2*y +
+        Y5^2*aa*ad*b5*ba*bb*bc*x^2*y + Y5^2*aa*b5*ba*bb*bc*bd*x^3*y - a5^2*aa^2*bb*bc*bd*x^2 +
+        2*a5^2*aa^2*bb*bc*bd*x*y - a5^2*aa^2*bb*bc*bd*y^2 + a5^2*aa*ab*ac*ad*ba +
+        a5^2*aa*ab*ac*ba*bd*y + a5^2*aa*ab*ad*ba*bc*y + a5^2*aa*ab*ba*bc*bd*y^2 +
+        a5^2*aa*ac*ad*ba*bb*y + a5^2*aa*ac*ba*bb*bd*y^2 + a5^2*aa*ad*ba*bb*bc*y^2 -
+        a5^2*aa*ba*bb*bc*bd*x^3 + a5^2*aa*ba*bb*bc*bd*x^2*y + a5^2*aa*ba*bb*bc*bd*x*y^2 +
+        a5^2*ab*ac*ad*ba^2*x + a5^2*ab*ac*ba^2*bd*x*y + a5^2*ab*ad*ba^2*bc*x*y +
+        a5^2*ab*ba^2*bc*bd*x*y^2 + a5^2*ac*ad*ba^2*bb*x*y + a5^2*ac*ba^2*bb*bd*x*y^2 +
+        a5^2*ad*ba^2*bb*bc*x*y^2 - a5^2*ba^2*bb*bc*bd*x^3*y + 2*a5^2*ba^2*bb*bc*bd*x^2*y^2 -
+        a5*aa^2*ab*ac*ad*b5 - a5*aa^2*ab*ac*b5*bd*y - a5*aa^2*ab*ad*b5*bc*y +
+        a5*aa^2*ab*b5*bc*bd*x^2 - 2*a5*aa^2*ab*b5*bc*bd*x*y - a5*aa^2*ac*ad*b5*bb*y +
+        a5*aa^2*ac*b5*bb*bd*x^2 - 2*a5*aa^2*ac*b5*bb*bd*x*y + a5*aa^2*ad*b5*bb*bc*x^2 -
+        2*a5*aa^2*ad*b5*bb*bc*x*y + a5*aa^2*b5*bb*bc*bd*x^2*y - 2*a5*aa^2*b5*bb*bc*bd*x*y^2 +
+        a5*aa*ab*ac*ad*b5*ba*x - a5*aa*ab*ac*ad*b5*ba*y + a5*aa*ab*ac*b5*ba*bd*x*y -
+        a5*aa*ab*ac*b5*ba*bd*y^2 + a5*aa*ab*ad*b5*ba*bc*x*y - a5*aa*ab*ad*b5*ba*bc*y^2 +
+        a5*aa*ab*b5*ba*bc*bd*x^3 - a5*aa*ab*b5*ba*bc*bd*x^2*y + a5*aa*ac*ad*b5*ba*bb*x*y -
+        a5*aa*ac*ad*b5*ba*bb*y^2 + a5*aa*ac*b5*ba*bb*bd*x^3 - a5*aa*ac*b5*ba*bb*bd*x^2*y +
+        a5*aa*ad*b5*ba*bb*bc*x^3 - a5*aa*ad*b5*ba*bb*bc*x^2*y + a5*aa*b5*ba*bb*bc*bd*x^3*y -
+        a5*aa*b5*ba*bb*bc*bd*x^2*y^2 + 2*a5*ab*ac*ad*b5*ba^2*x^2 - a5*ab*ac*ad*b5*ba^2*x*y +
+        2*a5*ab*ac*b5*ba^2*bd*x^2*y - a5*ab*ac*b5*ba^2*bd*x*y^2 + 2*a5*ab*ad*b5*ba^2*bc*x^2*y -
+        a5*ab*ad*b5*ba^2*bc*x*y^2 + a5*ab*b5*ba^2*bc*bd*x^3*y + 2*a5*ac*ad*b5*ba^2*bb*x^2*y -
+        a5*ac*ad*b5*ba^2*bb*x*y^2 + a5*ac*b5*ba^2*bb*bd*x^3*y + a5*ad*b5*ba^2*bb*bc*x^3*y +
+        a5*b5*ba^2*bb*bc*bd*x^3*y^2 - 2*aa^2*ab*ac*ad*b5^2*x + aa^2*ab*ac*ad*b5^2*y -
+        aa^2*ab*ac*b5^2*bd*x^2 - aa^2*ab*ad*b5^2*bc*x^2 - aa^2*ab*b5^2*bc*bd*x^2*y -
+        aa^2*ac*ad*b5^2*bb*x^2 - aa^2*ac*b5^2*bb*bd*x^2*y - aa^2*ad*b5^2*bb*bc*x^2*y -
+        aa^2*b5^2*bb*bc*bd*x^2*y^2 - aa*ab*ac*ad*b5^2*ba*x^2 - aa*ab*ac*ad*b5^2*ba*x*y +
+        aa*ab*ac*ad*b5^2*ba*y^2 - aa*ab*ac*b5^2*ba*bd*x^3 - aa*ab*ad*b5^2*ba*bc*x^3 -
+        aa*ab*b5^2*ba*bc*bd*x^3*y - aa*ac*ad*b5^2*ba*bb*x^3 - aa*ac*b5^2*ba*bb*bd*x^3*y -
+        aa*ad*b5^2*ba*bb*bc*x^3*y - aa*b5^2*ba*bb*bc*bd*x^3*y^2 + ab*ac*ad*b5^2*ba^2*x^3 -
+        2*ab*ac*ad*b5^2*ba^2*x^2*y + ab*ac*ad*b5^2*ba^2*x*y^2) * hY5
   have hM : Xa ^ 2 * Ya ^ 2 * (x - y) ^ 2 * (aa * b5 - a5 * ba) ≠ 0 := by
-    exact mul_ne_zero (mul_ne_zero (mul_ne_zero (pow_ne_zero 2 hXa0) (pow_ne_zero 2 hYa0)) (pow_ne_zero 2 hxy)) h5
+    exact mul_ne_zero (mul_ne_zero (mul_ne_zero (pow_ne_zero 2 hXa0) (pow_ne_zero 2 hYa0))
+        (pow_ne_zero 2 hxy)) h5
   rw [← sub_eq_zero]
   refine (mul_eq_zero.mp ?_).resolve_right hM
   have h5' : aa * b5 - ba * a5 ≠ 0 := by rwa [mul_comm ba a5]
@@ -259,7 +388,8 @@ theorem ellRedS5_sq_sub_Q5Sq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (
     ellRedS5 a b x y α β γ δ ^ 2 - ellRedQ5Sq a b x y α β γ δ =
       ellRedDet a b β 4 * ellRedDet a b γ 4 * ellRedDet a b δ 4 / ellRedDet a b α 4 := by
   have hd : (x : ℂ) - y ≠ 0 := sub_ne_zero.mpr (by exact_mod_cast hxy)
-  have H := ellRed_five_factor_identity (ellRedRoot a b x α) (ellRedRoot a b x β) (ellRedRoot a b x γ)
+  have H := ellRed_five_factor_identity (ellRedRoot a b x α) (ellRedRoot a b x β)
+      (ellRedRoot a b x γ)
     (ellRedRoot a b x δ) (ellRedRoot a b x 4) (ellRedRoot a b y α) (ellRedRoot a b y β)
     (ellRedRoot a b y γ) (ellRedRoot a b y δ) (ellRedRoot a b y 4) (a α) (a β) (a γ) (a δ) (a 4)
     (b α) (b β) (b γ) (b δ) (b 4) x y hd hX hY h5
@@ -444,8 +574,8 @@ def ellRedIntegrand (h : ℕ) {n : ℕ} (a b : Fin n → ℂ) (m : Fin n → ℤ
   (∏ α ∈ Finset.univ.filter (fun α : Fin n => (α : ℕ) < h), (a α + b α * t) ^ (-1 / 2 : ℂ)) *
     ∏ j, (a j + b j * t) ^ (m j)
 
-/-- DLMF 19.29.11: `I(𝐦) = ∫_y^x ∏_{α=1}^{h} (a_α + b_α t)^{-1/2} ∏_{j=1}^{n} (a_j + b_j t)^{m_j} dt`,
-`x > y`, `h = 3` or `4`, `n ≥ h`, integer `m_j` (DLMF's rewriting of (19.2.3)). -/
+/-- DLMF 19.29.11: `I(𝐦) = ∫_y^x ∏_{α=1}^{h} (a_α + b_α t)^{-1/2} ∏_{j=1}^{n} (a_j + b_j t)^{m_j}
+dt`, `x > y`, `h = 3` or `4`, `n ≥ h`, integer `m_j` (DLMF's rewriting of (19.2.3)). -/
 @[dlmf 19.29.E11]
 def ellRedI (h : ℕ) {n : ℕ} (a b : Fin n → ℂ) (x y : ℝ) (m : Fin n → ℤ) : ℂ :=
   ∫ t in Ioo y x, ellRedIntegrand h a b m t
@@ -828,7 +958,8 @@ theorem ellRed_two_quadratics {f₁ g₁ h₁ f₂ g₂ h₂ x y : ℝ} (hxy : y
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `0 ≤ c + d * x ∧ 0 ≤ c + d * y`. -/
-private lemma linear_endpoints_nonneg {c d x y : ℝ} (hxy : y < x) (h : ∀ t ∈ Ioo y x, 0 < c + d * t) :
+private lemma linear_endpoints_nonneg {c d x y : ℝ} (hxy : y < x)
+    (h : ∀ t ∈ Ioo y x, 0 < c + d * t) :
     0 ≤ c + d * x ∧ 0 ≤ c + d * y := by
   have hc : IsClosed {t : ℝ | 0 ≤ c + d * t} :=
     isClosed_le continuous_const (continuous_const.add (continuous_const.mul continuous_id))

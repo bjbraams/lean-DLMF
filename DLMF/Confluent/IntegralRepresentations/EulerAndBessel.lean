@@ -281,7 +281,8 @@ theorem regularized_bessel_integral {a b z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re
     regularizedHGFun {a} {b} (-z) =
       z ^ ((1 - b) / 2) / Gamma a *
         ∫ t : ℝ in Set.Ioi 0,
-          exp (-(t : ℂ)) * (t : ℂ) ^ (a - b / 2 - 1 / 2) * besselJ (b - 1) (2 * (z * t) ^ (1 / 2 : ℂ)) := by
+          exp (-(t : ℂ)) * (t : ℂ) ^ (a - b / 2 - 1 / 2) *
+              besselJ (b - 1) (2 * (z * t) ^ (1 / 2 : ℂ)) := by
   have hz0 : z ≠ 0 := by intro h; rw [h] at hz; simp at hz
   have hG : Gamma a ≠ 0 := Gamma_ne_zero_of_re_pos ha
   have hcongr : ∀ t ∈ Set.Ioi (0 : ℝ),
@@ -338,7 +339,8 @@ theorem kummerU_laplace_integrable {a b z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re)
   simp only [neg_re, mul_re, ofReal_re, ofReal_im, mul_zero, sub_zero, sub_re, one_re]
   apply mul_le_mul_of_nonneg_left ?_ (by positivity)
   rw [← Real.rpow_natCast]
-  exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by simpa [N] using Nat.le_ceil (b - a - 1).re)
+  exact Real.rpow_le_rpow_of_exponent_le (by linarith)
+      (by simpa [N] using Nat.le_ceil (b - a - 1).re)
 
 /-- Tricomi's normalized Laplace integral is continuous in the second parameter.
 A fixed integer power dominates every kernel in a neighborhood of that parameter. -/
@@ -724,7 +726,8 @@ def besselKUKernel (a b : ℂ) (x : ℝ) (t s : ℝ) : ℂ :=
 
 /-- Step 1: insert Schläfli's integral for `K_{b-1}(2√(xt))`. -/
 theorem besselK_kernel_eq_integral {a b : ℂ} {x t : ℝ} (hx : 0 < x) (ht : 0 < t) :
-    exp (-(t : ℂ)) * (t : ℂ) ^ (a - b / 2 - 1 / 2) * besselK (b - 1) (2 * ((x : ℂ) * t) ^ (1 / 2 : ℂ)) =
+    exp (-(t : ℂ)) * (t : ℂ) ^ (a - b / 2 - 1 / 2) *
+        besselK (b - 1) (2 * ((x : ℂ) * t) ^ (1 / 2 : ℂ)) =
       1 / 2 * (x : ℂ) ^ ((1 - b) / 2) * ∫ s : ℝ in Ioi 0, besselKUKernel a b x t s := by
   have hxt : 0 < x * t := mul_pos hx ht
   have hy : 0 < 2 * Real.sqrt (x * t) := by positivity
@@ -755,7 +758,8 @@ theorem besselK_kernel_eq_integral {a b : ℂ} {x t : ℝ} (hx : 0 < x) (ht : 0 
         (s : ℂ) ^ (b - 1 - 1)
   have key : exp (-(t : ℂ)) * exp ((a - b / 2 - 1 / 2) * (Real.log t : ℂ)) *
       exp (-(b - 1) * ((Real.log x + Real.log t) / 2 : ℝ)) =
-      exp ((1 - b) / 2 * (Real.log x : ℂ)) * (exp (-(t : ℂ)) * exp ((a - b) * (Real.log t : ℂ))) := by
+      exp ((1 - b) / 2 * (Real.log x : ℂ)) *
+          (exp (-(t : ℂ)) * exp ((a - b) * (Real.log t : ℂ))) := by
     rw [← exp_add, ← exp_add, ← exp_add, ← exp_add]
     congr 1
     push_cast
@@ -782,7 +786,8 @@ theorem integral_besselKUKernel_t {a b : ℂ} {x s : ℝ} (hx : 0 < x) (hs : 0 <
 
 /-- Step 3: the outer integral in `s` is a scaled Tricomi Laplace integral. -/
 theorem integral_besselKU_s {a b : ℂ} {x : ℝ} (hx : 0 < x) :
-    ∫ s : ℝ in Ioi 0, exp (-(s : ℂ)) * (s : ℂ) ^ (b - 2) * ((1 / (1 + x / s) : ℝ) : ℂ) ^ (a - b + 1) =
+    ∫ s : ℝ in Ioi 0, exp (-(s : ℂ)) * (s : ℂ) ^ (b - 2) *
+        ((1 / (1 + x / s) : ℝ) : ℂ) ^ (a - b + 1) =
       (x : ℂ) ^ (b - 1) * ∫ u : ℝ in Ioi 0,
         exp (-(x : ℂ) * u) * (u : ℂ) ^ (a - 1) * (1 + (u : ℂ)) ^ (b - a - 1) := by
   have h := integral_comp_mul_left_Ioi (fun s : ℝ => exp (-(s : ℂ)) * (s : ℂ) ^ (b - 2) *
@@ -835,7 +840,8 @@ theorem norm_besselKUKernel {a b : ℂ} {x t s : ℝ} (ht : 0 < t) (hs : 0 < s) 
     simp
   rw [h1]
   simp only [neg_re, ofReal_re, sub_re]
-  have : Real.exp (-t) * Real.exp (-s - x * t / s) = Real.exp (-s) * Real.exp (-(1 + x / s) * t) := by
+  have : Real.exp (-t) * Real.exp (-s - x * t / s) = Real.exp (-s) *
+      Real.exp (-(1 + x / s) * t) := by
     rw [← Real.exp_add, ← Real.exp_add]; congr 1; field_simp; ring
   simp only [show (2 : ℂ).re = 2 by norm_num]
   linear_combination t ^ (a - b).re * s ^ (b.re - 2) * this
@@ -857,7 +863,8 @@ theorem integrable_besselKUKernel {a b : ℂ} {x : ℝ} (hx : 0 < x) (hab : 0 < 
       (measurable_id.prodMk measurable_const)).aestronglyMeasurable ?_
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     rw [Function.uncurry_apply_pair, norm_besselKUKernel ht hs0, Real.rpow_one]
-  · have hcl : ∀ s ∈ Ioi (0 : ℝ), ∫ t : ℝ in Ioi 0, ‖Function.uncurry (besselKUKernel a b x) (t, s)‖ =
+  · have hcl : ∀ s ∈ Ioi (0 : ℝ), ∫ t : ℝ in Ioi 0,
+        ‖Function.uncurry (besselKUKernel a b x) (t, s)‖ =
         Real.exp (-s) * s ^ (b.re - 2) * ((1 / (1 + x / s)) ^ (A + 1) * Real.Gamma (A + 1)) := by
       intro s hs
       have hs0 : (0 : ℝ) < s := hs
@@ -867,7 +874,8 @@ theorem integrable_besselKUKernel {a b : ℂ} {x : ℝ} (hx : 0 < x) (hab : 0 < 
       rw [Function.uncurry_apply_pair, norm_besselKUKernel ht hs0, add_sub_cancel_right]
       simp only [A]
       ring_nf
-    refine Integrable.congr ?_ ((ae_restrict_mem measurableSet_Ioi).mono fun s hs => (hcl s hs).symm)
+    refine Integrable.congr ?_
+        ((ae_restrict_mem measurableSet_Ioi).mono fun s hs => (hcl s hs).symm)
     have hG := (Real.GammaIntegral_convergent ha).const_mul
       (Real.Gamma (A + 1) * x ^ (-(A + 1)))
     refine hG.mono' ?_ ?_
@@ -888,9 +896,11 @@ theorem integrable_besselKUKernel {a b : ℂ} {x : ℝ} (hx : 0 < x) (hab : 0 < 
         rw [div_eq_mul_inv]
         exact mul_le_mul_of_nonneg_left (inv_anti₀ hxp hsx) (by positivity)
       calc Real.exp (-s) * s ^ (b.re - 2) * (s ^ (A + 1) / (s + x) ^ (A + 1) * Real.Gamma (A + 1))
-          ≤ Real.exp (-s) * s ^ (b.re - 2) * (s ^ (A + 1) * (x ^ (A + 1))⁻¹ * Real.Gamma (A + 1)) := by
+          ≤ Real.exp (-s) * s ^ (b.re - 2) *
+              (s ^ (A + 1) * (x ^ (A + 1))⁻¹ * Real.Gamma (A + 1)) := by
             gcongr
-        _ = Real.Gamma (A + 1) * (x ^ (A + 1))⁻¹ * (Real.exp (-s) * (s ^ (b.re - 2) * s ^ (A + 1))) := by
+        _ = Real.Gamma (A + 1) * (x ^ (A + 1))⁻¹ *
+            (Real.exp (-s) * (s ^ (b.re - 2) * s ^ (A + 1))) := by
             ring
         _ = _ := by rw [hsA]
 
@@ -912,7 +922,8 @@ theorem kummerU_eq_integral_besselK_ofReal {a b : ℂ} {x : ℝ} (hx : 0 < x)
   have h2 : ∫ t : ℝ in Ioi 0, ∫ s : ℝ in Ioi 0, besselKUKernel a b x t s =
       Gamma (a - b + 1) * ∫ s : ℝ in Ioi 0, exp (-(s : ℂ)) * (s : ℂ) ^ (b - 2) *
         ((1 / (1 + x / s) : ℝ) : ℂ) ^ (a - b + 1) := by
-    rw [integral_integral_swap (integrable_besselKUKernel hx hab ha0), ← MeasureTheory.integral_const_mul]
+    rw [integral_integral_swap (integrable_besselKUKernel hx hab ha0),
+        ← MeasureTheory.integral_const_mul]
     refine setIntegral_congr_fun measurableSet_Ioi fun s hs => ?_
     rw [integral_besselKUKernel_t hx hs hab]
     ring
@@ -992,7 +1003,8 @@ theorem differentiableOn_integral_besselK {a b : ℂ} (ha : (b - 1).re < a.re) (
     have hw := two_mul_cpow_half_mem_slitPlane hz ht0
     have hc : ContinuousAt (fun s : ℝ => (s : ℂ)) t := continuous_ofReal.continuousAt
     have hK : ContinuousAt (besselK (b - 1)) (2 * (z * t) ^ (1 / 2 : ℂ)) :=
-      (differentiableOn_besselK_slitPlane (b - 1)).continuousOn.continuousAt (isOpen_slitPlane.mem_nhds hw)
+      (differentiableOn_besselK_slitPlane (b - 1)).continuousOn.continuousAt
+          (isOpen_slitPlane.mem_nhds hw)
     have hin : ContinuousAt (fun s : ℝ => 2 * (z * s) ^ (1 / 2 : ℂ)) t :=
       continuousAt_const.mul ((continuousAt_const.mul hc).cpow continuousAt_const hzt)
     exact ((hc.neg.cexp).mul (hc.cpow continuousAt_const hts)).mul
@@ -1041,7 +1053,8 @@ theorem differentiableOn_integral_besselK {a b : ℂ} (ha : (b - 1).re < a.re) (
       simp only [s, D]
       ring
     have hG : 0 ≤ Real.Gamma s := (Real.Gamma_pos_of_pos hs).le
-    calc Real.exp (-t) * t ^ (a.re - b.re / 2 - 1 / 2) * ‖besselK (b - 1) (2 * (z * t) ^ (1 / 2 : ℂ))‖
+    calc Real.exp (-t) * t ^ (a.re - b.re / 2 - 1 / 2) *
+           ‖besselK (b - 1) (2 * (z * t) ^ (1 / 2 : ℂ))‖
         ≤ Real.exp (-t) * t ^ (a.re - b.re / 2 - 1 / 2) *
             (Real.Gamma s * (t ^ (-s / 2) * c ^ (-s))) := by
           gcongr

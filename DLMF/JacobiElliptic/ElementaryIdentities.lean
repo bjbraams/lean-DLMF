@@ -295,7 +295,8 @@ local notation "θ₃" => jacobiThetaThreeTau
 local notation "θ₄" => jacobiThetaFourTau
 
 /-- `1 - k² sn⁴ z ≠ 0` where `sn` is finite at `z` and `2z` (helper). -/
-private lemma one_sub_sq_mul_jacobiSnk_pow_four_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+private lemma one_sub_sq_mul_jacobiSnk_pow_four_ne_zero {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     (hn : JacobiRegulark .n z k) (hn2 : JacobiRegulark .n (2 * z) k) :
     1 - k ^ 2 * jacobiSnk z k ^ 4 ≠ 0 := by
   have hτ := jacobiTauk_im_pos hk
@@ -647,7 +648,12 @@ theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : Ja
     exact hcross3.symm
   have eG := jacobiPQk_eq_div_of_regular_n hn2
   have eGw := jacobiPQk_eq_div_of_regular_n hn
-  cases p <;> cases q <;> cases r <;> try { exfalso; first | exact hp rfl | exact hq rfl | exact hr rfl | exact hpq rfl | exact hpr rfl | exact hqr rfl }
+  cases p <;> cases q <;> cases r <;>
+    try
+      exfalso
+      first
+        | exact hp rfl | exact hq rfl | exact hr rfl
+        | exact hpq rfl | exact hpr rfl | exact hqr rfl
   all_goals have hCsk (t : ℂ) : jacobiPQk .c .s t k = jacobiCsk t k := rfl
   all_goals have hDsk (t : ℂ) : jacobiPQk .d .s t k = jacobiDsk t k := rfl
   all_goals have hNsk (t : ℂ) : jacobiPQk .n .s t k = jacobiNsk t k := rfl
@@ -663,7 +669,9 @@ theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : Ja
   all_goals simp only [gcs, gds, gns, gdc, gnc, gcd, gnd, wdc, wnc, wcd, wnd] at h1 h2 h3 ⊢
   all_goals first | rw [Rcd] | rw [Rdc] | rw [Rnc] | rw [Rnd] | rw [Rcn] | rw [Rdn]
   all_goals refine ⟨?_, ?_, ?_⟩
-  all_goals have hdc : jacobiDnk (2 * w) k + jacobiCnk (2 * w) k ≠ 0 := by simpa only [add_comm] using hcd
+  all_goals
+    have hdc : jacobiDnk (2 * w) k + jacobiCnk (2 * w) k ≠ 0 := by
+      simpa only [add_comm] using hcd
   all_goals field_simp [hcd, hdc, hcn, hdn, hS0, hC0, hD0, hc0, hd0, h1, h2, h3]
   all_goals ring
 
@@ -690,12 +698,14 @@ theorem jacobiComodulusk_mem_jacobiModulusDomain {k : ℂ} (hk : k ∈ jacobiMod
 
 /-- Identity under the stated parameter and domain assumptions: `compEllIntKk (jacobiComodulusk k)
 = compEllIntKpk k`. -/
-theorem compEllIntKk_jacobiComodulusk_eq_compEllIntKpk (k : ℂ) : compEllIntKk (jacobiComodulusk k) = compEllIntKpk k := by
+theorem compEllIntKk_jacobiComodulusk_eq_compEllIntKpk (k : ℂ) : compEllIntKk (jacobiComodulusk k) =
+    compEllIntKpk k := by
   rw [compEllIntKk, compEllIntKpk, jacobiComodulusk_sq]
 
 /-- Identity under the stated parameter and domain assumptions: `compEllIntKpk (jacobiComodulusk
 k) = compEllIntKk k`. -/
-private lemma compEllIntKpk_jacobiComodulusk_eq_compEllIntKk (k : ℂ) : compEllIntKpk (jacobiComodulusk k) = compEllIntKk k := by
+private lemma compEllIntKpk_jacobiComodulusk_eq_compEllIntKk (k : ℂ) : compEllIntKpk
+    (jacobiComodulusk k) = compEllIntKk k := by
   rw [compEllIntKk, compEllIntKpk, jacobiComodulusk_sq]; ring_nf
 
 /-- Identity under the stated parameter and domain assumptions: `jacobiTauk (jacobiComodulusk k) =
@@ -704,8 +714,10 @@ private lemma jacobiTauk_jacobiComodulusk {k : ℂ} (hk : k ∈ jacobiModulusDom
     jacobiTauk (jacobiComodulusk k) = -1 / jacobiTauk k := by
   have h1 := compEllIntKk_ne_zero hk
   have h2 : compEllIntKpk k ≠ 0 := by
-    rw [← compEllIntKk_jacobiComodulusk_eq_compEllIntKpk]; exact compEllIntKk_ne_zero (jacobiComodulusk_mem_jacobiModulusDomain hk)
-  rw [jacobiTauk, jacobiTauk, compEllIntKk_jacobiComodulusk_eq_compEllIntKpk, compEllIntKpk_jacobiComodulusk_eq_compEllIntKk]
+    rw [← compEllIntKk_jacobiComodulusk_eq_compEllIntKpk];
+        exact compEllIntKk_ne_zero (jacobiComodulusk_mem_jacobiModulusDomain hk)
+  rw [jacobiTauk, jacobiTauk, compEllIntKk_jacobiComodulusk_eq_compEllIntKpk,
+      compEllIntKpk_jacobiComodulusk_eq_compEllIntKk]
   field_simp
   simp [I_sq]
 
@@ -760,14 +772,16 @@ theorem jacobiPQk_I_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p q : Jacobi
     (z : ℂ) : jacobiPQk p q (I * z) k =
       (if p = .s then -I else 1) / (if q = .s then -I else 1) *
         ((if p = .s then -1 else 1) * (if q = .s then -1 else 1)) *
-        jacobiPQk (jacobiLetterModularSwap p) (jacobiLetterModularSwap q) z (jacobiComodulusk k) := by
+        jacobiPQk (jacobiLetterModularSwap p) (jacobiLetterModularSwap q) z
+            (jacobiComodulusk k) := by
   have hτ := jacobiTauk_im_pos hk
   have hσ : jacobiLetterModularSwap p ≠ jacobiLetterModularSwap q := by
     cases p <;> cases q <;> simp_all [jacobiLetterModularSwap]
   have hw : jacobiZetak (I * z) k * (-1 / jacobiTauk k) = -jacobiZetak z (jacobiComodulusk k) := by
     have h1 := compEllIntKk_ne_zero hk
     have h2 : compEllIntKpk k ≠ 0 := by
-      rw [← compEllIntKk_jacobiComodulusk_eq_compEllIntKpk]; exact compEllIntKk_ne_zero (jacobiComodulusk_mem_jacobiModulusDomain hk)
+      rw [← compEllIntKk_jacobiComodulusk_eq_compEllIntKpk];
+          exact compEllIntKk_ne_zero (jacobiComodulusk_mem_jacobiModulusDomain hk)
     rw [jacobiZetak, jacobiZetak, jacobiTauk, compEllIntKk_jacobiComodulusk_eq_compEllIntKpk]
     field_simp
   unfold jacobiPQk jacobiGlaisher
@@ -808,7 +822,8 @@ theorem jacobi_imaginary_transformation {k : ℂ} (hk : k ∈ jacobiModulusDomai
   simp only [jacobiSnk, jacobiCnk, jacobiDnk, jacobiCdk, jacobiSdk, jacobiNdk, jacobiDck,
     jacobiNck, jacobiSck, jacobiNsk, jacobiDsk, jacobiCsk]
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
-    (rw [jacobiPQk_I_mul hk _ _ (by decide)]; simp only [jacobiLetterModularSwap, reduceCtorEq, ↓reduceIte, k'];
+    (rw [jacobiPQk_I_mul hk _ _ (by decide)];
+        simp only [jacobiLetterModularSwap, reduceCtorEq, ↓reduceIte, k'];
       try field_simp) <;> (try ring_nf) <;> (try simp [I_sq])
 
 end DLMF.JacobiElliptic

@@ -36,7 +36,8 @@ namespace DLMF.NumberTheory
 
 /-- Hecke product formula for a sequence with `g 0 = 1` and
 `g (r + 2) = g 1 * g (r + 1) - c * g r`. -/
-private lemma mul_eq_sum_pow_mul_of_recurrence {R : Type*} [CommRing R] (g : ℕ → R) (c : R) (h0 : g 0 = 1)
+private lemma mul_eq_sum_pow_mul_of_recurrence {R : Type*} [CommRing R] (g : ℕ → R)
+    (c : R) (h0 : g 0 = 1)
     (hrec : ∀ r, g (r + 2) = g 1 * g (r + 1) - c * g r) :
     ∀ a b : ℕ, a ≤ b → g a * g b = ∑ k ∈ range (a + 1), c ^ k * g (a + b - 2 * k) := by
   have h1 : ∀ b, 1 ≤ b → g 1 * g b = g (b + 1) + c * g (b - 1) := by
@@ -92,7 +93,8 @@ theorem hecke_relation_prime_pow {R : Type*} [CommRing R] (f w : ℕ → R) {p :
 
 /-- Splitting off the `p`-part of `∑_{d ∣ (m,n)} w(d) f(mn/d²)` for multiplicative `f` and
 completely multiplicative `w`. -/
-private lemma sum_divisors_gcd_mul_split {R : Type*} [CommRing R] {f w : ℕ → R} (hf : IsMultiplicativeFn f)
+private lemma sum_divisors_gcd_mul_split {R : Type*} [CommRing R] {f w : ℕ → R}
+    (hf : IsMultiplicativeFn f)
     (hw : ∀ i j, w (i * j) = w i * w j) {p a b m' n' : ℕ} (hp : 0 < p) (hm : p.Coprime m')
     (hn : p.Coprime n') (hm0 : 0 < m') (hn0 : 0 < n') :
     ∑ d ∈ ((p ^ a * m').gcd (p ^ b * n')).divisors,
@@ -132,7 +134,8 @@ private lemma sum_divisors_gcd_mul_split {R : Type*} [CommRing R] {f w : ℕ →
 
 /-- Hecke multiplication formula `f(m) f(n) = ∑_{d ∣ (m,n)} w(d) f(mn/d²)` for multiplicative
 `f` satisfying it at prime powers, with `w` completely multiplicative. -/
-theorem hecke_relation_of_prime_pow {R : Type*} [CommRing R] {f w : ℕ → R} (hf : IsMultiplicativeFn f)
+theorem hecke_relation_of_prime_pow {R : Type*} [CommRing R] {f w : ℕ → R}
+    (hf : IsMultiplicativeFn f)
     (hw : ∀ i j, w (i * j) = w i * w j)
     (hpp : ∀ p, p.Prime → ∀ a b : ℕ, f (p ^ a) * f (p ^ b) =
       ∑ d ∈ (p ^ min a b).divisors, w d * f (p ^ (a + b) / d ^ 2))

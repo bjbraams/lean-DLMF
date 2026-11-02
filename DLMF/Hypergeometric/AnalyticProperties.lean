@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.SeriesProperties
+public import DLMF.Hypergeometric.Basic.SpecialValues
 public import DLMF.Hypergeometric.ConnectionFormulas
 
 /-!
@@ -142,7 +142,8 @@ theorem conditional_convergence_on_circle
         (hev.mono fun k hk => hk.2) hr
     set M := ‖α‖ + ‖a * b - c‖ with hM
     have hvar : Summable fun k => ‖gaussHGCoeff a b c (k + 1) - gaussHGCoeff a b c k‖ := by
-      refine Summable.of_norm_bounded_eventually_nat (g := fun k : ℕ => 3 * M * ‖L‖ * (k : ℝ) ^ (σ - 1))
+      refine Summable.of_norm_bounded_eventually_nat
+          (g := fun k : ℕ => 3 * M * ‖L‖ * (k : ℝ) ^ (σ - 1))
         ((Real.summable_nat_rpow.mpr (by linarith)).mul_left _) ?_
       obtain ⟨K, hK⟩ : ∃ K : ℕ, 2 * ‖c‖ + 1 ≤ K := exists_nat_ge _
       filter_upwards [hev, eventually_ge_atTop (K + 1)] with k hk hkK
@@ -362,7 +363,8 @@ theorem zero_balanced_limit {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ))
       have hwb : 1 - (x : ℂ) ∈ Metric.eball (0 : ℂ) 1 := mem_eball_one_of_norm_lt_one hwn
       have hF1 := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b 1).hasSum_mul_pow hwb
       have hHs := hH.hasSum_mul_pow hwb
-      have hsum : HasSum (fun k : ℕ => poch a k * poch b k / ((k.factorial : ℂ) * (k.factorial : ℂ)) *
+      have hsum : HasSum (fun k : ℕ => poch a k * poch b k /
+          ((k.factorial : ℂ) * (k.factorial : ℂ)) *
           (1 - (x : ℂ)) ^ k * (log (1 - (x : ℂ)) - digamma (k + 1) - digamma (k + 1) +
             digamma (a + k) + digamma (b + k)))
           (log (1 - (x : ℂ)) * ₂F₁ a b 1 (1 - (x : ℂ)) + H (1 - (x : ℂ))) := by
@@ -404,7 +406,8 @@ theorem zero_balanced_limit {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ))
     obtain ⟨n, b', hF, hG⟩ := hpoly
     rw [hG, div_zero]
     have hcont : Tendsto (fun x : ℝ => ₂F₁ a b (a + b) (x : ℂ)) (𝓝[<] 1)
-        (𝓝 (∑ k ∈ Finset.range (n + 1), gaussHGCoeff (-(n : ℂ)) b' (a + b) k * ((1 : ℝ) : ℂ) ^ k)) := by
+        (𝓝 (∑ k ∈ Finset.range (n + 1), gaussHGCoeff (-(n : ℂ)) b' (a + b) k *
+            ((1 : ℝ) : ℂ) ^ k)) := by
       rw [hF]
       simp_rw [ordinaryHypergeometric_eq_sum_neg_nat]
       refine Tendsto.mono_left ?_ nhdsWithin_le_nhds
@@ -477,7 +480,8 @@ theorem imaginary_excess_limit
       rw [← cpow_add _ _ hne0, neg_add_cancel, cpow_zero]
     rw [show a + b - c = -s by rw [hs]; ring, show c - a - b = s from rfl,
       div_eq_mul_inv (Gamma c * Gamma s)]
-    rw [div_eq_mul_inv _ (Gamma (c - a) * Gamma (c - b)), div_eq_mul_inv _ (Gamma a * Gamma b)] at hcon
+    rw [div_eq_mul_inv _ (Gamma (c - a) * Gamma (c - b)),
+        div_eq_mul_inv _ (Gamma a * Gamma b)] at hcon
     change _ = _ * u - _ * v * _ at hcon
     rw [hGs1'] at hcon
     rw [hGms] at hrefl hcon
@@ -561,7 +565,8 @@ theorem diagonal_parameter_limit (b : ℂ) (m l : ℕ) {z : ℂ} (hz : ‖z‖ <
     have : m + l = j := by exact_mod_cast this
     omega
   have hPc : Continuous fun a : ℂ => poch (a - l) l :=
-    ((Polynomial.differentiable (ascPochhammer ℂ l)).comp (differentiable_id.sub_const _)).continuous
+    ((Polynomial.differentiable (ascPochhammer ℂ l)).comp
+        (differentiable_id.sub_const _)).continuous
   set δ := ‖poch (-(m : ℂ) - l) l‖ / 2 with hδ
   have hδ0 : 0 < δ := by have := norm_pos_iff.mpr hP0; positivity
   -- eventual properties near `-m`

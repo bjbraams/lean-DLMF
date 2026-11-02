@@ -67,7 +67,8 @@ private lemma q_mul_pow_ne_one {q : ℂ} (hq : ‖q‖<1) : ∀ n : ℕ, q*q^n �
   rw [pow_succ', h, sub_self]
 
 /-- A double geometric bound gives summability on `ℕ × ℕ`. -/
-private lemma summable_of_norm_le_geom_mul_geom {f : ℕ × ℕ → ℂ} {x y : ℂ} (hx : ‖x‖<1) (hy : ‖y‖<1) (C : ℝ)
+private lemma summable_of_norm_le_geom_mul_geom {f : ℕ × ℕ → ℂ} {x y : ℂ} (hx : ‖x‖<1)
+    (hy : ‖y‖<1) (C : ℝ)
     (h : ∀ p : ℕ × ℕ, ‖f p‖ ≤ C * (‖x‖^p.1 * ‖y‖^p.2)) : Summable f := by
   have hs : Summable fun p : ℕ × ℕ => ‖x‖^p.1 * ‖y‖^p.2 :=
     Summable.mul_of_nonneg (summable_geometric_of_lt_one (norm_nonneg _) hx)
@@ -209,7 +210,8 @@ theorem qAppell2_transformation (a b bp c cp q x y : ℂ)
     have hR : ∀ j : ℕ, qPochhammerListInf [b,a*x] q / qPochhammerListInf [c,x] q * U (n, j) =
         W * (qPochhammerInf b q * qPochhammerInf (a*x*q^n) q /
           (qPochhammerInf c q * qPochhammerInf x q)) *
-        (qPochhammer (c/b) q j * qPochhammer x q j / (qPochhammer (a*x*q^n) q j * qPochhammer q q j) *
+        (qPochhammer (c/b) q j * qPochhammer x q j /
+            (qPochhammer (a*x*q^n) q j * qPochhammer q q j) *
           b^j) := by
       intro j
       have hqj : qPochhammer q q j ≠ 0 := qPochhammer_self_ne_zero hq j
@@ -218,7 +220,8 @@ theorem qAppell2_transformation (a b bp c cp q x y : ℂ)
       simp only [hUdef, qPochhammerListInf, qPochhammerList, List.map_cons, List.map_nil,
         List.prod_cons, List.prod_nil, mul_one, W]
       rw [qPochhammer_add, hsplit]
-      have hc0 : qPochhammerInf c q ≠ 0 := qPochhammerInf_ne_zero hq (fun k => sub_ne_zero.mpr (hcr k).symm)
+      have hc0 : qPochhammerInf c q ≠ 0 :=
+          qPochhammerInf_ne_zero hq (fun k => sub_ne_zero.mpr (hcr k).symm)
       have hx0 : qPochhammerInf x q ≠ 0 := qPochhammerInf_ne_zero_of_norm_lt_one hx hq
       field_simp
     rw [tsum_congr hL, tsum_mul_left, hH]
@@ -278,7 +281,8 @@ theorem qAppell3_transformation (a ap b bp c q x y : ℂ)
     have hR : ∀ j : ℕ, qPochhammerListInf [a,b*x] q / qPochhammerListInf [c,x] q * U (n, j) =
         W * (qPochhammerInf a q * qPochhammerInf (b*x) q /
           (qPochhammerInf (c*q^n) q * qPochhammerInf x q)) *
-        (qPochhammer (c/a*q^n) q j * qPochhammer x q j / (qPochhammer (b*x) q j * qPochhammer q q j) *
+        (qPochhammer (c/a*q^n) q j * qPochhammer x q j /
+            (qPochhammer (b*x) q j * qPochhammer q q j) *
           a^j) := by
       intro j
       have hqj : qPochhammer q q j ≠ 0 := qPochhammer_self_ne_zero hq j
@@ -341,7 +345,8 @@ theorem summable_qLauricella (n : ℕ) (a c q : ℂ) (b x : Fin n → ℂ)
     _ = _ := by simp only [prod_mul_distrib]; ring
 
 /-- Sums of products over `Fin n → ℕ` factor into products of absolutely convergent sums. -/
-private lemma tsum_pi_prod_eq_prod_tsum : ∀ (n : ℕ) (f : Fin n → ℕ → ℂ), (∀ i, Summable fun k => ‖f i k‖) →
+private lemma tsum_pi_prod_eq_prod_tsum : ∀ (n : ℕ) (f : Fin n → ℕ → ℂ),
+    (∀ i, Summable fun k => ‖f i k‖) →
     Summable (fun m : Fin n → ℕ => ‖∏ i, f i (m i)‖) ∧
       ∑' m : Fin n → ℕ, ∏ i, f i (m i) = ∏ i, ∑' k, f i k
   | 0, f, _ => by
@@ -350,7 +355,8 @@ private lemma tsum_pi_prod_eq_prod_tsum : ∀ (n : ℕ) (f : Fin n → ℕ → �
   | n+1, f, hf => by
     obtain ⟨ih1, ih2⟩ := tsum_pi_prod_eq_prod_tsum n (fun i => f i.succ) (fun i => hf _)
     let e := Fin.consEquiv fun _ : Fin (n+1) => ℕ
-    have he : ∀ p : ℕ × (Fin n → ℕ), (∏ i, f i (e p i)) = f 0 p.1 * ∏ i : Fin n, f i.succ (p.2 i) := by
+    have he : ∀ p : ℕ × (Fin n → ℕ), (∏ i, f i (e p i)) = f 0 p.1 * ∏ i : Fin n,
+        f i.succ (p.2 i) := by
       intro p
       simp [e, Fin.consEquiv, Fin.prod_univ_succ]
     have hs : Summable fun p : ℕ × (Fin n → ℕ) => ‖f 0 p.1‖ * ‖∏ i : Fin n, f i.succ (p.2 i)‖ :=
@@ -438,7 +444,8 @@ theorem qLauricella_transformation (n : ℕ) (a c q : ℂ) (b x : Fin n → ℂ)
     have hk : ‖a*q^(∑ i, m i)‖ < 1 := lt_of_le_of_lt (hpow a _) ha
     have hqb := q_binomial_theorem (a := c/a) hq hk
     rw [show c/a*(a*q^(∑ i, m i)) = c*q^(∑ i, m i) by field_simp] at hqb
-    have hW : ∀ j : ℕ, G (m, j) = (∏ i, qPochhammer (b i) q (m i) / qPochhammer q q (m i) * x i^(m i)) *
+    have hW : ∀ j : ℕ, G (m, j) =
+        (∏ i, qPochhammer (b i) q (m i) / qPochhammer q q (m i) * x i^(m i)) *
         (qPochhammer (c/a) q j / qPochhammer q q j * (a*q^(∑ i, m i))^j) := by
       intro j
       simp only [hG, hC, hF, mul_pow, ← pow_mul, ← prod_pow_eq_pow_sum, prod_mul_distrib]
@@ -472,7 +479,8 @@ theorem qLauricella_transformation (n : ℕ) (a c q : ℂ) (b x : Fin n → ℂ)
         qPochhammerListInf (c :: List.ofFn x) q *
         qPhiTerm ((c/a) :: List.ofFn x) (List.ofFn (fun i => b i*x i)) q a j := by
     intro j
-    rw [prod_congr rfl fun i _ => qPochhammerInf_ratio_shift hq (hxf i) (hbxf i) j, prod_mul_distrib,
+    rw [prod_congr rfl fun i _ => qPochhammerInf_ratio_shift hq (hxf i) (hbxf i) j,
+        prod_mul_distrib,
       prod_div_distrib, prod_div_distrib]
     have n2 : ∏ i, qPochhammerInf (x i) q ≠ 0 := prod_ne_zero_iff.mpr fun i _ =>
       qPochhammerInf_ne_zero_of_norm_lt_one (hx i) hq

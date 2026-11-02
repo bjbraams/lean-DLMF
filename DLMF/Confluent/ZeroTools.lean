@@ -86,7 +86,8 @@ theorem KztIsSol.continuousOn {p q y y' : ℝ → ℝ} (h : KztIsSol p q y y') {
 
 /-- The weighted Wronskian is odd in `y`. -/
 theorem kzt_W_neg (p u u' y y' : ℝ → ℝ) (x : ℝ) :
-    ODE.sturmWronskian p u u' (fun x => -y x) (fun x => -y' x) x = -ODE.sturmWronskian p u u' y y' x := by
+    ODE.sturmWronskian p u u' (fun x => -y x) (fun x => -y' x) x =
+        -ODE.sturmWronskian p u u' y y' x := by
   simp only [ODE.sturmWronskian]; ring
 
 section Comparison
@@ -229,7 +230,8 @@ omit hp in
 /-- `W = p (u'y - uy')` is strictly decreasing where `u, y > 0` and `qy < qu`. -/
 theorem kzt_W_strictAntiOn (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {s : Set ℝ} (hs : s ⊆ Ioi (0:ℝ)) (hcv : Convex ℝ s)
-    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn (ODE.sturmWronskian p u u' y y') s := by
+    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn
+        (ODE.sturmWronskian p u u' y y') s := by
   refine strictAntiOn_of_deriv_neg hcv (kzt_W_continuousOn hy hu hs) fun x hx => ?_
   have hx' := hs (interior_subset hx)
   rw [(kzt_hasDerivAt_W hy hu hx').deriv]
@@ -241,7 +243,8 @@ omit hp in
 /-- `W = p (u'y - uy')` is strictly increasing where `u, y > 0` and `qu < qy`. -/
 theorem kzt_W_strictMonoOn (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qu x < qy x) {s : Set ℝ} (hs : s ⊆ Ioi (0:ℝ)) (hcv : Convex ℝ s)
-    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn (ODE.sturmWronskian p u u' y y') s := by
+    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn
+        (ODE.sturmWronskian p u u' y y') s := by
   refine strictMonoOn_of_deriv_pos hcv (kzt_W_continuousOn hy hu hs) fun x hx => ?_
   have hx' := hs (interior_subset hx)
   rw [(kzt_hasDerivAt_W hy hu hx').deriv]
@@ -314,7 +317,8 @@ theorem kzt_upper_right_core (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     hanti ((mem_Ici.2 le_rfl)) (mem_Ici.2 hzs.le) hzs
   have hIci : ∀ x ∈ Ici s₁, x ∈ Ioi z := fun x hx => lt_of_lt_of_le hzs hx
   have hIci0 : ∀ x ∈ Ici s₁, x ∈ Ioi s₀ := fun x hx => lt_of_lt_of_le hs0s hx
-  obtain ⟨x, hx, hxC⟩ := kzt_ratio_top (p := p) (y := y) (u := u) (c₀ := -ODE.sturmWronskian p u u' y y' s₁)
+  obtain ⟨x, hx, hxC⟩ :=
+      kzt_ratio_top (p := p) (y := y) (u := u) (c₀ := -ODE.sturmWronskian p u u' y y' s₁)
     hK (by linarith)
     (fun x hx => (hy x (hsub (le_of_lt (hIci x hx)))).1)
     (fun x hx => (hu x (hsub (le_of_lt (hIci x hx)))).1)
@@ -449,7 +453,8 @@ theorem kzt_lower_whole_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     have hS : ∀ x ∈ Ici s₁, x ∈ Ioi (0:ℝ) := fun x hx => by
       have : (0:ℝ) < s₁ := by linarith
       exact lt_of_lt_of_le this hx
-    have hW1 : ODE.sturmWronskian p w w' y y' 1 < ODE.sturmWronskian p w w' y y' s₁ := hmono h1 (hS s₁ (mem_Ici.2 le_rfl)) hzs
+    have hW1 : ODE.sturmWronskian p w w' y y' 1 < ODE.sturmWronskian p w w' y y' s₁ :=
+        hmono h1 (hS s₁ (mem_Ici.2 le_rfl)) hzs
     obtain ⟨x, hx, hxC⟩ := kzt_ratio_top (p := p) (y := fun x => -y x) (y' := fun x => -y' x)
       (u := w) (c₀ := ODE.sturmWronskian p w w' y y' s₁) hK (by linarith)
       (fun x hx => (hy x (hS x hx)).1.neg)
@@ -469,7 +474,8 @@ theorem kzt_lower_whole_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     have hs0s : s₁ < s₀' := by have := min_le_right 1 s₀'; linarith
     have hs1 : 0 < s₁ := by linarith
     have hS : ∀ x ∈ Ioc 0 s₁, x ∈ Ioi (0:ℝ) := fun x hx => hx.1
-    have hW1 : ODE.sturmWronskian p w w' y y' s₁ < ODE.sturmWronskian p w w' y y' 1 := hmono hs1 h1 hzs
+    have hW1 : ODE.sturmWronskian p w w' y y' s₁ < ODE.sturmWronskian p w w' y y' 1 :=
+        hmono hs1 h1 hzs
     obtain ⟨x, hx, hxC⟩ := kzt_ratio_zero (p := p) (y := y) (u := w)
       (c₀ := -ODE.sturmWronskian p w w' y y' s₁) hs1 hK (by linarith)
       (fun x hx => (hy x (hS x hx)).1) (fun x hx => (hw x (hS x hx)).1)
@@ -730,7 +736,8 @@ theorem kzt_U_eq_add (a b : ℝ) (k : ℕ) {x : ℝ} (hx : 0 < x) :
 
 /-- **Self-adjoint form of Kummer's equation.** For real `a`, `b`, the function `U(a,b,·)`
 solves `(x^b e^{-x} y')' - a x^{b-1} e^{-x} y = 0` on `(0, ∞)` (DLMF 13.2.1 with 13.3.22). -/
-theorem kzt_U_isSol (a b : ℝ) : KztIsSol (laguerreWeight b) (kzt_q a b) (kzt_U a b) (kzt_dU a b) := by
+theorem kzt_U_isSol (a b : ℝ) : KztIsSol (laguerreWeight b) (kzt_q a b) (kzt_U a b)
+    (kzt_dU a b) := by
   intro x hx
   have hx' : (0:ℝ) < x := hx
   have hz : (x : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 hx'

@@ -20,13 +20,16 @@ Its spectrum `ODE.separatedSpectrum V L odd0 oddK` is the set of `h` with a nonz
 
 ## Main results
 
-* `ODE.isSturmLiouvilleSolution_eq_mul_basicSolution`: every solution satisfying the condition at `0` is a multiple of the
-  basic solution `basicSolution V odd0 h` (data `(0, 1)` or `(1, 0)` at `0`); hence the eigenvalues are
-  simple and `h ∈ separatedSpectrum ↔ sturmCharacteristic V L odd0 oddK h = 0` (`ODE.mem_separatedSpectrum_iff`).
-* `ODE.neg_le_of_mem_separatedSpectrum`: the spectrum lies in `[-B, ∞)` if `|V| ≤ B` (energy identity).
-* `ODE.separatedSpectrum_inter_Iio_finite`: the spectrum meets every `(-∞, c)` in a finite set, because
-  `sturmCharacteristic` is the restriction to `ℝ` of an entire function (`ODE.differentiable_param_of_linear_ode`)
-  that does not vanish identically.
+* `ODE.isSturmLiouvilleSolution_eq_mul_basicSolution`: every solution satisfying the condition at
+  `0` is a multiple of the basic solution `basicSolution V odd0 h` (data `(0, 1)` or `(1, 0)` at
+  `0`); hence the eigenvalues are simple and
+  `h ∈ separatedSpectrum ↔ sturmCharacteristic V L odd0 oddK h = 0`
+  (`ODE.mem_separatedSpectrum_iff`).
+* `ODE.neg_le_of_mem_separatedSpectrum`: the spectrum lies in `[-B, ∞)` if `|V| ≤ B` (energy
+  identity).
+* `ODE.separatedSpectrum_inter_Iio_finite`: the spectrum meets every `(-∞, c)` in a finite set,
+  because `sturmCharacteristic` is the restriction to `ℝ` of an entire function
+  (`ODE.differentiable_param_of_linear_ode`) that does not vanish identically.
 * `ODE.not_bddAbove_separatedSpectrum`: the spectrum is unbounded above. The zero count of the basic
   solution (or of its derivative) on `[-L, L]` is locally constant in `h` as long as `h` is not
   an eigenvalue (`ODE.sturmDef_ncard_eq_of_isPreconnected`, using joint continuity in `(h, x)`
@@ -60,10 +63,12 @@ def basicInitValue (odd0 : Bool) : ℝ := if odd0 then 0 else 1
 /-- Initial slope at `0` of the basic solution. -/
 def basicInitSlope (odd0 : Bool) : ℝ := if odd0 then 1 else 0
 
-/-- Identity under the stated parameter and domain assumptions: `∃ f : ℝ → ℝ, f 0 = basicInitValue odd0 ∧
-deriv f 0 = basicInitSlope odd0 ∧ IsSturmLiouvilleSolution V h f`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`∃ f : ℝ → ℝ, f 0 = basicInitValue odd0 ∧ deriv f 0 = basicInitSlope odd0 ∧ IsSturmLiouvilleSolution
+V h f`. -/
 lemma exists_isSturmLiouvilleSolution_initial (hV : Continuous V) (h : ℝ) (odd0 : Bool) :
-    ∃ f : ℝ → ℝ, f 0 = basicInitValue odd0 ∧ deriv f 0 = basicInitSlope odd0 ∧ IsSturmLiouvilleSolution V h f := by
+    ∃ f : ℝ → ℝ, f 0 = basicInitValue odd0 ∧ deriv f 0 = basicInitSlope odd0 ∧
+        IsSturmLiouvilleSolution V h f := by
   obtain ⟨f, f', h0, h1, hf⟩ := exists_linear_ode (𝕜 := ℝ) (E := ℝ) (p := fun _ => 0)
     (q := fun x => V x - h) continuous_const (hV.sub continuous_const) 0 (basicInitValue odd0)
     (basicInitSlope odd0)
@@ -76,29 +81,36 @@ def basicSolution (V : ℝ → ℝ) (odd0 : Bool) (h : ℝ) : ℝ → ℝ :=
   open Classical in
   if hV : Continuous V then (exists_isSturmLiouvilleSolution_initial hV h odd0).choose else 0
 
-/-- Identity under the stated parameter and domain assumptions: `basicSolution V odd0 h 0 = basicInitValue odd0 ∧
-deriv (basicSolution V odd0 h) 0 = basicInitSlope odd0 ∧ IsSturmLiouvilleSolution V h (basicSolution V odd0 h)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`basicSolution V odd0 h 0 = basicInitValue odd0 ∧ deriv (basicSolution V odd0 h) 0 = basicInitSlope
+odd0 ∧ IsSturmLiouvilleSolution V h (basicSolution V odd0 h)`. -/
 theorem basicSolution_initial_and_isSol (hV : Continuous V) (odd0 : Bool) (h : ℝ) :
-    basicSolution V odd0 h 0 = basicInitValue odd0 ∧ deriv (basicSolution V odd0 h) 0 = basicInitSlope odd0 ∧
+    basicSolution V odd0 h 0 = basicInitValue odd0 ∧ deriv (basicSolution V odd0 h) 0 =
+        basicInitSlope odd0 ∧
       IsSturmLiouvilleSolution V h (basicSolution V odd0 h) := by
   rw [basicSolution, dite_eq_left hV]
   exact (exists_isSturmLiouvilleSolution_initial hV h odd0).choose_spec
 
 /-- At `x`, the function `w` has derivative `(deriv w x)`. -/
-theorem IsSturmLiouvilleSolution.hasDerivAt {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w) (x : ℝ) :
+theorem IsSturmLiouvilleSolution.hasDerivAt {w : ℝ → ℝ}
+    (hw : IsSturmLiouvilleSolution V h w) (x : ℝ) :
     HasDerivAt w (deriv w x) x := (hw.1 x).hasDerivAt
 
 /-- The function `w` is continuous. -/
-theorem IsSturmLiouvilleSolution.continuous {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w) : Continuous w :=
+theorem IsSturmLiouvilleSolution.continuous {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w) :
+    Continuous w :=
   hw.1.continuous
 
 /-- The function `(deriv w)` is continuous. -/
-theorem IsSturmLiouvilleSolution.continuous_deriv {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w) : Continuous (deriv w) :=
+theorem IsSturmLiouvilleSolution.continuous_deriv {w : ℝ → ℝ}
+    (hw : IsSturmLiouvilleSolution V h w) : Continuous (deriv w) :=
   continuous_iff_continuousAt.2 fun x => (hw.2 x).continuousAt
 
 /-- Uniqueness for the equation. -/
-theorem isSturmLiouvilleSolution_eq_of_eq_of_deriv_eq (hV : Continuous V) {w₁ w₂ : ℝ → ℝ} (h₁ : IsSturmLiouvilleSolution V h w₁)
-    (h₂ : IsSturmLiouvilleSolution V h w₂) {x₀ : ℝ} (e₀ : w₁ x₀ = w₂ x₀) (e₁ : deriv w₁ x₀ = deriv w₂ x₀) :
+theorem isSturmLiouvilleSolution_eq_of_eq_of_deriv_eq (hV : Continuous V) {w₁ w₂ : ℝ → ℝ}
+    (h₁ : IsSturmLiouvilleSolution V h w₁)
+    (h₂ : IsSturmLiouvilleSolution V h w₂) {x₀ : ℝ} (e₀ : w₁ x₀ = w₂ x₀)
+        (e₁ : deriv w₁ x₀ = deriv w₂ x₀) :
     w₁ = w₂ := by
   have := eq_of_linear_ode (𝕜 := ℝ) (E := ℝ) (t₀ := x₀) (p := fun _ => 0)
     (q := fun x => V x - h) continuous_const (hV.sub continuous_const)
@@ -107,8 +119,10 @@ theorem isSturmLiouvilleSolution_eq_of_eq_of_deriv_eq (hV : Continuous V) {w₁ 
     (fun t => ⟨h₂.hasDerivAt t, (h₂.2 t).congr_deriv (by simp)⟩) e₀ e₁
   exact this.1
 
-/-- Identity under the stated parameter and domain assumptions: `IsSturmLiouvilleSolution V h (fun x => c * w x)`. -/
-theorem IsSturmLiouvilleSolution.const_mul {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w) (c : ℝ) :
+/-- Identity under the stated parameter and domain assumptions:
+`IsSturmLiouvilleSolution V h (fun x => c * w x)`. -/
+theorem IsSturmLiouvilleSolution.const_mul {w : ℝ → ℝ}
+    (hw : IsSturmLiouvilleSolution V h w) (c : ℝ) :
     IsSturmLiouvilleSolution V h (fun x => c * w x) := by
   have hd : deriv (fun x => c * w x) = fun x => c * deriv w x :=
     funext fun x => ((hw.hasDerivAt x).const_mul c).deriv
@@ -117,14 +131,17 @@ theorem IsSturmLiouvilleSolution.const_mul {w : ℝ → ℝ} (hw : IsSturmLiouvi
   exact ((hw.2 x).const_mul c).congr_deriv (by ring)
 
 /-- A solution vanishing to first order at a point is zero. -/
-theorem isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero (hV : Continuous V) {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w) {x₀ : ℝ}
+theorem isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero (hV : Continuous V) {w : ℝ → ℝ}
+    (hw : IsSturmLiouvilleSolution V h w) {x₀ : ℝ}
     (e₀ : w x₀ = 0) (e₁ : deriv w x₀ = 0) : w = 0 := by
   have h0 : IsSturmLiouvilleSolution V h (0 : ℝ → ℝ) := ⟨differentiable_const 0, fun x => by
     simp⟩
-  exact isSturmLiouvilleSolution_eq_of_eq_of_deriv_eq hV hw h0 (x₀ := x₀) (by simp [e₀]) (by simp [e₁])
+  exact isSturmLiouvilleSolution_eq_of_eq_of_deriv_eq hV hw h0 (x₀ := x₀)
+      (by simp [e₀]) (by simp [e₁])
 
 /-- Every solution satisfying the condition at `0` is a multiple of the basic solution. -/
-theorem isSturmLiouvilleSolution_eq_mul_basicSolution (hV : Continuous V) {odd0 : Bool} {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w)
+theorem isSturmLiouvilleSolution_eq_mul_basicSolution (hV : Continuous V) {odd0 : Bool} {w : ℝ → ℝ}
+    (hw : IsSturmLiouvilleSolution V h w)
     (h0 : if odd0 then w 0 = 0 else deriv w 0 = 0) :
     w = fun x => (if odd0 then deriv w 0 else w 0) * basicSolution V odd0 h x := by
   obtain ⟨y0, y1, hy⟩ := basicSolution_initial_and_isSol hV odd0 h
@@ -137,7 +154,8 @@ theorem isSturmLiouvilleSolution_eq_mul_basicSolution (hV : Continuous V) {odd0 
   · rw [hd]; cases odd0 <;> simp_all [basicInitSlope]
 
 /-- Nonvanishing under the stated hypotheses: `basicSolution V odd0 h ≠ 0`. -/
-theorem basicSolution_ne_zero (hV : Continuous V) (odd0 : Bool) (h : ℝ) : basicSolution V odd0 h ≠ 0 := by
+theorem basicSolution_ne_zero (hV : Continuous V) (odd0 : Bool) (h : ℝ) : basicSolution V
+    odd0 h ≠ 0 := by
   intro h0
   obtain ⟨y0, y1, -⟩ := basicSolution_initial_and_isSol hV odd0 h
   rw [h0] at y0 y1
@@ -209,9 +227,10 @@ private lemma neg_le_of_mem_separatedSpectrum (hV : Continuous V) (hB : ∀ x, |
 
 /-! ### The complex family and discreteness of the spectrum -/
 
-/-- Identity under the stated parameter and domain assumptions: `∃ F F' : ℝ → ℂ, F 0 = (basicInitValue odd0
-: ℂ) ∧ F' 0 = (basicInitSlope odd0 : ℂ) ∧ ∀ t, HasDerivAt F (F' t) t ∧ HasDerivAt F' (((fun _ => (0 :
-ℂ)) t + μ * (fun _ => (0 : ℂ)) t) * F' t + ((V t : ℂ) + μ * (fun _ => (-1 : ℂ)) t) * F t) t`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`∃ F F' : ℝ → ℂ, F 0 = (basicInitValue odd0 : ℂ) ∧ F' 0 = (basicInitSlope odd0 : ℂ) ∧ ∀ t,
+HasDerivAt F (F' t) t ∧ HasDerivAt F' (((fun _ => (0 : ℂ)) t + μ * (fun _ => (0 : ℂ)) t) * F' t +
+((V t : ℂ) + μ * (fun _ => (-1 : ℂ)) t) * F t) t`. -/
 lemma exists_complex_param_solution (hV : Continuous V) (odd0 : Bool) (μ : ℂ) :
     ∃ F F' : ℝ → ℂ, F 0 = (basicInitValue odd0 : ℂ) ∧ F' 0 = (basicInitSlope odd0 : ℂ) ∧ ∀ t,
       HasDerivAt F (F' t) t ∧
@@ -233,30 +252,40 @@ def basicSolutionComplexDeriv (V : ℝ → ℝ) (odd0 : Bool) (t : ℝ) (μ : �
   open Classical in
   if hV : Continuous V then (exists_complex_param_solution hV odd0 μ).choose_spec.choose t else 0
 
-/-- Identity under the stated parameter and domain assumptions: `basicSolutionComplex V odd0 0 μ = (basicInitValue odd0 :
-ℂ) ∧ basicSolutionComplexDeriv V odd0 0 μ = (basicInitSlope odd0 : ℂ) ∧ ∀ t, HasDerivAt (fun t => basicSolutionComplex V odd0 t μ) (basicSolutionComplexDeriv V
-odd0 t μ) t ∧ HasDerivAt (fun t => basicSolutionComplexDeriv V odd0 t μ) (((fun _ => (0 : ℂ)) t + μ * (fun _ => (0
-: ℂ)) t) * basicSolutionComplexDeriv V odd0 t μ + ((V t : ℂ) + μ * (fun _ => (-1 : ℂ)) t) * basicSolutionComplex V odd0 t μ) t`. -/
-private lemma basicSolutionComplex_initial_and_hasDerivAt (hV : Continuous V) (odd0 : Bool) (μ : ℂ) :
-    basicSolutionComplex V odd0 0 μ = (basicInitValue odd0 : ℂ) ∧ basicSolutionComplexDeriv V odd0 0 μ = (basicInitSlope odd0 : ℂ) ∧ ∀ t,
-      HasDerivAt (fun t => basicSolutionComplex V odd0 t μ) (basicSolutionComplexDeriv V odd0 t μ) t ∧
+/-- Identity under the stated parameter and domain assumptions:
+`basicSolutionComplex V odd0 0 μ = (basicInitValue odd0 : ℂ) ∧ basicSolutionComplexDeriv V odd0 0 μ
+= (basicInitSlope odd0 : ℂ) ∧ ∀ t, HasDerivAt (fun t => basicSolutionComplex V odd0 t μ)
+(basicSolutionComplexDeriv V odd0 t μ) t ∧ HasDerivAt (fun t => basicSolutionComplexDeriv V odd0 t
+μ) (((fun _ => (0 : ℂ)) t + μ * (fun _ => (0 : ℂ)) t) * basicSolutionComplexDeriv V odd0 t μ + ((V t
+: ℂ) + μ * (fun _ => (-1 : ℂ)) t) * basicSolutionComplex V odd0 t μ) t`. -/
+private lemma basicSolutionComplex_initial_and_hasDerivAt (hV : Continuous V)
+    (odd0 : Bool) (μ : ℂ) :
+    basicSolutionComplex V odd0 0 μ = (basicInitValue odd0 : ℂ) ∧
+        basicSolutionComplexDeriv V odd0 0 μ = (basicInitSlope odd0 : ℂ) ∧ ∀ t,
+      HasDerivAt (fun t => basicSolutionComplex V odd0 t μ)
+          (basicSolutionComplexDeriv V odd0 t μ) t ∧
       HasDerivAt (fun t => basicSolutionComplexDeriv V odd0 t μ)
         (((fun _ => (0 : ℂ)) t + μ * (fun _ => (0 : ℂ)) t) * basicSolutionComplexDeriv V odd0 t μ +
           ((V t : ℂ) + μ * (fun _ => (-1 : ℂ)) t) * basicSolutionComplex V odd0 t μ) t := by
   simp only [basicSolutionComplex, basicSolutionComplexDeriv, dite_eq_left hV]
   exact (exists_complex_param_solution hV odd0 μ).choose_spec.choose_spec
 
-/-- Differentiability of the indicated parameterized function: `Differentiable ℂ (basicSolutionComplex V odd0 t) ∧
-Differentiable ℂ (basicSolutionComplexDeriv V odd0 t)`. -/
-private lemma differentiable_basicSolutionComplex_and_basicSolutionComplexDeriv (hV : Continuous V) (odd0 : Bool) (t : ℝ) :
-    Differentiable ℂ (basicSolutionComplex V odd0 t) ∧ Differentiable ℂ (basicSolutionComplexDeriv V odd0 t) :=
+/-- Differentiability of the indicated parameterized function:
+`Differentiable ℂ (basicSolutionComplex V odd0 t) ∧ Differentiable ℂ (basicSolutionComplexDeriv V
+odd0 t)`. -/
+private lemma differentiable_basicSolutionComplex_and_basicSolutionComplexDeriv (hV : Continuous V)
+    (odd0 : Bool) (t : ℝ) :
+    Differentiable ℂ (basicSolutionComplex V odd0 t) ∧
+        Differentiable ℂ (basicSolutionComplexDeriv V odd0 t) :=
   differentiable_param_of_linear_ode continuous_const continuous_const
     (Complex.continuous_ofReal.comp hV) continuous_const
-    (fun μ t => (basicSolutionComplex_initial_and_hasDerivAt hV odd0 μ).2.2 t) (fun μ => (basicSolutionComplex_initial_and_hasDerivAt hV odd0 μ).1)
+    (fun μ t => (basicSolutionComplex_initial_and_hasDerivAt hV odd0 μ).2.2 t)
+        (fun μ => (basicSolutionComplex_initial_and_hasDerivAt hV odd0 μ).1)
     (fun μ => (basicSolutionComplex_initial_and_hasDerivAt hV odd0 μ).2.1) t
 
 /-- At real parameters the complex family is the basic solution. -/
-private lemma basicSolutionComplex_ofReal_eq_basicSolution (hV : Continuous V) (odd0 : Bool) (h t : ℝ) :
+private lemma basicSolutionComplex_ofReal_eq_basicSolution (hV : Continuous V)
+    (odd0 : Bool) (h t : ℝ) :
     basicSolutionComplex V odd0 t h = (basicSolution V odd0 h t : ℂ) ∧
       basicSolutionComplexDeriv V odd0 t h = ((deriv (basicSolution V odd0 h) t : ℝ) : ℂ) := by
   obtain ⟨y0, y1, hy⟩ := basicSolution_initial_and_isSol hV odd0 h
@@ -264,34 +293,47 @@ private lemma basicSolutionComplex_ofReal_eq_basicSolution (hV : Continuous V) (
   have := eq_of_linear_ode (𝕜 := ℂ) (E := ℂ) (t₀ := 0) (p := fun _ => 0)
     (q := fun t => (V t : ℂ) + (h : ℂ) * (-1)) continuous_const
     ((Complex.continuous_ofReal.comp hV).add continuous_const)
-    (f := fun t => basicSolutionComplex V odd0 t h) (f' := fun t => basicSolutionComplexDeriv V odd0 t h)
-    (g := fun t => (basicSolution V odd0 h t : ℂ)) (g' := fun t => ((deriv (basicSolution V odd0 h) t : ℝ) : ℂ))
+    (f := fun t => basicSolutionComplex V odd0 t h)
+        (f' := fun t => basicSolutionComplexDeriv V odd0 t h)
+    (g := fun t => (basicSolution V odd0 h t : ℂ))
+        (g' := fun t => ((deriv (basicSolution V odd0 h) t : ℝ) : ℂ))
     (fun t => ⟨(hF t).1, (hF t).2.congr_deriv (by simp)⟩)
     (fun t => ⟨(hy.hasDerivAt t).ofReal_comp, (hy.2 t).ofReal_comp.congr_deriv (by
       push_cast; simp only [smul_eq_mul]; ring)⟩)
     (by rw [F0, y0]) (by rw [F1, y1])
   exact ⟨congrFun this.1 t, congrFun this.2 t⟩
 
-/-- Continuity of the indicated function: `Continuous (fun h => basicSolution V odd0 h t) ∧ Continuous (fun
-h => deriv (basicSolution V odd0 h) t)`. -/
+/-- Continuity of the indicated function:
+`Continuous (fun h => basicSolution V odd0 h t) ∧ Continuous (fun h => deriv (basicSolution V odd0
+h) t)`. -/
 theorem continuous_basicSolution_param (hV : Continuous V) (odd0 : Bool) (t : ℝ) :
-    Continuous (fun h => basicSolution V odd0 h t) ∧ Continuous (fun h => deriv (basicSolution V odd0 h) t) := by
+    Continuous (fun h => basicSolution V odd0 h t) ∧
+        Continuous (fun h => deriv (basicSolution V odd0 h) t) := by
   have e : ∀ h, basicSolution V odd0 h t = (basicSolutionComplex V odd0 t h).re ∧
       deriv (basicSolution V odd0 h) t = (basicSolutionComplexDeriv V odd0 t h).re := fun h => by
-    rw [(basicSolutionComplex_ofReal_eq_basicSolution hV odd0 h t).1, (basicSolutionComplex_ofReal_eq_basicSolution hV odd0 h t).2]; simp
+    rw [(basicSolutionComplex_ofReal_eq_basicSolution hV odd0 h t).1,
+        (basicSolutionComplex_ofReal_eq_basicSolution hV odd0 h t).2]; simp
   simp only [e]
-  exact ⟨Complex.continuous_re.comp ((differentiable_basicSolutionComplex_and_basicSolutionComplexDeriv hV odd0 t).1.continuous.comp
+  exact ⟨Complex.continuous_re.comp
+      ((differentiable_basicSolutionComplex_and_basicSolutionComplexDeriv hV odd0
+      t).1.continuous.comp
       Complex.continuous_ofReal),
-    Complex.continuous_re.comp ((differentiable_basicSolutionComplex_and_basicSolutionComplexDeriv hV odd0 t).2.continuous.comp
+    Complex.continuous_re.comp
+        ((differentiable_basicSolutionComplex_and_basicSolutionComplexDeriv hV odd0
+        t).2.continuous.comp
       Complex.continuous_ofReal)⟩
 
 /-- The spectrum meets every half-line `(-∞, c)` in a finite set. -/
 theorem separatedSpectrum_inter_Iio_finite (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (odd0 oddK : Bool) (c : ℝ) : (separatedSpectrum V L odd0 oddK ∩ Iio c).Finite := by
-  set g : ℝ → ℂ := fun h => if oddK then basicSolutionComplex V odd0 L h else basicSolutionComplexDeriv V odd0 L h
+  set g : ℝ → ℂ := fun h => if oddK then basicSolutionComplex V odd0 L h else
+      basicSolutionComplexDeriv V odd0 L h
   have hg : ∀ h, g h = (sturmCharacteristic V L odd0 oddK h : ℂ) := fun h => by
-    simp only [g, sturmCharacteristic]; cases oddK <;> simp [basicSolutionComplex_ofReal_eq_basicSolution hV]
-  have hgc : Differentiable ℂ (fun μ : ℂ => if oddK then basicSolutionComplex V odd0 L μ else basicSolutionComplexDeriv V odd0 L μ) :=
+    simp only [g, sturmCharacteristic]; cases oddK <;>
+        simp [basicSolutionComplex_ofReal_eq_basicSolution hV]
+  have hgc : Differentiable ℂ
+      (fun μ : ℂ => if oddK then basicSolutionComplex V odd0 L μ else
+      basicSolutionComplexDeriv V odd0 L μ) :=
     by cases oddK <;> simp [differentiable_basicSolutionComplex_and_basicSolutionComplexDeriv hV]
   have hga : AnalyticOnNhd ℝ g univ := fun x _ =>
     ((hgc.analyticAt (x : ℂ)).restrictScalars (𝕜 := ℝ)).comp
@@ -300,7 +342,8 @@ theorem separatedSpectrum_inter_Iio_finite (hV : Continuous V) (hB : ∀ x, |V x
     unfold sturmCharacteristic; cases oddK <;> simp [continuous_basicSolution_param hV]
   set Z := {h | h ∈ Icc (-B - 1) c ∧ sturmCharacteristic V L odd0 oddK h = 0}
   have hsub : separatedSpectrum V L odd0 oddK ∩ Iio c ⊆ Z := fun h ⟨hh, hc⟩ =>
-    ⟨⟨by linarith [neg_le_of_mem_separatedSpectrum hV hB hL hh], hc.le⟩, (mem_separatedSpectrum_iff hV odd0 oddK).1 hh⟩
+    ⟨⟨by linarith [neg_le_of_mem_separatedSpectrum hV hB hL hh], hc.le⟩,
+        (mem_separatedSpectrum_iff hV odd0 oddK).1 hh⟩
   refine Finite.subset ?_ hsub
   by_contra hinf
   have hZc : IsCompact Z := isCompact_Icc.of_isClosed_subset
@@ -323,9 +366,11 @@ theorem separatedSpectrum_inter_Iio_finite (hV : Continuous V) (hB : ∀ x, |V x
 def paritySign (odd0 : Bool) : ℝ := if odd0 then -1 else 1
 
 /-- For an even potential the basic solution is even (`odd0 = false`) or odd (`odd0 = true`). -/
-private lemma basicSolution_neg_of_even (hV : Continuous V) (hVe : ∀ x, V (-x) = V x) (odd0 : Bool) (h x : ℝ) :
+private lemma basicSolution_neg_of_even (hV : Continuous V) (hVe : ∀ x, V (-x) = V x)
+    (odd0 : Bool) (h x : ℝ) :
     basicSolution V odd0 h (-x) = paritySign odd0 * basicSolution V odd0 h x ∧
-      deriv (basicSolution V odd0 h) (-x) = -(paritySign odd0 * deriv (basicSolution V odd0 h) x) := by
+      deriv (basicSolution V odd0 h) (-x) =
+          -(paritySign odd0 * deriv (basicSolution V odd0 h) x) := by
   obtain ⟨y0, y1, hy⟩ := basicSolution_initial_and_isSol hV odd0 h
   set Y := basicSolution V odd0 h
   set s := paritySign odd0
@@ -356,15 +401,18 @@ private lemma basicSolution_neg_of_even (hV : Continuous V) (hVe : ∀ x, V (-x)
     _ = -(s * deriv Y x) := by rw [this]; ring
 
 /-- Energy bound: `Y² + Y'² ≤ exp((1 + B + |h|)|x|)`. -/
-private lemma basicSolution_sq_add_deriv_sq_le_exp (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (odd0 : Bool) (h x : ℝ) :
-    basicSolution V odd0 h x ^ 2 + deriv (basicSolution V odd0 h) x ^ 2 ≤ Real.exp ((1 + B + |h|) * |x|) := by
+private lemma basicSolution_sq_add_deriv_sq_le_exp (hV : Continuous V) (hB : ∀ x, |V x| ≤ B)
+    (odd0 : Bool) (h x : ℝ) :
+    basicSolution V odd0 h x ^ 2 + deriv (basicSolution V odd0 h) x ^ 2 ≤
+        Real.exp ((1 + B + |h|) * |x|) := by
   obtain ⟨y0, y1, hy⟩ := basicSolution_initial_and_isSol hV odd0 h
   set Y := basicSolution V odd0 h
   set C := 1 + B + |h|
   set E : ℝ → ℝ := fun x => Y x ^ 2 + deriv Y x ^ 2
   have hE : ∀ x, HasDerivAt E (2 * Y x * deriv Y x * (1 + (V x - h))) x := fun x =>
     (((hy.hasDerivAt x).pow 2).add ((hy.2 x).pow 2)).congr_deriv (by simp; ring)
-  have hE0 : E 0 = 1 := by simp only [E, y0, y1, basicInitValue, basicInitSlope]; cases odd0 <;> simp
+  have hE0 : E 0 = 1 := by simp only [E, y0, y1, basicInitValue, basicInitSlope];
+                           cases odd0 <;> simp
   have hEd : ∀ x, |2 * Y x * deriv Y x * (1 + (V x - h))| ≤ C * E x := by
     intro x
     have h1 : |1 + (V x - h)| ≤ C := by
@@ -423,7 +471,8 @@ private lemma abs_le_one_add_sq (a : ℝ) : |a| ≤ 1 + a ^ 2 := by
   · rw [abs_of_nonpos h]; nlinarith [sq_nonneg (a + 1)]
 
 /-- Local uniform bounds for the basic solution and its derivative. -/
-private lemma abs_basicSolution_le_and_abs_deriv_le (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (odd0 : Bool) {R X h x : ℝ}
+private lemma abs_basicSolution_le_and_abs_deriv_le (hV : Continuous V) (hB : ∀ x, |V x| ≤ B)
+    (odd0 : Bool) {R X h x : ℝ}
     (hh : |h| ≤ R) (hx : |x| ≤ X) :
     |basicSolution V odd0 h x| ≤ 1 + Real.exp ((1 + B + R) * X) ∧
       |deriv (basicSolution V odd0 h) x| ≤ 1 + Real.exp ((1 + B + R) * X) := by
@@ -432,12 +481,15 @@ private lemma abs_basicSolution_le_and_abs_deriv_le (hV : Continuous V) (hB : �
   have hmono : Real.exp ((1 + B + |h|) * |x|) ≤ Real.exp ((1 + B + R) * X) :=
     Real.exp_le_exp.2 (mul_le_mul (by linarith) hx (abs_nonneg _) (by linarith [abs_nonneg h]))
   constructor
-  · linarith [abs_le_one_add_sq (basicSolution V odd0 h x), sq_nonneg (deriv (basicSolution V odd0 h) x)]
-  · linarith [abs_le_one_add_sq (deriv (basicSolution V odd0 h) x), sq_nonneg (basicSolution V odd0 h x)]
+  · linarith [abs_le_one_add_sq (basicSolution V odd0 h x),
+        sq_nonneg (deriv (basicSolution V odd0 h) x)]
+  · linarith [abs_le_one_add_sq (deriv (basicSolution V odd0 h) x),
+        sq_nonneg (basicSolution V odd0 h x)]
 
 /-- Joint continuity from continuity in the parameter and a locally uniform derivative bound
 in the variable. -/
-private lemma continuous_uncurry_of_deriv_bound {f f' : ℝ → ℝ → ℝ} (hc : ∀ x, Continuous fun h => f h x)
+private lemma continuous_uncurry_of_deriv_bound {f f' : ℝ → ℝ → ℝ}
+    (hc : ∀ x, Continuous fun h => f h x)
     (hd : ∀ h x, HasDerivAt (f h) (f' h x) x)
     (hb : ∀ R X : ℝ, ∃ M, ∀ h x, |h| ≤ R → |x| ≤ X → |f' h x| ≤ M) :
     Continuous (Function.uncurry f) := by
@@ -491,7 +543,8 @@ theorem continuous_uncurry_basicSolution (hV : Continuous V) (hB : ∀ x, |V x| 
     continuous_uncurry_of_deriv_bound (fun x => (continuous_basicSolution_param hV odd0 x).1)
       (fun h x => ((basicSolution_initial_and_isSol hV odd0 h).2.2).hasDerivAt x)
       fun R X => ⟨_, fun h x hh hx => (abs_basicSolution_le_and_abs_deriv_le hV hB odd0 hh hx).2⟩
-  refine ⟨c1, continuous_uncurry_of_deriv_bound (fun x => (continuous_basicSolution_param hV odd0 x).2)
+  refine ⟨c1, continuous_uncurry_of_deriv_bound
+      (fun x => (continuous_basicSolution_param hV odd0 x).2)
       (fun h x => ((basicSolution_initial_and_isSol hV odd0 h).2.2).2 x)
       fun R X => ⟨(B + R) * (1 + Real.exp ((1 + B + R) * X)), fun h x hh hx => ?_⟩⟩
   rw [abs_mul]
@@ -503,7 +556,8 @@ theorem continuous_uncurry_basicSolution (hV : Continuous V) (hB : ∀ x, |V x| 
 
 /-- For `h > B + ((N + 1)π/(2L))²`, a nonzero solution has `N + 1` zeros in `(-L, L)`, in
 increasing order (Sturm comparison with `sin(ω(x + L))`, `ω = (N + 1)π/(2L)`). -/
-private lemma isSturmLiouvilleSolution_exists_strictMono_zeros (hB : ∀ x, |V x| ≤ B) (hL : 0 < L) (N : ℕ) {w : ℝ → ℝ}
+private lemma isSturmLiouvilleSolution_exists_strictMono_zeros (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+    (N : ℕ) {w : ℝ → ℝ}
     (hw : IsSturmLiouvilleSolution V h w) (hh : B + ((N + 1) * Real.pi / (2 * L)) ^ 2 < h) :
     ∃ z : Fin (N + 1) → ℝ, StrictMono z ∧ (∀ j, z j ∈ Ioo (-L) L) ∧ ∀ j, w (z j) = 0 := by
   set ω := (N + 1) * Real.pi / (2 * L)
@@ -564,9 +618,11 @@ private lemma isSturmLiouvilleSolution_exists_strictMono_zeros (hB : ∀ x, |V x
     linarith [(hz j).2]
 
 /-- Simple zeros of a nonzero solution in a compact interval are finite in number. -/
-theorem isSturmLiouvilleSolution_zeros_Icc_finite (hV : Continuous V) {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w) (hne : w ≠ 0)
+theorem isSturmLiouvilleSolution_zeros_Icc_finite (hV : Continuous V) {w : ℝ → ℝ}
+    (hw : IsSturmLiouvilleSolution V h w) (hne : w ≠ 0)
     (a b : ℝ) : {x | x ∈ Icc a b ∧ w x = 0}.Finite :=
-  sturmDef_finite (fun x _ => hw.hasDerivAt x) fun _ _ h0 h1 => hne (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV hw h0 h1)
+  sturmDef_finite (fun x _ => hw.hasDerivAt x) fun _ _ h0 h1 =>
+      hne (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV hw h0 h1)
 
 /-- Estimate under the stated parameter and domain assumptions: `n ≤ {x | P x}.ncard`. -/
 theorem le_ncard_of_strictMono {P : ℝ → Prop} {n : ℕ} {z : Fin n → ℝ} (hz : StrictMono z)
@@ -610,14 +666,17 @@ theorem not_bddAbove_separatedSpectrum (hV : Continuous V) (hB : ∀ x, |V x| �
   cases oddK
   · -- zeros of `Y'` on `[-L, L]`
     refine zero_count_deformation (Y := fun h x => deriv (basicSolution V odd0 h) x)
-      (Y' := fun h x => (V x - h) * basicSolution V odd0 h x) (H := B) (H₀ := H₀ + 1) (a := -L) (b := L)
+      (Y' := fun h x => (V x - h) * basicSolution V odd0 h x) (H := B) (H₀ := H₀ + 1)
+          (a := -L) (b := L)
       c2 ((hV.comp continuous_snd).sub continuous_fst |>.mul c1) (fun h _ x => (hY h).2.2.2 x)
       (fun h hh x h0 h1 => ?_) (fun N => ?_) (fun h hh => ?_)
     · rcases mul_eq_zero.1 h1 with h2 | h2
       · have := le_abs_self (V x); linarith [hB x]
-      · exact basicSolution_ne_zero hV odd0 h (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV (hY h).2.2 h2 h0)
+      · exact basicSolution_ne_zero hV odd0 h
+            (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV (hY h).2.2 h2 h0)
     · refine ⟨B + ((N + 1 + 1) * Real.pi / (2 * L)) ^ 2 + 1, fun h hh => ?_⟩
-      obtain ⟨z, hz, hzI, hz0⟩ := isSturmLiouvilleSolution_exists_strictMono_zeros hB hL (N + 1) (hY h).2.2 (by
+      obtain ⟨z, hz, hzI, hz0⟩ :=
+          isSturmLiouvilleSolution_exists_strictMono_zeros hB hL (N + 1) (hY h).2.2 (by
         push_cast; linarith)
       have hrolle : ∀ j : Fin (N + 1), ∃ c ∈ Ioo (z j.castSucc) (z j.succ),
           deriv (basicSolution V odd0 h) c = 0 := fun j =>
@@ -633,7 +692,8 @@ theorem not_bddAbove_separatedSpectrum (hV : Continuous V) (hB : ∀ x, |V x| �
           · have := le_abs_self (V x)
             have : 0 ≤ ((N + 1 + 1) * Real.pi / (2 * L)) ^ 2 := sq_nonneg _
             linarith [hB x]
-          · exact basicSolution_ne_zero hV odd0 h (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV (hY h).2.2 h2 h0)
+          · exact basicSolution_ne_zero hV odd0 h
+                (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV (hY h).2.2 h2 h0)
       have := le_ncard_of_strictMono (P := fun x => x ∈ Icc (-L) L ∧
         deriv (basicSolution V odd0 h) x = 0) hcm (fun j => ⟨⟨?_, ?_⟩, hc0 j⟩) hfin
       · omega
@@ -645,15 +705,19 @@ theorem not_bddAbove_separatedSpectrum (hV : Continuous V) (hB : ∀ x, |V x| �
       rw [(basicSolution_neg_of_even hV hVe odd0 h L).2]
       exact neg_ne_zero.2 (mul_ne_zero hsg hG)
   · -- zeros of `Y` on `[-L, L]`
-    refine zero_count_deformation (Y := basicSolution V odd0) (Y' := fun h x => deriv (basicSolution V odd0 h) x)
+    refine zero_count_deformation (Y := basicSolution V odd0)
+        (Y' := fun h x => deriv (basicSolution V odd0 h) x)
       (H := B) (H₀ := H₀ + 1) (a := -L) (b := L) c1 c2 (fun h _ x => (hY h).2.2.hasDerivAt x)
-      (fun h _ x h0 h1 => basicSolution_ne_zero hV odd0 h (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV (hY h).2.2 h0 h1))
+      (fun h _ x h0 h1 => basicSolution_ne_zero hV odd0 h
+          (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV (hY h).2.2 h0 h1))
       (fun N => ?_) (fun h hh => ?_)
     · refine ⟨B + ((N + 1) * Real.pi / (2 * L)) ^ 2 + 1, fun h hh => ?_⟩
-      obtain ⟨z, hz, hzI, hz0⟩ := isSturmLiouvilleSolution_exists_strictMono_zeros hB hL N (hY h).2.2 (by linarith)
+      obtain ⟨z, hz, hzI, hz0⟩ :=
+          isSturmLiouvilleSolution_exists_strictMono_zeros hB hL N (hY h).2.2 (by linarith)
       have := le_ncard_of_strictMono (P := fun x => x ∈ Icc (-L) L ∧ basicSolution V odd0 h x = 0)
         hz (fun j => ⟨Ioo_subset_Icc_self (hzI j), hz0 j⟩)
-        (isSturmLiouvilleSolution_zeros_Icc_finite hV (hY h).2.2 (basicSolution_ne_zero hV odd0 h) (-L) L)
+        (isSturmLiouvilleSolution_zeros_Icc_finite hV (hY h).2.2
+            (basicSolution_ne_zero hV odd0 h) (-L) L)
       omega
     · have hG := hnot h hh
       simp only [sturmCharacteristic, ↓reduceIte] at hG
@@ -669,13 +733,15 @@ variable {S : Set ℝ}
 
 /-- Estimate under the stated parameter and domain assumptions: `(S ∩ Iio s).ncard < (S ∩ Iio
 t).ncard`. -/
-private lemma ncard_inter_Iio_lt_of_mem (hfin : ∀ c, (S ∩ Iio c).Finite) {s t : ℝ} (hs : s ∈ S) (hst : s < t) :
+private lemma ncard_inter_Iio_lt_of_mem (hfin : ∀ c, (S ∩ Iio c).Finite) {s t : ℝ} (hs : s ∈ S)
+    (hst : s < t) :
     (S ∩ Iio s).ncard < (S ∩ Iio t).ncard :=
   Set.ncard_lt_ncard ⟨fun _ hx => ⟨hx.1, hx.2.trans hst⟩,
     fun h => (lt_irrefl s) (h ⟨hs, hst⟩).2⟩ (hfin t)
 
 /-- Identity under the stated parameter and domain assumptions: `s = t`. -/
-private lemma eq_of_ncard_inter_Iio_eq (hfin : ∀ c, (S ∩ Iio c).Finite) {s t : ℝ} (hs : s ∈ S) (ht : t ∈ S)
+private lemma eq_of_ncard_inter_Iio_eq (hfin : ∀ c, (S ∩ Iio c).Finite) {s t : ℝ}
+    (hs : s ∈ S) (ht : t ∈ S)
     (he : (S ∩ Iio s).ncard = (S ∩ Iio t).ncard) : s = t := by
   rcases lt_trichotomy s t with h | h | h
   · exact absurd he (ncard_inter_Iio_lt_of_mem hfin hs h).ne
@@ -684,7 +750,8 @@ private lemma eq_of_ncard_inter_Iio_eq (hfin : ∀ c, (S ∩ Iio c).Finite) {s t
 
 /-- Every natural index occurs as the number of spectral values strictly below some value in the
 discrete ordered spectrum. -/
-private lemma exists_mem_ncard_inter_Iio_eq (hinf : ¬BddAbove S) (hfin : ∀ c, (S ∩ Iio c).Finite) (j : ℕ) :
+private lemma exists_mem_ncard_inter_Iio_eq (hinf : ¬BddAbove S)
+    (hfin : ∀ c, (S ∩ Iio c).Finite) (j : ℕ) :
     ∃ s ∈ S, (S ∩ Iio s).ncard = j := by
   -- the least element of `S ∩ Ioi c ∩ Iic t`
   have hmin : ∀ c : WithBot ℝ, ∃ s ∈ S, c < s ∧ ∀ x ∈ S, c < x → s ≤ x := by

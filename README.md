@@ -269,10 +269,57 @@ theory, and the real connection formulas remain open; see the
 - `θ_j(z\|τ)`, `θ_j(z,q)`, `θ_j(q)` (20.2): `jacobiThetaOneTau`, …, `jacobiThetaFourTau`; `DLMF.Theta.jacobiThetaOneQ`, …; `Real.jacobiThetaThreeNullQ`, `Real.jacobiThetaFourNullQ` (Miller: `Jacobithetatau`, `Jacobithetaq`).
 - Carlson `R_F`, `R_D`, `R_C`, `R_J`, `R_G` (19.16): `carlsonRF`, … (planned) (Miller: `CarsonsymellintRF`, … (sic)).
 
-The real digamma function is still `Real.digamma`, defined in Mathlib's `Real` namespace beside
-Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a later pass.
+All project declarations under `DLMF/` live in `DLMF.<Area>`, with real forms in
+`DLMF.<Area>.Real` (for example `DLMF.Gamma.Real.digamma`, beside Mathlib's `Complex.digamma`).
+General results in `DLMFMathlib/` use the Mathlib namespaces of the APIs they extend.
+
+**Functions already in Mathlib or TauCeti.** When the upstream function matches DLMF, the
+project uses it directly and records the DLMF items it covers with checked
+`dlmf_upstream` pointers (for example `Complex.besselJ`, `riemannZeta`,
+`PeriodPair.weierstrassP`). When it differs in domain, branch, normalization or totalization,
+the project defines the DLMF function in its own namespace and proves a bridge in the
+foundational layer (for example `DLMF.Confluent.erf_ofReal` to TauCeti's `Real.erf`, and
+`DLMF.Bessel.besselI_ofReal` to TauCeti's `Real.besselI`). AGENTS.md states the rule.
 
 ## Status
+
+### Statistics
+
+Counts as of 2026-11-02, during the third proof round of that day. Theorems include private
+helper lemmas, and a theorem counts as admitted when its proof contains `sorry`.
+
+- **Size.** 1,357 Lean files with 606,184 lines (480,695 lines of code without comments and
+  blank lines): 1,227 files under `DLMF/` and 130 under `DLMFMathlib/`. The foundational
+  layer (every `Basic.lean` and every file below a `Basic/` directory) has 235 files and
+  49,068 lines.
+- **Declarations.** 3,470 definitions, 62 structures, inductive types and classes, 19
+  instances, and 23,785 theorems.
+- **Proofs.** 22,510 theorems are fully proved and 1,275 are admitted (94.6% proved). No
+  definition is admitted. The foundational layer (1,559 definitions, 2,000 theorems) and
+  `DLMFMathlib/` (78 definitions, 977 theorems) contain no admissions. No axioms are used
+  beyond `propext`, `Classical.choice` and `Quot.sound`.
+- **DLMF coverage.** 10,744 index entries link DLMF items in 35 chapters (Chapter 3 is out of
+  scope) to Lean declarations: 9,694 `@[dlmf]` tags on 8,741 project declarations, 1,031
+  checked `dlmf_upstream` pointers (987 to Mathlib, 30 to TauCeti, the rest to lean-codes and
+  other packages) and 19 tags carried by Mathlib itself. Of the 7,462 distinct DLMF items,
+  6,021 (81%) are proved, defined or covered upstream, 255 have both a proved and an admitted
+  formalization, and 1,186 (16%) are only admitted. These coverage figures are from the tag
+  dump taken before the third proof round.
+- **History.** The project started on 2026-09-24 as lean-AAR. The two proof rounds of
+  2026-11-02 before the current one reduced the admissions from 1,482 to 1,336.
+
+### Reports
+
+The LaTeX reports in `reports/` are built by CI and published on GitHub Pages under stable
+names:
+
+- [Mathematical synopsis of the Basic layer](https://bjbraams.github.io/lean-DLMF/BasicSynopsis.pdf)
+- [Review of the Basic layer](https://bjbraams.github.io/lean-DLMF/BasicLayerReview.pdf)
+- [Status review from a Mathlib perspective](https://bjbraams.github.io/lean-DLMF/MathlibReview.pdf)
+- [Namespaces of special functions in Mathlib and TauCeti](https://bjbraams.github.io/lean-DLMF/UpstreamNamespaces.pdf)
+- [DLMF errata](https://bjbraams.github.io/lean-DLMF/DLMFErrata.pdf)
+
+### Proof rounds
 
 The [L'Hôpital, inverse-series and Appell reduction round](REVIEW.md#lhopital-hyperbolic-series-carlson-principal-values-and-appell-reductions-2026-10-30)
 removes **9 admissions**, leaving **1,553**. It proves the unbounded-denominator L'Hôpital

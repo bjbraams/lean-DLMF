@@ -99,7 +99,9 @@ theorem jacobiThetaOneTau_logDeriv {z τ : ℂ} (hτ : 0 < τ.im) (hz : |z.im| <
         congrFun hfun z, hs, cot_eq_cos_div_sin, hs]
       simp
     · rw [show jacobiThetaOneTau z τ = K * P * sin z * thetaCosProduct (E ^ 2) (E ^ 2) z from
-        congrFun hfun z, hfun, deriv_const_mul_mul_div_eq_add_logDeriv (mul_ne_zero hK0 hPne) (hasDerivAt_sin z) hFd hs hFz,
+        congrFun hfun z, hfun,
+            deriv_const_mul_mul_div_eq_add_logDeriv (mul_ne_zero hK0 hPne)
+            (hasDerivAt_sin z) hFd hs hFz,
         cot_eq_cos_div_sin]
       ring
   rw [hL]
@@ -154,7 +156,8 @@ theorem jacobiThetaTwoTau_logDeriv {z τ : ℂ} (hτ : 0 < τ.im) (hz : |z.im| <
         congrFun hfun z, hs, tan_eq_sin_div_cos, hs]
       simp
     · rw [show jacobiThetaTwoTau z τ = K * P * cos z * thetaCosProduct (-E ^ 2) (E ^ 2) z from
-        congrFun hfun z, hfun, deriv_const_mul_mul_div_eq_add_logDeriv (mul_ne_zero hK0 hPne) (hasDerivAt_cos z)
+        congrFun hfun z, hfun,
+            deriv_const_mul_mul_div_eq_add_logDeriv (mul_ne_zero hK0 hPne) (hasDerivAt_cos z)
         hFd hs hFz, tan_eq_sin_div_cos]
       ring
   rw [hL]
@@ -200,8 +203,10 @@ theorem jacobiThetaThreeTau_logDeriv {z τ : ℂ} (hτ : 0 < τ.im) (hz : |z.im|
     ring
   have hL : deriv (fun w => jacobiThetaThreeTau w τ) z / jacobiThetaThreeTau z τ =
       logDeriv (thetaCosProduct (-E) (E ^ 2)) z := by
-    rw [show jacobiThetaThreeTau z τ = P * (fun _ => (1 : ℂ)) z * thetaCosProduct (-E) (E ^ 2) z from
-      congrFun hfun z, hfun, deriv_const_mul_mul_div_eq_add_logDeriv hPne (hasDerivAt_const z (1 : ℂ))
+    rw [show jacobiThetaThreeTau z τ = P * (fun _ => (1 : ℂ)) z *
+        thetaCosProduct (-E) (E ^ 2) z from
+      congrFun hfun z, hfun,
+          deriv_const_mul_mul_div_eq_add_logDeriv hPne (hasDerivAt_const z (1 : ℂ))
       hFd one_ne_zero hFz]
     ring
   rw [hL]
@@ -247,7 +252,8 @@ theorem jacobiThetaFourTau_logDeriv {z τ : ℂ} (hτ : 0 < τ.im) (hz : |z.im| 
   have hL : deriv (fun w => jacobiThetaFourTau w τ) z / jacobiThetaFourTau z τ =
       logDeriv (thetaCosProduct E (E ^ 2)) z := by
     rw [show jacobiThetaFourTau z τ = P * (fun _ => (1 : ℂ)) z * thetaCosProduct E (E ^ 2) z from
-      congrFun hfun z, hfun, deriv_const_mul_mul_div_eq_add_logDeriv hPne (hasDerivAt_const z (1 : ℂ))
+      congrFun hfun z, hfun,
+          deriv_const_mul_mul_div_eq_add_logDeriv hPne (hasDerivAt_const z (1 : ℂ))
       hFd one_ne_zero hFz]
     ring
   rw [hL]
@@ -311,13 +317,15 @@ theorem jacobiTheta_logDeriv_series_uniform {τ : ℂ} (hτ : 0 < τ.im) (K : Se
     have hxr : r ^ (k + 1) ≤ r := pow_le_of_le_one hr0 hr1.le (by omega)
     have hA : ρ ^ (k + 1) / (1 - r) ≥ 0 := div_nonneg (by positivity) (by linarith)
     have hB : r ^ (k + 1) / (1 - ρ) ^ 2 ≥ 0 := by positivity
-    have hq := norm_div_one_sub_two_mul_cos_add_sq_le (x := E ^ (2 * (k + 1))) (z := z) (R := r) (ρ := ρ)
+    have hq := norm_div_one_sub_two_mul_cos_add_sq_le (x := E ^ (2 * (k + 1))) (z := z)
+        (R := r) (ρ := ρ)
       (by rw [hxn]; exact hxr)
       (mul_le_mul_of_nonneg_left (hex z hz) hr0) hρ1
     rw [show E ^ (4 * (k + 1)) = (E ^ (2 * (k + 1))) ^ 2 by rw [← pow_mul]; ring_nf]
     rw [hxn] at hq
     refine ⟨?_, by linarith [hq.1], by linarith [hq.2]⟩
-    have hb := norm_div_one_sub_mul_sin_le (x := E ^ (2 * (k + 1))) (y := E ^ (2 * (k + 1))) (z := z) k
+    have hb := norm_div_one_sub_mul_sin_le (x := E ^ (2 * (k + 1)))
+        (y := E ^ (2 * (k + 1))) (z := z) k
       (by rw [hxn]; linarith)
     rw [hxn] at hb
     refine hb.trans ?_
@@ -340,10 +348,12 @@ theorem jacobiTheta_logDeriv_series_uniform {τ : ℂ} (hτ : 0 < τ.im) (K : Se
     · exact (((summable_nat_add_iff 1).mpr (summable_geometric_of_lt_one hσ0 hσ1)).div_const _).add
         (((summable_geometric_of_lt_one (by positivity) hs2).mul_left s).div_const _)
     have hyn : ‖E ^ (2 * k + 1)‖ = s * (s ^ 2) ^ k := by rw [norm_pow, ← pow_mul]; ring
-    have hys : s * (s ^ 2) ^ k ≤ s := mul_le_of_le_one_right hs0 (pow_le_one₀ (by positivity) hs2.le)
+    have hys : s * (s ^ 2) ^ k ≤ s :=
+        mul_le_of_le_one_right hs0 (pow_le_one₀ (by positivity) hs2.le)
     have hA : σ ^ (k + 1) / (1 - s ^ 2) ≥ 0 := div_nonneg (by positivity) (by linarith)
     have hB : s * (s ^ 2) ^ k / (1 - σ) ^ 2 ≥ 0 := by positivity
-    have hq := norm_div_one_sub_two_mul_cos_add_sq_le (x := E ^ (2 * k + 1)) (z := z) (R := s) (ρ := σ)
+    have hq := norm_div_one_sub_two_mul_cos_add_sq_le (x := E ^ (2 * k + 1)) (z := z)
+        (R := s) (ρ := σ)
       (by rw [hyn]; exact hys)
       (mul_le_mul_of_nonneg_left (hex z hz) hs0) hσ1
     rw [show E ^ (4 * k + 2) = (E ^ (2 * k + 1)) ^ 2 by rw [← pow_mul]; ring_nf]
@@ -369,7 +379,8 @@ noncomputable def eulerSinePartialProd (w : ℂ) (M : ℕ) : ℂ :=
   w * ∏ k ∈ Finset.range M, (1 - w ^ 2 / (((k : ℂ) + 1) * π) ^ 2)
 
 /-- Euler's sine product: `eulerSinePartialProd w M → sin w`. -/
-private lemma tendsto_eulerSinePartialProd (w : ℂ) : Tendsto (eulerSinePartialProd w) atTop (𝓝 (sin w)) := by
+private lemma tendsto_eulerSinePartialProd (w : ℂ) : Tendsto (eulerSinePartialProd w) atTop
+    (𝓝 (sin w)) := by
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have h := Complex.tendsto_euler_sin_prod (w / π)
   rw [show (π : ℂ) * (w / π) = w by field_simp] at h
@@ -401,7 +412,8 @@ private lemma prod_Icc_one_sub_succ (f : ℤ → ℂ) (M : ℕ) :
     Finset.prod_insert (by simp only [Finset.mem_Icc]; omega), mul_assoc]
 
 /-- `mπ + b ≠ 0` when `sin b ≠ 0`. -/
-private lemma intCast_mul_pi_add_ne_zero {b : ℂ} (hb : sin b ≠ 0) (n : ℤ) : (n : ℂ) * π + b ≠ 0 := by
+private lemma intCast_mul_pi_add_ne_zero {b : ℂ} (hb : sin b ≠ 0) (n : ℤ) : (n : ℂ) *
+    π + b ≠ 0 := by
   intro h
   apply hb
   rw [show b = ((-n : ℤ) : ℂ) * π by push_cast; linear_combination h]
@@ -413,7 +425,8 @@ private lemma tendsto_prod_Icc_one_add_div {b : ℂ} (hb : sin b ≠ 0) (z : ℂ
       (𝓝 (sin (b + z) / sin b)) := by
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have hne := intCast_mul_pi_add_ne_zero hb
-  have key : ∀ M : ℕ, (∏ m ∈ Finset.Icc (-(M : ℤ)) M, (1 + z / (m * π + b))) * eulerSinePartialProd b M =
+  have key : ∀ M : ℕ, (∏ m ∈ Finset.Icc (-(M : ℤ)) M, (1 + z / (m * π + b))) *
+      eulerSinePartialProd b M =
       eulerSinePartialProd (b + z) M := by
     intro M
     induction M with
@@ -702,7 +715,8 @@ theorem jacobiThetaFourTau_doubleProd (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     sin_ne_zero_of_im_ne_zero (im_half_int_mul_ne_zero hτ n)
   set L : ℤ → ℂ := fun n => sin ((n - 1 / 2) * τ * π + z) / sin ((n - 1 / 2) * τ * π) with hL
   refine ⟨L, fun n => ?_, ?_⟩
-  · refine (tendsto_prod_Icc_one_add_div (hsn n) z).congr fun M => Finset.prod_congr rfl fun m _ => ?_
+  · refine (tendsto_prod_Icc_one_add_div (hsn n) z).congr fun M =>
+        Finset.prod_congr rfl fun m _ => ?_
     congr 2; ring
   · obtain ⟨hm, he⟩ := jacobiThetaFourTau_hasProd_sin z hτ
     rw [he]

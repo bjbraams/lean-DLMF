@@ -284,7 +284,8 @@ private lemma ballotCount_eq_sum_unitSteps {d : ℤ} (hd : 0 ≤ d) {m n : ℕ} 
 private lemma ballotCount_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :
     ballotCount d (m + 1) (n + 1) =
       ballotCount (d - 1) m (n + 1) + ballotCount (d + 1) (m + 1) n := by
-  rw [ballotCount_eq_sum_unitSteps hd (by simp), show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ n + 1)
+  rw [ballotCount_eq_sum_unitSteps hd (by simp),
+      show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ n + 1)
       = unitSteps by
     ext ⟨a, b⟩; simp only [unitSteps, mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]
     omega]
@@ -297,7 +298,8 @@ private lemma ballotCount_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :
 /-- `ballotCount` recurrence at `(0, n+1)`. -/
 private lemma ballotCount_zero_succ {d : ℤ} (hd : 0 ≤ d) (n : ℕ) :
     ballotCount d 0 (n + 1) = ballotCount (d + 1) 0 n := by
-  rw [ballotCount_eq_sum_unitSteps hd (by simp), show unitSteps.filter (fun s => s.1 ≤ 0 ∧ s.2 ≤ n + 1)
+  rw [ballotCount_eq_sum_unitSteps hd (by simp),
+      show unitSteps.filter (fun s => s.1 ≤ 0 ∧ s.2 ≤ n + 1)
       = {(0, 1)} by
     ext ⟨a, b⟩; simp only [unitSteps, mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]
     omega]
@@ -306,7 +308,8 @@ private lemma ballotCount_zero_succ {d : ℤ} (hd : 0 ≤ d) (n : ℕ) :
 /-- `ballotCount` recurrence at `(m+1, 0)`. -/
 private lemma ballotCount_succ_zero {d : ℤ} (hd : 0 ≤ d) (m : ℕ) :
     ballotCount d (m + 1) 0 = ballotCount (d - 1) m 0 := by
-  rw [ballotCount_eq_sum_unitSteps hd (by simp), show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ 0)
+  rw [ballotCount_eq_sum_unitSteps hd (by simp),
+      show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ 0)
       = {(1, 0)} by
     ext ⟨a, b⟩; simp only [unitSteps, mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]
     omega]

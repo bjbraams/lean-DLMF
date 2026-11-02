@@ -692,7 +692,8 @@ private lemma eventually_qPochhammer_ne_zero (a q : ℂ) (hq : q ≠ 0) (m : ℕ
 
 /-- Watson's transformation in rational form, for all `a` with the natural denominators
 nonzero; the degenerate values of `a` with `(aq;q)_{2n} = 0` follow by continuity in `a`. -/
-theorem watson_transformation_rational {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+theorem watson_transformation_rational {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0)
+    (hb : b ≠ 0) (hc : c ≠ 0)
     (hd : d ≠ 0) (he : e ≠ 0) (hq : q ≠ 0) (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
     (hB : qPochhammer (a * q / b) q n ≠ 0) (hC : qPochhammer (a * q / c) q n ≠ 0)
     (hD : qPochhammer (a * q / d) q n ≠ 0) (hE : qPochhammer (a * q / e) q n ≠ 0)
@@ -831,7 +832,8 @@ theorem watson_transformation {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb :
   have HN := H (a * q * q ^ n) (by simp)
   have HY := H (d * e * q⁻¹ ^ n / a) (by simp)
   have HQ := H q (by simp)
-  have hW := watson_transformation_rational n ha hb hc hd he hq (fun m hm => HQ m (by omega)) (HB n (by omega))
+  have hW := watson_transformation_rational n ha hb hc hd he hq (fun m hm => HQ m (by omega))
+      (HB n (by omega))
     (HC n (by omega)) (HD n (by omega)) (HE n (by omega)) (HY n (by omega)) (HN n (by omega))
   have hzero : ∀ k, n < k → qPochhammer (q⁻¹ ^ n) q k = 0 :=
     fun k hk => by rw [inv_pow]; exact qPochhammer_recip_pow_eq_zero hq hk
@@ -1115,7 +1117,8 @@ private lemma summable_sign_pow {q : ℂ} (hq : ‖q‖ < 1) (s : ℕ → ℕ) (
   exact pow_le_pow_of_le_one (norm_nonneg q) hq.le (hE n)
 
 /-- The Jacobi triple product at base `q⁵` and `z = q^j`, split into `n ≥ 0` and `n < 0`. -/
-private lemma jacobiTripleProduct_q5_eq_tsum_add_tsum {q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (j : ℕ) (hj : 1 ≤ j)
+private lemma jacobiTripleProduct_q5_eq_tsum_add_tsum {q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0)
+    (j : ℕ) (hj : 1 ≤ j)
     (E : ℕ → ℕ)
     (hE : ∀ m, 5 * (m + 1 + 1).choose 2 = E m + j * (m + 1)) (hEm : ∀ m, m ≤ E m) :
     qPochhammerInf (q ^ 5) (q ^ 5) * qPochhammerInf (q ^ j) (q ^ 5) *

@@ -73,7 +73,8 @@ def reidAiryA (k : Fin 3) (z p : ℂ) : ℂ :=
 def reidAiryB0 (z : ℂ) (p : ℤ) : ℂ := reidArc z p 0 (2 * π) / (2 * π * I)
 /-- Coefficients of exp(zt-t³/3), used to specify the finite part at t=0. -/
 def reidTaylorCoeff (z : ℂ) (j : ℕ) : ℂ :=
-  ∑ k ∈ Finset.range (j / 3 + 1), (-1 / 3 : ℂ) ^ k * z ^ (j - 3 * k) / (k.factorial * (j - 3 * k).factorial)
+  ∑ k ∈ Finset.range (j / 3 + 1), (-1 / 3 : ℂ) ^ k * z ^ (j - 3 * k) /
+      (k.factorial * (j - 3 * k).factorial)
 /-- The ordinary ray integral when p≤0; for p>0 the explicitly subtracted Hadamard
 finite part, with the inherited logarithm at the lower endpoint. The printed positive-p
 integrals in 9.13.27 do not converge as ordinary integrals. -/
@@ -123,7 +124,8 @@ theorem reidArc_add {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p : ℂ) (α β : 
       exp (c * I) * exp (-p * (c * I)) * reidArc (z * exp (c * I)) p α β := by
   simp only [reidArc]
   rw [← intervalIntegral.integral_const_mul,
-    ← intervalIntegral.integral_comp_add_right (fun θ : ℝ => I * exp (θ * I) * reidKernel z p (θ * I)) c]
+    ← intervalIntegral.integral_comp_add_right
+        (fun θ : ℝ => I * exp (θ * I) * reidKernel z p (θ * I)) c]
   refine intervalIntegral.integral_congr fun θ _ => ?_
   rw [show ((θ + c : ℝ) : ℂ) * I = θ * I + c * I by push_cast; ring, reidKernel_add_mul_I hc,
     exp_add]
@@ -251,7 +253,8 @@ theorem hasDerivAt_reidArc (p : ℂ) (α β : ℝ) (z : ℂ) :
         have := norm_le_norm_add_norm_sub' x z
         rw [Metric.mem_ball, dist_eq_norm] at hx; linarith
       linarith)
-    ((by fun_prop : Continuous fun θ : ℝ => Real.exp (θ * (p - 1).im + (‖z‖ + 1) + 1 / 3)).intervalIntegrable _ _)
+    ((by fun_prop : Continuous fun θ : ℝ =>
+           Real.exp (θ * (p - 1).im + (‖z‖ + 1) + 1 / 3)).intervalIntegrable _ _)
     (ae_of_all _ fun θ _ x _ => (hasDerivAt_reidKernel_z x p (θ * I)).const_mul (I * exp (θ * I)))
   exact h.2
 
@@ -692,7 +695,8 @@ theorem reidAiryA_zero_initial :
     have hsc : (Real.sqrt 3 : ℂ) ^ 2 = 3 := by exact_mod_cast hs
     push_cast
     field_simp
-    linear_combination (-(Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 2) * hsc + (-3 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ)) * I_sq + (4 * I) * hGc
+    linear_combination (-(Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 2) * hsc +
+        (-3 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ)) * I_sq + (4 * I) * hGc
   · have h := hA 1
     simp only [Nat.cast_one] at h
     rw [h, airyAiDeriv_zero, hω2, exp_two_pi_div_three_mul_I,
@@ -708,8 +712,13 @@ theorem reidAiryA_zero_initial :
     have hsc : (Real.sqrt 3 : ℂ) ^ 2 = 3 := by exact_mod_cast hs
     push_cast
     field_simp
-    linear_combination (-(Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 4 * (Real.sqrt 3 : ℂ) ^ 2 - 3 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 4 + 4 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 3 * (Real.sqrt 3 : ℂ) - 2 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 2) * hsc +
-      (-9 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 2 + 12 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I * (Real.sqrt 3 : ℂ) + 3 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ)) * I_sq + (-16 * I) * hGc
+    linear_combination (-(Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 4 *
+        (Real.sqrt 3 : ℂ) ^ 2 - 3 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 4 +
+        4 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 3 * (Real.sqrt 3 : ℂ) - 2 *
+        (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 2) * hsc +
+      (-9 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 2 + 12 *
+          (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I * (Real.sqrt 3 : ℂ) + 3 *
+          (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ)) * I_sq + (-16 * I) * hGc
 
 /-- At `p = 0` Reid's first contour function is Airy's: `A(z, 0) = Ai(z)` on `L₁`
 (DLMF 9.13.28). -/
@@ -759,7 +768,8 @@ theorem reidAiryB_zero_parameter (z : ℂ) :
     simp only [Fin.val_zero, Nat.cast_zero, mul_zero, zero_mul, zero_div, ofReal_zero, add_zero,
       exp_zero, one_mul, reidKernel, Int.cast_zero, neg_zero]
     have ht' : exp (log (t : ℂ)) = t := exp_log (ofReal_ne_zero.mpr ht.ne')
-    rw [show exp (3 * log (t : ℂ)) = exp (log (t : ℂ)) ^ 3 by rw [← exp_nat_mul]; push_cast; ring_nf,
+    rw [show exp (3 * log (t : ℂ)) = exp (log (t : ℂ)) ^ 3 by rw [← exp_nat_mul];
+                                                              push_cast; ring_nf,
       ht']
     ring_nf
 
@@ -767,7 +777,8 @@ theorem reidAiryB_zero_parameter (z : ℂ) :
 (DLMF 9.13.31). -/
 @[dlmf 9.13.E31]
 theorem reidAiryA_ode (k : Fin 3) (z p : ℂ) :
-    iteratedDeriv 3 (fun t => reidAiryA k t p) z - z * deriv (fun t => reidAiryA k t p) z + (p - 1) * reidAiryA k z p = 0 := by
+    iteratedDeriv 3 (fun t => reidAiryA k t p) z - z * deriv (fun t => reidAiryA k t p) z +
+        (p - 1) * reidAiryA k z p = 0 := by
   have h3 : iteratedDeriv 3 (fun t => reidAiryA k t p) = fun t => reidAiryA k t (p - 3) := by
     rw [iteratedDeriv_succ, iteratedDeriv_succ, iteratedDeriv_one, deriv_reidAiryA,
       deriv_reidAiryA, deriv_reidAiryA]
@@ -782,7 +793,8 @@ theorem reidAiryA_ode (k : Fin 3) (z p : ℂ) :
 (DLMF 9.13.31). -/
 @[dlmf 9.13.E31]
 theorem reidAiryB_ode (k : Fin 3) (z : ℂ) {p : ℤ} (hp : p ≤ 0) :
-    iteratedDeriv 3 (fun t => reidAiryB k t p) z - z * deriv (fun t => reidAiryB k t p) z + ((p : ℂ) - 1) * reidAiryB k z p = 0 := by
+    iteratedDeriv 3 (fun t => reidAiryB k t p) z - z * deriv (fun t => reidAiryB k t p) z +
+        ((p : ℂ) - 1) * reidAiryB k z p = 0 := by
   have h3 : iteratedDeriv 3 (fun t => reidAiryB k t p) = fun t => reidAiryB k t (p - 3) := by
     rw [iteratedDeriv_succ, iteratedDeriv_succ, iteratedDeriv_one, deriv_reidAiryB k hp,
       deriv_reidAiryB k (by omega), deriv_reidAiryB k (by omega)]
@@ -866,7 +878,8 @@ theorem reidAiryB0_difference (z : ℂ) (p : ℤ) :
 (DLMF 9.13.31). -/
 @[dlmf 9.13.E31]
 theorem reidAiryB0_ode (z : ℂ) (p : ℤ) :
-    iteratedDeriv 3 (fun t => reidAiryB0 t p) z - z * deriv (fun t => reidAiryB0 t p) z + ((p : ℂ) - 1) * reidAiryB0 z p = 0 := by
+    iteratedDeriv 3 (fun t => reidAiryB0 t p) z - z * deriv (fun t => reidAiryB0 t p) z +
+        ((p : ℂ) - 1) * reidAiryB0 z p = 0 := by
   have h3 : iteratedDeriv 3 (fun t => reidAiryB0 t p) = fun t => reidAiryB0 t (p - 3) := by
     rw [iteratedDeriv_succ, iteratedDeriv_succ, iteratedDeriv_one, deriv_reidAiryB0,
       deriv_reidAiryB0, deriv_reidAiryB0]
@@ -880,7 +893,8 @@ theorem reidAiryB0_ode (z : ℂ) (p : ℤ) :
 @[dlmf 9.13.E33]
 theorem reidAiryA_rotations (z p : ℂ) :
     reidAiryA 1 z p = exp (-2 * (p - 1) * π * I / 3) * reidAiryA 0 (z * exp (2 * π * I / 3)) p ∧
-      reidAiryA 2 z p = exp (2 * (p - 1) * π * I / 3) * reidAiryA 0 (z * exp (-2 * π * I / 3)) p := by
+      reidAiryA 2 z p = exp (2 * (p - 1) * π * I / 3) *
+          reidAiryA 0 (z * exp (-2 * π * I / 3)) p := by
   have e1 : exp ((((2 * π / 3 : ℝ) : ℂ)) * I) = exp (2 * π * I / 3) := by push_cast; ring_nf
   have e2 : exp ((((-(2 * π / 3) : ℝ) : ℂ)) * I) = exp (-2 * π * I / 3) := by push_cast; ring_nf
   have k1 : exp ((((2 * π / 3 : ℝ) : ℂ)) * I) * exp (-p * ((((2 * π / 3 : ℝ) : ℂ)) * I)) =
@@ -1012,7 +1026,8 @@ def reidTaylorTail (z : ℂ) (n : ℕ) (u : ℂ) : ℂ := ∑' j : ℕ, reidTayl
 theorem hasFPowerSeriesOnBall_reidTaylorTail (z : ℂ) (n : ℕ) :
     HasFPowerSeriesOnBall (reidTaylorTail z n)
       (FormalMultilinearSeries.ofScalars ℂ fun j => reidTaylorCoeff z (j + n)) 0 ⊤ := by
-  have hr : (FormalMultilinearSeries.ofScalars ℂ fun j => reidTaylorCoeff z (j + n)).radius = ⊤ := by
+  have hr : (FormalMultilinearSeries.ofScalars ℂ fun j =>
+      reidTaylorCoeff z (j + n)).radius = ⊤ := by
     refine ENNReal.eq_top_of_forall_nnreal_le fun r => ?_
     rcases eq_or_ne r 0 with rfl | hr0
     · simp
@@ -1025,7 +1040,8 @@ theorem hasFPowerSeriesOnBall_reidTaylorTail (z : ℂ) (n : ℕ) :
       FormalMultilinearSeries.ofScalars_norm, Real.norm_eq_abs,
       abs_of_nonneg hrpos.le, pow_add]
     field_simp
-  have h := (FormalMultilinearSeries.ofScalars ℂ fun j => reidTaylorCoeff z (j + n)).hasFPowerSeriesOnBall
+  have h := (FormalMultilinearSeries.ofScalars ℂ fun j =>
+      reidTaylorCoeff z (j + n)).hasFPowerSeriesOnBall
     (by rw [hr]; simp)
   rw [hr] at h
   have he : (FormalMultilinearSeries.ofScalars ℂ fun j => reidTaylorCoeff z (j + n)).sum =
@@ -1096,11 +1112,13 @@ theorem reidArc_finitePart (z : ℂ) (m : ℕ) {G : ℂ → ℂ}
   have hd : ∀ θ : ℝ, HasDerivAt (reidFinitePartH z m G)
       (I * exp (θ * I) * reidKernel z ((m + 1 : ℕ) : ℂ) (θ * I)) θ := by
     intro θ
-    have hexp : ∀ w : ℂ, HasDerivAt (fun θ : ℝ => exp (θ * I * w)) (exp (θ * I * w) * (1 * I * w)) θ :=
+    have hexp : ∀ w : ℂ,
+        HasDerivAt (fun θ : ℝ => exp (θ * I * w)) (exp (θ * I * w) * (1 * I * w)) θ :=
       fun w => ((((hasDerivAt_id θ).ofReal_comp).mul_const I).mul_const w).cexp
     have h1 : HasDerivAt (fun θ : ℝ => ∑ j ∈ Finset.range m, reidTaylorCoeff z j *
         exp (θ * I * ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ))) / ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ)))
-        (∑ j ∈ Finset.range m, reidTaylorCoeff z j * (exp (θ * I * ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ))) *
+        (∑ j ∈ Finset.range m, reidTaylorCoeff z j *
+            (exp (θ * I * ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ))) *
           (1 * I * ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ)))) / ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ))) θ :=
       HasDerivAt.fun_sum fun j _ => ((hexp _).const_mul _).div_const _
     have h2 : HasDerivAt (fun θ : ℝ => (θ : ℂ) * I * reidTaylorCoeff z m)
@@ -1129,7 +1147,8 @@ theorem reidArc_finitePart (z : ℂ) (m : ℕ) {G : ℂ → ℂ}
     have hvm' : v * exp (-((m + 1 : ℕ) : ℂ) * (θ * I)) * v ^ m = 1 := by
       rw [hvj]; push_cast; ring_nf; exact exp_zero
     have key : ∀ j ∈ Finset.range m, reidTaylorCoeff z j *
-        (exp (θ * I * ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ))) * (1 * I * ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ)))) /
+        (exp (θ * I * ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ))) *
+            (1 * I * ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ)))) /
           ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ)) =
         I * (v * exp (-((m + 1 : ℕ) : ℂ) * (θ * I)) * (reidTaylorCoeff z j * v ^ j)) := by
       intro j hj
@@ -1279,11 +1298,5 @@ theorem reidAiry_connection_36 (z : ℂ) (p : ℤ) :
 theorem reidAiry_connection_36_of_nonpos (z : ℂ) {p : ℤ} (hp : p ≤ 0) :
     reidAiryB 2 z p - reidAiryB 0 z p = 2 * π * I * reidAiryA 1 z p := by
   rw [reidAiry_connection_36, reidAiryB0_of_nonpos z hp, add_zero]
-
-/-- Positive-p finite-part correction: the lower endpoint contributes a polynomial forcing. -/
-theorem reidAiryB_finitePart_ode (k : Fin 3) (z : ℂ) {p : ℤ} (hp : 1 ≤ p) :
-    iteratedDeriv 3 (fun t => reidAiryB k t p) z - z * deriv (fun t => reidAiryB k t p) z +
-      ((p : ℂ) - 1) * reidAiryB k z p = reidTaylorCoeff z (p.toNat - 1) := by
-  sorry
 
 end DLMF.Airy

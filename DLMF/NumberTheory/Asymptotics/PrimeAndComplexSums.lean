@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.NumberTheory.Asymptotics.DivisorSums
+public import DLMF.NumberTheory.Asymptotics.MoebiusSums
 
 /-!
 # Asymptotic formulas for arithmetic and prime sums (DLMF §27.11)
@@ -266,7 +267,8 @@ noncomputable def invLogNat (n : ℕ) : ℝ := 1 / Real.log n
 /-- Abel summation: `∑_{p ≤ N} 1/p = P(N) f(N) + ∑_{n < N} P(n) (f(n) - f(n+1))`. -/
 private lemma sum_primesLE_inv_eq_abel_summation (N : ℕ) :
     ∑ p ∈ Nat.primesLE N, (1 / p : ℝ) =
-      primeLogDivSum N * invLogNat N + ∑ n ∈ range N, primeLogDivSum n * (invLogNat n - invLogNat (n + 1)) := by
+      primeLogDivSum N * invLogNat N + ∑ n ∈ range N, primeLogDivSum n *
+          (invLogNat n - invLogNat (n + 1)) := by
   have hP : ∀ n, primeLogDivSum n = ∑ m ∈ range (n + 1), if m.Prime then Real.log m / m else 0 :=
     fun n ↦ sum_primesLE_eq_sum_range_ite _ n
   rw [sum_primesLE_eq_sum_range_ite]
@@ -397,11 +399,13 @@ private lemma abs_sum_primesLE_inv_sub_log_log_le {N : ℕ} (hN : 2 ≤ N) :
     calc |∑' i, mertensAbelError (i + N)| ≤ ∑' i, |mertensAbelError (i + N)| := by
           rw [← Real.norm_eq_abs]
           exact norm_tsum_le_tsum_norm (by simpa [Real.norm_eq_abs] using hs)
-      _ ≤ _ := Real.tsum_le_of_sum_range_le (fun _ ↦ abs_nonneg _) (sum_abs_mertensAbelError_tail_le hN)
+      _ ≤ _ := Real.tsum_le_of_sum_range_le (fun _ ↦ abs_nonneg _)
+          (sum_abs_mertensAbelError_tail_le hN)
   have hN1 : 1 ≤ N := by omega
   have hR := abs_sum_log_prime_div_sub_log_le hN1
   have hlogN : 0 < Real.log N := Real.log_pos (by exact_mod_cast (show 1 < N by omega))
-  have hPf : primeLogDivSum N * invLogNat N = 1 + (primeLogDivSum N - Real.log N) * invLogNat N := by
+  have hPf : primeLogDivSum N * invLogNat N = 1 + (primeLogDivSum N - Real.log N) *
+      invLogNat N := by
     simp only [invLogNat]; field_simp; ring
   have hRf : |(primeLogDivSum N - Real.log N) * invLogNat N| ≤ mertensBound * invLogNat N := by
     rw [abs_mul, abs_of_nonneg (invLogNat_nonneg N)]
@@ -409,10 +413,12 @@ private lemma abs_sum_primesLE_inv_sub_log_log_le {N : ℕ} (hN : 2 ≤ N) :
   rw [habel, htel, hPf, ← hsplit]
   have he : 1 + (primeLogDivSum N - Real.log N) * invLogNat N + (∑ n ∈ range N, mertensAbelError n +
       Real.log (Real.log N)) - (Real.log (Real.log N) + (1 + (∑ i ∈ range N, mertensAbelError i +
-        ∑' i, mertensAbelError (i + N)))) = (primeLogDivSum N - Real.log N) * invLogNat N - ∑' i, mertensAbelError (i + N) := by
+        ∑' i, mertensAbelError (i + N)))) = (primeLogDivSum N - Real.log N) * invLogNat N - ∑' i,
+            mertensAbelError (i + N) := by
     ring
   rw [he]
-  calc _ ≤ |(primeLogDivSum N - Real.log N) * invLogNat N| + |∑' i, mertensAbelError (i + N)| := abs_sub _ _
+  calc _ ≤ |(primeLogDivSum N - Real.log N) * invLogNat N| + |∑' i,
+         mertensAbelError (i + N)| := abs_sub _ _
     _ ≤ _ := by linarith
 
 /-- DLMF 27.11.8 (proof). -/
@@ -458,12 +464,15 @@ private lemma exists_isBigO_sum_prime_inv_sub_log_log :
   have hC := mertensBound_nonneg
   have hf0 := invLogNat_nonneg N
   rw [Real.norm_eq_abs, Real.norm_of_nonneg (by positivity)]
-  have he : ∑ p ∈ Nat.primesLE N, (1 / p : ℝ) - (Real.log (Real.log x) + (1 + ∑' n, mertensAbelError n)) =
-      (∑ p ∈ Nat.primesLE N, (1 / p : ℝ) - (Real.log (Real.log N) + (1 + ∑' n, mertensAbelError n))) -
+  have he : ∑ p ∈ Nat.primesLE N, (1 / p : ℝ) -
+      (Real.log (Real.log x) + (1 + ∑' n, mertensAbelError n)) =
+      (∑ p ∈ Nat.primesLE N, (1 / p : ℝ) -
+          (Real.log (Real.log N) + (1 + ∑' n, mertensAbelError n))) -
         (Real.log (Real.log x) - Real.log (Real.log N)) := by ring
   rw [he]
   calc _ ≤ |∑ p ∈ Nat.primesLE N, (1 / p : ℝ) - (Real.log (Real.log N) +
-        (1 + ∑' n, mertensAbelError n))| + |Real.log (Real.log x) - Real.log (Real.log N)| := abs_sub _ _
+        (1 + ∑' n, mertensAbelError n))| + |Real.log (Real.log x) -
+            Real.log (Real.log N)| := abs_sub _ _
     _ ≤ (2 * mertensBound + 1) * invLogNat N + invLogNat N := by
         rw [abs_of_nonneg hll0]; linarith
     _ = (2 * mertensBound + 2) * invLogNat N := by ring
@@ -472,7 +481,8 @@ private lemma exists_isBigO_sum_prime_inv_sub_log_log :
     _ = _ := by ring
 
 /-- Mean-value bounds for `t ↦ t^(α+1)`: `p u^α (v-u) ≤ v^p - u^p ≤ p v^α (v-u)`. -/
-private lemma rpow_add_one_sub_rpow_add_one_bounds {α : ℝ} (hα : 0 < α) {u v : ℝ} (hu : 0 ≤ u) (huv : u ≤ v) :
+private lemma rpow_add_one_sub_rpow_add_one_bounds {α : ℝ} (hα : 0 < α) {u v : ℝ} (hu : 0 ≤ u)
+    (huv : u ≤ v) :
     (α + 1) * u ^ α * (v - u) ≤ v ^ (α + 1) - u ^ (α + 1) ∧
       v ^ (α + 1) - u ^ (α + 1) ≤ (α + 1) * v ^ α * (v - u) := by
   have hp : 1 ≤ α + 1 := by linarith
@@ -527,7 +537,8 @@ private lemma sum_Ioc_rpow_bounds {α : ℝ} (hα : 0 < α) (M : ℕ) :
     simp [Real.zero_rpow hα.ne', Real.zero_rpow hp.ne']
   | succ M ih =>
     rw [sum_Ioc_succ_top (by omega)]
-    obtain ⟨h1, h2⟩ := rpow_add_one_sub_rpow_add_one_bounds hα (u := M) (v := (M + 1 : ℕ)) (by positivity)
+    obtain ⟨h1, h2⟩ := rpow_add_one_sub_rpow_add_one_bounds hα (u := M) (v := (M + 1 : ℕ))
+        (by positivity)
       (by push_cast; linarith)
     have hd : ((M + 1 : ℕ) : ℝ) - M = 1 := by push_cast; ring
     rw [hd, mul_one] at h1 h2
@@ -719,7 +730,8 @@ private lemma abs_sum_sum_divisors_rpow_sub_le {α : ℝ} (hα : 0 < α) {N : �
 /-- The integer bound of 27.11.5 is `O(N^β)`, `β = max(1, α)`. -/
 private lemma exists_abs_sum_sum_divisors_rpow_sub_le {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ N : ℕ, 1 ≤ N →
-      |∑ n ∈ Icc 1 N, ∑ d ∈ n.divisors, (d : ℝ) ^ α - realZetaSucc α * (N : ℝ) ^ (α + 1) / (α + 1)| ≤
+      |∑ n ∈ Icc 1 N, ∑ d ∈ n.divisors, (d : ℝ) ^ α - realZetaSucc α *
+          (N : ℝ) ^ (α + 1) / (α + 1)| ≤
         K * (N : ℝ) ^ max 1 α := by
   have hp : 0 < α + 1 := by linarith
   refine ⟨1 / ((α + 1) * α) + 1 + 1 / |1 - α|, by positivity, fun N hN ↦ ?_⟩
@@ -827,14 +839,16 @@ private lemma hasPartialSumAsymptotic_sigmaC {α : ℝ} (hα : 0 < α) (hα1 : �
       have : 0 ≤ x - N := by linarith
       positivity
     linarith
-  have hZd : realZetaSucc α * (x ^ (α + 1) - (N : ℝ) ^ (α + 1)) / (α + 1) ≤ realZetaSucc α * x ^ max 1 α := by
+  have hZd : realZetaSucc α * (x ^ (α + 1) - (N : ℝ) ^ (α + 1)) / (α + 1) ≤ realZetaSucc α *
+      x ^ max 1 α := by
     rw [div_le_iff₀ hp]
     calc realZetaSucc α * (x ^ (α + 1) - (N : ℝ) ^ (α + 1)) ≤ realZetaSucc α * ((α + 1) * x ^ α) :=
           mul_le_mul_of_nonneg_left hd hZ
       _ ≤ realZetaSucc α * ((α + 1) * x ^ max 1 α) := by gcongr
       _ = _ := by ring
   have hZd0 : 0 ≤ realZetaSucc α * (x ^ (α + 1) - (N : ℝ) ^ (α + 1)) / (α + 1) := by positivity
-  have he2 : ∑ n ∈ Finset.Icc 1 N, ∑ d ∈ n.divisors, (d : ℝ) ^ α - realZetaSucc α * x ^ (α + 1) / (α + 1)
+  have he2 : ∑ n ∈ Finset.Icc 1 N, ∑ d ∈ n.divisors, (d : ℝ) ^ α - realZetaSucc α *
+      x ^ (α + 1) / (α + 1)
       = (∑ n ∈ Finset.Icc 1 N, ∑ d ∈ n.divisors, (d : ℝ) ^ α -
         realZetaSucc α * (N : ℝ) ^ (α + 1) / (α + 1)) -
         realZetaSucc α * (x ^ (α + 1) - (N : ℝ) ^ (α + 1)) / (α + 1) := by ring
@@ -953,13 +967,25 @@ theorem). -/
 @[dlmf 27.11.E13]
 theorem tendsto_sum_moebius_div :
     Tendsto (fun x : ℝ ↦ (∑ n ∈ Finset.Icc 1 ⌊x⌋₊, (μ n : ℝ)) / x) atTop (nhds 0) := by
-  sorry
+  have h1 := (isLittleO_sum_moebius.tendsto_div_nhds_zero).comp
+    (tendsto_nat_floor_atTop (α := ℝ))
+  have h2 := h1.mul (tendsto_nat_floor_div_atTop (R := ℝ))
+  rw [zero_mul] at h2
+  refine h2.congr' ?_
+  filter_upwards [eventually_ge_atTop 1] with x hx
+  have hN : (0 : ℝ) < ⌊x⌋₊ := by exact_mod_cast Nat.floor_pos.mpr hx
+  have hI : Icc 1 ⌊x⌋₊ = Ioc 0 ⌊x⌋₊ := by ext; simp only [mem_Icc, mem_Ioc]; omega
+  simp only [Function.comp_apply, hI]
+  field_simp
 
 /-- DLMF 27.11.14: `lim_{x→∞} ∑_{n≤x} μ(n)/n = 0`. -/
 @[dlmf 27.11.E14]
 theorem tendsto_sum_moebius_div_self :
     Tendsto (fun x : ℝ ↦ ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, (μ n : ℝ) / n) atTop (nhds 0) := by
-  sorry
+  refine (tendsto_sum_moebius_div_self_nat.comp (tendsto_nat_floor_atTop (α := ℝ))).congr
+    fun x ↦ ?_
+  have hI : Icc 1 ⌊x⌋₊ = Ioc 0 ⌊x⌋₊ := by ext; simp only [mem_Icc, mem_Ioc]; omega
+  simp only [Function.comp_apply, hI]
 
 /-- DLMF 27.11.15: `lim_{x→∞} ∑_{n≤x} μ(n) ln n / n = -1`. -/
 @[dlmf 27.11.E15]

@@ -102,7 +102,8 @@ private lemma iteratedDeriv_id_mul_id_mul_zero {f : ℂ → ℂ} (hf : Different
 /-- Taylor recurrence of a solution of the factor equation:
 `a_{k+2} - (k(k-1) + 2(m+1)k - c) a_k - γ² k(k-1) a_{k-2} = 0` with
 `c = λ - m(m+1) + γ²`, `a_k = g^{(k)}(0)`. -/
-private lemma isSpheroidalFactor_iteratedDeriv_recurrence {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ} (hg : IsSpheroidalFactor m γ2 lam g)
+private lemma isSpheroidalFactor_iteratedDeriv_recurrence {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ}
+    (hg : IsSpheroidalFactor m γ2 lam g)
     (k : ℕ) :
     iteratedDeriv (k + 2) g 0 - ((k : ℂ) * (k - 1 : ℕ) + 2 * ((m : ℂ) + 1) * k -
         ((lam : ℂ) - m * ((m : ℂ) + 1) + γ2)) * iteratedDeriv k g 0 -
@@ -352,7 +353,8 @@ private lemma differentiable_iteratedDeriv_legendrePolyP (n m : ℕ) :
     (n := ((m + 1 : ℕ) : WithTop ℕ∞))).differentiable_iteratedDeriv' m
 
 /-- `𝖯^m_n(x) = (1-x²)^{m/2} (-1)^m dᵐP_n(x)/dxᵐ` on `(-1, 1)` (DLMF 14.6.1). -/
-private lemma ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolyP (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+private lemma ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolyP (n m : ℕ) {x : ℝ}
+    (hx : x ∈ Ioo (-1 : ℝ) 1) :
     ferrersP n m x = (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) *
       ((-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) x) := by
   rw [ferrersP_nat (n : ℂ) m hx]
@@ -621,7 +623,8 @@ theorem spheroidalPs_coeff_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
 /-! ### Orthogonality and expansions (§30.4(iv)) -/
 
 /-- The real form along `ℝ` of the factor equation, for a factor real on `ℝ`. -/
-private lemma isSpheroidalFactor_re_ode {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ} (hF : IsSpheroidalFactor m γ2 lam g)
+private lemma isSpheroidalFactor_re_ode {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ}
+    (hF : IsSpheroidalFactor m γ2 lam g)
     (hreal : ∀ x : ℝ, (g x).im = 0) (x : ℝ) :
     (1 - x ^ 2) * (deriv (deriv g) x).re - 2 * ((m : ℝ) + 1) * x * (deriv g x).re +
       (lam - m * ((m : ℝ) + 1) + γ2 * (1 - x ^ 2)) * (g x).re = 0 := by
@@ -774,7 +777,8 @@ theorem spheroidalQs_neg {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
 /-! #### Proof of the Legendre limit 30.5.3 -/
 
 /-- `𝖯^m_N(x)` is real for `-1 < x < 1`. -/
-private lemma im_ferrersP_natCast (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) : (ferrersP N m x).im = 0 := by
+private lemma im_ferrersP_natCast (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+    (ferrersP N m x).im = 0 := by
   have := ferrersP_real (N : ℝ) (m : ℝ) hx
   simpa using this
 
@@ -793,7 +797,8 @@ private lemma integral_re_ferrersP_mul_re_ferrersP {m n ν : ℕ} (hn : m ≤ n)
   exact h
 
 /-- `𝖯s^m_n(x, 0) = 𝖯^m_n(x)` (real form). -/
-private lemma spheroidalPs_gamma_zero_eq_re {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+private lemma spheroidalPs_gamma_zero_eq_re {n m : ℕ} (hmn : m ≤ n) {x : ℝ}
+    (hx : x ∈ Ioo (-1 : ℝ) 1) :
     spheroidalPs n m x 0 = (ferrersP n m x).re := by
   rw [← spheroidalPs_gamma_zero hmn hx, ofReal_re]
 
@@ -862,7 +867,8 @@ private lemma spheroidalANeg_gamma_zero {n m : ℕ} (hmn : m ≤ n) : spheroidal
   field_simp
 
 /-- Solutions of 30.2.1 on `(-1, 1)` in second-order form `f'' = p f' + q f`. -/
-private lemma isSpheroidalSolutionReal_hasDerivAt_deriv {lam γ2 μ : ℝ} {f : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f) :
+private lemma isSpheroidalSolutionReal_hasDerivAt_deriv {lam γ2 μ : ℝ} {f : ℝ → ℝ}
+    (hf : IsSpheroidalSolutionReal lam γ2 μ f) :
     ∀ t ∈ Ioo (-1 : ℝ) 1, HasDerivAt f (deriv f t) t ∧ HasDerivAt (deriv f)
       ((2 * t / (1 - t ^ 2)) • deriv f t +
         (-(lam + γ2 * (1 - t ^ 2) - μ ^ 2 / (1 - t ^ 2)) / (1 - t ^ 2)) • f t) t := by
@@ -884,7 +890,8 @@ private lemma isSpheroidalSolutionReal_hasDerivAt_deriv {lam γ2 μ : ℝ} {f : 
 
 /-- **Uniqueness** for 30.2.1 on `(-1, 1)`: two solutions with the same value and derivative at a
 point of `(-1, 1)` coincide there. -/
-private lemma isSpheroidalSolutionReal_eqOn_of_eq_of_deriv_eq {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f)
+private lemma isSpheroidalSolutionReal_eqOn_of_eq_of_deriv_eq {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
+    (hf : IsSpheroidalSolutionReal lam γ2 μ f)
     (hg : IsSpheroidalSolutionReal lam γ2 μ g) {x0 : ℝ} (hx0 : x0 ∈ Ioo (-1 : ℝ) 1)
     (h0 : f x0 = g x0) (h1 : deriv f x0 = deriv g x0) : EqOn f g (Ioo (-1 : ℝ) 1) := by
   have hp : ContinuousOn (fun t : ℝ => 2 * t / (1 - t ^ 2)) (Ioo (-1 : ℝ) 1) :=
@@ -895,11 +902,13 @@ private lemma isSpheroidalSolutionReal_eqOn_of_eq_of_deriv_eq {lam γ2 μ : ℝ}
     refine ContinuousOn.div ?_ (by fun_prop) hne
     exact ((continuousOn_const.add (continuousOn_const.mul (by fun_prop))).sub
       (continuousOn_const.div (by fun_prop) hne)).neg
-  exact (ODE.eqOn_of_linear_ode isOpen_Ioo ordConnected_Ioo hx0 hp hq (isSpheroidalSolutionReal_hasDerivAt_deriv hf)
+  exact (ODE.eqOn_of_linear_ode isOpen_Ioo ordConnected_Ioo hx0 hp hq
+      (isSpheroidalSolutionReal_hasDerivAt_deriv hf)
     (isSpheroidalSolutionReal_hasDerivAt_deriv hg) h0 h1).1
 
 /-- Solutions of 30.2.1 on `(-1, 1)` form a vector space: `f + c g` is a solution. -/
-private lemma isSpheroidalSolutionReal_add_mul {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f)
+private lemma isSpheroidalSolutionReal_add_mul {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
+    (hf : IsSpheroidalSolutionReal lam γ2 μ f)
     (hg : IsSpheroidalSolutionReal lam γ2 μ g) (c : ℝ) :
     IsSpheroidalSolutionReal lam γ2 μ (fun x => f x + c * g x) := by
   have hd : ∀ t ∈ Ioo (-1 : ℝ) 1, deriv (fun x => f x + c * g x) t = deriv f t + c * deriv g t :=
@@ -940,7 +949,8 @@ private lemma isSpheroidalQs_eqOn {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} {f g :
   have hW := (hf.wronskian x0 hx0).trans (hg.wronskian x0 hx0).symm
   change P x0 * deriv f x0 - deriv P x0 * f x0 = P x0 * deriv g x0 - deriv P x0 * g x0 at hW
   have hfG : EqOn f (fun x => g x + c * P x) (Ioo (-1 : ℝ) 1) := by
-    refine isSpheroidalSolutionReal_eqOn_of_eq_of_deriv_eq hf.ode hG hx0 (by show f x0 = g x0 + c * P x0; linarith) ?_
+    refine isSpheroidalSolutionReal_eqOn_of_eq_of_deriv_eq hf.ode hG hx0
+        (by show f x0 = g x0 + c * P x0; linarith) ?_
     rw [hdG]
     have : P x0 * (deriv f x0 - deriv g x0 - c * deriv P x0) = 0 := by
       linear_combination hW - deriv P x0 * hcP
@@ -968,7 +978,8 @@ private lemma isSpheroidalQs_eqOn {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} {f g :
   simp
 
 /-- The real part of a real-valued Ferrers solution solves 30.2.1 with `γ = 0`. -/
-private lemma isSpheroidalSolutionReal_re_of_isFerrersSolution {ν μ : ℝ} {F : ℝ → ℂ} (hF : IsFerrersSolution ν μ F) :
+private lemma isSpheroidalSolutionReal_re_of_isFerrersSolution {ν μ : ℝ} {F : ℝ → ℂ}
+    (hF : IsFerrersSolution ν μ F) :
     IsSpheroidalSolutionReal (ν * (ν + 1)) 0 μ (fun x => (F x).re) := by
   have hd : ∀ x ∈ Ioo (-1 : ℝ) 1, HasDerivAt (fun t => (F t).re) (deriv F x).re x :=
     fun x hx => by
@@ -1057,7 +1068,8 @@ theorem spheroidalQs_gamma_zero {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x �
         show ((-1 : ℂ) ^ (n + m + 1)) = (((-1 : ℝ) ^ (n - m + 1) : ℝ) : ℂ) by
           rw [show n + m + 1 = (n - m + 1) + 2 * m by omega, pow_add, pow_mul]; push_cast; ring,
         re_ofReal_mul]
-    · rw [hdQ y hy, hdP y hy, hf₀I y hy, spheroidalPs_gamma_zero_eq_re hmn hy, spheroidalA_gamma_zero hmn,
+    · rw [hdQ y hy, hdP y hy, hf₀I y hy, spheroidalPs_gamma_zero_eq_re hmn hy,
+          spheroidalA_gamma_zero hmn,
         spheroidalANeg_gamma_zero hmn, mul_one, mul_one]
       have hW := ferrers_wronskian_4 (n : ℂ) (m : ℂ) hreg hy
       unfold ODE.wronskian at hW

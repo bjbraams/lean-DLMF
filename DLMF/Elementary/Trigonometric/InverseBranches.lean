@@ -7,6 +7,7 @@ module
 
 public import DLMF.Elementary.Basic.InverseTrigonometric
 public import DLMF.Elementary.Trigonometric.DirectIdentities
+public import DLMF.Elementary.PathLifts
 
 /-!
 # Principal and general inverse trigonometric functions
@@ -85,23 +86,57 @@ def ArcsinLift (γ r : ℝ→ℂ) (z : ℂ) : Prop :=
 theorem arcsin_general_integral {z w : ℂ} (hzp : z≠1) (hzm : z≠ -1) :
     w∈arcsinGeneral z ↔ ∃ γ r : ℝ→ℂ,ArcsinLift γ r z ∧
       (∫ t in (0:ℝ)..1,deriv γ t/r t)=w := by
-  sorry
+  constructor
+  · intro hw
+    obtain ⟨hcd, hc, hint⟩ := arcsin_lift_exists hzp hzm hw
+    refine ⟨_, fun t => Complex.cos (pathDetour w (pathDetourSign w) t),
+      ⟨hcd, by simp, by simp only [pathDetour_one]; exact hw,
+        (Complex.continuous_cos.comp (contDiff_pathDetour _ _).continuous).continuousOn,
+        by simp, fun t ht => ⟨hc t ht, Complex.cos_sq' _⟩⟩, hint⟩
+  · rintro ⟨γ, r, ⟨hγ, h0, h1, hr, hr0, hrr⟩, hint⟩
+    exact hint ▸ (sin_of_arcsin_lift hγ h0 h1 hr hr0 hrr).2
 
 /-- The integral from z to 1, normalized by the principal segment from zero to one. -/
 @[dlmf 4.23.E2]
 theorem arccos_general_integral {z w : ℂ} (hzp : z≠1) (hzm : z≠ -1) :
     w∈arccosGeneral z ↔ ∃ γ r : ℝ→ℂ,ArcsinLift γ r z ∧
       π/2-(∫ t in (0:ℝ)..1,deriv γ t/r t)=w := by
-  sorry
+  have key := fun v => arcsin_general_integral (w := v) hzp hzm
+  constructor
+  · intro hw
+    have hv : π / 2 - w ∈ arcsinGeneral z := by
+      change Complex.sin _ = z
+      rw [Complex.sin_pi_div_two_sub]; exact hw
+    obtain ⟨γ, r, hl, hint⟩ := (key _).mp hv
+    exact ⟨γ, r, hl, by rw [hint]; ring⟩
+  · rintro ⟨γ, r, hl, hint⟩
+    have hv := (key _).mpr ⟨γ, r, hl, rfl⟩
+    change Complex.cos w = z
+    rw [← hint, Complex.cos_pi_div_two_sub]; exact hv
 
-/-- DLMF 4.23.E3: arctan general integral. -/
+/-- DLMF 4.23.E3: arctan general integral. Stronger than DLMF, which assumes `z ≠ ±i`. -/
 @[dlmf 4.23.E3]
-theorem arctan_general_integral {z w : ℂ} (hzp : z≠I) (hzm : z≠ -I) :
+theorem arctan_general_integral' {z w : ℂ} :
     w∈arctanGeneral z ↔ ∃ γ : ℝ→ℂ,
       ContDiffOn ℝ 1 γ (Icc 0 1) ∧ γ 0=0 ∧ γ 1=z ∧
       (∀ t∈Icc 0 1,γ t≠I ∧ γ t≠ -I) ∧
       (∫ t in (0:ℝ)..1,deriv γ t/(1+(γ t)^2))=w := by
-  sorry
+  constructor
+  · rintro ⟨hc, ht⟩
+    obtain ⟨hcd, hI, hint⟩ := arctan_lift_exists hc
+    exact ⟨_, hcd, by simp, by simpa using ht, hI, hint⟩
+  · rintro ⟨γ, hγ, h0, h1, hI, hint⟩
+    obtain ⟨-, hc, ht⟩ := tan_of_arctan_lift hγ h0 h1 hI
+    exact hint ▸ ⟨hc, ht⟩
+
+/-- DLMF 4.23.E3: arctan general integral. -/
+@[dlmf 4.23.E3]
+theorem arctan_general_integral {z w : ℂ} (_hzp : z≠I) (_hzm : z≠ -I) :
+    w∈arctanGeneral z ↔ ∃ γ : ℝ→ℂ,
+      ContDiffOn ℝ 1 γ (Icc 0 1) ∧ γ 0=0 ∧ γ 1=z ∧
+      (∀ t∈Icc 0 1,γ t≠I ∧ γ t≠ -I) ∧
+      (∫ t in (0:ℝ)..1,deriv γ t/(1+(γ t)^2))=w :=
+  arctan_general_integral'
 
 /-- DLMF 4.23.E4: arccsc general reciprocal. -/
 @[dlmf 4.23.E4]
@@ -166,7 +201,8 @@ def sqrtUpperBank (w : ℂ) : ℂ := (Real.sqrt ((‖w‖ + w.re)/2) : ℂ) + I 
 
 /-- On the lower half-plane the principal root is `sqrtLowerBank`. -/
 private lemma sqrt_eq_sqrtLowerBank {w : ℂ} (h : w.im < 0) : Complex.sqrt w = sqrtLowerBank w := by
-  rw [Complex.sqrt_eq_real_add_ite, sqrtLowerBank, ite_eq_right_of_eq_false _ _ (eq_false (not_le.mpr h))]; ring
+  rw [Complex.sqrt_eq_real_add_ite, sqrtLowerBank,
+      ite_eq_right_of_eq_false _ _ (eq_false (not_le.mpr h))]; ring
 
 /-- On the closed upper half-plane the principal root is `sqrtUpperBank`. -/
 lemma sqrt_eq_sqrtUpperBank {w : ℂ} (h : 0 ≤ w.im) : Complex.sqrt w = sqrtUpperBank w := by
@@ -181,7 +217,8 @@ lemma continuous_sqrtUpperBank : Continuous sqrtUpperBank := by
   unfold sqrtUpperBank; fun_prop
 
 /-- Lower-bank root of a nonpositive real. -/
-private lemma sqrtLowerBank_neg_ofReal {t : ℝ} (ht : 0 ≤ t) : sqrtLowerBank (-(t:ℂ)) = -I * Real.sqrt t := by
+private lemma sqrtLowerBank_neg_ofReal {t : ℝ} (ht : 0 ≤ t) : sqrtLowerBank (-(t:ℂ)) = -I *
+    Real.sqrt t := by
   simp [sqrtLowerBank, abs_of_nonneg ht]
 
 /-- Upper-bank root of a nonpositive real. -/
@@ -204,7 +241,8 @@ private lemma log_I_mul_ofReal_of_neg {s : ℝ} (hs : s < 0) :
   · rw [he, Complex.log_im, Complex.arg_real_mul _ (by linarith), Complex.arg_neg_I]; simp
 
 /-- Arcsine limits along a bank where the square root follows a continuous formula. -/
-private lemma tendsto_arcsinPrincipal_of_sqrt_eventuallyEq {x : ℝ} {T : Set ℂ} {G : ℂ → ℂ} (hG : Continuous G)
+private lemma tendsto_arcsinPrincipal_of_sqrt_eventuallyEq {x : ℝ} {T : Set ℂ} {G : ℂ → ℂ}
+    (hG : Continuous G)
     (hev : ∀ᶠ z in 𝓝[T] (x:ℂ), Complex.sqrt (1 - z^2) = G (1 - z^2))
     (hP : G (1 - (x:ℂ)^2) + I*x ∈ Complex.slitPlane) :
     Tendsto arcsinPrincipal (𝓝[T] (x:ℂ)) (𝓝 (-I * Complex.log (G (1 - (x:ℂ)^2) + I*x))) := by
@@ -466,7 +504,8 @@ theorem sin_arcsin_principal (z : ℂ) : Complex.sin (arcsinPrincipal z)=z := by
     apply (mul_left_cancel₀ hw)
     rw [mul_inv_cancel₀ hw,hp]
   have he:Complex.exp (arcsinPrincipal z*I)=w := by
-    rw [arcsinPrincipal,show -I*Complex.log w*I=Complex.log w by linear_combination -Complex.log w*Complex.I_sq]
+    rw [arcsinPrincipal,
+        show -I*Complex.log w*I=Complex.log w by linear_combination -Complex.log w*Complex.I_sq]
     exact Complex.exp_log hw
   have hn:Complex.exp (-(arcsinPrincipal z)*I)=w⁻¹ := by
     rw [neg_mul,Complex.exp_neg,he]

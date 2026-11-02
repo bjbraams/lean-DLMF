@@ -174,8 +174,10 @@ theorem eventually_ode_of_iteratedDeriv (hf : AnalyticAt 𝕜 f x₀) (hp : Anal
     refine ENat.eq_top_iff_forall_ge.mpr fun N => ?_
     rw [natCast_le_analyticOrderAt_iff_iteratedDeriv_eq_zero (hf2.sub hR)]
     intro n _
-    rw [iteratedDeriv_sub hf2.contDiffAt hR.contDiffAt, ← iteratedDeriv_succ', ← iteratedDeriv_succ',
-      hrec n, iteratedDeriv_fun_add (hp.contDiffAt.mul hf1.contDiffAt) (hq.contDiffAt.mul hf.contDiffAt),
+    rw [iteratedDeriv_sub hf2.contDiffAt hR.contDiffAt, ← iteratedDeriv_succ',
+        ← iteratedDeriv_succ',
+      hrec n, iteratedDeriv_fun_add (hp.contDiffAt.mul hf1.contDiffAt)
+          (hq.contDiffAt.mul hf.contDiffAt),
       iteratedDeriv_fun_mul hp.contDiffAt hf1.contDiffAt,
       iteratedDeriv_fun_mul hq.contDiffAt hf.contDiffAt, ← Finset.sum_add_distrib, sub_eq_zero]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -348,7 +350,8 @@ theorem eqOn_Icc_of_linear_system {a b t₀ : ℝ} (ht₀ : t₀ ∈ Icc a b)
   have hG : ∀ t ∈ Icc a b,
       HasDerivWithinAt (fun t => (u₁ t, v₁ t)) (V t (u₁ t, v₁ t)) (Icc a b) t :=
     fun t ht => (huv₁ t ht).1.prodMk (huv₁ t ht).2
-  have hFc : ContinuousOn (fun t => (u t, v t)) (Icc a b) := fun t ht => (hF t ht).continuousWithinAt
+  have hFc : ContinuousOn (fun t => (u t, v t)) (Icc a b) := fun t ht =>
+      (hF t ht).continuousWithinAt
   have hGc : ContinuousOn (fun t => (u₁ t, v₁ t)) (Icc a b) :=
     fun t ht => (hG t ht).continuousWithinAt
   have heq : (fun t => (u t, v t)) t₀ = (fun t => (u₁ t, v₁ t)) t₀ := by simp [h₀, h₁]

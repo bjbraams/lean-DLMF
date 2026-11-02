@@ -104,7 +104,8 @@ theorem IsGeneralizedExpLog.log_zero {φ ψ : ℝ → ℝ} (h : IsGeneralizedExp
   simpa [h.exp_zero] using h.log_exp 0 (by norm_num)
 
 /-- A generalized exponential exceeds one beyond the fundamental interval. -/
-private lemma one_lt_generalizedExp_of_one_lt {φ ψ : ℝ → ℝ} (h : IsGeneralizedExpLog φ ψ) {t : ℝ} (ht : 1 < t) :
+private lemma one_lt_generalizedExp_of_one_lt {φ ψ : ℝ → ℝ} (h : IsGeneralizedExpLog φ ψ)
+    {t : ℝ} (ht : 1 < t) :
     1 < φ t := by
   have base : ∀ s : ℝ, 1 < s → s ≤ 2 → 1 < φ s := by
     intro s hs1 hs2
@@ -263,7 +264,8 @@ private lemma log_iterate_exp_iterate (m : ℕ) (u : ℝ) : (Real.log^[m]) ((Rea
       Real.log_exp, ih]
 
 /-- Before the least landing index, iterated logarithms stay at least one. -/
-private lemma one_le_log_iterate_of_lt_logIterationCount {x : ℝ} (hx : 1 < x) {j : ℕ} (hj : j < logIterationCount x) :
+private lemma one_le_log_iterate_of_lt_logIterationCount {x : ℝ} (hx : 1 < x) {j : ℕ}
+    (hj : j < logIterationCount x) :
     1 ≤ (Real.log^[j]) x := by
   obtain ⟨-, -, -, hmin⟩ := generalizedLog_gt_one hx
   induction j with
@@ -288,7 +290,8 @@ private lemma exp_iterate_log_iterate (j : ℕ) {u : ℝ} (hu : ∀ i < j, 0 < (
       Real.exp_log (hu j (by omega)), ih (fun i hi => hu i (by omega))]
 
 /-- The inverse equation above the fundamental interval. -/
-private lemma generalizedExp_generalizedLog_of_one_lt {x : ℝ} (hx : 1 < x) : generalizedExp (generalizedLog x) = x := by
+private lemma generalizedExp_generalizedLog_of_one_lt {x : ℝ} (hx : 1 < x) : generalizedExp
+    (generalizedLog x) = x := by
   obtain ⟨hpos, he, hm, -⟩ := generalizedLog_gt_one hx
   set m := logIterationCount x
   rw [he]
@@ -301,7 +304,8 @@ private lemma generalizedExp_generalizedLog_of_one_lt {x : ℝ} (hx : 1 < x) : g
     linarith [one_le_log_iterate_of_lt_logIterationCount hx hi])
 
 /-- The logarithmic inverse equation above the fundamental interval. -/
-private lemma generalizedLog_generalizedExp_of_one_lt {x : ℝ} (hx : 1 < x) : generalizedLog (generalizedExp x) = x := by
+private lemma generalizedLog_generalizedExp_of_one_lt {x : ℝ} (hx : 1 < x) : generalizedLog
+    (generalizedExp x) = x := by
   set n := ⌊x⌋₊ with hn
   set f := x - n with hf
   have hn1 : 1 ≤ n := Nat.le_floor (by simpa using hx.le)
@@ -540,7 +544,8 @@ def floorFractSqReparam (x : ℝ) : ℝ := ⌊x⌋ + (Int.fract x)^2
 def floorFractSqrtReparam (x : ℝ) : ℝ := ⌊x⌋ + Real.sqrt (Int.fract x)
 
 /-- The reparametrization commutes with unit shifts. -/
-private lemma floorFractSqReparam_add_one (x : ℝ) : floorFractSqReparam (x + 1) = floorFractSqReparam x + 1 := by
+private lemma floorFractSqReparam_add_one (x : ℝ) : floorFractSqReparam (x + 1) =
+    floorFractSqReparam x + 1 := by
   simp [floorFractSqReparam, Int.floor_add_one, Int.fract_add_one]; ring
 
 /-- Floor and fractional part of an integer plus a number in `[0,1)`. -/
@@ -551,23 +556,28 @@ private lemma floor_intCast_add_and_fract_intCast_add {n : ℤ} {u : ℝ} (h0 : 
   rw [Int.fract_intCast_add, Int.fract_eq_self.mpr ⟨h0, h1⟩]
 
 /-- `floorFractSqrtReparam` is a left inverse of `floorFractSqReparam`. -/
-private lemma floorFractSqrtReparam_floorFractSqReparam (x : ℝ) : floorFractSqrtReparam (floorFractSqReparam x) = x := by
+private lemma floorFractSqrtReparam_floorFractSqReparam (x : ℝ) : floorFractSqrtReparam
+    (floorFractSqReparam x) = x := by
   have h0 := Int.fract_nonneg x
   have h1 := Int.fract_lt_one x
-  obtain ⟨ha, hb⟩ := floor_intCast_add_and_fract_intCast_add (n := ⌊x⌋) (u := (Int.fract x)^2) (by positivity)
+  obtain ⟨ha, hb⟩ := floor_intCast_add_and_fract_intCast_add (n := ⌊x⌋) (u := (Int.fract x)^2)
+      (by positivity)
     (by nlinarith)
   rw [floorFractSqrtReparam, floorFractSqReparam, ha, hb, Real.sqrt_sq h0, Int.floor_add_fract]
 
 /-- `floorFractSqrtReparam` is a right inverse of `floorFractSqReparam`. -/
-private lemma floorFractSqReparam_floorFractSqrtReparam (x : ℝ) : floorFractSqReparam (floorFractSqrtReparam x) = x := by
+private lemma floorFractSqReparam_floorFractSqrtReparam (x : ℝ) : floorFractSqReparam
+    (floorFractSqrtReparam x) = x := by
   have h0 := Int.fract_nonneg x
   have h1 := Int.fract_lt_one x
-  obtain ⟨ha, hb⟩ := floor_intCast_add_and_fract_intCast_add (n := ⌊x⌋) (u := Real.sqrt (Int.fract x))
+  obtain ⟨ha, hb⟩ := floor_intCast_add_and_fract_intCast_add (n := ⌊x⌋)
+      (u := Real.sqrt (Int.fract x))
     (Real.sqrt_nonneg _) (by rw [Real.sqrt_lt' one_pos]; simpa using h1)
   rw [floorFractSqReparam, floorFractSqrtReparam, ha, hb, Real.sq_sqrt h0, Int.floor_add_fract]
 
 /-- The reparametrization preserves the exponential domain. -/
-private lemma neg_one_lt_floorFractSqReparam {x : ℝ} (hx : -1 < x) : -1 < floorFractSqReparam x := by
+private lemma neg_one_lt_floorFractSqReparam {x : ℝ} (hx : -1 < x) : -1 <
+    floorFractSqReparam x := by
   have hfl : -1 ≤ ⌊x⌋ := Int.le_floor.mpr (by push_cast; linarith)
   rcases hfl.lt_or_eq with h | h
   · have : (0:ℝ) ≤ ⌊x⌋ := by exact_mod_cast (show (0:ℤ) ≤ ⌊x⌋ by omega)
@@ -576,7 +586,8 @@ private lemma neg_one_lt_floorFractSqReparam {x : ℝ} (hx : -1 < x) : -1 < floo
     rw [floorFractSqReparam, ← h, hfr]; push_cast; nlinarith
 
 /-- The inverse reparametrization preserves the exponential domain. -/
-private lemma neg_one_lt_floorFractSqrtReparam {x : ℝ} (hx : -1 < x) : -1 < floorFractSqrtReparam x := by
+private lemma neg_one_lt_floorFractSqrtReparam {x : ℝ} (hx : -1 < x) : -1 <
+    floorFractSqrtReparam x := by
   have hfl : -1 ≤ ⌊x⌋ := Int.le_floor.mpr (by push_cast; linarith)
   rcases hfl.lt_or_eq with h | h
   · have : (0:ℝ) ≤ ⌊x⌋ := by exact_mod_cast (show (0:ℤ) ≤ ⌊x⌋ by omega)
@@ -586,7 +597,8 @@ private lemma neg_one_lt_floorFractSqrtReparam {x : ℝ} (hx : -1 < x) : -1 < fl
     linarith [Real.sqrt_pos.mpr (show 0 < x + 1 by linarith)]
 
 /-- On the fundamental interval the reparametrization is squaring. -/
-private lemma floorFractSqReparam_of_mem_Icc {x : ℝ} (hx : x ∈ Icc (0:ℝ) 1) : floorFractSqReparam x = x^2 := by
+private lemma floorFractSqReparam_of_mem_Icc {x : ℝ} (hx : x ∈ Icc (0:ℝ) 1) :
+    floorFractSqReparam x = x^2 := by
   rcases hx.2.lt_or_eq with h | rfl
   · obtain ⟨ha, hb⟩ := floor_intCast_add_and_fract_intCast_add (n := 0) (u := x) hx.1 h
     simp only [Int.cast_zero, zero_add] at ha hb
@@ -597,7 +609,8 @@ private lemma floorFractSqReparam_of_mem_Icc {x : ℝ} (hx : x ∈ Icc (0:ℝ) 1
 theorem generalizedExpLog_not_unique :
     ∃ φ ψ : ℝ → ℝ, IsGeneralizedExpLog φ ψ ∧ φ ≠ generalizedExp := by
   have hs := generalizedExpLog_spec
-  refine ⟨fun x => generalizedExp (floorFractSqReparam x), fun x => floorFractSqrtReparam (generalizedLog x), ?_, ?_⟩
+  refine ⟨fun x => generalizedExp (floorFractSqReparam x), fun x =>
+      floorFractSqrtReparam (generalizedLog x), ?_, ?_⟩
   · refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
     · intro x hx
       simp only [floorFractSqReparam_add_one]
@@ -612,14 +625,16 @@ theorem generalizedExpLog_not_unique :
       rw [floorFractSqReparam_of_mem_Icc hx, floorFractSqReparam_of_mem_Icc hy]
       nlinarith [hx.1, hy.1]
     · intro x hx
-      rw [hs.log_exp _ (neg_one_lt_floorFractSqReparam hx), floorFractSqrtReparam_floorFractSqReparam]
+      rw [hs.log_exp _ (neg_one_lt_floorFractSqReparam hx),
+          floorFractSqrtReparam_floorFractSqReparam]
     · intro x
       rw [floorFractSqReparam_floorFractSqrtReparam, hs.exp_log]
     · intro x
       exact neg_one_lt_floorFractSqrtReparam (hs.log_range x)
   · intro h
     have := congrFun h (1/2)
-    rw [floorFractSqReparam_of_mem_Icc ⟨by norm_num, by norm_num⟩, (generalized_eq_self ⟨by norm_num, by norm_num⟩).1,
+    rw [floorFractSqReparam_of_mem_Icc ⟨by norm_num, by norm_num⟩,
+        (generalized_eq_self ⟨by norm_num, by norm_num⟩).1,
       (generalized_eq_self ⟨by norm_num, by norm_num⟩).1] at this
     norm_num at this
 

@@ -100,7 +100,8 @@ private lemma integral_neg_pi_pi_eq {g : ℝ → ℂ} (hg : Continuous g) :
     (hg.intervalIntegrable _ _)).symm
 
 /-- The coefficients of an even real function. -/
-private lemma legAdd_coeff_of_even {F : ℝ → ℝ} (hF : Continuous F) (hev : ∀ t, F (-t) = F t) (n : ℤ) :
+private lemma legAdd_coeff_of_even {F : ℝ → ℝ} (hF : Continuous F)
+    (hev : ∀ t, F (-t) = F t) (n : ℤ) :
     legAdd_coeff (fun t => (F t : ℂ)) n =
       ((1 / π * ∫ t in (0 : ℝ)..π, F t * Real.cos (n * t) : ℝ) : ℂ) := by
   have hc : Continuous fun t : ℝ => exp (-(n * (t : ℂ) * I)) * (F t : ℂ) := by fun_prop
@@ -116,7 +117,8 @@ private lemma legAdd_coeff_of_even {F : ℝ → ℝ} (hF : Continuous F) (hev : 
   field_simp
 
 /-- The coefficients of an odd real function. -/
-private lemma legAdd_coeff_of_odd {F : ℝ → ℝ} (hF : Continuous F) (hodd : ∀ t, F (-t) = -F t) (n : ℤ) :
+private lemma legAdd_coeff_of_odd {F : ℝ → ℝ} (hF : Continuous F)
+    (hodd : ∀ t, F (-t) = -F t) (n : ℤ) :
     legAdd_coeff (fun t => (F t : ℂ)) n =
       -I * ((1 / π * ∫ t in (0 : ℝ)..π, F t * Real.sin (n * t) : ℝ) : ℂ) := by
   have hc : Continuous fun t : ℝ => exp (-(n * (t : ℂ) * I)) * (F t : ℂ) := by fun_prop
@@ -135,7 +137,8 @@ private lemma legAdd_coeff_of_odd {F : ℝ → ℝ} (hF : Continuous F) (hodd : 
 
 /-- **Cosine series** of an even, `2π`-periodic `C²` real function, with coefficients
 `(2/π) ∫₀^π F(t) cos(nt) dt` (the zeroth term halved). -/
-theorem hasSum_cos_series_of_even {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F) (hper : Function.Periodic F (2 * π))
+theorem hasSum_cos_series_of_even {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F)
+    (hper : Function.Periodic F (2 * π))
     (hev : ∀ t, F (-t) = F t) (u : ℝ) :
     HasSum (fun n : ℕ => (if n = 0 then 1 / 2 else 1) *
       (2 / π * ∫ t in (0 : ℝ)..π, F t * Real.cos (n * t)) * Real.cos (n * u)) (F u) := by
@@ -166,7 +169,8 @@ theorem hasSum_cos_series_of_even {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F) (hpe
 
 /-- **Sine series** of an odd, `2π`-periodic `C²` real function, with coefficients
 `(2/π) ∫₀^π F(t) sin(nt) dt`. -/
-private lemma hasSum_sin_series_of_odd {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F) (hper : Function.Periodic F (2 * π))
+private lemma hasSum_sin_series_of_odd {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F)
+    (hper : Function.Periodic F (2 * π))
     (hodd : ∀ t, F (-t) = -F t) (u : ℝ) :
     HasSum (fun n : ℕ =>
       (2 / π * ∫ t in (0 : ℝ)..π, F t * Real.sin (n * t)) * Real.sin (n * u)) (F u) := by
@@ -217,13 +221,15 @@ theorem one_sub_sq_mul_cos_sq_pos (hk : k ^ 2 < 1) (φ : ℝ) : 0 < 1 - k ^ 2 * 
   nlinarith [sq_nonneg k, sq_nonneg (Real.cos φ)]
 
 /-- For `k² < 1`, the weight `ρ(φ)` is positive. -/
-theorem fourierWeight_pos (hk : k ^ 2 < 1) (weighted : Bool) (φ : ℝ) : 0 < fourierWeight k weighted φ := by
+theorem fourierWeight_pos (hk : k ^ 2 < 1) (weighted : Bool) (φ : ℝ) : 0 <
+    fourierWeight k weighted φ := by
   unfold fourierWeight; split_ifs
   · exact one_pos
   · exact Real.rpow_pos_of_pos (one_sub_sq_mul_cos_sq_pos hk φ) _
 
 /-- For `k² < 1`, the weight `ρ(φ)` is `C²`. -/
-private lemma contDiff_two_fourierWeight (hk : k ^ 2 < 1) (weighted : Bool) : ContDiff ℝ 2 (fourierWeight k weighted) := by
+private lemma contDiff_two_fourierWeight (hk : k ^ 2 < 1) (weighted : Bool) : ContDiff ℝ 2
+    (fourierWeight k weighted) := by
   unfold fourierWeight; cases weighted
   · simp only [Bool.false_eq_true, ↓reduceIte]
     exact (contDiff_const.sub (contDiff_const.mul (Real.contDiff_cos.pow 2))).rpow_const_of_ne
@@ -279,15 +285,18 @@ private lemma incEllIntFm_sub_two_pi (hk : k ^ 2 < 1) (ψ : ℝ) :
   linarith
 
 /-- The weight `ρ` is even: `ρ(-φ) = ρ(φ)`. -/
-private lemma fourierWeight_neg (φ : ℝ) : fourierWeight k weighted (-φ) = fourierWeight k weighted φ := by
+private lemma fourierWeight_neg (φ : ℝ) : fourierWeight k weighted (-φ) =
+    fourierWeight k weighted φ := by
   simp [fourierWeight, Real.cos_neg]
 
 /-- The weight `ρ` is symmetric about `π/2`: `ρ(π - φ) = ρ(φ)`. -/
-private lemma fourierWeight_pi_sub (φ : ℝ) : fourierWeight k weighted (π - φ) = fourierWeight k weighted φ := by
+private lemma fourierWeight_pi_sub (φ : ℝ) : fourierWeight k weighted (π - φ) =
+    fourierWeight k weighted φ := by
   simp [fourierWeight, Real.cos_pi_sub]
 
 /-- The weight `ρ` is `2π`-periodic. -/
-private lemma fourierWeight_add_two_pi (φ : ℝ) : fourierWeight k weighted (φ + 2 * π) = fourierWeight k weighted φ := by
+private lemma fourierWeight_add_two_pi (φ : ℝ) : fourierWeight k weighted (φ + 2 * π) =
+    fourierWeight k weighted φ := by
   simp [fourierWeight, Real.cos_add_two_pi]
 
 /-- If `w` has period `4K`, then `φ ↦ w(F(π/2 - φ, k))/ρ(φ)` has period `2π`. -/
@@ -373,7 +382,8 @@ private lemma integral_comp_lamePhi (hk0 : 0 < k) (hk1 : k < 1) (hw : Continuous
   · simp only [↓reduceIte, div_one]; ring
 
 /-- Folding `∫₀^π` onto `∫₀^{π/2}` for `g(π - s) = c g(s)`. -/
-private lemma integral_zero_pi_fold {g : ℝ → ℝ} (hg : Continuous g) {c : ℝ} (hc : ∀ s, g (π - s) = c * g s) :
+private lemma integral_zero_pi_fold {g : ℝ → ℝ} (hg : Continuous g) {c : ℝ}
+    (hc : ∀ s, g (π - s) = c * g s) :
     ∫ t in (0 : ℝ)..π, g t = (1 + c) * ∫ t in (0 : ℝ)..π / 2, g t := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := π / 2) (hg.intervalIntegrable _ _)
     (hg.intervalIntegrable _ _)]
@@ -543,7 +553,8 @@ theorem summable_abs_lameCosCoeff (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ
     have := phiTransform_neg (weighted := weighted) hk hσ' t
     rwa [one_mul] at this
   refine Summable.of_nonneg_of_le (fun _ => abs_nonneg _) (fun j => ?_)
-    (summable_abs_cos_coeff_of_even (contDiff_two_phiTransform hk hw) (phiTransform_periodic hk h4) hev)
+    (summable_abs_cos_coeff_of_even (contDiff_two_phiTransform hk hw)
+        (phiTransform_periodic hk h4) hev)
   rw [lameCosCoeff_eq_integral hk0 hk1 hw hδ, abs_mul]
   refine mul_le_of_le_one_left (abs_nonneg _) ?_
   split_ifs <;> norm_num
@@ -560,7 +571,8 @@ theorem summable_abs_lameSinCoeff (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ
   have hodd : ∀ t, phiTransform w k weighted (-t) = -phiTransform w k weighted t := fun t => by
     have := phiTransform_neg (weighted := weighted) hk hσ' t
     rwa [neg_one_mul] at this
-  refine (summable_abs_sin_coeff_of_odd (contDiff_two_phiTransform hk hw) (phiTransform_periodic hk h4)
+  refine (summable_abs_sin_coeff_of_odd (contDiff_two_phiTransform hk hw)
+      (phiTransform_periodic hk h4)
     hodd).congr fun j => ?_
   rw [lameSinCoeff_eq_integral hk0 hk1 hw hδ]
 

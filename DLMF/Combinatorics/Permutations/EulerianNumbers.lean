@@ -51,7 +51,8 @@ open Polynomial hiding bernoulli
 namespace DLMF.Combinatorics
 
 /-- `⟨0 k⟩ = δ_{0k}` (restated before its tagged form (26.14.13) below). -/
-private lemma eulerianNumber_zero_left_eq_ite (k : ℕ) : eulerianNumber 0 k = if k = 0 then 1 else 0 := by
+private lemma eulerianNumber_zero_left_eq_ite (k : ℕ) : eulerianNumber 0 k = if k =
+    0 then 1 else 0 := by
   unfold eulerianNumber
   have h0 : ∀ σ : Perm (Fin 0), descentNumber σ = 0 := fun σ => by
     simp [descentNumber, wordDescentSet]
@@ -152,7 +153,8 @@ private lemma factorial_mul_stirlingSecond_eq_sum_eulerianNumber (n j : ℕ) (hj
   simp only [Nat.descFactorial_eq_factorial_mul_choose] at h1
   calc ∑ j ∈ range (n + 1), m.choose j * (j.factorial * Nat.stirlingSecond n j) = m ^ n := by
         rw [h1]; exact sum_congr rfl fun j _ => by ring
-    _ = ∑ k ∈ range (n + 1), eulerianNumber n k * (m + k).choose n := pow_eq_sum_eulerianNumber_mul_choose n m
+    _ = ∑ k ∈ range (n + 1), eulerianNumber n k * (m + k).choose n :=
+        pow_eq_sum_eulerianNumber_mul_choose n m
     _ = ∑ k ∈ range (n + 1), eulerianNumber n k *
           ∑ j ∈ range (n + 1), m.choose j * k.choose (n - j) := by
         refine sum_congr rfl fun k _ => ?_
@@ -194,7 +196,8 @@ def eulerianAlternatingSum (n k : ℕ) : ℤ :=
   ∑ j ∈ range (k + 1), (-1 : ℤ) ^ j * (n + 1).choose j * (k + 1 - j) ^ n
 
 /-- The right side of (26.14.6) at `n = 0`. -/
-private lemma eulerianAlternatingSum_zero (K : ℕ) : eulerianAlternatingSum 0 K = if K = 0 then 1 else 0 := by
+private lemma eulerianAlternatingSum_zero (K : ℕ) : eulerianAlternatingSum 0 K = if K =
+    0 then 1 else 0 := by
   unfold eulerianAlternatingSum
   split_ifs with hK
   · subst hK; simp
@@ -208,7 +211,8 @@ private lemma eulerianAlternatingSum_zero (K : ℕ) : eulerianAlternatingSum 0 K
 /-- The right side of (26.14.6) satisfies the Eulerian recurrence. -/
 private lemma eulerianAlternatingSum_succ_succ (n k : ℕ) :
     eulerianAlternatingSum (n + 1) (k + 1) =
-      (k + 2) * eulerianAlternatingSum n (k + 1) + ((n : ℤ) + 1 - (k + 1)) * eulerianAlternatingSum n k := by
+      (k + 2) * eulerianAlternatingSum n (k + 1) + ((n : ℤ) + 1 - (k + 1)) *
+          eulerianAlternatingSum n k := by
   unfold eulerianAlternatingSum
   rw [sum_range_succ' _ (k + 1), sum_range_succ' _ (k + 1), mul_add, mul_sum, mul_sum]
   have h0 : (-1 : ℤ) ^ 0 * ((n + 1 + 1).choose 0 : ℕ) *
@@ -332,7 +336,8 @@ theorem sum_pow_inversionNumber {q : ℂ} (hq : q ≠ 1) (n : ℕ) :
         congr 1
         rw [Fin.sum_univ_eq_sum_range
           (fun p => q ^ majorIndexIncrement (wordDescentSet fun i => (σ i : ℕ)) p),
-          sum_pow_majorIndexIncrement q (by simpa using wordDescentSet_subset_range (fun i => (σ i : ℕ))),
+          sum_pow_majorIndexIncrement q
+              (by simpa using wordDescentSet_subset_range (fun i => (σ i : ℕ))),
           eq_div_iff hq', mul_comm, mul_neg_geom_sum]
         ring
 
@@ -353,7 +358,8 @@ theorem worpitzky {n : ℕ} (hn : 1 ≤ n) (x : ℂ) :
   field_simp
 
 /-- (26.14.6) for every `n`, including `n = 0` (stronger than DLMF). -/
-private lemma eulerianNumber_eq_eulerianAlternatingSum (n k : ℕ) : (eulerianNumber n k : ℤ) = eulerianAlternatingSum n k := by
+private lemma eulerianNumber_eq_eulerianAlternatingSum (n k : ℕ) : (eulerianNumber n k : ℤ) =
+    eulerianAlternatingSum n k := by
   induction n generalizing k with
   | zero => rw [eulerianNumber_zero_left_eq_ite, eulerianAlternatingSum_zero]; split_ifs <;> simp
   | succ n ih =>

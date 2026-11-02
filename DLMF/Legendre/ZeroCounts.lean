@@ -286,7 +286,8 @@ theorem lzc_neg_near_neg_one {f f' u u' : ℝ → ℝ} {s K c : ℝ} (hs : -1 < 
 /-- A solution has a zero between the last zero `s₀` of the recessive solution `u` and `1`
 (normalized signs). -/
 lemma lzc_zero_right_aux {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
-    (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x) (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
+    (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x)
+        (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
     (hc : 0 < c) (hW : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * (u x * y' x - y x * u' x) = c)
     (hs0 : s0 ∈ Ioo (-1:ℝ) 1) (hu0 : u s0 = 0) (hpos : ∀ x ∈ Ioo s0 1, 0 < u x)
     (hs : s ∈ Ioo (-1:ℝ) 1) (hK : 0 < K)
@@ -303,7 +304,8 @@ lemma lzc_zero_right_aux {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
     (fun x hx => hb x ⟨by linarith [hx.1], hx.2⟩) (fun x hx => hW x (hsub hx))
   have hsub2 : Ico s0 1 ⊆ Ioo (-1:ℝ) 1 := fun x hx => ⟨by linarith [hx.1, hs0.1], hx.2⟩
   set y0 := (t + 1) / 2
-  have hy0 : y0 ∈ Ioo t 1 := ⟨by simp only [y0]; linarith [ht.2], by simp only [y0]; linarith [ht.2]⟩
+  have hy0 : y0 ∈ Ioo t 1 :=
+      ⟨by simp only [y0]; linarith [ht.2], by simp only [y0]; linarith [ht.2]⟩
   have hy0' : y0 ∈ Ioo s0 1 := ⟨by linarith [ht.1, hy0.1], hy0.2⟩
   obtain ⟨e, he, -⟩ := ODE.sturmCount_existsUnique_zero_right (p := u) (q := y)
     (fun x hx => hud x (hsub2 hx)) (fun x hx => hyd x (hsub2 hx))
@@ -315,7 +317,8 @@ lemma lzc_zero_right_aux {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
 /-- A solution independent of `u` has a zero between the last zero `s₀` of `u` and `1`, when `u`
 is recessive at `1`. -/
 theorem lzc_zero_right {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
-    (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x) (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
+    (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x)
+        (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
     (hc : c ≠ 0) (hW : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * (u x * y' x - y x * u' x) = c)
     (hs0 : s0 ∈ Ioo (-1:ℝ) 1) (hu0 : u s0 = 0) (hne : ∀ x ∈ Ioo s0 1, u x ≠ 0)
     (hs : s ∈ Ioo (-1:ℝ) 1) (hK : 0 < K)
@@ -346,7 +349,8 @@ theorem lzc_zero_right {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
 zeros in `(-1, 1)`, and `(1-x²)(u y' - y u') = c ≠ 0`, then `y` has between `N` and `N + 1`
 zeros there. -/
 theorem lzc_count_bounds {u u' y y' : ℝ → ℝ} {c K s : ℝ} {N : ℕ}
-    (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x) (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
+    (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x)
+        (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
     (hc : c ≠ 0) (hW : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * (u x * y' x - y x * u' x) = c)
     (huf : {x | x ∈ Ioo (-1:ℝ) 1 ∧ u x = 0}.Finite)
     (hun : {x | x ∈ Ioo (-1:ℝ) 1 ∧ u x = 0}.ncard = N)

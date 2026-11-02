@@ -156,7 +156,8 @@ private lemma integral_inv_cos_eq_arsinh_tan {φ : ℝ} (hφ : |φ| < π / 2) :
       (cos_pos_of_abs_lt_pi_div_two (hsub θ hθ)).ne'
 
 /-- `Re cos z = cos(Re z) cosh(Im z)`. -/
-private lemma re_cos_eq_cos_mul_cosh (z : ℂ) : (Complex.cos z).re = Real.cos z.re * Real.cosh z.im := by
+private lemma re_cos_eq_cos_mul_cosh (z : ℂ) : (Complex.cos z).re = Real.cos z.re *
+    Real.cosh z.im := by
   conv_lhs => rw [← Complex.re_add_im z, Complex.cos_add_mul_I]
   simp [← Complex.ofReal_cos, ← Complex.ofReal_cosh, ← Complex.ofReal_sin, ← Complex.ofReal_sinh]
 
@@ -273,7 +274,8 @@ theorem integral_inv_ellDelta_cube {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (φ 
   ring
 
 /-- `∫₀^φ sec²θ Δ⁻¹ dθ = F(φ, k) - (E(φ, k) - Δ(φ) tan φ)/k′²` for real `|φ| < π/2`. -/
-private lemma integral_sec_sq_mul_inv_ellDelta {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) {φ : ℝ} (hφ : |φ| < π / 2) :
+private lemma integral_sec_sq_mul_inv_ellDelta {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) {φ : ℝ}
+    (hφ : |φ| < π / 2) :
     ∫ θ in (0 : ℝ)..φ, (1 - 1 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
       incEllIntFk φ k - (incEllIntEk φ k - ellDelta k φ * Real.tan φ) / (1 - k ^ 2) := by
@@ -331,9 +333,11 @@ private lemma integral_sec_sq_mul_inv_ellDelta {k : ℂ} (hk : 1 - k ^ 2 ∈ sli
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd hint]
   simp only [hB, intervalIntegral.integral_same, Real.sin_zero, Real.cos_zero, ofReal_zero,
     ofReal_one, zero_div, mul_zero, sub_zero, incEllIntEk_ofReal_eq_integral,
-    incEllIntFk_ofReal_eq_integral, one_sub_sq_mul_sin_sq_cpow_neg_half, Real.tan_eq_sin_div_cos, ofReal_div]
+    incEllIntFk_ofReal_eq_integral, one_sub_sq_mul_sin_sq_cpow_neg_half,
+        Real.tan_eq_sin_div_cos, ofReal_div]
 
-/-- For real `φ`, `Π(φ, α², k)` is the interval integral when `1 - α² sin²θ` is bounded away from `0`. -/
+/-- For real `φ`, `Π(φ, α², k)` is the interval integral when `1 - α² sin²θ` is bounded away from
+`0`. -/
 theorem incEllIntPik_ofReal_eq_integral_of_norm_ge {φ : ℝ} {α2 k : ℂ} {δ : ℝ} (hδ : 0 < δ)
     (h : ∀ t ∈ Icc (0 : ℝ) 1, δ ≤ ‖1 - α2 * (Real.sin (t * φ) : ℂ) ^ 2‖) :
     incEllIntPik φ α2 k = ∫ θ in (0 : ℝ)..φ, (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
@@ -360,7 +364,8 @@ theorem compEllIntPik_sq_self {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
     compEllIntPik (k ^ 2) k = compEllIntEk k / (1 - k ^ 2) := by
   obtain ⟨δ, hδ, h⟩ := exists_le_norm_one_sub_sq_mul_sin_sq hk
   rw [compEllIntPik, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-    incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _), integral_inv_ellDelta_cube hk, compEllIntEk]
+    incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _),
+        integral_inv_ellDelta_cube hk, compEllIntEk]
   simp
 
 /-- Identity under the stated parameter and domain assumptions: `incEllIntPik φ (k ^ 2) k =
@@ -373,7 +378,8 @@ theorem incEllIntPik_special_k' {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk :
       incEllIntPik φ 1 k = incEllIntFk φ k - (incEllIntEk φ k -
         (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ) * Real.tan φ) / (1 - k ^ 2) := by
   obtain ⟨δ, hδ, h⟩ := exists_le_norm_one_sub_sq_mul_sin_sq hk
-  refine ⟨by rw [incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _), integral_inv_ellDelta_cube hk], ?_⟩
+  refine ⟨by rw [incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _),
+               integral_inv_ellDelta_cube hk], ?_⟩
   have hc : 0 < Real.cos φ :=
     Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le φ], by linarith [le_abs_self φ]⟩
   have hcθ : ∀ t ∈ Icc (0 : ℝ) 1, Real.cos φ ≤ Real.cos (t * φ) := by
@@ -381,7 +387,8 @@ theorem incEllIntPik_special_k' {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk :
     rw [← Real.cos_abs (t * φ), ← Real.cos_abs φ]
     refine Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos]) ?_
     rw [abs_mul, abs_of_nonneg ht.1]; exact mul_le_of_le_one_left (abs_nonneg _) ht.2
-  rw [incEllIntPik_ofReal_eq_integral_of_norm_ge (δ := Real.cos φ ^ 2) (by positivity), integral_sec_sq_mul_inv_ellDelta hk hφ]
+  rw [incEllIntPik_ofReal_eq_integral_of_norm_ge (δ := Real.cos φ ^ 2) (by positivity),
+      integral_sec_sq_mul_inv_ellDelta hk hφ]
   intro t ht
   have : (1 - 1 * (Real.sin (t * φ) : ℂ) ^ 2) = ((Real.cos (t * φ) ^ 2 : ℝ) : ℂ) := by
     have h1 : (Real.sin (t * φ) : ℂ) ^ 2 + (Real.cos (t * φ) : ℂ) ^ 2 = 1 := by
@@ -392,11 +399,118 @@ theorem incEllIntPik_special_k' {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk :
   have := hcθ t ht
   nlinarith
 
-/-- **Admitted.** DLMF 19.6.2: `Π(-k, k) = π/(4(1 + k)) + K(k)/2` for real `k` with `k² < 1`. -/
+/-- `1 + k sin²θ > 0` for `k² < 1`. -/
+private lemma one_add_mul_sin_sq_pos {k : ℝ} (hk : k ^ 2 < 1) (θ : ℝ) :
+    0 < 1 + k * Real.sin θ ^ 2 := by
+  have hk1 : 0 < 1 + k := by nlinarith
+  have h1 := Real.sin_sq_le_one θ
+  have h2 := sq_nonneg (Real.sin θ)
+  rcases h2.lt_or_eq with h2 | h2
+  · nlinarith [mul_pos hk1 h2]
+  · rw [← h2]; norm_num
+
+/-- `∫₀^{π/2} (1 - k sin²θ)/((1 + k sin²θ)√(1 - k² sin²θ)) dθ = π/(2(1 + k))` for `k² < 1`,
+from the primitive `arctan((1 + k) tan θ/Δ)/(1 + k)`. -/
+private lemma integral_neg_self_aux {k : ℝ} (hk : k ^ 2 < 1) :
+    ∫ θ in (0 : ℝ)..(π / 2), (1 - k * Real.sin θ ^ 2) /
+      ((1 + k * Real.sin θ ^ 2) * √(1 - k ^ 2 * Real.sin θ ^ 2)) = π / (2 * (1 + k)) := by
+  have hk1 : 0 < 1 + k := by nlinarith
+  have hD : ∀ θ : ℝ, 0 < 1 - k ^ 2 * Real.sin θ ^ 2 := fun θ => by
+    nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ)]
+  have hP := one_add_mul_sin_sq_pos hk
+  set h : ℝ → ℝ := fun θ => (1 - k * Real.sin θ ^ 2) /
+      ((1 + k * Real.sin θ ^ 2) * √(1 - k ^ 2 * Real.sin θ ^ 2)) with hh
+  have hcont : Continuous h := by
+    refine Continuous.div (by fun_prop) (by fun_prop) fun θ => ?_
+    exact mul_ne_zero (hP θ).ne' (Real.sqrt_pos.mpr (hD θ)).ne'
+  set G : ℝ → ℝ := fun θ => Real.arctan ((1 + k) * Real.tan θ /
+      √(1 - k ^ 2 * Real.sin θ ^ 2)) / (1 + k) with hG
+  have hderiv : ∀ θ ∈ Ioo (-(π / 2)) (π / 2), HasDerivAt G (h θ) θ := by
+    intro θ hθ
+    have hc : 0 < Real.cos θ := Real.cos_pos_of_mem_Ioo hθ
+    have hsq := Real.sqrt_pos.mpr (hD θ)
+    have hΔ : HasDerivAt (fun θ => √(1 - k ^ 2 * Real.sin θ ^ 2))
+        (-(k ^ 2 * (2 * Real.sin θ * Real.cos θ)) / (2 * √(1 - k ^ 2 * Real.sin θ ^ 2))) θ := by
+      have := ((((Real.hasDerivAt_sin θ).pow 2).const_mul (k ^ 2)).const_sub 1).sqrt (hD θ).ne'
+      convert this using 1
+      simp
+    have htan : HasDerivAt Real.tan (1 / Real.cos θ ^ 2) θ := Real.hasDerivAt_tan hc.ne'
+    have hw := ((htan.const_mul (1 + k)).div hΔ hsq.ne').arctan
+    have := hw.div_const (1 + k)
+    refine this.congr_deriv ?_
+    simp only [Pi.div_apply, hh]
+    rw [Real.tan_eq_sin_div_cos]
+    have hsc : Real.cos θ ^ 2 = 1 - Real.sin θ ^ 2 := by linarith [Real.sin_sq_add_cos_sq θ]
+    have hsq2 := Real.sq_sqrt (hD θ).le
+    have := hP θ
+    field_simp
+    rw [hsq2, hsc]
+    ring
+  have hint : ∀ b ∈ Ioo 0 (π / 2), ∫ θ in (0 : ℝ)..b, h θ = G b := by
+    intro b hb
+    rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun θ hθ => hderiv θ ?_)
+      (hcont.intervalIntegrable _ _)]
+    · simp [hG]
+    · rw [uIcc_of_le hb.1.le] at hθ
+      exact ⟨by linarith [hθ.1, Real.pi_pos], hθ.2.trans_lt hb.2⟩
+  have hL : Tendsto (fun b => ∫ θ in (0 : ℝ)..b, h θ) (𝓝[<] (π / 2))
+      (𝓝 (∫ θ in (0 : ℝ)..(π / 2), h θ)) :=
+    ((intervalIntegral.continuous_primitive (fun a b => hcont.intervalIntegrable a b) 0).tendsto
+      _).mono_left nhdsWithin_le_nhds
+  have hR : Tendsto G (𝓝[<] (π / 2)) (𝓝 (π / 2 / (1 + k))) := by
+    have hΔ : Tendsto (fun θ => (1 + k) / √(1 - k ^ 2 * Real.sin θ ^ 2)) (𝓝[<] (π / 2))
+        (𝓝 ((1 + k) / √(1 - k ^ 2 * Real.sin (π / 2) ^ 2))) := by
+      refine (Continuous.tendsto ?_ _).mono_left nhdsWithin_le_nhds
+      exact continuous_const.div (by fun_prop) fun θ => (Real.sqrt_pos.mpr (hD θ)).ne'
+    have hw := Real.tendsto_tan_pi_div_two.atTop_mul_pos
+      (div_pos hk1 (Real.sqrt_pos.mpr (hD _))) hΔ
+    have := ((Real.tendsto_arctan_atTop.mono_right nhdsWithin_le_nhds).comp hw).div_const (1 + k)
+    refine this.congr fun θ => ?_
+    simp only [hG, Function.comp_apply]
+    congr 2
+    ring
+  have hev : (fun b => ∫ θ in (0 : ℝ)..b, h θ) =ᶠ[𝓝[<] (π / 2)] G := by
+    filter_upwards [Ioo_mem_nhdsLT (by positivity : (0 : ℝ) < π / 2)] with b hb using hint b hb
+  rw [tendsto_nhds_unique (hL.congr' hev) hR]
+  field_simp
+
+/-- DLMF 19.6.2: `Π(-k, k) = π/(4(1 + k)) + K(k)/2` for real `k` with `k² < 1`. -/
 @[dlmf 19.6.E2]
 theorem compEllIntPik_neg_self {k : ℝ} (hk : k ^ 2 < 1) :
     compEllIntPik (-k) k = π / (4 * (1 + k)) + compEllIntKk k / 2 := by
-  sorry
+  have hk1 : -k < 1 := by nlinarith
+  have hD : ∀ θ : ℝ, 0 < 1 - k ^ 2 * Real.sin θ ^ 2 := fun θ => by
+    nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ)]
+  have hc1 : Continuous fun θ : ℝ => (1 - k ^ 2 * Real.sin θ ^ 2) ^ (-(1 / 2) : ℝ) :=
+    Continuous.rpow_const (by fun_prop) fun θ => Or.inl (hD θ).ne'
+  have hc2 : Continuous fun θ : ℝ => (1 - k * Real.sin θ ^ 2) /
+      ((1 + k * Real.sin θ ^ 2) * √(1 - k ^ 2 * Real.sin θ ^ 2)) := by
+    exact Continuous.div (by fun_prop) (by fun_prop) fun θ =>
+      mul_ne_zero (one_add_mul_sin_sq_pos hk θ).ne' (Real.sqrt_pos.mpr (hD θ)).ne'
+  rw [compEllIntPik, show (π : ℂ) / 2 = ((π / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_neg,
+    incEllIntPik_eq_ofReal (m := k ^ 2) (by push_cast; rfl) hk.le hk1, compEllIntKk_ofReal hk]
+  have e : DLMF.Elliptic.Real.incEllIntPim (π / 2) (-k) (k ^ 2) =
+      ∫ θ in (0 : ℝ)..(π / 2), ((1 / 2) * (1 - k ^ 2 * Real.sin θ ^ 2) ^ (-(1 / 2) : ℝ) +
+        (1 / 2) * ((1 - k * Real.sin θ ^ 2) /
+          ((1 + k * Real.sin θ ^ 2) * √(1 - k ^ 2 * Real.sin θ ^ 2)))) := by
+    rw [DLMF.Elliptic.Real.incEllIntPim]
+    refine intervalIntegral.integral_congr fun θ _ => ?_
+    simp only [DLMF.Elliptic.piIntegrand]
+    rw [Real.rpow_neg (hD θ).le, ← Real.sqrt_eq_rpow]
+    have := one_add_mul_sin_sq_pos hk θ
+    have := Real.sqrt_pos.mpr (hD θ)
+    rw [show 1 - -k * Real.sin θ ^ 2 = 1 + k * Real.sin θ ^ 2 by ring]
+    field_simp
+    ring
+  rw [e, intervalIntegral.integral_add ((hc1.const_mul _).intervalIntegrable _ _)
+    ((hc2.const_mul _).intervalIntegrable _ _), intervalIntegral.integral_const_mul,
+    intervalIntegral.integral_const_mul, integral_neg_self_aux hk,
+    ← DLMF.Elliptic.Real.compEllIntKm]
+  have h1k : (1 + (k : ℂ)) ≠ 0 := by
+    rw [← ofReal_one, ← ofReal_add]; exact ofReal_ne_zero.mpr (by nlinarith)
+  push_cast
+  field_simp
+  ring
 
 /-- DLMF 19.6.13 (first relation): `Π(φ, 0, k) = F(φ, k)` for all complex `φ`, `k`. -/
 @[dlmf 19.6.E13]
@@ -447,7 +561,8 @@ theorem tendsto_compEllIntPik {k α2 : ℝ} (hk : k ^ 2 < 1) (hα : α2 < 1) :
     rw [DLMF.Elliptic.Real.compEllIntPim_param_zero ha] at hb
     convert hb using 1
     dsimp only [Function.comp_def]
-    rw [show (-1 / 2 : ℝ)=-(1 / 2) by norm_num, Real.rpow_neg (by linarith : 0 ≤ 1 - a), ←Real.sqrt_eq_rpow]
+    rw [show (-1 / 2 : ℝ)=-(1 / 2) by norm_num, Real.rpow_neg (by linarith : 0 ≤ 1 - a),
+                                        ←Real.sqrt_eq_rpow]
     ring
   · let c : ℝ := min 1 ((1 - α2)⁻¹)
     have hc : 0 < c := lt_min zero_lt_one (inv_pos.mpr (sub_pos.mpr hα))
@@ -626,7 +741,8 @@ theorem incEllIntEk_one_complex {φ : ℂ} (hφ : |φ.re| < π / 2) :
 @[dlmf 19.6.E10]
 theorem tendsto_incEllIntEk_div (k : ℂ) :
     Tendsto (fun φ : ℂ => incEllIntEk φ k / φ) (𝓝[≠] 0) (𝓝 1) := by
-  have := tendsto_segmentIntegral_div (eventually_continuousAt_one_sub_mul_sin_sq_cpow (k ^ 2) (1/2))
+  have := tendsto_segmentIntegral_div
+      (eventually_continuousAt_one_sub_mul_sin_sq_cpow (k ^ 2) (1/2))
   simpa [incEllIntEk] using this
 
 /-! ### §19.6(iv) `Π(φ, α², k)` -/
@@ -678,7 +794,8 @@ theorem incEllIntPik_one_zero {φ : ℝ} (hφ : |φ| < π / 2) :
       rcases le_total 0 φ with h | h
       · rw [uIcc_of_le h]; exact ⟨mul_nonneg ht.1 h, mul_le_of_le_one_left h ht.2⟩
       · rw [uIcc_of_ge h]; exact ⟨by nlinarith [ht.2], mul_nonpos_of_nonneg_of_nonpos ht.1 h⟩
-    have : (1 - (1 : ℂ) * Complex.sin ((t : ℂ) * (φ : ℂ)) ^ 2) = ((Real.cos (t * φ) ^ 2 : ℝ) : ℂ) := by
+    have : (1 - (1 : ℂ) * Complex.sin ((t : ℂ) * (φ : ℂ)) ^ 2) =
+        ((Real.cos (t * φ) ^ 2 : ℝ) : ℂ) := by
       rw [one_mul, ← Complex.cos_sq']; push_cast; rfl
     rw [this, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
     have := hcθ _ hθ
@@ -712,7 +829,8 @@ theorem incEllIntPik_special_k {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk : 
       incEllIntPik φ 1 k = incEllIntFk φ k - (incEllIntEk φ k -
         (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ) * Real.tan φ) / (1 - k ^ 2) := by
   obtain ⟨δ, hδ, h⟩ := exists_le_norm_one_sub_sq_mul_sin_sq hk
-  refine ⟨by rw [incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _), integral_inv_ellDelta_cube hk], ?_⟩
+  refine ⟨by rw [incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _),
+               integral_inv_ellDelta_cube hk], ?_⟩
   have hc : 0 < Real.cos φ :=
     Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le φ], by linarith [le_abs_self φ]⟩
   have hcθ : ∀ t ∈ Icc (0 : ℝ) 1, Real.cos φ ≤ Real.cos (t * φ) := by
@@ -720,7 +838,8 @@ theorem incEllIntPik_special_k {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk : 
     rw [← Real.cos_abs (t * φ), ← Real.cos_abs φ]
     refine Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos]) ?_
     rw [abs_mul, abs_of_nonneg ht.1]; exact mul_le_of_le_one_left (abs_nonneg _) ht.2
-  rw [incEllIntPik_ofReal_eq_integral_of_norm_ge (δ := Real.cos φ ^ 2) (by positivity), integral_sec_sq_mul_inv_ellDelta hk hφ]
+  rw [incEllIntPik_ofReal_eq_integral_of_norm_ge (δ := Real.cos φ ^ 2) (by positivity),
+      integral_sec_sq_mul_inv_ellDelta hk hφ]
   intro t ht
   have : (1 - 1 * (Real.sin (t * φ) : ℂ) ^ 2) = ((Real.cos (t * φ) ^ 2 : ℝ) : ℂ) := by
     have h1 : (Real.sin (t * φ) : ℂ) ^ 2 + (Real.cos (t * φ) : ℂ) ^ 2 = 1 := by
@@ -800,7 +919,8 @@ theorem tendsto_symEllIntRC_zero {x : ℝ} (hx : 0 < x) :
   have hxy : 0 < x - y := by linarith
   have hyabs : 0 < |y| := abs_pos.mpr hy0
   have hr : symEllIntRC x y =
-      ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt |y|) / Real.sqrt (x - y) : ℝ) : ℂ) := by
+      ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt |y|) /
+          Real.sqrt (x - y) : ℝ) : ℂ) := by
     rcases hy0.lt_or_gt with hy | hy
     · simpa only [abs_of_neg hy] using (symEllIntRC_of_neg hy hx.le).2.2
     · simpa only [abs_of_pos hy] using (symEllIntRC_of_gt hy hyx).2

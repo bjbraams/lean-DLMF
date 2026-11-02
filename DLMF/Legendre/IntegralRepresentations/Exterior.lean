@@ -145,7 +145,8 @@ theorem legInt_cpow_z_add_cosh {z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht 
     · simp at h; exact h h2
   have hBe : B = 2 * (z + Real.cosh t) / ((z+1) * (Real.cosh t + 1)) := by
     simp only [B, legInt_hs, ofReal_div, ofReal_sub, ofReal_add, ofReal_one]; field_simp; ring
-  have hB0 : B ≠ 0 := by rw [hBe]; exact div_ne_zero (mul_ne_zero two_ne_zero hzc) (mul_ne_zero hA0 hcp)
+  have hB0 : B ≠ 0 := by rw [hBe];
+                         exact div_ne_zero (mul_ne_zero two_ne_zero hzc) (mul_ne_zero hA0 hcp)
   have hr : (0:ℝ) < (Real.cosh t + 1)/2 := by linarith
   have hrB : (((Real.cosh t + 1)/2 : ℝ) : ℂ) * B = (z + Real.cosh t)/(z+1) := by
     rw [hBe, ofReal_div, ofReal_add, ofReal_one, ofReal_ofNat]; field_simp
@@ -182,7 +183,8 @@ theorem legInt_hs_logs {t : ℝ} (ht : 0 < t) :
   have hp : 0 < Real.cosh t + 1 := by linarith
   have hm : 0 < Real.cosh t - 1 := by linarith
   refine ⟨?_, ?_, ?_, ?_, ?_⟩
-  · rw [← Real.log_mul hm.ne' hp.ne', show (Real.cosh t - 1) * (Real.cosh t + 1) = Real.sinh t ^ 2 by
+  · rw [← Real.log_mul hm.ne' hp.ne', show (Real.cosh t - 1) * (Real.cosh t + 1) =
+        Real.sinh t ^ 2 by
       nlinarith [Real.cosh_sq_sub_sinh_sq t], Real.log_pow]; push_cast; ring
   · rw [legInt_hs', abs_of_pos (by positivity), Real.log_div (by positivity) (by positivity),
       Real.log_mul two_ne_zero hs.ne', Real.log_pow]; push_cast; ring
@@ -216,7 +218,8 @@ theorem legInt_kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht :
   rw [legInt_cpow_z_add_cosh hz ht, eulerKernel, real_smul,
     show (1:ℂ) - (legInt_hs t : ℂ) = ((1 - legInt_hs t : ℝ) : ℂ) by push_cast; ring,
     cpow_neg, show (2:ℂ)^(2*ν+1) = ((2:ℝ):ℂ)^(2*ν+1) by norm_num,
-    Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hr,
+    Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos,
+        Complex.ofReal_cpow_eq_exp hr,
     Complex.ofReal_cpow_eq_exp hs0, Complex.ofReal_cpow_eq_exp hs1,
     show ((|legInt_hs' t| : ℝ) : ℂ) = exp (Real.log |legInt_hs' t| : ℂ) by
       rw [← ofReal_exp, Real.exp_log hd]]
@@ -229,7 +232,8 @@ theorem legInt_kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht :
     simp only [← exp_add]
     congr 1
     rw [l2, l3, l4, l5]
-    have l1' : (2:ℂ) * Real.log (Real.sinh t) = Real.log (Real.cosh t - 1) + Real.log (Real.cosh t + 1) := by
+    have l1' : (2:ℂ) * Real.log (Real.sinh t) = Real.log (Real.cosh t - 1) +
+        Real.log (Real.cosh t + 1) := by
       exact_mod_cast l1
     push_cast
     linear_combination ν * l1'
@@ -265,7 +269,10 @@ theorem legInt_associatedP_pfaff (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
 @[dlmf 14.25.E1]
 theorem associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re < μ.re) {z : ℂ} (hz :
     z-1 ∈ slitPlane) :
-    HasIntegralAtTop (fun t : ℝ => legendreBranchPower μ z/(2^ν*Gamma (μ-ν)*Gamma (ν+1))*((Real.sinh t:ℂ)^(2*ν+1)/(z+Real.cosh t)^(ν+μ+1))) 0 (associatedP ν (-μ) z) := by
+    HasIntegralAtTop (fun t : ℝ =>
+        legendreBranchPower μ
+        z/(2^ν*Gamma (μ-ν)*Gamma (ν+1))*((Real.sinh t:ℂ)^(2*ν+1)/(z+Real.cosh t)^(ν+μ+1))) 0
+        (associatedP ν (-μ) z) := by
   have hz1' : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
   have hA0 : z + 1 ≠ 0 := slitPlane_ne_zero hz1'
   have hx := legInt_ratio_mem_cutPlane hz1'
@@ -336,7 +343,8 @@ theorem legInt_root_sq {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_root z ^ 2 = 
   ring
 
 /-- `ζ (z + √(z²-1)) = 1`, written as `ζ (2z - ζ) = 1`. -/
-theorem legInt_zeta_mul {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z * (2*z - legInt_zeta z) = 1 := by
+theorem legInt_zeta_mul {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z *
+    (2*z - legInt_zeta z) = 1 := by
   have := legInt_root_sq hz
   rw [legInt_zeta]; linear_combination -this
 
@@ -373,13 +381,16 @@ theorem legInt_norm_zeta_ne_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legInt_z
   have := re_le_norm w; linarith
 
 /-- For real `t > 1`, `ζ(t) = t - √(t²-1)`. -/
-theorem legInt_zeta_real {t : ℝ} (ht : 1 < t) : legInt_zeta t = ((t - Real.sqrt (t^2-1) : ℝ) : ℂ) := by
+theorem legInt_zeta_real {t : ℝ} (ht : 1 < t) : legInt_zeta t =
+    ((t - Real.sqrt (t^2-1) : ℝ) : ℂ) := by
   have hl : log ((t:ℂ)-1) + log ((t:ℂ)+1) = ((Real.log (t^2-1) : ℝ) : ℂ) := by
-    rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring, show (t:ℂ)+1 = ((t+1:ℝ):ℂ) by push_cast; ring,
+    rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring, show (t:ℂ)+1 =
+                                        ((t+1:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log (by linarith), ← ofReal_log (by linarith), ← ofReal_add,
       ← Real.log_mul (by linarith) (by linarith)]
     congr 2; ring
-  rw [legInt_zeta, legInt_root, hl, show ((Real.log (t^2-1) : ℝ) : ℂ)/2 = ((Real.log (t^2-1)/2 : ℝ) : ℂ)
+  rw [legInt_zeta, legInt_root, hl, show ((Real.log (t^2-1) : ℝ) : ℂ)/2 =
+      ((Real.log (t^2-1)/2 : ℝ) : ℂ)
     by push_cast; ring, ← ofReal_exp, Real.sqrt_eq_rpow, Real.rpow_def_of_pos (by nlinarith)]
   push_cast; ring_nf
 
@@ -521,7 +532,8 @@ theorem legInt_kernel_Q {ν μ z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht :
   rw [legInt_cpow_root_cosh hz ht, eulerKernel, real_smul,
     show (1:ℂ) - (legInt_hs t : ℂ) = ((1 - legInt_hs t : ℝ) : ℂ) by push_cast; ring,
     cpow_neg, show (2:ℂ)^(2*μ) = ((2:ℝ):ℂ)^(2*μ) by norm_num,
-    Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hr,
+    Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos,
+        Complex.ofReal_cpow_eq_exp hr,
     Complex.ofReal_cpow_eq_exp hs0, Complex.ofReal_cpow_eq_exp hs1,
     show ((|legInt_hs' t| : ℝ) : ℂ) = exp (Real.log |legInt_hs' t| : ℂ) by
       rw [← ofReal_exp, Real.exp_log hd]]
@@ -535,7 +547,8 @@ theorem legInt_kernel_Q {ν μ z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht :
     simp only [← exp_add]
     congr 1
     rw [l2, l3, l4, l5]
-    have l1' : (2:ℂ) * Real.log (Real.sinh t) = Real.log (Real.cosh t - 1) + Real.log (Real.cosh t + 1) := by
+    have l1' : (2:ℂ) * Real.log (Real.sinh t) = Real.log (Real.cosh t - 1) +
+        Real.log (Real.cosh t + 1) := by
       exact_mod_cast l1
     push_cast
     linear_combination (μ - 1/2) * l1'
@@ -559,7 +572,8 @@ theorem legInt_QForm_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane)
   have hc : (legInt_zeta z)^2 ∈ cutPlane := by
     refine mem_cutPlane_of_norm_lt_one ?_
     rw [norm_pow]; have := legInt_norm_zeta_lt_one hz; nlinarith [norm_nonneg (legInt_zeta z)]
-  have hF : AnalyticAt ℂ (fun w => regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta w)^2)) z :=
+  have hF : AnalyticAt ℂ
+      (fun w => regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta w)^2)) z :=
     (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (hζ.pow 2) rfl
   have hP : AnalyticAt ℂ (fun w => (legInt_zeta w)^(ν+μ+1)) z :=
     hζ.cpow analyticAt_const (legInt_zeta_mem_slitPlane hz)
@@ -567,7 +581,8 @@ theorem legInt_QForm_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane)
   exact (((analyticAt_const.mul hB).mul analyticAt_const).mul hP).mul hF
 
 /-- The `ζ`-form of `𝑸^μ_ν` on `(1, ∞)`, by the quadratic transformation DLMF 15.8.15. -/
-theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)) {x : ℝ} (hx : 1 < x) :
+theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ))
+    {x : ℝ} (hx : 1 < x) :
     olverQ ν μ x = legInt_QForm ν μ x := by
   have hz : (x:ℂ) - 1 ∈ slitPlane := legInt_one_lt_mem hx
   obtain ⟨hq0, hq1⟩ := legInt_real_bounds hx
@@ -577,7 +592,9 @@ theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 �
   have hq0' : (q:ℂ) ≠ 0 := ofReal_ne_zero.mpr hq0.ne'
   have hxr : x = (1+q^2)/(2*q) := by
     have : (2*x:ℝ) = q + q⁻¹ := by exact_mod_cast h2x
-    field_simp; linarith [this, show q * q⁻¹ = 1 from mul_inv_cancel₀ hq0.ne', show (2*x)*q = q*q + q⁻¹*q by rw [this]; ring,
+    field_simp; linarith
+        [this, show q * q⁻¹ = 1 from mul_inv_cancel₀ hq0.ne', show (2*x)*q = q*q +
+        q⁻¹*q by rw [this]; ring,
       show q⁻¹ * q = 1 from inv_mul_cancel₀ hq0.ne']
   have hx0 : 0 < x := by linarith
   have hn1 : ‖((q^2:ℝ):ℂ)‖ < 1 := by
@@ -600,7 +617,8 @@ theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 �
   -- powers of positive reals
   have h1q : (1:ℂ) + ((q^2:ℝ):ℂ) = ((1+q^2:ℝ):ℂ) := by push_cast; ring
   have hpos : 0 < 1 + q^2 := by positivity
-  rw [h1q, cpow_neg, Complex.ofReal_cpow_eq_exp hpos, Complex.ofReal_cpow_eq_exp hq0, Complex.ofReal_cpow_eq_exp hx0,
+  rw [h1q, cpow_neg, Complex.ofReal_cpow_eq_exp hpos, Complex.ofReal_cpow_eq_exp hq0,
+      Complex.ofReal_cpow_eq_exp hx0,
     show (2:ℂ)^μ = ((2:ℝ):ℂ)^μ by norm_num, show (2:ℂ)^(ν+1) = ((2:ℝ):ℂ)^(ν+1) by norm_num,
     Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp two_pos]
   have hl : Real.log (1+q^2) = Real.log 2 + Real.log q + Real.log x := by
@@ -616,7 +634,8 @@ theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 �
   field_simp
 
 /-- The `ζ`-form of `𝑸^μ_ν` on `ℂ ∖ (-∞, 1]` (identity theorem from `(1, ∞)`). -/
-theorem legInt_olverQ_eq_QForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_olverQ_eq_QForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
     olverQ ν μ z = legInt_QForm ν μ z := by
   set D : Set ℂ := {w : ℂ | w-1 ∈ slitPlane}
   have h2 : ((2 : ℝ) : ℂ) ∈ D := by show ((2 : ℝ) : ℂ) - 1 ∈ slitPlane; norm_num
@@ -636,7 +655,11 @@ theorem legInt_olverQ_eq_QForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k
 @[dlmf 14.25.E2]
 theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {z : ℂ} (hz :
     z-1 ∈ slitPlane) :
-    HasIntegralAtTop (fun t : ℝ => Real.sqrt π*legendreBranchPower μ z/(2^μ*Gamma (μ+1/2)*Gamma (ν-μ+1))*((Real.sinh t:ℂ)^(2*μ)/(z+exp ((log (z-1)+log (z+1))/2)*Real.cosh t)^(ν+μ+1))) 0 (olverQ ν μ z) := by
+    HasIntegralAtTop (fun t : ℝ =>
+        Real.sqrt π*legendreBranchPower μ
+        z/(2^μ*Gamma (μ+1/2)*Gamma
+        (ν-μ+1))*((Real.sinh t:ℂ)^(2*μ)/(z+exp ((log (z-1)+log (z+1))/2)*Real.cosh t)^(ν+μ+1))) 0
+        (olverQ ν μ z) := by
   have hx : (legInt_zeta z)^2 ∈ cutPlane := by
     refine mem_cutPlane_of_norm_lt_one ?_
     rw [norm_pow]; have := legInt_norm_zeta_lt_one hz; nlinarith [norm_nonneg (legInt_zeta z)]
@@ -650,7 +673,8 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
     (2^(2*μ) * (legInt_zeta z)^(ν+μ+1))
   have hf : ∀ t ∈ Ioi (0:ℝ), K * (|legInt_hs' t| • eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2)
       ((legInt_zeta z)^2) (legInt_hs t)) = Real.sqrt π*legendreBranchPower μ z/(2^μ*Gamma (μ+1/2)*
-        Gamma (ν-μ+1))*((Real.sinh t:ℂ)^(2*μ)/(z+exp ((log (z-1)+log (z+1))/2)*Real.cosh t)^(ν+μ+1)) := by
+        Gamma (ν-μ+1))*((Real.sinh t:ℂ)^(2*μ)/(z+exp ((log (z-1)+log (z+1))/2)*Real.cosh
+            t)^(ν+μ+1)) := by
     intro t ht
     have := legInt_kernel_Q (ν := ν) (μ := μ) hz ht
     rw [legInt_root] at this
@@ -665,7 +689,8 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
   have hG2 : Gamma (ν-μ+1) ≠ 0 := Gamma_ne_zero_of_re_pos (by
     rw [show ν-μ+1 = ν+3/2-(μ+1/2) by ring]; exact hcb)
   have hint' : ∫ s in Ioo (0:ℝ) 1, eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2) s =
-      Gamma (μ+1/2) * Gamma (ν-μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2) := by
+      Gamma (μ+1/2) * Gamma (ν-μ+1) *
+          regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2) := by
     rw [hG, show ν+3/2-(μ+1/2) = ν-μ+1 by ring, ← mul_assoc, mul_inv_cancel₀ (mul_ne_zero hG1 hG2),
       one_mul]
   rw [hint'] at hval
@@ -690,7 +715,8 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
 /-! ### Helpers for DLMF 14.12.4 (prefix `legInt_`) -/
 
 /-- The half-line Euler kernel of DLMF 14.12.4 at `v = E/q`, with `2qx = 1 + q²`. -/
-theorem legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q) (hqx : 1 + q^2 = 2*q*x) (hE : 0 < E) :
+theorem legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q)
+    (hqx : 1 + q^2 = 2*q*x) (hE : 0 < E) :
     ((E/q : ℝ):ℂ) * eulerHalfLineKernel (μ+1/2) (ν+μ+1) (μ-ν) (((q^2)⁻¹ : ℝ) : ℂ) (E/q) =
       (q:ℂ)^(μ-ν) * (2:ℂ)^(-(μ+1/2)) * (E:ℂ)^(ν+1/2) * ((x + (E + E⁻¹)/2 : ℝ):ℂ)^(-(μ+1/2)) := by
   have hv : 0 < E/q := div_pos hE hq
@@ -716,8 +742,10 @@ theorem legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q) (hqx : 1 
     show (((q^2)⁻¹:ℝ):ℂ) + ((E/q:ℝ):ℂ) = (((q^2)⁻¹ + E/q : ℝ):ℂ) by push_cast; ring,
     show (2:ℂ)^(-(μ+1/2)) = ((2:ℝ):ℂ)^(-(μ+1/2)) by norm_num,
     Complex.ofReal_cpow_eq_exp hv, Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1 + E/q),
-    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (q^2)⁻¹ + E/q), Complex.ofReal_cpow_eq_exp hq,
-    Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hE, Complex.ofReal_cpow_eq_exp hX,
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (q^2)⁻¹ + E/q),
+        Complex.ofReal_cpow_eq_exp hq,
+    Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hE,
+        Complex.ofReal_cpow_eq_exp hX,
     show ((E/q:ℝ):ℂ) = exp (Real.log (E/q) : ℂ) by rw [← ofReal_exp, Real.exp_log hv]]
   simp only [← exp_add]
   congr 1
@@ -731,10 +759,12 @@ theorem legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q) (hqx : 1 
 theorem legInt_exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK : IntegrableOn K (Ioi 0)) :
     IntegrableOn (fun t => (Real.exp t / q) • K (Real.exp t / q)) (Ioi 0) ∧
     IntegrableOn (fun t => (Real.exp (-t) / q) • K (Real.exp (-t) / q)) (Ioi 0) ∧
-    ∫ t in Ioi 0, ((Real.exp t / q) • K (Real.exp t / q) + (Real.exp (-t) / q) • K (Real.exp (-t) / q)) =
+    ∫ t in Ioi 0, ((Real.exp t / q) • K (Real.exp t / q) + (Real.exp (-t) / q) •
+        K (Real.exp (-t) / q)) =
       ∫ v in Ioi 0, K v := by
   -- the increasing branch on `[0, ∞)`
-  have hd1 : ∀ t ∈ Ici (0:ℝ), HasDerivWithinAt (fun t => Real.exp t / q) (Real.exp t / q) (Ici 0) t :=
+  have hd1 : ∀ t ∈ Ici (0:ℝ),
+      HasDerivWithinAt (fun t => Real.exp t / q) (Real.exp t / q) (Ici 0) t :=
     fun t _ => ((Real.hasDerivAt_exp t).div_const q).hasDerivWithinAt
   have hi1 : InjOn (fun t => Real.exp t / q) (Ici 0) := fun a _ b _ h => by
     have : Real.exp a = Real.exp b := by
@@ -743,7 +773,8 @@ theorem legInt_exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK : Integrab
   have him1 : (fun t => Real.exp t / q) '' Ici 0 = Ici (1/q) := by
     ext v; constructor
     · rintro ⟨t, ht, rfl⟩
-      exact div_le_div_of_nonneg_right (by simpa using Real.one_le_exp (show (0:ℝ) ≤ t from ht)) hq.le
+      exact div_le_div_of_nonneg_right
+          (by simpa using Real.one_le_exp (show (0:ℝ) ≤ t from ht)) hq.le
     · intro hv
       have hv' : 1 ≤ q * v := by
         have := mul_le_mul_of_nonneg_left (show 1/q ≤ v from hv) hq.le
@@ -795,7 +826,8 @@ theorem legInt_exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK : Integrab
     Ioo_union_Ici_eq_Ioi (by positivity)]
 
 /-- The hypergeometric value behind DLMF 14.12.4:
-`𝐅(μ+1/2, μ-ν; 2μ+1; 1-q⁻²) = q^{2(μ-ν)} (qx)^{ν-μ} Γ(μ+1)/Γ(2μ+1) 𝐅((μ-ν)/2, (μ-ν+1)/2; μ+1; 1-1/x²)`. -/
+`𝐅(μ+1/2, μ-ν; 2μ+1; 1-q⁻²) = q^{2(μ-ν)} (qx)^{ν-μ} Γ(μ+1)/Γ(2μ+1) 𝐅((μ-ν)/2, (μ-ν+1)/2; μ+1;
+1-1/x²)`. -/
 theorem legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 < q) (hq1 : q < 1)
     (hqx : 1 + q^2 = 2*q*x) :
     regularizedGaussHG (μ+1/2) (μ-ν) (2*μ+1) (1 - (((q^2)⁻¹:ℝ):ℂ)) =
@@ -805,13 +837,16 @@ theorem legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 
   have hx0 : 0 < x := by nlinarith
   have hx1 : 1 < x := by
     by_contra h; push Not at h
-    nlinarith [mul_pos hq0 (sub_pos.mpr hq1), mul_le_mul_of_nonneg_left h (by linarith : (0:ℝ) ≤ 2*q)]
+    nlinarith [mul_pos hq0 (sub_pos.mpr hq1),
+        mul_le_mul_of_nonneg_left h (by linarith : (0:ℝ) ≤ 2*q)]
   have hq2 : 0 < (q^2)⁻¹ := by positivity
   have hw : 1 - (((q^2)⁻¹:ℝ):ℂ) ∈ cutPlane := by
     rw [mem_cutPlane, sub_sub_cancel]; exact Or.inl (by simp only [ofReal_re]; exact hq2)
   have hc : ∀ k : ℕ, 2*μ+1 ≠ -(k:ℂ) := fun k hk => by
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
-  have hc2 : ∀ k : ℕ, 2*(μ+1/2) ≠ -(k:ℂ) := fun k => by rw [show 2*(μ+1/2) = 2*μ+1 by ring]; exact hc k
+  have hc2 : ∀ k : ℕ, 2*(μ+1/2) ≠ -(k:ℂ) := fun k => by
+                                                       rw [show 2*(μ+1/2) =
+                                                         2*μ+1 by ring]; exact hc k
   have hc3 : ∀ k : ℕ, μ+1/2+1/2 ≠ -(k:ℂ) := fun k hk => by
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hc4 : ∀ k : ℕ, μ+1 ≠ -(k:ℂ) := fun k => by rw [show μ+1 = μ+1/2+1/2 by ring]; exact hc3 k
@@ -824,12 +859,14 @@ theorem legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 
     have := congrArg (fun r : ℝ => (r:ℂ)) hR
     push_cast at this ⊢; exact this
   have hz2 : ‖(1:ℂ) - 1/(x:ℂ)^2‖ < 1 := by
-    rw [show (1:ℂ) - 1/(x:ℂ)^2 = ((1 - 1/x^2 : ℝ):ℂ) by push_cast; ring, norm_real, Real.norm_eq_abs,
+    rw [show (1:ℂ) - 1/(x:ℂ)^2 = ((1 - 1/x^2 : ℝ):ℂ) by push_cast; ring, norm_real,
+                                                          Real.norm_eq_abs,
       abs_lt]
     have : 0 < 1/x^2 := by positivity
     have : 1/x^2 < 1 := by rw [div_lt_one (by positivity)]; nlinarith
     constructor <;> linarith
-  have hquad := quadratic_double_denominator (a := μ-ν) (b := μ+1/2) (z := ((1-q^2:ℝ):ℂ)) hc2 hc3 hz1
+  have hquad := quadratic_double_denominator (a := μ-ν) (b := μ+1/2)
+      (z := ((1-q^2:ℝ):ℂ)) hc2 hc3 hz1
   rw [hratio, show μ+1/2+1/2 = μ+1 by ring, show 2*(μ+1/2) = 2*μ+1 by ring] at hquad
   rw [regularizedGaussHG_symm _ _ _ hw, regularizedGaussHG_pfaff _ _ _ hw,
     show 2*μ+1-(μ+1/2) = μ+1/2 by ring, sub_sub_cancel,
@@ -838,7 +875,8 @@ theorem legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 
       have : (q:ℂ) ≠ 0 := by exact_mod_cast hq0.ne'
       field_simp; ring,
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz1, regularizedGaussHGFun_eq_div_Gamma hc,
-    hquad, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz2, regularizedGaussHGFun_eq_div_Gamma hc4,
+    hquad, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz2,
+        regularizedGaussHGFun_eq_div_Gamma hc4,
     Complex.ofReal_cpow_eq_exp hq2,
     show (1:ℂ) - ((1-q^2:ℝ):ℂ)/2 = ((q*x:ℝ):ℂ) by
       rw [← show 1 - (1-q^2)/2 = q*x by linarith]; push_cast; ring,
@@ -896,8 +934,11 @@ theorem legInt_cosh_value (ν μ F P : ℂ) {x q : ℝ} (hq0 : 0 < q) (hx0 : 0 <
 
 /-- DLMF 14.12.4 by the substitution `v = e^{±t}/q`, Euler's half-line integral, Pfaff, the
 quadratic transformation 15.8.13 and 14.3.18. -/
-theorem legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re) {x : ℝ} (hx : 1 < x) :
-    HasIntegralAtTop (fun t : ℝ => Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) 0 (associatedP ν (-μ) x) := by
+theorem legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re)
+    {x : ℝ} (hx : 1 < x) :
+    HasIntegralAtTop (fun t : ℝ =>
+        Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh
+        ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) 0 (associatedP ν (-μ) x) := by
   set r := Real.sqrt (x^2-1) with hr
   have hr2 : r^2 = x^2-1 := Real.sq_sqrt (by nlinarith)
   have hr0 : 0 ≤ r := Real.sqrt_nonneg _
@@ -922,9 +963,11 @@ theorem legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hco
       2*C * (cosh ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) := by
     intro t
     rw [real_smul, real_smul, legInt_halfLine_point ν μ hq0 hqx (Real.exp_pos t),
-      legInt_halfLine_point ν μ hq0 hqx (Real.exp_pos (-t)), ← Real.exp_neg, ← Real.exp_neg, neg_neg,
+      legInt_halfLine_point ν μ hq0 hqx (Real.exp_pos (-t)), ← Real.exp_neg,
+          ← Real.exp_neg, neg_neg,
       show Real.exp (-t) + Real.exp t = Real.exp t + Real.exp (-t) by ring, ← Real.cosh_eq,
-      Complex.ofReal_cpow_eq_exp (Real.exp_pos t), Complex.ofReal_cpow_eq_exp (Real.exp_pos (-t)), Real.log_exp,
+      Complex.ofReal_cpow_eq_exp (Real.exp_pos t),
+          Complex.ofReal_cpow_eq_exp (Real.exp_pos (-t)), Real.log_exp,
       Real.log_exp]
     have hc : cosh ((ν+1/2)*t) = (exp ((t:ℂ)*(ν+1/2)) + exp (((-t:ℝ):ℂ)*(ν+1/2)))/2 := by
       rw [Complex.cosh]; push_cast; ring_nf
@@ -935,7 +978,8 @@ theorem legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hco
   have hC : C ≠ 0 := mul_ne_zero
     (cpow_ne_zero_iff.mpr (Or.inl (ofReal_ne_zero.mpr hq0.ne')))
     (cpow_ne_zero_iff.mpr (Or.inl two_ne_zero))
-  have hf : ∀ t ∈ Ioi (0:ℝ), Cst/(2*C) * ((Real.exp t / q) • eulerHalfLineKernel (μ+1/2) (ν+μ+1) (μ-ν)
+  have hf : ∀ t ∈ Ioi (0:ℝ), Cst/(2*C) *
+      ((Real.exp t / q) • eulerHalfLineKernel (μ+1/2) (ν+μ+1) (μ-ν)
       (((q^2)⁻¹:ℝ):ℂ) (Real.exp t / q) + (Real.exp (-t) / q) • eulerHalfLineKernel (μ+1/2) (ν+μ+1)
       (μ-ν) (((q^2)⁻¹:ℝ):ℂ) (Real.exp (-t) / q)) =
       Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*

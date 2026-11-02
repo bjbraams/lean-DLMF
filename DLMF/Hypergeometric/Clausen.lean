@@ -57,7 +57,8 @@ namespace DLMF.Hypergeometric
 def thetaPS (g : PowerSeries ℂ) : PowerSeries ℂ := PowerSeries.mk fun n => (n : ℂ) * coeff n g
 
 /-- Coefficients of `θ g`. -/
-@[simp] theorem coeff_thetaPS (g : PowerSeries ℂ) (n : ℕ) : coeff n (thetaPS g) = n * coeff n g := by
+@[simp] theorem coeff_thetaPS (g : PowerSeries ℂ) (n : ℕ) : coeff n (thetaPS g) = n *
+    coeff n g := by
   simp [thetaPS]
 
 /-- `θ` is additive. -/

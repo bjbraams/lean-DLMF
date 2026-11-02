@@ -134,7 +134,8 @@ private lemma qHahn_difference_equation_aux {a b q : ℂ} (hq : q ≠ 0) (hqn : 
       generalize 1 - q * q ^ k = W at hq1 ⊢
       field_simp
       ring
-    have hL : L k = ((1 - a * q * q ^ k) * (1 - q⁻¹ ^ N * q ^ k) * (1 - q * q ^ k)) / q ^ (k + 1) := by
+    have hL : L k = ((1 - a * q * q ^ k) * (1 - q⁻¹ ^ N * q ^ k) * (1 - q * q ^ k)) /
+        q ^ (k + 1) := by
       dsimp only [L]
       ring
     rw [hL, ← mul_div_assoc, hraw]
@@ -470,7 +471,8 @@ private lemma qLaguerre_integrable_weight {q r : ℝ} (hq : 0 < q) (hq1 : q < 1)
   have hm : Measurable (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) :=
     (Complex.continuous_ofReal.measurable.comp (measurable_id.pow_const r)).div hP.measurable
   obtain ⟨N, hN⟩ := exists_nat_gt (r + 1)
-  have h0 : IntegrableOn (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) (Set.Ioc 0 1) := by
+  have h0 : IntegrableOn (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q)
+      (Set.Ioc 0 1) := by
     refine Integrable.mono' (g := fun x : ℝ => x ^ r) ?_ hm.aestronglyMeasurable ?_
     · change IntegrableOn (fun x : ℝ => x ^ r) (Set.Ioc 0 1)
       rw [integrableOn_Ioc_iff_integrableOn_Ioo]
@@ -479,7 +481,8 @@ private lemma qLaguerre_integrable_weight {q r : ℝ} (hq : 0 < q) (hq1 : q < 1)
       rw [norm_div, Complex.norm_of_nonneg (Real.rpow_nonneg hx.1.le _)]
       exact div_le_self (Real.rpow_nonneg hx.1.le _) (by
         simpa using qLaguerre_norm_inf_ge_pow hq hq1 hx.1.le 0)
-  have h1 : IntegrableOn (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) (Set.Ioi 1) := by
+  have h1 : IntegrableOn (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q)
+      (Set.Ioi 1) := by
     refine ((integrableOn_Ioi_rpow_of_lt (by exact_mod_cast (by linarith : r - (N : ℝ) < -1))
       zero_lt_one).const_mul (q ^ N.choose 2)⁻¹).mono' hm.aestronglyMeasurable ?_
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
@@ -535,7 +538,8 @@ private lemma qLaguerre_moment_step {q r : ℝ} (hq : 0 < q) (hq1 : q < 1) (hr :
     ((q⁻¹ : ℝ) : ℂ) * qLaguerreMoment q r at hs
   have hqpow : (q : ℂ) * ((q ^ r : ℝ) : ℂ) = ((q ^ (r + 1) : ℝ) : ℂ) := by
     rw [Real.rpow_add hq, Real.rpow_one, Complex.ofReal_mul]; ring
-  calc _ = (q : ℂ) * (((q ^ r : ℝ) : ℂ) * (qLaguerreMoment q r + qLaguerreMoment q (r + 1))) := by rw [← hqpow]; ring
+  calc _ = (q : ℂ) * (((q ^ r : ℝ) : ℂ) * (qLaguerreMoment q r + qLaguerreMoment q (r + 1))) :=
+         by rw [← hqpow]; ring
        _ = (q : ℂ) * ((q⁻¹ : ℝ) : ℂ) * qLaguerreMoment q r := by rw [hs]; ring
        _ = _ := by rw [← Complex.ofReal_mul, mul_inv_cancel₀ hq.ne', Complex.ofReal_one, one_mul]
 
@@ -549,7 +553,8 @@ private lemma qLaguerre_moment_nat {q r : ℝ} (hq : 0 < q) (hq1 : q < 1) (hr : 
   induction k with
   | zero => simp
   | succ k ih =>
-    have hs := qLaguerre_moment_step hq hq1 (r := r + k) (by have := Nat.cast_nonneg (α := ℝ) k; linarith)
+    have hs := qLaguerre_moment_step hq hq1 (r := r + k)
+        (by have := Nat.cast_nonneg (α := ℝ) k; linarith)
     have he : ((q ^ (r + (k : ℝ) + 1) : ℝ) : ℂ) = ((q ^ (r + 1) : ℝ) : ℂ) * (q : ℂ) ^ k := by
       rw [show r + (k : ℝ) + 1 = (r + 1) + k by ring, Real.rpow_add hq,
         Real.rpow_natCast, Complex.ofReal_mul, Complex.ofReal_pow]
@@ -564,7 +569,8 @@ private lemma qLaguerre_moment_nat {q r : ℝ} (hq : 0 < q) (hq1 : q < 1) (hr : 
     field_simp
     ring
 
-/-- A terminating q-Laguerre sum has a finite expansion in monomials, for arbitrary complex parameters. -/
+/-- A terminating q-Laguerre sum has a finite expansion in monomials, for arbitrary complex
+parameters. -/
 private lemma qLaguerre_finite_monomial_expansion (α q : ℂ) (n : ℕ) :
     ∃ c : ℕ → ℂ, ∀ x : ℂ, qLaguerre α q n x = ∑ k ∈ Finset.range (n + 1), c k * x ^ k := by
   refine ⟨fun k => qPochhammer (q ^ (α + 1)) q n / qPochhammer q q n *
@@ -651,7 +657,8 @@ private lemma qLaguerre_monomial_orthogonality {α q : ℝ} (hα : -1 < α)
     change qLaguerreMoment q (α + ((i + k : ℕ) : ℝ)) = _
     rw [show α + ((i + k : ℕ) : ℝ) = (α + i) + k by push_cast; ring,
       qLaguerre_moment_nat hq hq1 (by have := Nat.cast_nonneg (α := ℝ) i; linarith), hpow]
-  have hterm (i d k : ℕ) : IntegrableOn (fun x : ℝ => c d k * ((x : ℂ) ^ (i + k) * w x)) (Set.Ioi 0) :=
+  have hterm (i d k : ℕ) : IntegrableOn
+      (fun x : ℝ => c d k * ((x : ℂ) ^ (i + k) * w x)) (Set.Ioi 0) :=
     (hi (i + k)).const_mul _
   have hsum (i d : ℕ) : (fun x : ℝ => (x : ℂ) ^ i * qLaguerre α q d x * w x) =
       fun x : ℝ => ∑ k ∈ Finset.range (d + 1), c d k * ((x : ℂ) ^ (i + k) * w x) := by
@@ -659,7 +666,8 @@ private lemma qLaguerre_monomial_orthogonality {α q : ℝ} (hα : -1 < α)
     rw [hpoly, Finset.mul_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [pow_add]; ring
-  have hiP (i d : ℕ) : IntegrableOn (fun x : ℝ => (x : ℂ) ^ i * qLaguerre α q d x * w x) (Set.Ioi 0) := by
+  have hiP (i d : ℕ) : IntegrableOn (fun x : ℝ => (x : ℂ) ^ i * qLaguerre α q d x * w x)
+      (Set.Ioi 0) := by
     rw [hsum]; exact integrable_finsetSum _ (fun k _ => hterm i d k)
   have hIP {i d : ℕ} (hid : i < d) :
       (∫ x : ℝ in Set.Ioi 0, (x : ℂ) ^ i * qLaguerre α q d x * w x) = 0 := by
@@ -694,7 +702,8 @@ private lemma qLaguerre_monomial_orthogonality {α q : ℝ} (hα : -1 < α)
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in Set.Ioi 0, qLaguerre α
 q m x * qLaguerre α q n x * (Real.rpow x α : ℂ) / qPochhammerInf (-x) q = 0`. -/
 @[dlmf 18.27.E16]
-theorem qLaguerre_orthogonal {α q : ℝ} (hα : -1 < α) (hq : 0 < q) (hq1 : q < 1) {m n : ℕ} (hmn : m ≠ n) :
+theorem qLaguerre_orthogonal {α q : ℝ} (hα : -1 < α) (hq : 0 < q) (hq1 : q < 1) {m n : ℕ}
+    (hmn : m ≠ n) :
     ∫ x : ℝ in Set.Ioi 0, qLaguerre α q m x * qLaguerre α q n x *
       (Real.rpow x α : ℂ) / qPochhammerInf (-x) q = 0 := by
   let w (x : ℝ) : ℂ := ((x ^ α : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q
@@ -779,7 +788,8 @@ private lemma logGaussian_moment {s : ℝ} (hs : 0 < s) (k : ℕ) :
       (fun x => logNormalPDFReal 0 v x * x ^ (k + 1)) by ext; ring]
     rw [hI]
 
-/-- The scaled monomial moments of the Stieltjes–Wigert weight are reciprocal triangular powers of `q`. -/
+/-- The scaled monomial moments of the Stieltjes–Wigert weight are reciprocal triangular powers of
+`q`. -/
 theorem stieltjesWigert_scaled_moment_real {q : ℝ} (hq : 0 < q) (hq1 : q < 1) (k : ℕ) :
     IntegrableOn (fun x : ℝ => (Real.sqrt q * x) ^ k *
       Real.exp (-(Real.log x) ^ 2 / (2 * Real.log q⁻¹))) (Set.Ioi 0) ∧
@@ -900,7 +910,8 @@ theorem stieltjesWigert_orthogonal {q : ℝ} (hq : 0 < q) (hq1 : q < 1) {m n : �
   have hlt {a b : ℕ} (hab : a < b) :
       (∫ x : ℝ in Set.Ioi 0, stieltjesWigert q a (u x) * stieltjesWigert q b (u x) * w x) = 0 := by
     have he : (fun x => stieltjesWigert q a (u x) * stieltjesWigert q b (u x) * w x) =
-        fun x => ∑ k ∈ Finset.range (a + 1), c a k * (u x ^ k * stieltjesWigert q b (u x) * w x) := by
+        fun x => ∑ k ∈ Finset.range (a + 1), c a k *
+            (u x ^ k * stieltjesWigert q b (u x) * w x) := by
       funext x
       rw [hpoly, Finset.sum_mul, Finset.sum_mul]
       refine Finset.sum_congr rfl fun k _ => ?_
@@ -943,7 +954,8 @@ z⁻¹) / 2) = a⁻¹ ^ n * qPochhammer (a * b) q n * qPochhammer (a * c) q n * 
 q n * askeyWilsonLaurent a b c d q n z`. -/
 @[dlmf 18.28.E1_5]
 theorem askeyWilson_laurent_representation {a b c d q : ℂ}
-    (hq1 : ‖q‖ < 1) (hab : ‖a * b‖ < 1) (hac : ‖a * c‖ < 1) (had : ‖a * d‖ < 1) (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
+    (hq1 : ‖q‖ < 1) (hab : ‖a * b‖ < 1) (hac : ‖a * c‖ < 1) (had : ‖a * d‖ < 1) (n : ℕ)
+        {z : ℂ} (hz : z ≠ 0) :
     askeyWilson a b c d q n ((z + z⁻¹) / 2) = a⁻¹ ^ n * qPochhammer (a * b) q n *
       qPochhammer (a * c) q n * qPochhammer (a * d) q n * askeyWilsonLaurent a b c d q n z := by
   have hne {w : ℂ} (hw : ‖w‖ < 1) (k : ℕ) : qPochhammer w q k ≠ 0 :=
@@ -969,21 +981,25 @@ askeyWilson a b c d q m (Real.cos θ) * askeyWilson a b c d q n (Real.cos θ) * 
 * qPochhammerInf (c * exp (I * θ)) q * qPochhammerInf (d * exp (I * θ)) q)‖ ^ 2 : ℝ) = 0`. -/
 @[dlmf 18.28.E2]
 theorem askeyWilson_orthogonal {a b c d q : ℝ} (hq : 0 < q) (hq1 : q < 1)
-    (ha0 : a ≠ 0) (ha : |a| < 1) (hb : |b| < 1) (hc : |c| < 1) (hd : |d| < 1) {m n : ℕ} (hmn : m ≠ n) :
+    (ha0 : a ≠ 0) (ha : |a| < 1) (hb : |b| < 1) (hc : |c| < 1) (hd : |d| < 1) {m n : ℕ}
+        (hmn : m ≠ n) :
     ∫ θ : ℝ in (0 : ℝ)..Real.pi, askeyWilson a b c d q m (Real.cos θ) *
       askeyWilson a b c d q n (Real.cos θ) *
       (‖qPochhammerInf (exp (2 * I * θ)) q /
         (qPochhammerInf (a * exp (I * θ)) q * qPochhammerInf (b * exp (I * θ)) q *
-         qPochhammerInf (c * exp (I * θ)) q * qPochhammerInf (d * exp (I * θ)) q)‖ ^ 2 : ℝ) = 0 := by
+         qPochhammerInf (c * exp (I * θ)) q *
+             qPochhammerInf (d * exp (I * θ)) q)‖ ^ 2 : ℝ) = 0 := by
   sorry
 
 /-- Identity under the stated parameter and domain assumptions: `∫ θ : ℝ in (0 : ℝ)..Real.pi,
 qGegenbauer β q m (exp (I * θ)) * qGegenbauer β q n (exp (I * θ)) * (‖qPochhammerInf (exp (2 *
 I * θ)) q / qPochhammerInf (β * exp (2 * I * θ)) q‖ ^ 2 : ℝ) = 0`. -/
 @[dlmf 18.28.E15]
-theorem qGegenbauer_orthogonal {β q : ℝ} (hq : 0 < q) (hq1 : q < 1) (hβ : |β| < 1) {m n : ℕ} (hmn : m ≠ n) :
+theorem qGegenbauer_orthogonal {β q : ℝ} (hq : 0 < q) (hq1 : q < 1) (hβ : |β| < 1) {m n : ℕ}
+    (hmn : m ≠ n) :
     ∫ θ : ℝ in (0 : ℝ)..Real.pi, qGegenbauer β q m (exp (I * θ)) * qGegenbauer β q n (exp (I * θ)) *
-      (‖qPochhammerInf (exp (2 * I * θ)) q / qPochhammerInf (β * exp (2 * I * θ)) q‖ ^ 2 : ℝ) = 0 := by
+      (‖qPochhammerInf (exp (2 * I * θ)) q /
+          qPochhammerInf (β * exp (2 * I * θ)) q‖ ^ 2 : ℝ) = 0 := by
   sorry
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ θ : ℝ in (0 : ℝ)..Real.pi,

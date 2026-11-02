@@ -120,7 +120,8 @@ lemma integral_cpow_arithmetic_progression_quadratic {x y a : ℝ} (hx : 0 < x) 
       ((u + x * y : ℝ) : ℂ) ^ ((-1 / 2 : ℝ) : ℂ)
   have H := integral_image_eq_integral_abs_deriv_smul (s := Ioi (0 : ℝ)) measurableSet_Ioi
     (f := g) (f' := fun t => 2 * (t + m))
-    (fun t _ => ((((hasDerivAt_id t).pow 2).add ((hasDerivAt_id t).const_mul (2 * m))).hasDerivWithinAt).congr_deriv (by simp; ring))
+    (fun t _ => ((((hasDerivAt_id t).pow 2).add
+        ((hasDerivAt_id t).const_mul (2 * m))).hasDerivWithinAt).congr_deriv (by simp; ring))
     hmono.injOn G
   rw [himg] at H
   change (∫ u in Ioi (0 : ℝ), G u) = _
@@ -149,7 +150,8 @@ lemma integral_cpow_arithmetic_progression_quadratic {x y a : ℝ} (hx : 0 < x) 
 
 /-- The quadratic transformation of a three-node R-function at its middle argument,
 for positive real arguments and positive real exponent. -/
-lemma symEllIntR_arithmetic_progression_quadratic_ofReal {x y a : ℝ} (hx : 0 < x) (hy : 0 < y) (ha : 0 < a) :
+lemma symEllIntR_arithmetic_progression_quadratic_ofReal {x y a : ℝ} (hx : 0 < x)
+    (hy : 0 < y) (ha : 0 < a) :
     symEllIntR (a : ℂ) ![1 / 2, 1 / 2, (a : ℂ)] ![(x : ℂ), y, ((x + y) / 2 : ℝ)] =
       symEllIntR ((a / 2 : ℝ) : ℂ) ![(((a + 1) / 2 : ℝ) : ℂ), 1 / 2]
         ![((((x + y) / 2) ^ 2 : ℝ) : ℂ), ((x * y : ℝ) : ℂ)] := by
@@ -168,7 +170,8 @@ lemma symEllIntR_arithmetic_progression_quadratic_ofReal {x y a : ℝ} (hx : 0 <
   rw [hleft, hright, Complex.betaIntegral_eval_one_right (show 0 < (a : ℂ).re from ha),
     Complex.betaIntegral_eval_one_right (by simp; positivity)]
   simp only [one_div, inv_inv, sub_self, cpow_zero, one_mul, Fin.prod_univ_three, Fin.prod_univ_two,
-    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons,
+        Matrix.tail_cons]
   have H := integral_cpow_arithmetic_progression_quadratic (a := a) hx hy
   change (∫ u in Ioi (0 : ℝ), ((u + m ^ 2 : ℝ) : ℂ) ^ (((-(a + 1) / 2 : ℝ) : ℂ)) *
       ((u + x * y : ℝ) : ℂ) ^ ((-1 / 2 : ℝ) : ℂ)) =
@@ -190,7 +193,8 @@ lemma analyticAt_symEllIntR_comp {n : ℕ} (a : ℂ) (b : Fin n → ℂ)
     exact analyticAt_const.mul (Carlson.analyticAt_regCarlsonR_comp
       analyticAt_const analyticAt_const hf hw)
   apply H.congr
-  filter_upwards [hf.continuousAt.eventually (Carlson.isOpen_carlsonRSlitDomain.mem_nhds hw)] with v hv
+  filter_upwards [hf.continuousAt.eventually
+      (Carlson.isOpen_carlsonRSlitDomain.mem_nhds hw)] with v hv
   exact (symEllIntR_of_mem a b hv).symm
 
 /-- The arithmetic-progression quadratic transformation continues to all pairs of nodes
@@ -248,7 +252,8 @@ theorem symEllIntRF_self {x : ℂ} (hx : x ∈ slitPlane) : symEllIntRF x x x = 
 theorem symEllIntRF_smul {l : ℝ} (hl : 0 < l) {x y z : ℂ} (hx : x ∈ slitPlane)
     (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRF (l * x) (l * y) (l * z) = (l : ℂ) ^ (-1 / 2 : ℂ) * symEllIntRF x y z := by
-  rw [symEllIntRF_eq_symEllIntR (Complex.ofReal_mul_mem_slitPlane hl hx) (Complex.ofReal_mul_mem_slitPlane hl hy)
+  rw [symEllIntRF_eq_symEllIntR (Complex.ofReal_mul_mem_slitPlane hl hx)
+      (Complex.ofReal_mul_mem_slitPlane hl hy)
     (Complex.ofReal_mul_mem_slitPlane hl hz), symEllIntRF_eq_symEllIntR hx hy hz]
   have : (![(l : ℂ) * x, l * y, l * z] : Fin 3 → ℂ) = fun i => (l : ℂ) * ![x, y, z] i := by
     funext i; fin_cases i <;> rfl
@@ -303,10 +308,11 @@ theorem symEllIntRF_lemniscatic {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
   convert H using 1 <;> norm_num
 
 
-/-- DLMF 19.20.3, corrected complex form: `R_F(x, a, y) = R_{-1 / 4}(3 / 4, 1/2; a², xy)`, `a = (x + y)/2`, for complex
-`x, y` with `ℜ x > 0` and `ℜ y > 0`. **Corrected from the printed DLMF formula**: DLMF states it
-under the 19.16(i) constraints only, but it fails there, e.g. at `x = -1 + i`, `y = -1 + 2i` the
-two sides differ by a factor `±i` (independent mpmath check, 2026-10-25). -/
+/-- DLMF 19.20.3, corrected complex form: `R_F(x, a, y) = R_{-1 / 4}(3 / 4, 1/2; a², xy)`,
+`a = (x + y)/2`, for complex `x, y` with `ℜ x > 0` and `ℜ y > 0`. **Corrected from the printed DLMF
+formula**: DLMF states it under the 19.16(i) constraints only, but it fails there, e.g. at
+`x = -1 + i`, `y = -1 + 2i` the two sides differ by a factor `±i` (independent mpmath check,
+2026-10-25). -/
 @[dlmf 19.20.E3 "corrected: complex x, y with Re x, Re y > 0"]
 theorem symEllIntRF_lemniscatic_complex {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     symEllIntRF x ((x + y) / 2) y =
@@ -336,7 +342,8 @@ theorem symEllIntRG_self {x : ℂ} (hx : x ∈ slitPlane) : symEllIntRG x x x = 
 theorem symEllIntRG_smul {l : ℝ} (hl : 0 < l) {x y z : ℂ} (hx : x ∈ slitPlane)
     (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRG (l * x) (l * y) (l * z) = (l : ℂ) ^ (1 / 2 : ℂ) * symEllIntRG x y z := by
-  rw [symEllIntRG_eq_symEllIntR (Complex.ofReal_mul_mem_slitPlane hl hx) (Complex.ofReal_mul_mem_slitPlane hl hy)
+  rw [symEllIntRG_eq_symEllIntR (Complex.ofReal_mul_mem_slitPlane hl hx)
+      (Complex.ofReal_mul_mem_slitPlane hl hy)
     (Complex.ofReal_mul_mem_slitPlane hl hz), symEllIntRG_eq_symEllIntR hx hy hz]
   have : (![(l : ℂ) * x, l * y, l * z] : Fin 3 → ℂ) = fun i => (l : ℂ) * ![x, y, z] i := by
     funext i; fin_cases i <;> rfl
@@ -453,7 +460,8 @@ theorem symEllIntRJ_self {x : ℂ} (hx : x ∈ slitPlane) :
 theorem symEllIntRJ_smul {l : ℝ} (hl : 0 < l) {x y z p : ℂ} (hx : x ∈ slitPlane)
     (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) (hp : p ∈ slitPlane) :
     symEllIntRJ (l * x) (l * y) (l * z) (l * p) = (l : ℂ) ^ (-3 / 2 : ℂ) * symEllIntRJ x y z p := by
-  rw [symEllIntRJ_eq_symEllIntR (Complex.ofReal_mul_mem_slitPlane hl hx) (Complex.ofReal_mul_mem_slitPlane hl hy)
+  rw [symEllIntRJ_eq_symEllIntR (Complex.ofReal_mul_mem_slitPlane hl hx)
+      (Complex.ofReal_mul_mem_slitPlane hl hy)
     (Complex.ofReal_mul_mem_slitPlane hl hz) (Complex.ofReal_mul_mem_slitPlane hl hp),
     symEllIntRJ_eq_symEllIntR hx hy hz hp]
   have : (![(l : ℂ) * x, l * y, l * z, l * p] : Fin 4 → ℂ) =
@@ -896,10 +904,11 @@ theorem symEllIntRD_lemniscatic {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
   convert H using 1 <;> norm_num
 
 
-/-- DLMF 19.20.23, corrected complex form: `R_D(x, y, a) = R_{-3 / 4}(5 / 4, 1/2; a², xy)`, `a = (x + y)/2`, for complex
-`x, y` with `ℜ x > 0` and `ℜ y > 0`. **Corrected from the printed DLMF formula**: DLMF states it
-under the 19.16(i) constraints only, but it fails there, e.g. at `x = -1 + i`, `y = -1 + 2i` the
-two sides differ by a factor `±i` (independent mpmath check, 2026-10-25). -/
+/-- DLMF 19.20.23, corrected complex form: `R_D(x, y, a) = R_{-3 / 4}(5 / 4, 1/2; a², xy)`,
+`a = (x + y)/2`, for complex `x, y` with `ℜ x > 0` and `ℜ y > 0`. **Corrected from the printed DLMF
+formula**: DLMF states it under the 19.16(i) constraints only, but it fails there, e.g. at
+`x = -1 + i`, `y = -1 + 2i` the two sides differ by a factor `±i` (independent mpmath check,
+2026-10-25). -/
 @[dlmf 19.20.E23 "corrected: complex x, y with Re x, Re y > 0"]
 theorem symEllIntRD_lemniscatic_complex {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     symEllIntRD x y ((x + y) / 2) =
@@ -937,7 +946,8 @@ theorem symEllIntR_neg_natCast {n : ℕ} (N : ℕ) (b : Fin n → ℂ) {z : Fin 
     linarith [Nat.cast_nonneg (α := ℝ) k]
   rw [symEllIntR_of_mem _ _ hz, Carlson.carlsonR, neg_neg,
     Carlson.regCarlsonR_natCast N b hz,
-    ← Carlson.carlsonRPolynomialNumerator_div_eq N hcn z, carlsonRPolynomialNumerator_eq_factorial_mul_symEllIntT]
+    ← Carlson.carlsonRPolynomialNumerator_div_eq N hcn z,
+        carlsonRPolynomialNumerator_eq_factorial_mul_symEllIntT]
   ring
 
 /-- DLMF 19.20.25: `R_{-c}(𝐛; 𝐳) = ∏ⱼ zⱼ^{-bⱼ}`, `c = ∑ bⱼ`, `Γ(c) ≠ 0`, slit-plane nodes.

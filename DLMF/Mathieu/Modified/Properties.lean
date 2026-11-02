@@ -509,7 +509,8 @@ theorem modMathieuM_wronskian_three {ν h : ℝ} (hh : 0 < h) (z : ℂ) :
 /-! ### §28.20(vii) Shift of variable -/
 
 /-- Term-wise form of 28.20.22: the shift `z ↦ z ± πi/2` against `h ↦ ±ih`. -/
-private lemma modMathieuTerm_add_pi_div_two_mul_I_of_not_int (j : ℕ) {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν)
+private lemma modMathieuTerm_add_pi_div_two_mul_I_of_not_int (j : ℕ) {ν : ℝ}
+    (hν : ∀ m : ℤ, (m : ℝ) ≠ ν)
     {h : ℝ} (hh : 0 < h) {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) (z : ℂ) (n ℓ : ℤ) :
     modMathieuTerm j ν (z + σ * π * I / 2) h n ℓ =
       (-1 : ℂ) ^ n * modMathieuTerm j ν z (σ * I * h) n ℓ := by
@@ -581,7 +582,8 @@ theorem exp_neg_I_mul_intCast_mul_pi (N : ℤ) : Complex.exp (-(I * N * π)) = (
 /-- Coefficients after a quarter-period shift: if `me_k(x, q') = ε me_{k'}(x - π/2, q)` and
 `me_{k'}(·, q)` has multiplier `(-1)^{k'}` under `x ↦ x + π`, then
 `c^k_{2ℓ}(q') = ε e^{-i(k+2ℓ)π/2} c^{k'}_{2ℓ'}(q)` whenever `k' + 2ℓ' = k + 2ℓ`. -/
-private lemma mathieuMeCoeff_eq_of_quarter_shift {k k' ℓ ℓ' : ℤ} (hkl : k' + 2 * ℓ' = k + 2 * ℓ) {q q' ε : ℂ}
+private lemma mathieuMeCoeff_eq_of_quarter_shift {k k' ℓ ℓ' : ℤ}
+    (hkl : k' + 2 * ℓ' = k + 2 * ℓ) {q q' ε : ℂ}
     (hme : ∀ x : ℝ, mathieuMe k x q' = ε * mathieuMe k' ((x : ℂ) - π / 2) q)
     (hper : ∀ y : ℝ, mathieuMe k' ((y : ℂ) + π) q = (-1 : ℂ) ^ k' * mathieuMe k' y q) :
     mathieuMeCoeff k q' ℓ =
@@ -627,7 +629,8 @@ private lemma mathieuMe_intCast_neg_natCast {N : ℕ} (hN : N ≠ 0) (z : ℂ) (
   rw [mathieuMe_intCast, mathieuMeInt, ite_eq_right (by omega)]; simp
 
 /-- `e^{-i(2M)π/2} = (-1)^M`. -/
-private lemma exp_neg_I_mul_two_mul_mul_pi_div_two (M : ℤ) : Complex.exp (-(I * (2 * M) * (π / 2))) = (-1 : ℂ) ^ M := by
+private lemma exp_neg_I_mul_two_mul_mul_pi_div_two (M : ℤ) : Complex.exp (-(I * (2 * M) * (π / 2)))
+    = (-1 : ℂ) ^ M := by
   rw [show -(I * (2 * (M : ℂ)) * (π / 2)) = -(I * M * π) by ring, exp_neg_I_mul_intCast_mul_pi]
 
 /-- `e^{-i(2M+1)π/2} = -i (-1)^M`. -/
@@ -646,7 +649,8 @@ private lemma neg_one_zpow_two_mul_eq_one (n : ℤ) : (-1 : ℂ) ^ (2 * n) = 1 :
 private lemma mathieuMeCoeff_even_neg_q (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
     mathieuMeCoeff (((2 * n : ℕ) : ℤ) : ℂ) ((-Q : ℝ) : ℂ) ℓ =
       (-1 : ℂ) ^ ℓ * mathieuMeCoeff (((2 * n : ℕ) : ℤ) : ℂ) (Q : ℂ) ℓ := by
-  rw [mathieuMeCoeff_eq_of_quarter_shift (k := ((2 * n : ℕ) : ℤ)) (k' := ((2 * n : ℕ) : ℤ)) (ℓ' := ℓ) rfl
+  rw [mathieuMeCoeff_eq_of_quarter_shift (k := ((2 * n : ℕ) : ℤ))
+      (k' := ((2 * n : ℕ) : ℤ)) (ℓ' := ℓ) rfl
     (ε := (-1 : ℂ) ^ n)]
   · rw [show ((((2 * n : ℕ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((n + ℓ : ℤ) : ℂ) by push_cast; ring,
       exp_neg_I_mul_two_mul_mul_pi_div_two, zpow_add₀ (by norm_num), zpow_natCast]
@@ -671,7 +675,8 @@ private lemma mathieuMeCoeff_negEven_neg_q (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
     mathieuMeCoeff ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) ((-Q : ℝ) : ℂ) ℓ =
       (-1 : ℂ) ^ ℓ * mathieuMeCoeff ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) (Q : ℂ) ℓ := by
   have hN : (2 * n + 2 : ℕ) ≠ 0 := by omega
-  rw [mathieuMeCoeff_eq_of_quarter_shift (k := -((2 * n + 2 : ℕ) : ℤ)) (k' := -((2 * n + 2 : ℕ) : ℤ))
+  rw [mathieuMeCoeff_eq_of_quarter_shift (k := -((2 * n + 2 : ℕ) : ℤ))
+      (k' := -((2 * n + 2 : ℕ) : ℤ))
     (ℓ' := ℓ) rfl (ε := -(-1 : ℂ) ^ n)]
   · rw [show (((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((ℓ - n - 1 : ℤ) : ℂ) by
       push_cast; ring, exp_neg_I_mul_two_mul_mul_pi_div_two, neg_one_zpow_sub, neg_one_zpow_sub]
@@ -725,7 +730,8 @@ private lemma mathieuMeCoeff_negOdd_neg_q (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
   rw [mathieuMeCoeff_eq_of_quarter_shift (k := -((2 * n + 1 : ℕ) : ℤ)) (k' := ((2 * n + 1 : ℕ) : ℤ))
     (ℓ' := ℓ + -((2 * n + 1 : ℕ) : ℤ)) (by ring) (ε := -I * (-1 : ℂ) ^ n)]
   · rw [show (((-((2 * n + 1 : ℕ) : ℤ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((ℓ - n - 1 : ℤ) : ℂ) + 1 by
-      push_cast; ring, exp_neg_I_mul_two_mul_add_one_mul_pi_div_two, neg_one_zpow_sub, neg_one_zpow_sub]
+      push_cast; ring, exp_neg_I_mul_two_mul_add_one_mul_pi_div_two, neg_one_zpow_sub,
+          neg_one_zpow_sub]
     have := neg_one_pow_mul_self_eq_one n
     simp only [zpow_natCast, zpow_one]
     linear_combination (-1 : ℂ) ^ ℓ *
@@ -758,7 +764,8 @@ private lemma modMathieuTerm_add_pi_div_two_mul_I (j : ℕ) (ν : ℂ) {h : ℝ}
 
 /-- **General shift by `±πi/2`**: if the coefficients of order `ν₁ = ν₀ + 2d` at `(±ih)²` are
 `κ (-1)^ℓ c^{ν₀}_{2(ℓ+d)}(h²)`, then `M^{(j)}_{ν₀}(z ± πi/2, h) = (-1)^d M^{(j)}_{ν₁}(z, ±ih)`. -/
-private lemma modMathieuM_add_pi_div_two_mul_I_of_coeff (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν₀ ν₁ : ℂ}
+private lemma modMathieuM_add_pi_div_two_mul_I_of_coeff (j : ℕ) (hj₁ : 1 ≤ j)
+    (hj₄ : j ≤ 4) {ν₀ ν₁ : ℂ}
     (d : ℤ) (hν : ν₁ = ν₀ + 2 * d) {h : ℝ} (hh : 0 < h) {σ : ℂ} (hσ : σ = 1 ∨ σ = -1)
     {κ : ℂ} (hκ : κ ≠ 0) (hadm : ModMathieuAdmissible ν₁ (σ * I * h))
     (hc : ∀ ℓ : ℤ, mathieuMeCoeff ν₁ ((σ * I * h) ^ 2) ℓ =
@@ -831,7 +838,8 @@ private lemma sq_sign_mul_I_mul_ofReal {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) (h 
   rcases hσ with rfl | rfl <;> ring_nf <;> rw [I_sq] <;> ring
 
 /-- Integer orders are admissible at `±ih` for real `h`. -/
-private lemma modMathieuAdmissible_intCast_sign_mul_I (k : ℤ) {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) (h : ℝ) :
+private lemma modMathieuAdmissible_intCast_sign_mul_I (k : ℤ) {σ : ℂ}
+    (hσ : σ = 1 ∨ σ = -1) (h : ℝ) :
     ModMathieuAdmissible (k : ℂ) (σ * I * h) :=
   Or.inr ⟨⟨k, rfl⟩, by rw [sq_sign_mul_I_mul_ofReal hσ]; exact ofReal_im _⟩
 
@@ -851,7 +859,8 @@ theorem radialMathieu_add_pi_div_two_even (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j
   · have key := modMathieuM_add_pi_div_two_mul_I_of_coeff j hj₁ hj₄ (ν₀ := (((2 * n : ℕ) : ℤ) : ℂ))
       (ν₁ := (((2 * n : ℕ) : ℤ) : ℂ)) 0 (by simp) hh hσ (κ := 1) one_ne_zero
       (modMathieuAdmissible_intCast_sign_mul_I _ hσ h) (fun ℓ => by
-        rw [sq_sign_mul_I_mul_ofReal hσ, ofReal_sq_eq_ofReal_sq, mathieuMeCoeff_even_neg_q, add_zero, one_mul]) z
+        rw [sq_sign_mul_I_mul_ofReal hσ, ofReal_sq_eq_ofReal_sq, mathieuMeCoeff_even_neg_q,
+            add_zero, one_mul]) z
     rw [Int.cast_natCast, zpow_zero, one_mul] at key
     exact key
   · have key := modMathieuM_add_pi_div_two_mul_I_of_coeff j hj₁ hj₄
@@ -886,7 +895,8 @@ theorem radialMathieu_add_pi_div_two_odd (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
       (ν₀ := ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ)) (ν₁ := ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ))
       0 (by simp) hh hσ (κ := 1) one_ne_zero
       (modMathieuAdmissible_intCast_sign_mul_I _ hσ h) (fun ℓ => by
-        rw [sq_sign_mul_I_mul_ofReal hσ, ofReal_sq_eq_ofReal_sq, mathieuMeCoeff_negEven_neg_q, add_zero, one_mul]) z
+        rw [sq_sign_mul_I_mul_ofReal hσ, ofReal_sq_eq_ofReal_sq, mathieuMeCoeff_negEven_neg_q,
+            add_zero, one_mul]) z
     simp only [Int.cast_neg, Int.cast_natCast, zpow_zero, one_mul] at key
     rw [radialMathieuMs, radialMathieuMs, key]
 
@@ -914,7 +924,8 @@ theorem modMathieuM_one_add_int_mul_pi_I (ν z h : ℂ) (s : ℤ) :
     have h1 := besselJExp_add_of_exp_two_mul_eq_one ((ℓ - n : ℤ) : ℂ) h (-z) (-(s * π * I))
       (by rw [show 2 * -((s : ℂ) * π * I) = 2 * (((-s : ℤ) : ℂ) * π * I) by push_cast; ring]
           exact exp_two_mul_intCast_mul_pi_mul_I _)
-    have h2 := besselJExp_add_of_exp_two_mul_eq_one (ν + n + ℓ) h z (s * π * I) (exp_two_mul_intCast_mul_pi_mul_I s)
+    have h2 := besselJExp_add_of_exp_two_mul_eq_one (ν + n + ℓ) h z (s * π * I)
+        (exp_two_mul_intCast_mul_pi_mul_I s)
     simp only [modMathieuTerm, mathieuCylExp]
     rw [show -(z + s * π * I) = -z + -(s * π * I) by ring, h1, h2]
     have e : Complex.exp (((ℓ - n : ℤ) : ℂ) * -(s * π * I)) *
@@ -941,8 +952,10 @@ private lemma modMathieuTerm_two_add_intCast_mul_pi_mul_I {ν : ℝ} (hν : ∀ 
   have h1 := besselJExp_add_of_exp_two_mul_eq_one ((ℓ - n : ℤ) : ℂ) h (-z) (-(s * π * I))
     (by rw [show 2 * -((s : ℂ) * π * I) = 2 * (((-s : ℤ) : ℂ) * π * I) by push_cast; ring]
         exact exp_two_mul_intCast_mul_pi_mul_I _)
-  have h2 := besselJExp_add_of_exp_two_mul_eq_one (ν + n + ℓ) h z (s * π * I) (exp_two_mul_intCast_mul_pi_mul_I s)
-  have h3 := besselJExp_add_of_exp_two_mul_eq_one (-(ν + n + ℓ)) h z (s * π * I) (exp_two_mul_intCast_mul_pi_mul_I s)
+  have h2 := besselJExp_add_of_exp_two_mul_eq_one (ν + n + ℓ) h z (s * π * I)
+      (exp_two_mul_intCast_mul_pi_mul_I s)
+  have h3 := besselJExp_add_of_exp_two_mul_eq_one (-(ν + n + ℓ)) h z (s * π * I)
+      (exp_two_mul_intCast_mul_pi_mul_I s)
   simp only [modMathieuTerm, mathieuCylExp]
   rw [besselYExp_of_not_exists_int hk', besselYExp_of_not_exists_int hk',
     show -(z + s * π * I) = -z + -(s * π * I) by ring, h1, h2, h3]

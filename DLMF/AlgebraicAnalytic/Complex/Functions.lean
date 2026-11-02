@@ -27,6 +27,10 @@ public import TauCeti.Analysis.Contour.Residue.Basic
 public import TauCeti.Analysis.Contour.Residue.Theorem
 public import DLMFMathlib.Analysis.Complex.RoucheFilledHull
 public import DLMFMathlib.Analysis.Complex.LaurentAnnulus
+public import DLMFMathlib.Analysis.Complex.LagrangeInversion
+public import DLMFMathlib.Analysis.Complex.MittagLeffler
+public import Mathlib.Analysis.Normed.Module.MultipliableUniformlyOn
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic
 public import TauCeti.Analysis.InnerProductSpace.Harmonic.Subharmonic
 public import TauCeti.Analysis.InnerProductSpace.Laplacian.StrongMaximumPrinciple
 
@@ -52,8 +56,10 @@ lemma on discs, removable singularities, Rouché's theorem on discs, …) are re
 * `schwarz_lemma`, `schwarz_lemma_eq_iff`: Schwarz's lemma (DLMF 1.10.11).
 * `sqrt_branch_slitPlane`, `sqrt_branch_compl_Ici`, `not_exists_sqrt_branch_punctured`,
   `differentiableOn_one_sub_cpow_mul_one_add_cpow`: branches in cut planes (§1.10(vi)).
+* `residueAt_div_sub_pow`, `eventually_hasSum_residueAt_lagrange`: residues of
+  `H(z)/(z - z₀)ⁿ⁺¹` and the Lagrange–Bürmann expansion in terms of residues.
 * `lagrange_inversion`, `lagrange_burmann`, `extendedInversion`, `extendedInversion_comp`:
-  inversion theorems (DLMF 1.10.12–1.10.17).
+  inversion theorems (DLMF 1.10.12–1.10.17), from `Complex.hasSum_lagrangeInversion`.
 * `differentiableOn_intervalIntegral_param`, `differentiableOn_improperIntegral_param`,
   `tendstoUniformlyOn_integral_of_norm_le`: analyticity of integrals (DLMF 1.10.18–1.10.19,
   §1.10(viii)).
@@ -658,6 +664,98 @@ theorem differentiableOn_one_sub_cpow_mul_one_add_cpow (α β : ℂ) :
 
 /-! ## §1.10(vii) Inverse functions -/
 
+/-- The residue at `z₀` of `H(z) / (z - z₀)ⁿ⁺¹`, `H` analytic at `z₀`, is `H⁽ⁿ⁾(z₀) / n!`. -/
+theorem residueAt_div_sub_pow {K H : ℂ → ℂ} {z₀ : ℂ} {n : ℕ} (hH : AnalyticAt ℂ H z₀)
+    (hK : ∀ᶠ z in 𝓝[≠] z₀, K z = H z / (z - z₀) ^ (n + 1)) :
+    residueAt K z₀ = iteratedDeriv n H z₀ / n.factorial := by
+  obtain ⟨δ, hδ, hHδ⟩ := hH.exists_ball_analyticOnNhd
+  obtain ⟨δ', hδ', hKδ⟩ := Metric.eventually_nhds_iff.1 (eventually_nhdsWithin_iff.1 hK)
+  have key : ∀ r ∈ Ioo 0 (min δ δ'), laurentCoeff K z₀ r (-1) =
+      iteratedDeriv n H z₀ / n.factorial := by
+    intro r hr
+    have hd : DiffContOnCl ℂ H (ball z₀ r) :=
+      (hHδ.differentiableOn.mono (closedBall_subset_ball (hr.2.trans_le (min_le_left _ _)))
+        ).diffContOnCl_ball le_rfl
+    have hc := hd.circleIntegral_one_div_sub_center_pow_smul hr.1 n
+    have hcongr : (∮ z in C(z₀, r), K z * (z - z₀) ^ (-(-1 : ℤ) - 1)) =
+        ∮ z in C(z₀, r), (1 / (z - z₀) ^ (n + 1)) • H z := by
+      refine circleIntegral.integral_congr hr.1.le fun z hz => ?_
+      have hzr : dist z z₀ = r := by rw [dist_eq_norm]; simpa using hz
+      have hz0 : z ≠ z₀ := by
+        rintro rfl
+        simp only [dist_self] at hzr
+        exact hr.1.ne hzr
+      simp only [show -(-1 : ℤ) - 1 = 0 by norm_num, zpow_zero, mul_one, smul_eq_mul]
+      rw [hKδ (hzr.trans_lt (hr.2.trans_le (min_le_right _ _))) hz0]
+      ring
+    rw [laurentCoeff, hcongr, hc, smul_eq_mul]
+    field_simp [Real.pi_ne_zero, I_ne_zero]
+  unfold residueAt
+  exact Tendsto.limUnder_eq (tendsto_nhds_of_eventually_eq (by
+    filter_upwards [Ioo_mem_nhdsGT (lt_min hδ hδ')] with r hr using key r hr))
+
+/-- Lagrange–Bürmann expansion in terms of residues: for `φ` analytic at `z₀` with a simple zero
+there and `g` analytic at `z₀`, for `z` near `z₀`,
+`g(z) - g(z₀) = ∑ₙ Res_{z₀}(g'/φⁿ⁺¹) / (n + 1) · φ(z)ⁿ⁺¹`. -/
+theorem eventually_hasSum_residueAt_lagrange {φ g : ℂ → ℂ} {z₀ : ℂ} (hφ : AnalyticAt ℂ φ z₀)
+    (hφ₀ : φ z₀ = 0) (hd : deriv φ z₀ ≠ 0) (hg : AnalyticAt ℂ g z₀) :
+    ∀ᶠ z in 𝓝 z₀, HasSum (fun n : ℕ =>
+      residueAt (fun z => deriv g z / φ z ^ (n + 1)) z₀ / (n + 1) * φ z ^ (n + 1))
+      (g z - g z₀) := by
+  set h : ℂ → ℂ := fun t => φ (z₀ + t) with hhdef
+  set G : ℂ → ℂ := fun t => g (z₀ + t) with hGdef
+  have hadd : AnalyticAt ℂ (fun t : ℂ => z₀ + t) 0 := analyticAt_const.add analyticAt_id
+  have hh : AnalyticAt ℂ h 0 := hφ.comp_of_eq hadd (add_zero z₀)
+  have hG : AnalyticAt ℂ G 0 := hg.comp_of_eq hadd (add_zero z₀)
+  have hh0 : h 0 = 0 := by simp [hhdef, hφ₀]
+  have hhd : deriv h 0 ≠ 0 := by
+    rw [hhdef, deriv_comp_const_add, add_zero]; exact hd
+  obtain ⟨ε, hε, hsum⟩ := Complex.hasSum_lagrangeInversion hh hh0 hhd hG
+  set Ψ : ℂ → ℂ := fun t => (dslope h 0 t)⁻¹ with hΨdef
+  have hΨ : AnalyticAt ℂ Ψ 0 := (hh.dslope 0).inv (by rwa [dslope_same])
+  have hsub : AnalyticAt ℂ (fun z : ℂ => z - z₀) z₀ := analyticAt_id.sub analyticAt_const
+  have hφeq : ∀ z, φ z = (z - z₀) * dslope h 0 (z - z₀) := by
+    intro z
+    have := sub_smul_dslope h 0 (z - z₀)
+    rw [hh0, sub_zero, sub_zero, smul_eq_mul] at this
+    rw [this, hhdef]
+    simp
+  have hcoef : ∀ n : ℕ, residueAt (fun z => deriv g z / φ z ^ (n + 1)) z₀ / (n + 1) =
+      iteratedDeriv n (fun t => deriv G t * Ψ t ^ (n + 1)) 0 / (n + 1).factorial := by
+    intro n
+    have hH : AnalyticAt ℂ (fun z => deriv g z * Ψ (z - z₀) ^ (n + 1)) z₀ :=
+      hg.deriv.mul ((hΨ.comp_of_eq hsub (sub_self z₀)).pow _)
+    rw [residueAt_div_sub_pow hH (Eventually.of_forall fun z => by
+      rw [hφeq z]
+      simp only [hΨdef, div_eq_mul_inv, mul_pow, mul_inv, inv_pow]
+      ring)]
+    have htr := congrFun (iteratedDeriv_comp_const_add n
+      (fun z => deriv g z * Ψ (z - z₀) ^ (n + 1)) z₀) 0
+    simp only [add_zero, add_sub_cancel_left] at htr
+    rw [← htr]
+    have hfun : (fun t => deriv G t * Ψ t ^ (n + 1)) =
+        fun t => deriv g (z₀ + t) * Ψ t ^ (n + 1) := by
+      funext t
+      rw [hGdef, deriv_comp_const_add]
+    rw [hfun, Nat.factorial_succ]
+    push_cast
+    field_simp
+  filter_upwards [ball_mem_nhds z₀ hε] with z hz
+  have hw : ‖z - z₀‖ < ε := by simpa [dist_eq_norm] using hz
+  have := hsum (z - z₀) hw
+  simp only [hGdef, hhdef, add_sub_cancel, add_zero] at this
+  refine this.congr_fun fun n => ?_
+  rw [hcoef n]
+
+/-- The local inverse of an analytic function with nonvanishing derivative, packaged. -/
+private theorem exists_analyticAt_localInverse {f : ℂ → ℂ} {z₀ : ℂ} (hf : AnalyticAt ℂ f z₀)
+    (hd : deriv f z₀ ≠ 0) :
+    ∃ F : ℂ → ℂ, AnalyticAt ℂ F (f z₀) ∧ F (f z₀) = z₀ ∧
+      (∀ᶠ w in 𝓝 (f z₀), f (F w) = w) ∧ (∀ᶠ z in 𝓝 z₀, F (f z) = z) :=
+  ⟨hf.hasStrictDerivAt.localInverse _ _ _ hd, hf.analyticAt_localInverse hd,
+    HasStrictFDerivAt.localInverse_apply_image .., HasStrictDerivAt.eventually_right_inverse ..,
+    HasStrictDerivAt.eventually_left_inverse ..⟩
+
 /-- DLMF 1.10.12–1.10.13 (Lagrange inversion theorem): if `f` is analytic at `z₀`,
 `f'(z₀) ≠ 0` and `w₀ = f(z₀)`, then `f(z) = w` has a unique solution `z = F(w)` analytic at `w₀`
 with `F(w₀) = z₀`, and `F(w) = z₀ + ∑_{n ≥ 1} Fₙ (w - w₀)ⁿ` near `w₀`, where `n Fₙ` is the
@@ -669,7 +767,16 @@ theorem lagrange_inversion {f : ℂ → ℂ} {z₀ : ℂ} (hf : AnalyticAt ℂ f
       ∀ᶠ w in 𝓝 (f z₀), HasSum (fun n : ℕ =>
         residueAt (fun z => ((f z - f z₀) ^ (n + 1))⁻¹) z₀ / (n + 1) * (w - f z₀) ^ (n + 1))
         (F w - z₀) := by
-  sorry
+  obtain ⟨F, hF, hF₀, hR, hL⟩ := exists_analyticAt_localInverse hf hd
+  refine ⟨F, hF, hF₀, hR, hL, ?_⟩
+  have hφd : deriv (fun z => f z - f z₀) z₀ ≠ 0 := by rwa [deriv_sub_const]
+  have hev := eventually_hasSum_residueAt_lagrange (φ := fun z => f z - f z₀) (g := fun z => z)
+    (hf.sub analyticAt_const) (sub_self _) hφd analyticAt_id
+  have hT : Tendsto F (𝓝 (f z₀)) (𝓝 z₀) := by
+    have := hF.continuousAt.tendsto; rwa [hF₀] at this
+  filter_upwards [hT.eventually hev, hR] with w h1 h2
+  rw [h2] at h1
+  simpa only [deriv_id'', one_div] using h1
 
 /-- DLMF 1.10.14: under the hypotheses of 1.10.12, for `g` analytic at `z₀`,
 `g(F(w)) = g(z₀) + ∑_{n ≥ 1} Gₙ (w - w₀)ⁿ` near `w₀`, where `n Gₙ` is the residue of
@@ -681,7 +788,36 @@ theorem lagrange_burmann {f g F : ℂ → ℂ} {z₀ : ℂ} (hf : AnalyticAt ℂ
     ∀ᶠ w in 𝓝 (f z₀), HasSum (fun n : ℕ =>
       residueAt (fun z => deriv g z / (f z - f z₀) ^ (n + 1)) z₀ / (n + 1) * (w - f z₀) ^ (n + 1))
       (g (F w) - g z₀) := by
-  sorry
+  have hφd : deriv (fun z => f z - f z₀) z₀ ≠ 0 := by rwa [deriv_sub_const]
+  have hev := eventually_hasSum_residueAt_lagrange (φ := fun z => f z - f z₀)
+    (hf.sub analyticAt_const) (sub_self _) hφd hg
+  have hT : Tendsto F (𝓝 (f z₀)) (𝓝 z₀) := by
+    have := hF.continuousAt.tendsto; rwa [hF₀] at this
+  filter_upwards [hT.eventually hev, hFinv] with w h1 h2
+  rwa [h2] at h1
+
+/-- DLMF 1.10.15–1.10.16, stronger than DLMF, which assumes `μ = m ≥ 1` and `f` analytic at
+`z₀`: if `φ` is analytic at `z₀`, `φ(z₀) = 0`, `φ'(z₀) ≠ 0` and `φ(z)^m = f(z) - f(z₀)` near `z₀`
+(any `m : ℕ`), then for every `ζ` near `0`, `z = z₀ + ∑_{n ≥ 1} Fₙ ζⁿ` solves
+`f(z) = f(z₀) + ζ^m`, where `n Fₙ` is the residue of `1/φ(z)ⁿ` at `z₀`. -/
+@[dlmf 1.10.E15, dlmf 1.10.E16]
+theorem extendedInversion' {f φ : ℂ → ℂ} {z₀ : ℂ} {m : ℕ}
+    (hφ : AnalyticAt ℂ φ z₀) (hφ₀ : φ z₀ = 0) (hφd : deriv φ z₀ ≠ 0)
+    (hroot : ∀ᶠ z in 𝓝 z₀, φ z ^ m = f z - f z₀) :
+    ∀ᶠ ζ in 𝓝 (0 : ℂ), ∃ z : ℂ,
+      HasSum (fun n : ℕ => residueAt (fun z => (φ z ^ (n + 1))⁻¹) z₀ / (n + 1) * ζ ^ (n + 1))
+        (z - z₀) ∧ f z = f z₀ + ζ ^ m := by
+  obtain ⟨F, hF, hF₀, hR, -⟩ := exists_analyticAt_localInverse hφ hφd
+  rw [hφ₀] at hF hF₀ hR
+  have hev := eventually_hasSum_residueAt_lagrange (g := fun z => z) hφ hφ₀ hφd analyticAt_id
+  have hT : Tendsto F (𝓝 0) (𝓝 z₀) := by
+    have := hF.continuousAt.tendsto; rwa [hF₀] at this
+  filter_upwards [hT.eventually (hev.and hroot), hR] with ζ ⟨h1, h2⟩ h3
+  refine ⟨F ζ, ?_, ?_⟩
+  · rw [h3] at h1
+    simpa only [deriv_id'', one_div] using h1
+  · rw [h3] at h2
+    linear_combination -h2
 
 /-- DLMF 1.10.15–1.10.16 (extended inversion theorem), case of an integer `μ = m ≥ 1`:
 suppose `f(z) - f(z₀)` has a zero of order `m` at `z₀` and `φ` is an analytic `m`-th root of it,
@@ -692,28 +828,53 @@ where `n Fₙ` is the residue of `1/φ(z)ⁿ = 1/(f(z) - f(z₀))^{n/m}` at `z�
 give the different solutions. DLMF allows real `μ > 0` with a series in `(z - z₀)^{μ + n}`; only
 integer `μ` is formalized. -/
 @[dlmf 1.10.E15, dlmf 1.10.E16]
-theorem extendedInversion {f φ : ℂ → ℂ} {z₀ : ℂ} {m : ℕ} (hm : 1 ≤ m) (hf : AnalyticAt ℂ f z₀)
+theorem extendedInversion {f φ : ℂ → ℂ} {z₀ : ℂ} {m : ℕ} (_hm : 1 ≤ m) (_hf : AnalyticAt ℂ f z₀)
     (hφ : AnalyticAt ℂ φ z₀) (hφ₀ : φ z₀ = 0) (hφd : deriv φ z₀ ≠ 0)
     (hroot : ∀ᶠ z in 𝓝 z₀, φ z ^ m = f z - f z₀) :
     ∀ᶠ ζ in 𝓝 (0 : ℂ), ∃ z : ℂ,
       HasSum (fun n : ℕ => residueAt (fun z => (φ z ^ (n + 1))⁻¹) z₀ / (n + 1) * ζ ^ (n + 1))
-        (z - z₀) ∧ f z = f z₀ + ζ ^ m := by
-  sorry
+        (z - z₀) ∧ f z = f z₀ + ζ ^ m :=
+  extendedInversion' hφ hφ₀ hφd hroot
+
+/-- DLMF 1.10.17, stronger than DLMF, which assumes `μ = m ≥ 1`, `f` analytic at `z₀` and
+`φ(z)^m = f(z) - f(z₀)`: only `φ` (analytic at `z₀` with a simple zero there) and `g` matter.
+For `ζ` near `0` and `z = z₀ + ∑ Fₙ ζⁿ`, `g(z) = g(z₀) + ∑_{n ≥ 1} Gₙ ζⁿ`, where `n Gₙ` is the
+residue of `g'(z)/φ(z)ⁿ` at `z₀`. -/
+@[dlmf 1.10.E17]
+theorem extendedInversion_comp' {φ g : ℂ → ℂ} {z₀ : ℂ}
+    (hφ : AnalyticAt ℂ φ z₀) (hφ₀ : φ z₀ = 0) (hφd : deriv φ z₀ ≠ 0) (hg : AnalyticAt ℂ g z₀) :
+    ∀ᶠ ζ in 𝓝 (0 : ℂ), ∀ z : ℂ,
+      HasSum (fun n : ℕ => residueAt (fun z => (φ z ^ (n + 1))⁻¹) z₀ / (n + 1) * ζ ^ (n + 1))
+        (z - z₀) →
+      HasSum (fun n : ℕ => residueAt (fun z => deriv g z / φ z ^ (n + 1)) z₀ / (n + 1) *
+        ζ ^ (n + 1)) (g z - g z₀) := by
+  obtain ⟨F, hF, hF₀, hR, -⟩ := exists_analyticAt_localInverse hφ hφd
+  rw [hφ₀] at hF hF₀ hR
+  have hev := eventually_hasSum_residueAt_lagrange (g := fun z => z) hφ hφ₀ hφd analyticAt_id
+  have hevg := eventually_hasSum_residueAt_lagrange hφ hφ₀ hφd hg
+  have hT : Tendsto F (𝓝 0) (𝓝 z₀) := by
+    have := hF.continuousAt.tendsto; rwa [hF₀] at this
+  filter_upwards [hT.eventually (hev.and hevg), hR] with ζ ⟨h1, h2⟩ h3 z hz
+  rw [h3] at h1 h2
+  simp only [deriv_id'', one_div] at h1
+  have hzF : z = F ζ := sub_left_injective (hz.unique h1)
+  rw [hzF]
+  exact h2
 
 /-- DLMF 1.10.17: in the setting of 1.10.15–1.10.16 (integer `μ = m`), for `g` analytic at `z₀`
 and `z = z₀ + ∑ Fₙ ζⁿ` the solution belonging to `ζ`,
 `g(z) = g(z₀) + ∑_{n ≥ 1} Gₙ ζⁿ`, where `n Gₙ` is the residue of
 `g'(z)/(f(z) - f(z₀))^{n/m} = g'(z)/φ(z)ⁿ` at `z₀`. -/
 @[dlmf 1.10.E17]
-theorem extendedInversion_comp {f φ g : ℂ → ℂ} {z₀ : ℂ} {m : ℕ} (hm : 1 ≤ m)
-    (hf : AnalyticAt ℂ f z₀) (hφ : AnalyticAt ℂ φ z₀) (hφ₀ : φ z₀ = 0) (hφd : deriv φ z₀ ≠ 0)
-    (hroot : ∀ᶠ z in 𝓝 z₀, φ z ^ m = f z - f z₀) (hg : AnalyticAt ℂ g z₀) :
+theorem extendedInversion_comp {f φ g : ℂ → ℂ} {z₀ : ℂ} {m : ℕ} (_hm : 1 ≤ m)
+    (_hf : AnalyticAt ℂ f z₀) (hφ : AnalyticAt ℂ φ z₀) (hφ₀ : φ z₀ = 0) (hφd : deriv φ z₀ ≠ 0)
+    (_hroot : ∀ᶠ z in 𝓝 z₀, φ z ^ m = f z - f z₀) (hg : AnalyticAt ℂ g z₀) :
     ∀ᶠ ζ in 𝓝 (0 : ℂ), ∀ z : ℂ,
       HasSum (fun n : ℕ => residueAt (fun z => (φ z ^ (n + 1))⁻¹) z₀ / (n + 1) * ζ ^ (n + 1))
         (z - z₀) →
       HasSum (fun n : ℕ => residueAt (fun z => deriv g z / φ z ^ (n + 1)) z₀ / (n + 1) *
-        ζ ^ (n + 1)) (g z - g z₀) := by
-  sorry
+        ζ ^ (n + 1)) (g z - g z₀) :=
+  extendedInversion_comp' hφ hφ₀ hφd hg
 
 /-! ## §1.10(viii) Functions defined by contour integrals -/
 
@@ -970,20 +1131,6 @@ theorem prodConvergesDLMF_norm_iff {a : ℕ → ℂ} :
       obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le hn
       simpa only [add_comm 1 m] using hshift 1 m
 
-/-- DLMF 1.10.20–1.10.21 (`M`-test for products): let `aₙ` be analytic in the domain `D`; if
-`|ln(1 + aₙ(z))| ≤ Mₙ` for `n ≥ N` and `z ∈ D` and `∑ Mₙ < ∞`, then `∏_{n ≥ 1} (1 + aₙ(z))`
-converges locally uniformly to a function `p` analytic in `D`, and `p(z) = 0` only where some factor
-`1 + aₙ(z)` vanishes. Bounds on the tail give local uniform convergence; global uniform
-convergence would additionally need control of the finite prefix. -/
-@[dlmf 1.10.E20]
-theorem prod_mtest_log {a : ℕ → ℂ → ℂ} {D : Set ℂ} (hD : IsOpen D)
-    (ha : ∀ n, DifferentiableOn ℂ (a n) D) {M : ℕ → ℝ} {N : ℕ}
-    (hM : ∀ n ≥ N, ∀ z ∈ D, ‖log (1 + a n z)‖ ≤ M n) (hs : Summable M) :
-    ∃ p : ℂ → ℂ, DifferentiableOn ℂ p D ∧
-      TendstoLocallyUniformlyOn (fun m z => ∏ n ∈ Finset.Icc 1 m, (1 + a n z)) p atTop D ∧
-      ∀ z ∈ D, p z = 0 → ∃ n ≥ 1, 1 + a n z = 0 := by
-  sorry
-
 /-- DLMF §1.10(ix) (`M`-test for products, second form): the conclusion of 1.10.20–1.10.21 holds
 if instead `|aₙ(z)| ≤ Mₙ` for all `n` and `z ∈ D`, with `∑ Mₙ < ∞`. -/
 @[dlmf 1.10.E21]
@@ -1052,6 +1199,179 @@ theorem prod_mtest {a : ℕ → ℂ → ℂ} {D : Set ℂ} (hD : IsOpen D)
     subst D
     exact ⟨p, differentiableOn_empty, tendstoUniformlyOn_empty, by simp⟩
 
+/-- DLMF 1.10.20–1.10.21 (`M`-test for products): let `aₙ` be analytic in the domain `D`; if
+`|ln(1 + aₙ(z))| ≤ Mₙ` for `n ≥ N` and `z ∈ D` and `∑ Mₙ < ∞`, then `∏_{n ≥ 1} (1 + aₙ(z))`
+converges locally uniformly to a function `p` analytic in `D`, and `p(z) = 0` only where some factor
+`1 + aₙ(z)` vanishes. Bounds on the tail give local uniform convergence; global uniform
+convergence would additionally need control of the finite prefix. -/
+@[dlmf 1.10.E20]
+theorem prod_mtest_log {a : ℕ → ℂ → ℂ} {D : Set ℂ} (hD : IsOpen D)
+    (ha : ∀ n, DifferentiableOn ℂ (a n) D) {M : ℕ → ℝ} {N : ℕ}
+    (hM : ∀ n ≥ N, ∀ z ∈ D, ‖log (1 + a n z)‖ ≤ M n) (hs : Summable M) :
+    ∃ p : ℂ → ℂ, DifferentiableOn ℂ p D ∧
+      TendstoLocallyUniformlyOn (fun m z => ∏ n ∈ Finset.Icc 1 m, (1 + a n z)) p atTop D ∧
+      ∀ z ∈ D, p z = 0 → ∃ n ≥ 1, 1 + a n z = 0 := by
+  classical
+  set F : ℕ → ℂ → ℂ := fun m z => ∏ n ∈ Finset.Icc 1 m, (1 + a n z) with hFdef
+  obtain ⟨N₀, hN₀⟩ := eventually_atTop.mp
+    (hs.tendsto_atTop_zero.eventually (eventually_le_nhds one_pos))
+  set N' := max (max N 1) N₀ with hN'
+  have hN'N : N ≤ N' := le_trans (le_max_left _ _) (le_max_left _ _)
+  have hN'1 : 1 ≤ N' := le_trans (le_max_right _ _) (le_max_left _ _)
+  have hN'0 : N₀ ≤ N' := le_max_right _ _
+  -- a nonvanishing tail factor is close to `1` and bounded away from `0`
+  have hfac : ∀ n ≥ N', ∀ z ∈ D, 1 + a n z ≠ 0 →
+      Real.exp (-1) ≤ ‖1 + a n z‖ ∧ ‖a n z‖ ≤ 2 * M n := by
+    intro n hn z hz hne
+    have hL := hM n (hN'N.trans hn) z hz
+    have hM1 : M n ≤ 1 := hN₀ n (hN'0.trans hn)
+    have hexp := Complex.exp_log hne
+    refine ⟨?_, ?_⟩
+    · rw [← hexp, Complex.norm_exp]
+      refine Real.exp_le_exp.mpr ?_
+      have := Complex.abs_re_le_norm (log (1 + a n z))
+      have := neg_abs_le (log (1 + a n z)).re
+      linarith
+    · have h1 := Complex.norm_exp_sub_one_le (hL.trans hM1)
+      rw [hexp, add_sub_cancel_left] at h1
+      linarith
+  -- the prefix product
+  set P : ℂ → ℂ := fun z => ∏ n ∈ Finset.Ico 1 N', (1 + a n z) with hPdef
+  have hPc : ContinuousOn P D :=
+    (DifferentiableOn.fun_finsetProd fun i _ => (ha i).const_add 1).continuousOn
+  have hloc : ∀ z₀ ∈ D, ∃ B ∈ 𝓝 z₀, ∃ q : ℂ → ℂ, TendstoUniformlyOn F q atTop B ∧
+      ((∀ n ≥ 1, 1 + a n z₀ ≠ 0) → q z₀ ≠ 0) := by
+    intro z₀ hz₀
+    obtain ⟨r₁, hr₁, hr₁D⟩ := Metric.isOpen_iff.mp hD z₀ hz₀
+    obtain ⟨r₂, hr₂, hr₂P⟩ := Metric.continuousOn_iff.mp hPc z₀ hz₀ 1 one_pos
+    set r := min r₁ r₂
+    have hr : 0 < r := lt_min hr₁ hr₂
+    have hBD : ball z₀ r ⊆ D := (ball_subset_ball (min_le_left _ _)).trans hr₁D
+    have hPb : ∀ z ∈ ball z₀ r, ‖P z‖ ≤ ‖P z₀‖ + 1 := by
+      intro z hz
+      have := hr₂P z (hBD hz) (lt_of_lt_of_le (mem_ball.mp hz) (min_le_right _ _))
+      rw [dist_eq_norm] at this
+      have := norm_le_norm_add_norm_sub' (P z) (P z₀)
+      linarith
+    -- each tail factor vanishes identically or nowhere on the ball
+    have hdich : ∀ n ≥ N', (∀ z ∈ ball z₀ r, 1 + a n z = 0) ∨
+        ∀ z ∈ ball z₀ r, 1 + a n z ≠ 0 := by
+      intro n hn
+      by_contra! h
+      obtain ⟨⟨z₁, hz₁, h₁⟩, ⟨z₂, hz₂, h₂⟩⟩ := h
+      have hc : ContinuousOn (fun z => ‖1 + a n z‖) (ball z₀ r) :=
+        (((ha n).const_add 1).continuousOn.mono hBD).norm
+      have hiv := (convex_ball z₀ r).isPreconnected.intermediate_value hz₂ hz₁ hc
+      have hlow := (hfac n hn z₁ (hBD hz₁) h₁).1
+      obtain ⟨w, hw, hw'⟩ := (hiv (show Real.exp (-1) / 2 ∈ Icc ‖1 + a n z₂‖ ‖1 + a n z₁‖ from
+        ⟨by simp only [h₂, norm_zero]; positivity, by linarith [Real.exp_pos (-1)]⟩))
+      have hwne : 1 + a n w ≠ 0 := by
+        intro h0
+        simp only [h0, norm_zero] at hw'
+        linarith [Real.exp_pos (-1)]
+      have := (hfac n hn w (hBD hw) hwne).1
+      linarith [Real.exp_pos (-1)]
+    by_cases hA : ∃ n ≥ N', ∀ z ∈ ball z₀ r, 1 + a n z = 0
+    · obtain ⟨n₀, hn₀, hz⟩ := hA
+      refine ⟨ball z₀ r, ball_mem_nhds z₀ hr, 0, ?_, fun h => absurd (hz z₀ (mem_ball_self hr))
+        (h n₀ (hN'1.trans hn₀))⟩
+      rw [Metric.tendstoUniformlyOn_iff]
+      intro ε hε
+      filter_upwards [eventually_ge_atTop n₀] with m hm z hzB
+      simp only [hFdef, Pi.zero_apply]
+      rw [Finset.prod_eq_zero (i := n₀) (Finset.mem_Icc.mpr ⟨hN'1.trans hn₀, hm⟩) (hz z hzB)]
+      simpa using hε
+    · push Not at hA
+      have hB : ∀ n ≥ N', ∀ z ∈ ball z₀ r, 1 + a n z ≠ 0 := by
+        intro n hn
+        rcases hdich n hn with h | h
+        · obtain ⟨z, hz, hne⟩ := hA n hn
+          exact absurd (h z hz) hne
+        · exact h
+      set b : ℕ → ℂ → ℂ := fun n z => if N' ≤ n then a n z else 0 with hbdef
+      have hbd : ∀ n, DifferentiableOn ℂ (b n) (ball z₀ r) := by
+        intro n
+        by_cases hn : N' ≤ n
+        · simpa only [hbdef, hn, ite_true] using (ha n).mono hBD
+        · simp only [hbdef, hn, ite_false]
+          exact differentiableOn_const 0
+      have hbM : ∀ n, ∀ z ∈ ball z₀ r, ‖b n z‖ ≤ 2 * |M n| := by
+        intro n z hz
+        by_cases hn : N' ≤ n
+        · simp only [hbdef, hn, ite_true]
+          exact (hfac n hn z (hBD hz) (hB n hn z hz)).2.trans (by
+            have := le_abs_self (M n); linarith)
+        · simp only [hbdef, hn, ite_false, norm_zero]
+          positivity
+      obtain ⟨pB, -, hpBu, hpB0⟩ := prod_mtest isOpen_ball hbd hbM (hs.abs.mul_left 2)
+      have hsplit : ∀ m ≥ N', ∀ z, F m z = P z * ∏ n ∈ Finset.Icc 1 m, (1 + b n z) := by
+        intro m hm z
+        have hfac' : ∀ n, 1 + a n z = (if N' ≤ n then 1 else 1 + a n z) * (1 + b n z) := by
+          intro n
+          by_cases hn : N' ≤ n <;> simp [hbdef, hn]
+        simp only [hFdef]
+        rw [Finset.prod_congr rfl fun n _ => hfac' n, Finset.prod_mul_distrib]
+        congr 1
+        have h1 : ∏ n ∈ Finset.Ico 1 N', (if N' ≤ n then (1 : ℂ) else 1 + a n z) = P z :=
+          Finset.prod_congr rfl fun n hn => by simp [not_le.mpr (Finset.mem_Ico.mp hn).2]
+        rw [← h1]
+        refine (Finset.prod_subset (fun n hn => ?_) (fun n hn hn' => ?_)).symm
+        · exact (Finset.mem_Icc.mpr ⟨(Finset.mem_Ico.mp hn).1,
+            ((Finset.mem_Ico.mp hn).2.le.trans hm)⟩)
+        · have : N' ≤ n := by
+            by_contra h
+            exact hn' (Finset.mem_Ico.mpr ⟨(Finset.mem_Icc.mp hn).1, not_le.mp h⟩)
+          simp [this]
+      refine ⟨ball z₀ r, ball_mem_nhds z₀ hr, fun z => P z * pB z, ?_, ?_⟩
+      · rw [Metric.tendstoUniformlyOn_iff] at hpBu ⊢
+        intro ε hε
+        have hK : 0 < ‖P z₀‖ + 1 := by positivity
+        filter_upwards [hpBu (ε / (‖P z₀‖ + 1)) (div_pos hε hK), eventually_ge_atTop N']
+          with m hm hmN z hz
+        rw [hsplit m hmN z, dist_eq_norm, ← mul_sub, norm_mul]
+        have h1 := hm z hz
+        rw [dist_eq_norm] at h1
+        calc ‖P z‖ * ‖pB z - ∏ n ∈ Finset.Icc 1 m, (1 + b n z)‖
+            ≤ (‖P z₀‖ + 1) * ‖pB z - ∏ n ∈ Finset.Icc 1 m, (1 + b n z)‖ :=
+              mul_le_mul_of_nonneg_right (hPb z hz) (norm_nonneg _)
+          _ < (‖P z₀‖ + 1) * (ε / (‖P z₀‖ + 1)) := mul_lt_mul_of_pos_left h1 hK
+          _ = ε := by field_simp
+      · intro hne
+        refine mul_ne_zero ?_ ?_
+        · exact Finset.prod_ne_zero_iff.mpr fun n hn => hne n (Finset.mem_Ico.mp hn).1
+        · intro h0
+          obtain ⟨n, hn1, hn⟩ := hpB0 z₀ (mem_ball_self hr) h0
+          by_cases hnN : N' ≤ n
+          · simp only [hbdef, hnN, ite_true] at hn
+            exact hne n hn1 hn
+          · simp [hbdef, hnN] at hn
+  set p : ℂ → ℂ := fun z => limUnder atTop fun m => F m z with hpdef
+  have hpq : ∀ B q, TendstoUniformlyOn F q atTop B → EqOn q p B := fun B q h z hz =>
+    ((h.tendsto_at hz).limUnder_eq).symm
+  have hU : TendstoLocallyUniformlyOn F p atTop D := by
+    refine tendstoLocallyUniformlyOn_of_forall_exists_nhds fun x hx => ?_
+    obtain ⟨B, hB, q, hq, -⟩ := hloc x hx
+    exact ⟨B, mem_nhdsWithin_of_mem_nhds hB, hq.congr_right (hpq B q hq)⟩
+  refine ⟨p, hU.differentiableOn (Eventually.of_forall fun m =>
+    DifferentiableOn.fun_finsetProd fun i _ => (ha i).const_add 1) hD, hU, ?_⟩
+  intro z hz hp
+  by_contra! hnone
+  obtain ⟨B, hB, q, hq, hq0⟩ := hloc z hz
+  exact hq0 hnone ((hpq B q hq (mem_of_mem_nhds hB)).trans hp)
+
+/-- The Weierstrass elementary factor: `|(1 - u) eᵘ - 1| ≤ 3 |u|²` for `|u| ≤ 1`. -/
+private theorem norm_one_sub_mul_exp_sub_one_le {u : ℂ} (hu : ‖u‖ ≤ 1) :
+    ‖(1 - u) * exp u - 1‖ ≤ 3 * ‖u‖ ^ 2 := by
+  have hR := norm_exp_sub_one_sub_id_le hu
+  have heq : (1 - u) * exp u - 1 = -u ^ 2 + (1 - u) * (exp u - 1 - u) := by ring
+  rw [heq]
+  calc ‖-u ^ 2 + (1 - u) * (exp u - 1 - u)‖ ≤ ‖u‖ ^ 2 + 2 * ‖u‖ ^ 2 := by
+        refine (norm_add_le _ _).trans (add_le_add (by simp) ?_)
+        rw [norm_mul]
+        have h1 : ‖1 - u‖ ≤ 2 := (norm_sub_le _ _).trans (by simp; linarith)
+        exact mul_le_mul h1 hR (norm_nonneg _) (by norm_num)
+    _ = 3 * ‖u‖ ^ 2 := by ring
+
 /-- DLMF 1.10.22 (Weierstrass product): if `zₙ ≠ 0` and `∑ |zₙ|⁻²` converges, then
 `P(z) = ∏ (1 - z/zₙ) e^{z/zₙ}` (an absolutely convergent product) is an entire function whose
 zeros are exactly the points `zₙ`. -/
@@ -1061,7 +1381,62 @@ theorem weierstrass_product {zs : ℕ → ℂ} (hz : ∀ n, zs n ≠ 0)
     (∀ z, Multipliable (fun n => (1 - z / zs n) * exp (z / zs n))) ∧
       Differentiable ℂ (fun z => ∏' n, (1 - z / zs n) * exp (z / zs n)) ∧
       ∀ z, (∏' n, (1 - z / zs n) * exp (z / zs n)) = 0 ↔ ∃ n, z = zs n := by
-  sorry
+  set f : ℕ → ℂ → ℂ := fun n z => (1 - z / zs n) * exp (z / zs n) - 1 with hfdef
+  have hf1 : ∀ n z, 1 + f n z = (1 - z / zs n) * exp (z / zs n) := fun n z => by
+    simp only [hfdef]; ring
+  have hinv : Tendsto (fun n => ‖zs n‖⁻¹) atTop (𝓝 0) := by
+    have h2 := hs.tendsto_atTop_zero
+    have h3 := h2.sqrt
+    simp only [Real.sqrt_zero] at h3
+    refine h3.congr fun n => ?_
+    rw [Real.sqrt_sq (inv_nonneg.2 (norm_nonneg _))]
+  have hbound : ∀ R : ℝ, 0 < R → ∀ᶠ n in atTop, ∀ z ∈ ball (0 : ℂ) R,
+      ‖f n z‖ ≤ 3 * R ^ 2 * ‖zs n‖⁻¹ ^ 2 := by
+    intro R hR
+    filter_upwards [hinv.eventually (gt_mem_nhds (inv_pos.2 hR))] with n hn z hzR
+    have hzR' : ‖z‖ < R := by simpa using hzR
+    have hu : ‖z / zs n‖ ≤ R * ‖zs n‖⁻¹ := by
+      rw [norm_div, div_eq_mul_inv]
+      exact mul_le_mul_of_nonneg_right hzR'.le (inv_nonneg.2 (norm_nonneg _))
+    have hu1 : ‖z / zs n‖ ≤ 1 := hu.trans (by
+      have := mul_lt_mul_of_pos_left hn hR
+      rw [mul_inv_cancel₀ hR.ne'] at this
+      exact this.le)
+    calc ‖f n z‖ ≤ 3 * ‖z / zs n‖ ^ 2 := norm_one_sub_mul_exp_sub_one_le hu1
+      _ ≤ 3 * (R * ‖zs n‖⁻¹) ^ 2 := by gcongr
+      _ = 3 * R ^ 2 * ‖zs n‖⁻¹ ^ 2 := by ring
+  have hsumm : ∀ z, Summable fun n => ‖f n z‖ := by
+    intro z
+    have hR : (0 : ℝ) < ‖z‖ + 1 := by positivity
+    refine (hs.mul_left (3 * (‖z‖ + 1) ^ 2)).of_norm_bounded_eventually_nat ?_
+    filter_upwards [hbound _ hR] with n hn
+    rw [norm_norm]
+    exact hn z (by simp)
+  have hcont : ∀ n, Continuous (f n) := fun n => by simp only [hfdef]; fun_prop
+  have hloc : ∀ R : ℝ, 0 < R → HasProdLocallyUniformlyOn (fun n z => 1 + f n z)
+      (fun z => ∏' n, (1 + f n z)) (ball (0 : ℂ) R) := fun R hR =>
+    (hs.mul_left (3 * R ^ 2)).hasProdLocallyUniformlyOn_nat_one_add isOpen_ball (hbound R hR)
+      fun n => (hcont n).continuousOn
+  refine ⟨fun z => ?_, fun z => ?_, fun z => ⟨fun h0 => ?_, ?_⟩⟩
+  · simpa only [hf1] using multipliable_one_add_of_summable (hsumm z)
+  · have hR : (0 : ℝ) < ‖z‖ + 1 := by positivity
+    have hd := (hloc _ hR).differentiableOn (.of_forall fun s => by
+      simpa [Finset.prod_fn] using DifferentiableOn.finsetProd (fun i _ =>
+        ((differentiable_const _).add (by simp only [hfdef]; fun_prop)).differentiableOn))
+      isOpen_ball
+    have := hd.differentiableAt (isOpen_ball.mem_nhds (by simp : z ∈ ball (0 : ℂ) (‖z‖ + 1)))
+    simpa only [hf1] using this
+  · by_contra hne
+    push Not at hne
+    have hne' : ∀ n, 1 + f n z ≠ 0 := by
+      intro n
+      rw [hf1]
+      refine mul_ne_zero ?_ (exp_ne_zero _)
+      rw [sub_ne_zero, ne_comm, Ne, div_eq_one_iff_eq (hz n)]
+      exact hne n
+    exact tprod_one_add_ne_zero_of_summable hne' (hsumm z) (by simpa only [hf1] using h0)
+  · rintro ⟨n, rfl⟩
+    exact tprod_of_exists_eq_zero ⟨n, by simp [hz n]⟩
 
 /-! ## §1.10(x) Infinite partial fractions -/
 
@@ -1117,7 +1492,17 @@ theorem mittag_leffler {a zs : ℕ → ℂ} (hinj : Function.Injective zs) (hz :
         ∃ g : ℂ → ℂ, AnalyticAt ℂ g (zs n) ∧
           ∀ᶠ z in 𝓝[≠] (zs n),
             ∑' k, a k * (1 / (z - zs k) + 1 / zs k) = a n / (z - zs n) + g z := by
-  sorry
+  refine ⟨Complex.differentiableOn_tsum_mittagLeffler hz hlim hs, fun n => ?_⟩
+  obtain ⟨g, hg, hev⟩ := Complex.exists_analyticAt_tsum_mittagLeffler_eq hinj hz hlim hs n
+  refine ⟨?_, g, hg, hev⟩
+  have hH : AnalyticAt ℂ (fun z => a n + (z - zs n) * g z) (zs n) :=
+    analyticAt_const.add ((analyticAt_id.sub analyticAt_const).mul hg)
+  rw [residueAt_div_sub_pow (n := 0) hH (by
+    filter_upwards [hev, self_mem_nhdsWithin] with z hz hne
+    have hne' : z - zs n ≠ 0 := sub_ne_zero.2 hne
+    rw [hz, zero_add, pow_one]
+    field_simp)]
+  simp
 
 /-! ## §1.10(xi) Generating functions -/
 

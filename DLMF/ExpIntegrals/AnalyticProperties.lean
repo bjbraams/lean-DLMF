@@ -12,6 +12,7 @@ public import DLMF.Confluent.ExpIntegral
 public import DLMF.Confluent.Integrals
 public import DLMF.Core.Basic
 public import DLMFMathlib.Analysis.Complex.FactorialSeries
+public import TauCeti.Analysis.SpecialFunctions.LogIntegral
 
 /-!
 # Analytic properties of exponential, trigonometric and hyperbolic integrals (DLMF §§6.2, 6.5–6.6)
@@ -99,7 +100,8 @@ theorem hasDerivAt_regularizedConfluent_Ein (z : ℂ) :
       Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (k+1))]
     simp only [Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
     ring
-  have hs := hasSum_deriv_regularizedConfluent_comp differentiable_id (differentiable_id.add_const 1) (-z) 0
+  have hs := hasSum_deriv_regularizedConfluent_comp differentiable_id
+      (differentiable_id.add_const 1) (-z) 0
   simp only [id_eq] at hs
   have hh : deriv (fun w : ℂ => poch w 0*(-z)^0/((0:ℕ).factorial:ℂ)*(Gamma (w+1+(0:ℕ)))⁻¹) 0=
       (Real.eulerMascheroniConstant:ℂ) := by
@@ -144,8 +146,10 @@ theorem expIntE1_eq_Ein_complex {z : ℂ} (hz : z ≠ 0) :
   have hd' : HasDerivAt (fun c : ℂ => tricomiD 1 c z)
       (exp z*(Real.eulerMascheroniConstant-expIntEin z+log z)) 1 := by
     refine (hd.congr_of_eventuallyEq (Eventually.of_forall heq)).congr_deriv ?_
-    simp only [Function.comp_apply, Pi.sub_apply, id_eq, sub_self, zero_add, mul_one, cpow_zero, one_mul, neg_one_mul,
-      regularizedConfluent_zero_upper, show (2:ℂ)-1=1 by norm_num, Gamma_one, inv_one, sub_zero, mul_zero, add_zero]
+    simp only [Function.comp_apply, Pi.sub_apply, id_eq, sub_self, zero_add, mul_one, cpow_zero,
+        one_mul, neg_one_mul,
+      regularizedConfluent_zero_upper, show (2:ℂ)-1=1 by norm_num, Gamma_one, inv_one, sub_zero,
+                                                           mul_zero, add_zero]
     ring
   rw [genExpIntE_eq_exp_mul_kummerU 1 hz]
   norm_num
@@ -190,7 +194,8 @@ theorem Real.expIntEi_principalValue {x : ℝ} (hx : 0 < x) :
     rw [himp ε hε]
     exact hasIntegralAtTop_exp_neg_div hε
   -- closed form of the regularized integral for 0 < ε < x
-  have hG (t : ℝ) (ht : t < 0) : HasDerivAt (fun t : ℝ => (Real.log (-t) : ℂ) - DLMF.Confluent.expIntEin t)
+  have hG (t : ℝ) (ht : t < 0) : HasDerivAt
+      (fun t : ℝ => (Real.log (-t) : ℂ) - DLMF.Confluent.expIntEin t)
       (exp (-t : ℂ)/(t : ℂ)) t := by
     have ht0 : (t:ℂ) ≠ 0 := by exact_mod_cast ht.ne
     have hl : HasDerivAt (fun t : ℝ => Real.log (-t)) (t⁻¹) t := by
@@ -202,7 +207,8 @@ theorem Real.expIntEi_principalValue {x : ℝ} (hx : 0 < x) :
     field_simp
     ring_nf
   have hclosed : ∀ᶠ ε in 𝓝[>] (0:ℝ),
-      (∫ t in -x..(0:ℝ)-ε, exp (-t : ℂ)/(t : ℂ)) + improperAtTop (fun t : ℝ => exp (-t : ℂ)/(t : ℂ)) (0+ε)
+      (∫ t in -x..(0:ℝ)-ε, exp (-t : ℂ)/(t : ℂ)) +
+          improperAtTop (fun t : ℝ => exp (-t : ℂ)/(t : ℂ)) (0+ε)
         = DLMF.Confluent.expIntEin (-x) - Real.log x - Real.eulerMascheroniConstant
           - DLMF.Confluent.expIntEin (-(ε:ℂ)) + DLMF.Confluent.expIntEin ε := by
     filter_upwards [Ioo_mem_nhdsGT hx] with ε hε
@@ -226,7 +232,8 @@ theorem Real.expIntEi_principalValue {x : ℝ} (hx : 0 < x) :
   have h0' : Tendsto (fun ε : ℝ => DLMF.Confluent.expIntEin (-(ε:ℂ))) (𝓝[>] 0) (𝓝 0) := by
     have := (hc.comp (Complex.continuous_ofReal.neg)).tendsto 0
     simpa [DLMF.Confluent.expIntEin, Function.comp_def] using this.mono_left nhdsWithin_le_nhds
-  have h := ((tendsto_const_nhds (x := DLMF.Confluent.expIntEin (-x) - Real.log x - Real.eulerMascheroniConstant)).sub
+  have h := ((tendsto_const_nhds
+      (x := DLMF.Confluent.expIntEin (-x) - Real.log x - Real.eulerMascheroniConstant)).sub
     h0').add h0
   convert h using 2
   rw [Real.expIntEi, abs_of_pos hx, show -(x:ℂ) = ((-x:ℝ):ℂ) by push_cast; ring, expIntEin_ofReal]
@@ -327,6 +334,21 @@ theorem liPV_hasDerivAt {t : ℝ} (ht : 0 < t) (ht1 : t ≠ 1) :
   field_simp
   ring
 
+/-- For `x > 1`, `li(x) = li(2) + Li(x)`, where `Li(x) = ∫₂ˣ dt / log t` is TauCeti's
+`TauCeti.Real.logIntegral`. -/
+theorem Real.logIntLi_eq_logIntLi_two_add_logIntegral {x : ℝ} (hx : 1 < x) :
+    Real.logIntLi x = Real.logIntLi 2 + TauCeti.Real.logIntegral x := by
+  have hsub : ∀ t ∈ Set.uIcc 2 x, 1 < t := fun t ht => by
+    rcases Set.mem_uIcc.mp ht with h | h <;> linarith [h.1, h.2]
+  have hderiv : ∀ t ∈ Set.uIcc 2 x, HasDerivAt Real.logIntLi (Real.log t)⁻¹ t := fun t ht => by
+    simpa [one_div] using liPV_hasDerivAt (by linarith [hsub t ht]) (hsub t ht).ne'
+  have hint : IntervalIntegrable (fun t => (Real.log t)⁻¹) MeasureTheory.volume 2 x := by
+    refine ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ ?_ fun t ht => ?_)
+    · exact Real.continuousOn_log.mono fun t ht => (by linarith [hsub t ht] : (0 : ℝ) < t).ne'
+    · exact (Real.log_pos (hsub t ht)).ne'
+  rw [TauCeti.Real.logIntegral_def, intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint]
+  ring
+
 /-- The integrand `1/log t` is continuous on `[0, b]` for `b < 1` (with `1/log 0 = 0`). -/
 theorem liPV_continuousOn_left {b : ℝ} (hb : b < 1) :
     ContinuousOn (fun t : ℝ => 1 / Real.log t) (Icc 0 b) := by
@@ -396,7 +418,8 @@ theorem liPV_tendsto_sub :
 tends to `(𝓝 (Real.logIntLi x))` along `(𝓝[>] (0 : ℝ))`. -/
 @[dlmf 6.2.E8, dlmf 4.10.E7]
 theorem Real.logIntLi_principalValue {x : ℝ} (hx : 1 < x) :
-    Tendsto (fun ε : ℝ => (∫ t in (0 : ℝ)..(1-ε), 1/Real.log t) + ∫ t in (1+ε)..x, 1/Real.log t) (𝓝[>] (0 : ℝ)) (𝓝 (Real.logIntLi x)) := by
+    Tendsto (fun ε : ℝ => (∫ t in (0 : ℝ)..(1-ε), 1/Real.log t) + ∫ t in (1+ε)..x, 1/Real.log t)
+        (𝓝[>] (0 : ℝ)) (𝓝 (Real.logIntLi x)) := by
   have hleft : ∀ ε : ℝ, 0 < ε → ε < 1 →
       (∫ t in (0 : ℝ)..(1-ε), 1/Real.log t) = Real.logIntLi (1 - ε) := by
     intro ε hε hε1
@@ -450,9 +473,11 @@ theorem log_quarter_turn {z : ℂ} (hz : 0 < z.re) :
   have hz0 : z≠0 := by intro h; simp [h] at hz
   have ha := abs_lt.mp (Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz))
   constructor
-  · rw [Complex.log_mul I_ne_zero hz0 (by simp only [arg_I, Set.mem_Ioc]; constructor <;> linarith [Real.pi_pos]), log_I]
+  · rw [Complex.log_mul I_ne_zero hz0
+        (by simp only [arg_I, Set.mem_Ioc]; constructor <;> linarith [Real.pi_pos]), log_I]
     ring
-  · rw [Complex.log_mul (neg_ne_zero.mpr I_ne_zero) hz0 (by simp only [arg_neg_I, Set.mem_Ioc]; constructor <;> linarith [Real.pi_pos]), log_neg_I]
+  · rw [Complex.log_mul (neg_ne_zero.mpr I_ne_zero) hz0
+        (by simp only [arg_neg_I, Set.mem_Ioc]; constructor <;> linarith [Real.pi_pos]), log_neg_I]
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `sinInt z = I/2*(genExpIntE 1
@@ -524,7 +549,8 @@ theorem hasIntegralAtTop_of_hasDerivAt_of_tendsto {f F : ℝ → ℂ} {a : ℝ} 
     ((hc.mono Icc_subset_Ici_self).intervalIntegrable_of_Icc hR)]
 
 /-- Improper integrals add when both integrands are integrable on bounded intervals. -/
-theorem _root_.DLMF.HasIntegralAtTop.add {f g : ℝ → ℂ} {a : ℝ} {u v : ℂ} (hf : HasIntegralAtTop f a u)
+theorem _root_.DLMF.HasIntegralAtTop.add {f g : ℝ → ℂ} {a : ℝ} {u v : ℂ}
+    (hf : HasIntegralAtTop f a u)
     (hg : HasIntegralAtTop g a v) (hfi : ∀ R, a ≤ R → IntervalIntegrable f volume a R)
     (hgi : ∀ R, a ≤ R → IntervalIntegrable g volume a R) :
     HasIntegralAtTop (fun t => f t+g t) a (u+v) := by
@@ -534,14 +560,16 @@ theorem _root_.DLMF.HasIntegralAtTop.add {f g : ℝ → ℂ} {a : ℝ} {u v : �
   rw [intervalIntegral.integral_add (hfi R hR) (hgi R hR)]
 
 /-- Improper integrals scale by constants. -/
-theorem _root_.DLMF.HasIntegralAtTop.const_mul {f : ℝ → ℂ} {a : ℝ} {u : ℂ} (hf : HasIntegralAtTop f a u)
+theorem _root_.DLMF.HasIntegralAtTop.const_mul {f : ℝ → ℂ} {a : ℝ} {u : ℂ}
+    (hf : HasIntegralAtTop f a u)
     (c : ℂ) : HasIntegralAtTop (fun t => c*f t) a (c*u) := by
   unfold HasIntegralAtTop at *
   refine (hf.const_mul c).congr' (Eventually.of_forall fun R => ?_)
   exact (intervalIntegral.integral_const_mul c f).symm
 
 /-- Changing the integrand off the half-line does not change the improper integral. -/
-theorem _root_.DLMF.HasIntegralAtTop.congr {f g : ℝ → ℂ} {a : ℝ} {u : ℂ} (hf : HasIntegralAtTop f a u)
+theorem _root_.DLMF.HasIntegralAtTop.congr {f g : ℝ → ℂ} {a : ℝ} {u : ℂ}
+    (hf : HasIntegralAtTop f a u)
     (h : ∀ t, a ≤ t → f t = g t) : HasIntegralAtTop g a u := by
   unfold HasIntegralAtTop at *
   refine hf.congr' ?_
@@ -614,7 +642,8 @@ theorem tendsto_exp_neg_mul_kummerU_sectorAtTop (a b : ℂ) {δ : ℝ} (hδ : 0 
   have h := hasAsymptoticExpansion_kummerU_sector a b hδ 0
   simp only [Finset.range_zero, Finset.sum_empty, sub_zero, CharP.cast_eq_zero, zero_add] at h
   refine ((isBigO_refl (fun z : ℂ => exp (-z)) _).mul h).trans_tendsto ?_
-  have hr : Tendsto (fun r : ℝ => r^(-a.re)*Real.exp (-δ*r)*Real.exp (π*|(-a).im|)) atTop (𝓝 0) := by
+  have hr : Tendsto (fun r : ℝ => r^(-a.re)*Real.exp (-δ*r)*Real.exp (π*|(-a).im|))
+      atTop (𝓝 0) := by
     simpa using (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (-a.re) δ hδ).mul_const
       (Real.exp (π*|(-a).im|))
   refine squeeze_zero_norm' ?_ (hr.comp (tendsto_norm_sectorAtTop δ))
@@ -649,7 +678,8 @@ theorem tendsto_mul_I_add_ofReal_rotSectorAtTop (z : ℂ) {ε : ℝ} (hε : ε=1
     rcases hε with rfl | rfl
     · simp [Real.cos_neg, Real.sin_neg, Real.cos_pi_div_four, Real.sin_pi_div_four]
     · simp [Real.cos_pi_div_four, Real.sin_pi_div_four]
-  have h := tendsto_ray_sectorAtTop (δ := 1/2) z (ε*I*exp ((-ε*(π/4):ℝ)*I)) hc (by norm_num) (by rw [hre]; exact hs)
+  have h := tendsto_ray_sectorAtTop (δ := 1/2) z (ε*I*exp ((-ε*(π/4):ℝ)*I)) hc (by norm_num)
+      (by rw [hre]; exact hs)
   refine h.congr fun t => ?_
   ring
 
@@ -657,7 +687,8 @@ theorem tendsto_mul_I_add_ofReal_rotSectorAtTop (z : ℂ) {ε : ℝ} (hε : ε=1
 theorem tendsto_expIntE1_mul_I_add_ofReal (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     Tendsto (fun t : ℝ => genExpIntE 1 (ε*I*(z+t))) atTop (𝓝 0) := by
   have hβ : |-ε*(π/4)| < π/2 := by
-    rcases hε with rfl | rfl <;> simp [abs_of_pos (by positivity : (0:ℝ) < π/4)] <;> linarith [Real.pi_pos]
+    rcases hε with rfl | rfl <;> simp [abs_of_pos (by positivity : (0:ℝ) < π/4)] <;>
+        linarith [Real.pi_pos]
   have hr := tendsto_mul_I_add_ofReal_rotSectorAtTop z hε
   have hU := (tendsto_kummerU_rotSectorAtTop (a := 1) 1 (by norm_num) (by norm_num) hβ).comp hr
   have hU' := hU.norm.mul_const (Real.exp (ε*z.im))
@@ -745,13 +776,15 @@ theorem genExpIntE_zero_eq (z : ℂ) : genExpIntE 0 z = exp (-z)/z := by
 @[dlmf 6.2.E1]
 theorem expIntE1_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => exp (-(z+t))/(z+t)) 0 (genExpIntE 1 z) := by
-  have hd : ∀ t : ℝ, 0 ≤ t → HasDerivAt (fun t : ℝ => -genExpIntE 1 (z+t)) (exp (-(z+t))/(z+t)) t := by
+  have hd : ∀ t : ℝ, 0 ≤ t →
+      HasDerivAt (fun t : ℝ => -genExpIntE 1 (z+t)) (exp (-(z+t))/(z+t)) t := by
     intro t ht
     refine (hasDerivAt_comp_add_ofReal (g := fun w => -genExpIntE 1 w)
       (hasDerivAt_genExpIntE 1 (add_ofReal_mem_slitPlane hz ht)).neg).congr_deriv ?_
     simp [genExpIntE_zero_eq]
   have hc : ContinuousOn (fun t : ℝ => exp (-(z+t))/(z+t)) (Ici 0) := by
-    refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => slitPlane_ne_zero (add_ofReal_mem_slitPlane hz ht)
+    refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht =>
+        slitPlane_ne_zero (add_ofReal_mem_slitPlane hz ht)
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc (tendsto_expIntE1_add_ofReal z).neg
   simpa using h
 
@@ -760,11 +793,13 @@ theorem expIntE1_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
 @[dlmf 6.2.E10]
 theorem sinIntTail_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => sin (z+t)/(z+t)) 0 (-sinIntTail z) := by
-  have hd : ∀ t : ℝ, 0 ≤ t → HasDerivAt (fun t : ℝ => sinIntTail (z+t)) (sin (z+t)/(z+t)) t := fun t ht =>
+  have hd : ∀ t : ℝ, 0 ≤ t →
+      HasDerivAt (fun t : ℝ => sinIntTail (z+t)) (sin (z+t)/(z+t)) t := fun t ht =>
     hasDerivAt_comp_add_ofReal (g := sinIntTail)
       ((hasDerivAt_sinInt_complex (slitPlane_ne_zero (add_ofReal_mem_slitPlane hz ht))).sub_const _)
   have hc : ContinuousOn (fun t : ℝ => sin (z+t)/(z+t)) (Ici 0) := by
-    refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => slitPlane_ne_zero (add_ofReal_mem_slitPlane hz ht)
+    refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht =>
+        slitPlane_ne_zero (add_ofReal_mem_slitPlane hz ht)
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc (tendsto_sinIntTail_add_ofReal z)
   simpa using h
 
@@ -773,10 +808,13 @@ theorem sinIntTail_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
 @[dlmf 6.2.E11]
 theorem cosInt_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => cos (z+t)/(z+t)) 0 (-cosInt z) := by
-  have hd : ∀ t : ℝ, 0 ≤ t → HasDerivAt (fun t : ℝ => cosInt (z+t)) (cos (z+t)/(z+t)) t := fun t ht =>
-    hasDerivAt_comp_add_ofReal (g := cosInt) (hasDerivAt_cosInt_complex (add_ofReal_mem_slitPlane hz ht))
+  have hd : ∀ t : ℝ, 0 ≤ t →
+      HasDerivAt (fun t : ℝ => cosInt (z+t)) (cos (z+t)/(z+t)) t := fun t ht =>
+    hasDerivAt_comp_add_ofReal (g := cosInt)
+        (hasDerivAt_cosInt_complex (add_ofReal_mem_slitPlane hz ht))
   have hc : ContinuousOn (fun t : ℝ => cos (z+t)/(z+t)) (Ici 0) := by
-    refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => slitPlane_ne_zero (add_ofReal_mem_slitPlane hz ht)
+    refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht =>
+        slitPlane_ne_zero (add_ofReal_mem_slitPlane hz ht)
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc (tendsto_cosInt_add_ofReal z)
   simpa using h
 

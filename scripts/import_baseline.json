@@ -3,11 +3,13 @@
   "BernoulliEuler <-> Combinatorics",
   "Bessel <-> Confluent",
   "Bessel <-> Struve",
+  "Combinatorics <-> NumberTheory",
   "Confluent <-> Coulomb",
   "Confluent <-> ErrorFunctions",
   "Confluent <-> Hypergeometric",
   "Confluent <-> OrthogonalPolynomials",
   "Confluent <-> ParabolicCylinder",
+  "EllipticIntegrals <-> JacobiElliptic",
   "ErrorFunctions <-> IncompleteGamma",
   "ErrorFunctions <-> ParabolicCylinder",
   "ExpIntegrals <-> IncompleteGamma",
@@ -15,7 +17,9 @@
   "GeneralizedHypergeometric <-> QHypergeometric",
   "JacobiElliptic <-> Theta",
   "JacobiElliptic <-> Weierstrass",
-  "Legendre <-> SphericalHarmonics"
+  "Legendre <-> SphericalHarmonics",
+  "NumberTheory <-> Partitions",
+  "Polylog <-> Zeta"
  ],
  "defs_imports": []
 }

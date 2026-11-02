@@ -93,9 +93,14 @@ theorem symEllIntRF_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     symEllIntRF 0 (x ^ 2) (y ^ 2) = symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
   have ha := re_half_add_pos hx hy
   rw [symEllIntRF_zero_left (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy),
-    symEllIntRF_zero_left (Carlson.mul_mem_slitPlane_of_re_pos hx hy) (sq_mem_slitPlane_of_zero_lt_re ha),
-    symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy)),
-    symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain (Carlson.mul_mem_slitPlane_of_re_pos hx hy) (sq_mem_slitPlane_of_zero_lt_re ha))]
+    symEllIntRF_zero_left (Carlson.mul_mem_slitPlane_of_re_pos hx hy)
+        (sq_mem_slitPlane_of_zero_lt_re ha),
+    symEllIntR_of_mem _ _
+        (vec2_mem_carlsonRSlitDomain (sq_mem_slitPlane_of_zero_lt_re hx)
+        (sq_mem_slitPlane_of_zero_lt_re hy)),
+    symEllIntR_of_mem _ _
+        (vec2_mem_carlsonRSlitDomain (Carlson.mul_mem_slitPlane_of_re_pos hx hy)
+        (sq_mem_slitPlane_of_zero_lt_re ha))]
   have h := Carlson.TwoVariable.carlsonRK_sq_eq x y hx hy
   rw [Carlson.TwoVariable.carlsonRK_comm (sq_mem_slitPlane_of_zero_lt_re ha)
     (Carlson.mul_mem_slitPlane_of_re_pos hx hy)] at h
@@ -127,7 +132,8 @@ theorem carlsonRE_comm_of_mem_slitPlane {y z : ℂ} (hy : y ∈ slitPlane) (hz :
 @[dlmf 19.22.E2]
 theorem symEllIntRG_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     2 * symEllIntRG 0 (x ^ 2) (y ^ 2) =
-      4 * symEllIntRG 0 (x * y) (((x + y) / 2) ^ 2) - x * y * symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
+      4 * symEllIntRG 0 (x * y) (((x + y) / 2) ^ 2) - x * y *
+          symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
   have ha := re_half_add_pos hx hy
   have hx2 := sq_mem_slitPlane_of_zero_lt_re hx
   have hy2 := sq_mem_slitPlane_of_zero_lt_re hy
@@ -249,7 +255,9 @@ theorem symEllIntRF_zero_eq_inv_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 
   have hx : (0 : ℝ) < (((a₀ : ℝ) : ℂ)).re := by simpa using ha
   have hy : (0 : ℝ) < (((g₀ : ℝ) : ℂ)).re := by simpa using hg
   rw [symEllIntRF_zero_left (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy),
-    symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy)),
+    symEllIntR_of_mem _ _
+        (vec2_mem_carlsonRSlitDomain (sq_mem_slitPlane_of_zero_lt_re hx)
+        (sq_mem_slitPlane_of_zero_lt_re hy)),
     ← Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm ha hg]
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair
@@ -308,7 +316,8 @@ theorem symEllIntRG_zero_agm {a₀ g₀ : ℝ≥0} (hg : 0 < g₀) (hag : g₀ �
           ∑' n : ℕ, (2 : ℝ) ^ ((n : ℤ) - 1) * (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2)) : ℝ) : ℂ) ∧
       (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
         ((((NNReal.agm a₀ g₀ : ℝ))⁻¹ * (agmA a₀ g₀ 1 ^ 2 -
-          ∑' n : ℕ, (2 : ℝ) ^ ((n : ℤ) + 1) * (agmA a₀ g₀ (n + 2) ^ 2 - agmG a₀ g₀ (n + 2) ^ 2)) : ℝ) : ℂ) := by
+          ∑' n : ℕ, (2 : ℝ) ^ ((n : ℤ) + 1) *
+              (agmA a₀ g₀ (n + 2) ^ 2 - agmG a₀ g₀ (n + 2) ^ 2)) : ℝ) : ℂ) := by
   have ha : (0 : ℝ) < a₀ := lt_of_lt_of_le (by exact_mod_cast hg) (by exact_mod_cast hag)
   have hg' : (0 : ℝ) < g₀ := by exact_mod_cast hg
   set M : ℝ := (NNReal.agm a₀ g₀ : ℝ) with hM_def
@@ -380,7 +389,8 @@ def agmQ (a₀ g₀ : ℝ≥0) : ℕ → ℝ
   | 0 => 1
   | n + 1 => (1 / 2) * agmQ a₀ g₀ n * (agmA a₀ g₀ n - agmG a₀ g₀ n) / (agmA a₀ g₀ n + agmG a₀ g₀ n)
 
-/-- Helper for 19.22.9/19.22.10 (any `a₀, g₀ > 0`): `∑ₙ 2^{n-1} cₙ² = a₀² - (4/π) M R_G(0, a₀², g₀²)`. -/
+/-- Helper for 19.22.9/19.22.10 (any `a₀, g₀ > 0`):
+`∑ₙ 2^{n-1} cₙ² = a₀² - (4/π) M R_G(0, a₀², g₀²)`. -/
 private lemma hasSum_agm_symEllIntRG {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) :
     HasSum (fun n : ℕ => (((2 : ℝ) ^ ((n : ℤ) - 1) *
       (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2) : ℝ) : ℂ))
@@ -838,8 +848,10 @@ theorem symEllIntRG_sq_landen {x y z : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hz 
 theorem symEllIntRC_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     symEllIntRC (x ^ 2) (y ^ 2) = symEllIntRC (((x + y) / 2) ^ 2) ((x + y) / 2 * y) := by
   have ha := re_half_add_pos hx hy
-  rw [symEllIntRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy),
-    symEllIntRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re ha) (Carlson.mul_mem_slitPlane_of_re_pos ha hy),
+  rw [symEllIntRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re hx)
+      (sq_mem_slitPlane_of_zero_lt_re hy),
+    symEllIntRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re ha)
+        (Carlson.mul_mem_slitPlane_of_re_pos ha hy),
     Carlson.TwoVariable.carlsonRC_sq_eq x y hx hy]
 
 /-- DLMF 19.22.23 (first and third equations, all complex values with `a ≠ 0`):
@@ -858,7 +870,8 @@ theorem symEllIntPm_inverse (x y z : ℂ) (ha : (x + y) / 2 ≠ 0) :
 theorem symEllIntPm_inverse_sub_real {x y z : ℝ} (hy : 0 < y) (hxy : y ≤ x) (hzx : x ≤ z) :
     let zp : ℝ := (Real.sqrt ((z + x) * (z + y)) + Real.sqrt ((z - x) * (z - y))) / 2
     let zm : ℝ := (Real.sqrt ((z + x) * (z + y)) - Real.sqrt ((z - x) * (z - y))) / 2
-    x - y = 2 / ((x + y) / 2) * Real.sqrt ((((x + y) / 2) ^ 2 - zp ^ 2) * (((x + y) / 2) ^ 2 - zm ^ 2)) := by
+    x - y = 2 / ((x + y) / 2) *
+        Real.sqrt ((((x + y) / 2) ^ 2 - zp ^ 2) * (((x + y) / 2) ^ 2 - zm ^ 2)) := by
   dsimp only
   let A := Real.sqrt ((z + x) * (z + y))
   let B := Real.sqrt ((z - x) * (z - y))

@@ -149,7 +149,8 @@ private lemma catalan_eq_ringChoose_half (n : ℕ) :
     have hb := Nat.succ_mul_centralBinom_succ n
     have hrec : Ring.choose (1 / 2 : ℝ) (n + 1 + 1) =
         Ring.choose (1 / 2 : ℝ) (n + 1) * (1 / 2 - (n + 1)) / (n + 2) := by
-      rw [ringChoose_eq_descPochhammer_div, ringChoose_eq_descPochhammer_div, descPochhammer_succ_eval, Nat.factorial_succ]
+      rw [ringChoose_eq_descPochhammer_div, ringChoose_eq_descPochhammer_div,
+          descPochhammer_succ_eval, Nat.factorial_succ]
       push_cast
       have : ((n + 1).factorial : ℝ) ≠ 0 := by exact_mod_cast (n + 1).factorial_ne_zero
       field_simp

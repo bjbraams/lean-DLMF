@@ -106,7 +106,8 @@ theorem tendsto_heunCFApprox (ha : 1 < ‖a‖) (hα : ∀ n : ℕ, α ≠ -(n :
 /-! ### Heun polynomials (§31.5) -/
 
 /-- Row `i` of `heunPolyMatrix` applied to a vector extended by zero. -/
-private lemma heunPolyMatrix_mulVec_apply (a β γ δ : ℂ) (n : ℕ) (w : ℕ → ℂ) (hw : w (n + 1) = 0) (i : Fin (n + 1)) :
+private lemma heunPolyMatrix_mulVec_apply (a β γ δ : ℂ) (n : ℕ) (w : ℕ → ℂ) (hw : w (n + 1) = 0)
+    (i : Fin (n + 1)) :
     ∑ k : Fin (n + 1), heunPolyMatrix a β γ δ n i k * w k =
       if (i : ℕ) = 0 then a * γ * w 1 else
         heunRecP (-(n : ℂ)) β i * w (i - 1) - heunRecQ a (-(n : ℂ)) β γ δ i * w i +
@@ -410,7 +411,8 @@ theorem heunPoly_isHeunSolOn (ha : a ≠ 0) {n : ℕ} (hγ : ∀ k : ℕ, k < n 
   set c := heunLocalCoeff a q (-(n : ℂ)) β γ δ with hc
   have hcoeff : P.coeff n = c n := by
     simp [P, heunPoly, finsetSum_coeff, c]
-  refine ⟨natDegree_eq_of_le_of_coeff_ne_zero ?_ (hcoeff ▸ heunLocalCoeff_top_ne_zero ha hγ hβ hq), ?_⟩
+  refine ⟨natDegree_eq_of_le_of_coeff_ne_zero ?_
+      (hcoeff ▸ heunLocalCoeff_top_ne_zero ha hγ hβ hq), ?_⟩
   · refine natDegree_sum_le_of_forall_le _ _ fun j hj => ?_
     exact (natDegree_C_mul_X_pow_le _ _).trans (by simpa [Nat.lt_succ_iff] using hj)
   set f : ℂ → ℂ := fun z => P.eval z with hfdef

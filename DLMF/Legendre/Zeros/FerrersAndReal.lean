@@ -85,7 +85,8 @@ as `n > m, δν ≤ δμ`; together with its count case `n ≥ m, δν > δμ` t
 where 𝖯^μ_ν has the extra zero (e.g. (ν, μ) = (1/4, 3/4), (1.2, 1.7), (0.3, 0.3): one zero each).
 Corrected 2026-10-22 to `n ≥ m` (DLMF erratum). -/
 def ferrersPExtraZero (ν μ : ℝ) : Bool :=
-  decide (0 < μ ∧ ((⌊μ⌋ ≤ ⌊ν⌋ ∧ legendreFractionalPart ν ≤ legendreFractionalPart μ) ∨ (⌊ν⌋ < ⌊μ⌋ ∧ Even (⌊μ⌋-⌊ν⌋))))
+  decide (0 < μ ∧ ((⌊μ⌋ ≤ ⌊ν⌋ ∧ legendreFractionalPart ν ≤ legendreFractionalPart μ) ∨
+      (⌊ν⌋ < ⌊μ⌋ ∧ Even (⌊μ⌋-⌊ν⌋))))
 
 /-- The zero set of `𝖯^μ_ν` in `(-1, 1)` through the real part. -/
 theorem lzero_zeroSet_P (ν μ : ℝ) : ferrersZeroSet false ν μ =
@@ -97,7 +98,8 @@ theorem lzero_zeroSet_P (ν μ : ℝ) : ferrersZeroSet false ν μ =
 
 /-- The nonpositive-order case, including integral parameters. -/
 theorem ferrersP_nonpositive_order_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hμ : μ ≤ 0) :
-    Set.Finite (ferrersZeroSet false ν μ) ∧ (ferrersZeroSet false ν μ).ncard=(max (⌈ν-|μ|⌉:ℤ) 0).toNat := by
+    Set.Finite (ferrersZeroSet false ν μ) ∧
+        (ferrersZeroSet false ν μ).ncard=(max (⌈ν-|μ|⌉:ℤ) 0).toNat := by
   have h := lzt_ferrersP_neg_order_zero_count (ν := ν) (m := -μ) (by linarith) hν
   simp only [neg_neg] at h
   rw [lzero_zeroSet_P, abs_of_nonpos hμ, sub_neg_eq_add]
@@ -105,8 +107,10 @@ theorem ferrersP_nonpositive_order_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) 
   exact h
 
 /-- The integral-order zero count, reduced to the order `-m` by DLMF 14.9.3. -/
-theorem lzero_posInt_zero_count {ν : ℝ} (hν : -1/2 ≤ ν) (m : ℕ) (hnondeg : ∃ x ∈ Ioo (-1:ℝ) 1, ferrersP ν m x ≠ 0) :
-    Set.Finite (ferrersZeroSet false ν m) ∧ (ferrersZeroSet false ν m).ncard=(max (⌈ν-m⌉:ℤ) 0).toNat := by
+theorem lzero_posInt_zero_count {ν : ℝ} (hν : -1/2 ≤ ν) (m : ℕ)
+    (hnondeg : ∃ x ∈ Ioo (-1:ℝ) 1, ferrersP ν m x ≠ 0) :
+    Set.Finite (ferrersZeroSet false ν m) ∧
+        (ferrersZeroSet false ν m).ncard=(max (⌈ν-m⌉:ℤ) 0).toNat := by
   by_cases h : ∀ n : ℕ, (ν:ℂ) - m + 1 ≠ -n
   · have hG1 : Gamma ((ν:ℂ) - m + 1) ≠ 0 := Complex.Gamma_ne_zero h
     have hG2 : Gamma ((ν:ℂ) + m + 1) ≠ 0 :=
@@ -134,14 +138,18 @@ theorem lzero_posInt_zero_count {ν : ℝ} (hν : -1/2 ≤ ν) (m : ℕ) (hnonde
     exfalso
     apply hne
     have hj : (ν:ℂ) = ((m - 1 - n : ℕ) : ℂ) := by
-      rw [hre]; push_cast [Nat.cast_sub (show n ≤ m - 1 by omega), Nat.cast_sub (show 1 ≤ m by omega)]
+      rw [hre]; push_cast [Nat.cast_sub (show n ≤ m - 1 by omega),
+          Nat.cast_sub (show 1 ≤ m by omega)]
       ring
     rw [hj]
     exact ferrersP_order_gt_degree _ _ (by omega) hx
 
-/-- Integer-degree case excludes the identically zero solution when integral order exceeds degree. -/
-theorem ferrersP_nat_degree_zero_count (n : ℕ) (μ : ℝ) (hnondeg : ∃ x ∈ Ioo (-1:ℝ) 1, ferrersP n μ x ≠ 0) :
-    Set.Finite (ferrersZeroSet false n μ) ∧ (ferrersZeroSet false n μ).ncard=(max (⌈(n:ℝ)-|μ|⌉:ℤ) 0).toNat := by
+/-- Integer-degree case excludes the identically zero solution when integral order exceeds degree.
+-/
+theorem ferrersP_nat_degree_zero_count (n : ℕ) (μ : ℝ)
+    (hnondeg : ∃ x ∈ Ioo (-1:ℝ) 1, ferrersP n μ x ≠ 0) :
+    Set.Finite (ferrersZeroSet false n μ) ∧
+        (ferrersZeroSet false n μ).ncard=(max (⌈(n:ℝ)-|μ|⌉:ℤ) 0).toNat := by
   have hn : (-1/2 : ℝ) ≤ n := by linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
   rcases le_or_gt μ 0 with hμ | hμ
   · exact ferrersP_nonpositive_order_zero_count hn hμ
@@ -277,8 +285,11 @@ theorem lzero_extra_iff {ν μ : ℝ} (hνn : ∀ n : ℤ, ν ≠ n) (hμn : ∀
     omega
 
 /-- Nonintegral parameter zero count from DLMF 14.16(ii). -/
-theorem ferrersP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hνn : ∀ n : ℤ, ν ≠ n) (hμn : ∀ n : ℤ, μ ≠ n) :
-    Set.Finite (ferrersZeroSet false ν μ) ∧ (ferrersZeroSet false ν μ).ncard=(max (⌈ν-|μ|⌉:ℤ) 0).toNat+(if ferrersPExtraZero ν μ then 1 else 0) := by
+theorem ferrersP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hνn : ∀ n : ℤ, ν ≠ n)
+    (hμn : ∀ n : ℤ, μ ≠ n) :
+    Set.Finite (ferrersZeroSet false ν μ) ∧
+        (ferrersZeroSet false ν μ).ncard=(max (⌈ν-|μ|⌉:ℤ) 0).toNat+(if ferrersPExtraZero ν μ then
+        1 else 0) := by
   rcases le_or_gt μ 0 with hμ | hμ
   · have h := ferrersP_nonpositive_order_zero_count hν hμ
     have : ferrersPExtraZero ν μ = false := by simp [ferrersPExtraZero, not_lt.mpr hμ]
@@ -292,12 +303,15 @@ theorem ferrersP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hνn : ∀ n : �
   have hsν := lzero_sin_sign hνn
   have hsμ0 : Real.sin (μ * π) ≠ 0 := fun h => by rw [h, mul_zero] at hsμ; exact lt_irrefl _ hsμ
   have hsν0 : Real.sin (ν * π) ≠ 0 := fun h => by rw [h, mul_zero] at hsν; exact lt_irrefl _ hsν
-  have hc₁ : 2 * Real.sin (μ * π) / π ≠ 0 := div_ne_zero (mul_ne_zero two_ne_zero hsμ0) Real.pi_ne_zero
-  have hc₂ : 2 * Real.sin (ν * π) / π ≠ 0 := div_ne_zero (mul_ne_zero two_ne_zero hsν0) Real.pi_ne_zero
+  have hc₁ : 2 * Real.sin (μ * π) / π ≠ 0 :=
+      div_ne_zero (mul_ne_zero two_ne_zero hsμ0) Real.pi_ne_zero
+  have hc₂ : 2 * Real.sin (ν * π) / π ≠ 0 :=
+      div_ne_zero (mul_ne_zero two_ne_zero hsν0) Real.pi_ne_zero
   have hW₁ : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * (u x * yd x - y x * u' x) =
       2 * Real.sin (μ * π) / π := fun x hx => by
     refine lzero_real_wronskian hx (lzt_ferrersP_real_data ν (-μ) hx).1
-      (lzt_ferrersP_real_data ν (-μ) hx).2 (lzt_ferrersP_real_data ν μ hx).1 (lzt_ferrersP_real_data ν μ hx).2 ?_
+      (lzt_ferrersP_real_data ν (-μ) hx).2 (lzt_ferrersP_real_data ν μ hx).1
+          (lzt_ferrersP_real_data ν μ hx).2 ?_
     have h := ferrers_wronskian_7 (ν:ℂ) (μ:ℂ) hx
     rw [show -(μ:ℂ) = ((-μ:ℝ):ℂ) by push_cast; ring] at h
     rw [h]; push_cast; rw [div_div]
@@ -335,7 +349,8 @@ theorem ferrersP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hνn : ∀ n : �
       have hsq : ((-1:ℝ) ^ n) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
       have key : (-1:ℝ) ^ n * (-1) ^ ⌊μ⌋ * (-1) ^ ⌊ν⌋ *
           -(Real.sin (μ * π) * Real.sin (ν * π) * (-1) ^ n) =
-          -(((-1) ^ ⌊μ⌋ * Real.sin (μ * π)) * ((-1) ^ ⌊ν⌋ * Real.sin (ν * π))) * ((-1:ℝ) ^ n) ^ 2 := by
+          -(((-1) ^ ⌊μ⌋ * Real.sin (μ * π)) * ((-1) ^ ⌊ν⌋ * Real.sin (ν * π))) *
+              ((-1:ℝ) ^ n) ^ 2 := by
         ring
       rw [hsq, mul_one, h1, one_mul] at key
       have := mul_pos hsμ hsν
@@ -385,7 +400,8 @@ theorem lzero_hasDerivAt_re {f : ℝ → ℂ} {x : ℝ} (hd : DifferentiableAt �
   have him0 : HasDerivAt (fun y => (f y).im) 0 x :=
     (hasDerivAt_const x (0 : ℝ)).congr_of_eventuallyEq (hreal.mono fun y hy => hy)
   have h0 : (deriv f x).im = 0 := him.unique him0
-  refine ⟨hre, h0, Complex.ext (by simp) (by simpa using hreal.self_of_nhds), Complex.ext (by simp) (by simp [h0])⟩
+  refine ⟨hre, h0, Complex.ext (by simp) (by simpa using hreal.self_of_nhds),
+      Complex.ext (by simp) (by simp [h0])⟩
 
 /-- The real part of `𝖯^μ_ν` on `(-1, 1)`. -/
 def lzero_p (ν μ : ℝ) (x : ℝ) : ℝ := (ferrersP ν μ x).re
@@ -629,11 +645,13 @@ theorem ferrersQ_nat_zero_count (n : ℕ) :
 
 /-- Separation of successive distinct zeros in both directions. -/
 def InterlacesZeros (S T : Set ℝ) : Prop :=
-  (∀ a ∈ S, ∀ b ∈ S, a < b → (¬∃ c ∈ S, a < c ∧ c < b) → ∃! c : ℝ, c ∈ T ∧ a < c ∧ c < b) ∧ (∀ a ∈ T, ∀ b ∈ T, a < b → (¬∃ c ∈ T, a < c ∧ c < b) → ∃! c : ℝ, c ∈ S ∧ a < c ∧ c < b)
+  (∀ a ∈ S, ∀ b ∈ S, a < b → (¬∃ c ∈ S, a < c ∧ c < b) → ∃! c : ℝ, c ∈ T ∧ a < c ∧ c < b) ∧
+      (∀ a ∈ T, ∀ b ∈ T, a < b → (¬∃ c ∈ T, a < c ∧ c < b) → ∃! c : ℝ, c ∈ S ∧ a < c ∧ c < b)
 
 /-- Interlacing on `(-1, 1)` from a positive Wronskian. -/
 theorem lzero_interlace_of_wronskian {p p' q q' : ℝ → ℝ}
-    (hp : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt p (p' x) x) (hq : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt q (q' x) x)
+    (hp : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt p (p' x) x)
+        (hq : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt q (q' x) x)
     (hw : ∀ x ∈ Ioo (-1:ℝ) 1, 0 < p x * q' x - q x * p' x) {S T : Set ℝ}
     (hS : ∀ x, x ∈ S ↔ x ∈ Ioo (-1:ℝ) 1 ∧ p x = 0) (hT : ∀ x, x ∈ T ↔ x ∈ Ioo (-1:ℝ) 1 ∧ q x = 0) :
     InterlacesZeros S T := by
@@ -658,7 +676,8 @@ theorem lzero_interlace_of_wronskian {p p' q q' : ℝ → ℝ}
     (fun x => by rw [hS x, neg_eq_zero])⟩
 
 /-- The Wronskian must be nonzero; degenerate proportional solutions do not interlace. -/
-theorem ferrersPQ_interlace {ν μ : ℝ} (hr : LegendreQRegular ν μ) (hind : Gamma (ν+μ+1)/Gamma (ν-μ+1) ≠ 0) :
+theorem ferrersPQ_interlace {ν μ : ℝ} (hr : LegendreQRegular ν μ)
+    (hind : Gamma (ν+μ+1)/Gamma (ν-μ+1) ≠ 0) :
     InterlacesZeros (ferrersZeroSet false ν μ) (ferrersZeroSet true ν μ) := by
   set G := Real.Gamma (ν + μ + 1) / Real.Gamma (ν - μ + 1)
   have hG : G ≠ 0 := by
@@ -680,7 +699,8 @@ theorem ferrersPQ_interlace {ν μ : ℝ} (hr : LegendreQRegular ν μ) (hind : 
     rw [(lzero_Q_data hx).2.1, ofReal_eq_zero]
   have hden : ∀ x ∈ Ioo (-1:ℝ) 1, 0 < 1 - x ^ 2 := fun x hx => by nlinarith [hx.1, hx.2]
   rcases hG.lt_or_gt with hneg | hpos
-  · refine lzero_interlace_of_wronskian (q := fun x => -lzero_q ν μ x) (q' := fun x => -lzero_q' ν μ x)
+  · refine lzero_interlace_of_wronskian (q := fun x => -lzero_q ν μ x)
+        (q' := fun x => -lzero_q' ν μ x)
       (fun x hx => (lzero_P_data ν μ hx).1) (fun x hx => (lzero_Q_data hx).1.neg)
       (fun x hx => ?_) hS (fun x => by rw [hT x, neg_eq_zero])
     have := lzero_wronskian hr hx
@@ -694,8 +714,12 @@ theorem ferrersPQ_interlace {ν μ : ℝ} (hr : LegendreQRegular ν μ) (hind : 
 /-- Count range and parity in DLMF 14.16(ii), on the nondegenerate domain. The parity statement
 fails for `μ < 0` (at ν = −0.369, μ = −0.206 both cosines are positive but 𝖰^μ_ν > 0 on (−1, 1)),
 so it is asserted for `0 ≤ μ` only (corrected 2026-10-22; DLMF erratum). -/
-theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : LegendreQRegular ν μ) (hind : Gamma (ν+μ+1)/Gamma (ν-μ+1) ≠ 0) :
-    Set.Finite (ferrersZeroSet true ν μ) ∧ ∃ k : ℤ, k ∈ Finset.Icc (-1) 2 ∧ ((ferrersZeroSet true ν μ).ncard:ℤ)=max (⌈ν-|μ|⌉:ℤ) 0+k ∧ (0 ≤ μ → Real.cos (ν*π)*Real.cos (μ*π) < 0 → Even ((ferrersZeroSet true ν μ).ncard:ℤ)) ∧ (0 ≤ μ → 0 < Real.cos (ν*π)*Real.cos (μ*π) → Odd ((ferrersZeroSet true ν μ).ncard:ℤ)) := by
+theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : LegendreQRegular ν μ)
+    (hind : Gamma (ν+μ+1)/Gamma (ν-μ+1) ≠ 0) :
+    Set.Finite (ferrersZeroSet true ν μ) ∧ ∃ k : ℤ, k ∈ Finset.Icc (-1) 2 ∧
+        ((ferrersZeroSet true ν μ).ncard:ℤ)=max (⌈ν-|μ|⌉:ℤ) 0+k ∧
+        (0 ≤ μ → Real.cos (ν*π)*Real.cos (μ*π) < 0 → Even ((ferrersZeroSet true ν μ).ncard:ℤ)) ∧
+        (0 ≤ μ → 0 < Real.cos (ν*π)*Real.cos (μ*π) → Odd ((ferrersZeroSet true ν μ).ncard:ℤ)) := by
   set G := Real.Gamma (ν + μ + 1) / Real.Gamma (ν - μ + 1)
   have hG : G ≠ 0 := by
     intro h
@@ -705,7 +729,8 @@ theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : Legend
       Complex.Gamma_ofReal, Complex.Gamma_ofReal, ← ofReal_div]
     exact_mod_cast h
   have hden : ∀ x ∈ Ioo (-1:ℝ) 1, 0 < 1 - x ^ 2 := fun x hx => by nlinarith [hx.1, hx.2]
-  have hW : ∀ x ∈ Ioo (-1:ℝ) 1, lzero_p ν μ x * lzero_q' ν μ x - lzero_q ν μ x * lzero_p' ν μ x ≠ 0 :=
+  have hW : ∀ x ∈ Ioo (-1:ℝ) 1, lzero_p ν μ x * lzero_q' ν μ x - lzero_q ν μ x *
+      lzero_p' ν μ x ≠ 0 :=
     fun x hx => by rw [lzero_wronskian hr hx]; exact div_ne_zero hG (hden x hx).ne'
   have hZq : ferrersZeroSet true ν μ = {x | x ∈ Ioo (-1:ℝ) 1 ∧ lzero_q ν μ x = 0} := by
     ext x
@@ -756,7 +781,8 @@ theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : Legend
           lzero_p ν μ x * (deriv (ferrersP ν (-μ:ℝ)) x).re) = 2 * Real.sin (μ * π) / π :=
         fun x hx => by
           refine lzero_real_wronskian (f := fun t => (ferrersP ν (-μ:ℝ) t).re)
-            (f' := fun t => (deriv (ferrersP ν (-μ:ℝ)) t).re) hx (lzt_ferrersP_real_data ν (-μ) hx).1
+            (f' := fun t => (deriv (ferrersP ν (-μ:ℝ)) t).re) hx
+                (lzt_ferrersP_real_data ν (-μ) hx).1
             (lzt_ferrersP_real_data ν (-μ) hx).2 (lzero_P_data ν μ hx).2.1
             (lzero_P_data ν μ hx).2.2 ?_
           have h := ferrers_wronskian_7 (ν:ℂ) (μ:ℂ) hx
@@ -824,9 +850,11 @@ theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : Legend
 
 /-- AssociatedPOneZero. DLMF 14.16(iii) case (b) (`μ ≤ ν`, μ non-integer, ⌊μ⌋ odd) needs `μ > 0`:
 for `μ < 0`, P^μ_ν > 0 on (1, ∞) (both the behaviour at `x = 1`, with factor `1/Γ(1−μ) > 0`, and the
-leading term at ∞ are positive), e.g. at ν = 0.184, μ = −0.088 (corrected 2026-10-22; DLMF erratum). -/
+leading term at ∞ are positive), e.g. at ν = 0.184, μ = −0.088 (corrected 2026-10-22; DLMF erratum).
+-/
 def AssociatedPOneZero (ν μ : ℝ) : Prop :=
-  (0 < μ ∧ ν < μ ∧ (∀ n : ℤ, μ ≠ n) ∧ Real.sin ((μ-ν)*π)*Real.sin (μ*π) < 0) ∨ (0 < μ ∧ μ ≤ ν ∧ (∀ n : ℤ, μ ≠ n) ∧ Odd (⌊μ⌋:ℤ))
+  (0 < μ ∧ ν < μ ∧ (∀ n : ℤ, μ ≠ n) ∧ Real.sin ((μ-ν)*π)*Real.sin (μ*π) < 0) ∨
+      (0 < μ ∧ μ ≤ ν ∧ (∀ n : ℤ, μ ≠ n) ∧ Odd (⌊μ⌋:ℤ))
 
 /-- A complex sum of nonnegative real terms with positive leading term is nonzero. -/
 theorem lzero_ne_zero_of_hasSum {f : ℕ → ℝ} {S : ℂ} (h : HasSum (fun k => (f k : ℂ)) S)
@@ -900,7 +928,8 @@ theorem lzero_nonpos_of_ode {g g' g'' : ℝ → ℝ} {a b : ℝ} (hab : a < b)
   have hc : ContinuousOn g (Icc a b) := fun x hx => (hg x hx).continuousAt.continuousWithinAt
   obtain ⟨x0, hx0, hmax⟩ := isCompact_Icc.exists_isMaxOn (nonempty_Icc.mpr hab.le) hc
   have hpos : 0 < g x0 := hgy.trans_le (hmax hy)
-  have hxa : a < x0 := lt_of_le_of_ne hx0.1 (fun h => by rw [← h, ha] at hpos; exact lt_irrefl _ hpos)
+  have hxa : a < x0 :=
+      lt_of_le_of_ne hx0.1 (fun h => by rw [← h, ha] at hpos; exact lt_irrefl _ hpos)
   have hxb : x0 < b := lt_of_le_of_ne hx0.2 (fun h => by rw [h, hb] at hpos; exact lt_irrefl _ hpos)
   have hloc : IsLocalMax g x0 := hmax.isLocalMax (Icc_mem_nhds hxa hxb)
   have hd0 : g' x0 = 0 := hloc.hasDerivAt_eq_zero (hg x0 hx0)
@@ -954,7 +983,8 @@ theorem lzero_real_ode (ν μ : ℝ) {x : ℝ} (hx : 1 < x) :
   simpa only [add_re, sub_re, re_ofReal_mul, zero_re] using h'
 
 /-- At most one exterior zero; the identically zero regularized solution is excluded. -/
-theorem olverQ_at_most_one_exterior_zero {ν μ : ℝ} (hν : ν < -1) (hnondeg : ∃ x : ℝ, 1 < x ∧ olverQ ν μ x ≠ 0) :
+theorem olverQ_at_most_one_exterior_zero {ν μ : ℝ} (hν : ν < -1)
+    (hnondeg : ∃ x : ℝ, 1 < x ∧ olverQ ν μ x ≠ 0) :
     ∀ x y : ℝ, 1 < x → 1 < y → olverQ ν μ x=0 → olverQ ν μ y=0 → x=y := by
   set Q := olverQ ν μ
   have hνν : 0 < ν * (ν + 1) := by nlinarith

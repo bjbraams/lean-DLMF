@@ -169,7 +169,8 @@ theorem hasSum_schlafli_lowerGamma {a : ℂ} (ha : a.re < 0) (c : ℂ) :
     (F := fun (n : ℕ) (u : ℝ) => (-c) ^ n / n ! * (u : ℂ) ^ ((n : ℂ) - a - 1))
     (f := fun u : ℝ => (u : ℂ) ^ (-a - 1) * exp (-(c * u)))
     (fun n u => ‖c‖ ^ n / n ! * u ^ (-a.re - 1))
-    (fun n => ((intervalIntegral.intervalIntegrable_cpow' (by simp; linarith [Nat.cast_nonneg (α := ℝ) n])).const_mul
+    (fun n => ((intervalIntegral.intervalIntegrable_cpow'
+        (by simp; linarith [Nat.cast_nonneg (α := ℝ) n])).const_mul
       ((-c) ^ n / n !)).aestronglyMeasurable)
     (fun n => Eventually.of_forall fun u hu => by
       rw [Set.uIoc_of_le zero_le_one] at hu
@@ -194,7 +195,8 @@ theorem hasSum_schlafli_lowerGamma {a : ℂ} (ha : a.re < 0) (c : ℂ) :
       (-c) ^ n / n ! * (1 / (n - a)) := by
     have hna : (n : ℂ) - a ≠ 0 := by
       intro h; have := congrArg Complex.re h; simp at this; linarith [Nat.cast_nonneg (α := ℝ) n]
-    rw [intervalIntegral.integral_const_mul, integral_cpow (Or.inl (by simp; linarith [Nat.cast_nonneg (α := ℝ) n]))]
+    rw [intervalIntegral.integral_const_mul,
+        integral_cpow (Or.inl (by simp; linarith [Nat.cast_nonneg (α := ℝ) n]))]
     rw [show (n : ℂ) - a - 1 + 1 = n - a by ring]
     simp [zero_cpow hna]
   simp only [hterm] at hint
@@ -388,7 +390,8 @@ theorem differentiableOn_schlafliRay_right (a : ℂ) :
       _, integrableOn_schlafli_bound ((|a.re| + 1) ^ 2 / (2 * (c0.re / 2))), by
         refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht y hy => ?_)
         simp only [mem_ofPred_eq] at hc0
-        refine norm_exp_schlafliRay_le (by linarith) ?_ (by linarith [neg_abs_le a.re]) (le_of_lt ht)
+        refine norm_exp_schlafliRay_le (by linarith) ?_
+            (by linarith [neg_abs_le a.re]) (le_of_lt ht)
         rw [Metric.mem_ball, dist_eq_norm] at hy
         have := abs_re_le_norm (y - c0)
         rw [sub_re] at this

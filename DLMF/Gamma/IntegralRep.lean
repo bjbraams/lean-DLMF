@@ -34,7 +34,9 @@ open scoped Real
 
 noncomputable section
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 /-- For `a, b > 0` the interval `[a, b]` (in either order) lies in `(0, ∞)`. -/
 theorem uIcc_subset_Ioi {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : uIcc a b ⊆ Ioi (0 : ℝ) := by
@@ -59,4 +61,4 @@ theorem intervalIntegral_digamma {x : ℝ} (hx : 0 < x) :
   simpa [Gamma_one, log_one] using
     integral_eq_sub_of_hasDerivAt hderiv (intervalIntegrable_digamma h1 hx)
 
-end Real
+end DLMF.Gamma.Real

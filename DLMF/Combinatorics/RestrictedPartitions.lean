@@ -831,7 +831,8 @@ private lemma atMostPartsSeries_zero : atMostPartsSeries 0 = 1 := by
   split_ifs <;> simp
 
 /-- (26.9.8) as a power series identity. -/
-private lemma atMostPartsSeries_succ_eq_X_pow_mul_add (k : ℕ) : atMostPartsSeries (k + 1) = X ^ (k + 1) * atMostPartsSeries (k + 1) + atMostPartsSeries k := by
+private lemma atMostPartsSeries_succ_eq_X_pow_mul_add (k : ℕ) : atMostPartsSeries (k + 1) =
+    X ^ (k + 1) * atMostPartsSeries (k + 1) + atMostPartsSeries k := by
   ext n
   rw [map_add, coeff_X_pow_mul']
   simp only [atMostPartsSeries, coeff_mk]
@@ -839,7 +840,8 @@ private lemma atMostPartsSeries_succ_eq_X_pow_mul_add (k : ℕ) : atMostPartsSer
   split_ifs <;> simp
 
 /-- `(1 - X^j) G_j = 1`. -/
-private lemma one_sub_X_pow_mul_multiplesSeries {j : ℕ} (hj : 1 ≤ j) : (1 - X ^ j) * multiplesSeries j = 1 := by
+private lemma one_sub_X_pow_mul_multiplesSeries {j : ℕ} (hj : 1 ≤ j) : (1 - X ^ j) *
+    multiplesSeries j = 1 := by
   ext n
   rw [sub_mul, one_mul, map_sub, coeff_X_pow_mul', multiplesSeries, coeff_mk, coeff_mk, coeff_one]
   rcases Nat.eq_zero_or_pos n with rfl | hn
@@ -854,18 +856,21 @@ private lemma one_sub_X_pow_mul_multiplesSeries {j : ℕ} (hj : 1 ≤ j) : (1 - 
     · rw [ite_eq_right hjn, ite_eq_right (fun h => hjn (Nat.le_of_dvd hn h))]; ring
 
 /-- `P_{k+1} = P_k G_{k+1}`. -/
-private lemma atMostPartsSeries_succ (k : ℕ) : atMostPartsSeries (k + 1) = atMostPartsSeries k * multiplesSeries (k + 1) := by
+private lemma atMostPartsSeries_succ (k : ℕ) : atMostPartsSeries (k + 1) = atMostPartsSeries k *
+    multiplesSeries (k + 1) := by
   have h1 : atMostPartsSeries (k + 1) * (1 - X ^ (k + 1)) = atMostPartsSeries k := by
     rw [mul_sub, mul_one]
     nth_rewrite 1 [atMostPartsSeries_succ_eq_X_pow_mul_add k]
     ring
-  calc atMostPartsSeries (k + 1) = atMostPartsSeries (k + 1) * ((1 - X ^ (k + 1)) * multiplesSeries (k + 1)) := by
+  calc atMostPartsSeries (k + 1) = atMostPartsSeries (k + 1) *
+         ((1 - X ^ (k + 1)) * multiplesSeries (k + 1)) := by
         rw [one_sub_X_pow_mul_multiplesSeries (by omega), mul_one]
     _ = atMostPartsSeries k * multiplesSeries (k + 1) := by rw [← mul_assoc, h1]
 
 /-- `X G_j' = G_j · j X^j G_j`. -/
 private lemma X_mul_derivative_multiplesSeries {j : ℕ} (hj : 1 ≤ j) :
-    X * d⁄dX (multiplesSeries j) = multiplesSeries j * ((j : ℚ⟦X⟧) * X ^ j * multiplesSeries j) := by
+    X * d⁄dX (multiplesSeries j) = multiplesSeries j *
+        ((j : ℚ⟦X⟧) * X ^ j * multiplesSeries j) := by
   have h := congrArg (fun f : ℚ⟦X⟧ => d⁄dX f) (one_sub_X_pow_mul_multiplesSeries hj)
   rw [Derivation.leibniz, derivative_one, map_sub, derivative_one, derivative_pow, derivative_X,
     zero_sub, mul_one, smul_eq_mul, smul_eq_mul] at h
@@ -892,7 +897,8 @@ private lemma boundedDivisorSumSeries_zero : boundedDivisorSumSeries 0 = 0 := by
 
 /-- `D_{k+1} = D_k + (k+1) X^{k+1} G_{k+1}`. -/
 private lemma boundedDivisorSumSeries_succ (k : ℕ) :
-    boundedDivisorSumSeries (k + 1) = boundedDivisorSumSeries k + ((k + 1 : ℕ) : ℚ⟦X⟧) * X ^ (k + 1) * multiplesSeries (k + 1) := by
+    boundedDivisorSumSeries (k + 1) = boundedDivisorSumSeries k + ((k + 1 : ℕ) : ℚ⟦X⟧) *
+        X ^ (k + 1) * multiplesSeries (k + 1) := by
   ext t
   rw [map_add, show ((k + 1 : ℕ) : ℚ⟦X⟧) = C ((k + 1 : ℕ) : ℚ) by simp, mul_assoc, coeff_C_mul,
     coeff_X_pow_mul']
@@ -919,14 +925,18 @@ private lemma boundedDivisorSumSeries_succ (k : ℕ) :
     · omega
 
 /-- The logarithmic derivative `X P_k' = P_k D_k`. -/
-private lemma X_mul_derivative_atMostPartsSeries (k : ℕ) : X * d⁄dX (atMostPartsSeries k) = atMostPartsSeries k * boundedDivisorSumSeries k := by
+private lemma X_mul_derivative_atMostPartsSeries (k : ℕ) : X * d⁄dX (atMostPartsSeries k) =
+    atMostPartsSeries k * boundedDivisorSumSeries k := by
   induction k with
   | zero => rw [atMostPartsSeries_zero, boundedDivisorSumSeries_zero, derivative_one]; ring
   | succ k ih =>
-    rw [atMostPartsSeries_succ, Derivation.leibniz, smul_eq_mul, smul_eq_mul, boundedDivisorSumSeries_succ]
+    rw [atMostPartsSeries_succ, Derivation.leibniz, smul_eq_mul, smul_eq_mul,
+        boundedDivisorSumSeries_succ]
     have hG := X_mul_derivative_multiplesSeries (j := k + 1) (by omega)
-    calc X * (atMostPartsSeries k * d⁄dX (multiplesSeries (k + 1)) + multiplesSeries (k + 1) * d⁄dX (atMostPartsSeries k))
-        = atMostPartsSeries k * (X * d⁄dX (multiplesSeries (k + 1))) + multiplesSeries (k + 1) * (X * d⁄dX (atMostPartsSeries k)) := by
+    calc X * (atMostPartsSeries k * d⁄dX (multiplesSeries (k + 1)) + multiplesSeries (k + 1) *
+           d⁄dX (atMostPartsSeries k))
+        = atMostPartsSeries k * (X * d⁄dX (multiplesSeries (k + 1))) + multiplesSeries (k + 1) *
+            (X * d⁄dX (atMostPartsSeries k)) := by
           ring
       _ = _ := by rw [hG, ih]; push_cast; ring
 
@@ -944,8 +954,10 @@ private lemma mul_partitionCountAtMostParts_eq_sum_divisors (k n : ℕ) :
         ∑ j ∈ t.divisors with j ≤ k, j := by
   have h := congrArg (coeff n) (X_mul_derivative_atMostPartsSeries k)
   rw [coeff_X_mul_derivative, coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ
-    (fun a b => coeff a (atMostPartsSeries k) * coeff b (boundedDivisorSumSeries k)), ← sum_range_reflect] at h
-  have hp : ∀ m, coeff m (atMostPartsSeries k) = (partitionCountAtMostParts k m : ℚ) := fun m => coeff_mk _ _
+    (fun a b => coeff a (atMostPartsSeries k) * coeff b (boundedDivisorSumSeries k)),
+        ← sum_range_reflect] at h
+  have hp : ∀ m, coeff m (atMostPartsSeries k) = (partitionCountAtMostParts k m : ℚ) :=
+      fun m => coeff_mk _ _
   have hd : ∀ m, coeff m (boundedDivisorSumSeries k) = ((∑ j ∈ m.divisors with j ≤ k, j : ℕ) : ℚ) :=
     fun m => coeff_mk _ _
   simp only [hp, hd, Nat.succ_eq_add_one] at h

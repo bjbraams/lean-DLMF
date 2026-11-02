@@ -350,7 +350,8 @@ private lemma confLP_integrable_Q {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 
       exact mul_ne_zero (mul_ne_zero (hcpow _ hρc) (hcpow _ h1ρ)) (mul_ne_zero (exp_ne_zero _)
         (mul_ne_zero (Gamma_ne_zero_of_re_pos (by simpa using ha)) (hcpow _ hrρ)))
     have hint := confLP_integrableOn_of_ne_zero hne
-    refine hint.norm.mono' ((hQm.comp (measurable_id.prodMk measurable_const)).aestronglyMeasurable) ?_
+    refine hint.norm.mono'
+        ((hQm.comp (measurable_id.prodMk measurable_const)).aestronglyMeasurable) ?_
     filter_upwards [ae_restrict_mem measurableSet_Ioo] with s hs
     exact (hnQ ρ hρ s hs).le
   · have hB := Complex.betaIntegral_convergent (u := ((γ : ℝ) : ℂ))
@@ -426,7 +427,8 @@ private lemma confLP_integrable_G {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 
   · have hI := integrableOn_cpow_mul_regularizedHGFun_neg_mul (a := (γ : ℂ)) (b := (β : ℂ))
       (c := (β : ℂ)) (h := F) (K := KF) (r := p) hFc.continuousOn hKF (by simpa using hb0)
       (by simp only [ofReal_re]; linarith)
-    refine IntegrableOn.congr_fun (hI.norm.const_mul ‖Gamma (γ : ℂ) * Gamma (α : ℂ)‖) (fun t ht => ?_)
+    refine IntegrableOn.congr_fun (hI.norm.const_mul ‖Gamma (γ : ℂ) * Gamma (α : ℂ)‖)
+        (fun t ht => ?_)
       measurableSet_Ioi
     have ht0 : (0:ℝ) < t := ht
     simp only [Function.uncurry_apply_pair]
@@ -533,7 +535,8 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
       Gamma a * (r : ℂ) ^ (-a) * (Gamma c * Gamma (ν + 1 - b) *
         regularizedHGFun {c} {ν + 1 - a} (-(r : ℂ))) := by
     have hE2 := regularized_euler_integral (a := c) (b := ν + 1 - a) (z := -(r : ℂ)) hc0 hνac
-    rw [show ν + 1 - a - c = ν + 1 - b by rw [hc]; ring, intervalIntegral.integral_of_le zero_le_one,
+    rw [show ν + 1 - a - c = ν + 1 - b by rw [hc]; ring,
+                                            intervalIntegral.integral_of_le zero_le_one,
       integral_Ioc_eq_integral_Ioo] at hE2
     rw [hE2, ← mul_assoc (Gamma c * Gamma (ν + 1 - b)), mul_one_div_cancel (mul_ne_zero hGc hGνb),
       one_mul, ← integral_const_mul]
@@ -737,7 +740,8 @@ relations. -/
 theorem confLP_Psi_rec {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
     (hν : 2 * a.re < ν.re + 1 / 2) :
     confLP_Psi a b ν r = (ν + 1) * confLP_Psi a b (ν + 1) r -
-      r * (b - a) * confLP_Psi a (b + 1) (ν + 2) r - r * a * confLP_Psi (a + 1) (b + 1) (ν + 2) r := by
+      r * (b - a) * confLP_Psi a (b + 1) (ν + 2) r - r * a *
+          confLP_Psi (a + 1) (b + 1) (ν + 2) r := by
   have h1 := confLP_integrableOn (a := a) (b := b) (ν := ν + 1) hr hb (by simp; linarith)
   have h2 := confLP_integrableOn (a := a) (b := b + 1) (ν := ν + 2) hr (by simp; linarith)
     (by simp; linarith)
@@ -782,12 +786,14 @@ theorem confLP_R_rec (a b ν : ℂ) {r : ℝ} (hr : 0 < r) :
   have h := confLP_contiguous_down (ν + 1 - b + 1) (ν + 1 - a + 1) (r : ℂ)
   rw [show ν + 1 - b + 1 - 1 = ν - b + 1 by ring, show ν + 1 - a + 1 - 1 = ν - a + 1 by ring,
     show ν + 1 - a + 1 + 1 = ν + 2 - a + 1 by ring] at h
-  rw [show ν + 2 - (b + 1) + 1 = ν + 1 - b + 1 by ring, show ν + 2 - (a + 1) + 1 = ν + 1 - a + 1 by ring,
+  rw [show ν + 2 - (b + 1) + 1 = ν + 1 - b + 1 by ring, show ν + 2 - (a + 1) + 1 = ν +
+                                                    1 - a + 1 by ring,
     h]
   have hpow : (r : ℂ) ^ (-(a + 1)) * r = (r : ℂ) ^ (-a) := by
     rw [show -(a + 1) = -a + -1 by ring, cpow_add _ _ hr0, cpow_neg_one, mul_assoc,
       inv_mul_cancel₀ hr0, mul_one]
-  linear_combination (a * exp (-(r : ℂ)) * regularizedHGFun {ν + 1 - b + 1} {ν + 1 - a + 1} r) * hpow
+  linear_combination (a * exp (-(r : ℂ)) *
+      regularizedHGFun {ν + 1 - b + 1} {ν + 1 - a + 1} r) * hpow
 
 /-- 13.10.13 in `₀F₁` form for all admissible parameters. -/
 theorem confLP_Psi_eq_R : ∀ n : ℕ, ∀ a b ν : ℂ, ∀ {r : ℝ}, 0 < r → 0 < b.re →

@@ -92,7 +92,8 @@ def rectangleDiagram (r t : ℕ) : YoungDiagram where
     exact ⟨lt_of_le_of_lt hba.1 ha.1, lt_of_le_of_lt hba.2 ha.2⟩
 
 /-- Membership in the rectangle. -/
-private lemma mem_rectangleDiagram {r t i c : ℕ} : (i, c) ∈ rectangleDiagram r t ↔ i < r ∧ c < t := by
+private lemma mem_rectangleDiagram {r t i c : ℕ} : (i, c) ∈ rectangleDiagram r t ↔ i <
+    r ∧ c < t := by
   change (i, c) ∈ range r ×ˢ range t ↔ _
   simp
 
@@ -101,7 +102,8 @@ def planeColumn (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ) : Finset ℕ :=
   (Icc 1 s).filter fun j => (h, j, k) ∈ π
 
 /-- The column over `(h, k)` of a plane partition is an initial segment `[1, m]`. -/
-private lemma mem_iff_le_card_planeColumn {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h j k : ℕ}
+private lemma mem_iff_le_card_planeColumn {π : Finset (ℕ × ℕ × ℕ)}
+    (hπ : IsPlanePartition π) {s h j k : ℕ}
     (hj1 : 1 ≤ j) (hjs : j ≤ s) : (h, j, k) ∈ π ↔ j ≤ #(planeColumn π s h k) := by
   constructor
   · intro hx
@@ -120,7 +122,8 @@ private lemma mem_iff_le_card_planeColumn {π : Finset (ℕ × ℕ × ℕ)} (hπ
       simp only [planeColumn, mem_filter, mem_Icc] at hj' ⊢
       refine ⟨hj'.1.1, ?_⟩
       by_contra hlt
-      exact hx (mem_of_isPlanePartition_of_le hπ hj'.2 (hπ _ hj'.2).1 le_rfl hj1 (by omega) (hπ _ hj'.2).2.2.1
+      exact hx (mem_of_isPlanePartition_of_le hπ hj'.2 (hπ _ hj'.2).1 le_rfl hj1 (by omega)
+          (hπ _ hj'.2).2.2.1
         le_rfl)
     have := card_le_card this
     simp at this; omega
@@ -131,7 +134,8 @@ private lemma card_planeColumn_le (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ
   simpa [planeColumn] using card_le_card (filter_subset (fun j => (h, j, k) ∈ π) (Icc 1 s))
 
 /-- Column heights of a plane partition are antitone. -/
-private lemma card_planeColumn_antitone {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h k h' k' : ℕ}
+private lemma card_planeColumn_antitone {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π)
+    {s h k h' k' : ℕ}
     (h1 : 1 ≤ h') (h2 : h' ≤ h) (k1 : 1 ≤ k') (k2 : k' ≤ k) :
     #(planeColumn π s h k) ≤ #(planeColumn π s h' k') := by
   refine card_le_card fun j hj => ?_
@@ -158,7 +162,8 @@ def planePartitionToTableau (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ
     rw [mem_rectangleDiagram] at hcell
     have e1 : i < r ∧ c1 < t := ⟨hcell.1, by omega⟩
     simp only [e1, hcell, and_self, ↓reduceIte]
-    have := card_planeColumn_antitone (s := s) hπ (h := r - i) (h' := r - i) (k := t - c1) (k' := t - c2)
+    have := card_planeColumn_antitone (s := s) hπ (h := r - i) (h' := r - i)
+        (k := t - c1) (k' := t - c2)
       (by omega) le_rfl (by omega) (by omega)
     omega
   col_strict' := by
@@ -166,7 +171,8 @@ def planePartitionToTableau (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ
     rw [mem_rectangleDiagram] at hcell
     have e1 : i1 < r ∧ c < t := ⟨by omega, hcell.2⟩
     simp only [e1, hcell, and_self, ↓reduceIte]
-    have := card_planeColumn_antitone (s := s) hπ (h := r - i1) (h' := r - i2) (k := t - c) (k' := t - c)
+    have := card_planeColumn_antitone (s := s) hπ (h := r - i1) (h' := r - i2)
+        (k := t - c) (k' := t - c)
       (by omega) (by omega) (by omega) le_rfl
     omega
   zeros' := by
@@ -175,16 +181,20 @@ def planePartitionToTableau (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ
     simp only [hc, ↓reduceIte]
 
 /-- The entries of `planePartitionToTableau`. -/
-private lemma planePartitionToTableau_apply (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ : IsPlanePartition π) (i c : ℕ) :
-    planePartitionToTableau r s t π hπ i c = if i < r ∧ c < t then #(planeColumn π s (r - i) (t - c)) + i else 0 :=
+private lemma planePartitionToTableau_apply (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ))
+    (hπ : IsPlanePartition π) (i c : ℕ) :
+    planePartitionToTableau r s t π hπ i c = if i < r ∧ c < t then
+        #(planeColumn π s (r - i) (t - c)) + i else 0 :=
   rfl
 
 /-- The plane partition of a tableau. -/
-def tableauToPlanePartition (r s t : ℕ) (T : SemistandardYoungTableau (rectangleDiagram r t)) : Finset (ℕ × ℕ × ℕ) :=
+def tableauToPlanePartition (r s t : ℕ) (T : SemistandardYoungTableau (rectangleDiagram r t)) :
+    Finset (ℕ × ℕ × ℕ) :=
   (planeBox r s t).filter fun x => x.2.1 + (r - x.1) ≤ T (r - x.1) (t - x.2.2)
 
 /-- `tableauToPlanePartition` produces a plane partition in the box. -/
-private lemma tableauToPlanePartition_mem (r s t : ℕ) (T : SemistandardYoungTableau (rectangleDiagram r t)) :
+private lemma tableauToPlanePartition_mem (r s t : ℕ)
+    (T : SemistandardYoungTableau (rectangleDiagram r t)) :
     tableauToPlanePartition r s t T ∈ planePartitionsIn r s t := by
   rw [mem_planePartitionsIn]
   refine ⟨filter_subset _ _, ?_⟩
@@ -207,8 +217,10 @@ private lemma tableauToPlanePartition_mem (r s t : ℕ) (T : SemistandardYoungTa
     omega
 
 /-- `tableauToPlanePartition` inverts `planePartitionToTableau`. -/
-private lemma tableauToPlanePartition_planePartitionToTableau {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
-    tableauToPlanePartition r s t (planePartitionToTableau r s t π (mem_planePartitionsIn.mp hπ').2) = π := by
+private lemma tableauToPlanePartition_planePartitionToTableau {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)}
+    (hπ' : π ∈ planePartitionsIn r s t) :
+    tableauToPlanePartition r s t
+        (planePartitionToTableau r s t π (mem_planePartitionsIn.mp hπ').2) = π := by
   obtain ⟨hsub, hπ⟩ := mem_planePartitionsIn.mp hπ'
   ext ⟨h, j, k⟩
   rw [tableauToPlanePartition, mem_filter]
@@ -242,7 +254,8 @@ private lemma le_ssyt_entry_le_add {r s t : ℕ} (T : SemistandardYoungTableau (
   omega
 
 /-- `planePartitionToTableau` inverts `tableauToPlanePartition` on bounded tableaux. -/
-private lemma planePartitionToTableau_tableauToPlanePartition {r s t : ℕ} (T : SemistandardYoungTableau (rectangleDiagram r t))
+private lemma planePartitionToTableau_tableauToPlanePartition {r s t : ℕ}
+    (T : SemistandardYoungTableau (rectangleDiagram r t))
     (hT : ∀ i c, (i, c) ∈ rectangleDiagram r t → T i c < r + s) :
     planePartitionToTableau r s t (tableauToPlanePartition r s t T)
       (mem_planePartitionsIn.mp (tableauToPlanePartition_mem r s t T)).2 = T := by
@@ -251,7 +264,8 @@ private lemma planePartitionToTableau_tableauToPlanePartition {r s t : ℕ} (T :
   split_ifs with hc
   · have hc' := mem_rectangleDiagram.mpr hc
     obtain ⟨hle1, hle2⟩ := le_ssyt_entry_le_add T hT hc'
-    have hf : planeColumn (tableauToPlanePartition r s t T) s (r - i) (t - c) = Icc 1 (T i c - i) := by
+    have hf : planeColumn (tableauToPlanePartition r s t T) s (r - i) (t - c) =
+        Icc 1 (T i c - i) := by
       ext j
       simp only [planeColumn, tableauToPlanePartition, mem_filter, mem_Icc, mem_planeBox]
       rw [show r - (r - i) = i by omega, show t - (t - c) = c by omega]
@@ -264,7 +278,8 @@ private lemma planePartitionToTableau_tableauToPlanePartition {r s t : ℕ} (T :
   · exact (T.zeros (fun h => hc (mem_rectangleDiagram.mp h))).symm
 
 /-- The tableau of a plane partition in `B(r, s, t)` has entries below `r + s`. -/
-private lemma planePartitionToTableau_lt {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
+private lemma planePartitionToTableau_lt {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)}
+    (hπ : IsPlanePartition π) :
     ∀ i c, (i, c) ∈ rectangleDiagram r t → planePartitionToTableau r s t π hπ i c < r + s := by
   intro i c hc
   rw [mem_rectangleDiagram] at hc
@@ -274,7 +289,8 @@ private lemma planePartitionToTableau_lt {r s t : ℕ} {π : Finset (ℕ × ℕ 
   omega
 
 /-- The entry sum of the tableau of a plane partition. -/
-private lemma sum_planePartitionToTableau {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
+private lemma sum_planePartitionToTableau {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)}
+    (hπ' : π ∈ planePartitionsIn r s t) :
     ∑ x ∈ (rectangleDiagram r t).cells,
         planePartitionToTableau r s t π (mem_planePartitionsIn.mp hπ').2 x.1 x.2 =
       #π + t * ∑ i ∈ range r, i := by
@@ -357,11 +373,13 @@ private lemma one_sub_X_pow_ne_zero {m : ℕ} (hm : 0 < m) : (1 - X ^ m : ℤ[X]
   intro h; apply this; rw [← neg_sub, h, neg_zero]
 
 /-- Vandermonde product for a strictly decreasing exponent sequence. -/
-private lemma prod_X_pow_sub_X_pow_of_strictAnti (N : ℕ) (α : ℕ → ℕ) (hα : ∀ i j, i < j → j < N → α j < α i) :
+private lemma prod_X_pow_sub_X_pow_of_strictAnti (N : ℕ) (α : ℕ → ℕ)
+    (hα : ∀ i j, i < j → j < N → α j < α i) :
     ∏ i : Fin N, ∏ j ∈ Ioi i, ((X : ℤ[X]) ^ α j - X ^ α i) =
       X ^ (∑ i : Fin N, ∑ j ∈ Ioi i, α j) *
         ∏ i ∈ range N, ∏ j ∈ range N, if i < j then (1 - X ^ (α i - α j)) else 1 := by
-  rw [← prod_fin_Ioi_eq_prod_range_ite N (fun i j => 1 - (X : ℤ[X]) ^ (α i - α j)), ← prod_pow_eq_pow_sum,
+  rw [← prod_fin_Ioi_eq_prod_range_ite N (fun i j => 1 - (X : ℤ[X]) ^ (α i - α j)),
+      ← prod_pow_eq_pow_sum,
     ← prod_mul_distrib]
   refine prod_congr rfl fun i _ => ?_
   rw [← prod_pow_eq_pow_sum, ← prod_mul_distrib]
@@ -371,7 +389,8 @@ private lemma prod_X_pow_sub_X_pow_of_strictAnti (N : ℕ) (α : ℕ → ℕ) (h
   rw [mul_sub, mul_one, ← pow_add, Nat.add_sub_cancel' this.le]
 
 /-- Splitting the pairs `i < j` into the cross pairs `i < r ≤ j` and the rest. -/
-private lemma prod_range_ite_lt_split {M : Type*} [CommMonoid M] (N r : ℕ) (hr : r ≤ N) (F : ℕ → ℕ → M) :
+private lemma prod_range_ite_lt_split {M : Type*} [CommMonoid M] (N r : ℕ) (hr : r ≤ N)
+    (F : ℕ → ℕ → M) :
     ∏ i ∈ range N, ∏ j ∈ range N, (if i < j then F i j else 1) =
       (∏ i ∈ range N, ∏ j ∈ range N, if i < j ∧ ¬(i < r ∧ r ≤ j) then F i j else 1) *
         ∏ i ∈ range r, ∏ j ∈ Ico r N, F i j := by
@@ -544,8 +563,10 @@ lemma sum_planePartitionsIn_X_pow_mul_prod (r s t : ℕ) :
     rw [mul_sum]
     symm
     refine sum_bij' (fun π hπ => ⟨planePartitionToTableau r s t π (mem_planePartitionsIn.mp hπ).2,
-        planePartitionToTableau_lt _⟩) (fun T _ => tableauToPlanePartition r s t T.1) (fun _ _ => mem_univ _)
-      (fun T _ => tableauToPlanePartition_mem r s t T.1) (fun π hπ => tableauToPlanePartition_planePartitionToTableau hπ)
+        planePartitionToTableau_lt _⟩) (fun T _ => tableauToPlanePartition r s t T.1)
+            (fun _ _ => mem_univ _)
+      (fun T _ => tableauToPlanePartition_mem r s t T.1)
+          (fun π hπ => tableauToPlanePartition_planePartitionToTableau hπ)
       (fun T _ => Subtype.ext (planePartitionToTableau_tableauToPlanePartition T.1 T.2)) ?_
     intro π hπ
     rw [← pow_add]
@@ -691,7 +712,8 @@ def arrayToPlanePartition (n : ℕ) (a : ℕ → ℕ → ℕ) : Finset (ℕ × �
   (planeBox n n n).filter fun x => x.2.1 ≤ a (x.1 - 1) (x.2.2 - 1)
 
 /-- `|π|` as the sum of its column heights. -/
-private lemma card_eq_sum_card_planeColumn {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hsub : π ⊆ planeBox r s t) :
+private lemma card_eq_sum_card_planeColumn {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)}
+    (hsub : π ⊆ planeBox r s t) :
     #π = ∑ h ∈ Icc 1 r, ∑ k ∈ Icc 1 t, #(planeColumn π s h k) := by
   rw [card_eq_sum_card_fiberwise (f := fun x : ℕ × ℕ × ℕ => (x.1, x.2.2))
     (t := Icc 1 r ×ˢ Icc 1 t), sum_product]
@@ -717,7 +739,8 @@ private lemma card_eq_sum_card_planeColumn {r s t : ℕ} {π : Finset (ℕ × �
     omega
 
 /-- The columns of `arrayToPlanePartition`. -/
-private lemma planeColumn_arrayToPlanePartition {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : IsPlaneArray n a) {h k : ℕ}
+private lemma planeColumn_arrayToPlanePartition {n : ℕ} {a : ℕ → ℕ → ℕ}
+    (ha : IsPlaneArray n a) {h k : ℕ}
     (hh : 1 ≤ h ∧ h ≤ n) (hk : 1 ≤ k ∧ k ≤ n) :
     planeColumn (arrayToPlanePartition n a) n h k = Icc 1 (a (h - 1) (k - 1)) := by
   have hle : a (h - 1) (k - 1) ≤ n := by
@@ -732,7 +755,8 @@ private lemma planeColumn_arrayToPlanePartition {n : ℕ} {a : ℕ → ℕ → �
 
 /-- `arrayToPlanePartition` of an array is a plane partition of `n` in `B(n, n, n)`. -/
 private lemma arrayToPlanePartition_mem {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : IsPlaneArray n a) :
-    arrayToPlanePartition n a ∈ {π ∈ (planeBox n n n).powerset | IsPlanePartition π ∧ π.card = n} := by
+    arrayToPlanePartition n a ∈
+        {π ∈ (planeBox n n n).powerset | IsPlanePartition π ∧ π.card = n} := by
   simp only [mem_filter, mem_powerset]
   refine ⟨filter_subset _ _, ?_, ?_⟩
   · rintro ⟨h, j, k⟩ hx

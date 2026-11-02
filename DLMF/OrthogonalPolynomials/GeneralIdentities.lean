@@ -237,7 +237,8 @@ theorem moment_coeff_sum {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogon
       ∫ t, t ^ i * q.eval t ∂μ := by
   have he (t : ℝ) : t ^ i * q.eval t =
       ∑ j : Fin (n + 1), q.coeff j * t ^ (i + j) := by
-    rw [eval_eq_sum_range' (lt_of_le_of_lt hq (Nat.lt_succ_self n)), ← Fin.sum_univ_eq_sum_range, Finset.mul_sum]
+    rw [eval_eq_sum_range' (lt_of_le_of_lt hq (Nat.lt_succ_self n)), ← Fin.sum_univ_eq_sum_range,
+        Finset.mul_sum]
     apply Finset.sum_congr rfl
     intro j hj
     rw [pow_add]
@@ -289,7 +290,8 @@ theorem monic_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : Is
     ext i j
     have hj : j.castSucc ≠ Fin.last n := Fin.castSucc_ne_last j
     rw [Matrix.submatrix_apply]
-    change (A.updateCol (Fin.last n) (fun k => ∑ l : Fin (n + 1), (p n).coeff l * A k l)) i.castSucc j.castSucc = _
+    change (A.updateCol (Fin.last n) (fun k => ∑ l : Fin (n + 1), (p n).coeff l * A k l))
+        i.castSucc j.castSucc = _
     rw [Matrix.updateCol_ne hj]
     simp [A, Nat.ne_of_lt i.isLt]
   -- Tau Ceti’s corner-minor formula after the orthogonal column replacement.
@@ -399,7 +401,8 @@ theorem monic_subleading_coeff_moment_determinant {μ : Measure ℝ} {p : ℕ �
   have hh := Matrix.det_updateCol_sum A (Fin.last n) (fun j => (p (n + 1)).coeff j)
   simp only [smul_eq_mul, Fin.val_last] at hh
   rw [hcol, Matrix.det_updateCol_smul, hshift] at hh
-  exact (eq_div_iff (hankelDeterminant_pos h (n + 1)).ne').mpr (by simpa only [A, hankelDeterminant, neg_one_mul] using hh.symm)
+  exact (eq_div_iff (hankelDeterminant_pos h (n + 1)).ne').mpr
+      (by simpa only [A, hankelDeterminant, neg_one_mul] using hh.symm)
 
 /-- Identity under the stated parameter and domain assumptions: `recurrenceDiagonal h n =
 shiftedHankelDeterminant μ (n + 1) / hankelDeterminant μ (n + 1) - shiftedHankelDeterminant μ
@@ -424,7 +427,8 @@ theorem monic_diagonal_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ[X]
 /-- The map `(fun N : ℕ => ∫ x, (f x - ∑ n ∈ Finset.range N, ((∫ t, f t * (p n).eval t ∂μ) /
 squaredNorm μ p n) * (p n).eval x) ^ 2 ∂μ)` tends to `(𝓝 0)` along `atTop`. -/
 @[dlmf 18.2.E25]
-theorem compact_support_L2_expansion {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
+theorem compact_support_L2_expansion {μ : Measure ℝ} {p : ℕ → ℝ[X]}
+    (h : IsOrthogonalPolynomials μ p)
     {a b : ℝ} (hsupp : μ (Set.Icc a b)ᶜ = 0) {f : ℝ → ℝ} (hf : MemLp f 2 μ) :
     Tendsto (fun N : ℕ => ∫ x, (f x - ∑ n ∈ Finset.range N,
       ((∫ t, f t * (p n).eval t ∂μ) / squaredNorm μ p n) * (p n).eval x) ^ 2 ∂μ) atTop (𝓝 0) := by
@@ -436,7 +440,8 @@ theorem compact_support_L2_expansion {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h 
   let := hfinite
   have hexp : ∃ r : ℝ, 0 < r ∧ Integrable (fun x : ℝ => Real.exp (r * |x|)) μ := by
     refine ⟨1, one_pos, ?_⟩
-    have hi := (show Continuous (fun x : ℝ => Real.exp (1 * |x|)) by fun_prop).continuousOn.integrableOn_compact
+    have hi := (show Continuous (fun x : ℝ => Real.exp (1 * |x|))
+        by fun_prop).continuousOn.integrableOn_compact
       (μ := μ) (isCompact_Icc (a := a) (b := b))
     simpa only [IntegrableOn, Measure.restrict_eq_self_of_ae_mem (ae_iff.mpr hsupp)] using hi
   let c : ℕ → ℝ := fun n => ∫ x, (p n).eval x ^ 2 ∂μ

@@ -57,7 +57,8 @@ private lemma im_ofReal_mul_exp_pow (R y : ℝ) (j : ℕ) :
   rw [ofReal_mul_exp_pow, im_ofReal_mul, exp_ofReal_mul_I_im]
 
 /-- Lower bound for `Im Φ_K` on the circle of radius `R`, `y ≥ 0`. -/
-private lemma le_im_cuspoidPotential_arc (K : ℕ) (x : Fin K → ℝ) {R y : ℝ} (hR : 0 ≤ R) (hy : 0 ≤ y) :
+private lemma le_im_cuspoidPotential_arc (K : ℕ) (x : Fin K → ℝ) {R y : ℝ}
+    (hR : 0 ≤ R) (hy : 0 ≤ y) :
     R ^ (K + 2) * Real.sin (((K + 2 : ℕ) : ℝ) * y) -
         ((K + 2 : ℕ) : ℝ) * y * ((∑ m, |x m|) * (1 + R ^ K)) ≤
       (cuspoidPotential K ((R : ℂ) * exp (y * I)) x).im := by
@@ -129,7 +130,8 @@ private lemma mul_le_im_cuspoidPotential_arc (K : ℕ) (x : Fin K → ℝ) {R y 
   linarith
 
 /-- Jordan-type bound for the arc `0 ≤ arg t ≤ π/(2(K+2))`, `|t| = R`, phase `κ > 0`. -/
-private lemma norm_integral_cuspoidPotential_arc_le (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) {R : ℝ} (hR : 1 ≤ R)
+private lemma norm_integral_cuspoidPotential_arc_le (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ)
+    {R : ℝ} (hR : 1 ≤ R)
     (hRC : 2 * π * (∑ m, |x m|) ≤ R ^ 2) :
     ‖∫ y in (0 : ℝ)..cuspoidAngle K, I * R * exp (y * I) *
         exp (I * κ * cuspoidPotential K ((R : ℂ) * exp (y * I)) x)‖ ≤ π / (κ * R) := by
@@ -167,14 +169,16 @@ private lemma exists_hasDerivAt_primitive {f : ℂ → ℂ} (hf : Differentiable
 
 /-- The right tail: `∫₀^R exp(iκΦ_K(t; x)) dt` tends to the integral over the rotated ray
 `arg t = π/(2(K+2))` (Cauchy's theorem on the sector and the Jordan-type arc bound). -/
-private lemma tendsto_intervalIntegral_cuspoidPotential_atTop (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
+private lemma tendsto_intervalIntegral_cuspoidPotential_atTop (K : ℕ) (x : Fin K → ℝ)
+    {κ : ℝ} (hκ : 0 < κ) :
     Tendsto (fun R : ℝ => ∫ t in (0 : ℝ)..R, exp (I * κ * cuspoidPotential K t x)) atTop
       (𝓝 (∫ r in Ioi (0 : ℝ), cuspoidContourDir K r *
         exp (I * κ * cuspoidPotential K (cuspoidContour K r) x))) := by
   set f : ℂ → ℂ := fun w => exp (I * κ * cuspoidPotential K w x) with hf
   have hfc : Continuous f := by
     rw [hf]; exact continuous_exp.comp (continuous_const.mul (continuous_cuspoidPotential K x))
-  obtain ⟨G, hG⟩ := exists_hasDerivAt_primitive (f := f) (by rw [hf]; unfold cuspoidPotential; fun_prop)
+  obtain ⟨G, hG⟩ := exists_hasDerivAt_primitive (f := f)
+      (by rw [hf]; unfold cuspoidPotential; fun_prop)
   set u := exp ((cuspoidAngle K : ℂ) * I) with hu
   have hsplit : ∀ R : ℝ, ∫ t in (0 : ℝ)..R, f t =
       (∫ r in (0 : ℝ)..R, u * f (r * u)) -
@@ -219,7 +223,8 @@ private lemma intervalIntegral_conj_eq_conj_intervalIntegral (f : ℝ → ℂ) (
 
 /-- The left tail: `∫_R^0 exp(iκΦ_K(t; x)) dt` tends, as `R → -∞`, to the integral over the
 rotated left ray of the contour of `cuspoidIntegral`. -/
-private lemma tendsto_intervalIntegral_cuspoidPotential_atBot (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
+private lemma tendsto_intervalIntegral_cuspoidPotential_atBot (K : ℕ) (x : Fin K → ℝ)
+    {κ : ℝ} (hκ : 0 < κ) :
     Tendsto (fun R : ℝ => ∫ t in R..0, exp (I * κ * cuspoidPotential K t x)) atBot
       (𝓝 (∫ r in Iic (0 : ℝ), cuspoidContourDir K r *
         exp (I * κ * cuspoidPotential K (cuspoidContour K r) x))) := by
@@ -238,7 +243,8 @@ private lemma tendsto_intervalIntegral_cuspoidPotential_atBot (K : ℕ) (x : Fin
   refine Tendsto.comp (g := fun S : ℝ => ∫ t in (0 : ℝ)..S,
     exp (I * κ * cuspoidPotential K (-(t : ℂ)) x)) ?_ tendsto_neg_atBot_atTop
   by_cases hK : Even K
-  · have h := tendsto_intervalIntegral_cuspoidPotential_atTop K (fun m => (-1) ^ ((m : ℕ) + 1) * x m) hκ
+  · have h := tendsto_intervalIntegral_cuspoidPotential_atTop K
+        (fun m => (-1) ^ ((m : ℕ) + 1) * x m) hκ
     simp_rw [cuspoidPotential_neg_of_even hK]
     convert h using 2
     refine setIntegral_congr_fun measurableSet_Ioi fun r _ => ?_
@@ -261,7 +267,8 @@ private lemma tendsto_intervalIntegral_cuspoidPotential_atBot (K : ℕ) (x : Fin
     rw [← integral_conj]
     refine setIntegral_congr_fun measurableSet_Ioi fun r (hr : 0 < r) => ?_
     have hd : conj (cuspoidContourDir K r) = cuspoidContourDir K (-r) := by
-      rw [cuspoidContourDir_of_nonneg K hr.le, cuspoidContourDir_of_odd_of_neg hK (by linarith), ← exp_conj]
+      rw [cuspoidContourDir_of_nonneg K hr.le,
+          cuspoidContourDir_of_odd_of_neg hK (by linarith), ← exp_conj]
       congr 1; simp [conj_ofReal]
     rw [map_mul, ← exp_conj, map_mul, map_mul, conj_I, conj_ofReal, conj_cuspoidPotential, hd]
     have hc : conj (cuspoidContour K r) = -cuspoidContour K (-r) := by
@@ -273,12 +280,14 @@ private lemma tendsto_intervalIntegral_cuspoidPotential_atBot (K : ℕ) (x : Fin
 
 /-- The improper real integral `∫ exp(iκΦ_K(t; x)) dt` converges (both tails) to the
 rotated-contour integral, for every phase `κ > 0`. -/
-private lemma hasIntegralWholeLine_exp_cuspoidPotential (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
+private lemma hasIntegralWholeLine_exp_cuspoidPotential (K : ℕ) (x : Fin K → ℝ)
+    {κ : ℝ} (hκ : 0 < κ) :
     HasIntegralWholeLine (fun t : ℝ => exp (I * κ * cuspoidPotential K t x))
       (∫ r : ℝ, cuspoidContourDir K r *
         exp (I * κ * cuspoidPotential K (cuspoidContour K r) x)) := by
   have hint := integrable_cuspoidIntegrand K x hκ
-  refine ⟨_, _, tendsto_intervalIntegral_cuspoidPotential_atBot K x hκ, tendsto_intervalIntegral_cuspoidPotential_atTop K x hκ, ?_⟩
+  refine ⟨_, _, tendsto_intervalIntegral_cuspoidPotential_atBot K x hκ,
+      tendsto_intervalIntegral_cuspoidPotential_atTop K x hκ, ?_⟩
   exact intervalIntegral.integral_Iic_add_Ioi hint.integrableOn hint.integrableOn
 
 /-- A constant factor passes through an improper whole-line integral. -/
@@ -835,13 +844,15 @@ theorem I_pow_eq_exp_mul_pi_div_two (p : ℕ) : I ^ p = exp (((p * (π / 2) : �
   rw [← exp_nat_mul]; congr 1; push_cast; ring
 
 /-- `(-I)^p` as an exponential. -/
-theorem neg_one_pow_mul_I_pow_eq_exp (p : ℕ) : (-1 : ℂ) ^ p * I ^ p = exp (-(((p * (π / 2) : ℝ) : ℂ) * I)) := by
+theorem neg_one_pow_mul_I_pow_eq_exp (p : ℕ) : (-1 : ℂ) ^ p * I ^ p =
+    exp (-(((p * (π / 2) : ℝ) : ℂ) * I)) := by
   rw [← mul_pow, show (-1 : ℂ) * I = -I by ring]
   conv_lhs => rw [← exp_neg_pi_div_two_mul_I]
   rw [← exp_nat_mul]; congr 1; push_cast; ring
 
 /-- `(e^{±iθ})^{p+1}` with `θ = π/(2(K+2))`. -/
-theorem exp_mul_cuspoidAngle_pow_succ (K p : ℕ) (σ : ℝ) : exp ((σ * cuspoidAngle K : ℝ) * I) ^ (p + 1) =
+theorem exp_mul_cuspoidAngle_pow_succ (K p : ℕ) (σ : ℝ) : exp
+    ((σ * cuspoidAngle K : ℝ) * I) ^ (p + 1) =
     exp ((σ * ((p + 1) * (π / (2 * ((K : ℝ) + 2)))) : ℝ) * I) := by
   rw [← exp_nat_mul]; congr 1; unfold cuspoidAngle; push_cast; ring
 
@@ -858,7 +869,8 @@ theorem cuspoidIntegral_two_zero_left {y : ℝ} (hy : y ≠ 0) :
 
 /-- A ray integral of the elliptic umbilic integrand at `z = 0` as an Airy ray integral:
 for `d = i e^{iθ}` and `β³ = 3/2`, `∫₀^∞ d exp(i((rd)³ + c rd)/2) dr = (i/β) P_θ(c/(2β))`. -/
-private lemma integral_ellipticUmbilic_ray_eq_rayIntegral (θ : ℝ) {d : ℂ} (hd : d = I * exp (θ * I)) (c : ℂ) {β : ℝ} (hβ : 0 < β)
+private lemma integral_ellipticUmbilic_ray_eq_rayIntegral (θ : ℝ) {d : ℂ} (hd : d = I * exp (θ * I))
+    (c : ℂ) {β : ℝ} (hβ : 0 < β)
     (hβ3 : (β : ℂ) ^ 3 = 3 / 2) :
     ∫ r in Ioi (0 : ℝ), d * exp (I * (((r : ℂ) * d) ^ 3 / 2 + c / 2 * ((r : ℂ) * d))) =
       I * (β⁻¹ : ℝ) * DLMF.Airy.rayIntegral
@@ -947,7 +959,8 @@ private lemma ellipticUmbilicRayDir_eq_I_mul_exp (j : Fin 3) :
 
 /-- At `z = 0` each quadrant integral of `Ψ^{(E)}` factorizes into two Airy ray integrals
 `P_θ(w) = ∫₀^∞ e^{iθ} exp((te^{iθ})³/3 - w t e^{iθ}) dt` at `w = (x ∓ iy)/(2β)`. -/
-private lemma ellipticUmbilicQuadrant_z_zero (x y : ℝ) {β : ℝ} (hβ : 0 < β) (hβ3 : (β : ℂ) ^ 3 = 3 / 2)
+private lemma ellipticUmbilicQuadrant_z_zero (x y : ℝ) {β : ℝ} (hβ : 0 < β)
+    (hβ3 : (β : ℂ) ^ 3 = 3 / 2)
     (j k : Fin 3) :
     ellipticUmbilicQuadrant 1 x y 0 j k =
       (I * (β⁻¹ : ℝ) * DLMF.Airy.rayIntegral
@@ -977,7 +990,9 @@ private lemma ellipticUmbilicQuadrant_z_zero (x y : ℝ) {β : ℝ} (hβ : 0 < �
     all_goals (try simp only [hc, hc'])
     all_goals ring
   rw [hfac, Measure.volume_eq_prod, setIntegral_prod_mul f g, hf, hg,
-    integral_ellipticUmbilic_ray_eq_rayIntegral _ (ellipticUmbilicRayDir_eq_I_mul_exp j) c hβ hβ3, integral_ellipticUmbilic_ray_eq_rayIntegral _ (ellipticUmbilicRayDir_eq_I_mul_exp k) c' hβ hβ3]
+    integral_ellipticUmbilic_ray_eq_rayIntegral _ (ellipticUmbilicRayDir_eq_I_mul_exp j) c hβ hβ3,
+        integral_ellipticUmbilic_ray_eq_rayIntegral _
+        (ellipticUmbilicRayDir_eq_I_mul_exp k) c' hβ hβ3]
 
 /-- DLMF 36.2.20:
 `Ψ^{(E)}(x, y, 0) = 2π²(2/3)^{2/3} Re(Ai((x + iy)/12^{1/3}) Bi((x - iy)/12^{1/3}))`. -/

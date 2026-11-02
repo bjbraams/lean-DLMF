@@ -460,8 +460,10 @@ theorem Lp_add_eq_iff {n : ℕ} {p : ℝ} (hp0 : 0 < p) (hp1 : p ≠ 1) (a b : F
     simpa only [A, one_div] using Real.rpow_inv_rpow hS hp0.ne'
   have hBp : B ^ p = T := by
     simpa only [B, one_div] using Real.rpow_inv_rpow hT hp0.ne'
-  exact (sum_rpow_add_eq_iff_normalized_eq hp0 hp1 a b ha hb hA hB (sum_normalized_rpow hp0 a ha hSp)
-    (sum_normalized_rpow hp0 b hb hTp)).trans (normalized_rpow_sum_eq_iff_proportional hp0 a b ha hb hA hB hAp hBp)
+  exact (sum_rpow_add_eq_iff_normalized_eq hp0 hp1 a b ha hb hA hB
+      (sum_normalized_rpow hp0 a ha hSp)
+    (sum_normalized_rpow hp0 b hb hTp)).trans
+        (normalized_rpow_sum_eq_iff_proportional hp0 a b ha hb hA hB hAp hBp)
 
 /-! ### §1.7(ii) Integrals -/
 
@@ -512,7 +514,8 @@ theorem sq_integral_mul_eq_iff {f g : ℝ → ℝ} {s : Set ℝ} (hf : MemLp f 2
 
 /-- Equality in the normalized integral Young inequality is equivalent to equality of the
 conjugate powers almost everywhere. -/
-private lemma integral_mul_eq_one_iff_of_integral_rpow_eq_one {f g : ℝ → ℝ} {μ : Measure ℝ} {p q : ℝ}
+private lemma integral_mul_eq_one_iff_of_integral_rpow_eq_one {f g : ℝ → ℝ}
+    {μ : Measure ℝ} {p q : ℝ}
     (hpq : p.HolderConjugate q) (hf0 : ∀ x, 0 ≤ f x) (hg0 : ∀ x, 0 ≤ g x)
     (hf : Integrable (fun x => f x ^ p) μ) (hg : Integrable (fun x => g x ^ q) μ)
     (hfg : Integrable (fun x => f x * g x) μ)
@@ -521,7 +524,8 @@ private lemma integral_mul_eq_one_iff_of_integral_rpow_eq_one {f g : ℝ → ℝ
   have hsum : (∫ x, f x ^ p / p + g x ^ q / q ∂μ) = 1 := by
     rw [integral_add (hf.div_const _) (hg.div_const _), integral_div, integral_div, hsf, hsg]
     simpa only [one_div] using hpq.inv_add_inv_eq_one
-  rw [← hsum, integral_eq_iff_of_ae_le (g := fun x => f x ^ p / p + g x ^ q / q) hfg ((hf.div_const _).add (hg.div_const _))
+  rw [← hsum, integral_eq_iff_of_ae_le (g := fun x => f x ^ p / p + g x ^ q / q) hfg
+      ((hf.div_const _).add (hg.div_const _))
     (Eventually.of_forall fun x => Real.young_inequality_of_nonneg (hf0 x) (hg0 x) hpq)]
   exact eventually_congr (Eventually.of_forall fun x =>
     Real.young_inequality_eq_iff_of_nonneg (hf0 x) (hg0 x) hpq)
@@ -625,7 +629,8 @@ theorem integral_mul_eq_Lp_mul_Lq_iff {f g : ℝ → ℝ} {s : Set ℝ} {p q : �
     simpa only [Real.div_rpow (hg0 _) hB.le] using hgq.div_const (B ^ q)
   have he : (fun x => f x / A * (g x / B)) = fun x => f x * g x / (A * B) := by
     funext x; ring
-  have hnorm := integral_mul_eq_one_iff_of_integral_rpow_eq_one hpq (fun x => div_nonneg (hf0 x) hA.le)
+  have hnorm := integral_mul_eq_one_iff_of_integral_rpow_eq_one hpq
+      (fun x => div_nonneg (hf0 x) hA.le)
     (fun x => div_nonneg (hg0 x) hB.le) hfn hgn
     (by rw [he]; exact hfg.div_const _)
     (integral_normalized_rpow hpq.pos hf0 hSp) (integral_normalized_rpow hpq.symm.pos hg0 hTp)
@@ -942,7 +947,8 @@ theorem integral_add_rpow_eq_iff {f g : ℝ → ℝ} {s : Set ℝ} {p : ℝ} (hp
     simpa only [B, one_div] using Real.rpow_inv_rpow hT hp0.ne'
   have hsum : Integrable (fun x => (f x + g x) ^ p) μ :=
     integrable_rpow_of_nonneg_memLp hp0 (fun x => add_nonneg (hf0 x) (hg0 x))
-      ((memLp_of_nonneg_integrable_rpow hp0 hf0 hf).add (memLp_of_nonneg_integrable_rpow hp0 hg0 hg))
+      ((memLp_of_nonneg_integrable_rpow hp0 hf0 hf).add
+          (memLp_of_nonneg_integrable_rpow hp0 hg0 hg))
   exact (integral_rpow_add_eq_iff_normalized_eq hp0 hp1 hf0 hg0 hf hg hsum hA hB
     (integral_normalized_rpow hp0 hf0 hSp) (integral_normalized_rpow hp0 hg0 hTp)).trans
     (normalized_rpow_integral_eq_iff_proportional hp0 hf0 hg0 hA hB hAp hBp)

@@ -18,6 +18,7 @@ public import DLMF.JacobiElliptic.Maclaurin
 public import DLMF.JacobiElliptic.MathlibCoverage
 public import DLMF.JacobiElliptic.OutsideModuli
 public import DLMF.JacobiElliptic.EisensteinSeries
+public import DLMF.JacobiElliptic.AmplitudeExpansions
 public import DLMF.JacobiElliptic.JacobiODE
 public import DLMF.JacobiElliptic.PartialFractions
 public import DLMF.JacobiElliptic.PeriodsPolesZeros

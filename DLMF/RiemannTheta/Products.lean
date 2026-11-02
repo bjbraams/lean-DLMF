@@ -54,7 +54,8 @@ variable {ι κ : Type*} [Fintype ι] [Fintype κ]
 /-! ## The sets `𝒦` and the number `𝒟` (DLMF 21.6.1–21.6.2) -/
 
 /-- A real matrix with integer entries. -/
-def IsIntegerMatrix {m n : Type*} (A : Matrix m n ℝ) : Prop := ∃ M : Matrix m n ℤ, A = M.map Int.cast
+def IsIntegerMatrix {m n : Type*} (A : Matrix m n ℝ) : Prop := ∃ M : Matrix m n ℤ,
+    A = M.map Int.cast
 
 /-- Identity under the stated parameter and domain assumptions: `Equivalence fun (A A' : Matrix m
 n ℝ) => IsIntegerMatrix (A - A')`. -/
@@ -117,7 +118,8 @@ theorem riemann_identity [DecidableEq κ] {T : Matrix κ κ ℝ}
     {Ω : Matrix ι ι ℂ} (hΩ : Ω ∈ siegelUpperHalfSpace ι) (Z : Matrix ι κ ℂ) :
     ∏ j, riemannTheta (fun i => ∑ k, (T j k : ℂ) * Z i k) Ω =
       ((riemannD T : ℂ)⁻¹) ^ Fintype.card ι * ∑ A ∈ R, ∑ B ∈ R,
-        cexp (2 * π * I * Matrix.trace ((1 / 2 : ℂ) • ((realMatrixToComplex A)ᵀ * Ω * realMatrixToComplex A) +
+        cexp (2 * π * I * Matrix.trace
+            ((1 / 2 : ℂ) • ((realMatrixToComplex A)ᵀ * Ω * realMatrixToComplex A) +
           (realMatrixToComplex A)ᵀ * (Z + realMatrixToComplex B))) *
         ∏ j, riemannTheta ((fun i => Z i j) + (Ω *ᵥ fun i => (A i j : ℂ)) +
           fun i => (B i j : ℂ)) Ω := by
@@ -175,7 +177,8 @@ abbrev halfBinaryVector (a : ι → Fin 2) : ι → ℝ := fun i => ((a i : ℕ)
 /-! ## Addition formula (DLMF 21.6.8) -/
 
 /-- Formula under the stated hypotheses: `(2 • Ω) ∈ siegelUpperHalfSpace ι`. -/
-private lemma two_smul_mem_siegelUpperHalfSpace {Ω : Matrix ι ι ℂ} (hΩ : Ω ∈ siegelUpperHalfSpace ι) :
+private lemma two_smul_mem_siegelUpperHalfSpace {Ω : Matrix ι ι ℂ}
+    (hΩ : Ω ∈ siegelUpperHalfSpace ι) :
     (2 • Ω) ∈ siegelUpperHalfSpace ι := by
   refine ⟨by rw [transpose_smul, hΩ.1], ?_⟩
   have : (2 • Ω).map Complex.im = Ω.map Complex.im + Ω.map Complex.im := by
@@ -318,7 +321,8 @@ private lemma riemannTheta_mul_riemannTheta_eq_sum [DecidableEq ι] {Ω : Matrix
 
 /-- Identity under the stated parameter and domain assumptions: `riemannThetaChar (c + fun i => (m
 i : ℝ)) 0 z Ω = riemannThetaChar c 0 z Ω`. -/
-private lemma riemannThetaChar_add_natCast_zero (c : ι → ℝ) (m : ι → ℕ) (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
+private lemma riemannThetaChar_add_natCast_zero (c : ι → ℝ) (m : ι → ℕ) (z : ι → ℂ)
+    (Ω : Matrix ι ι ℂ) :
     riemannThetaChar (c + fun i => (m i : ℝ)) 0 z Ω = riemannThetaChar c 0 z Ω := by
   have h := riemannThetaChar_add_int c 0 z Ω (fun i => (m i : ℤ)) 0
   have e1 : (c + fun i => (((m i : ℤ) : ℝ))) = c + fun i => (m i : ℝ) := by
@@ -332,7 +336,8 @@ private lemma riemannThetaChar_add_natCast_zero (c : ι → ℝ) (m : ι → ℕ
 /-- Identity under the stated parameter and domain assumptions: `riemannThetaChar c (fun i => ((b
 i : ℕ) : ℝ)) z Ω = cexp (2 * π * I * ((fun i => (c i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
 riemannThetaChar c 0 z Ω`. -/
-private lemma riemannThetaChar_binary_eq_exp_mul (c : ι → ℝ) (b : ι → Fin 2) (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
+private lemma riemannThetaChar_binary_eq_exp_mul (c : ι → ℝ) (b : ι → Fin 2) (z : ι → ℂ)
+    (Ω : Matrix ι ι ℂ) :
     riemannThetaChar c (fun i => ((b i : ℕ) : ℝ)) z Ω =
       cexp (2 * π * I * ((fun i => (c i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
         riemannThetaChar c 0 z Ω := by
@@ -344,10 +349,11 @@ private lemma riemannThetaChar_binary_eq_exp_mul (c : ι → ℝ) (b : ι → Fi
   rw [h]
   congr 3
 
-/-- Identity under the stated parameter and domain assumptions: `riemannThetaChar (halfBinaryVector a)
-(halfBinaryVector b) x Ω * riemannThetaChar (halfBinaryVector a) (halfBinaryVector b) y Ω = ∑ ν : ι → Fin 2,
-cexp (2 * π * I * ((fun i => (halfBinarySum a ν i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
-(riemannThetaChar (halfBinarySum a ν) 0 (x + y) (2 • Ω) * riemannThetaChar (halfBinaryVector ν) 0 (x
+/-- Identity under the stated parameter and domain assumptions:
+`riemannThetaChar (halfBinaryVector a) (halfBinaryVector b) x Ω * riemannThetaChar (halfBinaryVector
+a) (halfBinaryVector b) y Ω = ∑ ν : ι → Fin 2, cexp (2 * π * I * ((fun i => (halfBinarySum a ν i :
+ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) * (riemannThetaChar (halfBinarySum a ν) 0 (x + y) (2 • Ω) *
+riemannThetaChar (halfBinaryVector ν) 0 (x
 - y) (2 • Ω))`. -/
 private lemma riemannThetaChar_half_mul_eq_sum [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     (hΩ : Ω ∈ siegelUpperHalfSpace ι)
@@ -431,7 +437,8 @@ private lemma sum_exp_halfBinarySum_mul_exp [DecidableEq ι] (a ν μ : ι → F
 
 /-- Identity under the stated parameter and domain assumptions: `∑ a : ι → Fin 2, F (halfBinarySum
 a ν) = ∑ a : ι → Fin 2, F (halfBinaryVector a)`. -/
-private lemma sum_halfBinarySum_eq_sum_halfBinaryVector [DecidableEq ι] (ν : ι → Fin 2) (F : (ι → ℝ) → ℂ)
+private lemma sum_halfBinarySum_eq_sum_halfBinaryVector [DecidableEq ι] (ν : ι → Fin 2)
+    (F : (ι → ℝ) → ℂ)
     (hF : ∀ (c : ι → ℝ) (m : ι → ℕ), F (c + fun i => (m i : ℝ)) = F c) :
     ∑ a : ι → Fin 2, F (halfBinarySum a ν) = ∑ a : ι → Fin 2, F (halfBinaryVector a) := by
   rw [← Equiv.sum_comp (Equiv.addRight ν) (fun a => F (halfBinaryVector a))]
@@ -472,10 +479,14 @@ private lemma exp_mul_riemannTheta_four_shift {Ω : Matrix ι ι ℂ} (hΩ : Ω�
     cexp (2 * π * I * (2 * ((fun i => (halfBinaryVector a i : ℂ)) ⬝ᵥ
           (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ))) +
           (fun i => (halfBinaryVector a i : ℂ)) ⬝ᵥ (x + y + u + v))) *
-        riemannTheta (x + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i => (halfBinaryVector b i : ℂ)) Ω *
-        riemannTheta (y + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i => (halfBinaryVector b i : ℂ)) Ω *
-        riemannTheta (u + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i => (halfBinaryVector b i : ℂ)) Ω *
-        riemannTheta (v + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i => (halfBinaryVector b i : ℂ)) Ω =
+        riemannTheta (x + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i =>
+            (halfBinaryVector b i : ℂ)) Ω *
+        riemannTheta (y + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i =>
+            (halfBinaryVector b i : ℂ)) Ω *
+        riemannTheta (u + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i =>
+            (halfBinaryVector b i : ℂ)) Ω *
+        riemannTheta (v + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i =>
+            (halfBinaryVector b i : ℂ)) Ω =
       (riemannThetaChar (halfBinaryVector a) (halfBinaryVector b) x Ω *
           riemannThetaChar (halfBinaryVector a) (halfBinaryVector b) y Ω) *
         (riemannThetaChar (halfBinaryVector a) (halfBinaryVector b) u Ω *
@@ -517,12 +528,16 @@ theorem riemannTheta_four_product [DecidableEq ι] {Ω : Matrix ι ι ℂ}
         cexp (2 * π * I * (2 * ((fun i => (halfBinaryVector a i : ℂ)) ⬝ᵥ
           (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ))) +
           (fun i => (halfBinaryVector a i : ℂ)) ⬝ᵥ (x + y + u + v))) *
-        riemannTheta (x + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i => (halfBinaryVector b i : ℂ)) Ω *
-        riemannTheta (y + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i => (halfBinaryVector b i : ℂ)) Ω *
-        riemannTheta (u + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i => (halfBinaryVector b i : ℂ)) Ω *
+        riemannTheta (x + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i =>
+            (halfBinaryVector b i : ℂ)) Ω *
+        riemannTheta (y + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i =>
+            (halfBinaryVector b i : ℂ)) Ω *
+        riemannTheta (u + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) + fun i =>
+            (halfBinaryVector b i : ℂ)) Ω *
         riemannTheta (v + (Ω *ᵥ fun i => (halfBinaryVector a i : ℂ)) +
           fun i => (halfBinaryVector b i : ℂ)) Ω := by
-  rw [mul_assoc (riemannTheta _ Ω * riemannTheta _ Ω), riemannTheta_mul_riemannTheta_eq_sum hΩ, riemannTheta_mul_riemannTheta_eq_sum hΩ]
+  rw [mul_assoc (riemannTheta _ Ω * riemannTheta _ Ω), riemannTheta_mul_riemannTheta_eq_sum hΩ,
+      riemannTheta_mul_riemannTheta_eq_sum hΩ]
   have hw1 : (1 / 2 : ℂ) • (x + y + u + v) + (1 / 2 : ℂ) • (x + y - u - v) = x + y := by
     funext i; simp; ring
   have hw2 : (1 / 2 : ℂ) • (x + y + u + v) - (1 / 2 : ℂ) • (x + y - u - v) = u + v := by
@@ -543,7 +558,8 @@ theorem riemannTheta_four_product [DecidableEq ι] {Ω : Matrix ι ι ℂ}
   rw [← mul_assoc, inv_mul_cancel₀ (pow_ne_zero _ two_ne_zero), one_mul, Finset.sum_comm]
   conv_rhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun ν _ => ?_
-  have hF := sum_halfBinarySum_eq_sum_halfBinaryVector ν (fun c => riemannThetaChar c 0 (x + y) (2 • Ω) *
+  have hF := sum_halfBinarySum_eq_sum_halfBinaryVector ν
+      (fun c => riemannThetaChar c 0 (x + y) (2 • Ω) *
     riemannThetaChar c 0 (u + v) (2 • Ω)) (fun c m => by
       simp only [riemannThetaChar_add_natCast_zero])
   calc ∑ a : ι → Fin 2, riemannThetaChar (halfBinarySum a ν) 0 (x + y) (2 • Ω) *
@@ -566,7 +582,8 @@ theorem riemannTheta_four_product [DecidableEq ι] {Ω : Matrix ι ι ℂ}
 
 /-- Identity under the stated parameter and domain assumptions: `riemannThetaChar (c + fun i => (m
 i : ℝ)) q z Ω = riemannThetaChar c q z Ω`. -/
-private lemma riemannThetaChar_add_natCast (c q : ι → ℝ) (m : ι → ℕ) (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
+private lemma riemannThetaChar_add_natCast (c q : ι → ℝ) (m : ι → ℕ) (z : ι → ℂ)
+    (Ω : Matrix ι ι ℂ) :
     riemannThetaChar (c + fun i => (m i : ℝ)) q z Ω = riemannThetaChar c q z Ω := by
   have h := riemannThetaChar_add_int c q z Ω (fun i => (m i : ℤ)) 0
   have e1 : (c + fun i => (((m i : ℤ) : ℝ))) = c + fun i => (m i : ℝ) := by
@@ -580,7 +597,8 @@ private lemma riemannThetaChar_add_natCast (c q : ι → ℝ) (m : ι → ℕ) (
 /-- Identity under the stated parameter and domain assumptions: `riemannThetaChar c (q + fun i =>
 ((b i : ℕ) : ℝ)) z Ω = cexp (2 * π * I * ((fun i => (c i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
 riemannThetaChar c q z Ω`. -/
-private lemma riemannThetaChar_add_binary_eq_exp_mul (c q : ι → ℝ) (b : ι → Fin 2) (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
+private lemma riemannThetaChar_add_binary_eq_exp_mul (c q : ι → ℝ) (b : ι → Fin 2) (z : ι → ℂ)
+    (Ω : Matrix ι ι ℂ) :
     riemannThetaChar c (q + fun i => ((b i : ℕ) : ℝ)) z Ω =
       cexp (2 * π * I * ((fun i => (c i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
         riemannThetaChar c q z Ω := by
@@ -608,13 +626,16 @@ private lemma riemannThetaChar_shift_half_mul_eq_sum [DecidableEq ι] {Ω : Matr
               (2 • Ω)) := by
   rw [riemannThetaChar_mul_addition hΩ]
   refine Finset.sum_congr rfl fun ν _ => ?_
-  have h1 : (1 / 2 : ℝ) • (c₁ + halfBinaryVector a + (c₂ + halfBinaryVector a) + fun i => ((ν i : ℕ) : ℝ)) =
+  have h1 : (1 / 2 : ℝ) •
+      (c₁ + halfBinaryVector a + (c₂ + halfBinaryVector a) + fun i => ((ν i : ℕ) : ℝ)) =
       (1 / 2 : ℝ) • (c₁ + c₂) + halfBinarySum a ν := by
     funext i; simp [halfBinaryVector, halfBinarySum]; ring
-  have h2 : (1 / 2 : ℝ) • (c₁ + halfBinaryVector a - (c₂ + halfBinaryVector a) + fun i => ((ν i : ℕ) : ℝ)) =
+  have h2 : (1 / 2 : ℝ) •
+      (c₁ + halfBinaryVector a - (c₂ + halfBinaryVector a) + fun i => ((ν i : ℕ) : ℝ)) =
       (1 / 2 : ℝ) • (c₁ - c₂) + halfBinaryVector ν := by
     funext i; simp [halfBinaryVector]; ring
-  have h3 : d₁ + halfBinaryVector b + (d₂ + halfBinaryVector b) = (d₁ + d₂) + fun i => ((b i : ℕ) : ℝ) := by
+  have h3 : d₁ + halfBinaryVector b + (d₂ + halfBinaryVector b) = (d₁ + d₂) + fun i =>
+      ((b i : ℕ) : ℝ) := by
     funext i; simp [halfBinaryVector]; ring
   have h4 : d₁ + halfBinaryVector b - (d₂ + halfBinaryVector b) = d₁ - d₂ := by
     funext i; simp
@@ -643,7 +664,8 @@ private lemma sum_weighted_mul_sum_of_orthogonal [DecidableEq ι] {K : ℂ} (k :
 => (((1 / 2 : ℝ) • s₁ + halfBinarySum a ν) i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) * cexp (2 * π
 * I * ((fun i => (((1 / 2 : ℝ) • s₂ + halfBinarySum a μ) i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ)))
 = if ν = μ then (2 : ℂ) ^ Fintype.card ι else 0`. -/
-private lemma sum_exp_halfBinaryVector_mul_exp_mul_exp [DecidableEq ι] (a ν μ : ι → Fin 2) (s₁ s₂ : ι → ℝ) :
+private lemma sum_exp_halfBinaryVector_mul_exp_mul_exp [DecidableEq ι] (a ν μ : ι → Fin 2)
+    (s₁ s₂ : ι → ℝ) :
     ∑ b : ι → Fin 2,
       cexp (-2 * π * I * ((fun i => (halfBinaryVector b i : ℂ)) ⬝ᵥ fun i => ((s₁ + s₂) i : ℂ))) *
         cexp (2 * π * I * ((fun i => (((1 / 2 : ℝ) • s₁ + halfBinarySum a ν) i : ℂ)) ⬝ᵥ
@@ -745,16 +767,20 @@ theorem riemannThetaChar_four_product [DecidableEq ι] {Ω : Matrix ι ι ℂ}
       ((∑ ν, cexp (2 * π * I * ((fun i => (((1 / 2 : ℝ) • (c₁ + c₂) +
           halfBinarySum a ν) i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
         (riemannThetaChar ((1 / 2 : ℝ) • (c₁ + c₂) + halfBinarySum a ν) (d₁ + d₂) (x + y) (2 • Ω) *
-          riemannThetaChar ((1 / 2 : ℝ) • (c₁ - c₂) + halfBinaryVector ν) (d₁ - d₂) (x - y) (2 • Ω))) *
+          riemannThetaChar ((1 / 2 : ℝ) • (c₁ - c₂) + halfBinaryVector ν) (d₁ - d₂)
+              (x - y) (2 • Ω))) *
        (∑ μ, cexp (2 * π * I * ((fun i => (((1 / 2 : ℝ) • (c₃ + c₄) +
           halfBinarySum a μ) i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
         (riemannThetaChar ((1 / 2 : ℝ) • (c₃ + c₄) + halfBinarySum a μ) (d₃ + d₄) (u + v) (2 • Ω) *
-          riemannThetaChar ((1 / 2 : ℝ) • (c₃ - c₄) + halfBinaryVector μ) (d₃ - d₄) (u - v) (2 • Ω)))) =
+          riemannThetaChar ((1 / 2 : ℝ) • (c₃ - c₄) + halfBinaryVector μ) (d₃ - d₄)
+              (u - v) (2 • Ω)))) =
       ∑ ν, (2 : ℂ) ^ Fintype.card ι *
         ((riemannThetaChar ((1 / 2 : ℝ) • (c₁ + c₂) + halfBinarySum a ν) (d₁ + d₂) (x + y) (2 • Ω) *
-          riemannThetaChar ((1 / 2 : ℝ) • (c₁ - c₂) + halfBinaryVector ν) (d₁ - d₂) (x - y) (2 • Ω)) *
+          riemannThetaChar ((1 / 2 : ℝ) • (c₁ - c₂) + halfBinaryVector ν) (d₁ - d₂)
+              (x - y) (2 • Ω)) *
          (riemannThetaChar ((1 / 2 : ℝ) • (c₃ + c₄) + halfBinarySum a ν) (d₃ + d₄) (u + v) (2 • Ω) *
-          riemannThetaChar ((1 / 2 : ℝ) • (c₃ - c₄) + halfBinaryVector ν) (d₃ - d₄) (u - v) (2 • Ω))) :=
+          riemannThetaChar ((1 / 2 : ℝ) • (c₃ - c₄) + halfBinaryVector ν) (d₃ - d₄)
+              (u - v) (2 • Ω))) :=
     fun a => sum_weighted_mul_sum_of_orthogonal _ _ _ _ _
       (fun ν μ => sum_exp_halfBinaryVector_mul_exp_mul_exp a ν μ (c₁ + c₂) (c₃ + c₄))
   simp only [hcol]

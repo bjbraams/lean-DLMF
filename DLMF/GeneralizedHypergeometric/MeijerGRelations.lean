@@ -6,7 +6,12 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.GeneralizedHypergeometric.MeijerG
-public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
+public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence
+public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import DLMF.Hypergeometric.ArgumentContinuation
+public import DLMF.Hypergeometric.Solutions
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
@@ -91,7 +96,8 @@ def MeijerResidueRegion (P : MeijerGParameters) (w : ℂ) : Prop :=
 /-- The finite sum of regularized residue contributions. -/
 def meijerResidueExpansionLog (P : MeijerGParameters) (w : ℂ) : ℂ :=
   ∑ k∈Finset.range P.m,meijerResidueRegularCoeff P k w*
-    genRegularizedHG (meijerResidueUpper P k) (meijerResidueLower P k) (meijerParity P*Complex.exp w)
+    genRegularizedHG (meijerResidueUpper P k) (meijerResidueLower P k)
+        (meijerParity P*Complex.exp w)
 
 /-- A generic perturbation splits all bottom-parameter integer collisions. -/
 def meijerSplitBottom (P : MeijerGParameters) (t : ℂ) : MeijerGParameters :=
@@ -99,13 +105,15 @@ def meijerSplitBottom (P : MeijerGParameters) (t : ℂ) : MeijerGParameters :=
 
 /-- The full simple-bottom-pole formula, including exceptional nonnumerator lower parameters. -/
 @[dlmf 16.17.E2]
-theorem meijerG_regularized_residue_expansion {P : MeijerGParameters} (hP : P.Valid) (hs : P.SimpleBottom)
+theorem meijerG_regularized_residue_expansion {P : MeijerGParameters} (hP : P.Valid)
+    (hs : P.SimpleBottom)
     {w : ℂ} (hw : MeijerResidueRegion P w) : meijerGLog P w=meijerResidueExpansionLog P w := by
   sorry
 
 /-- 16.17.E2: meijerG ordinary residue expansion. -/
 @[dlmf 16.17.E2]
-theorem meijerG_ordinary_residue_expansion {P : MeijerGParameters} (hP : P.Valid) (hs : P.SimpleBottom)
+theorem meijerG_ordinary_residue_expansion {P : MeijerGParameters} (hP : P.Valid)
+    (hs : P.SimpleBottom)
     (hreg : ∀ k<P.m,GenDenRegular (meijerResidueLower P k))
     {w : ℂ} (hw : MeijerResidueRegion P w) :
     meijerGLog P w=∑ k∈Finset.range P.m,meijerResidueCoeff P k w*
@@ -169,7 +177,8 @@ def meijerHypergeomBranch (A B : List ℂ) (z : ℂ) : ℂ :=
 @[dlmf 16.18.E1]
 theorem genHG_meijerG (A B : List ℂ) (hcount : A.length≤B.length+1)
     (hA : GenDenRegular (A:Multiset ℂ)) (hB : GenDenRegular (B:Multiset ℂ))
-    {z : ℂ} (hz : z∈cutPlane) : genHG (A:Multiset ℂ) (B:Multiset ℂ) z=meijerHypergeomBranch A B z := by
+    {z : ℂ} (hz : z∈cutPlane) : genHG (A:Multiset ℂ) (B:Multiset ℂ)
+        z=meijerHypergeomBranch A B z := by
   sorry
 
 /-- The dual G uses the inverse logarithmic sheet, avoiding a principal-log bank mismatch. -/
@@ -358,7 +367,8 @@ theorem meijerG_equation_order (P : MeijerGParameters) :
 private lemma exists_meijerThetaCoeff_eq_C_mul_X_pow (A : List ℂ) :
     ∀ k, ∃ c : ℂ, meijerThetaCoeff A k = C c * X ^ k := by
   induction A with
-  | nil => intro k; refine ⟨if k = 0 then 1 else 0, ?_⟩; by_cases hk : k = 0 <;> simp [meijerThetaCoeff, hk]
+  | nil => intro k; refine ⟨if k = 0 then 1 else 0, ?_⟩; by_cases hk : k = 0 <;>
+           simp [meijerThetaCoeff, hk]
   | cons a A ih =>
     intro k
     obtain ⟨c, hc⟩ := ih k
@@ -394,7 +404,8 @@ private lemma meijerParity_ne_zero (P : MeijerGParameters) : meijerParity P ≠ 
   intro h; have := meijerParity_sq P; rw [h] at this; norm_num at this
 
 /-- For `p ≤ q` and `q > 0`, zero is a regular singular point of the Meijer equation. -/
-private lemma meijerRegularSingularAt_zero (P : MeijerGParameters) (hpq : P.p ≤ P.q) (hq : 0 < P.q) :
+private lemma meijerRegularSingularAt_zero (P : MeijerGParameters) (hpq : P.p ≤ P.q)
+    (hq : 0 < P.q) :
     MeijerRegularSingularAt P 0 := by
   have hN : max P.p P.q = P.q := max_eq_right hpq
   obtain ⟨-, hord⟩ := meijerG_equation_order P
@@ -546,7 +557,8 @@ theorem meijerG_fundamental_frame {P : MeijerGParameters} (hP : P.Valid) (hg : M
     Matrix.det (fun i j : Fin P.q => iteratedDeriv i.val (meijerFundamentalTerm P j.val) w)≠0 := by
   sorry
 
-/-- At integer exponent collisions, normalized combinations of the generic G-frame have a fundamental analytic limit. -/
+/-- At integer exponent collisions, normalized combinations of the generic G-frame have a
+fundamental analytic limit. -/
 @[dlmf 16.21.E2]
 theorem meijerG_resonant_fundamental_limits {P : MeijerGParameters} (hP : P.Valid) (hpq : P.p≤P.q)
     (hq : 0<P.q) {w : ℂ} (hw : w.re<0) :
@@ -554,7 +566,8 @@ theorem meijerG_resonant_fundamental_limits {P : MeijerGParameters} (hP : P.Vali
       (∀ k,AnalyticOnNhd ℂ (F k) U ∧ ∀ u∈U,MeijerLogEquation P (F k) u) ∧
       (∀ i k : Fin P.q,iteratedDeriv i.val (F k) w=if i=k then 1 else 0) ∧
       (∀ k,TendstoLocallyUniformlyOn
-        (fun t u => ∑ j∈Finset.range P.q,c t j k*meijerFundamentalTerm (meijerGenericDeformation P t) j u)
+        (fun t u => ∑ j∈Finset.range P.q,
+            c t j k*meijerFundamentalTerm (meijerGenericDeformation P t) j u)
         (F k) (𝓝[≠] 0) U) := by
   sorry
 
@@ -578,7 +591,8 @@ theorem meijer_hypergeometric_kernel (A B : List ℂ) (w s : ℂ) :
     meijerGKernelLog (meijerHypergeomData A B) w s=
       genBarnesKernelLog (A:Multiset ℂ) (B:Multiset ℂ) w s := by
   simp [meijerGKernelLog,meijerHypergeomData,genBarnesKernelLog,genGamma,genShift,
-    List.map_map,←List.map_take,←List.map_drop,List.prod_inv,Function.comp_def,div_eq_mul_inv,mul_assoc,mul_comm,mul_left_comm]
+    List.map_map, ←List.map_take, ←List.map_drop, List.prod_inv, Function.comp_def, div_eq_mul_inv,
+        mul_assoc, mul_comm, mul_left_comm]
 
 /-- The normalized G expression has the prescribed removable hypergeometric origin. -/
 @[dlmf 16.18.E1]

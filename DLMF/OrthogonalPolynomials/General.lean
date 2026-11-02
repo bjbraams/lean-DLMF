@@ -422,7 +422,8 @@ theorem orthogonal_polynomials_parseval {μ : Measure ℝ} {p : ℕ → ℝ[X]}
   let := hfinite
   have hexp : ∃ r : ℝ, 0 < r ∧ Integrable (fun x : ℝ => Real.exp (r * |x|)) μ := by
     refine ⟨1, one_pos, ?_⟩
-    have hi := (show Continuous (fun x : ℝ => Real.exp (1 * |x|)) by fun_prop).continuousOn.integrableOn_compact
+    have hi := (show Continuous (fun x : ℝ => Real.exp (1 * |x|))
+        by fun_prop).continuousOn.integrableOn_compact
       (μ := μ) (isCompact_Icc (a := a) (b := b))
     simpa only [IntegrableOn, Measure.restrict_eq_self_of_ae_mem (ae_iff.mpr hsupport)] using hi
   let c : ℕ → ℝ := fun n => ∫ x, (p n).eval x ^ 2 ∂μ

@@ -267,7 +267,8 @@ theorem coulombf_ode (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
     funext fun x => (hd x).deriv
   refine ⟨(hd r).deriv ▸ hd r, ?_⟩
   rw [hd']
-  have h := (hasDerivAt_deriv_coulombfComplex ε ℓ (z := (r : ℂ)) (by exact_mod_cast hr)).real_of_complex
+  have h := (hasDerivAt_deriv_coulombfComplex ε ℓ (z := (r : ℂ))
+      (by exact_mod_cast hr)).real_of_complex
   convert h using 1
   rw [coulombf_eq_re_coulombfComplex, ← Complex.re_ofReal_mul]
   push_cast
@@ -676,7 +677,8 @@ theorem coulombAProd_eq_Gamma {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ)
   have hG := Gamma_add_nat_eq_mul_prod hpole (2 * ℓ + 1)
   rw [show κ - ℓ + ((2 * ℓ + 1 : ℕ) : ℂ) = 1 + ℓ + κ by push_cast; ring] at hG
   have hG0 : Gamma (κ - ℓ) ≠ 0 := Complex.Gamma_ne_zero hpole
-  rw [hG, mul_div_cancel_left₀ _ hG0, prod_range_sub_add_eq_mul_prod_sq_sub, coulombAProd, Finset.prod_range_succ']
+  rw [hG, mul_div_cancel_left₀ _ hG0, prod_range_sub_add_eq_mul_prod_sq_sub, coulombAProd,
+      Finset.prod_range_succ']
   push_cast
   have hε' : (ε : ℂ) = -1 / κ ^ 2 := by
     rw [hsq]; field_simp
@@ -1001,7 +1003,8 @@ private lemma integral_hydrogenRadial_mul_of_ne {m n ℓ : ℕ} (hm : ℓ + 1 �
   have hW : W = fun r => R.eval r * Real.exp (-c * r) := by
     funext r
     simp only [W, (hasDerivAt_hydrogenRadial ℓ hm r).deriv,
-      (hasDerivAt_hydrogenRadial ℓ hn r).deriv, hydrogenRadial_eq_eval ℓ hm, hydrogenRadial_eq_eval ℓ hn, R, eval_sub, eval_mul, eval_C,
+      (hasDerivAt_hydrogenRadial ℓ hn r).deriv, hydrogenRadial_eq_eval ℓ hm,
+          hydrogenRadial_eq_eval ℓ hn, R, eval_sub, eval_mul, eval_C,
       ← hexp]
     ring
   set e : ℝ := -1 / (n : ℝ) ^ 2 - -1 / (m : ℝ) ^ 2

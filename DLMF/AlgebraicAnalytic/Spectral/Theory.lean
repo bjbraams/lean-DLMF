@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Spectral.Basic
+public import DLMF.Bessel.Basic.Equation
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.InnerProductSpace.l2Space
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
@@ -524,7 +525,66 @@ theorem tendsto_sokhotski_plemelj {f : ℝ → ℂ} (hf : ContDiff ℝ 1 f) (hcs
 theorem besselOp_sqrt_mul_besselJ (ν : ℝ) {t : ℝ} (ht : 0 ≤ t) {x : ℝ} (hx : 0 < x) :
     besselOp ν (fun y => (Real.sqrt y : ℂ) * Complex.besselJ ν (y * Real.sqrt t)) x =
       (t : ℂ) * ((Real.sqrt x : ℂ) * Complex.besselJ ν (x * Real.sqrt t)) := by
-  sorry
+  set s := Real.sqrt t with hs
+  set J := Complex.besselJ (ν : ℂ) with hJ
+  have hs0 : 0 ≤ s := Real.sqrt_nonneg t
+  have hst : (s : ℂ) ^ 2 = t := by
+    rw [← Complex.ofReal_pow, hs, Real.sq_sqrt ht]
+  -- derivatives of `y ↦ J(ys)` and `y ↦ J'(ys)`, also valid for `s = 0`
+  have hcomp : ∀ (G : ℂ → ℂ), (∀ w ∈ slitPlane, AnalyticAt ℂ G w) → ∀ y : ℝ, 0 < y →
+      HasDerivAt (fun y : ℝ => G (y * s)) (deriv G (y * s) * s) y := by
+    intro G hG y hy
+    rcases hs0.eq_or_lt with h0 | hpos
+    · rw [← h0]
+      simp only [Complex.ofReal_zero, mul_zero]
+      exact hasDerivAt_const _ _
+    · have hw : (y : ℂ) * s ∈ slitPlane := by
+        rw [← Complex.ofReal_mul]; exact Complex.ofReal_mem_slitPlane.mpr (mul_pos hy hpos)
+      have h := (hG _ hw).differentiableAt.hasDerivAt.comp (y : ℂ)
+        ((hasDerivAt_id (y : ℂ)).mul_const (s : ℂ))
+      simp only [id, one_mul] at h
+      exact h.comp_ofReal
+  have hJa : ∀ w ∈ slitPlane, AnalyticAt ℂ J w := fun w hw => analyticAt_besselJ _ hw
+  have hJ'a : ∀ w ∈ slitPlane, AnalyticAt ℂ (deriv J) w := fun w hw => (hJa w hw).deriv
+  have hsq : ∀ y : ℝ, 0 < y →
+      HasDerivAt (fun y : ℝ => (Real.sqrt y : ℂ)) (((1 / (2 * Real.sqrt y) : ℝ)) : ℂ) y :=
+    fun y hy => (Real.hasDerivAt_sqrt hy.ne').ofReal_comp
+  set g1 : ℝ → ℂ := fun y => ((1 / (2 * Real.sqrt y) : ℝ) : ℂ) * J (y * s) +
+    (Real.sqrt y : ℂ) * (deriv J (y * s) * s) with hg1
+  have hfirst : ∀ y : ℝ, 0 < y →
+      HasDerivAt (fun y => (Real.sqrt y : ℂ) * J (y * s)) (g1 y) y :=
+    fun y hy => (hsq y hy).mul (hcomp J hJa y hy)
+  have hderiv : deriv (fun y => (Real.sqrt y : ℂ) * J (y * s)) =ᶠ[𝓝 x] g1 := by
+    filter_upwards [Ioi_mem_nhds hx] with y hy
+    exact (hfirst y hy).deriv
+  have hr : 0 < Real.sqrt x := Real.sqrt_pos.mpr hx
+  have hinv : HasDerivAt (fun y : ℝ => ((1 / (2 * Real.sqrt y) : ℝ) : ℂ))
+      (((0 * (2 * Real.sqrt x) - 1 * (2 * (1 / (2 * Real.sqrt x)))) /
+        (2 * Real.sqrt x) ^ 2 : ℝ) : ℂ) x :=
+    ((hasDerivAt_const x (1 : ℝ)).div ((Real.hasDerivAt_sqrt hx.ne').const_mul 2)
+      (by positivity)).ofReal_comp
+  have hsecond : HasDerivAt g1 _ x := (hinv.mul (hcomp J hJa x hx)).add
+    ((hsq x hx).mul ((hcomp (deriv J) hJ'a x hx).mul_const (s : ℂ)))
+  have hode : ((x : ℂ) * s) ^ 2 * deriv (deriv J) (x * s) + (x * s) * deriv J (x * s) +
+      (((x : ℂ) * s) ^ 2 - (ν : ℂ) ^ 2) * J (x * s) = 0 := by
+    rcases hs0.eq_or_lt with h0 | hpos
+    · rw [← h0]
+      simp only [Complex.ofReal_zero, mul_zero, hJ, Complex.besselJ_zero]
+      split_ifs with h <;> simp [h]
+    · have hw : (x : ℂ) * s ∈ slitPlane := by
+        rw [← Complex.ofReal_mul]; exact Complex.ofReal_mem_slitPlane.mpr (mul_pos hx hpos)
+      have := DLMF.Bessel.besselJ_ode (ν := (ν : ℂ)) hw
+      simpa only [iteratedDeriv_succ, iteratedDeriv_zero] using this
+  unfold besselOp schrodingerOp
+  rw [hderiv.deriv_eq, hsecond.deriv]
+  have hxr : ((Real.sqrt x : ℝ) : ℂ) ^ 2 = x := by
+    rw [← Complex.ofReal_pow, Real.sq_sqrt hx.le]
+  have hr0 : ((Real.sqrt x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
+  rw [← hst]
+  push_cast
+  rw [← hxr] at hode ⊢
+  field_simp
+  linear_combination (-16 : ℂ) * hode
 
 /-- DLMF 1.18.56–1.18.58 (Hankel transform): for `ν > -1`, `x > 0` and `f` piecewise
 continuously differentiable on `(0, ∞)` (here: `C¹` on each side of `x` near `x`, with one-sided
@@ -601,7 +661,8 @@ orthogonal. -/
 theorem IsSelfAdjoint.inner_eigenvectors_eq_zero {T : E →ₗ.[ℂ] E} (hT : IsSelfAdjoint T)
     {z w : ℂ} (u v : T.domain) (hu : (u : E) ≠ 0) (hTu : T u = z • (u : E))
     (hTv : T v = w • (v : E)) (hzw : z ≠ w) : ⟪(u : E), (v : E)⟫_ℂ = 0 :=
-  IsSymmetricOp.inner_eq_zero ⟨hT.dense_domain, isFormalAdjoint_self_of_isSelfAdjoint hT⟩ u v hu hTu hTv hzw
+  IsSymmetricOp.inner_eq_zero ⟨hT.dense_domain, isFormalAdjoint_self_of_isSelfAdjoint hT⟩ u
+      v hu hTu hTv hzw
 
 /-- §1.18(ix): for a symmetric operator, `dim N_z` is constant on the upper and on the lower
 half-plane, so the deficiency indices `n₊ = dim N_i`, `n₋ = dim N_{-i}` describe all `N_z`. -/

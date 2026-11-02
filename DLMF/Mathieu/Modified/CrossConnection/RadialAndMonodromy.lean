@@ -33,7 +33,8 @@ open scoped Topology Real
 namespace DLMF.Mathieu
 
 /-- `‖J_n(w)‖ ≤ e^{‖w‖}` for integer `n`. -/
-private lemma norm_besselJ_intCast_le_exp_norm (n : ℤ) (w : ℂ) : ‖besselJ (n : ℂ) w‖ ≤ Real.exp ‖w‖ := by
+private lemma norm_besselJ_intCast_le_exp_norm (n : ℤ) (w : ℂ) : ‖besselJ (n : ℂ) w‖ ≤
+    Real.exp ‖w‖ := by
   rw [DLMF.Bessel.besselJ_int_eq_integral_cos n w, norm_mul]
   have hπ : 0 < π := Real.pi_pos
   have h1 : ‖∫ θ in (0 : ℝ)..π, Complex.cos (w * Complex.sin θ - n * θ)‖ ≤
@@ -165,7 +166,8 @@ private lemma deriv_radialMathieuMs_one_even_zero (k : ℕ) {h : ℝ} (hh : 0 < 
       show ((ℓ + 2 : ℕ) : ℂ) + 1 = ((ℓ + 3 : ℕ) : ℂ) by push_cast; ring, ez, ez, ez, ez]
     push_cast; ring
   simp_rw [hder]
-  have hk := (hasSum_mathieuFourierB_even_mul_besselJ_comb k hh).mul_left ((-1 : ℂ) ^ k / mathieuFourierB (2 * k + 2) 2 (h ^ 2))
+  have hk := (hasSum_mathieuFourierB_even_mul_besselJ_comb k hh).mul_left
+      ((-1 : ℂ) ^ k / mathieuFourierB (2 * k + 2) 2 (h ^ 2))
   have e : (fun ℓ : ℕ => c ℓ * (4 * (besselJ (ℓ : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h) +
       2 * h * (besselJ ((ℓ + 1 : ℕ) : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h -
         besselJ (ℓ : ℂ) h * besselJ ((ℓ + 3 : ℕ) : ℂ) h))) = fun ℓ : ℕ =>
@@ -180,7 +182,8 @@ private lemma deriv_radialMathieuMs_one_even_zero (k : ℕ) {h : ℝ} (hh : 0 < 
 
 /-- If `w` solves the modified Mathieu equation 28.20.1 then `t ↦ w(ct)`, `c² = -1`, solves
 Mathieu's equation 28.2.1. -/
-theorem isMathieuSolution_comp_mul_of_isModMathieuSolution {a q : ℂ} {w : ℂ → ℂ} (hw : IsModMathieuSolution a q w)
+theorem isMathieuSolution_comp_mul_of_isModMathieuSolution {a q : ℂ} {w : ℂ → ℂ}
+    (hw : IsModMathieuSolution a q w)
     {c : ℂ} (hc : c ^ 2 = -1) : IsMathieuSolution a q (fun t => w (c * t)) := by
   have hd : ∀ t, HasDerivAt (fun t => w (c * t)) (deriv w (c * t) * c) t := fun t => by
     have := ((hw.differentiable (c * t)).hasDerivAt).comp t ((hasDerivAt_id t).const_mul c)
@@ -214,7 +217,8 @@ private lemma modMathieuAdmissible_intCast (k : ℤ) (h : ℝ) : ModMathieuAdmis
   Or.inr ⟨⟨k, rfl⟩, by rw [ofReal_sq_eq_ofReal_sq]; exact ofReal_im _⟩
 
 /-- `Mc^{(j)}_m(·, h)` solves Mathieu's equation along the imaginary axis (`j = 1, …, 4`). -/
-private lemma isMathieuSolution_radialMathieuMc_neg_I_mul (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m : ℕ) {h : ℝ}
+private lemma isMathieuSolution_radialMathieuMc_neg_I_mul (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4)
+    (m : ℕ) {h : ℝ}
     (hh : 0 < h) :
     IsMathieuSolution (mathieuA m (h ^ 2)) ((h ^ 2 : ℝ) : ℂ)
       (fun t => radialMathieuMc j m (-I * t) h) := by
@@ -231,7 +235,8 @@ private lemma isMathieuSolution_radialMathieuMc_neg_I_mul (j : ℕ) (hj₁ : 1 �
 
 /-- `Ms^{(j)}_m(·, h)` solves Mathieu's equation along the imaginary axis (`m ≥ 1`,
 `j = 1, …, 4`). -/
-private lemma isMathieuSolution_radialMathieuMs_neg_I_mul (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {m : ℕ} (hm : m ≠ 0)
+private lemma isMathieuSolution_radialMathieuMs_neg_I_mul (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4)
+    {m : ℕ} (hm : m ≠ 0)
     {h : ℝ} (hh : 0 < h) :
     IsMathieuSolution (mathieuB m (h ^ 2)) ((h ^ 2 : ℝ) : ℂ)
       (fun t => radialMathieuMs j m (-I * t) h) := by
@@ -240,7 +245,8 @@ private lemma isMathieuSolution_radialMathieuMs_neg_I_mul (j : ℕ) (hj₁ : 1 �
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
   have hw := isModMathieuSolution_modMathieuM j hj₁ hj₄ hadm hh'
   have hl : mathieuLambda (-(m : ℂ)) ((h : ℂ) ^ 2) = (mathieuB m (h ^ 2) : ℂ) := by
-    rw [ofReal_sq_eq_ofReal_sq, show -(m : ℂ) = (Int.cast (-(m : ℤ)) : ℂ) by simp, mathieuLambda_intCast,
+    rw [ofReal_sq_eq_ofReal_sq, show -(m : ℂ) =
+        (Int.cast (-(m : ℤ)) : ℂ) by simp, mathieuLambda_intCast,
       mathieuLambdaInt]
     simp [hm]
   rw [hl, ofReal_sq_eq_ofReal_sq] at hw
@@ -268,7 +274,8 @@ private lemma radialMathieuMc_one_neg (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ)
     exact h2.unique (by convert h1 using 2 with ℓ; push_cast; ring)
 
 /-- `J_k(h e^0) = J_k(h)`, natural order. -/
-private lemma besselJExp_natCast_zero (k : ℕ) (h : ℂ) : besselJExp (k : ℂ) h 0 = besselJ (k : ℂ) h := by
+private lemma besselJExp_natCast_zero (k : ℕ) (h : ℂ) : besselJExp (k : ℂ) h 0 =
+    besselJ (k : ℂ) h := by
   simpa using besselJExp_intCast_zero k h
 
 /-- `Mc^{(1)}_{2k}(0, h) = (-1)^k A^{2k}_0 / ce_{2k}(π/2)`. -/
@@ -279,7 +286,8 @@ private lemma radialMathieuMc_one_even_zero (k : ℕ) {h : ℝ} (hh : 0 < h) :
   have hA0 := mathieuFourierA_even_zero_ne_zero k hq
   have hA : mathieuFourierA (2 * k) (2 * 0) (h ^ 2) ≠ 0 := by simpa using hA0
   have h1 := hasSum_radialMathieuMc_even_cross 1 le_rfl (by norm_num) k 0 hh hA 0
-  have hk := (hasSum_mathieuFourierA_even_mul_besselJ_sq k hh).mul_left ((-1 : ℂ) ^ k * 2 / mathieuFourierA (2 * k) 0 (h ^ 2))
+  have hk := (hasSum_mathieuFourierA_even_mul_besselJ_sq k hh).mul_left
+      ((-1 : ℂ) ^ k * 2 / mathieuFourierA (2 * k) 0 (h ^ 2))
   have e := h1.unique (by
     convert hk using 2 with ℓ
     simp only [neg_zero, mathieuCylExp, Nat.cast_zero, sub_zero, Int.cast_natCast, add_zero,
@@ -424,7 +432,8 @@ private lemma radialMathieuMs_one_odd_neg_pi_div_two_mul_I (k : ℕ) {h : ℝ} (
     convert hk using 2 with ℓ
     simp only [neg_neg, mathieuCylExp, Nat.cast_zero, sub_zero, Int.cast_natCast, add_zero,
       mul_zero, zero_add]
-    rw [besselJExp_natCast_pi_div_two_mul_I, besselJExp_natCast_neg_pi_div_two_mul_I, besselJExp_natCast_pi_div_two_mul_I,
+    rw [besselJExp_natCast_pi_div_two_mul_I, besselJExp_natCast_neg_pi_div_two_mul_I,
+        besselJExp_natCast_pi_div_two_mul_I,
       besselJExp_natCast_neg_pi_div_two_mul_I, pow_succ]
     field_simp
     linear_combination (-2 * mathieuFourierB (2 * k + 1) (2 * ℓ + 1) (h ^ 2) *
@@ -435,7 +444,8 @@ private lemma radialMathieuMs_one_odd_neg_pi_div_two_mul_I (k : ℕ) {h : ℝ} (
   field_simp
 
 /-- `Ms^{(1)}_m = c Se_m` with `c = Ms^{(1)'}_m(0)/se_m'(0)`. -/
-private lemma radialMathieuMs_one_eq_mul_modMathieuSe {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (z : ℂ) :
+private lemma radialMathieuMs_one_eq_mul_modMathieuSe {m : ℕ} (hm : m ≠ 0) {h : ℝ}
+    (hh : 0 < h) (z : ℂ) :
     radialMathieuMs 1 m z h = deriv (fun z => radialMathieuMs 1 m z h) 0 /
       deriv (fun w => mathieuSe m w (h ^ 2)) 0 * modMathieuSe m z ((h ^ 2 : ℝ) : ℂ) := by
   rw [modMathieuSe_natCast hm]
@@ -527,7 +537,8 @@ private lemma besselYExp_add_pi_mul_I (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : �
     rw [Complex.exp_eq_one_iff]; exact ⟨1, by ring⟩
   rw [besselYExp_eq_besselYExpNumerator_div hk, besselYExp_eq_besselYExpNumerator_div hk]
   simp only [besselYExpNumerator]
-  rw [besselJExp_add_of_exp_two_mul_eq_one c h z _ e, besselJExp_add_of_exp_two_mul_eq_one (-c) h z _ e]
+  rw [besselJExp_add_of_exp_two_mul_eq_one c h z _ e,
+      besselJExp_add_of_exp_two_mul_eq_one (-c) h z _ e]
   have hsin : 2 * I * Complex.sin (c * π) =
       Complex.exp (c * (π * I)) - Complex.exp (-(c * π * I)) := by
     rw [Complex.sin]; ring_nf; rw [I_sq]; ring_nf
@@ -543,7 +554,8 @@ private lemma besselYExp_intCast_add_pi_mul_I (k : ℤ) {h : ℂ} (hh : h ≠ 0)
   ring
 
 /-- Term-wise monodromy `z ↦ z + πi` of the integer-order series 28.24.1 with `j = 2`. -/
-private lemma modMathieuTerm_two_intCast_add_pi_mul_I (m : ℤ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) (n ℓ : ℤ) :
+private lemma modMathieuTerm_two_intCast_add_pi_mul_I (m : ℤ) {h : ℂ} (hh : h ≠ 0)
+    (z : ℂ) (n ℓ : ℤ) :
     modMathieuTerm 2 m (z + π * I) h n ℓ =
       (-1 : ℂ) ^ m * (modMathieuTerm 2 m z h n ℓ + 2 * I * modMathieuTerm 1 m z h n ℓ) := by
   have e : Complex.exp (2 * -(π * I)) = 1 := by

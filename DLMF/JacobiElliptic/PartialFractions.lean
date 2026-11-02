@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.EisensteinSeries
+public import DLMF.JacobiElliptic.EisensteinCotSeries
 
 /-!
 # Doubly infinite partial fractions: Eisenstein series (DLMF §22.12)
@@ -44,8 +44,11 @@ Each DLMF line has two equalities, and both are stated:
 `∑ₙ (±1)ⁿ π/sin(π(t - nτ))` by a Liouville argument (`jacobiPQk_s_eq_eisensteinSinSeries` in
 `DLMF.JacobiElliptic.EisensteinSeries`), the other six follow by the half-period shifts of
 Table 22.4.3, and the inner series is the alternating cotangent expansion
-`tendsto_sum_Icc_neg_one_zpow_div_sub`. The four `tan` forms (22.12.4, 7, 10, 13) have been
-checked numerically (mpmath), also for complex `k`.
+`tendsto_sum_Icc_neg_one_zpow_div_sub`. For the four `tan` forms (22.12.4, 7, 10, 13),
+`2K cs(2Kt)` is identified with the regularized cotangent series
+`∑ₙ (-1)ⁿ π cot(π(t - nτ))` (`jacobiCsk_eq_eisensteinCotSeries` in
+`DLMF.JacobiElliptic.EisensteinCotSeries`), whose regularizing constants cancel in symmetric
+partial sums; the inner series is the cotangent expansion `tendsto_sum_Icc_one_div_sub`.
 -/
 
 @[expose] public section
@@ -83,7 +86,8 @@ theorem jacobiSnk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
           jacobiTauk k - m))
         atTop (𝓝 (π / sin (π * (t - (n + 1 / 2) * jacobiTauk k)))) := by
   have hK := compEllIntKk_mul_jacobiTauk hk
-  refine ⟨?_, fun n => tendsto_sum_Icc_neg_one_zpow_div_sub fun m => by convert ht n m using 1; ring⟩
+  refine ⟨?_, fun n => tendsto_sum_Icc_neg_one_zpow_div_sub fun m =>
+      by convert ht n m using 1; ring⟩
   have h := hasSum_pi_div_sin_jacobiNsk hk (t := t - jacobiTauk k / 2)
     (not_mem_eisensteinSinLattice fun m n => by convert ht n m using 1; ring)
   convert h using 1
@@ -106,7 +110,8 @@ theorem jacobiCnk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
           2) * jacobiTauk k - m))
         atTop (𝓝 ((-1) ^ n * π / sin (π * (t - (n + 1 / 2) * jacobiTauk k)))) := by
   have hK := compEllIntKk_mul_jacobiTauk hk
-  refine ⟨?_, fun n => tendsto_sum_Icc_neg_one_zpow_add_div_sub (fun m => by convert ht n m using 1; ring) n⟩
+  refine ⟨?_, fun n =>
+      tendsto_sum_Icc_neg_one_zpow_add_div_sub (fun m => by convert ht n m using 1; ring) n⟩
   have h := hasSum_neg_one_zpow_pi_div_sin_jacobiDsk hk (t := t - jacobiTauk k / 2)
     (not_mem_eisensteinSinLattice fun m n => by convert ht n m using 1; ring)
   convert h using 1
@@ -118,8 +123,8 @@ theorem jacobiCnk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
       (jacobiDsk_shift hk _).2.2.1, hs]; ring
 
 /-- DLMF 22.12.4: the Eisenstein-type expansion of `dn(2Kt, k)`, `τ = iK'/K`, for
-`k ∈ jacobiModulusDomain` and `t` not a pole (both limits are symmetric partial sums, as printed).
-Admitted. -/
+`k ∈ jacobiModulusDomain` and `t` not a pole (both limits are symmetric partial sums, as
+printed). -/
 @[dlmf 22.12.E4 "domain: k ∈ jacobiModulusDomain, t not a pole"]
 theorem jacobiDnk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
     (ht : ∀ n m : ℤ, t - m - (n + 1 / 2) * jacobiTauk k ≠ 0) :
@@ -129,7 +134,22 @@ theorem jacobiDnk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
       ∀ n : ℤ, Tendsto (fun M : ℕ => ∑ m ∈ Finset.Icc (-(M : ℤ)) M, 1 / (t - (n + 1 / 2) *
           jacobiTauk k - m))
         atTop (𝓝 (π / tan (π * (t - (n + 1 / 2) * jacobiTauk k)))) := by
-  sorry
+  have hK := compEllIntKk_mul_jacobiTauk hk
+  have hl := not_mem_eisensteinSinLattice (τ := jacobiTauk k) (t := t - jacobiTauk k / 2)
+    fun m n => by convert ht n m using 1; ring
+  refine ⟨?_, fun n => ?_⟩
+  · have hv : 2 * I * compEllIntKk k * jacobiDnk (2 * compEllIntKk k * t) k =
+        eisensteinCotSeries (-1) (jacobiTauk k) (t - jacobiTauk k / 2) := by
+      rw [← jacobiCsk_eq_eisensteinCotSeries hk hl, show 2 * compEllIntKk k * t =
+        2 * compEllIntKk k * (t - jacobiTauk k / 2) + I * compEllIntKpk k by
+        linear_combination hK, (jacobiDnk_shift hk _).2.2.1]
+      ring_nf; rw [I_sq]; ring
+    rw [hv]
+    refine (tendsto_sum_Icc_zpow_pi_mul_cot (Or.inr rfl) (jacobiTauk_im_pos hk) _).congr
+      fun N => Finset.sum_congr rfl fun n _ => ?_
+    rw [mul_div_assoc, div_tan_eq_mul_cot]; congr 4; ring
+  · rw [div_tan_eq_mul_cot]
+    exact tendsto_sum_Icc_one_div_sub fun m => by convert ht n m using 1; ring
 
 /-- DLMF 22.12.5: the Eisenstein-type expansion of `cd(2Kt, k)`, `τ = iK'/K`, for
 `k ∈ jacobiModulusDomain` and `t` not a pole (the outer series converges absolutely (`HasSum` over
@@ -143,7 +163,8 @@ theorem jacobiCdk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
           1 / 2) * jacobiTauk k - m))
         atTop (𝓝 (π / sin (π * ((t + 1 / 2) - (n + 1 / 2) * jacobiTauk k)))) := by
   have hK := compEllIntKk_mul_jacobiTauk hk
-  refine ⟨?_, fun n => tendsto_sum_Icc_neg_one_zpow_div_sub fun m => by convert ht n m using 1; ring⟩
+  refine ⟨?_, fun n => tendsto_sum_Icc_neg_one_zpow_div_sub fun m =>
+      by convert ht n m using 1; ring⟩
   have h := hasSum_pi_div_sin_jacobiNsk hk (t := t + 1 / 2 - jacobiTauk k / 2)
     (not_mem_eisensteinSinLattice fun m n => by convert ht n m using 1; ring)
   convert h using 1
@@ -166,7 +187,8 @@ theorem jacobiSdk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
           (n + 1 / 2) * jacobiTauk k - m))
         atTop (𝓝 ((-1) ^ n * π / sin (π * ((t + 1 / 2) - (n + 1 / 2) * jacobiTauk k)))) := by
   have hK := compEllIntKk_mul_jacobiTauk hk
-  refine ⟨?_, fun n => tendsto_sum_Icc_neg_one_zpow_add_div_sub (fun m => by convert ht n m using 1; ring) n⟩
+  refine ⟨?_, fun n =>
+      tendsto_sum_Icc_neg_one_zpow_add_div_sub (fun m => by convert ht n m using 1; ring) n⟩
   have h := hasSum_neg_one_zpow_pi_div_sin_jacobiDsk hk (t := t + 1 / 2 - jacobiTauk k / 2)
     (not_mem_eisensteinSinLattice fun m n => by convert ht n m using 1; ring)
   convert h using 1
@@ -178,8 +200,8 @@ theorem jacobiSdk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
       linear_combination -hK, (jacobiDsk_shift hk _).2.1, hs]; ring
 
 /-- DLMF 22.12.7: the Eisenstein-type expansion of `nd(2Kt, k)`, `τ = iK'/K`, for
-`k ∈ jacobiModulusDomain` and `t` not a pole (both limits are symmetric partial sums, as printed).
-Admitted. -/
+`k ∈ jacobiModulusDomain` and `t` not a pole (both limits are symmetric partial sums, as
+printed). -/
 @[dlmf 22.12.E7 "domain: k ∈ jacobiModulusDomain, t not a pole"]
 theorem jacobiNdk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
     (ht : ∀ n m : ℤ, (t + 1 / 2) - m - (n + 1 / 2) * jacobiTauk k ≠ 0) :
@@ -189,7 +211,28 @@ theorem jacobiNdk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
       ∀ n : ℤ, Tendsto (fun M : ℕ => ∑ m ∈ Finset.Icc (-(M : ℤ)) M, 1 / ((t + 1 / 2) - (n + 1 /
           2) * jacobiTauk k - m))
         atTop (𝓝 (π / tan (π * ((t + 1 / 2) - (n + 1 / 2) * jacobiTauk k)))) := by
-  sorry
+  have hK := compEllIntKk_mul_jacobiTauk hk
+  have hl := not_mem_eisensteinSinLattice (τ := jacobiTauk k)
+    (t := t + 1 / 2 - jacobiTauk k / 2) fun m n => by convert ht n m using 1; ring
+  refine ⟨?_, fun n => ?_⟩
+  · obtain ⟨w, hw⟩ : ∃ w, w = 2 * compEllIntKk k * t - compEllIntKk k - I * compEllIntKpk k :=
+      ⟨_, rfl⟩
+    have e1 : 2 * compEllIntKk k * t = w + compEllIntKk k + I * compEllIntKpk k := by
+      rw [hw]; ring
+    have e2 : 2 * compEllIntKk k * (t + 1 / 2 - jacobiTauk k / 2) = w + 2 * compEllIntKk k := by
+      rw [hw]; linear_combination -hK
+    have hk' := jacobiComodulusk_ne_zero hk
+    have hv : 2 * I * compEllIntKk k * jacobiComodulusk k * jacobiNdk (2 * compEllIntKk k * t) k =
+        eisensteinCotSeries (-1) (jacobiTauk k) (t + 1 / 2 - jacobiTauk k / 2) := by
+      rw [← jacobiCsk_eq_eisensteinCotSeries hk hl, e2, (jacobiCsk_shift hk _).2.2.2.1, e1,
+        (jacobiNdk_shift hk _).2.1]
+      field_simp; ring_nf; rw [I_sq]; ring
+    rw [hv]
+    refine (tendsto_sum_Icc_zpow_pi_mul_cot (Or.inr rfl) (jacobiTauk_im_pos hk) _).congr
+      fun N => Finset.sum_congr rfl fun n _ => ?_
+    rw [mul_div_assoc, div_tan_eq_mul_cot]; congr 4; ring
+  · rw [div_tan_eq_mul_cot]
+    exact tendsto_sum_Icc_one_div_sub fun m => by convert ht n m using 1; ring
 
 /-- DLMF 22.12.8: the Eisenstein-type expansion of `dc(2Kt, k)`, `τ = iK'/K`, for
 `k ∈ jacobiModulusDomain` and `t` not a pole (the outer series converges absolutely (`HasSum` over
@@ -202,7 +245,8 @@ theorem jacobiDck_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
       ∀ n : ℤ, Tendsto (fun M : ℕ => ∑ m ∈ Finset.Icc (-(M : ℤ)) M, (-1) ^ m / ((t + 1 / 2) - n *
           jacobiTauk k - m))
         atTop (𝓝 (π / sin (π * ((t + 1 / 2) - n * jacobiTauk k)))) := by
-  refine ⟨?_, fun n => tendsto_sum_Icc_neg_one_zpow_div_sub fun m => by convert ht n m using 1; ring⟩
+  refine ⟨?_, fun n => tendsto_sum_Icc_neg_one_zpow_div_sub fun m =>
+      by convert ht n m using 1; ring⟩
   have h := hasSum_pi_div_sin_jacobiNsk hk (t := t + 1 / 2)
     (not_mem_eisensteinSinLattice fun m n => ht n m)
   convert h using 1
@@ -220,7 +264,8 @@ theorem jacobiNck_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
       ∀ n : ℤ, Tendsto (fun M : ℕ => ∑ m ∈ Finset.Icc (-(M : ℤ)) M, (-1) ^ (m + n) / ((t + 1 / 2) -
           n * jacobiTauk k - m))
         atTop (𝓝 ((-1) ^ n * π / sin (π * ((t + 1 / 2) - n * jacobiTauk k)))) := by
-  refine ⟨?_, fun n => tendsto_sum_Icc_neg_one_zpow_add_div_sub (fun m => by convert ht n m using 1; ring) n⟩
+  refine ⟨?_, fun n =>
+      tendsto_sum_Icc_neg_one_zpow_add_div_sub (fun m => by convert ht n m using 1; ring) n⟩
   have h := hasSum_neg_one_zpow_pi_div_sin_jacobiDsk hk (t := t + 1 / 2)
     (not_mem_eisensteinSinLattice fun m n => ht n m)
   convert h using 1
@@ -228,8 +273,8 @@ theorem jacobiNck_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
     (jacobiDsk_shift hk _).1]; ring
 
 /-- DLMF 22.12.10: the Eisenstein-type expansion of `sc(2Kt, k)`, `τ = iK'/K`, for
-`k ∈ jacobiModulusDomain` and `t` not a pole (both limits are symmetric partial sums, as printed).
-Admitted. -/
+`k ∈ jacobiModulusDomain` and `t` not a pole (both limits are symmetric partial sums, as
+printed). -/
 @[dlmf 22.12.E10 "domain: k ∈ jacobiModulusDomain, t not a pole"]
 theorem jacobiSck_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
     (ht : ∀ n m : ℤ, (t + 1 / 2) - m - n * jacobiTauk k ≠ 0) :
@@ -239,7 +284,20 @@ theorem jacobiSck_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
       ∀ n : ℤ, Tendsto (fun M : ℕ => ∑ m ∈ Finset.Icc (-(M : ℤ)) M, 1 / ((t + 1 / 2) - n *
           jacobiTauk k - m))
         atTop (𝓝 (π / tan (π * ((t + 1 / 2) - n * jacobiTauk k)))) := by
-  sorry
+  have hl := not_mem_eisensteinSinLattice (τ := jacobiTauk k) (t := t + 1 / 2)
+    fun m n => ht n m
+  refine ⟨?_, fun n => ?_⟩
+  · have hv : -2 * compEllIntKk k * jacobiComodulusk k * jacobiSck (2 * compEllIntKk k * t) k =
+        eisensteinCotSeries (-1) (jacobiTauk k) (t + 1 / 2) := by
+      rw [← jacobiCsk_eq_eisensteinCotSeries hk hl, show 2 * compEllIntKk k * (t + 1 / 2) =
+        2 * compEllIntKk k * t + compEllIntKk k by ring, (jacobiCsk_shift hk _).1]
+      ring
+    rw [hv]
+    refine (tendsto_sum_Icc_zpow_pi_mul_cot (Or.inr rfl) (jacobiTauk_im_pos hk) _).congr
+      fun N => Finset.sum_congr rfl fun n _ => ?_
+    rw [mul_div_assoc, div_tan_eq_mul_cot]
+  · rw [div_tan_eq_mul_cot]
+    exact tendsto_sum_Icc_one_div_sub fun m => by convert ht n m using 1; ring
 
 /-- DLMF 22.12.11: the Eisenstein-type expansion of `ns(2Kt, k)`, `τ = iK'/K`, for
 `k ∈ jacobiModulusDomain` and `t` not a pole (the outer series converges absolutely (`HasSum` over
@@ -266,12 +324,13 @@ theorem jacobiDsk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
       ∀ n : ℤ, Tendsto (fun M : ℕ => ∑ m ∈ Finset.Icc (-(M : ℤ)) M, (-1) ^ (m + n) / (t - n *
           jacobiTauk k - m))
         atTop (𝓝 ((-1) ^ n * π / sin (π * (t - n * jacobiTauk k)))) := by
-  exact ⟨hasSum_neg_one_zpow_pi_div_sin_jacobiDsk hk (not_mem_eisensteinSinLattice fun m n => ht n m),
+  exact ⟨hasSum_neg_one_zpow_pi_div_sin_jacobiDsk hk
+      (not_mem_eisensteinSinLattice fun m n => ht n m),
     fun n => tendsto_sum_Icc_neg_one_zpow_add_div_sub (fun m => by convert ht n m using 1; ring) n⟩
 
 /-- DLMF 22.12.13: the Eisenstein-type expansion of `cs(2Kt, k)`, `τ = iK'/K`, for
-`k ∈ jacobiModulusDomain` and `t` not a pole (both limits are symmetric partial sums, as printed).
-Admitted. -/
+`k ∈ jacobiModulusDomain` and `t` not a pole (both limits are symmetric partial sums, as
+printed). -/
 @[dlmf 22.12.E13 "domain: k ∈ jacobiModulusDomain, t not a pole"]
 theorem jacobiCsk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
     (ht : ∀ n m : ℤ, t - m - n * jacobiTauk k ≠ 0) :
@@ -280,7 +339,14 @@ theorem jacobiCsk_partialFractions (hk : k ∈ jacobiModulusDomain) {t : ℂ}
         (𝓝 (2 * compEllIntKk k * jacobiCsk (2 * compEllIntKk k * t) k)) ∧
       ∀ n : ℤ, Tendsto (fun M : ℕ => ∑ m ∈ Finset.Icc (-(M : ℤ)) M, 1 / (t - n * jacobiTauk k - m))
         atTop (𝓝 (π / tan (π * (t - n * jacobiTauk k)))) := by
-  sorry
+  have hl := not_mem_eisensteinSinLattice (τ := jacobiTauk k) (t := t) fun m n => ht n m
+  refine ⟨?_, fun n => ?_⟩
+  · rw [jacobiCsk_eq_eisensteinCotSeries hk hl]
+    refine (tendsto_sum_Icc_zpow_pi_mul_cot (Or.inr rfl) (jacobiTauk_im_pos hk) _).congr
+      fun N => Finset.sum_congr rfl fun n _ => ?_
+    rw [mul_div_assoc, div_tan_eq_mul_cot]
+  · rw [div_tan_eq_mul_cot]
+    exact tendsto_sum_Icc_one_div_sub fun m => by convert ht n m using 1; ring
 
 
 end DLMF.JacobiElliptic

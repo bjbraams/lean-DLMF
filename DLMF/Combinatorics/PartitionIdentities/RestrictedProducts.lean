@@ -74,7 +74,8 @@ private lemma hasProd_one_add_pow_succ {q : ℂ} (hq : ‖q‖ < 1) :
   ring
 
 /-- Removing `k` copies of an allowed part `a`, keeping track of the remaining multiplicity. -/
-private lemma card_restricted_count_ge_filter_count_sub (P : ℕ → Prop) [DecidablePred P] {a : ℕ} (ha1 : 1 ≤ a)
+private lemma card_restricted_count_ge_filter_count_sub (P : ℕ → Prop) [DecidablePred P]
+    {a : ℕ} (ha1 : 1 ≤ a)
     (hP : P a) (Q : ℕ → Prop) [DecidablePred Q] : ∀ k n : ℕ, k * a ≤ n →
       #{p ∈ Nat.Partition.restricted n P | k ≤ p.parts.count a ∧ Q (p.parts.count a - k)} =
         #{q ∈ Nat.Partition.restricted (n - k * a) P | Q (q.parts.count a)} := by
@@ -299,7 +300,8 @@ lemma prod_one_sub_pow_inv_le {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) (T : Finset
 
 /-- (26.10.5) for an arbitrary set of allowed positive parts (`0 ∉ S` is irrelevant: parts are
 positive). -/
-lemma hasSum_partitionCountIn_and_hasProd {q : ℂ} (hq : ‖q‖ < 1) (S : Set ℕ) [DecidablePred (· ∈ S)] :
+lemma hasSum_partitionCountIn_and_hasProd {q : ℂ} (hq : ‖q‖ < 1) (S : Set ℕ)
+    [DecidablePred (· ∈ S)] :
     HasSum (fun n => (partitionCountIn S n : ℂ) * q ^ n)
         (∏' j : ℕ, if j + 1 ∈ S then (1 - q ^ (j + 1))⁻¹ else 1) ∧
       HasProd (fun j : ℕ => if j + 1 ∈ S then (1 - q ^ (j + 1))⁻¹ else 1)
@@ -707,7 +709,8 @@ theorem hasSum_partitionCountAtMostDistinctBoxed (q : ℂ) {x : ℂ} (hx : ‖x�
   have hsum := hasSum_sum hT
   convert hsum using 1
   · ext ⟨m, n⟩
-    rw [partitionCountAtMostDistinctBoxed_eq_card, card_filter, Nat.cast_sum, sum_mul, sum_mul, mul_sum]
+    rw [partitionCountAtMostDistinctBoxed_eq_card, card_filter, Nat.cast_sum, sum_mul,
+        sum_mul, mul_sum]
     refine sum_congr rfl fun T _ => ?_
     split_ifs <;> simp
   · rw [prod_one_add]

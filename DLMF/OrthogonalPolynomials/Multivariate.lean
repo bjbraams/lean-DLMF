@@ -115,7 +115,8 @@ theorem jacobi_disk_coefficients {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn 
 /-- Factor the larger holomorphic degree from the finite disk polynomial. -/
 theorem diskPolynomial_eq_jacobi_of_le {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn : n ≤ m) (z : ℂ) :
     diskPolynomial α m n z = z ^ (m - n) *
-      (jacobiPolyP α ((m - n : ℕ) : ℂ) n (2 * (z * star z) - 1) / jacobiPolyP α ((m - n : ℕ) : ℂ) n 1) := by
+      (jacobiPolyP α ((m - n : ℕ) : ℂ) n (2 * (z * star z) - 1) /
+          jacobiPolyP α ((m - n : ℕ) : ℂ) n 1) := by
   rw [jacobi_disk_coefficients hα hmn, Finset.mul_sum, diskPolynomial, min_eq_right hmn]
   apply Finset.sum_congr rfl
   intro j hj
@@ -199,7 +200,8 @@ theorem diskPolynomial_at_one {α : ℂ} (hα : -1 < α.re) (m n : ℕ) : diskPo
   rw [hsub]
   have key : ∑ j ∈ Finset.range (n + 1), (-1 : ℂ) ^ j * poch (α + 1) (m + n - j) *
       poch (-(m : ℂ)) j * poch (-(n : ℂ)) j / (poch (α + 1) m * poch (α + 1) n * j.factorial) =
-      (∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * poch (-(m : ℂ)) j * poch (α + 1 + m) (n - j)) /
+      (∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * poch (-(m : ℂ)) j *
+          poch (α + 1 + m) (n - j)) /
         poch (α + 1) n := by
     rw [Finset.sum_div]
     refine Finset.sum_congr rfl fun j hj => ?_
@@ -363,7 +365,8 @@ private lemma integral_unit_disk_polar (f : ℝ × ℝ → ℂ) :
 /-- The nonconstant integral Fourier modes have zero angular mean. -/
 private lemma integral_exp_int_mode {l : ℤ} (hl : l ≠ 0) :
     (∫ θ : ℝ in Ioo (-Real.pi) Real.pi, exp (I * (l : ℂ) * θ)) = 0 := by
-  rw [← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le (by linarith [Real.pi_pos] : -Real.pi ≤ Real.pi)]
+  rw [← integral_Ioc_eq_integral_Ioo,
+      ← intervalIntegral.integral_of_le (by linarith [Real.pi_pos] : -Real.pi ≤ Real.pi)]
   rw [integral_exp_mul_complex (mul_ne_zero I_ne_zero (Int.cast_ne_zero.mpr hl))]
   have he : exp (I * (l : ℂ) * Real.pi) = exp (I * (l : ℂ) * (-Real.pi)) := by
     apply (div_eq_one_iff_eq (exp_ne_zero _)).mp

@@ -101,7 +101,8 @@ private lemma analyticAt_sub_linear_isBigO {f : ℂ → ℂ} {d : ℂ}
   have h0 : p.coeff 0 = f 0 := hp.coeff_zero _
   have h1 : p.coeff 1 = d := hp.hasDerivAt.unique hd
   simpa [FormalMultilinearSeries.partialSum, Finset.sum_range_succ,
-    FormalMultilinearSeries.apply_eq_prod_smul_coeff, h0, h1, smul_eq_mul, sub_add_eq_sub_sub, mul_comm] using H
+    FormalMultilinearSeries.apply_eq_prod_smul_coeff, h0, h1, smul_eq_mul, sub_add_eq_sub_sub,
+        mul_comm] using H
 
 /-- The chain rule for a continued R-function along a path with equal node derivatives. -/
 private lemma hasDerivAt_carlsonR_comp_common {ι : Type*} [Fintype ι]
@@ -244,7 +245,8 @@ def ellAsymTriple : Set (ℝ × ℝ × ℝ) :=
 @[dlmf 19.27.E2]
 theorem symEllIntRF_asymp_large_z {z : ℝ} (hz : 0 < z) :
     (fun q : ℝ × ℝ => symEllIntRF q.1 q.2 z -
-        ((Real.log (8 * z / (ellAsymA q.1 q.2 + ellAsymG q.1 q.2)) / (2 * √z) : ℝ) : ℂ)) =O[𝓝[ellAsymPair] 0]
+        ((Real.log (8 * z / (ellAsymA q.1 q.2 + ellAsymG q.1 q.2)) / (2 * √z) : ℝ) : ℂ))
+            =O[𝓝[ellAsymPair] 0]
       (fun q : ℝ × ℝ => ((ellAsymA q.1 q.2 / z *
         (Real.log (8 * z / (ellAsymA q.1 q.2 + ellAsymG q.1 q.2)) / (2 * √z)) : ℝ) : ℂ)) := by
   sorry
@@ -289,8 +291,10 @@ theorem symEllIntRF_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
   have HD' : HasDerivAt F (-((√(y * z))⁻¹ : ℂ)) 0 := by
     refine HD.congr_deriv ?_
     simp only [l, zero_pow (by norm_num : (2 : ℕ) ≠ 0), mul_zero, add_zero, zero_add]
-    rw [← ofReal_add, ← ofReal_add, ← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
-      ← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
+    rw [← ofReal_add, ← ofReal_add, ← inv_cpow_half_eq_cpow_neg_half,
+        ← inv_cpow_half_eq_cpow_neg_half,
+      ← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hr.le,
+          Carlson.ofReal_cpow_half hyr.le,
       Carlson.ofReal_cpow_half hzr.le]
     rw [Real.sqrt_mul hy.le]
     change 2 * (-(k : ℂ) / 2 * _) = -((r : ℝ) : ℂ)⁻¹
@@ -480,8 +484,10 @@ theorem symEllIntRG_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
   have HDF' : HasDerivAt RF (-(1 / (2 * (r : ℂ)))) 0 := by
     refine HDF.congr_deriv ?_
     simp only [l, zero_pow (by norm_num : (2 : ℕ) ≠ 0), mul_zero, add_zero, zero_add]
-    rw [← ofReal_add, ← ofReal_add, ← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
-      ← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
+    rw [← ofReal_add, ← ofReal_add, ← inv_cpow_half_eq_cpow_neg_half,
+        ← inv_cpow_half_eq_cpow_neg_half,
+      ← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hr.le,
+          Carlson.ofReal_cpow_half hyr.le,
       Carlson.ofReal_cpow_half hzr.le]
     have H := congrArg (fun a : ℝ => (a : ℂ)) hS
     push_cast at H
@@ -643,7 +649,8 @@ theorem symEllIntRD_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
   have ha : AnalyticAt ℂ F 0 := by
     apply (analyticAt_const.mul haG).add
     apply analyticAt_const.mul
-    exact (analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))).inv hzne
+    exact (analyticAt_const.add
+        (analyticAt_const.add (analyticAt_const.mul analyticAt_id))).inv hzne
   have hS : √r * √(y + r) * √(z + r) = r * k :=
     sqrt_product_duplication_boundary hy.le hz.le
   have hb : ∑ i, b i = 5 / 2 := by norm_num [b, Fin.sum_univ_three]
@@ -714,7 +721,8 @@ theorem symEllIntRD_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
   have HH := HT.comp_tendsto hlim
   have h0 : F 0 = symEllIntRD 0 y z := by simpa using hF 0 le_rfl
   have he : (fun x : ℝ => F (√x : ℂ) - F 0 - (-(3 / ((r : ℂ) * z))) * (√x : ℂ)) =ᶠ[𝓝[≥] 0]
-      fun x : ℝ => symEllIntRD x y z - symEllIntRD 0 y z + ((3 * √x / (ellAsymH y z * z) : ℝ) : ℂ) := by
+      fun x : ℝ => symEllIntRD x y z - symEllIntRD 0 y z +
+          ((3 * √x / (ellAsymH y z * z) : ℝ) : ℂ) := by
     filter_upwards [self_mem_nhdsWithin] with x hx
     rw [hF x hx, h0]
     simp only [ellAsymH, Real.sqrt_mul hy.le, ofReal_div, ofReal_mul, ofReal_ofNat]

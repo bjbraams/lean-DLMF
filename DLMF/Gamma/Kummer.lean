@@ -39,7 +39,9 @@ open scoped Real Interval
 
 noncomputable section
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 /-- `log Γ` is interval integrable between any two positive reals. -/
 theorem intervalIntegrable_log_Gamma {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
@@ -98,4 +100,4 @@ theorem integral_log_sin_pi_zero_one :
   simp [smul_eq_mul]
   field [hc]
 
-end Real
+end DLMF.Gamma.Real

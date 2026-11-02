@@ -425,17 +425,17 @@ theorem hasSum_one_div_odd_sq :
 
 /-- Tail of the trigamma series. -/
 theorem tendsto_trigamma_nat_add_one :
-    Tendsto (fun k : ℕ => Real.trigamma (k + 1)) atTop (𝓝 0) := by
+    Tendsto (fun k : ℕ => Gamma.Real.trigamma (k + 1)) atTop (𝓝 0) := by
   have hs : Summable fun n : ℕ => ((n : ℝ) + 1)⁻¹ ^ 2 := by
     have := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr one_lt_two)
     simpa [one_div] using this
   refine (tendsto_sum_nat_add fun n : ℕ => ((n : ℝ) + 1)⁻¹ ^ 2).congr fun k => ?_
-  rw [Real.trigamma_eq_tsum (by positivity)]
+  rw [Gamma.Real.trigamma_eq_tsum (by positivity)]
   congr 1; funext n; push_cast; ring_nf
 
 /-- Consecutive trigamma values differ by `1/(k+1)²`. -/
 theorem trigamma_succ_sub (k : ℕ) :
-    Real.trigamma ((k : ℝ) + 1) - Real.trigamma (((k + 1 : ℕ) : ℝ) + 1) =
+    Gamma.Real.trigamma ((k : ℝ) + 1) - Gamma.Real.trigamma (((k + 1 : ℕ) : ℝ) + 1) =
       1 / ((k : ℝ) + 1) ^ 2 := by
   have h := trigamma_add_one (x := (k : ℝ) + 1) (by positivity)
   push_cast
@@ -443,7 +443,7 @@ theorem trigamma_succ_sub (k : ℕ) :
 
 /-- Even partial sums of the alternating trigamma series. -/
 theorem sum_alternating_trigamma_even (M : ℕ) :
-    ∑ k ∈ Finset.range (2 * M), (-1 : ℝ) ^ (k + 1) * Real.trigamma (k + 1) =
+    ∑ k ∈ Finset.range (2 * M), (-1 : ℝ) ^ (k + 1) * Gamma.Real.trigamma (k + 1) =
       -∑ j ∈ Finset.range M, (1 : ℝ) / (2 * j + 1) ^ 2 := by
   induction M with
   | zero => simp
@@ -459,8 +459,8 @@ theorem sum_alternating_trigamma_even (M : ℕ) :
 
 /-- Odd partial sums of the alternating trigamma series. -/
 theorem sum_alternating_trigamma_odd (M : ℕ) :
-    ∑ k ∈ Finset.range (2 * M + 1), (-1 : ℝ) ^ (k + 1) * Real.trigamma (k + 1) =
-      -∑ j ∈ Finset.range M, (1 : ℝ) / (2 * j + 1) ^ 2 - Real.trigamma ((2 * M : ℕ) + 1) := by
+    ∑ k ∈ Finset.range (2 * M + 1), (-1 : ℝ) ^ (k + 1) * Gamma.Real.trigamma (k + 1) =
+      -∑ j ∈ Finset.range M, (1 : ℝ) / (2 * j + 1) ^ 2 - Gamma.Real.trigamma ((2 * M : ℕ) + 1) := by
   rw [Finset.sum_range_succ, sum_alternating_trigamma_even]
   have e1 : (-1 : ℝ) ^ (2 * M + 1) = -1 := by rw [pow_succ, pow_mul]; norm_num
   rw [e1]; push_cast; ring
@@ -469,11 +469,12 @@ theorem sum_alternating_trigamma_odd (M : ℕ) :
 ordered partial sums; Lean's unordered `tsum` of the series would be `0`. -/
 @[dlmf 5.16.E1]
 theorem sum_alternating_trigamma :
-    Filter.Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, (-1 : ℝ) ^ (k + 1) * Real.trigamma (k + 1))
+    Filter.Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, (-1 : ℝ) ^ (k + 1) *
+        Gamma.Real.trigamma (k + 1))
       Filter.atTop (nhds (-π ^ 2 / 8)) := by
   set A : ℕ → ℝ := fun M => ∑ j ∈ Finset.range M, (1 : ℝ) / (2 * j + 1) ^ 2
-  set E : ℕ → ℝ := fun N => if Even N then 0 else Real.trigamma (((N - 1 : ℕ) : ℝ) + 1)
-  have hform : ∀ N, ∑ k ∈ Finset.range N, (-1 : ℝ) ^ (k + 1) * Real.trigamma (k + 1) =
+  set E : ℕ → ℝ := fun N => if Even N then 0 else Gamma.Real.trigamma (((N - 1 : ℕ) : ℝ) + 1)
+  have hform : ∀ N, ∑ k ∈ Finset.range N, (-1 : ℝ) ^ (k + 1) * Gamma.Real.trigamma (k + 1) =
       -A (N / 2) - E N := by
     intro N
     obtain ⟨M, rfl | rfl⟩ := Nat.even_or_odd' N
@@ -484,15 +485,15 @@ theorem sum_alternating_trigamma :
   simp_rw [hform]
   have hA : Tendsto (fun N => A (N / 2)) atTop (𝓝 (π ^ 2 / 8)) :=
     hasSum_one_div_odd_sq.tendsto_sum_nat.comp (Nat.tendsto_div_const_atTop two_ne_zero)
-  have hT : Tendsto (fun N : ℕ => Real.trigamma (((N - 1 : ℕ) : ℝ) + 1)) atTop (𝓝 0) :=
+  have hT : Tendsto (fun N : ℕ => Gamma.Real.trigamma (((N - 1 : ℕ) : ℝ) + 1)) atTop (𝓝 0) :=
     tendsto_trigamma_nat_add_one.comp (tendsto_sub_atTop_nat 1)
   have hE : Tendsto E atTop (𝓝 0) := by
     refine squeeze_zero (fun N => ?_) (fun N => ?_) hT
     · simp only [E]; split_ifs
       · exact le_rfl
-      · rw [Real.trigamma_eq_tsum (by positivity)]; positivity
+      · rw [Gamma.Real.trigamma_eq_tsum (by positivity)]; positivity
     · simp only [E]; split_ifs
-      · rw [Real.trigamma_eq_tsum (by positivity)]; positivity
+      · rw [Gamma.Real.trigamma_eq_tsum (by positivity)]; positivity
       · exact le_rfl
   have := (hA.neg).sub hE
   simpa [neg_div] using this
@@ -503,10 +504,10 @@ open Finset
 open scoped ENNReal
 
 /-- `ψ'(k+2) ≤ 1/(k+1)`, by comparison with a telescoping series. -/
-theorem trigamma_add_two_le (k : ℕ) : Real.trigamma (k + 2) ≤ 1 / (k + 1) := by
-  rw [Real.trigamma_eq_tsum (by positivity)]
+theorem trigamma_add_two_le (k : ℕ) : Gamma.Real.trigamma (k + 2) ≤ 1 / (k + 1) := by
+  rw [Gamma.Real.trigamma_eq_tsum (by positivity)]
   refine Real.tsum_le_of_sum_range_le (fun n => by positivity) fun N => ?_
-  have h := Real.sum_recip_sub_recip_range ((k : ℝ) + 1) N
+  have h := Gamma.Real.sum_recip_sub_recip_range ((k : ℝ) + 1) N
   have hle : ∀ n ∈ range N, ((k : ℝ) + 2 + n)⁻¹ ^ 2 ≤
       ((k : ℝ) + 1 + n)⁻¹ - ((k : ℝ) + 1 + n + 1)⁻¹ := by
     intro n _
@@ -523,15 +524,15 @@ theorem trigamma_add_two_le (k : ℕ) : Real.trigamma (k + 2) ≤ 1 / (k + 1) :=
 /-- Row sums of the double series for 5.16.2: `∑_q 1/((p+1)(p+q+2)²) = ψ'(p+2)/(p+1)`. -/
 private lemma sumTrigamma_row (p : ℕ) :
     ∑' q : ℕ, ENNReal.ofReal (1 / ((p + 1 : ℝ) * ((p : ℝ) + q + 2) ^ 2)) =
-      ENNReal.ofReal ((1 / (p + 1 : ℝ)) * Real.trigamma (p + 2)) := by
-  have hS := Real.summable_trigamma (by positivity : (0 : ℝ) < p + 2)
+      ENNReal.ofReal ((1 / (p + 1 : ℝ)) * Gamma.Real.trigamma (p + 2)) := by
+  have hS := Gamma.Real.summable_trigamma (by positivity : (0 : ℝ) < p + 2)
   rw [show (fun q : ℕ => ENNReal.ofReal (1 / ((p + 1 : ℝ) * ((p : ℝ) + q + 2) ^ 2))) =
       fun q : ℕ => ENNReal.ofReal (1 / (p + 1 : ℝ)) *
       ENNReal.ofReal (((p : ℝ) + 2 + q)⁻¹ ^ 2) by
     funext q; rw [← ENNReal.ofReal_mul (by positivity)]; congr 1
     field_simp; ring_nf,
     ENNReal.tsum_mul_left, ← ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity) hS,
-    ← ENNReal.ofReal_mul (by positivity), ← Real.trigamma_eq_tsum (by positivity)]
+    ← ENNReal.ofReal_mul (by positivity), ← Gamma.Real.trigamma_eq_tsum (by positivity)]
 
 /-- Column sums of the double series for 5.16.2:
 `∑_q 1/((p+1)(q+1)(p+q+2)) = ∑_{j≤p} 1/((j+1)(p+1)²)`. -/
@@ -539,26 +540,26 @@ private lemma sumTrigamma_col (p : ℕ) :
     ∑' q : ℕ, ENNReal.ofReal (1 / ((p + 1 : ℝ) * (q + 1) * ((p : ℝ) + q + 2))) =
       ∑ j ∈ range (p + 1), ENNReal.ofReal (1 / ((j + 1 : ℝ) * (p + 1) ^ 2)) := by
   have hx : (0 : ℝ) < p + 2 := by positivity
-  have hT : ∑' n, Real.digammaSeriesTerm ((p : ℝ) + 2) n =
+  have hT : ∑' n, Gamma.Real.digammaSeriesTerm ((p : ℝ) + 2) n =
       ∑ j ∈ range (p + 1), 1 / (j + 1 : ℝ) := by
-    have h1 := Real.digamma_eq_tsum hx
-    have h2 := Real.digamma_nat_add_one (p + 1)
+    have h1 := Gamma.Real.digamma_eq_tsum hx
+    have h2 := Gamma.Real.digamma_nat_add_one (p + 1)
     rw [show ((p + 1 : ℕ) : ℝ) + 1 = (p : ℝ) + 2 by push_cast; ring, h1] at h2
     rw [show ∑ j ∈ range (p + 1), 1 / (j + 1 : ℝ) = (harmonic (p + 1) : ℝ) by
       simp [harmonic]]
     linarith
-  have hD0 : ∀ n, 0 ≤ Real.digammaSeriesTerm ((p : ℝ) + 2) n := fun n => by
-    simp only [Real.digammaSeriesTerm]
+  have hD0 : ∀ n, 0 ≤ Gamma.Real.digammaSeriesTerm ((p : ℝ) + 2) n := fun n => by
+    simp only [Gamma.Real.digammaSeriesTerm]
     rw [sub_nonneg]
     exact inv_anti₀ (by positivity) (by linarith)
   rw [show (fun q : ℕ => ENNReal.ofReal (1 / ((p + 1 : ℝ) * (q + 1) * ((p : ℝ) + q + 2)))) =
       fun q : ℕ => ENNReal.ofReal (1 / (p + 1 : ℝ) ^ 2) *
-      ENNReal.ofReal (Real.digammaSeriesTerm ((p : ℝ) + 2) q) by
+      ENNReal.ofReal (Gamma.Real.digammaSeriesTerm ((p : ℝ) + 2) q) by
     funext q; rw [← ENNReal.ofReal_mul (by positivity)]; congr 1
-    simp only [Real.digammaSeriesTerm]
+    simp only [Gamma.Real.digammaSeriesTerm]
     field_simp; ring,
     ENNReal.tsum_mul_left, ← ENNReal.ofReal_tsum_of_nonneg hD0
-      (Real.summable_digammaSeriesTerm hx), hT, ← ENNReal.ofReal_mul (by positivity),
+      (Gamma.Real.summable_digammaSeriesTerm hx), hT, ← ENNReal.ofReal_mul (by positivity),
     mul_sum, ENNReal.ofReal_sum_of_nonneg (fun j _ => by positivity)]
   refine sum_congr rfl fun j _ => ?_
   congr 1; field_simp
@@ -567,9 +568,9 @@ private lemma sumTrigamma_col (p : ℕ) :
 private lemma sumTrigamma_tri (j : ℕ) :
     ∑' p : ℕ, (if j ≤ p then ENNReal.ofReal (1 / ((j + 1 : ℝ) * (p + 1) ^ 2)) else 0) =
       ENNReal.ofReal (1 / ((j : ℝ) + 1) ^ 3) +
-        ENNReal.ofReal ((1 / (j + 1 : ℝ)) * Real.trigamma (j + 2)) := by
-  have ha0 : 0 ≤ (1 / (j + 1 : ℝ)) * Real.trigamma (j + 2) := by
-    rw [Real.trigamma_eq_tsum (by positivity)]; positivity
+        ENNReal.ofReal ((1 / (j + 1 : ℝ)) * Gamma.Real.trigamma (j + 2)) := by
+  have ha0 : 0 ≤ (1 / (j + 1 : ℝ)) * Gamma.Real.trigamma (j + 2) := by
+    rw [Gamma.Real.trigamma_eq_tsum (by positivity)]; positivity
   rw [← Summable.sum_add_tsum_nat_add' (f := fun p : ℕ =>
     if j ≤ p then ENNReal.ofReal (1 / ((j + 1 : ℝ) * (p + 1) ^ 2)) else 0) (k := j)
     ENNReal.summable, sum_eq_zero fun i hi => by simp [show ¬ j ≤ i by simpa using hi],
@@ -581,13 +582,13 @@ private lemma sumTrigamma_tri (j : ℕ) :
     funext i; rw [← ENNReal.ofReal_mul (by positivity)]; congr 1; push_cast
     field_simp; ring,
     ENNReal.tsum_mul_left, tsum_eq_zero_add' ENNReal.summable]
-  have hS := Real.summable_trigamma (by positivity : (0 : ℝ) < j + 2)
+  have hS := Gamma.Real.summable_trigamma (by positivity : (0 : ℝ) < j + 2)
   rw [show (fun i : ℕ => ENNReal.ofReal (((j : ℝ) + 1 + ((i + 1 : ℕ) : ℝ))⁻¹ ^ 2)) =
       fun i : ℕ => ENNReal.ofReal (((j : ℝ) + 2 + i)⁻¹ ^ 2) by
     funext i; push_cast; ring_nf,
     ← ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity) hS,
-    ← Real.trigamma_eq_tsum (by positivity), ← ENNReal.ofReal_add (by positivity)
-      (by rw [Real.trigamma_eq_tsum (by positivity)]; positivity),
+    ← Gamma.Real.trigamma_eq_tsum (by positivity), ← ENNReal.ofReal_add (by positivity)
+      (by rw [Gamma.Real.trigamma_eq_tsum (by positivity)]; positivity),
     ← ENNReal.ofReal_mul (by positivity), ← ENNReal.ofReal_add (by positivity) ha0]
   congr 1
   push_cast
@@ -597,16 +598,16 @@ private lemma sumTrigamma_tri (j : ℕ) :
 /-- DLMF 5.16.2: `∑_{k≥1} ψ'(k + 1)/k = ζ(3)`. -/
 @[dlmf 5.16.E2]
 theorem sum_trigamma_div :
-    ∑' k : ℕ, (1 / (k + 1 : ℝ)) * Real.trigamma (k + 2) = (riemannZeta 3).re := by
+    ∑' k : ℕ, (1 / (k + 1 : ℝ)) * Gamma.Real.trigamma (k + 2) = (riemannZeta 3).re := by
   -- the summand and its ENNReal sum `L`
-  set a : ℕ → ℝ := fun k => (1 / (k + 1 : ℝ)) * Real.trigamma (k + 2) with ha
+  set a : ℕ → ℝ := fun k => (1 / (k + 1 : ℝ)) * Gamma.Real.trigamma (k + 2) with ha
   have ha0 : ∀ k, 0 ≤ a k := fun k => by
-    simp only [ha]; rw [Real.trigamma_eq_tsum (by positivity)]; positivity
+    simp only [ha]; rw [Gamma.Real.trigamma_eq_tsum (by positivity)]; positivity
   have haS : Summable a := by
     refine Summable.of_nonneg_of_le ha0 (fun k => ?_)
       ((Real.summable_one_div_nat_add_rpow 1 2).mpr one_lt_two)
     simp only [ha]
-    calc (1 / (k + 1 : ℝ)) * Real.trigamma (k + 2) ≤ (1 / (k + 1)) * (1 / (k + 1)) :=
+    calc (1 / (k + 1 : ℝ)) * Gamma.Real.trigamma (k + 2) ≤ (1 / (k + 1)) * (1 / (k + 1)) :=
           mul_le_mul_of_nonneg_left (trigamma_add_two_le k) (by positivity)
       _ = 1 / |(k : ℝ) + 1| ^ (2 : ℝ) := by
           rw [abs_of_pos (by positivity), Real.rpow_two]; field_simp

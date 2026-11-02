@@ -373,7 +373,8 @@ theorem contFracEquiv_unit_denominators (hb : ∀ n, 1 ≤ n → b n ≠ 0) :
       field_simp [hb (n + 1) (by omega)]
 
 /-- The factors `d_n` of `contFracUnitFactor` do not vanish. -/
-private lemma contFracUnitFactor_ne_zero (ha : ∀ n, 1 ≤ n → a n ≠ 0) (n : ℕ) : contFracUnitFactor a n ≠ 0 := by
+private lemma contFracUnitFactor_ne_zero (ha : ∀ n, 1 ≤ n → a n ≠ 0) (n : ℕ) :
+    contFracUnitFactor a n ≠ 0 := by
   induction n with
   | zero => simp [contFracUnitFactor]
   | succ n ih =>
@@ -604,13 +605,154 @@ theorem exists_contFrac_convs_iff (C : ℕ → K) :
 
 /-! ## Contractions: even and odd parts -/
 
+/-- The continuants of the even part, for any pair of sequences with the recurrences. -/
+private theorem evenPart_seq {X X' : ℕ → K}
+    (hX : ∀ n, X (n + 2) = b (n + 2) * X (n + 1) + a (n + 2) * X n)
+    (hX' : ∀ n, X' (n + 2) = evenPartB a b (n + 2) * X' (n + 1) + evenPartA a b (n + 2) * X' n)
+    (h0 : X' 0 = X 0) (h1 : X' 1 = X 2) :
+    ∀ n, X' n = (∏ k ∈ Ico 1 n, b (2 * k)) * X (2 * n) := by
+  have key : ∀ n, X' n = (∏ k ∈ Ico 1 n, b (2 * k)) * X (2 * n) ∧
+      X' (n + 1) = (∏ k ∈ Ico 1 (n + 1), b (2 * k)) * X (2 * (n + 1)) := by
+    intro n
+    induction n with
+    | zero => exact ⟨by simp [h0], by simp [h1]⟩
+    | succ n ih =>
+      refine ⟨ih.2, ?_⟩
+      rw [hX' n, ih.1, ih.2]
+      rcases n with _ | k
+      · have e2 : X 2 = b 2 * X 1 + a 2 * X 0 := hX 0
+        have e3 : X 3 = b 3 * X 2 + a 3 * X 1 := hX 1
+        have e4 : X 4 = b 4 * X 3 + a 4 * X 2 := hX 2
+        have hB : evenPartB a b 2 = a 3 * b 4 + b 2 * (a 4 + b 3 * b 4) := rfl
+        have hA : evenPartA a b 2 = -(a 2 * a 3 * b 4) := rfl
+        simp only [zero_add, Ico_self, prod_empty, one_mul, mul_zero, mul_one,
+          show (2 : ℕ) * 2 = 4 from rfl, Nat.reduceAdd, hB, hA]
+        rw [Finset.prod_Ico_succ_top (by norm_num), Ico_self, prod_empty, one_mul,
+          show Ico 1 0 = (∅ : Finset ℕ) by decide, prod_empty, one_mul]
+        linear_combination (-b 2 * b 4) * e3 + (-b 2) * e4 + (a 3 * b 4) * e2
+      · have e2 : X (2 * k + 4) = b (2 * k + 4) * X (2 * k + 3) + a (2 * k + 4) * X (2 * k + 2) :=
+          hX (2 * k + 2)
+        have e3 : X (2 * k + 5) = b (2 * k + 5) * X (2 * k + 4) + a (2 * k + 5) * X (2 * k + 3) :=
+          hX (2 * k + 3)
+        have e4 : X (2 * k + 6) = b (2 * k + 6) * X (2 * k + 5) + a (2 * k + 6) * X (2 * k + 4) :=
+          hX (2 * k + 4)
+        have hB : evenPartB a b (k + 1 + 2) = a (2 * k + 5) * b (2 * k + 6) +
+            b (2 * k + 4) * (a (2 * k + 6) + b (2 * k + 5) * b (2 * k + 6)) := rfl
+        have hA : evenPartA a b (k + 1 + 2) =
+            -(a (2 * k + 4) * a (2 * k + 5) * b (2 * k + 2) * b (2 * k + 6)) := rfl
+        have hc1 : ∏ i ∈ Ico 1 (k + 1 + 1), b (2 * i) = (∏ i ∈ Ico 1 (k + 1), b (2 * i)) *
+            b (2 * k + 2) := Finset.prod_Ico_succ_top (by omega) _
+        have hc2 : ∏ i ∈ Ico 1 (k + 1 + 1 + 1), b (2 * i) =
+            (∏ i ∈ Ico 1 (k + 1 + 1), b (2 * i)) * b (2 * k + 4) :=
+          Finset.prod_Ico_succ_top (by omega) _
+        rw [hB, hA, hc2, hc1]
+        rw [show 2 * (k + 1) = 2 * k + 2 by ring, show 2 * (k + 1 + 1) = 2 * k + 4 by ring,
+          show 2 * (k + 1 + 1 + 1) = 2 * k + 6 by ring]
+        set c := ∏ i ∈ Ico 1 (k + 1), b (2 * i)
+        linear_combination (-c * b (2 * k + 2) * b (2 * k + 4) * b (2 * k + 6)) * e3 +
+          (-c * b (2 * k + 2) * b (2 * k + 4)) * e4 +
+          (a (2 * k + 5) * b (2 * k + 6) * c * b (2 * k + 2)) * e2
+  exact fun n => (key n).1
+
+/-- The continuants of the odd part, for any pair of sequences with the recurrences. -/
+private theorem oddPart_seq {X X' : ℕ → K}
+    (hX : ∀ n, X (n + 2) = b (n + 2) * X (n + 1) + a (n + 2) * X n)
+    (hX' : ∀ n, X' (n + 2) = oddPartB a b (n + 2) * X' (n + 1) + oddPartA a b (n + 2) * X' n)
+    (h0 : b 1 * X' 0 = X 1) (h1 : b 1 * X' 1 = b 1 * X 3) :
+    ∀ n, b 1 * X' n = (∏ k ∈ range n, b (2 * k + 1)) * X (2 * n + 1) := by
+  have key : ∀ n, b 1 * X' n = (∏ k ∈ range n, b (2 * k + 1)) * X (2 * n + 1) ∧
+      b 1 * X' (n + 1) = (∏ k ∈ range (n + 1), b (2 * k + 1)) * X (2 * (n + 1) + 1) := by
+    intro n
+    induction n with
+    | zero => exact ⟨by simp [h0], by simp [h1]⟩
+    | succ n ih =>
+      refine ⟨ih.2, ?_⟩
+      have e2 : X (2 * n + 3) = b (2 * n + 3) * X (2 * n + 2) + a (2 * n + 3) * X (2 * n + 1) :=
+        hX (2 * n + 1)
+      have e3 : X (2 * n + 4) = b (2 * n + 4) * X (2 * n + 3) + a (2 * n + 4) * X (2 * n + 2) :=
+        hX (2 * n + 2)
+      have e4 : X (2 * n + 5) = b (2 * n + 5) * X (2 * n + 4) + a (2 * n + 5) * X (2 * n + 3) :=
+        hX (2 * n + 3)
+      have hB : oddPartB a b (n + 2) = a (2 * n + 4) * b (2 * n + 5) +
+          b (2 * n + 3) * (a (2 * n + 5) + b (2 * n + 4) * b (2 * n + 5)) := rfl
+      have hA : oddPartA a b (n + 2) =
+          -(a (2 * n + 3) * a (2 * n + 4) * b (2 * n + 1) * b (2 * n + 5)) := rfl
+      have hc1 : ∏ i ∈ range (n + 1), b (2 * i + 1) = (∏ i ∈ range n, b (2 * i + 1)) *
+          b (2 * n + 1) := prod_range_succ _ _
+      have hc2 : ∏ i ∈ range (n + 1 + 1), b (2 * i + 1) =
+          (∏ i ∈ range (n + 1), b (2 * i + 1)) * b (2 * n + 3) := prod_range_succ _ _
+      rw [hX' n, mul_add, ← mul_assoc, mul_comm (b 1), mul_assoc, ih.2, ← mul_assoc (b 1),
+        mul_comm (b 1), mul_assoc, ih.1, hB, hA, hc2, hc1,
+        show 2 * (n + 1) + 1 = 2 * n + 3 by ring, show 2 * (n + 1 + 1) + 1 = 2 * n + 5 by ring]
+      set c := ∏ i ∈ range n, b (2 * i + 1)
+      linear_combination (-c * b (2 * n + 1) * b (2 * n + 3) * b (2 * n + 5)) * e3 +
+        (-c * b (2 * n + 1) * b (2 * n + 3)) * e4 +
+        (a (2 * n + 4) * b (2 * n + 5) * c * b (2 * n + 1)) * e2
+  exact fun n => (key n).1
+
+/-- Continuants of the even part: `A'_n = c_n A_{2n}`, `B'_n = c_n B_{2n}`,
+`c_n = ∏_{k=1}^{n-1} b_{2k}`. -/
+private theorem evenPart_nums_dens (n : ℕ) :
+    (contFrac (evenPartA a b) (evenPartB a b)).nums n =
+        (∏ k ∈ Ico 1 n, b (2 * k)) * (contFrac a b).nums (2 * n) ∧
+      (contFrac (evenPartA a b) (evenPartB a b)).dens n =
+        (∏ k ∈ Ico 1 n, b (2 * k)) * (contFrac a b).dens (2 * n) :=
+  ⟨evenPart_seq a b (contFrac_nums_step a b) (contFrac_nums_step _ _)
+    (by rw [contFrac_nums_zero, contFrac_nums_zero]; rfl)
+    (by rw [contFrac_nums_one, contFrac_nums_step, contFrac_nums_one, contFrac_nums_zero]
+        simp only [evenPartA, evenPartB]; ring) n,
+  evenPart_seq a b (contFrac_dens_step a b) (contFrac_dens_step _ _)
+    (by rw [contFrac_dens_zero, contFrac_dens_zero])
+    (by rw [contFrac_dens_one, contFrac_dens_step, contFrac_dens_one, contFrac_dens_zero]
+        simp only [evenPartB]; ring) n⟩
+
+/-- Continuants of the odd part: `b₁ A'_n = d_n A_{2n+1}`, `b₁ B'_n = d_n B_{2n+1}`,
+`d_n = ∏_{k=0}^{n-1} b_{2k+1}`. -/
+private theorem oddPart_nums_dens (hb1 : b 1 ≠ 0) (n : ℕ) :
+    b 1 * (contFrac (oddPartA a b) (oddPartB a b)).nums n =
+        (∏ k ∈ range n, b (2 * k + 1)) * (contFrac a b).nums (2 * n + 1) ∧
+      b 1 * (contFrac (oddPartA a b) (oddPartB a b)).dens n =
+        (∏ k ∈ range n, b (2 * k + 1)) * (contFrac a b).dens (2 * n + 1) :=
+  ⟨oddPart_seq a b (contFrac_nums_step a b) (contFrac_nums_step _ _)
+    (by rw [contFrac_nums_zero, contFrac_nums_one]; simp only [oddPartB]; field_simp; ring)
+    (by rw [contFrac_nums_one, contFrac_nums_step, contFrac_nums_step, contFrac_nums_one,
+          contFrac_nums_zero]
+        simp only [oddPartA, oddPartB]; field_simp; ring) n,
+  oddPart_seq a b (contFrac_dens_step a b) (contFrac_dens_step _ _)
+    (by rw [contFrac_dens_zero, contFrac_dens_one, mul_one])
+    (by rw [contFrac_dens_one, contFrac_dens_step, contFrac_dens_step, contFrac_dens_one,
+          contFrac_dens_zero]
+        simp only [oddPartB]; ring) n⟩
+
+/-- Consecutive convergents of a fraction with nonzero partial numerators and finite
+convergents are distinct (DLMF 1.12.8). -/
+private theorem contFrac_convs_succ_ne {a' b' : ℕ → K} (ha : ∀ k, 1 ≤ k → a' k ≠ 0)
+    (hB : ∀ n, (contFrac a' b').dens n ≠ 0) (m : ℕ) :
+    (contFrac a' b').convs (m + 1) ≠ (contFrac a' b').convs m := by
+  intro h
+  have := contFrac_convs_sub a' b' m (hB m) (hB (m + 1))
+  rw [h, sub_self] at this
+  refine (div_ne_zero (mul_ne_zero (pow_ne_zero _ (neg_ne_zero.2 one_ne_zero))
+    (prod_ne_zero_iff.2 fun k _ => ha (k + 1) (by omega))) (mul_ne_zero (hB m) (hB (m + 1))))
+    this.symm
+
+/-- If `b_{n+2} = 0` and `a_{n+2} ≠ 0` then `C_{n+2} = C_n`. -/
+private theorem contFrac_convs_add_two_eq {n : ℕ} (hb : b (n + 2) = 0) (ha : a (n + 2) ≠ 0) :
+    (contFrac a b).convs (n + 2) = (contFrac a b).convs n := by
+  simp only [GenContFract.convs]
+  rw [contFrac_nums_step, contFrac_dens_step, hb, zero_mul, zero_add, zero_mul, zero_add,
+    mul_div_mul_left _ _ ha]
+
 /-- DLMF 1.12.23: if `b_{2k} ≠ 0` (`k ≥ 1`), the continued fraction with elements
 `evenPartA a b`, `evenPartB a b` has the convergents `C'_n = C_{2n}` (its continuants are
 `∏_{k=1}^{n-1} b_{2k}` times `A_{2n}`, `B_{2n}`); it is the even part of `C`. -/
 @[dlmf 1.12.E23]
 theorem contFrac_evenPart_convs (hb : ∀ k, 1 ≤ k → b (2 * k) ≠ 0) (n : ℕ) :
     (contFrac (evenPartA a b) (evenPartB a b)).convs n = (contFrac a b).convs (2 * n) := by
-  sorry
+  have hc : ∏ k ∈ Ico 1 n, b (2 * k) ≠ 0 :=
+    prod_ne_zero_iff.2 fun k hk => hb k (mem_Ico.1 hk).1
+  simp only [GenContFract.convs]
+  rw [(evenPart_nums_dens a b n).1, (evenPart_nums_dens a b n).2, mul_div_mul_left _ _ hc]
 
 /-- DLMF §1.12(iv): the even part exists iff `b_{2k} ≠ 0`, `k ≥ 1`: for a fraction with
 `a_n ≠ 0` and finite convergents (`B_n ≠ 0`), there is a fraction with nonzero partial
@@ -620,7 +762,25 @@ theorem exists_evenPart_iff (ha : ∀ k, 1 ≤ k → a k ≠ 0) (hB : ∀ n, (co
     (∃ a' b' : ℕ → K, (∀ k, 1 ≤ k → a' k ≠ 0) ∧ (∀ n, (contFrac a' b').dens n ≠ 0) ∧
       ∀ n, (contFrac a' b').convs n = (contFrac a b).convs (2 * n)) ↔
       ∀ k, 1 ≤ k → b (2 * k) ≠ 0 := by
-  sorry
+  constructor
+  · rintro ⟨a', b', ha', hB', hC⟩ k hk hbk
+    obtain ⟨m, rfl⟩ : ∃ m, k = m + 1 := ⟨k - 1, by omega⟩
+    have h1 := contFrac_convs_add_two_eq a b (n := 2 * m)
+      (by rw [show 2 * m + 2 = 2 * (m + 1) by ring]; exact hbk) (ha _ (by omega))
+    refine contFrac_convs_succ_ne ha' hB' m ?_
+    rw [hC, hC, show 2 * (m + 1) = 2 * m + 2 by ring, h1]
+  · intro hb
+    refine ⟨evenPartA a b, evenPartB a b, fun k hk => ?_, fun n => ?_,
+      contFrac_evenPart_convs a b hb⟩
+    · rcases k with _ | _ | _ | k
+      · omega
+      · exact mul_ne_zero (ha 1 le_rfl) (hb 1 le_rfl)
+      · exact neg_ne_zero.2 (mul_ne_zero (mul_ne_zero (ha 2 (by omega)) (ha 3 (by omega)))
+          (hb 2 (by omega)))
+      · exact neg_ne_zero.2 (mul_ne_zero (mul_ne_zero (mul_ne_zero (ha _ (by omega))
+          (ha _ (by omega))) (hb (k + 1) (by omega))) (hb (k + 3) (by omega)))
+    · rw [(evenPart_nums_dens a b n).2]
+      exact mul_ne_zero (prod_ne_zero_iff.2 fun k hk => hb k (mem_Ico.1 hk).1) (hB _)
 
 /-- DLMF 1.12.24: if `b_{2k+1} ≠ 0` (`k ≥ 0`), the continued fraction with elements
 `oddPartA a b`, `oddPartB a b` has the convergents `C'_n = C_{2n+1}`; it is the odd part
@@ -628,7 +788,11 @@ of `C`. -/
 @[dlmf 1.12.E24]
 theorem contFrac_oddPart_convs (hb : ∀ k, b (2 * k + 1) ≠ 0) (n : ℕ) :
     (contFrac (oddPartA a b) (oddPartB a b)).convs n = (contFrac a b).convs (2 * n + 1) := by
-  sorry
+  have hb1 : b 1 ≠ 0 := hb 0
+  have hc : ∏ k ∈ range n, b (2 * k + 1) ≠ 0 := prod_ne_zero_iff.2 fun k _ => hb k
+  simp only [GenContFract.convs]
+  rw [← mul_div_mul_left _ _ hb1, (oddPart_nums_dens a b hb1 n).1,
+    (oddPart_nums_dens a b hb1 n).2, mul_div_mul_left _ _ hc]
 
 /-- DLMF §1.12(iv): the odd part exists iff `b_{2k+1} ≠ 0`, `k ≥ 0` (for a fraction with
 `a_n ≠ 0` and finite convergents). -/
@@ -637,6 +801,27 @@ theorem exists_oddPart_iff (ha : ∀ k, 1 ≤ k → a k ≠ 0) (hB : ∀ n, (con
     (∃ a' b' : ℕ → K, (∀ k, 1 ≤ k → a' k ≠ 0) ∧ (∀ n, (contFrac a' b').dens n ≠ 0) ∧
       ∀ n, (contFrac a' b').convs n = (contFrac a b).convs (2 * n + 1)) ↔
       ∀ k, b (2 * k + 1) ≠ 0 := by
-  sorry
+  constructor
+  · rintro ⟨a', b', ha', hB', hC⟩ k hbk
+    rcases k with _ | m
+    · exact hB 1 (by rw [contFrac_dens_one]; exact hbk)
+    · have h1 := contFrac_convs_add_two_eq a b (n := 2 * m + 1)
+        (by rw [show 2 * m + 1 + 2 = 2 * (m + 1) + 1 by ring]; exact hbk) (ha _ (by omega))
+      refine contFrac_convs_succ_ne ha' hB' m ?_
+      rw [hC, hC, show 2 * (m + 1) + 1 = 2 * m + 1 + 2 by ring, h1]
+  · intro hb
+    have hb1 : b 1 ≠ 0 := hb 0
+    refine ⟨oddPartA a b, oddPartB a b, fun k hk => ?_, fun n => ?_,
+      contFrac_oddPart_convs a b hb⟩
+    · rcases k with _ | _ | k
+      · omega
+      · exact neg_ne_zero.2 (div_ne_zero (mul_ne_zero (mul_ne_zero (ha 1 le_rfl)
+          (ha 2 (by omega))) (hb 1)) hb1)
+      · exact neg_ne_zero.2 (mul_ne_zero (mul_ne_zero (mul_ne_zero (ha _ (by omega))
+          (ha _ (by omega))) (hb k)) (hb (k + 2)))
+    · intro h0
+      have := (oddPart_nums_dens a b hb1 n).2
+      rw [h0, mul_zero] at this
+      exact mul_ne_zero (prod_ne_zero_iff.2 fun k _ => hb k) (hB _) this.symm
 
 end DLMF.AlgebraicAnalytic

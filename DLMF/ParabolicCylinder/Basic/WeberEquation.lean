@@ -80,7 +80,8 @@ theorem hasDerivAt_pcfEvenDeriv (a z : ℂ) :
   have h1 := hasDerivAt_kummerM_half_sq (α := a / 2 + 1 / 4 + 1) hb1 z
   have h := (((hasDerivAt_id z).mul (hasDerivAt_exp_neg_sq_div_four z)).mul
     ((h0.const_mul (-(1 / 2))).add (h1.const_mul (a + 1 / 2))))
-  have hc := kummerM_ode_contiguous (a := a / 2 + 1 / 4) (b := 1 / 2) Complex.one_div_two_ne_neg_natCast
+  have hc := kummerM_ode_contiguous (a := a / 2 + 1 / 4) (b := 1 / 2)
+      Complex.one_div_two_ne_neg_natCast
     (z := z ^ 2 / 2)
   refine h.congr_deriv ?_
   unfold pcfEven

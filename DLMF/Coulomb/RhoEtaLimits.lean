@@ -635,7 +635,8 @@ private lemma sub_arctan_nonneg_and_le {x : ℝ} (hx : 0 ≤ x) :
   · have := hh hx; simp at this; linarith
 
 /-- `|x - arctan x| ≤ |x|³/3`. -/
-private lemma abs_sub_arctan_le_abs_pow_three_div_three (x : ℝ) : |x - Real.arctan x| ≤ |x| ^ 3 / 3 := by
+private lemma abs_sub_arctan_le_abs_pow_three_div_three (x : ℝ) : |x -
+    Real.arctan x| ≤ |x| ^ 3 / 3 := by
   rcases le_total 0 x with hx | hx
   · obtain ⟨h1, h2⟩ := sub_arctan_nonneg_and_le hx
     rw [abs_of_nonneg h1, abs_of_nonneg hx]; exact h2
@@ -1132,7 +1133,8 @@ private lemma norm_one_add_I_mul (η : ℝ) : ‖1 + I * (η : ℂ)‖ = Real.sq
   norm_num
 
 /-- Stieltjes' bound at `1 + iη`. -/
-private lemma norm_binetMu_one_add_I_mul_le {η : ℝ} (hη : η ≠ 0) : ‖binetMu (1 + I * η)‖ ≤ 1 / (6 * |η|) := by
+private lemma norm_binetMu_one_add_I_mul_le {η : ℝ} (hη : η ≠ 0) : ‖binetMu (1 + I * η)‖ ≤ 1 /
+    (6 * |η|) := by
   refine (norm_binetMu_le (one_add_I_mul_mem_slitPlane η)).trans ?_
   have hre : (1 + I * (η : ℂ)).re = 1 := by simp
   have : |η| ≤ ‖1 + I * (η : ℂ)‖ := by
@@ -1184,7 +1186,8 @@ private lemma tendsto_phaseShift_zero_sub_atTop :
   rw [add_zero, add_zero] at this
   refine this.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with η hη
-  rw [phaseShift_zero_eq_im_binetExponent, im_binetExponent_one_add_I_mul, arg_one_add_I_mul, norm_one_add_I_mul]
+  rw [phaseShift_zero_eq_im_binetExponent, im_binetExponent_one_add_I_mul, arg_one_add_I_mul,
+      norm_one_add_I_mul]
   ring
 
 

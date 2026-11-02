@@ -47,11 +47,14 @@ namespace DLMF.Confluent
 
 /-- Residue at the right-pole family t=(A+n)/2; the minus one half Jacobian is retained. -/
 def pcfBarnesResidue (second : Bool) (a z : ℂ) (n : ℕ) : ℂ :=
-  let A:=if second then 1/2-a else a+1/2; let r:=(A+n)/2; (-1)^(n+1)/(2*(n.factorial:ℂ))*Gamma r*2^r*z^(A+n)*(if second then cos (π*r) else 1)
+  let A:=if second then 1/2-a else a+1/2; let r:=(A+n)/2;
+      (-1)^(n+1)/(2*(n.factorial:ℂ))*Gamma r*2^r*z^(A+n)*(if second then cos (π*r) else 1)
 
-/-- The finite set of right-family poles crossed by replacing a separating contour with the vertical line Re t=c. -/
+/-- The finite set of right-family poles crossed by replacing a separating contour with the vertical
+line Re t=c. -/
 def pcfBarnesResidueSum (second : Bool) (a z : ℂ) (c : ℝ) : ℂ :=
-  let A:=if second then 1/2-a else a+1/2; ∑ n ∈ Finset.range ((⌈2*c-A.re⌉:ℤ).toNat), pcfBarnesResidue second a z n
+  let A:=if second then 1/2-a else a+1/2; ∑ n ∈ Finset.range ((⌈2*c-A.re⌉:ℤ).toNat),
+      pcfBarnesResidue second a z n
 
 /-- Uniform vertical bounds for `Γ` on a strip `|Re w| ≤ X`: with the factor `|sin(π Re w)|`
 for all heights, and without it for `|Im w| ≥ 1`. -/
@@ -73,7 +76,8 @@ theorem pcfBC_Gamma_bound (X : ℝ) :
     refine this.trans ?_
     gcongr
     exact le_max_left _ _
-  have h2 := (Complex.barnesRes_norm_Gamma_mul_sin_le (x + I*y)).trans (mul_le_mul_of_nonneg_left h1 Real.pi_pos.le)
+  have h2 := (Complex.barnesRes_norm_Gamma_mul_sin_le (x + I*y)).trans
+      (mul_le_mul_of_nonneg_left h1 Real.pi_pos.le)
   have hw : (π:ℂ)*(x + I*y) = ((π*x:ℝ):ℂ) + ((π*y:ℝ):ℂ)*I := by push_cast; ring
   rw [hw] at h2
   have hcosh : E*E/2 ≤ Real.cosh (π*y) := by
@@ -349,7 +353,8 @@ theorem pcfBC_phi_pole (A z : ℂ) (n : ℕ) : pcfBC_phi A z n ((A+n)/2) = pcfBC
   rw [h1, h2, h3, Gamma_one]
   have hinv : ((-1:ℂ)^n)⁻¹ = (-1)^n := by rw [← inv_pow, inv_neg, inv_one]
   rw [show -(1/2:ℂ) * Gamma ((A+n)/2) * 1 / ((-1)^n * (n.factorial:ℂ)) =
-    -(1/2) * Gamma ((A+n)/2) * ((-1)^n)⁻¹ * (n.factorial:ℂ)⁻¹ by rw [div_eq_mul_inv, mul_inv]; ring, hinv]
+    -(1/2) * Gamma ((A+n)/2) * ((-1)^n)⁻¹ *
+        (n.factorial:ℂ)⁻¹ by rw [div_eq_mul_inv, mul_inv]; ring, hinv]
   ring
 
 /-- `φ(t)/(t - p) = F(t)` away from the pole `p = (A+n)/2` and from the poles of index `< n`. -/
@@ -563,7 +568,8 @@ theorem pcfBC_U_pos {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ
 def pcfBC_J (A z : ℂ) (c : ℝ) : ℂ :=
   (∫ y : ℝ, pcfBC_F A z (c + y*I)) - 2*π*∑ n ∈ Finset.range (pcfBC_N A c), pcfBC_res A z n
 
-/-- Identity under the stated parameter and domain assumptions: `pcfBC_J A z c₁ = pcfBC_J A z c₂`. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfBC_J A z c₁ = pcfBC_J A z c₂`.
+-/
 theorem pcfBC_J_eq {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) (hav₁ : ∀ n : ℕ, 2*c₁ ≠ A.re + n)
     (hav₂ : ∀ n : ℕ, 2*c₂ ≠ A.re + n) : pcfBC_J A z c₁ = pcfBC_J A z c₂ := by
@@ -809,10 +815,15 @@ theorem pcfBC_res_true {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (n : �
   have q2 : exp (-(π/2)*I*((1/2-a)+n)) = exp (-(π*((1/2-a+n)/2))*I) := by congr 1; ring
   rw [q1, q2]; ring
 
-/-- All regular parameters: crossed residues encode the deformed separating contour instead of strengthening the real-part hypothesis. -/
+/-- All regular parameters: crossed residues encode the deformed separating contour instead of
+strengthening the real-part hypothesis. -/
 @[dlmf 12.5.E8]
-theorem pcfU_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c) (havoid : ∀ n : ℕ, 2*c ≠ 1/2+1*a.re+n) :
-    HasIntegralWholeLine (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1) (2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z+pcfBarnesResidueSum false a z c)) := by
+theorem pcfU_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c) (havoid : ∀ n : ℕ, 2*c ≠ 1/2+1*a.re+n) :
+    HasIntegralWholeLine
+        (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1)
+        (2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z+pcfBarnesResidueSum
+        false a z c)) := by
   have ha' : ∀ n : ℕ, a ≠ -1/2 - n := fun n h => ha n (by rw [h]; ring)
   have hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n := fun n h => havoid n (by simp at h ⊢; linarith)
   have hfun : (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1) =
@@ -821,10 +832,15 @@ theorem pcfU_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz
   rw [hfun, pcfBC_sum_false, ← pcfBC_U_integral ha' hz0 hz hc hav]
   exact pcfInt_hasIntegralWholeLine (pcfBC_F_integrable hz0 hz hc hav)
 
-/-- All regular parameters: crossed residues encode the deformed separating contour instead of strengthening the real-part hypothesis. -/
+/-- All regular parameters: crossed residues encode the deformed separating contour instead of
+strengthening the real-part hypothesis. -/
 @[dlmf 12.5.E9]
-theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz0 : z ≠ 0) (hz : |arg z| < π/4) {c : ℝ} (hc : 0 < c) (havoid : ∀ n : ℕ, 2*c ≠ 1/2+-1*a.re+n) :
-    HasIntegralWholeLine (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t)) (2*π*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z+pcfBarnesResidueSum true a z c)) := by
+theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz0 : z ≠ 0)
+    (hz : |arg z| < π/4) {c : ℝ} (hc : 0 < c) (havoid : ∀ n : ℕ, 2*c ≠ 1/2+-1*a.re+n) :
+    HasIntegralWholeLine
+        (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t))
+        (2*π*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a
+        z+pcfBarnesResidueSum true a z c)) := by
   have ha' : ∀ n : ℕ, -a ≠ -1/2 - n := fun n h => ha n (by rw [neg_one_mul, h]; ring)
   have hav : ∀ n : ℕ, 2*c ≠ (1/2+1*(-a)).re + n := fun n h => havoid n (by simp at h ⊢; linarith)
   have hz2 : |arg z| < π/2 := by linarith [Real.pi_pos]
@@ -835,8 +851,10 @@ theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (h
     rw [ha1]; obtain ⟨h1, h2⟩ := abs_lt.mp hz; rw [abs_lt]; constructor <;> linarith
   have hma : |arg (-I*z)| < 3*π/4 := by
     rw [ha2]; obtain ⟨h1, h2⟩ := abs_lt.mp hz; rw [abs_lt]; constructor <;> linarith
-  have hfun : (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t)) =
-      fun y : ℝ => (pcfBC_F (1/2+1*(-a)) (I*z) (c + y*I) + pcfBC_F (1/2+1*(-a)) (-I*z) (c + y*I))/2 := by
+  have hfun : (fun y : ℝ => let t : ℂ := c+y*I;
+      Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t)) =
+      fun y : ℝ => (pcfBC_F (1/2+1*(-a)) (I*z) (c + y*I) +
+          pcfBC_F (1/2+1*(-a)) (-I*z) (c + y*I))/2 := by
     funext y
     rw [pcfBC_F_eq_B, pcfBC_F_eq_B]
     simp only [pcfInt_B]
@@ -848,8 +866,10 @@ theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (h
   have i1 := pcfBC_F_integrable hp0 hpa hc hav
   have i2 := pcfBC_F_integrable hm0 hma hc hav
   rw [hfun]
-  suffices hI : ∫ y : ℝ, (pcfBC_F (1/2+1*(-a)) (I*z) (c + y*I) + pcfBC_F (1/2+1*(-a)) (-I*z) (c + y*I))/2 =
-      2*π*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z+pcfBarnesResidueSum true a z c) by
+  suffices hI : ∫ y : ℝ,
+      (pcfBC_F (1/2+1*(-a)) (I*z) (c + y*I) + pcfBC_F (1/2+1*(-a)) (-I*z) (c + y*I))/2 =
+      2*π*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a
+          z+pcfBarnesResidueSum true a z c) by
     rw [← hI]; exact pcfInt_hasIntegralWholeLine ((i1.add i2).div_const 2)
   rw [integral_div, integral_add i1 i2, pcfBC_U_integral ha' hp0 hpa hc hav,
     pcfBC_U_integral ha' hm0 hma hc hav, pcfBC_sum_true]
@@ -875,7 +895,8 @@ theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (h
     have hsum : 2 * pcfV a z = (Real.sqrt (2/π):ℂ) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
         exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z)) := by
       linear_combination hV1 + hV2
-    linear_combination (-(Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) * (Real.sqrt (π/2):ℂ))) * hsum -
+    linear_combination (-(Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) *
+        (Real.sqrt (π/2):ℂ))) * hsum -
       (Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
         exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z))) * hs
   linear_combination π * hM + π * hR

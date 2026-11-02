@@ -83,7 +83,8 @@ private lemma jacobiSnk_sq_lattice_pole_add (hk0 : 0 < k) (hk1 : k < 1) (m n : �
 
 /-- **At a pole of `sn`, a solution of Lamé's equation satisfies `ν(ν+1) w(z₀) = 0`**: near
 `z₀` the equation reads `ν(ν+1) w = (w'' + h w) sn²(z - z₀)` and both sides are continuous. -/
-private lemma mul_eq_zero_at_pole_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1) {h ν : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
+private lemma mul_eq_zero_at_pole_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1) {h ν : ℂ}
+    {w : ℂ → ℂ} {U : Set ℂ}
     (hU : IsOpen U) (hw : IsLameSolutionOn h ν k w U) {z₀ : ℂ} (hz₀ : z₀ ∈ U)
     (hpole : ∀ u, jacobiSnk (z₀ + u) k ^ 2 = ((k : ℂ) ^ 2 * jacobiSnk u k ^ 2)⁻¹) :
     ν * (ν + 1) * w z₀ = 0 := by
@@ -140,7 +141,8 @@ private lemma mul_eq_zero_at_pole_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1
 
 /-- The Weierstrass half-periods `ω₁ = K/a`, `ω₃ = iK'/a` attached to a real modulus and a
 scale `a > 0`. -/
-def weierstrassHalfPeriods (hk0 : 0 < k) (hk1 : k < 1) {a : ℝ} (ha : 0 < a) : Weierstrass.HalfPeriods where
+def weierstrassHalfPeriods (hk0 : 0 < k) (hk1 : k < 1) {a : ℝ} (ha : 0 < a) :
+    Weierstrass.HalfPeriods where
   ω₁ := ((Real.compEllIntKm (k ^ 2) / a : ℝ) : ℂ)
   ω₃ := I * ((Real.compEllIntKm (1 - k ^ 2) / a : ℝ) : ℂ)
   ω₁_ne_zero := by

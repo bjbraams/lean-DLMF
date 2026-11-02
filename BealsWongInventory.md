@@ -421,9 +421,9 @@ the full chapter.
 ## Chapter 12 Generalized hypergeometric and Meijer G functions
 
 Mathlib already defines generalized regularized hypergeometric series, and
-[Generalized.lean](DLMF/Hypergeometric/Generalized.lean),
-[GeneralizedCalculus.lean](DLMF/Hypergeometric/GeneralizedCalculus.lean), and
-[GeneralizedIntegral.lean](DLMF/Hypergeometric/GeneralizedIntegral.lean)
+[GeneralizedEquation.lean](DLMF/Hypergeometric/Basic/GeneralizedEquation.lean),
+[GeneralizedCalculus.lean](DLMF/Hypergeometric/Basic/GeneralizedCalculus.lean), and
+[GeneralizedIntegral.lean](DLMF/Hypergeometric/Basic/GeneralizedIntegral.lean)
 provide local ODE, differentiation, coefficient-uniqueness, and integral
 results. Thus generalized hypergeometric functions themselves are present.
 

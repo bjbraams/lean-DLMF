@@ -2,7 +2,7 @@
 Copyright (c) 2026 Bastiaan J Braams. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bastiaan J Braams
--/
+  -/
 module
 
 public import DLMF.JacobiElliptic.Addition.ThetaAndQuotients
@@ -40,7 +40,7 @@ and the constant three-point and four-point expressions (DLMF 22.8.24–22.8.27)
 `z₁ + z₂ + z₃ + z₄ = 2K`) fails numerically (e.g. `k = 0.6`, determinant `≈ -0.107 + 0.033i`).
 Replacing the third column by `sn`, or the second by `sn dn`, gives true identities; both are
 stated (`jacobi_det_sum_two_K`, `jacobi_det_sum_two_K'`).
--/
+  -/
 
 @[expose] public section
 
@@ -91,10 +91,12 @@ theorem jacobiSnk_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
   have hD : (θ₄ (x + y) τ * θ₁ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination θ₄ 0 τ ^ 2 * (-jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ + θ₂ 0 τ * θ₃ 0 τ * h0)
+    linear_combination θ₄ 0 τ ^ 2 *
+        (-jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ + θ₂ 0 τ * θ₃ 0 τ * h0)
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₄ 0 τ ^ 2 * θ₁ (x + y) τ)) * jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ +
+  linear_combination (-(θ₄ 0 τ ^ 2 * θ₁ (x + y) τ)) *
+      jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ +
     (θ₃ 0 τ * θ₂ 0 τ * θ₄ (x + y) τ) * jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_four x y τ hτ
 
 /-- DLMF 22.8.14: an addition theorem for `sn`, at points `u`, `v` where the functions
@@ -127,10 +129,12 @@ theorem jacobiSnk_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : �
   have hD : (θ₄ (x + y) τ * θ₂ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination θ₄ 0 τ ^ 2 * (-jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ + θ₂ 0 τ * θ₄ 0 τ * h0)
+    linear_combination θ₄ 0 τ ^ 2 *
+        (-jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ + θ₂ 0 τ * θ₄ 0 τ * h0)
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₃ 0 τ * θ₁ (x + y) τ)) * jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
+  linear_combination (-(θ₃ 0 τ * θ₁ (x + y) τ)) *
+      jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
     (θ₂ 0 τ * θ₄ (x + y) τ) * jacobiThetaOneTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ
 
 /-- DLMF 22.8.15: an addition theorem for `cn`, at points `u`, `v` where the functions
@@ -163,10 +167,12 @@ theorem jacobiCnk_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
   have hD : (θ₄ (x + y) τ * θ₁ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination θ₄ 0 τ ^ 2 * (-jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ + θ₂ 0 τ * θ₃ 0 τ * h0)
+    linear_combination θ₄ 0 τ ^ 2 *
+        (-jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ + θ₂ 0 τ * θ₃ 0 τ * h0)
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₄ 0 τ * θ₂ (x + y) τ)) * jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ +
+  linear_combination (-(θ₄ 0 τ * θ₂ (x + y) τ)) *
+      jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ +
     (θ₂ 0 τ * θ₄ (x + y) τ) * jacobiThetaTwoTau_add_mul_jacobiThetaOneTau_sub x y τ hτ
 
 /-- DLMF 22.8.16: an addition theorem for `cn`, at points `u`, `v` where the functions
@@ -199,10 +205,12 @@ theorem jacobiCnk_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : �
   have hD : (θ₄ (x + y) τ * θ₂ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination θ₄ 0 τ ^ 2 * (-jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ + θ₂ 0 τ * θ₄ 0 τ * h0)
+    linear_combination θ₄ 0 τ ^ 2 *
+        (-jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ + θ₂ 0 τ * θ₄ 0 τ * h0)
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₄ 0 τ ^ 3 * θ₂ (x + y) τ)) * jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
+  linear_combination (-(θ₄ 0 τ ^ 3 * θ₂ (x + y) τ)) *
+      jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
     (θ₂ 0 τ * θ₄ (x + y) τ) * jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub_four x y τ hτ
 
 /-- DLMF 22.8.17: an addition theorem for `dn`, at points `u`, `v` where the functions
@@ -235,10 +243,12 @@ theorem jacobiDnk_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
   have hD : (θ₄ (x + y) τ * θ₁ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination θ₄ 0 τ ^ 2 * (-jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ + θ₂ 0 τ * θ₃ 0 τ * h0)
+    linear_combination θ₄ 0 τ ^ 2 *
+        (-jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ + θ₂ 0 τ * θ₃ 0 τ * h0)
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₄ 0 τ * θ₃ (x + y) τ)) * jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ +
+  linear_combination (-(θ₄ 0 τ * θ₃ (x + y) τ)) *
+      jacobiThetaFourTau_add_mul_jacobiThetaOneTau_sub x y τ hτ +
     (θ₃ 0 τ * θ₄ (x + y) τ) * jacobiThetaThreeTau_add_mul_jacobiThetaOneTau_sub x y τ hτ
 
 /-- DLMF 22.8.18: an addition theorem for `dn`, at points `u`, `v` where the functions
@@ -272,14 +282,17 @@ theorem jacobiDnk_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : �
   have hD : (θ₄ (x + y) τ * θ₂ (x - y) τ) ≠ 0 := by
     intro h0; apply hden
     field_simp
-    linear_combination θ₄ 0 τ ^ 2 * (-jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ + θ₂ 0 τ * θ₄ 0 τ * h0)
+    linear_combination θ₄ 0 τ ^ 2 *
+        (-jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ + θ₂ 0 τ * θ₄ 0 τ * h0)
   have hp := left_ne_zero_of_mul hD
   field_simp
-  linear_combination (-(θ₃ (x + y) τ * θ₃ 0 τ)) * jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
+  linear_combination (-(θ₃ (x + y) τ * θ₃ 0 τ)) *
+      jacobiThetaFourTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ +
     (θ₄ (x + y) τ * θ₄ 0 τ) * jacobiThetaThreeTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ
 
 /-- `1 - k² sn²u sn²v ≠ 0` where `sn` is finite at `u`, `v`, `u + v`, `u - v`. -/
-private lemma one_sub_sq_mul_jacobiSnk_sq_mul_jacobiSnk_sq_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
+private lemma one_sub_sq_mul_jacobiSnk_sq_mul_jacobiSnk_sq_ne_zero {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
     (hp : JacobiRegulark .n (u + v) k) (hm : JacobiRegulark .n (u - v) k) :
     1 - k ^ 2 * jacobiSnk u k ^ 2 * jacobiSnk v k ^ 2 ≠ 0 := by
@@ -311,7 +324,8 @@ private lemma one_sub_sq_mul_jacobiSnk_sq_mul_jacobiSnk_sq_ne_zero {k : ℂ} (hk
     · exact hm' h
 
 /-- The stated relation follows from the given hypotheses: `JacobiRegulark .n (-v) k`. -/
-private lemma jacobiRegulark_n_neg {k : ℂ} {v : ℂ} (hv : JacobiRegulark .n v k) : JacobiRegulark .n (-v) k := by
+private lemma jacobiRegulark_n_neg {k : ℂ} {v : ℂ} (hv : JacobiRegulark .n v k) : JacobiRegulark
+    .n (-v) k := by
   unfold JacobiRegulark at *
   rw [jacobiZetak_neg, jacobiLetterTheta_neg]; simpa using hv
 
@@ -357,7 +371,8 @@ private lemma jacobiPQk_ne_zero_of_regular {p q : JacobiLetter} (hpq : p ≠ q) 
 
 /-- The stated relation follows from the given hypotheses: `JacobiRegulark r (z + compEllIntKk k)
 k ↔ JacobiRegulark r.swapK z k`. -/
-theorem jacobiRegulark_add_compEllIntKk_iff {k : ℂ} (hk : k ∈ jacobiModulusDomain) (r : JacobiLetter) (z : ℂ) :
+theorem jacobiRegulark_add_compEllIntKk_iff {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (r : JacobiLetter) (z : ℂ) :
     JacobiRegulark r (z + compEllIntKk k) k ↔ JacobiRegulark r.swapK z k := by
   have hK := compEllIntKk_ne_zero hk
   have hτ := jacobiTauk_im_pos hk
@@ -370,7 +385,8 @@ theorem jacobiRegulark_add_compEllIntKk_iff {k : ℂ} (hk : k ∈ jacobiModulusD
 
 /-- The stated relation follows from the given hypotheses: `JacobiRegulark .n (z + 2 *
 compEllIntKk k) k ↔ JacobiRegulark .n z k`. -/
-theorem jacobiRegulark_n_add_two_mul_compEllIntKk_iff {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ) :
+theorem jacobiRegulark_n_add_two_mul_compEllIntKk_iff {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) (z : ℂ) :
     JacobiRegulark .n (z + 2 * compEllIntKk k) k ↔ JacobiRegulark .n z k := by
   rw [show z + 2 * compEllIntKk k = z + compEllIntKk k + compEllIntKk k by ring,
     jacobiRegulark_add_compEllIntKk_iff hk, jacobiRegulark_add_compEllIntKk_iff hk]
@@ -386,7 +402,8 @@ theorem jacobiThetaTau_real_mul_pi_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (r : ℝ
     have h' : ((r - y : ℝ) : ℂ) + (-x : ℝ) * τ = 0 := by
       have := mul_right_cancel₀ (ofReal_ne_zero.mpr Real.pi_ne_zero) h
       push_cast; linear_combination this
-    have := DLMF.Theta.eq_zero_of_lattice_point_eq_zero hτ (a := r - y) (b := -x) (by rw [h', zero_mul])
+    have := DLMF.Theta.eq_zero_of_lattice_point_eq_zero hτ (a := r - y) (b := -x)
+        (by rw [h', zero_mul])
     constructor <;> linarith [this.1, this.2]
   refine ⟨?_, ?_, ?_⟩
   · rw [Ne, h4]; rintro ⟨m, n, h⟩
@@ -481,7 +498,8 @@ theorem jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero {k : ℂ} (hk : k ∈ j
   rw [ea]; exact jacobiPQk_ne_zero_of_regular (by decide) hd hn
 
 /-- `sn² + cn² = 1`, `k² sn² + dn² = 1` (copy of 22.6.1 for use in this file). -/
-private lemma jacobiSnk_sq_add_jacobiCnk_sq_and_of_regular {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+private lemma jacobiSnk_sq_add_jacobiCnk_sq_and_of_regular {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     (hn : JacobiRegulark .n z k) :
     jacobiSnk z k ^ 2 + jacobiCnk z k ^ 2 = 1 ∧ k ^ 2 * jacobiSnk z k ^ 2 + jacobiDnk z k ^ 2 = 1 :=
         by
@@ -582,11 +600,13 @@ theorem jacobiDnThreePointExpr_const {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
     generalize (jacobiSnk (2 * compEllIntKk k / 3) k)⁻¹ = Y at hY
     have : (1 : ℂ) = 0 := by
       linear_combination (-4 * Y ^ 2) * E2 + (-jacobiSnk (2 * compEllIntKk k / 3) k * Y - 1) * hY +
-        (-2 * jacobiSnk (2 * compEllIntKk k / 3) k ^ 2 * jacobiDnk (2 * compEllIntKk k / 3) k * Y ^ 2 +
+        (-2 * jacobiSnk (2 * compEllIntKk k / 3) k ^ 2 *
+            jacobiDnk (2 * compEllIntKk k / 3) k * Y ^ 2 +
           jacobiSnk (2 * compEllIntKk k / 3) k ^ 2 * Y ^ 2 +
           4 * jacobiCnk (2 * compEllIntKk k / 3) k ^ 2 * Y ^ 2) * h
     exact one_ne_zero this
-  refine ⟨2 * jacobiDnk (2 * compEllIntKk k / 3) k * (1 + jacobiDnk (2 * compEllIntKk k / 3) k) ^ 2 /
+  refine ⟨2 * jacobiDnk (2 * compEllIntKk k / 3) k *
+      (1 + jacobiDnk (2 * compEllIntKk k / 3) k) ^ 2 /
     (1 + 2 * jacobiDnk (2 * compEllIntKk k / 3) k), fun z hreg hden => ?_⟩
   have hn := hreg 0
   have hm := hreg 1
@@ -598,7 +618,8 @@ theorem jacobiDnThreePointExpr_const {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
       z + 2 * compEllIntKk k / 3 := by push_cast; ring
   have hp : JacobiRegulark .n (z + 2 * compEllIntKk k / 3) k := by
     rw [← eb, jacobiRegulark_n_add_two_mul_compEllIntKk_iff hk]; exact hb
-  have d3 : jacobiDnk (z - 4 * compEllIntKk k / 3) k = jacobiDnk (z + 2 * compEllIntKk k / 3) k := by
+  have d3 : jacobiDnk (z - 4 * compEllIntKk k / 3) k =
+      jacobiDnk (z + 2 * compEllIntKk k / 3) k := by
     rw [← (jacobiDnk_shift hk _).2.2.2.1]; congr 1; ring
   obtain ⟨hD, -, -, e3, -, -, e6⟩ := jacobiSnCnDnk_add_sub hk hn hna hp hm
   obtain ⟨h1, h2⟩ := jacobiSnk_sq_add_jacobiCnk_sq_and_of_regular hk hn
@@ -613,192 +634,243 @@ theorem jacobiDnThreePointExpr_const {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
   generalize jacobiCnk (2 * compEllIntKk k / 3) k = ca at *
   generalize jacobiDnk (2 * compEllIntKk k / 3) k = κ at *
   generalize hDdef : 1 - k ^ 2 * s ^ 2 * sa ^ 2 = D at hD hden ⊢
-  have hden' : d * D + (d * κ + k ^ 2 * s * c * sa * ca) + (d * κ - k ^ 2 * s * c * sa * ca) ≠ 0 := by
+  have hden' : d * D + (d * κ + k ^ 2 * s * c * sa * ca) +
+      (d * κ - k ^ 2 * s * c * sa * ca) ≠ 0 := by
     intro h; apply hden; field_simp; linear_combination h
   have hX := mul_inv_cancel₀ hκ
   generalize κ⁻¹ = X at hX
   rw [div_eq_div_iff hden hF2]
   field_simp
   linear_combination (-4*d^3*ca^4*κ^2*k^2-2*d^3*ca^4*κ*k^2+4*d^3*ca^2*κ^2*k^2+4*d*ca^4*κ^2*k^2
-      -2*d*ca^2*k^4*D*X+2*d^3*ca^2*κ*k^2+2*d*ca^4*κ*k^2-2*d*ca^2*k^4*X-4*d*ca^2*κ^2*k^2
-        +2*d*k^4*D*X-2*d*ca^2*κ*k^2+2*d*k^4*X+2*d*κ*k^2*D-2*d*k^2*D*X+2*d*κ*k^2-2*d*k^2*X) * h1 +
+    -2*d*ca^2*k^4*D*X+2*d^3*ca^2*κ*k^2+2*d*ca^4*κ*k^2-2*d*ca^2*k^4*X-4*d*ca^2*κ^2*k^2
+    +2*d*k^4*D*X-2*d*ca^2*κ*k^2+2*d*k^4*X+2*d*κ*k^2*D-2*d*k^2*D*X+2*d*κ*k^2-2*d*k^2*X) * h1 +
       (-d^3*ca^6*κ^2+4*c^2*d*ca^4*κ^2*k^2-d^3*ca^6*κ*X-2*d^3*ca^6*κ+2*c^2*d*ca^4*κ*k^2+d^3*ca^5*κ
         +5*d^3*ca^4*κ^2-4*c^2*d*ca^2*κ^2*k^2+d^3*ca^4*κ*X+d^3*ca^5+7*d^3*ca^4*κ-2*c^2*d*ca^2*κ*k^2
-          -2*d*ca^2*κ^3*D^2-2*d*ca^2*κ^2*D^2*X+3*d^3*ca^4+2*d^3*ca^3*κ-4*d*ca^5*κ-7*d^3*ca^2*κ^2
-            -4*d*ca^4*κ^2+4*d*ca^2*κ^3*D+8*d*ca^2*κ*k^2*D-4*d*ca^2*κ^2*D^2-2*d*ca^5*X
-              -3*d^3*ca^2*κ*X+4*d*ca^2*κ^2*D*X+8*d*ca^2*k^2*D*X+2*d^3*ca^3-6*d*ca^5-8*d^3*ca^2*κ
-                -10*d*ca^4*κ+12*d*ca^2*κ^3+8*d*ca^2*κ*k^2-2*d*ca^3*κ*D+8*d*ca^2*κ^2*D
-                  +16*d*ca^2*k^2*D+2*d*κ^3*D^2-6*d*ca^4*X+12*d*ca^2*κ^2*X+8*d*ca^2*k^2*X
-                    +2*d*κ^2*D^2*X-14*d*ca^4-3*d^3*ca*κ-2*d*ca^3*κ+3*d^3*κ^2+20*d*ca^2*κ^2
-                      +16*d*ca^2*k^2-2*d*ca^3*D-10*d*ca^2*κ*D-4*d*κ^3*D-8*d*κ*k^2*D+4*d*κ^2*D^2
-                        -8*d*ca^3*X+3*d^3*κ*X-8*d*ca^2*κ*X-6*d*ca^2*D*X-4*d*κ^2*D*X-8*d*k^2*D*X
-                          -3*d^3*ca-10*d*ca^3+3*d^3*κ+2*d*ca^2*κ-12*d*κ^3-8*d*κ*k^2-16*d*ca^2*D
-                            +2*d*ca*κ*D-8*d*κ^2*D-16*d*k^2*D-12*d*κ^2*X-8*d*k^2*X-3*d^3+16*d*ca^2
-                              +6*d*ca*κ-16*d*κ^2-16*d*k^2+2*d*ca*D+8*d*κ*D+10*d*ca*X+8*d*κ*X
-                                +8*d*D*X+16*d*ca+6*d*κ+16*d*D+8*d*X-2*d) * h2 +
+        -2*d*ca^2*κ^3*D^2-2*d*ca^2*κ^2*D^2*X+3*d^3*ca^4+2*d^3*ca^3*κ-4*d*ca^5*κ-7*d^3*ca^2*κ^2
+        -4*d*ca^4*κ^2+4*d*ca^2*κ^3*D+8*d*ca^2*κ*k^2*D-4*d*ca^2*κ^2*D^2-2*d*ca^5*X
+        -3*d^3*ca^2*κ*X+4*d*ca^2*κ^2*D*X+8*d*ca^2*k^2*D*X+2*d^3*ca^3-6*d*ca^5-8*d^3*ca^2*κ
+        -10*d*ca^4*κ+12*d*ca^2*κ^3+8*d*ca^2*κ*k^2-2*d*ca^3*κ*D+8*d*ca^2*κ^2*D
+        +16*d*ca^2*k^2*D+2*d*κ^3*D^2-6*d*ca^4*X+12*d*ca^2*κ^2*X+8*d*ca^2*k^2*X
+        +2*d*κ^2*D^2*X-14*d*ca^4-3*d^3*ca*κ-2*d*ca^3*κ+3*d^3*κ^2+20*d*ca^2*κ^2
+        +16*d*ca^2*k^2-2*d*ca^3*D-10*d*ca^2*κ*D-4*d*κ^3*D-8*d*κ*k^2*D+4*d*κ^2*D^2
+        -8*d*ca^3*X+3*d^3*κ*X-8*d*ca^2*κ*X-6*d*ca^2*D*X-4*d*κ^2*D*X-8*d*k^2*D*X
+        -3*d^3*ca-10*d*ca^3+3*d^3*κ+2*d*ca^2*κ-12*d*κ^3-8*d*κ*k^2-16*d*ca^2*D
+        +2*d*ca*κ*D-8*d*κ^2*D-16*d*k^2*D-12*d*κ^2*X-8*d*k^2*X-3*d^3+16*d*ca^2
+        +6*d*ca*κ-16*d*κ^2-16*d*k^2+2*d*ca*D+8*d*κ*D+10*d*ca*X+8*d*κ*X
+        +8*d*D*X+16*d*ca+6*d*κ+16*d*D+8*d*X-2*d) * h2 +
       (2*d^3*sa^2*ca^3*κ^2*k^4*X+2*d^5*sa^2*ca^3*κ*k^2*X+d^3*sa^2*ca^3*κ*k^4*X
         +2*d^3*sa^2*ca^2*κ^2*k^4*X+2*d^5*sa^2*ca^3*κ*k^2+s^2*d^3*ca^4*κ^2*k^2
-          -4*s^2*c^2*d*ca^2*κ^2*k^4+d^5*ca^4*κ^3*X+1/2*d^5*sa^2*ca^3*k^2*X+2*d^5*sa^2*ca^2*κ*k^2*X
-            +s^2*d^3*ca^4*κ*k^2*X+2*d^3*ca^3*κ^4*k^2*X-d^3*sa^2*ca^2*κ*k^4*X
-              -2*d*sa^2*ca^3*κ^2*k^4*X-1/2*d^3*sa^2*ca^3*κ*k^2*D*X+d^3*sa^2*ca^2*k^4*X^2
-                +2*d^5*sa^2*ca^2*κ*k^2+2*s^2*d^3*ca^4*κ*k^2-2*s^2*c^2*d*ca^2*κ*k^4
-                  -1/2*d^3*sa^2*ca^3*κ*k^2*D-2*d^5*ca^3*κ^3*X-1/2*d^5*sa^2*ca^2*k^2*X
-                    -7/2*d^3*sa^2*ca^3*κ*k^2*X-3*d^3*ca^3*κ^3*k^2*X+2*d^3*ca^2*κ^4*k^2*X
-                      +d^3*sa^2*ca^2*k^4*X-4*d^3*sa^2*ca*κ*k^4*X-d*sa^2*ca^3*κ*k^4*X
-                        -2*d*sa^2*ca^2*κ^2*k^4*X-1/2*d^3*sa^2*ca^3*k^2*D*X
-                          -1/2*d^3*sa^2*ca^2*κ*k^2*D*X+3*d^3*sa^2*ca*k^4*X^2+2*d^5*ca^3*κ^3
-                            -2*d^5*sa^2*ca^2*k^2-s^2*d^3*ca^3*κ*k^2-7/2*d^3*sa^2*ca^3*κ*k^2
-                              -1/2*d^3*sa^2*ca^3*k^2*D-1/2*d^3*sa^2*ca^2*κ*k^2*D
-                                -1/2*d^5*ca^3*κ^2*X-2*d^5*ca^2*κ^3*X-d^3*ca^4*κ^3*X
-                                  -3/2*d^5*sa^2*ca*k^2*X-5/2*d^3*sa^2*ca^2*κ*k^2*X
-                                    -2*d^3*ca^3*κ^2*k^2*X-5*d^3*ca^2*κ^3*k^2*X-2*d*ca^3*κ^4*k^2*X
-                                      +4*d^3*sa^2*ca*k^4*X-4*d^3*sa^2*κ*k^4*X+d*sa^2*ca^2*κ*k^4*X
-                                        +1/2*d^3*ca^3*κ^3*D*X+1/2*d^3*sa^2*ca^2*k^2*D*X
-                                          -1/2*d^3*sa^2*ca*κ*k^2*D*X-d^3*ca^2*κ^2*k^2*X^2
-                                            +5*d^3*sa^2*k^4*X^2-d*sa^2*ca^2*k^4*X^2+2*d^5*ca^2*κ^3
-                                              -3*d^5*sa^2*ca*k^2-s^2*d^3*ca^3*k^2
-                                                +3/2*d^3*sa^2*ca^3*k^2-3*s^2*d^3*ca^2*κ*k^2
-                                                  -5/2*d^3*sa^2*ca^2*κ*k^2-1/2*d^3*ca^3*κ^3*D
-                                                    +1/2*d^3*sa^2*ca^2*k^2*D
-                                                      -1/2*d^3*sa^2*ca*κ*k^2*D+2*s^2*d*κ^3*k^2*D^2
-                                                        +1/2*d^5*ca^2*κ^2*X+7/2*d^3*ca^3*κ^3*X
-                                                          -3/2*d^5*sa^2*k^2*X
-                                                            +2*d^3*sa^2*ca^2*k^2*X
-                                                              +9/2*d^3*sa^2*ca*κ*k^2*X
-                                                                +2*d^3*ca^3*κ*k^2*X
-                                                                  +2*d*sa^2*ca^3*κ*k^2*X
-                                                                    +3*d^3*ca^2*κ^2*k^2*X
-                                                                      -4*d^3*ca*κ^3*k^2*X
-                                                                        +3*d*ca^3*κ^3*k^2*X
-                                                                          -2*d*ca^2*κ^4*k^2*X
-                                                                            +8*d^3*sa^2*k^4*X
-                                                                              -d*sa^2*ca^2*k^4*X
-                                                                                +4*d*sa^2*ca*κ*k^4*X+1/2*d^3*ca^3*κ^2*D*X+1/2*d^3*ca^2*κ^3*D*X+3/2*d^3*sa^2*ca*k^2*D*X-1/2*d^3*sa^2*κ*k^2*D*X+2*d^3*κ^4*D^2*X+2*s^2*d*κ^2*k^2*D^2*X-3*d^3*ca*κ^2*k^2*X^2-3*d*sa^2*ca*k^4*X^2-d*sa^2*ca^2*k^2*D*X^2-2*d^5*ca^2*κ^2-7/2*d^3*ca^3*κ^3-3*d^5*sa^2*k^2-3*s^2*d^3*ca^2*k^2+9/2*d^3*sa^2*ca^2*k^2-3*s^2*d^3*ca*κ*k^2+9/2*d^3*sa^2*ca*κ*k^2+4*s^2*d*ca^3*κ*k^2+4*d^3*ca^3*κ*k^2+2*d*sa^2*ca^3*κ*k^2+3*s^2*d^3*κ^2*k^2-1/2*d^3*ca^3*κ^2*D-1/2*d^3*ca^2*κ^3*D+5/2*d^3*sa^2*ca*k^2*D-1/2*d^3*sa^2*κ*k^2*D-4*s^2*d*κ^3*k^2*D-8*s^2*d*κ*k^4*D+4*s^2*d*κ^2*k^2*D^2+3/2*d^5*ca*κ^2*X+2*d^3*ca^3*κ^2*X+3*d^5*κ^3*X+5/2*d^3*ca^2*κ^3*X+4*d^3*sa^2*ca*k^2*X+2*s^2*d*ca^3*k^2*X-2*d^3*ca^3*k^2*X+3*s^2*d^3*κ*k^2*X+19/2*d^3*sa^2*κ*k^2*X+6*d^3*ca^2*κ*k^2*X+d*sa^2*ca^2*κ*k^2*X+12*d^3*ca*κ^2*k^2*X+2*d*ca^3*κ^2*k^2*X+5*d*ca^2*κ^3*k^2*X-4*d*sa^2*ca*k^4*X+4*d*sa^2*κ*k^4*X-1/2*d^3*ca^2*κ^2*D*X+1/2*d^3*ca*κ^3*D*X-4*d^3*κ^4*D*X+5/2*d^3*sa^2*k^2*D*X-3*d*sa^2*ca^2*k^2*D*X-4*s^2*d*κ^2*k^2*D*X-6*s^2*d*k^4*D*X+2*c^2*d*k^4*D*X-4*d*κ^3*k^2*D^2*X+d*sa^2*ca^2*k^2*X^2-5*d^3*κ^2*k^2*X^2+d*ca^2*κ^2*k^2*X^2-5*d*sa^2*k^4*X^2-3*d*sa^2*ca*k^2*D*X^2-3*d^5*ca*κ^2+3/2*d^3*ca^3*κ^2-5/2*d^3*ca^2*κ^3-3*s^2*d^3*ca*k^2+7/2*d^3*sa^2*ca*k^2+6*s^2*d*ca^3*k^2-4*d^3*ca^3*k^2-d*sa^2*ca^3*k^2+3*s^2*d^3*κ*k^2+19/2*d^3*sa^2*κ*k^2+8*s^2*d*ca^2*κ*k^2+4*d^3*ca^2*κ*k^2+d*sa^2*ca^2*κ*k^2-12*s^2*d*κ^3*k^2-8*s^2*d*κ*k^4+1/2*d^3*ca^2*κ^2*D-1/2*d^3*ca*κ^3*D+9/2*d^3*sa^2*k^2*D-2*d*sa^2*ca^2*k^2*D+2*s^2*d*ca*κ*k^2*D-8*s^2*d*κ^2*k^2*D-16*s^2*d*k^4*D+3/2*d^5*κ^2*X+4*d^3*ca^2*κ^2*X-9/2*d^3*ca*κ^3*X-2*d*ca^3*κ^3*X-12*d^3*κ^4*X+3*d^3*sa^2*k^2*X+6*s^2*d*ca^2*k^2*X-6*d^3*ca^2*k^2*X+d*sa^2*ca^2*k^2*X+14*d^3*ca*κ*k^2*X-4*d*sa^2*ca*κ*k^2*X-2*d*ca^3*κ*k^2*X-12*s^2*d*κ^2*k^2*X+2*d^3*κ^2*k^2*X-3*d*ca^2*κ^2*k^2*X+4*d*ca*κ^3*k^2*X-6*s^2*d*k^4*X+2*c^2*d*k^4*X-8*d*sa^2*k^4*X-3/2*d^3*ca*κ^2*D*X+1/2*d^3*κ^3*D*X-8*d*sa^2*ca*k^2*D*X-2*d*κ^4*D^2*X-d*sa^2*k^2*D^2*X-6*d*κ^2*k^2*D^2*X+3*d*sa^2*ca*k^2*X^2+3*d*ca*κ^2*k^2*X^2+d*ca^2*κ^2*D*X^2-5*d*sa^2*k^2*D*X^2-3*d^5*κ^2+9/2*d^3*ca^2*κ^2+9/2*d^3*ca*κ^3+2*d*ca^3*κ^3-3*s^2*d^3*k^2-5/2*d^3*sa^2*k^2+14*s^2*d*ca^2*k^2-12*d^3*ca^2*k^2-d*sa^2*ca^2*k^2+6*s^2*d*ca*κ*k^2-4*d*sa^2*ca*κ*k^2-4*d*ca^3*κ*k^2-16*s^2*d*κ^2*k^2-4*d^3*κ^2*k^2-16*s^2*d*k^4+5/2*d^3*ca*κ^2*D-1/2*d^3*κ^3*D+2*s^2*d*ca*k^2*D-6*d*sa^2*ca*k^2*D+10*s^2*d*κ*k^2*D-8*d^3*κ*k^2*D-d*sa^2*k^2*D^2+4*d*κ^2*k^2*D^2+6*d^3*ca*κ^2*X-2*d*ca^3*κ^2*X-9/2*d^3*κ^3*X-d*ca^2*κ^3*X+10*s^2*d*ca*k^2*X-10*d^3*ca*k^2*X+4*d*sa^2*ca*k^2*X+2*d*ca^3*k^2*X+8*s^2*d*κ*k^2*X+14*d^3*κ*k^2*X-9*d*sa^2*κ*k^2*X-8*d*ca^2*κ*k^2*X-12*d*ca*κ^2*k^2*X+4*d*κ^3*k^2*X+7/2*d^3*κ^2*D*X+d*ca^2*κ^2*D*X+4*d*κ^4*D*X+6*s^2*d*k^2*D*X-8*d^3*k^2*D*X-11*d*sa^2*k^2*D*X-2*d*k^4*D*X+4*d*κ*k^2*D^2*X-d*ca^2*κ^2*X^2+5*d*sa^2*k^2*X^2+5*d*κ^2*k^2*X^2+3*d*ca*κ^2*D*X^2+7/2*d^3*ca*κ^2-d*ca^3*κ^2+19/2*d^3*κ^3+d*ca^2*κ^3+16*s^2*d*ca*k^2-24*d^3*ca*k^2+3*d*sa^2*ca*k^2+4*d*ca^3*k^2+8*s^2*d*κ*k^2-2*d^3*κ*k^2-9*d*sa^2*κ*k^2-4*d*ca^2*κ*k^2+9/2*d^3*κ^2*D-2*d*ca^2*κ^2*D+16*s^2*d*k^2*D-16*d^3*k^2*D-8*d*sa^2*k^2*D+14*d*κ*k^2*D^2+3*d^3*κ^2*X-5*d*ca^2*κ^2*X+4*d*ca*κ^3*X+12*d*κ^4*X+6*s^2*d*k^2*X-8*d^3*k^2*X+8*d*sa^2*k^2*X+6*d*ca^2*k^2*X-14*d*ca*κ*k^2*X+4*d*κ^2*k^2*X-2*d*k^4*X+2*d*ca*κ^2*D*X+d*κ^2*D^2*X+6*d*k^2*D^2*X-3*d*ca*κ^2*X^2+5*d*κ^2*D*X^2-5/2*d^3*κ^2-d*ca^2*κ^2-4*d*ca*κ^3-2*s^2*d*k^2-20*d^3*k^2+10*d*sa^2*k^2+14*d*ca^2*k^2-6*d*ca*κ^2*D+8*d*κ*k^2*D-d*κ^2*D^2+12*d*k^2*D^2-8*d*ca*κ^2*X+d*κ^3*X+10*d*ca*k^2*X-18*d*κ*k^2*X-5*d*κ^2*D*X+8*d*k^2*D*X-5*d*κ^2*X^2+3*d*ca*κ^2-9*d*κ^3+24*d*ca*k^2-12*d*κ*k^2-8*d*κ^2*D+16*d*k^2*D-4*d*κ^2*X+2*d*k^2*X+10*d*κ^2+8*d*k^2) * ha1 +
+        -4*s^2*c^2*d*ca^2*κ^2*k^4+d^5*ca^4*κ^3*X+1/2*d^5*sa^2*ca^3*k^2*X+2*d^5*sa^2*ca^2*κ*k^2*X
+        +s^2*d^3*ca^4*κ*k^2*X+2*d^3*ca^3*κ^4*k^2*X-d^3*sa^2*ca^2*κ*k^4*X
+        -2*d*sa^2*ca^3*κ^2*k^4*X-1/2*d^3*sa^2*ca^3*κ*k^2*D*X+d^3*sa^2*ca^2*k^4*X^2
+        +2*d^5*sa^2*ca^2*κ*k^2+2*s^2*d^3*ca^4*κ*k^2-2*s^2*c^2*d*ca^2*κ*k^4
+        -1/2*d^3*sa^2*ca^3*κ*k^2*D-2*d^5*ca^3*κ^3*X-1/2*d^5*sa^2*ca^2*k^2*X
+        -7/2*d^3*sa^2*ca^3*κ*k^2*X-3*d^3*ca^3*κ^3*k^2*X+2*d^3*ca^2*κ^4*k^2*X
+        +d^3*sa^2*ca^2*k^4*X-4*d^3*sa^2*ca*κ*k^4*X-d*sa^2*ca^3*κ*k^4*X
+        -2*d*sa^2*ca^2*κ^2*k^4*X-1/2*d^3*sa^2*ca^3*k^2*D*X
+        -1/2*d^3*sa^2*ca^2*κ*k^2*D*X+3*d^3*sa^2*ca*k^4*X^2+2*d^5*ca^3*κ^3
+        -2*d^5*sa^2*ca^2*k^2-s^2*d^3*ca^3*κ*k^2-7/2*d^3*sa^2*ca^3*κ*k^2
+        -1/2*d^3*sa^2*ca^3*k^2*D-1/2*d^3*sa^2*ca^2*κ*k^2*D
+        -1/2*d^5*ca^3*κ^2*X-2*d^5*ca^2*κ^3*X-d^3*ca^4*κ^3*X
+        -3/2*d^5*sa^2*ca*k^2*X-5/2*d^3*sa^2*ca^2*κ*k^2*X
+        -2*d^3*ca^3*κ^2*k^2*X-5*d^3*ca^2*κ^3*k^2*X-2*d*ca^3*κ^4*k^2*X
+        +4*d^3*sa^2*ca*k^4*X-4*d^3*sa^2*κ*k^4*X+d*sa^2*ca^2*κ*k^4*X
+        +1/2*d^3*ca^3*κ^3*D*X+1/2*d^3*sa^2*ca^2*k^2*D*X
+        -1/2*d^3*sa^2*ca*κ*k^2*D*X-d^3*ca^2*κ^2*k^2*X^2
+        +5*d^3*sa^2*k^4*X^2-d*sa^2*ca^2*k^4*X^2+2*d^5*ca^2*κ^3
+        -3*d^5*sa^2*ca*k^2-s^2*d^3*ca^3*k^2
+        +3/2*d^3*sa^2*ca^3*k^2-3*s^2*d^3*ca^2*κ*k^2
+        -5/2*d^3*sa^2*ca^2*κ*k^2-1/2*d^3*ca^3*κ^3*D
+        +1/2*d^3*sa^2*ca^2*k^2*D
+        -1/2*d^3*sa^2*ca*κ*k^2*D+2*s^2*d*κ^3*k^2*D^2
+        +1/2*d^5*ca^2*κ^2*X+7/2*d^3*ca^3*κ^3*X
+        -3/2*d^5*sa^2*k^2*X
+        +2*d^3*sa^2*ca^2*k^2*X
+        +9/2*d^3*sa^2*ca*κ*k^2*X
+        +2*d^3*ca^3*κ*k^2*X
+        +2*d*sa^2*ca^3*κ*k^2*X
+        +3*d^3*ca^2*κ^2*k^2*X
+        -4*d^3*ca*κ^3*k^2*X
+        +3*d*ca^3*κ^3*k^2*X
+        -2*d*ca^2*κ^4*k^2*X
+        +8*d^3*sa^2*k^4*X
+        -d*sa^2*ca^2*k^4*X
+        +4*d*sa^2*ca*κ*k^4*X+1/2*d^3*ca^3*κ^2*D*X+1/2*d^3*ca^2*κ^3*D*X+3/2*d^3*sa^2*ca*k^2*D*X
+        -1/2*d^3*sa^2*κ*k^2*D*X+2*d^3*κ^4*D^2*X+2*s^2*d*κ^2*k^2*D^2*X-3*d^3*ca*κ^2*k^2*X^2
+        -3*d*sa^2*ca*k^4*X^2-d*sa^2*ca^2*k^2*D*X^2-2*d^5*ca^2*κ^2-7/2*d^3*ca^3*κ^3-3*d^5*sa^2*k^2
+        -3*s^2*d^3*ca^2*k^2+9/2*d^3*sa^2*ca^2*k^2-3*s^2*d^3*ca*κ*k^2+9/2*d^3*sa^2*ca*κ*k^2
+        +4*s^2*d*ca^3*κ*k^2+4*d^3*ca^3*κ*k^2+2*d*sa^2*ca^3*κ*k^2+3*s^2*d^3*κ^2*k^2
+        -1/2*d^3*ca^3*κ^2*D-1/2*d^3*ca^2*κ^3*D+5/2*d^3*sa^2*ca*k^2*D-1/2*d^3*sa^2*κ*k^2*D
+        -4*s^2*d*κ^3*k^2*D-8*s^2*d*κ*k^4*D+4*s^2*d*κ^2*k^2*D^2+3/2*d^5*ca*κ^2*X+2*d^3*ca^3*κ^2*X
+        +3*d^5*κ^3*X+5/2*d^3*ca^2*κ^3*X+4*d^3*sa^2*ca*k^2*X+2*s^2*d*ca^3*k^2*X-2*d^3*ca^3*k^2*X
+        +3*s^2*d^3*κ*k^2*X+19/2*d^3*sa^2*κ*k^2*X+6*d^3*ca^2*κ*k^2*X+d*sa^2*ca^2*κ*k^2*X
+        +12*d^3*ca*κ^2*k^2*X+2*d*ca^3*κ^2*k^2*X+5*d*ca^2*κ^3*k^2*X-4*d*sa^2*ca*k^4*X
+        +4*d*sa^2*κ*k^4*X-1/2*d^3*ca^2*κ^2*D*X+1/2*d^3*ca*κ^3*D*X-4*d^3*κ^4*D*X
+        +5/2*d^3*sa^2*k^2*D*X-3*d*sa^2*ca^2*k^2*D*X-4*s^2*d*κ^2*k^2*D*X-6*s^2*d*k^4*D*X
+        +2*c^2*d*k^4*D*X-4*d*κ^3*k^2*D^2*X+d*sa^2*ca^2*k^2*X^2-5*d^3*κ^2*k^2*X^2+d*ca^2*κ^2*k^2*X^2
+        -5*d*sa^2*k^4*X^2-3*d*sa^2*ca*k^2*D*X^2-3*d^5*ca*κ^2+3/2*d^3*ca^3*κ^2-5/2*d^3*ca^2*κ^3
+        -3*s^2*d^3*ca*k^2+7/2*d^3*sa^2*ca*k^2+6*s^2*d*ca^3*k^2-4*d^3*ca^3*k^2-d*sa^2*ca^3*k^2
+        +3*s^2*d^3*κ*k^2+19/2*d^3*sa^2*κ*k^2+8*s^2*d*ca^2*κ*k^2+4*d^3*ca^2*κ*k^2+d*sa^2*ca^2*κ*k^2
+        -12*s^2*d*κ^3*k^2-8*s^2*d*κ*k^4+1/2*d^3*ca^2*κ^2*D-1/2*d^3*ca*κ^3*D+9/2*d^3*sa^2*k^2*D
+        -2*d*sa^2*ca^2*k^2*D+2*s^2*d*ca*κ*k^2*D-8*s^2*d*κ^2*k^2*D-16*s^2*d*k^4*D+3/2*d^5*κ^2*X
+        +4*d^3*ca^2*κ^2*X-9/2*d^3*ca*κ^3*X-2*d*ca^3*κ^3*X-12*d^3*κ^4*X+3*d^3*sa^2*k^2*X
+        +6*s^2*d*ca^2*k^2*X-6*d^3*ca^2*k^2*X+d*sa^2*ca^2*k^2*X+14*d^3*ca*κ*k^2*X
+        -4*d*sa^2*ca*κ*k^2*X-2*d*ca^3*κ*k^2*X-12*s^2*d*κ^2*k^2*X+2*d^3*κ^2*k^2*X-3*d*ca^2*κ^2*k^2*X
+        +4*d*ca*κ^3*k^2*X-6*s^2*d*k^4*X+2*c^2*d*k^4*X-8*d*sa^2*k^4*X-3/2*d^3*ca*κ^2*D*X
+        +1/2*d^3*κ^3*D*X-8*d*sa^2*ca*k^2*D*X-2*d*κ^4*D^2*X-d*sa^2*k^2*D^2*X-6*d*κ^2*k^2*D^2*X
+        +3*d*sa^2*ca*k^2*X^2+3*d*ca*κ^2*k^2*X^2+d*ca^2*κ^2*D*X^2-5*d*sa^2*k^2*D*X^2-3*d^5*κ^2
+        +9/2*d^3*ca^2*κ^2+9/2*d^3*ca*κ^3+2*d*ca^3*κ^3-3*s^2*d^3*k^2-5/2*d^3*sa^2*k^2
+        +14*s^2*d*ca^2*k^2-12*d^3*ca^2*k^2-d*sa^2*ca^2*k^2+6*s^2*d*ca*κ*k^2-4*d*sa^2*ca*κ*k^2
+        -4*d*ca^3*κ*k^2-16*s^2*d*κ^2*k^2-4*d^3*κ^2*k^2-16*s^2*d*k^4+5/2*d^3*ca*κ^2*D-1/2*d^3*κ^3*D
+        +2*s^2*d*ca*k^2*D-6*d*sa^2*ca*k^2*D+10*s^2*d*κ*k^2*D-8*d^3*κ*k^2*D-d*sa^2*k^2*D^2
+        +4*d*κ^2*k^2*D^2+6*d^3*ca*κ^2*X-2*d*ca^3*κ^2*X-9/2*d^3*κ^3*X-d*ca^2*κ^3*X+10*s^2*d*ca*k^2*X
+        -10*d^3*ca*k^2*X+4*d*sa^2*ca*k^2*X+2*d*ca^3*k^2*X+8*s^2*d*κ*k^2*X+14*d^3*κ*k^2*X
+        -9*d*sa^2*κ*k^2*X-8*d*ca^2*κ*k^2*X-12*d*ca*κ^2*k^2*X+4*d*κ^3*k^2*X+7/2*d^3*κ^2*D*X
+        +d*ca^2*κ^2*D*X+4*d*κ^4*D*X+6*s^2*d*k^2*D*X-8*d^3*k^2*D*X-11*d*sa^2*k^2*D*X-2*d*k^4*D*X
+        +4*d*κ*k^2*D^2*X-d*ca^2*κ^2*X^2+5*d*sa^2*k^2*X^2+5*d*κ^2*k^2*X^2+3*d*ca*κ^2*D*X^2
+        +7/2*d^3*ca*κ^2-d*ca^3*κ^2+19/2*d^3*κ^3+d*ca^2*κ^3+16*s^2*d*ca*k^2-24*d^3*ca*k^2
+        +3*d*sa^2*ca*k^2+4*d*ca^3*k^2+8*s^2*d*κ*k^2-2*d^3*κ*k^2-9*d*sa^2*κ*k^2-4*d*ca^2*κ*k^2
+        +9/2*d^3*κ^2*D-2*d*ca^2*κ^2*D+16*s^2*d*k^2*D-16*d^3*k^2*D-8*d*sa^2*k^2*D+14*d*κ*k^2*D^2
+        +3*d^3*κ^2*X-5*d*ca^2*κ^2*X+4*d*ca*κ^3*X+12*d*κ^4*X+6*s^2*d*k^2*X-8*d^3*k^2*X
+        +8*d*sa^2*k^2*X+6*d*ca^2*k^2*X-14*d*ca*κ*k^2*X+4*d*κ^2*k^2*X-2*d*k^4*X+2*d*ca*κ^2*D*X
+        +d*κ^2*D^2*X+6*d*k^2*D^2*X-3*d*ca*κ^2*X^2+5*d*κ^2*D*X^2-5/2*d^3*κ^2-d*ca^2*κ^2-4*d*ca*κ^3
+        -2*s^2*d*k^2-20*d^3*k^2+10*d*sa^2*k^2+14*d*ca^2*k^2-6*d*ca*κ^2*D+8*d*κ*k^2*D-d*κ^2*D^2
+        +12*d*k^2*D^2-8*d*ca*κ^2*X+d*κ^3*X+10*d*ca*k^2*X-18*d*κ*k^2*X-5*d*κ^2*D*X+8*d*k^2*D*X
+        -5*d*κ^2*X^2+3*d*ca*κ^2-9*d*κ^3+24*d*ca*k^2-12*d*κ*k^2-8*d*κ^2*D+16*d*k^2*D-4*d*κ^2*X
+        +2*d*k^2*X+10*d*κ^2+8*d*k^2) * ha1 +
       (-2*d^3*ca^5*κ^2*k^2*X-2*d^5*ca^5*κ*X-d^3*ca^5*κ*k^2*X-2*d^3*ca^4*κ^2*k^2*X-2*d^5*ca^5*κ
         -1/2*d^5*ca^5*X-2*d^5*ca^4*κ*X+d^3*ca^4*κ*k^2*X+2*d^3*ca^3*κ^2*k^2*X+2*d*ca^5*κ^2*k^2*X
-          +1/2*d^3*ca^5*κ*D*X-d^3*ca^4*k^2*X^2-2*d^5*ca^4*κ+1/2*d^3*ca^5*κ*D+1/2*d^5*ca^4*X
-            +2*d^5*ca^3*κ*X+7/2*d^3*ca^5*κ*X-d^3*ca^4*k^2*X+5*d^3*ca^3*κ*k^2*X+d*ca^5*κ*k^2*X
-              +2*d^3*ca^2*κ^2*k^2*X+2*d*ca^4*κ^2*k^2*X+1/2*d^3*ca^5*D*X+1/2*d^3*ca^4*κ*D*X
-                -3*d^3*ca^3*k^2*X^2+2*d^5*ca^4+2*d^5*ca^3*κ+7/2*d^3*ca^5*κ+1/2*d^3*ca^5*D
-                  +1/2*d^3*ca^4*κ*D+2*d^5*ca^3*X+2*d^5*ca^2*κ*X+5/2*d^3*ca^4*κ*X+4*d^3*ca^3*κ^2*X
-                    -4*d^3*ca^3*k^2*X+3*d^3*ca^2*κ*k^2*X-d*ca^4*κ*k^2*X-2*d*ca^3*κ^2*k^2*X
-                      -1/2*d^3*ca^4*D*X-4*d^3*ca^2*k^2*X^2+d*ca^4*k^2*X^2+3*d^5*ca^3-3/2*d^3*ca^5
-                        +2*d^5*ca^2*κ+5/2*d^3*ca^4*κ-1/2*d^3*ca^4*D+d^5*ca^2*X-2*d^3*ca^4*X
-                          -10*d^3*ca^3*κ*X-2*d*ca^5*κ*X+4*d^3*ca^2*κ^2*X-7*d^3*ca^2*k^2*X
-                            +d*ca^4*k^2*X-4*d^3*ca*κ*k^2*X-5*d*ca^3*κ*k^2*X-2*d*ca^2*κ^2*k^2*X
-                              -2*d^3*ca^3*D*X+3*d^3*ca*k^2*X^2+3*d*ca^3*k^2*X^2+d*ca^4*D*X^2
-                                +d^5*ca^2-9/2*d^3*ca^4-12*d^3*ca^3*κ-2*d*ca^5*κ-3*d^3*ca^3*D
-                                  -3/2*d^5*ca*X-2*d^3*ca^3*X-18*d^3*ca^2*κ*X-d*ca^4*κ*X
-                                    -4*d*ca^3*κ^2*X+4*d^3*ca*k^2*X+4*d*ca^3*k^2*X-4*d^3*κ*k^2*X
-                                      -3*d*ca^2*κ*k^2*X-2*d^3*ca^2*D*X+3*d*ca^4*D*X
-                                        -1/2*d^3*ca*κ*D*X-2*c^2*d*k^2*D*X-d*ca^4*X^2+5*d^3*k^2*X^2
-                                          +4*d*ca^2*k^2*X^2+3*d*ca^3*D*X^2-3*d^5*ca+2*d^3*ca^3
-                                            +d*ca^5-16*d^3*ca^2*κ-d*ca^4*κ-4*d^3*ca^2*D+2*d*ca^4*D
-                                              -1/2*d^3*ca*κ*D-3/2*d^5*X+5*d^3*ca^2*X-d*ca^4*X
-                                                -19/2*d^3*ca*κ*X+8*d*ca^3*κ*X-4*d*ca^2*κ^2*X
-                                                  -2*c^2*d*k^2*X+8*d^3*k^2*X+7*d*ca^2*k^2*X
-                                                    +4*d*ca*κ*k^2*X+3/2*d^3*ca*D*X+8*d*ca^3*D*X
-                                                      -1/2*d^3*κ*D*X+d*ca^2*D^2*X-3*d*ca^3*X^2
-                                                        -3*d*ca*k^2*X^2+4*d*ca^2*D*X^2-3*d^5
-                                                          +19*d^3*ca^2+d*ca^4+9/2*d^3*ca*κ
-                                                            +10*d*ca^3*κ+4*d^3*κ^2+5/2*d^3*ca*D
-                                                              +6*d*ca^3*D+15/2*d^3*κ*D+d*ca^2*D^2
-                                                                -4*d*κ^2*D^2+14*d^3*ca*X
-                                                                  -6*d*ca^3*X-9/2*d^3*κ*X
-                                                                    +18*d*ca^2*κ*X-4*d*ca*k^2*X
-                                                                      +4*d*κ*k^2*X+21/2*d^3*D*X
-                                                                        +8*d*ca^2*D*X+2*d*k^2*D*X
-                                                                          -4*d*κ*D^2*X
-                                                                            -4*d*ca^2*X^2
-                                                                              -5*d*k^2*X^2
-                                                                                -3*d*ca*D*X^2
-                                                                                  +55/2*d^3*ca
-                                                                                    -8*d*ca^3+23/2*d^3*κ+14*d*ca^2*κ+41/2*d^3*D+6*d*ca^2*D-14*d*κ*D^2+11*d^3*X-13*d*ca^2*X+10*d*ca*κ*X-6*d*k^2*X-8*d*ca*D*X-7*d*D^2*X+3*d*ca*X^2-5*d*D*X^2+35/2*d^3-25*d*ca^2-4*d*ca*κ-6*d*ca*D-8*d*κ*D-13*d*D^2-6*d*ca*X+9*d*κ*X-19*d*D*X+5*d*X^2-21*d*ca+3*d*κ-24*d*D+6*d*X+2*d) * ha2 +
+        +1/2*d^3*ca^5*κ*D*X-d^3*ca^4*k^2*X^2-2*d^5*ca^4*κ+1/2*d^3*ca^5*κ*D+1/2*d^5*ca^4*X
+        +2*d^5*ca^3*κ*X+7/2*d^3*ca^5*κ*X-d^3*ca^4*k^2*X+5*d^3*ca^3*κ*k^2*X+d*ca^5*κ*k^2*X
+        +2*d^3*ca^2*κ^2*k^2*X+2*d*ca^4*κ^2*k^2*X+1/2*d^3*ca^5*D*X+1/2*d^3*ca^4*κ*D*X
+        -3*d^3*ca^3*k^2*X^2+2*d^5*ca^4+2*d^5*ca^3*κ+7/2*d^3*ca^5*κ+1/2*d^3*ca^5*D
+        +1/2*d^3*ca^4*κ*D+2*d^5*ca^3*X+2*d^5*ca^2*κ*X+5/2*d^3*ca^4*κ*X+4*d^3*ca^3*κ^2*X
+        -4*d^3*ca^3*k^2*X+3*d^3*ca^2*κ*k^2*X-d*ca^4*κ*k^2*X-2*d*ca^3*κ^2*k^2*X
+        -1/2*d^3*ca^4*D*X-4*d^3*ca^2*k^2*X^2+d*ca^4*k^2*X^2+3*d^5*ca^3-3/2*d^3*ca^5
+        +2*d^5*ca^2*κ+5/2*d^3*ca^4*κ-1/2*d^3*ca^4*D+d^5*ca^2*X-2*d^3*ca^4*X
+        -10*d^3*ca^3*κ*X-2*d*ca^5*κ*X+4*d^3*ca^2*κ^2*X-7*d^3*ca^2*k^2*X
+        +d*ca^4*k^2*X-4*d^3*ca*κ*k^2*X-5*d*ca^3*κ*k^2*X-2*d*ca^2*κ^2*k^2*X
+        -2*d^3*ca^3*D*X+3*d^3*ca*k^2*X^2+3*d*ca^3*k^2*X^2+d*ca^4*D*X^2
+        +d^5*ca^2-9/2*d^3*ca^4-12*d^3*ca^3*κ-2*d*ca^5*κ-3*d^3*ca^3*D
+        -3/2*d^5*ca*X-2*d^3*ca^3*X-18*d^3*ca^2*κ*X-d*ca^4*κ*X
+        -4*d*ca^3*κ^2*X+4*d^3*ca*k^2*X+4*d*ca^3*k^2*X-4*d^3*κ*k^2*X
+        -3*d*ca^2*κ*k^2*X-2*d^3*ca^2*D*X+3*d*ca^4*D*X
+        -1/2*d^3*ca*κ*D*X-2*c^2*d*k^2*D*X-d*ca^4*X^2+5*d^3*k^2*X^2
+        +4*d*ca^2*k^2*X^2+3*d*ca^3*D*X^2-3*d^5*ca+2*d^3*ca^3
+        +d*ca^5-16*d^3*ca^2*κ-d*ca^4*κ-4*d^3*ca^2*D+2*d*ca^4*D
+        -1/2*d^3*ca*κ*D-3/2*d^5*X+5*d^3*ca^2*X-d*ca^4*X
+        -19/2*d^3*ca*κ*X+8*d*ca^3*κ*X-4*d*ca^2*κ^2*X
+        -2*c^2*d*k^2*X+8*d^3*k^2*X+7*d*ca^2*k^2*X
+        +4*d*ca*κ*k^2*X+3/2*d^3*ca*D*X+8*d*ca^3*D*X
+        -1/2*d^3*κ*D*X+d*ca^2*D^2*X-3*d*ca^3*X^2
+        -3*d*ca*k^2*X^2+4*d*ca^2*D*X^2-3*d^5
+        +19*d^3*ca^2+d*ca^4+9/2*d^3*ca*κ
+        +10*d*ca^3*κ+4*d^3*κ^2+5/2*d^3*ca*D
+        +6*d*ca^3*D+15/2*d^3*κ*D+d*ca^2*D^2
+        -4*d*κ^2*D^2+14*d^3*ca*X
+        -6*d*ca^3*X-9/2*d^3*κ*X
+        +18*d*ca^2*κ*X-4*d*ca*k^2*X
+        +4*d*κ*k^2*X+21/2*d^3*D*X
+        +8*d*ca^2*D*X+2*d*k^2*D*X
+        -4*d*κ*D^2*X
+        -4*d*ca^2*X^2
+        -5*d*k^2*X^2
+        -3*d*ca*D*X^2
+        +55/2*d^3*ca
+        -8*d*ca^3+23/2*d^3*κ+14*d*ca^2*κ+41/2*d^3*D+6*d*ca^2*D-14*d*κ*D^2+11*d^3*X-13*d*ca^2*X
+        +10*d*ca*κ*X-6*d*k^2*X-8*d*ca*D*X-7*d*D^2*X+3*d*ca*X^2-5*d*D*X^2+35/2*d^3-25*d*ca^2
+        -4*d*ca*κ-6*d*ca*D-8*d*κ*D-13*d*D^2-6*d*ca*X+9*d*κ*X-19*d*D*X+5*d*X^2-21*d*ca+3*d*κ-24*d*D
+        +6*d*X+2*d) * ha2 +
       (2*d^3*ca^3*κ^2*k^2*X+2*d^5*ca^3*κ*X+d^3*ca^3*κ*k^2*X+2*d^3*ca^2*κ^2*k^2*X+2*d^5*ca^3*κ
         +1/2*d^5*ca^3*X+2*d^5*ca^2*κ*X-d^3*ca^2*κ*k^2*X-2*d*ca^3*κ^2*k^2*X-1/2*d^3*ca^3*κ*D*X
-          +d^3*ca^2*k^2*X^2+2*d^5*ca^2*κ-1/2*d^3*ca^3*κ*D-1/2*d^5*ca^2*X-7/2*d^3*ca^3*κ*X
-            +d^3*ca^2*k^2*X-4*d^3*ca*κ*k^2*X-d*ca^3*κ*k^2*X-2*d*ca^2*κ^2*k^2*X-1/2*d^3*ca^3*D*X
-              -1/2*d^3*ca^2*κ*D*X+3*d^3*ca*k^2*X^2-2*d^5*ca^2-7/2*d^3*ca^3*κ-1/2*d^3*ca^3*D
-                -1/2*d^3*ca^2*κ*D-3/2*d^5*ca*X-5/2*d^3*ca^2*κ*X+4*d^3*ca*k^2*X-4*d^3*κ*k^2*X
-                  +d*ca^2*κ*k^2*X+1/2*d^3*ca^2*D*X-1/2*d^3*ca*κ*D*X+5*d^3*k^2*X^2-d*ca^2*k^2*X^2
-                    -3*d^5*ca+3/2*d^3*ca^3-5/2*d^3*ca^2*κ+1/2*d^3*ca^2*D-1/2*d^3*ca*κ*D-3/2*d^5*X
-                      +2*d^3*ca^2*X+9/2*d^3*ca*κ*X+2*d*ca^3*κ*X+8*d^3*k^2*X-d*ca^2*k^2*X
-                        +4*d*ca*κ*k^2*X+3/2*d^3*ca*D*X-1/2*d^3*κ*D*X-3*d*ca*k^2*X^2-d*ca^2*D*X^2
-                          -3*d^5+9/2*d^3*ca^2+9/2*d^3*ca*κ+2*d*ca^3*κ+5/2*d^3*ca*D-1/2*d^3*κ*D
-                            +4*d^3*ca*X+19/2*d^3*κ*X+d*ca^2*κ*X-4*d*ca*k^2*X+4*d*κ*k^2*X
-                              +5/2*d^3*D*X-3*d*ca^2*D*X+d*ca^2*X^2-5*d*k^2*X^2-3*d*ca*D*X^2
-                                +7/2*d^3*ca-d*ca^3+19/2*d^3*κ+d*ca^2*κ+9/2*d^3*D-2*d*ca^2*D
-                                  +3*d^3*X+d*ca^2*X-4*d*ca*κ*X-8*d*k^2*X-8*d*ca*D*X-d*D^2*X
-                                    +3*d*ca*X^2-5*d*D*X^2-5/2*d^3-d*ca^2-4*d*ca*κ-6*d*ca*D-d*D^2
-                                      +4*d*ca*X-9*d*κ*X-11*d*D*X+5*d*X^2+3*d*ca-9*d*κ-8*d*D+8*d*X
-                                        +10*d) * E1 +
+        +d^3*ca^2*k^2*X^2+2*d^5*ca^2*κ-1/2*d^3*ca^3*κ*D-1/2*d^5*ca^2*X-7/2*d^3*ca^3*κ*X
+        +d^3*ca^2*k^2*X-4*d^3*ca*κ*k^2*X-d*ca^3*κ*k^2*X-2*d*ca^2*κ^2*k^2*X-1/2*d^3*ca^3*D*X
+        -1/2*d^3*ca^2*κ*D*X+3*d^3*ca*k^2*X^2-2*d^5*ca^2-7/2*d^3*ca^3*κ-1/2*d^3*ca^3*D
+        -1/2*d^3*ca^2*κ*D-3/2*d^5*ca*X-5/2*d^3*ca^2*κ*X+4*d^3*ca*k^2*X-4*d^3*κ*k^2*X
+        +d*ca^2*κ*k^2*X+1/2*d^3*ca^2*D*X-1/2*d^3*ca*κ*D*X+5*d^3*k^2*X^2-d*ca^2*k^2*X^2
+        -3*d^5*ca+3/2*d^3*ca^3-5/2*d^3*ca^2*κ+1/2*d^3*ca^2*D-1/2*d^3*ca*κ*D-3/2*d^5*X
+        +2*d^3*ca^2*X+9/2*d^3*ca*κ*X+2*d*ca^3*κ*X+8*d^3*k^2*X-d*ca^2*k^2*X
+        +4*d*ca*κ*k^2*X+3/2*d^3*ca*D*X-1/2*d^3*κ*D*X-3*d*ca*k^2*X^2-d*ca^2*D*X^2
+        -3*d^5+9/2*d^3*ca^2+9/2*d^3*ca*κ+2*d*ca^3*κ+5/2*d^3*ca*D-1/2*d^3*κ*D
+        +4*d^3*ca*X+19/2*d^3*κ*X+d*ca^2*κ*X-4*d*ca*k^2*X+4*d*κ*k^2*X
+        +5/2*d^3*D*X-3*d*ca^2*D*X+d*ca^2*X^2-5*d*k^2*X^2-3*d*ca*D*X^2
+        +7/2*d^3*ca-d*ca^3+19/2*d^3*κ+d*ca^2*κ+9/2*d^3*D-2*d*ca^2*D
+        +3*d^3*X+d*ca^2*X-4*d*ca*κ*X-8*d*k^2*X-8*d*ca*D*X-d*D^2*X
+        +3*d*ca*X^2-5*d*D*X^2-5/2*d^3-d*ca^2-4*d*ca*κ-6*d*ca*D-d*D^2
+        +4*d*ca*X-9*d*κ*X-11*d*D*X+5*d*X^2+3*d*ca-9*d*κ-8*d*D+8*d*X
+        +10*d) * E1 +
       (d^5*ca^4*κ*X+2*d^3*ca^3*κ^2*k^2*X-2*d^5*ca^3*κ*X-3*d^3*ca^3*κ*k^2*X+2*d^3*ca^2*κ^2*k^2*X
         +2*d^5*ca^3*κ-1/2*d^5*ca^3*X-2*d^5*ca^2*κ*X-d^3*ca^4*κ*X+2*d^3*ca^3*k^2*X
-          -5*d^3*ca^2*κ*k^2*X-2*d*ca^3*κ^2*k^2*X+1/2*d^3*ca^3*κ*D*X-d^3*ca^2*k^2*X^2+2*d^5*ca^2*κ
-            -1/2*d^3*ca^3*κ*D+1/2*d^5*ca^2*X+7/2*d^3*ca^3*κ*X+7*d^3*ca^2*k^2*X-4*d^3*ca*κ*k^2*X
-              +3*d*ca^3*κ*k^2*X-2*d*ca^2*κ^2*k^2*X+1/2*d^3*ca^3*D*X+1/2*d^3*ca^2*κ*D*X
-                +2*d^3*κ^2*D^2*X-3*d^3*ca*k^2*X^2-2*d^5*ca^2-7/2*d^3*ca^3*κ-1/2*d^3*ca^3*D
-                  -1/2*d^3*ca^2*κ*D+3/2*d^5*ca*X+2*d^3*ca^3*X+3*d^5*κ*X+5/2*d^3*ca^2*κ*X
-                    +12*d^3*ca*k^2*X-2*d*ca^3*k^2*X+5*d*ca^2*κ*k^2*X-1/2*d^3*ca^2*D*X
-                      +1/2*d^3*ca*κ*D*X-4*d^3*κ^2*D*X-4*d*κ*k^2*D^2*X-5*d^3*k^2*X^2+d*ca^2*k^2*X^2
-                        -3*d^5*ca+3/2*d^3*ca^3-5/2*d^3*ca^2*κ+1/2*d^3*ca^2*D-1/2*d^3*ca*κ*D
-                          +3/2*d^5*X+4*d^3*ca^2*X-9/2*d^3*ca*κ*X-2*d*ca^3*κ*X-12*d^3*κ^2*X
-                            +2*d^3*k^2*X-7*d*ca^2*k^2*X+4*d*ca*κ*k^2*X-3/2*d^3*ca*D*X
-                              +1/2*d^3*κ*D*X-2*d*κ^2*D^2*X-6*d*k^2*D^2*X+3*d*ca*k^2*X^2
-                                +d*ca^2*D*X^2-3*d^5+9/2*d^3*ca^2+9/2*d^3*ca*κ+2*d*ca^3*κ
-                                  +5/2*d^3*ca*D-1/2*d^3*κ*D+6*d^3*ca*X-2*d*ca^3*X-9/2*d^3*κ*X
-                                    -d*ca^2*κ*X-12*d*ca*k^2*X+4*d*κ*k^2*X+7/2*d^3*D*X+d*ca^2*D*X
-                                      +4*d*κ^2*D*X-d*ca^2*X^2+5*d*k^2*X^2+3*d*ca*D*X^2+7/2*d^3*ca
-                                        -d*ca^3+19/2*d^3*κ+d*ca^2*κ+9/2*d^3*D-2*d*ca^2*D+3*d^3*X
-                                          -5*d*ca^2*X+4*d*ca*κ*X+12*d*κ^2*X+4*d*k^2*X+2*d*ca*D*X
-                                            +d*D^2*X-3*d*ca*X^2+5*d*D*X^2-5/2*d^3-d*ca^2-4*d*ca*κ
-                                              -6*d*ca*D-d*D^2-8*d*ca*X+d*κ*X-5*d*D*X-5*d*X^2
-                                                +3*d*ca-9*d*κ-8*d*D-4*d*X+10*d) * E2 +
+        -5*d^3*ca^2*κ*k^2*X-2*d*ca^3*κ^2*k^2*X+1/2*d^3*ca^3*κ*D*X-d^3*ca^2*k^2*X^2+2*d^5*ca^2*κ
+        -1/2*d^3*ca^3*κ*D+1/2*d^5*ca^2*X+7/2*d^3*ca^3*κ*X+7*d^3*ca^2*k^2*X-4*d^3*ca*κ*k^2*X
+        +3*d*ca^3*κ*k^2*X-2*d*ca^2*κ^2*k^2*X+1/2*d^3*ca^3*D*X+1/2*d^3*ca^2*κ*D*X
+        +2*d^3*κ^2*D^2*X-3*d^3*ca*k^2*X^2-2*d^5*ca^2-7/2*d^3*ca^3*κ-1/2*d^3*ca^3*D
+        -1/2*d^3*ca^2*κ*D+3/2*d^5*ca*X+2*d^3*ca^3*X+3*d^5*κ*X+5/2*d^3*ca^2*κ*X
+        +12*d^3*ca*k^2*X-2*d*ca^3*k^2*X+5*d*ca^2*κ*k^2*X-1/2*d^3*ca^2*D*X
+        +1/2*d^3*ca*κ*D*X-4*d^3*κ^2*D*X-4*d*κ*k^2*D^2*X-5*d^3*k^2*X^2+d*ca^2*k^2*X^2
+        -3*d^5*ca+3/2*d^3*ca^3-5/2*d^3*ca^2*κ+1/2*d^3*ca^2*D-1/2*d^3*ca*κ*D
+        +3/2*d^5*X+4*d^3*ca^2*X-9/2*d^3*ca*κ*X-2*d*ca^3*κ*X-12*d^3*κ^2*X
+        +2*d^3*k^2*X-7*d*ca^2*k^2*X+4*d*ca*κ*k^2*X-3/2*d^3*ca*D*X
+        +1/2*d^3*κ*D*X-2*d*κ^2*D^2*X-6*d*k^2*D^2*X+3*d*ca*k^2*X^2
+        +d*ca^2*D*X^2-3*d^5+9/2*d^3*ca^2+9/2*d^3*ca*κ+2*d*ca^3*κ
+        +5/2*d^3*ca*D-1/2*d^3*κ*D+6*d^3*ca*X-2*d*ca^3*X-9/2*d^3*κ*X
+        -d*ca^2*κ*X-12*d*ca*k^2*X+4*d*κ*k^2*X+7/2*d^3*D*X+d*ca^2*D*X
+        +4*d*κ^2*D*X-d*ca^2*X^2+5*d*k^2*X^2+3*d*ca*D*X^2+7/2*d^3*ca
+        -d*ca^3+19/2*d^3*κ+d*ca^2*κ+9/2*d^3*D-2*d*ca^2*D+3*d^3*X
+        -5*d*ca^2*X+4*d*ca*κ*X+12*d*κ^2*X+4*d*k^2*X+2*d*ca*D*X
+        +d*D^2*X-3*d*ca*X^2+5*d*D*X^2-5/2*d^3-d*ca^2-4*d*ca*κ
+        -6*d*ca*D-d*D^2-8*d*ca*X+d*κ*X-5*d*D*X-5*d*X^2
+        +3*d*ca-9*d*κ-8*d*D-4*d*X+10*d) * E2 +
       (d^3*ca^4*κ^2+d^3*ca^4*κ*X+2*d^3*ca^4*κ-d^3*ca^3*κ-d^3*ca^3-3*d^3*ca^2*κ+2*d*κ^3*D^2
         +2*d*κ^2*D^2*X-3*d^3*ca^2-3*d^3*ca*κ+4*d*ca^3*κ+3*d^3*κ^2-4*d*κ^3*D-8*d*κ*k^2*D
-          +4*d*κ^2*D^2+2*d*ca^3*X+3*d^3*κ*X-4*d*κ^2*D*X-6*d*k^2*D*X-3*d^3*ca+6*d*ca^3+3*d^3*κ
-            +8*d*ca^2*κ-12*d*κ^3-8*d*κ*k^2+2*d*ca*κ*D-8*d*κ^2*D-16*d*k^2*D+6*d*ca^2*X-12*d*κ^2*X
-              -6*d*k^2*X-3*d^3+14*d*ca^2+6*d*ca*κ-16*d*κ^2-16*d*k^2+2*d*ca*D+10*d*κ*D+10*d*ca*X
-                +8*d*κ*X+6*d*D*X+16*d*ca+8*d*κ+16*d*D+6*d*X-2*d) * hDdef +
+        +4*d*κ^2*D^2+2*d*ca^3*X+3*d^3*κ*X-4*d*κ^2*D*X-6*d*k^2*D*X-3*d^3*ca+6*d*ca^3+3*d^3*κ
+        +8*d*ca^2*κ-12*d*κ^3-8*d*κ*k^2+2*d*ca*κ*D-8*d*κ^2*D-16*d*k^2*D+6*d*ca^2*X-12*d*κ^2*X
+        -6*d*k^2*X-3*d^3+14*d*ca^2+6*d*ca*κ-16*d*κ^2-16*d*k^2+2*d*ca*D+10*d*κ*D+10*d*ca*X
+        +8*d*κ*X+6*d*D*X+16*d*ca+8*d*κ+16*d*D+6*d*X-2*d) * hDdef +
       (-d^5*ca^6*κ^2-2*d^5*ca^6*κ+4*d^5*ca^5*κ^2+5*d^5*ca^5*κ+5*d^5*ca^4*κ^2+d^3*ca^6*κ^2
         +4*d^3*ca^5*κ*k^2+4*d^3*ca^4*κ^2*k^2-d^3*ca^5*κ^2*D+2*d^3*ca^4*κ*k^2*X+d^5*ca^5
-          +7*d^5*ca^4*κ+2*d^3*ca^6*κ-4*d^5*ca^3*κ^2-7*d^3*ca^5*κ^2-4*d^3*ca^5*k^2+6*d^3*ca^4*κ*k^2
-            -2*d^3*ca^5*κ*D-d^3*ca^4*κ^2*D-2*d^3*ca^2*κ^3*D^2+2*d^3*ca^4*k^2*X+6*d^3*ca^3*κ*k^2*X
-              -d^5*ca^4-9*d^3*ca^5*κ-7*d^5*ca^2*κ^2-6*d^3*ca^4*κ^2-4*d^3*ca^3*κ^3-12*d^3*ca^4*k^2
-                -4*d^3*ca^3*κ*k^2-4*d*ca^5*κ*k^2-8*d^3*ca^2*κ^2*k^2-4*d*ca^4*κ^2*k^2-d^3*ca^5*D
-                  -d^3*ca^4*κ*D+4*d^3*ca^2*κ^3*D-4*d^3*ca^2*κ^2*D^2+4*d*ca^2*κ^2*k^2*D^2
-                    +8*d^3*ca^3*k^2*X+8*d^3*ca^2*κ*k^2*X-2*d*ca^4*κ*k^2*X-4*d^5*ca^3-4*d^3*ca^5
-                      -8*d^5*ca^2*κ-14*d^3*ca^4*κ+18*d^3*ca^3*κ^2+4*d*ca^5*κ^2+8*d^3*ca^2*κ^3
-                        -20*d^3*ca^3*k^2+4*d*ca^5*k^2-6*d*ca^4*κ*k^2+d^3*ca^4*D+2*d^3*ca^3*κ*D
-                          +8*d^3*ca^2*κ^2*D+2*d^3*κ^3*D^2+2*d*ca^2*κ^3*D^2+14*d*ca^2*κ*k^2*D^2
-                            +16*d^3*ca^2*k^2*X-2*d*ca^4*k^2*X-6*d^3*ca*κ*k^2*X-6*d*ca^3*κ*k^2*X
-                              -2*d*ca^4*κ*D*X-6*d^5*ca^2-8*d^3*ca^4+3*d^5*ca*κ+6*d^3*ca^3*κ
-                                +6*d*ca^5*κ+3*d^5*κ^2+49*d^3*ca^2*κ^2+2*d*ca^4*κ^2+4*d*ca^3*κ^3
-                                  +8*d^3*ca^2*k^2+14*d*ca^4*k^2+4*d*ca^3*κ*k^2+4*d^3*κ^2*k^2
-                                    +4*d*ca^2*κ^2*k^2+4*d^3*ca^3*D-4*d^3*ca^2*κ*D-4*d*ca^4*κ*D
-                                      +d^3*ca*κ^2*D-4*d^3*κ^3*D-4*d*ca^2*κ^3*D+2*c^2*d*κ*k^2*D
-                                        +4*d*ca^2*κ^2*D^2+12*d*ca^2*k^2*D^2-4*d*κ^2*k^2*D^2
-                                          +2*d*ca^4*κ*X+10*d^3*ca*k^2*X-8*d*ca^3*k^2*X
-                                            -10*d^3*κ*k^2*X-8*d*ca^2*κ*k^2*X-2*d*ca^4*D*X
-                                              -6*d*ca^3*κ*D*X-3*d^5*ca-10*d^3*ca^3+4*d*ca^5
-                                                +3*d^5*κ+18*d^3*ca^2*κ+12*d*ca^4*κ+5*d^3*ca*κ^2
-                                                  -14*d*ca^3*κ^2-12*d^3*κ^3-8*d*ca^2*κ^3
-                                                    +24*d^3*ca*k^2+20*d*ca^3*k^2+2*c^2*d*κ*k^2
-                                                      -6*d^3*κ*k^2-14*d*ca^2*κ*k^2-4*d^3*ca^2*D
-                                                        -4*d*ca^4*D-4*d^3*ca*κ*D-10*d*ca^3*κ*D
-                                                          +d^3*κ^2*D-8*d*ca^2*κ^2*D-2*d^3*κ*D^2
-                                                            -2*d*ca^2*κ*D^2-2*d*κ^3*D^2
-                                                              -6*d*κ*k^2*D^2+2*d*ca^4*X
-                                                                +6*d*ca^3*κ*X-16*d*ca^2*k^2*X
-                                                                  +6*d*ca*κ*k^2*X-8*d*ca^3*D*X
-                                                                    -8*d*ca^2*κ*D*X-3*d^5
-                                                                      -4*d^3*ca^2+12*d*ca^4
-                                                                        +11*d^3*ca*κ+2*d*ca^3*κ
-                                                                          -44*d*ca^2*κ^2+4*d^3*k^2
-                                                                            -22*d*ca^2*k^2
-                                                                              +5*d^3*ca*D
-                                                                                -16*d*ca^3*D
-                                                                                  -3*d^3*κ*D-2*d*ca^2*κ*D+4*d*κ^3*D-2*d*κ*k^2*D-2*d*ca^2*D^2+4*d*κ^2*D^2+4*d*k^2*D^2+2*d*κ*D^3+8*d*ca^3*X+8*d*ca^2*κ*X-10*d*ca*k^2*X+10*d*κ*k^2*X-16*d*ca^2*D*X+6*d*ca*κ*D*X-8*d^3*ca+26*d*ca^3+4*d^3*κ-2*d*ca^2*κ-6*d*ca*κ^2+12*d*κ^3-24*d*ca*k^2+10*d*κ*k^2+3*d^3*D-14*d*ca^2*D+10*d*ca*κ*D-2*d*ca*D^2+4*d*κ*D^2+16*d*ca^2*X-6*d*ca*κ*X-10*d*ca*D*X+10*d*κ*D*X-22*d^3+32*d*ca^2-20*d*ca*κ-8*d*κ^2-8*d*k^2-16*d*ca*D+2*d*κ*D-4*d*D^2+10*d*ca*X-10*d*κ*X+24*d*ca-10*d*κ+18*d*D+8*d) * hX
+        +7*d^5*ca^4*κ+2*d^3*ca^6*κ-4*d^5*ca^3*κ^2-7*d^3*ca^5*κ^2-4*d^3*ca^5*k^2+6*d^3*ca^4*κ*k^2
+        -2*d^3*ca^5*κ*D-d^3*ca^4*κ^2*D-2*d^3*ca^2*κ^3*D^2+2*d^3*ca^4*k^2*X+6*d^3*ca^3*κ*k^2*X
+        -d^5*ca^4-9*d^3*ca^5*κ-7*d^5*ca^2*κ^2-6*d^3*ca^4*κ^2-4*d^3*ca^3*κ^3-12*d^3*ca^4*k^2
+        -4*d^3*ca^3*κ*k^2-4*d*ca^5*κ*k^2-8*d^3*ca^2*κ^2*k^2-4*d*ca^4*κ^2*k^2-d^3*ca^5*D
+        -d^3*ca^4*κ*D+4*d^3*ca^2*κ^3*D-4*d^3*ca^2*κ^2*D^2+4*d*ca^2*κ^2*k^2*D^2
+        +8*d^3*ca^3*k^2*X+8*d^3*ca^2*κ*k^2*X-2*d*ca^4*κ*k^2*X-4*d^5*ca^3-4*d^3*ca^5
+        -8*d^5*ca^2*κ-14*d^3*ca^4*κ+18*d^3*ca^3*κ^2+4*d*ca^5*κ^2+8*d^3*ca^2*κ^3
+        -20*d^3*ca^3*k^2+4*d*ca^5*k^2-6*d*ca^4*κ*k^2+d^3*ca^4*D+2*d^3*ca^3*κ*D
+        +8*d^3*ca^2*κ^2*D+2*d^3*κ^3*D^2+2*d*ca^2*κ^3*D^2+14*d*ca^2*κ*k^2*D^2
+        +16*d^3*ca^2*k^2*X-2*d*ca^4*k^2*X-6*d^3*ca*κ*k^2*X-6*d*ca^3*κ*k^2*X
+        -2*d*ca^4*κ*D*X-6*d^5*ca^2-8*d^3*ca^4+3*d^5*ca*κ+6*d^3*ca^3*κ
+        +6*d*ca^5*κ+3*d^5*κ^2+49*d^3*ca^2*κ^2+2*d*ca^4*κ^2+4*d*ca^3*κ^3
+        +8*d^3*ca^2*k^2+14*d*ca^4*k^2+4*d*ca^3*κ*k^2+4*d^3*κ^2*k^2
+        +4*d*ca^2*κ^2*k^2+4*d^3*ca^3*D-4*d^3*ca^2*κ*D-4*d*ca^4*κ*D
+        +d^3*ca*κ^2*D-4*d^3*κ^3*D-4*d*ca^2*κ^3*D+2*c^2*d*κ*k^2*D
+        +4*d*ca^2*κ^2*D^2+12*d*ca^2*k^2*D^2-4*d*κ^2*k^2*D^2
+        +2*d*ca^4*κ*X+10*d^3*ca*k^2*X-8*d*ca^3*k^2*X
+        -10*d^3*κ*k^2*X-8*d*ca^2*κ*k^2*X-2*d*ca^4*D*X
+        -6*d*ca^3*κ*D*X-3*d^5*ca-10*d^3*ca^3+4*d*ca^5
+        +3*d^5*κ+18*d^3*ca^2*κ+12*d*ca^4*κ+5*d^3*ca*κ^2
+        -14*d*ca^3*κ^2-12*d^3*κ^3-8*d*ca^2*κ^3
+        +24*d^3*ca*k^2+20*d*ca^3*k^2+2*c^2*d*κ*k^2
+        -6*d^3*κ*k^2-14*d*ca^2*κ*k^2-4*d^3*ca^2*D
+        -4*d*ca^4*D-4*d^3*ca*κ*D-10*d*ca^3*κ*D
+        +d^3*κ^2*D-8*d*ca^2*κ^2*D-2*d^3*κ*D^2
+        -2*d*ca^2*κ*D^2-2*d*κ^3*D^2
+        -6*d*κ*k^2*D^2+2*d*ca^4*X
+        +6*d*ca^3*κ*X-16*d*ca^2*k^2*X
+        +6*d*ca*κ*k^2*X-8*d*ca^3*D*X
+        -8*d*ca^2*κ*D*X-3*d^5
+        -4*d^3*ca^2+12*d*ca^4
+        +11*d^3*ca*κ+2*d*ca^3*κ
+        -44*d*ca^2*κ^2+4*d^3*k^2
+        -22*d*ca^2*k^2
+        +5*d^3*ca*D
+        -16*d*ca^3*D
+        -3*d^3*κ*D-2*d*ca^2*κ*D+4*d*κ^3*D-2*d*κ*k^2*D-2*d*ca^2*D^2+4*d*κ^2*D^2+4*d*k^2*D^2
+        +2*d*κ*D^3+8*d*ca^3*X+8*d*ca^2*κ*X-10*d*ca*k^2*X+10*d*κ*k^2*X-16*d*ca^2*D*X+6*d*ca*κ*D*X
+        -8*d^3*ca+26*d*ca^3+4*d^3*κ-2*d*ca^2*κ-6*d*ca*κ^2+12*d*κ^3-24*d*ca*k^2+10*d*κ*k^2+3*d^3*D
+        -14*d*ca^2*D+10*d*ca*κ*D-2*d*ca*D^2+4*d*κ*D^2+16*d*ca^2*X-6*d*ca*κ*X-10*d*ca*D*X+10*d*κ*D*X
+        -22*d^3+32*d*ca^2-20*d*ca*κ-8*d*κ^2-8*d*k^2-16*d*ca*D+2*d*κ*D-4*d*D^2+10*d*ca*X-10*d*κ*X
+        +24*d*ca-10*d*κ+18*d*D+8*d) * hX
 
 /-- `dn(z + K) dn z = k'` where both are finite and `dn z ≠ 0` (from Table 22.4.3). -/
 theorem jacobiDnk_add_K_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}

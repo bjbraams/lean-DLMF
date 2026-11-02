@@ -317,7 +317,7 @@ baseline for every auxiliary lemma, and the project now meets its formal-presenc
 Semantic quality is less uniform:
 
 - Some docstrings explain only a dependency, for example
-  [ordinaryHypergeometricSeries_eq_binomialSeries_comp](DLMF/Hypergeometric/SeriesProperties.lean#L177)
+  [ordinaryHypergeometricSeries_eq_binomialSeries_comp](DLMF/Hypergeometric/Basic/SpecialValues.lean#L177)
   and [poch_three_halves_factorial](DLMF/OrthogonalPolynomials/Classical.lean#L763).
   State the series identification or factorial identity first; mention the consuming
   theorem second.
@@ -466,7 +466,7 @@ type-and-proof kernel audit above.
 
 There are 4,376 source lines longer than 100 characters and 544 files with an unsorted
 consecutive import block. Twenty files have runs of at least four blank lines, largely
-left by moved declarations; `Hypergeometric/SeriesProperties.lean` has a 29-line run and
+left by moved declarations; `Hypergeometric/Basic/SpecialValues.lean` has a 29-line run and
 the Appell series file a 33-line run. These are straightforward cleanup candidates.
 The official style guide recommends readable line lengths and ordered imports; formatting
 should follow mathematical and dependency cleanup rather than obscure it.

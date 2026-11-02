@@ -60,23 +60,28 @@ theorem mathieuCe_zero_sub_isBigO (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => ((7 : ℂ) / 128))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 5) (by decide)
           (s := fun q : ℝ => ((7 : ℂ) / 256))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => ((5 : ℂ) / 72))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 5) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 2304))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 1152))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((1 : ℂ) / 16) * (q : ℂ) ^ 2)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -134,26 +139,31 @@ theorem mathieuCe_one_sub_isBigO (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 1536))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((11 : ℂ) / 4608) - ((1 : ℂ) / 3072) * (q : ℂ)
             - ((1 : ℂ) / 98304) * (q : ℂ) ^ 2)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 1024) + ((7 : ℂ) / 36864) * (q : ℂ)
             + ((1 : ℂ) / 73728) * (q : ℂ) ^ 2)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 1024) - ((1 : ℂ) / 73728) * (q : ℂ)
             - ((1 : ℂ) / 589824) * (q : ℂ) ^ 2)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 9216))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((1 : ℂ) / 128) * (q : ℂ) ^ 2 - ((1 : ℂ) / 512) * (q : ℂ) ^ 3)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -219,26 +229,31 @@ theorem mathieuSe_one_sub_isBigO (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 1536))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => ((11 : ℂ) / 4608) - ((1 : ℂ) / 3072) * (q : ℂ)
             + ((1 : ℂ) / 98304) * (q : ℂ) ^ 2)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 1024) - ((7 : ℂ) / 36864) * (q : ℂ)
             + ((1 : ℂ) / 73728) * (q : ℂ) ^ 2)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 1024) - ((1 : ℂ) / 73728) * (q : ℂ)
             + ((1 : ℂ) / 589824) * (q : ℂ) ^ 2)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 9216))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((1 : ℂ) / 128) * (q : ℂ) ^ 2 + ((1 : ℂ) / 512) * (q : ℂ) ^ 3)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -302,23 +317,28 @@ theorem mathieuCe_two_sub_isBigO (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => -((5 : ℂ) / 48))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => 0)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((43 : ℂ) / 1152))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((5 : ℂ) / 4608))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 384))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((19 : ℂ) / 288) * (q : ℂ) ^ 2)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -371,19 +391,23 @@ theorem mathieuSe_two_sub_isBigO (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => 0)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => -((5 : ℂ) / 1152))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 4608))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 384))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((1 : ℂ) / 288) * (q : ℂ) ^ 2)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -436,23 +460,28 @@ theorem mathieuCe_three_sub_isBigO {m : ℕ} (hm : m = 3) (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 128) - ((1 : ℂ) / 1024) * (q : ℂ))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 64))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((7 : ℂ) / 1280))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 10240))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 640))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((5 : ℂ) / 512) * (q : ℂ) ^ 2)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -515,23 +544,28 @@ theorem mathieuSe_three_sub_isBigO {m : ℕ} (hm : m = 3) (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 128) + ((1 : ℂ) / 1024) * (q : ℂ))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 64))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((7 : ℂ) / 1280))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 10240))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 640))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((5 : ℂ) / 512) * (q : ℂ) ^ 2)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -595,27 +629,33 @@ theorem mathieuCe_four_sub_isBigO {m : ℕ} (hm : m = 4) (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 5760))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((11 : ℂ) / 1440))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => 0)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((13 : ℂ) / 4800))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 28800))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 960))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((17 : ℂ) / 3600) * (q : ℂ) ^ 2)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -677,23 +717,28 @@ theorem mathieuSe_four_sub_isBigO {m : ℕ} (hm : m = 4) (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 360))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => 0)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((13 : ℂ) / 4800))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 28800))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 960))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((17 : ℂ) / 3600) * (q : ℂ) ^ 2)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -755,27 +800,33 @@ theorem mathieuCe_five_sub_isBigO {m : ℕ} (hm : m = 5) (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 384) - ((1 : ℂ) / 18432) * (q : ℂ))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 768))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => 0)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((13 : ℂ) / 8064))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 64512))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 1344))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((13 : ℂ) / 4608) * (q : ℂ) ^ 2)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>
@@ -837,27 +888,33 @@ theorem mathieuSe_five_sub_isBigO {m : ℕ} (hm : m = 5) (z : ℂ) :
       interval_cases i
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 384) - ((1 : ℂ) / 18432) * (q : ℂ))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 768))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => 0)
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((13 : ℂ) / 8064))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
           (s := fun q : ℝ => -((1 : ℂ) / 64512))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop)
       · exact isBigO_pow_of_eq_pow_mul (e := 3) (by decide)
           (s := fun q : ℝ => ((1 : ℂ) / 1344))
-          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+          (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                       push_cast; ring)
           (by fun_prop))
     (c := fun q : ℝ => (1 : ℂ) - ((13 : ℂ) / 4608) * (q : ℂ) ^ 2)
     (by simpa using ((by fun_prop : Continuous fun q : ℝ =>

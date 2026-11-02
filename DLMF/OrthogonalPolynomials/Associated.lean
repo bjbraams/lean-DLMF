@@ -96,7 +96,8 @@ def exceptionalHermite : Option ℕ → ℝ → ℝ
 (phi : ℂ))))` tends to `(𝓝 (associatedLaguerre lam c n x))` along `(𝓝[>] 0)`. -/
 @[dlmf 18.30.E19]
 theorem associatedPollaczek_limit_laguerrePolyL (lam : ℂ) {c : ℝ} (hc : 0 ≤ c) (n : ℕ) (x : ℂ) :
-    Tendsto (fun phi : ℝ => associatedMeixnerPollaczek ((lam + 1) / 2) phi c n (-x / (2 * sin (phi : ℂ))))
+    Tendsto (fun phi : ℝ =>
+        associatedMeixnerPollaczek ((lam + 1) / 2) phi c n (-x / (2 * sin (phi : ℂ))))
       (𝓝[>] 0) (𝓝 (associatedLaguerre lam c n x)) := by
   have hcos : Tendsto (fun phi : ℝ => cos (phi : ℂ)) (𝓝[>] 0) (𝓝 1) := by
     have h : Tendsto (fun phi : ℝ => cos (phi : ℂ)) (𝓝 0) (𝓝 (cos ((0 : ℝ) : ℂ))) :=
@@ -214,7 +215,8 @@ theorem poch_nat_succ_mul_factorial (a b : ℕ) :
 (n.factorial : ℂ) * (-x / 2) ^ n * laguerreExtended (1 - a - 2 * n) n (2 / x)`. -/
 @[dlmf 18.34.E1]
 theorem besselPolynomial_eq_laguerrePolyL (a : ℂ) (n : ℕ) {x : ℂ} (hx : x ≠ 0) :
-    besselPolynomial a n x = (n.factorial : ℂ) * (-x / 2) ^ n * laguerreExtended (1 - a - 2 * n) n (2 / x) := by
+    besselPolynomial a n x = (n.factorial : ℂ) * (-x / 2) ^ n *
+        laguerreExtended (1 - a - 2 * n) n (2 / x) := by
   unfold besselPolynomial terminatingHG laguerreExtended
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
   rw [Finset.mul_sum]
@@ -471,7 +473,8 @@ theorem reciprocal_gamma_moment {s : ℝ} (hs : 0 < s) :
     rw [show (-(s : ℂ) - 1) = ((-s - 1 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hx.le]
     push_cast
     rfl
-  refine ⟨hi'.ofReal.congr (ae_restrict_of_forall_mem measurableSet_Ioi (fun x hx => (hc x hx).symm)), ?_⟩
+  refine ⟨hi'.ofReal.congr
+      (ae_restrict_of_forall_mem measurableSet_Ioi (fun x hx => (hc x hx).symm)), ?_⟩
   rw [setIntegral_congr_fun measurableSet_Ioi hc, integral_complex_ofReal, hreal,
     ofReal_mul, ofReal_cpow (by norm_num : (0 : ℝ) ≤ 2), ← Gamma_ofReal]
   norm_cast
@@ -595,7 +598,9 @@ theorem bessel_product_integral_of_le {a : ℝ} (m n : ℕ) (hnm : n ≤ m) (ha 
     ring
   have hM (k : ℕ) (hk : k ∈ Finset.range (n + 1)) :=
     bessel_monomial_moment (a := a) m k (by
-      have hkm : (k : ℝ) ≤ m := by exact_mod_cast (Nat.le_of_lt_succ (Finset.mem_range.mp hk)).trans hnm
+      have hkm : (k : ℝ) ≤ m := by
+                                  exact_mod_cast (Nat.le_of_lt_succ
+                                    (Finset.mem_range.mp hk)).trans hnm
       linarith)
   change (∫ x : ℝ in Ioi 0, besselPolynomial a m x * besselPolynomial a n x * W x) = _
   rw [heq, integral_finsetSum _ fun k hk => (hM k hk).1.const_mul _]
@@ -705,7 +710,8 @@ theorem besselPolynomial_finite_orthogonality {a : ℝ} (m n : ℕ) (ha : a < 1 
     rw [h0, h1, h2] at hratio
     calc
       _ = ((2 : ℂ) ^ (1 - (a : ℂ)) * (2 : ℂ) ^ (a - 1 : ℂ)) *
-          (Gamma (1 - a - 2 * n : ℂ) * poch (2 - a - 2 * n : ℂ) n / Gamma (1 - a : ℂ)) * n ! := by ring
+          (Gamma (1 - a - 2 * n : ℂ) * poch (2 - a - 2 * n : ℂ) n / Gamma (1 - a : ℂ))
+              * n ! := by ring
       _ = _ := by rw [hpow, one_mul, hratio]; simp only [div_eq_mul_inv, mul_inv]; ring
   · simp
 
@@ -812,7 +818,8 @@ theorem pollaczek_finite_sum (lam a b : ℂ) (n : ℕ) {θ : ℂ} (hθ : sin θ 
 `((1 - z * exp (I * θ)) ^ (-lam + I * (a * Real.cos θ + b) / Real.sin θ) * (1 - z * exp (-I *
 θ)) ^ (-lam - I * (a * Real.cos θ + b) / Real.sin θ))`. -/
 @[dlmf 18.35.E7]
-theorem pollaczek_generating_function (lam a b : ℂ) (θ : ℝ) (hθ : Real.sin θ ≠ 0) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem pollaczek_generating_function (lam a b : ℂ) (θ : ℝ) (hθ : Real.sin θ ≠ 0) {z : ℂ}
+    (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => pollaczek lam a b 0 n (Real.cos θ) * z ^ n)
       ((1 - z * exp (I * θ)) ^ (-lam + I * (a * Real.cos θ + b) / Real.sin θ) *
        (1 - z * exp (-I * θ)) ^ (-lam - I * (a * Real.cos θ + b) / Real.sin θ)) := by
@@ -883,8 +890,10 @@ theorem pollaczek_eq_associatedMeixnerPollaczek (lam phi x : ℂ) (c : ℝ) (n :
   | one => simp [pollaczek, associatedMeixnerPollaczek, associated]; ring
   | more n ih0 ih1 =>
     change (2 * ((n + 1 + c : ℝ) + lam + 0) / ((n + 1 + c : ℝ) + 1) * cos phi +
-      2 * (x * sin phi) / ((n + 1 + c : ℝ) + 1)) * pollaczek lam 0 (x * sin phi) c (n + 1) (cos phi) -
-      (((n + 1 + c : ℝ) + 2 * lam - 1) / ((n + 1 + c : ℝ) + 1)) * pollaczek lam 0 (x * sin phi) c n (cos phi) = _
+      2 * (x * sin phi) / ((n + 1 + c : ℝ) + 1)) *
+          pollaczek lam 0 (x * sin phi) c (n + 1) (cos phi) -
+      (((n + 1 + c : ℝ) + 2 * lam - 1) / ((n + 1 + c : ℝ) + 1)) *
+          pollaczek lam 0 (x * sin phi) c n (cos phi) = _
     rw [ih0, ih1]
     simp only [associatedMeixnerPollaczek, associated]
     ring
@@ -963,7 +972,8 @@ exceptionalLaguerre k m x * exceptionalLaguerre k n x * exceptionalLaguerreWeigh
 n then (n + 1 + (k : ℂ)) * Gamma (n + (k : ℂ)) / n.factorial else 0`. -/
 @[dlmf 18.36.E6]
 theorem exceptionalLaguerre_orthogonality {k : ℝ} (hk : 0 < k) (m n : ℕ) :
-    ∫ x : ℝ in Set.Ioi 0, exceptionalLaguerre k m x * exceptionalLaguerre k n x * exceptionalLaguerreWeight k x =
+    ∫ x : ℝ in Set.Ioi 0, exceptionalLaguerre k m x * exceptionalLaguerre k n x *
+        exceptionalLaguerreWeight k x =
       if m = n then (n + 1 + (k : ℂ)) * Gamma (n + (k : ℂ)) / n.factorial else 0 := by
   sorry
 
@@ -971,7 +981,8 @@ theorem exceptionalLaguerre_orthogonality {k : ℝ} (hk : 0 < k) (m n : ℕ) :
 (exceptionalLaguerre k n)) x + (x - k) / (x + k) * ((x + k + 1) * deriv (exceptionalLaguerre k
 n) x - exceptionalLaguerre k n x) = n * exceptionalLaguerre k n x`. -/
 @[dlmf 18.36.E7]
-theorem exceptionalLaguerre_differential_equation {k : ℝ} (hk : 0 < k) (n : ℕ) {x : ℂ} (hx : x + k ≠ 0) :
+theorem exceptionalLaguerre_differential_equation {k : ℝ} (hk : 0 < k) (n : ℕ) {x : ℂ}
+    (hx : x + k ≠ 0) :
     -x * deriv (deriv (exceptionalLaguerre k n)) x + (x - k) / (x + k) *
       ((x + k + 1) * deriv (exceptionalLaguerre k n) x - exceptionalLaguerre k n x) =
       n * exceptionalLaguerre k n x := by
@@ -1205,7 +1216,8 @@ theorem morse_product_weight {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) (x : ℝ) 
       show (lam - 1 / 2 : ℂ) + (lam - 1 / 2 : ℂ) = 2 * lam - 1 by ring,
       show (2 / (u : ℂ)) ^ (2 * lam - 1 : ℂ) =
         (2 : ℂ) ^ (2 * lam - 1 : ℂ) / (u : ℂ) ^ (2 * lam - 1 : ℂ) by
-          convert Complex.div_cpow_ofReal_nonneg (by norm_num : (0 : ℝ) ≤ 2) hu.le (2 * lam - 1 : ℂ) using 1]
+          convert Complex.div_cpow_ofReal_nonneg (by norm_num : (0 : ℝ) ≤ 2) hu.le
+              (2 * lam - 1 : ℂ) using 1]
     have hpow : (u : ℂ) * (u : ℂ) ^ (-2 * lam : ℂ) = (u : ℂ) ^ (-(2 * lam - 1 : ℂ)) := by
       conv_lhs => arg 1; rw [← cpow_one (u : ℂ)]
       rw [← cpow_add _ _ hu0]
@@ -1273,7 +1285,8 @@ theorem morse_product_integral {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) :
 lam m x * morsePolynomialFunction lam n x = if m = n then Gamma (2 * (lam : ℂ) - n) / ((2 *
 lam - 2 * n - 1) * n.factorial) else 0`. -/
 @[dlmf 18.34.E7_3]
-theorem morsePolynomialFunction_orthogonality {lam : ℝ} (m n : ℕ) (hm : (m : ℝ) < lam - 1 / 2) (hn : (n : ℝ) < lam - 1 / 2) :
+theorem morsePolynomialFunction_orthogonality {lam : ℝ} (m n : ℕ) (hm : (m : ℝ) < lam - 1 / 2)
+    (hn : (n : ℝ) < lam - 1 / 2) :
     ∫ x : ℝ, morsePolynomialFunction lam m x * morsePolynomialFunction lam n x =
       if m = n then Gamma (2 * (lam : ℂ) - n) / ((2 * lam - 2 * n - 1) * n.factorial) else 0 := by
   have hlam : 0 < lam := by linarith [Nat.cast_nonneg (α := ℝ) m]
@@ -1291,7 +1304,8 @@ theorem morsePolynomialFunction_orthogonality {lam : ℝ} (m n : ℕ) (hm : (m :
     push_cast
     rw [show 2 - 2 * lam - 2 = -2 * lam by ring]
   rw [hW]
-  have hG : Gamma (2 * lam - 1 : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) n])
+  have hG : Gamma (2 * lam - 1 : ℂ) ≠ 0 :=
+      Gamma_ne_zero_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) n])
   have hpow : (2 : ℂ) ^ (2 * lam - 1 : ℂ) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
   have he1 : (1 - ((2 - 2 * lam : ℝ) : ℂ)) = 2 * lam - 1 := by push_cast; ring
   rw [he1] at hB
@@ -1319,7 +1333,8 @@ theorem morsePolynomialFunction_orthogonality {lam : ℝ} (m n : ℕ) (hm : (m :
       rw [div_eq_iff hG2] at h
       convert h using 1 ; congr 1 ; ring
     have hΓ1 : Gamma (2 * lam : ℂ) = (2 * lam - 1 : ℂ) * Gamma (2 * lam - 1 : ℂ) := by
-      have h0 : (2 * lam - 1 : ℂ) ≠ 0 := ne_zero_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) n])
+      have h0 : (2 * lam - 1 : ℂ) ≠ 0 :=
+          ne_zero_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) n])
       convert Gamma_add_one (2 * lam - 1 : ℂ) h0 using 1 ; congr 1 ; ring
     push_cast
     rw [show 1 - (2 - 2 * (lam : ℂ)) = 2 * lam - 1 by ring,

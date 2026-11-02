@@ -23,14 +23,14 @@ is `Complex.GammaSeq_tendsto_Gamma` (and the real analogue), in
 
 ## Main definitions
 
-* `Complex.weierstrassGammaTerm`, `Real.weierstrassGammaTerm`: the factors
+* `Gamma.weierstrassGammaTerm`, `Gamma.Real.weierstrassGammaTerm`: the factors
   `(1 + s/(n+1)) e^{-s/(n+1)}` of the Weierstrass product.
 
 ## Main results
 
-* `Complex.multipliable_weierstrassGammaTerm`, `Complex.tendsto_weierstrassGamma_prod`:
+* `Gamma.multipliable_weierstrassGammaTerm`, `Gamma.tendsto_weierstrassGamma_prod`:
   convergence of the Weierstrass product.
-* `Complex.one_div_Gamma_eq_tprod`, `Real.one_div_Gamma_eq_tprod`: Weierstrass's product
+* `Gamma.one_div_Gamma_eq_tprod`, `Gamma.Real.one_div_Gamma_eq_tprod`: Weierstrass's product
   `1/Γ(s) = s e^{γ s} ∏_{n≥1} (1 + s/n) e^{-s/n}` (DLMF 5.8.2, AAR Theorem 1.1.2).
 
 ## Implementation notes
@@ -42,7 +42,7 @@ and the Weierstrass formula holds at the poles as well.
 Correspondence with AAR §1.1:
 * Definition 1.1.1 (Gauss product): Mathlib's `Complex.GammaSeq` and
   `Complex.GammaSeq_tendsto_Gamma`.
-* Theorem 1.1.2 (Weierstrass product): `Complex.one_div_Gamma_eq_tprod`.
+* Theorem 1.1.2 (Weierstrass product): `Gamma.one_div_Gamma_eq_tprod`.
 * Definition 1.1.3 (Beta integral): Mathlib's `Complex.betaIntegral`.
 * Theorem 1.1.4 (`B(x,y) = Γ(x)Γ(y)/Γ(x+y)`): Mathlib's
   `Complex.betaIntegral_eq_Gamma_mul_div` and `Complex.Gamma_mul_Gamma_eq_betaIntegral`.
@@ -65,7 +65,9 @@ open scoped Topology Real
 
 noncomputable section
 
-namespace Complex
+namespace DLMF.Gamma
+
+open Complex
 
 local notation "γ" => Real.eulerMascheroniConstant
 
@@ -256,9 +258,11 @@ theorem one_div_Gamma_eq_tprod (s : ℂ) :
   have hp := (multipliable_weierstrassGammaTerm s).hasProd.tendsto_prod_nat
   exact tendsto_nhds_unique (tendsto_weierstrassGamma_prod s) (tendsto_const_nhds.mul hp)
 
-end Complex
+end DLMF.Gamma
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 local notation "γ" => eulerMascheroniConstant
 
@@ -268,14 +272,14 @@ def weierstrassGammaTerm (s : ℝ) (n : ℕ) : ℝ :=
 
 /-- The real Weierstrass factor agrees with the complex one at a real argument. -/
 theorem ofReal_weierstrassGammaTerm (s : ℝ) (n : ℕ) :
-    (weierstrassGammaTerm s n : ℂ) = Complex.weierstrassGammaTerm s n := by
-  simp [weierstrassGammaTerm, Complex.weierstrassGammaTerm, Complex.ofReal_exp]
+    (weierstrassGammaTerm s n : ℂ) = Gamma.weierstrassGammaTerm s n := by
+  simp [weierstrassGammaTerm, Gamma.weierstrassGammaTerm, Complex.ofReal_exp]
 
 /-- The real Weierstrass product `∏ₙ (1 + s/(n+1)) e^(-s/(n+1))` is multipliable. -/
 theorem multipliable_weierstrassGammaTerm (s : ℝ) :
     Multipliable (weierstrassGammaTerm s) := by
   have hc : Summable fun n : ℕ => ((weierstrassGammaTerm s n - 1 : ℝ) : ℂ) := by
-    convert Complex.summable_weierstrassGammaTerm_sub_one s using 1
+    convert Gamma.summable_weierstrassGammaTerm_sub_one s using 1
     ext n
     simp [ofReal_weierstrassGammaTerm]
   have h : Summable fun n : ℕ => weierstrassGammaTerm s n - 1 :=
@@ -293,7 +297,7 @@ theorem tendsto_weierstrassGamma_prod (s : ℝ) :
   have hC : Tendsto (fun n : ℕ =>
       ((s * exp (γ * s) * ∏ j ∈ range n, weierstrassGammaTerm s j : ℝ) : ℂ))
       atTop (𝓝 (((Gamma s)⁻¹ : ℝ) : ℂ)) := by
-    convert Complex.tendsto_weierstrassGamma_prod s using 1
+    convert Gamma.tendsto_weierstrassGamma_prod s using 1
     · ext n
       simp [ofReal_weierstrassGammaTerm, Complex.ofReal_exp, Complex.ofReal_prod,
         Complex.ofReal_mul]
@@ -313,4 +317,4 @@ theorem one_div_Gamma_eq_tprod (s : ℝ) :
   have hp := (multipliable_weierstrassGammaTerm s).hasProd.tendsto_prod_nat
   exact tendsto_nhds_unique (tendsto_weierstrassGamma_prod s) (tendsto_const_nhds.mul hp)
 
-end Real
+end DLMF.Gamma.Real

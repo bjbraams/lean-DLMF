@@ -42,7 +42,8 @@ noncomputable section
 namespace DLMF.JacobiElliptic
 
 /-- If `e(0) = 0` and `e' = O(zⁿ)` near `0`, then `e = O(zⁿ⁺¹)` (mean value inequality). -/
-theorem isBigO_pow_succ_of_deriv_isBigO_pow {e e' : ℂ → ℂ} {n : ℕ} (he : ∀ᶠ z in 𝓝 0, HasDerivAt e (e' z) z)
+theorem isBigO_pow_succ_of_deriv_isBigO_pow {e e' : ℂ → ℂ} {n : ℕ}
+    (he : ∀ᶠ z in 𝓝 0, HasDerivAt e (e' z) z)
     (h0 : e 0 = 0) (h : e' =O[𝓝 0] fun z => z ^ n) : e =O[𝓝 0] fun z => z ^ (n + 1) := by
   obtain ⟨C, hC0, hC⟩ := h.exists_nonneg
   rw [IsBigOWith] at hC
@@ -152,7 +153,8 @@ theorem jacobiSystem_eventuallyEq_of_initial {s c d s₂ c₂ d₂ : ℂ → ℂ
     | zero => simp only [pow_zero]; exact ⟨b hes, b hec, b hed⟩
     | succ j ih =>
       obtain ⟨h1, h2, h3⟩ := ih
-      refine ⟨isBigO_pow_succ_of_deriv_isBigO_pow hes z0s ?_, isBigO_pow_succ_of_deriv_isBigO_pow hec z0c ?_,
+      refine ⟨isBigO_pow_succ_of_deriv_isBigO_pow hes z0s ?_,
+          isBigO_pow_succ_of_deriv_isBigO_pow hec z0c ?_,
         isBigO_pow_succ_of_deriv_isBigO_pow hed z0d ?_⟩
       · exact (mul_isBigO_pow_of_isBigO_one h3 (b hc)).add (mul_isBigO_pow_of_isBigO_one h2 (b hd₂))
       · exact (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h3 (b hs)) bk).add
@@ -166,11 +168,14 @@ theorem jacobiSystem_eventuallyEq_of_initial {s c d s₂ c₂ d₂ : ℂ → ℂ
     exact DifferentiableOn.analyticAt (fun z hz => (hU hz).differentiableAt.differentiableWithinAt)
       (hUo.mem_nhds h0U)
   refine ⟨?_, ?_, ?_⟩
-  · filter_upwards [eventually_eq_zero_of_isBigO_pow ((an hs).sub (an hs₂)) fun n => (P n).1] with z hz
+  · filter_upwards [eventually_eq_zero_of_isBigO_pow ((an hs).sub (an hs₂)) fun n =>
+        (P n).1] with z hz
     exact sub_eq_zero.mp hz
-  · filter_upwards [eventually_eq_zero_of_isBigO_pow ((an hc).sub (an hc₂)) fun n => (P n).2.1] with z hz
+  · filter_upwards [eventually_eq_zero_of_isBigO_pow ((an hc).sub (an hc₂)) fun n =>
+        (P n).2.1] with z hz
     exact sub_eq_zero.mp hz
-  · filter_upwards [eventually_eq_zero_of_isBigO_pow ((an hd).sub (an hd₂)) fun n => (P n).2.2] with z hz
+  · filter_upwards [eventually_eq_zero_of_isBigO_pow ((an hd).sub (an hd₂)) fun n =>
+        (P n).2.2] with z hz
     exact sub_eq_zero.mp hz
 
 /-- The pole dichotomy: analytic at `z`, or a pole at `z` with Lean's junk value `0`. -/
@@ -178,7 +183,8 @@ def HasPoleDichotomy (f : ℂ → ℂ) : Prop :=
   ∀ z, AnalyticAt ℂ f z ∨ (meromorphicOrderAt f z < 0 ∧ f z = 0)
 
 /-- A function with the pole dichotomy is meromorphic. -/
-theorem HasPoleDichotomy.meromorphicAt {f : ℂ → ℂ} (hf : HasPoleDichotomy f) (z : ℂ) : MeromorphicAt f z := by
+theorem HasPoleDichotomy.meromorphicAt {f : ℂ → ℂ} (hf : HasPoleDichotomy f) (z : ℂ) :
+    MeromorphicAt f z := by
   rcases hf z with h | h
   · exact h.meromorphicAt
   · by_contra hm
@@ -187,7 +193,8 @@ theorem HasPoleDichotomy.meromorphicAt {f : ℂ → ℂ} (hf : HasPoleDichotomy 
 
 /-- Identity theorem for functions with the pole dichotomy: agreement near `0` gives agreement
 everywhere, including the junk values at the poles. -/
-theorem eq_of_eventuallyEq_of_poleDichotomy {f g : ℂ → ℂ} (hf : HasPoleDichotomy f) (hg : HasPoleDichotomy g)
+theorem eq_of_eventuallyEq_of_poleDichotomy {f g : ℂ → ℂ} (hf : HasPoleDichotomy f)
+    (hg : HasPoleDichotomy g)
     (h0 : f =ᶠ[𝓝 0] g) : f = g := by
   have hm : MeromorphicOn (f - g) Set.univ := fun z _ =>
     (hf.meromorphicAt z).sub (hg.meromorphicAt z)
@@ -212,7 +219,8 @@ theorem eq_of_eventuallyEq_of_poleDichotomy {f g : ℂ → ℂ} (hf : HasPoleDic
   · rw [h1.2, h2.2]
 
 /-- The pole dichotomy is preserved by `f ↦ c f(w/a)`. -/
-theorem HasPoleDichotomy.comp {f : ℂ → ℂ} (hf : HasPoleDichotomy f) {a c : ℂ} (ha : a ≠ 0) (hc : c ≠ 0) :
+theorem HasPoleDichotomy.comp {f : ℂ → ℂ} (hf : HasPoleDichotomy f) {a c : ℂ}
+    (ha : a ≠ 0) (hc : c ≠ 0) :
     HasPoleDichotomy fun w => c * f (w / a) := by
   intro z
   have hg : AnalyticAt ℂ (fun w : ℂ => w / a) z := by fun_prop
@@ -232,7 +240,8 @@ theorem HasPoleDichotomy.comp {f : ℂ → ℂ} (hf : HasPoleDichotomy f) {a c :
     exact h.1
 
 /-- The Glaisher functions have the pole dichotomy. -/
-theorem poleDichotomy_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter} (hpq : p ≠ q) :
+theorem poleDichotomy_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
+    (hpq : p ≠ q) :
     HasPoleDichotomy fun w => jacobiPQk p q w k := by
   intro z
   have hτ := jacobiTauk_im_pos hk
@@ -256,9 +265,11 @@ theorem poleDichotomy_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q 
       ((differentiable_jacobiLetterTheta_comp_jacobiZetak hk q).analyticAt z) hq
 
 /-- Regularity near `0`, after the substitution `w ↦ w/a`. -/
-theorem eventually_jacobiLetterTheta_div_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) {q : JacobiLetter} (hq : q ≠ .s)
+theorem eventually_jacobiLetterTheta_div_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    {q : JacobiLetter} (hq : q ≠ .s)
     (a : ℂ) : ∀ᶠ w in 𝓝 0, jacobiLetterTheta q (jacobiZetak (w / a) k) (jacobiTauk k) ≠ 0 := by
-  have h := eventually_jacobiLetterTheta_ne_zero hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk hq)
+  have h := eventually_jacobiLetterTheta_ne_zero hk
+      (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk hq)
   have ht : Tendsto (fun w : ℂ => w / a) (𝓝 0) (𝓝 0) := by
     have := ((continuous_id.div_const a).tendsto (0 : ℂ)); simpa using this
   exact ht.eventually h

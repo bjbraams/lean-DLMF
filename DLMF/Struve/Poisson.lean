@@ -303,7 +303,8 @@ theorem integral_poissonWeight_eq_trig (ν : ℂ) (f : ℝ → ℂ) :
 
 /-- Poisson-type integral for `M_ν`, from Poisson's integrals for `L_ν` and `I_ν`. -/
 theorem struveM_eq_poisson {ν : ℂ} (hν : -1/2 < ν.re) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveM ν z = -2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ t : ℝ in 0..1, exp (-z*t)*(1-t^2:ℂ)^(ν-1/2) := by
+    struveM ν z = -2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ t : ℝ in 0..1,
+        exp (-z*t)*(1-t^2:ℂ)^(ν-1/2) := by
   have hz0 := slitPlane_ne_zero hz
   have hw := intervalIntegrable_poissonWeight hν
   have hI := DLMF.Bessel.besselI_eq_poisson_integral hν hz

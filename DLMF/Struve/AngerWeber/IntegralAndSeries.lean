@@ -20,8 +20,8 @@ functions.
 
 ## Main definitions
 
-* `angerA`: the associated Anger–Weber function (DLMF 11.10.4), with `angerARegular` at
-  nonintegral order.
+* `angerA`: the associated Anger–Weber function (DLMF 11.10.4), with `angerARegular`
+  at nonintegral order.
 * `angerS1`, `angerS2`: the entire series `S₁(ν,z)`, `S₂(ν,z)` (DLMF 11.10.10–11.10.11).
 
 ## Main results
@@ -51,10 +51,10 @@ namespace DLMF.Struve
 
 open DLMF.Bessel DLMF.Confluent
 
-/-- At integer order the Anger function is Bessel's `J_n` (DLMF 11.10.29). -/
-lemma angerJ_int_aux (n : ℤ) {z : ℂ} (hz : z ∈ slitPlane) :
+/-- At integer order the Anger function is Bessel's `J_n` (DLMF 11.10.29). This is stronger than
+`angerJ_int_aux`, which also assumes `z ∈ ℂ \ (-∞, 0]`. -/
+lemma angerJ_int_aux' (n : ℤ) {z : ℂ} :
     angerJ n z = besselJ n z := by
-  have _ := slitPlane_ne_zero hz
   rw [besselJ_int_eq_integral_cos, angerJ]
   congr 1
   apply intervalIntegral.integral_congr
@@ -62,6 +62,11 @@ lemma angerJ_int_aux (n : ℤ) {z : ℂ} (hz : z ∈ slitPlane) :
   simp only
   rw [← cos_neg, ofReal_sin]
   ring_nf
+
+/-- At integer order the Anger function is Bessel's `J_n` (DLMF 11.10.29). -/
+lemma angerJ_int_aux (n : ℤ) {z : ℂ} (_hz : z ∈ slitPlane) :
+    angerJ n z = besselJ n z :=
+  angerJ_int_aux' n
 
 /-- In a punctured neighbourhood of any complex number there are no integers. -/
 theorem eventually_nhdsNE_not_int (ν : ℂ) : ∀ᶠ μ : ℂ in 𝓝[≠] ν, ∀ k : ℤ, μ ≠ k := by
@@ -210,8 +215,10 @@ theorem angerA_boundary_integral {ν z : ℂ} (hν : 0 < ν.re) (hz : z.re = 0) 
       exact (((angerJ_entire μ) z).continuousAt.sub
         (analyticAt_besselJ μ hzs).continuousAt).div_const _
     have hg := (continuousWithinAt_schlafliBoundary_right hμr hz0).div_const (π : ℂ)
-    refine tendsto_nhds_unique (l := 𝓝[{w : ℂ | 0 < w.re}] z) (hf.tendsto.mono_left nhdsWithin_le_nhds) ?_
-    refine ((hg.mono (s := {w : ℂ | 0 < w.re}) (fun w (hw : 0 < w.re) => show 0 ≤ w.re from le_of_lt hw)).tendsto).congr' ?_
+    refine tendsto_nhds_unique (l := 𝓝[{w : ℂ | 0 < w.re}] z)
+        (hf.tendsto.mono_left nhdsWithin_le_nhds) ?_
+    refine ((hg.mono (s := {w : ℂ | 0 < w.re})
+        (fun w (hw : 0 < w.re) => show 0 ≤ w.re from le_of_lt hw)).tendsto).congr' ?_
     filter_upwards [self_mem_nhdsWithin] with w hw
     rw [angerARegular_eq_integral hμ hw, integral_schlafli_eq_schlafliBoundary hμr hw]
   have hA : angerA ν z = schlafliBoundary ν z / π := by
@@ -282,7 +289,8 @@ def angerS2 (ν z : ℂ) : ℂ :=
 (k-ν/2+3/2)))` converges to `(angerS2 ν z)`. -/
 @[dlmf 11.10.E11]
 theorem hasSum_angerS2 (ν z : ℂ) :
-    HasSum (fun k : ℕ => (-1)^k*(z/2)^(2*k+1)/(Gamma (k+ν/2+3/2)*Gamma (k-ν/2+3/2))) (angerS2 ν z) := by
+    HasSum (fun k : ℕ => (-1)^k*(z/2)^(2*k+1)/(Gamma (k+ν/2+3/2)*Gamma (k-ν/2+3/2)))
+        (angerS2 ν z) := by
   have h := (hasSum_regularized1F2_one (ν/2+3/2) (-ν/2+3/2) z).mul_left (z/2)
   simp only [← add_assoc, ← sub_eq_add_neg, neg_div] at h
   refine (h.congr_fun fun k => ?_).summable.hasSum
@@ -326,7 +334,8 @@ theorem sinPow_moment_recurrence (ν : ℂ) {g g1 : ℝ → ℂ} (hg : ∀ θ, H
   have i2 : IntervalIntegrable (fun θ : ℝ => ((m:ℂ)+2)*((m:ℂ)+1) *
       ((Real.sin θ:ℂ)^m * g θ)) volume 0 π := by
     apply Continuous.intervalIntegrable; fun_prop
-  rw [intervalIntegral.integral_sub i1 i2, intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul] at hint
+  rw [intervalIntegral.integral_sub i1 i2, intervalIntegral.integral_const_mul,
+      intervalIntegral.integral_const_mul] at hint
   linear_combination hint
 
 /-- The first sine moment `(1-ν²) ∫₀^π sin θ g(θ) dθ = g(π) + g(0)` for `g'' = -ν² g`. -/
@@ -343,7 +352,8 @@ theorem sinPow_moment_one (ν : ℂ) {g g1 : ℝ → ℂ} (hg : ∀ θ, HasDeriv
     convert h using 1
     simp only [ofReal_neg]; ring
   have hint := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun θ _ => hd θ)
-    ((by fun_prop : Continuous fun θ : ℝ => (1 - ν^2) * ((Real.sin θ:ℂ) * g θ)).intervalIntegrable 0 π)
+    ((by fun_prop : Continuous fun θ : ℝ => (1 - ν^2) * ((Real.sin θ:ℂ) * g θ)).intervalIntegrable 0
+        π)
   rw [intervalIntegral.integral_const_mul] at hint
   rw [hint]
   simp [Φ]
@@ -496,23 +506,26 @@ theorem continuous_sinPowR (n : ℕ) : Continuous fun ν => sinPowR ν n := by
 /-- At `θ`, the function `(fun t : ℝ => cos (ν*t))` has derivative `(-ν * sin (ν*θ))`. -/
 theorem hasDerivAt_cos_mul_ofReal (ν : ℂ) (θ : ℝ) :
     HasDerivAt (fun t : ℝ => cos (ν*t)) (-ν * sin (ν*θ)) θ := by
-  have := ((Complex.hasDerivAt_cos (ν*θ)).comp (θ:ℂ) ((hasDerivAt_id (θ:ℂ)).const_mul ν)).comp_ofReal
+  have := ((Complex.hasDerivAt_cos (ν*θ)).comp (θ:ℂ)
+      ((hasDerivAt_id (θ:ℂ)).const_mul ν)).comp_ofReal
   convert this using 1; simp; ring
 
 /-- At `θ`, the function `(fun t : ℝ => sin (ν*t))` has derivative `(ν * cos (ν*θ))`. -/
 theorem hasDerivAt_sin_mul_ofReal (ν : ℂ) (θ : ℝ) :
     HasDerivAt (fun t : ℝ => sin (ν*t)) (ν * cos (ν*θ)) θ := by
-  have := ((Complex.hasDerivAt_sin (ν*θ)).comp (θ:ℂ) ((hasDerivAt_id (θ:ℂ)).const_mul ν)).comp_ofReal
+  have := ((Complex.hasDerivAt_sin (ν*θ)).comp (θ:ℂ)
+      ((hasDerivAt_id (θ:ℂ)).const_mul ν)).comp_ofReal
   convert this using 1; simp; ring
 
-/-- **Sine-power cosine moments**: `∫₀^π sinⁿθ cos νθ dθ = π cos(πν/2) n! / (2ⁿ Γ(1+(n+ν)/2) Γ(1+(n-ν)/2))`
-for every complex `ν`. -/
+/-- **Sine-power cosine moments**:
+`∫₀^π sinⁿθ cos νθ dθ = π cos(πν/2) n! / (2ⁿ Γ(1+(n+ν)/2) Γ(1+(n-ν)/2))` for every complex `ν`. -/
 theorem integral_sinPow_mul_cos (ν : ℂ) (n : ℕ) :
     (∫ θ : ℝ in 0..π, (Real.sin θ:ℂ)^n * cos (ν*θ)) = cos (π*ν/2) * sinPowR ν n := by
   refine eq_of_continuous_of_not_int (f := fun ν => ∫ θ : ℝ in 0..π, (Real.sin θ:ℂ)^n * cos (ν*θ))
     (g := fun ν => cos (π*ν/2) * sinPowR ν n)
     (intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' (by fun_prop) _ _)
-    ((by fun_prop : Continuous fun ν:ℂ => cos (π*ν/2)).mul (continuous_sinPowR n)) (fun ν hν => ?_) ν
+    ((by fun_prop : Continuous fun ν:ℂ => cos (π*ν/2)).mul (continuous_sinPowR n)) (fun ν hν => ?_)
+        ν
   have hg := hasDerivAt_cos_mul_ofReal ν
   have hg1 : ∀ θ:ℝ, HasDerivAt (fun t:ℝ => -ν * sin (ν*t)) (-ν^2 * cos (ν*θ)) θ := fun θ => by
     convert (hasDerivAt_sin_mul_ofReal ν θ).const_mul (-ν) using 1; ring
@@ -535,14 +548,15 @@ theorem integral_sinPow_mul_cos (ν : ℂ) (n : ℕ) :
     apply mul_left_cancel₀ hne
     rw [h1, this]; field_simp; ring
 
-/-- **Sine-power sine moments**: `∫₀^π sinⁿθ sin νθ dθ = π sin(πν/2) n! / (2ⁿ Γ(1+(n+ν)/2) Γ(1+(n-ν)/2))`
-for every complex `ν`. -/
+/-- **Sine-power sine moments**:
+`∫₀^π sinⁿθ sin νθ dθ = π sin(πν/2) n! / (2ⁿ Γ(1+(n+ν)/2) Γ(1+(n-ν)/2))` for every complex `ν`. -/
 theorem integral_sinPow_mul_sin (ν : ℂ) (n : ℕ) :
     (∫ θ : ℝ in 0..π, (Real.sin θ:ℂ)^n * sin (ν*θ)) = sin (π*ν/2) * sinPowR ν n := by
   refine eq_of_continuous_of_not_int (f := fun ν => ∫ θ : ℝ in 0..π, (Real.sin θ:ℂ)^n * sin (ν*θ))
     (g := fun ν => sin (π*ν/2) * sinPowR ν n)
     (intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' (by fun_prop) _ _)
-    ((by fun_prop : Continuous fun ν:ℂ => sin (π*ν/2)).mul (continuous_sinPowR n)) (fun ν hν => ?_) ν
+    ((by fun_prop : Continuous fun ν:ℂ => sin (π*ν/2)).mul (continuous_sinPowR n)) (fun ν hν => ?_)
+        ν
   have hg := hasDerivAt_sin_mul_ofReal ν
   have hg1 : ∀ θ:ℝ, HasDerivAt (fun t:ℝ => ν * cos (ν*t)) (-ν^2 * sin (ν*θ)) θ := fun θ => by
     convert (hasDerivAt_cos_mul_ofReal ν θ).const_mul ν using 1; ring
@@ -554,7 +568,8 @@ theorem integral_sinPow_mul_sin (ν : ℂ) (n : ℕ) :
     rw [sinPowR_zero hν]
     simp only [ofReal_zero, mul_zero, cos_zero, mul_one] at h0
     have : cos (ν*π) = 1 - 2*sin (π*ν/2)^2 := by
-      rw [show ν*(π:ℂ) = 2*(π*ν/2) by ring, Complex.cos_two_mul, ← Complex.sin_sq_add_cos_sq (π*ν/2)]
+      rw [show ν*(π:ℂ) = 2*(π*ν/2) by ring, Complex.cos_two_mul, ← Complex.sin_sq_add_cos_sq
+                                        (π*ν/2)]
       ring
     apply mul_left_cancel₀ (neg_ne_zero.2 (pow_ne_zero 2 hν0))
     rw [h0, this]; field_simp; ring

@@ -111,7 +111,8 @@ theorem hasDerivAt_neg_weierstrassZeta (L : PeriodPair) {z : ℂ} (hz : z ∉ L.
   exact h
 
 /-- `℘'` has derivative `6℘² - g₂/2` off the lattice. -/
-private lemma hasDerivAt_derivWeierstrassP_off_lattice (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
+private lemma hasDerivAt_derivWeierstrassP_off_lattice (L : PeriodPair) {z : ℂ}
+    (hz : z ∉ L.lattice) :
     HasDerivAt ℘'[L] (6 * ℘[L] z ^ 2 - L.g₂ / 2) z := by
   have hU : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl
   have hd := (L.analyticOnNhd_derivWeierstrassP z hz).differentiableAt

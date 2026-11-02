@@ -121,7 +121,8 @@ theorem legAdd_coeff_bound {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f) (hper : Fun
     (fun t => (hd2 t).hasDerivAt) hc2
     (by have := legAdd_deriv_periodic hper (-π); rw [show -π + 2 * π = π by ring] at this;
         exact this) hn
-  have hI : ‖∫ t : ℝ in (-π)..π, exp (-((n:ℂ) * (t:ℂ) * I)) * deriv (deriv f) t‖ ≤ max M 0 * |π - -π| := by
+  have hI : ‖∫ t : ℝ in (-π)..π, exp (-((n:ℂ) * (t:ℂ) * I)) * deriv (deriv f) t‖ ≤
+      max M 0 * |π - -π| := by
     refine intervalIntegral.norm_integral_le_of_norm_le_const fun t ht => ?_
     rw [uIoc_of_le (by linarith [Real.pi_pos])] at ht
     rw [norm_mul, show -((n:ℂ) * t * I) = ((-(n * t) : ℝ) : ℂ) * I by push_cast; ring,
@@ -140,7 +141,8 @@ theorem legAdd_coeff_bound {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f) (hper : Fun
   calc 1 / (2 * π) * (1 / |(n:ℝ)| * (1 / |(n:ℝ)| *
         ‖∫ t : ℝ in (-π)..π, exp (-((n:ℂ) * (t:ℂ) * I)) * deriv (deriv f) t‖))
       ≤ 1 / (2 * π) * (1 / |(n:ℝ)| * (1 / |(n:ℝ)| * (max M 0 * |π - -π|))) := by gcongr
-    _ = max M 0 / (n:ℝ) ^ 2 := by rw [← habs, abs_of_pos (show (0:ℝ) < π - -π by linarith)]; field_simp; ring
+    _ = max M 0 / (n:ℝ) ^ 2 := by rw [← habs, abs_of_pos (show (0:ℝ) < π - -π by linarith)];
+                                  field_simp; ring
 
 
 /-- The coefficients of an even function are even in the index. -/
@@ -408,7 +410,8 @@ theorem legAdd_hX_contDiff (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2
   have hh : ContDiff ℝ 2 (fun t : ℝ => (((1 - legAdd_hX ξ₁ ξ₂ t) / 2 : ℝ) : ℂ)) := by
     refine ofRealCLM.contDiff.comp ?_
     unfold legAdd_hX
-    exact (contDiff_const.sub (contDiff_const.sub (contDiff_const.mul Real.contDiff_cos))).div_const 2
+    exact (contDiff_const.sub
+        (contDiff_const.sub (contDiff_const.mul Real.contDiff_cos))).div_const 2
   have := hG2.comp_contDiff hh fun t =>
     legAdd_ofReal_mem_cutPlane (by linarith [(legAdd_hX_mem h1 h2 t).1])
   convert this using 1
@@ -693,7 +696,8 @@ theorem legAdd_associatedP_nat_nat (n m : ℕ) {x : ℝ} (hx : 1 < x) :
   rw [hpow]; rfl
 
 /-- `√(cosh² ξ - 1) = sinh ξ` for `ξ ≥ 0`. -/
-theorem legAdd_sqrt_cosh_sq {ξ : ℝ} (h : 0 ≤ ξ) : Real.sqrt (Real.cosh ξ ^ 2 - 1) = Real.sinh ξ := by
+theorem legAdd_sqrt_cosh_sq {ξ : ℝ} (h : 0 ≤ ξ) : Real.sqrt (Real.cosh ξ ^ 2 - 1) =
+    Real.sinh ξ := by
   rw [Real.cosh_sq, add_sub_cancel_right, Real.sqrt_sq (Real.sinh_nonneg_iff.2 h)]
 
 open DLMF.OrthogonalPolynomials.LegendreAddition in
@@ -707,14 +711,17 @@ theorem legAdd_hyp_nat (n : ℕ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < 
       rw [← ofReal_pow, Real.cosh_sq]; push_cast; ring
     rw [mul_pow, I_sq, h']; ring
   have hfun : (fun u : ℝ => associatedP (n:ℂ) 0 (legAdd_hX ξ₁ ξ₂ u)) =
-      fun u : ℝ => kernel n (Real.cosh ξ₁) (Real.cosh ξ₂) (I * Real.sinh ξ₁) (I * Real.sinh ξ₂) u := by
+      fun u : ℝ => kernel n (Real.cosh ξ₁) (Real.cosh ξ₂) (I * Real.sinh ξ₁)
+          (I * Real.sinh ξ₂) u := by
     funext u
     obtain ⟨hX1, -⟩ := legAdd_hX_mem h1.le h2.le u
     rw [legAdd_associatedP_zero hX1, legendreP_nat n (Or.inl (by simp; linarith)),
       ← legendre_eq_kernel n _ _ _ _ u (hsq ξ₁) (hsq ξ₂)]
     congr 1
-    have hI : (I * (Real.sinh ξ₁ : ℂ)) * (I * Real.sinh ξ₂) = -((Real.sinh ξ₁ : ℂ) * Real.sinh ξ₂) := by
-      rw [show (I * (Real.sinh ξ₁ : ℂ)) * (I * Real.sinh ξ₂) = I ^ 2 * ((Real.sinh ξ₁ : ℂ) * Real.sinh ξ₂) by ring,
+    have hI : (I * (Real.sinh ξ₁ : ℂ)) * (I * Real.sinh ξ₂) =
+        -((Real.sinh ξ₁ : ℂ) * Real.sinh ξ₂) := by
+      rw [show (I * (Real.sinh ξ₁ : ℂ)) * (I * Real.sinh ξ₂) = I ^ 2 *
+          ((Real.sinh ξ₁ : ℂ) * Real.sinh ξ₂) by ring,
         I_sq]; ring
     rw [hI, legAdd_hX]
     push_cast
@@ -735,7 +742,8 @@ theorem legAdd_hyp_nat (n : ℕ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < 
       legAdd_sqrt_cosh_sq h1.le, legAdd_sqrt_cosh_sq h2.le]
     simp only [coeff, weight]
     rw [show (I * (Real.sinh ξ₁ : ℂ) * (I * Real.sinh ξ₂)) = -((Real.sinh ξ₁ : ℂ) * Real.sinh ξ₂) by
-      rw [show (I * (Real.sinh ξ₁ : ℂ)) * (I * Real.sinh ξ₂) = I ^ 2 * ((Real.sinh ξ₁ : ℂ) * Real.sinh ξ₂) by ring,
+      rw [show (I * (Real.sinh ξ₁ : ℂ)) * (I * Real.sinh ξ₂) = I ^ 2 *
+          ((Real.sinh ξ₁ : ℂ) * Real.sinh ξ₂) by ring,
         I_sq]; ring, neg_pow, mul_pow]
     ring
   · rw [coeff_eq_zero hmn, legAdd_associatedP_nat_nat n m hc2, jet_eq_zero hmn]
@@ -838,7 +846,8 @@ theorem legAdd_integral_sin_pow_even (n : ℕ) :
     have hG : Gamma (1 / 2 + ((n + 1 : ℕ) : ℂ)) = (1 / 2 + n) * Gamma (1 / 2 + n) := by
       rw [show (1:ℂ) / 2 + ((n + 1 : ℕ) : ℂ) = (1 / 2 + n) + 1 by push_cast; ring,
         Gamma_add_one _ (by
-          intro h0; have := congrArg Complex.re h0; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)])]
+          intro h0; have := congrArg Complex.re h0; simp at this;
+              linarith [(n.cast_nonneg : (0:ℝ) ≤ n)])]
     rw [hG, Nat.factorial_succ]
     push_cast
     field_simp
@@ -849,7 +858,8 @@ theorem legAdd_integral_sin_pow_even (n : ℕ) :
 (the Mehler–Dirichlet integral in disguise). -/
 theorem legAdd_regGHG_one_eq_integral (ν : ℂ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s < 1) :
     regularizedGaussHGFun (ν + 1) (-ν) 1 s = 1 / (Real.sqrt π : ℂ) *
-      ∫ t : ℝ in (0:ℝ)..π, regularizedGaussHGFun (ν + 1) (-ν) (1 / 2) ((s * Real.sin t ^ 2 : ℝ)) := by
+      ∫ t : ℝ in (0:ℝ)..π,
+          regularizedGaussHGFun (ν + 1) (-ν) (1 / 2) ((s * Real.sin t ^ 2 : ℝ)) := by
   have hsn : ‖(s:ℂ)‖ < 1 := by rw [norm_real, Real.norm_eq_abs, abs_of_nonneg hs0]; exact hs1
   set e : ℕ → ℂ := fun n => (ascPochhammer ℂ n).eval (ν + 1) * (ascPochhammer ℂ n).eval (-ν) *
     (s:ℂ) ^ n / n.factorial * (Gamma (1 / 2 + n))⁻¹ with he_def
@@ -872,7 +882,9 @@ theorem legAdd_regGHG_one_eq_integral (ν : ℂ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 
     (Filter.Eventually.of_forall fun t _ => by
       have hz : ‖(((s * Real.sin t ^ 2 : ℝ)) : ℂ)‖ < 1 := by
         rw [norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
-        have h1 : Real.sin t ^ 2 ≤ 1 := by nlinarith [Real.sin_sq_add_cos_sq t, sq_nonneg (Real.cos t)]
+        have h1 : Real.sin t ^ 2 ≤ 1 := by
+                                          nlinarith [Real.sin_sq_add_cos_sq t,
+                                            sq_nonneg (Real.cos t)]
         nlinarith
       refine (hasSum_regularizedGaussHGFun (ν + 1) (-ν) (1 / 2) hz).congr_fun fun n => ?_
       simp only [hF_def, he_def]
@@ -1025,7 +1037,8 @@ theorem legAdd_fY_contDiff (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2
   have hh : ContDiff ℝ 2 (fun t : ℝ => (((1 - legAdd_fY θ₁ θ₂ t) / 2 : ℝ) : ℂ)) := by
     refine ofRealCLM.contDiff.comp ?_
     unfold legAdd_fY
-    exact (contDiff_const.sub (contDiff_const.add (contDiff_const.mul Real.contDiff_cos))).div_const 2
+    exact (contDiff_const.sub
+        (contDiff_const.add (contDiff_const.mul Real.contDiff_cos))).div_const 2
   have hc : -1 < Real.cos (θ₁ + θ₂) := by
     rw [← Real.cos_pi]; exact Real.cos_lt_cos_of_nonneg_of_le_pi (by linarith) le_rfl hs
   have := hG2.comp_contDiff hh fun t =>
@@ -1358,7 +1371,8 @@ theorem legAdd_ferrersP_nat_eq_ferrersPNat (n k : ℕ) {x : ℝ} (hx : x ∈ Ioc
     · simp only [ferrersP, Nat.cast_zero, zero_div, cpow_zero, one_mul, sub_zero, sub_self,
         ite_true]
       have hc : ∀ j : ℕ, (1:ℂ) ≠ -(j:ℂ) := by
-        intro j h; have := congrArg Complex.re h; simp at this; linarith [(j.cast_nonneg : (0:ℝ) ≤ j)]
+        intro j h; have := congrArg Complex.re h; simp at this;
+            linarith [(j.cast_nonneg : (0:ℝ) ≤ j)]
       rw [show ((1:ℂ) - ((1:ℝ):ℂ))/2 = 0 by simp, regularizedGaussHG_zero_of_regular hc]
       simp
     · simp [ferrersP]
@@ -1368,7 +1382,8 @@ theorem legAdd_ferrersP_nat_eq_ferrersPNat (n k : ℕ) {x : ℝ} (hx : x ∈ Ioc
 /-- Negative integer order Ferrers P in polynomial form on `(-1, 1]`. -/
 theorem legAdd_ferrersP_neg_nat_eq_ferrersPNat (n k : ℕ) (hk : k ≤ n) {x : ℝ}
     (hx : x ∈ Ioc (-1:ℝ) 1) :
-    ferrersP n (-(k:ℂ)) x = (-1)^k * ((n-k).factorial / (n+k).factorial : ℂ) * ferrersPNat n k x := by
+    ferrersP n (-(k:ℂ)) x = (-1)^k * ((n-k).factorial / (n+k).factorial : ℂ) *
+        ferrersPNat n k x := by
   rcases eq_or_lt_of_le hx.2 with rfl | hlt
   · rw [ferrersPNat_one]
     rcases k with _ | k
@@ -1376,7 +1391,8 @@ theorem legAdd_ferrersP_neg_nat_eq_ferrersPNat (n k : ℕ) (hk : k ≤ n) {x : �
         ferrersPNat_one]
       simp [Nat.factorial_ne_zero]
     · simp [ferrersP]
-      left; intro h; have := congrArg Complex.re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
+      left; intro h; have := congrArg Complex.re h; simp at this;
+          linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   · have hG : ∀ j : ℕ, (n:ℂ) - k + 1 ≠ -j := by
       intro j h
       have : ((n - k + 1 + j : ℕ) : ℂ) = 0 := by push_cast [Nat.cast_sub hk]; linear_combination h
@@ -1396,7 +1412,8 @@ theorem legAdd_fer_nat {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂)
   have hθ1 : θ₁ < π := by linarith
   have hθ2 : θ₂ < π := by linarith
   have hcos : ∀ θ, 0 ≤ θ → θ < π → Real.cos θ ∈ Ioc (-1:ℝ) 1 := fun θ h0 hπ =>
-    ⟨by rw [← Real.cos_pi]; exact Real.cos_lt_cos_of_nonneg_of_le_pi h0 le_rfl hπ, Real.cos_le_one θ⟩
+    ⟨by rw [← Real.cos_pi]; exact Real.cos_lt_cos_of_nonneg_of_le_pi h0 le_rfl hπ,
+          Real.cos_le_one θ⟩
   have hx1 := hcos θ₁ h1 hθ1
   have hx2 := hcos θ₂ h2 hθ2
   have hsq : ∀ θ : ℝ, (Real.sin θ : ℂ) ^ 2 = 1 - (Real.cos θ : ℂ) ^ 2 := fun θ => by
@@ -1405,7 +1422,8 @@ theorem legAdd_fer_nat {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂)
       fun t : ℝ => kernel n (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁) (Real.sin θ₂) t := by
     funext t
     have hY := legAdd_fY_mem h1 h2 hs t
-    have hY1 : -1 < legAdd_fY θ₁ θ₂ t := lt_of_lt_of_le (legAdd_neg_one_lt_cos (by linarith) hs) hY.1
+    have hY1 : -1 < legAdd_fY θ₁ θ₂ t :=
+        lt_of_lt_of_le (legAdd_neg_one_lt_cos (by linarith) hs) hY.1
     rw [ferrersP_zero _ hY1, legendreP_nat n (Or.inl (by simp; linarith)),
       ← legendre_eq_kernel n _ _ _ _ t (hsq θ₁) (hsq θ₂), legAdd_fY]
     push_cast; ring_nf
@@ -1417,14 +1435,18 @@ theorem legAdd_fer_nat {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂)
     rw [ferrersPNat, hsin θ h0 hπ]; rfl
   rw [hfun, legAdd_coeff_kernel]
   rcases le_or_gt m n with hmn | hmn
-  · rw [legAdd_ferrersP_neg_nat_eq_ferrersPNat n m hmn hx1, legAdd_ferrersP_nat_eq_ferrersPNat n m hx2,
+  · rw [legAdd_ferrersP_neg_nat_eq_ferrersPNat n m hmn hx1,
+        legAdd_ferrersP_nat_eq_ferrersPNat n m hx2,
       hF m θ₁ h1 hθ1, hF m θ₂ h2 hθ2]
     have h4 : ((-1:ℂ)) ^ m * (-1) ^ m * ((-1) ^ m * (-1) ^ m) = 1 := by
       rw [← mul_pow, ← mul_pow]; norm_num
     simp only [coeff, weight]
-    linear_combination (-(((n - m).factorial / (n + m).factorial : ℂ) * (Real.sin θ₁ * Real.sin θ₂ : ℂ) ^ m *
-      jet n m (Real.cos θ₁) * jet n m (Real.cos θ₂))) * h4 + 0 * (mul_pow (Real.sin θ₁ : ℂ) (Real.sin θ₂) m)
-  · rw [coeff_eq_zero hmn, legAdd_ferrersP_nat_eq_ferrersPNat n m hx2, hF m θ₂ h2 hθ2, jet_eq_zero hmn]
+    linear_combination (-(((n - m).factorial / (n + m).factorial : ℂ) *
+        (Real.sin θ₁ * Real.sin θ₂ : ℂ) ^ m *
+      jet n m (Real.cos θ₁) * jet n m (Real.cos θ₂))) * h4 + 0 *
+          (mul_pow (Real.sin θ₁ : ℂ) (Real.sin θ₂) m)
+  · rw [coeff_eq_zero hmn, legAdd_ferrersP_nat_eq_ferrersPNat n m hx2, hF m θ₂ h2 hθ2,
+        jet_eq_zero hmn]
     simp
 
 end DLMF.Legendre

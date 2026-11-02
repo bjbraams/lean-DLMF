@@ -125,7 +125,8 @@ theorem injOn_jacobiSnm_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
   exact (strictMono_jacobiAmm hm).injective h2
 
 /-- The prefactor is nonzero on `(0, K)`. -/
-private lemma lamePolyPrefactorReal_ne_zero {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {x : ℝ}
+private lemma lamePolyPrefactorReal_ne_zero {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    (t : LamePolyType) {x : ℝ}
     (hx : x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2))) : lamePolyPrefactorReal t x k ≠ 0 := by
   have hm : k ^ 2 < 1 := by nlinarith
   have hs := (jacobiSnm_pos_of_mem_Ioo hk0 hk1 hx).ne'
@@ -182,7 +183,8 @@ theorem eq_zero_or_deriv_eq_zero_of_reflection {E : ℂ → ℂ} {p σ : ℂ} (h
 
 /-- The real part along `ℝ` of a complex solution of Lamé's equation with real parameters, regular
 on `ℝ`, is a real solution. -/
-private lemma isLameSolution_re_of_isLameSolutionOn {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {h ν : ℝ} {E : ℂ → ℂ}
+private lemma isLameSolution_re_of_isLameSolutionOn {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    {h ν : ℝ} {E : ℂ → ℂ}
     (hE : IsLameSolutionOn (h : ℂ) (ν : ℂ) (k : ℂ) E {z | JacobiRegulark .n z k}) :
     Real.IsLameSolution h ν k (fun x : ℝ => (E x).re) ∧
       ∀ x : ℝ, deriv (fun x : ℝ => (E x).re) x = (deriv E x).re := by
@@ -254,21 +256,26 @@ theorem lameEigenvalue_lamePolyType_eq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t 
   set ν : ℝ := (t.order n : ℝ) with hνdef
   set hv : ℕ → ℝ := fun j => (lamePolyH t n j k + ν * (ν + 1) * k ^ 2) / 2 with hhv
   set S := Real.lameSpectrum ν k (lamePolyOddZero t) (lamePolyOddK t)
-  have hS := lameSpectrum_eq_separatedSpectrum (ν := ν) (k := k) (lamePolyOddZero t) (lamePolyOddK t)
+  have hS := lameSpectrum_eq_separatedSpectrum (ν := ν) (k := k) (lamePolyOddZero t)
+      (lamePolyOddK t)
   have hfin : ∀ c, (S ∩ Iio c).Finite := fun c => by
     simp only [S, hS]
-    exact ODE.separatedSpectrum_inter_Iio_finite (continuous_lamePotential hk) abs_lamePotential_le hK _ _ c
+    exact ODE.separatedSpectrum_inter_Iio_finite (continuous_lamePotential hk)
+        abs_lamePotential_le hK _ _ c
   -- each `j ≤ n` gives an eigenfunction with at most `n` zeros
   have key : ∀ j ≤ n, hv j ∈ S ∧ (S ∩ Iio (hv j)).ncard ≤ n := by
     intro j hj
-    obtain ⟨hre, hbc, hne⟩ : Real.IsLameEigenfunction (hv j) ν k (lamePolyOddZero t) (lamePolyOddK t)
+    obtain ⟨hre, hbc, hne⟩ : Real.IsLameEigenfunction (hv j) ν k (lamePolyOddZero t)
+        (lamePolyOddK t)
         (fun x : ℝ => (lamePolyEk t n j x k).re) := isLameEigenfunction_lamePolyEk_re hk0 hk1 t hj
     set w := fun x : ℝ => (lamePolyEk t n j x k).re
     obtain ⟨hZf, hZn, -⟩ := lamePolyEk_zeros_finite_le hk0 hk1 t hj
     have hmem : hv j ∈ S := ⟨w, hre, hbc, hne⟩
     refine ⟨hmem, ?_⟩
-    have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution (continuous_lamePotential hk) abs_lamePotential_le hK
-      (lamePolyOddZero t) (lamePolyOddK t) ((isLameSolution_iff_isSturmLiouvilleSolution).mp hre) hbc hne
+    have hosc := ODE.encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution
+        (continuous_lamePotential hk) abs_lamePotential_le hK
+      (lamePolyOddZero t) (lamePolyOddK t)
+          ((isLameSolution_iff_isSturmLiouvilleSolution).mp hre) hbc hne
     rw [← hS] at hosc
     have : (S ∩ Iio (hv j)).ncard =
         {x | x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2)) ∧ w x = 0}.ncard := by

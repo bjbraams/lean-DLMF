@@ -387,7 +387,8 @@ theorem norm_integral_mul_sin_le_exp {F : ℂ → ℂ} (hF : Differentiable ℂ 
     push_cast
     rw [hodd, show (m : ℂ) * -x = -(m * x) by ring, Complex.cos_neg]; ring
   have h := hC m
-  rw [fourierIntegral_eq_cos_sub_I_mul_sin hc, hc0, zero_sub, norm_neg, norm_mul, Complex.norm_I, one_mul] at h
+  rw [fourierIntegral_eq_cos_sub_I_mul_sin hc, hc0, zero_sub, norm_neg, norm_mul,
+      Complex.norm_I, one_mul] at h
   push_cast at h
   simpa using h
 
@@ -423,7 +424,8 @@ private lemma casoratian_eq_of_three_term_rec {q : ℂ} (hq : q ≠ 0) {b x y : 
 
 /-- **Coexistence is impossible** (Ince): for `q ≠ 0` an even and an odd solution of Mathieu's
 equation cannot both be `π`-periodic, or both `π`-antiperiodic. -/
-private lemma eq_zero_or_eq_zero_of_coexist {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F G : ℂ → ℂ}
+private lemma eq_zero_or_eq_zero_of_coexist {a q μ : ℂ} (hq : q ≠ 0)
+    (hμ : μ = 1 ∨ μ = -1) {F G : ℂ → ℂ}
     (hF : IsMathieuSolution a q F) (hG : IsMathieuSolution a q G) (hFe : ∀ z, F (-z) = F z)
     (hGo : ∀ z, G (-z) = -G z) (hFp : ∀ z, F (z + π) = μ * F z)
     (hGp : ∀ z, G (z + π) = μ * G z) : F = 0 ∨ G = 0 := by
@@ -812,7 +814,8 @@ theorem IsFloquetSolution.exists_fourier {a q ν : ℂ} {w : ℂ → ℂ}
             rw [← Real.exp_add]; simp
           linear_combination (‖(1 / (2 * π) : ℂ)‖ * C * Real.exp (-(ν * z).im) *
             Real.exp (-|(k : ℝ)|)) * e
-  · have h := (hasSum_fourier_of_differentiable_periodic hU hUper (2 * z)).mul_left (Complex.exp (I * ν * z))
+  · have h := (hasSum_fourier_of_differentiable_periodic hU hUper (2 * z)).mul_left
+        (Complex.exp (I * ν * z))
     have e : Complex.exp (I * ν * z) * U (2 * z) = w z := by
       simp only [U]
       rw [show 2 * z / 2 = z by ring, ← mul_assoc, ← Complex.exp_add]
@@ -828,7 +831,8 @@ theorem IsFloquetSolution.exists_fourier {a q ν : ℂ} {w : ℂ → ℂ}
     linear_combination (1 / π : ℂ) * this
 
 /-- A function on `ℤ` that is eventually (cofinitely) at most `1` is bounded above. -/
-private lemma exists_bound_of_eventually_le_one_cofinite {f : ℤ → ℝ} (h : ∀ᶠ n in cofinite, f n ≤ 1) :
+private lemma exists_bound_of_eventually_le_one_cofinite {f : ℤ → ℝ}
+    (h : ∀ᶠ n in cofinite, f n ≤ 1) :
     ∃ C, 0 ≤ C ∧ ∀ n, f n ≤ C := by
   have hfin : {n | ¬ f n ≤ 1}.Finite := Filter.eventually_cofinite.1 h
   obtain ⟨M, hM⟩ := (hfin.image f).bddAbove
@@ -844,7 +848,8 @@ private lemma norm_le_exp_of_tendsto_rpow_cofinite {c : ℤ → ℂ}
   have h1 : ∀ᶠ n : ℤ in cofinite, ‖c n‖ ^ (1 / (|n| : ℝ)) < Real.exp (-R) :=
     hlim.eventually (gt_mem_nhds (Real.exp_pos _))
   have h2 : ∀ᶠ n : ℤ in cofinite, n ≠ 0 := Filter.eventually_cofinite_ne 0
-  obtain ⟨C, hC0, hC⟩ := exists_bound_of_eventually_le_one_cofinite (f := fun n => ‖c n‖ * Real.exp (R * |(n : ℝ)|))
+  obtain ⟨C, hC0, hC⟩ :=
+      exists_bound_of_eventually_le_one_cofinite (f := fun n => ‖c n‖ * Real.exp (R * |(n : ℝ)|))
     (by
       filter_upwards [h1, h2] with n hn hn0
       have hpos : (0 : ℝ) < |(n : ℝ)| := abs_pos.2 (by exact_mod_cast hn0)
@@ -866,7 +871,8 @@ private lemma norm_le_exp_of_tendsto_rpow_cofinite {c : ℤ → ℂ}
     _ ≤ C * Real.exp (-(R * |(n : ℝ)|)) := by gcongr
 
 /-- `‖x‖^k ≤ e^{2‖x‖}` for `k ≤ 2`. -/
-private lemma norm_pow_le_exp_two_mul_norm {x : ℂ} {k : ℕ} (hk : k ≤ 2) : ‖x ^ k‖ ≤ Real.exp (2 * ‖x‖) := by
+private lemma norm_pow_le_exp_two_mul_norm {x : ℂ} {k : ℕ} (hk : k ≤ 2) : ‖x ^ k‖ ≤
+    Real.exp (2 * ‖x‖) := by
   rw [norm_pow]
   have h1 : max 1 ‖x‖ ≤ Real.exp ‖x‖ := max_le (Real.one_le_exp (norm_nonneg _))
     ((le_add_of_nonneg_right zero_le_one).trans (Real.add_one_le_exp _) |>.trans_eq' rfl)

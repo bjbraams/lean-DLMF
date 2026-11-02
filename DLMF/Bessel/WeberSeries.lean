@@ -340,8 +340,10 @@ theorem sum_antidiagonal_choose_recip_Gamma (n : ℕ) : ∀ a b : ℂ,
       refine Finset.sum_congr rfl fun ij _ => ?_
       push_cast; ring_nf
     rw [h1, h2, ih a (b + 1), ih (a + 1) b]
-    rw [show (Gamma (a + n))⁻¹ = (a + n) * (Gamma (a + n + 1))⁻¹ from Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one _,
-      show (Gamma (b + n))⁻¹ = (b + n) * (Gamma (b + n + 1))⁻¹ from Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one _,
+    rw [show (Gamma (a + n))⁻¹ = (a + n) *
+        (Gamma (a + n + 1))⁻¹ from Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one _,
+      show (Gamma (b + n))⁻¹ = (b + n) *
+          (Gamma (b + n + 1))⁻¹ from Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one _,
       poch_succ]
     push_cast
     rw [show a + (b + 1) + n - 1 = a + b + (n + 1) - 1 by ring,

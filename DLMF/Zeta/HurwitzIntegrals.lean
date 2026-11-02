@@ -142,7 +142,8 @@ private lemma isPreconnected_re_gt_diff_one {c : ℝ} (hc : c < 1) :
 
 /-- Domination of the 25.11.27 integrand: for `x > 0` and `σ₁ ≤ Re s ≤ σ₂`,
 `|β(x) x^{s-1} e^{-ax}| ≤ (x^{σ₁} + x^{σ₂-1}) e^{-Re a x}`. -/
-private lemma norm_binetBeta_mul_cpow_mul_exp_le {s a : ℂ} {x σ₁ σ₂ : ℝ} (hx : 0 < x) (h1 : σ₁ ≤ s.re)
+private lemma norm_binetBeta_mul_cpow_mul_exp_le {s a : ℂ} {x σ₁ σ₂ : ℝ} (hx : 0 < x)
+    (h1 : σ₁ ≤ s.re)
     (h2 : s.re ≤ σ₂) :
     ‖((DLMF.Gamma.binetBeta x : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) * cexp (-(a * x))‖ ≤
       (x ^ σ₁ + x ^ (σ₂ - 1)) * Real.exp (-(a.re * x)) := by
@@ -414,7 +415,8 @@ private lemma differentiableOn_lerchIntegral_neg_one {a : ℂ} (ha : 0 < a.re) :
 /-- The alternating Hurwitz integral (DLMF 25.11.35, integral form) for `Re a > 0`,
 `Re s > 0`, `s ≠ 1`:
 `(1/Γ(s)) ∫_0^∞ x^{s-1} e^{-ax}/(1+e^{-x}) dx = 2^{-s}(ζ(s,a/2) - ζ(s,(1+a)/2))`. -/
-private lemma one_div_Gamma_mul_lerchIntegral_neg_one {s a : ℂ} (hs0 : 0 < s.re) (hs1 : s ≠ 1) (ha : 0 < a.re) :
+private lemma one_div_Gamma_mul_lerchIntegral_neg_one {s a : ℂ} (hs0 : 0 < s.re) (hs1 : s ≠ 1)
+    (ha : 0 < a.re) :
     1 / Gamma s * lerchIntegral s a (-1) =
       2 ^ (-s) * (hurwitzZetaComplex s (a / 2) - hurwitzZetaComplex s ((1 + a) / 2)) := by
   have ha2 : 0 < (a / 2).re := by simp; linarith
@@ -432,7 +434,8 @@ private lemma one_div_Gamma_mul_lerchIntegral_neg_one {s a : ℂ} (hs0 : 0 < s.r
       hurwitzZetaComplex t ((1 + a) / 2))) W := by
     intro t ht
     exact (((differentiableAt_id.neg).const_cpow (Or.inl two_ne_zero)).mul
-      ((differentiableAt_hurwitzZetaComplex_of_add_natCast_ne_zero' ht.2 (Complex.add_natCast_ne_zero_of_re_pos ha2)).sub
+      ((differentiableAt_hurwitzZetaComplex_of_add_natCast_ne_zero' ht.2
+          (Complex.add_natCast_ne_zero_of_re_pos ha2)).sub
         (differentiableAt_hurwitzZetaComplex_of_add_natCast_ne_zero' ht.2
           (Complex.add_natCast_ne_zero_of_re_pos ha3)))).differentiableWithinAt
   refine (hF.analyticOnNhd hW).eqOn_of_preconnected_of_eventuallyEq (hG.analyticOnNhd hW)
@@ -576,21 +579,21 @@ theorem tendsto_integral_alternating_hurwitz {s a : ℂ} (hs1 : s ≠ 1)
 
 /-! ### §25.11(xi) Sums -/
 
-/-- **Logarithmic sum** (DLMF 25.11.37) for real `a ≥ 1`, `n = 2, 3, …`, principal logarithms:
+/-- **Logarithmic sum** (DLMF 25.11.37) for real `a > 1`, `n = 2, 3, …`, principal logarithms:
 `∑_{k≥1} ((-1)^k/k) ζ(nk, a) = -n ln Γ(a) + ln ∏_{j=0}^{n-1} Γ(a - e^{(2j+1)πi/n})`. -/
 @[dlmf 25.11.E37]
-theorem hasSum_hurwitzZeta_log_gamma {n : ℕ} (hn : 2 ≤ n) {a : ℝ} (ha : 1 ≤ a) :
+theorem hasSum_hurwitzZeta_log_gamma {n : ℕ} (hn : 2 ≤ n) {a : ℝ} (ha : 1 < a) :
     HasSum (fun k : ℕ => (-1) ^ (k + 1) / (k + 1 : ℂ) * hurwitzZetaComplex (n * (k + 1)) a)
       (-n * Real.log (Real.Gamma a) +
         Complex.log (∏ j ∈ Finset.range n, Gamma (a - cexp ((2 * j + 1) * π * I / n)))) := by
   sorry
 
-/-- **Logarithmic sum, exponentiated** (DLMF 25.11.37) for complex `Re a ≥ 1`, `n = 2, 3, …`:
+/-- **Logarithmic sum, exponentiated** (DLMF 25.11.37) for complex `Re a > 1`, `n = 2, 3, …`:
 `exp(∑_{k≥1} ((-1)^k/k) ζ(nk, a)) = Γ(a)^{-n} ∏_{j=0}^{n-1} Γ(a - e^{(2j+1)πi/n})`
 (branch-free form of the printed identity, whose logarithms must be read as the analytic branch of
 `ln Γ`). -/
 @[dlmf 25.11.E37]
-theorem exp_tsum_hurwitzZeta_eq_prod_gamma {n : ℕ} (hn : 2 ≤ n) {a : ℂ} (ha : 1 ≤ a.re) :
+theorem exp_tsum_hurwitzZeta_eq_prod_gamma {n : ℕ} (hn : 2 ≤ n) {a : ℂ} (ha : 1 < a.re) :
     Summable (fun k : ℕ => (-1) ^ (k + 1) / (k + 1 : ℂ) * hurwitzZetaComplex (n * (k + 1)) a) ∧
     cexp (∑' k : ℕ, (-1) ^ (k + 1) / (k + 1 : ℂ) * hurwitzZetaComplex (n * (k + 1)) a) =
       (∏ j ∈ Finset.range n, Gamma (a - cexp ((2 * j + 1) * π * I / n))) / Gamma a ^ n := by
@@ -733,13 +736,98 @@ theorem hurwitzZetaComplex_add_one_isBigO {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠
   simp only [mul_one] at this
   exact this.congr_left fun a => (key a).symm
 
+/-- Termwise bound for the Hurwitz series off the real axis. -/
+private lemma norm_one_div_cpow_le {s : ℂ} (hs : 0 ≤ s.re) {α β : ℝ} (hα : 0 ≤ α)
+    (hβ : 1 ≤ |β|) (n : ℕ) :
+    ‖1 / ((n : ℂ) + (α + β * I)) ^ s‖ ≤
+      Real.exp (π * |s.im|) * (((n : ℝ) ^ 2 + β ^ 2) ^ (-(s.re / 2))) := by
+  set w : ℂ := (n : ℂ) + (α + β * I)
+  have hwre : w.re = n + α := by simp [w]
+  have hwim : w.im = β := by simp [w]
+  have hw : w ≠ 0 := by
+    intro h; have := congrArg Complex.im h; rw [hwim] at this; simp at this
+    rw [this] at hβ; simp at hβ; linarith
+  have hnw : ‖w‖ ^ 2 = (n + α) ^ 2 + β ^ 2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply, hwre, hwim]; ring
+  have hpos : 0 < (n : ℝ) ^ 2 + β ^ 2 := by nlinarith [abs_nonneg β, sq_abs β]
+  rw [norm_div, norm_one, norm_cpow_of_ne_zero hw, one_div_div]
+  have h1 : Real.exp (arg w * s.im) ≤ Real.exp (π * |s.im|) := by
+    apply Real.exp_le_exp.mpr
+    calc arg w * s.im ≤ |arg w * s.im| := le_abs_self _
+      _ = |arg w| * |s.im| := abs_mul _ _
+      _ ≤ π * |s.im| := by gcongr; exact abs_arg_le_pi w
+  have h2 : ‖w‖ ^ s.re ≠ 0 := by positivity
+  have h3 : 1 / ‖w‖ ^ s.re ≤ ((n : ℝ) ^ 2 + β ^ 2) ^ (-(s.re / 2)) := by
+    have e : ‖w‖ ^ s.re = (‖w‖ ^ 2) ^ (s.re / 2) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (norm_nonneg _)]; ring_nf
+    rw [e, hnw, one_div, ← Real.rpow_neg (by positivity)]
+    exact Real.rpow_le_rpow_of_nonpos hpos (by nlinarith) (by linarith)
+  rw [div_eq_mul_one_div]
+  exact mul_le_mul h1 h3 (by positivity) (Real.exp_pos _).le
+
+private lemma summable_sq_add_rpow {σ : ℝ} (hσ : 1 < σ) :
+    Summable fun n : ℕ => (((n : ℝ) ^ 2 + 1) ^ (-(σ / 2))) := by
+  have hs : Summable fun n : ℕ => (2 : ℝ) ^ (σ / 2) * ((n + 1 : ℕ) : ℝ) ^ (-σ) := by
+    refine Summable.mul_left _ ?_
+    exact (summable_nat_add_iff 1).mpr (Real.summable_nat_rpow.mpr (by linarith))
+  refine Summable.of_nonneg_of_le (fun n => by positivity) (fun n => ?_) hs
+  have hn : (0 : ℝ) < ((n + 1 : ℕ) : ℝ) := by positivity
+  have h : ((n + 1 : ℕ) : ℝ) ^ 2 / 2 ≤ (n : ℝ) ^ 2 + 1 := by
+    push_cast; nlinarith [sq_nonneg ((n : ℝ) - 1)]
+  calc (((n : ℝ) ^ 2 + 1) ^ (-(σ / 2))) ≤ (((n + 1 : ℕ) : ℝ) ^ 2 / 2) ^ (-(σ / 2)) :=
+        Real.rpow_le_rpow_of_nonpos (by positivity) h (by linarith)
+    _ = (2 : ℝ) ^ (σ / 2) * ((n + 1 : ℕ) : ℝ) ^ (-σ) := by
+        rw [Real.div_rpow (by positivity) (by norm_num), ← Real.rpow_natCast,
+          ← Real.rpow_mul hn.le, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2)]
+        field_simp
+        ring_nf
+
 /-- **Large imaginary part** (DLMF 25.11.42): for `Re s > 1`, `ζ(s, α + iβ) → 0` as `β → ±∞`,
 uniformly for `α` in bounded subsets of `[0, ∞)`. -/
 @[dlmf 25.11.E42]
 theorem tendstoUniformlyOn_hurwitzZetaComplex_im {s : ℂ} (hs : 1 < s.re) (A : ℝ) :
     TendstoUniformlyOn (fun (β : ℝ) (α : ℝ) => hurwitzZetaComplex s (α + β * I)) 0
       (cocompact ℝ) (Icc 0 A) := by
-  sorry
+  set σ := s.re
+  set g : ℝ → ℝ := fun β => Real.exp (π * |s.im|) *
+    ∑' n : ℕ, (((n : ℝ) ^ 2 + β ^ 2) ^ (-(σ / 2)))
+  have hβ : Tendsto (fun β : ℝ => β ^ 2) (cocompact ℝ) atTop := by
+    have := tendsto_norm_cocompact_atTop (E := ℝ)
+    exact ((tendsto_pow_atTop two_ne_zero).comp this).congr fun β => by
+      simp [Real.norm_eq_abs, sq_abs]
+  have habs : ∀ᶠ β in cocompact ℝ, 1 ≤ |β| := by
+    have := tendsto_norm_cocompact_atTop (E := ℝ)
+    simpa [Real.norm_eq_abs] using this.eventually (eventually_ge_atTop 1)
+  have hg : Tendsto g (cocompact ℝ) (𝓝 0) := by
+    have h := tendsto_tsum_of_dominated_convergence (𝓕 := cocompact ℝ)
+      (f := fun β (n : ℕ) => (((n : ℝ) ^ 2 + β ^ 2) ^ (-(σ / 2))))
+      (g := fun _ => 0) (summable_sq_add_rpow hs) (fun n => ?_) ?_
+    · simpa [g] using h.const_mul (Real.exp (π * |s.im|))
+    · have : Tendsto (fun β : ℝ => (n : ℝ) ^ 2 + β ^ 2) (cocompact ℝ) atTop :=
+        tendsto_atTop_add_const_left _ _ hβ
+      exact (tendsto_rpow_neg_atTop (by linarith)).comp this
+    · filter_upwards [habs] with β hb n
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      refine Real.rpow_le_rpow_of_nonpos (by positivity) ?_ (by linarith)
+      nlinarith [sq_abs β]
+  rw [Metric.tendstoUniformlyOn_iff]
+  intro ε hε
+  filter_upwards [hg.eventually (gt_mem_nhds hε), habs] with β hgβ hb α hα
+  simp only [Pi.zero_apply, dist_zero_left]
+  have hsum := hasSum_hurwitzZetaComplex' (a := (α : ℂ) + β * I) (by linarith : 1 < s.re)
+  have hb2 : Summable fun n : ℕ => Real.exp (π * |s.im|) *
+      (((n : ℝ) ^ 2 + β ^ 2) ^ (-(σ / 2))) := by
+    refine Summable.mul_left _ (Summable.of_nonneg_of_le (fun n => by positivity) (fun n => ?_)
+      (summable_sq_add_rpow hs))
+    refine Real.rpow_le_rpow_of_nonpos (by positivity) ?_ (by linarith)
+    nlinarith [sq_abs β]
+  calc ‖hurwitzZetaComplex s (α + β * I)‖
+      ≤ ∑' n : ℕ, Real.exp (π * |s.im|) * (((n : ℝ) ^ 2 + β ^ 2) ^ (-(σ / 2))) :=
+        tsum_of_norm_bounded hb2.hasSum
+          (fun n => norm_one_div_cpow_le (by linarith) hα.1 hb n) |>.trans_eq' (by
+            rw [hsum.tsum_eq])
+    _ = g β := by simp only [g, tsum_mul_left]
+    _ < ε := hgβ
 
 /-- The sector `|ph a| ≤ π - δ` of DLMF §25.11(xii). -/
 def phaseSector (δ : ℝ) : Set ℂ := {a | |arg a| ≤ π - δ}

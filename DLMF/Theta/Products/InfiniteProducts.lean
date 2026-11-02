@@ -101,7 +101,8 @@ private lemma jacobiThetaOneTau_eq_qPochhammerInf (z : ℂ) {τ : ℂ} (hτ : 0 
         qPochhammerInf (cexp (π * I * τ) ^ 2 * cexp (2 * I * z)) (cexp (π * I * τ) ^ 2) *
         qPochhammerInf (cexp (π * I * τ) ^ 2 * (cexp (2 * I * z))⁻¹) (cexp (π * I * τ) ^ 2)) := by
   have hQn := norm_nome_sq_lt_one hτ
-  rw [(jacobiThetaOneTau_half_periods z τ).2.2, jacobiThetaThreeTau_eq_qPochhammerInf _ hτ, thetaMultiplierM]
+  rw [(jacobiThetaOneTau_half_periods z τ).2.2, jacobiThetaThreeTau_eq_qPochhammerInf _ hτ,
+      thetaMultiplierM]
   set E := cexp (π * I * τ) with hE
   set w := cexp (2 * I * z) with hw
   have hE0 : E ≠ 0 := exp_ne_zero _
@@ -150,7 +151,8 @@ lemma jacobiThetaOneDerivNullTau_eq_qPochhammerInf {τ : ℂ} (hτ : 0 < τ.im) 
   simp only [cos_zero, sin_zero, mul_zero, zero_mul, add_zero, mul_one, hG, exp_zero, inv_one]
   ring
 
-/-- `θ₁'(0|τ) = 2 q^{1/4} ∏_{n≥1} (1 - q^{2n})³`, with multipliability (helper for 20.4.2, 20.5.5). -/
+/-- `θ₁'(0|τ) = 2 q^{1/4} ∏_{n≥1} (1 - q^{2n})³`, with multipliability (helper for 20.4.2, 20.5.5).
+-/
 lemma jacobiThetaOneDerivNullTau_eq_tprod {τ : ℂ} (hτ : 0 < τ.im) :
     Multipliable (fun k : ℕ => 1 - cexp (π * I * τ) ^ (2 * (k + 1))) ∧
       qPochhammerInf (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) =
@@ -215,7 +217,8 @@ private lemma cos_add_mul_cos_sub_div_cos_sq (a z : ℂ) (hx : 1 + cexp (2 * I *
   field_simp
 
 /-- Quotient of two convergent products (helper). -/
-private lemma multipliable_div_and_tprod_eq {f g r : ℕ → ℂ} {F G : ℂ} (hf : HasProd f F) (hg : HasProd g G)
+private lemma multipliable_div_and_tprod_eq {f g r : ℕ → ℂ} {F G : ℂ} (hf : HasProd f F)
+    (hg : HasProd g G)
     (hG : G ≠ 0) (hr : ∀ k, r k = f k / g k) : Multipliable r ∧ ∏' k, r k = F / G := by
   have h := hf.div₀ hg hG
   have h' : HasProd r (F / G) := by
@@ -266,7 +269,8 @@ theorem jacobiThetaTwoTau_hasProd (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     field_simp
   have h3 : jacobiThetaThreeTau (z + π * τ / 2) τ = (1 + w⁻¹) * (qPochhammerInf (E ^ 2) (E ^ 2) *
       qPochhammerInf (-(E ^ 2 * w)) (E ^ 2) * qPochhammerInf (-(w⁻¹ * E ^ 2)) (E ^ 2)) := by
-    rw [jacobiThetaThreeTau_eq_qPochhammerInf _ hτ, ← hE, hw', qPochhammerInf_shift (a := -(E * (E * w)⁻¹)) hQn,
+    rw [jacobiThetaThreeTau_eq_qPochhammerInf _ hτ, ← hE, hw',
+        qPochhammerInf_shift (a := -(E * (E * w)⁻¹)) hQn,
       hEw, show -(E * (E * w)) = -(E ^ 2 * w) by ring, show -w⁻¹ * E ^ 2 = -(w⁻¹ * E ^ 2) by ring]
     ring
   have hcz : cexp (I * z) * (1 + w⁻¹) = 2 * cos z := by
@@ -397,7 +401,8 @@ theorem jacobiThetaTwoTau_hasProd_cos (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     one_sub_ne_zero_of_norm_lt_one (norm_nome_pow_lt_one hτ (by omega))
   have hx' : ∀ k : ℕ, 1 + E ^ (2 * (k + 1)) ≠ 0 := fun k => by
     rw [← sub_neg_eq_add]
-    exact one_sub_ne_zero_of_norm_lt_one (by rw [norm_neg]; exact norm_nome_pow_lt_one hτ (by omega))
+    exact one_sub_ne_zero_of_norm_lt_one
+        (by rw [norm_neg]; exact norm_nome_pow_lt_one hτ (by omega))
   have hxk : ∀ k : ℕ, cexp (2 * I * ((k + 1) * π * τ)) = E ^ (2 * (k + 1)) := fun k => by
     rw [hE, ← exp_nat_mul]; congr 1; push_cast; ring
   have hr : ∀ k : ℕ, cos ((k + 1) * π * τ + z) * cos ((k + 1) * π * τ - z) /
@@ -437,7 +442,8 @@ theorem jacobiThetaThreeTau_hasProd_cos (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     one_sub_ne_zero_of_norm_lt_one (norm_nome_pow_lt_one hτ (by omega))
   have hy' : ∀ k : ℕ, 1 + E ^ (2 * k + 1) ≠ 0 := fun k => by
     rw [← sub_neg_eq_add]
-    exact one_sub_ne_zero_of_norm_lt_one (by rw [norm_neg]; exact norm_nome_pow_lt_one hτ (by omega))
+    exact one_sub_ne_zero_of_norm_lt_one
+        (by rw [norm_neg]; exact norm_nome_pow_lt_one hτ (by omega))
   have hyk : ∀ k : ℕ, cexp (2 * I * ((k + 1 / 2) * π * τ)) = E ^ (2 * k + 1) := fun k => by
     rw [hE, ← exp_nat_mul]; congr 1; push_cast; ring
   have hr : ∀ k : ℕ, cos ((k + 1 / 2) * π * τ + z) * cos ((k + 1 / 2) * π * τ - z) /
@@ -530,13 +536,15 @@ theorem norm_sin_le_real_exp_abs_im (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| 
 
 /-- `1 - 2x cos 2z + x² = (1 - x e^{2iz})(1 - x e^{-2iz})` (helper). -/
 theorem one_sub_two_mul_cos_add_sq_eq_mul (x z : ℂ) :
-    1 - 2 * x * cos (2 * z) + x ^ 2 = (1 - x * cexp (2 * I * z)) * (1 - x * (cexp (2 * I * z))⁻¹) := by
+    1 - 2 * x * cos (2 * z) + x ^ 2 = (1 - x * cexp (2 * I * z)) *
+        (1 - x * (cexp (2 * I * z))⁻¹) := by
   have hc := exp_two_I_mul_add_inv z
   have h1 : cexp (2 * I * z) * (cexp (2 * I * z))⁻¹ = 1 := mul_inv_cancel₀ (exp_ne_zero _)
   linear_combination x * hc - x ^ 2 * h1
 
 /-- Lower bound for the norm of a quotient by `(1 - a)(1 - b)` (helper). -/
-private lemma norm_div_one_sub_mul_one_sub_le {x a b : ℂ} {ρ : ℝ} (hρ : ρ < 1) (ha : ‖a‖ ≤ ρ) (hb : ‖b‖ ≤ ρ) :
+private lemma norm_div_one_sub_mul_one_sub_le {x a b : ℂ} {ρ : ℝ} (hρ : ρ < 1) (ha : ‖a‖ ≤ ρ)
+    (hb : ‖b‖ ≤ ρ) :
     ‖x / ((1 - a) * (1 - b))‖ ≤ ‖x‖ / (1 - ρ) ^ 2 := by
   have h1 : 1 - ρ ≤ ‖1 - a‖ := by
     have := norm_sub_norm_le (1 : ℂ) a; rw [norm_one] at this; linarith
@@ -549,7 +557,8 @@ private lemma norm_div_one_sub_mul_one_sub_le {x a b : ℂ} {ρ : ℝ} (hρ : ρ
 
 /-- `‖e^{±2iz}‖ ≤ e^{2|Im z|}` (helper). -/
 theorem norm_exp_two_I_mul_le (z : ℂ) :
-    ‖cexp (2 * I * z)‖ ≤ Real.exp (2 * |z.im|) ∧ ‖(cexp (2 * I * z))⁻¹‖ ≤ Real.exp (2 * |z.im|) := by
+    ‖cexp (2 * I * z)‖ ≤ Real.exp (2 * |z.im|) ∧ ‖(cexp (2 * I * z))⁻¹‖ ≤
+        Real.exp (2 * |z.im|) := by
   rw [norm_inv, norm_exp]
   simp only [mul_re, re_ofNat, I_re, mul_zero, im_ofNat, I_im, zero_mul, sub_zero, mul_im,
     zero_sub]
@@ -558,7 +567,8 @@ theorem norm_exp_two_I_mul_le (z : ℂ) :
   · rw [← Real.exp_neg]; exact Real.exp_le_exp.mpr (by linarith [le_abs_self z.im])
 
 /-- Bounds for `x/(1 ∓ 2x cos 2z + x²)` (helper). -/
-theorem norm_div_one_sub_two_mul_cos_add_sq_le {x z : ℂ} {R ρ : ℝ} (hx : ‖x‖ ≤ R) (hR : R * Real.exp (2 * |z.im|) ≤ ρ)
+theorem norm_div_one_sub_two_mul_cos_add_sq_le {x z : ℂ} {R ρ : ℝ} (hx : ‖x‖ ≤ R)
+    (hR : R * Real.exp (2 * |z.im|) ≤ ρ)
     (hρ : ρ < 1) :
     ‖x / (1 - 2 * x * cos (2 * z) + x ^ 2)‖ ≤ ‖x‖ / (1 - ρ) ^ 2 ∧
       ‖x / (1 + 2 * x * cos (2 * z) + x ^ 2)‖ ≤ ‖x‖ / (1 - ρ) ^ 2 := by
@@ -629,9 +639,11 @@ private lemma hasSum_four_mul_pow_mul_sin {a z : ℂ} (h1 : ‖a * cexp (2 * I *
     ring
 
 /-- The product `∏ (1 - 2bQ^k cos 2w + (bQ^k)²)` (helper for 20.5.10–20.5.13). -/
-def thetaCosProduct (b Q w : ℂ) : ℂ := ∏' k : ℕ, (1 - 2 * (b * Q ^ k) * cos (2 * w) + (b * Q ^ k) ^ 2)
+def thetaCosProduct (b Q w : ℂ) : ℂ := ∏' k : ℕ,
+    (1 - 2 * (b * Q ^ k) * cos (2 * w) + (b * Q ^ k) ^ 2)
 
-/-- Logarithmic derivative of `thetaCosProduct` and its Fourier expansion (helper for 20.5.10–20.5.13). -/
+/-- Logarithmic derivative of `thetaCosProduct` and its Fourier expansion (helper for
+20.5.10–20.5.13). -/
 theorem thetaCosProduct_logDeriv {b Q z : ℂ} (hQ : ‖Q‖ < 1) (hb : ‖b‖ * Real.exp (2 * |z.im|) < 1) :
     thetaCosProduct b Q z ≠ 0 ∧ DifferentiableAt ℂ (thetaCosProduct b Q) z ∧
     HasSum (fun k : ℕ => 4 * (b * Q ^ k) * sin (2 * z) /
@@ -816,7 +828,8 @@ theorem multipliable_one_sub_nome_pow_and_tprod_ne_zero {τ : ℂ} (hτ : 0 < τ
   exact ⟨h1, h2⟩
 
 /-- `(K h F)'/(K h F) = h'/h + F'/F` (helper). -/
-lemma deriv_const_mul_mul_div_eq_add_logDeriv {K h' z : ℂ} {h F : ℂ → ℂ} (hK : K ≠ 0) (hh : HasDerivAt h h' z)
+lemma deriv_const_mul_mul_div_eq_add_logDeriv {K h' z : ℂ} {h F : ℂ → ℂ} (hK : K ≠ 0)
+    (hh : HasDerivAt h h' z)
     (hF : DifferentiableAt ℂ F z) (hhz : h z ≠ 0) (hFz : F z ≠ 0) :
     deriv (fun w => K * h w * F w) z / (K * h z * F z) = h' / h z + logDeriv F z := by
   have hd : HasDerivAt (fun w => K * h w * F w) (K * h' * F z + K * h z * deriv F z) z :=

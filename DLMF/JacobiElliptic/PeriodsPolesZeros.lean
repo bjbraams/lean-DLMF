@@ -103,11 +103,13 @@ private lemma jacobiModulusRootTau_ne_zero {τ : ℂ} (hτ : 0 < τ.im) : jacobi
   div_ne_zero (jacobiThetaTwoTau_zero_ne_zero hτ) (jacobiThetaThreeTau_zero_ne_zero hτ)
 
 /-- Nonvanishing under the stated hypotheses: `jacobiComodulusRootTau τ ≠ 0`. -/
-private lemma jacobiComodulusRootTau_ne_zero {τ : ℂ} (hτ : 0 < τ.im) : jacobiComodulusRootTau τ ≠ 0 :=
+private lemma jacobiComodulusRootTau_ne_zero {τ : ℂ} (hτ : 0 < τ.im) :
+    jacobiComodulusRootTau τ ≠ 0 :=
   div_ne_zero (jacobiThetaFourTau_zero_ne_zero hτ) (jacobiThetaThreeTau_zero_ne_zero hτ)
 
 /-- Nonvanishing under the stated hypotheses: `jacobiLetterMultiplierK τ p ≠ 0`. -/
-theorem jacobiLetterMultiplierK_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) : jacobiLetterMultiplierK τ p ≠ 0 := by
+theorem jacobiLetterMultiplierK_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) :
+    jacobiLetterMultiplierK τ p ≠ 0 := by
   have := jacobiComodulusRootTau_ne_zero hτ
   cases p <;> simp [jacobiLetterMultiplierK, this]
 
@@ -117,43 +119,52 @@ private lemma jacobiLetterMultiplierKp_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (p :
   have := jacobiModulusRootTau_ne_zero hτ
   cases p <;> simp [jacobiLetterMultiplierKp, this, I_ne_zero]
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiModulusTau τ = jacobiModulusRootTau τ ^
-2`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiModulusTau τ = jacobiModulusRootTau τ ^ 2`. -/
 private lemma jacobiModulusTau_eq_sq (τ : ℂ) : jacobiModulusTau τ = jacobiModulusRootTau τ ^ 2 := by
   rw [jacobiModulusTau, jacobiModulusRootTau, div_pow]
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusTau τ = jacobiComodulusRootTau τ
-^ 2`. -/
-private lemma jacobiComodulusTau_eq_sq (τ : ℂ) : jacobiComodulusTau τ = jacobiComodulusRootTau τ ^ 2 := by
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiComodulusTau τ = jacobiComodulusRootTau τ ^ 2`. -/
+private lemma jacobiComodulusTau_eq_sq (τ : ℂ) : jacobiComodulusTau τ =
+    jacobiComodulusRootTau τ ^ 2 := by
   rw [jacobiComodulusTau, jacobiComodulusRootTau, div_pow]
 
 /-- The normalized theta functions under `ζ ↦ ζ + π/2`. -/
 theorem jacobiLetterTheta_add_pi_div_two {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ : ℂ) :
-    jacobiLetterTheta p (ζ + π / 2) τ = jacobiLetterMultiplierK τ p * jacobiLetterTheta p.swapK ζ τ := by
+    jacobiLetterTheta p (ζ + π / 2) τ = jacobiLetterMultiplierK τ p *
+        jacobiLetterTheta p.swapK ζ τ := by
   have h2 := jacobiThetaTwoTau_zero_ne_zero hτ
   have h3 := jacobiThetaThreeTau_zero_ne_zero hτ
   have h4 := jacobiThetaFourTau_zero_ne_zero hτ
   cases p <;>
-    simp only [jacobiLetterTheta, jacobiLetterMultiplierK, JacobiLetter.swapK, jacobiComodulusRootTau,
-      jacobiThetaOneTau_add_pi_div_two, jacobiThetaTwoTau_add_pi_div_two, jacobiThetaThreeTau_add_pi_div_two,
+    simp only [jacobiLetterTheta, jacobiLetterMultiplierK, JacobiLetter.swapK,
+        jacobiComodulusRootTau,
+      jacobiThetaOneTau_add_pi_div_two, jacobiThetaTwoTau_add_pi_div_two,
+          jacobiThetaThreeTau_add_pi_div_two,
       jacobiThetaFourTau_add_pi_div_two] <;> field_simp
 
 /-- The normalized theta functions under `ζ ↦ ζ + πτ/2`. -/
-private lemma jacobiLetterTheta_add_pi_mul_div_two {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ : ℂ) :
+private lemma jacobiLetterTheta_add_pi_mul_div_two {τ : ℂ} (hτ : 0 < τ.im)
+    (p : JacobiLetter) (ζ : ℂ) :
     jacobiLetterTheta p (ζ + π * τ / 2) τ =
-      jacobiThetaShiftFactor ζ τ * jacobiLetterMultiplierKp τ p * jacobiLetterTheta p.swapKp ζ τ := by
+      jacobiThetaShiftFactor ζ τ * jacobiLetterMultiplierKp τ p *
+          jacobiLetterTheta p.swapKp ζ τ := by
   have h2 := jacobiThetaTwoTau_zero_ne_zero hτ
   have h3 := jacobiThetaThreeTau_zero_ne_zero hτ
   have h4 := jacobiThetaFourTau_zero_ne_zero hτ
   cases p <;>
-    simp only [jacobiLetterTheta, jacobiLetterMultiplierKp, JacobiLetter.swapKp, jacobiModulusRootTau,
-      jacobiThetaOneTau_add_pi_mul_div_two, jacobiThetaTwoTau_add_pi_mul_div_two, jacobiThetaThreeTau_add_pi_mul_div_two,
+    simp only [jacobiLetterTheta, jacobiLetterMultiplierKp, JacobiLetter.swapKp,
+        jacobiModulusRootTau,
+      jacobiThetaOneTau_add_pi_mul_div_two, jacobiThetaTwoTau_add_pi_mul_div_two,
+          jacobiThetaThreeTau_add_pi_mul_div_two,
       jacobiThetaFourTau_add_pi_mul_div_two] <;> field_simp
 
 /-- Glaisher quotients under `ζ ↦ ζ + π/2`. -/
 private lemma jacobiGlaisher_add_pi_div_two {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLetter) (ζ : ℂ) :
     jacobiGlaisher p q (ζ + π / 2) τ =
-      jacobiLetterMultiplierK τ p / jacobiLetterMultiplierK τ q * jacobiGlaisher p.swapK q.swapK ζ τ := by
+      jacobiLetterMultiplierK τ p / jacobiLetterMultiplierK τ q *
+          jacobiGlaisher p.swapK q.swapK ζ τ := by
   unfold jacobiGlaisher
   by_cases hpq : p = q
   · subst hpq; simp [div_self (jacobiLetterMultiplierK_ne_zero hτ p)]
@@ -162,9 +173,11 @@ private lemma jacobiGlaisher_add_pi_div_two {τ : ℂ} (hτ : 0 < τ.im) (p q : 
     rw [jacobiLetterTheta_add_pi_div_two hτ, jacobiLetterTheta_add_pi_div_two hτ, mul_div_mul_comm]
 
 /-- Glaisher quotients under `ζ ↦ ζ + πτ/2`. -/
-private lemma jacobiGlaisher_add_pi_mul_div_two {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLetter) (ζ : ℂ) :
+private lemma jacobiGlaisher_add_pi_mul_div_two {τ : ℂ} (hτ : 0 < τ.im)
+    (p q : JacobiLetter) (ζ : ℂ) :
     jacobiGlaisher p q (ζ + π * τ / 2) τ =
-      jacobiLetterMultiplierKp τ p / jacobiLetterMultiplierKp τ q * jacobiGlaisher p.swapKp q.swapKp ζ τ := by
+      jacobiLetterMultiplierKp τ p / jacobiLetterMultiplierKp τ q *
+          jacobiGlaisher p.swapKp q.swapKp ζ τ := by
   unfold jacobiGlaisher
   by_cases hpq : p = q
   · subst hpq; simp [div_self (jacobiLetterMultiplierKp_ne_zero hτ p)]
@@ -200,14 +213,18 @@ private lemma jacobiZetaTau_add_I_mul_compEllIntKpTau {τ : ℂ} (hτ : 0 < τ.i
 /-- `pq(z + K) = (β_p/β_q) · (σp)(σq)(z)` in the lattice form. -/
 theorem jacobiPQTau_add_K {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLetter) (z : ℂ) :
     jacobiPQTau p q (z + compEllIntKTau τ) τ =
-      jacobiLetterMultiplierK τ p / jacobiLetterMultiplierK τ q * jacobiPQTau p.swapK q.swapK z τ := by
-  rw [jacobiPQTau, jacobiZetaTau_add_compEllIntKTau hτ, jacobiGlaisher_add_pi_div_two hτ, jacobiPQTau]
+      jacobiLetterMultiplierK τ p / jacobiLetterMultiplierK τ q *
+          jacobiPQTau p.swapK q.swapK z τ := by
+  rw [jacobiPQTau, jacobiZetaTau_add_compEllIntKTau hτ,
+      jacobiGlaisher_add_pi_div_two hτ, jacobiPQTau]
 
 /-- `pq(z + iK') = (β'_p/β'_q) · (σ'p)(σ'q)(z)` in the lattice form. -/
 theorem jacobiPQTau_add_iKp {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLetter) (z : ℂ) :
     jacobiPQTau p q (z + I * compEllIntKpTau τ) τ =
-      jacobiLetterMultiplierKp τ p / jacobiLetterMultiplierKp τ q * jacobiPQTau p.swapKp q.swapKp z τ := by
-  rw [jacobiPQTau, jacobiZetaTau_add_I_mul_compEllIntKpTau hτ, jacobiGlaisher_add_pi_mul_div_two hτ, jacobiPQTau]
+      jacobiLetterMultiplierKp τ p / jacobiLetterMultiplierKp τ q *
+          jacobiPQTau p.swapKp q.swapKp z τ := by
+  rw [jacobiPQTau, jacobiZetaTau_add_I_mul_compEllIntKpTau hτ,
+      jacobiGlaisher_add_pi_mul_div_two hτ, jacobiPQTau]
 
 /-- Composing the real and imaginary quarter-period shifts of a Glaisher quotient. -/
 theorem jacobiPQTau_add_K_add_iKp {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLetter) (z : ℂ) :
@@ -261,7 +278,8 @@ macro "jacobi_shift_simp " h:term : tactic => `(tactic|
     jacobiPQTau_add_K_add_iKp $h, jacobiPQTau_add_two_K $h,
     jacobiPQTau_add_two_iKp $h, jacobiPQTau_add_two_K_add_two_iKp $h,
     JacobiLetter.swapK, JacobiLetter.swapKp,
-    jacobiLetterMultiplierK, jacobiLetterMultiplierKp, jacobiModulusTau_eq_sq, jacobiComodulusTau_eq_sq])
+    jacobiLetterMultiplierK, jacobiLetterMultiplierKp, jacobiModulusTau_eq_sq,
+        jacobiComodulusTau_eq_sq])
 
 /-- Close a coefficient identity `a * X = b * X` produced by `jacobi_shift_simp`. -/
 macro "jacobi_coef_tac" : tactic => `(tactic|
@@ -785,7 +803,8 @@ def jacobiLetterCornerIm : JacobiLetter → ℝ
   | .n => 1 / 2
 
 /-- The theta shift of a letter: `θ_p(ζ)` is a unit times `θ₁(ζ - jacobiLetterThetaShift p τ)`. -/
-def jacobiLetterThetaShift (p : JacobiLetter) (τ : ℂ) : ℂ := (jacobiLetterCornerRe p + jacobiLetterCornerIm p * τ) * π
+def jacobiLetterThetaShift (p : JacobiLetter) (τ : ℂ) : ℂ :=
+    (jacobiLetterCornerRe p + jacobiLetterCornerIm p * τ) * π
 
 /-- The (nonvanishing, entire) amplitude with `θ_p(ζ) = amp · θ₁(ζ - shift)`. -/
 def jacobiLetterThetaAmplitude (p : JacobiLetter) (ζ τ : ℂ) : ℂ :=
@@ -795,18 +814,23 @@ def jacobiLetterThetaAmplitude (p : JacobiLetter) (ζ τ : ℂ) : ℂ :=
   | .d => I * jacobiThetaShiftFactor (ζ - π / 2 - π * τ / 2) τ / jacobiThetaThreeTau 0 τ
   | .n => I * jacobiThetaShiftFactor (ζ - π * τ / 2) τ / jacobiThetaFourTau 0 τ
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiLetterTheta p ζ τ = jacobiLetterThetaAmplitude
-p ζ τ * jacobiThetaOneTau (ζ - jacobiLetterThetaShift p τ) τ`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiLetterTheta p ζ τ = jacobiLetterThetaAmplitude p ζ τ * jacobiThetaOneTau (ζ -
+jacobiLetterThetaShift p τ) τ`. -/
 theorem jacobiLetterTheta_eq_amplitude_mul (p : JacobiLetter) (ζ τ : ℂ) :
-    jacobiLetterTheta p ζ τ = jacobiLetterThetaAmplitude p ζ τ * jacobiThetaOneTau (ζ - jacobiLetterThetaShift p τ) τ := by
+    jacobiLetterTheta p ζ τ = jacobiLetterThetaAmplitude p ζ τ *
+        jacobiThetaOneTau (ζ - jacobiLetterThetaShift p τ) τ := by
   cases p
-  · simp [jacobiLetterTheta, jacobiLetterThetaAmplitude, jacobiLetterThetaShift, jacobiLetterCornerRe, jacobiLetterCornerIm]
-  · simp only [jacobiLetterTheta, jacobiLetterThetaAmplitude, jacobiLetterThetaShift, jacobiLetterCornerRe, jacobiLetterCornerIm]
+  · simp [jacobiLetterTheta, jacobiLetterThetaAmplitude, jacobiLetterThetaShift,
+        jacobiLetterCornerRe, jacobiLetterCornerIm]
+  · simp only [jacobiLetterTheta, jacobiLetterThetaAmplitude, jacobiLetterThetaShift,
+        jacobiLetterCornerRe, jacobiLetterCornerIm]
     rw [jacobiThetaOneTau]
     push_cast
     rw [show ζ - (1 / 2 + 0 * τ) * π + π / 2 = ζ by ring]
     ring
-  · simp only [jacobiLetterTheta, jacobiLetterThetaAmplitude, jacobiLetterThetaShift, jacobiLetterCornerRe, jacobiLetterCornerIm]
+  · simp only [jacobiLetterTheta, jacobiLetterThetaAmplitude, jacobiLetterThetaShift,
+        jacobiLetterCornerRe, jacobiLetterCornerIm]
     have h1 := jacobiThetaThreeTau_add_pi_div_two (ζ - π / 2) τ
     have h2 := jacobiThetaFourTau_add_pi_mul_div_two (ζ - π / 2 - π * τ / 2) τ
     rw [show ζ - π / 2 + π / 2 = ζ by ring] at h1
@@ -814,7 +838,8 @@ theorem jacobiLetterTheta_eq_amplitude_mul (p : JacobiLetter) (ζ τ : ℂ) :
     push_cast
     rw [show ζ - (1 / 2 + 1 / 2 * τ) * π = ζ - π / 2 - π * τ / 2 by ring, h1, h2]
     ring
-  · simp only [jacobiLetterTheta, jacobiLetterThetaAmplitude, jacobiLetterThetaShift, jacobiLetterCornerRe, jacobiLetterCornerIm]
+  · simp only [jacobiLetterTheta, jacobiLetterThetaAmplitude, jacobiLetterThetaShift,
+        jacobiLetterCornerRe, jacobiLetterCornerIm]
     have h2 := jacobiThetaFourTau_add_pi_mul_div_two (ζ - π * τ / 2) τ
     rw [show ζ - π * τ / 2 + π * τ / 2 = ζ by ring] at h2
     push_cast
@@ -822,14 +847,15 @@ theorem jacobiLetterTheta_eq_amplitude_mul (p : JacobiLetter) (ζ τ : ℂ) :
     ring
 
 /-- Nonvanishing under the stated hypotheses: `jacobiLetterThetaAmplitude p ζ τ ≠ 0`. -/
-theorem jacobiLetterThetaAmplitude_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ : ℂ) : jacobiLetterThetaAmplitude p ζ τ ≠ 0 := by
+theorem jacobiLetterThetaAmplitude_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ : ℂ) :
+    jacobiLetterThetaAmplitude p ζ τ ≠ 0 := by
   have h2 := jacobiThetaTwoTau_zero_ne_zero hτ
   have h3 := jacobiThetaThreeTau_zero_ne_zero hτ
   have h4 := jacobiThetaFourTau_zero_ne_zero hτ
   cases p <;> simp [jacobiLetterThetaAmplitude, h2, h3, h4, jacobiThetaShiftFactor_ne_zero]
 
-/-- Differentiability of the indicated parameterized function: `Differentiable ℂ (fun ζ => jacobiLetterThetaAmplitude
-p ζ τ)`. -/
+/-- Differentiability of the indicated parameterized function:
+`Differentiable ℂ (fun ζ => jacobiLetterThetaAmplitude p ζ τ)`. -/
 private lemma differentiable_jacobiLetterThetaAmplitude (p : JacobiLetter) (τ : ℂ) :
     Differentiable ℂ (fun ζ => jacobiLetterThetaAmplitude p ζ τ) := by
   cases p <;> simp only [jacobiLetterThetaAmplitude, jacobiThetaShiftFactor] <;> fun_prop
@@ -876,9 +902,11 @@ private lemma jacobiLetterPointk_eq_corner (p : JacobiLetter) (k : ℂ) :
   cases p <;> simp [jacobiLetterPointk, jacobiLetterCornerRe, jacobiLetterCornerIm]
 
 /-- The corners of a letter are the zeros of its theta function. -/
-theorem mem_jacobiCongruentk_iff_jacobiThetaOneTau_eq_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p : JacobiLetter) (z : ℂ) :
+theorem mem_jacobiCongruentk_iff_jacobiThetaOneTau_eq_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (p : JacobiLetter) (z : ℂ) :
     z ∈ jacobiCongruentk (jacobiLetterPointk p k) k ↔
-      jacobiThetaOneTau (jacobiZetak z k - jacobiLetterThetaShift p (jacobiTauk k)) (jacobiTauk k) = 0 := by
+      jacobiThetaOneTau (jacobiZetak z k - jacobiLetterThetaShift p (jacobiTauk k))
+          (jacobiTauk k) = 0 := by
   have hτ := jacobiTauk_im_pos hk
   have hK := compEllIntKk_ne_zero hk
   have hpi : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
@@ -903,17 +931,21 @@ private lemma jacobiLetterTheta_comp_eq_amplitude_mul {k : ℂ} (p : JacobiLette
 
 /-- Differentiability of the indicated parameterized function: `Differentiable ℂ (fun w =>
 jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k))`. -/
-theorem differentiable_jacobiLetterTheta_comp_jacobiZetak {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p : JacobiLetter) :
+theorem differentiable_jacobiLetterTheta_comp_jacobiZetak {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (p : JacobiLetter) :
     Differentiable ℂ (fun w => jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k)) := by
   rw [jacobiLetterTheta_comp_eq_amplitude_mul]
   have h1 : Differentiable ℂ (fun y => jacobiThetaOneTau y (jacobiTauk k)) :=
     DLMF.Theta.differentiable_jacobiThetaTau 1 (jacobiTauk_im_pos hk)
-  have h2 : Differentiable ℂ fun w => jacobiZetak w k - jacobiLetterThetaShift p (jacobiTauk k) := by
+  have h2 : Differentiable ℂ fun w => jacobiZetak w k -
+      jacobiLetterThetaShift p (jacobiTauk k) := by
     unfold jacobiZetak; fun_prop
-  exact ((differentiable_jacobiLetterThetaAmplitude p _).comp (by unfold jacobiZetak; fun_prop)).mul (h1.comp h2)
+  exact ((differentiable_jacobiLetterThetaAmplitude p _).comp
+      (by unfold jacobiZetak; fun_prop)).mul (h1.comp h2)
 
 /-- The zeros of the letter theta functions are simple. -/
-private lemma meromorphicOrderAt_jacobiLetterTheta_comp_eq_one {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p : JacobiLetter) {z : ℂ}
+private lemma meromorphicOrderAt_jacobiLetterTheta_comp_eq_one {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) (p : JacobiLetter) {z : ℂ}
     (hz : jacobiLetterTheta p (jacobiZetak z k) (jacobiTauk k) = 0) :
     meromorphicOrderAt (fun w => jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k)) z = 1 := by
   have hτ := jacobiTauk_im_pos hk
@@ -930,17 +962,21 @@ private lemma meromorphicOrderAt_jacobiLetterTheta_comp_eq_one {k : ℂ} (hk : k
   have hg0 : jacobiThetaOneTau (g z) (jacobiTauk k) = 0 := by
     rw [jacobiLetterTheta_eq_amplitude_mul] at hz
     exact (mul_eq_zero.mp hz).resolve_left (jacobiLetterThetaAmplitude_ne_zero hτ _ _)
-  have hamp : AnalyticAt ℂ (fun w => jacobiLetterThetaAmplitude p (jacobiZetak w k) (jacobiTauk k)) z :=
-    Differentiable.analyticAt ((differentiable_jacobiLetterThetaAmplitude p _).comp (by unfold jacobiZetak; fun_prop :
+  have hamp : AnalyticAt ℂ
+      (fun w => jacobiLetterThetaAmplitude p (jacobiZetak w k) (jacobiTauk k)) z :=
+    Differentiable.analyticAt
+        ((differentiable_jacobiLetterThetaAmplitude p _).comp (by unfold jacobiZetak; fun_prop :
       Differentiable ℂ fun w => jacobiZetak w k)) z
-  rw [jacobiLetterTheta_comp_eq_amplitude_mul, meromorphicOrderAt_mul_of_ne_zero hamp (jacobiLetterThetaAmplitude_ne_zero hτ _ _)]
+  rw [jacobiLetterTheta_comp_eq_amplitude_mul,
+      meromorphicOrderAt_mul_of_ne_zero hamp (jacobiLetterThetaAmplitude_ne_zero hτ _ _)]
   have hga : AnalyticAt ℂ g z :=
     Differentiable.analyticAt (by rw [hg]; unfold jacobiZetak; fun_prop) z
   rw [show (fun w => jacobiZetak w k - jacobiLetterThetaShift p (jacobiTauk k)) = g from rfl,
     meromorphicOrderAt_comp_of_deriv_ne_zero hga ?_]
   · have ha : AnalyticAt ℂ (fun y => jacobiThetaOneTau y (jacobiTauk k)) (g z) :=
       h1.analyticAt (g z)
-    have := ha.analyticOrderAt_sub_eq_one_of_deriv_ne_zero (deriv_jacobiThetaOneTau_ne_zero_of_eq_zero hτ hg0)
+    have := ha.analyticOrderAt_sub_eq_one_of_deriv_ne_zero
+        (deriv_jacobiThetaOneTau_ne_zero_of_eq_zero hτ hg0)
     simp only [hg0, sub_zero] at this
     rw [ha.meromorphicOrderAt_eq, this]
     rfl
@@ -955,13 +991,15 @@ private lemma one_half_sub_intCast_ne_zero (j : ℤ) : (1 / 2 : ℝ) - j ≠ 0 :
   omega
 
 /-- Distinct letters have disjoint zero sets. -/
-private lemma jacobiLetterThetaShift_zeros_disjoint {τ : ℂ} (hτ : 0 < τ.im) {p q : JacobiLetter} (hpq : p ≠ q) (ζ : ℂ)
+private lemma jacobiLetterThetaShift_zeros_disjoint {τ : ℂ} (hτ : 0 < τ.im) {p q : JacobiLetter}
+    (hpq : p ≠ q) (ζ : ℂ)
     (hp : jacobiThetaOneTau (ζ - jacobiLetterThetaShift p τ) τ = 0)
     (hq : jacobiThetaOneTau (ζ - jacobiLetterThetaShift q τ) τ = 0) : False := by
   obtain ⟨m, n, hmn⟩ := ((DLMF.Theta.jacobiThetaTau_eq_zero_iff hτ _).1).mp hp
   obtain ⟨m', n', hmn'⟩ := ((DLMF.Theta.jacobiThetaTau_eq_zero_iff hτ _).1).mp hq
   have h := DLMF.Theta.eq_zero_of_lattice_point_eq_zero hτ
-    (a := jacobiLetterCornerRe q - jacobiLetterCornerRe p - (m - m')) (b := jacobiLetterCornerIm q - jacobiLetterCornerIm p - (n - n'))
+    (a := jacobiLetterCornerRe q - jacobiLetterCornerRe p - (m - m'))
+        (b := jacobiLetterCornerIm q - jacobiLetterCornerIm p - (n - n'))
     (by simp only [jacobiLetterThetaShift] at hmn hmn'; push_cast; linear_combination hmn' - hmn)
   obtain ⟨ha, hb⟩ := h
   have e1 := one_half_sub_intCast_ne_zero (m - m')
@@ -990,11 +1028,13 @@ theorem jacobiPQk_zeros_poles {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : 
   have hτ := jacobiTauk_im_pos hk
   set F : JacobiLetter → ℂ → ℂ := fun r w => jacobiLetterTheta r (jacobiZetak w k) (jacobiTauk k)
     with hF
-  have hFd : ∀ r, Differentiable ℂ (F r) := fun r => differentiable_jacobiLetterTheta_comp_jacobiZetak hk r
+  have hFd : ∀ r, Differentiable ℂ (F r) := fun r =>
+      differentiable_jacobiLetterTheta_comp_jacobiZetak hk r
   have hzero : ∀ r, F r z = 0 ↔ z ∈ jacobiCongruentk (jacobiLetterPointk r k) k := by
     intro r
     rw [mem_jacobiCongruentk_iff_jacobiThetaOneTau_eq_zero hk, hF]
-    simp only [jacobiLetterTheta_eq_amplitude_mul, mul_eq_zero, jacobiLetterThetaAmplitude_ne_zero hτ, false_or]
+    simp only [jacobiLetterTheta_eq_amplitude_mul, mul_eq_zero,
+        jacobiLetterThetaAmplitude_ne_zero hτ, false_or]
   have hord : ∀ r, meromorphicOrderAt (F r) z = if F r z = 0 then 1 else 0 := by
     intro r
     split_ifs with h

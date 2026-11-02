@@ -117,7 +117,9 @@ theorem tendsto_whittakerM_div_Gamma (κ : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ 
   have hA : p - κ + 1 / 2 = -(n : ℂ) / 2 - κ := by dsimp [p]; ring
   have htB : Tendsto (fun μ : ℂ => 1 + 2 * μ) (𝓝[≠] p) (𝓝[≠] (-(n : ℂ))) := by
     rw [← hB]
-    exact (by fun_prop : Continuous (fun μ : ℂ => 1 + 2 * μ)).continuousAt.continuousWithinAt.tendsto_nhdsWithin (fun μ hμ h => hμ (by
+    exact (by fun_prop : Continuous
+                (fun μ : ℂ => 1 + 2 * μ)).continuousAt.continuousWithinAt.tendsto_nhdsWithin
+        (fun μ hμ h => hμ (by
         change μ = p
         change 1 + 2 * μ = 1 + 2 * p at h
         linear_combination h / 2))
@@ -327,7 +329,8 @@ theorem wronskian_whittakerM {κ μ z : ℂ} (hz : z ∈ slitPlane)
   have hu := ((analyticOnNhd_kummerM (a := μ - κ + 1 / 2) hμ) z (Set.mem_univ _)).differentiableAt
   have hv := ((analyticOnNhd_kummerM (a := μ - κ + 1 / 2 - b + 1) hB) z
     (Set.mem_univ _)).differentiableAt
-  have hy : DifferentiableAt ℂ (fun w => w ^ (1 - b) * kummerM (μ - κ + 1 / 2 - b + 1) (2 - b) w) z :=
+  have hy : DifferentiableAt ℂ
+      (fun w => w ^ (1 - b) * kummerM (μ - κ + 1 / 2 - b + 1) (2 - b) w) z :=
     ((hasDerivAt_id z).cpow_const (c := 1 - b) hz).differentiableAt.mul hv
   have hW : ODE.wronskian (whittakerM κ μ) (whittakerM κ (-μ)) z =
       ODE.wronskian (whittakerM κ μ) (fun w => (exp (-w / 2) * w ^ (μ + 1 / 2)) *

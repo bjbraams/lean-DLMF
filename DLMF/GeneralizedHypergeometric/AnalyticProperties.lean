@@ -6,7 +6,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
+public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence
+public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import DLMF.Hypergeometric.ArgumentContinuation
+public import DLMF.Hypergeometric.Solutions
 public import Mathlib.Algebra.Order.Ring.Star
 public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
@@ -62,7 +67,8 @@ theorem genHG_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) :
   exact analyticOnNhd_const.mul (Complex.analyticOnNhd_regularizedHGFun_of_card_le h)
 
 /-- The entire case has an absolutely convergent series for every finite z. -/
-theorem genHG_hasSum_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) (hb : GenDenRegular b) (z : ℂ) :
+theorem genHG_hasSum_entire {a b : Multiset ℂ} (h : a.card ≤ b.card)
+    (hb : GenDenRegular b) (z : ℂ) :
     HasSum (fun n : ℕ => genCoeff a b n * z ^ n) (genHG a b z) := by
   have hne : a.card ≠ b.card + 1 := by omega
   have hs : HasSum (fun n => Complex.regularizedHGFunCoeff a b n * z ^ n)
@@ -116,7 +122,8 @@ private lemma tendsto_poch_mul_cpow_div_factorial {s : ℂ} (hs : ∀ k : ℕ, s
   rw [add_comm (n : ℂ) s, div_self hsn]
 
 /-- Gauss asymptotics of a multiset rising-factorial product. -/
-private lemma tendsto_genPoch_mul_cpow_div_factorial_pow (a : Multiset ℂ) (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) :
+private lemma tendsto_genPoch_mul_cpow_div_factorial_pow (a : Multiset ℂ)
+    (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) :
     Tendsto (fun n : ℕ => genPoch a n * (n : ℂ) ^ (a.map (fun x => 1 - x)).sum /
       (n.factorial : ℂ) ^ a.card) atTop (𝓝 (a.map fun x => (Gamma x)⁻¹).prod) := by
   induction a using Multiset.induction_on with
@@ -152,7 +159,8 @@ private lemma tendsto_genCoeff_mul_cpow {a b : Multiset ℂ} (h : a.card = b.car
     (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) (hb : GenDenRegular b) :
     Tendsto (fun n : ℕ => genCoeff a b n * (n : ℂ) ^ (genExcess a b + 1)) atTop
       (𝓝 ((a.map fun x => (Gamma x)⁻¹).prod / (b.map fun x => (Gamma x)⁻¹).prod)) := by
-  apply ((tendsto_genPoch_mul_cpow_div_factorial_pow a ha).div (tendsto_genPoch_mul_cpow_div_factorial_pow b hb)
+  apply ((tendsto_genPoch_mul_cpow_div_factorial_pow a ha).div
+      (tendsto_genPoch_mul_cpow_div_factorial_pow b hb)
     (prod_map_inv_Gamma_ne_zero hb)).congr'
   filter_upwards [eventually_ne_atTop 0] with n hn
   have hn0 : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hn
@@ -222,7 +230,8 @@ theorem genCoeff_tendsto_zero {a b : Multiset ℂ} (h : a.card = b.card + 1) (hb
 private lemma summable_norm_genCoeff_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hb : GenDenRegular b) (ha : ¬GenTerminates a) :
     Summable (fun n : ℕ => ‖genCoeff a b n‖) ↔ 0 < (genExcess a b).re := by
-  obtain ⟨L, hL, hlim⟩ := exists_tendsto_norm_genCoeff_mul_rpow h (ne_neg_nat_of_not_genTerminates ha) hb
+  obtain ⟨L, hL, hlim⟩ :=
+      exists_tendsto_norm_genCoeff_mul_rpow h (ne_neg_nat_of_not_genTerminates ha) hb
   set e := (genExcess a b).re + 1
   have heq : Asymptotics.IsEquivalent atTop (fun n : ℕ => ‖genCoeff a b n‖)
       (fun n : ℕ => L * (n : ℝ) ^ (-e)) := by
@@ -259,8 +268,8 @@ private lemma genRegularizedHG_one_eq_regularizedHGFun (a b : Multiset ℂ) :
 
 /-- The principal branch is analytic on the plane cut from one to positive infinity. -/
 theorem genHG_principal_analytic {a b : Multiset ℂ} (h : a.card = b.card + 1) :
-    AnalyticOnNhd ℂ (genHG a b) cutPlane := by
-  sorry
+    AnalyticOnNhd ℂ (genHG a b) cutPlane :=
+  analyticOnNhd_const.mul (analyticOnNhd_genRegularizedHG h)
 
 /-- Full criterion for absolute convergence on the unit circle in the nonterminating case. -/
 theorem genHG_unit_absolute_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
@@ -270,7 +279,8 @@ theorem genHG_unit_absolute_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
   simp only [norm_mul, norm_pow, hz, one_pow, mul_one]
   exact summable_norm_genCoeff_iff h hb ha
 
-/-- Every nonunit point of the unit circle converges in natural order when the excess exceeds minus one. -/
+/-- Every nonunit point of the unit circle converges in natural order when the excess exceeds minus
+one. -/
 theorem genHG_unit_conditional {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hb : GenDenRegular b) {z : ℂ} (hz : ‖z‖ = 1) (hne : z ≠ 1)
     (hγ : -1 < (genExcess a b).re) : GenSeriesConvergesTo a b z (genHG a b z) := by
@@ -307,12 +317,14 @@ theorem genHG_one_hasSum {a b : Multiset ℂ} (h : a.card = b.card + 1)
     · exact Summable.of_norm ((summable_norm_genCoeff_iff h hb ha).mpr hγ)
   exact genHG_one_hasSum_of_summable hb hs
 
-/-- At real excess at most minus one, no point of the unit circle converges in the nonterminating case. -/
+/-- At real excess at most minus one, no point of the unit circle converges in the nonterminating
+case. -/
 theorem genHG_unit_diverges {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hb : GenDenRegular b) (ha : ¬GenTerminates a) {z : ℂ} (hz : ‖z‖ = 1)
     (hγ : (genExcess a b).re ≤ -1) : ¬∃ v : ℂ, GenSeriesConvergesTo a b z v := by
   rintro ⟨v, hv⟩
-  obtain ⟨L, hL, hlim⟩ := exists_tendsto_norm_genCoeff_mul_rpow h (ne_neg_nat_of_not_genTerminates ha) hb
+  obtain ⟨L, hL, hlim⟩ :=
+      exists_tendsto_norm_genCoeff_mul_rpow h (ne_neg_nat_of_not_genTerminates ha) hb
   have ht : Tendsto (fun n : ℕ => ‖genCoeff a b n‖) atTop (𝓝 0) := by
     simpa only [norm_mul, norm_pow, hz, one_pow, mul_one, norm_zero] using
       (tendsto_genCoeff_mul_pow_zero_of_converges hv).norm
@@ -401,7 +413,8 @@ private lemma not_tendsto_natCast_cpow_neg {γ : ℂ} (hγ : γ ≠ 0) {L : ℂ}
       refine (ht.const_mul ((m : ℂ) ^ (-γ))).congr fun N => ?_
       push_cast; rw [natCast_mul_natCast_cpow]
     exact (mul_eq_right₀ hL).mp (tendsto_nhds_unique h2 hsub)
-  have hlog := (Complex.continuous_ofReal.tendsto 0 |>.comp Real.tendsto_log_nat_add_one_sub_log).const_mul γ
+  have hlog := (Complex.continuous_ofReal.tendsto 0 |>.comp
+      Real.tendsto_log_nat_add_one_sub_log).const_mul γ
   rw [Complex.ofReal_zero, mul_zero] at hlog
   have hev := (hlog.eventually (Metric.ball_mem_nhds 0 (by positivity : (0:ℝ) < 2 * π)))
   obtain ⟨M, hM⟩ := (hev.and (eventually_ge_atTop 1)).exists
@@ -495,7 +508,8 @@ private lemma multiset_esymm_one (s : Multiset ℂ) : s.esymm 1 = s.sum := by
 
 /-- Two monic linear-factor products with equal degree and equal root sums differ
 by a polynomial of degree at most `card - 2`. -/
-private lemma exists_norm_prod_add_sub_prod_add_le (u v : Multiset ℂ) (hc : u.card = v.card) (hs : u.sum = v.sum) :
+private lemma exists_norm_prod_add_sub_prod_add_le (u v : Multiset ℂ) (hc : u.card = v.card)
+    (hs : u.sum = v.sum) :
     ∃ K : ℝ, ∀ x : ℝ, 1 ≤ x →
       ‖(u.map (· + (x : ℂ))).prod - (v.map (· + (x : ℂ))).prod‖ ≤ K * x ^ (u.card - 2) := by
   open Polynomial in
@@ -534,7 +548,8 @@ private lemma exists_norm_prod_add_sub_prod_add_le (u v : Multiset ℂ) (hc : u.
   exact Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
 
 /-- Lower bound `(x/2)^card` for `∏ (y + x)` when `2‖y‖ ≤ x` for all roots `y`. -/
-private lemma pow_le_norm_prod_map_add (v : Multiset ℂ) {x : ℝ} (hx0 : 0 ≤ x) (hx : ∀ y ∈ v, 2 * ‖y‖ ≤ x) :
+private lemma pow_le_norm_prod_map_add (v : Multiset ℂ) {x : ℝ} (hx0 : 0 ≤ x)
+    (hx : ∀ y ∈ v, 2 * ‖y‖ ≤ x) :
     (x / 2) ^ v.card ≤ ‖(v.map (· + (x : ℂ))).prod‖ := by
   induction v using Multiset.induction_on with
   | empty => simp
@@ -572,7 +587,8 @@ lemma genCoeff_succ_mul {a b : Multiset ℂ} (hb : GenDenRegular b) (n : ℕ) :
   field_simp
 
 /-- Summable tail bound from a summable-difference bound `‖d (n+1) - d n‖ ≤ K/n²`. -/
-private lemma norm_sub_lim_le_of_norm_succ_sub_le {d : ℕ → ℂ} {D : ℂ} {K : ℝ} {n₀ : ℕ} (hn₀ : 2 ≤ n₀)
+private lemma norm_sub_lim_le_of_norm_succ_sub_le {d : ℕ → ℂ} {D : ℂ} {K : ℝ}
+    {n₀ : ℕ} (hn₀ : 2 ≤ n₀)
     (hd : Tendsto d atTop (𝓝 D)) (hK : ∀ n, n₀ ≤ n → ‖d (n + 1) - d n‖ ≤ K / (n : ℝ) ^ 2) :
     ∀ n, n₀ ≤ n → ‖d n - D‖ ≤ K / ((n : ℝ) - 1) := by
   intro n hn
@@ -728,7 +744,8 @@ private lemma gen_one_compare {c m : ℕ → ℂ} {v D0 C2 γ : ℂ} {K2 : ℝ} 
   simp only [hx, ← Finset.mul_sum]
   field_simp
 
-/-- At one, natural-order convergence requires strictly positive real excess unless the series terminates. -/
+/-- At one, natural-order convergence requires strictly positive real excess unless the series
+terminates. -/
 theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hb : GenDenRegular b) (ha : ¬GenTerminates a) :
     (∃ v : ℂ, GenSeriesConvergesTo a b 1 v) ↔ 0 < (genExcess a b).re := by
@@ -859,7 +876,8 @@ theorem genHG_diverges_nonzero {a b : Multiset ℂ} (h : b.card + 1 < a.card)
   have : z = 0 := by simpa using hr
   exact hz this
 
-/-- General branches continue along every path avoiding the possible finite singularities zero and one. -/
+/-- General branches continue along every path avoiding the possible finite singularities zero and
+one. -/
 theorem genHG_continuation_along {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (γ : ℝ → ℂ) (hc : ContinuousOn γ (Icc 0 1))
     (hs : ∀ t ∈ Icc (0 : ℝ) 1, γ t ≠ 0 ∧ γ t ≠ 1) (h0 : ‖γ 0‖ < 1) :
@@ -867,9 +885,11 @@ theorem genHG_continuation_along {a b : Multiset ℂ} (h : a.card = b.card + 1)
       F 0 =ᶠ[𝓝 (γ 0)] Complex.regularizedHGFun a b := by
   sorry
 
-/-- The regularized principal branch is jointly entire in all parameters at every nonsingular fixed argument. -/
+/-- The regularized principal branch is jointly entire in all parameters at every nonsingular fixed
+argument. -/
 @[dlmf 16.2.E5]
-theorem genRegularizedHG_parameter_entire {p q : ℕ} (h : p ≤ q + 1) {z : ℂ} (hz : p = q + 1 → z ≠ 1) :
+theorem genRegularizedHG_parameter_entire {p q : ℕ} (h : p ≤ q + 1) {z : ℂ}
+    (hz : p = q + 1 → z ≠ 1) :
     Differentiable ℂ (fun P : (Fin p → ℂ) × (Fin q → ℂ) =>
       genRegularizedHG (genParams P.1) (genParams P.2) z) := by
   sorry
@@ -884,7 +904,8 @@ theorem genContinued_parameter_entire {q : ℕ} (γ : ℝ → ℂ) (hc : Continu
     Differentiable ℂ (fun P => F P 1 (γ 1)) := by
   sorry
 
-/-- Equal-order generalized hypergeometric functions have finitely many complex zeros exactly for a matched nonnegative-integer parameter difference. -/
+/-- Equal-order generalized hypergeometric functions have finitely many complex zeros exactly for a
+matched nonnegative-integer parameter difference. -/
 theorem genHG_finite_zeros_iff {p : ℕ} (a b : Fin p → ℂ)
     (hb : GenDenRegular (genParams b)) (ha : ¬GenTerminates (genParams a)) :
     {z : ℂ | genHG (genParams a) (genParams b) z = 0}.Finite ↔

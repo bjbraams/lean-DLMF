@@ -49,7 +49,8 @@ theorem coulombf_recurrence (ε : ℝ) {ℓ : ℕ} (hℓ : 1 ≤ ℓ) (r : ℝ) 
     Complex.ofReal_im, Complex.natCast_re, Complex.natCast_im, Complex.add_im, Complex.sub_im,
     Complex.mul_im, Complex.one_re, Complex.one_im, Complex.re_ofNat, Complex.im_ofNat,
     Complex.zero_re, pow_two] at h
-  rw [Nat.add_sub_cancel, coulombf_eq_re_coulombfComplex, coulombf_eq_re_coulombfComplex, coulombf_eq_re_coulombfComplex]
+  rw [Nat.add_sub_cancel, coulombf_eq_re_coulombfComplex, coulombf_eq_re_coulombfComplex,
+      coulombf_eq_re_coulombfComplex]
   push_cast
   linear_combination h
 

@@ -97,7 +97,8 @@ theorem eqOn_slitOne_of_eq_on_ball {F G : ℂ → ℂ} (hF : AnalyticOnNhd ℂ F
   exact h z (by simpa using hz)
 
 /-- `1 - z t ≠ 0` for `z` in the cut plane and `0 ≤ t ≤ 1`. -/
-private lemma one_sub_mul_ofReal_ne_zero {z : ℂ} (hz : z ∈ slitOne) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) 1) :
+private lemma one_sub_mul_ofReal_ne_zero {z : ℂ} (hz : z ∈ slitOne) {t : ℝ}
+    (ht : t ∈ Icc (0 : ℝ) 1) :
     1 - z * t ≠ 0 := by
   intro h
   have hre := congrArg Complex.re h
@@ -270,7 +271,8 @@ theorem hasSum_lerch_lerchIntegral {s a z : ℂ} (hs : 0 < s.re) (ha : 0 < a.re)
 
 /-- Absolute convergence of a power series inside its disk of convergence, from convergence on
 the open unit disk. -/
-private lemma summable_norm_mul_pow_of_summable_mul_pow {c : ℕ → ℂ} (hc : ∀ z : ℂ, ‖z‖ < 1 → Summable fun n => c n * z ^ n)
+private lemma summable_norm_mul_pow_of_summable_mul_pow {c : ℕ → ℂ}
+    (hc : ∀ z : ℂ, ‖z‖ < 1 → Summable fun n => c n * z ^ n)
     {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) : Summable fun n => ‖c n‖ * r ^ n := by
   set r' := (1 + r) / 2 with hr'
   have hr'0 : 0 < r' := by rw [hr']; linarith
@@ -418,7 +420,8 @@ Lean's conventions at `a + n = 0`). -/
 theorem summable_one_div_add_natCast_cpow {s : ℂ} (hs : 1 < s.re) (a : ℂ) :
     Summable fun n : ℕ => 1 / (a + n) ^ s := by
   obtain ⟨m, hm⟩ := exists_nat_gt (-a.re)
-  have h := (hasSum_lerch_of_hasSum_add_natCast m (hasSum_lerch_lerchIntegral (z := 1) (a := a + m) (by linarith)
+  have h := (hasSum_lerch_of_hasSum_add_natCast m
+      (hasSum_lerch_lerchIntegral (z := 1) (a := a + m) (by linarith)
     (by simp; linarith) (Or.inr ⟨by simp, hs⟩))).summable
   simpa using h
 

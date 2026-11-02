@@ -17,18 +17,18 @@ at the positive integers, the recurrence and the reflection formula.
 
 ## Main definitions
 
-* `Real.digamma`: the real digamma function `ψ(x) = Γ'(x)/Γ(x)`.
+* `Gamma.Real.digamma`: the real digamma function `ψ(x) = Γ'(x)/Γ(x)`.
 
 ## Main results
 
-* `Real.digamma_eq_deriv_log`, `Real.hasDerivAt_log_Gamma`: `log Γ` has derivative `ψ` on
-  `(0, ∞)`.
-* `Real.digamma_eq_re_digamma`: agreement with the real part of Mathlib's `Complex.digamma`.
-* `Real.digamma_one`, `Real.digamma_nat_add_one`: `ψ(1) = -γ` and `ψ(n+1) = -γ + H_n`
+* `Gamma.Real.digamma_eq_deriv_log`, `Gamma.Real.hasDerivAt_log_Gamma`: `log Γ` has derivative `ψ`
+  on `(0, ∞)`.
+* `Gamma.Real.digamma_eq_re_digamma`: agreement with the real part of Mathlib's `Complex.digamma`.
+* `Gamma.Real.digamma_one`, `Gamma.Real.digamma_nat_add_one`: `ψ(1) = -γ` and `ψ(n+1) = -γ + H_n`
   (DLMF 5.4.12, 5.4.14).
-* `Real.digamma_add_one`, `Real.digamma_add_nat`: the recurrence `ψ(x+1) = ψ(x) + 1/x`
+* `Gamma.Real.digamma_add_one`, `Gamma.Real.digamma_add_nat`: the recurrence `ψ(x+1) = ψ(x) + 1/x`
   (DLMF 5.5.2).
-* `Real.digamma_one_sub`: the reflection formula `ψ(1-x) - ψ(x) = π cot(π x)` on `(0, 1)`.
+* `Gamma.Real.digamma_one_sub`: the reflection formula `ψ(1-x) - ψ(x) = π cot(π x)` on `(0, 1)`.
 
 ## Implementation notes
 
@@ -45,7 +45,9 @@ open scoped Topology Real
 
 noncomputable section
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 local notation "γ" => eulerMascheroniConstant
 
@@ -138,4 +140,4 @@ public theorem digamma_one_sub {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1) :
     ← Complex.ofReal_mul, Complex.ofReal_re]
   ring
 
-end Real
+end DLMF.Gamma.Real

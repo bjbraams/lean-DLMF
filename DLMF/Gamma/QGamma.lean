@@ -222,7 +222,8 @@ theorem logPartialSum_succ (q x : ℝ) (N : ℕ) :
   ring
 
 /-- `D(n + 1) = K(n) + g(n + 1)`. -/
-theorem logPartialSum_base (q x : ℝ) (n : ℕ) : logPartialSum q x (n + 1) = logPartialSumShift q x n + g q ((n : ℝ) + 1) := by
+theorem logPartialSum_base (q x : ℝ) (n : ℕ) : logPartialSum q x (n + 1) =
+    logPartialSumShift q x n + g q ((n : ℝ) + 1) := by
   unfold logPartialSum logPartialSumShift
   rw [sum_range_succ (fun k : ℕ => g q ((k : ℝ) + 1))]
   ring
@@ -230,7 +231,8 @@ theorem logPartialSum_base (q x : ℝ) (n : ℕ) : logPartialSum q x (n + 1) = l
 /-- Lower bound for the partial log-sums `D(N)`, `N ≥ n + 1`, from concavity of `g`. -/
 theorem logPartialSum_lower (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 ≤ x) {n : ℕ} (hn : 1 ≤ n) :
     ∀ N, n + 1 ≤ N →
-      logPartialSumShift q x n + g q N + x * g q n - x * g q ((N : ℝ) - 1) ≤ logPartialSum q x N := by
+      logPartialSumShift q x n + g q N + x * g q n - x * g q ((N : ℝ) - 1) ≤
+          logPartialSum q x N := by
   intro N hN
   induction N, hN using Nat.le_induction with
   | base =>
@@ -304,7 +306,8 @@ theorem r_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) : 0 < r q x N 
 theorem r_bounds (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) {n : ℕ}
     (hn : 1 ≤ n) {N : ℕ} (hN : n + 1 ≤ N) :
     Real.exp (logPartialSumShift q x n + x * g q n + (1 - x) * Real.log (1 - q) + g q N) ≤ r q x N ∧
-      r q x N ≤ Real.exp (logPartialSumShift q x n + x * g q ((n : ℝ) + 1) + (1 - x) * Real.log (1 - q)) := by
+      r q x N ≤ Real.exp (logPartialSumShift q x n + x * g q ((n : ℝ) + 1) + (1 - x) *
+          Real.log (1 - q)) := by
   rw [← Real.exp_log (r_pos hq0 hq1 hx0 N), log_r hq0 hq1 hx0]
   have hNm : (0 : ℝ) < (N : ℝ) - 1 := by
     have : 2 ≤ N := by omega
@@ -373,7 +376,8 @@ def logQNumSum (q x : ℝ) (n : ℕ) (t : ℝ) : ℝ :=
 
 /-- Rewriting the bound exponent through `q`-numbers: `K(n) + x g(t) + (1 - x) log(1 - q) = L(n,
 t)`. -/
-theorem logPartialSumShift_add_eq (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht : 0 < t) :
+theorem logPartialSumShift_add_eq (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (n : ℕ)
+    {t : ℝ} (ht : 0 < t) :
     logPartialSumShift q x n + x * g q t + (1 - x) * Real.log (1 - q) = logQNumSum q x n t := by
   have e1 : ∑ k ∈ range n, g q ((k : ℝ) + 1) =
       ∑ k ∈ range n, (Real.log (qNum q ((k : ℝ) + 1)) + Real.log (1 - q)) :=
@@ -446,7 +450,8 @@ theorem key (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) :
   have him0 : (qGamma q x).im = 0 := tendsto_nhds_unique him tendsto_const_nhds
   refine ⟨Complex.ext (by simp) (by simp [him0]), fun n hn => ?_⟩
   have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
-  rw [← logPartialSumShift_add_eq hq0 hq1 hx0 n hn0, ← logPartialSumShift_add_eq hq0 hq1 hx0 n (by linarith)]
+  rw [← logPartialSumShift_add_eq hq0 hq1 hx0 n hn0,
+      ← logPartialSumShift_add_eq hq0 hq1 hx0 n (by linarith)]
   constructor
   · have hlo : Tendsto (fun N : ℕ => Real.exp (logPartialSumShift q x n + x * g q n +
         (1 - x) * Real.log (1 - q) + g q N)) atTop
@@ -693,14 +698,17 @@ theorem strictConcaveOn_logFactorDiff (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) 
   have hba : -Real.log p < -Real.log q := neg_lt_neg (Real.log_lt_log hq0 hqp)
   have e : logFactorDiff q p = fun t => ell (-Real.log p) t - ell (-Real.log q) t := by
     funext t
-    simp only [logFactorDiff, g, ell, Real.rpow_def_of_pos hp0, Real.rpow_def_of_pos hq0, neg_mul, neg_neg]
+    simp only [logFactorDiff, g, ell, Real.rpow_def_of_pos hp0, Real.rpow_def_of_pos hq0,
+        neg_mul, neg_neg]
   rw [e]
   exact strictConcaveOn_ell_sub hb hba
 
 /-- Strict-concavity step for `0 < x < 1`: `G(x + s) + (1 - x) G(s + 2) < (2 - x) G(s + 1)`. -/
-theorem logFactorDiff_step_left (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x < 1)
+theorem logFactorDiff_step_left (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1)
+    (hx0 : 0 < x) (hx1 : x < 1)
     {s : ℝ} (hs : 0 ≤ s) :
-    logFactorDiff q p (x + s) + (1 - x) * logFactorDiff q p (s + 2) < (2 - x) * logFactorDiff q p (s + 1) := by
+    logFactorDiff q p (x + s) + (1 - x) * logFactorDiff q p (s + 2) < (2 - x) *
+        logFactorDiff q p (s + 1) := by
   have h2x : 0 < 2 - x := by linarith
   have h2x' : 2 - x ≠ 0 := h2x.ne'
   have h := (strictConcaveOn_logFactorDiff hq0 hqp hp1).2 (mem_Ioi.2 (by linarith : 0 < x + s))
@@ -713,16 +721,20 @@ theorem logFactorDiff_step_left (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 :
     ring
   rw [hpt] at h
   have h' := mul_lt_mul_of_pos_left h h2x
-  have he : (2 - x) * (1 / (2 - x) * logFactorDiff q p (x + s) + (1 - x) / (2 - x) * logFactorDiff q p (s + 2)) =
+  have he : (2 - x) * (1 / (2 - x) * logFactorDiff q p (x + s) + (1 - x) / (2 - x) *
+      logFactorDiff q p (s + 2)) =
       logFactorDiff q p (x + s) + (1 - x) * logFactorDiff q p (s + 2) := by
     field_simp
   linarith
 
 /-- Strict-concavity step for `1 < x < 2`: `(2 - x) G(s + 1) + (x - 1) G(s + 2) < G(x + s)`. -/
-theorem logFactorDiff_step_right (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x < 2)
+theorem logFactorDiff_step_right (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1)
+    (hx : 1 < x) (hx2 : x < 2)
     {s : ℝ} (hs : 0 ≤ s) :
-    (2 - x) * logFactorDiff q p (s + 1) + (x - 1) * logFactorDiff q p (s + 2) < logFactorDiff q p (x + s) := by
-  have h := (strictConcaveOn_logFactorDiff hq0 hqp hp1).2 (mem_Ioi.2 (by linarith : (0 : ℝ) < s + 1))
+    (2 - x) * logFactorDiff q p (s + 1) + (x - 1) * logFactorDiff q p (s + 2) <
+        logFactorDiff q p (x + s) := by
+  have h := (strictConcaveOn_logFactorDiff hq0 hqp hp1).2
+      (mem_Ioi.2 (by linarith : (0 : ℝ) < s + 1))
     (mem_Ioi.2 (by linarith : (0 : ℝ) < s + 2)) (by intro h; linarith)
     (by linarith : (0 : ℝ) < 2 - x) (by linarith : (0 : ℝ) < x - 1) (by ring)
   simp only [smul_eq_mul] at h
@@ -731,17 +743,20 @@ theorem logFactorDiff_step_right (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx :
 
 /-- The difference of the logarithms of the truncations `r p x N` and `r q x N`. -/
 def logTruncDiff (q p x : ℝ) (N : ℕ) : ℝ :=
-  ∑ k ∈ range N, (logFactorDiff q p ((k : ℝ) + 1) - logFactorDiff q p (x + k)) + (1 - x) * logFactorDiff q p 1
+  ∑ k ∈ range N, (logFactorDiff q p ((k : ℝ) + 1) - logFactorDiff q p (x + k)) + (1 - x) *
+      logFactorDiff q p 1
 
 /-- Recurrence `T(N + 1) = T(N) + G(N + 1) - G(x + N)`. -/
 theorem logTruncDiff_succ (q p x : ℝ) (N : ℕ) :
-    logTruncDiff q p x (N + 1) = logTruncDiff q p x N + logFactorDiff q p ((N : ℝ) + 1) - logFactorDiff q p (x + N) := by
+    logTruncDiff q p x (N + 1) = logTruncDiff q p x N + logFactorDiff q p ((N : ℝ) + 1) -
+        logFactorDiff q p (x + N) := by
   unfold logTruncDiff
   rw [sum_range_succ]
   ring
 
 /-- `T(1) = (2 - x) G(1) - G(x)`. -/
-theorem logTruncDiff_one (q p x : ℝ) : logTruncDiff q p x 1 = (2 - x) * logFactorDiff q p 1 - logFactorDiff q p x := by
+theorem logTruncDiff_one (q p x : ℝ) : logTruncDiff q p x 1 = (2 - x) * logFactorDiff q p 1 -
+    logFactorDiff q p x := by
   simp [logTruncDiff]
   ring
 
@@ -793,13 +808,15 @@ theorem qGamma_re_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) 
     intro N
     rw [← Real.exp_log (r_pos hq0 hq1 hx0 N), log_r hq0 hq1 hx0]
     refine Real.exp_le_exp.2 ?_
-    linarith [logPartialSum_ge hq0 hq1 hx0 hx2 N, g_nonpos hq0 hq1 (by positivity : (0 : ℝ) < N + 1)]
+    linarith [logPartialSum_ge hq0 hq1 hx0 hx2 N,
+        g_nonpos hq0 hq1 (by positivity : (0 : ℝ) < N + 1)]
   exact (Real.exp_pos _).trans_le (ge_of_tendsto' (tendsto_r_re hq0 hq1 hx0) hlow)
 
 /-- For `0 < x < 1`, `T(N) - (1 - x) G(N + 1)` is bounded below by its value at `N = 1`. -/
 theorem logTruncDiff_lower (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x < 1) :
     ∀ N, 1 ≤ N →
-      logTruncDiff q p x 1 - (1 - x) * logFactorDiff q p 2 ≤ logTruncDiff q p x N - (1 - x) * logFactorDiff q p ((N : ℝ) + 1) := by
+      logTruncDiff q p x 1 - (1 - x) * logFactorDiff q p 2 ≤ logTruncDiff q p x N - (1 - x) *
+          logFactorDiff q p ((N : ℝ) + 1) := by
   intro N hN
   induction N, hN using Nat.le_induction with
   | base => norm_num
@@ -813,7 +830,8 @@ theorem logTruncDiff_lower (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < 
 /-- For `1 < x < 2`, `T(N) + (x - 1) G(N + 1)` is bounded above by its value at `N = 1`. -/
 theorem logTruncDiff_upper (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x < 2) :
     ∀ N, 1 ≤ N →
-      logTruncDiff q p x N + (x - 1) * logFactorDiff q p ((N : ℝ) + 1) ≤ logTruncDiff q p x 1 + (x - 1) * logFactorDiff q p 2 := by
+      logTruncDiff q p x N + (x - 1) * logFactorDiff q p ((N : ℝ) + 1) ≤ logTruncDiff q p x 1 +
+          (x - 1) * logFactorDiff q p 2 := by
   intro N hN
   induction N, hN using Nat.le_induction with
   | base => norm_num

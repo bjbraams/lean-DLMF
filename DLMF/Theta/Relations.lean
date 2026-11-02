@@ -76,15 +76,18 @@ def thetaModulusK (τ : ℂ) : ℂ := jacobiThetaTwoNullTau τ ^ 2 / jacobiTheta
 /-- The complementary modulus `k' = θ₄²(0|τ)/θ₃²(0|τ)` (DLMF 20.9.1 with 20.7.5). -/
 def thetaComplModulusK (τ : ℂ) : ℂ := jacobiThetaFourNullTau τ ^ 2 / jacobiThetaThreeNullTau τ ^ 2
 
-/-- On the imaginary axis `k(it) = ρ(t)` is real (from `DLMF.JacobiElliptic.jacobiModulusImag_spec`). -/
+/-- On the imaginary axis `k(it) = ρ(t)` is real (from
+`DLMF.JacobiElliptic.jacobiModulusImag_spec`). -/
 theorem thetaModulusK_I_mul {t : ℝ} (ht : 0 < t) :
     thetaModulusK (I * t) = (jacobiModulusImag t : ℂ) :=
   (jacobiModulusImag_spec ht).2.2.2.1
 /-- `R_F(0, 1 - k², 1) = K(k)` and `R_F(0, k², 1) = K'(k)` at `k = ρ(t)`, in terms of
 `B = θ₃(0|it)`. -/
 private lemma symEllIntRF_realThetaModulus {t : ℝ} (ht : 0 < t) :
-    symEllIntRF 0 ((1 - jacobiModulusImag t ^ 2 : ℝ) : ℂ) 1 = π / 2 * (jacobiThetaThreeImag t : ℂ) ^ 2 ∧
-      symEllIntRF 0 ((jacobiModulusImag t ^ 2 : ℝ) : ℂ) 1 = π / 2 * t * (jacobiThetaThreeImag t : ℂ) ^ 2 := by
+    symEllIntRF 0 ((1 - jacobiModulusImag t ^ 2 : ℝ) : ℂ) 1 = π / 2 *
+        (jacobiThetaThreeImag t : ℂ) ^ 2 ∧
+      symEllIntRF 0 ((jacobiModulusImag t ^ 2 : ℝ) : ℂ) 1 = π / 2 * t *
+          (jacobiThetaThreeImag t : ℂ) ^ 2 := by
   obtain ⟨h0, h1, -, -, -, -, a1, a2⟩ := jacobiModulusImag_spec ht
   have hk2 : jacobiModulusImag t ^ 2 < 1 := by nlinarith
   constructor
@@ -201,7 +204,8 @@ theorem carlsonRF_zero_jacobiThetaNull {t : ℝ} (ht : 0 < t) :
   have hB : 0 < jacobiThetaThreeImag t := by linarith
   have hC := jacobiThetaFourImag_pos ht
   have hf := jacobiThetaThreeImag_pow_four ht
-  rw [jacobiThetaThreeNullTau, jacobiThetaFourNullTau, jacobiThetaThreeTau_zero_I_mul_eq_imag, jacobiThetaFourTau_zero_I_mul_eq_imag, ← ofReal_pow,
+  rw [jacobiThetaThreeNullTau, jacobiThetaFourNullTau, jacobiThetaThreeTau_zero_I_mul_eq_imag,
+      jacobiThetaFourTau_zero_I_mul_eq_imag, ← ofReal_pow,
     ← ofReal_pow, ofReal_re, ofReal_re]
   set b := jacobiThetaThreeImag t ^ 4
   set c := jacobiThetaFourImag t ^ 4
@@ -229,7 +233,8 @@ theorem carlsonRF_zero_jacobiThetaNull {t : ℝ} (ht : 0 < t) :
     exact Real.rpow_neg_one _
   rw [hpow]
   have hB2 : (jacobiThetaThreeImag t : ℂ) ≠ 0 := ofReal_ne_zero.mpr hB.ne'
-  calc (π / 2 : ℂ) * (((jacobiThetaThreeImag t ^ 2)⁻¹ : ℝ) * Carlson.TwoVariable.carlsonRK 1 ((c / b : ℝ) : ℂ))
+  calc (π / 2 : ℂ) * (((jacobiThetaThreeImag t ^ 2)⁻¹ : ℝ) *
+         Carlson.TwoVariable.carlsonRK 1 ((c / b : ℝ) : ℂ))
       = ((jacobiThetaThreeImag t ^ 2)⁻¹ : ℝ) * ((π / 2 : ℂ) * Carlson.TwoVariable.carlsonRK 1
           ((c / b : ℝ) : ℂ)) := by ring
     _ = π / 2 := by
@@ -244,7 +249,8 @@ theorem exp_carlsonRF_ratio_eq_nome {t : ℝ} (ht : 0 < t) :
       Real.exp (-(π * t)) := by
   obtain ⟨e1, e2⟩ := symEllIntRF_realThetaModulus ht
   rw [thetaModulusK_I_mul ht, ofReal_re, e1, e2, ofReal_exp]
-  have hB : (jacobiThetaThreeImag t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (by linarith [one_le_jacobiThetaThreeImag ht])
+  have hB : (jacobiThetaThreeImag t : ℂ) ≠ 0 :=
+      ofReal_ne_zero.mpr (by linarith [one_le_jacobiThetaThreeImag ht])
   congr 1
   push_cast
   field_simp [pi_ne_zero']
@@ -265,8 +271,10 @@ theorem thetaModulusK_inversion {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
   rw [hsk'] at b1 b2
   have hB : 0 < jacobiThetaThreeImag s := by linarith [one_le_jacobiThetaThreeImag hs]
   have hB' : 0 < jacobiThetaThreeImag t := by linarith [one_le_jacobiThetaThreeImag ht]
-  have e1 : π / 2 * jacobiThetaThreeImag s ^ 2 = π / 2 * jacobiThetaThreeImag t ^ 2 := by rw [← b1, a1]
-  have e2 : π / 2 * s * jacobiThetaThreeImag s ^ 2 = π / 2 * t * jacobiThetaThreeImag t ^ 2 := by rw [← b2, a2]
+  have e1 : π / 2 * jacobiThetaThreeImag s ^ 2 = π / 2 * jacobiThetaThreeImag t ^ 2 :=
+      by rw [← b1, a1]
+  have e2 : π / 2 * s * jacobiThetaThreeImag s ^ 2 = π / 2 * t * jacobiThetaThreeImag t ^ 2 :=
+      by rw [← b2, a2]
   have hc : 0 < π / 2 * jacobiThetaThreeImag t ^ 2 := by positivity
   have e3 : (s - t) * (π / 2 * jacobiThetaThreeImag t ^ 2) = 0 := by linear_combination e2 - s * e1
   rcases mul_eq_zero.mp e3 with h | h

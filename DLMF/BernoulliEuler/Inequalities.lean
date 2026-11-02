@@ -139,7 +139,8 @@ private lemma zeta_two_mul_le_pi_sq_div_six {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
 
 /-- Sign of the odd Bernoulli polynomials: `(-1)ⁿ⁺¹ B₂ₙ₊₁(x) > 0` for `0 < x < 1/2`, `n ≥ 1`
 (from the Fourier series and `|sin mθ| ≤ m sin θ`). -/
-private lemma bernoulliFun_two_mul_add_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
+private lemma bernoulliFun_two_mul_add_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x)
+    (hx1 : x < 1 / 2) :
     0 < (-1) ^ (n + 1) * bernoulliFun (2 * n + 1) x := by
   have hn0 : n ≠ 0 := by omega
   have hs := hasSum_one_div_nat_pow_mul_sin hn0 (x := x) ⟨hx0.le, by linarith⟩
@@ -208,7 +209,8 @@ private lemma hasSum_inv_odd_pow_two_mul_and_eta_le_one {n : ℕ} (hn : 1 ≤ n)
     linarith
 
 /-- Sign of the odd Euler polynomials: `(-1)ⁿ E₂ₙ₋₁(x) > 0` for `0 < x < 1/2`, `n ≥ 1`. -/
-private lemma eulerFun_two_mul_sub_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
+private lemma eulerFun_two_mul_sub_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x)
+    (hx1 : x < 1 / 2) :
     0 < (-1) ^ n * eulerFun (2 * n - 1) x := by
   rcases Nat.lt_or_ge n 2 with h1 | h2
   · obtain rfl : n = 1 := by omega
@@ -271,7 +273,8 @@ private lemma eulerFun_two_mul_sub_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (h
 
 
 /-- Strict monotonicity on `[0, 1/2]` from a positive derivative on `(0, 1/2)`. -/
-private lemma strictMonoOn_Icc_zero_half_of_deriv_pos {f f' : ℝ → ℝ} (hd : ∀ x, HasDerivAt f (f' x) x)
+private lemma strictMonoOn_Icc_zero_half_of_deriv_pos {f f' : ℝ → ℝ}
+    (hd : ∀ x, HasDerivAt f (f' x) x)
     (hpos : ∀ x ∈ Set.Ioo (0 : ℝ) (1 / 2), 0 < f' x) : StrictMonoOn f (Set.Icc 0 (1 / 2)) := by
   refine strictMonoOn_of_deriv_pos (convex_Icc _ _)
     (fun x _ => (hd x).continuousAt.continuousWithinAt) fun x hx => ?_
@@ -291,7 +294,8 @@ private lemma eulerFun_two_mul_zero {n : ℕ} (hn : 1 ≤ n) : eulerFun (2 * n) 
 
 
 /-- `(-1)ⁿ B₂ₙ₋₁(x) > 0` for `0 < x < 1/2`, `n ≥ 1`. -/
-private lemma bernoulliFun_two_mul_sub_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
+private lemma bernoulliFun_two_mul_sub_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x)
+    (hx1 : x < 1 / 2) :
     0 < (-1) ^ n * bernoulliFun (2 * n - 1) x := by
   rcases Nat.lt_or_ge n 2 with h1 | h2
   · obtain rfl : n = 1 := by omega
@@ -360,7 +364,8 @@ theorem eulerFun_two_mul_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x)
       (-1) ^ n * eulerFun (2 * n) x < (4 : ℝ)⁻¹ ^ n * |(eulerNumber (2 * n) : ℝ)| := by
   set f : ℝ → ℝ := fun y => (-1) ^ n * eulerFun (2 * n) y
   have hmono : StrictMonoOn f (Set.Icc 0 (1 / 2)) := by
-    refine strictMonoOn_Icc_zero_half_of_deriv_pos (f' := fun y => (-1) ^ n * ((2 * n : ℕ) * eulerFun (2 * n - 1) y))
+    refine strictMonoOn_Icc_zero_half_of_deriv_pos
+        (f' := fun y => (-1) ^ n * ((2 * n : ℕ) * eulerFun (2 * n - 1) y))
       (fun y => (hasDerivAt_eulerFun _ y).const_mul _) fun y hy => ?_
     have := eulerFun_two_mul_sub_one_pos hn hy.1 hy.2
     have h2n : (0 : ℝ) < (2 * n : ℕ) := by exact_mod_cast (show 0 < 2 * n by omega)

@@ -563,7 +563,8 @@ theorem abs_eval_U_real_le {x : ℝ} (hx : |x| ≤ 1) (n : ℕ) :
 `((1 - x * z) / (1 - 2 * x * z + z ^ 2))`. -/
 @[dlmf 18.12.E8]
 theorem chebyshevT_generating_function {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => (Chebyshev.T ℂ n).eval (x : ℂ) * z ^ n) ((1 - x * z) / (1 - 2 * x * z + z ^ 2)) := by
+    HasSum (fun n : ℕ => (Chebyshev.T ℂ n).eval (x : ℂ) * z ^ n)
+        ((1 - x * z) / (1 - 2 * x * z + z ^ 2)) := by
   have hs : Summable fun n : ℕ => (Chebyshev.T ℂ n).eval (x : ℂ) * z ^ n := by
     refine Summable.of_norm_bounded (summable_geometric_of_lt_one (norm_nonneg z) hz) fun n => ?_
     rw [norm_mul, norm_pow, chebyshevT_eval_ofReal, norm_real, Real.norm_eq_abs]
@@ -602,7 +603,8 @@ theorem chebyshevT_log_generating_function {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} 
   have hvn : ‖v‖ < 1 := by
     rw [hv, norm_mul, show -(θ : ℂ) * I = ((-θ : ℝ) : ℂ) * I by push_cast; ring,
       norm_exp_ofReal_mul_I, mul_one]; exact hz
-  have h := (Complex.hasSum_taylorSeries_neg_log' hun).add (Complex.hasSum_taylorSeries_neg_log' hvn)
+  have h := (Complex.hasSum_taylorSeries_neg_log' hun).add
+      (Complex.hasSum_taylorSeries_neg_log' hvn)
   have hprod : (1 - u) * (1 - v) = 1 - 2 * x * z + z ^ 2 := by
     rw [← hcos, ofReal_cos, Complex.cos, hu, hv]
     have : exp (θ * I) * exp (-θ * I) = 1 := by rw [← exp_add]; ring_nf; simp
@@ -885,7 +887,8 @@ theorem hermitePolyH_addition (a b x y : ℝ) (hab : a ^ 2 + b ^ 2 = 1) (n : ℕ
         (n.choose k : ℂ) * a ^ k * b ^ (n - k) *
           aeval (x : ℂ) (hermitePolyH k) * aeval (y : ℂ) (hermitePolyH (n - k)) := by
       have he : (n.choose k : ℂ) * k ! * (n - k) ! = n ! := by
-        exact_mod_cast Nat.choose_mul_factorial_mul_factorial (by simpa using Finset.mem_range.mp hk)
+        exact_mod_cast Nat.choose_mul_factorial_mul_factorial
+            (by simpa using Finset.mem_range.mp hk)
       rw [← he]
       field_simp [Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k),
         Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n - k))]

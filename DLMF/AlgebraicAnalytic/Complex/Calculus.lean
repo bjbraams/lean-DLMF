@@ -108,7 +108,8 @@ theorem arg_eq_arctan_of_re_pos_of_im_nonneg {z : ℂ} (hx : 0 < z.re) (hy : 0 �
 @[dlmf 1.9.E5, dlmf 1.9.E6]
 theorem arg_eq_neg_arctan_of_re_pos_of_im_neg {z : ℂ} (hx : 0 < z.re) (hy : z.im < 0) :
     arg z = -Real.arctan |z.im / z.re| := by
-  rw [arg_eq_arctan_div_of_re_pos hx, abs_of_neg (div_neg_of_neg_of_pos hy hx), Real.arctan_neg, neg_neg]
+  rw [arg_eq_arctan_div_of_re_pos hx, abs_of_neg (div_neg_of_neg_of_pos hy hx),
+      Real.arctan_neg, neg_neg]
 
 /-- DLMF 1.9.5–1.9.6, second quadrant: for `x < 0`, `y ≥ 0`, `ph z = π - ω` (on the negative
 real axis this is Lean's single-valued choice `π`). -/
@@ -689,7 +690,8 @@ private lemma eq_recipCoeff_of_convolution {a b : ℕ → ℂ} (ha : a 0 ≠ 0)
 theorem hasSum_recipCoeff {a : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hf : ∀ z ∈ ball (0 : ℂ) r, HasSum (fun n => a n * z ^ n) (f z)) (ha : a 0 ≠ 0) :
     ∀ᶠ z in 𝓝 (0 : ℂ), HasSum (fun n => recipCoeff a n * z ^ n) (1 / f z) := by
-  have hp := Complex.hasFPowerSeriesOnBall_of_hasSum_ball (a := a) (f := f) (ρ := ⟨r / 2, by positivity⟩) (by exact_mod_cast half_pos hr) (half_lt_self hr)
+  have hp := Complex.hasFPowerSeriesOnBall_of_hasSum_ball (a := a) (f := f)
+      (ρ := ⟨r / 2, by positivity⟩) (by exact_mod_cast half_pos hr) (half_lt_self hr)
     (fun z hz => hf z (by simpa using hz))
   have hfa : AnalyticAt ℂ f 0 := hp.hasFPowerSeriesAt.analyticAt
   have hf0 : f 0 = a 0 := by
@@ -800,7 +802,8 @@ theorem hasSum_logCoeff {a : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ} (hr : 0 < 
       HasSum (fun n : ℕ => (n + 1 : ℂ) * a (n + 1) * z ^ n) (deriv f z) ∧
       f z * deriv g z = deriv f z := by
     filter_upwards [Metric.ball_mem_nhds (0 : ℂ) hr,
-      Complex.eventually_hasSum_deriv_powerSeries hbp, Complex.eventually_hasSum_deriv_powerSeries hp.hasFPowerSeriesAt,
+      Complex.eventually_hasSum_deriv_powerSeries hbp,
+          Complex.eventually_hasSum_deriv_powerSeries hp.hasFPowerSeriesAt,
       hfa.eventually_analyticAt, hfa.continuousAt.eventually_mem (isOpen_slitPlane.mem_nhds hslit0)]
       with z hz hzg hzf hzfa hzslit
     refine ⟨hf z hz, hzg, hzf, ?_⟩
@@ -918,7 +921,8 @@ theorem hasSum_powCoeff {a : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ} (hr : 0 < 
       HasSum (fun n => b n * z ^ n) (g z) ∧
       f z * deriv g z = ν * (deriv f z * g z) := by
     filter_upwards [Metric.ball_mem_nhds (0 : ℂ) hr, hb,
-      Complex.eventually_hasSum_deriv_powerSeries hbp, Complex.eventually_hasSum_deriv_powerSeries hp.hasFPowerSeriesAt,
+      Complex.eventually_hasSum_deriv_powerSeries hbp,
+          Complex.eventually_hasSum_deriv_powerSeries hp.hasFPowerSeriesAt,
       hfa.eventually_analyticAt, hfa.continuousAt.eventually_mem (isOpen_slitPlane.mem_nhds hslit0)]
       with z hz hzb hzg hzf hzfa hzslit
     refine ⟨hf z hz, hzg, hzf, hzb, ?_⟩

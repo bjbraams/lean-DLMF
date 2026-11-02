@@ -472,7 +472,8 @@ theorem largeSchroder_eq_delannoy_sub {n : ℕ} (hn : 1 ≤ n) :
     delannoy_diag_eq_sum (m + 1)
   have hD2 : (delannoy (m + 1 + 1) m : ℚ) =
       ∑ k ∈ range (m + 2), ((2 * k).choose (k + 1) : ℚ) * (m + 1 + k).choose (2 * k) := by
-    rw [delannoy_eq_sum_choose_mul_choose, Nat.cast_sum, sum_range_succ' _ (m + 1), ← sum_range_reflect]
+    rw [delannoy_eq_sum_choose_mul_choose, Nat.cast_sum, sum_range_succ' _ (m + 1),
+        ← sum_range_reflect]
     simp only [mul_zero, Nat.choose_zero_succ, Nat.cast_zero, zero_mul, add_zero]
     refine sum_congr rfl fun i hi => ?_
     simp only [mem_range] at hi

@@ -579,7 +579,8 @@ theorem krawtchouk_mul_x_nat {p : ℂ} (hp : p ≠ 0) {N n m : ℕ} (hn : n ≤ 
 krawtchouk p N n x * N.choose x * (p : ℂ) ^ x * (1 - p : ℂ) ^ (N - x) = if m = n then (((1 -
 p) / p : ℂ) ^ n / N.choose n) else 0`. -/
 @[dlmf 18.19.T1]
-theorem krawtchouk_orthogonality {p : ℝ} (hp : 0 < p) (hp1 : p < 1) {N m n : ℕ} (hm : m ≤ N) (hn : n ≤ N) :
+theorem krawtchouk_orthogonality {p : ℝ} (hp : 0 < p) (hp1 : p < 1) {N m n : ℕ}
+    (hm : m ≤ N) (hn : n ≤ N) :
     ∑ x ∈ Finset.range (N + 1), krawtchouk p N m x * krawtchouk p N n x *
       N.choose x * (p : ℂ) ^ x * (1 - p : ℂ) ^ (N - x) =
       if m = n then (((1 - p) / p : ℂ) ^ n / N.choose n) else 0 := by

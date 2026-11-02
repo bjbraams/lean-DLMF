@@ -72,13 +72,16 @@ theorem struveLO_hasDerivAt_circleIntegral {F F' : ℂ → ℂ → ℂ} {s : Set
   have hc : ∀ {G : ℂ → ℂ → ℂ}, ContinuousOn (fun p : ℂ × ℝ => G p.1 (circleMap 0 r p.2))
       (s ×ˢ univ) → ContinuousOn
       (fun p : ℂ × ℝ => (circleMap 0 r p.2 * I) • G p.1 (circleMap 0 r p.2)) (s ×ˢ univ) :=
-    fun h => (((continuous_circleMap 0 r).comp continuous_snd).mul continuous_const).continuousOn.smul h
+    fun h => (((continuous_circleMap 0 r).comp continuous_snd).mul
+        continuous_const).continuousOn.smul h
   have hθ : ∀ {G : ℂ → ℂ → ℂ}, ContinuousOn (fun p : ℂ × ℝ => G p.1 (circleMap 0 r p.2))
-      (s ×ˢ univ) → ∀ z ∈ s, Continuous fun θ : ℝ => (circleMap 0 r θ * I) • G z (circleMap 0 r θ) := by
+      (s ×ˢ univ) → ∀ z ∈ s, Continuous fun θ : ℝ => (circleMap 0 r θ * I) •
+          G z (circleMap 0 r θ) := by
     intro G h z hzs
     have := (hc h).comp_continuous (Continuous.prodMk_right z) (fun θ => ⟨hzs, mem_univ _⟩)
     exact this
-  obtain ⟨C, hC⟩ := (hs.prod (isCompact_uIcc (a := (0:ℝ)) (b := 2 * π))).exists_bound_of_continuousOn
+  obtain ⟨C, hC⟩ := (hs.prod
+      (isCompact_uIcc (a := (0:ℝ)) (b := 2 * π))).exists_bound_of_continuousOn
     ((hc hF').mono (prod_mono le_rfl (subset_univ _)))
   refine (intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le (bound := fun _ => C)
     (F := fun z θ => (circleMap 0 r θ * I) • F z (circleMap 0 r θ))
@@ -122,7 +125,8 @@ theorem struveLO_good_exists {lam₀ : ℂ} (h : 1 + lam₀ ≠ 0) :
   have hm0 : 0 < m := norm_pos_iff.2 h
   set L := ‖lam₀‖ + m / 4 + 1 with hL
   have hL0 : 0 < L := by positivity
-  have hcont : ContinuousAt (dslope sinh 0) 0 := struveLO_differentiable_dslope.continuous.continuousAt
+  have hcont : ContinuousAt (dslope sinh 0) 0 :=
+      struveLO_differentiable_dslope.continuous.continuousAt
   obtain ⟨ρ, hρ, hρ'⟩ := Metric.continuousAt_iff.1 hcont (m / (2 * L)) (by positivity)
   refine ⟨ρ / 2, by positivity, m / 4, by positivity, fun lam hlam t ht => ?_⟩
   have ht' : dist t 0 < ρ := by
@@ -177,7 +181,8 @@ theorem struveLO_hasDerivAt_recip_pow (a b c : ℂ) (m : ℕ) {w : ℂ} (h : a +
 theorem struveLO_continuousOn {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
     {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) :
     ContinuousOn (fun p : ℂ × ℝ => g (circleMap 0 r p.2) *
-      ((circleMap 0 r p.2 + p.1 * sinh (circleMap 0 r p.2)) ^ m)⁻¹) (closedBall lam₀ ε ×ˢ univ) := by
+      ((circleMap 0 r p.2 + p.1 * sinh (circleMap 0 r p.2)) ^ m)⁻¹)
+          (closedBall lam₀ ε ×ˢ univ) := by
   have hc : Continuous fun p : ℂ × ℝ => circleMap 0 r p.2 :=
     (continuous_circleMap 0 r).comp continuous_snd
   refine (hg.comp hc).continuousOn.mul (ContinuousOn.inv₀ (Continuous.continuousOn (by fun_prop))
@@ -340,7 +345,8 @@ theorem struveLO_norm_R_le : ∀ (N : ℕ) (a : ℂ), (N : ℝ) ≤ a.re → ∀
     exact Real.rpow_le_rpow hpos.le (by linarith [le_max_left u 0]) (by simpa using ha)
   | succ N ih =>
     intro a ha u hu
-    set C : ℝ := (∏ i ∈ Finset.range (N + 1), ‖a - i‖) * |u| ^ N * (1 + max u 0) ^ (a.re - (N + 1 : ℕ))
+    set C : ℝ := (∏ i ∈ Finset.range (N + 1), ‖a - i‖) * |u| ^ N *
+        (1 + max u 0) ^ (a.re - (N + 1 : ℕ))
       with hC
     have hs : Convex ℝ (uIcc 0 u) := convex_uIcc 0 u
     have hmem : ∀ v ∈ uIcc 0 u, -1 < v ∧ |v| ≤ |u| ∧ max v 0 ≤ max u 0 := by
@@ -350,7 +356,8 @@ theorem struveLO_norm_R_le : ∀ (N : ℕ) (a : ℂ), (N : ℝ) ≤ a.re → ∀
         exact ⟨by linarith [hv.1], by rw [abs_of_nonneg hv.1, abs_of_nonneg h]; exact hv.2,
           max_le_max hv.2 le_rfl⟩
       · rw [uIcc_of_ge h] at hv
-        refine ⟨by linarith [hv.1], by rw [abs_of_nonpos hv.2, abs_of_nonpos h]; linarith [hv.1], ?_⟩
+        refine ⟨by linarith [hv.1], by rw [abs_of_nonpos hv.2, abs_of_nonpos h];
+                                       linarith [hv.1], ?_⟩
         rw [max_eq_right hv.2, max_eq_right h]
     have hd : ∀ v ∈ uIcc 0 u, HasDerivWithinAt (struveLO_R a (N + 1))
         (a * struveLO_R (a - 1) N v) (uIcc 0 u) v :=
@@ -377,7 +384,8 @@ theorem struveLO_norm_R_le : ∀ (N : ℕ) (a : ℂ), (N : ℝ) ≤ a.re → ∀
                 ∏ i ∈ Finset.range N, ‖a - 1 - i‖ :=
               Finset.prod_congr rfl fun i _ => by push_cast; ring_nf
             rw [this]; simp; ring
-    have key := hs.norm_image_sub_le_of_norm_hasDerivWithin_le hd hb (left_mem_uIcc) (right_mem_uIcc)
+    have key := hs.norm_image_sub_le_of_norm_hasDerivWithin_le hd hb (left_mem_uIcc)
+        (right_mem_uIcc)
     rw [struveLO_R_succ_zero, sub_zero, Real.norm_eq_abs, sub_zero] at key
     calc ‖struveLO_R a (N + 1) u‖ ≤ C * |u| := key
       _ = _ := by rw [hC, pow_succ]; ring
@@ -436,7 +444,8 @@ theorem struveLO_K_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
     rw [this]; ring
   have hRc : Continuous fun t : ℝ => exp (-z * t) * struveLO_R a N (t ^ 2) := by
     unfold struveLO_R
-    refine (by fun_prop : Continuous fun t : ℝ => exp (-z * t)).mul (Continuous.sub ?_ (by fun_prop))
+    refine (by fun_prop : Continuous fun t : ℝ => exp (-z * t)).mul
+        (Continuous.sub ?_ (by fun_prop))
     refine Continuous.cpow (by fun_prop) continuous_const fun t => ?_
     rw [← ofReal_one, ← ofReal_add]; exact ofReal_mem_slitPlane.2 (by positivity)
   have hbd : ∀ t ∈ Ioi (0 : ℝ), ‖exp (-z * t) * struveLO_R a N (t ^ 2)‖ ≤
@@ -541,7 +550,8 @@ theorem struveLO_norm_integral_Ioi_one_le (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
 `∏_{i<N} |a-i| (2N)!/(re z)^{2N+1}` plus exponentially small tails. -/
 theorem struveLO_M_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re) (hz : 0 < z.re) :
     ‖(∫ t in (0 : ℝ)..1, exp (-z * t) * (1 - (t : ℂ) ^ 2) ^ a) -
-        ∑ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)‖ ≤
+        ∑ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) /
+            z ^ (2 * j + 1)‖ ≤
       (∏ i ∈ Finset.range N, ‖a - i‖) * (2 * N).factorial / z.re ^ (2 * N + 1) +
         ∑ j ∈ Finset.range N, ‖struveLO_b a j‖ *
           (Real.exp (-(z.re / 2)) * ((2 * j).factorial * (2 / z.re) ^ (2 * j + 1))) := by
@@ -587,7 +597,8 @@ theorem struveLO_M_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
       (fun t : ℝ => struveLO_b a j * (-1) ^ j * (exp (-z * t) * (t : ℂ) ^ (2 * j))) (Ioo 0 1) :=
     fun j _ => ((hjI j).mono_set Ioo_subset_Ioi_self).const_mul _
   have hpiece : ∀ j : ℕ, ∫ t in Ioo (0 : ℝ) 1, exp (-z * t) * (t : ℂ) ^ (2 * j) =
-      ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) - ∫ t in Ioi (1 : ℝ), exp (-z * t) * (t : ℂ) ^ (2 * j) := by
+      ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) - ∫ t in Ioi (1 : ℝ), exp (-z * t) *
+          (t : ℂ) ^ (2 * j) := by
     intro j
     have hu := setIntegral_union (μ := volume) (f := fun t : ℝ => exp (-z * t) * (t : ℂ) ^ (2 * j))
       (s := Ioo 0 1) (t := Ici 1)
@@ -605,7 +616,8 @@ theorem struveLO_M_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
     simp_rw [hpt]
     rw [integral_add (integrable_finsetSum _ hjint) hRint, integral_finsetSum _ hjint]
     simp_rw [integral_const_mul, hpiece, mul_sub, Finset.sum_sub_distrib]
-    have : ∀ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j * (((2 * j).factorial : ℂ) / z ^ (2 * j + 1)) =
+    have : ∀ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j *
+        (((2 * j).factorial : ℂ) / z ^ (2 * j + 1)) =
         struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) :=
       fun j _ => by ring
     rw [Finset.sum_congr rfl this]

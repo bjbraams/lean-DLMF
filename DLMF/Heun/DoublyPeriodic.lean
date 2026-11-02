@@ -119,7 +119,8 @@ theorem heun_jacobiForm {k : ℂ} (hk : k ∈ jacobiModulusDomain)
 
 /-- DLMF 23.6.26 in the modulus form: if `e₁ - e₃ = c²` and `k² = (e₂ - e₃)/(e₁ - e₃)`, then
 `sn²(iK' + cξ, k) = (℘(ξ) - e₃)/(e₂ - e₃)`. -/
-private lemma jacobiSnk_sq_eq_weierstrassP_of_sq_eq (H : HalfPeriods) {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+private lemma jacobiSnk_sq_eq_weierstrassP_of_sq_eq (H : HalfPeriods) {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain)
     (hk2 : k ^ 2 = (H.e 2 - H.e 3) / (H.e 1 - H.e 3)) {c : ℂ} (hc : c ≠ 0)
     (hc2 : c ^ 2 = H.e 1 - H.e 3) {ξ : ℂ} (hξ : ξ ∉ H.lattice) :
     jacobiSnk (I * compEllIntKpk k + ξ * c) k ^ 2 =
@@ -221,7 +222,8 @@ private lemma weierstrass_form_first_coeff_identity {x y e₁ e₂ e₃ γ δ ε
   ring
 
 /-- Algebra of 31.2.9–31.2.12, zeroth-order coefficient. -/
-private lemma weierstrass_form_zeroth_coeff_identity {x y e₁ e₂ e₃ q α β γ δ ε : ℂ} (hs : e₁ + e₂ + e₃ = 0)
+private lemma weierstrass_form_zeroth_coeff_identity {x y e₁ e₂ e₃ q α β γ δ ε : ℂ}
+    (hs : e₁ + e₂ + e₃ = 0)
     (hF : α + β + 1 = γ + δ + ε)
     (h1 : x - e₁ ≠ 0) (h2 : x - e₂ ≠ 0) (h3 : x - e₃ ≠ 0) (hE : e₂ - e₃ ≠ 0)
     (hsq : y ^ 2 = 4 * (x - e₁) * (x - e₂) * (x - e₃)) :

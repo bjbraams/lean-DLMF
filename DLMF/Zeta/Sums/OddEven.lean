@@ -296,7 +296,9 @@ theorem hasSum_riemannZeta_two_mul_div_odd_even :
     push_cast
     have h2 : (2 : ℂ) ≠ 0 := two_ne_zero
     have h3 : (2 * ((k : ℂ) + 1) + 1) ≠ 0 := by exact_mod_cast (show 2 * (k + 1) + 1 ≠ 0 by omega)
-    have h4 : (2 * ((k : ℂ) + 1) + 1 + 1) ≠ 0 := by exact_mod_cast (show 2 * (k + 1) + 1 + 1 ≠ 0 by omega)
+    have h4 : (2 * ((k : ℂ) + 1) + 1 + 1) ≠ 0 := by
+                                                   exact_mod_cast (show 2 * (k + 1) + 1 +
+                                                     1 ≠ 0 by omega)
     simp only [zero_pow (by omega : 2 * (k + 1) + 1 ≠ 0), sub_zero,
       zero_pow (by omega : 2 * (k + 1) + 1 + 1 ≠ 0)]
     simp only [div_pow, one_pow, pow_succ]

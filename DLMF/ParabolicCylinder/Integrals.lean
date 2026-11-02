@@ -27,8 +27,8 @@ integrals of DLMF §12.12.
 * `pcfU_hankel_integral`: the Hankel-loop integral DLMF 12.5.5.
 * `pcfU_vertical_integral`: the vertical-line integral DLMF 12.5.6.
 * `pcfV_horizontal_integral`: the horizontal-line integral DLMF 12.5.7.
-* `pcfU_barnes_integral`, `pcfV_barnes_integral`: the Barnes integrals DLMF 12.5.8–12.5.9 on a
-  straight separating contour.
+* `pcfU_barnes_integral`, `pcfU_barnes_integral'`, `pcfV_barnes_integral`, `pcfV_barnes_integral'`:
+  the Barnes integrals DLMF 12.5.8–12.5.9 on a straight separating contour.
 * `pcf_integral_1`, `pcf_integral_2`, `pcf_integral_3`: the integrals DLMF 12.12.1–12.12.3.
 * `weber_product_ode`: products of Weber solutions satisfy the symmetric-square equation.
 * `pcf_integral_4_integrable`, `pcf_integral_4`: absolute convergence and value of the square
@@ -54,17 +54,21 @@ namespace DLMF.Confluent
 (a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (pcfU a z)`. -/
 @[dlmf 12.5.E2]
 theorem pcfU_integral_2 {a z : ℂ} (ha : -1/2 < a.re) (hz : 0 < z.re) :
-    HasIntegralAtTop (fun t : ℝ => z*exp (-z^2/4)/Gamma (a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (pcfU a z) := by
+    HasIntegralAtTop (fun t : ℝ => z*exp (-z^2/4)/Gamma
+        (a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (pcfU a z) := by
   have hα : 0 < (a/2+1/4).re := by simp; linarith
-  have hv : pcfU a z = z * exp (-z^2/4) / Gamma (a/2+1/4) * pcfInt_F (a/2+1/4) (-a/2-3/4) (z^2) := by
+  have hv : pcfU a z = z * exp (-z^2/4) / Gamma (a/2+1/4) * pcfInt_F (a/2+1/4) (-a/2-3/4) (z^2) :=
+      by
     refine pcfInt_eq_of_real (f := pcfU a)
       (g := fun z => z * exp (-z^2/4) / Gamma (a/2+1/4) * pcfInt_F (a/2+1/4) (-a/2-3/4) (z^2))
       (pcfU_entire a).differentiableOn ?_ (fun x hx => pcfInt_U_real_2 ha hx) hz
-    exact ((differentiableOn_id.mul (differentiableOn_id.pow 2 |>.neg.div_const 4 |>.cexp)).div_const _).mul
+    exact ((differentiableOn_id.mul
+        (differentiableOn_id.pow 2 |>.neg.div_const 4 |>.cexp)).div_const _).mul
       (pcfInt_differentiableOn_comp hα _)
   have hI := pcfInt_integrableOn hα (-a/2-3/4) (pcfInt_sq_mem_slitPlane hz)
   rw [show a/2+1/4-1 = a/2-3/4 by ring] at hI
-  have T := intervalIntegral_tendsto_integral_Ioi 0 (hI.const_mul (z*exp (-z^2/4)/Gamma (a/2+1/4))) tendsto_id
+  have T := intervalIntegral_tendsto_integral_Ioi 0 (hI.const_mul (z*exp (-z^2/4)/Gamma (a/2+1/4)))
+      tendsto_id
   rw [integral_const_mul] at T
   unfold HasIntegralAtTop
   rw [hv]
@@ -76,7 +80,8 @@ theorem pcfU_integral_2 {a z : ℂ} (ha : -1/2 < a.re) (hz : 0 < z.re) :
 (a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (pcfU a z)`. -/
 @[dlmf 12.5.E3]
 theorem pcfU_integral_3 {a z : ℂ} (ha : -3/2 < a.re) (hz : 0 < z.re) :
-    HasIntegralAtTop (fun t : ℝ => exp (-z^2/4)/Gamma (a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (pcfU a z) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-z^2/4)/Gamma
+        (a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (pcfU a z) := by
   have hα : 0 < (a/2+3/4).re := by simp; linarith
   have hv : pcfU a z = exp (-z^2/4) / Gamma (a/2+3/4) * pcfInt_F (a/2+3/4) (-a/2-1/4) (z^2) := by
     refine pcfInt_eq_of_real (f := pcfU a)
@@ -86,7 +91,8 @@ theorem pcfU_integral_3 {a z : ℂ} (ha : -3/2 < a.re) (hz : 0 < z.re) :
       (pcfInt_differentiableOn_comp hα _)
   have hI := pcfInt_integrableOn hα (-a/2-1/4) (pcfInt_sq_mem_slitPlane hz)
   rw [show a/2+3/4-1 = a/2-1/4 by ring] at hI
-  have T := intervalIntegral_tendsto_integral_Ioi 0 (hI.const_mul (exp (-z^2/4)/Gamma (a/2+3/4))) tendsto_id
+  have T := intervalIntegral_tendsto_integral_Ioi 0 (hI.const_mul (exp (-z^2/4)/Gamma (a/2+3/4)))
+      tendsto_id
   rw [integral_const_mul] at T
   unfold HasIntegralAtTop
   rw [hv]
@@ -98,7 +104,8 @@ theorem pcfU_integral_3 {a z : ℂ} (ha : -3/2 < a.re) (hz : 0 < z.re) :
 (2/π):ℂ)*exp (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) 0 (pcfU a z)`. -/
 @[dlmf 12.5.E4]
 theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
-    HasIntegralAtTop (fun t : ℝ => (Real.sqrt (2/π):ℂ)*exp (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) 0 (pcfU a z) := by
+    HasIntegralAtTop (fun t : ℝ => (Real.sqrt (2/π):ℂ)*exp
+        (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) 0 (pcfU a z) := by
   have hc : -1 < (-a-1/2).re := by simp; linarith
   have ha' : -1/2 < (-a).re := by simp; linarith
   have han : ∀ n : ℕ, a ≠ n+1/2 := fun n h => by
@@ -110,13 +117,16 @@ theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
   set gm := fun t : ℝ => (t : ℂ) ^ (-a-1/2) * exp (-(t : ℂ) ^ 2 / 2 - (I*z) * t)
   have ip : IntegrableOn gp (Ioi 0) := integrableOn_pcfIntegrand hc (-I*z)
   have im : IntegrableOn gm (Ioi 0) := integrableOn_pcfIntegrand hc (I*z)
-  have hf : (fun t : ℝ => (Real.sqrt (2/π):ℂ)*exp (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) =
+  have hf : (fun t : ℝ => (Real.sqrt (2/π):ℂ)*exp
+      (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) =
       fun t => K * (exp (I*θ) * gp t + exp (-I*θ) * gm t) := by
     funext t
     simp only [K, gp, gm, θ, Complex.cos]
-    have e1 : exp (I*((a/2+1/4)*π)) * exp (-(t:ℂ)^2/2 - -I*z*t) = exp (-(t:ℂ)^2/2) * exp ((z*t+(a/2+1/4)*π)*I) := by
+    have e1 : exp (I*((a/2+1/4)*π)) * exp (-(t:ℂ)^2/2 - -I*z*t) = exp (-(t:ℂ)^2/2) * exp
+        ((z*t+(a/2+1/4)*π)*I) := by
       rw [← Complex.exp_add, ← Complex.exp_add]; congr 1; ring
-    have e2 : exp (-I*((a/2+1/4)*π)) * exp (-(t:ℂ)^2/2 - I*z*t) = exp (-(t:ℂ)^2/2) * exp (-(z*t+(a/2+1/4)*π)*I) := by
+    have e2 : exp (-I*((a/2+1/4)*π)) * exp (-(t:ℂ)^2/2 - I*z*t) = exp (-(t:ℂ)^2/2) * exp
+        (-(z*t+(a/2+1/4)*π)*I) := by
       rw [← Complex.exp_add, ← Complex.exp_add]; congr 1; ring
     linear_combination (-(Real.sqrt (2/π):ℂ)*exp (z^2/4)/2 * (t:ℂ)^(-a-1/2)) * (e1 + e2)
   have hp := pcfU_eq_integral ha' (-I*z)
@@ -133,7 +143,8 @@ theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
   have T := intervalIntegral_tendsto_integral_Ioi 0 H tendsto_id
   suffices hv : ∫ t in Ioi (0:ℝ), K*(exp (I*θ)*gp t + exp (-I*θ)*gm t) = pcfU a z by
     rw [← hv]; exact T
-  rw [integral_const_mul, integral_add (ip.const_mul _) (im.const_mul _), integral_const_mul, integral_const_mul]
+  rw [integral_const_mul, integral_add (ip.const_mul _) (im.const_mul _), integral_const_mul,
+      integral_const_mul]
   have hs : (Real.sqrt (2/π):ℂ) * Real.sqrt (2*π) = 2 := by
     rw [← Complex.ofReal_mul, ← Real.sqrt_mul (by positivity), show 2/π*(2*π) = 2^2 by field_simp,
       Real.sqrt_sq (by norm_num)]; norm_num
@@ -141,23 +152,30 @@ theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
   have he2 : exp (z^2/4) * exp (-z^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
   have hIp : ∫ t in Ioi (0:ℝ), gp t = Gamma (1/2-a) * exp (-z^2/4) * pcfU (-a) (-I*z) := by
     rw [hp, show ∀ X : ℂ, Gamma (1/2-a) * exp (-z^2/4) * (exp (- -z^2/4) / Gamma (1/2-a) * X) =
-      (exp (- -z^2/4) * exp (-z^2/4)) * X from fun X => by rw [div_mul_eq_mul_div, mul_div_assoc', div_eq_iff hΓ]; ring, he, one_mul]
+      (exp (- -z^2/4) * exp (-z^2/4)) * X from fun X => by
+        rw [div_mul_eq_mul_div, mul_div_assoc', div_eq_iff hΓ]; ring, he, one_mul]
   have hIm : ∫ t in Ioi (0:ℝ), gm t = Gamma (1/2-a) * exp (-z^2/4) * pcfU (-a) (I*z) := by
     rw [hm, show ∀ X : ℂ, Gamma (1/2-a) * exp (-z^2/4) * (exp (- -z^2/4) / Gamma (1/2-a) * X) =
-      (exp (- -z^2/4) * exp (-z^2/4)) * X from fun X => by rw [div_mul_eq_mul_div, mul_div_assoc', div_eq_iff hΓ]; ring, he, one_mul]
+      (exp (- -z^2/4) * exp (-z^2/4)) * X from fun X => by
+        rw [div_mul_eq_mul_div, mul_div_assoc', div_eq_iff hΓ]; ring, he, one_mul]
   rw [hIp, hIm, hK]
   have q1 : exp (-I*θ) = exp (-1*I*π*(a/2+1/4)) := by rw [hθ]; congr 1; ring
   have q2 : exp (I*θ) = exp (1*I*π*(a/2+1/4)) := by rw [hθ]; congr 1; ring
   rw [q1, q2, show (1:ℂ)*I*z = I*z by ring, show (-1:ℂ)*I*z = -I*z by ring] at *
-  linear_combination (Real.sqrt (2/π):ℂ)/2 * (Gamma (1/2-a) * (exp (1*I*π*(a/2+1/4)) * pcfU (-a) (-I*z) + exp (-1*I*π*(a/2+1/4)) * pcfU (-a) (I*z))) * he2 - (Real.sqrt (2/π):ℂ)/2 * hconn + pcfU a z / 2 * hs
+  linear_combination (Real.sqrt (2/π):ℂ)/2 *
+      (Gamma (1/2-a) * (exp (1*I*π*(a/2+1/4)) * pcfU (-a) (-I*z) + exp (-1*I*π*(a/2+1/4)) * pcfU
+      (-a) (I*z))) * he2 - (Real.sqrt (2/π):ℂ)/2 * hconn + pcfU a z / 2 * hs
 
 /-- Identity under the stated parameter and domain assumptions: `HasIntegralWholeLine (fun y : ℝ
 => let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp (-z*t+t^2/2)*t^(-a-1/2)) (pcfU a z)`. -/
 @[dlmf 12.5.E6]
 theorem pcfU_vertical_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
-    HasIntegralWholeLine (fun y : ℝ => let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp (-z*t+t^2/2)*t^(-a-1/2)) (pcfU a z) := by
+    HasIntegralWholeLine
+        (fun y : ℝ => let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp (-z*t+t^2/2)*t^(-a-1/2))
+        (pcfU a z) := by
   set K : ℂ := exp (z^2/4)/Real.sqrt (2*π)
-  have hfun : (fun y : ℝ => let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp (-z*t+t^2/2)*t^(-a-1/2)) =
+  have hfun : (fun y : ℝ => let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp
+      (-z*t+t^2/2)*t^(-a-1/2)) =
       fun y : ℝ => K * (exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(-a-1/2)) := by
     funext y; simp only [K]; ring
   have h := pcfInt_hasIntegralWholeLine ((pcfCt_vert_integrable z (-a-1/2) hc).const_mul K)
@@ -178,7 +196,11 @@ HasIntegralWholeLine (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*e
 (z*t-t^2/2)*t^(a-1/2)) v ∧ u+v=pcfV a z`. -/
 @[dlmf 12.5.E7]
 theorem pcfV_horizontal_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
-    ∃ u v : ℂ, HasIntegralWholeLine (fun x : ℝ => let t : ℂ := x-c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) u ∧ HasIntegralWholeLine (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) v ∧ u+v=pcfV a z := by
+    ∃ u v : ℂ, HasIntegralWholeLine
+        (fun x : ℝ => let t : ℂ := x-c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) u ∧
+        HasIntegralWholeLine
+        (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) v ∧ u+v=pcfV
+        a z := by
   set K : ℂ := exp (-z^2/4)/(2*π)
   obtain ⟨hiu, hvu⟩ := pcfCt_horizontal_upper a z hc
   obtain ⟨hil, hvl⟩ := pcfCt_horizontal_lower a z hc
@@ -215,13 +237,16 @@ theorem pcfV_horizontal_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
 
 /-- Hankel loop from negative infinity below the cut around zero to negative infinity above. -/
 def pcfNegativeLoop (a z : ℂ) (r R : ℝ) : ℂ :=
-  (∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t-π*I))) + (∫ θ : ℝ in -π..π, let t := r*exp (I*θ); exp (z*t-t^2/2)*exp ((a-1/2)*(Real.log r+I*θ))*I*t) - (∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t+π*I)))
+  (∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t-π*I))) +
+      (∫ θ : ℝ in -π..π, let t := r*exp (I*θ); exp (z*t-t^2/2)*exp ((a-1/2)*(Real.log r+I*θ))*I*t) -
+      (∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t+π*I)))
 
 /-- The map `(fun R => Gamma (1/2-a)/(2*π*I)*exp (-z^2/4)*pcfNegativeLoop a z r R)` tends to `(𝓝
 (pcfU a z))` along `atTop`. -/
 @[dlmf 12.5.E5]
 theorem pcfU_hankel_integral {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ) {r : ℝ} (hr : 0 < r) :
-    Tendsto (fun R => Gamma (1/2-a)/(2*π*I)*exp (-z^2/4)*pcfNegativeLoop a z r R) atTop (𝓝 (pcfU a z)) := by
+    Tendsto (fun R => Gamma (1/2-a)/(2*π*I)*exp (-z^2/4)*pcfNegativeLoop a z r R) atTop
+        (𝓝 (pcfU a z)) := by
   have hΓ : Gamma (1/2 - a) ≠ 0 := Complex.Gamma_ne_zero fun n h => ha n (by linear_combination -h)
   have hT := ((intervalIntegral_tendsto_integral_Ioi r (pcfCt_g_integrableOn a z hr)
     tendsto_id).const_mul (pcfCt_kappa a)).add_const (pcfCt_C a z r)
@@ -231,27 +256,44 @@ theorem pcfU_hankel_integral {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ)
     filter_upwards [eventually_gt_atTop 0] with R hR
     exact (pcfCt_loop_eq a z hr hR).symm
   have hT' := (hT.congr' hev).const_mul (Gamma (1/2-a)/(2*π*I)*exp (-z^2/4))
-  have hv : Gamma (1/2-a)/(2*π*I)*exp (-z^2/4) * (2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹) =
+  have hv : Gamma (1/2-a)/(2*π*I)*exp (-z^2/4) *
+      (2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹) =
       pcfU a z := by
     have he : exp (-z^2/4) * exp (z^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
     have hπ : (2*π*I : ℂ) ≠ 0 := by simp [Real.pi_ne_zero, I_ne_zero]
-    rw [show Gamma (1/2-a)/(2*π*I)*exp (-z^2/4) * (2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹) =
-      (Gamma (1/2-a) * (Gamma (1/2-a))⁻¹) * ((2*π*I)/(2*π*I)) * (exp (-z^2/4) * exp (z^2/4)) * pcfU a z by
+    rw [show Gamma (1/2-a)/(2*π*I)*exp (-z^2/4) *
+        (2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹) =
+      (Gamma (1/2-a) * (Gamma (1/2-a))⁻¹) * ((2*π*I)/(2*π*I)) * (exp (-z^2/4) * exp (z^2/4)) * pcfU
+          a z by
         ring, mul_inv_cancel₀ hΓ, div_self hπ, he]
     ring
   rw [hv] at hT'
   simpa only [mul_assoc] using hT'
 
-/-- Straight separating Barnes contour; exceptional-parameter deformations need residue corrections. -/
+/-- Straight separating Barnes contour; exceptional-parameter deformations need residue corrections.
+This is stronger than DLMF, which assumes `a + 1/2 ≠ 0, -1, -2, …` (implied here by `0 < c` and
+`2c < 1/2 + ℜ a`). -/
 @[dlmf 12.5.E8]
-theorem pcfU_barnes_integral {a z : ℂ} (ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2+1*a.re) :
-    HasIntegralWholeLine (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1) (2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z) := by
-  have _ := ha
+theorem pcfU_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ}
+    (hc : 0 < c) (hca : 2*c < 1/2+1*a.re) :
+    HasIntegralWholeLine
+      (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1)
+      (2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z) := by
   have hca' : 2*c < 1/2 + a.re := by simpa using hca
   have hfun : (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1) =
       pcfInt_B a z c := rfl
   rw [hfun, ← pcfInt_B_integral a hz0 hz hc hca']
   exact pcfInt_hasIntegralWholeLine (pcfInt_B_integrable a hz0 hz hc hca')
+
+/-- Straight separating Barnes contour; exceptional-parameter deformations need residue
+corrections. -/
+@[dlmf 12.5.E8]
+theorem pcfU_barnes_integral {a z : ℂ} (_ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2+1*a.re) :
+    HasIntegralWholeLine
+      (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1)
+      (2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z) :=
+  pcfU_barnes_integral' hz0 hz hc hca
 
 /-- `arg (±i z) = arg z ± π/2` for `|arg z| < π/2`. -/
 theorem pcfInt_arg_I_mul {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) :
@@ -280,11 +322,15 @@ theorem pcfInt_I_mul_cpow {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (w : �
   · rw [cpow_def_of_ne_zero (mul_ne_zero (neg_ne_zero.mpr I_ne_zero) hz0),
       cpow_def_of_ne_zero hz0, hl2, ← Complex.exp_add]; congr 1; ring
 
-/-- Straight separating Barnes contour; exceptional-parameter deformations need residue corrections. -/
+/-- Straight separating Barnes contour; exceptional-parameter deformations need residue corrections.
+This is stronger than DLMF, which assumes `-a + 1/2 ≠ 0, -1, -2, …` (implied here by `0 < c` and
+`2c < 1/2 - ℜ a`). -/
 @[dlmf 12.5.E9]
-theorem pcfV_barnes_integral {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz0 : z ≠ 0) (hz : |arg z| < π/4) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2+-1*a.re) :
-    HasIntegralWholeLine (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t)) (2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z) := by
-  have _ := ha
+theorem pcfV_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) {c : ℝ}
+    (hc : 0 < c) (hca : 2*c < 1/2+-1*a.re) :
+    HasIntegralWholeLine
+      (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t))
+      (2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z) := by
   have hca' : 2*c < 1/2 + (-a).re := by simpa using hca
   have hz2 : |arg z| < π/2 := by linarith [Real.pi_pos]
   obtain ⟨ha1, ha2⟩ := pcfInt_arg_I_mul hz0 hz2
@@ -294,7 +340,8 @@ theorem pcfV_barnes_integral {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz
     rw [ha1]; obtain ⟨h1, h2⟩ := abs_lt.mp hz; rw [abs_lt]; constructor <;> linarith
   have hma : |arg (-I*z)| < 3*π/4 := by
     rw [ha2]; obtain ⟨h1, h2⟩ := abs_lt.mp hz; rw [abs_lt]; constructor <;> linarith
-  have hfun : (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t)) =
+  have hfun : (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t))
+      =
       fun y => (pcfInt_B (-a) (I*z) c y + pcfInt_B (-a) (-I*z) c y)/2 := by
     funext y
     simp only [pcfInt_B]
@@ -315,7 +362,8 @@ theorem pcfV_barnes_integral {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz
   have hV2 := pcfV_eq_mul_neg_I a z
   obtain ⟨f1, f2⟩ := pcfInt_I_mul_cpow hz0 hz2 (-a+1/2)
   rw [f1, f2, show (I*z)^2 = -z^2 by rw [mul_pow, I_sq]; ring,
-    show (-I*z)^2 = -z^2 by rw [mul_pow, neg_sq, I_sq]; ring, show (1/2:ℂ)+1*(-a) = 1/2+-1*a by ring]
+    show (-I*z)^2 = -z^2 by rw [mul_pow, neg_sq, I_sq]; ring, show (1/2:ℂ)+1*(-a) = 1/2+-1*a by
+                              ring]
   have hs : (Real.sqrt (π/2):ℂ) * (Real.sqrt (2/π):ℂ) = 1 := by
     rw [← ofReal_mul, ← Real.sqrt_mul (by positivity), show π/2*(2/π) = 1 by field_simp]; simp
   have hq1 : exp (π/2*I*(-a+1/2)) = exp (-I*π*(a/2-1/4)) := by congr 1; ring
@@ -324,15 +372,27 @@ theorem pcfV_barnes_integral {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz
   have hsum : 2 * pcfV a z = (Real.sqrt (2/π):ℂ) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
       exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z)) := by
     linear_combination hV1 + hV2
-  linear_combination (-(π * Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) * (Real.sqrt (π/2):ℂ))) * hsum -
+  linear_combination (-(π * Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) * (Real.sqrt (π/2):ℂ))) *
+      hsum -
     (π * Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
       exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z))) * hs
+
+/-- Straight separating Barnes contour; exceptional-parameter deformations need residue
+corrections. -/
+@[dlmf 12.5.E9]
+theorem pcfV_barnes_integral {a z : ℂ} (_ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz0 : z ≠ 0)
+    (hz : |arg z| < π/4) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2+-1*a.re) :
+    HasIntegralWholeLine
+      (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t))
+      (2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z) :=
+  pcfV_barnes_integral' hz0 hz hc hca
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp
 (-t^2/4)*(t:ℂ)^(μ-1)*pcfU a t) 0 (Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma ((μ+a+3/2)/2))`. -/
 @[dlmf 12.12.E1]
 theorem pcf_integral_1 {μ : ℂ} (hμ : 0 < μ.re) (a : ℂ) :
-    HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(μ-1)*pcfU a t) 0 (Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma ((μ+a+3/2)/2)) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(μ-1)*pcfU a t) 0
+        (Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma ((μ+a+3/2)/2)) := by
   obtain ⟨hI, hV⟩ := laplace_kummerU_gauss (a := a/2+1/4) (b := μ/2) (c := 1/2) (z := 1)
     (by simp; linarith) (by simp; linarith) (by simp)
   obtain ⟨hI2, hV2⟩ := pcfInt_sq_half_subst hI
@@ -350,7 +410,8 @@ theorem pcf_integral_1 {μ : ℂ} (hμ : 0 < μ.re) (a : ℂ) :
   have h2 : C * (2:ℂ)^(1-μ) = (2:ℂ)^(-(μ+a+1/2)/2) := by
     simp only [C]
     rw [← cpow_add _ _ two_ne_zero, ← cpow_add _ _ two_ne_zero]; ring_nf
-  have hval : C * (Gamma (μ / 2) * Gamma (μ / 2 + 1 / 2) * (Gamma (a / 2 + 1 / 4 + μ / 2 - 1 / 2 + 1))⁻¹) =
+  have hval : C * (Gamma (μ / 2) * Gamma (μ / 2 + 1 / 2) *
+      (Gamma (a / 2 + 1 / 4 + μ / 2 - 1 / 2 + 1))⁻¹) =
       Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma ((μ+a+3/2)/2) := by
     rw [hd, show a/2+1/4 + μ/2 - 1/2 + 1 = (μ+a+3/2)/2 by ring]
     generalize Gamma ((μ+a+3/2)/2) = G
@@ -363,7 +424,8 @@ theorem pcf_integral_1 {μ : ℂ} (hμ : 0 < μ.re) (a : ℂ) :
 (-3*t^2/4)*(t:ℂ)^(-a-3/2)*pcfU a t) 0 (2^(1/4+a/2)*Gamma (-a-1/2)*cos ((a/4+1/8)*π))`. -/
 @[dlmf 12.12.E2]
 theorem pcf_integral_2 {a : ℂ} (ha : a.re < -1/2) :
-    HasIntegralAtTop (fun t : ℝ => exp (-3*t^2/4)*(t:ℂ)^(-a-3/2)*pcfU a t) 0 (2^(1/4+a/2)*Gamma (-a-1/2)*cos ((a/4+1/8)*π)) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-3*t^2/4)*(t:ℂ)^(-a-3/2)*pcfU a t) 0
+        (2^(1/4+a/2)*Gamma (-a-1/2)*cos ((a/4+1/8)*π)) := by
   set μ : ℂ := -a-1/2 with hμ
   have hb : 0 < (μ/2).re := by simp [hμ]; linarith
   have hab : a/2+1/4 = -(μ/2) := by rw [hμ]; ring
@@ -392,7 +454,8 @@ theorem pcf_integral_2 {a : ℂ} (ha : a.re < -1/2) :
   have hval : C * (Gamma (μ/2) * Gamma (μ/2 + 1/2) * (2:ℂ)^(-(μ/2)) * cos (μ/2*π/2) / Real.sqrt π) =
       2^(1/4+a/2)*Gamma (-a-1/2)*cos ((a/4+1/8)*π) := by
     rw [hd, hc, ← hμ]
-    calc C * (Gamma μ * (2:ℂ)^(1-μ) * Real.sqrt π * (2:ℂ)^(-(μ/2)) * cos ((a/4+1/8)*π) / Real.sqrt π)
+    calc C * (Gamma μ * (2:ℂ)^(1-μ) * Real.sqrt π * (2:ℂ)^(-(μ/2)) * cos ((a/4+1/8)*π) / Real.sqrt
+        π)
         = (C * (2:ℂ)^(1-μ) * (2:ℂ)^(-(μ/2))) * Gamma μ * cos ((a/4+1/8)*π) *
             ((Real.sqrt π : ℂ) / Real.sqrt π) := by ring
       _ = _ := by rw [h2, div_self hs]; ring
@@ -413,11 +476,14 @@ theorem pcfCt_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
 /-- DLMF 12.5.4 as a Lebesgue integral: `e^{-t²/4} U(a,t) = √(2/π) ∫₀^∞ s^{-a-1/2} e^{-s²/2}
 cos(ts + (a/2+1/4)π) ds` for `re a < 1/2`, real `t`. -/
 theorem pcfCt_U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
-    IntegrableOn (fun s : ℝ => (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos (t*s + (a/2+1/4)*π)) (Ioi 0) ∧
+    IntegrableOn (fun s : ℝ => (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos (t*s + (a/2+1/4)*π)) (Ioi 0)
+        ∧
     exp (-(t:ℂ)^2/4) * pcfU a t =
-      (Real.sqrt (2/π):ℂ) * ∫ s in Ioi (0:ℝ), (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos (t*s + (a/2+1/4)*π) := by
+      (Real.sqrt (2/π):ℂ) * ∫ s in Ioi (0:ℝ), (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos
+          (t*s + (a/2+1/4)*π) := by
   have hc : -1 < (-a-1/2).re := by simp; linarith
-  have hI : IntegrableOn (fun s : ℝ => (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos (t*s + (a/2+1/4)*π)) (Ioi 0) := by
+  have hI : IntegrableOn (fun s : ℝ => (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos (t*s + (a/2+1/4)*π))
+      (Ioi 0) := by
     refine Integrable.mono' (((integrableOn_pcfIntegrand hc 0).norm).mul_const
       (Real.exp |((a/2+1/4)*π).im|)) ?_ ?_
     · refine ContinuousOn.aestronglyMeasurable (fun s hs => ?_) measurableSet_Ioi
@@ -489,11 +555,13 @@ theorem pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) 
       ← integral_const_mul, ← integral_const_mul]
     refine integral_congr_ae (Eventually.of_forall fun s => ?_)
     simp only [hF, G2, hθ]; ring
-  have hint : IntegrableOn (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) (Ioi 0) := by
+  have hint : IntegrableOn (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t)
+      (Ioi 0) := by
     rw [funext hfeq]; exact hprod.integral_prod_left.const_mul _
   refine ⟨hint, ?_⟩
   rw [integral_congr_ae (Eventually.of_forall hfeq), integral_const_mul]
-  rw [show (∫ t in Ioi (0:ℝ), ∫ s in Ioi (0:ℝ), F (t, s)) = ∫ s in Ioi (0:ℝ), ∫ t in Ioi (0:ℝ), F (t, s)
+  rw [show (∫ t in Ioi (0:ℝ), ∫ s in Ioi (0:ℝ), F (t, s)) = ∫ s in Ioi (0:ℝ), ∫ t in Ioi (0:ℝ), F
+      (t, s)
     from integral_integral_swap hprod]
   have hin : ∀ s ∈ Ioi (0:ℝ), ∫ t in Ioi (0:ℝ), F (t, s) =
       π/2 * (x:ℂ)^(-a-3/2) * ((s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2 - x*s)) := by
@@ -567,7 +635,8 @@ theorem pcfCt_integral_3_dom {a0 : ℂ} (ha0 : a0.re < 1/2) {x : ℝ} (hx : 0 < 
         Real.norm_eq_abs, abs_of_pos (by positivity)]
       nlinarith
     have hrp := pcfCt_rpow_le_add (r := -a.re - 1/2) ht (q1 := q1) (q2 := q2)
-      (by simp only [q1]; linarith [(abs_lt.mp hre).2]) (by simp only [q2]; linarith [(abs_lt.mp hre).1])
+      (by simp only [q1]; linarith [(abs_lt.mp hre).2])
+          (by simp only [q2]; linarith [(abs_lt.mp hre).1])
     have hx2 : 0 < x^2 := by positivity
     simp only [add_sub_cancel_right]
     calc ‖exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t‖
@@ -656,7 +725,8 @@ theorem pcfCt_integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) 
 (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x)`. -/
 @[dlmf 12.12.E3]
 theorem pcf_integral_3 {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
-    HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) 0 ((Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) 0
+        ((Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x) := by
   obtain ⟨hI, hv⟩ := pcfCt_integral_3_all ha hx
   unfold HasIntegralAtTop
   rw [← hv]
@@ -683,12 +753,16 @@ lemma pcfIntegral4_weight_integrable {b : ℝ} (hb : b < 1) :
     refine (by fun_prop : Continuous (fun t : ℝ => Real.exp (b*t))).continuousOn.div
       (by fun_prop) ?_
     intro t ht
-    exact ne_of_gt (Real.sqrt_pos.mpr (Real.sinh_pos_iff.mpr (by linarith [show 0 < t from ht] : 0 < 2*t)))
-  have hnear : IntegrableOn (fun t : ℝ => Real.exp (b*t) / Real.sqrt (Real.sinh (2*t))) (Ioc 0 1) := by
+    exact ne_of_gt (Real.sqrt_pos.mpr
+        (Real.sinh_pos_iff.mpr (by linarith [show 0 < t from ht] : 0 < 2*t)))
+  have hnear : IntegrableOn (fun t : ℝ => Real.exp (b*t) / Real.sqrt (Real.sinh (2*t))) (Ioc 0 1) :=
+      by
     have hr : IntegrableOn (fun t : ℝ => t^(-(1/2):ℝ)) (Ioc 0 1) := by
-      rw [integrableOn_Ioc_iff_integrableOn_Ioo, intervalIntegral.integrableOn_Ioo_rpow_iff zero_lt_one]
+      rw [integrableOn_Ioc_iff_integrableOn_Ioo, intervalIntegral.integrableOn_Ioo_rpow_iff
+          zero_lt_one]
       norm_num
-    refine (hr.const_mul (Real.exp |b|)).mono' ((hc.mono (by intro t ht; exact ht.1)).aestronglyMeasurable measurableSet_Ioc) ?_
+    refine (hr.const_mul (Real.exp |b|)).mono'
+        ((hc.mono (by intro t ht; exact ht.1)).aestronglyMeasurable measurableSet_Ioc) ?_
     filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht
     have hsin : t ≤ Real.sinh (2*t) := by
       have := Real.self_le_sinh_iff.mpr (show 0 ≤ 2*t by linarith [ht.1])
@@ -709,7 +783,8 @@ lemma pcfIntegral4_weight_integrable {b : ℝ} (hb : b < 1) :
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
     calc Real.exp (b*t) / Real.sqrt (Real.sinh (2*t)) ≤ Real.exp (b*t) / (Real.exp t/2) :=
-        div_le_div_of_nonneg_left (by positivity) (by positivity) (pcfIntegral4_sqrt_sinh_lower ht.le)
+        div_le_div_of_nonneg_left (by positivity) (by positivity)
+            (pcfIntegral4_sqrt_sinh_lower ht.le)
       _ = 2 * Real.exp ((b-1)*t) := by
         rw [div_div_eq_mul_div, mul_comm (Real.exp (b*t)), mul_div_assoc, ← Real.exp_sub]
         congr 2
@@ -812,7 +887,8 @@ lemma pcfIntegral4_tanh_continuous : Continuous (fun t : ℝ => (Real.tanh t : �
 lemma pcfIntegral4_moment_norm_le (a z : ℂ) (n : ℕ) (t : ℝ) :
     ‖(Real.tanh t : ℂ)^n * pcfIntegral4Kernel a z t‖ ≤ ‖pcfIntegral4Kernel a z t‖ := by
   rw [norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs]
-  exact mul_le_of_le_one_left (norm_nonneg _) (pow_le_one₀ (abs_nonneg _) (Real.abs_tanh_lt_one t).le)
+  exact mul_le_of_le_one_left (norm_nonneg _)
+      (pow_le_one₀ (abs_nonneg _) (Real.abs_tanh_lt_one t).le)
 
 /-- Every nonnegative hyperbolic moment is absolutely integrable. -/
 lemma pcfIntegral4_moment_integrable {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : ℂ) :
@@ -977,7 +1053,8 @@ lemma pcfIntegral4_tanh_kernel_continuous_zero (a z : ℂ) :
 /-- Integration by parts gives the four-moment relation. -/
 lemma pcfIntegral4_moment_relation {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
     pcfIntegral4Moment a 0 z + 4*a*pcfIntegral4Moment a 1 z -
-      3*pcfIntegral4Moment a 2 z + z^2*(pcfIntegral4Moment a 1 z - pcfIntegral4Moment a 3 z) = 0 := by
+      3*pcfIntegral4Moment a 2 z + z^2*(pcfIntegral4Moment a 1 z - pcfIntegral4Moment a 3 z) = 0 :=
+          by
   let T (n : ℕ) (t : ℝ) : ℂ := (Real.tanh t : ℂ)^n * pcfIntegral4Kernel a z t
   have hT (n : ℕ) : IntegrableOn (T n) (Ioi 0) := pcfIntegral4_moment_integrable ha n z
   let R' (t : ℝ) := (1/2:ℂ)*T 0 t + 2*a*T 1 t - (3/2:ℂ)*T 2 t +
@@ -1101,8 +1178,11 @@ theorem pcfProduct_zero_beta_v {v : ℂ} (hv : 0 < v.re) :
   -- Eliminate the beta and duplication factors before the final square identity.
   have hg : Gamma (2*v)*betaIntegral v (1/2) = F^2 * Gamma v^2 := by
     apply mul_right_cancel₀ hG1
-    calc _ = Gamma (2*v)*(Gamma v*(Real.sqrt π : ℂ)) := by rw [mul_assoc, mul_comm _ (Gamma (v+1/2)), ← hbeta]
-         _ = F^2*Gamma v*(Gamma v*Gamma (v+1/2)) := by rw [hdup]; linear_combination -Gamma (2*v)*Gamma v*(Real.sqrt π : ℂ)*hpow
+    calc _ = Gamma (2*v)*(Gamma v*(Real.sqrt π : ℂ)) := by rw
+                                                             [mul_assoc, mul_comm _ (Gamma (v+1/2)),
+        ← hbeta]
+         _ = F^2*Gamma v*(Gamma v*Gamma (v+1/2)) := by rw [hdup]; linear_combination -Gamma
+                                                         (2*v)*Gamma v*(Real.sqrt π : ℂ)*hpow
          _ = _ := by ring
   rw [hg]
   rw [hs2]
@@ -1234,7 +1314,8 @@ lemma pcfIntegral4_exp_coth {t : ℝ} (ht : 0 < t) :
     rw [Real.tanh_eq_sinh_div_cosh]
     field_simp
     rw [Real.sinh_eq, Real.cosh_eq, Real.cosh_eq, Real.sinh_eq]
-    simp only [show 2*t = t+t by ring, show -2*t = -(t+t) by ring, show t*2 = t+t by ring, Real.exp_neg, Real.exp_add]
+    simp only [show 2*t = t+t by ring, show -2*t = -(t+t) by ring, show t*2 = t+t
+                                                               by ring, Real.exp_neg, Real.exp_add]
     have he := Real.exp_ne_zero t
     field_simp
     ring
@@ -1288,7 +1369,8 @@ lemma pcfIntegral4_first_moment {a : ℂ} (ha : a.re < 1/2) :
   have ht : Tendsto F atTop (𝓝 0) := by
     have he : Tendsto (fun t : ℝ => exp (-2*(t : ℂ))) atTop (𝓝 0) := by
       have h := (continuous_ofReal.tendsto 0).comp
-        (Real.tendsto_exp_atBot.comp (tendsto_id.const_mul_atTop_of_neg (by norm_num : (-2 : ℝ) < 0)))
+        (Real.tendsto_exp_atBot.comp
+            (tendsto_id.const_mul_atTop_of_neg (by norm_num : (-2 : ℝ) < 0)))
       change Tendsto (fun t : ℝ => (Real.exp (-2*t) : ℂ)) atTop (𝓝 0) at h
       refine h.congr' (Eventually.of_forall fun t => ?_)
       rw [ofReal_exp]

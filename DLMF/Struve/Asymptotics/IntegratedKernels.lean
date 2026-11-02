@@ -86,7 +86,8 @@ theorem struvePrim_norm_struveK_zero_le {α : ℝ} (hα : |α| < π / 2) {w : �
 
 /-- A local bound `‖𝐊₀(t y)‖ ≤ C t^{-1/2}`, uniform for `y` near a point of the slit plane. -/
 theorem struvePrim_local_bound {z₀ : ℂ} (hz₀ : z₀ ∈ slitPlane) :
-    ∃ V ∈ 𝓝 z₀, ∃ C : ℝ, ∀ y ∈ V, ∀ t : ℝ, 0 < t → ‖struveK 0 ((t : ℂ) * y)‖ ≤ C * t ^ (-(1 / 2 : ℝ)) := by
+    ∃ V ∈ 𝓝 z₀, ∃ C : ℝ, ∀ y ∈ V, ∀ t : ℝ, 0 < t → ‖struveK 0 ((t : ℂ) * y)‖ ≤ C *
+        t ^ (-(1 / 2 : ℝ)) := by
   set α : ℝ := -(arg z₀ / 2) with hα
   have hz0 : z₀ ≠ 0 := slitPlane_ne_zero hz₀
   have harg : |arg z₀| < π := by
@@ -110,7 +111,8 @@ theorem struvePrim_local_bound {z₀ : ℂ} (hz₀ : z₀ ∈ slitPlane) :
     rw [mul_assoc, re_ofReal_mul]; exact mul_pos ht (hc0.trans hy')
   refine (struvePrim_norm_struveK_zero_le hαπ hty).trans ?_
   rw [mul_assoc, re_ofReal_mul]
-  have hM0 : 0 ≤ ‖(2 : ℂ) / (Real.sqrt π * Gamma (1 / 2))‖ * Real.cos α ^ (-(1 / 2 : ℝ)) * Real.Gamma (1 / 2) := by
+  have hM0 : 0 ≤ ‖(2 : ℂ) / (Real.sqrt π * Gamma (1 / 2))‖ * Real.cos α ^ (-(1 / 2 : ℝ)) *
+      Real.Gamma (1 / 2) := by
     have := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 1 / 2)
     have hcα : 0 < Real.cos α := Real.cos_pos_of_mem_Ioo
       ⟨by linarith [neg_abs_le α], by linarith [le_abs_self α]⟩
@@ -183,7 +185,8 @@ theorem struvePrim_differentiableOn :
 /-- The DLMF.primitive `∫₀^z 𝐊₀` is a holomorphic antiderivative of `𝐊₀` on the slit plane. -/
 theorem struvePrim_hasDerivAt {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (DLMF.primitive (struveK 0)) (struveK 0 z) z := by
-  have hP : DLMF.primitive (struveK 0) = fun w : ℂ => w * ∫ t in (0 : ℝ)..1, struveK 0 ((t : ℂ) * w) := by
+  have hP : DLMF.primitive (struveK 0) = fun w : ℂ => w * ∫ t in (0 : ℝ)..1,
+      struveK 0 ((t : ℂ) * w) := by
     funext w; simp [DLMF.primitive, segmentIntegral]
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have hPd : DifferentiableAt ℂ (DLMF.primitive (struveK 0)) z := by
@@ -336,11 +339,13 @@ theorem struvePrim_integral_log {x : ℝ} (hx : 0 < x) :
     congr 1
     field_simp
   have hint : IntegrableOn (fun τ : ℝ => (1 / (1 + τ) - 1 / (1 + x * τ)) / τ) (Ioi 0) := by
-    refine Integrable.mono' ((integrable_inv_one_add_sq.const_mul (|x - 1| * (1 + 1 / x))).integrableOn)
+    refine Integrable.mono'
+        ((integrable_inv_one_add_sq.const_mul (|x - 1| * (1 + 1 / x))).integrableOn)
       ((ContinuousOn.div (ContinuousOn.sub
         (continuousOn_const.div (by fun_prop) fun τ (hτ : 0 < τ) => by positivity)
         (continuousOn_const.div (by fun_prop) fun τ (hτ : 0 < τ) => by positivity)) continuousOn_id
-        fun τ hτ => (ne_of_gt (show (0 : ℝ) < τ from hτ))).aestronglyMeasurable measurableSet_Ioi) ?_
+        fun τ hτ => (ne_of_gt (show (0 : ℝ) < τ from hτ))).aestronglyMeasurable
+            measurableSet_Ioi) ?_
     refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun τ hτ => ?_)
     have hτ0 : (0 : ℝ) < τ := hτ
     have e : (1 / (1 + τ) - 1 / (1 + x * τ)) / τ = (x - 1) / ((1 + τ) * (1 + x * τ)) := by
@@ -376,7 +381,8 @@ theorem struvePrim_integral_euler {x : ℝ} (hx : 0 < x) :
   · simp_rw [hpt]; exact hgi.const_mul x
   · simp_rw [hpt]
     rw [integral_const_mul, integral_comp_mul_left_Ioi g 0 hx, mul_zero, smul_eq_mul,
-      ← mul_assoc, mul_inv_cancel₀ hx.ne', one_mul, DLMF.Gamma.eulerMascheroni_eq_integral_recip_one_add]
+      ← mul_assoc, mul_inv_cancel₀ hx.ne', one_mul,
+          DLMF.Gamma.eulerMascheroni_eq_integral_recip_one_add]
 
 /-- The combined Frullani-type integral: `∫₀^∞ ((1+τ²)^{-1/2} - e^{-xτ})/τ dτ = log 2x + γ`. -/
 theorem struvePrim_integral_log_two_mul {x : ℝ} (hx : 0 < x) :
@@ -445,7 +451,8 @@ theorem struvePrim_primitive_ofReal {x : ℝ} (hx : 0 < x) :
   -- the DLMF.primitive as a real interval integral
   have hP : DLMF.primitive (struveK 0) x = ((∫ u in (0 : ℝ)..x, k u : ℝ) : ℂ) := by
     simp only [DLMF.primitive, segmentIntegral, sub_zero, zero_add]
-    have h1 : ∫ t in (0 : ℝ)..1, struveK 0 (↑t * ↑x) = ∫ t in (0 : ℝ)..1, ((k (x * t) : ℝ) : ℂ) := by
+    have h1 : ∫ t in (0 : ℝ)..1, struveK 0 (↑t * ↑x) = ∫ t in (0 : ℝ)..1,
+        ((k (x * t) : ℝ) : ℂ) := by
       refine intervalIntegral.integral_congr_ae (Eventually.of_forall fun t ht => ?_)
       rw [uIoc_of_le zero_le_one] at ht
       rw [← ofReal_mul, mul_comm t x, struvePrim_struveK_zero_ofReal (by nlinarith [ht.1])]
@@ -461,12 +468,14 @@ theorem struvePrim_primitive_ofReal {x : ℝ} (hx : 0 < x) :
   have hgle : ∀ τ, g τ ≤ 1 := fun τ => by
     simp only [hg]; rw [div_le_one (Real.sqrt_pos.2 (by positivity))]
     exact Real.one_le_sqrt.2 (by nlinarith)
-  have hinner : ∀ τ ∈ Ioi (0 : ℝ), ∫ u in Ioc 0 x, f u τ = g τ * ((1 - Real.exp (-(x * τ))) / τ) := by
+  have hinner : ∀ τ ∈ Ioi (0 : ℝ), ∫ u in Ioc 0 x, f u τ = g τ *
+      ((1 - Real.exp (-(x * τ))) / τ) := by
     intro τ hτ
     rw [← intervalIntegral.integral_of_le hx.le]
     simp only [hf]
     rw [intervalIntegral.integral_mul_const, struvePrim_integral_exp (ne_of_gt hτ), mul_comm]
-  have hbd : ∀ τ ∈ Ioi (0 : ℝ), g τ * ((1 - Real.exp (-(x * τ))) / τ) ≤ 2 * (x + 1) * (1 + τ ^ 2)⁻¹ := by
+  have hbd : ∀ τ ∈ Ioi (0 : ℝ), g τ * ((1 - Real.exp (-(x * τ))) / τ) ≤ 2 * (x + 1) *
+      (1 + τ ^ 2)⁻¹ := by
     intro τ hτ
     have hτ0 : (0 : ℝ) < τ := hτ
     have he : 0 < Real.exp (-(x * τ)) := Real.exp_pos _
@@ -572,7 +581,8 @@ theorem struvePrim_rem_integrable {x : ℝ} (hx : 0 < x) :
       ≤ Real.exp (-(x * τ)) * 1 := mul_le_mul_of_nonneg_left hq (Real.exp_pos _).le
     _ = _ := mul_one _
 
-/-- On the positive axis, `∫₀^x 𝐊₀ - (2/π)(log 2x + γ) = (2/π) ∫₀^∞ e^{-xτ} (1 - (1+τ²)^{-1/2})/τ dτ`. -/
+/-- On the positive axis,
+`∫₀^x 𝐊₀ - (2/π)(log 2x + γ) = (2/π) ∫₀^∞ e^{-xτ} (1 - (1+τ²)^{-1/2})/τ dτ`. -/
 theorem struvePrim_remainder_ofReal {x : ℝ} (hx : 0 < x) :
     DLMF.primitive (struveK 0) x - 2 / π * (log (2 * x) + Real.eulerMascheroniConstant) =
       (((2 / π) * ∫ τ in Ioi (0 : ℝ),
@@ -635,7 +645,8 @@ theorem struvePrim_exists_of_eventually_sector {α : ℝ} {p : ℂ → Prop}
 /-- **Integration of a derivative bound in a sector.** If `G` is holomorphic on the slit plane,
 `G(t) → 0` along the positive axis, and `‖G'(z)‖ ≤ C ‖z‖^{-(m+1)}` for large `z` with
 `|arg z| ≤ α < π`, then `G(z) = O(z^{-m})` in `sector α`. -/
-theorem struvePrim_isBigO_of_deriv {G G' : ℂ → ℂ} {α : ℝ} (hα0 : 0 ≤ α) (hα : α < π) {m : ℕ} (hm : 0 < m)
+theorem struvePrim_isBigO_of_deriv {G G' : ℂ → ℂ} {α : ℝ} (hα0 : 0 ≤ α) (hα : α < π)
+    {m : ℕ} (hm : 0 < m)
     (hG : ∀ z ∈ slitPlane, HasDerivAt G (G' z) z)
     (hlim : Tendsto (fun t : ℝ => G t) atTop (𝓝 0)) {R C : ℝ} (hR : 0 < R)
     (hC : ∀ z : ℂ, R ≤ ‖z‖ → |arg z| ≤ α → ‖G' z‖ ≤ C * ‖z‖ ^ (-((m : ℤ) + 1))) :
@@ -695,7 +706,8 @@ theorem struvePrim_isBigO_of_deriv {G G' : ℂ → ℂ} {α : ℝ} (hα0 : 0 ≤
     push Not at hneg
     nlinarith [norm_nonneg (G' R)]
   have hev : ∀ᶠ z in sector α, R ≤ ‖z‖ ∧ z ∈ {z : ℂ | z ≠ 0 ∧ |arg z| ≤ α} :=
-    (((tendsto_comap.mono_left inf_le_left : Tendsto (fun z : ℂ => ‖z‖) (sector α) atTop)).eventually
+    (((tendsto_comap.mono_left inf_le_left : Tendsto (fun z : ℂ => ‖z‖) (sector α)
+        atTop)).eventually
       (eventually_ge_atTop R)).and
       (mem_inf_of_right (mem_principal_self _))
   refine IsBigO.of_bound (C / m + C * α) (hev.mono fun z ⟨hzR, hz0, hzα⟩ => ?_)

@@ -97,7 +97,8 @@ theorem trig_quadrant_signs (q : Fin 4) {θ : ℝ}
     have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
     have hc : Real.cos θ < 0 := Real.cos_neg_of_pi_div_two_lt_of_lt (by linarith) (by linarith)
     fin_cases j <;> simp [trigRealVector, trigQuadrantSigns, Real.tan_eq_sin_div_cos,
-      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, trigRealSign_of_neg, hs, hc, div_neg_of_pos_of_neg,
+      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, trigRealSign_of_neg, hs, hc,
+          div_neg_of_pos_of_neg,
       div_neg_of_neg_of_pos]
   · simp at h1 h2
     norm_num at h1 h2
@@ -108,7 +109,8 @@ theorem trig_quadrant_signs (q : Fin 4) {θ : ℝ}
       have := Real.cos_pos_of_mem_Ioo (x := θ - π) ⟨by linarith, by linarith⟩
       rw [Real.cos_sub_pi] at this; linarith
     fin_cases j <;> simp [trigRealVector, trigQuadrantSigns, Real.tan_eq_sin_div_cos,
-      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, trigRealSign_of_neg, hs, hc, div_pos_of_neg_of_neg]
+      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, trigRealSign_of_neg, hs, hc,
+          div_pos_of_neg_of_neg]
   · simp at h1 h2
     norm_num at h1 h2
     have hs : Real.sin θ < 0 := by
@@ -118,17 +120,20 @@ theorem trig_quadrant_signs (q : Fin 4) {θ : ℝ}
       have := Real.cos_pos_of_mem_Ioo (x := θ - 2*π) ⟨by linarith, by linarith⟩
       rwa [Real.cos_sub_two_pi] at this
     fin_cases j <;> simp [trigRealVector, trigQuadrantSigns, Real.tan_eq_sin_div_cos,
-      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, trigRealSign_of_neg, hs, hc, div_neg_of_pos_of_neg,
+      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, trigRealSign_of_neg, hs, hc,
+          div_neg_of_pos_of_neg,
       div_neg_of_neg_of_pos]
 
-/-- All quarter-period identities; reflection and the full period supply both signs in Table 4.16.2. -/
+/-- All quarter-period identities; reflection and the full period supply both signs in Table 4.16.2.
+-/
 @[dlmf 4.16.T2]
 theorem trig_quarter_period_table (θ : ℝ) (q : Fin 4) :
     trigRealVector (θ+(q:ℝ)*π/2)=
     (![trigRealVector θ,
       ![Real.cos θ,-Real.sin θ,-Real.cot θ,(Real.cos θ)⁻¹,-(Real.sin θ)⁻¹,-Real.tan θ],
       ![-Real.sin θ,-Real.cos θ,Real.tan θ,-(Real.sin θ)⁻¹,-(Real.cos θ)⁻¹,Real.cot θ],
-      ![-Real.cos θ,Real.sin θ,-Real.cot θ,-(Real.cos θ)⁻¹,(Real.sin θ)⁻¹,-Real.tan θ]] : Fin 4→Fin 6→ℝ) q := by
+      ![-Real.cos θ, Real.sin θ, -Real.cot θ, -(Real.cos θ)⁻¹, (Real.sin θ)⁻¹, -Real.tan θ]] : Fin
+          4→Fin 6→ℝ) q := by
   have hs3 : Real.sin (3*Real.pi/2)= -1 := by
     rw [show (3:ℝ)*Real.pi/2=Real.pi+Real.pi/2 by ring,Real.sin_add]
     norm_num
@@ -220,22 +225,32 @@ theorem trig_twelfth_exact_values (q : Fin 13) (j : Fin 6) (h : ¬TrigTwelfthPol
   have key : ∀ θ s c : ℝ, Real.sin θ = s → Real.cos θ = c →
       trigRealVector θ = ![s, c, s/c, s⁻¹, c⁻¹, c/s] := by
     intro θ s c hs hc
-    ext k; fin_cases k <;> simp [trigRealVector, Real.tan_eq_sin_div_cos, Real.cot_eq_cos_div_sin, hs, hc]
+    ext k; fin_cases k <;>
+        simp [trigRealVector, Real.tan_eq_sin_div_cos, Real.cot_eq_cos_div_sin, hs, hc]
   fin_cases q
   · rw [key _ 0 1 (by simp) (by simp)]
     fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢
   · rw [key _ _ _ (by simpa using s1) (by simpa using c1)]
     fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (2*π/12) = 1/2 := by rw [show (2:ℝ)*π/12 = π/6 by ring, Real.sin_pi_div_six]
-    have hc : Real.cos (2*π/12) = Real.sqrt 3/2 := by rw [show (2:ℝ)*π/12 = π/6 by ring, Real.cos_pi_div_six]
+    have hc : Real.cos (2*π/12) = Real.sqrt 3/2 := by
+                                                     rw [show (2:ℝ)*π/12 =
+                                                       π/6 by ring, Real.cos_pi_div_six]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
     fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
-  · have hs : Real.sin (3*π/12) = Real.sqrt 2/2 := by rw [show (3:ℝ)*π/12 = π/4 by ring, Real.sin_pi_div_four]
-    have hc : Real.cos (3*π/12) = Real.sqrt 2/2 := by rw [show (3:ℝ)*π/12 = π/4 by ring, Real.cos_pi_div_four]
+  · have hs : Real.sin (3*π/12) = Real.sqrt 2/2 := by
+                                                     rw [show (3:ℝ)*π/12 =
+                                                       π/4 by ring, Real.sin_pi_div_four]
+    have hc : Real.cos (3*π/12) = Real.sqrt 2/2 := by
+                                                     rw [show (3:ℝ)*π/12 =
+                                                       π/4 by ring, Real.cos_pi_div_four]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
     fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢
-  · have hs : Real.sin (4*π/12) = Real.sqrt 3/2 := by rw [show (4:ℝ)*π/12 = π/3 by ring, Real.sin_pi_div_three]
-    have hc : Real.cos (4*π/12) = 1/2 := by rw [show (4:ℝ)*π/12 = π/3 by ring, Real.cos_pi_div_three]
+  · have hs : Real.sin (4*π/12) = Real.sqrt 3/2 := by
+                                                     rw [show (4:ℝ)*π/12 =
+                                                       π/3 by ring, Real.sin_pi_div_three]
+    have hc : Real.cos (4*π/12) = 1/2 := by
+                                           rw [show (4:ℝ)*π/12 = π/3 by ring, Real.cos_pi_div_three]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
     fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (5*π/12) = Real.sqrt 2 * (Real.sqrt 3 + 1) / 4 := by
@@ -282,7 +297,8 @@ theorem trig_twelfth_exact_values (q : Fin 13) (j : Fin 6) (h : ¬TrigTwelfthPol
     fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢
 
 /-- Real reciprocal blow-up at a simple zero. -/
-private lemma tendsto_abs_mul_inv_atTop_of_simple_zero {g h : ℝ → ℝ} {a : ℝ} {g' : ℝ} (hg : HasDerivAt g g' a) (hg' : g' ≠ 0)
+private lemma tendsto_abs_mul_inv_atTop_of_simple_zero {g h : ℝ → ℝ} {a : ℝ} {g' : ℝ}
+    (hg : HasDerivAt g g' a) (hg' : g' ≠ 0)
     (hga : g a = 0) (hh : ContinuousAt h a) (hha : h a ≠ 0) :
     Tendsto (fun θ => |h θ * (g θ)⁻¹|) (𝓝[≠] a) atTop := by
   have hne : ∀ᶠ θ in 𝓝[≠] a, g θ ≠ 0 := by simpa [hga] using hg.eventually_ne hg'
@@ -305,24 +321,31 @@ theorem trig_twelfth_poles (q : Fin 13) (j : Fin 6) (h : TrigTwelfthPole q j) :
   have hsin : ∀ a : ℝ, Real.sin a = 0 → Real.cos a ≠ 0 →
       Tendsto (fun θ : ℝ => |1 * (Real.sin θ)⁻¹|) (𝓝[≠] a) atTop ∧
       Tendsto (fun θ : ℝ => |Real.cos θ * (Real.sin θ)⁻¹|) (𝓝[≠] a) atTop := fun a h0 hc =>
-    ⟨tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_sin a) hc h0 continuousAt_const one_ne_zero,
-     tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_sin a) hc h0 Real.continuous_cos.continuousAt hc⟩
+    ⟨tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_sin a) hc h0
+        continuousAt_const one_ne_zero,
+     tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_sin a) hc h0
+         Real.continuous_cos.continuousAt hc⟩
   have hcos : ∀ a : ℝ, Real.cos a = 0 → Real.sin a ≠ 0 →
       Tendsto (fun θ : ℝ => |1 * (Real.cos θ)⁻¹|) (𝓝[≠] a) atTop ∧
       Tendsto (fun θ : ℝ => |Real.sin θ * (Real.cos θ)⁻¹|) (𝓝[≠] a) atTop := fun a h0 hs =>
-    ⟨tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0 continuousAt_const one_ne_zero,
-     tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0 Real.continuous_sin.continuousAt hs⟩
+    ⟨tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0
+        continuousAt_const one_ne_zero,
+     tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0
+         Real.continuous_sin.continuousAt hs⟩
   simp only [TrigTwelfthPole] at h
   rcases h with ⟨hq | hq, hj | hj⟩ | ⟨hq, hj | hj⟩ <;> subst hq <;> subst hj
   · simpa [trigRealVector] using (hsin 0 (by simp) (by simp)).1
-  · simpa [trigRealVector, Real.cot_eq_cos_div_sin, div_eq_mul_inv] using (hsin 0 (by simp) (by simp)).2
+  · simpa [trigRealVector, Real.cot_eq_cos_div_sin, div_eq_mul_inv] using
+        (hsin 0 (by simp) (by simp)).2
   · simpa [trigRealVector] using (hsin π (by simp) (by simp)).1
   · have e : ((12:Fin 13):ℝ)*π/12 = π := by norm_num
     rw [e]
-    simpa [trigRealVector, Real.cot_eq_cos_div_sin, div_eq_mul_inv] using (hsin π (by simp) (by simp)).2
+    simpa [trigRealVector, Real.cot_eq_cos_div_sin, div_eq_mul_inv] using
+        (hsin π (by simp) (by simp)).2
   · have e : ((6:Fin 13):ℝ)*π/12 = π/2 := by norm_num; ring
     rw [e]
-    simpa [trigRealVector, Real.tan_eq_sin_div_cos, div_eq_mul_inv] using (hcos (π/2) (by simp) (by simp)).2
+    simpa [trigRealVector, Real.tan_eq_sin_div_cos, div_eq_mul_inv] using
+        (hcos (π/2) (by simp) (by simp)).2
   · have e : ((6:Fin 13):ℝ)*π/12 = π/2 := by norm_num; ring
     rw [e]
     simpa [trigRealVector] using (hcos (π/2) (by simp) (by simp)).1
@@ -335,7 +358,8 @@ def inverseTrigRealVector (x : ℝ) : Fin 6→ℝ :=
 @[dlmf 4.23.T1]
 theorem inverse_trig_exact_table (q : Fin 3) (j : Fin 6) (h : q≠1 ∨ (j:ℕ)<3) :
     inverseTrigRealVector ((q:ℝ)-1) j=
-      (![![-π/2,π,-π/4,-π/2,π,-π/4],![0,π/2,0,0,0,0],![π/2,0,π/4,π/2,0,π/4]] : Fin 3→Fin 6→ℝ) q j := by
+      (![![-π/2, π, -π/4, -π/2, π, -π/4], ![0, π/2, 0, 0, 0, 0], ![π/2, 0, π/4, π/2, 0, π/4]] : Fin
+          3→Fin 6→ℝ) q j := by
   fin_cases q <;> fin_cases j <;>
     norm_num [inverseTrigRealVector,Real.arcsin_neg,Real.arccos_neg,Real.arctan_neg,neg_div] at *
 
@@ -384,7 +408,8 @@ theorem arcsec_arccot_interrelation {a : ℝ} (ha : 1<a) :
 
 /-- DLMF 4.26.E3: hasDerivAt neg log cos. -/
 @[dlmf 4.26.E3]
-theorem hasDerivAt_neg_log_cos {x : ℝ} (hx : |x|<π/2) : HasDerivAt (fun x : ℝ => -Real.log (Real.cos x)) (Real.tan x) x := by
+theorem hasDerivAt_neg_log_cos {x : ℝ} (hx : |x|<π/2) : HasDerivAt
+    (fun x : ℝ => -Real.log (Real.cos x)) (Real.tan x) x := by
   have hc : Real.cos x≠0 := (Real.cos_pos_of_mem_Ioo (abs_lt.mp hx)).ne'
   convert ((Real.hasDerivAt_cos x).log hc).neg using 1
   simp only [Real.tan_eq_sin_div_cos]
@@ -392,10 +417,12 @@ theorem hasDerivAt_neg_log_cos {x : ℝ} (hx : |x|<π/2) : HasDerivAt (fun x : �
 
 /-- DLMF 4.26.E4: hasDerivAt log tan half. -/
 @[dlmf 4.26.E4]
-theorem hasDerivAt_log_tan_half {x : ℝ} (hx : x∈Ioo 0 π) : HasDerivAt (fun x : ℝ => Real.log (Real.tan (x/2))) ((Real.sin x)⁻¹) x := by
+theorem hasDerivAt_log_tan_half {x : ℝ} (hx : x∈Ioo 0 π) : HasDerivAt
+    (fun x : ℝ => Real.log (Real.tan (x/2))) ((Real.sin x)⁻¹) x := by
   have hhalf : x/2∈Ioo (-(π/2)) (π/2) := ⟨by linarith [Real.pi_pos,hx.1],by linarith [hx.2]⟩
   have hc : Real.cos (x/2)≠0 := (Real.cos_pos_of_mem_Ioo hhalf).ne'
-  have hs : Real.sin (x/2)≠0 := (Real.sin_pos_of_pos_of_lt_pi (by linarith [hx.1]) (by linarith [hx.2,Real.pi_pos])).ne'
+  have hs : Real.sin (x/2)≠0 :=
+      (Real.sin_pos_of_pos_of_lt_pi (by linarith [hx.1]) (by linarith [hx.2, Real.pi_pos])).ne'
   have ht : Real.tan (x/2)≠0 := by simpa only [Real.tan_eq_sin_div_cos] using div_ne_zero hs hc
   have hd0 : HasDerivAt (fun t:ℝ=>Real.tan (t/2)) (1/Real.cos (x/2)^2*(1/2)) x := by
     exact (Real.hasDerivAt_tan (x:=x/2) hc).comp x ((hasDerivAt_id x).div_const (2:ℝ))
@@ -409,7 +436,8 @@ theorem hasDerivAt_log_tan_half {x : ℝ} (hx : x∈Ioo 0 π) : HasDerivAt (fun 
 
 /-- DLMF 4.26.E5: hasDerivAt inverse gudermannian. -/
 @[dlmf 4.26.E5]
-theorem hasDerivAt_inverse_gudermannian {x : ℝ} (hx : |x|<π/2) : HasDerivAt (inverseGudermannian) ((Real.cos x)⁻¹) x := by
+theorem hasDerivAt_inverse_gudermannian {x : ℝ} (hx : |x|<π/2) : HasDerivAt (inverseGudermannian)
+    ((Real.cos x)⁻¹) x := by
   have hcos : ∀t∈uIcc (0:ℝ) x,Real.cos t≠0 := by
     intro t ht
     apply (Real.cos_pos_of_mem_Ioo _).ne'
@@ -418,7 +446,8 @@ theorem hasDerivAt_inverse_gudermannian {x : ℝ} (hx : |x|<π/2) : HasDerivAt (
       exact ⟨by linarith [ht.1,Real.pi_pos],by linarith [ht.2,(abs_lt.mp hx).2]⟩
     · rw [uIcc_of_ge h] at ht
       exact ⟨by linarith [ht.1,(abs_lt.mp hx).1],by linarith [ht.2,Real.pi_pos]⟩
-  have hcont : ContinuousOn (fun t:ℝ=>(Real.cos t)⁻¹) (uIcc 0 x) := Real.continuous_cos.continuousOn.inv₀ hcos
+  have hcont : ContinuousOn (fun t:ℝ=>(Real.cos t)⁻¹) (uIcc 0 x) :=
+      Real.continuous_cos.continuousOn.inv₀ hcos
   have hxcos : Real.cos x≠0 := (Real.cos_pos_of_mem_Ioo (abs_lt.mp hx)).ne'
   apply intervalIntegral.integral_hasDerivAt_right hcont.intervalIntegrable
   · exact Real.continuous_cos.measurable.inv.aestronglyMeasurable.stronglyMeasurableAtFilter
@@ -426,11 +455,13 @@ theorem hasDerivAt_inverse_gudermannian {x : ℝ} (hx : |x|<π/2) : HasDerivAt (
 
 /-- DLMF 4.26.E6: hasDerivAt log sin. -/
 @[dlmf 4.26.E6]
-theorem hasDerivAt_log_sin {x : ℝ} (hx : x∈Ioo 0 π) : HasDerivAt (fun x : ℝ => Real.log (Real.sin x)) (Real.cot x) x := by
+theorem hasDerivAt_log_sin {x : ℝ} (hx : x∈Ioo 0 π) : HasDerivAt
+    (fun x : ℝ => Real.log (Real.sin x)) (Real.cot x) x := by
   have hs : Real.sin x≠0 := (Real.sin_pos_of_pos_of_lt_pi hx.1 hx.2).ne'
   simpa only [Real.cot_eq_cos_div_sin] using (Real.hasDerivAt_sin x).log hs
 
-/-- The exponential-trigonometric primitive, valid for complex parameters when its denominator is nonzero. -/
+/-- The exponential-trigonometric primitive, valid for complex parameters when its denominator is
+nonzero. -/
 @[dlmf 4.26.E7]
 theorem hasDerivAt_exp_sin_antiderivative {a b : ℂ} (h : a^2+b^2≠0) (z : ℂ) :
     HasDerivAt (fun z : ℂ => Complex.exp (a*z)/(a^2+b^2)*(a*Complex.sin (b*z)-b*Complex.cos (b*z)))
@@ -444,7 +475,8 @@ theorem hasDerivAt_exp_sin_antiderivative {a b : ℂ} (h : a^2+b^2≠0) (z : ℂ
     field_simp
     ring
 
-/-- The exponential-trigonometric primitive, valid for complex parameters when its denominator is nonzero. -/
+/-- The exponential-trigonometric primitive, valid for complex parameters when its denominator is
+nonzero. -/
 @[dlmf 4.26.E8]
 theorem hasDerivAt_exp_cos_antiderivative {a b : ℂ} (h : a^2+b^2≠0) (z : ℂ) :
     HasDerivAt (fun z : ℂ => Complex.exp (a*z)/(a^2+b^2)*(a*Complex.cos (b*z)+b*Complex.sin (b*z)))
@@ -556,7 +588,8 @@ theorem fresnel_integrals_elementary :
 
 /-- DLMF 4.26.E14: hasDerivAt arcsin antiderivative. -/
 @[dlmf 4.26.E14]
-theorem hasDerivAt_arcsin_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt (fun x : ℝ => x*Real.arcsin x+Real.sqrt (1-x^2)) (Real.arcsin x) x := by
+theorem hasDerivAt_arcsin_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt
+    (fun x : ℝ => x*Real.arcsin x+Real.sqrt (1-x^2)) (Real.arcsin x) x := by
   have hx1 : x≠1 := ne_of_lt (abs_lt.mp hx).2
   have hxm : x≠ -1 := ne_of_gt (abs_lt.mp hx).1
   have hs : 0<1-x^2 := by nlinarith [(abs_lt.mp hx).1,(abs_lt.mp hx).2]
@@ -567,11 +600,13 @@ theorem hasDerivAt_arcsin_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt (fu
   convert hd using 1
   · rfl
   · dsimp only [id,Pi.mul_apply,Pi.sub_apply,Pi.add_apply,Pi.pow_apply]
-    norm_num only [Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one,one_mul] <;> field_simp <;> nlinarith
+    norm_num only [Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one, one_mul] <;>
+        field_simp <;> nlinarith
 
 /-- DLMF 4.26.E15: hasDerivAt arccos antiderivative. -/
 @[dlmf 4.26.E15]
-theorem hasDerivAt_arccos_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt (fun x : ℝ => x*Real.arccos x-Real.sqrt (1-x^2)) (Real.arccos x) x := by
+theorem hasDerivAt_arccos_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt
+    (fun x : ℝ => x*Real.arccos x-Real.sqrt (1-x^2)) (Real.arccos x) x := by
   have hx1 : x≠1 := ne_of_lt (abs_lt.mp hx).2
   have hxm : x≠ -1 := ne_of_gt (abs_lt.mp hx).1
   have hs : 0<1-x^2 := by nlinarith [(abs_lt.mp hx).1,(abs_lt.mp hx).2]
@@ -582,11 +617,13 @@ theorem hasDerivAt_arccos_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt (fu
   convert hd using 1
   · rfl
   · dsimp only [id,Pi.mul_apply,Pi.sub_apply,Pi.add_apply,Pi.pow_apply]
-    norm_num only [Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one,one_mul] <;> field_simp <;> nlinarith
+    norm_num only [Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one, one_mul] <;>
+        field_simp <;> nlinarith
 
 /-- DLMF 4.26.E16: hasDerivAt arctan antiderivative. -/
 @[dlmf 4.26.E16]
-theorem hasDerivAt_arctan_antiderivative {x : ℝ} : HasDerivAt (fun x : ℝ => x*Real.arctan x-Real.log (1+x^2)/2) (Real.arctan x) x := by
+theorem hasDerivAt_arctan_antiderivative {x : ℝ} : HasDerivAt
+    (fun x : ℝ => x*Real.arctan x-Real.log (1+x^2)/2) (Real.arctan x) x := by
   have hlog : (1+x^2:ℝ)≠0 := by positivity
   have hd := ((hasDerivAt_id x).mul (Real.hasDerivAt_arctan x)).sub
     ((((hasDerivAt_id x).pow 2).const_add 1).log hlog |>.div_const 2)
@@ -598,7 +635,8 @@ theorem hasDerivAt_arctan_antiderivative {x : ℝ} : HasDerivAt (fun x : ℝ => 
 
 /-- DLMF 4.26.E17: hasDerivAt arccsc antiderivative. -/
 @[dlmf 4.26.E17]
-theorem hasDerivAt_arccsc_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt (fun x : ℝ => x*Real.arcsin x⁻¹+Real.log (x+Real.sqrt (x^2-1))) (Real.arcsin x⁻¹) x := by
+theorem hasDerivAt_arccsc_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt
+    (fun x : ℝ => x*Real.arcsin x⁻¹+Real.log (x+Real.sqrt (x^2-1))) (Real.arcsin x⁻¹) x := by
   have hx0 : 0<x := lt_trans zero_lt_one hx
   have hi : x⁻¹<1 := inv_lt_one_of_one_lt₀ hx
   have hip : 0<x⁻¹ := inv_pos.mpr hx0
@@ -606,7 +644,8 @@ theorem hasDerivAt_arccsc_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt (fun 
   have hs : 0<x^2-1 := by nlinarith
   have hs0 : Real.sqrt (x^2-1)≠0 := (Real.sqrt_pos.mpr hs).ne'
   have hinv : HasDerivAt (fun t:ℝ=>Real.arcsin t⁻¹) ((Real.sqrt (1-x⁻¹^2))⁻¹ * (-1/x^2)) x := by
-    simpa only [one_div,id_eq,Function.comp_def] using (Real.hasDerivAt_arcsin hxm hi.ne).comp x ((hasDerivAt_id x).inv hx0.ne')
+    simpa only [one_div, id_eq, Function.comp_def] using (Real.hasDerivAt_arcsin hxm hi.ne).comp x
+        ((hasDerivAt_id x).inv hx0.ne')
   have hd := ((hasDerivAt_id x).mul hinv).add (Real.hasDerivAt_arcosh hx)
   convert hd using 1
   · rfl
@@ -617,7 +656,8 @@ theorem hasDerivAt_arccsc_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt (fun 
 
 /-- DLMF 4.26.E18: hasDerivAt arcsec antiderivative. -/
 @[dlmf 4.26.E18]
-theorem hasDerivAt_arcsec_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt (fun x : ℝ => x*Real.arccos x⁻¹-Real.log (x+Real.sqrt (x^2-1))) (Real.arccos x⁻¹) x := by
+theorem hasDerivAt_arcsec_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt
+    (fun x : ℝ => x*Real.arccos x⁻¹-Real.log (x+Real.sqrt (x^2-1))) (Real.arccos x⁻¹) x := by
   have hx0 : 0<x := lt_trans zero_lt_one hx
   have hi : x⁻¹<1 := inv_lt_one_of_one_lt₀ hx
   have hip : 0<x⁻¹ := inv_pos.mpr hx0
@@ -625,7 +665,8 @@ theorem hasDerivAt_arcsec_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt (fun 
   have hs : 0<x^2-1 := by nlinarith
   have hs0 : Real.sqrt (x^2-1)≠0 := (Real.sqrt_pos.mpr hs).ne'
   have hinv : HasDerivAt (fun t:ℝ=>Real.arccos t⁻¹) (-(Real.sqrt (1-x⁻¹^2))⁻¹ * (-1/x^2)) x := by
-    simpa only [one_div,id_eq,Function.comp_def] using (Real.hasDerivAt_arccos hxm hi.ne).comp x ((hasDerivAt_id x).inv hx0.ne')
+    simpa only [one_div, id_eq, Function.comp_def] using (Real.hasDerivAt_arccos hxm hi.ne).comp x
+        ((hasDerivAt_id x).inv hx0.ne')
   have hd := ((hasDerivAt_id x).mul hinv).sub (Real.hasDerivAt_arcosh hx)
   convert hd using 1
   · rfl
@@ -636,7 +677,8 @@ theorem hasDerivAt_arcsec_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt (fun 
 
 /-- DLMF 4.26.E19: hasDerivAt arccot antiderivative. -/
 @[dlmf 4.26.E19]
-theorem hasDerivAt_arccot_antiderivative {x : ℝ} (hx : 0<x) : HasDerivAt (fun x : ℝ => x*Real.arctan x⁻¹+Real.log (1+x^2)/2) (Real.arctan x⁻¹) x := by
+theorem hasDerivAt_arccot_antiderivative {x : ℝ} (hx : 0<x) : HasDerivAt
+    (fun x : ℝ => x*Real.arctan x⁻¹+Real.log (1+x^2)/2) (Real.arctan x⁻¹) x := by
   have hx0 : x≠0 := hx.ne'
   have hlog : (1+x^2:ℝ)≠0 := by positivity
   have hd := ((hasDerivAt_id x).mul ((hasDerivAt_id x).inv hx0 |>.arctan)).add
@@ -649,7 +691,8 @@ theorem hasDerivAt_arccot_antiderivative {x : ℝ} (hx : 0<x) : HasDerivAt (fun 
 
 /-- DLMF 4.26.E20: hasDerivAt mul arcsin antiderivative. -/
 @[dlmf 4.26.E20]
-theorem hasDerivAt_mul_arcsin_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt (fun x : ℝ => (x^2/2-1/4)*Real.arcsin x+x/4*Real.sqrt (1-x^2)) (x*Real.arcsin x) x := by
+theorem hasDerivAt_mul_arcsin_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt
+    (fun x : ℝ => (x^2/2-1/4)*Real.arcsin x+x/4*Real.sqrt (1-x^2)) (x*Real.arcsin x) x := by
   have hx1 : x≠1 := ne_of_lt (abs_lt.mp hx).2
   have hxm : x≠ -1 := ne_of_gt (abs_lt.mp hx).1
   have hs : 0<1-x^2 := by nlinarith [(abs_lt.mp hx).1,(abs_lt.mp hx).2]
@@ -662,11 +705,13 @@ theorem hasDerivAt_mul_arcsin_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt
   convert hd using 1
   · rfl
   · dsimp only [id,Pi.mul_apply,Pi.sub_apply,Pi.add_apply,Pi.pow_apply]
-    norm_num only [Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one,one_mul] <;> field_simp <;> nlinarith
+    norm_num only [Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one, one_mul] <;>
+        field_simp <;> nlinarith
 
 /-- DLMF 4.26.E21: hasDerivAt mul arccos antiderivative. -/
 @[dlmf 4.26.E21]
-theorem hasDerivAt_mul_arccos_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt (fun x : ℝ => (x^2/2-1/4)*Real.arccos x-x/4*Real.sqrt (1-x^2)) (x*Real.arccos x) x := by
+theorem hasDerivAt_mul_arccos_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt
+    (fun x : ℝ => (x^2/2-1/4)*Real.arccos x-x/4*Real.sqrt (1-x^2)) (x*Real.arccos x) x := by
   have hx1 : x≠1 := ne_of_lt (abs_lt.mp hx).2
   have hxm : x≠ -1 := ne_of_gt (abs_lt.mp hx).1
   have hs : 0<1-x^2 := by nlinarith [(abs_lt.mp hx).1,(abs_lt.mp hx).2]
@@ -679,7 +724,8 @@ theorem hasDerivAt_mul_arccos_antiderivative {x : ℝ} (hx : |x|<1) : HasDerivAt
   convert hd using 1
   · rfl
   · dsimp only [id,Pi.mul_apply,Pi.sub_apply,Pi.add_apply,Pi.pow_apply]
-    norm_num only [Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one,one_mul] <;> field_simp <;> nlinarith
+    norm_num only [Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one, one_mul] <;>
+        field_simp <;> nlinarith
 
 /-- Complex antiderivatives use local continuous logarithm branches and exclude reciprocal poles. -/
 @[dlmf 4.26.i]
@@ -851,7 +897,8 @@ theorem complex_inverse_sin_cos_primitives {z : ℂ} (hz : z∈arcsinCutPlane) :
     exact (Complex.mem_slitPlane_iff_arg.mp hq).2 hs.symm
   have hS:HasDerivAt (fun w:ℂ=>Complex.sqrt (1-w^2)) (-z/Complex.sqrt (1-z^2)) z := by
     convert (trig_hasDerivAt_sqrt hq).comp z (((hasDerivAt_id z).pow 2).const_sub 1) using 1 <;>
-      simp only [id_eq,Function.comp_def,Pi.pow_apply,Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one] <;> ring
+      simp only [id_eq, Function.comp_def, Pi.pow_apply, Nat.cast_ofNat, Nat.reduceSub, pow_one,
+          mul_one] <;> ring
   have hA:=trig_hasDerivAt_arcsin hz
   have hC:=hasDerivAt_arccos_principal hz
   have hroot:=trig_sqrt_sq (1-z^2)

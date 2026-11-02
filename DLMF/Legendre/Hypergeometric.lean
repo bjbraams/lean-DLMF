@@ -69,10 +69,12 @@ theorem legendreGaussF_normalization {a b c z : ℂ} (hc : ∀ n : ℕ, c ≠ -n
 /-- Pochhammer products supply the limiting gamma quotient at exceptional degrees. -/
 @[dlmf 14.3.E4]
 theorem ferrersP_integer_hypergeometric_4 (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP ν m x=(-1)^m*poch (ν-m+1) (2*m)/2^m*(1-x^2:ℂ)^((m:ℂ)/2)*regularizedGaussHG (ν+m+1) (m-ν) (m+1) ((1-x)/2) := by
+    ferrersP ν m x=(-1)^m*poch (ν-m+1) (2*m)/2^m*(1-x^2:ℂ)^((m:ℂ)/2)*regularizedGaussHG (ν+m+1)
+        (m-ν) (m+1) ((1-x)/2) := by
   rcases m with _ | k
   · simp [ferrersP, poch_zero]
-  have hw := mem_cutPlane_of_one_add (show 1+(x:ℂ) ∈ slitPlane from Or.inl (by simp; linarith [hx.1]))
+  have hw := mem_cutPlane_of_one_add
+      (show 1+(x:ℂ) ∈ slitPlane from Or.inl (by simp; linarith [hx.1]))
   unfold ferrersP
   rw [show 1-((k+1:ℕ):ℂ) = -(k:ℂ) by push_cast; ring, regularizedGaussHG_neg_nat _ _ _ hw,
     show ν+1+k+1 = ν+((k+1:ℕ):ℂ)+1 by push_cast; ring,
@@ -85,10 +87,12 @@ theorem ferrersP_integer_hypergeometric_4 (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x
 /-- Pochhammer products supply the limiting gamma quotient at exceptional degrees. -/
 @[dlmf 14.3.E5]
 theorem ferrersP_integer_hypergeometric_5 (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP ν m x=(-1)^m*poch (ν-m+1) (2*m)*((1-x)/(1+x):ℂ)^((m:ℂ)/2)*regularizedGaussHG (ν+1) (-ν) (m+1) ((1-x)/2) := by
+    ferrersP ν m x=(-1)^m*poch (ν-m+1) (2*m)*((1-x)/(1+x):ℂ)^((m:ℂ)/2)*regularizedGaussHG (ν+1) (-ν)
+        (m+1) ((1-x)/2) := by
   rcases m with _ | k
   · simp [ferrersP, poch_zero]
-  have hw := mem_cutPlane_of_one_add (show 1+(x:ℂ) ∈ slitPlane from Or.inl (by simp; linarith [hx.1]))
+  have hw := mem_cutPlane_of_one_add
+      (show 1+(x:ℂ) ∈ slitPlane from Or.inl (by simp; linarith [hx.1]))
   have hr : 0 ≤ (1+x)/(1-x) := div_nonneg (by linarith [hx.1]) (by linarith [hx.2])
   have e : ((1-x)/(1+x):ℂ) = ((((1+x)/(1-x):ℝ):ℂ))⁻¹ := by push_cast; rw [inv_div]
   unfold ferrersP
@@ -99,7 +103,8 @@ theorem ferrersP_integer_hypergeometric_5 (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x
 /-- Pochhammer products supply the limiting gamma quotient at exceptional degrees. -/
 @[dlmf 14.3.E8]
 theorem associatedP_integer_hypergeometric_8 (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedP ν m z=poch (ν-m+1) (2*m)/2^m*legendreBranchPower m z*regularizedGaussHG (ν+m+1) (m-ν) (m+1) ((1-z)/2) := by
+    associatedP ν m z=poch (ν-m+1) (2*m)/2^m*legendreBranchPower m z*regularizedGaussHG (ν+m+1)
+        (m-ν) (m+1) ((1-z)/2) := by
   rcases m with _ | k
   · simp [associatedP, legendreBranchPower, poch_zero]
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
@@ -117,7 +122,8 @@ branches. DLMF assumes `z ∉ (-∞, 1]`; with Lean's principal branches the ide
 `z`, which extends DLMF via Lean's conventions. -/
 @[dlmf 14.3.E9]
 theorem associated_hypergeometric_9 (ν μ : ℂ) {z : ℂ} :
-    associatedP ν (-μ) z=exp (μ/2*(log (z-1)-log (z+1)))*regularizedGaussHG (ν+1) (-ν) (μ+1) ((1-z)/2) := by
+    associatedP ν (-μ) z=exp (μ/2*(log (z-1)-log (z+1)))*regularizedGaussHG (ν+1) (-ν) (μ+1)
+        ((1-z)/2) := by
   unfold associatedP
   rw [show 1-(-μ) = μ+1 by ring,
     show -μ/2*(log (z+1)-log (z-1)) = μ/2*(log (z-1)-log (z+1)) by ring]
@@ -126,7 +132,8 @@ theorem associated_hypergeometric_9 (ν μ : ℂ) {z : ℂ} :
 (1-z)/2)`. -/
 @[dlmf 14.3.E15]
 theorem associated_hypergeometric_15 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedP ν (-μ) z=2^(-μ)*legendreBranchPower μ z*regularizedGaussHG (μ-ν) (ν+μ+1) (μ+1) ((1-z)/2) := by
+    associatedP ν (-μ) z=2^(-μ)*legendreBranchPower μ z*regularizedGaussHG (μ-ν) (ν+μ+1) (μ+1)
+        ((1-z)/2) := by
   exact associatedP_neg_euler ν μ hz
 
 /-- DLMF 14.3.16: for `z ∉ (-∞, 1]`, `cos(νπ) P^{-μ}_ν(z) = 2^ν π^{1/2} z^{ν-μ}
@@ -134,7 +141,10 @@ theorem associated_hypergeometric_15 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
 z^{ν+μ+1}) 𝐅((ν+μ+2)/2, (ν+μ+1)/2; ν+3/2; 1/z²)`. -/
 @[dlmf 14.3.E16]
 theorem associated_hypergeometric_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    cos (ν*π)*associatedP ν (-μ) z=2^ν*Real.sqrt π*z^(ν-μ)*legendreBranchPower μ z/Gamma (ν+μ+1)*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/z^2)-Real.sqrt π*legendreBranchPower μ z/(2^(ν+1)*Gamma (μ-ν)*z^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/z^2) := by
+    cos (ν*π)*associatedP ν (-μ) z=2^ν*Real.sqrt π*z^(ν-μ)*legendreBranchPower μ z/Gamma
+        (ν+μ+1)*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/z^2)-Real.sqrt
+        π*legendreBranchPower μ z/(2^(ν+1)*Gamma (μ-ν)*z^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2)
+        ((ν+μ+1)/2) (ν+3/2) (1/z^2) := by
   set D : Set ℂ := {z : ℂ | z-1 ∈ slitPlane} with hD
   have hDo : IsOpen D := isOpen_slitPlane.preimage (continuous_sub_right 1)
   have hDc : IsPreconnected D := by
@@ -143,7 +153,9 @@ theorem associated_hypergeometric_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
       show w - 1 ∈ slitPlane ↔ _
       exact ⟨fun h => ⟨w-1, h, by ring⟩, fun ⟨u, hu, e⟩ => by rw [← e]; simpa using hu⟩
     rw [this]
-    exact (StarConvex.isPathConnected starConvex_one_slitPlane (Or.inl (by simp))).isConnected.isPreconnected.image _ (by fun_prop : Continuous fun w : ℂ => w+1).continuousOn
+    exact (StarConvex.isPathConnected starConvex_one_slitPlane
+        (Or.inl (by simp))).isConnected.isPreconnected.image _
+        (by fun_prop : Continuous fun w : ℂ => w+1).continuousOn
   have hmem : ∀ w ∈ D, w + 1 ∈ slitPlane ∧ w - 1 ∈ slitPlane ∧ w ∈ slitPlane ∧
       (1-w)/2 ∈ cutPlane ∧ 1/w^2 ∈ cutPlane := by
     intro w hw
@@ -163,16 +175,25 @@ theorem associated_hypergeometric_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
     unfold associatedP
     apply DifferentiableAt.differentiableWithinAt
     fun_prop (disch := assumption)
-  have hg : AnalyticOnNhd ℂ (fun z => 2^ν*Real.sqrt π*z^(ν-μ)*legendreBranchPower μ z/Gamma (ν+μ+1)*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/z^2)-Real.sqrt π*legendreBranchPower μ z/(2^(ν+1)*Gamma (μ-ν)*z^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/z^2)) D := by
+  have hg : AnalyticOnNhd ℂ
+      (fun z => 2^ν*Real.sqrt π*z^(ν-μ)*legendreBranchPower μ z/Gamma (ν+μ+1)*regularizedGaussHG
+      ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/z^2)-Real.sqrt π*legendreBranchPower μ
+      z/(2^(ν+1)*Gamma (μ-ν)*z^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2)
+      (1/z^2)) D := by
     refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) hDo
     obtain ⟨h1, h2, h3, -, h5⟩ := hmem w hw
     have h0 : w ^ 2 ≠ 0 := pow_ne_zero 2 (slitPlane_ne_zero h3)
-    have h6 : w ^ (ν+μ+1) ≠ 0 := by rw [cpow_def_of_ne_zero (slitPlane_ne_zero h3)]; exact exp_ne_zero _
+    have h6 : w ^ (ν+μ+1) ≠ 0 := by rw [cpow_def_of_ne_zero (slitPlane_ne_zero h3)];
+                                    exact exp_ne_zero _
     unfold legendreBranchPower
     simp only [div_eq_mul_inv, mul_inv]
     apply DifferentiableAt.differentiableWithinAt
     fun_prop (disch := first | assumption | simpa [div_eq_mul_inv] using h5)
-  have hreal : ∀ t : ℝ, t ∈ Ioo (1:ℝ) 2 → cos (ν*π)*associatedP ν (-μ) t = 2^ν*Real.sqrt π*(t:ℂ)^(ν-μ)*legendreBranchPower μ t/Gamma (ν+μ+1)*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/(t:ℂ)^2)-Real.sqrt π*legendreBranchPower μ t/(2^(ν+1)*Gamma (μ-ν)*(t:ℂ)^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/(t:ℂ)^2) := by
+  have hreal : ∀ t : ℝ, t ∈ Ioo (1:ℝ) 2 → cos (ν*π)*associatedP ν (-μ) t =
+      2^ν*Real.sqrt π*(t:ℂ)^(ν-μ)*legendreBranchPower μ t/Gamma (ν+μ+1)*regularizedGaussHG ((μ-ν)/2)
+      ((μ-ν+1)/2) (1/2-ν) (1/(t:ℂ)^2)-Real.sqrt π*legendreBranchPower μ
+      t/(2^(ν+1)*Gamma (μ-ν)*(t:ℂ)^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2)
+      (1/(t:ℂ)^2) := by
     intro t ht
     have htp : (0:ℝ) < t := by linarith [ht.1]
     have ht0 : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr htp.ne'
@@ -214,14 +235,16 @@ theorem associated_hypergeometric_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
       rw [← cpow_neg, ← cpow_neg, ← cpow_add _ _ h2]; ring_nf
     have f4 : (t:ℂ)^(ν-μ)*(1/(t:ℂ)^2)^(ν+1/2) = ((t:ℂ)^(ν+μ+1))⁻¹ := by
       have hl : log (1/(t:ℂ)^2) = -2*log (t:ℂ) := by
-        rw [hinv, ← ofReal_log hpos.le, ← ofReal_log htp.le, Real.log_div one_ne_zero (by positivity),
+        rw [hinv, ← ofReal_log hpos.le, ← ofReal_log htp.le,
+            Real.log_div one_ne_zero (by positivity),
           Real.log_one, Real.log_pow]; push_cast; ring
       have h10 : 1/(t:ℂ)^2 ≠ 0 := by simp [ht0]
       rw [cpow_def_of_ne_zero ht0, cpow_def_of_ne_zero h10, cpow_def_of_ne_zero ht0, hl, ← exp_add,
         ← exp_neg]
       congr 1; ring
     have hmain : cos (ν*π) * regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (μ+1) (1-1/(t:ℂ)^2) =
-        π * (regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/(t:ℂ)^2) / (Gamma (ν+μ+1)*2^(-ν-μ)*s) -
+        π * (regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/(t:ℂ)^2) /
+            (Gamma (ν+μ+1)*2^(-ν-μ)*s) -
           (1/(t:ℂ)^2)^(ν+1/2) / (Gamma (μ-ν)*2^(1-μ+ν)*s) *
             regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/(t:ℂ)^2)) := by
       rw [← hc]; field_simp
@@ -234,12 +257,20 @@ theorem associated_hypergeometric_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
     set K2 := BP*F2*(Gamma (μ-ν))⁻¹
     linear_combination ((2:ℂ)^(-μ)*T*BP) * hmain + K1*(π*s⁻¹)*f1 + K1*2^ν*f2
       - K2*(π*s⁻¹)*(T*Y)*f3 - K2*((2:ℂ)^(ν+1))⁻¹*(T*Y)*f2 - K2*((2:ℂ)^(ν+1))⁻¹*s*f4
-  have hfreq : ∃ᶠ w in 𝓝[≠] ((3/2:ℝ):ℂ), cos (ν*π)*associatedP ν (-μ) w = 2^ν*Real.sqrt π*w^(ν-μ)*legendreBranchPower μ w/Gamma (ν+μ+1)*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/w^2)-Real.sqrt π*legendreBranchPower μ w/(2^(ν+1)*Gamma (μ-ν)*w^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/w^2) := by
+  have hfreq : ∃ᶠ w in 𝓝[≠] ((3/2:ℝ):ℂ), cos (ν*π)*associatedP ν (-μ) w =
+      2^ν*Real.sqrt π*w^(ν-μ)*legendreBranchPower μ w/Gamma (ν+μ+1)*regularizedGaussHG ((μ-ν)/2)
+      ((μ-ν+1)/2) (1/2-ν) (1/w^2)-Real.sqrt π*legendreBranchPower μ
+      w/(2^(ν+1)*Gamma (μ-ν)*w^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2)
+      (ν+3/2) (1/w^2) := by
     have hT : Tendsto (fun t : ℝ => (t:ℂ)) (𝓝[≠] (3/2:ℝ)) (𝓝[≠] ((3/2:ℝ):ℂ)) :=
       (continuous_ofReal.tendsto _).inf (tendsto_principal_principal.mpr fun t ht =>
         fun h => ht (ofReal_injective h))
     apply hT.frequently
-    have hev : ∀ᶠ t : ℝ in 𝓝[≠] (3/2:ℝ), cos (ν*π)*associatedP ν (-μ) t = 2^ν*Real.sqrt π*(t:ℂ)^(ν-μ)*legendreBranchPower μ t/Gamma (ν+μ+1)*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/(t:ℂ)^2)-Real.sqrt π*legendreBranchPower μ t/(2^(ν+1)*Gamma (μ-ν)*(t:ℂ)^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/(t:ℂ)^2) := by
+    have hev : ∀ᶠ t : ℝ in 𝓝[≠] (3/2:ℝ), cos (ν*π)*associatedP ν (-μ) t =
+        2^ν*Real.sqrt π*(t:ℂ)^(ν-μ)*legendreBranchPower μ t/Gamma (ν+μ+1)*regularizedGaussHG
+        ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/(t:ℂ)^2)-Real.sqrt π*legendreBranchPower μ
+        t/(2^(ν+1)*Gamma (μ-ν)*(t:ℂ)^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2)
+        (1/(t:ℂ)^2) := by
       apply eventually_nhdsWithin_of_eventually_nhds
       filter_upwards [Ioo_mem_nhds (by norm_num : (1:ℝ) < 3/2) (by norm_num : (3/2:ℝ) < 2)]
         with t ht using hreal t ht
@@ -251,27 +282,266 @@ theorem associated_hypergeometric_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
 (μ-ν+1)/2; μ+1; 1-1/z²)`. -/
 @[dlmf 14.3.E18]
 theorem associated_hypergeometric_18 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.re) :
-    associatedP ν (-μ) z=2^(-μ)*z^(ν-μ)*legendreBranchPower μ z*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (μ+1) (1-1/z^2) := by
+    associatedP ν (-μ) z=2^(-μ)*z^(ν-μ)*legendreBranchPower μ z*regularizedGaussHG ((μ-ν)/2)
+        ((μ-ν+1)/2) (μ+1) (1-1/z^2) := by
   exact associatedP_neg_eq_quadratic ν μ hz hre
 
 /-- DLMF 14.3.20: for `z ∉ (-∞, 1]`, `(2 sin(μπ)/π) 𝑸^μ_ν(z) = P^μ_ν(z)/Γ(ν+μ+1) -
 P^{-μ}_ν(z)/Γ(ν-μ+1)`. -/
 @[dlmf 14.3.E20]
 theorem associated_hypergeometric_20 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ) z/Gamma (ν-μ+1) := by
+    2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ)
+        z/Gamma (ν-μ+1) := by
   exact olverQ_connection ν μ hz
 
-/-- Combined boundary value at the hypergeometric cut; separate totalized values on that cut are not used. -/
+/-- Combined boundary value at the hypergeometric cut; separate totalized values on that cut are not
+used. -/
 @[dlmf 14.3.E17]
 theorem associatedP_square_hypergeometric (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
-    Tendsto (fun ε : ℝ => let u : ℂ := x^2+I*ε; π*legendreBranchPower μ x/2^μ*(regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) u/(Gamma ((μ-ν+1)/2)*Gamma ((ν+μ+2)/2))-x*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) u/(Gamma ((μ-ν)/2)*Gamma ((ν+μ+1)/2)))) (𝓝[>] 0) (𝓝 (associatedP ν (-μ) x)) := by
+    Tendsto (fun ε : ℝ => let u : ℂ := x^2+I*ε;
+        π*legendreBranchPower μ
+        x/2^μ*(regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2)
+        u/(Gamma ((μ-ν+1)/2)*Gamma ((ν+μ+2)/2))-x*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+        u/(Gamma ((μ-ν)/2)*Gamma ((ν+μ+1)/2)))) (𝓝[>] 0) (𝓝 (associatedP ν (-μ) x)) := by
   sorry
+
+/-- DLMF 14.3.19 on the real half-line `t > 3`, where `2/(1-t)` lies in the unit disk. -/
+private lemma olverQ_linear_real {v : ℂ} (μ : ℂ) (hv : ∀ k : ℕ, 2*v+2 ≠ -k) {t : ℝ}
+    (ht : 3 < t) :
+    2^v*Gamma (v+1)*exp (μ/2*log ((t:ℂ)+1)-(μ/2+v+1)*log ((t:ℂ)-1))*
+        regularizedGaussHG (v+1) (v+μ+1) (2*v+2) (2/(1-(t:ℂ))) = olverQ v μ t := by
+  have ht0 : (0:ℝ) < t := by linarith
+  have ht1 : (0:ℝ) < t-1 := by linarith
+  have htp : (0:ℝ) < t+1 := by linarith
+  set w : ℂ := 2/(1-(t:ℂ)) with hwdef
+  have h1t : (1:ℂ)-t ≠ 0 := by
+    rw [← ofReal_one, ← ofReal_sub]; exact ofReal_ne_zero.mpr (by linarith)
+  have hwr : w = ((2/(1-t):ℝ):ℂ) := by rw [hwdef]; push_cast; rfl
+  have hw : ‖w‖ < 1 := by
+    rw [hwr, norm_real, Real.norm_eq_abs, abs_lt]
+    constructor
+    · rw [lt_div_iff_of_neg (by linarith)]; linarith
+    · rw [div_lt_iff_of_neg (by linarith)]; linarith
+  have hwc : w ∈ cutPlane := by
+    rw [mem_cutPlane, hwr, ← ofReal_one, ← ofReal_sub]
+    exact Or.inl (by
+      simp only [ofReal_re]
+      have : 2/(1-t) < 0 := div_neg_of_pos_of_neg (by norm_num) (by linarith)
+      linarith)
+  have hc2 : ∀ k : ℕ, 2*(v+1) ≠ -k := fun k h => hv k (by linear_combination h)
+  have hc3 : ∀ k : ℕ, (v+1)+1/2 ≠ -k := fun k h =>
+    hv (2*k+1) (by push_cast; linear_combination 2*h)
+  have hq := quadratic_double_denominator (a := v+μ+1) hc2 hc3 hw
+  have hw1 : 1 - w/2 = ((t/(t-1):ℝ):ℂ) := by
+    rw [hwdef]; push_cast
+    have : (t:ℂ)-1 ≠ 0 := by
+      rw [← ofReal_one, ← ofReal_sub]; exact ofReal_ne_zero.mpr ht1.ne'
+    field_simp; ring
+  have hw2 : (w/(2-w))^2 = 1/(t:ℂ)^2 := by
+    rw [hwdef]
+    have : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr ht0.ne'
+    have h2 : 2 - 2/(1-(t:ℂ)) = -2*t/(1-t) := by field_simp; ring
+    rw [h2]; field_simp
+  have hz2 : ‖1/(t:ℂ)^2‖ < 1 := by
+    rw [show (1:ℂ)/(t:ℂ)^2 = ((1/t^2:ℝ):ℂ) by push_cast; rfl, norm_real, Real.norm_eq_abs,
+      abs_of_pos (by positivity), div_lt_one (by positivity)]
+    nlinarith
+  have hzc : 1/(t:ℂ)^2 ∈ cutPlane := by
+    rw [mem_cutPlane, show (1:ℂ)/(t:ℂ)^2 = ((1/t^2:ℝ):ℂ) by push_cast; rfl, ← ofReal_one,
+      ← ofReal_sub]
+    refine Or.inl ?_
+    simp only [ofReal_re]
+    have : 1/t^2 < 1 := by rw [div_lt_one (by positivity)]; nlinarith
+    linarith
+  have e1 := ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHG (a := v+μ+1) (b := v+1) hc2 hw
+  have e2 := ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHG (a := (v+μ+1)/2)
+    (b := (v+μ+1+1)/2) hc3 hz2
+  rw [hq, hw1, hw2, e2] at e1
+  rw [regularizedGaussHG_symm _ _ _ hwc]
+  unfold olverQ
+  rw [regularizedGaussHG_symm _ _ _ hzc, show (v+μ+2)/2 = (v+μ+1+1)/2 by ring,
+    show v+3/2 = v+1+1/2 by ring, show 2*v+2 = 2*(v+1) by ring]
+  -- Gamma duplication
+  have hdup := Complex.Gamma_mul_Gamma_add_half (v+1)
+  have hG2 : Gamma (2*(v+1)) ≠ 0 := Gamma_ne_zero hc2
+  have hG3 : Gamma (v+1+1/2) ≠ 0 := Gamma_ne_zero hc3
+  -- powers of two
+  have h2 : (2:ℂ) ≠ 0 := two_ne_zero
+  have p1 : (2:ℂ)^(v+1) = 2^v*2 := by rw [cpow_add _ _ h2, cpow_one]
+  have p2 : (2:ℂ)^(1-2*(v+1)) * (2*((2:ℂ)^v)^2) = 1 := by
+    rw [← cpow_nat_mul, show (2:ℂ) * 2^(((2:ℕ):ℂ)*v) = 2^(1+((2:ℕ):ℂ)*v) by
+      rw [cpow_add _ _ h2, cpow_one], ← cpow_add _ _ h2]
+    push_cast; ring_nf; exact cpow_zero 2
+  -- logarithms of the real points
+  set a : ℂ := log (t:ℂ) with ha
+  set b : ℂ := log ((t:ℂ)-1)
+  set c : ℂ := log ((t:ℂ)+1)
+  have hlog : log ((t/(t-1):ℝ):ℂ) = a - b := by
+    rw [← ofReal_log (by positivity), Real.log_div ht0.ne' ht1.ne', ofReal_sub,
+      ofReal_log ht0.le, ofReal_log ht1.le]
+    push_cast; rfl
+  have hpow1 : ((t/(t-1):ℝ):ℂ)^(-(v+μ+1)) = exp (-(v+μ+1)*(a-b)) := by
+    rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr (by positivity)), hlog]; ring_nf
+  have hpow2 : (t:ℂ)^(v+μ+1) = exp ((v+μ+1)*a) := by
+    rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr ht0.ne'), ha]; ring_nf
+  have hBP : legendreBranchPower μ t = exp (μ/2*(b+c)) := rfl
+  have hE : exp (μ/2*c-(μ/2+v+1)*b) * exp (-(v+μ+1)*(a-b)) * exp ((v+μ+1)*a) =
+      exp (μ/2*(b+c)) := by
+    rw [← exp_add, ← exp_add]; congr 1; ring
+  rw [hpow2, hBP, p1]
+  rw [← hE]
+  set X := exp (μ/2*c-(μ/2+v+1)*b)
+  set Y := exp (-(v+μ+1)*(a-b))
+  set Z := exp ((v+μ+1)*a)
+  have hZ : Z ≠ 0 := exp_ne_zero _
+  rw [hpow1] at e1
+  set F1 := regularizedGaussHG (v+μ+1) (v+1) (2*(v+1)) w
+  set F2 := regularizedGaussHG ((v+μ+1)/2) ((v+μ+1+1)/2) (v+1+1/2) (1/(t:ℂ)^2)
+  set s : ℂ := ((Real.sqrt π:ℝ):ℂ)
+  set P := (2:ℂ)^v
+  have hP : P ≠ 0 := by simp [P, cpow_def_of_ne_zero h2, exp_ne_zero]
+  have hF1 : F1 = Y * Gamma (v+1+1/2) * F2 / Gamma (2*(v+1)) := by
+    rw [eq_div_iff hG2]; linear_combination -e1
+  rw [hF1]
+  have hq2 : (2:ℂ)^(1-2*(v+1)) = 1/(2*P^2) := eq_one_div_of_mul_eq_one_left p2
+  calc P*Gamma (v+1)*X*(Y*Gamma (v+1+1/2)*F2/Gamma (2*(v+1)))
+      = P*X*Y*F2*((Gamma (v+1)*Gamma (v+1+1/2))/Gamma (2*(v+1))) := by ring
+    _ = P*X*Y*F2*(2^(1-2*(v+1))*s) := by rw [hdup]; field_simp
+    _ = _ := by rw [hq2]; field_simp
+
+/-- `2/(1-z)` lies in the cut plane when `z ∉ (-∞, 1]`. -/
+private lemma two_div_one_sub_mem_cutPlane {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    2/(1-z) ∈ cutPlane := by
+  have h1 : 1 - z ≠ 0 := by
+    intro h; rw [show z = 1 by linear_combination -h] at hz; simp at hz
+  rw [mem_cutPlane, one_sub_div h1, show 1 - z - 2 = -(z+1) by ring,
+    show 1 - z = -(z-1) by ring, neg_div_neg_eq]
+  rw [mem_slitPlane_iff] at hz ⊢
+  by_contra hc
+  push Not at hc
+  obtain ⟨hre, him⟩ := hc
+  set q := (z+1)/(z-1) with hq
+  have hz1 : z - 1 ≠ 0 := fun h => h1 (by linear_combination -h)
+  have hqz : z + 1 = q*(z-1) := by rw [hq]; field_simp
+  have e1 := congrArg re hqz
+  have e2 := congrArg im hqz
+  simp only [add_re, one_re, mul_re, sub_re, add_im, one_im, mul_im, sub_im, him, zero_mul,
+    sub_zero, add_zero, zero_sub] at e1 e2
+  simp only [sub_re, one_re, sub_im, one_im, sub_zero] at hz
+  have hzi : z.im = 0 := by nlinarith
+  rcases hz with h | h
+  · nlinarith
+  · exact h hzi
+
+/-- DLMF 14.3.19 for fixed degree `v` with `2v+2` not a pole of the Gamma function. -/
+private lemma olverQ_linear_eq {v : ℂ} (μ : ℂ) (hv : ∀ k : ℕ, 2*v+2 ≠ -k) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
+    2^v*Gamma (v+1)*exp (μ/2*log (z+1)-(μ/2+v+1)*log (z-1))*
+        regularizedGaussHG (v+1) (v+μ+1) (2*v+2) (2/(1-z)) = olverQ v μ z := by
+  set D : Set ℂ := {z : ℂ | z-1 ∈ slitPlane} with hD
+  have hDo : IsOpen D := isOpen_slitPlane.preimage (continuous_sub_right 1)
+  have hDc : IsPreconnected D := by
+    have : D = (fun w => w+1) '' slitPlane := by
+      ext w; simp only [hD, mem_image]
+      show w - 1 ∈ slitPlane ↔ _
+      exact ⟨fun h => ⟨w-1, h, by ring⟩, fun ⟨u, hu, e⟩ => by rw [← e]; simpa using hu⟩
+    rw [this]
+    exact (StarConvex.isPathConnected starConvex_one_slitPlane
+        (Or.inl (by simp))).isConnected.isPreconnected.image _
+        (by fun_prop : Continuous fun w : ℂ => w+1).continuousOn
+  have hmem : ∀ w ∈ D, w + 1 ∈ slitPlane ∧ w - 1 ∈ slitPlane ∧ w ∈ slitPlane ∧
+      2/(1-w) ∈ cutPlane ∧ 1/w^2 ∈ cutPlane ∧ 1 - w ≠ 0 := by
+    intro w hw
+    have h2 : w - 1 ∈ slitPlane := hw
+    have h1 : w + 1 ∈ slitPlane := by
+      have := one_add_mem_slitPlane_of_sub_one h2; rwa [add_comm] at this
+    have h3 : w ∈ slitPlane := by
+      rw [mem_slitPlane_iff] at h2 ⊢
+      rcases h2 with h | h
+      · left; simp at h; linarith
+      · right; simpa using h
+    have h6 : 1 - w ≠ 0 := by
+      intro h; rw [show w = 1 by linear_combination -h] at h2; simp at h2
+    exact ⟨h1, h2, h3, two_div_one_sub_mem_cutPlane h2,
+      one_sub_recip_sq_mem_slitPlane_of_sub_one h2, h6⟩
+  have hf : AnalyticOnNhd ℂ (fun z => 2^v*Gamma (v+1)*exp (μ/2*log (z+1)-(μ/2+v+1)*log (z-1))*
+      regularizedGaussHG (v+1) (v+μ+1) (2*v+2) (2/(1-z))) D := by
+    refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) hDo
+    obtain ⟨h1, h2, -, h4, -, h6⟩ := hmem w hw
+    apply DifferentiableAt.differentiableWithinAt
+    fun_prop (disch := assumption)
+  have hg : AnalyticOnNhd ℂ (fun z => olverQ v μ z) D := by
+    refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) hDo
+    obtain ⟨h1, h2, h3, -, h5, -⟩ := hmem w hw
+    have h0 : w ^ 2 ≠ 0 := pow_ne_zero 2 (slitPlane_ne_zero h3)
+    have h6 : w ^ (v+μ+1) ≠ 0 := by
+      rw [cpow_def_of_ne_zero (slitPlane_ne_zero h3)]; exact exp_ne_zero _
+    have h7 : (2:ℂ) ^ (v+1) ≠ 0 := by
+      rw [cpow_def_of_ne_zero two_ne_zero]; exact exp_ne_zero _
+    unfold olverQ legendreBranchPower
+    simp only [div_eq_mul_inv, mul_inv]
+    apply DifferentiableAt.differentiableWithinAt
+    fun_prop (disch := first | assumption | simpa [div_eq_mul_inv] using h5)
+  have hfreq : ∃ᶠ w in 𝓝[≠] ((7/2:ℝ):ℂ),
+      2^v*Gamma (v+1)*exp (μ/2*log (w+1)-(μ/2+v+1)*log (w-1))*
+        regularizedGaussHG (v+1) (v+μ+1) (2*v+2) (2/(1-w)) = olverQ v μ w := by
+    have hT : Tendsto (fun t : ℝ => (t:ℂ)) (𝓝[≠] (7/2:ℝ)) (𝓝[≠] ((7/2:ℝ):ℂ)) :=
+      (continuous_ofReal.tendsto _).inf (tendsto_principal_principal.mpr fun t ht =>
+        fun h => ht (ofReal_injective h))
+    apply hT.frequently
+    have hev : ∀ᶠ t : ℝ in 𝓝[≠] (7/2:ℝ),
+        2^v*Gamma (v+1)*exp (μ/2*log ((t:ℂ)+1)-(μ/2+v+1)*log ((t:ℂ)-1))*
+          regularizedGaussHG (v+1) (v+μ+1) (2*v+2) (2/(1-(t:ℂ))) = olverQ v μ t := by
+      apply eventually_nhdsWithin_of_eventually_nhds
+      filter_upwards [Ioi_mem_nhds (by norm_num : (3:ℝ) < 7/2)] with t ht
+      exact olverQ_linear_real μ hv ht
+    exact hev.frequently
+  have h72 : ((7/2:ℝ):ℂ) ∈ D := Or.inl (by simp; norm_num)
+  exact hf.eqOn_of_preconnected_of_frequently_eq hg hDc h72 hfreq hz
 
 /-- Parameter limit includes the removable singularities of the gamma-prefactored representation. -/
 @[dlmf 14.3.E19]
 theorem olverQ_linear_hypergeometric (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    Tendsto (fun v : ℂ => 2^v*Gamma (v+1)*exp (μ/2*log (z+1)-(μ/2+v+1)*log (z-1))*regularizedGaussHG (v+1) (v+μ+1) (2*v+2) (2/(1-z))) (𝓝[≠] ν) (𝓝 (olverQ ν μ z)) := by
-  sorry
+    Tendsto (fun v : ℂ =>
+        2^v*Gamma (v+1)*exp (μ/2*log (z+1)-(μ/2+v+1)*log (z-1))*regularizedGaussHG (v+1) (v+μ+1)
+        (2*v+2) (2/(1-z))) (𝓝[≠] ν) (𝓝 (olverQ ν μ z)) := by
+  have hz0 : z ≠ 0 := by
+    rintro rfl; rw [mem_slitPlane_iff] at hz; norm_num at hz
+  have hzc : 1/z^2 ∈ cutPlane := one_sub_recip_sq_mem_slitPlane_of_sub_one hz
+  -- the degrees with `2v+2` a pole are isolated
+  have hev : ∀ᶠ v : ℂ in 𝓝[≠] ν, ∀ k : ℕ, 2*v+2 ≠ -(k:ℂ) := by
+    set f : ℂ → ℂ := fun v => (Gamma (2*v+2))⁻¹ with hfdef
+    have hfa : AnalyticOnNhd ℂ f univ := fun v _ =>
+      (Complex.differentiable_one_div_Gamma.comp (by fun_prop :
+        Differentiable ℂ fun v : ℂ => 2*v+2)).analyticAt v
+    rcases (hfa ν trivial).eventually_eq_zero_or_eventually_ne_zero with h | h
+    · exfalso
+      have h0 := hfa.eqOn_zero_of_preconnected_of_eventuallyEq_zero isPreconnected_univ
+        trivial h (mem_univ (-1/2 : ℂ))
+      simp [hfdef] at h0
+      norm_num at h0
+    · filter_upwards [h] with v hv k hk
+      apply hv
+      simp only [hfdef, hk, Complex.Gamma_neg_nat_eq_zero, inv_zero]
+  have hcont : ContinuousAt (fun v => olverQ v μ z) ν := by
+    have hF : Continuous (fun v : ℂ => regularizedGaussHG ((v+μ+2)/2) ((v+μ+1)/2) (v+3/2)
+        (1/z^2)) :=
+      (differentiable_regularizedGaussHG_comp (by fun_prop) (by fun_prop) (by fun_prop)
+        hzc).continuous
+    have h6 : z ^ (ν+μ+1) ≠ 0 := by
+      rw [cpow_def_of_ne_zero hz0]; exact exp_ne_zero _
+    have h7 : (2:ℂ) ^ (ν+1) ≠ 0 := by
+      rw [cpow_def_of_ne_zero two_ne_zero]; exact exp_ne_zero _
+    unfold olverQ
+    refine ContinuousAt.mul (ContinuousAt.div continuousAt_const ?_ (mul_ne_zero h7 h6))
+      hF.continuousAt
+    refine ContinuousAt.mul ?_ ?_
+    · exact (continuousAt_const_cpow two_ne_zero).comp (by fun_prop)
+    · exact (continuousAt_const_cpow hz0).comp (by fun_prop)
+  refine (hcont.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
+  filter_upwards [hev] with v hv
+  exact (olverQ_linear_eq μ hv hz).symm
+
 
 /-! ### Termwise differentiation in the degree and order derivatives (DLMF 14.11) -/
 
@@ -393,7 +663,8 @@ theorem legHyp_T_eq (c w : ℂ) {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (n : �
   generalize sin (π*ν) = s at hr hs ⊢
   have hr2 : Gamma (-ν) * Gamma (ν+1) * s = -π := by rw [hr]; field_simp
   field_simp
-  linear_combination (Gamma (ν+1+n) * Gamma (-ν+n) * w^n * ((n.factorial:ℂ))⁻¹ * (Gamma (c+n))⁻¹) * hr2
+  linear_combination (Gamma (ν+1+n) * Gamma (-ν+n) * w^n * ((n.factorial:ℂ))⁻¹ *
+      (Gamma (c+n))⁻¹) * hr2
 
 /-- Derivative of a term in the degree, off the integers. -/
 theorem legHyp_hasDerivAt_T (c w : ℂ) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ ≠ n) (n : ℕ) :
@@ -405,7 +676,8 @@ theorem legHyp_hasDerivAt_T (c w : ℂ) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ 
   have hp1 := DLMF.Hypergeometric.not_neg_nat_add_nat (legHyp_pole_add hν) n
   have hp2 := DLMF.Hypergeometric.not_neg_nat_add_nat (legHyp_pole_neg hν) n
   have hG1 : HasDerivAt (fun ν : ℂ => Gamma (ν+1+n)) (Gamma (ν₀+1+n) * digamma (ν₀+1+n)) ν₀ := by
-    have h := (legHyp_hasDerivAt_Gamma hp1).comp ν₀ (((hasDerivAt_id' ν₀).add_const 1).add_const (n:ℂ))
+    have h := (legHyp_hasDerivAt_Gamma hp1).comp ν₀
+        (((hasDerivAt_id' ν₀).add_const 1).add_const (n:ℂ))
     rw [mul_one] at h; exact h
   have hG2 : HasDerivAt (fun ν : ℂ => Gamma (-ν+n)) (-(Gamma (-ν₀+n) * digamma (-ν₀+n))) ν₀ := by
     have h := (legHyp_hasDerivAt_Gamma hp2).comp ν₀ ((hasDerivAt_neg ν₀).add_const (n:ℂ))
@@ -414,7 +686,8 @@ theorem legHyp_hasDerivAt_T (c w : ℂ) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ 
     (((hasDerivAt_id' ν₀).const_mul (π:ℂ)).csin).div_const (π:ℂ) |>.neg
   have hall := (hS.mul (hG1.mul hG2)).mul_const d
   simp only [Pi.mul_apply] at hall
-  have hev : legHypT c w n =ᶠ[𝓝 ν₀] fun ν => -(sin (π*ν)/π) * (Gamma (ν+1+n) * Gamma (-ν+n)) * d := by
+  have hev : legHypT c w n =ᶠ[𝓝 ν₀] fun ν => -(sin (π*ν)/π) *
+      (Gamma (ν+1+n) * Gamma (-ν+n)) * d := by
     have hopen : IsOpen {ν : ℂ | sin (π*ν) ≠ 0} :=
       isOpen_ne_fun (by fun_prop) continuous_const
     filter_upwards [hopen.mem_nhds (DLMF.Hypergeometric.sin_pi_mul_ne_zero_of_not_int hν)] with ν
@@ -424,8 +697,9 @@ theorem legHyp_hasDerivAt_T (c w : ℂ) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ 
   field_simp
   ring
 
-/-- The series of DLMF 14.11.3 in the degree-derivative form: with `S_n = Γ(ν+1+n)Γ(-ν+n)wⁿ/(n!Γ(c+n))`,
-`∑ S_n (ψ(ν+1+n) - ψ(-ν+n))` converges, to `(π / sin πν) (-cos πν ∑ S_n - F')`. -/
+/-- The series of DLMF 14.11.3 in the degree-derivative form: with
+`S_n = Γ(ν+1+n)Γ(-ν+n)wⁿ/(n!Γ(c+n))`, `∑ S_n (ψ(ν+1+n) - ψ(-ν+n))` converges, to
+`(π / sin πν) (-cos πν ∑ S_n - F')`. -/
 theorem legHyp_hasSum_R (c w : ℂ) (hw : ‖w‖ < 1) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ ≠ n) :
     let S : ℕ → ℂ := fun n => Gamma (ν₀+1+n) * Gamma (-ν₀+n) * (w^n / n.factorial * (Gamma (c+n))⁻¹)
     HasSum S (-(π / sin (π*ν₀)) * regularizedGaussHGFun (ν₀+1) (-ν₀) c w) ∧
@@ -442,7 +716,8 @@ theorem legHyp_hasSum_R (c w : ℂ) (hw : ‖w‖ < 1) {ν₀ : ℂ} (hν : ∀ 
     generalize sin (π*ν₀) = s at hs ⊢
     field_simp
   refine ⟨hS, ?_⟩
-  have h1' : HasSum (fun n : ℕ => (-cos (π*ν₀) - sin (π*ν₀)/π * (digamma (ν₀+1+n) - digamma (-ν₀+n))) * S n)
+  have h1' : HasSum (fun n : ℕ =>
+      (-cos (π*ν₀) - sin (π*ν₀)/π * (digamma (ν₀+1+n) - digamma (-ν₀+n))) * S n)
       (deriv (fun ν => regularizedGaussHGFun (ν+1) (-ν) c w) ν₀) :=
     h1.congr_fun fun n => ((legHyp_hasDerivAt_T c w hν n).deriv).symm
   refine (((hS.mul_left (-cos (π*ν₀))).sub h1').mul_left (π / sin (π*ν₀))).congr_fun fun n => ?_
@@ -498,7 +773,8 @@ theorem legHyp_order_deriv {p a b Q : ℂ → ℂ} {ν D : ℂ} (hν : ∀ m : �
   have hI := legHyp_hasDerivAt_recipGamma hν
   have h1 : HasDerivAt (fun μ : ℂ => (Gamma (ν+μ+1))⁻¹) (-digamma (ν+1) * (Gamma (ν+1))⁻¹ * 1) 0 :=
     hI.comp_of_eq (0:ℂ) (((hasDerivAt_id' (0:ℂ)).const_add ν).add_const 1) (by ring)
-  have h2 : HasDerivAt (fun μ : ℂ => (Gamma (ν-μ+1))⁻¹) (-digamma (ν+1) * (Gamma (ν+1))⁻¹ * (-1)) 0 :=
+  have h2 : HasDerivAt (fun μ : ℂ => (Gamma (ν-μ+1))⁻¹)
+      (-digamma (ν+1) * (Gamma (ν+1))⁻¹ * (-1)) 0 :=
     hI.comp_of_eq (0:ℂ) (((hasDerivAt_id' (0:ℂ)).const_sub ν).add_const 1) (by ring)
   have hq : HasDerivAt (fun μ => p (-μ)) (D * (-1)) 0 :=
     (show HasDerivAt p D (-(0:ℂ)) by rwa [neg_zero]).comp (0:ℂ) (hasDerivAt_neg (0:ℂ))
@@ -527,7 +803,8 @@ theorem legHyp_order_deriv {p a b Q : ℂ → ℂ} {ν D : ℂ} (hν : ∀ m : �
 theorem legHyp_differentiableAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRegular ν μ₀) {x : ℝ}
     (hx : x ∈ Ioo (-1:ℝ) 1) : DifferentiableAt ℂ (fun μ => ferrersQ ν μ x) μ₀ := by
   have h1 : ∀ m : ℕ, (ν+μ₀+1)/2 ≠ -m := fun m hm => h (2*m) (by push_cast; linear_combination 2*hm)
-  have h2 : ∀ m : ℕ, (ν+μ₀+2)/2 ≠ -m := fun m hm => h (2*m+1) (by push_cast; linear_combination 2*hm)
+  have h2 : ∀ m : ℕ, (ν+μ₀+2)/2 ≠ -m := fun m hm =>
+      h (2*m+1) (by push_cast; linear_combination 2*hm)
   have c1 : DifferentiableAt ℂ (fun μ => Gamma ((ν+μ+1)/2)) μ₀ :=
     DifferentiableAt.comp (g := Gamma) μ₀ (differentiableAt_Gamma _ h1) (by fun_prop)
   have c2 : DifferentiableAt ℂ (fun μ => Gamma ((ν+μ+2)/2)) μ₀ :=
@@ -543,9 +820,11 @@ theorem legHyp_differentiableAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRe
     differentiableAt_id.const_cpow (Or.inl (by norm_num))
   have pw : DifferentiableAt ℂ (fun μ : ℂ => (1-(x:ℂ)^2)^(-μ/2)) μ₀ :=
     (differentiableAt_id.neg.div_const 2).const_cpow (Or.inl hne)
-  have g1 := differentiable_regularizedGaussHG_comp (A := fun μ => -(ν+μ)/2) (B := fun μ => (ν-μ+1)/2)
+  have g1 := differentiable_regularizedGaussHG_comp (A := fun μ => -(ν+μ)/2)
+      (B := fun μ => (ν-μ+1)/2)
     (C := fun _ => 1/2) (by fun_prop) (by fun_prop) (by fun_prop) (ferrers_sq_mem_cutPlane hx)
-  have g2 := differentiable_regularizedGaussHG_comp (A := fun μ => (1-ν-μ)/2) (B := fun μ => (ν-μ+2)/2)
+  have g2 := differentiable_regularizedGaussHG_comp (A := fun μ => (1-ν-μ)/2)
+      (B := fun μ => (ν-μ+2)/2)
     (C := fun _ => 3/2) (by fun_prop) (by fun_prop) (by fun_prop) (ferrers_sq_mem_cutPlane hx)
   have hs : DifferentiableAt ℂ (fun μ : ℂ => sin ((ν+μ)*π/2)) μ₀ := by fun_prop
   have hc : DifferentiableAt ℂ (fun μ : ℂ => cos ((ν+μ)*π/2)) μ₀ := by fun_prop
@@ -553,7 +832,8 @@ theorem legHyp_differentiableAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRe
   simp only [div_eq_mul_inv]
   simp only [div_eq_mul_inv] at g1 g2 c1 c2 r1 r2 pw hs hc
   exact ((differentiableAt_const _).mul hs |>.mul ((((p2.mul c1).mul r1).mul pw).mul (g1 μ₀))).add
-    (((differentiableAt_const _).mul hc).mul (((((p2.mul c2).mul r2).mul (differentiableAt_const _)).mul
+    (((differentiableAt_const _).mul hc).mul
+        (((((p2.mul c2).mul r2).mul (differentiableAt_const _)).mul
       pw).mul (g2 μ₀)))
 
 /-- `𝖯^μ_ν(x)` is entire in the order. -/
@@ -601,13 +881,19 @@ theorem legHyp_nu {ν : ℂ} (hν : LegendreQRegular ν 0) : ∀ m : ℕ, ν+1 �
 14.11.1–2. -/
 @[dlmf 14.11.E3]
 def legendreDegreeA (ν μ : ℂ) (x : ℝ) : ℂ :=
-  sin (ν*π)*((1+x)/(1-x):ℂ)^(μ/2)*∑' k : ℕ, ((1-x)/2:ℂ)^k*Gamma (k-ν)*Gamma (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*(digamma (k+ν+1)-digamma (k-ν))
+  sin (ν*π)*((1+x)/(1-x):ℂ)^(μ/2)*∑' k : ℕ,
+      ((1-x)/2:ℂ)^k*Gamma (k-ν)*Gamma
+      (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*(digamma (k+ν+1)-digamma (k-ν))
 
 /-- DLMF 14.11.3: for non-integer `ν` and `-1 < x < 1`, the series `sin(νπ) ((1+x)/(1-x))^{μ/2} Σ_k
 ((1-x)/2)^k Γ(k-ν) Γ(k+ν+1)/(k! Γ(k-μ+1)) (ψ(k+ν+1) - ψ(k-ν))` converges to `𝖠^μ_ν(x)`. -/
 @[dlmf 14.11.E3]
-theorem legendreDegreeA_hasSum {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    HasSum (fun k : ℕ => sin (ν*π)*((1+x)/(1-x):ℂ)^(μ/2)*((1-x)/2:ℂ)^k*Gamma (k-ν)*Gamma (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*(digamma (k+ν+1)-digamma (k-ν))) (legendreDegreeA ν μ x) := by
+theorem legendreDegreeA_hasSum {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    HasSum (fun k : ℕ =>
+        sin (ν*π)*((1+x)/(1-x):ℂ)^(μ/2)*((1-x)/2:ℂ)^k*Gamma (k-ν)*Gamma
+        (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*(digamma (k+ν+1)-digamma (k-ν)))
+        (legendreDegreeA ν μ x) := by
   have hR := legHyp_hasSum_A hν μ hx
   unfold legendreDegreeA
   rw [hR.tsum_eq]
@@ -617,8 +903,10 @@ theorem legendreDegreeA_hasSum {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : �
 /-- DLMF 14.11.1: for non-integer `ν` and `-1 < x < 1`, `∂𝖯^μ_ν(x)/∂ν = π cot(νπ) 𝖯^μ_ν(x) - (1/π)
 𝖠^μ_ν(x)`, with `𝖠^μ_ν` the series 14.11.3. -/
 @[dlmf 14.11.E1]
-theorem ferrersP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    HasDerivAt (fun ν => ferrersP ν μ x) (π*cos (ν*π)/sin (ν*π)*ferrersP ν μ x-legendreDegreeA ν μ x/π) ν := by
+theorem ferrersP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    HasDerivAt (fun ν => ferrersP ν μ x)
+        (π*cos (ν*π)/sin (ν*π)*ferrersP ν μ x-legendreDegreeA ν μ x/π) ν := by
   have hw := legHyp_norm_w hx
   set w : ℂ := ((1-x)/2:ℂ)
   set F : ℂ → ℂ := fun ν' => regularizedGaussHGFun (ν'+1) (-ν') (1-μ) w
@@ -647,8 +935,12 @@ theorem ferrersP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ
 𝖯^μ_ν(x) + π sin(μπ)/(sin(νπ) sin((ν+μ)π)) 𝖰^μ_ν(x) - cot((ν+μ)π)/2 · 𝖠^μ_ν(x) + 𝖠^μ_ν(-x)/(2
 sin((ν+μ)π))`. -/
 @[dlmf 14.11.E2]
-theorem ferrersQ_degree_deriv {ν μ : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (hplus : ∀ n : ℤ, ν+μ ≠ n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    HasDerivAt (fun ν => ferrersQ ν μ x) (-π^2/2*ferrersP ν μ x+π*sin (μ*π)/(sin (ν*π)*sin ((ν+μ)*π))*ferrersQ ν μ x-cos ((ν+μ)*π)/(2*sin ((ν+μ)*π))*legendreDegreeA ν μ x+legendreDegreeA ν μ (-x)/(2*sin ((ν+μ)*π))) ν := by
+theorem ferrersQ_degree_deriv {ν μ : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (hplus : ∀ n : ℤ, ν+μ ≠ n) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    HasDerivAt (fun ν => ferrersQ ν μ x)
+        (-π^2/2*ferrersP ν μ x+π*sin (μ*π)/(sin (ν*π)*sin ((ν+μ)*π))*ferrersQ ν μ x-cos
+        ((ν+μ)*π)/(2*sin ((ν+μ)*π))*legendreDegreeA ν μ x+legendreDegreeA ν μ
+        (-x)/(2*sin ((ν+μ)*π))) ν := by
   have hx' : -x ∈ Ioo (-1:ℝ) 1 := ⟨by linarith [hx.2], by linarith [hx.1]⟩
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have hreg : ∀ ν' : ℂ, sin ((ν'+μ)*π) ≠ 0 → LegendreQRegular ν' μ := fun ν' h n hn => h (by
@@ -675,7 +967,8 @@ theorem ferrersQ_degree_deriv {ν μ : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (hplus
   have hG := ((((hc.mul hP1).sub hP2).div hs hsθ).const_mul ((π:ℂ)/2))
   simp only [Pi.mul_apply, Pi.sub_apply] at hG
   have hev : (fun ν' => ferrersQ ν' μ x) =ᶠ[𝓝 ν] G := by
-    have hopen : IsOpen {ν' : ℂ | sin ((ν'+μ)*π) ≠ 0} := isOpen_ne_fun (by fun_prop) continuous_const
+    have hopen : IsOpen {ν' : ℂ | sin ((ν'+μ)*π) ≠ 0} :=
+        isOpen_ne_fun (by fun_prop) continuous_const
     filter_upwards [hopen.mem_nhds hsθ] with ν' h using hQG ν' h
   refine (hG.congr_of_eventuallyEq hev).congr_deriv ?_
   rw [hQG ν hsθ]
@@ -693,7 +986,8 @@ theorem ferrersQ_degree_deriv {ν μ : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (hplus
 /-- DLMF 14.11.4: when `ν` is not a negative integer and `-1 < x < 1`, `∂𝖯^μ_ν(x)/∂μ` at `μ = 0`
 equals `ψ(ν+1) 𝖯_ν(x) + 𝖰_ν(x)`. -/
 @[dlmf 14.11.E4]
-theorem ferrersP_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersP_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun μ => ferrersP ν μ x) (digamma (ν+1)*ferrersP ν 0 x+ferrersQ ν 0 x) 0 := by
   have hν1 := legHyp_nu hν
   have hp := ((legHyp_differentiable_ferrersP_order ν hx) 0).hasDerivAt
@@ -723,8 +1017,10 @@ theorem ferrersP_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : 
 /-- DLMF 14.11.5: when `ν` is not a negative integer and `-1 < x < 1`, `∂𝖰^μ_ν(x)/∂μ` at `μ = 0`
 equals `-(π²/4) 𝖯_ν(x) + ψ(ν+1) 𝖰_ν(x)`. -/
 @[dlmf 14.11.E5]
-theorem ferrersQ_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    HasDerivAt (fun μ => ferrersQ ν μ x) (-π^2/4*ferrersP ν 0 x+digamma (ν+1)*ferrersQ ν 0 x) 0 := by
+theorem ferrersQ_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    HasDerivAt (fun μ => ferrersQ ν μ x)
+        (-π^2/4*ferrersP ν 0 x+digamma (ν+1)*ferrersQ ν 0 x) 0 := by
   have hν1 := legHyp_nu hν
   have hp := (legHyp_differentiableAt_ferrersQ_order hν hx).hasDerivAt
   have ha : HasDerivAt (fun μ : ℂ => cos (μ*π)) 0 0 := by
@@ -750,7 +1046,8 @@ theorem ferrersQ_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : 
   have key := legHyp_order_deriv hν1 hp ha (by simp) hb hQ hg
   simp only [neg_zero, sub_zero] at key
   have hI := inv_ne_zero (Gamma_ne_zero hν1)
-  have hD : deriv (fun μ => ferrersQ ν μ x) 0 = -π^2/4*ferrersP ν 0 x+digamma (ν+1)*ferrersQ ν 0 x := by
+  have hD : deriv (fun μ => ferrersQ ν μ x) 0 =
+      -π^2/4*ferrersP ν 0 x+digamma (ν+1)*ferrersQ ν 0 x := by
     have := mul_left_cancel₀ hI key
     linear_combination -this
   rwa [hD] at hp
@@ -758,8 +1055,10 @@ theorem ferrersQ_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : 
 /-- DLMF 14.11.4 (associated case): when `ν` is not a negative integer and `z ∉ (-∞, 1]`,
 `∂P^μ_ν(z)/∂μ` at `μ = 0` equals `ψ(ν+1) P_ν(z) + Q_ν(z)`. -/
 @[dlmf 14.11.E4]
-theorem associatedP_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    HasDerivAt (fun μ => associatedP ν μ z) (digamma (ν+1)*associatedP ν 0 z+associatedQ ν 0 z) 0 := by
+theorem associatedP_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
+    HasDerivAt (fun μ => associatedP ν μ z)
+        (digamma (ν+1)*associatedP ν 0 z+associatedQ ν 0 z) 0 := by
   have hν1 := legHyp_nu hν
   have hp := ((associatedP_entire_order ν z hz) 0).hasDerivAt
   have hQ : ContinuousAt (fun μ : ℂ => olverQ ν μ z) 0 :=
@@ -774,7 +1073,8 @@ theorem associatedP_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {z
   have key := legHyp_order_deriv hν1 hp (hasDerivAt_const _ _) rfl continuousAt_const hQ hg
   simp only [one_mul] at key
   have hG := Gamma_ne_zero hν1
-  have hD : deriv (fun μ => associatedP ν μ z) 0 = digamma (ν+1)*associatedP ν 0 z+associatedQ ν 0 z := by
+  have hD : deriv (fun μ => associatedP ν μ z) 0 =
+      digamma (ν+1)*associatedP ν 0 z+associatedQ ν 0 z := by
     simp only [associatedQ, zero_mul, Complex.exp_zero, one_mul, add_zero]
     rw [key]; field_simp; ring
   rwa [hD] at hp

@@ -84,7 +84,8 @@ theorem analyticAt_of_contDiffAt_two {f : ℂ → ℂ} {z : ℂ} (hf : ContDiffA
     AnalyticAt ℂ f z := by
   have hev := hf.eventually (by norm_num)
   obtain ⟨U, hU, hUo, hzU⟩ := eventually_nhds_iff.mp hev
-  exact DifferentiableOn.analyticAt (fun y hy => ((hU y hy).differentiableAt (by norm_num)).differentiableWithinAt)
+  exact DifferentiableOn.analyticAt
+      (fun y hy => ((hU y hy).differentiableAt (by norm_num)).differentiableWithinAt)
     (hUo.mem_nhds hzU)
 
 /-- Identity under the stated parameter and domain assumptions: `riemannOperator α β γ a₁ a₂ b₁ b₂
@@ -99,7 +100,8 @@ theorem riemann_hypergeometric_solution {α β γ a₁ a₂ b₁ b₂ c₁ c₂ 
     (hz : ‖(z - α) * (β - γ) / ((z - γ) * (β - α))‖ < 1) :
     riemannOperator α β γ a₁ a₂ b₁ b₂ c₁ c₂
       (fun w => ((w - α) / (w - γ)) ^ a₁ * ((w - β) / (w - γ)) ^ b₁ *
-        ₂F₁ (a₁ + b₁ + c₁) (a₁ + b₁ + c₂) (1 + a₁ - a₂) ((w - α) * (β - γ) / ((w - γ) * (β - α)))) z = 0 := by
+        ₂F₁ (a₁ + b₁ + c₁) (a₁ + b₁ + c₂) (1 + a₁ - a₂)
+            ((w - α) * (β - γ) / ((w - γ) * (β - α)))) z = 0 := by
   set T : ℂ → ℂ := fun w => (w - α) * (β - γ) / ((w - γ) * (β - α)) with hT
   set A : ℂ → ℂ := fun w => (w - α) / (w - γ) with hA
   set B : ℂ → ℂ := fun w => (w - β) / (w - γ) with hB
@@ -209,7 +211,8 @@ theorem riemann_hypergeometric_solution {α β γ a₁ a₂ b₁ b₂ c₁ c₂ 
       fun w => P w * Fh (T w) := rfl
   rw [hf]
   simp only [riemannOperator]
-  rw [show iteratedDeriv 2 (fun w => P w * Fh (T w)) z = deriv (deriv (fun w => P w * Fh (T w))) z by
+  rw [show iteratedDeriv 2 (fun w => P w * Fh (T w)) z =
+      deriv (deriv (fun w => P w * Fh (T w))) z by
     simp only [iteratedDeriv_succ, iteratedDeriv_zero], deriv_deriv_mul_comp hPa hTa hFa,
     (deriv_mul_comp_eventuallyEq hPa hTa hFa).eq_of_nhds, hPdd, (hPd z hzU).deriv, hTdd,
     (hTd z hzγ').deriv]

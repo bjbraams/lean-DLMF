@@ -90,7 +90,8 @@ theorem rpow_neg_sub_one_le_add {x σ σ₀ R : ℝ} (hx : 0 < x) (h0 : σ₀ �
 /-- **Dirichlet's test, holomorphic form**: if the partial sums of `c` are bounded and `a > 0`,
 then `∑ c n (n + a)^{-s}` converges for `Re s > 0` (as a limit of partial sums) to a function
 holomorphic on `Re s > 0`. -/
-theorem exists_differentiableOn_tendsto_sum_mul_cpow {c : ℕ → ℂ} {C : ℝ} (hC : ∀ N, ‖∑ n ∈ range N, c n‖ ≤ C)
+theorem exists_differentiableOn_tendsto_sum_mul_cpow {c : ℕ → ℂ} {C : ℝ}
+    (hC : ∀ N, ‖∑ n ∈ range N, c n‖ ≤ C)
     {a : ℝ} (ha : 0 < a) :
     ∃ G : ℂ → ℂ, DifferentiableOn ℂ G {s | 0 < s.re} ∧ ∀ s : ℂ, 0 < s.re →
       Tendsto (fun N => ∑ n ∈ range N, c n * (((n + a : ℝ)) : ℂ) ^ (-s)) atTop (𝓝 (G s)) := by
@@ -201,7 +202,8 @@ private lemma norm_sum_range_pow_succ_le {w : ℂ} (hw : ‖w‖ = 1) (hw1 : w �
     _ = 2 := by rw [norm_pow, hw, one_pow, norm_one]; norm_num
 
 /-- Identity theorem on the half-plane `Re s > 0` from agreement on `Re s > 1`. -/
-private lemma eqOn_re_pos_of_eq_of_one_lt_re {F G : ℂ → ℂ} (hF : DifferentiableOn ℂ F {s | 0 < s.re})
+private lemma eqOn_re_pos_of_eq_of_one_lt_re {F G : ℂ → ℂ}
+    (hF : DifferentiableOn ℂ F {s | 0 < s.re})
     (hG : DifferentiableOn ℂ G {s | 0 < s.re}) (h : ∀ s : ℂ, 1 < s.re → F s = G s) :
     EqOn F G {s | 0 < s.re} := by
   have hU : IsOpen {s : ℂ | 0 < s.re} := isOpen_lt continuous_const continuous_re
@@ -227,7 +229,8 @@ private lemma tendsto_sum_exp_div_cpow_expZeta_of_one_lt_re (x : ℝ) {s : ℂ} 
 
 /-- **DLMF 25.13.1 in both ranges**: the partial sums of `∑_{n≥1} e^{2πinx}/n^s` tend to
 `F(x, s) = expZeta x s` if `x ∉ ℤ` and `Re s > 0`, or if `Re s > 1`. -/
-theorem tendsto_sum_exp_div_cpow_expZeta {x : ℝ} {s : ℂ} (h : ((∀ m : ℤ, x ≠ m) ∧ 0 < s.re) ∨ 1 < s.re) :
+theorem tendsto_sum_exp_div_cpow_expZeta {x : ℝ} {s : ℂ}
+    (h : ((∀ m : ℤ, x ≠ m) ∧ 0 < s.re) ∨ 1 < s.re) :
     Tendsto (fun N : ℕ => ∑ n ∈ Finset.range N,
         cexp (2 * π * I * (n + 1) * x) / ((n : ℂ) + 1) ^ s) atTop
       (𝓝 (expZeta (x : UnitAddCircle) s)) := by
@@ -259,7 +262,8 @@ theorem tendsto_sum_exp_div_cpow_expZeta {x : ℝ} {s : ℂ} (h : ((∀ m : ℤ,
     rintro ⟨m, hm⟩
     exact hx m (by simpa using hm.symm)
   have heq : EqOn G (expZeta (x : UnitAddCircle)) {s | 0 < s.re} := by
-    refine eqOn_re_pos_of_eq_of_one_lt_re hG (differentiable_expZeta_of_ne_zero hx0).differentiableOn
+    refine eqOn_re_pos_of_eq_of_one_lt_re hG
+        (differentiable_expZeta_of_ne_zero hx0).differentiableOn
       fun t ht => ?_
     refine tendsto_nhds_unique (hT t (by linarith)) ?_
     exact (tendsto_sum_exp_div_cpow_expZeta_of_one_lt_re x ht).congr fun N =>

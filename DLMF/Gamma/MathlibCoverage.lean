@@ -28,7 +28,7 @@ dlmf_upstream 5.2.E1 Complex.Gamma_eq_integral
   "exact: Re z > 0; Mathlib's GammaIntegral s is ∫₀^∞ e^{-t} t^{s-1} dt"
 dlmf_upstream 5.2.E1 Real.Gamma_eq_integral "special case: real z > 0"
 
--- Digamma as logarithmic derivative; the project's real form is `Real.digamma`.
+-- Digamma as logarithmic derivative; the project's real form is `Gamma.Real.digamma`.
 dlmf_upstream 5.2.E2 Complex.digamma
   "different convention: ψ = logDeriv Γ, totalized to 0 at z = 0, -1, -2, …"
 
@@ -53,7 +53,7 @@ dlmf_upstream 5.4.E6 Complex.Gamma_one_half_eq
 dlmf_upstream 5.4.E6 Real.Gamma_one_half_eq
   "partial: Γ(1/2) = √π for the real Gamma; the decimal value is out of scope"
 
--- `ψ(1) = -γ`; project: `Real.digamma_one`.
+-- `ψ(1) = -γ`; project: `Gamma.Real.digamma_one`.
 dlmf_upstream 5.4.E12 Complex.digamma_one
   "partial: ψ(1) = -γ; the decimal value is not formalized (numerical, out of scope)"
 
@@ -66,7 +66,7 @@ dlmf_upstream 5.5.E1 Complex.Gamma_add_one
   "exact: z ≠ 0; at the other poles both sides are Mathlib's totalized value 0"
 dlmf_upstream 5.5.E1 Real.Gamma_add_one "special case: real z ≠ 0"
 
--- Digamma recurrence; project: `Real.digamma_add_one`.
+-- Digamma recurrence; project: `Gamma.Real.digamma_add_one`.
 dlmf_upstream 5.5.E2 Complex.digamma_apply_add_one "exact: z ≠ 0, -1, -2, …"
 
 -- Euler reflection.

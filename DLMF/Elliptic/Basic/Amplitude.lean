@@ -119,7 +119,8 @@ theorem Real.hasDerivAt_incEllIntEm {m : ℝ} (hm : m < 1) (φ : ℝ) :
     (continuous_one_sub_mul_sin_sq_rpow hm _).continuousAt
 
 /-- `φ ↦ F(φ|m)` is strictly increasing for `m < 1`. -/
-theorem Real.strictMono_incEllIntFm {m : ℝ} (hm : m < 1) : StrictMono fun φ => Real.incEllIntFm φ m :=
+theorem Real.strictMono_incEllIntFm {m : ℝ} (hm : m < 1) : StrictMono fun φ =>
+    Real.incEllIntFm φ m :=
   strictMono_of_deriv_pos fun φ => by
     rw [(Real.hasDerivAt_incEllIntFm hm φ).deriv]
     exact rpow_pos_of_pos (one_sub_mul_sin_sq_pos hm φ) _

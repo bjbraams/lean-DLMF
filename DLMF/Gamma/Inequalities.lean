@@ -102,11 +102,11 @@ theorem eulerMascheroniConstant_lt_three_fifths : γ < 3 / 5 := by
 
 /-- The trigamma function is antitone on `(0, ∞)`. -/
 theorem trigamma_le_of_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) :
-    Real.trigamma y ≤ Real.trigamma x := by
+    Gamma.Real.trigamma y ≤ Gamma.Real.trigamma x := by
   have hy : 0 < y := hx.trans_le hxy
-  rw [Real.trigamma_eq_tsum hy, Real.trigamma_eq_tsum hx]
-  refine Summable.tsum_le_tsum (fun n => ?_) (Real.summable_trigamma hy)
-    (Real.summable_trigamma hx)
+  rw [Gamma.Real.trigamma_eq_tsum hy, Gamma.Real.trigamma_eq_tsum hx]
+  refine Summable.tsum_le_tsum (fun n => ?_) (Gamma.Real.summable_trigamma hy)
+    (Gamma.Real.summable_trigamma hx)
   have h1 : 0 < x + n := by positivity
   have h2 : x + n ≤ y + n := by linarith
   exact pow_le_pow_left₀ (by positivity) (inv_anti₀ h1 h2) 2
@@ -166,14 +166,14 @@ theorem recip_sq_sub_recip_sq_le {a s : ℝ} (ha : 0 < a) (hs : 0 ≤ s) :
 
 /-- A Lipschitz bound for the trigamma function to the right of `1`. -/
 theorem trigamma_one_sub_le {s : ℝ} (hs : 0 ≤ s) :
-    Real.trigamma 1 - Real.trigamma (1 + s) ≤ 8 / 3 * s := by
+    Gamma.Real.trigamma 1 - Gamma.Real.trigamma (1 + s) ≤ 8 / 3 * s := by
   have h1s : 0 < 1 + s := by linarith
-  rw [Real.trigamma_eq_tsum one_pos, Real.trigamma_eq_tsum h1s,
-    ← (Real.summable_trigamma one_pos).tsum_sub (Real.summable_trigamma h1s)]
+  rw [Gamma.Real.trigamma_eq_tsum one_pos, Gamma.Real.trigamma_eq_tsum h1s,
+    ← (Gamma.Real.summable_trigamma one_pos).tsum_sub (Gamma.Real.summable_trigamma h1s)]
   calc ∑' n : ℕ, ((1 + (n : ℝ))⁻¹ ^ 2 - (1 + s + n)⁻¹ ^ 2)
       ≤ ∑' n : ℕ, 2 * s * ((1 : ℝ) + n)⁻¹ ^ 3 := by
         refine Summable.tsum_le_tsum (fun n => ?_)
-          ((Real.summable_trigamma one_pos).sub (Real.summable_trigamma h1s))
+          ((Gamma.Real.summable_trigamma one_pos).sub (Gamma.Real.summable_trigamma h1s))
           (summable_recip_one_add_cube.mul_left _)
         have := recip_sq_sub_recip_sq_le (a := 1 + n) (by positivity) hs
         rwa [show (1 : ℝ) + n + s = 1 + s + n by ring] at this
@@ -183,16 +183,16 @@ theorem trigamma_one_sub_le {s : ℝ} (hs : 0 ≤ s) :
 
 /-- For `x > 0`, `ψ` has derivative `ψ'(x)` at `x`. -/
 theorem hasDerivAt_digamma_trigamma {x : ℝ} (hx : 0 < x) :
-    HasDerivAt Real.digamma (Real.trigamma x) x := by
-  rw [Real.trigamma_eq_tsum hx]
-  exact Real.hasDerivAt_digamma hx
+    HasDerivAt Gamma.Real.digamma (Gamma.Real.trigamma x) x := by
+  rw [Gamma.Real.trigamma_eq_tsum hx]
+  exact Gamma.Real.hasDerivAt_digamma hx
 
 /-- Third-order Taylor lower bound for `log Γ` to the right of `1`. -/
 theorem log_Gamma_one_add_ge {t : ℝ} (ht : 0 ≤ t) :
     -γ * t + π ^ 2 / 6 * t ^ 2 / 2 - 4 / 9 * t ^ 3 ≤ Real.log (Real.Gamma (1 + t)) := by
   -- first derivative bound
-  set g : ℝ → ℝ := fun s => Real.digamma (1 + s) + γ - π ^ 2 / 6 * s + 4 / 3 * s ^ 2
-  have hgd : ∀ s, 0 ≤ s → HasDerivAt g (Real.trigamma (1 + s) - π ^ 2 / 6 + 8 / 3 * s) s := by
+  set g : ℝ → ℝ := fun s => Gamma.Real.digamma (1 + s) + γ - π ^ 2 / 6 * s + 4 / 3 * s ^ 2
+  have hgd : ∀ s, 0 ≤ s → HasDerivAt g (Gamma.Real.trigamma (1 + s) - π ^ 2 / 6 + 8 / 3 * s) s := by
     intro s hs
     have h1 := (hasDerivAt_digamma_trigamma (x := 1 + s) (by linarith)).comp_const_add 1 s
     have h2 := ((h1.add_const γ).sub ((hasDerivAt_id s).const_mul (π ^ 2 / 6))).add
@@ -206,14 +206,14 @@ theorem log_Gamma_one_add_ge {t : ℝ} (ht : 0 ≤ t) :
     have := trigamma_one_sub_le (le_of_lt hs)
     rw [trigamma_one] at this
     linarith
-  have hg0 : g 0 = 0 := by simp [g, Real.digamma_one]
+  have hg0 : g 0 = 0 := by simp [g, Gamma.Real.digamma_one]
   have hgnn : ∀ s, 0 ≤ s → 0 ≤ g s := fun s hs =>
     hg0 ▸ hgmono ((Set.mem_Ici.mpr le_rfl)) hs hs
   set h : ℝ → ℝ := fun s => Real.log (Real.Gamma (1 + s)) -
     (-γ * s + π ^ 2 / 6 * s ^ 2 / 2 - 4 / 9 * s ^ 3)
   have hhd : ∀ s, 0 ≤ s → HasDerivAt h (g s) s := by
     intro s hs
-    have h1 := (Real.hasDerivAt_log_Gamma (x := 1 + s) (by linarith)).comp_const_add 1 s
+    have h1 := (Gamma.Real.hasDerivAt_log_Gamma (x := 1 + s) (by linarith)).comp_const_add 1 s
     have h2 := h1.sub (((((hasDerivAt_id s).const_mul (-γ)).add
       (((hasDerivAt_id s).pow 2).const_mul (π ^ 2 / 6) |>.div_const 2))).sub
       (((hasDerivAt_id s).pow 3).const_mul (4 / 9)))
@@ -232,8 +232,8 @@ theorem log_Gamma_one_add_ge {t : ℝ} (ht : 0 ≤ t) :
 /-- Second-order Taylor lower bound for `log Γ` to the left of `1`. -/
 theorem log_Gamma_one_sub_ge {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
     γ * r + π ^ 2 / 6 * r ^ 2 / 2 ≤ Real.log (Real.Gamma (1 - r)) := by
-  set k1 : ℝ → ℝ := fun s => -Real.digamma (1 - s) - γ - π ^ 2 / 6 * s
-  have hk1d : ∀ s ∈ Ico (0 : ℝ) 1, HasDerivAt k1 (Real.trigamma (1 - s) - π ^ 2 / 6) s := by
+  set k1 : ℝ → ℝ := fun s => -Gamma.Real.digamma (1 - s) - γ - π ^ 2 / 6 * s
+  have hk1d : ∀ s ∈ Ico (0 : ℝ) 1, HasDerivAt k1 (Gamma.Real.trigamma (1 - s) - π ^ 2 / 6) s := by
     intro s hs
     have h1 := (hasDerivAt_digamma_trigamma (x := 1 - s) (by linarith [hs.2])).comp_const_sub 1 s
     have h2 := (h1.neg.sub_const γ).sub ((hasDerivAt_id s).const_mul (π ^ 2 / 6))
@@ -246,14 +246,15 @@ theorem log_Gamma_one_sub_ge {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
     have := trigamma_le_of_le (x := 1 - s) (y := 1) (by linarith [hs.2]) (by linarith [hs.1])
     rw [trigamma_one] at this
     linarith
-  have hk10 : k1 0 = 0 := by simp [k1, Real.digamma_one]
+  have hk10 : k1 0 = 0 := by simp [k1, Gamma.Real.digamma_one]
   have h0mem : (0 : ℝ) ∈ Ico (0 : ℝ) 1 := ⟨le_rfl, one_pos⟩
   have hk1nn : ∀ s ∈ Ico (0 : ℝ) 1, 0 ≤ k1 s := fun s hs =>
     hk10 ▸ hk1mono h0mem hs hs.1
   set k : ℝ → ℝ := fun s => Real.log (Real.Gamma (1 - s)) - (γ * s + π ^ 2 / 6 * s ^ 2 / 2)
   have hkd : ∀ s ∈ Ico (0 : ℝ) 1, HasDerivAt k (k1 s) s := by
     intro s hs
-    have h1 := (Real.hasDerivAt_log_Gamma (x := 1 - s) (by linarith [hs.2])).comp_const_sub 1 s
+    have h1 := (Gamma.Real.hasDerivAt_log_Gamma (x := 1 - s)
+        (by linarith [hs.2])).comp_const_sub 1 s
     have h2 := h1.sub (((hasDerivAt_id s).const_mul γ).add
       (((hasDerivAt_id s).pow 2).const_mul (π ^ 2 / 6) |>.div_const 2))
     exact h2.congr_deriv (by simp [k1]; ring)
@@ -421,28 +422,28 @@ theorem recip_Gamma_add_recip_Gamma_recip {x : ℝ} (hx : 0 < x) :
     sq_nonneg (1 / Real.Gamma x + 1 / Real.Gamma x⁻¹ - 2)]
 
 /-- `ψ` is strictly increasing on `(0, ∞)`. -/
-theorem digamma_strictMonoOn : StrictMonoOn Real.digamma (Set.Ioi 0) := by
+theorem digamma_strictMonoOn : StrictMonoOn Gamma.Real.digamma (Set.Ioi 0) := by
   intro x hx y hy hxy
   have hx' : (0 : ℝ) < x := hx
   have hy' : (0 : ℝ) < y := hy
-  rw [Real.digamma_eq_tsum hx', Real.digamma_eq_tsum hy']
-  have h := (Real.summable_digammaSeriesTerm hx').tsum_lt_tsum (i := 0)
+  rw [Gamma.Real.digamma_eq_tsum hx', Gamma.Real.digamma_eq_tsum hy']
+  have h := (Gamma.Real.summable_digammaSeriesTerm hx').tsum_lt_tsum (i := 0)
     (fun n => by
-      simp only [Real.digammaSeriesTerm]
+      simp only [Gamma.Real.digammaSeriesTerm]
       have : 0 < x + n := by positivity
       gcongr)
-    (by simp only [Real.digammaSeriesTerm, Nat.cast_zero, add_zero]; gcongr)
-    (Real.summable_digammaSeriesTerm hy')
+    (by simp only [Gamma.Real.digammaSeriesTerm, Nat.cast_zero, add_zero]; gcongr)
+    (Gamma.Real.summable_digammaSeriesTerm hy')
   linarith
 
 /-- `log Γ` is strictly convex on `(0, ∞)`. -/
 theorem strictConvexOn_log_Gamma :
     StrictConvexOn ℝ (Set.Ioi 0) fun y : ℝ => Real.log (Real.Gamma y) := by
   refine StrictMonoOn.strictConvexOn_of_deriv (convex_Ioi 0)
-    (fun y hy => (Real.hasDerivAt_log_Gamma hy).continuousAt.continuousWithinAt) ?_
+    (fun y hy => (Gamma.Real.hasDerivAt_log_Gamma hy).continuousAt.continuousWithinAt) ?_
   rw [interior_Ioi]
   intro a ha b hb hab
-  rw [(Real.hasDerivAt_log_Gamma ha).deriv, (Real.hasDerivAt_log_Gamma hb).deriv]
+  rw [(Gamma.Real.hasDerivAt_log_Gamma ha).deriv, (Gamma.Real.hasDerivAt_log_Gamma hb).deriv]
   exact digamma_strictMonoOn ha hb hab
 
 /-- `log Γ(y + 1) = log Γ(y) + log y` for `y > 0`. -/
@@ -562,7 +563,7 @@ theorem two_mul_sub_div_add_le_log {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
 /-- `log Γ(z+1) - log Γ(z+s) - (1-s) ψ(z+c) → 0` as `z → ∞`, for `c > 0`. -/
 theorem tendsto_log_Gamma_ratio_sub_digamma {s c : ℝ} (hs0 : 0 < s) (hs1 : s < 1) (hc0 : 0 < c) :
     Tendsto (fun z : ℝ => Real.log (Real.Gamma (z + 1)) - Real.log (Real.Gamma (z + s)) -
-      (1 - s) * Real.digamma (z + c)) atTop (𝓝 0) := by
+      (1 - s) * Gamma.Real.digamma (z + c)) atTop (𝓝 0) := by
   have hlogq : ∀ a b : ℝ, Tendsto (fun z : ℝ => Real.log (z + a) - Real.log (z + b)) atTop
       (𝓝 0) := by
     intro a b
@@ -634,10 +635,10 @@ inequalities between the logarithmic mean and the geometric (`c = √s`) or arit
 (`c = (1+s)/2`) means, and the gap tends to `0`. -/
 @[dlmf 5.6.E5]
 theorem Gamma_ratio_digamma_bounds {x s : ℝ} (hx : 0 < x) (hs0 : 0 < s) (hs1 : s < 1) :
-    Real.exp ((1 - s) * Real.digamma (x + Real.sqrt s)) ≤
+    Real.exp ((1 - s) * Gamma.Real.digamma (x + Real.sqrt s)) ≤
         Real.Gamma (x + 1) / Real.Gamma (x + s) ∧
       Real.Gamma (x + 1) / Real.Gamma (x + s) ≤
-        Real.exp ((1 - s) * Real.digamma (x + (s + 1) / 2)) := by
+        Real.exp ((1 - s) * Gamma.Real.digamma (x + (s + 1) / 2)) := by
   have hGpos : ∀ y, 0 < y → 0 < Real.Gamma (y + 1) / Real.Gamma (y + s) := fun y hy =>
     div_pos (Real.Gamma_pos_of_pos (by linarith)) (Real.Gamma_pos_of_pos (by linarith))
   have hratio : ∀ y, 0 < y → Real.log (Real.Gamma (y + 1) / Real.Gamma (y + s)) =
@@ -656,12 +657,12 @@ theorem Gamma_ratio_digamma_bounds {x s : ℝ} (hx : 0 < x) (hs0 : 0 < s) (hs1 :
   have hsq1 : Real.sqrt s ≤ 1 := Real.sqrt_le_one.mpr hs1.le
   constructor
   · set F : ℝ → ℝ := fun y => Real.log (Real.Gamma (y + 1)) - Real.log (Real.Gamma (y + s)) -
-      (1 - s) * Real.digamma (y + Real.sqrt s) with hF
+      (1 - s) * Gamma.Real.digamma (y + Real.sqrt s) with hF
     have hstep : ∀ y, 0 < y → F (y + 1) ≤ F y := by
       intro y hy
       simp only [hF]
       rw [hstepΓ y hy, show y + 1 + Real.sqrt s = (y + Real.sqrt s) + 1 by ring,
-        Real.digamma_add_one (by positivity)]
+        Gamma.Real.digamma_add_one (by positivity)]
       -- `log((y+1)/(y+s)) ≤ (1-s)/(y+√s)`
       have hmean := log_div_le_sub_div_sqrt (a := y + s) (b := y + 1) (by linarith)
         (by linarith)
@@ -680,7 +681,7 @@ theorem Gamma_ratio_digamma_bounds {x s : ℝ} (hx : 0 < x) (hs0 : 0 < s) (hs1 :
     rw [← Real.exp_log (hGpos x hx), Real.exp_le_exp, hratio x hx]
     simp only [hF] at h
     linarith
-  · set G : ℝ → ℝ := fun y => (1 - s) * Real.digamma (y + (s + 1) / 2) -
+  · set G : ℝ → ℝ := fun y => (1 - s) * Gamma.Real.digamma (y + (s + 1) / 2) -
       (Real.log (Real.Gamma (y + 1)) - Real.log (Real.Gamma (y + s))) with hG
     have hc0 : 0 < (s + 1) / 2 := by linarith
     have hc1 : (s + 1) / 2 ≤ 1 := by linarith
@@ -688,7 +689,7 @@ theorem Gamma_ratio_digamma_bounds {x s : ℝ} (hx : 0 < x) (hs0 : 0 < s) (hs1 :
       intro y hy
       simp only [hG]
       rw [hstepΓ y hy, show y + 1 + (s + 1) / 2 = (y + (s + 1) / 2) + 1 by ring,
-        Real.digamma_add_one (by positivity)]
+        Gamma.Real.digamma_add_one (by positivity)]
       have hmean := two_mul_sub_div_add_le_log (a := y + s) (b := y + 1) (by linarith)
         (by linarith)
       rw [Real.log_div (by linarith) (by linarith)] at hmean

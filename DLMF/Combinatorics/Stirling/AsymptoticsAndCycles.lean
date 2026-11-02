@@ -230,7 +230,8 @@ section CycleCount
 open Equiv Equiv.Perm
 
 /-- A relation that is an equivalence and relates every point to its image contains `SameCycle`. -/
-private lemma sameCycle_le_of_equivalence {α : Type*} {f : Perm α} {R : α → α → Prop} (hR : Equivalence R)
+private lemma sameCycle_le_of_equivalence {α : Type*} {f : Perm α} {R : α → α → Prop}
+    (hR : Equivalence R)
     (hf : ∀ x, R x (f x)) {x y : α} (h : SameCycle f x y) : R x y := by
   obtain ⟨i, rfl⟩ := h
   induction i using Int.induction_on with
@@ -249,7 +250,8 @@ def cycleMaxima {α : Type*} [Fintype α] [LinearOrder α] (σ : Perm α) : Fins
 
 /-- Inserting `0` into a permutation of `Fin n` (via `decomposeFin`) does not change which
 nonzero points lie in a common cycle. -/
-private lemma sameCycle_decomposeFin_symm_succ_iff {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) (x y : Fin n) :
+private lemma sameCycle_decomposeFin_symm_succ_iff {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n))
+    (x y : Fin n) :
     SameCycle (decomposeFin.symm (p, τ)) x.succ y.succ ↔ SameCycle τ x y := by
   set σ := decomposeFin.symm (p, τ)
   constructor
@@ -335,7 +337,8 @@ private lemma card_cycleMaxima_decomposeFin_symm {n : ℕ} (p : Fin (n + 1)) (τ
         simpa using this
       exact hp (le_antisymm (h p hs) (Fin.zero_le _))
 /-- The number of cycles (fixed points included) equals the number of cycle maxima. -/
-private lemma card_parts_partition_eq_card_cycleMaxima {α : Type*} [Fintype α] [LinearOrder α] (σ : Perm α) :
+private lemma card_parts_partition_eq_card_cycleMaxima {α : Type*} [Fintype α]
+    [LinearOrder α] (σ : Perm α) :
     Multiset.card σ.partition.parts = #(cycleMaxima σ) := by
   rw [parts_partition, Multiset.card_add, Multiset.card_replicate, cycleType_def,
     Multiset.card_map]
@@ -402,7 +405,8 @@ private lemma card_filter_card_cycleMaxima_eq (n k : ℕ) :
       intro m
       simp only [card_filter]
       rw [← Equiv.sum_comp decomposeFin.symm, Fintype.sum_prod_type, Fin.sum_univ_succ]
-      simp only [card_cycleMaxima_decomposeFin_symm, Fin.succ_ne_zero, ite_true, ite_false, add_zero,
+      simp only [card_cycleMaxima_decomposeFin_symm, Fin.succ_ne_zero, ite_true,
+          ite_false, add_zero,
         sum_const, card_univ, Fintype.card_fin, smul_eq_mul]
     rcases k with _ | k
     · rw [Nat.stirlingFirst_succ_zero, key, ih]

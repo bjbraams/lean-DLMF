@@ -14,6 +14,7 @@ public import DLMF.EllipticIntegrals.Inequalities
 public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.SymmetricBounds
+public import DLMF.EllipticIntegrals.SymmetricInverseJacobi
 public import DLMF.EllipticIntegrals.SymmetricLegendreConnection
 public import DLMF.EllipticIntegrals.LegendreSymmetricForms
 public import DLMF.EllipticIntegrals.Quadratic

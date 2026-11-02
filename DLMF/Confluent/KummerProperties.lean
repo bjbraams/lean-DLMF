@@ -150,7 +150,8 @@ theorem norm_poch_div_pow_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) (n : ℕ) 
   | zero => simp [poch_zero]
   | succ n ih =>
     rw [poch_div_pow_succ (ofReal_ne_zero.mpr (ne_of_gt hy)),
-      poch_div_pow_succ (ofReal_ne_zero.mpr (ne_of_gt hx)), norm_mul, norm_mul, hnorm y hy, hnorm x hx]
+      poch_div_pow_succ (ofReal_ne_zero.mpr (ne_of_gt hx)), norm_mul, norm_mul,
+          hnorm y hy, hnorm x hx]
     exact mul_le_mul ih (add_le_add_right (div_le_div_of_nonneg_left (Nat.cast_nonneg n) hx hxy) 1)
       (by positivity) (norm_nonneg _)
 

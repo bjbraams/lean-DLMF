@@ -60,20 +60,23 @@ theorem scIncGamma_hasSum_alternating {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z 
   rw [he] at hs
   refine hs.congr_fun fun k => ?_
   have hk : a+(k:ℂ) ≠ 0 := by intro h; exact ha k (by linear_combination h)
-  have hG : Gamma (a+k) ≠ 0 := Gamma_ne_zero (fun n h => ha (k+n) (by push_cast; linear_combination h))
+  have hG : Gamma (a+k) ≠ 0 :=
+      Gamma_ne_zero (fun n h => ha (k+n) (by push_cast; linear_combination h))
   rw [regularizedHGFunCoeff_singleton, poch, ← Gamma_add_nat_div_Gamma_eq a ha,
     show a+1+k=(a+k)+1 by ring, Gamma_add_one _ hk]
   field_simp [Gamma_ne_zero ha, hG]
 
 /-- Derivative of the exponential partial sum: `e_n' = e_n - z^n/n!`. -/
 theorem incrSer_hasDerivAt_expPartialSum (n : ℕ) (s : ℂ) :
-    HasDerivAt (Elementary.expPartialSum n) (Elementary.expPartialSum n s - s^n/(n.factorial : ℂ)) s := by
+    HasDerivAt (Elementary.expPartialSum n)
+        (Elementary.expPartialSum n s - s^n/(n.factorial : ℂ)) s := by
   induction n with
   | zero =>
     have : Elementary.expPartialSum 0 = fun _ => 1 := by funext w; simp [Elementary.expPartialSum]
     rw [this]; simpa using hasDerivAt_const s (1:ℂ)
   | succ n ih =>
-    have he : Elementary.expPartialSum (n+1) = fun w => Elementary.expPartialSum n w + w^(n+1)/((n+1).factorial : ℂ) := by
+    have he : Elementary.expPartialSum (n+1) = fun w => Elementary.expPartialSum n w +
+        w^(n+1)/((n+1).factorial : ℂ) := by
       funext w; simp [Elementary.expPartialSum, Finset.sum_range_succ]
     rw [he]
     have hp := (hasDerivAt_pow (n+1) s).div_const ((n+1).factorial : ℂ)
@@ -87,7 +90,8 @@ theorem incrSer_hasDerivAt_expPartialSum (n : ℕ) (s : ℂ) :
 
 /-- `-n! e^{-s} e_n(s)` is a primitive of `s^n e^{-s}`. -/
 theorem incrSer_hasDerivAt_primitive (n : ℕ) (s : ℂ) :
-    HasDerivAt (fun w => -(n.factorial : ℂ)*(exp (-w)*Elementary.expPartialSum n w)) (s^n*exp (-s)) s := by
+    HasDerivAt (fun w => -(n.factorial : ℂ)*(exp (-w)*Elementary.expPartialSum n w))
+        (s^n*exp (-s)) s := by
   have h := (((hasDerivAt_neg s).cexp).mul (incrSer_hasDerivAt_expPartialSum n s)).const_mul
     (-(n.factorial : ℂ))
   refine h.congr_deriv ?_
@@ -101,7 +105,10 @@ theorem incrSer_hasDerivAt_primitive (n : ℕ) (s : ℂ) :
 @[dlmf 8.7.E2]
 theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hx : x ∈ slitPlane)
     (hxy : ∀ t ∈ Set.Icc (0:ℝ) 1, x + t * y ∈ slitPlane) (hy : ‖y‖ < ‖x‖) :
-    HasSum (fun n : ℕ => exp (-x)*x^(a-1)*poch (1-a) n/(-x)^n*(1-exp (-y)*Elementary.expPartialSum n y)) (lowerIncGamma a (x+y)-lowerIncGamma a x) ∧ lowerIncGamma a (x+y)-lowerIncGamma a x=upperIncGamma a x-upperIncGamma a (x+y) := by
+    HasSum (fun n : ℕ =>
+        exp (-x)*x^(a-1)*poch (1-a) n/(-x)^n*(1-exp (-y)*Elementary.expPartialSum n y))
+        (lowerIncGamma a (x+y)-lowerIncGamma a x) ∧
+        lowerIncGamma a (x+y)-lowerIncGamma a x=upperIncGamma a x-upperIncGamma a (x+y) := by
   have hx0 : x ≠ 0 := slitPlane_ne_zero hx
   have hxy1 : x + y ∈ slitPlane := by simpa using hxy 1 ⟨zero_le_one, le_rfl⟩
   refine ⟨?_, ?_⟩
@@ -186,7 +193,8 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
     intro n
     set c : ℂ := exp (-x)*x^(a-1)*poch (1-a) n/(n.factorial : ℂ)/(-x)^n with hc
     have hd : ∀ t ∈ uIcc (0:ℝ) 1, HasDerivAt
-        (fun t:ℝ => c*(-(n.factorial : ℂ)*(exp (-(t*y))*Elementary.expPartialSum n (t*y)))) (u n t) t := by
+        (fun t:ℝ => c*(-(n.factorial : ℂ)*(exp (-(t*y))*Elementary.expPartialSum n (t*y))))
+            (u n t) t := by
       intro t _
       have h1 : HasDerivAt (fun s:ℂ => s*y) y (t:ℂ) := by
         simpa using (hasDerivAt_id (t:ℂ)).mul_const y
@@ -243,7 +251,8 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
 to `(Gamma a-upperIncGamma a z)`. -/
 @[dlmf 8.7.E3]
 theorem upperIncGamma_hasSum_alternating {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ≠ 0) :
-    HasSum (fun k : ℕ => (-1 : ℂ)^k*z^(a+k)/((k.factorial : ℂ)*(a+k))) (Gamma a-upperIncGamma a z) := by
+    HasSum (fun k : ℕ => (-1 : ℂ)^k*z^(a+k)/((k.factorial : ℂ)*(a+k)))
+        (Gamma a-upperIncGamma a z) := by
   have hs := (scIncGamma_hasSum_alternating ha z).mul_left (Gamma a*z^a)
   have he : Gamma a*z^a*scIncGamma a z=Gamma a-upperIncGamma a z := by
     rw [scIncGamma_eq ha hz]
@@ -307,7 +316,8 @@ theorem serRec_sum_antidiagonal_expPartialSum (j : ℕ) :
   | succ j ih =>
     rw [Finset.Nat.sum_antidiagonal_succ]
     have hsplit : ∀ p : ℕ × ℕ, Elementary.expPartialSum (p.1+1) (-1)/((p.2)! : ℂ) =
-        Elementary.expPartialSum p.1 (-1)/((p.2)! : ℂ) + (-1 : ℂ)^(p.1+1)/(((p.1+1))! * (p.2)!) := by
+        Elementary.expPartialSum p.1 (-1)/((p.2)! : ℂ) +
+            (-1 : ℂ)^(p.1+1)/(((p.1+1))! * (p.2)!) := by
       intro p
       rw [Elementary.expPartialSum, Finset.sum_range_succ, ← Elementary.expPartialSum]
       have h1 : (((p.1+1))! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -368,7 +378,8 @@ theorem scSph_euler_F {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
         rw [show (16*|R| : ℂ) = ((16*|R| : ℝ) : ℂ) by push_cast; ring, this,
           show a + 1 + (k:ℂ) = a + k + 1 by ring] at h2
         linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
-      simp only [norm_mul, norm_inv, norm_norm, norm_pow, Real.norm_of_nonneg (by positivity : (0:ℝ) ≤ 2*|R|)]
+      simp only [norm_mul, norm_inv, norm_norm, norm_pow,
+          Real.norm_of_nonneg (by positivity : (0:ℝ) ≤ 2*|R|)]
       rw [pow_succ]
       have hG0 : 0 ≤ ‖Gamma (a+k+1)‖⁻¹ := by positivity
       calc (2*|R|)^k * (2*|R|) * (‖a+k+1‖ * ‖Gamma (a+k+1)‖)⁻¹
@@ -636,8 +647,11 @@ theorem scSph_coeff_bound (a₀ : ℂ) : ∃ K : ℝ, ∀ n : ℕ, ∀ a ∈ Met
 /-- DLMF 8.7.5 for every `a`: the generic case by the Euler operator, the poles of `Γ(a)`
 by continuity in `a`. -/
 theorem scSph_series (a z : ℂ) :
-    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2)) (scIncGamma a z) := by
-  have hgen : ∀ a : ℂ, (∀ n : ℕ, a ≠ -n) → HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2)) (scIncGamma a z) := by
+    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2))
+        (scIncGamma a z) := by
+  have hgen : ∀ a : ℂ, (∀ n : ℕ, a ≠ -n) →
+      HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2))
+      (scIncGamma a z) := by
     intro a ha
     have h := scSph_generic ha (z/2)
     rw [show 2*(z/2) = z by ring] at h
@@ -694,7 +708,8 @@ theorem scSph_series (a z : ℂ) :
   have hmem : s ∈ 𝓝 a₀ := Metric.closedBall_mem_nhds a₀ (by norm_num)
   have hΦa : ContinuousAt (fun a => ∑' n, T a n) a₀ := hΦ.continuousAt hmem
   have hSa : ContinuousAt (fun a => scIncGamma a z) a₀ :=
-    (scIncGamma_joint_entire.continuous.comp (by fun_prop : Continuous fun a : ℂ => (a, z))).continuousAt
+    (scIncGamma_joint_entire.continuous.comp
+        (by fun_prop : Continuous fun a : ℂ => (a, z))).continuousAt
   have heq : ∀ᶠ a in 𝓝[≠] a₀, ∑' n, T a n = scIncGamma a z := by
     have hb : Metric.ball a₀ (1/2) ∈ 𝓝 a₀ := Metric.ball_mem_nhds a₀ (by norm_num)
     filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds hb] with a hne hball
@@ -709,19 +724,23 @@ theorem scSph_series (a z : ℂ) :
       linarith
     rw [hk, hkm, Set.mem_singleton_iff]
   have hlim1 := hΦa.tendsto.mono_left (nhdsWithin_le_nhds (s := {a₀}ᶜ))
-  have hlim2 := (hSa.tendsto.mono_left (nhdsWithin_le_nhds (s := {a₀}ᶜ))).congr' (heq.mono fun a h => h.symm)
+  have hlim2 := (hSa.tendsto.mono_left (nhdsWithin_le_nhds (s := {a₀}ᶜ))).congr'
+      (heq.mono fun a h => h.symm)
   have hval : ∑' n, T a₀ n = scIncGamma a₀ z := tendsto_nhds_unique hlim1 hlim2
   have hsT : Summable (fun n => T a₀ n) :=
     Summable.of_norm_bounded hsum (fun n => hbound n a₀ (Metric.mem_closedBall_self (by norm_num)))
   rw [← hval]
   exact hsT.hasSum
 
-/-- The series with terms `(fun n : ℕ => Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*Elementary.expPartialSum n
-(-1)*(x : ℂ)^((n : ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x))` converges to
-`(lowerIncGamma a x)`. -/
+/-- The series with terms
+`(fun n : ℕ => Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*Elementary.expPartialSum n (-1)*(x : ℂ)^((n :
+ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x))` converges to `(lowerIncGamma a x)`. -/
 @[dlmf 8.7.E4]
 theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x : ℝ} (hx : 0 < x) :
-    HasSum (fun n : ℕ => Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*Elementary.expPartialSum n (-1)*(x : ℂ)^((n : ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x)) (lowerIncGamma a x) := by
+    HasSum (fun n : ℕ =>
+        Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*Elementary.expPartialSum n
+        (-1)*(x : ℂ)^((n : ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x))
+        (lowerIncGamma a x) := by
   set r : ℂ := ((Real.sqrt x : ℝ) : ℂ) with hr
   have hr0 : r ≠ 0 := by simp only [hr]; exact_mod_cast (Real.sqrt_pos.mpr hx).ne'
   have hz : (2*r) ≠ 0 := mul_ne_zero two_ne_zero hr0
@@ -739,7 +758,8 @@ theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x :
       intro i _; simp
     rw [Finset.sum_congr rfl this]
     exact Summable.sum_le_tsum _ (fun i _ => by positivity) (Real.summable_pow_div_factorial 1)
-  have hsum : Summable fun k : ℕ => ‖Elementary.expPartialSum k (-1)‖ * ‖2*r/2‖^(2*k) * (2^k/(k)!) := by
+  have hsum : Summable fun k : ℕ => ‖Elementary.expPartialSum k (-1)‖ * ‖2*r/2‖^(2*k) *
+      (2^k/(k)!) := by
     refine Summable.of_nonneg_of_le (fun k => by positivity) (fun k => ?_)
       ((Real.summable_pow_div_factorial (2*x)).mul_left C)
     rw [hz2, hnr, pow_mul, Real.sq_sqrt hx.le, mul_pow]
@@ -749,11 +769,13 @@ theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x :
   have hN := DLMF.Bessel.hasSum_besselI_neumann hz a (fun k => Elementary.expPartialSum k (-1))
     (fun k => k) (fun k => k) (fun k => by ring) hsum
   rw [hz2] at hN
-  have hcoef : ∀ j : ℕ, DLMF.Bessel.neumannCoeff a 1 (fun k => Elementary.expPartialSum k (-1)) (fun k => k) j
+  have hcoef : ∀ j : ℕ,
+      DLMF.Bessel.neumannCoeff a 1 (fun k => Elementary.expPartialSum k (-1)) (fun k => k) j
       = 1/Gamma (a+j+1) := by
     intro j
     simp only [DLMF.Bessel.neumannCoeff, one_pow, mul_one, DLMF.Bessel.regularizedHGFunCoeff_empty]
-    have : ∀ p ∈ Finset.antidiagonal j, Elementary.expPartialSum p.1 (-1) * (1/((p.2)! * Gamma (a + p.1 + 1 + p.2)))
+    have : ∀ p ∈ Finset.antidiagonal j, Elementary.expPartialSum p.1 (-1) *
+        (1/((p.2)! * Gamma (a + p.1 + 1 + p.2)))
         = (1/Gamma (a+j+1)) * (Elementary.expPartialSum p.1 (-1)/((p.2)! : ℂ)) := by
       intro p hp
       rw [Finset.mem_antidiagonal] at hp
@@ -770,7 +792,8 @@ theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x :
     field_simp
     linear_combination (-lowerIncGamma a x) * this
   have hval : lowerIncGamma a x = Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ) *
-      (r^a * ∑' j, DLMF.Bessel.neumannCoeff a 1 (fun k => Elementary.expPartialSum k (-1)) (fun k => k) j * r^(2*j)) := by
+      (r^a * ∑' j, DLMF.Bessel.neumannCoeff a 1 (fun k => Elementary.expPartialSum k (-1))
+          (fun k => k) j * r^(2*j)) := by
     rw [hlow, hS]
     simp only [hcoef, hr2]
     have hx0 : (x:ℂ) ≠ 0 := by exact_mod_cast hx.ne'
@@ -792,21 +815,25 @@ theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x :
 n (z/2))` converges to `(scIncGamma a z)`. -/
 @[dlmf 8.7.E5]
 theorem scIncGamma_sphericalI_series (a z : ℂ) :
-    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2)) (scIncGamma a z) := by
+    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2))
+        (scIncGamma a z) := by
   exact scSph_series a z
 
 /-- The series with terms `(fun n : ℕ => (x : ℂ)^a*exp (-x :
 ℂ)*DLMF.OrthogonalPolynomials.laguerrePolyL a n x/(n+1))` converges to `(upperIncGamma a x)`. -/
 @[dlmf 8.7.E6]
 theorem upperIncGamma_laguerre_series {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
-    HasSum (fun n : ℕ => (x : ℂ)^a*exp (-x : ℂ)*DLMF.OrthogonalPolynomials.laguerrePolyL a n x/(n+1)) (upperIncGamma a x) := by
+    HasSum (fun n : ℕ =>
+        (x : ℂ)^a*exp (-x : ℂ)*DLMF.OrthogonalPolynomials.laguerrePolyL a n x/(n+1))
+        (upperIncGamma a x) := by
   sorry
 
 /-- Formula under the stated hypotheses: `∀ f ∈ ({lowerIncGamma,upperIncGamma} : Set (ℂ → ℂ → ℂ)),
 f (a+2) z-(a+1+z)*f (a+1) z+a*z*f a z=0`. -/
 @[dlmf 8.8.E3]
 theorem incompleteGamma_threeTerm {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ≠ 0) :
-    ∀ f ∈ ({lowerIncGamma,upperIncGamma} : Set (ℂ → ℂ → ℂ)), f (a+2) z-(a+1+z)*f (a+1) z+a*z*f a z=0 := by
+    ∀ f ∈ ({lowerIncGamma, upperIncGamma} : Set (ℂ → ℂ → ℂ)),
+        f (a+2) z-(a+1+z)*f (a+1) z+a*z*f a z=0 := by
   intro f hf
   rcases hf with rfl | rfl
   · have h0 := lowerIncGamma_add_one ha hz
@@ -822,7 +849,8 @@ theorem incompleteGamma_threeTerm {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : �
 z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k)`. -/
 @[dlmf 8.8.E7]
 theorem lowerIncGamma_shift_up (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ} (hz : z ≠ 0) :
-    lowerIncGamma (a+n) z=poch a n*lowerIncGamma a z - z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k) := by
+    lowerIncGamma (a+n) z=poch a n*lowerIncGamma a z -
+        z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k) := by
   have han := not_neg_nat_add_nat ha n
   have hGa := Gamma_ne_zero ha
   have hGan := Gamma_ne_zero han
@@ -870,7 +898,8 @@ theorem incompleteGamma_shift_sum_reverse (n : ℕ) (a : ℂ) {z : ℂ} (hz : z�
 (a-n) z - z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ)))`. -/
 @[dlmf 8.8.E8]
 theorem lowerIncGamma_shift_down (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ} (hz : z ≠ 0) :
-    lowerIncGamma a z=Gamma a/Gamma (a-n)*lowerIncGamma (a-n) z - z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ))) := by
+    lowerIncGamma a z=Gamma a/Gamma (a-n)*lowerIncGamma (a-n) z -
+        z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ))) := by
   have hs := lowerIncGamma_shift_up n ha hz
   have hg := Gamma_add_nat_div_Gamma_eq (n:=n) (a-n) ha
   rw [show a-(n:ℂ)+n=a by ring] at hs hg
@@ -883,7 +912,8 @@ theorem lowerIncGamma_shift_down (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ 
 z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k)`. -/
 @[dlmf 8.8.E9]
 theorem upperIncGamma_shift_up (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ} (hz : z ≠ 0) :
-    upperIncGamma (a+n) z=poch a n*upperIncGamma a z + z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k) := by
+    upperIncGamma (a+n) z=poch a n*upperIncGamma a z +
+        z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k) := by
   have h0 := lowerIncGamma_add_upperIncGamma ha hz
   have hn := lowerIncGamma_add_upperIncGamma (not_neg_nat_add_nat ha n) hz
   have hs := lowerIncGamma_shift_up n ha hz
@@ -895,7 +925,8 @@ theorem upperIncGamma_shift_up (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) 
 (a-n) z + z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ)))`. -/
 @[dlmf 8.8.E10]
 theorem upperIncGamma_shift_down (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ} (hz : z ≠ 0) :
-    upperIncGamma a z=Gamma a/Gamma (a-n)*upperIncGamma (a-n) z + z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ))) := by
+    upperIncGamma a z=Gamma a/Gamma (a-n)*upperIncGamma (a-n) z +
+        z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ))) := by
   have hs := upperIncGamma_shift_up n ha hz
   have hg := Gamma_add_nat_div_Gamma_eq (n:=n) (a-n) ha
   rw [show a-(n:ℂ)+n=a by ring] at hs hg
@@ -920,8 +951,10 @@ theorem scIncGamma_deriv_parameter_zero {z : ℂ} (hz : z ≠ 0) :
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t =>
 t^(-a)*lowerIncGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*lowerIncGamma (a+n) z`. -/
 @[dlmf 8.8.E15]
-theorem lowerIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ} (hz : z ∈ slitPlane) :
-    iteratedDeriv n (fun t => t^(-a)*lowerIncGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*lowerIncGamma (a+n) z := by
+theorem lowerIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ}
+    (hz : z ∈ slitPlane) :
+    iteratedDeriv n (fun t => t^(-a)*lowerIncGamma a t)
+        z=(-1 : ℂ)^n*z^(-a-n)*lowerIncGamma (a+n) z := by
   have hz0 := slitPlane_ne_zero hz
   have ha0 : a≠0 := by simpa using ha 0
   have ha1 := add_one_ne_neg_nat ha
@@ -951,7 +984,8 @@ theorem lowerIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} (ha : ∀ k
 t^(-a)*upperIncGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*upperIncGamma (a+n) z`. -/
 @[dlmf 8.8.E16]
 theorem upperIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} {z : ℂ} (hz : z ∈ slitPlane) :
-    iteratedDeriv n (fun t => t^(-a)*upperIncGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*upperIncGamma (a+n) z := by
+    iteratedDeriv n (fun t => t^(-a)*upperIncGamma a t)
+        z=(-1 : ℂ)^n*z^(-a-n)*upperIncGamma (a+n) z := by
   have he : (fun t => t^(-a)*upperIncGamma a t)=ᶠ[𝓝 z]
       (fun t => exp (-t)*kummerU 1 (1+a) t) := by
     filter_upwards [isOpen_slitPlane.mem_nhds hz] with t ht
@@ -992,8 +1026,10 @@ theorem hasDerivAt_exp_mul_lowerIncGamma (a : ℂ)
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t => exp
 t*lowerIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp z*lowerIncGamma (a-n) z`. -/
 @[dlmf 8.8.E17]
-theorem lowerIncGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ} (hz : z ∈ slitPlane) :
-    iteratedDeriv n (fun t => exp t*lowerIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp z*lowerIncGamma (a-n) z := by
+theorem lowerIncGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ}
+    (hz : z ∈ slitPlane) :
+    iteratedDeriv n (fun t => exp t*lowerIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp
+        z*lowerIncGamma (a-n) z := by
   induction n generalizing a with
   | zero => simp [poch_zero]
   | succ n ih =>
@@ -1020,8 +1056,10 @@ theorem lowerIncGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ} (ha : ∀ k :
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t => exp
 t*upperIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp z*upperIncGamma (a-n) z`. -/
 @[dlmf 8.8.E19]
-theorem upperIncGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ} (hz : z ∈ slitPlane) :
-    iteratedDeriv n (fun t => exp t*upperIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp z*upperIncGamma (a-n) z := by
+theorem upperIncGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ}
+    (hz : z ∈ slitPlane) :
+    iteratedDeriv n (fun t => exp t*upperIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp
+        z*upperIncGamma (a-n) z := by
   induction n generalizing a with
   | zero => simp [poch_zero]
   | succ n ih =>
@@ -1116,14 +1154,16 @@ theorem exp_add_two_pi_int_mul_I (w : ℂ) (m : ℤ) : exp (w+2*π*m*I)=exp w :=
 /-- At nonpositive integral parameters the logarithmic-plane upper Gamma function changes by an
 additive constant under a full turn. -/
 theorem upperIncGammaOnLog_neg_nat_monodromy (k : ℕ) (w : ℂ) (m : ℤ) :
-    upperIncGammaOnLog (-k) (w+2*π*m*I)=upperIncGammaOnLog (-k) w-2*π*m*I*(-1 : ℂ)^k/k.factorial := by
+    upperIncGammaOnLog (-k) (w+2*π*m*I)=upperIncGammaOnLog (-k)
+        w-2*π*m*I*(-1 : ℂ)^k/k.factorial := by
   induction k with
   | zero =>
     simp only [CharP.cast_eq_zero, neg_zero, upperIncGammaOnLog_zero, exp_add_two_pi_int_mul_I,
       pow_zero, Nat.factorial_zero, Nat.cast_one, div_one]
     ring
   | succ k ih =>
-    have hk : (-((k+1:ℕ):ℂ)) ≠ 0 := by push_cast; exact neg_ne_zero.mpr (by exact_mod_cast k.succ_ne_zero)
+    have hk : (-((k+1:ℕ):ℂ)) ≠ 0 := by push_cast;
+                                       exact neg_ne_zero.mpr (by exact_mod_cast k.succ_ne_zero)
     have hr (v : ℂ) := upperIncGammaOnLog_add_one (-((k+1:ℕ):ℂ)) v
     rw [show -((k+1:ℕ):ℂ)+1=-(k:ℂ) by push_cast; ring] at hr
     have he : exp (-((k+1:ℕ):ℂ)*(w+2*π*m*I))=exp (-((k+1:ℕ):ℂ)*w) := by
@@ -1141,7 +1181,8 @@ theorem upperIncGammaOnLog_neg_nat_monodromy (k : ℕ) (w : ℂ) (m : ℤ) :
     have hinv : ((k:ℂ)+1)⁻¹*((k:ℂ)+1)=1 := inv_mul_cancel₀ hk'
     push_cast at h1 h0 ⊢
     rw [pow_succ, div_eq_mul_inv, mul_inv]
-    linear_combination ((k:ℂ)+1)⁻¹*(h1-h0)-(upperIncGammaOnLog (-(k+1)) (w+2*π*m*I)-upperIncGammaOnLog (-(k+1)) w)*hinv
+    linear_combination ((k:ℂ)+1)⁻¹*(h1-h0)-(upperIncGammaOnLog (-(k+1))
+        (w+2*π*m*I)-upperIncGammaOnLog (-(k+1)) w)*hinv
 
 /-- On the principal strip the logarithmic-plane upper Gamma function is the principal one. -/
 theorem upperIncGammaOnLog_eq_upperIncGamma (a : ℂ) {w : ℂ} (h1 : -π < w.im) (h2 : w.im ≤ π) :
@@ -1155,7 +1196,8 @@ theorem hasDerivAt_upperIncGammaOnLog (a w : ℂ) :
     HasDerivAt (upperIncGammaOnLog a) (-exp (a*w-exp w)) w := by
   by_cases ha : ∀ n : ℕ, a ≠ -n
   · have h := (hasDerivAt_lowerIncGammaOnLog ha w).const_sub (Gamma a)
-    exact h.congr_of_eventuallyEq (Eventually.of_forall fun v => upperIncGammaOnLog_eq_Gamma_sub ha v)
+    exact h.congr_of_eventuallyEq
+        (Eventually.of_forall fun v => upperIncGammaOnLog_eq_Gamma_sub ha v)
   push Not at ha
   obtain ⟨n, rfl⟩ := ha
   induction n generalizing w with
@@ -1172,7 +1214,8 @@ theorem hasDerivAt_upperIncGammaOnLog (a w : ℂ) :
     have hk : (-((n+1:ℕ):ℂ)) ≠ 0 := by
       push_cast; exact neg_ne_zero.mpr (by exact_mod_cast n.succ_ne_zero)
     set a : ℂ := -((n+1:ℕ):ℂ) with ha
-    have hr (v : ℂ) : upperIncGammaOnLog a v = (upperIncGammaOnLog (-(n:ℂ)) v - exp (a*v-exp v))/a := by
+    have hr (v : ℂ) : upperIncGammaOnLog a v =
+        (upperIncGammaOnLog (-(n:ℂ)) v - exp (a*v-exp v))/a := by
       have := upperIncGammaOnLog_add_one a v
       rw [show a+1 = -(n:ℂ) by rw [ha]; push_cast; ring] at this
       rw [this]; field_simp; ring

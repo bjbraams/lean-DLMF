@@ -54,11 +54,13 @@ theorem Real.millsRatio_integral (x : ℝ) :
     Real.millsRatio x=Real.exp (x^2)*(∫ t : ℝ in Ioi x, Real.exp (-t^2)) := by
   have hre : (erfc x).re = TauCeti.Real.erfc x := by
     rw [erfc, erf_ofReal, TauCeti.Real.erfc_def]; simp
-  have hd (t : ℝ) : HasDerivAt (fun t => -(Real.sqrt π/2*TauCeti.Real.erfc t)) (Real.exp (-t^2)) t := by
+  have hd (t : ℝ) : HasDerivAt (fun t => -(Real.sqrt π/2*TauCeti.Real.erfc t))
+      (Real.exp (-t^2)) t := by
     have hπ : Real.sqrt π ≠ 0 := (Real.sqrt_pos.mpr Real.pi_pos).ne'
     convert ((TauCeti.Real.hasDerivAt_erfc t).const_mul (Real.sqrt π/2)).neg using 1
     field_simp
-  have hi := integral_Ioi_of_hasDerivAt_of_tendsto (f := fun t => -(Real.sqrt π/2*TauCeti.Real.erfc t))
+  have hi := integral_Ioi_of_hasDerivAt_of_tendsto
+      (f := fun t => -(Real.sqrt π/2*TauCeti.Real.erfc t))
     (m := 0) (a := x) (hd x).continuousAt.continuousWithinAt (fun t _ => hd t)
     (by simpa using (integrable_exp_neg_mul_sq one_pos).integrableOn)
     (by simpa using (TauCeti.Real.tendsto_erfc_atTop.const_mul (Real.sqrt π/2)).neg)
@@ -71,7 +73,8 @@ theorem bndAsy_tail_nonneg {E E' : ℝ → ℝ} {x : ℝ} (hE : ∀ y, x ≤ y �
   have hanti : AntitoneOn E (Ici x) :=
     antitoneOn_of_deriv_nonpos (convex_Ici x)
       (fun y hy => (hE y hy).continuousAt.continuousWithinAt)
-      (fun y hy => by rw [interior_Ici] at hy; exact (hE y (le_of_lt hy)).differentiableAt.differentiableWithinAt)
+      (fun y hy => by rw [interior_Ici] at hy;
+                      exact (hE y (le_of_lt hy)).differentiableAt.differentiableWithinAt)
       (fun y hy => by rw [interior_Ici] at hy; rw [(hE y (le_of_lt hy)).deriv]; exact hneg y hy)
   refine le_of_tendsto hlim ?_
   filter_upwards [eventually_ge_atTop x] with t ht
@@ -90,13 +93,16 @@ theorem bndAsy_tail_pos {E E' : ℝ → ℝ} {x : ℝ} (hE : ∀ y, x ≤ y → 
   linarith
 
 /-- Estimate under the stated parameter and domain assumptions: `E 0 ≤ E x`. -/
-theorem bndAsy_head_le {E E' : ℝ → ℝ} {x : ℝ} (hx : 0 ≤ x) (hE : ∀ y, 0 ≤ y → y ≤ x → HasDerivAt E (E' y) y)
+theorem bndAsy_head_le {E E' : ℝ → ℝ} {x : ℝ} (hx : 0 ≤ x)
+    (hE : ∀ y, 0 ≤ y → y ≤ x → HasDerivAt E (E' y) y)
     (hpos : ∀ y, 0 < y → y < x → 0 ≤ E' y) : E 0 ≤ E x := by
   have hmono : MonotoneOn E (Icc 0 x) :=
     monotoneOn_of_deriv_nonneg (convex_Icc 0 x)
       (fun y hy => (hE y hy.1 hy.2).continuousAt.continuousWithinAt)
-      (fun y hy => by rw [interior_Icc] at hy; exact (hE y hy.1.le hy.2.le).differentiableAt.differentiableWithinAt)
-      (fun y hy => by rw [interior_Icc] at hy; rw [(hE y hy.1.le hy.2.le).deriv]; exact hpos y hy.1 hy.2)
+      (fun y hy => by rw [interior_Icc] at hy;
+                      exact (hE y hy.1.le hy.2.le).differentiableAt.differentiableWithinAt)
+      (fun y hy => by rw [interior_Icc] at hy; rw [(hE y hy.1.le hy.2.le).deriv];
+                      exact hpos y hy.1 hy.2)
   exact hmono ⟨le_rfl, hx⟩ ⟨hx, le_rfl⟩ hx
 
 /-- The tail integral `∫ₓ^∞ e^{-t²}` in terms of `erfc`. -/
@@ -149,7 +155,8 @@ theorem bndAsy_millsRatio_lt {g g' : ℝ → ℝ} {x : ℝ} (hg : ∀ y, x ≤ y
 theorem bndAsy_lt_millsRatio {g g' : ℝ → ℝ} {x : ℝ} (hg : ∀ y, x ≤ y → HasDerivAt g (g' y) y)
     (hlim : Tendsto g atTop (𝓝 0)) (hP : ∀ y, x < y → 0 < g' y - 2*y*g y + 1) :
     g x < Real.millsRatio x := by
-  have h := bndAsy_tail_pos (E := fun y => -(Real.exp (-y^2) * g y - Real.sqrt π/2 * TauCeti.Real.erfc y))
+  have h := bndAsy_tail_pos
+      (E := fun y => -(Real.exp (-y^2) * g y - Real.sqrt π/2 * TauCeti.Real.erfc y))
     (fun y hy => (bndAsy_hasDerivAt_E (hg y hy)).neg) (by simpa using (bndAsy_tendsto_E hlim).neg)
     (fun y hy => neg_neg_of_pos (mul_pos (Real.exp_pos _) (hP y hy)))
   rw [bndAsy_millsRatio_eq]
@@ -250,20 +257,25 @@ theorem bndAsy_pos_of_hasDerivAt {f f' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f 
 (a*x^2))`. -/
 theorem bndAsy_hasDerivAt_integral_exp (a x : ℝ) :
     HasDerivAt (fun x => ∫ t in (0:ℝ)..x, Real.exp (a*t^2)) (Real.exp (a*x^2)) x :=
-  ((by fun_prop : Continuous fun t : ℝ => Real.exp (a*t^2)).integral_hasStrictDerivAt 0 x).hasDerivAt
+  ((by fun_prop : Continuous fun t : ℝ => Real.exp (a*t^2)).integral_hasStrictDerivAt
+      0 x).hasDerivAt
 
 /-- Estimate under the stated parameter and domain assumptions: `1/(x+Real.sqrt (x^2+2)) <
 Real.millsRatio x ∧ Real.millsRatio x ≤ 1/(x+Real.sqrt (x^2+4/π))`. -/
 @[dlmf 7.8.E2]
 theorem Real.millsRatio_bound_2 {x : ℝ} (hx : 0 ≤ x) :
-    1/(x+Real.sqrt (x^2+2)) < Real.millsRatio x ∧ Real.millsRatio x ≤ 1/(x+Real.sqrt (x^2+4/π)) := by
-  have hsq : ∀ c y : ℝ, 0 < c → Real.sqrt (y^2+c)^2 = y^2+c := fun c y hc => Real.sq_sqrt (by positivity)
-  have hsp : ∀ c y : ℝ, 0 < c → 0 < Real.sqrt (y^2+c) := fun c y hc => Real.sqrt_pos.mpr (by positivity)
+    1/(x+Real.sqrt (x^2+2)) < Real.millsRatio x ∧ Real.millsRatio x ≤
+        1/(x+Real.sqrt (x^2+4/π)) := by
+  have hsq : ∀ c y : ℝ, 0 < c → Real.sqrt (y^2+c)^2 = y^2+c := fun c y hc =>
+      Real.sq_sqrt (by positivity)
+  have hsp : ∀ c y : ℝ, 0 < c → 0 < Real.sqrt (y^2+c) := fun c y hc =>
+      Real.sqrt_pos.mpr (by positivity)
   have hD : ∀ c y : ℝ, 0 < c → 0 ≤ y → 1*y + Real.sqrt (y^2+c) ≠ 0 := fun c y hc hy => by
     have := hsp c y hc; positivity
   -- the key identity for `P`
   have hP : ∀ c y : ℝ, 0 < c → 0 ≤ y →
-      -1*(1 + y/Real.sqrt (y^2+c))/(1*y + Real.sqrt (y^2+c))^2 - 2*y*(1/(1*y + Real.sqrt (y^2+c))) + 1
+      -1*(1 + y/Real.sqrt (y^2+c))/(1*y + Real.sqrt (y^2+c))^2 -
+          2*y*(1/(1*y + Real.sqrt (y^2+c))) + 1
         = (c - 1 - y*(Real.sqrt (y^2+c) - y))/(Real.sqrt (y^2+c)*(y + Real.sqrt (y^2+c))) := by
     intro c y hc hy
     have h1 := hsp c y hc
@@ -320,7 +332,8 @@ theorem Real.millsRatio_bound_2 {x : ℝ} (hx : 0 ≤ x) :
           have h1 := hsp c y (hc)
           have hq : 0 < Real.sqrt (y^2+c)*(y + Real.sqrt (y^2+c)) := by
             have := hx.trans hy.le; positivity
-          exact mul_nonpos_of_nonneg_of_nonpos (Real.exp_pos _).le (div_nonpos_of_nonpos_of_nonneg hNy hq.le)
+          exact mul_nonpos_of_nonneg_of_nonpos (Real.exp_pos _).le
+              (div_nonpos_of_nonpos_of_nonneg hNy hq.le)
       · have h := bndAsy_head_le hx (fun y hy _ => hEd y hy) (fun y hy hyx => by
           rw [← hEP y hy.le]
           have := bndAsy_sqrt_gap_mono hc hy.le hyx.le
@@ -381,11 +394,13 @@ theorem Real.millsRatio_bound_3 {x : ℝ} (hx : 0 ≤ x) :
           simp only [hF]
           norm_num [TauCeti.Real.erfc_zero]
         linarith
-    have := bndAsy_le_millsRatio_of (g := fun y => k/(2*k*y+2)) (x := x) (by simp only [hF] at hF0; linarith)
+    have := bndAsy_le_millsRatio_of (g := fun y => k/(2*k*y+2)) (x := x)
+        (by simp only [hF] at hF0; linarith)
     exact this
   · have hg : ∀ y : ℝ, 0 ≤ y → HasDerivAt (fun y : ℝ => 1/(y+1)) (-1/(y+1)^2) y := by
       intro y hy
-      have := (hasDerivAt_const y (1:ℝ)).div ((hasDerivAt_id y).add_const 1) (by simp only [id]; positivity)
+      have := (hasDerivAt_const y (1:ℝ)).div ((hasDerivAt_id y).add_const 1)
+          (by simp only [id]; positivity)
       exact this.congr_deriv (by simp)
     refine bndAsy_millsRatio_lt (fun y hy => hg y (hx.trans hy)) ?_ ?_
     · refine tendsto_const_nhds.div_atTop ?_
@@ -440,10 +455,13 @@ x*Real.millsRatio x < (2*x^4+9*x^2+4)/(4*x^4+20*x^2+15) ∧ (2*x^4+9*x^2+4)/(4*x
 (x^2+1)/(2*x^2+3)`. -/
 @[dlmf 7.8.E5]
 theorem Real.millsRatio_rational_bounds {x : ℝ} (hx : 0 ≤ x) :
-    x^2/(2*x^2+1) ≤ x^2*(2*x^2+5)/(4*x^4+12*x^2+3) ∧ x^2*(2*x^2+5)/(4*x^4+12*x^2+3) ≤ x*Real.millsRatio x ∧ x*Real.millsRatio x < (2*x^4+9*x^2+4)/(4*x^4+20*x^2+15) ∧ (2*x^4+9*x^2+4)/(4*x^4+20*x^2+15) < (x^2+1)/(2*x^2+3) := by
+    x^2/(2*x^2+1) ≤ x^2*(2*x^2+5)/(4*x^4+12*x^2+3) ∧ x^2*(2*x^2+5)/(4*x^4+12*x^2+3) ≤
+        x*Real.millsRatio x ∧ x*Real.millsRatio x < (2*x^4+9*x^2+4)/(4*x^4+20*x^2+15) ∧
+        (2*x^4+9*x^2+4)/(4*x^4+20*x^2+15) < (x^2+1)/(2*x^2+3) := by
   have hq1 : ∀ y : ℝ, 0 < 4*y^4+12*y^2+3 := fun y => by positivity
   refine ⟨?_, ?_, ?_, ?_⟩
-  · rw [div_le_div_iff₀ (by positivity) (hq1 x)]; nlinarith [sq_nonneg x, pow_nonneg (sq_nonneg x) 2]
+  · rw [div_le_div_iff₀ (by positivity) (hq1 x)];
+        nlinarith [sq_nonneg x, pow_nonneg (sq_nonneg x) 2]
   · -- lower bound via `g₁ = y(2y²+5)/(4y⁴+12y²+3)`, with `q₁² (g₁' − 2y g₁ + 1) = 24`
     have hg : ∀ y : ℝ, HasDerivAt (fun y : ℝ => y*(2*y^2+5)/(4*y^4+12*y^2+3))
         (((6*y^2+5)*(4*y^4+12*y^2+3) - y*(2*y^2+5)*(16*y^3+24*y))/(4*y^4+12*y^2+3)^2) y := by
@@ -452,7 +470,8 @@ theorem Real.millsRatio_rational_bounds {x : ℝ} (hx : 0 ≤ x) :
         have := (hasDerivAt_id y).mul (((hasDerivAt_pow 2 y).const_mul 2).add_const 5)
         exact this.congr_deriv (by simp; ring)
       have hq : HasDerivAt (fun y : ℝ => 4*y^4+12*y^2+3) (16*y^3+24*y) y := by
-        have := (((hasDerivAt_pow 4 y).const_mul 4).add ((hasDerivAt_pow 2 y).const_mul 12)).add_const 3
+        have := (((hasDerivAt_pow 4 y).const_mul 4).add
+            ((hasDerivAt_pow 2 y).const_mul 12)).add_const 3
         exact this.congr_deriv (by simp; ring)
       exact hp.div hq (hq1 y).ne'
     have hlim : Tendsto (fun y : ℝ => y*(2*y^2+5)/(4*y^4+12*y^2+3)) atTop (𝓝 0) := by
@@ -480,7 +499,8 @@ theorem Real.millsRatio_rational_bounds {x : ℝ} (hx : 0 ≤ x) :
           (y*(4*y^4+20*y^2+15))^2) y := by
       intro y hy
       have hp : HasDerivAt (fun y : ℝ => 2*y^4+9*y^2+4) (8*y^3+18*y) y := by
-        have := (((hasDerivAt_pow 4 y).const_mul 2).add ((hasDerivAt_pow 2 y).const_mul 9)).add_const 4
+        have := (((hasDerivAt_pow 4 y).const_mul 2).add
+            ((hasDerivAt_pow 2 y).const_mul 9)).add_const 4
         exact this.congr_deriv (by simp; ring)
       have hq : HasDerivAt (fun y : ℝ => y*(4*y^4+20*y^2+15)) (20*y^4+60*y^2+15) y := by
         have := (hasDerivAt_id y).mul ((((hasDerivAt_pow 4 y).const_mul 4).add
@@ -496,7 +516,8 @@ theorem Real.millsRatio_rational_bounds {x : ℝ} (hx : 0 ≤ x) :
         rw [div_le_div_iff₀ (hq2 y (by linarith)) (by linarith)]
         nlinarith [pow_le_pow_left₀ zero_le_one hy 2, pow_le_pow_left₀ zero_le_one hy 3,
           pow_le_pow_left₀ zero_le_one hy 4, pow_le_pow_left₀ zero_le_one hy 5]
-    have h := bndAsy_millsRatio_lt (x := x) (fun y hy => hg y (hx0.trans_le hy)) hlim (fun y hy => by
+    have h := bndAsy_millsRatio_lt (x := x) (fun y hy => hg y (hx0.trans_le hy)) hlim
+        (fun y hy => by
       have hy0 : 0 < y := hx0.trans hy
       have : 0 < y*(4*y^4+20*y^2+15) := hq2 y hy0
       rw [show ((8*y^3+18*y)*(y*(4*y^4+20*y^2+15)) - (2*y^4+9*y^2+4)*(20*y^4+60*y^2+15))/
@@ -509,7 +530,8 @@ theorem Real.millsRatio_rational_bounds {x : ℝ} (hx : 0 ≤ x) :
     rw [show x * ((2*x^4+9*x^2+4)/(x*(4*x^4+20*x^2+15))) = (2*x^4+9*x^2+4)/(4*x^4+20*x^2+15) by
       field_simp] at this
     exact this
-  · rw [div_lt_div_iff₀ (by positivity) (by positivity)]; nlinarith [sq_nonneg x, pow_nonneg (sq_nonneg x) 2]
+  · rw [div_lt_div_iff₀ (by positivity) (by positivity)];
+        nlinarith [sq_nonneg x, pow_nonneg (sq_nonneg x) 2]
 
 /-- Estimate under the stated parameter and domain assumptions: `(∫ t in (0 : ℝ)..x, Real.exp
 (a*t^2)) < (2*Real.exp (a*x^2)+a*x^2-2)/(3*a*x)`. -/
@@ -526,14 +548,16 @@ theorem Real.exp_sq_integral_bound {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     have h1 : HasDerivAt (fun y => Real.exp (a*y^2)) (Real.exp (a*y^2)*(a*(2*y))) y := by
       have := ((hasDerivAt_pow 2 y).const_mul a).exp
       exact this.congr_deriv (by norm_num)
-    have := (((hasDerivAt_id y).mul h1).add ((hasDerivAt_id y).const_mul 2)).div_const 3 |>.sub (hId y)
+    have := (((hasDerivAt_id y).mul h1).add ((hasDerivAt_id y).const_mul 2)).div_const
+        3 |>.sub (hId y)
     exact this.congr_deriv (by (try simp only [id_eq]); ring)
   have hψpos : ∀ y, 0 < y → 0 < (2/3)*(1+(a*y^2-1)*Real.exp (a*y^2)) := by
     intro y hy
     have hu : 0 < a*y^2 := by positivity
     have he := Real.add_one_lt_exp (by linarith : -(a*y^2) < 0).ne
     have hE := Real.exp_pos (a*y^2)
-    have : 1 + (a*y^2-1)*Real.exp (a*y^2) = Real.exp (a*y^2) * (Real.exp (-(a*y^2)) - (1 - a*y^2)) := by
+    have : 1 + (a*y^2-1)*Real.exp (a*y^2) = Real.exp (a*y^2) *
+        (Real.exp (-(a*y^2)) - (1 - a*y^2)) := by
       rw [mul_sub, ← Real.exp_add]; simp; ring
     rw [this]; have : 0 < Real.exp (-(a*y^2)) - (1 - a*y^2) := by linarith
     exact mul_pos (by norm_num) (mul_pos hE this)
@@ -543,7 +567,8 @@ theorem Real.exp_sq_integral_bound {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     have h1 : HasDerivAt (fun y => Real.exp (a*y^2)) (Real.exp (a*y^2)*(a*(2*y))) y := by
       have := ((hasDerivAt_pow 2 y).const_mul a).exp
       exact this.congr_deriv (by norm_num)
-    have := ((((h1.const_mul 2).add ((hasDerivAt_pow 2 y).const_mul a)).sub_const 2).div_const (3*a)).sub
+    have := ((((h1.const_mul 2).add ((hasDerivAt_pow 2 y).const_mul a)).sub_const
+        2).div_const (3*a)).sub
       ((hasDerivAt_id y).mul (hId y))
     exact this.congr_deriv (by (try simp only [id_eq]); field_simp; ring)
   have hpos := bndAsy_pos_of_hasDerivAt hφ (by simp [hI0])
@@ -557,7 +582,8 @@ theorem Real.exp_sq_integral_bound {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
 (x^2)*Real.dawsonF x ∧ Real.exp (x^2)*Real.dawsonF x < (Real.exp (x^2)-1)/x`. -/
 @[dlmf 7.8.E7]
 theorem Real.dawsonF_integral_bounds {x : ℝ} (hx : 0 < x) :
-    Real.sinh (x^2)/x < Real.exp (x^2)*Real.dawsonF x ∧ Real.exp (x^2)*Real.dawsonF x < (Real.exp (x^2)-1)/x := by
+    Real.sinh (x^2)/x < Real.exp (x^2)*Real.dawsonF x ∧ Real.exp (x^2)*Real.dawsonF x <
+        (Real.exp (x^2)-1)/x := by
   have hD : Real.exp (x^2)*Real.dawsonF x = ∫ t in (0 : ℝ)..x, Real.exp (1*t^2) := by
     rw [Real.dawsonF, ← mul_assoc, ← Real.exp_add]; simp
   rw [hD]
@@ -567,7 +593,8 @@ theorem Real.dawsonF_integral_bounds {x : ℝ} (hx : 0 < x) :
   have hE : ∀ y, HasDerivAt (fun y => Real.exp (1*y^2)) (Real.exp (1*y^2)*(1*(2*y))) y := by
     intro y; have := ((hasDerivAt_pow 2 y).const_mul 1).exp
     exact this.congr_deriv (by norm_num)
-  have hEn : ∀ y, HasDerivAt (fun y => Real.exp (-(1*y^2))) (Real.exp (-(1*y^2))*(-(1*(2*y)))) y := by
+  have hEn : ∀ y, HasDerivAt (fun y => Real.exp (-(1*y^2)))
+      (Real.exp (-(1*y^2))*(-(1*(2*y)))) y := by
     intro y; have := ((hasDerivAt_pow 2 y).const_mul 1).neg.exp
     exact this.congr_deriv (by norm_num)
   constructor
@@ -577,7 +604,8 @@ theorem Real.dawsonF_integral_bounds {x : ℝ} (hx : 0 < x) :
       intro y
       have := (hId y).sub ((hasDerivAt_id y).mul (hEn y))
       exact this.congr_deriv (by (try simp only [id_eq]); ring)
-    have hK2pos : ∀ y, 0 < y → 0 < Real.exp (1*y^2) - Real.exp (-(1*y^2)) + 2*y^2*Real.exp (-(1*y^2)) := by
+    have hK2pos : ∀ y, 0 < y → 0 < Real.exp (1*y^2) - Real.exp (-(1*y^2)) +
+        2*y^2*Real.exp (-(1*y^2)) := by
       intro y hy
       have : Real.exp (-(1*y^2)) < Real.exp (1*y^2) := Real.exp_lt_exp.mpr (by nlinarith)
       have : 0 < 2*y^2*Real.exp (-(1*y^2)) := by positivity
@@ -646,7 +674,8 @@ theorem Real.erf_exponential_bound {x : ℝ} (hx : 0 < x) :
   set D : ℝ → ℝ := fun y => TauCeti.Real.erf y - c*y*Real.exp ((1-k)*y^2) with hD
   have hDd : ∀ y, HasDerivAt D (c*Real.exp ((1-k)*y^2) * ph (y^2)) y := by
     intro y
-    have he : HasDerivAt (fun y : ℝ => Real.exp ((1-k)*y^2)) (Real.exp ((1-k)*y^2) * ((1-k)*(2*y))) y := by
+    have he : HasDerivAt (fun y : ℝ => Real.exp ((1-k)*y^2))
+        (Real.exp ((1-k)*y^2) * ((1-k)*(2*y))) y := by
       have := ((hasDerivAt_pow 2 y).const_mul (1-k)).exp
       exact this.congr_deriv (by norm_num)
     have := (TauCeti.Real.hasDerivAt_erf y).sub (((hasDerivAt_id y).const_mul c).mul he)
@@ -671,7 +700,8 @@ theorem Real.erf_exponential_bound {x : ℝ} (hx : 0 < x) :
         have : ph (s^2) < 0 := by simp only [hph] at h2 ⊢; linarith
         exact mul_neg_of_pos_of_neg (by positivity) this
       have hanti : StrictAntiOn D (Icc 0 y) :=
-        strictAntiOn_of_deriv_neg (convex_Icc 0 y) (fun s _ => (hDd s).continuousAt.continuousWithinAt)
+        strictAntiOn_of_deriv_neg (convex_Icc 0 y)
+            (fun s _ => (hDd s).continuousAt.continuousWithinAt)
           (fun s hs => by rw [interior_Icc] at hs; rw [(hDd s).deriv]; exact hneg s hs.1 hs.2)
       have := hanti ⟨le_rfl, hy.le⟩ ⟨hy.le, le_rfl⟩ hy
       linarith
@@ -696,7 +726,8 @@ theorem Real.erf_exponential_bound {x : ℝ} (hx : 0 < x) :
   set h : ℝ → ℝ := fun y => 1 - Real.exp (-(k*y^2)) - TauCeti.Real.erf y^2 with hh
   have hhd : ∀ y, HasDerivAt h (-(2*c*Real.exp (-y^2)) * D y) y := by
     intro y
-    have he : HasDerivAt (fun y : ℝ => Real.exp (-(k*y^2))) (Real.exp (-(k*y^2)) * (-(k*(2*y)))) y := by
+    have he : HasDerivAt (fun y : ℝ => Real.exp (-(k*y^2)))
+        (Real.exp (-(k*y^2)) * (-(k*(2*y)))) y := by
       have := ((hasDerivAt_pow 2 y).const_mul k).neg.exp
       exact this.congr_deriv (by norm_num)
     have := (he.const_sub 1).sub ((TauCeti.Real.hasDerivAt_erf y).pow 2)
@@ -726,7 +757,8 @@ theorem Real.erf_exponential_bound {x : ℝ} (hx : 0 < x) :
         have := hP y hy hcon x hyx
         linarith
       have hmono : StrictMonoOn h (Icc 0 x) :=
-        strictMonoOn_of_deriv_pos (convex_Icc 0 x) (fun s _ => (hhd s).continuousAt.continuousWithinAt)
+        strictMonoOn_of_deriv_pos (convex_Icc 0 x)
+            (fun s _ => (hhd s).continuousAt.continuousWithinAt)
           (fun s hs => by
             rw [interior_Icc] at hs; rw [(hhd s).deriv]
             have := hneg s hs.1 hs.2
@@ -746,7 +778,8 @@ theorem Real.dawsonF_normalized_strictAnti  :
   have hF : ∀ x : ℝ, HasDerivAt Real.dawsonF (1 - 2*x*Real.dawsonF x) x := by
     intro x
     have hI : HasDerivAt (fun x => ∫ t in (0:ℝ)..x, Real.exp (t^2)) (Real.exp (x^2)) x :=
-      ((by fun_prop : Continuous fun t : ℝ => Real.exp (t^2)).integral_hasStrictDerivAt 0 x).hasDerivAt
+      ((by fun_prop : Continuous fun t : ℝ => Real.exp (t^2)).integral_hasStrictDerivAt
+          0 x).hasDerivAt
     have he : HasDerivAt (fun x : ℝ => Real.exp (-x^2)) (Real.exp (-x^2) * (-(2*x))) x := by
       have := (hasDerivAt_pow 2 x).neg.exp
       exact this.congr_deriv (by norm_num)
@@ -803,7 +836,8 @@ theorem Real.dawsonF_normalized_strictAnti  :
 ℂ)/2) (fun k => if Even k then z^2 else 1) (Real.sqrt π*exp (z^2)*erfc z)`. -/
 @[dlmf 7.9.E1]
 theorem erfc_continuedFraction_one {z : ℂ} (hz : 0 < z.re) :
-    HasContinuedFraction (fun k => if k=0 then z else (k : ℂ)/2) (fun k => if Even k then z^2 else 1) (Real.sqrt π*exp (z^2)*erfc z) := by
+    HasContinuedFraction (fun k => if k=0 then z else (k : ℂ)/2)
+        (fun k => if Even k then z^2 else 1) (Real.sqrt π*exp (z^2)*erfc z) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have hw : z ^ 2 ∈ slitPlane := by
     rw [mem_slitPlane_iff]
@@ -844,7 +878,8 @@ theorem erfc_continuedFraction_one {z : ℂ} (hz : 0 < z.re) :
 -(2*k-1 : ℂ)*(2*k)) (fun k => 2*z^2+4*k+1) (Real.sqrt π*exp (z^2)*erfc z)`. -/
 @[dlmf 7.9.E2]
 theorem erfc_continuedFraction_two {z : ℂ} (hz : 0 < z.re) :
-    HasContinuedFraction (fun k => if k=0 then 2*z else -(2*k-1 : ℂ)*(2*k)) (fun k => 2*z^2+4*k+1) (Real.sqrt π*exp (z^2)*erfc z) := by
+    HasContinuedFraction (fun k => if k=0 then 2*z else -(2*k-1 : ℂ)*(2*k)) (fun k => 2*z^2+4*k+1)
+        (Real.sqrt π*exp (z^2)*erfc z) := by
   set a1 : ℕ → ℂ := fun k => if k=0 then z else (k : ℂ)/2 with ha1
   set b1 : ℕ → ℂ := fun k => if Even k then z^2 else 1 with hb1
   set a2 : ℕ → ℂ := fun k => if k=0 then 2*z else -(2*k-1 : ℂ)*(2*k) with ha2

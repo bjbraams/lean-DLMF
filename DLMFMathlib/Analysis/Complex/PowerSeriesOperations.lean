@@ -48,7 +48,8 @@ theorem eventually_hasSum_deriv_powerSeries {a : ℕ → ℂ} {f : ℂ → ℂ}
   have hn1 : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
   field_simp
 
-/-- Principal complex powers satisfy the first-order power differential identity on the slit plane. -/
+/-- Principal complex powers satisfy the first-order power differential identity on the slit plane.
+-/
 theorem mul_deriv_cpow_const {f : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z)
     (hz : f z ∈ slitPlane) (ν : ℂ) :
     f z * deriv (fun w => f w ^ ν) z = ν * (deriv f z * f z ^ ν) := by

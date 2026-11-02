@@ -130,7 +130,8 @@ theorem binomSeriesCoeff_one (β : ℂ) : binomSeriesCoeff p β 1 = β * (p 1 / 
 / p 0) + β * (β - 1) / 2 * (p 1 / p 0) ^ 2`. -/
 theorem binomSeriesCoeff_two (β : ℂ) :
     binomSeriesCoeff p β 2 = β * (p 2 / p 0) + β * (β - 1) / 2 * (p 1 / p 0) ^ 2 := by
-  simp only [binomSeriesCoeff, Ring.choose_eq_descPochhammer_div, sum_range_succ, range_zero, sum_empty, pow_zero,
+  simp only [binomSeriesCoeff, Ring.choose_eq_descPochhammer_div, sum_range_succ, range_zero,
+      sum_empty, pow_zero,
     pow_one, zero_add]
   simp [descPochhammer_succ_right, pow_two, PowerSeries.coeff_mul, Finset.Nat.antidiagonal_succ,
     PowerSeries.coeff_one]

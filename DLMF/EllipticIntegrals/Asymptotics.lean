@@ -8,6 +8,7 @@ module
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Relations
+public import DLMF.EllipticIntegrals.LegendreIdentities
 
 /-!
 # Asymptotic approximations of elliptic integrals (DLMF §19.12)
@@ -271,6 +272,86 @@ theorem symEllIntRC_isBigO_small :
       ≤ (Real.sqrt y)⁻¹ * (3 * s ^ 2) := mul_le_mul_of_nonneg_left he (by positivity)
     _ = 3 * ((Real.sqrt y)⁻¹ * s ^ 2) := by ring
 
+/-- The elementary estimate behind 19.12.7: with `v = √(1 - u)`, `L = ln(4/u)`,
+`|ln((1 + v)/√u)/v - M| ≤ 7 M u²`, `M = ((1 + u/2) L - u/2)/2`, for `0 < u ≤ 1/2`. -/
+private lemma abs_log_div_sqrt_sub_main_le {u : ℝ} (h0 : 0 < u) (h1 : u ≤ 1 / 2) :
+    |Real.log ((1 + √(1 - u)) / √u) / √(1 - u) -
+        ((1 + u / 2) * Real.log (4 / u) - u / 2) / 2| ≤
+      7 * (((1 + u / 2) * Real.log (4 / u) - u / 2) / 2) * u ^ 2 ∧
+      0 < ((1 + u / 2) * Real.log (4 / u) - u / 2) / 2 := by
+  set v := √(1 - u) with hv
+  set L := Real.log (4 / u) with hL
+  have hv2 : v ^ 2 = 1 - u := Real.sq_sqrt (by linarith)
+  have hv0 : 0 < v := Real.sqrt_pos.mpr (by linarith)
+  have hv1 : v < 1 := by nlinarith
+  have hvh : 1 / 2 < v := by nlinarith
+  have hL2 : 2 ≤ L := by
+    rw [hL]
+    have h8 : (8 : ℝ) ≤ 4 / u := by rw [le_div_iff₀ h0]; linarith
+    have : Real.log 8 ≤ Real.log (4 / u) := Real.log_le_log (by norm_num) h8
+    have h2 : (2 : ℝ) < Real.log 8 := by
+      rw [Real.lt_log_iff_exp_lt (by norm_num), show (2 : ℝ) = 1 + 1 by norm_num,
+        Real.exp_add]
+      have := Real.exp_one_lt_d9
+      have := Real.exp_pos 1
+      nlinarith
+    linarith
+  -- decomposition
+  set w := (1 - v) / 2 with hw
+  have hsu : √u ≠ 0 := (Real.sqrt_pos.mpr h0).ne'
+  have hlog : Real.log ((1 + v) / √u) = Real.log (1 - w) + L / 2 := by
+    rw [hw, hL, show 1 - (1 - v) / 2 = (1 + v) / 2 by ring,
+      Real.log_div (by linarith) hsu, Real.log_div (by linarith) (by norm_num),
+      Real.log_div (by norm_num) h0.ne', Real.log_sqrt h0.le,
+      show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
+    push_cast; ring
+  have hw0 : 0 ≤ w := by rw [hw]; linarith
+  have hw1 : w ≤ u / 2 := by rw [hw]; nlinarith [mul_pos hv0 (sub_pos.2 hv1)]
+  have hser := Real.abs_log_sub_add_sum_range_le (x := w) (by rw [abs_of_nonneg hw0]; linarith) 1
+  simp only [Finset.range_one, Finset.sum_singleton, zero_add, pow_one, Nat.cast_zero,
+    div_one, abs_of_nonneg hw0] at hser
+  have hser' : |w + Real.log (1 - w)| ≤ 2 * w ^ 2 := by
+    refine hser.trans ?_
+    rw [div_le_iff₀ (by linarith), show w ^ (1 + 1) = w ^ 2 by norm_num]
+    nlinarith [mul_nonneg (sq_nonneg w) (show 0 ≤ 1 - 2 * w by linarith)]
+  have hA : 0 ≤ 1 / v - 1 - u / 2 ∧ 1 / v - 1 - u / 2 ≤ u ^ 2 := by
+    constructor
+    · rw [sub_sub, sub_nonneg, le_div_iff₀ hv0]
+      nlinarith [sq_nonneg v]
+    · rw [sub_sub, sub_le_iff_le_add, div_le_iff₀ hv0]
+      nlinarith [sq_nonneg v]
+  have key : Real.log ((1 + v) / √u) / v - ((1 + u / 2) * L - u / 2) / 2 =
+      L / 2 * (1 / v - 1 - u / 2) + (w + Real.log (1 - w)) / v -
+        (1 - v) ^ 2 * (v + 2) / (4 * v) := by
+    rw [hlog, hw]
+    have : u = 1 - v ^ 2 := by linarith
+    rw [this]
+    field_simp
+    ring
+  have hM : L / 4 ≤ ((1 + u / 2) * L - u / 2) / 2 := by nlinarith
+  refine ⟨?_, by linarith⟩
+  rw [key]
+  have e1 : |L / 2 * (1 / v - 1 - u / 2)| ≤ L / 2 * u ^ 2 := by
+    rw [abs_of_nonneg (mul_nonneg (by linarith) hA.1)]
+    exact mul_le_mul_of_nonneg_left hA.2 (by linarith)
+  have e2 : |(w + Real.log (1 - w)) / v| ≤ u ^ 2 := by
+    rw [abs_div, abs_of_pos hv0, div_le_iff₀ hv0]
+    nlinarith
+  have e3 : |(1 - v) ^ 2 * (v + 2) / (4 * v)| ≤ 3 / 2 * u ^ 2 := by
+    have h1v : 1 - v ≤ u := by nlinarith
+    rw [abs_of_nonneg (by positivity), div_le_iff₀ (by positivity)]
+    have : (1 - v) ^ 2 ≤ u ^ 2 := by nlinarith
+    nlinarith
+  calc |L / 2 * (1 / v - 1 - u / 2) + (w + Real.log (1 - w)) / v -
+        (1 - v) ^ 2 * (v + 2) / (4 * v)|
+      ≤ |L / 2 * (1 / v - 1 - u / 2)| + |(w + Real.log (1 - w)) / v| +
+          |(1 - v) ^ 2 * (v + 2) / (4 * v)| := by
+        refine (abs_sub _ _).trans ?_
+        gcongr
+        exact abs_add_le _ _
+    _ ≤ L / 2 * u ^ 2 + u ^ 2 + 3 / 2 * u ^ 2 := by linarith
+    _ ≤ 7 * (((1 + u / 2) * L - u / 2) / 2) * u ^ 2 := by nlinarith [sq_nonneg u]
+
 /-- DLMF 19.12.7:
 `R_C(x, y) = (1/(2√x))((1 + y/(2x)) ln(4x/y) - y/(2x))(1 + O(y²/x²))` as `y/x → 0`, `x, y > 0`;
 stated as `R_C(x, y) - M = O(M y²/x²)` with `M` the main term. -/
@@ -281,6 +362,47 @@ theorem symEllIntRC_isBigO_large :
           p.2 / (2 * p.1)) : ℝ) : ℂ)) =O[largeRatioFilter]
       fun p : ℝ × ℝ => 1 / (2 * Real.sqrt p.1) * ((1 + p.2 / (2 * p.1)) *
         Real.log (4 * p.1 / p.2) - p.2 / (2 * p.1)) * (p.2 / p.1) ^ 2 := by
-  sorry
+  have hev : ∀ᶠ p : ℝ × ℝ in largeRatioFilter,
+      p.2 / p.1 < 1 / 2 ∧ 0 < p.1 ∧ 0 < p.2 := by
+    have h1 : ∀ᶠ p : ℝ × ℝ in largeRatioFilter, p.2 / p.1 < 1 / 2 :=
+      (tendsto_comap.eventually (eventually_lt_nhds (by norm_num : (0 : ℝ) < 1 / 2))).filter_mono
+        inf_le_left
+    have h2 : ∀ᶠ p : ℝ × ℝ in largeRatioFilter, 0 < p.1 ∧ 0 < p.2 :=
+      (eventually_principal.mpr fun p hp => hp).filter_mono inf_le_right
+    exact h1.and h2
+  refine IsBigO.of_bound 7 ?_
+  filter_upwards [hev] with p ⟨ht, hx, hy⟩
+  obtain ⟨x, y⟩ := p
+  simp only at ht hx hy ⊢
+  set u := y / x with hu
+  have hu0 : 0 < u := div_pos hy hx
+  have hyx : y < x := by
+    have : y / x < 1 := by linarith
+    rwa [div_lt_one hx] at this
+  have hsx : 0 < √x := Real.sqrt_pos.mpr hx
+  have hyu : y = x * u := by rw [hu]; field_simp
+  have h4 : 4 * x / y = 4 / u := by rw [hu]; field_simp
+  have hxy : √(x - y) = √x * √(1 - u) := by
+    rw [← Real.sqrt_mul hx.le]; congr 1; rw [hyu]; ring
+  have hsy : √y = √x * √u := by rw [hyu, Real.sqrt_mul hx.le]
+  have hRC := (symEllIntRC_of_gt hy hyx).2
+  have hsplit : (√x + √(x - y)) / √y = (1 + √(1 - u)) / √u := by
+    rw [hxy, hsy]; field_simp
+  obtain ⟨hb, hM⟩ := abs_log_div_sqrt_sub_main_le hu0 ht.le
+  rw [hRC, ← ofReal_sub, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs, hsplit, hxy, h4,
+    show y / (2 * x) = u / 2 by rw [hu]; ring]
+  have hv0 : 0 < √(1 - u) := Real.sqrt_pos.mpr (by linarith)
+  rw [show Real.log ((1 + √(1 - u)) / √u) / (√x * √(1 - u)) -
+      1 / (2 * √x) * ((1 + u / 2) * Real.log (4 / u) - u / 2) =
+      (√x)⁻¹ * (Real.log ((1 + √(1 - u)) / √u) / √(1 - u) -
+        ((1 + u / 2) * Real.log (4 / u) - u / 2) / 2) by field_simp,
+    show 1 / (2 * √x) * ((1 + u / 2) * Real.log (4 / u) - u / 2) * u ^ 2 =
+      (√x)⁻¹ * (((1 + u / 2) * Real.log (4 / u) - u / 2) / 2 * u ^ 2) by field_simp,
+    abs_mul, abs_mul, abs_of_pos (inv_pos.mpr hsx), abs_of_pos (mul_pos hM (by positivity))]
+  calc (√x)⁻¹ * |Real.log ((1 + √(1 - u)) / √u) / √(1 - u) -
+        ((1 + u / 2) * Real.log (4 / u) - u / 2) / 2|
+      ≤ (√x)⁻¹ * (7 * (((1 + u / 2) * Real.log (4 / u) - u / 2) / 2) * u ^ 2) :=
+        mul_le_mul_of_nonneg_left hb (by positivity)
+    _ = 7 * ((√x)⁻¹ * (((1 + u / 2) * Real.log (4 / u) - u / 2) / 2 * u ^ 2)) := by ring
 
 end DLMF.EllipticIntegrals

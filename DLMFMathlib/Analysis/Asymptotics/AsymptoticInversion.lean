@@ -44,8 +44,8 @@ An equation `F(x) = T` with `F(x) ~ x (1 + ∑_{n≥1} cₙ x⁻ⁿ)` is the cas
 * `HasAsymptoticPowerSeries.comp`: composition `H ∘ y ~ P.subst Q`.
 * `HasAsymptoticPowerSeries.analytic_comp`: composition with an analytic function.
 * `HasAsymptoticPowerSeries.inversion`: asymptotic inversion.
-* `HasAsymptoticPowerSeries.mcMahon_inversion`, `hasAsymptoticPowerSeries_mcMahon_atTop`: McMahon-type
-  inversion `x = T + ∑ dₙ T⁻ⁿ`; `mcMahonSeries_spec`: the formal fixed-point identity.
+* `HasAsymptoticPowerSeries.mcMahon_inversion`, `hasAsymptoticPowerSeries_mcMahon_atTop`:
+  McMahon-type inversion `x = T + ∑ dₙ T⁻ⁿ`; `mcMahonSeries_spec`: the formal fixed-point identity.
 * `hasAsymptoticPowerSeries_recip_iff`: translation to the scale `ξ^{-n}` of
   `HasAsymptoticExpansion`.
 * `mcMahonSeries_coeff_le_two`: `d₀ = -c₀`, `d₁ = -c₁`, `d₂ = -(c₂ + c₀c₁)`.

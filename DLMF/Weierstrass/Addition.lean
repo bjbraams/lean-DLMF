@@ -28,7 +28,8 @@ functions `℘`, `ζ` and `σ`.
 * `weierstrassP_two_mul`, `weierstrassP_two_mul_sub_e`, `weierstrassZeta_two_mul`,
   `weierstrassSigma_two_mul`: duplication formulas, DLMF 23.10.7–23.10.10.
 * `weierstrassP_nsmul`, `weierstrassZeta_nsmul`, `weierstrassSigma_nsmul`: `n`-tuple
-  formulas, DLMF 23.10.11–23.10.13.
+  formulas, DLMF 23.10.11–23.10.13, with the stronger primed forms for all `n ≥ 1` (and, for
+  `ζ` and `σ`, all `n` and `z`).
 * `nTupleConst_eq`: the corrected DLMF 23.10.15.
 * `weierstrassP_scale`, `weierstrassZeta_scale`, `weierstrassSigma_scale`: homogeneity,
   DLMF 23.10.17–23.10.19.
@@ -86,7 +87,8 @@ private lemma nonneg_add_neg_of_le {o : WithTop ℤ} {k : ℤ} (h : (k : WithTop
 
 open Classical in
 /-- Lower bound for the order of `℘ - ℘(v)` at a non-lattice point. -/
-private lemma le_meromorphicOrderAt_weierstrassP_sub (L : PeriodPair) {v x : ℂ} (hx : x ∉ L.lattice) :
+private lemma le_meromorphicOrderAt_weierstrassP_sub (L : PeriodPair) {v x : ℂ}
+    (hx : x ∉ L.lattice) :
     (((if x + v ∈ L.lattice then 1 else 0) + (if x - v ∈ L.lattice then 1 else 0) : ℤ) :
       WithTop ℤ) ≤ meromorphicOrderAt (fun u => ℘[L] u - ℘[L] v) x := by
   have hA : AnalyticAt ℂ (fun u => ℘[L] u - ℘[L] v) x :=
@@ -138,7 +140,8 @@ private lemma le_meromorphicOrderAt_weierstrassP_sub (L : PeriodPair) {v x : ℂ
     exact hA.meromorphicOrderAt_nonneg
 
 /-- `(℘(u) - ℘(v))σ(u)²σ(v)² = -σ(u + v)σ(u - v)` off the singular set (Liouville). -/
-private lemma weierstrassP_sub_mul_weierstrassSigma_div_eq (L : PeriodPair) {v : ℂ} (hv : v ∉ L.lattice) {u : ℂ}
+private lemma weierstrassP_sub_mul_weierstrassSigma_div_eq (L : PeriodPair) {v : ℂ}
+    (hv : v ∉ L.lattice) {u : ℂ}
     (hu : u ∉ L.lattice) (h1 : u + v ∉ L.lattice) (h2 : u - v ∉ L.lattice) :
     (℘[L] u - ℘[L] v) * (weierstrassSigma L u * weierstrassSigma L u * weierstrassSigma L v ^ 2) *
       (weierstrassSigma L (u + v) * weierstrassSigma L (u - v))⁻¹ = -1 := by
@@ -264,7 +267,8 @@ private lemma weierstrassP_sub_mul_weierstrassSigma_div_eq (L : PeriodPair) {v :
   have hT3 : Tendsto (fun w => (σ (w + v) * σ (w - v))⁻¹) (𝓝[≠] (0 : ℂ))
       (𝓝 (σ (0 + v) * σ (0 - v))⁻¹) := by
     refine Tendsto.mono_left ?_ nhdsWithin_le_nhds
-    refine Tendsto.inv₀ ?_ (mul_ne_zero (hσnot _ (by simpa using hv)) (hσnot _ (by simpa using hmv)))
+    refine Tendsto.inv₀ ?_
+        (mul_ne_zero (hσnot _ (by simpa using hv)) (hσnot _ (by simpa using hmv)))
     exact ((hσd.continuous.comp hcont).tendsto 0).mul ((hσd.continuous.comp hcont').tendsto 0)
   have hlim : Tendsto F (𝓝[≠] (0 : ℂ)) (𝓝 (1 * (1 * 1 * σ v ^ 2) * (σ (0 + v) * σ (0 - v))⁻¹)) := by
     have := (hT1.mul ((hT2.mul hT2).mul (tendsto_const_nhds (x := σ v ^ 2)))).mul hT3
@@ -277,14 +281,16 @@ private lemma weierstrassP_sub_mul_weierstrassSigma_div_eq (L : PeriodPair) {v :
     rw [zero_add, zero_sub, hσ, weierstrassSigma_neg, ← hσ]
     field_simp
   rw [hval] at hlim
-  have hc1 : c = -1 := tendsto_nhds_unique (tendsto_const_nhds.congr' (hev.mono fun w hw => hw.symm))
+  have hc1 : c = -1 :=
+      tendsto_nhds_unique (tendsto_const_nhds.congr' (hev.mono fun w hw => hw.symm))
     hlim
   rw [← hc1]
   exact hc u (hFan u hu h1 h2)
 
 /-- `σ(u+v)σ(u-v) = (℘(v) - ℘(u)) σ(u)² σ(v)²` for `u, v ∉ 𝕃` (23.10.3 with cleared
 denominators). -/
-private lemma weierstrassSigma_add_mul_sub_of_not_mem (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice) :
+private lemma weierstrassSigma_add_mul_sub_of_not_mem (L : PeriodPair) {u v : ℂ}
+    (hu : u ∉ L.lattice) (hv : v ∉ L.lattice) :
     weierstrassSigma L (u + v) * weierstrassSigma L (u - v) =
       (℘[L] v - ℘[L] u) * weierstrassSigma L u ^ 2 * weierstrassSigma L v ^ 2 := by
   by_cases h1 : u + v ∈ L.lattice
@@ -325,7 +331,8 @@ theorem hasDerivAt_derivWeierstrassP (L : PeriodPair) {x : ℂ} (hx : x ∉ L.la
   rwa [deriv_derivWeierstrassP L hx] at this
 
 /-- The addition formula for `ζ` in terms of `℘` and `℘'`, together with `℘(u) ≠ ℘(v)`. -/
-private lemma weierstrassP_ne_and_weierstrassZeta_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
+private lemma weierstrassP_ne_and_weierstrassZeta_add (L : PeriodPair) {u v : ℂ}
+    (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
     (huv : u + v ∉ L.lattice) (huv' : u - v ∉ L.lattice) :
     ℘[L] u ≠ ℘[L] v ∧ weierstrassZeta L (u + v) = weierstrassZeta L u + weierstrassZeta L v +
       1 / 2 * ((℘'[L] u - ℘'[L] v) / (℘[L] u - ℘[L] v)) := by
@@ -355,9 +362,11 @@ private lemma weierstrassP_ne_and_weierstrassZeta_add (L : PeriodPair) {u v : �
       simp
     have heq : (fun w => σ (w + v) * σ (w - v)) =ᶠ[𝓝 u]
         (fun w => (℘[L] v - ℘[L] w) * σ w ^ 2 * σ v ^ 2) := by
-      filter_upwards [hopen.mem_nhds hu] with w hw using weierstrassSigma_add_mul_sub_of_not_mem L hw hv
+      filter_upwards [hopen.mem_nhds hu] with w hw using
+          weierstrassSigma_add_mul_sub_of_not_mem L hw hv
     have := (hf.congr_of_eventuallyEq heq.symm).unique hg
-    rw [deriv_weierstrassSigma_eq_zeta_mul L huv, deriv_weierstrassSigma_eq_zeta_mul L huv', deriv_weierstrassSigma_eq_zeta_mul L hu] at this
+    rw [deriv_weierstrassSigma_eq_zeta_mul L huv, deriv_weierstrassSigma_eq_zeta_mul L huv',
+        deriv_weierstrassSigma_eq_zeta_mul L hu] at this
     have hm := weierstrassSigma_add_mul_sub_of_not_mem L hu hv
     have hs : σ u ^ 2 * σ v ^ 2 ≠ 0 := by have := hnz u hu; have := hnz v hv; positivity
     apply mul_left_cancel₀ hs
@@ -379,7 +388,8 @@ private lemma weierstrassP_ne_and_weierstrassZeta_add (L : PeriodPair) {u v : �
       filter_upwards [hopen.mem_nhds hv] with w hw
       rw [weierstrassSigma_add_mul_sub_of_not_mem L hu hw]
     have := (hf.congr_of_eventuallyEq heq.symm).unique hg
-    rw [deriv_weierstrassSigma_eq_zeta_mul L huv, deriv_weierstrassSigma_eq_zeta_mul L huv', deriv_weierstrassSigma_eq_zeta_mul L hv] at this
+    rw [deriv_weierstrassSigma_eq_zeta_mul L huv, deriv_weierstrassSigma_eq_zeta_mul L huv',
+        deriv_weierstrassSigma_eq_zeta_mul L hv] at this
     have hm := weierstrassSigma_add_mul_sub_of_not_mem L hu hv
     have hs : σ u ^ 2 * σ v ^ 2 ≠ 0 := by have := hnz u hu; have := hnz v hv; positivity
     apply mul_left_cancel₀ hs
@@ -395,25 +405,31 @@ private lemma eventually_not_mem_lattice_add_sub (L : PeriodPair) {u v : ℂ} (h
     ∀ᶠ w in 𝓝 u, w ∉ L.lattice ∧ w + v ∉ L.lattice ∧ w - v ∉ L.lattice := by
   have hopen : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl
   have h1 := hopen.mem_nhds hu
-  have h2 := (continuous_id.add (continuous_const (y := v))).continuousAt.preimage_mem_nhds (hopen.mem_nhds huv)
-  have h3 := (continuous_id.sub (continuous_const (y := v))).continuousAt.preimage_mem_nhds (hopen.mem_nhds huv')
+  have h2 := (continuous_id.add (continuous_const (y := v))).continuousAt.preimage_mem_nhds
+      (hopen.mem_nhds huv)
+  have h3 := (continuous_id.sub (continuous_const (y := v))).continuousAt.preimage_mem_nhds
+      (hopen.mem_nhds huv')
   filter_upwards [h1, h2, h3] with w a b c using ⟨a, b, c⟩
 
 /-- Derivative of `(℘'(w) - ℘'(v))/(℘(w) - ℘(v))` at `w = u`. -/
-private lemma hasDerivAt_weierstrassP_difference_quotient (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice)
+private lemma hasDerivAt_weierstrassP_difference_quotient (L : PeriodPair) {u v : ℂ}
+    (hu : u ∉ L.lattice)
     (hne : ℘[L] u - ℘[L] v ≠ 0) :
     HasDerivAt (fun w => (℘'[L] w - ℘'[L] v) / (℘[L] w - ℘[L] v))
       (((6 * ℘[L] u ^ 2 - L.g₂ / 2) * (℘[L] u - ℘[L] v) - (℘'[L] u - ℘'[L] v) * ℘'[L] u) /
         (℘[L] u - ℘[L] v) ^ 2) u :=
-  ((hasDerivAt_derivWeierstrassP L hu).sub_const _).div ((hasDerivAt_weierstrassP L hu).sub_const _) hne
+  ((hasDerivAt_derivWeierstrassP L hu).sub_const _).div
+      ((hasDerivAt_weierstrassP L hu).sub_const _) hne
 
 /-- Differentiated `ζ`-addition formula: `℘(u+v) = ℘(u) - ½ X'(u)`. -/
-private lemma neg_weierstrassP_add_eq_deriv_form (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
+private lemma neg_weierstrassP_add_eq_deriv_form (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice)
+    (hv : v ∉ L.lattice)
     (huv : u + v ∉ L.lattice) (huv' : u - v ∉ L.lattice) :
     -℘[L] (u + v) = -℘[L] u + 1 / 2 *
       (((6 * ℘[L] u ^ 2 - L.g₂ / 2) * (℘[L] u - ℘[L] v) - (℘'[L] u - ℘'[L] v) * ℘'[L] u) /
         (℘[L] u - ℘[L] v) ^ 2) := by
-  have hne : ℘[L] u - ℘[L] v ≠ 0 := sub_ne_zero.mpr (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').1
+  have hne : ℘[L] u - ℘[L] v ≠ 0 :=
+      sub_ne_zero.mpr (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').1
   have heq : (fun w => weierstrassZeta L (w + v)) =ᶠ[𝓝 u] (fun w => weierstrassZeta L w +
       weierstrassZeta L v + 1 / 2 * ((℘'[L] w - ℘'[L] v) / (℘[L] w - ℘[L] v))) := by
     filter_upwards [eventually_not_mem_lattice_add_sub L hu huv huv'] with w ⟨a, b, c⟩
@@ -424,10 +440,12 @@ private lemma neg_weierstrassP_add_eq_deriv_form (L : PeriodPair) {u v : ℂ} (h
   exact (hf.congr_of_eventuallyEq heq.symm).unique hg
 
 /-- The addition formula 23.10.1 (helper form). -/
-private lemma weierstrassP_add_of_not_mem (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
+private lemma weierstrassP_add_of_not_mem (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice)
+    (hv : v ∉ L.lattice)
     (huv : u + v ∉ L.lattice) (huv' : u - v ∉ L.lattice) :
     ℘[L] (u + v) = 1 / 4 * ((℘'[L] u - ℘'[L] v) / (℘[L] u - ℘[L] v)) ^ 2 - ℘[L] u - ℘[L] v := by
-  have hne : ℘[L] u - ℘[L] v ≠ 0 := sub_ne_zero.mpr (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').1
+  have hne : ℘[L] u - ℘[L] v ≠ 0 :=
+      sub_ne_zero.mpr (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').1
   have h := neg_weierstrassP_add_eq_deriv_form L hu hv huv huv'
   have hp := L.derivWeierstrassP_sq u hu
   have hq := L.derivWeierstrassP_sq v hv
@@ -461,11 +479,13 @@ private lemma deriv_deriv_deriv_weierstrassZeta (L : PeriodPair) {x : ℂ} (hx :
 
 /-- The addition formula for `℘'`: `℘'(u+v) = X (℘(u) - ℘(u+v)) - ℘'(u)` with
 `X = (℘'(u) - ℘'(v))/(℘(u) - ℘(v))`. -/
-private lemma derivWeierstrassP_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
+private lemma derivWeierstrassP_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice)
+    (hv : v ∉ L.lattice)
     (huv : u + v ∉ L.lattice) (huv' : u - v ∉ L.lattice) :
     ℘'[L] (u + v) = (℘'[L] u - ℘'[L] v) / (℘[L] u - ℘[L] v) * (℘[L] u - ℘[L] (u + v)) -
       ℘'[L] u := by
-  have hne : ℘[L] u - ℘[L] v ≠ 0 := sub_ne_zero.mpr (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').1
+  have hne : ℘[L] u - ℘[L] v ≠ 0 :=
+      sub_ne_zero.mpr (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').1
   have heq : (fun w => ℘[L] (w + v)) =ᶠ[𝓝 u] (fun w => 1 / 4 *
       ((℘'[L] w - ℘'[L] v) / (℘[L] w - ℘[L] v)) ^ 2 - ℘[L] w - ℘[L] v) := by
     filter_upwards [eventually_not_mem_lattice_add_sub L hu huv huv'] with w ⟨a, b, c⟩
@@ -479,7 +499,8 @@ private lemma derivWeierstrassP_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.l
   linear_combination h - (℘'[L] u - ℘'[L] v) / (℘[L] u - ℘[L] v) * ha
 
 /-- `℘'(z) ≠ 0` for `z, 2z ∉ 𝕃`. -/
-private lemma derivWeierstrassP_ne_zero_of_two_mul_not_mem (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice)
+private lemma derivWeierstrassP_ne_zero_of_two_mul_not_mem (L : PeriodPair) {z : ℂ}
+    (hz : z ∉ L.lattice)
     (h2z : 2 * z ∉ L.lattice) : ℘'[L] z ≠ 0 := by
   set H := halfPeriodsOf L
   have hl : H.lattice = L.lattice := halfPeriodsOf_lattice L
@@ -510,7 +531,8 @@ private lemma derivWeierstrassP_ne_zero_of_two_mul_not_mem (L : PeriodPair) {z :
   exact h2z (by convert this using 1; ring)
 
 /-- Generic case of 23.10.6. -/
-private lemma weierstrassZeta_sum_sq_of_sub_not_mem (L : PeriodPair) {u v w : ℂ} (hu : u ∉ L.lattice)
+private lemma weierstrassZeta_sum_sq_of_sub_not_mem (L : PeriodPair) {u v w : ℂ}
+    (hu : u ∉ L.lattice)
     (hv : v ∉ L.lattice) (hw : w ∉ L.lattice) (h : u + v + w = 0) (huv' : u - v ∉ L.lattice) :
     (weierstrassZeta L u + weierstrassZeta L v + weierstrassZeta L w) ^ 2 +
       deriv (weierstrassZeta L) u + deriv (weierstrassZeta L) v +
@@ -535,7 +557,8 @@ private lemma eventually_not_mem_lattice_sub_nhdsNE (L : PeriodPair) {z : ℂ} (
   exact sub_right_injective this
 
 /-- The difference quotient `(℘'(z) - ℘'(v))/(℘(z) - ℘(v))` tends to `℘''(z)/℘'(z)`. -/
-private lemma tendsto_derivWeierstrassP_difference_quotient (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) (hp : ℘'[L] z ≠ 0) :
+private lemma tendsto_derivWeierstrassP_difference_quotient (L : PeriodPair) {z : ℂ}
+    (hz : z ∉ L.lattice) (hp : ℘'[L] z ≠ 0) :
     Tendsto (fun v => (℘'[L] z - ℘'[L] v) / (℘[L] z - ℘[L] v)) (𝓝[≠] z)
       (𝓝 (deriv ℘'[L] z / ℘'[L] z)) := by
   have h1 := hasDerivAt_iff_tendsto_slope.mp (hasDerivAt_weierstrassP L hz)
@@ -547,10 +570,12 @@ private lemma tendsto_derivWeierstrassP_difference_quotient (L : PeriodPair) {z 
   refine (h2.div h1 hp).congr' ?_
   filter_upwards [self_mem_nhdsWithin] with v hv
   have hv' : v - z ≠ 0 := sub_ne_zero.mpr hv
-  rw [Pi.div_apply, slope_def_field, slope_def_field, div_div_div_cancel_right₀ hv', ← neg_sub (℘'[L] v), ← neg_sub (℘[L] v), neg_div_neg_eq]
+  rw [Pi.div_apply, slope_def_field, slope_def_field, div_div_div_cancel_right₀ hv',
+      ← neg_sub (℘'[L] v), ← neg_sub (℘[L] v), neg_div_neg_eq]
 
 /-- A continuous function vanishing off the lattice vanishes everywhere. -/
-private lemma eq_zero_of_continuous_of_eq_zero_off_lattice (L : PeriodPair) {g : ℂ → ℂ} (hg : Continuous g)
+private lemma eq_zero_of_continuous_of_eq_zero_off_lattice (L : PeriodPair) {g : ℂ → ℂ}
+    (hg : Continuous g)
     (h : ∀ x, x ∉ L.lattice → g x = 0) (x : ℂ) : g x = 0 := by
   have hev : ∀ᶠ y in 𝓝[≠] x, g y = 0 := by
     filter_upwards [nhdsWithin_le_nhds (L.compl_lattice_sdiff_singleton_mem_nhds x),
@@ -576,8 +601,10 @@ theorem weierstrassZeta_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) 
     weierstrassZeta L (u + v) = weierstrassZeta L u + weierstrassZeta L v +
       1 / 2 * ((deriv (deriv (weierstrassZeta L)) u - deriv (deriv (weierstrassZeta L)) v) /
         (deriv (weierstrassZeta L) u - deriv (weierstrassZeta L) v)) := by
-  rw [deriv_deriv_weierstrassZeta L hu, deriv_deriv_weierstrassZeta L hv, deriv_weierstrassZeta L hu,
-    deriv_weierstrassZeta L hv, (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').2, neg_sub_neg, neg_sub_neg,
+  rw [deriv_deriv_weierstrassZeta L hu, deriv_deriv_weierstrassZeta L hv,
+      deriv_weierstrassZeta L hu,
+    deriv_weierstrassZeta L hv, (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').2,
+        neg_sub_neg, neg_sub_neg,
     ← neg_sub (℘'[L] u), ← neg_sub (℘[L] u), neg_div_neg_eq]
 
 /-- DLMF 23.10.3: `σ(u + v)σ(u - v)/(σ²(u)σ²(v)) = ℘(v) - ℘(u)` for `u, v ∉ 𝕃`. -/
@@ -651,7 +678,8 @@ theorem weierstrassP_det_eq_zero (L : PeriodPair) {u v w : ℂ} (hu : u ∉ L.la
       rw [show u = v + (u - v) by ring, L.derivWeierstrassP_add_coe v ⟨u - v, huv'⟩]
     rw [e1, e2]; ring
   have huv : u + v ∉ L.lattice := fun hm => hw (by rw [hw']; exact neg_mem hm)
-  have hne : ℘[L] u - ℘[L] v ≠ 0 := sub_ne_zero.mpr (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').1
+  have hne : ℘[L] u - ℘[L] v ≠ 0 :=
+      sub_ne_zero.mpr (weierstrassP_ne_and_weierstrassZeta_add L hu hv huv huv').1
   have hP : ℘[L] w = ℘[L] (u + v) := by rw [hw', L.weierstrassP_neg]
   have hD : ℘'[L] w = -℘'[L] (u + v) := by rw [hw', L.derivWeierstrassP_neg]
   rw [hP, hD, derivWeierstrassP_add L hu hv huv huv']
@@ -677,7 +705,8 @@ theorem weierstrassZeta_sum_sq (L : PeriodPair) {u v w : ℂ} (hu : u ∉ L.latt
   have hcz : ∀ x, x ∉ L.lattice → ContinuousAt ζ x := fun x hx =>
     (hasDerivAt_weierstrassZeta L hx).continuousAt
   have hcd : ∀ x, x ∉ L.lattice → ContinuousAt (deriv ζ) x := fun x hx =>
-    ((hasDerivAt_weierstrassP L hx).continuousAt.neg).congr (deriv_weierstrassZeta_eventuallyEq L hx).symm
+    ((hasDerivAt_weierstrassP L hx).continuousAt.neg).congr
+        (deriv_weierstrassZeta_eventuallyEq L hx).symm
   have hc1 : Continuous fun y : ℂ => -u - y := by fun_prop
   have hcont : ContinuousAt f v := by
     have h1 : ContinuousAt (fun y => ζ (-u - y)) v :=
@@ -688,7 +717,8 @@ theorem weierstrassZeta_sum_sq (L : PeriodPair) {u v w : ℂ} (hu : u ∉ L.latt
       (hcd v hv)).add h2
   have hev : ∀ᶠ y in 𝓝[≠] v, f y = 0 := by
     have hA := hopen.mem_nhds hv
-    have hB := hc1.continuousAt.preimage_mem_nhds (hopen.mem_nhds (by rwa [← hw'] : -u - v ∉ L.lattice))
+    have hB := hc1.continuousAt.preimage_mem_nhds
+        (hopen.mem_nhds (by rwa [← hw'] : -u - v ∉ L.lattice))
     have hC := (continuous_const.sub continuous_id : Continuous fun y : ℂ => u - y).continuousAt
       |>.preimage_mem_nhds (L.compl_lattice_sdiff_singleton_mem_nhds (u - v))
     filter_upwards [nhdsWithin_le_nhds hA, nhdsWithin_le_nhds hB, nhdsWithin_le_nhds hC,
@@ -717,7 +747,8 @@ theorem weierstrassP_two_mul (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice)
     |>.preimage_mem_nhds (hopen.mem_nhds hzz)
   have hev : ∀ᶠ v in 𝓝[≠] z, ℘[L] (z + v) =
       1 / 4 * ((℘'[L] z - ℘'[L] v) / (℘[L] z - ℘[L] v)) ^ 2 - ℘[L] z - ℘[L] v := by
-    filter_upwards [eventually_not_mem_lattice_sub_nhdsNE L hz, nhdsWithin_le_nhds hB] with v ⟨h1, h2⟩ h3
+    filter_upwards [eventually_not_mem_lattice_sub_nhdsNE L hz, nhdsWithin_le_nhds hB]
+        with v ⟨h1, h2⟩ h3
     exact weierstrassP_add_of_not_mem L hz h1 h3 h2
   have hl : Tendsto (fun v => ℘[L] (z + v)) (𝓝[≠] z) (𝓝 (℘[L] (z + z))) :=
     (((hasDerivAt_weierstrassP L hzz).continuousAt.comp
@@ -777,7 +808,8 @@ theorem weierstrassZeta_two_mul (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice
     |>.preimage_mem_nhds (hopen.mem_nhds hzz)
   have hev : ∀ᶠ v in 𝓝[≠] z, weierstrassZeta L (z + v) = weierstrassZeta L z +
       weierstrassZeta L v + 1 / 2 * ((℘'[L] z - ℘'[L] v) / (℘[L] z - ℘[L] v)) := by
-    filter_upwards [eventually_not_mem_lattice_sub_nhdsNE L hz, nhdsWithin_le_nhds hB] with v ⟨h1, h2⟩ h3
+    filter_upwards [eventually_not_mem_lattice_sub_nhdsNE L hz, nhdsWithin_le_nhds hB]
+        with v ⟨h1, h2⟩ h3
     exact (weierstrassP_ne_and_weierstrassZeta_add L hz h1 h3 h2).2
   have hl : Tendsto (fun v => weierstrassZeta L (z + v)) (𝓝[≠] z)
       (𝓝 (weierstrassZeta L (z + z))) :=
@@ -807,7 +839,8 @@ theorem weierstrassSigma_two_mul (L : PeriodPair) (z : ℂ) :
   have hσd : Differentiable ℂ σ := differentiable_weierstrassSigma L
   have hev : ∀ᶠ v in 𝓝[≠] z, σ (z + v) * -(σ (z - v) / (z - v)) =
       slope ℘[L] z v * σ z ^ 2 * σ v ^ 2 := by
-    filter_upwards [eventually_not_mem_lattice_sub_nhdsNE L hz, self_mem_nhdsWithin] with v ⟨h1, _⟩ h3
+    filter_upwards [eventually_not_mem_lattice_sub_nhdsNE L hz, self_mem_nhdsWithin]
+        with v ⟨h1, _⟩ h3
     have hv' : z - v ≠ 0 := sub_ne_zero.mpr (Ne.symm h3)
     have hv'' : v - z ≠ 0 := sub_ne_zero.mpr h3
     have := weierstrassSigma_add_mul_sub_of_not_mem L hz h1
@@ -847,21 +880,362 @@ variable (H : HalfPeriods)
 /-- The `n²` shifts `2jω₁/n + 2ℓω₃/n`, `0 ≤ j, ℓ < n`. -/
 def divisionPoint (n j l : ℕ) : ℂ := 2 * j / n * H.ω₁ + 2 * l / n * H.ω₃
 
+private lemma natCast_mul_divisionPoint {n : ℕ} (hn : n ≠ 0) (j l : ℕ) :
+    (n : ℂ) * H.divisionPoint n j l = 2 * j * H.ω₁ + 2 * l * H.ω₃ := by
+  have : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  unfold divisionPoint; field_simp
+
+private lemma mem_of_add_divisionPoint_mem {n : ℕ} (hn : n ≠ 0) {z : ℂ} (j l : ℕ)
+    (h : z + H.divisionPoint n j l ∈ H.lattice) : (n : ℂ) * z ∈ H.lattice := by
+  have h1 : (n : ℂ) * (z + H.divisionPoint n j l) ∈ H.lattice := by
+    have := Submodule.smul_mem H.lattice (n : ℤ) h
+    rw [mul_add]; simpa [zsmul_eq_mul, mul_add] using this
+  have h2 : 2 * (j : ℂ) * H.ω₁ + 2 * l * H.ω₃ ∈ H.lattice :=
+    H.mem_lattice_iff.mpr ⟨j, l, by push_cast; ring⟩
+  have := sub_mem h1 h2
+  rw [mul_add, natCast_mul_divisionPoint H hn] at this
+  simpa using this
+
+private lemma add_divisionPoint_not_mem {n : ℕ} (hn : n ≠ 0) {z : ℂ}
+    (hz : (n : ℂ) * z ∉ H.lattice) (j l : ℕ) : z + H.divisionPoint n j l ∉ H.lattice :=
+  fun h => hz (mem_of_add_divisionPoint_mem H hn j l h)
+
+/-- Division points differing by a lattice vector coincide. -/
+private lemma divisionPoint_sub_mem {n : ℕ} (hn : n ≠ 0) {j l j' l' : ℕ} (hj : j < n)
+    (hl : l < n) (hj' : j' < n) (hl' : l' < n)
+    (h : H.divisionPoint n j l - H.divisionPoint n j' l' ∈ H.lattice) : j = j' ∧ l = l' := by
+  have hn' : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  have e : H.divisionPoint n j l - H.divisionPoint n j' l' =
+      (((j - j' : ℤ) : ℚ) / (n : ℤ) : ℚ) * H.periodPair.ω₁ +
+        (((l - l' : ℤ) : ℚ) / (n : ℤ) : ℚ) * H.periodPair.ω₂ := by
+    simp only [divisionPoint, periodPair_ω₁, periodPair_ω₂]
+    push_cast; field_simp; ring
+  rw [e, PeriodPair.mul_ω₁_add_mul_ω₂_mem_lattice,
+    Rat.den_div_intCast_eq_one_iff _ _ (by exact_mod_cast hn),
+    Rat.den_div_intCast_eq_one_iff _ _ (by exact_mod_cast hn)] at h
+  have h1 := Int.eq_zero_of_abs_lt_dvd h.1 (by rw [abs_lt]; omega)
+  have h2 := Int.eq_zero_of_abs_lt_dvd h.2 (by rw [abs_lt]; omega)
+  omega
+
+/-- For `nx ∈ 𝕃` exactly one shift `x + 2jω₁/n + 2ℓω₃/n` lies in `𝕃`. -/
+private lemma exists_unique_add_divisionPoint_mem {n : ℕ} (hn : n ≠ 0) {x : ℂ}
+    (hx : (n : ℂ) * x ∈ H.lattice) :
+    ∃ j₀ < n, ∃ l₀ < n, x + H.divisionPoint n j₀ l₀ ∈ H.lattice ∧
+      ∀ j < n, ∀ l < n, x + H.divisionPoint n j l ∈ H.lattice → j = j₀ ∧ l = l₀ := by
+  have hn' : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  have hnz : (n : ℤ) ≠ 0 := by exact_mod_cast hn
+  have hnpos : (0 : ℤ) < n := by omega
+  obtain ⟨a, b, hab⟩ := H.mem_lattice_iff.mp hx
+  set j₀ := ((-a) % (n : ℤ)).toNat with hj₀
+  set l₀ := ((-b) % (n : ℤ)).toNat with hl₀
+  have ej : (j₀ : ℤ) = -a - n * ((-a) / n) := by
+    rw [hj₀, Int.toNat_of_nonneg (Int.emod_nonneg _ hnz), Int.emod_def]
+  have el : (l₀ : ℤ) = -b - n * ((-b) / n) := by
+    rw [hl₀, Int.toNat_of_nonneg (Int.emod_nonneg _ hnz), Int.emod_def]
+  have hj₀n : j₀ < n := by
+    have := Int.emod_lt_of_pos (-a) hnpos
+    have h0 := Int.emod_nonneg (-a) hnz
+    omega
+  have hl₀n : l₀ < n := by
+    have := Int.emod_lt_of_pos (-b) hnpos
+    have h0 := Int.emod_nonneg (-b) hnz
+    omega
+  have hmem : x + H.divisionPoint n j₀ l₀ ∈ H.lattice := by
+    refine H.mem_lattice_iff.mpr ⟨-((-a) / n), -((-b) / n), ?_⟩
+    apply mul_left_cancel₀ hn'
+    rw [mul_add, natCast_mul_divisionPoint H hn, hab]
+    have ej' : ((j₀ : ℤ) : ℂ) = -a - n * (((-a) / n : ℤ) : ℂ) := by
+      rw [ej]; push_cast; ring
+    have el' : ((l₀ : ℤ) : ℂ) = -b - n * (((-b) / n : ℤ) : ℂ) := by
+      rw [el]; push_cast; ring
+    push_cast at ej' el' ⊢
+    rw [ej', el']; ring
+  refine ⟨j₀, hj₀n, l₀, hl₀n, hmem, fun j hj l hl h => ?_⟩
+  refine divisionPoint_sub_mem H hn hj hl hj₀n hl₀n ?_
+  simpa using sub_mem h hmem
+
+/-- `∑_{j,ℓ} ζ(z + 2jω₁/n + 2ℓω₃/n) - nζ(nz)`, the difference in DLMF 23.10.12. -/
+private def nTupleZetaDiff (n : ℕ) (z : ℂ) : ℂ :=
+  (∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n, H.weierstrassZeta (z + H.divisionPoint n j l)) -
+    n * H.weierstrassZeta (n * z)
+
+private lemma analyticAt_nTupleZetaDiff {n : ℕ} (hn : n ≠ 0) (x : ℂ) :
+    AnalyticAt ℂ (H.nTupleZetaDiff n) x := by
+  have hn' : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  have hζ := analyticOnNhd_weierstrassZeta H.periodPair
+  by_cases hx : (n : ℂ) * x ∈ H.lattice
+  · obtain ⟨j₀, hj₀, l₀, hl₀, hmem, huniq⟩ := exists_unique_add_divisionPoint_mem H hn hx
+    set w := x + H.divisionPoint n j₀ l₀
+    have heq : H.nTupleZetaDiff n = fun z =>
+        (∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n,
+          (H.weierstrassZeta (z + H.divisionPoint n j l) -
+            if j = j₀ ∧ l = l₀ then 1 / (z + H.divisionPoint n j l - w) else 0)) -
+        n * (H.weierstrassZeta (n * z) - 1 / (n * z - n * x)) := by
+      funext z
+      simp only [nTupleZetaDiff, Finset.sum_sub_distrib]
+      have hs : (∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n,
+          if j = j₀ ∧ l = l₀ then 1 / (z + H.divisionPoint n j l - w) else 0) =
+          1 / (z - x) := by
+        rw [Finset.sum_eq_single j₀, Finset.sum_eq_single l₀]
+        · simp [w]
+        · intro l _ hl; simp [hl]
+        · intro h; exact absurd (Finset.mem_range.mpr hl₀) h
+        · intro j _ hj; simp [hj]
+        · intro h; exact absurd (Finset.mem_range.mpr hj₀) h
+      rw [hs]
+      have : (n : ℂ) * (1 / (n * z - n * x)) = 1 / (z - x) := by
+        rw [← mul_sub]
+        by_cases hzx : z - x = 0
+        · simp [hzx]
+        · field_simp
+      rw [mul_sub, this]; ring
+    rw [heq]
+    refine AnalyticAt.sub (Finset.analyticAt_fun_sum _ fun j hj => Finset.analyticAt_fun_sum _
+      fun l hl => ?_) (analyticAt_const.mul ?_)
+    · by_cases hjl : j = j₀ ∧ l = l₀
+      · obtain ⟨rfl, rfl⟩ := hjl
+        simp only [and_self, ite_true]
+        have := (analyticAt_weierstrassZeta_sub H.periodPair hmem).comp
+          (f := fun z => z + H.divisionPoint n j l) (by fun_prop)
+        exact this
+      · simp only [hjl, ite_false, sub_zero]
+        have hnm : x + H.divisionPoint n j l ∉ H.lattice := fun h =>
+          hjl (huniq j (Finset.mem_range.mp hj) l (Finset.mem_range.mp hl) h)
+        exact (hζ _ hnm).comp (f := fun z => z + H.divisionPoint n j l) (by fun_prop)
+    · have h1 := (analyticAt_weierstrassZeta_sub H.periodPair hx).comp
+        (f := fun z => (n : ℂ) * z) (by fun_prop)
+      exact h1
+  · refine AnalyticAt.sub (Finset.analyticAt_fun_sum _ fun j _ => Finset.analyticAt_fun_sum _
+      fun l _ => ?_) (analyticAt_const.mul ?_)
+    · exact (hζ _ (add_divisionPoint_not_mem H hn hx j l)).comp
+        (f := fun z => z + H.divisionPoint n j l) (by fun_prop)
+    · exact (hζ _ hx).comp (f := fun z => (n : ℂ) * z) (by fun_prop)
+
+private lemma sum_range_succ_shift (g : ℕ → ℂ) (n : ℕ) :
+    ∑ j ∈ Finset.range n, g (j + 1) = ∑ j ∈ Finset.range n, g j + (g n - g 0) := by
+  have h1 := Finset.sum_range_succ' g n
+  have h2 := Finset.sum_range_succ g n
+  linear_combination h2 - h1
+
+private lemma weierstrassZeta_add_two_mul_ω₁' {y : ℂ} (hy : y ∉ H.lattice) :
+    H.weierstrassZeta (y + 2 * H.ω₁) = H.weierstrassZeta y + 2 * H.eta 1 :=
+  H.weierstrassZeta_add_two_mul_halfPeriod hy (j := 1) (by simp)
+
+private lemma weierstrassZeta_add_two_mul_ω₃' {y : ℂ} (hy : y ∉ H.lattice) :
+    H.weierstrassZeta (y + 2 * H.ω₃) = H.weierstrassZeta y + 2 * H.eta 3 :=
+  H.weierstrassZeta_add_two_mul_halfPeriod hy (j := 3) (by simp)
+
+/-- The lattice `𝕃/n` of the division points. -/
+private abbrev divisionPeriodPair (n : ℕ) (hn : n ≠ 0) : PeriodPair :=
+  scalePeriodPair (1 / (n : ℂ)) (by simp; exact_mod_cast hn) H.periodPair
+
+private lemma mem_divisionPeriodPair_iff {n : ℕ} (hn : n ≠ 0) {z : ℂ} :
+    z ∈ (H.divisionPeriodPair n hn).lattice ↔ (n : ℂ) * z ∈ H.lattice := by
+  rw [mem_scalePeriodPair_lattice_iff, div_div_eq_mul_div, div_one, mul_comm]
+
+private lemma nTupleZetaDiff_add_ω₁_of_not_mem {n : ℕ} (hn : n ≠ 0) {z : ℂ}
+    (hz : (n : ℂ) * z ∉ H.lattice) :
+    H.nTupleZetaDiff n (z + 2 * H.ω₁ / n) = H.nTupleZetaDiff n z := by
+  have hn' : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  set g : ℕ → ℂ := fun j => ∑ l ∈ Finset.range n, H.weierstrassZeta (z + H.divisionPoint n j l)
+  have hg : ∀ j, ∑ l ∈ Finset.range n,
+      H.weierstrassZeta (z + 2 * H.ω₁ / n + H.divisionPoint n j l) = g (j + 1) := by
+    intro j; refine Finset.sum_congr rfl fun l _ => ?_
+    congr 1; simp only [divisionPoint]; push_cast; ring
+  have hgn : g n = g 0 + n * (2 * H.eta 1) := by
+    simp only [g]
+    have hc : (n : ℂ) * (2 * H.eta 1) = ∑ _l ∈ Finset.range n, 2 * H.eta 1 := by simp
+    rw [hc, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun l _ => ?_
+    rw [← weierstrassZeta_add_two_mul_ω₁' H (add_divisionPoint_not_mem H hn hz 0 l)]
+    congr 1; simp only [divisionPoint]; field_simp; ring
+  have hnz : (n : ℂ) * (z + 2 * H.ω₁ / n) = n * z + 2 * H.ω₁ := by field_simp
+  simp only [nTupleZetaDiff, hg, hnz, weierstrassZeta_add_two_mul_ω₁' H hz]
+  rw [sum_range_succ_shift g n, hgn]
+  simp only [g]; ring
+
+private lemma nTupleZetaDiff_add_ω₃_of_not_mem {n : ℕ} (hn : n ≠ 0) {z : ℂ}
+    (hz : (n : ℂ) * z ∉ H.lattice) :
+    H.nTupleZetaDiff n (z + 2 * H.ω₃ / n) = H.nTupleZetaDiff n z := by
+  have hn' : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  have hinner : ∀ j, ∑ l ∈ Finset.range n,
+      H.weierstrassZeta (z + 2 * H.ω₃ / n + H.divisionPoint n j l) =
+      ∑ l ∈ Finset.range n, H.weierstrassZeta (z + H.divisionPoint n j l) + 2 * H.eta 3 := by
+    intro j
+    set g : ℕ → ℂ := fun l => H.weierstrassZeta (z + H.divisionPoint n j l)
+    have hg : ∀ l, H.weierstrassZeta (z + 2 * H.ω₃ / n + H.divisionPoint n j l) = g (l + 1) := by
+      intro l; simp only [g]; congr 1; simp only [divisionPoint]; push_cast; ring
+    have hgn : g n = g 0 + 2 * H.eta 3 := by
+      simp only [g]
+      rw [← weierstrassZeta_add_two_mul_ω₃' H (add_divisionPoint_not_mem H hn hz j 0)]
+      congr 1; simp only [divisionPoint]; field_simp; ring
+    simp only [hg]
+    rw [sum_range_succ_shift g n, hgn]; ring
+  have hnz : (n : ℂ) * (z + 2 * H.ω₃ / n) = n * z + 2 * H.ω₃ := by field_simp
+  simp only [nTupleZetaDiff, hinner, hnz, weierstrassZeta_add_two_mul_ω₃' H hz,
+    Finset.sum_add_distrib, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  ring
+
+private lemma nTupleZetaDiff_periodic {n : ℕ} (hn : n ≠ 0) {t : ℂ}
+    (ht : t = 2 * H.ω₁ / n ∨ t = 2 * H.ω₃ / n) :
+    Function.Periodic (H.nTupleZetaDiff n) t := by
+  intro z
+  have hc : Continuous fun z => H.nTupleZetaDiff n (z + t) - H.nTupleZetaDiff n z :=
+    ((continuous_iff_continuousAt.mpr fun x => (analyticAt_nTupleZetaDiff H hn x).continuousAt)
+      |>.comp (continuous_id.add continuous_const)).sub
+      (continuous_iff_continuousAt.mpr fun x => (analyticAt_nTupleZetaDiff H hn x).continuousAt)
+  have := eq_zero_of_continuous_of_eq_zero_off_lattice (H.divisionPeriodPair n hn) hc
+    (fun x hx => by
+      rw [mem_divisionPeriodPair_iff] at hx
+      rcases ht with rfl | rfl
+      · rw [nTupleZetaDiff_add_ω₁_of_not_mem H hn hx, sub_self]
+      · rw [nTupleZetaDiff_add_ω₃_of_not_mem H hn hx, sub_self]) z
+  exact sub_eq_zero.mp this
+
+private lemma exists_nTupleZetaDiff_eq_const {n : ℕ} (hn : n ≠ 0) :
+    ∃ c, ∀ z, H.nTupleZetaDiff n z = c := by
+  have hn' : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  set L' := H.divisionPeriodPair n hn
+  have h1 : Function.Periodic (H.nTupleZetaDiff n) L'.ω₁ := by
+    convert nTupleZetaDiff_periodic H hn (Or.inl rfl) using 1
+    simp [L', scalePeriodPair]; ring
+  have h2 : Function.Periodic (H.nTupleZetaDiff n) L'.ω₂ := by
+    convert nTupleZetaDiff_periodic H hn (Or.inr rfl) using 1
+    simp [L', scalePeriodPair]; ring
+  obtain ⟨c, hc⟩ := exists_eq_const_of_periodic_of_order_nonneg L'
+    (fun x => (analyticAt_nTupleZetaDiff H hn x).meromorphicAt)
+    (fun z l hl => by
+      obtain ⟨m, k, rfl⟩ := PeriodPair.mem_lattice.mp hl
+      exact ((h1.int_mul m).add_period (h2.int_mul k)) z)
+    (fun x => (analyticAt_nTupleZetaDiff H hn x).meromorphicOrderAt_nonneg)
+  exact ⟨c, fun z => hc z (analyticAt_nTupleZetaDiff H hn z)⟩
+
+private lemma weierstrassZeta_add_two_mul_ω₁_add_ω₃ {y : ℂ} (hy : y ∉ H.lattice) :
+    H.weierstrassZeta (y + 2 * H.ω₁ + 2 * H.ω₃) =
+      H.weierstrassZeta y + 2 * H.eta 1 + 2 * H.eta 3 := by
+  have hy' : y + 2 * H.ω₁ ∉ H.lattice := fun h => hy (by
+    simpa using sub_mem h H.two_mul_ω₁_mem)
+  rw [weierstrassZeta_add_two_mul_ω₃' H hy', weierstrassZeta_add_two_mul_ω₁' H hy]
+
+private lemma sum_weierstrassZeta_sub_divisionPoint {n : ℕ} (hn : n ≠ 0) {z : ℂ}
+    (hz : (n : ℂ) * z ∉ H.lattice) :
+    ∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n, H.weierstrassZeta (z - H.divisionPoint n j l) =
+      ∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n,
+        H.weierstrassZeta (z + (2 * H.ω₁ / n + 2 * H.ω₃ / n) + H.divisionPoint n j l) -
+      n ^ 2 * (2 * H.eta 1 + 2 * H.eta 3) := by
+  have hn' : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  set t := 2 * H.ω₁ / n + 2 * H.ω₃ / n
+  have hzt : (n : ℂ) * (z + t) ∉ H.lattice := by
+    rw [show (n : ℂ) * (z + t) = n * z + 2 * H.ω₁ + 2 * H.ω₃ by simp only [t]; field_simp; ring]
+    intro h; apply hz
+    convert sub_mem (sub_mem h H.two_mul_ω₁_mem) H.two_mul_ω₃_mem using 1; ring
+  have key : ∀ j ∈ Finset.range n, ∀ l ∈ Finset.range n,
+      H.weierstrassZeta (z - H.divisionPoint n j l) =
+      H.weierstrassZeta (z + t + H.divisionPoint n (n - 1 - j) (n - 1 - l)) -
+        (2 * H.eta 1 + 2 * H.eta 3) := by
+    intro j hj l hl
+    have hj' := Finset.mem_range.mp hj
+    have hl' := Finset.mem_range.mp hl
+    set y := z - H.divisionPoint n j l
+    have e : z + t + H.divisionPoint n (n - 1 - j) (n - 1 - l) = y + 2 * H.ω₁ + 2 * H.ω₃ := by
+      simp only [y, t, divisionPoint]
+      rw [Nat.cast_sub (by omega), Nat.cast_sub (by omega), Nat.cast_sub (by omega),
+        Nat.cast_sub (by omega)]
+      field_simp; ring
+    have hy : y ∉ H.lattice := fun h => add_divisionPoint_not_mem H hn hzt _ _ (by
+      rw [e]; exact add_mem (add_mem h H.two_mul_ω₁_mem) H.two_mul_ω₃_mem)
+    rw [e, weierstrassZeta_add_two_mul_ω₁_add_ω₃ H hy]; ring
+  rw [Finset.sum_congr rfl fun j hj => Finset.sum_congr rfl fun l hl => key j hj l hl]
+  simp only [Finset.sum_sub_distrib, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  rw [Finset.sum_range_reflect (fun j => ∑ l ∈ Finset.range n,
+    H.weierstrassZeta (z + t + H.divisionPoint n j (n - 1 - l))) n]
+  rw [Finset.sum_congr rfl fun j _ =>
+    Finset.sum_range_reflect (fun l => H.weierstrassZeta (z + t + H.divisionPoint n j l)) n]
+  ring
+
+private lemma nTupleZetaDiff_eq {n : ℕ} (hn : n ≠ 0) (z : ℂ) :
+    H.nTupleZetaDiff n z = n * (n - 1) * (H.eta 1 + H.eta 3) := by
+  have hn' : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  obtain ⟨c, hc⟩ := exists_nTupleZetaDiff_eq_const H hn
+  rw [hc z]
+  set z₀ := H.ω₁ / n
+  have hω : H.ω₁ ∉ H.lattice := by simpa using H.halfPeriod_notMem (j := 1) (by simp)
+  have hz₀ : (n : ℂ) * z₀ ∉ H.lattice := by simp only [z₀]; field_simp; exact hω
+  have hz₀' : (n : ℂ) * z₀ = H.ω₁ := by simp only [z₀]; field_simp
+  have h3 := sum_weierstrassZeta_sub_divisionPoint H hn hz₀
+  set t := 2 * H.ω₁ / n + 2 * H.ω₃ / n
+  have h1 := hc (-z₀)
+  have h2 := hc (z₀ + t)
+  simp only [nTupleZetaDiff] at h1 h2
+  have hneg : ∀ j l, H.weierstrassZeta (-z₀ + H.divisionPoint n j l) =
+      -H.weierstrassZeta (z₀ - H.divisionPoint n j l) := by
+    intro j l
+    rw [show -z₀ + H.divisionPoint n j l = -(z₀ - H.divisionPoint n j l) by ring]
+    exact weierstrassZeta_neg _ _
+  have hneg' : H.weierstrassZeta ((n : ℂ) * -z₀) = -H.weierstrassZeta (n * z₀) := by
+    rw [mul_neg]; exact weierstrassZeta_neg _ _
+  have hnt : H.weierstrassZeta ((n : ℂ) * (z₀ + t)) =
+      H.weierstrassZeta (n * z₀) + 2 * H.eta 1 + 2 * H.eta 3 := by
+    rw [show (n : ℂ) * (z₀ + t) = n * z₀ + 2 * H.ω₁ + 2 * H.ω₃ by simp only [t]; field_simp; ring,
+      weierstrassZeta_add_two_mul_ω₁_add_ω₃ H hz₀]
+  simp only [hneg, hneg', Finset.sum_neg_distrib] at h1
+  rw [hnt] at h2
+  linear_combination (-1 / 2 : ℂ) * h1 - (1 / 2 : ℂ) * h2 - (1 / 2 : ℂ) * h3
+
+/-- DLMF 23.10.11 for `n ≥ 1`: `n²℘(nz) = ∑_{j,ℓ=0}^{n-1} ℘(z + 2jω₁/n + 2ℓω₃/n)` for
+`nz ∉ 𝕃`. Stronger than DLMF, which assumes `n ≥ 2`. -/
+@[dlmf 23.10.E11]
+theorem weierstrassP_nsmul' {n : ℕ} (hn : n ≠ 0) {z : ℂ} (hz : (n : ℂ) * z ∉ H.lattice) :
+    (n : ℂ) ^ 2 * H.weierstrassP (n * z) =
+      ∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n, H.weierstrassP (z + H.divisionPoint n j l) := by
+  have h0 : HasDerivAt (H.nTupleZetaDiff n) 0 z := by
+    have : H.nTupleZetaDiff n = fun _ => (n * (n - 1) * (H.eta 1 + H.eta 3) : ℂ) :=
+      funext (nTupleZetaDiff_eq H hn)
+    rw [this]; exact hasDerivAt_const _ _
+  have h1 : HasDerivAt (H.nTupleZetaDiff n)
+      ((∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n, -H.weierstrassP (z + H.divisionPoint n j l)) -
+        n * (-H.weierstrassP (n * z) * n)) z := by
+    refine HasDerivAt.sub (HasDerivAt.fun_sum fun j _ => HasDerivAt.fun_sum fun l _ => ?_)
+      (HasDerivAt.const_mul _ ?_)
+    · exact (hasDerivAt_weierstrassZeta H.periodPair
+        (add_divisionPoint_not_mem H hn hz j l)).comp_add_const z _
+    · have := (hasDerivAt_weierstrassZeta H.periodPair hz).comp z
+        ((hasDerivAt_id z).const_mul (n : ℂ))
+      rw [mul_one] at this; exact this
+  have := h1.unique h0
+  simp only [Finset.sum_neg_distrib] at this
+  linear_combination this
+
+/-- DLMF 23.10.12 for every `n` and every `z`:
+`nζ(nz) = -n(n-1)(η₁ + η₃) + ∑_{j,ℓ=0}^{n-1} ζ(z + 2jω₁/n + 2ℓω₃/n)`. With Lean's totalization
+of `ζ` at lattice points (the regular part) the identity also holds for `nz ∈ 𝕃`. Stronger than
+DLMF, which assumes `n ≥ 2` and `nz ∉ 𝕃`. -/
+@[dlmf 23.10.E12]
+theorem weierstrassZeta_nsmul' (n : ℕ) (z : ℂ) :
+    (n : ℂ) * H.weierstrassZeta (n * z) = -(n * (n - 1)) * (H.eta 1 + H.eta 3) +
+      ∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n,
+        H.weierstrassZeta (z + H.divisionPoint n j l) := by
+  rcases Nat.eq_zero_or_pos n with rfl | hpos
+  · simp
+  have := nTupleZetaDiff_eq H hpos.ne' z
+  simp only [nTupleZetaDiff] at this
+  linear_combination -this
+
 /-- DLMF 23.10.11: `n²℘(nz) = ∑_{j,ℓ=0}^{n-1} ℘(z + 2jω₁/n + 2ℓω₃/n)`, `n ≥ 2`, `nz ∉ 𝕃`. -/
 @[dlmf 23.10.E11]
 theorem weierstrassP_nsmul {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz : (n : ℂ) * z ∉ H.lattice) :
     (n : ℂ) ^ 2 * H.weierstrassP (n * z) =
-      ∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n, H.weierstrassP (z + H.divisionPoint n j l) := by
-  sorry
+      ∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n, H.weierstrassP (z + H.divisionPoint n j l) :=
+  H.weierstrassP_nsmul' (by omega) hz
 
 /-- DLMF 23.10.12: `nζ(nz) = -n(n-1)(η₁ + η₃) + ∑_{j,ℓ=0}^{n-1} ζ(z + 2jω₁/n + 2ℓω₃/n)`,
 `n ≥ 2`, `nz ∉ 𝕃`. -/
 @[dlmf 23.10.E12]
-theorem weierstrassZeta_nsmul {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz : (n : ℂ) * z ∉ H.lattice) :
+theorem weierstrassZeta_nsmul {n : ℕ} (_hn : 2 ≤ n) {z : ℂ} (_hz : (n : ℂ) * z ∉ H.lattice) :
     (n : ℂ) * H.weierstrassZeta (n * z) = -(n * (n - 1)) * (H.eta 1 + H.eta 3) +
       ∑ j ∈ Finset.range n, ∑ l ∈ Finset.range n,
-        H.weierstrassZeta (z + H.divisionPoint n j l) := by
-  sorry
+        H.weierstrassZeta (z + H.divisionPoint n j l) :=
+  H.weierstrassZeta_nsmul' n z
 
 /-- The constant `A_n` of 23.10.13, by the **corrected** DLMF 23.10.14:
 `A_n = n ∏_{(j,ℓ) ≠ (0,0)} 1/σ((2jω₁ + 2ℓω₃)/n)`, `0 ≤ j, ℓ < n`.
@@ -872,14 +1246,152 @@ def nTupleConst (n : ℕ) : ℂ :=
   n * ∏ p ∈ (Finset.range n ×ˢ Finset.range n).erase (0, 0),
     1 / H.weierstrassSigma (H.divisionPoint n p.1 p.2)
 
-/-- DLMF 23.10.13: `σ(nz) = A_n e^{-n(n-1)(η₁+η₃)z} ∏_{j,ℓ=0}^{n-1} σ(z + 2jω₁/n + 2ℓω₃/n)`,
-`n ≥ 2`, `z ∈ ℂ`, with `A_n` as in the corrected 23.10.14. -/
+private lemma divisionPoint_zero_zero (n : ℕ) : H.divisionPoint n 0 0 = 0 := by
+  simp [divisionPoint]
+
+/-- The product `∏_{j,ℓ} σ(z + 2jω₁/n + 2ℓω₃/n)` as a product over pairs. -/
+private lemma prod_prod_eq_prod_product (n : ℕ) (f : ℕ → ℕ → ℂ) :
+    ∏ j ∈ Finset.range n, ∏ l ∈ Finset.range n, f j l =
+      ∏ p ∈ Finset.range n ×ˢ Finset.range n, f p.1 p.2 :=
+  (Finset.prod_product' _ _ _).symm
+
+/-- DLMF 23.10.13 for every `n` (with `A_n` as in the corrected 23.10.14). Stronger than DLMF,
+which assumes `n ≥ 2`. -/
 @[dlmf 23.10.E13]
-theorem weierstrassSigma_nsmul {n : ℕ} (hn : 2 ≤ n) (z : ℂ) :
+theorem weierstrassSigma_nsmul' (n : ℕ) (z : ℂ) :
     H.weierstrassSigma (n * z) = H.nTupleConst n * cexp (-(n * (n - 1)) * (H.eta 1 + H.eta 3) * z) *
       ∏ j ∈ Finset.range n, ∏ l ∈ Finset.range n,
         H.weierstrassSigma (z + H.divisionPoint n j l) := by
-  sorry
+  rcases Nat.eq_zero_or_pos n with rfl | hpos
+  · simp [nTupleConst, weierstrassSigma_eq_zero_of_mem _ (zero_mem _)]
+  have hn : n ≠ 0 := hpos.ne'
+  have hn' : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  set κ : ℂ := n * (n - 1) * (H.eta 1 + H.eta 3)
+  set S := Finset.range n ×ˢ Finset.range n
+  set σ := Weierstrass.weierstrassSigma H.periodPair
+  have hσd := differentiable_weierstrassSigma H.periodPair
+  set P : ℂ → ℂ := fun z => ∏ p ∈ S, σ (z + H.divisionPoint n p.1 p.2)
+  set g1 : ℂ → ℂ := fun z => σ (n * z) * cexp (κ * z)
+  set U : Set ℂ := ((H.divisionPeriodPair n hn).lattice : Set ℂ)ᶜ
+  have hU : IsOpen U := (H.divisionPeriodPair n hn).isClosed_lattice.isOpen_compl
+  have hmemU : ∀ z, z ∈ U ↔ (n : ℂ) * z ∉ H.lattice := fun z => by
+    simp only [U, Set.mem_compl_iff, SetLike.mem_coe, mem_divisionPeriodPair_iff]
+  have hne : ∀ y, y ∉ H.lattice → σ y ≠ 0 := fun y hy =>
+    (weierstrassSigma_eq_zero_iff _).not.mpr hy
+  have hP0 : ∀ z, z ∈ U → P z ≠ 0 := fun z hz => Finset.prod_ne_zero_iff.mpr fun p _ =>
+    hne _ (add_divisionPoint_not_mem H hn ((hmemU z).mp hz) _ _)
+  have hg10 : ∀ z, z ∈ U → g1 z ≠ 0 := fun z hz =>
+    mul_ne_zero (hne _ ((hmemU z).mp hz)) (Complex.exp_ne_zero _)
+  have hdP : ∀ z, z ∈ U → HasDerivAt P (P z * ∑ p ∈ S,
+      H.weierstrassZeta (z + H.divisionPoint n p.1 p.2)) z := by
+    intro z hz
+    have := HasDerivAt.fun_finsetProd (u := S) (x := z)
+      (f := fun p y => σ (y + H.divisionPoint n p.1 p.2))
+      (f' := fun p => H.weierstrassZeta (z + H.divisionPoint n p.1 p.2) *
+        σ (z + H.divisionPoint n p.1 p.2)) (fun p _ => by
+        have h := (hσd (z + H.divisionPoint n p.1 p.2)).hasDerivAt.comp_add_const z
+          (H.divisionPoint n p.1 p.2)
+        rwa [deriv_weierstrassSigma_eq_zeta_mul _
+          (add_divisionPoint_not_mem H hn ((hmemU z).mp hz) _ _)] at h)
+    convert this using 1
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun p hp => ?_
+    simp only [P]
+    rw [smul_eq_mul, ← Finset.prod_erase_mul _ _ hp]
+    ring
+  have hdg1 : ∀ z, z ∈ U → HasDerivAt g1
+      (g1 z * (n * H.weierstrassZeta (n * z) + κ)) z := by
+    intro z hz
+    have h1 : HasDerivAt (fun z => σ (n * z)) (H.weierstrassZeta (n * z) * σ (n * z) * n) z := by
+      have h := (hσd (n * z)).hasDerivAt.comp z ((hasDerivAt_id z).const_mul (n : ℂ))
+      rw [deriv_weierstrassSigma_eq_zeta_mul _ ((hmemU z).mp hz), mul_one] at h
+      exact h
+    have h2 : HasDerivAt (fun z => cexp (κ * z)) (cexp (κ * z) * κ) z := by
+      have := ((hasDerivAt_id z).const_mul κ).cexp
+      simpa using this
+    convert h1.mul h2 using 1
+    simp only [g1]; ring
+  set h : ℂ → ℂ := fun z => g1 z / P z
+  have hD : ∀ z ∈ U, HasDerivAt h 0 z := by
+    intro z hz
+    have hF := nTupleZetaDiff_eq H hn z
+    simp only [nTupleZetaDiff] at hF
+    rw [← Finset.sum_product'] at hF
+    convert (hdg1 z hz).div (hdP z hz) (hP0 z hz) using 1
+    rw [eq_div_iff (pow_ne_zero 2 (hP0 z hz))]
+    linear_combination (g1 z * P z) * hF
+  have hω : H.ω₁ ∉ H.lattice := by simpa using H.halfPeriod_notMem (j := 1) (by simp)
+  have hz₀ : H.ω₁ / n ∈ U := by
+    rw [hmemU]; rwa [mul_div_cancel₀ _ hn']
+  have hconst : ∀ z ∈ U, h z = h (H.ω₁ / n) := fun z hz =>
+    hU.is_const_of_deriv_eq_zero (isPreconnected_compl_lattice _)
+      (fun y hy => (hD y hy).differentiableAt.differentiableWithinAt)
+      (fun y hy => (hD y hy).deriv) hz hz₀
+  set K := h (H.ω₁ / n)
+  have hall : ∀ z, σ (n * z) = K * cexp (-κ * z) * P z := by
+    intro z
+    by_cases hz : z ∈ U
+    · have := hconst z hz
+      simp only [h, g1] at this
+      rw [div_eq_iff (hP0 z hz)] at this
+      have he : cexp (κ * z) * cexp (-κ * z) = 1 := by rw [← Complex.exp_add]; simp
+      linear_combination cexp (-κ * z) * this - σ (n * z) * he
+    · rw [hmemU, not_not] at hz
+      obtain ⟨j₀, hj₀, l₀, hl₀, hmem, -⟩ := exists_unique_add_divisionPoint_mem H hn hz
+      have hP : P z = 0 := Finset.prod_eq_zero (i := (j₀, l₀))
+        (Finset.mem_product.mpr ⟨Finset.mem_range.mpr hj₀, Finset.mem_range.mpr hl₀⟩)
+        (weierstrassSigma_eq_zero_of_mem _ hmem)
+      rw [hP, mul_zero]; exact weierstrassSigma_eq_zero_of_mem _ hz
+  have h00 : ((0, 0) : ℕ × ℕ) ∈ S :=
+    Finset.mem_product.mpr ⟨Finset.mem_range.mpr hpos, Finset.mem_range.mpr hpos⟩
+  set Q : ℂ → ℂ := fun z => ∏ p ∈ S.erase (0, 0), σ (z + H.divisionPoint n p.1 p.2)
+  have hPQ : ∀ z, P z = σ z * Q z := fun z => by
+    simp only [P, Q]
+    rw [← Finset.mul_prod_erase S _ h00, divisionPoint_zero_zero, add_zero]
+  have hQd : Differentiable ℂ Q := by
+    simp only [Q]
+    exact Differentiable.fun_finsetProd fun p _ => hσd.comp (differentiable_id.add_const _)
+  have hσ0 : σ 0 = 0 := weierstrassSigma_eq_zero_of_mem _ (zero_mem _)
+  have hL : HasDerivAt (fun z => σ (n * z)) n 0 := by
+    have h0 : HasDerivAt σ 1 ((n : ℂ) * 0) := by
+      simpa using hasDerivAt_weierstrassSigma_zero H.periodPair
+    have := h0.comp (0 : ℂ) ((hasDerivAt_id (0 : ℂ)).const_mul (n : ℂ))
+    simp only [one_mul, mul_one] at this; exact this
+  have hR : HasDerivAt (fun z => K * cexp (-κ * z) * P z) (K * Q 0) 0 := by
+    have he : HasDerivAt (fun z => K * cexp (-κ * z)) (K * (cexp (-κ * 0) * -κ)) 0 := by
+      have := ((hasDerivAt_id (0 : ℂ)).const_mul (-κ)).cexp.const_mul K
+      simpa using this
+    have hp : HasDerivAt P (1 * Q 0 + σ 0 * deriv Q 0) 0 := by
+      rw [show P = fun z => σ z * Q z from funext hPQ]
+      exact (hasDerivAt_weierstrassSigma_zero H.periodPair).mul (hQd 0).hasDerivAt
+    convert he.mul hp using 1
+    rw [hPQ 0, hσ0]; simp
+  rw [show (fun z => σ (n * z)) = fun z => K * cexp (-κ * z) * P z from funext hall] at hL
+  have hKQ : (n : ℂ) = K * Q 0 := hL.unique hR
+  have hQ0 : Q 0 ≠ 0 := by
+    refine Finset.prod_ne_zero_iff.mpr fun p hp => hne _ fun hmem => ?_
+    obtain ⟨hp0, hpS⟩ := Finset.mem_erase.mp hp
+    obtain ⟨hp1, hp2⟩ := Finset.mem_product.mp hpS
+    have := divisionPoint_sub_mem H hn (Finset.mem_range.mp hp1) (Finset.mem_range.mp hp2)
+      hpos hpos (by simpa [divisionPoint_zero_zero] using hmem)
+    exact hp0 (Prod.ext this.1 this.2)
+  have hK : H.nTupleConst n = K := by
+    simp only [nTupleConst, Finset.prod_div_distrib, Finset.prod_const_one]
+    rw [hKQ]
+    simp only [Q, zero_add] at hQ0 ⊢
+    rw [mul_one_div]; exact mul_div_cancel_right₀ K hQ0
+  have hexp : -(n * (n - 1) : ℂ) * (H.eta 1 + H.eta 3) * z = -κ * z := by simp only [κ]; ring
+  rw [hK, hexp, prod_prod_eq_prod_product]
+  exact hall z
+
+/-- DLMF 23.10.13: `σ(nz) = A_n e^{-n(n-1)(η₁+η₃)z} ∏_{j,ℓ=0}^{n-1} σ(z + 2jω₁/n + 2ℓω₃/n)`,
+`n ≥ 2`, `z ∈ ℂ`, with `A_n` as in the corrected 23.10.14. -/
+@[dlmf 23.10.E13]
+theorem weierstrassSigma_nsmul {n : ℕ} (_hn : 2 ≤ n) (z : ℂ) :
+    H.weierstrassSigma (n * z) = H.nTupleConst n * cexp (-(n * (n - 1)) * (H.eta 1 + H.eta 3) * z) *
+      ∏ j ∈ Finset.range n, ∏ l ∈ Finset.range n,
+        H.weierstrassSigma (z + H.divisionPoint n j l) :=
+  H.weierstrassSigma_nsmul' n z
 
 /-- `G = ∏_{n≥1} (1 - q^{2n})`, `q = e^{πiω₃/ω₁}` (DLMF 23.10.16). -/
 @[dlmf 23.10.E16]

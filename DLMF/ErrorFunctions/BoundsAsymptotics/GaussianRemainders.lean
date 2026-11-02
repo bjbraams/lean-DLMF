@@ -42,7 +42,8 @@ namespace DLMF.Confluent
 else -(k : ℂ)/2) (fun _ => z) (faddeevaW z)`. -/
 @[dlmf 7.9.E3]
 theorem faddeevaW_continuedFraction {z : ℂ} (hz : 0 < z.im) :
-    HasContinuedFraction (fun k => if k=0 then I/Real.sqrt π else -(k : ℂ)/2) (fun _ => z) (faddeevaW z) := by
+    HasContinuedFraction (fun k => if k=0 then I/Real.sqrt π else -(k : ℂ)/2) (fun _ => z)
+        (faddeevaW z) := by
   set ζ : ℂ := -I * z with hζ
   have hζre : 0 < ζ.re := by simp [ζ, hz]
   have hζ0 : ζ ≠ 0 := fun h => by simp [h] at hζre
@@ -145,7 +146,8 @@ theorem integrableOn_gauss_rotate (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 4) :
 theorem differentiable_laplace_gauss_rotate {θ : ℝ} (hθ : |θ| < π / 4) :
     Differentiable ℂ (fun w : ℂ => ∫ r in Ioi (0 : ℝ), cexp (-(w * r)) •
       cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4))) := fun w =>
-  (differentiableOn_integral_cexp_neg_mul_smul (integrableOn_gauss_rotate (w.re - 1) hθ)).differentiableAt
+  (differentiableOn_integral_cexp_neg_mul_smul
+      (integrableOn_gauss_rotate (w.re - 1) hθ)).differentiableAt
     ((isOpen_lt continuous_const continuous_re).mem_nhds (by simp))
 
 /-- The real Laplace representation `erfc x = π^{-1/2} e^{-x²} ∫₀^∞ e^{-xt} e^{-t²/4} dt`. -/
@@ -176,7 +178,8 @@ theorem erfc_ofReal_eq_laplace_gauss (x : ℝ) :
     push_cast
     ring_nf
   rw [integral_const_mul, h2, hsh] at hcomp
-  have hreal : ∫ u in Ioi x, cexp (-((u : ℂ) ^ 2)) = ((∫ u in Ioi x, Real.exp (-u ^ 2) : ℝ) : ℂ) := by
+  have hreal : ∫ u in Ioi x, cexp (-((u : ℂ) ^ 2)) =
+      ((∫ u in Ioi x, Real.exp (-u ^ 2) : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun u _ => ?_
     push_cast; rfl
@@ -364,7 +367,10 @@ n/Real.sqrt π) erfc ∧ HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z =>
 (-z)-2)`. -/
 @[dlmf 7.12.E1]
 theorem erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
-    HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) erfc ∧ HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1))) (fun n => -(-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) (fun z => erfc (-z)-2) := by
+    HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1)))
+        (fun n => (-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) erfc ∧
+        HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1)))
+        (fun n => -(-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) (fun z => erfc (-z)-2) := by
   set d := min δ (π / 4) with hd
   have hd0 : 0 < d := lt_min hδ (by positivity)
   have hdδ : d ≤ δ := min_le_left _ _
@@ -533,7 +539,8 @@ theorem erfc_eq_integral_rotate_laplace {θ : ℝ} (hθ : |θ| < π) {z : ℂ}
       rw [sq, mul_re]; have h := abs_lt.mp hw; nlinarith [abs_nonneg w.im]
     rw [erfc_eq_laplace hw1 hw2]
     congr 1
-    have hlap : (∫ t : ℝ in Ioi 0, exp (-w ^ 2 * t) * (t : ℂ) ^ (-1/2 : ℂ) * (1 + (t : ℂ)) ^ (-1 : ℂ)) =
+    have hlap : (∫ t : ℝ in Ioi 0, exp (-w ^ 2 * t) * (t : ℂ) ^ (-1/2 : ℂ) *
+        (1 + (t : ℂ)) ^ (-1 : ℂ)) =
         ∫ t : ℝ in Ioi 0, cexp (-(w ^ 2 * t)) * K t :=
       setIntegral_congr_fun measurableSet_Ioi fun t _ => by
         rw [hK]; simp only [cpow_neg_one]; ring_nf
@@ -577,7 +584,9 @@ theorem erfc_eq_integral_rotate_laplace {θ : ℝ} (hθ : |θ| < π) {z : ℂ}
 
 /-- Sector-dependent next-term bounds from DLMF §7.12(i). -/
 theorem erfc_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (N : ℕ) :
-    ‖erfcAsymptoticRemainder N z‖ ≤ (if |arg z| ≤ π/4 then 1 else 1/Real.sin (2*|arg z|))*‖exp (-z^2)/Real.sqrt π*poch (1/2) N/z^(2*N+1)‖ := by
+    ‖erfcAsymptoticRemainder N z‖ ≤
+        (if |arg z| ≤ π/4 then 1 else 1/Real.sin (2*|arg z|))*‖exp (-z^2)/Real.sqrt π*poch (1/2)
+        N/z^(2*N+1)‖ := by
   set α := arg z with hα
   set θ : ℝ := -2 * α with hθdef
   have hθ : |θ| < π := by
@@ -776,7 +785,8 @@ theorem erfc_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (N 
 theorem erfc_ofReal_eq_laplace {x : ℝ} (hx : 0 < x) :
     TauCeti.Real.erfc x = Real.exp (-x^2)/π *
       ∫ u in Ioi (0:ℝ), Real.exp (-(x^2*u)) * u^(-1/2:ℝ) * (1+u)^(-1:ℝ) := by
-  have h := erfc_eq_laplace (z := (x:ℂ)) (by simpa using hx) (by rw [← ofReal_pow, ofReal_re]; positivity)
+  have h := erfc_eq_laplace (z := (x:ℂ)) (by simpa using hx)
+      (by rw [← ofReal_pow, ofReal_re]; positivity)
   have hk : (∫ t : ℝ in Ioi 0, exp (-(x:ℂ)^2*t) * (t:ℂ)^(-1/2:ℂ) * (1+(t:ℂ))^(-1:ℂ)) =
       ((∫ u in Ioi (0:ℝ), Real.exp (-(x^2*u)) * u^(-1/2:ℝ) * (1+u)^(-1:ℝ) : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]
@@ -862,19 +872,25 @@ theorem erfc_remainder_sign {x : ℝ} (hx : 0 < x) (N : ℕ) :
     · exact integrable_finsetSum _ fun n _ => (hint n).const_mul _
     · exact hgint.const_mul _
   -- the remainder
-  have hR : (erfcAsymptoticRemainder N x).re = Real.exp (-x^2)/π * ((-1:ℝ)^N * ∫ u in Ioi (0:ℝ), g u) := by
-    have hsum : (exp (-(x:ℂ)^2)/Real.sqrt π*∑ n ∈ Finset.range N, (-1 : ℂ)^n*poch (1/2) n/(x:ℂ)^(2*n+1)) =
-        ((Real.exp (-x^2)/π * ∑ n ∈ Finset.range N, (-1:ℝ)^n * (Real.Gamma (n+1/2) / x^(2*n+1)) : ℝ) : ℂ) := by
+  have hR : (erfcAsymptoticRemainder N x).re = Real.exp (-x^2)/π *
+      ((-1:ℝ)^N * ∫ u in Ioi (0:ℝ), g u) := by
+    have hsum : (exp (-(x:ℂ)^2)/Real.sqrt π*∑ n ∈ Finset.range N,
+        (-1 : ℂ)^n*poch (1/2) n/(x:ℂ)^(2*n+1)) =
+        ((Real.exp (-x^2)/π * ∑ n ∈ Finset.range N, (-1:ℝ)^n *
+            (Real.Gamma (n+1/2) / x^(2*n+1)) : ℝ) : ℂ) := by
       simp only [poch_half_eq_Gamma]
       push_cast
       rw [Finset.mul_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun n _ => ?_
-      have hp : (Real.sqrt π:ℂ)*Real.sqrt π = π := by exact_mod_cast Real.mul_self_sqrt Real.pi_pos.le
+      have hp : (Real.sqrt π:ℂ)*Real.sqrt π = π := by
+                                                     exact_mod_cast Real.mul_self_sqrt
+                                                       Real.pi_pos.le
       have hp0 : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
       rw [← hp]; field_simp
     have herfc : erfc (x:ℂ) = (TauCeti.Real.erfc x : ℂ) := by
       rw [erfc, erf_ofReal, TauCeti.Real.erfc_def]; push_cast; ring
-    rw [erfcAsymptoticRemainder, hsum, herfc, ← ofReal_sub, ofReal_re, erfc_ofReal_eq_laplace hx, hdec]
+    rw [erfcAsymptoticRemainder, hsum, herfc, ← ofReal_sub, ofReal_re,
+        erfc_ofReal_eq_laplace hx, hdec]
     ring
   rw [hR, ← mul_assoc, mul_comm ((-1:ℝ)^N), mul_assoc, ← mul_assoc ((-1:ℝ)^N), ← pow_add,
     ← two_mul, pow_mul, neg_one_sq, one_pow, one_mul]

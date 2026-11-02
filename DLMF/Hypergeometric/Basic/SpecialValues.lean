@@ -5,7 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Basic
+public import DLMF.Hypergeometric.Basic.Pochhammer
+public import DLMF.Hypergeometric.Basic.GaussCoefficients
+public import DLMF.Hypergeometric.Basic.PrincipalBranch
+public import DLMF.Hypergeometric.Basic.AppellF4
+public import DLMF.Hypergeometric.Basic.GaussEquation
+public import DLMF.Hypergeometric.Basic.ParameterAnalyticity
+public import DLMF.Hypergeometric.Basic.CutPlane
 public import DLMF.Hypergeometric.Basic.GaussSeries
 
 public import Mathlib.Analysis.Analytic.Binomial

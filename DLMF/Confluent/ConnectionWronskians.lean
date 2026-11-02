@@ -80,7 +80,8 @@ theorem wronskian_kummerU_reflected_eq (a b : ℂ) {z : ℂ} (hz : z ∈ slitPla
       kummerU a b z * (exp z * kummerU (b - a) b (-z) +
         exp z * ((b - a) * kummerU (b - a + 1) (b + 1) (-z))) -
       exp z * kummerU (b - a) b (-z) * (-a * kummerU (a + 1) (b + 1) z) := by
-  rw [ODE.wronskian, (hasDerivAt_kummerU_reflected a b hz').deriv, (hasDerivAt_kummerU a b hz).deriv]
+  rw [ODE.wronskian, (hasDerivAt_kummerU_reflected a b hz').deriv,
+      (hasDerivAt_kummerU a b hz).deriv]
 
 /-- The connection formula in a neighborhood of a point off the real axis. -/
 theorem eventually_regularizedHGFun_eq_connection (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)

@@ -289,6 +289,117 @@ theorem mellinConvergent_pairs {f h : ℝ → ℂ} {α b c β : ℝ}
   exact ⟨fun h1 h2 => ⟨hL h2, hh.1 z h1⟩, fun h1 h2 => ⟨hL h1, hh.2 z h2⟩,
     fun h1 h2 => ⟨hH h2, hh.1 z h1⟩, fun h1 h2 => ⟨hH h1, hh.2 z h2⟩⟩
 
+/-- The truncated remainder `(f - ∑_{s<N} aₛ t^{αₛ})₁` of the expansion 2.5.17. -/
+private noncomputable def truncLowRemainder (f : ℝ → ℂ) (a α : ℕ → ℂ) (N : ℕ) : ℝ → ℂ :=
+  mellinTruncLow fun t => f t - ∑ s ∈ range N, (t : ℂ) ^ α s • a s
+
+/-- Peeling off one term of the remainder 2.5.17. -/
+private lemma truncLowRemainder_succ (f : ℝ → ℂ) (a α : ℕ → ℂ) (N : ℕ) :
+    truncLowRemainder f a α N = truncLowRemainder f a α (N + 1) +
+      mellinTruncLow (fun t => (t : ℂ) ^ α N • a N) := by
+  funext t
+  simp only [truncLowRemainder, mellinTruncLow, Pi.add_apply, sum_range_succ]
+  by_cases ht : t ∈ Iic (1 : ℝ)
+  · simp only [indicator_of_mem ht]; ring
+  · simp [indicator_of_notMem ht]
+
+/-- `𝓜[(t^α a)₁](z) = a/(z + α)` for `ℜ(z + α) > 0`. -/
+private lemma hasMellin_truncLow_cpow_smul (α c : ℂ) {z : ℂ} (hz : 0 < z.re + α.re) :
+    HasMellin (mellinTruncLow fun t => (t : ℂ) ^ α • c) z (c / (z + α)) := by
+  have h := hasMellin_cpow_Ioc α hz
+  have heq : EqOn (mellinTruncLow fun t => (t : ℂ) ^ α • c)
+      (fun t => (indicator (Ioc 0 1) (fun t : ℝ => (t : ℂ) ^ α) t) * c) (Ioi 0) := by
+    intro t ht
+    by_cases h1 : t ≤ 1
+    · simp [mellinTruncLow, indicator_of_mem (show t ∈ Iic (1 : ℝ) from h1),
+        indicator_of_mem (show t ∈ Ioc (0 : ℝ) 1 from ⟨ht, h1⟩)]
+    · simp [mellinTruncLow, indicator_of_notMem (show t ∉ Iic (1 : ℝ) from h1),
+        indicator_of_notMem (show t ∉ Ioc (0 : ℝ) 1 from fun h' => h1 h'.2)]
+  have hc : MellinConvergent (fun t => (indicator (Ioc 0 1) (fun t : ℝ => (t : ℂ) ^ α) t) * c)
+      z := by
+    have := h.1.const_smul c
+    refine this.congr_fun (fun t _ => ?_) measurableSet_Ioi
+    simp only [smul_eq_mul]; ring
+  refine ⟨hc.congr_fun (fun t ht => by simp only [heq ht]) measurableSet_Ioi, ?_⟩
+  unfold mellin
+  rw [setIntegral_congr_fun measurableSet_Ioi fun t ht => by rw [heq ht]]
+  simp only [smul_eq_mul]
+  have h2 := h.2
+  unfold mellin at h2
+  simp only [smul_eq_mul] at h2
+  calc ∫ t in Ioi (0 : ℝ),
+        (t : ℂ) ^ (z - 1) * (indicator (Ioc 0 1) (fun t : ℝ => (t : ℂ) ^ α) t * c)
+      = (∫ t in Ioi (0 : ℝ), (t : ℂ) ^ (z - 1) * indicator (Ioc 0 1) (fun t : ℝ => (t : ℂ) ^ α) t)
+        * c := by
+        rw [← integral_mul_const]; congr 1; funext t; ring
+    _ = c / (z + α) := by rw [h2]; ring
+
+/-- Mellin convergence and holomorphy of the remainder in `ℜz > -ℜα_N`. -/
+private lemma truncLowRemainder_mellin {f : ℝ → ℂ} {a α : ℕ → ℂ}
+    (hfc : LocallyIntegrableOn f (Ioi 0))
+    (hf : HasAsymptoticExpansion (𝓝[>] 0) (fun s (t : ℝ) => (t : ℂ) ^ α s) a f) (N : ℕ)
+    {z : ℂ} (hz : -(α N).re < z.re) :
+    MellinConvergent (truncLowRemainder f a α N) z ∧
+      DifferentiableAt ℂ (mellin (truncLowRemainder f a α N)) z := by
+  have hloc : LocallyIntegrableOn (fun t => f t - ∑ s ∈ range N, (t : ℂ) ^ α s • a s)
+      (Ioi 0) := by
+    refine hfc.sub ?_
+    refine ContinuousOn.locallyIntegrableOn ?_ measurableSet_Ioi
+    refine continuousOn_finsetSum _ fun s _ => ?_
+    intro t ht
+    have h1 : ContinuousAt (fun t : ℝ => (t : ℂ) ^ α s) t :=
+      (continuousAt_cpow_const (ofReal_mem_slitPlane.2 ht)).comp continuous_ofReal.continuousAt
+    exact (h1.smul (continuousAt_const (y := a s))).continuousWithinAt
+  have hc : LocallyIntegrableOn (truncLowRemainder f a α N) (Ioi 0) :=
+    locallyIntegrableOn_indicator_of_measurableSet hloc measurableSet_Iic
+  have htop : truncLowRemainder f a α N =O[atTop] (· ^ (-(z.re + 1))) := by
+    refine (isBigO_zero _ _).congr' ?_ EventuallyEq.rfl
+    filter_upwards [eventually_gt_atTop 1] with t ht
+    rw [truncLowRemainder, mellinTruncLow,
+      indicator_of_notMem (show t ∉ Set.Iic 1 from not_le.2 ht)]
+  have hbot : truncLowRemainder f a α N =O[𝓝[>] 0] (· ^ (-(-(α N).re))) := by
+    simp only [neg_neg]
+    have h1 := hf N
+    have h2 : (fun t : ℝ => (t : ℂ) ^ α N) =O[𝓝[>] 0] fun t : ℝ => t ^ (α N).re := by
+      refine IsBigO.of_bound 1 ?_
+      filter_upwards [self_mem_nhdsWithin] with t ht
+      rw [norm_cpow_eq_rpow_re_of_pos ht, Real.norm_of_nonneg (Real.rpow_nonneg ht.le _),
+        one_mul]
+    refine IsBigO.trans ?_ (h1.trans h2)
+    refine (isBigO_refl _ _).congr' ?_ EventuallyEq.rfl
+    filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with t ht
+    rw [truncLowRemainder, mellinTruncLow, indicator_of_mem (show t ∈ Set.Iic 1 from ht.2.le)]
+  exact ⟨mellinConvergent_of_isBigO_rpow hc htop (by linarith) hbot hz,
+    mellin_differentiableAt_of_isBigO_rpow hc htop (by linarith) hbot hz⟩
+
+
+/-- Additivity of the Mellin transform where both transforms converge. -/
+private lemma mellin_add_of_mellinConvergent {f g : ℝ → ℂ} {z : ℂ} (hf : MellinConvergent f z)
+    (hg : MellinConvergent g z) : mellin (f + g) z = mellin f z + mellin g z := by
+  unfold mellin
+  rw [← integral_add hf hg]
+  congr 1; funext t
+  simp only [Pi.add_apply, smul_add]
+
+/-- Comparing the remainders after `K ≤ M` terms. -/
+private lemma mellin_truncLowRemainder_eq {f : ℝ → ℂ} {a α : ℕ → ℂ}
+    (hfc : LocallyIntegrableOn f (Ioi 0)) (hα : StrictMono fun s => (α s).re)
+    (hf : HasAsymptoticExpansion (𝓝[>] 0) (fun s (t : ℝ) => (t : ℂ) ^ α s) a f) {K M : ℕ}
+    (hKM : K ≤ M) {z : ℂ} (hz : -(α K).re < z.re) :
+    mellin (truncLowRemainder f a α K) z =
+      mellin (truncLowRemainder f a α M) z + ∑ s ∈ Ico K M, a s / (z + α s) := by
+  induction M, hKM using Nat.le_induction with
+  | base => simp
+  | succ M hKM ih =>
+    have hM : -(α M).re < z.re := lt_of_le_of_lt (neg_le_neg (hα.monotone hKM)) hz
+    have hM1 : -(α (M + 1)).re < z.re :=
+      lt_trans (neg_lt_neg (hα (Nat.lt_succ_self M))) hM
+    have h1 := (truncLowRemainder_mellin hfc hf (M + 1) hM1).1
+    have h2 := hasMellin_truncLow_cpow_smul (α M) (a M) (z := z) (by linarith)
+    rw [ih, truncLowRemainder_succ f a α M, mellin_add_of_mellinConvergent h1 h2.1, h2.2,
+      sum_Ico_succ_top hKM]
+    ring
+
 /-- DLMF 2.5.25 and §2.5(ii): let `f` be locally integrable on `(0, ∞)` with
 `f(t) ∼ ∑ aₛ t^{αₛ}` as `t → 0⁺` (2.5.17), `ℜαₛ` strictly increasing and `ℜαₛ → ∞`. Then
 `𝓜f₁` continues analytically from `ℜz > -ℜα₀` to a meromorphic function `F` on `ℂ` whose
@@ -302,7 +413,28 @@ theorem mellin_truncLow_continuation {f : ℝ → ℂ} {a : ℕ → ℂ} {α : �
     ∃ F : ℂ → ℂ, (∀ z : ℂ, -(α 0).re < z.re → F z = mellin (mellinTruncLow f) z) ∧
       ∀ N : ℕ, DifferentiableOn ℂ (fun z => F z - ∑ s ∈ range N, a s / (z + α s))
         {z : ℂ | -(α N).re < z.re} := by
-  sorry
+  classical
+  have hex : ∀ z : ℂ, ∃ N, -(α N).re < z.re := fun z => by
+    obtain ⟨N, hN⟩ := (hαinf.eventually_gt_atTop (-z.re)).exists
+    exact ⟨N, by linarith⟩
+  set F : ℂ → ℂ := fun z => mellin (truncLowRemainder f a α (Nat.find (hex z))) z +
+    ∑ s ∈ range (Nat.find (hex z)), a s / (z + α s) with hF
+  have key : ∀ z : ℂ, ∀ N, -(α N).re < z.re →
+      F z = mellin (truncLowRemainder f a α N) z + ∑ s ∈ range N, a s / (z + α s) := by
+    intro z N hN
+    have hK := Nat.find_min' (hex z) hN
+    rw [hF]; dsimp only
+    rw [mellin_truncLowRemainder_eq hfc hα hf hK (Nat.find_spec (hex z)), add_assoc,
+      add_comm (∑ s ∈ Ico _ N, _), sum_range_add_sum_Ico _ hK]
+  refine ⟨F, fun z hz => ?_, fun N => ?_⟩
+  · rw [key z 0 hz]
+    simp [truncLowRemainder]
+  · have hopen : IsOpen {z : ℂ | -(α N).re < z.re} := isOpen_lt continuous_const continuous_re
+    intro z hz
+    refine ((truncLowRemainder_mellin hfc hf N hz).2.congr_of_eventuallyEq ?_)
+      |>.differentiableWithinAt
+    filter_upwards [hopen.mem_nhds hz] with w hw
+    rw [key w N hw]; ring
 
 /-- DLMF 2.5.26 (and 2.5.28 for `h`): where `𝓜f₁(z)` and `𝓜f₂(z)` both converge,
 `𝓜f(z) = 𝓜f₁(z) + 𝓜f₂(z)`; DLMF uses the right side to extend `𝓜f` to `ℜz < b`. -/
@@ -317,6 +449,116 @@ theorem mellin_eq_truncLow_add_truncHigh {f : ℝ → ℂ} {z : ℂ}
   simp only [mellinTruncHigh, Pi.sub_apply, smul_eq_mul]
   ring
 
+/-- The truncated remainder `(h - ∑_{s<N} bₛ t^{-βₛ})₂` of the expansion 2.5.18 (`κ = 0`). -/
+private noncomputable def truncHighRemainder (h : ℝ → ℂ) (b β : ℕ → ℂ) (N : ℕ) : ℝ → ℂ :=
+  mellinTruncHigh fun t => h t - ∑ s ∈ range N, (t : ℂ) ^ (-β s) • b s
+
+/-- `f₂` is the restriction of `f` to `(1, ∞)`. -/
+private lemma mellinTruncHigh_eq_indicator (g : ℝ → ℂ) :
+    mellinTruncHigh g = (Ioi (1 : ℝ)).indicator g := by
+  funext t
+  by_cases ht : t ≤ 1
+  · simp [mellinTruncHigh, mellinTruncLow, ht]
+  · simp [mellinTruncHigh, mellinTruncLow, ht, not_le.1 ht]
+
+/-- Peeling off one term of the remainder 2.5.18. -/
+private lemma truncHighRemainder_succ (h : ℝ → ℂ) (b β : ℕ → ℂ) (N : ℕ) :
+    truncHighRemainder h b β N = truncHighRemainder h b β (N + 1) +
+      mellinTruncHigh (fun t => (t : ℂ) ^ (-β N) • b N) := by
+  simp only [truncHighRemainder, mellinTruncHigh_eq_indicator]
+  funext t
+  simp only [Pi.add_apply, sum_range_succ]
+  by_cases ht : t ∈ Ioi (1 : ℝ)
+  · simp only [indicator_of_mem ht]; ring
+  · simp [indicator_of_notMem ht]
+
+/-- `𝓜[(t^{-β} c)₂](z) = -c/(z - β)` for `ℜz < ℜβ`. -/
+private lemma hasMellin_truncHigh_cpow_smul (β c : ℂ) {z : ℂ} (hz : z.re < β.re) :
+    HasMellin (mellinTruncHigh fun t => (t : ℂ) ^ (-β) • c) z (-(c / (z - β))) := by
+  have ha : (z - 1 - β).re < -1 := by simp; linarith
+  have hpt : ∀ t ∈ Ioi (0 : ℝ), (t : ℂ) ^ (z - 1) • (Ioi (1 : ℝ)).indicator
+      (fun t => (t : ℂ) ^ (-β) • c) t = (Ioi (1 : ℝ)).indicator
+      (fun t => (t : ℂ) ^ (z - 1 - β) * c) t := by
+    intro t ht
+    by_cases h1 : t ∈ Ioi (1 : ℝ)
+    · have ht0 : (t : ℂ) ≠ 0 := ofReal_ne_zero.2 (ne_of_gt ht)
+      simp only [indicator_of_mem h1, smul_eq_mul]
+      rw [show z - 1 - β = (z - 1) + -β by ring, cpow_add _ _ ht0]; ring
+    · simp [indicator_of_notMem h1]
+  have hint : IntegrableOn (fun t : ℝ => (t : ℂ) ^ (z - 1 - β) * c) (Ioi 1) :=
+    (integrableOn_Ioi_cpow_of_lt ha one_pos).mul_const c
+  rw [mellinTruncHigh_eq_indicator]
+  refine ⟨?_, ?_⟩
+  · refine IntegrableOn.congr_fun ?_ (fun t ht => (hpt t ht).symm) measurableSet_Ioi
+    exact (hint.integrable_indicator measurableSet_Ioi).integrableOn
+  · unfold mellin
+    rw [setIntegral_congr_fun measurableSet_Ioi hpt, integral_indicator measurableSet_Ioi,
+      Measure.restrict_restrict measurableSet_Ioi,
+      show Set.Ioi (1 : ℝ) ∩ Set.Ioi 0 = Set.Ioi 1 from
+        inter_eq_left.2 (Ioi_subset_Ioi zero_le_one),
+      integral_mul_const, integral_Ioi_cpow_of_lt ha one_pos]
+    have hzb : z - β ≠ 0 := fun h0 => by
+      have := congrArg re h0; simp at this; linarith
+    rw [show z - 1 - β + 1 = z - β by ring, ofReal_one, one_cpow]
+    field_simp
+
+
+/-- Mellin convergence and holomorphy of the remainder in `ℜz < ℜβ_N`. -/
+private lemma truncHighRemainder_mellin {h : ℝ → ℂ} {b β : ℕ → ℂ}
+    (hhc : LocallyIntegrableOn h (Ioi 0))
+    (hh : HasAsymptoticExpansion atTop (fun s (t : ℝ) => (t : ℂ) ^ (-β s)) b h) (N : ℕ)
+    {z : ℂ} (hz : z.re < (β N).re) :
+    MellinConvergent (truncHighRemainder h b β N) z ∧
+      DifferentiableAt ℂ (mellin (truncHighRemainder h b β N)) z := by
+  have hloc : LocallyIntegrableOn (fun t => h t - ∑ s ∈ range N, (t : ℂ) ^ (-β s) • b s)
+      (Ioi 0) := by
+    refine hhc.sub ?_
+    refine ContinuousOn.locallyIntegrableOn ?_ measurableSet_Ioi
+    refine continuousOn_finsetSum _ fun s _ => ?_
+    intro t ht
+    have h1 : ContinuousAt (fun t : ℝ => (t : ℂ) ^ (-β s)) t :=
+      (continuousAt_cpow_const (ofReal_mem_slitPlane.2 ht)).comp continuous_ofReal.continuousAt
+    exact (h1.smul (continuousAt_const (y := b s))).continuousWithinAt
+  have hc : LocallyIntegrableOn (truncHighRemainder h b β N) (Ioi 0) := by
+    rw [truncHighRemainder, mellinTruncHigh_eq_indicator]
+    exact locallyIntegrableOn_indicator_of_measurableSet hloc measurableSet_Ioi
+  have hbot : truncHighRemainder h b β N =O[𝓝[>] 0] (· ^ (-(z.re - 1))) := by
+    refine (isBigO_zero _ _).congr' ?_ EventuallyEq.rfl
+    filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with t ht
+    rw [truncHighRemainder, mellinTruncHigh_eq_indicator,
+      indicator_of_notMem (show t ∉ Set.Ioi 1 from not_lt.2 ht.2.le)]
+  have htop : truncHighRemainder h b β N =O[atTop] (· ^ (-(β N).re)) := by
+    have h2 : (fun t : ℝ => (t : ℂ) ^ (-β N)) =O[atTop] fun t : ℝ => t ^ (-(β N).re) := by
+      refine IsBigO.of_bound 1 ?_
+      filter_upwards [eventually_gt_atTop 0] with t ht
+      rw [norm_cpow_eq_rpow_re_of_pos ht, Real.norm_of_nonneg (Real.rpow_nonneg ht.le _),
+        one_mul, neg_re]
+    refine IsBigO.trans ?_ ((hh N).trans h2)
+    refine (isBigO_refl _ _).congr' ?_ EventuallyEq.rfl
+    filter_upwards [eventually_gt_atTop 1] with t ht
+    rw [truncHighRemainder, mellinTruncHigh_eq_indicator,
+      indicator_of_mem (show t ∈ Set.Ioi 1 from ht)]
+  exact ⟨mellinConvergent_of_isBigO_rpow hc htop hz hbot (by linarith),
+    mellin_differentiableAt_of_isBigO_rpow hc htop hz hbot (by linarith)⟩
+
+/-- Comparing the remainders after `K ≤ M` terms of 2.5.18. -/
+private lemma mellin_truncHighRemainder_eq {h : ℝ → ℂ} {b β : ℕ → ℂ}
+    (hhc : LocallyIntegrableOn h (Ioi 0)) (hβ : StrictMono fun s => (β s).re)
+    (hh : HasAsymptoticExpansion atTop (fun s (t : ℝ) => (t : ℂ) ^ (-β s)) b h) {K M : ℕ}
+    (hKM : K ≤ M) {z : ℂ} (hz : z.re < (β K).re) :
+    mellin (truncHighRemainder h b β K) z =
+      mellin (truncHighRemainder h b β M) z - ∑ s ∈ Ico K M, b s / (z - β s) := by
+  induction M, hKM using Nat.le_induction with
+  | base => simp
+  | succ M hKM ih =>
+    have hM : z.re < (β M).re := lt_of_lt_of_le hz (hβ.monotone hKM)
+    have hM1 : z.re < (β (M + 1)).re := lt_trans hM (hβ (Nat.lt_succ_self M))
+    have h1 := (truncHighRemainder_mellin hhc hh (M + 1) hM1).1
+    have h2 := hasMellin_truncHigh_cpow_smul (β M) (b M) hM
+    rw [ih, truncHighRemainder_succ h b β M, mellin_add_of_mellinConvergent h1 h2.1, h2.2,
+      sum_Ico_succ_top hKM]
+    ring
+
 /-- DLMF 2.5.27 and §2.5(ii), case `κ = 0`: let `h` be locally integrable on `(0, ∞)` with
 `h(t) ∼ ∑ bₛ t^{-βₛ}` as `t → ∞` (2.5.18 with `κ = 0`), `ℜβₛ` strictly increasing and
 `ℜβₛ → ∞`. Then `𝓜h₂` continues analytically from `ℜz < ℜβ₀` to a meromorphic function `H` on
@@ -330,7 +572,27 @@ theorem mellin_truncHigh_continuation {h : ℝ → ℂ} {b : ℕ → ℂ} {β : 
     ∃ H : ℂ → ℂ, (∀ z : ℂ, z.re < (β 0).re → H z = mellin (mellinTruncHigh h) z) ∧
       ∀ N : ℕ, DifferentiableOn ℂ (fun z => H z + ∑ s ∈ range N, b s / (z - β s))
         {z : ℂ | z.re < (β N).re} := by
-  sorry
+  classical
+  have hex : ∀ z : ℂ, ∃ N, z.re < (β N).re := fun z =>
+    (hβinf.eventually_gt_atTop z.re).exists
+  set H : ℂ → ℂ := fun z => mellin (truncHighRemainder h b β (Nat.find (hex z))) z -
+    ∑ s ∈ range (Nat.find (hex z)), b s / (z - β s) with hH
+  have key : ∀ z : ℂ, ∀ N, z.re < (β N).re →
+      H z = mellin (truncHighRemainder h b β N) z - ∑ s ∈ range N, b s / (z - β s) := by
+    intro z N hN
+    have hK := Nat.find_min' (hex z) hN
+    rw [hH]; dsimp only
+    rw [mellin_truncHighRemainder_eq hhc hβ hh hK (Nat.find_spec (hex z)), sub_sub,
+      add_comm (∑ s ∈ Ico _ N, _), sum_range_add_sum_Ico _ hK]
+  refine ⟨H, fun z hz => ?_, fun N => ?_⟩
+  · rw [key z 0 hz]
+    simp [truncHighRemainder]
+  · have hopen : IsOpen {z : ℂ | z.re < (β N).re} := isOpen_lt continuous_re continuous_const
+    intro z hz
+    refine ((truncHighRemainder_mellin hhc hh N hz).2.congr_of_eventuallyEq ?_)
+      |>.differentiableWithinAt
+    filter_upwards [hopen.mem_nhds hz] with w hw
+    rw [key w N hw]; ring
 
 /-- DLMF §2.5(ii), case `κ ≠ 0`: if `h(t) ∼ exp(iκt^p) ∑ bₛ t^{-βₛ}` as `t → ∞` (2.5.18) with
 real `κ ≠ 0`, `p > 0`, and `ℜβₛ → ∞`, then `𝓜h₂` continues analytically from `ℜz < ℜβ₀` to an

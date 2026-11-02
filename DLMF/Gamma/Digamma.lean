@@ -24,7 +24,7 @@ on `(0, ∞)`.
 
 ## Main definitions
 
-* `trigamma`: the derivative of the real digamma function `Real.digamma`, which is defined in
+* `trigamma`: the derivative of the real digamma function `Gamma.Real.digamma`, which is defined in
   `DLMF.Gamma.Basic.Digamma`.
 * `digammaSeriesTerm`: the general term of the digamma series.
 
@@ -37,7 +37,7 @@ on `(0, ∞)`.
 
 ## Implementation notes
 
-The definition of `Real.digamma`, its values at the positive integers, the recurrence and the
+The definition of `Gamma.Real.digamma`, its values at the positive integers, the recurrence and the
 reflection formula are in `DLMF.Gamma.Basic.Digamma`.
 
 ## References
@@ -54,7 +54,9 @@ open scoped Topology Real
 
 noncomputable section
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 local notation "γ" => eulerMascheroniConstant
 
@@ -365,6 +367,6 @@ theorem hasDerivAt_log_sin_pi {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
   rw [cot_eq_cos_div_sin]
   ring
 
-end Real
+end DLMF.Gamma.Real
 
 

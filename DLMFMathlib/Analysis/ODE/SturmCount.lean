@@ -235,7 +235,8 @@ theorem sturmCount_existsUnique_zero_between {p p' q q' : ℝ → ℝ} {c d : �
     have hsub : Icc y e ⊆ Ioo c d := Icc_subset_Ioo hy.1 he.2
     have hD : ∀ x ∈ Icc y e, HasDerivAt (fun t => q t / p t)
         ((q' x * p x - q x * p' x) / p x ^ 2) x := fun x hx =>
-      HasDerivAt.fun_div (hq x (Ioo_subset_Icc_self (hsub hx))) (hp x (Ioo_subset_Icc_self (hsub hx)))
+      HasDerivAt.fun_div (hq x (Ioo_subset_Icc_self (hsub hx)))
+          (hp x (Ioo_subset_Icc_self (hsub hx)))
         (hne x (hsub hx))
     obtain ⟨ξ, hξ, hξ0⟩ := exists_hasDerivAt_eq_zero hlt
       (fun x hx => (hD x hx).continuousAt.continuousWithinAt) (by simp [hy0, he0])

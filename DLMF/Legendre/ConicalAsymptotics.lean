@@ -49,14 +49,20 @@ open DLMF.Bessel
 θ)^{1/2} I_μ(τθ) (1 + O(1/τ))` as `τ → ∞`, uniformly for `θ ∈ (0, π-δ]`. -/
 @[dlmf 14.20.E15]
 theorem conicalP_large_tau_uniform {μ : ℝ} (hμ : 0 ≤ μ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
-    (fun p : ℝ × ℝ => conicalP p.1 μ (Real.cos p.2)/((p.1:ℂ)^(-(μ:ℂ))*(p.2/Real.sin p.2:ℂ)^(1/2:ℂ)*besselI μ (p.1*p.2))-1) =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 0 < p.2 ∧ p.2 ≤ π-δ}] (fun p : ℝ × ℝ => (p.1:ℂ)⁻¹) := by
+    (fun p : ℝ × ℝ => conicalP p.1 μ
+        (Real.cos p.2)/((p.1:ℂ)^(-(μ:ℂ))*(p.2/Real.sin p.2:ℂ)^(1/2:ℂ)*besselI μ (p.1*p.2))-1)
+        =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 0 < p.2 ∧ p.2 ≤ π-δ}]
+        (fun p : ℝ × ℝ => (p.1:ℂ)⁻¹) := by
   sorry
 
 /-- DLMF 14.20.16: for fixed `μ ≥ 0` and `0 < δ < π`, `𝖰̂^{-μ}_{-1/2+iτ}(cos θ) = τ^{-μ} (θ/sin
 θ)^{1/2} K_μ(τθ) (1 + O(1/τ))` as `τ → ∞`, uniformly for `θ ∈ (0, π-δ]`. -/
 @[dlmf 14.20.E16]
 theorem conicalQHat_large_tau_uniform {μ : ℝ} (hμ : 0 ≤ μ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
-    (fun p : ℝ × ℝ => conicalQHat p.1 μ (Real.cos p.2)/((p.1:ℂ)^(-(μ:ℂ))*(p.2/Real.sin p.2:ℂ)^(1/2:ℂ)*besselK μ (p.1*p.2))-1) =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 0 < p.2 ∧ p.2 ≤ π-δ}] (fun p : ℝ × ℝ => (p.1:ℂ)⁻¹) := by
+    (fun p : ℝ × ℝ => conicalQHat p.1 μ
+        (Real.cos p.2)/((p.1:ℂ)^(-(μ:ℂ))*(p.2/Real.sin p.2:ℂ)^(1/2:ℂ)*besselK μ (p.1*p.2))-1)
+        =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 0 < p.2 ∧ p.2 ≤ π-δ}]
+        (fun p : ℝ × ℝ => (p.1:ℂ)⁻¹) := by
   sorry
 
 /-- DLMF 14.20.19: the ratio `α = μ/τ` used in the uniform large-`τ` asymptotics of conical
@@ -76,7 +82,9 @@ def conicalSigma (μ τ : ℝ) : ℝ :=
 conical-function asymptotics. -/
 @[dlmf 14.20.E21]
 def ConicalEtaRelation (α x η : ℝ) : Prop :=
-  Real.sqrt (α^2+η)+α/2*Real.log η-α*Real.log (Real.sqrt (α^2+η)+α)=Real.arccos (x/Real.sqrt (1+α^2))+α/2*Real.log ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2)))
+  Real.sqrt (α^2+η)+α/2*Real.log η-α*Real.log (Real.sqrt (α^2+η)+α)=Real.arccos
+      (x/Real.sqrt (1+α^2))+α/2*Real.log
+      ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2)))
 
 /-- DLMF 14.20.21: the variable `η(α, x)`, chosen as a positive solution of the relation
 `ConicalEtaRelation α x η` (and characterized as the unique one by `conicalEta_spec`). -/
@@ -157,12 +165,15 @@ theorem conE_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (conE_L α) atT
 defining relation 14.20.21, and is the unique positive solution of that relation. -/
 @[dlmf 14.20.E21]
 theorem conicalEta_spec {α x : ℝ} (hα : 0 ≤ α) (hx : x ∈ Ioo (-1:ℝ) 1) :
-    0 < conicalEta α x ∧ ConicalEtaRelation α x (conicalEta α x) ∧ ∀ η : ℝ, 0 < η → ConicalEtaRelation α x η → η=conicalEta α x := by
-  have hrel : ∀ η, ConicalEtaRelation α x η ↔ conE_L α η = Real.arccos (x/Real.sqrt (1+α^2))+α/2*Real.log ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2))) :=
+    0 < conicalEta α x ∧ ConicalEtaRelation α x (conicalEta α x) ∧ ∀ η : ℝ, 0 < η →
+        ConicalEtaRelation α x η → η=conicalEta α x := by
+  have hrel : ∀ η, ConicalEtaRelation α x η ↔ conE_L α η =
+      Real.arccos (x/Real.sqrt (1+α^2))+α/2*Real.log
+      ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2))) :=
     fun η => Iff.rfl
   have hex : ∃ η : ℝ, 0 < η ∧ ConicalEtaRelation α x η := by
     rcases hα.lt_or_eq with hα | hα
-    · obtain ⟨η, hη, h⟩ := dblZero_exists_eq_of_tendsto
+    · obtain ⟨η, hη, h⟩ := DoubleZeroSqrt.exists_eq_of_tendsto
         (fun η hη => (conE_hasDerivAt hα.le hη).continuousAt.continuousWithinAt)
         (conE_tendsto_zero hα) (conE_tendsto_atTop hα.le) _
       exact ⟨η, hη, (hrel η).2 h⟩
@@ -176,7 +187,8 @@ theorem conicalEta_spec {α x : ℝ} (hα : 0 ≤ α) (hx : x ∈ Ioo (-1:ℝ) 1
 
 /-- The right side of DLMF 14.20.21 as a function of `x`. -/
 noncomputable def conE_R (α x : ℝ) : ℝ :=
-  Real.arccos (x/Real.sqrt (1+α^2))+α/2*Real.log ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2)))
+  Real.arccos (x/Real.sqrt (1+α^2))+α/2*Real.log
+      ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2)))
 
 /-- The argument of the logarithm in DLMF 14.20.21 is positive. -/
 theorem conE_Q_pos {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
@@ -318,7 +330,8 @@ theorem conE_R_tendsto_one {α : ℝ} (hα : 0 < α) :
 /-- Mapping and endpoints in DLMF 14.20(viii). The hypothesis is `0 < α` (corrected
 2026-10-20): at `α = 0` the relation is `sqrt η = arccos x`, so `η → π^2` as `x → -1`. -/
 theorem conicalEta_mapping {α : ℝ} (hα : 0 < α) :
-    Set.BijOn (conicalEta α) (Ioo (-1:ℝ) 1) (Ioi 0) ∧ StrictAntiOn (conicalEta α) (Ioo (-1:ℝ) 1) ∧ Tendsto (conicalEta α) (𝓝[>] (-1:ℝ)) atTop ∧ Tendsto (conicalEta α) (𝓝[<] (1:ℝ)) (𝓝 0) := by
+    Set.BijOn (conicalEta α) (Ioo (-1:ℝ) 1) (Ioi 0) ∧ StrictAntiOn (conicalEta α) (Ioo (-1:ℝ) 1) ∧
+        Tendsto (conicalEta α) (𝓝[>] (-1:ℝ)) atTop ∧ Tendsto (conicalEta α) (𝓝[<] (1:ℝ)) (𝓝 0) := by
   have hE : ∀ x ∈ Ioo (-1:ℝ) 1, 0 < conicalEta α x ∧ conE_L α (conicalEta α x) = conE_R α x :=
     fun x hx => ⟨(conicalEta_spec hα.le hx).1, (conicalEta_spec hα.le hx).2.1⟩
   have hL := conE_strictMonoOn hα.le
@@ -372,7 +385,12 @@ theorem conicalEta_mapping {α : ℝ} (hα : 0 < α) :
 for `x ∈ [-1+δ, 1)` and `0 ≤ μ ≤ Aτ`. -/
 @[dlmf 14.20.E17]
 theorem conicalP_two_large_tau_uniform {A δ : ℝ} (hA : 0 < A) (hδ : 0 < δ) (hδ2 : δ < 2) :
-    (fun p : ℝ × ℝ × ℝ => let τ:=p.1; let μ:=p.2.1; let x:=p.2.2; let α:=conicalAlpha μ τ; let η:=conicalEta α x; conicalP τ μ x/(conicalSigma μ τ*((α^2+η)/(1+α^2-x^2):ℂ)^(1/4:ℂ)*besselI μ (τ*Real.sqrt η))-1) =O[legendreUniformFilter {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ico (-1+δ) 1 ∧ 0 ≤ p.2.1 ∧ p.2.1 ≤ A*p.1}] (fun p : ℝ × ℝ × ℝ => (p.1:ℂ)⁻¹) := by
+    (fun p : ℝ × ℝ × ℝ => let τ:=p.1; let μ:=p.2.1; let x:=p.2.2; let α:=conicalAlpha μ τ;
+        let η:=conicalEta α x;
+        conicalP τ μ x/(conicalSigma μ τ*((α^2+η)/(1+α^2-x^2):ℂ)^(1/4:ℂ)*besselI μ
+        (τ*Real.sqrt η))-1) =O[legendreUniformFilter
+        {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ico (-1+δ) 1 ∧ 0 ≤ p.2.1 ∧ p.2.1 ≤ A*p.1}]
+        (fun p : ℝ × ℝ × ℝ => (p.1:ℂ)⁻¹) := by
   sorry
 
 /-- DLMF 14.20.18: for `A > 0` and `0 < δ < 2`, with `α = μ/τ` and `η = η(α, x)`,
@@ -380,7 +398,12 @@ theorem conicalP_two_large_tau_uniform {A δ : ℝ} (hA : 0 < A) (hδ : 0 < δ) 
 for `x ∈ [-1+δ, 1)` and `0 ≤ μ ≤ Aτ`. -/
 @[dlmf 14.20.E18]
 theorem conicalQHat_two_large_tau_uniform {A δ : ℝ} (hA : 0 < A) (hδ : 0 < δ) (hδ2 : δ < 2) :
-    (fun p : ℝ × ℝ × ℝ => let τ:=p.1; let μ:=p.2.1; let x:=p.2.2; let α:=conicalAlpha μ τ; let η:=conicalEta α x; conicalQHat τ μ x/(conicalSigma μ τ*((α^2+η)/(1+α^2-x^2):ℂ)^(1/4:ℂ)*besselK μ (τ*Real.sqrt η))-1) =O[legendreUniformFilter {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ico (-1+δ) 1 ∧ 0 ≤ p.2.1 ∧ p.2.1 ≤ A*p.1}] (fun p : ℝ × ℝ × ℝ => (p.1:ℂ)⁻¹) := by
+    (fun p : ℝ × ℝ × ℝ => let τ:=p.1; let μ:=p.2.1; let x:=p.2.2; let α:=conicalAlpha μ τ;
+        let η:=conicalEta α x;
+        conicalQHat τ μ x/(conicalSigma μ τ*((α^2+η)/(1+α^2-x^2):ℂ)^(1/4:ℂ)*besselK μ
+        (τ*Real.sqrt η))-1) =O[legendreUniformFilter
+        {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ico (-1+δ) 1 ∧ 0 ≤ p.2.1 ∧ p.2.1 ≤ A*p.1}]
+        (fun p : ℝ × ℝ × ℝ => (p.1:ℂ)⁻¹) := by
   sorry
 
 /-- DLMF 14.20.23: the ratio `β = τ/μ` used in the uniform large-`μ` asymptotics of conical
@@ -393,7 +416,8 @@ def conicalBeta (μ τ : ℝ) : ℝ :=
 arctan(βx/√(1+β²-β²x²)) - (1/2) ln(1+β²)` of the uniform conical-function asymptotics. -/
 @[dlmf 14.20.E24]
 def conicalRho (β x : ℝ) : ℝ :=
-  Real.log (((1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2))/(1-x^2))/2+β*Real.arctan (β*x/Real.sqrt (1+β^2-β^2*x^2))-Real.log (1+β^2)/2
+  Real.log (((1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2))/(1-x^2))/2+β*Real.arctan
+      (β*x/Real.sqrt (1+β^2-β^2*x^2))-Real.log (1+β^2)/2
 
 /-- `ρ'(x) = √(1+β²-β²x²)/(1-x²)` on `(-1, 1)`. -/
 theorem conR_hasDerivAt (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
@@ -537,7 +561,9 @@ theorem conR_tendsto_neg_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[>] (-1:�
 
 /-- Mapping and endpoints in DLMF 14.20(ix). -/
 theorem conicalRho_mapping (β : ℝ) :
-    Set.BijOn (conicalRho β) (Ioo (-1:ℝ) 1) univ ∧ StrictMonoOn (conicalRho β) (Ioo (-1:ℝ) 1) ∧ conicalRho β 0=0 ∧ Tendsto (conicalRho β) (𝓝[>] (-1:ℝ)) atBot ∧ Tendsto (conicalRho β) (𝓝[<] (1:ℝ)) atTop := by
+    Set.BijOn (conicalRho β) (Ioo (-1:ℝ) 1) univ ∧ StrictMonoOn (conicalRho β) (Ioo (-1:ℝ) 1) ∧
+        conicalRho β 0=0 ∧ Tendsto (conicalRho β) (𝓝[>] (-1:ℝ)) atBot ∧
+        Tendsto (conicalRho β) (𝓝[<] (1:ℝ)) atTop := by
   have hcont : ContinuousOn (conicalRho β) (Ioo (-1:ℝ) 1) :=
     fun x hx => (conR_hasDerivAt β hx).continuousAt.continuousWithinAt
   have hmono : StrictMonoOn (conicalRho β) (Ioo (-1:ℝ) 1) := by
@@ -569,7 +595,11 @@ theorem conicalRho_mapping (β : ℝ) :
 `x ∈ (-1, 1)` and `0 ≤ τ ≤ Aμ`. -/
 @[dlmf 14.20.E22]
 theorem conicalP_two_large_mu_uniform {A : ℝ} (hA : 0 < A) :
-    (fun p : ℝ × ℝ × ℝ => let μ:=p.1; let τ:=p.2.1; let x:=p.2.2; let β:=conicalBeta μ τ; conicalP τ μ x/(exp (μ*β*Real.arctan β)/(Gamma (μ+1)*(1+β^2:ℂ)^((μ:ℂ)/2))*exp (-μ*conicalRho β x)/(1+β^2-x^2*β^2:ℂ)^(1/4:ℂ))-1) =O[legendreUniformFilter {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ioo (-1:ℝ) 1 ∧ 0 ≤ p.2.1 ∧ p.2.1 ≤ A*p.1}] (fun p : ℝ × ℝ × ℝ => (p.1:ℂ)⁻¹) := by
+    (fun p : ℝ × ℝ × ℝ => let μ:=p.1; let τ:=p.2.1; let x:=p.2.2; let β:=conicalBeta μ τ;
+        conicalP τ μ x/(exp (μ*β*Real.arctan β)/(Gamma (μ+1)*(1+β^2:ℂ)^((μ:ℂ)/2))*exp
+        (-μ*conicalRho β x)/(1+β^2-x^2*β^2:ℂ)^(1/4:ℂ))-1)
+        =O[legendreUniformFilter {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ioo (-1:ℝ) 1 ∧ 0 ≤ p.2.1 ∧ p.2.1 ≤ A*p.1}]
+        (fun p : ℝ × ℝ × ℝ => (p.1:ℂ)⁻¹) := by
   sorry
 
 end DLMF.Legendre

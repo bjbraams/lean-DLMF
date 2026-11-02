@@ -100,7 +100,8 @@ theorem legFS_log_sub_one_lim {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) {x : ℝ} (h
         show _ < 0; rw [himε]; have : (0:ℝ) < ε := hε; linarith⟩
     have h := hc.comp hp'
     rw [hnorm] at h
-    have e : (Real.log (1-x) : ℂ) + ((-1:ℝ):ℂ)*π*I = (Real.log (1-x) : ℂ) - π*I := by push_cast; ring
+    have e : (Real.log (1-x) : ℂ) + ((-1:ℝ):ℂ)*π*I = (Real.log (1-x) : ℂ) - π*I :=
+        by push_cast; ring
     rw [e]; exact h
 
 
@@ -140,7 +141,8 @@ theorem legFS_zeta_lim {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) {θ : ℝ} (h0 : 0 
       ← ofReal_exp, hsq, Real.sqrt_eq_rpow, Real.rpow_def_of_pos (by nlinarith)]
     rw [show Real.log (1 - x^2) * (1/2) = Real.log (1 - x^2)/2 by ring]
     rcases hσ with rfl | rfl
-    · push_cast; rw [show (1:ℂ)*π/2*I = (π/2:ℂ)*I by ring, exp_mul_I, cos_pi_div_two, sin_pi_div_two]
+    · push_cast; rw [show (1:ℂ)*π/2*I = (π/2:ℂ)*I by ring, exp_mul_I, cos_pi_div_two,
+                                                       sin_pi_div_two]
       ring
     · push_cast; rw [show (-1:ℂ)*π/2*I = (-(π/2):ℂ)*I by ring, exp_mul_I, cos_neg, sin_neg,
         cos_pi_div_two, sin_pi_div_two]
@@ -183,7 +185,8 @@ theorem legFS_one_sub_exp_sq {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℝ) :
 
 
 /-- DLMF 14.13 (unnumbered) for real side `s = ±1`:
-`s(πi/2) 𝖯^μ_ν(cos θ) + 𝖰^μ_ν(cos θ) = √π Γ(ν+μ+1) (2 sin θ)^μ e^{s(ν+μ+1)iθ} 𝐅(ν+μ+1, μ+1/2; ν+3/2; e^{2isθ})`. -/
+`s(πi/2) 𝖯^μ_ν(cos θ) + 𝖰^μ_ν(cos θ) = √π Γ(ν+μ+1) (2 sin θ)^μ e^{s(ν+μ+1)iθ} 𝐅(ν+μ+1, μ+1/2; ν+3/2;
+e^{2isθ})`. -/
 theorem legFS_PQ_hyp (ν μ : ℂ) (hr : LegendreQRegular ν μ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π)
     {s : ℝ} (hs : s = 1 ∨ s = -1) :
     (s:ℂ)*π*I/2*ferrersP ν μ (Real.cos θ) + ferrersQ ν μ (Real.cos θ) =
@@ -380,7 +383,8 @@ theorem legFS_tannery (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
 theorem legFS_cfContinuants_eq {a b : ℕ → ℂ} {K : ℕ} (ha : ∀ k, 1 ≤ k → k < K → a k ≠ 0)
     (n : ℕ) (hn : n ≤ K) :
     DLMF.cfContinuants a b 0 n =
-      ((GenContFract.cfConv_ofFun 0 a b).nums n, (GenContFract.cfConv_ofFun 0 a b).dens n, false) := by
+      ((GenContFract.cfConv_ofFun 0 a b).nums n,
+          (GenContFract.cfConv_ofFun 0 a b).dens n, false) := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     rcases n with _ | _ | n
@@ -398,7 +402,8 @@ theorem legFS_cfTail_freeze {a b : ℕ → ℂ} {K : ℕ} (hK : 1 ≤ K)
     (ha : ∀ k, 1 ≤ k → k < K → a k ≠ 0) (haK : a K = 0) {N : ℕ} (hN : K ≤ N) :
     DLMF.cfTail a b 0 N = (GenContFract.cfConv_ofFun 0 a b).convs K := by
   have hfr : ∀ j, DLMF.cfContinuants a b 0 (K + 1 + j) =
-      ((GenContFract.cfConv_ofFun 0 a b).nums K, (GenContFract.cfConv_ofFun 0 a b).dens K, true) := by
+      ((GenContFract.cfConv_ofFun 0 a b).nums K,
+          (GenContFract.cfConv_ofFun 0 a b).dens K, true) := by
     intro j
     induction j with
     | zero =>
@@ -502,7 +507,8 @@ theorem legTr_integrableOn_kernel {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re 
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one,
     integrableOn_Ioc_iff_integrableOn_Ioo] at hg
   obtain ⟨hI, -⟩ := legInt_hs_cov hg
-  refine IntegrableOn.congr_fun (hI.const_mul (2^(2*μ) * (legInt_zeta z)^(ν+μ+1))) ?_ measurableSet_Ioi
+  refine IntegrableOn.congr_fun (hI.const_mul (2^(2*μ) * (legInt_zeta z)^(ν+μ+1))) ?_
+      measurableSet_Ioi
   intro t ht
   exact (legInt_kernel_Q (ν := ν) (μ := μ) hz ht).symm
 
@@ -591,7 +597,8 @@ theorem legTr_side {ν μ : ℂ} (hμ : -1/2 < μ.re) (ha : 0 < (ν+μ+1).re) (h
     (‖(Real.sinh t:ℂ)^(2*μ)‖*(W3 t)^(-a.re)) with hB
   have hK3 := legTr_integrableOn_kernel (ν:=ν) (μ:=μ) hμ h1 (z := 3) (Or.inl (by norm_num))
   have hBint : IntegrableOn B (Ioi 0) := by
-    refine IntegrableOn.congr_fun (Integrable.const_mul hK3.norm (‖c‖*(‖P‖+1)*Real.exp (π*|a.im|)*κ^(-a.re)))
+    refine IntegrableOn.congr_fun (Integrable.const_mul hK3.norm
+        (‖c‖*(‖P‖+1)*Real.exp (π*|a.im|)*κ^(-a.re)))
       (fun t _ => ?_) measurableSet_Ioi
     simp only [B]
     congr 1
@@ -637,7 +644,8 @@ theorem legTr_side {ν μ : ℂ} (hμ : -1/2 < μ.re) (ha : 0 < (ν+μ+1).re) (h
           gcongr
           exact hinv.trans (mul_le_mul_of_nonneg_left hpow (by positivity))
       _ = B t := by simp only [B]; ring
-  have hlim_pt : ∀ t : ℝ, Tendsto (fun ε => F ε t) (𝓝[>] (0:ℝ)) (𝓝 (legTr_sideKernel ν μ σ θ t)) := by
+  have hlim_pt : ∀ t : ℝ,
+      Tendsto (fun ε => F ε t) (𝓝[>] (0:ℝ)) (𝓝 (legTr_sideKernel ν μ σ θ t)) := by
     intro t
     have hw : Tendsto (fun ε => z ε + legInt_root (z ε) * Real.cosh t) (𝓝[>] (0:ℝ))
         (𝓝 ((x:ℂ) + (σ:ℂ)*I*(Real.sin θ:ℂ)*Real.cosh t)) := hpath.add (hroot.mul_const _)
@@ -696,7 +704,8 @@ theorem legTr_side_exp (μ : ℂ) {σ : ℝ} {θ : ℝ} (hθ : 0 < θ) (hπ : θ
     norm_num
   rw [cpow_def_of_ne_zero (by exact_mod_cast hs.ne'), ← ofReal_log hs.le, ← exp_add]
   congr 1
-  have hl' : (Real.log (1-Real.cos θ):ℂ) + (Real.log (1+Real.cos θ):ℂ) = 2*(Real.log (Real.sin θ):ℂ) := by
+  have hl' : (Real.log (1-Real.cos θ):ℂ) + (Real.log (1+Real.cos θ):ℂ) =
+      2*(Real.log (Real.sin θ):ℂ) := by
     exact_mod_cast hl
   linear_combination μ/2*hl'
 
@@ -706,8 +715,12 @@ Moved here from `DLMF.Legendre.IntegralRepresentations` (round 13): the proof ta
 boundary values of DLMF 14.25.2 at `cos θ ± i0` (`olverQ_boundary_upper`/`lower`) under
 dominated convergence. -/
 @[dlmf 14.12.E3]
-theorem ferrersQ_complex_integral {ν μ : ℂ} (hμ : -1/2 < μ.re) (h0 : -1 < (ν+μ).re) (h1 : -1 < (ν-μ).re) {θ : ℝ} (hθ : 0 < θ) (hπ : θ < π) :
-    HasIntegralAtTop (fun t : ℝ => Real.sqrt π*Gamma (ν+μ+1)*(Real.sin θ:ℂ)^μ/(2^(μ+1)*Gamma (μ+1/2)*Gamma (ν-μ+1))*(Real.sinh t:ℂ)^(2*μ)*(1/(Real.cos θ+I*Real.sin θ*Real.cosh t)^(ν+μ+1)+1/(Real.cos θ-I*Real.sin θ*Real.cosh t)^(ν+μ+1))) 0 (ferrersQ ν μ (Real.cos θ)) := by
+theorem ferrersQ_complex_integral {ν μ : ℂ} (hμ : -1/2 < μ.re) (h0 : -1 < (ν+μ).re)
+    (h1 : -1 < (ν-μ).re) {θ : ℝ} (hθ : 0 < θ) (hπ : θ < π) :
+    HasIntegralAtTop (fun t : ℝ =>
+        Real.sqrt π*Gamma (ν+μ+1)*(Real.sin θ:ℂ)^μ/(2^(μ+1)*Gamma (μ+1/2)*Gamma (ν-μ+1))*(Real.sinh
+        t:ℂ)^(2*μ)*(1/(Real.cos θ+I*Real.sin θ*Real.cosh t)^(ν+μ+1)+1/(Real.cos θ-I*Real.sin
+        θ*Real.cosh t)^(ν+μ+1))) 0 (ferrersQ ν μ (Real.cos θ)) := by
   have ha : 0 < (ν+μ+1).re := by simp at h0 ⊢; linarith
   have h1' : μ.re < (ν+1).re := by simp at h1 ⊢; linarith
   obtain ⟨hIp, hTp⟩ := legTr_side hμ ha h1' (σ := 1) (Or.inl rfl) hθ hπ
@@ -729,16 +742,24 @@ theorem ferrersQ_complex_integral {ν μ : ℂ} (hμ : -1/2 < μ.re) (h0 : -1 < 
   have e2 : exp ((-1:ℂ)*μ*π*I/2) = E⁻¹ := by rw [hE, ← exp_neg]; ring_nf
   have e3 : exp (-μ*π*I/2) = E⁻¹ := by rw [hE, ← exp_neg]; ring_nf
   have e1' : exp (((1:ℝ):ℂ)*μ*π*I/2) = E := by rw [ofReal_one]; exact e1
-  have e2' : exp (((-1:ℝ):ℂ)*μ*π*I/2) = E⁻¹ := by rw [show ((-1:ℝ):ℂ) = -1 by push_cast; ring]; exact e2
+  have e2' : exp (((-1:ℝ):ℂ)*μ*π*I/2) = E⁻¹ := by
+                                                 rw [show ((-1:ℝ):ℂ) = -1 by push_cast;
+                                                                             ring]; exact e2
   have h2 : (2:ℂ)^(μ+1) = 2^μ*2 := by rw [cpow_add _ _ two_ne_zero, cpow_one]
-  have hfun : (fun t : ℝ => Real.sqrt π*Gamma (ν+μ+1)*(Real.sin θ:ℂ)^μ/(2^(μ+1)*Gamma (μ+1/2)*Gamma (ν-μ+1))*(Real.sinh t:ℂ)^(2*μ)*(1/(Real.cos θ+I*Real.sin θ*Real.cosh t)^(ν+μ+1)+1/(Real.cos θ-I*Real.sin θ*Real.cosh t)^(ν+μ+1))) =
-      fun t => Gamma (ν+μ+1)/2*(E⁻¹*legTr_sideKernel ν μ 1 θ t + E*legTr_sideKernel ν μ (-1) θ t) := by
+  have hfun : (fun t : ℝ =>
+      Real.sqrt π*Gamma (ν+μ+1)*(Real.sin θ:ℂ)^μ/(2^(μ+1)*Gamma (μ+1/2)*Gamma (ν-μ+1))*(Real.sinh
+      t:ℂ)^(2*μ)*(1/(Real.cos θ+I*Real.sin θ*Real.cosh t)^(ν+μ+1)+1/(Real.cos θ-I*Real.sin
+      θ*Real.cosh t)^(ν+μ+1))) =
+      fun t => Gamma (ν+μ+1)/2*(E⁻¹*legTr_sideKernel ν μ 1 θ t +
+          E*legTr_sideKernel ν μ (-1) θ t) := by
     funext t
     unfold legTr_sideKernel
     rw [legTr_side_exp μ hθ hπ, legTr_side_exp μ hθ hπ, e1', e2',
-      show (Real.cos θ:ℂ)+((1:ℝ):ℂ)*I*(Real.sin θ:ℂ)*Real.cosh t = Real.cos θ+I*Real.sin θ*Real.cosh t by
+      show (Real.cos θ:ℂ)+((1:ℝ):ℂ)*I*(Real.sin θ:ℂ)*Real.cosh t =
+          Real.cos θ+I*Real.sin θ*Real.cosh t by
         push_cast; ring,
-      show (Real.cos θ:ℂ)+((-1:ℝ):ℂ)*I*(Real.sin θ:ℂ)*Real.cosh t = Real.cos θ-I*Real.sin θ*Real.cosh t by
+      show (Real.cos θ:ℂ)+((-1:ℝ):ℂ)*I*(Real.sin θ:ℂ)*Real.cosh t =
+          Real.cos θ-I*Real.sin θ*Real.cosh t by
         push_cast; ring, h2]
     field_simp
   rw [hfun]

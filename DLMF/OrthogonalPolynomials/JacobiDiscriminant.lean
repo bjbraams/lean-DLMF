@@ -454,7 +454,8 @@ variable {α β : ℝ}
 
 /-- The discriminant expressed through the resultant-type product `SS`. -/
 def discRootProdForm (a b : ℂ) (n : ℕ) : ℂ :=
-  (-1) ^ ((n + 1).choose 2) * (2 * ((n : ℂ) + a + 1) * ((n : ℂ) + b + 1)) ^ (n + 1) * rootProd a b n *
+  (-1) ^ ((n + 1).choose 2) * (2 * ((n : ℂ) + a + 1) * ((n : ℂ) + b + 1)) ^ (n + 1) *
+      rootProd a b n *
       (((n + 1)! : ℕ) : ℂ) ^ 2 * kk a b (n + 1) ^ 2 /
     ((2 * (n : ℂ) + a + b + 2) ^ (n + 1) * poch (a + 1) (n + 1) * poch (b + 1) (n + 1) *
       kk a b (n + 1) ^ (n + 1))
@@ -464,7 +465,8 @@ theorem discRootProdForm_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     discRootProdForm α β (n + 1) = discRootProdForm α β n * ratioR α β n := by
   have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   have h := disc_step_algebra n (K := kk α β (n + 1)) (K2 := kk α β (n + 2))
-    (S0 := rootProd α β n) (S1 := rootProd α β (n + 1)) (u1 := (n : ℂ) + α + 1) (v1 := (n : ℂ) + β + 1)
+    (S0 := rootProd α β n) (S1 := rootProd α β (n + 1)) (u1 := (n : ℂ) + α + 1)
+        (v1 := (n : ℂ) + β + 1)
     (c1 := 2 * (n : ℂ) + α + β + 2) (u2 := ((n + 1 : ℕ) : ℂ) + α + 1)
     (v2 := ((n + 1 : ℕ) : ℂ) + β + 1) (c2 := 2 * ((n + 1 : ℕ) : ℂ) + α + β + 2)
     (d := 2 * (n : ℂ) + α + β + 3) (e := (n : ℂ) + α + β + 2) (n2 := ((n + 1 + 1 : ℕ) : ℂ))
@@ -505,7 +507,8 @@ theorem discRootProdForm_zero (hα : -1 < α) (hβ : -1 < β) : discRootProdForm
   field_simp
 
 /-- `EE α β n = Fr α β (n + 1)`, by induction. -/
-theorem discRootProdForm_eq_discClosedForm (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : discRootProdForm α β n = discClosedForm α β (n + 1) := by
+theorem discRootProdForm_eq_discClosedForm (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : discRootProdForm α
+    β n = discClosedForm α β (n + 1) := by
   induction n with
   | zero => rw [discRootProdForm_zero hα hβ]; simp [discClosedForm]
   | succ n ih => rw [discRootProdForm_succ hα hβ, ih, discClosedForm_succ hα hβ]
@@ -651,7 +654,8 @@ theorem jacobiPolyP_prod_sq_sub {α β : ℝ} {n : ℕ} (hn : n ≠ 0)
             ((j : ℂ) + 1 + β) ^ j.val /
             ((n : ℂ) + j + 1 + α + β) ^ (n + j.val - 1) := by
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hn
-  rw [JacobiDisc.disc_eq_discRootProdForm hα hβ m x hroot hinj, JacobiDisc.discRootProdForm_eq_discClosedForm hα hβ m, JacobiDisc.discClosedForm]
+  rw [JacobiDisc.disc_eq_discRootProdForm hα hβ m x hroot hinj,
+      JacobiDisc.discRootProdForm_eq_discClosedForm hα hβ m, JacobiDisc.discClosedForm]
   congr 1
   exact (Fin.prod_univ_eq_prod_range (fun j : ℕ => ((j : ℂ) + 1) ^ (j + 1) *
     ((j : ℂ) + 1 + α) ^ j * ((j : ℂ) + 1 + β) ^ j /

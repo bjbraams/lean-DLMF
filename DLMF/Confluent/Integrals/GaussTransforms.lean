@@ -256,7 +256,8 @@ theorem confLP_gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
   rw [show ∀ X Y Z : ℂ, X * (Y * X⁻¹ * Z) = X * X⁻¹ * (Y * Z) by intros; ring,
     mul_inv_cancel₀ hne, one_mul]
 
-/-- The outer `u`-integral of 13.10.6: after `u = 1/v` it is Tricomi's Gauss-type integral 13.4.8. -/
+/-- The outer `u`-integral of 13.10.6: after `u = 1/v` it is Tricomi's Gauss-type integral 13.4.8.
+-/
 theorem confLP_gauss_outer {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
     ∫ u : ℝ in Ioi 0, exp (-(ζ : ℂ) ^ 2 / (4 * u)) * (u : ℂ) ^ (-(3 / 2 : ℂ)) *
         ((u : ℂ) ^ (-(b - 1 / 2)) *
@@ -506,7 +507,8 @@ theorem gauss_regularizedHGFun {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0
       · left; rw [hre, hy]; nlinarith
       · right; rw [him]; exact div_ne_zero (mul_ne_zero (mul_ne_zero two_ne_zero hw0.ne') hy)
           (by norm_num)
-    exact (((differentiableAt_kummerU (b - 1 / 2) (a + 1 / 2) hw').comp (f := fun z : ℂ => z ^ 2 / 4) w
+    exact (((differentiableAt_kummerU (b - 1 / 2) (a + 1 / 2) hw').comp
+        (f := fun z : ℂ => z ^ 2 / 4) w
       (by fun_prop)).const_mul
       ((1 / 2) * (π : ℂ) ^ (-(1 / 2 : ℂ)) * Gamma (b - 1 / 2))).differentiableWithinAt
   have hfreq : ∃ᶠ w in 𝓝[≠] ((1 : ℝ) : ℂ), (fun z : ℂ => ∫ t : ℝ in Ioi 0,

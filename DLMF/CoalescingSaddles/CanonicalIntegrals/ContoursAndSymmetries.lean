@@ -45,17 +45,20 @@ private lemma integral_airyInt_osc_ray_pi_div_six (x : ℝ) :
   exact setIntegral_congr_fun measurableSet_Ioi fun r _ => DLMF.Airy.airyInt_osc_rotate x r
 
 /-- For `K = 1` the sign flip `x_m ↦ (-1)^m x_m` is the identity. -/
-private lemma alternating_sign_vecCons_one (x : ℝ) : (fun m : Fin 1 => (-1 : ℝ) ^ (m : ℕ) * ![x] m) = ![x] := by
+private lemma alternating_sign_vecCons_one (x : ℝ) :
+    (fun m : Fin 1 => (-1 : ℝ) ^ (m : ℕ) * ![x] m) = ![x] := by
   funext m; rw [Fin.fin_one_eq_zero m]; simp
 
 /-- For odd `K` and `r > 0`, the integrand at `-r` is the conjugate of the integrand at `r` with
 the parameters `x'_m = (-1)^m x_m`. -/
-private lemma cuspoidContourIntegrand_neg_of_odd {K : ℕ} (hK : ¬ Even K) (x : Fin K → ℝ) {r : ℝ} (hr : 0 < r) :
+private lemma cuspoidContourIntegrand_neg_of_odd {K : ℕ} (hK : ¬ Even K) (x : Fin K → ℝ)
+    {r : ℝ} (hr : 0 < r) :
     cuspoidContourDir K (-r) * exp (I * cuspoidPotential K (cuspoidContour K (-r)) x) =
       conj (cuspoidContourDir K r *
         exp (I * cuspoidPotential K (cuspoidContour K r) (fun m => (-1) ^ (m : ℕ) * x m))) := by
   have hd : conj (cuspoidContourDir K r) = cuspoidContourDir K (-r) := by
-    rw [cuspoidContourDir_of_nonneg K hr.le, cuspoidContourDir_of_odd_of_neg hK (by linarith), ← exp_conj]
+    rw [cuspoidContourDir_of_nonneg K hr.le,
+        cuspoidContourDir_of_odd_of_neg hK (by linarith), ← exp_conj]
     congr 1; simp [conj_ofReal]
   have hc : cuspoidContour K (-r) = -conj (cuspoidContour K r) := by
     simp only [cuspoidContour, map_mul, conj_ofReal, hd]; push_cast; ring
@@ -85,7 +88,8 @@ theorem cuspoidIntegral_one (x : ℝ) :
     have h1 : ∀ r ∈ Ioi (0 : ℝ),
         f r = (fun ρ : ℝ => u * DLMF.Airy.airyInt_osc (x / a) (ρ * u)) (a * r) := by
       intro r hr
-      simp only [hf, cuspoidContour, cuspoidContourDir_of_nonneg 1 (le_of_lt hr), hθ, cuspoidPotential,
+      simp only [hf, cuspoidContour, cuspoidContourDir_of_nonneg 1 (le_of_lt hr), hθ,
+          cuspoidPotential,
         DLMF.Airy.airyInt_osc, Fin.sum_univ_one]
       congr 2
       simp only [Matrix.cons_val_fin_one, Fin.val_zero, zero_add, pow_one]

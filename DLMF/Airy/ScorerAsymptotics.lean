@@ -167,7 +167,8 @@ theorem scorerTwo_half {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0
     rw [hωc, norm_neg, norm_exp_ofReal_mul_I]
   have hω0 : ω ≠ 0 := by rw [hω]; exact exp_ne_zero _
   -- Hi part
-  have T1' : Tendsto (fun z : ℂ => z * ω) F (comap (fun z : ℂ => -z) (airySector (2 * π / 3 - δ))) :=
+  have T1' : Tendsto (fun z : ℂ => z * ω) F
+      (comap (fun z : ℂ => -z) (airySector (2 * π / 3 - δ))) :=
     tendsto_comap_iff.mpr (T1.congr fun z => by simp only [Function.comp_apply, hωc]; ring)
   have h1 := (scorerAsym_scorerHi_isBigO (α := 2 * π / 3 - δ) (by linarith) (by linarith)
     N).comp_tendsto T1'
@@ -177,7 +178,8 @@ theorem scorerTwo_half {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0
       (fun z => ‖z‖ ^ (-(3 * N + 1 : ℤ)) + ‖airyPrefactor .bi z / airyZetaComplex z ^ M‖) := by
     refine IsBigO.of_bound 1 (Eventually.of_forall fun z => ?_)
     rw [one_mul, norm_inv, norm_pow, norm_mul, hωn, mul_one, Real.norm_of_nonneg (by positivity)]
-    rw [zpow_neg, show ((3 * N + 1 : ℤ)) = ((3 * N + 0 + 1 : ℕ) : ℤ) by push_cast; ring, zpow_natCast]
+    rw [zpow_neg, show ((3 * N + 1 : ℤ)) = ((3 * N + 0 + 1 : ℕ) : ℤ) by push_cast;
+                                                                        ring, zpow_natCast]
     exact le_add_of_nonneg_right (norm_nonneg _)
   have hpref : ∀ z : ℂ, z ≠ 0 → |arg z| ≤ π - δ → 0 ≤ ε * arg z →
       C * airyPrefactor .ai (z * exp (d * I)) = airyPrefactor .bi z ∧
@@ -196,7 +198,8 @@ theorem scorerTwo_half {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0
       rw [← p1]; field_simp [show C ≠ 0 by rw [← norm_ne_zero_iff, hCn]; norm_num]
     have e : ‖airyPrefactor .bi z / C / (-airyZetaComplex z) ^ M‖ =
         ‖airyPrefactor .bi z / airyZetaComplex z ^ M‖ / 2 := by
-      rw [neg_pow, norm_div, norm_div, hCn, norm_mul, norm_pow, norm_pow, norm_neg, norm_one, one_pow,
+      rw [neg_pow, norm_div, norm_div, hCn, norm_mul, norm_pow, norm_pow, norm_neg,
+          norm_one, one_pow,
         one_mul, norm_div, norm_pow]; ring
     rw [one_mul, Real.norm_of_nonneg (by positivity), this, p2, e]
     have h0 : 0 ≤ ‖z‖ ^ (-(3 * N + 1 : ℤ)) := by positivity
@@ -213,7 +216,8 @@ theorem scorerTwo_half {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0
   have hsum : airyExponentialSum .ai M (z * exp (d * I)) = airyExponentialSum .bi M z := by
     simp only [airyExponentialSum, airyExpansionCoeff, p2]
     refine Finset.sum_congr rfl fun k _ => ?_
-    rw [neg_pow (airyZetaComplex z), mul_div_mul_left _ _ (pow_ne_zero k (neg_ne_zero.2 one_ne_zero))]
+    rw [neg_pow (airyZetaComplex z),
+        mul_div_mul_left _ _ (pow_ne_zero k (neg_ne_zero.2 one_ne_zero))]
   have hz3 : (z * ω) ^ 3 = z ^ 3 := by rw [mul_pow, hω3, mul_one]
   rw [mul_sub, mul_sub, ← mul_assoc C, p1, hsum, hz3]
   have hzπ : (π : ℂ) * z ≠ 0 := mul_ne_zero (ofReal_ne_zero.mpr hπ.ne') hz0
@@ -523,7 +527,8 @@ theorem scorerPrim_primitive_ofReal {x : ℝ} (hx : 0 < x) :
   congr 1
   -- Fubini
   set f : ℝ → ℝ → ℝ := fun u v => Real.exp (-(v ^ 3 / 3)) * Real.exp (-(u * v))
-  have hint : Integrable (Function.uncurry f) ((volume.restrict (Ioc 0 x)).prod (volume.restrict (Ioi 0))) := by
+  have hint : Integrable (Function.uncurry f)
+      ((volume.restrict (Ioc 0 x)).prod (volume.restrict (Ioi 0))) := by
     have hb : Integrable (fun z : ℝ × ℝ => (1 : ℝ) * Real.exp (-(z.2 ^ 3 / 3)))
         ((volume.restrict (Ioc 0 x)).prod (volume.restrict (Ioi 0))) :=
       (integrable_const (1 : ℝ)).mul_prod scorerPrim_integrableOn_exp_cube

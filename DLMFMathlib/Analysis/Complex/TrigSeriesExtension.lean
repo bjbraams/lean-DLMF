@@ -47,7 +47,8 @@ theorem hasFPowerSeriesOnBall_of_hasSum_ball {a : ℕ → ℂ} {f : ℂ → ℂ}
       (ρ : ENNReal) := by
   refine ⟨?_, by exact_mod_cast hρ, ?_⟩
   · apply FormalMultilinearSeries.le_radius_of_summable_norm
-    have h := (hf ((ρ : ℝ) : ℂ) (by simpa [Real.norm_of_nonneg ρ.coe_nonneg] using hρR)).summable.norm
+    have h := (hf ((ρ : ℝ) : ℂ)
+        (by simpa [Real.norm_of_nonneg ρ.coe_nonneg] using hρR)).summable.norm
     simpa [FormalMultilinearSeries.ofScalars_norm, norm_mul, norm_pow,
       Complex.norm_real, Real.norm_of_nonneg ρ.coe_nonneg] using h
   · intro w hw

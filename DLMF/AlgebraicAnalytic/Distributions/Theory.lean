@@ -24,7 +24,8 @@ Theorems of DLMF §1.16 that are not already in Mathlib (the upstream pointers a
 * `deriv_heaviside` (1.16.15), `deriv_heaviside_shift` (1.16.16), `stieltjes_eq_deriv`
   (1.16.9_5), `delta_not_regular` (§1.16(iii)).
 * `iterDeriv_piecewise`: the jump formula (1.16.17–1.16.18).
-* `deriv_xPlusRpow` (1.16.20), `xPlusDistrib_eq_iterDeriv` (1.16.21),
+* `deriv_xPlusRpow` (1.16.20) and its iterate `distribIterDeriv_xPlusRpow`,
+  `xPlusDistrib_eq_iterDeriv` (1.16.21),
   `factorial_smul_xPlusDistrib` (1.16.23).
 * `sign_eq_two_mul_heaviside_sub_one` (1.16.44), `deriv_sign` (1.16.45).
 * `dlmfFourierSchwartz_apply` (1.16.29), `dlmfFourierSchwartz_polyDiffOp`,
@@ -191,7 +192,8 @@ theorem deriv_sign : ∂_{(1 : ℝ)} (lineDistrib Real.sign) = (2 : ℝ) • Dis
       Distribution.ofFun_smul, Distribution.ofFun_neg, sub_eq_add_neg]
     rfl
   rw [h2, sub_eq_add_neg, LineDeriv.lineDerivOp_add, LineDeriv.lineDerivOp_neg,
-    LineDeriv.lineDerivOp_smul, deriv_heaviside_shift, lineDerivOp_lineDistrib_const, neg_zero, add_zero]
+    LineDeriv.lineDerivOp_smul, deriv_heaviside_shift, lineDerivOp_lineDistrib_const,
+        neg_zero, add_zero]
 
 /-! ## §1.16(i): products, convergence, Stieltjes measures -/
 
@@ -280,20 +282,135 @@ theorem iterDeriv_piecewise {f g h : ℝ → ℝ} {x₀ : ℝ} (hg : ContDiff �
         distribIterDeriv (m - 1 - k) (Distribution.delta x₀) := by
   sorry
 
+/-- `x₊^β` is locally integrable for `β > -1`. -/
+private lemma locallyIntegrable_xPlusRpow {β : ℝ} (hβ : -1 < β) :
+    LocallyIntegrable (xPlusRpow β) volume := by
+  rw [locallyIntegrable_iff]
+  intro K hK
+  obtain ⟨a, ha⟩ := hK.bddBelow
+  obtain ⟨b, hb⟩ := hK.bddAbove
+  have hsub : K ⊆ Iic 0 ∪ Ioc 0 (max b 0) := by
+    intro x hx
+    rcases le_or_gt x 0 with h | h
+    · exact Or.inl h
+    · exact Or.inr ⟨h, (hb hx).trans (le_max_left _ _)⟩
+  refine IntegrableOn.mono_set (integrableOn_union.mpr ⟨?_, ?_⟩) hsub
+  · refine (integrableOn_zero).congr_fun (fun x hx => ?_) measurableSet_Iic
+    simp [xPlusRpow, not_lt.mpr (show x ≤ 0 from hx)]
+  · have h := (intervalIntegral.intervalIntegrable_rpow' (a := 0) (b := max b 0) hβ)
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (le_max_right _ _)] at h
+    refine h.congr_fun (fun x hx => ?_) measurableSet_Ioc
+    simp [xPlusRpow, hx.1]
+
 /-- DLMF 1.16.20: `D x₊^α = α x₊^{α-1}` for `α > 0`, as distributions on the line. -/
 @[dlmf 1.16.E20]
 theorem deriv_xPlusRpow {α : ℝ} (hα : 0 < α) :
     ∂_{(1 : ℝ)} (lineDistrib (xPlusRpow α)) = α • lineDistrib (xPlusRpow (α - 1)) := by
-  sorry
+  ext φ
+  have hli := locallyIntegrable_xPlusRpow (show -1 < α by linarith)
+  have hli' := locallyIntegrable_xPlusRpow (show -1 < α - 1 by linarith)
+  have hd : ContDiff ℝ 1 ⇑φ := φ.contDiff.of_le (by simp)
+  rw [Distribution.lineDerivOp_apply_apply, lineDistrib,
+    Distribution.ofFun_apply (hli.locallyIntegrableOn _)]
+  rw [_root_.smul_apply, lineDistrib,
+    Distribution.ofFun_apply (hli'.locallyIntegrableOn _)]
+  simp only [FunLike.coe_neg, Pi.neg_apply, coe_lineDerivOp_one, smul_eq_mul, neg_mul,
+    integral_neg]
+  have h1 : (fun x => deriv ⇑φ x * xPlusRpow α x) =
+      (Ioi 0).indicator (fun x => x ^ α * deriv ⇑φ x) := by
+    ext x; by_cases hx : 0 < x <;> simp [xPlusRpow, Set.indicator, hx, mul_comm]
+  have h2 : (fun x => φ x * xPlusRpow (α - 1) x) =
+      (Ioi 0).indicator (fun x => x ^ (α - 1) * φ x) := by
+    ext x; by_cases hx : 0 < x <;> simp [xPlusRpow, Set.indicator, hx, mul_comm]
+  rw [h1, h2, integral_indicator measurableSet_Ioi, integral_indicator measurableSet_Ioi]
+  have hcs : HasCompactSupport (fun x => x ^ α * φ x) := φ.hasCompactSupport.mul_left
+  have hcont : Continuous (fun x => x ^ α * φ x) :=
+    (Real.continuous_rpow_const hα.le).mul φ.continuous
+  have hibp := integral_Ioi_mul_deriv_eq_deriv_mul (a := 0) (a' := 0) (b' := 0)
+    (u := fun x => x ^ α) (u' := fun x => α * x ^ (α - 1)) (v := ⇑φ) (v' := deriv ⇑φ)
+    (fun x hx => Real.hasDerivAt_rpow_const (Or.inl (ne_of_gt hx)))
+    (fun x _ => (hd.differentiable (by norm_num) x).hasDerivAt)
+    (((Real.continuous_rpow_const hα.le).mul
+      (hd.continuous_deriv le_rfl)).integrable_of_hasCompactSupport
+        φ.hasCompactSupport.deriv.mul_left).integrableOn
+    (by
+      have hI := hli'.integrable_smul_left_of_hasCompactSupport φ.continuous φ.hasCompactSupport
+      refine ((hI.const_mul α).integrableOn).congr_fun (fun x hx => ?_) measurableSet_Ioi
+      simp [xPlusRpow, show (0 : ℝ) < x from hx]; ring)
+    (by
+      have := hcont.tendsto 0
+      simp only [Real.zero_rpow hα.ne', zero_mul] at this
+      exact this.mono_left nhdsWithin_le_nhds)
+    ((hcs.is_zero_at_infty).mono_left atTop_le_cocompact)
+  simp only [sub_zero, zero_sub] at hibp
+  rw [hibp, neg_neg, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioi fun x _ => ?_
+  ring
+
+/-- `D^k` commutes with scalar multiplication. -/
+private lemma distribIterDeriv_smul (k : ℕ) (c : ℝ)
+    (T : 𝓓'((⊤ : TopologicalSpace.Opens ℝ), ℝ)) :
+    distribIterDeriv k (c • T) = c • distribIterDeriv k T := by
+  induction k generalizing T with
+  | zero => rfl
+  | succ k ih =>
+    simp only [distribIterDeriv, Function.iterate_succ_apply] at ih ⊢
+    rw [LineDeriv.lineDerivOp_smul, ih]
+
+/-- Iterated form of DLMF 1.16.20: `D^k x₊^{γ+k} = (γ+1)_k x₊^γ` for `γ > -1`. -/
+theorem distribIterDeriv_xPlusRpow {γ : ℝ} (hγ : -1 < γ) (k : ℕ) :
+    distribIterDeriv k (lineDistrib (xPlusRpow (γ + k))) =
+      (ascPochhammer ℝ k).eval (γ + 1) • lineDistrib (xPlusRpow γ) := by
+  induction k with
+  | zero => simp [distribIterDeriv]
+  | succ k ih =>
+    have h : distribIterDeriv (k + 1) (lineDistrib (xPlusRpow (γ + ↑(k + 1)))) =
+        distribIterDeriv k (∂_{(1 : ℝ)} (lineDistrib (xPlusRpow (γ + ↑(k + 1))))) := by
+      simp only [distribIterDeriv, Function.iterate_succ_apply]
+    rw [h, deriv_xPlusRpow (by push_cast; linarith), distribIterDeriv_smul,
+      show γ + ↑(k + 1) - 1 = γ + k by push_cast; ring, ih, smul_smul, ascPochhammer_succ_eval]
+    congr 1
+    push_cast
+    ring
 
 /-- DLMF 1.16.21: for `α < -1` not an integer, `x₊^α = D^n x₊^{α+n} / (α+1)_n` for every
 integer `n` with `α + n > -1` (the definition `xPlusDistrib` uses the least such `n`). -/
 @[dlmf 1.16.E21]
 theorem xPlusDistrib_eq_iterDeriv {α : ℝ} (hα : α < -1) (hαZ : ∀ m : ℤ, α ≠ m) (n : ℕ)
     (hn : -1 < α + n) :
-    xPlusDistrib α = (ascPochhammer ℝ n).eval (α + 1) ⁻¹ •
+    xPlusDistrib α = ((ascPochhammer ℝ n).eval (α + 1))⁻¹ •
       distribIterDeriv n (lineDistrib (xPlusRpow (α + n))) := by
-  sorry
+  set n₀ := ⌊-α⌋₊ with hn₀
+  have hfl : (n₀ : ℝ) ≤ -α := Nat.floor_le (by linarith)
+  have hfl' : -α < n₀ + 1 := Nat.lt_floor_add_one _
+  have hne : (n₀ : ℝ) ≠ -α := by
+    intro h
+    exact hαZ (-(n₀ : ℤ)) (by push_cast; linarith)
+  have hγ : -1 < α + n₀ := by linarith
+  have hnn : n₀ ≤ n := by
+    have : (n₀ : ℝ) < n + 1 := by linarith [lt_of_le_of_ne hfl hne]
+    exact_mod_cast Nat.lt_succ_iff.mp (by exact_mod_cast this)
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hnn
+  have hnotint : ¬ ∃ m : ℕ, α = -1 - m := by
+    rintro ⟨m, hm⟩
+    exact hαZ (-1 - m) (by rw [hm]; push_cast; ring)
+  rw [xPlusDistrib, if_neg (by linarith), if_neg hnotint, ← hn₀]
+  have hsplit : distribIterDeriv (n₀ + k) (lineDistrib (xPlusRpow (α + ↑(n₀ + k)))) =
+      distribIterDeriv n₀ (distribIterDeriv k (lineDistrib (xPlusRpow (α + n₀ + k)))) := by
+    simp only [distribIterDeriv, Function.iterate_add_apply]
+    push_cast
+    rw [add_assoc]
+  rw [hsplit, distribIterDeriv_xPlusRpow hγ k, distribIterDeriv_smul, smul_smul]
+  congr 1
+  have hmul := congrArg (Polynomial.eval (α + 1)) (ascPochhammer_mul (S := ℝ) n₀ k)
+  rw [Polynomial.eval_mul, Polynomial.eval_comp] at hmul
+  simp only [Polynomial.eval_add, Polynomial.eval_X, Polynomial.eval_natCast] at hmul
+  rw [← hmul, show α + n₀ + 1 = α + 1 + n₀ by ring]
+  have h0 : (ascPochhammer ℝ k).eval (α + 1 + n₀) ≠ 0 := by
+    rw [Ne, ascPochhammer_eval_eq_zero_iff]
+    rintro ⟨j, -, hj⟩
+    exact hαZ (-1 - n₀ - j) (by push_cast; linarith)
+  field_simp
 
 /-- DLMF 1.16.23: `(-1)^n n! x₊^{-1-n} = D^{n+1} ln₊ x`, `n = 0, 1, 2, …`. -/
 @[dlmf 1.16.E23]
@@ -501,7 +618,8 @@ lemma lineDeriv_dlmfFourierSchwartz (φ : 𝓢(E, ℂ)) (v : E) :
     SchwartzMap.lineDerivOp_fourierInv_eq]
   congr 3
   ext x
-  have h₁ : (fun y : E => inner ℝ y ((scaleEquiv (2 * Real.pi)⁻¹ (by positivity)) v)).HasTemperateGrowth := by fun_prop
+  have h₁ : (fun y : E =>
+      inner ℝ y ((scaleEquiv (2 * Real.pi)⁻¹ (by positivity)) v)).HasTemperateGrowth := by fun_prop
   have h₂ : (fun x : E => I * (inner ℝ x v : ℂ)).HasTemperateGrowth := by fun_prop
   simp only [smul_apply]
   rw [SchwartzMap.smulLeftCLM_apply h₁, SchwartzMap.smulLeftCLM_apply h₂]
@@ -622,7 +740,8 @@ lemma dlmfD_dlmfFourierSchwartz {n : ℕ} (j : Fin n)
   have hg : (fun x : EuclideanSpace ℝ (Fin n) =>
       I * (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)).HasTemperateGrowth := by fun_prop
   have he : SchwartzMap.smulLeftCLM ℂ
-      (fun x : EuclideanSpace ℝ (Fin n) => I * (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)) φ =
+      (fun x : EuclideanSpace ℝ (Fin n) => I *
+          (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)) φ =
       I • SchwartzMap.smulLeftCLM ℂ (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ)) φ := by
     ext x
     rw [SchwartzMap.smulLeftCLM_apply hg]
@@ -674,7 +793,8 @@ theorem dlmfFourierSchwartz_polyMul {n : ℕ} (P : MvPolynomial (Fin n) ℂ)
     have hg : (fun x : EuclideanSpace ℝ (Fin n) =>
         I * (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)).HasTemperateGrowth := by fun_prop
     have he : SchwartzMap.smulLeftCLM ℂ
-        (fun x : EuclideanSpace ℝ (Fin n) => I * (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)) ψ =
+        (fun x : EuclideanSpace ℝ (Fin n) => I *
+            (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)) ψ =
         I • X j ψ := by
       ext x
       rw [SchwartzMap.smulLeftCLM_apply hg]

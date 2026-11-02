@@ -91,7 +91,8 @@ def recurrenceWeight (β : ℂ) (i : ℕ) : ℂ := if i = 0 then β else 1
 /-- Telescoped Green identity: `∑_{i≤N} w_i (A_i (Lv)_i - (LA)_i v_i)` equals the boundary
 term `w_N q (A_N v_{N+1} - A_{N+1} v_N)`. -/
 private lemma sum_green_eq_boundary (d : ℕ → ℂ) (β q : ℂ) (A v : ℕ → ℂ) (N : ℕ) :
-    ∑ i ∈ Finset.range (N + 1), recurrenceWeight β i * (A i * recurrenceOperator d β q v i - recurrenceOperator d β q A i * v i) =
+    ∑ i ∈ Finset.range (N + 1), recurrenceWeight β i *
+        (A i * recurrenceOperator d β q v i - recurrenceOperator d β q A i * v i) =
       recurrenceWeight β N * q * (A N * v (N + 1) - A (N + 1) * v N) := by
   induction N with
   | zero => simp [recurrenceWeight, recurrenceOperator, recurrenceLower]; ring
@@ -99,14 +100,17 @@ private lemma sum_green_eq_boundary (d : ℕ → ℂ) (β q : ℂ) (A v : ℕ �
     rw [Finset.sum_range_succ, ih]
     rcases N with _ | N
     · simp [recurrenceWeight, recurrenceOperator, recurrenceLower]; ring
-    · simp only [recurrenceWeight, recurrenceOperator, recurrenceLower, Nat.add_eq_zero_iff, one_ne_zero, and_false, ↓reduceIte]
+    · simp only [recurrenceWeight, recurrenceOperator, recurrenceLower, Nat.add_eq_zero_iff,
+          one_ne_zero, and_false, ↓reduceIte]
       ring
 
 /-- **Symmetry of the recurrence** (finite Green identity): for `v` supported in `[0, N)`,
 `∑ w_i A_i ((Lv)_i - p v_i) = (a - p) ∑ w_i A_i v_i`. -/
-private lemma green_identity_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : SolvesRecurrence d β q a A) (v : ℕ → ℂ)
+private lemma green_identity_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ}
+    (hrec : SolvesRecurrence d β q a A) (v : ℕ → ℂ)
     (p : ℂ) {N : ℕ} (hv : v N = 0) (hv' : v (N + 1) = 0) :
-    ∑ i ∈ Finset.range (N + 1), recurrenceWeight β i * A i * (recurrenceOperator d β q v i - p * v i) =
+    ∑ i ∈ Finset.range (N + 1), recurrenceWeight β i * A i *
+        (recurrenceOperator d β q v i - p * v i) =
       (a - p) * ∑ i ∈ Finset.range (N + 1), recurrenceWeight β i * A i * v i := by
   have h := sum_green_eq_boundary d β q A v N
   rw [hv, hv'] at h
@@ -117,7 +121,8 @@ private lemma green_identity_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ
 
 /-- Row estimate for a solution of `L A = a A`:
 `|a - d_i| |A_i| ≤ |q| (|lo_i| + |A_{i+1}|)`. -/
-private lemma norm_sub_diag_mul_le_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : SolvesRecurrence d β q a A) (i : ℕ) :
+private lemma norm_sub_diag_mul_le_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ}
+    (hrec : SolvesRecurrence d β q a A) (i : ℕ) :
     ‖a - d i‖ * ‖A i‖ ≤ ‖q‖ * (‖recurrenceLower β A i‖ + ‖A (i + 1)‖) := by
   have h := hrec i
   simp only [recurrenceOperator] at h
@@ -137,7 +142,8 @@ theorem norm_recurrenceLower_le {β : ℂ} (hβ : ‖β‖ ≤ 2) (A : ℕ → �
     linarith [h (i + 1) rfl]
 
 /-- A nonnegative sequence tending to `0` attains its maximum on every tail `[i, ∞)`. -/
-theorem exists_max_on_tail_of_tendsto_zero {f : ℕ → ℝ} (hf : Tendsto f atTop (𝓝 0)) (hf0 : ∀ i, 0 ≤ f i)
+theorem exists_max_on_tail_of_tendsto_zero {f : ℕ → ℝ} (hf : Tendsto f atTop (𝓝 0))
+    (hf0 : ∀ i, 0 ≤ f i)
     (i : ℕ) : ∃ k ≥ i, ∀ j ≥ i, f j ≤ f k := by
   by_cases h : ∃ j ≥ i, 0 < f j
   · obtain ⟨j₀, hj₀, hpos⟩ := h
@@ -154,10 +160,12 @@ theorem exists_max_on_tail_of_tendsto_zero {f : ℕ → ℝ} (hf : Tendsto f atT
     exact ⟨i, le_rfl, fun j hj => (h j hj).trans (hf0 i)⟩
 
 /-- **Window**: some diagonal entry is within `3|q|` of the eigenvalue. -/
-theorem exists_norm_sub_diag_le_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
+theorem exists_norm_sub_diag_le_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ}
+    {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
     (hrec : SolvesRecurrence d β q a A) (hA : Tendsto A atTop (𝓝 0)) (hne : ∃ i, A i ≠ 0) :
     ∃ i, ‖a - d i‖ ≤ 3 * ‖q‖ := by
-  obtain ⟨k, -, hk⟩ := exists_max_on_tail_of_tendsto_zero (f := fun i => ‖A i‖) (by simpa using hA.norm)
+  obtain ⟨k, -, hk⟩ :=
+      exists_max_on_tail_of_tendsto_zero (f := fun i => ‖A i‖) (by simpa using hA.norm)
     (fun _ => norm_nonneg _) 0
   obtain ⟨i₀, hi₀⟩ := hne
   have hM : 0 < ‖A k‖ := (norm_pos_iff.2 hi₀).trans_le (hk i₀ (Nat.zero_le _))
@@ -171,11 +179,13 @@ theorem exists_norm_sub_diag_le_of_solvesRecurrence {d : ℕ → ℂ} {β q a : 
 
 /-- Upward decay step: above the isolated index `n`, `|A_i| ≤ 3|q| |A_{i-1}|`
 (for `|q| ≤ 1/4`, `A → 0`). -/
-private lemma norm_le_mul_norm_pred_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
+private lemma norm_le_mul_norm_pred_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ}
+    {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
     (hrec : SolvesRecurrence d β q a A) (hA : Tendsto A atTop (𝓝 0)) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
     (hgap : ∀ i ≠ n, 1 ≤ ‖a - d i‖) {i : ℕ} (hi : n < i) :
     ‖A i‖ ≤ 3 * ‖q‖ * ‖A (i - 1)‖ := by
-  obtain ⟨k, hki, hk⟩ := exists_max_on_tail_of_tendsto_zero (f := fun i => ‖A i‖) (by simpa using hA.norm)
+  obtain ⟨k, hki, hk⟩ :=
+      exists_max_on_tail_of_tendsto_zero (f := fun i => ‖A i‖) (by simpa using hA.norm)
     (fun _ => norm_nonneg _) i
   have hq0 := norm_nonneg q
   have h1 := norm_sub_diag_mul_le_of_solvesRecurrence hrec k
@@ -194,7 +204,8 @@ private lemma norm_le_mul_norm_pred_of_solvesRecurrence {d : ℕ → ℂ} {β q 
 
 /-- Downward decay step: below the isolated index `n`, `|A_i| ≤ 3|q| |A_{i+1}|`
 (for `|q| ≤ 1/4`). -/
-private lemma norm_le_mul_norm_succ_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
+private lemma norm_le_mul_norm_succ_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ}
+    {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
     (hrec : SolvesRecurrence d β q a A) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
     (hgap : ∀ i ≠ n, 1 ≤ ‖a - d i‖) {i : ℕ} (hi : i < n) :
     ‖A i‖ ≤ 3 * ‖q‖ * ‖A (i + 1)‖ := by
@@ -206,7 +217,8 @@ private lemma norm_le_mul_norm_succ_of_solvesRecurrence {d : ℕ → ℂ} {β q 
   have hg := hgap k (by omega)
   have hAk := norm_nonneg (A k)
   have hAi := hmax i (Finset.mem_range.2 (by omega))
-  have h2 := norm_recurrenceLower_le hβ A (i := k) hAk (fun j hj => hmax j (Finset.mem_range.2 (by omega)))
+  have h2 := norm_recurrenceLower_le hβ A (i := k) hAk
+      (fun j hj => hmax j (Finset.mem_range.2 (by omega)))
   rcases (Nat.lt_succ_iff.1 hk).lt_or_eq with hlt | heq
   · have h3 := hmax (k + 1) (Finset.mem_range.2 (by omega))
     have : ‖A k‖ ≤ 0 := by nlinarith
@@ -227,7 +239,8 @@ theorem norm_le_pow_dist_mul_of_solvesRecurrence {d : ℕ → ℂ} {β q a : ℂ
     induction j with
     | zero => simp
     | succ j ih =>
-      have := norm_le_mul_norm_pred_of_solvesRecurrence hβ hrec hA hq hgap (i := n + (j + 1)) (by omega)
+      have := norm_le_mul_norm_pred_of_solvesRecurrence hβ hrec hA hq hgap
+          (i := n + (j + 1)) (by omega)
       rw [show n + (j + 1) - 1 = n + j by omega] at this
       calc _ ≤ 3 * ‖q‖ * ‖A (n + j)‖ := this
         _ ≤ 3 * ‖q‖ * ((3 * ‖q‖) ^ j * ‖A n‖) := by gcongr; exact ih (by omega)
@@ -260,7 +273,8 @@ private lemma recurrenceWeight_ne_zero {β : ℂ} (hβ : β ≠ 0) (i : ℕ) : r
   unfold recurrenceWeight; split_ifs <;> simp [hβ]
 
 /-- The weights satisfy `|w_i| ≤ 2` when `|β| ≤ 2`. -/
-private lemma recurrenceWeight_norm_le {β : ℂ} (hβ : ‖β‖ ≤ 2) (i : ℕ) : ‖recurrenceWeight β i‖ ≤ 2 := by
+private lemma recurrenceWeight_norm_le {β : ℂ} (hβ : ‖β‖ ≤ 2) (i : ℕ) :
+    ‖recurrenceWeight β i‖ ≤ 2 := by
   unfold recurrenceWeight; split_ifs <;> norm_num [hβ]
 
 /-- **Eigenvalue perturbation estimate.** Let `A(q)` solve the recurrence `L A = a A` with an
@@ -309,7 +323,8 @@ theorem eigenvalue_sub_isBigO_of_trial {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ
       refine Finset.sum_congr rfl fun i _ => by simp only [hαdef]; ring
     simp only [hD, hR]
     rw [e, e, this, mul_div_assoc]
-  have hα : ∀ i, (fun q => recurrenceWeight β i * α q i) =O[𝓝 0] (fun q : ℝ => q ^ (Nat.dist i n)) := by
+  have hα : ∀ i, (fun q => recurrenceWeight β i * α q i) =O[𝓝 0]
+      (fun q : ℝ => q ^ (Nat.dist i n)) := by
     intro i
     refine IsBigO.of_bound (2 * 3 ^ Nat.dist i n) ?_
     filter_upwards [hdec] with q hq
@@ -325,7 +340,8 @@ theorem eigenvalue_sub_isBigO_of_trial {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ
     exact pow_isBigO_pow_of_le (by omega)
   have hw : recurrenceWeight β n ≠ 0 := recurrenceWeight_ne_zero hβ0 n
   have hDt : Tendsto D (𝓝 0) (𝓝 (recurrenceWeight β n)) := by
-    have e : recurrenceWeight β n = ∑ i ∈ Finset.range (N + 1), if i = n then recurrenceWeight β n else 0 := by
+    have e : recurrenceWeight β n = ∑ i ∈ Finset.range (N + 1), if i = n then
+        recurrenceWeight β n else 0 := by
       rw [Finset.sum_ite_eq']; simp only [Finset.mem_range]
       rw [ite_eq_left_iff.2 (fun h => absurd (by omega) h)]
     rw [e]

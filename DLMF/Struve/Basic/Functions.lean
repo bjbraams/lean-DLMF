@@ -73,7 +73,8 @@ def struveL (ν z : ℂ) : ℂ :=
 def struveLOnLog (ν w : ℂ) : ℂ :=
   exp ((ν+1)*(w-log 2)) * struveLCore ν (exp w)
 
-/-- A common signed regularized-series representation of the ordinary and modified Struve functions. -/
+/-- A common signed regularized-series representation of the ordinary and modified Struve functions.
+-/
 def struveQuadratic (ν σ z : ℂ) : ℂ :=
   (z/2)^(ν+1)*regularizedHGFun {1} {3/2,ν+3/2} (σ*z^2/4)
 
@@ -91,7 +92,8 @@ def struveM (ν z : ℂ) : ℂ :=
 DLMF reciprocal-Gamma forcing term. -/
 @[dlmf 11.2.E7, dlmf 11.2.E9]
 def StruveEquation (ν : ℂ) (modified : Bool) (f : ℂ → ℂ) (z : ℂ) : Prop :=
-  iteratedDeriv 2 f z + deriv f z/z + ((if modified then -1 else 1)-ν^2/z^2)*f z = (z/2)^(ν-1)/(Real.sqrt π*Gamma (ν+1/2))
+  iteratedDeriv 2 f z + deriv f z/z + ((if modified then -1 else 1)-ν^2/z^2)*f z =
+      (z/2)^(ν-1)/(Real.sqrt π*Gamma (ν+1/2))
 
 /-- An analytic function on S satisfying the ordinary or modified Struve differential equation at
 each point of S. -/

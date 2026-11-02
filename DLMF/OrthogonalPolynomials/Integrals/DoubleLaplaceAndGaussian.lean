@@ -70,7 +70,8 @@ def angularJacobiSum (β : ℂ) (n : ℕ) (x y : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), poch (β + n - k + 1) k / k ! *
     (poch (β + k + 1) (n - k) / (n - k) !) * (-y ^ 2) ^ (n - k) * (x ^ 2) ^ k
 
-/-- A normalized Gegenbauer polynomial is the corresponding normalized symmetric Jacobi polynomial. -/
+/-- A normalized Gegenbauer polynomial is the corresponding normalized symmetric Jacobi polynomial.
+-/
 theorem gegenbauer_normalized_jacobi {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) (z : ℂ) :
     ultrasphPoly (β + 1 / 2) n z / ultrasphPoly (β + 1 / 2) n 1 =
       jacobiPolyP β β n z / jacobiPolyP β β n 1 := by
@@ -113,7 +114,8 @@ theorem angularJacobiSum_eq {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
 theorem angular_weight_integrable {β : ℝ} (hβ : -1 / 2 < β) :
     IntervalIntegrable (fun phi : ℝ => (Real.sin phi : ℂ) ^ (2 * β : ℂ)) volume 0 Real.pi := by
   have h := (integral_sin_rpow_aux (lam := β + 1 / 2) (by linarith)).1
-  have hc : IntervalIntegrable (fun phi : ℝ => ((Real.sin phi ^ (2 * β) : ℝ) : ℂ)) volume 0 Real.pi := by
+  have hc : IntervalIntegrable (fun phi : ℝ => ((Real.sin phi ^ (2 * β) : ℝ) : ℂ)) volume
+      0 Real.pi := by
     have hh : IntervalIntegrable (fun phi : ℝ => Real.sin phi ^ (2 * β)) volume 0 Real.pi := by
       convert h using 1  ; ring
     exact ⟨hh.1.ofReal, hh.2.ofReal⟩
@@ -188,7 +190,8 @@ theorem angular_homogeneous {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
     ring
   rw [hI]
   have hscaled := angularJacobiSum_eq hβ n hs
-  have harg : ((Real.cos q.arg : ℝ) : ℂ) = (x ^ 2 - y ^ 2) / (x ^ 2 + y ^ 2) := by rw [hc]; push_cast; rfl
+  have harg : ((Real.cos q.arg : ℝ) : ℂ) = (x ^ 2 - y ^ 2) / (x ^ 2 + y ^ 2) :=
+      by rw [hc]; push_cast; rfl
   conv_lhs at hL => rw [harg, jacobiPolyP_one ]
   have hGammaArgs : (β + 1 / 2 + 1 / 2 : ℂ) = β + 1 := by ring
   rw [show (β : ℂ) + 1 / 2 + 1 / 2 = β + 1 by ring] at hL
@@ -221,7 +224,8 @@ theorem gaussian_radial_moment {s : ℝ} (hs : 0 < s) :
       ← Complex.ofReal_cpow hr.le]
     push_cast
     ring
-  refine ⟨(hi.ofReal).congr (ae_restrict_of_forall_mem measurableSet_Ioi (fun r hr => (he r hr).symm)), ?_⟩
+  refine ⟨(hi.ofReal).congr
+      (ae_restrict_of_forall_mem measurableSet_Ioi (fun r hr => (he r hr).symm)), ?_⟩
   rw [setIntegral_congr_fun measurableSet_Ioi he, integral_complex_ofReal]
   -- Mathlib's real Gaussian moment theorem fixes the radial Gamma normalization.
   have h := _root_.integral_rpow_mul_exp_neg_mul_rpow (p := 2) (q := 2 * s - 1) (b := 1)
@@ -244,17 +248,20 @@ theorem square_image_Ioo : (fun r : ℝ => r ^ 2) '' Ioo 0 1 = Ioo 0 1 := by
   · rintro ⟨r, hr, rfl⟩
     exact ⟨sq_pos_of_pos hr.1, by nlinarith [hr.1, hr.2]⟩
   · intro hx
-    exact ⟨Real.sqrt x, ⟨Real.sqrt_pos.mpr hx.1, (Real.sqrt_lt' zero_lt_one).mpr (by simpa using hx.2)⟩,
+    exact ⟨Real.sqrt x, ⟨Real.sqrt_pos.mpr hx.1,
+        (Real.sqrt_lt' zero_lt_one).mpr (by simpa using hx.2)⟩,
       Real.sq_sqrt hx.1.le⟩
 
 /-- Beta radial moments after the square substitution; endpoint singularities are retained. -/
 theorem beta_radial_moment {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
-    IntervalIntegrable (fun r : ℝ => (r : ℂ) ^ (2 * a - 1 : ℂ) * (1 - (r : ℂ) ^ 2) ^ (b - 1 : ℂ)) volume 0 1 ∧
+    IntervalIntegrable (fun r : ℝ => (r : ℂ) ^ (2 * a - 1 : ℂ) *
+        (1 - (r : ℂ) ^ 2) ^ (b - 1 : ℂ)) volume 0 1 ∧
     (∫ r : ℝ in (0 : ℝ)..1, (r : ℂ) ^ (2 * a - 1 : ℂ) * (1 - (r : ℂ) ^ 2) ^ (b - 1 : ℂ)) =
       (1 / 2) * (Gamma (a : ℂ) * Gamma (b : ℂ) / Gamma (a + b : ℂ)) := by
   let f : ℝ → ℂ := fun u => (u : ℂ) ^ (a - 1 : ℂ) * (1 - (u : ℂ)) ^ (b - 1 : ℂ)
   have hf : IntegrableOn f (Ioo 0 1) := by
-    exact ((betaIntegral_convergent (by simpa using ha) (by simpa using hb)).1).mono_set Ioo_subset_Ioc_self
+    exact ((betaIntegral_convergent (by simpa using ha) (by simpa using hb)).1).mono_set
+        Ioo_subset_Ioc_self
   have hd : ∀ r ∈ Ioo (0 : ℝ) 1, HasDerivWithinAt (fun r : ℝ => r ^ 2) (2 * r) (Ioo 0 1) r := by
     intro r _
     simpa only [Nat.reduceSub, pow_one, mul_one, Nat.cast_ofNat] using
@@ -292,7 +299,8 @@ theorem beta_radial_moment {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     apply (eq_div_iff hgab).mpr
     change betaIntegral (a : ℂ) (b : ℂ) * Gamma (a + b : ℂ) = _
     rw [mul_comm]
-    exact (Gamma_mul_Gamma_eq_betaIntegral (s := (a : ℂ)) (t := (b : ℂ)) (by simpa using ha) (by simpa using hb)).symm
+    exact (Gamma_mul_Gamma_eq_betaIntegral (s := (a : ℂ)) (t := (b : ℂ)) (by simpa using ha)
+        (by simpa using hb)).symm
   rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo]
   rw [hbval] at hchange
   linear_combination -(1 / 2 : ℂ) * hchange
@@ -839,7 +847,8 @@ theorem ultrasphPoly_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ
     have h := DLMF.Gamma.poch_neg_eq ((m : ℂ) - 1 / 2 - z / 2) m
     rw [show -((m : ℂ) - 1 / 2 - z / 2) = 1 / 2 + z / 2 - m by ring,
       show (m : ℂ) - 1 / 2 - z / 2 - m + 1 = 1 / 2 - z / 2 by ring] at h
-    rw [recip_Gamma_eq_poch_mul_recip_Gamma_add m, h, show 1 / 2 + z / 2 - (m : ℂ) + m = 1 / 2 + z / 2
+    rw [recip_Gamma_eq_poch_mul_recip_Gamma_add m, h, show 1 / 2 + z / 2 - (m : ℂ) +
+        m = 1 / 2 + z / 2
       by ring]
   have F1 := Complex.Gamma_mul_Gamma_add_half (z / 2)
   rw [show 2 * (z / 2) = z by ring, show z / 2 + 1 / 2 = 1 / 2 + z / 2 by ring] at F1

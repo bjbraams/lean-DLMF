@@ -62,7 +62,8 @@ namespace DLMF.Struve
 
 open DLMF.Bessel
 
-/-- Removable parameter continuation of the capital Lommel function, including exceptional parameters. -/
+/-- Removable parameter continuation of the capital Lommel function, including exceptional
+parameters. -/
 def lommelCapital (μ ν z : ℂ) : ℂ :=
   limUnder (𝓝[≠] μ) (fun m => lommelCapitalRegular m ν z)
 
@@ -271,11 +272,13 @@ theorem hasSum_lommelS {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} :
   have hr : (regularizedHGFunSeries {1} {(μ-ν+3)/2,(μ+ν+3)/2}).radius=⊤ :=
     radius_regularizedHGFunSeries_eq_top (by simp)
   have hp : HasFPowerSeriesOnBall (regularizedHGFun {1} {(μ-ν+3)/2,(μ+ν+3)/2})
-      (FormalMultilinearSeries.ofScalars ℂ (regularizedHGFunCoeff {1} {(μ-ν+3)/2,(μ+ν+3)/2})) 0 ⊤ := by
+      (FormalMultilinearSeries.ofScalars ℂ
+          (regularizedHGFunCoeff {1} {(μ-ν+3)/2, (μ+ν+3)/2})) 0 ⊤ := by
     change HasFPowerSeriesOnBall (regularizedHGFunSeries {1} {(μ-ν+3)/2,(μ+ν+3)/2}).sum
       (regularizedHGFunSeries {1} {(μ-ν+3)/2,(μ+ν+3)/2}) 0 ⊤
     rw [← hr]
-    exact (regularizedHGFunSeries {1} {(μ-ν+3)/2,(μ+ν+3)/2}).hasFPowerSeriesOnBall (by rw [hr]; simp)
+    exact (regularizedHGFunSeries {1} {(μ-ν+3)/2, (μ+ν+3)/2}).hasFPowerSeriesOnBall
+        (by rw [hr]; simp)
   have hs := (hp.hasSum_mul_pow (by simp : (-z^2/4) ∈ Metric.eball (0:ℂ) ⊤)).mul_left
     (z^(μ+1)*(Gamma ((μ-ν+1)/2)*Gamma ((μ+ν+1)/2)/4))
   rw [← lommelS_eq_regularized h] at hs
@@ -334,7 +337,8 @@ theorem lommelS_residual {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz :
 z+deriv (lommelS μ ν) z/z+(1-ν^2/z^2)*lommelS μ ν z = z^(μ-1)`. -/
 @[dlmf 11.9.E1]
 theorem lommelS_ode {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z ∈ slitPlane) :
-    iteratedDeriv 2 (lommelS μ ν) z+deriv (lommelS μ ν) z/z+(1-ν^2/z^2)*lommelS μ ν z = z^(μ-1) := by
+    iteratedDeriv 2 (lommelS μ ν) z+deriv (lommelS μ ν) z/z+(1-ν^2/z^2)*lommelS μ ν z
+        = z^(μ-1) := by
   have he := lommelS_residual h hz
   have hp : z^(μ+1)=z^(μ-1)*z^2 := by
     rw [show μ+1=μ-1+(2:ℕ) by norm_num; ring,
@@ -358,7 +362,9 @@ iteratedDeriv 2 f z+deriv f z/z+(1-ν^2/z^2)*f z=z^(μ-1)) ↔ ∃ A B : ℂ, �
 z=lommelS μ ν z+A*besselJ ν z+B*besselY ν z`. -/
 @[dlmf 11.9.E2]
 theorem lommel_general_solution {μ ν : ℂ} (h : LommelRegular μ ν) (f : ℂ → ℂ) :
-    (AnalyticOnNhd ℂ f slitPlane ∧ ∀ z ∈ slitPlane, iteratedDeriv 2 f z+deriv f z/z+(1-ν^2/z^2)*f z=z^(μ-1)) ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z=lommelS μ ν z+A*besselJ ν z+B*besselY ν z := by
+    (AnalyticOnNhd ℂ f slitPlane ∧ ∀ z ∈ slitPlane,
+        iteratedDeriv 2 f z+deriv f z/z+(1-ν^2/z^2)*f z=z^(μ-1)) ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane,
+        f z=lommelS μ ν z+A*besselJ ν z+B*besselY ν z := by
   rw [← bessel_inhomogeneous_general_solution ν (lommelS_analytic h)]
   apply and_congr_right
   intro _
@@ -383,8 +389,11 @@ theorem lommel_general_solution {μ ν : ℂ} (h : LommelRegular μ ν) (f : ℂ
 (k+μ+1)/((k.factorial:ℂ)*(2*k+μ-ν+1)*(2*k+μ+ν+1))*besselJ (2*k+μ+1) z)` converges to `(lommelS
 μ ν z)`. -/
 @[dlmf 11.9.E7]
-theorem lommelS_bessel_series_7 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1) ∧ μ+ν ≠ -(n+1)) (hm : ∀ n : ℕ, μ ≠ -(n+1)) {z : ℂ} (hz : z ∈ slitPlane) :
-    HasSum (fun k : ℕ => 2^(μ+1)*(2*k+μ+1)*Gamma (k+μ+1)/((k.factorial:ℂ)*(2*k+μ-ν+1)*(2*k+μ+ν+1))*besselJ (2*k+μ+1) z) (lommelS μ ν z) := by
+theorem lommelS_bessel_series_7 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1) ∧ μ+ν ≠ -(n+1))
+    (hm : ∀ n : ℕ, μ ≠ -(n+1)) {z : ℂ} (hz : z ∈ slitPlane) :
+    HasSum (fun k : ℕ =>
+        2^(μ+1)*(2*k+μ+1)*Gamma (k+μ+1)/((k.factorial:ℂ)*(2*k+μ-ν+1)*(2*k+μ+ν+1))*besselJ (2*k+μ+1)
+        z) (lommelS μ ν z) := by
   have hz0 := slitPlane_ne_zero hz
   have hl : ∀ n : ℕ, μ + 1 ≠ -n := fun n h' => hm n (by linear_combination h')
   have ha : ∀ n : ℕ, (n : ℂ) + (μ - ν + 1) / 2 ≠ 0 := fun n h' =>
@@ -394,7 +403,8 @@ theorem lommelS_bessel_series_7 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1)
   have hL := (hasSum_besselJ_neumann_lommel (l := μ + 1) (a := (μ - ν + 1) / 2)
     (b := (μ + ν + 1) / 2) (by ring) hl ha hb hz0).mul_left ((2 : ℂ) ^ (μ + 1) / 4)
   have hA : ∀ j : ℕ, lommelA μ ν (j + 1) =
-      4 ^ (j + 1) * ∏ i ∈ Finset.range (j + 1), (((i : ℂ) + (μ - ν + 1) / 2) * (i + (μ + ν + 1) / 2)) := by
+      4 ^ (j + 1) * ∏ i ∈ Finset.range (j + 1),
+          (((i : ℂ) + (μ - ν + 1) / 2) * (i + (μ + ν + 1) / 2)) := by
     intro j
     rw [lommelA, show (4 : ℂ) ^ (j + 1) = ∏ _i ∈ Finset.range (j + 1), (4 : ℂ) by simp,
       ← Finset.prod_mul_distrib]
@@ -417,10 +427,12 @@ theorem lommelS_bessel_series_7 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1)
       X * (1 / 4 * Y) from fun X Y => by field_simp, ← tsum_mul_left (α := ℂ) (a := 1 / 4)]
     congr 1
     refine tsum_congr fun j => ?_
-    have hP : ∏ i ∈ Finset.range (j + 1), (((i : ℂ) + (μ - ν + 1) / 2) * (i + (μ + ν + 1) / 2)) ≠ 0 :=
+    have hP : ∏ i ∈ Finset.range (j + 1),
+        (((i : ℂ) + (μ - ν + 1) / 2) * (i + (μ + ν + 1) / 2)) ≠ 0 :=
       Finset.prod_ne_zero_iff.mpr fun i _ => mul_ne_zero (ha i) (hb i)
     rw [hA, div_pow, pow_mul, pow_mul, pow_succ]
-    generalize ∏ i ∈ Finset.range (j + 1), (((i : ℂ) + (μ - ν + 1) / 2) * (i + (μ + ν + 1) / 2)) = P at hP ⊢
+    generalize ∏ i ∈ Finset.range (j + 1),
+        (((i : ℂ) + (μ - ν + 1) / 2) * (i + (μ + ν + 1) / 2)) = P at hP ⊢
     field_simp
     ring
 
@@ -428,8 +440,11 @@ theorem lommelS_bessel_series_7 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1)
 ((μ+ν+1)/2)*z^((μ+1-ν)/2)*(z/2)^k/((k.factorial:ℂ)*(2*k+μ-ν+1))*besselJ (k+(μ+ν+1)/2) z)`
 converges to `(lommelS μ ν z)`. -/
 @[dlmf 11.9.E8]
-theorem lommelS_bessel_series_8 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1) ∧ μ+ν ≠ -(n+1)) {z : ℂ} (hz : z ∈ slitPlane) :
-    HasSum (fun k : ℕ => 2^((μ+ν-1)/2)*Gamma ((μ+ν+1)/2)*z^((μ+1-ν)/2)*(z/2)^k/((k.factorial:ℂ)*(2*k+μ-ν+1))*besselJ (k+(μ+ν+1)/2) z) (lommelS μ ν z) := by
+theorem lommelS_bessel_series_8 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1) ∧ μ+ν ≠ -(n+1)) {z : ℂ}
+    (hz : z ∈ slitPlane) :
+    HasSum (fun k : ℕ =>
+        2^((μ+ν-1)/2)*Gamma ((μ+ν+1)/2)*z^((μ+1-ν)/2)*(z/2)^k/((k.factorial:ℂ)*(2*k+μ-ν+1))*besselJ
+        (k+(μ+ν+1)/2) z) (lommelS μ ν z) := by
   have hz0 := slitPlane_ne_zero hz
   have hw0 : z / 2 ≠ 0 := div_ne_zero hz0 two_ne_zero
   set α : ℂ := (μ - ν + 1) / 2 with hα
@@ -444,7 +459,8 @@ theorem lommelS_bessel_series_8 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1)
   set c : ℕ → ℂ := fun k => 1 / ((k ! : ℂ) * (k + α)) with hc_def
   obtain ⟨B, hB0, hB⟩ := exists_norm_recip_nat_add_le α
   have hcb : ∀ k, ‖c k‖ ≤ B * 1 ^ k := fun k => by
-    have hf : (1 : ℝ) ≤ k ! := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero k)
+    have hf : (1 : ℝ) ≤ k ! := by
+                                 exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero k)
     show ‖1 / ((k ! : ℂ) * (k + α))‖ ≤ B * 1 ^ k
     rw [one_pow, mul_one, one_div, mul_inv, norm_mul, norm_inv, Complex.norm_natCast]
     calc (k ! : ℝ)⁻¹ * ‖((k : ℂ) + α)⁻¹‖ ≤ 1 * B := by
@@ -492,12 +508,15 @@ theorem lommelS_bessel_series_8 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1)
     refine tsum_congr fun j => ?_
     have hP := Gamma_add_nat_succ_eq_prod hy j
     have hA : lommelA μ ν (j + 1) =
-        4 ^ (j + 1) * ((∏ i ∈ Finset.range (j + 1), (α + (i : ℂ))) * ∏ i ∈ Finset.range (j + 1), (β + (i : ℂ))) := by
+        4 ^ (j + 1) * ((∏ i ∈ Finset.range (j + 1), (α + (i : ℂ))) * ∏ i ∈ Finset.range (j + 1),
+            (β + (i : ℂ))) := by
       rw [lommelA, show (4 : ℂ) ^ (j + 1) = ∏ _i ∈ Finset.range (j + 1), (4 : ℂ) by simp,
         ← Finset.prod_mul_distrib, ← Finset.prod_mul_distrib]
       exact Finset.prod_congr rfl fun i _ => by rw [hα, hβ]; ring
-    have hq1 : ∏ i ∈ Finset.range (j + 1), (α + (i : ℂ)) ≠ 0 := Finset.prod_ne_zero_iff.mpr fun i _ => hx i
-    have hq2 : ∏ i ∈ Finset.range (j + 1), (β + (i : ℂ)) ≠ 0 := Finset.prod_ne_zero_iff.mpr fun i _ => hy i
+    have hq1 : ∏ i ∈ Finset.range (j + 1), (α + (i : ℂ)) ≠ 0 :=
+        Finset.prod_ne_zero_iff.mpr fun i _ => hx i
+    have hq2 : ∏ i ∈ Finset.range (j + 1), (β + (i : ℂ)) ≠ 0 :=
+        Finset.prod_ne_zero_iff.mpr fun i _ => hy i
     rw [hA, hP, div_pow, pow_mul, pow_mul, pow_succ]
     generalize ∏ i ∈ Finset.range (j + 1), (α + (i : ℂ)) = P at hq1 ⊢
     generalize ∏ i ∈ Finset.range (j + 1), (β + (i : ℂ)) = Q at hq2 ⊢
@@ -509,7 +528,8 @@ z-z^(μ-1)*∑ k ∈ Finset.range N, (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))) =
 : ℂ => z^(μ-1-2*N))`. -/
 @[dlmf 11.9.E9]
 theorem lommelCapital_asymptotic (μ ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
-    (fun z : ℂ => lommelCapital μ ν z-z^(μ-1)*∑ k ∈ Finset.range N, (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))) =O[sector (π-δ)] (fun z : ℂ => z^(μ-1-2*N)) := by
+    (fun z : ℂ => lommelCapital μ ν z-z^(μ-1)*∑ k ∈ Finset.range N,
+        (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))) =O[sector (π-δ)] (fun z : ℂ => z^(μ-1-2*N)) := by
   sorry
 
 set_option maxHeartbeats 1000000 in
@@ -651,7 +671,9 @@ theorem differentiable_regularized1F2_params (q : ℂ) :
     have h1 := hbound w.1 hw1 (n-m)
     have h2 := hbound w.2 hw2 (n-m)
     rw [← Nat.cast_add, Nat.sub_add_cancel hn] at h1 h2
-    have hf : (1:ℝ) ≤ ((n-m)! : ℕ) := by exact_mod_cast Nat.one_le_iff_ne_zero.2 (Nat.factorial_ne_zero (n-m))
+    have hf : (1:ℝ) ≤ ((n-m)! : ℕ) := by
+                                        exact_mod_cast Nat.one_le_iff_ne_zero.2
+                                          (Nat.factorial_ne_zero (n-m))
     have hc : C / (((n-m)! : ℕ):ℝ) ≤ C := div_le_self hC hf
     simp only [norm_mul, norm_pow]
     calc ‖q‖^n * ‖(Gamma (w.1+n))⁻¹‖ * ‖(Gamma (w.2+n))⁻¹‖ ≤
@@ -665,7 +687,8 @@ theorem differentiable_besselY_order {z : ℂ} (hz : z ∈ slitPlane) :
   by_cases hν : ∃ n : ℤ, ν = n
   · obtain ⟨n,rfl⟩ := hν
     have hD := ((differentiable_besselD (slitPlane_ne_zero hz)).analyticAt n).dslope (n:ℂ)
-    have hS := ((show Differentiable ℂ (fun ν : ℂ => sin (ν*π)) by fun_prop).analyticAt n).dslope (n:ℂ)
+    have hS := ((show Differentiable ℂ (fun ν : ℂ => sin (ν*π)) by fun_prop).analyticAt
+        n).dslope (n:ℂ)
     refine (hD.differentiableAt.div hS.differentiableAt
       (dslope_sin_ne_zero n (Metric.mem_ball_self (by norm_num)))).congr_of_eventuallyEq ?_
     filter_upwards [Metric.ball_mem_nhds (n:ℂ) (by norm_num : (0:ℝ)<1/2)] with μ hμ
@@ -673,7 +696,9 @@ theorem differentiable_besselY_order {z : ℂ} (hz : z ∈ slitPlane) :
   · push Not at hν
     have hS : sin (ν*π) ≠ 0 := sin_mul_pi_ne_zero hν
     have hopen : IsOpen {μ : ℂ | sin (μ*π) ≠ 0} := isOpen_ne_fun (by fun_prop) continuous_const
-    refine ((differentiable_besselD (slitPlane_ne_zero hz) ν).div (show DifferentiableAt ℂ (fun μ : ℂ => sin (μ*π)) ν by fun_prop) hS).congr_of_eventuallyEq ?_
+    refine ((differentiable_besselD (slitPlane_ne_zero hz) ν).div
+        (show DifferentiableAt ℂ (fun μ : ℂ => sin (μ*π)) ν by fun_prop)
+        hS).congr_of_eventuallyEq ?_
     filter_upwards [hopen.mem_nhds hS] with μ hμ
     exact besselY_eq_of_not_int (fun k hk => hμ (by rw [hk, Complex.sin_int_mul_pi])) z
 
@@ -710,7 +735,8 @@ lemma regularized1F2_one_neg_nat (n : ℕ) (b q : ℂ) :
 theorem lommelNumerator_symm (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     lommelNumerator a b z = lommelNumerator b a z := by
   unfold lommelNumerator
-  rw [show ({b+1,a+1}:Multiset ℂ)={a+1,b+1} by simp only [Multiset.insert_eq_cons]; exact Multiset.cons_swap _ _ _, add_comm b a]
+  rw [show ({b+1, a+1}:Multiset ℂ)={a+1, b+1} by simp only [Multiset.insert_eq_cons];
+                                                 exact Multiset.cons_swap _ _ _, add_comm b a]
   have he : b-a = -(a-b) := by ring
   rw [he, besselJ_neg_eq (a-b) hz, besselY_neg (a-b) hz]
   have hc := cos_sub (a*π) (b*π)
@@ -803,7 +829,8 @@ private lemma lommelNumerator_differentiable {z : ℂ} (hz : z ∈ slitPlane) :
     (hsum.sub_const 2).const_cpow (Or.inl two_ne_zero)
   have hc : Differentiable ℂ (fun p : ℂ × ℂ => cos (p.2*π)) := by fun_prop
   have hs : Differentiable ℂ (fun p : ℂ × ℂ => sin (p.2*π)) := by fun_prop
-  simpa only [lommelNumerator,div_eq_mul_inv,Function.comp_def,Pi.mul_def,Pi.sub_def,Pi.add_def] using
+  simpa only [lommelNumerator, div_eq_mul_inv, Function.comp_def, Pi.mul_def, Pi.sub_def,
+      Pi.add_def] using
     (((hp.mul_const ((4:ℂ)⁻¹)).mul hF).sub (hp2.mul
       ((hc.mul (hJ.comp (differentiable_fst.sub differentiable_snd))).add
         (hs.mul (hY.comp (differentiable_fst.sub differentiable_snd))))))
@@ -1057,7 +1084,8 @@ private lemma lommelNumerator_joint_continuous (ν : ℂ) {μ z : ℂ} (hz : z �
   have hp : ContinuousAt (fun p : ℂ × ℂ => p.2^(((p.1+ν+1)/2)+((p.1-ν+1)/2))) (μ,z) :=
     ContinuousAt.cpow (by fun_prop) (by fun_prop) hz
   have hp2 : Continuous (fun p : ℂ × ℂ => (2:ℂ)^(((p.1+ν+1)/2)+((p.1-ν+1)/2)-2)) :=
-    (by fun_prop : Continuous fun p : ℂ × ℂ => ((p.1+ν+1)/2)+((p.1-ν+1)/2)-2).const_cpow (Or.inl two_ne_zero)
+    (by fun_prop : Continuous fun p : ℂ × ℂ => ((p.1+ν+1)/2)+((p.1-ν+1)/2)-2).const_cpow
+        (Or.inl two_ne_zero)
   have he : ∀ w : ℂ, (w+ν+1)/2-(w-ν+1)/2=ν := by intro w;ring
   have hc : ContinuousAt (fun p : ℂ × ℂ => cos (((p.1-ν+1)/2)*π)) (μ,z) := by fun_prop
   have hs : ContinuousAt (fun p : ℂ × ℂ => sin (((p.1-ν+1)/2)*π)) (μ,z) := by fun_prop
@@ -1190,7 +1218,8 @@ private lemma lommelCapital_parameter_locallyUniform (μ ν : ℂ) :
     · push Not at hBpole
       have hG' : ContinuousAt (Gamma ∘ B) μ :=
         (continuousAt_Gamma (B μ) hBpole).comp hBcont.continuousAt
-      apply tendstoLocallyUniformlyOn_of_local_extension (E:=fun m z => Gamma (A m)*Gamma (B m)*H z m)
+      apply tendstoLocallyUniformlyOn_of_local_extension
+          (E:=fun m z => Gamma (A m)*Gamma (B m)*H z m)
         nhdsWithin_le_nhds isOpen_slitPlane ?_ ?_ hpoint
       · intro z hz
         exact ((hG.comp (x:=(μ,z)) continuousAt_fst).mul
@@ -1253,7 +1282,8 @@ theorem lommelCapital_add_two (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       (f := fun m : ℂ => m + 1) (x := μ) (by fun_prop)).tendsto.mono_left nhdsWithin_le_nhds
   have hc : Tendsto (fun m : ℂ => (m + 1) ^ 2 - ν ^ 2) (𝓝[≠] μ)
       (𝓝 ((μ + 1) ^ 2 - ν ^ 2)) := by
-    exact (by fun_prop : ContinuousAt (fun m : ℂ => (m + 1) ^ 2 - ν ^ 2) μ).tendsto.mono_left nhdsWithin_le_nhds
+    exact (by fun_prop : ContinuousAt (fun m : ℂ => (m + 1) ^ 2 - ν ^ 2) μ).tendsto.mono_left
+        nhdsWithin_le_nhds
   have hr := hp.sub (hc.mul (lommelCapital_parameter_limit μ ν hz))
   apply tendsto_nhds_unique hl
   apply hr.congr'

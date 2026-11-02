@@ -66,7 +66,8 @@ theorem det_fin_two_sq_le (A : Matrix (Fin 2) (Fin 2) ℝ) :
   nlinarith [sq_nonneg (A 0 0 * A 1 0 + A 0 1 * A 1 1)]
 
 /-- Helper: `‖v‖² = ∑ v_k²` for the vector of a matrix row. -/
-private lemma euclidean_norm_sq_eq_sum {n : ℕ} (v : EuclideanSpace ℝ (Fin n)) : ‖v‖ ^ 2 = ∑ k, v k ^ 2 := by
+private lemma euclidean_norm_sq_eq_sum {n : ℕ} (v : EuclideanSpace ℝ (Fin n)) : ‖v‖ ^ 2 =
+    ∑ k, v k ^ 2 := by
   rw [EuclideanSpace.real_norm_sq_eq]
 
 /-- Helper: the real inner product of two vectors of `EuclideanSpace`. -/
@@ -96,7 +97,8 @@ private lemma abs_det_eq_prod_abs_inner_gramSchmidt {n : ℕ} (v : Fin n → Euc
   rw [← h1, h2, abs_mul, h3, one_mul, gramSchmidtOrthonormalBasis_det, abs_prod]
 
 /-- Helper: `|⟪b, v⟫| ≤ ‖v‖` for a unit vector `b`. -/
-private lemma abs_inner_orthonormalBasis_le_norm {n : ℕ} (b : OrthonormalBasis (Fin n) ℝ (EuclideanSpace ℝ (Fin n)))
+private lemma abs_inner_orthonormalBasis_le_norm {n : ℕ}
+    (b : OrthonormalBasis (Fin n) ℝ (EuclideanSpace ℝ (Fin n)))
     (j : Fin n) (v : EuclideanSpace ℝ (Fin n)) : |inner ℝ (b j) v| ≤ ‖v‖ := by
   calc |inner ℝ (b j) v| ≤ ‖b j‖ * ‖v‖ := abs_real_inner_le_norm _ _
     _ = ‖v‖ := by rw [b.orthonormal.1 j, one_mul]
@@ -130,7 +132,8 @@ theorem det_sq_le_prod_sum_sq {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) :
   simp only [hsq, prod_pow]
   rw [← sq_abs, hA, hb]
   exact pow_le_pow_left₀ (prod_nonneg fun i _ => abs_nonneg _)
-    (prod_le_prod₀ (fun i _ => abs_nonneg _) fun i _ => abs_inner_orthonormalBasis_le_norm b i (v i)) 2
+    (prod_le_prod₀ (fun i _ => abs_nonneg _) fun i _ =>
+        abs_inner_orthonormalBasis_le_norm b i (v i)) 2
 
 /-- DLMF 1.3.10: equality holds in Hadamard's inequality 1.3.9 iff the rows are pairwise
 orthogonal, `a_{j1}a_{k1} + ⋯ + a_{jn}a_{kn} = 0` for `j ≠ k`, or one of the factors
@@ -157,7 +160,8 @@ theorem det_sq_eq_prod_sum_sq_iff {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) :
       exact (pow_left_inj₀ (abs_nonneg _) (prod_nonneg fun j _ => norm_nonneg _)
         two_ne_zero).1 h'
     rw [hA, hb] at habs
-    have heq := eq_of_prod_eq_of_le (fun j => abs_nonneg _) (fun j => abs_inner_orthonormalBasis_le_norm b j (v j))
+    have heq := eq_of_prod_eq_of_le (fun j => abs_nonneg _)
+        (fun j => abs_inner_orthonormalBasis_le_norm b j (v j))
       hnpos habs
     have hpar : ∀ j, ∃ r : ℝ, v j = r • b j := fun j => by
       have hbj : b j ≠ 0 := fun h => by simpa [h] using b.orthonormal.1 j
@@ -165,7 +169,8 @@ theorem det_sq_eq_prod_sum_sq_iff {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) :
         rw [Real.norm_eq_abs, heq j, b.orthonormal.1 j, one_mul])
       exact ⟨r, hr⟩
     intro j k hjk
-    have hjk' : ∑ l, A j l * A k l = inner ℝ (v j) (v k) := (euclidean_inner_eq_sum (v j) (v k)).symm
+    have hjk' : ∑ l, A j l * A k l = inner ℝ (v j) (v k) :=
+        (euclidean_inner_eq_sum (v j) (v k)).symm
     rw [hjk']
     obtain ⟨r, hr⟩ := hpar j
     obtain ⟨s, hs⟩ := hpar k
@@ -348,7 +353,8 @@ theorem det_circulant {n : ℕ} [NeZero n] (a : Fin n → ℂ) :
   exact mul_left_cancel₀ hdetF this
 
 /-- Helper: the column polynomials of Krattenthaler's determinant. -/
-private lemma krattenthaler_column_natDegree_lt {n : ℕ} {R : Type*} [CommRing R] [Nontrivial R] (a b : Fin n → R)
+private lemma krattenthaler_column_natDegree_lt {n : ℕ} {R : Type*} [CommRing R] [Nontrivial R]
+    (a b : Fin n → R)
     (k : Fin n) :
     ((∏ i ∈ Ioi k, (X + C (a i))) *
       ∏ i ∈ (Iic k).filter (fun i : Fin n => 0 < (i : ℕ)), (X + C (b i))).natDegree < n := by
@@ -435,7 +441,8 @@ theorem det_krattenthaler {n : ℕ} {R : Type*} [CommRing R] (x a b : Fin n → 
     · intro j k hkj
       simp only [of_apply, hp₀, eval_mul, eval_prod, eval_add, eval_X, eval_C]
       rw [prod_eq_zero (i := j) (mem_Ioi.2 (by simpa using hkj)) (by simp), zero_mul]
-  have hfac₀ := det_eval_eq_det_vandermonde_mul p₀ (fun k => krattenthaler_column_natDegree_lt A₀ B₀ k)
+  have hfac₀ := det_eval_eq_det_vandermonde_mul p₀
+      (fun k => krattenthaler_column_natDegree_lt A₀ B₀ k)
     (fun j => -A₀ j)
   have hV : (vandermonde fun j => -A₀ j).det = (-1) ^ N * V₀ := by
     rw [det_vandermonde]

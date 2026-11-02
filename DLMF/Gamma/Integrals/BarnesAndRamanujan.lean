@@ -136,7 +136,8 @@ theorem integral_normSqHalfB_ofReal {α : ℝ} (hα : 0 < α) {v : ℝ} (hv : 0 
       4 * π * Complex.Gamma (2 * α) * ((v : ℂ) + (v : ℂ)⁻¹) ^ (-(2 * α : ℂ)) := by
   set x : ℝ := (v ^ 2)⁻¹ with hxdef
   have hx : 0 < x := by positivity
-  have h := mellin_barnes_beta (a := (α : ℂ)) (b := (α : ℂ)) (σ := 0) hx (by simpa using hα) (by simpa using hα)
+  have h := mellin_barnes_beta (a := (α : ℂ)) (b := (α : ℂ)) (σ := 0) hx (by simpa using hα)
+      (by simpa using hα)
   have hv0 : (v : ℂ) ≠ 0 := ofReal_ne_zero.2 hv.ne'
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.2 hx.ne'
   -- substitute `s = 2t`

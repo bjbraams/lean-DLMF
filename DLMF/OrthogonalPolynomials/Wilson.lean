@@ -88,7 +88,8 @@ theorem poch_quadratic_pair (v y : ℂ) (k : ℕ) :
 @[dlmf 18.26.E1]
 theorem wilson_hypergeometric (a b c d : ℂ) (n : ℕ) (y : ℂ) :
     wilson a b c d n (y ^ 2) = poch (a + b) n * poch (a + c) n * poch (a + d) n *
-      terminatingHG n [-(n : ℂ), n + a + b + c + d - 1, a + I * y, a - I * y] [a + b, a + c, a + d] 1 := by
+      terminatingHG n [-(n : ℂ), n + a + b + c + d - 1, a + I * y, a - I * y]
+          [a + b, a + c, a + d] 1 := by
   unfold wilson terminatingHG
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, one_pow]
   congr 1
@@ -180,9 +181,11 @@ theorem racah_duality (α β γ δ : ℂ) (n y : ℕ) :
 c d m ((y : ℂ) ^ 2) * wilson a b c d n ((y : ℂ) ^ 2) * (‖Gamma (a + I * y) * Gamma (b + I * y)
 * Gamma (c + I * y) * Gamma (d + I * y) / Gamma (2 * I * y)‖ ^ 2 : ℝ) = 0`. -/
 @[dlmf 18.25.E2]
-theorem wilson_orthogonal {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) (hd : 0 < d) {m n : ℕ} (hmn : m ≠ n) :
+theorem wilson_orthogonal {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) (hd : 0 < d)
+    {m n : ℕ} (hmn : m ≠ n) :
     ∫ y : ℝ in Set.Ioi 0, wilson a b c d m ((y : ℂ) ^ 2) * wilson a b c d n ((y : ℂ) ^ 2) *
-      (‖Gamma (a + I * y) * Gamma (b + I * y) * Gamma (c + I * y) * Gamma (d + I * y) / Gamma (2 * I * y)‖ ^ 2 : ℝ) = 0 := by
+      (‖Gamma (a + I * y) * Gamma (b + I * y) * Gamma (c + I * y) * Gamma (d + I * y) /
+          Gamma (2 * I * y)‖ ^ 2 : ℝ) = 0 := by
   sorry
 
 /-- Identity under the stated parameter and domain assumptions: `∫ y : ℝ in Set.Ioi 0,
@@ -191,8 +194,10 @@ continuousDualHahn a b c m ((y : ℂ) ^ 2) * continuousDualHahn a b c n ((y : �
 then n.factorial * 2 * Real.pi * Gamma (n + (a : ℂ) + b) * Gamma (n + (a : ℂ) + c) * Gamma (n
 + (b : ℂ) + c) else 0`. -/
 @[dlmf 18.25.E8]
-theorem continuousDualHahn_orthogonality {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) (m n : ℕ) :
-    ∫ y : ℝ in Set.Ioi 0, continuousDualHahn a b c m ((y : ℂ) ^ 2) * continuousDualHahn a b c n ((y : ℂ) ^ 2) *
+theorem continuousDualHahn_orthogonality {a b c : ℝ} (ha : 0 < a) (hb : 0 < b)
+    (hc : 0 < c) (m n : ℕ) :
+    ∫ y : ℝ in Set.Ioi 0, continuousDualHahn a b c m ((y : ℂ) ^ 2) *
+        continuousDualHahn a b c n ((y : ℂ) ^ 2) *
       (‖Gamma (a + I * y) * Gamma (b + I * y) * Gamma (c + I * y) / Gamma (2 * I * y)‖ ^ 2 : ℝ) =
       if m = n then n.factorial * 2 * Real.pi * Gamma (n + (a : ℂ) + b) *
         Gamma (n + (a : ℂ) + c) * Gamma (n + (b : ℂ) + c) else 0 := by
@@ -219,7 +224,8 @@ theorem eventually_poch_add_ne_zero (u : ℂ) (k : ℕ) :
 a b c n x))` along `atTop`. -/
 @[dlmf 18.26.E5]
 theorem wilson_limit_continuousDualHahn {a b c : ℂ} (n : ℕ) (x : ℂ) :
-    Tendsto (fun d : ℝ => wilson a b c d n x / poch (a + d) n) atTop (𝓝 (continuousDualHahn a b c n x)) := by
+    Tendsto (fun d : ℝ => wilson a b c d n x / poch (a + d) n) atTop
+        (𝓝 (continuousDualHahn a b c n x)) := by
   unfold wilson continuousDualHahn
   have hT : Tendsto (fun d : ℝ => poch (a + b) n * poch (a + c) n *
       ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k *
@@ -266,7 +272,8 @@ theorem racah_limit_dualHahn {γ δ : ℂ} {N n : ℕ} (x : ℂ) :
 N n x))` along `atTop`. -/
 @[dlmf 18.26.E10]
 theorem racah_limit_hahn {α β : ℂ} {N n : ℕ} (x : ℂ) :
-    Tendsto (fun d : ℝ => racah α β (-(N : ℂ) - 1) d n (x * (x - N + d))) atTop (𝓝 (hahn α β N n x)) := by
+    Tendsto (fun d : ℝ => racah α β (-(N : ℂ) - 1) d n (x * (x - N + d))) atTop
+        (𝓝 (hahn α β N n x)) := by
   unfold racah hahn terminatingHG
   refine tendsto_finsetSum _ fun k _ => ?_
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, one_pow]
@@ -343,7 +350,8 @@ theorem wilson_central_difference {a b c d : ℂ}
     poch_succ_left (a + b) k, poch_succ_left (a + c) k, poch_succ_left (a + d) k,
     poch_succ_left (-((n + 1 : ℕ) : ℂ)), poch_succ_left (((n + 1 : ℕ) : ℂ) + a + b + c + d - 1),
     Nat.factorial_succ,
-    show a + 1 / 2 + (b + 1 / 2) = a + b + 1 by ring, show a + 1 / 2 + (c + 1 / 2) = a + c + 1 by ring,
+    show a + 1 / 2 + (b + 1 / 2) = a + b + 1 by ring, show a + 1 / 2 + (c + 1 / 2) =
+                                                  a + c + 1 by ring,
     show a + 1 / 2 + (d + 1 / 2) = a + d + 1 by ring,
     show -((n + 1 : ℕ) : ℂ) + 1 = -(n : ℂ) by push_cast; ring,
     show ((n + 1 : ℕ) : ℂ) + a + b + c + d - 1 + 1 = (n : ℂ) + (a + 1 / 2) + (b + 1 / 2) +
@@ -362,7 +370,8 @@ theorem wilson_central_difference {a b c d : ℂ}
 @[dlmf 18.26.E15]
 theorem continuousDualHahn_central_difference {a b c : ℂ}
     (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (n : ℕ) (y : ℂ) :
-    continuousDualHahn a b c (n + 1) ((y + I / 2) ^ 2) - continuousDualHahn a b c (n + 1) ((y - I / 2) ^ 2) =
+    continuousDualHahn a b c (n + 1) ((y + I / 2) ^ 2) -
+        continuousDualHahn a b c (n + 1) ((y - I / 2) ^ 2) =
       -2 * I * y * (n + 1) * continuousDualHahn (a + 1 / 2) (b + 1 / 2) (c + 1 / 2) n (y ^ 2) := by
   have hp : ∀ (z : ℂ) (k : ℕ), 0 < z.re → poch (z + 1) k ≠ 0 := fun z k hz =>
     poch_ne_zero_of_re_pos (by simp; linarith) k
@@ -393,7 +402,8 @@ theorem continuousDualHahn_central_difference {a b c : ℂ}
   rw [poch_succ_left (a + b), poch_succ_left (a + c),
     poch_succ_left (a + b) k, poch_succ_left (a + c) k,
     poch_succ_left (-((n + 1 : ℕ) : ℂ)), Nat.factorial_succ,
-    show a + 1 / 2 + (b + 1 / 2) = a + b + 1 by ring, show a + 1 / 2 + (c + 1 / 2) = a + c + 1 by ring,
+    show a + 1 / 2 + (b + 1 / 2) = a + b + 1 by ring, show a + 1 / 2 + (c + 1 / 2) =
+                                                  a + c + 1 by ring,
     show -((n + 1 : ℕ) : ℂ) + 1 = -(n : ℂ) by push_cast; ring]
   have := h0 _ hab; have := h0 _ hac
   have := hp _ k hab; have := hp _ k hac
@@ -426,7 +436,8 @@ theorem wilson_coeff_convolution {a b c d : ℂ}
         poch (n+a+b+c+d-1) k /
         (poch (a+d) k * poch (a+b) k * poch (a+c) k * k !)) := by
     rw [wilson_hypergeometric]
-    simp only [terminatingHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, one_pow]
+    simp only [terminatingHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
+        mul_one, one_pow]
     have hs : (∑ k ∈ Finset.range (n+1),
         poch (-(n : ℂ)) k * (poch (n+a+b+c+d-1) k *
           (poch (a+I*y) k * poch (a-I*y) k)) /
@@ -458,8 +469,12 @@ theorem wilson_coeff_convolution {a b c d : ℂ}
   have hjf : (j ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
   have hlf : ((n-j)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (n-j).factorial_ne_zero
   have hchoose : (n.choose j : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.choose_pos hj').ne'
-  have hEs := poch_ne_zero_of_re_pos (show 0 < (a+b+j).re by change 0 < (a+b).re + (j : ℝ); exact add_pos_of_pos_of_nonneg hab j.cast_nonneg) (n-j)
-  have hFs := poch_ne_zero_of_re_pos (show 0 < (a+c+j).re by change 0 < (a+c).re + (j : ℝ); exact add_pos_of_pos_of_nonneg hac j.cast_nonneg) (n-j)
+  have hEs := poch_ne_zero_of_re_pos
+      (show 0 < (a+b+j).re by change 0 < (a+b).re + (j : ℝ);
+                              exact add_pos_of_pos_of_nonneg hab j.cast_nonneg) (n-j)
+  have hFs := poch_ne_zero_of_re_pos
+      (show 0 < (a+c+j).re by change 0 < (a+c).re + (j : ℝ);
+                              exact add_pos_of_pos_of_nonneg hac j.cast_nonneg) (n-j)
   rw [← hf]
   push_cast
   field_simp [hE j, hF j, hR j, hT n, hT (n-j), hjf, hlf, hchoose, hEs, hFs]
@@ -473,7 +488,8 @@ y) (c - I * y) (b + c) z)`. -/
 theorem wilson_generating_function {a b c d : ℂ}
     (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (had : 0 < (a + d).re)
     (hbc : 0 < (b + c).re) (y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => wilson a b c d n (y ^ 2) / (poch (a + d) n * poch (b + c) n * n.factorial) * z ^ n)
+    HasSum (fun n : ℕ => wilson a b c d n (y ^ 2) /
+        (poch (a + d) n * poch (b + c) n * n.factorial) * z ^ n)
       (₂F₁ (a + I * y) (d + I * y) (a + d) z * ₂F₁ (b - I * y) (c - I * y) (b + c) z) := by
   have h1 := (hasFPowerSeriesOnBall_ordinaryHypergeometric (a+I*y) (d+I*y) (a+d)).hasSum_mul_pow
     (mem_eball_one_of_norm_lt_one hz)
@@ -528,9 +544,11 @@ n.factorial) * z ^ n)` converges to `((1 - z) ^ (-c + I * y) * ₂F₁ (a + I * 
 @[dlmf 18.26.E19]
 theorem continuousDualHahn_generating_function {a b c : ℂ}
     (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => continuousDualHahn a b c n (y ^ 2) / (poch (a + b) n * n.factorial) * z ^ n)
+    HasSum (fun n : ℕ => continuousDualHahn a b c n (y ^ 2) /
+        (poch (a + b) n * n.factorial) * z ^ n)
       ((1 - z) ^ (-c + I * y) * ₂F₁ (a + I * y) (b + I * y) (a + b) z) := by
-  have hg := (hasFPowerSeriesOnBall_ordinaryHypergeometric (a + I * y) (b + I * y) (a + b)).hasSum_mul_pow
+  have hg := (hasFPowerSeriesOnBall_ordinaryHypergeometric (a + I * y) (b + I * y)
+      (a + b)).hasSum_mul_pow
     (mem_eball_one_of_norm_lt_one hz)
   have hb := hasSum_one_sub_cpow_neg (c - I * y) hz
   have h := hasSum_coefficient_convolution hg hb

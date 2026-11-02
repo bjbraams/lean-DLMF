@@ -5,7 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
+public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence
+public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import DLMF.Hypergeometric.ArgumentContinuation
+public import DLMF.Hypergeometric.Solutions
 public import DLMF.QHypergeometric.Basic.SeriesProperties
 public import DLMF.QHypergeometric.Basic.ShiftedFactorials
 public import DLMF.QSeries.Identities
@@ -276,7 +281,8 @@ private lemma summable_qPsiTerm_neg {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (
   exact mul_le_mul_of_nonneg_right (le_of_lt hn) (norm_nonneg _)
 
 /-- Both halves of a bilateral series in its annulus are summable. -/
-private lemma summable_qPsiTerm_natCast_and_neg_succ {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
+private lemma summable_qPsiTerm_natCast_and_neg_succ {a b : List ℂ} {q z : ℂ}
+    (hq0 : q≠0) (hq : ‖q‖<1)
     (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1)
     (hz' : a.length=b.length → ‖z‖<1) :
@@ -415,7 +421,8 @@ theorem qPsi_split_indices {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q
   congr 1
   ring
 
-/-- The normalized principal-power increment tends to its exponent as the real base approaches one. -/
+/-- The normalized principal-power increment tends to its exponent as the real base approaches one.
+-/
 lemma tendsto_cpow_increment (a : ℂ) :
     Tendsto (fun q : ℝ => (1 - (q : ℂ) ^ a) / (1 - (q : ℂ))) (𝓝[<] 1) (𝓝 a) := by
   have hd : HasDerivAt (fun z : ℂ => z ^ a) a 1 := by
@@ -591,7 +598,8 @@ theorem qPhi_finite_classical_limit (a b : List ℂ) (z : ℂ) (N : ℕ)
   exact qPhiTerm_classical_limit a b z n fun x hx j hj => hb x hx j
     (lt_of_lt_of_le hj (Nat.le_of_lt_succ (Finset.mem_range.mp hn)))
 
-/-- Equal-length finite products have a classical ratio limit with no residual power of one minus q. -/
+/-- Equal-length finite products have a classical ratio limit with no residual power of one minus q.
+-/
 lemma tendsto_qPochhammerList_ratio (a b : List ℂ) (n : ℕ) (hlen : a.length = b.length)
     (hb : ∀ x ∈ b, ∀ j < n, x ≠ -(j : ℂ)) :
     Tendsto (fun q : ℝ => qPochhammerList (a.map fun x => (q : ℂ) ^ x) q n /
@@ -777,7 +785,8 @@ theorem zero_phi_zero {q : ℂ} (hq : ‖q‖<1) (z : ℂ) : qPhi [] [] q z=qPoc
       ring
     _ = _ := by simpa using tsum_qExp hq (-z)
 
-/-- The infinite shifted factorial is entire in its first argument for a fixed base in the unit disk. -/
+/-- The infinite shifted factorial is entire in its first argument for a fixed base in the unit
+disk. -/
 theorem qPochhammerInf_analytic {q : ℂ} (hq : ‖q‖<1) :
     AnalyticOnNhd ℂ (fun a : ℂ => qPochhammerInf a q) Set.univ := by
   by_cases hq0 : q=0
@@ -849,7 +858,8 @@ theorem qPsi_analytic_annulus {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖
   let F : ℂ → ℂ := fun w => ∑' n : ℕ, c n * w ^ n
   have hneg : AnalyticAt ℂ F z⁻¹ := by
     apply qPsi_negative_analyticAt hq0 hq hab ha hr
-    simpa [div_mul_eq_div_div, div_eq_mul_inv, norm_mul, mul_assoc, mul_left_comm, mul_comm] using hz.2.1
+    simpa [div_mul_eq_div_div, div_eq_mul_inv, norm_mul, mul_assoc, mul_left_comm,
+        mul_comm] using hz.2.1
   have hpos : AnalyticAt ℂ (qPhi (q :: a) b q) z := by
     by_cases heq : a.length = b.length
     · exact qPhi_analytic_disc hq0 hq hab.1 (by simp; omega) z (hz.2.2 heq)

@@ -112,7 +112,8 @@ theorem kumZ_sector_bound (a b : ℂ) :
   obtain ⟨R, hR⟩ := hb
   refine ⟨K₁, hK₁, R, fun z hzR h1 h2 => ?_⟩
   have := hR ‖z‖ hzR z rfl ⟨h1, h2⟩
-  simpa [DLMF.Hypergeometric.poch_zero, abs_of_nonneg (add_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+  simpa [DLMF.Hypergeometric.poch_zero,
+      abs_of_nonneg (add_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _))
     (norm_nonneg _))] using this
 
 /-- `‖exp ζ‖ ≤ 3` for `‖ζ‖ ≤ 1`. -/
@@ -225,8 +226,11 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
     rw [norm_mul, norm_neg]; gcongr
   have hεab : ‖(a - b) * ε‖ ≤ ‖a - b‖ * η := by
     rw [norm_mul]; gcongr
-  have haη : ‖a‖ * η ≤ 1 / 2 := by nlinarith only [hηM, hη0, norm_nonneg a, norm_nonneg (a - b), hM₀]
-  have habη : ‖a - b‖ * η ≤ 1 / 2 := by nlinarith only [hηM, hη0, norm_nonneg a, norm_nonneg (a - b), hM₀]
+  have haη : ‖a‖ * η ≤ 1 / 2 := by
+                                  nlinarith only [hηM, hη0, norm_nonneg a, norm_nonneg (a - b), hM₀]
+  have habη : ‖a - b‖ * η ≤ 1 / 2 := by
+                                       nlinarith only [hηM, hη0, norm_nonneg a,
+                                         norm_nonneg (a - b), hM₀]
   -- `z` lies in the sector and is large
   have hzim : t / 2 ≤ z.im := by
     have h1 := abs_im_le_norm (z - u)
@@ -244,7 +248,8 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
     refine (abs_im_le_norm ε).trans (hεb.trans ?_)
     nlinarith only [hηM, hM₀1, hη0]
   have hpi := Real.two_le_pi
-  have hbound := hR z (by linarith only [le_abs_self R, hzn, htR]) (by rw [abs_le] at harg; linarith only [harg.1, hpi])
+  have hbound := hR z (by linarith only [le_abs_self R, hzn, htR])
+      (by rw [abs_le] at harg; linarith only [harg.1, hpi])
     (by rw [abs_le] at harg; linarith only [harg.2, hpi])
   -- algebraic identities
   have hz1 : z ^ (a - b) = u ^ (a - b) * exp ((a - b) * ε) := kumZ_cpow_eq hu0 hz0' _

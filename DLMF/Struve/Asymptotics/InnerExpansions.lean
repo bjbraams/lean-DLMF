@@ -344,7 +344,8 @@ theorem struveSc_hasDerivAt_sqrt (s : ℝ) :
   field_simp
   push_cast; ring
 
-/-- At `s`, the function `(struveSc_phiR lam)` has derivative `(lam - (Real.sqrt (1 + s ^ 2))⁻¹)`. -/
+/-- At `s`, the function `(struveSc_phiR lam)` has derivative `(lam - (Real.sqrt (1 + s ^ 2))⁻¹)`.
+-/
 theorem struveSc_hasDerivAt_phiR (lam s : ℝ) :
     HasDerivAt (struveSc_phiR lam) (lam - (Real.sqrt (1 + s ^ 2))⁻¹) s := by
   have h := ((hasDerivAt_id s).const_mul lam).sub (Real.hasDerivAt_arsinh s)
@@ -643,7 +644,8 @@ theorem struveSc_phiR_ge {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs
 
 /-- The phase gap away from the saddle. -/
 theorem struveSc_phiR_gap {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs : 0 ≤ s)
-    (hout : s ∉ Icc (struveSc_s0 lam - struveSc_Q0 lam / 2) (struveSc_s0 lam + struveSc_Q0 lam / 2)) :
+    (hout : s ∉ Icc (struveSc_s0 lam - struveSc_Q0 lam / 2)
+        (struveSc_s0 lam + struveSc_Q0 lam / 2)) :
     struveSc_phiR lam (struveSc_s0 lam) + struveSc_Q0 lam * (struveSc_Q0 lam / 2) ^ 2 / 2 ≤
       struveSc_phiR lam s := by
   set s₀ := struveSc_s0 lam with hs₀

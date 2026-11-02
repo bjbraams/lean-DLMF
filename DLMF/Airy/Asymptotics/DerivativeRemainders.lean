@@ -99,7 +99,8 @@ theorem airyDer_integrable_cauchy {f : ℝ → ℂ} (hf : IntegrableOn f (Ioi 0)
     (hz : z ∈ slitPlane) : IntegrableOn (fun t : ℝ => f t/((t:ℂ)+z)) (Ioi 0) := by
   obtain ⟨δ, hδ, hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz
   have hm : AEStronglyMeasurable (fun t : ℝ => f t/((t:ℂ)+z)) (volume.restrict (Ioi 0)) :=
-    hf.aestronglyMeasurable.mul (by fun_prop : Measurable fun t : ℝ => ((t:ℂ)+z)⁻¹).aestronglyMeasurable
+    hf.aestronglyMeasurable.mul
+        (by fun_prop : Measurable fun t : ℝ => ((t:ℂ)+z)⁻¹).aestronglyMeasurable
   refine (hf.norm.const_mul δ⁻¹).mono' hm ?_
   filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
   have hb := hδb t (le_of_lt ht) z (Metric.mem_ball_self hδ)
@@ -117,7 +118,8 @@ theorem airyDer_U_lower {z : ℂ} (hz : z ≠ 0) :
 
 /-- The kernel relation used to combine the two positive-parameter transforms. -/
 theorem airyDer_U_kernel {t : ℂ} (ht : t ≠ 0) :
-    kummerU (-(7/6)) (-(1/3)) t = t*kummerU (-(1/6)) (2/3) t+(1/6:ℂ)*kummerU (-(1/6)) (-(1/3)) t := by
+    kummerU (-(7/6)) (-(1/3)) t =
+        t*kummerU (-(1/6)) (2/3) t+(1/6:ℂ)*kummerU (-(1/6)) (-(1/3)) t := by
   have h := kummerU_contiguous_shift_a (-(1/6)) (-(1/3)) t ht
   norm_num at h
   linear_combination h
@@ -198,15 +200,19 @@ theorem airyDer_stieltjes {z : ℂ} (hz : z ∈ slitPlane) :
   have hint : z*(∫ t in Ioi (0:ℝ), f t/((t:ℂ)+z))+
       (∫ t in Ioi (0:ℝ), g t/((t:ℂ)+z)) =
       Gamma (5/6)*Gamma (7/6)+(1/6:ℂ)*(∫ t in Ioi (0:ℝ), p t/((t:ℂ)+z)) := by
-    rw [← integral_const_mul, ← integral_add ((airyDer_integrable_cauchy hf hz).const_mul _) (airyDer_integrable_cauchy hg hz),
-      setIntegral_congr_fun measurableSet_Ioi hpt, integral_add hf ((airyDer_integrable_cauchy hp hz).const_mul _), integral_const_mul]
+    rw [← integral_const_mul,
+        ← integral_add ((airyDer_integrable_cauchy hf hz).const_mul _)
+        (airyDer_integrable_cauchy hg hz),
+      setIntegral_congr_fun measurableSet_Ioi hpt,
+          integral_add hf ((airyDer_integrable_cauchy hp hz).const_mul _), integral_const_mul]
     rw [show (∫ t in Ioi (0:ℝ), f t)=Gamma (5/6)*Gamma (7/6) from airyDer_constant_moment]
   have hu := airyDer_U_lower hz0
   rw [h1,h2,hG] at hu
   have hI1 : (∫ t in Ioi (0:ℝ), kummerU (-(1/6)) (2/3) t*exp (-(t:ℂ))*(t:ℂ)^(-(1/6):ℂ)/((t:ℂ)+z)) =
       ∫ t in Ioi (0:ℝ), f t/((t:ℂ)+z) := by
     apply setIntegral_congr_fun measurableSet_Ioi; intro t ht; dsimp only [f]; ring
-  have hI2 : (∫ t in Ioi (0:ℝ), kummerU (-(7/6)) (-(1/3)) t*exp (-(t:ℂ))*(t:ℂ)^(-(1/6):ℂ)/((t:ℂ)+z)) =
+  have hI2 : (∫ t in Ioi (0:ℝ),
+      kummerU (-(7/6)) (-(1/3)) t*exp (-(t:ℂ))*(t:ℂ)^(-(1/6):ℂ)/((t:ℂ)+z)) =
       ∫ t in Ioi (0:ℝ), g t/((t:ℂ)+z) := by
     apply setIntegral_congr_fun measurableSet_Ioi; intro t ht; dsimp only [g]; ring
   rw [hI1,hI2] at hu
@@ -272,7 +278,8 @@ theorem airyDer_normalizedU_nonneg {t : ℝ} (ht : 0 < t) :
     have hu0 : 0 < u := hu
     have : 0 ≤ 1+u := by linarith
     positivity
-  exact mul_nonneg (div_nonneg (Real.rpow_nonneg ht.le _) (Real.Gamma_pos_of_pos (by norm_num)).le) hi
+  exact mul_nonneg (div_nonneg (Real.rpow_nonneg ht.le _)
+      (Real.Gamma_pos_of_pos (by norm_num)).le) hi
 
 /-- The real density of the Airy derivative Stieltjes transform. -/
 def airyDer_density (t : ℝ) : ℝ := Real.exp (-t)*(airyDer_normalizedU t).re

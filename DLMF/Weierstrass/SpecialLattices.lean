@@ -232,9 +232,12 @@ theorem exists_real_data_of_isRectangular {H : HalfPeriods} (h : H.IsRectangular
   have hB := one_le_jacobiThetaThreeImag ht
   have hC := jacobiThetaFourImag_pos ht
   have hA := jacobiThetaTwoImag_pos ht
-  have h2 : jacobiThetaTwoTau 0 H.tau = (jacobiThetaTwoImag t : ℂ) := by rw [hτ, jacobiThetaTwoTau_zero_I_mul_eq_div_sqrt ht]; rfl
-  have h3 : jacobiThetaThreeTau 0 H.tau = (jacobiThetaThreeImag t : ℂ) := by rw [hτ, jacobiThetaThreeTau_zero_I_mul_eq_imag]
-  have h4 : jacobiThetaFourTau 0 H.tau = (jacobiThetaFourImag t : ℂ) := by rw [hτ, jacobiThetaFourTau_zero_I_mul_eq_imag]
+  have h2 : jacobiThetaTwoTau 0 H.tau = (jacobiThetaTwoImag t : ℂ) :=
+      by rw [hτ, jacobiThetaTwoTau_zero_I_mul_eq_div_sqrt ht]; rfl
+  have h3 : jacobiThetaThreeTau 0 H.tau = (jacobiThetaThreeImag t : ℂ) :=
+      by rw [hτ, jacobiThetaThreeTau_zero_I_mul_eq_imag]
+  have h4 : jacobiThetaFourTau 0 H.tau = (jacobiThetaFourImag t : ℂ) :=
+      by rw [hτ, jacobiThetaFourTau_zero_I_mul_eq_imag]
   obtain ⟨d3, d2⟩ := H.e_one_sub_e_three_and_e_one_sub_e_two
   have hs := H.e_sum
   set c : ℝ := (π / (2 * a)) ^ 2 with hc
@@ -242,7 +245,8 @@ theorem exists_real_data_of_isRectangular {H : HalfPeriods} (h : H.IsRectangular
   rw [hcc, h3] at d3
   rw [hcc, h4] at d2
   have hB0 : (jacobiThetaThreeImag t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (by linarith)
-  refine ⟨a, c, jacobiThetaTwoImag t, jacobiThetaThreeImag t, jacobiThetaFourImag t, h1r, hω1, rfl, by positivity, hA, hB, hC,
+  refine ⟨a, c, jacobiThetaTwoImag t, jacobiThetaThreeImag t, jacobiThetaFourImag t, h1r, hω1, rfl,
+      by positivity, hA, hB, hC,
     jacobiThetaThreeImag_pow_four ht, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · push_cast; linear_combination (d3 + d2 + hs) / 3
   · push_cast; linear_combination (d3 - 2 * d2 + hs) / 3
@@ -255,7 +259,8 @@ theorem exists_real_data_of_isRectangular {H : HalfPeriods} (h : H.IsRectangular
 @[dlmf 23.5.ii]
 theorem IsRectangular.discriminant_pos {H : HalfPeriods} (h : H.IsRectangular) :
     (latticeDiscriminant H.periodPair).im = 0 ∧ 0 < (latticeDiscriminant H.periodPair).re := by
-  obtain ⟨a, c, A, B, C, -, -, -, hc, hA, hB, hC, hJ, e1, e2, e3, -⟩ := exists_real_data_of_isRectangular h
+  obtain ⟨a, c, A, B, C, -, -, -, hc, hA, hB, hC, hJ, e1, e2, e3, -⟩ :=
+      exists_real_data_of_isRectangular h
   rw [H.latticeDiscriminant_eq, e1, e2, e3]
   have hA4 : 0 < A ^ 4 := by positivity
   have hC4 : 0 < C ^ 4 := by positivity
@@ -275,7 +280,8 @@ theorem IsRectangular.discriminant_pos {H : HalfPeriods} (h : H.IsRectangular) :
 theorem IsRectangular.roots {H : HalfPeriods} (h : H.IsRectangular) :
     (H.e 1).im = 0 ∧ (H.e 2).im = 0 ∧ (H.e 3).im = 0 ∧
       (H.e 2).re < (H.e 1).re ∧ (H.e 3).re < (H.e 2).re ∧ 0 < (H.e 1).re ∧ (H.e 3).re < 0 := by
-  obtain ⟨a, c, A, B, C, -, -, -, hc, hA, hB, hC, hJ, e1, e2, e3, -⟩ := exists_real_data_of_isRectangular h
+  obtain ⟨a, c, A, B, C, -, -, -, hc, hA, hB, hC, hJ, e1, e2, e3, -⟩ :=
+      exists_real_data_of_isRectangular h
   rw [e1, e2, e3]
   simp only [ofReal_im, ofReal_re, true_and]
   have hA4 : 0 < A ^ 4 := by positivity

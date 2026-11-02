@@ -173,7 +173,8 @@ def ferrersOdd (ν μ : ℂ) (x : ℝ) : ℂ :=
   (x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2))
 
 /-- `1-x²` lies in the slit plane for `x ∈ (-1,1)`. -/
-theorem ferrers_one_sub_sq_mem_slitPlane {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 1-(x:ℂ)^2 ∈ slitPlane := by
+theorem ferrers_one_sub_sq_mem_slitPlane {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 1-(x:ℂ)^2 ∈
+    slitPlane := by
   left
   simp only [sub_re,one_re,pow_two,mul_re,ofReal_re,ofReal_im,mul_zero,sub_zero]
   nlinarith [hx.1,hx.2]
@@ -291,11 +292,13 @@ theorem legendre_Gamma_minus (ν μ : ℂ) :
 
 /-- Reciprocal duplication for `Γ(μ-ν)`. -/
 theorem legendre_recip_Gamma_sub (ν μ : ℂ) :
-    (Gamma (μ-ν))⁻¹ = (Gamma ((μ-ν)/2))⁻¹*(Gamma ((1-ν+μ)/2))⁻¹*(2*2^ν*((2:ℂ)^μ)⁻¹)*(Real.sqrt π:ℂ) := by
+    (Gamma (μ-ν))⁻¹ = (Gamma ((μ-ν)/2))⁻¹*(Gamma
+        ((1-ν+μ)/2))⁻¹*(2*2^ν*((2:ℂ)^μ)⁻¹)*(Real.sqrt π:ℂ) := by
   have h := legendre_recip_duplication (μ-ν-1)
   rw [show μ-ν-1+1 = μ-ν by ring,
     show (μ-ν-1+2)/2 = (1-ν+μ)/2 by ring] at h
-  rw [h, show -(μ-ν-1) = 1+ν-μ by ring, cpow_sub _ _ two_ne_zero, cpow_add _ _ two_ne_zero, cpow_one]
+  rw [h, show -(μ-ν-1) = 1+ν-μ by ring, cpow_sub _ _ two_ne_zero,
+                                    cpow_add _ _ two_ne_zero, cpow_one]
   ring
 
 /-- Regularity of `ν+μ` makes both half-argument Gamma factors finite. -/
@@ -359,7 +362,8 @@ theorem legendre_sin_sub_nat_mul_pi (z : ℂ) (m : ℕ) : sin (z-m*π) = (-1)^m*
   have hs : sin ((m:ℂ)*π) = 0 := by
     rw [show (m:ℂ)*π = ((m*π:ℝ):ℂ) by push_cast; ring, ← ofReal_sin, Real.sin_nat_mul_pi]; simp
   have hc : cos ((m:ℂ)*π) = (-1)^m := by
-    rw [show (m:ℂ)*π = ((m*π:ℝ):ℂ) by push_cast; ring, ← ofReal_cos, Real.cos_nat_mul_pi]; push_cast; rfl
+    rw [show (m:ℂ)*π = ((m*π:ℝ):ℂ) by push_cast; ring, ← ofReal_cos,
+                                        Real.cos_nat_mul_pi]; push_cast; rfl
   rw [sin_sub, hs, hc]; ring
 
 /-- `cos(z-mπ) = (-1)^m cos z` for complex `z`. -/
@@ -367,12 +371,14 @@ theorem legendre_cos_sub_nat_mul_pi (z : ℂ) (m : ℕ) : cos (z-m*π) = (-1)^m*
   have hs : sin ((m:ℂ)*π) = 0 := by
     rw [show (m:ℂ)*π = ((m*π:ℝ):ℂ) by push_cast; ring, ← ofReal_sin, Real.sin_nat_mul_pi]; simp
   have hc : cos ((m:ℂ)*π) = (-1)^m := by
-    rw [show (m:ℂ)*π = ((m*π:ℝ):ℂ) by push_cast; ring, ← ofReal_cos, Real.cos_nat_mul_pi]; push_cast; rfl
+    rw [show (m:ℂ)*π = ((m*π:ℝ):ℂ) by push_cast; ring, ← ofReal_cos,
+                                        Real.cos_nat_mul_pi]; push_cast; rfl
   rw [cos_sub, hs, hc]; ring
 
 /-- `(1/2)^(-μ) = 2^μ`. -/
 theorem half_cpow_neg (μ : ℂ) : (1/2:ℂ)^(-μ) = 2^μ := by
-  rw [show (1/2:ℂ) = ((2:ℝ):ℂ)⁻¹ by norm_num, inv_cpow_ofReal_nonneg (by norm_num), cpow_neg, inv_inv]
+  rw [show (1/2:ℂ) = ((2:ℝ):ℂ)⁻¹ by norm_num, inv_cpow_ofReal_nonneg (by norm_num),
+                                      cpow_neg, inv_inv]
   norm_num
 
 /-- The even quadratic Gauss pullback `(1-w²)^(-μ/2) 𝐅(a,b;c;w²)` is stationary at `0`. -/
@@ -382,7 +388,8 @@ theorem hasDerivAt_quadratic_even (a b c μ : ℂ) :
   have hg := (hasStrictDerivAt_cpow_const (c := -μ/2) h1).hasDerivAt.comp (0:ℂ)
     ((hasDerivAt_pow 2 (0:ℂ)).const_sub 1)
   have h0 : (0:ℂ)^2 ∈ cutPlane := by rw [zero_pow two_ne_zero]; exact zero_mem_cutPlane
-  have hF := (differentiableAt_regularizedGaussHG a b c h0).hasDerivAt.comp (0:ℂ) (h := fun w : ℂ => w^2)
+  have hF := (differentiableAt_regularizedGaussHG a b c h0).hasDerivAt.comp (0:ℂ)
+      (h := fun w : ℂ => w^2)
     (hasDerivAt_pow 2 (0:ℂ))
   refine (hg.mul hF).congr_deriv ?_
   simp
@@ -399,7 +406,8 @@ theorem ferrersP_eq_quadratic (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
     ferrersP ν μ x = 2^μ*(π/(Gamma ((1-ν-μ)/2)*Gamma ((ν-μ+2)/2))*
         ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) -
       π/(Gamma (-(ν+μ)/2)*Gamma ((ν-μ+1)/2))*
-        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2)))) := by
+        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
+            ((x:ℂ)^2)))) := by
   have hz : ‖((1-(x:ℂ))/2)‖<1 := by
     rw [show (1-(x:ℂ))/2=(((1-x)/2:ℝ):ℂ) by push_cast; ring,
       Complex.norm_real,Real.norm_eq_abs,abs_lt]
@@ -456,21 +464,24 @@ theorem ferrersP_neg_even_odd (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
 
 /-- `𝖰^μ_ν` in the even/odd basis; this is its definition (DLMF 14.3.12). -/
 theorem ferrersQ_even_odd (ν μ : ℂ) (x : ℝ) :
-    ferrersQ ν μ x = 2^μ*π/2*(-sin ((ν+μ)*π/2)*Gamma ((ν+μ+1)/2)*(Gamma ((ν-μ+2)/2))⁻¹*ferrersEven ν μ x +
+    ferrersQ ν μ x = 2^μ*π/2*(-sin ((ν+μ)*π/2)*Gamma
+        ((ν+μ+1)/2)*(Gamma ((ν-μ+2)/2))⁻¹*ferrersEven ν μ x +
       cos ((ν+μ)*π/2)*Gamma ((ν+μ+2)/2)*(Gamma ((ν-μ+1)/2))⁻¹*ferrersOdd ν μ x) := by
   simp only [ferrersQ, ferrersW1, ferrersW2, ferrersEven, ferrersOdd]
   ring
 
 /-- `𝖰^{-μ}_ν` in the even/odd basis of order `μ`. -/
 theorem ferrersQ_neg_even_odd (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersQ ν (-μ) x = 2^(-μ)*π/2*(-sin ((ν-μ)*π/2)*Gamma ((ν-μ+1)/2)*(Gamma ((ν+μ+2)/2))⁻¹*ferrersEven ν μ x +
+    ferrersQ ν (-μ) x = 2^(-μ)*π/2*(-sin ((ν-μ)*π/2)*Gamma
+        ((ν-μ+1)/2)*(Gamma ((ν+μ+2)/2))⁻¹*ferrersEven ν μ x +
       cos ((ν-μ)*π/2)*Gamma ((ν-μ+2)/2)*(Gamma ((ν+μ+1)/2))⁻¹*ferrersOdd ν μ x) := by
   rw [ferrersQ_even_odd ν (-μ) x, ferrersEven_neg_order ν μ hx, ferrersOdd_neg_order ν μ hx]
   ring_nf
 
 /-- `𝖰^μ_{-ν-1}` in the even/odd basis of degree `ν`. -/
 theorem ferrersQ_neg_degree_even_odd (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersQ (-ν-1) μ x = 2^μ*π/2*(cos ((ν-μ)*π/2)*Gamma ((μ-ν)/2)*(Gamma ((1-ν-μ)/2))⁻¹*ferrersEven ν μ x -
+    ferrersQ (-ν-1) μ x =
+        2^μ*π/2*(cos ((ν-μ)*π/2)*Gamma ((μ-ν)/2)*(Gamma ((1-ν-μ)/2))⁻¹*ferrersEven ν μ x -
       sin ((ν-μ)*π/2)*Gamma ((1-ν+μ)/2)*(Gamma (-(ν+μ)/2))⁻¹*ferrersOdd ν μ x) := by
   have hs : sin ((-ν-1+μ)*π/2) = -cos ((ν-μ)*π/2) := by
     rw [show (-ν-1+μ)*π/2 = -((ν-μ)*π/2+π/2) by ring, sin_neg, sin_add_pi_div_two]
@@ -489,8 +500,10 @@ theorem ferrersP_regular {ν μ : ℂ} (h : LegendreQRegular ν μ) {x : ℝ} (h
   ring
 
 /-- `𝖯^{-μ}_ν` in the even/odd basis of order `μ` when `ν-μ` is regular. -/
-theorem ferrersP_neg_regular {ν μ : ℂ} (h : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP ν (-μ) x = 2^(-μ)*(cos ((ν-μ)*π/2)*Gamma ((ν-μ+1)/2)/Gamma ((ν+μ+2)/2)*ferrersEven ν μ x +
+theorem ferrersP_neg_regular {ν μ : ℂ} (h : LegendreQRegular ν (-μ)) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    ferrersP ν (-μ) x = 2^(-μ)*(cos ((ν-μ)*π/2)*Gamma ((ν-μ+1)/2)/Gamma
+        ((ν+μ+2)/2)*ferrersEven ν μ x +
       sin ((ν-μ)*π/2)*Gamma ((ν-μ+2)/2)/Gamma ((ν+μ+1)/2)*ferrersOdd ν μ x) := by
   rw [ferrersP_regular h hx, ferrersEven_neg_order ν μ hx, ferrersOdd_neg_order ν μ hx]
   ring_nf
@@ -498,8 +511,10 @@ theorem ferrersP_neg_regular {ν μ : ℂ} (h : LegendreQRegular ν (-μ)) {x : 
 /-- DLMF 14.3.2: for non-integer `μ`, `ν+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `𝖰^μ_ν(x) = π/(2
 sin(μπ)) (cos(μπ) 𝖯^μ_ν(x) - Γ(ν+μ+1)/Γ(ν-μ+1) 𝖯^{-μ}_ν(x))`. -/
 @[dlmf 14.3.E2]
-theorem ferrersQ_hypergeometric {ν μ : ℂ} (h : LegendreQRegular ν μ) (hμ : ∀ n : ℤ, μ ≠ n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersQ ν μ x = π/(2*sin (μ*π))*(cos (μ*π)*ferrersP ν μ x-Gamma (ν+μ+1)/Gamma (ν-μ+1)*ferrersP ν (-μ) x) := by
+theorem ferrersQ_hypergeometric {ν μ : ℂ} (h : LegendreQRegular ν μ) (hμ : ∀ n : ℤ, μ ≠ n) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    ferrersQ ν μ x = π/(2*sin (μ*π))*(cos (μ*π)*ferrersP ν μ x-Gamma (ν+μ+1)/Gamma (ν-μ+1)*ferrersP
+        ν (-μ) x) := by
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero h
   have hs : sin (μ*π) ≠ 0 := by
     intro h0
@@ -510,7 +525,8 @@ theorem ferrersQ_hypergeometric {ν μ : ℂ} (h : LegendreQRegular ν μ) (hμ 
   have k1 : Gamma ((ν+μ+1)/2)*(Gamma ((ν+μ+1)/2))⁻¹ = 1 := mul_inv_cancel₀ hg1
   have k2 : Gamma ((ν+μ+2)/2)*(Gamma ((ν+μ+2)/2))⁻¹ = 1 := mul_inv_cancel₀ hg2
   have pyth := sin_sq_add_cos_sq ((ν+μ)*π/2)
-  rw [ferrersQ_even_odd, ferrersP_even_odd ν μ hx, ferrersP_neg_even_odd ν μ hx, legendre_Gamma_ratio,
+  rw [ferrersQ_even_odd, ferrersP_even_odd ν μ hx, ferrersP_neg_even_odd ν μ hx,
+      legendre_Gamma_ratio,
     cpow_neg, div_mul_eq_mul_div (π:ℂ) (2*sin (μ*π)), eq_div_iff (mul_ne_zero two_ne_zero hs)]
   have hμπ : μ*π = (ν+μ)*π/2 - (ν-μ)*π/2 := by ring
   rw [hμπ, sin_sub, cos_sub]
@@ -551,16 +567,20 @@ theorem continuous_recip_Gamma : Continuous fun s : ℂ => (Gamma s)⁻¹ := by
   simpa [one_div] using Complex.differentiable_one_div_Gamma.continuous
 
 /-- `𝖰^μ_ν(x)` is continuous in the order at a regular parameter. -/
-theorem continuousAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRegular ν μ₀) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem continuousAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRegular ν μ₀) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     ContinuousAt (fun μ => ferrersQ ν μ x) μ₀ := by
   have h1 : ∀ m : ℕ, (ν+μ₀+1)/2 ≠ -m := fun m hm => h (2*m) (by push_cast; linear_combination 2*hm)
-  have h2 : ∀ m : ℕ, (ν+μ₀+2)/2 ≠ -m := fun m hm => h (2*m+1) (by push_cast; linear_combination 2*hm)
+  have h2 : ∀ m : ℕ, (ν+μ₀+2)/2 ≠ -m := fun m hm =>
+      h (2*m+1) (by push_cast; linear_combination 2*hm)
   have c1 : ContinuousAt (fun μ => Gamma ((ν+μ+1)/2)) μ₀ :=
     ContinuousAt.comp (g := Gamma) (differentiableAt_Gamma _ h1).continuousAt (by fun_prop)
   have c2 : ContinuousAt (fun μ => Gamma ((ν+μ+2)/2)) μ₀ :=
     ContinuousAt.comp (g := Gamma) (differentiableAt_Gamma _ h2).continuousAt (by fun_prop)
-  have r1 := (continuous_recip_Gamma.comp (by fun_prop : Continuous fun μ : ℂ => (ν-μ+2)/2)).continuousAt (x := μ₀)
-  have r2 := (continuous_recip_Gamma.comp (by fun_prop : Continuous fun μ : ℂ => (ν-μ+1)/2)).continuousAt (x := μ₀)
+  have r1 := (continuous_recip_Gamma.comp
+      (by fun_prop : Continuous fun μ : ℂ => (ν-μ+2)/2)).continuousAt (x := μ₀)
+  have r2 := (continuous_recip_Gamma.comp
+      (by fun_prop : Continuous fun μ : ℂ => (ν-μ+1)/2)).continuousAt (x := μ₀)
   have hne := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hx)
   have p2 : Continuous fun μ : ℂ => (2:ℂ)^μ := continuous_const_cpow' (by norm_num)
   have pw : Continuous fun μ : ℂ => (1-(x:ℂ)^2)^(-μ/2) :=
@@ -574,7 +594,8 @@ theorem continuousAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRegular ν μ
   unfold ferrersQ ferrersW1 ferrersW2
   exact ((continuousAt_const.mul hs.continuousAt).mul ((((p2.continuousAt.mul c1).mul r1).mul
     pw.continuousAt).mul g1.continuousAt)).add ((continuousAt_const.mul hc.continuousAt).mul
-    (((((p2.continuousAt.mul c2).mul r2).mul continuousAt_const).mul pw.continuousAt).mul g2.continuousAt))
+    (((((p2.continuousAt.mul c2).mul r2).mul continuousAt_const).mul pw.continuousAt).mul
+        g2.continuousAt))
 
 /-- An affine image of a punctured neighbourhood eventually avoids the poles of `Γ`. -/
 theorem eventually_affine_ne_neg_nat {a : ℂ} (ha : a ≠ 0) (b μ : ℂ) :
@@ -600,9 +621,13 @@ theorem eventually_affine_ne_neg_nat {a : ℂ} (ha : a ≠ 0) (b μ : ℂ) :
 the right-hand side `π/(2 sin(μπ)) (cos(μπ) 𝖯^μ_ν(x) - Γ(ν+μ+1)/Γ(ν-μ+1) 𝖯^{-μ}_ν(x))` tends to
 `𝖰^m_ν(x)` as `μ → m`, `μ ≠ m`. -/
 @[dlmf 14.3.E2]
-theorem ferrersQ_order_limit {ν : ℂ} (m : ℤ) (h : LegendreQRegular ν m) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Tendsto (fun μ : ℂ => π/(2*sin (μ*π))*(cos (μ*π)*ferrersP ν μ x-Gamma (ν+μ+1)/Gamma (ν-μ+1)*ferrersP ν (-μ) x)) (𝓝[≠] (m:ℂ)) (𝓝 (ferrersQ ν m x)) := by
-  have hc := (continuousAt_ferrersQ_order h hx).tendsto.mono_left (nhdsWithin_le_nhds (s := {(m:ℂ)}ᶜ))
+theorem ferrersQ_order_limit {ν : ℂ} (m : ℤ) (h : LegendreQRegular ν m) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    Tendsto (fun μ : ℂ =>
+        π/(2*sin (μ*π))*(cos (μ*π)*ferrersP ν μ x-Gamma (ν+μ+1)/Gamma (ν-μ+1)*ferrersP ν (-μ) x))
+        (𝓝[≠] (m:ℂ)) (𝓝 (ferrersQ ν m x)) := by
+  have hc := (continuousAt_ferrersQ_order h hx).tendsto.mono_left
+      (nhdsWithin_le_nhds (s := {(m:ℂ)}ᶜ))
   refine hc.congr' ?_
   have hG0 : (Gamma (ν+m+1))⁻¹ ≠ 0 := inv_ne_zero (Complex.Gamma_ne_zero fun k hk =>
     h k (by linear_combination hk))
@@ -610,7 +635,8 @@ theorem ferrersQ_order_limit {ν : ℂ} (m : ℤ) (h : LegendreQRegular ν m) {x
     ((continuous_recip_Gamma.comp (by fun_prop : Continuous fun μ : ℂ => ν+μ+1)).continuousAt
       (x := (m:ℂ))).eventually_ne hG0
   have hev2 : ∀ᶠ μ in 𝓝 (m:ℂ), μ ∈ Metric.ball (m:ℂ) 1 := Metric.ball_mem_nhds _ one_pos
-  filter_upwards [nhdsWithin_le_nhds hev1, nhdsWithin_le_nhds hev2, self_mem_nhdsWithin] with μ hμ1 hμ2 hμ3
+  filter_upwards [nhdsWithin_le_nhds hev1, nhdsWithin_le_nhds hev2, self_mem_nhdsWithin]
+      with μ hμ1 hμ2 hμ3
   have hreg : LegendreQRegular ν μ := fun k hk => hμ1 (by
     rw [show ν+μ+1 = -(k:ℂ) by linear_combination hk, Complex.Gamma_neg_nat_eq_zero, inv_zero])
   have hnot : ∀ n : ℤ, μ ≠ n := by

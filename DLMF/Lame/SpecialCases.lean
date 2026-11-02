@@ -24,8 +24,10 @@ as `k → 0⁺`, `ν → ∞` with `k²ν(ν+1) = 4θ` (DLMF §29.5).
 
 ## Main results
 
-* `Real.lameAk_zero`, `Real.lameBk_zero`: `a^m_ν(0) = b^m_ν(0) = m²` (DLMF 29.5.1).
-* `Real.lameEck_zero_zero`, `Real.lameEck_modulus_zero`, `Real.lameEsk_modulus_zero`:
+* `Real.lameAk_zero`, `Real.lameAk_zero'`, `Real.lameBk_zero`, `Real.lameBk_zero'`:
+  `a^m_ν(0) = b^m_ν(0) = m²` (DLMF 29.5.1).
+* `Real.lameEck_zero_zero`, `Real.lameEck_zero_zero'`, `Real.lameEck_modulus_zero`,
+  `Real.lameEck_modulus_zero'`, `Real.lameEsk_modulus_zero`, `Real.lameEsk_modulus_zero'`:
   `Ec^0_ν(x, 0) = 2^{-1/2}`, `Ec^m_ν(x, 0) = cos(m(π/2 - x))`, `Es^m_ν(x, 0) = sin(m(π/2 - x))`
   (DLMF 29.5.2–29.5.3).
 * `Real.tendsto_lameAk_one`, `Real.tendsto_lameBk_one`: the eigenvalue limits DLMF 29.5.4.
@@ -79,7 +81,8 @@ private lemma isZeroModulusSolution_unique {h : ℝ} {w g g' : ℝ → ℝ} (hw 
   exact this
 
 /-- A nonzero solution with `w' 0 = 0` has `w 0 ≠ 0`, and one with `w 0 = 0` has `w' 0 ≠ 0`. -/
-private lemma isZeroModulusSolution_init_ne_zero {h : ℝ} {w : ℝ → ℝ} (hw : IsZeroModulusSolution h w) (hne : w ≠ 0) :
+private lemma isZeroModulusSolution_init_ne_zero {h : ℝ} {w : ℝ → ℝ}
+    (hw : IsZeroModulusSolution h w) (hne : w ≠ 0) :
     ¬ (w 0 = 0 ∧ deriv w 0 = 0) := by
   rintro ⟨h0, h1⟩
   refine hne (isZeroModulusSolution_unique hw (g := 0) (g' := 0) (fun t => ⟨?_, ?_⟩) h0 h1).1
@@ -88,7 +91,8 @@ private lemma isZeroModulusSolution_init_ne_zero {h : ℝ} {w : ℝ → ℝ} (hw
 
 /-- For `h > 0` a solution of `w'' = -h w` is
 `w(x) = w(0) cos(√h x) + w'(0)/√h · sin(√h x)`, together with the formula for `w'`. -/
-private lemma isZeroModulusSolution_eq_of_pos {h : ℝ} {w : ℝ → ℝ} (hh : 0 < h) (hw : IsZeroModulusSolution h w) (x : ℝ) :
+private lemma isZeroModulusSolution_eq_of_pos {h : ℝ} {w : ℝ → ℝ} (hh : 0 < h)
+    (hw : IsZeroModulusSolution h w) (x : ℝ) :
     w x = w 0 * Real.cos (√h * x) + deriv w 0 / √h * Real.sin (√h * x) ∧
       deriv w x = -(w 0 * √h * Real.sin (√h * x)) + deriv w 0 * Real.cos (√h * x) := by
   obtain ⟨s, hs, rfl⟩ : ∃ s, 0 < s ∧ h = s ^ 2 :=
@@ -110,14 +114,16 @@ private lemma isZeroModulusSolution_eq_of_pos {h : ℝ} {w : ℝ → ℝ} (hh : 
 /-- For `h = 0` a solution of `w'' = 0` is `w(x) = w(0) + w'(0) x`, with `w' ≡ w'(0)`. -/
 private lemma isZeroModulusSolution_zero_eq {w : ℝ → ℝ} (hw : IsZeroModulusSolution 0 w) (x : ℝ) :
     w x = w 0 + deriv w 0 * x ∧ deriv w x = deriv w 0 := by
-  have := isZeroModulusSolution_unique hw (g := fun t => w 0 + deriv w 0 * t) (g' := fun _ => deriv w 0)
+  have := isZeroModulusSolution_unique hw (g := fun t => w 0 + deriv w 0 * t)
+      (g' := fun _ => deriv w 0)
     (fun t => ⟨by simpa using ((hasDerivAt_id t).const_mul (deriv w 0)).const_add (w 0),
       by simpa using hasDerivAt_const t (deriv w 0)⟩) (by simp) (by simp)
   exact ⟨congrFun this.1 x, congrFun this.2 x⟩
 
 /-- For `h < 0` a solution of `w'' = -h w` is
 `w(x) = w(0) cosh(√(-h) x) + w'(0)/√(-h) · sinh(√(-h) x)`, together with the formula for `w'`. -/
-private lemma isZeroModulusSolution_eq_of_neg {h : ℝ} {w : ℝ → ℝ} (hh : h < 0) (hw : IsZeroModulusSolution h w) (x : ℝ) :
+private lemma isZeroModulusSolution_eq_of_neg {h : ℝ} {w : ℝ → ℝ} (hh : h < 0)
+    (hw : IsZeroModulusSolution h w) (x : ℝ) :
     w x = w 0 * Real.cosh (√(-h) * x) + deriv w 0 / √(-h) * Real.sinh (√(-h) * x) ∧
       deriv w x = w 0 * √(-h) * Real.sinh (√(-h) * x) + deriv w 0 * Real.cosh (√(-h) * x) := by
   obtain ⟨s, hs, rfl⟩ : ∃ s, 0 < s ∧ h = -s ^ 2 :=
@@ -137,7 +143,8 @@ private lemma isZeroModulusSolution_eq_of_neg {h : ℝ} {w : ℝ → ℝ} (hh : 
   exact ⟨congrFun this.1 x, congrFun this.2 x⟩
 
 /-- If `s > 0` and `sin(sπ/2) = 0`, then `s = 2n` for some natural `n > 0`. -/
-private lemma exists_eq_two_mul_of_sin_mul_pi_div_two_eq_zero {s : ℝ} (hs : 0 < s) (h : Real.sin (s * (π / 2)) = 0) :
+private lemma exists_eq_two_mul_of_sin_mul_pi_div_two_eq_zero {s : ℝ} (hs : 0 < s)
+    (h : Real.sin (s * (π / 2)) = 0) :
     ∃ n : ℕ, 0 < n ∧ s = 2 * n := by
   obtain ⟨n, hn⟩ := Real.sin_eq_zero_iff.mp h
   have hs' : s = 2 * n := by
@@ -155,7 +162,8 @@ private lemma exists_eq_two_mul_of_sin_mul_pi_div_two_eq_zero {s : ℝ} (hs : 0 
   rw [this]
 
 /-- If `s > 0` and `cos(sπ/2) = 0`, then `s = 2n + 1` for some natural `n`. -/
-private lemma exists_eq_two_mul_add_one_of_cos_mul_pi_div_two_eq_zero {s : ℝ} (hs : 0 < s) (h : Real.cos (s * (π / 2)) = 0) :
+private lemma exists_eq_two_mul_add_one_of_cos_mul_pi_div_two_eq_zero {s : ℝ} (hs : 0 < s)
+    (h : Real.cos (s * (π / 2)) = 0) :
     ∃ n : ℕ, s = 2 * n + 1 := by
   obtain ⟨n, hn⟩ := Real.cos_eq_zero_iff.mp h
   have hs' : s = 2 * n + 1 := by
@@ -181,10 +189,12 @@ def zeroModulusEigenfunction (N : ℕ) (oddK : Bool) (x : ℝ) : ℝ :=
 def zeroModulusEigenfunctionDeriv (N : ℕ) (oddK : Bool) (x : ℝ) : ℝ :=
   if oddK then -(N * Real.cos (N * (π / 2 - x))) else N * Real.sin (N * (π / 2 - x))
 
-/-- `zeroModulusEigenfunction N oddK` has derivative `zeroModulusEigenfunctionDeriv N oddK`, whose derivative is `-N² zeroModulusEigenfunction`. -/
+/-- `zeroModulusEigenfunction N oddK` has derivative `zeroModulusEigenfunctionDeriv N oddK`, whose
+derivative is `-N² zeroModulusEigenfunction`. -/
 private lemma hasDerivAt_zeroModulusEigenfunction (N : ℕ) (oddK : Bool) (x : ℝ) :
     HasDerivAt (zeroModulusEigenfunction N oddK) (zeroModulusEigenfunctionDeriv N oddK x) x ∧
-      HasDerivAt (zeroModulusEigenfunctionDeriv N oddK) (-(N : ℝ) ^ 2 * zeroModulusEigenfunction N oddK x) x := by
+      HasDerivAt (zeroModulusEigenfunctionDeriv N oddK)
+          (-(N : ℝ) ^ 2 * zeroModulusEigenfunction N oddK x) x := by
   have hin : HasDerivAt (fun x : ℝ => (N : ℝ) * (π / 2 - x)) (-(N : ℝ)) x := by
     simpa using ((hasDerivAt_id x).const_sub (π / 2)).const_mul (N : ℝ)
   have hc := (Real.hasDerivAt_cos _).comp x hin
@@ -201,22 +211,28 @@ private lemma hasDerivAt_zeroModulusEigenfunction (N : ℕ) (oddK : Bool) (x : �
     · simp only [zeroModulusEigenfunction, ite_true]
       exact (hc.const_mul (N : ℝ)).neg.congr_deriv (by ring)
 
-/-- The derivative of `zeroModulusEigenfunction N oddK` is `zeroModulusEigenfunctionDeriv N oddK`. -/
-private lemma deriv_zeroModulusEigenfunction (N : ℕ) (oddK : Bool) : deriv (zeroModulusEigenfunction N oddK) = zeroModulusEigenfunctionDeriv N oddK :=
+/-- The derivative of `zeroModulusEigenfunction N oddK` is `zeroModulusEigenfunctionDeriv N oddK`.
+-/
+private lemma deriv_zeroModulusEigenfunction (N : ℕ) (oddK : Bool) : deriv
+    (zeroModulusEigenfunction N oddK) = zeroModulusEigenfunctionDeriv N oddK :=
   funext fun x => (hasDerivAt_zeroModulusEigenfunction N oddK x).1.deriv
 
 /-- `zeroModulusEigenfunction N oddK` solves `w'' + N² w = 0`. -/
-private lemma isZeroModulusSolution_zeroModulusEigenfunction (N : ℕ) (oddK : Bool) : IsZeroModulusSolution ((N : ℝ) ^ 2) (zeroModulusEigenfunction N oddK) :=
+private lemma isZeroModulusSolution_zeroModulusEigenfunction (N : ℕ) (oddK : Bool) :
+    IsZeroModulusSolution ((N : ℝ) ^ 2) (zeroModulusEigenfunction N oddK) :=
   ⟨fun x => (hasDerivAt_zeroModulusEigenfunction N oddK x).1.differentiableAt, fun x => by
-    rw [deriv_zeroModulusEigenfunction]; exact (hasDerivAt_zeroModulusEigenfunction N oddK x).2.congr_deriv (by ring)⟩
+    rw [deriv_zeroModulusEigenfunction]; exact
+        (hasDerivAt_zeroModulusEigenfunction N oddK x).2.congr_deriv (by ring)⟩
 
 /-- `sin(2q · π/2) = 0`. -/
-private lemma sin_two_mul_nat_mul_pi_div_two (q : ℕ) : Real.sin (((2 * q : ℕ) : ℝ) * (π / 2)) = 0 := by
+private lemma sin_two_mul_nat_mul_pi_div_two (q : ℕ) : Real.sin (((2 * q : ℕ) : ℝ) * (π / 2)) = 0 :=
+    by
   rw [show ((2 * q : ℕ) : ℝ) * (π / 2) = q * π by push_cast; ring]
   exact Real.sin_nat_mul_pi q
 
 /-- `cos((2q + 1) · π/2) = 0`. -/
-private lemma cos_two_mul_nat_add_one_mul_pi_div_two (q : ℕ) : Real.cos (((2 * q + 1 : ℕ) : ℝ) * (π / 2)) = 0 := by
+private lemma cos_two_mul_nat_add_one_mul_pi_div_two (q : ℕ) : Real.cos
+    (((2 * q + 1 : ℕ) : ℝ) * (π / 2)) = 0 := by
   rw [show ((2 * q + 1 : ℕ) : ℝ) * (π / 2) = q * π + π / 2 by push_cast; ring,
     Real.cos_add_pi_div_two, Real.sin_nat_mul_pi, neg_zero]
 
@@ -245,7 +261,8 @@ private lemma isLameEigenfunction_zeroModulusEigenfunction (ν : ℝ) (odd0 oddK
     cases oddK
     · have := congrFun h0 (π / 2)
       simp [zeroModulusEigenfunction] at this
-    · have := congrFun (deriv_zeroModulusEigenfunction (2 * j + odd0.toNat + true.toNat) true) (π / 2)
+    · have := congrFun (deriv_zeroModulusEigenfunction (2 * j + odd0.toNat + true.toNat) true)
+          (π / 2)
       rw [h0] at this
       simp [zeroModulusEigenfunctionDeriv] at this
       have h1 : (0 : ℝ) ≤ odd0.toNat := Nat.cast_nonneg _
@@ -257,7 +274,8 @@ private lemma lameSpectrum_modulus_zero (ν : ℝ) (odd0 oddK : Bool) :
     Real.lameSpectrum ν 0 odd0 oddK =
       range fun j : ℕ => (((2 * j + odd0.toNat + oddK.toNat : ℕ) : ℝ)) ^ 2 := by
   ext h
-  simp only [Real.lameSpectrum, Real.IsLameEigenfunction, Real.LameBoundary, compEllIntKm_modulus_zero,
+  simp only [Real.lameSpectrum, Real.IsLameEigenfunction, Real.LameBoundary,
+      compEllIntKm_modulus_zero,
     isLameSolution_modulus_zero_iff, mem_ofPred_eq, mem_range]
   constructor
   · rintro ⟨w, hw, ⟨hb0, hbK⟩, hne⟩
@@ -372,7 +390,8 @@ private lemma lameEigenvalue_modulus_zero (ν : ℝ) (odd0 oddK : Bool) (j : ℕ
 
 /-- Two solutions of `w'' = -h w` with the same boundary condition at `0`, the second nonzero,
 are proportional. -/
-private lemma isZeroModulusSolution_eq_const_mul {h : ℝ} {odd0 : Bool} {w ψ : ℝ → ℝ} (hw : IsZeroModulusSolution h w) (hψ : IsZeroModulusSolution h ψ)
+private lemma isZeroModulusSolution_eq_const_mul {h : ℝ} {odd0 : Bool} {w ψ : ℝ → ℝ}
+    (hw : IsZeroModulusSolution h w) (hψ : IsZeroModulusSolution h ψ)
     (hψ0 : ψ ≠ 0) (hbw : if odd0 then w 0 = 0 else deriv w 0 = 0)
     (hbψ : if odd0 then ψ 0 = 0 else deriv ψ 0 = 0) : ∃ c, w = fun x => c * ψ x := by
   have hi := isZeroModulusSolution_init_ne_zero hψ hψ0
@@ -462,14 +481,16 @@ private lemma two_mul_div_two_add_bodd_toNat (m : ℕ) : 2 * (m / 2) + m.bodd.to
   · simp [Nat.bodd_mul]
   · simp [Nat.bodd_mul]; omega
 
-/-- At `k = 0`, for `N = 2j + [odd0] + [oddK] ≠ 0`, `zeroModulusEigenfunction N oddK` is the `j`th normalized
-Lamé eigenfunction of boundary type `(odd0, oddK)`. -/
-private lemma isNormalizedLameEigenfunction_zeroModulusEigenfunction (ν : ℝ) (odd0 oddK : Bool) (j : ℕ)
+/-- At `k = 0`, for `N = 2j + [odd0] + [oddK] ≠ 0`, `zeroModulusEigenfunction N oddK` is the `j`th
+normalized Lamé eigenfunction of boundary type `(odd0, oddK)`. -/
+private lemma isNormalizedLameEigenfunction_zeroModulusEigenfunction (ν : ℝ) (odd0 oddK : Bool)
+    (j : ℕ)
     (hN : 2 * j + odd0.toNat + oddK.toNat ≠ 0) :
     Real.IsNormalizedLameEigenfunction ν 0 odd0 oddK j
       (zeroModulusEigenfunction (2 * j + odd0.toNat + oddK.toNat) oddK) := by
   refine ⟨?_, ?_, ?_⟩
-  · rw [lameEigenvalue_modulus_zero]; exact isLameEigenfunction_zeroModulusEigenfunction ν odd0 oddK j
+  · rw [lameEigenvalue_modulus_zero]; exact isLameEigenfunction_zeroModulusEigenfunction ν odd0 oddK
+        j
   · simp only [jacobiDnm_modulus_zero, one_mul, compEllIntKm_modulus_zero]
     exact integral_zeroModulusEigenfunction_sq hN oddK
   · rw [compEllIntKm_modulus_zero, deriv_zeroModulusEigenfunction]
@@ -493,24 +514,30 @@ private lemma isNormalizedLameEigenfunction_const_modulus_zero (ν : ℝ) :
   · intro h0
     have := congrFun h0 0
     simp [h2.ne'] at this
-  · simp only [jacobiDnm_modulus_zero, one_mul, compEllIntKm_modulus_zero, intervalIntegral.integral_const, smul_eq_mul]
+  · simp only [jacobiDnm_modulus_zero, one_mul, compEllIntKm_modulus_zero,
+        intervalIntegral.integral_const, smul_eq_mul]
     rw [div_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
     ring
   · simp [h2]
 
 /-- 29.5.1: `a^m_ν(0) = m²`. Proved: at `k = 0` Lamé's equation is
+`w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
+@[dlmf 29.5.E1]
+theorem Real.lameAk_zero' {ν : ℝ} (m : ℕ) : Real.lameAk ν m 0 = m ^ 2 := by
+  rw [Real.lameAk, lameEigenvalue_modulus_zero, Bool.toNat_false, add_zero,
+      two_mul_div_two_add_bodd_toNat]
+
+/-- 29.5.1: `a^m_ν(0) = m²`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. -/
 @[dlmf 29.5.E1]
-theorem Real.lameAk_zero {ν : ℝ} (hν : -1 / 2 ≤ ν) (m : ℕ) : Real.lameAk ν m 0 = m ^ 2 := by
-  have _ := hν
-  rw [Real.lameAk, lameEigenvalue_modulus_zero, Bool.toNat_false, add_zero, two_mul_div_two_add_bodd_toNat]
+theorem Real.lameAk_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) (m : ℕ) : Real.lameAk ν m 0 = m ^ 2 :=
+  Real.lameAk_zero' m
 
 /-- 29.5.1: `b^m_ν(0) = m²`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
-`w'' + h w = 0` on `[0, π/2]`. -/
+`w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
 @[dlmf 29.5.E1]
-theorem Real.lameBk_zero {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) :
+theorem Real.lameBk_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) :
     Real.lameBk ν m 0 = m ^ 2 := by
-  have _ := hν
   rw [Real.lameBk, lameEigenvalue_modulus_zero, Bool.toNat_true]
   congr 2
   rcases Nat.even_or_odd' m with ⟨q, rfl | rfl⟩
@@ -518,39 +545,66 @@ theorem Real.lameBk_zero {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ 
     simp [Nat.bodd_mul]; omega
   · simp [Nat.bodd_mul]
 
+/-- 29.5.1: `b^m_ν(0) = m²`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
+`w'' + h w = 0` on `[0, π/2]`. -/
+@[dlmf 29.5.E1]
+theorem Real.lameBk_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) :
+    Real.lameBk ν m 0 = m ^ 2 :=
+  Real.lameBk_zero' hm
+
+/-- 29.5.2: `Ec^0_ν(x, 0) = 2^{-1/2}`. Proved: at `k = 0` Lamé's equation is
+`w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
+@[dlmf 29.5.E2]
+theorem Real.lameEck_zero_zero' {ν : ℝ} (x : ℝ) :
+    Real.lameEck ν 0 x 0 = 1 / Real.sqrt 2 := by
+  rw [Real.lameEck, show (0 : ℕ).bodd = false from rfl, show (0 : ℕ) / 2 = 0 from rfl,
+    lameEigenfunction_modulus_zero_eq (isNormalizedLameEigenfunction_const_modulus_zero ν)]
+
 /-- 29.5.2: `Ec^0_ν(x, 0) = 2^{-1/2}`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. -/
 @[dlmf 29.5.E2]
-theorem Real.lameEck_zero_zero {ν : ℝ} (hν : -1 / 2 ≤ ν) (x : ℝ) :
-    Real.lameEck ν 0 x 0 = 1 / Real.sqrt 2 := by
-  have _ := hν
-  rw [Real.lameEck, show (0 : ℕ).bodd = false from rfl, show (0 : ℕ) / 2 = 0 from rfl,
-    lameEigenfunction_modulus_zero_eq (isNormalizedLameEigenfunction_const_modulus_zero ν)]
+theorem Real.lameEck_zero_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) (x : ℝ) :
+    Real.lameEck ν 0 x 0 = 1 / Real.sqrt 2 :=
+  Real.lameEck_zero_zero' x
+
+/-- 29.5.3: `Ec^m_ν(x, 0) = cos(m(π/2 - x))`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
+`w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
+@[dlmf 29.5.E3]
+theorem Real.lameEck_modulus_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
+    Real.lameEck ν m x 0 = Real.cos (m * (π / 2 - x)) := by
+  have hN : 2 * (m / 2) + m.bodd.toNat + false.toNat = m := by
+    rw [Bool.toNat_false, add_zero, two_mul_div_two_add_bodd_toNat]
+  rw [Real.lameEck, lameEigenfunction_modulus_zero_eq
+      (isNormalizedLameEigenfunction_zeroModulusEigenfunction ν _ _ _ (by omega)), hN]
+  simp [zeroModulusEigenfunction]
 
 /-- 29.5.3: `Ec^m_ν(x, 0) = cos(m(π/2 - x))`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. -/
 @[dlmf 29.5.E3]
-theorem Real.lameEck_modulus_zero {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
-    Real.lameEck ν m x 0 = Real.cos (m * (π / 2 - x)) := by
-  have _ := hν
-  have hN : 2 * (m / 2) + m.bodd.toNat + false.toNat = m := by
-    rw [Bool.toNat_false, add_zero, two_mul_div_two_add_bodd_toNat]
-  rw [Real.lameEck, lameEigenfunction_modulus_zero_eq (isNormalizedLameEigenfunction_zeroModulusEigenfunction ν _ _ _ (by omega)), hN]
-  simp [zeroModulusEigenfunction]
+theorem Real.lameEck_modulus_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
+    Real.lameEck ν m x 0 = Real.cos (m * (π / 2 - x)) :=
+  Real.lameEck_modulus_zero' hm x
 
 /-- 29.5.3: `Es^m_ν(x, 0) = sin(m(π/2 - x))`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
-`w'' + h w = 0` on `[0, π/2]`. -/
+`w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
 @[dlmf 29.5.E3]
-theorem Real.lameEsk_modulus_zero {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
+theorem Real.lameEsk_modulus_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
     Real.lameEsk ν m x 0 = Real.sin (m * (π / 2 - x)) := by
-  have _ := hν
   have hN : 2 * ((m - 1) / 2) + (!m.bodd).toNat + true.toNat = m := by
     rcases Nat.even_or_odd' m with ⟨q, rfl | rfl⟩
     · obtain ⟨q, rfl⟩ : ∃ r, q = r + 1 := ⟨q - 1, by omega⟩
       simp [Nat.bodd_mul]; omega
     · simp [Nat.bodd_mul]
-  rw [Real.lameEsk, lameEigenfunction_modulus_zero_eq (isNormalizedLameEigenfunction_zeroModulusEigenfunction ν _ _ _ (by omega)), hN]
+  rw [Real.lameEsk, lameEigenfunction_modulus_zero_eq
+      (isNormalizedLameEigenfunction_zeroModulusEigenfunction ν _ _ _ (by omega)), hN]
   simp [zeroModulusEigenfunction]
+
+/-- 29.5.3: `Es^m_ν(x, 0) = sin(m(π/2 - x))`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
+`w'' + h w = 0` on `[0, π/2]`. -/
+@[dlmf 29.5.E3]
+theorem Real.lameEsk_modulus_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
+    Real.lameEsk ν m x 0 = Real.sin (m * (π / 2 - x)) :=
+  Real.lameEsk_modulus_zero' hm x
 
 /-- 29.5.4: `lim_{k→1⁻} a^m_ν(k²) = ν(ν+1) - μ²` with `μ = max(ν - m, 0)`. Admitted. -/
 @[dlmf 29.5.E4]

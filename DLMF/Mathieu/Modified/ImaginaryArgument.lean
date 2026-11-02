@@ -81,7 +81,8 @@ private lemma besselJExp_I_mul_ofReal (μ : ℂ) {h : ℝ} (hh : 0 < h) {z : ℂ
   ring
 
 /-- `h e^z` lies in the slit plane for `h > 0` and `|Im z| < π`. -/
-private lemma ofReal_mul_exp_mem_slitPlane_of_abs_im_lt {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : |z.im| < π) :
+private lemma ofReal_mul_exp_mem_slitPlane_of_abs_im_lt {h : ℝ} (hh : 0 < h) {z : ℂ}
+    (hz : |z.im| < π) :
     (h : ℂ) * Complex.exp z ∈ slitPlane := by
   rw [show (h : ℂ) * Complex.exp z = Complex.exp ((Real.log h : ℂ) + z) by
     rw [Complex.exp_add, ← Complex.ofReal_exp, Real.exp_log hh]]
@@ -94,7 +95,8 @@ private lemma ofReal_mul_exp_mem_slitPlane_of_abs_im_lt {h : ℝ} (hh : 0 < h) {
 open DLMF.Bessel in
 /-- `H^{(1)}_μ(ih e^z) = (2/(πi)) e^{-iμπ/2} K_μ(h e^z)` (DLMF 10.27.8), with `H^{(1)}` continued
 in `z` (`mathieuCylExp 3`), for `h > 0`, `|Im z| < π` and every order `μ`. -/
-private lemma mathieuCylExp_three_I_mul_ofReal (μ : ℂ) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : |z.im| < π) :
+private lemma mathieuCylExp_three_I_mul_ofReal (μ : ℂ) {h : ℝ} (hh : 0 < h) {z : ℂ}
+    (hz : |z.im| < π) :
     mathieuCylExp 3 μ (I * h) z =
       2 / (π * I) * Complex.exp (-(I * μ * π / 2)) * besselK μ (h * Complex.exp z) := by
   have hs := ofReal_mul_exp_mem_slitPlane_of_abs_im_lt hh hz
@@ -113,7 +115,8 @@ private lemma mathieuCylExp_three_I_mul_ofReal (μ : ℂ) {h : ℝ} (hh : 0 < h)
     have hc' := Complex.forall_of_mem_integerComplement hc
     have hsin := DLMF.Bessel.sin_mul_pi_ne_zero hc'
     simp only [mathieuCylExp]
-    rw [besselYExp_of_not_exists_int (fun ⟨k, hk⟩ => hc' k hk), besselJExp_I_mul_ofReal c hh h1.1 h1.2.le,
+    rw [besselYExp_of_not_exists_int (fun ⟨k, hk⟩ => hc' k hk),
+        besselJExp_I_mul_ofReal c hh h1.1 h1.2.le,
       besselJExp_I_mul_ofReal (-c) hh h1.1 h1.2.le, besselK_eq_of_not_int hc', besselE]
     set E := Complex.exp (I * c * π / 2) with hE
     have hE0 : E ≠ 0 := Complex.exp_ne_zero _
@@ -149,7 +152,8 @@ private lemma I_zpow_natCast_add (a b : ℕ) : I ^ ((a : ℤ) + b) = I ^ a * I ^
   rw [zpow_add₀ I_ne_zero, zpow_natCast, zpow_natCast]
 
 /-- `i^{-2m} = ((-1)^m)⁻¹`. -/
-private lemma I_zpow_neg_natCast_two_mul_eq_inv (m : ℕ) : I ^ (-((2 * m : ℕ) : ℤ)) = ((-1 : ℂ) ^ m)⁻¹ := by
+private lemma I_zpow_neg_natCast_two_mul_eq_inv (m : ℕ) : I ^ (-((2 * m : ℕ) : ℤ)) =
+    ((-1 : ℂ) ^ m)⁻¹ := by
   rw [zpow_neg, zpow_natCast, pow_mul, I_sq]
 
 /-- `(i^a)² = (-1)^a`. -/
@@ -184,7 +188,8 @@ theorem hasSum_modMathieuIe_even' (m s : ℕ) {h : ℝ} (hh : 0 < h)
     rw [show ((ℓ + s : ℕ) : ℂ) = (((ℓ : ℤ) + s : ℤ) : ℂ) by push_cast; ring,
       besselJExp_intCast_I_mul, besselJExp_intCast_I_mul, besselJExp_intCast_I_mul,
       besselJExp_intCast_I_mul, mathieuFourierA_even_neg_q, mathieuFourierA_even_neg_q,
-      I_zpow_natCast_sub, I_zpow_natCast_add, I_zpow_neg_natCast_two_mul_eq_inv, neg_one_zpow_natCast_sub,
+      I_zpow_natCast_sub, I_zpow_natCast_add, I_zpow_neg_natCast_two_mul_eq_inv,
+          neg_one_zpow_natCast_sub,
       neg_one_zpow_natCast_sub]
     have h1 := I_pow_sq_eq_neg_one_pow ℓ
     have h2 := I_pow_sq_eq_neg_one_pow s
@@ -357,7 +362,8 @@ private lemma I_zpow_neg_two_mul_natCast (s : ℕ) : I ^ (-(2 * (s : ℤ))) = (-
   rw [← mul_pow]; simp
 
 /-- `i^{2s+1} = (-1)^s i` (integer exponent). -/
-private lemma I_zpow_two_mul_natCast_add_one (s : ℕ) : I ^ (2 * (s : ℤ) + 1) = (-1 : ℂ) ^ s * I := by
+private lemma I_zpow_two_mul_natCast_add_one (s : ℕ) : I ^ (2 * (s : ℤ) + 1) =
+    (-1 : ℂ) ^ s * I := by
   rw [zpow_add₀ I_ne_zero, I_zpow_two_mul_natCast, zpow_one]
 
 /-- `i^{-(2s+1)} = -(-1)^s i` (integer exponent). -/
@@ -377,7 +383,8 @@ private lemma I_zpow_neg_two_mul_natCast_add_two (s : ℕ) :
 
 open DLMF.Bessel in
 /-- The product `J_a(ih e^{-z}) H^{(1)}_b(ih e^z)` in modified Bessel functions. -/
-private lemma besselJExp_mul_mathieuCylExp_three_I_mul (a b : ℤ) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : |z.im| < π) :
+private lemma besselJExp_mul_mathieuCylExp_three_I_mul (a b : ℤ) {h : ℝ} (hh : 0 < h) {z : ℂ}
+    (hz : |z.im| < π) :
     besselJExp a (I * h) (-z) * mathieuCylExp 3 b (I * h) z =
       2 / (π * I) * I ^ (a - b) * (besselI a (h * Complex.exp (-z)) *
         besselK b (h * Complex.exp z)) := by
@@ -408,7 +415,8 @@ theorem hasSum_modMathieuKe_even' (m s : ℕ) {h : ℝ} (hh : 0 < h)
   convert G using 1
   · funext ℓ
     rw [show ((ℓ + s : ℕ) : ℂ) = (((ℓ + s : ℕ) : ℤ) : ℂ) by push_cast; ring,
-      besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz, besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
+      besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
+          besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
       show (ℓ : ℤ) - s - ((ℓ + s : ℕ) : ℤ) = -(2 * (s : ℤ)) by push_cast; ring,
       show ((ℓ + s : ℕ) : ℤ) - ((ℓ : ℤ) - s) = 2 * (s : ℤ) by push_cast; ring,
       I_zpow_neg_two_mul_natCast, I_zpow_two_mul_natCast,
@@ -453,7 +461,8 @@ theorem hasSum_modMathieuKo_even' (m s : ℕ) {h : ℝ} (hh : 0 < h)
   convert G using 1
   · funext ℓ
     rw [show ((ℓ + s + 2 : ℕ) : ℂ) = (((ℓ + s + 2 : ℕ) : ℤ) : ℂ) by push_cast; ring,
-      besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz, besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
+      besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
+          besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
       show (ℓ : ℤ) - s - ((ℓ + s + 2 : ℕ) : ℤ) = -(2 * (s : ℤ) + 2) by push_cast; ring,
       show ((ℓ + s + 2 : ℕ) : ℤ) - ((ℓ : ℤ) - s) = 2 * (s : ℤ) + 2 by push_cast; ring,
       I_zpow_neg_two_mul_natCast_add_two, I_zpow_two_mul_natCast_add_two,
@@ -499,7 +508,8 @@ theorem hasSum_modMathieuKe_odd' (m s : ℕ) {h : ℝ} (hh : 0 < h)
   convert G using 1
   · funext ℓ
     rw [show ((ℓ + s + 1 : ℕ) : ℂ) = (((ℓ + s + 1 : ℕ) : ℤ) : ℂ) by push_cast; ring,
-      besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz, besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
+      besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
+          besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
       show (ℓ : ℤ) - s - ((ℓ + s + 1 : ℕ) : ℤ) = -(2 * (s : ℤ) + 1) by push_cast; ring,
       show ((ℓ + s + 1 : ℕ) : ℤ) - ((ℓ : ℤ) - s) = 2 * (s : ℤ) + 1 by push_cast; ring,
       I_zpow_neg_two_mul_natCast_add_one, I_zpow_two_mul_natCast_add_one,
@@ -544,7 +554,8 @@ theorem hasSum_modMathieuKo_odd' (m s : ℕ) {h : ℝ} (hh : 0 < h)
   convert G using 1
   · funext ℓ
     rw [show ((ℓ + s + 1 : ℕ) : ℂ) = (((ℓ + s + 1 : ℕ) : ℤ) : ℂ) by push_cast; ring,
-      besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz, besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
+      besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
+          besselJExp_mul_mathieuCylExp_three_I_mul _ _ hh hz,
       show (ℓ : ℤ) - s - ((ℓ + s + 1 : ℕ) : ℤ) = -(2 * (s : ℤ) + 1) by push_cast; ring,
       show ((ℓ + s + 1 : ℕ) : ℤ) - ((ℓ : ℤ) - s) = 2 * (s : ℤ) + 1 by push_cast; ring,
       I_zpow_neg_two_mul_natCast_add_one, I_zpow_two_mul_natCast_add_one,

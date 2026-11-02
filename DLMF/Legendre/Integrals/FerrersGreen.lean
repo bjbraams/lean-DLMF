@@ -62,14 +62,16 @@ namespace DLMF.Legendre
 Γ(σ/2+1)/(2^{μ+1} Γ((σ-ν+μ)/2+1) Γ((σ+ν+μ+3)/2))`. -/
 @[dlmf 14.17.E5]
 theorem ferrers_barnes_integral {σ μ : ℂ} (hσ : -1 < σ.re) (hμ : -1 < μ.re) (ν : ℂ) :
-    (∫ x : ℝ in 0..1, (x:ℂ)^σ*(1-x^2:ℂ)^(μ/2)*ferrersP ν (-μ) x)=Gamma ((σ+1)/2)*Gamma (σ/2+1)/(2^(μ+1)*Gamma ((σ-ν+μ)/2+1)*Gamma ((σ+ν+μ+3)/2)) := by
+    (∫ x : ℝ in 0..1, (x:ℂ)^σ*(1-x^2:ℂ)^(μ/2)*ferrersP ν (-μ) x)=Gamma ((σ+1)/2)*Gamma
+        (σ/2+1)/(2^(μ+1)*Gamma ((σ-ν+μ)/2+1)*Gamma ((σ+ν+μ+3)/2)) := by
   sorry
 
-/-- DLMF 14.17.6: for natural numbers `m ≤ n` (DLMF also assumes `m ≤ l`, which is not needed), `∫_{-1}^{1} 𝖯^m_l(x) 𝖯^m_n(x) dx =
-(n+m)!/((n-m)! (n+1/2)) δ_{l,n}`. -/
+/-- DLMF 14.17.6: for natural numbers `m ≤ n` (DLMF also assumes `m ≤ l`, which is not needed),
+`∫_{-1}^{1} 𝖯^m_l(x) 𝖯^m_n(x) dx = (n+m)!/((n-m)! (n+1/2)) δ_{l,n}`. -/
 @[dlmf 14.17.E6]
 theorem ferrers_orthogonality_6 (l m n : ℕ) (hn : m ≤ n) :
-    ∫ x : ℝ in -1..1, 1*ferrersP l (m) x*ferrersP n (m) x=if l=n then ((n+m).factorial:ℂ)/((n-m).factorial*(n+1/2:ℂ)) else 0 := by
+    ∫ x : ℝ in -1..1, 1*ferrersP l (m) x*ferrersP n (m) x=if l=n then
+        ((n+m).factorial:ℂ)/((n-m).factorial*(n+1/2:ℂ)) else 0 := by
   have hI : (∫ x : ℝ in -1..1, 1*ferrersP l (m) x*ferrersP n (m) x) = legInt_I m l n := by
     refine intervalIntegral.integral_congr_ae ?_
     have : ∀ᵐ t : ℝ ∂volume, t ≠ 1 := by simp [ae_iff]
@@ -87,8 +89,8 @@ theorem ferrers_orthogonality_6 (l m n : ℕ) (hn : m ≤ n) :
     field_simp
   · simp
 
-/-- For natural numbers `m ≤ n` (no condition on `l`), `∫_{-1}^{1} 𝖯^m_l(x) 𝖯^{-m}_n(x) dx = (-1)^m/(l+1/2)
-δ_{l,n}`. -/
+/-- For natural numbers `m ≤ n` (no condition on `l`),
+`∫_{-1}^{1} 𝖯^m_l(x) 𝖯^{-m}_n(x) dx = (-1)^m/(l+1/2) δ_{l,n}`. -/
 @[dlmf 14.17.E7]
 theorem ferrers_orthogonality_7 (l m n : ℕ) (hn : m ≤ n) :
     ∫ x : ℝ in -1..1, 1*ferrersP l (m) x*ferrersP n (-m) x=if l=n then (-1)^m/(l+1/2:ℂ) else 0 := by
@@ -116,10 +118,12 @@ theorem ferrers_orthogonality_7 (l m n : ℕ) (hn : m ≤ n) :
     field_simp
   · simp
 
-/-- Nonzero polynomial degrees and integrability are explicit; singular-weight integrals retain their integrability conditions. -/
+/-- Nonzero polynomial degrees and integrability are explicit; singular-weight integrals retain
+their integrability conditions. -/
 @[dlmf 14.17.E8]
 theorem ferrers_orthogonality_8 (l m n : ℕ) (hl : l ≤ n) (hm : m ≤ n) (hp : 0 < m) :
-    ∫ x : ℝ in -1..1, 1/(1-x^2:ℂ)*ferrersP n (l) x*ferrersP n (m) x=if l=m then ((n+m).factorial:ℂ)/((n-m).factorial*m) else 0 := by
+    ∫ x : ℝ in -1..1, 1/(1-x^2:ℂ)*ferrersP n (l) x*ferrersP n (m) x=if l=m then
+        ((n+m).factorial:ℂ)/((n-m).factorial*m) else 0 := by
   split_ifs with h
   · subst h
     obtain ⟨k, rfl⟩ : ∃ k, l = k+1 := ⟨l-1, by omega⟩
@@ -133,10 +137,12 @@ theorem ferrers_orthogonality_8 (l m n : ℕ) (hl : l ≤ n) (hm : m ≤ n) (hp 
     rw [← hJ]; field_simp
   · exact legInt_ferrers_offdiag n l m h (by omega)
 
-/-- Nonzero polynomial degrees and integrability are explicit; singular-weight integrals retain their integrability conditions. -/
+/-- Nonzero polynomial degrees and integrability are explicit; singular-weight integrals retain
+their integrability conditions. -/
 @[dlmf 14.17.E9]
 theorem ferrers_orthogonality_9 (l m n : ℕ) (hl : l ≤ n) (hm : m ≤ n) (hp : 0 < l) :
-    ∫ x : ℝ in -1..1, 1/(1-x^2:ℂ)*ferrersP n (l) x*ferrersP n (-m) x=if l=m then (-1)^l/(l:ℂ) else 0 := by
+    ∫ x : ℝ in -1..1, 1/(1-x^2:ℂ)*ferrersP n (l) x*ferrersP n (-m) x=if l=m then
+        (-1)^l/(l:ℂ) else 0 := by
   have hk : ((n:ℂ)-m+1) = ((n-m:ℕ):ℂ)+1 := by rw [Nat.cast_sub hm]
   have hreg : ∀ k : ℕ, (n:ℂ)-m+1 ≠ -k := fun k h => by
     rw [hk] at h; have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
@@ -492,7 +498,8 @@ def legPIR (Kn Kl Cn Cl rn rl n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (Cl*n + Cl)*v 6
 
 /-- The boundary-form remainder `legPIR Kn Kl Cn Cl rn rl n l` is continuous in `v`. -/
-theorem legPI_continuous_R (Kn Kl Cn Cl rn rl n l : ℂ) : Continuous (legPIR Kn Kl Cn Cl rn rl n l) := by
+theorem legPI_continuous_R (Kn Kl Cn Cl rn rl n l : ℂ) : Continuous
+    (legPIR Kn Kl Cn Cl rn rl n l) := by
   unfold legPIR; fun_prop
 
 /-- The polynomial remainder in the boundary form at `+1`. -/
@@ -518,7 +525,8 @@ def legPIRp (kf kg cf cg rf rg n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (cg*n + cg)*v 6
 
 /-- The boundary-form remainder `legPIRp kf kg cf cg rf rg n l` is continuous in `v`. -/
-theorem legPI_continuous_Rp (kf kg cf cg rf rg n l : ℂ) : Continuous (legPIRp kf kg cf cg rf rg n l) := by
+theorem legPI_continuous_Rp (kf kg cf cg rf rg n l : ℂ) : Continuous
+    (legPIRp kf kg cf cg rf rg n l) := by
   unfold legPIRp; fun_prop
 
 /-- Basic limits at a boundary point where `τ → 0⁺`. -/
@@ -1007,7 +1015,8 @@ theorem legPI_integral_PP (ν lam : ℂ) (h : (ν*(ν+1) - lam*(lam+1)) ≠ 0) :
   ring
 
 /-- Closed form of the boundary constant `K_ν C_λ - K_λ C_ν`. -/
-theorem legPI_boundary_const {ν lam : ℂ} (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
+theorem legPI_boundary_const {ν lam : ℂ} (hν : LegendreQRegular ν 0)
+    (hlam : LegendreQRegular lam 0) :
     (π:ℂ)^2 * (legPIK ν * legPIC lam - legPIK lam * legPIC ν) =
       π*sin ((lam-ν)*π) + 2*sin (ν*π)*sin (lam*π)*(digamma (ν+1)-digamma (lam+1)) := by
   have hr : ∀ {α : ℂ}, LegendreQRegular α 0 → ∀ m : ℕ, α+1 ≠ -(m:ℂ) := by
@@ -1039,7 +1048,8 @@ theorem legPI_K'_eq_all (α : ℂ) :
 (the removable extension of `sin(πα) ψ(α+1)`). -/
 theorem legPI_boundary_const_all (ν lam : ℂ) :
     (π:ℂ)^2 * (legPIK ν * legPIC lam - legPIK lam * legPIC ν) =
-      π*sin ((lam-ν)*π) + 2*(sin (π*lam) * (π * DLMF.Gamma.recipGammaDeriv 1 (ν+1) * (Gamma (-ν))⁻¹) -
+      π*sin ((lam-ν)*π) + 2*(sin (π*lam) *
+          (π * DLMF.Gamma.recipGammaDeriv 1 (ν+1) * (Gamma (-ν))⁻¹) -
         sin (π*ν) * (π * DLMF.Gamma.recipGammaDeriv 1 (lam+1) * (Gamma (-lam))⁻¹)) := by
   have e1 := legPI_K'_eq_all ν
   have e2 := legPI_K'_eq_all lam
@@ -1048,7 +1058,8 @@ theorem legPI_boundary_const_all (ν lam : ℂ) :
   unfold legPIC legPIK
   rw [e1, e2]
   rw [show (lam-ν)*π = π*lam - π*ν by ring, sin_sub]
-  linear_combination ((π:ℂ)*cos (π*lam) + 2*π*(DLMF.Gamma.recipGammaDeriv 1 (lam+1) * (Gamma (-lam))⁻¹)) * k1 +
+  linear_combination ((π:ℂ)*cos (π*lam) +
+      2*π*(DLMF.Gamma.recipGammaDeriv 1 (lam+1) * (Gamma (-lam))⁻¹)) * k1 +
     (-(π:ℂ)*cos (π*ν) - 2*π*(DLMF.Gamma.recipGammaDeriv 1 (ν+1) * (Gamma (-ν))⁻¹)) * k2
 
 end DLMF.Legendre

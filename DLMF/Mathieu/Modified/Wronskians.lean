@@ -62,7 +62,8 @@ theorem mathieuMeCoeff_modMathieuIndex_ne_zero {ν : ℝ} (hν : ∀ m : ℤ, (m
   have hex : ∃ n : ℤ, mathieuMeCoeff ν ((h : ℂ) ^ 2) n ≠ 0 := by
     by_contra hc
     push Not at hc
-    have := hasSum_mathieuMeCoeff_sq (intCast_ne_ofReal_of_not_int hν) (mathieuNormalSegment_ofReal hν h)
+    have := hasSum_mathieuMeCoeff_sq (intCast_ne_ofReal_of_not_int hν)
+        (mathieuNormalSegment_ofReal hν h)
     have e : (fun m : ℤ => mathieuMeCoeff ν ((h : ℂ) ^ 2) m ^ 2) = fun _ => 0 :=
       funext fun m => by rw [hc m]; ring
     rw [e] at this
@@ -71,7 +72,8 @@ theorem mathieuMeCoeff_modMathieuIndex_ne_zero {ν : ℝ} (hν : ∀ m : ℤ, (m
   exact hex.choose_spec
 
 /-- `-ν ∉ ℤ` when `ν ∉ ℤ`. -/
-theorem intCast_ne_neg_real_of_not_int {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) : ∀ m : ℤ, (m : ℝ) ≠ -ν := by
+theorem intCast_ne_neg_real_of_not_int {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) : ∀ m : ℤ,
+    (m : ℝ) ≠ -ν := by
   intro m hm; exact hν (-m) (by push_cast; linarith)
 
 /-- Every real `ν` with real `h` is admissible. -/
@@ -95,7 +97,8 @@ private lemma exists_eq_add_two_mul_or_neg_one_pow_mul_eq_neg_one (N m : ℕ) :
     rw [e, one_zpow, one_mul, mul_neg_one, mul_neg, ← mul_pow]; simp
 
 /-- Not all coefficients `c^ν_{2n}(h²)` vanish, for real `ν` and real `h`. -/
-private lemma exists_mathieuMeCoeff_ne_zero (ν h : ℝ) : ∃ n : ℤ, mathieuMeCoeff ν ((h : ℂ) ^ 2) n ≠ 0 := by
+private lemma exists_mathieuMeCoeff_ne_zero (ν h : ℝ) : ∃ n : ℤ,
+    mathieuMeCoeff ν ((h : ℂ) ^ 2) n ≠ 0 := by
   by_cases hν : ∀ m : ℤ, (m : ℝ) ≠ ν
   · exact ⟨_, mathieuMeCoeff_modMathieuIndex_ne_zero hν h⟩
   push Not at hν
@@ -248,7 +251,8 @@ private lemma tendsto_besselY_atTop (l : ℝ) :
 
 /-- The continued cylinder functions `𝒞^{(j)}_λ(h e^x)`, `j = 1, 2`, tend to `0` as `x → +∞`
 (real `λ`, `h > 0`). -/
-private lemma tendsto_mathieuCylExp_atTop {j : ℕ} (hj : j = 1 ∨ j = 2) (l : ℝ) {h : ℝ} (hh : 0 < h) :
+private lemma tendsto_mathieuCylExp_atTop {j : ℕ} (hj : j = 1 ∨ j = 2) (l : ℝ)
+    {h : ℝ} (hh : 0 < h) :
     Tendsto (fun x : ℝ => mathieuCylExp j l h x) atTop (𝓝 0) := by
   have he : ∀ x : ℝ, mathieuCylExp j l h x = mathieuCyl j l ((h * Real.exp x : ℝ) : ℂ) := by
     intro x
@@ -269,7 +273,8 @@ def crossSeriesTailConst (Cc K C : ℝ) (β : ℤ) : ℝ :=
 /-- **Tail bounds** for the shifted cross-product series at real `x`: with `u = h e^{-x} ≤ 2`,
 `|F_{α,β}(x)| ≤ L U` and `|F_{α,β}(x) - (term ℓ = -α)| ≤ L U u/2`, where `U` bounds
 `|𝒞_{ν-1}|, |𝒞_ν|, |𝒞_{ν+1}|` at `h e^x`. -/
-private lemma crossSeries_tail_bound (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℝ} (hh : 0 < h)
+private lemma crossSeries_tail_bound (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ)
+    {h : ℝ} (hh : 0 < h)
     {c : ℤ → ℂ} {Cc K : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs) {C : ℝ} (hC : 1 ≤ C)
     (α β : ℤ) {x : ℝ} (hu : h * Real.exp (-x) ≤ 2)
@@ -278,7 +283,8 @@ private lemma crossSeries_tail_bound (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 
     (hU0 : ‖mathieuCylExp j (ν + ((0 : ℤ) : ℂ)) h x‖ ≤ U)
     (hU2 : ‖mathieuCylExp j (ν + ((1 : ℤ) : ℂ)) h x‖ ≤ U) :
     ‖crossSeries j ν h c α β x‖ ≤ crossSeriesTailConst Cc K C β * U ∧
-      ‖crossSeries j ν h c α β x - crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq j ν h x) α β (-α)‖ ≤
+      ‖crossSeries j ν h c α β x -
+          crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq j ν h x) α β (-α)‖ ≤
         crossSeriesTailConst Cc K C β * U * (h * Real.exp (-x) / 2) := by
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
   set u := h * Real.exp (-x) with hudef
@@ -316,7 +322,8 @@ private lemma crossSeries_tail_bound (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 
   have hy : (h : ℂ) * Complex.exp (x : ℂ) ≠ 0 := mul_ne_zero hh' (Complex.exp_ne_zero _)
   have hynorm : ‖(h : ℂ) * Complex.exp (x : ℂ)‖ = h * Real.exp x := by
     rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hh, Complex.norm_exp_ofReal]
-  have hCb : ∀ k : ℤ, ‖mathieuCylExpSeq j ν h x k‖ ≤ U * (2 * C) * (4 * C) ^ k.natAbs * (k.natAbs ! : ℝ) := by
+  have hCb : ∀ k : ℤ, ‖mathieuCylExpSeq j ν h x k‖ ≤ U * (2 * C) * (4 * C) ^ k.natAbs *
+      (k.natAbs ! : ℝ) := by
     intro k
     refine norm_le_factorial_of_besselRec (ν := ν) hy hC (by rw [hynorm]; exact hCw) ?_ ?_ ?_ ?_ k
     · simpa only [mathieuCylExpSeq] using hU1
@@ -338,8 +345,10 @@ private lemma crossSeries_tail_bound (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 
       (le_of_eq ?_)
     simp only [crossSeriesTailConst, one_pow]; ring
   · have hF := hasSum_crossSeries j hj₁ hj₄ ν hh' hCc hK hc α β x
-    have hupd : crossTerm c (Function.update (besselJExpNegSeq h x) 0 0) (mathieuCylExpSeq j ν h x) α β =
-        Function.update (crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq j ν h x) α β) (-α) 0 := by
+    have hupd : crossTerm c (Function.update (besselJExpNegSeq h x) 0 0)
+        (mathieuCylExpSeq j ν h x) α β =
+        Function.update (crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq j ν h x) α
+            β) (-α) 0 := by
       funext ℓ
       by_cases hl : ℓ = -α
       · subst hl; simp [crossTerm]
@@ -348,8 +357,10 @@ private lemma crossSeries_tail_bound (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 
         simp only [crossTerm, Function.update_of_ne this]
     have hT := hF.update (-α) 0
     rw [← hupd] at hT
-    rw [show crossSeries j ν h c α β x - crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq j ν h x) α β (-α) =
-      0 - crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq j ν h x) α β (-α) + crossSeries j ν h c α β x by ring,
+    rw [show crossSeries j ν h c α β x -
+        crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq j ν h x) α β (-α) =
+      0 - crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq j ν h x) α β (-α) +
+          crossSeries j ν h c α β x by ring,
       ← hT.tsum_eq]
     have hEJ : 0 ≤ Real.exp 1 * (u / 2) := by positivity
     refine (norm_tsum_crossTerm_le hCc hK hEJ le_rfl hEC hA hc hJ' hCb α β).trans (le_of_eq ?_)
@@ -395,7 +406,8 @@ private lemma mathieuCylExp_one_two_cross (μ : ℂ) {h : ℝ} (hh : 0 < h) (x :
   linear_combination (-besselJ μ w) * eY + DLMF.Bessel.besselY μ w * eJ + 2 * eW
 
 /-- The algebraic error estimate for the Wronskian of the cross-product series. -/
-private lemma wronskian_error_estimate {F1 F2 P1 P2 R1 R2 m1 m2 q1 q2 : ℂ} {u v h2 B : ℝ} (hu : 0 ≤ u)
+private lemma wronskian_error_estimate {F1 F2 P1 P2 R1 R2 m1 m2 q1 q2 : ℂ}
+    {u v h2 B : ℝ} (hu : 0 ≤ u)
     (hu2 : u ≤ 2) (hv : 0 ≤ v) (huv : u * v = h2) (hB : 0 ≤ B) (hF1 : ‖F1‖ ≤ B)
     (hF2 : ‖F2‖ ≤ B) (hm1 : ‖F1 - m1‖ ≤ B * u) (hm2 : ‖F2 - m2‖ ≤ B * u)
     (hP1 : ‖P1 - q1‖ ≤ B * u) (hP2 : ‖P2 - q2‖ ≤ B * u) (hq1 : ‖q1‖ ≤ B) (hq2 : ‖q2‖ ≤ B)
@@ -436,14 +448,16 @@ private lemma wronskian_error_estimate {F1 F2 P1 P2 R1 R2 m1 m2 q1 q2 : ℂ} {u 
   nlinarith [sq_nonneg B, mul_nonneg hu (sq_nonneg B)]
 
 /-- If `‖F‖ ≤ b` and `‖F - m‖ ≤ b u/2` with `u ≤ 2`, then `‖m‖ ≤ 2b`. -/
-private lemma norm_le_two_mul_of_tail_bound {F m : ℂ} {b u : ℝ} (hb : 0 ≤ b) (hu2 : u ≤ 2) (hF : ‖F‖ ≤ b)
+private lemma norm_le_two_mul_of_tail_bound {F m : ℂ} {b u : ℝ} (hb : 0 ≤ b)
+    (hu2 : u ≤ 2) (hF : ‖F‖ ≤ b)
     (hFm : ‖F - m‖ ≤ b * (u / 2)) : ‖m‖ ≤ 2 * b := by
   have := norm_sub_le F (F - m)
   rw [sub_sub_cancel] at this
   nlinarith [mul_le_mul_of_nonneg_left hu2 hb]
 
 /-- Assembly of the tail bounds into the Wronskian estimate. -/
-private lemma wronskian_estimate_assemble {F1 F2 G1a G1c G2a G2c H1a H1c H2a H2c m1 m2 m1a m1c m2a m2c : ℂ}
+private lemma wronskian_estimate_assemble
+    {F1 F2 G1a G1c G2a G2c H1a H1c H2a H2c m1 m2 m1a m1c m2a m2c : ℂ}
     {u v h2 a b c : ℝ} (hu : 0 ≤ u) (hu2 : u ≤ 2) (hv : 0 ≤ v) (huv : u * v = h2)
     (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c)
     (f1 : ‖F1‖ ≤ b) (g1 : ‖F1 - m1‖ ≤ b * (u / 2)) (f2 : ‖F2‖ ≤ b) (g2 : ‖F2 - m2‖ ≤ b * (u / 2))
@@ -471,30 +485,38 @@ private lemma wronskian_estimate_assemble {F1 F2 G1a G1c G2a G2c H1a H1c H2a H2c
     rw [show G1a - G1c - (m1a - m1c) = (G1a - m1a) - (G1c - m1c) by ring]; nlinarith
   · have := sub_b g2a g2c
     rw [show G2a - G2c - (m2a - m2c) = (G2a - m2a) - (G2c - m2c) by ring]; nlinarith
-  · have := sub_b (norm_le_two_mul_of_tail_bound ha hu2 f1a g1a) (norm_le_two_mul_of_tail_bound hc hu2 f1c g1c); linarith
-  · have := sub_b (norm_le_two_mul_of_tail_bound ha hu2 f2a g2a) (norm_le_two_mul_of_tail_bound hc hu2 f2c g2c); linarith
+  · have := sub_b (norm_le_two_mul_of_tail_bound ha hu2 f1a g1a)
+        (norm_le_two_mul_of_tail_bound hc hu2 f1c g1c); linarith
+  · have := sub_b (norm_le_two_mul_of_tail_bound ha hu2 f2a g2a)
+        (norm_le_two_mul_of_tail_bound hc hu2 f2c g2c); linarith
   · have := sub_b r1a r1c; linarith
   · have := sub_b r2a r2c; linarith
 
 /-- The tail-bound constant `crossSeriesTailConst` is nonnegative. -/
-private lemma crossSeriesTailConst_nonneg {Cc K C : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K) (hC : 0 ≤ C) (β : ℤ) :
+private lemma crossSeriesTailConst_nonneg {Cc K C : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
+    (hC : 0 ≤ C) (β : ℤ) :
     0 ≤ crossSeriesTailConst Cc K C β := by
   unfold crossSeriesTailConst
   have : 0 ≤ ∑' ℓ : ℤ, (2 * K * 1 * (4 * C)) ^ ℓ.natAbs / (ℓ.natAbs ! : ℝ) :=
     tsum_nonneg fun ℓ => by positivity
   positivity
 
-/-- The derivative of the shifted cross-product series `F_{-n,n}` (from `hasDerivAt_crossSeries`). -/
+/-- The derivative of the shifted cross-product series `F_{-n,n}` (from `hasDerivAt_crossSeries`).
+-/
 def derivCrossSeries (j : ℕ) (ν h : ℂ) (c : ℤ → ℂ) (n : ℤ) (z : ℂ) : ℂ :=
-  -(h * Complex.exp (-z) / 2) * (crossSeries j ν h c (-n - 1) n z - crossSeries j ν h c (-n + 1) n z) +
-    h * Complex.exp z / 2 * (crossSeries j ν h c (-n) (n - 1) z - crossSeries j ν h c (-n) (n + 1) z)
+  -(h * Complex.exp (-z) / 2) *
+      (crossSeries j ν h c (-n - 1) n z - crossSeries j ν h c (-n + 1) n z) +
+    h * Complex.exp z / 2 *
+        (crossSeries j ν h c (-n) (n - 1) z - crossSeries j ν h c (-n) (n + 1) z)
 
 /-- The Wronskian of `F^{(1)}_{-n,n}` and `F^{(2)}_{-n,n}`. -/
 def crossSeriesWronskian (ν h : ℂ) (c : ℤ → ℂ) (n : ℤ) (z : ℂ) : ℂ :=
-  crossSeries 1 ν h c (-n) n z * derivCrossSeries 2 ν h c n z - derivCrossSeries 1 ν h c n z * crossSeries 2 ν h c (-n) n z
+  crossSeries 1 ν h c (-n) n z * derivCrossSeries 2 ν h c n z - derivCrossSeries 1 ν h c n z *
+      crossSeries 2 ν h c (-n) n z
 
 /-- The Wronskian of the dominant terms. -/
-private lemma crossTerm_dominant_wronskian (ν : ℂ) {h : ℝ} (hh : 0 < h) (c : ℤ → ℂ) (n : ℤ) (x : ℝ) :
+private lemma crossTerm_dominant_wronskian (ν : ℂ) {h : ℝ} (hh : 0 < h) (c : ℤ → ℂ)
+    (n : ℤ) (x : ℝ) :
     ((h * Real.exp x : ℝ) : ℂ) / 2 *
       (crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq 1 ν h x) (-n) n (-(-n)) *
           (crossTerm c (besselJExpNegSeq h x) (mathieuCylExpSeq 2 ν h x) (-n) (n - 1) (-(-n)) -
@@ -532,7 +554,8 @@ private lemma tendsto_crossSeriesWronskian {ν h : ℝ} (hh : 0 < h) (n : ℤ) :
     Tendsto (fun x : ℝ => crossSeriesWronskian ν h (mathieuMeCoeff ν ((h : ℂ) ^ 2)) n x) atTop
       (𝓝 (2 / π * mathieuMeCoeff ν ((h : ℂ) ^ 2) n ^ 2)) := by
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
-  obtain ⟨Cc, K, hCc, hK, hc⟩ := mathieuMeCoeff_factorial_decay (modMathieuAdmissible_ofReal ν h) hh'
+  obtain ⟨Cc, K, hCc, hK, hc⟩ :=
+      mathieuMeCoeff_factorial_decay (modMathieuAdmissible_ofReal ν h) hh'
   set c := mathieuMeCoeff (ν : ℂ) ((h : ℂ) ^ 2) with hcdef
   set C := max 1 (2 * (‖(ν : ℂ)‖ + 1) / h) with hCdef
   have hC1 : 1 ≤ C := le_max_left _ _
@@ -604,9 +627,11 @@ private lemma tendsto_crossSeriesWronskian {ν h : ℝ} (hh : 0 < h) (n : ℤ) :
           norm_nonneg (mathieuCylExp 2 ((ν : ℂ) + ((-1 : ℤ) : ℂ)) h x),
           norm_nonneg (mathieuCylExp 2 ((ν : ℂ) + ((0 : ℤ) : ℂ)) h x),
           norm_nonneg (mathieuCylExp 2 ((ν : ℂ) + ((1 : ℤ) : ℂ)) h x)]
-    have t1 := fun α β => crossSeries_tail_bound 1 le_rfl (by norm_num) ν hh hCc hK hc hC1 α β hu hCw
+    have t1 := fun α β =>
+        crossSeries_tail_bound 1 le_rfl (by norm_num) ν hh hCc hK hc hC1 α β hu hCw
       (b1 (-1) (Or.inl rfl)) (b1 0 (Or.inr (Or.inl rfl))) (b1 1 (Or.inr (Or.inr rfl)))
-    have t2 := fun α β => crossSeries_tail_bound 2 (by norm_num) (by norm_num) ν hh hCc hK hc hC1 α β hu
+    have t2 := fun α β =>
+        crossSeries_tail_bound 2 (by norm_num) (by norm_num) ν hh hCc hK hc hC1 α β hu
       hCw (b2 (-1) (Or.inl rfl)) (b2 0 (Or.inr (Or.inl rfl))) (b2 1 (Or.inr (Or.inr rfl)))
     have hux : (h : ℂ) * Complex.exp (-(x : ℂ)) = (u : ℂ) := by simp [hudef, Complex.ofReal_exp]
     have hvx : (h : ℂ) * Complex.exp (x : ℂ) = (v : ℂ) := by simp [hvdef, Complex.ofReal_exp]
@@ -637,7 +662,8 @@ private lemma tendsto_crossSeriesWronskian {ν h : ℝ} (hh : 0 < h) (n : ℤ) :
     have pau : 0 ≤ La * UU * u := by positivity
     have pbu : 0 ≤ Lb * UU * u := by positivity
     have pcu : 0 ≤ Lc * UU * u := by positivity
-    have := wronskian_estimate_assemble hu0 hu hv0 huv pa pb pc f1 g1 f2 g2 f1a g1a f1c g1c f2a g2a f2c g2c
+    have := wronskian_estimate_assemble hu0 hu hv0 huv pa pb pc f1 g1 f2 g2 f1a g1a f1c g1c
+        f2a g2a f2c g2c
       r1a r1c r2a r2c
     convert this using 2; ring
   have T3 : Tendsto (fun x : ℝ => crossSeriesWronskian ν h c n x - main x) atTop (𝓝 0) := by
@@ -695,7 +721,8 @@ theorem complexWronskian_modMathieuM_one_two {ν h : ℝ} (hh : 0 < h) (z : ℂ)
     rw [hW, hW] at this
     exact (mul_left_cancel₀ hci this).symm
   have hlim := tendsto_crossSeriesWronskian (ν := ν) hh n
-  have hlim' : Tendsto (fun x : ℝ => crossSeriesWronskian ν h c n x) atTop (𝓝 (crossSeriesWronskian ν h c n z)) :=
+  have hlim' : Tendsto (fun x : ℝ => crossSeriesWronskian ν h c n x) atTop
+      (𝓝 (crossSeriesWronskian ν h c n z)) :=
     tendsto_const_nhds.congr fun x => (hWF x).symm
   have heq := tendsto_nhds_unique hlim' hlim
   rw [hW, heq, ← hcdef]

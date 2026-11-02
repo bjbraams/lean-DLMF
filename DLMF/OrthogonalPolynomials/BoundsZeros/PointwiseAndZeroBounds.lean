@@ -28,8 +28,8 @@ Laguerre's differential inequality bound the values and zeros.
 * `ultrasphPoly_bound_at_one`, `ultrasphPoly_even_bound`, `ultrasphPoly_odd_bound`,
   `ultrasphPoly_bernstein_bound`: bounds for Gegenbauer polynomials (DLMF 18.14.4–18.14.7).
 * `laguerrePolyL_bound`, `hermitePolyH_bound`: DLMF 18.14.8 and 18.14.9.
-* `jacobi_turan`, `laguerrePolyL_turan`, `hermitePolyH_turan`: Turán's inequalities
-  (DLMF 18.14.11–18.14.13).
+* `jacobi_turan`, `laguerrePolyL_turan`, `laguerrePolyL_turan'`, `hermitePolyH_turan`: Turán's
+  inequalities (DLMF 18.14.11–18.14.13).
 * `jacobi_positive_weighted_sum`, `jacobi_positive_sum`, `laguerrePolyL_positive_weighted_sum`:
   positive sums (DLMF 18.14.25–18.14.27).
 * `jacobi_darboux_asymptotic`: the large-`n` asymptotic form of Jacobi polynomials (DLMF §18.15).
@@ -90,7 +90,8 @@ theorem poch_ofReal_le {r s : ℝ} (hr : 0 < r) (hrs : r ≤ s) (n : ℕ) :
 /-- Estimate under the stated parameter and domain assumptions: `‖jacobiPolyP α β n x‖ ≤ (poch (α
 + 1) n).re / n.factorial`. -/
 @[dlmf 18.14.E1]
-theorem jacobi_bound_at_one {α β x : ℝ} (hαβ : β ≤ α) (hβ : -1 < β) (hα : -1 / 2 ≤ α) (hx : |x| ≤ 1) (n : ℕ) :
+theorem jacobi_bound_at_one {α β x : ℝ} (hαβ : β ≤ α) (hβ : -1 < β) (hα : -1 / 2 ≤ α) (hx : |x| ≤ 1)
+    (n : ℕ) :
     ‖jacobiPolyP α β n x‖ ≤ (poch (α + 1) n).re / n.factorial := by
   have hα1 : -1 < α := by linarith
   obtain ⟨u, v, hu, huv, h1, h2⟩ := poch_ofReal_le (r := β + 1) (s := α + 1) (by linarith)
@@ -141,7 +142,8 @@ theorem jacobi_bound_at_one {α β x : ℝ} (hαβ : β ≤ α) (hβ : -1 < β) 
 /-- Estimate under the stated parameter and domain assumptions: `‖jacobiPolyP α β n x‖ ≤ (poch (β
 + 1) n).re / n.factorial`. -/
 @[dlmf 18.14.E2]
-theorem jacobi_bound_at_neg_one {α β x : ℝ} (hαβ : α ≤ β) (hα : -1 < α) (hβ : -1 / 2 ≤ β) (hx : |x| ≤ 1) (n : ℕ) :
+theorem jacobi_bound_at_neg_one {α β x : ℝ} (hαβ : α ≤ β) (hα : -1 < α) (hβ : -1 / 2 ≤ β)
+    (hx : |x| ≤ 1) (n : ℕ) :
     ‖jacobiPolyP α β n x‖ ≤ (poch (β + 1) n).re / n.factorial := by
   rw [show (x : ℂ) = -((-x : ℝ) : ℂ) by push_cast; ring,
     jacobi_reflection (by simpa using hα) (by simpa using hα.trans_le hαβ), norm_mul, norm_pow,
@@ -704,12 +706,11 @@ theorem jacobi_turan {α β x : ℝ} (hα : -1 < α) (hαβ : α ≤ β) (hx : |
 
 /-- Turán's inequality for Laguerre polynomials, via the identity
 `(n+2)Δₙ = (L_{n+1} - Lₙ)² + (n+α)Δ_{n-1}` for `Δₙ = L_{n+1}² - Lₙ L_{n+2}`.
-Stronger than DLMF: the hypothesis `0 ≤ x` is not used; the inequality holds for all real `x`. -/
+This is stronger than DLMF, which assumes `0 ≤ x`; the inequality holds for all real `x`. -/
 @[dlmf 18.14.E12]
-theorem laguerrePolyL_turan {α x : ℝ} (hα : 0 ≤ α) (hx : 0 ≤ x) (n : ℕ) :
+theorem laguerrePolyL_turan' {α x : ℝ} (hα : 0 ≤ α) (n : ℕ) :
     (laguerrePolyL α (n + 1) x).re ^ 2 ≥ (laguerrePolyL α n x).re
         * (laguerrePolyL α (n + 2) x).re := by
-  have _ := hx
   have hα' : -1 < ((α : ℂ)).re := by simp; linarith
   set L : ℕ → ℝ := fun k => (laguerrePolyLR α k).eval x with hL
   have hreal (k : ℕ) : laguerrePolyL α k x = (L k : ℂ) := (eval_laguerrePolyLR α k x).symm
@@ -756,6 +757,15 @@ theorem laguerrePolyL_turan {α x : ℝ} (hα : 0 ≤ α) (hx : 0 ≤ x) (n : �
       exact (mul_nonneg_iff_of_pos_left hk).mp this
   simp only [hreal, Complex.ofReal_re]
   linarith [key n]
+
+/-- Turán's inequality for Laguerre polynomials, via the identity
+`(n+2)Δₙ = (L_{n+1} - Lₙ)² + (n+α)Δ_{n-1}` for `Δₙ = L_{n+1}² - Lₙ L_{n+2}`.
+This is the form with DLMF's hypothesis `0 ≤ x`; see `laguerrePolyL_turan'` for all real `x`. -/
+@[dlmf 18.14.E12]
+theorem laguerrePolyL_turan {α x : ℝ} (hα : 0 ≤ α) (_hx : 0 ≤ x) (n : ℕ) :
+    (laguerrePolyL α (n + 1) x).re ^ 2 ≥ (laguerrePolyL α n x).re
+        * (laguerrePolyL α (n + 2) x).re :=
+  laguerrePolyL_turan' hα n
 
 /-- The stated relation follows from the given hypotheses: `(aeval x (hermitePolyH (n + 1)) : ℝ) ^
 2 ≥ aeval x (hermitePolyH n) * aeval x (hermitePolyH (n + 2))`. -/
@@ -857,7 +867,8 @@ theorem jacobi_darboux_asymptotic {α β θ : ℝ} (hα : -1 < α) (hβ : -1 < �
     (hθ : 0 < θ) (hθπ : θ < Real.pi) :
     Tendsto (fun n : ℕ => Real.sqrt n * (Real.sin (θ / 2)) ^ (α + 1 / 2) *
       (Real.cos (θ / 2)) ^ (β + 1 / 2) * (jacobiPolyP α β n (Real.cos θ)).re -
-      Real.cos ((n + (α + β + 1) / 2) * θ - (α + 1 / 2) * Real.pi / 2) / Real.sqrt Real.pi) atTop (𝓝 0) := by
+      Real.cos ((n + (α + β + 1) / 2) * θ - (α + 1 / 2) * Real.pi / 2) / Real.sqrt Real.pi) atTop
+          (𝓝 0) := by
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `((1 + x) / 2) ^ (β / 2) *

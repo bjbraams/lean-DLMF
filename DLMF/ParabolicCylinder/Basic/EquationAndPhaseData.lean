@@ -50,7 +50,8 @@ derivatives. -/
 def IsOscillatoryCylinderSolution (a : ℂ) (f : ℂ → ℂ) : Prop :=
   ∀ z, iteratedDeriv 2 f z+(z^2/4-a)*f z=0
 
-/-- The barred U solution; meaningful only away from positive half-integral parameters, not complex conjugation. -/
+/-- The barred U solution; meaningful only away from positive half-integral parameters, not complex
+conjugation. -/
 @[dlmf 12.2.E21]
 def pcfUBar (a z : ℂ) : ℂ :=
   Gamma (1/2-a)*pcfV a z

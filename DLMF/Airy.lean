@@ -24,6 +24,7 @@ public import DLMF.Airy.Integrals
 public import DLMF.Airy.Products
 public import DLMF.Airy.Generalized
 public import DLMF.Airy.GeneralizedContours
+public import DLMF.Airy.GeneralizedFinitePart
 public import DLMF.Airy.Incomplete
 public import DLMF.Airy.SquareTools
 

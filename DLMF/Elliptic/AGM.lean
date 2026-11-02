@@ -169,7 +169,8 @@ theorem agmIntegral_pointwise {a b t : ℝ} (ha : 0 < a) (hb : 0 < b) (ht : 0 < 
     rw [div_pow, div_pow, h1]
     field_simp
     ring
-  rw [hbase, rpow_neg_half_eq_recip_sqrt (by positivity), rpow_neg_half_eq_recip_sqrt (by positivity),
+  rw [hbase, rpow_neg_half_eq_recip_sqrt (by positivity),
+      rpow_neg_half_eq_recip_sqrt (by positivity),
     sqrt_mul (by positivity), sqrt_mul' _ (by positivity), sqrt_sq hb.le,
     sqrt_div' _ (by positivity), abs_of_pos (by positivity)]
   have hA : 0 < √(t ^ 2 + a ^ 2) := sqrt_pos.mpr (by positivity)
@@ -202,7 +203,8 @@ theorem agmIntegral_eq_gaussLineIntegral {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     rw [smul_eq_mul]; exact agmIntegral_pointwise ha hb ht
 
 /-- `agmIntegral` is symmetric. -/
-theorem agmIntegral_comm {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : agmIntegral a b = agmIntegral b a := by
+theorem agmIntegral_comm {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : agmIntegral a b =
+    agmIntegral b a := by
   rw [agmIntegral_eq_gaussLineIntegral ha hb, agmIntegral_eq_gaussLineIntegral hb ha,
     gaussLineIntegral, gaussLineIntegral]
   simp_rw [mul_comm (_ ^ 2 + a ^ 2)]

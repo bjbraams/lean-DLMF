@@ -559,11 +559,13 @@ def partitionUnshift {n : ℕ} (p : n.Partition) (N : ℕ) (h : N + Multiset.car
     omega
   parts_sum := by
     have := sum_map_add_one (p.parts.map (· - 1))
-    rw [map_add_one_map_sub_one (fun i hi => p.parts_pos hi), Multiset.card_map, p.parts_sum] at this
+    rw [map_add_one_map_sub_one (fun i hi => p.parts_pos hi), Multiset.card_map,
+        p.parts_sum] at this
     omega
 
 /-- Helper for (26.10.9) (agent p26a). -/
-private lemma parts_partitionShift {N : ℕ} (q : N.Partition) (n : ℕ) (h : N + Multiset.card q.parts = n) :
+private lemma parts_partitionShift {N : ℕ} (q : N.Partition) (n : ℕ)
+    (h : N + Multiset.card q.parts = n) :
     (partitionShift q n h).parts = q.parts.map (· + 1) := rfl
 
 /-- Helper for (26.10.9) (agent p26a). -/
@@ -572,7 +574,8 @@ private lemma parts_partitionShiftCons {N : ℕ} (q : N.Partition) (n : ℕ)
     (partitionShiftCons q n h).parts = 1 ::ₘ q.parts.map (· + 1) := rfl
 
 /-- Helper for (26.10.9) (agent p26a). -/
-private lemma parts_partitionUnshift {n : ℕ} (p : n.Partition) (N : ℕ) (h : N + Multiset.card p.parts = n)
+private lemma parts_partitionUnshift {n : ℕ} (p : n.Partition) (N : ℕ)
+    (h : N + Multiset.card p.parts = n)
     (h1 : 1 ∉ p.parts) : (partitionUnshift p N h h1).parts = p.parts.map (· - 1) := rfl
 
 /-- Helper for (26.10.9) (agent p26a). -/
@@ -606,7 +609,8 @@ private lemma card_distincts_card_parts_one_not_mem {m n : ℕ} (hmn : m ≤ n) 
       rw [parts_partitionUnshift, Multiset.card_map]
       exact ⟨nodup_map_sub_one (fun i hi => p.parts_pos hi) hp.1, hp.2.1⟩
     · apply Nat.Partition.ext
-      rw [parts_partitionShift, parts_partitionUnshift, map_add_one_map_sub_one (fun i hi => p.parts_pos hi)]
+      rw [parts_partitionShift, parts_partitionUnshift,
+          map_add_one_map_sub_one (fun i hi => p.parts_pos hi)]
 
 /-- Helper for (26.10.9) (agent p26a). -/
 private lemma card_distincts_card_parts_one_mem {m n : ℕ} (hm : 1 ≤ m) (hmn : m ≤ n) :
@@ -681,7 +685,8 @@ theorem card_distinct_card_eq_recurrence {m n : ℕ} (hm : 1 ≤ m) (hmn : m ≤
   rw [← card_filter_add_card_filter_not (fun p : n.Partition => 1 ∉ p.parts), filter_filter,
     filter_filter, add_comm]
   simp only [not_not]
-  rw [← card_distincts_card_parts_one_not_mem hmn, ← card_distincts_card_parts_one_mem hm hmn, add_comm]
+  rw [← card_distincts_card_parts_one_not_mem hmn,
+      ← card_distincts_card_parts_one_mem hm hmn, add_comm]
 
 /-- (26.10.9), corrected: `p_m(𝒟, n) = p_{m-1}(𝒟, n) + p_m(𝒟, n - m) - p_{m-2}(𝒟, n - m)`
 for `1 ≤ m ≤ n` (with `p_{-1} = 0`). DLMF prints `p_m(𝒟, n) = p_m(𝒟, n - m) + p_{m-1}(𝒟, n)`,

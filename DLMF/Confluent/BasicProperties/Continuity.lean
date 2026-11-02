@@ -86,7 +86,8 @@ theorem regularizedHGFun_of_neg_nat (a : ℂ) (n : ℕ) (z : ℂ) :
   rw [← hF.tsum_eq, ← tsum_mul_left]
   congr 1
   funext j
-  have hΓ : Gamma ((n : ℂ) + 2 + j) = (ascPochhammer ℂ j).eval ((n : ℂ) + 2) * Gamma ((n : ℂ) + 2) := by
+  have hΓ : Gamma ((n : ℂ) + 2 + j) = (ascPochhammer ℂ j).eval ((n : ℂ) + 2) *
+      Gamma ((n : ℂ) + 2) := by
     rw [← Gamma_add_nat_div_Gamma_eq (n := j) ((n : ℂ) + 2) hpole]
     field_simp [Gamma_ne_zero hpole]
   have hΓ1 : Gamma ((n : ℂ) + 2 + j) = ((n + 1 + j).factorial : ℂ) := by
@@ -167,7 +168,8 @@ theorem tricomiD_intCast (a z : ℂ) (hz : z ≠ 0) (n : ℤ) : tricomiD a n z =
   rcases le_or_gt n 0 with hn | hn
   · obtain ⟨k, rfl⟩ : ∃ k : ℕ, n = -(k : ℤ) := ⟨n.natAbs, by omega⟩
     push_cast
-    rw [hneg, DLMF.Hypergeometric.recip_Gamma_eq_poch_mul k a, show 1 - -(k : ℂ) = ((k + 1 : ℕ) : ℂ) by push_cast; ring,
+    rw [hneg, DLMF.Hypergeometric.recip_Gamma_eq_poch_mul k a, show 1 - -(k : ℂ) =
+        ((k + 1 : ℕ) : ℂ) by push_cast; ring,
       cpow_natCast, show a - -(k : ℂ) + 1 = a + ((k + 1 : ℕ) : ℂ) by push_cast; ring,
       show 2 - -(k : ℂ) = (k + 2 : ℂ) by ring]
     push_cast
@@ -604,7 +606,8 @@ theorem neg_nat_sum_eq (m : ℕ) {b : ℂ} (hb : ∀ k : ℕ, b ≠ -(k : ℂ)) 
 /-- The connection formula at `a = -m`, for noninteger `c`. -/
 theorem kummerUConnection_neg_nat (m : ℕ) {c : ℂ} (hc : c ∈ integerComplement) (z : ℂ) :
     kummerUConnection (-(m : ℂ)) c z =
-      (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1), (m.choose s : ℂ) * poch (c + s) (m - s) * (-z) ^ s := by
+      (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1), (m.choose s : ℂ) *
+          poch (c + s) (m - s) * (-z) ^ s := by
   have hc0 := not_neg_nat_of_mem_integerComplement hc
   rw [neg_nat_sum_eq m hc0, kummerUConnection, Gamma_neg_nat_eq_zero, div_zero, zero_mul,
     zero_mul, add_zero]
@@ -626,7 +629,8 @@ theorem kummerU_neg_nat_sum (m : ℕ) (b z : ℂ) :
     (m.choose s : ℂ) * poch (c + s) (m - s) * (-z) ^ s with hP
   have hPc : Continuous P := by
     refine continuous_const.mul (continuous_finsetSum _ fun s _ => ?_)
-    exact (continuous_const.mul ((Polynomial.differentiable (ascPochhammer ℂ (m - s))).continuous.comp
+    exact (continuous_const.mul
+        ((Polynomial.differentiable (ascPochhammer ℂ (m - s))).continuous.comp
       (continuous_id.add continuous_const))).mul continuous_const
   by_cases hb : ∀ k : ℤ, b ≠ k
   · rw [kummerU_eq_connection _ _ _ hb,

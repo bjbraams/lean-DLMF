@@ -83,7 +83,8 @@ def mellinQBetaValue (q : ℝ) (α β : ℂ) : ℂ :=
       (DLMF.QSeries.qGamma q (1-a) * DLMF.QSeries.qGamma q (a+β)))
 
 /-- The q-Gamma function is continuous and nonzero on the right half-plane. -/
-private lemma continuousAt_qGamma_and_ne_zero (q : ℝ) (hq0 : 0<q) (hq1 : q<1) (x : ℂ) (hx : 0<x.re) :
+private lemma continuousAt_qGamma_and_ne_zero (q : ℝ) (hq0 : 0<q) (hq1 : q<1) (x : ℂ)
+    (hx : 0<x.re) :
     ContinuousAt (DLMF.QSeries.qGamma (q:ℂ)) x ∧ DLMF.QSeries.qGamma (q:ℂ) x≠0 := by
   have hqn : ‖(q:ℂ)‖<1 := by rw [Complex.norm_real,Real.norm_eq_abs,abs_of_pos hq0]; exact hq1
   have hqc : (q:ℂ)≠0 := by exact_mod_cast hq0.ne'
@@ -122,13 +123,15 @@ theorem mellinQBetaValue_eq (q : ℝ) (hq0 : 0<q) (hq1 : q<1)
     have := congrArg Complex.re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ)≤m)]
   have hG2 : ∀ m : ℕ, 1-α≠-m := fun m h => by
     have := congrArg Complex.re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ)≤m)]
-  have hc : ContinuousAt (fun a : ℂ => Complex.Gamma a * Complex.Gamma (1-a) * DLMF.QSeries.qGamma q β /
+  have hc : ContinuousAt
+      (fun a : ℂ => Complex.Gamma a * Complex.Gamma (1-a) * DLMF.QSeries.qGamma q β /
       (DLMF.QSeries.qGamma q (1-a) * DLMF.QSeries.qGamma q (a+β))) α := by
     refine ((((Complex.differentiableAt_Gamma α hG1).continuousAt).mul
       (((Complex.differentiableAt_Gamma (1-α) hG2).continuousAt).comp
         (continuousAt_const.sub continuousAt_id))).mul continuousAt_const).div
       ((h1.1.comp (continuousAt_const.sub continuousAt_id)).mul
-        (ContinuousAt.comp (x:=α) (f:=fun a : ℂ => a+β) h2.1 (continuousAt_id.add continuousAt_const))) (mul_ne_zero h1.2 h2.2)
+        (ContinuousAt.comp (x:=α) (f:=fun a : ℂ => a+β) h2.1
+            (continuousAt_id.add continuousAt_const))) (mul_ne_zero h1.2 h2.2)
   exact (hc.tendsto.mono_left nhdsWithin_le_nhds).limUnder_eq
 
 /-- The ordinary Mellin q-beta integral, including the removable integer-alpha cases. -/

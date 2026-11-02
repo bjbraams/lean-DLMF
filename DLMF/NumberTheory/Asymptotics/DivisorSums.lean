@@ -241,7 +241,8 @@ private lemma sum_sigma_one_eq_sum_triangle_floor (N : ℕ) :
     pow_one]
 
 /-- From `|S(N) - c N²| ≤ N(2 + ln N)` to `|S(⌊x⌋) - c x²| ≤ 8 x ln x`, `x ≥ 3`. -/
-private lemma abs_floor_sub_mul_sq_le_of_quadratic_bound {S : ℕ → ℝ} {c : ℝ} (hc0 : 0 ≤ c) (hc : c ≤ 2)
+private lemma abs_floor_sub_mul_sq_le_of_quadratic_bound {S : ℕ → ℝ} {c : ℝ}
+    (hc0 : 0 ≤ c) (hc : c ≤ 2)
     (h : ∀ N : ℕ, 1 ≤ N → |S N - c * N ^ 2| ≤ N * (2 + Real.log N)) {x : ℝ} (hx : 3 ≤ x) :
     |S ⌊x⌋₊ - c * x ^ 2| ≤ 8 * |x * Real.log x| := by
   have hx0 : 0 ≤ x := by linarith
@@ -399,7 +400,8 @@ lemma hasPartialSumAsymptotic_totient :
   refine isBigO_ofReal_of_abs_le 8 ?_
   filter_upwards [eventually_ge_atTop (3 : ℝ)] with x hx
   have hpi : 3 < π := Real.pi_gt_three
-  refine abs_floor_sub_mul_sq_le_of_quadratic_bound (S := fun N ↦ ∑ n ∈ Finset.Icc 1 N, (n.totient : ℝ))
+  refine abs_floor_sub_mul_sq_le_of_quadratic_bound
+      (S := fun N ↦ ∑ n ∈ Finset.Icc 1 N, (n.totient : ℝ))
     (by positivity) ?_ (fun N hN ↦ ?_) hx
   · rw [div_le_iff₀ (by positivity)]; nlinarith
   have hcore := abs_sum_mul_triangle_floor_sub_le (a := fun d ↦ (μ d : ℝ))
@@ -419,7 +421,8 @@ lemma hasPartialSumAsymptotic_totient_div :
   refine isBigO_ofReal_of_abs_le 5 ?_
   filter_upwards [eventually_ge_atTop (3 : ℝ)] with x hx
   have hpi : 3 < π := Real.pi_gt_three
-  refine abs_floor_sub_mul_le_of_linear_bound (S := fun N ↦ ∑ n ∈ Finset.Icc 1 N, (n.totient : ℝ) / n)
+  refine abs_floor_sub_mul_le_of_linear_bound
+      (S := fun N ↦ ∑ n ∈ Finset.Icc 1 N, (n.totient : ℝ) / n)
     (by positivity) ?_ (fun N hN ↦ ?_) hx
   · rw [div_le_iff₀ (by positivity)]; nlinarith
   have hcore := abs_sum_div_mul_floor_sub_le (a := fun d ↦ (μ d : ℝ))
@@ -651,7 +654,8 @@ lemma hasPartialSumAsymptotic_sigma_zero :
   constructor <;> nlinarith
 
 /-- The error sequence of the telescoping comparison for `∑ ln a / a`. -/
-noncomputable def logDivTelescopeError (a : ℕ) : ℝ := Real.log a / (a * ((a : ℝ) - 1)) + 1 / ((a : ℝ) - 1) ^ 2
+noncomputable def logDivTelescopeError (a : ℕ) : ℝ := Real.log a / (a * ((a : ℝ) - 1)) + 1 /
+    ((a : ℝ) - 1) ^ 2
 
 /-- Estimate under the stated parameter and domain assumptions: `0 ≤ logDivTelescopeError a`. -/
 lemma logDivTelescopeError_nonneg (a : ℕ) : 0 ≤ logDivTelescopeError a := by

@@ -61,7 +61,8 @@ theorem airyMod_wInt {a : ℝ} (ha : -1 < a) {v : ℝ} (hv : 0 ≤ v) :
           gcongr
       _ = _ := by ring
 
-/-- The weighted Nicholson function `G(v) = ∫₀^∞ e^{-u}(u^{-1/2} + (v/2) u^{3/2}) e^{-vu³/12} du`. -/
+/-- The weighted Nicholson function `G(v) = ∫₀^∞ e^{-u}(u^{-1/2} + (v/2) u^{3/2}) e^{-vu³/12} du`.
+-/
 noncomputable def airyMod_wG (v : ℝ) : ℝ :=
   ∫ u in Ioi (0 : ℝ), Real.exp (-u) * (u ^ (-(1 / 2) : ℝ) + v / 2 * u ^ (3 / 2 : ℝ)) *
     Real.exp (-(v * u ^ 3 / 12))
@@ -88,7 +89,8 @@ theorem airyMod_wG_hasDerivAt_integrand (u v : ℝ) :
   convert this using 1
   ring
 
-/-- `u^{a} ≤ u^{b_1} + u^{b_2}` style domination: `u^a ≤ u^{-1/2} + u^{9/2}` for `-1/2 ≤ a ≤ 9/2`. -/
+/-- `u^{a} ≤ u^{b_1} + u^{b_2}` style domination: `u^a ≤ u^{-1/2} + u^{9/2}` for `-1/2 ≤ a ≤ 9/2`.
+-/
 theorem airyMod_rpow_le_sum {u a : ℝ} (hu : 0 < u) (ha1 : -(1 / 2) ≤ a) (ha2 : a ≤ 9 / 2) :
     u ^ a ≤ u ^ (-(1 / 2) : ℝ) + u ^ (9 / 2 : ℝ) := by
   rcases le_total u 1 with h | h
@@ -328,7 +330,8 @@ theorem airyMod_wScale {s : ℝ} (hs : 0 < s) (p : ℝ) :
 
 /-- **Scaling form for `N²`**: for `s > 0`, `π^{3/2} s^{-1/2} N(-s)² = G(s^{-3})`. -/
 theorem airyMod_wG_scaling {s : ℝ} (hs : 0 < s) :
-    s ^ (-(1 / 2) : ℝ) * airyDerivModulus (-s) ^ 2 = airyMod_wG ((s ^ 3)⁻¹) / (π * Real.sqrt π) := by
+    s ^ (-(1 / 2) : ℝ) * airyDerivModulus (-s) ^ 2 = airyMod_wG ((s ^ 3)⁻¹) /
+        (π * Real.sqrt π) := by
   have hv : 0 ≤ (s ^ 3)⁻¹ := by positivity
   have h0 : (∫ t in Ioi (0 : ℝ), airyMod_kernel (-s) t) = s ^ (-(-(1 / 2) + 1) : ℝ) *
       ∫ u in Ioi (0 : ℝ), Real.exp (-u) * u ^ (-(1 / 2) : ℝ) *
@@ -513,8 +516,10 @@ theorem airy_weighted_modulus_monotone :
   refine lt_of_pow_lt_pow_left₀ 2 (hpos x hx) ?_
   rw [hsq x hx, hsq y hy]
   refine div_lt_div_of_pos_right ?_ (by positivity)
-  rw [← sub_pos, ← integral_sub (airyMod_scaled_integrable (by linarith)) (airyMod_scaled_integrable (by linarith))]
-  refine airyMod_integral_pos ((airyMod_scaled_integrable (by linarith)).sub (airyMod_scaled_integrable (by linarith)))
+  rw [← sub_pos, ← integral_sub (airyMod_scaled_integrable (by linarith))
+      (airyMod_scaled_integrable (by linarith))]
+  refine airyMod_integral_pos
+      ((airyMod_scaled_integrable (by linarith)).sub (airyMod_scaled_integrable (by linarith)))
     fun u hu => ?_
   have h3 : (-y) ^ 3 < (-x) ^ 3 := by
     have : 0 < -y := by linarith
@@ -592,7 +597,8 @@ theorem airyMod_tendsto_of_deriv_bound {F f : ℝ → ℝ} {R K p : ℝ} (hR : 0
   have hc : CauchySeq F := by
     rw [Metric.cauchySeq_iff']
     intro ε hε
-    obtain ⟨N, hN⟩ := (eventually_ge_atTop R).and (hQlim.eventually (gt_mem_nhds hε)) |>.exists_forall_of_atTop
+    obtain ⟨N, hN⟩ := (eventually_ge_atTop R).and
+        (hQlim.eventually (gt_mem_nhds hε)) |>.exists_forall_of_atTop
     refine ⟨max N R, fun n hn => ?_⟩
     have hNR := (hN (max N R) (le_max_left _ _))
     rw [Real.dist_eq]
@@ -662,13 +668,15 @@ private lemma airyMod_tendsto_sigma_succ (k : ℕ) (a : ℝ) :
 constant `L = lim (G(s) - (2/3) c₀ s^{3/2})`. -/
 theorem airyMod_expansion_of_deriv {G g : ℝ → ℝ} {c : ℕ → ℝ}
     (hG : ∀ s, 0 < s → HasDerivAt G (g s) s)
-    (hg : ∀ N : ℕ, (fun s => g s - ∑ k ∈ Finset.range N, s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * c k)
+    (hg : ∀ N : ℕ, (fun s => g s - ∑ k ∈ Finset.range N, s ^ (1 / 2 : ℝ) *
+        (-s) ^ (-(3 * k : ℤ)) * c k)
       =O[atTop] (fun s => s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * N : ℤ)))) :
     ∃ L, Tendsto (fun s => G s - 2 / 3 * s ^ (3 / 2 : ℝ) * c 0) atTop (𝓝 L) ∧
       ∀ N : ℕ, (fun s => G s - L - ∑ k ∈ Finset.range N,
         2 / 3 * s ^ (3 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * (c k / (1 - 2 * k))) =O[atTop]
         (fun s => 2 / 3 * s ^ (3 / 2 : ℝ) * (-s) ^ (-(3 * N : ℤ))) := by
-  set σ : ℕ → ℝ → ℝ := fun k s => 2 / 3 * s ^ (3 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * (c k / (1 - 2 * k))
+  set σ : ℕ → ℝ → ℝ := fun k s => 2 / 3 * s ^ (3 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) *
+      (c k / (1 - 2 * k))
   set F : ℕ → ℝ → ℝ := fun N s => G s - ∑ k ∈ Finset.range N, σ k s
   have hF : ∀ N s, 0 < s → HasDerivAt (F N) (g s - ∑ k ∈ Finset.range N,
       s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * c k) s := fun N s hs =>
@@ -714,7 +722,8 @@ theorem airyMod_expansion_of_deriv {G g : ℝ → ℝ} {c : ℕ → ℝ}
       rw [norm_one, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
       have : 1 ≤ s ^ (3 / 2 : ℝ) := Real.one_le_rpow hs (by norm_num)
       nlinarith
-    have h2 : (fun s => 2 / 3 * s ^ (3 / 2 : ℝ) * c 0) =O[atTop] (fun s : ℝ => 2 / 3 * s ^ (3 / 2 : ℝ)) :=
+    have h2 : (fun s => 2 / 3 * s ^ (3 / 2 : ℝ) * c 0) =O[atTop]
+        (fun s : ℝ => 2 / 3 * s ^ (3 / 2 : ℝ)) :=
       IsBigO.of_bound |c 0| (Eventually.of_forall fun s => by
         rw [norm_mul, Real.norm_eq_abs (c 0), mul_comm])
     refine (h1.add h2).congr' (Eventually.of_forall fun s => ?_) EventuallyEq.rfl
@@ -728,7 +737,8 @@ theorem airyMod_expansion_of_deriv {G g : ℝ → ℝ} {c : ℕ → ℝ}
     have hs0 : 0 < s := hR.trans_le hs
     have hb' := hb s hs
     have e : G s - L' - ∑ k ∈ Finset.range N, σ k s = F N s - L' := by simp only [F]; ring
-    rw [Real.norm_eq_abs, Real.norm_eq_abs, e, mul_assoc, abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 2 / 3),
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, e, mul_assoc, abs_mul,
+        abs_of_pos (by norm_num : (0 : ℝ) < 2 / 3),
       airyMod_abs_rpow_mul_zpow hs0]
     have : (0 : ℝ) < -((3 / 2 : ℝ) - 3 * N) := by
       have : (1 : ℝ) ≤ N := by exact_mod_cast hN
@@ -754,7 +764,8 @@ theorem airyMod_coeff_recip_mk {c : ℕ → ℝ} (hc : c 0 = 1) (n : ℕ) :
         Nat.succ_ne_zero, ite_false]
       rw [airyReciprocalCoeff]
       rw [← Finset.sum_range_reflect]
-      have : ∀ j ∈ Finset.range (m + 1), airyReciprocalCoeff c (m + 1 - 1 - j) * c (m + 1 - (m + 1 - 1 - j)) =
+      have : ∀ j ∈ Finset.range (m + 1), airyReciprocalCoeff c (m + 1 - 1 - j) *
+          c (m + 1 - (m + 1 - 1 - j)) =
           c (j + 1) * airyReciprocalCoeff c (m - j) := by
         intro j hj
         have hj' := Finset.mem_range.mp hj
@@ -882,21 +893,30 @@ theorem airyDerivModulus_asymptotic :
 
 /-- Signed first-neglected-term bounds, DLMF §9.8(iv). -/
 theorem airyModulus_error {x : ℝ} (hx : x < 0) {N : ℕ} :
-    |(airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x| ≤ |((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))| ∧
-      0 ≤ ((airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x) * (((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))) :=
+    |(airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) *
+        airyModulusSum false N x| ≤ |((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N *
+        x ^ (-(3 * N : ℤ))| ∧
+      0 ≤ ((airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x) *
+          (((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))) :=
   airyMod_sq_error_bound hx N
 
 /-- For `x < 0`, the error of the `θ` expansion after `N + 1` terms is bounded by, and has
 the sign of, the first neglected term, DLMF §9.8(iv). -/
 theorem airyPhase_error {x : ℝ} (hx : x < 0) {N : ℕ} (hN : 0 ≤ N) :
-    |(airyPhase x - (π / 4)) - (2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyPhaseSum false (N + 1) x| ≤ |(2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyPhaseCoeff (N + 1) * x ^ (-(3 * (N + 1) : ℤ))| ∧
-      0 ≤ ((airyPhase x - (π / 4)) - (2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyPhaseSum false (N + 1) x) * ((2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyPhaseCoeff (N + 1) * x ^ (-(3 * (N + 1) : ℤ))) := by
+    |(airyPhase x - (π / 4)) - (2 / 3 * (-x) ^ (3 / 2 : ℝ)) *
+        airyPhaseSum false (N + 1) x| ≤ |(2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyPhaseCoeff (N + 1) *
+        x ^ (-(3 * (N + 1) : ℤ))| ∧
+      0 ≤ ((airyPhase x - (π / 4)) - (2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyPhaseSum false (N + 1) x) *
+          ((2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyPhaseCoeff (N + 1) * x ^ (-(3 * (N + 1) : ℤ))) := by
   sorry
 
 /-- Signed first-neglected-term bounds, DLMF §9.8(iv). -/
 theorem airyDerivModulus_error {x : ℝ} (hx : x < 0) {N : ℕ} (hN : 1 ≤ N) :
-    |(airyDerivModulus x ^ 2) - ((-x) ^ (1 / 2 : ℝ) / π) * airyModulusSum true N x| ≤ |((-x) ^ (1 / 2 : ℝ) / π) * airyDerivModulusCoeff N * x ^ (-(3 * N : ℤ))| ∧
-      0 ≤ ((airyDerivModulus x ^ 2) - ((-x) ^ (1 / 2 : ℝ) / π) * airyModulusSum true N x) * (((-x) ^ (1 / 2 : ℝ) / π) * airyDerivModulusCoeff N * x ^ (-(3 * N : ℤ))) := by
+    |(airyDerivModulus x ^ 2) - ((-x) ^ (1 / 2 : ℝ) / π) *
+        airyModulusSum true N x| ≤ |((-x) ^ (1 / 2 : ℝ) / π) * airyDerivModulusCoeff N *
+        x ^ (-(3 * N : ℤ))| ∧
+      0 ≤ ((airyDerivModulus x ^ 2) - ((-x) ^ (1 / 2 : ℝ) / π) * airyModulusSum true N x) *
+          (((-x) ^ (1 / 2 : ℝ) / π) * airyDerivModulusCoeff N * x ^ (-(3 * N : ℤ))) := by
   obtain ⟨K, rfl⟩ : ∃ K, N = K + 1 := ⟨N - 1, by omega⟩
   obtain ⟨s, hs, rfl⟩ : ∃ s : ℝ, 0 < s ∧ x = -s := ⟨-x, by linarith, by ring⟩
   rw [neg_neg]
@@ -924,7 +944,8 @@ theorem airyDerivModulus_error {x : ℝ} (hx : x < 0) {N : ℕ} (hN : 1 ≤ N) :
   have hG : 0 ≤ G := hJ1.trans hJ2
   constructor
   · rw [show (π * Real.sqrt π)⁻¹ * J = (-1) ^ K * ((π * Real.sqrt π)⁻¹ * ((-1) ^ K * J)) by
-      rw [← mul_assoc ((-1 : ℝ) ^ K), mul_comm ((-1 : ℝ) ^ K), mul_assoc, ← mul_assoc ((-1 : ℝ) ^ K),
+      rw [← mul_assoc ((-1 : ℝ) ^ K), mul_comm ((-1 : ℝ) ^ K), mul_assoc,
+          ← mul_assoc ((-1 : ℝ) ^ K),
         ← pow_two, hsq, one_mul],
       show (π * Real.sqrt π)⁻¹ * G * (-1) ^ K = (-1) ^ K * ((π * Real.sqrt π)⁻¹ * G) by ring,
       abs_mul ((-1 : ℝ) ^ K), abs_mul ((-1 : ℝ) ^ K), hab, one_mul, one_mul,
@@ -938,8 +959,13 @@ theorem airyDerivModulus_error {x : ℝ} (hx : x < 0) {N : ℕ} (hN : 1 ≤ N) :
 /-- For `x < 0`, the error of the `φ` expansion after `N + 1` terms is bounded by, and has
 the sign of, the first neglected term, DLMF §9.8(iv). -/
 theorem airyDerivPhase_error {x : ℝ} (hx : x < 0) {N : ℕ} (hN : 0 ≤ N) :
-    |(airyDerivPhase x - (-π / 4)) - (2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyPhaseSum true (N + 1) x| ≤ |(2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyDerivPhaseCoeff (N + 1) * x ^ (-(3 * (N + 1) : ℤ))| ∧
-      0 ≤ ((airyDerivPhase x - (-π / 4)) - (2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyPhaseSum true (N + 1) x) * ((2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyDerivPhaseCoeff (N + 1) * x ^ (-(3 * (N + 1) : ℤ))) := by
+    |(airyDerivPhase x - (-π / 4)) - (2 / 3 * (-x) ^ (3 / 2 : ℝ)) *
+        airyPhaseSum true (N + 1) x| ≤ |(2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyDerivPhaseCoeff (N + 1) *
+        x ^ (-(3 * (N + 1) : ℤ))| ∧
+      0 ≤ ((airyDerivPhase x - (-π / 4)) - (2 / 3 * (-x) ^ (3 / 2 : ℝ)) *
+          airyPhaseSum true (N + 1) x) *
+          ((2 / 3 * (-x) ^ (3 / 2 : ℝ)) * airyDerivPhaseCoeff (N + 1) *
+          x ^ (-(3 * (N + 1) : ℤ))) := by
   sorry
 
 end DLMF.Airy

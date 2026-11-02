@@ -101,16 +101,21 @@ private lemma jacobiSystem_isBigO_of_approx {s c d S C D S' C' D' : ℂ → ℂ}
       have r8 := hrs.trans (pow_isBigO_pow_of_le (a := 8) (b := j) (by omega))
       have r7c := hrc.trans (pow_isBigO_pow_of_le (a := 7) (b := j) (by omega))
       have r7d := hrd.trans (pow_isBigO_pow_of_le (a := 7) (b := j) (by omega))
-      refine ⟨isBigO_pow_succ_of_deriv_isBigO_pow hes z0s ?_, isBigO_pow_succ_of_deriv_isBigO_pow hec z0c ?_,
+      refine ⟨isBigO_pow_succ_of_deriv_isBigO_pow hes z0s ?_,
+          isBigO_pow_succ_of_deriv_isBigO_pow hec z0c ?_,
         isBigO_pow_succ_of_deriv_isBigO_pow hed z0d ?_⟩
-      · exact ((r8.add (mul_isBigO_pow_of_isBigO_one h3 bC)).add (mul_isBigO_pow_of_isBigO_one h2 bD)).add (mul_isBigO_pow_of_isBigO_one h3 bec)
+      · exact ((r8.add (mul_isBigO_pow_of_isBigO_one h3 bC)).add
+            (mul_isBigO_pow_of_isBigO_one h2 bD)).add (mul_isBigO_pow_of_isBigO_one h3 bec)
       · exact ((r7c.add (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h3 bS) bk)).add
-          (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h1 bD) bk)).add (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h3 bes) bk)
+          (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h1 bD) bk)).add
+              (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h3 bes) bk)
       · exact ((r7d.add (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h2 bS) bκ)).add
-          (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h1 bC) bκ)).add (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h2 bes) bκ)
+          (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h1 bC) bκ)).add
+              (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h2 bes) bκ)
   obtain ⟨h1, h2, h3⟩ := P 8 le_rfl
   exact ⟨isBigO_pow_succ_of_deriv_isBigO_pow hes z0s
-    (((hrs.add (mul_isBigO_pow_of_isBigO_one h3 bC)).add (mul_isBigO_pow_of_isBigO_one h2 bD)).add (mul_isBigO_pow_of_isBigO_one h3 bec)), h2, h3⟩
+    (((hrs.add (mul_isBigO_pow_of_isBigO_one h3 bC)).add (mul_isBigO_pow_of_isBigO_one h2 bD)).add
+        (mul_isBigO_pow_of_isBigO_one h3 bec)), h2, h3⟩
 
 /-- Asymptotic bound with the indicated comparison function: `R =O[𝓝 0] fun z => z ^ n`. -/
 private lemma isBigO_pow_of_eq_pow_mul {R Q : ℂ → ℂ} {n : ℕ} (hQ : Continuous Q)
@@ -128,7 +133,8 @@ private lemma jacobiSnCnDnk_sub_maclaurin_isBigO {k : ℂ} (hk : k ∈ jacobiMod
         (1 + 44 * k ^ 2 + 16 * k ^ 4) * z ^ 6 / 720)) =O[𝓝 0] (fun z => z ^ 8) ∧
       (fun z => jacobiDnk z k - (1 - k ^ 2 * z ^ 2 / 2 + k ^ 2 * (4 + k ^ 2) * z ^ 4 / 24 -
         k ^ 2 * (16 + 44 * k ^ 2 + k ^ 4) * z ^ 6 / 720)) =O[𝓝 0] (fun z => z ^ 8) := by
-  have hreg := eventually_jacobiLetterTheta_ne_zero hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (q := .n) (by decide))
+  have hreg := eventually_jacobiLetterTheta_ne_zero hk
+      (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (q := .n) (by decide))
   have hpow : ∀ (a : ℂ) (n : ℕ) (b : ℂ) (z : ℂ),
       HasDerivAt (fun z : ℂ => a * z ^ n / b) (a * (n * z ^ (n - 1)) / b) z :=
     fun a n b z => ((hasDerivAt_pow n z).const_mul a).div_const b
@@ -161,7 +167,8 @@ private lemma jacobiSnCnDnk_sub_maclaurin_isBigO {k : ℂ} (hk : k ∈ jacobiMod
       (hpow (k ^ 2 * (4 + k ^ 2)) 4 24 z)).sub (hpow (k ^ 2 * (16 + 44 * k ^ 2 + k ^ 4)) 6 720 z))
     convert this using 1
     simp
-  · refine isBigO_pow_of_eq_pow_mul (Q := fun z => k^10*z^4/32400 + 187*k^8*z^4/129600 - k^8*z^2/864 +
+  · refine isBigO_pow_of_eq_pow_mul
+        (Q := fun z => k^10*z^4/32400 + 187*k^8*z^4/129600 - k^8*z^2/864 +
       731*k^6*z^4/172800 - 19*k^6*z^2/1152 + 3*k^6/160 + 187*k^4*z^4/129600 - 19*k^4*z^2/1152 +
       29*k^4/320 + k^2*z^4/32400 - k^2*z^2/864 + 3*k^2/160) (by fun_prop) fun z => by ring
   · refine isBigO_pow_of_eq_pow_mul (Q := fun z => -k^12*z^6/3628800 - 179*k^10*z^6/3628800 +

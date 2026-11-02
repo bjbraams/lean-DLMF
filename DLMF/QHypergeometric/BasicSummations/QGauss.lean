@@ -46,7 +46,8 @@ theorem q_chu_vandermonde_first {a c q : ℂ} (ha : a≠0) (hq0 : q≠0) (hq : �
   have hz : -(c*q^n/a*q^(-(n:ℤ)))=-c/a := by
     rw [zpow_neg,zpow_natCast]; field_simp
   rw [hz]
-  have hterm : ∀ k ∈ range (n+1), qBinom q n k*qPochhammer a q k*qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*
+  have hterm : ∀ k ∈ range (n+1),
+      qBinom q n k*qPochhammer a q k*qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*
       (-c/a)^k*(-c)^(n-k)=(-c)^n*(a^n)⁻¹*(qBinom q n k*qPochhammer a q k*
         qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*a^(n-k)) := by
     intro k hk
@@ -112,7 +113,8 @@ theorem q_chu_vandermonde_second {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n
     exact this
   exact qPhi_neg_pow_q_mul_qPochhammer hq0 hq n hc0 hcn
 
-/-- The phase-free coefficients are bounded because the finite factorials have nonzero limiting denominators. -/
+/-- The phase-free coefficients are bounded because the finite factorials have nonzero limiting
+denominators. -/
 private lemma qGauss_coefficient_bound {a c q : ℂ} (hq : ‖q‖ < 1)
     (hc : QDenominatorRegular [c] q) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ n : ℕ,
@@ -335,7 +337,8 @@ theorem one_phi_one_sum {a c q : ℂ} (ha : a ≠ 0) (hq : ‖q‖ < 1)
       rw [tsum_eq_sum (s := range 2)]
       · simp [sum_range_succ]
       · intro n hn
-        have hn2 : 0 < n.choose 2 := Nat.choose_pos (by simp only [Finset.mem_range, not_lt] at hn; omega)
+        have hn2 : 0 < n.choose 2 :=
+            Nat.choose_pos (by simp only [Finset.mem_range, not_lt] at hn; omega)
         simp [qPhiTerm, qPhiExponent, qPochhammerList, qTri_nat,
           zpow_natCast, zero_pow hn2.ne']
     rw [hsum]

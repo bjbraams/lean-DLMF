@@ -179,7 +179,8 @@ private lemma lameSnOperator_chebyshevU_cn_dn (k h lam s : ℂ) (j : ℤ) :
     (-k ^ 2 * (j ^ 2 + 5 * j - lam + 6) / 4) * r2
 
 /-- First and second derivatives of `F(z) G(sn z)` at a regular point. -/
-private lemma hasDerivAt_mul_eval_jacobiSnk {k : ℂ} (hk : k ∈ jacobiModulusDomain) (F F1 : ℂ → ℂ) (F2 : ℂ) (G : ℂ[X])
+private lemma hasDerivAt_mul_eval_jacobiSnk {k : ℂ} (hk : k ∈ jacobiModulusDomain) (F F1 : ℂ → ℂ)
+    (F2 : ℂ) (G : ℂ[X])
     {z : ℂ} (hz : JacobiRegulark .n z k)
     (hF : ∀ y, JacobiRegulark .n y k → HasDerivAt F (F1 y) y) (hF1 : HasDerivAt F1 F2 z) :
     HasDerivAt (deriv fun z => F z * G.eval (jacobiSnk z k))
@@ -210,7 +211,8 @@ private lemma hasDerivAt_mul_eval_jacobiSnk {k : ℂ} (hk : k ∈ jacobiModulusD
   ring
 
 /-- Lamé's equation for `F(z) G(sn z)` from the pointwise identity for its second derivative. -/
-private lemma isLameSolutionOn_mul_eval_jacobiSnk {k : ℂ} (hk : k ∈ jacobiModulusDomain) (F F1 F2 : ℂ → ℂ) (G : ℂ[X])
+private lemma isLameSolutionOn_mul_eval_jacobiSnk {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (F F1 F2 : ℂ → ℂ) (G : ℂ[X])
     (h ν : ℂ) (hF : ∀ y, JacobiRegulark .n y k → HasDerivAt F (F1 y) y)
     (hF1 : ∀ y, JacobiRegulark .n y k → HasDerivAt F1 (F2 y) y)
     (hval : ∀ y, JacobiRegulark .n y k →
@@ -229,7 +231,8 @@ private lemma isLameSolutionOn_mul_eval_jacobiSnk {k : ℂ} (hk : k ∈ jacobiMo
   · exact (hasDerivAt_mul_eval_jacobiSnk hk F F1 (F2 z) G hz hF (hF1 z hz)).congr_deriv (hval z hz)
 
 /-- The case of prefactor `1`. -/
-private lemma isLameSolutionOn_of_lameSnOperator_one {k : ℂ} (hk : k ∈ jacobiModulusDomain) (G : ℂ[X]) (h ν : ℂ)
+private lemma isLameSolutionOn_of_lameSnOperator_one {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (G : ℂ[X]) (h ν : ℂ)
     (hop : ∀ s, lameSnOperator k h (ν * (ν + 1)) (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2) 0 G s = 0) :
     IsLameSolutionOn h ν k (fun z => 1 * G.eval (jacobiSnk z k)) {z | JacobiRegulark .n z k} := by
   refine isLameSolutionOn_mul_eval_jacobiSnk hk (fun _ => 1) (fun _ => 0) (fun _ => 0) G h ν
@@ -243,13 +246,15 @@ private lemma isLameSolutionOn_of_lameSnOperator_one {k : ℂ} (hk : k ∈ jacob
   linear_combination this + (-G1 * k ^ 2 * s + G2 * d ^ 2) * e1 + (-G1 * s - G2 * s ^ 2 + G2) * e2
 
 /-- The case of prefactor `cn`. -/
-private lemma isLameSolutionOn_of_lameSnOperator_cn {k : ℂ} (hk : k ∈ jacobiModulusDomain) (G : ℂ[X]) (h ν : ℂ)
+private lemma isLameSolutionOn_of_lameSnOperator_cn {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (G : ℂ[X]) (h ν : ℂ)
     (hop : ∀ s, lameSnOperator k h (ν * (ν + 1))
       (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2 + 2 * (1 - k ^ 2 * s ^ 2))
       (2 * k ^ 2 * s ^ 2 - 1) G s = 0) :
     IsLameSolutionOn h ν k (fun z => jacobiCnk z k * G.eval (jacobiSnk z k))
       {z | JacobiRegulark .n z k} := by
-  refine isLameSolutionOn_mul_eval_jacobiSnk hk (fun y => jacobiCnk y k) (fun y => -(jacobiSnk y k * jacobiDnk y k))
+  refine isLameSolutionOn_mul_eval_jacobiSnk hk (fun y => jacobiCnk y k)
+      (fun y => -(jacobiSnk y k * jacobiDnk y k))
     (fun y => -(jacobiCnk y k * jacobiDnk y k * jacobiDnk y k +
       jacobiSnk y k * -(k ^ 2 * jacobiSnk y k * jacobiCnk y k))) G h ν
     (fun y hy => hasDerivAt_jacobiCnk hk hy)
@@ -265,7 +270,8 @@ private lemma isLameSolutionOn_of_lameSnOperator_cn {k : ℂ} (hk : k ∈ jacobi
     (-c * (G0 + 3 * G1 * s + G2 * s ^ 2 - G2)) * e2
 
 /-- The case of prefactor `dn`. -/
-private lemma isLameSolutionOn_of_lameSnOperator_dn {k : ℂ} (hk : k ∈ jacobiModulusDomain) (G : ℂ[X]) (h ν : ℂ)
+private lemma isLameSolutionOn_of_lameSnOperator_dn {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (G : ℂ[X]) (h ν : ℂ)
     (hop : ∀ s, lameSnOperator k h (ν * (ν + 1))
       (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2 + 2 * k ^ 2 * (1 - s ^ 2)) (-k ^ 2 * (1 - 2 * s ^ 2)) G s =
         0) :
@@ -289,7 +295,8 @@ private lemma isLameSolutionOn_of_lameSnOperator_dn {k : ℂ} (hk : k ∈ jacobi
     (-d * (G1 * s + G2 * s ^ 2 - G2)) * e2
 
 /-- The case of prefactor `cn dn`. -/
-private lemma isLameSolutionOn_of_lameSnOperator_cn_dn {k : ℂ} (hk : k ∈ jacobiModulusDomain) (G : ℂ[X]) (h ν : ℂ)
+private lemma isLameSolutionOn_of_lameSnOperator_cn_dn {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (G : ℂ[X]) (h ν : ℂ)
     (hop : ∀ s, lameSnOperator k h (ν * (ν + 1)) (3 * (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2))
       (4 * k ^ 2 * s ^ 2 - (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2)) G s = 0) :
     IsLameSolutionOn h ν k (fun z => jacobiCnk z k * jacobiDnk z k * G.eval (jacobiSnk z k))
@@ -332,7 +339,8 @@ private lemma lameSnOperator_sum (k h lam M N s : ℂ) (S : Finset ℕ) (c : ℕ
   exact Finset.sum_congr rfl fun p _ => by ring
 
 /-- Regrouping a three-term action by basis index. -/
-private lemma sum_three_term_regroup (N : ℕ) (c A B E Y : ℕ → ℂ) (Yn : ℂ) (hN : c N = 0) (hN1 : c (N + 1) = 0) :
+private lemma sum_three_term_regroup (N : ℕ) (c A B E Y : ℕ → ℂ) (Yn : ℂ) (hN : c N = 0)
+    (hN1 : c (N + 1) = 0) :
     ∑ p ∈ Finset.range (N + 1),
         c p * (A p * Y (p + 1) + B p * Y p + E p * (if p = 0 then Yn else Y (p - 1))) =
       c 0 * E 0 * Yn + ∑ q ∈ Finset.range (N + 1),
@@ -353,7 +361,8 @@ private lemma sum_three_term_regroup (N : ℕ) (c A B E Y : ℕ → ℂ) (Yn : �
   ring
 
 /-- The operator applied to a Chebyshev series `∑ c_p P_{2p+δ}`. -/
-private lemma lameSnOperator_chebyshev_sum (k h lam M N s : ℂ) (P : ℤ → ℂ[X]) (δ : ℕ) (a b e : ℂ → ℂ)
+private lemma lameSnOperator_chebyshev_sum (k h lam M N s : ℂ) (P : ℤ → ℂ[X]) (δ : ℕ)
+    (a b e : ℂ → ℂ)
     (hkind : ∀ j : ℤ, lameSnOperator k h lam M N (P j) s =
       a j * (P (j + 2)).eval s + b j * (P j).eval s + e j * (P (j - 2)).eval s)
     (n : ℕ) (c : ℕ → ℂ) (hc : ∀ p, n < p → c p = 0) :
@@ -386,7 +395,8 @@ private lemma lameSnOperator_chebyshev_sum (k h lam M N s : ℂ) (P : ℤ → �
   simp
 
 /-- Vanishing of a regrouped sum from its first two coefficients and the rest. -/
-private lemma sum_range_eq_zero_of_head (n : ℕ) (r Y : ℕ → ℂ) (X0 : ℂ) (h01 : X0 + r 0 * Y 0 + r 1 * Y 1 = 0)
+private lemma sum_range_eq_zero_of_head (n : ℕ) (r Y : ℕ → ℂ) (X0 : ℂ)
+    (h01 : X0 + r 0 * Y 0 + r 1 * Y 1 = 0)
     (hq : ∀ q, r (q + 2) = 0) : X0 + ∑ q ∈ Finset.range (n + 2), r q * Y q = 0 := by
   rw [Finset.sum_range_succ', Finset.sum_range_succ']
   simp only [hq, zero_mul, Finset.sum_const_zero, zero_add]
@@ -414,7 +424,8 @@ private lemma lameRecVec_last_row {r : LameRecurrence} {ν k H : ℝ} {n : ℕ}
       (if p = 0 then 0 else r.gamma ν k p * U (p - 1)) = H * U p := by
     intro p hp
     have h1 := congrFun hMu ⟨p, by omega⟩
-    have h2 := tridiagMatrix_mulVec_apply (r.alpha ν k) (r.beta ν k) (r.gamma ν k) u (p := p) (by omega)
+    have h2 := tridiagMatrix_mulVec_apply (r.alpha ν k) (r.beta ν k) (r.gamma ν k) u
+        (p := p) (by omega)
     rw [show lameMatrix r ν k n = tridiagMatrix (r.alpha ν k) (r.beta ν k) (r.gamma ν k) n
       from rfl, h2] at h1
     rw [h1]
@@ -474,7 +485,8 @@ private lemma lamePolyType_gamma_succ_eq_zero (t : LamePolyType) (n : ℕ) (k : 
 
 /-- The coefficients `c_p` (extended by `0`) satisfy every row
 `γ_q c_{q-1} + (β_q - H) c_q + α_q c_{q+1} = 0` of the recurrence, `q ≥ 0`. -/
-private lemma lamePolyCoeff_recurrence_row {k : ℝ} (hk0 : 0 < k) (t : LamePolyType) {n m : ℕ} (hm : m ≤ n) (q : ℕ) :
+private lemma lamePolyCoeff_recurrence_row {k : ℝ} (hk0 : 0 < k) (t : LamePolyType) {n m : ℕ}
+    (hm : m ≤ n) (q : ℕ) :
     (if q = 0 then 0 else t.recurrence.gamma (t.order n) k q * lamePolyCoeff t n m k (q - 1)) +
       (t.recurrence.beta (t.order n) k q - lamePolyH t n m k) * lamePolyCoeff t n m k q +
       t.recurrence.alpha (t.order n) k q * lamePolyCoeff t n m k (q + 1) = 0 := by
@@ -507,7 +519,8 @@ private lemma lamePolyCoeff_recurrence_row {k : ℝ} (hk0 : 0 < k) (t : LamePoly
 
 end TridiagonalRows
 /-- Composition of `lameSnOperator_chebyshev_sum` and `sum_range_eq_zero_of_head`. -/
-private lemma lameSnOperator_chebyshev_sum_eq_zero (k h lam M N s : ℂ) (P : ℤ → ℂ[X]) (δ : ℕ) (a b e : ℂ → ℂ)
+private lemma lameSnOperator_chebyshev_sum_eq_zero (k h lam M N s : ℂ) (P : ℤ → ℂ[X]) (δ : ℕ)
+    (a b e : ℂ → ℂ)
     (hkind : ∀ j : ℤ, lameSnOperator k h lam M N (P j) s =
       a j * (P (j + 2)).eval s + b j * (P j).eval s + e j * (P (j - 2)).eval s)
     (n : ℕ) (c : ℕ → ℂ) (hc : ∀ p, n < p → c p = 0)
@@ -535,10 +548,12 @@ private lemma lameSnOperator_uE_eq_zero {k : ℝ} (hk0 : 0 < k) {n m : ℕ} (hm 
       (1 + (k : ℂ) ^ 2 - 2 * k ^ 2 * s ^ 2) 0
       (∑ p ∈ Finset.range (n + 1), C ((lamePolyCoeff .uE n m k p : ℂ) *
         (if p = 0 then 1 / 2 else 1)) * Chebyshev.T ℂ ((2 * p + 0 : ℕ) : ℤ)) s = 0 := by
-  have R : ∀ q, _ := fun q => congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .uE hm q)
+  have R : ∀ q, _ := fun q =>
+      congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .uE hm q)
   have hc : ∀ p, n < p → lamePolyCoeff .uE n m k p = 0 := fun p hp => by
     simp [lamePolyCoeff, show ¬ p ≤ n by omega]
-  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 0 (fun j => (k : ℂ) ^ 2 * (j ^ 2 + j - _) / 4)
+  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 0
+      (fun j => (k : ℂ) ^ 2 * (j ^ 2 + j - _) / 4)
     (fun j => (2 * _ + j ^ 2 * (k : ℂ) ^ 2 - 2 * j ^ 2 - k ^ 2 * _) / 2)
     (fun j => (k : ℂ) ^ 2 * (j ^ 2 - j - _) / 4) (fun j => lameSnOperator_chebyshevT k _ _ s j) n _
     (fun p hp => by simp [hc p hp]) ?_ fun q => ?_
@@ -567,10 +582,12 @@ private lemma lameSnOperator_sE_eq_zero {k : ℝ} (hk0 : 0 < k) {n m : ℕ} (hm 
       (1 + (k : ℂ) ^ 2 - 2 * k ^ 2 * s ^ 2) 0
       (∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .sE n m k p : ℂ) *
         Chebyshev.T ℂ ((2 * p + 1 : ℕ) : ℤ)) s = 0 := by
-  have R : ∀ q, _ := fun q => congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .sE hm q)
+  have R : ∀ q, _ := fun q =>
+      congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .sE hm q)
   have hc : ∀ p, n < p → lamePolyCoeff .sE n m k p = 0 := fun p hp => by
     simp [lamePolyCoeff, show ¬ p ≤ n by omega]
-  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 1 (fun j => (k : ℂ) ^ 2 * (j ^ 2 + j - _) / 4)
+  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 1
+      (fun j => (k : ℂ) ^ 2 * (j ^ 2 + j - _) / 4)
     (fun j => (2 * _ + j ^ 2 * (k : ℂ) ^ 2 - 2 * j ^ 2 - k ^ 2 * _) / 2)
     (fun j => (k : ℂ) ^ 2 * (j ^ 2 - j - _) / 4) (fun j => lameSnOperator_chebyshevT k _ _ s j) n _
     (fun p hp => by simp [hc p hp]) ?_ fun q => ?_
@@ -597,13 +614,16 @@ private lemma lameSnOperator_cE_eq_zero {k : ℝ} (hk0 : 0 < k) {n m : ℕ} (hm 
       (1 + (k : ℂ) ^ 2 - 2 * k ^ 2 * s ^ 2 + 2 * (1 - k ^ 2 * s ^ 2)) (2 * (k : ℂ) ^ 2 * s ^ 2 - 1)
       (∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .cE n m k p : ℂ) *
         Chebyshev.U ℂ ((2 * p + 0 : ℕ) : ℤ)) s = 0 := by
-  have R : ∀ q, _ := fun q => congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .cE hm q)
+  have R : ∀ q, _ := fun q =>
+      congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .cE hm q)
   have hc : ∀ p, n < p → lamePolyCoeff .cE n m k p = 0 := fun p hp => by
     simp [lamePolyCoeff, show ¬ p ≤ n by omega]
-  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 0 (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 3 * j - _ + 2) / 4)
+  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 0
+      (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 3 * j - _ + 2) / 4)
     (fun j => (2 * _ + j ^ 2 * (k : ℂ) ^ 2 - 2 * j ^ 2 + 2 * j * k ^ 2 - 4 * j - k ^ 2 * _ +
       k ^ 2 - 2) / 2)
-    (fun j => (k : ℂ) ^ 2 * (j ^ 2 + j - _) / 4) (fun j => lameSnOperator_chebyshevU_cn k _ _ s j) n _
+    (fun j => (k : ℂ) ^ 2 * (j ^ 2 + j - _) / 4)
+        (fun j => lameSnOperator_chebyshevU_cn k _ _ s j) n _
     (fun p hp => by simp [hc p hp]) ?_ fun q => ?_
   · have R0 := R 0
     have R1 := R 1
@@ -630,12 +650,15 @@ private lemma lameSnOperator_dE_eq_zero {k : ℝ} (hk0 : 0 < k) {n m : ℕ} (hm 
       (-(k : ℂ) ^ 2 * (1 - 2 * s ^ 2))
       (∑ p ∈ Finset.range (n + 1), C ((lamePolyCoeff .dE n m k p : ℂ) *
         (if p = 0 then 1 / 2 else 1)) * Chebyshev.T ℂ ((2 * p + 0 : ℕ) : ℤ)) s = 0 := by
-  have R : ∀ q, _ := fun q => congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .dE hm q)
+  have R : ∀ q, _ := fun q =>
+      congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .dE hm q)
   have hc : ∀ p, n < p → lamePolyCoeff .dE n m k p = 0 := fun p hp => by
     simp [lamePolyCoeff, show ¬ p ≤ n by omega]
-  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 0 (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 3 * j - _ + 2) / 4)
+  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 0
+      (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 3 * j - _ + 2) / 4)
     (fun j => (2 * _ + j ^ 2 * (k : ℂ) ^ 2 - 2 * j ^ 2 - k ^ 2 * _) / 2)
-    (fun j => (k : ℂ) ^ 2 * (j ^ 2 - 3 * j - _ + 2) / 4) (fun j => lameSnOperator_chebyshevT_dn k _ _ s j) n _
+    (fun j => (k : ℂ) ^ 2 * (j ^ 2 - 3 * j - _ + 2) / 4)
+        (fun j => lameSnOperator_chebyshevT_dn k _ _ s j) n _
     (fun p hp => by simp [hc p hp]) ?_ fun q => ?_
   · have R0 := R 0
     have R1 := R 1
@@ -661,13 +684,16 @@ private lemma lameSnOperator_scE_eq_zero {k : ℝ} (hk0 : 0 < k) {n m : ℕ} (hm
       (1 + (k : ℂ) ^ 2 - 2 * k ^ 2 * s ^ 2 + 2 * (1 - k ^ 2 * s ^ 2)) (2 * (k : ℂ) ^ 2 * s ^ 2 - 1)
       (∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .scE n m k p : ℂ) *
         Chebyshev.U ℂ ((2 * p + 1 : ℕ) : ℤ)) s = 0 := by
-  have R : ∀ q, _ := fun q => congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .scE hm q)
+  have R : ∀ q, _ := fun q =>
+      congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .scE hm q)
   have hc : ∀ p, n < p → lamePolyCoeff .scE n m k p = 0 := fun p hp => by
     simp [lamePolyCoeff, show ¬ p ≤ n by omega]
-  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 1 (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 3 * j - _ + 2) / 4)
+  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 1
+      (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 3 * j - _ + 2) / 4)
     (fun j => (2 * _ + j ^ 2 * (k : ℂ) ^ 2 - 2 * j ^ 2 + 2 * j * k ^ 2 - 4 * j - k ^ 2 * _ +
       k ^ 2 - 2) / 2)
-    (fun j => (k : ℂ) ^ 2 * (j ^ 2 + j - _) / 4) (fun j => lameSnOperator_chebyshevU_cn k _ _ s j) n _
+    (fun j => (k : ℂ) ^ 2 * (j ^ 2 + j - _) / 4)
+        (fun j => lameSnOperator_chebyshevU_cn k _ _ s j) n _
     (fun p hp => by simp [hc p hp]) ?_ fun q => ?_
   · have R0 := R 0
     have R1 := R 1
@@ -693,12 +719,15 @@ private lemma lameSnOperator_sdE_eq_zero {k : ℝ} (hk0 : 0 < k) {n m : ℕ} (hm
       (-(k : ℂ) ^ 2 * (1 - 2 * s ^ 2))
       (∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .sdE n m k p : ℂ) *
         Chebyshev.T ℂ ((2 * p + 1 : ℕ) : ℤ)) s = 0 := by
-  have R : ∀ q, _ := fun q => congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .sdE hm q)
+  have R : ∀ q, _ := fun q =>
+      congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .sdE hm q)
   have hc : ∀ p, n < p → lamePolyCoeff .sdE n m k p = 0 := fun p hp => by
     simp [lamePolyCoeff, show ¬ p ≤ n by omega]
-  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 1 (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 3 * j - _ + 2) / 4)
+  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 1
+      (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 3 * j - _ + 2) / 4)
     (fun j => (2 * _ + j ^ 2 * (k : ℂ) ^ 2 - 2 * j ^ 2 - k ^ 2 * _) / 2)
-    (fun j => (k : ℂ) ^ 2 * (j ^ 2 - 3 * j - _ + 2) / 4) (fun j => lameSnOperator_chebyshevT_dn k _ _ s j) n _
+    (fun j => (k : ℂ) ^ 2 * (j ^ 2 - 3 * j - _ + 2) / 4)
+        (fun j => lameSnOperator_chebyshevT_dn k _ _ s j) n _
     (fun p hp => by simp [hc p hp]) ?_ fun q => ?_
   · have R0 := R 0
     have R1 := R 1
@@ -724,13 +753,16 @@ private lemma lameSnOperator_cdE_eq_zero {k : ℝ} (hk0 : 0 < k) {n m : ℕ} (hm
       (4 * (k : ℂ) ^ 2 * s ^ 2 - (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2))
       (∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .cdE n m k p : ℂ) *
         Chebyshev.U ℂ ((2 * p + 0 : ℕ) : ℤ)) s = 0 := by
-  have R : ∀ q, _ := fun q => congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .cdE hm q)
+  have R : ∀ q, _ := fun q =>
+      congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .cdE hm q)
   have hc : ∀ p, n < p → lamePolyCoeff .cdE n m k p = 0 := fun p hp => by
     simp [lamePolyCoeff, show ¬ p ≤ n by omega]
-  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 0 (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 5 * j - _ + 6) / 4)
+  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 0
+      (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 5 * j - _ + 6) / 4)
     (fun j => (2 * _ + j ^ 2 * (k : ℂ) ^ 2 - 2 * j ^ 2 + 2 * j * k ^ 2 - 4 * j - k ^ 2 * _ +
       k ^ 2 - 2) / 2)
-    (fun j => (k : ℂ) ^ 2 * (j ^ 2 - j - _) / 4) (fun j => lameSnOperator_chebyshevU_cn_dn k _ _ s j) n _
+    (fun j => (k : ℂ) ^ 2 * (j ^ 2 - j - _) / 4)
+        (fun j => lameSnOperator_chebyshevU_cn_dn k _ _ s j) n _
     (fun p hp => by simp [hc p hp]) ?_ fun q => ?_
   · have R0 := R 0
     have R1 := R 1
@@ -757,13 +789,16 @@ private lemma lameSnOperator_scdE_eq_zero {k : ℝ} (hk0 : 0 < k) {n m : ℕ} (h
       (4 * (k : ℂ) ^ 2 * s ^ 2 - (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2))
       (∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .scdE n m k p : ℂ) *
         Chebyshev.U ℂ ((2 * p + 1 : ℕ) : ℤ)) s = 0 := by
-  have R : ∀ q, _ := fun q => congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .scdE hm q)
+  have R : ∀ q, _ := fun q =>
+      congrArg (fun x : ℝ => (x : ℂ)) (lamePolyCoeff_recurrence_row hk0 .scdE hm q)
   have hc : ∀ p, n < p → lamePolyCoeff .scdE n m k p = 0 := fun p hp => by
     simp [lamePolyCoeff, show ¬ p ≤ n by omega]
-  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 1 (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 5 * j - _ + 6) / 4)
+  refine lameSnOperator_chebyshev_sum_eq_zero _ _ _ _ _ s _ 1
+      (fun j => (k : ℂ) ^ 2 * (j ^ 2 + 5 * j - _ + 6) / 4)
     (fun j => (2 * _ + j ^ 2 * (k : ℂ) ^ 2 - 2 * j ^ 2 + 2 * j * k ^ 2 - 4 * j - k ^ 2 * _ +
       k ^ 2 - 2) / 2)
-    (fun j => (k : ℂ) ^ 2 * (j ^ 2 - j - _) / 4) (fun j => lameSnOperator_chebyshevU_cn_dn k _ _ s j) n _
+    (fun j => (k : ℂ) ^ 2 * (j ^ 2 - j - _) / 4)
+        (fun j => lameSnOperator_chebyshevU_cn_dn k _ _ s j) n _
     (fun p hp => by simp [hc p hp]) ?_ fun q => ?_
   · have R0 := R 0
     have R1 := R 1
@@ -794,21 +829,29 @@ theorem lamePolyEk_isLameSolutionOn {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : L
       (t.order n) k (fun z => lamePolyEk t n m z k) {z | JacobiRegulark .n z k} := by
   have hk := ofReal_mem_jacobiModulusDomain hk0 hk1
   cases t
-  · convert isLameSolutionOn_of_lameSnOperator_one hk _ _ _ (lameSnOperator_uE_eq_zero hk0 hm) using 2 with z
+  · convert isLameSolutionOn_of_lameSnOperator_one hk _ _ _
+        (lameSnOperator_uE_eq_zero hk0 hm) using 2 with z
     lame_poly_eq_tac
-  · convert isLameSolutionOn_of_lameSnOperator_one hk _ _ _ (lameSnOperator_sE_eq_zero hk0 hm) using 2 with z
+  · convert isLameSolutionOn_of_lameSnOperator_one hk _ _ _
+        (lameSnOperator_sE_eq_zero hk0 hm) using 2 with z
     lame_poly_eq_tac
-  · convert isLameSolutionOn_of_lameSnOperator_cn hk _ _ _ (lameSnOperator_cE_eq_zero hk0 hm) using 2 with z
+  · convert isLameSolutionOn_of_lameSnOperator_cn hk _ _ _
+        (lameSnOperator_cE_eq_zero hk0 hm) using 2 with z
     lame_poly_eq_tac
-  · convert isLameSolutionOn_of_lameSnOperator_dn hk _ _ _ (lameSnOperator_dE_eq_zero hk0 hm) using 2 with z
+  · convert isLameSolutionOn_of_lameSnOperator_dn hk _ _ _
+        (lameSnOperator_dE_eq_zero hk0 hm) using 2 with z
     lame_poly_eq_tac
-  · convert isLameSolutionOn_of_lameSnOperator_cn hk _ _ _ (lameSnOperator_scE_eq_zero hk0 hm) using 2 with z
+  · convert isLameSolutionOn_of_lameSnOperator_cn hk _ _ _
+        (lameSnOperator_scE_eq_zero hk0 hm) using 2 with z
     lame_poly_eq_tac
-  · convert isLameSolutionOn_of_lameSnOperator_dn hk _ _ _ (lameSnOperator_sdE_eq_zero hk0 hm) using 2 with z
+  · convert isLameSolutionOn_of_lameSnOperator_dn hk _ _ _
+        (lameSnOperator_sdE_eq_zero hk0 hm) using 2 with z
     lame_poly_eq_tac
-  · convert isLameSolutionOn_of_lameSnOperator_cn_dn hk _ _ _ (lameSnOperator_cdE_eq_zero hk0 hm) using 2 with z
+  · convert isLameSolutionOn_of_lameSnOperator_cn_dn hk _ _ _
+        (lameSnOperator_cdE_eq_zero hk0 hm) using 2 with z
     lame_poly_eq_tac
-  · convert isLameSolutionOn_of_lameSnOperator_cn_dn hk _ _ _ (lameSnOperator_scdE_eq_zero hk0 hm) using 2 with z
+  · convert isLameSolutionOn_of_lameSnOperator_cn_dn hk _ _ _
+        (lameSnOperator_scdE_eq_zero hk0 hm) using 2 with z
     lame_poly_eq_tac
 
 /-- For real `0 < k < 1`, a point other than `2pK + (2q+1)iK'` is not a pole of `sn, cn, dn`. -/
@@ -866,7 +909,8 @@ theorem jacobiRegulark_K_add_I_mul {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (τ : �
   omega
 
 /-- Green's identity for two solutions of Lamé's equation along the segment `x ↦ p₀ + u x`. -/
-private lemma integral_lame_green {k : ℂ} (hk : k ∈ jacobiModulusDomain) {h1 h2 ν1 ν2 : ℂ} {E1 E2 : ℂ → ℂ}
+private lemma integral_lame_green {k : ℂ} (hk : k ∈ jacobiModulusDomain) {h1 h2 ν1 ν2 : ℂ}
+    {E1 E2 : ℂ → ℂ}
     (hE1 : IsLameSolutionOn h1 ν1 k E1 {z | JacobiRegulark .n z k})
     (hE2 : IsLameSolutionOn h2 ν2 k E2 {z | JacobiRegulark .n z k}) (p0 u : ℂ) (a b : ℝ)
     (hreg : ∀ x : ℝ, JacobiRegulark .n (p0 + u * x) k) :
@@ -928,7 +972,8 @@ private lemma wronskian_eq_zero_of_reflection {E1 E2 : ℂ → ℂ} {p σ : ℂ}
     rw [hz h1, hz h2]; ring
 
 /-- Green's identity, split. -/
-private lemma integral_lame_green_split {k : ℂ} (hk : k ∈ jacobiModulusDomain) {h1 h2 ν1 ν2 : ℂ} {E1 E2 : ℂ → ℂ}
+private lemma integral_lame_green_split {k : ℂ} (hk : k ∈ jacobiModulusDomain) {h1 h2 ν1 ν2 : ℂ}
+    {E1 E2 : ℂ → ℂ}
     (hE1 : IsLameSolutionOn h1 ν1 k E1 {z | JacobiRegulark .n z k})
     (hE2 : IsLameSolutionOn h2 ν2 k E2 {z | JacobiRegulark .n z k}) (p0 u : ℂ) (a b : ℝ)
     (hreg : ∀ x : ℝ, JacobiRegulark .n (p0 + u * x) k) :
@@ -966,7 +1011,8 @@ theorem lamePolyH_lt_of_lt {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyTy
   | succ j hj ih => exact (ih (by omega)).trans (hs j (by omega))
 
 /-- Continuity along a line of a solution of Lamé's equation and of `sn`. -/
-private lemma continuous_comp_line_of_isLameSolutionOn {k : ℂ} (hk : k ∈ jacobiModulusDomain) {h ν : ℂ} {E : ℂ → ℂ}
+private lemma continuous_comp_line_of_isLameSolutionOn {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    {h ν : ℂ} {E : ℂ → ℂ}
     (hE : IsLameSolutionOn h ν k E {z | JacobiRegulark .n z k}) (p0 u : ℂ)
     (hreg : ∀ x : ℝ, JacobiRegulark .n (p0 + u * x) k) :
     Continuous (fun x : ℝ => E (p0 + u * x)) ∧
@@ -979,7 +1025,8 @@ private lemma continuous_comp_line_of_isLameSolutionOn {k : ℂ} (hk : k ∈ jac
       hγc.continuousAt⟩
 
 /-- The integral over a period of a periodic function odd about `c` vanishes. -/
-private lemma intervalIntegral_eq_zero_of_periodic_of_odd (f : ℝ → ℂ) (T c : ℝ) (hper : ∀ x, f (x + T) = f x)
+private lemma intervalIntegral_eq_zero_of_periodic_of_odd (f : ℝ → ℂ) (T c : ℝ)
+    (hper : ∀ x, f (x + T) = f x)
     (hodd : ∀ x, f (c - x) = -f (c + x)) : ∫ x in (0 : ℝ)..T, f x = 0 := by
   have h1 : ∫ x in (0 : ℝ)..T, f x = ∫ x in (c - T / 2)..(c - T / 2 + T), f x := by
     simpa using (Function.Periodic.intervalIntegral_add_eq (f := f) hper 0 (c - T / 2))
@@ -1041,7 +1088,8 @@ theorem lameInner_lameProduct_eq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : L
 
 /-- Orthogonality from Green's identity: if the Wronskians vanish at the ends of `[0, a]` and of
 `K + i[0, b]` and the eigenvalue pairs differ, the inner product vanishes. -/
-theorem lameInner_lameProduct_eq_zero_of_wronskian {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
+theorem lameInner_lameProduct_eq_zero_of_wronskian {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    {t t' : LamePolyType}
     {n m n' m' : ℕ} (hm : m ≤ n) (hm' : m' ≤ n') (a b : ℝ)
     (hW : ∀ z ∈ ({0, (a : ℂ), (Real.compEllIntKm (k ^ 2) : ℂ),
         (Real.compEllIntKm (k ^ 2) : ℂ) + I * b} : Set ℂ),
@@ -1083,26 +1131,32 @@ theorem lameInner_lameProduct_eq_zero_of_wronskian {k : ℝ} (hk0 : 0 < k) (hk1 
       linear_combination J0 * e1 - I0 * e2)).resolve_left hD
 
 /-- The reflection signs of Table 29.12.1 about `0` (factor `sn`). -/
-def lamePolySignSn (t : LamePolyType) : ℂ := if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then -1 else 1
+def lamePolySignSn (t : LamePolyType) : ℂ := if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t =
+    .scdE then -1 else 1
 
 /-- The reflection signs of Table 29.12.1 about `K` (factor `cn`). -/
-def lamePolySignCn (t : LamePolyType) : ℂ := if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then -1 else 1
+def lamePolySignCn (t : LamePolyType) : ℂ := if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t =
+    .scdE then -1 else 1
 
 /-- The reflection signs of Table 29.12.1 about `K + iK'` (factor `dn`). -/
-def lamePolySignDn (t : LamePolyType) : ℂ := if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then -1 else 1
+def lamePolySignDn (t : LamePolyType) : ℂ := if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t =
+    .scdE then -1 else 1
 
 /-- The reflection signs are `±1`. -/
 theorem lamePolySign_eq_one_or_neg_one (t : LamePolyType) :
-    (lamePolySignSn t = 1 ∨ lamePolySignSn t = -1) ∧ (lamePolySignCn t = 1 ∨ lamePolySignCn t = -1) ∧
+    (lamePolySignSn t = 1 ∨ lamePolySignSn t = -1) ∧
+        (lamePolySignCn t = 1 ∨ lamePolySignCn t = -1) ∧
       (lamePolySignDn t = 1 ∨ lamePolySignDn t = -1) := by
   cases t <;> simp [lamePolySignSn, lamePolySignCn, lamePolySignDn]
 
 /-- Reflection symmetries and periods of a Lamé polynomial used for the boundary terms. -/
-theorem lamePolyEk_reflection_period {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n m : ℕ) :
+theorem lamePolyEk_reflection_period {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    (t : LamePolyType) (n m : ℕ) :
     let K : ℂ := Real.compEllIntKm (k ^ 2)
     let K' : ℂ := Real.compEllIntKm (1 - k ^ 2)
     let E := fun z => lamePolyEk t n m z k
-    (∀ z, E (0 - z) = lamePolySignSn t * E (0 + z)) ∧ (∀ z, E (K - z) = lamePolySignCn t * E (K + z)) ∧
+    (∀ z, E (0 - z) = lamePolySignSn t * E (0 + z)) ∧
+        (∀ z, E (K - z) = lamePolySignCn t * E (K + z)) ∧
       (∀ z, E (K + I * K' - z) = lamePolySignDn t * E (K + I * K' + z)) ∧
       (∀ z, E (z + 4 * K) = E z) ∧ (∀ z, E (4 * K - z) = lamePolySignSn t * E (4 * K + z)) ∧
       (∀ z, E (K + I * (2 * K') - z) = lamePolySignCn t * E (K + I * (2 * K') + z)) := by
@@ -1114,7 +1168,8 @@ theorem lamePolyEk_reflection_period {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : 
       (b := -1) (Or.inl rfl) (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.1]; ring)
       (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.2.1]; ring)
       (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.2.2]; ring)
-    simp only [E, show w + I * (2 * K') = w + 2 * I * K' by ring, this, lamePolySignCn, lamePolySignDn]
+    simp only [E, show w + I * (2 * K') = w + 2 * I * K' by ring, this, lamePolySignCn,
+                                                              lamePolySignDn]
     cases t <;> simp
   have h4 : ∀ z, E (z + 4 * K) = E z := fun z => by
     have h := (per z).1
@@ -1136,7 +1191,8 @@ theorem lamePolyEk_reflection_period {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : 
 
 /-- The Wronskian of two Lamé polynomials vanishes at a regular point of common reflection
 symmetry. -/
-theorem lamePolyEk_wronskian_eq_zero_of_reflection {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType} {n m n' m' : ℕ}
+theorem lamePolyEk_wronskian_eq_zero_of_reflection {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    {t t' : LamePolyType} {n m n' m' : ℕ}
     (hm : m ≤ n) (hm' : m' ≤ n') {p σ : ℂ} (hreg : JacobiRegulark .n p k)
     (hσ : σ = 1 ∨ σ = -1)
     (h1 : ∀ z, lamePolyEk t n m (p - z) k = σ * lamePolyEk t n m (p + z) k)
@@ -1149,8 +1205,10 @@ theorem lamePolyEk_wronskian_eq_zero_of_reflection {k : ℝ} (hk0 : 0 < k) (hk1 
     ((lamePolyEk_isLameSolutionOn hk0 hk1 t' hm').differentiableAt _ hreg)
 
 /-- Types with the same reflection signs about `0` and `K` and equal orders coincide. -/
-private lemma lamePolyType_eq_of_sign_eq {t t' : LamePolyType} {n n' : ℕ} (hs : lamePolySignSn t = lamePolySignSn t')
-    (hc : lamePolySignCn t = lamePolySignCn t') (hν : t'.order n' = t.order n) : t' = t ∧ n' = n := by
+private lemma lamePolyType_eq_of_sign_eq {t t' : LamePolyType} {n n' : ℕ}
+    (hs : lamePolySignSn t = lamePolySignSn t')
+    (hc : lamePolySignCn t = lamePolySignCn t') (hν : t'.order n' = t.order n) : t' =
+        t ∧ n' = n := by
   revert hs hc hν
   cases t <;> cases t' <;> norm_num [lamePolySignSn, lamePolySignCn, LamePolyType.order] <;> omega
 
@@ -1191,13 +1249,15 @@ theorem lamePoly_eigenvalue_ne {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : Lam
   · exact (lamePolyH_lt_of_lt hk0 hk1 t' h hm).ne hH'
 
 /-- The product of two distinct signs `±1` is `-1`. -/
-theorem sign_mul_eq_neg_one_of_ne {σ σ' : ℂ} (h : σ = 1 ∨ σ = -1) (h' : σ' = 1 ∨ σ' = -1) (hne : σ ≠ σ') :
+theorem sign_mul_eq_neg_one_of_ne {σ σ' : ℂ} (h : σ = 1 ∨ σ = -1) (h' : σ' = 1 ∨ σ' = -1)
+    (hne : σ ≠ σ') :
     σ * σ' = -1 := by
   rcases h with rfl | rfl <;> rcases h' with rfl | rfl <;> first | (exfalso; exact hne rfl) | ring
 
 /-- If the product of two Lamé polynomials is odd about `c ∈ {0, K}` on the real line, its
 integrals over `[0, 4K]` against `1` and `sn²` vanish. -/
-theorem integral_lamePolyEk_mul_eq_zero_of_odd {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
+theorem integral_lamePolyEk_mul_eq_zero_of_odd {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    {t t' : LamePolyType}
     {n m n' m' : ℕ} (c : ℝ) (hc : c = 0 ∨ c = Real.compEllIntKm (k ^ 2))
     (hodd : ∀ z : ℂ, lamePolyEk t n m (c - z) k * lamePolyEk t' n' m' (c - z) k =
       -(lamePolyEk t n m (c + z) k * lamePolyEk t' n' m' (c + z) k)) :

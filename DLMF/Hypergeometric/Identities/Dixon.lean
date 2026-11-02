@@ -64,7 +64,8 @@ theorem wz_zero (a b c : ℂ) :
       -(1 / 2) * wzCertificate a b c 0 := by
   have e : (Gamma (1 + a - c))⁻¹ = (1 + a - c) * (Gamma (2 + a - c))⁻¹ := by
     rw [← mul_recip_Gamma_add_one]; ring_nf
-  simp only [s, wzCertificate, gaussHGCoeff, poch_zero, Nat.factorial_zero, Nat.cast_one, Nat.cast_zero,
+  simp only [s, wzCertificate, gaussHGCoeff, poch_zero, Nat.factorial_zero,
+      Nat.cast_one, Nat.cast_zero,
     add_zero, mul_one, div_one]
   rw [show 1 + a - (c - 1) = 2 + a - c by ring, e]
   ring
@@ -98,7 +99,8 @@ def normalizedSeries (a b c : ℂ) : ℂ := ∑' n : ℕ, s a b c n
 /-- **The recurrence in `c`**, from the WZ pair. -/
 theorem recurrence (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable (s a b c))
     (h2 : Summable (s a b (c - 1))) (hH : Tendsto (wzCertificate a b c) atTop (𝓝 0)) :
-    (1 + a / 2 - b - c) * normalizedSeries a b c = (1 + a / 2 - c) * (1 + a - b - c) * normalizedSeries a b (c - 1) := by
+    (1 + a / 2 - b - c) * normalizedSeries a b c = (1 + a / 2 - c) * (1 + a - b - c) *
+        normalizedSeries a b (c - 1) := by
   set T : ℕ → ℂ := fun n =>
     (1 + a / 2 - b - c) * s a b c n - (1 + a / 2 - c) * (1 + a - b - c) * s a b (c - 1) n
   have hT : Summable T := (h1.mul_left _).sub (h2.mul_left _)
@@ -124,10 +126,12 @@ theorem recurrence (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable
 
 /-- The periodic normalization. -/
 def periodicNormalization (a b c : ℂ) : ℂ :=
-  normalizedSeries a b c * Gamma (1 + a / 2 - c) * Gamma (1 + a - b - c) * (Gamma (1 + a / 2 - b - c))⁻¹
+  normalizedSeries a b c * Gamma (1 + a / 2 - c) * Gamma (1 + a - b - c) *
+      (Gamma (1 + a / 2 - b - c))⁻¹
 
 /-- Under convergence, the normalization `P` is invariant under `c ↦ c - 1`. -/
-theorem periodicNormalization_sub_one (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable (s a b c))
+theorem periodicNormalization_sub_one (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ}
+    (h1 : Summable (s a b c))
     (h2 : Summable (s a b (c - 1))) (hH : Tendsto (wzCertificate a b c) atTop (𝓝 0))
     (hc1 : 1 + a / 2 - c ≠ 0) (hc2 : 1 + a - b - c ≠ 0) :
     periodicNormalization a b (c - 1) = periodicNormalization a b c := by
@@ -165,7 +169,8 @@ theorem s_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : s a b (-(j : ℂ
   simp [s, poch_neg_nat_eq_zero h]
 
 /-- For `c = -j`, the WZ certificate vanishes beyond index `j`. -/
-theorem wzCertificate_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : wzCertificate a b (-(j : ℂ)) n = 0 := by
+theorem wzCertificate_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : wzCertificate a b
+    (-(j : ℂ)) n = 0 := by
   simp [wzCertificate, poch_neg_nat_eq_zero h]
 
 /-- For `c = -j` the Dixon series terminates, hence is summable. -/
@@ -175,7 +180,8 @@ theorem summable_s_neg_nat (a b : ℂ) (j : ℕ) : Summable (s a b (-(j : ℂ)))
     exact s_neg_nat_eq_zero a b (by omega)
 
 /-- For `c = -j` the WZ certificate tends to `0`. -/
-theorem tendsto_wzCertificate_neg_nat (a b : ℂ) (j : ℕ) : Tendsto (wzCertificate a b (-(j : ℂ))) atTop (𝓝 0) :=
+theorem tendsto_wzCertificate_neg_nat (a b : ℂ) (j : ℕ) : Tendsto
+    (wzCertificate a b (-(j : ℂ))) atTop (𝓝 0) :=
   tendsto_const_nhds.congr' (by
     filter_upwards [eventually_gt_atTop j] with n hn
     exact (wzCertificate_neg_nat_eq_zero a b hn).symm)
@@ -267,7 +273,8 @@ theorem periodicNormalization_zero (a b : ℂ) : periodicNormalization a b 0 = g
   ring
 
 /-- **Terminating Dixon** in normalized form: `P(-j) = K` for all `j`. -/
-theorem periodicNormalization_neg_nat (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k) (hb : ∀ k : ℕ, 1 + a - b ≠ -k) (j : ℕ) :
+theorem periodicNormalization_neg_nat (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k)
+    (hb : ∀ k : ℕ, 1 + a - b ≠ -k) (j : ℕ) :
     periodicNormalization a b (-(j : ℂ)) = gammaConstant a b := by
   induction j with
   | zero => simpa using periodicNormalization_zero a b
@@ -439,7 +446,8 @@ theorem differentiableOn_normalizedSeries (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {
   exact (hball.differentiableAt (Metric.ball_mem_nhds _ hr0)).differentiableWithinAt
 
 /-- **Carlson's theorem in `c`**: `P(c) = K` on a left half-plane. -/
-theorem exists_periodicNormalization_eq_gammaConstant (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k) (hb : ∀ k : ℕ, 1 + a - b ≠ -k) :
+theorem exists_periodicNormalization_eq_gammaConstant (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k)
+    (hb : ∀ k : ℕ, 1 + a - b ≠ -k) :
     ∃ X : ℝ, ∀ c : ℂ, c.re ≤ -X → periodicNormalization a b c = gammaConstant a b := by
   obtain ⟨m₀, hm₀⟩ := exists_nat_ge (10 + 2 * |a.re| + 2 * |b.re|)
   have hm : (10 : ℝ) + 2 * |a.re| + 2 * |b.re| ≤ m₀ := hm₀
@@ -493,7 +501,8 @@ theorem exists_periodicNormalization_eq_gammaConstant (ha : ∀ k : ℕ, 1 + a /
     obtain ⟨hs2, -⟩ := summable_s_and_tendsto_wzCertificate hb hcv'
     obtain ⟨hn1, hn2⟩ := hnz c hc
     simp only [hF]
-    rw [show -(m₀ : ℂ) - (w + 1) = c - 1 by rw [hcdef]; ring, periodicNormalization_sub_one hb hs1 hs2 hH hn1 hn2]
+    rw [show -(m₀ : ℂ) - (w + 1) = c - 1 by rw [hcdef]; ring,
+                                              periodicNormalization_sub_one hb hs1 hs2 hH hn1 hn2]
   -- the value at `0`: terminating Dixon
   have hF0 : F 0 = 0 := by
     simp only [hF, sub_zero]
@@ -542,7 +551,8 @@ theorem exists_periodicNormalization_eq_gammaConstant (ha : ∀ k : ℕ, 1 + a /
       have := le_abs_self (1 + a.re / 2 - b.re + m₀)
       have := neg_abs_le (1 + a.re / 2 - b.re + m₀)
       constructor <;> simp <;> linarith
-    have hP : ‖periodicNormalization a b c‖ ≤ A * (1 + |y|) ^ (K₁ + K₂ + K₃ + K₄) * Real.exp (π / 2 * |y|) := by
+    have hP : ‖periodicNormalization a b c‖ ≤ A * (1 + |y|) ^ (K₁ + K₂ + K₃ + K₄) *
+        Real.exp (π / 2 * |y|) := by
       simp only [periodicNormalization, norm_mul]
       have hE : Real.exp (-(π * |y|) / 2) * Real.exp (π * |y|) * Real.exp (π * (|y| + |a.im|) / 2) *
           Real.exp (-(π * |y|) / 2) * Real.exp (-(π * |y|) / 2) * Real.exp (π * |y| / 2) =
@@ -571,7 +581,8 @@ theorem exists_periodicNormalization_eq_gammaConstant (ha : ∀ k : ℕ, 1 + a /
             ‖gammaConstant a b‖ * ((1 + |y|) ^ (K₁ + K₂ + K₃ + K₄) * Real.exp (π / 2 * |y|)) := by
           gcongr
           exact le_mul_of_one_le_right (norm_nonneg _) hpos
-      _ = (A + ‖gammaConstant a b‖) * (1 + |y|) ^ (K₁ + K₂ + K₃ + K₄) * Real.exp (π / 2 * |y|) := by ring
+      _ = (A + ‖gammaConstant a b‖) * (1 + |y|) ^ (K₁ + K₂ + K₃ + K₄) *
+          Real.exp (π / 2 * |y|) := by ring
   have hzero := eq_zero_of_periodic_of_bound (by norm_num : (0 : ℝ) < 1 / 2) hFd hper
     (σ := π / 2) (by linarith [Real.pi_pos]) hstrip hF0
   refine ⟨m₀, fun c hc => ?_⟩
@@ -581,12 +592,14 @@ theorem exists_periodicNormalization_eq_gammaConstant (ha : ∀ k : ℕ, 1 + a /
 
 /-- The normalized right-hand side of Dixon's formula. -/
 def normalizedRhs (a b c : ℂ) : ℂ :=
-  gammaConstant a b * Gamma (1 + a / 2 - b - c) * (Gamma (1 + a / 2 - c))⁻¹ * (Gamma (1 + a - b - c))⁻¹
+  gammaConstant a b * Gamma (1 + a / 2 - b - c) * (Gamma (1 + a / 2 - c))⁻¹ *
+      (Gamma (1 + a - b - c))⁻¹
 
 /-- The normalized right-hand side of Dixon's formula satisfies the same recurrence in `c` as the
   series. -/
 theorem normalizedRhs_recurrence {c : ℂ} (hc : 1 + a / 2 - b - c ≠ 0) :
-    (1 + a / 2 - b - c) * normalizedRhs a b c = (1 + a / 2 - c) * (1 + a - b - c) * normalizedRhs a b (c - 1) := by
+    (1 + a / 2 - b - c) * normalizedRhs a b c = (1 + a / 2 - c) * (1 + a - b - c) *
+        normalizedRhs a b (c - 1) := by
   have g1 : Gamma (1 + a / 2 - b - (c - 1)) = (1 + a / 2 - b - c) * Gamma (1 + a / 2 - b - c) := by
     rw [show 1 + a / 2 - b - (c - 1) = (1 + a / 2 - b - c) + 1 by ring,
       Complex.Gamma_add_one _ hc]
@@ -621,7 +634,8 @@ theorem dixon_sum {a b c : ℂ}
           Gamma (1 + a - b - c)) := by
   -- `Lh = Rh` on a left half-plane, by Carlson's theorem
   obtain ⟨X, hX⟩ := exists_periodicNormalization_eq_gammaConstant ha hb
-  have hfar : ∀ c' : ℂ, c'.re ≤ -(max X (|a.re| + |b.re| + 2)) → normalizedSeries a b c' = normalizedRhs a b c' := by
+  have hfar : ∀ c' : ℂ, c'.re ≤ -(max X (|a.re| + |b.re| + 2)) → normalizedSeries a b c' =
+      normalizedRhs a b c' := by
     intro c' hc'
     have hP := hX c' (by linarith [le_max_left X (|a.re| + |b.re| + 2)])
     have hm := le_max_right X (|a.re| + |b.re| + 2)
@@ -641,9 +655,11 @@ theorem dixon_sum {a b c : ℂ}
     have i1 := mul_inv_cancel₀ n1
     have i2 := mul_inv_cancel₀ n2
     have i3 := inv_mul_cancel₀ n3
-    linear_combination (-(normalizedSeries a b c' * (Gamma (1 + a - b - c') * (Gamma (1 + a - b - c'))⁻¹) *
+    linear_combination (-(normalizedSeries a b c' *
+        (Gamma (1 + a - b - c') * (Gamma (1 + a - b - c'))⁻¹) *
       ((Gamma (1 + a / 2 - b - c'))⁻¹ * Gamma (1 + a / 2 - b - c')))) * i1 +
-      (-(normalizedSeries a b c' * ((Gamma (1 + a / 2 - b - c'))⁻¹ * Gamma (1 + a / 2 - b - c')))) * i2 +
+      (-(normalizedSeries a b c' *
+          ((Gamma (1 + a / 2 - b - c'))⁻¹ * Gamma (1 + a / 2 - b - c')))) * i2 +
       (-normalizedSeries a b c') * i3
   -- climb back to `c` with the recurrence
   set E : ℂ → ℂ := fun c' => normalizedSeries a b c' - normalizedRhs a b c' with hE

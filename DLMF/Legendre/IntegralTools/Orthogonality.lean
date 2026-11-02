@@ -61,7 +61,8 @@ open DLMF.OrthogonalPolynomials
 /-- `P_n^{(m)}` is entire. -/
 theorem legInt_analytic_D (n m : ℕ) : AnalyticOnNhd ℂ (LegendreAddition.jet n m) univ := by
   rw [LegendreAddition.jet, iteratedDeriv_eq_iterate]
-  exact (show AnalyticOnNhd ℂ (legendrePolyP n) univ from analyticOnNhd_jacobiPolyP 0 0 n).iterated_deriv m
+  exact (show AnalyticOnNhd ℂ (legendrePolyP n) univ from analyticOnNhd_jacobiPolyP 0 0
+      n).iterated_deriv m
 
 /-- Complex derivative of `P_n^{(m)}`. -/
 theorem legInt_hasDerivAt_D (n m : ℕ) (z : ℂ) :
@@ -89,9 +90,12 @@ theorem legInt_ode (n m : ℕ) (z : ℂ) :
     have h := ((((hasDerivAt_pow 2 z).const_sub 1).mul (legInt_hasDerivAt_D n (m+2) z)).sub
       (((hasDerivAt_id' z).const_mul (2*((m:ℂ)+1))).mul (legInt_hasDerivAt_D n (m+1) z))).add
       ((legInt_hasDerivAt_D n m z).const_mul ((n:ℂ)*(n+1) - m*(m+1)))
-    have h0 : HasDerivAt (fun z => (1 - z^2) * LegendreAddition.jet n (m+2) z - 2*(m+1)*z*LegendreAddition.jet n (m+1) z
+    have h0 : HasDerivAt
+        (fun z => (1 - z^2) * LegendreAddition.jet n (m+2) z -
+        2*(m+1)*z*LegendreAddition.jet n (m+1) z
       + ((n:ℂ)*(n+1) - m*(m+1)) * LegendreAddition.jet n m z) 0 z := by
-      rw [show (fun z => (1 - z^2) * LegendreAddition.jet n (m+2) z - 2*(m+1)*z*LegendreAddition.jet n (m+1) z
+      rw [show (fun z => (1 - z^2) * LegendreAddition.jet n (m+2) z -
+          2*(m+1)*z*LegendreAddition.jet n (m+1) z
         + ((n:ℂ)*(n+1) - m*(m+1)) * LegendreAddition.jet n m z) = fun _ => 0 from funext ih]
       exact hasDerivAt_const _ _
     have hu := h.unique h0
@@ -109,7 +113,8 @@ theorem legInt_cont_D (n m : ℕ) : Continuous fun x : ℝ => LegendreAddition.j
 /-- Moment recursion by integration by parts and the differentiated Legendre equation. -/
 theorem legInt_I_succ (m l n : ℕ) :
     legInt_I (m+1) l n = ((n:ℂ)-m)*(n+m+1) * legInt_I m l n := by
-  have hv : ∀ x ∈ uIcc (-1:ℝ) 1, HasDerivAt (fun x : ℝ => (1-(x:ℂ)^2)^(m+1) * LegendreAddition.jet n (m+1) x)
+  have hv : ∀ x ∈ uIcc (-1:ℝ) 1,
+      HasDerivAt (fun x : ℝ => (1-(x:ℂ)^2)^(m+1) * LegendreAddition.jet n (m+1) x)
       (-(((n:ℂ)-m)*(n+m+1)) * ((1-(x:ℂ)^2)^m * LegendreAddition.jet n m x)) x := by
     intro x _
     have h1 : HasDerivAt (fun x : ℝ => (1-(x:ℂ)^2)) (-(2*(x:ℂ))) x := by
@@ -143,14 +148,16 @@ theorem legInt_I_eq (m l n : ℕ) :
       (if l = n then 2/(2*(n:ℂ)+1) else 0) := by
   induction m with
   | zero =>
-    simp only [legInt_I, pow_zero, one_mul, Finset.range_zero, Finset.prod_empty, LegendreAddition.jet,
+    simp only [legInt_I, pow_zero, one_mul, Finset.range_zero, Finset.prod_empty,
+        LegendreAddition.jet,
       iteratedDeriv_zero]
     exact legendre_orthogonality l n
   | succ m ih => rw [legInt_I_succ, ih, Finset.prod_range_succ]; ring
 
 /-- `∏_{k<m} (n-k)(n+k+1) · (n-m)! = (n+m)!` for `m ≤ n`. -/
 theorem legInt_prod_factorial {m n : ℕ} (h : m ≤ n) :
-    (∏ k ∈ Finset.range m, (((n:ℂ)-k)*(n+k+1))) * ((n-m).factorial : ℂ) = ((n+m).factorial : ℂ) := by
+    (∏ k ∈ Finset.range m, (((n:ℂ)-k)*(n+k+1))) * ((n-m).factorial : ℂ) =
+        ((n+m).factorial : ℂ) := by
   induction m with
   | zero => simp
   | succ m ih =>
@@ -177,7 +184,8 @@ theorem legInt_ferrersP_nat_nat (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
 
 /-- Product of two Ferrers functions of integer degree and equal integer order. -/
 theorem legInt_ferrersP_mul (l n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP l m x * ferrersP n m x = (1-(x:ℂ)^2)^m * LegendreAddition.jet l m x * LegendreAddition.jet n m x := by
+    ferrersP l m x * ferrersP n m x = (1-(x:ℂ)^2)^m * LegendreAddition.jet l m x *
+        LegendreAddition.jet n m x := by
   rw [legInt_ferrersP_nat_nat l m hx, legInt_ferrersP_nat_nat n m hx]
   have h0 : (0:ℝ) ≤ 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hr : ((1-x^2)^((m:ℝ)/2)) * ((1-x^2)^((m:ℝ)/2)) = (1-x^2)^m := by
@@ -326,7 +334,8 @@ theorem legInt_integral_K (a b : ℂ) (k : ℕ) {x : ℝ} (hx : 1 ≤ x) :
   have hint := hco.intervalIntegrable (μ := volume)
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt
     (f := fun t : ℝ => legInt_K a b (k+1) t)
-    (fun t ht => (legInt_hasDerivAt_K a b k (legInt_one_add_ofReal_mem (hsub t ht))).comp_ofReal) hint
+    (fun t ht => (legInt_hasDerivAt_K a b k
+        (legInt_one_add_ofReal_mem (hsub t ht))).comp_ofReal) hint
   rw [h]; simp [legInt_K]
 
 /-- Iterated integrals of `P_ν` from `1` on the real half-line. -/
@@ -451,8 +460,10 @@ theorem legInt_hasDerivAt_one_sub_sq (x : ℝ) :
 /-- `∫ (P_n')² = n(n+1)`. -/
 theorem legInt_J_zero (n : ℕ) : legInt_J 0 n = n*(n+1) := by
   set c : ℂ := (n:ℂ)*(n+1)
-  have hd : ∀ x ∈ uIcc (-1:ℝ) 1, HasDerivAt (fun x : ℝ => (x:ℂ)*(1-(x:ℂ)^2)*(LegendreAddition.jet n 1 x)^2
-      + c*x*(LegendreAddition.jet n 0 x)^2 + (1-(x:ℂ)^2)*LegendreAddition.jet n 1 x*LegendreAddition.jet n 0 x)
+  have hd : ∀ x ∈ uIcc (-1:ℝ) 1,
+      HasDerivAt (fun x : ℝ => (x:ℂ)*(1-(x:ℂ)^2)*(LegendreAddition.jet n 1 x)^2
+      + c*x*(LegendreAddition.jet n 0 x)^2 +
+          (1-(x:ℂ)^2)*LegendreAddition.jet n 1 x*LegendreAddition.jet n 0 x)
       (2*(LegendreAddition.jet n 1 x)^2) x := by
     intro x _
     have hx := (hasDerivAt_id x).ofReal_comp
@@ -471,7 +482,8 @@ theorem legInt_J_zero (n : ℕ) : legInt_J 0 n = n*(n+1) := by
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt hd (hco.intervalIntegrable _ _)
   have e1 := (LegendreSingular.endpoints n).1
   have e2 := (LegendreSingular.endpoints n).2
-  simp only [LegendreAddition.jet, iteratedDeriv_zero, ofReal_one, ofReal_neg, one_pow, sub_self, mul_zero,
+  simp only [LegendreAddition.jet, iteratedDeriv_zero, ofReal_one, ofReal_neg, one_pow,
+      sub_self, mul_zero,
     zero_mul, add_zero, zero_add, even_two, Even.neg_pow, e1, e2] at h
   rw [intervalIntegral.integral_const_mul] at h
   have hsq : ((-1:ℂ)^n)^2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
@@ -551,16 +563,20 @@ theorem legInt_J_eq {k n : ℕ} (h : k+1 ≤ n) :
 theorem legInt_intervalIntegrable_rpow {r : ℝ} (hr : r = -1/2 ∨ 0 ≤ r) :
     IntervalIntegrable (fun x : ℝ => (1-x^2)^r) volume (-1) 1 := by
   rcases hr with rfl | hr
-  · have hd : ∀ x ∈ Ioo (min (-1:ℝ) 1) (max (-1) 1), HasDerivAt Real.arcsin ((1-x^2)^(-1/2:ℝ)) x := by
+  · have hd : ∀ x ∈ Ioo (min (-1:ℝ) 1) (max (-1) 1),
+        HasDerivAt Real.arcsin ((1-x^2)^(-1/2:ℝ)) x := by
       intro x hx
-      simp only [min_eq_left (by norm_num : (-1:ℝ) ≤ 1), max_eq_right (by norm_num : (-1:ℝ) ≤ 1)] at hx
+      simp only [min_eq_left (by norm_num : (-1:ℝ) ≤ 1),
+          max_eq_right (by norm_num : (-1:ℝ) ≤ 1)] at hx
       have h := Real.hasDerivAt_arcsin (by linarith [hx.1] : x ≠ -1) (by linarith [hx.2] : x ≠ 1)
       have h0 : (0:ℝ) ≤ 1 - x^2 := by nlinarith [hx.1, hx.2]
       convert h using 1
       rw [show (-1/2:ℝ) = -(1/2) by ring, Real.rpow_neg h0, Real.sqrt_eq_rpow, one_div, one_div]
-    refine intervalIntegral.intervalIntegrable_deriv_of_nonneg Real.continuous_arcsin.continuousOn hd ?_
+    refine intervalIntegral.intervalIntegrable_deriv_of_nonneg
+        Real.continuous_arcsin.continuousOn hd ?_
     intro x hx
-    simp only [min_eq_left (by norm_num : (-1:ℝ) ≤ 1), max_eq_right (by norm_num : (-1:ℝ) ≤ 1)] at hx
+    simp only [min_eq_left (by norm_num : (-1:ℝ) ≤ 1),
+        max_eq_right (by norm_num : (-1:ℝ) ≤ 1)] at hx
     exact Real.rpow_nonneg (by nlinarith [hx.1, hx.2]) _
   · exact ((continuous_const.sub (continuous_pow 2)).rpow_const (fun _ => Or.inr hr)
       ).intervalIntegrable _ _
@@ -573,8 +589,10 @@ theorem legInt_offdiag (n l m : ℕ) (hlm : l ≠ m) (hpos : 0 < l+m) :
   have ha : 0 < a := by
     rw [ha_def]; have : (0:ℝ) < ((l+m:ℕ):ℝ) := by exact_mod_cast hpos
     positivity
-  set B : ℝ → ℂ := fun x => (1-(x:ℂ)^2)*(LegendreAddition.jet n l x * LegendreAddition.jet n (m+1) x -
-      LegendreAddition.jet n m x * LegendreAddition.jet n (l+1) x) + ((l:ℂ)-m)*x*LegendreAddition.jet n l x*LegendreAddition.jet n m x with hB
+  set B : ℝ → ℂ := fun x =>
+      (1-(x:ℂ)^2)*(LegendreAddition.jet n l x * LegendreAddition.jet n (m+1) x -
+      LegendreAddition.jet n m x * LegendreAddition.jet n (l+1) x) +
+          ((l:ℂ)-m)*x*LegendreAddition.jet n l x*LegendreAddition.jet n m x with hB
   set Φ : ℝ → ℂ := fun x => (((1-x^2)^a : ℝ) : ℂ) * B x with hΦ
   set f' : ℝ → ℂ := fun x => ((m:ℂ)^2-l^2) * ((((1-x^2)^(a-1) : ℝ) : ℂ) *
       (LegendreAddition.jet n l x * LegendreAddition.jet n m x)) with hf'
@@ -604,7 +622,8 @@ theorem legInt_offdiag (n l m : ℕ) (hlm : l ≠ m) (hpos : 0 < l+m) :
     rw [hac]
     rw [show l+1+1 = l+2 by ring, show m+1+1 = m+2 by ring]
     set T : ℂ := (((1-x^2)^(a-1) : ℝ) : ℂ)
-    linear_combination T*(1-(x:ℂ)^2)*(LegendreAddition.jet n l x * odm - LegendreAddition.jet n m x * odl)
+    linear_combination T*(1-(x:ℂ)^2)*(LegendreAddition.jet n l x * odm -
+        LegendreAddition.jet n m x * odl)
   have hcΦ : Continuous Φ := by
     have hr : Continuous fun x : ℝ => (1-x^2)^a :=
       (continuous_const.sub (continuous_pow 2)).rpow_const (fun _ => Or.inr ha.le)
@@ -639,7 +658,8 @@ theorem legInt_offdiag (n l m : ℕ) (hlm : l ≠ m) (hpos : 0 < l+m) :
 /-- `𝖯^l_n 𝖯^m_n/(1-x²) = (-1)^{l+m} (1-x²)^{(l+m)/2-1} P_n^{(l)} P_n^{(m)}` on `(-1,1)`. -/
 theorem legInt_ferrers_div_mul (n l m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     1/(1-x^2:ℂ)*ferrersP n l x*ferrersP n m x = (-1)^(l+m) *
-      ((((1-x^2)^(((l+m:ℕ):ℝ)/2-1)) : ℝ) : ℂ) * (LegendreAddition.jet n l x * LegendreAddition.jet n m x) := by
+      ((((1-x^2)^(((l+m:ℕ):ℝ)/2-1)) : ℝ) : ℂ) *
+          (LegendreAddition.jet n l x * LegendreAddition.jet n m x) := by
   have hpos : (0:ℝ) < 1 - x^2 := by nlinarith [hx.1, hx.2]
   rw [legInt_ferrersP_nat_nat n l hx, legInt_ferrersP_nat_nat n m hx]
   have hr : (1-x^2)^((l:ℝ)/2) * (1-x^2)^((m:ℝ)/2) =

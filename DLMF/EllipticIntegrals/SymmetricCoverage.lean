@@ -19,7 +19,8 @@ upstream: its results are used through the bridge theorems of
 -/
 
 dlmf_upstream 19.19.E4 Multiset.prod_X_add_C_eq_sum_esymm
-  "polynomial (Vieta) form ∏ (X + r) = ∑ⱼ esymm j · X^(n-j); DLMF's ∏(1 + t zⱼ) = ∑ tˢ Eₛ after reversal"
+  "polynomial (Vieta) form ∏ (X + r) = ∑ⱼ esymm j · X^(n-j); DLMF's ∏(1 + t zⱼ) = ∑ tˢ Eₛ after \
+      reversal"
 
 dlmf_upstream 19.19.E4 MvPolynomial.prod_C_add_X_eq_sum_esymm
   "multivariate-polynomial form of the same generating function"

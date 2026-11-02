@@ -83,7 +83,8 @@ private lemma mathieuLambdaData_eq_of_unique {ν q : ℂ} {p : ℂ × (ℤ → �
   exact hu _ h.choose_spec.1
 
 /-- At a normal value the endpoint is attained by a continuation path. -/
-private lemma exists_isMathieuLambdaPath_mathieuLambdaData {ν q : ℂ} (h : MathieuNormalSegment ν q) :
+private lemma exists_isMathieuLambdaPath_mathieuLambdaData {ν q : ℂ}
+    (h : MathieuNormalSegment ν q) :
     ∃ Λ c, IsMathieuLambdaPath ν q Λ c ∧ Λ 1 = (mathieuLambdaData ν q).1 ∧
       c 1 = (mathieuLambdaData ν q).2 := by
   simp only [mathieuLambdaData, h, dite_true]
@@ -136,7 +137,8 @@ private lemma mathieuLambdaData_transport {ν q ν' q' : ℂ} (F : ℂ × (ℤ �
 /-! ### The case `q = 0` -/
 
 /-- For `ν ∉ ℤ` and `m ≠ 0`, `ν² ≠ (ν + 2m)²`. -/
-private lemma sq_sub_add_two_mul_sq_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {m : ℤ} (hm : m ≠ 0) :
+private lemma sq_sub_add_two_mul_sq_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+    {m : ℤ} (hm : m ≠ 0) :
     ν ^ 2 - (ν + 2 * m) ^ 2 ≠ 0 := by
   have e : ν ^ 2 - (ν + 2 * m) ^ 2 = -4 * m * (ν + m) := by ring
   rw [e]
@@ -165,7 +167,8 @@ private lemma eq_of_countable_continuousOn_Icc {f : ℝ → ℂ} {S : Set ℂ} (
   exact hsing ⟨t, ht, rfl⟩ ⟨0, ⟨le_rfl, zero_le_one⟩, rfl⟩
 
 /-- Every continuation path for `q = 0` is the constant path `(ν², δ_0)`. -/
-private lemma isMathieuLambdaPath_zero_eq_const {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
+private lemma isMathieuLambdaPath_zero_eq_const {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {Λ : ℝ → ℂ}
+    {c : ℝ → ℤ → ℂ}
     (hp : IsMathieuLambdaPath ν 0 Λ c) :
     ∀ t ∈ Icc (0 : ℝ) 1, Λ t = ν ^ 2 ∧ c t = Pi.single 0 1 := by
   have hrec : ∀ t ∈ Icc (0 : ℝ) 1, ∀ m : ℤ, (Λ t - (ν + 2 * m) ^ 2) * c t m = 0 := by
@@ -203,7 +206,8 @@ private lemma isMathieuLambdaPath_zero_eq_const {ν : ℂ} (hν : ∀ m : ℤ, (
     rcases mul_self_eq_one_iff.mp this with h | h <;> simp [h]
   have hc0' : ∀ t ∈ Icc (0 : ℝ) 1, c t 0 = 1 := by
     intro t ht
-    rw [eq_of_countable_continuousOn_Icc (Set.toFinite _).countable (hp.continuousOn_coeff 0) hc0 t ht,
+    rw [eq_of_countable_continuousOn_Icc (Set.toFinite _).countable
+        (hp.continuousOn_coeff 0) hc0 t ht,
       hp.coeff_zero]
   intro t ht
   refine ⟨hΛ t ht, funext fun m => ?_⟩
@@ -358,7 +362,8 @@ theorem mathieuLambdaData_conj (ν q : ℂ) :
 theorem mathieuLambda_neg_q_and_neg_nu {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (q : ℂ) :
     mathieuLambda ν (-q) = mathieuLambda ν q ∧ mathieuLambda (-ν) q = mathieuLambda ν q := by
   rw [mathieuLambda_of_not_int hν, mathieuLambda_of_not_int hν,
-    mathieuLambda_of_not_int (intCast_ne_neg_of_not_int hν), mathieuLambdaData_neg_q, mathieuLambdaData_neg_nu]
+    mathieuLambda_of_not_int (intCast_ne_neg_of_not_int hν), mathieuLambdaData_neg_q,
+        mathieuLambdaData_neg_nu]
   exact ⟨rfl, rfl⟩
 
 /-- **Integer order** (DLMF 28.12.3): `λ_m(q) = a_m(q)` for `m = 0, 1, …` and
@@ -465,7 +470,8 @@ theorem isFloquetSolution_mathieuMe {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) �
     rw [mathieuLambda_of_not_int hν]
     convert this using 2 with z
     rw [← mathieuMe_neg_nu hν, mathieuMe_of_not_int (intCast_ne_neg_of_not_int hν)]
-    simp only [mathieuMeCoeff_of_not_int (intCast_ne_neg_of_not_int hν), mathieuLambdaData_neg_nu, c]
+    simp only [mathieuMeCoeff_of_not_int (intCast_ne_neg_of_not_int hν),
+        mathieuLambdaData_neg_nu, c]
   · funext z
     have := congrFun h (-z)
     simpa using this
@@ -478,7 +484,8 @@ theorem isFloquetSolution_mathieuMe {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) �
 /-- **Green's identity on a period**: solutions `f`, `g` of Mathieu's equation with eigenvalues
 `a ≠ b` and reciprocal multipliers `f(z + π) = μ f(z)`, `g(z + π) = μ⁻¹ g(z)` satisfy
 `∫₀^π f g = 0`. -/
-private lemma integral_mul_eq_zero_of_pseudoperiodic {a b q μ : ℂ} {f g : ℂ → ℂ} (hf : IsMathieuSolution a q f)
+private lemma integral_mul_eq_zero_of_pseudoperiodic {a b q μ : ℂ} {f g : ℂ → ℂ}
+    (hf : IsMathieuSolution a q f)
     (hg : IsMathieuSolution b q g) (hμ : μ ≠ 0) (hfp : ∀ z, f (z + π) = μ * f z)
     (hgp : ∀ z, g (z + π) = μ⁻¹ * g z) (hab : a ≠ b) :
     ∫ x in (0 : ℝ)..π, f x * g x = 0 := by
@@ -516,13 +523,16 @@ private lemma integral_mul_eq_zero_of_pseudoperiodic {a b q μ : ℂ} {f g : ℂ
 /-- **Orthogonality with distinct eigenvalues** (DLMF 28.12.7 under the extra hypothesis
 `λ_{ν+2m}(q) ≠ λ_{ν+2n}(q)`; Green's identity on `[0, π]`). The statement
 `integral_mathieuMe_orthogonal` without this hypothesis remains admitted. -/
-private lemma integral_mathieuMe_orthogonal_of_mathieuLambda_ne {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+private lemma integral_mathieuMe_orthogonal_of_mathieuLambda_ne {ν q : ℂ}
+    (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
     {m n : ℤ} (hm : MathieuNormalSegment (ν + 2 * m) q)
     (hn : MathieuNormalSegment (ν + 2 * n) q)
     (hne : mathieuLambda (ν + 2 * m) q ≠ mathieuLambda (ν + 2 * n) q) :
     ∫ x in (0 : ℝ)..π, mathieuMe (ν + 2 * m) x q * mathieuMe (ν + 2 * n) (-x) q = 0 := by
-  obtain ⟨⟨h1, -, hp1⟩, -⟩ := isFloquetSolution_mathieuMe (intCast_ne_add_two_mul_of_not_int hν m) hm
-  obtain ⟨-, ⟨h2, -, hp2⟩⟩ := isFloquetSolution_mathieuMe (intCast_ne_add_two_mul_of_not_int hν n) hn
+  obtain ⟨⟨h1, -, hp1⟩, -⟩ :=
+      isFloquetSolution_mathieuMe (intCast_ne_add_two_mul_of_not_int hν m) hm
+  obtain ⟨-, ⟨h2, -, hp2⟩⟩ :=
+      isFloquetSolution_mathieuMe (intCast_ne_add_two_mul_of_not_int hν n) hn
   refine integral_mul_eq_zero_of_pseudoperiodic h1 h2 (Complex.exp_ne_zero _) hp1 (fun z => ?_) hne
   have h2z := hp2 z
   simp only at h2z
@@ -535,7 +545,8 @@ private lemma integral_mathieuMe_orthogonal_of_mathieuLambda_ne {ν q : ℂ} (h�
 
 /-- A Floquet solution with respect to `ν ∉ ℤ` whose reflection `w(-z)` is a Floquet solution
 with respect to `-ν` does not vanish at `0`, and `cos πν = w_I(π)`. -/
-theorem isMathieuCharExp_of_isFloquetSolution_pair {a q ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {w : ℂ → ℂ}
+theorem isMathieuCharExp_of_isFloquetSolution_pair {a q ν : ℂ}
+    (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {w : ℂ → ℂ}
     (h1 : IsFloquetSolution a q ν w) (h2 : IsFloquetSolution a q (-ν) (fun z => w (-z))) :
     w 0 ≠ 0 ∧ IsMathieuCharExp a q ν := by
   obtain ⟨hw, hw0, hper⟩ := h1
@@ -632,8 +643,10 @@ for `ν ∉ ℤ`. Stronger than DLMF: with the straight-segment continuation it 
 @[dlmf 28.12.E10]
 theorem conj_mathieuMe {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (z q : ℂ) :
     conj (mathieuMe ν z q) = mathieuMe (conj ν) (-conj z) (conj q) := by
-  rw [mathieuMe_of_not_int hν, mathieuMe_of_not_int (intCast_ne_conj_of_not_int hν), Complex.conj_tsum]
-  simp only [mathieuMeCoeff_of_not_int hν, mathieuMeCoeff_of_not_int (intCast_ne_conj_of_not_int hν),
+  rw [mathieuMe_of_not_int hν, mathieuMe_of_not_int (intCast_ne_conj_of_not_int hν),
+      Complex.conj_tsum]
+  simp only [mathieuMeCoeff_of_not_int hν,
+      mathieuMeCoeff_of_not_int (intCast_ne_conj_of_not_int hν),
     mathieuLambdaData_conj]
   congr 1; funext m
   rw [map_mul, ← Complex.exp_conj]
@@ -701,7 +714,8 @@ theorem exp_pi_mul_I_mul_ne_inv {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
   linear_combination -hn
 
 /-- A Floquet solution with respect to `ν` with `e^{2πimν} = 1` has period `2mπ`. -/
-private lemma periodic_of_isFloquetSolution {a q ν : ℂ} {w : ℂ → ℂ} (hw : IsFloquetSolution a q ν w) {m : ℕ}
+private lemma periodic_of_isFloquetSolution {a q ν : ℂ} {w : ℂ → ℂ}
+    (hw : IsFloquetSolution a q ν w) {m : ℕ}
     (hm : Complex.exp (2 * m * π * I * ν) = 1) : Function.Periodic w (2 * m * π) := by
   intro z
   have := pseudoperiodic_add_nat_mul_pi hw.2.2 z (2 * m)

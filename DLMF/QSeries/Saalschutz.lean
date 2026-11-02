@@ -161,7 +161,8 @@ theorem qPochhammer_ne_zero_of_le {x q : ℂ} {m n : ℕ} (h : qPochhammer x q n
 `b = s`, `c = xrs`, after reversing the summation):
 `∑_m (r;q)_m (s;q)_m (x;q)_{n-m} x^m / ((q;q)_{n-m} (q;q)_m (xrs;q)_m)
   = (xr;q)_n (xs;q)_n / ((q;q)_n (xrs;q)_n)`. -/
-@[dlmf 17.7.E4 "equivalent finite q-Pfaff-Saalschutz identity after reversing the summation; quotient normalization differs"]
+@[dlmf 17.7.E4 "equivalent finite q-Pfaff-Saalschutz identity after reversing the summation; \
+    quotient normalization differs"]
 theorem sum_saalschutz_div (q x r s : ℂ) (n : ℕ) (hq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
     (hA : qPochhammer (x * r * s) q n ≠ 0) :
     ∑ m ∈ range (n + 1), qPochhammer r q m * qPochhammer s q m * qPochhammer x q (n - m) *

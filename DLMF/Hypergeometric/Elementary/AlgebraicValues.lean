@@ -137,7 +137,8 @@ theorem log_add_sqrt {z : ℂ} (hz : ‖z‖ < 1) :
     field_simp
     ring
   have hdiff : DifferentiableOn ℂ (fun w => f w - g w) (Metric.ball 0 1) := fun w hw =>
-    (((hfd w (by simpa using hw)).sub (hgd w (by simpa using hw))).differentiableAt).differentiableWithinAt
+    (((hfd w (by simpa using hw)).sub
+        (hgd w (by simpa using hw))).differentiableAt).differentiableWithinAt
   have hderiv : Set.EqOn (deriv (fun w => f w - g w)) 0 (Metric.ball 0 1) := by
     intro w hw
     have hw' : ‖w‖ < 1 := by simpa using hw
@@ -334,7 +335,8 @@ theorem tan_sin (a : ℂ) {x : ℝ} (hx : |x| < Real.pi / 4) :
 @[dlmf 15.4.E11]
 theorem opposite_parameters_sqrt (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     ₂F₁ (-a) a (1 / 2) (-z ^ 2) =
-      (((1 + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ (2 * a) + ((1 + z ^ 2) ^ (1 / 2 : ℂ) - z) ^ (2 * a)) / 2 := by
+      (((1 + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ (2 * a) +
+          ((1 + z ^ 2) ^ (1 / 2 : ℂ) - z) ^ (2 * a)) / 2 := by
   set r : ℂ → ℂ := fun z => (1 + z ^ 2) ^ (1 / 2 : ℂ) with hrdef
   have hc12 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
@@ -476,7 +478,8 @@ theorem ordinaryHypergeometric_neg_tan_sq (a b : ℂ) {c : ℂ} (hc : ∀ k : �
     push_cast; ring
   have hpos : 0 < 1 + Real.tan x ^ 2 := by positivity
   have hcos : (Real.cos x : ℂ) ^ (2 * a) = ((1 + Real.tan x ^ 2 : ℝ) : ℂ) ^ (-a) := by
-    rw [Complex.ofReal_cpow_eq_exp hcx, Complex.ofReal_cpow_eq_exp hpos, ← inv_inv (1 + Real.tan x ^ 2),
+    rw [Complex.ofReal_cpow_eq_exp hcx, Complex.ofReal_cpow_eq_exp hpos,
+        ← inv_inv (1 + Real.tan x ^ 2),
       Real.inv_one_add_tan_sq hcx.ne', Real.log_inv, Real.log_pow]
     push_cast; ring_nf
   rw [hP, h1t, hcos]
@@ -507,7 +510,8 @@ theorem sin_sq_cos (a : ℂ) {x : ℝ} (hx : |x| < Real.pi / 2) :
 @[dlmf 15.4.E13]
 theorem complementary_parameters_sqrt (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     ₂F₁ a (1 - a) (1 / 2) (-z ^ 2) =
-      (((1 + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ (2 * a - 1) + ((1 + z ^ 2) ^ (1 / 2 : ℂ) - z) ^ (2 * a - 1)) / (2 *
+      (((1 + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ (2 * a - 1) +
+          ((1 + z ^ 2) ^ (1 / 2 : ℂ) - z) ^ (2 * a - 1)) / (2 *
         (1 + z ^ 2) ^ (1 / 2 : ℂ)) := by
   have hc12 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
@@ -554,7 +558,8 @@ theorem sin_sq_cos_quotient (a : ℂ) {x : ℝ} (hx : |x| < Real.pi / 2) :
 @[dlmf 15.4.E15]
 theorem complementary_parameters_odd_sqrt (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     (2 - 4 * a) * z * ₂F₁ a (1 - a) (3 / 2) (-z ^ 2) =
-      ((1 + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ (1 - 2 * a) - ((1 + z ^ 2) ^ (1 / 2 : ℂ) - z) ^ (1 - 2 * a) := by
+      ((1 + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ (1 - 2 * a) -
+          ((1 + z ^ 2) ^ (1 / 2 : ℂ) - z) ^ (1 - 2 * a) := by
   set r : ℂ → ℂ := fun z => (1 + z ^ 2) ^ (1 / 2 : ℂ) with hrdef
   have hc32 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
@@ -683,7 +688,8 @@ theorem quadratic_binomial_derivative {a z : ℂ} (hc : ∀ k : ℕ, 2 * a ≠ -
     show 2 * (a - 1 / 2) = 2 * a - 1 by ring, ordinaryHypergeometric_symm (2 * a)] at hk
   rw [euler_transformation_of_ne_neg_nat hc hz, show 2 * a - a - (a + 1 / 2) = -(1 / 2) by ring,
     show 2 * a - a = a by ring, show 2 * a - (a + 1 / 2) = a - 1 / 2 by ring, hk,
-    ordinaryHypergeometric_eq_one_sub_neg_cpow (fun k hk' => hc k (neg_eq_iff_eq_neg.mp hk'.symm)) h1]
+    ordinaryHypergeometric_eq_one_sub_neg_cpow
+        (fun k hk' => hc k (neg_eq_iff_eq_neg.mp hk'.symm)) h1]
   congr 2 <;> ring_nf
 
 /-- Identity under the stated parameter and domain assumptions: `₂F₁ (a + 1) b a z = (1 - (1 - b /
@@ -698,8 +704,10 @@ theorem successor_binomial {a b z : ℂ} (ha : ∀ k : ℕ, a ≠ -(k : ℂ)) (h
   have hsymm : ₂F₁ b (a + 1) a z = ₂F₁ (a + 1) b a z := by
     unfold ordinaryHypergeometric
     rw [ordinaryHypergeometricSeries_symm]
-  rw [hsymm, ordinaryHypergeometric_eq_one_sub_neg_cpow (fun k hk => ha k (neg_eq_iff_eq_neg.mp hk.symm)) hz,
-    ordinaryHypergeometric_eq_one_sub_neg_cpow (fun k hk => ha1 k (neg_eq_iff_eq_neg.mp hk.symm)) hz] at h
+  rw [hsymm, ordinaryHypergeometric_eq_one_sub_neg_cpow
+      (fun k hk => ha k (neg_eq_iff_eq_neg.mp hk.symm)) hz,
+    ordinaryHypergeometric_eq_one_sub_neg_cpow
+        (fun k hk => ha1 k (neg_eq_iff_eq_neg.mp hk.symm)) hz] at h
   have hz1 : z ≠ 1 := by intro he; simp [he] at hz
   have hp : (1 - z) ^ (-b) = (1 - z) * (1 - z) ^ (-1 - b) := by
     calc
@@ -716,7 +724,8 @@ theorem successor_binomial {a b z : ℂ} (ha : ∀ k : ℕ, a ≠ -(k : ℂ)) (h
 @[dlmf 15.4.E28]
 theorem gauss_second_summation {a b : ℂ} (hc : ∀ k : ℕ, (a + b + 1) / 2 ≠ -(k : ℂ)) :
     ₂F₁ a b ((a + b + 1) / 2) (1 / 2) =
-      (Real.sqrt Real.pi : ℂ) * Gamma ((a + b + 1) / 2) / (Gamma ((a + 1) / 2) * Gamma ((b + 1) / 2)) := by
+      (Real.sqrt Real.pi : ℂ) * Gamma ((a + b + 1) / 2) /
+          (Gamma ((a + 1) / 2) * Gamma ((b + 1) / 2)) := by
   set C := (a + b + 1) / 2 with hC
   have hC' : ∀ k : ℕ, a / 2 + b / 2 + 1 / 2 ≠ -(k : ℂ) := by
     rw [show a / 2 + b / 2 + 1 / 2 = C by rw [hC]; ring]; exact hc
@@ -731,7 +740,8 @@ theorem gauss_second_summation {a b : ℂ} (hc : ∀ k : ℕ, (a + b + 1) / 2 �
       (show ‖(1 / 2 : ℂ)‖ < 1 by norm_num)).continuousAt.tendsto.comp hc0
   have hmap : Tendsto (fun x : ℝ => 4 * x * (1 - x)) (𝓝[<] (1 / 2)) (𝓝[<] 1) := by
     apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
-    · have := ((show Continuous (fun x : ℝ => 4 * x * (1 - x)) by fun_prop).tendsto (1 / 2)).mono_left
+    · have := ((show Continuous (fun x : ℝ => 4 * x * (1 - x)) by fun_prop).tendsto
+          (1 / 2)).mono_left
         (nhdsWithin_le_nhds (s := Set.Iio (1 / 2 : ℝ)))
       rw [show (4 : ℝ) * (1 / 2) * (1 - 1 / 2) = 1 by norm_num] at this
       exact this
@@ -775,7 +785,8 @@ theorem gauss_second_summation_contiguous
     (a + b) / 2 + 1 ≠ -(k : ℂ))
     (hab : a ≠ b) :
     ₂F₁ a b ((a + b) / 2 + 1) (1 / 2) =
-      2 * (Real.sqrt Real.pi : ℂ) / (a - b) * Gamma ((a + b) / 2 + 1) * (1 / (Gamma (a / 2) * Gamma ((b + 1)
+      2 * (Real.sqrt Real.pi : ℂ) / (a - b) * Gamma ((a + b) / 2 + 1) *
+          (1 / (Gamma (a / 2) * Gamma ((b + 1)
         / 2)) - 1 / (Gamma ((a + 1) / 2) * Gamma (b / 2))) := by
   set c := (a + b) / 2 + 1 with hcdef
   have h12 : ‖(1 / 2 : ℂ)‖ < 1 := by norm_num
@@ -794,7 +805,8 @@ theorem gauss_second_summation_contiguous
     · rw [Complex.Gamma_add_one _ (by simpa using hx), mul_inv]
       field_simp
   have hab' : a - b ≠ 0 := sub_ne_zero.mpr hab
-  have key : (a - b) * ₂F₁ a b c (1 / 2) = a * ₂F₁ (a + 1) b c (1 / 2) - b * ₂F₁ a (b + 1) c (1 / 2) := by
+  have key : (a - b) * ₂F₁ a b c (1 / 2) = a * ₂F₁ (a + 1) b c (1 / 2) - b *
+      ₂F₁ a (b + 1) c (1 / 2) := by
     linear_combination -hcon
   rw [h1, h2] at key
   apply mul_left_cancel₀ hab'
@@ -812,12 +824,14 @@ theorem gauss_second_summation_contiguous
 @[dlmf 15.4.E30]
 theorem bailey_summation {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -(k : ℂ)) :
     ₂F₁ a (1 - a) b (1 / 2) =
-      (2 : ℂ) ^ (1 - b) * (Real.sqrt Real.pi : ℂ) * Gamma b / (Gamma ((a + b) / 2) * Gamma ((b - a + 1) /
+      (2 : ℂ) ^ (1 - b) * (Real.sqrt Real.pi : ℂ) * Gamma b /
+          (Gamma ((a + b) / 2) * Gamma ((b - a + 1) /
         2)) := by
   have h12 : ‖(1 / 2 : ℂ)‖ < 1 := by norm_num
   have hg := gauss_second_summation (a := b - a) (b := b + a - 1)
     (by rw [show (b - a + (b + a - 1) + 1) / 2 = b by ring]; exact hb)
-  rw [show (b - a + (b + a - 1) + 1) / 2 = b by ring, show (b + a - 1 + 1) / 2 = (a + b) / 2 by ring]
+  rw [show (b - a + (b + a - 1) + 1) / 2 = b by ring, show (b + a - 1 + 1) / 2 =
+                                                  (a + b) / 2 by ring]
     at hg
   have harg2 : (2 : ℂ).arg ≠ Real.pi := by
     rw [show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num, arg_ofReal_of_nonneg (by norm_num)]
@@ -834,7 +848,8 @@ Gamma (4 / 3 - 2 * a))`. -/
 @[dlmf 15.4.E31]
 theorem value_neg_one_third {a : ℂ} (hc : ∀ k : ℕ, 3 / 2 - 2 * a ≠ -(k : ℂ)) :
     ₂F₁ a (a + 1 / 2) (3 / 2 - 2 * a) (-1 / 3) =
-      (8 / 9 : ℂ) ^ (-2 * a) * Gamma (4 / 3) * Gamma (3 / 2 - 2 * a) / (Gamma (3 / 2) * Gamma (4 / 3 - 2 *
+      (8 / 9 : ℂ) ^ (-2 * a) * Gamma (4 / 3) * Gamma (3 / 2 - 2 * a) /
+          (Gamma (3 / 2) * Gamma (4 / 3 - 2 *
         a)) := by
   set A : ℂ := 1 / 3 - a with hA
   have hcA : ∀ k : ℕ, 2 * A + 5 / 6 ≠ -(k : ℂ) := by
@@ -867,11 +882,14 @@ theorem value_neg_one_third {a : ℂ} (hc : ∀ k : ℕ, 3 / 2 - 2 * a ≠ -(k :
   have hpow : (4 / 3 : ℂ) ^ (1 - 4 * a) * (4 : ℂ) ^ (-2 * A) =
       2 / 3 * (8 / 9 : ℂ) ^ (-2 * a) * (2 : ℂ) ^ (1 - 2 * (2 / 3 - a)) := by
     have e1 : (4 / 3 : ℂ) ^ (1 - 4 * a) = exp (Real.log (4 / 3) * (1 - 4 * a)) := by
-      have := Complex.ofReal_cpow_eq_exp (q := 4 / 3) (by norm_num) (1 - 4 * a); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 4 / 3) (by norm_num) (1 - 4 * a);
+          push_cast at this; exact this
     have e2 : (4 : ℂ) ^ (-2 * A) = exp (Real.log 4 * (-2 * A)) := by
-      have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-2 * A); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-2 * A);
+          push_cast at this; exact this
     have e3 : (8 / 9 : ℂ) ^ (-2 * a) = exp (Real.log (8 / 9) * (-2 * a)) := by
-      have := Complex.ofReal_cpow_eq_exp (q := 8 / 9) (by norm_num) (-2 * a); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 8 / 9) (by norm_num) (-2 * a);
+          push_cast at this; exact this
     have e4 : (2 : ℂ) ^ (1 - 2 * (2 / 3 - a)) = exp (Real.log 2 * (1 - 2 * (2 / 3 - a))) := by
       have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (1 - 2 * (2 / 3 - a))
       push_cast at this; exact this
@@ -911,7 +929,8 @@ theorem value_neg_one_third {a : ℂ} (hc : ∀ k : ℕ, 3 / 2 - 2 * a ≠ -(k :
 @[dlmf 15.4.E32]
 theorem value_one_ninth {a : ℂ} (hc : ∀ k : ℕ, 5 / 6 + 2 * a / 3 ≠ -(k : ℂ)) :
     ₂F₁ a (a + 1 / 2) (5 / 6 + 2 * a / 3) (1 / 9) =
-      (Real.sqrt Real.pi : ℂ) * (3 / 4 : ℂ) ^ a * Gamma (5 / 6 + 2 * a / 3) / (Gamma (1 / 2 + a / 3) * Gamma
+      (Real.sqrt Real.pi : ℂ) * (3 / 4 : ℂ) ^ a * Gamma (5 / 6 + 2 * a / 3) /
+          (Gamma (1 / 2 + a / 3) * Gamma
         (5 / 6 + a / 3)) := by
   set A : ℂ := a / 3 with hA
   have hcA : ∀ k : ℕ, 2 * A + 5 / 6 ≠ -(k : ℂ) := by
@@ -983,9 +1002,11 @@ theorem value_one_ninth {a : ℂ} (hc : ∀ k : ℕ, 5 / 6 + 2 * a / 3 ≠ -(k :
     rw [Real.sqrt_eq_rpow, ofReal_cpow Real.pi_pos.le]; push_cast; ring_nf
   have hpow : (8 / 9 : ℂ) ^ (-a) * (3 / 2 : ℂ) ^ (-3 * A) = (3 / 4 : ℂ) ^ a := by
     have e1 : (8 / 9 : ℂ) ^ (-a) = exp (Real.log (8 / 9) * (-a)) := by
-      have := Complex.ofReal_cpow_eq_exp (q := 8 / 9) (by norm_num) (-a); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 8 / 9) (by norm_num) (-a);
+          push_cast at this; exact this
     have e2 : (3 / 2 : ℂ) ^ (-3 * A) = exp (Real.log (3 / 2) * (-3 * A)) := by
-      have := Complex.ofReal_cpow_eq_exp (q := 3 / 2) (by norm_num) (-3 * A); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 3 / 2) (by norm_num) (-3 * A);
+          push_cast at this; exact this
     have e3 : (3 / 4 : ℂ) ^ a = exp (Real.log (3 / 4) * a) := by
       have := Complex.ofReal_cpow_eq_exp (q := 3 / 4) (by norm_num) a; push_cast at this; exact this
     rw [e1, e2, e3, ← exp_add]

@@ -9,6 +9,7 @@ public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMF.AlgebraicAnalytic.Transforms.Fourier
 public import DLMF.AsymptoticApproximations.Integrals.Basic
 public import DLMFMathlib.Analysis.Asymptotics.WatsonKernel
+public import DLMFMathlib.Analysis.Fourier.DirichletKernel
 public import DLMFMathlib.Analysis.Asymptotics.WatsonLog
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
@@ -339,6 +340,32 @@ end Sector
 
 /-! ### §2.4(ii): inverse Laplace transforms -/
 
+/-- The inner Bromwich integral `∫_{-η}^{η} e^{iaτ} dτ = 2 sin(ηa)/a` for `a ≠ 0`. -/
+private theorem integral_cexp_mul_I_symm {a : ℝ} (ha : a ≠ 0) (η : ℝ) :
+    ∫ τ in -η..η, cexp (((a : ℂ) * I) * τ) = ((2 * (Real.sin (η * a) / a) : ℝ) : ℂ) := by
+  have haI : (a : ℂ) * I ≠ 0 := mul_ne_zero (by exact_mod_cast ha) I_ne_zero
+  rw [integral_exp_mul_complex haI]
+  have h1 : (a : ℂ) * I * (η : ℂ) = ((η * a : ℝ) : ℂ) * I := by push_cast; ring
+  have h2 : (a : ℂ) * I * ((-η : ℝ) : ℂ) = ((-(η * a) : ℝ) : ℂ) * I := by push_cast; ring
+  rw [h1, h2, exp_mul_I, exp_mul_I, ← ofReal_cos, ← ofReal_sin, ← ofReal_cos, ← ofReal_sin,
+    Real.cos_neg, Real.sin_neg]
+  have ha' : (a : ℂ) ≠ 0 := by exact_mod_cast ha
+  field_simp
+  push_cast
+  ring_nf
+  field_simp
+
+/-- Pointwise rearrangement of the Bromwich integrand. -/
+private theorem bromwich_integrand_eq (q : ℝ → ℂ) (σ t τ u : ℝ) :
+    cexp (t * (σ + τ * I)) * (cexp (-(σ + τ * I) * u) * q u) =
+      cexp (σ * t) * (cexp (((t - u : ℝ) : ℂ) * I * τ) * ((Real.exp (-σ * u) : ℂ) * q u)) := by
+  rw [ofReal_exp]
+  calc cexp (t * (σ + τ * I)) * (cexp (-(σ + τ * I) * u) * q u)
+        = cexp (t * (σ + τ * I) + -(σ + τ * I) * u) * q u := by rw [exp_add]; ring
+    _ = cexp (σ * t + ((t - u : ℝ) : ℂ) * I * τ + ((-σ * u : ℝ) : ℂ)) * q u := by
+        congr 2; push_cast; ring
+    _ = _ := by rw [exp_add, exp_add]; ring
+
 /-- DLMF 2.4.2–2.4.3 (Laplace inversion, §1.14(iii)): if `q` is differentiable on `(0, ∞)` and
 `e^{-ct} q(t)` is integrable there, then with `Q(z) = ∫₀^∞ e^{-zt} q(t) dt` (2.4.2),
 `q(t) = (2πi)⁻¹ lim_{η→∞} ∫_{σ-iη}^{σ+iη} e^{tz} Q(z) dz` for `0 < t < ∞` and every `σ ≥ c`
@@ -349,7 +376,105 @@ theorem laplace_inversion {q : ℝ → ℂ} {c σ t : ℝ} (hq : DifferentiableO
     (hint : IntegrableOn (fun t => Real.exp (-c * t) • q t) (Ioi 0)) (hσ : c ≤ σ) (ht : 0 < t) :
     Tendsto (bromwichPartial (DLMF.AlgebraicAnalytic.laplaceTransform q) σ t) atTop
       (𝓝 (q t)) := by
-  sorry
+  set g : ℝ → ℂ := fun u => (Real.exp (-σ * u) : ℂ) * q u with hgdef
+  have hgm : AEStronglyMeasurable g (volume.restrict (Set.Ioi 0)) :=
+    ((continuous_ofReal.comp ((continuous_const.mul continuous_id).rexp)).continuousOn.mul
+      hq.continuousOn).aestronglyMeasurable measurableSet_Ioi
+  have hg : IntegrableOn g (Set.Ioi 0) := by
+    refine Integrable.mono hint hgm ?_
+    refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun u hu => ?_)
+    simp only [hgdef, norm_mul, norm_smul, norm_real, Real.norm_eq_abs, Real.abs_exp]
+    gcongr
+    have : (0 : ℝ) < u := hu
+    nlinarith
+  set G : ℝ → ℂ := (Set.Ioi 0).indicator g with hGdef
+  have hG : Integrable G := (integrable_indicator_iff measurableSet_Ioi).2 hg
+  have hGt : DifferentiableAt ℝ G t := by
+    have hqt : DifferentiableAt ℝ q t := hq.differentiableAt (Ioi_mem_nhds ht)
+    have he : DifferentiableAt ℝ (fun u : ℝ => (Real.exp (-σ * u) : ℂ)) t := by fun_prop
+    have : DifferentiableAt ℝ g t := he.mul hqt
+    refine this.congr_of_eventuallyEq ?_
+    filter_upwards [Ioi_mem_nhds ht] with u hu
+    exact Set.indicator_of_mem hu g
+  have hlim := (Real.tendsto_integral_mul_sin_div_of_differentiableAt hG hGt).const_mul
+    (cexp (σ * t))
+  have hval : cexp (σ * t) * G t = q t := by
+    rw [hGdef, indicator_of_mem (show t ∈ Set.Ioi (0 : ℝ) from ht), hgdef]
+    simp only [ofReal_exp, ← mul_assoc, ← exp_add]
+    push_cast
+    ring_nf
+    simp
+  rw [hval] at hlim
+  refine hlim.congr' ?_
+  filter_upwards [eventually_ge_atTop 0] with η hη
+  have hK : ∀ u, u ≠ t → ((2 * Real.pi : ℝ) : ℂ)⁻¹ *
+      ∫ τ in -η..η, cexp (((t - u : ℝ) : ℂ) * I * τ) =
+        ((Real.sin (η * (t - u)) / (Real.pi * (t - u)) : ℝ) : ℂ) := by
+    intro u hu
+    rw [integral_cexp_mul_I_symm (sub_ne_zero.2 hu.symm)]
+    have : Real.pi ≠ 0 := Real.pi_ne_zero
+    have : t - u ≠ 0 := sub_ne_zero.2 hu.symm
+    push_cast
+    field_simp
+  set F : ℝ → ℝ → ℂ := fun τ u => cexp (t * (σ + τ * I)) * (cexp (-(σ + τ * I) * u) * q u)
+    with hFdef
+  have hF' : ∀ τ u, F τ u =
+      cexp (σ * t) * (cexp (((t - u : ℝ) : ℂ) * I * τ) * g u) := fun τ u =>
+    bromwich_integrand_eq q σ t τ u
+  have hFi : Integrable (Function.uncurry F)
+      ((volume.restrict (Set.uIoc (-η) η)).prod (volume.restrict (Set.Ioi 0))) := by
+    have hb : Integrable (fun p : ℝ × ℝ => ‖cexp (σ * t)‖ * ((1 : ℝ) * ‖g p.2‖))
+        ((volume.restrict (Set.uIoc (-η) η)).prod (volume.restrict (Set.Ioi 0))) := by
+      have : IsFiniteMeasure (volume.restrict (Set.uIoc (-η) η)) := ⟨by
+        rw [Measure.restrict_apply_univ, Set.uIoc_of_le (by linarith)]
+        exact measure_Ioc_lt_top⟩
+      exact ((integrable_const (1 : ℝ)).mul_prod hg.norm).const_mul _
+    refine hb.mono' ?_ (Eventually.of_forall fun p => ?_)
+    · have : Function.uncurry F = fun p : ℝ × ℝ =>
+          cexp (σ * t) * (cexp (((t - p.2 : ℝ) : ℂ) * I * p.1) * g p.2) := by
+        funext p; exact hF' p.1 p.2
+      rw [this]
+      refine aestronglyMeasurable_const.mul (Continuous.aestronglyMeasurable ?_ |>.mul hgm.comp_snd)
+      fun_prop
+    · simp only [Function.uncurry, hF', norm_mul, one_mul]
+      rw [show ((t - p.2 : ℝ) : ℂ) * I * p.1 = ((((t - p.2) * p.1 : ℝ)) : ℂ) * I by
+        push_cast; ring, norm_exp_ofReal_mul_I, one_mul]
+  unfold bromwichPartial
+  refine Eq.symm ?_
+  calc ((2 * Real.pi : ℝ) : ℂ)⁻¹ * ∫ τ in -η..η,
+        cexp (t * (σ + τ * I)) * DLMF.AlgebraicAnalytic.laplaceTransform q (σ + τ * I)
+      = ((2 * Real.pi : ℝ) : ℂ)⁻¹ * ∫ τ in -η..η, ∫ u in Set.Ioi 0, F τ u := by
+        congr 1
+        refine intervalIntegral.integral_congr fun τ _ => ?_
+        simp only [DLMF.AlgebraicAnalytic.laplaceTransform, hFdef, ← integral_const_mul]
+    _ = ((2 * Real.pi : ℝ) : ℂ)⁻¹ * ∫ u in Set.Ioi 0, ∫ τ in -η..η, F τ u := by
+        rw [intervalIntegral_integral_swap hFi]
+    _ = ((2 * Real.pi : ℝ) : ℂ)⁻¹ * ∫ u in Set.Ioi 0,
+          cexp (σ * t) * (g u * ∫ τ in -η..η, cexp (((t - u : ℝ) : ℂ) * I * τ)) := by
+        congr 1
+        refine integral_congr_ae (Eventually.of_forall fun u => ?_)
+        simp only [hF']
+        rw [intervalIntegral.integral_const_mul]
+        congr 1
+        rw [← intervalIntegral.integral_const_mul]
+        congr 1
+        funext τ
+        ring
+    _ = cexp (σ * t) * ∫ u in Set.Ioi 0,
+          g u * ((Real.sin (η * (t - u)) / (Real.pi * (t - u)) : ℝ) : ℂ) := by
+        rw [← integral_const_mul, ← integral_const_mul]
+        refine integral_congr_ae ?_
+        have hae : ∀ᵐ u ∂(volume.restrict (Set.Ioi (0 : ℝ))), u ≠ t :=
+          ae_restrict_of_ae (by simpa using (Set.countable_singleton t).ae_notMem volume)
+        filter_upwards [hae] with u hu
+        rw [← hK u hu]
+        ring
+    _ = cexp (σ * t) * ∫ u, G u * ((Real.sin (η * (t - u)) / (Real.pi * (t - u)) : ℝ) : ℂ) := by
+        rw [← integral_indicator measurableSet_Ioi]
+        congr 1
+        refine integral_congr_ae (Eventually.of_forall fun u => ?_)
+        simp only [hGdef, Set.indicator]
+        split_ifs <;> simp
 
 /-- DLMF 2.4.4–2.4.5: let `c > 0` and let `Q` be analytic in `ℜz ≥ c` with the differentiable
 expansion `Q(z) ∼ ∑ Γ((s+λ)/μ) aₛ z^{-(s+λ)/μ}` as `z → ∞` there (2.4.4; `λ, μ > 0`, principal

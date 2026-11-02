@@ -9,7 +9,7 @@ public import DLMF.Struve.Basic
 
 public import DLMF.Confluent.Relations
 public import DLMF.Core.Basic
-public import DLMF.Hypergeometric.GeneralizedCalculus
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
 
 /-!
 # Struve functions: convergence and differential equations
@@ -125,7 +125,8 @@ theorem besselResidual_congr (ν σ : ℂ) {f g : ℂ → ℂ} {z : ℂ}
 /-- Analyticity of the second-kind Bessel function on its principal slit plane. -/
 theorem besselY_analytic (ν : ℂ) : AnalyticOnNhd ℂ (besselY ν) slitPlane :=
   (show DifferentiableOn ℂ (besselY ν) slitPlane from fun _z hz =>
-    (hasDerivAt_besselY ν hz).differentiableAt.differentiableWithinAt).analyticOnNhd isOpen_slitPlane
+    (hasDerivAt_besselY ν hz).differentiableAt.differentiableWithinAt).analyticOnNhd
+        isOpen_slitPlane
 
 /-- Adding an analytic particular solution gives every ordinary inhomogeneous Bessel solution.
 This uses the previously proved Bessel fundamental-system theorem for every order. -/
@@ -382,7 +383,8 @@ theorem hasDerivAt_struveQuadratic (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane
   let F := regularizedHGFun {1} {3/2,ν+3/2}
   let u := fun w : ℂ => σ*w^2/4
   have hF : HasDerivAt F (deriv F (u z)) (u z) :=
-    ((hasFPowerSeriesOnBall_regularized1F2_one _ _).analyticAt_of_mem (by simp)).differentiableAt.hasDerivAt
+    ((hasFPowerSeriesOnBall_regularized1F2_one _ _).analyticAt_of_mem
+        (by simp)).differentiableAt.hasDerivAt
   have hu : HasDerivAt u (σ*z/2) z := by
     convert! (((hasDerivAt_id z).pow 2).const_mul σ).div_const 4 using 1
     simp only [id_eq]
@@ -461,7 +463,8 @@ theorem iterated_weighted_struveQuadratic (ν σ : ℂ) (m : ℕ) {z : ℂ} (hz 
   | zero => simp
   | succ m ih =>
     rw [Function.iterate_succ_apply']
-    have he : ((fun f : ℂ → ℂ => fun z => deriv f z/z)^[m]) (fun z => z^ν*struveQuadratic ν σ z) =ᶠ[𝓝 z]
+    have he : ((fun f : ℂ → ℂ => fun z => deriv f z/z)^[m])
+        (fun z => z^ν*struveQuadratic ν σ z) =ᶠ[𝓝 z]
         (fun w => w^(ν-m)*struveQuadratic (ν-m) σ w) := by
       filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
       exact ih hw
@@ -478,9 +481,11 @@ theorem struve_analytic (ν : ℂ) :
     (analyticAt_id.div_const (c:=(2:ℂ))).cpow analyticAt_const (div_two_mem_slitPlane hz)
   constructor
   · intro z hz
-    exact (hg z hz).mul (((entire_struveHCore ν).differentiableOn.analyticOnNhd isOpen_univ) z (mem_univ z))
+    exact (hg z hz).mul (((entire_struveHCore ν).differentiableOn.analyticOnNhd isOpen_univ)
+        z (mem_univ z))
   · intro z hz
-    exact (hg z hz).mul (((entire_struveLCore ν).differentiableOn.analyticOnNhd isOpen_univ) z (mem_univ z))
+    exact (hg z hz).mul (((entire_struveLCore ν).differentiableOn.analyticOnNhd isOpen_univ)
+        z (mem_univ z))
 
 /-- The common Struve forcing, with a sign distinguishing ordinary and modified equations. -/
 theorem struve_series_ode (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
@@ -508,7 +513,8 @@ theorem struve_series_ode (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   generalize iteratedDeriv 2 f z=A, deriv f z=B, f z=C at h ⊢
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) h/z^2
 
-/-- The stated relation follows from the given hypotheses: `StruveEquation ν false (struveH ν) z`. -/
+/-- The stated relation follows from the given hypotheses: `StruveEquation ν false (struveH ν) z`.
+-/
 @[dlmf 11.2.E8]
 theorem struveH_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     StruveEquation ν false (struveH ν) z := by
@@ -519,7 +525,8 @@ theorem struveH_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     simp only [struveH, struveHCore_eq_regularized, neg_one_mul, neg_div]
   dsimp only at h
   rw [he] at h
-  simpa only [StruveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul, struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
+  simpa only [StruveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul,
+      struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
 
 /-- The auxiliary ordinary Struve function satisfies the inhomogeneous Bessel equation with the
 ordinary Struve forcing term. -/
@@ -555,7 +562,8 @@ theorem struveL_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     simp only [struveL, struveLCore_eq_regularized, one_mul]
   dsimp only at h
   rw [he] at h
-  simpa only [StruveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul, struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
+  simpa only [StruveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul,
+      struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
 
 /-- The stated relation follows from the given hypotheses: `StruveEquation ν true (struveM ν) z`. -/
 @[dlmf 11.2.E10]
@@ -581,7 +589,8 @@ theorem struveM_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 /-- General analytic solutions on the principal slit plane; numerical stability is not asserted. -/
 @[dlmf 11.2.E11]
 theorem struve_general_solution_11 (ν : ℂ) (f : ℂ → ℂ) :
-    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveH ν z + A*besselJ ν z + B*besselY ν z := by
+    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveH ν z +
+        A*besselJ ν z + B*besselY ν z := by
   rw [← bessel_inhomogeneous_general_solution ν (struve_analytic ν).1]
   unfold IsStruveSolutionOn
   apply and_congr_right
@@ -603,7 +612,8 @@ theorem struve_general_solution_11 (ν : ℂ) (f : ℂ → ℂ) :
 /-- General analytic solutions on the principal slit plane; numerical stability is not asserted. -/
 @[dlmf 11.2.E12]
 theorem struve_general_solution_12 (ν : ℂ) (f : ℂ → ℂ) :
-    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveK ν z + A*besselJ ν z + B*besselY ν z := by
+    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveK ν z +
+        A*besselJ ν z + B*besselY ν z := by
   rw [struve_general_solution_11]
   constructor
   · rintro ⟨A,B,h⟩
@@ -620,7 +630,8 @@ theorem struve_general_solution_12 (ν : ℂ) (f : ℂ → ℂ) :
 /-- General analytic solutions on the principal slit plane; numerical stability is not asserted. -/
 @[dlmf 11.2.E13]
 theorem struve_general_solution_13 (ν : ℂ) (f : ℂ → ℂ) :
-    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveH ν z + A*besselJ ν z + B*hankelH1 ν z := by
+    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveH ν z +
+        A*besselJ ν z + B*hankelH1 ν z := by
   rw [struve_general_solution_11]
   constructor
   · rintro ⟨A,B,h⟩
@@ -639,7 +650,8 @@ theorem struve_general_solution_13 (ν : ℂ) (f : ℂ → ℂ) :
 /-- General analytic solutions on the principal slit plane; numerical stability is not asserted. -/
 @[dlmf 11.2.E14]
 theorem struve_general_solution_14 (ν : ℂ) (f : ℂ → ℂ) :
-    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveH ν z + A*besselJ ν z + B*hankelH2 ν z := by
+    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveH ν z +
+        A*besselJ ν z + B*hankelH2 ν z := by
   rw [struve_general_solution_11]
   constructor
   · rintro ⟨A,B,h⟩
@@ -658,7 +670,8 @@ theorem struve_general_solution_14 (ν : ℂ) (f : ℂ → ℂ) :
 /-- General analytic solutions on the principal slit plane; numerical stability is not asserted. -/
 @[dlmf 11.2.E15]
 theorem struve_general_solution_15 (ν : ℂ) (f : ℂ → ℂ) :
-    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveK ν z + A*hankelH1 ν z + B*hankelH2 ν z := by
+    IsStruveSolutionOn ν false f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveK ν z +
+        A*hankelH1 ν z + B*hankelH2 ν z := by
   rw [struve_general_solution_11]
   constructor
   · rintro ⟨A,B,h⟩
@@ -698,7 +711,8 @@ theorem eq_besselK_besselI_of_residual (ν : ℂ) {f : ℂ → ℂ}
     ∃ A B : ℂ, ∀ z∈slitPlane, f z=A*besselK ν z+B*besselI ν z := by
   have hK : AnalyticOnNhd ℂ (besselK ν) slitPlane :=
     (show DifferentiableOn ℂ (besselK ν) slitPlane from fun z hz =>
-      (hasDerivAt_besselK ν hz).differentiableAt.differentiableWithinAt).analyticOnNhd isOpen_slitPlane
+      (hasDerivAt_besselK ν hz).differentiableAt.differentiableWithinAt).analyticOnNhd
+          isOpen_slitPlane
   have hI : AnalyticOnNhd ℂ (besselI ν) slitPlane := fun z hz=>analyticAt_besselI ν hz
   have hKo (z : ℂ) (hz : z∈slitPlane) : besselResidual ν 1 (besselK ν) z=0 := by
     unfold besselResidual; linear_combination besselK_ode_all ν hz
@@ -711,7 +725,8 @@ theorem eq_besselK_besselI_of_residual (ν : ℂ) {f : ℂ → ℂ}
       z*(u z*deriv v z-deriv u z*v z)=u 1*deriv v 1-deriv u 1*v 1 := by
     have h := isOpen_slitPlane.is_const_of_deriv_eq_zero
       (starConvex_one_slitPlane.isPathConnected one_mem_slitPlane).isConnected.isPreconnected
-      (fun w hw=>(besselResidual_wronskian ν 1 hu hv huo hvo hw).differentiableAt.differentiableWithinAt)
+      (fun w hw=>(besselResidual_wronskian ν 1 hu hv huo hvo
+          hw).differentiableAt.differentiableWithinAt)
       (fun w hw=>(besselResidual_wronskian ν 1 hu hv huo hvo hw).deriv) hz one_mem_slitPlane
     simpa using h
   refine ⟨f 1*deriv (besselI ν) 1-deriv f 1*besselI ν 1,
@@ -729,7 +744,8 @@ theorem modified_bessel_inhomogeneous_general_solution (ν : ℂ) {p f : ℂ →
       ∃ A B : ℂ, ∀ z∈slitPlane, f z=p z+A*besselK ν z+B*besselI ν z := by
   have hK : AnalyticOnNhd ℂ (besselK ν) slitPlane :=
     (show DifferentiableOn ℂ (besselK ν) slitPlane from fun z hz =>
-      (hasDerivAt_besselK ν hz).differentiableAt.differentiableWithinAt).analyticOnNhd isOpen_slitPlane
+      (hasDerivAt_besselK ν hz).differentiableAt.differentiableWithinAt).analyticOnNhd
+          isOpen_slitPlane
   have hI : AnalyticOnNhd ℂ (besselI ν) slitPlane := fun z hz=>analyticAt_besselI ν hz
   have hKo (z : ℂ) (hz : z∈slitPlane) : besselResidual ν 1 (besselK ν) z=0 := by
     unfold besselResidual; linear_combination besselK_ode_all ν hz
@@ -763,7 +779,8 @@ theorem modified_bessel_inhomogeneous_general_solution (ν : ℂ) {p f : ℂ →
 /-- General analytic solutions on the principal slit plane; numerical stability is not asserted. -/
 @[dlmf 11.2.E16]
 theorem struve_general_solution_16 (ν : ℂ) (f : ℂ → ℂ) :
-    IsStruveSolutionOn ν true f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveL ν z + A*besselK ν z + B*besselI ν z := by
+    IsStruveSolutionOn ν true f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveL ν z +
+        A*besselK ν z + B*besselI ν z := by
   rw [← modified_bessel_inhomogeneous_general_solution ν (struve_analytic ν).2]
   unfold IsStruveSolutionOn
   apply and_congr_right
@@ -785,7 +802,8 @@ theorem struve_general_solution_16 (ν : ℂ) (f : ℂ → ℂ) :
 /-- General analytic solutions on the principal slit plane; numerical stability is not asserted. -/
 @[dlmf 11.2.E17]
 theorem struve_general_solution_17 (ν : ℂ) (f : ℂ → ℂ) :
-    IsStruveSolutionOn ν true f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveM ν z + A*besselK ν z + B*besselI ν z := by
+    IsStruveSolutionOn ν true f slitPlane ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z = struveM ν z +
+        A*besselK ν z + B*besselI ν z := by
   rw [struve_general_solution_16]
   constructor
   · rintro ⟨A,B,h⟩

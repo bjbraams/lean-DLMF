@@ -56,7 +56,8 @@ theorem integral_voigt_kernel_fourier (x : ℝ) {t : ℝ} (ht : 0 < t) (s : ℝ)
     linarith [show -1/(4*t) = -(1/(4*t)) by ring]
   have h := integral_cexp_quadratic hb ((x/(2*t):ℝ) + I*s) ((-x^2/(4*t) - s:ℝ))
   have hpt : (fun y : ℝ => (Real.exp (-(x-y)^2/(4*t)) : ℂ) * exp (-(s:ℂ)*(1-I*y))) =
-      fun y : ℝ => cexp (((-1/(4*t):ℝ):ℂ) * y^2 + (((x/(2*t):ℝ):ℂ) + I*s) * y + ((-x^2/(4*t) - s:ℝ):ℂ)) := by
+      fun y : ℝ => cexp (((-1/(4*t):ℝ):ℂ) * y^2 + (((x/(2*t):ℝ):ℂ) + I*s) * y +
+          ((-x^2/(4*t) - s:ℝ):ℂ)) := by
     funext y
     rw [ofReal_exp, ← Complex.exp_add]
     congr 1
@@ -168,7 +169,8 @@ theorem integrableOn_voigt_fourier_laplace {a : ℝ} (ha : 0 < a) (u : ℝ) :
   refine Integrable.mono' (exp_neg_integrableOn_Ioi 0 ha) (Continuous.aestronglyMeasurable
     (by fun_prop)) ((ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun τ hτ => ?_))
   rw [Complex.norm_exp]
-  simp only [add_re, ofReal_re, mul_re, ofReal_im, I_re, I_im, mul_zero, mul_one, add_zero, sub_self]
+  simp only [add_re, ofReal_re, mul_re, ofReal_im, I_re, I_im, mul_zero, mul_one,
+      add_zero, sub_self]
   rw [Real.exp_le_exp]
   nlinarith [sq_nonneg τ]
 
@@ -199,10 +201,12 @@ theorem voigt_laplace_deriv (x : ℝ) {t : ℝ} (ht : 0 < t) :
       one_pos one_pos
     refine this.congr_fun (fun s _ => ?_) measurableSet_Ioi
     simp [Real.rpow_one]
-  have hb0 : IntegrableOn (fun s : ℝ => Real.exp (-1*s)) (Ioi 0) := exp_neg_integrableOn_Ioi 0 one_pos
+  have hb0 : IntegrableOn (fun s : ℝ => Real.exp (-1*s)) (Ioi 0) :=
+      exp_neg_integrableOn_Ioi 0 one_pos
   have hint0 (x : ℝ) : IntegrableOn (e x) (Ioi 0) :=
     hb0.mono' (Continuous.aestronglyMeasurable (by fun_prop))
-      ((ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun s hs => hne x s (le_of_lt hs)))
+      ((ae_restrict_iff' measurableSet_Ioi).mpr
+          (Eventually.of_forall fun s hs => hne x s (le_of_lt hs)))
   have hint1 (x : ℝ) : IntegrableOn (fun s : ℝ => (s:ℂ) * e x s) (Ioi 0) := by
     refine hb1.mono' (Continuous.aestronglyMeasurable (by fun_prop))
       ((ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun s hs => ?_))
@@ -255,7 +259,8 @@ theorem voigt_laplace_deriv (x : ℝ) {t : ℝ} (ht : 0 < t) :
     rw [he0] at h
     have hsplit : (∫ s : ℝ in Ioi 0, (1-I*(x:ℂ) + 2*t*s) * e x s) =
         (1-I*(x:ℂ)) * (∫ s : ℝ in Ioi 0, e x s) + 2*t*(∫ s : ℝ in Ioi 0, (s:ℂ) * e x s) := by
-      rw [← integral_const_mul, ← integral_const_mul, ← integral_add ((hint0 x).const_mul (1-I*(x:ℂ)))
+      rw [← integral_const_mul, ← integral_const_mul,
+          ← integral_add ((hint0 x).const_mul (1-I*(x:ℂ)))
         ((hint1 x).const_mul (2*t:ℂ))]
       congr 1; funext s; ring
     rw [hsplit, zero_sub, neg_neg] at h
@@ -285,7 +290,8 @@ theorem hasDerivAt_voigt (x : ℝ) {t : ℝ} (ht : 0 < t) :
 ((1-I*x)/(2*Real.sqrt t))`. -/
 @[dlmf 7.19.E3]
 theorem voigt_erfc (x : ℝ) {t : ℝ} (ht : 0 < t) :
-    (Real.voigtU x t : ℂ)+I*Real.voigtV x t=(π/(4*t : ℂ))^(1/2 : ℂ)*exp (((1-I*x)/(2*Real.sqrt t))^2)*erfc ((1-I*x)/(2*Real.sqrt t)) := by
+    (Real.voigtU x t : ℂ)+I*Real.voigtV x t=(π/(4*t : ℂ))^(1/2 : ℂ)*exp
+        (((1-I*x)/(2*Real.sqrt t))^2)*erfc ((1-I*x)/(2*Real.sqrt t)) := by
   rw [voigt_laplace x ht]
   have h := gaussian_quadratic_tail (a := (t:ℂ)) (by simpa using ht) ((1-I*x)/2) 0 0
   have hi : (fun s : ℝ => exp (-(s:ℂ)*(1-I*x) - t*(s:ℂ)^2)) =
@@ -301,12 +307,14 @@ theorem voigt_erfc (x : ℝ) {t : ℝ} (ht : 0 < t) :
   have hpi : (π/(t:ℂ))^(1/2:ℂ)/2 = (π/(4*t : ℂ))^(1/2 : ℂ) := by
     rw [show (π/(t:ℂ)) = ((π/t:ℝ):ℂ) by push_cast; ring, show (π/(4*t:ℂ)) = ((π/(4*t):ℝ):ℂ) by
       push_cast; ring, show (1/2:ℂ) = ((1/2:ℝ):ℂ) by push_cast; ring,
-      ← ofReal_cpow (div_pos Real.pi_pos ht).le, ← ofReal_cpow (div_pos Real.pi_pos (by linarith)).le,
+      ← ofReal_cpow (div_pos Real.pi_pos ht).le,
+          ← ofReal_cpow (div_pos Real.pi_pos (by linarith)).le,
       ← Real.sqrt_eq_rpow, ← Real.sqrt_eq_rpow, hr]
     push_cast; ring
   rw [hi, h, hst, hpi]
   congr 2
-  · congr 1; simp only [mul_zero, sub_zero]; rw [div_pow (1-I*(x:ℂ)) (2*_), mul_pow, hss]; field_simp
+  · congr 1; simp only [mul_zero, sub_zero];
+        rw [div_pow (1-I*(x:ℂ)) (2*_), mul_pow, hss]; field_simp
   · rw [ofReal_zero, mul_zero, zero_add, div_div]
 
 /-- Identity under the stated parameter and domain assumptions: `Real.voigtH a u=Real.voigtU (u/a)
@@ -341,7 +349,8 @@ theorem Real.voigtH_eq_voigtU {a : ℝ} (ha : 0 < a) (u : ℝ) :
 Tendsto (Real.voigtV x) (𝓝[>] 0) (𝓝 (x/(1+x^2)))`. -/
 @[dlmf 7.19.E5]
 theorem Real.voigt_limits (x : ℝ) :
-    Tendsto (Real.voigtU x) (𝓝[>] 0) (𝓝 (1/(1+x^2))) ∧ Tendsto (Real.voigtV x) (𝓝[>] 0) (𝓝 (x/(1+x^2))) := by
+    Tendsto (Real.voigtU x) (𝓝[>] 0) (𝓝 (1/(1+x^2))) ∧
+        Tendsto (Real.voigtV x) (𝓝[>] 0) (𝓝 (x/(1+x^2))) := by
   have hW : Tendsto (fun t : ℝ => ∫ s : ℝ in Ioi 0, exp (-(s:ℂ)*(1-I*x) - t*(s:ℂ)^2))
       (𝓝[>] 0) (𝓝 (1-I*(x:ℂ))⁻¹) := by
     rw [← integral_exp_neg_mul_one_sub_I_mul]

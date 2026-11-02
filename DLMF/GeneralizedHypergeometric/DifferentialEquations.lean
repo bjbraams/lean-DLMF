@@ -8,6 +8,7 @@ module
 public import DLMF.GeneralizedHypergeometric.AnalyticProperties
 public import DLMF.GeneralizedHypergeometric.Derivatives
 public import DLMFMathlib.Analysis.ODE.Singularities
+public import Mathlib.Algebra.Group.ForwardDiff
 
 /-!
 # Differential equations and confluence of `ₚF_q` (DLMF §16.8)
@@ -23,11 +24,13 @@ public import DLMFMathlib.Analysis.ODE.Singularities
 
 ## Main results
 
-* `genHG_theta_ode`: the `θ`-equation on the principal analytic domain, DLMF 16.8.3.
+* `genHG_theta_ode`: the `θ`-equation on the principal analytic domain, DLMF 16.8.3
+  (`genHG_theta_ode'` without the regularity hypothesis).
 * `genHG_expanded_ode_entire`, `genHG_expanded_ode_balanced`: the expanded equations,
-  DLMF 16.8.4–16.8.5.
+  DLMF 16.8.4–16.8.5 (`genHG_expanded_ode_balanced'` without the regularity hypothesis).
 * `genHG_ode_singularities_entire`, `genHG_ode_singularities_balanced`,
-  `genHG_ode_nominal_order`: classification of the singularities and the order.
+  `genHG_ode_nominal_order`: classification of the singularities and the order (the primed
+  classifications drop the regularity hypothesis).
 * `genFrobeniusZero_fundamental`, `genFrobeniusInfinity_fundamental`: fundamental systems at
   `0` and `∞`; `genFrobeniusZero_resonant`, `genFrobeniusInfinity_resonant` for the resonant
   cases.
@@ -48,7 +51,7 @@ empty parameter multisets.
 
 @[expose] public section
 open Complex Filter Set Finset Polynomial
-open scoped Topology Real
+open scoped Topology Real fwdDiff
 noncomputable section
 namespace DLMF.Hypergeometric
 
@@ -152,20 +155,15 @@ def genCenteredInfinityTerm {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → �
       Complex.regularizedHGFunCoeff (genShift (genParams a) (-a j - n))
         (genShift (genParams b) (-a j - n)) k * z₀ ^ k) * (z - z₀) ^ (-(n : ℤ))
 
-/-- The proved theta equation continued throughout the ordinary principal analytic domain. -/
-@[dlmf 16.8.E3]
-theorem genHG_theta_ode (a b : Multiset ℂ) (hb : GenDenRegular b)
-    (h : a.card ≤ b.card + 1 ∨ GenTerminates a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
-    GenODESolution a b (genHG a b) z := by
-  sorry
-
 /-- Derivative of an iterated derivative of a smooth function. -/
-private lemma hasDerivAt_iteratedDeriv_of_contDiff {f : ℂ → ℂ} (hf : ContDiff ℂ ⊤ f) (j : ℕ) (w : ℂ) :
+private lemma hasDerivAt_iteratedDeriv_of_contDiff {f : ℂ → ℂ} (hf : ContDiff ℂ ⊤ f)
+    (j : ℕ) (w : ℂ) :
     HasDerivAt (iteratedDeriv j f) (iteratedDeriv (j + 1) f w) w := by
   rw [iteratedDeriv_succ]
   exact ((hf.differentiable_iteratedDeriv j (by exact_mod_cast WithTop.coe_lt_top _)) w).hasDerivAt
 
-/-- Powers of theta in ordinary derivatives: `θ^k f = Σ S(k,j) z^j f^(j)` (Stirling numbers of the second kind). -/
+/-- Powers of theta in ordinary derivatives: `θ^k f = Σ S(k,j) z^j f^(j)` (Stirling numbers of the
+second kind). -/
 private lemma eulerTheta_iterate_eq_sum_stirlingSecond {f : ℂ → ℂ} (hf : ContDiff ℂ ⊤ f) (k : ℕ) :
     ∀ M, k ≤ M → ∀ z, (eulerTheta^[k] f) z =
       ∑ j ∈ range (M + 1), (Nat.stirlingSecond k j : ℂ) * z ^ j * iteratedDeriv j f z := by
@@ -288,7 +286,8 @@ private lemma genThetaDCoeff_eq_zero_of_natDegree_lt (P : ℂ[X]) {j : ℕ} (hj 
     rw [Nat.stirlingSecond_eq_zero_of_lt (by have := Finset.mem_range.mp hk; omega)]; simp)
 
 /-- The zeroth derivative coefficient of the lower theta polynomial vanishes. -/
-private lemma genThetaDCoeff_genThetaB_zero (b : Multiset ℂ) : genThetaDCoeff (genThetaB b) 0 = 0 := by
+private lemma genThetaDCoeff_genThetaB_zero (b : Multiset ℂ) : genThetaDCoeff
+    (genThetaB b) 0 = 0 := by
   unfold genThetaDCoeff
   rw [sum_range_succ']
   rw [sum_eq_zero (fun k _ => by rw [Nat.stirlingSecond_succ_zero]; simp)]
@@ -311,6 +310,96 @@ private lemma genODESolution_genHG_of_card_le {a b : Multiset ℂ} (h : a.card �
   simp only [genThetaA, genThetaB]
   rw [this]; ring
 
+/-- Iterated theta depends only on the germ. -/
+private lemma eulerTheta_iterate_congr {f g : ℂ → ℂ} {z : ℂ} (h : f =ᶠ[𝓝 z] g) (k : ℕ) :
+    eulerTheta^[k] f =ᶠ[𝓝 z] eulerTheta^[k] g := by
+  induction k with
+  | zero => exact h
+  | succ k ih =>
+    rw [Function.iterate_succ_apply', Function.iterate_succ_apply']
+    filter_upwards [ih.deriv] with w hw
+    simp only [eulerTheta, hw]
+
+/-- Theta polynomials depend only on the germ. -/
+private lemma thetaPoly_congr {f g : ℂ → ℂ} {z : ℂ} (h : f =ᶠ[𝓝 z] g) (P : ℂ[X]) :
+    thetaPoly P f z = thetaPoly P g z := by
+  unfold thetaPoly
+  exact sum_congr rfl fun k _ => by rw [(eulerTheta_iterate_congr h k).eq_of_nhds]
+
+/-- Iterated theta preserves analyticity on an open set. -/
+private lemma analyticOnNhd_eulerTheta_iterate {f : ℂ → ℂ} {U : Set ℂ}
+    (hf : AnalyticOnNhd ℂ f U) (k : ℕ) : AnalyticOnNhd ℂ (eulerTheta^[k] f) U := by
+  induction k with
+  | zero => exact hf
+  | succ k ih =>
+    rw [Function.iterate_succ_apply']
+    exact analyticOnNhd_id.mul ih.deriv
+
+/-- Theta polynomials preserve analyticity on an open set. -/
+private lemma analyticOnNhd_thetaPoly {f : ℂ → ℂ} {U : Set ℂ} (hf : AnalyticOnNhd ℂ f U)
+    (P : ℂ[X]) : AnalyticOnNhd ℂ (thetaPoly P f) U := by
+  have : thetaPoly P f = fun z => ∑ k ∈ range (P.natDegree + 1),
+      P.coeff k * (eulerTheta^[k] f) z := rfl
+  rw [this]
+  exact Finset.analyticOnNhd_fun_sum _ fun k _ =>
+    analyticOnNhd_const.mul (analyticOnNhd_eulerTheta_iterate hf k)
+
+/-- The theta equation for the regularized principal function on its analytic domain. -/
+private lemma genRegularizedHG_theta_ode (a b : Multiset ℂ)
+    (h : a.card ≤ b.card + 1 ∨ GenTerminates a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
+    thetaPoly (genThetaB b) (genRegularizedHG a b) z =
+      z * thetaPoly (genThetaA a) (genRegularizedHG a b) z := by
+  by_cases hT : GenTerminates a
+  · have heq : genRegularizedHG a b = Complex.regularizedHGFun a b :=
+      funext (genRegularizedHG_eq_series_of_terminates hT)
+    rw [heq]
+    obtain ⟨x, hx, m, hxm⟩ := hT
+    have hr := Complex.radius_regularizedHGFunSeries_eq_top_of_finite (b := b) hx hxm
+    exact regularizedHGFun_ode a b (by rw [hr]; simp) (by rw [hr]; simp)
+  · by_cases hc : a.card ≤ b.card
+    · have hne : a.card ≠ b.card + 1 := by omega
+      have heq : genRegularizedHG a b = Complex.regularizedHGFun a b := by
+        funext w
+        unfold genRegularizedHG
+        simp only [ite_eq_right hne]
+      rw [heq]
+      exact regularizedHGFun_ode_of_card_le hc z
+    · have hc' : a.card = b.card + 1 := by
+        rcases h with h | h
+        · omega
+        · exact absurd h hT
+      have hzc : z ∈ cutPlane := by
+        unfold genAnalyticDomain at hz
+        rwa [ite_eq_right (by tauto)] at hz
+      have hA := analyticOnNhd_genRegularizedHG hc'
+      refine eqOn_cutPlane_of_eqOn_disk (f := thetaPoly (genThetaB b) (genRegularizedHG a b))
+        (g := fun z => z * thetaPoly (genThetaA a) (genRegularizedHG a b) z)
+        (analyticOnNhd_thetaPoly hA _) (analyticOnNhd_id.mul (analyticOnNhd_thetaPoly hA _))
+        (fun w hw => ?_) hzc
+      have hev : genRegularizedHG a b =ᶠ[𝓝 w] Complex.regularizedHGFun a b := by
+        filter_upwards [Metric.isOpen_ball.mem_nhds (mem_ball_zero_iff.mpr hw)] with v hv
+        exact genRegularizedHG_eq_series (by simpa using hv)
+      rw [thetaPoly_congr hev, thetaPoly_congr hev]
+      exact regularizedHGFun_ode_of_card_eq_add_one hc' hw
+
+/-- The theta equation on the principal analytic domain, without the regularity hypothesis on
+the lower parameters; stronger than DLMF, which assumes regular lower parameters. -/
+@[dlmf 16.8.E3]
+theorem genHG_theta_ode' (a b : Multiset ℂ)
+    (h : a.card ≤ b.card + 1 ∨ GenTerminates a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
+    GenODESolution a b (genHG a b) z := by
+  unfold GenODESolution
+  have hgen : genHG a b = fun z => genGamma b * genRegularizedHG a b z := rfl
+  rw [hgen, thetaPoly_const_mul, thetaPoly_const_mul, genRegularizedHG_theta_ode a b h hz]
+  ring
+
+/-- The proved theta equation continued throughout the ordinary principal analytic domain. -/
+@[dlmf 16.8.E3]
+theorem genHG_theta_ode (a b : Multiset ℂ) (_hb : GenDenRegular b)
+    (h : a.card ≤ b.card + 1 ∨ GenTerminates a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
+    GenODESolution a b (genHG a b) z :=
+  genHG_theta_ode' a b h hz
+
 /-- The full expanded equation for p≤q with the explicit alpha and beta constants. -/
 @[dlmf 16.8.E4]
 theorem genHG_expanded_ode_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (z : ℂ) :
@@ -328,7 +417,8 @@ theorem genHG_expanded_ode_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (
   have hAdeg : (genThetaA a).natDegree = a.card := genThetaA_natDegree a
   have hβtop : genODEBeta b (q + 1) = 1 := by
     rw [genODEBeta, ← hBdeg]
-    exact genThetaDCoeff_natDegree_of_monic _ (by rw [genThetaB_eq_genThetaA]; exact genThetaA_monic _)
+    exact genThetaDCoeff_natDegree_of_monic _
+        (by rw [genThetaB_eq_genThetaA]; exact genThetaA_monic _)
   have hαtop : genODEAlpha a (q + 1) = 0 := by
     rw [genODEAlpha, genThetaDCoeff_eq_zero_of_natDegree_lt _ (by rw [hAdeg]; omega), neg_zero]
   have hβ0 : genODEBeta b 0 = 0 := genThetaDCoeff_genThetaB_zero b
@@ -376,32 +466,552 @@ theorem genHG_expanded_ode_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (
     rw [hz]; exact h0
   · exact (mul_eq_zero.mp (hzT z)).resolve_left hz
 
-/-- The full expanded equation for p=q+1. -/
+/-- Derivative of an iterated derivative of a function analytic on an open set. -/
+private lemma hasDerivAt_iteratedDeriv_of_analyticOnNhd {f : ℂ → ℂ} {U : Set ℂ}
+    (hf : AnalyticOnNhd ℂ f U) (j : ℕ) {w : ℂ} (hw : w ∈ U) :
+    HasDerivAt (iteratedDeriv j f) (iteratedDeriv (j + 1) f w) w := by
+  rw [iteratedDeriv_succ, iteratedDeriv_eq_iterate]
+  exact ((hf.iterated_deriv j) w hw).differentiableAt.hasDerivAt
+
+/-- The local form of `eulerTheta_iterate_eq_sum_stirlingSecond` on an open set. -/
+private lemma eulerTheta_iterate_eq_sum_stirlingSecond_on {f : ℂ → ℂ} {U : Set ℂ}
+    (hU : IsOpen U) (hf : AnalyticOnNhd ℂ f U) (k : ℕ) :
+    ∀ M, k ≤ M → ∀ z ∈ U, (eulerTheta^[k] f) z =
+      ∑ j ∈ range (M + 1), (Nat.stirlingSecond k j : ℂ) * z ^ j * iteratedDeriv j f z := by
+  induction k with
+  | zero =>
+    intro M _ z _
+    rw [sum_range_succ']
+    rw [sum_eq_zero (fun j _ => by simp [Nat.stirlingSecond_zero_succ])]
+    simp
+  | succ k ih =>
+    intro M hM z hz
+    have hev : eulerTheta^[k] f =ᶠ[𝓝 z] fun w =>
+        ∑ j ∈ range (M + 1), (Nat.stirlingSecond k j : ℂ) * w ^ j * iteratedDeriv j f w := by
+      filter_upwards [hU.mem_nhds hz] with w hw
+      exact ih M (by omega) w hw
+    rw [Function.iterate_succ_apply', eulerTheta, hev.deriv_eq]
+    have hd : HasDerivAt (fun w => ∑ j ∈ range (M + 1),
+        (Nat.stirlingSecond k j : ℂ) * w ^ j * iteratedDeriv j f w)
+        (∑ j ∈ range (M + 1), (Nat.stirlingSecond k j : ℂ) *
+          ((j : ℂ) * z ^ (j - 1) * iteratedDeriv j f z + z ^ j * iteratedDeriv (j + 1) f z)) z := by
+      apply HasDerivAt.fun_sum
+      intro j _
+      have := ((hasDerivAt_pow j z).mul
+        (hasDerivAt_iteratedDeriv_of_analyticOnNhd hf j hz)).const_mul
+        (Nat.stirlingSecond k j : ℂ)
+      simpa [mul_assoc] using this
+    rw [hd.deriv, mul_sum]
+    have hsplit : ∀ j ∈ range (M + 1), z * ((Nat.stirlingSecond k j : ℂ) *
+        ((j : ℂ) * z ^ (j - 1) * iteratedDeriv j f z + z ^ j * iteratedDeriv (j + 1) f z)) =
+        (Nat.stirlingSecond k j : ℂ) * j * z ^ j * iteratedDeriv j f z +
+          (Nat.stirlingSecond k j : ℂ) * z ^ (j + 1) * iteratedDeriv (j + 1) f z := by
+      intro j _
+      rcases j with _ | j
+      · simp; ring
+      · simp only [Nat.add_sub_cancel, pow_succ]; ring
+    rw [sum_congr rfl hsplit, sum_add_distrib]
+    rw [sum_range_succ' (fun j => (Nat.stirlingSecond k j : ℂ) * j * z ^ j * iteratedDeriv j f z),
+      sum_range_succ (fun j => (Nat.stirlingSecond k j : ℂ) * z ^ (j + 1) *
+        iteratedDeriv (j + 1) f z),
+      sum_range_succ' (fun j => (Nat.stirlingSecond (k + 1) j : ℂ) * z ^ j * iteratedDeriv j f z)]
+    rw [Nat.stirlingSecond_eq_zero_of_lt (show k < M by omega), Nat.stirlingSecond_succ_zero]
+    simp only [Nat.cast_zero, zero_mul, mul_zero, add_zero, Nat.stirlingSecond_succ_succ]
+    rw [← sum_add_distrib]
+    apply sum_congr rfl
+    intro j _
+    push_cast
+    ring
+
+/-- The local form of `thetaPoly_eq_sum_iteratedDeriv` on an open set. -/
+private lemma thetaPoly_eq_sum_iteratedDeriv_on {f : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+    (hf : AnalyticOnNhd ℂ f U) (P : ℂ[X]) {M : ℕ} (hM : P.natDegree ≤ M) {z : ℂ} (hz : z ∈ U) :
+    thetaPoly P f z = ∑ j ∈ range (M + 1), genThetaDCoeff P j * z ^ j * iteratedDeriv j f z := by
+  unfold thetaPoly genThetaDCoeff
+  rw [sum_congr rfl fun k hk => by
+    rw [eulerTheta_iterate_eq_sum_stirlingSecond_on hU hf k M
+      (by have := Finset.mem_range.mp hk; omega) z hz, mul_sum]]
+  rw [sum_comm]
+  apply sum_congr rfl
+  intro j _
+  rw [sum_mul, sum_mul]
+  apply sum_congr rfl
+  intro k _
+  ring
+
+/-- The full expanded equation for p=q+1, without the regularity hypothesis on the lower
+parameters; stronger than DLMF, which assumes regular lower parameters. -/
 @[dlmf 16.8.E5]
-theorem genHG_expanded_ode_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1) (hb : GenDenRegular b)
+theorem genHG_expanded_ode_balanced' (a b : Multiset ℂ) (h : a.card = b.card + 1)
     {z : ℂ} (hz : z ∈ cutPlane) :
     z ^ b.card * (1 - z) * iteratedDeriv (b.card + 1) (genHG a b) z +
       (∑ j ∈ Finset.Icc 1 b.card, z ^ (j - 1) *
         (genODEAlpha a j * z + genODEBeta b j) * iteratedDeriv j (genHG a b) z) +
       genODEAlpha a 0 * genHG a b z = 0 := by
-  sorry
+  set f := genHG a b with hfdef
+  set q := b.card
+  have hf : AnalyticOnNhd ℂ f cutPlane :=
+    analyticOnNhd_const.mul (analyticOnNhd_genRegularizedHG h)
+  have hdom : cutPlane ⊆ genAnalyticDomain a b := by
+    intro w hw
+    unfold genAnalyticDomain
+    split_ifs
+    · exact mem_univ w
+    · exact hw
+  have hBdeg : (genThetaB b).natDegree = q + 1 := by
+    rw [genThetaB_eq_genThetaA, genThetaA_natDegree]; simp [q]
+  have hAdeg : (genThetaA a).natDegree = q + 1 := by rw [genThetaA_natDegree, h]
+  have hβtop : genODEBeta b (q + 1) = 1 := by
+    rw [genODEBeta, ← hBdeg]
+    exact genThetaDCoeff_natDegree_of_monic _
+        (by rw [genThetaB_eq_genThetaA]; exact genThetaA_monic _)
+  have hαtop : genODEAlpha a (q + 1) = -1 := by
+    rw [genODEAlpha, ← hAdeg, genThetaDCoeff_natDegree_of_monic _ (genThetaA_monic a)]
+  have hβ0 : genODEBeta b 0 = 0 := genThetaDCoeff_genThetaB_zero b
+  set T : ℂ → ℂ := fun z => z ^ q * (1 - z) * iteratedDeriv (q + 1) f z +
+      (∑ j ∈ Finset.Icc 1 q, z ^ (j - 1) *
+        (genODEAlpha a j * z + genODEBeta b j) * iteratedDeriv j f z) +
+      genODEAlpha a 0 * f z with hT
+  have hzT : ∀ z ∈ cutPlane, z * T z = 0 := by
+    intro z hz
+    have hode := genHG_theta_ode' a b (Or.inl h.le) (hdom hz)
+    unfold GenODESolution at hode
+    rw [thetaPoly_eq_sum_iteratedDeriv_on isOpen_cutPlane hf _ (M := q + 1) hBdeg.le hz,
+      thetaPoly_eq_sum_iteratedDeriv_on isOpen_cutPlane hf _ (M := q + 1) hAdeg.le hz] at hode
+    have hE : ∑ j ∈ range (q + 1 + 1), (genODEBeta b j * z ^ j + genODEAlpha a j * z ^ (j + 1)) *
+        iteratedDeriv j f z = 0 := by
+      simp only [genODEBeta, genODEAlpha]
+      rw [← sub_eq_zero] at hode
+      rw [← hode, mul_sum, ← sum_sub_distrib]
+      apply sum_congr rfl
+      intro j _
+      ring
+    rw [← hE, sum_range_succ, range_eq_Ico, sum_eq_sum_Ico_succ_bot (by omega),
+      Finset.Ico_add_one_right_eq_Icc]
+    simp only [hT, hβtop, hαtop, hβ0, pow_zero]
+    rw [mul_add, mul_add, mul_sum]
+    have hmid : ∀ j ∈ Finset.Icc 1 q, z * (z ^ (j - 1) * (genODEAlpha a j * z + genODEBeta b j) *
+        iteratedDeriv j f z) = (genODEBeta b j * z ^ j + genODEAlpha a j * z ^ (j + 1)) *
+          iteratedDeriv j f z := by
+      intro j hj
+      have hj1 : 1 ≤ j := (Finset.mem_Icc.mp hj).1
+      obtain ⟨i, rfl⟩ : ∃ i, j = i + 1 := ⟨j - 1, by omega⟩
+      simp only [Nat.add_sub_cancel, pow_succ]; ring
+    rw [sum_congr rfl hmid, iteratedDeriv_zero, zero_add]
+    ring
+  by_cases hz0 : z = 0
+  · have hTc : ContinuousAt T 0 := by
+      have hc : ∀ j, ContinuousAt (iteratedDeriv j f) 0 := fun j => by
+        rw [iteratedDeriv_eq_iterate]
+        exact ((hf.iterated_deriv j) 0 zero_mem_cutPlane).continuousAt
+      simp only [hT]
+      have h1 := hc (q + 1)
+      have h2 : ContinuousAt f 0 := (hf 0 zero_mem_cutPlane).continuousAt
+      refine ((((continuousAt_id.pow q).mul (continuousAt_const.sub continuousAt_id)).mul
+        h1).add ?_).add (continuousAt_const.mul h2)
+      exact tendsto_finsetSum _ fun j _ =>
+        ((continuousAt_id.pow _).mul ((continuousAt_const.mul continuousAt_id).add
+          continuousAt_const)).mul (hc j)
+    have hlim : Tendsto T (𝓝[≠] (0 : ℂ)) (𝓝 0) := by
+      apply tendsto_const_nhds.congr'
+      filter_upwards [self_mem_nhdsWithin,
+        nhdsWithin_le_nhds (isOpen_cutPlane.mem_nhds zero_mem_cutPlane)] with w hw hwc
+      exact ((mul_eq_zero.mp (hzT w hwc)).resolve_left hw).symm
+    have h0 := tendsto_nhds_unique (hTc.tendsto.mono_left nhdsWithin_le_nhds) hlim
+    rw [hz0]; exact h0
+  · exact (mul_eq_zero.mp (hzT z hz)).resolve_left hz0
 
-/-- Zero is at most regular, infinity is irregular, and there are no other singularities for p≤q. -/
-theorem genHG_ode_singularities_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb : GenDenRegular b) :
+/-- The full expanded equation for p=q+1. -/
+@[dlmf 16.8.E5]
+theorem genHG_expanded_ode_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1)
+    (_hb : GenDenRegular b)
+    {z : ℂ} (hz : z ∈ cutPlane) :
+    z ^ b.card * (1 - z) * iteratedDeriv (b.card + 1) (genHG a b) z +
+      (∑ j ∈ Finset.Icc 1 b.card, z ^ (j - 1) *
+        (genODEAlpha a j * z + genODEBeta b j) * iteratedDeriv j (genHG a b) z) +
+      genODEAlpha a 0 * genHG a b z = 0 :=
+  genHG_expanded_ode_balanced' a b h hz
+
+/-! ### Singularities of the expanded equation -/
+
+/-- The common denominator of the normalized coefficients `genODECoeff`. -/
+private def genODEDen (a b : Multiset ℂ) (z : ℂ) : ℂ :=
+  genThetaDCoeff (genThetaB b) (genODEOrder a b) * z ^ genODEOrder a b -
+    genThetaDCoeff (genThetaA a) (genODEOrder a b) * z ^ (genODEOrder a b + 1)
+
+/-- The finite difference `∑ₘ (j choose m) (-1)^(j-m) P(-m)` of a theta polynomial. -/
+private def genThetaFinDiff (P : ℂ[X]) (j : ℕ) : ℂ :=
+  ∑ m ∈ range (j + 1), (j.choose m : ℂ) * (-1) ^ (j - m) * P.eval (-(m : ℂ))
+
+/-- The normalized operator as one quotient by the common denominator. -/
+private lemma linearODEValue_genODECoeff (a b : Multiset ℂ) (f : ℂ → ℂ) {z : ℂ}
+    (hz : genODEDen a b z ≠ 0) :
+    Complex.linearODEValue (genODECoeff a b) f z =
+      (∑ i ∈ range (genODEOrder a b + 1),
+        (genThetaDCoeff (genThetaB b) i * z ^ i - genThetaDCoeff (genThetaA a) i * z ^ (i + 1)) *
+          iteratedDeriv i f z) / genODEDen a b z := by
+  rw [eq_div_iff hz, Complex.linearODEValue, sum_range_succ, add_mul, sum_mul]
+  rw [← Fin.sum_univ_eq_sum_range (fun i => (genThetaDCoeff (genThetaB b) i * z ^ i -
+    genThetaDCoeff (genThetaA a) i * z ^ (i + 1)) * iteratedDeriv i f z)]
+  have : ∀ j : Fin (genODEOrder a b), genODECoeff a b j z * iteratedDeriv j f z *
+      genODEDen a b z = (genThetaDCoeff (genThetaB b) j * z ^ (j : ℕ) -
+        genThetaDCoeff (genThetaA a) j * z ^ ((j : ℕ) + 1)) * iteratedDeriv j f z := by
+    intro j
+    simp only [genODECoeff]
+    rw [show genThetaDCoeff (genThetaB b) (genODEOrder a b) * z ^ genODEOrder a b -
+      genThetaDCoeff (genThetaA a) (genODEOrder a b) * z ^ (genODEOrder a b + 1) =
+        genODEDen a b z from rfl]
+    field_simp
+  rw [sum_congr rfl fun j _ => this j]
+  simp only [genODEDen]
+  ring
+
+/-- The theta polynomials have degree at most the nominal order. -/
+private lemma genThetaB_natDegree_le (a b : Multiset ℂ) :
+    (genThetaB b).natDegree ≤ genODEOrder a b := by
+  rw [genThetaB_eq_genThetaA, genThetaA_natDegree]
+  simp [genODEOrder]
+
+/-- The upper theta polynomial has degree at most the nominal order. -/
+private lemma genThetaA_natDegree_le (a b : Multiset ℂ) :
+    (genThetaA a).natDegree ≤ genODEOrder a b := by
+  rw [genThetaA_natDegree]
+  simp [genODEOrder]
+
+/-- The Euler operator acts diagonally on finite sums of negative powers. -/
+private lemma eulerTheta_sum_zpow (w : ℕ → ℂ) (N : ℕ) :
+    eulerTheta (fun z => ∑ m ∈ range N, w m * z ^ (-(m : ℤ))) =
+      fun z => ∑ m ∈ range N, (w m * (-(m : ℂ))) * z ^ (-(m : ℤ)) := by
+  funext z
+  unfold eulerTheta
+  by_cases hz : z = 0
+  · subst hz
+    rw [zero_mul]
+    refine (sum_eq_zero fun m _ => ?_).symm
+    rcases m with _ | m
+    · simp
+    · rw [zero_zpow _ (by omega)]; ring
+  · rw [deriv_fun_sum fun m _ => ((differentiableAt_zpow).mpr (Or.inl hz)).const_mul _,
+      mul_sum]
+    refine sum_congr rfl fun m _ => ?_
+    rw [deriv_const_mul _ ((differentiableAt_zpow).mpr (Or.inl hz)), deriv_zpow]
+    have : z * z ^ (-(m : ℤ) - 1) = z ^ (-(m : ℤ)) := by
+      rw [zpow_sub_one₀ hz]; field_simp
+    push_cast
+    linear_combination (w m * (-(m : ℂ))) * this
+
+/-- Iterates of the Euler operator on finite sums of negative powers. -/
+private lemma eulerTheta_iterate_sum_zpow (w : ℕ → ℂ) (N k : ℕ) :
+    eulerTheta^[k] (fun z => ∑ m ∈ range N, w m * z ^ (-(m : ℤ))) =
+      fun z => ∑ m ∈ range N, (w m * (-(m : ℂ)) ^ k) * z ^ (-(m : ℤ)) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [Function.iterate_succ_apply', ih, eulerTheta_sum_zpow]
+    funext z
+    refine sum_congr rfl fun m _ => ?_
+    ring
+
+/-- Theta polynomials on finite sums of negative powers. -/
+private lemma thetaPoly_sum_zpow (P : ℂ[X]) (w : ℕ → ℂ) (N : ℕ) (z : ℂ) :
+    thetaPoly P (fun z => ∑ m ∈ range N, w m * z ^ (-(m : ℤ))) z =
+      ∑ m ∈ range N, w m * P.eval (-(m : ℂ)) * z ^ (-(m : ℤ)) := by
+  unfold thetaPoly
+  simp only [eulerTheta_iterate_sum_zpow, mul_sum]
+  rw [sum_comm]
+  refine sum_congr rfl fun m _ => ?_
+  rw [P.eval_eq_sum_range, mul_sum, sum_mul]
+  refine sum_congr rfl fun k _ => ?_
+  ring
+
+/-- The normalized monomials of the reciprocal change of variable as sums of negative powers. -/
+private lemma inv_sub_pow_div_eq_sum (u : ℂ) (j : ℕ) :
+    (fun z : ℂ => (z⁻¹ - u) ^ j / j.factorial) = fun z =>
+      ∑ m ∈ range (j + 1), ((j.choose m : ℂ) * (-u) ^ (j - m) / j.factorial) *
+        z ^ (-(m : ℤ)) := by
+  funext z
+  rw [sub_eq_add_neg, add_pow, sum_div]
+  refine sum_congr rfl fun m _ => ?_
+  rw [zpow_neg, zpow_natCast, inv_pow]
+  ring
+
+/-- The unnormalized reciprocal coefficients of the generalized hypergeometric equation. -/
+private lemma linearODEReciprocalRaw_genODECoeff (a b : Multiset ℂ) (j : ℕ) {u : ℂ}
+    (hu : u ≠ 0) (hd : genODEDen a b u⁻¹ ≠ 0) :
+    Complex.linearODEReciprocalRaw (genODECoeff a b) j u =
+      u ^ j / j.factorial * (genThetaFinDiff (genThetaB b) j -
+        u⁻¹ * genThetaFinDiff (genThetaA a) j) / genODEDen a b u⁻¹ := by
+  have hU : IsOpen ({0}ᶜ : Set ℂ) := isOpen_compl_singleton
+  have hz : u⁻¹ ∈ ({0}ᶜ : Set ℂ) := inv_ne_zero hu
+  have hg : AnalyticOnNhd ℂ (fun z : ℂ => (z⁻¹ - u) ^ j / j.factorial) {0}ᶜ := fun z hz =>
+    (((analyticAt_inv hz).sub analyticAt_const).pow j).div_const
+  unfold Complex.linearODEReciprocalRaw
+  rw [linearODEValue_genODECoeff a b _ hd]
+  congr 1
+  have hsum : ∀ P : ℂ[X], P.natDegree ≤ genODEOrder a b → thetaPoly P
+      (fun z : ℂ => (z⁻¹ - u) ^ j / j.factorial) u⁻¹ = ∑ i ∈ range (genODEOrder a b + 1),
+        genThetaDCoeff P i * u⁻¹ ^ i *
+          iteratedDeriv i (fun z : ℂ => (z⁻¹ - u) ^ j / j.factorial) u⁻¹ :=
+    fun P hP => thetaPoly_eq_sum_iteratedDeriv_on hU hg P hP hz
+  have hB := hsum _ (genThetaB_natDegree_le a b)
+  have hA := hsum _ (genThetaA_natDegree_le a b)
+  rw [inv_sub_pow_div_eq_sum, thetaPoly_sum_zpow] at hB hA
+  rw [← inv_sub_pow_div_eq_sum] at hB hA
+  have hsplit : ∑ i ∈ range (genODEOrder a b + 1),
+      (genThetaDCoeff (genThetaB b) i * u⁻¹ ^ i - genThetaDCoeff (genThetaA a) i *
+        u⁻¹ ^ (i + 1)) * iteratedDeriv i (fun z : ℂ => (z⁻¹ - u) ^ j / j.factorial) u⁻¹ =
+      (∑ i ∈ range (genODEOrder a b + 1), genThetaDCoeff (genThetaB b) i * u⁻¹ ^ i *
+        iteratedDeriv i (fun z : ℂ => (z⁻¹ - u) ^ j / j.factorial) u⁻¹) -
+      u⁻¹ * ∑ i ∈ range (genODEOrder a b + 1), genThetaDCoeff (genThetaA a) i * u⁻¹ ^ i *
+        iteratedDeriv i (fun z : ℂ => (z⁻¹ - u) ^ j / j.factorial) u⁻¹ := by
+    rw [mul_sum, ← sum_sub_distrib]
+    refine sum_congr rfl fun i _ => ?_
+    ring
+  rw [hsplit, ← hB, ← hA]
+  unfold genThetaFinDiff
+  rw [mul_sum, mul_sum, ← sum_sub_distrib, ← sum_sub_distrib, mul_sum]
+  refine sum_congr rfl fun m hm => ?_
+  have hmj : m ≤ j := Nat.lt_succ_iff.mp (mem_range.mp hm)
+  have hp : (-u) ^ (j - m) * u⁻¹ ^ (-(m : ℤ)) = (-1) ^ (j - m) * u ^ j := by
+    rw [inv_zpow', neg_neg, zpow_natCast, neg_pow, mul_assoc, ← pow_add, Nat.sub_add_cancel hmj]
+  linear_combination ((j.choose m : ℂ) / j.factorial *
+    ((genThetaB b).eval (-(m : ℂ)) - u⁻¹ * (genThetaA a).eval (-(m : ℂ)))) * hp
+
+/-- Finite differences vanish above the degree. -/
+private lemma genThetaFinDiff_eq_zero_of_natDegree_lt (P : ℂ[X]) {j : ℕ}
+    (hj : P.natDegree < j) : genThetaFinDiff P j = 0 := by
+  have h := congrFun (Polynomial.fwdDiff_iter_eq_zero_of_degree_lt
+    (P := P.comp (-X)) (n := j) (by simpa [natDegree_comp] using hj)) 0
+  rw [Pi.zero_apply, fwdDiff_iter_eq_sum_shift] at h
+  rw [← h]
+  unfold genThetaFinDiff
+  refine sum_congr rfl fun m _ => ?_
+  simp [zsmul_eq_mul, mul_comm]
+
+/-- The top finite difference of a monic polynomial. -/
+private lemma genThetaFinDiff_natDegree_of_monic (P : ℂ[X]) (hP : P.Monic) :
+    genThetaFinDiff P P.natDegree = (-1) ^ P.natDegree * P.natDegree.factorial := by
+  have h := congrFun (Polynomial.fwdDiff_iter_degree_eq_factorial (P.comp (-X))) 0
+  have hd : (P.comp (-X)).natDegree = P.natDegree := by simp [natDegree_comp]
+  have hl : (P.comp (-X)).leadingCoeff = (-1) ^ P.natDegree := by
+    rw [leadingCoeff_comp (by simp), hP.leadingCoeff]; simp
+  rw [hd, hl, fwdDiff_iter_eq_sum_shift] at h
+  unfold genThetaFinDiff
+  rw [show ∑ m ∈ range (P.natDegree + 1), (P.natDegree.choose m : ℂ) * (-1) ^ (P.natDegree - m) *
+      P.eval (-(m : ℂ)) = ∑ k ∈ range (P.natDegree + 1),
+        ((-1 : ℤ) ^ (P.natDegree - k) * P.natDegree.choose k) • (P.comp (-X)).eval (0 + k • 1) from
+    sum_congr rfl fun m _ => by simp [zsmul_eq_mul, mul_comm], h]
+  simp
+
+/-- Top coefficients of the theta polynomials and the denominator for `p ≤ q`. -/
+private lemma genODEDen_of_card_le {a b : Multiset ℂ} (h : a.card ≤ b.card) (z : ℂ) :
+    genODEOrder a b = b.card + 1 ∧ genODEDen a b z = z ^ genODEOrder a b ∧
+      genThetaFinDiff (genThetaB b) (genODEOrder a b) =
+        (-1) ^ genODEOrder a b * (genODEOrder a b).factorial ∧
+      genThetaFinDiff (genThetaA a) (genODEOrder a b) = 0 := by
+  have hn : genODEOrder a b = b.card + 1 := by simp [genODEOrder]; omega
+  have hBdeg : (genThetaB b).natDegree = genODEOrder a b := by
+    rw [genThetaB_eq_genThetaA, genThetaA_natDegree, hn]; simp
+  have hBm : (genThetaB b).Monic := by rw [genThetaB_eq_genThetaA]; exact genThetaA_monic _
+  have hAdeg : (genThetaA a).natDegree < genODEOrder a b := by
+    rw [genThetaA_natDegree, hn]; omega
+  refine ⟨hn, ?_, ?_, genThetaFinDiff_eq_zero_of_natDegree_lt _ hAdeg⟩
+  · simp only [genODEDen]
+    rw [← hBdeg, genThetaDCoeff_natDegree_of_monic _ hBm, hBdeg,
+      genThetaDCoeff_eq_zero_of_natDegree_lt _ hAdeg]
+    ring
+  · rw [← hBdeg, genThetaFinDiff_natDegree_of_monic _ hBm]
+
+/-- Top coefficients of the theta polynomials and the denominator for `p = q + 1`. -/
+private lemma genODEDen_of_card_eq {a b : Multiset ℂ} (h : a.card = b.card + 1) (z : ℂ) :
+    genODEOrder a b = b.card + 1 ∧
+      genODEDen a b z = z ^ genODEOrder a b * (1 - z) ∧
+      genThetaFinDiff (genThetaB b) (genODEOrder a b) =
+        (-1) ^ genODEOrder a b * (genODEOrder a b).factorial ∧
+      genThetaFinDiff (genThetaA a) (genODEOrder a b) =
+        (-1) ^ genODEOrder a b * (genODEOrder a b).factorial := by
+  have hn : genODEOrder a b = b.card + 1 := by simp [genODEOrder, h]
+  have hBdeg : (genThetaB b).natDegree = genODEOrder a b := by
+    rw [genThetaB_eq_genThetaA, genThetaA_natDegree, hn]; simp
+  have hBm : (genThetaB b).Monic := by rw [genThetaB_eq_genThetaA]; exact genThetaA_monic _
+  have hAdeg : (genThetaA a).natDegree = genODEOrder a b := by
+    rw [genThetaA_natDegree, hn, h]
+  refine ⟨hn, ?_, ?_, ?_⟩
+  · simp only [genODEDen]
+    rw [← hBdeg, genThetaDCoeff_natDegree_of_monic _ hBm, hBdeg, ← hAdeg,
+      genThetaDCoeff_natDegree_of_monic _ (genThetaA_monic a), hAdeg]
+    ring
+  · rw [← hBdeg, genThetaFinDiff_natDegree_of_monic _ hBm]
+  · rw [← hAdeg, genThetaFinDiff_natDegree_of_monic _ (genThetaA_monic a)]
+
+/-- Ordinary behavior where the common denominator does not vanish. -/
+private lemma linearODEOrdinaryAt_genODECoeff {a b : Multiset ℂ} {z₀ : ℂ}
+    (hz : genODEDen a b z₀ ≠ 0) : Complex.LinearODEOrdinaryAt (genODECoeff a b) z₀ := by
+  intro j
+  refine ⟨genODECoeff a b j, ?_, Filter.EventuallyEq.rfl⟩
+  have hd : AnalyticAt ℂ (genODEDen a b) z₀ := by unfold genODEDen; fun_prop
+  exact AnalyticAt.div (by fun_prop) hd hz
+
+/-- At most regular behavior is implied by ordinary behavior. -/
+private lemma linearODEAtMostRegularAt_of_ordinaryAt {n : ℕ} {c : Fin n → ℂ → ℂ} {z₀ : ℂ}
+    (h : Complex.LinearODEOrdinaryAt c z₀) : Complex.LinearODEAtMostRegularAt c z₀ := by
+  intro j
+  obtain ⟨g, hg, hev⟩ := h j
+  refine ⟨fun z => (z - z₀) ^ (n - j.val) * g z, by fun_prop, ?_⟩
+  filter_upwards [hev] with z hz
+  rw [hz]
+
+/-- The classification for `p ≤ q`, without the regularity hypothesis on the lower parameters. -/
+theorem genHG_ode_singularities_entire' (a b : Multiset ℂ) (h : a.card ≤ b.card) :
     Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
     Complex.LinearODEIrregularAtInfinity (genODECoeff a b) ∧
     ∀ z : ℂ, z ≠ 0 → Complex.LinearODEOrdinaryAt (genODECoeff a b) z := by
-  sorry
+  have hD := genODEDen_of_card_le h
+  set n := genODEOrder a b with hndef
+  refine ⟨fun j => ?_, ?_, fun z hz => linearODEOrdinaryAt_genODECoeff (by
+    rw [(hD z).2.1]; exact pow_ne_zero _ hz)⟩
+  · refine ⟨fun z => genThetaDCoeff (genThetaB b) j - genThetaDCoeff (genThetaA a) j * z,
+      by fun_prop, ?_⟩
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    have hz0 : z ≠ 0 := hz
+    simp only [genODECoeff]
+    rw [show genThetaDCoeff (genThetaB b) (genODEOrder a b) * z ^ genODEOrder a b -
+      genThetaDCoeff (genThetaA a) (genODEOrder a b) * z ^ (genODEOrder a b + 1) =
+        genODEDen a b z from rfl, (hD z).2.1, sub_zero,
+      show z ^ genODEOrder a b = z ^ (n - j.val) * z ^ j.val by
+        rw [← pow_add, Nat.sub_add_cancel j.is_lt.le]]
+    field_simp
+    ring
+  · -- the coefficient of order `p` has a pole beyond the regular order
+    have hp : a.card < n := by rw [(hD 0).1]; omega
+    have hnot : ¬Complex.LinearODEAtMostRegularAt
+        (Complex.linearODEReciprocalCoeff (genODECoeff a b)) 0 := by
+      intro H
+      obtain ⟨g, hg, hev⟩ := H ⟨a.card, hp⟩
+      set K := genThetaFinDiff (genThetaB b) a.card
+      have hA : genThetaFinDiff (genThetaA a) a.card = (-1) ^ a.card * a.card.factorial := by
+        have := genThetaFinDiff_natDegree_of_monic _ (genThetaA_monic a)
+        rwa [genThetaA_natDegree] at this
+      have hev' : (fun u => u * g u) =ᶠ[𝓝[≠] (0 : ℂ)] fun u =>
+          (-1) ^ n * (u * K / a.card.factorial - (-1) ^ a.card) := by
+        filter_upwards [hev, self_mem_nhdsWithin] with u hu hu0
+        have hu0 : u ≠ 0 := hu0
+        have hd : genODEDen a b u⁻¹ ≠ 0 := by
+          rw [(hD _).2.1]; exact pow_ne_zero _ (inv_ne_zero hu0)
+        rw [← hu]
+        simp only [Complex.linearODEReciprocalCoeff, ← hndef]
+        rw [linearODEReciprocalRaw_genODECoeff a b _ hu0 hd,
+          linearODEReciprocalRaw_genODECoeff a b _ hu0 hd, (hD 0).2.2.1, (hD 0).2.2.2, hA,
+          (hD u⁻¹).2.1]
+        have hf : (a.card.factorial : ℂ) ≠ 0 := by exact_mod_cast a.card.factorial_ne_zero
+        have hf' : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
+        have hpow : u ^ n = u ^ (n - a.card) * u ^ a.card := by
+          rw [← pow_add, Nat.sub_add_cancel hp.le]
+        simp only [sub_zero, mul_zero, hpow]
+        field_simp
+        rw [show ((-1 : ℂ) ^ n) ^ 2 = 1 by rw [← pow_mul, mul_comm, pow_mul]; simp]
+        ring
+      have h1 : Filter.Tendsto (fun u => u * g u) (𝓝[≠] (0 : ℂ)) (𝓝 (0 * g 0)) :=
+        ((continuous_id.continuousAt).mul hg.continuousAt).tendsto.mono_left
+          nhdsWithin_le_nhds
+      have h2 : Filter.Tendsto (fun u : ℂ => (-1) ^ n * (u * K / a.card.factorial -
+          (-1) ^ a.card)) (𝓝[≠] (0 : ℂ)) (𝓝 ((-1) ^ n * (0 * K / a.card.factorial -
+            (-1) ^ a.card))) :=
+        (Continuous.tendsto (by fun_prop) _).mono_left nhdsWithin_le_nhds
+      have := tendsto_nhds_unique (h1.congr' hev') h2
+      simp only [zero_mul, zero_div, zero_sub, mul_neg] at this
+      exact (neg_ne_zero.mpr (mul_ne_zero (pow_ne_zero _ (by norm_num))
+        (pow_ne_zero _ (by norm_num)))) this.symm
+    exact ⟨fun H => hnot (linearODEAtMostRegularAt_of_ordinaryAt H), hnot⟩
 
-/-- Zero, one and infinity are at most regular; removable parameter degeneracies are retained. -/
-theorem genHG_ode_singularities_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1) (hb : GenDenRegular b) :
+/-- The classification for `p = q + 1`, without the regularity hypothesis on the lower
+parameters. -/
+theorem genHG_ode_singularities_balanced' (a b : Multiset ℂ) (h : a.card = b.card + 1) :
     Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
     Complex.LinearODEAtMostRegularAt (genODECoeff a b) 1 ∧
     Complex.LinearODEAtMostRegularAtInfinity (genODECoeff a b) ∧
     ∀ z : ℂ, z ≠ 0 → z ≠ 1 → Complex.LinearODEOrdinaryAt (genODECoeff a b) z := by
-  sorry
+  have hD := genODEDen_of_card_eq h
+  set n := genODEOrder a b with hndef
+  have hden : ∀ z, genODEDen a b z = z ^ n * (1 - z) := fun z => (hD z).2.1
+  have hc : ∀ (j : Fin n) z, genODECoeff a b j z = (genThetaDCoeff (genThetaB b) j * z ^ j.val -
+      genThetaDCoeff (genThetaA a) j * z ^ (j.val + 1)) / (z ^ n * (1 - z)) := fun j z => by
+    rw [← hden]; rfl
+  refine ⟨fun j => ?_, fun j => ?_, fun j => ?_, fun z hz hz1 =>
+    linearODEOrdinaryAt_genODECoeff (by
+      rw [hden]; exact mul_ne_zero (pow_ne_zero _ hz) (sub_ne_zero.mpr (Ne.symm hz1)))⟩
+  · refine ⟨fun z => (genThetaDCoeff (genThetaB b) j - genThetaDCoeff (genThetaA a) j * z) /
+      (1 - z), AnalyticAt.div (by fun_prop) (by fun_prop) (by norm_num), ?_⟩
+    have h1 : ∀ᶠ z in 𝓝[≠] (0 : ℂ), z ≠ 1 := nhdsWithin_le_nhds
+      (isOpen_ne.mem_nhds (by norm_num : (0 : ℂ) ≠ 1))
+    filter_upwards [self_mem_nhdsWithin, h1] with z hz hz1
+    have hz0 : z ≠ 0 := hz
+    have hz1' : (1 : ℂ) - z ≠ 0 := sub_ne_zero.mpr (Ne.symm hz1)
+    rw [hc, show z ^ n = z ^ (n - j.val) * z ^ j.val by
+        rw [← pow_add, Nat.sub_add_cancel j.is_lt.le]]
+    field_simp
+    ring
+  · refine ⟨fun z => -((z - 1) ^ (n - j.val - 1) * (genThetaDCoeff (genThetaB b) j * z ^ j.val -
+      genThetaDCoeff (genThetaA a) j * z ^ (j.val + 1))) / z ^ n,
+      AnalyticAt.div (by fun_prop) (by fun_prop) (by norm_num), ?_⟩
+    have h0 : ∀ᶠ z in 𝓝[≠] (1 : ℂ), z ≠ 0 := nhdsWithin_le_nhds
+      (isOpen_ne.mem_nhds (by norm_num : (1 : ℂ) ≠ 0))
+    filter_upwards [self_mem_nhdsWithin, h0] with z hz hz0
+    have hz1 : z - 1 ≠ 0 := sub_ne_zero.mpr hz
+    have hz1' : (1 : ℂ) - z ≠ 0 := sub_ne_zero.mpr (Ne.symm hz)
+    rw [hc, show (z - 1) ^ (n - j.val) = (z - 1) ^ (n - j.val - 1) * (z - 1) by
+        rw [← pow_succ, Nat.sub_add_cancel (Nat.sub_pos_of_lt j.is_lt)]]
+    field_simp
+    ring
+  · set KB := genThetaFinDiff (genThetaB b) j
+    set KA := genThetaFinDiff (genThetaA a) j
+    refine ⟨fun u => (u * KB - KA) / (j.val.factorial * (-1) ^ n * (u - 1)),
+      AnalyticAt.div (by fun_prop) (by fun_prop) (by
+        simp only [zero_sub, mul_neg, mul_one, ne_eq, neg_eq_zero]
+        exact mul_ne_zero (by exact_mod_cast j.val.factorial_ne_zero)
+          (pow_ne_zero _ (by norm_num))), ?_⟩
+    have h1 : ∀ᶠ u in 𝓝[≠] (0 : ℂ), u ≠ 1 := nhdsWithin_le_nhds
+      (isOpen_ne.mem_nhds (by norm_num : (0 : ℂ) ≠ 1))
+    filter_upwards [self_mem_nhdsWithin, h1] with u hu hu1
+    have hu0 : u ≠ 0 := hu
+    have hu1' : u - 1 ≠ 0 := sub_ne_zero.mpr hu1
+    have hd : genODEDen a b u⁻¹ ≠ 0 := by
+      rw [hden]
+      refine mul_ne_zero (pow_ne_zero _ (inv_ne_zero hu0)) ?_
+      rw [sub_ne_zero]; intro h1; apply hu1; rw [← inv_inv u, ← h1, inv_one]
+    simp only [Complex.linearODEReciprocalCoeff]
+    simp only [← hndef]
+    rw [linearODEReciprocalRaw_genODECoeff a b _ hu0 hd,
+      linearODEReciprocalRaw_genODECoeff a b _ hu0 hd, (hD 0).2.2.1, (hD 0).2.2.2, hden]
+    have hf : (j.val.factorial : ℂ) ≠ 0 := by exact_mod_cast j.val.factorial_ne_zero
+    have hf' : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
+    have hpow : u ^ n = u ^ (n - j.val) * u ^ j.val := by
+      rw [← pow_add, Nat.sub_add_cancel j.is_lt.le]
+    have hs : (1 : ℂ) - u⁻¹ ≠ 0 := by
+      rw [sub_ne_zero]; intro h1; apply hu1; rw [← inv_inv u, ← h1, inv_one]
+    simp only [sub_zero, hpow]
+    field_simp
+    ring
 
-/-- The nominal operator order is max(p,q+1), independently of lower-order equations for special solutions. -/
+/-- Zero is at most regular, infinity is irregular, and there are no other singularities for p≤q. -/
+theorem genHG_ode_singularities_entire (a b : Multiset ℂ) (h : a.card ≤ b.card)
+    (_hb : GenDenRegular b) :
+    Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
+    Complex.LinearODEIrregularAtInfinity (genODECoeff a b) ∧
+    ∀ z : ℂ, z ≠ 0 → Complex.LinearODEOrdinaryAt (genODECoeff a b) z :=
+  genHG_ode_singularities_entire' a b h
+
+/-- Zero, one and infinity are at most regular; removable parameter degeneracies are retained. -/
+theorem genHG_ode_singularities_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1)
+    (_hb : GenDenRegular b) :
+    Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
+    Complex.LinearODEAtMostRegularAt (genODECoeff a b) 1 ∧
+    Complex.LinearODEAtMostRegularAtInfinity (genODECoeff a b) ∧
+    ∀ z : ℂ, z ≠ 0 → z ≠ 1 → Complex.LinearODEOrdinaryAt (genODECoeff a b) z :=
+  genHG_ode_singularities_balanced' a b h
+
+/-- The nominal operator order is max(p,q+1), independently of lower-order equations for special
+solutions. -/
 theorem genHG_ode_nominal_order (a b : Multiset ℂ) :
     max (genThetaA a).natDegree (genThetaB b).natDegree = genODEOrder a b := by
   have hA (c : Multiset ℂ) : (genThetaA c).natDegree = c.card := by
@@ -427,7 +1037,8 @@ theorem genFrobeniusZero_fundamental {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
     GenFundamentalSystem (genParams a) (genParams b) genFrobeniusDomain (genFrobeniusZero a b) := by
   sorry
 
-/-- All resonant cases admit logarithmic Frobenius series, with analytic power series and logs through order q. -/
+/-- All resonant cases admit logarithmic Frobenius series, with analytic power series and logs
+through order q. -/
 theorem genFrobeniusZero_resonant {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p ≤ q + 1)
     (hb : GenDenRegular (genParams b)) :
     ∃ r : ℝ, 0 < r ∧ ∃ F : Fin (q + 1) → ℂ → ℂ,
@@ -440,7 +1051,8 @@ theorem genFrobeniusZero_resonant {p q : ℕ} (a : Fin p → ℂ) (b : Fin q →
             Complex.log z ^ k.val * A i j k z := by
   sorry
 
-/-- The nonresonant infinity solutions form a fundamental system in their principal exterior domain. -/
+/-- The nonresonant infinity solutions form a fundamental system in their principal exterior domain.
+-/
 @[dlmf 16.8.E7]
 theorem genFrobeniusInfinity_fundamental {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
     (hb : GenDenRegular (genParams b))
@@ -460,7 +1072,8 @@ theorem genHG_infinity_connection {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q
       ∑ j, genInfinityConnectionCoeff a b j * genFrobeniusInfinityLog a b j w := by
   sorry
 
-/-- The convergent displaced-center expansion with correlated principal branches and all regularized finite inner polynomials. -/
+/-- The convergent displaced-center expansion with correlated principal branches and all regularized
+finite inner polynomials. -/
 @[dlmf 16.8.E9]
 theorem genHG_centered_infinity_connection {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
     (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b))
@@ -488,7 +1101,8 @@ private lemma genCoeff_cons (x : ℂ) (a b : Multiset ℂ) (n : ℕ) :
   ring
 
 /-- The coefficient series converges absolutely in the open unit disk for p≤q+1. -/
-private lemma summable_norm_genCoeff_mul_pow_of_norm_lt_one {a b : Multiset ℂ} (h : a.card ≤ b.card + 1)
+private lemma summable_norm_genCoeff_mul_pow_of_norm_lt_one {a b : Multiset ℂ}
+    (h : a.card ≤ b.card + 1)
     (hb : GenDenRegular b) {w : ℂ} (hw : ‖w‖ < 1) :
     Summable (fun n : ℕ => ‖genCoeff a b n * w ^ n‖) := by
   have hr : (1 : ENNReal) ≤ (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).radius := by
@@ -497,14 +1111,16 @@ private lemma summable_norm_genCoeff_mul_pow_of_norm_lt_one {a b : Multiset ℂ}
     by_cases hc : a.card ≤ b.card
     · rw [Complex.radius_regularizedHGFunSeries_eq_top hc]; exact le_top
     · exact Complex.radius_regularizedHGFunSeries_ge_one (by omega)
-  have hlt : ((‖w‖₊ : NNReal) : ENNReal) < (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).radius :=
+  have hlt : ((‖w‖₊ : NNReal) : ENNReal) <
+      (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).radius :=
     lt_of_lt_of_le (by exact_mod_cast hw) hr
   have := (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).summable_norm_mul_pow hlt
   simpa only [FormalMultilinearSeries.ofScalars_norm, coe_nnnorm, norm_mul, norm_pow] using this
 
 /-- Upper-parameter confluence along every complex direction to infinity. -/
 @[dlmf 16.8.E10]
-theorem genHG_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb : GenDenRegular b) (z : ℂ) :
+theorem genHG_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card)
+    (hb : GenDenRegular b) (z : ℂ) :
     Tendsto (fun α : ℂ => genHG (α ::ₘ a) b (z / α)) (Bornology.cobounded ℂ)
       (𝓝 (genHG a b z)) := by
   set R : ℝ := ‖z‖ + 1 with hR
@@ -522,7 +1138,8 @@ theorem genHG_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb 
   have hRz : ‖z / (R : ℂ)‖ < 1 := by
     rw [norm_div, Complex.norm_real, Real.norm_of_nonneg hR0.le, div_lt_one hR0]; linarith
   refine tendsto_tsum_of_dominated_convergence
-    (summable_norm_genCoeff_mul_pow_of_norm_lt_one (a := (R : ℂ) ::ₘ a) (by simp; omega) hb hRz) ?_ ?_
+    (summable_norm_genCoeff_mul_pow_of_norm_lt_one (a := (R : ℂ) ::ₘ a)
+        (by simp; omega) hb hRz) ?_ ?_
   · intro k
     have hinv : Tendsto (fun α : ℂ => α⁻¹) (Bornology.cobounded ℂ) (𝓝 0) := tendsto_inv₀_cobounded
     have hprod : Tendsto (fun α : ℂ => ∏ j ∈ range k, (1 + (j : ℂ) * α⁻¹))

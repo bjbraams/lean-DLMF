@@ -124,7 +124,8 @@ private lemma cuspoidIntegrand_two_symmetryLine (y r : ℝ) :
   push_cast
   linear_combination ((r : ℂ) ^ 4) * I_sq
 
-/-- For `y > 0`, the substitution `t = u/√y` gives `Ψ₂(0, y) = y^{-1/2} ∫ pearceySymmetryLineScaled y u du`.
+/-- For `y > 0`, the substitution `t = u/√y` gives
+`Ψ₂(0, y) = y^{-1/2} ∫ pearceySymmetryLineScaled y u du`.
 -/
 private lemma cuspoidIntegral_two_symmetryLine_eq_scaled {y : ℝ} (hy : 0 < y) :
     cuspoidIntegral 2 ![0, y] =
@@ -259,13 +260,15 @@ private lemma norm_exp_I_mul_cube_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ
   nlinarith
 
 /-- `‖(r e^{iθ})³‖ = r³` for `r ≥ 0`. -/
-private lemma norm_ofReal_mul_exp_cube (θ r : ℝ) (hr : 0 ≤ r) : ‖((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3‖ = r ^ 3 := by
+private lemma norm_ofReal_mul_exp_cube (θ r : ℝ) (hr : 0 ≤ r) : ‖((r : ℂ) * exp ((θ : ℂ) * I)) ^
+    3‖ = r ^ 3 := by
   rw [norm_pow, norm_mul, norm_exp_ofReal_mul_I, mul_one, Complex.norm_real, Real.norm_eq_abs,
     abs_of_nonneg hr]
 
 /-- Uniform bound `(1 + 3r³) exp(-(√2/2) r³)` on the `θ`-derivative of the cubic ray integrand for
 `π/12 ≤ θ ≤ π/4`. -/
-private lemma norm_cubicRayIntegrandDeriv_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
+private lemma norm_cubicRayIntegrandDeriv_le {θ r : ℝ} (h1 : π / 12 ≤ θ)
+    (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
     ‖cubicRayIntegrandDeriv θ r‖ ≤ (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3) := by
   unfold cubicRayIntegrandDeriv
   rw [norm_mul, norm_mul, norm_mul, norm_I, norm_exp_ofReal_mul_I, one_mul, one_mul, mul_comm]
@@ -306,7 +309,8 @@ private lemma integral_cubicRayIntegrandDeriv_eq_zero {θ : ℝ} (h1 : π / 12 �
       (1 + 3 * I * ((r : ℂ) * E) ^ 3)) * I_sq
   have hint : IntegrableOn (fun r => (-I) * cubicRayIntegrandDeriv θ r) (Ioi 0) := by
     refine (integrableOn_cubic_dominating.mono' ?_ ?_).const_mul (-I)
-    · exact (by unfold cubicRayIntegrandDeriv; fun_prop : Continuous fun r => cubicRayIntegrandDeriv θ r)
+    · exact (by unfold cubicRayIntegrandDeriv; fun_prop : Continuous fun r =>
+                  cubicRayIntegrandDeriv θ r)
         |>.aestronglyMeasurable
     · exact ae_restrict_of_forall_mem measurableSet_Ioi fun r hr =>
         norm_cubicRayIntegrandDeriv_le h1 h2 (le_of_lt hr)
@@ -441,8 +445,10 @@ private lemma swallowtailZAxisIntegrand_neg (z : ℝ) {s : ℝ} (hs : 0 < s) :
     swallowtailZAxisIntegrand z (-s) = (starRingEnd ℂ) (swallowtailZAxisIntegrand z s) := by
   have hn : ¬ Even 3 := by decide
   unfold swallowtailZAxisIntegrand cuspoidContour
-  rw [cuspoidContourDir_of_odd_of_neg hn (by linarith : -s < 0), cuspoidContourDir_of_nonneg 3 hs.le,
-    cuspoidAngle_three, cuspoidPotential_three_zAxis, cuspoidPotential_three_zAxis, map_mul, ← exp_conj, ← exp_conj]
+  rw [cuspoidContourDir_of_odd_of_neg hn (by linarith : -s < 0),
+      cuspoidContourDir_of_nonneg 3 hs.le,
+    cuspoidAngle_three, cuspoidPotential_three_zAxis, cuspoidPotential_three_zAxis, map_mul,
+        ← exp_conj, ← exp_conj]
   congr 2
   · simp only [map_mul, conj_I, conj_ofReal]; ring
   · simp only [map_mul, map_add, map_pow, conj_I, conj_ofReal, ← exp_conj]
@@ -453,7 +459,8 @@ private lemma swallowtailZAxisIntegrand_neg (z : ℝ) {s : ℝ} (hs : 0 < s) :
 private lemma cuspoidIntegral_three_zAxis_eq_two_re (z : ℝ) :
     cuspoidIntegral 3 ![0, 0, z] =
       (((2 * (∫ r in Ioi (0 : ℝ), swallowtailZAxisIntegrand z r).re : ℝ)) : ℂ) := by
-  have hint : Integrable (swallowtailZAxisIntegrand z) := integrable_cuspoidIntegral_integrand 3 ![0, 0, z]
+  have hint : Integrable (swallowtailZAxisIntegrand z) :=
+      integrable_cuspoidIntegral_integrand 3 ![0, 0, z]
   have h := integral_add_compl (s := Ioi (0 : ℝ)) measurableSet_Ioi hint
   rw [compl_Ioi] at h
   have hc : ∫ r in Iic (0 : ℝ), swallowtailZAxisIntegrand z r =
@@ -518,7 +525,8 @@ private lemma tendsto_integral_swallowtailZAxisScaled :
     (fun u => (1 + 3 * u ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * u ^ 3))
     (Eventually.of_forall fun s => ?_) ?_ integrableOn_cubic_dominating
     (ae_of_all _ fun u => ?_)
-  · exact (by unfold swallowtailZAxisScaled; fun_prop : Continuous fun u => swallowtailZAxisScaled s u)
+  · exact (by unfold swallowtailZAxisScaled; fun_prop : Continuous fun u =>
+                swallowtailZAxisScaled s u)
       |>.aestronglyMeasurable
   · filter_upwards [eventually_gt_atTop 0] with s hs
     exact ae_restrict_of_forall_mem measurableSet_Ioi fun u hu =>
@@ -531,9 +539,11 @@ private lemma tendsto_integral_swallowtailZAxisScaled :
     simpa [swallowtailZAxisScaled, cubicRayIntegrand, Function.comp_def] using h1
 
 /-- `Re G(π/10) = Γ(1/3)/(2√3)`. -/
-private lemma re_cubicRayIntegral_pi_div_ten : (cubicRayIntegral (π / 10)).re = Real.Gamma (1 / 3) / (2 * Real.sqrt 3) := by
+private lemma re_cubicRayIntegral_pi_div_ten : (cubicRayIntegral (π / 10)).re = Real.Gamma (1 / 3) /
+    (2 * Real.sqrt 3) := by
   have hpi := Real.pi_pos
-  rw [← cubicRayIntegral_eq_pi_div_ten (θ := π / 6) (by linarith) le_rfl, cubicRayIntegral_pi_div_six,
+  rw [← cubicRayIntegral_eq_pi_div_ten (θ := π / 6) (by linarith) le_rfl,
+      cubicRayIntegral_pi_div_six,
     show (1 / 3 : ℝ) + 1 = 1 / 3 + 1 from rfl, Real.Gamma_add_one (by norm_num),
     exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_six]
   simp only [mul_re, add_re, add_im, ofReal_re, ofReal_im, I_re, I_im, mul_im]
@@ -635,7 +645,8 @@ theorem cuspoidIntegral_three_z_atTop :
       (fun z : ℝ => |z| ^ (-(1 / 3 : ℝ))) := by
   rw [isLittleO_iff]
   intro c hc
-  have hT := tendsto_integral_swallowtailZAxisScaled.comp (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 3))
+  have hT := tendsto_integral_swallowtailZAxisScaled.comp
+      (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 3))
   have hev := (Metric.tendsto_nhds.mp hT) (c / 2) (by positivity)
   filter_upwards [hev, eventually_gt_atTop 0] with z hz hz0
   simp only [Function.comp_apply, dist_eq_norm] at hz
@@ -646,14 +657,16 @@ theorem cuspoidIntegral_three_z_atTop :
   set H := ∫ u in Set.Ioi (0 : ℝ), swallowtailZAxisScaled s u
   set G := cubicRayIntegral (π / 10)
   have hI : ∫ r in Set.Ioi (0 : ℝ), swallowtailZAxisIntegrand z r = ((s⁻¹ : ℝ) : ℂ) * H := by
-    have h := MeasureTheory.integral_comp_mul_left_Ioi' (swallowtailZAxisIntegrand z) 0 (inv_pos.mpr hs)
+    have h := MeasureTheory.integral_comp_mul_left_Ioi' (swallowtailZAxisIntegrand z) 0
+        (inv_pos.mpr hs)
     rw [mul_zero] at h
     rw [← h, Complex.real_smul]
     congr 1
     refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi fun u (hu : 0 < u) => ?_
     rw [← hs3]; exact swallowtailZAxisIntegrand_scale hs hu.le
   have habs : |z| = z := abs_of_pos hz0
-  rw [cuspoidIntegral_three_zAxis_eq_two_re, hI, habs, ← hsdef, Real.rpow_neg hz0.le, ← hsdef, ← ofReal_sub,
+  rw [cuspoidIntegral_three_zAxis_eq_two_re, hI, habs, ← hsdef, Real.rpow_neg hz0.le,
+      ← hsdef, ← ofReal_sub,
     norm_real, Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hs)]
   have hre : (((s⁻¹ : ℝ) : ℂ) * H).re = s⁻¹ * H.re := by
     rw [re_ofReal_mul]

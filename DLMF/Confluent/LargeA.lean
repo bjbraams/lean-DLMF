@@ -1339,7 +1339,8 @@ theorem laguerrePolyL_fejer {α : ℝ} (hα : -1 < α) {x : ℝ} (hx : 0 < x) :
   -- the Gamma ratio
   set R : ℕ → ℂ := fun n => Complex.Gamma ((n : ℂ) + c) / (n ! : ℂ) / (((n : ℝ) ^ α : ℝ) : ℂ)
   have hR : Tendsto R atTop (𝓝 1) := by
-    have h := (DLMF.Gamma.Gamma_ratio_power (a := (c : ℂ)) (b := 1)).comp tendsto_natCast_atTop_atTop
+    have h := (DLMF.Gamma.Gamma_ratio_power (a := (c : ℂ)) (b := 1)).comp
+        tendsto_natCast_atTop_atTop
     refine h.congr' ?_
     filter_upwards with n
     simp only [Function.comp_apply, R]

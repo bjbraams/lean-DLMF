@@ -129,7 +129,8 @@ lemma floquet_integral_exp_rec {a q s : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSo
   linear_combination h0
 
 /-- The order recurrence of the cylinder functions `𝒞^{(j)}_μ(h e^z)`, `j = 1, …, 4`. -/
-theorem mathieuCylExp_sub_one_add_add_one (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (μ : ℂ) {h : ℂ} (hh : h ≠ 0)
+theorem mathieuCylExp_sub_one_add_add_one (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (μ : ℂ)
+    {h : ℂ} (hh : h ≠ 0)
     (z : ℂ) :
     mathieuCylExp j (μ - 1) h z + mathieuCylExp j (μ + 1) h z =
       2 * μ / (h * Complex.exp z) * mathieuCylExp j μ h z := by
@@ -350,7 +351,8 @@ private lemma continuousAt_besselYExp_uncurry {h : ℂ} (hh : h ≠ 0) (μ₀ z�
   · obtain ⟨n, rfl⟩ := hν
     have hds := continuousOn_dslope_param (X := ℂ)
       (f := fun w ν => besselYExpNumerator ν h w) (s := univ) isOpen_univ
-      ((hD.comp continuous_swap).continuousOn) (fun w _ => differentiable_besselYExpNumerator hh w) n
+      ((hD.comp continuous_swap).continuousOn)
+          (fun w _ => differentiable_besselYExpNumerator hh w) n
     have h1 : ContinuousAt (fun p : ℂ × ℂ => dslope (fun ν => besselYExpNumerator ν h p.2) n p.1)
         (n, z₀) :=
       ContinuousAt.comp (g := fun q : ℂ × ℂ => dslope (fun ν => besselYExpNumerator ν h q.1) n q.2)
@@ -384,7 +386,8 @@ private lemma hasDerivAt_besselYExp_of_not_int {μ : ℂ} (hμ : ∀ k : ℤ, μ
     HasDerivAt (fun z => besselYExp μ h z)
       (μ * besselYExp μ h z - h * Complex.exp z * besselYExp (μ + 1) h z) z := by
   have hs := DLMF.Bessel.sin_mul_pi_ne_zero hμ
-  have hY : (fun z => besselYExp μ h z) = fun z => besselYExpNumerator μ h z / Complex.sin (μ * π) :=
+  have hY : (fun z => besselYExp μ h z) = fun z => besselYExpNumerator μ h z /
+      Complex.sin (μ * π) :=
     funext fun w => besselYExp_eq_besselYExpNumerator_div hμ h w
   have hJ1 := hasDerivAt_besselJExp μ hh z
   have hJ2 := hasDerivAt_besselJExp (-μ) hh z
@@ -396,7 +399,8 @@ private lemma hasDerivAt_besselYExp_of_not_int {μ : ℂ} (hμ : ∀ k : ℤ, μ
   have h' := hD.div_const (Complex.sin (μ * π))
   rw [← hY] at h'
   convert h' using 1
-  rw [besselYExp_eq_besselYExpNumerator_div hμ, besselYExp_eq_besselYExpNumerator_div (DLMF.Bessel.not_int_add_one hμ),
+  rw [besselYExp_eq_besselYExpNumerator_div hμ,
+      besselYExp_eq_besselYExpNumerator_div (DLMF.Bessel.not_int_add_one hμ),
     DLMF.Bessel.sin_add_one_mul_pi]
   have hr := besselJExp_sub_one_add_add_one (-μ) hh z
   rw [show -μ - 1 = -(μ + 1) by ring] at hr
@@ -564,7 +568,8 @@ lemma crossTerm_locally_uniform (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (�
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs) {S : Set ℂ}
     (hS : IsCompact S) (α β : ℤ) :
     ∃ u : ℤ → ℝ, Summable u ∧
-      ∀ ℓ, ∀ z ∈ S, ‖crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α β ℓ‖ ≤ u ℓ := by
+      ∀ ℓ, ∀ z ∈ S, ‖crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α
+          β ℓ‖ ≤ u ℓ := by
   obtain ⟨R, hR⟩ := hS.exists_bound_of_continuousOn
     (f := fun z => h * Complex.exp (-z)) (by fun_prop)
   have hy0 : ∀ z, ‖h * Complex.exp z‖ ≠ 0 := fun z =>
@@ -637,7 +642,8 @@ theorem mathieuMeCoeff_factorial_decay {ν h : ℂ} (hν : ModMathieuAdmissible 
 `α = -n`, `β = n`. -/
 private lemma modMathieuTerm_eq_crossTerm (j : ℕ) (ν z h : ℂ) (n : ℤ) :
     modMathieuTerm j ν z h n =
-      crossTerm (mathieuMeCoeff ν (h ^ 2)) (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (-n) n := by
+      crossTerm (mathieuMeCoeff ν (h ^ 2)) (besselJExpNegSeq h z)
+          (mathieuCylExpSeq j ν h z) (-n) n := by
   funext ℓ
   simp only [modMathieuTerm, crossTerm, besselJExpNegSeq, mathieuCylExpSeq]
   rw [show ℓ + -n = ℓ - n by ring]
@@ -656,9 +662,11 @@ theorem modMathieuTerm_locally_uniform' (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j �
 private lemma hasDerivAt_crossTerm (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0)
     (c : ℤ → ℂ) (α β ℓ : ℤ) (z : ℂ) :
     HasDerivAt (fun z => crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α β ℓ)
-      (-(h * Complex.exp (-z) / 2) * (crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (α - 1) β ℓ -
+      (-(h * Complex.exp (-z) / 2) *
+          (crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (α - 1) β ℓ -
           crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (α + 1) β ℓ) +
-        h * Complex.exp z / 2 * (crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α (β - 1) ℓ -
+        h * Complex.exp z / 2 *
+            (crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α (β - 1) ℓ -
           crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α (β + 1) ℓ)) z := by
   have hJ := hasDerivAt_besselJExp_comp_neg ((ℓ + α : ℤ) : ℂ) hh z
   have hC := hasDerivAt_mathieuCylExp_symm j hj₁ hj₄ (ν + ((β + ℓ : ℤ) : ℂ)) hh z
@@ -681,7 +689,8 @@ converges (to its `tsum`). -/
 theorem hasSum_crossSeries (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0)
     {c : ℤ → ℂ} {Cc K : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs) (α β : ℤ) (z : ℂ) :
-    HasSum (fun ℓ => crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α β ℓ) (crossSeries j ν h c α β z) := by
+    HasSum (fun ℓ => crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α β ℓ)
+        (crossSeries j ν h c α β z) := by
   obtain ⟨u, hu, hle⟩ := crossTerm_locally_uniform j hj₁ hj₄ ν hh hCc hK hc
     (isCompact_singleton (x := z)) α β
   exact (Summable.of_norm_bounded hu fun ℓ => hle ℓ z rfl).hasSum
@@ -693,12 +702,15 @@ theorem hasDerivAt_crossSeries (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν
     {c : ℤ → ℂ} {Cc K : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs) (α β : ℤ) (z : ℂ) :
     HasDerivAt (crossSeries j ν h c α β)
-      (-(h * Complex.exp (-z) / 2) * (crossSeries j ν h c (α - 1) β z - crossSeries j ν h c (α + 1) β z) +
-        h * Complex.exp z / 2 * (crossSeries j ν h c α (β - 1) z - crossSeries j ν h c α (β + 1) z)) z := by
+      (-(h * Complex.exp (-z) / 2) *
+          (crossSeries j ν h c (α - 1) β z - crossSeries j ν h c (α + 1) β z) +
+        h * Complex.exp z / 2 *
+            (crossSeries j ν h c α (β - 1) z - crossSeries j ν h c α (β + 1) z)) z := by
   obtain ⟨u, hu, hle⟩ := crossTerm_locally_uniform j hj₁ hj₄ ν hh hCc hK hc
     (isCompact_closedBall z 1) α β
   have hdiff : ∀ ℓ, DifferentiableOn ℂ
-      (fun w => crossTerm c (besselJExpNegSeq h w) (mathieuCylExpSeq j ν h w) α β ℓ) (Metric.ball z 1) :=
+      (fun w => crossTerm c (besselJExpNegSeq h w) (mathieuCylExpSeq j ν h w) α β ℓ)
+          (Metric.ball z 1) :=
     fun ℓ w _ =>
       (hasDerivAt_crossTerm j hj₁ hj₄ ν hh c α β ℓ w).differentiableAt.differentiableWithinAt
   have hle' : ∀ ℓ w, w ∈ Metric.ball z 1 →
@@ -710,10 +722,13 @@ theorem hasDerivAt_crossSeries (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν
     (Complex.differentiableOn_tsum_of_summable_norm hu hdiff Metric.isOpen_ball
       hle').differentiableAt
       (Metric.isOpen_ball.mem_nhds hz)
-  have e : ∀ ℓ, deriv (fun w => crossTerm c (besselJExpNegSeq h w) (mathieuCylExpSeq j ν h w) α β ℓ) z =
-      -(h * Complex.exp (-z) / 2) * (crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (α - 1) β ℓ -
+  have e : ∀ ℓ, deriv (fun w =>
+      crossTerm c (besselJExpNegSeq h w) (mathieuCylExpSeq j ν h w) α β ℓ) z =
+      -(h * Complex.exp (-z) / 2) *
+          (crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (α - 1) β ℓ -
           crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (α + 1) β ℓ) +
-        h * Complex.exp z / 2 * (crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α (β - 1) ℓ -
+        h * Complex.exp z / 2 *
+            (crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α (β - 1) ℓ -
           crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) α (β + 1) ℓ) :=
     fun ℓ => (hasDerivAt_crossTerm j hj₁ hj₄ ν hh c α β ℓ z).deriv
   simp_rw [e] at hs
@@ -725,7 +740,8 @@ theorem hasDerivAt_crossSeries (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν
 
 /-- `(x/2)(A_{k-1} - A_{k+1}) + (x²/4)(A_{k-2} - 2A_k + A_{k+2}) = (k² - x²) A_k` for a solution of
 the Bessel order recurrence. -/
-private lemma bessel_rec_second_difference {x k km kp Am2 Am1 A0 Ap1 Ap2 : ℂ} (hx : x ≠ 0) (hkm : km = k - 1)
+private lemma bessel_rec_second_difference {x k km kp Am2 Am1 A0 Ap1 Ap2 : ℂ} (hx : x ≠ 0)
+    (hkm : km = k - 1)
     (hkp : kp = k + 1) (r1 : Am2 + A0 = 2 * km / x * Am1) (r0 : Am1 + Ap1 = 2 * k / x * A0)
     (r2 : A0 + Ap2 = 2 * kp / x * Ap1) :
     x / 2 * (Am1 - Ap1) + x ^ 2 / 4 * (Am2 - 2 * A0 + Ap2) = (k ^ 2 - x ^ 2) * A0 := by
@@ -739,14 +755,16 @@ private lemma bessel_rec_second_difference {x k km kp Am2 Am1 A0 Ap1 Ap2 : ℂ} 
 
 /-- Three-term recurrence `J_{k-1} + J_{k+1} = (2k/x) J_k` at `x = h e^{-z}`. -/
 private lemma besselJExpNegSeq_rec {h : ℂ} (hh : h ≠ 0) (z : ℂ) (k : ℤ) :
-    besselJExpNegSeq h z (k - 1) + besselJExpNegSeq h z (k + 1) = 2 * k / (h * Complex.exp (-z)) * besselJExpNegSeq h z k := by
+    besselJExpNegSeq h z (k - 1) + besselJExpNegSeq h z (k + 1) = 2 * k / (h * Complex.exp (-z)) *
+        besselJExpNegSeq h z k := by
   have := besselJExp_sub_one_add_add_one (k : ℂ) hh (-z)
   simp only [besselJExpNegSeq]
   push_cast
   exact this
 
 /-- Three-term recurrence `𝒞_{μ-1} + 𝒞_{μ+1} = (2μ/x) 𝒞_μ` at `x = h e^z`, `μ = ν + k`. -/
-private lemma mathieuCylExpSeq_rec (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ)
+private lemma mathieuCylExpSeq_rec (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ}
+    (hh : h ≠ 0) (z : ℂ)
     (k : ℤ) : mathieuCylExpSeq j ν h z (k - 1) + mathieuCylExpSeq j ν h z (k + 1) =
       2 * (ν + k) / (h * Complex.exp z) * mathieuCylExpSeq j ν h z k := by
   have := mathieuCylExp_sub_one_add_add_one j hj₁ hj₄ (ν + k) hh z
@@ -767,8 +785,10 @@ lemma hasDerivAt_deriv_crossSeries (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4)
   have hF := fun α β w => hasDerivAt_crossSeries j hj₁ hj₄ ν hh hCc hK hc α β w
   have hS := fun α β => hasSum_crossSeries j hj₁ hj₄ ν hh hCc hK hc α β z
   have hderiv : deriv (crossSeries j ν h c (-n) n) = fun w =>
-      -(h * Complex.exp (-w) / 2) * (crossSeries j ν h c (-n - 1) n w - crossSeries j ν h c (-n + 1) n w) +
-        h * Complex.exp w / 2 * (crossSeries j ν h c (-n) (n - 1) w - crossSeries j ν h c (-n) (n + 1) w) :=
+      -(h * Complex.exp (-w) / 2) *
+          (crossSeries j ν h c (-n - 1) n w - crossSeries j ν h c (-n + 1) n w) +
+        h * Complex.exp w / 2 *
+            (crossSeries j ν h c (-n) (n - 1) w - crossSeries j ν h c (-n) (n + 1) w) :=
     funext fun w => (hF (-n) n w).deriv
   rw [hderiv]
   have hx' : HasDerivAt (fun w => -(h * Complex.exp (-w) / 2)) (h * Complex.exp (-z) / 2) z := by
@@ -800,15 +820,19 @@ lemma hasDerivAt_deriv_crossSeries (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4)
     (((hD (-n - 1) n).sub (hD (-n + 1) n)).mul_left (-(x / 2)))).add
     ((((hS (-n) (n - 1)).sub (hS (-n) (n + 1))).mul_left (y / 2)).add
     (((hD (-n) (n - 1)).sub (hD (-n) (n + 1))).mul_left (y / 2)))
-  have hsh1 : HasSum (fun ℓ => crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (-n - 1) (n - 1) (ℓ + 1))
+  have hsh1 : HasSum (fun ℓ =>
+      crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (-n - 1) (n - 1) (ℓ + 1))
       (crossSeries j ν h c (-n - 1) (n - 1) z) :=
     ((Equiv.addRight (1 : ℤ)).hasSum_iff
-      (f := fun ℓ => crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (-n - 1) (n - 1) ℓ)).mpr
+      (f := fun ℓ => crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (-n - 1)
+          (n - 1) ℓ)).mpr
       (hS (-n - 1) (n - 1))
-  have hsh2 : HasSum (fun ℓ => crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (-n + 1) (n + 1) (ℓ - 1))
+  have hsh2 : HasSum (fun ℓ =>
+      crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (-n + 1) (n + 1) (ℓ - 1))
       (crossSeries j ν h c (-n + 1) (n + 1) z) :=
     ((Equiv.subRight (1 : ℤ)).hasSum_iff
-      (f := fun ℓ => crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (-n + 1) (n + 1) ℓ)).mpr
+      (f := fun ℓ => crossTerm c (besselJExpNegSeq h z) (mathieuCylExpSeq j ν h z) (-n + 1)
+          (n + 1) ℓ)).mpr
       (hS (-n + 1) (n + 1))
   have hW := (((hS (-n) n).mul_left (a - x ^ 2 - y ^ 2)).add
     ((hsh1.sub (hS (-n - 1) (n - 1))).mul_left (x * y))).add
@@ -836,7 +860,8 @@ lemma hasDerivAt_deriv_crossSeries (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4)
     have rC0 := mathieuCylExpSeq_rec j hj₁ hj₄ ν hh z (n + ℓ)
     have rC2 := mathieuCylExpSeq_rec j hj₁ hj₄ ν hh z (n + ℓ + 1)
     simp only [sub_add_cancel, add_sub_cancel_right] at rJ1 rJ2 rC1 rC2
-    have hP := bessel_rec_second_difference hx (k := ((ℓ - n : ℤ) : ℂ)) (by push_cast; ring) (by push_cast; ring)
+    have hP := bessel_rec_second_difference hx (k := ((ℓ - n : ℤ) : ℂ)) (by push_cast; ring)
+        (by push_cast; ring)
       rJ1 rJ0 rJ2
     have hQ := bessel_rec_second_difference hy (k := ν + ((n + ℓ : ℤ) : ℂ)) (by push_cast; ring)
       (by push_cast; ring) rC1 rC0 rC2
@@ -860,7 +885,8 @@ lemma hasDerivAt_deriv_crossSeries (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4)
 `c_n`, `n` the normalizing index. -/
 theorem modMathieuM_eq_crossSeries (j : ℕ) (ν h : ℂ) :
     (fun z => modMathieuM j ν z h) = fun z => (mathieuMeCoeff ν (h ^ 2) (modMathieuIndex ν h))⁻¹ *
-      crossSeries j ν h (mathieuMeCoeff ν (h ^ 2)) (-modMathieuIndex ν h) (modMathieuIndex ν h) z := by
+      crossSeries j ν h (mathieuMeCoeff ν (h ^ 2)) (-modMathieuIndex ν h)
+          (modMathieuIndex ν h) z := by
   funext z
   simp only [modMathieuM, crossSeries, modMathieuTerm_eq_crossTerm]
 

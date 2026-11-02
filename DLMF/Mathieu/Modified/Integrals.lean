@@ -103,7 +103,8 @@ theorem integral_exp_mathieuSe {n : ℕ} (hn : n ≠ 0) (h : ℝ) (z α : ℂ) :
   integral_exp_mathieuSe' hn h z α
 
 /-- 28.28.4/28.28.5 from 28.28.2/28.28.3: differentiate in `α`. -/
-private lemma integral_deriv_mathieuKernelW_of_integral (h : ℝ) (z : ℂ) {g : ℝ → ℂ} (hg : Continuous g)
+private lemma integral_deriv_mathieuKernelW_of_integral (h : ℝ) (z : ℂ) {g : ℝ → ℂ}
+    (hg : Continuous g)
     {f : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hint : ∀ β : ℂ, (2 * π : ℂ)⁻¹ * ∫ t in (0 : ℝ)..2 * π,
         Complex.exp (2 * I * h * mathieuKernelW z t β) * g t = f β) (α : ℂ) :
@@ -284,7 +285,8 @@ theorem integral_sin_cosh_modMathieuCe (n : ℕ) {h : ℝ} (hh : 0 < h) {y : ℝ
 /-! ### §28.28(ii) Integrals of products with Bessel functions -/
 
 /-- `1 + e^{-2w} ≠ 0` for `Re w > 0` (helper for 28.28.18–28.28.19). -/
-private lemma one_add_exp_neg_two_mul_ne_zero {w : ℂ} (hw : 0 < w.re) : 1 + Complex.exp (-2 * w) ≠ 0 := by
+private lemma one_add_exp_neg_two_mul_ne_zero {w : ℂ} (hw : 0 < w.re) : 1 +
+    Complex.exp (-2 * w) ≠ 0 := by
   intro h0
   have h1 : Complex.exp (-2 * w) = -1 := by linear_combination h0
   have h2 := congrArg norm h1

@@ -130,7 +130,8 @@ theorem airyMod_gamma_third_reflection :
   field_simp
 
 /-- `I_0 = 4π^{3/2} / (3^{2/3} Γ(2/3))²`. -/
-theorem airyMod_I_zero : airyMod_I 0 = 4 * π * Real.sqrt π / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) ^ 2 := by
+theorem airyMod_I_zero : airyMod_I 0 = 4 * π * Real.sqrt π /
+    ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) ^ 2 := by
   set u : ℝ := (3 : ℝ) ^ (1 / 6 : ℝ) with hu
   set v : ℝ := (2 : ℝ) ^ (1 / 3 : ℝ) with hv
   have hu6 : u ^ 6 = 3 := by rw [hu, ← airyMod_three_rpow]; norm_num
@@ -156,7 +157,8 @@ theorem airyMod_I_zero : airyMod_I 0 = 4 * π * Real.sqrt π / ((3 : ℝ) ^ (2 /
 
 /-- `I_1 = 4π^{3/2} / (3^{2/3} Γ(2/3) 3^{1/3} Γ(1/3))`. -/
 theorem airyMod_I_one : airyMod_I 1 = 4 * π * Real.sqrt π /
-    (((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) * ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3))) := by
+    (((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) *
+        ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3))) := by
   set u : ℝ := (3 : ℝ) ^ (1 / 6 : ℝ) with hu
   set v : ℝ := (2 : ℝ) ^ (1 / 3 : ℝ) with hv
   have hu6 : u ^ 6 = 3 := by rw [hu, ← airyMod_three_rpow]; norm_num
@@ -178,7 +180,8 @@ theorem airyMod_I_one : airyMod_I 1 = 4 * π * Real.sqrt π /
     (4 * π) * hu6
 
 /-- `I_2 = 8π^{3/2} / (3^{1/3} Γ(1/3))²`. -/
-theorem airyMod_I_two : airyMod_I 2 = 8 * π * Real.sqrt π / ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3)) ^ 2 := by
+theorem airyMod_I_two : airyMod_I 2 = 8 * π * Real.sqrt π /
+    ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3)) ^ 2 := by
   set u : ℝ := (3 : ℝ) ^ (1 / 6 : ℝ) with hu
   set v : ℝ := (2 : ℝ) ^ (1 / 3 : ℝ) with hv
   have hu6 : u ^ 6 = 3 := by rw [hu, ← airyMod_three_rpow]; norm_num
@@ -221,7 +224,8 @@ theorem airyMod_integrableOn_exp_pow (a : ℝ) (m : ℕ) :
     have h1 : t ^ m ≤ m ! * Real.exp t := by
       have := Real.pow_div_factorial_le_exp t ht.le m
       rwa [div_le_iff₀ (by positivity), mul_comm] at this
-    have h2 : 0 ≤ Real.exp (a * t) * (Real.exp (-(t ^ 3 / 12)) * t ^ (-(1 / 2) : ℝ)) := by positivity
+    have h2 : 0 ≤ Real.exp (a * t) *
+        (Real.exp (-(t ^ 3 / 12)) * t ^ (-(1 / 2) : ℝ)) := by positivity
     calc Real.exp (a * t) * (Real.exp (-(t ^ 3 / 12)) * (t ^ m * t ^ (-(1 / 2) : ℝ)))
         = t ^ m * (Real.exp (a * t) * (Real.exp (-(t ^ 3 / 12)) * t ^ (-(1 / 2) : ℝ))) := by ring
       _ ≤ (m ! * Real.exp t) * (Real.exp (a * t) * (Real.exp (-(t ^ 3 / 12)) *
@@ -253,10 +257,12 @@ private lemma airyMod_integral_term (m k : ℕ) (z : ℂ) :
 /-- The weighted Nicholson integrand `e^{zt - t³/12} t^m t^{-1/2}` is integrable on `(0, ∞)`,
 and its integral is the power series `∑ I_{k+m} z^k / k!`. -/
 theorem airyMod_hasSum_pow (m : ℕ) (z : ℂ) :
-    IntegrableOn (fun t : ℝ => exp (z * t - (t : ℂ) ^ 3 / 12) * ((t : ℂ) ^ m * (t : ℂ) ^ (-1 / 2 : ℂ)))
+    IntegrableOn (fun t : ℝ => exp (z * t - (t : ℂ) ^ 3 / 12) *
+        ((t : ℂ) ^ m * (t : ℂ) ^ (-1 / 2 : ℂ)))
       (Ioi 0) ∧
     HasSum (fun k : ℕ => z ^ k / k ! * (airyMod_I (k + m) : ℂ))
-      (∫ t : ℝ in Ioi 0, exp (z * t - (t : ℂ) ^ 3 / 12) * ((t : ℂ) ^ m * (t : ℂ) ^ (-1 / 2 : ℂ))) := by
+      (∫ t : ℝ in Ioi 0, exp (z * t - (t : ℂ) ^ 3 / 12) *
+          ((t : ℂ) ^ m * (t : ℂ) ^ (-1 / 2 : ℂ))) := by
   set F : ℕ → ℝ → ℂ := fun k t =>
     (z * t) ^ k / k ! * (exp (-((t : ℂ) ^ 3 / 12)) * ((t : ℂ) ^ m * (t : ℂ) ^ (-1 / 2 : ℂ)))
   set bound : ℕ → ℝ → ℝ := fun k t =>
@@ -271,7 +277,8 @@ theorem airyMod_hasSum_pow (m : ℕ) (z : ℂ) :
     rw [← Complex.exp_eq_exp_ℂ] at e
     rw [hexp]; exact e
   have hsumB : ∀ t : ℝ, HasSum (fun k => bound k t)
-      (Real.exp (‖z‖ * t) * (Real.exp (-(t ^ 3 / 12)) * (t ^ m * t ^ (-(1 / 2) : ℝ)))) := fun t => by
+      (Real.exp (‖z‖ * t) *
+          (Real.exp (-(t ^ 3 / 12)) * (t ^ m * t ^ (-(1 / 2) : ℝ)))) := fun t => by
     have e := (NormedSpace.expSeries_div_hasSum_exp (‖z‖ * t)).mul_right
       (Real.exp (-(t ^ 3 / 12)) * (t ^ m * t ^ (-(1 / 2) : ℝ)))
     rw [← Real.exp_eq_exp_ℝ] at e
@@ -391,7 +398,8 @@ theorem airyMod_iteratedDeriv_sq (n : ℕ) :
     rw [airyAi_zero, show (2 / 3 : ℂ) = ((2 / 3 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
     push_cast; ring
   have hA1 : airyAiDeriv 0 = ((-1 / ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3)) : ℝ) : ℂ) := by
-    rw [airyAiDeriv_zero, show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
+    rw [airyAiDeriv_zero, show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring,
+                                                                    Complex.Gamma_ofReal]
     push_cast; ring
   have hB0 : airyBi 0 = (Real.sqrt 3 : ℂ) * airyAi 0 := by
     simp only [airyBi, airyAi, airyG_zero, mul_zero, add_zero, sub_zero]
@@ -423,12 +431,14 @@ theorem airyMod_iteratedDeriv_sq (n : ℕ) :
       have d0 : deriv (fun w => airyAi w ^ 2 + airyBi w ^ 2) =
           fun w => 2 * (airyAi w * airyAiDeriv w + airyBi w * airyBiDeriv w) :=
         funext fun z => (hd z).1.deriv
-      rw [d0, (hd 0).2.1.deriv, airyMod_I_two, hB1, mul_zero, zero_mul, add_zero, neg_sq, mul_pow, h3,
+      rw [d0, (hd 0).2.1.deriv, airyMod_I_two, hB1, mul_zero, zero_mul, add_zero,
+          neg_sq, mul_pow, h3,
         hA1]
       push_cast
       field_simp
       ring
-    · rw [airyMod_iteratedDeriv_rec (fun z => (hd z).1) (fun z => (hd z).2.1) (fun z => (hd z).2.2) m,
+    · rw [airyMod_iteratedDeriv_rec (fun z => (hd z).1) (fun z => (hd z).2.1)
+          (fun z => (hd z).2.2) m,
         ih m (by omega), airyMod_I_add_three]
       push_cast; ring
 

@@ -320,7 +320,8 @@ theorem struveMel_value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) 
       at hrefl
     have hQT : (2 : ℂ) ^ (-ν) = (2 : ℂ) ^ (1 - μ) * (2 : ℂ) ^ (μ - ν - 1) := by
       rw [← cpow_add _ _ two_ne_zero]; ring_nf
-    have ha : Gamma μ = Gamma (μ / 2) * Gamma (μ / 2 + 1 / 2) / ((2 : ℂ) ^ (1 - μ) * Real.sqrt π) := by
+    have ha : Gamma μ = Gamma (μ / 2) * Gamma (μ / 2 + 1 / 2) /
+        ((2 : ℂ) ^ (1 - μ) * Real.sqrt π) := by
       rw [hdup]; field_simp
     have hb : Gamma ((1 - μ) / 2) = Real.sqrt π * Real.sqrt π /
         (cos (π * μ / 2) * Gamma (μ / 2 + 1 / 2)) := by
@@ -509,16 +510,19 @@ theorem struveMel_tendsto_boundary {μ ν : ℂ} (hν : ν.re ≤ 1 / 2) (h1 : �
 
 /-- For `t > 0`, `t^a H_ν(t) = t^{a+ν+1} (1/2)^{ν+1} H̃_ν(t)` with the entire core `H̃_ν`. -/
 theorem struveMel_cpow_mul_struveH (a ν : ℂ) {t : ℝ} (ht : 0 < t) :
-    (t : ℂ) ^ a * struveH ν t = (t : ℂ) ^ (a + ν + 1) * ((1 / 2 : ℂ) ^ (ν + 1) * struveHCore ν t) := by
+    (t : ℂ) ^ a * struveH ν t = (t : ℂ) ^ (a + ν + 1) *
+        ((1 / 2 : ℂ) ^ (ν + 1) * struveHCore ν t) := by
   have ht0 : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
   rw [struveH, show (t : ℂ) / 2 = ((t : ℝ) : ℂ) * ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
-    mul_cpow_ofReal_nonneg ht.le (by norm_num), show ((1 / 2 : ℝ) : ℂ) = (1 / 2 : ℂ) by push_cast; ring,
+    mul_cpow_ofReal_nonneg ht.le (by norm_num), show ((1 / 2 : ℝ) : ℂ) =
+        (1 / 2 : ℂ) by push_cast; ring,
     show a + ν + 1 = a + (ν + 1) by ring, cpow_add a (ν + 1) ht0]
   ring
 
 /-- The Struve Mellin integrand `t^{μ-ν-1} H_ν(t)` is interval integrable on `[0, R]`
 when `re μ > -1`. -/
-theorem struveMel_intervalIntegrable_struveH {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ) {R : ℝ} (hR : 0 ≤ R) :
+theorem struveMel_intervalIntegrable_struveH {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ)
+    {R : ℝ} (hR : 0 ≤ R) :
     IntervalIntegrable (fun t : ℝ => (t : ℂ) ^ (μ - ν - 1) * struveH ν t) volume 0 R := by
   have h := (intervalIntegral.intervalIntegrable_cpow' hμ0 (a := 0) (b := R)).mul_continuousOn
     (g := fun t : ℝ => (1 / 2 : ℂ) ^ (ν + 1) * struveHCore ν t)
@@ -706,7 +710,9 @@ theorem struveH_integral_mellin_zero {ν : ℂ} (hν : -3/2 < ν.re) :
 (π*μ/2)*Gamma (ν-μ/2+1)))`. -/
 @[dlmf 11.7.E11]
 theorem struveH_integral_mellin {μ ν : ℂ} (hμ : |μ.re| < 1) (hν : μ.re-3/2 < ν.re) :
-    HasIntegralAtTop (fun t : ℝ => (t:ℂ)^(μ-ν-1)*struveH ν t) 0 (if μ=0 then π/(2^(ν+1)*Gamma (ν+1)) else Gamma (μ/2)*2^(μ-ν-1)*sin (π*μ/2)/(cos (π*μ/2)*Gamma (ν-μ/2+1))) := by
+    HasIntegralAtTop (fun t : ℝ => (t:ℂ)^(μ-ν-1)*struveH ν t) 0
+        (if μ=0 then π/(2^(ν+1)*Gamma (ν+1)) else
+        Gamma (μ/2)*2^(μ-ν-1)*sin (π*μ/2)/(cos (π*μ/2)*Gamma (ν-μ/2+1))) := by
   obtain ⟨h0, h1⟩ := abs_lt.mp hμ
   exact struveMel_tendsto h0 h1 hν
 
@@ -717,7 +723,8 @@ diverges, e.g. at `μ = 3`, `ν = -2` the integrand grows like `t^(1/2) cos(...)
 @[dlmf 11.7.E12]
 theorem struveH_integral_product {μ ν : ℂ} (h : 0 < (μ+ν).re) (hμ : -3/2 < μ.re)
     (hν : -3/2 < ν.re) :
-    HasIntegralAtTop (fun t : ℝ => (t:ℂ)^(-μ-ν)*struveH μ t*struveH ν t) 0 (Real.sqrt π*Gamma (μ+ν)/(2^(μ+ν)*Gamma (μ+ν+1/2)*Gamma (μ+1/2)*Gamma (ν+1/2))) := by
+    HasIntegralAtTop (fun t : ℝ => (t:ℂ)^(-μ-ν)*struveH μ t*struveH ν t) 0
+        (Real.sqrt π*Gamma (μ+ν)/(2^(μ+ν)*Gamma (μ+ν+1/2)*Gamma (μ+1/2)*Gamma (ν+1/2))) := by
   sorry
 
 /-- Fubini for the Laplace transform of a Poisson-weighted integral. -/
@@ -736,7 +743,8 @@ theorem laplace_poissonWeight {a : ℂ} {β : ℝ} (hβ : β < a.re) {k : ℝ �
   set F : ℝ × ℝ → ℂ := fun p => exp (-a*p.1) * (w p.2 * k p.1 p.2)
   have hwm : Measurable w := by
     simp only [w]; fun_prop
-  have hFm : AEStronglyMeasurable F ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioc (0:ℝ) 1))) := by
+  have hFm : AEStronglyMeasurable F
+      ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioc (0:ℝ) 1))) := by
     apply Measurable.aestronglyMeasurable
     simp only [F]
     have hk' : Measurable (fun p : ℝ × ℝ => k p.1 p.2) := hk.measurable

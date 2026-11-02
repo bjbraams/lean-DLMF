@@ -115,7 +115,8 @@ theorem airyReal_rho_btw (N : ℕ) : ∀ β : ℝ, β ≤ N → ∀ t : ℝ, 0 �
     simp only [airyReal_rho, Finset.range_zero, Finset.sum_empty, sub_zero, Ring.choose_zero_right,
       pow_zero, one_mul]
     have h1 : 0 ≤ (1 + t) ^ β := Real.rpow_nonneg (by linarith) _
-    have h2 : (1 + t) ^ β ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos (by linarith) (by simpa using hβ)
+    have h2 : (1 + t) ^ β ≤ 1 :=
+        Real.rpow_le_one_of_one_le_of_nonpos (by linarith) (by simpa using hβ)
     nlinarith
   | succ N ih =>
     intro β hβ t ht
@@ -451,7 +452,8 @@ theorem airyReal_pack {a β : ℝ} (ha : 0 < a) {N : ℕ} (hβ : β ≤ N) {x : 
   obtain ⟨-, hb⟩ := airyReal_integral_btw (β := β) ha hs hβ
   set J := ∫ r in Ioi (0 : ℝ), Real.exp (-(s * r)) * r ^ (a - 1) * airyReal_rho β N r
   set M := Ring.choose β N * (Real.Gamma (a + N) * s ^ (-(a + N)))
-  have hC : 0 < s ^ a / Real.Gamma a := div_pos (Real.rpow_pos_of_pos hs _) (Real.Gamma_pos_of_pos ha)
+  have hC : 0 < s ^ a / Real.Gamma a :=
+      div_pos (Real.rpow_pos_of_pos hs _) (Real.Gamma_pos_of_pos ha)
   set C := s ^ a / Real.Gamma a
   have hb' : 0 ≤ (C * J) * (C * M - C * J) := by
     have : (C * J) * (C * M - C * J) = C ^ 2 * (J * (M - J)) := by ring
@@ -786,7 +788,8 @@ def airySt_q (N : ℕ) : ℝ :=
 /-- `log(1+x) ≥ x - x²/2 + x³/3 - x⁴/4` for `0 ≤ x ≤ 1/6`. -/
 theorem airySt_log_lower {x : ℝ} (hx0 : 0 ≤ x) (hx : x ≤ 1 / 6) :
     x - x ^ 2 / 2 + x ^ 3 / 3 - x ^ 4 / 4 ≤ Real.log (1 + x) := by
-  have h := Real.abs_log_sub_add_sum_range_le (x := -x) (by rw [abs_neg, abs_of_nonneg hx0]; linarith) 5
+  have h := Real.abs_log_sub_add_sum_range_le (x := -x)
+      (by rw [abs_neg, abs_of_nonneg hx0]; linarith) 5
   rw [abs_neg, abs_of_nonneg hx0, sub_neg_eq_add] at h
   simp only [Finset.sum_range_succ, Finset.sum_range_zero] at h
   have h1 := (abs_le.mp h).1
@@ -820,7 +823,8 @@ theorem airySt_q_succ_le {N : ℕ} (hN : 6 ≤ N) : airySt_q (N + 1) ≤ airySt_
   have hN0 : (0 : ℝ) < N := by linarith
   set x : ℝ := 1 / N with hx
   have hx0 : 0 ≤ x := by positivity
-  have hx6 : x ≤ 1 / 6 := by rw [hx]; exact div_le_div_of_nonneg_left (by norm_num) (by norm_num) hN'
+  have hx6 : x ≤ 1 / 6 := by rw [hx];
+                             exact div_le_div_of_nonneg_left (by norm_num) (by norm_num) hN'
   have hL := airySt_log_lower hx0 hx6
   have hlog1 : Real.log (N + 1) = Real.log N + Real.log (1 + x) := by
     rw [← Real.log_mul hN0.ne' (by positivity)]; congr 1; rw [hx]; field_simp
@@ -938,7 +942,8 @@ theorem airySt_tendsto_q : Tendsto airySt_q atTop (𝓝 0) := by
     have hu : Tendsto (fun N : ℕ => 1 / (12 * ((N : ℝ) + a))) atTop (𝓝 0) :=
       tendsto_const_nhds.div_atTop
         (Tendsto.const_mul_atTop (by norm_num) (tendsto_atTop_add_const_right _ a hn))
-    refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hu (fun N => ?_) (fun N => ?_)
+    refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hu
+        (fun N => ?_) (fun N => ?_)
     · exact (DLMF.Gamma.binetIntegral_mem (by positivity)).1
     · exact (DLMF.Gamma.binetIntegral_mem (by positivity)).2
   have hD : ∀ a t : ℝ, Tendsto (fun N : ℕ => ((N : ℝ) + a) * Real.log (1 + t / N)) atTop (𝓝 t) := by

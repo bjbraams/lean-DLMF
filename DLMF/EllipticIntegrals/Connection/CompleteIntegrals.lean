@@ -86,7 +86,8 @@ private lemma integral_cpow_imag_modulus {x c : ℝ} (hc : 0 < c) (hxc : c ^ 2 =
   refine intervalIntegral.integral_congr fun θ _ => ?_
   rw [Real.sin_pi_div_two_sub]
   have hA : 0 ≤ 1 - x ^ 2 * Real.sin θ ^ 2 := by
-    nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ), sq_nonneg c, mul_nonneg (sq_nonneg x) (sq_nonneg (Real.sin θ))]
+    nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ), sq_nonneg c,
+        mul_nonneg (sq_nonneg x) (sq_nonneg (Real.sin θ))]
   have e : (1 - (I * x / c) ^ 2 * (Real.cos θ : ℂ) ^ 2) =
       (((c ^ 2)⁻¹ : ℝ) : ℂ) * ((1 - x ^ 2 * Real.sin θ ^ 2 : ℝ) : ℂ) := by
     have hc0 : (c : ℂ) ≠ 0 := by exact_mod_cast hc.ne'
@@ -101,7 +102,8 @@ private lemma integral_cpow_imag_modulus {x c : ℝ} (hc : 0 < c) (hxc : c ^ 2 =
 /-- Identity under the stated parameter and domain assumptions: `(((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (-(1 / 2
 : ℂ)) = c ∧ (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (1 / 2 : ℂ) = (c : ℂ)⁻¹`. -/
 lemma ofReal_inv_sq_cpow_half {c : ℝ} (hc : 0 < c) :
-    (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (-(1 / 2 : ℂ)) = c ∧ (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (1 / 2 : ℂ) = (c : ℂ)⁻¹ := by
+    (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (-(1 / 2 : ℂ)) = c ∧ (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (1 / 2 : ℂ) =
+        (c : ℂ)⁻¹ := by
   have h1 : (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (1 / 2 : ℂ) = (c : ℂ)⁻¹ := by
     rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow (by positivity),
       Real.inv_rpow (by positivity), ← Real.sqrt_eq_rpow, Real.sqrt_sq hc.le]
@@ -124,7 +126,8 @@ theorem isOpen_setOf_one_sub_sq_mem_slitPlane : IsOpen {k : ℂ | 1 - k ^ 2 ∈ 
   isOpen_slitPlane.preimage (by fun_prop)
 
 /-- Formula under the stated hypotheses: `IsPreconnected {k : ℂ | 1 - k ^ 2 ∈ slitPlane}`. -/
-private lemma isPreconnected_setOf_one_sub_sq_mem_slitPlane : IsPreconnected {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := by
+private lemma isPreconnected_setOf_one_sub_sq_mem_slitPlane : IsPreconnected
+    {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := by
   refine (StarConvex.isPathConnected (a := (0 : ℂ)) ?_ (by simp)).isConnected.isPreconnected
   intro y hy a b ha hb hab
   simp only [smul_zero, zero_add, Set.mem_ofPred_eq, real_smul] at hy ⊢
@@ -138,7 +141,8 @@ theorem differentiableAt_jacobiComodulusk {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlan
   exact (by fun_prop : DifferentiableAt ℂ (fun k : ℂ => 1 - k ^ 2) k).cpow_const hk
 
 /-- Nonvanishing under the stated hypotheses: `jacobiComodulusk k ≠ 0`. -/
-private lemma jacobiComodulusk_ne_zero_of_mem_slitPlane {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) : jacobiComodulusk k ≠ 0 := by
+private lemma jacobiComodulusk_ne_zero_of_mem_slitPlane {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
+    jacobiComodulusk k ≠ 0 := by
   intro h
   have := jacobiComodulusk_sq_eq_one_sub_sq k
   rw [h] at this
@@ -162,13 +166,17 @@ private lemma one_sub_sq_imag_modulus_mem_slitPlane {k : ℂ} (hk : 1 - k ^ 2 �
   rw [this]; exact inv_mem_slitPlane_of_mem hk
 
 /-- Identity under the stated parameter and domain assumptions: `f k = g k`. -/
-theorem eq_of_differentiableOn_of_eq_on_Ioo {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f {k : ℂ | 1 - k ^ 2 ∈ slitPlane})
+theorem eq_of_differentiableOn_of_eq_on_Ioo {f g : ℂ → ℂ}
+    (hf : DifferentiableOn ℂ f {k : ℂ | 1 - k ^ 2 ∈ slitPlane})
     (hg : DifferentiableOn ℂ g {k : ℂ | 1 - k ^ 2 ∈ slitPlane})
     (h : ∀ x : ℝ, 0 < x → x < 1 → f x = g x) {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) : f k = g k := by
   have h0 : (0 : ℂ) ∈ {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := by simp
-  refine (hf.analyticOnNhd isOpen_setOf_one_sub_sq_mem_slitPlane).eqOn_of_preconnected_of_frequently_eq
-    (hg.analyticOnNhd isOpen_setOf_one_sub_sq_mem_slitPlane) isPreconnected_setOf_one_sub_sq_mem_slitPlane h0 ?_ hk
-  have := Carlson.TwoVariable.frequently_ofReal_Ioo (a := 0) (ε := 1) one_pos (P := fun z => f z = g z)
+  refine (hf.analyticOnNhd
+      isOpen_setOf_one_sub_sq_mem_slitPlane).eqOn_of_preconnected_of_frequently_eq
+    (hg.analyticOnNhd isOpen_setOf_one_sub_sq_mem_slitPlane)
+        isPreconnected_setOf_one_sub_sq_mem_slitPlane h0 ?_ hk
+  have := Carlson.TwoVariable.frequently_ofReal_Ioo (a := 0) (ε := 1) one_pos
+      (P := fun z => f z = g z)
     (fun x h1 h2 => h x h1 (by linarith))
   simpa using this
 
@@ -181,7 +189,8 @@ private lemma compEllIntKk_compEllIntEk_imag_modulus {k : ℂ} (hk : 1 - k ^ 2 �
   have hD := differentiableOn_compEllIntKk_compEllIntEk
   have hcomp : DifferentiableOn ℂ (fun k : ℂ => I * k / jacobiComodulusk k)
       {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := fun k hk =>
-    ((differentiableAt_const _).mul differentiableAt_id |>.div (differentiableAt_jacobiComodulusk hk)
+    ((differentiableAt_const _).mul differentiableAt_id |>.div
+        (differentiableAt_jacobiComodulusk hk)
       (jacobiComodulusk_ne_zero_of_mem_slitPlane hk)).differentiableWithinAt
   have hmaps : MapsTo (fun k : ℂ => I * k / jacobiComodulusk k) {k : ℂ | 1 - k ^ 2 ∈ slitPlane}
       {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := fun k hk => one_sub_sq_imag_modulus_mem_slitPlane hk
@@ -192,12 +201,15 @@ private lemma compEllIntKk_compEllIntEk_imag_modulus {k : ℂ} (hk : 1 - k ^ 2 �
     fun x h0 h1 => ⟨Real.sqrt_pos.2 (by nlinarith), Real.sq_sqrt (by nlinarith),
       jacobiComodulusk_ofReal_eq_sqrt (by nlinarith)⟩
   constructor
-  · refine eq_of_differentiableOn_of_eq_on_Ioo (hD.1.comp hcomp hmaps) (g := fun k => jacobiComodulusk k * compEllIntKk k) (hc.mul hD.1) (fun x h0 h1 => ?_) hk
+  · refine eq_of_differentiableOn_of_eq_on_Ioo (hD.1.comp hcomp hmaps)
+        (g := fun k => jacobiComodulusk k * compEllIntKk k) (hc.mul hD.1) (fun x h0 h1 => ?_) hk
     obtain ⟨hc0, hc2, hcx⟩ := hreal x h0 h1
     simp only [Function.comp, hcx]
     unfold compEllIntKk
     rw [integral_cpow_imag_modulus hc0 hc2, (ofReal_inv_sq_cpow_half hc0).1]
-  · refine eq_of_differentiableOn_of_eq_on_Ioo (hD.2.comp hcomp hmaps) (g := fun k => compEllIntEk k / jacobiComodulusk k) (hD.2.div hc fun k hk => jacobiComodulusk_ne_zero_of_mem_slitPlane hk)
+  · refine eq_of_differentiableOn_of_eq_on_Ioo (hD.2.comp hcomp hmaps)
+        (g := fun k => compEllIntEk k / jacobiComodulusk k)
+        (hD.2.div hc fun k hk => jacobiComodulusk_ne_zero_of_mem_slitPlane hk)
       (fun x h0 h1 => ?_) hk
     obtain ⟨hc0, hc2, hcx⟩ := hreal x h0 h1
     simp only [Function.comp_def, hcx]
@@ -217,7 +229,8 @@ private lemma jacobiComodulusk_jacobiComodulusk {k : ℂ} (hk : 0 < k.re) :
 /-- Identity under the stated parameter and domain assumptions: `compEllIntKk (-I *
 jacobiComodulusk k / k) = k * compEllIntKk (jacobiComodulusk k) ∧ compEllIntEk (-I *
 jacobiComodulusk k / k) = compEllIntEk (jacobiComodulusk k) / k`. -/
-private lemma compEllIntKk_compEllIntEk_imag_comodulus {k : ℂ} (hk : 0 < k.re) (hk2 : k ^ 2 ∈ slitPlane) :
+private lemma compEllIntKk_compEllIntEk_imag_comodulus {k : ℂ} (hk : 0 < k.re)
+    (hk2 : k ^ 2 ∈ slitPlane) :
     compEllIntKk (-I * jacobiComodulusk k / k) = k * compEllIntKk (jacobiComodulusk k) ∧
       compEllIntEk (-I * jacobiComodulusk k / k) = compEllIntEk (jacobiComodulusk k) / k := by
   have h1 : 1 - jacobiComodulusk k ^ 2 ∈ slitPlane := by
@@ -239,8 +252,10 @@ jacobiComodulusk k`. -/
 private lemma jacobiComodulusk_neg (k : ℂ) : jacobiComodulusk (-k) = jacobiComodulusk k := by
   simp [jacobiComodulusk]
 
-/-- Identity under the stated parameter and domain assumptions: `legendreCombination (-k) = legendreCombination k`. -/
-private lemma legendreCombination_neg (k : ℂ) : legendreCombination (-k) = legendreCombination k := by
+/-- Identity under the stated parameter and domain assumptions:
+`legendreCombination (-k) = legendreCombination k`. -/
+private lemma legendreCombination_neg (k : ℂ) : legendreCombination (-k) =
+    legendreCombination k := by
   simp only [legendreCombination, jacobiComodulusk_neg, compEllIntKk_neg, compEllIntEk_neg]
 
 /-- Formula under the stated hypotheses: `k ^ 2 ∈ slitPlane`. -/
@@ -256,7 +271,8 @@ private lemma pow_two_mem_slitPlane_of_re_pos {k : ℂ} (hk : 0 < k.re) : k ^ 2 
 
 /-- Estimate under the stated parameter and domain assumptions: `1 - z ^ 2 ∈ slitPlane ↔ z.im ≠ 0
 ∨ z.re ^ 2 < 1`. -/
-private lemma one_sub_sq_mem_slitPlane_iff {z : ℂ} : 1 - z ^ 2 ∈ slitPlane ↔ z.im ≠ 0 ∨ z.re ^ 2 < 1 := by
+private lemma one_sub_sq_mem_slitPlane_iff {z : ℂ} : 1 - z ^ 2 ∈ slitPlane ↔ z.im ≠ 0 ∨
+    z.re ^ 2 < 1 := by
   rw [mem_slitPlane_iff]
   simp only [sub_re, one_re, sub_im, one_im, sq, mul_re, mul_im, zero_sub, ne_eq, neg_eq_zero]
   constructor
@@ -276,12 +292,14 @@ private lemma one_sub_sq_mem_slitPlane_iff {z : ℂ} : 1 - z ^ 2 ∈ slitPlane �
     · left; nlinarith [sq_nonneg z.im]
 
 /-- The indicated domain is open: `IsOpen {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane}`. -/
-private lemma isOpen_setOf_re_pos_one_sub_sq_mem_slitPlane : IsOpen {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} :=
+private lemma isOpen_setOf_re_pos_one_sub_sq_mem_slitPlane : IsOpen
+    {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} :=
   (isOpen_lt continuous_const continuous_re).inter isOpen_setOf_one_sub_sq_mem_slitPlane
 
 /-- Estimate under the stated parameter and domain assumptions: `IsPreconnected {k : ℂ | 0 < k.re
 ∧ 1 - k ^ 2 ∈ slitPlane}`. -/
-private lemma isPreconnected_setOf_re_pos_one_sub_sq_mem_slitPlane : IsPreconnected {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} := by
+private lemma isPreconnected_setOf_re_pos_one_sub_sq_mem_slitPlane : IsPreconnected
+    {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} := by
   refine (StarConvex.isPathConnected (a := ((1 / 2 : ℝ) : ℂ)) ?_ ?_).isConnected.isPreconnected
   · intro y hy a b ha hb hab
     simp only [Set.mem_ofPred_eq, real_smul, one_sub_sq_mem_slitPlane_iff] at hy ⊢
@@ -314,7 +332,8 @@ private lemma legendreCombination_of_re_pos {k : ℂ} (hk : 0 < k.re) (hk1 : 1 -
   have hmaps : MapsTo jacobiComodulusk {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane}
       {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := fun k hk => by
     show 1 - jacobiComodulusk k ^ 2 ∈ slitPlane
-    rw [jacobiComodulusk_sq_eq_one_sub_sq, sub_sub_cancel]; exact pow_two_mem_slitPlane_of_re_pos hk.1
+    rw [jacobiComodulusk_sq_eq_one_sub_sq, sub_sub_cancel];
+        exact pow_two_mem_slitPlane_of_re_pos hk.1
   have hW : DifferentiableOn ℂ legendreCombination {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} := by
     have h1 := hD.1.mono hV
     have h2 := hD.2.mono hV
@@ -323,8 +342,10 @@ private lemma legendreCombination_of_re_pos {k : ℂ} (hk : 0 < k.re) (hk1 : 1 -
     exact ((h2.mul h3).add (h4.mul h1)).sub (h1.mul h3)
   have h0 : ((1 / 2 : ℝ) : ℂ) ∈ {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} := by
     simp only [Set.mem_ofPred_eq, one_sub_sq_mem_slitPlane_iff, ofReal_re, ofReal_im]; norm_num
-  refine (hW.analyticOnNhd isOpen_setOf_re_pos_one_sub_sq_mem_slitPlane).eqOn_of_preconnected_of_frequently_eq
-    (analyticOnNhd_const (v := ((π : ℂ) / 2))) isPreconnected_setOf_re_pos_one_sub_sq_mem_slitPlane h0 ?_ ⟨hk, hk1⟩
+  refine (hW.analyticOnNhd
+      isOpen_setOf_re_pos_one_sub_sq_mem_slitPlane).eqOn_of_preconnected_of_frequently_eq
+    (analyticOnNhd_const (v := ((π : ℂ) / 2))) isPreconnected_setOf_re_pos_one_sub_sq_mem_slitPlane
+        h0 ?_ ⟨hk, hk1⟩
   refine Carlson.TwoVariable.frequently_ofReal_Ioo (a := 1 / 2) (ε := 1 / 2) (by norm_num)
     (fun x h1 h2 => ?_)
   have hx0 : 0 < x := by linarith
@@ -334,7 +355,8 @@ private lemma legendreCombination_of_re_pos {k : ℂ} (hk : 0 < k.re) (hk1 : 1 -
   rw [(cCompEllIntKk_of_re_pos hre).1, (cCompEllIntKk_of_re_pos hre).2] at h
   rw [legendreCombination]; exact h
 
-/-- The Legendre combination with DLMF's continued `K'`, `E'` equals `legendreCombination` everywhere. -/
+/-- The Legendre combination with DLMF's continued `K'`, `E'` equals `legendreCombination`
+everywhere. -/
 private lemma compEllInt_legendre_sum_eq_legendreCombination (k : ℂ) :
     compEllIntEk k * cCompEllIntKk k + cCompEllIntEk k * compEllIntKk k -
       compEllIntKk k * cCompEllIntKk k = legendreCombination k := by
@@ -410,7 +432,8 @@ private lemma intervalIntegrable_abs_sub_rpow_neg_half {θ₀ : ℝ} (h0 : 0 ≤
     refine h.congr fun x hx => ?_
     rw [uIoc_of_le h0] at hx
     rw [abs_of_nonpos (by linarith [hx.2])]; ring_nf
-  · have h := (intervalIntegral.intervalIntegrable_rpow' hr (a := 0) (b := π / 2 - θ₀)).comp_sub_right
+  · have h := (intervalIntegral.intervalIntegrable_rpow' hr (a := 0)
+        (b := π / 2 - θ₀)).comp_sub_right
       θ₀ (by simp)
     simp only [zero_add, sub_add_cancel] at h
     refine h.congr fun x hx => ?_
@@ -420,7 +443,8 @@ private lemma intervalIntegrable_abs_sub_rpow_neg_half {θ₀ : ℝ} (h0 : 0 ≤
 /-- Integrability between the indicated endpoints: `IntervalIntegrable (fun θ : ℝ => |1 - a *
 Real.sin θ ^ 2| ^ (-(1 / 2) : ℝ)) volume 0 (π / 2)`. -/
 private lemma intervalIntegrable_abs_one_sub_mul_sin_sq_rpow {a : ℝ} (ha : 1 < a) :
-    IntervalIntegrable (fun θ : ℝ => |1 - a * Real.sin θ ^ 2| ^ (-(1 / 2) : ℝ)) volume 0 (π / 2) := by
+    IntervalIntegrable (fun θ : ℝ => |1 - a * Real.sin θ ^ 2| ^ (-(1 / 2) : ℝ)) volume
+        0 (π / 2) := by
   set θ₀ := Real.arcsin (1 / Real.sqrt a) with hθ₀
   have hsa : 0 < Real.sqrt a := Real.sqrt_pos.2 (by linarith)
   have hsa1 : 1 < Real.sqrt a := by
@@ -464,7 +488,8 @@ private lemma ae_one_sub_mul_sin_sq_ne_zero {a : ℝ} (ha : 1 < a) :
   filter_upwards [Measure.ae_ne volume (Real.arcsin (1 / Real.sqrt a))] with θ hne hθ h
   rw [uIoc_of_le (by positivity)] at hθ
   apply hne
-  have hs0 : 0 ≤ Real.sin θ := Real.sin_nonneg_of_nonneg_of_le_pi hθ.1.le (by linarith [hθ.2, Real.pi_pos])
+  have hs0 : 0 ≤ Real.sin θ :=
+      Real.sin_nonneg_of_nonneg_of_le_pi hθ.1.le (by linarith [hθ.2, Real.pi_pos])
   have hsq : Real.sin θ ^ 2 = 1 / a := by field_simp; linarith
   have hs : Real.sin θ = 1 / Real.sqrt a := by
     rw [← Real.sqrt_sq hs0, hsq, Real.sqrt_div' _ (by linarith : (0 : ℝ) ≤ a), Real.sqrt_one]
@@ -473,7 +498,8 @@ private lemma ae_one_sub_mul_sin_sq_ne_zero {a : ℝ} (ha : 1 < a) :
 /-- The map `(fun η : ℝ => ∫ θ in (0 : ℝ)..(π / 2), (1 - ((a : ℂ) - I * η) * (Real.sin θ : ℂ) ^ 2)
 ^ (ρ : ℂ))` tends to `(𝓝 (∫ θ in (0 : ℝ)..(π / 2), (1 - (a : ℂ) * (Real.sin θ : ℂ) ^ 2) ^ (ρ :
 ℂ)))` along `(𝓝[>] 0)`. -/
-private lemma tendsto_integral_cpow_cut {a : ℝ} (ha : 1 < a) {ρ : ℝ} (hρ : ρ = -(1 / 2) ∨ ρ = 1 / 2) :
+private lemma tendsto_integral_cpow_cut {a : ℝ} (ha : 1 < a) {ρ : ℝ}
+    (hρ : ρ = -(1 / 2) ∨ ρ = 1 / 2) :
     Tendsto (fun η : ℝ => ∫ θ in (0 : ℝ)..(π / 2),
         (1 - ((a : ℂ) - I * η) * (Real.sin θ : ℂ) ^ 2) ^ (ρ : ℂ)) (𝓝[>] 0)
       (𝓝 (∫ θ in (0 : ℝ)..(π / 2), (1 - (a : ℂ) * (Real.sin θ : ℂ) ^ 2) ^ (ρ : ℂ))) := by
@@ -531,11 +557,11 @@ private lemma tendsto_integral_cpow_cut {a : ℝ} (ha : 1 < a) {ρ : ℝ} (hρ :
         one_mul, zero_add]
       exact mul_nonneg (le_of_lt hη) (sq_nonneg _)
 
-/-- Identity under the stated parameter and domain assumptions: `legendreCombination k = compEllIntEk k * (∫
-θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ)) + (∫ θ
-in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((1 / 2 : ℝ) : ℂ)) *
-compEllIntKk k - compEllIntKk k * (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ :
-ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`legendreCombination k = compEllIntEk k * (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ :
+ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ)) + (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2)
+^ ((1 / 2 : ℝ) : ℂ)) * compEllIntKk k - compEllIntKk k * (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2)
+* (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ))`. -/
 private lemma legendreCombination_eq_integral (k : ℂ) : legendreCombination k =
     compEllIntEk k * (∫ θ in (0 : ℝ)..(π / 2),
       (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ)) +
@@ -551,8 +577,10 @@ private lemma legendreCombination_eq_integral (k : ℂ) : legendreCombination k 
     rw [compEllIntEk_eq_integral, jacobiComodulusk_sq_eq_one_sub_sq]; push_cast; rfl
   rw [legendreCombination, hK, hE]
 
-/-- Identity under the stated parameter and domain assumptions: `legendreCombination (I * y) = π / 2`. -/
-private lemma legendreCombination_I_mul {y : ℝ} (hy : 0 < y) : legendreCombination (I * y) = π / 2 := by
+/-- Identity under the stated parameter and domain assumptions:
+`legendreCombination (I * y) = π / 2`. -/
+private lemma legendreCombination_I_mul {y : ℝ} (hy : 0 < y) : legendreCombination
+    (I * y) = π / 2 := by
   set kε : ℝ → ℂ := fun ε => (ε : ℂ) + I * (Real.sqrt (y ^ 2 + ε ^ 2) : ℂ) with hkε
   set η : ℝ → ℝ := fun ε => 2 * ε * Real.sqrt (y ^ 2 + ε ^ 2) with hη
   set a : ℝ := 1 + y ^ 2 with ha
@@ -592,7 +620,8 @@ private lemma legendreCombination_I_mul {y : ℝ} (hy : 0 < y) : legendreCombina
   have hD := differentiableOn_compEllIntKk_compEllIntEk
   have hKc := (tendsto_integral_cpow_cut ha1 (ρ := -(1 / 2)) (Or.inl rfl)).comp hηt
   have hEc := (tendsto_integral_cpow_cut ha1 (ρ := 1 / 2) (Or.inr rfl)).comp hηt
-  have hT : Tendsto (fun ε => legendreCombination (kε ε)) (𝓝[>] 0) (𝓝 (legendreCombination (I * y))) := by
+  have hT : Tendsto (fun ε => legendreCombination (kε ε)) (𝓝[>] 0)
+      (𝓝 (legendreCombination (I * y))) := by
     simp only [legendreCombination_eq_integral, h1k, h1I]
     exact (((hcont _ hD.2).mul hKc).add (hEc.mul (hcont _ hD.1))).sub ((hcont _ hD.1).mul hKc)
   have hconst : ∀ᶠ ε in 𝓝[>] (0 : ℝ), legendreCombination (kε ε) = π / 2 := by

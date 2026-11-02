@@ -75,7 +75,8 @@ namespace DLMF.NumberTheory
 /-! ### §27.8 Dirichlet characters -/
 
 /-- A function with the properties 27.8.1–27.8.4 only depends on `n mod k` (`n ≥ 1`). -/
-private lemma isDirichletCharacterFn_apply_eq_mod_add {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ} (hf : IsDirichletCharacterFn k f)
+private lemma isDirichletCharacterFn_apply_eq_mod_add {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ}
+    (hf : IsDirichletCharacterFn k f)
     {a : ℕ} (ha : 0 < a) : f a = f (a % k + k) := by
   have hq : ∀ r, 0 < r → ∀ q, f (r + k * q) = f r := by
     intro r hr q
@@ -115,7 +116,8 @@ theorem IsDirichletCharacterFn.exists_dirichletCharacter {k : ℕ} (hk : 0 < k) 
       map_mul' := by
         intro x y
         show f ((x * y).val + k) = f (x.val + k) * f (y.val + k)
-        rw [← hf.2.1 _ _ (by omega) (by omega), isDirichletCharacterFn_apply_eq_mod_add hk hf (a := (x.val + k) * _)
+        rw [← hf.2.1 _ _ (by omega) (by omega),
+            isDirichletCharacterFn_apply_eq_mod_add hk hf (a := (x.val + k) * _)
           (by positivity), ZMod.val_mul]
         congr 2
         rw [Nat.mul_mod (x.val + k), Nat.add_mod_right, Nat.add_mod_right, ← Nat.mul_mod]
@@ -163,7 +165,8 @@ theorem DirichletCharacter.exists_conj {k : ℕ} (χ : DirichletCharacter ℂ k)
   dirichletCharacter_exists_conj χ
 
 /-- DLMF 27.8.6 (proof). -/
-private lemma sum_dirichletCharacter_mul_conj_eq_ite (k : ℕ) [NeZero k] (m n : ℕ) (hn : n.Coprime k) :
+private lemma sum_dirichletCharacter_mul_conj_eq_ite (k : ℕ) [NeZero k] (m n : ℕ)
+    (hn : n.Coprime k) :
     ∑ χ : DirichletCharacter ℂ k, χ m * starRingEnd ℂ (χ n) =
       if m ≡ n [MOD k] then (k.totient : ℂ) else 0 := by
   obtain ⟨u, hu⟩ := (ZMod.isUnit_iff_coprime n k).mpr hn
@@ -194,14 +197,16 @@ theorem sum_dirichletCharacter_mul_conj (k : ℕ) [NeZero k] (m n : ℕ) (hn : n
   sum_dirichletCharacter_mul_conj_eq_ite k m n hn
 
 /-- `χ(a) = χ₀(a)` for the primitive character `χ₀` and `(a, k) = 1`. -/
-private lemma dirichletCharacter_apply_eq_primitiveCharacter {k : ℕ} (χ : DirichletCharacter ℂ k) (a : ℕ)
+private lemma dirichletCharacter_apply_eq_primitiveCharacter {k : ℕ}
+    (χ : DirichletCharacter ℂ k) (a : ℕ)
     (ha : a.Coprime k) : χ a = χ.primitiveCharacter a := by
   have := χ.primitiveCharacter_apply_of_isCoprime (a := (a : ℤ))
     (Nat.isCoprime_iff_coprime.mpr ha)
   simpa using this.symm
 
 /-- `χ(a) = 1` when `(a, k) = 1` and `a ≡ 1` modulo the conductor. -/
-private lemma dirichletCharacter_apply_eq_one_of_modEq_conductor {k : ℕ} (χ : DirichletCharacter ℂ k) (a : ℕ)
+private lemma dirichletCharacter_apply_eq_one_of_modEq_conductor {k : ℕ}
+    (χ : DirichletCharacter ℂ k) (a : ℕ)
     (ha : a.Coprime k) (hmod : a ≡ 1 [MOD χ.conductor]) : χ a = 1 := by
   rw [dirichletCharacter_apply_eq_primitiveCharacter χ a ha]
   have : (a : ZMod χ.conductor) = 1 := by
@@ -248,7 +253,8 @@ theorem isPrimitiveDLMF_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k)
   isPrimitiveDLMF_iff_isPrimitive χ
 
 /-- Nonprincipal characters to a prime modulus are primitive (proof). -/
-private lemma dirichletCharacter_isPrimitive_of_prime {k : ℕ} (hk : k.Prime) (χ : DirichletCharacter ℂ k)
+private lemma dirichletCharacter_isPrimitive_of_prime {k : ℕ} (hk : k.Prime)
+    (χ : DirichletCharacter ℂ k)
     (hχ : χ ≠ 1) : χ.IsPrimitive := by
   have : NeZero k := ⟨hk.ne_zero⟩
   rcases (Nat.dvd_prime hk).mp χ.conductor_dvd_level with h | h
@@ -262,10 +268,12 @@ theorem isPrimitive_of_prime {k : ℕ} (hk : k.Prime) (χ : DirichletCharacter �
   dirichletCharacter_isPrimitive_of_prime hk χ hχ
 
 /-- DLMF 27.8.8 (proof), with `χ₀` the primitive character. -/
-private lemma isInducedModulus_conductor_and_exists_eq_mul_one {k : ℕ} (χ : DirichletCharacter ℂ k) :
+private lemma isInducedModulus_conductor_and_exists_eq_mul_one {k : ℕ}
+    (χ : DirichletCharacter ℂ k) :
     IsInducedModulus χ χ.conductor ∧ ∃ χ₀ : DirichletCharacter ℂ χ.conductor,
       ∀ n : ℕ, χ n = χ₀ n * (1 : DirichletCharacter ℂ k) n := by
-  refine ⟨⟨χ.conductor_dvd_level, fun a ha hmod ↦ dirichletCharacter_apply_eq_one_of_modEq_conductor χ a ha hmod⟩,
+  refine ⟨⟨χ.conductor_dvd_level,
+      fun a ha hmod ↦ dirichletCharacter_apply_eq_one_of_modEq_conductor χ a ha hmod⟩,
     χ.primitiveCharacter, fun n ↦ ?_⟩
   · rw [principalCharacter_apply]
     split_ifs with h
@@ -540,7 +548,8 @@ private lemma exp_neg_eq_expFrac_sub {k : ℕ} (hk : 0 < k) (m j : ℕ) (hj : j 
     Complex.exp_nat_mul_two_pi_mul_I, mul_one]
 
 /-- `e(ma/k) e(mb/k) = e(m(a+b)/k)`. -/
-private lemma expFrac_mul_expFrac (m a b k : ℕ) : expFrac m a k * expFrac m b k = expFrac m (a + b) k := by
+private lemma expFrac_mul_expFrac (m a b k : ℕ) : expFrac m a k * expFrac m b k =
+    expFrac m (a + b) k := by
   rw [expFrac, expFrac, expFrac, ← Complex.exp_add]
   congr 1; push_cast; ring
 
@@ -549,7 +558,8 @@ private lemma expFrac_comm (m n k : ℕ) : expFrac m n k = expFrac n m k := by
   rw [expFrac, expFrac]; congr 1; ring
 
 /-- DLMF 27.10.2–27.10.3 (proof). -/
-private lemma finiteFourierCoeff_expansion {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ} (hf : IsPeriodicFn k f) :
+private lemma finiteFourierCoeff_expansion {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ}
+    (hf : IsPeriodicFn k f) :
     (∀ n : ℕ, 0 < n → f n = ∑ m ∈ Finset.Icc 1 k, finiteFourierCoeff k f m * expFrac m n k) ∧
       IsPeriodicFn k (finiteFourierCoeff k f) := by
   have hk0 : (k : ℂ) ≠ 0 := by exact_mod_cast hk.ne'
@@ -562,7 +572,8 @@ private lemma finiteFourierCoeff_expansion {k : ℕ} (hk : 0 < k) {f : ℕ → �
       rw [mul_assoc, sum_mul]
       congr 1
       refine sum_congr rfl fun j hj ↦ ?_
-      rw [exp_neg_eq_expFrac_sub hk m j (mem_Icc.mp hj).2, mul_assoc, mul_comm (expFrac _ (k - j) _),
+      rw [exp_neg_eq_expFrac_sub hk m j (mem_Icc.mp hj).2, mul_assoc,
+          mul_comm (expFrac _ (k - j) _),
         expFrac_mul_expFrac]
     rw [sum_congr rfl e1, ← mul_sum, sum_comm]
     simp_rw [← mul_sum]
@@ -831,14 +842,16 @@ theorem gaussSumSeparable_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ 
   exact gaussSumSeparable_of_coprime_and_iff χ
 
 /-- For primitive `χ`, `G(n, χ) = χ̄(n) G(1, χ)` in Mathlib's normalization. -/
-private lemma gaussSum_stdAddChar_mulShift_eq_conj_mul {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ k}
+private lemma gaussSum_stdAddChar_mulShift_eq_conj_mul {k : ℕ} [NeZero k]
+    {χ : DirichletCharacter ℂ k}
     (hχ : χ.IsPrimitive) (a : ZMod k) :
     gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift a) =
       starRingEnd ℂ (χ a) * gaussSum χ (ZMod.stdAddChar (N := k)) := by
   rw [gaussSum_mulShift_of_isPrimitive _ hχ a, ← MulChar.star_apply', Complex.star_def]
 
 /-- `|G(1, χ)|² = k` for a primitive character `χ` mod `k`. -/
-private lemma gaussSum_stdAddChar_mul_conj_of_isPrimitive {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ k}
+private lemma gaussSum_stdAddChar_mul_conj_of_isPrimitive {k : ℕ} [NeZero k]
+    {χ : DirichletCharacter ℂ k}
     (hχ : χ.IsPrimitive) :
     gaussSum χ (ZMod.stdAddChar (N := k)) * starRingEnd ℂ (gaussSum χ (ZMod.stdAddChar (N := k)))
       = k := by
@@ -895,13 +908,15 @@ theorem gaussSumDLMF_primitive {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ
   have h1 : gaussSumDLMF χ 1 = gaussSum χ (ZMod.stdAddChar (N := k)) := by
     rw [gaussSumDLMF_eq_gaussSum, Nat.cast_one, AddChar.mulShift_one]
   refine ⟨fun n ↦ ?_, ?_⟩
-  · rw [GaussSumSeparable, gaussSumDLMF_eq_gaussSum, gaussSum_stdAddChar_mulShift_eq_conj_mul hχ, h1]
+  · rw [GaussSumSeparable, gaussSumDLMF_eq_gaussSum,
+        gaussSum_stdAddChar_mulShift_eq_conj_mul hχ, h1]
   · have h := gaussSum_stdAddChar_mul_conj_of_isPrimitive hχ
     rw [← h1, Complex.mul_conj, Complex.normSq_eq_norm_sq] at h
     exact_mod_cast h
 
 /-- A character sum over `ZMod N` is a sum over the units. -/
-private lemma sum_dirichletCharacter_mul_eq_sum_units {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (e : ZMod N → ℂ) :
+private lemma sum_dirichletCharacter_mul_eq_sum_units {N : ℕ} [NeZero N]
+    (χ : DirichletCharacter ℂ N) (e : ZMod N → ℂ) :
     ∑ a : ZMod N, χ a * e a = ∑ u : (ZMod N)ˣ, χ u * e u := by
   classical
   have : ∑ u : (ZMod N)ˣ, χ u * e u =
@@ -915,7 +930,8 @@ private lemma sum_dirichletCharacter_mul_eq_sum_units {N : ℕ} [NeZero N] (χ :
   rw [MulChar.map_nonunit _ this, zero_mul]
 
 /-- `ψ_k(q a) = ψ_d(a mod d)` when `k = d q`. -/
-private lemma stdAddChar_natCast_mul_eq_castHom {k d q : ℕ} [NeZero k] [NeZero d] (hkq : k = d * q) (hd : d ∣ k)
+private lemma stdAddChar_natCast_mul_eq_castHom {k d q : ℕ} [NeZero k] [NeZero d]
+    (hkq : k = d * q) (hd : d ∣ k)
     (a : ZMod k) :
     ZMod.stdAddChar (N := k) ((q : ZMod k) * a) =
       ZMod.stdAddChar (N := d) (ZMod.castHom hd (ZMod d) a) := by
@@ -933,7 +949,8 @@ private lemma stdAddChar_natCast_mul_eq_castHom {k d q : ℕ} [NeZero k] [NeZero
   field_simp
 
 /-- Sums over the units through a surjective hom: `∑_u g(f u) = #ker · ∑_v g v`. -/
-private lemma sum_comp_surjective_monoidHom {G H : Type*} [Group G] [Fintype G] [Group H] [Fintype H]
+private lemma sum_comp_surjective_monoidHom {G H : Type*} [Group G] [Fintype G]
+    [Group H] [Fintype H]
     [DecidableEq H] (f : G →* H) (hf : Function.Surjective f) (g : H → ℂ) :
     ∑ u, g (f u) = (#{u | f u = 1} : ℂ) * ∑ v, g v := by
   classical
@@ -947,14 +964,16 @@ private lemma sum_comp_surjective_monoidHom {G H : Type*} [Group G] [Fintype G] 
   exact MonoidHom.card_fiber_eq_of_mem_range f (hf v) (hf 1)
 
 /-- For `k = d q` with `d` the conductor, `G(q, χ) = #ker · G(1, χ*)`. -/
-private lemma gaussSum_mulShift_eq_card_ker_mul_primitiveCharacter {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k)
+private lemma gaussSum_mulShift_eq_card_ker_mul_primitiveCharacter {k : ℕ} [NeZero k]
+    (χ : DirichletCharacter ℂ k)
     [NeZero χ.conductor] {q : ℕ} (hkq : k = χ.conductor * q) :
     gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift (q : ZMod k)) =
       (#{u | ZMod.unitsMap χ.conductor_dvd_level u = 1} : ℂ) *
         gaussSum χ.primitiveCharacter (ZMod.stdAddChar (N := χ.conductor)) := by
   classical
   set hd := χ.conductor_dvd_level
-  rw [gaussSum, gaussSum, sum_dirichletCharacter_mul_eq_sum_units, sum_dirichletCharacter_mul_eq_sum_units]
+  rw [gaussSum, gaussSum, sum_dirichletCharacter_mul_eq_sum_units,
+      sum_dirichletCharacter_mul_eq_sum_units]
   have hterm : ∀ u : (ZMod k)ˣ, χ u * ((ZMod.stdAddChar (N := k)).mulShift (q : ZMod k)) u =
       (fun v : (ZMod χ.conductor)ˣ ↦ χ.primitiveCharacter v *
         ZMod.stdAddChar (N := χ.conductor) v) (ZMod.unitsMap hd u) := by

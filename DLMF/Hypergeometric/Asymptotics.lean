@@ -130,7 +130,8 @@ theorem large_denominator_expansion (a b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m 
             ((c ^ m * (k + m).factorial) / m.factorial * (k + m).factorial) := by
           field_simp
       _ ≤ _ := by
-          have hle : c ^ m * (k + m).factorial / m.factorial ≤ (ascPochhammer ℝ (k + m)).eval c := by
+          have hle : c ^ m * (k + m).factorial / m.factorial ≤
+              (ascPochhammer ℝ (k + m)).eval c := by
             rw [div_le_iff₀ (by positivity)]; linarith
           gcongr
   have hgs' : Summable fun k => g (k + m) := (summable_nat_add_iff m).mpr hgs
@@ -165,7 +166,8 @@ theorem expSubOneDiv_eq_dslope : expSubOneDiv = dslope exp 0 := by
   funext t
   by_cases ht : t = 0
   · subst ht; simp [expSubOneDiv, dslope_same, Complex.deriv_exp]
-  · rw [expSubOneDiv, ite_eq_right_iff.mpr (fun h => absurd h ht), dslope_of_ne _ ht, slope_def_field, exp_zero, sub_zero]
+  · rw [expSubOneDiv, ite_eq_right_iff.mpr (fun h => absurd h ht), dslope_of_ne _ ht,
+        slope_def_field, exp_zero, sub_zero]
 
 /-- `expSubOneDiv` is entire. -/
 theorem analyticAt_expSubOneDiv (t : ℂ) : AnalyticAt ℂ expSubOneDiv t := by
@@ -428,7 +430,8 @@ theorem hcub_large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) 
 theorem hcub_largeDen_taylor (a b c z : ℂ) (N : ℕ) :
     (fun t => largeDenominatorGenerating a b c z t -
       ∑ n ∈ Finset.range N, largeDenominatorCoeff a b c z n * t ^ n) =O[𝓝 0] fun t => ‖t‖ ^ N := by
-  have h := (analyticAt_largeDenominatorGenerating a b c z).hasFPowerSeriesAt.isBigO_sub_partialSum_pow
+  have h := (analyticAt_largeDenominatorGenerating a b c
+      z).hasFPowerSeriesAt.isBigO_sub_partialSum_pow
     N
   refine h.congr' (Eventually.of_forall fun s => ?_) EventuallyEq.rfl
   simp only [zero_add, FormalMultilinearSeries.partialSum,
@@ -450,11 +453,13 @@ theorem hcub_subst₂ (a b c z : ℂ) (l : ℝ) {t : ℝ} (ht : 0 < t) :
   have hc : ((1 - Real.exp (-t) : ℝ) : ℂ) ^ (b - 1) =
       exp (-(t : ℂ) * (b - 1)) * ((t : ℂ) ^ (b - 1) * (E : ℂ) ^ (b - 1)) := by
     rw [hs, Complex.ofReal_mul, mul_cpow_ofReal_nonneg (Real.exp_pos _).le
-      (by positivity), Complex.ofReal_mul, mul_cpow_ofReal_nonneg ht.le hE0.le, TauCeti.ofReal_exp_cpow]
+      (by positivity), Complex.ofReal_mul, mul_cpow_ofReal_nonneg ht.le hE0.le,
+          TauCeti.ofReal_exp_cpow]
     push_cast; ring_nf
   have hw : (1 - z * ((1 - Real.exp (-t) : ℝ) : ℂ)) = 1 - z + z * exp (-(t : ℂ)) := by
     push_cast; ring
-  rw [hc, show (1 : ℂ) - ((1 - Real.exp (-t) : ℝ) : ℂ) = ((Real.exp (-t) : ℝ) : ℂ) by push_cast; ring,
+  rw [hc, show (1 : ℂ) - ((1 - Real.exp (-t) : ℝ) : ℂ) =
+      ((Real.exp (-t) : ℝ) : ℂ) by push_cast; ring,
     TauCeti.ofReal_exp_cpow, abs_of_pos (Real.exp_pos _), Complex.real_smul,
     Complex.real_smul, largeDenominatorGenerating, hEc, hw]
   set W := (1 - z + z * exp (-(t : ℂ))) ^ (-a)

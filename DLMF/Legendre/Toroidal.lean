@@ -48,7 +48,8 @@ namespace DLMF.Legendre
 sin φ, c sin θ)/(cosh η - cos θ)`. -/
 @[dlmf 14.19.E1]
 def toroidalCoordinates (c η θ phi : ℝ) : ℝ × ℝ × ℝ :=
-  (c*Real.sinh η*Real.cos phi/(Real.cosh η-Real.cos θ),c*Real.sinh η*Real.sin phi/(Real.cosh η-Real.cos θ),c*Real.sin θ/(Real.cosh η-Real.cos θ))
+  (c*Real.sinh η*Real.cos phi/(Real.cosh η-Real.cos θ),
+      c*Real.sinh η*Real.sin phi/(Real.cosh η-Real.cos θ), c*Real.sin θ/(Real.cosh η-Real.cos θ))
 
 /-- Toroidal function of the first kind. -/
 def toroidalP (n : ℕ) (μ : ℂ) (x : ℝ) : ℂ :=
@@ -66,7 +67,8 @@ theorem legTor_point {t u : ℝ} (ht : 1 < t) (hu : 0 < u) (htu : t^2 - 1 = u^2)
     (t:ℂ)/exp ((log ((t:ℂ)-1)+log ((t:ℂ)+1))/2) = ((t/u:ℝ):ℂ) ∧
       legendreBranchPower (-1/2) t = exp (-(Real.log u:ℂ)/2) := by
   have hl : log ((t:ℂ)-1)+log ((t:ℂ)+1) = 2*(Real.log u:ℂ) := by
-    rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring, show (t:ℂ)+1 = ((t+1:ℝ):ℂ) by push_cast; ring,
+    rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring, show (t:ℂ)+1 =
+                                        ((t+1:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log (by linarith), ← ofReal_log (by linarith), ← ofReal_add,
       ← Real.log_mul (by linarith) (by linarith), show (t-1)*(t+1) = u^2 by linear_combination htu,
       Real.log_pow]
@@ -144,7 +146,8 @@ theorem legTor_quad (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : 
   rw [harg]
   have hw2 : (1:ℂ) - (w:ℂ)/2 = ((1-w/2:ℝ):ℂ) := by push_cast; ring
   have h1q : (1:ℂ) + q = ((1+q:ℝ):ℂ) := by push_cast; ring
-  rw [hw2, h1q, Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by linarith), ← mul_assoc,
+  rw [hw2, h1q, Complex.ofReal_cpow_eq_exp (by positivity),
+      Complex.ofReal_cpow_eq_exp (by linarith), ← mul_assoc,
     ← exp_add]
   congr 2
   have hl : Real.log (1+q^2) = 2*Real.log (1+q) + Real.log (1-w/2) := by
@@ -154,9 +157,11 @@ theorem legTor_quad (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : 
   rw [hl]; push_cast; ring
 
 /-- DLMF 14.19.3 off the half-integer degrees `2ν ∈ ℤ`. -/
-theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
+theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ))
+    (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
     {ξ : ℝ} (hξ : 0 < ξ) :
-    olverQ (ν-1/2) μ (Real.cosh ξ)=Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
+    olverQ (ν-1/2) μ (Real.cosh ξ)=Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp
+        ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
   set q := Real.exp (-ξ) with hqdef
   have hq0 : 0 < q := Real.exp_pos _
   have hq1 : q < 1 := by rw [hqdef]; exact Real.exp_lt_one_iff.mpr (by linarith)
@@ -191,7 +196,8 @@ theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ
     show ν-1/2+3/2 = ν+1 by ring]
   set G := ₂F₁ ((ν+μ+1/2)/2) ((ν+μ+1/2+1)/2) (ν+1) (((2*q/(1+q^2))^2:ℝ):ℂ) / Gamma (ν+1)
   -- logarithmic bookkeeping
-  have hl : log (((Real.cosh ξ:ℝ):ℂ)-1)+log (((Real.cosh ξ:ℝ):ℂ)+1) = 2*(Real.log (Real.sinh ξ):ℂ) := by
+  have hl : log (((Real.cosh ξ:ℝ):ℂ)-1)+log (((Real.cosh ξ:ℝ):ℂ)+1) =
+      2*(Real.log (Real.sinh ξ):ℂ) := by
     rw [show ((Real.cosh ξ:ℝ):ℂ)-1 = ((Real.cosh ξ-1:ℝ):ℂ) by push_cast; ring,
       show ((Real.cosh ξ:ℝ):ℂ)+1 = ((Real.cosh ξ+1:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log (by linarith), ← ofReal_log (by linarith), ← ofReal_add,
@@ -209,7 +215,8 @@ theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ
   have e1 : (1:ℂ) - ((q^2:ℝ):ℂ) = ((1-q^2:ℝ):ℂ) := by push_cast; ring
   have q21 : q^2 < 1 := by nlinarith
   unfold legendreBranchPower
-  rw [hl, e1, Complex.ofReal_cpow_eq_exp (by linarith) μ, show (2:ℂ)^(ν-1/2+1) = ((2:ℝ):ℂ)^(ν-1/2+1) by norm_num,
+  rw [hl, e1, Complex.ofReal_cpow_eq_exp (by linarith) μ, show (2:ℂ)^(ν-1/2+1) =
+      ((2:ℝ):ℂ)^(ν-1/2+1) by norm_num,
     Complex.ofReal_cpow_eq_exp (by norm_num : (0:ℝ) < 2),
     Complex.ofReal_cpow_eq_exp hx0]
   have L : ∀ A B C : ℂ, (Real.sqrt π:ℂ) * exp A / (exp B * exp C) * G =
@@ -224,9 +231,12 @@ theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ
   rw [hl1, hl2, hlq]; push_cast; ring
 
 /-- DLMF 14.19.2 off the half-integer orders `2μ ∈ ℤ`. -/
-theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:ℂ)) (hc2 : ∀ k : ℕ, 1 - μ ≠ -(k:ℂ))
+theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:ℂ))
+    (hc2 : ∀ k : ℕ, 1 - μ ≠ -(k:ℂ))
     {ξ : ℝ} (hξ : 0 < ξ) :
-    associatedP (ν-1/2) μ (Real.cosh ξ)=Gamma (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))*regularizedGaussHG (1/2-μ) (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := by
+    associatedP (ν-1/2) μ (Real.cosh ξ)=Gamma
+        (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))*regularizedGaussHG (1/2-μ)
+        (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := by
   set q := Real.exp (-ξ) with hqdef
   have hq0 : 0 < q := Real.exp_pos _
   have hq1 : q < 1 := by rw [hqdef]; exact Real.exp_lt_one_iff.mpr (by linarith)
@@ -242,13 +252,15 @@ theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:
   have ht1 : 1 < Real.cosh ξ := Real.one_lt_cosh.mpr hξ.ne'
   have hx0 : 0 < Real.cosh ξ := by linarith
   have q21 : q^2 < 1 := by nlinarith
-  have hz : ((Real.cosh ξ:ℝ):ℂ) - 1 ∈ slitPlane := Or.inl (by simp only [sub_re, ofReal_re, one_re]; linarith)
+  have hz : ((Real.cosh ξ:ℝ):ℂ) - 1 ∈ slitPlane :=
+      Or.inl (by simp only [sub_re, ofReal_re, one_re]; linarith)
   -- step 1: degree reflection and DLMF 14.3.18
   have hrefl := legTor_P_neg_degree (-ν-1/2) μ ht1
   rw [show -(-ν-1/2)-1 = ν-1/2 by ring] at hrefl
   rw [hrefl]
   rw [show associatedP (-ν-1/2) μ (Real.cosh ξ) = associatedP (-ν-1/2) (-(-μ)) (Real.cosh ξ) by
-    rw [neg_neg], associatedP_neg_eq_quadratic (-ν-1/2) (-μ) hz (by simp only [ofReal_re]; linarith)]
+    rw [neg_neg], associatedP_neg_eq_quadratic (-ν-1/2) (-μ) hz
+        (by simp only [ofReal_re]; linarith)]
   simp only [neg_neg]
   -- step 2: hypergeometric factors
   have hw1 : ‖(1:ℂ) - 1/((Real.cosh ξ:ℝ):ℂ)^2‖ < 1 := by
@@ -274,7 +286,8 @@ theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:
     have : (1+q^2)^2 ≠ 0 := by positivity
     rw [eq_sub_iff_add_eq, ← add_div, div_eq_one_iff_eq this]; ring
   have harg : (((1-q^2:ℝ):ℂ)/(2-((1-q^2:ℝ):ℂ)))^2 = (1:ℂ) - 1/((Real.cosh ξ:ℝ):ℂ)^2 := by
-    rw [show (((1-q^2:ℝ):ℂ)/(2-((1-q^2:ℝ):ℂ)))^2 = ((((1-q^2)/(2-(1-q^2)))^2:ℝ):ℂ) by push_cast; ring,
+    rw [show (((1-q^2:ℝ):ℂ)/(2-((1-q^2:ℝ):ℂ)))^2 =
+        ((((1-q^2)/(2-(1-q^2)))^2:ℝ):ℂ) by push_cast; ring,
       hr]; push_cast; ring
   rw [harg]
   set F := ₂F₁ ((1/2+ν-μ)/2) ((1/2+ν-μ+1)/2) (-μ+1) ((1:ℂ) - 1/((Real.cosh ξ:ℝ):ℂ)^2)
@@ -288,7 +301,8 @@ theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:
     rw [eq_div_iff hG1, hdup]
   rw [hGam]
   -- step 4: logarithms
-  have hl : log (((Real.cosh ξ:ℝ):ℂ)-1)+log (((Real.cosh ξ:ℝ):ℂ)+1) = 2*(Real.log (Real.sinh ξ):ℂ) := by
+  have hl : log (((Real.cosh ξ:ℝ):ℂ)-1)+log (((Real.cosh ξ:ℝ):ℂ)+1) =
+      2*(Real.log (Real.sinh ξ):ℂ) := by
     rw [show ((Real.cosh ξ:ℝ):ℂ)-1 = ((Real.cosh ξ-1:ℝ):ℂ) by push_cast; ring,
       show ((Real.cosh ξ:ℝ):ℂ)+1 = ((Real.cosh ξ+1:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log (by linarith), ← ofReal_log (by linarith), ← ofReal_add,
@@ -310,7 +324,8 @@ theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:
   rw [hl, e2, h2, h2, Complex.ofReal_cpow_eq_exp hx0, Complex.ofReal_cpow_eq_exp (by linarith) μ,
     Complex.ofReal_cpow_eq_exp (by nlinarith)]
   have hpi : (Real.sqrt π:ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
-  have L : ∀ A B C : ℂ, exp A * exp B * exp C * (F / Gamma (-μ+1)) = F / Gamma (-μ+1) * exp (A+B+C) := by
+  have L : ∀ A B C : ℂ, exp A * exp B * exp C * (F / Gamma (-μ+1)) = F / Gamma (-μ+1) *
+      exp (A+B+C) := by
     intro A B C; rw [exp_add, exp_add]; ring
   have R : ∀ D E G H : ℂ, Gamma (2*(1/2-μ)) * exp D * (Real.sqrt π:ℂ) / Gamma (-μ+1) /
       ((Real.sqrt π:ℂ) * exp E * exp G) * (exp H * F / Gamma (2*(1/2-μ))) =
@@ -325,9 +340,12 @@ theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:
 Γ(1/2-μ)/(π^{1/2} (1-e^{-2ξ})^μ e^{(ν+1/2)ξ}) 𝐅(1/2-μ, 1/2+ν-μ; 1-2μ; 1-e^{-2ξ})`. -/
 @[dlmf 14.19.E2]
 theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2) {ξ : ℝ} (hξ : 0 < ξ) :
-    associatedP (ν-1/2) μ (Real.cosh ξ)=Gamma (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))*regularizedGaussHG (1/2-μ) (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := by
+    associatedP (ν-1/2) μ (Real.cosh ξ)=Gamma
+        (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))*regularizedGaussHG (1/2-μ)
+        (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := by
   have ht1 : 1 < Real.cosh ξ := Real.one_lt_cosh.mpr hξ.ne'
-  have hz : ((Real.cosh ξ:ℝ):ℂ) - 1 ∈ slitPlane := Or.inl (by simp only [sub_re, ofReal_re, one_re]; linarith)
+  have hz : ((Real.cosh ξ:ℝ):ℂ) - 1 ∈ slitPlane :=
+      Or.inl (by simp only [sub_re, ofReal_re, one_re]; linarith)
   have he0 : 0 < Real.exp (-2*ξ) := Real.exp_pos _
   have he1 : Real.exp (-2*ξ) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
   have hcut : (1:ℂ) - ((Real.exp (-2*ξ):ℝ):ℂ) ∈ cutPlane := by
@@ -347,9 +365,11 @@ theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2)
       regularizedGaussHG (1/2-μ) (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)))
     ((differentiable_one_div_Gamma.continuous.comp (continuous_const.sub continuous_id)).mul
       (associatedP_entire_order (ν-1/2) _ hz).continuous)
-    (((continuous_const.mul (continuous_const_cpow' hb)).mul (Continuous.cexp (by fun_prop))).inv₀ hD
+    (((continuous_const.mul (continuous_const_cpow' hb)).mul
+        (Continuous.cexp (by fun_prop))).inv₀ hD
       |>.mul (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => 1/2-μ)
-      (B := fun μ : ℂ => 1/2+ν-μ) (C := fun μ : ℂ => 1-2*μ) (by fun_prop) (by fun_prop) (by fun_prop)
+      (B := fun μ : ℂ => 1/2+ν-μ) (C := fun μ : ℂ => 1-2*μ) (by fun_prop)
+          (by fun_prop) (by fun_prop)
       hcut).continuous)
     (countable_range (fun n : ℤ => (n:ℂ)/2)) (fun μ hμ' => ?_) μ
   · have hG : Gamma (1/2-μ) ≠ 0 := Gamma_ne_zero fun m hm => hμ m (by linear_combination -hm)
@@ -371,15 +391,18 @@ theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2)
 ν+μ+1/2; ν+1; e^{-2ξ})`. -/
 @[dlmf 14.19.E3]
 theorem toroidalQ_hypergeometric (ν μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
-    olverQ (ν-1/2) μ (Real.cosh ξ)=Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
+    olverQ (ν-1/2) μ (Real.cosh ξ)=Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp
+        ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
   have ht1 : 1 < Real.cosh ξ := Real.one_lt_cosh.mpr hξ.ne'
-  have hz : ((Real.cosh ξ:ℝ):ℂ) - 1 ∈ slitPlane := Or.inl (by simp only [sub_re, ofReal_re, one_re]; linarith)
+  have hz : ((Real.cosh ξ:ℝ):ℂ) - 1 ∈ slitPlane :=
+      Or.inl (by simp only [sub_re, ofReal_re, one_re]; linarith)
   have hcut : ((Real.exp (-2*ξ):ℝ):ℂ) ∈ cutPlane := by
     refine mem_cutPlane_of_norm_lt_one ?_
     rw [norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
     exact Real.exp_lt_one_iff.mpr (by linarith)
   refine legendre_eq_of_continuous_off_countable (f := fun ν : ℂ => olverQ (ν-1/2) μ (Real.cosh ξ))
-    (g := fun ν : ℂ => Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2)
+    (g := fun ν : ℂ => Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp
+        ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2)
       (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)))
     ((olverQ_entire_degree μ _ hz).continuous.comp (continuous_id.sub continuous_const)) ?_
     (countable_range (fun n : ℤ => (n:ℂ)/2)) (fun ν hν => ?_) ν
@@ -387,7 +410,8 @@ theorem toroidalQ_hypergeometric (ν μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     exact (differentiable_regularizedGaussHG_comp (A := fun _ : ℂ => μ+1/2)
       (B := fun ν : ℂ => ν+μ+1/2) (C := fun ν : ℂ => ν+1) (by fun_prop) (by fun_prop) (by fun_prop)
       hcut).continuous
-  · refine legTor_Q_hyp_generic ν μ (fun k hk => hν ⟨-2*(k:ℤ)-2, ?_⟩) (fun k hk => hν ⟨-(k:ℤ)-1, ?_⟩) hξ
+  · refine legTor_Q_hyp_generic ν μ (fun k hk => hν ⟨-2*(k:ℤ)-2, ?_⟩)
+        (fun k hk => hν ⟨-(k:ℤ)-1, ?_⟩) hξ
     · push_cast; linear_combination -hk
     · push_cast; linear_combination -hk/2
 
@@ -483,9 +507,12 @@ theorem legInt_toroidal_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q) 
     show (((q^2)⁻¹:ℝ):ℂ) + ((legInt_ht θ:ℝ):ℂ) = (((q^2)⁻¹ + legInt_ht θ : ℝ):ℂ) by push_cast; ring,
     show (2:ℂ)^(-(2*m:ℂ)) = ((2:ℝ):ℂ)^(-(2*m:ℂ)) by norm_num,
     show (S:ℂ)^(2*m) = (S:ℂ)^(((2*m:ℕ):ℂ)) by rw [cpow_natCast],
-    Complex.ofReal_cpow_eq_exp hu, Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1 + legInt_ht θ),
-    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (q^2)⁻¹ + legInt_ht θ), Complex.ofReal_cpow_eq_exp hq,
-    Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hS, Complex.ofReal_cpow_eq_exp hW, real_smul,
+    Complex.ofReal_cpow_eq_exp hu,
+        Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1 + legInt_ht θ),
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (q^2)⁻¹ + legInt_ht θ),
+        Complex.ofReal_cpow_eq_exp hq,
+    Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hS,
+        Complex.ofReal_cpow_eq_exp hW, real_smul,
     show ((|legInt_ht' θ|:ℝ):ℂ) = exp (Real.log |legInt_ht' θ| : ℂ) by
       rw [← ofReal_exp, Real.exp_log hd]]
   rw [← Complex.exp_sub]
@@ -497,35 +524,42 @@ theorem legInt_toroidal_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q) 
   linear_combination (-(m:ℂ)+1/2) * l0'
 
 /-- The constant in DLMF 14.19.4, by the duplication formula. -/
-theorem legInt_toroidal_value (n m : ℕ) (F : ℂ) {q c s : ℝ} (hq0 : 0 < q) (hc0 : 0 < c) (hs0 : 0 < s) :
+theorem legInt_toroidal_value (n m : ℕ) (F : ℂ) {q c s : ℝ} (hq0 : 0 < q) (hc0 : 0 < c)
+    (hs0 : 0 < s) :
     Gamma (n+m+1/2)*(s:ℂ)^m/(2^m*Real.sqrt π*Gamma (n-m+1/2)*Gamma (m+1/2)) *
       ((2:ℂ)^(2*m:ℂ) * (q:ℂ)^(-((n:ℂ)+m+1/2)) * (Gamma (m+1/2) * Gamma (m+1/2) *
-        (exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) * exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) *
+        (exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) *
+            exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) *
           (Gamma ((m:ℂ)+1) / Gamma (2*(m:ℂ)+1)) * F))) =
       Gamma (n+m+1/2) / Gamma (n-m+1/2) *
         ((2:ℂ)^(-(m:ℂ)) * (c:ℂ)^((-n-1/2:ℂ)-m) * exp (Real.log s * m) * F) := by
   have hdup := Complex.Gamma_mul_Gamma_add_half ((m:ℂ)+1/2)
   rw [show (m:ℂ)+1/2+1/2 = m+1 by ring, show 2*((m:ℂ)+1/2) = 2*m+1 by ring] at hdup
   have hc : ∀ k : ℕ, 2*(m:ℂ)+1 ≠ -(k:ℂ) := fun k hk => by
-    have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k), (m.cast_nonneg : (0:ℝ) ≤ m)]
+    have := congrArg re hk; simp at this;
+        linarith [(k.cast_nonneg : (0:ℝ) ≤ k), (m.cast_nonneg : (0:ℝ) ≤ m)]
   have hGa : Gamma ((m:ℂ)+1/2) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; positivity)
   have hG2 : Gamma (2*(m:ℂ)+1) ≠ 0 := Gamma_ne_zero hc
   have hGb : Gamma ((n:ℂ)-m+1/2) ≠ 0 := by
     have := legTor_Gamma_half_ne ((n:ℤ)-m); push_cast at this; exact this
   have hpi : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
-  have hG1 : Gamma ((m:ℂ)+1) / Gamma (2*(m:ℂ)+1) = 2^(1-(2*(m:ℂ)+1)) * Real.sqrt π / Gamma ((m:ℂ)+1/2) := by
+  have hG1 : Gamma ((m:ℂ)+1) / Gamma (2*(m:ℂ)+1) = 2^(1-(2*(m:ℂ)+1)) * Real.sqrt π /
+      Gamma ((m:ℂ)+1/2) := by
     rw [eq_div_iff hGa, div_mul_eq_mul_div, div_eq_iff hG2, mul_comm (Gamma ((m:ℂ)+1)), hdup]; ring
   rw [hG1]
   have h2 : ∀ w : ℂ, (2:ℂ)^w = exp (Real.log 2 * w) := fun w => by
     rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.ofReal_cpow_eq_exp two_pos]
   have h2n : (2:ℂ)^m = exp (Real.log 2 * (m:ℂ)) := by rw [← h2, cpow_natCast]
-  have hsn : (s:ℂ)^m = exp (Real.log s * (m:ℂ)) := by rw [← cpow_natCast, Complex.ofReal_cpow_eq_exp hs0]
+  have hsn : (s:ℂ)^m = exp (Real.log s * (m:ℂ)) := by
+                                                     rw [← cpow_natCast, Complex.ofReal_cpow_eq_exp
+                                                       hs0]
   rw [h2n, hsn, h2, h2, h2, Complex.ofReal_cpow_eq_exp hq0, Complex.ofReal_cpow_eq_exp hc0]
   have e : exp (Real.log s * (m:ℂ)) * exp (Real.log 2 * (2*m:ℂ)) *
       exp (Real.log q * (-((n:ℂ)+m+1/2))) * exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) *
       exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) * exp (Real.log 2 * (1-(2*(m:ℂ)+1))) =
       exp (Real.log 2 * (m:ℂ)) *
-        (exp (Real.log 2 * (-(m:ℂ))) * exp (Real.log c * ((-n-1/2:ℂ)-m)) * exp (Real.log s * m)) := by
+        (exp (Real.log 2 * (-(m:ℂ))) * exp (Real.log c * ((-n-1/2:ℂ)-m)) *
+            exp (Real.log s * m)) := by
     simp only [← exp_add]; congr 1; ring
   have hne : exp (Real.log 2 * (m:ℂ)) ≠ 0 := exp_ne_zero _
   calc _ = (exp (Real.log s * (m:ℂ)) * exp (Real.log 2 * (2*m:ℂ)) *
@@ -542,7 +576,9 @@ theorem legInt_toroidal_value (n m : ℕ) (F : ℂ) {q c s : ℝ} (hq0 : 0 < q) 
 `u = tan²(θ/2)`) and the hypergeometric form of `P^{-m}_{-n-1/2}`. -/
 @[dlmf 14.19.E4]
 theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
-    toroidalP n m (Real.cosh ξ)=Gamma (n+m+1/2)*(Real.sinh ξ:ℂ)^m/(2^m*Real.sqrt π*Gamma (n-m+1/2)*Gamma (m+1/2))*∫ θ : ℝ in 0..π, (Real.sin θ:ℂ)^(2*m)/(Real.cosh ξ+Real.cos θ*Real.sinh ξ:ℂ)^(n+m+1/2:ℂ) := by
+    toroidalP n m (Real.cosh ξ)=Gamma
+        (n+m+1/2)*(Real.sinh ξ:ℂ)^m/(2^m*Real.sqrt π*Gamma (n-m+1/2)*Gamma (m+1/2))*∫ θ : ℝ in 0..π,
+        (Real.sin θ:ℂ)^(2*m)/(Real.cosh ξ+Real.cos θ*Real.sinh ξ:ℂ)^(n+m+1/2:ℂ) := by
   set c := Real.cosh ξ with hcdef
   set s := Real.sinh ξ with hsdef
   set q := Real.exp (-ξ) with hqdef
@@ -565,7 +601,8 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
   have hF : regularizedGaussHG a ((m:ℂ)+1/2) (2*(m:ℂ)+1) (1 - (((q^2)⁻¹:ℝ):ℂ)) =
       exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) * exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) *
         (Gamma ((m:ℂ)+1) / Gamma (2*(m:ℂ)+1)) *
-        regularizedGaussHG (((m:ℂ)-(-n-1/2))/2) (((m:ℂ)-(-n-1/2)+1)/2) ((m:ℂ)+1) (1 - 1/(c:ℂ)^2) := by
+        regularizedGaussHG (((m:ℂ)-(-n-1/2))/2) (((m:ℂ)-(-n-1/2)+1)/2) ((m:ℂ)+1)
+            (1 - 1/(c:ℂ)^2) := by
     rw [regularizedGaussHG_symm _ _ _ hw, show a = (m:ℂ) - (-n-1/2) by rw [hadef]; ring,
       legInt_cosh_hyp (-n-1/2) m (by simp only [natCast_re]; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)])
         hq0 hq1 hqx]
@@ -579,16 +616,20 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
       rw [← cpow_add _ _ two_ne_zero, add_neg_cancel, cpow_zero]
     have h2 : (q:ℂ)^(-a) * (q:ℂ)^a = 1 := by
       rw [← cpow_add _ _ (ofReal_ne_zero.mpr hq0.ne'), neg_add_cancel, cpow_zero]
-    have key : ∀ X : ℂ, (2:ℂ)^(2*m:ℂ) * (q:ℂ)^(-a) * ((2:ℂ)^(-(2*m:ℂ)) * (q:ℂ)^a * X) = X := fun X => by
+    have key : ∀ X : ℂ, (2:ℂ)^(2*m:ℂ) * (q:ℂ)^(-a) * ((2:ℂ)^(-(2*m:ℂ)) * (q:ℂ)^a * X) =
+        X := fun X => by
       linear_combination X * ((2:ℂ)^(2*m:ℂ) * (2:ℂ)^(-(2*m:ℂ)) * h2 + h1)
     rw [legInt_toroidal_point a m hq0 hqx hqs hq1 hθ, key,
       show ((c + Real.cos θ * s : ℝ):ℂ) = (Real.cosh ξ:ℂ) + (Real.cos θ:ℂ) * (Real.sinh ξ:ℂ) by
         rw [ofReal_add, ofReal_mul]]
-  have hint : ∫ θ : ℝ in 0..π, (Real.sin θ:ℂ)^(2*m)/(Real.cosh ξ+Real.cos θ*Real.sinh ξ:ℂ)^(n+m+1/2:ℂ) =
+  have hint : ∫ θ : ℝ in 0..π,
+      (Real.sin θ:ℂ)^(2*m)/(Real.cosh ξ+Real.cos θ*Real.sinh ξ:ℂ)^(n+m+1/2:ℂ) =
       (2:ℂ)^(2*m:ℂ) * (q:ℂ)^(-a) * (Gamma ((m:ℂ)+1/2) * Gamma ((m:ℂ)+1/2) *
-        (exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) * exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) *
+        (exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) *
+            exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) *
           (Gamma ((m:ℂ)+1) / Gamma (2*(m:ℂ)+1)) *
-          regularizedGaussHG (((m:ℂ)-(-n-1/2))/2) (((m:ℂ)-(-n-1/2)+1)/2) ((m:ℂ)+1) (1 - 1/(c:ℂ)^2))) := by
+          regularizedGaussHG (((m:ℂ)-(-n-1/2))/2) (((m:ℂ)-(-n-1/2)+1)/2) ((m:ℂ)+1)
+              (1 - 1/(c:ℂ)^2))) := by
     rw [intervalIntegral.integral_of_le Real.pi_pos.le, integral_Ioc_eq_integral_Ioo,
       ← setIntegral_congr_fun measurableSet_Ioo hf, integral_const_mul, hE, hKv]
   rw [hint]
@@ -624,7 +665,10 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
 /-- toroidalQ integral, from Whipple's formula 14.9.16 and DLMF 14.12.4. -/
 @[dlmf 14.19.E5]
 theorem toroidalQ_integral (n m : ℕ) (hmn : m ≤ n) {ξ : ℝ} (hξ : 0 < ξ) :
-    HasIntegralAtTop (fun t : ℝ => Gamma (n+1/2)/(Gamma (n+m+1/2)*Gamma (n-m+1/2))*Real.cosh (m*t)/(Real.cosh ξ+Real.cosh t*Real.sinh ξ:ℂ)^(n+1/2:ℂ)) 0 (toroidalQ n m (Real.cosh ξ)) := by
+    HasIntegralAtTop (fun t : ℝ =>
+        Gamma (n+1/2)/(Gamma (n+m+1/2)*Gamma (n-m+1/2))*Real.cosh
+        (m*t)/(Real.cosh ξ+Real.cosh t*Real.sinh ξ:ℂ)^(n+1/2:ℂ)) 0
+        (toroidalQ n m (Real.cosh ξ)) := by
   have hc1 : 1 < Real.cosh ξ := Real.one_lt_cosh.mpr hξ.ne'
   have hs : 0 < Real.sinh ξ := Real.sinh_pos_iff.mpr hξ
   set c := Real.cosh ξ with hcdef
@@ -775,7 +819,8 @@ theorem legFS_fiber (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ}
   have h3 : E^k * E⁻¹^k = 1 := by rw [← mul_pow, mul_inv_cancel₀ hE, one_pow]
   field_simp
   linear_combination (Polynomial.eval α (ascPochhammer ℂ m) * Polynomial.eval (α + ↑m)
-    (ascPochhammer ℂ k) * ↑t ^ m * ↑t ^ (k * 2) * E ^ m * Polynomial.eval α (ascPochhammer ℂ k)) * h3
+    (ascPochhammer ℂ k) * ↑t ^ m * ↑t ^ (k * 2) * E ^ m *
+        Polynomial.eval α (ascPochhammer ℂ k)) * h3
 
 /-- The Fourier modes of `(1 - tE)^{-α} (1 - t/E)^{-α}`, `0 ≤ t < 1`, `|E| = 1`: with
 `c_n = t^n (α)_n 𝐅(α, α+n; n+1; t²)`, `∑_{n ≥ 1} (Eⁿ + E⁻ⁿ) c_n = (1-tE)^{-α}(1-t/E)^{-α} - c_0`. -/
@@ -814,7 +859,8 @@ theorem legFS_binom_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {
   have ha' := (hasSum_nat_add_iff' 1).mpr ha
   simp only [Finset.range_one, Finset.sum_singleton] at ha'
   have hsum := ha'.add hb
-  rw [show a - (E^0 * (t:ℂ)^0 * poch α 0 * regularizedGaussHGFun α (α+(0:ℕ)) ((0:ℕ)+1) ((t:ℂ)^2)) + b
+  rw [show a - (E^0 * (t:ℂ)^0 * poch α 0 *
+      regularizedGaussHGFun α (α+(0:ℕ)) ((0:ℕ)+1) ((t:ℂ)^2)) + b
     = a + b - regularizedGaussHGFun α α 1 ((t:ℂ)^2) by simp [poch]; ring, hab] at hsum
   convert hsum using 1
   funext j
@@ -833,10 +879,12 @@ theorem legFS_cpow_mul_conj {w : ℂ} (hw : w ∈ slitPlane) (s : ℂ) :
     add_conj, log_re]
 
 /-- The closed form behind DLMF 14.19.6: with `t = e^{-ξ}`, `E = e^{iphi}`,
-`√π (1-t²)^μ e^{-ξ/2} (1-tE)^{-μ-1/2} (1-t/E)^{-μ-1/2} = (π/2)^{1/2} sinh^μ ξ (cosh ξ - cos phi)^{-μ-1/2}`. -/
+`√π (1-t²)^μ e^{-ξ/2} (1-tE)^{-μ-1/2} (1-t/E)^{-μ-1/2} = (π/2)^{1/2} sinh^μ ξ (cosh ξ - cos
+phi)^{-μ-1/2}`. -/
 theorem legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
     Real.sqrt π * (1 - (Real.exp (-2*ξ):ℂ))^μ / exp (ξ/2) *
-      ((1 - (Real.exp (-ξ):ℂ)*exp (phi*I))^(-(μ+1/2)) * (1 - (Real.exp (-ξ):ℂ)*(exp (phi*I))⁻¹)^(-(μ+1/2))) =
+      ((1 - (Real.exp (-ξ):ℂ)*exp (phi*I))^(-(μ+1/2)) *
+          (1 - (Real.exp (-ξ):ℂ)*(exp (phi*I))⁻¹)^(-(μ+1/2))) =
     (π/2:ℂ)^(1/2:ℂ)*(Real.sinh ξ:ℂ)^μ/(Real.cosh ξ-Real.cos phi:ℂ)^(μ+1/2) := by
   set t := Real.exp (-ξ) with htdef
   have ht0 : 0 < t := Real.exp_pos _
@@ -884,7 +932,8 @@ theorem legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
   rw [show (1 - (Real.exp (-2*ξ):ℂ)) = ((1 - t^2 : ℝ) : ℂ) by rw [h2t]; push_cast; ring,
     Complex.ofReal_cpow_eq_exp ht2, hsq, show (π/2:ℂ) = ((π/2 : ℝ) : ℂ) by push_cast; ring,
     Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp hsinh0,
-    show (Real.cosh ξ - Real.cos phi : ℂ) = ((Real.cosh ξ - Real.cos phi : ℝ) : ℂ) by push_cast; ring,
+    show (Real.cosh ξ - Real.cos phi : ℂ) =
+        ((Real.cosh ξ - Real.cos phi : ℝ) : ℂ) by push_cast; ring,
     Complex.ofReal_cpow_eq_exp hcc0, hL1, hL2, hL3]
   simp only [← exp_add, ← exp_sub]
   congr 1
@@ -894,17 +943,20 @@ theorem legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
 /-- The hypergeometric form of `𝑸^μ_{n-1/2}(cosh ξ)` in terms of `t = e^{-ξ}` (DLMF 14.19.3). -/
 theorem legFS_toroidal_coef (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (n : ℕ) :
     olverQ ((n:ℂ)-1/2) μ (Real.cosh ξ) = Real.sqrt π * (1 - (Real.exp (-2*ξ):ℂ))^μ / exp (ξ/2) *
-      ((Real.exp (-ξ):ℂ)^n * regularizedGaussHGFun (μ+1/2) (μ+1/2+n) (n+1) ((Real.exp (-ξ):ℂ)^2)) := by
+      ((Real.exp (-ξ):ℂ)^n *
+          regularizedGaussHGFun (μ+1/2) (μ+1/2+n) (n+1) ((Real.exp (-ξ):ℂ)^2)) := by
   have ht : ‖((Real.exp (-ξ):ℂ))^2‖ < 1 := by
     rw [norm_pow, norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
     have : Real.exp (-ξ) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
     nlinarith [Real.exp_pos (-ξ)]
   have h2 : ((Real.exp (-ξ):ℂ))^2 = (Real.exp (-2*ξ):ℂ) := by
     rw [← ofReal_pow, ← Real.exp_nat_mul]; push_cast; ring_nf
-  rw [toroidalQ_hypergeometric (n:ℂ) μ hξ, ← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ ht, h2,
+  rw [toroidalQ_hypergeometric (n:ℂ) μ hξ,
+      ← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ ht, h2,
     show (n:ℂ)+μ+1/2 = μ+1/2+n by ring]
   have he : exp (((n:ℂ)+1/2)*ξ) = exp (ξ/2) * (((Real.exp (-ξ):ℂ))^n)⁻¹ := by
-    rw [← ofReal_pow, ← Real.exp_nat_mul, ofReal_exp, ← exp_neg, ← exp_add]; congr 1; push_cast; ring
+    rw [← ofReal_pow, ← Real.exp_nat_mul, ofReal_exp, ← exp_neg, ← exp_add]; congr 1;
+        push_cast; ring
   rw [he]
   have : exp ((ξ:ℂ)/2) ≠ 0 := exp_ne_zero _
   have : ((Real.exp (-ξ):ℂ))^n ≠ 0 := pow_ne_zero _ (ofReal_ne_zero.mpr (Real.exp_pos _).ne')
@@ -915,7 +967,10 @@ theorem legFS_toroidal_coef (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (n : ℕ) :
 convergent series. -/
 @[dlmf 14.19.E6]
 theorem toroidalQ_fourier {μ : ℂ} (hμ : -1/2 < μ.re) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
-    HasSum (fun j : ℕ => let n:=j+1; 2*Gamma (μ+n+1/2)/Gamma (μ+1/2)*olverQ (n-1/2) μ (Real.cosh ξ)*Real.cos (n*phi)) ((π/2:ℂ)^(1/2:ℂ)*(Real.sinh ξ:ℂ)^μ/(Real.cosh ξ-Real.cos phi:ℂ)^(μ+1/2)-olverQ (-1/2) μ (Real.cosh ξ)) := by
+    HasSum (fun j : ℕ => let n:=j+1;
+        2*Gamma (μ+n+1/2)/Gamma (μ+1/2)*olverQ (n-1/2) μ (Real.cosh ξ)*Real.cos (n*phi))
+        ((π/2:ℂ)^(1/2:ℂ)*(Real.sinh ξ:ℂ)^μ/(Real.cosh ξ-Real.cos phi:ℂ)^(μ+1/2)-olverQ (-1/2) μ
+        (Real.cosh ξ)) := by
   have ht0 : 0 ≤ Real.exp (-ξ) := (Real.exp_pos _).le
   have ht1 : Real.exp (-ξ) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
   have hE : ‖exp ((phi:ℂ)*I)‖ = 1 := norm_exp_ofReal_mul_I phi
@@ -945,7 +1000,8 @@ theorem toroidalQ_fourier {μ : ℂ} (hμ : -1/2 < μ.re) {ξ : ℝ} (hξ : 0 < 
 Γ(n+m+1/2)/Γ(n-m+1/2) (2/(π sinh ξ))^{1/2} 𝑸^n_{m-1/2}(coth ξ)`. -/
 @[dlmf 14.19.E7]
 theorem toroidal_whipple_P (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
-    toroidalP n m (Real.cosh ξ)=Gamma (n+m+1/2)/Gamma (n-m+1/2)*(2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*toroidalQ m n (Real.cosh ξ/Real.sinh ξ) := by
+    toroidalP n m (Real.cosh ξ)=Gamma (n+m+1/2)/Gamma
+        (n-m+1/2)*(2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*toroidalQ m n (Real.cosh ξ/Real.sinh ξ) := by
   have hs : 0 < Real.sinh ξ := Real.sinh_pos_iff.mpr hξ
   have ht : 1 < Real.cosh ξ := Real.one_lt_cosh.mpr hξ.ne'
   have hcs : Real.cosh ξ^2 - 1 = Real.sinh ξ^2 := by rw [Real.cosh_sq]; ring
@@ -971,7 +1027,8 @@ theorem toroidal_whipple_P (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
       rw [show (π/2:ℂ) = ((π/2:ℝ):ℂ) by push_cast; ring,
         ← mul_cpow_ofReal_nonneg (by positivity) (by positivity),
         ← ofReal_mul, show 2/π*(π/2) = (1:ℝ) by field_simp, ofReal_one, one_cpow]
-    have he : exp (-(Real.log (Real.sinh ξ):ℂ)/2) * exp (-((0 - Real.log (Real.sinh ξ):ℝ):ℂ)/2) = 1 := by
+    have he : exp (-(Real.log (Real.sinh ξ):ℂ)/2) *
+        exp (-((0 - Real.log (Real.sinh ξ):ℝ):ℂ)/2) = 1 := by
       rw [← exp_add]; push_cast; ring_nf; exact exp_zero
     have h3 := mul_inv_cancel₀ hG1
     have h4 := mul_inv_cancel₀ hG2
@@ -992,7 +1049,8 @@ theorem toroidal_whipple_P (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
 Γ(m-n+1/2)/Γ(m+n+1/2) (π/(2 sinh ξ))^{1/2} P^n_{m-1/2}(coth ξ)`. -/
 @[dlmf 14.19.E8]
 theorem toroidal_whipple_Q (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
-    toroidalQ n m (Real.cosh ξ)=Gamma (m-n+1/2)/Gamma (m+n+1/2)*(π/(2*Real.sinh ξ):ℂ)^(1/2:ℂ)*toroidalP m n (Real.cosh ξ/Real.sinh ξ) := by
+    toroidalQ n m (Real.cosh ξ)=Gamma (m-n+1/2)/Gamma
+        (m+n+1/2)*(π/(2*Real.sinh ξ):ℂ)^(1/2:ℂ)*toroidalP m n (Real.cosh ξ/Real.sinh ξ) := by
   have hs : 0 < Real.sinh ξ := Real.sinh_pos_iff.mpr hξ
   have ht : 1 < Real.cosh ξ := Real.one_lt_cosh.mpr hξ.ne'
   have hcs : Real.cosh ξ^2 - 1 = Real.sinh ξ^2 := by rw [Real.cosh_sq]; ring

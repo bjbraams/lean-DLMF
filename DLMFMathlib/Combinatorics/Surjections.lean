@@ -60,7 +60,8 @@ theorem Fintype.card_filter_surjective_congr {ι α β : Type*} [Fintype ι] [De
     · funext i; simp
 
 /-- The maps `ι → β` with image exactly `T` are the surjections onto `T`. -/
-private lemma Fintype.card_filter_image_univ_eq {ι β : Type*} [Fintype ι] [DecidableEq ι] [Fintype β] [DecidableEq β]
+private lemma Fintype.card_filter_image_univ_eq {ι β : Type*} [Fintype ι] [DecidableEq ι]
+    [Fintype β] [DecidableEq β]
     (T : Finset β) :
     #{f : ι → β | univ.image f = T} = #{g : ι → T | Function.Surjective g} := by
   symm
@@ -170,7 +171,8 @@ theorem Nat.card_quot_eq_of_surjective {α M : Type*} (r : α → α → Prop) (
     exact ⟨Quot.mk _ a, rfl⟩
 
 /-- Two maps with fibres of equal sizes differ by a permutation of the domain. -/
-private lemma Equiv.Perm.exists_comp_eq_of_card_fiber_eq {α β : Type*} [Fintype α] [DecidableEq β] {f g : α → β}
+private lemma Equiv.Perm.exists_comp_eq_of_card_fiber_eq {α β : Type*} [Fintype α]
+    [DecidableEq β] {f g : α → β}
     (h : ∀ c, #{a | f a = c} = #{a | g a = c}) : ∃ σ : Perm α, ∀ a, g (σ a) = f a := by
   classical
   have e : ∀ c, {a // f a = c} ≃ {a // g a = c} := fun c =>

@@ -20,10 +20,10 @@ Whittaker functions for `ε < 0` (33.16.8–33.16.13, 33.16.16–33.16.18). We w
 ## Main results
 
 * `coulombF_eq_coulombf`, `coulombG_eq_coulombh`: DLMF 33.16.1 and 33.16.2.
-* `coulombf_eq_coulombF_pos`, `coulombh_eq_coulombG_pos`: `ε > 0`, `r > 0`
-  (DLMF 33.16.4, 33.16.5).
-* `coulombf_eq_coulombF_neg`, `coulombh_eq_coulombG_neg`: `ε > 0`, `r < 0`
-  (DLMF 33.16.6, 33.16.7).
+* `coulombf_eq_coulombF_pos`, `coulombf_eq_coulombF_pos'`, `coulombh_eq_coulombG_pos`: `ε > 0`,
+  `r > 0` (DLMF 33.16.4, 33.16.5).
+* `coulombf_eq_coulombF_neg`, `coulombf_eq_coulombF_neg'`, `coulombh_eq_coulombG_neg`: `ε > 0`,
+  `r < 0` (DLMF 33.16.6, 33.16.7).
 * `coulombs_coulombc_eq_pos`: DLMF 33.16.14.
 * `coulombs_coulombc_eq_neg`: DLMF 33.16.15, corrected.
 * `coulombf_eq_whittaker_pos`, `coulombh_eq_whittaker_pos`: `ε < 0`, `r > 0`
@@ -178,7 +178,8 @@ private lemma coulombAProd_pos {ε : ℝ} (hε : 0 ≤ ε) (ℓ : ℕ) : 0 < cou
   Finset.prod_pos fun k _ => by positivity
 
 /-- For `ε > 0`, `1 - e^{-2π/√ε} > 0`. -/
-private lemma one_sub_exp_neg_two_pi_div_sqrt_pos {ε : ℝ} (hε : 0 < ε) : 0 < 1 - Real.exp (-(2 * π / Real.sqrt ε)) := by
+private lemma one_sub_exp_neg_two_pi_div_sqrt_pos {ε : ℝ} (hε : 0 < ε) : 0 < 1 - Real.exp
+    (-(2 * π / Real.sqrt ε)) := by
   have : 0 < 2 * π / Real.sqrt ε := by have := Real.sqrt_pos.mpr hε; positivity
   have := Real.exp_lt_one_iff.mpr (neg_neg_of_pos this)
   linarith
@@ -215,13 +216,13 @@ private lemma factorial_mul_coulombC_sq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) 
   field_simp
 
 /-- **DLMF 33.16.4**: for `ε > 0`, `τ = ε^{1/2}` (33.16.3) and `r > 0`,
-`f(ε,ℓ;r) = ((2/(πτ)) (1 - e^{-2π/τ}) / A(ε,ℓ))^{1/2} F_ℓ(-1/τ, τr)`. -/
+`f(ε,ℓ;r) = ((2/(πτ)) (1 - e^{-2π/τ}) / A(ε,ℓ))^{1/2} F_ℓ(-1/τ, τr)`. This is stronger than DLMF,
+which assumes `r > 0`. -/
 @[dlmf 33.16.E3, dlmf 33.16.E4]
-theorem coulombf_eq_coulombF_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
+theorem coulombf_eq_coulombF_pos' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} :
     coulombf ε ℓ r = Real.sqrt (2 / (π * Real.sqrt ε) *
         (1 - Real.exp (-(2 * π / Real.sqrt ε))) / coulombAProd ε ℓ) *
       coulombF ℓ (-1 / Real.sqrt ε) (Real.sqrt ε * r) := by
-  have _ := hr
   have hτ := Real.sqrt_pos.mpr hε
   set τ := Real.sqrt ε with hτ_def
   have hτ2 : τ ^ 2 = ε := Real.sq_sqrt hε.le
@@ -254,6 +255,15 @@ theorem coulombf_eq_coulombF_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
       norm_num]
   field_simp
   ring
+
+/-- **DLMF 33.16.4**: for `ε > 0`, `τ = ε^{1/2}` (33.16.3) and `r > 0`,
+`f(ε,ℓ;r) = ((2/(πτ)) (1 - e^{-2π/τ}) / A(ε,ℓ))^{1/2} F_ℓ(-1/τ, τr)`. -/
+@[dlmf 33.16.E3, dlmf 33.16.E4]
+theorem coulombf_eq_coulombF_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (_hr : 0 < r) :
+    coulombf ε ℓ r = Real.sqrt (2 / (π * Real.sqrt ε) *
+        (1 - Real.exp (-(2 * π / Real.sqrt ε))) / coulombAProd ε ℓ) *
+      coulombF ℓ (-1 / Real.sqrt ε) (Real.sqrt ε * r) :=
+  coulombf_eq_coulombF_pos' hε ℓ
 
 /-- **DLMF 33.16.5**: for `ε > 0`, `r > 0`,
 `h(ε,ℓ;r) = ((2/(πτ)) A(ε,ℓ) / (1 - e^{-2π/τ}))^{1/2} G_ℓ(-1/τ, τr)`. -/
@@ -296,13 +306,13 @@ theorem coulombh_eq_coulombG_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
   ring
 
 /-- **DLMF 33.16.6**: for `ε > 0`, `r < 0`,
-`f(ε,ℓ;r) = (-1)^{ℓ+1} ((2/(πτ)) (e^{2π/τ} - 1) / A(ε,ℓ))^{1/2} F_ℓ(1/τ, -τr)`. -/
+`f(ε,ℓ;r) = (-1)^{ℓ+1} ((2/(πτ)) (e^{2π/τ} - 1) / A(ε,ℓ))^{1/2} F_ℓ(1/τ, -τr)`. This is stronger
+than DLMF, which assumes `r < 0`. -/
 @[dlmf 33.16.E6]
-theorem coulombf_eq_coulombF_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
+theorem coulombf_eq_coulombF_neg' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} :
     coulombf ε ℓ r = (-1) ^ (ℓ + 1) * Real.sqrt (2 / (π * Real.sqrt ε) *
         (Real.exp (2 * π / Real.sqrt ε) - 1) / coulombAProd ε ℓ) *
       coulombF ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r)) := by
-  have _ := hr
   have hτ := Real.sqrt_pos.mpr hε
   set τ := Real.sqrt ε with hτ_def
   have hτ2 : τ ^ 2 = ε := Real.sq_sqrt hε.le
@@ -341,6 +351,15 @@ theorem coulombf_eq_coulombF_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
       norm_num]
   field_simp
   ring
+
+/-- **DLMF 33.16.6**: for `ε > 0`, `r < 0`,
+`f(ε,ℓ;r) = (-1)^{ℓ+1} ((2/(πτ)) (e^{2π/τ} - 1) / A(ε,ℓ))^{1/2} F_ℓ(1/τ, -τr)`. -/
+@[dlmf 33.16.E6]
+theorem coulombf_eq_coulombF_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (_hr : r < 0) :
+    coulombf ε ℓ r = (-1) ^ (ℓ + 1) * Real.sqrt (2 / (π * Real.sqrt ε) *
+        (Real.exp (2 * π / Real.sqrt ε) - 1) / coulombAProd ε ℓ) *
+      coulombF ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r)) :=
+  coulombf_eq_coulombF_neg' hε ℓ
 
 /-- **DLMF 33.16.7**: for `ε > 0`, `r < 0`,
 `h(ε,ℓ;r) = (-1)^ℓ ((2/(πτ)) A(ε,ℓ) / (e^{2π/τ} - 1))^{1/2} G_ℓ(1/τ, -τr)`. -/
@@ -402,7 +421,8 @@ theorem coulombs_coulombc_eq_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
     rw [← Real.sqrt_inv]
     congr 1
     field_simp
-  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), coulombh_eq_coulombG_pos hε ℓ hr,
+  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), coulombh_eq_coulombG_pos hε
+        ℓ hr,
       ← Complex.ofReal_mul, ← mul_assoc, ← Real.sqrt_inv, ← Real.sqrt_mul (by positivity)]
     congr 3
     rw [← Real.sqrt_inv]
@@ -451,7 +471,8 @@ theorem coulombs_coulombc_eq_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
       have hq1 : 1 - (Real.exp (π / Real.sqrt ε) ^ 2)⁻¹ ≠ 0 := by rw [← h3]; exact hE.ne'
       field_simp
     linear_combination ((-1) ^ (ℓ + 1) * coulombF ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r))) * key
-  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), coulombh_eq_coulombG_neg hε ℓ hr,
+  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), coulombh_eq_coulombG_neg hε
+        ℓ hr,
       ← Complex.ofReal_mul]
     congr 1
     have key : (Real.sqrt (2 * (coulombAProd ε ℓ / (1 - Real.exp (-(2 * π / Real.sqrt ε))))))⁻¹ *
@@ -489,12 +510,14 @@ private lemma coulombKappa_of_neg_of_nonpos {ε : ℝ} (hε : ε < 0) {r : ℝ} 
   simp [coulombKappa, hε, not_lt.mpr hr]
 
 /-- `ε = -1/ν²`. -/
-private lemma eq_neg_one_div_neg_rpow_neg_half_sq {ε : ℝ} (hε : ε < 0) : ε = -1 / ((-ε) ^ (-(1 / 2 : ℝ))) ^ 2 := by
+private lemma eq_neg_one_div_neg_rpow_neg_half_sq {ε : ℝ} (hε : ε < 0) : ε = -1 /
+    ((-ε) ^ (-(1 / 2 : ℝ))) ^ 2 := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul (neg_pos.mpr hε).le]
   norm_num [Real.rpow_neg_one]
 
 /-- `A(ε,ℓ) ≠ 0` excludes `ν ∈ {1, …, ℓ}`. -/
-private lemma neg_rpow_neg_half_sub_ne_neg_nat {ε : ℝ} (hε : ε < 0) {ℓ : ℕ} (hA : coulombAProd ε ℓ ≠ 0) (m : ℕ) :
+private lemma neg_rpow_neg_half_sub_ne_neg_nat {ε : ℝ} (hε : ε < 0) {ℓ : ℕ}
+    (hA : coulombAProd ε ℓ ≠ 0) (m : ℕ) :
     (((-ε) ^ (-(1 / 2 : ℝ)) : ℝ) : ℂ) - ℓ ≠ -(m : ℂ) := by
   intro h
   set ν := (-ε) ^ (-(1 / 2 : ℝ))
@@ -919,13 +942,15 @@ theorem coulombs_coulombc_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
   have cπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   have c2 : (Real.sqrt 2 : ℂ) ≠ 0 := by exact_mod_cast h2.ne'
   constructor
-  · rw [coulombs, hB, Carlson.ofReal_cpow_half (by positivity), hf, Real.sqrt_div' _ (by norm_num), hsA,
+  · rw [coulombs, hB, Carlson.ofReal_cpow_half (by positivity), hf, Real.sqrt_div' _ (by norm_num),
+        hsA,
       h32, hK']
     rw [hνt, hGmk, hGpg]
     push_cast
     field_simp
     ring
-  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), hh, Real.sqrt_mul (by norm_num), hsA,
+  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), hh, Real.sqrt_mul
+        (by norm_num), hsA,
       h2ν, hK', hAr]
     rw [hνt, hGmk, hGpg]
     push_cast

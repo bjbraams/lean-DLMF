@@ -137,7 +137,8 @@ theorem besselYExp_eq_dslope_div_dslope (n : ℤ) {μ h : ℂ} (hμ : μ ∈ Met
     have hex : ∃ k : ℤ, (n : ℂ) = k := ⟨n, rfl⟩
     simp only [besselYExp, hex, ite_true]
     exact ht.limUnder_eq
-  · rw [besselYExp_eq_besselYExpNumerator_div (DLMF.Bessel.not_int_of_mem_ball hμ hne), dslope_of_ne _ hne,
+  · rw [besselYExp_eq_besselYExpNumerator_div (DLMF.Bessel.not_int_of_mem_ball hμ hne),
+        dslope_of_ne _ hne,
       dslope_of_ne _ hne, slope_def_field, slope_def_field, besselYExpNumerator_intCast,
       Complex.sin_int_mul_pi, sub_zero, sub_zero]
     have hμn : μ - n ≠ 0 := sub_ne_zero.mpr hne
@@ -317,7 +318,8 @@ theorem exists_norm_le_factorial_of_besselRec {u : ℤ → ℂ} {ν w : ℂ} (hw
 
 /-- A bounded solution of `q u_{n+1} - D_n u_n + q u_{n-1} = 0` with `‖D_n‖ ≥ 2n² + 3‖q‖`
 for `n ≥ N₀` decays like `K^n / (n!)²`. -/
-private lemma exists_norm_mul_factorial_sq_le_of_rec_nat {u : ℕ → ℂ} {D : ℕ → ℂ} {q : ℂ} {M : ℝ} (hq : q ≠ 0)
+private lemma exists_norm_mul_factorial_sq_le_of_rec_nat {u : ℕ → ℂ} {D : ℕ → ℂ} {q : ℂ}
+    {M : ℝ} (hq : q ≠ 0)
     (hM : ∀ n, ‖u n‖ ≤ M) (N₀ : ℕ) (hN₀ : 1 ≤ N₀)
     (hD : ∀ n, N₀ ≤ n → 2 * (n : ℝ) ^ 2 + 3 * ‖q‖ ≤ ‖D n‖)
     (hrec : ∀ n, 1 ≤ n → q * u (n + 1) - D n * u n + q * u (n - 1) = 0) :
@@ -405,13 +407,15 @@ private lemma exists_norm_mul_factorial_sq_le_of_rec_nat {u : ℕ → ℂ} {D : 
 
 /-- A bounded solution `c : ℤ → ℂ` of the recurrence 28.14.4 with `q ≠ 0` satisfies
 `‖c_m‖ (|m|!)² ≤ C K^{|m|}`. -/
-theorem exists_norm_mul_factorial_sq_le_of_rec {c : ℤ → ℂ} {ν q a : ℂ} {M : ℝ} (hq : q ≠ 0) (hM : ∀ m, ‖c m‖ ≤ M)
+theorem exists_norm_mul_factorial_sq_le_of_rec {c : ℤ → ℂ} {ν q a : ℂ} {M : ℝ} (hq : q ≠ 0)
+    (hM : ∀ m, ‖c m‖ ≤ M)
     (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0) :
     ∃ C K : ℝ, 0 ≤ C ∧ 0 ≤ K ∧
       ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ C * K ^ m.natAbs := by
   obtain ⟨N₁, hN₁⟩ := exists_le_norm_sub_add_two_mul_sq ν a (3 * ‖q‖)
   obtain ⟨N₂, hN₂⟩ := exists_le_norm_sub_add_two_mul_sq (-ν) a (3 * ‖q‖)
-  obtain ⟨C₁, K₁, hC₁, hK₁, h₁⟩ := exists_norm_mul_factorial_sq_le_of_rec_nat (u := fun n : ℕ => c n)
+  obtain ⟨C₁, K₁, hC₁, hK₁, h₁⟩ :=
+      exists_norm_mul_factorial_sq_le_of_rec_nat (u := fun n : ℕ => c n)
     (D := fun n : ℕ => a - (ν + 2 * (n : ℤ)) ^ 2) hq (fun n => hM n) (max N₁ 1)
     (le_max_right _ _) (fun n hn => by
       have := hN₁ n (by exact_mod_cast (le_max_left _ _).trans hn)
@@ -421,7 +425,8 @@ theorem exists_norm_mul_factorial_sq_le_of_rec {c : ℤ → ℂ} {ν q a : ℂ} 
       rw [show ((n - 1 : ℕ) : ℤ) = (n : ℤ) - 1 by omega]
       push_cast at this ⊢
       exact this)
-  obtain ⟨C₂, K₂, hC₂, hK₂, h₂⟩ := exists_norm_mul_factorial_sq_le_of_rec_nat (u := fun n : ℕ => c (-(n : ℤ)))
+  obtain ⟨C₂, K₂, hC₂, hK₂, h₂⟩ :=
+      exists_norm_mul_factorial_sq_le_of_rec_nat (u := fun n : ℕ => c (-(n : ℤ)))
     (D := fun n : ℕ => a - (-ν + 2 * (n : ℤ)) ^ 2) hq (fun n => hM _) (max N₂ 1)
     (le_max_right _ _) (fun n hn => by
       have := hN₂ n (by exact_mod_cast (le_max_left _ _).trans hn)
@@ -449,7 +454,8 @@ theorem summable_pow_natAbs_div_factorial (R : ℝ) :
   · simpa using Real.summable_pow_div_factorial R
 
 /-- `(a + b)! ≤ 2^{a+b} a! b!`. -/
-private lemma factorial_add_le_two_pow_mul (a b : ℕ) : ((a + b) ! : ℝ) ≤ 2 ^ (a + b) * a ! * b ! := by
+private lemma factorial_add_le_two_pow_mul (a b : ℕ) : ((a + b) ! : ℝ) ≤ 2 ^ (a + b) *
+    a ! * b ! := by
   have h := Nat.add_choose_mul_factorial_mul_factorial a b
   have h2 := Nat.choose_le_two_pow (a + b) b
   have : (a + b) ! ≤ 2 ^ (a + b) * a ! * b ! := by
@@ -526,7 +532,8 @@ private lemma crossTerm_rec {c Jx Cy : ℤ → ℂ} {ν a x y : ℂ} (hx : x ≠
     (hJr : ∀ k : ℤ, Jx (k - 1) + Jx (k + 1) = 2 * k / x * Jx k)
     (hCr : ∀ k : ℤ, Cy (k - 1) + Cy (k + 1) = 2 * (ν + k) / y * Cy k) (n ℓ : ℤ) :
     (a - (ν + 2 * n) ^ 2) * crossTerm c Jx Cy (-n) n ℓ =
-      x * y * crossTerm c Jx Cy (-(n + 1)) (n + 1) ℓ + x * y * crossTerm c Jx Cy (-(n - 1)) (n - 1) ℓ +
+      x * y * crossTerm c Jx Cy (-(n + 1)) (n + 1) ℓ + x * y *
+          crossTerm c Jx Cy (-(n - 1)) (n - 1) ℓ +
       x * y * crossTerm c Jx Cy (-n - 1) (n - 1) ℓ + x * y * crossTerm c Jx Cy (-n + 1) (n + 1) ℓ -
       x * y * crossTerm c Jx Cy (-n - 1) (n - 1) (ℓ + 1) -
       x * y * crossTerm c Jx Cy (-n + 1) (n + 1) (ℓ - 1) := by
@@ -603,7 +610,8 @@ theorem tsum_crossTerm_eq_mul {c Jx Cy : ℤ → ℂ} {ν a x y : ℂ} (hx : x �
     have e : (fun ℓ => (a - (ν + 2 * m) ^ 2) * crossTerm c Jx Cy (-m) m ℓ) = fun ℓ =>
         x * y * crossTerm c Jx Cy (-(m + 1)) (m + 1) ℓ +
           x * y * crossTerm c Jx Cy (-(m - 1)) (m - 1) ℓ +
-          x * y * crossTerm c Jx Cy (-m - 1) (m - 1) ℓ + x * y * crossTerm c Jx Cy (-m + 1) (m + 1) ℓ -
+          x * y * crossTerm c Jx Cy (-m - 1) (m - 1) ℓ + x * y *
+              crossTerm c Jx Cy (-m + 1) (m + 1) ℓ -
           x * y * (crossTerm c Jx Cy (-m - 1) (m - 1) ∘ Equiv.addRight 1) ℓ -
           x * y * (crossTerm c Jx Cy (-m + 1) (m + 1) ∘ Equiv.addRight (-1)) ℓ := by
       funext ℓ
@@ -689,7 +697,8 @@ theorem tsum_crossTerm_eq_mul {c Jx Cy : ℤ → ℂ} {ν a x y : ℂ} (hx : x �
     exact norm_le_zero_iff.mp (ge_of_tendsto' ht hbound)
   -- conclusion
   set L : ℂ := (c n₀)⁻¹ * S n₀
-  have hu := eq_zero_of_three_term_rec_of_two_zeros (u := fun m => S m - L * c m) (D := fun m => a - (ν + 2 * m) ^ 2) hq
+  have hu := eq_zero_of_three_term_rec_of_two_zeros (u := fun m => S m - L * c m)
+      (D := fun m => a - (ν + 2 * m) ^ 2) hq
     (fun m => by linear_combination hSrec m - L * hrec m) (n₀ := n₀)
     (by simp only [L]; field_simp; ring)
     (by

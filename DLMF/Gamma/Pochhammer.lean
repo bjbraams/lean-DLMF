@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.SeriesProperties
-public import DLMF.Hypergeometric.Series
+public import DLMF.Hypergeometric.Basic.SpecialValues
+public import DLMF.Hypergeometric.Basic.RealPochhammer
 
 /-!
 # Pochhammer identities (DLMF §5.2)

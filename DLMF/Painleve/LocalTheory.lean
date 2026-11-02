@@ -52,7 +52,8 @@ theorem exists_local_real_solution (c x₀ u₀ v₀ : ℝ) :
     ∃ ε > 0, ∃ u : ℝ → ℝ, IsPIIOn c u (Ioo (x₀ - ε) (x₀ + ε)) ∧
       u x₀ = u₀ ∧ deriv u x₀ = v₀ := by
   obtain ⟨γ, hγ₀, ε, hε, hγ⟩ :=
-    (contDiff_piiVectorField c).contDiffAt.exists_forall_mem_closedBall_exists_eq_forall_mem_Ioo_hasDerivAt₀
+    (contDiff_piiVectorField
+        c).contDiffAt.exists_forall_mem_closedBall_exists_eq_forall_mem_Ioo_hasDerivAt₀
       (x₀ := (x₀, u₀, v₀)) x₀
   have hx₀ : x₀ ∈ Ioo (x₀ - ε) (x₀ + ε) := ⟨by linarith, by linarith⟩
   have hfst (x : ℝ) (hx : x ∈ Ioo (x₀ - ε) (x₀ + ε)) :

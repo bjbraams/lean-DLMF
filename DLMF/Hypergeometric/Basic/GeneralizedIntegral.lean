@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.GeneralizedCalculus
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
 
 /-!
 # The Euler–Pochhammer integral for `ₚF_q` (Duverney Thm 3.18; DLMF 16.5.2)

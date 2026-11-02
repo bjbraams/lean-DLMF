@@ -83,7 +83,8 @@ theorem nthPrime_gt {n : ℕ} (hn : 0 < n) : (n : ℝ) * Real.log n < nthPrime n
 
 /-- Inclusion–exclusion (sieve of Eratosthenes): the number of `1 ≤ n ≤ N` divisible by no
 prime of a set `T` of primes is `∑_{S ⊆ T} (-1)^{|S|} ⌊N/∏S⌋`. -/
-private lemma card_filter_forall_not_dvd_eq_sum_powerset (N : ℕ) (T : Finset ℕ) (hT : ∀ p ∈ T, p.Prime) :
+private lemma card_filter_forall_not_dvd_eq_sum_powerset (N : ℕ) (T : Finset ℕ)
+    (hT : ∀ p ∈ T, p.Prime) :
     ((Ioc 0 N).filter (fun n ↦ ∀ p ∈ T, ¬ p ∣ n)).card =
       ∑ S ∈ T.powerset, (-1 : ℤ) ^ S.card * ((N / ∏ p ∈ S, p : ℕ) : ℤ) := by
   have hdvd : ∀ S ∈ T.powerset, ∀ n, (∏ p ∈ S, p) ∣ n ↔ ∀ p ∈ S, p ∣ n := by
@@ -126,7 +127,8 @@ theorem primePi_legendre {x : ℝ} (hx : 1 ≤ x) :
   have hfl : ∀ S ∈ T.powerset, ⌊x / ∏ p ∈ S, (p : ℝ)⌋ = ((N / ∏ p ∈ S, p : ℕ) : ℤ) := by
     intro S _
     rw [← Nat.cast_prod, Int.floor_div_natCast, ← Int.natCast_floor_eq_floor hx0, Int.natCast_div]
-  rw [sum_congr rfl fun S hS ↦ by rw [hfl S hS], ← card_filter_forall_not_dvd_eq_sum_powerset N T hT]
+  rw [sum_congr rfl fun S hS ↦ by rw [hfl S hS],
+                                    ← card_filter_forall_not_dvd_eq_sum_powerset N T hT]
   -- the sieved set is `{1} ∪ {primes in (y, N]}`
   have hset : (Ioc 0 N).filter (fun n ↦ ∀ p ∈ T, ¬ p ∣ n) =
       insert 1 ((Ioc y N).filter Nat.Prime) := by

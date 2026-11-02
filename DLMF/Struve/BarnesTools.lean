@@ -71,7 +71,8 @@ theorem struveBar_recip_Gamma_isBigO (a m : ℝ) :
   simp only [Function.comp_apply, Pi.inv_apply, id, abs_of_pos hym, norm_inv, norm_mul,
     Real.norm_eq_abs]
   rw [abs_of_pos (Real.sqrt_pos.mpr (by positivity)), abs_of_pos (Real.rpow_pos_of_pos hym _),
-    abs_of_pos (Real.exp_pos _), abs_of_pos (Real.rpow_pos_of_pos hy0 _), abs_of_pos (Real.exp_pos _)]
+    abs_of_pos (Real.exp_pos _), abs_of_pos (Real.rpow_pos_of_pos hy0 _),
+        abs_of_pos (Real.exp_pos _)]
   rw [mul_inv, mul_inv, ← Real.rpow_neg hym.le, ← Real.exp_neg,
     show -(a - 1 / 2) = 1 / 2 - a by ring,
     show -(-π * (y + m) / 2) = π * m / 2 + π * y / 2 by ring, Real.exp_add]
@@ -165,7 +166,8 @@ theorem struveBar_integrableOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + 
   set C : ℝ := Real.exp (A + 1 + 2) * A ^ (1 - α) with hC
   have h2 : IntegrableOn f (Ioi T) := by
     refine ((exp_neg_integrableOn_Ioi T one_pos).const_mul C).mono'
-      ((hcont.mono fun t ht => le_trans hcT (le_of_lt ht)).aestronglyMeasurable measurableSet_Ioi) ?_
+      ((hcont.mono fun t ht => le_trans hcT (le_of_lt ht)).aestronglyMeasurable
+          measurableSet_Ioi) ?_
     refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
     have ht' : T < t := ht
     have ht0 : 0 ≤ t := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) ht'.le
@@ -178,7 +180,8 @@ theorem struveBar_integrableOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + 
     have hp1 : 0 < A ^ (α + t - 1) * Real.exp (-(A + 1)) := by positivity
     have hp2 : 0 < Real.exp (-2) := Real.exp_pos _
     rw [Real.norm_eq_abs, abs_of_nonneg (div_nonneg (Real.rpow_nonneg hw.le _)
-      (mul_nonneg (Real.Gamma_pos_of_pos (by linarith)).le (Real.Gamma_pos_of_pos (by linarith)).le))]
+      (mul_nonneg (Real.Gamma_pos_of_pos (by linarith)).le
+          (Real.Gamma_pos_of_pos (by linarith)).le))]
     calc w ^ t / (Real.Gamma (α + t) * Real.Gamma (β + t))
         ≤ w ^ t / ((A ^ (α + t - 1) * Real.exp (-(A + 1))) * Real.exp (-2)) :=
           div_le_div_of_nonneg_left (Real.rpow_nonneg hw.le _) (by positivity)
@@ -220,7 +223,8 @@ theorem struveBar_rpow_isBigO_one_add {p : ℝ} (hp : p ≤ 0) :
 /-- A continuous function on `ℝ` with `O(|y|^p)` tails at both ends, `p < -1`, is integrable. -/
 theorem struveBar_integrable_of_isBigO {E : Type*} [NormedAddCommGroup E] {f : ℝ → E}
     (hf : Continuous f) {p : ℝ} (hp : p < -1)
-    (h1 : f =O[atTop] (fun y : ℝ => y ^ p)) (h2 : (fun y => f (-y)) =O[atTop] (fun y : ℝ => y ^ p)) :
+    (h1 : f =O[atTop] (fun y : ℝ => y ^ p))
+        (h2 : (fun y => f (-y)) =O[atTop] (fun y : ℝ => y ^ p)) :
     Integrable f := by
   have hg : Integrable (fun y : ℝ => (1 + ‖y‖) ^ p) := by
     have := integrable_one_add_norm (E := ℝ) (μ := volume) (r := -p) (by simp; linarith)

@@ -63,7 +63,8 @@ def legendreBoundary (F : ℂ → ℂ) (s x : ℝ) : ℂ :=
   limUnder (𝓝[>] (0:ℝ)) (fun ε : ℝ => F (x+s*I*ε))
 
 /-- Boundary values of `associatedP` from either side of the cut `(-1, 1)`. -/
-lemma associatedP_boundary_aux (ν μ : ℂ) (s : ℝ) (hs : s = 1 ∨ s = -1) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+lemma associatedP_boundary_aux (ν μ : ℂ) (s : ℝ) (hs : s = 1 ∨ s = -1) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     Tendsto (fun ε : ℝ => associatedP ν μ (x+(s:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
       (𝓝 (exp (-(s:ℂ)*μ*π*I/2)*ferrersP ν μ x)) := by
   have h1 : 0 < 1 + x := by linarith [hx.1]
@@ -77,7 +78,8 @@ lemma associatedP_boundary_aux (ν μ : ℂ) (s : ℝ) (hs : s = 1 ∨ s = -1) {
     have hre : ((x:ℂ) - 1).re < 0 := by simp; linarith [hx.2]
     have him : ((x:ℂ) - 1).im = 0 := by simp
     have hnorm : Real.log ‖(x:ℂ) - 1‖ = Real.log (1 - x) := by
-      rw [show (x:ℂ) - 1 = ((x - 1 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real, Real.norm_eq_abs,
+      rw [show (x:ℂ) - 1 = ((x - 1 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
+                                                  Real.norm_eq_abs,
         abs_of_neg (by linarith [hx.2])]; ring_nf
     have hw : Tendsto (fun ε : ℝ => (x:ℂ)+(s:ℂ)*I*ε - 1) (𝓝[>] (0:ℝ)) (𝓝 ((x:ℂ) - 1)) :=
       hz.sub_const 1
@@ -130,7 +132,8 @@ lemma associatedP_boundary_aux (ν μ : ℂ) (s : ℝ) (hs : s = 1 ∨ s = -1) {
 0⁺`. -/
 @[dlmf 14.23.E1]
 theorem associatedP_boundary_upper (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Tendsto (fun ε : ℝ => associatedP ν μ (x+(1:ℂ)*I*ε)) (𝓝[>] (0:ℝ)) (𝓝 (exp (-(1:ℂ)*μ*π*I/2)*ferrersP ν μ x)) := by
+    Tendsto (fun ε : ℝ => associatedP ν μ (x+(1:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
+        (𝓝 (exp (-(1:ℂ)*μ*π*I/2)*ferrersP ν μ x)) := by
   have h := associatedP_boundary_aux ν μ 1 (Or.inl rfl) hx
   simpa only [ofReal_one] using h
 
@@ -138,7 +141,8 @@ theorem associatedP_boundary_upper (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:�
 theorem legendre_eq_of_continuousAt_off_countable {f g : ℂ → ℂ} {μ₀ : ℂ} (hf : ContinuousAt f μ₀)
     (hg : ContinuousAt g μ₀) {S : Set ℂ} (hS : S.Countable) (h : ∀ᶠ μ in 𝓝 μ₀, μ ∉ S → f μ = g μ) :
     f μ₀ = g μ₀ := by
-  have : (𝓝[Sᶜ] μ₀).NeBot := mem_closure_iff_nhdsWithin_neBot.mp ((hS.dense_compl ℂ).closure_eq ▸ mem_univ _)
+  have : (𝓝[Sᶜ] μ₀).NeBot :=
+      mem_closure_iff_nhdsWithin_neBot.mp ((hS.dense_compl ℂ).closure_eq ▸ mem_univ _)
   have hev : f =ᶠ[𝓝[Sᶜ] μ₀] g := by
     filter_upwards [nhdsWithin_le_nhds h, self_mem_nhdsWithin] with μ h1 h2 using h1 h2
   exact tendsto_nhds_unique (hf.tendsto.mono_left nhdsWithin_le_nhds)
@@ -165,7 +169,8 @@ theorem ferrersPCont_ofReal (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) 
     ferrersPCont ν μ x = ferrersP ν μ x := by
   have h1 : 0 < 1 + x := by linarith [hx.1]
   have h2 : 0 < 1 - x := by linarith [hx.2]
-  rw [ferrersPCont, ferrersP, Complex.ofReal_cpow_eq_exp (div_pos h1 h2), Real.log_div h1.ne' h2.ne',
+  rw [ferrersPCont, ferrersP, Complex.ofReal_cpow_eq_exp (div_pos h1 h2),
+      Real.log_div h1.ne' h2.ne',
     show (1:ℂ)+x = ((1+x:ℝ):ℂ) by push_cast; ring, show (1:ℂ)-x = ((1-x:ℝ):ℂ) by push_cast; ring,
     ← ofReal_log h1.le, ← ofReal_log h2.le]
   push_cast; ring_nf
@@ -173,7 +178,8 @@ theorem ferrersPCont_ofReal (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) 
 /-- For `|z| < 1`, the points `1 + z`, `1 - z` and `1 - z²` lie in the slit plane and `(1 - z)/2`
 and `z²` lie in the cut plane `ℂ \ [1, ∞)`. -/
 theorem legendre_disk_facts {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
-    1+z ∈ slitPlane ∧ 1-z ∈ slitPlane ∧ (1-z)/2 ∈ cutPlane ∧ 1-z^2 ∈ slitPlane ∧ z^2 ∈ cutPlane := by
+    1+z ∈ slitPlane ∧ 1-z ∈ slitPlane ∧ (1-z)/2 ∈ cutPlane ∧ 1-z^2 ∈ slitPlane ∧
+        z^2 ∈ cutPlane := by
   have hn : ‖z‖ < 1 := by simpa using hz
   have hre := abs_re_le_norm z
   have hre' : |z.re| < 1 := lt_of_le_of_lt hre hn
@@ -188,7 +194,8 @@ theorem legendre_disk_facts {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
     rw [this]; linarith [(abs_lt.mp hre2).2]
 
 /-- `ferrersPCont ν μ` is analytic on the open unit disk. -/
-theorem ferrersPCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersPCont ν μ) (Metric.ball (0:ℂ) 1) := by
+theorem ferrersPCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersPCont ν μ)
+    (Metric.ball (0:ℂ) 1) := by
   intro z hz
   obtain ⟨hp, hm, hc, -, -⟩ := legendre_disk_facts hz
   have hG : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-w)/2)) z :=
@@ -198,7 +205,8 @@ theorem ferrersPCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersPCont ν
   exact hE.mul hG
 
 /-- `ferrersQCont ν μ` is analytic on the open unit disk. -/
-theorem ferrersQCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersQCont ν μ) (Metric.ball (0:ℂ) 1) := by
+theorem ferrersQCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersQCont ν μ)
+    (Metric.ball (0:ℂ) 1) := by
   intro z hz
   obtain ⟨-, -, -, hs, hc⟩ := legendre_disk_facts hz
   have hW : AnalyticAt ℂ (fun w : ℂ => (1-w^2)^(-μ/2)) z :=
@@ -217,26 +225,33 @@ theorem continuousAt_ferrersQCont_order {ν μ₀ : ℂ} (h : LegendreQRegular �
     (hz : z ∈ Metric.ball (0:ℂ) 1) : ContinuousAt (fun μ => ferrersQCont ν μ z) μ₀ := by
   obtain ⟨-, -, -, hsl, hc⟩ := legendre_disk_facts hz
   have h1 : ∀ m : ℕ, (ν+μ₀+1)/2 ≠ -m := fun m hm => h (2*m) (by push_cast; linear_combination 2*hm)
-  have h2 : ∀ m : ℕ, (ν+μ₀+2)/2 ≠ -m := fun m hm => h (2*m+1) (by push_cast; linear_combination 2*hm)
+  have h2 : ∀ m : ℕ, (ν+μ₀+2)/2 ≠ -m := fun m hm =>
+      h (2*m+1) (by push_cast; linear_combination 2*hm)
   have c1 : ContinuousAt (fun μ => Gamma ((ν+μ+1)/2)) μ₀ :=
     ContinuousAt.comp (g := Gamma) (differentiableAt_Gamma _ h1).continuousAt (by fun_prop)
   have c2 : ContinuousAt (fun μ => Gamma ((ν+μ+2)/2)) μ₀ :=
     ContinuousAt.comp (g := Gamma) (differentiableAt_Gamma _ h2).continuousAt (by fun_prop)
-  have r1 := (continuous_recip_Gamma.comp (by fun_prop : Continuous fun μ : ℂ => (ν-μ+2)/2)).continuousAt (x := μ₀)
-  have r2 := (continuous_recip_Gamma.comp (by fun_prop : Continuous fun μ : ℂ => (ν-μ+1)/2)).continuousAt (x := μ₀)
+  have r1 := (continuous_recip_Gamma.comp
+      (by fun_prop : Continuous fun μ : ℂ => (ν-μ+2)/2)).continuousAt (x := μ₀)
+  have r2 := (continuous_recip_Gamma.comp
+      (by fun_prop : Continuous fun μ : ℂ => (ν-μ+1)/2)).continuousAt (x := μ₀)
   have hne := slitPlane_ne_zero hsl
   have p2 : Continuous fun μ : ℂ => (2:ℂ)^μ := continuous_const_cpow' (by norm_num)
-  have pw : Continuous fun μ : ℂ => (1-z^2)^(-μ/2) := (continuous_const_cpow' hne).comp (by fun_prop)
-  have g1 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => -(ν+μ)/2) (B := fun μ : ℂ => (ν-μ+1)/2)
+  have pw : Continuous fun μ : ℂ => (1-z^2)^(-μ/2) :=
+      (continuous_const_cpow' hne).comp (by fun_prop)
+  have g1 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => -(ν+μ)/2)
+      (B := fun μ : ℂ => (ν-μ+1)/2)
     (C := fun _ : ℂ => 1/2) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
-  have g2 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (1-ν-μ)/2) (B := fun μ : ℂ => (ν-μ+2)/2)
+  have g2 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (1-ν-μ)/2)
+      (B := fun μ : ℂ => (ν-μ+2)/2)
     (C := fun _ : ℂ => 3/2) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
   have hs : Continuous fun μ : ℂ => sin ((ν+μ)*π/2) := by fun_prop
   have hcs : Continuous fun μ : ℂ => cos ((ν+μ)*π/2) := by fun_prop
   unfold ferrersQCont
   exact ((continuousAt_const.mul hs.continuousAt).mul ((((p2.continuousAt.mul c1).mul r1).mul
     pw.continuousAt).mul g1.continuousAt)).add ((continuousAt_const.mul hcs.continuousAt).mul
-    (((((p2.continuousAt.mul c2).mul r2).mul continuousAt_const).mul pw.continuousAt).mul g2.continuousAt))
+    (((((p2.continuousAt.mul c2).mul r2).mul continuousAt_const).mul pw.continuousAt).mul
+        g2.continuousAt))
 
 /-- For `|z| < 1`, `μ ↦ ferrersPCont ν μ z` is continuous. -/
 theorem continuous_ferrersPCont_order (ν : ℂ) {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
@@ -261,7 +276,8 @@ theorem legendre_log_sub_one_side {s : ℝ} (hs : s = 1 ∨ s = -1) {z : ℂ} (h
 
 /-- For `s = ±1` and `s · Im z > 0`, `P^μ_ν(z) = e^{-sμπi/2} ferrersPCont ν μ z`, relating the
 Legendre function to the continued Ferrers function in the upper or lower half-plane. -/
-theorem associatedP_eq_ferrersPCont {s : ℝ} (hs : s = 1 ∨ s = -1) (ν μ : ℂ) {z : ℂ} (hz : 0 < s*z.im) :
+theorem associatedP_eq_ferrersPCont {s : ℝ} (hs : s = 1 ∨ s = -1) (ν μ : ℂ) {z : ℂ}
+    (hz : 0 < s*z.im) :
     associatedP ν μ z = exp (-(s:ℂ)*μ*π*I/2)*ferrersPCont ν μ z := by
   unfold associatedP ferrersPCont
   rw [legendre_log_sub_one_side hs hz, ← mul_assoc, ← exp_add, add_comm z 1]
@@ -295,7 +311,8 @@ theorem olverQSide_eq_nonint {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h 
   have hG : AnalyticOnNhd ℂ (fun w => π/(2*sin (μ*π))*(exp (-(s:ℂ)*μ*π*I/2)*ferrersPCont ν μ w*
       (Gamma (ν+μ+1))⁻¹-exp ((s:ℂ)*μ*π*I/2)*ferrersPCont ν (-μ) w*(Gamma (ν-μ+1))⁻¹))
       (Metric.ball (0:ℂ) 1) := fun w hw =>
-    analyticAt_const.mul (((analyticAt_const.mul (ferrersPCont_analytic ν μ w hw)).mul analyticAt_const).sub
+    analyticAt_const.mul
+        (((analyticAt_const.mul (ferrersPCont_analytic ν μ w hw)).mul analyticAt_const).sub
       ((analyticAt_const.mul (ferrersPCont_analytic ν (-μ) w hw)).mul analyticAt_const))
   have h0 : ((0:ℝ):ℂ) ∈ Metric.ball (0:ℂ) 1 := by simp
   refine hR.eqOn_of_preconnected_of_frequently_eq hG (convex_ball _ _).isPreconnected h0 ?_ hz
@@ -337,7 +354,8 @@ theorem olverQ_eq_olverQSide {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h 
       ContinuousAt.comp (g := Gamma) (differentiableAt_Gamma _
         (fun m hm => h m (by linear_combination hm))).continuousAt (by fun_prop)
     unfold olverQSide
-    exact (((by fun_prop : Continuous fun μ : ℂ => exp ((s:ℂ)*μ*π*I/2)).continuousAt).div cG hG1).mul
+    exact (((by fun_prop : Continuous fun μ : ℂ =>
+                  exp ((s:ℂ)*μ*π*I/2)).continuousAt).div cG hG1).mul
       ((continuousAt_ferrersQCont_order h hz).sub
         (continuousAt_const.mul (continuous_ferrersPCont_order ν hz).continuousAt))
   refine legendre_eq_of_continuousAt_off_countable (f := fun μ => olverQ ν μ z)
@@ -391,8 +409,10 @@ theorem legendre_cos_sub_sin_exp {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℂ) :
 /-- The right side of DLMF 14.23.3, continued into the unit disk. -/
 noncomputable def olverQSideHyp (s : ℝ) (ν μ z : ℂ) : ℂ :=
   exp (-(s:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-z^2)^(μ/2)*((2:ℂ)^(ν+1))⁻¹*
-    (z*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (z^2)*((Gamma ((ν-μ+1)/2))⁻¹*(Gamma ((ν+μ+1)/2))⁻¹)-
-      (s:ℂ)*I*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (z^2)*((Gamma ((ν-μ+2)/2))⁻¹*(Gamma ((ν+μ+2)/2))⁻¹))
+    (z*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+        (z^2)*((Gamma ((ν-μ+1)/2))⁻¹*(Gamma ((ν+μ+1)/2))⁻¹)-
+      (s:ℂ)*I*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2)
+          (z^2)*((Gamma ((ν-μ+2)/2))⁻¹*(Gamma ((ν+μ+2)/2))⁻¹))
 
 /-- `olverQSideHyp s ν μ` is analytic on the open unit disk. -/
 theorem olverQSideHyp_analytic (s : ℝ) (ν μ : ℂ) :
@@ -407,7 +427,8 @@ theorem olverQSideHyp_analytic (s : ℝ) (ν μ : ℂ) :
     (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
   unfold olverQSideHyp
   exact ((analyticAt_const.mul hW).mul analyticAt_const).mul
-    (((analyticAt_id.mul hG1).mul analyticAt_const).sub ((analyticAt_const.mul hG2).mul analyticAt_const))
+    (((analyticAt_id.mul hG1).mul analyticAt_const).sub
+        ((analyticAt_const.mul hG2).mul analyticAt_const))
 
 /-- For `|z| < 1`, `μ ↦ olverQSideHyp s ν μ z` is continuous. -/
 theorem continuous_olverQSideHyp_order (s : ℝ) (ν : ℂ) {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
@@ -415,9 +436,11 @@ theorem continuous_olverQSideHyp_order (s : ℝ) (ν : ℂ) {z : ℂ} (hz : z �
   obtain ⟨-, -, -, hsl, hc⟩ := legendre_disk_facts hz
   have hne := slitPlane_ne_zero hsl
   have pw : Continuous fun μ : ℂ => (1-z^2)^(μ/2) := (continuous_const_cpow' hne).comp (by fun_prop)
-  have g1 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (μ-ν+1)/2) (B := fun μ : ℂ => (ν+μ+2)/2)
+  have g1 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (μ-ν+1)/2)
+      (B := fun μ : ℂ => (ν+μ+2)/2)
     (C := fun _ : ℂ => 3/2) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
-  have g2 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (μ-ν)/2) (B := fun μ : ℂ => (ν+μ+1)/2)
+  have g2 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (μ-ν)/2)
+      (B := fun μ : ℂ => (ν+μ+1)/2)
     (C := fun _ : ℂ => 1/2) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
   have i1 := continuous_recip_Gamma.comp (by fun_prop : Continuous fun μ : ℂ => (ν-μ+1)/2)
   have i2 := continuous_recip_Gamma.comp (by fun_prop : Continuous fun μ : ℂ => (ν+μ+1)/2)
@@ -440,17 +463,21 @@ theorem olverQSide_eq_hyp_real {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (
   obtain ⟨ha, hb⟩ := legendre_Gamma_half_ne_zero h
   have hc := ferrers_sq_mem_cutPlane hy
   have hne := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hy)
-  have hE : ferrersEven ν μ y = (1-(y:ℂ)^2)^(μ/2)*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) ((y:ℂ)^2) := by
+  have hE : ferrersEven ν μ y =
+      (1-(y:ℂ)^2)^(μ/2)*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) ((y:ℂ)^2) := by
     unfold ferrersEven
     rw [regularizedGaussHG_euler _ _ _ hc, regularizedGaussHG_symm _ _ _ hc,
       show (1/2:ℂ) - -(ν+μ)/2 - (ν-μ+1)/2 = μ by ring, show (1/2:ℂ) - (ν-μ+1)/2 = (μ-ν)/2 by ring,
       show (1/2:ℂ) - -(ν+μ)/2 = (ν+μ+1)/2 by ring, ← mul_assoc, ← cpow_add _ _ hne]
     ring_nf
-  have hO : ferrersOdd ν μ y = y*((1-(y:ℂ)^2)^(μ/2)*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) ((y:ℂ)^2)) := by
+  have hO : ferrersOdd ν μ y =
+      y*((1-(y:ℂ)^2)^(μ/2)*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) ((y:ℂ)^2)) := by
     unfold ferrersOdd
     rw [regularizedGaussHG_euler _ _ _ hc, regularizedGaussHG_symm _ _ _ hc,
-      show (3/2:ℂ) - (1-ν-μ)/2 - (ν-μ+2)/2 = μ by ring, show (3/2:ℂ) - (ν-μ+2)/2 = (μ-ν+1)/2 by ring,
-      show (3/2:ℂ) - (1-ν-μ)/2 = (ν+μ+2)/2 by ring, ← mul_assoc ((1-(y:ℂ)^2)^(-μ/2)), ← cpow_add _ _ hne]
+      show (3/2:ℂ) - (1-ν-μ)/2 - (ν-μ+2)/2 = μ by ring, show (3/2:ℂ) - (ν-μ+2)/2 =
+                                                    (μ-ν+1)/2 by ring,
+      show (3/2:ℂ) - (1-ν-μ)/2 = (ν+μ+2)/2 by ring, ← mul_assoc ((1-(y:ℂ)^2)^(-μ/2)),
+                                                ← cpow_add _ _ hne]
     ring_nf
   have hpi : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have e := legendre_reflection_even (ν+μ)
@@ -459,12 +486,15 @@ theorem olverQSide_eq_hyp_real {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (
   have r1 : (Gamma ((1-ν-μ)/2))⁻¹ = cos ((ν+μ)*π/2)*Gamma ((ν+μ+1)/2)/π := by
     rw [← e]; field_simp
   have r2 : (Gamma (-(ν+μ)/2))⁻¹ = -sin ((ν+μ)*π/2)*Gamma ((ν+μ+2)/2)/π := by
-    rw [show -sin ((ν+μ)*π/2) = π*((Gamma (-(ν+μ)/2))⁻¹*(Gamma ((ν+μ+2)/2))⁻¹) from o.symm]; field_simp
-  have hX : exp (-(s:ℂ)*ν*π*I/2) = exp ((s:ℂ)*μ*π*I/2)*(cos ((ν+μ)*π/2)-(s:ℂ)*I*sin ((ν+μ)*π/2)) := by
+    rw [show -sin ((ν+μ)*π/2) =
+        π*((Gamma (-(ν+μ)/2))⁻¹*(Gamma ((ν+μ+2)/2))⁻¹) from o.symm]; field_simp
+  have hX : exp (-(s:ℂ)*ν*π*I/2) =
+      exp ((s:ℂ)*μ*π*I/2)*(cos ((ν+μ)*π/2)-(s:ℂ)*I*sin ((ν+μ)*π/2)) := by
     rw [legendre_cos_sub_sin_exp hs, ← exp_add]; congr 1; ring
   have hsq : (Real.sqrt π:ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   unfold olverQSide olverQSideHyp
-  rw [ferrersQCont_ofReal, ferrersPCont_ofReal ν μ hy, ferrersQ_even_odd, ferrersP_even_odd ν μ hy, r1, r2,
+  rw [ferrersQCont_ofReal, ferrersPCont_ofReal ν μ hy, ferrersQ_even_odd,
+      ferrersP_even_odd ν μ hy, r1, r2,
     hE, hO, legendre_Gamma_plus, hX, legendre_pi_three_halves, cpow_add _ _ two_ne_zero, cpow_one]
   generalize (1-(y:ℂ)^2)^(μ/2) = U
   generalize regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) ((y:ℂ)^2) = F1
@@ -524,7 +554,8 @@ theorem olverQ_eq_olverQSideHyp {s : ℝ} (hs : s = 1 ∨ s = -1) (ν μ : ℂ)
   rw [olverQ_eq_olverQSide hs hreg hz him, olverQSide_eq_hyp hs hreg hz]
 
 /-- Boundary values of `𝑸^μ_ν` in hypergeometric form (DLMF 14.23.3), for all parameters. -/
-lemma olverQ_boundary_hyp_aux (ν μ : ℂ) (s : ℝ) (hs : s = 1 ∨ s = -1) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+lemma olverQ_boundary_hyp_aux (ν μ : ℂ) (s : ℝ) (hs : s = 1 ∨ s = -1) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     Tendsto (fun ε : ℝ => olverQ ν μ (x+(s:ℂ)*I*ε)) (𝓝[>] (0:ℝ)) (𝓝 (olverQSideHyp s ν μ x)) := by
   have hxD : (x:ℂ) ∈ Metric.ball (0:ℂ) 1 := by
     simp only [Metric.mem_ball, dist_zero_right, norm_real, Real.norm_eq_abs]
@@ -546,8 +577,10 @@ lemma olverQ_boundary_hyp_aux (ν μ : ℂ) (s : ℝ) (hs : s = 1 ∨ s = -1) {x
 /-- DLMF 14.23.2 (upper side): when `ν + μ` is not a negative integer and `-1 < x < 1`, `𝑸^μ_ν(x +
 iε) → e^{μπi/2} (𝖰^μ_ν(x) - (πi/2) 𝖯^μ_ν(x))/Γ(ν+μ+1)` as `ε → 0⁺`. -/
 @[dlmf 14.23.E2]
-theorem olverQ_boundary_upper (ν μ : ℂ) (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Tendsto (fun ε : ℝ => olverQ ν μ (x+(1:ℂ)*I*ε)) (𝓝[>] (0:ℝ)) (𝓝 (exp ((1:ℂ)*μ*π*I/2)/Gamma (ν+μ+1)*(ferrersQ ν μ x-(1:ℂ)*π*I/2*ferrersP ν μ x))) := by
+theorem olverQ_boundary_upper (ν μ : ℂ) (hr : LegendreQRegular ν μ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    Tendsto (fun ε : ℝ => olverQ ν μ (x+(1:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
+        (𝓝 (exp ((1:ℂ)*μ*π*I/2)/Gamma (ν+μ+1)*(ferrersQ ν μ x-(1:ℂ)*π*I/2*ferrersP ν μ x))) := by
   simpa only [ofReal_one] using olverQ_boundary_aux ν μ hr 1 (Or.inl rfl) hx
 
 /-- DLMF 14.23.4 (upper side): for `-1 < x < 1`, `𝖯^μ_ν(x) = e^{μπi/2} P^μ_ν(x + i0)`, the boundary
@@ -562,13 +595,16 @@ theorem ferrersP_boundary_inverse_upper (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo 
 /-- DLMF 14.23.6 (upper side): when `ν + μ` is not a negative integer and `-1 < x < 1`, `𝖰^μ_ν(x) =
 e^{-μπi/2} Γ(ν+μ+1) 𝑸^μ_ν(x + i0) + (πi/2) e^{μπi/2} P^μ_ν(x + i0)`. -/
 @[dlmf 14.23.E6]
-theorem ferrersQ_boundary_inverse_upper {ν μ : ℂ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersQ ν μ x=exp (-(1:ℂ)*μ*π*I/2)*Gamma (ν+μ+1)*legendreBoundary (olverQ ν μ) 1 x+(1:ℂ)*π*I/2*exp ((1:ℂ)*μ*π*I/2)*legendreBoundary (associatedP ν μ) 1 x := by
+theorem ferrersQ_boundary_inverse_upper {ν μ : ℂ} (hr : LegendreQRegular ν μ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    ferrersQ ν μ x=exp (-(1:ℂ)*μ*π*I/2)*Gamma (ν+μ+1)*legendreBoundary (olverQ ν μ) 1
+        x+(1:ℂ)*π*I/2*exp ((1:ℂ)*μ*π*I/2)*legendreBoundary (associatedP ν μ) 1 x := by
   have hG1 : Gamma (ν+μ+1) ≠ 0 := Gamma_ne_zero (fun n he => hr n (by linear_combination he))
   have hG : Gamma (ν+μ+1)*(Gamma (ν+μ+1))⁻¹ = 1 := mul_inv_cancel₀ hG1
   have hAB : exp (-(1:ℂ)*μ*π*I/2)*exp ((1:ℂ)*μ*π*I/2) = 1 := by
     rw [← exp_add, show -(1:ℂ)*μ*π*I/2+(1:ℂ)*μ*π*I/2 = 0 by ring, exp_zero]
-  rw [legendreBoundary, legendreBoundary, (olverQ_boundary_aux ν μ hr 1 (Or.inl rfl) hx).limUnder_eq,
+  rw [legendreBoundary, legendreBoundary,
+      (olverQ_boundary_aux ν μ hr 1 (Or.inl rfl) hx).limUnder_eq,
     (associatedP_boundary_aux ν μ 1 (Or.inl rfl) hx).limUnder_eq]
   simp only [ofReal_one, div_eq_mul_inv]
   simp only [div_eq_mul_inv] at hAB
@@ -580,7 +616,11 @@ theorem ferrersQ_boundary_inverse_upper {ν μ : ℂ} (hr : LegendreQRegular ν 
 𝐅((μ-ν)/2, (ν+μ+1)/2; 1/2; x²)/(Γ((ν-μ+2)/2) Γ((ν+μ+2)/2)))`. -/
 @[dlmf 14.23.E3]
 theorem olverQ_boundary_hypergeometric_upper (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Tendsto (fun ε : ℝ => olverQ ν μ (x+(1:ℂ)*I*ε)) (𝓝[>] (0:ℝ)) (𝓝 (exp (-(1:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-x^2:ℂ)^(μ/2)/2^(ν+1)*(x*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (x^2)/(Gamma ((ν-μ+1)/2)*Gamma ((ν+μ+1)/2))-(1:ℂ)*I*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (x^2)/(Gamma ((ν-μ+2)/2)*Gamma ((ν+μ+2)/2))))) := by
+    Tendsto (fun ε : ℝ => olverQ ν μ (x+(1:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
+        (𝓝 (exp (-(1:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-x^2:ℂ)^(μ/2)/2^(ν+1)*(x*regularizedGaussHG
+        ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+        (x^2)/(Gamma ((ν-μ+1)/2)*Gamma ((ν+μ+1)/2))-(1:ℂ)*I*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2)
+        (1/2) (x^2)/(Gamma ((ν-μ+2)/2)*Gamma ((ν+μ+2)/2))))) := by
   have h := olverQ_boundary_hyp_aux ν μ 1 (Or.inl rfl) hx
   simp only [olverQSideHyp, ofReal_one] at h
   simpa only [div_eq_mul_inv, mul_inv] using h
@@ -589,15 +629,18 @@ theorem olverQ_boundary_hypergeometric_upper (ν μ : ℂ) {x : ℝ} (hx : x ∈
 0⁺`. -/
 @[dlmf 14.23.E1]
 theorem associatedP_boundary_lower (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Tendsto (fun ε : ℝ => associatedP ν μ (x+(-1:ℂ)*I*ε)) (𝓝[>] (0:ℝ)) (𝓝 (exp (-(-1:ℂ)*μ*π*I/2)*ferrersP ν μ x)) := by
+    Tendsto (fun ε : ℝ => associatedP ν μ (x+(-1:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
+        (𝓝 (exp (-(-1:ℂ)*μ*π*I/2)*ferrersP ν μ x)) := by
   have h := associatedP_boundary_aux ν μ (-1) (Or.inr rfl) hx
   simpa only [ofReal_neg, ofReal_one] using h
 
 /-- DLMF 14.23.2 (lower side): when `ν + μ` is not a negative integer and `-1 < x < 1`, `𝑸^μ_ν(x -
 iε) → e^{-μπi/2} (𝖰^μ_ν(x) + (πi/2) 𝖯^μ_ν(x))/Γ(ν+μ+1)` as `ε → 0⁺`. -/
 @[dlmf 14.23.E2]
-theorem olverQ_boundary_lower (ν μ : ℂ) (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Tendsto (fun ε : ℝ => olverQ ν μ (x+(-1:ℂ)*I*ε)) (𝓝[>] (0:ℝ)) (𝓝 (exp ((-1:ℂ)*μ*π*I/2)/Gamma (ν+μ+1)*(ferrersQ ν μ x-(-1:ℂ)*π*I/2*ferrersP ν μ x))) := by
+theorem olverQ_boundary_lower (ν μ : ℂ) (hr : LegendreQRegular ν μ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    Tendsto (fun ε : ℝ => olverQ ν μ (x+(-1:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
+        (𝓝 (exp ((-1:ℂ)*μ*π*I/2)/Gamma (ν+μ+1)*(ferrersQ ν μ x-(-1:ℂ)*π*I/2*ferrersP ν μ x))) := by
   simpa only [ofReal_neg, ofReal_one] using olverQ_boundary_aux ν μ hr (-1) (Or.inr rfl) hx
 
 /-- DLMF 14.23.4 (lower side): for `-1 < x < 1`, `𝖯^μ_ν(x) = e^{-μπi/2} P^μ_ν(x - i0)`, the boundary
@@ -605,20 +648,24 @@ value being taken from below the cut. -/
 @[dlmf 14.23.E4]
 theorem ferrersP_boundary_inverse_lower (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν μ x=exp ((-1:ℂ)*μ*π*I/2)*legendreBoundary (associatedP ν μ) (-1) x := by
-  rw [legendreBoundary, (associatedP_boundary_aux ν μ (-1) (Or.inr rfl) hx).limUnder_eq, ← mul_assoc,
+  rw [legendreBoundary,
+      (associatedP_boundary_aux ν μ (-1) (Or.inr rfl) hx).limUnder_eq, ← mul_assoc,
     ← exp_add]
   push_cast; ring_nf; rw [exp_zero, one_mul]
 
 /-- DLMF 14.23.6 (lower side): when `ν + μ` is not a negative integer and `-1 < x < 1`, `𝖰^μ_ν(x) =
 e^{μπi/2} Γ(ν+μ+1) 𝑸^μ_ν(x - i0) - (πi/2) e^{-μπi/2} P^μ_ν(x - i0)`. -/
 @[dlmf 14.23.E6]
-theorem ferrersQ_boundary_inverse_lower {ν μ : ℂ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersQ ν μ x=exp (-(-1:ℂ)*μ*π*I/2)*Gamma (ν+μ+1)*legendreBoundary (olverQ ν μ) (-1) x+(-1:ℂ)*π*I/2*exp ((-1:ℂ)*μ*π*I/2)*legendreBoundary (associatedP ν μ) (-1) x := by
+theorem ferrersQ_boundary_inverse_lower {ν μ : ℂ} (hr : LegendreQRegular ν μ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    ferrersQ ν μ x=exp (-(-1:ℂ)*μ*π*I/2)*Gamma (ν+μ+1)*legendreBoundary (olverQ ν μ) (-1)
+        x+(-1:ℂ)*π*I/2*exp ((-1:ℂ)*μ*π*I/2)*legendreBoundary (associatedP ν μ) (-1) x := by
   have hG1 : Gamma (ν+μ+1) ≠ 0 := Gamma_ne_zero (fun n he => hr n (by linear_combination he))
   have hG : Gamma (ν+μ+1)*(Gamma (ν+μ+1))⁻¹ = 1 := mul_inv_cancel₀ hG1
   have hAB : exp (-(-1:ℂ)*μ*π*I/2)*exp ((-1:ℂ)*μ*π*I/2) = 1 := by
     rw [← exp_add, show -(-1:ℂ)*μ*π*I/2+(-1:ℂ)*μ*π*I/2 = 0 by ring, exp_zero]
-  rw [legendreBoundary, legendreBoundary, (olverQ_boundary_aux ν μ hr (-1) (Or.inr rfl) hx).limUnder_eq,
+  rw [legendreBoundary, legendreBoundary,
+      (olverQ_boundary_aux ν μ hr (-1) (Or.inr rfl) hx).limUnder_eq,
     (associatedP_boundary_aux ν μ (-1) (Or.inr rfl) hx).limUnder_eq]
   simp only [ofReal_neg, ofReal_one, div_eq_mul_inv]
   simp only [div_eq_mul_inv] at hAB
@@ -630,7 +677,11 @@ theorem ferrersQ_boundary_inverse_lower {ν μ : ℂ} (hr : LegendreQRegular ν 
 𝐅((μ-ν)/2, (ν+μ+1)/2; 1/2; x²)/(Γ((ν-μ+2)/2) Γ((ν+μ+2)/2)))`. -/
 @[dlmf 14.23.E3]
 theorem olverQ_boundary_hypergeometric_lower (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Tendsto (fun ε : ℝ => olverQ ν μ (x+(-1:ℂ)*I*ε)) (𝓝[>] (0:ℝ)) (𝓝 (exp (-(-1:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-x^2:ℂ)^(μ/2)/2^(ν+1)*(x*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (x^2)/(Gamma ((ν-μ+1)/2)*Gamma ((ν+μ+1)/2))-(-1:ℂ)*I*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (x^2)/(Gamma ((ν-μ+2)/2)*Gamma ((ν+μ+2)/2))))) := by
+    Tendsto (fun ε : ℝ => olverQ ν μ (x+(-1:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
+        (𝓝 (exp (-(-1:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-x^2:ℂ)^(μ/2)/2^(ν+1)*(x*regularizedGaussHG
+        ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+        (x^2)/(Gamma ((ν-μ+1)/2)*Gamma ((ν+μ+1)/2))-(-1:ℂ)*I*regularizedGaussHG ((μ-ν)/2)
+        ((ν+μ+1)/2) (1/2) (x^2)/(Gamma ((ν-μ+2)/2)*Gamma ((ν+μ+2)/2))))) := by
   have h := olverQ_boundary_hyp_aux ν μ (-1) (Or.inr rfl) hx
   simp only [olverQSideHyp, ofReal_neg, ofReal_one] at h
   simpa only [div_eq_mul_inv, mul_inv] using h
@@ -638,13 +689,17 @@ theorem olverQ_boundary_hypergeometric_lower (ν μ : ℂ) {x : ℝ} (hx : x ∈
 /-- DLMF 14.23.5: when `ν + μ` is not a negative integer and `-1 < x < 1`, `𝖰^μ_ν(x) = (Γ(ν+μ+1)/2)
 (e^{-μπi/2} 𝑸^μ_ν(x + i0) + e^{μπi/2} 𝑸^μ_ν(x - i0))`. -/
 @[dlmf 14.23.E5]
-theorem ferrersQ_boundary_average {ν μ : ℂ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersQ ν μ x=Gamma (ν+μ+1)/2*(exp (-μ*π*I/2)*legendreBoundary (olverQ ν μ) 1 x+exp (μ*π*I/2)*legendreBoundary (olverQ ν μ) (-1) x) := by
+theorem ferrersQ_boundary_average {ν μ : ℂ} (hr : LegendreQRegular ν μ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    ferrersQ ν μ x=Gamma
+        (ν+μ+1)/2*(exp (-μ*π*I/2)*legendreBoundary (olverQ ν μ) 1 x+exp (μ*π*I/2)*legendreBoundary
+        (olverQ ν μ) (-1) x) := by
   have hG1 : Gamma (ν+μ+1) ≠ 0 := Gamma_ne_zero (fun n he => hr n (by linear_combination he))
   have hG : Gamma (ν+μ+1)*(Gamma (ν+μ+1))⁻¹ = 1 := mul_inv_cancel₀ hG1
   have hXY : exp (μ*π*I/2)*exp (-μ*π*I/2) = 1 := by
     rw [← exp_add, show μ*π*I/2+(-μ)*π*I/2 = 0 by ring, exp_zero]
-  rw [legendreBoundary, legendreBoundary, (olverQ_boundary_aux ν μ hr 1 (Or.inl rfl) hx).limUnder_eq,
+  rw [legendreBoundary, legendreBoundary,
+      (olverQ_boundary_aux ν μ hr 1 (Or.inl rfl) hx).limUnder_eq,
     (olverQ_boundary_aux ν μ hr (-1) (Or.inr rfl) hx).limUnder_eq]
   simp only [ofReal_neg, ofReal_one, one_mul, neg_mul]
   rw [show -(μ*π*I)/2 = -μ*π*I/2 by ring]
@@ -670,8 +725,10 @@ With DLMF's own conventions 14.20.2 and 14.23.1–14.23.6 (which `legendreBounda
 conjugates and the right side is real, as `Q̂` is. Checked independently with mpmath.
 Stronger than DLMF: the standing assumptions `τ ≥ 0`, `μ ≥ 0` of §14.20 are not needed. -/
 @[dlmf 14.23.E7]
-theorem conicalQHat_boundary {τ μ : ℝ} (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    conicalQHat τ μ x=1/2*exp (3*μ*π*I/2)*legendreBoundary (associatedQ (-1/2+I*τ) (-μ)) (-1) x+1/2*exp (μ*π*I/2)*legendreBoundary (associatedQ (-1/2-I*τ) (-μ)) 1 x := by
+theorem conicalQHat_boundary {τ μ : ℝ} (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    conicalQHat τ μ x=1/2*exp (3*μ*π*I/2)*legendreBoundary (associatedQ (-1/2+I*τ) (-μ)) (-1)
+        x+1/2*exp (μ*π*I/2)*legendreBoundary (associatedQ (-1/2-I*τ) (-μ)) 1 x := by
   have hreg : ∀ σ : ℂ, (σ = I ∨ σ = -I) → LegendreQRegular (-1/2+σ*τ) (-μ) := by
     intro σ hσ n hn
     rcases hex with h | h
@@ -685,7 +742,8 @@ theorem conicalQHat_boundary {τ μ : ℝ} (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ �
   -- boundary values of `Q^{-μ}_ν` from DLMF 14.23.2
   have hb : ∀ ν : ℂ, LegendreQRegular ν (-μ) → ∀ s : ℝ, (s = 1 ∨ s = -1) →
       legendreBoundary (associatedQ ν (-μ)) s x =
-        exp ((-μ:ℂ)*π*I)*exp ((s:ℂ)*(-μ)*π*I/2)*(ferrersQ ν (-μ) x-(s:ℂ)*π*I/2*ferrersP ν (-μ) x) := by
+        exp ((-μ:ℂ)*π*I)*exp
+            ((s:ℂ)*(-μ)*π*I/2)*(ferrersQ ν (-μ) x-(s:ℂ)*π*I/2*ferrersP ν (-μ) x) := by
     intro ν hr s hs
     have hG : Gamma (ν+(-μ)+1) ≠ 0 := Gamma_ne_zero (fun n he => hr n (by linear_combination he))
     have h := (olverQ_boundary_aux ν (-μ) hr s hs hx).const_mul (exp ((-μ:ℂ)*π*I)*Gamma (ν+(-μ)+1))
@@ -718,16 +776,23 @@ theorem conicalQHat_boundary {τ μ : ℝ} (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ �
   field_simp
   ring
 
-/-- Continuation of the value and complex derivative along a path, by its first-order differential system. -/
+/-- Continuation of the value and complex derivative along a path, by its first-order differential
+system. -/
 def IsLegendreTransport (ν μ : ℂ) (γ : ℝ → ℂ) (a b : ℂ) (u v : ℝ → ℂ) : Prop :=
-  u 0=a ∧ v 0=b ∧ ContinuousOn u (Icc 0 1) ∧ ContinuousOn v (Icc 0 1) ∧ ∀ t ∈ Icc (0:ℝ) 1, HasDerivWithinAt u (deriv γ t*v t) (Icc 0 1) t ∧ HasDerivWithinAt v (deriv γ t*(2*γ t*v t-(ν*(ν+1)-μ^2/(1-(γ t)^2))*u t)/(1-(γ t)^2)) (Icc 0 1) t
+  u 0=a ∧ v 0=b ∧ ContinuousOn u (Icc 0 1) ∧ ContinuousOn v (Icc 0 1) ∧ ∀ t ∈ Icc (0:ℝ) 1,
+      HasDerivWithinAt u (deriv γ t*v t) (Icc 0 1) t ∧
+      HasDerivWithinAt v (deriv γ
+      t*(2*γ t*v t-(ν*(ν+1)-μ^2/(1-(γ t)^2))*u t)/(1-(γ t)^2)) (Icc 0 1) t
 
-/-- Endpoint value of the continued solution; existence and endpoint uniqueness are not consequences of choice. -/
+/-- Endpoint value of the continued solution; existence and endpoint uniqueness are not consequences
+of choice. -/
 def legendreTransport (ν μ : ℂ) (γ : ℝ → ℂ) (a b : ℂ) : ℂ :=
-  let uv:=Classical.epsilon (fun p : (ℝ → ℂ) × (ℝ → ℂ) => IsLegendreTransport ν μ γ a b p.1 p.2); uv.1 1
+  let uv:=Classical.epsilon (fun p : (ℝ → ℂ) × (ℝ → ℂ) => IsLegendreTransport ν μ γ a b p.1 p.2);
+      uv.1 1
 
 /-- Existence on a compact path avoiding both regular singular points. -/
-theorem legendreTransport_exists (ν μ a b : ℂ) (γ : ℝ → ℂ) (hγ : ContDiff ℝ 1 γ) (hreg : ∀ t ∈ Icc (0:ℝ) 1, γ t ≠ 1 ∧ γ t ≠ -1) :
+theorem legendreTransport_exists (ν μ a b : ℂ) (γ : ℝ → ℂ) (hγ : ContDiff ℝ 1 γ)
+    (hreg : ∀ t ∈ Icc (0:ℝ) 1, γ t ≠ 1 ∧ γ t ≠ -1) :
     ∃ u v : ℝ → ℂ, IsLegendreTransport ν μ γ a b u v := by
   have hγc : Continuous γ := hγ.continuous
   have hγ'c : Continuous (deriv γ) := hγ.continuous_deriv le_rfl
@@ -787,7 +852,9 @@ theorem isLegendreTransport_unique {ν μ a b : ℂ} {γ : ℝ → ℂ} (hγ : C
     simp only [smul_eq_mul]; field_simp; ring
 
 /-- Uniqueness identifies the actual analytic continuation, independently of the chosen solution. -/
-theorem legendreTransport_unique (ν μ a b : ℂ) (γ : ℝ → ℂ) (hγ : ContDiff ℝ 1 γ) (hreg : ∀ t ∈ Icc (0:ℝ) 1, γ t ≠ 1 ∧ γ t ≠ -1) {u v : ℝ → ℂ} (huv : IsLegendreTransport ν μ γ a b u v) :
+theorem legendreTransport_unique (ν μ a b : ℂ) (γ : ℝ → ℂ) (hγ : ContDiff ℝ 1 γ)
+    (hreg : ∀ t ∈ Icc (0:ℝ) 1, γ t ≠ 1 ∧ γ t ≠ -1) {u v : ℝ → ℂ}
+    (huv : IsLegendreTransport ν μ γ a b u v) :
     legendreTransport ν μ γ a b=u 1 := by
   have hex : ∃ p : (ℝ → ℂ) × (ℝ → ℂ), IsLegendreTransport ν μ γ a b p.1 p.2 := ⟨(u, v), huv⟩
   have hs := Classical.epsilon_spec hex
@@ -851,7 +918,8 @@ theorem legFS_olverQ_eq_G (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   have he2 : ((Real.exp (-ξ) : ℝ) : ℂ)^2 = ((Real.exp (-2*ξ) : ℝ) : ℂ) := by
     rw [← ofReal_pow, ← Real.exp_nat_mul]; push_cast; ring_nf
   have hpow : ((Real.exp (-ξ) : ℝ) : ℂ)^(ν+1) = (exp ((ν+1/2+1/2)*ξ))⁻¹ := by
-    rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr (Real.exp_pos _).ne'), ← ofReal_log (Real.exp_pos _).le,
+    rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr (Real.exp_pos _).ne'),
+        ← ofReal_log (Real.exp_pos _).le,
       Real.log_exp, ← exp_neg]
     congr 1; push_cast; ring
   rw [he2, hpow, show ν+1/2+μ+1/2 = ν+μ+1 by ring, show ν+1/2+1 = ν+3/2 by ring]

@@ -70,7 +70,8 @@ theorem zcount_enum {P : ℝ → Prop} {t : ℕ → ℝ} (ht0 : t 0 = 0) (htm : 
       by_contra hle
       exact Nat.find_min hex (show m < n by omega) (not_lt.mp hle)
     have hne : x ≠ t (m + 1) := fun h => he m (h ▸ hPx)
-    have hxI : x ∈ Ioo (t m) (t (m + 1)) := ⟨hlt, lt_of_le_of_ne (by rw [← Nat.succ_eq_add_one, ← hm]; exact hn) hne⟩
+    have hxI : x ∈ Ioo (t m) (t (m + 1)) :=
+        ⟨hlt, lt_of_le_of_ne (by rw [← Nat.succ_eq_add_one, ← hm]; exact hn) hne⟩
     exact ⟨m, (hzu m x ⟨hxI, hPx⟩).symm⟩
   have hiff : ∀ x, 0 < x → (P x ↔ ∃ k, z k = x) := fun x hx =>
     ⟨hall x hx, fun ⟨k, hk⟩ => hk ▸ hzP k⟩

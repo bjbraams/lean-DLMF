@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.NumberTheory.Basic
 public import DLMF.NumberTheory.Functions
+public import DLMF.NumberTheory.ThetaFourthPowerLambert
 public import DLMF.NumberTheory.HeckeOperators
 public import DLMF.NumberTheory.DirichletSeries
 public import DLMF.NumberTheory.Inversion

@@ -108,7 +108,8 @@ theorem hypSV_psi_one_sub_re_pos {w : ℂ} (h₁ : 30 * |w.im| < 1 + 3 * w.re)
   have hqim : |(1 - 9 * w).im| ≤ 3 / 10 * (1 - 9 * w).re := by
     simp [abs_mul]; linarith
   obtain ⟨hq1, hq2⟩ := hypSV_tan_recip hqre hqim
-  obtain ⟨hp2r, hp2i⟩ := hypSV_tan_mul (T := 21 / 100) hpre hpre hpim hpim (by norm_num) (by norm_num)
+  obtain ⟨hp2r, hp2i⟩ :=
+      hypSV_tan_mul (T := 21 / 100) hpre hpre hpim hpim (by norm_num) (by norm_num)
   obtain ⟨hp3r, hp3i⟩ := hypSV_tan_mul (T := 8 / 25) hp2r hpre hp2i hpim (by norm_num) (by norm_num)
   obtain ⟨hq2r, hq2i⟩ := hypSV_tan_mul (T := 2 / 3) hq1 hq1 hq2 hq2 (by norm_num) (by norm_num)
   exact (hypSV_tan_mul (T := 2) hp3r hq2r hp3i hq2i (by norm_num) (by norm_num)).1
@@ -164,7 +165,8 @@ theorem hypSV_cubic_psi {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : �
     (analyticAt_const.add (analyticAt_const.mul analyticAt_id)).cpow analyticAt_const (hslit w hw)
   have hφa : ∀ w ∈ D, AnalyticAt ℂ φ w := fun w hw =>
     (((analyticAt_const.mul analyticAt_id).mul ((analyticAt_const.sub analyticAt_id).pow 2)).div
-      ((analyticAt_const.sub (analyticAt_const.mul analyticAt_id)).pow 2)) (pow_ne_zero 2 (hq0 w hw))
+      ((analyticAt_const.sub (analyticAt_const.mul analyticAt_id)).pow 2))
+          (pow_ne_zero 2 (hq0 w hw))
   have hDopen : IsOpen D := by
     rw [hD, Set.ofPred_and]
     exact (isOpen_lt (by fun_prop) (by fun_prop)).inter (isOpen_lt (by fun_prop) (by fun_prop))
@@ -318,7 +320,8 @@ theorem hypSV_cubicTwo_one_sub_re_pos {w : ℂ} (h₁ : 80 * |w.im| < 1 + 8 * w.
   have hqim : |(1 - 4 * w).im| ≤ 1 / 10 * (1 - 4 * w).re := by
     simp [abs_mul]; linarith
   obtain ⟨hq1, hq2⟩ := hypSV_tan_recip hqre hqim
-  obtain ⟨hp2r, hp2i⟩ := hypSV_tan_mul (T := 21 / 100) hpre hpre hpim hpim (by norm_num) (by norm_num)
+  obtain ⟨hp2r, hp2i⟩ :=
+      hypSV_tan_mul (T := 21 / 100) hpre hpre hpim hpim (by norm_num) (by norm_num)
   obtain ⟨hprr, hpri⟩ := hypSV_tan_mul (T := 6 / 25) hp2r hrre hp2i hrim (by norm_num) (by norm_num)
   obtain ⟨hq2r, hq2i⟩ := hypSV_tan_mul (T := 21 / 100) hq1 hq1 hq2 hq2 (by norm_num) (by norm_num)
   obtain ⟨hq3r, hq3i⟩ := hypSV_tan_mul (T := 8 / 25) hq2r hq1 hq2i hq2 (by norm_num) (by norm_num)
@@ -373,7 +376,8 @@ theorem hypSV_cubic_two {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : �
     (analyticAt_const.add (analyticAt_const.mul analyticAt_id)).cpow analyticAt_const (hslit w hw)
   have hφa : ∀ w ∈ D, AnalyticAt ℂ φ w := fun w hw =>
     ((analyticAt_const.mul analyticAt_id).div
-      (((analyticAt_const.mul analyticAt_id).sub analyticAt_const).pow 3)) (pow_ne_zero 3 (hq0 w hw))
+      (((analyticAt_const.mul analyticAt_id).sub analyticAt_const).pow 3))
+          (pow_ne_zero 3 (hq0 w hw))
   have hDopen : IsOpen D := by
     rw [hD, Set.ofPred_and]
     exact (isOpen_lt (by fun_prop) (by fun_prop)).inter (isOpen_lt (by fun_prop) (by fun_prop))
@@ -507,7 +511,8 @@ theorem hypSV_cubic_psi_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 
     simp only [hψr]
     constructor
     · apply div_nonneg _ hq.le; nlinarith [sq_nonneg (1 - x)]
-    · rw [div_lt_one hq]; nlinarith [sq_nonneg (1 + 3 * x), mul_pos (by linarith : (0:ℝ) < 1 + 3 * x)
+    · rw [div_lt_one hq];
+          nlinarith [sq_nonneg (1 + 3 * x), mul_pos (by linarith : (0:ℝ) < 1 + 3 * x)
         (mul_pos (by linarith : (0:ℝ) < 1 + 3 * x) (by linarith : (0:ℝ) < 1 + 3 * x))]
   have hmap : Tendsto ψr (𝓝[>] (-1 / 3)) (𝓝[<] 1) := by
     apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
@@ -520,7 +525,8 @@ theorem hypSV_cubic_psi_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 
     · filter_upwards [Ioo_mem_nhdsGT (show (-1 / 3 : ℝ) < 0 by norm_num)] with x hx
       exact (hψ1 x hx.1 hx.2.le).2
   have hR := (tendsto_ordinaryHypergeometric_left_one hre).comp hmap
-  have hP : Tendsto (fun x : ℝ => (1 - 9 * (x : ℂ)) ^ (-2 * A)) (𝓝[>] (-1 / 3)) (𝓝 ((4 : ℂ) ^ (-2 * A))) := by
+  have hP : Tendsto (fun x : ℝ => (1 - 9 * (x : ℂ)) ^ (-2 * A)) (𝓝[>] (-1 / 3))
+      (𝓝 ((4 : ℂ) ^ (-2 * A))) := by
     have h4 : (1 : ℂ) - 9 * ((-1 / 3 : ℝ) : ℂ) = 4 := by push_cast; norm_num
     have hcont : ContinuousAt (fun x : ℝ => (1 - 9 * (x : ℂ)) ^ (-2 * A)) (-1 / 3) := by
       apply ContinuousAt.cpow (by fun_prop) continuousAt_const
@@ -629,7 +635,8 @@ theorem hypSV_cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 �
     have hp : 0 < 1 + 3 * x := by linarith
     have hq : 0 < 1 - 9 * x := by linarith
     set ψ : ℂ := -27 * (x : ℂ) * (1 - x) ^ 2 / (1 - 9 * x) ^ 2 with hψ
-    have hψr : ψ = ((-27 * x * (1 - x) ^ 2 / (1 - 9 * x) ^ 2 : ℝ) : ℂ) := by rw [hψ]; push_cast; ring
+    have hψr : ψ = ((-27 * x * (1 - x) ^ 2 / (1 - 9 * x) ^ 2 : ℝ) : ℂ) := by rw [hψ];
+                                                                             push_cast; ring
     have h1ψ : 1 - ψ = (((1 + 3 * x) ^ 3 / (1 - 9 * x) ^ 2 : ℝ) : ℂ) := by
       rw [hψr, ← ofReal_one, ← ofReal_sub]
       congr 1
@@ -663,8 +670,10 @@ theorem hypSV_cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 �
       regularizedGaussHGFun_eq_div_Gamma (c := 2 / 3) (fun k => by
         intro h; have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]),
       regularizedGaussHGFun_eq_div_Gamma (c := 4 / 3) (fun k => by
-        intro h; have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)])] at hcon
-    have hthird : (1 - ψ) ^ (1 / 3 : ℂ) = (1 + 3 * (x : ℂ)) * (1 + (-9) * (x : ℂ)) ^ (-(2 / 3) : ℂ) := by
+        intro h; have := congrArg re h; simp at this;
+            linarith [(k.cast_nonneg : (0:ℝ) ≤ k)])] at hcon
+    have hthird : (1 - ψ) ^ (1 / 3 : ℂ) = (1 + 3 * (x : ℂ)) *
+        (1 + (-9) * (x : ℂ)) ^ (-(2 / 3) : ℂ) := by
       rw [h1ψ, show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hur.le,
         hypSV_rpow_third hp hq, ofReal_mul, ofReal_cpow hq.le]
       push_cast; ring_nf
@@ -675,7 +684,8 @@ theorem hypSV_cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 �
     have hG : Gamma c ≠ 0 := Gamma_ne_zero hcA
     have hπ : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
     have hF : ₂F₁ A (A + 1 / 2) c ψ = Gamma c * (Real.pi / sin (Real.pi * (1 / 3))) *
-        (₂F₁ A (A + 1 / 2) (2 / 3) (1 - ψ) / Gamma (2 / 3) / (Gamma (A + 5 / 6) * Gamma (A + 1 / 3)) -
+        (₂F₁ A (A + 1 / 2) (2 / 3) (1 - ψ) / Gamma (2 / 3) /
+            (Gamma (A + 5 / 6) * Gamma (A + 1 / 3)) -
           (1 - ψ) ^ (1 / 3 : ℂ) / (Gamma A * Gamma (A + 1 / 2)) *
             (₂F₁ (A + 5 / 6) (A + 1 / 3) (4 / 3) (1 - ψ) / Gamma (4 / 3))) := by
       have hs' : sin ((Real.pi : ℂ) / 3) ≠ 0 := by
@@ -704,7 +714,8 @@ theorem hypSV_cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 �
 theorem hypSV_cubic_psi_deriv_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 ≠ -(k : ℂ)) :
     deriv (₂F₁ (3 * A) (3 * A + 1 / 2) (2 * A + 5 / 6)) (-1 / 3) =
       Gamma (2 * A + 5 / 6) * (Real.pi / sin (Real.pi * (1 / 3))) *
-        (18 * A * (4 : ℂ) ^ (-2 * A) / 4 * (Gamma (2 / 3) * (Gamma (A + 5 / 6) * Gamma (A + 1 / 3)))⁻¹ -
+        (18 * A * (4 : ℂ) ^ (-2 * A) / 4 *
+            (Gamma (2 / 3) * (Gamma (A + 5 / 6) * Gamma (A + 1 / 3)))⁻¹ -
           (4 : ℂ) ^ (-2 * A) * (3 * (4 : ℂ) ^ (-(2 / 3) : ℂ)) *
             (Gamma (4 / 3) * (Gamma A * Gamma (A + 1 / 2)))⁻¹) := by
   rw [(hypSV_cubic_psi_eventually hcA).deriv_eq]
@@ -735,7 +746,8 @@ theorem hypSV_cubic_psi_deriv_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A 
     simpa using ((hasDerivAt_id (-1 / 3 : ℂ)).const_mul (3 : ℂ)).const_add (1 : ℂ)
   have hΦ := ((((hP (-2 * A)).mul (hF A (A + 1 / 2) (2 / 3))).mul_const
     (Gamma (2 / 3) * (Gamma (A + 5 / 6) * Gamma (A + 1 / 3)))⁻¹).sub
-    ((((hP (-2 * A)).mul (hL.mul (hP (-(2 / 3) : ℂ)))).mul (hF (A + 5 / 6) (A + 1 / 3) (4 / 3))).mul_const
+    ((((hP (-2 * A)).mul (hL.mul (hP (-(2 / 3) : ℂ)))).mul
+        (hF (A + 5 / 6) (A + 1 / 3) (4 / 3))).mul_const
       (Gamma (4 / 3) * (Gamma A * Gamma (A + 1 / 2)))⁻¹)).const_mul
     (Gamma (2 * A + 5 / 6) * (Real.pi / sin (Real.pi * (1 / 3))))
   refine Eq.trans hΦ.deriv ?_

@@ -7,6 +7,7 @@ module
 
 public import DLMF.Elementary.Basic.InverseHyperbolic
 public import DLMF.Elementary.Hyperbolic.Products
+public import DLMF.Elementary.PathLifts
 
 /-!
 # Inverse hyperbolic functions: path integrals
@@ -61,18 +62,115 @@ def IsArctanhPathValue (z w : ℂ) : Prop := ∃ γ : ℝ → ℂ,
   (∫ s : ℝ in 0..1, deriv γ s/(1-γ s^2))=w
 /-- The multivalued inverse defined by all admissible continued-branch path integrals. -/
 @[dlmf 4.37.E1]
-theorem arcsinh_path_values {z : ℂ} (hz : z≠I ∧ z≠ -I) : {w | IsArcsinhPathValue z w}=arcsinhValues z := by
-  sorry
+theorem arcsinh_path_values {z : ℂ} (hz : z≠I ∧ z≠ -I) :
+    {w | IsArcsinhPathValue z w}=arcsinhValues z := by
+  ext w
+  simp only [mem_ofPred_eq, arcsinhValues]
+  constructor
+  · rintro ⟨γ, r, hγ, h0, h1, hr, hr0, hh, -, hint⟩
+    have hrr : ∀ t ∈ Icc (0 : ℝ) 1, r t ≠ 0 ∧ r t ^ 2 = 1 - (I * γ t) ^ 2 := by
+      intro t ht
+      obtain ⟨hp, hm, hs⟩ := hh t ht
+      refine ⟨fun h0 => ?_, by rw [hs]; linear_combination (γ t ^ 2) * I_sq⟩
+      rw [h0] at hs
+      have : (γ t - I) * (γ t + I) = 0 := by linear_combination -hs - I_sq
+      rcases mul_eq_zero.mp this with h | h
+      · exact hp (sub_eq_zero.mp h)
+      · exact hm (eq_neg_of_add_eq_zero_left h)
+    have hs := (sin_of_arcsin_lift (z := I * z) (contDiffOn_const.mul hγ) (by simp [h0])
+      (by simp [h1]) hr hr0 hrr).2
+    simp only [deriv_const_mul_field', mul_div_assoc, intervalIntegral.integral_const_mul,
+      hint] at hs
+    rw [mul_comm, Complex.sin_mul_I] at hs
+    exact mul_right_cancel₀ I_ne_zero (hs.trans (mul_comm _ _))
+  · intro hw
+    have hzI : z * I ≠ 1 := fun h => hz.2 (by linear_combination (-I) * h + z * I_sq)
+    have hzI' : z * I ≠ -1 := fun h => hz.1 (by linear_combination (-I) * h + z * I_sq)
+    have hsw : Complex.sin (w * I) = z * I := by rw [Complex.sin_mul_I, hw]
+    obtain ⟨hcd, hc, hint⟩ := arcsin_lift_exists hzI hzI' hsw
+    set D := pathDetour (w * I) (pathDetourSign (w * I))
+    have hrr : ∀ t ∈ Icc (0 : ℝ) 1, Complex.cos (D t) ≠ 0 ∧
+        Complex.cos (D t) ^ 2 = 1 - Complex.sin (D t) ^ 2 :=
+      fun t ht => ⟨hc t ht, Complex.cos_sq' _⟩
+    have hcr : ContinuousOn (fun t => Complex.cos (D t)) (Icc 0 1) :=
+      (Complex.continuous_cos.comp (contDiff_pathDetour _ _).continuous).continuousOn
+    have hi := (sin_of_arcsin_lift (z := z * I) hcd (by simp [D]) (by simp [D, hsw]) hcr
+      (by simp [D]) hrr).1
+    have hder : deriv (fun t => -I * Complex.sin (D t)) =
+        fun t => -I * deriv (fun t => Complex.sin (D t)) t := deriv_const_mul_field' _
+    refine ⟨fun t => -I * Complex.sin (D t), fun t => Complex.cos (D t),
+      contDiffOn_const.mul hcd, by simp [D], ?_, hcr, by simp [D], fun t ht => ?_, ?_, ?_⟩
+    · simp only [D, pathDetour_one, hsw]; linear_combination (-z) * I_sq
+    · have hsq : Complex.cos (D t) ^ 2 = 1 + (-I * Complex.sin (D t)) ^ 2 := by
+        rw [Complex.cos_sq']; linear_combination (-Complex.sin (D t) ^ 2) * I_sq
+      refine ⟨fun h => hc t ht ?_, fun h => hc t ht ?_, hsq⟩ <;>
+      · beta_reduce at h
+        rw [h] at hsq
+        have : Complex.cos (D t) ^ 2 = 0 := by linear_combination hsq + I_sq
+        exact pow_eq_zero_iff two_ne_zero |>.mp this
+    · rw [hder]
+      simpa only [mul_div_assoc] using hi.const_mul (-I)
+    · rw [hder]
+      simp only [mul_div_assoc, intervalIntegral.integral_const_mul, hint]
+      linear_combination (-w) * I_sq
 
 /-- The multivalued inverse defined by all admissible continued-branch path integrals. -/
 @[dlmf 4.37.E2]
-theorem arccosh_path_values {z : ℂ} (hz : z≠1 ∧ z≠ -1) : {w | IsArccoshPathValue z w}=arccoshValues z := by
+theorem arccosh_path_values {z : ℂ} (hz : z≠1 ∧ z≠ -1) :
+    {w | IsArccoshPathValue z w}=arccoshValues z := by
   sorry
+
+/-- The multivalued inverse defined by all admissible continued-branch path integrals.
+Stronger than DLMF, which assumes `z ≠ ±1`. -/
+@[dlmf 4.37.E3]
+theorem arctanh_path_values' {z : ℂ} :
+    {w | IsArctanhPathValue z w}=arctanhValues z := by
+  ext w
+  simp only [mem_ofPred_eq, arctanhValues]
+  constructor
+  · rintro ⟨γ, hγ, h0, h1, hh, -, hint⟩
+    have hI : ∀ t ∈ Icc (0 : ℝ) 1, I * γ t ≠ I ∧ I * γ t ≠ -I := by
+      intro t ht
+      refine ⟨fun h => (hh t ht).1 ?_, fun h => (hh t ht).2 ?_⟩
+      · exact mul_left_cancel₀ I_ne_zero (h.trans (mul_one I).symm)
+      · exact mul_left_cancel₀ I_ne_zero (h.trans (by ring))
+    obtain ⟨-, hc, ht⟩ := tan_of_arctan_lift (z := I * z) (contDiffOn_const.mul hγ) (by simp [h0])
+      (by simp [h1]) hI
+    have he : ∀ t, deriv (fun t => I * γ t) t / (1 + (I * γ t) ^ 2) =
+        I * (deriv γ t / (1 - γ t ^ 2)) := by
+      intro t
+      rw [deriv_const_mul_field, mul_div_assoc, mul_pow, I_sq]; ring_nf
+    simp only [he, intervalIntegral.integral_const_mul, hint] at hc ht
+    rw [mul_comm, Complex.cos_mul_I] at hc
+    rw [mul_comm, Complex.tan_mul_I] at ht
+    exact ⟨hc, mul_right_cancel₀ I_ne_zero (ht.trans (mul_comm _ _))⟩
+  · rintro ⟨hc, ht⟩
+    have hcw : Complex.cos (w * I) ≠ 0 := by rwa [Complex.cos_mul_I]
+    have htw : Complex.tan (w * I) = z * I := by rw [Complex.tan_mul_I, ht]
+    obtain ⟨hcd, hI, hint⟩ := arctan_lift_exists hcw
+    set D := pathDetour (w * I) (pathDetourSign (w * I))
+    have hi := (tan_of_arctan_lift (z := z * I) hcd (by simp [D]) (by simp [D, htw]) hI).1
+    have he : ∀ t, deriv (fun t => -I * Complex.tan (D t)) t /
+        (1 - (-I * Complex.tan (D t)) ^ 2) =
+        -I * (deriv (fun t => Complex.tan (D t)) t / (1 + Complex.tan (D t) ^ 2)) := by
+      intro t
+      rw [deriv_const_mul_field, mul_div_assoc, mul_pow, neg_sq, I_sq]; ring_nf
+    refine ⟨fun t => -I * Complex.tan (D t), contDiffOn_const.mul hcd, by simp [D], ?_,
+      fun t ht => ?_, ?_, ?_⟩
+    · simp only [D, pathDetour_one, htw]; linear_combination (-z) * I_sq
+    · refine ⟨fun h => (hI t ht).1 ?_, fun h => (hI t ht).2 ?_⟩
+      · linear_combination I * h + Complex.tan (D t) * I_sq
+      · linear_combination I * h + Complex.tan (D t) * I_sq
+    · simp only [he]
+      exact hi.const_mul (-I)
+    · simp only [he, intervalIntegral.integral_const_mul, hint]
+      linear_combination (-w) * I_sq
 
 /-- The multivalued inverse defined by all admissible continued-branch path integrals. -/
 @[dlmf 4.37.E3]
-theorem arctanh_path_values {z : ℂ} (hz : z≠1 ∧ z≠ -1) : {w | IsArctanhPathValue z w}=arctanhValues z := by
-  sorry
+theorem arctanh_path_values {z : ℂ} (_hz : z≠1 ∧ z≠ -1) :
+    {w | IsArctanhPathValue z w}=arctanhValues z :=
+  arctanh_path_values'
 
 /-- Identity under the stated parameter and domain assumptions: `arccschValues z=arcsinhValues
 z⁻¹`. -/

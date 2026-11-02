@@ -37,7 +37,9 @@ open scoped ENNReal Nat
 
 noncomputable section
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 /-- Inner integral of Dirichlet's formula in two variables: `∫_0^t y^{b-1} dy = t^b / b`. -/
 theorem integral_rpow_zero_of_pos {b t : ℝ} (hb : 0 < b) :
@@ -45,9 +47,11 @@ theorem integral_rpow_zero_of_pos {b t : ℝ} (hb : 0 < b) :
   have h : -1 < b - 1 := by linarith
   rw [integral_rpow (Or.inl h), sub_add_cancel, zero_rpow hb.ne', sub_zero]
 
-end Real
+end DLMF.Gamma.Real
 
-namespace MeasureTheory
+namespace DLMF.Gamma
+
+open MeasureTheory
 
 /-- AAR Corollary 1.8.3 for equal exponents `p_i = p`: volume of the `ℓ^p` ball of radius `r`.
 This is Mathlib's `volume_sum_rpow_le`. -/
@@ -76,4 +80,4 @@ theorem volume_l1_unitBall (ι : Type*) [Fintype ι] [Nonempty ι] :
   rw [← hset, h, hG, hGn]
   simp [ENNReal.ofReal_one, one_pow]
 
-end MeasureTheory
+end DLMF.Gamma

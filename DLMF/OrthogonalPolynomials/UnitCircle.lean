@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QSeries.Pochhammer
-public import DLMF.Hypergeometric.SeriesProperties
+public import DLMF.Hypergeometric.Basic.SpecialValues
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
 /-!
@@ -492,7 +492,8 @@ theorem unitCircle_norm_ratio {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUni
 
 /-- The Verblunsky coefficients satisfy `|α_n| < 1` (DLMF 18.33.25). -/
 @[dlmf 18.33.E25]
-theorem verblunskyCoefficient_norm_lt_one {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
+theorem verblunskyCoefficient_norm_lt_one {μ : Measure ℂ} {p : ℕ → ℂ[X]}
+    (h : IsUnitCircleOP μ p) (n : ℕ) :
     ‖verblunskyCoefficient p n‖ < 1 := by
   have h1 := unitCircle_norm_ratio h n
   have hp1 := h.2.2.2.2.1 (n + 1)
@@ -520,7 +521,8 @@ theorem inverse_szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : Is
 /-- The inverse reversed recurrence `(1 - |α_n|²) φ_n* = φ_{n+1}* + α_n φ_{n+1}`
 (DLMF 18.33.28). -/
 @[dlmf 18.33.E28]
-theorem inverse_reflected_szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
+theorem inverse_reflected_szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]}
+    (h : IsUnitCircleOP μ p) (n : ℕ) :
     C (1 - ((‖verblunskyCoefficient p n‖ ^ 2 : ℝ) : ℂ)) * reflectedPolynomial n (p n) =
       reflectedPolynomial (n + 1) (p (n + 1)) + C (verblunskyCoefficient p n) * p (n + 1) := by
   rw [szego_reflected_recurrence h n]
@@ -532,10 +534,13 @@ theorem inverse_reflected_szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X
 /-- The three-term recurrence of monic OPUC eliminating the reversed polynomials
 (DLMF 18.33.30). -/
 @[dlmf 18.33.E30]
-theorem unitCircle_three_term_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
+theorem unitCircle_three_term_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]}
+    (h : IsUnitCircleOP μ p) (n : ℕ) :
     C (star (verblunskyCoefficient p n)) * p (n + 2) =
-      (C (star (verblunskyCoefficient p (n + 1))) + C (star (verblunskyCoefficient p n)) * X) * p (n + 1) -
-      C (star (verblunskyCoefficient p (n + 1)) * (1 - (‖verblunskyCoefficient p n‖ ^ 2 : ℝ))) * X * p n := by
+      (C (star (verblunskyCoefficient p (n + 1))) + C (star (verblunskyCoefficient p n)) *
+          X) * p (n + 1) -
+      C (star (verblunskyCoefficient p (n + 1)) * (1 - (‖verblunskyCoefficient p n‖ ^ 2 : ℝ)))
+          * X * p n := by
   have e23 := szego_recurrence h (n + 1)
   have e27 := inverse_szego_recurrence h n
   simp only [map_mul] at e27 ⊢
@@ -560,10 +565,12 @@ theorem szegoAskey_orthogonal {lam : ℝ} (hlam : -1 / 2 < lam) {m n : ℕ} (hmn
 
 /-- Orthogonality of the `q`-Szegő–Askey polynomials on the unit circle (DLMF 18.33.16). -/
 @[dlmf 18.33.E16]
-theorem szegoAskeyQ_orthogonal {a q : ℝ} (hq : 0 < q) (hq1 : q < 1) (ha : |a * q| < 1) {m n : ℕ} (hmn : m ≠ n) :
+theorem szegoAskeyQ_orthogonal {a q : ℝ} (hq : 0 < q) (hq1 : q < 1) (ha : |a * q| < 1) {m n : ℕ}
+    (hmn : m ≠ n) :
     ∫ θ : ℝ in (0 : ℝ)..(2 * Real.pi), szegoAskeyQ a q m (exp (I * θ)) *
       star (szegoAskeyQ a q n (exp (I * θ))) *
-      (‖qPochhammerInf (q * exp (I * θ)) (q ^ 2) / qPochhammerInf (a * q * exp (I * θ)) (q ^ 2)‖ ^ 2 : ℝ) = 0 := by
+      (‖qPochhammerInf (q * exp (I * θ)) (q ^ 2) /
+          qPochhammerInf (a * q * exp (I * θ)) (q ^ 2)‖ ^ 2 : ℝ) = 0 := by
   sorry
 
 

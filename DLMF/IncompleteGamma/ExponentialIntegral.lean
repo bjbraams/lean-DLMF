@@ -122,7 +122,8 @@ theorem tendsto_mul_log_nhdsNE_zero :
   rw [tendsto_zero_iff_norm_tendsto_zero]
   have hc : Tendsto (fun z : ℂ => |‖z‖ * Real.log ‖z‖| + π * ‖z‖) (𝓝[≠] 0) (𝓝 0) := by
     have h1 : Continuous (fun z : ℂ => |‖z‖ * Real.log ‖z‖| + π * ‖z‖) :=
-      ((Real.continuous_mul_log.comp continuous_norm).abs).add (continuous_const.mul continuous_norm)
+      ((Real.continuous_mul_log.comp continuous_norm).abs).add
+          (continuous_const.mul continuous_norm)
     simpa using (h1.tendsto 0).mono_left nhdsWithin_le_nhds
   refine squeeze_zero (fun _ => norm_nonneg _) (fun z => ?_) hc
   rw [norm_mul]
@@ -155,10 +156,12 @@ theorem genExpIntEExtended_zero {p : ℂ} (hp : 1 < p.re) :
       · have h := (isBigO_kummerU_at_zero_b_zero 1).trans_tendsto tendsto_mul_log_nhdsNE_zero
         rw [hb0]
         simpa using h
-      · exact ((isBigO_kummerU_at_zero_re_nonpos 1 (2 - p) hb hb0).mono nhdsWithin_le_nhds).trans_tendsto
+      · exact ((isBigO_kummerU_at_zero_re_nonpos 1 (2 - p) hb hb0).mono
+            nhdsWithin_le_nhds).trans_tendsto
           ((continuous_id.tendsto' 0 0 rfl).mono_left nhdsWithin_le_nhds)
     · push Not at hb
-      refine (isBigO_kummerU_at_zero_re_zero_to_one 1 (2 - p) hb (by simp; linarith)).trans_tendsto ?_
+      refine (isBigO_kummerU_at_zero_re_zero_to_one 1 (2 - p) hb
+          (by simp; linarith)).trans_tendsto ?_
       have hr : 0 < ((1 - (2 - p).re : ℝ) : ℂ).re := by simp; linarith
       have hc := (continuousAt_cpow_zero_of_re_pos hr).tendsto.comp
         ((continuous_id.prodMk continuous_const).tendsto (0 : ℂ))
@@ -181,7 +184,8 @@ theorem genExpIntEExtended_zero {p : ℂ} (hp : 1 < p.re) :
 finite factorial sum. -/
 @[dlmf 8.19.E7]
 theorem genExpIntE_nat_finite {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz : z ≠ 0) :
-    genExpIntE n z=(-z)^(n-1)/(n-1).factorial*genExpIntE 1 z+exp (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), ((n-k-2).factorial : ℂ)*(-z)^k) := by
+    genExpIntE n z=(-z)^(n-1)/(n-1).factorial*genExpIntE 1 z+exp
+        (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), ((n-k-2).factorial : ℂ)*(-z)^k) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 := ⟨n-2, by omega⟩
   have h := upperIncGamma_neg_nat_finite (m+1) hz
   rw [show m+2-1 = m+1 by omega, genExpIntE]
@@ -227,7 +231,8 @@ theorem genExpIntE_nat_finite {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz : z ≠ 0) 
 series give the generalized exponential integral. -/
 @[dlmf 8.19.E8]
 theorem genExpIntE_nat_hasSum {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) :
-    HasSum (fun k : ℕ => if k=n-1 then 0 else (-z)^k/((k.factorial : ℂ)*(1-(n : ℂ)+k))) ((-z)^(n-1)/(n-1).factorial*(digamma n-log z)-genExpIntE n z) := by
+    HasSum (fun k : ℕ => if k=n-1 then 0 else (-z)^k/((k.factorial : ℂ)*(1-(n : ℂ)+k)))
+        ((-z)^(n-1)/(n-1).factorial*(digamma n-log z)-genExpIntE n z) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n-1, by omega⟩
   have h := upperIncGamma_neg_nat_hasSum m hz
   simp only [Nat.add_sub_cancel]
@@ -381,7 +386,8 @@ theorem incG_genExpIntE_succ_digamma (m : ℕ) {z : ℂ} (hz : z ≠ 0) :
     push_cast
     apply mul_left_cancel₀ hm
     rw [show ((m:ℂ)+1+1) = ((m:ℂ)+1)+1 from rfl]
-    have hr' : ((m:ℂ)+1) * genExpIntE ((m:ℂ)+1+1) z = exp (-z) - z * ((-1:ℂ)^(m+1)*z^m/(m.factorial : ℂ)*log z +
+    have hr' : ((m:ℂ)+1) * genExpIntE ((m:ℂ)+1+1) z = exp (-z) - z *
+        ((-1:ℂ)^(m+1)*z^m/(m.factorial : ℂ)*log z +
       exp (-z)/(m.factorial : ℂ)*(∑ k ∈ Finset.range m, (-z)^k*((m-(k+1)).factorial : ℂ)) +
       exp (-z)*(-z)^m/(m.factorial : ℂ)*(exp z*(genExpIntE 1 z+log z))) := by
       linear_combination hr
@@ -392,7 +398,9 @@ theorem incG_genExpIntE_succ_digamma (m : ℕ) {z : ℂ} (hz : z ≠ 0) :
 /-- The digamma-series representation of the generalized exponential integral at positive integral
 order and nonzero argument. -/
 theorem incG_genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) :
-    genExpIntE n z=(-1 : ℂ)^n*z^(n-1)/(n-1).factorial*log z+exp (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), (-z)^k*Gamma (n-(k+1)))+exp (-z)*(-z)^(n-1)/(n-1).factorial*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) := by
+    genExpIntE n z=(-1 : ℂ)^n*z^(n-1)/(n-1).factorial*log z+exp
+        (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), (-z)^k*Gamma (n-(k+1)))+exp
+        (-z)*(-z)^(n-1)/(n-1).factorial*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m+1 := ⟨n-1, by omega⟩
   simp only [Nat.add_sub_cancel]
   have hG : ∀ k ∈ Finset.range m, (-z)^k*Gamma (((m+1:ℕ):ℂ)-(k+1)) =
@@ -408,7 +416,9 @@ theorem incG_genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (h
 order and nonzero argument. -/
 @[dlmf 8.19.E9]
 theorem genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) :
-    genExpIntE n z=(-1 : ℂ)^n*z^(n-1)/(n-1).factorial*log z+exp (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), (-z)^k*Gamma (n-(k+1)))+exp (-z)*(-z)^(n-1)/(n-1).factorial*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) :=
+    genExpIntE n z=(-1 : ℂ)^n*z^(n-1)/(n-1).factorial*log z+exp
+        (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), (-z)^k*Gamma (n-(k+1)))+exp
+        (-z)*(-z)^(n-1)/(n-1).factorial*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) :=
   incG_genExpIntE_nat_digamma_series hn hz
 
 /-- Excluding positive integral `p` excludes nonpositive integral `1-p`. -/
@@ -419,7 +429,8 @@ theorem one_sub_ne_neg_nat {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) : ∀ n : ℕ
 term separated using Gamma. -/
 @[dlmf 8.19.E10]
 theorem genExpIntE_hasSum_noninteger {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) {z : ℂ} (hz : z ≠ 0) :
-    HasSum (fun k : ℕ => (-z)^k/((k.factorial : ℂ)*(1-p+k))) (z^(p-1)*Gamma (1-p)-genExpIntE p z) := by
+    HasSum (fun k : ℕ => (-z)^k/((k.factorial : ℂ)*(1-p+k)))
+        (z^(p-1)*Gamma (1-p)-genExpIntE p z) := by
   have h := (upperIncGamma_hasSum_alternating (one_sub_ne_neg_nat hp) hz).mul_left (z^(p-1))
   rw [genExpIntE, ← mul_sub]
   refine h.congr_fun fun k => ?_
@@ -445,7 +456,8 @@ theorem genExpIntE_hasSum_exponential {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) {z
 /-- The required limiting interpretation at positive integral p. -/
 @[dlmf 8.19.E10, dlmf 8.19.E11]
 theorem genExpIntE_series_integer_limits {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) :
-    Tendsto (fun p : ℂ => z^(p-1)*Gamma (1-p)-∑' k : ℕ, (-z)^k/((k.factorial : ℂ)*(1-p+k))) (𝓝[≠] (n : ℂ)) (𝓝 (genExpIntE n z)) := by
+    Tendsto (fun p : ℂ => z^(p-1)*Gamma (1-p)-∑' k : ℕ, (-z)^k/((k.factorial : ℂ)*(1-p+k)))
+        (𝓝[≠] (n : ℂ)) (𝓝 (genExpIntE n z)) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n-1, by omega⟩
   have hcont : Continuous fun p : ℂ => genExpIntE p z :=
     ((continuous_const_cpow' hz).comp (continuous_id.sub continuous_const)).mul
@@ -492,7 +504,8 @@ theorem incG_integrableOn_rpow_mul_exp_neg {s b : ℝ} (hb : 0 < b) :
   · intro t ht
     have ht0 : (0:ℝ) < t := by have : (1:ℝ) ≤ t := ht; linarith
     exact ((Real.continuousAt_rpow_const _ _ (Or.inl ht0.ne')).mul
-      (Real.continuous_exp.continuousAt.comp (continuousAt_const.mul continuousAt_id))).continuousWithinAt
+      (Real.continuous_exp.continuousAt.comp
+          (continuousAt_const.mul continuousAt_id))).continuousWithinAt
   · have h := (isLittleO_rpow_exp_pos_mul_atTop s (b := b/2) (by positivity)).isBigO.mul
       (isBigO_refl (fun t : ℝ => Real.exp (-b*t)) atTop)
     refine h.congr' (Eventually.of_forall fun t => rfl) (Eventually.of_forall fun t => ?_)
@@ -519,7 +532,8 @@ theorem incG_paramIntegrand_continuousOn (j : ℕ) (q z : ℂ) :
   intro t ht
   have ht0 : (0:ℝ) < t := ht
   refine ContinuousAt.continuousWithinAt ?_
-  refine ((continuous_ofReal.continuousAt.comp (Real.continuousAt_log ht0.ne')).pow j).mul ?_ |>.mul ?_
+  refine ((continuous_ofReal.continuousAt.comp (Real.continuousAt_log ht0.ne')).pow
+      j).mul ?_ |>.mul ?_
   · exact (continuousAt_ofReal_cpow_const _ _ (Or.inr ht0.ne'))
   · exact (Complex.continuous_exp.comp (continuous_const.mul continuous_ofReal)).continuousAt
 
@@ -528,7 +542,8 @@ theorem incG_paramIntegrand_continuousOn (j : ℕ) (q z : ℂ) :
 theorem incG_paramIntegrand_integrableOn (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z.re) :
     IntegrableOn (fun t : ℝ => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t)) (Ioi 1) := by
   refine Integrable.mono' (incG_integrableOn_rpow_mul_exp_neg (s := (j:ℝ) - q.re) hz) ?_ ?_
-  · exact ((incG_paramIntegrand_continuousOn j q z).mono (Ioi_subset_Ioi zero_le_one)).aestronglyMeasurable
+  · exact ((incG_paramIntegrand_continuousOn j q z).mono
+        (Ioi_subset_Ioi zero_le_one)).aestronglyMeasurable
       measurableSet_Ioi
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     exact incG_norm_paramIntegrand_le j q z (le_of_lt ht)
@@ -549,7 +564,8 @@ theorem incG_hasDerivAt_paramIntegral (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z.
       (-(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^(j+1)*(t : ℂ)^(-q)*exp (-z*t))) q := by
   have hb := incG_integrableOn_rpow_mul_exp_neg (s := ((j+1:ℕ):ℝ) + (1 - q.re)) hz
   have h := hasDerivAt_integral_of_dominated_loc_of_deriv_le (μ := volume.restrict (Ioi (1:ℝ)))
-    (x₀ := q) (s := Metric.ball q 1) (bound := fun t : ℝ => t^(((j+1:ℕ):ℝ) + (1 - q.re)) * Real.exp (-z.re*t))
+    (x₀ := q) (s := Metric.ball q 1)
+        (bound := fun t : ℝ => t^(((j+1:ℕ):ℝ) + (1 - q.re)) * Real.exp (-z.re*t))
     (F := fun q (t:ℝ) => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t))
     (F' := fun q (t:ℝ) => -((Real.log t : ℂ)^(j+1)*(t : ℂ)^(-q)*exp (-z*t)))
     (Metric.ball_mem_nhds q one_pos)
@@ -573,8 +589,10 @@ theorem incG_hasDerivAt_paramIntegral (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z.
 /-- Differentiating with respect to the order inserts powers of the logarithm into the Laplace
 integral, with sign `(-1)^j`. -/
 theorem incG_genExpIntE_parameter_derivatives (j : ℕ) (p : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    iteratedDeriv j (fun q => genExpIntE q z) p=(-1 : ℂ)^j*(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^j*(t : ℂ)^(-p)*exp (-z*t)) := by
-  have h0 : (fun q => genExpIntE q z) = fun q => ∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^0*(t : ℂ)^(-q)*exp (-z*t) := by
+    iteratedDeriv j (fun q => genExpIntE q z)
+        p=(-1 : ℂ)^j*(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^j*(t : ℂ)^(-p)*exp (-z*t)) := by
+  have h0 : (fun q => genExpIntE q z) = fun q => ∫ t : ℝ in Ioi 1,
+      (Real.log t : ℂ)^0*(t : ℂ)^(-q)*exp (-z*t) := by
     funext q; rw [genExpIntE_laplace_complex q hz]
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
     ring
@@ -592,21 +610,25 @@ theorem incG_genExpIntE_parameter_derivatives (j : ℕ) (p : ℂ) {z : ℂ} (hz 
 integral, with sign `(-1)^j`. -/
 @[dlmf 8.19.E15]
 theorem genExpIntE_parameter_derivatives (j : ℕ) (p : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    iteratedDeriv j (fun q => genExpIntE q z) p=(-1 : ℂ)^j*(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^j*(t : ℂ)^(-p)*exp (-z*t)) :=
+    iteratedDeriv j (fun q => genExpIntE q z)
+        p=(-1 : ℂ)^j*(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^j*(t : ℂ)^(-p)*exp (-z*t)) :=
   incG_genExpIntE_parameter_derivatives j p hz
 
 /-- Continued-fraction representation of the generalized exponential integral on the principal
 slit plane, with alternating order and argument coefficients. -/
 @[dlmf 8.19.E17]
 theorem genExpIntE_continuedFraction (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    HasContinuedFraction (fun k => if k=0 then exp (-z) else if Odd k then p+((k-1)/2 : ℕ) else ((k/2 : ℕ) : ℂ)) (fun k => if Even k then z else 1) (genExpIntE p z) := by
+    HasContinuedFraction
+        (fun k => if k=0 then exp (-z) else if Odd k then p+((k-1)/2 : ℕ) else ((k/2 : ℕ) : ℂ))
+        (fun k => if Even k then z else 1) (genExpIntE p z) := by
   sorry
 
 /-- Monodromy of the generalized exponential integral at nonintegral order under an integral
 number of turns in the logarithmic argument. -/
 @[dlmf 8.19.E18]
 theorem genExpIntEOnLog_monodromy {p : ℂ} (hp : ∀ n : ℤ, p ≠ n) (w : ℂ) (m : ℤ) :
-    genExpIntEOnLog p (w+2*m*π*I)=2*π*I*exp (m*p*π*I)/Gamma p*sin (m*p*π)/sin (p*π)*exp ((p-1)*w)+genExpIntEOnLog p w := by
+    genExpIntEOnLog p (w+2*m*π*I)=2*π*I*exp (m*p*π*I)/Gamma p*sin (m*p*π)/sin (p*π)*exp
+        ((p-1)*w)+genExpIntEOnLog p w := by
   have ha : ∀ n : ℕ, 1-p ≠ -n := fun n h => hp (n+1) (by push_cast; linear_combination -h)
   have hp0 : ∀ n : ℕ, p ≠ -n := fun n h => hp (-n) (by rw [h]; push_cast; ring)
   have hs : Complex.sin (p*π) ≠ 0 := by
@@ -641,7 +663,8 @@ theorem genExpIntEOnLog_monodromy {p : ℂ} (hp : ∀ n : ℤ, p ≠ n) (w : ℂ
 exponential monodromy term. -/
 @[dlmf 8.19.E18]
 theorem genExpIntEOnLog_nat_monodromy {n : ℕ} (hn : 1 ≤ n) (w : ℂ) (m : ℤ) :
-    genExpIntEOnLog n (w+2*m*π*I)=genExpIntEOnLog n w+2*π*I*m*(-1 : ℂ)^n/(n-1).factorial*exp (((n : ℂ)-1)*w) := by
+    genExpIntEOnLog n (w+2*m*π*I)=genExpIntEOnLog n w+2*π*I*m*(-1 : ℂ)^n/(n-1).factorial*exp
+        (((n : ℂ)-1)*w) := by
   obtain ⟨k, rfl⟩ : ∃ k, n = k+1 := ⟨n-1, by omega⟩
   unfold genExpIntEOnLog
   have h1 : (1:ℂ)-((k+1:ℕ):ℂ) = -(k:ℂ) := by push_cast; ring
@@ -674,8 +697,10 @@ theorem genExpIntEOnLog_nonpos_nat_monodromy (n : ℕ) (w : ℂ) (m : ℤ) :
 theorem genExpIntEOnLog_parameter_entire (w : ℂ) :
     Differentiable ℂ (fun p => genExpIntEOnLog p w) := by
   unfold genExpIntEOnLog
-  have h := (upperIncGammaOnLog_parameter_entire w).comp (differentiable_const (1:ℂ) |>.sub differentiable_id)
-  exact (by fun_prop : Differentiable ℂ fun p : ℂ => exp ((p-1)*w)).mul (by simpa [Function.comp_def] using h)
+  have h := (upperIncGammaOnLog_parameter_entire w).comp
+      (differentiable_const (1:ℂ) |>.sub differentiable_id)
+  exact (by fun_prop : Differentiable ℂ fun p : ℂ => exp ((p-1)*w)).mul
+      (by simpa [Function.comp_def] using h)
 
 /-- Nontrivial monodromy except at nonpositive integral order. -/
 theorem genExpIntEOnLog_branch_point {p : ℂ} (hp : ∀ n : ℕ, p ≠ -n) (w : ℂ) :
@@ -728,7 +753,8 @@ theorem incG_integrableOn_expInt {p : ℝ} (hp : 0 ≤ p) {x : ℝ} (hx : 0 < x)
     IntegrableOn (fun t => Real.exp (-x*t)*t^(-p)) (Ioi 1) := by
   refine (exp_neg_integrableOn_Ioi 1 hx).mono' ?_ ?_
   · exact (ContinuousOn.mul (by fun_prop) (fun t ht => (Real.continuousAt_rpow_const _ _
-      (Or.inl (lt_trans one_pos ht).ne')).continuousWithinAt)).aestronglyMeasurable measurableSet_Ioi
+      (Or.inl (lt_trans one_pos ht).ne')).continuousWithinAt)).aestronglyMeasurable
+          measurableSet_Ioi
   · refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
     have ht0 : (0:ℝ) < t := lt_trans one_pos ht
     rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
@@ -798,7 +824,8 @@ theorem incG_genExpIntE_rational_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx :
 
 /-- DLMF 8.19.19 for natural order. -/
 theorem incG_genExpIntE_order_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
-    ((n : ℝ)-1)/n*(genExpIntE n x).re < (genExpIntE (n+1) x).re ∧ (genExpIntE (n+1) x).re < (genExpIntE n x).re := by
+    ((n : ℝ)-1)/n*(genExpIntE n x).re < (genExpIntE (n+1) x).re ∧ (genExpIntE (n+1) x).re <
+        (genExpIntE n x).re := by
   have hn1 : (1:ℝ) ≤ n := by exact_mod_cast hn
   have hu := incG_genExpIntE_upper hn hx
   have hr := incG_genExpIntE_re_rec (n:ℝ) hx
@@ -930,7 +957,8 @@ theorem incG_genExpIntE_ratio_derivative {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx 
 the lower ratio bounded by `(n-1)/n`. -/
 @[dlmf 8.19.E19]
 theorem genExpIntE_nat_order_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
-    ((n : ℝ)-1)/n*(genExpIntE n x).re < (genExpIntE (n+1) x).re ∧ (genExpIntE (n+1) x).re < (genExpIntE n x).re :=
+    ((n : ℝ)-1)/n*(genExpIntE n x).re < (genExpIntE (n+1) x).re ∧ (genExpIntE (n+1) x).re <
+        (genExpIntE n x).re :=
   incG_genExpIntE_order_bounds hn hx
 
 /-- Strict discrete log-convexity of the generalized exponential integral in its positive integral
@@ -959,7 +987,8 @@ the current-order function. -/
 @[dlmf 8.19.E23]
 theorem genExpIntE_tail_integral (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => genExpIntE (p-1) (z+t)) 0 (genExpIntE p z) := by
-  have hd : ∀ t : ℝ, 0 ≤ t → HasDerivAt (fun t : ℝ => -genExpIntE p (z+t)) (genExpIntE (p-1) (z+t)) t := by
+  have hd : ∀ t : ℝ, 0 ≤ t →
+      HasDerivAt (fun t : ℝ => -genExpIntE p (z+t)) (genExpIntE (p-1) (z+t)) t := by
     intro t ht
     refine (hasDerivAt_comp_add_ofReal (g := fun w => -genExpIntE p w)
       (hasDerivAt_genExpIntE p (add_ofReal_mem_slitPlane hz ht)).neg).congr_deriv ?_
@@ -981,8 +1010,10 @@ theorem genExpIntE_tail_integral (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 
 /-- The displayed formula also needs Re b>0 for convergence at zero. -/
 @[dlmf 8.19.E25]
-theorem genExpIntE_mellin_laplace {a b p : ℂ} (ha : -1 < a.re) (hb : 0 < b.re) (hpb : 1 < (p+b).re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*(t : ℂ)^(b-1)*genExpIntE p t)=Gamma b*(1+a)^(-b)/(p+b-1)*Gamma (p+b)*DLMF.Hypergeometric.regularizedGaussHG 1 b (p+b) (a/(1+a)) := by
+theorem genExpIntE_mellin_laplace {a b p : ℂ} (ha : -1 < a.re) (hb : 0 < b.re)
+    (hpb : 1 < (p+b).re) :
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*(t : ℂ)^(b-1)*genExpIntE p t)=Gamma b*(1+a)^(-b)/(p+b-1)*Gamma
+        (p+b)*DLMF.Hypergeometric.regularizedGaussHG 1 b (p+b) (a/(1+a)) := by
   have hz : 0 < (1+a).re := by simp; linarith
   have hz0 : (1+a) ≠ 0 := slitPlane_ne_zero (Or.inl hz)
   have hL := laplace_kummerU (a := p) (b := b+p-1) (c := p) (z := 1+a)
@@ -1043,7 +1074,8 @@ theorem incG_laplaceJ_recurrence {a : ℂ} (ha : -1 < a.re) (m : ℕ) :
       rw [← intervalIntegral.integral_ofReal]; simp
     rw [this, integral_pow]; push_cast; simp
   rw [← hp, ← intervalIntegral.integral_const_mul,
-    ← intervalIntegral.integral_sub ((by fun_prop : Continuous fun u : ℝ => (u:ℂ)^m).intervalIntegrable 0 1) hi]
+    ← intervalIntegral.integral_sub
+        ((by fun_prop : Continuous fun u : ℝ => (u:ℂ)^m).intervalIntegrable 0 1) hi]
   refine intervalIntegral.integral_congr fun u hu => ?_
   have h0 : 1 + a*u ≠ 0 := by
     intro h0; have := incG_one_add_mul_re_pos ha hu; rw [h0] at this; simp at this
@@ -1054,7 +1086,8 @@ theorem incG_laplaceJ_recurrence {a : ℂ} (ha : -1 < a.re) (m : ℕ) :
 (u:ℂ)^0/(1+a*u)) = log (1+a)/a`. -/
 theorem incG_laplaceJ_one {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) :
     (∫ u in (0:ℝ)..1, (u:ℂ)^0/(1+a*u)) = log (1+a)/a := by
-  have hd : ∀ u ∈ Set.uIcc (0:ℝ) 1, HasDerivAt (fun u : ℝ => log (1+a*u)/a) ((u:ℂ)^0/(1+a*u)) u := by
+  have hd : ∀ u ∈ Set.uIcc (0:ℝ) 1,
+      HasDerivAt (fun u : ℝ => log (1+a*u)/a) ((u:ℂ)^0/(1+a*u)) u := by
     intro u hu
     have h1 : HasDerivAt (fun u : ℝ => 1+a*(u:ℂ)) a u := by
       simpa using ((hasDerivAt_id u).ofReal_comp.const_mul a).const_add 1
@@ -1067,7 +1100,8 @@ theorem incG_laplaceJ_one {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) :
 /-- Formula under the stated hypotheses: `(∫ u in (0:ℝ)..1, (u:ℂ)^m/(1+a*u)) = (-1 :
 ℂ)^m/a^(m+1)*(log (1+a)+∑ k ∈ Finset.range m, (-1 : ℂ)^(k+1)*a^(k+1)/(k+1))`. -/
 theorem incG_laplaceJ_closed {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) (m : ℕ) :
-    (∫ u in (0:ℝ)..1, (u:ℂ)^m/(1+a*u)) = (-1 : ℂ)^m/a^(m+1)*(log (1+a)+∑ k ∈ Finset.range m, (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) := by
+    (∫ u in (0:ℝ)..1, (u:ℂ)^m/(1+a*u)) =
+        (-1 : ℂ)^m/a^(m+1)*(log (1+a)+∑ k ∈ Finset.range m, (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) := by
   induction m with
   | zero => rw [incG_laplaceJ_one ha ha0]; simp; ring
   | succ m ih =>
@@ -1140,7 +1174,8 @@ theorem incG_genExpIntE_laplace_eq {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 <
 /-- Laplace transform of the generalized exponential integral at positive integral order,
 including the removable value at zero. -/
 theorem incG_genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE n t)=if a=0 then 1/(n : ℂ) else (-1 : ℂ)^(n-1)/a^n*(log (1+a)+∑ k ∈ Finset.range (n-1), (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) := by
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE n t)=if a=0 then 1/(n : ℂ) else
+        (-1 : ℂ)^(n-1)/a^n*(log (1+a)+∑ k ∈ Finset.range (n-1), (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) := by
   rw [incG_genExpIntE_laplace_eq hn ha]
   obtain ⟨m, rfl⟩ : ∃ m, n = m+1 := ⟨n-1, by omega⟩
   simp only [Nat.add_sub_cancel]
@@ -1152,7 +1187,8 @@ theorem incG_genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 
 including the removable value at zero. -/
 @[dlmf 8.19.E24]
 theorem genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE n t)=if a=0 then 1/(n : ℂ) else (-1 : ℂ)^(n-1)/a^n*(log (1+a)+∑ k ∈ Finset.range (n-1), (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) :=
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE n t)=if a=0 then 1/(n : ℂ) else
+        (-1 : ℂ)^(n-1)/a^n*(log (1+a)+∑ k ∈ Finset.range (n-1), (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) :=
   incG_genExpIntE_nat_laplace hn ha
 
 /-- The auxiliary integral L(p) for positive p. -/
@@ -1164,7 +1200,8 @@ def genExpIntL (p : ℝ) : ℂ :=
 regularized Gauss hypergeometric value at one half. -/
 @[dlmf 8.19.E27]
 theorem genExpIntL_hypergeometric {p : ℝ} (hp : 0 < p) :
-    genExpIntL p=Gamma (1+(p : ℂ))/(2*p)*DLMF.Hypergeometric.regularizedGaussHG 1 1 (1+p) (1/2) := by
+    genExpIntL p=Gamma (1+(p : ℂ))/(2*p)*DLMF.Hypergeometric.regularizedGaussHG 1 1
+        (1+p) (1/2) := by
   have h := genExpIntE_mellin_laplace (a := 1) (b := 1) (p := p) (by norm_num) (by norm_num)
     (by simp; linarith)
   rw [genExpIntL]
@@ -1318,10 +1355,12 @@ theorem genExpIntE_product_integral {p q : ℝ} (hp : 0 < p) (hq : 0 < q) (hpq :
           gcongr; exact hb t ht
       _ = _ := by ring
   -- integrability
-  have hmeas : ∀ g : ℝ → ℝ, ContinuousOn g (Ioi 0) → AEStronglyMeasurable g (volume.restrict (Ioi 0)) :=
+  have hmeas : ∀ g : ℝ → ℝ, ContinuousOn g (Ioi 0) →
+      AEStronglyMeasurable g (volume.restrict (Ioi 0)) :=
     fun g hg => hg.aestronglyMeasurable measurableSet_Ioi
   have hI1 : IntegrableOn (fun t => e p t * e q t) (Ioi 0) := by
-    refine (incGP_integrableOn (σ := s + s' - 2) (by linarith) (Cp * Cq)).mono' (hmeas _ ((hcontE p).mul (hcontE q))) ?_
+    refine (incGP_integrableOn (σ := s + s' - 2) (by linarith) (Cp * Cq)).mono'
+        (hmeas _ ((hcontE p).mul (hcontE q))) ?_
     exact (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => hb1 t ht)
   have hI2 : ∀ r σ C : ℝ, 0 < C → -1 < σ → (∀ t : ℝ, 0 < t → 0 < e r t) →
       (∀ t : ℝ, 0 < t → e r t ≤ C * t ^ σ * Real.exp (-t)) →

@@ -40,7 +40,8 @@ open scoped Topology Real
 namespace DLMF.Mathieu
 
 /-- The Mathieu potential `x ↦ 2q cos 2x` is continuous. -/
-theorem continuous_two_mul_cos_two_mul (q : ℝ) : Continuous fun x : ℝ => 2 * q * Real.cos (2 * x) := by fun_prop
+theorem continuous_two_mul_cos_two_mul (q : ℝ) : Continuous fun x : ℝ => 2 * q *
+    Real.cos (2 * x) := by fun_prop
 
 /-- The Mathieu potential is bounded: `|2q cos 2x| ≤ 2|q|`. -/
 theorem abs_two_mul_cos_two_mul_le (q : ℝ) (x : ℝ) : |2 * q * Real.cos (2 * x)| ≤ 2 * |q| := by
@@ -63,8 +64,10 @@ private lemma re_mathieuWI_eq_sturmSolution (a q : ℝ) : (fun x : ℝ => (mathi
   have hsol : ODE.IsSturmLiouvilleSolution (fun x : ℝ => 2 * q * Real.cos (2 * x)) a
       (fun x : ℝ => (mathieuWI a q x).re) :=
     ⟨fun x => (hd a x).differentiableAt, fun x => by rw [hdw]; exact hd' a x⟩
-  obtain ⟨y0, y1, hy⟩ := ODE.basicSolution_initial_and_isSol (continuous_two_mul_cos_two_mul q) false a
-  refine ODE.isSturmLiouvilleSolution_eq_of_eq_of_deriv_eq (continuous_two_mul_cos_two_mul q) hsol hy (x₀ := 0) ?_ ?_
+  obtain ⟨y0, y1, hy⟩ :=
+      ODE.basicSolution_initial_and_isSol (continuous_two_mul_cos_two_mul q) false a
+  refine ODE.isSturmLiouvilleSolution_eq_of_eq_of_deriv_eq (continuous_two_mul_cos_two_mul q) hsol
+      hy (x₀ := 0) ?_ ?_
   · rw [y0]; simp [(mathieuWI_spec a q).2.1, ODE.basicInitValue]
   · rw [hdw, y1]; simp [(mathieuWI_spec a q).2.2, ODE.basicInitSlope]
 
@@ -81,8 +84,10 @@ private lemma re_mathieuWII_eq_sturmSolution (a q : ℝ) : (fun x : ℝ => (math
   have hsol : ODE.IsSturmLiouvilleSolution (fun x : ℝ => 2 * q * Real.cos (2 * x)) a
       (fun x : ℝ => (mathieuWII a q x).re) :=
     ⟨fun x => (hd a x).differentiableAt, fun x => by rw [hdw]; exact hd' a x⟩
-  obtain ⟨y0, y1, hy⟩ := ODE.basicSolution_initial_and_isSol (continuous_two_mul_cos_two_mul q) true a
-  refine ODE.isSturmLiouvilleSolution_eq_of_eq_of_deriv_eq (continuous_two_mul_cos_two_mul q) hsol hy (x₀ := 0) ?_ ?_
+  obtain ⟨y0, y1, hy⟩ :=
+      ODE.basicSolution_initial_and_isSol (continuous_two_mul_cos_two_mul q) true a
+  refine ODE.isSturmLiouvilleSolution_eq_of_eq_of_deriv_eq (continuous_two_mul_cos_two_mul q) hsol
+      hy (x₀ := 0) ?_ ?_
   · rw [y0]; simp [(mathieuWII_spec a q).2.1, ODE.basicInitValue]
   · rw [hdw, y1]; simp [(mathieuWII_spec a q).2.2, ODE.basicInitSlope]
 
@@ -118,9 +123,11 @@ theorem mathieuSpecA_eq_sturmSpectrum (n : ℕ) (q : ℝ) : mathieuSpecA n q =
   unfold mathieuSpecA
   split_ifs
   · rw [ODE.separatedSpectrum_false_eq (continuous_two_mul_cos_two_mul q)]
-    ext a; simp only [mem_ofPred_eq]; rw [← ofReal_pi_div_two, (mathieuWI_ofReal_eq_sturmSolution a q _).2, ofReal_eq_zero]
+    ext a; simp only [mem_ofPred_eq];
+        rw [← ofReal_pi_div_two, (mathieuWI_ofReal_eq_sturmSolution a q _).2, ofReal_eq_zero]
   · rw [ODE.separatedSpectrum_true_eq (continuous_two_mul_cos_two_mul q)]
-    ext a; simp only [mem_ofPred_eq]; rw [← ofReal_pi_div_two, (mathieuWI_ofReal_eq_sturmSolution a q _).1, ofReal_eq_zero]
+    ext a; simp only [mem_ofPred_eq];
+        rw [← ofReal_pi_div_two, (mathieuWI_ofReal_eq_sturmSolution a q _).1, ofReal_eq_zero]
 
 /-- The `b_n` spectra of Table 28.2.1 as separated Sturm–Liouville spectra on `[0, π/2]`. -/
 theorem mathieuSpecB_eq_sturmSpectrum (n : ℕ) (q : ℝ) : mathieuSpecB n q =
@@ -129,16 +136,19 @@ theorem mathieuSpecB_eq_sturmSpectrum (n : ℕ) (q : ℝ) : mathieuSpecB n q =
   unfold mathieuSpecB
   split_ifs
   · rw [ODE.separatedSpectrum_true_eq (continuous_two_mul_cos_two_mul q)]
-    ext a; simp only [mem_ofPred_eq]; rw [← ofReal_pi_div_two, (mathieuWII_ofReal_eq_sturmSolution a q _).1, ofReal_eq_zero]
+    ext a; simp only [mem_ofPred_eq];
+        rw [← ofReal_pi_div_two, (mathieuWII_ofReal_eq_sturmSolution a q _).1, ofReal_eq_zero]
   · rw [ODE.separatedSpectrum_false_eq (continuous_two_mul_cos_two_mul q)]
-    ext a; simp only [mem_ofPred_eq]; rw [← ofReal_pi_div_two, (mathieuWII_ofReal_eq_sturmSolution a q _).2, ofReal_eq_zero]
+    ext a; simp only [mem_ofPred_eq];
+        rw [← ofReal_pi_div_two, (mathieuWII_ofReal_eq_sturmSolution a q _).2, ofReal_eq_zero]
 
 /-- **Zeros of `w_I(x; a_n(q), q)`** in `(0, π/2)`: exactly `⌊n/2⌋` (Sturm oscillation). -/
 theorem encard_zeros_mathieuWI_mathieuA (n : ℕ) (q : ℝ) :
     {x : ℝ | x ∈ Ioo 0 (π / 2) ∧ mathieuWI (mathieuA n q) q x = 0}.encard = (n / 2 : ℕ) := by
   have hh := (mathieuA_spec n q).1
   rw [mathieuSpecA_eq_sturmSpectrum] at hh
-  have := ODE.encard_basicSolution_zeros_eq_encard_separatedSpectrum_inter_Iio (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) _ _ hh
+  have := ODE.encard_basicSolution_zeros_eq_encard_separatedSpectrum_inter_Iio
+      (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) _ _ hh
   rw [← mathieuSpecA_eq_sturmSpectrum, (mathieuA_spec n q).2] at this
   rw [← this]
   congr 1; ext x
@@ -151,7 +161,8 @@ theorem encard_zeros_mathieuWII_mathieuB {n : ℕ} (hn : n ≠ 0) (q : ℝ) :
       ((n - 1) / 2 : ℕ) := by
   have hh := (mathieuB_spec hn q).1
   rw [mathieuSpecB_eq_sturmSpectrum] at hh
-  have := ODE.encard_basicSolution_zeros_eq_encard_separatedSpectrum_inter_Iio (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) _ _ hh
+  have := ODE.encard_basicSolution_zeros_eq_encard_separatedSpectrum_inter_Iio
+      (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) _ _ hh
   rw [← mathieuSpecB_eq_sturmSpectrum, (mathieuB_spec hn q).2] at this
   rw [← this]
   congr 1; ext x
@@ -170,7 +181,8 @@ theorem mathieuWI_half_pi_mathieuA_even_sign (n : ℕ) (q : ℝ) : ∃ α : ℝ,
   have hk := ncard_eq_of_encard_eq_natCast (mathieuA_spec (2 * n) q).2
   rw [mathieuSpecA_eq_sturmSpectrum] at hh hk
   simp only [he, ↓reduceIte] at hh hk
-  have := ODE.neg_one_pow_mul_basicSolution_pos_of_mem_separatedSpectrum_false (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) false hh
+  have := ODE.neg_one_pow_mul_basicSolution_pos_of_mem_separatedSpectrum_false
+      (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) false hh
   rw [hk, show 2 * n / 2 = n by omega] at this
   exact ⟨_, by rw [← ofReal_pi_div_two]; exact (mathieuWI_ofReal_eq_sturmSolution _ q _).1, this⟩
 
@@ -182,7 +194,8 @@ theorem mathieuWII_half_pi_mathieuB_odd_sign (n : ℕ) (q : ℝ) : ∃ β : ℝ,
   have hk := ncard_eq_of_encard_eq_natCast (mathieuB_spec (n := 2 * n + 1) (by omega) q).2
   rw [mathieuSpecB_eq_sturmSpectrum] at hh hk
   simp only [he, ↓reduceIte] at hh hk
-  have := ODE.neg_one_pow_mul_basicSolution_pos_of_mem_separatedSpectrum_false (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) true hh
+  have := ODE.neg_one_pow_mul_basicSolution_pos_of_mem_separatedSpectrum_false
+      (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) true hh
   rw [hk, show (2 * n + 1 - 1) / 2 = n by omega] at this
   exact ⟨_, by rw [← ofReal_pi_div_two]; exact (mathieuWII_ofReal_eq_sturmSolution _ q _).1, this⟩
 
@@ -194,7 +207,8 @@ theorem deriv_mathieuWI_half_pi_mathieuA_odd_sign (n : ℕ) (q : ℝ) : ∃ α :
   have hk := ncard_eq_of_encard_eq_natCast (mathieuA_spec (2 * n + 1) q).2
   rw [mathieuSpecA_eq_sturmSpectrum] at hh hk
   simp only [he, ↓reduceIte] at hh hk
-  have := ODE.neg_one_pow_mul_deriv_basicSolution_pos_of_mem_separatedSpectrum_true (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) false hh
+  have := ODE.neg_one_pow_mul_deriv_basicSolution_pos_of_mem_separatedSpectrum_true
+      (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) false hh
   rw [hk, show (2 * n + 1) / 2 = n by omega] at this
   exact ⟨_, by rw [← ofReal_pi_div_two]; exact (mathieuWI_ofReal_eq_sturmSolution _ q _).2, this⟩
 
@@ -206,7 +220,8 @@ theorem deriv_mathieuWII_half_pi_mathieuB_even_sign (n : ℕ) (q : ℝ) : ∃ β
   have hk := ncard_eq_of_encard_eq_natCast (mathieuB_spec (n := 2 * n + 2) (by omega) q).2
   rw [mathieuSpecB_eq_sturmSpectrum] at hh hk
   simp only [he, ↓reduceIte] at hh hk
-  have := ODE.neg_one_pow_mul_deriv_basicSolution_pos_of_mem_separatedSpectrum_true (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) true hh
+  have := ODE.neg_one_pow_mul_deriv_basicSolution_pos_of_mem_separatedSpectrum_true
+      (continuous_two_mul_cos_two_mul q) (abs_two_mul_cos_two_mul_le q) (by positivity) true hh
   rw [hk, show (2 * n + 2 - 1) / 2 = n by omega] at this
   exact ⟨_, by rw [← ofReal_pi_div_two]; exact (mathieuWII_ofReal_eq_sturmSolution _ q _).2, this⟩
 

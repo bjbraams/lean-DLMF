@@ -109,7 +109,8 @@ private lemma hasSum_jacobiTheta₂_term_mul {u v τ σ : ℂ} (hτ : 0 < τ.im)
   have hs : Summable (fun p : ℤ × ℤ => jacobiTheta₂_term p.1 u τ * jacobiTheta₂_term p.2 v σ) :=
     summable_mul_of_summable_norm (f := fun n : ℤ => jacobiTheta₂_term n u τ)
       (g := fun n : ℤ => jacobiTheta₂_term n v σ)
-      (summable_norm_jacobiTheta₂_term_of_im_pos u hτ) (summable_norm_jacobiTheta₂_term_of_im_pos v hσ)
+      (summable_norm_jacobiTheta₂_term_of_im_pos u hτ)
+          (summable_norm_jacobiTheta₂_term_of_im_pos v hσ)
   exact h1.mul h2 hs
 
 /-- Watson's product formula in Mathlib's normalization:
@@ -204,27 +205,33 @@ private lemma jacobiThetaOneTau_mul_jacobiThetaOneTau (z w τ : ℂ) (hτ : 0 < 
   linear_combination -h
 
 /-- `θ₁(x + π/2|τ) = θ₂(x|τ)` (helper). -/
-private lemma jacobiThetaOneTau_add_half_pi (x τ : ℂ) : jacobiThetaOneTau (x + π / 2) τ = jacobiThetaTwoTau x τ :=
+private lemma jacobiThetaOneTau_add_half_pi (x τ : ℂ) : jacobiThetaOneTau (x + π / 2) τ =
+    jacobiThetaTwoTau x τ :=
   (jacobiThetaTwoTau_half_periods x τ).1.symm
 
 /-- `θ₂(x + π/2|τ) = -θ₁(x|τ)` (helper). -/
-private lemma jacobiThetaTwoTau_add_half_pi (x τ : ℂ) : jacobiThetaTwoTau (x + π / 2) τ = -jacobiThetaOneTau x τ := by
+private lemma jacobiThetaTwoTau_add_half_pi (x τ : ℂ) : jacobiThetaTwoTau (x + π / 2) τ =
+    -jacobiThetaOneTau x τ := by
   rw [jacobiThetaOneTau, neg_neg]
 
 /-- `θ₃(x + π/2|τ) = θ₄(x|τ)` (helper). -/
-private lemma jacobiThetaThreeTau_add_half_pi (x τ : ℂ) : jacobiThetaThreeTau (x + π / 2) τ = jacobiThetaFourTau x τ :=
+private lemma jacobiThetaThreeTau_add_half_pi (x τ : ℂ) : jacobiThetaThreeTau (x + π / 2) τ =
+    jacobiThetaFourTau x τ :=
   rfl
 
 /-- `θ₄(x + π/2|τ) = θ₃(x|τ)` (helper). -/
-private lemma jacobiThetaFourTau_add_half_pi (x τ : ℂ) : jacobiThetaFourTau (x + π / 2) τ = jacobiThetaThreeTau x τ := by
+private lemma jacobiThetaFourTau_add_half_pi (x τ : ℂ) : jacobiThetaFourTau (x + π / 2) τ =
+    jacobiThetaThreeTau x τ := by
   rw [jacobiThetaFourTau, show x + π / 2 + π / 2 = x + π by ring, jacobiThetaThreeTau_add_pi]
 
 /-- `θ₂(π/2|τ) = 0` (helper). -/
 private lemma jacobiThetaTwoTau_half_pi (τ : ℂ) : jacobiThetaTwoTau (π / 2) τ = 0 := by
-  rw [show (π / 2 : ℂ) = 0 + π / 2 by ring, jacobiThetaTwoTau_add_half_pi, jacobiThetaOneTau_zero, neg_zero]
+  rw [show (π / 2 : ℂ) = 0 + π / 2 by ring, jacobiThetaTwoTau_add_half_pi,
+                                        jacobiThetaOneTau_zero, neg_zero]
 
 /-- `θ₃(π/2|τ) = θ₄(0|τ)` (helper). -/
-private lemma jacobiThetaThreeTau_half_pi (τ : ℂ) : jacobiThetaThreeTau (π / 2) τ = jacobiThetaFourNullTau τ := by
+private lemma jacobiThetaThreeTau_half_pi (τ : ℂ) : jacobiThetaThreeTau (π / 2) τ =
+    jacobiThetaFourNullTau τ := by
   rw [show (π / 2 : ℂ) = 0 + π / 2 by ring, jacobiThetaThreeTau_add_half_pi]
 
 /-- The quartic identity `θ₃²(z)θ₃²(w) - θ₄²(z)θ₄²(w) = θ₂²(z)θ₂²(w) - θ₁²(z)θ₁²(w)` (helper). -/
@@ -251,7 +258,8 @@ private lemma jacobiThetaThreeTau_sq_mul_sq_sub (z w τ : ℂ) (hτ : 0 < τ.im)
         jacobiThetaTwoTau (z + w) (2 * τ) * jacobiThetaThreeTau (z - w) (2 * τ))) * h1
 
 /-- Algebraic step for the addition formulas 20.7.6–20.7.9 (helper). -/
-private lemma addition_algebraic_step {n p₁ p₂ u v r t X Y a b c d : ℂ} (hP : p₁ * p₂ = X) (hN : n * n = Y)
+private lemma addition_algebraic_step {n p₁ p₂ u v r t X Y a b c d : ℂ} (hP : p₁ * p₂ = X)
+    (hN : n * n = Y)
     (h1 : u * u = a) (h2 : v * v = b) (h3 : r * r = c) (h4 : t * t = d)
     (hid : Y * X = a * b - c * d) : n ^ 2 * p₁ * p₂ = u ^ 2 * v ^ 2 - r ^ 2 * t ^ 2 := by
   calc n ^ 2 * p₁ * p₂ = (n * n) * (p₁ * p₂) := by ring
@@ -284,7 +292,8 @@ private lemma jacobiThetaOneTau_quarter_pi_sub_mul_add (z τ : ℂ) (hτ : 0 < �
       jacobiThetaFourNullTau (2 * τ) * jacobiThetaTwoTau (2 * z) (2 * τ) := by
   have h := jacobiThetaOneTau_mul_jacobiThetaOneTau (π / 4 - z) (π / 4 + z) τ hτ
   rw [show π / 4 - z + (π / 4 + z) = π / 2 by ring, show π / 4 - z - (π / 4 + z) = -(2 * z) by ring,
-    jacobiThetaTwoTau_neg, jacobiThetaThreeTau_neg, jacobiThetaTwoTau_half_pi, jacobiThetaThreeTau_half_pi] at h
+    jacobiThetaTwoTau_neg, jacobiThetaThreeTau_neg, jacobiThetaTwoTau_half_pi,
+        jacobiThetaThreeTau_half_pi] at h
   linear_combination h
 
 /-- Landen-type product `θ₃(π/4-z|τ)θ₃(π/4+z|τ) = θ₄(0|2τ)θ₃(2z|2τ)` (helper). -/
@@ -293,7 +302,8 @@ private lemma jacobiThetaThreeTau_quarter_pi_sub_mul_add (z τ : ℂ) (hτ : 0 <
       jacobiThetaFourNullTau (2 * τ) * jacobiThetaThreeTau (2 * z) (2 * τ) := by
   have h := jacobiThetaThreeTau_mul_jacobiThetaThreeTau (π / 4 - z) (π / 4 + z) τ hτ
   rw [show π / 4 - z + (π / 4 + z) = π / 2 by ring, show π / 4 - z - (π / 4 + z) = -(2 * z) by ring,
-    jacobiThetaTwoTau_neg, jacobiThetaThreeTau_neg, jacobiThetaTwoTau_half_pi, jacobiThetaThreeTau_half_pi] at h
+    jacobiThetaTwoTau_neg, jacobiThetaThreeTau_neg, jacobiThetaTwoTau_half_pi,
+        jacobiThetaThreeTau_half_pi] at h
   linear_combination h
 
 /-- `2 θ₁(x|2τ)θ₄(x|2τ) = θ₁(x|τ)θ₂(0|τ)` (helper, 20.7.12). -/
@@ -389,7 +399,8 @@ private lemma jacobiThetaThreeTau_eq_four_mul_tau (z τ : ℂ) (hτ : 0 < τ.im)
 /-- `θ₃(π/4|τ) = θ₄(0|4τ)` (helper). -/
 private lemma jacobiThetaThreeTau_quarter_pi (τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeTau (π / 4) τ = jacobiThetaFourNullTau (4 * τ) := by
-  rw [jacobiThetaThreeTau_eq_four_mul_tau _ τ hτ, show 2 * (π / 4 : ℂ) = π / 2 by ring, jacobiThetaTwoTau_half_pi,
+  rw [jacobiThetaThreeTau_eq_four_mul_tau _ τ hτ, show 2 * (π / 4 : ℂ) = π /
+      2 by ring, jacobiThetaTwoTau_half_pi,
     jacobiThetaThreeTau_half_pi, add_zero]
 
 /-- `θ₄(π/4 - a|τ) = θ₃(π/4 + a|τ)` (helper). -/
@@ -454,7 +465,8 @@ theorem jacobiTheta_sq_three_four (z τ : ℂ) (hτ : 0 < τ.im) :
       jacobiThetaTwoNullTau τ ^ 2 * jacobiThetaOneTau z τ ^ 2 +
         jacobiThetaFourNullTau τ ^ 2 * jacobiThetaThreeTau z τ ^ 2 := by
   have h := jacobiThetaThreeTau_sq_mul_sq_sub (z + π / 2) 0 τ hτ
-  rw [jacobiThetaThreeTau_add_half_pi, jacobiThetaFourTau_add_half_pi, jacobiThetaTwoTau_add_half_pi, jacobiThetaOneTau_add_half_pi,
+  rw [jacobiThetaThreeTau_add_half_pi, jacobiThetaFourTau_add_half_pi,
+      jacobiThetaTwoTau_add_half_pi, jacobiThetaOneTau_add_half_pi,
     jacobiThetaOneTau_zero] at h
   linear_combination h
 
@@ -465,7 +477,8 @@ theorem jacobiTheta_sq_two_four (z τ : ℂ) (hτ : 0 < τ.im) :
       jacobiThetaThreeNullTau τ ^ 2 * jacobiThetaOneTau z τ ^ 2 +
         jacobiThetaFourNullTau τ ^ 2 * jacobiThetaTwoTau z τ ^ 2 := by
   have h := jacobiThetaTwoNullTau_sq_mul_jacobiThetaThreeTau_sq (z + π / 2) τ hτ
-  rw [jacobiThetaThreeTau_add_half_pi, jacobiThetaOneTau_add_half_pi, jacobiThetaTwoTau_add_half_pi] at h
+  rw [jacobiThetaThreeTau_add_half_pi, jacobiThetaOneTau_add_half_pi,
+      jacobiThetaTwoTau_add_half_pi] at h
   linear_combination h
 
 /-- DLMF 20.7.4: `θ₂²(0) θ₃²(z) = θ₄²(0) θ₁²(z) + θ₃²(0) θ₂²(z)`. -/
@@ -603,8 +616,10 @@ theorem jacobiTheta_reduction_two_tau (z τ : ℂ) (hτ : 0 < τ.im) :
       jacobiThetaTwoTau z (2 * τ) * jacobiThetaThreeTau z (2 * τ) / jacobiThetaTwoTau z τ =
         jacobiThetaTwoNullTau τ / 2) := by
   refine ⟨fun h => ?_, fun h => ?_⟩
-  · rw [div_eq_iff h]; linear_combination two_mul_jacobiThetaOneTau_mul_jacobiThetaFourTau_two_mul z τ hτ / 2
-  · rw [div_eq_iff h]; linear_combination two_mul_jacobiThetaTwoTau_mul_jacobiThetaThreeTau_two_mul z τ hτ / 2
+  · rw [div_eq_iff h];
+        linear_combination two_mul_jacobiThetaOneTau_mul_jacobiThetaFourTau_two_mul z τ hτ / 2
+  · rw [div_eq_iff h];
+        linear_combination two_mul_jacobiThetaTwoTau_mul_jacobiThetaThreeTau_two_mul z τ hτ / 2
 
 /-! ### §20.7(v) Watson's identities -/
 
@@ -690,7 +705,9 @@ theorem jacobiThetaOneTau_landen_four (z τ : ℂ) (hτ : 0 < τ.im) :
       (jacobiThetaOneTau (2 * z) (2 * τ) * jacobiThetaFourNullTau (2 * τ)) * hL2
   have hne := one_div_mul_cancel (landen_denominator_ne_zero τ hτ)
   rw [thetaLandenB]
-  linear_combination (1 / (jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ * jacobiThetaThreeTau (π / 4) τ)) * hK - jacobiThetaOneTau (4 * z) (4 * τ) * hne
+  linear_combination (1 /
+      (jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ * jacobiThetaThreeTau (π / 4) τ)) * hK -
+      jacobiThetaOneTau (4 * z) (4 * τ) * hne
 
 /-- DLMF 20.7.22: `θ₂(4z|4τ) = B θ₂(π/8 - z) θ₂(π/8 + z) θ₂(3π/8 - z) θ₂(3π/8 + z)`. -/
 @[dlmf 20.7.E22]
@@ -710,7 +727,8 @@ theorem jacobiThetaTwoTau_landen_four (z τ : ℂ) (hτ : 0 < τ.im) :
     rw [show 2 * (π / 8 - z) = π / 4 - 2 * z by ring] at hx
     rw [show 2 * (π / 8 + z) = π / 4 + 2 * z by ring] at hy
     have hL40 := jacobiThetaThreeNullTau_mul_jacobiThetaFourNullTau τ hτ
-    rw [jacobiThetaThreeTau_quarter_pi τ hτ, jacobiThetaTwoTau_three_eighth_pi_add, jacobiThetaTwoTau_three_eighth_pi_sub]
+    rw [jacobiThetaThreeTau_quarter_pi τ hτ, jacobiThetaTwoTau_three_eighth_pi_add,
+        jacobiThetaTwoTau_three_eighth_pi_sub]
     linear_combination (-(jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ)) * hA +
       (jacobiThetaOneTau (π / 4 - 2 * z) (2 * τ) * jacobiThetaOneTau (π / 4 + 2 * z) (2 * τ)) *
         hL40 -
@@ -718,7 +736,9 @@ theorem jacobiThetaTwoTau_landen_four (z τ : ℂ) (hτ : 0 < τ.im) :
       (jacobiThetaOneTau (π / 4 - 2 * z) (2 * τ) * jacobiThetaFourNullTau (2 * τ)) * hy
   have hne := one_div_mul_cancel (landen_denominator_ne_zero τ hτ)
   rw [thetaLandenB]
-  linear_combination (1 / (jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ * jacobiThetaThreeTau (π / 4) τ)) * hK - jacobiThetaTwoTau (4 * z) (4 * τ) * hne
+  linear_combination (1 /
+      (jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ * jacobiThetaThreeTau (π / 4) τ)) * hK -
+      jacobiThetaTwoTau (4 * z) (4 * τ) * hne
 
 /-- DLMF 20.7.23: `θ₃(4z|4τ) = B θ₃(π/8 - z) θ₃(π/8 + z) θ₃(3π/8 - z) θ₃(3π/8 + z)`. -/
 @[dlmf 20.7.E23]
@@ -738,7 +758,8 @@ theorem jacobiThetaThreeTau_landen_four (z τ : ℂ) (hτ : 0 < τ.im) :
     rw [show 2 * (π / 8 - z) = π / 4 - 2 * z by ring, jacobiThetaFourTau_quarter_pi_sub] at hx
     rw [show 2 * (π / 8 + z) = π / 4 + 2 * z by ring, jacobiThetaFourTau_quarter_pi_add] at hy
     have hL40 := jacobiThetaThreeNullTau_mul_jacobiThetaFourNullTau τ hτ
-    rw [jacobiThetaThreeTau_quarter_pi τ hτ, jacobiThetaThreeTau_three_eighth_pi_add, jacobiThetaThreeTau_three_eighth_pi_sub]
+    rw [jacobiThetaThreeTau_quarter_pi τ hτ, jacobiThetaThreeTau_three_eighth_pi_add,
+        jacobiThetaThreeTau_three_eighth_pi_sub]
     linear_combination (-(jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ)) * hA +
       (jacobiThetaThreeTau (π / 4 - 2 * z) (2 * τ) * jacobiThetaThreeTau (π / 4 + 2 * z) (2 * τ)) *
         hL40 -
@@ -746,7 +767,9 @@ theorem jacobiThetaThreeTau_landen_four (z τ : ℂ) (hτ : 0 < τ.im) :
       (jacobiThetaThreeTau (π / 4 + 2 * z) (2 * τ) * jacobiThetaFourNullTau (2 * τ)) * hy
   have hne := one_div_mul_cancel (landen_denominator_ne_zero τ hτ)
   rw [thetaLandenB]
-  linear_combination (1 / (jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ * jacobiThetaThreeTau (π / 4) τ)) * hK - jacobiThetaThreeTau (4 * z) (4 * τ) * hne
+  linear_combination (1 /
+      (jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ * jacobiThetaThreeTau (π / 4) τ)) * hK -
+      jacobiThetaThreeTau (4 * z) (4 * τ) * hne
 
 /-- DLMF 20.7.24: `θ₄(4z|4τ) = B θ₄(z|τ) θ₄(π/4 - z|τ) θ₄(π/4 + z|τ) θ₃(z|τ)`. -/
 @[dlmf 20.7.E24]
@@ -764,14 +787,17 @@ theorem jacobiThetaFourTau_landen_four (z τ : ℂ) (hτ : 0 < τ.im) :
     have hL4 := jacobiThetaThreeTau_mul_jacobiThetaFourTau z τ hτ
     have hL3 := jacobiThetaThreeTau_quarter_pi_sub_mul_add z τ hτ
     have hL40 := jacobiThetaThreeNullTau_mul_jacobiThetaFourNullTau τ hτ
-    rw [jacobiThetaThreeTau_quarter_pi τ hτ, jacobiThetaFourTau_quarter_pi_sub, jacobiThetaFourTau_quarter_pi_add]
+    rw [jacobiThetaThreeTau_quarter_pi τ hτ, jacobiThetaFourTau_quarter_pi_sub,
+        jacobiThetaFourTau_quarter_pi_add]
     linear_combination (-(jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ)) * hA +
       (jacobiThetaThreeTau (2 * z) (2 * τ) * jacobiThetaFourTau (2 * z) (2 * τ)) * hL40 -
       (jacobiThetaThreeTau (π / 4 - z) τ * jacobiThetaThreeTau (π / 4 + z) τ) * hL4 -
       (jacobiThetaFourTau (2 * z) (2 * τ) * jacobiThetaFourNullTau (2 * τ)) * hL3
   have hne := one_div_mul_cancel (landen_denominator_ne_zero τ hτ)
   rw [thetaLandenB]
-  linear_combination (1 / (jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ * jacobiThetaThreeTau (π / 4) τ)) * hK - jacobiThetaFourTau (4 * z) (4 * τ) * hne
+  linear_combination (1 /
+      (jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ * jacobiThetaThreeTau (π / 4) τ)) * hK -
+      jacobiThetaFourTau (4 * z) (4 * τ) * hne
 
 /-! ### §20.7(viii) Transformations of lattice parameter -/
 
@@ -807,7 +833,8 @@ theorem jacobiThetaFourTau_add_one (z τ : ℂ) :
 /-- `cexp(iπ(τ+1))^{n(n+1)} = cexp(iπτ)^{n(n+1)}`. -/
 private lemma nome_add_one_zpow_mul_succ (τ : ℂ) (n : ℤ) :
     cexp (π * I * (τ + 1)) ^ (n * (n + 1)) = cexp (π * I * τ) ^ (n * (n + 1)) := by
-  rw [exp_zpow_eq_exp_intCast_mul, exp_zpow_eq_exp_intCast_mul, show ((n * (n + 1) : ℤ) : ℂ) * (π * I * (τ + 1)) =
+  rw [exp_zpow_eq_exp_intCast_mul, exp_zpow_eq_exp_intCast_mul, show ((n * (n + 1) : ℤ) : ℂ) *
+      (π * I * (τ + 1)) =
     ((n * (n + 1) : ℤ) : ℂ) * (π * I * τ) + π * I * ((n * (n + 1) : ℤ) : ℂ) by ring, exp_add,
     exp_pi_mul_I_mul_mul_succ, mul_one]
 
@@ -828,11 +855,13 @@ theorem jacobiThetaOneTau_add_one (z τ : ℂ) :
   ring
 
 /-- `θ₁(x - π/2|τ) = -θ₂(x|τ)` (helper). -/
-private lemma jacobiThetaOneTau_sub_half_pi (x τ : ℂ) : jacobiThetaOneTau (x - π / 2) τ = -jacobiThetaTwoTau x τ := by
+private lemma jacobiThetaOneTau_sub_half_pi (x τ : ℂ) : jacobiThetaOneTau (x - π / 2) τ =
+    -jacobiThetaTwoTau x τ := by
   rw [jacobiThetaOneTau, sub_add_cancel]
 
 /-- `θ₂(x - π/2|τ) = θ₁(x|τ)` (helper). -/
-private lemma jacobiThetaTwoTau_sub_half_pi (x τ : ℂ) : jacobiThetaTwoTau (x - π / 2) τ = jacobiThetaOneTau x τ := by
+private lemma jacobiThetaTwoTau_sub_half_pi (x τ : ℂ) : jacobiThetaTwoTau (x - π / 2) τ =
+    jacobiThetaOneTau x τ := by
   have h := jacobiThetaOneTau_add_half_pi (x - π / 2) τ
   rw [sub_add_cancel] at h
   exact h.symm
@@ -856,7 +885,8 @@ theorem jacobiThetaOneTau_add_mul_jacobiThetaFourTau_sub (u v τ : ℂ) (hτ : 0
   have k2 := jacobiThetaOneTau_mul_jacobiThetaOneTau v (u - π / 2) (τ / 2) hσ
   rw [h2, jacobiThetaOneTau_sub_half_pi, show u + (v - π / 2) = (u + v) - π / 2 by ring,
     show u - (v - π / 2) = (u - v) + π / 2 by ring, jacobiThetaThreeTau_sub_half_pi,
-    jacobiThetaTwoTau_add_half_pi, jacobiThetaTwoTau_sub_half_pi, jacobiThetaThreeTau_add_half_pi] at k1
+    jacobiThetaTwoTau_add_half_pi, jacobiThetaTwoTau_sub_half_pi,
+        jacobiThetaThreeTau_add_half_pi] at k1
   rw [h2, jacobiThetaOneTau_sub_half_pi, show v + (u - π / 2) = (u + v) - π / 2 by ring,
     show v - (u - π / 2) = -(u - v) + π / 2 by ring, jacobiThetaThreeTau_sub_half_pi,
     jacobiThetaTwoTau_add_half_pi, jacobiThetaTwoTau_sub_half_pi, jacobiThetaThreeTau_add_half_pi,
@@ -890,7 +920,8 @@ theorem jacobiThetaTwoTau_add_mul_jacobiThetaFourTau_sub (u v τ : ℂ) (hτ : 0
     jacobiThetaOneTau_add_one, jacobiThetaTwoTau_add_one, jacobiThetaThreeTau_add_one,
     jacobiThetaFourTau_add_one] at h ⊢
   rw [show u + π / 2 + v = (u + v) + π / 2 by ring, show u + π / 2 - v = (u - v) + π / 2 by ring,
-    jacobiThetaOneTau_add_half_pi, jacobiThetaTwoTau_add_half_pi, jacobiThetaThreeTau_add_half_pi, jacobiThetaFourTau_add_half_pi,
+    jacobiThetaOneTau_add_half_pi, jacobiThetaTwoTau_add_half_pi, jacobiThetaThreeTau_add_half_pi,
+        jacobiThetaFourTau_add_half_pi,
     jacobiThetaOneTau_add_half_pi, jacobiThetaThreeTau_add_half_pi] at h
   have hε : cexp (π * I / 4) ^ 2 ≠ 0 := pow_ne_zero _ (exp_ne_zero _)
   apply mul_left_cancel₀ hε
@@ -1034,7 +1065,8 @@ theorem jacobiThetaOneTau_neg_inv {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
   ring
 
 /-- Multipliability of `1 - c y^{k+1}`-type products (helper). -/
-private lemma hasProd_one_sub_of_norm_le_pow {f : ℕ → ℂ} {ρ : ℝ} (hρ : ρ < 1) (hf : ∀ k, ‖f k‖ ≤ ρ ^ (k + 1)) :
+private lemma hasProd_one_sub_of_norm_le_pow {f : ℕ → ℂ} {ρ : ℝ} (hρ : ρ < 1)
+    (hf : ∀ k, ‖f k‖ ≤ ρ ^ (k + 1)) :
     HasProd (fun k => 1 - f k) (∏' k, (1 - f k)) := by
   have h0 : 0 ≤ ρ := by have := hf 0; rw [pow_one] at this; exact (norm_nonneg _).trans this
   have hs : Summable (fun k => ‖f k‖) :=
@@ -1062,8 +1094,10 @@ private lemma jacobiThetaTwoNullTau_add_half_mul_eta {τ : ℂ} (hτ : 0 < τ.im
   have pw' : ∀ k : ℕ, ‖p ^ (2 * k + 1)‖ ≤ ‖p‖ ^ (k + 1) := fun k => by
     rw [norm_pow]; exact pow_le_pow_of_le_one hp0 hpn.le (by omega)
   have hA := hasProd_one_sub_of_norm_le_pow hpn (f := fun k => p ^ (k + 1)) (fun k => by simp)
-  have hB := hasProd_one_sub_of_norm_le_pow hpn (f := fun k => p ^ (2 * (k + 1))) (fun k => pw 2 k (by norm_num))
-  have hC := hasProd_one_sub_of_norm_le_pow hpn (f := fun k => p ^ (4 * (k + 1))) (fun k => pw 4 k (by norm_num))
+  have hB := hasProd_one_sub_of_norm_le_pow hpn (f := fun k => p ^ (2 * (k + 1)))
+      (fun k => pw 2 k (by norm_num))
+  have hC := hasProd_one_sub_of_norm_le_pow hpn (f := fun k => p ^ (4 * (k + 1)))
+      (fun k => pw 4 k (by norm_num))
   have hBp := hasProd_one_sub_of_norm_le_pow hpn (f := fun k => -p ^ (2 * (k + 1))) (fun k => by
     rw [norm_neg]; exact pw 2 k (by norm_num))
   have hO := hasProd_one_sub_of_norm_le_pow hpn (f := fun k => p ^ (2 * k + 1)) pw'
@@ -1120,10 +1154,12 @@ private lemma jacobiThetaTwoNullTau_add_half_mul_eta {τ : ℂ} (hτ : 0 < τ.im
 private lemma jacobiTheta_iq_quotients_eq (z τ : ℂ) (hτ : 0 < τ.im) :
     (jacobiThetaOneTau z (τ + 1 / 2) ≠ 0 →
       jacobiThetaOneTau z (2 * τ) * jacobiThetaThreeTau z (2 * τ) /
-        jacobiThetaOneTau z (τ + 1 / 2) = jacobiThetaTwoNullTau (τ + 1 / 2) / (2 * cexp (π * I / 4))) ∧
+        jacobiThetaOneTau z (τ + 1 / 2) = jacobiThetaTwoNullTau (τ + 1 / 2) /
+            (2 * cexp (π * I / 4))) ∧
     (jacobiThetaTwoTau z (τ + 1 / 2) ≠ 0 →
       jacobiThetaTwoTau z (2 * τ) * jacobiThetaFourTau z (2 * τ) /
-        jacobiThetaTwoTau z (τ + 1 / 2) = jacobiThetaTwoNullTau (τ + 1 / 2) / (2 * cexp (π * I / 4))) := by
+        jacobiThetaTwoTau z (τ + 1 / 2) = jacobiThetaTwoNullTau (τ + 1 / 2) /
+            (2 * cexp (π * I / 4))) := by
   have hτ' : 0 < (τ + 1 / 2).im := by simpa using hτ
   have h2 : 2 * (τ + 1 / 2) = 2 * τ + 1 := by ring
   have hD1 := two_mul_jacobiThetaOneTau_mul_jacobiThetaFourTau_two_mul z (τ + 1 / 2) hτ'
@@ -1140,7 +1176,8 @@ private lemma jacobiTheta_iq_quotients_eq (z τ : ℂ) (hτ : 0 < τ.im) :
 /-- `θ₂(0|τ+½)/(2e^{iπ/4}) = e^{-iπ/8} η(τ)η(4τ)/η(2τ)` (helper). -/
 private lemma jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient {τ : ℂ} (hτ : 0 < τ.im) :
     jacobiThetaTwoNullTau (τ + 1 / 2) / (2 * cexp (π * I / 4)) =
-      cexp (-(π * I / 8)) * (ModularForm.eta τ * ModularForm.eta (4 * τ) / ModularForm.eta (2 * τ)) := by
+      cexp (-(π * I / 8)) *
+          (ModularForm.eta τ * ModularForm.eta (4 * τ) / ModularForm.eta (2 * τ)) := by
   have key := jacobiThetaTwoNullTau_add_half_mul_eta hτ
   have hη2 : ModularForm.eta (2 * τ) ≠ 0 :=
     ModularForm.eta_ne_zero (by show 0 < (2 * τ).im; simp; linarith)
@@ -1206,7 +1243,8 @@ private lemma exists_pos_eta_I_mul_eq {s : ℝ} (hs : 0 < s) :
     ∃ r : ℝ, 0 < r ∧ ModularForm.eta (I * s) = r := by
   set x : ℝ := Real.exp (-(2 * π * s)) with hx
   have hx0 : 0 < x := Real.exp_pos _
-  have hx1 : x < 1 := by rw [hx, ← Real.exp_zero]; exact Real.exp_lt_exp.mpr (by nlinarith [Real.pi_pos])
+  have hx1 : x < 1 := by rw [hx, ← Real.exp_zero];
+                         exact Real.exp_lt_exp.mpr (by nlinarith [Real.pi_pos])
   have hq : cexp (2 * π * I * (I * s)) = (x : ℂ) := by
     rw [hx, ofReal_exp]; congr 1; push_cast; ring_nf; rw [I_sq]; ring
   have hxn : ‖(x : ℂ)‖ < 1 := by rw [norm_real, Real.norm_of_nonneg hx0.le]; exact hx1
@@ -1223,7 +1261,8 @@ private lemma exists_pos_eta_I_mul_eq {s : ℝ} (hs : 0 < s) :
       have : x ^ (n + 1) < 1 := pow_lt_one₀ hx0.le hx1 (by omega)
       linarith⟩
   have hPne : P ≠ 0 := by
-    have := ModularForm.eta_tprod_ne_zero (z := I * s) (by show 0 < (I * (s : ℂ)).im; simpa using hs)
+    have := ModularForm.eta_tprod_ne_zero (z := I * s)
+        (by show 0 < (I * (s : ℂ)).im; simpa using hs)
     simpa only [ModularForm.eta_q_eq_pow, hq] using this
   have hPr : P = (P.re : ℂ) := ext (by simp) (by simp [hmem.1])
   have hPpos : 0 < P.re := lt_of_le_of_ne hmem.2 (fun h => hPne (by rw [hPr, ← h]; simp))
@@ -1242,7 +1281,8 @@ private lemma cpow_half_jacobiThetaNull_eq_eta_quotient {t : ℝ} (ht : 0 < t) :
   obtain ⟨r1, hr1, e1⟩ := exists_pos_eta_I_mul_eq ht
   obtain ⟨r2, hr2, e2⟩ := exists_pos_eta_I_mul_eq (show 0 < 2 * t by linarith)
   obtain ⟨r4, hr4, e4⟩ := exists_pos_eta_I_mul_eq (show 0 < 4 * t by linarith)
-  have hW : ModularForm.eta (I * t) * ModularForm.eta (4 * (I * t)) / ModularForm.eta (2 * (I * t)) =
+  have hW : ModularForm.eta (I * t) * ModularForm.eta (4 * (I * t)) /
+      ModularForm.eta (2 * (I * t)) =
       ((r1 * r4 / r2 : ℝ) : ℂ) := by
     rw [show 4 * (I * (t : ℂ)) = I * ((4 * t : ℝ) : ℂ) by push_cast; ring,
       show 2 * (I * (t : ℂ)) = I * ((2 * t : ℝ) : ℂ) by push_cast; ring, e1, e2, e4]
@@ -1261,7 +1301,8 @@ private lemma cpow_half_jacobiThetaNull_eq_eta_quotient {t : ℝ} (ht : 0 < t) :
       have h2 : (2 : ℂ) * cexp (π * I / 8) ≠ 0 := mul_ne_zero two_ne_zero (exp_ne_zero _)
       exact (mul_eq_zero.mp key.symm).resolve_left h2)
   have hsq := (jacobiTheta_reduction_iq_sq 0 (I * t) hτ).2 hN
-  have heta := ((jacobiTheta_iq_quotients_eq 0 (I * t) hτ).2 hN).trans (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ)
+  have heta := ((jacobiTheta_iq_quotients_eq 0 (I * t) hτ).2 hN).trans
+      (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ)
   rw [heta, hW] at hsq
   have hX : jacobiThetaTwoNullTau (2 * (I * t)) * jacobiThetaFourNullTau (2 * (I * t)) / 2 =
       ((r1 * r4 / r2 : ℝ) : ℂ) ^ 2 := by
@@ -1293,7 +1334,8 @@ theorem jacobiTheta_reduction_iq_rectangular (z : ℂ) {t : ℝ} (ht : 0 < t) :
   have hτ : 0 < (I * (t : ℂ)).im := by simpa using ht
   obtain ⟨h1, h2⟩ := jacobiTheta_iq_quotients_eq z (I * t) hτ
   rw [cpow_half_jacobiThetaNull_eq_eta_quotient ht]
-  exact ⟨fun h => (h1 h).trans (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ), fun h => (h2 h).trans (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ)⟩
+  exact ⟨fun h => (h1 h).trans (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ), fun h =>
+      (h2 h).trans (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ)⟩
 
 /-- DLMF 20.7.34 (`q² ↔ 2τ`, `iq ↔ τ + 1/2`), **corrected full-domain form**: for all `τ` with
 `Im τ > 0`, `θ₁(z|2τ)θ₃(z|2τ)/θ₁(z|τ+½) = θ₂(z|2τ)θ₄(z|2τ)/θ₂(z|τ+½) = e^{-iπ/8} η(τ)η(4τ)/η(2τ)`
@@ -1316,7 +1358,8 @@ theorem jacobiTheta_reduction_iq_eta (z τ : ℂ) (hτ : 0 < τ.im) :
         cexp (-(π * I / 8)) *
           (ModularForm.eta τ * ModularForm.eta (4 * τ) / ModularForm.eta (2 * τ))) := by
   obtain ⟨h1, h2⟩ := jacobiTheta_iq_quotients_eq z τ hτ
-  exact ⟨fun h => (h1 h).trans (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ), fun h => (h2 h).trans (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ)⟩
+  exact ⟨fun h => (h1 h).trans (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ), fun h =>
+      (h2 h).trans (jacobiThetaTwoNullTau_add_half_div_eq_eta_quotient hτ)⟩
 
 /-! ### §20.8 Watson's expansions -/
 

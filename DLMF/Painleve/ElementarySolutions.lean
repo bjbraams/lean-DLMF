@@ -268,7 +268,8 @@ theorem painleveIII_zero_power {C μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs :
   have hw0 : ∀ z ∈ U, C * z ^ μ ≠ 0 := fun z hz =>
     mul_ne_zero hC (by rw [Ne, cpow_eq_zero_iff]; exact fun h => hz0 z hz h.1)
   refine ⟨isODE2SolutionOn_of_hasDerivAt hU (v := fun z => C * (μ * z ^ μ / z))
-    (fun z hz => (hasDerivAt_cpow_of_mem_slitPlane (hUs hz)).const_mul C) (fun z hz => ?_), hz0, hw0⟩
+    (fun z hz => (hasDerivAt_cpow_of_mem_slitPlane (hUs hz)).const_mul C)
+        (fun z hz => ?_), hz0, hw0⟩
   have hzU := hz
   have hz := hz0 z hzU
   have hw := hw0 z hzU
@@ -443,7 +444,8 @@ theorem painleveVI_sqrt {κ μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs : U ⊆
     have hzz : z * z = z * 1 := by rw [← pow_two, h2, mul_one]
     exact h1 z hz (mul_left_cancel₀ (hz0 z hz) hzz)
   refine ⟨isODE2SolutionOn_of_hasDerivAt hU
-    (v := fun z => 1 / 2 * z ^ (1 / 2 : ℂ) / z) (fun z hz => hasDerivAt_cpow_of_mem_slitPlane (hUs hz))
+    (v := fun z => 1 / 2 * z ^ (1 / 2 : ℂ) / z)
+        (fun z hz => hasDerivAt_cpow_of_mem_slitPlane (hUs hz))
     (fun z hz => ?_), hz0, h1, ht0, ht1, htz⟩
   have hzU := hz
   have ht := ht0 z hzU

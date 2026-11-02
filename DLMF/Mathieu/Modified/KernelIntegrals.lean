@@ -222,7 +222,8 @@ private lemma integral_two_pi_eq_zero_of_antiperiodic {g : ℝ → ℂ} (hg : Co
   rw [intervalIntegral.integral_neg]; ring
 
 /-- `ce_n` is continuous on the real line. -/
-private lemma continuous_mathieuCe_ofReal (n : ℕ) (q : ℝ) : Continuous fun t : ℝ => mathieuCe n t q :=
+private lemma continuous_mathieuCe_ofReal (n : ℕ) (q : ℝ) : Continuous fun t : ℝ =>
+    mathieuCe n t q :=
   (isMathieuSolution_mathieuCe n q).differentiable.continuous.comp continuous_ofReal
 
 /-- The kernel integral against `ce_n` is `G(z, 0)/ce_n(0) · ce_n(α)`. -/
@@ -261,7 +262,8 @@ private lemma integral_kernel_mathieuCe_eq_mul_mathieuCe (n : ℕ) (h : ℝ) (z 
       (fun α => ∫ t in (0 : ℝ)..2 * π,
       Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuCe n t (h ^ 2)) α := by
     intro α
-    have := integral_exp_mathieuKernelW_neg h z (f := fun t : ℝ => mathieuCe n t (h ^ 2)) hper (s := 1)
+    have := integral_exp_mathieuKernelW_neg h z
+        (f := fun t : ℝ => mathieuCe n t (h ^ 2)) hper (s := 1)
       (fun t => by push_cast; rw [mathieuCe_neg, one_mul]) α
     simpa using this
   have := eq_mul_mathieuCe_of_even hG hev α
@@ -271,7 +273,8 @@ private lemma integral_kernel_mathieuCe_eq_mul_mathieuCe (n : ℕ) (h : ℝ) (z 
   simp [mathieuKernelW]
 
 /-- Splitting `e^{iθ} = cos θ + i sin θ` under the integral. -/
-private lemma integral_exp_I_mul_eq_cos_add_sin {u g : ℝ → ℂ} (hu : Continuous u) (hg : Continuous g) :
+private lemma integral_exp_I_mul_eq_cos_add_sin {u g : ℝ → ℂ} (hu : Continuous u)
+    (hg : Continuous g) :
     ∫ t in (0 : ℝ)..2 * π, Complex.exp (I * u t) * g t =
       (∫ t in (0 : ℝ)..2 * π, Complex.cos (u t) * g t) +
         I * ∫ t in (0 : ℝ)..2 * π, Complex.sin (u t) * g t := by
@@ -312,7 +315,8 @@ private lemma integral_exp_cosh_cos_mul_mathieuCe_even (k : ℕ) (h : ℝ) (z : 
     ring
   have hcos : ∫ t in (0 : ℝ)..2 * π, Complex.cos (u t) * mathieuCe (2 * k) t (h ^ 2) =
       4 * ∫ t in (0 : ℝ)..π / 2, Complex.cos (u t) * mathieuCe (2 * k) t (h ^ 2) := by
-    refine integral_two_pi_eq_four_mul_integral_pi_div_two (hcs _ Complex.continuous_cos) (fun x => ?_) (fun x => ?_)
+    refine integral_two_pi_eq_four_mul_integral_pi_div_two (hcs _ Complex.continuous_cos)
+        (fun x => ?_) (fun x => ?_)
     · simp only [u]
       push_cast
       rw [mathieuCe_even_add_pi, Complex.cos_add_pi]
@@ -362,7 +366,8 @@ private lemma integral_exp_cosh_cos_mul_mathieuCe_odd (k : ℕ) (h : ℝ) (z : �
     ring
   have hs : ∫ t in (0 : ℝ)..2 * π, Complex.sin (u t) * mathieuCe (2 * k + 1) t (h ^ 2) =
       4 * ∫ t in (0 : ℝ)..π / 2, Complex.sin (u t) * mathieuCe (2 * k + 1) t (h ^ 2) := by
-    refine integral_two_pi_eq_four_mul_integral_pi_div_two (hcs _ Complex.continuous_sin) (fun x => ?_) (fun x => ?_)
+    refine integral_two_pi_eq_four_mul_integral_pi_div_two (hcs _ Complex.continuous_sin)
+        (fun x => ?_) (fun x => ?_)
     · simp only [u]
       push_cast
       rw [mathieuCe_odd_add_pi, Complex.cos_add_pi]
@@ -492,7 +497,8 @@ private lemma besselJExp_intCast_parameter_zero (k : ℤ) (w : ℂ) :
       Complex.zero_cpow (by exact_mod_cast hk), zero_mul]
 
 /-- The coefficients `c^N_{2m}(0)` vanish unless `N + 2m = ±N`. -/
-private lemma mathieuMeCoeff_natCast_q_zero_of_add_eq_zero (N : ℕ) (m : ℤ) (hm : (N : ℤ) + 2 * m = 0) (hN : N ≠ 0) :
+private lemma mathieuMeCoeff_natCast_q_zero_of_add_eq_zero (N : ℕ) (m : ℤ)
+    (hm : (N : ℤ) + 2 * m = 0) (hN : N ≠ 0) :
     mathieuMeCoeff (N : ℂ) ((0 : ℂ) ^ 2) m = 0 := by
   have := mathieuMeCoeff_natCast_eq_integral N 0 m
   push_cast at this
@@ -536,7 +542,8 @@ private lemma radialMathieuMc_one_parameter_zero (n : ℕ) (z : ℂ) :
     simp only [sub_eq_zero, hℓ, ↓reduceIte]; ring
   rw [tsum_eq_single K hterm]
   simp only [modMathieuTerm, mathieuCylExp, sub_self, besselJExp_intCast_parameter_zero, ite_true]
-  rw [show (n : ℂ) + K + K = ((n + K + K : ℤ) : ℂ) by push_cast; ring, besselJExp_intCast_parameter_zero]
+  rw [show (n : ℂ) + K + K = ((n + K + K : ℤ) : ℂ) by push_cast; ring,
+                                                        besselJExp_intCast_parameter_zero]
   by_cases hn : n = 0
   · subst hn
     have hK : K = 0 := by
@@ -594,7 +601,8 @@ theorem integral_exp_mathieuCe' (n : ℕ) (h : ℝ) (z α : ℂ) :
   · exact integral_exp_mathieuCe_of_pos n hpos z α
 
 /-- `se_n` is continuous on the real line. -/
-private lemma continuous_mathieuSe_ofReal (n : ℕ) (q : ℝ) : Continuous fun t : ℝ => mathieuSe n t q :=
+private lemma continuous_mathieuSe_ofReal (n : ℕ) (q : ℝ) : Continuous fun t : ℝ =>
+    mathieuSe n t q :=
   (isMathieuSolution_mathieuSe n q).differentiable.continuous.comp continuous_ofReal
 
 /-- The kernel integral against `se_n` is `G'(0)/se_n'(0) · se_n(α)`, with
@@ -627,7 +635,8 @@ private lemma integral_kernel_mathieuSe_eq_mul_mathieuSe {n : ℕ} (hn : n ≠ 0
       -(fun α => ∫ t in (0 : ℝ)..2 * π,
       Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuSe n t (h ^ 2)) α := by
     intro α
-    have := integral_exp_mathieuKernelW_neg h z (f := fun t : ℝ => mathieuSe n t (h ^ 2)) hper (s := -1)
+    have := integral_exp_mathieuKernelW_neg h z
+        (f := fun t : ℝ => mathieuSe n t (h ^ 2)) hper (s := -1)
       (fun t => by push_cast; rw [mathieuSe_neg]; ring) α
     simpa using this
   have := eq_mul_mathieuSe_of_odd hG hodd α
@@ -674,7 +683,8 @@ private lemma integral_sinh_sin_exp_cosh_cos_mul_mathieuSe_odd (k : ℕ) (h : �
     ring
   have hq : ∫ t in (0 : ℝ)..2 * π, Complex.cos (u t) * g t =
       4 * ∫ t in (0 : ℝ)..π / 2, Complex.cos (u t) * g t := by
-    refine integral_two_pi_eq_four_mul_integral_pi_div_two (hcs _ Complex.continuous_cos) (fun x => ?_) (fun x => ?_)
+    refine integral_two_pi_eq_four_mul_integral_pi_div_two (hcs _ Complex.continuous_cos)
+        (fun x => ?_) (fun x => ?_)
     · simp only [u, g]
       push_cast
       rw [mathieuSe_odd_add_pi, Complex.cos_add_pi, Complex.sin_add_pi]
@@ -737,7 +747,8 @@ private lemma integral_sinh_sin_exp_cosh_cos_mul_mathieuSe_even (k : ℕ) (h : �
     ring
   have hq : ∫ t in (0 : ℝ)..2 * π, Complex.sin (u t) * g t =
       4 * ∫ t in (0 : ℝ)..π / 2, Complex.sin (u t) * g t := by
-    refine integral_two_pi_eq_four_mul_integral_pi_div_two (hcs _ Complex.continuous_sin) (fun x => ?_) (fun x => ?_)
+    refine integral_two_pi_eq_four_mul_integral_pi_div_two (hcs _ Complex.continuous_sin)
+        (fun x => ?_) (fun x => ?_)
     · simp only [u, g]
       push_cast
       rw [mathieuSe_even_add_pi, Complex.cos_add_pi, Complex.sin_add_pi]
@@ -791,7 +802,8 @@ private lemma modMathieuM_one_intCast_neg_parameter (m : ℤ) (z H : ℂ) :
 private lemma radialMathieuMs_one_neg_parameter (n : ℕ) (z H : ℂ) :
     radialMathieuMs 1 n z (-H) = (-1 : ℂ) ^ n * radialMathieuMs 1 n z H := by
   simp only [radialMathieuMs]
-  rw [show -(n : ℂ) = ((-(n : ℤ) : ℤ) : ℂ) by push_cast; ring, modMathieuM_one_intCast_neg_parameter,
+  rw [show -(n : ℂ) = ((-(n : ℤ) : ℤ) : ℂ) by push_cast; ring,
+                                                modMathieuM_one_intCast_neg_parameter,
     zpow_neg, zpow_natCast]
   have : ((-1 : ℂ) ^ n)⁻¹ = (-1) ^ n := by
     rw [← inv_pow, inv_neg, inv_one]
@@ -843,7 +855,8 @@ private lemma integral_sin_intCast_mul_eq_zero {m : ℤ} (hm : m ≠ 0) :
   rw [this]; simp
 
 /-- `se_n'(0) ≠ 0`. -/
-private lemma deriv_mathieuSe_zero_ne_zero (n : ℕ) (q : ℝ) : deriv (fun w => mathieuSe n w q) 0 ≠ 0 := by
+private lemma deriv_mathieuSe_zero_ne_zero (n : ℕ) (q : ℝ) : deriv
+    (fun w => mathieuSe n w q) 0 ≠ 0 := by
   rw [deriv_mathieuSe_zero]; exact_mod_cast (mathieuSeDerivZero_pos n q).ne'
 
 /-- Closed form of the left side of 28.28.3, odd `n = 2k + 1`, all real `h`. -/
@@ -853,7 +866,8 @@ private lemma integral_kernel_mathieuSe_odd_closedForm (k : ℕ) (h : ℝ) (z α
       h * mathieuFourierB (2 * k + 1) 1 (h ^ 2) / mathieuSe (2 * k + 1) (π / 2) (h ^ 2) *
         mathieuSe (2 * k + 1) (I * z) (h ^ 2) / deriv (fun w => mathieuSe (2 * k + 1) w (h ^ 2)) 0 *
           mathieuSe (2 * k + 1) α (h ^ 2) := by
-  rw [integral_kernel_mathieuSe_eq_mul_mathieuSe (by omega), integral_sinh_sin_exp_cosh_cos_mul_mathieuSe_odd]
+  rw [integral_kernel_mathieuSe_eq_mul_mathieuSe (by omega),
+      integral_sinh_sin_exp_cosh_cos_mul_mathieuSe_odd]
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   field_simp
 
@@ -865,7 +879,8 @@ private lemma integral_kernel_mathieuSe_even_closedForm (k : ℕ) (h : ℝ) (z �
         deriv (fun w => mathieuSe (2 * k + 2) w (h ^ 2)) (π / 2)) *
         mathieuSe (2 * k + 2) (I * z) (h ^ 2) / deriv (fun w => mathieuSe (2 * k + 2) w (h ^ 2)) 0 *
           mathieuSe (2 * k + 2) α (h ^ 2) := by
-  rw [integral_kernel_mathieuSe_eq_mul_mathieuSe (by omega), integral_sinh_sin_exp_cosh_cos_mul_mathieuSe_even]
+  rw [integral_kernel_mathieuSe_eq_mul_mathieuSe (by omega),
+      integral_sinh_sin_exp_cosh_cos_mul_mathieuSe_even]
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   field_simp
 

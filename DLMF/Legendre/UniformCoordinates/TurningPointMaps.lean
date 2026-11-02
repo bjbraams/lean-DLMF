@@ -78,7 +78,9 @@ def legendreOrderRho (α x : ℝ) : ℝ :=
 1)^{1/2})/(1−α²))` defining `η` in 14.15.8–14.15.9. -/
 @[dlmf 14.15.E10]
 def LegendreEtaRelation (α x η : ℝ) : Prop :=
-  α*Real.log (Real.sqrt (α^2+η^2)+α)-α*Real.log η-Real.sqrt (α^2+η^2) = Real.log (((1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1))/((x^2-1)*(1-α^2)))/2+α/2*Real.log ((α^2*(2*x^2-1)+1+2*α*x*Real.sqrt (α^2*x^2-α^2+1))/(1-α^2))
+  α*Real.log (Real.sqrt (α^2+η^2)+α)-α*Real.log η-Real.sqrt (α^2+η^2) =
+      Real.log (((1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1))/((x^2-1)*(1-α^2)))/2+α/2*Real.log
+      ((α^2*(2*x^2-1)+1+2*α*x*Real.sqrt (α^2*x^2-α^2+1))/(1-α^2))
 
 /-- DLMF 14.15.10: the variable `η`, chosen as a positive solution of `LegendreEtaRelation α x η`
 (unique for `0 ≤ α < 1`, `x > 1`; see `legendreOrderEta_spec`). -/
@@ -122,7 +124,8 @@ theorem legO_strictAntiOn {α : ℝ} (hα : 0 ≤ α) : StrictAntiOn (legO_L α)
 
 /-- `L → ∞` as `η → 0⁺` when `α > 0`. -/
 theorem legO_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (legO_L α) (𝓝[>] 0) atTop := by
-  have hg : ContinuousAt (fun η : ℝ => α*Real.log (Real.sqrt (α^2+η^2)+α) - Real.sqrt (α^2+η^2)) 0 := by
+  have hg : ContinuousAt
+      (fun η : ℝ => α*Real.log (Real.sqrt (α^2+η^2)+α) - Real.sqrt (α^2+η^2)) 0 := by
     have h : Real.sqrt (α^2+0^2)+α ≠ 0 := by positivity
     fun_prop (disch := exact h)
   have := (Real.tendsto_log_nhdsGT_zero.const_mul_atBot_of_neg (show -α < 0 by linarith)).atTop_add
@@ -152,17 +155,19 @@ theorem legO_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (legO_L α) atT
 
 /-- The right side of DLMF 14.15.10 as a function of `x`. -/
 noncomputable def legO_R (α x : ℝ) : ℝ :=
-  Real.log (((1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1))/((x^2-1)*(1-α^2)))/2+α/2*Real.log ((α^2*(2*x^2-1)+1+2*α*x*Real.sqrt (α^2*x^2-α^2+1))/(1-α^2))
+  Real.log (((1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1))/((x^2-1)*(1-α^2)))/2+α/2*Real.log
+      ((α^2*(2*x^2-1)+1+2*α*x*Real.sqrt (α^2*x^2-α^2+1))/(1-α^2))
 
 /-- DLMF 14.15.10: for `0 ≤ α < 1` and `x > 1`, `η = legendreOrderEta α x` is positive, satisfies
 `LegendreEtaRelation α x η`, and is the unique positive solution. -/
 @[dlmf 14.15.E10]
 theorem legendreOrderEta_spec {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
-    0 < legendreOrderEta α x ∧ LegendreEtaRelation α x (legendreOrderEta α x) ∧ ∀ η : ℝ, 0 < η → LegendreEtaRelation α x η → η=legendreOrderEta α x := by
+    0 < legendreOrderEta α x ∧ LegendreEtaRelation α x (legendreOrderEta α x) ∧ ∀ η : ℝ, 0 < η →
+        LegendreEtaRelation α x η → η=legendreOrderEta α x := by
   have hrel : ∀ η, LegendreEtaRelation α x η ↔ legO_L α η = legO_R α x := fun η => Iff.rfl
   have hex : ∃ η : ℝ, 0 < η ∧ LegendreEtaRelation α x η := by
     rcases hα.lt_or_eq with hα | hα
-    · obtain ⟨η, hη, h⟩ := dblZero_exists_eq_of_tendsto (f := fun η => -legO_L α η)
+    · obtain ⟨η, hη, h⟩ := DoubleZeroSqrt.exists_eq_of_tendsto (f := fun η => -legO_L α η)
         (fun η hη => (legO_hasDerivAt hα.le hη).continuousAt.neg.continuousWithinAt)
         (tendsto_neg_atTop_atBot.comp (legO_tendsto_zero hα))
         (tendsto_neg_atBot_atTop.comp (legO_tendsto_atTop hα.le)) (-legO_R α x)
@@ -300,7 +305,9 @@ theorem legO_R_tendsto_one {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
         simp only [hTdef]; nlinarith [sq_nonneg α]
       exact div_pos (by positivity) hTx
   have hl := (Real.tendsto_log_nhdsGT_zero.comp harg).atBot_div_const (show (0:ℝ) < 2 by norm_num)
-  have h2 : ContinuousAt (fun x : ℝ => α/2*Real.log ((α^2*(2*x^2-1)+1+2*α*x*Real.sqrt (α^2*x^2-α^2+1))/(1-α^2))) 1 := by
+  have h2 : ContinuousAt
+      (fun x : ℝ => α/2*Real.log
+      ((α^2*(2*x^2-1)+1+2*α*x*Real.sqrt (α^2*x^2-α^2+1))/(1-α^2))) 1 := by
     have hP : (α^2*(2*1^2-1)+1+2*α*1*Real.sqrt (α^2*1^2-α^2+1))/(1-α^2) ≠ 0 := by
       rw [show α^2*(1:ℝ)^2-α^2+1 = 1 by ring, Real.sqrt_one]
       exact div_ne_zero (by nlinarith) hB.ne'
@@ -339,7 +346,9 @@ theorem legO_R_tendsto_atTop {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
       refine Real.log_le_log (by positivity) ?_
       rw [le_div_iff₀ hB]
       have : 0 ≤ α*x*W := by positivity
-      nlinarith [mul_nonneg (sq_nonneg α) (sq_nonneg x), mul_nonneg (mul_nonneg (sq_nonneg α) (sq_nonneg x)) (sq_nonneg α), mul_nonneg (sq_nonneg α) hx2.le]
+      nlinarith [mul_nonneg (sq_nonneg α) (sq_nonneg x),
+          mul_nonneg (mul_nonneg (sq_nonneg α) (sq_nonneg x)) (sq_nonneg α),
+          mul_nonneg (sq_nonneg α) hx2.le]
     simp only [legO_R]
     rw [legO_ratio hα.le hα1 hx1, ← hWdef]
     nlinarith
@@ -380,8 +389,10 @@ theorem legO_R_eventually_gt {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) {b : �
 
 /-- One-to-one correspondence and endpoint behavior in DLMF 14.15(ii). -/
 theorem legendreOrderEta_bijective {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
-    Set.BijOn (legendreOrderEta α) (Ioi 1) (Ioi 0) ∧ StrictAntiOn (legendreOrderEta α) (Ioi 1) ∧ Tendsto (legendreOrderEta α) (𝓝[>] 1) atTop ∧ Tendsto (legendreOrderEta α) atTop (𝓝 0) := by
-  have hE : ∀ x ∈ Ioi (1:ℝ), 0 < legendreOrderEta α x ∧ legO_L α (legendreOrderEta α x) = legO_R α x :=
+    Set.BijOn (legendreOrderEta α) (Ioi 1) (Ioi 0) ∧ StrictAntiOn (legendreOrderEta α) (Ioi 1) ∧
+        Tendsto (legendreOrderEta α) (𝓝[>] 1) atTop ∧ Tendsto (legendreOrderEta α) atTop (𝓝 0) := by
+  have hE : ∀ x ∈ Ioi (1:ℝ), 0 < legendreOrderEta α x ∧
+      legO_L α (legendreOrderEta α x) = legO_R α x :=
     fun x hx => ⟨(legendreOrderEta_spec hα hα1 hx).1, (legendreOrderEta_spec hα hα1 hx).2.1⟩
   have hL := legO_strictAntiOn hα
   have hRc : ContinuousOn (legO_R α) (Ioi 1) :=
@@ -435,12 +446,18 @@ def legendreDegreeBeta (ν μ : ℝ) : ℝ :=
   Real.exp μ*((ν-μ+1/2)/(ν+μ+1/2))^(ν/2+1/4)*((ν+1/2)^2-μ^2)^(-μ/2)
 
 /-- LegendreYRelation. For `x ≥ √(1−α²)` the equation 14.15.22 has a root in `(0, α²)` and one
-in `(−∞, 0)` whenever its right side is negative; DLMF's `y` decreases through `0` at `x = 1`, so the
-sign conditions `x < 1 → 0 < y` and `1 < x → y < 0` select it (corrected 2026-10-22; at `α = 0.6`,
-`x = 0.9` both `y = 0.177237` and `y = −0.116411` solve the equation). -/
+in `(−∞, 0)` whenever its right side is negative; DLMF's `y` decreases through `0` at `x = 1`, so
+the sign conditions `x < 1 → 0 < y` and `1 < x → y < 0` select it (corrected 2026-10-22; at
+`α = 0.6`, `x = 0.9` both `y = 0.177237` and `y = −0.116411` solve the equation). -/
 @[dlmf 14.15.E21, dlmf 14.15.E22]
 def LegendreYRelation (α x y : ℝ) : Prop :=
-  if x=1 then y=0 else if x ≤ Real.sqrt (1-α^2) then α^2 ≤ y ∧ Real.sqrt (y-α^2)-α*Real.arctan (Real.sqrt (y-α^2)/α)=Real.arccos (x/Real.sqrt (1-α^2))-α/2*Real.arccos (((1+α^2)*x^2-1+α^2)/((1-α^2)*(1-x^2))) else y ≤ α^2 ∧ (x < 1 → 0 < y) ∧ (1 < x → y < 0) ∧ Real.sqrt (α^2-y)+α/2*Real.log |y|-α*Real.log (Real.sqrt (α^2-y)+α)=Real.log ((x+Real.sqrt (x^2-1+α^2))/Real.sqrt (1-α^2))+α/2*Real.log ((1-α^2)*|1-x^2|/((1+α^2)*x^2-1+α^2+2*α*x*Real.sqrt (x^2-1+α^2)))
+  if x=1 then y=0 else if x ≤ Real.sqrt (1-α^2) then α^2 ≤ y ∧
+      Real.sqrt (y-α^2)-α*Real.arctan (Real.sqrt (y-α^2)/α)=Real.arccos
+      (x/Real.sqrt (1-α^2))-α/2*Real.arccos (((1+α^2)*x^2-1+α^2)/((1-α^2)*(1-x^2))) else y ≤ α^2 ∧
+      (x < 1 → 0 < y) ∧ (1 < x → y < 0) ∧
+      Real.sqrt (α^2-y)+α/2*Real.log |y|-α*Real.log (Real.sqrt (α^2-y)+α)=Real.log
+      ((x+Real.sqrt (x^2-1+α^2))/Real.sqrt (1-α^2))+α/2*Real.log
+      ((1-α^2)*|1-x^2|/((1+α^2)*x^2-1+α^2+2*α*x*Real.sqrt (x^2-1+α^2)))
 
 /-- DLMF 14.15.21–14.15.22: the variable `y`, chosen as a solution of `LegendreYRelation α x y`
 (unique for `0 ≤ α < 1`, `x ≥ 0`; see `legendreDegreeY_spec`). -/
@@ -603,7 +620,8 @@ noncomputable def legY_R1 (a x : ℝ) : ℝ :=
 
 /-- Right side of 14.15.22. -/
 noncomputable def legY_R2 (a x : ℝ) : ℝ :=
-  Real.log ((x+Real.sqrt (x^2-1+a^2))/Real.sqrt (1-a^2))+a/2*Real.log ((1-a^2)*|1-x^2|/((1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2)))
+  Real.log ((x+Real.sqrt (x^2-1+a^2))/Real.sqrt (1-a^2))+a/2*Real.log
+      ((1-a^2)*|1-x^2|/((1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2)))
 
 /-- `√(1-α²) > 0`. -/
 theorem legY_x0_pos {a : ℝ} (ha1 : a < 1) (ha : 0 ≤ a) : 0 < Real.sqrt (1 - a^2) :=
@@ -722,7 +740,8 @@ theorem legY_R1_nonneg {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
 
 /-- The right side of 14.15.22 without the absolute value (the logarithm is even). -/
 theorem legY_R2_eq (a x : ℝ) : legY_R2 a x =
-    Real.log ((x+Real.sqrt (x^2-1+a^2))/Real.sqrt (1-a^2)) + a/2*Real.log ((1-a^2)*(1-x^2)/((1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2))) := by
+    Real.log ((x+Real.sqrt (x^2-1+a^2))/Real.sqrt (1-a^2)) +
+        a/2*Real.log ((1-a^2)*(1-x^2)/((1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2))) := by
   unfold legY_R2
   congr 2
   rcases abs_choice (1 - x^2) with h | h
@@ -999,7 +1018,8 @@ theorem legY_existsUnique {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x
       rw [Real.sqrt_lt' ha0]; linarith
     refine ⟨?_, fun y₁ y₂ h₁ h₂ => ?_⟩
     · obtain ⟨s₁, hs₁, hs₁a⟩ := (((legY_L2_tendsto_nhdsNE ha0).mono_left
-        (nhdsWithin_mono _ (show Iio a ⊆ ({a}ᶜ : Set ℝ) from fun s (hs : s < a) => ne_of_lt hs))).eventually
+        (nhdsWithin_mono _ (show Iio a ⊆ ({a}ᶜ : Set ℝ) from fun s (hs : s < a) =>
+            ne_of_lt hs))).eventually
         (eventually_lt_atBot (legY_R2 a x)) |>.and (Ioo_mem_nhdsLT ha0)).exists
       have hcont : ContinuousOn (legY_L2 a) (Icc 0 s₁) :=
         (legY_L2_continuousOn a).mono fun s hs =>
@@ -1032,7 +1052,8 @@ theorem legY_existsUnique {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x
           refine ⟨v/2, by positivity, ?_⟩
           simp only [legY_L2]; simp; linarith
         · obtain ⟨s₁, hs₁, hs₁a⟩ := (((legY_L2_tendsto_nhdsNE ha0).mono_left
-            (nhdsWithin_mono _ (show Ioi a ⊆ ({a}ᶜ : Set ℝ) from fun s (hs : a < s) => ne_of_gt hs))).eventually
+            (nhdsWithin_mono _ (show Ioi a ⊆ ({a}ᶜ : Set ℝ) from fun s (hs : a < s) =>
+                ne_of_gt hs))).eventually
             (eventually_lt_atBot v) |>.and self_mem_nhdsWithin).exists
           exact ⟨s₁, hs₁a, hs₁⟩
       obtain ⟨s₂, hs₂, hs₂a⟩ := ((legY_L2_tendsto_atTop ha).eventually (eventually_gt_atTop v)

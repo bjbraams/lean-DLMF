@@ -56,7 +56,8 @@ namespace DLMF.Combinatorics
 /-! ### Recurrence relations (§26.8(iv)) -/
 
 /-- The falling factorial evaluated (`smeval`) in a commutative ring, as `∑_k s(n,k) rᵏ`. -/
-private lemma smeval_descPochhammer_eq_sum_signedStirlingFirst {R : Type*} [CommRing R] (n : ℕ) (r : R) :
+private lemma smeval_descPochhammer_eq_sum_signedStirlingFirst {R : Type*} [CommRing R]
+    (n : ℕ) (r : R) :
     (descPochhammer ℤ n).smeval r = ∑ k ∈ range (n + 1), (signedStirlingFirst n k : R) * r ^ k := by
   rw [← aeval_eq_smeval, aeval_eq_sum_range' (n := n + 1) (by simp [descPochhammer_natDegree])]
   simp [coeff_descPochhammer, zsmul_eq_mul]
@@ -79,7 +80,8 @@ theorem choose_mul_signedStirlingFirst {n k h : ℕ} (hkn : k ≤ n) (hhk : h �
   obtain ⟨m, rfl⟩ : ∃ m, k = h + m := ⟨k - h, by omega⟩
   have hV := Ring.descPochhammer_smeval_add (R := ℤ[X][X]) (r := C X) (s := X) n (Commute.all _ _)
   have hφ := congrArg (fun p : ℤ[X][X] => (p.coeff m).coeff h) hV
-  simp only [smeval_descPochhammer_eq_sum_signedStirlingFirst, add_pow, mul_sum, sum_mul, finsetSum_coeff] at hφ
+  simp only [smeval_descPochhammer_eq_sum_signedStirlingFirst, add_pow, mul_sum, sum_mul,
+      finsetSum_coeff] at hφ
   have hL : ∀ x ∈ range (n + 1), ∑ i ∈ range (x + 1),
       (((signedStirlingFirst n x : ℤ[X][X]) *
         (C X ^ i * X ^ (x - i) * (x.choose i : ℤ[X][X]))).coeff
@@ -116,7 +118,8 @@ theorem choose_mul_signedStirlingFirst {n k h : ℕ} (hkn : k ≤ n) (hhk : h �
       rw [show (n.choose x.1 : ℤ[X][X]) * ((signedStirlingFirst x.1 i : ℤ[X][X]) * C X ^ i *
           ((signedStirlingFirst x.2 x_1 : ℤ[X][X]) * X ^ x_1)) =
           (((n.choose x.1 : ℤ) * signedStirlingFirst x.1 i * signedStirlingFirst x.2 x_1 : ℤ) :
-            ℤ[X][X]) * C X ^ i * X ^ x_1 by push_cast; ring, coeff_coeff_intCast_mul_C_X_pow_mul_X_pow]
+            ℤ[X][X]) * C X ^ i * X ^ x_1 by push_cast; ring,
+                                              coeff_coeff_intCast_mul_C_X_pow_mul_X_pow]
       rw [mem_antidiagonal] at hx
       rw [← Nat.choose_symm_of_eq_add hx.symm]
       by_cases h1 : x_1 = m <;> by_cases h2 : i = h <;> simp [h1, h2]
@@ -382,7 +385,8 @@ private lemma sum_range_succ_eq_sum_Icc_of_zero {M : Type*} [AddCommMonoid M] (n
   rfl
 
 /-- `(-1)^{n-k} = (-1)^n (-1)^k` for `k ≤ n`. -/
-private lemma neg_one_pow_sub_eq_mul {R : Type*} [Monoid R] [HasDistribNeg R] {n k : ℕ} (hk : k ≤ n) :
+private lemma neg_one_pow_sub_eq_mul {R : Type*} [Monoid R] [HasDistribNeg R]
+    {n k : ℕ} (hk : k ≤ n) :
     (-1 : R) ^ (n - k) = (-1) ^ n * (-1) ^ k := by
   have : (-1 : R) ^ n = (-1) ^ (n - k) * (-1) ^ k := by rw [← pow_add, Nat.sub_add_cancel hk]
   rw [this, mul_assoc, ← pow_add, ← two_mul, pow_mul]; simp
@@ -596,7 +600,8 @@ theorem sum_range_pow_eq_sum_stirlingSecond (n k : ℕ) :
 @[dlmf 26.8.E36]
 theorem sum_neg_one_pow_mul_factorial_mul_stirlingSecond (n : ℕ) :
     ∑ k ∈ range (n + 1), (-1) ^ (n - k) * (k.factorial : ℤ) * Nat.stirlingSecond n k = 1 := by
-  have h := congrArg (Polynomial.eval (-1 : ℤ)) (X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int n)
+  have h := congrArg (Polynomial.eval (-1 : ℤ))
+      (X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int n)
   simp only [eval_pow, eval_X, eval_finsetSum, eval_mul, eval_C,
     descPochhammer_eval_neg_one] at h
   have h2 : ∑ k ∈ range (n + 1), (-1) ^ (n - k) * (k.factorial : ℤ) * Nat.stirlingSecond n k =
@@ -642,7 +647,8 @@ theorem hasSum_stirlingSecond_iteratedDeriv {f : ℂ → ℂ} (hf : Differentiab
 @[dlmf 26.8.E39]
 theorem sum_signedStirlingFirst_mul_stirlingSecond (n k : ℕ) :
     ∑ j ∈ Icc k n, signedStirlingFirst j k * Nat.stirlingSecond n j = if n = k then 1 else 0 := by
-  have h := congrArg (fun p : ℤ[X] => p.coeff k) (X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int n)
+  have h := congrArg (fun p : ℤ[X] => p.coeff k)
+      (X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int n)
   simp only [coeff_X_pow, finsetSum_coeff, coeff_C_mul, coeff_descPochhammer] at h
   rw [show (if n = k then (1 : ℤ) else 0) = if k = n then 1 else 0 by simp [eq_comm], h]
   apply sum_subset_zero_on_sdiff
@@ -662,11 +668,14 @@ def signedStirlingFirstMatrix (n : ℕ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℤ
 def stirlingSecondMatrix (n : ℕ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℤ :=
   fun i j => Nat.stirlingSecond i j
 
-/-- Identity under the stated parameter and domain assumptions: `stirlingSecondMatrix n * signedStirlingFirstMatrix n = 1`. -/
-private lemma stirlingSecondMatrix_mul_signedStirlingFirstMatrix (n : ℕ) : stirlingSecondMatrix n * signedStirlingFirstMatrix n = 1 := by
+/-- Identity under the stated parameter and domain assumptions:
+`stirlingSecondMatrix n * signedStirlingFirstMatrix n = 1`. -/
+private lemma stirlingSecondMatrix_mul_signedStirlingFirstMatrix (n : ℕ) : stirlingSecondMatrix n *
+    signedStirlingFirstMatrix n = 1 := by
   ext a b
   have ha := a.isLt
-  simp only [Matrix.mul_apply, signedStirlingFirstMatrix, stirlingSecondMatrix, Matrix.one_apply, Fin.ext_iff]
+  simp only [Matrix.mul_apply, signedStirlingFirstMatrix, stirlingSecondMatrix,
+      Matrix.one_apply, Fin.ext_iff]
   rw [← sum_signedStirlingFirst_mul_stirlingSecond a b]
   rw [Finset.sum_fin_eq_sum_range]
   symm
@@ -685,10 +694,12 @@ theorem sum_signedStirlingFirst_mul_stirlingSecond' (n k : ℕ) :
     ∑ j ∈ Icc k n, signedStirlingFirst n j * Nat.stirlingSecond j k = if n = k then 1 else 0 := by
   rcases lt_or_ge n k with hnk | hkn
   · rw [Finset.Icc_eq_empty (by omega)]; simp [hnk.ne]
-  have hm := congrFun (congrFun ((mul_eq_one_comm (a := stirlingSecondMatrix n) (b := signedStirlingFirstMatrix n)).mp
+  have hm := congrFun (congrFun
+      ((mul_eq_one_comm (a := stirlingSecondMatrix n) (b := signedStirlingFirstMatrix n)).mp
     (stirlingSecondMatrix_mul_signedStirlingFirstMatrix n))
     ⟨n, by omega⟩) ⟨k, by omega⟩
-  simp only [Matrix.mul_apply, signedStirlingFirstMatrix, stirlingSecondMatrix, Matrix.one_apply, Fin.ext_iff] at hm
+  simp only [Matrix.mul_apply, signedStirlingFirstMatrix, stirlingSecondMatrix, Matrix.one_apply,
+      Fin.ext_iff] at hm
   rw [← hm, Finset.sum_fin_eq_sum_range]
   apply sum_subset_zero_on_sdiff
   · intro j hj; simp only [mem_Icc] at hj; simp only [mem_range]; omega

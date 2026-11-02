@@ -107,6 +107,38 @@ Mathlib and TauCeti are allowed throughout the DLMF library, including when fill
 existing admissions. Preserve complex branches, normalizations, exceptional parameters
 and the meaning of totalized series and integrals when adopting upstream statements.
 
+## Namespaces and upstream functions (adopted 2026-11-02)
+
+- Every declaration under `DLMF/` lives in `DLMF.<Area>`; real-variable forms go in the
+  `Real` sub-namespace of the area (`DLMF.Gamma.Real.digamma`, `DLMF.Confluent.Real.sinInt`).
+  The only exception is a dot-notation lemma whose namespace is fixed by the head symbol of its
+  conclusion (`DifferentiableOn.regularizedGaussHG`, `DirichletCharacter.…`). Never declare a
+  new name in a Mathlib or TauCeti namespace from `DLMF/`: a later upstream declaration of the
+  same name breaks the build.
+- `DLMFMathlib/` holds results that extend a Mathlib API and are not specific to DLMF; they use
+  the Mathlib namespace of that API and Mathlib-style names, as candidates for upstreaming.
+  Definitions there follow Mathlib's placement (root-level `eulerNumber` beside Mathlib's
+  `bernoulli`); file-local helper families go in a descriptive namespace, never behind an
+  abbreviated prefix such as `stRem_`.
+- When Mathlib or TauCeti already has a DLMF function, one of three patterns applies:
+  1. Upstream matches DLMF (same normalization, domain and branch): use it directly, define
+     nothing locally, and record each DLMF item it covers with
+     `dlmf_upstream REF decl "relation: comment"` (`DLMF/Core/Upstream.lean`; relations exact,
+     stronger, special case, different convention, partial) in the area's `MathlibCoverage`
+     file. Example: `Complex.besselJ` for 10.2.2.
+  2. Upstream differs (real only, a series instead of the continuation, another normalization
+     or totalization): define the DLMF function in `DLMF.<Area>` under the naming conventions
+     of the README, and prove a bridge theorem to the upstream function in the foundational
+     layer, named `X_ofReal`, `re_X_ofReal` or `X_eq_<upstreamName>`, with the domain as
+     hypothesis. Examples: `DLMF.Confluent.erf_ofReal` (TauCeti `Real.erf`),
+     `DLMF.Bessel.besselI_ofReal` (TauCeti `Real.besselI`).
+  3. A thin wrapper (`def X := upstream`) only when a `@[dlmf]` tag needs a home that the
+     upstream declaration cannot provide; prefer a `dlmf_upstream` pointer.
+- When upstream later adds a function the project already defines, add the bridge (pattern 2)
+  or, if the definitions agree, replace the local definition by the upstream one, keeping the
+  local name as a deprecated alias for one cleanup round. Check new Mathlib and TauCeti
+  versions for such overlaps when updating dependencies.
+
 ## DLMF statement acquisition
 
 - Cover definitions and mathematical theorems in the selected DLMF scope, including

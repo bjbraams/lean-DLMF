@@ -158,8 +158,8 @@ def genericEigenResidualThree (m q : ℂ) : ℂ :=
 def genericEigenResidualFour (m _q : ℂ) : ℂ :=
   (-1/(384*(m + 1)*(m + 2)*(m + 3)))
 
-/-- The residual quotient: row `j` of the generic recurrence applied to `genericEigenTrialVector` equals
-`q^{8-|j|} genericEigenResidual m q j` (`genericEigenTrial_row`). -/
+/-- The residual quotient: row `j` of the generic recurrence applied to `genericEigenTrialVector`
+equals `q^{8-|j|} genericEigenResidual m q j` (`genericEigenTrial_row`). -/
 def genericEigenResidual (m q : ℂ) (j : ℤ) : ℂ :=
   if j = -4 then genericEigenResidualNegFour m q
   else if j = -3 then genericEigenResidualNegThree m q
@@ -201,8 +201,10 @@ lemma IsGenericOrder.sq9 {m : ℂ} (h : IsGenericOrder m) : m ^ 2 - 9 ≠ 0 := b
 
 /-- Row `j = -4` of the generic row identity `genericEigenTrial_row`. -/
 private lemma genericEigenTrial_row_negFour {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) :
-    ((m + 2 * ((-4 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) * genericEigenTrialVector m q (-4 : ℤ) +
-      q * (genericEigenTrialVector m q ((-4 : ℤ) - 1) + genericEigenTrialVector m q ((-4 : ℤ) + 1)) =
+    ((m + 2 * ((-4 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) *
+        genericEigenTrialVector m q (-4 : ℤ) +
+      q * (genericEigenTrialVector m q ((-4 : ℤ) - 1) +
+          genericEigenTrialVector m q ((-4 : ℤ) + 1)) =
       q ^ (8 - Int.natAbs (-4 : ℤ)) * genericEigenResidual m q (-4 : ℤ) := by
   have := hm.h1; have := hm.h2; have := hm.h3; have := hm.h1'; have := hm.h2'; have := hm.h3'
   have := hm.sq1; have := hm.sq4; have := hm.sq9
@@ -212,91 +214,109 @@ private lemma genericEigenTrial_row_negFour {m : ℂ} (hm : IsGenericOrder m) (q
 
 /-- Row `j = -3` of the generic row identity `genericEigenTrial_row`. -/
 private lemma genericEigenTrial_row_negThree {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) :
-    ((m + 2 * ((-3 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) * genericEigenTrialVector m q (-3 : ℤ) +
-      q * (genericEigenTrialVector m q ((-3 : ℤ) - 1) + genericEigenTrialVector m q ((-3 : ℤ) + 1)) =
+    ((m + 2 * ((-3 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) *
+        genericEigenTrialVector m q (-3 : ℤ) +
+      q * (genericEigenTrialVector m q ((-3 : ℤ) - 1) +
+          genericEigenTrialVector m q ((-3 : ℤ) + 1)) =
       q ^ (8 - Int.natAbs (-3 : ℤ)) * genericEigenResidual m q (-3 : ℤ) := by
   have := hm.h1; have := hm.h2; have := hm.h3; have := hm.h1'; have := hm.h2'; have := hm.h3'
   have := hm.sq1; have := hm.sq4; have := hm.sq9
   norm_num [genericEigenTrialVector, genericEigenResidual]
-  simp only [genericEigenTrialNegThree, genericEigenTrialNegTwo, genericEigenResidualNegThree, genericEigenvaluePoly]
+  simp only [genericEigenTrialNegThree, genericEigenTrialNegTwo, genericEigenResidualNegThree,
+      genericEigenvaluePoly]
   field_simp
   ring
 
 /-- Row `j = -2` of the generic row identity `genericEigenTrial_row`. -/
 private lemma genericEigenTrial_row_negTwo {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) :
-    ((m + 2 * ((-2 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) * genericEigenTrialVector m q (-2 : ℤ) +
-      q * (genericEigenTrialVector m q ((-2 : ℤ) - 1) + genericEigenTrialVector m q ((-2 : ℤ) + 1)) =
+    ((m + 2 * ((-2 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) *
+        genericEigenTrialVector m q (-2 : ℤ) +
+      q * (genericEigenTrialVector m q ((-2 : ℤ) - 1) +
+          genericEigenTrialVector m q ((-2 : ℤ) + 1)) =
       q ^ (8 - Int.natAbs (-2 : ℤ)) * genericEigenResidual m q (-2 : ℤ) := by
   have := hm.h1; have := hm.h2; have := hm.h3; have := hm.h1'; have := hm.h2'; have := hm.h3'
   have := hm.sq1; have := hm.sq4; have := hm.sq9
   norm_num [genericEigenTrialVector, genericEigenResidual]
-  simp only [genericEigenTrialNegThree, genericEigenTrialNegTwo, genericEigenTrialNegOne, genericEigenResidualNegTwo, genericEigenvaluePoly]
+  simp only [genericEigenTrialNegThree, genericEigenTrialNegTwo, genericEigenTrialNegOne,
+      genericEigenResidualNegTwo, genericEigenvaluePoly]
   field_simp
   ring
 
 /-- Row `j = -1` of the generic row identity `genericEigenTrial_row`. -/
 private lemma genericEigenTrial_row_negOne {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) :
-    ((m + 2 * ((-1 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) * genericEigenTrialVector m q (-1 : ℤ) +
-      q * (genericEigenTrialVector m q ((-1 : ℤ) - 1) + genericEigenTrialVector m q ((-1 : ℤ) + 1)) =
+    ((m + 2 * ((-1 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) *
+        genericEigenTrialVector m q (-1 : ℤ) +
+      q * (genericEigenTrialVector m q ((-1 : ℤ) - 1) +
+          genericEigenTrialVector m q ((-1 : ℤ) + 1)) =
       q ^ (8 - Int.natAbs (-1 : ℤ)) * genericEigenResidual m q (-1 : ℤ) := by
   have := hm.h1; have := hm.h2; have := hm.h3; have := hm.h1'; have := hm.h2'; have := hm.h3'
   have := hm.sq1; have := hm.sq4; have := hm.sq9
   norm_num [genericEigenTrialVector, genericEigenResidual]
-  simp only [genericEigenTrialNegTwo, genericEigenTrialNegOne, genericEigenTrialZero, genericEigenResidualNegOne, genericEigenvaluePoly]
+  simp only [genericEigenTrialNegTwo, genericEigenTrialNegOne, genericEigenTrialZero,
+      genericEigenResidualNegOne, genericEigenvaluePoly]
   field_simp
   ring
 
 /-- Row `j = 0` of the generic row identity `genericEigenTrial_row`. -/
 private lemma genericEigenTrial_row_zero {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) :
-    ((m + 2 * ((0 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) * genericEigenTrialVector m q (0 : ℤ) +
+    ((m + 2 * ((0 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) *
+        genericEigenTrialVector m q (0 : ℤ) +
       q * (genericEigenTrialVector m q ((0 : ℤ) - 1) + genericEigenTrialVector m q ((0 : ℤ) + 1)) =
       q ^ (8 - Int.natAbs (0 : ℤ)) * genericEigenResidual m q (0 : ℤ) := by
   have := hm.h1; have := hm.h2; have := hm.h3; have := hm.h1'; have := hm.h2'; have := hm.h3'
   have := hm.sq1; have := hm.sq4; have := hm.sq9
   norm_num [genericEigenTrialVector, genericEigenResidual]
-  simp only [genericEigenTrialNegOne, genericEigenTrialZero, genericEigenTrialOne, genericEigenResidualZero, genericEigenvaluePoly]
+  simp only [genericEigenTrialNegOne, genericEigenTrialZero, genericEigenTrialOne,
+      genericEigenResidualZero, genericEigenvaluePoly]
   field_simp
   ring
 
 /-- Row `j = 1` of the generic row identity `genericEigenTrial_row`. -/
 private lemma genericEigenTrial_row_one {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) :
-    ((m + 2 * ((1 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) * genericEigenTrialVector m q (1 : ℤ) +
+    ((m + 2 * ((1 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) *
+        genericEigenTrialVector m q (1 : ℤ) +
       q * (genericEigenTrialVector m q ((1 : ℤ) - 1) + genericEigenTrialVector m q ((1 : ℤ) + 1)) =
       q ^ (8 - Int.natAbs (1 : ℤ)) * genericEigenResidual m q (1 : ℤ) := by
   have := hm.h1; have := hm.h2; have := hm.h3; have := hm.h1'; have := hm.h2'; have := hm.h3'
   have := hm.sq1; have := hm.sq4; have := hm.sq9
   norm_num [genericEigenTrialVector, genericEigenResidual]
-  simp only [genericEigenTrialZero, genericEigenTrialOne, genericEigenTrialTwo, genericEigenResidualOne, genericEigenvaluePoly]
+  simp only [genericEigenTrialZero, genericEigenTrialOne, genericEigenTrialTwo,
+      genericEigenResidualOne, genericEigenvaluePoly]
   field_simp
   ring
 
 /-- Row `j = 2` of the generic row identity `genericEigenTrial_row`. -/
 private lemma genericEigenTrial_row_two {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) :
-    ((m + 2 * ((2 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) * genericEigenTrialVector m q (2 : ℤ) +
+    ((m + 2 * ((2 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) *
+        genericEigenTrialVector m q (2 : ℤ) +
       q * (genericEigenTrialVector m q ((2 : ℤ) - 1) + genericEigenTrialVector m q ((2 : ℤ) + 1)) =
       q ^ (8 - Int.natAbs (2 : ℤ)) * genericEigenResidual m q (2 : ℤ) := by
   have := hm.h1; have := hm.h2; have := hm.h3; have := hm.h1'; have := hm.h2'; have := hm.h3'
   have := hm.sq1; have := hm.sq4; have := hm.sq9
   norm_num [genericEigenTrialVector, genericEigenResidual]
-  simp only [genericEigenTrialOne, genericEigenTrialTwo, genericEigenTrialThree, genericEigenResidualTwo, genericEigenvaluePoly]
+  simp only [genericEigenTrialOne, genericEigenTrialTwo, genericEigenTrialThree,
+      genericEigenResidualTwo, genericEigenvaluePoly]
   field_simp
   ring
 
 /-- Row `j = 3` of the generic row identity `genericEigenTrial_row`. -/
 private lemma genericEigenTrial_row_three {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) :
-    ((m + 2 * ((3 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) * genericEigenTrialVector m q (3 : ℤ) +
+    ((m + 2 * ((3 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) *
+        genericEigenTrialVector m q (3 : ℤ) +
       q * (genericEigenTrialVector m q ((3 : ℤ) - 1) + genericEigenTrialVector m q ((3 : ℤ) + 1)) =
       q ^ (8 - Int.natAbs (3 : ℤ)) * genericEigenResidual m q (3 : ℤ) := by
   have := hm.h1; have := hm.h2; have := hm.h3; have := hm.h1'; have := hm.h2'; have := hm.h3'
   have := hm.sq1; have := hm.sq4; have := hm.sq9
   norm_num [genericEigenTrialVector, genericEigenResidual]
-  simp only [genericEigenTrialTwo, genericEigenTrialThree, genericEigenResidualThree, genericEigenvaluePoly]
+  simp only [genericEigenTrialTwo, genericEigenTrialThree, genericEigenResidualThree,
+      genericEigenvaluePoly]
   field_simp
   ring
 
 /-- Row `j = 4` of the generic row identity `genericEigenTrial_row`. -/
 private lemma genericEigenTrial_row_four {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) :
-    ((m + 2 * ((4 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) * genericEigenTrialVector m q (4 : ℤ) +
+    ((m + 2 * ((4 : ℤ) : ℂ)) ^ 2 - genericEigenvaluePoly m q) *
+        genericEigenTrialVector m q (4 : ℤ) +
       q * (genericEigenTrialVector m q ((4 : ℤ) - 1) + genericEigenTrialVector m q ((4 : ℤ) + 1)) =
       q ^ (8 - Int.natAbs (4 : ℤ)) * genericEigenResidual m q (4 : ℤ) := by
   have := hm.h1; have := hm.h2; have := hm.h3; have := hm.h1'; have := hm.h2'; have := hm.h3'
@@ -306,12 +326,14 @@ private lemma genericEigenTrial_row_four {m : ℂ} (hm : IsGenericOrder m) (q : 
   field_simp
 
 /-- The trial vector vanishes outside its support: `T_j = 0` for `|j| ≥ 4`. -/
-private lemma genericEigenTrial_eq_zero_of_four_le_natAbs (m q : ℂ) {j : ℤ} (hj : 4 ≤ j.natAbs) : genericEigenTrialVector m q j = 0 := by
+private lemma genericEigenTrial_eq_zero_of_four_le_natAbs (m q : ℂ) {j : ℤ} (hj : 4 ≤ j.natAbs) :
+    genericEigenTrialVector m q j = 0 := by
   unfold genericEigenTrialVector
   split_ifs <;> first | rfl | (exfalso; omega)
 
 /-- The residual quotient vanishes for `|j| ≥ 5`. -/
-private lemma genericEigenResidual_eq_zero_of_five_le_natAbs (m q : ℂ) {j : ℤ} (hj : 5 ≤ j.natAbs) : genericEigenResidual m q j = 0 := by
+private lemma genericEigenResidual_eq_zero_of_five_le_natAbs (m q : ℂ) {j : ℤ} (hj : 5 ≤ j.natAbs) :
+    genericEigenResidual m q j = 0 := by
   unfold genericEigenResidual
   split_ifs <;> first | rfl | (exfalso; omega)
 
@@ -335,22 +357,30 @@ private lemma genericEigenTrial_row {m : ℂ} (hm : IsGenericOrder m) (q : ℂ) 
     · exact genericEigenTrial_row_two hm q
     · exact genericEigenTrial_row_three hm q
     · exact genericEigenTrial_row_four hm q
-  · rw [genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega), genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega),
-      genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega), genericEigenResidual_eq_zero_of_five_le_natAbs m q (by omega)]
+  · rw [genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega),
+        genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega),
+      genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega),
+          genericEigenResidual_eq_zero_of_five_le_natAbs m q (by omega)]
     ring
 
 /-- Each component `T_j(m, q)` is continuous in real `q`. -/
-private lemma continuous_genericEigenTrial (m : ℂ) (j : ℤ) : Continuous fun q : ℝ => genericEigenTrialVector m q j := by
+private lemma continuous_genericEigenTrial (m : ℂ) (j : ℤ) : Continuous fun q : ℝ =>
+    genericEigenTrialVector m q j := by
   unfold genericEigenTrialVector
   split_ifs <;>
-    (try simp only [genericEigenTrialNegThree, genericEigenTrialNegTwo, genericEigenTrialNegOne, genericEigenTrialZero, genericEigenTrialOne, genericEigenTrialTwo, genericEigenTrialThree]) <;>
+    (try simp only [genericEigenTrialNegThree, genericEigenTrialNegTwo, genericEigenTrialNegOne,
+        genericEigenTrialZero, genericEigenTrialOne, genericEigenTrialTwo,
+        genericEigenTrialThree]) <;>
     fun_prop
 
 /-- Each residual quotient `genericEigenResidual m q j` is continuous in real `q`. -/
-private lemma continuous_genericEigenResidual (m : ℂ) (j : ℤ) : Continuous fun q : ℝ => genericEigenResidual m q j := by
+private lemma continuous_genericEigenResidual (m : ℂ) (j : ℤ) : Continuous fun q : ℝ =>
+    genericEigenResidual m q j := by
   unfold genericEigenResidual
   split_ifs <;>
-    (try simp only [genericEigenResidualNegFour, genericEigenResidualNegThree, genericEigenResidualNegTwo, genericEigenResidualNegOne, genericEigenResidualZero, genericEigenResidualOne, genericEigenResidualTwo, genericEigenResidualThree,
+    (try simp only [genericEigenResidualNegFour, genericEigenResidualNegThree,
+        genericEigenResidualNegTwo, genericEigenResidualNegOne, genericEigenResidualZero,
+        genericEigenResidualOne, genericEigenResidualTwo, genericEigenResidualThree,
       genericEigenResidualFour]) <;>
     fun_prop
 
@@ -364,29 +394,37 @@ theorem isGenericOrder_natCast {k : ℕ} (hk : 4 ≤ k) : IsGenericOrder (k : �
 
 /-- The residual rows of the generic trial vector `v_i = T_{i-n}` in a recurrence whose diagonal
 agrees with `(m + 2(i - n))²` for `|i - n| ≤ 3`. -/
-private lemma genericEigenTrial_residual_isBigO {D : ℝ → ℕ → ℂ} {β : ℂ} {n : ℕ} {m : ℂ} (hm : IsGenericOrder m) (hn : 3 ≤ n)
+private lemma genericEigenTrial_residual_isBigO {D : ℝ → ℕ → ℂ} {β : ℂ} {n : ℕ} {m : ℂ}
+    (hm : IsGenericOrder m) (hn : 3 ≤ n)
     (hβ : n = 3 → β = 1)
     (hD : ∀ q i, n ≤ i + 3 → i ≤ n + 3 → D q i = (m + 2 * ((i : ℂ) - n)) ^ 2) (i : ℕ) :
-    (fun q : ℝ => recurrenceOperator (D q) β q (fun i => genericEigenTrialVector m q ((i : ℤ) - n)) i -
-      genericEigenvaluePoly m q * genericEigenTrialVector m q ((i : ℤ) - n)) =O[𝓝 0] (fun q : ℝ => q ^ (8 - Nat.dist i n)) := by
+    (fun q : ℝ => recurrenceOperator (D q) β q
+        (fun i => genericEigenTrialVector m q ((i : ℤ) - n)) i -
+      genericEigenvaluePoly m q *
+          genericEigenTrialVector m q ((i : ℤ) - n)) =O[𝓝 0]
+          (fun q : ℝ => q ^ (8 - Nat.dist i n)) := by
   have hdist : Nat.dist i n = ((i : ℤ) - n).natAbs := by
     unfold Nat.dist; omega
   refine isBigO_pow_of_eq_pow_mul (e := 8 - ((i : ℤ) - n).natAbs) (by omega)
-    (s := fun q : ℝ => genericEigenResidual m q ((i : ℤ) - n)) (fun q => ?_) (continuous_genericEigenResidual m _)
+    (s := fun q : ℝ => genericEigenResidual m q ((i : ℤ) - n)) (fun q => ?_)
+        (continuous_genericEigenResidual m _)
   rw [← genericEigenTrial_row hm]
   have hdiag : D q i * genericEigenTrialVector m q ((i : ℤ) - n) =
       (m + 2 * ((((i : ℤ) - n : ℤ)) : ℂ)) ^ 2 * genericEigenTrialVector m q ((i : ℤ) - n) := by
     by_cases h : n ≤ i + 3 ∧ i ≤ n + 3
     · rw [hD q i h.1 h.2]; push_cast; ring
     · rw [genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega)]; ring
-  have hlo : recurrenceLower β (fun i => genericEigenTrialVector m q ((i : ℤ) - n)) i = genericEigenTrialVector m q ((i : ℤ) - n - 1) := by
+  have hlo : recurrenceLower β (fun i => genericEigenTrialVector m q ((i : ℤ) - n)) i =
+      genericEigenTrialVector m q ((i : ℤ) - n - 1) := by
     match i with
-    | 0 => simp only [recurrenceLower]; rw [genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega)]
+    | 0 => simp only [recurrenceLower];
+           rw [genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega)]
     | 1 =>
       simp only [recurrenceLower]
       rcases eq_or_lt_of_le hn with h3 | h4
       · subst h3; rw [hβ rfl, one_mul]; congr 1
-      · rw [genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega), genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega), mul_zero]
+      · rw [genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega),
+            genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega), mul_zero]
     | k + 2 => simp only [recurrenceLower]; congr 1; push_cast; ring
   simp only [recurrenceOperator, hdiag, hlo]
   rw [show (((i + 1 : ℕ) : ℤ) - n) = ((i : ℤ) - n) + 1 by push_cast; ring]
@@ -398,15 +436,18 @@ private lemma genericEigenTrial_isBigO_one (m : ℂ) (n : ℕ) (i : ℕ) :
   isBigO_one_of_continuous (continuous_genericEigenTrial m _)
 
 /-- The shifted trial vector vanishes at `i = n + 4`. -/
-private lemma genericEigenTrial_shift_four (m q : ℂ) (n : ℕ) : genericEigenTrialVector m q (((n + 4 : ℕ) : ℤ) - n) = 0 :=
+private lemma genericEigenTrial_shift_four (m q : ℂ) (n : ℕ) : genericEigenTrialVector m q
+    (((n + 4 : ℕ) : ℤ) - n) = 0 :=
   genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega)
 
 /-- The shifted trial vector vanishes at `i = n + 5`. -/
-private lemma genericEigenTrial_shift_five (m q : ℂ) (n : ℕ) : genericEigenTrialVector m q (((n + 4 + 1 : ℕ) : ℤ) - n) = 0 :=
+private lemma genericEigenTrial_shift_five (m q : ℂ) (n : ℕ) : genericEigenTrialVector m q
+    (((n + 4 + 1 : ℕ) : ℤ) - n) = 0 :=
   genericEigenTrial_eq_zero_of_four_le_natAbs m q (by omega)
 
 /-- The shifted trial vector equals `1` at `i = n`. -/
-private lemma genericEigenTrial_shift_self (m q : ℂ) (n : ℕ) : genericEigenTrialVector m q ((n : ℤ) - n) = 1 := by
+private lemma genericEigenTrial_shift_self (m q : ℂ) (n : ℕ) : genericEigenTrialVector m q
+    ((n : ℤ) - n) = 1 := by
   simp [genericEigenTrialVector, genericEigenTrialZero]
 
 
@@ -414,46 +455,64 @@ private lemma genericEigenTrial_shift_self (m q : ℂ) (n : ℕ) : genericEigenT
 private lemma mathieuA_even_sub_generalPoly_isBigO (n : ℕ) (hn : 4 ≤ n) :
     (fun q : ℝ => (mathieuA (2 * n) q : ℂ) - genericEigenvaluePoly ((2 * n : ℕ) : ℂ) q) =O[𝓝 0]
       (fun q : ℝ => q ^ 8) :=
-  mathieuA_even_sub_isBigO_of_trial n (N := n + 4) (K := 8) (p := fun q => genericEigenvaluePoly ((2 * n : ℕ) : ℂ) q)
+  mathieuA_even_sub_isBigO_of_trial n (N := n + 4) (K := 8)
+      (p := fun q => genericEigenvaluePoly ((2 * n : ℕ) : ℂ) q)
     (v := fun q i => genericEigenTrialVector ((2 * n : ℕ) : ℂ) q ((i : ℤ) - n)) (by omega)
-    (fun q => genericEigenTrial_shift_four _ _ n) (fun q => genericEigenTrial_shift_five _ _ n) (fun q => genericEigenTrial_shift_self _ _ n)
+    (fun q => genericEigenTrial_shift_four _ _ n) (fun q => genericEigenTrial_shift_five _ _ n)
+        (fun q => genericEigenTrial_shift_self _ _ n)
     (fun i _ => genericEigenTrial_isBigO_one _ n i)
-    (fun i _ => genericEigenTrial_residual_isBigO (isGenericOrder_natCast (by omega)) (by omega) (fun h => absurd h (by omega))
+    (fun i _ => genericEigenTrial_residual_isBigO (isGenericOrder_natCast (by omega)) (by omega)
+        (fun h => absurd h (by omega))
       (fun q i h1 _ => by push_cast; ring) i)
 
-/-- DLMF 28.6.14 for `a_m`, `m = 2 * n + 1`, from the generic trial vector `genericEigenTrialVector`. -/
+/-- DLMF 28.6.14 for `a_m`, `m = 2 * n + 1`, from the generic trial vector
+`genericEigenTrialVector`. -/
 private lemma mathieuA_odd_sub_generalPoly_isBigO (n : ℕ) (hn : 4 ≤ n) :
-    (fun q : ℝ => (mathieuA (2 * n + 1) q : ℂ) - genericEigenvaluePoly ((2 * n + 1 : ℕ) : ℂ) q) =O[𝓝 0]
+    (fun q : ℝ => (mathieuA (2 * n + 1) q : ℂ) -
+        genericEigenvaluePoly ((2 * n + 1 : ℕ) : ℂ) q) =O[𝓝 0]
       (fun q : ℝ => q ^ 8) :=
-  mathieuA_odd_sub_isBigO_of_trial n (N := n + 4) (K := 8) (p := fun q => genericEigenvaluePoly ((2 * n + 1 : ℕ) : ℂ) q)
+  mathieuA_odd_sub_isBigO_of_trial n (N := n + 4) (K := 8)
+      (p := fun q => genericEigenvaluePoly ((2 * n + 1 : ℕ) : ℂ) q)
     (v := fun q i => genericEigenTrialVector ((2 * n + 1 : ℕ) : ℂ) q ((i : ℤ) - n)) (by omega)
-    (fun q => genericEigenTrial_shift_four _ _ n) (fun q => genericEigenTrial_shift_five _ _ n) (fun q => genericEigenTrial_shift_self _ _ n)
+    (fun q => genericEigenTrial_shift_four _ _ n) (fun q => genericEigenTrial_shift_five _ _ n)
+        (fun q => genericEigenTrial_shift_self _ _ n)
     (fun i _ => genericEigenTrial_isBigO_one _ n i)
-    (fun i _ => genericEigenTrial_residual_isBigO (isGenericOrder_natCast (by omega)) (by omega) (fun h => absurd h (by omega))
+    (fun i _ => genericEigenTrial_residual_isBigO (isGenericOrder_natCast (by omega)) (by omega)
+        (fun h => absurd h (by omega))
       (fun q i h1 _ => by
         simp only [show i ≠ 0 by omega, ↓reduceIte]; push_cast; ring) i)
 
-/-- DLMF 28.6.14 for `b_m`, `m = 2 * n + 1`, from the generic trial vector `genericEigenTrialVector`. -/
+/-- DLMF 28.6.14 for `b_m`, `m = 2 * n + 1`, from the generic trial vector
+`genericEigenTrialVector`. -/
 private lemma mathieuB_odd_sub_generalPoly_isBigO (n : ℕ) (hn : 4 ≤ n) :
-    (fun q : ℝ => (mathieuB (2 * n + 1) q : ℂ) - genericEigenvaluePoly ((2 * n + 1 : ℕ) : ℂ) q) =O[𝓝 0]
+    (fun q : ℝ => (mathieuB (2 * n + 1) q : ℂ) -
+        genericEigenvaluePoly ((2 * n + 1 : ℕ) : ℂ) q) =O[𝓝 0]
       (fun q : ℝ => q ^ 8) :=
-  mathieuB_odd_sub_isBigO_of_trial n (N := n + 4) (K := 8) (p := fun q => genericEigenvaluePoly ((2 * n + 1 : ℕ) : ℂ) q)
+  mathieuB_odd_sub_isBigO_of_trial n (N := n + 4) (K := 8)
+      (p := fun q => genericEigenvaluePoly ((2 * n + 1 : ℕ) : ℂ) q)
     (v := fun q i => genericEigenTrialVector ((2 * n + 1 : ℕ) : ℂ) q ((i : ℤ) - n)) (by omega)
-    (fun q => genericEigenTrial_shift_four _ _ n) (fun q => genericEigenTrial_shift_five _ _ n) (fun q => genericEigenTrial_shift_self _ _ n)
+    (fun q => genericEigenTrial_shift_four _ _ n) (fun q => genericEigenTrial_shift_five _ _ n)
+        (fun q => genericEigenTrial_shift_self _ _ n)
     (fun i _ => genericEigenTrial_isBigO_one _ n i)
-    (fun i _ => genericEigenTrial_residual_isBigO (isGenericOrder_natCast (by omega)) (by omega) (fun h => absurd h (by omega))
+    (fun i _ => genericEigenTrial_residual_isBigO (isGenericOrder_natCast (by omega)) (by omega)
+        (fun h => absurd h (by omega))
       (fun q i h1 _ => by
         simp only [show i ≠ 0 by omega, ↓reduceIte]; push_cast; ring) i)
 
-/-- DLMF 28.6.14 for `b_m`, `m = 2 * n + 2`, from the generic trial vector `genericEigenTrialVector`. -/
+/-- DLMF 28.6.14 for `b_m`, `m = 2 * n + 2`, from the generic trial vector
+`genericEigenTrialVector`. -/
 private lemma mathieuB_even_sub_generalPoly_isBigO (n : ℕ) (hn : 3 ≤ n) :
-    (fun q : ℝ => (mathieuB (2 * n + 2) q : ℂ) - genericEigenvaluePoly ((2 * n + 2 : ℕ) : ℂ) q) =O[𝓝 0]
+    (fun q : ℝ => (mathieuB (2 * n + 2) q : ℂ) -
+        genericEigenvaluePoly ((2 * n + 2 : ℕ) : ℂ) q) =O[𝓝 0]
       (fun q : ℝ => q ^ 8) :=
-  mathieuB_even_sub_isBigO_of_trial n (N := n + 4) (K := 8) (p := fun q => genericEigenvaluePoly ((2 * n + 2 : ℕ) : ℂ) q)
+  mathieuB_even_sub_isBigO_of_trial n (N := n + 4) (K := 8)
+      (p := fun q => genericEigenvaluePoly ((2 * n + 2 : ℕ) : ℂ) q)
     (v := fun q i => genericEigenTrialVector ((2 * n + 2 : ℕ) : ℂ) q ((i : ℤ) - n)) (by omega)
-    (fun q => genericEigenTrial_shift_four _ _ n) (fun q => genericEigenTrial_shift_five _ _ n) (fun q => genericEigenTrial_shift_self _ _ n)
+    (fun q => genericEigenTrial_shift_four _ _ n) (fun q => genericEigenTrial_shift_five _ _ n)
+        (fun q => genericEigenTrial_shift_self _ _ n)
     (fun i _ => genericEigenTrial_isBigO_one _ n i)
-    (fun i _ => genericEigenTrial_residual_isBigO (isGenericOrder_natCast (by omega)) (by omega) (fun _ => rfl)
+    (fun i _ => genericEigenTrial_residual_isBigO (isGenericOrder_natCast (by omega))
+        (by omega) (fun _ => rfl)
       (fun q i h1 _ => by push_cast; ring) i)
 
 /-- DLMF 28.6.14 for `a_m`, `m ≥ 8`, with remainder `O(q⁸)`. -/
@@ -513,54 +572,65 @@ theorem mathieuA_seven_sub_isBigO :
     · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
         (s := fun q : ℝ => ((1 : ℂ) / 46080) + ((1 : ℂ) / 1474560) * (q : ℂ)
           - ((7 : ℂ) / 203843174400) * (q : ℂ) ^ 3 - ((17 : ℂ) / 939309347635200) * (q : ℂ) ^ 5)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 6) (by decide)
         (s := fun q : ℝ => ((41 : ℂ) / 3185049600) - ((1 : ℂ) / 434865438720) * (q : ℂ) ^ 2
           - ((17 : ℂ) / 22543424343244800) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 7) (by decide)
         (s := fun q : ℝ => -((793 : ℂ) / 2446118092800)
           - ((133 : ℂ) / 2254342434324480) * (q : ℂ) ^ 2
           - ((1037 : ℂ) / 51940049686836019200) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 7) (by decide)
         (s := fun q : ℝ => 0)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 7) (by decide)
         (s := fun q : ℝ => ((397 : ℂ) / 1304596316160)
           + ((847 : ℂ) / 15028949562163200) * (q : ℂ) ^ 2
           + ((2669 : ℂ) / 138506799164896051200) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 6) (by decide)
         (s := fun q : ℝ => -((193 : ℂ) / 6794772480) - ((499 : ℂ) / 469654673817600) * (q : ℂ) ^ 2
           - ((799 : ℂ) / 2164168736951500800) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 5) (by decide)
         (s := fun q : ℝ => ((17 : ℂ) / 35389440) + ((7 : ℂ) / 1223059046400) * (q : ℂ) ^ 2
           + ((17 : ℂ) / 5635856085811200) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
         (s := fun q : ℝ => -((1 : ℂ) / 276480))
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 2) (by decide)
         (s := fun q : ℝ => 0)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 1) (by decide)
         (s := fun q : ℝ => 0)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 0) (by decide)
         (s := fun q : ℝ => 0)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
   · intro q; push_cast; ring_nf
 
@@ -593,54 +663,65 @@ theorem mathieuB_seven_sub_isBigO :
     · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
         (s := fun q : ℝ => -((1 : ℂ) / 46080) + ((1 : ℂ) / 1474560) * (q : ℂ)
           - ((7 : ℂ) / 203843174400) * (q : ℂ) ^ 3 - ((17 : ℂ) / 939309347635200) * (q : ℂ) ^ 5)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 6) (by decide)
         (s := fun q : ℝ => ((41 : ℂ) / 3185049600) - ((1 : ℂ) / 434865438720) * (q : ℂ) ^ 2
           - ((17 : ℂ) / 22543424343244800) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 7) (by decide)
         (s := fun q : ℝ => -((793 : ℂ) / 2446118092800)
           - ((133 : ℂ) / 2254342434324480) * (q : ℂ) ^ 2
           - ((1037 : ℂ) / 51940049686836019200) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 7) (by decide)
         (s := fun q : ℝ => 0)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 7) (by decide)
         (s := fun q : ℝ => ((397 : ℂ) / 1304596316160)
           + ((847 : ℂ) / 15028949562163200) * (q : ℂ) ^ 2
           + ((2669 : ℂ) / 138506799164896051200) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 6) (by decide)
         (s := fun q : ℝ => -((193 : ℂ) / 6794772480) - ((499 : ℂ) / 469654673817600) * (q : ℂ) ^ 2
           - ((799 : ℂ) / 2164168736951500800) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 5) (by decide)
         (s := fun q : ℝ => ((17 : ℂ) / 35389440) + ((7 : ℂ) / 1223059046400) * (q : ℂ) ^ 2
           + ((17 : ℂ) / 5635856085811200) * (q : ℂ) ^ 4)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
         (s := fun q : ℝ => -((1 : ℂ) / 276480))
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 2) (by decide)
         (s := fun q : ℝ => 0)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 1) (by decide)
         (s := fun q : ℝ => 0)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
     · exact isBigO_pow_of_eq_pow_mul (e := 0) (by decide)
         (s := fun q : ℝ => 0)
-        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd]; push_cast; ring)
+        (fun q => by simp only [recurrenceOperator, recurrenceLower, Nat.reduceAdd];
+                     push_cast; ring)
         (by fun_prop)
   · intro q; push_cast; ring_nf
 

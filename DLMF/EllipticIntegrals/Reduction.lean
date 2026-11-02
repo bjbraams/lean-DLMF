@@ -67,6 +67,199 @@ namespace DLMF.EllipticIntegrals
 
 /-! ### Examples (19.14.1)–(19.14.3) -/
 
+/-- `√√3 = 3^{1/4}`. -/
+private lemma sqrt_sqrt_three : √(√3) = (3 : ℝ) ^ (1 / 4 : ℝ) := by
+  rw [Real.sqrt_eq_rpow, Real.sqrt_eq_rpow, ← Real.rpow_mul (by norm_num)]; norm_num
+
+/-- `(r²)^{-1/2} = r⁻¹` for real `r > 0`. -/
+private lemma sq_rpow_neg_half {r : ℝ} (hr : 0 < r) : (r ^ 2) ^ (-(1 / 2) : ℝ) = r⁻¹ := by
+  rw [Real.rpow_neg (sq_nonneg r), ← Real.sqrt_eq_rpow, Real.sqrt_sq hr.le]
+
+/-- Real form of DLMF 19.14.1: `∫₁ˣ dt/√(t³ - 1) = 3^{-1/4} F(φ | m)`. -/
+private lemma integral_inv_sqrt_cube_sub_one_real {x : ℝ} (h1 : 1 < x) (h2 : x ≤ √3 + 1) :
+    ∫ t in (1 : ℝ)..x, (√(t ^ 3 - 1))⁻¹ =
+      (3 : ℝ) ^ (-(1 / 4) : ℝ) * DLMF.Elliptic.Real.incEllIntFm
+        (Real.arccos ((√3 + 1 - x) / (√3 - 1 + x))) ((2 - √3) / 4) := by
+  set s := √3 with hs
+  have hs2 : s ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have hs0 : 0 < s := by positivity
+  set m := (2 - s) / 4 with hm
+  set u : ℝ → ℝ := fun t => (s + 1 - t) / (s - 1 + t) with hu
+  set f : ℝ → ℝ := fun t => Real.arccos (u t) with hf
+  have hD : ∀ t, 1 ≤ t → 0 < s - 1 + t := fun t ht => by linarith
+  have hu1 : ∀ t, 1 ≤ t → t ≤ s + 1 → u t ∈ Icc (-1) 1 := fun t ht ht' => by
+    have := hD t ht
+    simp only [hu, mem_Icc]
+    constructor
+    · rw [le_div_iff₀ this]; linarith
+    · rw [div_le_iff₀ this]; linarith
+  have hanti : StrictAntiOn u (Icc 1 x) := by
+    intro a ha b hb hab
+    have := hD a ha.1; have := hD b hb.1
+    simp only [hu]
+    rw [div_lt_div_iff₀ (hD b hb.1) (hD a ha.1)]
+    nlinarith
+  have hmono : StrictMonoOn f (Icc 1 x) := by
+    intro a ha b hb hab
+    exact Real.strictAntiOn_arccos (hu1 b hb.1 (hb.2.trans h2)) (hu1 a ha.1 (ha.2.trans h2))
+      (hanti ha hb hab)
+  have hcont : ContinuousOn f (Icc 1 x) := by
+    refine Real.continuous_arccos.comp_continuousOn ?_
+    refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => (hD t ht.1).ne'
+  have hf1 : f 1 = 0 := by simp [hf, hu, div_self hs0.ne']
+  have himg : f '' Ioo 1 x = Ioo 0 (f x) := by
+    rw [hcont.image_Ioo_of_strictMonoOn h1.le hmono, hf1]
+  -- derivative
+  set f' : ℝ → ℝ := fun t => 2 * s / ((s - 1 + t) ^ 2 * √(1 - u t ^ 2)) with hf'
+  have hderiv : ∀ t ∈ Ioo 1 x, HasDerivWithinAt f (f' t) (Ioo 1 x) t := by
+    intro t ht
+    have hDt := hD t ht.1.le
+    have hut : u t ∈ Ioo (-1) 1 := by
+      simp only [hu, mem_Ioo]
+      constructor
+      · rw [lt_div_iff₀ hDt]; linarith [ht.2]
+      · rw [div_lt_iff₀ hDt]; linarith [ht.1]
+    have hdu : HasDerivAt u (-(2 * s) / (s - 1 + t) ^ 2) t := by
+      have h := ((hasDerivAt_id t).const_sub (s + 1)).div ((hasDerivAt_id t).const_add (s - 1))
+        hDt.ne'
+      exact h.congr_deriv (by simp only [id]; ring)
+    have h := (Real.hasDerivAt_arccos hut.1.ne' hut.2.ne).comp t hdu
+    refine (h.congr_deriv ?_).hasDerivWithinAt
+    simp only [hf']
+    field_simp
+  have hinj : InjOn f (Ioo 1 x) := (hmono.mono Ioo_subset_Icc_self).injOn
+  have h := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioo hderiv hinj
+    (fun φ => (1 - m * Real.sin φ ^ 2) ^ (-(1 / 2) : ℝ))
+  rw [himg] at h
+  have hfx : 0 ≤ f x := Real.arccos_nonneg _
+  rw [DLMF.Elliptic.Real.incEllIntFm, intervalIntegral.integral_of_le hfx,
+    integral_Ioc_eq_integral_Ioo, h, intervalIntegral.integral_of_le h1.le,
+    integral_Ioc_eq_integral_Ioo, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioo fun t ht => ?_
+  have ht1 : 0 < t - 1 := by linarith [ht.1]
+  have hDt := hD t ht.1.le
+  have hq : 0 < t ^ 2 + t + 1 := by nlinarith
+  have hsq : 0 < √s := Real.sqrt_pos.mpr hs0
+  have hsq2 : √s ^ 2 = s := Real.sq_sqrt hs0.le
+  have hA : 1 - u t ^ 2 = (2 * √s * √(t - 1) / (s - 1 + t)) ^ 2 := by
+    rw [show (2 * √s * √(t - 1) / (s - 1 + t)) ^ 2 = 4 * s * (t - 1) / (s - 1 + t) ^ 2 by
+      rw [div_pow, mul_pow, mul_pow, hsq2, Real.sq_sqrt ht1.le]; ring]
+    simp only [hu]
+    field_simp
+    ring
+  have hB : 1 - m * (1 - u t ^ 2) = (√(t ^ 2 + t + 1) / (s - 1 + t)) ^ 2 := by
+    rw [show (√(t ^ 2 + t + 1) / (s - 1 + t)) ^ 2 = (t ^ 2 + t + 1) / (s - 1 + t) ^ 2 by
+      rw [div_pow, Real.sq_sqrt hq.le]]
+    simp only [hu, hm]
+    field_simp
+    linear_combination 4 * t * hs2
+  have hsin : Real.sin (f t) ^ 2 = 1 - u t ^ 2 := by
+    simp only [hf]
+    rw [Real.sin_arccos, Real.sq_sqrt (by rw [hA]; positivity)]
+  have hp : 0 < 2 * √s * √(t - 1) / (s - 1 + t) := by
+    have := Real.sqrt_pos.mpr ht1; positivity
+  rw [smul_eq_mul, hsin, hB, sq_rpow_neg_half (by have := Real.sqrt_pos.mpr hq; positivity)]
+  simp only [hf']
+  rw [hA, Real.sqrt_sq hp.le, Real.rpow_neg (by norm_num), ← sqrt_sqrt_three, ← hs,
+    show t ^ 3 - 1 = (t - 1) * (t ^ 2 + t + 1) by ring, Real.sqrt_mul ht1.le]
+  have h3 : 0 < √(t - 1) := Real.sqrt_pos.mpr ht1
+  have h4 : 0 < √(t ^ 2 + t + 1) := Real.sqrt_pos.mpr hq
+  rw [abs_of_pos (by positivity)]
+  field_simp
+  rw [hsq2]
+
+/-- Real form of DLMF 19.14.2: `∫ₓ¹ dt/√(1 - t³) = 3^{-1/4} F(φ | m)`. -/
+private lemma integral_inv_sqrt_one_sub_cube_real {x : ℝ} (h1 : 1 - √3 ≤ x) (h2 : x < 1) :
+    ∫ t in x..1, (√(1 - t ^ 3))⁻¹ =
+      (3 : ℝ) ^ (-(1 / 4) : ℝ) * DLMF.Elliptic.Real.incEllIntFm
+        (Real.arccos ((√3 - 1 + x) / (√3 + 1 - x))) ((2 + √3) / 4) := by
+  set s := √3 with hs
+  have hs2 : s ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have hs0 : 0 < s := by positivity
+  set m := (2 + s) / 4 with hm
+  set u : ℝ → ℝ := fun t => (s - 1 + t) / (s + 1 - t) with hu
+  set f : ℝ → ℝ := fun t => Real.arccos (u t) with hf
+  have hD : ∀ t, t ≤ 1 → 0 < s + 1 - t := fun t ht => by linarith
+  have hu1 : ∀ t, 1 - s ≤ t → t ≤ 1 → u t ∈ Icc (-1) 1 := fun t ht ht' => by
+    have := hD t ht'
+    simp only [hu, mem_Icc]
+    constructor
+    · rw [le_div_iff₀ this]; linarith
+    · rw [div_le_iff₀ this]; linarith
+  have hmonou : StrictMonoOn u (Icc x 1) := by
+    intro a ha b hb hab
+    have := hD a ha.2; have := hD b hb.2
+    simp only [hu]
+    rw [div_lt_div_iff₀ (hD a ha.2) (hD b hb.2)]
+    nlinarith
+  have hanti : StrictAntiOn f (Icc x 1) := by
+    intro a ha b hb hab
+    exact Real.strictAntiOn_arccos (hu1 a (h1.trans ha.1) ha.2) (hu1 b (h1.trans hb.1) hb.2)
+      (hmonou ha hb hab)
+  have hcont : ContinuousOn f (Icc x 1) := by
+    refine Real.continuous_arccos.comp_continuousOn ?_
+    refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => (hD t ht.2).ne'
+  have hf1 : f 1 = 0 := by simp [hf, hu, div_self hs0.ne']
+  have himg : f '' Ioo x 1 = Ioo 0 (f x) := by
+    rw [hcont.image_Ioo_of_strictAntiOn h2.le hanti, hf1]
+  set f' : ℝ → ℝ := fun t => -(2 * s / ((s + 1 - t) ^ 2 * √(1 - u t ^ 2))) with hf'
+  have hderiv : ∀ t ∈ Ioo x 1, HasDerivWithinAt f (f' t) (Ioo x 1) t := by
+    intro t ht
+    have hDt := hD t ht.2.le
+    have hut : u t ∈ Ioo (-1) 1 := by
+      simp only [hu, mem_Ioo]
+      constructor
+      · rw [lt_div_iff₀ hDt]; linarith [ht.1]
+      · rw [div_lt_iff₀ hDt]; linarith [ht.2]
+    have hdu : HasDerivAt u (2 * s / (s + 1 - t) ^ 2) t := by
+      have h := ((hasDerivAt_id t).const_add (s - 1)).div ((hasDerivAt_id t).const_sub (s + 1))
+        hDt.ne'
+      exact h.congr_deriv (by simp only [id]; ring)
+    have h := (Real.hasDerivAt_arccos hut.1.ne' hut.2.ne).comp t hdu
+    refine (h.congr_deriv ?_).hasDerivWithinAt
+    simp only [hf']
+    field_simp
+  have hinj : InjOn f (Ioo x 1) := (hanti.mono Ioo_subset_Icc_self).injOn
+  have h := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioo hderiv hinj
+    (fun φ => (1 - m * Real.sin φ ^ 2) ^ (-(1 / 2) : ℝ))
+  rw [himg] at h
+  have hfx : 0 ≤ f x := Real.arccos_nonneg _
+  rw [DLMF.Elliptic.Real.incEllIntFm, intervalIntegral.integral_of_le hfx,
+    integral_Ioc_eq_integral_Ioo, h, intervalIntegral.integral_of_le h2.le,
+    integral_Ioc_eq_integral_Ioo, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioo fun t ht => ?_
+  have ht1 : 0 < 1 - t := by linarith [ht.2]
+  have hDt := hD t ht.2.le
+  have hq : 0 < t ^ 2 + t + 1 := by nlinarith
+  have hsq : 0 < √s := Real.sqrt_pos.mpr hs0
+  have hsq2 : √s ^ 2 = s := Real.sq_sqrt hs0.le
+  have hA : 1 - u t ^ 2 = (2 * √s * √(1 - t) / (s + 1 - t)) ^ 2 := by
+    rw [show (2 * √s * √(1 - t) / (s + 1 - t)) ^ 2 = 4 * s * (1 - t) / (s + 1 - t) ^ 2 by
+      rw [div_pow, mul_pow, mul_pow, hsq2, Real.sq_sqrt ht1.le]; ring]
+    simp only [hu]
+    field_simp
+    ring
+  have hB : 1 - m * (1 - u t ^ 2) = (√(t ^ 2 + t + 1) / (s + 1 - t)) ^ 2 := by
+    rw [show (√(t ^ 2 + t + 1) / (s + 1 - t)) ^ 2 = (t ^ 2 + t + 1) / (s + 1 - t) ^ 2 by
+      rw [div_pow, Real.sq_sqrt hq.le]]
+    simp only [hu, hm]
+    field_simp
+    linear_combination 4 * t * hs2
+  have hsin : Real.sin (f t) ^ 2 = 1 - u t ^ 2 := by
+    simp only [hf]
+    rw [Real.sin_arccos, Real.sq_sqrt (by rw [hA]; positivity)]
+  have hp : 0 < 2 * √s * √(1 - t) / (s + 1 - t) := by
+    have := Real.sqrt_pos.mpr ht1; positivity
+  rw [smul_eq_mul, hsin, hB, sq_rpow_neg_half (by have := Real.sqrt_pos.mpr hq; positivity)]
+  simp only [hf']
+  rw [hA, Real.sqrt_sq hp.le, Real.rpow_neg (by norm_num), ← sqrt_sqrt_three, ← hs,
+    show 1 - t ^ 3 = (1 - t) * (t ^ 2 + t + 1) by ring, Real.sqrt_mul ht1.le]
+  have h3 : 0 < √(1 - t) := Real.sqrt_pos.mpr ht1
+  have h4 : 0 < √(t ^ 2 + t + 1) := Real.sqrt_pos.mpr hq
+  rw [abs_neg, abs_of_pos (by positivity)]
+  field_simp
+  rw [hsq2]
+
 /-- DLMF 19.14.1: `∫₁^x dt/√(t³ - 1) = 3^{-1/4} F(φ, k)`,
 `cos φ = (√3 + 1 - x)/(√3 - 1 + x)`, `k² = (2 - √3)/4`, for `1 ≤ x ≤ √3 + 1`. -/
 @[dlmf 19.14.E1]
@@ -75,7 +268,18 @@ theorem integral_inv_sqrt_cube_sub_one {x : ℝ} (h1 : 1 ≤ x) (h2 : x ≤ Real
       ((3 : ℝ) ^ (-(1 / 4) : ℝ) : ℝ) *
         incEllIntFk (Real.arccos ((Real.sqrt 3 + 1 - x) / (Real.sqrt 3 - 1 + x)))
           (Real.sqrt ((2 - Real.sqrt 3) / 4)) := by
-  sorry
+  have hs : Real.sqrt 3 < 2 := by
+    rw [show (2 : ℝ) = √4 by rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
+    exact Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  have hm0 : 0 ≤ (2 - Real.sqrt 3) / 4 := by linarith
+  have hk : ((Real.sqrt ((2 - Real.sqrt 3) / 4) : ℝ) : ℂ) ^ 2 =
+      (((2 - Real.sqrt 3) / 4 : ℝ) : ℂ) := by
+    rw [← ofReal_pow, Real.sq_sqrt hm0]
+  rw [incEllIntFk_eq_ofReal hk (by linarith [Real.sqrt_nonneg 3]), ← ofReal_mul]
+  congr 1
+  rcases h1.lt_or_eq with h1 | rfl
+  · exact integral_inv_sqrt_cube_sub_one_real h1 h2
+  · simp [DLMF.Elliptic.Real.incEllIntFm]
 
 /-- DLMF 19.14.2: `∫ₓ¹ dt/√(1 - t³) = 3^{-1/4} F(φ, k)`,
 `cos φ = (√3 - 1 + x)/(√3 + 1 - x)`, `k² = (2 + √3)/4`, for `1 - √3 ≤ x ≤ 1`. -/
@@ -85,7 +289,18 @@ theorem integral_inv_sqrt_one_sub_cube {x : ℝ} (h1 : 1 - Real.sqrt 3 ≤ x) (h
       ((3 : ℝ) ^ (-(1 / 4) : ℝ) : ℝ) *
         incEllIntFk (Real.arccos ((Real.sqrt 3 - 1 + x) / (Real.sqrt 3 + 1 - x)))
           (Real.sqrt ((2 + Real.sqrt 3) / 4)) := by
-  sorry
+  have hs : Real.sqrt 3 < 2 := by
+    rw [show (2 : ℝ) = √4 by rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
+    exact Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  have hm0 : 0 ≤ (2 + Real.sqrt 3) / 4 := by positivity
+  have hk : ((Real.sqrt ((2 + Real.sqrt 3) / 4) : ℝ) : ℂ) ^ 2 =
+      (((2 + Real.sqrt 3) / 4 : ℝ) : ℂ) := by
+    rw [← ofReal_pow, Real.sq_sqrt hm0]
+  rw [incEllIntFk_eq_ofReal hk (by linarith), ← ofReal_mul]
+  congr 1
+  rcases h2.lt_or_eq with h2 | rfl
+  · exact integral_inv_sqrt_one_sub_cube_real h1 h2
+  · simp [DLMF.Elliptic.Real.incEllIntFm]
 
 /-- The substitution `φ = 2 arctan t` of (19.14.3):
 `(1 - ½ sin²(2 arctan t))^{-1/2} · 2/(1 + t²) = 2/√(1 + t⁴)`. -/
@@ -156,7 +371,8 @@ theorem integral_inv_sqrt_one_add_pow_four (x : ℝ) :
     push_cast
     ring
   · simp
-  · rw [integral_inv_sqrt_one_add_pow_four_eq_incEllIntFm x, harc x h.le, sign_pos h, SignType.coe_one]
+  · rw [integral_inv_sqrt_one_add_pow_four_eq_incEllIntFm x, harc x h.le, sign_pos h,
+        SignType.coe_one]
     push_cast
     ring
 
@@ -747,7 +963,8 @@ private lemma nonneg_left_of_pos_on_Ioo {f : ℝ → ℝ} (hf : Continuous f) {x
     (Filter.eventually_of_mem (Ioo_mem_nhdsGT hyx) fun t ht => (hpos t ht).le)
 
 /-- The product of the quadratics is nonnegative at both endpoints. -/
-private lemma quadratic_product_nonneg {a₁ b₁ a₂ b₂ x y α β γ : ℝ} (h : QuadraticProductReductionHyp a₁ b₁ a₂ b₂ x y α β γ) :
+private lemma quadratic_product_nonneg {a₁ b₁ a₂ b₂ x y α β γ : ℝ}
+    (h : QuadraticProductReductionHyp a₁ b₁ a₂ b₂ x y α β γ) :
     0 ≤ (a₁ + b₁ * x ^ 2) * (a₂ + b₂ * x ^ 2) ∧ 0 ≤ (a₁ + b₁ * y ^ 2) * (a₂ + b₂ * y ^ 2) := by
   have hc : Continuous fun t : ℝ => (a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2) := by fun_prop
   have hp : ∀ t ∈ Ioo y x, 0 < (a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2) := fun t ht =>

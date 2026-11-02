@@ -93,7 +93,8 @@ theorem symEllIntR_two_eq_integral_trig (a : ℂ) {b₁ b₂ : ℝ} (hb₁ : 0 <
   rw [← integral_const_mul]
   rw [intervalIntegral.integral_of_le (show (0 : ℝ) ≤ π / 2 by positivity),
     integral_Ioc_eq_integral_Ioo, ← integral_const_mul]
-  have hB := Complex.betaIntegral_eq_Gamma_mul_div (b₁ : ℂ) (b₂ : ℂ) (show 0 < (b₁ : ℂ).re by exact hb₁)
+  have hB := Complex.betaIntegral_eq_Gamma_mul_div (b₁ : ℂ) (b₂ : ℂ)
+      (show 0 < (b₁ : ℂ).re by exact hb₁)
     (show 0 < (b₂ : ℂ).re by exact hb₂)
   rw [hB]
   simp_rw [← integral_const_mul]
@@ -102,7 +103,8 @@ theorem symEllIntR_two_eq_integral_trig (a : ℂ) {b₁ b₂ : ℝ} (hb₁ : 0 <
   have hc : 0 < Real.cos θ := Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], hθ.2⟩
   have hc2 : (1 : ℂ) - (Real.cos θ ^ 2 : ℝ) = ((Real.sin θ ^ 2 : ℝ) : ℂ) := by
     push_cast
-    exact_mod_cast (show (1 : ℝ) - Real.cos θ ^ 2 = Real.sin θ ^ 2 by nlinarith [Real.sin_sq_add_cos_sq θ])
+    exact_mod_cast (show (1 : ℝ) - Real.cos θ ^ 2 =
+        Real.sin θ ^ 2 by nlinarith [Real.sin_sq_add_cos_sq θ])
   rw [hc2]
   have hbase : ((Real.cos θ ^ 2 : ℝ) : ℂ) * z₁ + ((Real.sin θ ^ 2 : ℝ) : ℂ) * z₂ =
       z₁ * (Real.cos θ : ℂ) ^ 2 + z₂ * (Real.sin θ : ℂ) ^ 2 := by push_cast; ring
@@ -122,7 +124,8 @@ theorem symEllIntR_two_eq_integral_trig (a : ℂ) {b₁ b₂ : ℝ} (hb₁ : 0 <
   have hweightC := congrArg (fun r : ℝ => (r : ℂ)) hweight
   simp only [ofReal_mul, ofReal_ofNat] at hweightC ⊢
   simp only [div_eq_mul_inv, mul_inv_rev, inv_inv]
-  linear_combination (Gamma ((b₁ : ℂ) + b₂) * (z₁ * (Real.cos θ : ℂ) ^ 2 + z₂ * (Real.sin θ : ℂ) ^ 2) ^ (-a) *
+  linear_combination (Gamma ((b₁ : ℂ) + b₂) *
+      (z₁ * (Real.cos θ : ℂ) ^ 2 + z₂ * (Real.sin θ : ℂ) ^ 2) ^ (-a) *
     (Gamma (b₁ : ℂ))⁻¹ * (Gamma (b₂ : ℂ))⁻¹) * hweightC
 
 /-! ### Complete integrals (19.23.1)–(19.23.3) -/

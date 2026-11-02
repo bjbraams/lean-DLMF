@@ -49,27 +49,30 @@ def StaircaseGood (k s : ℕ) : List ℕ → Prop
 
 /-- Identity under the stated parameter and domain assumptions: `(staircaseSub k s l).length =
 l.length`. -/
-@[simp] lemma length_staircaseSub (k s : ℕ) (l : List ℕ) : (staircaseSub k s l).length = l.length := by
+@[simp] lemma length_staircaseSub (k s : ℕ) (l : List ℕ) : (staircaseSub k s l).length
+    = l.length := by
   induction l with
   | nil => rfl
   | cons a t ih => simp [staircaseSub, ih]
 
 /-- Identity under the stated parameter and domain assumptions: `(staircaseAdd k s l).length =
 l.length`. -/
-@[simp] lemma length_staircaseAdd (k s : ℕ) (l : List ℕ) : (staircaseAdd k s l).length = l.length := by
+@[simp] lemma length_staircaseAdd (k s : ℕ) (l : List ℕ) : (staircaseAdd k s l).length
+    = l.length := by
   induction l with
   | nil => rfl
   | cons a t ih => simp [staircaseAdd, ih]
 
-/-- Identity under the stated parameter and domain assumptions: `staircaseSub k s (staircaseAdd k s l) =
-l`. -/
-private lemma staircaseSub_staircaseAdd (k s : ℕ) (l : List ℕ) : staircaseSub k s (staircaseAdd k s l) = l := by
+/-- Identity under the stated parameter and domain assumptions:
+`staircaseSub k s (staircaseAdd k s l) = l`. -/
+private lemma staircaseSub_staircaseAdd (k s : ℕ) (l : List ℕ) : staircaseSub k s
+    (staircaseAdd k s l) = l := by
   induction l with
   | nil => rfl
   | cons a t ih => simp [staircaseSub, staircaseAdd, ih]
 
-/-- Identity under the stated parameter and domain assumptions: `staircaseAdd k s (staircaseSub k s l) =
-l`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`staircaseAdd k s (staircaseSub k s l) = l`. -/
 private lemma staircaseAdd_staircaseSub (k s : ℕ) {l : List ℕ} (h : StaircaseGood k s l) :
     staircaseAdd k s (staircaseSub k s l) = l := by
   induction l with
@@ -79,7 +82,8 @@ private lemma staircaseAdd_staircaseSub (k s : ℕ) {l : List ℕ} (h : Staircas
     simp only [staircaseSub, staircaseAdd, length_staircaseSub, ih h.2, List.cons.injEq, and_true]
     omega
 
-/-- Identity under the stated parameter and domain assumptions: `(staircaseAdd k s l).sum = l.sum + (k
+/-- Identity under the stated parameter and domain assumptions:
+`(staircaseAdd k s l).sum = l.sum + (k
 * l.length.choose 2 + s * l.length)`. -/
 private lemma sum_staircaseAdd (k s : ℕ) (l : List ℕ) :
     (staircaseAdd k s l).sum = l.sum + (k * l.length.choose 2 + s * l.length) := by
@@ -98,14 +102,17 @@ private lemma sum_staircaseSub_add (k s : ℕ) {l : List ℕ} (h : StaircaseGood
   rw [staircaseAdd_staircaseSub k s h, length_staircaseSub] at this
   exact this.symm
 
-/-- The stated relation follows from the given hypotheses: `StaircaseGood k s (staircaseAdd k s l)`. -/
-private lemma staircaseGood_staircaseAdd (k s : ℕ) (l : List ℕ) : StaircaseGood k s (staircaseAdd k s l) := by
+/-- The stated relation follows from the given hypotheses: `StaircaseGood k s (staircaseAdd k s l)`.
+-/
+private lemma staircaseGood_staircaseAdd (k s : ℕ) (l : List ℕ) : StaircaseGood k s
+    (staircaseAdd k s l) := by
   induction l with
   | nil => trivial
   | cons a t ih => exact ⟨by simp, ih⟩
 
 /-- The stated relation follows from the given hypotheses: `StaircaseGood k s l`. -/
-private lemma staircaseGood_of_isChain (k s : ℕ) {l : List ℕ} (hc : l.IsChain (fun a b => b + k ≤ a))
+private lemma staircaseGood_of_isChain (k s : ℕ) {l : List ℕ}
+    (hc : l.IsChain (fun a b => b + k ≤ a))
     (hs : ∀ x ∈ l, s ≤ x) : StaircaseGood k s l := by
   induction l with
   | nil => trivial
@@ -132,8 +139,8 @@ private lemma isChain_staircaseSub (k s : ℕ) {l : List ℕ} (hc : l.IsChain (f
       have : k * (t'.length + 1) = k * t'.length + k := by ring
       omega
 
-/-- Estimate under the stated parameter and domain assumptions: `(staircaseAdd k s l).IsChain (fun a b
-=> b + k ≤ a)`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`(staircaseAdd k s l).IsChain (fun a b => b + k ≤ a)`. -/
 private lemma isChain_staircaseAdd (k s : ℕ) {l : List ℕ} (hc : l.IsChain (fun a b => b ≤ a)) :
     (staircaseAdd k s l).IsChain (fun a b => b + k ≤ a) := by
   induction l with
@@ -165,7 +172,8 @@ private lemma pairwise_add_le_of_parts_differ (k : ℕ) {l : List ℕ} (hsort : 
 
 /-- Estimate under the stated parameter and domain assumptions: `∀ a ∈ l, ∀ b ∈ l.erase a, a + k ≤
 b ∨ b + k ≤ a`. -/
-private lemma parts_differ_of_pairwise_add_le (k : ℕ) {l : List ℕ} (h : l.Pairwise (fun a b => b + k ≤ a)) :
+private lemma parts_differ_of_pairwise_add_le (k : ℕ) {l : List ℕ}
+    (h : l.Pairwise (fun a b => b + k ≤ a)) :
     ∀ a ∈ l, ∀ b ∈ l.erase a, a + k ≤ b ∨ b + k ≤ a := by
   induction l with
   | nil => simp
@@ -221,12 +229,14 @@ private lemma sum_filter_pos (L : List ℕ) : (L.filter (fun x => 0 < x)).sum = 
 def partsSortDesc {n : ℕ} (p : n.Partition) : List ℕ := p.parts.sort (· ≥ ·)
 
 /-- The stated relation follows from the given hypotheses: `(partsSortDesc p).Pairwise (· ≥ ·)`. -/
-private lemma pairwise_partsSortDesc {n : ℕ} (p : n.Partition) : (partsSortDesc p).Pairwise (· ≥ ·) :=
+private lemma pairwise_partsSortDesc {n : ℕ} (p : n.Partition) :
+    (partsSortDesc p).Pairwise (· ≥ ·) :=
   Multiset.pairwise_sort _ _
 
 /-- Identity under the stated parameter and domain assumptions: `(↑(partsSortDesc p) : Multiset ℕ)
 = p.parts`. -/
-private lemma coe_partsSortDesc {n : ℕ} (p : n.Partition) : (↑(partsSortDesc p) : Multiset ℕ) = p.parts :=
+private lemma coe_partsSortDesc {n : ℕ} (p : n.Partition) :
+    (↑(partsSortDesc p) : Multiset ℕ) = p.parts :=
   Multiset.sort_eq _ _
 
 /-- Identity under the stated parameter and domain assumptions: `(↑L : Multiset ℕ).sort (· ≥ ·) =
@@ -244,7 +254,8 @@ private lemma pairwise_add_le_of_isChain (k : ℕ) {l : List ℕ}
   exact h.pairwise
 
 /-- Estimate under the stated parameter and domain assumptions: `s ≤ x`. -/
-private lemma le_of_mem_staircaseAdd (k s : ℕ) {L : List ℕ} {x : ℕ} (hx : x ∈ staircaseAdd k s L) : s ≤ x := by
+private lemma le_of_mem_staircaseAdd (k s : ℕ) {L : List ℕ} {x : ℕ}
+    (hx : x ∈ staircaseAdd k s L) : s ≤ x := by
   induction L with
   | nil => simp [staircaseAdd] at hx
   | cons a t ih =>
@@ -330,7 +341,8 @@ private lemma card_partsDiffer_eq_card_card_parts_le (k s m : ℕ) (hs : 1 ≤ s
   · intro q hq
     simp only [mem_filter, mem_univ, true_and] at hq ⊢
     obtain ⟨hlen, -, hpw⟩ := htgt q hq
-    refine ⟨fun a ha b hb => ?_, fun i hi => le_of_mem_staircaseAdd k s (Multiset.mem_coe.mp hi), ?_⟩
+    refine ⟨fun a ha b hb => ?_, fun i hi =>
+        le_of_mem_staircaseAdd k s (Multiset.mem_coe.mp hi), ?_⟩
     · rw [Multiset.coe_erase] at hb
       exact parts_differ_of_pairwise_add_le k (hpad_add _ hpw) a (Multiset.mem_coe.mp ha) b
         (Multiset.mem_coe.mp hb)
@@ -383,7 +395,8 @@ theorem card_partsDiffer_ge_eq_sum (k s n : ℕ) (hs : 1 ≤ s) :
   rw [filter_filter]
   split_ifs with h
   · simp only [and_assoc]
-    rw [card_partsDiffer_eq_card_card_parts_le k s m hs (N := n - (k * m.choose 2 + s * m)) (by omega)]
+    rw [card_partsDiffer_eq_card_card_parts_le k s m hs
+        (N := n - (k * m.choose 2 + s * m)) (by omega)]
     rfl
   · simp only [and_assoc]
     exact card_partsDiffer_eq_zero k s m (by omega)

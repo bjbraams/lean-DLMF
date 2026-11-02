@@ -42,7 +42,8 @@ variable {K : Type*} [NormedField K] {a b : ℕ → K}
 
 /-- Under the Pringsheim condition the canonical denominators satisfy
 `|B_{m+1}| - |B_m| ≥ |a₁ ⋯ a_{m+1}|`. -/
-private lemma prod_norm_le_norm_dens_succ_sub_of_pringsheim (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n‖) (m : ℕ) :
+private lemma prod_norm_le_norm_dens_succ_sub_of_pringsheim
+    (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n‖) (m : ℕ) :
     ∏ k ∈ range (m + 1), ‖a (k + 1)‖ ≤
       ‖(contFrac a b).dens (m + 1)‖ - ‖(contFrac a b).dens m‖ := by
   induction m with
@@ -92,7 +93,8 @@ private lemma norm_convs_succ_sub_le_of_pringsheim (h : ∀ n, 1 ≤ n → ‖a 
   rw [contFrac_convs_sub a b m hne0 hne1, norm_div, norm_mul, norm_mul, norm_pow, norm_neg,
     norm_one, one_pow, one_mul, norm_prod, div_sub_div _ _ (by positivity) (by positivity),
     one_mul, mul_one]
-  exact div_le_div_of_nonneg_right (prod_norm_le_norm_dens_succ_sub_of_pringsheim h m) (by positivity)
+  exact div_le_div_of_nonneg_right (prod_norm_le_norm_dens_succ_sub_of_pringsheim h m)
+      (by positivity)
 
 /-- The partial sums of the telescoping bound. -/
 private lemma sum_inv_norm_dens_sub_eq (n : ℕ) :

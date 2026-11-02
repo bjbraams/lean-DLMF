@@ -80,7 +80,8 @@ theorem igBd_pos_of_leftProp {H H' : ℝ → ℝ} (hc : ContinuousOn H (Ici 0)) 
       exact ha.antitoneOn (mem_Ici.mpr (by linarith)) (mem_Ici.mpr (by linarith)) ht
     exact h1.trans_lt (ha (mem_Ici.mpr le_rfl) (mem_Ici.mpr (by linarith)) (by linarith))
 
-/-- If `F(0) = 0` and nonnegativity of `F'` propagates strictly to the right, so does that of `F`. -/
+/-- If `F(0) = 0` and nonnegativity of `F'` propagates strictly to the right, so does that of `F`.
+-/
 theorem igBd_rightProp {F F' : ℝ → ℝ} (hc : ContinuousOn F (Ici 0)) (h0 : F 0 = 0)
     (hd : ∀ w, 0 < w → HasDerivAt F (F' w) w)
     (hprop : ∀ v w, 0 < v → v < w → 0 ≤ F' v → 0 < F' w) :
@@ -230,9 +231,11 @@ theorem igBd_two_lower_mode_lt_Gamma {a : ℝ} (ha : 1 < a) :
   have hd : ∀ s ∈ Ioo 0 m, HasDerivAt Φ ((m+s)^(a-1)*Real.exp (-(m+s)) -
       (m-s)^(a-1)*Real.exp (-(m-s))) s := by
     intro s hs
-    have h1 := (TauCeti.hasDerivAt_lowerIncompleteGamma ha0 (show 0 < m + s by linarith [hs.1])).comp s
+    have h1 := (TauCeti.hasDerivAt_lowerIncompleteGamma ha0
+        (show 0 < m + s by linarith [hs.1])).comp s
       ((hasDerivAt_id s).const_add m)
-    have h2 := (TauCeti.hasDerivAt_lowerIncompleteGamma ha0 (show 0 < m - s by linarith [hs.2])).comp s
+    have h2 := (TauCeti.hasDerivAt_lowerIncompleteGamma ha0
+        (show 0 < m - s by linarith [hs.2])).comp s
       ((hasDerivAt_id s).const_sub m)
     convert (h1.sub_const (2 * L m)).add h2 using 1
     · rfl
@@ -332,7 +335,8 @@ theorem igBd_Q_rightProp {a l : ℝ} (ha : 0 < a) (ha1 : a < 1) (hl : a < l) :
     have := nonneg_of_mul_nonneg_right (by linarith : 0 ≤ (1-a)*(1+v)^(a-3) * ((l-2) + (l-a)*v))
       hfv
     exact mul_pos hfw (by nlinarith)
-  have hd := igBd_rightProp igBd_dQ_continuousOn igBd_dQ_zero (fun w hw => igBd_dQ_hasDerivAt hw) hdd
+  have hd := igBd_rightProp igBd_dQ_continuousOn igBd_dQ_zero
+      (fun w hw => igBd_dQ_hasDerivAt hw) hdd
   exact igBd_rightProp igBd_Q_continuousOn igBd_Q_zero (fun w hw => igBd_Q_hasDerivAt ha hw) hd
 
 /-- A function vanishing at `0` with positive derivative on `(0,∞)` is positive there. -/
@@ -440,7 +444,8 @@ theorem igBd_Gamma_one_add_le_one {a : ℝ} (ha : 0 ≤ a) (ha1 : a ≤ 1) : Rea
 `0 < a < 1`, `x > 0`, `c = Γ(1+a)^{1/(a-1)}`. -/
 theorem igBd_upper_lt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 0 < x) :
     Real.Gamma a - TauCeti.lowerIncompleteGamma a x <
-      Real.exp (-x) * (((x+Real.Gamma (1+a)^(1/(a-1)))^a - x^a)/(a*Real.Gamma (1+a)^(1/(a-1)))) := by
+      Real.exp (-x) * (((x+Real.Gamma (1+a)^(1/(a-1)))^a -
+          x^a)/(a*Real.Gamma (1+a)^(1/(a-1)))) := by
   set c := Real.Gamma (1+a)^(1/(a-1)) with hc
   have hG := Real.Gamma_pos_of_pos (show 0 < 1 + a by linarith)
   have hc1 : 1 ≤ c := Real.one_le_rpow_of_pos_of_le_one_of_nonpos hG
@@ -539,7 +544,8 @@ theorem igBd_ell_hasDerivAt {u : ℝ} (hu : 0 < u) :
     rw [igBd_ell, Real.log_div (by linarith) (ne_of_gt hv)]
   refine (h.congr_of_eventuallyEq heq.symm).congr_deriv ?_
   have h2 : Real.exp (-u) * Real.exp u = 1 := by rw [← Real.exp_add]; simp
-  have h3 : Real.exp u - 1 ≠ 0 := by have := Real.add_one_lt_exp (ne_of_gt (mem_Ioi.mp hu)); linarith
+  have h3 : Real.exp u - 1 ≠ 0 := by have :=
+                                       Real.add_one_lt_exp (ne_of_gt (mem_Ioi.mp hu)); linarith
   simp only [Function.comp_apply, mul_neg, mul_one, neg_neg]
   congr 1
   rw [Real.exp_neg]
@@ -551,13 +557,15 @@ theorem igBd_D_strictMono : StrictMonoOn (fun u : ℝ => (Real.exp u - 1)⁻¹ -
   refine strictMonoOn_of_deriv_pos (convex_Ioi 0) ?_ ?_
   · intro u hu
     replace hu : 0 < u := hu
-    have h3 : Real.exp u - 1 ≠ 0 := by have := Real.add_one_lt_exp (ne_of_gt (mem_Ioi.mp hu)); linarith
+    have h3 : Real.exp u - 1 ≠ 0 := by have :=
+                                         Real.add_one_lt_exp (ne_of_gt (mem_Ioi.mp hu)); linarith
     exact (((Real.continuous_exp.continuousAt.sub continuousAt_const).inv₀ h3).sub
       (continuousAt_id.inv₀ (ne_of_gt hu))).continuousWithinAt
   · intro u hu
     rw [interior_Ioi] at hu
     replace hu : 0 < u := hu
-    have h3 : 0 < Real.exp u - 1 := by have := Real.add_one_lt_exp (ne_of_gt (mem_Ioi.mp hu)); linarith
+    have h3 : 0 < Real.exp u - 1 := by have :=
+                                         Real.add_one_lt_exp (ne_of_gt (mem_Ioi.mp hu)); linarith
     have h := (((Real.hasDerivAt_exp u).sub_const 1).inv h3.ne').sub (hasDerivAt_inv (ne_of_gt hu))
     rw [show deriv (fun u : ℝ => (Real.exp u - 1)⁻¹ - u⁻¹) u = _ from h.deriv]
     -- u e^{u/2} < e^u - 1
@@ -658,7 +666,8 @@ theorem igBd_sign_neg_lt {B k : ℝ} (hB : 0 < B) : 0 < -(B * Real.exp k - B) �
 /-- Derivative of `(1-e^{-γx})^a - P(a,x)`. -/
 theorem igBd_H_hasDerivAt {a γ x : ℝ} (ha : 0 < a) (hγ : 0 < γ) (hx : 0 < x) :
     HasDerivAt (fun x => (1 - Real.exp (-(γ*x)))^a - TauCeti.regularizedGamma a x)
-      (γ*Real.exp (-(γ*x))*a*(1-Real.exp (-(γ*x)))^(a-1) - x^(a-1)*Real.exp (-x)/Real.Gamma a) x := by
+      (γ*Real.exp (-(γ*x))*a*(1-Real.exp (-(γ*x)))^(a-1) -
+          x^(a-1)*Real.exp (-x)/Real.Gamma a) x := by
   have hf : HasDerivAt (fun x => 1 - Real.exp (-(γ*x))) (γ*Real.exp (-(γ*x))) x := by
     have := ((Real.hasDerivAt_exp (-(γ*x))).comp x ((hasDerivAt_id x).const_mul γ).neg).const_sub 1
     convert this using 1; simp; ring
@@ -668,7 +677,8 @@ theorem igBd_H_hasDerivAt {a γ x : ℝ} (ha : 0 < a) (hγ : 0 < γ) (hx : 0 < x
 /-- Continuity of `(1-e^{-γx})^a - P(a,x)`. -/
 theorem igBd_H_continuous {a γ : ℝ} (ha : 0 < a) :
     Continuous (fun x => (1 - Real.exp (-(γ*x)))^a - TauCeti.regularizedGamma a x) :=
-  ((continuous_const.sub (Real.continuous_exp.comp (continuous_const.mul continuous_id).neg)).rpow_const
+  ((continuous_const.sub
+      (Real.continuous_exp.comp (continuous_const.mul continuous_id).neg)).rpow_const
     (fun _ => Or.inr ha.le)).sub (TauCeti.continuous_regularizedGamma a)
 
 /-- `(1-e^{-γx})^a - P(a,x)` vanishes at `x = 0`. -/
@@ -706,7 +716,8 @@ theorem igBd_pow_lt_regGamma {a γ : ℝ} (ha : 0 < a) (hγ : 0 < γ)
     div_pos (mul_pos (Real.rpow_pos_of_pos hx _) (Real.exp_pos _)) (Real.Gamma_pos_of_pos ha)
   have := igBd_pos_of_leftProp (igBd_H_continuous (γ := γ) ha).neg.continuousOn
     (by simp only [Pi.neg_apply]; rw [igBd_H_zero ha, neg_zero])
-    (by have := (igBd_H_tendsto ha hγ).neg; rw [neg_zero] at this; exact this) (fun x hx => (igBd_H_hasDerivAt ha hγ hx).neg)
+    (by have := (igBd_H_tendsto ha hγ).neg; rw [neg_zero] at this; exact this)
+        (fun x hx => (igBd_H_hasDerivAt ha hγ hx).neg)
     (fun x y hx hxy hy => by
       rw [igBd_deriv_eq ha hγ (hx.trans hxy), igBd_sign_neg_le (hB y (hx.trans hxy))] at hy
       rw [igBd_deriv_eq ha hγ hx, igBd_sign_neg_lt (hB x hx)]

@@ -104,7 +104,8 @@ private lemma sturm_comparison_false (hμ : μ₁ < μ₂) (hab : a < b) (hu : �
 /-- **Comparison in the parameter.** Let `μ₁ < μ₂`, `u'' = (Q - μ₁) u`, `v'' = (Q - μ₂) v`,
 `u ≠ 0` on `(a, b)`, and at each end either `u = 0` or `u' v - u v' = 0`. Then `v` vanishes
 somewhere in `(a, b)`. -/
-private lemma sturm_comparison_exists_zero (hμ : μ₁ < μ₂) (hab : a < b) (hu : ∀ x, HasDerivAt u (u' x) x)
+private lemma sturm_comparison_exists_zero (hμ : μ₁ < μ₂) (hab : a < b)
+    (hu : ∀ x, HasDerivAt u (u' x) x)
     (hu' : ∀ x, HasDerivAt u' ((Q x - μ₁) * u x) x) (hv : ∀ x, HasDerivAt v (v' x) x)
     (hv' : ∀ x, HasDerivAt v' ((Q x - μ₂) * v x) x) (hu0 : ∀ x ∈ Ioo a b, u x ≠ 0)
     (ha : u a = 0 ∨ u' a * v a - u a * v' a = 0)
@@ -136,7 +137,8 @@ private lemma sturm_comparison_exists_zero (hμ : μ₁ < μ₂) (hab : a < b) (
 `u' v - u v' = 0` at `0`, and `X > 0`. If `u` has finitely many zeros in `(0, X]`, then `v`
 has at least as many zeros in `(0, X)` (one in each gap between consecutive zeros of `u`,
 starting from `0`). -/
-private lemma sturm_comparison_ncard_zeros_le (hμ : μ₁ < μ₂) {X : ℝ} (hX : 0 < X) (hu : ∀ x, HasDerivAt u (u' x) x)
+private lemma sturm_comparison_ncard_zeros_le (hμ : μ₁ < μ₂) {X : ℝ} (hX : 0 < X)
+    (hu : ∀ x, HasDerivAt u (u' x) x)
     (hu' : ∀ x, HasDerivAt u' ((Q x - μ₁) * u x) x) (hv : ∀ x, HasDerivAt v (v' x) x)
     (hv' : ∀ x, HasDerivAt v' ((Q x - μ₂) * v x) x) (hW0 : u' 0 * v 0 - u 0 * v' 0 = 0)
     (hfin : {x | x ∈ Ioc 0 X ∧ u x = 0}.Finite) (hfin' : {x | x ∈ Ioo 0 X ∧ v x = 0}.Finite) :
@@ -242,38 +244,50 @@ variable {V : ℝ → ℝ} {B L : ℝ} {odd0 : Bool}
 noncomputable def basicSolutionZeroCount (V : ℝ → ℝ) (odd0 : Bool) (h X : ℝ) : ℕ :=
   {x | x ∈ Ioc 0 X ∧ basicSolution V odd0 h x = 0}.ncard
 
-/-- At `x`, the function `(basicSolution V odd0 h)` has derivative `(deriv (basicSolution V odd0 h) x)`. -/
+/-- At `x`, the function `(basicSolution V odd0 h)` has derivative
+`(deriv (basicSolution V odd0 h) x)`. -/
 private lemma hasDerivAt_basicSolution (hV : Continuous V) (h x : ℝ) :
     HasDerivAt (basicSolution V odd0 h) (deriv (basicSolution V odd0 h) x) x :=
   (basicSolution_initial_and_isSol hV odd0 h).2.2.hasDerivAt x
 
-/-- At `x`, the function `(deriv (basicSolution V odd0 h))` has derivative `((V x - h) * basicSolution V odd0 h x)`. -/
+/-- At `x`, the function `(deriv (basicSolution V odd0 h))` has derivative
+`((V x - h) * basicSolution V odd0 h x)`. -/
 private lemma hasDerivAt_deriv_basicSolution (hV : Continuous V) (h x : ℝ) :
     HasDerivAt (deriv (basicSolution V odd0 h)) ((V x - h) * basicSolution V odd0 h x) x :=
   (basicSolution_initial_and_isSol hV odd0 h).2.2.2 x
 
 /-- Nonvanishing under the stated hypotheses: `deriv (basicSolution V odd0 h) x ≠ 0`. -/
-private lemma deriv_basicSolution_ne_zero_of_basicSolution_eq_zero (hV : Continuous V) {h x : ℝ} (h0 : basicSolution V odd0 h x = 0) :
+private lemma deriv_basicSolution_ne_zero_of_basicSolution_eq_zero (hV : Continuous V) {h x : ℝ}
+    (h0 : basicSolution V odd0 h x = 0) :
     deriv (basicSolution V odd0 h) x ≠ 0 := fun h1 =>
-  basicSolution_ne_zero hV odd0 h (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV (basicSolution_initial_and_isSol hV odd0 h).2.2 h0 h1)
+  basicSolution_ne_zero hV odd0 h
+      (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV
+      (basicSolution_initial_and_isSol hV odd0 h).2.2 h0 h1)
 
-/-- Formula under the stated hypotheses: `{x | x ∈ Ioc a b ∧ basicSolution V odd0 h x = 0}.Finite`. -/
+/-- Formula under the stated hypotheses: `{x | x ∈ Ioc a b ∧ basicSolution V odd0 h x = 0}.Finite`.
+-/
 private lemma basicSolution_zeros_Ioc_finite (hV : Continuous V) (h a b : ℝ) :
     {x | x ∈ Ioc a b ∧ basicSolution V odd0 h x = 0}.Finite :=
-  (isSturmLiouvilleSolution_zeros_Icc_finite hV (basicSolution_initial_and_isSol hV odd0 h).2.2 (basicSolution_ne_zero hV odd0 h) a b).subset
+  (isSturmLiouvilleSolution_zeros_Icc_finite hV (basicSolution_initial_and_isSol hV odd0 h).2.2
+      (basicSolution_ne_zero hV odd0 h) a b).subset
     fun _ hx => ⟨Ioc_subset_Icc_self hx.1, hx.2⟩
 
-/-- Formula under the stated hypotheses: `{x | x ∈ Ioo a b ∧ basicSolution V odd0 h x = 0}.Finite`. -/
+/-- Formula under the stated hypotheses: `{x | x ∈ Ioo a b ∧ basicSolution V odd0 h x = 0}.Finite`.
+-/
 private lemma basicSolution_zeros_Ioo_finite (hV : Continuous V) (h a b : ℝ) :
     {x | x ∈ Ioo a b ∧ basicSolution V odd0 h x = 0}.Finite :=
   (basicSolution_zeros_Ioc_finite hV h a b).subset fun _ hx => ⟨Ioo_subset_Ioc_self hx.1, hx.2⟩
 
-/-- Identity under the stated parameter and domain assumptions: `deriv (basicSolution V odd0 h) 0 * basicSolution V
-odd0 h' 0 - basicSolution V odd0 h 0 * deriv (basicSolution V odd0 h') 0 = 0`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`deriv (basicSolution V odd0 h) 0 * basicSolution V odd0 h' 0 - basicSolution V odd0 h 0 * deriv
+(basicSolution V odd0 h') 0 = 0`. -/
 private lemma basicSolution_wronskian_zero_eq_zero (hV : Continuous V) (h h' : ℝ) :
-    deriv (basicSolution V odd0 h) 0 * basicSolution V odd0 h' 0 - basicSolution V odd0 h 0 * deriv (basicSolution V odd0 h') 0
+    deriv (basicSolution V odd0 h) 0 * basicSolution V odd0 h' 0 - basicSolution V odd0 h 0 *
+        deriv (basicSolution V odd0 h') 0
       = 0 := by
-  rw [(basicSolution_initial_and_isSol hV odd0 h).1, (basicSolution_initial_and_isSol hV odd0 h).2.1, (basicSolution_initial_and_isSol hV odd0 h').1,
+  rw [(basicSolution_initial_and_isSol hV odd0 h).1,
+      (basicSolution_initial_and_isSol hV odd0 h).2.1,
+      (basicSolution_initial_and_isSol hV odd0 h').1,
     (basicSolution_initial_and_isSol hV odd0 h').2.1]; ring
 
 /-- Uniformly near `h₀`, the basic solution is positive on `(0, δ]`. -/
@@ -312,12 +326,14 @@ private lemma eventually_basicSolution_pos_Ioc (hV : Continuous V) (hB : ∀ x, 
     simpa [(basicSolution_initial_and_isSol hV true h).1, basicInitValue] using this
 
 /-- Below the potential, `y y'` is positive on `(0, ∞)`. -/
-private lemma basicSolution_mul_deriv_pos_of_lt_neg (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h : ℝ} (hh : h < -B) {x : ℝ}
+private lemma basicSolution_mul_deriv_pos_of_lt_neg (hV : Continuous V) (hB : ∀ x, |V x| ≤ B)
+    {h : ℝ} (hh : h < -B) {x : ℝ}
     (hx : 0 < x) : 0 < basicSolution V odd0 h x * deriv (basicSolution V odd0 h) x := by
   set y := basicSolution V odd0 h
   have hE : ∀ t, HasDerivAt (fun t => y t * deriv y t)
       (deriv y t ^ 2 + (V t - h) * y t ^ 2) t := fun t =>
-    ((hasDerivAt_basicSolution hV h t).mul (hasDerivAt_deriv_basicSolution hV h t)).congr_deriv (by ring)
+    ((hasDerivAt_basicSolution hV h t).mul
+        (hasDerivAt_deriv_basicSolution hV h t)).congr_deriv (by ring)
   have hpos : ∀ t, 0 < deriv y t ^ 2 + (V t - h) * y t ^ 2 := fun t => by
     have hVt : 0 < V t - h := by linarith [neg_abs_le (V t), hB t]
     by_cases h0 : y t = 0
@@ -333,13 +349,16 @@ private lemma basicSolution_mul_deriv_pos_of_lt_neg (hV : Continuous V) (hB : �
     (fun t _ => hpos t)
   have := hm (left_mem_Icc.2 hx.le) (right_mem_Icc.2 hx.le) hx
   have h00 : y 0 * deriv y 0 = 0 := by
-    simp only [y]; rw [(basicSolution_initial_and_isSol hV odd0 h).1, (basicSolution_initial_and_isSol hV odd0 h).2.1]
+    simp only [y]; rw [(basicSolution_initial_and_isSol hV odd0 h).1,
+        (basicSolution_initial_and_isSol hV odd0 h).2.1]
     cases odd0 <;> simp [basicInitValue, basicInitSlope]
   linarith
 
 /-- **Local constancy of the zero count** in `(0, X]` while `X` is not a zero. -/
-private lemma eventually_basicSolutionZeroCount_eq (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h₀ X : ℝ} (hX : 0 < X)
-    (hY : basicSolution V odd0 h₀ X ≠ 0) : ∀ᶠ h in 𝓝 h₀, basicSolutionZeroCount V odd0 h X = basicSolutionZeroCount V odd0 h₀ X := by
+private lemma eventually_basicSolutionZeroCount_eq (hV : Continuous V) (hB : ∀ x, |V x| ≤ B)
+    {h₀ X : ℝ} (hX : 0 < X)
+    (hY : basicSolution V odd0 h₀ X ≠ 0) : ∀ᶠ h in 𝓝 h₀, basicSolutionZeroCount V odd0 h X =
+        basicSolutionZeroCount V odd0 h₀ X := by
   obtain ⟨δ, hδ, hev⟩ := eventually_basicSolution_pos_Ioc (odd0 := odd0) hV hB h₀
   set δ' := min δ (X / 2)
   have hδ' : 0 < δ' := by positivity
@@ -347,7 +366,8 @@ private lemma eventually_basicSolutionZeroCount_eq (hV : Continuous V) (hB : ∀
   have hev' : ∀ᶠ h in 𝓝 h₀, ∀ x ∈ Ioc 0 δ', 0 < basicSolution V odd0 h x :=
     hev.mono fun h hh x hx => hh x ⟨hx.1, hx.2.trans (min_le_left _ _)⟩
   have key : ∀ h, (∀ x ∈ Ioc 0 δ', 0 < basicSolution V odd0 h x) →
-      {x | x ∈ Ioc 0 X ∧ basicSolution V odd0 h x = 0} = {x | x ∈ Icc δ' X ∧ basicSolution V odd0 h x = 0} := by
+      {x | x ∈ Ioc 0 X ∧ basicSolution V odd0 h x = 0} =
+          {x | x ∈ Icc δ' X ∧ basicSolution V odd0 h x = 0} := by
     intro h hh
     ext x
     simp only [mem_ofPred_eq, mem_Ioc, mem_Icc]
@@ -361,16 +381,19 @@ private lemma eventually_basicSolutionZeroCount_eq (hV : Continuous V) (hB : ∀
       exact ⟨⟨hδ'.trans_le h1, h2⟩, h3⟩
   obtain ⟨c1, c2⟩ := continuous_uncurry_basicSolution hV hB odd0
   have hst := sturmDef_eventually_ncard_eq (T := ℝ) (Y := basicSolution V odd0)
-    (Y' := fun h x => deriv (basicSolution V odd0 h) x) (Λ := univ) (U := univ) isOpen_univ isOpen_univ
+    (Y' := fun h x => deriv (basicSolution V odd0 h) x) (Λ := univ) (U := univ)
+        isOpen_univ isOpen_univ
     (a := δ') (b := X) (subset_univ _) c1.continuousOn c2.continuousOn
-    (fun t _ x _ => hasDerivAt_basicSolution hV t x) (fun t _ x _ h0 => deriv_basicSolution_ne_zero_of_basicSolution_eq_zero hV h0)
+    (fun t _ x _ => hasDerivAt_basicSolution hV t x)
+        (fun t _ x _ h0 => deriv_basicSolution_ne_zero_of_basicSolution_eq_zero hV h0)
     (mem_univ h₀) (hev'.self_of_nhds δ' ⟨hδ', le_rfl⟩).ne' hY
   filter_upwards [hev', hst] with h hh hs
   simp only [basicSolutionZeroCount]
   rw [key h hh, key h₀ hev'.self_of_nhds, hs]
 
 /-- A set meeting every `(-∞, c)` in a finite set is discrete. -/
-private lemma exists_isolated_of_inter_Iio_finite {S : Set ℝ} (hfin : ∀ c, (S ∩ Iio c).Finite) (h₀ : ℝ) :
+private lemma exists_isolated_of_inter_Iio_finite {S : Set ℝ}
+    (hfin : ∀ c, (S ∩ Iio c).Finite) (h₀ : ℝ) :
     ∃ ε > 0, ∀ h ∈ S, |h - h₀| < ε → h = h₀ := by
   set T : Set ℝ := (S ∩ Iio (h₀ + 1)) \ {h₀}
   have hT : IsOpen Tᶜ := ((hfin _).sdiff).isClosed.isOpen_compl
@@ -383,7 +406,8 @@ private lemma exists_isolated_of_inter_Iio_finite {S : Set ℝ} (hfin : ∀ c, (
     rw [Real.dist_eq]; exact hh.trans_le (min_le_left _ _)) ⟨⟨hS, hlt⟩, hne⟩
 
 /-- Identity under the stated parameter and domain assumptions: `S ∩ Iic h = S ∩ Iio h₀`. -/
-private lemma inter_Iic_eq_inter_Iio_of_isolated_left {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
+private lemma inter_Iic_eq_inter_Iio_of_isolated_left {S : Set ℝ} {ε h₀ h : ℝ}
+    (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
     (hh : h ∈ Ioo (h₀ - ε) h₀) : S ∩ Iic h = S ∩ Iio h₀ := by
   ext t
   simp only [mem_inter_iff, mem_Iic, mem_Iio]
@@ -396,7 +420,8 @@ private lemma inter_Iic_eq_inter_Iio_of_isolated_left {S : Set ℝ} {ε h₀ h :
     linarith
 
 /-- Identity under the stated parameter and domain assumptions: `S ∩ Iic h = S ∩ Iic h₀`. -/
-private lemma inter_Iic_eq_inter_Iic_of_isolated_right {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
+private lemma inter_Iic_eq_inter_Iic_of_isolated_right {S : Set ℝ} {ε h₀ h : ℝ}
+    (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
     (hh : h ∈ Ico h₀ (h₀ + ε)) : S ∩ Iic h = S ∩ Iic h₀ := by
   ext t
   simp only [mem_inter_iff, mem_Iic]
@@ -425,14 +450,16 @@ private lemma inter_Iic_eq_insert_inter_Iio {S : Set ℝ} {h₀ : ℝ} (hS : h�
 
 /-- Identity under the stated parameter and domain assumptions: `(S ∩ Iic h₀).ncard = (S ∩ Iio
 h₀).ncard + 1`. -/
-private lemma ncard_inter_Iic_eq_ncard_inter_Iio_add_one {S : Set ℝ} (hfin : ∀ c, (S ∩ Iio c).Finite) {h₀ : ℝ} (hS : h₀ ∈ S) :
+private lemma ncard_inter_Iic_eq_ncard_inter_Iio_add_one {S : Set ℝ}
+    (hfin : ∀ c, (S ∩ Iio c).Finite) {h₀ : ℝ} (hS : h₀ ∈ S) :
     (S ∩ Iic h₀).ncard = (S ∩ Iio h₀).ncard + 1 := by
   rw [inter_Iic_eq_insert_inter_Iio hS, Set.ncard_insert_of_notMem (by simp) (hfin _)]
 
 /-- **The zero count near a zero at the end.** If `y(e, X) = 0`, then for some small `δ` and all
 `h` near `e`, the zeros in `(0, X]` are those in `(0, X - δ]` plus exactly one more when
 `y'(e, X) y(h, X) ≥ 0`, and no more when `y'(e, X) y(h, X) < 0`. -/
-private lemma eventually_basicSolutionZeroCount_eq_near_zero_endpoint (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {e X : ℝ} (hX : 0 < X)
+private lemma eventually_basicSolutionZeroCount_eq_near_zero_endpoint (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) {e X : ℝ} (hX : 0 < X)
     (he : basicSolution V odd0 e X = 0) :
     ∃ δ, 0 < δ ∧ δ < X ∧ basicSolution V odd0 e (X - δ) ≠ 0 ∧ ∀ᶠ h in 𝓝 e,
       (0 ≤ deriv (basicSolution V odd0 e) X * basicSolution V odd0 h X →
@@ -453,7 +480,8 @@ private lemma eventually_basicSolutionZeroCount_eq_near_zero_endpoint (hV : Cont
   have hδX : δ < X := (min_le_right _ _).trans_lt (by linarith)
   have hδε : δ < ε := (min_le_left _ _).trans_lt (by linarith)
   -- strict monotonicity of `s y(h, ·)` on `[X - δ, X]`
-  have hmono : ∀ h, dist h e < ε → StrictMonoOn (fun x => s * basicSolution V odd0 h x) (Icc (X - δ) X) :=
+  have hmono : ∀ h, dist h e < ε →
+      StrictMonoOn (fun x => s * basicSolution V odd0 h x) (Icc (X - δ) X) :=
     fun h hh => strictMonoOn_of_hasDerivWithinAt_pos (convex_Icc _ _)
       (fun t _ => ((hasDerivAt_basicSolution hV h t).const_mul s).continuousAt.continuousWithinAt)
       (fun t _ => ((hasDerivAt_basicSolution hV h t).const_mul s).hasDerivWithinAt) fun t ht => by
@@ -523,16 +551,18 @@ private lemma eventually_basicSolutionZeroCount_eq_near_zero_endpoint (hV : Cont
     simp only [basicSolutionZeroCount]
     rw [heq]
 
-/-- Estimate under the stated parameter and domain assumptions: `basicSolutionZeroCount V odd0 h X ≤ basicSolutionZeroCount V odd0 h
-X'`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`basicSolutionZeroCount V odd0 h X ≤ basicSolutionZeroCount V odd0 h X'`. -/
 private lemma basicSolutionZeroCount_mono (hV : Continuous V) (h : ℝ) {X X' : ℝ} (hXX : X ≤ X') :
     basicSolutionZeroCount V odd0 h X ≤ basicSolutionZeroCount V odd0 h X' :=
-  Set.ncard_le_ncard (fun _ hx => ⟨⟨hx.1.1, hx.1.2.trans hXX⟩, hx.2⟩) (basicSolution_zeros_Ioc_finite hV h 0 X')
+  Set.ncard_le_ncard (fun _ hx => ⟨⟨hx.1.1, hx.1.2.trans hXX⟩, hx.2⟩)
+      (basicSolution_zeros_Ioc_finite hV h 0 X')
 
 /-- The zeros in `(0, X]` versus `(0, X)` when `X` is a zero. -/
 private lemma basicSolutionZeroCount_eq_ncard_Ioo_add_one (hV : Continuous V) {h X : ℝ} (hX : 0 < X)
     (he : basicSolution V odd0 h X = 0) :
-    basicSolutionZeroCount V odd0 h X = {x | x ∈ Ioo 0 X ∧ basicSolution V odd0 h x = 0}.ncard + 1 := by
+    basicSolutionZeroCount V odd0 h X =
+        {x | x ∈ Ioo 0 X ∧ basicSolution V odd0 h x = 0}.ncard + 1 := by
   have heq : {x | x ∈ Ioc 0 X ∧ basicSolution V odd0 h x = 0} =
       insert X {x | x ∈ Ioo 0 X ∧ basicSolution V odd0 h x = 0} := by
     ext x
@@ -548,8 +578,8 @@ private lemma basicSolutionZeroCount_eq_ncard_Ioo_add_one (hV : Continuous V) {h
   simp only [basicSolutionZeroCount]
   rw [heq, Set.ncard_insert_of_notMem (by simp) (basicSolution_zeros_Ioo_finite hV h 0 X)]
 
-/-- Formula under the stated hypotheses: `basicSolutionZeroCount V odd0 h X = {x | x ∈ Ioo 0 X ∧ basicSolution V odd0 h x =
-0}.ncard`. -/
+/-- Formula under the stated hypotheses:
+`basicSolutionZeroCount V odd0 h X = {x | x ∈ Ioo 0 X ∧ basicSolution V odd0 h x = 0}.ncard`. -/
 private lemma basicSolutionZeroCount_eq_ncard_Ioo {h X : ℝ} (he : basicSolution V odd0 h X ≠ 0) :
     basicSolutionZeroCount V odd0 h X = {x | x ∈ Ioo 0 X ∧ basicSolution V odd0 h x = 0}.ncard := by
   simp only [basicSolutionZeroCount]
@@ -563,17 +593,22 @@ private lemma basicSolutionZeroCount_eq_ncard_Ioo {h X : ℝ} (he : basicSolutio
     exact ⟨⟨h1, h2.le⟩, h3⟩
 
 /-- Monotonicity of the zero count in the parameter (Sturm comparison). -/
-private lemma basicSolutionZeroCount_add_le_ncard_Ioo_of_lt (hV : Continuous V) {h₁ h₂ X : ℝ} (hh : h₁ < h₂) (hX : 0 < X) :
-    basicSolutionZeroCount V odd0 h₁ X + (if deriv (basicSolution V odd0 h₁) X = 0 ∧ deriv (basicSolution V odd0 h₂) X = 0 ∧
+private lemma basicSolutionZeroCount_add_le_ncard_Ioo_of_lt (hV : Continuous V) {h₁ h₂ X : ℝ}
+    (hh : h₁ < h₂) (hX : 0 < X) :
+    basicSolutionZeroCount V odd0 h₁ X +
+        (if deriv (basicSolution V odd0 h₁) X = 0 ∧ deriv (basicSolution V odd0 h₂) X = 0 ∧
         basicSolution V odd0 h₁ X ≠ 0 then 1 else 0) ≤
       {x | x ∈ Ioo 0 X ∧ basicSolution V odd0 h₂ x = 0}.ncard :=
-  sturm_comparison_ncard_zeros_le hh hX (hasDerivAt_basicSolution hV h₁) (hasDerivAt_deriv_basicSolution hV h₁) (hasDerivAt_basicSolution hV h₂)
-    (hasDerivAt_deriv_basicSolution hV h₂) (basicSolution_wronskian_zero_eq_zero hV h₁ h₂) (basicSolution_zeros_Ioc_finite hV h₁ 0 X)
+  sturm_comparison_ncard_zeros_le hh hX (hasDerivAt_basicSolution hV h₁)
+      (hasDerivAt_deriv_basicSolution hV h₁) (hasDerivAt_basicSolution hV h₂)
+    (hasDerivAt_deriv_basicSolution hV h₂) (basicSolution_wronskian_zero_eq_zero hV h₁ h₂)
+        (basicSolution_zeros_Ioc_finite hV h₁ 0 X)
     (basicSolution_zeros_Ioo_finite hV h₂ 0 X)
 
 /-- **Sturm oscillation, Dirichlet condition at `L`.** The number of zeros of `y(h, ·)` in
 `(0, L]` equals the number of Dirichlet eigenvalues `≤ h`. -/
-theorem basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+theorem basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (hfin : ∀ c, ({e | basicSolution V odd0 e L = 0} ∩ Iio c).Finite) (h : ℝ) :
     basicSolutionZeroCount V odd0 h L = ({e | basicSolution V odd0 e L = 0} ∩ Iic h).ncard := by
   set D := {e | basicSolution V odd0 e L = 0}
@@ -583,9 +618,12 @@ theorem basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le (hV : Continuou
     intro h₀
     obtain ⟨ε, hε, hiso⟩ := exists_isolated_of_inter_Iio_finite hfin h₀
     by_cases hD : h₀ ∈ D
-    · obtain ⟨δ, hδ, hδL, hYδ, hev⟩ := eventually_basicSolutionZeroCount_eq_near_zero_endpoint (odd0 := odd0) hV hB hL hD
-      have hF := eventually_basicSolutionZeroCount_eq (odd0 := odd0) hV hB (by linarith : 0 < L - δ) hYδ
-      have he0 := (hev.self_of_nhds).1 (by rw [show basicSolution V odd0 h₀ L = 0 from hD, mul_zero])
+    · obtain ⟨δ, hδ, hδL, hYδ, hev⟩ :=
+          eventually_basicSolutionZeroCount_eq_near_zero_endpoint (odd0 := odd0) hV hB hL hD
+      have hF := eventually_basicSolutionZeroCount_eq (odd0 := odd0) hV hB
+          (by linarith : 0 < L - δ) hYδ
+      have he0 := (hev.self_of_nhds).1
+          (by rw [show basicSolution V odd0 h₀ L = 0 from hD, mul_zero])
       have hcD := ncard_inter_Iic_eq_ncard_inter_Iio_add_one hfin hD
       filter_upwards [hev, hF, Metric.ball_mem_nhds h₀ hε] with h hh hF' hball
       rw [Metric.mem_ball, Real.dist_eq] at hball
@@ -594,26 +632,32 @@ theorem basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le (hV : Continuou
           have := basicSolutionZeroCount_add_le_ncard_Ioo_of_lt (odd0 := odd0) hV hlt hL
           have := basicSolutionZeroCount_eq_ncard_Ioo_add_one hV hL hD
           omega
-        have h2 : basicSolutionZeroCount V odd0 h (L - δ) ≤ basicSolutionZeroCount V odd0 h L := basicSolutionZeroCount_mono hV h (by linarith)
-        have hDl := inter_Iic_eq_inter_Iio_of_isolated_left hiso (h := h) ⟨by linarith [(abs_lt.1 hball).1], hlt⟩
+        have h2 : basicSolutionZeroCount V odd0 h (L - δ) ≤ basicSolutionZeroCount V odd0 h L :=
+            basicSolutionZeroCount_mono hV h (by linarith)
+        have hDl := inter_Iic_eq_inter_Iio_of_isolated_left hiso (h := h)
+            ⟨by linarith [(abs_lt.1 hball).1], hlt⟩
         simp only [g]
         rw [hDl]
         omega
       · rfl
       · have h1 : basicSolutionZeroCount V odd0 h₀ L ≤ basicSolutionZeroCount V odd0 h L := by
           have := basicSolutionZeroCount_add_le_ncard_Ioo_of_lt (odd0 := odd0) hV hgt hL
-          have := basicSolutionZeroCount_eq_ncard_Ioo (V := V) (odd0 := odd0) (h := h) (X := L) (fun h0 => by
+          have := basicSolutionZeroCount_eq_ncard_Ioo (V := V) (odd0 := odd0) (h := h)
+              (X := L) (fun h0 => by
             have := hiso h h0 hball; linarith)
           omega
-        have h2 : basicSolutionZeroCount V odd0 h L ≤ basicSolutionZeroCount V odd0 h (L - δ) + 1 := by
+        have h2 : basicSolutionZeroCount V odd0 h L ≤
+            basicSolutionZeroCount V odd0 h (L - δ) + 1 := by
           by_cases hs : 0 ≤ deriv (basicSolution V odd0 h₀) L * basicSolution V odd0 h L
           · exact (hh.1 hs).le
           · exact (hh.2 (not_le.1 hs)).le.trans (Nat.le_succ _)
-        have hDr := inter_Iic_eq_inter_Iic_of_isolated_right hiso (h := h) ⟨hgt.le, by linarith [(abs_lt.1 hball).2]⟩
+        have hDr := inter_Iic_eq_inter_Iic_of_isolated_right hiso (h := h)
+            ⟨hgt.le, by linarith [(abs_lt.1 hball).2]⟩
         simp only [g]
         rw [hDr]
         omega
-    · filter_upwards [eventually_basicSolutionZeroCount_eq (odd0 := odd0) hV hB hL hD, Metric.ball_mem_nhds h₀ hε]
+    · filter_upwards [eventually_basicSolutionZeroCount_eq (odd0 := odd0) hV hB hL hD,
+          Metric.ball_mem_nhds h₀ hε]
         with h hF hball
       rw [Metric.mem_ball, Real.dist_eq] at hball
       have hDc : D ∩ Iic h = D ∩ Iic h₀ := by
@@ -623,7 +667,8 @@ theorem basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le (hV : Continuou
           simp only [mem_inter_iff, mem_Iio, mem_Iic]
           exact ⟨fun ⟨h1, h2⟩ => ⟨h1, h2.le⟩, fun ⟨h1, h2⟩ =>
             ⟨h1, lt_of_le_of_ne h2 fun h' => hD (h' ▸ h1)⟩⟩
-        · exact inter_Iic_eq_inter_Iic_of_isolated_right hiso ⟨hge, by linarith [(abs_lt.1 hball).2]⟩
+        · exact inter_Iic_eq_inter_Iic_of_isolated_right hiso
+              ⟨hge, by linarith [(abs_lt.1 hball).2]⟩
       simp only [g]
       rw [hF, hDc]
   have hlow : g (-B - 1) = 0 := by
@@ -633,7 +678,8 @@ theorem basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le (hV : Continuou
       ext x
       simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false, not_and]
       intro hx h0
-      have := basicSolution_mul_deriv_pos_of_lt_neg (odd0 := odd0) hV hB (by linarith : -B - 1 < -B) hx.1
+      have := basicSolution_mul_deriv_pos_of_lt_neg (odd0 := odd0) hV hB
+          (by linarith : -B - 1 < -B) hx.1
       rw [h0, zero_mul] at this
       exact lt_irrefl _ this
     have h2 : D ∩ Iic (-B - 1) = ∅ := by
@@ -650,12 +696,15 @@ theorem basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le (hV : Continuou
   omega
 
 /-- Nonvanishing under the stated hypotheses: `basicSolution V odd0 h X ≠ 0`. -/
-theorem basicSolution_ne_zero_of_deriv_eq_zero (hV : Continuous V) {h X : ℝ} (h1 : deriv (basicSolution V odd0 h) X = 0) :
-    basicSolution V odd0 h X ≠ 0 := fun h0 => deriv_basicSolution_ne_zero_of_basicSolution_eq_zero hV h0 h1
+theorem basicSolution_ne_zero_of_deriv_eq_zero (hV : Continuous V) {h X : ℝ}
+    (h1 : deriv (basicSolution V odd0 h) X = 0) :
+    basicSolution V odd0 h X ≠ 0 := fun h0 =>
+        deriv_basicSolution_ne_zero_of_basicSolution_eq_zero hV h0 h1
 
 /-- **A Neumann eigenvalue in each Dirichlet gap.** Below each Dirichlet eigenvalue `d` and
 above all smaller ones there is an `h` with `y'(h, L) = 0`. -/
-private lemma exists_neumann_eigenvalue_in_dirichlet_gap (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+private lemma exists_neumann_eigenvalue_in_dirichlet_gap (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (hfin : ∀ c, ({e | basicSolution V odd0 e L = 0} ∩ Iio c).Finite) {d : ℝ}
     (hd : basicSolution V odd0 d L = 0) :
     ∃ e, deriv (basicSolution V odd0 e) L = 0 ∧ e < d ∧
@@ -664,18 +713,23 @@ private lemma exists_neumann_eigenvalue_in_dirichlet_gap (hV : Continuous V) (hB
   set φ : ℝ → ℝ := fun h => basicSolution V odd0 h L * deriv (basicSolution V odd0 h) L
   have hφc : Continuous φ :=
     (continuous_basicSolution_param hV odd0 L).1.mul (continuous_basicSolution_param hV odd0 L).2
-  have hdc := fun h => basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le (odd0 := odd0) hV hB hL hfin h
+  have hdc := fun h =>
+      basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le (odd0 := odd0) hV hB hL hfin h
   -- sign of the derivative near an eigenvalue
   have hder : ∀ m, m ∈ D → ∀ᶠ h in 𝓝 m,
       0 < deriv (basicSolution V odd0 m) L * deriv (basicSolution V odd0 h) L := fun m hm => by
-    have hc : Continuous fun h => deriv (basicSolution V odd0 m) L * deriv (basicSolution V odd0 h) L :=
+    have hc : Continuous fun h => deriv (basicSolution V odd0 m) L *
+        deriv (basicSolution V odd0 h) L :=
       continuous_const.mul (continuous_basicSolution_param hV odd0 L).2
-    exact hc.continuousAt.eventually (lt_mem_nhds (mul_self_pos.2 (deriv_basicSolution_ne_zero_of_basicSolution_eq_zero hV hm)))
+    exact hc.continuousAt.eventually
+        (lt_mem_nhds (mul_self_pos.2 (deriv_basicSolution_ne_zero_of_basicSolution_eq_zero hV hm)))
   -- Step A: just below `d`
   obtain ⟨h2, h2d, h2c, h2φ⟩ : ∃ h2, h2 < d ∧ (∀ d' ∈ D, d' < d → d' < h2) ∧ φ h2 < 0 := by
     obtain ⟨ε, hε, hiso⟩ := exists_isolated_of_inter_Iio_finite hfin d
-    obtain ⟨δ, hδ, hδL, hYδ, hev⟩ := eventually_basicSolutionZeroCount_eq_near_zero_endpoint (odd0 := odd0) hV hB hL hd
-    have hF := eventually_basicSolutionZeroCount_eq (odd0 := odd0) hV hB (by linarith : 0 < L - δ) hYδ
+    obtain ⟨δ, hδ, hδL, hYδ, hev⟩ :=
+        eventually_basicSolutionZeroCount_eq_near_zero_endpoint (odd0 := odd0) hV hB hL hd
+    have hF := eventually_basicSolutionZeroCount_eq (odd0 := odd0) hV hB
+        (by linarith : 0 < L - δ) hYδ
     have he0 := (hev.self_of_nhds).1 (by rw [hd, mul_zero])
     have hall := ((hev.and (hF.and (hder d hd))).filter_mono nhdsWithin_le_nhds).and
       (Ioo_mem_nhdsLT (show d - ε < d by linarith))
@@ -705,9 +759,12 @@ private lemma exists_neumann_eigenvalue_in_dirichlet_gap (hV : Continuous V) (hB
     · obtain ⟨m, ⟨hmD, hmd⟩, hmax⟩ := Set.exists_max_image (D ∩ Iio d) id (hfin d) hne
       have hm2 : m < h2 := h2c m hmD hmd
       obtain ⟨ε, hε, hiso⟩ := exists_isolated_of_inter_Iio_finite hfin m
-      obtain ⟨δ, hδ, hδL, hYδ, hev⟩ := eventually_basicSolutionZeroCount_eq_near_zero_endpoint (odd0 := odd0) hV hB hL hmD
-      have hF := eventually_basicSolutionZeroCount_eq (odd0 := odd0) hV hB (by linarith : 0 < L - δ) hYδ
-      have he0 := (hev.self_of_nhds).1 (by rw [show basicSolution V odd0 m L = 0 from hmD, mul_zero])
+      obtain ⟨δ, hδ, hδL, hYδ, hev⟩ :=
+          eventually_basicSolutionZeroCount_eq_near_zero_endpoint (odd0 := odd0) hV hB hL hmD
+      have hF := eventually_basicSolutionZeroCount_eq (odd0 := odd0) hV hB
+          (by linarith : 0 < L - δ) hYδ
+      have he0 := (hev.self_of_nhds).1
+          (by rw [show basicSolution V odd0 m L = 0 from hmD, mul_zero])
       have hall := ((hev.and (hF.and (hder m hmD))).filter_mono nhdsWithin_le_nhds).and
         (Ioo_mem_nhdsGT (show m < min (m + ε) h2 from lt_min (by linarith) hm2))
       obtain ⟨h, ⟨hb, hF', hs⟩, hh⟩ := hall.exists
@@ -718,11 +775,14 @@ private lemma exists_neumann_eigenvalue_in_dirichlet_gap (hV : Continuous V) (hB
         linarith [hh.1]
       refine ⟨h, hh2, fun d' hd' hlt => (hmax d' ⟨hd', hlt⟩).trans_lt hh.1, ?_⟩
       have hc1 := hdc h
-      rw [inter_Iic_eq_inter_Iic_of_isolated_right hiso ⟨hh.1.le, hh.2.trans_le (min_le_left _ _)⟩, ← hdc m] at hc1
+      rw [inter_Iic_eq_inter_Iic_of_isolated_right hiso ⟨hh.1.le, hh.2.trans_le (min_le_left _ _)⟩,
+          ← hdc m] at hc1
       have hpos : 0 < deriv (basicSolution V odd0 m) L * basicSolution V odd0 h L := by
-        rcases lt_trichotomy 0 (deriv (basicSolution V odd0 m) L * basicSolution V odd0 h L) with h' | h' | h'
+        rcases lt_trichotomy 0 (deriv (basicSolution V odd0 m) L * basicSolution V odd0 h L)
+            with h' | h' | h'
         · exact h'
-        · exact absurd (mul_eq_zero.1 h'.symm) (not_or.2 ⟨deriv_basicSolution_ne_zero_of_basicSolution_eq_zero hV hmD, hnD⟩)
+        · exact absurd (mul_eq_zero.1 h'.symm)
+              (not_or.2 ⟨deriv_basicSolution_ne_zero_of_basicSolution_eq_zero hV hmD, hnD⟩)
         · have := hb.2 h'
           omega
       simp only [φ]
@@ -737,7 +797,8 @@ private lemma exists_neumann_eigenvalue_in_dirichlet_gap (hV : Continuous V) (hB
       linarith
     · refine ⟨min (-B - 1) (h2 - 1), (min_le_right _ _).trans_lt (by linarith),
         fun d' hd' hlt => absurd ⟨d', hd', hlt⟩ hne, ?_⟩
-      exact basicSolution_mul_deriv_pos_of_lt_neg hV hB ((min_le_left _ _).trans_lt (by linarith)) hL
+      exact basicSolution_mul_deriv_pos_of_lt_neg hV hB
+          ((min_le_left _ _).trans_lt (by linarith)) hL
   -- Step C: intermediate values
   obtain ⟨c, hc, hc0⟩ := intermediate_value_Icc' h12.le hφc.continuousOn
     (show (0 : ℝ) ∈ Icc (φ h2) (φ h1) from ⟨h2φ.le, h1φ.le⟩)
@@ -748,24 +809,29 @@ private lemma exists_neumann_eigenvalue_in_dirichlet_gap (hV : Continuous V) (hB
 
 /-- **Sturm oscillation, Neumann condition at `L`.** At a Neumann eigenvalue `e`, the number
 of zeros of `y(e, ·)` in `(0, L]` equals the number of Neumann eigenvalues `< e`. -/
-theorem basicSolutionZeroCount_eq_ncard_neumann_eigenvalues (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+theorem basicSolutionZeroCount_eq_ncard_neumann_eigenvalues (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (hfin : ∀ c, ({e | basicSolution V odd0 e L = 0} ∩ Iio c).Finite)
     (hfinN : ∀ c, ({e | deriv (basicSolution V odd0 e) L = 0} ∩ Iio c).Finite) {e : ℝ}
     (he : deriv (basicSolution V odd0 e) L = 0) :
-    basicSolutionZeroCount V odd0 e L = ({e | deriv (basicSolution V odd0 e) L = 0} ∩ Iio e).ncard := by
+    basicSolutionZeroCount V odd0 e L =
+        ({e | deriv (basicSolution V odd0 e) L = 0} ∩ Iio e).ncard := by
   set D := {e | basicSolution V odd0 e L = 0}
   set Nn := {e | deriv (basicSolution V odd0 e) L = 0}
   have hstrict : ∀ e₁ e₂, e₁ ∈ Nn → e₂ ∈ Nn → e₁ < e₂ →
-      basicSolutionZeroCount V odd0 e₁ L < basicSolutionZeroCount V odd0 e₂ L := fun e₁ e₂ h₁ h₂ hlt => by
+      basicSolutionZeroCount V odd0 e₁ L < basicSolutionZeroCount V odd0 e₂ L :=
+          fun e₁ e₂ h₁ h₂ hlt => by
     have := basicSolutionZeroCount_add_le_ncard_Ioo_of_lt (odd0 := odd0) hV hlt hL
     have hc : deriv (basicSolution V odd0 e₁) L = 0 ∧ deriv (basicSolution V odd0 e₂) L = 0 ∧
         basicSolution V odd0 e₁ L ≠ 0 := ⟨h₁, h₂, basicSolution_ne_zero_of_deriv_eq_zero hV h₁⟩
     simp only [hc, ne_eq, not_false_eq_true, and_self, ↓reduceIte] at this
-    rw [← basicSolutionZeroCount_eq_ncard_Ioo (basicSolution_ne_zero_of_deriv_eq_zero hV h₂)] at this
+    rw [← basicSolutionZeroCount_eq_ncard_Ioo
+        (basicSolution_ne_zero_of_deriv_eq_zero hV h₂)] at this
     omega
   apply le_antisymm
   · rw [basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le hV hB hL hfin e]
-    choose! f hf using fun d (hd : d ∈ D) => exists_neumann_eigenvalue_in_dirichlet_gap (odd0 := odd0) hV hB hL hfin hd
+    choose! f hf using fun d (hd : d ∈ D) =>
+        exists_neumann_eigenvalue_in_dirichlet_gap (odd0 := odd0) hV hB hL hfin hd
     refine Set.ncard_le_ncard_of_injOn f (fun d hd => ⟨(hf d hd.1).1, ?_⟩) ?_ (hfinN e)
     · exact (hf d hd.1).2.1.trans_le hd.2
     · intro d₁ hd₁ d₂ hd₂ heq
@@ -778,7 +844,8 @@ theorem basicSolutionZeroCount_eq_ncard_neumann_eigenvalues (hV : Continuous V) 
         have h2 := (hf d₂ hd₂.1).2.1
         rw [← heq] at h2; linarith
   · have := Set.ncard_le_ncard_of_injOn (s := Nn ∩ Iio e)
-      (t := ((Finset.range (basicSolutionZeroCount V odd0 e L) : Finset ℕ) : Set ℕ)) (fun e' => basicSolutionZeroCount V odd0 e' L)
+      (t := ((Finset.range (basicSolutionZeroCount V odd0 e L) : Finset ℕ) : Set ℕ))
+          (fun e' => basicSolutionZeroCount V odd0 e' L)
       (fun e' he' => by
         simp only [Finset.coe_range, mem_Iio]
         exact hstrict e' e he'.1 he he'.2)
@@ -790,14 +857,14 @@ theorem basicSolutionZeroCount_eq_ncard_neumann_eigenvalues (hV : Continuous V) 
       (Finset.finite_toSet _)
     rwa [Set.ncard_coe_finset, Finset.card_range] at this
 
-/-- Identity under the stated parameter and domain assumptions: `separatedSpectrum V L odd0 true = {e | basicSolution
-V odd0 e L = 0}`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`separatedSpectrum V L odd0 true = {e | basicSolution V odd0 e L = 0}`. -/
 theorem separatedSpectrum_true_eq (hV : Continuous V) (odd0 : Bool) :
     separatedSpectrum V L odd0 true = {e | basicSolution V odd0 e L = 0} := by
   ext e; rw [mem_separatedSpectrum_iff hV]; simp [sturmCharacteristic]
 
-/-- Identity under the stated parameter and domain assumptions: `separatedSpectrum V L odd0 false = {e |
-deriv (basicSolution V odd0 e) L = 0}`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`separatedSpectrum V L odd0 false = {e | deriv (basicSolution V odd0 e) L = 0}`. -/
 theorem separatedSpectrum_false_eq (hV : Continuous V) (odd0 : Bool) :
     separatedSpectrum V L odd0 false = {e | deriv (basicSolution V odd0 e) L = 0} := by
   ext e; rw [mem_separatedSpectrum_iff hV]; simp [sturmCharacteristic]
@@ -806,24 +873,30 @@ theorem separatedSpectrum_false_eq (hV : Continuous V) (odd0 : Bool) :
 (`V` continuous and bounded, any of the four combinations of Dirichlet/Neumann conditions at
 `0` and `L`): at an eigenvalue `h` with exactly `k` smaller eigenvalues, the eigenfunction
 `basicSolution V odd0 h` has exactly `k` zeros in `(0, L)`. -/
-lemma ncard_basicSolution_zeros_eq_ncard_separatedSpectrum_inter_Iio (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+lemma ncard_basicSolution_zeros_eq_ncard_separatedSpectrum_inter_Iio (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (odd0 oddK : Bool) {h : ℝ} (hh : h ∈ separatedSpectrum V L odd0 oddK) :
-    {x | x ∈ Ioo 0 L ∧ basicSolution V odd0 h x = 0}.ncard = (separatedSpectrum V L odd0 oddK ∩ Iio h).ncard := by
+    {x | x ∈ Ioo 0 L ∧ basicSolution V odd0 h x = 0}.ncard =
+        (separatedSpectrum V L odd0 oddK ∩ Iio h).ncard := by
   have hfin := separatedSpectrum_inter_Iio_finite hV hB hL odd0 oddK
   have hfinD := separatedSpectrum_inter_Iio_finite hV hB hL odd0 true
   rw [separatedSpectrum_true_eq hV] at hfinD
   cases oddK
   · rw [separatedSpectrum_false_eq hV] at hh hfin ⊢
-    rw [← basicSolutionZeroCount_eq_ncard_neumann_eigenvalues hV hB hL hfinD hfin hh, basicSolutionZeroCount_eq_ncard_Ioo (basicSolution_ne_zero_of_deriv_eq_zero hV hh)]
+    rw [← basicSolutionZeroCount_eq_ncard_neumann_eigenvalues hV hB hL hfinD hfin hh,
+        basicSolutionZeroCount_eq_ncard_Ioo (basicSolution_ne_zero_of_deriv_eq_zero hV hh)]
   · rw [separatedSpectrum_true_eq hV] at hh ⊢
     have h1 := basicSolutionZeroCount_eq_ncard_dirichlet_eigenvalues_le hV hB hL hfinD h
-    rw [ncard_inter_Iic_eq_ncard_inter_Iio_add_one hfinD hh, basicSolutionZeroCount_eq_ncard_Ioo_add_one hV hL hh] at h1
+    rw [ncard_inter_Iic_eq_ncard_inter_Iio_add_one hfinD hh,
+        basicSolutionZeroCount_eq_ncard_Ioo_add_one hV hL hh] at h1
     omega
 
 /-- `encard` form of `ODE.ncard_basicSolution_zeros_eq_ncard_separatedSpectrum_inter_Iio`. -/
-theorem encard_basicSolution_zeros_eq_encard_separatedSpectrum_inter_Iio (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+theorem encard_basicSolution_zeros_eq_encard_separatedSpectrum_inter_Iio (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (odd0 oddK : Bool) {h : ℝ} (hh : h ∈ separatedSpectrum V L odd0 oddK) :
-    {x | x ∈ Ioo 0 L ∧ basicSolution V odd0 h x = 0}.encard = (separatedSpectrum V L odd0 oddK ∩ Iio h).encard := by
+    {x | x ∈ Ioo 0 L ∧ basicSolution V odd0 h x = 0}.encard =
+        (separatedSpectrum V L odd0 oddK ∩ Iio h).encard := by
   rw [← (basicSolution_zeros_Ioo_finite hV h 0 L).cast_ncard_eq,
     ← (separatedSpectrum_inter_Iio_finite hV hB hL odd0 oddK h).cast_ncard_eq,
     ncard_basicSolution_zeros_eq_ncard_separatedSpectrum_inter_Iio hV hB hL odd0 oddK hh]
@@ -831,8 +904,10 @@ theorem encard_basicSolution_zeros_eq_encard_separatedSpectrum_inter_Iio (hV : C
 /-- **Sturm's oscillation theorem for an arbitrary eigenfunction**: a nonzero solution `w` of
 `w'' = (V - h) w` satisfying the separated boundary conditions has as many zeros in `(0, L)`
 as there are eigenvalues below `h`. -/
-theorem encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
-    (odd0 oddK : Bool) {h : ℝ} {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w) (hbc : SatisfiesSeparatedBC L odd0 oddK w)
+theorem encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSolution
+    (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+    (odd0 oddK : Bool) {h : ℝ} {w : ℝ → ℝ} (hw : IsSturmLiouvilleSolution V h w)
+        (hbc : SatisfiesSeparatedBC L odd0 oddK w)
     (hne : w ≠ 0) :
     {x | x ∈ Ioo 0 L ∧ w x = 0}.encard = (separatedSpectrum V L odd0 oddK ∩ Iio h).encard := by
   have hh : h ∈ separatedSpectrum V L odd0 oddK := ⟨w, hw, hbc, hne⟩
@@ -847,8 +922,10 @@ theorem encard_zeros_eq_encard_separatedSpectrum_inter_Iio_of_isSturmLiouvilleSo
   simp [hc]
 
 /-- Around a simple zero `z`, `y'(z) y` is negative to the left and positive to the right. -/
-private lemma exists_sign_deriv_mul_basicSolution_around_zero (hV : Continuous V) {h z : ℝ} (hz : basicSolution V odd0 h z = 0) :
-    ∃ η > 0, (∀ x ∈ Ico (z - η) z, deriv (basicSolution V odd0 h) z * basicSolution V odd0 h x < 0) ∧
+private lemma exists_sign_deriv_mul_basicSolution_around_zero (hV : Continuous V) {h z : ℝ}
+    (hz : basicSolution V odd0 h z = 0) :
+    ∃ η > 0, (∀ x ∈ Ico (z - η) z, deriv (basicSolution V odd0 h) z *
+        basicSolution V odd0 h x < 0) ∧
       ∀ x ∈ Ioc z (z + η), 0 < deriv (basicSolution V odd0 h) z * basicSolution V odd0 h x := by
   set s := deriv (basicSolution V odd0 h) z
   have hs : s ≠ 0 := deriv_basicSolution_ne_zero_of_basicSolution_eq_zero hV hz
@@ -872,10 +949,12 @@ private lemma exists_sign_deriv_mul_basicSolution_around_zero (hV : Continuous V
 
 /-- **The sign of the basic solution** at `X > 0` is `(-1)^N`, where `N` is the number of zeros
 in `(0, X]`. -/
-private lemma neg_one_pow_basicSolutionZeroCount_mul_basicSolution_pos (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (h : ℝ) :
+private lemma neg_one_pow_basicSolutionZeroCount_mul_basicSolution_pos (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) (h : ℝ) :
     ∀ k : ℕ, ∀ X, 0 < X → basicSolutionZeroCount V odd0 h X = k → basicSolution V odd0 h X ≠ 0 →
       0 < (-1) ^ k * basicSolution V odd0 h X := by
-  have hcY : Continuous (basicSolution V odd0 h) := (basicSolution_initial_and_isSol hV odd0 h).2.2.continuous
+  have hcY : Continuous (basicSolution V odd0 h) :=
+      (basicSolution_initial_and_isSol hV odd0 h).2.2.continuous
   intro k
   induction k with
   | zero =>
@@ -886,7 +965,8 @@ private lemma neg_one_pow_basicSolutionZeroCount_mul_basicSolution_pos (hV : Con
     rw [pow_zero, one_mul]
     by_contra hneg
     obtain ⟨w, hw, hw0⟩ := intermediate_value_Icc' (min_le_right δ X) hcY.continuousOn
-      (show (0 : ℝ) ∈ Icc (basicSolution V odd0 h X) (basicSolution V odd0 h t) from ⟨not_lt.1 hneg, ht.le⟩)
+      (show (0 : ℝ) ∈ Icc (basicSolution V odd0 h X) (basicSolution V odd0 h t)
+          from ⟨not_lt.1 hneg, ht.le⟩)
     have hmem : w ∈ {x | x ∈ Ioc 0 X ∧ basicSolution V odd0 h x = 0} :=
       ⟨⟨(show 0 < t by positivity).trans_le hw.1, hw.2⟩, hw0⟩
     have := Set.ncard_pos (basicSolution_zeros_Ioc_finite hV h 0 X) |>.2 ⟨w, hmem⟩
@@ -900,8 +980,10 @@ private lemma neg_one_pow_basicSolutionZeroCount_mul_basicSolution_pos (hV : Con
     have hZne : Z.Nonempty := Set.nonempty_of_ncard_ne_zero (by omega)
     obtain ⟨z, hzZ, hzmax⟩ := Set.exists_max_image Z id hZf hZne
     have hzX : z < X := lt_of_le_of_ne hzZ.1.2 fun h' => hY (h' ▸ hzZ.2)
-    obtain ⟨ε, hε, hiso⟩ := exists_isolated_of_inter_Iio_finite (S := Z) (fun c => hZf.subset inter_subset_left) z
-    obtain ⟨η, hη, hl, hr⟩ := exists_sign_deriv_mul_basicSolution_around_zero (odd0 := odd0) hV hzZ.2
+    obtain ⟨ε, hε, hiso⟩ :=
+        exists_isolated_of_inter_Iio_finite (S := Z) (fun c => hZf.subset inter_subset_left) z
+    obtain ⟨η, hη, hl, hr⟩ :=
+        exists_sign_deriv_mul_basicSolution_around_zero (odd0 := odd0) hV hzZ.2
     set s := deriv (basicSolution V odd0 h) z
     -- a point just left of `z`
     set X' := max (max (z - ε / 2) (z / 2)) (z - η)
@@ -935,7 +1017,8 @@ private lemma neg_one_pow_basicSolutionZeroCount_mul_basicSolution_pos (hV : Con
     -- the sign at `X`
     have hsX : 0 < s * basicSolution V odd0 h X := by
       set xp := min (z + η) X
-      have hxp : 0 < s * basicSolution V odd0 h xp := hr xp ⟨lt_min (by linarith) hzX, min_le_left _ _⟩
+      have hxp : 0 < s * basicSolution V odd0 h xp :=
+          hr xp ⟨lt_min (by linarith) hzX, min_le_left _ _⟩
       by_contra hneg
       have hc : Continuous fun x => s * basicSolution V odd0 h x := continuous_const.mul hcY
       obtain ⟨w, hw, hw0⟩ := intermediate_value_Icc' (min_le_right (z + η) X) hc.continuousOn
@@ -959,22 +1042,26 @@ private lemma neg_one_pow_basicSolutionZeroCount_mul_basicSolution_pos (hV : Con
 
 /-- At a Neumann eigenvalue `h` (condition `w'(L) = 0`) with `k` smaller eigenvalues, the
 basic solution has sign `(-1)^k` at `L`. -/
-theorem neg_one_pow_mul_basicSolution_pos_of_mem_separatedSpectrum_false (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+theorem neg_one_pow_mul_basicSolution_pos_of_mem_separatedSpectrum_false (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (odd0 : Bool) {h : ℝ} (hh : h ∈ separatedSpectrum V L odd0 false) :
     0 < (-1) ^ (separatedSpectrum V L odd0 false ∩ Iio h).ncard * basicSolution V odd0 h L := by
   have hh' : deriv (basicSolution V odd0 h) L = 0 := by rwa [separatedSpectrum_false_eq hV] at hh
   have hY := basicSolution_ne_zero_of_deriv_eq_zero hV hh'
   refine neg_one_pow_basicSolutionZeroCount_mul_basicSolution_pos hV hB h _ L hL ?_ hY
-  rw [basicSolutionZeroCount_eq_ncard_Ioo hY, ncard_basicSolution_zeros_eq_ncard_separatedSpectrum_inter_Iio hV hB hL odd0 false hh]
+  rw [basicSolutionZeroCount_eq_ncard_Ioo hY,
+      ncard_basicSolution_zeros_eq_ncard_separatedSpectrum_inter_Iio hV hB hL odd0 false hh]
 
 /-- Just left of a positive zero `z` there is a point `X'` with no zeros in `(X', z)`. -/
-private lemma exists_left_point_basicSolutionZeroCount_eq_add_one (hV : Continuous V) {h z : ℝ} (hz0 : 0 < z) (hz : basicSolution V odd0 h z = 0) :
+private lemma exists_left_point_basicSolutionZeroCount_eq_add_one (hV : Continuous V) {h z : ℝ}
+    (hz0 : 0 < z) (hz : basicSolution V odd0 h z = 0) :
     ∃ X', 0 < X' ∧ X' < z ∧ deriv (basicSolution V odd0 h) z * basicSolution V odd0 h X' < 0 ∧
       basicSolutionZeroCount V odd0 h z = basicSolutionZeroCount V odd0 h X' + 1 := by
   set Z := {x | x ∈ Ioc 0 z ∧ basicSolution V odd0 h x = 0}
   have hZf : Z.Finite := basicSolution_zeros_Ioc_finite hV h 0 z
   have hzZ : z ∈ Z := ⟨⟨hz0, le_rfl⟩, hz⟩
-  obtain ⟨ε, hε, hiso⟩ := exists_isolated_of_inter_Iio_finite (S := Z) (fun c => hZf.subset inter_subset_left) z
+  obtain ⟨ε, hε, hiso⟩ :=
+      exists_isolated_of_inter_Iio_finite (S := Z) (fun c => hZf.subset inter_subset_left) z
   obtain ⟨η, hη, hl, -⟩ := exists_sign_deriv_mul_basicSolution_around_zero (odd0 := odd0) hV hz
   set X' := max (max (z - ε / 2) (z / 2)) (z - η)
   have hX'z : X' < z := max_lt (max_lt (by linarith) (by linarith)) (by linarith)
@@ -1001,10 +1088,14 @@ private lemma exists_left_point_basicSolutionZeroCount_eq_add_one (hV : Continuo
 
 /-- At a positive zero `X`, the derivative has sign `(-1)^N`, `N` the number of zeros in
 `(0, X]` (including `X`). -/
-private lemma neg_one_pow_basicSolutionZeroCount_mul_deriv_basicSolution_pos (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h X : ℝ} (hX : 0 < X)
-    (hz : basicSolution V odd0 h X = 0) : 0 < (-1) ^ basicSolutionZeroCount V odd0 h X * deriv (basicSolution V odd0 h) X := by
-  obtain ⟨X', hX'0, -, hs, hN⟩ := exists_left_point_basicSolutionZeroCount_eq_add_one (odd0 := odd0) hV hX hz
-  have hY : basicSolution V odd0 h X' ≠ 0 := fun h0 => by rw [h0, mul_zero] at hs; exact lt_irrefl _ hs
+private lemma neg_one_pow_basicSolutionZeroCount_mul_deriv_basicSolution_pos (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) {h X : ℝ} (hX : 0 < X)
+    (hz : basicSolution V odd0 h X = 0) : 0 < (-1) ^ basicSolutionZeroCount V odd0 h X *
+        deriv (basicSolution V odd0 h) X := by
+  obtain ⟨X', hX'0, -, hs, hN⟩ :=
+      exists_left_point_basicSolutionZeroCount_eq_add_one (odd0 := odd0) hV hX hz
+  have hY : basicSolution V odd0 h X' ≠ 0 := fun h0 => by rw [h0, mul_zero] at hs;
+                                                          exact lt_irrefl _ hs
   have hih := neg_one_pow_basicSolutionZeroCount_mul_basicSolution_pos hV hB h _ X' hX'0 rfl hY
   rw [hN, pow_succ]
   rcases neg_one_pow_eq_or ℝ (basicSolutionZeroCount V odd0 h X') with hk | hk
@@ -1013,12 +1104,15 @@ private lemma neg_one_pow_basicSolutionZeroCount_mul_deriv_basicSolution_pos (hV
 
 /-- At a Dirichlet eigenvalue `h` (condition `w(L) = 0`) with `k` smaller eigenvalues,
 `(-1)^(k+1) y'(h, L) > 0`. -/
-theorem neg_one_pow_mul_deriv_basicSolution_pos_of_mem_separatedSpectrum_true (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+theorem neg_one_pow_mul_deriv_basicSolution_pos_of_mem_separatedSpectrum_true (hV : Continuous V)
+    (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (odd0 : Bool) {h : ℝ} (hh : h ∈ separatedSpectrum V L odd0 true) :
-    0 < (-1) ^ ((separatedSpectrum V L odd0 true ∩ Iio h).ncard + 1) * deriv (basicSolution V odd0 h) L := by
+    0 < (-1) ^ ((separatedSpectrum V L odd0 true ∩ Iio h).ncard + 1) *
+        deriv (basicSolution V odd0 h) L := by
   have hh' : basicSolution V odd0 h L = 0 := by rwa [separatedSpectrum_true_eq hV] at hh
   have := neg_one_pow_basicSolutionZeroCount_mul_deriv_basicSolution_pos hV hB hL hh'
-  rwa [basicSolutionZeroCount_eq_ncard_Ioo_add_one hV hL hh', ncard_basicSolution_zeros_eq_ncard_separatedSpectrum_inter_Iio hV hB hL odd0 true hh] at this
+  rwa [basicSolutionZeroCount_eq_ncard_Ioo_add_one hV hL hh',
+      ncard_basicSolution_zeros_eq_ncard_separatedSpectrum_inter_Iio hV hB hL odd0 true hh] at this
 
 end Osc
 

@@ -78,7 +78,8 @@ theorem one_phi_zero_mul {a b q x : ℂ} (hq : ‖q‖ < 1) (hx : ‖x‖ < 1) (
 
 /-- **Heine's summation** (the `q`-Gauss sum, Duverney (10.53)):
 `₂φ₁(a, b; c; q, c/(ab)) = (c/a;q)_∞ (c/b;q)_∞ / ((c;q)_∞ (c/(ab);q)_∞)`. -/
-@[dlmf 17.6.E1 "partial: additionally assumes |b|<1 and avoids intermediate c/b q-lattice; full source domain acquired separately"]
+@[dlmf 17.6.E1 "partial: additionally assumes |b|<1 and avoids intermediate c/b q-lattice; full \
+    source domain acquired separately"]
 theorem q_gauss_summation {a b c q : ℂ} (hq : ‖q‖ < 1) (ha : a ≠ 0) (hb : ‖b‖ < 1)
     (hb0 : b ≠ 0) (hz : ‖c / (a * b)‖ < 1) (hc : ∀ k : ℕ, c * q ^ k ≠ 1)
     (hcb : ∀ k : ℕ, c / b * q ^ k ≠ 1) :
@@ -134,7 +135,8 @@ theorem heine_transformation_three {a b c q z : ℂ} (hq : ‖q‖ < 1) (hz : �
 
 /-- **`q`-Chu–Vandermonde** (Duverney (10.54)): for `|b| < 1`, `|c qⁿ/b| < 1` and `c ≠ q^{-m}`,
 `∑_{k ≤ n} (q^{-n};q)_k (b;q)_k / ((c;q)_k (q;q)_k) (c qⁿ/b)^k = (c/b;q)_n / (c;q)_n`. -/
-@[dlmf 17.6.E2 "partial: additionally bounds the other upper parameter by1 and excludes later lower poles; finite full-domain statement acquired separately"]
+@[dlmf 17.6.E2 "partial: additionally bounds the other upper parameter by1 and excludes later \
+    lower poles; finite full-domain statement acquired separately"]
 theorem q_chu_vandermonde {b c q : ℂ} (n : ℕ) (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hb : ‖b‖ < 1)
     (hb0 : b ≠ 0) (hz : ‖c * q ^ n / b‖ < 1) (hc : ∀ k : ℕ, c * q ^ k ≠ 1)
     (hcb : ∀ k : ℕ, c / b * q ^ k ≠ 1) :

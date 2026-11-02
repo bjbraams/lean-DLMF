@@ -174,7 +174,8 @@ theorem kummerU_contiguous_a_b_of_mem {a c z : ℂ} (hc : c ∈ integerComplemen
   rw [show 1 - c + 1 = 2 - c by ring] at hG1
   rw [show c - 2 + 1 = c - 1 by ring] at hG2
   rw [show a + 1 - c + 1 = a - c + 2 by ring, show a - (c - 1) + 1 = a - c + 2 by ring,
-    show 2 - (c - 1) = 3 - c by ring, show 1 - (c - 1) = 2 - c by ring, show c - 1 - 1 = c - 2 by ring]
+    show 2 - (c - 1) = 3 - c by ring, show 1 - (c - 1) = 2 - c by ring, show c - 1 -
+                                                                    1 = c - 2 by ring]
   rw [hzc]
   simp only [div_eq_mul_inv]
   rw [hR, hS, hG1, hG2]
@@ -209,7 +210,8 @@ theorem kummerU_contiguous_shift_a_of_mem {a c z : ℂ} (hc : c ∈ integerCompl
   have hzc : z ^ (1 - c) = z * z ^ (-c) := by
     rw [show 1 - c = -c + 1 by ring, cpow_add _ _ hz, cpow_one, mul_comm]
   rw [show a - 1 - c + 1 = a - c by ring, show 1 - (c + 1) = -c by ring,
-    show a - (c + 1) + 1 = a - c by ring, show c + 1 - 1 = c by ring, show 2 - (c + 1) = 1 - c by ring]
+    show a - (c + 1) + 1 = a - c by ring, show c + 1 - 1 = c by ring, show 2 -
+                                                                  (c + 1) = 1 - c by ring]
   simp only [div_eq_mul_inv]
   rw [hR, hS, hG0, hG1, hzc]
   linear_combination Gamma (-c) * (Gamma (a - c + 1))⁻¹ * (a - c) * E4 +
@@ -386,7 +388,9 @@ theorem kummerU_ode_contiguous_of_mem {a c z : ℂ} (hc : c ∈ integerComplemen
   rw [show (1 : ℂ) - c - 1 = -c by ring, show 1 - c + 1 = 2 - c by ring] at E2
   have hG0 := Gamma_add_one (-c) (integerComplement.ne_zero hnc)
   rw [show -c + 1 = 1 - c by ring] at hG0
-  have hm1 : -1 - c ∈ integerComplement := by simpa [sub_eq_add_neg, add_comm] using intCompl_add_int hnc (-1)
+  have hm1 : -1 - c ∈ integerComplement := by
+                                             simpa [sub_eq_add_neg, add_comm] using
+                                               intCompl_add_int hnc (-1)
   have hGm := Gamma_add_one (-1 - c) (integerComplement.ne_zero hm1)
   rw [show -1 - c + 1 = -c by ring] at hGm
   have hG1 := Gamma_add_one (c - 1) (integerComplement.ne_zero (intCompl_sub_one hc))
@@ -428,7 +432,8 @@ theorem kummerU_contiguous_a (a b z : ℂ) (hz : z ≠ 0) :
 theorem kummerU_contiguous_b (a b z : ℂ) (hz : z ≠ 0) :
     (b - a - 1) * kummerU a (b - 1) z + (1 - b - z) * kummerU a b z +
       z * kummerU a (b + 1) z = 0 := by
-  refine eq_zero_of_tendsto_integerComplement (b := b) (f := fun c => (c - a - 1) * kummerU a (c - 1) z +
+  refine eq_zero_of_tendsto_integerComplement (b := b)
+      (f := fun c => (c - a - 1) * kummerU a (c - 1) z +
     (1 - c - z) * kummerU a c z + z * kummerU a (c + 1) z) ?_
     fun c hc => kummerU_contiguous_b_of_mem hc hz
   have hc := tendsto_id_integerComplement b

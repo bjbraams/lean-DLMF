@@ -126,7 +126,8 @@ def airyPIIJet (k a b : ℂ) : ℕ → ℂ → ℂ × ℂ
 /-- The Airy logarithmic quotient is meromorphic on the complex plane. -/
 theorem meromorphic_airyPII {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) :
     Meromorphic (airyPII k a b) := by
-  have hF : Differentiable ℂ (airySeed k a b) := fun z => (hasDerivAt_airySeed k a b z).differentiableAt
+  have hF : Differentiable ℂ (airySeed k a b) := fun z =>
+      (hasDerivAt_airySeed k a b z).differentiableAt
   have hG : Differentiable ℂ (airySeedDeriv k a b) :=
     fun z => (hasDerivAt_airySeedDeriv hk a b z).differentiableAt
   intro z
@@ -164,7 +165,8 @@ theorem exists_open_isPIIOn_airyPIIJet {k a b : ℂ} (hk : k ^ 3 = -1 / 2)
   | zero =>
     refine ⟨{z | airySeed k a b z ≠ 0}, ?_, hne, ?_, ?_⟩
     · exact isOpen_ne_fun
-        (continuous_iff_continuousAt.mpr fun z => (hasDerivAt_airySeed k a b z).continuousAt) continuous_const
+        (continuous_iff_continuousAt.mpr fun z => (hasDerivAt_airySeed k a b z).continuousAt)
+            continuous_const
     · simpa only [airyPIIJet, Nat.cast_zero, zero_add] using isPIIOn_airyPII hk a b
     · intro z hz
       exact (hasDerivAt_airyPII hk a b hz).deriv

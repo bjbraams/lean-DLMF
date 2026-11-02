@@ -257,8 +257,10 @@ theorem zero_second_representations
     (hw : ‖z /
     (z - 1)‖ < 1) :
     zeroSecond a b c z = z ^ (1 - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - a) (1 - b) (2 - c) z ∧
-      zeroSecond a b c z = z ^ (1 - c) * (1 - z) ^ (c - a - 1) * ₂F₁ (a - c + 1) (1 - b) (2 - c) (z / (z - 1)) ∧
-      zeroSecond a b c z = z ^ (1 - c) * (1 - z) ^ (c - b - 1) * ₂F₁ (1 - a) (b - c + 1) (2 - c) (z / (z -
+      zeroSecond a b c z = z ^ (1 - c) * (1 - z) ^ (c - a - 1) *
+          ₂F₁ (a - c + 1) (1 - b) (2 - c) (z / (z - 1)) ∧
+      zeroSecond a b c z = z ^ (1 - c) * (1 - z) ^ (c - b - 1) *
+          ₂F₁ (1 - a) (b - c + 1) (2 - c) (z / (z -
         1)) := by
   refine ⟨?_, ?_, ?_⟩
   · unfold zeroSecond
@@ -271,7 +273,8 @@ theorem zero_second_representations
       show 2 - c - (b - c + 1) = 1 - b by ring]
     ring
   · unfold zeroSecond
-    rw [show (₂F₁ (a - c + 1) (b - c + 1) (2 - c) : ℂ → ℂ) = ₂F₁ (b - c + 1) (a - c + 1) (2 - c) from
+    rw [show (₂F₁ (a - c + 1) (b - c + 1) (2 - c) : ℂ → ℂ) =
+        ₂F₁ (b - c + 1) (a - c + 1) (2 - c) from
       ordinaryHypergeometric_symm _ _ _, pfaff_transformation_of_ne_neg_nat hc hz hw,
       show -(b - c + 1) = c - b - 1 by ring, show 2 - c - (a - c + 1) = 1 - a by ring,
       show (₂F₁ (b - c + 1) (1 - a) (2 - c) : ℂ → ℂ) = ₂F₁ (1 - a) (b - c + 1) (2 - c) from
@@ -326,10 +329,13 @@ theorem one_second_representations
     (hz : ‖1 - z‖ < 1)
     (hs : 1 - z ∈ slitPlane)
     (hw : ‖1 - 1 / z‖ < 1) :
-    oneSecond a b c z = z ^ (1 - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - a) (1 - b) (c - a - b + 1) (1 - z) ∧
-      oneSecond a b c z = z ^ (a - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - a) (c - a) (c - a - b + 1) (1 - 1 /
+    oneSecond a b c z = z ^ (1 - c) * (1 - z) ^ (c - a - b) *
+        ₂F₁ (1 - a) (1 - b) (c - a - b + 1) (1 - z) ∧
+      oneSecond a b c z = z ^ (a - c) * (1 - z) ^ (c - a - b) *
+          ₂F₁ (1 - a) (c - a) (c - a - b + 1) (1 - 1 /
         z) ∧
-      oneSecond a b c z = z ^ (b - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - b) (c - b) (c - a - b + 1) (1 - 1 /
+      oneSecond a b c z = z ^ (b - c) * (1 - z) ^ (c - a - b) *
+          ₂F₁ (1 - b) (c - b) (c - a - b + 1) (1 - 1 /
         z) := by
   have hz0 : z ≠ 0 := by
     rintro rfl
@@ -354,7 +360,8 @@ theorem one_second_representations
         ordinaryHypergeometric_symm _ _ _]
     ring
   · unfold oneSecond
-    rw [show (₂F₁ (c - a) (c - b) (c - a - b + 1) : ℂ → ℂ) = ₂F₁ (c - b) (c - a) (c - a - b + 1) from
+    rw [show (₂F₁ (c - a) (c - b) (c - a - b + 1) : ℂ → ℂ) =
+        ₂F₁ (c - b) (c - a) (c - a - b + 1) from
       ordinaryHypergeometric_symm _ _ _, pfaff_transformation_of_ne_neg_nat hc hz hw',
       sub_sub_cancel, hmap, show -(c - b) = b - c by ring,
       show c - a - b + 1 - (c - a) = 1 - b by ring,
@@ -373,10 +380,12 @@ theorem kummer_five_representations
     (hz : 1 < ‖z‖)
     (hw : 1 < ‖1 - z‖)
     (hi : 0 < z.im) :
-    kummerFive a b c z = exp ((c - b) * Real.pi * I) * z ^ (b - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - b) (c
+    kummerFive a b c z = exp ((c - b) * Real.pi * I) * z ^ (b - c) *
+        (1 - z) ^ (c - a - b) * ₂F₁ (1 - b) (c
       - b) (a - b + 1) (1 / z) ∧
       kummerFive a b c z = kummerFiveLeft a b c z ∧
-      kummerFive a b c z = exp ((c - 1) * Real.pi * I) * z ^ (1 - c) * (1 - z) ^ (c - a - 1) * ₂F₁ (1 - b)
+      kummerFive a b c z = exp ((c - 1) * Real.pi * I) * z ^ (1 - c) *
+          (1 - z) ^ (c - a - 1) * ₂F₁ (1 - b)
         (a - c + 1) (a - b + 1) (1 / (1 - z)) := by
   have hz0 : z ≠ 0 := by rintro rfl; simp at hi
   have h1z : 1 - z ≠ 0 := by intro h; rw [h] at hw; norm_num at hw
@@ -436,10 +445,12 @@ theorem kummer_six_representations
     (hz : 1 < ‖z‖)
     (hw : 1 < ‖1 - z‖)
     (hi : 0 < z.im) :
-    kummerSix a b c z = exp ((c - a) * Real.pi * I) * z ^ (a - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - a) (c -
+    kummerSix a b c z = exp ((c - a) * Real.pi * I) * z ^ (a - c) * (1 - z) ^ (c - a - b) *
+        ₂F₁ (1 - a) (c -
       a) (b - a + 1) (1 / z) ∧
       kummerSix a b c z = kummerSixLeft a b c z ∧
-      kummerSix a b c z = exp ((c - 1) * Real.pi * I) * z ^ (1 - c) * (1 - z) ^ (c - b - 1) * ₂F₁ (1 - a) (b
+      kummerSix a b c z = exp ((c - 1) * Real.pi * I) * z ^ (1 - c) *
+          (1 - z) ^ (c - b - 1) * ₂F₁ (1 - a) (b
         - c + 1) (b - a + 1) (1 / (1 - z)) := by
   obtain ⟨h1, h2, h3⟩ := kummer_five_representations (a := b) (b := a) (c := c) hc hz hw hi
   refine ⟨?_, h2, h3⟩
@@ -455,8 +466,10 @@ theorem kummer_five_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c �
     (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) (hi : 0 < z.im) :
     kummerFiveLeft a b c z =
-      Gamma (1 - c) * Gamma (a - b + 1) / (Gamma (a - c + 1) * Gamma (1 - b)) * ₂F₁ a b c z + exp ((c - 1) *
-        Real.pi * I) * Gamma (c - 1) * Gamma (a - b + 1) / (Gamma a * Gamma (c - b)) * zeroSecond a b c z :=
+      Gamma (1 - c) * Gamma (a - b + 1) / (Gamma (a - c + 1) * Gamma (1 - b)) *
+          ₂F₁ a b c z + exp ((c - 1) *
+        Real.pi * I) * Gamma (c - 1) * Gamma (a - b + 1) / (Gamma a * Gamma (c - b)) *
+            zeroSecond a b c z :=
         by
   have hz0 : z ≠ 0 := by rintro rfl; simp at hi
   have h1z : 1 - z ≠ 0 := by intro h; rw [h] at hw; norm_num at hw
@@ -502,8 +515,10 @@ theorem kummer_six_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠
     (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) (hi : 0 < z.im) :
     kummerSixLeft a b c z =
-      Gamma (1 - c) * Gamma (b - a + 1) / (Gamma (b - c + 1) * Gamma (1 - a)) * ₂F₁ a b c z + exp ((c - 1) *
-        Real.pi * I) * Gamma (c - 1) * Gamma (b - a + 1) / (Gamma b * Gamma (c - a)) * zeroSecond a b c z :=
+      Gamma (1 - c) * Gamma (b - a + 1) / (Gamma (b - c + 1) * Gamma (1 - a)) *
+          ₂F₁ a b c z + exp ((c - 1) *
+        Real.pi * I) * Gamma (c - 1) * Gamma (b - a + 1) / (Gamma b * Gamma (c - a)) *
+            zeroSecond a b c z :=
         by
   have hab' : ∀ k : ℤ, b - a ≠ (k : ℂ) := fun k h => hab (-k) (by
     push_cast; linear_combination -h)
@@ -521,7 +536,8 @@ theorem zero_first_connection_left {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k :
     (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) :
     ₂F₁ a b c z =
-      Gamma c * Gamma (b - a) / (Gamma b * Gamma (c - a)) * kummerFiveLeft a b c z + Gamma c * Gamma (a - b)
+      Gamma c * Gamma (b - a) / (Gamma b * Gamma (c - a)) * kummerFiveLeft a b c z +
+          Gamma c * Gamma (a - b)
         / (Gamma a * Gamma (c - b)) * kummerSixLeft a b c z := by
   exact zero_first_connection_left_gen hc hab hz hw
 
@@ -534,8 +550,10 @@ theorem zero_second_connection_left {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k 
     (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) (hi : 0 < z.im) :
     zeroSecond a b c z =
-      exp ((1 - c) * Real.pi * I) * Gamma (2 - c) * Gamma (b - a) / (Gamma (1 - a) * Gamma (b - c + 1)) *
-        kummerFiveLeft a b c z + exp ((1 - c) * Real.pi * I) * Gamma (2 - c) * Gamma (a - b) / (Gamma (1 -
+      exp ((1 - c) * Real.pi * I) * Gamma (2 - c) * Gamma (b - a) /
+          (Gamma (1 - a) * Gamma (b - c + 1)) *
+        kummerFiveLeft a b c z + exp ((1 - c) * Real.pi * I) * Gamma (2 - c) *
+            Gamma (a - b) / (Gamma (1 -
         b) * Gamma (a - c + 1)) * kummerSixLeft a b c z := by
   have h := zero_second_connection_left_gen (φ := -(↑Real.pi * I)) hc hab hz hw
     (div_sub_one_cpow_upper hi)
@@ -551,8 +569,10 @@ theorem kummer_five_connection_one {a b c z : ℂ}
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : 1 < ‖z‖) (hw : ‖1 - z‖ < 1) (hi : 0 < z.im) :
     kummerFive a b c z =
-      exp (a * Real.pi * I) * Gamma (a - b + 1) * Gamma (c - a - b) / (Gamma (1 - b) * Gamma (c - b)) *
-        oneFirst a b c z + exp ((c - b) * Real.pi * I) * Gamma (a - b + 1) * Gamma (a + b - c) / (Gamma a *
+      exp (a * Real.pi * I) * Gamma (a - b + 1) * Gamma (c - a - b) /
+          (Gamma (1 - b) * Gamma (c - b)) *
+        oneFirst a b c z + exp ((c - b) * Real.pi * I) * Gamma (a - b + 1) *
+            Gamma (a + b - c) / (Gamma a *
         Gamma (a - c + 1)) * oneSecond a b c z := by
   have hz0 : z ≠ 0 := by rintro rfl; simp at hi
   have h1z : 1 - z ≠ 0 := by intro h; have := congrArg im h; simp at this; linarith
@@ -602,8 +622,10 @@ theorem kummer_six_connection_one {a b c z : ℂ}
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : 1 < ‖z‖) (hw : ‖1 - z‖ < 1) (hi : 0 < z.im) :
     kummerSix a b c z =
-      exp (b * Real.pi * I) * Gamma (b - a + 1) * Gamma (c - a - b) / (Gamma (1 - a) * Gamma (c - a)) *
-        oneFirst a b c z + exp ((c - a) * Real.pi * I) * Gamma (b - a + 1) * Gamma (a + b - c) / (Gamma b *
+      exp (b * Real.pi * I) * Gamma (b - a + 1) * Gamma (c - a - b) /
+          (Gamma (1 - a) * Gamma (c - a)) *
+        oneFirst a b c z + exp ((c - a) * Real.pi * I) * Gamma (b - a + 1) *
+            Gamma (a + b - c) / (Gamma b *
         Gamma (b - c + 1)) * oneSecond a b c z := by
   have hab' : ∀ k : ℤ, b - a ≠ (k : ℂ) := fun k h => hab (-k) (by
     push_cast; linear_combination -h)
@@ -627,8 +649,10 @@ theorem one_first_connection_infinity {a b c z : ℂ}
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : 1 < ‖z‖) (hw : ‖1 - z‖ < 1) :
     oneFirst a b c z =
-      exp (-a * Real.pi * I) * Gamma (a + b - c + 1) * Gamma (b - a) / (Gamma b * Gamma (b - c + 1)) *
-        kummerFive a b c z + exp (-b * Real.pi * I) * Gamma (a + b - c + 1) * Gamma (a - b) / (Gamma a *
+      exp (-a * Real.pi * I) * Gamma (a + b - c + 1) * Gamma (b - a) /
+          (Gamma b * Gamma (b - c + 1)) *
+        kummerFive a b c z + exp (-b * Real.pi * I) * Gamma (a + b - c + 1) *
+            Gamma (a - b) / (Gamma a *
         Gamma (a - c + 1)) * kummerSix a b c z := by
   have hC : ∀ k : ℤ, a + b - c + 1 ≠ (k : ℂ) := fun k h => he (1 - k) (by
     push_cast; linear_combination -h)
@@ -657,8 +681,10 @@ theorem one_second_connection_infinity {a b c z : ℂ}
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : 1 < ‖z‖) (hw : ‖1 - z‖ < 1) (hi : 0 < z.im) :
     oneSecond a b c z =
-      exp ((b - c) * Real.pi * I) * Gamma (c - a - b + 1) * Gamma (b - a) / (Gamma (1 - a) * Gamma (c - a))
-        * kummerFive a b c z + exp ((a - c) * Real.pi * I) * Gamma (c - a - b + 1) * Gamma (a - b) / (Gamma
+      exp ((b - c) * Real.pi * I) * Gamma (c - a - b + 1) * Gamma (b - a) /
+          (Gamma (1 - a) * Gamma (c - a))
+        * kummerFive a b c z + exp ((a - c) * Real.pi * I) * Gamma (c - a - b + 1) *
+            Gamma (a - b) / (Gamma
         (1 - b) * Gamma (c - b)) * kummerSix a b c z := by
   have hC : ∀ k : ℤ, a + b - c + 1 ≠ (k : ℂ) := fun k h => he (1 - k) (by
     push_cast; linear_combination -h)

@@ -43,7 +43,8 @@ def incompleteAiryAi (a z : ℂ) : ℂ :=
 /-- A segment integral of a derivative is the difference of the primitive at the endpoints. -/
 theorem lineIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z, HasDerivAt g (f z) z)
     (a b : ℂ) : segmentIntegral f a b = g b - g a := by
-  have hd (t : ℝ) : HasDerivAt (fun u : ℝ => g (a + u * (b - a))) ((b - a) * f (a + t * (b - a))) t := by
+  have hd (t : ℝ) : HasDerivAt (fun u : ℝ => g (a + u * (b - a)))
+      ((b - a) * f (a + t * (b - a))) t := by
     have h := ((hg (a + t * (b - a))).comp (t : ℂ)
       (((hasDerivAt_id (t : ℂ)).mul_const (b - a)).const_add a)).comp_ofReal
     simpa [mul_comm] using h
@@ -87,17 +88,20 @@ theorem incompleteAiryAi_endpoint_derivative (a z : ℂ) :
 /-- An arc integral of a derivative is the difference of the primitive at the endpoints. -/
 theorem arcIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z, HasDerivAt g (f z) z)
     (α β : ℝ) : arcIntegral f α β = g (exp (β * I)) - g (exp (α * I)) := by
-  have hd : ∀ θ : ℝ, HasDerivAt (fun θ : ℝ => g (exp (θ * I))) (I * exp (θ * I) * f (exp (θ * I))) θ := by
+  have hd : ∀ θ : ℝ, HasDerivAt (fun θ : ℝ => g (exp (θ * I)))
+      (I * exp (θ * I) * f (exp (θ * I))) θ := by
     intro θ
     have h1 : HasDerivAt (fun θ : ℝ => exp ((θ : ℂ) * I)) (exp (θ * I) * (1 * I)) θ :=
       (((hasDerivAt_id θ).ofReal_comp).mul_const I).cexp
     exact ((hg _).comp θ h1).congr_deriv (by ring)
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun θ _ => hd θ)
-    ((by fun_prop : Continuous fun θ : ℝ => I * exp (θ * I) * f (exp (θ * I))).intervalIntegrable _ _)
+    ((by fun_prop : Continuous fun θ : ℝ => I * exp (θ * I) *
+           f (exp (θ * I))).intervalIntegrable _ _)
 
 /-- Integrability of the Airy contour integrand on a ray where it decays. -/
 theorem integrableOn_airy_ray (z : ℂ) {θ : ℝ} (hc : exp (3 * (((θ + π : ℝ) : ℂ) * I)) = 1) :
-    IntegrableOn (fun t : ℝ => exp (θ * I) * exp ((t * exp (θ * I)) ^ 3 / 3 - z * (t * exp (θ * I))))
+    IntegrableOn (fun t : ℝ => exp (θ * I) *
+        exp ((t * exp (θ * I)) ^ 3 / 3 - z * (t * exp (θ * I))))
       (Ioi 1) := by
   have h := (integrableOn_reidRay hc z 0 zero_le_one (Or.inl le_rfl)).neg
   refine h.congr_fun (fun t (ht : 1 < t) => ?_) measurableSet_Ioi
@@ -178,7 +182,8 @@ theorem incompleteAiryAi_split (a z : ℂ) :
 
 /-- Recovery with the lower endpoint tending to its original infinite limit, DLMF §9.14. -/
 theorem incompleteAiryAiLower_complete_limit (z : ℂ) :
-    Tendsto (fun R : ℝ => incompleteAiryAiLower ((R : ℂ) * exp (-π * I / 3)) z) atTop (𝓝 (airyAi z)) := by
+    Tendsto (fun R : ℝ => incompleteAiryAiLower ((R : ℂ) * exp (-π * I / 3)) z) atTop
+        (𝓝 (airyAi z)) := by
   obtain ⟨g, hg⟩ := (differentiable_airyIntegrand z).isExactOn_univ
   have hg' : ∀ u, HasDerivAt g (exp (u ^ 3 / 3 - z * u)) u := fun u => hg u (mem_univ u)
   have hline := lineIntegral_eq_sub (differentiable_airyIntegrand z).continuous hg'

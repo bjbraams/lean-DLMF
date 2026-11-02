@@ -102,7 +102,8 @@ theorem fresMB_integrableOn_rpow_div {q : ℝ} (h0 : -1 < q) (h1 : q < 1) :
   ring
 
 /-- The Fresnel auxiliary functions `f` (`aux = false`) and `g` (`aux = true`). -/
-def fresMB_aux (aux : Bool) (z : ℂ) : ℂ := if aux then fresnelAuxGComplex z else fresnelAuxFComplex z
+def fresMB_aux (aux : Bool) (z : ℂ) : ℂ := if aux then fresnelAuxGComplex z else
+    fresnelAuxFComplex z
 
 /-- The kernel of the double integral for the Mellin transform of the auxiliary functions. -/
 def fresMB_kernel (k : ℕ) (w : ℂ) (p : ℝ × ℝ) : ℂ :=
@@ -250,7 +251,8 @@ theorem fresMB_bound_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 
     push_cast; ring
   have e₃ : (c : ℂ) + y * I + b = ((c + b : ℝ) : ℂ) + I * (((0 : ℝ) : ℂ) + (y : ℂ)) := by
     push_cast; ring
-  have e₄ : 1 - (b : ℂ) - (c + y * I) = ((1 - b - c : ℝ) : ℂ) + I * (((0 : ℝ) : ℂ) + ((-y : ℝ) : ℂ)) := by
+  have e₄ : 1 - (b : ℂ) - (c + y * I) = ((1 - b - c : ℝ) : ℂ) + I *
+      (((0 : ℝ) : ℂ) + ((-y : ℝ) : ℂ)) := by
     push_cast; ring
   have b₁ := h₁ y; have b₂ := h₂ y; have b₃ := h₃ y; have b₄ := h₄ (-y)
   rw [← e₁] at b₁; rw [← e₂] at b₂; rw [← e₃] at b₃; rw [← e₄, abs_neg] at b₄
@@ -274,7 +276,8 @@ theorem fresMB_bound_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 
 theorem fresMB_integrable_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
     Integrable fun y : ℝ => fresMB_G b (c + y * I) := by
   obtain ⟨C, K, hC⟩ := fresMB_bound_G hc hcb hcb1
-  refine ((DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (by positivity : 0 < 2 * π) K).const_mul
+  refine ((DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg
+      (by positivity : 0 < 2 * π) K).const_mul
     C).mono' (fresMB_continuous_G hc hcb hcb1).aestronglyMeasurable
     (Eventually.of_forall fun y => (hC y).trans (le_of_eq (by ring)))
 
@@ -324,7 +327,8 @@ theorem fresMB_mellin_g (aux : Bool) {s : ℂ} (hs : 0 < s.re)
   have hE : ((2 / Real.sqrt π : ℝ) : ℂ) ^ (-(4 * s)) * ((2 / π : ℝ) : ℂ) ^ (4 * s / 2) *
       (2 : ℂ) ^ (2 * s) = 1 := by
     rw [show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num, Complex.ofReal_cpow_eq_exp hsq,
-      Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp two_pos, ← exp_add, ← exp_add,
+      Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp two_pos,
+          ← exp_add, ← exp_add,
       Real.log_div (by norm_num) (Real.sqrt_pos.mpr Real.pi_pos).ne',
       Real.log_div (by norm_num) Real.pi_ne_zero, Real.log_sqrt Real.pi_pos.le]
     rw [← exp_zero]; congr 1; push_cast; ring
@@ -406,10 +410,12 @@ theorem fresMB_real (aux : Bool) {c : ℝ} (hc : 0 < c)
       show (16 : ℂ) = ((16 : ℝ) : ℂ) by norm_num, ← ofReal_log (by norm_num)]
     congr 1; push_cast; ring
   -- Mellin inversion
-  have hconv := (fresMB_mellin_g aux (s := (c : ℂ)) (by simpa using hc) (by have h := hc1; rw [hkdef] at h; simpa using h)).1
+  have hconv := (fresMB_mellin_g aux (s := (c : ℂ)) (by simpa using hc)
+      (by have h := hc1; rw [hkdef] at h; simpa using h)).1
   have hmel : ∀ y : ℝ, mellin (fresMB_g aux) ((c : ℂ) + y * I) =
       ((2 * π : ℂ) ^ (3 / 2 : ℂ))⁻¹ * fresMB_G b (c + y * I) := fun y =>
-    (fresMB_mellin_g aux (s := (c : ℂ) + y * I) (by simpa using hc) (by have h := hc1; rw [hkdef] at h; simpa using h)).2
+    (fresMB_mellin_g aux (s := (c : ℂ) + y * I) (by simpa using hc)
+        (by have h := hc1; rw [hkdef] at h; simpa using h)).2
   have hGint := fresMB_integrable_G hc hcb hcb1
   have hvert : VerticalIntegrable (mellin (fresMB_g aux)) c := by
     unfold VerticalIntegrable
@@ -512,7 +518,8 @@ def fresMB_B (b c : ℝ) (y : ℝ) : ℂ :=
 /-- Identity under the stated parameter and domain assumptions: `fresMB_E b c z y = fresMB_B b c
 (4 * y) * z⁻¹ ^ (((4 * c : ℝ) : ℂ) + I * ((4 * y : ℝ) : ℂ))`. -/
 theorem fresMB_E_eq {b c : ℝ} {z : ℂ} (hz : 0 < z.re) (y : ℝ) :
-    fresMB_E b c z y = fresMB_B b c (4 * y) * z⁻¹ ^ (((4 * c : ℝ) : ℂ) + I * ((4 * y : ℝ) : ℂ)) := by
+    fresMB_E b c z y = fresMB_B b c (4 * y) *
+        z⁻¹ ^ (((4 * c : ℝ) : ℂ) + I * ((4 * y : ℝ) : ℂ)) := by
   have hz0 : z ≠ 0 := by rintro rfl; simp at hz
   have harg : z.arg ≠ π := by
     intro h
@@ -627,8 +634,12 @@ end FresnelMellinBarnes
 => let s : ℂ := c+y*I; exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma
 (s+3/4)*Gamma (1/4-s)) (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxFComplex z)`. -/
 @[dlmf 7.7.E13]
-theorem fresnelAuxFComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) {c : ℝ} (hc : 0 < c) (hc1 : c < 1/4) :
-    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma (s+3/4)*Gamma (1/4-s)) (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxFComplex z) := by
+theorem fresnelAuxFComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) {c : ℝ}
+    (hc : 0 < c) (hc1 : c < 1/4) :
+    HasIntegralWholeLine
+        (fun y : ℝ => let s : ℂ := c+y*I;
+        exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma (s+3/4)*Gamma (1/4-s))
+        (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxFComplex z) := by
   have hre : 0 < z.re := (abs_arg_lt_pi_div_two_iff.mp hz).resolve_right hz0
   have hv := fresMB_complex false hc (by norm_num; linarith) hre
   have e : (3 / 4 - ((if false = true then 1 else 0 : ℕ) : ℝ) / 2) = 3 / 4 := by norm_num
@@ -646,8 +657,12 @@ theorem fresnelAuxFComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| 
 => let s : ℂ := c+y*I; exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma
 (s+1/4)*Gamma (3/4-s)) (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxGComplex z)`. -/
 @[dlmf 7.7.E14]
-theorem fresnelAuxGComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) {c : ℝ} (hc : 0 < c) (hc1 : c < 3/4) :
-    HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma (s+1/4)*Gamma (3/4-s)) (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxGComplex z) := by
+theorem fresnelAuxGComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) {c : ℝ}
+    (hc : 0 < c) (hc1 : c < 3/4) :
+    HasIntegralWholeLine
+        (fun y : ℝ => let s : ℂ := c+y*I;
+        exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma (s+1/4)*Gamma (3/4-s))
+        (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxGComplex z) := by
   have hre : 0 < z.re := (abs_arg_lt_pi_div_two_iff.mp hz).resolve_right hz0
   have hv := fresMB_complex true hc (by norm_num; linarith) hre
   have e : (3 / 4 - ((if true = true then 1 else 0 : ℕ) : ℝ) / 2) = 1 / 4 := by norm_num
@@ -679,7 +694,8 @@ theorem laplace_gaussian_boundary {a b0 : ℂ} (ha : 0 < a.re) (hb0re : b0.re = 
     refine tendsto_integral_filter_of_dominated_convergence (fun t => Real.exp (-a.re*t)) ?_ ?_
       (exp_neg_integrableOn_Ioi 0 ha) ?_
     · exact Eventually.of_forall fun δ =>
-        (by fun_prop : Continuous fun t : ℝ => exp (-(A δ*(t:ℂ)^2+2*(a/2)*t+0))).aestronglyMeasurable
+        (by fun_prop : Continuous fun t : ℝ =>
+              exp (-(A δ*(t:ℂ)^2+2*(a/2)*t+0))).aestronglyMeasurable
     · filter_upwards [self_mem_nhdsWithin] with δ hδ
       have hδ : (0:ℝ) < δ := hδ
       refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
@@ -710,10 +726,12 @@ theorem laplace_gaussian_boundary {a b0 : ℂ} (ha : 0 < a.re) (hb0re : b0.re = 
     simp only [hR]
     refine ((h1.div_const 2).mul ?_).mul ?_
     · exact Complex.continuous_exp.continuousAt.comp
-        ((continuousAt_const.sub (continuousAt_id.mul continuousAt_const)).div continuousAt_id hb0ne)
+        ((continuousAt_const.sub (continuousAt_id.mul continuousAt_const)).div
+            continuousAt_id hb0ne)
     · exact he.continuousAt.comp ((h2.mul continuousAt_const).add (continuousAt_const.div h2 hs0))
   have hAt : Tendsto A (𝓝[>] 0) (𝓝 b0) := by
-    have : Tendsto A (𝓝 0) (𝓝 (((0:ℝ):ℂ)+b0)) := ((continuous_ofReal.add continuous_const).tendsto 0)
+    have : Tendsto A (𝓝 0) (𝓝 (((0:ℝ):ℂ)+b0)) :=
+        ((continuous_ofReal.add continuous_const).tendsto 0)
     simpa using this.mono_left nhdsWithin_le_nhds
   have hlim2 : Tendsto (fun δ : ℝ => ∫ t : ℝ in Ioi 0, exp (-(A δ*(t:ℂ)^2+2*(a/2)*t+0)))
       (𝓝[>] 0) (𝓝 (R b0)) := by
@@ -805,7 +823,8 @@ theorem integrableOn_exp_mul_exp_I_sq {a : ℂ} (ha : 0 < a.re) (ε : ℝ) :
 ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxFComplex (a/Real.sqrt (2*π))`. -/
 @[dlmf 7.7.E15]
 theorem fresnelAuxFComplex_laplace_square {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*cos ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxFComplex (a/Real.sqrt (2*π)) := by
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*cos ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxFComplex
+        (a/Real.sqrt (2*π)) := by
   have h1 := laplace_exp_I_sq ha (Or.inl rfl)
   have h2 := laplace_exp_I_sq ha (Or.inr rfl)
   have e : (fun t : ℝ => exp (-a*t)*cos ((t : ℂ)^2)) = fun t : ℝ =>
@@ -819,7 +838,8 @@ theorem fresnelAuxFComplex_laplace_square {a : ℂ} (ha : 0 < a.re) :
 ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxGComplex (a/Real.sqrt (2*π))`. -/
 @[dlmf 7.7.E16]
 theorem fresnelAuxGComplex_laplace_square {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*sin ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxGComplex (a/Real.sqrt (2*π)) := by
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*sin ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxGComplex
+        (a/Real.sqrt (2*π)) := by
   have h1 := laplace_exp_I_sq ha (Or.inl rfl)
   have h2 := laplace_exp_I_sq ha (Or.inr rfl)
   have e : (fun t : ℝ => exp (-a*t)*sin ((t : ℂ)^2)) = fun t : ℝ =>
@@ -834,7 +854,8 @@ theorem fresnelAuxGComplex_laplace_square {a : ℂ} (ha : 0 < a.re) :
 π)+I/(2*a)*(1-exp (-(a/b)^2))`. -/
 @[dlmf 7.14.E1]
 theorem erfc_fourier_halfLine {b : ℂ} (hb0 : b ≠ 0) (hb : |arg b| < π/4) (a : ℂ) :
-    (∫ t : ℝ in Ioi 0, exp (2*I*a*t)*erfc (b*t))=if a=0 then 1/(b*Real.sqrt π) else dawsonF (a/b)/(a*Real.sqrt π)+I/(2*a)*(1-exp (-(a/b)^2)) := by
+    (∫ t : ℝ in Ioi 0, exp (2*I*a*t)*erfc (b*t))=if a=0 then 1/(b*Real.sqrt π) else
+        dawsonF (a/b)/(a*Real.sqrt π)+I/(2*a)*(1-exp (-(a/b)^2)) := by
   have hbr : 0 < b.re := re_pos_of_abs_arg_lt hb0 (by linarith [Real.pi_pos])
   have hb2 := re_sq_pos_of_abs_arg_lt hb0 hb
   set β := (b^2).re
@@ -868,13 +889,15 @@ theorem erfc_fourier_halfLine {b : ℂ} (hb0 : b ≠ 0) (hb : |arg b| < π/4) (a
   have hint : IntegrableOn (fun t : ℝ => exp (2*I*a*t)*erfc (b*t)) (Ioi 0) := by
     refine Integrable.mono' hgint.integrableOn ?_ ?_
     · exact (Continuous.aestronglyMeasurable (by
-        have : Continuous erfc := by unfold erfc; have := differentiable_erf_complex.continuous; fun_prop
+        have : Continuous erfc := by unfold erfc; have :=
+                                       differentiable_erf_complex.continuous; fun_prop
         fun_prop))
     · exact (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => hmaj t ht)
   have hPlim : Tendsto (fun t : ℝ => exp (2*I*a*t)*erfc (b*t)) atTop (𝓝 0) := by
     refine squeeze_zero_norm' ?_ hmajlim
     filter_upwards [eventually_gt_atTop 0] with t ht using hmaj t ht
-  have herfc (t : ℝ) : HasDerivAt (fun t : ℝ => erfc (b*(t:ℂ))) (-(2/Real.sqrt π*exp (-(b*t)^2)*b)) t := by
+  have herfc (t : ℝ) : HasDerivAt (fun t : ℝ => erfc (b*(t:ℂ)))
+      (-(2/Real.sqrt π*exp (-(b*t)^2)*b)) t := by
     have := (hasDerivAt_erf_complex (b*t)).comp t (((hasDerivAt_id (t:ℂ)).const_mul b).comp_ofReal)
     simpa [erfc, Function.comp_def] using this.const_sub 1
   split_ifs with ha
@@ -882,7 +905,8 @@ theorem erfc_fourier_halfLine {b : ℂ} (hb0 : b ≠ 0) (hb : |arg b| < π/4) (a
     simp only [mul_zero, zero_mul, Complex.exp_zero, one_mul]
     set F : ℝ → ℂ := fun t => t*erfc (b*t) - exp (-(b^2)*t^2)/(b*Real.sqrt π) with hF
     have hd (t : ℝ) : HasDerivAt F (erfc (b*t)) t := by
-      have h1 : HasDerivAt (fun t : ℝ => exp (-(b^2)*(t:ℂ)^2)) (exp (-(b^2)*t^2)*(-(b^2)*(2*t))) t := by
+      have h1 : HasDerivAt (fun t : ℝ => exp (-(b^2)*(t:ℂ)^2))
+          (exp (-(b^2)*t^2)*(-(b^2)*(2*t))) t := by
         have := (((hasDerivAt_id (t:ℂ)).pow 2).const_mul (-(b^2))).cexp
         simpa using this.comp_ofReal
       have := ((hasDerivAt_id t).ofReal_comp.mul (herfc t)).sub (h1.div_const (b*Real.sqrt π))
@@ -894,7 +918,8 @@ theorem erfc_fourier_halfLine {b : ℂ} (hb0 : b ≠ 0) (hb : |arg b| < π/4) (a
       have h1 : Tendsto (fun t : ℝ => (t:ℂ)*erfc (b*t)) atTop (𝓝 0) := by
         have hs0 : 0 < Real.sqrt (π*β) := Real.sqrt_pos.mpr (by positivity)
         have hm : Tendsto (fun t : ℝ => Real.exp (-β*t^2)/Real.sqrt (π*β)) atTop (𝓝 0) := by
-          have := (Real.tendsto_exp_atBot.comp ((tendsto_pow_atTop two_ne_zero).const_mul_atTop_of_neg
+          have := (Real.tendsto_exp_atBot.comp
+              ((tendsto_pow_atTop two_ne_zero).const_mul_atTop_of_neg
             (by linarith : -β < 0))).div_const (Real.sqrt (π*β))
           simpa using this
         refine squeeze_zero_norm' ?_ hm
@@ -911,7 +936,8 @@ theorem erfc_fourier_halfLine {b : ℂ} (hb0 : b ≠ 0) (hb : |arg b| < π/4) (a
       have h2 : Tendsto (fun t : ℝ => exp (-(b^2)*(t:ℂ)^2)) atTop (𝓝 0) := by
         rw [tendsto_zero_iff_norm_tendsto_zero]
         have : Tendsto (fun t : ℝ => Real.exp (-β*t^2)) atTop (𝓝 0) :=
-          Real.tendsto_exp_atBot.comp ((tendsto_pow_atTop two_ne_zero).const_mul_atTop_of_neg (by linarith))
+          Real.tendsto_exp_atBot.comp
+              ((tendsto_pow_atTop two_ne_zero).const_mul_atTop_of_neg (by linarith))
         refine this.congr fun t => ?_
         rw [Complex.norm_exp]; congr 1
         rw [← ofReal_pow, re_mul_ofReal, neg_re]
@@ -1042,8 +1068,10 @@ theorem div_cpow_half {b c : ℂ} (hb : 0 < b.re) (hc : 0 < c.re) :
     have hn : 0 < normSq q := normSq_pos.mpr hq0
     have hlt : (p.im*q.im)^2 < (p.re*q.re)^2 := by
       rw [mul_pow, mul_pow]
-      have h3 : p.im^2*q.im^2 ≤ p.re^2*q.im^2 := mul_le_mul_of_nonneg_right (by linarith) (sq_nonneg _)
-      have h4 : p.re^2*q.im^2 < p.re^2*q.re^2 := mul_lt_mul_of_pos_left (by linarith) (by positivity)
+      have h3 : p.im^2*q.im^2 ≤ p.re^2*q.im^2 :=
+          mul_le_mul_of_nonneg_right (by linarith) (sq_nonneg _)
+      have h4 : p.re^2*q.im^2 < p.re^2*q.re^2 :=
+          mul_lt_mul_of_pos_left (by linarith) (by positivity)
       linarith
     have := abs_lt_of_sq_lt_sq hlt (by positivity)
     have h5 : 0 < p.re*q.re + p.im*q.im := by linarith [neg_abs_le (p.im*q.im)]

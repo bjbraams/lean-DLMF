@@ -83,7 +83,8 @@ theorem wigner9j_zero (j₁₁ j₁₂ j₁₃ j₂₁ j₂₂ j₃₁ : ℚ) :
     linarith
   have hF3 : wigner6j j₁₃ j₁₃ 0 j₁₁ j₁₁ j₁₂ = wigner6j j₁₂ j₁₁ j₁₃ 0 j₁₃ j₁₁ := by
     rw [wigner6j_flip j₁₃ j₁₃ 0 j₁₁ j₁₁ j₁₂, wigner6j_swap_columns j₁₃ j₁₁ j₁₂ j₁₁ j₁₃ 0,
-      wigner6j_swap_columns_two_three j₁₁ j₁₃ j₁₂ j₁₃ j₁₁ 0, wigner6j_swap_columns j₁₁ j₁₂ j₁₃ j₁₃ 0 j₁₁]
+      wigner6j_swap_columns_two_three j₁₁ j₁₃ j₁₂ j₁₃ j₁₁ 0,
+          wigner6j_swap_columns j₁₁ j₁₂ j₁₃ j₁₃ 0 j₁₁]
   have hF1 : wigner6j j₁₁ j₂₁ j₃₁ j₃₁ 0 j₁₁ = wigner6j j₂₁ j₁₁ j₃₁ 0 j₃₁ j₁₁ :=
     wigner6j_swap_columns _ _ _ _ _ _
   unfold wigner9j
@@ -156,7 +157,8 @@ theorem wigner9j_transpose (j₁₁ j₁₂ j₁₃ j₂₁ j₂₂ j₂₃ j₃
   refine Finset.sum_congr rfl fun t _ => ?_
   set x : ℚ := (t : ℚ) / 2
   have e1 : wigner6j j₁₁ j₂₁ j₃₁ j₃₂ j₃₃ x = wigner6j j₃₁ j₃₂ j₃₃ x j₁₁ j₂₁ := by
-    rw [wigner6j_flip_first_two j₁₁ j₂₁ j₃₁ j₃₂ j₃₃ x, wigner6j_swap_columns_two_three j₃₂ j₃₃ j₃₁ j₁₁ j₂₁ x,
+    rw [wigner6j_flip_first_two j₁₁ j₂₁ j₃₁ j₃₂ j₃₃ x,
+        wigner6j_swap_columns_two_three j₃₂ j₃₃ j₃₁ j₁₁ j₂₁ x,
       wigner6j_swap_columns j₃₂ j₃₁ j₃₃ j₁₁ x j₂₁]
   have e3 : wigner6j j₁₃ j₂₃ j₃₃ x j₁₁ j₁₂ = wigner6j j₁₁ j₁₂ j₁₃ j₂₃ j₃₃ x := by
     rw [wigner6j_flip j₁₃ j₂₃ j₃₃ x j₁₁ j₁₂, wigner6j_swap_columns j₁₃ j₁₁ j₁₂ x j₂₃ j₃₃,

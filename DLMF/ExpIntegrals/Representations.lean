@@ -140,7 +140,9 @@ lemma expIntE1_rational_intervalIntegrable (a x : ℝ) (ha : 0 < a) (G : ℝ →
 (exp (a*b : ℂ)*genExpIntE 1 (a*b))`. -/
 @[dlmf 6.7.E1]
 theorem expIntE1_scaled_integrals {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
-    HasIntegralAtTop (fun t : ℝ => exp (-a*t : ℂ)/(t+b)) 0 (exp (a*b : ℂ)*genExpIntE 1 (a*b)) ∧ HasIntegralAtTop (fun t : ℝ => exp (I*a*t)/(t+I*b)) 0 (exp (a*b : ℂ)*genExpIntE 1 (a*b)) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-a*t : ℂ)/(t+b)) 0 (exp (a*b : ℂ)*genExpIntE 1 (a*b)) ∧
+        HasIntegralAtTop (fun t : ℝ => exp (I*a*t)/(t+I*b)) 0
+        (exp (a*b : ℂ)*genExpIntE 1 (a*b)) := by
   have hat : Tendsto (fun t : ℝ => a*t) atTop atTop := tendsto_id.const_mul_atTop ha
   have ha0 : (a:ℂ) ≠ 0 := ofReal_ne_zero.mpr ha.ne'
   have hab : exp (a*b : ℂ)*exp (-(a*b) : ℂ) = 1 := by rw [← Complex.exp_add]; simp
@@ -156,7 +158,8 @@ theorem expIntE1_scaled_integrals {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
       have htb : (t:ℂ)+b ≠ 0 := by
         have : (0:ℝ) < t+b := by linarith
         exact_mod_cast this.ne'
-      rw [show (1:ℂ)-1 = 0 by norm_num, genExpIntE_zero_eq, show -((a:ℂ)*(t+b)) = -a*t+(-(a*b)) by ring,
+      rw [show (1:ℂ)-1 = 0 by norm_num, genExpIntE_zero_eq, show -((a:ℂ)*(t+b)) =
+                                -a*t+(-(a*b)) by ring,
         Complex.exp_add]
       simp only [id, mul_one, Function.comp_apply]
       field_simp
@@ -174,7 +177,8 @@ theorem expIntE1_scaled_integrals {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     simpa using h
   · have hs : ∀ t : ℝ, 0 ≤ t → -I*(a*(t+I*b)) ∈ slitPlane := fun t ht => by
       left; simp; positivity
-    have hd : ∀ t : ℝ, 0 ≤ t → HasDerivAt (fun t : ℝ => -exp (a*b : ℂ)*genExpIntE 1 (-I*(a*(t+I*b))))
+    have hd : ∀ t : ℝ, 0 ≤ t →
+        HasDerivAt (fun t : ℝ => -exp (a*b : ℂ)*genExpIntE 1 (-I*(a*(t+I*b))))
         (exp (I*a*t)/(t+I*b)) t := by
       intro t ht
       have h1 := (hasDerivAt_genExpIntE 1 (hs t ht)).comp (t:ℂ)
@@ -194,7 +198,8 @@ theorem expIntE1_scaled_integrals {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
       ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht h0 => by
         have := congrArg Complex.im h0; simp at this; linarith
     have hl : Tendsto (fun t : ℝ => -exp (a*b : ℂ)*genExpIntE 1 (-I*(a*(t+I*b)))) atTop (𝓝 0) := by
-      have h := ((tendsto_expIntE1_mul_I_add_ofReal (I*a*b) (ε := -1) (Or.inr rfl)).comp hat).const_mul
+      have h := ((tendsto_expIntE1_mul_I_add_ofReal (I*a*b) (ε := -1)
+          (Or.inr rfl)).comp hat).const_mul
         (-exp (a*b : ℂ))
       rw [mul_zero] at h
       refine h.congr fun t => ?_
@@ -231,7 +236,8 @@ theorem Real.hasDerivAt_expIntEi {u : ℝ} (hu : 0 < u) :
 Real.exp (-x*t)/(1-t)) = Real.expIntEi x - Real.expIntEi ((1-α)*x)`. -/
 @[dlmf 6.7.E2]
 theorem expIntEi_finite_integral {x α : ℝ} (hx : 0 < x) (hα : 0 ≤ α) (hα1 : α < 1) :
-    Real.exp x * (∫ t in (0 : ℝ)..α, Real.exp (-x*t)/(1-t)) = Real.expIntEi x - Real.expIntEi ((1-α)*x) := by
+    Real.exp x * (∫ t in (0 : ℝ)..α, Real.exp (-x*t)/(1-t)) = Real.expIntEi x -
+        Real.expIntEi ((1-α)*x) := by
   have hd : ∀ t ∈ uIcc 0 α, HasDerivAt (fun t => -Real.expIntEi ((1-t)*x))
       (Real.exp x * (Real.exp (-x*t)/(1-t))) t := by
     intro t ht
@@ -255,7 +261,8 @@ theorem expIntEi_finite_integral {x α : ℝ} (hx : 0 < x) (hα : 0 ≤ α) (hα
 ℂ)^2)) x (I/(2*a)*(exp a*genExpIntE 1 (a-I*x)-exp (-a)*genExpIntE 1 (-a-I*x)))`. -/
 @[dlmf 6.7.E3]
 theorem expIntE1_rational_fourier_0 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
-    HasIntegralAtTop (fun t : ℝ => exp (I*t)/(a^2+(t : ℂ)^2)) x (I/(2*a)*(exp a*genExpIntE 1 (a-I*x)-exp (-a)*genExpIntE 1 (-a-I*x))) := by
+    HasIntegralAtTop (fun t : ℝ => exp (I*t)/(a^2+(t : ℂ)^2)) x
+        (I/(2*a)*(exp a*genExpIntE 1 (a-I*x)-exp (-a)*genExpIntE 1 (-a-I*x))) := by
   obtain ⟨s1, s2⟩ := expIntE1_rational_slit_I ha hx
   obtain ⟨i1, i2⟩ := expIntE1_rational_intervalIntegrable a x ha (fun t => exp (I*t)) (by fun_prop)
   have h1 := hasIntegralAtTop_exp_I_div_sub _ x s1
@@ -264,7 +271,8 @@ theorem expIntE1_rational_fourier_0 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     fun t _ => ((expIntE1_rational_split ha t _).1).symm
   convert h using 1
   have ha0 : (a:ℂ) ≠ 0 := ofReal_ne_zero.mpr ha.ne'
-  rw [show I*(I*(a:ℂ)) = -a by ring_nf; rw [I_sq]; ring, show I*(-I*(a:ℂ)) = a by ring_nf; rw [I_sq]; ring,
+  rw [show I*(I*(a:ℂ)) = -a by ring_nf; rw [I_sq]; ring, show I*(-I*(a:ℂ)) = a by ring_nf;
+                                                                                  rw [I_sq]; ring,
     show -I*((x:ℂ)-I*a) = -a-I*x by ring_nf; rw [I_sq]; ring,
     show -I*((x:ℂ)-(-I*a)) = a-I*x by ring_nf; rw [I_sq]; ring]
   field_simp
@@ -274,16 +282,19 @@ theorem expIntE1_rational_fourier_0 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
 ℂ)^2)) x (-1/(2*a*I)*(exp (I*a)*genExpIntE 1 (x+I*a)-exp (-I*a)*genExpIntE 1 (x-I*a)))`. -/
 @[dlmf 6.7.E5]
 theorem expIntE1_rational_laplace_0 {a : ℝ} (ha : 0 < a) (x : ℝ) :
-    HasIntegralAtTop (fun t : ℝ => exp (-t : ℂ)/(a^2+(t : ℂ)^2)) x (-1/(2*a*I)*(exp (I*a)*genExpIntE 1 (x+I*a)-exp (-I*a)*genExpIntE 1 (x-I*a))) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-t : ℂ)/(a^2+(t : ℂ)^2)) x
+        (-1/(2*a*I)*(exp (I*a)*genExpIntE 1 (x+I*a)-exp (-I*a)*genExpIntE 1 (x-I*a))) := by
   obtain ⟨s1, s2⟩ := expIntE1_rational_slit_real ha x
-  obtain ⟨i1, i2⟩ := expIntE1_rational_intervalIntegrable a x ha (fun t => exp (-t : ℂ)) (by fun_prop)
+  obtain ⟨i1, i2⟩ := expIntE1_rational_intervalIntegrable a x ha
+      (fun t => exp (-t : ℂ)) (by fun_prop)
   have h1 := hasIntegralAtTop_exp_neg_div_sub _ x s1
   have h2 := (hasIntegralAtTop_exp_neg_div_sub _ x s2).const_mul (-1)
   have h := ((h1.add h2 i1 (fun R hR => (i2 R hR).const_mul _)).const_mul (1/(2*I*a))).congr
     fun t _ => ((expIntE1_rational_split ha t _).1).symm
   convert h using 1
   have ha0 : (a:ℂ) ≠ 0 := ofReal_ne_zero.mpr ha.ne'
-  rw [show (x:ℂ)-(-I*a) = x+I*a by ring, show -(-I*(a:ℂ)) = I*a by ring, show -(I*(a:ℂ)) = -I*a by ring]
+  rw [show (x:ℂ)-(-I*a) = x+I*a by ring, show -(-I*(a:ℂ)) =
+                                     I*a by ring, show -(I*(a:ℂ)) = -I*a by ring]
   field_simp
   ring_nf
 
@@ -291,7 +302,8 @@ theorem expIntE1_rational_laplace_0 {a : ℝ} (ha : 0 < a) (x : ℝ) :
 (I*t)/(a^2+(t : ℂ)^2)) x ((exp a*genExpIntE 1 (a-I*x)+exp (-a)*genExpIntE 1 (-a-I*x))/2)`. -/
 @[dlmf 6.7.E4]
 theorem expIntE1_rational_fourier_1 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
-    HasIntegralAtTop (fun t : ℝ => (t : ℂ)*exp (I*t)/(a^2+(t : ℂ)^2)) x ((exp a*genExpIntE 1 (a-I*x)+exp (-a)*genExpIntE 1 (-a-I*x))/2) := by
+    HasIntegralAtTop (fun t : ℝ => (t : ℂ)*exp (I*t)/(a^2+(t : ℂ)^2)) x
+        ((exp a*genExpIntE 1 (a-I*x)+exp (-a)*genExpIntE 1 (-a-I*x))/2) := by
   obtain ⟨s1, s2⟩ := expIntE1_rational_slit_I ha hx
   obtain ⟨i1, i2⟩ := expIntE1_rational_intervalIntegrable a x ha (fun t => exp (I*t)) (by fun_prop)
   have h1 := hasIntegralAtTop_exp_I_div_sub _ x s1
@@ -299,7 +311,8 @@ theorem expIntE1_rational_fourier_1 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
   have h := ((h1.add h2 i1 i2).const_mul (1/2)).congr
     fun t _ => ((expIntE1_rational_split ha t _).2).symm
   convert h using 1
-  rw [show I*(I*(a:ℂ)) = -a by ring_nf; rw [I_sq]; ring, show I*(-I*(a:ℂ)) = a by ring_nf; rw [I_sq]; ring,
+  rw [show I*(I*(a:ℂ)) = -a by ring_nf; rw [I_sq]; ring, show I*(-I*(a:ℂ)) = a by ring_nf;
+                                                                                  rw [I_sq]; ring,
     show -I*((x:ℂ)-I*a) = -a-I*x by ring_nf; rw [I_sq]; ring,
     show -I*((x:ℂ)-(-I*a)) = a-I*x by ring_nf; rw [I_sq]; ring]
   ring
@@ -308,15 +321,18 @@ theorem expIntE1_rational_fourier_1 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
 ℂ)/(a^2+(t : ℂ)^2)) x ((exp (I*a)*genExpIntE 1 (x+I*a)+exp (-I*a)*genExpIntE 1 (x-I*a))/2)`. -/
 @[dlmf 6.7.E6]
 theorem expIntE1_rational_laplace_1 {a : ℝ} (ha : 0 < a) (x : ℝ) :
-    HasIntegralAtTop (fun t : ℝ => (t : ℂ)*exp (-t : ℂ)/(a^2+(t : ℂ)^2)) x ((exp (I*a)*genExpIntE 1 (x+I*a)+exp (-I*a)*genExpIntE 1 (x-I*a))/2) := by
+    HasIntegralAtTop (fun t : ℝ => (t : ℂ)*exp (-t : ℂ)/(a^2+(t : ℂ)^2)) x
+        ((exp (I*a)*genExpIntE 1 (x+I*a)+exp (-I*a)*genExpIntE 1 (x-I*a))/2) := by
   obtain ⟨s1, s2⟩ := expIntE1_rational_slit_real ha x
-  obtain ⟨i1, i2⟩ := expIntE1_rational_intervalIntegrable a x ha (fun t => exp (-t : ℂ)) (by fun_prop)
+  obtain ⟨i1, i2⟩ := expIntE1_rational_intervalIntegrable a x ha
+      (fun t => exp (-t : ℂ)) (by fun_prop)
   have h1 := hasIntegralAtTop_exp_neg_div_sub _ x s1
   have h2 := hasIntegralAtTop_exp_neg_div_sub _ x s2
   have h := ((h1.add h2 i1 i2).const_mul (1/2)).congr
     fun t _ => ((expIntE1_rational_split ha t _).2).symm
   convert h using 1
-  rw [show (x:ℂ)-(-I*a) = x+I*a by ring, show -(-I*(a:ℂ)) = I*a by ring, show -(I*(a:ℂ)) = -I*a by ring]
+  rw [show (x:ℂ)-(-I*a) = x+I*a by ring, show -(-I*(a:ℂ)) =
+                                     I*a by ring, show -(I*(a:ℂ)) = -I*a by ring]
   ring
 
 /-- A removable-quotient primitive on a straight segment is an integral over the unit interval,
@@ -365,7 +381,8 @@ theorem expIntEin_real_integral_7 (a b : ℝ) :
 (-a*t)*(1-Real.cos (b*t))/t) = (expIntEin (a+I*b)).re-(expIntEin a).re`. -/
 @[dlmf 6.7.E8]
 theorem expIntEin_real_integral_8 (a b : ℝ) :
-    (∫ t in (0 : ℝ)..1, Real.exp (-a*t)*(1-Real.cos (b*t))/t) = (expIntEin (a+I*b)).re-(expIntEin a).re := by
+    (∫ t in (0 : ℝ)..1, Real.exp (-a*t)*(1-Real.cos (b*t))/t) =
+        (expIntEin (a+I*b)).re-(expIntEin a).re := by
   obtain ⟨hi, he⟩ := primitive_div_self_eq_integral (F := fun t => 1-exp (-t)) (by fun_prop)
     (by simp) (a+I*b)
   obtain ⟨hi', he'⟩ := primitive_div_self_eq_integral (F := fun t => 1-exp (-t)) (by fun_prop)
@@ -383,7 +400,8 @@ theorem expIntEin_real_integral_8 (a b : ℝ) :
 (-a*t))*Real.cos (b*t)/t) = (expIntEin (a+I*b)).re-(cosIntCin b).re`. -/
 @[dlmf 6.7.E11]
 theorem expIntEin_real_integral_11 (a b : ℝ) :
-    (∫ t in (0 : ℝ)..1, (1-Real.exp (-a*t))*Real.cos (b*t)/t) = (expIntEin (a+I*b)).re-(cosIntCin b).re := by
+    (∫ t in (0 : ℝ)..1, (1-Real.exp (-a*t))*Real.cos (b*t)/t) =
+        (expIntEin (a+I*b)).re-(cosIntCin b).re := by
   obtain ⟨hi, he⟩ := primitive_div_self_eq_integral (F := fun t => 1-exp (-t)) (by fun_prop)
     (by simp) (a+I*b)
   obtain ⟨hi', he'⟩ := primitive_div_self_eq_integral (F := fun t => 1-cos t) (by fun_prop)
@@ -471,7 +489,8 @@ theorem sinIntTail_angular_integral (z : ℂ) :
     congr 2 <;> congr 1 <;> ring
   simp_rw [hpt]
   rw [intervalIntegral.integral_div, intervalIntegral.integral_add
-    (by apply Continuous.intervalIntegrable; fun_prop) (by apply Continuous.intervalIntegrable; fun_prop),
+    (by apply Continuous.intervalIntegrable; fun_prop)
+        (by apply Continuous.intervalIntegrable; fun_prop),
     eiIn_arc_integral_exp (Or.inl rfl), eiIn_arc_integral_exp (Or.inr rfl), eiIn_Ein_neg_I,
     show I*(1:ℂ)*z = I*z by ring, expIntEin_mul_I, sinIntTail]
   field_simp
@@ -489,8 +508,10 @@ theorem Ein_sub_Cin_angular_integral (z : ℂ) :
     rw [Complex.sin, mul_div_assoc', ← mul_assoc, mul_sub, ← Complex.exp_add, ← Complex.exp_add]
     congr 3 <;> congr 1 <;> ring
   simp_rw [hpt]
-  rw [intervalIntegral.integral_div, intervalIntegral.integral_mul_const, intervalIntegral.integral_sub
-    (by apply Continuous.intervalIntegrable; fun_prop) (by apply Continuous.intervalIntegrable; fun_prop),
+  rw [intervalIntegral.integral_div, intervalIntegral.integral_mul_const,
+      intervalIntegral.integral_sub
+    (by apply Continuous.intervalIntegrable; fun_prop)
+        (by apply Continuous.intervalIntegrable; fun_prop),
     eiIn_arc_integral_exp (Or.inl rfl), eiIn_arc_integral_exp (Or.inr rfl), eiIn_Ein_neg_I,
     show I*(1:ℂ)*z = I*z by ring, expIntEin_mul_I]
   field_simp
@@ -500,14 +521,17 @@ theorem Ein_sub_Cin_angular_integral (z : ℂ) :
 (exp (I*z)*(expIntAuxG z+I*expIntAuxF z))`. -/
 @[dlmf 6.7.E12]
 theorem expIntAux_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
-    HasIntegralAtTop (fun t : ℝ => exp (I*(z+t))/(z+t)) 0 (exp (I*z)*(expIntAuxG z+I*expIntAuxF z)) := by
-  have hd : ∀ t : ℝ, 0 ≤ t → HasDerivAt (fun t : ℝ => -(exp (I*(z+t))*(expIntAuxG (z+t)+I*expIntAuxF (z+t))))
+    HasIntegralAtTop (fun t : ℝ => exp (I*(z+t))/(z+t)) 0
+        (exp (I*z)*(expIntAuxG z+I*expIntAuxF z)) := by
+  have hd : ∀ t : ℝ, 0 ≤ t →
+      HasDerivAt (fun t : ℝ => -(exp (I*(z+t))*(expIntAuxG (z+t)+I*expIntAuxF (z+t))))
       (exp (I*(z+t))/(z+t)) t := by
     intro t ht
     have hm := add_ofReal_mem_slitPlane hz ht
     have h0 := slitPlane_ne_zero hm
     have hG : HasDerivAt (fun w => -(exp (I*w)*(expIntAuxG w+I*expIntAuxF w)))
-        (-((I*exp (I*(z+t)))*(expIntAuxG (z+t)+I*expIntAuxF (z+t))+exp (I*(z+t))*((expIntAuxF (z+t)-1/(z+t))+I*(-expIntAuxG (z+t))))) (z+t) := by
+        (-((I*exp (I*(z+t)))*(expIntAuxG (z+t)+I*expIntAuxF (z+t))+exp
+            (I*(z+t))*((expIntAuxF (z+t)-1/(z+t))+I*(-expIntAuxG (z+t))))) (z+t) := by
       have he : HasDerivAt (fun w => exp (I*w)) (I*exp (I*(z+t))) (z+t) := by
         simpa [mul_comm] using ((hasDerivAt_id (z+t)).const_mul I).cexp
       exact (he.mul ((hasDerivAt_expIntAuxG hm).add ((hasDerivAt_expIntAuxF hm).const_mul I))).neg
@@ -515,8 +539,10 @@ theorem expIntAux_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     field_simp
     ring_nf; rw [I_sq]; ring
   have hc : ContinuousOn (fun t : ℝ => exp (I*(z+t))/(z+t)) (Ici 0) :=
-    ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => slitPlane_ne_zero (add_ofReal_mem_slitPlane hz ht)
-  have hl : Tendsto (fun t : ℝ => -(exp (I*(z+t))*(expIntAuxG (z+t)+I*expIntAuxF (z+t)))) atTop (𝓝 0) := by
+    ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht =>
+        slitPlane_ne_zero (add_ofReal_mem_slitPlane hz ht)
+  have hl : Tendsto (fun t : ℝ => -(exp (I*(z+t))*(expIntAuxG (z+t)+I*expIntAuxF (z+t))))
+      atTop (𝓝 0) := by
     have h := (tendsto_expIntE1_mul_I_add_ofReal z (ε := -1) (Or.inr rfl)).neg
     rw [neg_zero] at h
     refine h.congr' ?_
@@ -541,7 +567,8 @@ theorem expIntAuxF_oscillatory_integral {z : ℂ} (hz : z ∈ slitPlane) :
     have h0 := slitPlane_ne_zero hm
     have hG : HasDerivAt (fun w => cos z*sinIntTail w-sin z*cosInt w)
         (cos z*(sin (z+t)/(z+t))-sin z*(cos (z+t)/(z+t))) (z+t) :=
-      (((hasDerivAt_sinInt_complex h0).sub_const _).const_mul _).sub ((hasDerivAt_cosInt_complex hm).const_mul _)
+      (((hasDerivAt_sinInt_complex h0).sub_const _).const_mul _).sub
+          ((hasDerivAt_cosInt_complex hm).const_mul _)
     refine (hasDerivAt_comp_add_ofReal hG).congr_deriv ?_
     have hs : sin (t:ℂ) = sin (z+t)*cos z-cos (z+t)*sin z := by
       rw [← Complex.sin_sub]; ring_nf
@@ -982,7 +1009,8 @@ theorem expIntAuxG_oscillatory_integral {z : ℂ} (hz : z ∈ slitPlane) :
     have h0 := slitPlane_ne_zero hm
     have hG : HasDerivAt (fun w => cos z*cosInt w+sin z*sinIntTail w)
         (cos z*(cos (z+t)/(z+t))+sin z*(sin (z+t)/(z+t))) (z+t) :=
-      ((hasDerivAt_cosInt_complex hm).const_mul _).add (((hasDerivAt_sinInt_complex h0).sub_const _).const_mul _)
+      ((hasDerivAt_cosInt_complex hm).const_mul _).add
+          (((hasDerivAt_sinInt_complex h0).sub_const _).const_mul _)
     refine (hasDerivAt_comp_add_ofReal hG).congr_deriv ?_
     have hs : cos (t:ℂ) = cos (z+t)*cos z+sin (z+t)*sin z := by
       rw [← Complex.cos_sub]; ring_nf
@@ -1107,7 +1135,8 @@ theorem eiIn_log_lt_half_sub_recip {y : ℝ} (hy : 1 < y) : Real.log y < (y - 1/
       have hd : HasDerivAt h (((1 - (-(1:ℝ)/s^2)))/2 - 1/s) s := by
         have h1 : HasDerivAt (fun s : ℝ => 1/s) (-(1:ℝ)/s^2) s := by
           simpa [one_div, neg_div] using hasDerivAt_inv hs0
-        exact (((hasDerivAt_id s).sub h1).div_const 2).sub (by simpa [one_div] using Real.hasDerivAt_log hs0)
+        exact (((hasDerivAt_id s).sub h1).div_const 2).sub
+            (by simpa [one_div] using Real.hasDerivAt_log hs0)
       rw [hd.deriv, show ((1 - (-(1:ℝ)/s^2)))/2 - 1/s = (s-1)^2/(2*s^2) by field_simp; ring]
       have : 0 < s - 1 := by linarith
       positivity
@@ -1130,9 +1159,11 @@ end InequalityTools
 x*(genExpIntE 1 x).re ∧ Real.exp x*(genExpIntE 1 x).re < Real.log (1+1/x)`. -/
 @[dlmf 6.8.E1]
 theorem expIntE1_inequality_1 {x : ℝ} (hx : 0 < x) :
-    Real.log (1+2/x)/2 < Real.exp x*(genExpIntE 1 x).re ∧ Real.exp x*(genExpIntE 1 x).re < Real.log (1+1/x) := by
+    Real.log (1+2/x)/2 < Real.exp x*(genExpIntE 1 x).re ∧ Real.exp x*(genExpIntE 1 x).re <
+        Real.log (1+1/x) := by
   constructor
-  · refine eiIn_lt_of_sub_neg (R := fun t => Real.log (1+2/t)/2) (R' := fun t => -(1/(t*(t+2)))) hx ?_ ?_ ?_
+  · refine eiIn_lt_of_sub_neg (R := fun t => Real.log (1+2/t)/2)
+        (R' := fun t => -(1/(t*(t+2)))) hx ?_ ?_ ?_
     · intro t ht
       have h1 : (1:ℝ)+2/t ≠ 0 := by positivity
       have hd : HasDerivAt (fun s : ℝ => 1+2/s) (-(2:ℝ)/t^2) t := by
@@ -1144,13 +1175,15 @@ theorem expIntE1_inequality_1 {x : ℝ} (hx : 0 < x) :
       have : (1+2/t - 1/(1+2/t))/2 = 2*(t+1)/(t*(t+2)) := by field_simp; ring
       have h2 : -(1/(t*(t+2))) = -(2/(2*t*(t+2))) := by field_simp
       rw [this] at hl
-      have : Real.log (1+2/t)/2 - -(1/(t*(t+2))) - 1/t = (Real.log (1+2/t) - 2*(t+1)/(t*(t+2)))/2 := by
+      have : Real.log (1+2/t)/2 - -(1/(t*(t+2))) - 1/t =
+          (Real.log (1+2/t) - 2*(t+1)/(t*(t+2)))/2 := by
         field_simp; ring
       rw [this]; linarith
     · refine eiIn_tendsto_rat (F := fun u => Real.log (1+2*u)/2) ?_ (by simp) fun t ht => by
         simp [div_eq_mul_inv]
       exact ((Real.continuousAt_log (by norm_num)).comp (by fun_prop)).div_const 2
-  · refine eiIn_gt_of_sub_pos (R := fun t => Real.log (1+1/t)) (R' := fun t => -(1/(t*(t+1)))) hx ?_ ?_ ?_
+  · refine eiIn_gt_of_sub_pos (R := fun t => Real.log (1+1/t))
+        (R' := fun t => -(1/(t*(t+1)))) hx ?_ ?_ ?_
     · intro t ht
       have h1 : (1:ℝ)+1/t ≠ 0 := by positivity
       have hd : HasDerivAt (fun s : ℝ => 1+1/s) (-(1:ℝ)/t^2) t := by
@@ -1178,7 +1211,8 @@ theorem expIntE1_inequality_1 {x : ℝ} (hx : 0 < x) :
 x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re < (x+1)/(x+2)`. -/
 @[dlmf 6.8.E2]
 theorem expIntE1_inequality_2 {x : ℝ} (hx : 0 < x) :
-    x/(x+1) < x*Real.exp x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re < (x+1)/(x+2) := by
+    x/(x+1) < x*Real.exp x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re <
+        (x+1)/(x+2) := by
   have hlo : 1/(x+1) < Real.exp x*(genExpIntE 1 x).re := by
     refine eiIn_lt_of_sub_neg (R := fun t => 1/(t+1)) (R' := fun t => -(1/(t+1)^2)) hx ?_ ?_ ?_
     · intro t ht
@@ -1193,7 +1227,8 @@ theorem expIntE1_inequality_2 {x : ℝ} (hx : 0 < x) :
     · exact eiIn_tendsto_rat (F := fun u => u/(1+u)) (by fun_prop (disch := norm_num)) (by simp)
         fun t ht => by field_simp
   have hhi : Real.exp x*(genExpIntE 1 x).re < (x+1)/(x*(x+2)) := by
-    refine eiIn_gt_of_sub_pos (R := fun t => (t+1)/(t*(t+2))) (R' := fun t => (1*(t*(t+2)) - (t+1)*(2*t+2))/(t*(t+2))^2) hx ?_ ?_ ?_
+    refine eiIn_gt_of_sub_pos (R := fun t => (t+1)/(t*(t+2)))
+        (R' := fun t => (1*(t*(t+2)) - (t+1)*(2*t+2))/(t*(t+2))^2) hx ?_ ?_ ?_
     · intro t ht
       have h0 : t*(t+2) ≠ 0 := by positivity
       have hn : HasDerivAt (fun s : ℝ => s+1) 1 t := (hasDerivAt_id t).add_const 1
@@ -1205,7 +1240,8 @@ theorem expIntE1_inequality_2 {x : ℝ} (hx : 0 < x) :
       rw [show (t+1)/(t*(t+2)) - (1*(t*(t+2)) - (t+1)*(2*t+2))/(t*(t+2))^2 - 1/t
         = 2/(t^2*(t+2)^2) by field_simp; ring]
       positivity
-    · exact eiIn_tendsto_rat (F := fun u => u*(1+u)/(1+2*u)) (by fun_prop (disch := norm_num)) (by simp)
+    · exact eiIn_tendsto_rat (F := fun u => u*(1+u)/(1+2*u))
+          (by fun_prop (disch := norm_num)) (by simp)
         fun t ht => by field_simp
   constructor
   · have := mul_lt_mul_of_pos_left hlo hx
@@ -1217,14 +1253,17 @@ theorem expIntE1_inequality_2 {x : ℝ} (hx : 0 < x) :
 x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re < (x^2+5*x+2)/(x^2+6*x+6)`. -/
 @[dlmf 6.8.E3]
 theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
-    x*(x+3)/(x^2+4*x+2) < x*Real.exp x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re < (x^2+5*x+2)/(x^2+6*x+6) := by
+    x*(x+3)/(x^2+4*x+2) < x*Real.exp x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re <
+        (x^2+5*x+2)/(x^2+6*x+6) := by
   have hlo : (x+3)/(x^2+4*x+2) < Real.exp x*(genExpIntE 1 x).re := by
-    refine eiIn_lt_of_sub_neg (R := fun t => (t+3)/(t^2+4*t+2)) (R' := fun t => (1*(t^2+4*t+2) - (t+3)*(2*t+4))/(t^2+4*t+2)^2) hx ?_ ?_ ?_
+    refine eiIn_lt_of_sub_neg (R := fun t => (t+3)/(t^2+4*t+2))
+        (R' := fun t => (1*(t^2+4*t+2) - (t+3)*(2*t+4))/(t^2+4*t+2)^2) hx ?_ ?_ ?_
     · intro t ht
       have h0 : t^2+4*t+2 ≠ 0 := by positivity
       have hn : HasDerivAt (fun s : ℝ => s+3) 1 t := (hasDerivAt_id t).add_const 3
       have hd : HasDerivAt (fun s : ℝ => s^2+4*s+2) (2*t+4) t := by
-        refine ((((hasDerivAt_id t).pow 2).add ((hasDerivAt_id t).const_mul 4)).add_const 2).congr_deriv ?_
+        refine ((((hasDerivAt_id t).pow 2).add ((hasDerivAt_id t).const_mul 4)).add_const
+            2).congr_deriv ?_
         simp
       exact hn.div hd h0
     · intro t ht
@@ -1232,14 +1271,18 @@ theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
         = -(4/(t*(t^2+4*t+2)^2)) by field_simp; ring]
       have : 0 < 4/(t*(t^2+4*t+2)^2) := by positivity
       linarith
-    · exact eiIn_tendsto_rat (F := fun u => u*(1+3*u)/(1+4*u+2*u^2)) (by fun_prop (disch := norm_num))
+    · exact eiIn_tendsto_rat (F := fun u => u*(1+3*u)/(1+4*u+2*u^2))
+          (by fun_prop (disch := norm_num))
         (by simp) fun t ht => by field_simp
   have hhi : Real.exp x*(genExpIntE 1 x).re < (x^2+5*x+2)/(x*(x^2+6*x+6)) := by
-    refine eiIn_gt_of_sub_pos (R := fun t => (t^2+5*t+2)/(t*(t^2+6*t+6))) (R' := fun t => ((2*t+5)*(t*(t^2+6*t+6)) - (t^2+5*t+2)*(3*t^2+12*t+6))/(t*(t^2+6*t+6))^2) hx ?_ ?_ ?_
+    refine eiIn_gt_of_sub_pos (R := fun t => (t^2+5*t+2)/(t*(t^2+6*t+6)))
+        (R' := fun t => ((2*t+5)*(t*(t^2+6*t+6)) -
+        (t^2+5*t+2)*(3*t^2+12*t+6))/(t*(t^2+6*t+6))^2) hx ?_ ?_ ?_
     · intro t ht
       have h0 : t*(t^2+6*t+6) ≠ 0 := by positivity
       have hn : HasDerivAt (fun s : ℝ => s^2+5*s+2) (2*t+5) t := by
-        refine ((((hasDerivAt_id t).pow 2).add ((hasDerivAt_id t).const_mul 5)).add_const 2).congr_deriv ?_
+        refine ((((hasDerivAt_id t).pow 2).add ((hasDerivAt_id t).const_mul 5)).add_const
+            2).congr_deriv ?_
         simp
       have hd : HasDerivAt (fun s : ℝ => s*(s^2+6*s+6)) (3*t^2+12*t+6) t := by
         refine ((hasDerivAt_id t).mul ((((hasDerivAt_id t).pow 2).add
@@ -1247,10 +1290,12 @@ theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
         simp; ring
       exact hn.div hd h0
     · intro t ht
-      rw [show (t^2+5*t+2)/(t*(t^2+6*t+6)) - ((2*t+5)*(t*(t^2+6*t+6)) - (t^2+5*t+2)*(3*t^2+12*t+6))/(t*(t^2+6*t+6))^2 - 1/t
+      rw [show (t^2+5*t+2)/(t*(t^2+6*t+6)) -
+          ((2*t+5)*(t*(t^2+6*t+6)) - (t^2+5*t+2)*(3*t^2+12*t+6))/(t*(t^2+6*t+6))^2 - 1/t
         = 12/(t^2*(t^2+6*t+6)^2) by field_simp; ring]
       positivity
-    · exact eiIn_tendsto_rat (F := fun u => u*(1+5*u+2*u^2)/(1+6*u+6*u^2)) (by fun_prop (disch := norm_num))
+    · exact eiIn_tendsto_rat (F := fun u => u*(1+5*u+2*u^2)/(1+6*u+6*u^2))
+          (by fun_prop (disch := norm_num))
         (by simp) fun t ht => by field_simp
   constructor
   · have := mul_lt_mul_of_pos_left hlo hx
@@ -1262,7 +1307,8 @@ theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
 ((k+1)/2 : ℕ)) (fun k => if Even k then z else 1) (genExpIntE 1 z)`. -/
 @[dlmf 6.9.E1]
 theorem expIntE1_continuedFraction {z : ℂ} (hz : z ∈ slitPlane) :
-    HasContinuedFraction (fun k => if k=0 then exp (-z) else ((k+1)/2 : ℕ)) (fun k => if Even k then z else 1) (genExpIntE 1 z) := by
+    HasContinuedFraction (fun k => if k=0 then exp (-z) else ((k+1)/2 : ℕ))
+        (fun k => if Even k then z else 1) (genExpIntE 1 z) := by
   have hc : ∀ k, 1 ≤ k → (((k + 1) / 2 : ℕ) : ℂ) = (incGF_c 0 k : ℂ) := by
     intro k _
     unfold incGF_c

@@ -83,9 +83,9 @@ theorem umbilicSeriesD_one : umbilicSeriesD 1 = 1 := by
 /-! ### Helpers for 36.8.1: Taylor coefficients and termwise integration
 
 The coefficients `aₙ(x)` of 36.8.2 are the Taylor coefficients of the entire function
-`exp(i ∑ₘ xₘ t^{m+1})` (`cuspoidSeriesCoeff_eq_iteratedDeriv_div_factorial`, by the Leibniz rule applied to its differential
-equation); Cauchy's estimate bounds them (`norm_cuspoidSeriesCoeff_le`), so that the series may be
-integrated termwise along the rotated contour against `exp(i t^{K+2})`
+`exp(i ∑ₘ xₘ t^{m+1})` (`cuspoidSeriesCoeff_eq_iteratedDeriv_div_factorial`, by the Leibniz rule
+applied to its differential equation); Cauchy's estimate bounds them (`norm_cuspoidSeriesCoeff_le`),
+so that the series may be integrated termwise along the rotated contour against `exp(i t^{K+2})`
 (`hasSum_cuspoidSeriesCoeff_mul_cuspoidMoment`, dominated convergence). The moments
 `∫ tⁿ exp(i t^{K+2}) dt` are gamma functions (`cuspoidMoment_zero_eq`). -/
 
@@ -114,7 +114,8 @@ private lemma hasDerivAt_cuspoidPotentialLower (K : ℕ) (x : Fin K → ℝ) (t 
 /-- Derivative of `exp(i ∑ₘ xₘ t^{m+1})`. -/
 private lemma deriv_exp_I_mul_cuspoidPotentialLower (K : ℕ) (x : Fin K → ℝ) :
     deriv (fun t => exp (I * cuspoidPotentialLower K x t)) =
-      (fun t => I * cuspoidPotentialLowerDeriv K x t) * fun t => exp (I * cuspoidPotentialLower K x t) := by
+      (fun t => I * cuspoidPotentialLowerDeriv K x t) * fun t =>
+          exp (I * cuspoidPotentialLower K x t) := by
   funext t
   rw [(((hasDerivAt_cuspoidPotentialLower K x t).const_mul I).cexp).deriv]
   simp only [Pi.mul_apply]; ring
@@ -214,7 +215,8 @@ private lemma differentiable_exp_I_mul_cuspoidPotentialLower (K : ℕ) (x : Fin 
 /-- `exp(i ∑ₘ xₘ t^{m+1}) = ∑ aₙ(x) tⁿ` for all complex `t` (DLMF 36.8.2). -/
 private lemma hasSum_cuspoidSeriesCoeff_mul_pow (K : ℕ) (x : Fin K → ℝ) (t : ℂ) :
     HasSum (fun n => cuspoidSeriesCoeff K x n * t ^ n) (exp (I * cuspoidPotentialLower K x t)) := by
-  have h := Complex.hasSum_taylorSeries_of_entire (differentiable_exp_I_mul_cuspoidPotentialLower K x) 0 t
+  have h := Complex.hasSum_taylorSeries_of_entire
+      (differentiable_exp_I_mul_cuspoidPotentialLower K x) 0 t
   convert h using 1
   funext n
   rw [cuspoidSeriesCoeff_eq_iteratedDeriv_div_factorial, sub_zero, smul_eq_mul, smul_eq_mul]
@@ -246,7 +248,8 @@ private lemma norm_cuspoidSeriesCoeff_le (K : ℕ) (x : Fin K → ℝ) (n : ℕ)
     _ = _ := by ring
 
 /-- `∑ ‖aₙ(x)‖ ρⁿ` converges, with sum at most `2 exp(∑ₘ |xₘ| (2ρ+1)^{m+1})`. -/
-private lemma summable_norm_cuspoidSeriesCoeff_mul_pow (K : ℕ) (x : Fin K → ℝ) {ρ : ℝ} (hρ : 0 ≤ ρ) :
+private lemma summable_norm_cuspoidSeriesCoeff_mul_pow (K : ℕ) (x : Fin K → ℝ)
+    {ρ : ℝ} (hρ : 0 ≤ ρ) :
     Summable (fun n => ‖cuspoidSeriesCoeff K x n‖ * ρ ^ n) ∧
       ∑' n, ‖cuspoidSeriesCoeff K x n‖ * ρ ^ n ≤
         2 * Real.exp (∑ m : Fin K, |x m| * (2 * ρ + 1) ^ ((m : ℕ) + 1)) := by
@@ -292,7 +295,8 @@ private lemma cuspoidSeries_majorant_exponent_le (K : ℕ) (x : Fin K → ℝ) {
     refine Finset.sum_le_sum fun m _ => mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
     exact pow_le_pow_right₀ (by linarith) m.isLt
   have h2 := two_mul_add_one_pow_le K ha
-  have h3 := mul_pow_le_pow_add_two_div_two_add K ha (mul_nonneg hS (pow_nonneg (by norm_num : (0 : ℝ) ≤ 3) K))
+  have h3 := mul_pow_le_pow_add_two_div_two_add K ha
+      (mul_nonneg hS (pow_nonneg (by norm_num : (0 : ℝ) ≤ 3) K))
   have h4 := sq_sub_one_le_pow_add_two K ha
   have h5 : S * (2 * a + 1) ^ K ≤ S * 3 ^ K + S * 3 ^ K * a ^ K := by
     have := mul_le_mul_of_nonneg_left h2 hS; nlinarith
@@ -326,7 +330,8 @@ private lemma norm_exp_I_mul_cuspoidContour_pow (K : ℕ) (r : ℝ) :
 private lemma hasSum_cuspoidSeriesCoeff_mul_cuspoidMoment (K : ℕ) (x : Fin K → ℝ) :
     HasSum (fun n => cuspoidSeriesCoeff K x n * cuspoidMoment K 0 n) (cuspoidIntegral K x) := by
   have hpot0 : ∀ t, cuspoidPotential K t 0 = t ^ (K + 2) := fun t => by simp [cuspoidPotential]
-  have hpot : ∀ t, cuspoidPotential K t x = t ^ (K + 2) + cuspoidPotentialLower K x t := fun t => rfl
+  have hpot : ∀ t, cuspoidPotential K t x = t ^ (K + 2) +
+      cuspoidPotentialLower K x t := fun t => rfl
   set F : ℕ → ℝ → ℂ := fun n r => cuspoidContourDir K r *
     (cuspoidSeriesCoeff K x n * cuspoidContour K r ^ n) *
       exp (I * cuspoidContour K r ^ (K + 2)) with hF
@@ -345,7 +350,8 @@ private lemma hasSum_cuspoidSeriesCoeff_mul_cuspoidMoment (K : ℕ) (x : Fin K �
   refine hasSum_integral_of_dominated_convergence
     (fun n r => ‖cuspoidSeriesCoeff K x n‖ * |r| ^ n * Real.exp (-|r| ^ (K + 2)))
     (fun n => ?_) (fun n => ae_of_all _ fun r => (hnorm n r).le)
-    (ae_of_all _ fun r => ((summable_norm_cuspoidSeriesCoeff_mul_pow K x (abs_nonneg r)).1.mul_right _)) ?_
+    (ae_of_all _ fun r =>
+        ((summable_norm_cuspoidSeriesCoeff_mul_pow K x (abs_nonneg r)).1.mul_right _)) ?_
     (ae_of_all _ fun r => ?_)
   · exact ((measurable_cuspoidContourDir K).mul (measurable_const.mul
       ((measurable_cuspoidContour K).pow_const n))).mul (measurable_exp.comp
@@ -354,7 +360,8 @@ private lemma hasSum_cuspoidSeriesCoeff_mul_cuspoidMoment (K : ℕ) (x : Fin K �
     · exact (Measurable.tsum fun n => by fun_prop).aestronglyMeasurable
     · rw [tsum_mul_right, Real.norm_eq_abs, abs_of_nonneg (by
         exact mul_nonneg (tsum_nonneg fun n => by positivity) (Real.exp_pos _).le)]
-      exact mul_le_mul_of_nonneg_right (summable_norm_cuspoidSeriesCoeff_mul_pow K x (abs_nonneg r)).2
+      exact mul_le_mul_of_nonneg_right
+          (summable_norm_cuspoidSeriesCoeff_mul_pow K x (abs_nonneg r)).2
         (Real.exp_pos _).le
   · have h := ((hasSum_cuspoidSeriesCoeff_mul_pow K x (cuspoidContour K r)).mul_left
       (cuspoidContourDir K r)).mul_right (exp (I * cuspoidContour K r ^ (K + 2)))
@@ -434,8 +441,8 @@ private lemma exp_pow_succ_add_neg_one_pow_mul (θ : ℝ) (n : ℕ) :
 
 /-! ### Helpers for 36.8.3: termwise integration of `exp(izst)`
 
-`Ai^{(n)} = cₙ Ai + dₙ Ai'` (`hasDerivAt_airyAiIteratedDeriv`, from 36.8.6 and the Airy equation), so
-that the fold moments `∫ sⁿ exp(i(s³ + xs)) ds` are Airy derivatives (`cuspoidMoment_one_eq`,
+`Ai^{(n)} = cₙ Ai + dₙ Ai'` (`hasDerivAt_airyAiIteratedDeriv`, from 36.8.6 and the Airy equation),
+so that the fold moments `∫ sⁿ exp(i(s³ + xs)) ds` are Airy derivatives (`cuspoidMoment_one_eq`,
 from 36.2.13 and differentiation under the integral sign); expanding `exp(izst)` in the
 hyperbolic umbilic integral and integrating termwise over the product contour gives a series
 of products of fold moments (`hasSum_hyperbolicUmbilicIntegral_cuspoidMoment`). -/
@@ -471,7 +478,8 @@ private lemma iteratedDeriv_airyAi_div (a : ℝ) (n : ℕ) :
       simpa [div_eq_mul_inv] using this
     have h2 := ((hasDerivAt_airyAiIteratedDeriv n _).comp s h1).const_mul (((a⁻¹ : ℝ) : ℂ) ^ n)
     rw [show (fun s : ℝ => ((a⁻¹ : ℝ) : ℂ) ^ n * airyAiIteratedDeriv n (((s / a : ℝ)) : ℂ)) =
-      fun y => ((a⁻¹ : ℝ) : ℂ) ^ n * (airyAiIteratedDeriv n ∘ fun s : ℝ => (((s / a : ℝ)) : ℂ)) y from rfl,
+      fun y => ((a⁻¹ : ℝ) : ℂ) ^ n *
+          (airyAiIteratedDeriv n ∘ fun s : ℝ => (((s / a : ℝ)) : ℂ)) y from rfl,
       h2.deriv]; ring
 
 /-- The fold moments: `∫ sⁿ exp(i(s³ + Xs)) ds = (-i)ⁿ (2π/a) a^{-n} Ai^{(n)}(X/a)`,
@@ -527,7 +535,8 @@ private lemma integrable_hyperbolicUmbilic_majorant (x y z : ℝ) :
   set C := |x| + |y| + |z|
   have hC : 0 ≤ C := by positivity
   set B := (3 * C + 1) / 2 with hB
-  refine ((integrable_abs_pow_mul_exp_neg_half_sq_prod 0 0).const_mul (Real.exp (2 * C + 2 * (B ^ 3 + B)))).mono'
+  refine ((integrable_abs_pow_mul_exp_neg_half_sq_prod 0 0).const_mul
+      (Real.exp (2 * C + 2 * (B ^ 3 + B)))).mono'
     (((((measurable_foldContourExp x).comp measurable_fst).norm).mul
       (((measurable_foldContourExp y).comp measurable_snd).norm)).mul
       (by fun_prop)).aestronglyMeasurable (ae_of_all _ fun p => ?_)
@@ -604,7 +613,8 @@ private lemma hasSum_hyperbolicUmbilicIntegral_cuspoidMoment (x y z : ℝ) :
   · rw [htsum]; exact integrable_hyperbolicUmbilic_majorant x y z
   · have h := (Complex.hasSum_pow_div_factorial (I * z * cuspoidContour 1 p.1 * cuspoidContour 1
       p.2)).mul_left
-      (cuspoidContourDir 1 p.1 * foldContourExp x p.1 * (cuspoidContourDir 1 p.2 * foldContourExp y p.2))
+      (cuspoidContourDir 1 p.1 * foldContourExp x p.1 *
+          (cuspoidContourDir 1 p.2 * foldContourExp y p.2))
     rw [exp_I_mul_hyperbolicUmbilicPotential_eq_foldContourExp]
     convert h using 1
     · funext n; rw [hF]; simp only [mul_pow]; ring

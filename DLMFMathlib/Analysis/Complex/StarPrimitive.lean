@@ -69,10 +69,12 @@ theorem starPrim_hasDerivAt {U : Set ℂ} (hU : IsOpen U) (hs : StarConvex ℝ 0
     (ball_mem_nhds z hr')
     (by
       filter_upwards [ball_mem_nhds z hr'] with w hw
-      exact ((hcont w (ball_subset_closedBall hw)).mono hIoc).aestronglyMeasurable measurableSet_uIoc)
+      exact ((hcont w (ball_subset_closedBall hw)).mono hIoc).aestronglyMeasurable
+          measurableSet_uIoc)
     ((hcont z (mem_closedBall_self hr'.le)).intervalIntegrable_of_Icc zero_le_one)
     ((ContinuousOn.mul (by fun_prop) (hd.continuousOn.comp (by fun_prop) fun t ht =>
-      hseg z (mem_closedBall_self hr'.le) t ht)).mono hIoc |>.aestronglyMeasurable measurableSet_uIoc)
+      hseg z (mem_closedBall_self hr'.le) t ht)).mono hIoc |>.aestronglyMeasurable
+          measurableSet_uIoc)
     (Eventually.of_forall fun t ht w hw => by
       have ht' := hIoc ht
       rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg ht'.1]
@@ -101,16 +103,20 @@ theorem starPrim_hasDerivAt {U : Set ℂ} (hU : IsOpen U) (hs : StarConvex ℝ 0
       simpa using (hasDerivAt_id t).ofReal_comp
     have h2 := h0.mul h1
     convert h2 using 1; ring
-  have hint : IntervalIntegrable (fun t : ℝ => h ((t:ℂ)*z) + (t:ℂ) * (deriv h ((t:ℂ)*z) * z)) volume 0 1 := by
+  have hint : IntervalIntegrable (fun t : ℝ => h ((t:ℂ)*z) + (t:ℂ) * (deriv h ((t:ℂ)*z) * z))
+      volume 0 1 := by
     refine ContinuousOn.intervalIntegrable_of_Icc zero_le_one ?_
     refine (hcont z (mem_closedBall_self hr'.le)).add (ContinuousOn.mul (by fun_prop) ?_)
-    exact (hd.continuousOn.comp (by fun_prop) fun t ht => hseg z (mem_closedBall_self hr'.le) t ht).mul
+    exact (hd.continuousOn.comp (by fun_prop) fun t ht =>
+        hseg z (mem_closedBall_self hr'.le) t ht).mul
       continuousOn_const
   have hF := intervalIntegral.integral_eq_sub_of_hasDerivAt hφ hint
-  have hi1 : IntervalIntegrable (fun t : ℝ => h ((t:ℂ)*z)) volume 0 1 := (hcont z (mem_closedBall_self hr'.le)).intervalIntegrable_of_Icc zero_le_one
+  have hi1 : IntervalIntegrable (fun t : ℝ => h ((t:ℂ)*z)) volume 0 1 :=
+      (hcont z (mem_closedBall_self hr'.le)).intervalIntegrable_of_Icc zero_le_one
   have hi2 : IntervalIntegrable (fun t : ℝ => (t:ℂ) * (deriv h ((t:ℂ)*z) * z)) volume 0 1 := by
     refine ContinuousOn.intervalIntegrable_of_Icc zero_le_one (ContinuousOn.mul (by fun_prop) ?_)
-    exact (hd.continuousOn.comp (by fun_prop) fun t ht => hseg z (mem_closedBall_self hr'.le) t ht).mul
+    exact (hd.continuousOn.comp (by fun_prop) fun t ht =>
+        hseg z (mem_closedBall_self hr'.le) t ht).mul
       continuousOn_const
   rw [intervalIntegral.integral_add hi1 hi2] at hF
   simp only [ofReal_one, one_mul, ofReal_zero, zero_mul, sub_zero] at hF

@@ -65,18 +65,21 @@ theorem hcub_ode_alg {t a u P h0 h1 h2 : ℂ} (ht : t ^ 2 = -3)
         (1 - 3 * t * u * (u - 1) / (1 + (-1 - t) / 2 * u) ^ 3) * h2 +
       (2 * a + 2 / 3 - (a + (a + 1 / 3) + 1) * (3 * t * u * (u - 1) / (1 + (-1 - t) / 2 * u) ^ 3))
         * h1 - a * (a + 1 / 3) * h0 = 0) :
-    u * (1 - u) * ((-3 * a) * (-3 * a - 1) * ((-1 - t) / 2) ^ 2 * P / (1 + (-1 - t) / 2 * u) ^ 2 * h0 +
+    u * (1 - u) * ((-3 * a) * (-3 * a - 1) * ((-1 - t) / 2) ^ 2 * P /
+        (1 + (-1 - t) / 2 * u) ^ 2 * h0 +
         2 * ((-3 * a) * ((-1 - t) / 2) * P / (1 + (-1 - t) / 2 * u)) *
           (h1 * (3 * t * ((2 * u - 1) * (1 + (-1 - t) / 2 * u) - 3 * ((-1 - t) / 2) * u * (u - 1)) /
             (1 + (-1 - t) / 2 * u) ^ 4)) +
-        P * (h2 * (3 * t * ((2 * u - 1) * (1 + (-1 - t) / 2 * u) - 3 * ((-1 - t) / 2) * u * (u - 1)) /
+        P * (h2 * (3 * t * ((2 * u - 1) * (1 + (-1 - t) / 2 * u) - 3 *
+            ((-1 - t) / 2) * u * (u - 1)) /
             (1 + (-1 - t) / 2 * u) ^ 4) ^ 2 +
           h1 * (3 * t * ((2 * (1 + (-1 - t) / 2 * u) - 2 * ((-1 - t) / 2) * (2 * u - 1)) *
             (1 + (-1 - t) / 2 * u) - 4 * ((-1 - t) / 2) * ((2 * u - 1) * (1 + (-1 - t) / 2 * u) -
               3 * ((-1 - t) / 2) * u * (u - 1))) / (1 + (-1 - t) / 2 * u) ^ 5))) +
       (2 * a + 2 / 3 - (a + 1 / 3 + 3 * a + 1) * u) *
         ((-3 * a) * ((-1 - t) / 2) * P / (1 + (-1 - t) / 2 * u) * h0 +
-          P * (h1 * (3 * t * ((2 * u - 1) * (1 + (-1 - t) / 2 * u) - 3 * ((-1 - t) / 2) * u * (u - 1)) /
+          P * (h1 * (3 * t * ((2 * u - 1) * (1 + (-1 - t) / 2 * u) - 3 *
+              ((-1 - t) / 2) * u * (u - 1)) /
             (1 + (-1 - t) / 2 * u) ^ 4))) -
       (a + 1 / 3) * (3 * a) * (P * h0) = 0 := by
   obtain ⟨h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩ := hcub_tpow ht
@@ -134,7 +137,8 @@ theorem hcub_norm_t : ‖(Real.sqrt 3 : ℂ) * I‖ = Real.sqrt 3 := by
   rw [norm_mul, norm_I, mul_one, norm_real, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- `|ω| = |ω²| = 1`. -/
-theorem hcub_norm_m (ε : ℝ) (hε : ε = 1 ∨ ε = -1) : ‖(-1 + ε * ((Real.sqrt 3 : ℂ) * I)) / 2‖ = 1 := by
+theorem hcub_norm_m (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
+    ‖(-1 + ε * ((Real.sqrt 3 : ℂ) * I)) / 2‖ = 1 := by
   have h3 := Real.sq_sqrt (show (0 : ℝ) ≤ 3 by norm_num)
   have hε2 : ε ^ 2 = 1 := by rcases hε with rfl | rfl <;> norm_num
   rw [show (-1 + ε * ((Real.sqrt 3 : ℂ) * I)) / 2 = ⟨-1 / 2, ε * Real.sqrt 3 / 2⟩ by
@@ -170,7 +174,8 @@ theorem hcub_cubic {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ)) {u
   set t : ℂ := (Real.sqrt 3 : ℂ) * I with htdef
   have ht : t ^ 2 = -3 := hcub_t_sq
   have hm : ‖(-1 - t) / 2‖ = 1 := by
-    have := hcub_norm_m (-1) (Or.inr rfl); rw [← htdef] at this; convert this using 2; push_cast; ring
+    have := hcub_norm_m (-1) (Or.inr rfl); rw [← htdef] at this; convert this using 2;
+        push_cast; ring
   have hω : ‖(-1 + t) / 2‖ = 1 := by
     have := hcub_norm_m 1 (Or.inl rfl); rw [← htdef] at this; convert this using 2; push_cast; ring
   set m : ℂ := (-1 - t) / 2 with hmdef
@@ -532,38 +537,44 @@ theorem hcub_alg {t u : ℂ} (ht : t ^ 2 = -3) (hq : 1 + (-1 - t) / 2 * u ≠ 0)
 
 /-- **The connection identity in the cubic variable.** For `Im u > 0`, `|u| < 1`, with
 `ω = e^{2πi/3}` and `Z = ω²(1+ωu)/(u+ω)` (so that `Z³` lies in the unit disk), the bracket of
-DLMF 15.8.32 at `z = 1/Z` equals `√3 Γ(a+1/3)/(2π Γ(2a+2/3)) (1+ω²u)^{3a} F(a+1/3, 3a; 2a+2/3; u)`. -/
+DLMF 15.8.32 at `z = 1/Z` equals `√3 Γ(a+1/3)/(2π Γ(2a+2/3)) (1+ω²u)^{3a} F(a+1/3, 3a; 2a+2/3; u)`.
+-/
 theorem hcub_main {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
     (ha : ∀ k : ℕ, a + 1 / 3 ≠ -(k : ℂ)) {u : ℂ} (hu0 : 0 < u.im) (hu1 : ‖u‖ < 1) :
     ₂F₁ a (a + 1 / 3) (2 / 3) (((-1 - (Real.sqrt 3 : ℂ) * I) / 2 *
-          (1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u) / (u + (-1 + (Real.sqrt 3 : ℂ) * I) / 2)) ^ 3) /
+          (1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u) /
+              (u + (-1 + (Real.sqrt 3 : ℂ) * I) / 2)) ^ 3) /
         (Gamma (a + 2 / 3) * Gamma (2 / 3)) +
       exp (Real.pi * I / 3) * ((-1 - (Real.sqrt 3 : ℂ) * I) / 2 *
           (1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u) / (u + (-1 + (Real.sqrt 3 : ℂ) * I) / 2)) /
         (Gamma a * Gamma (4 / 3)) *
         ₂F₁ (a + 1 / 3) (a + 2 / 3) (4 / 3) (((-1 - (Real.sqrt 3 : ℂ) * I) / 2 *
-          (1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u) / (u + (-1 + (Real.sqrt 3 : ℂ) * I) / 2)) ^ 3) =
+          (1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u) /
+              (u + (-1 + (Real.sqrt 3 : ℂ) * I) / 2)) ^ 3) =
       Real.sqrt 3 * Gamma (a + 1 / 3) / (2 * π * Gamma (2 * a + 2 / 3)) *
         (1 + (-1 - (Real.sqrt 3 : ℂ) * I) / 2 * u) ^ (3 * a) *
         ₂F₁ (a + 1 / 3) (3 * a) (2 * a + 2 / 3) u := by
   set t : ℂ := (Real.sqrt 3 : ℂ) * I with htdef
   have ht : t ^ 2 = -3 := hcub_t_sq
   have hm : ‖(-1 - t) / 2‖ = 1 := by
-    have := hcub_norm_m (-1) (Or.inr rfl); rw [← htdef] at this; convert this using 2; push_cast; ring
+    have := hcub_norm_m (-1) (Or.inr rfl); rw [← htdef] at this; convert this using 2;
+        push_cast; ring
   have hωn : ‖(-1 + t) / 2‖ = 1 := by
     have := hcub_norm_m 1 (Or.inl rfl); rw [← htdef] at this; convert this using 2; push_cast; ring
   set ω : ℂ := (-1 + t) / 2 with hωdef
   set m : ℂ := (-1 - t) / 2 with hmdef
   set Zf : ℂ → ℂ := fun v => m * (1 + ω * v) / (v + ω) with hZf
   set β : ℂ := Real.sqrt 3 * Gamma (a + 1 / 3) / (2 * π * Gamma (2 * a + 2 / 3)) with hβ
-  set Bf : ℂ → ℂ := fun v => ₂F₁ a (a + 1 / 3) (2 / 3) (Zf v ^ 3) / (Gamma (a + 2 / 3) * Gamma (2 / 3)) +
+  set Bf : ℂ → ℂ := fun v => ₂F₁ a (a + 1 / 3) (2 / 3) (Zf v ^ 3) /
+      (Gamma (a + 2 / 3) * Gamma (2 / 3)) +
       exp (Real.pi * I / 3) * Zf v / (Gamma a * Gamma (4 / 3)) *
         ₂F₁ (a + 1 / 3) (a + 2 / 3) (4 / 3) (Zf v ^ 3) with hBf
   set Rf : ℂ → ℂ := fun v => β * (1 + m * v) ^ (3 * a) * ₂F₁ (a + 1 / 3) (3 * a) (2 * a + 2 / 3) v
     with hRf
   set Ω : Set ℂ := {v : ℂ | 0 < v.im} ∩ Metric.ball 0 1 with hΩ
   have hΩo : IsOpen Ω := (isOpen_lt continuous_const continuous_im).inter Metric.isOpen_ball
-  have hΩc : IsPreconnected Ω := (Convex.inter (convex_halfSpace_im_gt (r := 0)) (convex_ball (0 : ℂ) 1)).isPreconnected
+  have hΩc : IsPreconnected Ω :=
+      (Convex.inter (convex_halfSpace_im_gt (r := 0)) (convex_ball (0 : ℂ) 1)).isPreconnected
   have hmem : ∀ v ∈ Ω, 0 < v.im ∧ ‖v‖ < 1 := fun v hv => ⟨hv.1, by simpa using hv.2⟩
   have hlt : ∀ v ∈ Ω, ‖1 + ω * v‖ < ‖v + ω‖ := fun v hv => hcub_norm_lt_of_im_pos (hmem v hv).1
   have hden : ∀ v ∈ Ω, v + ω ≠ 0 := fun v hv h => by

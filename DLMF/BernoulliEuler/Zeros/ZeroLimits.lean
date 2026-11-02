@@ -105,8 +105,8 @@ private lemma length_filter_realZerosGE (p : ℝ[X]) (c : ℝ) :
   congr 2
   funext x; simp [and_comm]
 
-/-- If `realZeroCountBelow p (z - r) = j - 1` and `realZeroCountBelow p (z + r) = j`, then the `j`-th zero of
-`p` in `[1/2, ∞)` lies in `[z - r, z + r)`. -/
+/-- If `realZeroCountBelow p (z - r) = j - 1` and `realZeroCountBelow p (z + r) = j`, then the
+`j`-th zero of `p` in `[1/2, ∞)` lies in `[z - r, z + r)`. -/
 private lemma getD_realZerosGE_mem_Ico_of_count {p : ℝ[X]} {j : ℕ} (hj : 1 ≤ j) {a b : ℝ}
     (ha : realZeroCountBelow p a = j - 1) (hb : realZeroCountBelow p b = j) :
     a ≤ (realZerosGE p).getD (j - 1) 0 ∧ (realZerosGE p).getD (j - 1) 0 < b := by
@@ -146,7 +146,8 @@ private lemma card_filter_roots_eq_zero {p : ℝ[X]} {q : ℝ → Prop} [Decidab
 
 /-- Exactly one root (with multiplicity) satisfies `q` when `ζ` is the unique zero there and
 simple. -/
-private lemma card_filter_roots_eq_one {p : ℝ[X]} (hp : p ≠ 0) {q : ℝ → Prop} [DecidablePred q] {ζ : ℝ}
+private lemma card_filter_roots_eq_one {p : ℝ[X]} (hp : p ≠ 0) {q : ℝ → Prop}
+    [DecidablePred q] {ζ : ℝ}
     (hζ : q ζ) (hζ0 : p.eval ζ = 0) (hd : p.derivative.eval ζ ≠ 0)
     (huniq : ∀ x, q x → p.eval x = 0 → x = ζ) : Multiset.card (p.roots.filter q) = 1 := by
   have hfilt : p.roots.filter q = p.roots.filter (fun x => x = ζ) := by
@@ -175,7 +176,8 @@ private lemma eq_of_zero_of_deriv_ne_zero {F F' : ℝ → ℝ} (hF : ∀ x, HasD
 
 /-- Mean value estimate at a simple zero: if `g z = 0` and `|g' - s| < |s|/4` on `[z - r, z + r]`,
 then `s g(z ± r) ≷ ± (3/4) r s²`. -/
-private lemma mul_apply_bounds_near_simple_zero {g g' : ℝ → ℝ} (hg : ∀ x, HasDerivAt g (g' x) x) {z r s : ℝ}
+private lemma mul_apply_bounds_near_simple_zero {g g' : ℝ → ℝ}
+    (hg : ∀ x, HasDerivAt g (g' x) x) {z r s : ℝ}
     (hr : 0 < r) (hgz : g z = 0) (hd : ∀ x, |x - z| ≤ r → |g' x - s| < |s| / 4) :
     3 / 4 * r * s ^ 2 < s * g (z + r) ∧ s * g (z - r) < -(3 / 4 * r * s ^ 2) := by
   have hcont : Continuous g := continuous_iff_continuousAt.mpr fun t => (hg t).continuousAt
@@ -446,7 +448,8 @@ private lemma ofReal_eval_map_eq_aeval (p : ℚ[X]) (x : ℝ) :
   (aeval_ofReal_eq_eval_map p x).symm
 
 /-- Zeros of `cos (2πx)` in `[1/2, ∞)`. -/
-private lemma exists_eq_of_cos_two_pi_mul_eq_zero {x : ℝ} (hx : 1 / 2 ≤ x) (h : Real.cos (2 * π * x) = 0) :
+private lemma exists_eq_of_cos_two_pi_mul_eq_zero {x : ℝ} (hx : 1 / 2 ≤ x)
+    (h : Real.cos (2 * π * x) = 0) :
     ∃ i : ℕ, 1 ≤ i ∧ x = (i : ℝ) / 2 + 1 / 4 := by
   obtain ⟨l, hl⟩ := Real.cos_eq_zero_iff.mp h
   have hx' : x = (2 * l + 1) / 4 := by
@@ -459,7 +462,8 @@ private lemma exists_eq_of_cos_two_pi_mul_eq_zero {x : ℝ} (hx : 1 / 2 ≤ x) (
   exact ⟨l, by exact_mod_cast hl1, by rw [hx']; push_cast; ring⟩
 
 /-- Zeros of `sin (a πx)` (`a > 0`) in `[1/2, ∞)`. -/
-private lemma exists_eq_of_sin_mul_pi_mul_eq_zero {a x : ℝ} (ha : 0 < a) (h : Real.sin (a * π * x) = 0) :
+private lemma exists_eq_of_sin_mul_pi_mul_eq_zero {a x : ℝ} (ha : 0 < a)
+    (h : Real.sin (a * π * x) = 0) :
     ∃ n : ℤ, x = n / a := by
   obtain ⟨n, hn⟩ := Real.sin_eq_zero_iff.mp h
   refine ⟨n, ?_⟩
@@ -493,7 +497,8 @@ private lemma tendsto_bernoulliRealZero_two_mul {j : ℕ} (hj : 1 ≤ j) :
     (fun k => -(-1) ^ k * (2 * π) ^ (2 * k) / (2 * (2 * k)!)) (fun k => ?_)
     (fun x => Real.cos (2 * π * x)) (fun x => -(2 * π) * Real.sin (2 * π * x)) (fun x => ?_)
     (by fun_prop) (fun i => (i : ℝ) / 2 + 1 / 4) (fun a b hab => ?_) (by norm_num)
-    (fun x hx h => exists_eq_of_cos_two_pi_mul_eq_zero hx h) (fun i _ => ?_) (fun i _ => ?_) (fun h => ?_) ?_ hj
+    (fun x hx h => exists_eq_of_cos_two_pi_mul_eq_zero hx h) (fun i _ => ?_) (fun i _ => ?_)
+        (fun h => ?_) ?_ hj
   · have := Nat.factorial_pos (2 * k)
     have := Real.pi_pos
     exact div_ne_zero (mul_ne_zero (neg_ne_zero.mpr (pow_ne_zero _ (by norm_num)))
@@ -517,9 +522,12 @@ private lemma tendsto_bernoulliRealZero_two_mul {j : ℕ} (hj : 1 ≤ j) :
     rw [this] at hs; norm_num at hs
   · norm_num at h
   · intro M ε hε
-    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_bernoulli_even hK) 1 _
+    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn
+        (fun K hK => tendstoUniformlyOn_bernoulli_even hK) 1 _
         (fun x => Real.cos (2 * π * x)) hcplx (fun x => by push_cast; ring) M ε hε,
-      eventually_one_le_and_sub_one (eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_bernoulli_odd hK)
+      eventually_one_le_and_sub_one
+          (eventually_abs_sub_lt_of_tendstoUniformlyOn
+          (fun K hK => tendstoUniformlyOn_bernoulli_odd hK)
         (-(2 * π)) _ (fun x => -(2 * π) * Real.sin (2 * π * x)) hcplx'
         (fun x => by push_cast; ring) M ε hε)] with k h1 h2 x hx1 hxM
     obtain ⟨hk1, h2⟩ := h2
@@ -582,7 +590,8 @@ private lemma tendsto_bernoulliRealZero_two_mul_add_one {j : ℕ} (hj : 1 ≤ j)
   · have := bernoulliFun_eval_half_eq_zero k
     rwa [bernoulliFun, ← one_div] at this
   · intro M ε hε
-    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_bernoulli_odd hK) 1 _
+    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn
+        (fun K hK => tendstoUniformlyOn_bernoulli_odd hK) 1 _
         (fun x => Real.sin (2 * π * x)) hcplx (fun x => by push_cast; ring) M ε hε,
       eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_bernoulli_even hK)
         _ _ (fun x => (2 * π) * Real.cos (2 * π * x)) hcplx'
@@ -638,9 +647,11 @@ lemma tendsto_eulerRealZero_two_mul {j : ℕ} (hj : 1 ≤ j) :
     exact mul_ne_zero (by positivity) (cos_ne_zero_of_sin_eq_zero hs)
   · norm_num at h
   · intro M ε hε
-    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_euler_even hK) 1 _
+    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn
+        (fun K hK => tendstoUniformlyOn_euler_even hK) 1 _
         (fun x => Real.sin (π * x)) hcplx (fun x => by push_cast; ring) M ε hε,
-      eventually_one_le_and_sub_one (eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_euler_odd hK)
+      eventually_one_le_and_sub_one
+          (eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_euler_odd hK)
         _ _ (fun x => π * Real.cos (π * x)) hcplx'
         (fun x => by push_cast; ring) M ε hε)] with k h1 h2 x hx1 hxM
     obtain ⟨hk1, h2⟩ := h2
@@ -712,7 +723,8 @@ lemma tendsto_eulerRealZero_two_mul_add_one {j : ℕ} (hj : 1 ≤ j) :
     · rw [h] at hs; norm_num at hs
   · exact eulerFun_two_mul_add_one_half k
   · intro M ε hε
-    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_euler_odd hK) 1 _
+    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn
+        (fun K hK => tendstoUniformlyOn_euler_odd hK) 1 _
         (fun x => Real.cos (π * x)) hcplx (fun x => by push_cast; ring) M ε hε,
       eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_euler_even hK)
         _ _ (fun x => -π * Real.sin (π * x)) hcplx'
@@ -774,7 +786,8 @@ theorem bernoulliRealZero_two_of_odd {n : ℕ} (hn : Odd n) (h3 : 3 ≤ n) :
       bernoulli_eq_zero_of_odd (odd_two_mul_add_one _) (by omega)]; simp
   have hzeros : ∀ x ∈ Set.Ioo (1 / 2 : ℝ) 1, bernoulliFun (2 * k + 1) x ≠ 0 := by
     intro x hx h
-    apply bernoulliFun_two_mul_add_one_ne_zero k (x := 1 - x) ⟨by linarith [hx.2], by linarith [hx.1]⟩
+    apply bernoulliFun_two_mul_add_one_ne_zero k (x := 1 - x)
+        ⟨by linarith [hx.2], by linarith [hx.1]⟩
     rw [bernoulliFun_eval_one_sub, h, mul_zero]
   refine getD_one_eq_of_sorted (bernoulliRealZerosGE_sorted _) ?_ ?_ (by norm_num) hcount ?_ ?_
   · exact mem_bernoulliRealZerosGE.mpr
@@ -850,7 +863,8 @@ theorem bernoulliRealZeroCount_eq_self {n : ℕ} (h1 : 1 ≤ n) (h5 : n ≤ 5) :
         forall_eq_or_imp, forall_eq, IsEmpty.forall_iff, forall_const, List.Pairwise.nil, and_true]
       constructorm* _ ∧ _ <;> linarith [ha.1, ha.2, hd.1, hd.2]
     · intro x hx; simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
-      rcases hx with rfl | rfl | rfl | rfl | rfl <;> first | assumption | (rw [bernoulliFun_five_apply]; norm_num)
+      rcases hx with rfl | rfl | rfl | rfl | rfl <;>
+          first | assumption | (rw [bernoulliFun_five_apply]; norm_num)
 
 /-- DLMF 24.12.6: `R(n) ∼ 2n/(πe)` as `n → ∞`. -/
 @[dlmf 24.12.E6]

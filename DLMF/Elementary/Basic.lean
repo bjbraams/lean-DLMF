@@ -11,6 +11,7 @@ public import DLMF.Elementary.Basic.InverseTrigonometric
 public import DLMF.Elementary.Basic.Gudermannian
 public import DLMF.Elementary.Basic.Hyperbolic
 public import DLMF.Elementary.Basic.InverseHyperbolic
+public import DLMF.Elementary.Basic.LambertW
 
 /-!
 # Elementary functions: foundations
@@ -22,6 +23,7 @@ principal inverse hyperbolic functions (§§4.28, 4.37).
 
 ## Implementation notes
 
-The Lambert W function is defined in `DLMF.Elementary.LambertW.BranchesAndCalculus`, from the
-branch family constructed in `DLMF.Elementary.LambertW.BranchConstruction`.
+The Lambert W function is defined in `DLMF.Elementary.Basic.LambertW`, from the branch family
+constructed in `DLMF.Elementary.Basic.LambertWConstruction`; its expansion coefficients and
+asymptotics are in the theorem layer (`DLMF.Elementary.LambertW`).
 -/

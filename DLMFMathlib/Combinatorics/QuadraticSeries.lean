@@ -49,9 +49,10 @@ noncomputable section
 /-- The Catalan generating series `∑ C(n) Xⁿ` over `ℚ`. -/
 noncomputable def PowerSeries.catalanSeriesRat : ℚ⟦X⟧ := mk fun n => (catalan n : ℚ)
 
-/-- Identity under the stated parameter and domain assumptions: `PowerSeries.catalanSeriesRat = 1 + X *
-PowerSeries.catalanSeriesRat ^ 2`. -/
-private lemma PowerSeries.catalanSeriesRat_eq : PowerSeries.catalanSeriesRat = 1 + X * PowerSeries.catalanSeriesRat ^ 2 := by
+/-- Identity under the stated parameter and domain assumptions:
+`PowerSeries.catalanSeriesRat = 1 + X * PowerSeries.catalanSeriesRat ^ 2`. -/
+private lemma PowerSeries.catalanSeriesRat_eq : PowerSeries.catalanSeriesRat = 1 + X *
+    PowerSeries.catalanSeriesRat ^ 2 := by
   ext n
   rcases n with _ | n
   · simp [PowerSeries.catalanSeriesRat]
@@ -61,46 +62,58 @@ private lemma PowerSeries.catalanSeriesRat_eq : PowerSeries.catalanSeriesRat = 1
 /-- The geometric series `∑ aⁿ Xⁿ = 1/(1 - aX)`. -/
 noncomputable def PowerSeries.geometricSeries (a : ℚ) : ℚ⟦X⟧ := rescale a (mk 1)
 
-/-- Identity under the stated parameter and domain assumptions: `PowerSeries.geometricSeries a * (1 - C a * X) = 1`. -/
-private lemma PowerSeries.geometricSeries_mul_one_sub_C_mul_X (a : ℚ) : PowerSeries.geometricSeries a * (1 - C a * X) = 1 := by
+/-- Identity under the stated parameter and domain assumptions:
+`PowerSeries.geometricSeries a * (1 - C a * X) = 1`. -/
+private lemma PowerSeries.geometricSeries_mul_one_sub_C_mul_X (a : ℚ) : PowerSeries.geometricSeries
+    a * (1 - C a * X) = 1 := by
   have := congrArg (rescale a) (mk_one_mul_one_sub_eq_one (S := ℚ))
   rwa [map_mul, map_sub, map_one, rescale_X] at this
 
-/-- Identity under the stated parameter and domain assumptions: `coeff n (PowerSeries.geometricSeries a ^ (d + 1)) =
-a ^ n * (d + n).choose d`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`coeff n (PowerSeries.geometricSeries a ^ (d + 1)) = a ^ n * (d + n).choose d`. -/
 private lemma PowerSeries.coeff_geometricSeries_pow_succ (a : ℚ) (d n : ℕ) :
     coeff n (PowerSeries.geometricSeries a ^ (d + 1)) = a ^ n * (d + n).choose d := by
   rw [PowerSeries.geometricSeries, ← map_pow, mk_one_pow_eq_mk_choose_add, rescale_mk, coeff_mk]
 
-/-- Identity under the stated parameter and domain assumptions: `constantCoeff (PowerSeries.geometricSeries a) = 1`. -/
-private lemma PowerSeries.constantCoeff_geometricSeries (a : ℚ) : constantCoeff (PowerSeries.geometricSeries a) = 1 := by
+/-- Identity under the stated parameter and domain assumptions:
+`constantCoeff (PowerSeries.geometricSeries a) = 1`. -/
+private lemma PowerSeries.constantCoeff_geometricSeries (a : ℚ) : constantCoeff
+    (PowerSeries.geometricSeries a) = 1 := by
   rw [← coeff_zero_eq_constantCoeff_apply, PowerSeries.geometricSeries, rescale_mk, coeff_mk]; simp
 
 /-- The substituted argument `q = X^e (1 - aX)^{-2}`. -/
-noncomputable def PowerSeries.quadraticSubstArg (a : ℚ) (e : ℕ) : ℚ⟦X⟧ := X ^ e * PowerSeries.geometricSeries a ^ 2
+noncomputable def PowerSeries.quadraticSubstArg (a : ℚ) (e : ℕ) : ℚ⟦X⟧ := X ^ e *
+    PowerSeries.geometricSeries a ^ 2
 
-/-- The stated relation follows from the given hypotheses: `HasSubst (PowerSeries.quadraticSubstArg a e)`. -/
-private lemma PowerSeries.hasSubst_quadraticSubstArg (a : ℚ) {e : ℕ} (he : 1 ≤ e) : HasSubst (PowerSeries.quadraticSubstArg a e) :=
+/-- The stated relation follows from the given hypotheses:
+`HasSubst (PowerSeries.quadraticSubstArg a e)`. -/
+private lemma PowerSeries.hasSubst_quadraticSubstArg (a : ℚ) {e : ℕ} (he : 1 ≤ e) : HasSubst
+    (PowerSeries.quadraticSubstArg a e) :=
   HasSubst.of_constantCoeff_zero' (by
     simp [PowerSeries.quadraticSubstArg, zero_pow (by omega : e ≠ 0)])
 
 /-- `F = (1 - aX)⁻¹ C(X^e (1 - aX)^{-2})`. -/
 noncomputable def PowerSeries.catalanQuadraticSeries (a : ℚ) (e : ℕ) : ℚ⟦X⟧ :=
-  PowerSeries.geometricSeries a * subst (PowerSeries.quadraticSubstArg a e) PowerSeries.catalanSeriesRat
+  PowerSeries.geometricSeries a *
+      subst (PowerSeries.quadraticSubstArg a e) PowerSeries.catalanSeriesRat
 
-/-- Identity under the stated parameter and domain assumptions: `PowerSeries.catalanQuadraticSeries a e = 1 + C a * X
+/-- Identity under the stated parameter and domain assumptions:
+`PowerSeries.catalanQuadraticSeries a e = 1 + C a * X
 * PowerSeries.catalanQuadraticSeries a e + X ^ e * PowerSeries.catalanQuadraticSeries a e ^ 2`. -/
 theorem PowerSeries.catalanQuadraticSeries_eq (a : ℚ) {e : ℕ} (he : 1 ≤ e) :
     PowerSeries.catalanQuadraticSeries a e =
-      1 + C a * X * PowerSeries.catalanQuadraticSeries a e + X ^ e * PowerSeries.catalanQuadraticSeries a e ^ 2 := by
+      1 + C a * X * PowerSeries.catalanQuadraticSeries a e + X ^ e *
+          PowerSeries.catalanQuadraticSeries a e ^ 2 := by
   have hs := PowerSeries.hasSubst_quadraticSubstArg a he
   have hD : subst (PowerSeries.quadraticSubstArg a e) PowerSeries.catalanSeriesRat =
-      1 + PowerSeries.quadraticSubstArg a e * subst (PowerSeries.quadraticSubstArg a e) PowerSeries.catalanSeriesRat ^ 2 := by
+      1 + PowerSeries.quadraticSubstArg a e *
+          subst (PowerSeries.quadraticSubstArg a e) PowerSeries.catalanSeriesRat ^ 2 := by
     conv_lhs => rw [PowerSeries.catalanSeriesRat_eq]
     rw [← coe_substAlgHom hs, map_add, map_one, map_mul, map_pow, substAlgHom_X]
   have hg := PowerSeries.geometricSeries_mul_one_sub_C_mul_X a
   simp only [PowerSeries.catalanQuadraticSeries, PowerSeries.quadraticSubstArg] at hD ⊢
-  linear_combination (subst (X ^ e * PowerSeries.geometricSeries a ^ 2) PowerSeries.catalanSeriesRat) * hg + hD
+  linear_combination (subst (X ^ e * PowerSeries.geometricSeries a ^ 2)
+      PowerSeries.catalanSeriesRat) * hg + hD
 
 /-- Uniqueness of the power series solution of `F = 1 + aXF + X^e F²`. -/
 theorem PowerSeries.eq_of_quadratic_eq (a : ℚ) {e : ℕ} (he : 1 ≤ e) {F G : ℚ⟦X⟧}
@@ -116,7 +129,8 @@ theorem PowerSeries.eq_of_quadratic_eq (a : ℚ) {e : ℕ} (he : 1 ≤ e) {F G :
 
 /-- Formula under the stated hypotheses: `coeff n (subst q f) = ∑ k ∈ range N, coeff k f * coeff n
 (q ^ k)`. -/
-private lemma PowerSeries.coeff_subst_eq_sum_range (q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : ℚ⟦X⟧) {n N : ℕ}
+private lemma PowerSeries.coeff_subst_eq_sum_range (q : ℚ⟦X⟧) (hq : constantCoeff q = 0)
+    (f : ℚ⟦X⟧) {n N : ℕ}
     (hN : n < N) : coeff n (subst q f) = ∑ k ∈ range N, coeff k f * coeff n (q ^ k) := by
   rw [coeff_subst' (HasSubst.of_constantCoeff_zero' hq)]
   rw [finsum_eq_sum_of_support_subset _ (s := range N)]
@@ -130,7 +144,8 @@ private lemma PowerSeries.coeff_subst_eq_sum_range (q : ℚ⟦X⟧) (hq : consta
     rw [this n (by omega), smul_zero]
 
 /-- Coefficients of `g · f(q)` for a power series `g` and `q` without constant term. -/
-private lemma PowerSeries.coeff_mul_subst_eq_sum_range (g q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : ℚ⟦X⟧) (n : ℕ) :
+private lemma PowerSeries.coeff_mul_subst_eq_sum_range (g q : ℚ⟦X⟧) (hq : constantCoeff q = 0)
+    (f : ℚ⟦X⟧) (n : ℕ) :
     coeff n (g * subst q f) = ∑ k ∈ range (n + 1), coeff k f * coeff n (g * q ^ k) := by
   set P : ℚ⟦X⟧ := ∑ k ∈ range (n + 1), C (coeff k f) * q ^ k
   have hdvd : X ^ (n + 1) ∣ subst q f - P := by
@@ -144,9 +159,9 @@ private lemma PowerSeries.coeff_mul_subst_eq_sum_range (g q : ℚ⟦X⟧) (hq : 
   refine sum_congr rfl fun k _ => ?_
   rw [mul_left_comm, coeff_C_mul]
 
-/-- Estimate under the stated parameter and domain assumptions: `coeff n (PowerSeries.catalanQuadraticSeries a e) = ∑
-k ∈ range (n + 1), (catalan k : ℚ) * if e * k ≤ n then a ^ (n - e * k) * (2 * k + (n - e *
-k)).choose (2 * k) else 0`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`coeff n (PowerSeries.catalanQuadraticSeries a e) = ∑ k ∈ range (n + 1), (catalan k : ℚ) * if e * k
+≤ n then a ^ (n - e * k) * (2 * k + (n - e * k)).choose (2 * k) else 0`. -/
 private lemma PowerSeries.coeff_catalanQuadraticSeries (a : ℚ) {e : ℕ} (he : 1 ≤ e) (n : ℕ) :
     coeff n (PowerSeries.catalanQuadraticSeries a e) = ∑ k ∈ range (n + 1), (catalan k : ℚ) *
       if e * k ≤ n then a ^ (n - e * k) * (2 * k + (n - e * k)).choose (2 * k) else 0 := by
@@ -156,7 +171,8 @@ private lemma PowerSeries.coeff_catalanQuadraticSeries (a : ℚ) {e : ℕ} (he :
   congr 1
   · simp [PowerSeries.catalanSeriesRat]
   · rw [PowerSeries.quadraticSubstArg, mul_pow, ← pow_mul, mul_left_comm,
-      show PowerSeries.geometricSeries a * (PowerSeries.geometricSeries a ^ 2) ^ k = PowerSeries.geometricSeries a ^ (2 * k + 1) by ring,
+      show PowerSeries.geometricSeries a * (PowerSeries.geometricSeries a ^ 2) ^ k =
+          PowerSeries.geometricSeries a ^ (2 * k + 1) by ring,
       coeff_X_pow_mul', mul_comm e k]
     split_ifs
     · rw [PowerSeries.coeff_geometricSeries_pow_succ]
@@ -198,7 +214,8 @@ theorem catalan_succ_eq_sum_catalan_mul_choose_mul_two_pow (n : ℕ) :
       have h2 : (C 2 : ℚ⟦X⟧) = 2 := map_ofNat C 2
       rw [h2]; linear_combination h
     exact mul_left_cancel₀ X_ne_zero this
-  have := PowerSeries.eq_of_quadratic_eq 2 (by norm_num) hG (PowerSeries.catalanQuadraticSeries_eq 2 (by norm_num))
+  have := PowerSeries.eq_of_quadratic_eq 2 (by norm_num) hG
+      (PowerSeries.catalanQuadraticSeries_eq 2 (by norm_num))
   have h := congrArg (coeff n) this
   rwa [PowerSeries.coeff_catalanQuadraticSeries_two, coeff_mk] at h
 
@@ -215,13 +232,15 @@ theorem Nat.largeSchroder_eq_sum_catalan_mul_choose (n : ℕ) :
       simp only [R, coeff_mk, Nat.largeSchroder_succ, Nat.cast_add, Nat.cast_sum, Nat.cast_mul]
       simp [Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j =>
         (Nat.largeSchroder i : ℚ) * Nat.largeSchroder j), Nat.range_succ_eq_Iic]
-  have := PowerSeries.eq_of_quadratic_eq 1 le_rfl hR (PowerSeries.catalanQuadraticSeries_eq 1 le_rfl)
+  have := PowerSeries.eq_of_quadratic_eq 1 le_rfl hR
+      (PowerSeries.catalanQuadraticSeries_eq 1 le_rfl)
   have h := congrArg (coeff n) this
   rw [PowerSeries.coeff_catalanQuadraticSeries_one, coeff_mk] at h
   simpa using h
 
 /-- Splitting a sum over `range (m + d + 1)` at `m`, the lower part vanishing. -/
-private lemma Finset.sum_range_add_succ_eq_of_eq_zero {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m d : ℕ)
+private lemma Finset.sum_range_add_succ_eq_of_eq_zero {M : Type*} [AddCommMonoid M]
+    (f : ℕ → M) (m d : ℕ)
     (h : ∀ k < m, f k = 0) :
     ∑ k ∈ range (m + d + 1), f k = ∑ j ∈ range (d + 1), f (m + j) := by
   rw [add_assoc, sum_range_add, sum_eq_zero fun k hk => h k (mem_range.mp hk), zero_add]
@@ -234,7 +253,8 @@ theorem Nat.sum_range_choose_mul_choose_eq (n m : ℕ) :
     exact sum_eq_zero fun k hk => by
       rw [Nat.choose_eq_zero_of_lt (n := k) (by simp at hk; omega), mul_zero]
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le h
-  rw [Finset.sum_range_add_succ_eq_of_eq_zero _ m d fun k hk => by rw [Nat.choose_eq_zero_of_lt hk, mul_zero],
+  rw [Finset.sum_range_add_succ_eq_of_eq_zero _ m d fun k hk =>
+      by rw [Nat.choose_eq_zero_of_lt hk, mul_zero],
     Nat.add_sub_cancel_left, ← Nat.sum_range_choose, mul_sum]
   refine sum_congr rfl fun j _ => ?_
   rw [Nat.choose_mul (by omega), Nat.add_sub_cancel_left, Nat.add_sub_cancel_left]

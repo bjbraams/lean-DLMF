@@ -253,7 +253,8 @@ theorem contiguous_ab {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz :
 (1 - z) * ₂F₁ (a + 1) b c z - (c - b) * ₂F₁ a (b - 1) c z = 0`. -/
 @[dlmf 15.5.E13]
 theorem contiguous_a_b_pred {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
-    (c - a - b) * ₂F₁ a b c z + a * (1 - z) * ₂F₁ (a + 1) b c z - (c - b) * ₂F₁ a (b - 1) c z = 0 := by
+    (c - a - b) * ₂F₁ a b c z + a * (1 - z) * ₂F₁ (a + 1) b c z - (c - b) *
+        ₂F₁ a (b - 1) c z = 0 := by
   have ha := ordinaryHypergeometric_mul_deriv_eq_shift_a (a := a) (b := b) hc hz
   have hb := ordinaryHypergeometric_mul_one_sub_mul_deriv_eq (a := b) (b := a) hc hz
   simp only [ordinaryHypergeometric_symm b a c, ordinaryHypergeometric_symm (b - 1) a c] at hb
@@ -271,8 +272,9 @@ theorem contiguous_a_pred_b_pred {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : 
       ordinaryHypergeometric_symm (b + 1) a c] at h2
   linear_combination (1 - z) * hab + h2 - h1
 
-/-- Raising `c` together with `a` or `b`: `c(b-a)F(a,b;c) = (c-a) b F(a,b+1;c+1) - (c-b) a F(a+1,b;c+1)`,
-the hypergeometric form of the `α`-raising companion of 18.9.5. -/
+/-- Raising `c` together with `a` or `b`:
+`c(b-a)F(a,b;c) = (c-a) b F(a,b+1;c+1) - (c-b) a F(a+1,b;c+1)`, the hypergeometric form of the
+`α`-raising companion of 18.9.5. -/
 theorem contiguous_c_pair {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
     c * (b - a) * ₂F₁ a b c z =
       (c - a) * b * ₂F₁ a (b + 1) (c + 1) z - (c - b) * a * ₂F₁ (a + 1) b (c + 1) z := by
@@ -358,7 +360,8 @@ theorem contiguous_c_succ_shift {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : �
 z - a * c * (1 - z) * ₂F₁ (a + 1) b c z + (c - a) * (c - b) * z * ₂F₁ a b (c + 1) z = 0`. -/
 @[dlmf 15.5.E14]
 theorem contiguous_a_c_succ {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
-    c * (a + (b - c) * z) * ₂F₁ a b c z - a * c * (1 - z) * ₂F₁ (a + 1) b c z + (c - a) * (c - b) * z * ₂F₁
+    c * (a + (b - c) * z) * ₂F₁ a b c z - a * c * (1 - z) * ₂F₁ (a + 1) b c z + (c - a) *
+        (c - b) * z * ₂F₁
       a b (c + 1) z = 0 := by
   have ha := ordinaryHypergeometric_mul_deriv_eq_shift_a (a := a) (b := b) hc hz
   have hd := deriv_contiguous_c_succ (a := a) (b := b) hc hz
@@ -397,7 +400,8 @@ theorem contiguous_a_pred_c_pred
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hz : ‖z‖ < 1)
     (hcm : ∀ k : ℕ, c - 1 ≠ -(k : ℂ)) :
-    (a - 1 + (b + 1 - c) * z) * ₂F₁ a b c z + (c - a) * ₂F₁ (a - 1) b c z - (c - 1) * (1 - z) * ₂F₁ a b (c -
+    (a - 1 + (b + 1 - c) * z) * ₂F₁ a b c z + (c - a) * ₂F₁ (a - 1) b c z - (c - 1) *
+        (1 - z) * ₂F₁ a b (c -
       1) z = 0 := by
   have h₁ := contiguous_a (a := a) (b := b) hc hz
   have h₂ := contiguous_a_succ_c_pred (a := a) (b := b) hz hcm
@@ -412,7 +416,8 @@ theorem contiguous_c_three
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hz : ‖z‖ < 1)
     (hcm : ∀ k : ℕ, c - 1 ≠ -(k : ℂ)) :
-    c * (c - 1) * (z - 1) * ₂F₁ a b (c - 1) z + c * (c - 1 - (2 * c - a - b - 1) * z) * ₂F₁ a b c z + (c -
+    c * (c - 1) * (z - 1) * ₂F₁ a b (c - 1) z + c * (c - 1 - (2 * c - a - b - 1) * z) *
+        ₂F₁ a b c z + (c -
       a) * (c - b) * z * ₂F₁ a b (c + 1) z = 0 := by
   have h₁ := contiguous_a_c_succ (a := a) (b := b) hc hz
   have h₂ := contiguous_a (a := a) (b := b) hc hz
@@ -424,7 +429,8 @@ theorem contiguous_c_three
 z - c * (c + 1) * ₂F₁ a b c z = 0`. -/
 @[dlmf 15.5.E19]
 theorem contiguous_diagonal {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
-    z * (1 - z) * (a + 1) * (b + 1) * ₂F₁ (a + 2) (b + 2) (c + 2) z + (c - (a + b + 1) * z) * (c + 1) * ₂F₁
+    z * (1 - z) * (a + 1) * (b + 1) * ₂F₁ (a + 2) (b + 2) (c + 2) z +
+        (c - (a + b + 1) * z) * (c + 1) * ₂F₁
       (a + 1) (b + 1) (c + 1) z - c * (c + 1) * ₂F₁ a b c z = 0 := by
   have hc1 : ∀ k : ℕ, c + 1 ≠ -(k : ℂ) := by simpa using not_neg_nat_add_nat hc 1
   have hc10 : c + 1 ≠ 0 := by simpa using hc1 0
@@ -524,7 +530,8 @@ theorem iterate_mulDerivMul_euler
 @[dlmf 15.5.E6]
 theorem iteratedDeriv_euler {a b c z : ℂ} (n : ℕ) (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
     iteratedDeriv n (fun w => (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z =
-      poch (c - a) n * poch (c - b) n / poch c n * (1 - z) ^ (a + b - c - n) * ₂F₁ a b (c + n) z := by
+      poch (c - a) n * poch (c - b) n / poch c n * (1 - z) ^ (a + b - c - n) *
+          ₂F₁ a b (c + n) z := by
   induction n generalizing c with
   | zero => simp [iteratedDeriv_zero, poch_zero]
   | succ n ih =>
@@ -606,7 +613,8 @@ theorem iterate_oneSubMulDerivMul
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hz : ‖z‖ < 1)  :
     (oneSubMulDerivMul^[n]) (fun w => (1 - w) ^ (a - 1) * ₂F₁ a b c w) z =
-      (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n * (1 - z) ^ (a + n - 1) * ₂F₁ (a + n) b (c + n) z
+      (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n * (1 - z) ^ (a + n - 1) *
+          ₂F₁ (a + n) b (c + n) z
         := by
   induction n generalizing z with
   | zero => simp [poch_zero]
@@ -707,7 +715,8 @@ theorem iteratedDeriv_two_cpow
     (hzs : z ∈ slitPlane)
     (hcn : ∀ k : ℕ, c - n ≠ -(k : ℂ)) :
     iteratedDeriv n (fun w => w ^ (c - 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z =
-      poch (c - n) n * z ^ (c - n - 1) * (1 - z) ^ (a + b - c - n) * ₂F₁ (a - n) (b - n) (c - n) z := by
+      poch (c - n) n * z ^ (c - n - 1) * (1 - z) ^ (a + b - c - n) *
+          ₂F₁ (a - n) (b - n) (c - n) z := by
   induction n generalizing a b c with
   | zero => simp [iteratedDeriv_zero, poch_zero]
   | succ n ih =>
@@ -751,14 +760,18 @@ theorem iteratedDeriv_two_cpow
 
 /-- Hypergeometric form of 18.9.7 (`b = 2c - 1 - a`). -/
 theorem contiguous_ultrasphPoly_raise {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
-    (2*z*(a - 2*c + 2)) * ((-c*(2*c - 1)*(2*a - 2*c + 1)) * ₂F₁ a (-a + 2*c - 1) c z + (-(a - 2*c)*(2*c - 1)*(a - 2*c + 1)/2) * ₂F₁ a ((-a + 2*c - 1) + 2) (c + 1) z + (a*(a + 1)*(2*c - 1)/2) * ₂F₁ (a + 2) (-a + 2*c - 1) (c + 1) z) = 0 := by
+    (2*z*(a - 2*c + 2)) *
+        ((-c*(2*c - 1)*(2*a - 2*c + 1)) * ₂F₁ a (-a + 2*c - 1) c z +
+        (-(a - 2*c)*(2*c - 1)*(a - 2*c + 1)/2) * ₂F₁ a ((-a + 2*c - 1) + 2) (c + 1) z +
+        (a*(a + 1)*(2*c - 1)/2) * ₂F₁ (a + 2) (-a + 2*c - 1) (c + 1) z) = 0 := by
   have h0 := DLMF.Hypergeometric.contiguous_ab (a := a) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
   have h1 := contiguous_c (a := ((-a + 2*c - 1) - 1)) (b := a) (c := c) hc hz
   simp only [ordinaryHypergeometric_symm ((-a + 2*c - 1) - 1) a c,
     ordinaryHypergeometric_symm ((-a + 2*c - 1) - 1) a (c + 1),
     ordinaryHypergeometric_symm (((-a + 2*c - 1) - 1) + 1) a (c + 1)] at h1
   have h2 := contiguous_shift_b (a := a) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
-  have h3 := DLMF.Hypergeometric.contiguous_c_succ_shift (a := a) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
+  have h3 := DLMF.Hypergeometric.contiguous_c_succ_shift (a := a)
+      (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
   have h4 := DLMF.Hypergeometric.contiguous_ab (a := a) (b := (-a + 2*c - 1)) (c := c) hc hz
   have h5 := DLMF.Hypergeometric.contiguous_a_b_pred (a := a) (b := (-a + 2*c - 1)) (c := c) hc hz
   have h6 := contiguous_c (a := (-a + 2*c - 1)) (b := a) (c := c) hc hz
@@ -771,23 +784,34 @@ theorem contiguous_ultrasphPoly_raise {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k
     ordinaryHypergeometric_symm (((-a + 2*c - 1) + 1) + 1) a (c + 1)] at h7
   have h8 := contiguous_shift_b (a := (a + 1)) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
   ring_nf at h0 h1 h2 h3 h4 h5 h6 h7 h8 ⊢
-  linear_combination (-c*(2*c - 1)*(a - 2*c + 2)) * h0 + (-z*(a - c)*(2*c - 1)*(a - c + 1)) * h1 + ((2*c - 1)*(z - 1)*(a - 2*c + 2)*(a - c + 1)) * h2 + (-z*(2*c - 1)*(a - c + 1)) * h3 + (c*z*(2*c - 1)*(a - 2*c + 2)) * h4 + (c*(2*c - 1)*(a - 2*c + 2)) * h5 + (-z*(a - c)*(2*c - 1)*(a - 2*c + 2)) * h6 + (-z*(2*c - 1)*(a - 2*c + 1)*(a - 2*c + 2)) * h7 + (a*(2*c - 1)*(a - 2*c + 2)) * h8
+  linear_combination (-c*(2*c - 1)*(a - 2*c + 2)) * h0 + (-z*(a - c)*(2*c - 1)*(a - c + 1)) * h1 +
+      ((2*c - 1)*(z - 1)*(a - 2*c + 2)*(a - c + 1)) * h2 + (-z*(2*c - 1)*(a - c + 1)) * h3 +
+      (c*z*(2*c - 1)*(a - 2*c + 2)) * h4 + (c*(2*c - 1)*(a - 2*c + 2)) * h5 +
+      (-z*(a - c)*(2*c - 1)*(a - 2*c + 2)) * h6 + (-z*(2*c - 1)*(a - 2*c + 1)*(a - 2*c + 2)) * h7 +
+      (a*(2*c - 1)*(a - 2*c + 2)) * h8
 
 /-- Hypergeometric form of 18.9.8 (`b = 2c - 1 - a`). -/
 theorem contiguous_ultrasphPoly_raise_sq {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
-    (a*(a + 1)) * ((2*c) * ₂F₁ a (-a + 2*c - 1) c z + (4*z*(z - 1)*(2*a - 2*c + 3)) * ₂F₁ (a + 2) (-a + 2*c - 1) (c + 1) z + (-2*c) * ₂F₁ (a + 2) ((-a + 2*c - 1) - 2) c z) = 0 := by
+    (a*(a + 1)) * ((2*c) * ₂F₁ a (-a + 2*c - 1) c z + (4*z*(z - 1)*(2*a - 2*c + 3)) *
+        ₂F₁ (a + 2) (-a + 2*c - 1) (c + 1) z + (-2*c) *
+        ₂F₁ (a + 2) ((-a + 2*c - 1) - 2) c z) = 0 := by
   have h0 := DLMF.Hypergeometric.contiguous_ab (a := a) (b := ((-a + 2*c - 1) - 2)) (c := c) hc hz
   have h1 := DLMF.Hypergeometric.contiguous_ab (a := a) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
-  have h2 := DLMF.Hypergeometric.contiguous_a_b_pred (a := a) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
+  have h2 := DLMF.Hypergeometric.contiguous_a_b_pred (a := a)
+      (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
   have h3 := DLMF.Hypergeometric.contiguous_a_b_pred (a := a) (b := (-a + 2*c - 1)) (c := c) hc hz
-  have h4 := DLMF.Hypergeometric.contiguous_ab (a := (a + 1)) (b := ((-a + 2*c - 1) - 2)) (c := c) hc hz
+  have h4 := DLMF.Hypergeometric.contiguous_ab (a := (a + 1))
+      (b := ((-a + 2*c - 1) - 2)) (c := c) hc hz
   have h5 := contiguous_shift_b (a := (a + 1)) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
   ring_nf at h0 h1 h2 h3 h4 h5 ⊢
-  linear_combination (-4*c*(a - c + 2)) * h0 + (2*c*(a - 2*c + 3)) * h1 + (4*c*(2*a - 2*c + 3)) * h2 + (-4*c*(2*a - 2*c + 3)) * h3 + (-2*a*c) * h4 + (4*a*(z - 1)*(2*a - 2*c + 3)) * h5
+  linear_combination (-4*c*(a - c + 2)) * h0 + (2*c*(a - 2*c + 3)) * h1 + (4*c*(2*a - 2*c + 3)) *
+      h2 + (-4*c*(2*a - 2*c + 3)) * h3 + (-2*a*c) * h4 + (4*a*(z - 1)*(2*a - 2*c + 3)) * h5
 
 /-- Hypergeometric form of 18.9.17. -/
 theorem contiguous_jacobi_lowering {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
-    (a - 1) * ((2*a*c*(a - c + 1)*(a*z - b*z + b - c + z)) * ₂F₁ a b c z + (2*a*b*z*(z - 1)*(a - b + 1)*(a - c + 1)) * ₂F₁ (a + 1) (b + 1) (c + 1) z + (-2*a*c*(b - c)*(a - c + 1)) * ₂F₁ (a + 1) (b - 1) c z) = 0 := by
+    (a - 1) * ((2*a*c*(a - c + 1)*(a*z - b*z + b - c + z)) * ₂F₁ a b c z +
+        (2*a*b*z*(z - 1)*(a - b + 1)*(a - c + 1)) * ₂F₁ (a + 1) (b + 1) (c + 1) z +
+        (-2*a*c*(b - c)*(a - c + 1)) * ₂F₁ (a + 1) (b - 1) c z) = 0 := by
   have h0 := DLMF.Hypergeometric.contiguous_ab (a := (a - 1)) (b := (b - 1)) (c := c) hc hz
   have h1 := DLMF.Hypergeometric.contiguous_ab (a := (a - 1)) (b := b) (c := c) hc hz
   have h2 := DLMF.Hypergeometric.contiguous_a_b_pred (a := (a - 1)) (b := b) (c := c) hc hz
@@ -795,11 +819,16 @@ theorem contiguous_jacobi_lowering {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k 
   have h4 := DLMF.Hypergeometric.contiguous_ab (a := a) (b := (b - 1)) (c := c) hc hz
   have h5 := contiguous_shift_b (a := a) (b := b) (c := c) hc hz
   ring_nf at h0 h1 h2 h3 h4 h5 ⊢
-  linear_combination (-2*c*(b - c)*(a - b + 1)*(a - c + 1)) * h0 + (2*c*(a - b + 1)*(a + b - c)*(a - c + 1)) * h1 + (-2*c*(a - b)*(a - b + 1)*(a - c + 1)) * h2 + (-2*b*c*(a - b + 1)*(a - c + 1)) * h3 + (-2*c*(a - 1)*(b - c)*(a - c + 1)) * h4 + (2*b*(a - 1)*(z - 1)*(a - b + 1)*(a - c + 1)) * h5
+  linear_combination (-2*c*(b - c)*(a - b + 1)*(a - c + 1)) * h0 +
+      (2*c*(a - b + 1)*(a + b - c)*(a - c + 1)) * h1 + (-2*c*(a - b)*(a - b + 1)*(a - c + 1)) * h2 +
+      (-2*b*c*(a - b + 1)*(a - c + 1)) * h3 + (-2*c*(a - 1)*(b - c)*(a - c + 1)) * h4 +
+      (2*b*(a - 1)*(z - 1)*(a - b + 1)*(a - c + 1)) * h5
 
 /-- Hypergeometric form of 18.9.18. -/
 theorem contiguous_jacobi_raising {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
-    (a - 2) * ((2*b*c*(a - 1)*(a*z - a - b*z + c - z)) * ₂F₁ a b c z + (2*a*b*z*(a - 1)*(z - 1)*(a - b - 1)) * ₂F₁ (a + 1) (b + 1) (c + 1) z + (2*b*c*(a - 1)*(a - c)) * ₂F₁ (a - 1) (b + 1) c z) = 0 := by
+    (a - 2) * ((2*b*c*(a - 1)*(a*z - a - b*z + c - z)) * ₂F₁ a b c z +
+        (2*a*b*z*(a - 1)*(z - 1)*(a - b - 1)) * ₂F₁ (a + 1) (b + 1) (c + 1) z +
+        (2*b*c*(a - 1)*(a - c)) * ₂F₁ (a - 1) (b + 1) c z) = 0 := by
   have h0 := DLMF.Hypergeometric.contiguous_ab (a := (a - 2)) (b := b) (c := c) hc hz
   have h1 := DLMF.Hypergeometric.contiguous_ab (a := (a - 2)) (b := (b + 1)) (c := c) hc hz
   have h2 := DLMF.Hypergeometric.contiguous_a_b_pred (a := (a - 2)) (b := (b + 1)) (c := c) hc hz
@@ -808,6 +837,9 @@ theorem contiguous_jacobi_raising {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k :
   have h5 := DLMF.Hypergeometric.contiguous_ab (a := (a - 1)) (b := (b + 1)) (c := c) hc hz
   have h6 := contiguous_shift_b (a := a) (b := b) (c := c) hc hz
   ring_nf at h0 h1 h2 h3 h4 h5 h6 ⊢
-  linear_combination (-2*b*c*(a - b - 1)*(b - c + 1)) * h0 + (2*b*c*(a - b - 1)*(a + b - c)) * h1 + (-2*b*c*(a - b - 2)*(a - b - 1)) * h2 + (-2*b*c*(b + 1)*(a - b - 1)) * h3 + (-2*b*c*(a - 2)*(b - c + 1)) * h4 + (2*b*c*(a - 2)*(z - 1)*(a - b - 1)) * h5 + (2*b*(a - 2)*(a - 1)*(z - 1)*(a - b - 1)) * h6
+  linear_combination (-2*b*c*(a - b - 1)*(b - c + 1)) * h0 + (2*b*c*(a - b - 1)*(a + b - c)) * h1 +
+      (-2*b*c*(a - b - 2)*(a - b - 1)) * h2 + (-2*b*c*(b + 1)*(a - b - 1)) * h3 +
+      (-2*b*c*(a - 2)*(b - c + 1)) * h4 + (2*b*c*(a - 2)*(z - 1)*(a - b - 1)) * h5 +
+      (2*b*(a - 2)*(a - 1)*(z - 1)*(a - b - 1)) * h6
 
 end DLMF.Hypergeometric

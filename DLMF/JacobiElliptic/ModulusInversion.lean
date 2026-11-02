@@ -94,7 +94,8 @@ def oddLatticeEquiv : ℤ × ℤ ≃ {p : ℤ × ℤ // ¬ Even (p.1 + p.2)} whe
     omega
 
 /-- `θ₃(q)² - θ₄(q)² = 2q P(q²)²`. -/
-private lemma jacobiThetaThreeNullQ_sq_sub_jacobiThetaFourNullQ_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+private lemma jacobiThetaThreeNullQ_sq_sub_jacobiThetaFourNullQ_sq {q : ℝ} (hq0 : 0 < q)
+    (hq1 : q < 1) :
     Real.jacobiThetaThreeNullQ q ^ 2 - Real.jacobiThetaFourNullQ q ^ 2 =
       2 * q * jacobiThetaTwoReducedQ (q ^ 2) ^ 2 := by
   have hs3 := summable_zpow_sq hq0 hq1
@@ -136,7 +137,8 @@ private lemma jacobiThetaThreeNullQ_sq_sub_jacobiThetaFourNullQ_sq {q : ℝ} (hq
 
 /-- `P(q)² = 2 P(q²) θ₃(q²)`. -/
 private lemma jacobiThetaTwoReducedQ_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
-    jacobiThetaTwoReducedQ q ^ 2 = 2 * (jacobiThetaTwoReducedQ (q ^ 2) * Real.jacobiThetaThreeNullQ (q ^ 2)) := by
+    jacobiThetaTwoReducedQ q ^ 2 = 2 *
+        (jacobiThetaTwoReducedQ (q ^ 2) * Real.jacobiThetaThreeNullQ (q ^ 2)) := by
   have hq2 : 0 < q ^ 2 := by positivity
   have hq21 : q ^ 2 < 1 := by nlinarith
   have hsP := summable_pow_sq_add_self hq0 hq1
@@ -146,7 +148,8 @@ private lemma jacobiThetaTwoReducedQ_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
   have hP3 := tsum_mul_tsum_of_summable_norm hsP'.norm hs3'.norm
   have hHs := summable_mul_of_summable_norm hsP.norm hsP.norm
   set H : ℤ × ℤ → ℝ := fun p => q ^ (p.1 ^ 2 + p.1) * q ^ (p.2 ^ 2 + p.2) with hH
-  rw [jacobiThetaTwoReducedQ, sq, hPP, jacobiThetaTwoReducedQ, Real.jacobiThetaThreeNullQ, hP3, two_mul]
+  rw [jacobiThetaTwoReducedQ, sq, hPP, jacobiThetaTwoReducedQ,
+      Real.jacobiThetaThreeNullQ, hP3, two_mul]
   change ∑' p, H p = _
   rw [← hHs.tsum_subtype_add_tsum_subtype_compl {p : ℤ × ℤ | Even (p.1 + p.2)}]
   congr 1
@@ -175,7 +178,8 @@ private lemma jacobiThetaTwoReducedQ_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
 
 /-- Jacobi's identity for a real nome: `θ₃(q)⁴ = θ₄(q)⁴ + q P(q)⁴`, i.e. `θ₃⁴ = θ₂⁴ + θ₄⁴`. -/
 private lemma jacobiThetaThreeNullQ_pow_four_eq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
-    Real.jacobiThetaThreeNullQ q ^ 4 = Real.jacobiThetaFourNullQ q ^ 4 + q * jacobiThetaTwoReducedQ q ^ 4 := by
+    Real.jacobiThetaThreeNullQ q ^ 4 = Real.jacobiThetaFourNullQ q ^ 4 + q *
+        jacobiThetaTwoReducedQ q ^ 4 := by
   have h1 := Real.jacobiThetaThreeNullQ_sq_add_jacobiThetaFourNullQ_sq hq0 hq1
   have h2 := jacobiThetaThreeNullQ_sq_sub_jacobiThetaFourNullQ_sq hq0 hq1
   have h3 := jacobiThetaTwoReducedQ_sq hq0 hq1
@@ -189,7 +193,8 @@ private lemma jacobiThetaThreeNullQ_pow_four_eq {q : ℝ} (hq0 : 0 < q) (hq1 : q
 private lemma jacobiThetaTwoTau_zero_I_mul_eq_reducedQ (t : ℝ) :
     jacobiThetaTwoTau 0 (I * t) =
       ((Real.exp (-(π * t) / 4) * jacobiThetaTwoReducedQ (Real.exp (-(π * t))) : ℝ) : ℂ) := by
-  rw [jacobiThetaTwoTau, jacobiThetaThreeTau_eq_tsum, jacobiThetaTwoReducedQ, ofReal_mul, ofReal_tsum,
+  rw [jacobiThetaTwoTau, jacobiThetaThreeTau_eq_tsum, jacobiThetaTwoReducedQ,
+      ofReal_mul, ofReal_tsum,
     ← tsum_mul_left, ← tsum_mul_left]
   refine tsum_congr fun n => ?_
   rw [Complex.ofReal_zpow, Complex.ofReal_exp, Complex.ofReal_exp, ← Complex.exp_int_mul,
@@ -203,13 +208,15 @@ private lemma jacobiThetaTwoTau_zero_I_mul_eq_reducedQ (t : ℝ) :
 end
 
 /-- `θ₃(0|it)` as a real function of `t`. -/
-noncomputable def jacobiThetaThreeImag (t : ℝ) : ℝ := Real.jacobiThetaThreeNullQ (Real.exp (-(π * t)))
+noncomputable def jacobiThetaThreeImag (t : ℝ) : ℝ :=
+    Real.jacobiThetaThreeNullQ (Real.exp (-(π * t)))
 /-- `θ₄(0|it)` as a real function of `t`. -/
 noncomputable def jacobiThetaFourImag (t : ℝ) : ℝ := Real.jacobiThetaFourNullQ (Real.exp (-(π * t)))
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < Real.exp (-(π * t)) ∧
 Real.exp (-(π * t)) < 1`. -/
-private lemma exp_neg_pi_mul_mem_Ioo {t : ℝ} (ht : 0 < t) : 0 < Real.exp (-(π * t)) ∧ Real.exp (-(π * t)) < 1 :=
+private lemma exp_neg_pi_mul_mem_Ioo {t : ℝ} (ht : 0 < t) : 0 < Real.exp (-(π * t)) ∧
+    Real.exp (-(π * t)) < 1 :=
   ⟨Real.exp_pos _, Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos])⟩
 
 /-- Estimate under the stated parameter and domain assumptions: `1 ≤ jacobiThetaThreeImag t`. -/
@@ -222,17 +229,20 @@ theorem jacobiThetaFourImag_pos {t : ℝ} (ht : 0 < t) : 0 < jacobiThetaFourImag
 
 /-- Identity under the stated parameter and domain assumptions: `jacobiThetaThreeTau 0 (I * t) =
 jacobiThetaThreeImag t`. -/
-theorem jacobiThetaThreeTau_zero_I_mul_eq_imag (t : ℝ) : jacobiThetaThreeTau 0 (I * t) = jacobiThetaThreeImag t :=
+theorem jacobiThetaThreeTau_zero_I_mul_eq_imag (t : ℝ) : jacobiThetaThreeTau 0 (I * t) =
+    jacobiThetaThreeImag t :=
   jacobiThetaThreeTau_zero_I_mul t
 
 /-- Identity under the stated parameter and domain assumptions: `jacobiThetaFourTau 0 (I * t) =
 jacobiThetaFourImag t`. -/
-theorem jacobiThetaFourTau_zero_I_mul_eq_imag (t : ℝ) : jacobiThetaFourTau 0 (I * t) = jacobiThetaFourImag t :=
+theorem jacobiThetaFourTau_zero_I_mul_eq_imag (t : ℝ) : jacobiThetaFourTau 0 (I * t) =
+    jacobiThetaFourImag t :=
   jacobiThetaFourTau_zero_I_mul t
 
 /-- Identity under the stated parameter and domain assumptions: `-1 / (I * t) = I * ((1 / t : ℝ) :
 ℂ)`. -/
-private lemma neg_one_div_I_mul_ofReal {t : ℝ} (ht : 0 < t) : -1 / (I * t) = I * ((1 / t : ℝ) : ℂ) := by
+private lemma neg_one_div_I_mul_ofReal {t : ℝ} (ht : 0 < t) : -1 / (I * t) = I *
+    ((1 / t : ℝ) : ℂ) := by
   have : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
   push_cast
   field_simp
@@ -246,9 +256,11 @@ private lemma neg_I_mul_I_mul_ofReal {t : ℝ} : -I * (I * t) = (t : ℂ) := by
 private lemma im_I_mul_ofReal_pos {t : ℝ} (ht : 0 < t) : 0 < (I * (t : ℂ)).im := by simpa using ht
 
 /-- `θ₃(0|i/t) = √t θ₃(0|it)`. -/
-private lemma jacobiThetaThreeImag_one_div {t : ℝ} (ht : 0 < t) : jacobiThetaThreeImag (1 / t) = Real.sqrt t * jacobiThetaThreeImag t := by
+private lemma jacobiThetaThreeImag_one_div {t : ℝ} (ht : 0 < t) : jacobiThetaThreeImag (1 / t) =
+    Real.sqrt t * jacobiThetaThreeImag t := by
   have h := DLMF.Theta.jacobiThetaThreeTau_neg_inv (im_I_mul_ofReal_pos ht) 0
-  rw [neg_I_mul_I_mul_ofReal, neg_one_div_I_mul_ofReal ht, Carlson.ofReal_cpow_half ht.le, jacobiThetaThreeTau_zero_I_mul_eq_imag] at h
+  rw [neg_I_mul_I_mul_ofReal, neg_one_div_I_mul_ofReal ht, Carlson.ofReal_cpow_half ht.le,
+      jacobiThetaThreeTau_zero_I_mul_eq_imag] at h
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero, zero_div,
     exp_zero, one_mul, zero_mul] at h
   rw [jacobiThetaThreeTau_zero_I_mul_eq_imag] at h
@@ -276,32 +288,38 @@ theorem jacobiThetaTwoImag_pos {t : ℝ} (ht : 0 < t) : 0 < jacobiThetaTwoImag t
 /-- Jacobi's identity on the imaginary axis: `B⁴ = A⁴ + C⁴`. -/
 theorem jacobiThetaThreeImag_pow_four {t : ℝ} (ht : 0 < t) :
     jacobiThetaThreeImag t ^ 4 = jacobiThetaTwoImag t ^ 4 + jacobiThetaFourImag t ^ 4 := by
-  have h := jacobiThetaThreeNullQ_pow_four_eq (exp_neg_pi_mul_mem_Ioo ht).1 (exp_neg_pi_mul_mem_Ioo ht).2
-  have hA : jacobiThetaTwoImag t = Real.exp (-(π * t) / 4) * jacobiThetaTwoReducedQ (Real.exp (-(π * t))) := by
-    have e := (jacobiThetaTwoTau_zero_I_mul_eq_div_sqrt ht).symm.trans (jacobiThetaTwoTau_zero_I_mul_eq_reducedQ t)
+  have h := jacobiThetaThreeNullQ_pow_four_eq (exp_neg_pi_mul_mem_Ioo ht).1
+      (exp_neg_pi_mul_mem_Ioo ht).2
+  have hA : jacobiThetaTwoImag t = Real.exp (-(π * t) / 4) *
+      jacobiThetaTwoReducedQ (Real.exp (-(π * t))) := by
+    have e := (jacobiThetaTwoTau_zero_I_mul_eq_div_sqrt ht).symm.trans
+        (jacobiThetaTwoTau_zero_I_mul_eq_reducedQ t)
     exact_mod_cast e
   have he : Real.exp (-(π * t) / 4) ^ 4 = Real.exp (-(π * t)) := by
     rw [← Real.exp_nat_mul]; ring_nf
   rw [jacobiThetaThreeImag, jacobiThetaFourImag, h, hA, mul_pow, he]
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiThetaTwoImag (1 / t) = jacobiThetaFourImag t *
-Real.sqrt t`. -/
-private lemma jacobiThetaTwoImag_one_div {t : ℝ} (ht : 0 < t) : jacobiThetaTwoImag (1 / t) = jacobiThetaFourImag t * Real.sqrt t := by
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiThetaTwoImag (1 / t) = jacobiThetaFourImag t * Real.sqrt t`. -/
+private lemma jacobiThetaTwoImag_one_div {t : ℝ} (ht : 0 < t) : jacobiThetaTwoImag (1 / t) =
+    jacobiThetaFourImag t * Real.sqrt t := by
   rw [jacobiThetaTwoImag, one_div_one_div, Real.sqrt_div' _ ht.le, Real.sqrt_one]
   field_simp
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiThetaThreeImag t = Real.sqrt (1 / t) *
-jacobiThetaThreeImag (1 / t)`. -/
-private lemma jacobiThetaThreeImag_eq_sqrt_one_div_mul {t : ℝ} (ht : 0 < t) : jacobiThetaThreeImag t = Real.sqrt (1 / t) * jacobiThetaThreeImag (1 / t) := by
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiThetaThreeImag t = Real.sqrt (1 / t) * jacobiThetaThreeImag (1 / t)`. -/
+private lemma jacobiThetaThreeImag_eq_sqrt_one_div_mul {t : ℝ} (ht : 0 < t) : jacobiThetaThreeImag t
+    = Real.sqrt (1 / t) * jacobiThetaThreeImag (1 / t) := by
   have h := jacobiThetaThreeImag_one_div (t := 1 / t) (by positivity)
   rwa [one_div_one_div] at h
 
 /-- `ρ(t) = θ₂²(0|it)/θ₃²(0|it)`. -/
-noncomputable def jacobiModulusImag (t : ℝ) : ℝ := (jacobiThetaTwoImag t / jacobiThetaThreeImag t) ^ 2
+noncomputable def jacobiModulusImag (t : ℝ) : ℝ :=
+    (jacobiThetaTwoImag t / jacobiThetaThreeImag t) ^ 2
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiModulusImag (1 / t) = (jacobiThetaFourImag t /
-jacobiThetaThreeImag t) ^ 2`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiModulusImag (1 / t) = (jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 2`. -/
 private lemma jacobiModulusImag_one_div {t : ℝ} (ht : 0 < t) :
     jacobiModulusImag (1 / t) = (jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 2 := by
   rw [jacobiModulusImag, jacobiThetaTwoImag_one_div ht, jacobiThetaThreeImag_one_div ht]
@@ -311,7 +329,8 @@ private lemma jacobiModulusImag_one_div {t : ℝ} (ht : 0 < t) :
   field_simp
 
 /-- The function `jacobiThetaThreeImag` is continuous on `(Set.Ioi 0)`. -/
-private lemma continuousOn_jacobiThetaThreeImag : ContinuousOn jacobiThetaThreeImag (Set.Ioi 0) := by
+private lemma continuousOn_jacobiThetaThreeImag : ContinuousOn jacobiThetaThreeImag
+    (Set.Ioi 0) := by
   intro t ht
   have h : ContinuousAt (fun s : ℝ => jacobiThetaThreeTau 0 (I * s)) t := by
     have h1 : ContinuousAt (fun τ => jacobiTheta₂ (0 / π) τ) (I * t) :=
@@ -335,7 +354,8 @@ private lemma continuousOn_jacobiThetaFourImag : ContinuousOn jacobiThetaFourIma
 /-- The function `jacobiModulusImag` is continuous on `(Set.Ioi 0)`. -/
 private lemma continuousOn_jacobiModulusImag : ContinuousOn jacobiModulusImag (Set.Ioi 0) := by
   have hC' : ContinuousOn (fun t => jacobiThetaFourImag (1 / t)) (Set.Ioi 0) :=
-    continuousOn_jacobiThetaFourImag.comp (continuousOn_const.div continuousOn_id fun t ht => ht.ne')
+    continuousOn_jacobiThetaFourImag.comp
+        (continuousOn_const.div continuousOn_id fun t ht => ht.ne')
       fun t ht => by simp only [Set.mem_Ioi] at ht ⊢; positivity
   have hA : ContinuousOn jacobiThetaTwoImag (Set.Ioi 0) :=
     hC'.div Real.continuous_sqrt.continuousOn fun t ht => (Real.sqrt_pos.mpr ht).ne'
@@ -343,13 +363,16 @@ private lemma continuousOn_jacobiModulusImag : ContinuousOn jacobiModulusImag (S
     have := one_le_jacobiThetaThreeImag ht; positivity).pow 2
 
 /-- The map `(fun t : ℝ => Real.exp (-(π * t)))` tends to `(𝓝[>] 0)` along `atTop`. -/
-private lemma tendsto_exp_neg_pi_mul_atTop : Tendsto (fun t : ℝ => Real.exp (-(π * t))) atTop (𝓝[>] 0) := by
+private lemma tendsto_exp_neg_pi_mul_atTop : Tendsto (fun t : ℝ => Real.exp (-(π * t)))
+    atTop (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, Eventually.of_forall fun t => Real.exp_pos _⟩
   exact Real.tendsto_exp_atBot.comp (tendsto_neg_atTop_atBot.comp
     (Tendsto.const_mul_atTop Real.pi_pos tendsto_id))
 
-/-- The map `(fun t => jacobiThetaFourImag t / jacobiThetaThreeImag t)` tends to `(𝓝 1)` along `atTop`. -/
-private lemma tendsto_jacobiThetaFourImag_div_jacobiThetaThreeImag : Tendsto (fun t => jacobiThetaFourImag t / jacobiThetaThreeImag t) atTop (𝓝 1) := by
+/-- The map `(fun t => jacobiThetaFourImag t / jacobiThetaThreeImag t)` tends to `(𝓝 1)` along
+`atTop`. -/
+private lemma tendsto_jacobiThetaFourImag_div_jacobiThetaThreeImag : Tendsto
+    (fun t => jacobiThetaFourImag t / jacobiThetaThreeImag t) atTop (𝓝 1) := by
   have h3 := Real.tendsto_jacobiThetaThreeNullQ.comp tendsto_exp_neg_pi_mul_atTop
   have h4 := Real.tendsto_jacobiThetaFourNullQ.comp tendsto_exp_neg_pi_mul_atTop
   have h := h4.div h3 one_ne_zero
@@ -377,7 +400,8 @@ theorem exists_jacobiModulusImag_eq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
   have hρT : jacobiModulusImag T < k := by
     have hf := jacobiThetaThreeImag_pow_four hT0
     have hB := one_le_jacobiThetaThreeImag hT0
-    have hsq : jacobiModulusImag T ^ 2 = 1 - (jacobiThetaFourImag T / jacobiThetaThreeImag T) ^ 4 := by
+    have hsq : jacobiModulusImag T ^ 2 = 1 -
+        (jacobiThetaFourImag T / jacobiThetaThreeImag T) ^ 4 := by
       rw [jacobiModulusImag]; field_simp; linarith
     have hρ0 : 0 ≤ jacobiModulusImag T := sq_nonneg _
     nlinarith
@@ -401,7 +425,8 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
   have hB0 : 0 < jacobiThetaThreeImag t := by linarith
   have hC := jacobiThetaFourImag_pos ht
   have hf := jacobiThetaThreeImag_pow_four ht
-  have hA' : jacobiThetaTwoTau 0 (I * t) = jacobiThetaTwoImag t := jacobiThetaTwoTau_zero_I_mul_eq_div_sqrt ht
+  have hA' : jacobiThetaTwoTau 0 (I * t) = jacobiThetaTwoImag t :=
+      jacobiThetaTwoTau_zero_I_mul_eq_div_sqrt ht
   -- `k² = 1 - (C/B)⁴` and `1 - k² = (C/B)⁴`
   have hk2 : k ^ 2 = 1 - (jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 4 := by
     rw [← hρ, jacobiModulusImag]; field_simp; linarith
@@ -411,13 +436,16 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
       rw [hk2]; have : 0 < (jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 4 := by positivity
       linarith
     nlinarith
-  have hKm (s : ℝ) (hs : 0 < s) : Real.compEllIntKm (1 - (jacobiThetaFourImag s / jacobiThetaThreeImag s) ^ 4) =
+  have hKm (s : ℝ) (hs : 0 < s) : Real.compEllIntKm
+      (1 - (jacobiThetaFourImag s / jacobiThetaThreeImag s) ^ 4) =
       π / 2 * jacobiThetaThreeImag s ^ 2 :=
-    Real.compEllIntKm_eq_jacobiThetaThreeNullQ (exp_neg_pi_mul_mem_Ioo hs).1 (exp_neg_pi_mul_mem_Ioo hs).2
+    Real.compEllIntKm_eq_jacobiThetaThreeNullQ (exp_neg_pi_mul_mem_Ioo hs).1
+        (exp_neg_pi_mul_mem_Ioo hs).2
   have hKk : compEllIntKk k = π / 2 * (jacobiThetaThreeImag t : ℂ) ^ 2 := by
     rw [compEllIntKk_ofReal (by nlinarith), hk2, hKm t ht]
     push_cast; ring
-  have hKmk : Real.compEllIntKm (k ^ 2) = π / 2 * jacobiThetaThreeImag t ^ 2 := by rw [hk2, hKm t ht]
+  have hKmk : Real.compEllIntKm (k ^ 2) = π / 2 * jacobiThetaThreeImag t ^ 2 :=
+      by rw [hk2, hKm t ht]
   have hKmk' : Real.compEllIntKm (1 - k ^ 2) = π / 2 * t * jacobiThetaThreeImag t ^ 2 := by
     have ht' : (0 : ℝ) < 1 / t := by positivity
     have e : 1 - k ^ 2 = 1 - (jacobiThetaFourImag (1 / t) / jacobiThetaThreeImag (1 / t)) ^ 4 := by
@@ -436,7 +464,8 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
       rw [h1, jacobiThetaThreeImag_one_div ht, ← hρ, jacobiModulusImag]
       have := Real.sqrt_pos.mpr ht
       field_simp
-    rw [compEllIntKpk_ofReal (by positivity), e, hKm _ ht', jacobiThetaThreeImag_one_div ht, mul_pow,
+    rw [compEllIntKpk_ofReal (by positivity), e, hKm _ ht',
+        jacobiThetaThreeImag_one_div ht, mul_pow,
       Real.sq_sqrt ht.le]
     push_cast
     ring
@@ -451,10 +480,12 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
     field_simp
   · rw [jacobiModulusTau, hA', jacobiThetaThreeTau_zero_I_mul_eq_imag, ← hρ, jacobiModulusImag]
     push_cast; ring
-  · rw [jacobiComodulusTau, jacobiComodulusk, jacobiThetaFourTau_zero_I_mul_eq_imag, jacobiThetaThreeTau_zero_I_mul_eq_imag,
+  · rw [jacobiComodulusTau, jacobiComodulusk, jacobiThetaFourTau_zero_I_mul_eq_imag,
+        jacobiThetaThreeTau_zero_I_mul_eq_imag,
       show (1 : ℂ) - (k : ℂ) ^ 2 = ((1 - k ^ 2 : ℝ) : ℂ) by push_cast; ring,
       Carlson.ofReal_cpow_half (by nlinarith), hk2,
-      show 1 - (1 - (jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 4) = ((jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 2) ^ 2 by ring,
+      show 1 - (1 - (jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 4) =
+          ((jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 2) ^ 2 by ring,
       Real.sqrt_sq (by positivity)]
     push_cast; ring
   · rw [compEllIntKTau, jacobiThetaThreeTau_zero_I_mul_eq_imag, hKk]
@@ -463,14 +494,16 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
 relations hold at `τ = it`. -/
 lemma exists_jacobiTauk_eq_I_mul_of_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
     ∃ t : ℝ, 0 < t ∧ jacobiTauk k = I * t ∧ jacobiModulusTau (I * t) = k ∧
-      jacobiComodulusTau (I * t) = jacobiComodulusk k ∧ compEllIntKTau (I * t) = compEllIntKk k := by
+      jacobiComodulusTau (I * t) = jacobiComodulusk k ∧ compEllIntKTau (I * t) =
+          compEllIntKk k := by
   obtain ⟨t, ht, hρ⟩ := exists_jacobiModulusImag_eq hk0 hk1
   obtain ⟨-, -, h1, h2, h3, h4, -⟩ := jacobiModulusImag_spec ht
   rw [hρ] at h1 h2 h3 h4
   exact ⟨t, ht, h1, h2, h3, h4⟩
 
 /-- Holomorphy of the parametric integrals `∫₀^{π/2} (1 - c(k) sin²θ)^{-1/2} dθ`. -/
-private lemma differentiableOn_integral_one_sub_mul_sin_sq_rpow {U : Set ℂ} (hU : IsOpen U) {c : ℂ → ℂ}
+private lemma differentiableOn_integral_one_sub_mul_sin_sq_rpow {U : Set ℂ}
+    (hU : IsOpen U) {c : ℂ → ℂ}
     (hc : Differentiable ℂ c)
     (hslit : ∀ k ∈ U, ∀ s : ℝ, 0 ≤ s → s ≤ 1 → 1 - c k * (s : ℂ) ∈ slitPlane) :
     DifferentiableOn ℂ
@@ -505,7 +538,8 @@ private lemma differentiableOn_integral_one_sub_mul_sin_sq_rpow {U : Set ℂ} (h
       exact hM (y, Real.sin θ ^ 2) ⟨hy, sq_nonneg _, Real.sin_sq_le_one θ⟩
 
 /-- `K(k) ≠ 0` on `jacobiModulusDomain`. -/
-theorem compEllIntKk_ne_zero_of_mem_jacobiModulusDomain {k : ℂ} (hk : k ∈ jacobiModulusDomain) : compEllIntKk k ≠ 0 := by
+theorem compEllIntKk_ne_zero_of_mem_jacobiModulusDomain {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    compEllIntKk k ≠ 0 := by
   intro h
   have := jacobiTauk_im_pos hk
   simp [jacobiTauk, h] at this
@@ -543,12 +577,14 @@ private lemma one_half_mem_jacobiModulusDomain : (1 / 2 : ℂ) ∈ jacobiModulus
   refine ⟨by norm_num, fun _ => by norm_num⟩
 
 /-- Formula under the stated hypotheses: `(x : ℂ) ∈ jacobiModulusDomain`. -/
-theorem ofReal_mem_jacobiModulusDomain {x : ℝ} (h0 : 0 < x) (h1 : x < 1) : (x : ℂ) ∈ jacobiModulusDomain :=
+theorem ofReal_mem_jacobiModulusDomain {x : ℝ} (h0 : 0 < x) (h1 : x < 1) : (x : ℂ) ∈
+    jacobiModulusDomain :=
   ⟨by simpa using h0, fun _ => by simpa using h1⟩
 
 /-- The stated relation follows from the given hypotheses: `IsPreconnected jacobiModulusDomain`. -/
 private lemma isPreconnected_jacobiModulusDomain : IsPreconnected jacobiModulusDomain := by
-  refine (StarConvex.isPathConnected (a := (1 / 2 : ℂ)) ?_ one_half_mem_jacobiModulusDomain).isConnected.isPreconnected
+  refine (StarConvex.isPathConnected (a := (1 / 2 : ℂ)) ?_
+      one_half_mem_jacobiModulusDomain).isConnected.isPreconnected
   intro k hk a b ha hb hab
   obtain ⟨hk0, hk1⟩ := hk
   have hre : (a • (1 / 2 : ℂ) + b • k).re = a / 2 + b * k.re := by simp; ring
@@ -572,14 +608,21 @@ private lemma isPreconnected_jacobiModulusDomain : IsPreconnected jacobiModulusD
 /-- Differentiability throughout the specified domain: `DifferentiableOn ℂ compEllIntKk
 jacobiModulusDomain`. -/
 lemma differentiableOn_compEllIntKk : DifferentiableOn ℂ compEllIntKk jacobiModulusDomain :=
-  differentiableOn_integral_one_sub_mul_sin_sq_rpow (c := fun k => k ^ 2) isOpen_jacobiModulusDomain (by fun_prop)
-    fun k hk s hs0 hs1 => (one_sub_mul_mem_slitPlane (sq_im_ne_zero_or_mem_Ioo_of_mem_jacobiModulusDomain hk) hs0 hs1).2
+  differentiableOn_integral_one_sub_mul_sin_sq_rpow (c := fun k => k ^ 2)
+      isOpen_jacobiModulusDomain (by fun_prop)
+    fun k hk s hs0 hs1 =>
+        (one_sub_mul_mem_slitPlane
+        (sq_im_ne_zero_or_mem_Ioo_of_mem_jacobiModulusDomain hk) hs0 hs1).2
 
 /-- Differentiability throughout the specified domain: `DifferentiableOn ℂ compEllIntKpk
 jacobiModulusDomain`. -/
-private lemma differentiableOn_compEllIntKpk : DifferentiableOn ℂ compEllIntKpk jacobiModulusDomain :=
-  differentiableOn_integral_one_sub_mul_sin_sq_rpow (c := fun k => 1 - k ^ 2) isOpen_jacobiModulusDomain (by fun_prop)
-    fun k hk s hs0 hs1 => (one_sub_mul_mem_slitPlane (sq_im_ne_zero_or_mem_Ioo_of_mem_jacobiModulusDomain hk) hs0 hs1).1
+private lemma differentiableOn_compEllIntKpk : DifferentiableOn ℂ compEllIntKpk
+    jacobiModulusDomain :=
+  differentiableOn_integral_one_sub_mul_sin_sq_rpow (c := fun k => 1 - k ^ 2)
+      isOpen_jacobiModulusDomain (by fun_prop)
+    fun k hk s hs0 hs1 =>
+        (one_sub_mul_mem_slitPlane
+        (sq_im_ne_zero_or_mem_Ioo_of_mem_jacobiModulusDomain hk) hs0 hs1).1
 
 /-- Differentiability throughout the specified domain: `DifferentiableOn ℂ jacobiTauk
 jacobiModulusDomain`. -/
@@ -618,11 +661,13 @@ theorem differentiableOn_comp_jacobiTauk {f : ℂ → ℂ}
       (isOpen_jacobiModulusDomain.mem_nhds hk))).differentiableWithinAt
 
 /-- Identity theorem on the domain from agreement on `(0, 1)`. -/
-theorem eqOn_jacobiModulusDomain_of_real {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f jacobiModulusDomain)
+theorem eqOn_jacobiModulusDomain_of_real {f g : ℂ → ℂ}
+    (hf : DifferentiableOn ℂ f jacobiModulusDomain)
     (hg : DifferentiableOn ℂ g jacobiModulusDomain)
     (hreal : ∀ x : ℝ, 0 < x → x < 1 → f x = g x) : Set.EqOn f g jacobiModulusDomain := by
   refine (hf.analyticOnNhd isOpen_jacobiModulusDomain).eqOn_of_preconnected_of_frequently_eq
-    (hg.analyticOnNhd isOpen_jacobiModulusDomain) isPreconnected_jacobiModulusDomain one_half_mem_jacobiModulusDomain ?_
+    (hg.analyticOnNhd isOpen_jacobiModulusDomain) isPreconnected_jacobiModulusDomain
+        one_half_mem_jacobiModulusDomain ?_
   have ht : Tendsto (fun x : ℝ => (x : ℂ)) (𝓝[≠] (1 / 2 : ℝ)) (𝓝[≠] (1 / 2 : ℂ)) := by
     refine tendsto_nhdsWithin_iff.mpr ⟨?_, eventually_nhdsWithin_of_forall fun x hx => ?_⟩
     · have := (Complex.continuous_ofReal.tendsto (1 / 2 : ℝ)).mono_left
@@ -645,13 +690,16 @@ theorem jacobi_inversion_k {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     jacobiModulusTau (jacobiTauk k) = k ∧
       jacobiComodulusTau (jacobiTauk k) = jacobiComodulusk k ∧
       compEllIntKTau (jacobiTauk k) = compEllIntKk k := by
-  have h3 := differentiableOn_comp_jacobiTauk fun τ hτ => differentiableAt_jacobiThetaThreeTau_zero hτ
+  have h3 := differentiableOn_comp_jacobiTauk fun τ hτ =>
+      differentiableAt_jacobiThetaThreeTau_zero hτ
   have h2 := differentiableOn_comp_jacobiTauk fun τ hτ => differentiableAt_jacobiThetaTwoTau_zero hτ
-  have h4 := differentiableOn_comp_jacobiTauk fun τ hτ => differentiableAt_jacobiThetaFourTau_zero hτ
+  have h4 := differentiableOn_comp_jacobiTauk fun τ hτ =>
+      differentiableAt_jacobiThetaFourTau_zero hτ
   have h3ne : ∀ k ∈ jacobiModulusDomain, jacobiThetaThreeTau 0 (jacobiTauk k) ^ 2 ≠ 0 :=
     fun k hk => pow_ne_zero _ (jacobiThetaThreeTau_zero_ne_zero (jacobiTauk_im_pos hk))
   refine ⟨?_, ?_, ?_⟩
-  · refine eqOn_jacobiModulusDomain_of_real (f := fun k => jacobiModulusTau (jacobiTauk k)) (g := id)
+  · refine eqOn_jacobiModulusDomain_of_real
+        (f := fun k => jacobiModulusTau (jacobiTauk k)) (g := id)
       ((h2.pow 2).div (h3.pow 2) h3ne) differentiableOn_id (fun x hx0 hx1 => ?_) hk
     obtain ⟨t, -, ht, hm, -, -⟩ := exists_jacobiTauk_eq_I_mul_of_real hx0 hx1
     simp only [id, ht, hm]

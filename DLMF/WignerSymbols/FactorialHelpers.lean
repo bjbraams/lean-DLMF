@@ -117,7 +117,8 @@ macro "wigner_cast_ring" : tactic => `(tactic| (
 macro "wigner_fin_simp" : tactic => `(tactic| (
   (set_option linter.unusedSimpArgs false in
     simp only [Nat.add_assoc, natCast_factorial_one_add, natCast_factorial_two_add,
-      natCast_factorial_three_add, natCast_factorial_four_add, Nat.factorial_two, Nat.factorial_one])
+      natCast_factorial_three_add, natCast_factorial_four_add, Nat.factorial_two,
+          Nat.factorial_one])
   push_cast
   field_simp (disch := first | positivity | (ring_nf; positivity))
   ring))

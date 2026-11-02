@@ -152,7 +152,8 @@ private lemma two_mul_choose_two_add (m : ℕ) : 2 * m.choose 2 + m = m * m := b
     nlinarith
 
 /-- The generating function of `p(∈ S, n)` for `S` two residue classes mod 5. -/
-private lemma hasSum_partitionCountIn_two_residues_mod_five {q : ℂ} (hq : ‖q‖ < 1) {a b : ℕ} (ha : 1 ≤ a)
+private lemma hasSum_partitionCountIn_two_residues_mod_five {q : ℂ} (hq : ‖q‖ < 1)
+    {a b : ℕ} (ha : 1 ≤ a)
     (hab : a < b) (hb : b < 5) (S : Set ℕ) [DecidablePred (· ∈ S)]
     (hS : ∀ n, n ∈ S ↔ 1 ≤ n ∧ (n % 5 = a ∨ n % 5 = b)) :
     HasSum (fun n => (partitionCountIn S n : ℂ) * q ^ n)
@@ -167,7 +168,8 @@ theorem partitionCountDiff_two_eq (n : ℕ) :
     partitionCountDiff 2 n = partitionCountIn (residueSetPM 1 5) n := by
   refine congrFun (coeff_eq_of_hasSum_nat_mul_pow (F := fun q =>
     1 / (qPochhammerInf (q ^ 1) (q ^ 5) * qPochhammerInf (q ^ 4) (q ^ 5))) (fun q hq => ?_)
-    (fun q hq => hasSum_partitionCountIn_two_residues_mod_five hq le_rfl (by norm_num) (by norm_num) _
+    (fun q hq => hasSum_partitionCountIn_two_residues_mod_five hq le_rfl (by norm_num)
+        (by norm_num) _
       fun n => mem_residueSetPM_five 1 n (by norm_num))) n
   have h := (hasSum_partitionCountDiff hq 2).1
   simp_rw [two_mul_choose_two_add] at h
@@ -180,7 +182,8 @@ theorem partitionCountDiffTwoNoOne_eq (n : ℕ) :
     partitionCountDiffTwoNoOne n = partitionCountIn (residueSetPM 2 5) n := by
   refine congrFun (coeff_eq_of_hasSum_nat_mul_pow (F := fun q =>
     1 / (qPochhammerInf (q ^ 2) (q ^ 5) * qPochhammerInf (q ^ 3) (q ^ 5))) (fun q hq => ?_)
-    (fun q hq => hasSum_partitionCountIn_two_residues_mod_five hq (by norm_num) (by norm_num) (by norm_num)
+    (fun q hq => hasSum_partitionCountIn_two_residues_mod_five hq (by norm_num)
+        (by norm_num) (by norm_num)
       _ fun n => mem_residueSetPM_five 2 n (by norm_num))) n
   have hc : ∀ n, partitionCountDiffTwoNoOne n = ∑ m ∈ range (n + 1) with m * (m + 1) ≤ n,
       partitionCountAtMostParts m (n - m * (m + 1)) := by
@@ -216,7 +219,8 @@ def partitionOfParts (n : ℕ) (s : Multiset ℕ) (hpos : ∀ i ∈ s, 0 < i) (h
     n.Partition := ⟨s, fun hi => hpos _ hi, hs⟩
 
 /-- For distinct parts, `PartsDifferAtLeast` is a condition on pairs of different parts. -/
-private lemma partsDifferAtLeast_iff_of_nodup {n : ℕ} (k : ℕ) (p : n.Partition) (hp : p.parts.Nodup) :
+private lemma partsDifferAtLeast_iff_of_nodup {n : ℕ} (k : ℕ) (p : n.Partition)
+    (hp : p.parts.Nodup) :
     PartsDifferAtLeast k p ↔ ∀ x ∈ p.parts, ∀ y ∈ p.parts, x ≠ y → x + k ≤ y ∨ y + k ≤ x := by
   unfold PartsDifferAtLeast
   refine forall₂_congr fun x hx => ⟨fun h y hy hxy => h y ((hp.mem_erase_iff).2 ⟨Ne.symm hxy, hy⟩),
@@ -242,7 +246,8 @@ private lemma exists_partsDifferAtLeast_three_not_schurCondition (n : ℕ) (hn :
       (∀ x ∈ s, ∀ y ∈ s, x ≠ y → x + 3 ≤ y ∨ y + 3 ≤ x) →
       ∃ p : n.Partition, PartsDifferAtLeast 3 p ∧ ¬ SchurCondition p := by
     intro s hnd has has3 hpos hs hd
-    refine ⟨partitionOfParts n s hpos hs, (partsDifferAtLeast_iff_of_nodup 3 _ hnd).2 hd, fun h => ?_⟩
+    refine ⟨partitionOfParts n s hpos hs,
+        (partsDifferAtLeast_iff_of_nodup 3 _ hnd).2 hd, fun h => ?_⟩
     have := h.2 a has (a + 3) ((hnd.mem_erase_iff).2 ⟨by omega, has3⟩) h3a (by omega)
     omega
   rcases hcs with rfl | ⟨hc1, hc⟩
@@ -257,7 +262,8 @@ private lemma exists_partsDifferAtLeast_three_not_schurCondition (n : ℕ) (hn :
 
 /-- A partition with parts differing by at least `3` that violates Schur's condition has
 `n = 9` or `n ≥ 15`. -/
-private lemma eq_nine_or_le_of_not_schurCondition {n : ℕ} (p : n.Partition) (hd : PartsDifferAtLeast 3 p)
+private lemma eq_nine_or_le_of_not_schurCondition {n : ℕ} (p : n.Partition)
+    (hd : PartsDifferAtLeast 3 p)
     (hs : ¬ SchurCondition p) : n = 9 ∨ 15 ≤ n := by
   unfold SchurCondition at hs
   simp only [hd, true_and, not_forall] at hs
@@ -392,7 +398,8 @@ private lemma distinctPartitionDedekindSum_sub (h k : ℕ) (hhk : h ≤ k) (hk :
 
 open Complex in
 /-- §26.10(vi): the terms for `h` and `k - h` are complex conjugates. -/
-private lemma distinctPartitionKloosterman_im_eq_zero (k n : ℕ) : (distinctPartitionKloosterman k n).im = 0 := by
+private lemma distinctPartitionKloosterman_im_eq_zero (k n : ℕ) :
+    (distinctPartitionKloosterman k n).im = 0 := by
   rcases Nat.lt_or_ge k 2 with hk | hk
   · interval_cases k
     · simp [distinctPartitionKloosterman]

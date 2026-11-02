@@ -70,7 +70,8 @@ theorem sum_choose_weighted_recip_poch_tail {a : ℂ} (ha : -1 < a.re) (N : ℕ)
     have hB : 1 / poch (a + (k + 1) + 1) (N + 1) =
         (a + (k + 1)) / poch (a + (k + 1)) (N + 2) := by
       rw [h1]
-      have he : a + (k + 1) ≠ 0 := by intro he; have := congrArg re he; simp at this; linarith [Nat.cast_nonneg (α := ℝ) k]
+      have he : a + (k + 1) ≠ 0 := by intro he; have := congrArg re he; simp at this;
+                                      linarith [Nat.cast_nonneg (α := ℝ) k]
       field_simp
     have hC : 1 / poch (a + (k + 1)) (N + 1) =
         (a + k + 1 + (N + 1)) / poch (a + (k + 1)) (N + 2) := by
@@ -88,7 +89,8 @@ theorem sum_choose_weighted_recip_poch_tail {a : ℂ} (ha : -1 < a.re) (N : ℕ)
       Nat.choose_succ_succ, Nat.cast_add, pow_succ]
     rw [Nat.choose_succ_succ, Nat.cast_add] at hc
     have hA : poch (a + (k + 1 : ℕ)) (N + 2) ≠ 0 :=
-      poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) k])) _
+      poch_ne_zero_of_not_neg_nat
+          (not_neg_nat_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) k])) _
     simp only [Nat.cast_add, Nat.cast_one] at hA
     field_simp
     linear_combination -hc
@@ -173,9 +175,11 @@ theorem sum_choose_recip_poch {a : ℂ} (ha : -1 < a.re) (r : ℕ) :
         linarith [Nat.cast_nonneg (α := ℝ) k]
       rw [hd, show N + 1 - (k + 1) = N - k by omega]
       have hp1 : poch (a + (k + 1)) (k + 1) ≠ 0 :=
-        poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) k])) _
+        poch_ne_zero_of_not_neg_nat
+            (not_neg_nat_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) k])) _
       have hp2 : poch (a + 2 * (k + 1) + 1) (N - k) ≠ 0 :=
-        poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) k])) _
+        poch_ne_zero_of_not_neg_nat
+            (not_neg_nat_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) k])) _
       simp only [mul_comm] at hp1 hp2 hz ⊢
       field_simp [hp1, hp2, hz]
     rw [Finset.sum_congr rfl ht]
@@ -262,7 +266,8 @@ theorem jacobiInverseCoeff_mul_gaussCoeff {α β : ℂ} (hα : -1 < α.re) (hβ 
 
 /-- Powers of the shifted coordinate in the Jacobi basis, including `α + β = -1`. -/
 theorem jacobi_monomial_inverse {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (n : ℕ) (x : ℂ) :
-    ((1 - x) / 2) ^ n = ∑ k ∈ Finset.range (n + 1), jacobiInverseCoeff α β n k * jacobiPolyP α β k x := by
+    ((1 - x) / 2) ^ n = ∑ k ∈ Finset.range (n + 1), jacobiInverseCoeff α β n k *
+        jacobiPolyP α β k x := by
   have hexpand : (∑ k ∈ Finset.range (n + 1), jacobiInverseCoeff α β n k * jacobiPolyP α β k x) =
       ∑ j ∈ Finset.range (n + 1), (∑ k ∈ Finset.Ico j (n + 1),
         jacobiInverseCoeff α β n k * (poch (α + 1) k / k.factorial *
@@ -329,7 +334,8 @@ theorem jacobi_connection_coeff_term {α β γ δ : ℂ} (hα : -1 < α.re) (hβ
   have hγnp : ∀ r : ℕ, γ + 1 ≠ -(r : ℂ) := not_neg_nat_of_re_pos (by simp; linarith)
   have hp (r : ℕ) : poch (γ + 1) r ≠ 0 := poch_ne_zero_of_not_neg_nat hγnp r
   have hpk (r : ℕ) : poch (γ + k + 1) r ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) k])) r
+    poch_ne_zero_of_not_neg_nat
+        (not_neg_nat_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) k])) r
   have hf (r : ℕ) : (r.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr r.factorial_ne_zero
   have hlead := jacobi_leading_poch_ne_zero hα hβ k
   have hshift : poch (α + β + 2 * k + 2) j ≠ 0 := by

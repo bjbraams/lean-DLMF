@@ -193,7 +193,9 @@ theorem hasSum_arctanh_large {z : ℂ} (hn : 1 < ‖z‖) (hz : z.im ≠ 0) :
 /-- The factorial-coefficient expansion of the principal `arctanh` quotient on
 `Re (z²) < 1/2`, normalized to one at zero. -/
 @[dlmf 4.38.E7]
-theorem hasSum_arctanh_transformed {z : ℂ} (hz : (z^2).re<1/2) : HasSum (fun n : ℕ => (4:ℂ)^n*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*(z^2/(z^2-1))^n) (if z=0 then 1 else (1-z^2)/z*arctanh z) := by
+theorem hasSum_arctanh_transformed {z : ℂ} (hz : (z^2).re<1/2) : HasSum
+    (fun n : ℕ => (4:ℂ)^n*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*(z^2/(z^2-1))^n)
+    (if z=0 then 1 else (1-z^2)/z*arctanh z) := by
   by_cases hz0 : z=0
   · subst z
     convert hasSum_ite_eq (0:ℕ) (1:ℂ) using 1
@@ -244,18 +246,21 @@ theorem arctanh_transformed_region (z : ℂ) : (z^2).re<1/2 ↔ z.re^2-z.im^2<1/
 
 /-- At `z`, the function `arcsinh` has derivative `((Complex.sqrt (1+z^2))⁻¹)`. -/
 @[dlmf 4.38.E9]
-theorem hasDerivAt_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) : HasDerivAt arcsinh ((Complex.sqrt (1+z^2))⁻¹) z := by
+theorem hasDerivAt_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) : HasDerivAt arcsinh
+    ((Complex.sqrt (1+z^2))⁻¹) z := by
   exact hyper_hasDerivAt_arcsinh hz
 
 /-- At `z`, the function `arccosh` has derivative `((Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹)`. -/
 @[dlmf 4.38.E10]
-theorem hasDerivAt_arccosh {z : ℂ} (hz : z∈arccoshDomain) : HasDerivAt arccosh ((Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹) z := by
+theorem hasDerivAt_arccosh {z : ℂ} (hz : z∈arccoshDomain) : HasDerivAt arccosh
+    ((Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹) z := by
   exact hasDerivAt_arccosh_of_mem hz
 
 /-- At `z`, the function `arccosh` has derivative `((if 0<z.re then 1 else -1)*(Complex.sqrt
 (z^2-1))⁻¹)`. -/
 @[dlmf 4.38.E10]
-theorem hasDerivAt_arccosh_signed {z : ℂ} (hz : z∈arccoshDomain) (hre : z.re≠0) : HasDerivAt arccosh ((if 0<z.re then 1 else -1)*(Complex.sqrt (z^2-1))⁻¹) z := by
+theorem hasDerivAt_arccosh_signed {z : ℂ} (hz : z∈arccoshDomain) (hre : z.re≠0) : HasDerivAt arccosh
+    ((if 0<z.re then 1 else -1)*(Complex.sqrt (z^2-1))⁻¹) z := by
   have h := hasDerivAt_arccosh_of_mem hz
   rw [sqrt_sub_one_mul_sqrt_add_one_eq_sign_mul_sqrt hz hre] at h
   convert h using 1
@@ -268,7 +273,8 @@ theorem hasDerivAt_arctanh {z : ℂ} (hz : z∈arctanhDomain) : HasDerivAt arcta
 
 /-- At `z`, the function `arccsch` has derivative `(-1/(z^2*Complex.sqrt (1+z⁻¹^2)))`. -/
 @[dlmf 4.38.E12]
-theorem hasDerivAt_arccsch {z : ℂ} (hz : z∈arccschDomain) : HasDerivAt arccsch (-1/(z^2*Complex.sqrt (1+z⁻¹^2))) z := by
+theorem hasDerivAt_arccsch {z : ℂ} (hz : z∈arccschDomain) : HasDerivAt arccsch
+    (-1/(z^2*Complex.sqrt (1+z⁻¹^2))) z := by
   have hd:=(hyper_hasDerivAt_arcsinh hz.2).comp z ((hasDerivAt_id z).inv hz.1)
   convert hd using 1
   · rfl
@@ -305,7 +311,8 @@ private lemma mul_sqrt_one_add_inv_sq_of_re_pos {z : ℂ} (hre : 0 < z.re) :
     have hw0 : w ≠ 0 := fun h => by subst h; exact absurd (show (0:ℝ) < (0:ℂ).re from hw) (by simp)
     have hsl := one_add_sq_mem_slitPlane (Or.inl (hinvre w hw).ne')
     exact (differentiableAt_id.mul ((Complex.differentiableAt_sqrt hsl).comp w
-      (by fun_prop (disch := exact hw0) : DifferentiableAt ℂ (fun w : ℂ => 1+w⁻¹^2) w))).differentiableWithinAt
+      (by fun_prop (disch := exact hw0) : DifferentiableAt ℂ (fun w : ℂ => 1+w⁻¹^2)
+            w))).differentiableWithinAt
   have hs : AnalyticOnNhd ℂ (fun w => Complex.sqrt (1+w^2)) V := by
     apply DifferentiableOn.analyticOnNhd _ hVo
     intro w hw
@@ -334,7 +341,8 @@ private lemma mul_sqrt_one_add_inv_sq_signed {z : ℂ} (hre : z.re ≠ 0) :
 /-- At `z`, the function `arccsch` has derivative `(-(if 0<z.re then 1 else -1)/(z*Complex.sqrt
 (1+z^2)))`. -/
 @[dlmf 4.38.E12]
-theorem hasDerivAt_arccsch_signed {z : ℂ} (hz : z∈arccschDomain) (hre : z.re≠0) : HasDerivAt arccsch (-(if 0<z.re then 1 else -1)/(z*Complex.sqrt (1+z^2))) z := by
+theorem hasDerivAt_arccsch_signed {z : ℂ} (hz : z∈arccschDomain) (hre : z.re≠0) : HasDerivAt arccsch
+    (-(if 0<z.re then 1 else -1)/(z*Complex.sqrt (1+z^2))) z := by
   have h := hasDerivAt_arccsch hz
   have hz0 : z ≠ 0 := hz.1
   have e := mul_sqrt_one_add_inv_sq_signed hre
@@ -344,11 +352,13 @@ theorem hasDerivAt_arccsch_signed {z : ℂ} (hz : z∈arccschDomain) (hre : z.re
 
 /-- At `z`, the function `arcsech` has derivative `(-1/(z*Complex.sqrt (1-z^2)))`. -/
 @[dlmf 4.38.E13]
-theorem hasDerivAt_arcsech {z : ℂ} (hz : z∈arcsechDomain) : HasDerivAt arcsech (-1/(z*Complex.sqrt (1-z^2))) z := by
+theorem hasDerivAt_arcsech {z : ℂ} (hz : z∈arcsechDomain) : HasDerivAt arcsech
+    (-1/(z*Complex.sqrt (1-z^2))) z := by
   have hz0 : z ≠ 0 := hz.1
   have h := (hasDerivAt_arccosh_of_mem hz.2).comp z (hasDerivAt_inv hz0)
   have e := mul_sqrt_inv_sub_one_mul_sqrt_inv_add_one hz
-  have hS : Complex.sqrt (z⁻¹-1)*Complex.sqrt (z⁻¹+1) ≠ 0 := sqrt_sub_one_mul_sqrt_add_one_ne_zero hz.2
+  have hS : Complex.sqrt (z⁻¹-1)*Complex.sqrt (z⁻¹+1) ≠ 0 :=
+      sqrt_sub_one_mul_sqrt_add_one_ne_zero hz.2
   have hf : arcsech = arccosh ∘ (fun w : ℂ => w⁻¹) := rfl
   rw [hf]
   convert h using 1
@@ -493,7 +503,8 @@ private lemma mem_arccothValues_iff_exp {z w : ℂ} :
 
 /-- Solution sets of `exp (2w) c = d` add (Minkowski sum) by multiplying the coefficients. -/
 private lemma image2_add_expSolutionSet {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
-    Set.image2 (fun a b : ℂ => a+b) {w | Complex.exp (2*w)*c₁ = d₁} {w | Complex.exp (2*w)*c₂ = d₂} =
+    Set.image2 (fun a b : ℂ => a+b) {w | Complex.exp (2*w)*c₁ = d₁}
+        {w | Complex.exp (2*w)*c₂ = d₂} =
       {w | Complex.exp (2*w)*(c₁*c₂) = d₁*d₂} := by
   ext w
   constructor
@@ -517,9 +528,11 @@ private lemma image2_add_expSolutionSet {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c�
 
 /-- Solution sets of `exp (2w) c = d` subtract by cross-multiplying the coefficients. -/
 private lemma image2_sub_expSolutionSet {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
-    Set.image2 (fun a b : ℂ => a-b) {w | Complex.exp (2*w)*c₁ = d₁} {w | Complex.exp (2*w)*c₂ = d₂} =
+    Set.image2 (fun a b : ℂ => a-b) {w | Complex.exp (2*w)*c₁ = d₁}
+        {w | Complex.exp (2*w)*c₂ = d₂} =
       {w | Complex.exp (2*w)*(c₁*d₂) = d₁*c₂} := by
-  have hneg : {w : ℂ | Complex.exp (2*w)*c₂ = d₂} = (fun w => -w) '' {w | Complex.exp (2*w)*d₂ = c₂} := by
+  have hneg : {w : ℂ | Complex.exp (2*w)*c₂ = d₂} =
+      (fun w => -w) '' {w | Complex.exp (2*w)*d₂ = c₂} := by
     ext w
     simp only [Set.mem_ofPred_eq, Set.mem_image]
     constructor
@@ -545,7 +558,8 @@ private lemma expSolutionSet_congr {c d c' d' : ℂ} (hc : c ≠ 0) (hc' : c' �
 (arctanhValues u) (arctanhValues v)=arctanhValues ((u+v)/(1+u*v))`. -/
 @[dlmf 4.38.E17]
 theorem arctanh_values_add {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v≠1 ∧ v≠ -1) (hp : 1+u*v≠0) :
-    Set.image2 (fun a b : ℂ => a+b) (arctanhValues u) (arctanhValues v)=arctanhValues ((u+v)/(1+u*v)) := by
+    Set.image2 (fun a b : ℂ => a+b) (arctanhValues u) (arctanhValues v)=arctanhValues
+        ((u+v)/(1+u*v)) := by
   have hu1 : 1-u ≠ 0 := sub_ne_zero.mpr (Ne.symm hu.1)
   have hu2 : 1+u ≠ 0 := fun h => hu.2 (by first | linear_combination h | linear_combination -h)
   have hv1 : 1-v ≠ 0 := sub_ne_zero.mpr (Ne.symm hv.1)
@@ -561,7 +575,8 @@ theorem arctanh_values_add {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v≠1 ∧ 
     Set.ext fun w => mem_arctanhValues_iff_exp
   have e1 : arctanhValues (v) = {w : ℂ | Complex.exp (2*w)*(1-(v)) = 1+(v)} :=
     Set.ext fun w => mem_arctanhValues_iff_exp
-  have e2 : arctanhValues ((u+v)/(1+u*v)) = {w : ℂ | Complex.exp (2*w)*(1-((u+v)/(1+u*v))) = 1+((u+v)/(1+u*v))} :=
+  have e2 : arctanhValues ((u+v)/(1+u*v)) =
+      {w : ℂ | Complex.exp (2*w)*(1-((u+v)/(1+u*v))) = 1+((u+v)/(1+u*v))} :=
     Set.ext fun w => mem_arctanhValues_iff_exp
   rw [e0, e1, e2, image2_add_expSolutionSet hu1 hu2]
   apply expSolutionSet_congr (mul_ne_zero hu1 hv1) ht3
@@ -636,8 +651,10 @@ a+b) (arctanhValues u) (arccothValues v)=arccothValues ((v+u)/(u*v+1))`. -/
 @[dlmf 4.38.E19]
 theorem arctanh_arccoth_values_add {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v≠1 ∧ v≠ -1)
     (hp : v+u≠0) (hq : u*v+1≠0) :
-    Set.image2 (fun a b : ℂ => a+b) (arctanhValues u) (arccothValues v)=arctanhValues ((u*v+1)/(v+u)) ∧
-    Set.image2 (fun a b : ℂ => a+b) (arctanhValues u) (arccothValues v)=arccothValues ((v+u)/(u*v+1)) := by
+    Set.image2 (fun a b : ℂ => a+b) (arctanhValues u) (arccothValues v)=arctanhValues
+        ((u*v+1)/(v+u)) ∧
+    Set.image2 (fun a b : ℂ => a+b) (arctanhValues u) (arccothValues v)=arccothValues
+        ((v+u)/(u*v+1)) := by
   have hu1 : 1-u ≠ 0 := sub_ne_zero.mpr (Ne.symm hu.1)
   have hu2 : 1+u ≠ 0 := fun h => hu.2 (by first | linear_combination h | linear_combination -h)
   have hv1 : v-1 ≠ 0 := sub_ne_zero.mpr hv.1
@@ -660,9 +677,11 @@ theorem arctanh_arccoth_values_add {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v�
     Set.ext fun w => mem_arctanhValues_iff_exp
   have e1 : arccothValues (v) = {w : ℂ | Complex.exp (2*w)*((v)-1) = (v)+1} :=
     Set.ext fun w => mem_arccothValues_iff_exp
-  have e2 : arctanhValues ((u*v+1)/(v+u)) = {w : ℂ | Complex.exp (2*w)*(1-((u*v+1)/(v+u))) = 1+((u*v+1)/(v+u))} :=
+  have e2 : arctanhValues ((u*v+1)/(v+u)) =
+      {w : ℂ | Complex.exp (2*w)*(1-((u*v+1)/(v+u))) = 1+((u*v+1)/(v+u))} :=
     Set.ext fun w => mem_arctanhValues_iff_exp
-  have e3 : arccothValues ((v+u)/(u*v+1)) = {w : ℂ | Complex.exp (2*w)*(((v+u)/(u*v+1))-1) = ((v+u)/(u*v+1))+1} :=
+  have e3 : arccothValues ((v+u)/(u*v+1)) =
+      {w : ℂ | Complex.exp (2*w)*(((v+u)/(u*v+1))-1) = ((v+u)/(u*v+1))+1} :=
     Set.ext fun w => mem_arccothValues_iff_exp
   rw [e0, e1, e2, e3, image2_add_expSolutionSet hu1 hu2]
   constructor
@@ -753,7 +772,8 @@ theorem arccosh_values_sub (u v : ℂ) :
 (arctanhValues u) (arctanhValues v)=arctanhValues ((u-v)/(1-u*v))`. -/
 @[dlmf 4.38.E17]
 theorem arctanh_values_sub {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v≠1 ∧ v≠ -1) (hp : 1-u*v≠0) :
-    Set.image2 (fun a b : ℂ => a-b) (arctanhValues u) (arctanhValues v)=arctanhValues ((u-v)/(1-u*v)) := by
+    Set.image2 (fun a b : ℂ => a-b) (arctanhValues u) (arctanhValues v)=arctanhValues
+        ((u-v)/(1-u*v)) := by
   have hu1 : 1-u ≠ 0 := sub_ne_zero.mpr (Ne.symm hu.1)
   have hu2 : 1+u ≠ 0 := fun h => hu.2 (by first | linear_combination h | linear_combination -h)
   have hv1 : 1-v ≠ 0 := sub_ne_zero.mpr (Ne.symm hv.1)
@@ -769,7 +789,8 @@ theorem arctanh_values_sub {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v≠1 ∧ 
     Set.ext fun w => mem_arctanhValues_iff_exp
   have e1 : arctanhValues (v) = {w : ℂ | Complex.exp (2*w)*(1-(v)) = 1+(v)} :=
     Set.ext fun w => mem_arctanhValues_iff_exp
-  have e2 : arctanhValues ((u-v)/(1-u*v)) = {w : ℂ | Complex.exp (2*w)*(1-((u-v)/(1-u*v))) = 1+((u-v)/(1-u*v))} :=
+  have e2 : arctanhValues ((u-v)/(1-u*v)) =
+      {w : ℂ | Complex.exp (2*w)*(1-((u-v)/(1-u*v))) = 1+((u-v)/(1-u*v))} :=
     Set.ext fun w => mem_arctanhValues_iff_exp
   rw [e0, e1, e2, image2_sub_expSolutionSet hu1 hu2]
   apply expSolutionSet_congr (mul_ne_zero hu1 hv2) ht3
@@ -807,8 +828,10 @@ a-b) (arctanhValues u) (arccothValues v)=arccothValues ((v-u)/(u*v-1))`. -/
 @[dlmf 4.38.E19]
 theorem arctanh_arccoth_values_sub {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v≠1 ∧ v≠ -1)
     (hp : v-u≠0) (hq : u*v-1≠0) :
-    Set.image2 (fun a b : ℂ => a-b) (arctanhValues u) (arccothValues v)=arctanhValues ((u*v-1)/(v-u)) ∧
-    Set.image2 (fun a b : ℂ => a-b) (arctanhValues u) (arccothValues v)=arccothValues ((v-u)/(u*v-1)) := by
+    Set.image2 (fun a b : ℂ => a-b) (arctanhValues u) (arccothValues v)=arctanhValues
+        ((u*v-1)/(v-u)) ∧
+    Set.image2 (fun a b : ℂ => a-b) (arctanhValues u) (arccothValues v)=arccothValues
+        ((v-u)/(u*v-1)) := by
   have hu1 : 1-u ≠ 0 := sub_ne_zero.mpr (Ne.symm hu.1)
   have hu2 : 1+u ≠ 0 := fun h => hu.2 (by first | linear_combination h | linear_combination -h)
   have hv1 : v-1 ≠ 0 := sub_ne_zero.mpr hv.1
@@ -831,9 +854,11 @@ theorem arctanh_arccoth_values_sub {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v�
     Set.ext fun w => mem_arctanhValues_iff_exp
   have e1 : arccothValues (v) = {w : ℂ | Complex.exp (2*w)*((v)-1) = (v)+1} :=
     Set.ext fun w => mem_arccothValues_iff_exp
-  have e2 : arctanhValues ((u*v-1)/(v-u)) = {w : ℂ | Complex.exp (2*w)*(1-((u*v-1)/(v-u))) = 1+((u*v-1)/(v-u))} :=
+  have e2 : arctanhValues ((u*v-1)/(v-u)) =
+      {w : ℂ | Complex.exp (2*w)*(1-((u*v-1)/(v-u))) = 1+((u*v-1)/(v-u))} :=
     Set.ext fun w => mem_arctanhValues_iff_exp
-  have e3 : arccothValues ((v-u)/(u*v-1)) = {w : ℂ | Complex.exp (2*w)*(((v-u)/(u*v-1))-1) = ((v-u)/(u*v-1))+1} :=
+  have e3 : arccothValues ((v-u)/(u*v-1)) =
+      {w : ℂ | Complex.exp (2*w)*(((v-u)/(u*v-1))-1) = ((v-u)/(u*v-1))+1} :=
     Set.ext fun w => mem_arccothValues_iff_exp
   rw [e0, e1, e2, e3, image2_sub_expSolutionSet hu1 hu2]
   constructor

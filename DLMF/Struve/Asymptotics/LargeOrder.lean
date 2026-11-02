@@ -435,7 +435,8 @@ theorem isEquivalent_of_struve_order_expansion {f : ℂ → ℂ} {z : ℂ} (hz :
     calc ‖Gamma (3 / 2)‖ / ‖ν + 3 / 2‖ ≤ ‖Gamma (3 / 2)‖ / (‖ν‖ * Real.sin δ) := by gcongr
       _ = _ := by field_simp
   have hko : k =o[sector (π - δ)] fun _ => (1 : ℂ) := (isLittleO_one_iff ℂ).mpr hk0
-  have hrem : (fun ν : ℂ => (z / 2) ^ (ν + 1) / Gamma (ν + ((1 : ℕ) : ℂ) + 3 / 2)) =ᶠ[sector (π - δ)]
+  have hrem : (fun ν : ℂ => (z / 2) ^ (ν + 1) / Gamma (ν + ((1 : ℕ) : ℂ) + 3 / 2))
+      =ᶠ[sector (π - δ)]
       fun ν => lead ν * k ν := by
     rw [EventuallyEq, DLMF.sector, eventually_inf_principal]
     refine Eventually.of_forall fun ν hν => ?_
@@ -464,7 +465,8 @@ end LargeOrder
 ~[sector (π-δ)] (fun ν => z/(π*ν*Real.sqrt 2)*exp (ν*(1+log z-log 2-log ν)))`. -/
 @[dlmf 11.6.E5]
 theorem struveH_large_order {z : ℂ} (hz : z ∈ slitPlane) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
-    (fun ν : ℂ => struveH ν z) ~[sector (π-δ)] (fun ν => z/(π*ν*Real.sqrt 2)*exp (ν*(1+log z-log 2-log ν))) := by
+    (fun ν : ℂ => struveH ν z) ~[sector (π-δ)]
+        (fun ν => z/(π*ν*Real.sqrt 2)*exp (ν*(1+log z-log 2-log ν))) := by
   refine isEquivalent_of_struve_order_expansion (slitPlane_ne_zero hz) hδ hδπ ?_
   simpa [struveH] using struve_series_tail_isBigO (slitPlane_ne_zero hz) (by simp) hδ hδπ 1
     (fun ν => struveHCore ν z) (fun ν => hasSum_struveHCore ν z)
@@ -473,7 +475,8 @@ theorem struveH_large_order {z : ℂ} (hz : z ∈ slitPlane) {δ : ℝ} (hδ : 0
 ~[sector (π-δ)] (fun ν => z/(π*ν*Real.sqrt 2)*exp (ν*(1+log z-log 2-log ν)))`. -/
 @[dlmf 11.6.E5]
 theorem struveL_large_order {z : ℂ} (hz : z ∈ slitPlane) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
-    (fun ν : ℂ => struveL ν z) ~[sector (π-δ)] (fun ν => z/(π*ν*Real.sqrt 2)*exp (ν*(1+log z-log 2-log ν))) := by
+    (fun ν : ℂ => struveL ν z) ~[sector (π-δ)]
+        (fun ν => z/(π*ν*Real.sqrt 2)*exp (ν*(1+log z-log 2-log ν))) := by
   refine isEquivalent_of_struve_order_expansion (slitPlane_ne_zero hz) hδ hδπ ?_
   have h := struve_series_tail_isBigO (slitPlane_ne_zero hz) (ε := 1) (by simp) hδ hδπ 1
     (fun ν => struveLCore ν z) (fun ν => by simpa using hasSum_struveLCore ν z)
@@ -583,7 +586,8 @@ theorem struveLO_poly_bound (μ : ℂ) (N : ℕ) : ∃ B : ℝ, ∀ ν : ℂ, 1 
   have hν0 : ν ≠ 0 := by rintro rfl; norm_num at hν
   have hw : ν⁻¹ ∈ closedBall (0 : ℂ) 1 := by
     rw [mem_closedBall, dist_zero_right, norm_inv]; exact inv_le_one_of_one_le₀ hν
-  have h1 : ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff μ k / ν ^ k = T.eval ν⁻¹ := by
+  have h1 : ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff μ k / ν ^ k =
+      T.eval ν⁻¹ := by
     rw [hT, eval_finsetSum]
     refine Finset.sum_congr rfl fun k hk => ?_
     rw [eval_mul, eval_C, eval_pow, eval_X, struveLO_coeff_Q μ (Finset.mem_range.1 hk), inv_pow,
@@ -627,7 +631,8 @@ theorem struveLO_norm_b_le {ν : ℂ} {N j : ℕ} (hj : j ≤ N) (hN : (N : ℝ)
   unfold struveLO_b
   rw [norm_div, norm_prod, Complex.norm_natCast]
   have h1 : (1 : ℝ) ≤ j.factorial := by exact_mod_cast j.factorial_pos
-  calc (∏ i ∈ Finset.range j, ‖ν - 1 / 2 - i‖) / j.factorial ≤ ∏ i ∈ Finset.range j, ‖ν - 1 / 2 - i‖ :=
+  calc (∏ i ∈ Finset.range j, ‖ν - 1 / 2 - i‖) / j.factorial ≤ ∏ i ∈ Finset.range j,
+         ‖ν - 1 / 2 - i‖ :=
         div_le_self (Finset.prod_nonneg fun _ _ => norm_nonneg _) h1
     _ ≤ ∏ _i ∈ Finset.range j, 2 * ‖ν‖ :=
         Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) (fun i hi => by
@@ -669,8 +674,11 @@ end StruveLOScaled
 (ν+1/2)*exp ((1-ν)*(log (lam*ν)-log 2))*struveK ν (lam*ν)-∑ k ∈ Finset.range N,
 (k.factorial:ℂ)*struveScaledCoeff (lam) k/ν^k) =O[sector (π/2-δ)] (fun ν : ℂ => ν^(-(N:ℤ)))`. -/
 @[dlmf 11.6.E6]
-theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun ν : ℂ => Real.sqrt π*Gamma (ν+1/2)*exp ((1-ν)*(log (lam*ν)-log 2))*struveK ν (lam*ν)-∑ k ∈ Finset.range N, (k.factorial:ℂ)*struveScaledCoeff (lam) k/ν^k) =O[sector (π/2-δ)] (fun ν : ℂ => ν^(-(N:ℤ))) := by
+theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ : 0 < δ)
+    (hδπ : δ < π/2) (N : ℕ) :
+    (fun ν : ℂ => Real.sqrt π*Gamma (ν+1/2)*exp ((1-ν)*(log (lam*ν)-log 2))*struveK ν (lam*ν)-∑ k ∈
+        Finset.range N, (k.factorial:ℂ)*struveScaledCoeff (lam) k/ν^k) =O[sector (π/2-δ)]
+        (fun ν : ℂ => ν^(-(N:ℤ))) := by
   obtain ⟨B, hB⟩ := struveLO_poly_bound (lam : ℂ) N
   set s := Real.sin δ with hs_def
   have hs : 0 < s := Real.sin_pos_of_pos_of_lt_pi hδ (by linarith [Real.pi_pos])
@@ -710,7 +718,8 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
           ((exp ((1 - ν) * (log z - log 2)) * (2 * (z / 2) ^ ν)) * J) := by ring
       _ = z * J := by rw [div_self hc, one_mul, struveLO_normalize hz0 ν]
   have hsum : z * ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) =
-      ∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) / ((lam : ℂ) * ν) ^ (2 * j) := by
+      ∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+          ((lam : ℂ) * ν) ^ (2 * j) := by
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [← ha_def, ← hz, pow_succ]
@@ -729,14 +738,16 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
       _ = (2 * ‖ν‖) ^ N := by rw [Finset.prod_const, Finset.card_range]
   have hden : (lam - 1) * s * ‖ν‖ ≤ z.re - a.re := by rw [hzre, hare]; nlinarith
   have hpos : 0 < (lam - 1) * s * ‖ν‖ := by positivity
-  have hE : ‖z‖ * ‖J - ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)‖ ≤
+  have hE : ‖z‖ * ‖J - ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) /
+      z ^ (2 * j + 1)‖ ≤
       C' * ‖ν‖⁻¹ ^ N := by
     have hzn : ‖z‖ = lam * ‖ν‖ := by rw [hz, norm_mul, norm_real, Real.norm_of_nonneg hl0.le]
     rw [hzn]
     calc lam * ‖ν‖ * ‖J - _‖
         ≤ lam * ‖ν‖ * ((∏ i ∈ Finset.range N, ‖a - i‖) * (2 * N).factorial /
             (z.re - a.re) ^ (2 * N + 1)) := by gcongr
-      _ ≤ lam * ‖ν‖ * ((2 * ‖ν‖) ^ N * (2 * N).factorial / ((lam - 1) * s * ‖ν‖) ^ (2 * N + 1)) := by
+      _ ≤ lam * ‖ν‖ * ((2 * ‖ν‖) ^ N * (2 * N).factorial /
+          ((lam - 1) * s * ‖ν‖) ^ (2 * N + 1)) := by
           gcongr
       _ = C' * ‖ν‖⁻¹ ^ N := by
           have hx : ‖ν‖ ^ (2 * N + 1) = ‖ν‖ * ‖ν‖ ^ N * ‖ν‖ ^ N := by ring
@@ -745,14 +756,18 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
           field_simp
   rw [hid]
   have hsplit : z * J - ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff lam k / ν ^ k =
-      (∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) / ((lam : ℂ) * ν) ^ (2 * j) -
+      (∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+          ((lam : ℂ) * ν) ^ (2 * j) -
         ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff lam k / ν ^ k) +
-      z * (J - ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)) := by
+      z * (J - ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) /
+          z ^ (2 * j + 1)) := by
     rw [mul_sub, hsum]; ring
   rw [hsplit, norm_zpow, zpow_neg, zpow_natCast, ← inv_pow]
-  calc _ ≤ ‖∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) / ((lam : ℂ) * ν) ^ (2 * j) -
+  calc _ ≤ ‖∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+         ((lam : ℂ) * ν) ^ (2 * j) -
         ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff lam k / ν ^ k‖ +
-      ‖z‖ * ‖J - ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)‖ := by
+      ‖z‖ * ‖J - ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) /
+          z ^ (2 * j + 1)‖ := by
         rw [← norm_mul]; exact norm_add_le _ _
     _ ≤ B * ‖ν‖⁻¹ ^ N + C' * ‖ν‖⁻¹ ^ N := add_le_add (hB ν hR1) hE
     _ = (B + C') * ‖ν‖⁻¹ ^ N := by ring
@@ -762,8 +777,11 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
 (k.factorial:ℂ)*struveScaledCoeff (I*lam) k/ν^k) =O[sector (π/2-δ)] (fun ν : ℂ =>
 ν^(-(N:ℤ)))`. -/
 @[dlmf 11.6.E7]
-theorem struveM_scaled_asymptotic {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun ν : ℂ => -Real.sqrt π*Gamma (ν+1/2)*exp ((1-ν)*(log (lam*ν)-log 2))*struveM ν (lam*ν)-∑ k ∈ Finset.range N, (k.factorial:ℂ)*struveScaledCoeff (I*lam) k/ν^k) =O[sector (π/2-δ)] (fun ν : ℂ => ν^(-(N:ℤ))) := by
+theorem struveM_scaled_asymptotic {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ : 0 < δ)
+    (hδπ : δ < π/2) (N : ℕ) :
+    (fun ν : ℂ => -Real.sqrt π*Gamma (ν+1/2)*exp ((1-ν)*(log (lam*ν)-log 2))*struveM ν (lam*ν)-∑ k ∈
+        Finset.range N, (k.factorial:ℂ)*struveScaledCoeff (I*lam) k/ν^k) =O[sector (π/2-δ)]
+        (fun ν : ℂ => ν^(-(N:ℤ))) := by
   obtain ⟨B, hB⟩ := struveLO_poly_bound (I * lam : ℂ) N
   set s := Real.sin δ with hs_def
   have hs : 0 < s := Real.sin_pos_of_pos_of_lt_pi hδ (by linarith [Real.pi_pos])
@@ -864,8 +882,10 @@ theorem struveM_scaled_asymptotic {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ :
       _ ≤ C1 * ‖ν‖⁻¹ ^ N + C2 * ‖ν‖⁻¹ ^ N := by rw [mul_add]; exact add_le_add h1 h2
       _ = (C1 + C2) * ‖ν‖⁻¹ ^ N := by ring
   rw [hid]
-  have hsplit : z * J - ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff (I * lam) k / ν ^ k =
-      (∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) / ((I * lam : ℂ) * ν) ^ (2 * j) -
+  have hsplit : z * J - ∑ k ∈ Finset.range N, (k.factorial : ℂ) *
+      struveScaledCoeff (I * lam) k / ν ^ k =
+      (∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+          ((I * lam : ℂ) * ν) ^ (2 * j) -
         ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff (I * lam) k / ν ^ k) +
       z * (J - ∑ j ∈ Finset.range N,
         struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)) := by
@@ -881,7 +901,10 @@ struveScaledCoeff lam 3=20/(lam:ℂ)^6-4/(lam:ℂ)^4 ∧ struveScaledCoeff lam
 4=70/(lam:ℂ)^8-45/(2*(lam:ℂ)^6)+3/(8*(lam:ℂ)^4)`. -/
 @[dlmf 11.6.E8]
 theorem struveScaledCoeff_initial (lam : ℂ) (hlam : lam ≠ 0) :
-    struveScaledCoeff lam 0=1 ∧ struveScaledCoeff lam 1=2/(lam:ℂ)^2 ∧ struveScaledCoeff lam 2=6/(lam:ℂ)^4-1/(2*(lam:ℂ)^2) ∧ struveScaledCoeff lam 3=20/(lam:ℂ)^6-4/(lam:ℂ)^4 ∧ struveScaledCoeff lam 4=70/(lam:ℂ)^8-45/(2*(lam:ℂ)^6)+3/(8*(lam:ℂ)^4) := by
+    struveScaledCoeff lam 0=1 ∧ struveScaledCoeff lam 1=2/(lam:ℂ)^2 ∧
+        struveScaledCoeff lam 2=6/(lam:ℂ)^4-1/(2*(lam:ℂ)^2) ∧
+        struveScaledCoeff lam 3=20/(lam:ℂ)^6-4/(lam:ℂ)^4 ∧
+        struveScaledCoeff lam 4=70/(lam:ℂ)^8-45/(2*(lam:ℂ)^6)+3/(8*(lam:ℂ)^4) := by
   simp only [struveScaledCoeff, Finset.sum_range_succ, Finset.prod_range_succ,
     Finset.sum_range_zero, Finset.prod_range_zero, one_mul]
   refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;>

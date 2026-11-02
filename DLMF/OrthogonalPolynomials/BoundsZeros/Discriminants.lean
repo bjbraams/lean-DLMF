@@ -149,7 +149,8 @@ theorem jacobi_discriminant {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {n : �
 
 Schur's route as for Jacobi: `laguerreRootProd m = ∏ L_m(y)` over the zeros of `L_{m+1}` satisfies a
 first-order recursion from the three-term recurrence, and `x L_{m+1}'(x) = -(m+α+1) L_m(x)` at
-the zeros, with `L_{m+1}(0) = (α+1)_{m+1}/(m+1)!`, expresses the discriminant through `laguerreRootProd`. -/
+the zeros, with `L_{m+1}(0) = (α+1)_{m+1}/(m+1)!`, expresses the discriminant through
+`laguerreRootProd`. -/
 
 namespace LagDisc
 
@@ -209,7 +210,8 @@ theorem natDegree_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).natDegree =
     · omega
 
 /-- For `α > -1`, the leading coefficient of `lagPoly α n` is `(-1)ⁿ/n!`. -/
-theorem leadingCoeff_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).leadingCoeff = laguerreLeadingCoeff n := by
+theorem leadingCoeff_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).leadingCoeff =
+    laguerreLeadingCoeff n := by
   rw [leadingCoeff, natDegree_lagPoly hα, coeff_lagPoly]
   split_ifs with h
   · exact lcoef_self hα n
@@ -248,7 +250,8 @@ theorem lagPoly_eq_nodal (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
   rw [leadingCoeff_lagPoly hα, roots_lagPoly_eq hα x hroot hinj, Multiset.map_map]
   rfl
 /-- `∏ L_m(y)` over the zeros `y` of `L_{m+1}`. -/
-def laguerreRootProd (a : ℂ) (m : ℕ) : ℂ := ((lagPoly a (m + 1)).roots.map fun y => (lagPoly a m).eval y).prod
+def laguerreRootProd (a : ℂ) (m : ℕ) : ℂ :=
+    ((lagPoly a (m + 1)).roots.map fun y => (lagPoly a m).eval y).prod
 
 /-- `laguerreRootProd a 0 = 1`. -/
 theorem laguerreRootProd_zero (a : ℂ) : laguerreRootProd a 0 = 1 := by
@@ -270,7 +273,8 @@ theorem eval_lagPoly_two_of_root (hα : -1 < α) (m : ℕ) {y : ℂ}
 
 /-- The recursion for the product of `L_m^{(α)}` over the zeros of `L_{m+1}^{(α)}`. -/
 theorem laguerreRootProd_succ (hα : -1 < α) (m : ℕ) :
-    laguerreRootProd α (m + 1) = (-1) ^ (m + 1) * ((m : ℂ) + 1 + α) ^ (m + 1) / ((m + 1) ! : ℂ) * laguerreRootProd α m := by
+    laguerreRootProd α (m + 1) = (-1) ^ (m + 1) * ((m : ℂ) + 1 + α) ^ (m + 1) / ((m + 1) ! : ℂ) *
+        laguerreRootProd α m := by
   have key := lc_pow_mul_prod_roots_eval (lagPoly α (m + 2)) (lagPoly α (m + 1))
   rw [natDegree_lagPoly hα, natDegree_lagPoly hα, leadingCoeff_lagPoly hα,
     leadingCoeff_lagPoly hα] at key
@@ -281,7 +285,8 @@ theorem laguerreRootProd_succ (hα : -1 < α) (m : ℕ) :
     refine Multiset.map_congr rfl fun y hy => ?_
     exact eval_lagPoly_two_of_root hα m ((mem_roots hne).mp hy)
   rw [hmap, prod_map_const_mul, IsAlgClosed.card_roots_eq_natDegree, natDegree_lagPoly hα] at key
-  change laguerreLeadingCoeff (m + 2) ^ (m + 1) * laguerreRootProd α (m + 1) = _ * (_ * laguerreRootProd α m) at key
+  change laguerreLeadingCoeff (m + 2) ^ (m + 1) * laguerreRootProd α (m + 1) = _ *
+      (_ * laguerreRootProd α m) at key
   have he : Even ((m + 2) * (m + 1)) := by
     rw [mul_comm]; exact Nat.even_mul_succ_self (m + 1)
   rw [he.neg_one_pow, one_mul] at key
@@ -306,7 +311,8 @@ theorem laguerreRootProd_succ (hα : -1 < α) (m : ℕ) :
 
 /-- Closed form of the product of `L_m^{(α)}` over the zeros of `L_{m+1}^{(α)}`. -/
 theorem laguerreRootProd_eq (hα : -1 < α) (m : ℕ) :
-    laguerreRootProd α m = ∏ k ∈ range m, (-1) ^ (k + 1) * ((k : ℂ) + 1 + α) ^ (k + 1) / ((k + 1) ! : ℂ) := by
+    laguerreRootProd α m = ∏ k ∈ range m, (-1) ^ (k + 1) * ((k : ℂ) + 1 + α) ^ (k + 1) /
+        ((k + 1) ! : ℂ) := by
   induction m with
   | zero => simp [laguerreRootProd_zero]
   | succ m ih => rw [laguerreRootProd_succ hα, ih, prod_range_succ]; ring
@@ -631,7 +637,8 @@ theorem hermiteRootProd_zero : hermiteRootProd 0 = 1 := by
   simp [hermiteRootProd, hP, hermitePolyH_zero]
 
 /-- The recursion for the product of `H_m` over the zeros of `H_{m+1}`. -/
-theorem hermiteRootProd_succ (m : ℕ) : hermiteRootProd (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) * hermiteRootProd m := by
+theorem hermiteRootProd_succ (m : ℕ) : hermiteRootProd (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) *
+    hermiteRootProd m := by
   have key := lc_pow_mul_prod_roots_eval (hP (m + 2)) (hP (m + 1))
   rw [natDegree_hP, natDegree_hP, leadingCoeff_hP, leadingCoeff_hP] at key
   have hne := hP_ne_zero (m + 1)
@@ -643,14 +650,16 @@ theorem hermiteRootProd_succ (m : ℕ) : hermiteRootProd (m + 1) = (-(2 * ((m : 
     rw [hP_recurrence, eval_sub, eval_mul, h0, mul_zero, zero_sub, eval_mul, eval_C]
     ring
   rw [hmap, prod_map_const_mul, IsAlgClosed.card_roots_eq_natDegree, natDegree_hP] at key
-  change ((2 : ℂ) ^ (m + 2)) ^ (m + 1) * hermiteRootProd (m + 1) = _ * (_ * hermiteRootProd m) at key
+  change ((2 : ℂ) ^ (m + 2)) ^ (m + 1) * hermiteRootProd (m + 1) = _ *
+      (_ * hermiteRootProd m) at key
   have he : Even ((m + 2) * (m + 1)) := by
     rw [mul_comm]; exact Nat.even_mul_succ_self (m + 1)
   rw [he.neg_one_pow, one_mul, ← pow_mul, ← pow_mul, mul_comm (m + 1) (m + 2)] at key
   exact mul_left_cancel₀ (pow_ne_zero _ two_ne_zero) key
 
 /-- Closed form of the product of `H_m` over the zeros of `H_{m+1}`. -/
-theorem hermiteRootProd_eq (m : ℕ) : hermiteRootProd m = ∏ k ∈ range m, (-(2 * ((k : ℂ) + 1))) ^ (k + 1) := by
+theorem hermiteRootProd_eq (m : ℕ) : hermiteRootProd m = ∏ k ∈ range m,
+    (-(2 * ((k : ℂ) + 1))) ^ (k + 1) := by
   induction m with
   | zero => simp [hermiteRootProd_zero]
   | succ m ih => rw [hermiteRootProd_succ, ih, prod_range_succ]; ring

@@ -87,7 +87,8 @@ def HyperbolicPositive (z : ℂ) : Prop :=
   0 ≤ (Complex.sinh z).re ∧ (Complex.sinh z).im=0 ∧
   0 ≤ (Complex.cosh z).re ∧ (Complex.cosh z).im=0
 /-- The six hyperbolic functions in the row order of Table4.30.1. -/
-def hyperbolicSix (z : ℂ) : Fin 6 → ℂ := ![Complex.sinh z,Complex.cosh z,Complex.tanh z,csch z,sech z,coth z]
+def hyperbolicSix (z : ℂ) : Fin 6 → ℂ :=
+    ![Complex.sinh z, Complex.cosh z, Complex.tanh z, csch z, sech z, coth z]
 /-- The principal square root of the square of a nonnegative real number. -/
 private lemma complexSqrt_ofReal_sq {x : ℝ} (hx : 0 ≤ x) : Complex.sqrt ((x:ℂ)^2) = x := by
   have h : Complex.sqrt ((x^2:ℝ):ℂ) = (Real.sqrt (x^2):ℂ) :=
@@ -113,8 +114,10 @@ private lemma exists_sinh_cosh_pos_of_hyperbolicPositive {z : ℂ} (hz : Hyperbo
 
 /-- Table4.30.1, column1: all six entries with the stated real nonnegative branch. -/
 @[dlmf 4.30.T1]
-theorem hyperbolic_interrelations_0 {z a : ℂ} (hz : HyperbolicPositive z) (ha : hyperbolicSix z 0=a) :
-    hyperbolicSix z = ![a,Complex.sqrt (1+a^2),a/Complex.sqrt (1+a^2),a⁻¹,1/Complex.sqrt (1+a^2),Complex.sqrt (1+a^2)/a] := by
+theorem hyperbolic_interrelations_0 {z a : ℂ} (hz : HyperbolicPositive z)
+    (ha : hyperbolicSix z 0=a) :
+    hyperbolicSix z = ![a, Complex.sqrt (1+a^2), a/Complex.sqrt (1+a^2), a⁻¹,
+        1/Complex.sqrt (1+a^2), Complex.sqrt (1+a^2)/a] := by
   obtain ⟨σ, γ, hσ, hγ, hγσ, hs, hc⟩ := exists_sinh_cosh_pos_of_hyperbolicPositive hz
   have hγσ' : (γ:ℂ)^2 = 1+(σ:ℂ)^2 := by exact_mod_cast hγσ
   have ha' : a = (σ:ℂ) := by
@@ -137,8 +140,10 @@ theorem hyperbolic_interrelations_0 {z a : ℂ} (hz : HyperbolicPositive z) (ha 
 
 /-- Table4.30.1, column2: all six entries with the stated real nonnegative branch. -/
 @[dlmf 4.30.T1]
-theorem hyperbolic_interrelations_1 {z a : ℂ} (hz : HyperbolicPositive z) (ha : hyperbolicSix z 1=a) :
-    hyperbolicSix z = ![Complex.sqrt (a^2-1),a,Complex.sqrt (a^2-1)/a,1/Complex.sqrt (a^2-1),a⁻¹,a/Complex.sqrt (a^2-1)] := by
+theorem hyperbolic_interrelations_1 {z a : ℂ} (hz : HyperbolicPositive z)
+    (ha : hyperbolicSix z 1=a) :
+    hyperbolicSix z = ![Complex.sqrt (a^2-1), a, Complex.sqrt (a^2-1)/a, 1/Complex.sqrt (a^2-1),
+        a⁻¹, a/Complex.sqrt (a^2-1)] := by
   obtain ⟨σ, γ, hσ, hγ, hγσ, hs, hc⟩ := exists_sinh_cosh_pos_of_hyperbolicPositive hz
   have hγσ' : (γ:ℂ)^2 = 1+(σ:ℂ)^2 := by exact_mod_cast hγσ
   have ha' : a = (γ:ℂ) := by
@@ -161,8 +166,10 @@ theorem hyperbolic_interrelations_1 {z a : ℂ} (hz : HyperbolicPositive z) (ha 
 
 /-- Table4.30.1, column3: all six entries with the stated real nonnegative branch. -/
 @[dlmf 4.30.T1]
-theorem hyperbolic_interrelations_2 {z a : ℂ} (hz : HyperbolicPositive z) (ha : hyperbolicSix z 2=a) :
-    hyperbolicSix z = ![a/Complex.sqrt (1-a^2),1/Complex.sqrt (1-a^2),a,Complex.sqrt (1-a^2)/a,Complex.sqrt (1-a^2),a⁻¹] := by
+theorem hyperbolic_interrelations_2 {z a : ℂ} (hz : HyperbolicPositive z)
+    (ha : hyperbolicSix z 2=a) :
+    hyperbolicSix z = ![a/Complex.sqrt (1-a^2), 1/Complex.sqrt (1-a^2), a, Complex.sqrt (1-a^2)/a,
+        Complex.sqrt (1-a^2), a⁻¹] := by
   obtain ⟨σ, γ, hσ, hγ, hγσ, hs, hc⟩ := exists_sinh_cosh_pos_of_hyperbolicPositive hz
   have hγσ' : (γ:ℂ)^2 = 1+(σ:ℂ)^2 := by exact_mod_cast hγσ
   have ha' : a = (σ:ℂ)/γ := by
@@ -185,8 +192,10 @@ theorem hyperbolic_interrelations_2 {z a : ℂ} (hz : HyperbolicPositive z) (ha 
 
 /-- Table4.30.1, column4: all six entries with the stated real nonnegative branch. -/
 @[dlmf 4.30.T1]
-theorem hyperbolic_interrelations_3 {z a : ℂ} (hz : HyperbolicPositive z) (ha : hyperbolicSix z 3=a) :
-    hyperbolicSix z = ![a⁻¹,Complex.sqrt (1+a^2)/a,1/Complex.sqrt (1+a^2),a,a/Complex.sqrt (1+a^2),Complex.sqrt (1+a^2)] := by
+theorem hyperbolic_interrelations_3 {z a : ℂ} (hz : HyperbolicPositive z)
+    (ha : hyperbolicSix z 3=a) :
+    hyperbolicSix z = ![a⁻¹, Complex.sqrt (1+a^2)/a, 1/Complex.sqrt (1+a^2), a,
+        a/Complex.sqrt (1+a^2), Complex.sqrt (1+a^2)] := by
   obtain ⟨σ, γ, hσ, hγ, hγσ, hs, hc⟩ := exists_sinh_cosh_pos_of_hyperbolicPositive hz
   have hγσ' : (γ:ℂ)^2 = 1+(σ:ℂ)^2 := by exact_mod_cast hγσ
   have ha' : a = (σ:ℂ)⁻¹ := by
@@ -209,8 +218,10 @@ theorem hyperbolic_interrelations_3 {z a : ℂ} (hz : HyperbolicPositive z) (ha 
 
 /-- Table4.30.1, column5: all six entries with the stated real nonnegative branch. -/
 @[dlmf 4.30.T1]
-theorem hyperbolic_interrelations_4 {z a : ℂ} (hz : HyperbolicPositive z) (ha : hyperbolicSix z 4=a) :
-    hyperbolicSix z = ![Complex.sqrt (1-a^2)/a,a⁻¹,Complex.sqrt (1-a^2),a/Complex.sqrt (1-a^2),a,1/Complex.sqrt (1-a^2)] := by
+theorem hyperbolic_interrelations_4 {z a : ℂ} (hz : HyperbolicPositive z)
+    (ha : hyperbolicSix z 4=a) :
+    hyperbolicSix z = ![Complex.sqrt (1-a^2)/a, a⁻¹, Complex.sqrt (1-a^2), a/Complex.sqrt (1-a^2),
+        a, 1/Complex.sqrt (1-a^2)] := by
   obtain ⟨σ, γ, hσ, hγ, hγσ, hs, hc⟩ := exists_sinh_cosh_pos_of_hyperbolicPositive hz
   have hγσ' : (γ:ℂ)^2 = 1+(σ:ℂ)^2 := by exact_mod_cast hγσ
   have ha' : a = (γ:ℂ)⁻¹ := by
@@ -233,8 +244,10 @@ theorem hyperbolic_interrelations_4 {z a : ℂ} (hz : HyperbolicPositive z) (ha 
 
 /-- Table4.30.1, column6: all six entries with the stated real nonnegative branch. -/
 @[dlmf 4.30.T1]
-theorem hyperbolic_interrelations_5 {z a : ℂ} (hz : HyperbolicPositive z) (ha : hyperbolicSix z 5=a) :
-    hyperbolicSix z = ![1/Complex.sqrt (a^2-1),a/Complex.sqrt (a^2-1),a⁻¹,Complex.sqrt (a^2-1),Complex.sqrt (a^2-1)/a,a] := by
+theorem hyperbolic_interrelations_5 {z a : ℂ} (hz : HyperbolicPositive z)
+    (ha : hyperbolicSix z 5=a) :
+    hyperbolicSix z = ![1/Complex.sqrt (a^2-1), a/Complex.sqrt (a^2-1), a⁻¹, Complex.sqrt (a^2-1),
+        Complex.sqrt (a^2-1)/a, a] := by
   obtain ⟨σ, γ, hσ, hγ, hγσ, hs, hc⟩ := exists_sinh_cosh_pos_of_hyperbolicPositive hz
   have hγσ' : (γ:ℂ)^2 = 1+(σ:ℂ)^2 := by exact_mod_cast hγσ
   have ha' : a = (γ:ℂ)/σ := by
@@ -271,7 +284,8 @@ theorem tanh_div_limit  : Tendsto (fun z : ℂ => Complex.tanh z/z) (𝓝[≠] 0
 
 /-- The map `(fun z : ℂ => (Complex.cosh z-1)/z^2)` tends to `(𝓝 (1/2))` along `(𝓝[≠] 0)`. -/
 @[dlmf 4.31.E3]
-theorem cosh_sub_one_div_sq_limit  : Tendsto (fun z : ℂ => (Complex.cosh z-1)/z^2) (𝓝[≠] 0) (𝓝 (1/2)) := by
+theorem cosh_sub_one_div_sq_limit  : Tendsto (fun z : ℂ => (Complex.cosh z-1)/z^2) (𝓝[≠] 0)
+    (𝓝 (1/2)) := by
   have hd:HasDerivAt (fun z:ℂ=>Complex.sinh (z/2)) ((1:ℂ)/2) 0 := by
     simpa only [zero_div,Complex.cosh_zero,one_mul,Function.comp_def,id_eq] using
       (Complex.hasDerivAt_sinh ((0:ℂ)/2)).comp (0:ℂ) ((hasDerivAt_id (0:ℂ)).div_const (2:ℂ))
@@ -288,7 +302,8 @@ theorem cosh_sub_one_div_sq_limit  : Tendsto (fun z : ℂ => (Complex.cosh z-1)/
     ring
   · norm_num
 
-/-- Every finite entry of Table4.31.1; zeros at excluded pole entries are Lean totalizations, whose meromorphic poles are asserted separately below. -/
+/-- Every finite entry of Table4.31.1; zeros at excluded pole entries are Lean totalizations, whose
+meromorphic poles are asserted separately below. -/
 @[dlmf 4.31.T1]
 theorem hyperbolic_special_values  :
     hyperbolicSix 0 = ![0,1,0,0,1,0] ∧
@@ -313,7 +328,8 @@ private lemma eventually_ne_zero_of_hasDerivAt_ne_zero {f : ℂ → ℂ} {p c : 
 
 /-- The norm of the reciprocal of a function tends to infinity at a zero, provided the function
 is continuous there and does not vanish nearby. -/
-private lemma tendsto_norm_inv_atTop_of_zero {f : ℂ → ℂ} {p : ℂ} (hf : ContinuousAt f p) (h0 : f p = 0)
+private lemma tendsto_norm_inv_atTop_of_zero {f : ℂ → ℂ} {p : ℂ}
+    (hf : ContinuousAt f p) (h0 : f p = 0)
     (hne : ∀ᶠ z in 𝓝[≠] p, f z ≠ 0) : Tendsto (fun z => ‖(f z)⁻¹‖) (𝓝[≠] p) atTop := by
   have hn : Tendsto (fun z => ‖f z‖) (𝓝[≠] p) (𝓝[>] 0) := by
     apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
@@ -335,7 +351,8 @@ theorem hyperbolic_real_infinity  :
     Tendsto (fun x : ℝ => (Real.cosh x)⁻¹) atTop (𝓝 0) ∧
     Tendsto (fun x : ℝ => Real.cosh x/Real.sinh x) atTop (𝓝 1) := by
   have hs : Tendsto Real.sinh atTop atTop :=
-    tendsto_atTop_mono' atTop ((eventually_ge_atTop 0).mono fun x hx => Real.self_le_sinh_iff.mpr hx)
+    tendsto_atTop_mono' atTop
+        ((eventually_ge_atTop 0).mono fun x hx => Real.self_le_sinh_iff.mpr hx)
       tendsto_id
   have hc : Tendsto Real.cosh atTop atTop :=
     tendsto_atTop_mono (fun x => (Real.sinh_lt_cosh x).le) hs
@@ -349,7 +366,8 @@ theorem hyperbolic_real_infinity  :
     rw [h1, div_eq_div_iff (by positivity) (by positivity)]
     linear_combination (2*Real.exp (-x)) * h2
   have ht : Tendsto Real.tanh atTop (𝓝 1) := by
-    have := (tendsto_const_nhds (x := (1:ℝ))).sub he |>.div (tendsto_const_nhds.add he) (by norm_num : (1:ℝ)+0 ≠ 0)
+    have := (tendsto_const_nhds (x := (1:ℝ))).sub he |>.div (tendsto_const_nhds.add he)
+        (by norm_num : (1:ℝ)+0 ≠ 0)
     simp only [sub_zero, add_zero, div_one] at this
     exact this.congr (fun x => (key x).symm)
   refine ⟨hs, hc, ht, hs.inv_tendsto_atTop, hc.inv_tendsto_atTop, ?_⟩
@@ -366,13 +384,15 @@ theorem hyperbolic_table_sinh_poles (k : ℤ) :
   have hp : Complex.sinh ((k:ℂ)*π*I) = 0 := (sinh_zeros _).mpr ⟨k, rfl⟩
   have hne := eventually_ne_zero_of_hasDerivAt_ne_zero (Complex.differentiable_sinh.analyticAt _)
     (Complex.hasDerivAt_sinh ((k:ℂ)*π*I))
-    (by intro h; have := Complex.cosh_sq_sub_sinh_sq ((k:ℂ)*π*I); rw [h, hp] at this; norm_num at this)
+    (by intro h; have := Complex.cosh_sq_sub_sinh_sq ((k:ℂ)*π*I); rw [h, hp] at this;
+        norm_num at this)
   have hinv := tendsto_norm_inv_atTop_of_zero Complex.continuous_sinh.continuousAt hp hne
   refine ⟨hinv, ?_⟩
   have hC : 0 < ‖Complex.cosh ((k:ℂ)*π*I)‖ := by
     rw [norm_pos_iff]; intro h
     have := Complex.cosh_sq_sub_sinh_sq ((k:ℂ)*π*I); rw [h, hp] at this; norm_num at this
-  have hcl : Tendsto (fun z => ‖Complex.cosh z‖) (𝓝[≠] ((k:ℂ)*π*I)) (𝓝 ‖Complex.cosh ((k:ℂ)*π*I)‖) :=
+  have hcl : Tendsto (fun z => ‖Complex.cosh z‖) (𝓝[≠] ((k:ℂ)*π*I))
+      (𝓝 ‖Complex.cosh ((k:ℂ)*π*I)‖) :=
     (Complex.continuous_cosh.continuousAt.norm.tendsto).mono_left nhdsWithin_le_nhds
   exact (hcl.pos_mul_atTop hC hinv).congr (fun z => by simp [coth, div_eq_mul_inv])
 
@@ -384,7 +404,8 @@ theorem hyperbolic_table_cosh_poles (k : ℤ) :
     Tendsto (fun z : ℂ => ‖sech z‖) (𝓝[≠] (((k:ℂ)+1/2)*π*I)) atTop := by
   have hp : Complex.cosh (((k:ℂ)+1/2)*π*I) = 0 := (cosh_zeros _).mpr ⟨k, rfl⟩
   have hS : Complex.sinh (((k:ℂ)+1/2)*π*I) ≠ 0 := by
-    intro h; have := Complex.cosh_sq_sub_sinh_sq (((k:ℂ)+1/2)*π*I); rw [h, hp] at this; norm_num at this
+    intro h; have := Complex.cosh_sq_sub_sinh_sq (((k:ℂ)+1/2)*π*I); rw [h, hp] at this;
+        norm_num at this
   have hne := eventually_ne_zero_of_hasDerivAt_ne_zero (Complex.differentiable_cosh.analyticAt _)
     (Complex.hasDerivAt_cosh (((k:ℂ)+1/2)*π*I)) hS
   have hinv := tendsto_norm_inv_atTop_of_zero Complex.continuous_cosh.continuousAt hp hne
@@ -418,11 +439,13 @@ private lemma lazarevic_numerator_pos {x : ℝ} (hx : 0 < x) :
         have h := ((hasDerivAt_id u).mul (Real.hasDerivAt_cosh u)).sub (Real.hasDerivAt_sinh u)
         exact h.congr_deriv (by simp only [id_eq]; ring))
       (fun u hu => mul_pos hu (Real.sinh_pos_iff.mpr hu)) ht
-  exact pos_of_hasDerivAt_pos (f := fun u => u * (3 + 2 * Real.sinh u ^ 2) - 3 * Real.sinh u * Real.cosh u)
+  exact pos_of_hasDerivAt_pos
+      (f := fun u => u * (3 + 2 * Real.sinh u ^ 2) - 3 * Real.sinh u * Real.cosh u)
     (f' := fun u => 4 * Real.sinh u * (u * Real.cosh u - Real.sinh u))
     (by fun_prop) (by simp)
     (fun u _ => by
-      have h := ((hasDerivAt_id u).mul ((Real.hasDerivAt_sinh u).pow 2 |>.const_mul 2 |>.const_add 3)).sub
+      have h := ((hasDerivAt_id u).mul
+          ((Real.hasDerivAt_sinh u).pow 2 |>.const_mul 2 |>.const_add 3)).sub
         (((Real.hasDerivAt_sinh u).mul (Real.hasDerivAt_cosh u)).const_mul 3)
       have hh : 1 * (3 + 2 * Real.sinh u ^ 2) + u * (2 * (2 * Real.sinh u * Real.cosh u)) -
           3 * (Real.cosh u * Real.cosh u + Real.sinh u * Real.sinh u) =
@@ -498,7 +521,9 @@ theorem cosh_le_sinhc_cube (x : ℝ) : Real.cosh x ≤ (if x=0 then 1 else Real.
     · intro t ht
       rw [interior_Ici] at ht
       rw [(hgderiv t ht).deriv]
-      exact div_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr (mul_nonneg (sq_nonneg t) (lazarevic_numerator_pos ht).le)) (pow_nonneg (Real.sinh_pos_iff.mpr ht).le _)
+      exact div_nonpos_of_nonpos_of_nonneg
+          (neg_nonpos.mpr (mul_nonneg (sq_nonneg t) (lazarevic_numerator_pos ht).le))
+          (pow_nonneg (Real.sinh_pos_iff.mpr ht).le _)
   have hpos : ∀ x : ℝ, 0 ≤ x → Real.cosh x ≤ (if x=0 then 1 else Real.sinh x/x)^3 := by
     intro x hx
     have h := hmono (mem_Ici.mpr (le_refl 0)) (mem_Ici.mpr hx) hx
@@ -509,7 +534,8 @@ theorem cosh_le_sinhc_cube (x : ℝ) : Real.cosh x ≤ (if x=0 then 1 else Real.
     have hdpos : 0 < s x ^ 3 := pow_pos (by
       by_cases h : x = 0
       · simp [h, hs0]
-      · rw [hseq x h]; exact div_pos (Real.sinh_pos_iff.mpr (lt_of_le_of_ne hx (Ne.symm h))) (lt_of_le_of_ne hx (Ne.symm h))) _
+      · rw [hseq x h]; exact div_pos (Real.sinh_pos_iff.mpr (lt_of_le_of_ne hx (Ne.symm h)))
+            (lt_of_le_of_ne hx (Ne.symm h))) _
     dsimp only [g] at h
     rw [div_le_iff₀ hdpos] at h
     linarith
@@ -561,7 +587,8 @@ private lemma tanh_bounds_of_pos {x : ℝ} (hx : 0 < x) :
 /-- Estimate under the stated parameter and domain assumptions: `Real.sin x*Real.cos x < Real.tanh
 x ∧ Real.tanh x<x`. -/
 @[dlmf 4.32.E2]
-theorem sin_cos_lt_tanh_lt {x : ℝ} (hx : 0<x) : Real.sin x*Real.cos x < Real.tanh x ∧ Real.tanh x<x := by
+theorem sin_cos_lt_tanh_lt {x : ℝ} (hx : 0<x) : Real.sin x*Real.cos x < Real.tanh x ∧
+    Real.tanh x<x := by
   obtain ⟨h1, h2⟩ := tanh_bounds_of_pos hx
   refine ⟨?_, h2⟩
   rcases le_or_gt x 1 with hx1 | hx1
@@ -623,7 +650,8 @@ theorem cosh_sub_lower {x y : ℝ} (hx : 0<x) (hy : 0<y) :
     _ = 2*Real.sinh ((x+y)/2)*(|x-y|/2) := by ring
     _ ≤ 2*Real.sinh ((x+y)/2)*|Real.sinh ((x-y)/2)| := by gcongr
 
-/-- Estimate under the stated parameter and domain assumptions: `Real.arctan x ≤ π/2*Real.tanh x`. -/
+/-- Estimate under the stated parameter and domain assumptions: `Real.arctan x ≤ π/2*Real.tanh x`.
+-/
 @[dlmf 4.32.E4]
 theorem arctan_le_tanh {x : ℝ} (hx : 0≤x) : Real.arctan x ≤ π/2*Real.tanh x := by
   have hs : x ≤ Real.sinh x := Real.self_le_sinh_iff.mpr hx
@@ -649,7 +677,8 @@ private lemma neg_one_pow_mul_self (k : ℕ) : (-1:ℂ)^k*(-1:ℂ)^k = 1 := by
 
 /-- The rotated point `iz/π` has norm `‖z‖/π`. -/
 private lemma norm_I_mul_div_pi (z : ℂ) : ‖I*z/π‖ = ‖z‖/π := by
-  rw [norm_div, norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]
+  rw [norm_div, norm_mul, Complex.norm_I, one_mul, Complex.norm_real,
+      Real.norm_of_nonneg Real.pi_pos.le]
 
 /-- The series with terms `(fun n : ℕ => (2:ℂ)^(2*(n+1))*((2:ℂ)^(2*(n+1))-1)* (bernoulli
 (2*(n+1)):ℂ)/((2*(n+1)).factorial:ℂ)*z^(2*n+1))` converges to `(Complex.tanh z)`. -/
@@ -762,7 +791,8 @@ theorem hasSum_coth {z : ℂ} (hz0 : z≠0) (hz : ‖z‖<π) :
     convert h using 1
     · funext k
       rw [show (2:ℂ)*π*(I*z/π) = 2*(I*z) by field_simp, mul_I_mul_pow_two_mul]
-      linear_combination (-(bernoulli (2*k):ℂ)*(2*z)^(2*k)/((2*k).factorial:ℂ))*neg_one_pow_mul_self k
+      linear_combination (-(bernoulli
+          (2*k):ℂ)*(2*z)^(2*k)/((2*k).factorial:ℂ))*neg_one_pow_mul_self k
     · rw [show (π:ℂ)*(I*z/π) = z*I by field_simp, Complex.cot, Complex.cos_mul_I,
         Complex.sin_mul_I, coth]
       field_simp
@@ -833,7 +863,8 @@ theorem hasSum_log_sinhc {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric
       have hdq := ((Complex.hasDerivAt_sinh w).div (hasDerivAt_id w) hw0).congr_of_eventuallyEq he
       rw [hdq.deriv, sinhc, ite_eq_right hw0] at hd
       have hs : Complex.sinh w ≠ 0 := by
-        have hne : sinhc w ≠ 0 := by rw [← hL.2.2 w (by simpa using hw)]; exact Complex.exp_ne_zero _
+        have hne : sinhc w ≠ 0 := by rw [← hL.2.2 w (by simpa using hw)];
+                                     exact Complex.exp_ne_zero _
         rw [sinhc, ite_eq_right hw0] at hne
         exact (div_ne_zero_iff.mp hne).1
       have hd' : deriv L w = coth w - w⁻¹ := by
@@ -854,7 +885,8 @@ theorem hasSum_log_sinhc {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric
 
 /-- The Bernoulli expansion of an analytic logarithm of `cosh`, normalized to vanish at zero,
 on the disk `‖z‖ < π / 2`. -/
-theorem hasSum_log_cosh {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric.ball 0 (π/2)) Complex.cosh L)
+theorem hasSum_log_cosh {L : ℂ → ℂ}
+    (hL : HyperbolicNormalizedLog (Metric.ball 0 (π/2)) Complex.cosh L)
     {z : ℂ} (hz : ‖z‖<π/2) :
     HasSum (fun n : ℕ => (2:ℂ)^(2*n+1)*((2:ℂ)^(2*n+2)-1)*(bernoulli (2*n+2):ℂ)/
       ((n+1:ℂ)*((2*n+2).factorial:ℂ))*z^(2*n+2)) (L z) := by
@@ -1055,9 +1087,11 @@ private lemma squared_ode_reduce {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected
     rw [← hd]
     linear_combination (-(a ^ 2) * (B ^ 2 - A ^ 2)) * hcs
 
-/-- General squared first-order equation, including the equilibrium solutions omitted in the source shorthand. -/
+/-- General squared first-order equation, including the equilibrium solutions omitted in the source
+shorthand. -/
 @[dlmf 4.34.E8, dlmf 4.34.E12]
-theorem hyperbolic_squared_ode_plus {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U) {a : ℂ} (ha : a≠0)
+theorem hyperbolic_squared_ode_plus {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U)
+    {a : ℂ} (ha : a≠0)
     {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) :
     (∀ z ∈ U, (deriv f z)^2-a^2*(f z)^2=1) ↔
       (∃ c : ℂ, ∀ z ∈ U, f z=a⁻¹*Complex.sinh (a*z+c)) ∨
@@ -1104,9 +1138,11 @@ theorem hyperbolic_squared_ode_plus {U : Set ℂ} (hU : IsOpen U) (hc : IsConnec
       rw [hev.deriv_eq, deriv_const, hfw z hz]
       linear_combination hw
 
-/-- General squared first-order equation, including the equilibrium solutions omitted in the source shorthand. -/
+/-- General squared first-order equation, including the equilibrium solutions omitted in the source
+shorthand. -/
 @[dlmf 4.34.E9, dlmf 4.34.E13]
-theorem hyperbolic_squared_ode_minus {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U) {a : ℂ} (ha : a≠0)
+theorem hyperbolic_squared_ode_minus {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U)
+    {a : ℂ} (ha : a≠0)
     {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) :
     (∀ z ∈ U, (deriv f z)^2-a^2*(f z)^2=-1) ↔
       (∃ c : ℂ, ∀ z ∈ U, f z=a⁻¹*Complex.cosh (a*z+c)) ∨

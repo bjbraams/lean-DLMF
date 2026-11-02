@@ -103,7 +103,8 @@ theorem pcfLG_eq_mul_of_tendsto {b : ℝ} {q : ℝ → ℝ} {U U' : ℝ → ℂ}
     have hFTC := intervalIntegral.integral_eq_sub_of_hasDerivAt (a := T) (b := T+1)
       (f := fun s => U s / W s) (f' := fun s => -C * ((((W s)^2)⁻¹ : ℝ) : ℂ))
       (fun s hs => hg s (by rw [uIcc_of_le (by linarith)] at hs; linarith [hs.1]))
-      ((continuousOn_const.mul (continuous_ofReal.comp_continuousOn hcont)).intervalIntegrable_of_Icc
+      ((continuousOn_const.mul
+          (continuous_ofReal.comp_continuousOn hcont)).intervalIntegrable_of_Icc
         (by linarith))
     rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_ofReal] at hFTC
     have hlow : (η^2)⁻¹ ≤ ∫ s in T..T+1, ((W s)^2)⁻¹ := by
@@ -298,7 +299,8 @@ theorem pcfLG_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
     simpa using (hasDerivAt_pow 2 t).sub_const 1
   have hs : HasDerivAt (fun t : ℝ => Real.sqrt (t^2-1)) (2*t / (2 * r)) t := h1.sqrt hy.ne'
   have htr : 0 < t + r := by linarith
-  have hl : HasDerivAt (fun t : ℝ => Real.log (t + Real.sqrt (t^2-1))) ((1 + 2*t/(2*r)) / (t + r)) t :=
+  have hl : HasDerivAt (fun t : ℝ => Real.log (t + Real.sqrt (t^2-1)))
+      ((1 + 2*t/(2*r)) / (t + r)) t :=
     ((hasDerivAt_id t).add hs).log htr.ne'
   have := (((hasDerivAt_id t).mul hs).sub hl).div_const 2
   have e : pcfXi = fun x => ((((id : ℝ → ℝ) * fun t : ℝ => Real.sqrt (t^2-1)) -
@@ -378,7 +380,8 @@ theorem pcfLG_integrableOn_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natD
     (ae_restrict_of_forall_mem measurableSet_Ioi fun t ht => ?_)
   · refine ContinuousOn.aestronglyMeasurable (fun t ht => ?_) measurableSet_Ioi
     have hy : 0 < t^2-1 := by have : c < t := ht; nlinarith
-    exact ((P.continuous.continuousAt.mul ((continuousAt_id.pow 2).sub continuousAt_const |>.rpow_const
+    exact ((P.continuous.continuousAt.mul
+        ((continuousAt_id.pow 2).sub continuousAt_const |>.rpow_const
       (Or.inl hy.ne'))).abs).continuousWithinAt
   · rw [Real.norm_eq_abs, abs_abs]; exact hb t (le_of_lt ht)
 
@@ -651,7 +654,8 @@ theorem pcfLG_A_mul_A2 {t : ℝ} (ht : 1 < t) :
 
 /-- The error-control integrand `|A A''|` is integrable at infinity. -/
 theorem pcfLG_integrableOn_V {c : ℝ} (hc : 1 < c) :
-    IntegrableOn (fun t => |pcfLG_A t * pcfLG_A2 t - (fun _ => (0:ℝ)) t * pcfLG_A t ^ 2|) (Ioi c) := by
+    IntegrableOn (fun t => |pcfLG_A t * pcfLG_A2 t - (fun _ => (0:ℝ)) t *
+                              pcfLG_A t ^ 2|) (Ioi c) := by
   have := pcfLG_integrableOn_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (d := 2) (by compute_degree)
     (e := 5/2) (by norm_num) (by norm_num) hc
   refine this.congr_fun (fun t ht => ?_) measurableSet_Ioi
@@ -1098,7 +1102,8 @@ theorem pcf_negative_parameter_uniform_U :
     have heq : pcfH μ / (Φ (μ^2) : ℂ) / pcfH μ * (pcfLG_S N (μ^2) : ℂ) - 1 =
         (((pcfLG_S N (μ^2) - Φ (μ^2)) / Φ (μ^2) : ℝ) : ℂ) := by
       push_cast; field_simp
-    rw [heq, Complex.norm_real, Real.norm_eq_abs, abs_div, abs_of_pos (show (0:ℝ) < Φ (μ^2) by linarith),
+    rw [heq, Complex.norm_real, Real.norm_eq_abs, abs_div,
+        abs_of_pos (show (0:ℝ) < Φ (μ^2) by linarith),
       abs_sub_comm]
     have := hb μ ((le_max_right _ _).trans hμ)
     rw [div_le_iff₀ (by linarith)]
@@ -1134,7 +1139,8 @@ theorem pcf_negative_parameter_uniform_U :
       have hF : pcfU (-μ^2/2) (μ*t*Real.sqrt 2) / (pcfH μ / (Φ (μ^2) : ℂ) *
           ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) - (pcfLG_ser N (μ^2) t : ℂ) =
           (Φ (μ^2) / pcfLG_S N (μ^2) : ℂ) * (X - pcfLG_ser N (μ^2) t) +
-          (((Φ (μ^2) - pcfLG_S N (μ^2)) / pcfLG_S N (μ^2) : ℝ) : ℂ) * (pcfLG_ser N (μ^2) t : ℂ) := by
+          (((Φ (μ^2) - pcfLG_S N (μ^2)) / pcfLG_S N (μ^2) : ℝ) : ℂ) *
+              (pcfLG_ser N (μ^2) t : ℂ) := by
         rw [hXdef]; push_cast; field_simp; ring
       rw [hF]
       refine (norm_add_le _ _).trans ?_

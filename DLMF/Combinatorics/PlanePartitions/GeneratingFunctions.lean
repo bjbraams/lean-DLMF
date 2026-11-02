@@ -81,7 +81,8 @@ private lemma coeff_eq_of_truncMk_eq {N : ℕ} {A B : ℤ[X]} (h : truncMk N A =
 def eulerOperator (A : ℤ[X]) : ℤ[X] := X * derivative A
 
 /-- `θ` is a derivation. -/
-private lemma eulerOperator_mul (A B : ℤ[X]) : eulerOperator (A * B) = eulerOperator A * B + A * eulerOperator B := by
+private lemma eulerOperator_mul (A B : ℤ[X]) : eulerOperator (A * B) = eulerOperator A * B + A *
+    eulerOperator B := by
   simp only [eulerOperator, derivative_mul]; ring
 
 /-- `θ` preserves congruence modulo `X^(N+1)`. -/
@@ -90,7 +91,8 @@ private lemma truncMk_eulerOperator_eq {N : ℕ} {A B : ℤ[X]} (h : truncMk N A
   rw [Ideal.Quotient.eq, Ideal.mem_span_singleton] at h ⊢
   obtain ⟨C, hC⟩ := h
   refine ⟨(N + 1 : ℤ[X]) * C + X * derivative C, ?_⟩
-  rw [eulerOperator, eulerOperator, ← mul_sub, ← derivative_sub, hC, derivative_mul, derivative_X_pow]
+  rw [eulerOperator, eulerOperator, ← mul_sub, ← derivative_sub, hC, derivative_mul,
+      derivative_X_pow]
   simp only [Nat.cast_add, Nat.cast_one, Nat.add_sub_cancel, map_add, map_one, map_natCast]
   ring
 
@@ -108,7 +110,8 @@ private lemma truncMk_eulerOperator_prod {N : ℕ} {ι : Type*} (s : Finset ι) 
     ring
 
 /-- A plane partition lies in the cube of side `|π|`. -/
-private lemma subset_planeBox_card_of_isPlanePartition {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
+private lemma subset_planeBox_card_of_isPlanePartition {π : Finset (ℕ × ℕ × ℕ)}
+    (hπ : IsPlanePartition π) :
     π ⊆ planeBox #π #π #π := by
   rintro ⟨h, j, k⟩ hx
   obtain ⟨h1, j1, k1, -⟩ := hπ _ hx
@@ -214,7 +217,8 @@ private lemma truncMk_eulerOperator_one_sub_X_pow_pow {N m : ℕ} (hm : 1 ≤ m)
 
 /-- Coefficients of `∑_{m ≤ N} m² T_m` are `σ₂`. -/
 private lemma coeff_sum_sq_mul_truncDivisorSeries {N j : ℕ} (hj : 1 ≤ j) (hjN : j ≤ N) :
-    (∑ m ∈ Icc 1 N, C ((m : ℤ) ^ 2) * truncDivisorSeries N m).coeff j = ArithmeticFunction.sigma 2 j := by
+    (∑ m ∈ Icc 1 N, C ((m : ℤ) ^ 2) * truncDivisorSeries N m).coeff j =
+        ArithmeticFunction.sigma 2 j := by
   simp only [finsetSum_coeff, coeff_C_mul, truncDivisorSeries, coeff_X_pow]
   rw [ArithmeticFunction.sigma_apply, Nat.cast_sum]
   have : ∀ m ∈ Icc 1 N, ((m : ℤ) ^ 2 * ∑ l ∈ range N, if j = m * (l + 1) then (1 : ℤ) else 0) =
@@ -274,8 +278,10 @@ private lemma mul_planePartitionCount_eq_sum_sigma (n : ℕ) :
     rw [map_sub, map_one, truncMk_X_pow (by omega), sub_zero]
   -- `θ E ≡ -E S`
   have hθE : truncMk n (eulerOperator E) = truncMk n (E * -S) := by
-    rw [hE, truncMk_eulerOperator_prod _ _ (fun m : ℕ => -(C ((m : ℤ) ^ 2)) * truncDivisorSeries n m)
-      (fun m hm => truncMk_eulerOperator_one_sub_X_pow_pow (mem_Icc.mp hm).1), hS, ← sum_neg_distrib]
+    rw [hE, truncMk_eulerOperator_prod _ _
+        (fun m : ℕ => -(C ((m : ℤ) ^ 2)) * truncDivisorSeries n m)
+      (fun m hm => truncMk_eulerOperator_one_sub_X_pow_pow (mem_Icc.mp hm).1), hS,
+          ← sum_neg_distrib]
     simp only [neg_mul]
   have hθ1 : truncMk n (eulerOperator (G * E)) = 0 := by
     rw [truncMk_eulerOperator_eq hGE]; simp [eulerOperator]
@@ -411,7 +417,8 @@ private lemma summable_norm_planePartitionCount_mul_pow {q : ℂ} (hq : ‖q‖ 
     _ ≤ B * ‖q‖ ^ n := mul_le_mul_of_nonneg_right this (by positivity)
 
 /-- `1 - qᵐ ≠ 0` for `|q| < 1`, `m > 0`. -/
-private lemma one_sub_pow_ne_zero_of_norm_lt_one {q : ℂ} (hq : ‖q‖ < 1) {m : ℕ} (hm : 0 < m) : 1 - q ^ m ≠ 0 := by
+private lemma one_sub_pow_ne_zero_of_norm_lt_one {q : ℂ} (hq : ‖q‖ < 1) {m : ℕ} (hm : 0 < m) : 1 -
+    q ^ m ≠ 0 := by
   intro h
   have : ‖q ^ m‖ = 1 := by rw [← sub_eq_zero.mp h, norm_one]
   rw [norm_pow] at this
@@ -504,14 +511,16 @@ private lemma prod_Icc_Icc_add_sub_one_eq_prod_pow {M : Type*} [CommMonoid M] (N
 def boxPlanePartitionCount (N n : ℕ) : ℕ := #{π ∈ planePartitionsIn N N N | π.card = n}
 
 /-- `c_N(n) ≤ pp(n)`. -/
-private lemma boxPlanePartitionCount_le (N n : ℕ) : boxPlanePartitionCount N n ≤ planePartitionCount n := by
+private lemma boxPlanePartitionCount_le (N n : ℕ) : boxPlanePartitionCount N n ≤
+    planePartitionCount n := by
   refine card_le_card fun π hπ => ?_
   simp only [mem_filter, mem_planePartitionsIn, mem_powerset] at hπ ⊢
   obtain ⟨⟨_, hπ⟩, rfl⟩ := hπ
   exact ⟨subset_planeBox_card_of_isPlanePartition hπ, hπ, rfl⟩
 
 /-- `c_N(n) = pp(n)` for `n ≤ N`. -/
-private lemma boxPlanePartitionCount_eq_of_le {N n : ℕ} (hn : n ≤ N) : boxPlanePartitionCount N n = planePartitionCount n := by
+private lemma boxPlanePartitionCount_eq_of_le {N n : ℕ} (hn : n ≤ N) : boxPlanePartitionCount N n =
+    planePartitionCount n := by
   have := coeff_sum_planePartitionsIn_X_pow (N := N) hn
   simp only [Polynomial.finsetSum_coeff, Polynomial.coeff_X_pow, sum_boole] at this
   rw [boxPlanePartitionCount]
@@ -520,7 +529,8 @@ private lemma boxPlanePartitionCount_eq_of_le {N n : ℕ} (hn : n ≤ N) : boxPl
 
 /-- `∑_{π ⊆ B(N,N,N)} q^{|π|} = ∑ₙ c_N(n) qⁿ`. -/
 private lemma hasSum_boxPlanePartitionCount {q : ℂ} (N : ℕ) :
-    HasSum (fun n => (boxPlanePartitionCount N n : ℂ) * q ^ n) (∑ π ∈ planePartitionsIn N N N, q ^ π.card) := by
+    HasSum (fun n => (boxPlanePartitionCount N n : ℂ) * q ^ n)
+        (∑ π ∈ planePartitionsIn N N N, q ^ π.card) := by
   have hmaps : ∀ π ∈ planePartitionsIn N N N, π.card ∈ range (N ^ 3 + 1) := by
     intro π hπ
     have := card_le_card (mem_planePartitionsIn.mp hπ).1
@@ -530,7 +540,8 @@ private lemma hasSum_boxPlanePartitionCount {q : ℂ} (N : ℕ) :
   have : ∀ n ∈ range (N ^ 3 + 1), ∑ π ∈ planePartitionsIn N N N with π.card = n, q ^ π.card =
       (boxPlanePartitionCount N n : ℂ) * q ^ n := by
     intro n _
-    rw [sum_congr rfl fun π hπ => by rw [(mem_filter.mp hπ).2], sum_const, nsmul_eq_mul, boxPlanePartitionCount]
+    rw [sum_congr rfl fun π hπ => by rw [(mem_filter.mp hπ).2], sum_const, nsmul_eq_mul,
+                                       boxPlanePartitionCount]
   rw [sum_congr rfl this]
   refine hasSum_sum_of_ne_finset_zero fun n hn => ?_
   rw [boxPlanePartitionCount, card_eq_zero.mpr, Nat.cast_zero, zero_mul]
@@ -595,7 +606,8 @@ theorem hasSum_planePartitionCount {q : ℂ} (hq : ‖q‖ < 1) :
       refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
       rw [show ((planePartitionCount n : ℂ) - boxPlanePartitionCount N n) =
         ((planePartitionCount n - boxPlanePartitionCount N n : ℕ) : ℂ) by
-          rw [Nat.cast_sub (boxPlanePartitionCount_le N n)], Complex.norm_natCast, Complex.norm_natCast]
+          rw [Nat.cast_sub (boxPlanePartitionCount_le N n)], Complex.norm_natCast,
+              Complex.norm_natCast]
       exact_mod_cast Nat.sub_le _ _
     have hshift := (hasSum_nat_add_iff' (f := d) (N + 1)).mpr hdsum
     rw [sum_eq_zero fun n hn => hd0 n (mem_range.mp hn), sub_zero] at hshift

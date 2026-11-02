@@ -49,13 +49,15 @@ theorem meijerG_contour_independent {P : MeijerGParameters} {w v v' : ℂ}
 
 /-- 16.17: meijerG converges of region. -/
 @[dlmf 16.17]
-theorem meijerG_converges_of_region {P : MeijerGParameters} (hP : P.Valid) (kind : MeijerContourKind)
+theorem meijerG_converges_of_region {P : MeijerGParameters} (hP : P.Valid)
+    (kind : MeijerContourKind)
     {w : ℂ} (hw : MeijerGContourRegion P kind w) : MeijerGConvergesLog P w := by
   sorry
 
 /-- 16.17: meijerGLog eq of value. -/
 @[dlmf 16.17]
-theorem meijerGLog_eq_of_value {P : MeijerGParameters} {w v : ℂ} (h : MeijerGHasValueLog P w v) : meijerGLog P w=v := by
+theorem meijerGLog_eq_of_value {P : MeijerGParameters} {w v : ℂ} (h : MeijerGHasValueLog P w v) :
+    meijerGLog P w=v := by
   sorry
 
 /-- 16.17: meijerGLog analytic. -/
@@ -64,7 +66,8 @@ theorem meijerGLog_analytic (P : MeijerGParameters) (hP : P.Valid) :
     AnalyticOnNhd ℂ (meijerGLog P) {w | MeijerGConvergesLog P w} := by
   sorry
 
-/-- Bottom-pole collisions remain meaningful in the contour definition; finite multiplicity collisions are not discarded. -/
+/-- Bottom-pole collisions remain meaningful in the contour definition; finite multiplicity
+collisions are not discarded. -/
 @[dlmf 16.17]
 theorem meijerGLog_parameter_continuous {A B : ℝ→List ℂ} {P : MeijerGParameters} {w : ℂ}
     (hA : A 0=P.a) (hB : B 0=P.b)

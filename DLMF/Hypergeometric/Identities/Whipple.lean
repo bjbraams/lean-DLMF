@@ -162,7 +162,8 @@ private lemma whipple_qratio_limit (xs ys : List ℂ) (hlen : xs.length=ys.lengt
   exact div_div_div_cancel_right₀ (pow_ne_zero _ ht) _ _
 
 /-- Include the cancelled very-well-poised factor in the finite product limit. -/
-private lemma whipple_unit_ratio_limit (a : ℂ) (xs ys : List ℂ) (hlen : xs.length+1=ys.length) (k : ℕ)
+private lemma whipple_unit_ratio_limit (a : ℂ) (xs ys : List ℂ)
+    (hlen : xs.length+1=ys.length) (k : ℕ)
     (hy : ∀ b ∈ ys, poch b k ≠ 0) :
     Tendsto (fun t : ℂ => DLMF.Bailey.unitD (exp (a*t)) (exp t) k *
       (xs.map (fun b => qPochhammer (exp (b*t)) (exp t) k)).prod /
@@ -344,7 +345,8 @@ theorem whipple_7F6 {a b c d e : ℂ} (m : ℕ)
       ∑ k ∈ Finset.range (m+1),DLMF.Bailey.watsonR4
         (exp (a*t)) (exp (b*t)) (exp (c*t)) (exp (d*t)) (exp (e*t)) (exp t) m k) := by
     filter_upwards [hQB,hQC,hQD,hQE,hQN,hQY,hQQ] with t hB hC hD hE hN hY hQ
-    refine DLMF.Bailey.watson_transformation_rational m (exp_ne_zero _) (exp_ne_zero _) (exp_ne_zero _)
+    refine DLMF.Bailey.watson_transformation_rational m (exp_ne_zero _) (exp_ne_zero _)
+        (exp_ne_zero _)
       (exp_ne_zero _) (exp_ne_zero _) (exp_ne_zero _) (fun k hk => hQ k (by simpa using hk))
       ?_ ?_ ?_ ?_ ?_ ?_
     · simpa only [whipple_exp_param] using hB

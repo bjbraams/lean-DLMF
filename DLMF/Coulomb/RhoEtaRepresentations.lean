@@ -104,7 +104,8 @@ section Rotation
 open scoped Interval
 
 /-- Tricomi's kernel is differentiable at `t ≠ 0` with `re t ≥ 0`. -/
-private lemma differentiableAt_tricomiKernel_of_re_nonneg (a b z : ℂ) {t : ℂ} (ht : 0 ≤ t.re) (ht0 : t ≠ 0) :
+private lemma differentiableAt_tricomiKernel_of_re_nonneg (a b z : ℂ) {t : ℂ} (ht : 0 ≤ t.re)
+    (ht0 : t ≠ 0) :
     DifferentiableAt ℂ (tricomiKernel a b z) t := by
   have h1 : t ∈ slitPlane := by
     rcases ht.lt_or_eq with h | h
@@ -124,7 +125,8 @@ private lemma re_two_I_mul_mul_ofReal_mul_exp (ρ r θ : ℝ) :
   ring
 
 /-- `re (r e^{iθ}) = r cos θ`. -/
-private lemma re_ofReal_mul_exp_ofReal_mul_I (r θ : ℝ) : ((r : ℂ) * exp (θ * I)).re = r * Real.cos θ := by
+private lemma re_ofReal_mul_exp_ofReal_mul_I (r θ : ℝ) : ((r : ℂ) * exp (θ * I)).re = r *
+    Real.cos θ := by
   rw [re_ofReal_mul, exp_ofReal_mul_I_re]
 
 /-- Bounds for Tricomi's kernel at `z = 2iρ` along rays of angle `θ ∈ [-π/2, -π/4]`. -/
@@ -188,7 +190,8 @@ private lemma tricomiKernel_bound_on_rays (a b : ℂ) {ρ : ℝ} (hρ : 0 < ρ) 
 /-- **Tricomi's integral on the imaginary axis**: for `re a > 0`, `ρ > 0`,
 `Γ(a) U(a,b,2iρ) = e^{-iπ/2} ∫₀^∞ K(r e^{-iπ/2}) dr` with `K` Tricomi's kernel at `z = 2iρ`,
 and the integrand is integrable. -/
-private lemma Gamma_mul_kummerU_two_I_mul_eq_integral (a b : ℂ) (ha : 0 < a.re) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma Gamma_mul_kummerU_two_I_mul_eq_integral (a b : ℂ) (ha : 0 < a.re)
+    {ρ : ℝ} (hρ : 0 < ρ) :
     IntegrableOn (fun r : ℝ => tricomiKernel a b (2 * I * ρ) (r * exp (-(π / 2) * I))) (Ioi 0) ∧
     Gamma a * kummerU a b (2 * I * ρ) = exp (-(π / 2) * I) *
       ∫ r in Ioi (0 : ℝ), tricomiKernel a b (2 * I * ρ) (r * exp (-(π / 2) * I)) := by
@@ -258,16 +261,19 @@ private lemma Gamma_mul_kummerU_two_I_mul_eq_integral (a b : ℂ) (ha : 0 < a.re
   field_simp
 
 /-- `(x u)^w = x^w u^w` for real `x > 0` and `u ≠ 0`. -/
-private lemma ofReal_mul_cpow_eq_of_pos_of_ne_zero {x : ℝ} (hx : 0 < x) {u : ℂ} (hu : u ≠ 0) (w : ℂ) :
+private lemma ofReal_mul_cpow_eq_of_pos_of_ne_zero {x : ℝ} (hx : 0 < x) {u : ℂ}
+    (hu : u ≠ 0) (w : ℂ) :
     ((x : ℂ) * u) ^ w = (x : ℂ) ^ w * u ^ w := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
   rw [cpow_def_of_ne_zero (mul_ne_zero hx0 hu), cpow_def_of_ne_zero hx0, cpow_def_of_ne_zero hu,
     log_ofReal_mul hx hu, ← exp_add, ← ofReal_log hx.le]
   ring_nf
 
-/-- The kernel of `Gamma_mul_kummerU_two_I_mul_eq_integral` at `a = ℓ+1-iη`, `b = 2ℓ+2` in terms of the integrand
-of DLMF 33.7.2: `(2ρ)^{2ℓ} K(r e^{-iπ/2}) = (-1)^ℓ e^{-t} t^{ℓ-iη} (t+2iρ)^{ℓ+iη}`, `t = 2ρr`. -/
-private lemma tricomiKernel_coulomb_eq_integrand (ℓ : ℕ) (η : ℝ) {ρ r : ℝ} (hρ : 0 < ρ) (hr : 0 < r) :
+/-- The kernel of `Gamma_mul_kummerU_two_I_mul_eq_integral` at `a = ℓ+1-iη`, `b = 2ℓ+2` in terms of
+the integrand of DLMF 33.7.2: `(2ρ)^{2ℓ} K(r e^{-iπ/2}) = (-1)^ℓ e^{-t} t^{ℓ-iη} (t+2iρ)^{ℓ+iη}`,
+`t = 2ρr`. -/
+private lemma tricomiKernel_coulomb_eq_integrand (ℓ : ℕ) (η : ℝ) {ρ r : ℝ}
+    (hρ : 0 < ρ) (hr : 0 < r) :
     tricomiKernel ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) (2 * I * ρ) (r * exp (-(π / 2) * I)) *
       (2 * (ρ : ℂ)) ^ (2 * ℓ) = (-1) ^ ℓ * (exp (-((2 * ρ * r : ℝ) : ℂ)) *
         ((2 * ρ * r : ℝ) : ℂ) ^ ((ℓ : ℂ) - I * η) *
@@ -293,7 +299,8 @@ private lemma tricomiKernel_coulomb_eq_integrand (ℓ : ℕ) (η : ℝ) {ρ r : 
   have e2 : ((2 * ρ * r : ℝ) : ℂ) = ((2 * ρ : ℝ) : ℂ) * r := by push_cast; ring
   have e3 : ((2 * ρ * r : ℝ) : ℂ) + 2 * I * ρ = ((2 * ρ : ℝ) : ℂ) * ((r : ℂ) + I) := by
     push_cast; ring
-  rw [e3, e2, ofReal_mul_cpow_eq_of_pos_of_ne_zero h2ρ hr0, ofReal_mul_cpow_eq_of_pos_of_ne_zero h2ρ hri]
+  rw [e3, e2, ofReal_mul_cpow_eq_of_pos_of_ne_zero h2ρ hr0,
+      ofReal_mul_cpow_eq_of_pos_of_ne_zero h2ρ hri]
   have hP : ((2 * ρ : ℝ) : ℂ) ^ ((ℓ : ℂ) - I * η) * ((2 * ρ : ℝ) : ℂ) ^ ((ℓ : ℂ) + I * η) =
       (2 * (ρ : ℂ)) ^ (2 * ℓ) := by
     rw [← cpow_add _ _ (by exact_mod_cast h2ρ.ne'), show (ℓ : ℂ) - I * η + (ℓ + I * η) =
@@ -345,7 +352,8 @@ private lemma factorial_mul_coulombC (ℓ : ℕ) (η : ℝ) :
   field_simp
 
 /-- `conj (z^w) = (conj z)^(conj w)` for `arg z ≠ π`. -/
-private lemma conj_cpow_of_arg_ne_pi {z : ℂ} (hz : z.arg ≠ π) (w : ℂ) : conj (z ^ w) = conj z ^ conj w := by
+private lemma conj_cpow_of_arg_ne_pi {z : ℂ} (hz : z.arg ≠ π) (w : ℂ) : conj (z ^ w) =
+    conj z ^ conj w := by
   rw [conj_cpow _ _ hz, conj_conj]
 
 /-- The integrand of DLMF 33.7.4 on the ray `t = -1 - is` in terms of the conjugate of the
@@ -376,7 +384,8 @@ private lemma integrand_ray_eq_conj_integrand (ℓ : ℕ) (η : ℝ) {ρ s : ℝ
     cpow_mul_exp_mul_I hsi (by linarith) (by linarith)]
   have e3 : ((ρ * s : ℝ) : ℂ) = (ρ : ℂ) * s := by push_cast; ring
   have e4 : ((ρ * s : ℝ) : ℂ) - 2 * I * ρ = (ρ : ℂ) * ((s : ℂ) - 2 * I) := by push_cast; ring
-  rw [e4, e3, ofReal_mul_cpow_eq_of_pos_of_ne_zero hρ hs0, ofReal_mul_cpow_eq_of_pos_of_ne_zero hρ hsi]
+  rw [e4, e3, ofReal_mul_cpow_eq_of_pos_of_ne_zero hρ hs0,
+      ofReal_mul_cpow_eq_of_pos_of_ne_zero hρ hsi]
   have hP : (ρ : ℂ) ^ ((ℓ : ℂ) + I * η) * (ρ : ℂ) ^ ((ℓ : ℂ) - I * η) = (ρ : ℂ) ^ (2 * ℓ) := by
     rw [← cpow_add _ _ (by exact_mod_cast hρ.ne'), show (ℓ : ℂ) + I * η + (ℓ - I * η) =
       ((2 * ℓ : ℕ) : ℂ) by push_cast; ring, cpow_natCast]
@@ -648,7 +657,8 @@ private lemma abs_coulombF_eq_norm_normalizedKummerFactor (m : ℕ) (η : ℝ) {
   ring
 
 /-- `u_m → 1` as `m → ∞`. -/
-private lemma tendsto_normalizedKummerFactor (η ρ : ℝ) : Tendsto (normalizedKummerFactor η ρ) atTop (𝓝 1) := by
+private lemma tendsto_normalizedKummerFactor (η ρ : ℝ) : Tendsto (normalizedKummerFactor η ρ)
+    atTop (𝓝 1) := by
   have h := (tendsto_kummerM_atTop_exp_div_two η (2 * I * ρ)).const_mul (exp (-I * ρ))
   rwa [← Complex.exp_add, show -I * (ρ : ℂ) + 2 * I * ρ / 2 = 0 by ring, Complex.exp_zero] at h
 
@@ -690,7 +700,8 @@ private lemma prod_range_recurrenceR_pos (ℓ : ℕ) (η : ℝ) (k : ℕ) :
 
 /-- The backward solution satisfies `w_k = T_{ℓ+1+k} w_{k+1} - R_{ℓ+2+k}² w_{k+2}`. -/
 private lemma scaledBackwardSolution_recurrence (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) (k : ℕ) :
-    scaledBackwardSolution ℓ η ρ k = recurrenceT (ℓ + 1 + k) η ρ * scaledBackwardSolution ℓ η ρ (k + 1) +
+    scaledBackwardSolution ℓ η ρ k = recurrenceT (ℓ + 1 + k) η ρ *
+        scaledBackwardSolution ℓ η ρ (k + 1) +
       -(recurrenceR (ℓ + 1 + (k + 1)) η ^ 2) * scaledBackwardSolution ℓ η ρ (k + 2) := by
   have hr := coulombF_recurrence (ℓ + k) η hρ
   have p0 := (prod_range_recurrenceR_pos ℓ η k).ne'
@@ -720,7 +731,8 @@ private lemma tendsto_convs_deriv_coulombF_div_coulombF (ℓ : ℕ) (η : ℝ) {
       (fun k => recurrenceT (ℓ + 1 + k) η ρ)).convs atTop
       (𝓝 (deriv (coulombF ℓ η) ρ / coulombF ℓ η ρ - recurrenceS (ℓ + 1) η ρ)) := by
   obtain ⟨M0, hM0⟩ := eventually_atTop.mp
-    ((tendsto_normalizedKummerFactor η ρ).eventually (Metric.ball_mem_nhds (1 : ℂ) (by norm_num : (0:ℝ) < 1/2)))
+    ((tendsto_normalizedKummerFactor η ρ).eventually
+        (Metric.ball_mem_nhds (1 : ℂ) (by norm_num : (0:ℝ) < 1/2)))
   have hu_lo : ∀ m ≥ M0, 1 / 2 ≤ ‖normalizedKummerFactor η ρ m‖ := by
     intro m hm
     have h := hM0 m hm
@@ -749,7 +761,8 @@ private lemma tendsto_convs_deriv_coulombF_div_coulombF (ℓ : ℕ) (η : ℝ) {
     have := hu_lo _ hm
     have := coulombC_pos (ℓ + k) η
     positivity
-  have hrat : ∀ k ≥ N, 3 * ‖-(recurrenceR (ℓ + 1 + (k + 1)) η ^ 2) * scaledBackwardSolution ℓ η ρ (k + 2)‖ ≤
+  have hrat : ∀ k ≥ N, 3 * ‖-(recurrenceR (ℓ + 1 + (k + 1)) η ^ 2) *
+      scaledBackwardSolution ℓ η ρ (k + 2)‖ ≤
       ‖scaledBackwardSolution ℓ η ρ k‖ := by
     intro k hk
     have hmM : ℓ + k ≥ M0 := le_trans (le_max_left _ _) (hk.trans (Nat.le_add_left _ _))
@@ -796,7 +809,8 @@ private lemma tendsto_convs_deriv_coulombF_div_coulombF (ℓ : ℕ) (η : ℝ) {
           ring
       _ ≤ U0 * (coulombC m η * ρ ^ (m + 1) / p) := mul_le_mul_of_nonneg_right key hcp
       _ = coulombC m η * ρ ^ (m + 1) * U0 / p := by ring
-  have := GenContFract.cfConv_tendsto_of_ratio (h := (0 : ℝ)) (scaledBackwardSolution_recurrence ℓ η hρ) hw0 ha hwN
+  have := GenContFract.cfConv_tendsto_of_ratio (h := (0 : ℝ))
+      (scaledBackwardSolution_recurrence ℓ η hρ) hw0 ha hwN
     (by norm_num : (2:ℝ) < 3) hrat
   convert this using 2
   simp only [scaledBackwardSolution, Finset.range_zero, Finset.prod_empty, div_one, zero_add,

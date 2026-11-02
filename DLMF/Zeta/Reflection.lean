@@ -170,7 +170,8 @@ theorem iteratedDeriv_riemannZeta_one_sub {s : ℂ} (hs : ∀ n : ℕ, s ≠ -n)
   have hm' : m ≤ k := Nat.lt_succ_iff.mp (mem_range.mp hm)
   rw [show k + 1 - 1 - m = k - m by omega,
     iteratedDeriv_mul (f := Gamma) (g := riemannZeta) (hGc.of_le ?_) (hZc.of_le ?_), hAder,
-    reflectionConst_pow_mul_exp_add_conj, show k - (k - m) = m by omega, Nat.choose_symm hm', mul_sum, mul_sum]
+    reflectionConst_pow_mul_exp_add_conj, show k - (k - m) = m by omega, Nat.choose_symm hm',
+                                                                    mul_sum, mul_sum]
   · refine sum_congr rfl fun r _ => ?_
     ring1
   all_goals exact_mod_cast (by omega : k - (k - m) ≤ k)

@@ -170,13 +170,15 @@ theorem mathieuFourierB_zero_right (n : ℕ) (q : ℝ) : mathieuFourierB n 0 q =
 /-- The full cosine series of `ce_n` (all `m`). -/
 theorem hasSum_mathieuFourierA_mul_cos (n : ℕ) (q : ℝ) (z : ℂ) :
     HasSum (fun m : ℕ => mathieuFourierA n m q * Complex.cos (m * z)) (mathieuCe n z q) :=
-  hasSum_cos_of_differentiable_periodic_even (F := fun z => mathieuCe n z q) (isMathieuSolution_mathieuCe n q).differentiable
+  hasSum_cos_of_differentiable_periodic_even (F := fun z => mathieuCe n z q)
+      (isMathieuSolution_mathieuCe n q).differentiable
     (mathieuCe_periodic_two_pi n q) (fun z => mathieuCe_neg n z q) z
 
 /-- The full sine series of `se_n`, `n ≥ 1` (all `m`). -/
 theorem hasSum_mathieuFourierB_mul_sin {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
     HasSum (fun m : ℕ => mathieuFourierB n m q * Complex.sin (m * z)) (mathieuSe n z q) :=
-  hasSum_sin_of_differentiable_periodic_odd (F := fun z => mathieuSe n z q) (isMathieuSolution_mathieuSe n q).differentiable
+  hasSum_sin_of_differentiable_periodic_odd (F := fun z => mathieuSe n z q)
+      (isMathieuSolution_mathieuSe n q).differentiable
     (mathieuSe_periodic_two_pi hn q) (fun z => mathieuSe_neg n z q) z
 
 /-- Parseval for `ce_n` over all indices. -/
@@ -290,7 +292,8 @@ private lemma inv_pi_mul_integral_sin_mul_sin {a b : ℕ} (hb : b ≠ 0) :
     simp [h2, hab]
 
 /-- Reflection `x ↦ π/2 - x` preserves integrals over a period. -/
-private lemma integral_comp_pi_div_two_sub_of_periodic {g : ℝ → ℂ} (hg : Function.Periodic g (2 * π)) :
+private lemma integral_comp_pi_div_two_sub_of_periodic {g : ℝ → ℂ}
+    (hg : Function.Periodic g (2 * π)) :
     ∫ x in (0 : ℝ)..2 * π, g (π / 2 - x) = ∫ x in (0 : ℝ)..2 * π, g x := by
   rw [intervalIntegral.integral_comp_sub_left, sub_zero]
   have h := hg.intervalIntegral_add_eq (π / 2 - 2 * π) 0
@@ -417,7 +420,8 @@ private lemma norm_exp_mul_I_le_exp_abs_im (w : ℂ) : ‖Complex.exp (w * I)‖
 
 /-- Absolute and locally uniform convergence of a trigonometric series with rapidly decaying
 coefficients. -/
-private lemma summable_and_tendstoLocallyUniformly_trig_series {c : ℕ → ℂ} {g : ℕ → ℂ → ℂ} {F : ℂ → ℂ}
+private lemma summable_and_tendstoLocallyUniformly_trig_series {c : ℕ → ℂ}
+    {g : ℕ → ℂ → ℂ} {F : ℂ → ℂ}
     (hc : ∀ R : ℝ, ∃ C, 0 ≤ C ∧ ∀ m : ℕ, ‖c m‖ ≤ C * Real.exp (-(R * m)))
     (hg : ∀ m z, ‖g m z‖ ≤ Real.exp (m * |z.im|)) (hF : ∀ z, HasSum (fun m => c m * g m z) (F z)) :
     (∀ z, Summable fun m => ‖c m * g m z‖) ∧
@@ -503,9 +507,11 @@ theorem mathieu_fourier_locallyUniform (n : ℕ) (q : ℝ) :
   have hg' : ∀ (m : ℕ) (z : ℂ), ‖Complex.sin (m * z)‖ ≤ Real.exp (m * |z.im|) := fun m z => by
     refine (Complex.norm_sin_le_exp_abs_im _).trans (le_of_eq ?_)
     rw [show ((m : ℂ) * z).im = m * z.im by simp, abs_mul, Nat.abs_cast]
-  have hA := summable_and_tendstoLocallyUniformly_trig_series (g := fun m z => Complex.cos (m * z)) (exists_norm_mathieuFourierA_le_exp n q) hg
+  have hA := summable_and_tendstoLocallyUniformly_trig_series (g := fun m z => Complex.cos (m * z))
+      (exists_norm_mathieuFourierA_le_exp n q) hg
     (hasSum_mathieuFourierA_mul_cos n q)
-  have hB : n ≠ 0 → _ := fun hn => summable_and_tendstoLocallyUniformly_trig_series (g := fun m z => Complex.sin (m * z))
+  have hB : n ≠ 0 → _ := fun hn =>
+      summable_and_tendstoLocallyUniformly_trig_series (g := fun m z => Complex.sin (m * z))
     (exists_norm_mathieuFourierB_le_exp hn q) hg' (hasSum_mathieuFourierB_mul_sin hn q)
   exact ⟨hA.1, fun hn => (hB hn).1, hA.2, fun hn => (hB hn).2⟩
 

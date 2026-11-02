@@ -24,10 +24,10 @@ Lerch's series `lerchPhiSeries` (DLMF 25.14.1) and Lerch's transcendent `lerchPh
 
 ## Main results
 
-* `exists_lerchPhi_continuation`, `analyticOnNhd_lerchPhi`: convergence and continuation
-  (DLMF §25.14(i)).
-* `hasSum_lerchPhi`, `hasSum_lerchPhi_of_norm_eq_one`: the series 25.14.1 in the unit disk and
-  on the unit circle.
+* `exists_lerchPhi_continuation`, `exists_lerchPhi_continuation'`, `analyticOnNhd_lerchPhi`:
+  convergence and continuation (DLMF §25.14(i)).
+* `hasSum_lerchPhi`, `hasSum_lerchPhi_of_norm_eq_one`, `hasSum_lerchPhi_of_norm_eq_one'`: the series
+  25.14.1 in the unit disk and on the unit circle.
 * `hurwitzZetaComplex_eq_lerchPhi`, `polylog_eq_mul_lerchPhi`: DLMF 25.14.2–25.14.3.
 * `hasSum_lerchPhi_log`, `hasSum_lerchPhi_log_nat`: expansions about `z = 1`
   (DLMF 25.14.3_1–25.14.3_2).
@@ -82,13 +82,21 @@ private lemma lerchParamAdmissible_add_natCast {s a : ℂ} (h : LerchParamAdmiss
   · right; simpa using h1
 
 /-- **Convergence and continuation** (DLMF §25.14(i)): under the conditions of 25.14.1, the series
-converges in the unit disk and extends analytically in `z` to `ℂ \ [1, ∞)`. -/
+converges in the unit disk and extends analytically in `z` to `ℂ \ [1, ∞)`. This is stronger than
+DLMF, which assumes the conditions of 25.14.1 on `s` and `a` (`LerchParamAdmissible s a`). -/
 @[dlmf 25.14.i]
-theorem exists_lerchPhi_continuation {s a : ℂ} (h : LerchParamAdmissible s a) :
+theorem exists_lerchPhi_continuation' {s a : ℂ} :
     ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F slitOne ∧
       ∀ z, ‖z‖ < 1 → HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (F z) := by
-  have _ := h
   exact exists_isLerchContinuation s a
+
+/-- **Convergence and continuation** (DLMF §25.14(i)): under the conditions of 25.14.1, the series
+converges in the unit disk and extends analytically in `z` to `ℂ \ [1, ∞)`. -/
+@[dlmf 25.14.i]
+theorem exists_lerchPhi_continuation {s a : ℂ} (_h : LerchParamAdmissible s a) :
+    ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F slitOne ∧
+      ∀ z, ‖z‖ < 1 → HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (F z) :=
+  exists_lerchPhi_continuation'
 
 /-- Analyticity on a neighborhood of the specified domain: `AnalyticOnNhd ℂ (slitContinuation
 (fun w => lerchPhiSeries w s a)) slitOne ∧ ∀ z, ‖z‖ < 1 → HasSum (fun n : ℕ => z ^ n / (a
@@ -109,7 +117,8 @@ private lemma lerchPhi_slitContinuation_spec {s a : ℂ} (h : LerchParamAdmissib
 
 /-- On the cut plane, `Φ(z, s, a)` is the value of any continuation of Lerch's series (no
 conditions on `s`, `a`). -/
-private lemma lerchPhi_eq_of_isLerchContinuation {s a : ℂ} {F : ℂ → ℂ} (hF : IsLerchContinuation s a F) {z : ℂ}
+private lemma lerchPhi_eq_of_isLerchContinuation {s a : ℂ} {F : ℂ → ℂ}
+    (hF : IsLerchContinuation s a F) {z : ℂ}
     (hz : z ∈ slitOne) : lerchPhi z s a = F z := by
   obtain ⟨G, hG⟩ := exists_isLerchContinuation s a
   have he : ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F slitOne ∧
@@ -124,7 +133,8 @@ private lemma lerchPhi_eq_of_isLerchContinuation {s a : ℂ} {F : ℂ → ℂ} (
 private lemma summable_lerch_of_norm_le_one {s a z : ℂ} (hs : 1 < s.re) (hz : ‖z‖ ≤ 1) :
     Summable fun n : ℕ => z ^ n / (a + n) ^ s := by
   obtain ⟨m, hm⟩ := exists_nat_gt (-a.re)
-  exact (hasSum_lerch_of_hasSum_add_natCast m (hasSum_lerch_lerchIntegral (a := a + m) (by linarith) (by simp; linarith)
+  exact (hasSum_lerch_of_hasSum_add_natCast m
+      (hasSum_lerch_lerchIntegral (a := a + m) (by linarith) (by simp; linarith)
     (Or.inr ⟨hz, hs⟩))).summable
 
 /-- **The series in the unit disk** (DLMF 25.14.1): `Φ(z, s, a) = ∑ zⁿ/(a+n)^s` for `|z| < 1`
@@ -136,12 +146,11 @@ theorem hasSum_lerchPhi {z s a : ℂ} (h : LerchParamAdmissible s a) (hz : ‖z�
   exact (lerchPhi_slitContinuation_spec h).2 z hz
 
 /-- **The series on the unit circle** (DLMF 25.14.1): for `|z| = 1` and `Re s > 1` (at `z = 1` by
-definition; otherwise by Abel's theorem). -/
+definition; otherwise by Abel's theorem). This is stronger than DLMF, which assumes the conditions
+of 25.14.1 on `s` and `a` (`LerchParamAdmissible s a`). -/
 @[dlmf 25.14.E1]
-theorem hasSum_lerchPhi_of_norm_eq_one {z s a : ℂ} (h : LerchParamAdmissible s a) (hs : 1 < s.re)
-    (hz : ‖z‖ = 1) :
+theorem hasSum_lerchPhi_of_norm_eq_one' {z s a : ℂ} (hs : 1 < s.re) (hz : ‖z‖ = 1) :
     HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (lerchPhi z s a) := by
-  have _ := h
   by_cases h1 : z = 1
   · subst h1
     have h1' : (1 : ℂ) ∉ slitOne := by simp [slitOne]
@@ -151,6 +160,14 @@ theorem hasSum_lerchPhi_of_norm_eq_one {z s a : ℂ} (h : LerchParamAdmissible s
     have hzs := mem_slitOne_of_norm_le_one hz.le h1
     rw [lerchPhi_eq_of_isLerchContinuation hF hzs]
     exact hF.hasSum_of_norm_le_one hs hz.le hzs
+
+/-- **The series on the unit circle** (DLMF 25.14.1): for `|z| = 1` and `Re s > 1` (at `z = 1` by
+definition; otherwise by Abel's theorem). -/
+@[dlmf 25.14.E1]
+theorem hasSum_lerchPhi_of_norm_eq_one {z s a : ℂ} (_h : LerchParamAdmissible s a)
+    (hs : 1 < s.re) (hz : ‖z‖ = 1) :
+    HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (lerchPhi z s a) :=
+  hasSum_lerchPhi_of_norm_eq_one' hs hz
 
 /-- **Analyticity in `z`** (DLMF §25.14(i)). -/
 @[dlmf 25.14.i]
@@ -266,7 +283,8 @@ theorem lerchPhi_eq_add_nat {z s a : ℂ} (h : LerchParamAdmissible s a)
     lerchPhi z s a = z ^ m * lerchPhi z s (a + m) +
       ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s := by
   have h1 := (hasSum_nat_add_iff' m).mpr (hasSum_lerchPhi_of_lerchParamAdmissible h hz)
-  have h2 := (hasSum_lerchPhi_of_lerchParamAdmissible (lerchParamAdmissible_add_natCast h m) hz).mul_left (z ^ m)
+  have h2 := (hasSum_lerchPhi_of_lerchParamAdmissible (lerchParamAdmissible_add_natCast h m)
+      hz).mul_left (z ^ m)
   have h3 : HasSum (fun n : ℕ => z ^ (n + m) / (a + ↑(n + m)) ^ s)
       (z ^ m * lerchPhi z s (a + m)) := by
     refine h2.congr_fun fun n => ?_

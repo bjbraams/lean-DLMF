@@ -11,6 +11,8 @@ public import DLMF.Gamma.BarnesG
 public import DLMF.Gamma.Asymptotics.Stirling
 public import Mathlib.Analysis.Calculus.MeanValue
 public import DLMFMathlib.Analysis.Asymptotics.PowerSums
+public import DLMF.BernoulliEuler.Inequalities
+public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 
 /-!
 # The Euler–Maclaurin formula and summation by parts
@@ -106,7 +108,8 @@ theorem euler_maclaurin {f : ℝ → ℝ} {m : ℕ} (hm : 1 ≤ m) (hf : ContDif
       (fun x => periodicBernoulli (2 * m) x * iteratedDeriv (2 * m) f x) (a : ℝ) (a := 0) (b := N)
     simp only [periodicBernoulli_add_intCast, zero_add] at this
     rw [this, add_comm]
-  rw [hper, sum_bernoulli_odd_eq_neg_sum_even (fun j => iteratedDeriv j f (N + a) - iteratedDeriv j f a),
+  rw [hper, sum_bernoulli_odd_eq_neg_sum_even
+      (fun j => iteratedDeriv j f (N + a) - iteratedDeriv j f a),
     Finset.sum_Ico_succ_top (by omega : 1 ≤ m)] at h
   have hR : Continuous (iteratedDeriv (2 * m) f) := hf.continuous_iteratedDeriv _ le_rfl
   have hRint : IntervalIntegrable (fun x => periodicBernoulli (2 * m) x *
@@ -173,25 +176,6 @@ theorem abel_plana {f : ℂ → ℂ} {a n : ℤ} (han : a < n) {m : ℕ} (hm : 1
 
 /-! ### Example: `∑ j ln j` (2.10.3–2.10.6) -/
 
-/-- DLMF 2.10.4 (with 2.10.3, 2.10.5 and 2.10.6): for `m ≥ 2` and `n ≥ 1`,
-`S(n) = ½n² ln n - ¼n² + ½n ln n + 1/12 ln n + C
-  + ∑_{s=2}^{m-1} (-B_{2s})/(2s(2s-1)(2s-2)) n^{-(2s-2)} + R_m(n)`
-with `C = ln A`, `A` the Glaisher–Kinkelin constant. -/
-@[dlmf 2.10.E4, dlmf 2.10.E5]
-theorem jLogJSum_eq {m n : ℕ} (hm : 2 ≤ m) (hn : 1 ≤ n) :
-    jLogJSum n = (n : ℝ) ^ 2 / 2 * Real.log n - (n : ℝ) ^ 2 / 4 + n / 2 * Real.log n +
-      Real.log n / 12 + Real.log DLMF.Gamma.glaisherKinkelin +
-      ∑ s ∈ Ico 2 m, sumMulLogTerm s n + jLogJRemainder m n := by
-  sorry
-
-/-- DLMF §2.10(i) (remainder of 2.10.4): since `B̃_{2m}(x) - B_{2m}` has constant sign
-`(-1)^m`, `R_m(n)` has the sign of the `s = m` term of 2.10.4 and is bounded in absolute value
-by it (`m ≥ 2`, `n ≥ 1`). -/
-@[dlmf 2.10.i]
-theorem jLogJRemainder_bound {m n : ℕ} (hm : 2 ≤ m) (hn : 1 ≤ n) :
-    0 ≤ jLogJRemainder m n * sumMulLogTerm m n ∧ |jLogJRemainder m n| ≤ |sumMulLogTerm m n| := by
-  sorry
-
 /-- DLMF 2.10.4 to leading order (the case `m = 2`, with `R_2(n) → 0`):
 `S(n) - (½n² ln n - ¼n² + ½n ln n + 1/12 ln n) → C = ln A` as `n → ∞`. Proved from the
 project's limit for the Glaisher–Kinkelin constant. -/
@@ -206,6 +190,373 @@ theorem tendsto_jLogJSum_sub :
     rfl
   rw [DLMF.Gamma.BarnesAsymp.hseq, hS]
   ring
+
+/-- Derivatives of `x ln x` of order at least two. -/
+private lemma iteratedDeriv_mul_log {x : ℝ} (hx : 0 < x) (k : ℕ) :
+    iteratedDeriv (k + 2) (fun x : ℝ => x * Real.log x) x =
+      (-1) ^ k * k ! * x ^ (-1 - k : ℤ) := by
+  rw [iteratedDeriv_succ', iteratedDeriv_succ']
+  have h1 : ∀ y : ℝ, 0 < y → deriv (fun x : ℝ => x * Real.log x) =ᶠ[𝓝 y]
+      fun x => Real.log x + 1 := fun y hy => by
+    filter_upwards [lt_mem_nhds hy] with z hz using Real.deriv_mul_log hz.ne'
+  have h2 : deriv (deriv (fun x : ℝ => x * Real.log x)) =ᶠ[𝓝 x] Inv.inv := by
+    filter_upwards [lt_mem_nhds hx] with y hy
+    rw [(h1 y hy).deriv_eq]
+    simp [Real.deriv_log]
+  rw [h2.iteratedDeriv_eq, iteratedDeriv_eq_iterate, iter_deriv_inv]
+
+/-- First derivative of `x ln x`. -/
+private lemma iteratedDeriv_one_mul_log {x : ℝ} (hx : 0 < x) :
+    iteratedDeriv 1 (fun x : ℝ => x * Real.log x) x = Real.log x + 1 := by
+  rw [iteratedDeriv_one, Real.deriv_mul_log hx.ne']
+
+/-- A smooth function on `ℝ` agreeing with `x ln x` for `x ≥ 1/2`. -/
+private lemma exists_contDiff_eq_mul_log :
+    ∃ f : ℝ → ℝ, ContDiff ℝ (⊤ : ℕ∞) f ∧ ∀ x : ℝ, 1 / 2 < x →
+      f =ᶠ[𝓝 x] fun x : ℝ => x * Real.log x := by
+  set ψ : ℝ → ℝ := fun x => Real.smoothTransition (4 * x - 1) * x +
+    (1 - Real.smoothTransition (4 * x - 1)) * (1 / 4)
+  have hψ : ContDiff ℝ (⊤ : ℕ∞) ψ := by
+    have hs : ContDiff ℝ (⊤ : ℕ∞) fun x : ℝ => Real.smoothTransition (4 * x - 1) :=
+      Real.smoothTransition.contDiff.comp (by fun_prop)
+    exact (hs.mul contDiff_id).add ((contDiff_const.sub hs).mul contDiff_const)
+  have hpos : ∀ x, 0 < ψ x := by
+    intro x
+    have h0 := Real.smoothTransition.nonneg (4 * x - 1)
+    have h1 := Real.smoothTransition.le_one (4 * x - 1)
+    by_cases hx : x ≤ 1 / 4
+    · rw [show ψ x = 1 / 4 by
+        simp only [ψ, Real.smoothTransition.zero_of_nonpos (show 4 * x - 1 ≤ 0 by linarith)]
+        ring]
+      norm_num
+    · simp only [ψ]
+      nlinarith
+  refine ⟨fun x => ψ x * Real.log (ψ x), hψ.mul (hψ.log fun x => (hpos x).ne'), ?_⟩
+  intro x hx
+  filter_upwards [lt_mem_nhds hx] with y hy
+  have : ψ y = y := by
+    simp only [ψ, Real.smoothTransition.one_of_one_le (show 1 ≤ 4 * y - 1 by linarith)]
+    ring
+  simp only [this]
+
+/-- Pointwise bound for the integrand of `R_m(n)` (DLMF 2.10.5), `m ≥ 2`. -/
+private lemma exists_norm_jLogJIntegrand_le {m : ℕ} (hm : 2 ≤ m) :
+    ∃ K : ℝ, ∀ x : ℝ, 0 < x → ‖(periodicBernoulli (2 * m) x - bernoulli (2 * m)) /
+      (2 * m * (2 * m - 1) * x ^ (2 * m - 1))‖ ≤ K * x ^ (-((2 * m - 1 : ℕ) : ℝ)) := by
+  obtain ⟨D, hD⟩ := DLMF.Zeta.exists_abs_periodicBernoulli_le (2 * m)
+  have hm' : (2 : ℝ) ≤ m := by exact_mod_cast hm
+  have hc : 0 < (2 * m * (2 * m - 1) : ℝ) := by nlinarith
+  refine ⟨(D + |(bernoulli (2 * m) : ℝ)|) / (2 * m * (2 * m - 1)), fun x hx0 => ?_⟩
+  have hxp : 0 < x ^ (2 * m - 1) := pow_pos hx0 _
+  rw [Real.rpow_neg hx0.le, Real.rpow_natCast, Real.norm_eq_abs, abs_div,
+    abs_of_pos (by positivity : (0 : ℝ) < 2 * m * (2 * m - 1) * x ^ (2 * m - 1))]
+  have hnum : |periodicBernoulli (2 * m) x - bernoulli (2 * m)| ≤
+      D + |(bernoulli (2 * m) : ℝ)| := (abs_sub _ _).trans (by linarith [hD x])
+  rw [div_le_iff₀ (by positivity)]
+  calc |periodicBernoulli (2 * m) x - bernoulli (2 * m)|
+      ≤ D + |(bernoulli (2 * m) : ℝ)| := hnum
+    _ = (D + |(bernoulli (2 * m) : ℝ)|) / (2 * m * (2 * m - 1)) * (x ^ (2 * m - 1))⁻¹ *
+        (2 * m * (2 * m - 1) * x ^ (2 * m - 1)) := by
+        have : (2 * m - 1 : ℝ) ≠ 0 := by linarith
+        field_simp
+
+/-- `((2m - 1 : ℕ) : ℝ) = 2m - 1` for `m ≥ 2`. -/
+private lemma two_mul_sub_one_cast {m : ℕ} (hm : 2 ≤ m) :
+    ((2 * m - 1 : ℕ) : ℝ) = 2 * m - 1 := by
+  rw [Nat.cast_sub (by omega)]; push_cast; ring
+
+/-- The integrand of `R_m(n)` (DLMF 2.10.5) is integrable on `(a, ∞)`, `a > 0`, `m ≥ 2`. -/
+private lemma integrableOn_jLogJIntegrand {m : ℕ} (hm : 2 ≤ m) {a : ℝ} (ha : 0 < a) :
+    IntegrableOn (fun x : ℝ => (periodicBernoulli (2 * m) x - bernoulli (2 * m)) /
+      (2 * m * (2 * m - 1) * x ^ (2 * m - 1))) (Ioi a) := by
+  obtain ⟨K, hK⟩ := exists_norm_jLogJIntegrand_le hm
+  have hm' : (2 : ℝ) ≤ m := by exact_mod_cast hm
+  have hi := (integrableOn_Ioi_rpow_of_lt (a := -((2 * m - 1 : ℕ) : ℝ))
+    (by rw [two_mul_sub_one_cast hm]; linarith) ha).const_mul K
+  refine hi.mono' ?_ ?_
+  · refine (((measurable_periodicBernoulli _).sub_const _).div ?_).aestronglyMeasurable
+    exact measurable_const.mul (measurable_id.pow_const _)
+  · exact (ae_restrict_iff' measurableSet_Ioi).2
+      (Eventually.of_forall fun x hx => hK x (ha.trans hx))
+
+/-- `R_m(n) → 0` as `n → ∞` (`m ≥ 2`). -/
+private lemma tendsto_jLogJRemainder {m : ℕ} (hm : 2 ≤ m) :
+    Tendsto (fun n : ℕ => jLogJRemainder m n) atTop (𝓝 0) := by
+  obtain ⟨K, hK⟩ := exists_norm_jLogJIntegrand_le hm
+  have hm' : (2 : ℝ) ≤ m := by exact_mod_cast hm
+  set a : ℝ := -((2 * m - 1 : ℕ) : ℝ) with ha
+  have ha1 : a < -1 := by rw [ha, two_mul_sub_one_cast hm]; linarith
+  have hlim : Tendsto (fun n : ℕ => K * (-((n : ℝ) ^ (a + 1)) / (a + 1))) atTop (𝓝 0) := by
+    have h := (tendsto_rpow_neg_atTop (y := -(a + 1)) (by linarith)).comp
+      tendsto_natCast_atTop_atTop
+    simp only [neg_neg] at h
+    have h' := (h.div_const (a + 1)).neg.const_mul K
+    simp only [neg_zero, zero_div, mul_zero] at h'
+    refine h'.congr fun n => ?_
+    simp only [Function.comp_apply]
+    ring
+  refine squeeze_zero_norm' ?_ hlim
+  filter_upwards [eventually_ge_atTop 1] with n hn
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
+  rw [jLogJRemainder, ← integral_Ioi_rpow_of_lt ha1 hn0, ← MeasureTheory.integral_const_mul]
+  refine norm_integral_le_of_norm_le ((integrableOn_Ioi_rpow_of_lt ha1 hn0).const_mul K) ?_
+  exact (ae_restrict_iff' measurableSet_Ioi).2
+    (Eventually.of_forall fun x hx => hK x (hn0.trans hx))
+
+/-- The `s`-th Euler–Maclaurin term for `x ln x` (`s = t + 2 ≥ 2`). -/
+private lemma jLogJ_em_term (t n : ℕ) (hn : 1 ≤ n) :
+    (bernoulli (2 * (t + 2)) : ℝ) / ((2 * (t + 2))! : ℕ) *
+      ((-1) ^ (2 * t + 1) * ((2 * t + 1)! : ℕ) * (n : ℝ) ^ (-1 - (2 * t + 1 : ℕ) : ℤ) -
+        (-1) ^ (2 * t + 1) * ((2 * t + 1)! : ℕ) * (1 : ℝ) ^ (-1 - (2 * t + 1 : ℕ) : ℤ)) =
+      (bernoulli (2 * (t + 2)) : ℝ) /
+          (2 * ((t + 2 : ℕ) : ℝ) * (2 * ((t + 2 : ℕ) : ℝ) - 1) * (2 * ((t + 2 : ℕ) : ℝ) - 2)) +
+        sumMulLogTerm (t + 2) n := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
+  have hodd : (-1 : ℝ) ^ (2 * t + 1) = -1 := by rw [pow_succ, pow_mul]; norm_num
+  have hz : (n : ℝ) ^ (-1 - (2 * t + 1 : ℕ) : ℤ) = ((n : ℝ) ^ (2 * t + 2))⁻¹ := by
+    rw [show (-1 - (2 * t + 1 : ℕ) : ℤ) = -((2 * t + 2 : ℕ) : ℤ) by push_cast; ring, zpow_neg,
+      zpow_natCast]
+  have hfac : ((2 * (t + 2))! : ℝ) =
+      (2 * t + 4) * (2 * t + 3) * (2 * t + 2) * ((2 * t + 1)! : ℕ) := by
+    rw [show 2 * (t + 2) = (2 * t + 1) + 1 + 1 + 1 by ring, Nat.factorial_succ,
+      Nat.factorial_succ, Nat.factorial_succ]
+    push_cast; ring
+  rw [sumMulLogTerm, hodd, hz, one_zpow, show 2 * (t + 2) - 2 = 2 * t + 2 by omega]
+  push_cast
+  rw [hfac]
+  have hf0 : ((2 * t + 1)! : ℝ) ≠ 0 := by positivity
+  have ht : (0 : ℝ) ≤ t := t.cast_nonneg
+  have h1 : 2 * ((t : ℝ) + 2) - 1 ≠ 0 := by linarith
+  have h2 : 2 * ((t : ℝ) + 2) - 2 ≠ 0 := by linarith
+  have h3 : (2 * (t : ℝ) + 4) * (2 * t + 3) * (2 * t + 2) ≠ 0 := by positivity
+  have h4 : (1 : ℝ) + t ≠ 0 := by positivity
+  generalize (bernoulli (2 * (t + 2)) : ℝ) = B
+  generalize ((2 * t + 1)! : ℝ) = F at hf0 ⊢
+  have hN : (n : ℝ) ^ (2 * t + 2) ≠ 0 := by positivity
+  generalize (n : ℝ) ^ (2 * t + 2) = N at hN ⊢
+  rw [show 2 * ((t : ℝ) + 2) * (2 * (t + 2) - 1) * (2 * (t + 2) - 2) =
+    (2 * t + 4) * (2 * t + 3) * (2 * t + 2) by ring]
+  field_simp
+  ring
+
+/-- The constant of the exact form of 2.10.4 before its identification with `ln A`. -/
+private noncomputable def jLogJConst (m : ℕ) : ℝ :=
+  1 / 4 + ∑ s ∈ Ico 2 m, (bernoulli (2 * s) : ℝ) / (2 * s * (2 * s - 1) * (2 * s - 2)) -
+    jLogJRemainder m 1
+
+/-- Euler–Maclaurin for `∑ j ln j`, with an unidentified constant. -/
+private lemma jLogJSum_eq_const {m n : ℕ} (hm : 2 ≤ m) (hn : 1 ≤ n) :
+    jLogJSum n = (n : ℝ) ^ 2 / 2 * Real.log n - (n : ℝ) ^ 2 / 4 + n / 2 * Real.log n +
+      Real.log n / 12 + jLogJConst m +
+      ∑ s ∈ Ico 2 m, sumMulLogTerm s n + jLogJRemainder m n := by
+  obtain ⟨f, hf, hfeq⟩ := exists_contDiff_eq_mul_log
+  set g : ℝ → ℝ := fun x => x * Real.log x with hg
+  have hfg : ∀ x : ℝ, 1 ≤ x → f x = g x := fun x hx => (hfeq x (by linarith)).eq_of_nhds
+  have hfgk : ∀ (k : ℕ) (x : ℝ), 1 ≤ x → iteratedDeriv k f x = iteratedDeriv k g x :=
+    fun k x hx => (hfeq x (by linarith)).iteratedDeriv_eq k
+  have hf' : ContDiff ℝ (2 * m : ℕ) f := contDiff_infty.1 hf _
+  have h := euler_maclaurin (m := m) (by omega) hf' 1 (n - 1)
+  have hN : ((1 : ℤ) : ℝ) + ((n - 1 : ℕ) : ℝ) = n := by
+    rw [Nat.cast_sub hn]; push_cast; ring
+  rw [hN] at h
+  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast hn
+  -- the sum
+  have hS : ∑ k ∈ range (n - 1 + 1), f (((1 : ℤ) : ℝ) + k) = jLogJSum n := by
+    rw [Nat.sub_add_cancel hn, jLogJSum, ← Finset.Ico_add_one_right_eq_Icc,
+      Finset.sum_Ico_eq_sum_range,
+      Nat.add_sub_cancel]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [hfg _ (by push_cast; linarith [(k.cast_nonneg : (0 : ℝ) ≤ k)])]
+    simp only [hg]; push_cast; ring
+  -- the integral
+  have hI : ∫ x in ((1 : ℤ) : ℝ)..n, f x = (n : ℝ) ^ 2 / 2 * Real.log n - (n : ℝ) ^ 2 / 4 +
+      1 / 4 := by
+    push_cast
+    rw [intervalIntegral.integral_congr (g := g) fun x hx => hfg x (by
+      rw [uIcc_of_le hn1] at hx; exact hx.1)]
+    rw [intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (f := fun x : ℝ => x ^ 2 / 2 * Real.log x - x ^ 2 / 4)]
+    · simp
+    · intro x hx
+      rw [uIcc_of_le hn1] at hx
+      have hx0 : 0 < x := by linarith [hx.1]
+      have := (((hasDerivAt_pow 2 x).div_const 2).mul (Real.hasDerivAt_log hx0.ne')).sub
+        ((hasDerivAt_pow 2 x).div_const 4)
+      convert this using 1
+      simp only [hg]; field_simp; ring
+    · refine ContinuousOn.intervalIntegrable fun x hx => ?_
+      rw [uIcc_of_le hn1] at hx
+      exact (continuousAt_id.mul (Real.continuousAt_log (by linarith [hx.1]))).continuousWithinAt
+  simp only [Int.cast_one] at h hS hI
+  -- the Bernoulli terms
+  have hB : ∑ s ∈ Ico 1 m, (bernoulli (2 * s) : ℝ) / ((2 * s)! : ℕ) *
+      (iteratedDeriv (2 * s - 1) f n - iteratedDeriv (2 * s - 1) f 1) =
+      Real.log n / 12 + ∑ s ∈ Ico 2 m, ((bernoulli (2 * s) : ℝ) /
+        (2 * s * (2 * s - 1) * (2 * s - 2)) + sumMulLogTerm s n) := by
+    rw [Finset.sum_eq_sum_Ico_succ_bot (by omega : 1 < m)]
+    congr 1
+    · rw [hfgk _ _ hn1, hfgk _ _ le_rfl, show 2 * 1 - 1 = 1 from rfl,
+        iteratedDeriv_one_mul_log (by linarith), iteratedDeriv_one_mul_log one_pos]
+      simp [bernoulli_two]
+      ring
+    · refine Finset.sum_congr rfl fun s hs => ?_
+      obtain ⟨t, rfl⟩ : ∃ t, s = t + 2 := ⟨s - 2, by simp at hs; omega⟩
+      rw [hfgk _ _ hn1, hfgk _ _ le_rfl, show 2 * (t + 2) - 1 = (2 * t + 1) + 2 by omega,
+        iteratedDeriv_mul_log (by linarith), iteratedDeriv_mul_log one_pos]
+      exact jLogJ_em_term t n hn
+  -- the remainder
+  have hR : ∫ x in (1 : ℝ)..n, ((bernoulli (2 * m) : ℝ) - periodicBernoulli (2 * m) x) /
+      ((2 * m)! : ℕ) * iteratedDeriv (2 * m) f x = jLogJRemainder m n - jLogJRemainder m 1 := by
+    rw [intervalIntegral.integral_congr (g := fun x => -((periodicBernoulli (2 * m) x -
+      bernoulli (2 * m)) / (2 * m * (2 * m - 1) * x ^ (2 * m - 1))))]
+    · rw [intervalIntegral.integral_neg, ← intervalIntegral.integral_Ioi_sub_Ioi
+        (integrableOn_jLogJIntegrand hm one_pos) hn1, jLogJRemainder, jLogJRemainder,
+        Nat.cast_one]
+      ring
+    · intro x hx
+      rw [uIcc_of_le hn1] at hx
+      have hx0 : 0 < x := by linarith [hx.1]
+      obtain ⟨t, rfl⟩ : ∃ t, m = t + 2 := ⟨m - 2, by omega⟩
+      simp only
+      rw [hfgk _ _ hx.1, show 2 * (t + 2) = (2 * t + 2) + 2 by ring,
+        iteratedDeriv_mul_log hx0]
+      have hz : x ^ (-1 - (2 * t + 2 : ℕ) : ℤ) = (x ^ (2 * t + 2 + 2 - 1))⁻¹ := by
+        rw [show (-1 - (2 * t + 2 : ℕ) : ℤ) = -((2 * t + 2 + 2 - 1 : ℕ) : ℤ) by
+          push_cast [show 2 * t + 2 + 2 - 1 = 2 * t + 3 by omega]; ring, zpow_neg, zpow_natCast]
+      have hev : (-1 : ℝ) ^ (2 * t + 2) = 1 := by
+        rw [show 2 * t + 2 = 2 * (t + 1) by ring, pow_mul]; norm_num
+      have hfac : (((2 * t + 2 + 2)! : ℕ) : ℝ) =
+          (2 * t + 4) * (2 * t + 3) * ((2 * t + 2)! : ℕ) := by
+        rw [Nat.factorial_succ, Nat.factorial_succ]; push_cast; ring
+      rw [hz, hev, hfac]
+      have hf0 : (((2 * t + 2)! : ℕ) : ℝ) ≠ 0 := by positivity
+      have hxp : x ^ (2 * t + 2 + 2 - 1) ≠ 0 := by positivity
+      generalize (((2 * t + 2)! : ℕ) : ℝ) = F at hf0 ⊢
+      generalize x ^ (2 * t + 2 + 2 - 1) = X at hxp ⊢
+      push_cast
+      have ht : (0 : ℝ) ≤ t := t.cast_nonneg
+      have h3 : (2 * (t : ℝ) + 4) * (2 * t + 3) ≠ 0 := by positivity
+      rw [show 2 * ((t : ℝ) + 2) * (2 * (t + 2) - 1) = (2 * t + 4) * (2 * t + 3) by ring]
+      field_simp
+      ring
+  rw [hS, hI, hB, hR] at h
+  rw [h, jLogJConst, hfg 1 le_rfl, hfg n hn1, Finset.sum_add_distrib]
+  simp only [hg, Real.log_one, mul_zero]
+  ring
+
+/-- The constant of the exact form is `ln A`. -/
+private lemma jLogJConst_eq {m : ℕ} (hm : 2 ≤ m) :
+    jLogJConst m = Real.log DLMF.Gamma.glaisherKinkelin := by
+  refine tendsto_nhds_unique ?_ tendsto_jLogJSum_sub
+  have hT : Tendsto (fun n : ℕ => ∑ s ∈ Ico 2 m, sumMulLogTerm s n) atTop (𝓝 0) := by
+    rw [← Finset.sum_const_zero (s := Ico 2 m) (M := ℝ)]
+    refine tendsto_finsetSum _ fun s hs => ?_
+    have hs2 : 2 ≤ s := (Finset.mem_Ico.1 hs).1
+    unfold sumMulLogTerm
+    exact tendsto_const_nhds.div_atTop ((tendsto_pow_atTop (by omega)).comp
+      tendsto_natCast_atTop_atTop)
+  have h := (tendsto_const_nhds (x := jLogJConst m)).add hT |>.add (tendsto_jLogJRemainder hm)
+  rw [add_zero, add_zero] at h
+  refine h.congr' ?_
+  filter_upwards [eventually_ge_atTop 1] with n hn
+  rw [jLogJSum_eq_const hm hn]
+  ring
+
+/-- DLMF 2.10.4 (with 2.10.3, 2.10.5 and 2.10.6): for `m ≥ 2` and `n ≥ 1`,
+`S(n) = ½n² ln n - ¼n² + ½n ln n + 1/12 ln n + C
+  + ∑_{s=2}^{m-1} (-B_{2s})/(2s(2s-1)(2s-2)) n^{-(2s-2)} + R_m(n)`
+with `C = ln A`, `A` the Glaisher–Kinkelin constant. -/
+@[dlmf 2.10.E4, dlmf 2.10.E5]
+theorem jLogJSum_eq {m n : ℕ} (hm : 2 ≤ m) (hn : 1 ≤ n) :
+    jLogJSum n = (n : ℝ) ^ 2 / 2 * Real.log n - (n : ℝ) ^ 2 / 4 + n / 2 * Real.log n +
+      Real.log n / 12 + Real.log DLMF.Gamma.glaisherKinkelin +
+      ∑ s ∈ Ico 2 m, sumMulLogTerm s n + jLogJRemainder m n := by
+  rw [jLogJSum_eq_const hm hn, jLogJConst_eq hm]
+
+/-- `|B̃_{2m}(x)| ≤ |B_{2m}|` (DLMF 24.9.1). -/
+private lemma abs_periodicBernoulli_two_mul_le {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
+    |periodicBernoulli (2 * m) x| ≤ |(bernoulli (2 * m) : ℝ)| := by
+  rw [periodicBernoulli]
+  rcases (Int.fract_nonneg x).eq_or_lt with h | h
+  · rw [← h, bernoulliFun_eval_zero]
+  · exact (DLMF.BernoulliEuler.abs_bernoulliFun_two_mul_lt hm h (Int.fract_lt_one x)).le
+
+/-- `R_m(n)` has the sign of `-B_{2m}`. -/
+private lemma jLogJRemainder_mul_neg_bernoulli_nonneg {m : ℕ} (hm : 2 ≤ m) (n : ℕ) :
+    0 ≤ jLogJRemainder m n * -(bernoulli (2 * m) : ℝ) := by
+  have hm' : (2 : ℝ) ≤ m := by exact_mod_cast hm
+  rw [jLogJRemainder, ← MeasureTheory.integral_mul_const]
+  refine setIntegral_nonneg measurableSet_Ioi fun x hx => ?_
+  have hx0 : (0 : ℝ) < x := lt_of_le_of_lt (Nat.cast_nonneg n) hx
+  have hb := abs_periodicBernoulli_two_mul_le (m := m) (by omega) x
+  have hden : 0 < (2 * m * (2 * m - 1) * x ^ (2 * m - 1) : ℝ) := by
+    have : 0 < x ^ (2 * m - 1) := pow_pos hx0 _
+    have : (0 : ℝ) < 2 * m * (2 * m - 1) := by nlinarith
+    positivity
+  rw [div_mul_eq_mul_div]
+  refine div_nonneg ?_ hden.le
+  set B : ℝ := (bernoulli (2 * m) : ℝ)
+  set P : ℝ := periodicBernoulli (2 * m) x
+  have h1 : P * B ≤ |P| * |B| := by rw [← abs_mul]; exact le_abs_self _
+  have h2 : |P| * |B| ≤ |B| * |B| := mul_le_mul_of_nonneg_right hb (abs_nonneg _)
+  have h3 : |B| * |B| = B * B := abs_mul_abs_self B
+  nlinarith
+
+/-- The `s = m` term of 2.10.4 is `-B_{2m}` times a positive number. -/
+private lemma sumMulLogTerm_eq {m n : ℕ} (hm : 2 ≤ m) (hn : 1 ≤ n) :
+    ∃ p : ℝ, 0 < p ∧ sumMulLogTerm m n = -(bernoulli (2 * m) : ℝ) * p := by
+  have hm' : (2 : ℝ) ≤ m := by exact_mod_cast hm
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
+  refine ⟨1 / (2 * m * (2 * m - 1) * (2 * m - 2)) / (n : ℝ) ^ (2 * m - 2), ?_, ?_⟩
+  · have : (0 : ℝ) < 2 * m * (2 * m - 1) * (2 * m - 2) := by
+      have : (0 : ℝ) < 2 * m - 2 := by linarith
+      have : (0 : ℝ) < 2 * m * (2 * m - 1) := by nlinarith
+      positivity
+    positivity
+  · rw [sumMulLogTerm]; ring
+
+/-- DLMF §2.10(i) (remainder of 2.10.4): since `B̃_{2m}(x) - B_{2m}` has constant sign
+`(-1)^m`, `R_m(n)` has the sign of the `s = m` term of 2.10.4 and is bounded in absolute value
+by it (`m ≥ 2`, `n ≥ 1`). -/
+@[dlmf 2.10.i]
+theorem jLogJRemainder_bound {m n : ℕ} (hm : 2 ≤ m) (hn : 1 ≤ n) :
+    0 ≤ jLogJRemainder m n * sumMulLogTerm m n ∧ |jLogJRemainder m n| ≤ |sumMulLogTerm m n| := by
+  have hdiff : jLogJRemainder m n = sumMulLogTerm m n + jLogJRemainder (m + 1) n := by
+    have h1 := jLogJSum_eq hm hn
+    have h2 := jLogJSum_eq (m := m + 1) (by omega) hn
+    rw [Finset.sum_Ico_succ_top (by omega)] at h2
+    linarith
+  obtain ⟨p, hp, hT⟩ := sumMulLogTerm_eq hm hn
+  have hR := jLogJRemainder_mul_neg_bernoulli_nonneg hm n
+  have hR' := jLogJRemainder_mul_neg_bernoulli_nonneg (m := m + 1) (by omega) n
+  have hs1 := (DLMF.BernoulliEuler.bernoulli_two_mul_add_one_eq_zero_and_sign
+    (n := m) (by omega)).2
+  have hs2 := (DLMF.BernoulliEuler.bernoulli_two_mul_add_one_eq_zero_and_sign
+    (n := m + 1) (by omega)).2
+  have hs1' : (0 : ℝ) < (-1) ^ (m + 1) * (bernoulli (2 * m) : ℝ) := by exact_mod_cast hs1
+  have hs2' : (0 : ℝ) < (-1) ^ (m + 1 + 1) * (bernoulli (2 * (m + 1)) : ℝ) := by
+    exact_mod_cast hs2
+  rw [pow_succ] at hs2'
+  set u : ℝ := -(bernoulli (2 * m) : ℝ)
+  set v : ℝ := -(bernoulli (2 * (m + 1)) : ℝ)
+  set R := jLogJRemainder m n
+  set R' := jLogJRemainder (m + 1) n
+  rw [hT] at hdiff ⊢
+  refine ⟨by nlinarith [mul_nonneg hR hp.le], ?_⟩
+  rcases neg_one_pow_eq_or ℝ (m + 1) with h | h <;> rw [h] at hs1' hs2'
+  · -- `B_{2m} > 0`, `u < 0`, `v > 0`
+    have hu : u < 0 := by simp only [u]; linarith
+    have hv : 0 < v := by simp only [v]; linarith
+    have hR0 : R ≤ 0 := by nlinarith
+    have hR'0 : 0 ≤ R' := by nlinarith
+    rw [abs_of_nonpos hR0, abs_of_nonpos (by nlinarith)]
+    linarith
+  · have hu : 0 < u := by simp only [u]; linarith
+    have hv : v < 0 := by simp only [v]; linarith
+    have hR0 : 0 ≤ R := by nlinarith
+    have hR'0 : R' ≤ 0 := by nlinarith
+    rw [abs_of_nonneg hR0, abs_of_nonneg (by nlinarith)]
+    linarith
 
 /-- DLMF 2.10.6: the constant of 2.10.4 is
 `C = (γ + ln(2π))/12 - ζ'(2)/(2π²) = 1/12 - ζ'(-1)`; `e^C` is Glaisher's constant. -/
@@ -229,7 +580,7 @@ private theorem harmonic_remainder_eq_integral (m n : ℕ) (hn : 1 ≤ n) :
       ∑ s ∈ Ico 1 m, (bernoulli (2 * s) : ℝ) / (2 * s) / (n : ℝ) ^ (2 * s)) =
       -∫ t in Ioi (0 : ℝ), Real.exp (-(n : ℝ) * t) *
         (t ^ 1 * (DLMF.Gamma.binetBeta t / t - DLMF.Gamma.binetPoly (m - 1) t)) := by
-  have hd := Real.digamma_nat_add_one (n - 1)
+  have hd := Gamma.Real.digamma_nat_add_one (n - 1)
   rw [← Nat.cast_add_one, Nat.sub_add_cancel hn] at hd
   have hs : Finset.Ico 1 m = Finset.Icc 1 (m - 1) := by
     ext k
@@ -360,7 +711,8 @@ theorem harmonic_asymptotic :
   have hr := (hR (N + 1) (by omega)).trans (invScale_isBigO_of_le hNM)
   have htail : (fun n => ∑ s ∈ Ico N M, invPowScaleReal s n * harmonicAsymptoticCoeff s) =O[atTop]
       invPowScaleReal N := by
-    have h := IsBigO.sum (s := Ico N M) (A := fun s n => invPowScaleReal s n * harmonicAsymptoticCoeff s)
+    have h := IsBigO.sum (s := Ico N M)
+        (A := fun s n => invPowScaleReal s n * harmonicAsymptoticCoeff s)
       fun s hs => ((invScale_isBigO_of_le (mem_Ico.mp hs).1).const_mul_left
         (harmonicAsymptoticCoeff s)).congr_left (fun n => mul_comm _ _)
     exact h.congr_left fun n => by simp only [Finset.sum_apply]

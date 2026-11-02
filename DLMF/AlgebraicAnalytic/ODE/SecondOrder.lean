@@ -73,7 +73,8 @@ theorem IsLinODE2SolOn.analyticOnNhd {w : ℂ → ℂ} (hD : IsOpen D) (hw : IsL
 
 /-- Linear combinations: if `w` solves the equation with right side `r₁` and `v` with `r₂`, then
 `A w + B v` solves it with right side `A r₁ + B r₂`. -/
-theorem IsLinODE2SolOn.linear_combination {r₁ r₂ w v : ℂ → ℂ} (hD : IsOpen D) (hw : IsLinODE2SolOn f g r₁ w D)
+theorem IsLinODE2SolOn.linear_combination {r₁ r₂ w v : ℂ → ℂ} (hD : IsOpen D)
+    (hw : IsLinODE2SolOn f g r₁ w D)
     (hv : IsLinODE2SolOn f g r₂ v D) (A B : ℂ) (hr : ∀ z ∈ D, r z = A * r₁ z + B * r₂ z) :
     IsLinODE2SolOn f g r (fun z => A * w z + B * v z) D := by
   intro z hz
@@ -96,7 +97,8 @@ lemma isLinODE2SolOn_zero : IsLinODE2SolOn f g 0 (fun _ => 0) D := fun z _ => by
   exact hasDerivAt_const z 0
 
 /-- The derivative of a linear combination of solutions, at a point of the open set `D`. -/
-private lemma deriv_const_mul_add_const_mul_of_isLinODE2SolOn {w v : ℂ → ℂ} {r₁ r₂ : ℂ → ℂ} (hw : IsLinODE2SolOn f g r₁ w D)
+private lemma deriv_const_mul_add_const_mul_of_isLinODE2SolOn {w v : ℂ → ℂ} {r₁ r₂ : ℂ → ℂ}
+    (hw : IsLinODE2SolOn f g r₁ w D)
     (hv : IsLinODE2SolOn f g r₂ v D) (A B : ℂ) {z : ℂ} (hz : z ∈ D) :
     deriv (fun y => A * w y + B * v y) z = A * deriv w z + B * deriv v z :=
   (((hw z hz).1.hasDerivAt.const_mul A).add ((hv z hz).1.hasDerivAt.const_mul B)).deriv
@@ -276,7 +278,8 @@ theorem exists_isFundamentalPair (hD : IsOpen D) (hsc : IsSimplyConnected D)
     hf hg h₁ h₂ hz₀ h10 h11 h20 h21⟩
 
 /-- The derivative of the Wronskian of two solutions of 1.13.1: `𝒲' = -f 𝒲`. -/
-private lemma hasDerivAt_wronskian_of_isLinODE2SolOn {w₁ w₂ : ℂ → ℂ} (h₁ : IsLinODE2SolOn f g 0 w₁ D)
+private lemma hasDerivAt_wronskian_of_isLinODE2SolOn {w₁ w₂ : ℂ → ℂ}
+    (h₁ : IsLinODE2SolOn f g 0 w₁ D)
     (h₂ : IsLinODE2SolOn f g 0 w₂ D) {z : ℂ} (hz : z ∈ D) :
     HasDerivAt (ODE.wronskian w₁ w₂) (-f z * ODE.wronskian w₁ w₂ z) z := by
   have := (((h₁ z hz).1.hasDerivAt.mul (h₂ z hz).2)).sub
@@ -315,7 +318,8 @@ theorem wronskian_const_of_f_eq_zero (hD : IsOpen D) (hD' : IsPreconnected D)
 
 /-- The data of a linear combination of solutions at a point vanish only trivially if the
 Wronskian there does not vanish. -/
-private lemma eq_zero_of_wronskian_ne_zero {w₁ w₂ : ℂ → ℂ} {A B z : ℂ} (hW : ODE.wronskian w₁ w₂ z ≠ 0)
+private lemma eq_zero_of_wronskian_ne_zero {w₁ w₂ : ℂ → ℂ} {A B z : ℂ}
+    (hW : ODE.wronskian w₁ w₂ z ≠ 0)
     (h0 : A * w₁ z + B * w₂ z = 0) (h1 : A * deriv w₁ z + B * deriv w₂ z = 0) :
     A = 0 ∧ B = 0 := by
   unfold ODE.wronskian at hW
@@ -427,7 +431,8 @@ theorem isLinODE2SolOn_inhom_eq (hD : IsOpen D) {w₀ w₁ w₂ w : ℂ → ℂ}
 
 /-- The variation-of-parameters solution `w₂ P - w₁ Q` (with `P' = w₁ r/𝒲`, `Q' = w₂ r/𝒲`)
 has derivative `w₂' P - w₁' Q`. -/
-private lemma hasDerivAt_variationOfParameters {w₁ w₂ P Q : ℂ → ℂ} {z : ℂ} (h₁ : DifferentiableAt ℂ w₁ z)
+private lemma hasDerivAt_variationOfParameters {w₁ w₂ P Q : ℂ → ℂ} {z : ℂ}
+    (h₁ : DifferentiableAt ℂ w₁ z)
     (h₂ : DifferentiableAt ℂ w₂ z) (hP : HasDerivAt P (w₁ z * r z / ODE.wronskian w₁ w₂ z) z)
     (hQ : HasDerivAt Q (w₂ z * r z / ODE.wronskian w₁ w₂ z) z) :
     HasDerivAt (fun y => w₂ y * P y - w₁ y * Q y) (deriv w₂ z * P z - deriv w₁ z * Q z) z := by

@@ -157,14 +157,16 @@ theorem integral_Ioi_symEllIntRD {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0
     simp [mul_re]
   have hnonpos : ∀ t ∈ Ioi z, -(1 / 6) * (symEllIntRD x y t).re ≤ 0 := by
     intro t ht
-    exact mul_nonpos_of_nonpos_of_nonneg (by norm_num) (symEllIntRD_real_nonneg hx hy (hz.trans ht)).2
+    exact mul_nonpos_of_nonpos_of_nonneg (by norm_num)
+        (symEllIntRD_real_nonneg hx hy (hz.trans ht)).2
   have hlim := (Complex.continuous_re.tendsto (0 : ℂ)).comp (tendsto_symEllIntRF_atTop hx hy)
   simp only [zero_re, Function.comp_def] at hlim
   have H := integral_Ioi_of_hasDerivAt_of_nonpos' hderiv hnonpos hlim
   rw [integral_const_mul, zero_sub] at H
   have H' : ∫ t in Ioi z, (symEllIntRD x y t).re = 6 * (symEllIntRF x y z).re := by
     linarith
-  rw [setIntegral_congr_fun measurableSet_Ioi (fun t ht => (symEllIntRD_real_nonneg hx hy (hz.trans ht)).1),
+  rw [setIntegral_congr_fun measurableSet_Ioi
+      (fun t ht => (symEllIntRD_real_nonneg hx hy (hz.trans ht)).1),
     integral_complex_ofReal, H', ofReal_mul, ofReal_ofNat]
   congr 1
   apply Complex.ext
@@ -219,7 +221,8 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
       intro i
       have hi := e.surjective i
       obtain ⟨j, rfl⟩ := hi
-      have he : Dirichlet.mergeNodes (2 : Fin 4) 3 Z w (e j) = ![(x : ℂ), y, w] j := congrFun (hnodes w) j
+      have he : Dirichlet.mergeNodes (2 : Fin 4) 3 Z w (e j) = ![(x : ℂ), y, w] j :=
+          congrFun (hnodes w) j
       change 0 < (Dirichlet.mergeNodes (2 : Fin 4) 3 Z w (e j)).re
       rw [he]
       fin_cases j <;> assumption
@@ -242,7 +245,8 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
     rw [← Carlson.regCarlsonRIntegral, ← Carlson.regCarlsonR_eq_regCarlsonRIntegral _ hbeta
       hdom, ← heq, symEllIntRD_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx)
       (ofReal_mem_slitPlane.mpr hy) (Or.inl hw), symEllIntR_of_mem _ _
-      (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy) (Or.inl hw)),
+      (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx)
+          (ofReal_mem_slitPlane.mpr hy) (Or.inl hw)),
       Carlson.carlsonR]
     simp only [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two]
     norm_num

@@ -92,7 +92,8 @@ def IsSymplecticBlocks (A B C D : Matrix ι ι ℤ) : Prop :=
   IsSymplectic (Matrix.fromBlocks A B C D)
 
 omit [Fintype ι] in
-/-- Identity under the stated parameter and domain assumptions: `symplecticJ ι R = -Matrix.J ι R`. -/
+/-- Identity under the stated parameter and domain assumptions: `symplecticJ ι R = -Matrix.J ι R`.
+-/
 theorem symplecticJ_eq_neg {R : Type*} [CommRing R] : symplecticJ ι R = -Matrix.J ι R := by
   simp [symplecticJ, Matrix.J, Matrix.fromBlocks_neg]
 
@@ -160,14 +161,19 @@ private lemma sub_conjTranspose_eq_two_I_smul_im {Ω : Matrix ι ι ℂ} (hΩ : 
 
 omit [Fintype ι] [DecidableEq ι] in
 /-- Integer matrices are fixed by `ᴴ` up to transposition. -/
-private lemma conjTranspose_intMatrixToComplex (A : Matrix ι ι ℤ) : (intMatrixToComplex A)ᴴ = (intMatrixToComplex A)ᵀ := by
+private lemma conjTranspose_intMatrixToComplex (A : Matrix ι ι ℤ) : (intMatrixToComplex A)ᴴ =
+    (intMatrixToComplex A)ᵀ := by
   ext i j; simp [conjTranspose_apply]
 
 /-- The block relations of an integer symplectic matrix, over `ℂ`. -/
-private lemma isSymplecticBlocks_complex_relations {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D) :
-    (intMatrixToComplex A)ᵀ * intMatrixToComplex C = (intMatrixToComplex C)ᵀ * intMatrixToComplex A ∧
-      (intMatrixToComplex B)ᵀ * intMatrixToComplex D = (intMatrixToComplex D)ᵀ * intMatrixToComplex B ∧
-      (intMatrixToComplex A)ᵀ * intMatrixToComplex D - (intMatrixToComplex C)ᵀ * intMatrixToComplex B = 1 := by
+private lemma isSymplecticBlocks_complex_relations {A B C D : Matrix ι ι ℤ}
+    (hΓ : IsSymplecticBlocks A B C D) :
+    (intMatrixToComplex A)ᵀ * intMatrixToComplex C = (intMatrixToComplex C)ᵀ *
+        intMatrixToComplex A ∧
+      (intMatrixToComplex B)ᵀ * intMatrixToComplex D = (intMatrixToComplex D)ᵀ *
+          intMatrixToComplex B ∧
+      (intMatrixToComplex A)ᵀ * intMatrixToComplex D - (intMatrixToComplex C)ᵀ *
+          intMatrixToComplex B = 1 := by
   obtain ⟨h1, h2, h3⟩ := SymplecticGroup.fromBlocks_mem_iff.mp
     ((isSymplectic_iff_mem_symplecticGroup _).mp hΓ)
   have e : ∀ X : Matrix ι ι ℤ, intMatrixToComplex X = X.map (Int.castRingHom ℂ) := fun X => by
@@ -190,7 +196,8 @@ invertible there (DLMF §21.5(i), implicit in 21.5.4). -/
 theorem modular_mem_siegel {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D)
     {Ω : Matrix ι ι ℂ} (hΩ : Ω ∈ siegelUpperHalfSpace ι) :
     IsUnit (intMatrixToComplex C * Ω + intMatrixToComplex D).det ∧
-      (intMatrixToComplex A * Ω + intMatrixToComplex B) * (intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ ∈
+      (intMatrixToComplex A * Ω + intMatrixToComplex B) *
+          (intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ ∈
         siegelUpperHalfSpace ι := by
   obtain ⟨m1, m2, m3⟩ := isSymplecticBlocks_complex_relations hΓ
   set a := intMatrixToComplex A
@@ -215,9 +222,11 @@ theorem modular_mem_siegel {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlock
   have hMt : Mᵀ = Ω * cᵀ + dᵀ := by rw [hM, transpose_add, transpose_mul, hΩ.1]
   have hNt : Nᵀ = Ω * aᵀ + bᵀ := by rw [hN, transpose_add, transpose_mul, hΩ.1]
   have hMh : Mᴴ = Ωᴴ * cᵀ + dᵀ := by
-    rw [hM, conjTranspose_add, conjTranspose_mul, conjTranspose_intMatrixToComplex, conjTranspose_intMatrixToComplex]
+    rw [hM, conjTranspose_add, conjTranspose_mul, conjTranspose_intMatrixToComplex,
+        conjTranspose_intMatrixToComplex]
   have hNh : Nᴴ = Ωᴴ * aᵀ + bᵀ := by
-    rw [hN, conjTranspose_add, conjTranspose_mul, conjTranspose_intMatrixToComplex, conjTranspose_intMatrixToComplex]
+    rw [hN, conjTranspose_add, conjTranspose_mul, conjTranspose_intMatrixToComplex,
+        conjTranspose_intMatrixToComplex]
   have hT : Mᵀ * N = Nᵀ * M := by
     have := key Ω; rw [sub_self, ← hMt, ← hNt] at this; exact sub_eq_zero.mp this
   have hH : Mᴴ * N - Nᴴ * M = (2 * I) • Y.map ofReal := by
@@ -304,7 +313,8 @@ private lemma convex_siegelUpperHalfSpace : Convex ℝ (siegelUpperHalfSpace ι)
     exact (h₁.2.smul ha).add (h₂.2.smul hb)
 
 /-- `iI` lies in the Siegel upper half-space. -/
-private lemma I_smul_one_mem_siegelUpperHalfSpace : (I • (1 : Matrix ι ι ℂ)) ∈ siegelUpperHalfSpace ι := by
+private lemma I_smul_one_mem_siegelUpperHalfSpace : (I • (1 : Matrix ι ι ℂ)) ∈
+    siegelUpperHalfSpace ι := by
   refine ⟨by simp, ?_⟩
   have e : (I • (1 : Matrix ι ι ℂ)).map Complex.im = 1 := by
     ext i j; by_cases h : i = j <;> simp [h, Matrix.one_apply]
@@ -314,9 +324,11 @@ private lemma I_smul_one_mem_siegelUpperHalfSpace : (I • (1 : Matrix ι ι ℂ
 branch of `√det[CΩ+D]` in 21.5.4 and 21.5.9). -/
 @[dlmf 21.5.i "existence of a continuous branch of the square root of det(CΩ+D)"]
 theorem exists_continuous_sqrt_det {C D : Matrix ι ι ℤ}
-    (hdet : ∀ Ω ∈ siegelUpperHalfSpace ι, (intMatrixToComplex C * Ω + intMatrixToComplex D).det ≠ 0) :
+    (hdet : ∀ Ω ∈ siegelUpperHalfSpace ι,
+        (intMatrixToComplex C * Ω + intMatrixToComplex D).det ≠ 0) :
     ∃ s : Matrix ι ι ℂ → ℂ, ContinuousOn s (siegelUpperHalfSpace ι) ∧
-      ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (intMatrixToComplex C * Ω + intMatrixToComplex D).det := by
+      ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 =
+          (intMatrixToComplex C * Ω + intMatrixToComplex D).det := by
   classical
   set S := siegelUpperHalfSpace ι
   have : LocallyConvexSpace ℝ (Matrix ι ι ℂ) :=
@@ -324,7 +336,8 @@ theorem exists_continuous_sqrt_det {C D : Matrix ι ι ℤ}
   have hne : S.Nonempty := ⟨_, I_smul_one_mem_siegelUpperHalfSpace⟩
   have : ContractibleSpace S := convex_siegelUpperHalfSpace.contractibleSpace hne
   have : LocallyPathConnectedSpace S := convex_siegelUpperHalfSpace.locallyPathConnectedSpace
-  let f : C(S, {z : ℂ // z ≠ 0}) := ⟨fun Ω => ⟨(intMatrixToComplex C * Ω.1 + intMatrixToComplex D).det,
+  let f : C(S, {z : ℂ // z ≠ 0}) :=
+      ⟨fun Ω => ⟨(intMatrixToComplex C * Ω.1 + intMatrixToComplex D).det,
     hdet Ω.1 Ω.2⟩, by
       refine Continuous.subtype_mk ?_ _
       exact (Continuous.matrix_det ((continuous_const.matrix_mul continuous_subtype_val).add
@@ -361,11 +374,14 @@ theta-group condition is added and the square root is a continuous branch; the g
 theorem riemannTheta_modular {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D)
     (hCD : ∀ i, Even ((C * Dᵀ) i i)) (hAB : ∀ i, Even ((A * Bᵀ) i i))
     {s : Matrix ι ι ℂ → ℂ} (hs : ContinuousOn s (siegelUpperHalfSpace ι))
-    (hs2 : ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (intMatrixToComplex C * Ω + intMatrixToComplex D).det) :
+    (hs2 : ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 =
+        (intMatrixToComplex C * Ω + intMatrixToComplex D).det) :
     ∃ ξ : ℂ, ξ ^ 8 = 1 ∧ ∀ Ω ∈ siegelUpperHalfSpace ι, ∀ z : ι → ℂ,
       riemannTheta ((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ᵀ *ᵥ z)
-          ((intMatrixToComplex A * Ω + intMatrixToComplex B) * (intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹) =
-        ξ * s Ω * cexp (π * I * (z ⬝ᵥ (((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ * intMatrixToComplex C) *ᵥ
+          ((intMatrixToComplex A * Ω + intMatrixToComplex B) *
+              (intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹) =
+        ξ * s Ω * cexp (π * I *
+            (z ⬝ᵥ (((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ * intMatrixToComplex C) *ᵥ
           z))) * riemannTheta z Ω := by
   sorry
 
@@ -378,7 +394,8 @@ Corrected from the printed DLMF formula: `A` must be invertible over `ℤ` (`A �
 @[dlmf 21.5.E5]
 theorem riemannTheta_unimodular {A : Matrix ι ι ℤ} (hA : IsUnit A) (z : ι → ℂ)
     (Ω : Matrix ι ι ℂ) :
-    riemannTheta (intMatrixToComplex A *ᵥ z) (intMatrixToComplex A * Ω * (intMatrixToComplex A)ᵀ) = riemannTheta z Ω := by
+    riemannTheta (intMatrixToComplex A *ᵥ z) (intMatrixToComplex A * Ω * (intMatrixToComplex A)ᵀ) =
+        riemannTheta z Ω := by
   obtain ⟨u, rfl⟩ := hA
   let e : (ι → ℤ) ≃ (ι → ℤ) :=
     { toFun := fun n => (u : Matrix ι ι ℤ)ᵀ *ᵥ n
@@ -451,7 +468,8 @@ theorem riemannTheta_add_symm_int {B : Matrix ι ι ℤ} (hB : Bᵀ = B) (z : ι
   rw [riemannTheta, riemannTheta]
   refine tsum_congr fun n => ?_
   obtain ⟨k, hk⟩ : (2 : ℤ) ∣ n ⬝ᵥ (B *ᵥ n) - ∑ i, B i i * n i :=
-    (ZMod.intCast_eq_intCast_iff_dvd_sub _ _ 2).mp (intCast_dotProduct_mulVec_self_zmod_two B hB n).symm
+    (ZMod.intCast_eq_intCast_iff_dvd_sub _ _ 2).mp
+        (intCast_dotProduct_mulVec_self_zmod_two B hB n).symm
   have hq : (fun i => (n i : ℂ)) ⬝ᵥ (intMatrixToComplex B *ᵥ fun i => (n i : ℂ)) =
       ((n ⬝ᵥ (B *ᵥ n) : ℤ) : ℂ) := by
     simp [dotProduct, mulVec]
@@ -509,7 +527,8 @@ theorem riemannTheta_inversion_principal (hg : Fintype.card ι ≤ 2) {Ω : Matr
 
 /-- Identity under the stated parameter and domain assumptions: `(!![τ] : Matrix (Fin 1) (Fin 1)
 ℂ)⁻¹ = !![τ⁻¹]`. -/
-private lemma inv_matrix_fin_one {τ : ℂ} (hτ : τ ≠ 0) : (!![τ] : Matrix (Fin 1) (Fin 1) ℂ)⁻¹ = !![τ⁻¹] := by
+private lemma inv_matrix_fin_one {τ : ℂ} (hτ : τ ≠ 0) : (!![τ] : Matrix (Fin 1) (Fin 1) ℂ)⁻¹
+    = !![τ⁻¹] := by
   refine Matrix.inv_eq_right_inv ?_
   ext i j
   fin_cases i; fin_cases j
@@ -517,7 +536,8 @@ private lemma inv_matrix_fin_one {τ : ℂ} (hτ : τ ≠ 0) : (!![τ] : Matrix 
 
 /-- Identity under the stated parameter and domain assumptions: `riemannTheta ![w] !![σ] =
 jacobiTheta₂ w σ`. -/
-lemma riemannTheta_fin_one_eq_jacobiTheta₂ (w σ : ℂ) : riemannTheta ![w] !![σ] = jacobiTheta₂ w σ := by
+lemma riemannTheta_fin_one_eq_jacobiTheta₂ (w σ : ℂ) : riemannTheta ![w] !![σ] =
+    jacobiTheta₂ w σ := by
   rw [riemannTheta_fin_one, DLMF.Elliptic.jacobiThetaThreeTau,
     mul_div_cancel_left₀ _ DLMF.Elliptic.pi_ne_zero']
 
@@ -560,14 +580,17 @@ constant `κ(α, β, Γ)`, independent of `z` and `Ω`, with
 @[dlmf 21.5.E9 "continuous square-root branch; κ independent of z and Ω"]
 theorem riemannThetaChar_modular {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D)
     (α β : ι → ℝ) {s : Matrix ι ι ℂ → ℂ} (hs : ContinuousOn s (siegelUpperHalfSpace ι))
-    (hs2 : ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (intMatrixToComplex C * Ω + intMatrixToComplex D).det) :
+    (hs2 : ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 =
+        (intMatrixToComplex C * Ω + intMatrixToComplex D).det) :
     ∃ κ : ℂ, ∀ Ω ∈ siegelUpperHalfSpace ι, ∀ z : ι → ℂ,
       riemannThetaChar
           (intMatrixToReal D *ᵥ α - intMatrixToReal C *ᵥ β + fun i => ((C * Dᵀ) i i : ℝ) / 2)
           (-(intMatrixToReal B *ᵥ α) + intMatrixToReal A *ᵥ β + fun i => ((A * Bᵀ) i i : ℝ) / 2)
           ((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ᵀ *ᵥ z)
-          ((intMatrixToComplex A * Ω + intMatrixToComplex B) * (intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹) =
-        κ * s Ω * cexp (π * I * (z ⬝ᵥ (((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ * intMatrixToComplex C) *ᵥ
+          ((intMatrixToComplex A * Ω + intMatrixToComplex B) *
+              (intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹) =
+        κ * s Ω * cexp (π * I *
+            (z ⬝ᵥ (((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ * intMatrixToComplex C) *ᵥ
           z))) * riemannThetaChar α β z Ω := by
   sorry
 

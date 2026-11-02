@@ -102,7 +102,8 @@ noncomputable def legInt_ew (ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ := ζ * exp (-(
 
 /-- The ellipse path is `J(w(t))`. -/
 theorem legInt_path_eq {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
-    legendreEllipsePath z s t = (legInt_ew (legInt_zeta z) s t + (legInt_ew (legInt_zeta z) s t)⁻¹)/2 := by
+    legendreEllipsePath z s t =
+        (legInt_ew (legInt_zeta z) s t + (legInt_ew (legInt_zeta z) s t)⁻¹)/2 := by
   have h0 := legInt_zeta_ne_zero hz
   have hq : z + exp ((log (z-1) + log (z+1))/2) = (legInt_zeta z)⁻¹ := by
     have := legInt_zeta_mul hz
@@ -140,8 +141,10 @@ theorem legInt_eu_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : �
     (hσ : σ = 1 ∨ σ = -1) {t₀ : ℝ} (ht₀ : σ * legInt_ew (legInt_zeta z) s t₀ ∈ slitPlane) :
     ∀ᶠ t in 𝓝 t₀, (σ * legInt_ew (legInt_zeta z) s t ∈ slitPlane) ∧
       legInt_eu ν μ (legInt_zeta z) s t =
-      exp ((ν+1)*(log (legInt_zeta z) - (log (σ * legInt_ew (legInt_zeta z) s t₀) + (s:ℂ)*π*I*t₀))) *
-        olverQ ν μ (σ * ((legInt_ew (legInt_zeta z) s t + (legInt_ew (legInt_zeta z) s t)⁻¹)/2)) := by
+      exp ((ν+1)*(log (legInt_zeta z) -
+          (log (σ * legInt_ew (legInt_zeta z) s t₀) + (s:ℂ)*π*I*t₀))) *
+        olverQ ν μ (σ * ((legInt_ew (legInt_zeta z) s t +
+            (legInt_ew (legInt_zeta z) s t)⁻¹)/2)) := by
   set ζ := legInt_zeta z with hζ
   have hζ0 : ζ ≠ 0 := legInt_zeta_ne_zero hz
   have hζ1 : ‖ζ‖ < 1 := legInt_norm_zeta_lt_one hz
@@ -151,7 +154,8 @@ theorem legInt_eu_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : �
   have hwc : Continuous w := by
     rw [hw]; unfold legInt_ew; fun_prop
   have hU : ∀ᶠ t in 𝓝 t₀, σ * w t ∈ slitPlane :=
-    ((continuous_const.mul hwc).continuousAt (x := t₀)).preimage_mem_nhds (isOpen_slitPlane.mem_nhds ht₀)
+    ((continuous_const.mul hwc).continuousAt (x := t₀)).preimage_mem_nhds
+        (isOpen_slitPlane.mem_nhds ht₀)
   obtain ⟨l, r, hlr, hsub⟩ := hU.exists_Ioo_subset
   set h : ℝ → ℂ := fun t => log (σ * w t) + (s:ℂ)*π*I*t with hh
   have hdh : ∀ t ∈ Ioo l r, HasDerivAt h 0 t := by
@@ -297,7 +301,8 @@ theorem legInt_eu_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) {s : �
     have hQ : HasDerivAt Q (deriv Q (σ * γ t)) (σ * γ t) :=
       (olverQ_analytic ν μ _ ht).differentiableAt.hasDerivAt
     exact (hQ.comp t ((hγ t).const_mul σ)).const_mul c
-  have hloc : ∀ᶠ t in 𝓝 t₀, σ * γ t - 1 ∈ slitPlane ∧ HasDerivAt u (c * (deriv Q (σ * γ t) * (σ * gd t))) t := by
+  have hloc : ∀ᶠ t in 𝓝 t₀, σ * γ t - 1 ∈ slitPlane ∧
+      HasDerivAt u (c * (deriv Q (σ * γ t) * (σ * gd t))) t := by
     filter_upwards [hev.eventually_nhds] with t ht
     have hm := ht.self_of_nhds.1
     refine ⟨hm, (hf t hm).congr_of_eventuallyEq ?_⟩
@@ -371,7 +376,8 @@ theorem legInt_eu_zero (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ
   simp only [ofReal_zero, mul_zero, add_zero, sub_self, exp_zero, one_mul] at hev
   have hγ0 : legendreEllipsePath z s 0 = z := by
     rw [legInt_path_eq hz s 0, hw0, legInt_two_mul_eq hz |>.symm]; ring
-  have hev' : legInt_eu ν μ (legInt_zeta z) s =ᶠ[𝓝 0] fun t => olverQ ν μ (legendreEllipsePath z s t) := by
+  have hev' : legInt_eu ν μ (legInt_zeta z) s =ᶠ[𝓝 0] fun t =>
+      olverQ ν μ (legendreEllipsePath z s t) := by
     filter_upwards [hev] with t ht
     rw [ht.2, legInt_path_eq hz s t]
   refine ⟨by rw [hev'.self_of_nhds]; show olverQ ν μ (legendreEllipsePath z s 0) = _; rw [hγ0], ?_⟩
@@ -379,7 +385,8 @@ theorem legInt_eu_zero (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ
     rw [hγ0]; exact (olverQ_analytic ν μ z hz).differentiableAt.hasDerivAt
   exact (hQ.comp 0 (legInt_hasDerivAt_path hz s 0)).congr_of_eventuallyEq hev'
 
--- DLMF 14.24.1 `associatedP_ellipse_continuation` is stated below, after 14.24.2 and 14.24.3, which its proof uses.
+-- DLMF 14.24.1 `associatedP_ellipse_continuation` is stated below, after 14.24.2 and 14.24.3, which
+-- its proof uses.
 
 /-- olverQ ellipse continuation. Along the ellipse `γ(t) = J(w(t))`, `w(t) = ζ e^{-sπit}`, the
 transport is `√π (1-w²)^μ ζ^{ν+1} e^{-(ν+1)sπit} 𝐅(μ+1/2, ν+μ+1; ν+3/2; w²)` (`legInt_eu`),
@@ -404,7 +411,8 @@ theorem olverQ_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPl
       have hw : legInt_ew (legInt_zeta z) 0 t = legInt_zeta z := by simp [legInt_ew]
       rw [legInt_path_eq hz 0 t, hw, ← legInt_two_mul_eq hz]; ring
     have hd : ∀ t, deriv (legendreEllipsePath z 0) t = 0 := fun t => by rw [hγ]; simp
-    have huv : IsLegendreTransport ν μ (legendreEllipsePath z 0) (olverQ ν μ z) (deriv (olverQ ν μ) z)
+    have huv : IsLegendreTransport ν μ (legendreEllipsePath z 0) (olverQ ν μ z)
+        (deriv (olverQ ν μ) z)
         (fun _ => olverQ ν μ z) (fun _ => deriv (olverQ ν μ) z) := by
       refine ⟨rfl, rfl, continuousOn_const, continuousOn_const, fun t _ => ⟨?_, ?_⟩⟩
       · rw [hd, zero_mul]; exact hasDerivWithinAt_const _ _ _
@@ -414,7 +422,8 @@ theorem olverQ_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPl
   · set u := legInt_eu ν μ (legInt_zeta z) s with hudef
     set gd := legInt_gd (legInt_zeta z) s with hgd
     have hD := legInt_eu_deriv ν μ hz hs
-    have huv : IsLegendreTransport ν μ (legendreEllipsePath z s) (olverQ ν μ z) (deriv (olverQ ν μ) z)
+    have huv : IsLegendreTransport ν μ (legendreEllipsePath z s) (olverQ ν μ z)
+        (deriv (olverQ ν μ) z)
         u (fun t => deriv u t / gd t) := by
       refine ⟨hu0, ?_, fun t _ => (hD t).1.continuousAt.continuousWithinAt,
         fun t _ => (hD t).2.continuousAt.continuousWithinAt,
@@ -439,9 +448,11 @@ theorem olverQ_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPl
 def legendreSmoothStep (t : ℝ) : ℝ :=
   3*t^2-2*t^3
 
-/-- A joined path from z to 3/2, s circuits about one of radius 1/2, and back; minus one is not enclosed. -/
+/-- A joined path from z to 3/2, s circuits about one of radius 1/2, and back; minus one is not
+enclosed. -/
 def legendreOneLoop (z : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
-  if t ≤ 1/3 then z+legendreSmoothStep (3*t)*(3/2-z) else if t ≤ 2/3 then 1+1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1)) else 3/2+legendreSmoothStep (3*t-2)*(z-3/2)
+  if t ≤ 1/3 then z+legendreSmoothStep (3*t)*(3/2-z) else if t ≤ 2/3 then
+      1+1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1)) else 3/2+legendreSmoothStep (3*t-2)*(z-3/2)
 
 /-- The value obtained by continuing the solution `F` of the associated Legendre equation (with its
 derivative at `z`) along a loop from `z` that makes `s` circuits around the branch point `1` but not
@@ -568,7 +579,8 @@ theorem legTr_ferrersPCont_ode (ν μ : ℂ) {w : ℂ} (hw : w ∈ Metric.ball (
     have h1' : AnalyticAt ℂ (deriv F) w := h1
     have h0' : AnalyticAt ℂ F w := h0
     exact (((analyticAt_const.sub (analyticAt_id.pow 2)).fun_mul h2).fun_sub
-      ((analyticAt_const.fun_mul analyticAt_id).fun_mul h1')).fun_add ((analyticAt_const.fun_sub hd).fun_mul h0')
+      ((analyticAt_const.fun_mul analyticAt_id).fun_mul h1')).fun_add
+          ((analyticAt_const.fun_sub hd).fun_mul h0')
   have hI : (I/2 : ℂ) ∈ B := by
     simp only [B, Metric.mem_ball, dist_zero_right, norm_div, norm_I]; norm_num
   have hev : (fun w => (1-w^2)*iteratedDeriv 2 F w-2*w*deriv F w+
@@ -636,7 +648,8 @@ theorem legTr_local_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiabl
     filter_upwards [nhdsWithin_le_nhds hγU, self_mem_nhdsWithin] with t h1 h2
     rw [hdexp t h2 h1, hdexp t₀ ht₀ hw₀])
   set c := exp (μ/2*d t₀)
-  have hF' : ∀ w ∈ U, deriv F w = exp (μ/2*L w) * (μ/2*legTr_K ν μ w/(w-1) + deriv (legTr_K ν μ) w) := by
+  have hF' : ∀ w ∈ U, deriv F w = exp (μ/2*L w) *
+      (μ/2*legTr_K ν μ w/(w-1) + deriv (legTr_K ν μ) w) := by
     intro w hw
     have he : F = fun w => exp (μ/2*L w) * legTr_K ν μ w := funext hFeq
     rw [he]; exact (legTr_hasDerivAt_branch ν μ (hLd w hw) (hKd w hw)).deriv
@@ -675,7 +688,8 @@ theorem legTr_isTransport_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differe
     have h1 := slitPlane_ne_zero (show w - 1 ∈ slitPlane from hw)
     have h2 := slitPlane_ne_zero (hp w hw)
     intro h; apply mul_ne_zero h1 h2; linear_combination -h
-  · refine legTr_local_branch ν μ hγ hℓ hexp ht₀ (L := fun w => log (1-w)) (F := ferrersPCont ν (-μ))
+  · refine legTr_local_branch ν μ hγ hℓ hexp ht₀ (L := fun w => log (1-w))
+        (F := ferrersPCont ν (-μ))
       (U := Metric.ball (0:ℂ) 1) (κ := -1) Metric.isOpen_ball hb
       (fun w hw => legTr_hasDerivAt_log_one_sub (legendre_disk_facts hw).2.1)
       (fun w hw => by rw [exp_log (slitPlane_ne_zero (legendre_disk_facts hw).2.1)]; ring)
@@ -768,7 +782,8 @@ noncomputable def legTr_loopDeriv (z : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
     1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1))*(2*π*I*s*legTr_Sd 1 t) else legTr_Sd 2 t*(z-3/2)
 
 /-- `e^{2πis S(1)} = 1`. -/
-theorem legTr_exp_two_pi_s (s : ℤ) : exp (2*π*I*s*((legendreSmoothStep (3*(2/3:ℝ)-1) : ℝ) : ℂ)) = 1 := by
+theorem legTr_exp_two_pi_s (s : ℤ) : exp
+    (2*π*I*s*((legendreSmoothStep (3*(2/3:ℝ)-1) : ℝ) : ℂ)) = 1 := by
   rw [show legendreSmoothStep (3*(2/3:ℝ)-1) = 1 by unfold legendreSmoothStep; norm_num]
   rw [show 2*π*I*(s:ℂ)*((1:ℝ):ℂ) = (s:ℂ)*(2*π*I) by push_cast; ring]
   exact exp_int_mul_two_pi_mul_I s
@@ -776,7 +791,8 @@ theorem legTr_exp_two_pi_s (s : ℤ) : exp (2*π*I*s*((legendreSmoothStep (3*(2/
 /-- `legendreOneLoop` is differentiable, with derivative `legTr_loopDeriv`. -/
 theorem legTr_hasDerivAt_loop (z : ℂ) (s : ℤ) (t : ℝ) :
     HasDerivAt (legendreOneLoop z s) (legTr_loopDeriv z s t) t := by
-  have hA : ∀ t, HasDerivAt (fun t : ℝ => z+legendreSmoothStep (3*t)*(3/2-z)) (legTr_Sd 0 t*(3/2-z)) t := by
+  have hA : ∀ t, HasDerivAt (fun t : ℝ => z+legendreSmoothStep (3*t)*(3/2-z))
+      (legTr_Sd 0 t*(3/2-z)) t := by
     intro t
     have := ((legTr_hasDerivAt_S 0 t).mul_const (3/2-z)).const_add z
     simpa [legTr_Sd] using this
@@ -786,7 +802,8 @@ theorem legTr_hasDerivAt_loop (z : ℂ) (s : ℤ) (t : ℝ) :
     have := ((((legTr_hasDerivAt_S 1 t).const_mul (2*π*I*s)).cexp).const_mul (1/2)).const_add 1
     convert this using 1
     simp only [legTr_Sd]; ring
-  have hC : ∀ t, HasDerivAt (fun t : ℝ => 3/2+legendreSmoothStep (3*t-2)*(z-3/2)) (legTr_Sd 2 t*(z-3/2)) t := by
+  have hC : ∀ t, HasDerivAt (fun t : ℝ => 3/2+legendreSmoothStep (3*t-2)*(z-3/2))
+      (legTr_Sd 2 t*(z-3/2)) t := by
     intro t
     have := ((legTr_hasDerivAt_S 2 t).mul_const (z-3/2)).const_add (3/2)
     simpa [legTr_Sd] using this
@@ -820,7 +837,8 @@ theorem legTr_contDiff_loop (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreOneLoo
 /-- A continuous logarithm of `γ - 1` along `legendreOneLoop`. -/
 noncomputable def legTr_ell (z : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
   if t ≤ 1/3 then log (z+legendreSmoothStep (3*t)*(3/2-z)-1) else if t ≤ 2/3 then
-    log (1/2)+2*π*I*s*legendreSmoothStep (3*t-1) else log (3/2+legendreSmoothStep (3*t-2)*(z-3/2)-1)+2*π*I*s
+    log (1/2)+2*π*I*s*legendreSmoothStep (3*t-1) else
+        log (3/2+legendreSmoothStep (3*t-2)*(z-3/2)-1)+2*π*I*s
 
 /-- The first leg of `legendreOneLoop` stays in `ℂ ∖ (-∞, 1]`. -/
 theorem legTr_mem_first {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) (1/3)) :
@@ -904,7 +922,8 @@ logarithm of `γ - 1` along the loop (`legTr_isTransport_branch`), so `ℓ(1) = 
 @[dlmf 14.24.E3]
 theorem associatedP_one_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     legendreOneContinued (associatedP ν (-μ)) ν μ z s=exp (s*μ*π*I)*associatedP ν (-μ) z := by
-  have hγd : Differentiable ℝ (legendreOneLoop z s) := fun t => (legTr_hasDerivAt_loop z s t).differentiableAt
+  have hγd : Differentiable ℝ (legendreOneLoop z s) := fun t =>
+      (legTr_hasDerivAt_loop z s t).differentiableAt
   have huv := legTr_isTransport_branch ν μ hγd (legTr_continuousOn_ell hz s)
     (fun t ht => legTr_exp_ell hz s ht) (fun t ht => legTr_loop_dom hz s ht)
   have hreg : ∀ t ∈ Icc (0:ℝ) 1, legendreOneLoop z s t ≠ 1 ∧ legendreOneLoop z s t ≠ -1 := by
@@ -914,7 +933,8 @@ theorem associatedP_one_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
       rw [h1] at h; norm_num [mem_slitPlane_iff] at h
     · have hn : ‖legendreOneLoop z s t‖ < 1 := by simpa using h
       refine ⟨fun h1 => by rw [h1] at hn; simp at hn, fun h1 => by rw [h1] at hn; simp at hn⟩
-  have key := legendreTransport_unique ν μ _ _ (legendreOneLoop z s) (legTr_contDiff_loop z s) hreg huv
+  have key := legendreTransport_unique ν μ _ _ (legendreOneLoop z s)
+      (legTr_contDiff_loop z s) hreg huv
   have hγ0 : legendreOneLoop z s 0 = z := by
     simp only [legendreOneLoop]; unfold legendreSmoothStep; norm_num
   have hγ1 : legendreOneLoop z s 1 = z := by
@@ -928,7 +948,8 @@ theorem associatedP_one_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
     (mem_cutPlane_of_one_add (by simpa [add_comm] using hp))).differentiableAt
   have hu0 : legTr_u ν μ (legendreOneLoop z s) (legTr_ell z s) 0 = associatedP ν (-μ) z := by
     rw [legTr_u, hγ0, hℓ0, legTr_associatedP_eq]
-  have hv0 : legTr_v ν μ (legendreOneLoop z s) (legTr_ell z s) 0 = deriv (associatedP ν (-μ)) z := by
+  have hv0 : legTr_v ν μ (legendreOneLoop z s) (legTr_ell z s) 0 =
+      deriv (associatedP ν (-μ)) z := by
     have he : associatedP ν (-μ) = fun w => exp (μ/2*log (w-1)) * legTr_K ν μ w :=
       funext (legTr_associatedP_eq ν μ)
     rw [he, (legTr_hasDerivAt_branch ν μ (legTr_hasDerivAt_log_sub_one hz) hKd).deriv, legTr_v,

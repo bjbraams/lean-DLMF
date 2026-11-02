@@ -265,7 +265,9 @@ theorem incGF_gammaStar_tendsto {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -(n + 1)) (
       have e1 : a + 1 + (k : ℂ) = a + (k + 1) := by ring
       have e2 : a + 1 + ((k : ℂ) + 1) = a + (k + 1) + 1 := by ring
       rw [e1, e2]
-      have h2' : a + ((k : ℂ) + 1) + 1 ≠ 0 := by rw [show a + ((k : ℂ) + 1) + 1 = a + (k + 2) by ring]; exact h2
+      have h2' : a + ((k : ℂ) + 1) + 1 ≠ 0 := by
+                                                rw [show a + ((k : ℂ) + 1) + 1 = a +
+                                                  (k + 2) by ring]; exact h2
       field_simp
   obtain ⟨N, hN⟩ := eventually_atTop.mp (kumCF_eventually_ratio 0 a z)
   have hwN : ∀ k ≥ N + 1, incGF_w a z k ≠ 0 := by

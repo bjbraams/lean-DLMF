@@ -57,8 +57,10 @@ theorem two_cpow_neg_half_mul_sqrt_two_pow (n : ℕ) :
 (-z^2/4)*Polynomial.aeval (z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolyH n)`. -/
 @[dlmf 12.7.E2]
 theorem pcfU_physicists_hermite (n : ℕ) (z : ℂ) :
-    pcfU (-n-1/2) z=2^(-(n:ℂ)/2)*exp (-z^2/4)*Polynomial.aeval (z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolyH n) := by
-  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
+    pcfU (-n-1/2) z=2^(-(n:ℂ)/2)*exp (-z^2/4)*Polynomial.aeval (z/Real.sqrt 2)
+        (DLMF.OrthogonalPolynomials.hermitePolyH n) := by
+  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by
+                                      exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   have h := pcfD_nat n z
   rw [pcfD] at h
   rw [h, aeval_hermitePolyH_eq_hermite_complex, mul_div_cancel₀ _ hs0]
@@ -69,8 +71,10 @@ theorem pcfU_physicists_hermite (n : ℕ) (z : ℂ) :
 (DLMF.OrthogonalPolynomials.hermitePolyH n)`. -/
 @[dlmf 12.7.E3]
 theorem pcfV_physicists_hermite (n : ℕ) (z : ℂ) :
-    pcfV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*2^(-(n:ℂ)/2)*Polynomial.aeval (I*z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolyH n) := by
-  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
+    pcfV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*2^(-(n:ℂ)/2)*Polynomial.aeval
+        (I*z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolyH n) := by
+  have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by
+                                      exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   rw [pcfV_nat_add_half, aeval_hermitePolyH_eq_hermite_complex, mul_div_cancel₀ _ hs0]
   linear_combination (-((Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n * aeval (I*z) (hermite n))) *
     two_cpow_neg_half_mul_sqrt_two_pow n

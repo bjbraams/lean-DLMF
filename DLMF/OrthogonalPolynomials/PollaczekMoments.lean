@@ -179,8 +179,10 @@ theorem pairHalf_transform {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {w : ℂ} (hw :
         have hmul : z.re*z.im = 0 := by linear_combination h/2
         exact (mul_ne_zero (show z.re ≠ 0 from ne_of_gt hz) hi) hmul
     exact DifferentiableAt.differentiableWithinAt
-      (((differentiableAt_const _).mul (differentiableAt_id.cpow (differentiableAt_const _) (Or.inl hz))).mul
-        ((by fun_prop : DifferentiableAt ℂ (fun z : ℂ => 1+z^2) z).cpow (differentiableAt_const _) hs))
+      (((differentiableAt_const _).mul
+          (differentiableAt_id.cpow (differentiableAt_const _) (Or.inl hz))).mul
+        ((by fun_prop : DifferentiableAt ℂ (fun z : ℂ => 1+z^2) z).cpow
+            (differentiableAt_const _) hs))
   refine hf.eqOn_of_preconnected_of_frequently_eq hg (convex_halfSpace_re_gt 0).isPreconnected
     (show (1:ℂ) ∈ {w | 0 < w.re} by simp)
     (DLMF.Bessel.frequently_of_forall_nat_add fun n => ?_) hw
@@ -255,10 +257,12 @@ theorem integrable_tilted_Gamma {a b θ : ℝ} (ha : 0 < a) (hb : 0 < b) (hθ : 
     Integrable (fun y : ℝ => Gamma ((a:ℂ)+I*y)*Gamma ((b:ℂ)-I*y)*exp (θ*y)) := by
   obtain ⟨C,K,h⟩ := pairHalf_bound ha hb
   have hC : 0 ≤ C := (norm_nonneg _).trans (by simpa using h 0)
-  have hi := (DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (sub_pos.mpr hθ) K).const_mul (C*2^K)
+  have hi := (DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (sub_pos.mpr hθ)
+      K).const_mul (C*2^K)
   apply hi.mono' (show AEStronglyMeasurable _ volume from ?_) (Eventually.of_forall fun y => ?_)
   · apply Continuous.aestronglyMeasurable
-    have hc : Continuous (fun y : ℝ => pairHalf a b (2*y)) := (pairHalf_continuous ha hb).comp (by fun_prop)
+    have hc : Continuous (fun y : ℝ => pairHalf a b (2*y)) :=
+        (pairHalf_continuous ha hb).comp (by fun_prop)
     have hc' : Continuous (fun y : ℝ => Gamma ((a:ℂ)+I*y)*Gamma ((b:ℂ)-I*y)) := by
       simpa [pairHalf] using hc
     exact hc'.mul (show Continuous (fun y : ℝ => exp ((θ:ℂ)*y)) by fun_prop)
@@ -375,7 +379,8 @@ theorem poly_same_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n k :
         (moment lam θ j*poch (-(j:ℂ)) n/poch (2*(lam:ℂ)) n) := by
   let C (j : ℕ) : ℂ := (-1:ℂ)^k*k.choose j*poch (-2*(lam:ℂ)-k+1) (k-j)
   have he : (fun x : ℝ => poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) =
-      fun x : ℝ => ∑ j ∈ Finset.range (k+1), C j*(poly lam θ n x*poch ((lam:ℂ)-I*x) j*weight lam θ x) := by
+      fun x : ℝ => ∑ j ∈ Finset.range (k+1),
+          C j*(poly lam θ n x*poch ((lam:ℂ)-I*x) j*weight lam θ x) := by
     funext x
     rw [show (lam:ℂ)+I*x = 2*(lam:ℂ)-((lam:ℂ)-I*x) by ring,
       HahnMoments.poch_reverse_basis, Finset.mul_sum, Finset.sum_mul]
@@ -390,7 +395,8 @@ theorem poly_same_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n k :
   simp_rw [integral_const_mul, integral_poly_basis hlam hθ]
   rfl
 /-- A Pollaczek polynomial annihilates each lower-degree rising factorial. -/
-theorem integral_poly_same_basis_zero {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) {n k : ℕ} (hk : k < n) :
+theorem integral_poly_same_basis_zero {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π)
+    {n k : ℕ} (hk : k < n) :
     (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) = 0 := by
   rw [(poly_same_basis hlam hθ n k).2]
   apply Finset.sum_eq_zero
@@ -431,7 +437,8 @@ theorem poly_orthogonal {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) {m n :
     rw [integral_poly_mul_poly hlam hθ]
     apply Finset.sum_eq_zero
     intro k hk
-    rw [integral_poly_same_basis_zero hlam hθ (show k < n by have := Finset.mem_range.mp hk; omega), mul_zero]
+    rw [integral_poly_same_basis_zero hlam hθ
+        (show k < n by have := Finset.mem_range.mp hk; omega), mul_zero]
   rcases lt_or_gt_of_ne hmn with h | h
   · exact hlt m n h
   · rw [show (fun x : ℝ => poly lam θ m x*poly lam θ n x*weight lam θ x) =
@@ -445,10 +452,12 @@ theorem poly_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) 
   · rw [integral_poly_same_basis_self hlam hθ]
     simp only [Nat.choose_self, Nat.cast_one, mul_one]
     have hn : ((-1:ℂ)^n)^2 = 1 := by rw [← pow_mul, mul_comm n 2, pow_mul]; simp
-    calc _ = ((-1:ℂ)^n)^2 * ((scale θ/phase θ)^n*moment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n^2) := by ring
+    calc _ = ((-1:ℂ)^n)^2 *
+           ((scale θ/phase θ)^n*moment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n^2) := by ring
       _ = _ := by rw [hn, one_mul]
   · intro k hk hkn
-    rw [integral_poly_same_basis_zero hlam hθ (show k < n by have := Finset.mem_range.mp hk; omega), mul_zero]
+    rw [integral_poly_same_basis_zero hlam hθ
+        (show k < n by have := Finset.mem_range.mp hk; omega), mul_zero]
   · simp
 
 /-- The standard Pollaczek normalization cancels the phase in the square norm. -/

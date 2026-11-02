@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.GeneralizedCalculus
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
 public import DLMF.Confluent.Regularized
 public import ToMathlib.Analysis.SpecialFunctions.GammaShiftBounds
 

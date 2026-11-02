@@ -83,7 +83,8 @@ theorem airyAi_integral_scorerGi (z : ℂ) :
   have hW := wronskian_airyAi_airyBi z
   have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [show airyAi z * (airyBiDeriv z * (1 / 3 - primitive airyAi z) +
-      airyAiDeriv z * primitive airyBi z) - airyAiDeriv z * (airyBi z * (1 / 3 - primitive airyAi z) +
+      airyAiDeriv z * primitive airyBi z) - airyAiDeriv z *
+          (airyBi z * (1 / 3 - primitive airyAi z) +
       airyAi z * primitive airyBi z) = (airyAi z * airyBiDeriv z - airyAiDeriv z * airyBi z) *
       (1 / 3 - primitive airyAi z) by ring, hW]
   field_simp
@@ -96,7 +97,8 @@ theorem airyAi_integral_scorerHi (z : ℂ) :
   have hW := wronskian_airyAi_airyBi z
   have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [show airyAi z * (airyBiDeriv z * (2 / 3 + primitive airyAi z) -
-      airyAiDeriv z * primitive airyBi z) - airyAiDeriv z * (airyBi z * (2 / 3 + primitive airyAi z) -
+      airyAiDeriv z * primitive airyBi z) - airyAiDeriv z *
+          (airyBi z * (2 / 3 + primitive airyAi z) -
       airyAi z * primitive airyBi z) = (airyAi z * airyBiDeriv z - airyAiDeriv z * airyBi z) *
       (2 / 3 + primitive airyAi z) by ring, hW]
   field_simp
@@ -110,12 +112,15 @@ theorem airyBi_integral_scorer (z : ℂ) :
   have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   constructor
   · rw [scorerGiDeriv_variation, scorerGi_variation]
-    rw [show airyBiDeriv z * (airyBi z * (1 / 3 - primitive airyAi z) + airyAi z * primitive airyBi z) -
-        airyBi z * (airyBiDeriv z * (1 / 3 - primitive airyAi z) + airyAiDeriv z * primitive airyBi z) =
+    rw [show airyBiDeriv z *
+        (airyBi z * (1 / 3 - primitive airyAi z) + airyAi z * primitive airyBi z) -
+        airyBi z * (airyBiDeriv z * (1 / 3 - primitive airyAi z) + airyAiDeriv z *
+            primitive airyBi z) =
         (airyAi z * airyBiDeriv z - airyAiDeriv z * airyBi z) * primitive airyBi z by ring, hW]
     field_simp
   · rw [scorerHiDeriv_variation, scorerHi_variation]
-    rw [show airyBi z * (airyBiDeriv z * (2 / 3 + primitive airyAi z) - airyAiDeriv z * primitive airyBi z) -
+    rw [show airyBi z * (airyBiDeriv z * (2 / 3 + primitive airyAi z) - airyAiDeriv z *
+        primitive airyBi z) -
         airyBiDeriv z * (airyBi z * (2 / 3 + primitive airyAi z) - airyAi z * primitive airyBi z) =
         (airyAi z * airyBiDeriv z - airyAiDeriv z * airyBi z) * primitive airyBi z by ring, hW]
     field_simp
@@ -162,7 +167,8 @@ theorem airyAi_tail_integral_asymptotic  :
   have hval : ∀ x : ℝ, improperAtTop (fun t => airyAi t) x =
       π * (airyAi x * scorerGiDeriv x - airyAiDeriv x * scorerGi x) := by
     intro x
-    have hc : Continuous fun t : ℝ => airyAi t := differentiable_airyAi.continuous.comp continuous_ofReal
+    have hc : Continuous fun t : ℝ => airyAi t :=
+        differentiable_airyAi.continuous.comp continuous_ofReal
     have hI : HasIntegralAtTop (fun t => airyAi t) x (1 / 3 - primitive airyAi x) := by
       have h := airyAi_positive_integral.sub_const (primitive airyAi x)
       refine h.congr fun R => ?_
@@ -196,7 +202,8 @@ theorem airyAi_tail_integral_asymptotic  :
             = (x ^ (1 / 4 : ℝ) * x ^ (3 / 4 : ℝ)) *
               (Real.exp (-airyZeta x) / (2 * Real.sqrt π * x ^ (3 / 4 : ℝ))) := by rw [h1]
           _ = _ := by field_simp
-      have key : (x : ℂ) * ((Real.exp (-airyZeta x) / (2 * Real.sqrt π * x ^ (3 / 4 : ℝ)) : ℝ) : ℂ) =
+      have key : (x : ℂ) *
+          ((Real.exp (-airyZeta x) / (2 * Real.sqrt π * x ^ (3 / 4 : ℝ)) : ℝ) : ℂ) =
           (((x ^ (1 / 4 : ℝ)) * Real.exp (-airyZeta x) / (2 * Real.sqrt π) : ℝ) : ℂ) := by
         rw [← ofReal_mul, R]
       rw [key, airyInt_cpow_quarter_ofReal hx, airyReal_zeta_ofReal hx]
@@ -291,7 +298,8 @@ theorem airyAi_negative_integral_asymptotic  :
       (airyAi_lower_integral_scorerHi x).limUnder_eq
     simp only [Function.comp_apply, ofReal_neg, neg_neg]
     rw [hv, airyAi_integral_scorerHi]
-    have hc : Real.cos (2 / 3 * (-x) ^ (3 / 2 : ℝ) + π / 4) = -Real.sin (airyZeta (-x) - π / 4) := by
+    have hc : Real.cos (2 / 3 * (-x) ^ (3 / 2 : ℝ) + π / 4) =
+        -Real.sin (airyZeta (-x) - π / 4) := by
       rw [airyZeta, show 2 / 3 * (-x) ^ (3 / 2 : ℝ) - π / 4 =
         (2 / 3 * (-x) ^ (3 / 2 : ℝ) + π / 4) - π / 2 by ring, Real.sin_sub_pi_div_two]
       ring
@@ -605,7 +613,8 @@ theorem airyLap_dom {a : ℝ} (ha : 0 < a) (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q 
     have hcinv : 1 ≤ c⁻¹ := by rw [le_inv_comm₀ one_pos hc]; simpa using hc1
     constructor
     · calc (1 + |t|) * (Real.exp (q.re * t) * ‖airyAi t‖)
-          ≤ (c⁻¹ * Real.exp (c * |t|)) * (Real.exp (q.re * t) * (Cp * Real.exp (-(b + 1) * t))) := by
+          ≤ (c⁻¹ * Real.exp (c * |t|)) *
+              (Real.exp (q.re * t) * (Cp * Real.exp (-(b + 1) * t))) := by
             gcongr
         _ = c⁻¹ * Cp * (Real.exp (c * |t|) *
             (Real.exp (q.re * t) * Real.exp (-(b + 1) * t))) := by ring
@@ -678,7 +687,8 @@ theorem airyLap_hasDerivAt {p : ℂ} (hp : 0 < p.re) :
     (Eventually.of_forall fun q => (by fun_prop : Continuous fun t : ℝ =>
       exp (q * t) * airyAi t).aestronglyMeasurable)
     (airyLap_integrable hp).1
-    ((by fun_prop : Continuous fun t : ℝ => (t : ℂ) * (exp (p * t) * airyAi t)).aestronglyMeasurable)
+    ((by fun_prop : Continuous fun t : ℝ => (t : ℂ) *
+           (exp (p * t) * airyAi t)).aestronglyMeasurable)
     (Eventually.of_forall fun t q hq => ?_) hI
     (Eventually.of_forall fun t q _ => ?_)
   · exact h.2
@@ -793,7 +803,8 @@ theorem airyLap_pos_tendsto :
   · filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with x hx
     refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht => ?_)
     have ht0 : 0 ≤ t := le_of_lt ht
-    rw [norm_mul, show ((x : ℂ) * t) = ((x * t : ℝ) : ℂ) by push_cast; ring, Complex.norm_exp_ofReal]
+    rw [norm_mul, show ((x : ℂ) * t) = ((x * t : ℝ) : ℂ) by push_cast; ring,
+                                                              Complex.norm_exp_ofReal]
     have h1 : Real.exp (x * t) ≤ Real.exp t := Real.exp_le_exp.mpr (by nlinarith [hx.2])
     calc Real.exp (x * t) * ‖airyAi t‖ ≤ Real.exp t * (C * Real.exp (-2 * t)) := by
           gcongr; exact (hC t ht0).1

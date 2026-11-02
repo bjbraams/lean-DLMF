@@ -52,7 +52,8 @@ namespace DLMF.CoalescingSaddles
 /-! ### Fold (`K = 1`) -/
 
 /-- `Re w = 0` iff `w²` is real and nonpositive. -/
-private lemma re_eq_zero_iff_sq_real_nonpos {w : ℂ} : w.re = 0 ↔ (w ^ 2).im = 0 ∧ (w ^ 2).re ≤ 0 := by
+private lemma re_eq_zero_iff_sq_real_nonpos {w : ℂ} : w.re = 0 ↔ (w ^ 2).im = 0 ∧
+    (w ^ 2).re ≤ 0 := by
   rw [sq, Complex.mul_im, Complex.mul_re]
   constructor
   · intro h; rw [h]; constructor
@@ -171,7 +172,8 @@ private lemma cuspoidStokesSet_two_curve_of_mem {x : Fin 2 → ℝ} (hx : x ∈ 
 `m = 10 + 6s`, the function `W(u) = (6u² + k - √D(u))/2` is nonnegative, solves the quadratic
 `W² - (6u² + k) W + u⁴ + k u² - m u - (1 + k - m) = 0`, and has `W(1) = 0`,
 `W(-1/2) = (9 + 6s)/4`. -/
-private lemma cusp_path_quadratic_root_props {s k m : ℝ} (hs : s ^ 2 = 3) (hs0 : 0 < s) (hk : k = 3 + 3 * s)
+private lemma cusp_path_quadratic_root_props {s k m : ℝ} (hs : s ^ 2 = 3) (hs0 : 0 < s)
+    (hk : k = 3 + 3 * s)
     (hm : m = 10 + 6 * s) {W : ℝ → ℝ}
     (hW : ∀ u, W u = (6 * u ^ 2 + k - Real.sqrt (32 * u ^ 4 + 8 * k * u ^ 2 + 4 * m * u +
       k ^ 2 + 4 * (1 + k - m))) / 2) :

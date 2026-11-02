@@ -7,7 +7,7 @@ module
 
 public import DLMF.Hypergeometric.Basic.Pochhammer
 
-public import DLMF.Hypergeometric.Series
+public import DLMF.Hypergeometric.Basic.RealPochhammer
 public import Mathlib.Analysis.Normed.Group.Tannery
 public import Carlson.TwoVariable.GaussHypergeometric
 public import DLMF.Hypergeometric.Basic.CutPlane

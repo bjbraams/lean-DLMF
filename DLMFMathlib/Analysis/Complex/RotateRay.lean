@@ -65,7 +65,8 @@ theorem integrableOn_ray_of_bounds (hσ : 0 < σ) (hκ : 0 < κ) {y : ℝ}
 
 /-- Identity under the stated parameter and domain assumptions: `exp ((x : ℂ) + y * I) = (Real.exp
 x : ℂ) * exp (y * I)`. -/
-theorem exp_ofReal_add_mul_I (x y : ℝ) : exp ((x : ℂ) + y * I) = (Real.exp x : ℂ) * exp (y * I) := by
+theorem exp_ofReal_add_mul_I (x y : ℝ) : exp ((x : ℂ) + y * I) = (Real.exp x : ℂ) *
+    exp (y * I) := by
   rw [exp_add, ofReal_exp]
 
 /-- The rectangle identity behind the rotation formula, for `0 < ε` and `0 < R`. -/

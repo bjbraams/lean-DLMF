@@ -98,7 +98,8 @@ entire functions of `a` (holomorphic parameter dependence), they do not vanish f
 `cos √a x`, `sin √a x / √a`); see `DLMFMathlib/Analysis/ODE/SturmSpectrum.lean`. -/
 
 /-- A solution of Mathieu's equation, restricted to the real line, with its derivative. -/
-private lemma hasDerivAt_along_real_axis {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) (t : ℝ) :
+private lemma hasDerivAt_along_real_axis {a q : ℂ} {w : ℂ → ℂ}
+    (h : IsMathieuSolution a q w) (t : ℝ) :
     HasDerivAt (fun t : ℝ => w t) (deriv w t) t ∧
       HasDerivAt (fun t : ℝ => deriv w t) ((2 * q * Complex.cos (2 * t) - a) * w t) t :=
   ⟨((h.differentiable t).hasDerivAt).comp_ofReal, (h.hasDerivAt_deriv t).comp_ofReal⟩
@@ -106,7 +107,8 @@ private lemma hasDerivAt_along_real_axis {a q : ℂ} {w : ℂ → ℂ} (h : IsMa
 /-- The real family attached to a family of solutions of Mathieu's equation with real
 parameters and real initial data at `0`: the solutions are real on `ℝ`, their real parts solve
 the real equation, and their values and derivatives are entire in `a`. -/
-theorem real_family_of_isMathieuSolution (q : ℝ) {w : ℂ → ℂ → ℂ} (hw : ∀ a, IsMathieuSolution a q (w a)) {α β : ℝ}
+theorem real_family_of_isMathieuSolution (q : ℝ) {w : ℂ → ℂ → ℂ}
+    (hw : ∀ a, IsMathieuSolution a q (w a)) {α β : ℝ}
     (h0 : ∀ a, w a 0 = α) (h1 : ∀ a, deriv (w a) 0 = β) :
     (∀ a x : ℝ, w a x = ((w a x).re : ℂ) ∧ deriv (w a) x = ((deriv (w a) x).re : ℂ)) ∧
     (∀ a x : ℝ, HasDerivAt (fun x : ℝ => (w a x).re) (deriv (w a) x).re x) ∧
@@ -166,7 +168,8 @@ private lemma exists_encard_zeros_inter_Iio_of_endpoint {G : ℂ → ℂ} (hG : 
 
 /-- The real roots `a` of `w_I(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
 order. -/
-private lemma exists_nth_zero_mathieuWI_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWI a q (π / 2) = 0},
+private lemma exists_nth_zero_mathieuWI_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈
+    {a : ℝ | mathieuWI a q (π / 2) = 0},
     ({a : ℝ | mathieuWI a q (π / 2) = 0} ∩ Iio x).encard = k := by
   obtain ⟨hre, hd, hd', hent⟩ := real_family_of_isMathieuSolution q (w := fun a => mathieuWI a q)
     (fun a => isMathieuSolution_mathieuWI a q) (α := 1) (β := 0)
@@ -180,14 +183,17 @@ private lemma exists_nth_zero_mathieuWI_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈ 
   rw [← hpi]
   refine exists_encard_zeros_inter_Iio_of_endpoint (G := fun μ => mathieuWI μ q ((π / 2 : ℝ) : ℂ))
     (hent _).1 (fun a => (hre a _).1) ⟨-(2 * |q| + 1), fun a ha => ?_⟩ ?_ k
-  · exact (ODE.endpoint_ne_zero_of_lt_neg (by positivity) (abs_two_mul_cos_two_mul_le_add_one q) ha (hd a) (hd' a)
+  · exact (ODE.endpoint_ne_zero_of_lt_neg (by positivity) (abs_two_mul_cos_two_mul_le_add_one q)
+        ha (hd a) (hd' a)
       (by rw [h0, h1]; norm_num) (Or.inl (by rw [h0]; norm_num))).1
-  · exact ODE.sign_changes_val_initial_one_zero (Y := fun a x => (mathieuWI a q x).re) hM (by positivity)
+  · exact ODE.sign_changes_val_initial_one_zero (Y := fun a x => (mathieuWI a q x).re) hM
+        (by positivity)
       (abs_two_mul_cos_two_mul_le_add_one q) hd hd' h0 h1
 
 /-- The real roots `a` of `w_I'(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
 order. -/
-private lemma exists_nth_zero_deriv_mathieuWI_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | deriv (mathieuWI a q) (π / 2) = 0},
+private lemma exists_nth_zero_deriv_mathieuWI_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈
+    {a : ℝ | deriv (mathieuWI a q) (π / 2) = 0},
     ({a : ℝ | deriv (mathieuWI a q) (π / 2) = 0} ∩ Iio x).encard = k := by
   obtain ⟨hre, hd, hd', hent⟩ := real_family_of_isMathieuSolution q (w := fun a => mathieuWI a q)
     (fun a => isMathieuSolution_mathieuWI a q) (α := 1) (β := 0)
@@ -199,16 +205,20 @@ private lemma exists_nth_zero_deriv_mathieuWI_half_pi (q : ℝ) (k : ℕ) : ∃ 
   have h1 : ∀ a : ℝ, (deriv (mathieuWI a q) ((0 : ℝ) : ℂ)).re = 0 := fun a => by
     simp [(mathieuWI_spec a q).2.2]
   rw [← hpi]
-  refine exists_encard_zeros_inter_Iio_of_endpoint (G := fun μ => deriv (mathieuWI μ q) ((π / 2 : ℝ) : ℂ))
+  refine exists_encard_zeros_inter_Iio_of_endpoint
+      (G := fun μ => deriv (mathieuWI μ q) ((π / 2 : ℝ) : ℂ))
     (hent _).2 (fun a => (hre a _).2) ⟨-(2 * |q| + 1), fun a ha => ?_⟩ ?_ k
-  · exact (ODE.endpoint_ne_zero_of_lt_neg (by positivity) (abs_two_mul_cos_two_mul_le_add_one q) ha (hd a) (hd' a)
+  · exact (ODE.endpoint_ne_zero_of_lt_neg (by positivity) (abs_two_mul_cos_two_mul_le_add_one q)
+        ha (hd a) (hd' a)
       (by rw [h0, h1]; norm_num) (Or.inl (by rw [h0]; norm_num))).2
-  · exact ODE.sign_changes_deriv_initial_one_zero (Y := fun a x => (mathieuWI a q x).re) hM (by positivity)
+  · exact ODE.sign_changes_deriv_initial_one_zero (Y := fun a x => (mathieuWI a q x).re) hM
+        (by positivity)
       (abs_two_mul_cos_two_mul_le_add_one q) hd hd' h0 h1
 
 /-- The real roots `a` of `w_II(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
 order. -/
-private lemma exists_nth_zero_mathieuWII_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWII a q (π / 2) = 0},
+private lemma exists_nth_zero_mathieuWII_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈
+    {a : ℝ | mathieuWII a q (π / 2) = 0},
     ({a : ℝ | mathieuWII a q (π / 2) = 0} ∩ Iio x).encard = k := by
   obtain ⟨hre, hd, hd', hent⟩ := real_family_of_isMathieuSolution q (w := fun a => mathieuWII a q)
     (fun a => isMathieuSolution_mathieuWII a q) (α := 0) (β := 1)
@@ -222,14 +232,17 @@ private lemma exists_nth_zero_mathieuWII_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈
   rw [← hpi]
   refine exists_encard_zeros_inter_Iio_of_endpoint (G := fun μ => mathieuWII μ q ((π / 2 : ℝ) : ℂ))
     (hent _).1 (fun a => (hre a _).1) ⟨-(2 * |q| + 1), fun a ha => ?_⟩ ?_ k
-  · exact (ODE.endpoint_ne_zero_of_lt_neg (by positivity) (abs_two_mul_cos_two_mul_le_add_one q) ha (hd a) (hd' a)
+  · exact (ODE.endpoint_ne_zero_of_lt_neg (by positivity) (abs_two_mul_cos_two_mul_le_add_one q)
+        ha (hd a) (hd' a)
       (by rw [h0, h1]; norm_num) (Or.inr (by rw [h1]; norm_num))).1
-  · exact ODE.sign_changes_val_initial_zero_one (Y := fun a x => (mathieuWII a q x).re) hM (by positivity)
+  · exact ODE.sign_changes_val_initial_zero_one (Y := fun a x => (mathieuWII a q x).re) hM
+        (by positivity)
       (abs_two_mul_cos_two_mul_le_add_one q) hd hd' h0 h1
 
 /-- The real roots `a` of `w_II'(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
 order. -/
-private lemma exists_nth_zero_deriv_mathieuWII_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | deriv (mathieuWII a q) (π / 2) = 0},
+private lemma exists_nth_zero_deriv_mathieuWII_half_pi (q : ℝ) (k : ℕ) : ∃ x ∈
+    {a : ℝ | deriv (mathieuWII a q) (π / 2) = 0},
     ({a : ℝ | deriv (mathieuWII a q) (π / 2) = 0} ∩ Iio x).encard = k := by
   obtain ⟨hre, hd, hd', hent⟩ := real_family_of_isMathieuSolution q (w := fun a => mathieuWII a q)
     (fun a => isMathieuSolution_mathieuWII a q) (α := 0) (β := 1)
@@ -241,11 +254,14 @@ private lemma exists_nth_zero_deriv_mathieuWII_half_pi (q : ℝ) (k : ℕ) : ∃
   have h1 : ∀ a : ℝ, (deriv (mathieuWII a q) ((0 : ℝ) : ℂ)).re = 1 := fun a => by
     simp [(mathieuWII_spec a q).2.2]
   rw [← hpi]
-  refine exists_encard_zeros_inter_Iio_of_endpoint (G := fun μ => deriv (mathieuWII μ q) ((π / 2 : ℝ) : ℂ))
+  refine exists_encard_zeros_inter_Iio_of_endpoint
+      (G := fun μ => deriv (mathieuWII μ q) ((π / 2 : ℝ) : ℂ))
     (hent _).2 (fun a => (hre a _).2) ⟨-(2 * |q| + 1), fun a ha => ?_⟩ ?_ k
-  · exact (ODE.endpoint_ne_zero_of_lt_neg (by positivity) (abs_two_mul_cos_two_mul_le_add_one q) ha (hd a) (hd' a)
+  · exact (ODE.endpoint_ne_zero_of_lt_neg (by positivity) (abs_two_mul_cos_two_mul_le_add_one q)
+        ha (hd a) (hd' a)
       (by rw [h0, h1]; norm_num) (Or.inr (by rw [h1]; norm_num))).2
-  · exact ODE.sign_changes_deriv_initial_zero_one (Y := fun a x => (mathieuWII a q x).re) hM (by positivity)
+  · exact ODE.sign_changes_deriv_initial_zero_one (Y := fun a x => (mathieuWII a q x).re) hM
+        (by positivity)
       (abs_two_mul_cos_two_mul_le_add_one q) hd hd' h0 h1
 
 /-- **Existence of the eigenvalues** (DLMF §28.2(v)): for real `q` each spectrum of Table 28.2.1

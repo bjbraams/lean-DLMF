@@ -116,7 +116,8 @@ theorem exists_connection_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     · rw [h1z₀, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht.1]
       linarith [ht.2]
   have htn : ‖(t : ℂ)‖ < 1 := by rw [← h1z₀]; exact hz₀L.2
-  have htslit : (t : ℂ) ∈ slitPlane := by rw [← h1z₀]; exact one_sub_mem_slitPlane_of_mem_connLens hz₀L
+  have htslit : (t : ℂ) ∈ slitPlane := by rw [← h1z₀];
+                                          exact one_sub_mem_slitPlane_of_mem_connLens hz₀L
   -- Derivatives at `z₀`.
   have hHt : AnalyticAt ℂ H t := analyticAt_ordinaryHypergeometric htn
   have hGt : AnalyticAt ℂ G t := analyticAt_ordinaryHypergeometric htn
@@ -261,7 +262,8 @@ theorem zero_first_connection_one_base {a b c : ℂ} (ha : ∀ k : ℤ, a ≠ (k
     intro x hx0 hx1
     exact hαβ _ (hmem x hx0 hx1)
   have hsub1 : Tendsto (fun x : ℝ => (1 : ℂ) - x) (𝓝[<] 1) (𝓝 0) := by
-    have := ((show Continuous (fun x : ℝ => (1 : ℂ) - (x : ℂ)) by fun_prop).tendsto (1 : ℝ)).mono_left
+    have := ((show Continuous (fun x : ℝ => (1 : ℂ) - (x : ℂ)) by fun_prop).tendsto
+        (1 : ℝ)).mono_left
       (nhdsWithin_le_nhds (s := Set.Iio (1 : ℝ)))
     simpa using this
   have hsub0 : Tendsto (fun x : ℝ => 1 - x) (𝓝[>] 0) (𝓝[<] 1) := by
@@ -321,7 +323,8 @@ theorem zero_first_connection_one_base {a b c : ℂ} (ha : ∀ k : ℤ, a ≠ (k
       · have h1 := (continuousAt_cpow_const (b := c - a - b) one_mem_slitPlane).tendsto
         rw [one_cpow] at h1
         refine h1.comp ?_
-        have := ((show Continuous (fun x : ℝ => (1 : ℂ) - (x : ℂ)) by fun_prop).tendsto (0 : ℝ)).mono_left
+        have := ((show Continuous (fun x : ℝ => (1 : ℂ) - (x : ℂ)) by fun_prop).tendsto
+            (0 : ℝ)).mono_left
           (nhdsWithin_le_nhds (s := Set.Ioi (0 : ℝ)))
         simpa using this
       · have := (tendsto_ordinaryHypergeometric_left_one hre'').comp hsub0
@@ -536,7 +539,8 @@ theorem connLhs_eq_connRhs (a b c : ℂ) {z : ℂ} (hz : z ∈ connLens) :
 theorem zero_first_connection_one_of_not_neg_nat {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hz : ‖z‖ < 1) (hw : ‖1 - z‖ < 1) :
     ₂F₁ a b c z =
-      Gamma c * Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b)) * oneFirst a b c z + Gamma c * Gamma (a
+      Gamma c * Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b)) * oneFirst a b c z +
+          Gamma c * Gamma (a
         + b - c) / (Gamma a * Gamma b) * oneSecond a b c z := by
   have hP := connLhs_eq_connRhs a b c (z := z) ⟨hz, hw⟩
   have hc' := hc
@@ -582,7 +586,8 @@ theorem zero_first_connection_one_of_not_neg_nat {a b c z : ℂ} (hc : ∀ k : �
 theorem zero_first_connection_one {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hz : ‖z‖ < 1) (hw : ‖1 - z‖ < 1) :
     ₂F₁ a b c z =
-      Gamma c * Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b)) * oneFirst a b c z + Gamma c * Gamma (a
+      Gamma c * Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b)) * oneFirst a b c z +
+          Gamma c * Gamma (a
         + b - c) / (Gamma a * Gamma b) * oneSecond a b c z := by
   exact zero_first_connection_one_of_not_neg_nat (not_neg_nat_of_not_int hc) he hz hw
 
@@ -593,7 +598,8 @@ Gamma (a + b - c) / (Gamma (a - c + 1) * Gamma (b - c + 1)) * oneSecond a b c z`
 theorem zero_second_connection_one {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hz : ‖z‖ < 1) (hw : ‖1 - z‖ < 1) :
     zeroSecond a b c z =
-      Gamma (2 - c) * Gamma (c - a - b) / (Gamma (1 - a) * Gamma (1 - b)) * oneFirst a b c z + Gamma (2 - c)
+      Gamma (2 - c) * Gamma (c - a - b) / (Gamma (1 - a) * Gamma (1 - b)) *
+          oneFirst a b c z + Gamma (2 - c)
         * Gamma (a + b - c) / (Gamma (a - c + 1) * Gamma (b - c + 1)) * oneSecond a b c z := by
   have hz0 : z ≠ 0 := ne_zero_of_mem_connLens ⟨hz, hw⟩
   have hc' : ∀ k : ℤ, 2 - c ≠ (k : ℂ) := fun k h => hc (2 - k) (by
@@ -637,7 +643,8 @@ theorem zero_second_connection_one {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k :
 theorem one_first_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hz : ‖z‖ < 1) (hw : ‖1 - z‖ < 1) :
     oneFirst a b c z =
-      Gamma (1 - c) * Gamma (a + b - c + 1) / (Gamma (a - c + 1) * Gamma (b - c + 1)) * ₂F₁ a b c z + Gamma
+      Gamma (1 - c) * Gamma (a + b - c + 1) / (Gamma (a - c + 1) * Gamma (b - c + 1)) *
+          ₂F₁ a b c z + Gamma
         (c - 1) * Gamma (a + b - c + 1) / (Gamma a * Gamma b) * zeroSecond a b c z := by
   have hc' : ∀ k : ℤ, a + b - c + 1 ≠ (k : ℂ) := fun k h => he (1 - k) (by
     push_cast; linear_combination -h)
@@ -663,7 +670,8 @@ Gamma (c - a - b + 1) / (Gamma (c - a) * Gamma (c - b)) * zeroSecond a b c z`. -
 theorem one_second_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hz : ‖z‖ < 1) (hw : ‖1 - z‖ < 1) :
     oneSecond a b c z =
-      Gamma (1 - c) * Gamma (c - a - b + 1) / (Gamma (1 - a) * Gamma (1 - b)) * ₂F₁ a b c z + Gamma (c - 1)
+      Gamma (1 - c) * Gamma (c - a - b + 1) / (Gamma (1 - a) * Gamma (1 - b)) *
+          ₂F₁ a b c z + Gamma (c - 1)
         * Gamma (c - a - b + 1) / (Gamma (c - a) * Gamma (c - b)) * zeroSecond a b c z := by
   have hc' : ∀ k : ℤ, a + b - c + 1 ≠ (k : ℂ) := fun k h => he (1 - k) (by
     push_cast; linear_combination -h)

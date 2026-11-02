@@ -191,7 +191,8 @@ theorem airyMod_rem_bounds (K : ℕ) {w : ℝ} (hw : 0 ≤ w) :
         ((-1) ^ K * airyMod_rem K v) v := fun v => by
       convert (airyMod_hasDerivAt_rem K v).const_mul ((-1 : ℝ) ^ (K + 1)) using 1; ring
     have hh : ∀ v : ℝ, HasDerivAt (fun v => v ^ (K + 1) / (Nat.factorial (K + 1) : ℝ) -
-        (-1) ^ (K + 1) * airyMod_rem (K + 1) v) (v ^ K / (Nat.factorial K : ℝ) - (-1) ^ K * airyMod_rem K v) v :=
+        (-1) ^ (K + 1) * airyMod_rem (K + 1) v)
+            (v ^ K / (Nat.factorial K : ℝ) - (-1) ^ K * airyMod_rem K v) v :=
       fun v => by
         convert ((hasDerivAt_pow (K + 1) v).div_const (Nat.factorial (K + 1) : ℝ)).sub (hg v)
           using 1
@@ -285,13 +286,15 @@ theorem airyMod_sq_error_integral {s : ℝ} (hs : 0 < s) (N : ℕ) :
     ring
   have hA : IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
       airyMod_rem N (t ^ 3 / 12)) (Ioi 0) := by
-    refine ((airyMod_kernel_integrable (-s)).sub (integrable_finsetSum (Finset.range N) fun k _ => hB k)).congr_fun
+    refine ((airyMod_kernel_integrable (-s)).sub
+        (integrable_finsetSum (Finset.range N) fun k _ => hB k)).congr_fun
       (fun t (ht : 0 < t) => ?_) measurableSet_Ioi
     simp only [Pi.sub_apply, hpt t ht]
     ring
   refine ⟨hA, ?_⟩
   rw [airyMod_sq_eq_integral, setIntegral_congr_fun measurableSet_Ioi hpt,
-    integral_add hA (integrable_finsetSum (Finset.range N) fun k _ => hB k), integral_finsetSum (Finset.range N) fun k _ => hB k]
+    integral_add hA (integrable_finsetSum (Finset.range N) fun k _ => hB k),
+        integral_finsetSum (Finset.range N) fun k _ => hB k]
   simp only [hBi, airyModulusSum, Bool.false_eq_true, ite_false]
   rw [Finset.mul_sum, div_eq_inv_mul, mul_add, Finset.mul_sum]
   have : ∀ k ∈ Finset.range N, (π * Real.sqrt π)⁻¹ * (Real.Gamma ((3 * k : ℕ) + 1 / 2) *
@@ -303,8 +306,11 @@ theorem airyMod_sq_error_integral {s : ℝ} (hs : 0 < s) (N : ℕ) :
 
 /-- Signed first-neglected-term bound for the expansion of `M²` at `-∞` (DLMF §9.8(iv)). -/
 theorem airyMod_sq_error_bound {x : ℝ} (hx : x < 0) (N : ℕ) :
-    |(airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x| ≤ |((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))| ∧
-      0 ≤ ((airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x) * (((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))) := by
+    |(airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) *
+        airyModulusSum false N x| ≤ |((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N *
+        x ^ (-(3 * N : ℤ))| ∧
+      0 ≤ ((airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x) *
+          (((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))) := by
   obtain ⟨s, hs, rfl⟩ : ∃ s : ℝ, 0 < s ∧ x = -s := ⟨-x, by linarith, by ring⟩
   rw [neg_neg]
   have hπ := Real.pi_pos
@@ -343,7 +349,8 @@ theorem airyMod_sq_error_bound {x : ℝ} (hx : x < 0) (N : ℕ) :
   have hG : 0 ≤ G / (12 ^ N * N !) := hJ1.trans hJ2
   constructor
   · rw [show (π * Real.sqrt π)⁻¹ * J = (-1) ^ N * ((π * Real.sqrt π)⁻¹ * ((-1) ^ N * J)) by
-      rw [← mul_assoc ((-1 : ℝ) ^ N), mul_comm ((-1 : ℝ) ^ N), mul_assoc, ← mul_assoc ((-1 : ℝ) ^ N),
+      rw [← mul_assoc ((-1 : ℝ) ^ N), mul_comm ((-1 : ℝ) ^ N), mul_assoc,
+          ← mul_assoc ((-1 : ℝ) ^ N),
         ← pow_two, hsq, one_mul],
       show (π * Real.sqrt π)⁻¹ * (G * ((-1) ^ N / (12 ^ N * N !))) =
         (-1) ^ N * ((π * Real.sqrt π)⁻¹ * (G / (12 ^ N * N !))) by ring,
@@ -381,7 +388,8 @@ theorem airyMod_derivSq_eq_integral (x : ℝ) :
     rw [hc t ht]; push_cast
     rw [sub_eq_add_neg, Complex.exp_add]; ring
   have hI2 : (∫ t : ℝ in Ioi 0, exp ((x : ℂ) * t - (t : ℂ) ^ 3 / 12) *
-      ((t : ℂ) ^ 2 * (t : ℂ) ^ (-1 / 2 : ℂ))) = ((∫ t in Ioi (0 : ℝ), airyMod_kernel2 x t : ℝ) : ℂ) := by
+      ((t : ℂ) ^ 2 * (t : ℂ) ^ (-1 / 2 : ℂ))) =
+          ((∫ t in Ioi (0 : ℝ), airyMod_kernel2 x t : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
     simp only [airyMod_kernel2]
@@ -390,7 +398,8 @@ theorem airyMod_derivSq_eq_integral (x : ℝ) :
   rw [hI, hI2] at h
   rw [airyDerivModulus_sq]
   have h' : ((airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2 : ℝ) : ℂ) =
-      ((((∫ t in Ioi (0 : ℝ), airyMod_kernel2 x t) / 2 - x * ∫ t in Ioi (0 : ℝ), airyMod_kernel x t) /
+      ((((∫ t in Ioi (0 : ℝ), airyMod_kernel2 x t) / 2 - x * ∫ t in Ioi (0 : ℝ),
+          airyMod_kernel x t) /
         (π * Real.sqrt π) : ℝ) : ℂ) := by
     push_cast; rw [h]; push_cast; ring
   exact_mod_cast h'
@@ -482,7 +491,8 @@ theorem airyMod_kernel2_error {s : ℝ} (hs : 0 < s) (N : ℕ) :
       field_simp
     rw [← Finset.sum_congr rfl this, ← Finset.mul_sum]
     ring
-  have hg : IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ ((((3 * N + 2 : ℕ) : ℝ) + 1 / 2) - 1) /
+  have hg : IntegrableOn
+      (fun t : ℝ => Real.exp (-s * t) * t ^ ((((3 * N + 2 : ℕ) : ℝ) + 1 / 2) - 1) /
       (12 ^ N * N !)) (Ioi 0) := (airyMod_mom_integral (3 * N + 2) hs).1.div_const _
   have hA : IntegrableOn (fun t : ℝ => Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
       airyMod_rem N (t ^ 3 / 12)) (Ioi 0) := by
@@ -571,7 +581,8 @@ theorem airyMod_derivSq_error {x : ℝ} (hx : x < 0) (N : ℕ) :
       show s ^ (3 * N + 3) = s ^ (3 * N + 2) * (s ^ (1 / 2 : ℝ) * s ^ (1 / 2 : ℝ)) by
         rw [← Real.rpow_add hs]; norm_num; ring]
     field_simp
-  have hpsi : s * |s ^ (-1 / 2 : ℝ) / π * airyModulusCoeff (N + 1) * (-s) ^ (-(3 * (N + 1 : ℕ) : ℤ))| =
+  have hpsi : s * |s ^ (-1 / 2 : ℝ) / π * airyModulusCoeff (N + 1) *
+      (-s) ^ (-(3 * (N + 1 : ℕ) : ℤ))| =
       |airyModulusCoeff (N + 1)| * |s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (N + 1 : ℕ) : ℤ))| := by
     rw [← hsq, ← abs_of_pos hs]
     simp only [abs_mul, abs_div, abs_of_pos hπ, abs_abs]
@@ -719,14 +730,17 @@ theorem airyMod_derivErr_integrable (s : ℝ) (hs : 0 < s) (K : ℕ) :
     exact h1
 
 /-- Integration by parts for the `M²` error integrand:
-`s ∫ e^{-st} t^{-1/2} R_{K+1}(t³/12) = ∫ e^{-st} t^{-1/2}(t² R_K/4 - R_{K+1}/(2t)) - ½ ∫ e^{-st} t^{3/2} R_K`. -/
+`s ∫ e^{-st} t^{-1/2} R_{K+1}(t³/12) = ∫ e^{-st} t^{-1/2}(t² R_K/4 - R_{K+1}/(2t)) - ½ ∫ e^{-st}
+t^{3/2} R_K`. -/
 theorem airyMod_derivErr_ibp {s : ℝ} (hs : 0 < s) (K : ℕ) :
-    s * ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * airyMod_rem (K + 1) (t ^ 3 / 12) =
+    s * ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
+        airyMod_rem (K + 1) (t ^ 3 / 12) =
       (∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
         (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))) -
       (∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
         airyMod_rem K (t ^ 3 / 12)) / 2 := by
-  set F : ℝ → ℝ := fun t => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * airyMod_rem (K + 1) (t ^ 3 / 12)
+  set F : ℝ → ℝ := fun t => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
+      airyMod_rem (K + 1) (t ^ 3 / 12)
   set E : ℝ → ℝ := fun t => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
     (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))
   set B : ℝ → ℝ := fun t => Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
@@ -883,7 +897,8 @@ theorem airyMod_cross_eq_integral (x : ℝ) :
   rw [airyAi_ofReal_eq, airyBi_ofReal_eq, airyAiDeriv_ofReal_eq, airyBiDeriv_ofReal_eq,
     airyMod_pi_cpow] at h
   have hI : (∫ t : ℝ in Ioi 0, exp ((x : ℂ) * t - (t : ℂ) ^ 3 / 12) *
-      ((t : ℂ) ^ 1 * (t : ℂ) ^ (-1 / 2 : ℂ))) = ((∫ t in Ioi (0 : ℝ), airyMod_kernel1 x t : ℝ) : ℂ) := by
+      ((t : ℂ) ^ 1 * (t : ℂ) ^ (-1 / 2 : ℂ))) =
+          ((∫ t in Ioi (0 : ℝ), airyMod_kernel1 x t : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
     have hc : ((t : ℂ) ^ (-1 / 2 : ℂ)) = ((t ^ (-(1 / 2) : ℝ) : ℝ) : ℂ) := by
@@ -895,7 +910,8 @@ theorem airyMod_cross_eq_integral (x : ℝ) :
   exact_mod_cast h
 
 /-- `|x|^{1/2} M(x)² < 1/π` for `x < 0`. -/
-theorem airyMod_sqrt_mul_sq_lt {s : ℝ} (hs : 0 < s) : s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2 < 1 / π := by
+theorem airyMod_sqrt_mul_sq_lt {s : ℝ} (hs : 0 < s) : s ^ (1 / 2 : ℝ) *
+    airyModulus (-s) ^ 2 < 1 / π := by
   have hπ := Real.pi_pos
   rw [airyMod_sqrt_mul_sq hs]
   have hG : ∫ u in Ioi (0 : ℝ), Real.exp (-u) * u ^ (-(1 / 2) : ℝ) = Real.sqrt π := by

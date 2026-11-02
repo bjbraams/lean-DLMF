@@ -80,7 +80,8 @@ private lemma cfInt_aestronglyMeasurable_laplace_rpow (r p s : ℝ) :
   refine ContinuousOn.aestronglyMeasurable (fun t ht => ?_) measurableSet_Ioi
   have ht0 : (0 : ℝ) < t := ht
   exact (((Real.continuousAt_rpow_const _ _ (Or.inl ht0.ne')).mul
-    (Real.continuousAt_rpow_const _ _ (Or.inl (by simp only [Pi.add_apply, _root_.id]; linarith)) |>.comp
+    (Real.continuousAt_rpow_const _ _
+        (Or.inl (by simp only [Pi.add_apply, _root_.id]; linarith)) |>.comp
       (continuous_const.add continuous_id).continuousAt)).mul
     (Real.continuous_exp.comp (by fun_prop)).continuousAt).continuousWithinAt
 
@@ -461,12 +462,14 @@ theorem cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s :
     have hGk := cfInt_norm_Gamma_add_nat_ge (w := ν + 1) (by simp; linarith) k
     simp only [add_re, one_re] at hGk
     have hGnk : 0 < ‖Gamma (ν + 1 + k)‖ := by
-      have := Gamma_ne_zero_of_re_pos (s := ν + 1 + k) (by simp; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)])
+      have := Gamma_ne_zero_of_re_pos (s := ν + 1 + k)
+          (by simp; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)])
       exact norm_pos_iff.mpr this
     have hG1 : 0 < ‖Gamma (ν + 1)‖ := norm_pos_iff.mpr hG0
     rw [show ν + 1 + (k : ℂ) = ν + 1 + k by rfl] at hGnk
     simp only [norm_div, norm_one, norm_mul, Complex.norm_natCast]
-    rw [show ν.re + k + 1 = ν.re + 1 + k by ring, show -(ν.re + 1 + k) = -(ν.re + 1) + -(k : ℝ) by ring,
+    rw [show ν.re + k + 1 = ν.re + 1 + k by ring, show -(ν.re + 1 + k) = -(ν.re + 1) +
+                                              -(k : ℝ) by ring,
       Real.rpow_add hs, Real.rpow_neg hs.le (k : ℝ), Real.rpow_natCast, div_pow]
     have hfac : (0 : ℝ) < k.factorial := by positivity
     have hsk : (0 : ℝ) < s ^ k := by positivity
@@ -902,7 +905,8 @@ theorem cfInt_integral_cos_gauss (x : ℝ) {s : ℝ} (hs : 0 < s) :
       show I * (-(2 * (x : ℂ))) * t = -(2 * x * t) * I by ring,
       show -((s : ℂ) * (t : ℂ) ^ 2) = -(s : ℂ) * (t : ℂ) ^ 2 by ring]
     ring
-  have hI : ∀ T : ℝ, Integrable (fun t : ℝ => cexp (I * T * t) * cexp (-(s : ℂ) * (t : ℂ) ^ 2)) := by
+  have hI : ∀ T : ℝ, Integrable
+      (fun t : ℝ => cexp (I * T * t) * cexp (-(s : ℂ) * (t : ℂ) ^ 2)) := by
     intro T
     refine (integrable_exp_neg_mul_sq hs).mono' (Continuous.aestronglyMeasurable (by fun_prop))
       (Eventually.of_forall fun t => ?_)
@@ -926,7 +930,8 @@ theorem cfInt_integral_cos_gauss (x : ℝ) {s : ℝ} (hs : 0 < s) :
   rw [ofReal_cpow (by positivity), ofReal_mul, ofReal_cpow hs.le] at hc
   push_cast at hc
   rw [show (((∫ t, g t) / 2 : ℝ) : ℂ) = ((∫ t, g t : ℝ) : ℂ) / 2 by push_cast; ring,
-    integral_complex_ofReal.symm, show (fun t : ℝ => (g t : ℂ)) = _ from funext hsplit, integral_div,
+    integral_complex_ofReal.symm, show (fun t : ℝ => (g t : ℂ)) =
+        _ from funext hsplit, integral_div,
     integral_add (hI _) (hI _), h1, h2, hc]
   ring
 
@@ -971,7 +976,8 @@ theorem cfInt_cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a) (
     intro s hs
     have hI := (integrable_exp_neg_mul_sq hs.1).integrableOn (s := Ioi (0:ℝ))
     have hInt : IntegrableOn (fun t => G t s) (Ioi 0) :=
-      (hI.const_mul (w s)).mono' ((hEm.comp (measurable_id.prodMk measurable_const)).aestronglyMeasurable)
+      (hI.const_mul (w s)).mono'
+          ((hEm.comp (measurable_id.prodMk measurable_const)).aestronglyMeasurable)
         (Eventually.of_forall fun t => hnG s hs t)
     refine ⟨hInt, ?_⟩
     calc ∫ t in Ioi 0, ‖G t s‖ ≤ ∫ t in Ioi 0, w s * Real.exp (-s * t ^ 2) :=

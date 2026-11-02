@@ -130,7 +130,8 @@ theorem hasSum_besselJ_graf (n : ℤ) {u v w α χ : ℂ} (hc : w * cos χ = u -
   set F1 : ℤ → ℝ → ℂ := fun m θ => besselJ m w * E ^ m * exp (I * (m - n : ℤ) * θ)
   have h1 : HasSum (fun m => ∫ θ in (0 : ℝ)..2 * π, F1 m θ)
       (∫ θ in (0 : ℝ)..2 * π, G θ * exp (-(I * n * θ))) := by
-    refine hasSum_intervalIntegral_of_norm_le (b := fun m => ‖besselJ m w‖ * Real.exp |χ.im| ^ m.natAbs)
+    refine hasSum_intervalIntegral_of_norm_le
+        (b := fun m => ‖besselJ m w‖ * Real.exp |χ.im| ^ m.natAbs)
       (fun m => by simp only [F1]; fun_prop) (fun m θ => ?_)
       (summable_norm_besselJ_int_mul_pow w (Real.exp_pos _).le) (fun θ => ?_)
     · simp only [F1]

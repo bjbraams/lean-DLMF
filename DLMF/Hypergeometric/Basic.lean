@@ -13,6 +13,11 @@ public import DLMF.Hypergeometric.Basic.GaussSeries
 public import DLMF.Hypergeometric.Basic.GaussEquation
 public import DLMF.Hypergeometric.Basic.ParameterAnalyticity
 public import DLMF.Hypergeometric.Basic.CutPlane
+public import DLMF.Hypergeometric.Basic.SpecialValues
+public import DLMF.Hypergeometric.Basic.RealPochhammer
+public import DLMF.Hypergeometric.Basic.GeneralizedEquation
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
+public import DLMF.Hypergeometric.Basic.GeneralizedIntegral
 
 /-!
 # Definitions and elementary coefficient algebra for hypergeometric functions
@@ -24,6 +29,11 @@ This module collects the foundational definitions for DLMF Chapter 15: Pochhamme
 (`DLMF.Hypergeometric.Basic.AppellF4`), and the basic properties of the Gauss function: the series
 on the unit disk (`DLMF.Hypergeometric.Basic.GaussSeries`), the hypergeometric equation and its
 standard solutions (`DLMF.Hypergeometric.Basic.GaussEquation`), analyticity in the parameters
-(`DLMF.Hypergeometric.Basic.ParameterAnalyticity`) and the continuation to the cut plane
-(`DLMF.Hypergeometric.Basic.CutPlane`).
+(`DLMF.Hypergeometric.Basic.ParameterAnalyticity`), the continuation to the cut plane
+(`DLMF.Hypergeometric.Basic.CutPlane`) and special values
+(`DLMF.Hypergeometric.Basic.SpecialValues`). It also collects the real Pochhammer and series
+calculus (`DLMF.Hypergeometric.Basic.RealPochhammer`) and the generalized series `ₚF_q`: its
+differential equation (`DLMF.Hypergeometric.Basic.GeneralizedEquation`), termwise calculus
+(`DLMF.Hypergeometric.Basic.GeneralizedCalculus`) and Euler-type integrals
+(`DLMF.Hypergeometric.Basic.GeneralizedIntegral`).
 -/

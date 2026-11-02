@@ -416,7 +416,8 @@ theorem zcnt_fresnelCosInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
     fresnelCosInt ((1 + I) * x) ≠ 0 := by
   rw [zcnt_fresnelCosInt_diag]
   have hpos : 0 < ∫ t in (0 : ℝ)..1, Real.cosh (π * t ^ 2 * x ^ 2) :=
-    intervalIntegral.intervalIntegral_pos_of_pos_on (Continuous.intervalIntegrable (by fun_prop) _ _)
+    intervalIntegral.intervalIntegral_pos_of_pos_on
+        (Continuous.intervalIntegrable (by fun_prop) _ _)
       (fun t _ => Real.cosh_pos _) one_pos
   have h1 : (1 + I) ≠ 0 := fun h => by simpa using congrArg Complex.re h
   exact mul_ne_zero (mul_ne_zero h1 (by exact_mod_cast hx)) (by exact_mod_cast hpos.ne')
@@ -426,7 +427,8 @@ theorem zcnt_fresnelSinInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
     fresnelSinInt ((1 + I) * x) ≠ 0 := by
   rw [zcnt_fresnelSinInt_diag]
   have hpos : 0 < ∫ t in (0 : ℝ)..1, Real.sinh (π * t ^ 2 * x ^ 2) :=
-    intervalIntegral.intervalIntegral_pos_of_pos_on (Continuous.intervalIntegrable (by fun_prop) _ _)
+    intervalIntegral.intervalIntegral_pos_of_pos_on
+        (Continuous.intervalIntegrable (by fun_prop) _ _)
       (fun t ht => Real.sinh_pos_iff.mpr (by
         have : 0 < t := ht.1
         have : 0 < x ^ 2 := by positivity
@@ -703,7 +705,8 @@ theorem zcnt_octant_classification {f : ℂ → ℂ}
       rcases lt_or_gt_of_ne hd2 with h | h
       · obtain ⟨k, hk, hw⟩ := henum (-star z) (by simp; linarith)
           (by simp; linarith) ((hneg _).mpr ((hconj z).mpr h0))
-        exact ⟨k, hk, Or.inr (Or.inr (Or.inr (Or.inl (by rw [← hw, star_neg, star_star, neg_neg]))))⟩
+        exact ⟨k, hk, Or.inr
+            (Or.inr (Or.inr (Or.inl (by rw [← hw, star_neg, star_star, neg_neg]))))⟩
       · -- -x < y
         obtain ⟨k, hk, hw⟩ := henum (-I * z) (by simp; linarith)
           (by simp; linarith) ((hnegI z).mpr h0)

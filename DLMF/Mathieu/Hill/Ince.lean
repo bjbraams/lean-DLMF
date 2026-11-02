@@ -77,7 +77,8 @@ namespace DLMF.Mathieu
 /-! ### §28.31(i)–(ii) Whittaker–Hill and Ince equations -/
 
 /-- `cos 4z = 1 - 2 sin² 2z`. -/
-private lemma cos_four_mul_eq_one_sub_two_mul_sin_sq (z : ℂ) : Complex.cos (4 * z) = 1 - 2 * Complex.sin (2 * z) ^ 2 := by
+private lemma cos_four_mul_eq_one_sub_two_mul_sin_sq (z : ℂ) : Complex.cos (4 * z) = 1 - 2 *
+    Complex.sin (2 * z) ^ 2 := by
   rw [show (4 : ℂ) * z = 2 * (2 * z) by ring, Complex.cos_two_mul]
   have := Complex.sin_sq_add_cos_sq (2 * z)
   linear_combination (2 : ℂ) * this
@@ -111,7 +112,8 @@ theorem isWhittakerHillSolution_iff_isInceSolution {k c ξ η p : ℂ}
   set g : ℂ → ℂ := fun z => -(ξ * Complex.cos (2 * z)) / 4
   set g' : ℂ → ℂ := fun z => ξ * Complex.sin (2 * z) / 2
   set E : ℂ → ℂ := fun z => Complex.exp (g z)
-  have hE : ∀ z, HasDerivAt E (E z * g' z) z := fun z => (hasDerivAt_neg_mul_cos_two_mul_div_four ξ z).cexp
+  have hE : ∀ z, HasDerivAt E (E z * g' z) z := fun z =>
+      (hasDerivAt_neg_mul_cos_two_mul_div_four ξ z).cexp
   have hF : ∀ z, HasDerivAt (fun z => Complex.exp (-g z)) (Complex.exp (-g z) * -g' z) z :=
     fun z => (hasDerivAt_neg_mul_cos_two_mul_div_four ξ z).neg.cexp
   have hg' : ∀ z, HasDerivAt g' (ξ * Complex.cos (2 * z)) z := hasDerivAt_mul_sin_two_mul_div_two ξ
@@ -159,7 +161,8 @@ theorem isWhittakerHillSolution_iff_isInceSolution {k c ξ η p : ℂ}
 
 /-- Subsequences `A_{2ℓ+b}` of entire Fourier coefficients decay faster than every
 exponential in `ℓ`. -/
-private lemma summable_entireFourierCoeff_mul_exp {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (K : ℝ) :
+private lemma summable_entireFourierCoeff_mul_exp {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A)
+    (b : ℕ) (K : ℝ) :
     Summable (fun ℓ : ℕ => ‖A (2 * ℓ + b)‖ * Real.exp (K * ℓ)) := by
   have hinj : Function.Injective (fun ℓ : ℕ => 2 * ℓ + b) := fun i j h => by
     simp only at h; omega
@@ -327,7 +330,8 @@ def twoSidedSeq (a b : ℕ → ℂ) : ℤ → ℂ := fun n => match n with
 private lemma twoSidedSeq_natCast (a b : ℕ → ℂ) (ℓ : ℕ) : twoSidedSeq a b ℓ = a ℓ := rfl
 
 /-- `c_{-ℓ-1} = b_ℓ`. -/
-private lemma twoSidedSeq_neg_sub_one (a b : ℕ → ℂ) (ℓ : ℕ) : twoSidedSeq a b (-(ℓ : ℤ) - 1) = b ℓ := by
+private lemma twoSidedSeq_neg_sub_one (a b : ℕ → ℂ) (ℓ : ℕ) : twoSidedSeq a b
+    (-(ℓ : ℤ) - 1) = b ℓ := by
   rw [show -(ℓ : ℤ) - 1 = Int.negSucc ℓ by rw [Int.negSucc_eq]; ring]; rfl
 
 /-- Two-sided sequences built from sequences decaying faster than every exponential: decay,
@@ -382,7 +386,8 @@ private lemma summable_twoSidedSeq_and_hasSum {a b : ℕ → ℂ}
   · rw [show -((ℓ : ℤ) + 1) = -(ℓ : ℤ) - 1 by ring, twoSidedSeq_neg_sub_one]; push_cast; rfl
 
 /-- Halved subsequences of entire Fourier coefficients. -/
-private lemma summable_const_mul_entireFourierCoeff_mul_exp {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (κ : ℂ)
+private lemma summable_const_mul_entireFourierCoeff_mul_exp {A : ℕ → ℂ}
+    (hA : IsEntireFourierCoeff A) (b : ℕ) (κ : ℂ)
     (K : ℝ) : Summable (fun ℓ : ℕ => ‖κ * A (2 * ℓ + b)‖ * Real.exp (K * ℓ)) :=
   ((summable_entireFourierCoeff_mul_exp hA b K).mul_left ‖κ‖).congr fun ℓ => by rw [norm_mul]; ring
 
@@ -949,7 +954,8 @@ theorem integral_paraboloidal_orthogonal {p m₁ m₂ : ℕ} (h₁ : m₁ ≤ p)
         have e2 := periodic_of_isInceCosPoly hc z
         simp only at e1 e2
         rw [e1, e2]
-    exact integral_whittakerHillSolution_mul_eq_zero (paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).1
+    exact integral_whittakerHillSolution_mul_eq_zero
+        (paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).1
       (paraboloidal_isWhittakerHillSolution h₂ h₂' ξ).1 hA (hper s1.1) (hper s2.1)
   · have s1 := inceS_spec k₁ h₁ h₁' ξ
     have s2 := inceS_spec k₂ h₂ h₂' ξ
@@ -964,7 +970,8 @@ theorem integral_paraboloidal_orthogonal {p m₁ m₂ : ℕ} (h₁ : m₁ ≤ p)
         have e2 := periodic_of_isInceSinPoly hc z
         simp only at e1 e2
         rw [e1, e2]
-    exact integral_whittakerHillSolution_mul_eq_zero ((paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).2 k₁)
+    exact integral_whittakerHillSolution_mul_eq_zero
+        ((paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).2 k₁)
       ((paraboloidal_isWhittakerHillSolution h₂ h₂' ξ).2 k₂) hA (hper s1.1) (hper s2.1)
 
 /-- **Double orthogonality of `hc`** (DLMF 28.31.22): for real `ξ ≠ 0` and admissible

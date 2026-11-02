@@ -58,7 +58,8 @@ def gaussianProbabilityHh (n : ℕ) (z : ℂ) : ℂ :=
 /-- Completing the square identifies the Gaussian probability moments with cylinder U. -/
 theorem gaussianProbabilityHh_eq_pcfU (n : ℕ) (z : ℂ) :
     gaussianProbabilityHh n z=exp (-z^2/4)*pcfU (n+1/2) z := by
-  rw [pcfU_eq_integral (by simp only [add_re, natCast_re]; norm_num; linarith [(Nat.cast_nonneg n : (0:ℝ)≤n)])]
+  rw [pcfU_eq_integral
+      (by simp only [add_re, natCast_re]; norm_num; linarith [(Nat.cast_nonneg n : (0:ℝ)≤n)])]
   rw [show (1/2:ℂ)+(n+1/2)=(n:ℂ)+1 by ring, Gamma_nat_eq_factorial,
     show (n:ℂ)+1/2-1/2=n by ring]
   simp only [cpow_natCast]
@@ -83,7 +84,8 @@ theorem gaussianProbabilityHh_sqrt_two (n : ℕ) (z : ℂ) :
   have hc := integral_comp_mul_left_Ioi' F 0 hspos
   simp only [mul_zero, Complex.real_smul] at hc
   calc
-    gaussianProbabilityHh n ((Real.sqrt 2:ℂ)*z)=(Real.sqrt 2:ℂ)*∫ t : ℝ in Ioi 0, F (Real.sqrt 2*t) := hc.symm
+    gaussianProbabilityHh n ((Real.sqrt 2:ℂ)*z)=(Real.sqrt 2:ℂ)*∫ t : ℝ in Ioi 0,
+        F (Real.sqrt 2*t) := hc.symm
     _ = (Real.sqrt 2:ℂ)*∫ t : ℝ in Ioi 0,
         (Real.sqrt 2:ℂ)^n*((t:ℂ)^n/(n.factorial:ℂ)*exp (-(z+t)^2)) := by
       congr 1
@@ -157,7 +159,8 @@ theorem iteratedErfc_initial (z : ℂ) :
   have hs : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   rw [show ((Real.sqrt 2:ℂ)*z)/(Real.sqrt 2:ℂ)=z by field_simp,
     mul_pow, hs, show (2*z^2)/4=z^2/2 by ring]
-  rw [show (Real.sqrt (π/2):ℂ)=(Real.sqrt π:ℂ)/(Real.sqrt 2:ℂ) by exact_mod_cast Real.sqrt_div Real.pi_pos.le 2]
+  rw [show (Real.sqrt (π/2):ℂ)=(Real.sqrt π:ℂ)/(Real.sqrt 2:ℂ)
+      by exact_mod_cast Real.sqrt_div Real.pi_pos.le 2]
   rw [← mul_assoc, show 2/((Real.sqrt π:ℂ)*(Real.sqrt 2:ℂ)^(0+1))*exp (-z^2/2)*
       ((Real.sqrt π:ℂ)/(Real.sqrt 2:ℂ)*exp (z^2/2))=
       (2/(Real.sqrt 2:ℂ)^2)*(exp (-z^2/2)*exp (z^2/2)) by field_simp; ring,
@@ -178,7 +181,8 @@ theorem iteratedErfc_eq_pcfU_int (n : ℤ) (hn : -1≤n) (z : ℂ) :
     ring
   · have hn0 : 0≤n := by omega
     lift n to ℕ using hn0 with m
-    simpa only [Int.cast_natCast, ← Int.natCast_add_one, zpow_natCast] using iteratedErfc_eq_pcfU_nat m z
+    simpa only [Int.cast_natCast, ← Int.natCast_add_one, zpow_natCast] using
+        iteratedErfc_eq_pcfU_nat m z
 
 /-- Entire differentiability of every nonnegative repeated erfc integral. -/
 theorem differentiable_iteratedErfc (n : ℕ) : Differentiable ℂ (iteratedErfc n) := by
@@ -204,9 +208,11 @@ theorem hasDerivAt_iteratedErfc (n : ℕ) (z : ℂ) :
     exact iteratedErfc_eq_pcfU_int n (by omega) w
   rw [he]
   have hd : HasDerivAt (fun w : ℂ => exp (-w^2/2)) (-z*exp (-z^2/2)) z := by
-    convert (((hasDerivAt_pow 2 z).neg).div_const 2).cexp using 1 <;> simp only [Pi.neg_apply, Function.comp_apply] <;> ring
+    convert (((hasDerivAt_pow 2 z).neg).div_const 2).cexp using 1 <;>
+        simp only [Pi.neg_apply, Function.comp_apply] <;> ring
   have hu := (hasDerivAt_pcfU ((n:ℂ)+1/2) (s*z)).comp z ((hasDerivAt_id z).const_mul s)
-  refine (((hd.const_mul (c n)).mul hu).congr_of_eventuallyEq (Eventually.of_forall fun w=>rfl)).congr_deriv ?_
+  refine (((hd.const_mul (c n)).mul hu).congr_of_eventuallyEq
+      (Eventually.of_forall fun w=>rfl)).congr_deriv ?_
   rw [iteratedErfc_eq_pcfU_int ((n:ℤ)-1) (by omega), ← deriv_pcfU]
   change _ = -(c ((n:ℤ)-1)*exp (-z^2/2)*pcfU (((n:ℤ)-1:ℤ)+1/2) (s*z))
   rw [hc]
@@ -268,7 +274,8 @@ theorem tendsto_iteratedErfc_add_atTop (n : ℕ) (z : ℂ) :
       _ = _ := by rw [integral_const_mul]; ring
   refine squeeze_zero_norm' hev ?_
   have : Tendsto (fun R : ℝ => -(z.re+R)^2) atTop atBot := by
-    have h1 : Tendsto (fun R : ℝ => z.re+R) atTop atTop := tendsto_atTop_add_const_left _ _ tendsto_id
+    have h1 : Tendsto (fun R : ℝ => z.re+R) atTop atTop :=
+        tendsto_atTop_add_const_left _ _ tendsto_id
     exact tendsto_neg_atTop_atBot.comp ((tendsto_pow_atTop two_ne_zero).comp h1)
   simpa using (Real.tendsto_exp_atBot.comp this).const_mul (2/Real.sqrt π*(Real.exp (z.im^2)*M))
 
@@ -353,13 +360,16 @@ theorem hasDerivAt_exp_mul_iteratedErfc (n : ℕ) (z : ℂ) :
 (t^2)*erfc t) z=(-1 : ℂ)^n*2^n*n.factorial*exp (z^2)*iteratedErfc n z`. -/
 @[dlmf 7.18.E4]
 theorem iteratedDeriv_scaled_erfc (n : ℕ) (z : ℂ) :
-    iteratedDeriv n (fun t => exp (t^2)*erfc t) z=(-1 : ℂ)^n*2^n*n.factorial*exp (z^2)*iteratedErfc n z := by
+    iteratedDeriv n (fun t => exp (t^2)*erfc t) z=(-1 : ℂ)^n*2^n*n.factorial*exp
+        (z^2)*iteratedErfc n z := by
   induction n generalizing z with
-  | zero => simp only [iteratedDeriv_zero, pow_zero, Nat.factorial_zero, Nat.cast_one, Nat.cast_zero, one_mul]; rw [(iteratedErfc_initial z).2]
+  | zero => simp only [iteratedDeriv_zero, pow_zero, Nat.factorial_zero, Nat.cast_one,
+              Nat.cast_zero, one_mul]; rw [(iteratedErfc_initial z).2]
   | succ n ih =>
     rw [iteratedDeriv_succ,funext ih]
     have hf : (fun t : ℂ => (-1:ℂ)^n*2^n*(n.factorial:ℂ)*exp (t^2)*iteratedErfc n t)=
-        (fun t : ℂ => ((-1:ℂ)^n*2^n*(n.factorial:ℂ))*(exp (t^2)*iteratedErfc n t)) := by funext t; ring
+        (fun t : ℂ => ((-1:ℂ)^n*2^n*(n.factorial:ℂ))*(exp (t^2)*iteratedErfc n t)) :=
+            by funext t; ring
     rw [hf]
     rw [((hasDerivAt_exp_mul_iteratedErfc n z).const_mul _).deriv]
     rw [pow_succ,pow_succ,Nat.factorial_succ]
@@ -379,7 +389,8 @@ theorem hasDerivAt_deriv_iteratedErfc (n : ℕ) (z : ℂ) :
       rw [(iteratedErfc_initial w).1]
     rw [he]
     have hd := (((hasDerivAt_pow 2 z).neg).cexp).const_mul (-(2/(Real.sqrt π:ℂ)))
-    refine (hd.congr_of_eventuallyEq (Eventually.of_forall fun w=>by simp only [Pi.neg_apply]; ring)).congr_deriv ?_
+    refine (hd.congr_of_eventuallyEq
+        (Eventually.of_forall fun w=>by simp only [Pi.neg_apply]; ring)).congr_deriv ?_
     simp only [Pi.neg_apply,Nat.cast_zero,zero_mul,zero_sub,Nat.cast_ofNat,pow_one]
     ring
   | succ n =>
@@ -401,7 +412,8 @@ theorem hasDerivAt_deriv_iteratedErfc (n : ℕ) (z : ℂ) :
 /-- The stated relation follows from the given hypotheses: `let W`. -/
 @[dlmf 7.18.E5]
 theorem iteratedErfc_ode (n : ℕ) (A B z : ℂ) :
-    let W := fun t => A*iteratedErfc n t+B*iteratedErfc n (-t); deriv (deriv W) z+2*z*deriv W z-2*n*W z=0 := by
+    let W := fun t => A*iteratedErfc n t+B*iteratedErfc n (-t);
+        deriv (deriv W) z+2*z*deriv W z-2*n*W z=0 := by
   dsimp only
   have h1 (w : ℂ) := (differentiable_iteratedErfc n w).hasDerivAt
   have h2 (w : ℂ) := hasDerivAt_deriv_iteratedErfc n w
@@ -454,12 +466,14 @@ theorem iteratedErfc_ne_zero_at_zero (k : ℤ) (hk : -1≤k) : iteratedErfc k 0�
 /-- Identity under the stated parameter and domain assumptions: `∃ A B : ℂ, ∀ z, W
 z=A*iteratedErfc n z+B*iteratedErfc n (-z)`. -/
 @[dlmf 7.18.E5]
-theorem iteratedErfc_general_solution (n : ℕ) {W : ℂ → ℂ} (hW : Differentiable ℂ W) (hW2 : Differentiable ℂ (deriv W)) (hode : ∀ z, deriv (deriv W) z+2*z*deriv W z-2*n*W z=0) :
+theorem iteratedErfc_general_solution (n : ℕ) {W : ℂ → ℂ} (hW : Differentiable ℂ W)
+    (hW2 : Differentiable ℂ (deriv W)) (hode : ∀ z, deriv (deriv W) z+2*z*deriv W z-2*n*W z=0) :
     ∃ A B : ℂ, ∀ z, W z=A*iteratedErfc n z+B*iteratedErfc n (-z) := by
   let f : ℂ → ℂ := iteratedErfc n
   let g : ℂ → ℂ := fun z=>iteratedErfc n (-z)
   have hf : Differentiable ℂ f := differentiable_iteratedErfc n
-  have hf2 : Differentiable ℂ (deriv f) := fun z=>(hasDerivAt_deriv_iteratedErfc n z).differentiableAt
+  have hf2 : Differentiable ℂ (deriv f) :=
+      fun z=>(hasDerivAt_deriv_iteratedErfc n z).differentiableAt
   have hgd : deriv g=(fun z=> -deriv f (-z)) := by
     funext z
     exact ((hf (-z)).hasDerivAt.comp z (hasDerivAt_neg z)).deriv.trans (by simp)
@@ -531,7 +545,8 @@ theorem iteratedDeriv_iteratedErfc_zero (n k : ℕ) :
   have hc : 2/((Real.sqrt π:ℂ)*s^(n+1))*s^k*(Real.sqrt π:ℂ)/s^((n:ℤ)-k+1)=
       1/(2:ℂ)^((n:ℤ)-k) := by
     rw [zpow_add₀ hs0,zpow_sub₀ hs0,zpow_natCast,zpow_natCast,zpow_one,
-      zpow_sub₀ (by norm_num : (2:ℂ)≠0),zpow_natCast,zpow_natCast,← hs,pow_right_comm s 2 n,pow_right_comm s 2 k,pow_succ]
+      zpow_sub₀ (by norm_num : (2:ℂ)≠0), zpow_natCast, zpow_natCast, ← hs, pow_right_comm s 2 n,
+          pow_right_comm s 2 k, pow_succ]
     field_simp
     ring
   generalize Gamma (1+((n:ℂ)-k)/2)=G
@@ -542,7 +557,9 @@ theorem iteratedDeriv_iteratedErfc_zero (n k : ℕ) :
 ℂ)*Gamma (1+((n : ℂ)-k)/2)))` converges to `(iteratedErfc n z)`. -/
 @[dlmf 7.18.E6]
 theorem iteratedErfc_hasSum (n : ℕ) (z : ℂ) :
-    HasSum (fun k : ℕ => (-1 : ℂ)^k*z^k/((2 : ℂ)^((n : ℤ)-k)*(k.factorial : ℂ)*Gamma (1+((n : ℂ)-k)/2))) (iteratedErfc n z) := by
+    HasSum (fun k : ℕ =>
+        (-1 : ℂ)^k*z^k/((2 : ℂ)^((n : ℤ)-k)*(k.factorial : ℂ)*Gamma (1+((n : ℂ)-k)/2)))
+        (iteratedErfc n z) := by
   have h := Complex.hasSum_taylorSeries_of_entire (differentiable_iteratedErfc n) 0 z
   refine h.congr_fun fun k => ?_
   rw [iteratedDeriv_iteratedErfc_zero]
@@ -554,7 +571,8 @@ z+iteratedErfc n (-z)=I^(-(n : ℤ))/((2 : ℂ)^((n : ℤ)-1)*(n.factorial : ℂ
 (I*z)`. -/
 @[dlmf 7.18.E8]
 theorem iteratedErfc_hermite (n : ℕ) (z : ℂ) :
-    (-1 : ℂ)^n*iteratedErfc n z+iteratedErfc n (-z)=I^(-(n : ℤ))/((2 : ℂ)^((n : ℤ)-1)*(n.factorial : ℂ))*hermitePolyHEval n (I*z) := by
+    (-1 : ℂ)^n*iteratedErfc n z+iteratedErfc n
+        (-z)=I^(-(n : ℤ))/((2 : ℂ)^((n : ℤ)-1)*(n.factorial : ℂ))*hermitePolyHEval n (I*z) := by
   let J (k : ℕ) : ℂ := (-1:ℂ)^k*iteratedErfc k z+iteratedErfc k (-z)
   have hstep (k : ℕ) : 2*(k+2)*J (k+2)=2*z*J (k+1)+J k := by
     have hp := iteratedErfc_recurrence (n:=k+2) (by omega) z
@@ -587,10 +605,12 @@ theorem iteratedErfc_hermite (n : ℕ) (z : ℂ) :
     | more k ih0 ih1 =>
       rw [hermitePolyHEval_succ_succ]
       have hs := hstep k
-      rw [show k+2=(k+1)+1 by omega,Nat.factorial_succ,Nat.factorial_succ,pow_succ,pow_succ,pow_succ,pow_succ]
+      rw [show k+2=(k+1)+1 by omega, Nat.factorial_succ, Nat.factorial_succ, pow_succ, pow_succ,
+                                pow_succ, pow_succ]
       push_cast
       simp only [Nat.factorial_succ,Nat.cast_mul,Nat.cast_add,Nat.cast_one] at ih1
-      linear_combination (norm := ring_nf) (2:ℂ)^(k+1)*((k:ℂ)+1)*(k.factorial:ℂ)*hs+2*z*ih1+2*((k:ℂ)+1)*ih0
+      linear_combination (norm := ring_nf)
+          (2:ℂ)^(k+1)*((k:ℂ)+1)*(k.factorial:ℂ)*hs+2*z*ih1+2*((k:ℂ)+1)*ih0
       simp [I_sq]
   have hn0 : (n.factorial:ℂ)≠0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hIinv : I⁻¹= -I := by norm_num
@@ -605,7 +625,9 @@ theorem iteratedErfc_hermite (n : ℕ) (z : ℂ) :
 ℂ)/2+1) (3/2) (z^2)/((2 : ℂ)^((n : ℤ)-1)*Gamma ((n : ℂ)/2+1/2)))`. -/
 @[dlmf 7.18.E9]
 theorem iteratedErfc_kummerM (n : ℕ) (z : ℂ) :
-    iteratedErfc n z=exp (-z^2)*(kummerM ((n : ℂ)/2+1/2) (1/2) (z^2)/((2 : ℂ)^n*Gamma ((n : ℂ)/2+1))-z*kummerM ((n : ℂ)/2+1) (3/2) (z^2)/((2 : ℂ)^((n : ℤ)-1)*Gamma ((n : ℂ)/2+1/2))) := by
+    iteratedErfc n z=exp
+        (-z^2)*(kummerM ((n : ℂ)/2+1/2) (1/2) (z^2)/((2 : ℂ)^n*Gamma ((n : ℂ)/2+1))-z*kummerM
+        ((n : ℂ)/2+1) (3/2) (z^2)/((2 : ℂ)^((n : ℤ)-1)*Gamma ((n : ℂ)/2+1/2))) := by
   let s : ℂ := Real.sqrt 2
   have hs : s^2=2 := by dsimp [s]; exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   have hs0 : s≠0 := by intro h; rw [h] at hs; norm_num at hs
@@ -657,7 +679,10 @@ theorem iteratedErfc_kummerU (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
   have hs : s^2=2 := by dsimp [s]; exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   have hspos : 0<Real.sqrt 2 := Real.sqrt_pos.mpr (by norm_num)
   have hs0 : s≠0 := by dsimp [s]; exact_mod_cast hspos.ne'
-  rw [iteratedErfc_eq_pcfU_nat,pcfU_eq_kummerU _ (by simp only [mul_re,ofReal_re,ofReal_im,zero_mul,sub_zero]; positivity)]
+  rw [iteratedErfc_eq_pcfU_nat,
+      pcfU_eq_kummerU _ (by
+                           simp only [mul_re, ofReal_re, ofReal_im, zero_mul,
+                             sub_zero]; positivity)]
   change 2/((Real.sqrt π:ℂ)*s^(n+1))*exp (-z^2/2)*
       ((2:ℂ)^(-(1/4)-((n:ℂ)+1/2)/2)*exp (-(s*z)^2/4)*
         kummerU (((n:ℂ)+1/2)/2+1/4) (1/2) ((s*z)^2/2)) = _
@@ -682,19 +707,23 @@ theorem iteratedErfc_kummerU (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
 ℂ)^n*Real.sqrt π)*kummerUOnLog ((n : ℂ)/2+1/2) (1/2) (2*log z)`. -/
 @[dlmf 7.18.E10]
 theorem iteratedErfc_kummerUOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    iteratedErfc n z=exp (-z^2)/((2 : ℂ)^n*Real.sqrt π)*kummerUOnLog ((n : ℂ)/2+1/2) (1/2) (2*log z) := by
+    iteratedErfc n z=exp (-z^2)/((2 : ℂ)^n*Real.sqrt π)*kummerUOnLog ((n : ℂ)/2+1/2) (1/2)
+        (2*log z) := by
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hg : Gamma (-1/2:ℂ)= -2*(Real.sqrt π:ℂ) := by
     have h := Gamma_add_one (-1/2:ℂ) (by norm_num)
     rw [show (-1/2:ℂ)+1=1/2 by ring,Complex.Gamma_one_half_eq_sqrt] at h
     linear_combination 2*h
-  have he : exp (2*log z)=z^2 := by simpa only [Nat.cast_ofNat,Complex.exp_log hz] using Complex.exp_nat_mul (log z) 2
+  have he : exp (2*log z)=z^2 := by
+                                   simpa only [Nat.cast_ofNat, Complex.exp_log hz] using
+                                     Complex.exp_nat_mul (log z) 2
   rw [iteratedErfc_kummerM,kummerUOnLog]
   norm_num only [show (1:ℂ)-1/2=1/2 by ring,show (1/2:ℂ)-1= -1/2 by ring,
     show (2:ℂ)-1/2=3/2 by ring]
   rw [show (n:ℂ)/2+1/2-1/2+1=n/2+1 by ring,
     show (1/2:ℂ)*(2*log z)=log z by ring,Complex.exp_log hz,he,
-    Complex.Gamma_one_half_eq_sqrt,show -(1/2:ℂ)= -1/2 by ring,hg,zpow_sub₀ (by norm_num : (2:ℂ)≠0),zpow_natCast,zpow_one]
+    Complex.Gamma_one_half_eq_sqrt, show -(1/2:ℂ)= -1/2 by
+        ring, hg, zpow_sub₀ (by norm_num : (2:ℂ)≠0), zpow_natCast, zpow_one]
   field_simp [hp0]
   ring
 
@@ -702,7 +731,8 @@ theorem iteratedErfc_kummerUOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
 : ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)*pcfU (n+1/2) (z*Real.sqrt 2)`. -/
 @[dlmf 7.18.E11]
 theorem iteratedErfc_pcfU (n : ℕ) (z : ℂ) :
-    iteratedErfc n z=exp (-z^2/2)/((2 : ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)*pcfU (n+1/2) (z*Real.sqrt 2) := by
+    iteratedErfc n z=exp (-z^2/2)/((2 : ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)*pcfU (n+1/2)
+        (z*Real.sqrt 2) := by
   rw [iteratedErfc_normalization, iteratedErfc_eq_pcfU_nat, mul_comm z (Real.sqrt 2:ℂ)]
   ring
 
@@ -721,7 +751,8 @@ theorem iteratedErfc_probability (n : ℕ) (z : ℂ) :
 ℂ)/2) (fun _ => z) (iteratedErfc n z/iteratedErfc ((n : ℤ)-1) z)`. -/
 @[dlmf 7.18.E13]
 theorem iteratedErfc_continuedFraction (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
-    HasContinuedFraction (fun k => if k=0 then 1/2 else (n+k : ℂ)/2) (fun _ => z) (iteratedErfc n z/iteratedErfc ((n : ℤ)-1) z) := by
+    HasContinuedFraction (fun k => if k=0 then 1/2 else (n+k : ℂ)/2) (fun _ => z)
+        (iteratedErfc n z/iteratedErfc ((n : ℤ)-1) z) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   set aR : ℕ → ℕ → ℂ := fun n k => if k=0 then 1/2 else (n+k : ℂ)/2 with haR
   set ρ : ℕ → ℂ := fun n => iteratedErfc n z/iteratedErfc ((n : ℤ)-1) z with hρ
@@ -1036,7 +1067,9 @@ theorem erfRecip_iteratedErfc_rotSector (n : ℕ) {θ δ : ℝ} (hθ : |θ| < π
 ℂ)^m*(2*m+n).factorial/((n.factorial : ℂ)*m.factorial)) (iteratedErfc n)`. -/
 @[dlmf 7.18.E14]
 theorem iteratedErfc_asymptotic (n : ℕ) {δ : ℝ} (hδ : 0 < δ) :
-    HasAsymptoticExpansion (sector (3*π/4-δ)) (fun m z => 2/Real.sqrt π*exp (-z^2)/(2*z)^(n+1+2*m)) (fun m => (-1 : ℂ)^m*(2*m+n).factorial/((n.factorial : ℂ)*m.factorial)) (iteratedErfc n) := by
+    HasAsymptoticExpansion (sector (3*π/4-δ)) (fun m z => 2/Real.sqrt π*exp (-z^2)/(2*z)^(n+1+2*m))
+        (fun m => (-1 : ℂ)^m*(2*m+n).factorial/((n.factorial : ℂ)*m.factorial))
+        (iteratedErfc n) := by
   set d := min δ (π / 4) with hd
   have hd0 : 0 < d := lt_min hδ (by positivity)
   have hdδ : d ≤ δ := min_le_left _ _

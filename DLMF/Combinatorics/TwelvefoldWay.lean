@@ -164,7 +164,8 @@ private lemma mapKernel_comp {n : ℕ} {β γ : Type*} [DecidableEq β] [Decidab
   (mapKernel_eq_iff _ _).2 fun _ _ => he.eq_iff
 
 /-- Maps into `Fin k` with the same kernel differ by a permutation of `Fin k`. -/
-private lemma exists_perm_of_mapKernel_eq {n k : ℕ} {f g : Fin n → Fin k} (h : mapKernel f = mapKernel g) :
+private lemma exists_perm_of_mapKernel_eq {n k : ℕ} {f g : Fin n → Fin k}
+    (h : mapKernel f = mapKernel g) :
     ∃ τ : Perm (Fin k), g = τ ∘ f := by
   classical
   rw [mapKernel_eq_iff] at h
@@ -212,7 +213,8 @@ private lemma twelvefoldCount_labeled_unlabeled (r : MapRestriction) (n k : ℕ)
     twelvefoldCount .labeled .unlabeled r n k =
       #((univ.filter (r.Holds (n := n) (k := k))).image mapKernel) := by
   unfold twelvefoldCount
-  rw [Nat.card_quot_eq_of_surjective (M := {x // x ∈ (univ.filter (r.Holds (n := n) (k := k))).image mapKernel}) _
+  rw [Nat.card_quot_eq_of_surjective
+      (M := {x // x ∈ (univ.filter (r.Holds (n := n) (k := k))).image mapKernel}) _
     (fun f => ⟨mapKernel f.1, mem_image_of_mem _ (by simpa using f.2)⟩)]
   · rw [Nat.card_eq_fintype_card, Fintype.card_coe]
   · intro a b
@@ -234,7 +236,8 @@ private lemma twelvefoldRel_equivalence {n k : ℕ} (balls boxes : Labeling) :
     funext i; simp
 
 /-- `Quot.mk` of an equivalence relation. -/
-private lemma quot_mk_eq_iff_of_equivalence {α : Type*} {r : α → α → Prop} (h : Equivalence r) (a b : α) :
+private lemma quot_mk_eq_iff_of_equivalence {α : Type*} {r : α → α → Prop}
+    (h : Equivalence r) (a b : α) :
     Quot.mk r a = Quot.mk r b ↔ r a b :=
   ⟨fun e => h.eqvGen_iff.mp (Quot.eqvGen_exact e), Quot.sound⟩
 
@@ -500,12 +503,14 @@ theorem twelvefoldCount_UL_injective (n k : ℕ) :
   unfold twelvefoldCount
   have himg : ∀ f : Fin n → Fin k, Function.Injective f → (univ.image f).val = univ.val.map f :=
     fun f hf => Finset.image_val_of_injOn (fun a _ b _ h => hf h)
-  rw [Nat.card_quot_eq_of_surjective _ (fun f : {f : Fin n → Fin k // MapRestriction.injective.Holds f} =>
+  rw [Nat.card_quot_eq_of_surjective _
+      (fun f : {f : Fin n → Fin k // MapRestriction.injective.Holds f} =>
     (⟨univ.image f.1, by rw [card_image_of_injective _ f.2, card_univ, Fintype.card_fin]⟩ :
       {T : Finset (Fin k) // #T = n}))]
   · rw [Nat.card_eq_fintype_card, Fintype.card_finset_len, Fintype.card_fin]
   · intro a b
-    rw [twelvefoldRel_unlabeled_labeled_iff, ← Multiset.map_univ_eq_map_univ_iff, Subtype.ext_iff, ← Finset.val_inj, himg _ a.2,
+    rw [twelvefoldRel_unlabeled_labeled_iff, ← Multiset.map_univ_eq_map_univ_iff, Subtype.ext_iff,
+        ← Finset.val_inj, himg _ a.2,
       himg _ b.2]
   · rintro ⟨T, hT⟩
     obtain ⟨f, hf⟩ := Multiset.exists_map_univ_eq T.val hT

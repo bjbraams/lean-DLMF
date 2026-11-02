@@ -172,7 +172,9 @@ theorem associated_gauge_shifts (μ : ℂ) {z : ℂ} (hz : z-1∈slitPlane) :
     legendreBranchPower 1 z*exp ((μ+1)/2*(log (z+1)-log (z-1)))=E*(z+1) := by
   dsimp only
   have hm := slitPlane_ne_zero hz
-  have hp : z+1≠0 := by simpa [add_comm] using slitPlane_ne_zero (one_add_mem_slitPlane_of_sub_one hz)
+  have hp : z+1≠0 := by
+                       simpa [add_comm] using slitPlane_ne_zero
+                         (one_add_mem_slitPlane_of_sub_one hz)
   constructor
   · rw [show (μ+2)/2*(log (z+1)-log (z-1))=
       μ/2*(log (z+1)-log (z-1))+(log (z+1)-log (z-1)) by ring,
@@ -192,7 +194,8 @@ theorem associated_gauge_shifts (μ : ℂ) {z : ℂ} (hz : z-1∈slitPlane) :
 (ν-μ)(ν+μ+1) 𝖯^μ_ν(x) = 0`. -/
 @[dlmf 14.10.E1]
 theorem ferrersP_recurrence_1 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP ν (μ+2) x+2*(μ+1)*x*(1-x^2:ℂ)^(-1/2:ℂ)*ferrersP ν (μ+1) x+(ν-μ)*(ν+μ+1)*ferrersP ν μ x=0 := by
+    ferrersP ν (μ+2) x+2*(μ+1)*x*(1-x^2:ℂ)^(-1/2:ℂ)*ferrersP ν (μ+1)
+        x+(ν-μ)*(ν+μ+1)*ferrersP ν μ x=0 := by
   have hs : 1+(x:ℂ)∈slitPlane := Or.inl (by simp; linarith [hx.1])
   have hw := mem_cutPlane_of_one_add hs
   have hg := ferrers_gauge_shifts μ hx
@@ -322,7 +325,8 @@ theorem hasDerivAt_ferrersEven (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 
 
 /-- Explicit derivative of the odd quadratic solution. -/
 theorem hasDerivAt_ferrersOdd (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    HasDerivAt (ferrersOdd ν μ) ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2)+
+    HasDerivAt (ferrersOdd ν μ)
+        ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2)+
       x*((1-(x:ℂ)^2)^(-μ/2)*(μ*x/(1-(x:ℂ)^2)*
       regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2)+2*x*(((1-ν-μ)/2)*((ν-μ+2)/2)*
       regularizedGaussHG ((1-ν-μ)/2+1) ((ν-μ+2)/2+1) (3/2+1) ((x:ℂ)^2))))) x := by
@@ -334,18 +338,23 @@ theorem hasDerivAt_ferrersOdd (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
 
 /-- The two Gamma numerators of `𝖰^μ_ν` are continuous at a regular degree. -/
 theorem continuousAt_Gamma_ferrersQ {ν₀ μ : ℂ} (h : LegendreQRegular ν₀ μ) :
-    ContinuousAt (fun ν => Gamma ((ν+μ+1)/2)) ν₀ ∧ ContinuousAt (fun ν => Gamma ((ν+μ+2)/2)) ν₀ := by
+    ContinuousAt (fun ν => Gamma ((ν+μ+1)/2)) ν₀ ∧
+        ContinuousAt (fun ν => Gamma ((ν+μ+2)/2)) ν₀ := by
   have h1 : ∀ m : ℕ, (ν₀+μ+1)/2 ≠ -m := fun m hm => h (2*m) (by push_cast; linear_combination 2*hm)
-  have h2 : ∀ m : ℕ, (ν₀+μ+2)/2 ≠ -m := fun m hm => h (2*m+1) (by push_cast; linear_combination 2*hm)
+  have h2 : ∀ m : ℕ, (ν₀+μ+2)/2 ≠ -m := fun m hm =>
+      h (2*m+1) (by push_cast; linear_combination 2*hm)
   exact ⟨ContinuousAt.comp (g := Gamma) (differentiableAt_Gamma _ h1).continuousAt (by fun_prop),
     ContinuousAt.comp (g := Gamma) (differentiableAt_Gamma _ h2).continuousAt (by fun_prop)⟩
 
 /-- `𝖰^μ_ν(x)` is continuous in the degree at a regular parameter. -/
-theorem continuousAt_ferrersQ_degree {ν₀ μ : ℂ} (h : LegendreQRegular ν₀ μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem continuousAt_ferrersQ_degree {ν₀ μ : ℂ} (h : LegendreQRegular ν₀ μ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     ContinuousAt (fun ν => ferrersQ ν μ x) ν₀ := by
   obtain ⟨c1, c2⟩ := continuousAt_Gamma_ferrersQ h
-  have hr1 := (continuous_recip_Gamma.comp (by fun_prop : Continuous fun ν : ℂ => (ν-μ+1)/2)).continuousAt (x := ν₀)
-  have hr2 := (continuous_recip_Gamma.comp (by fun_prop : Continuous fun ν : ℂ => (ν-μ+2)/2)).continuousAt (x := ν₀)
+  have hr1 := (continuous_recip_Gamma.comp
+      (by fun_prop : Continuous fun ν : ℂ => (ν-μ+1)/2)).continuousAt (x := ν₀)
+  have hr2 := (continuous_recip_Gamma.comp
+      (by fun_prop : Continuous fun ν : ℂ => (ν-μ+2)/2)).continuousAt (x := ν₀)
   have hE : Continuous fun ν => ferrersEven ν μ x := continuous_const.mul
     (continuous_regularizedGaussHG_sq (by fun_prop) (by fun_prop) (by fun_prop) hx)
   have hO : Continuous fun ν => ferrersOdd ν μ x := continuous_const.mul (continuous_const.mul
@@ -361,9 +370,12 @@ theorem continuousAt_deriv_ferrersQ_degree {ν₀ μ : ℂ} (h : LegendreQRegula
     (hx : x ∈ Ioo (-1:ℝ) 1) :
     ContinuousAt (fun ν => deriv (ferrersQ ν μ) x) ν₀ := by
   obtain ⟨c1, c2⟩ := continuousAt_Gamma_ferrersQ h
-  have hr1 := (continuous_recip_Gamma.comp (by fun_prop : Continuous fun ν : ℂ => (ν-μ+1)/2)).continuousAt (x := ν₀)
-  have hr2 := (continuous_recip_Gamma.comp (by fun_prop : Continuous fun ν : ℂ => (ν-μ+2)/2)).continuousAt (x := ν₀)
-  have hd : ∀ ν, deriv (ferrersQ ν μ) x = 2^μ*π/2*(-sin ((ν+μ)*π/2)*Gamma ((ν+μ+1)/2)*(Gamma ((ν-μ+2)/2))⁻¹)*
+  have hr1 := (continuous_recip_Gamma.comp
+      (by fun_prop : Continuous fun ν : ℂ => (ν-μ+1)/2)).continuousAt (x := ν₀)
+  have hr2 := (continuous_recip_Gamma.comp
+      (by fun_prop : Continuous fun ν : ℂ => (ν-μ+2)/2)).continuousAt (x := ν₀)
+  have hd : ∀ ν, deriv (ferrersQ ν μ) x =
+      2^μ*π/2*(-sin ((ν+μ)*π/2)*Gamma ((ν+μ+1)/2)*(Gamma ((ν-μ+2)/2))⁻¹)*
       deriv (ferrersEven ν μ) x + 2^μ*π/2*(cos ((ν+μ)*π/2)*Gamma ((ν+μ+2)/2)*(Gamma ((ν-μ+1)/2))⁻¹)*
       deriv (ferrersOdd ν μ) x := by
     intro ν
@@ -373,19 +385,23 @@ theorem continuousAt_deriv_ferrersQ_degree {ν₀ μ : ℂ} (h : LegendreQRegula
       ((hasDerivAt_ferrersOdd ν μ hx).const_mul _))).deriv.trans
       (by rw [(hasDerivAt_ferrersEven ν μ hx).deriv, (hasDerivAt_ferrersOdd ν μ hx).deriv])
   simp only [hd, (hasDerivAt_ferrersEven _ μ hx).deriv, (hasDerivAt_ferrersOdd _ μ hx).deriv]
-  have hF := fun (A B C : ℂ → ℂ) (hA : Differentiable ℂ A) (hB : Differentiable ℂ B) (hC : Differentiable ℂ C) =>
+  have hF := fun (A B C : ℂ → ℂ) (hA : Differentiable ℂ A) (hB : Differentiable ℂ B)
+      (hC : Differentiable ℂ C) =>
     (continuous_regularizedGaussHG_sq hA hB hC hx).continuousAt (x := ν₀)
   have hs : Continuous fun ν : ℂ => sin ((ν+μ)*π/2) := by fun_prop
   have hc : Continuous fun ν : ℂ => cos ((ν+μ)*π/2) := by fun_prop
   refine (continuousAt_const.mul (((hs.continuousAt.neg.mul c1).mul hr2))).mul ?_ |>.add
     ((continuousAt_const.mul ((hc.continuousAt.mul c2).mul hr1)).mul ?_)
-  · exact continuousAt_const.mul ((continuousAt_const.mul (hF _ _ _ (by fun_prop) (by fun_prop) (by fun_prop))).add
-      (continuousAt_const.mul ((by fun_prop : Continuous fun ν : ℂ => (-(ν+μ)/2)*((ν-μ+1)/2)).continuousAt.mul
+  · exact continuousAt_const.mul
+        ((continuousAt_const.mul (hF _ _ _ (by fun_prop) (by fun_prop) (by fun_prop))).add
+      (continuousAt_const.mul
+          ((by fun_prop : Continuous fun ν : ℂ => (-(ν+μ)/2)*((ν-μ+1)/2)).continuousAt.mul
         (hF _ _ _ (by fun_prop) (by fun_prop) (by fun_prop)))))
   · exact (continuousAt_const.mul (hF _ _ _ (by fun_prop) (by fun_prop) (by fun_prop))).add
       (continuousAt_const.mul (continuousAt_const.mul ((continuousAt_const.mul
         (hF _ _ _ (by fun_prop) (by fun_prop) (by fun_prop))).add
-      (continuousAt_const.mul ((by fun_prop : Continuous fun ν : ℂ => ((1-ν-μ)/2)*((ν-μ+2)/2)).continuousAt.mul
+      (continuousAt_const.mul
+          ((by fun_prop : Continuous fun ν : ℂ => ((1-ν-μ)/2)*((ν-μ+2)/2)).continuousAt.mul
         (hF _ _ _ (by fun_prop) (by fun_prop) (by fun_prop)))))))
 
 /-- `𝖰^μ_ν` through `𝖯^μ_ν(±x)` (DLMF 14.9.10 with `μ ↦ -μ`), needing only regular `ν+μ`. -/
@@ -393,7 +409,8 @@ theorem ferrersQ_reflection {ν μ : ℂ} (h : LegendreQRegular ν μ) {x : ℝ}
     2/π*sin ((ν+μ)*π)*ferrersQ ν μ x = cos ((ν+μ)*π)*ferrersP ν μ x-ferrersP ν μ (-x) := by
   have pyth := sin_sq_add_cos_sq ((ν+μ)*π/2)
   have hP : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  rw [ferrersQ_even_odd, ferrersP_regular h hx, ferrersP_regular h (ferrers_neg_mem_Ioo hx), ferrersEven_neg,
+  rw [ferrersQ_even_odd, ferrersP_regular h hx, ferrersP_regular h (ferrers_neg_mem_Ioo hx),
+      ferrersEven_neg,
     ferrersOdd_neg, legendre_sin_two_mul_half, legendre_cos_two_mul_half]
   generalize sin ((ν+μ)*π/2) = sb at pyth
   generalize cos ((ν+μ)*π/2) = cb at pyth
@@ -401,7 +418,8 @@ theorem ferrersQ_reflection {ν μ : ℂ} (h : LegendreQRegular ν μ) {x : ℝ}
   linear_combination (-(2*cb*Gamma ((ν+μ+1)/2)*ferrersEven ν μ x*(Gamma ((ν-μ+2)/2))⁻¹))*pyth
 
 /-- The reflection formula differentiated in `x`. -/
-theorem ferrersQ_reflection_deriv {ν μ : ℂ} (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersQ_reflection_deriv {ν μ : ℂ} (h : LegendreQRegular ν μ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     2/π*sin ((ν+μ)*π)*deriv (ferrersQ ν μ) x =
       cos ((ν+μ)*π)*deriv (ferrersP ν μ) x+deriv (ferrersP ν μ) (-x) := by
   have hPd : ∀ y ∈ Ioo (-1:ℝ) 1, HasDerivAt (ferrersP ν μ) (deriv (ferrersP ν μ) y) y := fun y hy =>
@@ -420,7 +438,8 @@ theorem ferrersQ_reflection_deriv {ν μ : ℂ} (h : LegendreQRegular ν μ) {x 
 (1-x²)^{-1/2} 𝖰^{μ+1}_ν(x) + (ν-μ)(ν+μ+1) 𝖰^μ_ν(x) = 0`. -/
 @[dlmf 14.10.E1]
 theorem ferrersQ_recurrence_1 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersQ ν (μ+2) x+2*(μ+1)*x*(1-x^2:ℂ)^(-1/2:ℂ)*ferrersQ ν (μ+1) x+(ν-μ)*(ν+μ+1)*ferrersQ ν μ x=0 := by
+    ferrersQ ν (μ+2) x+2*(μ+1)*x*(1-x^2:ℂ)^(-1/2:ℂ)*ferrersQ ν (μ+1)
+        x+(ν-μ)*(ν+μ+1)*ferrersQ ν μ x=0 := by
   have h1 : LegendreQRegular ν (μ+1) := fun n hn => h (n+1) (by push_cast; linear_combination hn)
   have h2 : LegendreQRegular ν (μ+2) := fun n hn => h (n+2) (by push_cast; linear_combination hn)
   refine eq_zero_of_im_ne_zero (G := fun ν => ferrersQ ν (μ+2) x+2*(μ+1)*x*(1-x^2:ℂ)^(-1/2:ℂ)*
@@ -432,8 +451,10 @@ theorem ferrersQ_recurrence_1 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
   intro ν hν
   have hs := sin_mul_pi_ne_zero_of_im_ne_zero hν
   have r0 := ferrersQ_reflection (legendreQRegular_of_im_ne_zero hν) hx
-  have r1 := ferrersQ_reflection (μ := μ+1) (legendreQRegular_of_im_ne_zero (by simpa [← add_assoc] using hν)) hx
-  have r2 := ferrersQ_reflection (μ := μ+2) (legendreQRegular_of_im_ne_zero (by simpa [← add_assoc] using hν)) hx
+  have r1 := ferrersQ_reflection (μ := μ+1)
+      (legendreQRegular_of_im_ne_zero (by simpa [← add_assoc] using hν)) hx
+  have r2 := ferrersQ_reflection (μ := μ+2)
+      (legendreQRegular_of_im_ne_zero (by simpa [← add_assoc] using hν)) hx
   rw [show (ν+(μ+1))*π = (ν+μ)*π+π by ring, sin_add_pi, cos_add_pi] at r1
   rw [show (ν+(μ+2))*π = (ν+μ)*π+2*π by ring, sin_add_two_pi, cos_add_two_pi] at r2
   have pa := ferrersP_recurrence_1 ν μ hx
@@ -453,18 +474,22 @@ theorem ferrersQ_recurrence_2 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
     (1-x^2:ℂ)^(1/2:ℂ)*ferrersQ ν (μ+1) x-(ν-μ+1)*ferrersQ (ν+1) μ x+(ν+μ+1)*x*ferrersQ ν μ x=0 := by
   have h1 : LegendreQRegular ν (μ+1) := fun n hn => h (n+1) (by push_cast; linear_combination hn)
   have h1' : LegendreQRegular (ν+1) μ := fun n hn => h (n+1) (by push_cast; linear_combination hn)
-  refine eq_zero_of_im_ne_zero (G := fun ν => (1-x^2:ℂ)^(1/2:ℂ)*ferrersQ ν (μ+1) x-(ν-μ+1)*ferrersQ (ν+1) μ x+
+  refine eq_zero_of_im_ne_zero
+      (G := fun ν => (1-x^2:ℂ)^(1/2:ℂ)*ferrersQ ν (μ+1) x-(ν-μ+1)*ferrersQ (ν+1) μ x+
     (ν+μ+1)*x*ferrersQ ν μ x) (μ := μ) ?_ ?_
   · have c1 : ContinuousAt (fun ν => ferrersQ (ν+1) μ x) ν :=
       (continuousAt_ferrersQ_degree h1' hx).comp (f := fun ν => ν+1) (by fun_prop)
     exact ((continuousAt_const.mul (continuousAt_ferrersQ_degree h1 hx)).sub
       ((by fun_prop : Continuous fun ν : ℂ => ν-μ+1).continuousAt.mul c1)).add
-      ((by fun_prop : Continuous fun ν : ℂ => (ν+μ+1)*x).continuousAt.mul (continuousAt_ferrersQ_degree h hx))
+      ((by fun_prop : Continuous fun ν : ℂ => (ν+μ+1)*x).continuousAt.mul
+          (continuousAt_ferrersQ_degree h hx))
   intro ν hν
   have hs := sin_mul_pi_ne_zero_of_im_ne_zero hν
   have r0 := ferrersQ_reflection (legendreQRegular_of_im_ne_zero hν) hx
-  have ra := ferrersQ_reflection (μ := μ+1) (legendreQRegular_of_im_ne_zero (by simpa [← add_assoc] using hν)) hx
-  have rb := ferrersQ_reflection (ν := ν+1) (legendreQRegular_of_im_ne_zero (by simpa [add_right_comm] using hν)) hx
+  have ra := ferrersQ_reflection (μ := μ+1)
+      (legendreQRegular_of_im_ne_zero (by simpa [← add_assoc] using hν)) hx
+  have rb := ferrersQ_reflection (ν := ν+1)
+      (legendreQRegular_of_im_ne_zero (by simpa [add_right_comm] using hν)) hx
   rw [show (ν+(μ+1))*π = (ν+μ)*π+π by ring, sin_add_pi, cos_add_pi] at ra
   rw [show (ν+1+μ)*π = (ν+μ)*π+π by ring, sin_add_pi, cos_add_pi] at rb
   have pa := ferrersP_recurrence_2 ν μ hx
@@ -483,7 +508,8 @@ theorem ferrersQ_recurrence_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
     (ν-μ+2)*ferrersQ (ν+2) μ x-(2*ν+3)*x*ferrersQ (ν+1) μ x+(ν+μ+1)*ferrersQ ν μ x=0 := by
   have h1 : LegendreQRegular (ν+1) μ := fun n hn => h (n+1) (by push_cast; linear_combination hn)
   have h2 : LegendreQRegular (ν+2) μ := fun n hn => h (n+2) (by push_cast; linear_combination hn)
-  refine eq_zero_of_im_ne_zero (G := fun ν => (ν-μ+2)*ferrersQ (ν+2) μ x-(2*ν+3)*x*ferrersQ (ν+1) μ x+
+  refine eq_zero_of_im_ne_zero
+      (G := fun ν => (ν-μ+2)*ferrersQ (ν+2) μ x-(2*ν+3)*x*ferrersQ (ν+1) μ x+
     (ν+μ+1)*ferrersQ ν μ x) (μ := μ) ?_ ?_
   · have c2 : ContinuousAt (fun ν => ferrersQ (ν+2) μ x) ν :=
       (continuousAt_ferrersQ_degree h2 hx).comp (f := fun ν => ν+2) (by fun_prop)
@@ -491,12 +517,15 @@ theorem ferrersQ_recurrence_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
       (continuousAt_ferrersQ_degree h1 hx).comp (f := fun ν => ν+1) (by fun_prop)
     exact (((by fun_prop : Continuous fun ν : ℂ => ν-μ+2).continuousAt.mul c2).sub
       ((by fun_prop : Continuous fun ν : ℂ => (2*ν+3)*x).continuousAt.mul c1)).add
-      ((by fun_prop : Continuous fun ν : ℂ => ν+μ+1).continuousAt.mul (continuousAt_ferrersQ_degree h hx))
+      ((by fun_prop : Continuous fun ν : ℂ => ν+μ+1).continuousAt.mul
+          (continuousAt_ferrersQ_degree h hx))
   intro ν hν
   have hs := sin_mul_pi_ne_zero_of_im_ne_zero hν
   have r0 := ferrersQ_reflection (legendreQRegular_of_im_ne_zero hν) hx
-  have r1 := ferrersQ_reflection (ν := ν+1) (legendreQRegular_of_im_ne_zero (by simpa [add_right_comm] using hν)) hx
-  have r2 := ferrersQ_reflection (ν := ν+2) (legendreQRegular_of_im_ne_zero (by simpa [add_right_comm] using hν)) hx
+  have r1 := ferrersQ_reflection (ν := ν+1)
+      (legendreQRegular_of_im_ne_zero (by simpa [add_right_comm] using hν)) hx
+  have r2 := ferrersQ_reflection (ν := ν+2)
+      (legendreQRegular_of_im_ne_zero (by simpa [add_right_comm] using hν)) hx
   rw [show (ν+1+μ)*π = (ν+μ)*π+π by ring, sin_add_pi, cos_add_pi] at r1
   rw [show (ν+2+μ)*π = (ν+μ)*π+2*π by ring, sin_add_two_pi, cos_add_two_pi] at r2
   have pa := ferrersP_recurrence_3 ν μ hx
@@ -514,19 +543,22 @@ theorem ferrersQ_recurrence_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
     (1-x^2:ℂ)*deriv (ferrersQ ν μ) x=(μ-ν-1)*ferrersQ (ν+1) μ x+(ν+1)*x*ferrersQ ν μ x := by
   have h1' : LegendreQRegular (ν+1) μ := fun n hn => h (n+1) (by push_cast; linear_combination hn)
   rw [← sub_eq_zero]
-  refine eq_zero_of_im_ne_zero (G := fun ν => (1-x^2:ℂ)*deriv (ferrersQ ν μ) x-((μ-ν-1)*ferrersQ (ν+1) μ x+
+  refine eq_zero_of_im_ne_zero
+      (G := fun ν => (1-x^2:ℂ)*deriv (ferrersQ ν μ) x-((μ-ν-1)*ferrersQ (ν+1) μ x+
     (ν+1)*x*ferrersQ ν μ x)) (μ := μ) ?_ ?_
   · have c1 : ContinuousAt (fun ν => ferrersQ (ν+1) μ x) ν :=
       (continuousAt_ferrersQ_degree h1' hx).comp (f := fun ν => ν+1) (by fun_prop)
     exact (continuousAt_const.mul (continuousAt_deriv_ferrersQ_degree h hx)).sub
       (((by fun_prop : Continuous fun ν : ℂ => μ-ν-1).continuousAt.mul c1).add
-      ((by fun_prop : Continuous fun ν : ℂ => (ν+1)*x).continuousAt.mul (continuousAt_ferrersQ_degree h hx)))
+      ((by fun_prop : Continuous fun ν : ℂ => (ν+1)*x).continuousAt.mul
+          (continuousAt_ferrersQ_degree h hx)))
   intro ν hν
   have hs := sin_mul_pi_ne_zero_of_im_ne_zero hν
   have hr := legendreQRegular_of_im_ne_zero hν
   have r0 := ferrersQ_reflection hr hx
   have rd := ferrersQ_reflection_deriv hr hx
-  have r1 := ferrersQ_reflection (ν := ν+1) (legendreQRegular_of_im_ne_zero (by simpa [add_right_comm] using hν)) hx
+  have r1 := ferrersQ_reflection (ν := ν+1)
+      (legendreQRegular_of_im_ne_zero (by simpa [add_right_comm] using hν)) hx
   rw [show (ν+1+μ)*π = (ν+μ)*π+π by ring, sin_add_pi, cos_add_pi] at r1
   have pa := ferrersP_recurrence_4 ν μ hx
   have pb := ferrersP_recurrence_4 ν μ (ferrers_neg_mem_Ioo hx)
@@ -540,23 +572,27 @@ theorem ferrersQ_recurrence_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
 /-- DLMF 14.10.5 for `𝖰`: when `ν-1+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `(1-x²) d𝖰^μ_ν(x)/dx =
 (ν+μ) 𝖰^μ_{ν-1}(x) - ν x 𝖰^μ_ν(x)`. -/
 @[dlmf 14.10.E5]
-theorem ferrersQ_recurrence_5 (ν μ : ℂ) (h : LegendreQRegular (ν-1) μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersQ_recurrence_5 (ν μ : ℂ) (h : LegendreQRegular (ν-1) μ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*deriv (ferrersQ ν μ) x=(ν+μ)*ferrersQ (ν-1) μ x-ν*x*ferrersQ ν μ x := by
   have h0 : LegendreQRegular ν μ := fun n hn => h (n+1) (by push_cast; linear_combination hn)
   rw [← sub_eq_zero]
-  refine eq_zero_of_im_ne_zero (G := fun ν => (1-x^2:ℂ)*deriv (ferrersQ ν μ) x-((ν+μ)*ferrersQ (ν-1) μ x-
+  refine eq_zero_of_im_ne_zero
+      (G := fun ν => (1-x^2:ℂ)*deriv (ferrersQ ν μ) x-((ν+μ)*ferrersQ (ν-1) μ x-
     ν*x*ferrersQ ν μ x)) (μ := μ) ?_ ?_
   · have c1 : ContinuousAt (fun ν => ferrersQ (ν-1) μ x) ν :=
       (continuousAt_ferrersQ_degree h hx).comp (f := fun ν => ν-1) (by fun_prop)
     exact (continuousAt_const.mul (continuousAt_deriv_ferrersQ_degree h0 hx)).sub
       (((by fun_prop : Continuous fun ν : ℂ => ν+μ).continuousAt.mul c1).sub
-      ((by fun_prop : Continuous fun ν : ℂ => ν*x).continuousAt.mul (continuousAt_ferrersQ_degree h0 hx)))
+      ((by fun_prop : Continuous fun ν : ℂ => ν*x).continuousAt.mul
+          (continuousAt_ferrersQ_degree h0 hx)))
   intro ν hν
   have hs := sin_mul_pi_ne_zero_of_im_ne_zero hν
   have hr := legendreQRegular_of_im_ne_zero hν
   have r0 := ferrersQ_reflection hr hx
   have rd := ferrersQ_reflection_deriv hr hx
-  have r1 := ferrersQ_reflection (ν := ν-1) (legendreQRegular_of_im_ne_zero (by simpa [sub_add_eq_add_sub] using hν)) hx
+  have r1 := ferrersQ_reflection (ν := ν-1)
+      (legendreQRegular_of_im_ne_zero (by simpa [sub_add_eq_add_sub] using hν)) hx
   rw [show (ν-1+μ)*π = (ν+μ)*π-π by ring, sin_sub_pi, cos_sub_pi] at r1
   have pa := ferrersP_recurrence_5 ν μ hx
   have pb := ferrersP_recurrence_5 ν μ (ferrers_neg_mem_Ioo hx)
@@ -570,7 +606,8 @@ theorem ferrersQ_recurrence_5 (ν μ : ℂ) (h : LegendreQRegular (ν-1) μ) {x 
 /-- The Casoratian identity away from the exceptional value `μ = ν+1`. -/
 theorem ferrers_wronskian_5_generic (ν μ : ℂ) (h : LegendreQRegular ν μ) (hd : ν-μ+1 ≠ 0) {x : ℝ}
     (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP (ν+1) μ x*ferrersQ ν μ x-ferrersP ν μ x*ferrersQ (ν+1) μ x=Gamma (ν+μ+1)/Gamma (ν-μ+2) := by
+    ferrersP (ν+1) μ x*ferrersQ ν μ x-ferrersP ν μ x*ferrersQ (ν+1) μ x=Gamma
+        (ν+μ+1)/Gamma (ν-μ+2) := by
   have hP := ferrersP_recurrence_4 ν μ hx
   have hQ := ferrersQ_recurrence_4 ν μ h hx
   have hW := ferrers_wronskian_4 ν μ h hx
@@ -579,7 +616,8 @@ theorem ferrers_wronskian_5_generic (ν μ : ℂ) (h : LegendreQRegular ν μ) (
   rw [show ν-μ+2 = (ν-μ+1)+1 by ring, Gamma_add_one _ hd]
   have key : (ν-μ+1)*(ferrersP (ν+1) μ x*ferrersQ ν μ x-ferrersP ν μ x*ferrersQ (ν+1) μ x) =
       Gamma (ν+μ+1)/Gamma (ν-μ+1) := by
-    have : (1-(x:ℂ)^2)*(Gamma (ν+μ+1)/(Gamma (ν-μ+1)*(1-(x:ℂ)^2))) = Gamma (ν+μ+1)/Gamma (ν-μ+1) := by
+    have : (1-(x:ℂ)^2)*(Gamma (ν+μ+1)/(Gamma (ν-μ+1)*(1-(x:ℂ)^2))) =
+        Gamma (ν+μ+1)/Gamma (ν-μ+1) := by
       field_simp
     rw [← this, ← hW]
     linear_combination ferrersQ ν μ x*hP - ferrersP ν μ x*hQ
@@ -591,7 +629,8 @@ theorem ferrers_wronskian_5_generic (ν μ : ℂ) (h : LegendreQRegular ν μ) (
 𝖰^μ_{ν+1}(x) = Γ(ν+μ+1)/Γ(ν-μ+2)`. -/
 @[dlmf 14.2.E5]
 theorem ferrers_wronskian_5 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP (ν+1) μ x*ferrersQ ν μ x-ferrersP ν μ x*ferrersQ (ν+1) μ x=Gamma (ν+μ+1)/Gamma (ν-μ+2) := by
+    ferrersP (ν+1) μ x*ferrersQ ν μ x-ferrersP ν μ x*ferrersQ (ν+1) μ x=Gamma
+        (ν+μ+1)/Gamma (ν-μ+2) := by
   by_cases hd : ν-μ+1 = 0
   swap
   · exact ferrers_wronskian_5_generic ν μ h hd hx
@@ -600,14 +639,17 @@ theorem ferrers_wronskian_5 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
     exact Or.inl (by simp only [ofReal_re]; linarith [hx.1])
   have hPc : Continuous fun v : ℂ => ferrersP v μ x := by
     unfold ferrersP
-    exact continuous_const.mul (differentiable_regularizedGaussHG_comp (A := fun v => v+1) (B := fun v => -v)
+    exact continuous_const.mul
+        (differentiable_regularizedGaussHG_comp (A := fun v => v+1) (B := fun v => -v)
       (C := fun _ => 1-μ) (by fun_prop) (by fun_prop) (by fun_prop) ht).continuous
   have h1 : LegendreQRegular (ν+1) μ := fun n hn => h (n+1) (by push_cast; linear_combination hn)
   have hQ0 := continuousAt_ferrersQ_degree h hx
   have hQ1 : ContinuousAt (fun v : ℂ => ferrersQ (v+1) μ x) ν :=
-    ContinuousAt.comp (g := fun v => ferrersQ v μ x) (continuousAt_ferrersQ_degree h1 hx) (by fun_prop)
+    ContinuousAt.comp (g := fun v => ferrersQ v μ x)
+        (continuousAt_ferrersQ_degree h1 hx) (by fun_prop)
   have hG1 : ContinuousAt (fun v : ℂ => Gamma (v+μ+1)) ν :=
-    ContinuousAt.comp (g := Gamma) (differentiableAt_Gamma _ (fun k hk => h k (by linear_combination hk))).continuousAt
+    ContinuousAt.comp (g := Gamma)
+        (differentiableAt_Gamma _ (fun k hk => h k (by linear_combination hk))).continuousAt
       (by fun_prop)
   have hG2 : ContinuousAt (fun v : ℂ => (Gamma (v-μ+2))⁻¹) ν :=
     (continuous_recip_Gamma.comp (by fun_prop : Continuous fun v : ℂ => v-μ+2)).continuousAt
@@ -617,7 +659,8 @@ theorem ferrers_wronskian_5 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
     ((((hPc.comp (by fun_prop : Continuous fun v : ℂ => v+1)).continuousAt.mul hQ0).sub
       (hPc.continuousAt.mul hQ1)).sub (hG1.mul hG2))
   have hev : G =ᶠ[𝓝[≠] ν] fun _ => 0 := by
-    filter_upwards [self_mem_nhdsWithin, eventually_affine_ne_neg_nat one_ne_zero (μ+1) ν] with v hv hr
+    filter_upwards [self_mem_nhdsWithin,
+        eventually_affine_ne_neg_nat one_ne_zero (μ+1) ν] with v hv hr
     have hreg : LegendreQRegular v μ := fun n hn => hr n (by linear_combination hn)
     have hdv : v-μ+1 ≠ 0 := by
       intro h0; apply hv; show v = ν; linear_combination h0 - hd
@@ -634,7 +677,8 @@ theorem ferrers_wronskian_5 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
 1`. -/
 @[dlmf 14.10.E6]
 theorem associatedP_recurrence_6 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedP ν (μ+2) z+2*(μ+1)*z*legendreBranchPower (-1) z*associatedP ν (μ+1) z-(ν-μ)*(ν+μ+1)*associatedP ν μ z=0 := by
+    associatedP ν (μ+2) z+2*(μ+1)*z*legendreBranchPower (-1) z*associatedP ν (μ+1)
+        z-(ν-μ)*(ν+μ+1)*associatedP ν μ z=0 := by
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   have hg := associated_gauge_shifts μ hz
   have he := regularizedGaussHG_legendre_orders ν (1-μ) hw
@@ -651,7 +695,8 @@ theorem associatedP_recurrence_6 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
 P^μ_{ν+1}(z) + (ν+μ+1) z P^μ_ν(z) = 0`, with `(z²-1)^{1/2}` continued from `z > 1`. -/
 @[dlmf 14.10.E7]
 theorem associatedP_recurrence_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    legendreBranchPower 1 z*associatedP ν (μ+1) z-(ν-μ+1)*associatedP (ν+1) μ z+(ν+μ+1)*z*associatedP ν μ z=0 := by
+    legendreBranchPower 1 z*associatedP ν (μ+1) z-(ν-μ+1)*associatedP (ν+1) μ
+        z+(ν+μ+1)*z*associatedP ν μ z=0 := by
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   have hg := associated_gauge_shifts μ hz
   have he := regularizedGaussHG_legendre_order ν (1-μ) hw
@@ -704,7 +749,8 @@ theorem associatedP_recurrence_5 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
 dP^μ_ν(z)/dz = (μ-ν-1) P^μ_{ν+1}(z) + (ν+1) z P^μ_ν(z)`. -/
 @[dlmf 14.10.E4]
 theorem associatedP_recurrence_4 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    (1-z^2:ℂ)*deriv (associatedP ν μ) z=(μ-ν-1)*associatedP (ν+1) μ z+(ν+1)*z*associatedP ν μ z := by
+    (1-z^2:ℂ)*deriv (associatedP ν μ) z=(μ-ν-1)*associatedP (ν+1) μ
+        z+(ν+1)*z*associatedP ν μ z := by
   have hd := associatedP_recurrence_5 ν μ hz
   have hr := associatedP_recurrence_3 (ν-1) μ hz
   rw [show ν-1+2=ν+1 by ring,show ν-1+1=ν by ring] at hr
@@ -767,7 +813,8 @@ theorem olverQ_recurrence_3 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 /-- DLMF 14.10.3 for `Q` (§14.10(ii)): when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉
 (-∞, 1]`), `(ν-μ+2) Q^μ_{ν+2}(z) - (2ν+3) z Q^μ_{ν+1}(z) + (ν+μ+1) Q^μ_ν(z) = 0`. -/
 @[dlmf 14.10.E3]
-theorem associatedQ_recurrence_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem associatedQ_recurrence_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
     (ν-μ+2)*associatedQ (ν+2) μ z-(2*ν+3)*z*associatedQ (ν+1) μ z+(ν+μ+1)*associatedQ ν μ z=0 := by
   have R := olverQ_recurrence_3 ν μ hz
   have h1 : ν+μ+1 ≠ 0 := fun he => h 0 (by push_cast; linear_combination he)
@@ -782,7 +829,8 @@ theorem associatedQ_recurrence_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z :
 
 /-- Order recurrence for `𝑸^μ_ν`, non-integer order. -/
 theorem olverQ_recurrence_6_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    (ν+μ+2)*olverQ ν (μ+2) z-2*(μ+1)*z*legendreBranchPower (-1) z*olverQ ν (μ+1) z-(ν-μ)*olverQ ν μ z=0 := by
+    (ν+μ+2)*olverQ ν (μ+2) z-2*(μ+1)*z*legendreBranchPower (-1) z*olverQ ν (μ+1)
+        z-(ν-μ)*olverQ ν μ z=0 := by
   have hμ1 := legendre_nonint_add_one hμ
   have hμ2 : ∀ n : ℤ, μ+2 ≠ n := fun n hn => hμ (n-2) (by push_cast; linear_combination hn)
   have R1 := associatedP_recurrence_6 ν μ hz
@@ -805,18 +853,23 @@ theorem olverQ_recurrence_6_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {
 (ν-μ) 𝑸^μ_ν(z) = 0`, the form of the order recurrence DLMF 14.10.6 for Olver's `𝑸`, valid for all
 `ν, μ`. -/
 theorem olverQ_recurrence_6 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    (ν+μ+2)*olverQ ν (μ+2) z-2*(μ+1)*z*legendreBranchPower (-1) z*olverQ ν (μ+1) z-(ν-μ)*olverQ ν μ z=0 := by
+    (ν+μ+2)*olverQ ν (μ+2) z-2*(μ+1)*z*legendreBranchPower (-1) z*olverQ ν (μ+1)
+        z-(ν-μ)*olverQ ν μ z=0 := by
   have h0 := (olverQ_entire_order ν z hz).continuous
-  have h1 : Continuous fun μ => olverQ ν (μ+1) z := h0.comp (by fun_prop : Continuous fun μ : ℂ => μ+1)
-  have h2 : Continuous fun μ => olverQ ν (μ+2) z := h0.comp (by fun_prop : Continuous fun μ : ℂ => μ+2)
+  have h1 : Continuous fun μ => olverQ ν (μ+1) z :=
+      h0.comp (by fun_prop : Continuous fun μ : ℂ => μ+1)
+  have h2 : Continuous fun μ => olverQ ν (μ+2) z :=
+      h0.comp (by fun_prop : Continuous fun μ : ℂ => μ+2)
   exact legendre_eq_of_continuous_nonint (g := fun _ => 0) (by fun_prop) continuous_const
     (fun μ hμ => olverQ_recurrence_6_nonint ν μ hμ hz) μ
 
 /-- DLMF 14.10.6 for `Q`: when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉ (-∞, 1]`),
 `Q^{μ+2}_ν(z) + 2(μ+1) z (z²-1)^{-1/2} Q^{μ+1}_ν(z) - (ν-μ)(ν+μ+1) Q^μ_ν(z) = 0`. -/
 @[dlmf 14.10.E6]
-theorem associatedQ_recurrence_6 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedQ ν (μ+2) z+2*(μ+1)*z*legendreBranchPower (-1) z*associatedQ ν (μ+1) z-(ν-μ)*(ν+μ+1)*associatedQ ν μ z=0 := by
+theorem associatedQ_recurrence_6 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
+    associatedQ ν (μ+2) z+2*(μ+1)*z*legendreBranchPower (-1) z*associatedQ ν (μ+1)
+        z-(ν-μ)*(ν+μ+1)*associatedQ ν μ z=0 := by
   have R := olverQ_recurrence_6 ν μ hz
   have h1 : ν+μ+1 ≠ 0 := fun he => h 0 (by push_cast; linear_combination he)
   have h2 : ν+μ+1+1 ≠ 0 := fun he => h 1 (by push_cast; linear_combination he)
@@ -832,12 +885,17 @@ theorem associatedQ_recurrence_6 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z :
 
 /-- A mixed recurrence for `P^μ_ν`: `P^{μ+1}_{ν+1} - z P^{μ+1}_ν = (ν+μ+1)(z²-1)^{1/2} P^μ_ν`. -/
 theorem associatedP_mixed_recurrence (ν l : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedP (ν+1) (l+1) z-z*associatedP ν (l+1) z-(ν+l+1)*legendreBranchPower 1 z*associatedP ν l z=0 := by
+    associatedP (ν+1) (l+1) z-z*associatedP ν (l+1) z-(ν+l+1)*legendreBranchPower 1
+        z*associatedP ν l z=0 := by
   have hc0 := (associatedP_entire_order ν z hz).continuous
   have hc1 := (associatedP_entire_order (ν+1) z hz).continuous
-  have hd0 : Continuous fun l => associatedP ν (l+1) z := hc0.comp (by fun_prop : Continuous fun μ : ℂ => μ+1)
-  have hd1 : Continuous fun l => associatedP (ν+1) (l+1) z := hc1.comp (by fun_prop : Continuous fun μ : ℂ => μ+1)
-  refine legendre_eq_of_continuous_off_countable (f := fun l => associatedP (ν+1) (l+1) z-z*associatedP ν (l+1) z-(ν+l+1)*legendreBranchPower 1 z*associatedP ν l z) (g := fun _ => 0) (by fun_prop) continuous_const
+  have hd0 : Continuous fun l => associatedP ν (l+1) z :=
+      hc0.comp (by fun_prop : Continuous fun μ : ℂ => μ+1)
+  have hd1 : Continuous fun l => associatedP (ν+1) (l+1) z :=
+      hc1.comp (by fun_prop : Continuous fun μ : ℂ => μ+1)
+  refine legendre_eq_of_continuous_off_countable
+      (f := fun l => associatedP (ν+1) (l+1) z-z*associatedP ν (l+1) z-(ν+l+1)*legendreBranchPower 1
+      z*associatedP ν l z) (g := fun _ => 0) (by fun_prop) continuous_const
     (countable_singleton ν) (fun l hl => ?_) l
   have hne : ν-l ≠ 0 := sub_ne_zero.mpr (fun h => hl (by simp [h]))
   have R6 := associatedP_recurrence_6 ν l hz
@@ -872,7 +930,8 @@ theorem olverQ_recurrence_7_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {
 theorem olverQ_recurrence_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     -legendreBranchPower 1 z*olverQ ν (μ+1) z-(ν-μ+1)*olverQ (ν+1) μ z+z*olverQ ν μ z=0 := by
   have h0 := (olverQ_entire_order ν z hz).continuous
-  have h1 : Continuous fun μ => olverQ ν (μ+1) z := h0.comp (by fun_prop : Continuous fun μ : ℂ => μ+1)
+  have h1 : Continuous fun μ => olverQ ν (μ+1) z :=
+      h0.comp (by fun_prop : Continuous fun μ : ℂ => μ+1)
   have h2 := (olverQ_entire_order (ν+1) z hz).continuous
   exact legendre_eq_of_continuous_nonint (g := fun _ => 0) (by fun_prop) continuous_const
     (fun μ hμ => olverQ_recurrence_7_nonint ν μ hμ hz) μ
@@ -880,8 +939,10 @@ theorem olverQ_recurrence_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 /-- DLMF 14.10.7 for `Q`: when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉ (-∞, 1]`),
 `(z²-1)^{1/2} Q^{μ+1}_ν(z) - (ν-μ+1) Q^μ_{ν+1}(z) + (ν+μ+1) z Q^μ_ν(z) = 0`. -/
 @[dlmf 14.10.E7]
-theorem associatedQ_recurrence_7 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    legendreBranchPower 1 z*associatedQ ν (μ+1) z-(ν-μ+1)*associatedQ (ν+1) μ z+(ν+μ+1)*z*associatedQ ν μ z=0 := by
+theorem associatedQ_recurrence_7 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
+    legendreBranchPower 1 z*associatedQ ν (μ+1) z-(ν-μ+1)*associatedQ (ν+1) μ
+        z+(ν+μ+1)*z*associatedQ ν μ z=0 := by
   have R := olverQ_recurrence_7 ν μ hz
   have h1 : ν+μ+1 ≠ 0 := fun he => h 0 (by push_cast; linear_combination he)
   have e1 : Gamma (ν+(μ+1)+1) = (ν+μ+1)*Gamma (ν+μ+1) := by
@@ -924,8 +985,10 @@ theorem olverQ_recurrence_4 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 /-- DLMF 14.10.4 for `Q` (§14.10(ii)): when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉
 (-∞, 1]`), `(1-z²) dQ^μ_ν(z)/dz = (μ-ν-1) Q^μ_{ν+1}(z) + (ν+1) z Q^μ_ν(z)`. -/
 @[dlmf 14.10.E4]
-theorem associatedQ_recurrence_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    (1-z^2:ℂ)*deriv (associatedQ ν μ) z=(μ-ν-1)*associatedQ (ν+1) μ z+(ν+1)*z*associatedQ ν μ z := by
+theorem associatedQ_recurrence_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
+    (1-z^2:ℂ)*deriv (associatedQ ν μ) z=(μ-ν-1)*associatedQ (ν+1) μ
+        z+(ν+1)*z*associatedQ ν μ z := by
   have R := olverQ_recurrence_4 ν μ hz
   have h1 : ν+μ+1 ≠ 0 := fun he => h 0 (by push_cast; linear_combination he)
   have e1' : Gamma (ν+1+μ+1) = (ν+μ+1)*Gamma (ν+μ+1) := by
@@ -962,7 +1025,8 @@ theorem olverQ_recurrence_5 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 /-- DLMF 14.10.5 for `Q` (§14.10(ii)): when `ν-1+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z
 ∉ (-∞, 1]`), `(1-z²) dQ^μ_ν(z)/dz = (ν+μ) Q^μ_{ν-1}(z) - ν z Q^μ_ν(z)`. -/
 @[dlmf 14.10.E5]
-theorem associatedQ_recurrence_5 (ν μ : ℂ) (h : LegendreQRegular (ν-1) μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem associatedQ_recurrence_5 (ν μ : ℂ) (h : LegendreQRegular (ν-1) μ) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
     (1-z^2:ℂ)*deriv (associatedQ ν μ) z=(ν+μ)*associatedQ (ν-1) μ z-ν*z*associatedQ ν μ z := by
   have R := olverQ_recurrence_5 ν μ hz
   have h1 : ν+μ ≠ 0 := fun he => h 0 (by push_cast; linear_combination he)
@@ -974,7 +1038,8 @@ theorem associatedQ_recurrence_5 (ν μ : ℂ) (h : LegendreQRegular (ν-1) μ) 
 
 /-- Casoratian of `P^μ` and `𝑸^μ` in the degree, non-integer order. -/
 theorem olverQ_casoratian_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedP (ν+1) μ z*olverQ ν μ z-(ν+μ+1)*associatedP ν μ z*olverQ (ν+1) μ z=(Gamma (ν-μ+2))⁻¹ := by
+    associatedP (ν+1) μ z*olverQ ν μ z-(ν+μ+1)*associatedP ν μ z*olverQ (ν+1) μ
+        z=(Gamma (ν-μ+2))⁻¹ := by
   have h7 := associated_wronskian_7 ν μ hz
   unfold ODE.wronskian at h7
   have R1 := associatedP_recurrence_4 ν μ hz
@@ -998,7 +1063,8 @@ theorem olverQ_casoratian_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z 
 /-- For `z - 1` in the slit plane, the Casoratian `P^μ_{ν+1}(z) 𝑸^μ_ν(z) - (ν+μ+1) P^μ_ν(z)
 𝑸^μ_{ν+1}(z) = 1/Γ(ν-μ+2)`. -/
 theorem olverQ_casoratian (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedP (ν+1) μ z*olverQ ν μ z-(ν+μ+1)*associatedP ν μ z*olverQ (ν+1) μ z=(Gamma (ν-μ+2))⁻¹ := by
+    associatedP (ν+1) μ z*olverQ ν μ z-(ν+μ+1)*associatedP ν μ z*olverQ (ν+1) μ
+        z=(Gamma (ν-μ+2))⁻¹ := by
   have h0 := (olverQ_entire_order ν z hz).continuous
   have h1 := (olverQ_entire_order (ν+1) z hz).continuous
   have p0 := (associatedP_entire_order ν z hz).continuous
@@ -1010,8 +1076,10 @@ theorem olverQ_casoratian (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 /-- DLMF 14.2.11: when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉ (-∞, 1]`),
 `P^μ_{ν+1}(z) Q^μ_ν(z) - P^μ_ν(z) Q^μ_{ν+1}(z) = e^{μπi} Γ(ν+μ+1)/Γ(ν-μ+2)`. -/
 @[dlmf 14.2.E11]
-theorem associated_wronskian_11 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedP (ν+1) μ z*associatedQ ν μ z-associatedP ν μ z*associatedQ (ν+1) μ z=exp (μ*π*I)*Gamma (ν+μ+1)/Gamma (ν-μ+2) := by
+theorem associated_wronskian_11 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
+    associatedP (ν+1) μ z*associatedQ ν μ z-associatedP ν μ z*associatedQ (ν+1) μ z=exp
+        (μ*π*I)*Gamma (ν+μ+1)/Gamma (ν-μ+2) := by
   have R := olverQ_casoratian ν μ hz
   have h1 : ν+μ+1 ≠ 0 := fun he => h 0 (by push_cast; linear_combination he)
   have e1' : Gamma (ν+1+μ+1) = (ν+μ+1)*Gamma (ν+μ+1) := by
@@ -1029,7 +1097,8 @@ theorem differentiableAt_ferrersQ (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:�
 
 /-- Order raising: `(1-x²)^{1/2} 𝖰^{μ+1} = -(1-x²) d𝖰^μ/dx - μ x 𝖰^μ`. -/
 theorem ferrersQ_order_raise (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    (1-x^2:ℂ)^(1/2:ℂ)*ferrersQ ν (μ+1) x = -(1-x^2:ℂ)*deriv (ferrersQ ν μ) x-μ*x*ferrersQ ν μ x := by
+    (1-x^2:ℂ)^(1/2:ℂ)*ferrersQ ν (μ+1) x =
+        -(1-x^2:ℂ)*deriv (ferrersQ ν μ) x-μ*x*ferrersQ ν μ x := by
   have h2 := ferrersQ_recurrence_2 ν μ h hx
   have h4 := ferrersQ_recurrence_4 ν μ h hx
   linear_combination h2 + h4
@@ -1052,7 +1121,8 @@ theorem hasDerivAt_one_sub_sq_sqrt {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
 /-- DLMF 14.6.2 / 14.7.9: for `m ∈ ℕ`, `ν ∉ {-1,-2,…}` and for `-1 < x < 1`, `𝖰^m_ν(x) = (-1)^m
 (1-x²)^{m/2} d^m 𝖰_ν(x)/dx^m`. -/
 @[dlmf 14.6.E2, dlmf 14.7.E9]
-theorem ferrersQ_nat_order_derivative (ν : ℂ) (m : ℕ) (h : LegendreQRegular ν 0) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersQ_nat_order_derivative (ν : ℂ) (m : ℕ) (h : LegendreQRegular ν 0) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ ν m x=(-1)^m*(1-x^2:ℂ)^((m:ℂ)/2)*iteratedDeriv m (ferrersQ ν 0) x := by
   set u : ℝ → ℂ := fun y => (1-(y:ℂ)^2)^(1/2:ℂ) with hu
   have hu0 : ∀ y ∈ Ioo (-1:ℝ) 1, u y ≠ 0 := fun y hy =>
@@ -1060,7 +1130,8 @@ theorem ferrersQ_nat_order_derivative (ν : ℂ) (m : ℕ) (h : LegendreQRegular
   have husq : ∀ y ∈ Ioo (-1:ℝ) 1, u y ^ 2 = 1-(y:ℂ)^2 := fun y hy => by
     simp only [hu]
     rw [sq, ← cpow_add _ _ (slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hy))]; norm_num
-  have hreg : ∀ k : ℕ, LegendreQRegular ν k := fun k n hn => h (n+k) (by push_cast; linear_combination hn)
+  have hreg : ∀ k : ℕ, LegendreQRegular ν k := fun k n hn =>
+      h (n+k) (by push_cast; linear_combination hn)
   have key : ∀ k : ℕ, ∀ y ∈ Ioo (-1:ℝ) 1,
       ferrersQ ν k y = (-1)^k*u y^k*iteratedDeriv k (ferrersQ ν 0) y := by
     intro k
@@ -1111,7 +1182,8 @@ theorem associatedP_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-
   have hz' := one_add_mem_slitPlane_of_sub_one hz
   have hw := mem_cutPlane_of_one_add hz'
   have hev : associatedP ν 0 =ᶠ[𝓝 z] legendreP ν := by
-    filter_upwards [(isOpen_slitPlane.preimage (by fun_prop : Continuous fun w : ℂ => w-1)).mem_nhds hz]
+    filter_upwards [(isOpen_slitPlane.preimage
+        (by fun_prop : Continuous fun w : ℂ => w-1)).mem_nhds hz]
       with w hw using associatedP_zero_order ν hw
   rw [hev.iteratedDeriv_eq, iteratedDeriv_legendreP ν m hz']
   rcases m with _ | k
@@ -1153,7 +1225,8 @@ theorem legendreBranchPower_mul (a b z : ℂ) :
   rw [← exp_add]; congr 1; ring
 
 /-- For `z - 1` in the slit plane, `legendreBranchPower 2 z = z² - 1`. -/
-theorem legendreBranchPower_two {z : ℂ} (hz : z-1 ∈ slitPlane) : legendreBranchPower 2 z = z^2-1 := by
+theorem legendreBranchPower_two {z : ℂ} (hz : z-1 ∈ slitPlane) : legendreBranchPower 2
+    z = z^2-1 := by
   have hp' : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
   unfold legendreBranchPower
   rw [show (2:ℂ)/2*(log (z-1)+log (z+1)) = log (z-1)+log (z+1) by ring, exp_add,
@@ -1166,10 +1239,12 @@ theorem legendreBranchPower_two {z : ℂ} (hz : z-1 ∈ slitPlane) : legendreBra
 theorem olverQ_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     poch (ν+1) m*olverQ ν m z=(-1)^m*legendreBranchPower m z*iteratedDeriv m (olverQ ν 0) z := by
   set R : ℕ → ℂ → ℂ := fun k w => poch (ν+1) k*olverQ ν k w with hR
-  have hRd : ∀ (k : ℕ) w, w-1 ∈ slitPlane → HasDerivAt (R k) (poch (ν+1) k*deriv (olverQ ν k) w) w :=
+  have hRd : ∀ (k : ℕ) w, w-1 ∈ slitPlane →
+      HasDerivAt (R k) (poch (ν+1) k*deriv (olverQ ν k) w) w :=
     fun k w hw => (olverQ_analytic ν k w hw).differentiableAt.hasDerivAt.const_mul _
   have hraise : ∀ (k : ℕ) w, w-1 ∈ slitPlane →
-      legendreBranchPower 1 w*R (k+1) w = (1-w^2)*(poch (ν+1) k*deriv (olverQ ν k) w)+k*w*R k w := by
+      legendreBranchPower 1 w*R (k+1) w =
+          (1-w^2)*(poch (ν+1) k*deriv (olverQ ν k) w)+k*w*R k w := by
     intro k w hw
     have h7 := olverQ_recurrence_7 ν k hw
     have h4 := olverQ_recurrence_4 ν k hw
@@ -1219,7 +1294,8 @@ theorem olverQ_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈
 /-- DLMF 14.6.4 / 14.7.12: for `m ∈ ℕ`, `ν ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉ (-∞,
 1]`), `Q^m_ν(z) = (z²-1)^{m/2} d^m Q_ν(z)/dz^m`. -/
 @[dlmf 14.6.E4, dlmf 14.7.E12]
-theorem associatedQ_nat_order_derivative (ν : ℂ) (m : ℕ) (h : LegendreQRegular ν 0) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem associatedQ_nat_order_derivative (ν : ℂ) (m : ℕ) (h : LegendreQRegular ν 0) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
     associatedQ ν m z=legendreBranchPower m z*iteratedDeriv m (associatedQ ν 0) z := by
   have hO := olverQ_nat_order_derivative ν m hz
   have h' : ∀ k : ℕ, ν+1 ≠ -k := fun k hk => h k (by linear_combination hk)

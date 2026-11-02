@@ -65,8 +65,10 @@ theorem hderiv_jet (n k : ℕ) (z : ℂ) : HasDerivAt (jet n k) (jet n (k+1) z) 
 
 /-- Weighted derivative ladders, valid also at the endpoints. -/
 theorem weighted_ladders (n : ℕ) (z : ℂ) :
-      (1-z^2) * deriv (legendrePolyP n) z = (n+1) * (z * legendrePolyP n z - legendrePolyP (n+1) z) ∧
-      (1-z^2) * deriv (legendrePolyP (n+1)) z = (n+1) * (legendrePolyP n z-z*legendrePolyP (n+1) z) := by
+      (1-z^2) * deriv (legendrePolyP n) z = (n+1) *
+          (z * legendrePolyP n z - legendrePolyP (n+1) z) ∧
+      (1-z^2) * deriv (legendrePolyP (n+1)) z = (n+1) *
+          (legendrePolyP n z-z*legendrePolyP (n+1) z) := by
   have h0 := jacobi_raising_derivative (α := 0) (β := 0) (by norm_num) n z
   have h1 := jacobi_lowering_derivative (α := 0) (β := 0) (by norm_num) n z
   change (2*n+0+0+2) * (1-z^2) * deriv (legendrePolyP n) z = _ at h0
@@ -88,8 +90,10 @@ theorem weighted_ladders (n : ℕ) (z : ℂ) :
 
 /-- The two derivative ladders at order one. -/
 theorem base_ladders (n : ℕ) :
-    deriv (legendrePolyP (n+1)) = (fun z => z * deriv (legendrePolyP n) z + (n+1) * legendrePolyP n z) ∧
-    deriv (legendrePolyP n) = (fun z => z * deriv (legendrePolyP (n+1)) z - (n+1) * legendrePolyP (n+1) z) := by
+    deriv (legendrePolyP (n+1)) =
+        (fun z => z * deriv (legendrePolyP n) z + (n+1) * legendrePolyP n z) ∧
+    deriv (legendrePolyP n) =
+        (fun z => z * deriv (legendrePolyP (n+1)) z - (n+1) * legendrePolyP (n+1) z) := by
   have hmul := weighted_ladders n
   have hne {z : ℂ} (hz : z ∈ Metric.ball (0 : ℂ) 1) : 1-z^2 ≠ 0 := by
     have hz' : ‖z‖ < 1 := by simpa using hz
@@ -140,7 +144,8 @@ theorem jet_lower (n k : ℕ) (z : ℂ) :
   induction k generalizing z with
   | zero => simpa [jet, iteratedDeriv_one] using congrFun (base_ladders n).2 z
   | succ k ih =>
-    have he : jet n (k+1) = fun z => z * jet (n+1) (k+1) z - ((n : ℂ)+1-k) * jet (n+1) k z := funext ih
+    have he : jet n (k+1) = fun z => z * jet (n+1) (k+1) z - ((n : ℂ)+1-k) *
+        jet (n+1) k z := funext ih
     have hd := congrArg (fun f : ℂ → ℂ => deriv f z) he
     rw [deriv_jet] at hd
     have hh := ((hasDerivAt_id z).mul (hderiv_jet (n+1) (k+1) z)).sub
@@ -156,7 +161,8 @@ theorem jet_ode (n k : ℕ) (z : ℂ) :
     (1-z^2) * jet n (k+2) z - 2*(k+1)*z*jet n (k+1) z +
       ((n : ℂ)-k)*(n+k+1)*jet n k z = 0 := by
   induction k generalizing z with
-  | zero => simpa [jet, iteratedDeriv_succ, iteratedDeriv_zero] using legendre_differential_equation n z
+  | zero => simpa [jet, iteratedDeriv_succ, iteratedDeriv_zero] using
+              legendre_differential_equation n z
   | succ k ih =>
     have he : (fun z : ℂ => (1-z^2) * jet n (k+2) z - 2*(k+1)*z*jet n (k+1) z +
         ((n : ℂ)-k)*(n+k+1)*jet n k z) = fun _ => 0 := funext ih
@@ -183,7 +189,8 @@ theorem jet_eq_jacobi (n k : ℕ) (hk : k ≤ n) (z : ℂ) :
         jacobiPolyP k k ((k+1+r)-k) z := funext fun z => ih _ (by omega) z
     rw [← deriv_jet, he, deriv_const_mul_field', show k+1+r-k = r+1 by omega]
     dsimp only
-    rw [jacobi_derivative (show -1 < ((k : ℂ)).re by change -1 < (k : ℝ); linarith [Nat.cast_nonneg (α := ℝ) k])]
+    rw [jacobi_derivative
+        (show -1 < ((k : ℂ)).re by change -1 < (k : ℝ); linarith [Nat.cast_nonneg (α := ℝ) k])]
     rw [show k+1+r-(k+1) = r by omega, poch_succ, pow_succ]
     push_cast
     field_simp
@@ -422,7 +429,8 @@ theorem coeff_recurrence {n k : ℕ} (hn : 0 < n) (hk : 0 < k)
     · subst k
       simpa only [Nat.add_sub_cancel] using coeff_recurrence_top n x y s t
     · rw [coeff_eq_zero (show n+1 < k by omega), coeff_eq_zero (show n-1 < k by omega),
-        coeff_eq_zero h, coeff_eq_zero (show n < k-1 by omega), coeff_eq_zero (show n < k+1 by omega)]
+        coeff_eq_zero h, coeff_eq_zero (show n < k-1 by omega),
+            coeff_eq_zero (show n < k+1 by omega)]
       ring
 
 /-- The elementary cosine recurrence. -/
@@ -443,8 +451,10 @@ theorem cosine_neighbor_sum (f : ℕ → ℂ) (n : ℕ) (phi : ℂ)
       ∑ k ∈ Finset.range n, f (k+1)*cos (k*phi) := by
     have hh := Finset.sum_range_succ' (fun k => f (k+1)*cos (k*phi)) (n+1)
     simp only [zero_add, Nat.cast_zero, zero_mul, cos_zero, mul_one] at hh
-    rw [Finset.sum_range_succ, Finset.sum_range_succ, h1, h2, zero_mul, zero_mul, add_zero, add_zero] at hh
-    simpa only [Nat.cast_add, Nat.cast_one, show ∀ k : ℕ, k+1+1 = k+2 by intro k; omega, add_comm] using hh.symm
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, h1, h2, zero_mul, zero_mul, add_zero,
+        add_zero] at hh
+    simpa only [Nat.cast_add, Nat.cast_one, show ∀ k : ℕ, k+1+1 = k+2 by intro k; omega,
+                                                                           add_comm] using hh.symm
   rw [Finset.sum_congr rfl (fun k _ => show (f k + f (k+2)) * cos ((k+1)*phi) =
     f k * cos ((k+1)*phi) + f (k+2)*cos ((k+1)*phi) by ring)]
   rw [Finset.sum_add_distrib]
@@ -487,8 +497,11 @@ theorem kernel_recurrence {n : ℕ} (hn : 0 < n) (x y s t phi : ℂ)
       (2*n+1)*(x*y+s*t*cos phi)*kernel n x y s t phi := by
   have hzero := coeff_recurrence_zero hn x y s t hs ht
   have hsum :
-      (∑ k ∈ Finset.range (n+1), ((n+1)*coeff (n+1) (k+1) x y s t + n*coeff (n-1) (k+1) x y s t) * cos ((k+1)*phi)) =
-      ∑ k ∈ Finset.range (n+1), ((2*n+1)*(x*y*coeff n (k+1) x y s t + s*t/2*(coeff n k x y s t + coeff n (k+2) x y s t))) * cos ((k+1)*phi) := by
+      (∑ k ∈ Finset.range (n+1), ((n+1)*coeff (n+1) (k+1) x y s t + n*coeff (n-1) (k+1) x y s t) *
+          cos ((k+1)*phi)) =
+      ∑ k ∈ Finset.range (n+1),
+          ((2*n+1)*(x*y*coeff n (k+1) x y s t + s*t/2*(coeff n k x y s t + coeff n (k+2) x y s t)))
+          * cos ((k+1)*phi) := by
     apply Finset.sum_congr rfl
     intro k _
     rw [coeff_recurrence hn (show 0 < k+1 by omega) x y s t hs ht, Nat.add_sub_cancel]
@@ -499,7 +512,8 @@ theorem kernel_recurrence {n : ℕ} (hn : 0 < n) (x y s t phi : ℂ)
     rw [Finset.sum_range_succ, coeff_eq_zero (show n < n+1 by omega), zero_mul, add_zero]
   rw [kernel_eq_sum (n-1) (n+1) (by omega)]
   dsimp only [kernel] at *
-  simp only [add_mul, mul_add, Finset.sum_add_distrib, mul_assoc, ← Finset.mul_sum] at hsum hc hcut ⊢
+  simp only [add_mul, mul_add, Finset.sum_add_distrib, mul_assoc, ← Finset.mul_sum]
+      at hsum hc hcut ⊢
   rw [hcut] at hsum
   linear_combination hzero + 2*hsum + (2*n+1)*s*t*hc
 

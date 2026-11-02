@@ -151,7 +151,8 @@ theorem gegenbauerLaplace_recurrence {lam : ℝ} (hlam : 0 < lam) (θ : ℝ) (n 
     rw [intervalIntegral.integral_const_mul, hFTC]; simp
   rw [intervalIntegral.integral_congr (fun t _ => hpt t)] at h0
   have hk : ∀ k : ℕ, IntervalIntegrable (fun t => w t ^ k * ρ t) volume 0 π :=
-    fun k => hρi.continuousOn_mul (hU ▸ (by fun_prop : Continuous fun t : ℝ => w t ^ k).continuousOn)
+    fun k => hρi.continuousOn_mul
+        (hU ▸ (by fun_prop : Continuous fun t : ℝ => w t ^ k).continuousOn)
   have hsplit3 : ∀ t : ℝ, ρ t * ((n + 1) * w t ^ n - 2 * (n + 1 + lam) * c * w t ^ (n + 1) +
       (n + 1 + 2 * lam) * w t ^ (n + 2)) = (n + 1) * (w t ^ n * ρ t) -
       2 * (n + 1 + lam) * c * (w t ^ (n + 1) * ρ t) + (n + 1 + 2 * lam) * (w t ^ (n + 2) * ρ t) :=
@@ -204,10 +205,12 @@ theorem ultrasphPoly_laplace_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ) (θ
   have hbase1 : gegenbauerLaplace lam θ 1 = Real.cos θ * K := by
     simp only [gegenbauerLaplace, pow_one]
     have hsplit : ∀ t : ℝ, ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) *
-        ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ) = Real.cos θ * ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ) +
+        ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ) = Real.cos θ *
+            ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ) +
           I * Real.sin θ * ((Real.cos t * Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ) := by
       intro t; push_cast; ring
-    have hρC : IntervalIntegrable (fun t : ℝ => ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ)) volume 0 π :=
+    have hρC : IntervalIntegrable
+        (fun t : ℝ => ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ)) volume 0 π :=
       ⟨hρi'.1.ofReal, hρi'.2.ofReal⟩
     have hψ := hρi'.continuousOn_mul Real.continuous_cos.continuousOn
     have hψC : IntervalIntegrable (fun t : ℝ => ((Real.cos t * Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ))
@@ -243,7 +246,8 @@ theorem ultrasphPoly_laplace_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ) (θ
       Complex.Gamma_ofReal, Complex.Gamma_ofReal]
     push_cast
     field_simp
-  rw [hGam, show (∫ phi : ℝ in (0 : ℝ)..Real.pi, ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos phi) ^ n *
+  rw [hGam, show (∫ phi : ℝ in (0 : ℝ)..Real.pi,
+      ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos phi) ^ n *
       (Real.rpow (Real.sin phi) (2 * lam - 1) : ℂ)) = gegenbauerLaplace lam θ n from rfl, hmain]
   field_simp
   rfl
@@ -491,7 +495,8 @@ theorem integral_t_mul_add_I_pow (x : ℂ) (n : ℕ) :
   have hibp := integral_mul_deriv_eq_deriv_mul_of_integrable (fun t _ => hu t) (fun t _ => hv t)
     ?_ ?_ ?_
   · rw [hibp]
-    rw [show (fun t : ℝ => (n + 1 : ℂ) * (x + I * t) ^ n * I * ((-(Real.exp (-(t ^ 2))) / 2 : ℝ) : ℂ))
+    rw [show (fun t : ℝ => (n + 1 : ℂ) * (x + I * t) ^ n * I *
+        ((-(Real.exp (-(t ^ 2))) / 2 : ℝ) : ℂ))
       = fun t => -(I * (n + 1) / 2) * ((x + I * t) ^ n * ((Real.exp (-(t ^ 2)) : ℝ) : ℂ)) by
         funext t; push_cast; ring, integral_const_mul]
     ring
@@ -563,7 +568,8 @@ theorem hermitePolyH_laplace_integral (n : ℕ) (x : ℂ) :
 
 /-- `e^{-t²} tⁿ e^{2ixt}` is integrable. -/
 theorem integrable_gauss_pow_cexp (x : ℝ) (n : ℕ) :
-    Integrable fun t : ℝ => ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ n * cexp (2 * I * x * t) := by
+    Integrable fun t : ℝ => ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ n *
+        cexp (2 * I * x * t) := by
   refine (integrable_pow_mul_cexp_gauss n (-2 * I * x)).congr (Eventually.of_forall fun t => ?_)
   simp only [ofReal_exp]
   push_cast
@@ -573,8 +579,10 @@ theorem integrable_gauss_pow_cexp (x : ℝ) (n : ℕ) :
 /-- The moment recurrence for `∫ e^{-t²} tⁿ e^{2ixt} dt`. -/
 theorem integral_K_succ_succ (x : ℝ) (n : ℕ) :
     ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ (n + 2) * cexp (2 * I * x * t) =
-      I * x * (∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ (n + 1) * cexp (2 * I * x * t)) +
-      (n + 1) / 2 * ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ n * cexp (2 * I * x * t) := by
+      I * x * (∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ (n + 1) *
+          cexp (2 * I * x * t)) +
+      (n + 1) / 2 * ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ n *
+          cexp (2 * I * x * t) := by
   have hu : ∀ t : ℝ, HasDerivAt (fun s : ℝ => (s : ℂ) ^ (n + 1) * cexp (2 * I * x * s))
       (((n + 1 : ℂ) * (t : ℂ) ^ n) * cexp (2 * I * x * t) +
         (t : ℂ) ^ (n + 1) * (cexp (2 * I * x * t) * (2 * I * x))) t := by
@@ -600,13 +608,16 @@ theorem integral_K_succ_succ (x : ℝ) (n : ℕ) :
     (((integrable_gauss_pow_cexp x (n + 1)).const_mul (-(1 / 2))).congr
       (Eventually.of_forall fun t => by simp only [Pi.mul_apply]; push_cast; ring))
   have e1 : ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ (n + 2) * cexp (2 * I * x * t) =
-      ∫ t : ℝ, (t : ℂ) ^ (n + 1) * cexp (2 * I * x * t) * (((t * Real.exp (-(t ^ 2))) : ℝ) : ℂ) := by
+      ∫ t : ℝ, (t : ℂ) ^ (n + 1) * cexp (2 * I * x * t) *
+          (((t * Real.exp (-(t ^ 2))) : ℝ) : ℂ) := by
     congr 1; funext t; push_cast; ring
   rw [e1, hibp]
   rw [show (fun t : ℝ => (((n + 1 : ℂ) * (t : ℂ) ^ n) * cexp (2 * I * x * t) +
-      (t : ℂ) ^ (n + 1) * (cexp (2 * I * x * t) * (2 * I * x))) * ((-(Real.exp (-(t ^ 2))) / 2 : ℝ) : ℂ))
+      (t : ℂ) ^ (n + 1) * (cexp (2 * I * x * t) * (2 * I * x))) *
+          ((-(Real.exp (-(t ^ 2))) / 2 : ℝ) : ℂ))
       = fun t => (-((n : ℂ) + 1) / 2) * (((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ n *
-          cexp (2 * I * x * t)) + (-(I * x)) * (((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ (n + 1) *
+          cexp (2 * I * x * t)) + (-(I * x)) *
+              (((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ (n + 1) *
           cexp (2 * I * x * t)) by funext t; push_cast; ring]
   rw [integral_add ((integrable_gauss_pow_cexp x n).const_mul _)
     ((integrable_gauss_pow_cexp x (n + 1)).const_mul _), integral_const_mul, integral_const_mul]
@@ -770,9 +781,11 @@ theorem legendre_product_integral (n : ℕ) (θ ψ : ℝ) :
       2*∑ k ∈ Finset.Icc 1 n, ∫ phi : ℝ in (0 : ℝ)..π, c k*(Real.cos (k*phi) : ℂ) := by
     rw [intervalIntegral.integral_const_mul,
       intervalIntegral.integral_finsetSum (fun k _ =>
-        (show Continuous (fun phi : ℝ => c k*(Real.cos (k*phi) : ℂ)) by fun_prop).intervalIntegrable _ _)]
+        (show Continuous (fun phi : ℝ => c k*(Real.cos (k*phi) : ℂ))
+            by fun_prop).intervalIntegrable _ _)]
   rw [he, intervalIntegral.integral_add intervalIntegrable_const
-    ((show Continuous (fun phi : ℝ => ∑ k ∈ Finset.Icc 1 n, c k*(Real.cos (k*phi) : ℂ)) by fun_prop).intervalIntegrable _ _ |>.const_mul _), hsum]
+    ((show Continuous (fun phi : ℝ => ∑ k ∈ Finset.Icc 1 n, c k*(Real.cos (k*phi) : ℂ))
+        by fun_prop).intervalIntegrable _ _ |>.const_mul _), hsum]
   have hz : ∑ k ∈ Finset.Icc 1 n, ∫ phi : ℝ in (0 : ℝ)..π, c k*(Real.cos (k*phi) : ℂ) = 0 := by
     apply Finset.sum_eq_zero
     intro k hk

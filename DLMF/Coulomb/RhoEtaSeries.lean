@@ -10,6 +10,7 @@ public import DLMF.Core.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Analytic
 public import DLMF.Confluent.CoulombIrregular
+public import DLMF.Confluent.BasicProperties.IntegerParametersAndLimits
 public import DLMF.Coulomb.Basic.AuxiliaryData
 
 /-!
@@ -28,6 +29,8 @@ functions `I_k`, `J_k`, with the asymptotic form of `G_ℓ` in functions `K_k` (
 * `powerSeriesCoeff_eq_hyp2F1`: `A_k^ℓ` as a terminating `₂F₁` (DLMF 33.6.4).
 * `hasSum_coulombHPlus_log`, `hasSum_coulombHMinus_log`: the logarithmic series of `H^±_ℓ`
   (DLMF 33.6.5), for `η ≠ 0`.
+* `hasSum_coulombHPlus_log_recipGamma`, `hasSum_coulombHMinus_log_recipGamma`: the pole-free
+  form of DLMF 33.6.5, valid for all `η` (stronger than DLMF).
 * `besselSeriesCoeffA_initial`, `besselSeriesCoeffA_recurrence`: the coefficients `a_k`
   (DLMF 33.9.2).
 * `hasSum_coulombF_sphericalJ`: `F_ℓ(η,ρ) = ρ ∑_{k ≥ 0} a_k j_{ℓ+k}(ρ)` (DLMF 33.9.1).
@@ -330,7 +333,8 @@ theorem hasSum_deriv_coulombF (ℓ : ℕ) (η ρ : ℝ) :
       ((coulombC ℓ η : ℂ) * coulombWaveDeriv ℓ η ρ) := by
     convert ht.mul_left (coulombC ℓ η : ℂ) using 1
     funext n
-    rw [← hD, ← iteratedDeriv_succ', ← iteratedDeriv_coulombWave_zero_div_factorial ℓ η (n + 1), sub_zero,
+    rw [← hD, ← iteratedDeriv_succ',
+        ← iteratedDeriv_coulombWave_zero_div_factorial ℓ η (n + 1), sub_zero,
       smul_eq_mul, smul_eq_mul, Nat.factorial_succ]
     have : (n ! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
     push_cast
@@ -401,6 +405,151 @@ theorem powerSeriesCoeff_eq_hyp2F1 (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ + 
     rw [iteratedDeriv_fun_pow_zero]; simp [hi]
   · intro h; simp at h
 
+/-- `Γ(n+1+k) = n! (n+1)_k`. -/
+private lemma Gamma_natCast_add_one_add (n k : ℕ) :
+    Gamma ((n : ℂ) + 1 + k) = (n ! : ℂ) * poch ((n : ℂ) + 1) k := by
+  have hn' : ∀ j : ℕ, (n : ℂ) + 1 ≠ -(j : ℂ) := by
+    intro j hj
+    have := congrArg re hj
+    simp at this
+    linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n), (Nat.cast_nonneg j : (0 : ℝ) ≤ j)]
+  have hG := Gamma_add_nat_div_Gamma_eq (n := k) ((n : ℂ) + 1) hn'
+  rw [div_eq_iff (Gamma_ne_zero hn'), Gamma_nat_eq_factorial] at hG
+  rw [hG]; ring
+
+/-- The parameter `2ℓ+2` of the Coulomb `U`-function as `n + 1` with `n = 2ℓ+1`. -/
+private lemma two_mul_add_two_eq (ℓ : ℕ) :
+    (2 * (ℓ : ℂ) + 2) = ((2 * ℓ + 1 : ℕ) : ℂ) + 1 := by push_cast; ring
+
+/-- DLMF 13.2.9 at `b = 2ℓ+2`, multiplied by `(2ℓ+1)! Γ(a-2ℓ-1) z^a`. -/
+private lemma hasSum_log_aux (ℓ : ℕ) {a z : ℂ} (hzs : z ∈ slitPlane)
+    (han : ∀ k : ℕ, a - ((2 * ℓ + 1 : ℕ) : ℂ) ≠ -(k : ℂ)) (hare : 0 < a.re) :
+    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+        (log z + Complex.digamma (a + k) - Complex.digamma (1 + k) -
+          Complex.digamma (2 * ℓ + 2 + k)))
+      ((2 * ℓ + 1)! * Gamma (a - ((2 * ℓ + 1 : ℕ) : ℂ)) *
+          (z ^ a * kummerU a (2 * ℓ + 2) z) +
+        ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) /
+          ((2 * ℓ + 1 - k)! * poch (1 - a) k) * z ^ (a - k)) := by
+  have hb := two_mul_add_two_eq ℓ
+  set n := 2 * ℓ + 1 with hn
+  have hz0 : z ≠ 0 := slitPlane_ne_zero hzs
+  obtain ⟨hsum, -⟩ := tricomi_numerator_nat_series a n hz0 han
+  have hU := kummerU_nat_denom a n hzs han
+  have hn0 : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
+  set f : ℕ → ℂ := fun k => poch a k / (poch (n + 1 : ℂ) k * k.factorial) * z ^ k *
+    (log z + digamma (a + k) - digamma (1 + k) - digamma (n + k + 1)) with hf_def
+  have hf : Summable f := by
+    refine (hsum.mul_left (n ! : ℂ)).congr fun k => ?_
+    rw [Gamma_natCast_add_one_add, hf_def]
+    simp only
+    rw [show (k : ℂ) + 1 = 1 + k by ring, show (n : ℂ) + 1 + k = n + k + 1 by ring]
+    field_simp
+  have hn1 : (-1 : ℂ) ^ (n + 1) = 1 := by
+    rw [hn, show 2 * ℓ + 1 + 1 = 2 * (ℓ + 1) by ring, pow_mul]; norm_num
+  have hGa : Gamma a ≠ 0 := Gamma_ne_zero_of_re_pos hare
+  have hGan : Gamma (a - n) ≠ 0 := Gamma_ne_zero han
+  have hpochn : poch (1 - a) n * Gamma (a - n) = - Gamma a := by
+    have h1 := poch_reflect (a - n) n
+    rw [show 1 - (a - n) - n = 1 - a by ring] at h1
+    have h2 := Gamma_add_nat_div_Gamma_eq (n := n) (a - n) han
+    rw [sub_add_cancel, div_eq_iff hGan] at h2
+    rw [h1, show (-1 : ℂ) ^ n = -1 by rw [hn, pow_succ, pow_mul]; norm_num]
+    linear_combination h2
+  have hT : tsum f = n ! * Gamma (a - n) * (kummerU a ((n : ℂ) + 1) z -
+      1 / Gamma a * ∑ k ∈ Finset.Icc 1 n, ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) /
+        ((n - k).factorial : ℂ) * z ^ (-(k : ℂ))) := by
+    rw [hU, hn1]; field_simp; ring
+  have hS : ∑ k ∈ Finset.Icc 1 n, ((n ! * (k - 1)! : ℂ)) /
+      (((n - k)! : ℂ) * poch (1 - a) k) * z ^ (a - k) =
+      -(n ! * Gamma (a - n) / Gamma a) * z ^ a * ∑ k ∈ Finset.Icc 1 n,
+        ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) /
+        ((n - k).factorial : ℂ) * z ^ (-(k : ℂ)) := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun k hk => ?_
+    have hp := poch_add (1 - a) k (n - k)
+    rw [Nat.add_sub_cancel' (Finset.mem_Icc.mp hk).2] at hp
+    have hpk : poch (1 - a) k ≠ 0 := by
+      intro h0
+      rw [h0, zero_mul] at hp
+      rw [hp, zero_mul] at hpochn
+      exact hGa (neg_eq_zero.mp hpochn.symm)
+    rw [sub_eq_add_neg a (k : ℂ), cpow_add _ _ hz0]
+    have : ((n - k).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
+    field_simp
+    rw [hp] at hpochn
+    linear_combination ((k - 1)! * z ^ a * z ^ (-(k : ℂ)) : ℂ) * hpochn
+  convert (hf.hasSum.mul_left (z ^ a)) using 1
+  · funext k
+    rw [hf_def, cpow_add _ _ hz0, cpow_natCast, hb]
+    simp only
+    ring_nf
+  · rw [hb, hS, hT]
+    field_simp
+    ring
+
+/-- DLMF 13.2.9 in the pole-free form, at `b = 2ℓ+2`, multiplied by `(2ℓ+1)! z^a`. -/
+private lemma hasSum_log_recipGamma_aux (ℓ : ℕ) {a z : ℂ} (hzs : z ∈ slitPlane) :
+    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+        ((Gamma (a - ((2 * ℓ + 1 : ℕ) : ℂ)))⁻¹ *
+            (log z - Complex.digamma (1 + k) - Complex.digamma (2 * ℓ + 2 + k)) -
+          poch (a - ((2 * ℓ + 1 : ℕ) : ℂ)) (2 * ℓ + 1 + k) *
+            DLMF.Gamma.recipGammaDeriv 1 (a + k)))
+      ((2 * ℓ + 1)! * (z ^ a * kummerU a (2 * ℓ + 2) z) -
+        ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) *
+          poch (1 - a + k) (2 * ℓ + 1 - k) / ((2 * ℓ + 1 - k)! * Gamma a) * z ^ (a - k)) := by
+  have hb := two_mul_add_two_eq ℓ
+  set n := 2 * ℓ + 1 with hn
+  have hz0 : z ≠ 0 := slitPlane_ne_zero hzs
+  obtain ⟨hsum, -⟩ := tricomi_numerator_nat_series_recipGamma a n hz0
+  have hU := kummerU_nat_denom_recipGamma a n hzs
+  have hn0 : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
+  set f : ℕ → ℂ := fun k => poch a k / (poch (n + 1 : ℂ) k * k.factorial) * z ^ k *
+    ((Gamma (a - n))⁻¹ * (log z - digamma (1 + k) - digamma (n + k + 1)) -
+      poch (a - n) (n + k) * DLMF.Gamma.recipGammaDeriv 1 (a + k)) with hf_def
+  have hf : Summable f := by
+    refine (hsum.mul_left (n ! : ℂ)).congr fun k => ?_
+    rw [Gamma_natCast_add_one_add, hf_def]
+    simp only
+    rw [show (k : ℂ) + 1 = 1 + k by ring, show (n : ℂ) + 1 + k = n + k + 1 by ring]
+    field_simp
+  have hn1 : (-1 : ℂ) ^ (n + 1) = 1 := by
+    rw [hn, show 2 * ℓ + 1 + 1 = 2 * (ℓ + 1) by ring, pow_mul]; norm_num
+  have hT : tsum f = n ! * (kummerU a ((n : ℂ) + 1) z -
+      1 / Gamma a * ∑ k ∈ Finset.Icc 1 n, ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) /
+        ((n - k).factorial : ℂ) * z ^ (-(k : ℂ))) := by
+    rw [hU, hn1]; field_simp; ring
+  convert (hf.hasSum.mul_left (z ^ a)) using 1
+  · funext k
+    rw [hf_def, cpow_add _ _ hz0, cpow_natCast, hb]
+    simp only
+    ring_nf
+  · rw [hb, hT]
+    simp only [mul_sub, Finset.mul_sum]
+    congr 1
+    · ring
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [sub_eq_add_neg a (k : ℂ), cpow_add _ _ hz0]
+    ring
+
+/-- `e^{-iθ_ℓ} H^+_ℓ = z^a U(a, 2ℓ+2, z)` with `a = 1+ℓ+iη`, `z = -2iρ`. -/
+private lemma exp_neg_mul_coulombHPlus (ℓ : ℕ) (η ρ : ℝ) {a z : ℂ} (ha : a = 1 + ℓ + I * η)
+    (hz : z = -2 * I * ρ) :
+    exp (-(I * coulombTheta ℓ η ρ)) * coulombHPlus ℓ η ρ =
+      z ^ a * kummerU a (2 * ℓ + 2) z := by
+  rw [coulombHPlus, show (ℓ : ℂ) + 1 + I * η = a by rw [ha]; ring, ← hz,
+    ← mul_assoc, ← mul_assoc, ← exp_add]
+  simp
+
+/-- `e^{iθ_ℓ} H^-_ℓ = z^a U(a, 2ℓ+2, z)` with `a = 1+ℓ-iη`, `z = 2iρ`. -/
+private lemma exp_mul_coulombHMinus (ℓ : ℕ) (η ρ : ℝ) {a z : ℂ} (ha : a = 1 + ℓ - I * η)
+    (hz : z = 2 * I * ρ) :
+    exp (I * coulombTheta ℓ η ρ) * coulombHMinus ℓ η ρ =
+      z ^ a * kummerU a (2 * ℓ + 2) z := by
+  rw [coulombHMinus, show (ℓ : ℂ) + 1 - I * η = a by rw [ha]; ring, ← hz,
+    ← mul_assoc, ← mul_assoc, ← exp_add]
+  simp
+
 /-- **The logarithmic series of `H^+_ℓ`** (DLMF 33.6.5, upper signs), `ρ > 0`, with
 `a = 1 + ℓ + iη`, `z = -2iρ`:
 `H^+_ℓ = e^{iθ_ℓ}/((2ℓ+1)! Γ(-ℓ+iη)) (∑_{k ≥ 0} … - ∑_{k=1}^{2ℓ+1} …)`, stated as the sum of
@@ -416,7 +565,17 @@ theorem hasSum_coulombHPlus_log (ℓ : ℕ) (η : ℝ) (hη : η ≠ 0) {ρ : �
           coulombHPlus ℓ η ρ +
         ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) /
           ((2 * ℓ + 1 - k)! * poch (1 - a) k) * z ^ (a - k)) := by
-  sorry
+  have hzs : z ∈ slitPlane := by
+    rw [hz]; refine Or.inr ?_; simp; exact hρ.ne'
+  have han : ∀ k : ℕ, a - ((2 * ℓ + 1 : ℕ) : ℂ) ≠ -(k : ℂ) := by
+    intro k hk
+    have := congrArg im hk
+    simp [ha] at this
+    exact hη this
+  have hare : 0 < a.re := by simp [ha]; linarith [(Nat.cast_nonneg ℓ : (0 : ℝ) ≤ ℓ)]
+  rw [show -(ℓ : ℂ) + I * η = a - ((2 * ℓ + 1 : ℕ) : ℂ) by rw [ha]; push_cast; ring,
+    mul_assoc _ (exp _), exp_neg_mul_coulombHPlus ℓ η ρ ha hz]
+  exact hasSum_log_aux ℓ hzs han hare
 
 /-- **The logarithmic series of `H^-_ℓ`** (DLMF 33.6.5, lower signs), `ρ > 0`, with
 `a = 1 + ℓ - iη`, `z = 2iρ`, for `η ≠ 0`. -/
@@ -430,7 +589,57 @@ theorem hasSum_coulombHMinus_log (ℓ : ℕ) (η : ℝ) (hη : η ≠ 0) {ρ : �
           coulombHMinus ℓ η ρ +
         ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) /
           ((2 * ℓ + 1 - k)! * poch (1 - a) k) * z ^ (a - k)) := by
-  sorry
+  have hzs : z ∈ slitPlane := by
+    rw [hz]; refine Or.inr ?_; simp; exact hρ.ne'
+  have han : ∀ k : ℕ, a - ((2 * ℓ + 1 : ℕ) : ℂ) ≠ -(k : ℂ) := by
+    intro k hk
+    have := congrArg im hk
+    simp [ha] at this
+    exact hη this
+  have hare : 0 < a.re := by simp [ha]; linarith [(Nat.cast_nonneg ℓ : (0 : ℝ) ≤ ℓ)]
+  rw [show -(ℓ : ℂ) - I * η = a - ((2 * ℓ + 1 : ℕ) : ℂ) by rw [ha]; push_cast; ring,
+    mul_assoc _ (exp _), exp_mul_coulombHMinus ℓ η ρ ha hz]
+  exact hasSum_log_aux ℓ hzs han hare
+
+/-- **The logarithmic series of `H^+_ℓ`, pole-free form** (DLMF 33.6.5, upper signs), `ρ > 0`,
+with `a = 1 + ℓ + iη`, `z = -2iρ`. Each product `ψ(a+k)/Γ(-ℓ+iη)` is written as
+`-(-ℓ+iη)_{2ℓ+1+k} (1/Γ)'(a+k)`, and the coefficient `1/(Γ(-ℓ+iη) (1-a)_k)` of the finite sum
+as `-(1-a+k)_{2ℓ+1-k}/Γ(a) = -e^{-2iσ_ℓ}/Γ(k-ℓ-iη)`. Stronger than DLMF: valid for all real `η`,
+including `η = 0`, where the series vanishes and the formula gives `H^+_ℓ` as a finite sum. -/
+@[dlmf 33.6.E5]
+theorem hasSum_coulombHPlus_log_recipGamma (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
+    {a z : ℂ} (ha : a = 1 + ℓ + I * η) (hz : z = -2 * I * ρ) :
+    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+        ((Gamma (-(ℓ : ℂ) + I * η))⁻¹ *
+            (log z - Complex.digamma (1 + k) - Complex.digamma (2 * ℓ + 2 + k)) -
+          poch (-(ℓ : ℂ) + I * η) (2 * ℓ + 1 + k) * DLMF.Gamma.recipGammaDeriv 1 (a + k)))
+      ((2 * ℓ + 1)! * exp (-(I * coulombTheta ℓ η ρ)) * coulombHPlus ℓ η ρ -
+        ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) *
+          poch (1 - a + k) (2 * ℓ + 1 - k) / ((2 * ℓ + 1 - k)! * Gamma a) * z ^ (a - k)) := by
+  have hzs : z ∈ slitPlane := by
+    rw [hz]; refine Or.inr ?_; simp; exact hρ.ne'
+  rw [show -(ℓ : ℂ) + I * η = a - ((2 * ℓ + 1 : ℕ) : ℂ) by rw [ha]; push_cast; ring,
+    mul_assoc _ (exp _), exp_neg_mul_coulombHPlus ℓ η ρ ha hz]
+  exact hasSum_log_recipGamma_aux ℓ hzs
+
+/-- **The logarithmic series of `H^-_ℓ`, pole-free form** (DLMF 33.6.5, lower signs), `ρ > 0`,
+with `a = 1 + ℓ - iη`, `z = 2iρ`; see `hasSum_coulombHPlus_log_recipGamma`. Stronger than
+DLMF: valid for all real `η`, including `η = 0`. -/
+@[dlmf 33.6.E5]
+theorem hasSum_coulombHMinus_log_recipGamma (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
+    {a z : ℂ} (ha : a = 1 + ℓ - I * η) (hz : z = 2 * I * ρ) :
+    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+        ((Gamma (-(ℓ : ℂ) - I * η))⁻¹ *
+            (log z - Complex.digamma (1 + k) - Complex.digamma (2 * ℓ + 2 + k)) -
+          poch (-(ℓ : ℂ) - I * η) (2 * ℓ + 1 + k) * DLMF.Gamma.recipGammaDeriv 1 (a + k)))
+      ((2 * ℓ + 1)! * exp (I * coulombTheta ℓ η ρ) * coulombHMinus ℓ η ρ -
+        ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) *
+          poch (1 - a + k) (2 * ℓ + 1 - k) / ((2 * ℓ + 1 - k)! * Gamma a) * z ^ (a - k)) := by
+  have hzs : z ∈ slitPlane := by
+    rw [hz]; refine Or.inr ?_; simp; exact hρ.ne'
+  rw [show -(ℓ : ℂ) - I * η = a - ((2 * ℓ + 1 : ℕ) : ℂ) by rw [ha]; push_cast; ring,
+    mul_assoc _ (exp _), exp_mul_coulombHMinus ℓ η ρ ha hz]
+  exact hasSum_log_recipGamma_aux ℓ hzs
 
 /-! ### §33.9(i) Spherical Bessel functions -/
 

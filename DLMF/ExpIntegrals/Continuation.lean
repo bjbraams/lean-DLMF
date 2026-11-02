@@ -156,7 +156,8 @@ along `(𝓝[>] 0)`. -/
 @[dlmf 6.5.E1]
 theorem expIntE1_negative_boundary {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     Tendsto (fun y : ℝ => genExpIntE 1 (-x+ε*y*I)) (𝓝[>] 0) (𝓝 (-(Real.expIntEi x : ℂ)-ε*π*I)) := by
-  have hEin : expIntEin (-(x:ℂ))-(Real.log x:ℂ)-(Real.eulerMascheroniConstant:ℂ)= -(Real.expIntEi x:ℂ) := by
+  have hEin : expIntEin (-(x:ℂ))-(Real.log x:ℂ)-(Real.eulerMascheroniConstant:ℂ)=
+      -(Real.expIntEi x:ℂ) := by
     rw [Real.expIntEi,show -(x:ℂ)=(-x:ℝ) by simp,expIntEin_ofReal]
     simp only [abs_of_pos hx,Complex.ofReal_re,Complex.ofReal_neg]
     push_cast
@@ -169,7 +170,8 @@ theorem expIntE1_negative_boundary {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1
     rcases hε with rfl | rfl
     · have ht : Tendsto (fun y : ℝ => -(x:ℂ)+(1:ℂ)*y*I) (𝓝[>] 0)
           (𝓝[{w : ℂ | 0≤w.im}] (-(x:ℂ))) := by
-        refine tendsto_nhdsWithin_iff.mpr ⟨by simpa only [Complex.ofReal_neg,Complex.ofReal_one] using hf,?_⟩
+        refine tendsto_nhdsWithin_iff.mpr
+            ⟨by simpa only [Complex.ofReal_neg, Complex.ofReal_one] using hf, ?_⟩
         filter_upwards [self_mem_nhdsWithin] with y hy
         simp only [one_mul,add_im,neg_im,ofReal_im,mul_I_im,ofReal_re,neg_zero,zero_add]
         exact hy.le
@@ -178,7 +180,8 @@ theorem expIntE1_negative_boundary {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1
       simpa [Function.comp_def,Complex.norm_real,Real.norm_of_nonneg hx.le] using hh
     · have ht : Tendsto (fun y : ℝ => -(x:ℂ)+(-1:ℂ)*y*I) (𝓝[>] 0)
           (𝓝[{w : ℂ | w.im<0}] (-(x:ℂ))) := by
-        refine tendsto_nhdsWithin_iff.mpr ⟨by simpa only [Complex.ofReal_neg,Complex.ofReal_one] using hf,?_⟩
+        refine tendsto_nhdsWithin_iff.mpr
+            ⟨by simpa only [Complex.ofReal_neg, Complex.ofReal_one] using hf, ?_⟩
         filter_upwards [self_mem_nhdsWithin] with y hy
         simp only [neg_one_mul,add_im,neg_im,ofReal_im,mul_I_im,neg_re,ofReal_re,neg_zero,zero_add]
         exact neg_neg_of_pos hy
@@ -343,7 +346,8 @@ theorem hasIntegralAtTop_exp_neg_mul_div_sub {z : ℂ} (hz0 : z ≠ 0) (hz : 0 �
   have hd : ∀ t : ℝ, x ≤ t → HasDerivAt (fun t : ℝ => -exp (-z*c)*expIntE1OnLog (log z+log (t-c)))
       (exp (-z*t)/(t-c)) t := by
     intro t ht
-    have hl := ((Complex.hasDerivAt_log (hc t ht)).comp (t:ℂ) ((hasDerivAt_id (t:ℂ)).sub_const c)).const_add (log z)
+    have hl := ((Complex.hasDerivAt_log (hc t ht)).comp (t:ℂ)
+        ((hasDerivAt_id (t:ℂ)).sub_const c)).const_add (log z)
     have h1 := ((hasDerivAt_expIntE1OnLog _).comp (t:ℂ) hl).comp_ofReal.const_mul (-exp (-z*c))
     refine h1.congr_deriv ?_
     have hne := slitPlane_ne_zero (hc t ht)
@@ -366,7 +370,8 @@ theorem hasIntegralAtTop_exp_neg_mul_div_sub {z : ℂ} (hz0 : z ≠ 0) (hz : 0 �
     have ha := abs_lt.mp (Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hre))
     have hne : (t:ℂ)-c ≠ 0 := fun h0 => by rw [h0] at hre; simp at hre
     rw [← Complex.log_mul hz0 hne (by
-      constructor <;> linarith [abs_le.mp harg, Real.pi_pos]), expIntE1OnLog_principal (mul_ne_zero hz0 hne)]
+      constructor <;> linarith [abs_le.mp harg, Real.pi_pos]),
+          expIntE1OnLog_principal (mul_ne_zero hz0 hne)]
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hcont hl
   simpa using h
 
@@ -395,20 +400,23 @@ theorem expIntAux_laplace_hasIntegralAtTop {z : ℂ} (hz0 : z ≠ 0) (hz : 0 ≤
     · field_simp; ring_nf
     · field_simp; ring
   -- the common value
-  have hEm : expIntE1OnLog (log z+log (((0:ℝ):ℂ)-I)) = cosIntCin z-I*sinInt z-log z+π*I/2-Real.eulerMascheroniConstant := by
+  have hEm : expIntE1OnLog (log z+log (((0:ℝ):ℂ)-I)) =
+      cosIntCin z-I*sinInt z-log z+π*I/2-Real.eulerMascheroniConstant := by
     have he := expIntEin_mul_I (-z)
     rw [cosIntCin_even, sinInt_odd] at he
     rw [expIntE1OnLog, Complex.exp_add, Complex.exp_log hz0, show ((0:ℝ):ℂ)-I = -I by simp,
       Complex.exp_log (neg_ne_zero.mpr I_ne_zero), log_neg_I, show z*(-I) = I*(-z) by ring, he]
     ring
-  have hEp : expIntE1OnLog (log z+log (((0:ℝ):ℂ)-(-I))) = cosIntCin z+I*sinInt z-log z-π*I/2-Real.eulerMascheroniConstant := by
+  have hEp : expIntE1OnLog (log z+log (((0:ℝ):ℂ)-(-I))) =
+      cosIntCin z+I*sinInt z-log z-π*I/2-Real.eulerMascheroniConstant := by
     rw [expIntE1OnLog, Complex.exp_add, Complex.exp_log hz0, show ((0:ℝ):ℂ)-(-I) = I by simp,
       Complex.exp_log I_ne_zero, log_I, mul_comm z I, expIntEin_mul_I]
     ring
   have hsin : sin z = (exp (-z*I)-exp (z*I))*I/2 := by rw [Complex.sin]
   have hcos : cos z = (exp (z*I)+exp (-z*I))/2 := by rw [Complex.cos]
   constructor
-  · have h := ((h1.add (h2.const_mul (-1)) hi1 (fun R hR => (hi2 R hR).const_mul _)).const_mul (1/(2*I))).congr
+  · have h := ((h1.add (h2.const_mul (-1)) hi1 (fun R hR => (hi2 R hR).const_mul _)).const_mul
+        (1/(2*I))).congr
       fun t _ => ((hf t _).1).symm
     convert h using 1
     rw [hEm, hEp, expIntAuxF, cosInt, sinIntTail, hsin, hcos, show -z*I = -(z*I) by ring,

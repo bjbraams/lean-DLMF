@@ -7,7 +7,12 @@ module
 
 public import DLMF.WignerSymbols.Basic
 public import DLMF.WignerSymbols.FactorialHelpers
-public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
+public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence
+public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import DLMF.Hypergeometric.ArgumentContinuation
+public import DLMF.Hypergeometric.Solutions
 
 /-!
 # The `6j` symbol
@@ -104,7 +109,8 @@ macro "wigner_pick" : tactic => `(tactic| first
 
 
 /-- The sum of 34.4.2 may be extended beyond `s = j₁ + j₂ + l₁ + l₂`. -/
-private lemma sum_racahTerm6j_extend {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (N : ℕ)
+private lemma sum_racahTerm6j_extend {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ}
+    (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (N : ℕ)
     (hN : ⌊j₁ + j₂ + l₁ + l₂⌋.toNat ≤ N) :
     ∑ s ∈ range (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + 1), racahTerm6j j₁ j₂ j₃ l₁ l₂ l₃ s =
       ∑ s ∈ range (N + 1), racahTerm6j j₁ j₂ j₃ l₁ l₂ l₃ s := by
@@ -189,21 +195,24 @@ theorem wigner6j_eq_hyp4F3 {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissib
 /-! ### Single-term evaluations -/
 
 /-- A Racah term of 34.4.2 vanishes below the summation range. -/
-private lemma racahTerm6j_eq_zero_of_lt {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} {s : ℕ} (h : (s : ℚ) < j₁ + j₂ + j₃) :
+private lemma racahTerm6j_eq_zero_of_lt {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} {s : ℕ}
+    (h : (s : ℚ) < j₁ + j₂ + j₃) :
     racahTerm6j j₁ j₂ j₃ l₁ l₂ l₃ s = 0 := by
   unfold racahTerm6j
   rw [invFactQ_of_neg (x := (s : ℚ) - j₁ - j₂ - j₃) (by linarith)]
   ring
 
 /-- A Racah term of 34.4.2 vanishes above the summation range. -/
-private lemma racahTerm6j_eq_zero_of_gt {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} {s : ℕ} (h : j₁ + j₂ + l₁ + l₂ < s) :
+private lemma racahTerm6j_eq_zero_of_gt {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} {s : ℕ}
+    (h : j₁ + j₂ + l₁ + l₂ < s) :
     racahTerm6j j₁ j₂ j₃ l₁ l₂ l₃ s = 0 := by
   unfold racahTerm6j
   rw [invFactQ_of_neg (x := j₁ + j₂ + l₁ + l₂ - s) (by linarith)]
   ring
 
 /-- Single-term evaluation of 34.4.2 when `j₁ + j₂ + j₃ = j₁ + j₂ + l₁ + l₂ = n`. -/
-private lemma wigner6j_eq_single_term {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (n : ℕ)
+private lemma wigner6j_eq_single_term {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ}
+    (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (n : ℕ)
     (h₁ : j₁ + j₂ + j₃ = n) (h₂ : j₁ + j₂ + l₁ + l₂ = n) :
     wigner6j j₁ j₂ j₃ l₁ l₂ l₃ = (-1 : ℝ) ^ n *
       (triangleDelta j₁ j₂ j₃ * triangleDelta j₁ l₂ l₃ * triangleDelta l₁ j₂ l₃ *
@@ -245,11 +254,13 @@ macro "wigner_casts" : tactic => `(tactic| (push_cast; ring_nf; simp only [one_a
   one_mul]))
 
 /-- Replace the argument of a square root of a rational cast. -/
-private lemma sqrt_ratCast_eq {y : ℚ} {Y : ℝ} (h : (y : ℝ) = Y) : Real.sqrt (y : ℝ) = Real.sqrt Y := by
+private lemma sqrt_ratCast_eq {y : ℚ} {Y : ℝ} (h : (y : ℝ) = Y) : Real.sqrt (y : ℝ) =
+    Real.sqrt Y := by
   rw [h]
 
 /-- Two-term evaluation of 34.4.2 when `j₁ + j₂ + j₃ = n` and `j₁ + j₂ + l₁ + l₂ = n + 1`. -/
-private lemma wigner6j_eq_two_terms {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (n : ℕ)
+private lemma wigner6j_eq_two_terms {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ}
+    (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (n : ℕ)
     (h₁ : j₁ + j₂ + j₃ = n) (h₂ : j₁ + j₂ + l₁ + l₂ = n + 1) :
     wigner6j j₁ j₂ j₃ l₁ l₂ l₃ =
       triangleDelta j₁ j₂ j₃ * triangleDelta j₁ l₂ l₃ * triangleDelta l₁ j₂ l₃ *

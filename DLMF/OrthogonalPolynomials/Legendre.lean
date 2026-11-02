@@ -368,7 +368,8 @@ theorem laplace_integrand_eq (θ ψ : ℝ) :
 theorem integral_laplace_eq_add_conj (n : ℕ) (θ : ℝ) :
     ∫ t : ℝ in (0 : ℝ)..π, ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n =
       (∫ t : ℝ in (0 : ℝ)..(π / 2), ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n) +
-        conj (∫ t : ℝ in (0 : ℝ)..(π / 2), ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n) := by
+        conj (∫ t : ℝ in (0 : ℝ)..(π / 2),
+            ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n) := by
   set g : ℝ → ℂ := fun t => ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n with hg
   have hgc : Continuous g := by fun_prop
   have h1 := intervalIntegral.integral_add_adjacent_intervals (μ := volume) (a := 0)
@@ -377,7 +378,8 @@ theorem integral_laplace_eq_add_conj (n : ℕ) (θ : ℝ) :
   rw [show π - π / 2 = π / 2 by ring, sub_zero] at h2
   rw [← h1, ← h2]
   congr 1
-  rw [intervalIntegral.integral_of_le (by positivity), intervalIntegral.integral_of_le (by positivity),
+  rw [intervalIntegral.integral_of_le (by positivity),
+      intervalIntegral.integral_of_le (by positivity),
     ← integral_conj]
   refine setIntegral_congr_fun measurableSet_Ioc fun t _ => ?_
   simp only [hg, map_pow, map_add, map_mul, Complex.conj_ofReal, Complex.conj_I, Real.cos_pi_sub]
@@ -406,7 +408,8 @@ theorem norm_one_sub_laplaceKappa_pow_le (n : ℕ) (θ ψ : ℝ) :
 
 /-- `n sin²(t / (2√n)) → t²/4`. -/
 theorem tendsto_nat_mul_sin_sq (t : ℝ) :
-    Tendsto (fun n : ℕ => (n : ℝ) * Real.sin (t / (2 * Real.sqrt n)) ^ 2) atTop (𝓝 (t ^ 2 / 4)) := by
+    Tendsto (fun n : ℕ => (n : ℝ) * Real.sin (t / (2 * Real.sqrt n)) ^ 2) atTop
+        (𝓝 (t ^ 2 / 4)) := by
   have hx : Tendsto (fun n : ℕ => t / (2 * Real.sqrt n)) atTop (𝓝 0) := by
     have hs : Tendsto (fun n : ℕ => 2 * Real.sqrt n) atTop atTop :=
       (Real.tendsto_sqrt_atTop.comp tendsto_natCast_atTop_atTop).const_mul_atTop two_pos
@@ -503,7 +506,8 @@ theorem tendsto_sqrt_mul_integral_laplace_half {θ : ℝ} (hθ : 0 < θ) (hθπ 
       have hpow := Complex.tendsto_one_add_pow_exp_of_tendsto
         (g := fun n : ℕ => -(κ * Real.sin (t / (2 * Real.sqrt n)) ^ 2)) (t := -(κ / 4) * t ^ 2)
         (by
-          have h := ((Complex.continuous_ofReal.tendsto _).comp (tendsto_nat_mul_sin_sq t)).const_mul
+          have h := ((Complex.continuous_ofReal.tendsto _).comp
+              (tendsto_nat_mul_sin_sq t)).const_mul
             (-κ)
           convert h using 1
           · funext n; simp only [Function.comp_apply]; push_cast; ring
@@ -522,7 +526,8 @@ theorem tendsto_sqrt_mul_integral_laplace_half {θ : ℝ} (hθ : 0 < θ) (hθπ 
 /-- The Gaussian constant `(π/(κ/4))^{1/2}/2 = ½ √(2π / sin θ) e^{i(θ/2 - π/4)}`. -/
 theorem laplace_gaussian_constant {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < π) :
     (π / (laplaceKappa θ / 4)) ^ (1 / 2 : ℂ) / 2 =
-      ((Real.sqrt (2 * π / Real.sin θ) / 2 : ℝ) : ℂ) * Complex.exp (((θ / 2 - π / 4 : ℝ) : ℂ) * I) := by
+      ((Real.sqrt (2 * π / Real.sin θ) / 2 : ℝ) : ℂ) *
+          Complex.exp (((θ / 2 - π / 4 : ℝ) : ℂ) * I) := by
   set s := Real.sin θ with hs
   set c := Real.cos θ with hc
   have hs0 : 0 < s := Real.sin_pos_of_pos_of_lt_pi hθ hθπ
@@ -678,7 +683,8 @@ theorem besselJ_zero_eq_integral (u : ℂ) :
     besselJ 0 u = (π : ℂ)⁻¹ * ∫ t in (0 : ℝ)..π, Complex.exp (I * u * Real.cos t) := by
   have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have hS := hasSum_integral_pow_div_factorial (g := fun t => (Real.cos t : ℂ))
-    (by fun_prop) (fun t => by rw [Complex.norm_real, Real.norm_eq_abs]; exact Real.abs_cos_le_one t)
+    (by fun_prop) (fun t => by rw [Complex.norm_real, Real.norm_eq_abs];
+                               exact Real.abs_cos_le_one t)
     (I * u)
   -- the terms
   have hterm : ∀ k : ℕ, ∫ t in (0 : ℝ)..π, (I * u * (Real.cos t : ℂ)) ^ k / k ! =
@@ -736,7 +742,8 @@ theorem legendre_exponential_generating_function {x : ℝ} (hx : |x| ≤ 1) (z :
   convert h using 1
   · funext n
     have hI : ∫ t in (0 : ℝ)..π, (z * ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t)) ^ n /
-        n ! = z ^ n / n ! * ∫ t in (0 : ℝ)..π, ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n := by
+        n ! = z ^ n / n ! * ∫ t in (0 : ℝ)..π,
+            ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n := by
       rw [← intervalIntegral.integral_const_mul]
       refine intervalIntegral.integral_congr fun t _ => ?_
       rw [mul_pow]; ring

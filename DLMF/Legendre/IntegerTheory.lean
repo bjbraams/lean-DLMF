@@ -59,7 +59,8 @@ open DLMF.OrthogonalPolynomials
 
 /-- Iterated derivatives of a polynomial function are the iterated polynomial derivatives. -/
 theorem iteratedDeriv_eval_polynomial {𝕜 : Type*} [NontriviallyNormedField 𝕜] (p : Polynomial 𝕜)
-    (k : ℕ) : iteratedDeriv k (fun z => p.eval z) = fun z => (Polynomial.derivative^[k] p).eval z := by
+    (k : ℕ) : iteratedDeriv k (fun z => p.eval z) = fun z =>
+        (Polynomial.derivative^[k] p).eval z := by
   induction k with
   | zero => simp
   | succ k ih =>
@@ -104,7 +105,8 @@ theorem legendrePolyP_rodrigues_complex (n : ℕ) (z : ℂ) :
   set R : Polynomial ℝ := (Polynomial.X^2 - 1)^n
   set B : Polynomial ℝ := Polynomial.C ((2^n*(n.factorial:ℝ))⁻¹) * Polynomial.derivative^[n] R
   have hAB : legendrePolyR n = B := by
-    refine Polynomial.eq_of_infinite_eval_eq _ _ ((Set.Ioo_infinite (show (-1:ℝ) < 1 by norm_num)).mono ?_)
+    refine Polynomial.eq_of_infinite_eval_eq _ _
+        ((Set.Ioo_infinite (show (-1:ℝ) < 1 by norm_num)).mono ?_)
     intro x hx
     have h := legendre_rodrigues n hx
     rw [legendrePolyP_eq_eval, eval_ofReal_map_ofRealHom, ← iteratedDeriv_eq_iterate] at h
@@ -115,7 +117,8 @@ theorem legendrePolyP_rodrigues_complex (n : ℕ) (z : ℂ) :
     exact_mod_cast h
   have hRC : (fun z : ℂ => (z^2-1)^n) = fun z => (R.map ofRealHom).eval z := by
     funext w; simp [R]
-  rw [legendrePolyP_eq_eval, hAB, hRC, iteratedDeriv_eval_polynomial, Polynomial.iterate_derivative_map]
+  rw [legendrePolyP_eq_eval, hAB, hRC, iteratedDeriv_eval_polynomial,
+      Polynomial.iterate_derivative_map]
   simp [B, Polynomial.map_mul]
 
 /-- `dᵐ P_n(z)/dzᵐ = (2ⁿ n!)⁻¹ dᵐ⁺ⁿ/dzᵐ⁺ⁿ (z²-1)ⁿ`. -/
@@ -140,7 +143,8 @@ end RodriguesHelpers
 (1-x²)^{m/2}/(2^n n!) · d^{m+n}(1-x²)^n/dx^{m+n}`. -/
 @[dlmf 14.7.E8, dlmf 14.7.E10]
 theorem ferrersP_nat_order_rodrigues (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP n m x=(-1)^(m+n)*(1-x^2:ℂ)^((m:ℂ)/2)/(2^n*(n.factorial:ℂ))*iteratedDeriv (m+n) (fun x : ℝ => (1-x^2:ℂ)^n) x := by
+    ferrersP n m x=(-1)^(m+n)*(1-x^2:ℂ)^((m:ℂ)/2)/(2^n*(n.factorial:ℂ))*iteratedDeriv (m+n)
+        (fun x : ℝ => (1-x^2:ℂ)^n) x := by
   have hs : 1+(x:ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
   have hev : legendreP (n:ℂ) =ᶠ[𝓝 (x:ℂ)] DLMF.OrthogonalPolynomials.legendrePolyP n := by
     filter_upwards [isOpen_one_add_mem_slitPlane.mem_nhds hs] with w hw
@@ -173,9 +177,11 @@ theorem ferrersP_nat_order_rodrigues (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:�
 d^{m+n}(z²-1)^n/dz^{m+n}`. -/
 @[dlmf 14.7.E14]
 theorem associatedP_nat_order_rodrigues (n m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedP n m z=legendreBranchPower m z/(2^n*(n.factorial:ℂ))*iteratedDeriv (m+n) (fun z : ℂ => (z^2-1)^n) z := by
+    associatedP n m z=legendreBranchPower m z/(2^n*(n.factorial:ℂ))*iteratedDeriv (m+n)
+        (fun z : ℂ => (z^2-1)^n) z := by
   have hev : associatedP (n:ℂ) 0 =ᶠ[𝓝 z] DLMF.OrthogonalPolynomials.legendrePolyP n := by
-    filter_upwards [(isOpen_slitPlane.preimage (by fun_prop : Continuous fun w : ℂ => w-1)).mem_nhds hz]
+    filter_upwards [(isOpen_slitPlane.preimage
+        (by fun_prop : Continuous fun w : ℂ => w-1)).mem_nhds hz]
       with w hw
     rw [associatedP_zero_order _ hw, legendreP_nat n (one_add_mem_slitPlane_of_sub_one hw)]
   rw [associatedP_nat_order_derivative n m hz, hev.iteratedDeriv_eq,
@@ -189,7 +195,8 @@ theorem associatedP_equal_nat_order (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane)
   have hz' := one_add_mem_slitPlane_of_sub_one hz
   have hw := mem_cutPlane_of_one_add hz'
   have hev : associatedP (m:ℂ) 0 =ᶠ[𝓝 z] legendreP m := by
-    filter_upwards [(isOpen_slitPlane.preimage (by fun_prop : Continuous fun w : ℂ => w-1)).mem_nhds hz]
+    filter_upwards [(isOpen_slitPlane.preimage
+        (by fun_prop : Continuous fun w : ℂ => w-1)).mem_nhds hz]
       with w hw using associatedP_zero_order _ hw
   have hc : ((2*m).factorial : ℂ) = ((2*m).choose m) * m.factorial * m.factorial := by
     have h := congrArg (Nat.cast : ℕ → ℂ)
@@ -198,7 +205,8 @@ theorem associatedP_equal_nat_order (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane)
     push_cast at h ⊢; rw [h]
   have hsq : (-1:ℂ)^m*(-1)^m = 1 := by rw [← mul_pow]; norm_num
   have hf : (m.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
-  rw [associatedP_nat_order_derivative m m hz, hev.iteratedDeriv_eq, iteratedDeriv_legendreP _ _ hz',
+  rw [associatedP_nat_order_derivative m m hz, hev.iteratedDeriv_eq,
+      iteratedDeriv_legendreP _ _ hz',
     show -(m:ℂ)+m = 0 by ring, regularizedGaussHG_zero_left _ _ hw, poch_neg_coe_nat,
     Nat.descFactorial_self, DLMF.OrthogonalPolynomials.poch_nat_succ_eq_choose_mul_factorial,
     show (1:ℂ)+m = (m:ℂ)+1 by ring, Gamma_nat_eq_factorial, hc, div_pow, show m+m = 2*m by ring]

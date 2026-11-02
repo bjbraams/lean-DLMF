@@ -7,7 +7,7 @@ module
 
 public import DLMF.Hypergeometric.Basic.Pochhammer
 public import DLMF.Hypergeometric.Basic.GaussSeries
-public import DLMF.Hypergeometric.SeriesProperties
+public import DLMF.Hypergeometric.Basic.SpecialValues
 
 /-!
 # Pochhammer symbols of real arguments

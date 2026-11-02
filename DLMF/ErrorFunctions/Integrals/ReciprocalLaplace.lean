@@ -558,7 +558,8 @@ theorem erfInt_norm_erf_le (w : ℂ) :
 theorem erfInt_norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {M : ℝ}
     (hM : ‖c‖ ≤ M) {t : ℝ} (ht : 0 < t) :
     ‖erfc (-(a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))‖ ≤ 1 + 2/Real.sqrt π *
-      Real.exp (2*Real.sqrt (‖a‖*M)) * (Real.sqrt ‖a‖ * Real.sqrt t + Real.sqrt M / Real.sqrt t) := by
+      Real.exp (2*Real.sqrt (‖a‖*M)) *
+          (Real.sqrt ‖a‖ * Real.sqrt t + Real.sqrt M / Real.sqrt t) := by
   have hat : 0 < (a*(t:ℂ)).re := by rw [re_mul_ofReal]; positivity
   have hct : 0 < (c/(t:ℂ)).re := by rw [div_ofReal_re]; positivity
   have hat0 : a*(t:ℂ) ≠ 0 := fun h => by rw [h] at hat; simp at hat
@@ -611,7 +612,8 @@ theorem erfInt_norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {M
 
 /-- Integrability of `(A + B√t + C/√t) e^{-λt}` on `(0, ∞)`. -/
 theorem erfInt_integrableOn_majorant {l : ℝ} (hl : 0 < l) (A B C : ℝ) :
-    IntegrableOn (fun t : ℝ => (A + B*Real.sqrt t + C/Real.sqrt t) * Real.exp (-(l*t))) (Ioi 0) := by
+    IntegrableOn (fun t : ℝ => (A + B*Real.sqrt t + C/Real.sqrt t) *
+        Real.exp (-(l*t))) (Ioi 0) := by
   have h0 : IntegrableOn (fun t : ℝ => t^(0:ℝ) * Real.exp (-l * t^(1:ℝ))) (Ioi 0) :=
     integrableOn_rpow_mul_exp_neg_mul_rpow (by norm_num) one_pos hl
   have h1 : IntegrableOn (fun t : ℝ => t^(1/2:ℝ) * Real.exp (-l * t^(1:ℝ))) (Ioi 0) :=
@@ -763,12 +765,15 @@ theorem erfInt_laplace_minus {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re) 
 ℂ)))/(b^(1/2 : ℂ)*(a^(1/2 : ℂ)+b^(1/2 : ℂ)))`. -/
 @[dlmf 7.14.E4]
 theorem erfc_sqrt_reciprocal_laplace {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re) :
-    (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)))=exp (-2*((a*c)^(1/2 : ℂ)+(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(a^(1/2 : ℂ)+b^(1/2 : ℂ))) :=
+    (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)))=exp
+        (-2*((a*c)^(1/2 : ℂ)+(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(a^(1/2 : ℂ)+b^(1/2 : ℂ))) :=
   erfInt_laplace_plus ha hb hc
 
 /-- Unnumbered transform following DLMF 7.14.4. -/
-theorem erfc_sqrt_reciprocal_laplace_negative {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < (b-a).re) (hc : 0 ≤ c.re) :
-    (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc (-(a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)))=exp (2*((a*c)^(1/2 : ℂ)-(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(b^(1/2 : ℂ)-a^(1/2 : ℂ))) :=
+theorem erfc_sqrt_reciprocal_laplace_negative {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < (b-a).re)
+    (hc : 0 ≤ c.re) :
+    (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc (-(a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)))=exp
+        (2*((a*c)^(1/2 : ℂ)-(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(b^(1/2 : ℂ)-a^(1/2 : ℂ))) :=
   erfInt_laplace_minus ha hb hc
 
 /-- A continuous function with a limit at `+∞` is bounded on `[0, ∞)`. -/
@@ -829,7 +834,8 @@ theorem integral_exp_mul_eq_of_antideriv {a : ℂ} (ha : 0 < a.re) {u u' G : ℝ
   have hint : IntegrableOn (fun t : ℝ => exp (-a*t)*u t) (Ioi 0) := by
     have hg : IntegrableOn (fun t : ℝ => B*Real.exp (-a.re*t)) (Ioi 0) :=
       ((exp_neg_integrableOn_Ioi 0 ha).const_mul B :)
-    refine hg.mono' ((by fun_prop : Continuous fun t : ℝ => exp (-a*t)).mul hu).aestronglyMeasurable ?_
+    refine hg.mono' ((by fun_prop : Continuous fun t : ℝ => exp (-a*t)).mul
+        hu).aestronglyMeasurable ?_
     refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
     rw [norm_mul, Complex.norm_exp, hre, mul_comm]
     exact mul_le_mul_of_nonneg_right (hB t (le_of_lt ht)) (Real.exp_pos _).le
@@ -882,7 +888,8 @@ theorem hasDerivAt_sqrt_two_mul_div_pi {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun t : ℝ => ((Real.sqrt (2*t/π):ℝ):ℂ)) (((1/(π*Real.sqrt (2*t/π))):ℝ):ℂ) t := by
   have hp := Real.pi_pos
   have hne : 2*t/π ≠ 0 := by positivity
-  have h := ((Real.hasDerivAt_sqrt hne).comp t (((hasDerivAt_id t).const_mul 2).div_const π)).ofReal_comp
+  have h := ((Real.hasDerivAt_sqrt hne).comp t
+      (((hasDerivAt_id t).const_mul 2).div_const π)).ofReal_comp
   refine h.congr_deriv ?_
   congr 1
   have : 0 < Real.sqrt (2*t/π) := Real.sqrt_pos.mpr (by positivity)
@@ -903,7 +910,8 @@ theorem re_mul_pos_of_re_sq {u v : ℂ} (hu : 0 < u.re) (hu2 : 0 < (u^2).re) (hv
   have e2 : (v^2).re = v.re^2 - v.im^2 := by simp [sq]
   have hlt : (u.im*v.im)^2 < (u.re*v.re)^2 := by
     rw [mul_pow, mul_pow]
-    have h3 : u.im^2*v.im^2 ≤ u.re^2*v.im^2 := mul_le_mul_of_nonneg_right (by linarith) (sq_nonneg _)
+    have h3 : u.im^2*v.im^2 ≤ u.re^2*v.im^2 :=
+        mul_le_mul_of_nonneg_right (by linarith) (sq_nonneg _)
     have h4 : u.re^2*v.im^2 < u.re^2*v.re^2 := mul_lt_mul_of_pos_left (by linarith) (by positivity)
     linarith
   have := abs_lt_of_sq_lt_sq hlt (by positivity)
@@ -1008,7 +1016,8 @@ theorem fresnelCosInt_laplace {a : ℂ} (ha : 0 < a.re) :
         Real.norm_eq_abs]
       exact Real.abs_cos_le_one _
     simpa using mul_le_mul_of_nonneg_left h1 (Real.exp_pos (-a.re*t)).le
-  rw [integral_exp_mul_eq_of_deriv ha (u := fun t : ℝ => fresnelCosInt (t:ℂ)) (fresnelCosInt_entire.continuous.comp continuous_ofReal)
+  rw [integral_exp_mul_eq_of_deriv ha (u := fun t : ℝ => fresnelCosInt (t:ℂ))
+      (fresnelCosInt_entire.continuous.comp continuous_ofReal)
     (by simpa using (fresnelCosInt_ofReal 0).trans (by simp [Real.fresnelCosInt])) hB
     (fun t _ => (hasDerivAt_fresnelCosInt_complex t).comp_ofReal) (by fun_prop) hi,
     laplace_cos_pi_sq ha]
@@ -1018,7 +1027,8 @@ theorem fresnelCosInt_laplace {a : ℂ} (ha : 0 < a.re) :
 : ℂ))`. -/
 @[dlmf 7.14.E7]
 theorem fresnelCosInt_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelCosInt (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))+a)^(1/2 : ℂ)/(2*a*(a^2+1)^(1/2 : ℂ)) := by
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelCosInt (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))+a)^(1/2 :
+        ℂ)/(2*a*(a^2+1)^(1/2 : ℂ)) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
   have hm : (0:ℝ) < (a-I).re := by simpa using ha
   have hp : (0:ℝ) < (a+I).re := by simpa using ha
@@ -1065,7 +1075,8 @@ theorem fresnelCosInt_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
       simp only [k]
       push_cast
       field_simp)
-    (((tendsto_recip_mul_erf_sqrt hu1r hu1r2).add (tendsto_recip_mul_erf_sqrt hv1r hv1r2)).const_mul k)
+    (((tendsto_recip_mul_erf_sqrt hu1r hu1r2).add
+        (tendsto_recip_mul_erf_sqrt hv1r hv1r2)).const_mul k)
   rw [key]
   have huv : (a^2+1)^(1/2 : ℂ) = u1*v1 := by
     rw [show a^2+1 = (u1*v1)^2 by rw [mul_pow, hu1, hv1]; ring_nf; rw [I_sq]; ring]
@@ -1102,7 +1113,8 @@ theorem fresnelSinInt_laplace {a : ℂ} (ha : 0 < a.re) :
         Real.norm_eq_abs]
       exact Real.abs_sin_le_one _
     simpa using mul_le_mul_of_nonneg_left h1 (Real.exp_pos (-a.re*t)).le
-  rw [integral_exp_mul_eq_of_deriv ha (u := fun t : ℝ => fresnelSinInt (t:ℂ)) (fresnelSinInt_entire.continuous.comp continuous_ofReal)
+  rw [integral_exp_mul_eq_of_deriv ha (u := fun t : ℝ => fresnelSinInt (t:ℂ))
+      (fresnelSinInt_entire.continuous.comp continuous_ofReal)
     (by simpa using (fresnelSinInt_ofReal 0).trans (by simp [Real.fresnelSinInt])) hB
     (fun t _ => (hasDerivAt_fresnelSinInt_complex t).comp_ofReal) (by fun_prop) hi,
     laplace_sin_pi_sq ha]
@@ -1112,7 +1124,8 @@ theorem fresnelSinInt_laplace {a : ℂ} (ha : 0 < a.re) :
 : ℂ))`. -/
 @[dlmf 7.14.E8]
 theorem fresnelSinInt_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelSinInt (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))-a)^(1/2 : ℂ)/(2*a*(a^2+1)^(1/2 : ℂ)) := by
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelSinInt (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))-a)^(1/2 :
+        ℂ)/(2*a*(a^2+1)^(1/2 : ℂ)) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
   have hm : (0:ℝ) < (a-I).re := by simpa using ha
   have hp : (0:ℝ) < (a+I).re := by simpa using ha
@@ -1162,7 +1175,8 @@ theorem fresnelSinInt_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
       ring_nf
       rw [I_sq]
       ring)
-    (((tendsto_recip_mul_erf_sqrt hu1r hu1r2).sub (tendsto_recip_mul_erf_sqrt hv1r hv1r2)).const_mul k)
+    (((tendsto_recip_mul_erf_sqrt hu1r hu1r2).sub
+        (tendsto_recip_mul_erf_sqrt hv1r hv1r2)).const_mul k)
   rw [key]
   have huv : (a^2+1)^(1/2 : ℂ) = u1*v1 := by
     rw [show a^2+1 = (u1*v1)^2 by rw [mul_pow, hu1, hv1]; ring_nf; rw [I_sq]; ring]

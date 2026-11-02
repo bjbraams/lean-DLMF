@@ -30,6 +30,7 @@ public import DLMF.AsymptoticApproximations.Remainders.Basic
 public import DLMF.AsymptoticApproximations.Sums.Basic
 public import DLMF.BernoulliEuler.Basic
 public import DLMF.Bessel.Basic
+public import DLMF.Bessel.Basic.RealModified
 public import DLMF.CoalescingSaddles.Basic
 public import DLMF.Combinatorics.Basic
 public import DLMF.Confluent.Basic

@@ -142,8 +142,10 @@ theorem exists_norm_regularized0F1Coeff_le (ν : ℂ) :
     one_div, mul_inv, norm_mul, norm_inv, Complex.norm_natCast]
   have h := hC (n + m)
   have hf : (n ! : ℝ) * m ! ≤ (n + m)! := by
-    exact_mod_cast Nat.le_of_dvd (Nat.factorial_pos _) (Nat.factorial_mul_factorial_dvd_factorial_add n m)
-  have hm1 : ((m ! : ℝ))⁻¹ ≤ 1 := inv_le_one_of_one_le₀ (by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero m))
+    exact_mod_cast Nat.le_of_dvd (Nat.factorial_pos _)
+        (Nat.factorial_mul_factorial_dvd_factorial_add n m)
+  have hm1 : ((m ! : ℝ))⁻¹ ≤ 1 :=
+      inv_le_one_of_one_le₀ (by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero m))
   have hnm : C * (2 ^ (n + m) / (n + m)!) ≤ C * (2 ^ n / n !) * (2 ^ m / m !) := by
     rw [mul_assoc, div_mul_div_comm, ← pow_add]
     gcongr
@@ -154,7 +156,8 @@ theorem exists_norm_regularized0F1Coeff_le (ν : ℂ) :
 /-- The term `(k, m)` of the double series of a Neumann-type series
 `∑ₖ aₖ w^{eₖ} ₀F̃₁(;ν+nₖ+1;σw²)`. -/
 def neumannTerm (ν σ w : ℂ) (a : ℕ → ℂ) (n e : ℕ → ℕ) (p : ℕ × ℕ) : ℂ :=
-  a p.1 * w ^ e p.1 * (regularizedHGFunCoeff (∅ : Multiset ℂ) {ν + n p.1 + 1} p.2 * (σ * w ^ 2) ^ p.2)
+  a p.1 * w ^ e p.1 * (regularizedHGFunCoeff (∅ : Multiset ℂ) {ν + n p.1 + 1} p.2 *
+      (σ * w ^ 2) ^ p.2)
 
 /-- Absolute summability of the Neumann double series under
 `∑ₖ |aₖ| |w|^{eₖ} 2^{nₖ}/nₖ! < ∞`. -/
@@ -261,7 +264,8 @@ theorem sum_antidiagonal_neg_one_pow_div_add (j : ℕ) {x : ℂ} (hx : ∀ i : �
       simp only [Nat.cast_zero, add_zero, Nat.cast_succ]
       rw [mul_comm]; congr 1
       exact prod_congr rfl fun i _ => by ring
-    have hP' : ∏ i ∈ range (j + 1 + 1), (x + i) = (∏ i ∈ range (j + 1), (x + i)) * (x + (j + 1)) := by
+    have hP' : ∏ i ∈ range (j + 1 + 1), (x + i) = (∏ i ∈ range (j + 1), (x + i)) *
+        (x + (j + 1)) := by
       rw [prod_range_succ]; push_cast; ring
     have hA : ∏ i ∈ range (j + 1), (x + i) ≠ 0 := prod_ne_zero_iff.mpr fun i _ => hx i
     have hB : ∏ i ∈ range (j + 1), (x + 1 + i) ≠ 0 := prod_ne_zero_iff.mpr fun i _ => hx1 i
@@ -271,7 +275,8 @@ theorem sum_antidiagonal_neg_one_pow_div_add (j : ℕ) {x : ℂ} (hx : ∀ i : �
     rw [hsplit]
     have e1 : (∏ i ∈ range (j + 1), (x + 1 + i)) = (∏ i ∈ range (j + 1 + 1), (x + i)) / x := by
       rw [hP]; field_simp
-    have e2 : (∏ i ∈ range (j + 1), (x + i)) = (∏ i ∈ range (j + 1 + 1), (x + i)) / (x + (j+1)) := by
+    have e2 : (∏ i ∈ range (j + 1), (x + i)) = (∏ i ∈ range (j + 1 + 1), (x + i)) /
+        (x + (j+1)) := by
       rw [hP']; field_simp
     have hC : ∏ i ∈ range (j + 1 + 1), (x + i) ≠ 0 := prod_ne_zero_iff.mpr fun i _ => hx i
     rw [e1, e2]
@@ -280,7 +285,8 @@ theorem sum_antidiagonal_neg_one_pow_div_add (j : ℕ) {x : ℂ} (hx : ∀ i : �
 
 /-- Summand of Neumann's expansion of a power, in range form. -/
 def powerNeumannSummand (l : ℂ) (j k : ℕ) : ℂ :=
-  (-1) ^ (j - k) * (l + 2 * k) * Gamma (l + k) / ((k ! : ℂ) * ((j - k) ! : ℂ) * Gamma (l + j + k + 1))
+  (-1) ^ (j - k) * (l + 2 * k) * Gamma (l + k) /
+      ((k ! : ℂ) * ((j - k) ! : ℂ) * Gamma (l + j + k + 1))
 
 /-- `Γ(λ+n) ≠ 0` for `λ ∉ -ℕ`. -/
 theorem Gamma_add_nat_ne_zero_of_ne {l : ℂ} (hl : ∀ n : ℕ, l ≠ -n) (n : ℕ) : Gamma (l + n) ≠ 0 := by
@@ -441,7 +447,8 @@ theorem neumannCoeff_lommel {l a b : ℂ} (hab : a + b = l) (hl : ∀ n : ℕ, l
       funext k
       have := ha k; have := hb k
       field_simp
-    rw [hfun, neumannCoeff_powerNeumannCoeff hl, ite_eq_right_iff.mpr (fun h => absurd h (Nat.succ_ne_zero j)), ih] at hrec
+    rw [hfun, neumannCoeff_powerNeumannCoeff hl,
+        ite_eq_right_iff.mpr (fun h => absurd h (Nat.succ_ne_zero j)), ih] at hrec
     have hA : ((j : ℂ) + 1 + a) * (j + 1 + b) ≠ 0 := by
       have h1 := ha (j + 1); have h2 := hb (j + 1); push_cast at h1 h2
       exact mul_ne_zero h1 h2
@@ -869,7 +876,8 @@ theorem sum_range_vwpTerm (A B : ℂ) (n : ℕ) :
   | succ n ih =>
     have h := Finset.sum_congr rfl fun s (hs : s ∈ range (n + 2)) =>
       vwpTerm_succ_sub A B n s (by rw [Finset.mem_range] at hs; omega)
-    rw [Finset.sum_sub_distrib, Finset.sum_range_sub, ← Finset.mul_sum, Finset.sum_range_succ (fun s => vwpTerm A B n s) (n + 1),
+    rw [Finset.sum_sub_distrib, Finset.sum_range_sub, ← Finset.mul_sum,
+        Finset.sum_range_succ (fun s => vwpTerm A B n s) (n + 1),
       ih] at h
     have h0 : vwpTerm A B n (n + 1) = 0 := by simp [vwpTerm, Nat.choose_succ_self]
     have h1 : vwpCert A B n (n + 1 + 1) = 0 := by simp [vwpCert, Nat.choose_succ_self]
@@ -927,7 +935,8 @@ theorem kumTerm_succ_sub (c : ℂ) (K m : ℕ) :
           ((2 * m + e + 2).choose (2 * m + 1) : ℂ) * (e + 1) := by exact_mod_cast h4
       linear_combination (2 * m + 1 : ℂ) * h4' + (e + 1 : ℂ) * h3'
     simp only [kumTerm, kumCert]
-    rw [show 2 * m + e + 1 + 1 - 2 * m = e + 2 by omega, show 2 * m + e + 1 - 2 * m = e + 1 by omega,
+    rw [show 2 * m + e + 1 + 1 - 2 * m = e + 2 by omega, show 2 * m + e + 1 - 2 * m =
+                                                    e + 1 by omega,
       show 2 * m + e + 1 + 1 - m = (m + e + 1) + 1 by omega,
       show 2 * m + e + 1 - m = m + e + 1 by omega,
       show 2 * m + e + 1 + 1 - 2 * (m + 1) = e by omega,
@@ -937,14 +946,17 @@ theorem kumTerm_succ_sub (c : ℂ) (K m : ℕ) :
     rw [show c + ((m : ℂ) + 1) = c + 1 + m by ring]
     generalize poch (c + 1 + m) (m + e + 1) = X
     generalize ((2 * m)! / m ! : ℂ) = q at *
-    have hD : (2 * (m : ℂ) + e + 1 + 1) ≠ 0 := by exact_mod_cast (show 2 * m + e + 1 + 1 ≠ 0 by omega)
+    have hD : (2 * (m : ℂ) + e + 1 + 1) ≠ 0 := by
+                                                 exact_mod_cast (show 2 * m + e + 1 +
+                                                   1 ≠ 0 by omega)
     have hI := mul_inv_cancel₀ hD
     simp only [div_eq_mul_inv]
     generalize (2 * (m : ℂ) + e + 1 + 1)⁻¹ = I at *
     generalize ((2 * m + e + 1 + 1).choose (2 * m) : ℂ) = B1 at *
     generalize ((2 * m + e + 1).choose (2 * m) : ℂ) = B0 at *
     generalize ((2 * m + e + 1 + 1).choose (2 * (m + 1)) : ℂ) = B2 at *
-    linear_combination (q * 2 ^ e * X) * ((2 * (2 * c + 2 * m + e + 1) * B0 - 4 * B1 * (c + m)) * hI +
+    linear_combination (q * 2 ^ e * X) *
+        ((2 * (2 * c + 2 * m + e + 1) * B0 - 4 * B1 * (c + m)) * hI +
       2 * (2 * c + 2 * m + e + 1) * I * hB1 + 2 * I * hB2)
   · by_cases h2 : K = 2 * m
     · subst h2
@@ -952,7 +964,8 @@ theorem kumTerm_succ_sub (c : ℂ) (K m : ℕ) :
       rw [show 2 * m + 1 - 2 * m = 1 by omega, show 2 * m + 1 - m = m + 1 by omega, Nat.sub_self,
         show 2 * m - m = m by omega, show 2 * m + 1 - 2 * (m + 1) = 0 by omega,
         Nat.choose_eq_zero_of_lt (show 2 * m + 1 < 2 * (m + 1) by omega), Nat.choose_self,
-        Nat.choose_succ_self_right, poch_succ_left (c + m) m, show c + (m : ℂ) + 1 = c + 1 + m by ring]
+        Nat.choose_succ_self_right, poch_succ_left (c + m) m, show c + (m : ℂ) + 1 =
+            c + 1 + m by ring]
       have hm : (2 * (m : ℂ) + 1) ≠ 0 := by exact_mod_cast (show 2 * m + 1 ≠ 0 by omega)
       push_cast
       field_simp
@@ -1063,7 +1076,8 @@ theorem hasSum_regularized0F1_mul_exp {c : ℂ} (hc : ∀ j : ℕ, c + j ≠ 0) 
   have hs2 : Summable fun r : ℕ => ‖(2 * w) ^ r / (r ! : ℂ)‖ := by
     simpa [norm_div, norm_pow] using Real.summable_pow_div_factorial ‖2 * w‖
   have hprod := h1.mul h2 (summable_mul_of_summable_norm (f := fun m =>
-    regularizedHGFunCoeff (∅ : Multiset ℂ) {c} m * (w ^ 2) ^ m) (g := fun r : ℕ => (2 * w) ^ r / (r ! : ℂ)) hs1 hs2)
+    regularizedHGFunCoeff (∅ : Multiset ℂ) {c} m *
+        (w ^ 2) ^ m) (g := fun r : ℕ => (2 * w) ^ r / (r ! : ℂ)) hs1 hs2)
   have hfib := hasSum_sum_range_fiber (d := 2) two_pos hprod
   refine hfib.congr_fun ?_
   intro K
@@ -1131,7 +1145,8 @@ theorem poch_two_mul_two_mul_add_one (ν : ℂ) (N : ℕ) :
     push_cast
     ring
 
-/-- Uniform bound on the coefficients of `₀F̃₁(;ν+k+1;w²) e^{2w}` (`hasSum_regularized0F1_mul_exp`). -/
+/-- Uniform bound on the coefficients of `₀F̃₁(;ν+k+1;w²) e^{2w}` (`hasSum_regularized0F1_mul_exp`).
+-/
 theorem exists_norm_regularized0F1_mul_exp_coeff_le (ν : ℂ) :
     ∃ C X : ℝ, 0 ≤ C ∧ 1 ≤ X ∧ ∀ k K : ℕ,
       ‖poch (2 * (ν + k + 1) + K - 1) K / (K ! * Gamma (ν + k + 1 + K))‖ ≤

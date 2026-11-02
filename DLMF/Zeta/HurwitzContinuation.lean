@@ -82,7 +82,8 @@ private lemma hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq' {M : ℕ} {s z :
 
 /-- **Uniform convergence to `hurwitzZetaComplex`** on bounded sets with `Re s ≥ σ > -2M`,
 `s ≠ 1`. -/
-private lemma tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex' {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ} (hR : 0 ≤ R)
+private lemma tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex' {M : ℕ} {K : Set (ℂ × ℂ)}
+    {R σ : ℝ} (hR : 0 ≤ R)
     (hσ : 0 < σ + 2 * M) (hK : ∀ q ∈ K, ‖q.1‖ ≤ R ∧ ‖q.2‖ ≤ R ∧ σ ≤ q.1.re ∧ q.1 ≠ 1) :
     TendstoUniformlyOn (fun N (q : ℂ × ℂ) => eulerMaclaurinSeq M q.1 q.2 (⌈R⌉₊ + 1 + N))
       (fun q => DLMF.Zeta.hurwitzZetaComplex q.1 q.2) atTop K :=
@@ -99,8 +100,8 @@ private lemma hasDerivAt_add_cpow {w c : ℂ} (n : ℂ) (h : w + n ∈ slitPlane
     HasDerivAt (fun x => (x + n) ^ c) (c * (w + n) ^ (c - 1)) w := by
   simpa using ((hasDerivAt_id w).add_const n).cpow_const (c := c) h
 
-/-- Identity under the stated parameter and domain assumptions: `eulerMaclaurinCoeff s k * (-s - (2 * k + 1))
-= -s * eulerMaclaurinCoeff (s + 1) k`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`eulerMaclaurinCoeff s k * (-s - (2 * k + 1)) = -s * eulerMaclaurinCoeff (s + 1) k`. -/
 private lemma eulerMaclaurinCoeff_mul_eq (s : ℂ) (k : ℕ) :
     eulerMaclaurinCoeff s k * (-s - (2 * k + 1)) = -s * eulerMaclaurinCoeff (s + 1) k := by
   have h : poch s (2 * k + 1 + 1) = s * poch (s + 1) (2 * k + 1) := by
@@ -111,7 +112,8 @@ private lemma eulerMaclaurinCoeff_mul_eq (s : ℂ) (k : ℕ) :
   linear_combination (-(bernoulli (2 * k + 2) : ℂ) / ((2 * k + 2)! : ℂ)) * h
 
 /-- The `z`-derivative of the Euler–Maclaurin sequence: `∂_z E_N(s, z) = -s E_N(s+1, z)`. -/
-private lemma hasDerivAt_eulerMaclaurinSeq_param (M : ℕ) {s w : ℂ} (hs : s ≠ 0) (hs1' : s ≠ 1) (hw : 0 < w.re)
+private lemma hasDerivAt_eulerMaclaurinSeq_param (M : ℕ) {s w : ℂ} (hs : s ≠ 0) (hs1' : s ≠ 1)
+    (hw : 0 < w.re)
     (N : ℕ) :
     HasDerivAt (fun x => eulerMaclaurinSeq M s x N) (-s * eulerMaclaurinSeq M (s + 1) w N) w := by
   have hsl : ∀ n : ℕ, w + n ∈ slitPlane := fun n =>
@@ -143,7 +145,8 @@ private lemma hasDerivAt_eulerMaclaurinSeq_param (M : ℕ) {s w : ℂ} (hs : s �
     ring
 
 /-- Each term of the Euler–Maclaurin sequence is holomorphic in `z` on `Re z > 0`. -/
-private lemma differentiableAt_eulerMaclaurinSeq_param (M : ℕ) (s : ℂ) {w : ℂ} (hw : 0 < w.re) (N : ℕ) :
+private lemma differentiableAt_eulerMaclaurinSeq_param (M : ℕ) (s : ℂ) {w : ℂ}
+    (hw : 0 < w.re) (N : ℕ) :
     DifferentiableAt ℂ (fun x => eulerMaclaurinSeq M s x N) w := by
   have hsl : ∀ n : ℕ, w + n ∈ slitPlane := fun n =>
     Complex.mem_slitPlane_iff.mpr (Or.inl (by simp; linarith [(n.cast_nonneg : (0 : ℝ) ≤ n)]))
@@ -177,7 +180,8 @@ private lemma tendstoUniformlyOn_eulerMaclaurinSeq_param {s : ℂ} (a₀ : ℂ) 
     calc ‖a‖ = ‖(a - a₀) + a₀‖ := by ring_nf
       _ ≤ ‖a - a₀‖ + ‖a₀‖ := norm_add_le _ _
       _ ≤ R := by simp only [R]; exact le_max_of_le_right (by linarith)
-  have hU := (tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex' hR hσ hK).comp (fun a : ℂ => (s, a))
+  have hU := (tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex' hR hσ hK).comp
+      (fun a : ℂ => (s, a))
   have hpre : (fun a : ℂ => (s, a)) ⁻¹' (({s} : Set ℂ) ×ˢ Metric.closedBall a₀ r) =
       Metric.closedBall a₀ r := by
     ext a; simp
@@ -185,7 +189,8 @@ private lemma tendstoUniformlyOn_eulerMaclaurinSeq_param {s : ℂ} (a₀ : ℂ) 
   exact hU
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < a.re`. -/
-private lemma re_pos_of_mem_ball_half_re {a₀ a : ℂ} (ha₀ : 0 < a₀.re) (ha : a ∈ Metric.ball a₀ (a₀.re / 2)) :
+private lemma re_pos_of_mem_ball_half_re {a₀ a : ℂ} (ha₀ : 0 < a₀.re)
+    (ha : a ∈ Metric.ball a₀ (a₀.re / 2)) :
     0 < a.re := by
   rw [Metric.mem_ball, dist_eq_norm] at ha
   have := abs_re_le_norm (a - a₀)
@@ -201,7 +206,8 @@ theorem differentiableOn_hurwitzZetaComplex_param' {s : ℂ} (hs : s ≠ 1) :
   have hU := ((tendstoUniformlyOn_eulerMaclaurinSeq_param a₀ hs).mono
     Metric.ball_subset_closedBall).tendstoLocallyUniformlyOn
   have hdiff := hU.differentiableOn (Eventually.of_forall fun N a ha =>
-    (differentiableAt_eulerMaclaurinSeq_param _ s (re_pos_of_mem_ball_half_re ha₀' ha) _).differentiableWithinAt)
+    (differentiableAt_eulerMaclaurinSeq_param _ s (re_pos_of_mem_ball_half_re ha₀' ha)
+        _).differentiableWithinAt)
     Metric.isOpen_ball
   exact (hdiff.differentiableAt (Metric.ball_mem_nhds _ hr)).differentiableWithinAt
 
@@ -216,7 +222,8 @@ theorem hasDerivAt_hurwitzZetaComplex_param' {s : ℂ} (hs0 : s ≠ 0) (hs1 : s 
   have hF : ∀ᶠ N in atTop, DifferentiableOn ℂ (fun a => eulerMaclaurinSeq (⌈|s.re|⌉₊ + 1) s a
       (⌈max (‖s‖ + 1) (‖a₀‖ + a₀.re / 2)⌉₊ + 1 + N)) (Metric.ball a₀ (a₀.re / 2)) :=
     Eventually.of_forall fun N a ha =>
-      (differentiableAt_eulerMaclaurinSeq_param _ s (re_pos_of_mem_ball_half_re ha₀ ha) _).differentiableWithinAt
+      (differentiableAt_eulerMaclaurinSeq_param _ s (re_pos_of_mem_ball_half_re ha₀ ha)
+          _).differentiableWithinAt
   have hdiff := hU.differentiableOn hF Metric.isOpen_ball
   have hD := (hU.deriv hF Metric.isOpen_ball).tendsto_at (Metric.mem_ball_self hr)
   have hD' : Tendsto (fun N => -s * eulerMaclaurinSeq (⌈|s.re|⌉₊ + 1) (s + 1) a₀
@@ -247,10 +254,11 @@ theorem hasDerivAt_hurwitzZetaComplex_param' {s : ℂ} (hs0 : s ≠ 0) (hs1 : s 
 /-- `(s - 1) E_N(s, a)`, written without division so that it is entire in `s`. -/
 def subOneMulEulerMaclaurinSeq (M : ℕ) (s a : ℂ) (N : ℕ) : ℂ :=
   (s - 1) * ((∑ n ∈ Finset.range N, (a + n) ^ (-s)) + (a + N) ^ (-s) / 2 +
-    ∑ k ∈ Finset.range M, eulerMaclaurinCoeff s k * (a + N) ^ (-s - (2 * k + 1))) + (a + N) ^ (1 - s)
+    ∑ k ∈ Finset.range M, eulerMaclaurinCoeff s k * (a + N) ^ (-s - (2 * k + 1))) +
+        (a + N) ^ (1 - s)
 
-/-- Identity under the stated parameter and domain assumptions: `subOneMulEulerMaclaurinSeq M s a N = (s - 1) *
-eulerMaclaurinSeq M s a N`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`subOneMulEulerMaclaurinSeq M s a N = (s - 1) * eulerMaclaurinSeq M s a N`. -/
 private lemma subOneMulEulerMaclaurinSeq_eq {M : ℕ} {s : ℂ} (hs : s ≠ 1) (a : ℂ) (N : ℕ) :
     subOneMulEulerMaclaurinSeq M s a N = (s - 1) * eulerMaclaurinSeq M s a N := by
   have hs1 : s - 1 ≠ 0 := sub_ne_zero.mpr hs
@@ -258,17 +266,22 @@ private lemma subOneMulEulerMaclaurinSeq_eq {M : ℕ} {s : ℂ} (hs : s ≠ 1) (
   field_simp
   ring
 
-/-- Formula under the stated hypotheses: `subOneMulEulerMaclaurinSeq M s a (N₀ + N) = subOneMulEulerMaclaurinSeq M s a N₀ + ∑ n ∈
+/-- Formula under the stated hypotheses:
+`subOneMulEulerMaclaurinSeq M s a (N₀ + N) = subOneMulEulerMaclaurinSeq M s a N₀ + ∑ n ∈
 Finset.range N, (s - 1) * eulerMaclaurinIncrement M s (a + (N₀ + n : ℕ))`. -/
 private lemma subOneMulEulerMaclaurinSeq_add (M : ℕ) (s a : ℂ) (N₀ N : ℕ) :
     subOneMulEulerMaclaurinSeq M s a (N₀ + N) =
-      subOneMulEulerMaclaurinSeq M s a N₀ + ∑ n ∈ Finset.range N, (s - 1) * eulerMaclaurinIncrement M s (a + (N₀ + n : ℕ)) := by
+      subOneMulEulerMaclaurinSeq M s a N₀ + ∑ n ∈ Finset.range N, (s - 1) *
+          eulerMaclaurinIncrement M s (a + (N₀ + n : ℕ)) := by
   rcases eq_or_ne s 1 with rfl | hs
   · simp [subOneMulEulerMaclaurinSeq]
-  · rw [subOneMulEulerMaclaurinSeq_eq hs, subOneMulEulerMaclaurinSeq_eq hs, eulerMaclaurinSeq_add, mul_add, Finset.mul_sum]
+  · rw [subOneMulEulerMaclaurinSeq_eq hs, subOneMulEulerMaclaurinSeq_eq hs, eulerMaclaurinSeq_add,
+        mul_add, Finset.mul_sum]
 
-/-- Continuity of the indicated function: `Continuous fun s => subOneMulEulerMaclaurinSeq M s a N`. -/
-private lemma continuous_subOneMulEulerMaclaurinSeq (M : ℕ) {a : ℂ} (ha : ∀ n : ℕ, a + n ≠ 0) (N : ℕ) :
+/-- Continuity of the indicated function: `Continuous fun s => subOneMulEulerMaclaurinSeq M s a N`.
+-/
+private lemma continuous_subOneMulEulerMaclaurinSeq (M : ℕ) {a : ℂ}
+    (ha : ∀ n : ℕ, a + n ≠ 0) (N : ℕ) :
     Continuous fun s => subOneMulEulerMaclaurinSeq M s a N := by
   refine continuous_iff_continuousAt.mpr fun s => DifferentiableAt.continuousAt (𝕜 := ℂ) ?_
   unfold subOneMulEulerMaclaurinSeq eulerMaclaurinCoeff
@@ -302,9 +315,11 @@ theorem tendsto_sub_one_mul_hurwitzZetaComplex {a : ℂ} (ha : ∀ n : ℕ, a + 
   have hK : ∀ q ∈ K, ‖q.1‖ ≤ R ∧ ‖q.2‖ ≤ R ∧ (1 / 2 : ℝ) ≤ q.1.re ∧ q.1 ≠ 1 := by
     rintro ⟨s, w⟩ ⟨hs, hs1, rfl⟩
     exact ⟨(hB s hs).1.trans (le_max_left _ _), le_max_right _ _, (hB s hs).2.1, hs1⟩
-  obtain ⟨u, hu, hu0, hb⟩ := exists_summable_bound_eulerMaclaurinIncrement (M := 0) hR (by norm_num) hK
+  obtain ⟨u, hu, hu0, hb⟩ :=
+      exists_summable_bound_eulerMaclaurinIncrement (M := 0) hR (by norm_num) hK
   set N₀ := ⌈R⌉₊ + 1
-  have hbound : ∀ n : ℕ, ∀ s ∈ B, ‖(s - 1) * eulerMaclaurinIncrement 0 s (a + (N₀ + n : ℕ))‖ ≤ u n := by
+  have hbound : ∀ n : ℕ, ∀ s ∈ B, ‖(s - 1) *
+      eulerMaclaurinIncrement 0 s (a + (N₀ + n : ℕ))‖ ≤ u n := by
     intro n s hs
     rcases eq_or_ne s 1 with rfl | hs1
     · simpa using hu0 n
@@ -317,14 +332,16 @@ theorem tendsto_sub_one_mul_hurwitzZetaComplex {a : ℂ} (ha : ∀ n : ℕ, a + 
   have hT := tendstoUniformlyOn_tsum_nat hu hbound
   set H : ℂ → ℂ := fun s => subOneMulEulerMaclaurinSeq 0 s a N₀ +
     ∑' n : ℕ, (s - 1) * eulerMaclaurinIncrement 0 s (a + (N₀ + n : ℕ))
-  have hU : TendstoUniformlyOn (fun N s => subOneMulEulerMaclaurinSeq 0 s a (N₀ + N)) H atTop B := by
+  have hU : TendstoUniformlyOn (fun N s => subOneMulEulerMaclaurinSeq 0 s a (N₀ + N))
+      H atTop B := by
     rw [Metric.tendstoUniformlyOn_iff] at hT ⊢
     intro ε hε
     filter_upwards [hT ε hε] with N hN s hs
     rw [subOneMulEulerMaclaurinSeq_add 0 s a N₀ N, dist_add_left]
     exact hN s hs
   have hHc : ContinuousOn H B :=
-    hU.continuousOn (Frequently.of_forall fun N => (continuous_subOneMulEulerMaclaurinSeq 0 ha _).continuousOn)
+    hU.continuousOn (Frequently.of_forall fun N =>
+        (continuous_subOneMulEulerMaclaurinSeq 0 ha _).continuousOn)
   have hH1 : H 1 = 1 := by simp [H, subOneMulEulerMaclaurinSeq]
   have hHeq : ∀ s ∈ B, s ≠ 1 → (s - 1) * DLMF.Zeta.hurwitzZetaComplex s a = H s := by
     intro s hs hs1
@@ -332,7 +349,8 @@ theorem tendsto_sub_one_mul_hurwitzZetaComplex {a : ℂ} (ha : ∀ n : ℕ, a + 
     have hM : 0 < s.re + 2 * ((0 : ℕ) : ℝ) := by simp; linarith [(hB s hs).2.1]
     have hT0 : Tendsto (fun N : ℕ => N₀ + N) atTop atTop :=
       tendsto_atTop_mono (fun N => Nat.le_add_left N _) tendsto_id
-    have hT2 := (((tendsto_eulerMaclaurinSeq_hurwitzZetaComplex (z := a) hs1 hM).comp hT0).const_mul (s - 1))
+    have hT2 := (((tendsto_eulerMaclaurinSeq_hurwitzZetaComplex (z := a) hs1 hM).comp
+        hT0).const_mul (s - 1))
     refine tendsto_nhds_unique hT2 ?_
     refine hT1.congr fun N => ?_
     simp only [Function.comp_apply]

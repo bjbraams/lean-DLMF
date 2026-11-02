@@ -199,8 +199,10 @@ theorem hyperbolicUmbilicDiffraction_eq_scale (x y z : ℝ) {k : ℝ} (hk : 0 < 
       ∫ p : ℝ × ℝ, g (c • p) := by
     congr 1; funext p
     simp only [hg, Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
-    rw [cuspoidContourDir_mul_of_pos 1 hcpos, cuspoidContourDir_mul_of_pos 1 hcpos, cuspoidContour_mul_of_pos 1 hcpos,
-      cuspoidContour_mul_of_pos 1 hcpos, mul_assoc I, mul_hyperbolicUmbilicPotential_eq_scaled x y z hk]
+    rw [cuspoidContourDir_mul_of_pos 1 hcpos, cuspoidContourDir_mul_of_pos 1 hcpos,
+        cuspoidContour_mul_of_pos 1 hcpos,
+      cuspoidContour_mul_of_pos 1 hcpos, mul_assoc I,
+          mul_hyperbolicUmbilicPotential_eq_scaled x y z hk]
   unfold hyperbolicUmbilicDiffraction hyperbolicUmbilicIntegral
   rw [hint, Measure.integral_comp_smul, finrank_real_prod_real,
     abs_of_pos (inv_pos.2 (pow_pos hcpos 2)), real_smul, ← mul_assoc, ← ofReal_mul,

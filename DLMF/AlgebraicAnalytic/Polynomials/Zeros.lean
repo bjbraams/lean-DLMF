@@ -80,7 +80,8 @@ private lemma natDegree_divByMonic_X_sub_C_lt (f : K[X]) (α : K) (hf : 0 < f.na
   omega
 
 /-- The quotient of a constant polynomial by `X - α` vanishes. -/
-private lemma divByMonic_X_sub_C_eq_zero_of_natDegree_eq_zero (f : K[X]) (α : K) (hf : f.natDegree = 0) :
+private lemma divByMonic_X_sub_C_eq_zero_of_natDegree_eq_zero (f : K[X]) (α : K)
+    (hf : f.natDegree = 0) :
     f /ₘ (X - C α) = 0 := by
   rw [divByMonic_eq_zero_iff (monic_X_sub_C α), degree_X_sub_C]
   exact lt_of_le_of_lt (natDegree_eq_zero_iff_degree_le_zero.mp hf) (by norm_num)
@@ -161,7 +162,8 @@ theorem hornerC_one (f : K[X]) (α : K) : hornerC f α 1 = (derivative f).eval �
 
 /-- A real polynomial of positive degree with nonnegative leading coefficient and negative value
 at `0` has a positive zero (intermediate value theorem). -/
-private lemma exists_pos_isRoot_of_eval_zero_neg {f : ℝ[X]} (hdeg : 0 < f.degree) (hlc : 0 ≤ f.leadingCoeff)
+private lemma exists_pos_isRoot_of_eval_zero_neg {f : ℝ[X]} (hdeg : 0 < f.degree)
+    (hlc : 0 ≤ f.leadingCoeff)
     (h0 : f.eval 0 < 0) : ∃ x, 0 < x ∧ f.IsRoot x := by
   obtain ⟨M, hM, hM0⟩ := (((tendsto_atTop_of_leadingCoeff_nonneg f hdeg hlc).eventually
     (Filter.eventually_gt_atTop 0)).and (Filter.eventually_gt_atTop 0)).exists
@@ -190,7 +192,8 @@ theorem exists_root_sign_of_odd {f : ℝ[X]} (hm : f.Monic) (hodd : Odd f.natDeg
   have hpos : 0 < f.natDegree := hodd.pos
   have hdeg : 0 < f.degree := natDegree_pos_iff_degree_pos.mp hpos
   rcases lt_trichotomy (f.coeff 0) 0 with h | h | h
-  · obtain ⟨x, hx, hr⟩ := exists_pos_isRoot_of_eval_zero_neg hdeg (by rw [hm.leadingCoeff]; norm_num)
+  · obtain ⟨x, hx, hr⟩ :=
+        exists_pos_isRoot_of_eval_zero_neg hdeg (by rw [hm.leadingCoeff]; norm_num)
       (by rwa [← coeff_zero_eq_eval_zero])
     exact ⟨x, hr, fun _ => hx, fun h' => absurd h' (not_lt.mpr h.le)⟩
   · exact ⟨0, by rwa [IsRoot, ← coeff_zero_eq_eval_zero], fun h' => absurd h (ne_of_lt h'),
@@ -254,8 +257,8 @@ theorem isRoot_reverse_inv_iff (f : K[X]) {x : K} (hx : x ≠ 0) :
 
 /-- DLMF 1.11.9: the discriminant of `f = a_n ∏ (z - z_j)` is
 `D = a_n^{2n-2} ∏_{j<k} (z_j - z_k)²` (Mathlib's `Polynomial.discr`; the cases `n = 2, 3` are
-Mathlib's `Polynomial.discr_of_degree_eq_two` and `Cubic.discr_eq_prod_three_roots`). This adapter combines Tau Ceti’s
-`TauCeti.discr_C_mul` and `Polynomial.discr_prod_X_sub_C`. -/
+Mathlib's `Polynomial.discr_of_degree_eq_two` and `Cubic.discr_eq_prod_three_roots`). This adapter
+combines Tau Ceti’s `TauCeti.discr_C_mul` and `Polynomial.discr_prod_X_sub_C`. -/
 @[dlmf 1.11.E9]
 theorem discr_eq_prod_roots {n : ℕ} (a : K) (ha : a ≠ 0) (z : Fin n → K) :
     (C a * ∏ j, (X - C (z j))).discr =

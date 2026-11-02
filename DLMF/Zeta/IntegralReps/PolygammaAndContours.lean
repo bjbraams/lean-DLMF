@@ -76,7 +76,8 @@ noncomputable def evenKernelTail : ℝ → ℂ :=
   (Set.Ioi 1).indicator (fun x => (hurwitzEvenFEPair 0).f x - (hurwitzEvenFEPair 0).f₀)
 
 /-- On `(1, ∞)` the tail is `2ω(x)`. -/
-private lemma evenKernelTail_eq {x : ℝ} (hx : 1 < x) : evenKernelTail x = 2 * (zetaOmega x : ℂ) := by
+private lemma evenKernelTail_eq {x : ℝ} (hx : 1 < x) : evenKernelTail x = 2 *
+    (zetaOmega x : ℂ) := by
   have hx0 : 0 < x := by linarith
   rw [evenKernelTail, indicator_of_mem (Set.mem_Ioi.mpr hx), zetaOmega_eq_jacobiTheta hx0]
   simp only [hurwitzEvenFEPair, Function.comp_apply, ite_true]
@@ -142,7 +143,8 @@ private lemma mellin_evenKernelTail (a : ℂ) :
 /-- `x^a ω(x)/x` is integrable on `(1, ∞)`. -/
 private lemma integrableOn_cpow_mul_zetaOmega_div (a : ℂ) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ a * zetaOmega x / x) (Set.Ioi 1) := by
-  have h := ((mellinConvergent_evenKernelTail a).mono_set (Set.Ioi_subset_Ioi zero_le_one)).const_mul
+  have h := ((mellinConvergent_evenKernelTail a).mono_set
+      (Set.Ioi_subset_Ioi zero_le_one)).const_mul
     (1 / 2 : ℂ)
   refine IntegrableOn.congr_fun h (fun x hx => ?_) measurableSet_Ioi
   have hx0 : (0 : ℝ) < x := lt_trans zero_lt_one hx
@@ -182,8 +184,10 @@ theorem riemannZeta_eq_integral_zetaOmega {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠
       fun x : ℝ => (x : ℂ) ^ (s / 2) * zetaOmega x / x +
         (x : ℂ) ^ ((1 - s) / 2) * zetaOmega x / x := by
     funext x; ring
-  refine ⟨he ▸ (integrableOn_cpow_mul_zetaOmega_div _).add (integrableOn_cpow_mul_zetaOmega_div _), ?_⟩
-  rw [he, integral_add (integrableOn_cpow_mul_zetaOmega_div _) (integrableOn_cpow_mul_zetaOmega_div _),
+  refine ⟨he ▸ (integrableOn_cpow_mul_zetaOmega_div _).add
+      (integrableOn_cpow_mul_zetaOmega_div _), ?_⟩
+  rw [he, integral_add (integrableOn_cpow_mul_zetaOmega_div _)
+      (integrableOn_cpow_mul_zetaOmega_div _),
     riemannZeta_eq_completedRiemannZeta₀ hs0]
   have hc : completedRiemannZeta₀ s = (HurwitzZeta.hurwitzEvenFEPair 0).Λ₀ (s / 2) / 2 := rfl
   rw [hc, hurwitzEvenFEPair_zero_Λ₀_eq, mellin_evenKernelTail, mellin_evenKernelTail]
@@ -245,7 +249,8 @@ private lemma polygammaKernel_mul_rpow (m : ℕ) (σ : ℝ) {t : ℝ} (ht : 0 < 
   field_simp
 
 /-- DLMF 25.5.19 core: `∫₀^∞ ψ^{(m)}(1+x) x^{-s} dx = (-1)^{m+1} Γ(1-s) Γ(m+s) ζ(m+s)`. -/
-private lemma integral_polygamma_one_add_mul_cpow {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re) (hs' : s.re < 1) :
+private lemma integral_polygamma_one_add_mul_cpow {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re)
+    (hs' : s.re < 1) :
     IntegrableOn (fun x : ℝ => DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s)) (Ioi 0) ∧
       ∫ x in Ioi (0 : ℝ), DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s) =
         (-1) ^ (m + 1) * (Gamma (1 - s) * Gamma (m + s) * riemannZeta (m + s)) := by
@@ -271,7 +276,8 @@ private lemma integral_polygamma_one_add_mul_cpow {s : ℂ} {m : ℕ} (hm : 1 �
   -- the `x`-integral for fixed `t`
   have hxint : ∀ t : ℝ, 0 < t → Integrable (fun x => K x t) μ := by
     intro t ht
-    have := (DLMF.Gamma.integrableOn_cpow_mul_exp_neg_mul h1s ht).mul_const (polygammaKernel m t : ℂ)
+    have := (DLMF.Gamma.integrableOn_cpow_mul_exp_neg_mul h1s ht).mul_const
+        (polygammaKernel m t : ℂ)
     simp only [sub_sub_cancel_left] at this
     exact this
   have hxval : ∀ t : ℝ, 0 < t → ∫ x in Ioi (0 : ℝ), K x t =

@@ -57,13 +57,16 @@ termination_by n => n
 /-- The all-order θ expansion coefficients, obtained by integrating 1/M². -/
 def airyPhaseCoeff (k : ℕ) : ℝ := airyReciprocalCoeff airyModulusCoeff k / (1 - 2 * (k : ℝ))
 /-- The all-order φ expansion coefficients, obtained by integrating x/N². -/
-def airyDerivPhaseCoeff (k : ℕ) : ℝ := airyReciprocalCoeff airyDerivModulusCoeff k / (1 - 2 * (k : ℝ))
+def airyDerivPhaseCoeff (k : ℕ) : ℝ := airyReciprocalCoeff airyDerivModulusCoeff k /
+    (1 - 2 * (k : ℝ))
 /-- Modulus-square truncation, before its algebraic prefactor. -/
 def airyModulusSum (derivative : Bool) (N : ℕ) (x : ℝ) : ℝ :=
-  ∑ k ∈ Finset.range N, (if derivative then airyDerivModulusCoeff k else airyModulusCoeff k) * x ^ (-(3 * k : ℤ))
+  ∑ k ∈ Finset.range N, (if derivative then airyDerivModulusCoeff k else airyModulusCoeff k) *
+      x ^ (-(3 * k : ℤ))
 /-- Phase truncation, before its leading algebraic prefactor. -/
 def airyPhaseSum (derivative : Bool) (N : ℕ) (x : ℝ) : ℝ :=
-  ∑ k ∈ Finset.range N, (if derivative then airyDerivPhaseCoeff k else airyPhaseCoeff k) * x ^ (-(3 * k : ℤ))
+  ∑ k ∈ Finset.range N, (if derivative then airyDerivPhaseCoeff k else airyPhaseCoeff k) *
+      x ^ (-(3 * k : ℤ))
 
 /-! ### Real-axis calculus for `Ai`, `Bi` -/
 
@@ -256,14 +259,16 @@ theorem airyBiDeriv_add_I_airyAiDeriv (x : ℝ) :
   simp
 
 /-- `Ai = M sin θ` on the whole real axis. -/
-theorem airyAiReal_eq_modulus_sin (x : ℝ) : airyAiReal x = airyModulus x * Real.sin (airyPhase x) := by
+theorem airyAiReal_eq_modulus_sin (x : ℝ) : airyAiReal x = airyModulus x *
+    Real.sin (airyPhase x) := by
   have h := congrArg Complex.im (airyBi_add_I_airyAi x)
   rw [show I * (airyPhase x : ℂ) = (airyPhase x : ℂ) * I by ring, exp_mul_I,
 ] at h
   simpa [Complex.cos_ofReal_re, Complex.sin_ofReal_re] using h
 
 /-- `Bi = M cos θ` on the whole real axis. -/
-theorem airyBiReal_eq_modulus_cos (x : ℝ) : airyBiReal x = airyModulus x * Real.cos (airyPhase x) := by
+theorem airyBiReal_eq_modulus_cos (x : ℝ) : airyBiReal x = airyModulus x *
+    Real.cos (airyPhase x) := by
   have h := congrArg Complex.re (airyBi_add_I_airyAi x)
   rw [show I * (airyPhase x : ℂ) = (airyPhase x : ℂ) * I by ring, exp_mul_I,
 ] at h
@@ -339,7 +344,8 @@ theorem airy_energy_monotoneOn {f f' : ℝ → ℝ} (hf : ∀ t, HasDerivAt f (f
     have ht1 : t ≠ 0 := fun h => ht0 (by rw [h, neg_zero])
     field_simp
     ring
-  refine monotoneOn_of_deriv_nonneg (convex_Iio 0) (fun t ht => (hd t ht).continuousAt.continuousWithinAt)
+  refine monotoneOn_of_deriv_nonneg (convex_Iio 0)
+      (fun t ht => (hd t ht).continuousAt.continuousWithinAt)
     (fun t ht => (hd t (interior_subset ht)).differentiableAt.differentiableWithinAt) fun t ht => ?_
   rw [interior_Iio] at ht
   rw [(hd t ht).deriv]
@@ -385,7 +391,8 @@ theorem tendsto_airyPhase_atBot : Tendsto airyPhase atBot atTop := by
   have hanti : AntitoneOn h (Iic (-1)) := by
     have hd : ∀ x, HasDerivAt h (-(1 / (π * airyModulus x ^ 2)) + 1 / (π * C)) x := fun x =>
       (hasDerivAt_airyPhase x).add ((hasDerivAt_id x).div_const _) |>.congr_deriv (by simp)
-    refine antitoneOn_of_deriv_nonpos (convex_Iic _) (fun x _ => (hd x).continuousAt.continuousWithinAt)
+    refine antitoneOn_of_deriv_nonpos (convex_Iic _)
+        (fun x _ => (hd x).continuousAt.continuousWithinAt)
       (fun x _ => (hd x).differentiableAt.differentiableWithinAt) fun x hx => ?_
     rw [interior_Iic, mem_Iio] at hx
     rw [(hd x).deriv]
@@ -413,7 +420,8 @@ theorem tendsto_airyDerivPhase_atBot : Tendsto airyDerivPhase atBot atTop := by
     have hd : ∀ x, HasDerivAt h (x / (π * airyDerivModulus x ^ 2) + 1 / (π * C)) x := fun x =>
       (hasDerivAt_airyDerivPhase x).add ((hasDerivAt_id x).div_const _) |>.congr_deriv
         (by simp)
-    refine antitoneOn_of_deriv_nonpos (convex_Iic _) (fun x _ => (hd x).continuousAt.continuousWithinAt)
+    refine antitoneOn_of_deriv_nonpos (convex_Iic _)
+        (fun x _ => (hd x).continuousAt.continuousWithinAt)
       (fun x _ => (hd x).differentiableAt.differentiableWithinAt) fun x hx => ?_
     rw [interior_Iic, mem_Iio] at hx
     rw [(hd x).deriv]
@@ -465,7 +473,8 @@ theorem airyBiDerivReal_modulus_phase {x : ℝ} :
 @[dlmf 9.8.E4]
 theorem airyPhase_atan_branch {x : ℝ} (hb : airyBiReal x ≠ 0) :
     ∃ k : ℤ, airyPhase x = Real.arctan (airyAiReal x / airyBiReal x) + k * π := by
-  have hc : Real.cos (airyPhase x) ≠ 0 := fun h => hb (by rw [airyBiReal_eq_modulus_cos, h, mul_zero])
+  have hc : Real.cos (airyPhase x) ≠ 0 := fun h =>
+      hb (by rw [airyBiReal_eq_modulus_cos, h, mul_zero])
   have hM := (airyModulus_pos x).ne'
   rw [airyAiReal_eq_modulus_sin, airyBiReal_eq_modulus_cos, mul_div_mul_left _ _ hM,
     ← Real.tan_eq_sin_div_cos]
@@ -740,7 +749,8 @@ theorem airyDerivPhase_bessel_atan {x : ℝ} (hx : x < 0)
   rw [show (-(y : ℂ)) = ((-y : ℝ) : ℂ) by push_cast; ring, ← hxy, airyBiDeriv_ofReal_eq] at hB
   have hs3 : Real.sqrt 3 ≠ 0 := by positivity
   have hYr : (DLMF.Bessel.besselY (2 / 3) (airyZeta y)).re =
-      -((Complex.besselJ (2 / 3) (airyZeta y)).re + 2 * (Complex.besselJ (-2 / 3) (airyZeta y)).re) /
+      -((Complex.besselJ (2 / 3) (airyZeta y)).re + 2 *
+          (Complex.besselJ (-2 / 3) (airyZeta y)).re) /
         Real.sqrt 3 := by
     rw [besselY_two_thirds_eq, Complex.div_ofReal_re]
     simp only [Complex.sub_re, Complex.mul_re]
@@ -809,8 +819,10 @@ theorem airy_derivModulus_identity {x : ℝ} :
 /-- `x² M² = N'² + N² φ'² = N'² + x²/(π² N²)` (DLMF 9.8.16). -/
 @[dlmf 9.8.E16]
 theorem airy_modulus_identity {x : ℝ} :
-    x ^ 2 * airyModulus x ^ 2 = deriv airyDerivModulus x ^ 2 + airyDerivModulus x ^ 2 * deriv airyDerivPhase x ^ 2 ∧
-      x ^ 2 * airyModulus x ^ 2 = deriv airyDerivModulus x ^ 2 + x ^ 2 / (π ^ 2 * airyDerivModulus x ^ 2) := by
+    x ^ 2 * airyModulus x ^ 2 = deriv airyDerivModulus x ^ 2 + airyDerivModulus x ^ 2 *
+        deriv airyDerivPhase x ^ 2 ∧
+      x ^ 2 * airyModulus x ^ 2 = deriv airyDerivModulus x ^ 2 + x ^ 2 /
+          (π ^ 2 * airyDerivModulus x ^ 2) := by
   have hN := (airyDerivModulus_pos x).ne'
   have hπ := Real.pi_ne_zero
   have hL := airy_lagrange x
@@ -827,7 +839,8 @@ theorem airy_modulus_identity {x : ℝ} :
 @[dlmf 9.8.E17]
 theorem airy_phase_difference_tan {x : ℝ} :
     Real.tan (airyPhase x - airyDerivPhase x) = 1 / (π * airyModulus x * deriv airyModulus x) ∧
-      Real.tan (airyPhase x - airyDerivPhase x) = -airyModulus x * deriv airyPhase x / deriv airyModulus x := by
+      Real.tan (airyPhase x - airyDerivPhase x) = -airyModulus x * deriv airyPhase x /
+          deriv airyModulus x := by
   have hM := (airyModulus_pos x).ne'
   have hN := (airyDerivModulus_pos x).ne'
   have hπ := Real.pi_ne_zero
@@ -840,9 +853,11 @@ theorem airy_phase_difference_tan {x : ℝ} :
       1 / (π * (airyModulus x * airyDerivModulus x)) := by
     rw [eq_div_iff (mul_ne_zero hπ (mul_ne_zero hM hN)),
       show Real.sin (airyPhase x - airyDerivPhase x) * (π * (airyModulus x * airyDerivModulus x)) =
-        (airyModulus x * airyDerivModulus x * Real.sin (airyPhase x - airyDerivPhase x)) * π by ring,
+        (airyModulus x * airyDerivModulus x *
+            Real.sin (airyPhase x - airyDerivPhase x)) * π by ring,
       hs, one_div, inv_mul_cancel₀ hπ]
-  have hcos : Real.cos (airyPhase x - airyDerivPhase x) = S / (airyModulus x * airyDerivModulus x) := by
+  have hcos : Real.cos (airyPhase x - airyDerivPhase x) = S /
+      (airyModulus x * airyDerivModulus x) := by
     rw [eq_div_iff (mul_ne_zero hM hN), ← hc]; ring
   rw [hsin, hcos]
   by_cases hS : S = 0
@@ -881,7 +896,8 @@ theorem airy_modulus_ode {x : ℝ} :
       funext fun t => ((hasDerivAt_airyCross t).const_mul 2).deriv
     have d3 : HasDerivAt (fun t => 2 * (airyAiDerivReal t ^ 2 + airyBiDerivReal t ^ 2 +
           t * (airyAiReal t ^ 2 + airyBiReal t ^ 2)))
-        (2 * (2 * airyAiDerivReal x * (x * airyAiReal x) + 2 * airyBiDerivReal x * (x * airyBiReal x) +
+        (2 * (2 * airyAiDerivReal x * (x * airyAiReal x) + 2 * airyBiDerivReal x *
+            (x * airyBiReal x) +
           ((airyAiReal x ^ 2 + airyBiReal x ^ 2) + x * (2 * (airyAiReal x * airyAiDerivReal x +
             airyBiReal x * airyBiDerivReal x))))) x := by
       have h := (((((hasDerivAt_airyAiDerivReal x).pow 2).add

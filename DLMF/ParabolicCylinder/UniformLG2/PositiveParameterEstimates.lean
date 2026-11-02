@@ -257,7 +257,8 @@ lemma pcfLG2_hasDerivAt_xiBar (t : ℝ) : HasDerivAt pcfXiBar (Real.sqrt (t^2+1)
     have : |t| < r := by
       rw [hr, ← Real.sqrt_sq_eq_abs]; exact Real.sqrt_lt_sqrt (sq_nonneg _) (by linarith)
     linarith [neg_abs_le t]
-  have hl : HasDerivAt (fun t : ℝ => Real.log (t + Real.sqrt (t^2+1))) ((1 + 2*t/(2*r)) / (t + r)) t :=
+  have hl : HasDerivAt (fun t : ℝ => Real.log (t + Real.sqrt (t^2+1)))
+      ((1 + 2*t/(2*r)) / (t + r)) t :=
     ((hasDerivAt_id t).add hs).log htr.ne'
   have := (((hasDerivAt_id t).mul hs).add hl).div_const 2
   have e : pcfXiBar = fun x => ((((id : ℝ → ℝ) * fun t : ℝ => Real.sqrt (t^2+1)) +
@@ -856,7 +857,8 @@ lemma pcfLG2_pos_core {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ : ℝ, 0 ≤ C ∧ 
       |e| ≤ C / (μ^2)^N ∧ |pcfLG2_PA t ^ 2 * e'| ≤ 2 * C / (μ^2)^(N-1) ∧
       pcfU (μ^2/2) (μ*t*Real.sqrt 2) = (((μ * Real.sqrt 2 * pcfLG_h μ)⁻¹ : ℝ) : ℂ) /
         (pcfLG2_ser (fun s _ => pcfLG2_cbar s) N (μ^2) 0 : ℂ) *
-        ((pcfLG2_PA t * Real.exp (-(μ^2 * pcfXiBar t)) * (pcfLG2_ser pcfLG2_Pa N (μ^2) t + e) : ℝ) : ℂ) ∧
+        ((pcfLG2_PA t * Real.exp (-(μ^2 * pcfXiBar t)) *
+            (pcfLG2_ser pcfLG2_Pa N (μ^2) t + e) : ℝ) : ℂ) ∧
       (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (μ^2/2) (μ*t*Real.sqrt 2) =
         (((μ * Real.sqrt 2 * pcfLG_h μ)⁻¹ : ℝ) : ℂ) /
         (pcfLG2_ser (fun s _ => pcfLG2_cbar s) N (μ^2) 0 : ℂ) *
@@ -891,7 +893,8 @@ lemma pcfLG2_pos_core {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ : ℝ, 0 ≤ C ∧ 
       fun _ => by
         unfold pcfLG2_PA2
         exact (Continuous.mul (by fun_prop)
-          (Continuous.rpow_const (by fun_prop) fun t => Or.inl (by positivity))).continuousAt).continuousOn
+          (Continuous.rpow_const (by fun_prop) fun t =>
+              Or.inl (by positivity))).continuousAt).continuousOn
     (fun t _ => by rw [pcfLG2_PA_sq_recip]; exact pcfLG2_hasDerivAt_xiBar t)
     (fun c _ => (pcfLG2_integrable_of_le pcfLG2_continuous_V pcfLG2_abs_V_le).integrableOn)
     (fun t _ => pcfLG2_tail_le pcfLG2_continuous_V pcfLG2_abs_V_le t)
@@ -909,7 +912,8 @@ lemma pcfLG2_pos_core {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ : ℝ, 0 ≤ C ∧ 
     (fun s _ => pcfLG2_tendsto_Pa s)
     (U := fun μ t => pcfU (μ^2/2) (μ*t*Real.sqrt 2))
     (U' := fun μ t => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (μ^2/2) (μ*t*Real.sqrt 2))
-    (H := fun μ => (((μ * Real.sqrt 2 * pcfLG_h μ)⁻¹ : ℝ) : ℂ)) (fun μ t _ => pcfLG2_hasDerivAt_PU μ t)
+    (H := fun μ => (((μ * Real.sqrt 2 * pcfLG_h μ)⁻¹ : ℝ) : ℂ))
+        (fun μ t _ => pcfLG2_hasDerivAt_PU μ t)
     (fun μ t _ => (pcfLG2_hasDerivAt_PU' μ t).congr_deriv (by rw [pcfLG2_PA_pow_four_recip]))
     (fun μ hμ => pcfLG2_tendsto_PU_div (by linarith)) le_rfl hμ₀ hμ₀C
   refine ⟨((hcore 0) μ hμ).1, fun t => ?_⟩

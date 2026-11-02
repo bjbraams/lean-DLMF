@@ -94,7 +94,8 @@ private lemma hasSum_inv_succ_pow_two_mul_bernoulli {n : ℕ} (hn : n ≠ 0) :
   exact h
 
 /-- The Dirichlet eta function from zeta: `∑ (-1)ᵏ/(k+1)ˢ = (1 - 2^{1-s}) ∑ 1/(k+1)ˢ`. -/
-private lemma hasSum_alt_inv_succ_pow {s : ℕ} {Z : ℝ} (hZ : HasSum (fun k : ℕ => 1 / ((k : ℝ) + 1) ^ s) Z) :
+private lemma hasSum_alt_inv_succ_pow {s : ℕ} {Z : ℝ}
+    (hZ : HasSum (fun k : ℕ => 1 / ((k : ℝ) + 1) ^ s) Z) :
     HasSum (fun k : ℕ => (-1) ^ k * (1 / ((k : ℝ) + 1) ^ s)) ((1 - 2 / 2 ^ s) * Z) := by
   set f : ℕ → ℝ := fun k => 1 / ((k : ℝ) + 1) ^ s
   have ho : HasSum (fun k => f (2 * k + 1)) (Z / 2 ^ s) := by
@@ -128,7 +129,8 @@ private lemma summable_one_div_mul_succ_pow (m : ℕ) {c : ℝ} (hc : 0 < c) :
 private lemma hasSum_integral_pow_div_exp_sub_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
     HasSum (fun i : ℕ => ((m + 1) ! : ℝ) * 1 / (c * ((i : ℝ) + 1)) ^ (m + 2))
       (∫ t in Ioi (0 : ℝ), t ^ (m + 1) * (1 / (rexp (c * t) - 1))) := by
-  refine hasSum_integral_pow_mul_of_hasSum_exp (a := fun _ => 1) (p := fun i => c * ((i : ℝ) + 1)) (m + 1)
+  refine hasSum_integral_pow_mul_of_hasSum_exp (a := fun _ => 1)
+      (p := fun i => c * ((i : ℝ) + 1)) (m + 1)
     (fun i => by positivity) (fun t ht => ?_) ?_
   · have ht' : 0 < t := ht
     set r := rexp (-(c * t))
@@ -154,7 +156,8 @@ private lemma hasSum_integral_pow_div_exp_sub_one (m : ℕ) {c : ℝ} (hc : 0 < 
 private lemma hasSum_integral_pow_div_exp_add_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
     HasSum (fun i : ℕ => ((m + 1) ! : ℝ) * (-1) ^ i / (c * ((i : ℝ) + 1)) ^ (m + 2))
       (∫ t in Ioi (0 : ℝ), t ^ (m + 1) * (1 / (rexp (c * t) + 1))) := by
-  refine hasSum_integral_pow_mul_of_hasSum_exp (a := fun i => (-1) ^ i) (p := fun i => c * ((i : ℝ) + 1))
+  refine hasSum_integral_pow_mul_of_hasSum_exp (a := fun i => (-1) ^ i)
+      (p := fun i => c * ((i : ℝ) + 1))
     (m + 1) (fun i => by positivity) (fun t ht => ?_) ?_
   · have ht' : 0 < t := ht
     set r := rexp (-(c * t))

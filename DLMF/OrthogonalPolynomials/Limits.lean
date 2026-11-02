@@ -845,7 +845,8 @@ theorem hermite_odd_mehler_heine (z : ℂ) :
     Tendsto (fun n : ℕ => (-1 : ℂ) ^ n / (2 ^ (2 * n) * (n.factorial : ℂ)) *
       aeval (z / (2 * (Real.sqrt n : ℂ))) (hermitePolyH (2 * n + 1))) atTop
       (𝓝 (2 * sin z / (Real.sqrt Real.pi : ℂ))) := by
-  have h := (laguerrePolyL_mehler_heine_regularized (α := 1 / 2) (by norm_num) (z ^ 2 / 4)).const_mul z
+  have h := (laguerrePolyL_mehler_heine_regularized (α := 1 / 2) (by norm_num)
+      (z ^ 2 / 4)).const_mul z
   norm_num only [ofReal_div, ofReal_one, ofReal_ofNat] at h
   have hΓ : Gamma (1 / 2 : ℂ) = (Real.sqrt Real.pi : ℂ) := by
     rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by norm_num, Gamma_ofReal, Real.Gamma_one_half_eq]

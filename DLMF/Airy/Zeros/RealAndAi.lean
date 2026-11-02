@@ -77,7 +77,8 @@ def HasAiryZeroExpansion (q : ℝ) (f t : ℕ → ℂ) (c : ℕ → ℂ) : Prop 
 /-- The real argument of the T,V pair at the (k+1)-st Ai zero. -/
 def airyZeroArgument (offset : ℝ) (k : ℕ) : ℂ := (3 * π / 8 * (4 * (k + 1 : ℝ) - offset) : ℝ)
 /-- The complex argument of the T,V and U,W pairs for Bi's upper-sector zeros. -/
-def airyComplexZeroArgument (offset : ℝ) (k : ℕ) : ℂ := airyZeroArgument offset k + 3 * I * Real.log 2 / 4
+def airyComplexZeroArgument (offset : ℝ) (k : ℕ) : ℂ := airyZeroArgument offset k + 3 *
+    I * Real.log 2 / 4
 
 /-- `Ai(x) → 0` as `x → +∞` on the real axis. -/
 theorem tendsto_airyAiReal_atTop : Tendsto airyAiReal atTop (𝓝 0) := by
@@ -324,7 +325,8 @@ theorem airyAiZero_spec {k : ℕ} (hk : 1 ≤ k) :
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
 theorem airyAiZero_enumeration :
-    StrictAntiOn airyAiZero (Ici 1) ∧ ∀ x : ℝ, airyAiReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧ airyAiZero k = x := by
+    StrictAntiOn airyAiZero (Ici 1) ∧ ∀ x : ℝ, airyAiReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+        airyAiZero k = x := by
   exact phaseZeroData_airyAi.enumeration
 
 /-- All real zeros are negative, DLMF §9.9(i). -/
@@ -385,7 +387,8 @@ theorem airyAiDerivZero_spec {k : ℕ} (hk : 1 ≤ k) :
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
 theorem airyAiDerivZero_enumeration :
-    StrictAntiOn airyAiDerivZero (Ici 1) ∧ ∀ x : ℝ, airyAiDerivReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧ airyAiDerivZero k = x := by
+    StrictAntiOn airyAiDerivZero (Ici 1) ∧ ∀ x : ℝ, airyAiDerivReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+        airyAiDerivZero k = x := by
   exact phaseZeroData_airyAiDeriv.enumeration
 
 /-- All real zeros are negative, DLMF §9.9(i). -/
@@ -426,7 +429,8 @@ theorem airyBiZero_spec {k : ℕ} (hk : 1 ≤ k) :
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
 theorem airyBiZero_enumeration :
-    StrictAntiOn airyBiZero (Ici 1) ∧ ∀ x : ℝ, airyBiReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧ airyBiZero k = x := by
+    StrictAntiOn airyBiZero (Ici 1) ∧ ∀ x : ℝ, airyBiReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+        airyBiZero k = x := by
   exact phaseZeroData_airyBi.enumeration
 
 /-- All real zeros are negative, DLMF §9.9(i). -/
@@ -474,7 +478,8 @@ theorem airyBiDerivZero_spec {k : ℕ} (hk : 1 ≤ k) :
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
 theorem airyBiDerivZero_enumeration :
-    StrictAntiOn airyBiDerivZero (Ici 1) ∧ ∀ x : ℝ, airyBiDerivReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧ airyBiDerivZero k = x := by
+    StrictAntiOn airyBiDerivZero (Ici 1) ∧ ∀ x : ℝ, airyBiDerivReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+        airyBiDerivZero k = x := by
   exact phaseZeroData_airyBiDeriv.enumeration
 
 /-! ### Nonreal zeros of `Ai` and `Ai'`
@@ -558,9 +563,11 @@ theorem airyZeroC_tendsto_boundary (z0 : ℂ) :
     Tendsto (fun T : ℝ => (starRingEnd ℂ) (airyAi (z0 + T)) * airyAiDeriv (z0 + T)) atTop
       (𝓝 0) := by
   have hT := airyZeroC_tendsto_sector z0
-  have hA := (airy_ai_poincare (δ := π / 2) (by positivity) (by linarith [Real.pi_pos]) 0).comp_tendsto
+  have hA := (airy_ai_poincare (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
+      0).comp_tendsto
     (by rw [show π - π / 2 = π / 2 by ring]; exact hT)
-  have hD := (airy_aiDeriv_poincare (δ := π / 2) (by positivity) (by linarith [Real.pi_pos]) 0).comp_tendsto
+  have hD := (airy_aiDeriv_poincare (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
+      0).comp_tendsto
     (by rw [show π - π / 2 = π / 2 by ring]; exact hT)
   simp only [airyFunction, airyExponentialSum, Finset.range_zero, Finset.sum_empty, mul_zero,
     sub_zero, pow_zero, div_one, Function.comp_def] at hA hD

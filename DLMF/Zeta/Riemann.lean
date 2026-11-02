@@ -115,7 +115,8 @@ private lemma continuous_periodicBernoulli {q : ℕ} (hq : q ≠ 1) :
   rw [this]; exact (periodizedBernoulli.continuous hq).comp continuous_quotient_mk'
 
 /-- `B̃_{p+1}' = (p+1) B̃_p` off the integers. -/
-private lemma hasDerivAt_periodicBernoulli_succ (p : ℕ) {x : ℝ} (hx : x ∉ range (Int.cast : ℤ → ℝ)) :
+private lemma hasDerivAt_periodicBernoulli_succ (p : ℕ) {x : ℝ}
+    (hx : x ∉ range (Int.cast : ℤ → ℝ)) :
     HasDerivAt (periodicBernoulli (p + 1)) ((p + 1) * periodicBernoulli p x) x := by
   set m := ⌊x⌋
   have hlt : (m : ℝ) < x := lt_of_le_of_ne (Int.floor_le x) (fun h => hx ⟨m, h⟩)
@@ -182,7 +183,8 @@ private lemma hasDerivAt_periodicBernoulli_div_cpow (p : ℕ) (w : ℂ) {x : ℝ
   · rw [show -w - 1 = -(w + 1) by ring, cpow_neg, cpow_neg]; push_cast; ring
 
 /-- Integration by parts against `B̃_{p+1}` on `[a, b]`, `0 < a ≤ b`, `p ≥ 1`. -/
-theorem integral_periodicBernoulli_div_cpow_by_parts {p : ℕ} (hp : 1 ≤ p) (w : ℂ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
+theorem integral_periodicBernoulli_div_cpow_by_parts {p : ℕ} (hp : 1 ≤ p) (w : ℂ) {a b : ℝ}
+    (ha : 0 < a) (hab : a ≤ b) :
     ∫ x in a..b, ((p + 1) * ((periodicBernoulli p x : ℂ) / (x : ℂ) ^ w) -
         w * ((periodicBernoulli (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1))) =
       (periodicBernoulli (p + 1) b : ℂ) / (b : ℂ) ^ w -
@@ -219,7 +221,8 @@ theorem tendsto_periodicBernoulli_div_cpow (q : ℕ) {w : ℂ} (hw : 0 < w.re) :
 
 /-- The recursion for `∫_a^∞ B̃_p(x) x^{-w} dx`, `p ≥ 1`, `Re w > 1`, `a > 0`:
 `(p+1) ∫ B̃_p x^{-w} = -B̃_{p+1}(a) a^{-w} + w ∫ B̃_{p+1} x^{-w-1}`. -/
-theorem integral_Ioi_periodicBernoulli_div_cpow_recursion {p : ℕ} (hp : 1 ≤ p) {w : ℂ} (hw : 1 < w.re) {a : ℝ} (ha : 0 < a) :
+theorem integral_Ioi_periodicBernoulli_div_cpow_recursion {p : ℕ} (hp : 1 ≤ p) {w : ℂ}
+    (hw : 1 < w.re) {a : ℝ} (ha : 0 < a) :
     (p + 1) * ∫ x in Ioi a, (periodicBernoulli p x : ℂ) / (x : ℂ) ^ w =
       -((periodicBernoulli (p + 1) a : ℂ) / (a : ℂ) ^ w) +
         w * ∫ x in Ioi a, (periodicBernoulli (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1) := by
@@ -237,7 +240,8 @@ theorem integral_Ioi_periodicBernoulli_div_cpow_recursion {p : ℕ} (hp : 1 ≤ 
       (periodicBernoulli (p + 1) b : ℂ) / (b : ℂ) ^ w -
         (periodicBernoulli (p + 1) a : ℂ) / (a : ℂ) ^ w := by
     filter_upwards [eventually_ge_atTop a] with b hb
-    rw [← integral_periodicBernoulli_div_cpow_by_parts hp w ha hb, intervalIntegral.integral_sub, id,
+    rw [← integral_periodicBernoulli_div_cpow_by_parts hp w ha hb,
+        intervalIntegral.integral_sub, id,
       intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
     · exact (intervalIntegrable_bdd_div_cpow (measurable_periodicBernoulli p) hC w
         ha hb).const_mul _
@@ -273,7 +277,8 @@ private lemma tendsto_sum_Icc_one_div_cpow {s : ℂ} (hs : 1 < s.re) :
 /-- One unit interval of the base identity: for `k ≥ 1`, `s ≠ 0, 1`,
 `(k+1)^{-s} = -((k+1)^{1-s} - k^{1-s})/(s-1) + ((k+1)^{-s} - k^{-s})/2
   - s ∫_k^{k+1} B̃₁(x) x^{-s-1} dx`. -/
-private lemma one_div_natCast_succ_cpow_eq_integral_step {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) {k : ℕ} (hk : 1 ≤ k) :
+private lemma one_div_natCast_succ_cpow_eq_integral_step {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1)
+    {k : ℕ} (hk : 1 ≤ k) :
     1 / ((k + 1 : ℕ) : ℂ) ^ s = -(((k + 1 : ℕ) : ℂ) ^ (1 - s) - (k : ℂ) ^ (1 - s)) / (s - 1) +
       1 / 2 * (((k + 1 : ℕ) : ℂ) ^ (-s) - (k : ℂ) ^ (-s)) -
       s * ∫ x in (k : ℝ)..(k + 1 : ℕ), (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
@@ -331,7 +336,8 @@ private lemma one_div_natCast_succ_cpow_eq_integral_step {s : ℂ} (hs0 : s ≠ 
   ring
 
 /-- The finite form of the base identity, `N ≤ M`, `s ≠ 0, 1`. -/
-private lemma sum_Icc_one_div_cpow_eq_finite_identity {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) {N : ℕ} (hN : 1 ≤ N) (M : ℕ)
+private lemma sum_Icc_one_div_cpow_eq_finite_identity {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) {N : ℕ}
+    (hN : 1 ≤ N) (M : ℕ)
     (hM : N ≤ M) :
     ∑ k ∈ Finset.Icc (1 : ℕ) M, 1 / (k : ℂ) ^ s =
       ∑ k ∈ Finset.Icc (1 : ℕ) N, 1 / (k : ℂ) ^ s + (N : ℂ) ^ (1 - s) / (s - 1) -
@@ -348,12 +354,14 @@ private lemma sum_Icc_one_div_cpow_eq_finite_identity {s : ℂ} (hs0 : s ≠ 0) 
         hN0 (by exact_mod_cast hNM : (N : ℝ) ≤ M))
       (intervalIntegrable_bdd_div_cpow (measurable_periodicBernoulli 1) hC (s + 1)
         (by exact_mod_cast hM1 : (0 : ℝ) < M) (by push_cast; linarith : (M : ℝ) ≤ (M + 1 : ℕ)))
-    rw [sum_Icc_succ_top (by omega), ih, one_div_natCast_succ_cpow_eq_integral_step hs0 hs1 hM1, ← hsplit]
+    rw [sum_Icc_succ_top (by omega), ih,
+        one_div_natCast_succ_cpow_eq_integral_step hs0 hs1 hM1, ← hsplit]
     ring
 
 /-- The base identity (25.2.8 with `B̃₁`) for `Re s > 1`:
 `ζ(s) = ∑_{k=1}^{N} k^{-s} + N^{1-s}/(s-1) - N^{-s}/2 - s ∫_N^∞ B̃₁(x) x^{-s-1} dx`. -/
-private lemma riemannZeta_eq_sum_add_integral_periodicBernoulli_one {s : ℂ} (hs : 1 < s.re) {N : ℕ} (hN : 1 ≤ N) :
+private lemma riemannZeta_eq_sum_add_integral_periodicBernoulli_one {s : ℂ} (hs : 1 < s.re)
+    {N : ℕ} (hN : 1 ≤ N) :
     riemannZeta s = ∑ k ∈ Finset.Icc (1 : ℕ) N, 1 / (k : ℂ) ^ s + (N : ℂ) ^ (1 - s) / (s - 1) -
       1 / 2 * (N : ℂ) ^ (-s) -
       s * ∫ x in Ioi (N : ℝ), (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
@@ -382,14 +390,16 @@ private lemma riemannZeta_eq_sum_add_integral_periodicBernoulli_one {s : ℂ} (h
         s * ∫ x in (N : ℝ)..M, (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
     filter_upwards [eventually_ge_atTop N] with M hM
     exact sum_Icc_one_div_cpow_eq_finite_identity hs0 hs1 hN M hM
-  have := tendsto_nhds_unique (tendsto_sum_Icc_one_div_cpow hs) (hR.congr' (heq.mono fun M h => h.symm))
+  have := tendsto_nhds_unique (tendsto_sum_Icc_one_div_cpow hs)
+      (hR.congr' (heq.mono fun M h => h.symm))
   rw [this]
   ring
 
 /-- `binom(z+1, m+1) = binom(z, m) (z+1)/(m+1)`. -/
 private lemma choose_add_one_succ (z : ℂ) (m : ℕ) :
     Ring.choose (z + 1) (m + 1) = Ring.choose z m * (z + 1) / (m + 1) := by
-  rw [Ring.choose_eq_descPochhammer_div, Ring.choose_eq_descPochhammer_div, descPochhammer_succ_left, Polynomial.eval_mul,
+  rw [Ring.choose_eq_descPochhammer_div, Ring.choose_eq_descPochhammer_div,
+      descPochhammer_succ_left, Polynomial.eval_mul,
     Polynomial.eval_comp, Polynomial.eval_X, Polynomial.eval_sub, Polynomial.eval_X,
     Polynomial.eval_one, add_sub_cancel_right, Nat.factorial_succ]
   have h1 : ((m ! : ℕ) : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos m).ne'
@@ -403,7 +413,8 @@ private lemma periodicBernoulli_natCast (q N : ℕ) :
   rw [periodicBernoulli, Int.fract_natCast, bernoulliFun_eval_zero]
 
 /-- The double integration-by-parts step from `B̃_{2n+1}` to `B̃_{2n+3}`, `Re s > -2n`. -/
-private lemma choose_mul_integral_periodicBernoulli_double_step {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (hs : -(2 * n : ℝ) < s.re) :
+private lemma choose_mul_integral_periodicBernoulli_double_step {s : ℂ} {n N : ℕ} (hN : 1 ≤ N)
+    (hs : -(2 * n : ℝ) < s.re) :
     Ring.choose (s + 2 * n) (2 * n + 1) * ∫ x in Ioi (N : ℝ),
         (periodicBernoulli (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1) =
       -(Ring.choose (s + 2 * n) (2 * n + 1) * ((bernoulli (2 * n + 2) : ℂ) / (2 * n + 2)) *
@@ -411,9 +422,11 @@ private lemma choose_mul_integral_periodicBernoulli_double_step {s : ℂ} {n N :
         Ring.choose (s + 2 * n + 2) (2 * n + 3) * ∫ x in Ioi (N : ℝ),
           (periodicBernoulli (2 * n + 3) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 3) := by
   have hN0 : (0 : ℝ) < N := by exact_mod_cast hN
-  have h1 := integral_Ioi_periodicBernoulli_div_cpow_recursion (p := 2 * n + 1) (by omega) (w := s + 2 * n + 1)
+  have h1 := integral_Ioi_periodicBernoulli_div_cpow_recursion (p := 2 * n + 1) (by omega)
+      (w := s + 2 * n + 1)
     (by simp; linarith) hN0
-  have h2 := integral_Ioi_periodicBernoulli_div_cpow_recursion (p := 2 * n + 2) (by omega) (w := s + 2 * n + 2)
+  have h2 := integral_Ioi_periodicBernoulli_div_cpow_recursion (p := 2 * n + 2) (by omega)
+      (w := s + 2 * n + 2)
     (by simp; linarith) hN0
   rw [periodicBernoulli_natCast] at h1 h2
   rw [show 2 * n + 2 + 1 = 2 * n + 3 by ring, bernoulli_eq_zero_of_odd ⟨n + 1, by ring⟩
@@ -476,9 +489,10 @@ private lemma eulerMaclaurinZetaRHS_succ {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (h
   rw [e1, e3, e2, e4, e5]
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `riemannZeta s = eulerMaclaurinZetaRHS N n
-s`. -/
-private lemma riemannZeta_eq_eulerMaclaurinZetaRHS_of_one_lt_re {s : ℂ} (hs : 1 < s.re) {N : ℕ} (hN : 1 ≤ N) (n : ℕ) :
+/-- Identity under the stated parameter and domain assumptions:
+`riemannZeta s = eulerMaclaurinZetaRHS N n s`. -/
+private lemma riemannZeta_eq_eulerMaclaurinZetaRHS_of_one_lt_re {s : ℂ} (hs : 1 < s.re) {N : ℕ}
+    (hN : 1 ≤ N) (n : ℕ) :
     riemannZeta s = eulerMaclaurinZetaRHS N n s := by
   induction n with
   | zero =>
@@ -653,7 +667,8 @@ theorem riemannZeta_eq_sum_add_integral_fract {s : ℂ} (hs : 0 < s.re) (hs1 : s
   have hJ := integrableOn_bdd_div_cpow (measurable_periodicBernoulli 1) hD hw hN0
   have hP := integrableOn_Ioi_cpow_of_lt (a := -(s + 1)) (by simp; linarith) hN0
   have h1 := riemannZeta_eq_eulerMaclaurinZetaRHS (n := 1) le_rfl hN (by simp; linarith) hs1
-  have h0 : eulerMaclaurinZetaRHS N 1 s = eulerMaclaurinZetaRHS N 0 s := eulerMaclaurinZetaRHS_succ hN (by simpa using hs)
+  have h0 : eulerMaclaurinZetaRHS N 1 s = eulerMaclaurinZetaRHS N 0 s :=
+      eulerMaclaurinZetaRHS_succ hN (by simpa using hs)
   rw [h0, eulerMaclaurinZetaRHS] at h1
   simp at h1
   have hsplit : ∫ x in Ioi (N : ℝ), ((Int.fract x : ℝ) : ℂ) / (x : ℂ) ^ (s + 1) =

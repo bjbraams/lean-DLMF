@@ -143,7 +143,8 @@ notion of a solution expressible in terms of Airy functions and is not formalize
 @[dlmf 32.10.E2]
 theorem painleveII_exists_airy (n : ℤ) :
     ∃ (w : ℂ → ℂ) (U : Set ℂ), IsOpen U ∧ U.Nonempty ∧ IsPainleveIIOn ((n : ℂ) + 1 / 2) w U := by
-  obtain ⟨s, hs, hne, h⟩ := exists_open_isPIIOn_airyPIIHierarchy neg_two_cpow_neg_third_cube (-n - 1)
+  obtain ⟨s, hs, hne, h⟩ :=
+      exists_open_isPIIOn_airyPIIHierarchy neg_two_cpow_neg_third_cube (-n - 1)
   refine ⟨airyPIIHierarchy (-(2 : ℂ) ^ (-1 / 3 : ℂ)) 1 0 (-n - 1), s, hs, hne,
       isPainleveIIOn_iff_isPIIOn.mpr ?_⟩
   convert h using 2
@@ -414,9 +415,11 @@ theorem painleveIII_bessel_riccati {ε₁ ε₂ α C₁ C₂ : ℂ} (h₁ : ε�
     rw [(hφd x hx).deriv]
   have hz0 : z ≠ 0 := slitPlane_ne_zero (hUs hz)
   have hs0 : z ^ ν ≠ 0 := by rw [cpow_def_of_ne_zero hz0]; exact exp_ne_zero _
-  have hφ1d := (((hasDerivAt_cpow_of_mem_slitPlane (a := ν) (hUs hz)).const_mul ν).div (hasDerivAt_id z)
+  have hφ1d := (((hasDerivAt_cpow_of_mem_slitPlane (a := ν) (hUs hz)).const_mul ν).div
+      (hasDerivAt_id z)
     hz0).mul ((hBd _ (hζ z hz)).comp z (hlin z)) |>.add
-    ((hasDerivAt_cpow_of_mem_slitPlane (a := ν) (hUs hz)).mul (((hB1d _ (hζ z hz)).comp z (hlin z)).mul_const c))
+    ((hasDerivAt_cpow_of_mem_slitPlane (a := ν) (hUs hz)).mul
+        (((hB1d _ (hζ z hz)).comp z (hlin z)).mul_const c))
   refine ((((hφ1d.const_mul (-ε₁)).div (hφd z hzV) hφ0)).congr_of_eventuallyEq hev).congr_deriv ?_
   rw [(hφd z hzV).deriv]
   have hO := hode _ (hζ z hz)
@@ -847,7 +850,8 @@ theorem painleveVI_hypergeometric_riccati {a b c C₁ C₂ : ℂ} (ha : a ≠ 0)
     ζ ^ (1 - b - c) * deriv G ζ) with hφ1
   have hφd : ∀ ζ ∈ Ω, HasDerivAt φ (φ1 ζ) ζ := fun ζ hζ => by
     have := ((hFd ζ hζ).hasDerivAt.const_mul C₁).add
-      (((hasDerivAt_cpow_of_mem_slitPlane (a := 1 - b - c) hζ.2).const_mul C₂).mul (hGd ζ hζ).hasDerivAt)
+      (((hasDerivAt_cpow_of_mem_slitPlane (a := 1 - b - c) hζ.2).const_mul C₂).mul
+          (hGd ζ hζ).hasDerivAt)
     exact this.congr_deriv (by simp only [hφ1]; ring)
   have hζ00 : ζ0 ≠ 0 := slitPlane_ne_zero hzs
   have hζ01 : ζ0 ≠ 1 := hne1 _ hζΩ

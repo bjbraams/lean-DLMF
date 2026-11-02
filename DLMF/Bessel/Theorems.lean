@@ -83,7 +83,8 @@ theorem besselJ_eq_poisson_integral {ν : ℂ} {x : ℝ}
   have hP : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpow : (4 : ℂ) ^ (ν - 1 / 2) * (2 : ℂ) ^ (-2 * ν) = 1 / 2 := by
     rw [show (4 : ℂ) = (2 : ℝ) * (2 : ℝ) by norm_num,
-      mul_cpow_ofReal_nonneg (by norm_num) (by norm_num), ofReal_ofNat, ← cpow_add _ _ (by norm_num),
+      mul_cpow_ofReal_nonneg (by norm_num) (by norm_num), ofReal_ofNat,
+          ← cpow_add _ _ (by norm_num),
       ← cpow_add _ _ (by norm_num)]
     rw [show ν - 1 / 2 + (ν - 1 / 2) + -2 * ν = -1 by ring, cpow_neg_one]
     norm_num
@@ -168,7 +169,8 @@ theorem besselJ_zeros_simple {ν x : ℝ} (hν : -1 < ν) (hx : 0 < x)
     rw [besselJ_eq_regularized] at hroot
     exact (mul_eq_zero.mp hroot).resolve_left (hp ν)
   have hc : ∀ k : ℕ, (ν : ℂ) + 1 ≠ -k := not_neg_nat_of_re_pos (by simp; linarith)
-  have hw : -((x : ℂ) ^ 2 / 4) ≠ 0 := neg_ne_zero.mpr (div_ne_zero (pow_ne_zero _ hx0) (by norm_num))
+  have hw : -((x : ℂ) ^ 2 / 4) ≠ 0 :=
+      neg_ne_zero.mpr (div_ne_zero (pow_ne_zero _ hx0) (by norm_num))
   have hne := regularized0F1_deriv_ne_zero hc hw hf
   rw [deriv_regularized0F1] at hne
   rw [(hasDerivAt_besselJ hxslit).deriv, hroot, mul_zero, zero_sub, neg_ne_zero,

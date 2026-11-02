@@ -757,7 +757,8 @@ theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
       ∫ t : ℝ in (0 : ℝ)..1,
         (t : ℂ) ^ (d - 1) * (1 - (t : ℂ)) ^ (c - d - 1) / (1 - (x : ℂ) * t) ^ (a + b - l) *
           regularizedGaussHGFun (l - a) (l - b) d ((x : ℂ) * t) *
-          regularizedGaussHGFun (a + b - l) (l - d) (c - d) ((1 - (t : ℂ)) * x / (1 - (x : ℂ) * t)) := by
+          regularizedGaussHGFun (a + b - l) (l - d) (c - d)
+              ((1 - (t : ℂ)) * x / (1 - (x : ℂ) * t)) := by
   set α := a + b - l with hα
   have hc0 : 0 < c.re := by
     rw [sub_re] at hcd; linarith

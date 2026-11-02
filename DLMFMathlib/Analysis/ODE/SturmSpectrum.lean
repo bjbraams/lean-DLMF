@@ -49,7 +49,8 @@ namespace ODE
 
 /-- A set of reals all of whose initial segments `S ∩ (-∞, x)` are finite has a least element
 in each of its nonempty subsets. -/
-private lemma exists_least_of_inter_Iio_finite {S T : Set ℝ} (hfin : ∀ x, (S ∩ Iio x).Finite) (hTS : T ⊆ S)
+private lemma exists_least_of_inter_Iio_finite {S T : Set ℝ}
+    (hfin : ∀ x, (S ∩ Iio x).Finite) (hTS : T ⊆ S)
     (hT : T.Nonempty) : ∃ m ∈ T, ∀ t ∈ T, m ≤ t := by
   obtain ⟨z, hz⟩ := hT
   have hF : (T ∩ Iic z).Finite := by
@@ -112,7 +113,8 @@ theorem analyticAt_re_comp_ofReal {G : ℂ → ℂ} (hG : Differentiable ℂ G) 
 
 /-- The zeros in a compact interval of a real analytic function on `ℝ` that does not vanish
 identically are finite in number. -/
-theorem zeros_Icc_finite_of_analyticAt {g : ℝ → ℝ} (hg : ∀ x, AnalyticAt ℝ g x) {x₀ : ℝ} (hx₀ : g x₀ ≠ 0)
+theorem zeros_Icc_finite_of_analyticAt {g : ℝ → ℝ} (hg : ∀ x, AnalyticAt ℝ g x) {x₀ : ℝ}
+    (hx₀ : g x₀ ≠ 0)
     (a b : ℝ) : {x | x ∈ Icc a b ∧ g x = 0}.Finite := by
   have hc : Continuous g := continuous_iff_continuousAt.mpr fun x => (hg x).continuousAt
   have hK : IsCompact {x | x ∈ Icc a b ∧ g x = 0} :=
@@ -290,7 +292,8 @@ theorem endpoint_ne_zero_of_lt_neg {Q y y' : ℝ → ℝ} {M L μ : ℝ} (hL : 0
 
 /-- If `(-1)^j g(t_j) > 0` for all large `j` and `t_j → ∞`, then `g` takes positive and negative
 values for arbitrarily large arguments. -/
-private lemma pos_and_neg_of_alternating {g : ℝ → ℝ} {t : ℕ → ℝ} (ht : Tendsto t atTop atTop) {J : ℕ}
+private lemma pos_and_neg_of_alternating {g : ℝ → ℝ} {t : ℕ → ℝ}
+    (ht : Tendsto t atTop atTop) {J : ℕ}
     (h : ∀ j ≥ J, 0 < (-1) ^ j * g (t j)) :
     (∀ N, ∃ x > N, 0 < g x) ∧ (∀ N, ∃ x > N, g x < 0) := by
   have key : ∀ N, ∃ j, J ≤ j ∧ Even j ∧ N < t j ∧ N < t (j + 1) := by
@@ -363,7 +366,8 @@ theorem sign_changes_val_initial_one_zero (hM : 0 < M) (hL : 0 < L) (hQ : ∀ x 
 
 /-- **Sign changes of `y'(L, λ)`** for `(y, y')(0) = (1, 0)`: at `λ = k_j²`,
 `k_j = (jπ + π/2) / L`, the sign of `y'(L, λ)` is `-(-1)^j` for large `j`. -/
-theorem sign_changes_deriv_initial_one_zero (hM : 0 < M) (hL : 0 < L) (hQ : ∀ x ∈ Icc 0 L, |Q x| ≤ M)
+theorem sign_changes_deriv_initial_one_zero (hM : 0 < M) (hL : 0 < L)
+    (hQ : ∀ x ∈ Icc 0 L, |Q x| ≤ M)
     (hY : ∀ μ x, HasDerivAt (Y μ) (Y' μ x) x)
     (hY' : ∀ μ x, HasDerivAt (Y' μ) ((Q x - μ) * Y μ x) x) (h0 : ∀ μ, Y μ 0 = 1)
     (h1 : ∀ μ, Y' μ 0 = 0) :
@@ -422,7 +426,8 @@ theorem sign_changes_val_initial_zero_one (hM : 0 < M) (hL : 0 < L) (hQ : ∀ x 
 
 /-- **Sign changes of `y'(L, λ)`** for `(y, y')(0) = (0, 1)`: at `λ = k_j²`, `k_j = jπ / L`,
 the sign of `y'(L, λ)` is `(-1)^j` for large `j`. -/
-theorem sign_changes_deriv_initial_zero_one (hM : 0 < M) (hL : 0 < L) (hQ : ∀ x ∈ Icc 0 L, |Q x| ≤ M)
+theorem sign_changes_deriv_initial_zero_one (hM : 0 < M) (hL : 0 < L)
+    (hQ : ∀ x ∈ Icc 0 L, |Q x| ≤ M)
     (hY : ∀ μ x, HasDerivAt (Y μ) (Y' μ x) x)
     (hY' : ∀ μ x, HasDerivAt (Y' μ) ((Q x - μ) * Y μ x) x) (h0 : ∀ μ, Y μ 0 = 0)
     (h1 : ∀ μ, Y' μ 0 = 1) :

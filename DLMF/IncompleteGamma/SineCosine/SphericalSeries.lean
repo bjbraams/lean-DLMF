@@ -152,7 +152,8 @@ theorem gsSph_cos_part {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) :
 (k+1)*sphericalJ (2*k+1) z)` converges to `(genSinInt a z)`. -/
 @[dlmf 8.21.E16]
 theorem genSinInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) {z : ℂ} (hz : z ≠ 0) :
-    HasSum (fun k : ℕ => z^a*(2*k+3/2 : ℂ)*poch (1-a/2) k/poch (1/2+a/2) (k+1)*sphericalJ (2*k+1) z) (genSinInt a z) := by
+    HasSum (fun k : ℕ => z^a*(2*k+3/2 : ℂ)*poch (1-a/2) k/poch (1/2+a/2) (k+1)*sphericalJ (2*k+1) z)
+        (genSinInt a z) := by
   obtain ⟨hHd, hHL⟩ := gsSph_sin_part ha
   set H : ℂ → ℂ := fun w => ∑' k : ℕ, (-1 : ℂ)^k*w^(2*k+1)/((2*k+a+1)*(2*k+1).factorial) with hH
   have hQ : ∀ k : ℕ, (1/2+a/2+k : ℂ) ≠ 0 := fun k e => ha k (by linear_combination 2*e)
@@ -283,7 +284,8 @@ theorem genSinInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) 
 (k+1)*sphericalJ (2*k) z)` converges to `(genCosInt a z)`. -/
 @[dlmf 8.21.E17]
 theorem genCosInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) {z : ℂ} (hz : z ≠ 0) :
-    HasSum (fun k : ℕ => z^a*(2*k+1/2 : ℂ)*poch (1/2-a/2) k/poch (a/2) (k+1)*sphericalJ (2*k) z) (genCosInt a z) := by
+    HasSum (fun k : ℕ => z^a*(2*k+1/2 : ℂ)*poch (1/2-a/2) k/poch (a/2) (k+1)*sphericalJ (2*k) z)
+        (genCosInt a z) := by
   obtain ⟨hHd, hHL⟩ := gsSph_cos_part ha
   set H : ℂ → ℂ := fun w => ∑' k : ℕ, (-1 : ℂ)^k*w^(2*k)/((2*k+a)*(2*k).factorial) with hH
   have hQ : ∀ k : ℕ, (a/2+k : ℂ) ≠ 0 := fun k e => ha k (by linear_combination 2*e)
@@ -472,11 +474,13 @@ theorem genCosIntTail_aux (a z : ℂ) :
 @[dlmf 8.21.E22]
 theorem genTrigAuxF_oscillatory_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => sin t*(t+z)^(a-1)) 0 (genTrigAuxF a z) := by
-  have hd : ∀ t : ℝ, 0 ≤ t → HasDerivAt (fun t : ℝ => -cos z*genSinIntTail a (z+t)+sin z*genCosIntTail a (z+t))
+  have hd : ∀ t : ℝ, 0 ≤ t →
+      HasDerivAt (fun t : ℝ => -cos z*genSinIntTail a (z+t)+sin z*genCosIntTail a (z+t))
       (sin t*(t+z)^(a-1)) t := by
     intro t ht
     obtain ⟨hS, hC⟩ := hasDerivAt_genTrigTail a (add_ofReal_mem_slitPlane hz ht)
-    refine (hasDerivAt_comp_add_ofReal (g := fun w => -cos z*genSinIntTail a w+sin z*genCosIntTail a w)
+    refine (hasDerivAt_comp_add_ofReal
+        (g := fun w => -cos z*genSinIntTail a w+sin z*genCosIntTail a w)
       ((hS.const_mul _).add (hC.const_mul _))).congr_deriv ?_
     have hs : sin (t:ℂ) = sin (z+t)*cos z-cos (z+t)*sin z := by rw [← Complex.sin_sub]; ring_nf
     rw [hs, add_comm (t:ℂ) z]
@@ -487,7 +491,8 @@ theorem genTrigAuxF_oscillatory_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz
     rw [add_comm] at this
     exact ((continuous_ofReal.continuousAt.add continuousAt_const).cpow continuousAt_const
       this).continuousWithinAt
-  have hl : Tendsto (fun t : ℝ => -cos z*genSinIntTail a (z+t)+sin z*genCosIntTail a (z+t)) atTop (𝓝 0) := by
+  have hl : Tendsto (fun t : ℝ => -cos z*genSinIntTail a (z+t)+sin z*genCosIntTail a (z+t))
+      atTop (𝓝 0) := by
     obtain ⟨h1, h2⟩ := tendsto_genTrigTail_add_ofReal ha z
     simpa using (h1.const_mul (-cos z)).add (h2.const_mul (sin z))
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc hl
@@ -499,11 +504,13 @@ theorem genTrigAuxF_oscillatory_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz
 @[dlmf 8.21.E23]
 theorem genTrigAuxG_oscillatory_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => cos t*(t+z)^(a-1)) 0 (genTrigAuxG a z) := by
-  have hd : ∀ t : ℝ, 0 ≤ t → HasDerivAt (fun t : ℝ => -sin z*genSinIntTail a (z+t)-cos z*genCosIntTail a (z+t))
+  have hd : ∀ t : ℝ, 0 ≤ t →
+      HasDerivAt (fun t : ℝ => -sin z*genSinIntTail a (z+t)-cos z*genCosIntTail a (z+t))
       (cos t*(t+z)^(a-1)) t := by
     intro t ht
     obtain ⟨hS, hC⟩ := hasDerivAt_genTrigTail a (add_ofReal_mem_slitPlane hz ht)
-    refine (hasDerivAt_comp_add_ofReal (g := fun w => -sin z*genSinIntTail a w-cos z*genCosIntTail a w)
+    refine (hasDerivAt_comp_add_ofReal
+        (g := fun w => -sin z*genSinIntTail a w-cos z*genCosIntTail a w)
       ((hS.const_mul _).sub (hC.const_mul _))).congr_deriv ?_
     have hs : cos (t:ℂ) = cos (z+t)*cos z+sin (z+t)*sin z := by rw [← Complex.cos_sub]; ring_nf
     rw [hs, add_comm (t:ℂ) z]
@@ -514,7 +521,8 @@ theorem genTrigAuxG_oscillatory_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz
     rw [add_comm] at this
     exact ((continuous_ofReal.continuousAt.add continuousAt_const).cpow continuousAt_const
       this).continuousWithinAt
-  have hl : Tendsto (fun t : ℝ => -sin z*genSinIntTail a (z+t)-cos z*genCosIntTail a (z+t)) atTop (𝓝 0) := by
+  have hl : Tendsto (fun t : ℝ => -sin z*genSinIntTail a (z+t)-cos z*genCosIntTail a (z+t))
+      atTop (𝓝 0) := by
     obtain ⟨h1, h2⟩ := tendsto_genTrigTail_add_ofReal ha z
     simpa using (h1.const_mul (-sin z)).sub (h2.const_mul (cos z))
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc hl
@@ -534,7 +542,8 @@ theorem incG_integrableOn_one_add_rpow_mul_exp {k b : ℝ} (hb : 0 < b) :
     have ht0 : (0:ℝ) < 1+t := by have : (0:ℝ) ≤ t := ht; linarith
     exact ((Real.continuousAt_rpow_const _ _ (Or.inl ht0.ne')).comp
       (continuousAt_const.add continuousAt_id) |>.mul
-      (Real.continuous_exp.continuousAt.comp (continuousAt_const.mul continuousAt_id))).continuousWithinAt
+      (Real.continuous_exp.continuousAt.comp
+          (continuousAt_const.mul continuousAt_id))).continuousWithinAt
   · have h1 := (isLittleO_rpow_exp_pos_mul_atTop k (b := b/2) (by positivity)).isBigO.comp_tendsto
       (tendsto_atTop_add_const_left atTop 1 tendsto_id)
     have h := h1.mul (isBigO_refl (fun t : ℝ => Real.exp (-b*t)) atTop)
@@ -543,7 +552,8 @@ theorem incG_integrableOn_one_add_rpow_mul_exp {k b : ℝ} (hb : 0 < b) :
       refine (isBigO_const_mul_self (Real.exp (b/2)) _ _).congr' (Eventually.of_forall fun t => ?_)
         (Eventually.of_forall fun t => rfl)
       simp only; rw [← Real.exp_add, ← Real.exp_add]; ring_nf
-    exact (h.trans h2).congr' (Eventually.of_forall fun t => by simp [id]) (Eventually.of_forall fun _ => rfl)
+    exact (h.trans h2).congr' (Eventually.of_forall fun t => by simp [id])
+        (Eventually.of_forall fun _ => rfl)
 
 /-- Estimate under the stated parameter and domain assumptions: `‖(1+c*t)^(a-1)‖ ≤ (1+t)^|a.re-1|
 * Real.exp (π/2*|a.im|)`. -/
@@ -571,7 +581,8 @@ theorem incG_norm_one_add_cpow_le {c : ℂ} (hc : c = I ∨ c = -I) (a : ℂ) {t
   have hB : 1 / Real.exp (arg (1+c*(t:ℂ)) * (a-1).im) ≤ Real.exp (π/2*|a.im|) := by
     rw [one_div, ← Real.exp_neg, Real.exp_le_exp, show (a-1).im = a.im by simp]
     have := abs_mul (arg (1+c*(t:ℂ))) a.im
-    have h2 : |arg (1+c*(t:ℂ))| * |a.im| ≤ π/2 * |a.im| := mul_le_mul_of_nonneg_right harg (abs_nonneg _)
+    have h2 : |arg (1+c*(t:ℂ))| * |a.im| ≤ π/2 * |a.im| :=
+        mul_le_mul_of_nonneg_right harg (abs_nonneg _)
     nlinarith [neg_abs_le (arg (1+c*(t:ℂ)) * a.im)]
   calc ‖1+c*(t:ℂ)‖ ^ (a-1).re / Real.exp (arg (1+c*(t:ℂ)) * (a-1).im)
       = ‖1+c*(t:ℂ)‖ ^ (a-1).re * (1 / Real.exp (arg (1+c*(t:ℂ)) * (a-1).im)) := by ring
@@ -587,7 +598,8 @@ theorem incG_integrableOn_trigLap {c : ℂ} (hc : c = I ∨ c = -I) (a : ℂ) {z
     IntegrableOn (fun t : ℝ => (1+c*t)^(a-1)*exp (-z*t)) (Ioi 0) := by
   refine Integrable.mono' ((incG_integrableOn_one_add_rpow_mul_exp (k := |a.re-1|) hz).mul_const
     (Real.exp (π/2*|a.im|))) ?_ ?_
-  · refine ContinuousOn.aestronglyMeasurable (fun t _ => ContinuousAt.continuousWithinAt ?_) measurableSet_Ioi
+  · refine ContinuousOn.aestronglyMeasurable (fun t _ => ContinuousAt.continuousWithinAt ?_)
+        measurableSet_Ioi
     refine ContinuousAt.mul ?_ (by fun_prop)
     exact (continuousAt_const.add (continuousAt_const.mul continuous_ofReal.continuousAt)).cpow
       continuousAt_const (incG_one_add_mul_mem_slitPlane hc t)
@@ -622,7 +634,8 @@ theorem incG_ray_cpow {c : ℂ} (hc : c = I ∨ c = -I) (a : ℂ) {z : ℂ} (hz 
   have hz0 : z ≠ 0 := by intro h; rw [h] at hz; simp at hz
   obtain ⟨hre, him⟩ := incG_unit_cases hc
   have hc0 : c ≠ 0 := by intro h; rw [h] at him; simp at him
-  have hw0 : ((t:ℂ)-c) ≠ 0 := by intro h; have := congrArg Complex.im h; simp at this; rcases him with h1 | h1 <;> linarith
+  have hw0 : ((t:ℂ)-c) ≠ 0 := by intro h; have := congrArg Complex.im h; simp at this;
+                                 rcases him with h1 | h1 <;> linarith
   have hv0 : (1+c*(t:ℂ)) ≠ 0 := by
     intro h; have := congrArg Complex.re h; simp [hre] at this
   have hfac : ((t:ℂ)-c) = (-c)*(1+c*t) := by
@@ -729,7 +742,8 @@ theorem incG_trigTail_rot (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
 
 /-- Identity under the stated parameter and domain assumptions: `(-I)^(a-1) = exp (-π*I*a/2)*I`. -/
 theorem incG_negI_cpow (a : ℂ) : (-I)^(a-1) = exp (-π*I*a/2)*I := by
-  rw [cpow_sub _ _ (neg_ne_zero.mpr I_ne_zero), cpow_one, cpow_def_of_ne_zero (neg_ne_zero.mpr I_ne_zero),
+  rw [cpow_sub _ _ (neg_ne_zero.mpr I_ne_zero), cpow_one,
+      cpow_def_of_ne_zero (neg_ne_zero.mpr I_ne_zero),
     log_neg_I]
   field_simp
   ring_nf
@@ -928,7 +942,8 @@ lemma genTrigAux_eq_pieces (a z : ℂ) :
 (π-δ)) (fun k z => z^(a-1-2*k-0)) (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+0)) (genTrigAuxF a)`. -/
 @[dlmf 8.21.E26]
 theorem genTrigAuxF_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
-    HasAsymptoticExpansion (sector (π-δ)) (fun k z => z^(a-1-2*k-0)) (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+0)) (genTrigAuxF a) := by
+    HasAsymptoticExpansion (sector (π-δ)) (fun k z => z^(a-1-2*k-0))
+        (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+0)) (genTrigAuxF a) := by
   have hm := upperIncGamma_rotated_piece_asymptotic a (s := -1) (Or.inr rfl) hδ hδ1
   have hp := upperIncGamma_rotated_piece_asymptotic a (s := 1) (Or.inl rfl) hδ hδ1
   have h := (hm.sub hp).const_smul (1 / (2 * I))
@@ -966,7 +981,8 @@ theorem genTrigAuxF_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 
 (π-δ)) (fun k z => z^(a-1-2*k-1)) (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+1)) (genTrigAuxG a)`. -/
 @[dlmf 8.21.E27]
 theorem genTrigAuxG_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
-    HasAsymptoticExpansion (sector (π-δ)) (fun k z => z^(a-1-2*k-1)) (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+1)) (genTrigAuxG a) := by
+    HasAsymptoticExpansion (sector (π-δ)) (fun k z => z^(a-1-2*k-1))
+        (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+1)) (genTrigAuxG a) := by
   have hm := upperIncGamma_rotated_piece_asymptotic a (s := -1) (Or.inr rfl) hδ hδ1
   have hp := upperIncGamma_rotated_piece_asymptotic a (s := 1) (Or.inl rfl) hδ hδ1
   have h := (hm.add hp).const_smul (1 / 2 : ℂ)

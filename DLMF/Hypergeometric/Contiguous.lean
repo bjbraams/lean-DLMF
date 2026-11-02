@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Series
+public import DLMF.Hypergeometric.Basic.RealPochhammer
 public import DLMF.Hypergeometric.Basic.ParameterAnalyticity
 
 /-!

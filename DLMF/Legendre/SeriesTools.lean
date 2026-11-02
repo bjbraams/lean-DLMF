@@ -288,7 +288,8 @@ theorem legSer_Q_G_sq (z : ℂ) : legSerQ z * legSerG z ^ 2 = 1 := by
         2 * legSerG z * (legSerL z * legSerG z) := by
       rw [← h]; push_cast; ring
     rw [this]; unfold legSerL; simp only [map_mul, map_ofNat]; ring
-  · rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
+  · rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
+        ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
       legSer_coeff_Q_zero, pow_two, PowerSeries.coeff_mul]
     simp [legSerG, legSerP_zero]
 
@@ -397,7 +398,8 @@ theorem legSer_B_ode (ζ : ℂ) :
 theorem legSer_B_sq (ζ : ℂ) : (1 - PowerSeries.C ζ * PowerSeries.X) * legSerB ζ ^ 2 = 1 := by
   refine PowerSeries.derivative.ext ?_ ?_
   · rw [Derivation.leibniz, PowerSeries.derivative_pow, PowerSeries.derivative_one, map_sub,
-      Derivation.leibniz, PowerSeries.derivative_one, PowerSeries.derivative_C, PowerSeries.derivative_X]
+      Derivation.leibniz, PowerSeries.derivative_one, PowerSeries.derivative_C,
+          PowerSeries.derivative_X]
     simp only [smul_eq_mul]
     have h := legSer_B_ode ζ
     have : (1 - PowerSeries.C ζ * PowerSeries.X) * (((2:ℕ):ℂ⟦X⟧) * legSerB ζ ^ (2-1) *
@@ -408,7 +410,8 @@ theorem legSer_B_sq (ζ : ℂ) : (1 - PowerSeries.C ζ * PowerSeries.X) * legSer
     have h2 : (2:ℂ⟦X⟧) * PowerSeries.C (1/2) = 1 := by
       rw [← map_ofNat PowerSeries.C 2, ← map_mul]; norm_num
     linear_combination (PowerSeries.C ζ * legSerB ζ ^ 2) * h2
-  · rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
+  · rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
+        ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
       sub_mul, one_mul, map_sub, mul_assoc, PowerSeries.coeff_C_mul, PowerSeries.coeff_zero_X_mul,
       pow_two, PowerSeries.coeff_mul]
     simp [legSerB, poch_zero]
@@ -428,7 +431,8 @@ theorem legSer_sq_inj {A B : ℂ⟦X⟧} (h : A^2 = B^2)
 /-- `B(ζ₁) B(ζ₂) = ∑ P_n(z) Xⁿ` when `ζ₁ + ζ₂ = 2z` and `ζ₁ ζ₂ = 1`. -/
 theorem legSer_B_mul (z ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ * ζ₂ = 1) :
     legSerB ζ₁ * legSerB ζ₂ = legSerG z := by
-  have hQ : legSerQ z = (1 - PowerSeries.C ζ₁ * PowerSeries.X) * (1 - PowerSeries.C ζ₂ * PowerSeries.X) := by
+  have hQ : legSerQ z = (1 - PowerSeries.C ζ₁ * PowerSeries.X) *
+      (1 - PowerSeries.C ζ₂ * PowerSeries.X) := by
     unfold legSerQ
     rw [show (2:ℂ)*z = ζ₁ + ζ₂ by rw [hs], map_add]
     have : PowerSeries.C ζ₁ * PowerSeries.C ζ₂ = (1:ℂ⟦X⟧) := by rw [← map_mul, hp, map_one]
@@ -440,10 +444,12 @@ theorem legSer_B_mul (z ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ�
   refine legSer_sq_inj ?_ ?_ ?_
   · refine mul_left_cancel₀ hQ0 ?_
     rw [legSer_Q_G_sq, hQ]
-    linear_combination (legSer_B_sq ζ₂) * ((1 - PowerSeries.C ζ₁ * PowerSeries.X) * legSerB ζ₁ ^ 2) +
+    linear_combination (legSer_B_sq ζ₂) *
+        ((1 - PowerSeries.C ζ₁ * PowerSeries.X) * legSerB ζ₁ ^ 2) +
       legSer_B_sq ζ₁
   · rw [map_mul, ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
-      ← PowerSeries.coeff_zero_eq_constantCoeff_apply, ← PowerSeries.coeff_zero_eq_constantCoeff_apply]
+      ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
+          ← PowerSeries.coeff_zero_eq_constantCoeff_apply]
     simp [legSerB, legSerG, poch_zero, legSerP_zero]
   · rw [map_mul, ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
       ← PowerSeries.coeff_zero_eq_constantCoeff_apply]
@@ -469,7 +475,8 @@ theorem legSer_norm_coeff_B_le (ζ h : ℂ) (j : ℕ) :
   simp only [legSerB, PowerSeries.coeff_mk]
   have hf : (0:ℝ) < j.factorial := by exact_mod_cast j.factorial_pos
   rw [norm_mul, norm_div, norm_mul, norm_pow, norm_pow, Complex.norm_natCast, norm_mul, mul_pow]
-  calc ‖poch (1/2:ℂ) j‖ * ‖ζ‖^j / j.factorial * ‖h‖^j ≤ j.factorial * ‖ζ‖^j / j.factorial * ‖h‖^j := by
+  calc ‖poch (1/2:ℂ) j‖ * ‖ζ‖^j / j.factorial * ‖h‖^j ≤ j.factorial * ‖ζ‖^j /
+         j.factorial * ‖h‖^j := by
         gcongr; exact legSer_norm_poch_le j
     _ = ‖h‖^j * ‖ζ‖^j := by field_simp
 
@@ -757,7 +764,8 @@ theorem legSer_norm_coeff_F_le (z h : ℂ) (n : ℕ) :
       Complex.norm_natCast, pow_succ]
     have : (1:ℝ) ≤ ((n+1:ℕ):ℝ) := by exact_mod_cast Nat.succ_pos n
     have h0 : 0 ≤ ‖legSerP z n‖ * (‖h‖^n * ‖h‖) := by positivity
-    calc ‖legSerP z n‖ / ((n+1:ℕ):ℝ) * (‖h‖^n * ‖h‖) = (‖legSerP z n‖ * (‖h‖^n * ‖h‖)) / ((n+1:ℕ):ℝ) := by ring
+    calc ‖legSerP z n‖ / ((n+1:ℕ):ℝ) * (‖h‖^n * ‖h‖) = (‖legSerP z n‖ * (‖h‖^n * ‖h‖)) /
+           ((n+1:ℕ):ℝ) := by ring
       _ ≤ ‖legSerP z n‖ * (‖h‖^n * ‖h‖) := div_le_self h0 this
       _ = _ := by ring
 
@@ -831,7 +839,8 @@ theorem legSer_tsum_F_real {x r : ℝ} (ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ =
   have htS : t ∈ S := abs_lt.mp ht
   have hnorm : ∀ y : ℝ, |y| < r → ∀ ζ : ℂ, ‖(r:ℂ)*ζ‖ < 1 → ‖(y:ℂ)*ζ‖ < 1 := fun y hy ζ hζ => by
     refine lt_of_le_of_lt ?_ hζ
-    rw [norm_mul, norm_mul, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs,
+    rw [norm_mul, norm_mul, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs,
+        Real.norm_eq_abs,
       abs_of_pos hr0]
     exact mul_le_mul_of_nonneg_right hy.le (norm_nonneg _)
   -- termwise derivative
@@ -902,7 +911,8 @@ theorem legSer_hasSum_Q_real {x h r : ℝ} (ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ�
   have hr0 : 0 < r := lt_of_le_of_lt (abs_nonneg h) hh
   have hn : ∀ ζ : ℂ, ‖(r:ℂ)*ζ‖ < 1 → ‖(h:ℂ)*ζ‖ < 1 := fun ζ hζ => by
     refine lt_of_le_of_lt ?_ hζ
-    rw [norm_mul, norm_mul, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs,
+    rw [norm_mul, norm_mul, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs,
+        Real.norm_eq_abs,
       abs_of_pos hr0]
     exact mul_le_mul_of_nonneg_right hh.le (norm_nonneg _)
   have hP := (legSer_generating x ζ₁ ζ₂ h hs hp (hn ζ₁ h1) (hn ζ₂ h2)).mul_left c

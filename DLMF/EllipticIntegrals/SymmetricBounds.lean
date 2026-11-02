@@ -171,11 +171,13 @@ theorem hasDerivAt_ofReal_add_cpow_half {t : ℝ} {w : ℂ} (h : (t : ℂ) + w �
 integrable there. -/
 theorem integrableOn_Ioi_of_norm_le_inv_sqrt_mul {f : ℝ → ℂ} (hf : ContinuousOn f (Ioi 0)) {C : ℝ}
     (h : ∀ t : ℝ, 0 < t → ‖f t‖ ≤ C * (Real.sqrt t * (t + 1))⁻¹) : IntegrableOn f (Ioi 0) := by
-  refine (integrableOn_inv_sqrt_mul_add_one.const_mul C).mono' (hf.aestronglyMeasurable measurableSet_Ioi) ?_
+  refine (integrableOn_inv_sqrt_mul_add_one.const_mul C).mono'
+      (hf.aestronglyMeasurable measurableSet_Ioi) ?_
   exact (ae_restrict_mem measurableSet_Ioi).mono fun t ht => h t ht
 
 /-- The bound for `R_F`'s integrand: `a` admissible, `b, c` in the slit plane. -/
-theorem exists_norm_inv_sqrt_product_le {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0) (hb : b ∈ slitPlane)
+theorem exists_norm_inv_sqrt_product_le {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
+    (hb : b ∈ slitPlane)
     (hc : c ∈ slitPlane) : ∃ C, ∀ t : ℝ, 0 < t →
       ‖(((t : ℂ) + a) ^ (1 / 2 : ℂ) * ((t : ℂ) + b) ^ (1 / 2 : ℂ) *
         ((t : ℂ) + c) ^ (1 / 2 : ℂ))⁻¹‖ ≤ C * (Real.sqrt t * (t + 1))⁻¹ := by
@@ -191,7 +193,8 @@ theorem exists_norm_inv_sqrt_product_le {a b c : ℂ} (ha : a ∈ slitPlane ∨ 
   have hss : Real.sqrt (t + 1) * Real.sqrt (t + 1) = t + 1 := Real.mul_self_sqrt (by linarith)
   rw [norm_inv, norm_mul, norm_mul, ← mul_inv]
   rw [inv_le_inv₀ (by
-    have := mul_pos (mul_pos (lt_of_lt_of_le (by positivity) h1) (lt_of_lt_of_le (by positivity) h2))
+    have := mul_pos (mul_pos (lt_of_lt_of_le (by positivity) h1)
+        (lt_of_lt_of_le (by positivity) h2))
       (lt_of_lt_of_le (by positivity) h3)
     exact this) (by positivity)]
   calc ca * cb * cc * (Real.sqrt t * (t + 1))
@@ -230,19 +233,23 @@ private lemma continuousOn_inv_sqrt_product {a b c : ℂ} (ha : a ∈ slitPlane 
         ((t : ℂ) + c) ^ (1 / 2 : ℂ))⁻¹) (Ioi 0) :=
   (((continuousOn_ofReal_add_cpow_half ha).mul (continuousOn_ofReal_add_cpow_half hb)).mul
     (continuousOn_ofReal_add_cpow_half hc)).inv₀ fun _t ht =>
-      mul_ne_zero (mul_ne_zero (ofReal_pos_add_cpow_half_ne_zero ht ha) (ofReal_pos_add_cpow_half_ne_zero ht hb))
+      mul_ne_zero (mul_ne_zero (ofReal_pos_add_cpow_half_ne_zero ht ha)
+          (ofReal_pos_add_cpow_half_ne_zero ht hb))
         (ofReal_pos_add_cpow_half_ne_zero ht hc)
 
 /-- Integrability of `R_F`'s integrand: `a` admissible, `b, c` in the slit plane. -/
-theorem integrableOn_symEllIntRF_integrand {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0) (hb : b ∈ slitPlane)
+theorem integrableOn_symEllIntRF_integrand {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
+    (hb : b ∈ slitPlane)
     (hc : c ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + a) ^ (1 / 2 : ℂ) * ((t : ℂ) + b) ^ (1 / 2 : ℂ) *
         ((t : ℂ) + c) ^ (1 / 2 : ℂ))⁻¹) (Ioi 0) := by
   obtain ⟨C, hC⟩ := exists_norm_inv_sqrt_product_le ha hb hc
-  exact integrableOn_Ioi_of_norm_le_inv_sqrt_mul (continuousOn_inv_sqrt_product ha (Or.inl hb) (Or.inl hc)) hC
+  exact integrableOn_Ioi_of_norm_le_inv_sqrt_mul
+      (continuousOn_inv_sqrt_product ha (Or.inl hb) (Or.inl hc)) hC
 
 /-- Integrability of `R_J`'s integrand: `a` admissible, `b, c, p` in the slit plane. -/
-theorem integrableOn_symEllIntRJ_integrand {a b c p : ℂ} (ha : a ∈ slitPlane ∨ a = 0) (hb : b ∈ slitPlane)
+theorem integrableOn_symEllIntRJ_integrand {a b c p : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
+    (hb : b ∈ slitPlane)
     (hc : c ∈ slitPlane) (hp : p ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + a) ^ (1 / 2 : ℂ) * ((t : ℂ) + b) ^ (1 / 2 : ℂ) *
         ((t : ℂ) + c) ^ (1 / 2 : ℂ) * ((t : ℂ) + p))⁻¹) (Ioi 0) := by
@@ -262,7 +269,8 @@ theorem integrableOn_symEllIntRJ_integrand {a b c p : ℂ} (ha : a ∈ slitPlane
       _ = _ := by ring
 
 /-- Integrability of `R_G`'s integrand: `a` admissible, `b, c` in the slit plane. -/
-private lemma integrableOn_symEllIntRG_integrand {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0) (hb : b ∈ slitPlane)
+private lemma integrableOn_symEllIntRG_integrand {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
+    (hb : b ∈ slitPlane)
     (hc : c ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + a) ^ (1 / 2 : ℂ) * ((t : ℂ) + b) ^ (1 / 2 : ℂ) *
         ((t : ℂ) + c) ^ (1 / 2 : ℂ))⁻¹ *
@@ -292,7 +300,8 @@ private lemma integrableOn_symEllIntRG_integrand {a b c : ℂ} (ha : a ∈ slitP
       _ = _ := by ring
 
 /-- The algebraic identity behind `symEllIntRG_integral_identity`, with `u² = t + x` etc. -/
-private lemma symEllIntRG_derivative_identity (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
+private lemma symEllIntRG_derivative_identity (t u v w x y z : ℂ) (hu : u ^ 2 = t + x)
+    (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (x + y) * (u * v * w)⁻¹ + (t * (x + y) + x * y) *
       (-((u / (2 * (t + x)) * v + u * (v / (2 * (t + y)))) * w + u * v * (w / (2 * (t + z)))) /
@@ -350,7 +359,8 @@ theorem symEllIntRG_integral_identity {x y z : ℂ} (hx : x ∈ slitPlane ∨ x 
     rw [one_mul] at this
     convert this using 1
     simp only [hf, hG, hF, hD, hS, Pi.mul_apply, Pi.inv_apply]
-    exact (symEllIntRG_derivative_identity (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _) (Carlson.cpow_half_sq _)
+    exact (symEllIntRG_derivative_identity (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _)
+        (Carlson.cpow_half_sq _)
       (Carlson.cpow_half_sq _) hu0 hv0 hw0).symm
   obtain ⟨C, hC⟩ := exists_norm_inv_sqrt_product_le hx hy hz
   have hC0 : 0 ≤ C := by
@@ -386,7 +396,8 @@ theorem symEllIntRG_integral_identity {x y z : ℂ} (hx : x ∈ slitPlane ∨ x 
           (continuousAt_ofReal_add_cpow_half (h0 y hy))).mul
           (continuousAt_ofReal_add_cpow_half (h0 z hz))).inv₀ ?_))
       exact mul_ne_zero (mul_ne_zero (cpow_half_ne_zero_of_mem_slitPlane (h0 x hx))
-        (cpow_half_ne_zero_of_mem_slitPlane (h0 y hy))) (cpow_half_ne_zero_of_mem_slitPlane (h0 z hz))
+        (cpow_half_ne_zero_of_mem_slitPlane (h0 y hy)))
+            (cpow_half_ne_zero_of_mem_slitPlane (h0 z hz))
     · have h00 : h 0 = 0 := by simp [hh]
       rw [ContinuousWithinAt, h00]
       have hb0 : ∀ t ∈ Ici (0 : ℝ), ‖h t‖ ≤ ‖y‖ * C * Real.sqrt t := by
@@ -424,9 +435,12 @@ theorem symEllIntRG_integral_identity {x y z : ℂ} (hx : x ∈ slitPlane ∨ x 
     rcases hx with hx | rfl
     · have e1 := Carlson.cpow_half_sq x
       have e2 := Carlson.cpow_half_sq y
-      have hx0 : x ^ (1 / 2 : ℂ) ≠ 0 := fun h => slitPlane_ne_zero hx ((cpow_eq_zero_iff _ _).mp h).1
-      have hy0 : y ^ (1 / 2 : ℂ) ≠ 0 := fun h => slitPlane_ne_zero hy ((cpow_eq_zero_iff _ _).mp h).1
-      have hz0 : z ^ (1 / 2 : ℂ) ≠ 0 := fun h => slitPlane_ne_zero hz ((cpow_eq_zero_iff _ _).mp h).1
+      have hx0 : x ^ (1 / 2 : ℂ) ≠ 0 := fun h =>
+          slitPlane_ne_zero hx ((cpow_eq_zero_iff _ _).mp h).1
+      have hy0 : y ^ (1 / 2 : ℂ) ≠ 0 := fun h =>
+          slitPlane_ne_zero hy ((cpow_eq_zero_iff _ _).mp h).1
+      have hz0 : z ^ (1 / 2 : ℂ) ≠ 0 := fun h =>
+          slitPlane_ne_zero hz ((cpow_eq_zero_iff _ _).mp h).1
       rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
       field_simp
       rw [e1, e2]

@@ -64,7 +64,8 @@ theorem ferrersP_zero_1 (ν μ : ℂ) :
   unfold ferrersP
   simp only [ofReal_zero, add_zero, sub_zero, div_one, ofReal_one, one_cpow, one_mul]
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz, show -ν = 1-(ν+1) by ring, hq,
-    show (1:ℂ)-2*(1/2) = 0 by norm_num, zero_pow two_ne_zero, regularizedGaussHGFun_zero_of_regular hh,
+    show (1:ℂ)-2*(1/2) = 0 by norm_num, zero_pow two_ne_zero,
+                                regularizedGaussHGFun_zero_of_regular hh,
     show (1:ℂ)-1/2 = 1/2 by norm_num, show 1-μ-1 = -μ by ring, half_cpow_neg,
     show (1-μ-(ν+1)+1)/2 = (1-ν-μ)/2 by ring, show (1-μ+(ν+1))/2 = (ν-μ)/2+1 by ring,
     legendre_Gamma_one_half]
@@ -85,7 +86,8 @@ theorem ferrersP_zero_2 (ν μ : ℂ) :
   have hev : ferrersP ν μ =ᶠ[𝓝 0] fun x : ℝ => 2^μ*(π/(Gamma ((1-ν-μ)/2)*Gamma ((ν-μ+2)/2))*
         ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) -
       π/(Gamma (-(ν+μ)/2)*Gamma ((ν-μ+1)/2))*
-        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2)))) := by
+        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
+            ((x:ℂ)^2)))) := by
     filter_upwards [Ioo_mem_nhds (show (-1:ℝ) < 0 by norm_num) (show (0:ℝ) < 1 by norm_num)]
       with x hx using ferrersP_eq_quadratic ν μ hx
   refine (hd.congr_of_eventuallyEq hev).congr_deriv ?_
@@ -105,9 +107,11 @@ theorem ferrersP_zero_2 (ν μ : ℂ) :
 theorem ferrersQ_zero_3 (ν μ : ℂ) :
     ferrersQ ν μ 0=-2^(μ-1)*Real.sqrt π*sin ((ν+μ)*π/2)*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ)/2+1) := by
   unfold ferrersQ ferrersW1 ferrersW2
-  simp only [ofReal_zero, zero_mul, mul_zero, add_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+  simp only [ofReal_zero, zero_mul, mul_zero, add_zero, ne_eq, OfNat.ofNat_ne_zero,
+      not_false_eq_true,
     zero_pow, sub_zero, one_cpow, mul_one]
-  rw [regularizedGaussHG_zero_of_regular Complex.one_div_two_ne_neg_natCast, legendre_Gamma_one_half,
+  rw [regularizedGaussHG_zero_of_regular Complex.one_div_two_ne_neg_natCast,
+      legendre_Gamma_one_half,
     cpow_sub _ _ (by norm_num : (2:ℂ) ≠ 0), cpow_one, show (ν-μ+2)/2 = (ν-μ)/2+1 by ring]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpi : (π:ℂ) = (Real.sqrt π : ℂ)^2 := by
@@ -119,7 +123,8 @@ theorem ferrersQ_zero_3 (ν μ : ℂ) :
 Γ((ν+μ)/2+1)/Γ((ν-μ+1)/2)` at `x = 0`. -/
 @[dlmf 14.5.E4]
 theorem ferrersQ_zero_4 (ν μ : ℂ) :
-    HasDerivAt (ferrersQ ν μ) (2^μ*Real.sqrt π*cos ((ν+μ)*π/2)*Gamma ((ν+μ)/2+1)/Gamma ((ν-μ+1)/2)) 0 := by
+    HasDerivAt (ferrersQ ν μ)
+        (2^μ*Real.sqrt π*cos ((ν+μ)*π/2)*Gamma ((ν+μ)/2+1)/Gamma ((ν-μ+1)/2)) 0 := by
   have h1 := (hasDerivAt_quadratic_even (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) μ).comp_ofReal (z := 0)
   have h2 := (hasDerivAt_quadratic_odd ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) μ).comp_ofReal (z := 0)
   have hd := ((h1.const_mul (-π/2*sin ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ+2)/2))))).add
@@ -128,7 +133,8 @@ theorem ferrersQ_zero_4 (ν μ : ℂ) :
       -π/2*sin ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ+2)/2))*
         ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) +
       π/2*cos ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+2)/2)/Gamma ((ν-μ+1)/2))*
-        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2))) := by
+        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
+            ((x:ℂ)^2))) := by
     funext x
     unfold ferrersQ ferrersW1 ferrersW2
     ring
@@ -350,12 +356,14 @@ theorem ferrersP_half_order_11 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
   have hsq1 : Real.sin t^2 < 1 := by
     have := Real.sin_sq_add_cos_sq t; nlinarith
   have hz : ‖((1:ℂ) - (Real.cos θ:ℝ))/2‖ < 1 := by
-    rw [hcos, show ((1:ℂ) - ((1 - 2*Real.sin t^2 : ℝ) : ℂ))/2 = ((Real.sin t^2 : ℝ) : ℂ) by push_cast; ring,
+    rw [hcos, show ((1:ℂ) - ((1 - 2*Real.sin t^2 : ℝ) : ℂ))/2 =
+        ((Real.sin t^2 : ℝ) : ℂ) by push_cast; ring,
       Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
     exact hsq1
   have hc : ∀ k : ℕ, (1 - 1/2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [ferrersP, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz, regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [ferrersP, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
+      regularizedGaussHGFun_eq_div_Gamma hc,
     show (1 - 1/2 : ℂ) = 1/2 by norm_num, show -ν = 1 - (ν+1) by ring,
     show ((1:ℂ) - (Real.cos θ:ℝ))/2 = (Real.sin t:ℂ)^2 by rw [hcos]; push_cast; ring,
     sin_sq_cos_quotient (ν+1) habs, legendre_Gamma_one_half]
@@ -367,7 +375,8 @@ theorem ferrersP_half_order_11 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
     rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos Real.pi_pos, ofReal_exp]; push_cast; ring_nf
   have hC : ((Real.cos t : ℝ) : ℂ) = exp (Real.log (Real.cos t) : ℂ) := by
     rw [← ofReal_exp, Real.exp_log hct]
-  rw [hr, hR, Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by positivity), hpi, hC,
+  rw [hr, hR, Complex.ofReal_cpow_eq_exp (by positivity),
+      Complex.ofReal_cpow_eq_exp (by positivity), hpi, hC,
     Real.log_pow, Real.log_div hct.ne' hst.ne', one_div (π * Real.sin t * Real.cos t), Real.log_inv,
     Real.log_mul (by positivity) hct.ne', Real.log_mul Real.pi_pos.ne' hst.ne',
     show ((ν+1/2)*(θ:ℂ)) = (2*(ν+1)-1)*(t:ℂ) by rw [hθ]; push_cast; ring]
@@ -381,7 +390,8 @@ theorem ferrersP_half_order_11 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
 with the limiting value `(2/(π sin θ))^{1/2} θ` at `ν = -1/2`. -/
 @[dlmf 14.5.E12]
 theorem ferrersP_half_order_12 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    ferrersP ν (-1/2) (Real.cos θ)=if ν=-1/2 then (2/(π*Real.sin θ):ℂ)^(1/2:ℂ)*θ else (2/(π*Real.sin θ):ℂ)^(1/2:ℂ)*sin ((ν+1/2)*θ)/(ν+1/2) := by
+    ferrersP ν (-1/2) (Real.cos θ)=if ν=-1/2 then (2/(π*Real.sin θ):ℂ)^(1/2:ℂ)*θ else
+        (2/(π*Real.sin θ):ℂ)^(1/2:ℂ)*sin ((ν+1/2)*θ)/(ν+1/2) := by
   set t := θ/2 with ht
   have ht0 : 0 < t := by positivity
   have htπ : t < π/2 := by linarith
@@ -394,12 +404,14 @@ theorem ferrersP_half_order_12 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
   have hsq1 : Real.sin t^2 < 1 := by
     have := Real.sin_sq_add_cos_sq t; nlinarith
   have hz : ‖((1:ℂ) - (Real.cos θ:ℝ))/2‖ < 1 := by
-    rw [hcos, show ((1:ℂ) - ((1 - 2*Real.sin t^2 : ℝ) : ℂ))/2 = ((Real.sin t^2 : ℝ) : ℂ) by push_cast; ring,
+    rw [hcos, show ((1:ℂ) - ((1 - 2*Real.sin t^2 : ℝ) : ℂ))/2 =
+        ((Real.sin t^2 : ℝ) : ℂ) by push_cast; ring,
       Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
     exact hsq1
   have hc : ∀ k : ℕ, (1 - -1/2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [ferrersP, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz, regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [ferrersP, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
+      regularizedGaussHGFun_eq_div_Gamma hc,
     show (1 - -1/2 : ℂ) = 3/2 by norm_num, show -ν = 1 - (ν+1) by ring,
     show ((1:ℂ) - (Real.cos θ:ℝ))/2 = (Real.sin t:ℂ)^2 by rw [hcos]; push_cast; ring,
     legendre_Gamma_three_halves]
@@ -414,8 +426,10 @@ theorem ferrersP_half_order_12 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
       rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos Real.pi_pos, ofReal_exp]; push_cast; ring_nf
     have hS : ((Real.sin t : ℝ) : ℂ) = exp (Real.log (Real.sin t) : ℂ) := by
       rw [← ofReal_exp, Real.exp_log hst]
-    rw [hr, hR, Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by positivity), hpi, hS,
-      Real.log_pow, Real.log_div hct.ne' hst.ne', one_div (π * Real.sin t * Real.cos t), Real.log_inv,
+    rw [hr, hR, Complex.ofReal_cpow_eq_exp (by positivity),
+        Complex.ofReal_cpow_eq_exp (by positivity), hpi, hS,
+      Real.log_pow, Real.log_div hct.ne' hst.ne',
+          one_div (π * Real.sin t * Real.cos t), Real.log_inv,
       Real.log_mul (by positivity) hct.ne', Real.log_mul Real.pi_pos.ne' hst.ne']
     rw [div_div_eq_mul_div, mul_comm (exp _) 2, mul_div_assoc, mul_assoc, ← exp_sub, ← exp_add]
     congr 2
@@ -429,7 +443,8 @@ theorem ferrersP_half_order_12 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
     exact absurd h (div_ne_zero two_ne_zero this)
   split_ifs with hν
   · subst hν
-    have hA := arcsin_eq_ordinaryHypergeometric (x := Real.sin t) (by rw [abs_of_pos hst]; nlinarith)
+    have hA := arcsin_eq_ordinaryHypergeometric (x := Real.sin t)
+        (by rw [abs_of_pos hst]; nlinarith)
     have hI := ordinaryHypergeometric_half_im (x := Real.sin t) (by rw [abs_of_pos hst]; nlinarith)
     rw [Real.arcsin_sin (by linarith) htπ.le] at hA
     have hF : ₂F₁ (1/2:ℂ) (1/2) (3/2) ((Real.sin t:ℂ)^2) = (t:ℂ) / Real.sin t := by
@@ -461,7 +476,8 @@ theorem ferrersP_half_order_12 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
 /-- DLMF 14.5.13: for `ν+1/2 ∉ {-1,-2,…}` and `0 < θ < π`, `𝖰^{1/2}_ν(cos θ) = -(π/(2 sin θ))^{1/2}
 sin((ν+1/2)θ)`. -/
 @[dlmf 14.5.E13]
-theorem ferrersQ_half_order_13 (ν : ℂ) (h : LegendreQRegular ν (1/2)) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
+theorem ferrersQ_half_order_13 (ν : ℂ) (h : LegendreQRegular ν (1/2)) {θ : ℝ}
+    (h0 : 0 < θ) (hπ : θ < π) :
     ferrersQ ν (1/2) (Real.cos θ)=-(π/(2*Real.sin θ):ℂ)^(1/2:ℂ)*sin ((ν+1/2)*θ)/(1) := by
   set ph := π/2 - θ with hph
   have hphabs : |ph| < π/2 := by rw [abs_lt]; constructor <;> linarith
@@ -505,7 +521,8 @@ theorem ferrersQ_half_order_13 (ν : ℂ) (h : LegendreQRegular ν (1/2)) {θ : 
     rw [hx, show -(ν + 1/2)/2 = -b by rw [hb]; ring, show (ν - 1/2 + 1)/2 = b by rw [hb]; ring,
       sin_sq_cos b hphabs]; congr 1; rw [hb]; ring
   have hF2 : 2 * b * ((Real.cos θ : ℝ) : ℂ) *
-      ₂F₁ ((1 - ν - 1/2)/2) ((ν - 1/2 + 2)/2) (3/2) (((Real.cos θ : ℝ) : ℂ)^2) = sin ((ν + 1/2) * ph) := by
+      ₂F₁ ((1 - ν - 1/2)/2) ((ν - 1/2 + 2)/2) (3/2) (((Real.cos θ : ℝ) : ℂ)^2) =
+          sin ((ν + 1/2) * ph) := by
     have hS := sin_sq_sin ((ν - 1/2 + 2)/2) hphabs
     rw [show (1:ℂ) - (ν - 1/2 + 2)/2 = (1 - ν - 1/2)/2 by ring, ordinaryHypergeometric_symm,
       show 2 * ((ν - 1/2 + 2)/2) - 1 = ν + 1/2 by ring] at hS
@@ -514,7 +531,8 @@ theorem ferrersQ_half_order_13 (ν : ℂ) (h : LegendreQRegular ν (1/2)) {θ : 
     mul_div_assoc (2 ^ (1/2:ℂ)) (Gamma ((ν + 1/2 + 2)/2)), hG2, hF1]
   have hsp : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.2 Real.pi_pos).ne'
   have hpi2 : (Real.sqrt π : ℂ)^2 = π := by rw [← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
-  have htrig : -(sin ((ν + 1/2) * π/2) * cos ((ν + 1/2) * ph)) + cos ((ν + 1/2) * π/2) * sin ((ν + 1/2) * ph)
+  have htrig : -(sin ((ν + 1/2) * π/2) * cos ((ν + 1/2) * ph)) + cos ((ν + 1/2) * π/2) *
+      sin ((ν + 1/2) * ph)
       = -sin ((ν + 1/2) * θ) := by
     rw [← neg_neg (sin ((ν + 1/2) * (θ:ℂ))), ← Complex.sin_neg,
       show -((ν + 1/2) * (θ:ℂ)) = (ν + 1/2) * ph - (ν + 1/2) * π/2 by rw [hph]; push_cast; ring,
@@ -528,8 +546,10 @@ theorem ferrersQ_half_order_13 (ν : ℂ) (h : LegendreQRegular ν (1/2)) {θ : 
         rw [Real.sin_sq]; push_cast; ring,
       show (π:ℂ)/(2*Real.sin θ) = ((π/(2*Real.sin θ) : ℝ) : ℂ) by push_cast; ring,
       show (2:ℂ)^(1/2:ℂ) = ((2:ℝ):ℂ)^(1/2:ℂ) by norm_num,
-      Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by positivity),
-      hpi, Real.log_pow, Real.log_div Real.pi_pos.ne' (by positivity), Real.log_mul two_ne_zero hs.ne']
+      Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp (by positivity),
+          Complex.ofReal_cpow_eq_exp (by positivity),
+      hpi, Real.log_pow, Real.log_div Real.pi_pos.ne' (by positivity),
+          Real.log_mul two_ne_zero hs.ne']
     conv_rhs => arg 1; rw [h2]
     simp only [← exp_add]; congr 1; push_cast; ring
   set Q := (2:ℂ)^(1/2:ℂ)
@@ -538,13 +558,15 @@ theorem ferrersQ_half_order_13 (ν : ℂ) (h : LegendreQRegular ν (1/2)) {θ : 
   set F2 := ₂F₁ ((1 - ν - 1/2)/2) ((ν - 1/2 + 2)/2) (3/2) (((Real.cos θ : ℝ) : ℂ)^2)
   set sp := (Real.sqrt π : ℂ)
   have hpi' : (π:ℂ) * sp⁻¹ = sp := by rw [← hpi2]; field_simp
-  linear_combination (π * Q * R * sp⁻¹ / 2) * htrig + (π * cos ((ν + 1/2) * π/2) * Q * R * sp⁻¹ / 2) * hF2
+  linear_combination (π * Q * R * sp⁻¹ / 2) * htrig +
+      (π * cos ((ν + 1/2) * π/2) * Q * R * sp⁻¹ / 2) * hF2
     - (sin ((ν + 1/2) * θ) / 2) * hT - (sin ((ν + 1/2) * θ) * Q * R / 2) * hpi'
 
 /-- DLMF 14.5.14: for `ν-1/2 ∉ {-1,-2,…}` and `0 < θ < π`, `𝖰^{-1/2}_ν(cos θ) = (π/(2 sin θ))^{1/2}
 cos((ν+1/2)θ)/(ν+1/2)`. -/
 @[dlmf 14.5.E14]
-theorem ferrersQ_half_order_14 (ν : ℂ) (h : LegendreQRegular ν (-1/2)) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
+theorem ferrersQ_half_order_14 (ν : ℂ) (h : LegendreQRegular ν (-1/2)) {θ : ℝ}
+    (h0 : 0 < θ) (hπ : θ < π) :
     ferrersQ ν (-1/2) (Real.cos θ)=(π/(2*Real.sin θ):ℂ)^(1/2:ℂ)*cos ((ν+1/2)*θ)/(ν+1/2) := by
   set ph := π/2 - θ with hph
   have hphabs : |ph| < π/2 := by rw [abs_lt]; constructor <;> linarith
@@ -589,7 +611,8 @@ theorem ferrersQ_half_order_14 (ν : ℂ) (h : LegendreQRegular ν (-1/2)) {θ :
       show 2 * ((ν - -1/2 + 1)/2) - 1 = ν + 1/2 by ring, hcph] at hq
     rw [hx, hq]
   have hF2 : (ν + 1/2) * ((Real.cos θ : ℝ) : ℂ) * (Real.sin θ : ℂ) *
-      ₂F₁ ((1 - ν - -1/2)/2) ((ν - -1/2 + 2)/2) (3/2) (((Real.cos θ : ℝ) : ℂ)^2) = sin ((ν + 1/2) * ph) := by
+      ₂F₁ ((1 - ν - -1/2)/2) ((ν - -1/2 + 2)/2) (3/2) (((Real.cos θ : ℝ) : ℂ)^2) =
+          sin ((ν + 1/2) * ph) := by
     rw [euler_transformation_of_ne_neg_nat hc3 hx2,
       show (3/2:ℂ) - (1 - ν - -1/2)/2 - (ν - -1/2 + 2)/2 = -(1/2) by ring,
       show (3/2:ℂ) - (1 - ν - -1/2)/2 = (ν - -1/2 + 1)/2 by ring,
@@ -599,7 +622,8 @@ theorem ferrersQ_half_order_14 (ν : ℂ) (h : LegendreQRegular ν (-1/2)) {θ :
     have hE : (1 - ((Real.cos θ : ℝ) : ℂ)^2)^(-(1/2):ℂ) * (Real.sin θ : ℂ) = 1 := by
       rw [show (1:ℂ) - ((Real.cos θ : ℝ) : ℂ)^2 = ((Real.sin θ ^ 2 : ℝ) : ℂ) by
         rw [Real.sin_sq]; push_cast; ring, Complex.ofReal_cpow_eq_exp (by positivity), Real.log_pow,
-        show (Real.sin θ : ℂ) = exp (Real.log (Real.sin θ) : ℂ) by rw [← ofReal_exp, Real.exp_log hs],
+        show (Real.sin θ : ℂ) =
+            exp (Real.log (Real.sin θ) : ℂ) by rw [← ofReal_exp, Real.exp_log hs],
         ← exp_add]
       push_cast; ring_nf; exact exp_zero
     rw [← hS, hx]
@@ -611,9 +635,11 @@ theorem ferrersQ_half_order_14 (ν : ℂ) (h : LegendreQRegular ν (-1/2)) {θ :
   have hsp : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.2 Real.pi_pos).ne'
   have hpi2 : (π:ℂ) = (Real.sqrt π : ℂ)^2 := by rw [← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
   have hsC : (Real.sin θ : ℂ) ≠ 0 := by exact_mod_cast hs.ne'
-  have htrig : -(sin ((ν + -1/2) * π/2) * cos ((ν + 1/2) * ph)) + cos ((ν + -1/2) * π/2) * sin ((ν + 1/2) * ph)
+  have htrig : -(sin ((ν + -1/2) * π/2) * cos ((ν + 1/2) * ph)) + cos ((ν + -1/2) * π/2) *
+      sin ((ν + 1/2) * ph)
       = cos ((ν + 1/2) * θ) := by
-    rw [show (ν + 1/2) * (θ:ℂ) = π/2 - ((ν + 1/2) * ph - (ν + -1/2) * π/2) by rw [hph]; push_cast; ring,
+    rw [show (ν + 1/2) * (θ:ℂ) = π/2 - ((ν + 1/2) * ph - (ν + -1/2) * π/2) by rw [hph];
+                                                                              push_cast; ring,
       Complex.cos_pi_div_two_sub, Complex.sin_sub]; ring
   have hT : (2:ℂ)^(-1/2:ℂ) * (1 - ((Real.cos θ : ℝ) : ℂ)^2)^(-(-1/2:ℂ)/2) * (Real.sqrt π : ℂ) =
       ((π:ℂ)/(2*Real.sin θ))^(1/2:ℂ) * (Real.sin θ : ℂ) := by
@@ -625,12 +651,15 @@ theorem ferrersQ_half_order_14 (ν : ℂ) (h : LegendreQRegular ν (-1/2)) {θ :
         rw [Real.sin_sq]; push_cast; ring,
       show (π:ℂ)/(2*Real.sin θ) = ((π/(2*Real.sin θ) : ℝ) : ℂ) by push_cast; ring,
       show (2:ℂ)^(-1/2:ℂ) = ((2:ℝ):ℂ)^(-1/2:ℂ) by norm_num,
-      Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by positivity),
-      hpi, hS, Real.log_pow, Real.log_div Real.pi_pos.ne' (by positivity), Real.log_mul two_ne_zero hs.ne']
+      Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp (by positivity),
+          Complex.ofReal_cpow_eq_exp (by positivity),
+      hpi, hS, Real.log_pow, Real.log_div Real.pi_pos.ne' (by positivity),
+          Real.log_mul two_ne_zero hs.ne']
     simp only [← exp_add]; congr 1; push_cast; ring
   have alg : ∀ (pi Q R s sp T n x F2 cB sB sA cA C : ℂ), s ≠ 0 → sp ≠ 0 → n ≠ 0 →
       n * x * s * F2 = sB → -(sA * cB) + cA * sB = C → Q * R * sp = T * s → pi = sp^2 →
-      -pi/2 * sA * (Q * (2/n) * R * (cB / s / sp)) + pi/2 * cA * (Q * 1 * x * R * (F2 / (sp/2))) = T * C / n := by
+      -pi/2 * sA * (Q * (2/n) * R * (cB / s / sp)) + pi/2 * cA * (Q * 1 * x * R * (F2 / (sp/2))) =
+          T * C / n := by
     intro pi Q R s sp T n x F2 cB sB sA cA C hs hsp hn h1 h2 h3 h4
     subst h4
     field_simp
@@ -694,13 +723,16 @@ theorem associatedP_half_order_15 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by positivity),
     Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by positivity),
     Real.log_mul two_ne_zero (by positivity), Real.log_mul two_ne_zero (by positivity),
-    Real.log_pow, Real.log_pow, Real.log_div (Real.exp_pos _).ne' hC0.ne', Real.log_div (Real.exp_pos _).ne' hC0.ne',
+    Real.log_pow, Real.log_pow, Real.log_div (Real.exp_pos _).ne' hC0.ne',
+        Real.log_div (Real.exp_pos _).ne' hC0.ne',
     Real.log_exp, Real.log_exp, one_div (π*S*C), Real.log_inv,
     Real.log_mul (by positivity) hC0.ne', Real.log_mul Real.pi_pos.ne' hS0.ne', Complex.cosh, hξ2]
   have key : ∀ x y z u v w : ℂ, x + y + z = u + v + w →
       exp x * exp y * exp z = exp u * exp v * exp w := by
     intro x y z u v w h; rw [← exp_add, ← exp_add, ← exp_add, ← exp_add, h]
-  set Ea := cexp (1 / 2 / 2 * (((Real.log 2 + ((2:ℕ):ℝ) * Real.log C : ℝ) : ℂ) - ((Real.log 2 + ((2:ℕ):ℝ) * Real.log S : ℝ) : ℂ)))
+  set Ea := cexp (1 / 2 / 2 *
+      (((Real.log 2 + ((2:ℕ):ℝ) * Real.log C : ℝ) : ℂ) -
+      ((Real.log 2 + ((2:ℕ):ℝ) * Real.log S : ℝ) : ℂ)))
   set Eb := cexp (((((2:ℕ):ℝ) * Real.log C : ℝ) : ℂ) * -(ν + 1 / 2 + 1 / 2))
   set Ec := cexp (((s - Real.log C : ℝ) : ℂ) * (-2 * (ν + 1 / 2)))
   set Ed := cexp (((-s - Real.log C : ℝ) : ℂ) * (-2 * (ν + 1 / 2)))
@@ -719,7 +751,8 @@ theorem associatedP_half_order_15 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
 with the limiting value `(2/(π sinh ξ))^{1/2} ξ` at `ν = -1/2`. -/
 @[dlmf 14.5.E16]
 theorem associatedP_half_order_16 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
-    associatedP ν (-1/2) (Real.cosh ξ)=if ν=-1/2 then (2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*ξ else (2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*sinh ((ν+1/2)*ξ)/(ν+1/2) := by
+    associatedP ν (-1/2) (Real.cosh ξ)=if ν=-1/2 then (2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*ξ else
+        (2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*sinh ((ν+1/2)*ξ)/(ν+1/2) := by
   set s := ξ/2 with hsdef
   set S := Real.sinh s
   set C := Real.cosh s
@@ -793,7 +826,8 @@ theorem associatedP_half_order_16 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     rw [← exp_add, ← exp_add, ← exp_add]; congr 1; push_cast; ring
   · have hn : ν + 1/2 ≠ 0 := by intro h; apply hν; linear_combination h
     have hO := odd_binomial (ν+1) hm
-    rw [hTp, hTm, Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by positivity),
+    rw [hTp, hTm, Complex.ofReal_cpow_eq_exp (by positivity),
+        Complex.ofReal_cpow_eq_exp (by positivity),
       Real.log_div (Real.exp_pos _).ne' hC0.ne', Real.log_div (Real.exp_pos _).ne' hC0.ne',
       Real.log_exp, Real.log_exp] at hO
     have alg : ∀ a b e f F P M g h k T n : ℂ, n ≠ 0 → e ≠ 0 → T ≠ 0 → k = -4*n → k*T*F = P - M →
@@ -842,7 +876,8 @@ theorem olverQ_half_order_1 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
         show (((2:ℕ) * Real.log (Sh/Z) : ℝ) : ℂ) * (1/2) = (Real.log (Sh/Z) : ℂ) by push_cast; ring,
         ← ofReal_exp, Real.exp_log hSZ0]
     have hsqm : (1 - 1/(Z:ℂ)^2)^(-(1/2):ℂ) = exp (-((Real.log Sh - Real.log Z : ℝ) : ℂ)) := by
-      rw [h1w, Complex.ofReal_cpow_eq_exp (by positivity), Real.log_pow, Real.log_div hS0.ne' hZ0.ne']
+      rw [h1w, Complex.ofReal_cpow_eq_exp (by positivity), Real.log_pow,
+          Real.log_div hS0.ne' hZ0.ne']
       congr 1; push_cast; ring
     have hhalf : (1 + ((Sh/Z : ℝ) : ℂ))/2 = ((Real.exp ξ / (2*Z) : ℝ) : ℂ) := by
       rw [← Real.cosh_add_sinh]; change _ = (((Z + Sh)/(2*Z) : ℝ):ℂ); push_cast; field_simp
@@ -855,11 +890,14 @@ theorem olverQ_half_order_1 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
       push_cast; ring_nf
     have hpi : ((Real.sqrt π : ℝ) : ℂ) = exp ((Real.log π : ℂ)/2) := by
       rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos Real.pi_pos, ofReal_exp]; push_cast; ring_nf
-    rw [hsq, hsqm, hhalf, hBP, hpi, Complex.ofReal_cpow_eq_exp (q := Real.exp ξ / (2*Z)) (by positivity),
-      show (2:ℂ)^(ν+1) = ((2:ℝ):ℂ)^(ν+1) by norm_num, Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hZ0,
+    rw [hsq, hsqm, hhalf, hBP, hpi,
+        Complex.ofReal_cpow_eq_exp (q := Real.exp ξ / (2*Z)) (by positivity),
+      show (2:ℂ)^(ν+1) = ((2:ℝ):ℂ)^(ν+1) by norm_num, Complex.ofReal_cpow_eq_exp two_pos,
+                                              Complex.ofReal_cpow_eq_exp hZ0,
       show ((π:ℝ):ℂ) / (2 * (Sh:ℂ)) = ((π / (2*Sh) : ℝ) : ℂ) by push_cast; ring,
       Complex.ofReal_cpow_eq_exp (q := π / (2*Sh)) (by positivity),
-      Real.log_div (Real.exp_pos _).ne' (by positivity), Real.log_mul two_ne_zero hZ0.ne', Real.log_exp,
+      Real.log_div (Real.exp_pos _).ne' (by positivity),
+          Real.log_mul two_ne_zero hZ0.ne', Real.log_exp,
       Real.log_div Real.pi_pos.ne' (by positivity), Real.log_mul two_ne_zero hS0.ne']
     have alg : ∀ e1 e2 e3 e4 e5 e6 e7 e8 G : ℂ, e3 ≠ 0 → e4 ≠ 0 →
         e1*e2*e5*e6 = e7*e8*e3*e4 → e1*e2/(e3*e4)*(e5*e6/G) = e7*e8/G := by
@@ -913,7 +951,8 @@ theorem olverQ_half_order_2 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
         show (((2:ℕ) * Real.log (Sh/Z) : ℝ) : ℂ) * (1/2) = (Real.log (Sh/Z) : ℂ) by push_cast; ring,
         ← ofReal_exp, Real.exp_log hSZ0]
     have hsqm : (1 - 1/(Z:ℂ)^2)^(-(1/2):ℂ) = exp (-((Real.log Sh - Real.log Z : ℝ) : ℂ)) := by
-      rw [h1w, Complex.ofReal_cpow_eq_exp (by positivity), Real.log_pow, Real.log_div hS0.ne' hZ0.ne']
+      rw [h1w, Complex.ofReal_cpow_eq_exp (by positivity), Real.log_pow,
+          Real.log_div hS0.ne' hZ0.ne']
       congr 1; push_cast; ring
     have hhalf : (1 + ((Sh/Z : ℝ) : ℂ))/2 = ((Real.exp ξ / (2*Z) : ℝ) : ℂ) := by
       rw [← Real.cosh_add_sinh]; change _ = (((Z + Sh)/(2*Z) : ℝ):ℂ); push_cast; field_simp
@@ -927,10 +966,12 @@ theorem olverQ_half_order_2 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     have hpi : ((Real.sqrt π : ℝ) : ℂ) = exp ((Real.log π : ℂ)/2) := by
       rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos Real.pi_pos, ofReal_exp]; push_cast; ring_nf
     rw [hsq, hhalf, hBP, hpi, Complex.ofReal_cpow_eq_exp (q := Real.exp ξ / (2*Z)) (by positivity),
-      show (2:ℂ)^(ν+1) = ((2:ℝ):ℂ)^(ν+1) by norm_num, Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hZ0,
+      show (2:ℂ)^(ν+1) = ((2:ℝ):ℂ)^(ν+1) by norm_num, Complex.ofReal_cpow_eq_exp two_pos,
+                                              Complex.ofReal_cpow_eq_exp hZ0,
       show ((π:ℝ):ℂ) / (2 * (Sh:ℂ)) = ((π / (2*Sh) : ℝ) : ℂ) by push_cast; ring,
       Complex.ofReal_cpow_eq_exp (q := π / (2*Sh)) (by positivity),
-      Real.log_div (Real.exp_pos _).ne' (by positivity), Real.log_mul two_ne_zero hZ0.ne', Real.log_exp,
+      Real.log_div (Real.exp_pos _).ne' (by positivity),
+          Real.log_mul two_ne_zero hZ0.ne', Real.log_exp,
       Real.log_div Real.pi_pos.ne' (by positivity), Real.log_mul two_ne_zero hS0.ne']
     have alg : ∀ e1 e2 e3 e4 e6 e7 e8 G : ℂ, e3 ≠ 0 → e4 ≠ 0 →
         e1*e2*e6 = e7*e8*e3*e4 → e1*e2/(e3*e4)*(e6/G) = e7*e8/G := by
@@ -958,8 +999,10 @@ theorem ferrersP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ 
     ferrersP ν (-ν) (Real.cos θ)=(Real.sin θ:ℂ)^ν/(2^ν*Gamma (ν+1)) := by
   set x := Real.cos θ with hxdef
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi h0 hπ
-  have hx1 : -1 < x := by rw [← Real.cos_pi]; exact Real.cos_lt_cos_of_nonneg_of_le_pi h0.le le_rfl hπ
-  have hx2 : x < 1 := by rw [← Real.cos_zero]; exact Real.cos_lt_cos_of_nonneg_of_le_pi le_rfl hπ.le h0
+  have hx1 : -1 < x := by rw [← Real.cos_pi];
+                          exact Real.cos_lt_cos_of_nonneg_of_le_pi h0.le le_rfl hπ
+  have hx2 : x < 1 := by rw [← Real.cos_zero];
+                         exact Real.cos_lt_cos_of_nonneg_of_le_pi le_rfl hπ.le h0
   have hz : ‖((1:ℂ) - x)/2‖ < 1 := by
     rw [show ((1:ℂ) - x)/2 = (((1-x)/2 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
       Real.norm_eq_abs, abs_lt]; constructor <;> linarith
@@ -972,7 +1015,8 @@ theorem ferrersP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ 
     have h2 : 0 < 1 - x := by linarith
     rw [show (1:ℂ) - (1 - x)/2 = (((1+x)/2 : ℝ) : ℂ) by push_cast; ring,
       Complex.ofReal_cpow_eq_exp (div_pos h1 h2), Complex.ofReal_cpow_eq_exp (by positivity),
-      show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos,
+      show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.ofReal_cpow_eq_exp hs,
+                                  Complex.ofReal_cpow_eq_exp two_pos,
       Real.log_div h1.ne' h2.ne', Real.log_div h1.ne' two_ne_zero]
     have hsin : Real.log (Real.sin θ) = (Real.log (1+x) + Real.log (1-x))/2 := by
       rw [← Real.log_mul h1.ne' h2.ne', show (1+x)*(1-x) = Real.sin θ^2 by
@@ -1000,7 +1044,8 @@ theorem regularizedGaussHG_legendre_neg_degree (ν : ℂ) {w : ℂ} (hw : w ∈ 
   · rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz]
     by_cases hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)
     · rw [regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_symm,
-        ordinaryHypergeometric_eq_one_sub_neg_cpow (fun k h => hc k (by rw [h, neg_neg])) hz, neg_neg]
+        ordinaryHypergeometric_eq_one_sub_neg_cpow
+            (fun k h => hc k (by rw [h, neg_neg])) hz, neg_neg]
     · push Not at hc
       obtain ⟨k, hk⟩ := hc
       have hG : Gamma (ν+1) = 0 := by rw [hk]; exact Complex.Gamma_neg_nat_eq_zero k
@@ -1023,10 +1068,12 @@ theorem associatedP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) :
     exact Or.inl (by simp only [ofReal_re]; linarith)
   rw [associatedP, show 1 - -ν = ν + 1 by ring, regularizedGaussHG_legendre_neg_degree ν hw,
     show (1:ℂ) - (1 - z)/2 = (((z+1)/2 : ℝ) : ℂ) by push_cast; ring,
-    show (z:ℂ) + 1 = ((z+1:ℝ):ℂ) by push_cast; ring, show (z:ℂ) - 1 = ((z-1:ℝ):ℂ) by push_cast; ring,
+    show (z:ℂ) + 1 = ((z+1:ℝ):ℂ) by push_cast; ring, show (z:ℂ) - 1 =
+                                      ((z-1:ℝ):ℂ) by push_cast; ring,
     ← ofReal_log h1.le, ← ofReal_log h2.le,
     Complex.ofReal_cpow_eq_exp (by positivity), show (2:ℂ) = ((2:ℝ):ℂ) by norm_num,
-    Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos, Real.log_div h1.ne' two_ne_zero]
+    Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos,
+        Real.log_div h1.ne' two_ne_zero]
   have hsinh : Real.log (Real.sinh θ) = (Real.log (z+1) + Real.log (z-1))/2 := by
     rw [← Real.log_mul h1.ne' h2.ne', show (z+1)*(z-1) = Real.sinh θ^2 by
       rw [hzdef, Real.sinh_sq]; ring, Real.log_pow]; push_cast; ring
@@ -1055,18 +1102,23 @@ theorem ferrersP_zero_order_sin_sq (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ
     exact hsq1
   have hc : ∀ k : ℕ, (1 - 0 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [ferrersP, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz, regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [ferrersP, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
+      regularizedGaussHGFun_eq_div_Gamma hc,
     zero_div, cpow_zero, one_mul, sub_zero, Complex.Gamma_one, div_one,
     show ((1:ℂ) - (Real.cos θ:ℝ))/2 = ((Real.sin (θ/2)^2 : ℝ) : ℂ) by rw [hcos]; push_cast; ring]
 
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E20]
 theorem legendre_elliptic_20 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    ferrersP (1/2) 0 (Real.cos θ)=2/π*(2*(DLMF.Elliptic.Real.compEllIntEm ((Real.sin (θ/2))^2):ℂ)-(DLMF.Elliptic.Real.compEllIntKm ((Real.sin (θ/2))^2):ℂ)) := by
+    ferrersP (1/2) 0 (Real.cos
+        θ)=2/π*(2*(DLMF.Elliptic.Real.compEllIntEm
+        ((Real.sin (θ/2))^2):ℂ)-(DLMF.Elliptic.Real.compEllIntKm ((Real.sin (θ/2))^2):ℂ)) := by
   obtain ⟨h, hm⟩ := ferrersP_zero_order_sin_sq (1/2) h0 hπ
   rw [h, DLMF.Elliptic.Real.compEllIntKm_eq_ordinaryHypergeometric hm,
     DLMF.Elliptic.Real.compEllIntEm_eq_ordinaryHypergeometric hm]
-  have hz : ‖(((Real.sin (θ/2))^2 : ℝ) : ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_eq_abs]; exact hm
+  have hz : ‖(((Real.sin (θ/2))^2 : ℝ) : ℂ)‖ < 1 := by
+                                                      rw [Complex.norm_real,
+                                                        Real.norm_eq_abs]; exact hm
   have hc : ∀ k : ℕ, (1:ℂ) ≠ -(k:ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hcon := contiguous_ab (a := (1/2:ℂ)) (b := -(1/2)) (c := 1) hc hz
@@ -1079,7 +1131,8 @@ theorem legendre_elliptic_20 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E21]
 theorem legendre_elliptic_21 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    ferrersP (-1/2) 0 (Real.cos θ)=2/π*(DLMF.Elliptic.Real.compEllIntKm ((Real.sin (θ/2))^2):ℂ) := by
+    ferrersP (-1/2) 0 (Real.cos θ)=2/π*(DLMF.Elliptic.Real.compEllIntKm
+        ((Real.sin (θ/2))^2):ℂ) := by
   obtain ⟨h, hm⟩ := ferrersP_zero_order_sin_sq (-1/2) h0 hπ
   rw [h, DLMF.Elliptic.Real.compEllIntKm_eq_ordinaryHypergeometric hm]
   have hπ0 : (π:ℂ) ≠ 0 := by exact_mod_cast Real.pi_pos.ne'
@@ -1109,7 +1162,8 @@ private lemma sin_half_pi_sub (θ : ℝ) : Real.sin ((π-θ)/2) = Real.cos (θ/2
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E22]
 theorem legendre_elliptic_22 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    ferrersQ (1/2) 0 (Real.cos θ)=(DLMF.Elliptic.Real.compEllIntKm ((Real.cos (θ/2))^2):ℂ)-2*(DLMF.Elliptic.Real.compEllIntEm ((Real.cos (θ/2))^2):ℂ) := by
+    ferrersQ (1/2) 0 (Real.cos θ)=(DLMF.Elliptic.Real.compEllIntKm
+        ((Real.cos (θ/2))^2):ℂ)-2*(DLMF.Elliptic.Real.compEllIntEm ((Real.cos (θ/2))^2):ℂ) := by
   have hr : LegendreQRegular (1/2) 0 := by
     intro n h; have := congrArg Complex.re h; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
   have h := ferrersQ_zero_order_connection hr h0 hπ
@@ -1147,7 +1201,8 @@ theorem legendre_elliptic_23 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E24]
 theorem legendre_elliptic_24 {θ : ℝ} (h0 : 0 < θ) :
-    associatedP (1/2) 0 (Real.cosh θ)=2/π*Real.exp (θ/2)*(DLMF.Elliptic.Real.compEllIntEm ((Real.sqrt (1-Real.exp (-2*θ)))^2):ℂ) := by
+    associatedP (1/2) 0 (Real.cosh θ)=2/π*Real.exp
+        (θ/2)*(DLMF.Elliptic.Real.compEllIntEm ((Real.sqrt (1-Real.exp (-2*θ)))^2):ℂ) := by
   have hc1 : 1 < Real.cosh θ := Real.one_lt_cosh.mpr h0.ne'
   have hsl : (Real.cosh θ : ℂ) - 1 ∈ slitPlane := Or.inl (by simp; linarith)
   set m : ℝ := 1 - Real.exp (-2*θ) with hm
@@ -1158,7 +1213,8 @@ theorem legendre_elliptic_24 {θ : ℝ} (h0 : 0 < θ) :
   have hsq : Real.sqrt (Real.cosh θ ^ 2 - 1) = Real.sinh θ := by
     rw [Real.cosh_sq, show Real.sinh θ ^ 2 + 1 - 1 = Real.sinh θ ^ 2 by ring,
       Real.sqrt_sq (Real.sinh_nonneg_iff.mpr h0.le)]
-  have hpt : ∀ phi : ℝ, (((Real.cosh θ + Real.sqrt (Real.cosh θ ^ 2 - 1) * Real.cos phi : ℝ)) : ℂ) ^ (1/2:ℂ) =
+  have hpt : ∀ phi : ℝ,
+      (((Real.cosh θ + Real.sqrt (Real.cosh θ ^ 2 - 1) * Real.cos phi : ℝ)) : ℂ) ^ (1/2:ℂ) =
       ((Real.exp (θ/2) * (1 - m * Real.sin (phi/2) ^ 2) ^ (1/2:ℝ) : ℝ) : ℂ) := by
     intro phi
     have hs2 : Real.sin (phi/2) ^ 2 ≤ 1 := Real.sin_sq_le_one _
@@ -1184,7 +1240,9 @@ theorem legendre_elliptic_24 {θ : ℝ} (h0 : 0 < θ) :
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E25]
 theorem legendre_elliptic_25 {θ : ℝ} (h0 : 0 < θ) :
-    associatedP (-1/2) 0 (Real.cosh θ)=2/(π*Real.cosh (θ/2))*(DLMF.Elliptic.Real.compEllIntKm ((Real.tanh (θ/2))^2):ℂ) := by
+    associatedP (-1/2) 0
+        (Real.cosh θ)=2/(π*Real.cosh (θ/2))*(DLMF.Elliptic.Real.compEllIntKm
+        ((Real.tanh (θ/2))^2):ℂ) := by
   set s := Real.sinh (θ/2)
   set c := Real.cosh (θ/2)
   have hc0 : 0 < c := Real.cosh_pos _
@@ -1207,7 +1265,8 @@ theorem legendre_elliptic_25 {θ : ℝ} (h0 : 0 < θ) :
     rw [Complex.norm_real, Real.norm_eq_abs]; exact hm
   have hc1 : ∀ k : ℕ, (1 - 0 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [associatedP, zero_div, zero_mul, exp_zero, one_mul, hz, regularizedGaussHG_pfaff _ _ _ hcut, hq,
+  rw [associatedP, zero_div, zero_mul, exp_zero, one_mul, hz,
+      regularizedGaussHG_pfaff _ _ _ hcut, hq,
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hnorm, regularizedGaussHGFun_eq_div_Gamma hc1,
     DLMF.Elliptic.Real.compEllIntKm_eq_ordinaryHypergeometric hm]
   have h1 : (1:ℂ) - ((-s^2:ℝ):ℂ) = ((c^2:ℝ):ℂ) := by rw [hcs]; push_cast; ring
@@ -1223,7 +1282,8 @@ theorem legendre_elliptic_25 {θ : ℝ} (h0 : 0 < θ) :
 
 /-- `₂F₁(1/2, 3/2; 2; q) = 4(K(q) - E(q))/(πq)`, from `dE/dm = (E-K)/(2m)` and DLMF 15.5.1. -/
 private lemma hyp_half_three_halves_two {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
-    ₂F₁ (1/2:ℂ) (3/2) 2 (q:ℂ) = 4/π * ((DLMF.Elliptic.Real.compEllIntKm q:ℂ) - DLMF.Elliptic.Real.compEllIntEm q)/q := by
+    ₂F₁ (1/2:ℂ) (3/2) 2 (q:ℂ) = 4/π *
+        ((DLMF.Elliptic.Real.compEllIntKm q:ℂ) - DLMF.Elliptic.Real.compEllIntEm q)/q := by
   have hqn : ‖(q:ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hq0]; exact hq1
   have hc : ∀ k : ℕ, (1:ℂ) ≠ -k := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
@@ -1249,7 +1309,9 @@ private lemma hyp_half_three_halves_two {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E26]
 theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
-    olverQ (1/2) 0 (Real.cosh θ)=2/Real.sqrt π*Real.cosh θ/Real.cosh (θ/2)*(DLMF.Elliptic.Real.compEllIntKm ((1/Real.cosh (θ/2))^2):ℂ)-4/Real.sqrt π*Real.cosh (θ/2)*(DLMF.Elliptic.Real.compEllIntEm ((1/Real.cosh (θ/2))^2):ℂ) := by
+    olverQ (1/2) 0 (Real.cosh θ)=2/Real.sqrt π*Real.cosh θ/Real.cosh
+        (θ/2)*(DLMF.Elliptic.Real.compEllIntKm ((1/Real.cosh (θ/2))^2):ℂ)-4/Real.sqrt π*Real.cosh
+        (θ/2)*(DLMF.Elliptic.Real.compEllIntEm ((1/Real.cosh (θ/2))^2):ℂ) := by
   set Z := Real.cosh θ
   set k := Real.exp (-θ) with hkdef
   set q := k^2 with hqdef
@@ -1260,7 +1322,8 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
   have hq1 : q < 1 := pow_lt_one₀ hk0.le hk1 two_ne_zero
   have hZq : Z = Real.exp θ * (1 + q) / 2 := by
     show Real.cosh θ = _
-    rw [Real.cosh_eq, hqdef, hkdef, ← Real.exp_nat_mul, mul_add, mul_one, ← Real.exp_add]; push_cast; ring_nf
+    rw [Real.cosh_eq, hqdef, hkdef, ← Real.exp_nat_mul, mul_add, mul_one, ← Real.exp_add];
+        push_cast; ring_nf
   have hqn : ‖(q:ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hq0]; exact hq1
   have h4 : 4 * (q:ℂ) / (1 + q)^2 = 1/(Z:ℂ)^2 := by
     have hq' : (q:ℂ) * (Real.exp θ : ℂ)^2 = 1 := by
@@ -1277,11 +1340,13 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hwp := quadratic_well_poised_plus hc hqn (by rw [h4]; exact hw)
   rw [h4, show (3/2:ℂ) - 1/2 + 1 = 2 by norm_num, show (3/2:ℂ)/2 = 3/4 by norm_num,
-    show ((3/2:ℂ)+1)/2 = 5/4 by norm_num, ordinaryHypergeometric_symm (3/2), hyp_half_three_halves_two hq0 hq1] at hwp
+    show ((3/2:ℂ)+1)/2 = 5/4 by norm_num, ordinaryHypergeometric_symm (3/2),
+                                  hyp_half_three_halves_two hq0 hq1] at hwp
   have hc1 : ∀ k : ℕ, (1/2 : ℂ) + 3/2 ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hG2 : Gamma (2:ℂ) = 1 := by simp
-  rw [olverQ, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw, regularizedGaussHGFun_eq_div_Gamma hc1,
+  rw [olverQ, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
+      regularizedGaussHGFun_eq_div_Gamma hc1,
     show (1/2:ℂ) + 0 + 2 = 5/2 by norm_num, show (1/2:ℂ) + 0 + 1 = 3/2 by norm_num,
     show (5/2:ℂ)/2 = 5/4 by norm_num, show (3/2:ℂ)/2 = 3/4 by norm_num,
     show (1/2:ℂ) + 3/2 = 2 by norm_num, hG2, div_one,
@@ -1290,8 +1355,10 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
   have hpre : (1:ℂ) / ((2:ℂ)^((1/2:ℂ)+1) * (Z:ℂ)^(3/2:ℂ)) =
       (Real.exp (-3*θ/2) : ℂ) * (((1 + q : ℝ) : ℂ))^(-(3/2:ℂ)) := by
     rw [show (2:ℂ)^((1/2:ℂ)+1) = ((2:ℝ):ℂ)^(3/2:ℂ) by norm_num, Complex.ofReal_cpow_eq_exp two_pos,
-      Complex.ofReal_cpow_eq_exp hZ0, Complex.ofReal_cpow_eq_exp h1q, ofReal_exp, ← exp_add, ← exp_add, one_div, ← exp_neg,
-      hZq, Real.log_div (by positivity) two_ne_zero, Real.log_mul (Real.exp_pos _).ne' h1q.ne', Real.log_exp]
+      Complex.ofReal_cpow_eq_exp hZ0, Complex.ofReal_cpow_eq_exp h1q, ofReal_exp, ← exp_add,
+          ← exp_add, one_div, ← exp_neg,
+      hZq, Real.log_div (by positivity) two_ne_zero,
+          Real.log_mul (Real.exp_pos _).ne' h1q.ne', Real.log_exp]
     congr 1; push_cast; ring
   rw [ofReal_add, ofReal_one] at hpre
   rw [div_eq_mul_one_div (Real.sqrt π : ℂ), hpre, mul_assoc, mul_assoc, ← hwp]
@@ -1310,7 +1377,8 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
   rw [hM, hsq] at hKa hEa
   have hZu : Z = (u^2 + (u⁻¹)^2)/2 := by
     show Real.cosh θ = _
-    rw [Real.cosh_eq, hu, ← Real.exp_neg, ← Real.exp_nat_mul, ← Real.exp_nat_mul]; push_cast; ring_nf
+    rw [Real.cosh_eq, hu, ← Real.exp_neg, ← Real.exp_nat_mul, ← Real.exp_nat_mul];
+        push_cast; ring_nf
   have he3 : Real.exp (-3*θ/2) = (u⁻¹)^3 := by
     rw [hu, ← Real.exp_neg, ← Real.exp_nat_mul]; push_cast; ring_nf
   set A := DLMF.Elliptic.Real.compEllIntKm ((1/Real.cosh (θ/2))^2)
@@ -1333,7 +1401,8 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E27]
 theorem legendre_elliptic_27 {θ : ℝ} (h0 : 0 < θ) :
-    olverQ (-1/2) 0 (Real.cosh θ)=2/Real.sqrt π*Real.exp (-θ/2)*(DLMF.Elliptic.Real.compEllIntKm ((Real.exp (-θ))^2):ℂ) := by
+    olverQ (-1/2) 0 (Real.cosh θ)=2/Real.sqrt π*Real.exp
+        (-θ/2)*(DLMF.Elliptic.Real.compEllIntKm ((Real.exp (-θ))^2):ℂ) := by
   set Z := Real.cosh θ
   set q := (Real.exp (-θ))^2 with hqdef
   have hZ0 : 0 < Z := Real.cosh_pos _
@@ -1344,7 +1413,8 @@ theorem legendre_elliptic_27 {θ : ℝ} (h0 : 0 < θ) :
     exact pow_lt_one₀ (Real.exp_pos _).le this two_ne_zero
   have hZq : Z = Real.exp θ * (1 + q) / 2 := by
     show Real.cosh θ = _
-    rw [Real.cosh_eq, hqdef, ← Real.exp_nat_mul, mul_add, mul_one, ← Real.exp_add]; push_cast; ring_nf
+    rw [Real.cosh_eq, hqdef, ← Real.exp_nat_mul, mul_add, mul_one, ← Real.exp_add];
+        push_cast; ring_nf
   have hm : |q| < 1 := by rw [abs_of_pos hq0]; exact hq1
   have hqn : ‖(q:ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_eq_abs]; exact hm
   have h4 : 4 * (q:ℂ) / (1 + q)^2 = 1/(Z:ℂ)^2 := by
@@ -1365,7 +1435,8 @@ theorem legendre_elliptic_27 {θ : ℝ} (h0 : 0 < θ) :
     show ((1/2:ℂ)+1)/2 = 3/4 by norm_num] at hwp
   have hc1 : ∀ k : ℕ, (-1/2 : ℂ) + 3/2 ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [olverQ, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw, regularizedGaussHGFun_eq_div_Gamma hc1,
+  rw [olverQ, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
+      regularizedGaussHGFun_eq_div_Gamma hc1,
     show (-1/2:ℂ) + 0 + 2 = 2*(3/4) by norm_num, show (-1/2:ℂ) + 0 + 1 = 1/2 by norm_num,
     show (2*(3/4:ℂ))/2 = 3/4 by norm_num, show (1/2:ℂ)/2 = 1/4 by norm_num,
     show (-1/2:ℂ) + 3/2 = 1 by norm_num, Complex.Gamma_one, div_one,
@@ -1377,8 +1448,10 @@ theorem legendre_elliptic_27 {θ : ℝ} (h0 : 0 < θ) :
   have hpre : (1:ℂ) / ((2:ℂ)^((-1/2:ℂ)+1) * (Z:ℂ)^(1/2:ℂ)) =
       (Real.exp (-θ/2) : ℂ) * (((1 + q : ℝ) : ℂ))^(-(1/2:ℂ)) := by
     rw [show (2:ℂ)^((-1/2:ℂ)+1) = ((2:ℝ):ℂ)^(1/2:ℂ) by norm_num, Complex.ofReal_cpow_eq_exp two_pos,
-      Complex.ofReal_cpow_eq_exp hZ0, Complex.ofReal_cpow_eq_exp h1q, ofReal_exp, ← exp_add, ← exp_add, one_div, ← exp_neg,
-      hZq, Real.log_div (by positivity) two_ne_zero, Real.log_mul (Real.exp_pos _).ne' h1q.ne', Real.log_exp]
+      Complex.ofReal_cpow_eq_exp hZ0, Complex.ofReal_cpow_eq_exp h1q, ofReal_exp, ← exp_add,
+          ← exp_add, one_div, ← exp_neg,
+      hZq, Real.log_div (by positivity) two_ne_zero,
+          Real.log_mul (Real.exp_pos _).ne' h1q.ne', Real.log_exp]
     congr 1; push_cast; ring
   rw [ofReal_add, ofReal_one] at hpre
   rw [div_eq_mul_one_div (Real.sqrt π : ℂ), hpre]

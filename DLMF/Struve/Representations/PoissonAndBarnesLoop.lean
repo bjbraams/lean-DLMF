@@ -56,7 +56,8 @@ open DLMF.Bessel
 ℂ)^(2*ν)`. -/
 @[dlmf 11.5.E1]
 theorem struveH_trig_integral {ν : ℂ} (hν : -1/2 < ν.re) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveH ν z = 2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ θ : ℝ in 0..π/2, sin (z*Real.cos θ)*(Real.sin θ : ℂ)^(2*ν) := by
+    struveH ν z = 2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ θ : ℝ in 0..π/2,
+        sin (z*Real.cos θ)*(Real.sin θ : ℂ)^(2*ν) := by
   rw [struveH_eq_poisson hν (slitPlane_ne_zero hz),
     integral_poissonWeight_eq_trig ν (fun t => sin (z*t))]
 
@@ -65,7 +66,8 @@ theorem struveH_trig_integral {ν : ℂ} (hν : -1/2 < ν.re) {z : ℂ} (hz : z 
 ℂ)^(2*ν)`. -/
 @[dlmf 11.5.E6]
 theorem struveL_trig_integral {ν : ℂ} (hν : -1/2 < ν.re) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveL ν z = 2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ θ : ℝ in 0..π/2, sinh (z*Real.cos θ)*(Real.sin θ : ℂ)^(2*ν) := by
+    struveL ν z = 2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ θ : ℝ in 0..π/2,
+        sinh (z*Real.cos θ)*(Real.sin θ : ℂ)^(2*ν) := by
   rw [struveL_eq_poisson hν (slitPlane_ne_zero hz),
     integral_poissonWeight_eq_trig ν (fun t => sinh (z*t))]
 
@@ -73,13 +75,15 @@ theorem struveL_trig_integral {ν : ℂ} (hν : -1/2 < ν.re) {z : ℂ} (hz : z 
 2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ t : ℝ in 0..1, (1-t^2:ℂ)^(ν-1/2)*sin (z*t)`. -/
 @[dlmf 11.5.E1]
 theorem struveH_integral {ν : ℂ} (hν : -1/2 < ν.re) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveH ν z = 2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ t : ℝ in 0..1, (1-t^2:ℂ)^(ν-1/2)*sin (z*t) := by
+    struveH ν z = 2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ t : ℝ in 0..1,
+        (1-t^2:ℂ)^(ν-1/2)*sin (z*t) := by
   exact struveH_eq_poisson hν (slitPlane_ne_zero hz)
 
 /-- Laplace representation retaining the reciprocal-gamma prefactor at exceptional orders. -/
 @[dlmf 11.5.E2]
 theorem struveK_laplace (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    HasIntegralAtTop (fun t : ℝ => 2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2))*exp (-z*t)*(1+t^2:ℂ)^(ν-1/2)) 0 (struveK ν z) := by
+    HasIntegralAtTop (fun t : ℝ =>
+        2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2))*exp (-z*t)*(1+t^2:ℂ)^(ν-1/2)) 0 (struveK ν z) := by
   -- `DLMF.Bessel.struveK_eq_besselYLaplace` (contour rotation plus downward induction in `ν`)
   have h := intervalIntegral_tendsto_integral_Ioi 0
     ((integrableOn_yLaplaceKernel ν hz).const_mul (2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2))))
@@ -133,7 +137,8 @@ theorem struveK_zero_laplace {z : ℂ} (hz : 0 < z.re) :
 -2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ t : ℝ in 0..1, exp (-z*t)*(1-t^2:ℂ)^(ν-1/2)`. -/
 @[dlmf 11.5.E4]
 theorem struveM_integral {ν : ℂ} (hν : -1/2 < ν.re) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveM ν z = -2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ t : ℝ in 0..1, exp (-z*t)*(1-t^2:ℂ)^(ν-1/2) := by
+    struveM ν z = -2*(z/2)^ν/(Real.sqrt π*Gamma (ν+1/2)) * ∫ t : ℝ in 0..1,
+        exp (-z*t)*(1-t^2:ℂ)^(ν-1/2) := by
   exact struveM_eq_poisson hν hz
 
 /-- Two continuous functions on `ℂ` that agree on the slit plane agree everywhere. -/
@@ -335,7 +340,8 @@ theorem struveFour_Y {x : ℝ} (hx : 0 < x) (ν : ℂ) :
     have e3 : exp (I * c * π / 2) * exp (-(I * c * π / 2)) = 1 := by
       rw [← exp_add]; simp
     rw [e1, e2]
-    rw [show -(I * -c * π / 2) = I * c * π / 2 by ring, show I * -c * π / 2 = -(I * c * π / 2) by ring]
+    rw [show -(I * -c * π / 2) = I * c * π / 2 by ring, show I * -c * π / 2 =
+                                                    -(I * c * π / 2) by ring]
     set E := exp (I * c * π / 2)
     set F := exp (-(I * c * π / 2))
     have hd : E * E - F * F ≠ 0 := by
@@ -465,7 +471,8 @@ theorem struveFour_exists {a : ℂ} (ha : a.re < 0) {x : ℝ} (hx : 0 < x) :
           gcongr
       _ = _ := by ring
   refine ⟨0 - (1 + ((0 : ℝ) : ℂ) ^ 2) ^ a * v 0 - ∫ t in Ioi 0, u' t * v t, ?_⟩
-  have := (hb.sub (tendsto_const_nhds (x := (1 + ((0 : ℝ) : ℂ) ^ 2) ^ a * v 0))).sub (intervalIntegral_tendsto_integral_Ioi 0 hgi tendsto_id)
+  have := (hb.sub (tendsto_const_nhds (x := (1 + ((0 : ℝ) : ℂ) ^ 2) ^ a * v 0))).sub
+      (intervalIntegral_tendsto_integral_Ioi 0 hgi tendsto_id)
   exact this.congr fun X => (hibp X).symm
 
 /-- The regularized integrand splits into two Laplace kernels. -/
@@ -511,7 +518,9 @@ theorem struveFour_continuousAt (ν : ℂ) (x : ℝ) {w : ℂ} (hw : w ∈ slitP
 π*Gamma (ν+1/2))*(1+t^2:ℂ)^(ν-1/2)*Real.sin (x*t)) 0 (besselI (-ν) x-struveL ν x)`. -/
 @[dlmf 11.5.E7]
 theorem struveL_fourier {ν : ℂ} (hν : ν.re < 1/2) {x : ℝ} (hx : 0 < x) :
-    HasIntegralAtTop (fun t : ℝ => 2*(x/2:ℂ)^ν/(Real.sqrt π*Gamma (ν+1/2))*(1+t^2:ℂ)^(ν-1/2)*Real.sin (x*t)) 0 (besselI (-ν) x-struveL ν x) := by
+    HasIntegralAtTop (fun t : ℝ =>
+        2*(x/2:ℂ)^ν/(Real.sqrt π*Gamma (ν+1/2))*(1+t^2:ℂ)^(ν-1/2)*Real.sin (x*t)) 0
+        (besselI (-ν) x-struveL ν x) := by
   set C : ℂ := 2*(x/2:ℂ)^ν/(Real.sqrt π*Gamma (ν+1/2)) with hC
   set f : ℝ → ℂ := fun t => C*(1+t^2:ℂ)^(ν-1/2)*Real.sin (x*t) with hf
   have hfc : Continuous f := by
@@ -564,7 +573,8 @@ theorem struveL_fourier {ν : ℂ} (hν : ν.re < 1/2) {x : ℝ} (hx : 0 < x) :
 
 /-- Separating loop from positive infinity above the poles to positive infinity below them. -/
 def positiveBarnesLoop (f : ℂ → ℂ) (c h R : ℝ) : ℂ :=
-  segmentIntegral f (R+h*I) (c+h*I) + segmentIntegral f (c+h*I) (c-h*I) + segmentIntegral f (c-h*I) (R-h*I)
+  segmentIntegral f (R+h*I) (c+h*I) + segmentIntegral f (c+h*I) (c-h*I) +
+      segmentIntegral f (c-h*I) (R-h*I)
 
 /-! ### The Barnes loop for `L_ν` (DLMF 11.5.9)
 
@@ -645,7 +655,8 @@ theorem struveLoop_rect_recip {a b p h : ℝ} (ha : a < p) (hb : p < b) (hh : 0 
 theorem struveLoop_rect_add {f g : ℂ → ℂ} {a b h : ℝ}
     (hf : ContinuousOn f ([[a, b]] ×ℂ [[-h, h]] \ (re ⁻¹' Ioo a b ∩ im ⁻¹' Ioo (-h) h)))
     (hg : ContinuousOn g ([[a, b]] ×ℂ [[-h, h]] \ (re ⁻¹' Ioo a b ∩ im ⁻¹' Ioo (-h) h))) :
-    struveLoop_rect (fun s => f s + g s) a b h = struveLoop_rect f a b h + struveLoop_rect g a b h := by
+    struveLoop_rect (fun s => f s + g s) a b h = struveLoop_rect f a b h +
+        struveLoop_rect g a b h := by
   have hh : ∀ t : ℝ, (t = -h ∨ t = h) → ∀ k : ℂ → ℂ,
       ContinuousOn k ([[a, b]] ×ℂ [[-h, h]] \ (re ⁻¹' Ioo a b ∩ im ⁻¹' Ioo (-h) h)) →
       IntervalIntegrable (fun x : ℝ => k (x + t * I)) volume a b := by
@@ -654,7 +665,8 @@ theorem struveLoop_rect_add {f g : ℂ → ℂ} {a b h : ℝ}
     refine hk.comp (by fun_prop) fun x hx => ?_
     refine ⟨⟨by simpa using hx, ?_⟩, ?_⟩
     · show (((x : ℂ) + t * I).im) ∈ [[-h, h]]
-      simp only [add_im, ofReal_im, mul_im, ofReal_re, I_im, mul_one, I_re, mul_zero, zero_add, add_zero]
+      simp only [add_im, ofReal_im, mul_im, ofReal_re, I_im, mul_one, I_re, mul_zero,
+          zero_add, add_zero]
       rcases ht with ht | ht <;> rw [ht]
       exacts [Set.left_mem_uIcc (a := -h) (b := h), Set.right_mem_uIcc (a := -h) (b := h)]
     · rintro ⟨-, h2⟩
@@ -747,7 +759,8 @@ theorem struveLoop_rect_pole {F Φ : ℂ → ℂ} {a b p h : ℝ} (ha : a < p) (
       (isOpen_Ioo.preimage continuous_re).inter (isOpen_Ioo.preimage continuous_im)
     refine Filter.mem_of_superset (ho.mem_nhds ⟨by simp [ha, hb], by simp [hh]⟩) ?_
     rintro s ⟨h1, h2⟩
-    exact ⟨Ioo_subset_Icc_self.trans Icc_subset_uIcc h1, Ioo_subset_Icc_self.trans Icc_subset_uIcc h2⟩
+    exact ⟨Ioo_subset_Icc_self.trans Icc_subset_uIcc h1,
+        Ioo_subset_Icc_self.trans Icc_subset_uIcc h2⟩
   set g := dslope Φ p with hgdef
   have hg : DifferentiableOn ℂ g ([[a, b]] ×ℂ [[-h, h]]) := (differentiableOn_dslope hS).mpr hΦ
   have hne : ∀ s ∈ struveLoop_bdry a b h, s ≠ (p : ℂ) := by
@@ -815,9 +828,11 @@ theorem struveLoop_rect_adj {F : ℂ → ℂ} {a b d h : ℝ}
     struveLoop_rect F a b h + struveLoop_rect F b d h = struveLoop_rect F a d h := by
   unfold struveLoop_rect
   rw [← intervalIntegral.integral_add_adjacent_intervals
-      ((hcont _ (Or.inl rfl)).intervalIntegrable a b) ((hcont _ (Or.inl rfl)).intervalIntegrable b d),
+      ((hcont _ (Or.inl rfl)).intervalIntegrable a b)
+          ((hcont _ (Or.inl rfl)).intervalIntegrable b d),
     ← intervalIntegral.integral_add_adjacent_intervals
-      ((hcont _ (Or.inr rfl)).intervalIntegrable a b) ((hcont _ (Or.inr rfl)).intervalIntegrable b d)]
+      ((hcont _ (Or.inr rfl)).intervalIntegrable a b)
+          ((hcont _ (Or.inr rfl)).intervalIntegrable b d)]
   ring
 
 /-- The left end of the `n`-th rectangle: `c` for `n = 0`, `n - 1/2` otherwise. -/
@@ -1009,7 +1024,8 @@ theorem struveLoop_D_ne_zero {c h : ℝ} (hc : -1 < c) (hc0 : c < 0) {n : ℕ} {
   subst this; simp
 
 /-- The numerator `Φ_n` is holomorphic on the closed `n`-th rectangle. -/
-theorem struveLoop_differentiableOn_Φ (ν z : ℂ) {c h : ℝ} (hc : -1 < c) (hc0 : c < 0) (hz : z ≠ 0) (n : ℕ) :
+theorem struveLoop_differentiableOn_Φ (ν z : ℂ) {c h : ℝ} (hc : -1 < c) (hc0 : c < 0)
+    (hz : z ≠ 0) (n : ℕ) :
     DifferentiableOn ℂ (struveLoop_num ν z n) ([[struveLoop_cut c n, n + 1 / 2]] ×ℂ [[-h, h]]) := by
   have hw : -z ^ 2 / 4 ≠ 0 := by
     have := pow_ne_zero 2 hz; intro h0; apply this; linear_combination -4 * h0
@@ -1157,8 +1173,11 @@ end StruveLoop
 
 /-- struveL barnes loop (DLMF 11.5.9): residue theorem on rectangles `[c, N+1/2] × [-h, h]`. -/
 @[dlmf 11.5.E9]
-theorem struveL_barnes_loop (ν : ℂ) {z : ℂ} (hz : z ≠ 0) {c h : ℝ} (hc : -1 < c) (hc0 : c < 0) (hh : 0 < h) :
-    Tendsto (fun R => positiveBarnesLoop (fun s : ℂ => π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(-z^2/4)^s) c h R) atTop (𝓝 (2*π*I*(z/2)^(-ν-1)*struveL ν z)) := by
+theorem struveL_barnes_loop (ν : ℂ) {z : ℂ} (hz : z ≠ 0) {c h : ℝ} (hc : -1 < c)
+    (hc0 : c < 0) (hh : 0 < h) :
+    Tendsto (fun R => positiveBarnesLoop
+        (fun s : ℂ => π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(-z^2/4)^s) c h R) atTop
+        (𝓝 (2*π*I*(z/2)^(-ν-1)*struveL ν z)) := by
   change Tendsto (fun R => positiveBarnesLoop (struveLoop_F ν z) c h R) atTop _
   set F := struveLoop_F ν z with hFdef
   have hcont : ∀ t : ℝ, (t = -h ∨ t = h) → Continuous fun x : ℝ => F (x + t * I) := by

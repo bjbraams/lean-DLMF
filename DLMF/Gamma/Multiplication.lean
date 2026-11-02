@@ -25,8 +25,8 @@ $$
 * `prod_Gamma_div`: `∏_{k=1}^{m-1} Γ(k/m) = (2π)^{(m-1)/2} / √m`, DLMF 5.5.7.
 * `multiplicationGamma_eq_Gamma`: the Bohr–Mollerup form of the multiplication formula.
 * `Gamma_mul_nat_of_pos`: DLMF 5.5.6 for positive real arguments.
-* `Complex.Gamma_prod_add_div`, `Complex.Gamma_mul_nat`: DLMF 5.5.6 for complex arguments.
-* `Real.Gamma_prod_add_div`, `Real.Gamma_mul_nat`: DLMF 5.5.6 for real arguments.
+* `Gamma.Gamma_prod_add_div`, `Gamma.Gamma_mul_nat`: DLMF 5.5.6 for complex arguments.
+* `Gamma.Real.Gamma_prod_add_div`, `Gamma.Real.Gamma_mul_nat`: DLMF 5.5.6 for real arguments.
 
 ## Implementation notes
 
@@ -47,7 +47,9 @@ open scoped Topology Real
 
 noncomputable section
 
-namespace Complex
+namespace DLMF.Gamma
+
+open Complex
 
 /-- Algebraic identity `1 - exp(I θ) = -2 I exp(I θ / 2) sin(θ / 2)`. -/
 theorem one_sub_exp_mul_I (θ : ℂ) :
@@ -164,9 +166,11 @@ theorem pow_neg_two_I_mul_I (n : ℕ) : (-2 * I : ℂ) ^ n * I ^ n = (2 : ℂ) ^
   rw [mul_pow, mul_assoc, ← pow_add, ← two_mul, pow_mul, I_sq, ← mul_pow]
   norm_num
 
-end Complex
+end DLMF.Gamma
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 /-- `∏_{k=1}^{m-1} sin(π k / m) = m / 2^{m-1}`. Empty product when `m = 1`. -/
 theorem prod_sin_pi_div {m : ℕ} (hm : 0 < m) :
@@ -176,15 +180,15 @@ theorem prod_sin_pi_div {m : ℕ} (hm : 0 < m) :
         ∏ k ∈ Ico 1 m, sin (π * k / m) := by
     simpa [add_comm] using
       (prod_Ico_eq_prod_range (fun k : ℕ => sin (π * k / m)) 1 m).symm
-  have hμ := Complex.prod_one_sub_exp_two_pi hm
+  have hμ := Gamma.prod_one_sub_exp_two_pi hm
   have hprod :
       ∏ k ∈ range (m - 1),
           ((1 : ℂ) - Complex.exp (2 * π * Complex.I / m) ^ (k + 1)) =
         (-2 * Complex.I) ^ (m - 1) * Complex.I ^ (m - 1) *
           ∏ k ∈ range (m - 1), (sin (π * (k + 1 : ℝ) / m) : ℂ) := by
-    simp_rw [Complex.one_sub_root_eq_sin hm]
+    simp_rw [Gamma.one_sub_root_eq_sin hm]
     rw [prod_mul_distrib, prod_mul_distrib, prod_const, card_range,
-      ← Complex.exp_sum, Complex.exp_sum_pi_div hm]
+      ← Complex.exp_sum, Gamma.exp_sum_pi_div hm]
   have hmain : (m : ℂ) =
       (2 : ℂ) ^ (m - 1) *
         ↑(∏ k ∈ range (m - 1), sin (π * (k + 1 : ℝ) / m)) := by
@@ -195,7 +199,7 @@ theorem prod_sin_pi_div {m : ℕ} (hm : 0 < m) :
             ∏ k ∈ range (m - 1), (sin (π * (k + 1 : ℝ) / m) : ℂ) := hprod
       _ = (2 : ℂ) ^ (m - 1) *
             ↑(∏ k ∈ range (m - 1), sin (π * (k + 1 : ℝ) / m)) := by
-          rw [Complex.pow_neg_two_I_mul_I, Complex.ofReal_prod]
+          rw [Gamma.pow_neg_two_I_mul_I, Complex.ofReal_prod]
   have hreal : (m : ℝ) =
       (2 : ℝ) ^ (m - 1) *
         ∏ k ∈ range (m - 1), sin (π * (k + 1 : ℝ) / m) := by
@@ -508,9 +512,11 @@ theorem Gamma_mul_nat_of_pos {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
   rw [← hF, hrpowC]
   field
 
-end Real
+end DLMF.Gamma.Real
 
-namespace Complex
+namespace DLMF.Gamma
+
+open Complex
 
 /-- `(2π)^((m-1)/2)` as a complex constant, obtained by coercing the real power. -/
 def gaussMulConst (m : ℕ) : ℂ :=
@@ -574,7 +580,7 @@ theorem Gamma_prod_add_div {m : ℕ} (hm : 0 < m) (s : ℂ) :
   refine AnalyticOnNhd.eq_of_frequently_eq h1 h2 (h3.frequently ?_)
   refine ((Eventually.filter_mono nhdsWithin_le_nhds) ?_).frequently
   refine (eventually_gt_nhds zero_lt_one).mp (Eventually.of_forall fun t ht => ?_)
-  have hreal := Real.Gamma_prod_add_div_of_pos hm ht
+  have hreal := Gamma.Real.Gamma_prod_add_div_of_pos hm ht
   have hm0R : (0 : ℝ) ≤ m := Nat.cast_nonneg _
   have hprod : ((∏ k ∈ range m, Real.Gamma (t + k / m) : ℝ) : ℂ) =
       ∏ k ∈ range m, Gamma (↑t + k / m) := by
@@ -644,16 +650,18 @@ theorem Gamma_mul_nat {m : ℕ} (hm : 0 < m) (s : ℂ) :
   · rw [hrpowC, hrpowM]
     ring
 
-end Complex
+end DLMF.Gamma
 
-namespace Real
+namespace DLMF.Gamma.Real
+
+open _root_.Real
 
 /-- Gauss's multiplication formula, real arguments. -/
 theorem Gamma_prod_add_div {m : ℕ} (hm : 0 < m) (s : ℝ) :
     ∏ k ∈ range m, Gamma (s + k / m) =
       (2 * π) ^ ((m - 1 : ℝ) / 2) * (m : ℝ) ^ (1 / 2 - m * s) * Gamma (m * s) := by
   apply Complex.ofReal_injective
-  have h := Complex.Gamma_prod_add_div hm (s : ℂ)
+  have h := Gamma.Gamma_prod_add_div hm (s : ℂ)
   have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg _
   have h2π : 0 ≤ 2 * π := mul_nonneg zero_le_two pi_pos.le
   have hprod : ((∏ k ∈ range m, Gamma (s + k / m) : ℝ) : ℂ) =
@@ -690,7 +698,7 @@ theorem Gamma_mul_nat {m : ℕ} (hm : 0 < m) (s : ℝ) :
       (2 * π) ^ ((1 - m : ℝ) / 2) * (m : ℝ) ^ (m * s - 1 / 2) *
         ∏ k ∈ range m, Gamma (s + k / m) := by
   apply Complex.ofReal_injective
-  have h := Complex.Gamma_mul_nat hm (s : ℂ)
+  have h := Gamma.Gamma_mul_nat hm (s : ℂ)
   have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg _
   have h2π : 0 ≤ 2 * π := mul_nonneg zero_le_two pi_pos.le
   have hprod : ((∏ k ∈ range m, Gamma (s + k / m) : ℝ) : ℂ) =
@@ -720,6 +728,6 @@ theorem Gamma_mul_nat {m : ℕ} (hm : 0 < m) (s : ℝ) :
   rw [hG, hRHS]
   exact h
 
-end Real
+end DLMF.Gamma.Real
 
 

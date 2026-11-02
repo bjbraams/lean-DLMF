@@ -54,14 +54,17 @@ open Fin.NatCast
 /-- `k`-subsets of `range M` without two consecutive elements. -/
 def linearNonConsecutiveCount (M k : ℕ) : ℕ := #{S ∈ (range M).powersetCard k | ∀ i ∈ S, i + 1 ∉ S}
 
-/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount M 0 = 1`. -/
+/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount M 0 = 1`.
+-/
 private lemma linearNonConsecutiveCount_zero_right (M : ℕ) : linearNonConsecutiveCount M 0 = 1 := by
   rw [linearNonConsecutiveCount, powersetCard_zero, filter_true_of_mem (by simp), card_singleton]
 
-/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount (M + 2) (k + 1) = linearNonConsecutiveCount
-(M + 1) (k + 1) + linearNonConsecutiveCount M k`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`linearNonConsecutiveCount (M + 2) (k + 1) = linearNonConsecutiveCount (M + 1) (k + 1) +
+linearNonConsecutiveCount M k`. -/
 private lemma linearNonConsecutiveCount_succ_succ (M k : ℕ) :
-    linearNonConsecutiveCount (M + 2) (k + 1) = linearNonConsecutiveCount (M + 1) (k + 1) + linearNonConsecutiveCount M k := by
+    linearNonConsecutiveCount (M + 2) (k + 1) = linearNonConsecutiveCount (M + 1) (k + 1) +
+        linearNonConsecutiveCount M k := by
   rw [linearNonConsecutiveCount, ← card_filter_add_card_filter_not (p := fun S => M + 1 ∉ S)]
   congr 1
   · rw [filter_filter, linearNonConsecutiveCount]
@@ -112,21 +115,27 @@ private lemma linearNonConsecutiveCount_succ_succ (M k : ℕ) :
       have hM : M + 1 ∉ S := fun h => by have := mem_range.mp (hS.1.1 h); omega
       exact erase_insert hM
 
-/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount 0 (k + 1) = 0`. -/
-private lemma linearNonConsecutiveCount_zero_succ (k : ℕ) : linearNonConsecutiveCount 0 (k + 1) = 0 := by
+/-- Identity under the stated parameter and domain assumptions:
+`linearNonConsecutiveCount 0 (k + 1) = 0`. -/
+private lemma linearNonConsecutiveCount_zero_succ (k : ℕ) : linearNonConsecutiveCount 0
+    (k + 1) = 0 := by
   simp [linearNonConsecutiveCount]
 
-/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount 1 (k + 2) = 0`. -/
-private lemma linearNonConsecutiveCount_one_succ_succ (k : ℕ) : linearNonConsecutiveCount 1 (k + 2) = 0 := by
+/-- Identity under the stated parameter and domain assumptions:
+`linearNonConsecutiveCount 1 (k + 2) = 0`. -/
+private lemma linearNonConsecutiveCount_one_succ_succ (k : ℕ) : linearNonConsecutiveCount 1
+    (k + 2) = 0 := by
   rw [linearNonConsecutiveCount, powersetCard_eq_empty.mpr (by simp)]
   rfl
 
-/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount 1 1 = 1`. -/
+/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount 1 1 = 1`.
+-/
 private lemma linearNonConsecutiveCount_one_one : linearNonConsecutiveCount 1 1 = 1 := by decide
 
-/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount M k = (M + 1 - k).choose
-k`. -/
-private lemma linearNonConsecutiveCount_eq_choose (M k : ℕ) : linearNonConsecutiveCount M k = (M + 1 - k).choose k := by
+/-- Identity under the stated parameter and domain assumptions:
+`linearNonConsecutiveCount M k = (M + 1 - k).choose k`. -/
+private lemma linearNonConsecutiveCount_eq_choose (M k : ℕ) : linearNonConsecutiveCount M k =
+    (M + 1 - k).choose k := by
   induction M using Nat.strong_induction_on generalizing k with
   | _ M ih =>
     rcases k with _ | k
@@ -186,18 +195,24 @@ private lemma card_nonConsecutive_Ico_eq_linearNonConsecutiveCount (a M k : ℕ)
     have := mem_Ico.mp (hS.1.1 hx); simp only [Function.comp_apply, id]; omega
 
 /-- `k`-subsets of `range N` without two cyclically consecutive elements. -/
-def cyclicNonConsecutiveCount (N k : ℕ) : ℕ := #{S ∈ (range N).powersetCard k | ∀ i ∈ S, (i + 1) % N ∉ S}
+def cyclicNonConsecutiveCount (N k : ℕ) : ℕ :=
+    #{S ∈ (range N).powersetCard k | ∀ i ∈ S, (i + 1) % N ∉ S}
 
-/-- Identity under the stated parameter and domain assumptions: `cyclicNonConsecutiveCount N 0 = 1`. -/
+/-- Identity under the stated parameter and domain assumptions: `cyclicNonConsecutiveCount N 0 = 1`.
+-/
 private lemma cyclicNonConsecutiveCount_zero (N : ℕ) : cyclicNonConsecutiveCount N 0 = 1 := by
   rw [cyclicNonConsecutiveCount, powersetCard_zero, filter_true_of_mem (by simp), card_singleton]
 
-/-- Identity under the stated parameter and domain assumptions: `cyclicNonConsecutiveCount N (k + 1) = linearNonConsecutiveCount (N - 1)
-(k + 1) + linearNonConsecutiveCount (N - 3) k`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`cyclicNonConsecutiveCount N (k + 1) = linearNonConsecutiveCount (N - 1) (k + 1) +
+linearNonConsecutiveCount (N - 3) k`. -/
 private lemma cyclicNonConsecutiveCount_succ {N : ℕ} (hN : 3 ≤ N) (k : ℕ) :
-    cyclicNonConsecutiveCount N (k + 1) = linearNonConsecutiveCount (N - 1) (k + 1) + linearNonConsecutiveCount (N - 3) k := by
-  rw [cyclicNonConsecutiveCount, ← card_filter_add_card_filter_not (p := fun S => 0 ∉ S), filter_filter,
-    filter_filter, ← card_nonConsecutive_Ico_eq_linearNonConsecutiveCount 1, ← card_nonConsecutive_Ico_eq_linearNonConsecutiveCount 2]
+    cyclicNonConsecutiveCount N (k + 1) = linearNonConsecutiveCount (N - 1) (k + 1) +
+        linearNonConsecutiveCount (N - 3) k := by
+  rw [cyclicNonConsecutiveCount,
+      ← card_filter_add_card_filter_not (p := fun S => 0 ∉ S), filter_filter,
+    filter_filter, ← card_nonConsecutive_Ico_eq_linearNonConsecutiveCount 1,
+        ← card_nonConsecutive_Ico_eq_linearNonConsecutiveCount 2]
   congr 1
   · congr 1
     ext S
@@ -262,14 +277,15 @@ private lemma cyclicNonConsecutiveCount_succ {N : ℕ} (hN : 3 ≤ N) (k : ℕ) 
       have h0 : 0 ∉ S := fun h => by have := mem_Ico.mp (hS.1.1 h); omega
       exact erase_insert h0
 
-/-- Identity under the stated parameter and domain assumptions: `(cyclicNonConsecutiveCount (2 * n) k : ℚ) = 2 * n /
-(2 * n - k) * (2 * n - k).choose k`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`(cyclicNonConsecutiveCount (2 * n) k : ℚ) = 2 * n / (2 * n - k) * (2 * n - k).choose k`. -/
 private lemma cyclicNonConsecutiveCount_two_mul_eq {n : ℕ} (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ n) :
     (cyclicNonConsecutiveCount (2 * n) k : ℚ) = 2 * n / (2 * n - k) * (2 * n - k).choose k := by
   rcases k with _ | k
   · rw [cyclicNonConsecutiveCount_zero]; have : (2 * n : ℚ) ≠ 0 := by positivity
     simp [this]
-  rw [cyclicNonConsecutiveCount_succ (by omega), linearNonConsecutiveCount_eq_choose, linearNonConsecutiveCount_eq_choose]
+  rw [cyclicNonConsecutiveCount_succ (by omega), linearNonConsecutiveCount_eq_choose,
+      linearNonConsecutiveCount_eq_choose]
   obtain ⟨M, hM⟩ : ∃ M, 2 * n = M + k + 2 := ⟨2 * n - k - 2, by omega⟩
   rw [show 2 * n - 1 + 1 - (k + 1) = M + 1 by omega, show 2 * n - 3 + 1 - k = M by omega,
     show 2 * n - (k + 1) = M + 1 by omega]
@@ -301,9 +317,10 @@ private lemma finCast_eq_finCast_iff {n : ℕ} [NeZero n] {x y : ℕ} (hx : x �
   · rw [Nat.mod_eq_of_lt hy, Nat.mod_self]; omega
   · simp
 
-/-- Identity under the stated parameter and domain assumptions: `(range (2 * n)).image (menageSquare n)
-= menageBoard n`. -/
-private lemma image_menageSquare_range {n : ℕ} [NeZero n] : (range (2 * n)).image (menageSquare n) = menageBoard n := by
+/-- Identity under the stated parameter and domain assumptions:
+`(range (2 * n)).image (menageSquare n) = menageBoard n`. -/
+private lemma image_menageSquare_range {n : ℕ} [NeZero n] : (range (2 * n)).image (menageSquare n) =
+    menageBoard n := by
   ext ⟨i, j⟩
   simp only [mem_image, mem_range, menageBoard, mem_union, mem_univ, true_and, Prod.mk.injEq]
   constructor
@@ -330,19 +347,22 @@ private lemma image_menageSquare_range {n : ℕ} [NeZero n] : (range (2 * n)).im
         show (2 * a.val + 1 + 1) / 2 = a.val + 1 by omega, Nat.cast_succ, Fin.cast_val_eq_self]
       exact ⟨ha, hb⟩
 
-/-- The stated relation follows from the given hypotheses: `Set.InjOn (menageSquare n) (range (2 * n) :
-Set ℕ)`. -/
+/-- The stated relation follows from the given hypotheses:
+`Set.InjOn (menageSquare n) (range (2 * n) : Set ℕ)`. -/
 private lemma injOn_menageSquare {n : ℕ} [NeZero n] (hn : 2 ≤ n) :
     Set.InjOn (menageSquare n) (range (2 * n) : Set ℕ) := by
   intro a ha b hb h
   have ha := mem_range.mp ha; have hb := mem_range.mp hb
   simp only [menageSquare, Prod.mk.injEq] at h
-  rw [finCast_eq_finCast_iff (by omega) (by omega), finCast_eq_finCast_iff (by omega) (by omega)] at h
+  rw [finCast_eq_finCast_iff (by omega) (by omega),
+      finCast_eq_finCast_iff (by omega) (by omega)] at h
   omega
 
-/-- Identity under the stated parameter and domain assumptions: `((menageSquare n a).1 = (menageSquare n b).1
-∨ (menageSquare n a).2 = (menageSquare n b).2) ↔ a = b ∨ (a + 1) % (2 * n) = b ∨ (b + 1) % (2 * n) = a`. -/
-private lemma menageSquare_attack_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {a b : ℕ} (ha : a < 2 * n) (hb : b < 2 * n) :
+/-- Identity under the stated parameter and domain assumptions:
+`((menageSquare n a).1 = (menageSquare n b).1 ∨ (menageSquare n a).2 = (menageSquare n b).2) ↔ a = b
+∨ (a + 1) % (2 * n) = b ∨ (b + 1) % (2 * n) = a`. -/
+private lemma menageSquare_attack_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {a b : ℕ} (ha : a < 2 * n)
+    (hb : b < 2 * n) :
     ((menageSquare n a).1 = (menageSquare n b).1 ∨ (menageSquare n a).2 = (menageSquare n b).2) ↔
       a = b ∨ (a + 1) % (2 * n) = b ∨ (b + 1) % (2 * n) = a := by
   simp only [menageSquare]
@@ -354,8 +374,8 @@ private lemma menageSquare_attack_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {a b :
   · rw [Nat.mod_eq_of_lt h2, show a + 1 = 2 * n by omega, Nat.mod_self]; omega
   · omega
 
-/-- Formula under the stated hypotheses: `IsNonattacking (S.image (menageSquare n)) ↔ ∀ i ∈ S, (i + 1) %
-(2 * n) ∉ S`. -/
+/-- Formula under the stated hypotheses:
+`IsNonattacking (S.image (menageSquare n)) ↔ ∀ i ∈ S, (i + 1) % (2 * n) ∉ S`. -/
 private lemma isNonattacking_image_menageSquare_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
     (hS : S ⊆ range (2 * n)) :
     IsNonattacking (S.image (menageSquare n)) ↔ ∀ i ∈ S, (i + 1) % (2 * n) ∉ S := by
@@ -368,7 +388,8 @@ private lemma isNonattacking_image_menageSquare_iff {n : ℕ} [NeZero n] (hn : 2
       rcases Nat.lt_or_ge (i + 1) (2 * n) with h1 | h1
       · rw [Nat.mod_eq_of_lt h1]; omega
       · rw [show i + 1 = 2 * n by omega, Nat.mod_self]; omega
-    have hψ : menageSquare n i ≠ menageSquare n ((i + 1) % (2 * n)) := fun e => hne (hinj hj hi e.symm)
+    have hψ : menageSquare n i ≠ menageSquare n ((i + 1) % (2 * n)) := fun e =>
+        hne (hinj hj hi e.symm)
     have := h _ (mem_image_of_mem _ hi) _ (mem_image_of_mem _ hj) hψ
     have := (menageSquare_attack_iff hn hi' hj').mpr (Or.inr (Or.inl rfl))
     tauto
@@ -377,14 +398,16 @@ private lemma isNonattacking_image_menageSquare_iff {n : ℕ} [NeZero n] (hn : 2
     obtain ⟨b, hb, rfl⟩ := mem_image.mp hy
     have hab : a ≠ b := fun e => hxy (e ▸ rfl)
     by_contra hc
-    have hc : (menageSquare n a).1 = (menageSquare n b).1 ∨ (menageSquare n a).2 = (menageSquare n b).2 := by tauto
-    rcases (menageSquare_attack_iff hn (mem_range.mp (hS ha)) (mem_range.mp (hS hb))).mp hc with e | e | e
+    have hc : (menageSquare n a).1 = (menageSquare n b).1 ∨ (menageSquare n a).2 =
+        (menageSquare n b).2 := by tauto
+    rcases (menageSquare_attack_iff hn (mem_range.mp (hS ha)) (mem_range.mp (hS hb))).mp
+        hc with e | e | e
     · exact hab e
     · exact h a ha (e ▸ hb)
     · exact h b hb (e ▸ ha)
 
-/-- Formula under the stated hypotheses: `(range (2 * n)).filter (fun m => menageSquare n m ∈ S.image
-(menageSquare n)) = S`. -/
+/-- Formula under the stated hypotheses:
+`(range (2 * n)).filter (fun m => menageSquare n m ∈ S.image (menageSquare n)) = S`. -/
 private lemma filter_menageSquare_mem_image {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
     (hS : S ⊆ range (2 * n)) :
     (range (2 * n)).filter (fun m => menageSquare n m ∈ S.image (menageSquare n)) = S := by
@@ -395,8 +418,8 @@ private lemma filter_menageSquare_mem_image {n : ℕ} [NeZero n] (hn : 2 ≤ n) 
     rwa [← injOn_menageSquare hn (coe_subset.mpr hS ha) hm e]
   · intro hm; exact ⟨hS hm, m, hm, rfl⟩
 
-/-- Formula under the stated hypotheses: `((range (2 * n)).filter (fun m => menageSquare n m ∈ C)).image
-(menageSquare n) = C`. -/
+/-- Formula under the stated hypotheses:
+`((range (2 * n)).filter (fun m => menageSquare n m ∈ C)).image (menageSquare n) = C`. -/
 private lemma image_filter_menageSquare_mem {n : ℕ} [NeZero n] {C : Finset (Fin n × Fin n)}
     (hC : C ⊆ menageBoard n) :
     ((range (2 * n)).filter (fun m => menageSquare n m ∈ C)).image (menageSquare n) = C := by
@@ -405,13 +428,15 @@ private lemma image_filter_menageSquare_mem {n : ℕ} [NeZero n] {C : Finset (Fi
   constructor
   · rintro ⟨m, ⟨_, hm⟩, rfl⟩; exact hm
   · intro hx
-    have hx' : x ∈ (range (2 * n)).image (menageSquare n) := by rw [image_menageSquare_range]; exact hC hx
+    have hx' : x ∈ (range (2 * n)).image (menageSquare n) :=
+        by rw [image_menageSquare_range]; exact hC hx
     obtain ⟨m, hm, e⟩ := mem_image.mp hx'
     exact ⟨m, ⟨hm, e ▸ hx⟩, e⟩
 
 /-- Identity under the stated parameter and domain assumptions: `rookNumber (menageBoard n) k =
 cyclicNonConsecutiveCount (2 * n) k`. -/
-private lemma rookNumber_menageBoard_eq_cyclicNonConsecutiveCount {n : ℕ} [NeZero n] (hn : 2 ≤ n) (k : ℕ) :
+private lemma rookNumber_menageBoard_eq_cyclicNonConsecutiveCount {n : ℕ} [NeZero n]
+    (hn : 2 ≤ n) (k : ℕ) :
     rookNumber (menageBoard n) k = cyclicNonConsecutiveCount (2 * n) k := by
   rw [rookNumber, cyclicNonConsecutiveCount]
   symm
@@ -446,7 +471,8 @@ end MenageHelpers
 @[dlmf 26.15.E9]
 theorem rookNumber_menageBoard {n : ℕ} [NeZero n] (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ n) :
     (rookNumber (menageBoard n) k : ℚ) = 2 * n / (2 * n - k) * (2 * n - k).choose k := by
-  rw [rookNumber_menageBoard_eq_cyclicNonConsecutiveCount hn, cyclicNonConsecutiveCount_two_mul_eq hn hk]
+  rw [rookNumber_menageBoard_eq_cyclicNonConsecutiveCount hn,
+      cyclicNonConsecutiveCount_two_mul_eq hn hk]
 
 /-- (26.15.10): the number of permutations avoiding the ménage board (the placements of the
 husbands; the solution of the problème des ménages is `2 (n!)` times this) is
@@ -474,8 +500,8 @@ def ferrersBoard {n : ℕ} (b : Fin n → ℕ) : Finset (Fin n × Fin n) :=
 
 /-! ### Rook numbers of Ferrers boards, column by column
 
-`ferrersPlacements b m k`: nonattacking placements of `k` rooks in the first `m` columns of the Ferrers
-board; adding column `m` gives `r_{k+1} = r_{k+1}' + (b_m - k) r_k'`, from which (26.15.11)
+`ferrersPlacements b m k`: nonattacking placements of `k` rooks in the first `m` columns of the
+Ferrers board; adding column `m` gives `r_{k+1} = r_{k+1}' + (b_m - k) r_k'`, from which (26.15.11)
 follows by induction with `(X + c)(x)_k = (x)_{k+1} + (c + k)(x)_k`. -/
 
 /-- The first `m` columns of the Ferrers board. -/
@@ -492,11 +518,14 @@ private lemma mem_ferrersPlacements {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C
       IsNonattacking C := by
   simp only [ferrersPlacements, mem_filter, mem_powerset]
   constructor
-  · rintro ⟨h1, h2⟩; exact ⟨fun x hx => by simpa [ferrersBoardColumns, ferrersBoard] using h1 hx, h2⟩
-  · rintro ⟨h1, h2⟩; exact ⟨fun x hx => by simpa [ferrersBoardColumns, ferrersBoard] using h1 x hx, h2⟩
+  · rintro ⟨h1, h2⟩; exact
+        ⟨fun x hx => by simpa [ferrersBoardColumns, ferrersBoard] using h1 hx, h2⟩
+  · rintro ⟨h1, h2⟩; exact
+        ⟨fun x hx => by simpa [ferrersBoardColumns, ferrersBoard] using h1 x hx, h2⟩
 
 /-- Distinct columns: a placement on `m` columns has at most `m` rooks. -/
-private lemma le_of_mem_ferrersPlacements {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n × Fin n)}
+private lemma le_of_mem_ferrersPlacements {n : ℕ} {b : Fin n → ℕ} {m k : ℕ}
+    {C : Finset (Fin n × Fin n)}
     (hC : C ∈ ferrersPlacements b m k) : k ≤ m := by
   obtain ⟨h1, rfl, h3⟩ := mem_ferrersPlacements.mp hC
   have hinj : Set.InjOn (fun x : Fin n × Fin n => (x.1 : ℕ)) C := fun x hx y hy h => by
@@ -508,10 +537,12 @@ private lemma le_of_mem_ferrersPlacements {n : ℕ} {b : Fin n → ℕ} {m k : �
   simpa using card_le_card this
 
 /-- The recurrence for the column-by-column rook numbers of a Ferrers board. -/
-private lemma card_ferrersPlacements_succ_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) {m : ℕ}
+private lemma card_ferrersPlacements_succ_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b)
+    (hbn : ∀ j, b j ≤ n) {m : ℕ}
     (hm : m < n) (k : ℕ) :
     ((ferrersPlacements b (m + 1) (k + 1)).card : ℤ) =
-      (ferrersPlacements b m (k + 1)).card + ((b ⟨m, hm⟩ : ℤ) - k) * (ferrersPlacements b m k).card := by
+      (ferrersPlacements b m (k + 1)).card + ((b ⟨m, hm⟩ : ℤ) - k) *
+          (ferrersPlacements b m k).card := by
   set bm := b ⟨m, hm⟩ with hbm
   have hbmn : bm ≤ n := hbn ⟨m, hm⟩
   set A := ferrersPlacements b (m + 1) (k + 1)
@@ -532,7 +563,8 @@ private lemma card_ferrersPlacements_succ_succ {n : ℕ} {b : Fin n → ℕ} (hb
     simp only [A1, A, mem_filter, mem_ferrersPlacements, not_forall] at hC
     obtain ⟨⟨h1, h2, h3⟩, x0, hx0, hx0m⟩ := hC
     have hx0' : (x0.1 : ℕ) = m := by have := (h1 x0 hx0).2; omega
-    refine mem_ferrersPlacements.mpr ⟨fun x hx => ⟨(h1 x (mem_filter.mp hx).1).1, (mem_filter.mp hx).2⟩,
+    refine mem_ferrersPlacements.mpr
+        ⟨fun x hx => ⟨(h1 x (mem_filter.mp hx).1).1, (mem_filter.mp hx).2⟩,
       ?_, fun x hx y hy => h3 x (mem_filter.mp hx).1 y (mem_filter.mp hy).1⟩
     have : C.filter (fun x => (x.1 : ℕ) < m) = C.erase x0 := by
       ext x
@@ -635,7 +667,8 @@ private lemma card_ferrersPlacements_succ_succ {n : ℕ} {b : Fin n → ℕ} (hb
   rw [← hsplit, h0, Nat.cast_add, hA1]
 
 /-- One empty placement. -/
-private lemma card_ferrersPlacements_zero {n : ℕ} (b : Fin n → ℕ) (m : ℕ) : #(ferrersPlacements b m 0) = 1 := by
+private lemma card_ferrersPlacements_zero {n : ℕ} (b : Fin n → ℕ) (m : ℕ) :
+    #(ferrersPlacements b m 0) = 1 := by
   rw [card_eq_one]
   refine ⟨∅, ?_⟩
   ext C
@@ -645,7 +678,8 @@ private lemma card_ferrersPlacements_zero {n : ℕ} (b : Fin n → ℕ) (m : ℕ
   · rintro rfl; exact ⟨by simp, rfl, by simp [IsNonattacking]⟩
 
 /-- No placement of more rooks than columns. -/
-private lemma card_ferrersPlacements_of_lt {n : ℕ} (b : Fin n → ℕ) {m k : ℕ} (h : m < k) : #(ferrersPlacements b m k) = 0 := by
+private lemma card_ferrersPlacements_of_lt {n : ℕ} (b : Fin n → ℕ) {m k : ℕ} (h : m < k) :
+    #(ferrersPlacements b m k) = 0 := by
   rw [card_eq_zero, eq_empty_iff_forall_notMem]
   intro C hC
   have := le_of_mem_ferrersPlacements hC
@@ -667,8 +701,10 @@ private lemma X_add_C_mul_descPochhammer (c : ℤ) (k : ℕ) :
 def ferrersHeight {n : ℕ} (b : Fin n → ℕ) (j : ℕ) : ℕ := if h : j < n then b ⟨j, h⟩ else 0
 
 /-- The column-by-column form of the Ferrers board identity. -/
-private lemma sum_card_ferrersPlacements_mul_descPochhammer {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) :
-    ∀ m, m ≤ n → ∑ k ∈ range (m + 1), C (#(ferrersPlacements b m (m - k)) : ℤ) * descPochhammer ℤ k =
+private lemma sum_card_ferrersPlacements_mul_descPochhammer {n : ℕ} {b : Fin n → ℕ}
+    (hb : Monotone b) (hbn : ∀ j, b j ≤ n) :
+    ∀ m, m ≤ n → ∑ k ∈ range (m + 1), C (#(ferrersPlacements b m (m - k)) : ℤ) *
+        descPochhammer ℤ k =
       ∏ j ∈ range m, (X + C ((ferrersHeight b j : ℤ) - j)) := by
   intro m
   induction m with
@@ -676,30 +712,37 @@ private lemma sum_card_ferrersPlacements_mul_descPochhammer {n : ℕ} {b : Fin n
   | succ m ih =>
     intro hm
     have hmn : m < n := by omega
-    rw [prod_range_succ, ← ih hmn.le, sum_mul, sum_range_succ, Nat.sub_self, card_ferrersPlacements_zero,
+    rw [prod_range_succ, ← ih hmn.le, sum_mul, sum_range_succ, Nat.sub_self,
+        card_ferrersPlacements_zero,
       Nat.cast_one, map_one, one_mul]
     have hbb : ferrersHeight b m = b ⟨m, hmn⟩ := by simp only [ferrersHeight, hmn, ↓reduceDIte]
     have hL : ∀ k ∈ range (m + 1), C (#(ferrersPlacements b (m + 1) (m + 1 - k)) : ℤ) *
         descPochhammer ℤ k = C (#(ferrersPlacements b m (m - k + 1)) : ℤ) * descPochhammer ℤ k +
-        C (#(ferrersPlacements b m (m - k)) : ℤ) * C ((b ⟨m, hmn⟩ : ℤ) - m + k) * descPochhammer ℤ k := by
+        C (#(ferrersPlacements b m (m - k)) : ℤ) * C ((b ⟨m, hmn⟩ : ℤ) - m + k) *
+            descPochhammer ℤ k := by
       intro k hk
       rw [mem_range] at hk
-      rw [show m + 1 - k = (m - k) + 1 by omega, card_ferrersPlacements_succ_succ hb hbn hmn, Nat.cast_sub (by omega)]
+      rw [show m + 1 - k = (m - k) + 1 by omega, card_ferrersPlacements_succ_succ hb hbn hmn,
+                                            Nat.cast_sub (by omega)]
       simp only [map_add, map_mul, map_sub, map_natCast]
       ring
     have hR : ∀ k ∈ range (m + 1), C (#(ferrersPlacements b m (m - k)) : ℤ) * descPochhammer ℤ k *
         (X + C ((ferrersHeight b m : ℤ) - m)) = C (#(ferrersPlacements b m (m - k)) : ℤ) *
           descPochhammer ℤ (k + 1) +
-        C (#(ferrersPlacements b m (m - k)) : ℤ) * C ((b ⟨m, hmn⟩ : ℤ) - m + k) * descPochhammer ℤ k := by
+        C (#(ferrersPlacements b m (m - k)) : ℤ) * C ((b ⟨m, hmn⟩ : ℤ) - m + k) *
+            descPochhammer ℤ k := by
       intro k _
       rw [hbb, mul_assoc, mul_comm (descPochhammer ℤ k), X_add_C_mul_descPochhammer]
       ring
     rw [sum_congr rfl hL, sum_congr rfl hR, sum_add_distrib, sum_add_distrib]
-    rw [sum_range_succ' (fun k => C (#(ferrersPlacements b m (m - k + 1)) : ℤ) * descPochhammer ℤ k),
+    rw [sum_range_succ' (fun k => C (#(ferrersPlacements b m (m - k + 1)) : ℤ) *
+        descPochhammer ℤ k),
       sum_range_succ (fun k => C (#(ferrersPlacements b m (m - k)) : ℤ) * descPochhammer ℤ (k + 1)),
-      Nat.sub_zero, card_ferrersPlacements_of_lt b (Nat.lt_succ_self m), Nat.sub_self, card_ferrersPlacements_zero]
+      Nat.sub_zero, card_ferrersPlacements_of_lt b (Nat.lt_succ_self m), Nat.sub_self,
+          card_ferrersPlacements_zero]
     have hre : ∀ k ∈ range m, C (#(ferrersPlacements b m (m - (k + 1) + 1)) : ℤ) *
-        descPochhammer ℤ (k + 1) = C (#(ferrersPlacements b m (m - k)) : ℤ) * descPochhammer ℤ (k + 1) := by
+        descPochhammer ℤ (k + 1) = C (#(ferrersPlacements b m (m - k)) : ℤ) *
+            descPochhammer ℤ (k + 1) := by
       intro k hk
       rw [mem_range] at hk
       rw [show m - (k + 1) + 1 = m - k by omega]

@@ -43,8 +43,10 @@ namespace DLMF.Legendre
 /-- DLMF 14.9.1: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `π sin(μπ)/(2Γ(ν−μ+1)) 𝖯^{−μ}_ν(x) =
 −𝖰^μ_ν(x)/Γ(ν+μ+1) + cos(μπ)/Γ(ν−μ+1) 𝖰^{−μ}_ν(x)`. -/
 @[dlmf 14.9.E1]
-theorem ferrers_connection_1 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    π*sin (μ*π)/(2*Gamma (ν-μ+1))*ferrersP ν (-μ) x=-ferrersQ ν μ x/Gamma (ν+μ+1)+cos (μ*π)/Gamma (ν-μ+1)*ferrersQ ν (-μ) x := by
+theorem ferrers_connection_1 (ν μ : ℂ) (hplus : LegendreQRegular ν μ)
+    (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+    π*sin (μ*π)/(2*Gamma (ν-μ+1))*ferrersP ν (-μ) x=-ferrersQ ν μ x/Gamma (ν+μ+1)+cos (μ*π)/Gamma
+        (ν-μ+1)*ferrersQ ν (-μ) x := by
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero hplus
   obtain ⟨hh1, hh2⟩ := legendre_Gamma_half_ne_zero_neg hminus
   have pyth := sin_sq_add_cos_sq ((ν+μ)*π/2)
@@ -77,8 +79,10 @@ theorem ferrers_connection_1 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
 /-- DLMF 14.9.2: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `2 sin(μπ)/(π Γ(ν−μ+1)) 𝖰^{−μ}_ν(x) =
 𝖯^μ_ν(x)/Γ(ν+μ+1) − cos(μπ)/Γ(ν−μ+1) 𝖯^{−μ}_ν(x)`. -/
 @[dlmf 14.9.E2]
-theorem ferrers_connection_2 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    2*sin (μ*π)/(π*Gamma (ν-μ+1))*ferrersQ ν (-μ) x=ferrersP ν μ x/Gamma (ν+μ+1)-cos (μ*π)/Gamma (ν-μ+1)*ferrersP ν (-μ) x := by
+theorem ferrers_connection_2 (ν μ : ℂ) (hplus : LegendreQRegular ν μ)
+    (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+    2*sin (μ*π)/(π*Gamma (ν-μ+1))*ferrersQ ν (-μ) x=ferrersP ν μ x/Gamma (ν+μ+1)-cos (μ*π)/Gamma
+        (ν-μ+1)*ferrersP ν (-μ) x := by
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero hplus
   obtain ⟨hh1, hh2⟩ := legendre_Gamma_half_ne_zero_neg hminus
   have pyth := sin_sq_add_cos_sq ((ν+μ)*π/2)
@@ -120,8 +124,11 @@ theorem ferrers_connection_5 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1)
 /-- DLMF 14.9.6: for `-1 < x < 1`, with `ν ± μ ∉ {−1, −2, …}` and `−ν−1+μ ∉ {−1, −2, …}`, `π cos(νπ)
 cos(μπ) 𝖯^μ_ν(x) = sin((ν+μ)π) 𝖰^μ_ν(x) − sin((ν−μ)π) 𝖰^μ_{−ν−1}(x)`. -/
 @[dlmf 14.9.E6]
-theorem ferrers_connection_6 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) (hother : LegendreQRegular (-ν-1) μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    π*cos (ν*π)*cos (μ*π)*ferrersP ν μ x=sin ((ν+μ)*π)*ferrersQ ν μ x-sin ((ν-μ)*π)*ferrersQ (-ν-1) μ x := by
+theorem ferrers_connection_6 (ν μ : ℂ) (hplus : LegendreQRegular ν μ)
+    (hminus : LegendreQRegular ν (-μ)) (hother : LegendreQRegular (-ν-1) μ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
+    π*cos (ν*π)*cos (μ*π)*ferrersP ν μ x=sin ((ν+μ)*π)*ferrersQ ν μ x-sin ((ν-μ)*π)*ferrersQ
+        (-ν-1) μ x := by
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero hplus
   obtain ⟨hh1, hh2⟩ := legendre_Gamma_half_ne_zero_neg hminus
   obtain ⟨hk1, hk2⟩ := legendre_Gamma_half_ne_zero hother
@@ -159,8 +166,10 @@ theorem ferrers_connection_6 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
 /-- DLMF 14.9.7: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `sin((ν−μ)π)/Γ(ν+μ+1) 𝖯^μ_ν(x) =
 sin(νπ)/Γ(ν−μ+1) 𝖯^{−μ}_ν(x) − sin(μπ)/Γ(ν−μ+1) 𝖯^{−μ}_ν(−x)`. -/
 @[dlmf 14.9.E7]
-theorem ferrers_connection_7 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    sin ((ν-μ)*π)/Gamma (ν+μ+1)*ferrersP ν μ x=sin (ν*π)/Gamma (ν-μ+1)*ferrersP ν (-μ) x-sin (μ*π)/Gamma (ν-μ+1)*ferrersP ν (-μ) (-x) := by
+theorem ferrers_connection_7 (ν μ : ℂ) (hplus : LegendreQRegular ν μ)
+    (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+    sin ((ν-μ)*π)/Gamma (ν+μ+1)*ferrersP ν μ x=sin (ν*π)/Gamma (ν-μ+1)*ferrersP ν (-μ) x-sin
+        (μ*π)/Gamma (ν-μ+1)*ferrersP ν (-μ) (-x) := by
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero hplus
   obtain ⟨hh1, hh2⟩ := legendre_Gamma_half_ne_zero_neg hminus
   have pyth := sin_sq_add_cos_sq ((ν+μ)*π/2)
@@ -169,7 +178,8 @@ theorem ferrers_connection_7 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
   have hT : (2:ℂ)^μ ≠ 0 := by simp
   have hN : (2:ℂ)^ν ≠ 0 := by simp
   have hP : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  rw [ferrersP_neg_regular hminus hx, ferrersP_neg_regular hminus (ferrers_neg_mem_Ioo hx), ferrersEven_neg,
+  rw [ferrersP_neg_regular hminus hx, ferrersP_neg_regular hminus (ferrers_neg_mem_Ioo hx),
+      ferrersEven_neg,
     ferrersOdd_neg, ferrersP_regular hplus hx, legendre_Gamma_plus, legendre_Gamma_minus, cpow_neg]
   rw [show μ*π = (ν+μ)*π/2 - (ν-μ)*π/2 by ring, show ν*π = (ν+μ)*π/2 + (ν-μ)*π/2 by ring,
     sin_sub, sin_add, legendre_sin_two_mul_half]
@@ -193,14 +203,16 @@ theorem ferrers_connection_7 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
 /-- DLMF 14.9.8: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `(π/2) sin((ν−μ)π) 𝖯^{−μ}_ν(x) =
 −cos((ν−μ)π) 𝖰^{−μ}_ν(x) − 𝖰^{−μ}_ν(−x)`. -/
 @[dlmf 14.9.E8]
-theorem ferrers_connection_8 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrers_connection_8 (ν μ : ℂ) (hplus : LegendreQRegular ν μ)
+    (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     π/2*sin ((ν-μ)*π)*ferrersP ν (-μ) x=-cos ((ν-μ)*π)*ferrersQ ν (-μ) x-ferrersQ ν (-μ) (-x) := by
   obtain ⟨hh1, hh2⟩ := legendre_Gamma_half_ne_zero_neg hminus
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero hplus
   have pytha := sin_sq_add_cos_sq ((ν-μ)*π/2)
   have hT : (2:ℂ)^μ ≠ 0 := by simp
   have hP : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  rw [ferrersP_neg_regular hminus hx, ferrersQ_neg_even_odd ν μ hx, ferrersQ_neg_even_odd ν μ (ferrers_neg_mem_Ioo hx),
+  rw [ferrersP_neg_regular hminus hx, ferrersQ_neg_even_odd ν μ hx,
+      ferrersQ_neg_even_odd ν μ (ferrers_neg_mem_Ioo hx),
     ferrersEven_neg, ferrersOdd_neg, cpow_neg]
   rw [legendre_sin_two_mul_half, legendre_cos_two_mul_half]
   generalize ferrersEven ν μ x = E
@@ -219,8 +231,10 @@ theorem ferrers_connection_8 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
 /-- DLMF 14.9.9: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `2/(Γ(ν+μ+1) Γ(μ−ν)) 𝖰^μ_ν(x) =
 −cos(νπ) 𝖯^{−μ}_ν(x) + cos(μπ) 𝖯^{−μ}_ν(−x)`. -/
 @[dlmf 14.9.E9]
-theorem ferrers_connection_9 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    2/(Gamma (ν+μ+1)*Gamma (μ-ν))*ferrersQ ν μ x=-cos (ν*π)*ferrersP ν (-μ) x+cos (μ*π)*ferrersP ν (-μ) (-x) := by
+theorem ferrers_connection_9 (ν μ : ℂ) (hplus : LegendreQRegular ν μ)
+    (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+    2/(Gamma (ν+μ+1)*Gamma (μ-ν))*ferrersQ ν μ x=-cos (ν*π)*ferrersP ν (-μ) x+cos (μ*π)*ferrersP ν
+        (-μ) (-x) := by
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero hplus
   obtain ⟨hh1, hh2⟩ := legendre_Gamma_half_ne_zero_neg hminus
   obtain ⟨hA, hB⟩ := legendre_reflection_recip_neg hminus
@@ -231,7 +245,8 @@ theorem ferrers_connection_9 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
   have hT : (2:ℂ)^μ ≠ 0 := by simp
   have hN : (2:ℂ)^ν ≠ 0 := by simp
   have hP : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  rw [ferrersP_neg_regular hminus hx, ferrersP_neg_regular hminus (ferrers_neg_mem_Ioo hx), ferrersEven_neg,
+  rw [ferrersP_neg_regular hminus hx, ferrersP_neg_regular hminus (ferrers_neg_mem_Ioo hx),
+      ferrersEven_neg,
     ferrersOdd_neg, ferrersQ_even_odd, div_eq_mul_inv, mul_inv, legendre_recip_Gamma_sub, hA, hB,
     legendre_Gamma_plus, cpow_neg]
   rw [show μ*π = (ν+μ)*π/2 - (ν-μ)*π/2 by ring, show ν*π = (ν+μ)*π/2 + (ν-μ)*π/2 by ring,
@@ -256,14 +271,16 @@ theorem ferrers_connection_9 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
 /-- DLMF 14.9.10: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `(2/π) sin((ν−μ)π) 𝖰^{−μ}_ν(x) =
 cos((ν−μ)π) 𝖯^{−μ}_ν(x) − 𝖯^{−μ}_ν(−x)`. -/
 @[dlmf 14.9.E10]
-theorem ferrers_connection_10 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrers_connection_10 (ν μ : ℂ) (hplus : LegendreQRegular ν μ)
+    (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     2/π*sin ((ν-μ)*π)*ferrersQ ν (-μ) x=cos ((ν-μ)*π)*ferrersP ν (-μ) x-ferrersP ν (-μ) (-x) := by
   obtain ⟨hh1, hh2⟩ := legendre_Gamma_half_ne_zero_neg hminus
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero hplus
   have pytha := sin_sq_add_cos_sq ((ν-μ)*π/2)
   have hT : (2:ℂ)^μ ≠ 0 := by simp
   have hP : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  rw [ferrersP_neg_regular hminus hx, ferrersP_neg_regular hminus (ferrers_neg_mem_Ioo hx), ferrersQ_neg_even_odd ν μ hx,
+  rw [ferrersP_neg_regular hminus hx, ferrersP_neg_regular hminus (ferrers_neg_mem_Ioo hx),
+      ferrersQ_neg_even_odd ν μ hx,
     ferrersEven_neg, ferrersOdd_neg, cpow_neg]
   rw [legendre_sin_two_mul_half, legendre_cos_two_mul_half]
   generalize ferrersEven ν μ x = E
@@ -282,13 +299,15 @@ theorem ferrers_connection_10 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hm
 /-- DLMF 14.9.3: for `m ∈ ℕ`, `ν − m + 1 ∉ {0, −1, −2, …}` and `-1 < x < 1`, `𝖯^{−m}_ν(x) = (−1)^m
 Γ(ν−m+1)/Γ(ν+m+1) 𝖯^m_ν(x)`. -/
 @[dlmf 14.9.E3]
-theorem ferrersP_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, ν-m+1 ≠ -n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersP_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, ν-m+1 ≠ -n) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν (-m) x=(-1)^m*Gamma (ν-m+1)/Gamma (ν+m+1)*ferrersP ν m x := by
   have hG := Gamma_add_nat_ne_zero ν m h
   rcases m with _ | k
   · simp only [Nat.cast_zero, neg_zero, sub_zero, add_zero, pow_zero, one_mul] at hG ⊢
     rw [div_self hG, one_mul]
-  have hw := mem_cutPlane_of_one_add (show 1+(x:ℂ) ∈ slitPlane from Or.inl (by simp; linarith [hx.1]))
+  have hw := mem_cutPlane_of_one_add
+      (show 1+(x:ℂ) ∈ slitPlane from Or.inl (by simp; linarith [hx.1]))
   have hp := poch_mul_poch_neg_mul_Gamma ν (k+1) h
   have hg := ferrers_gauge_neg_nat (k+1) hx
   unfold ferrersP
@@ -304,7 +323,8 @@ theorem ferrersP_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, �
 /-- DLMF 14.9.4: for `m ∈ ℕ`, `ν − m + 1 ∉ {0, −1, −2, …}` and `-1 < x < 1`, `𝖰^{−m}_ν(x) = (−1)^m
 Γ(ν−m+1)/Γ(ν+m+1) 𝖰^m_ν(x)`. -/
 @[dlmf 14.9.E4]
-theorem ferrersQ_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, ν-m+1 ≠ -n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersQ_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, ν-m+1 ≠ -n) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ ν (-m) x=(-1)^m*Gamma (ν-m+1)/Gamma (ν+m+1)*ferrersQ ν m x := by
   have hm : LegendreQRegular ν (-(m:ℂ)) := fun n hn => h n (by linear_combination hn)
   have hp : LegendreQRegular ν (m:ℂ) := fun n hn => h (n+2*m) (by push_cast; linear_combination hn)
@@ -314,8 +334,10 @@ theorem ferrersQ_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, �
   have hT : (2:ℂ)^(m:ℂ) ≠ 0 := by simp
   have hN : (2:ℂ)^ν ≠ 0 := by simp
   have hσ : ((-1:ℂ)^m)^2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
-  rw [ferrersQ_neg_even_odd ν m hx, ferrersQ_even_odd, legendre_Gamma_plus, legendre_Gamma_minus, cpow_neg,
-    show (ν-m)*π/2 = (ν+m)*π/2 - m*π by ring, legendre_sin_sub_nat_mul_pi, legendre_cos_sub_nat_mul_pi]
+  rw [ferrersQ_neg_even_odd ν m hx, ferrersQ_even_odd, legendre_Gamma_plus,
+      legendre_Gamma_minus, cpow_neg,
+    show (ν-m)*π/2 = (ν+m)*π/2 - m*π by ring, legendre_sin_sub_nat_mul_pi,
+                                          legendre_cos_sub_nat_mul_pi]
   generalize ferrersEven ν m x = E
   generalize ferrersOdd ν m x = O
   generalize Gamma ((ν+m+1)/2) = g1 at hg1
@@ -342,8 +364,10 @@ theorem associated_connection_11 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
 @[dlmf 14.9.E14]
 theorem associated_connection_14 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ ν (-μ) z=olverQ ν μ z := by
-  refine legendre_eq_of_continuous_nonint (f := fun μ => olverQ ν (-μ) z) (g := fun μ => olverQ ν μ z)
-    ((olverQ_entire_order ν z hz).continuous.comp continuous_neg) (olverQ_entire_order ν z hz).continuous
+  refine legendre_eq_of_continuous_nonint (f := fun μ => olverQ ν (-μ) z)
+      (g := fun μ => olverQ ν μ z)
+    ((olverQ_entire_order ν z hz).continuous.comp continuous_neg)
+        (olverQ_entire_order ν z hz).continuous
     (fun μ hμ => ?_) μ
   have hμ' : ∀ n : ℤ, -μ ≠ n := fun n hn => hμ (-n) (by push_cast; linear_combination -hn)
   have h1 := olverQ_connection ν μ hz
@@ -366,10 +390,13 @@ theorem associated_connection_12 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
     (f := fun μ => cos (ν*π)*associatedP ν (-μ) z)
     (g := fun μ => -olverQ ν μ z*(Gamma (μ-ν))⁻¹+olverQ (-ν-1) μ z*(Gamma (ν+μ+1))⁻¹)
     (continuous_const.mul (continuous_associatedP_neg_order ν hz))
-    ((((olverQ_entire_order ν z hz).continuous.neg.mul (continuous_recip_Gamma.comp (by fun_prop)))).add
-      ((olverQ_entire_order (-ν-1) z hz).continuous.mul (continuous_recip_Gamma.comp (by fun_prop))))
+    ((((olverQ_entire_order ν z hz).continuous.neg.mul
+        (continuous_recip_Gamma.comp (by fun_prop)))).add
+      ((olverQ_entire_order (-ν-1) z hz).continuous.mul
+          (continuous_recip_Gamma.comp (by fun_prop))))
     (fun μ hμ => ?_) μ |>.trans (by simp only [div_eq_mul_inv])
-  rw [(olverQ_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds, (olverQ_reflect_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds]
+  rw [(olverQ_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds,
+      (olverQ_reflect_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds]
   have r1 := legendre_recip_Gamma_reflection (ν+μ+1)
   have r2 := legendre_recip_Gamma_reflection (ν-μ+1)
   rw [show 1-(ν+μ+1) = -ν-1-μ+1 by ring] at r1
@@ -398,13 +425,15 @@ theorem associated_connection_12 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
 P^{−μ}_ν(z)/Γ(ν−μ+1)`. -/
 @[dlmf 14.9.E15]
 theorem associated_connection_15 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ) z/Gamma (ν-μ+1) := by
+    2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ)
+        z/Gamma (ν-μ+1) := by
   exact olverQ_connection ν μ hz
 
 /-- Euler-transformed hypergeometric form of `P^{-μ}_ν` (DLMF 14.3.15), available before
 the hypergeometric-representation module for the Whipple formulas. -/
 theorem associatedP_neg_euler (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    associatedP ν (-μ) z=2^(-μ)*legendreBranchPower μ z*regularizedGaussHG (μ-ν) (ν+μ+1) (μ+1) ((1-z)/2) := by
+    associatedP ν (-μ) z=2^(-μ)*legendreBranchPower μ z*regularizedGaussHG (μ-ν) (ν+μ+1) (μ+1)
+        ((1-z)/2) := by
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   have h1 : z+1 ≠ 0 := by
     simpa [add_comm] using slitPlane_ne_zero (one_add_mem_slitPlane_of_sub_one hz)
@@ -488,7 +517,8 @@ theorem starConvex_re_pos_sub_one_slitPlane :
 /-- DLMF 14.3.18 for `Re z > 0`, proved before 14.3.16 because the latter is derived from it:
 the quadratic transformation 15.8.17 on the real segment `(1,2)`, then analytic continuation. -/
 theorem associatedP_neg_eq_quadratic (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.re) :
-    associatedP ν (-μ) z=2^(-μ)*z^(ν-μ)*legendreBranchPower μ z*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (μ+1) (1-1/z^2) := by
+    associatedP ν (-μ) z=2^(-μ)*z^(ν-μ)*legendreBranchPower μ z*regularizedGaussHG ((μ-ν)/2)
+        ((μ-ν+1)/2) (μ+1) (1-1/z^2) := by
   set D : Set ℂ := {z : ℂ | 0 < z.re ∧ z-1 ∈ slitPlane} with hD
   have hDo : IsOpen D := (isOpen_lt continuous_const continuous_re).inter
     (isOpen_slitPlane.preimage (continuous_sub_right 1))
@@ -556,7 +586,8 @@ theorem associatedP_neg_eq_quadratic (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
       ⟨by simp, Or.inl (by simp)⟩).isConnected.isPreconnected h32 hfreq ⟨hre, hz⟩
 
 /-- Off `(-∞,1]`, `1 - 1/z²` lies in the slit plane. -/
-theorem one_sub_recip_sq_mem_slitPlane_of_sub_one {z : ℂ} (hz : z-1 ∈ slitPlane) : 1-1/z^2 ∈ slitPlane := by
+theorem one_sub_recip_sq_mem_slitPlane_of_sub_one {z : ℂ} (hz : z-1 ∈ slitPlane) : 1-1/z^2 ∈
+    slitPlane := by
   have hz0 : z ≠ 0 := by
     rintro rfl; rw [mem_slitPlane_iff] at hz; norm_num at hz
   rw [mem_slitPlane_iff_not_le_zero]
@@ -592,7 +623,8 @@ theorem one_sub_recip_sq_mem_slitPlane_of_sub_one {z : ℂ} (hz : z-1 ∈ slitPl
 /-- The square of the inherited square root `exp((log(z-1)+log(z+1))/2)` is `(z-1)(z+1)`. -/
 theorem whipple_sqrt_sq {z : ℂ} (h1 : z - 1 ≠ 0) (h2 : z + 1 ≠ 0) :
     exp ((log (z-1)+log (z+1))/2)^2 = (z-1)*(z+1) := by
-  rw [← exp_nat_mul, show ((2:ℕ):ℂ)*((log (z-1)+log (z+1))/2) = log (z-1)+log (z+1) by push_cast; ring,
+  rw [← exp_nat_mul, show ((2:ℕ):ℂ)*((log (z-1)+log (z+1))/2) =
+      log (z-1)+log (z+1) by push_cast; ring,
     exp_add, exp_log h1, exp_log h2]
 
 /-- On the right half of the cut domain, the Whipple point `z/√(z²-1)` avoids `(-∞,1]`. -/
@@ -668,7 +700,8 @@ theorem whipple_point_real {t : ℝ} (ht : 1 < t) :
   have ht0 : 0 < t := by linarith
   have hWt : W < t := by nlinarith
   refine ⟨t/W, by rw [lt_div_iff₀ hW0]; linarith, ?_, ?_, ?_, ?_⟩
-  · rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring, show (t:ℂ)+1 = ((t+1:ℝ):ℂ) by push_cast; ring,
+  · rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring, show (t:ℂ)+1 =
+                                        ((t+1:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log (by linarith), ← ofReal_log (by linarith), ← ofReal_add,
       show ((Real.log (t-1) + Real.log (t+1) : ℝ):ℂ)/2 = ((l/2:ℝ):ℂ) by rw [hl]; push_cast; ring,
       ← ofReal_exp, ← ofReal_div]
@@ -687,7 +720,8 @@ theorem whipple_point_real {t : ℝ} (ht : 1 < t) :
 
 /-- Whipple's formula 14.9.16 on the real ray `t > 1`. -/
 theorem olverQ_whipple_real (ν μ : ℂ) (t : ℝ) (ht : 1 < t) :
-    olverQ ν μ t=(π/2:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) t*associatedP (-μ-1/2) (-ν-1/2) (t/exp ((log ((t:ℂ)-1)+log ((t:ℂ)+1))/2)) := by
+    olverQ ν μ t=(π/2:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) t*associatedP (-μ-1/2) (-ν-1/2)
+        (t/exp ((log ((t:ℂ)-1)+log ((t:ℂ)+1))/2)) := by
   obtain ⟨ζ, hζ1, hζe, hlog, hlogζ, hinv⟩ := whipple_point_real ht
   have ht0 : 0 < t := by linarith
   rw [hζe, show -ν-1/2 = -(ν+1/2) by ring,
@@ -710,7 +744,8 @@ theorem olverQ_whipple_real (ν μ : ℂ) (t : ℝ) (ht : 1 < t) :
   have hk2 : log ((ζ:ℂ)+1) = (Real.log (ζ+1):ℂ) := by
     rw [show (ζ:ℂ)+1 = ((ζ+1:ℝ):ℂ) by push_cast; ring, ofReal_log (by linarith)]
   have hc2 : ∀ s : ℂ, (2:ℂ)^s = exp ((Real.log 2:ℂ)*s) := fun s => by
-    rw [cpow_def_of_ne_zero two_ne_zero, show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, ofReal_log (by norm_num)]
+    rw [cpow_def_of_ne_zero two_ne_zero, show (2:ℂ) = ((2:ℝ):ℂ) by norm_num,
+                                                                     ofReal_log (by norm_num)]
   have hct : ∀ s : ℂ, (t:ℂ)^s = exp ((Real.log t:ℂ)*s) := fun s => by
     rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr ht0.ne'), ofReal_log ht0.le]
   have hcz : ∀ s : ℂ, (ζ:ℂ)^s = exp ((Real.log ζ:ℂ)*s) := fun s => by
@@ -729,7 +764,8 @@ theorem olverQ_whipple_real (ν μ : ℂ) (t : ℝ) (ht : 1 < t) :
 
 /-- Whipple's formula 14.9.17 on the real ray `t > 1`. -/
 theorem associatedP_whipple_real (ν μ : ℂ) (t : ℝ) (ht : 1 < t) :
-    associatedP ν μ t=(2/π:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) t*olverQ (-μ-1/2) (ν+1/2) (t/exp ((log ((t:ℂ)-1)+log ((t:ℂ)+1))/2)) := by
+    associatedP ν μ t=(2/π:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) t*olverQ (-μ-1/2) (ν+1/2)
+        (t/exp ((log ((t:ℂ)-1)+log ((t:ℂ)+1))/2)) := by
   obtain ⟨ζ, hζ1, hζe, hlog, hlogζ, hinv⟩ := whipple_point_real ht
   have ht0 : 0 < t := by linarith
   have hz1 : (t:ℂ) - 1 ∈ slitPlane := Or.inl (by simp; linarith)
@@ -757,13 +793,15 @@ theorem associatedP_whipple_real (ν μ : ℂ) (t : ℝ) (ht : 1 < t) :
   have hk2 : log ((ζ:ℂ)+1) = (Real.log (ζ+1):ℂ) := by
     rw [show (ζ:ℂ)+1 = ((ζ+1:ℝ):ℂ) by push_cast; ring, ofReal_log (by linarith)]
   have hc2 : ∀ s : ℂ, (2:ℂ)^s = exp ((Real.log 2:ℂ)*s) := fun s => by
-    rw [cpow_def_of_ne_zero two_ne_zero, show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, ofReal_log (by norm_num)]
+    rw [cpow_def_of_ne_zero two_ne_zero, show (2:ℂ) = ((2:ℝ):ℂ) by norm_num,
+                                                                     ofReal_log (by norm_num)]
   have hct : ∀ s : ℂ, (t:ℂ)^s = exp ((Real.log t:ℂ)*s) := fun s => by
     rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr ht0.ne'), ofReal_log ht0.le]
   have hcz : ∀ s : ℂ, (ζ:ℂ)^s = exp ((Real.log ζ:ℂ)*s) := fun s => by
     rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr (by linarith)), ofReal_log (by linarith)]
   have hct2 : ∀ s : ℂ, (1/(t:ℂ)^2)^s = exp ((-2*Real.log t:ℝ)*s) := fun s => by
-    rw [cpow_def_of_ne_zero (by simp; exact ht0.ne'), show 1/(t:ℂ)^2 = ((1/t^2:ℝ):ℂ) by push_cast; ring,
+    rw [cpow_def_of_ne_zero (by simp; exact ht0.ne'), show 1/(t:ℂ)^2 =
+        ((1/t^2:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log (by positivity), Real.log_div one_ne_zero (by positivity), Real.log_one,
       Real.log_pow]
     push_cast; ring_nf
@@ -824,22 +862,28 @@ theorem whipple_domain {w : ℂ} (hw : w ∈ {z : ℂ | 0 < z.re ∧ z-1 ∈ sli
     mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hm),
     one_sub_recip_sq_mem_slitPlane_of_sub_one hm⟩
 
-/-- Principal-sheet formula; Whipple transformation is stated in the right half-plane to fix its inherited branch. -/
+/-- Principal-sheet formula; Whipple transformation is stated in the right half-plane to fix its
+inherited branch. -/
 @[dlmf 14.9.E16]
 theorem associated_connection_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.re) :
-    olverQ ν μ z=(π/2:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) z*associatedP (-μ-1/2) (-ν-1/2) (z/exp ((log (z-1)+log (z+1))/2)) := by
+    olverQ ν μ z=(π/2:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) z*associatedP (-μ-1/2) (-ν-1/2)
+        (z/exp ((log (z-1)+log (z+1))/2)) := by
   refine eq_of_eqOn_Ioo_re_pos (f := olverQ ν μ)
-    (g := fun z => (π/2:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) z*associatedP (-μ-1/2) (-ν-1/2) (z/exp ((log (z-1)+log (z+1))/2))) ?_ ?_ (fun t ht => olverQ_whipple_real ν μ t ht.1) hz hre
-  · refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) ((isOpen_lt continuous_const continuous_re).inter
+    (g := fun z => (π/2:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) z*associatedP (-μ-1/2) (-ν-1/2)
+        (z/exp ((log (z-1)+log (z+1))/2))) ?_ ?_ (fun t ht => olverQ_whipple_real ν μ t ht.1) hz hre
+  · refine DifferentiableOn.analyticOnNhd (fun w hw => ?_)
+        ((isOpen_lt continuous_const continuous_re).inter
       (isOpen_slitPlane.preimage (continuous_sub_right 1)))
     obtain ⟨h1, h2, h3, h4, -⟩ := whipple_domain hw
     have h0 : w ^ 2 ≠ 0 := pow_ne_zero 2 (slitPlane_ne_zero h3)
-    have h6 : w ^ (ν+μ+1) ≠ 0 := by rw [cpow_def_of_ne_zero (slitPlane_ne_zero h3)]; exact exp_ne_zero _
+    have h6 : w ^ (ν+μ+1) ≠ 0 := by rw [cpow_def_of_ne_zero (slitPlane_ne_zero h3)];
+                                    exact exp_ne_zero _
     unfold olverQ legendreBranchPower
     simp only [div_eq_mul_inv, mul_inv]
     apply DifferentiableAt.differentiableWithinAt
     fun_prop (disch := first | assumption | simpa [div_eq_mul_inv] using h4)
-  · refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) ((isOpen_lt continuous_const continuous_re).inter
+  · refine DifferentiableOn.analyticOnNhd (fun w hw => ?_)
+        ((isOpen_lt continuous_const continuous_re).inter
       (isOpen_slitPlane.preimage (continuous_sub_right 1)))
     obtain ⟨h1, h2, h3, -, h5, h6, h7, h8, -⟩ := whipple_domain hw
     have hE : exp ((log (w-1)+log (w+1))/2) ≠ 0 := exp_ne_zero _
@@ -847,20 +891,26 @@ theorem associated_connection_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
     apply DifferentiableAt.differentiableWithinAt
     fun_prop (disch := assumption)
 
-/-- Principal-sheet formula; Whipple transformation is stated in the right half-plane to fix its inherited branch. -/
+/-- Principal-sheet formula; Whipple transformation is stated in the right half-plane to fix its
+inherited branch. -/
 @[dlmf 14.9.E17]
 theorem associated_connection_17 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.re) :
-    associatedP ν μ z=(2/π:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) z*olverQ (-μ-1/2) (ν+1/2) (z/exp ((log (z-1)+log (z+1))/2)) := by
+    associatedP ν μ z=(2/π:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) z*olverQ (-μ-1/2) (ν+1/2)
+        (z/exp ((log (z-1)+log (z+1))/2)) := by
   refine eq_of_eqOn_Ioo_re_pos (f := associatedP ν μ)
-    (g := fun z => (2/π:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) z*olverQ (-μ-1/2) (ν+1/2) (z/exp ((log (z-1)+log (z+1))/2))) ?_ ?_ (fun t ht => associatedP_whipple_real ν μ t ht.1) hz hre
-  · refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) ((isOpen_lt continuous_const continuous_re).inter
+    (g := fun z => (2/π:ℂ)^(1/2:ℂ)*legendreBranchPower (-1/2) z*olverQ (-μ-1/2) (ν+1/2)
+        (z/exp ((log (z-1)+log (z+1))/2))) ?_ ?_
+        (fun t ht => associatedP_whipple_real ν μ t ht.1) hz hre
+  · refine DifferentiableOn.analyticOnNhd (fun w hw => ?_)
+        ((isOpen_lt continuous_const continuous_re).inter
       (isOpen_slitPlane.preimage (continuous_sub_right 1)))
     obtain ⟨h1, h2, -, -, -⟩ := whipple_domain hw
     have h4 : (1-w)/2 ∈ cutPlane := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one h2)
     unfold associatedP
     apply DifferentiableAt.differentiableWithinAt
     fun_prop (disch := assumption)
-  · refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) ((isOpen_lt continuous_const continuous_re).inter
+  · refine DifferentiableOn.analyticOnNhd (fun w hw => ?_)
+        ((isOpen_lt continuous_const continuous_re).inter
       (isOpen_slitPlane.preimage (continuous_sub_right 1)))
     obtain ⟨h1, h2, h3, -, h5, h6, h7, -, h9⟩ := whipple_domain hw
     have hE : exp ((log (w-1)+log (w+1))/2) ≠ 0 := exp_ne_zero _
@@ -875,7 +925,8 @@ theorem associated_connection_17 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
 /-- DLMF 14.9.13: for `m ∈ ℕ`, `ν − m + 1 ∉ {0, −1, −2, …}` and `z ∉ (−∞, 1]`, `P^{−m}_ν(z) =
 Γ(ν−m+1)/Γ(ν+m+1) P^m_ν(z)`. -/
 @[dlmf 14.9.E13]
-theorem associatedP_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, ν-m+1 ≠ -n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem associatedP_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, ν-m+1 ≠ -n) {z : ℂ}
+    (hz : z-1 ∈ slitPlane) :
     associatedP ν (-m) z=Gamma (ν-m+1)/Gamma (ν+m+1)*associatedP ν m z := by
   have hG := Gamma_add_nat_ne_zero ν m h
   rcases m with _ | k

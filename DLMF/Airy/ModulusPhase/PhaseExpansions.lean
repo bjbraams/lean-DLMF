@@ -79,7 +79,8 @@ theorem airyMod_limit_bounds {E e : ℝ → ℝ} {L a b K : ℝ} (hc : Continuou
     (hK : ∀ s, 1 ≤ s → |e s| ≤ K * s ^ (-(5 / 2) : ℝ)) (hL : Tendsto E atTop (𝓝 L)) :
     E 0 + a - 2 / 3 * K ≤ L ∧ L ≤ E 0 + b + 2 / 3 * K := by
   have hc' : ContinuousOn E (Icc 0 1) := hc.mono Icc_subset_Ici_self
-  have mono : ∀ {g g' : ℝ → ℝ}, ContinuousOn g (Icc 0 1) → (∀ s, 0 < s → s < 1 → HasDerivAt g (g' s) s) →
+  have mono : ∀ {g g' : ℝ → ℝ}, ContinuousOn g (Icc 0 1) →
+      (∀ s, 0 < s → s < 1 → HasDerivAt g (g' s) s) →
       (∀ s, 0 < s → s < 1 → 0 ≤ g' s) → g 0 ≤ g 1 := by
     intro g g' hgc hg hg'
     have hm : MonotoneOn g (Icc 0 1) := by
@@ -90,11 +91,13 @@ theorem airyMod_limit_bounds {E e : ℝ → ℝ} {L a b K : ℝ} (hc : Continuou
     exact hm ⟨le_rfl, zero_le_one⟩ ⟨zero_le_one, le_rfl⟩ zero_le_one
   have m1 := mono (g := fun s => E s - a * s) (g' := fun s => e s - a)
     (hc'.sub (continuousOn_const.mul continuousOn_id))
-    (fun s hs _ => by convert (hd s hs).sub ((hasDerivAt_id s).const_mul a) using 1 <;> first | rfl | ring)
+    (fun s hs _ => by convert (hd s hs).sub ((hasDerivAt_id s).const_mul a) using 1 <;>
+                      first | rfl | ring)
     (fun s hs hs1 => by linarith [(hab s hs hs1).1])
   have m2 := mono (g := fun s => b * s - E s) (g' := fun s => b - e s)
     ((continuousOn_const.mul continuousOn_id).sub hc')
-    (fun s hs _ => by convert ((hasDerivAt_id s).const_mul b).sub (hd s hs) using 1 <;> first | rfl | ring)
+    (fun s hs _ => by convert ((hasDerivAt_id s).const_mul b).sub (hd s hs) using 1 <;>
+                      first | rfl | ring)
     (fun s hs hs1 => by linarith [(hab s hs hs1).2])
   simp only [mul_zero, sub_zero, mul_one, zero_sub] at m1 m2
   obtain ⟨L', hL', hb⟩ := airyMod_tendsto_of_deriv_bound (F := E) (f := e) (R := 1) (K := K)
@@ -146,7 +149,8 @@ theorem airyMod_modulus_bounds {s : ℝ} (hs : 0 < s) :
     rw [← e]
     exact mul_le_mul_of_nonneg_left this (by positivity)
   · have := airyMod_sqrt_mul_sq_lt hs
-    calc π * s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2 = π * (s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2) := by ring
+    calc π * s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2 = π *
+           (s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2) := by ring
       _ < π * (1 / π) := by gcongr
       _ = 1 := by field_simp
 
@@ -162,7 +166,8 @@ theorem airyMod_tendsto_rpow_mul {f : ℝ → ℝ} {a b : ℝ} (c : ℝ) (hab : 
 
 /-- `Ai(-s) = π^{-1/2} s^{-1/4} cos(ζ - π/4) + O(s^{-7/4})`, real form. -/
 theorem airyMod_aiReal_neg_sub :
-    (fun s : ℝ => airyAiReal (-s) - s ^ (-(1 / 4) : ℝ) / Real.sqrt π * Real.cos (airyZeta s - π / 4))
+    (fun s : ℝ => airyAiReal (-s) - s ^ (-(1 / 4) : ℝ) / Real.sqrt π *
+        Real.cos (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(7 / 4) : ℝ)) := by
   refine (airyMod_ai_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
   rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring, airyAi_ofReal_eq, ← ofReal_sub,
@@ -170,7 +175,8 @@ theorem airyMod_aiReal_neg_sub :
 
 /-- `Bi(-s) = -π^{-1/2} s^{-1/4} sin(ζ - π/4) + O(s^{-7/4})`, real form. -/
 theorem airyMod_biReal_neg_sub :
-    (fun s : ℝ => airyBiReal (-s) + s ^ (-(1 / 4) : ℝ) / Real.sqrt π * Real.sin (airyZeta s - π / 4))
+    (fun s : ℝ => airyBiReal (-s) + s ^ (-(1 / 4) : ℝ) / Real.sqrt π *
+        Real.sin (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(7 / 4) : ℝ)) := by
   refine (airyMod_bi_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
   rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring, airyBi_ofReal_eq, ← ofReal_add,
@@ -325,7 +331,8 @@ theorem airyMod_phase_limit {L : ℝ}
   linarith
 
 /-- The first coefficients of the expansion of `N²`. -/
-theorem airyMod_derivCoeff_values : airyDerivModulusCoeff 0 = 1 ∧ airyDerivModulusCoeff 1 = -(7 / 32) ∧
+theorem airyMod_derivCoeff_values : airyDerivModulusCoeff 0 = 1 ∧
+    airyDerivModulusCoeff 1 = -(7 / 32) ∧
     airyDerivModulusCoeff 2 < 0 := by
   obtain ⟨c0, c1, c2⟩ := airyMod_coeff_values
   refine ⟨by simp [airyDerivModulusCoeff, c0], by rw [airyDerivModulusCoeff, c1]; norm_num, ?_⟩
@@ -380,7 +387,8 @@ theorem airyMod_derivModulus_bounds {s : ℝ} (hs : 0 < s) :
 
 /-- `Ai'(-s) = π^{-1/2} s^{1/4} sin(ζ - π/4) + O(s^{-5/4})`, real form. -/
 theorem airyMod_aiDerivReal_neg_sub :
-    (fun s : ℝ => airyAiDerivReal (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π * Real.sin (airyZeta s - π / 4))
+    (fun s : ℝ => airyAiDerivReal (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π *
+        Real.sin (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)) := by
   refine (airyInt_aiDeriv_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
   rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring, airyAiDeriv_ofReal_eq, ← ofReal_sub,
@@ -388,7 +396,8 @@ theorem airyMod_aiDerivReal_neg_sub :
 
 /-- `Bi'(-s) = π^{-1/2} s^{1/4} cos(ζ - π/4) + O(s^{-5/4})`, real form. -/
 theorem airyMod_biDerivReal_neg_sub :
-    (fun s : ℝ => airyBiDerivReal (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π * Real.cos (airyZeta s - π / 4))
+    (fun s : ℝ => airyBiDerivReal (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π *
+        Real.cos (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)) := by
   refine (airyInt_biDeriv_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
   rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring, airyBiDeriv_ofReal_eq, ← ofReal_sub,
@@ -579,8 +588,10 @@ theorem airyDerivPhase_asymptotic :
 /-- Every printed coefficient in the phase expansions 9.8.22 and 9.8.23. -/
 @[dlmf 9.8.E22, dlmf 9.8.E23]
 theorem airy_phase_printed_coefficients :
-    (∀ n < 5, airyPhaseCoeff n = ([1, 5/32, 1105/6144, 82825/65536, 1282031525/58720256] : List ℝ)[n]!) ∧
-    (∀ n < 5, airyDerivPhaseCoeff n = ([1, -7/32, -1463/6144, -495271/327680, -206530429/8388608] : List ℝ)[n]!) := by
+    (∀ n < 5, airyPhaseCoeff n =
+        ([1, 5/32, 1105/6144, 82825/65536, 1282031525/58720256] : List ℝ)[n]!) ∧
+    (∀ n < 5, airyDerivPhaseCoeff n =
+        ([1, -7/32, -1463/6144, -495271/327680, -206530429/8388608] : List ℝ)[n]!) := by
   constructor <;> intro n hn <;> interval_cases n <;>
     norm_num [airyPhaseCoeff, airyDerivPhaseCoeff, airyReciprocalCoeff,
       airyModulusCoeff, airyDerivModulusCoeff, Finset.sum_range_succ, Finset.prod_range_succ]

@@ -6,10 +6,13 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AsymptoticApproximations.Mellin.Transforms
+public import DLMF.AsymptoticApproximations.Mellin.Residues
 public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMF.ExpIntegrals.Expansions
 public import DLMF.IncompleteGamma.ExponentialIntegral
 public import DLMF.Hypergeometric.Solutions.Logarithmic
+public import DLMF.Gamma.VerticalBounds
+public import DLMFMathlib.Analysis.Complex.BarnesResidue
 
 /-!
 # Laplace transforms with small parameters (DLMF §2.5(iii))
@@ -40,7 +43,7 @@ continuation of `𝓜h₂` (2.5.27–2.5.28).
 
 @[expose] public noncomputable section
 
-open MeasureTheory Set Filter Finset Asymptotics Complex
+open MeasureTheory Set Filter Finset Asymptotics Complex Metric
 open scoped Topology Real Nat
 
 namespace DLMF.AsymptoticApproximations
@@ -104,6 +107,145 @@ theorem laplace_trunc_eq_mellinInv {h : ℝ → ℂ} {p x : ℝ} (hp : p < 1) (h
   unfold mellinInv
   simp only [hline]
 
+/-- `Γ` is holomorphic at points of positive real part. -/
+private lemma differentiableAt_Gamma_of_re_pos {s : ℂ} (hs : 0 < s.re) :
+    DifferentiableAt ℂ Gamma s :=
+  Complex.differentiableAt_Gamma s fun m h => by
+    rw [h] at hs; simp at hs; linarith [(m.cast_nonneg : (0 : ℝ) ≤ m)]
+
+/-- Uniform vertical bound for `Γ` on a strip. -/
+private lemma norm_Gamma_le_of_mem_Icc {a b x : ℝ} (ha : 0 < a) (hx : x ∈ Icc a b) (y : ℝ) :
+    ‖Complex.Gamma (x + I * y)‖ ≤
+      max (Real.Gamma a) (Real.Gamma b) / Real.Gamma b * ‖Complex.Gamma (b + I * y)‖ := by
+  have hx0 : 0 < x := ha.trans_le hx.1
+  have hb0 : 0 < b := hx0.trans_le hx.2
+  have hM : Real.Gamma x ≤ max (Real.Gamma a) (Real.Gamma b) :=
+    Real.convexOn_Gamma.le_max_of_mem_Icc (mem_Ioi.2 ha) (mem_Ioi.2 hb0) hx
+  have hGx := Real.Gamma_pos_of_pos hx0
+  have hGb := Real.Gamma_pos_of_pos hb0
+  have hP := DLMF.Gamma.gammaVertProd_anti hx0 hx.2 y
+  have hP1 := DLMF.Gamma.one_le_gammaVertProd b y
+  refine (pow_le_pow_iff_left₀ (norm_nonneg _) (by positivity) two_ne_zero).1 ?_
+  rw [mul_pow, DLMF.Gamma.norm_Gamma_sq_eq hx0, DLMF.Gamma.norm_Gamma_sq_eq hb0, div_pow]
+  rw [show max (Real.Gamma a) (Real.Gamma b) ^ 2 / Real.Gamma b ^ 2 *
+      (Real.Gamma b ^ 2 / DLMF.Gamma.gammaVertProd b y) =
+      max (Real.Gamma a) (Real.Gamma b) ^ 2 / DLMF.Gamma.gammaVertProd b y by
+    field_simp]
+  exact div_le_div₀ (by positivity) (pow_le_pow_left₀ hGx.le hM 2) (by linarith) hP
+
+/-- `|Γ(b - iy)| → 0` as `|y| → ∞`, for `b > 0`. -/
+private lemma tendsto_norm_Gamma_vertical {b : ℝ} (hb : 0 < b) :
+    Tendsto (fun y : ℝ => ‖Complex.Gamma (b + I * ((-y : ℝ) : ℂ))‖) (cocompact ℝ) (𝓝 0) := by
+  obtain ⟨C, K, hC⟩ := DLMF.Gamma.exists_norm_Gamma_le hb
+  have hlim : Tendsto (fun t : ℝ => (1 + t) ^ K * Real.exp (-(π * t) / 2)) atTop (𝓝 0) := by
+    have hu : Tendsto (fun t : ℝ => π / 2 * (1 + t)) atTop atTop :=
+      (tendsto_atTop_add_const_left _ 1 tendsto_id).const_mul_atTop (by positivity)
+    have h := (Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero K).comp hu
+    have h' := h.const_mul ((2 / π) ^ K * Real.exp (π / 2))
+    rw [mul_zero] at h'
+    refine h'.congr' (Eventually.of_forall fun t => ?_)
+    simp only [Function.comp_apply]
+    rw [show -(π / 2 * (1 + t)) = -(π * t) / 2 + -(π / 2) by ring, Real.exp_add, mul_pow]
+    have h1 : Real.exp (π / 2) * Real.exp (-(π / 2)) = 1 := by rw [← Real.exp_add]; simp
+    have h2 : (2 / π) ^ K * (π / 2) ^ K = 1 := by rw [← mul_pow]; field_simp; simp
+    linear_combination ((1 + t) ^ K * Real.exp (-(π * t) / 2)) *
+      ((2 / π) ^ K * (π / 2) ^ K * h1 + h2)
+  have h2 := (hlim.comp (tendsto_norm_cocompact_atTop (E := ℝ))).const_mul C
+  rw [mul_zero] at h2
+  refine squeeze_zero (fun y => norm_nonneg _) (fun y => ?_) h2
+  simpa [Real.norm_eq_abs, mul_assoc] using hC (-y)
+
+/-- `y ↦ |Γ(b + iy)|` is integrable for `b > 0`. -/
+private lemma integrable_norm_Gamma_vertical {b : ℝ} (hb : 0 < b) :
+    Integrable (fun y : ℝ => ‖Complex.Gamma (b + I * y)‖) := by
+  obtain ⟨C, K, hC⟩ := DLMF.Gamma.exists_norm_Gamma_le hb
+  have hi := (DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg
+    (c := π / 2) (by positivity) K).const_mul C
+  refine hi.mono' ?_ (Eventually.of_forall fun y => ?_)
+  · refine Continuous.aestronglyMeasurable (continuous_norm.comp ?_)
+    refine continuous_iff_continuousAt.2 fun y => ?_
+    refine (Complex.differentiableAt_Gamma _ fun m hm => ?_).continuousAt.comp (by fun_prop)
+    have := congrArg re hm; simp at this; linarith [(m.cast_nonneg : (0 : ℝ) ≤ m)]
+  · rw [norm_norm]
+    refine (hC y).trans (le_of_eq ?_)
+    rw [show -(π * |y|) / 2 = -(π / 2 * |y|) by ring]; ring
+/-- `𝓜h₁` is holomorphic on `ℜz > -c` when `h(t) = O(t^c)` as `t → 0⁺`. -/
+private lemma mellin_truncLow_differentiableAt {h : ℝ → ℂ} {c : ℝ}
+    (hhc : LocallyIntegrableOn h (Ioi 0)) (h0 : h =O[𝓝[>] 0] fun t => t ^ c) {z : ℂ}
+    (hz : -c < z.re) : DifferentiableAt ℂ (mellin (mellinTruncLow h)) z := by
+  have hc : LocallyIntegrableOn (mellinTruncLow h) (Ioi 0) := by
+    intro x hx
+    obtain ⟨U, hU, h'U⟩ := hhc x hx
+    exact ⟨U, hU, h'U.indicator measurableSet_Iic⟩
+  refine mellin_differentiableAt_of_isBigO_rpow hc (a := z.re + 1) ?_ (by linarith) ?_ hz
+  · refine (isBigO_zero _ _).congr' ?_ EventuallyEq.rfl
+    filter_upwards [eventually_gt_atTop 1] with t ht
+    rw [mellinTruncLow, indicator_of_notMem (show t ∉ Set.Iic 1 from not_le.2 ht)]
+  · simp only [neg_neg]
+    refine IsBigO.trans ?_ h0
+    refine (isBigO_refl _ _).congr' ?_ EventuallyEq.rfl
+    filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with t ht
+    rw [mellinTruncLow, indicator_of_mem (show t ∈ Set.Iic 1 from ht.2.le)]
+
+/-- `|𝓜h₁(z)| ≤ ∫₀¹ t^{p-1} |h(t)| dt` for `ℜz ≥ p`. -/
+private lemma norm_mellin_truncLow_le {h : ℝ → ℂ} {p : ℝ}
+    (hconv : MellinConvergent (mellinTruncLow h) p) {z : ℂ} (hz : p ≤ z.re) :
+    ‖mellin (mellinTruncLow h) z‖ ≤ ∫ t in Ioi 0, t ^ (p - 1) * ‖mellinTruncLow h t‖ := by
+  refine (norm_integral_le_integral_norm _).trans ?_
+  have hint : IntegrableOn (fun t : ℝ => t ^ (p - 1) * ‖mellinTruncLow h t‖) (Ioi 0) := by
+    refine IntegrableOn.congr_fun (Integrable.norm hconv) (fun t ht => ?_) measurableSet_Ioi
+    rw [norm_smul, norm_cpow_eq_rpow_re_of_pos ht]
+    simp
+  refine integral_mono_of_nonneg (Eventually.of_forall fun t => norm_nonneg _) hint ?_
+  refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht => ?_)
+  dsimp only
+  rw [norm_smul, norm_cpow_eq_rpow_re_of_pos ht]
+  by_cases h1 : t ≤ 1
+  · refine mul_le_mul_of_nonneg_right (Real.rpow_le_rpow_of_exponent_ge ht h1 ?_)
+      (norm_nonneg _)
+    simp only [sub_re, one_re]; linarith
+  · simp [mellinTruncLow, indicator_of_notMem (show t ∉ Set.Iic (1 : ℝ) from h1)]
+
+
+/-- `I₁(x) = ∫₀^∞ e^{-t} h₁(xt) dt` is continuous at `x > 0` when `∫₀¹ |h| < ∞`. -/
+private lemma continuousAt_laplace_truncLow {h : ℝ → ℂ}
+    (hconv1 : MellinConvergent (mellinTruncLow h) 1) {x : ℝ} (hx : 0 < x) :
+    ContinuousAt (fun x => ∫ t in Ioi 0, (Real.exp (-t) : ℂ) * mellinTruncLow h (x * t)) x := by
+  set g := mellinTruncLow h
+  have hg : IntegrableOn g (Ioi 0) := by
+    refine IntegrableOn.congr_fun hconv1 (fun t _ => ?_) measurableSet_Ioi
+    simp
+  have heq : ∀ y : ℝ, 0 < y → (∫ t in Ioi 0, (Real.exp (-t) : ℂ) * g (y * t)) =
+      (y : ℂ)⁻¹ * ∫ u in Ioi 0, (Real.exp (-(u / y)) : ℂ) * g u := by
+    intro y hy
+    have h := integral_comp_mul_left_Ioi (fun u => (Real.exp (-(u / y)) : ℂ) * g u) 0 hy
+    rw [mul_zero] at h
+    rw [← Complex.ofReal_inv, ← Complex.real_smul, ← h]
+    refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+    rw [mul_div_cancel_left₀ t hy.ne']
+  have hI : ContinuousAt (fun y : ℝ => ∫ u in Ioi 0, (Real.exp (-(u / y)) : ℂ) * g u) x := by
+    refine continuousAt_of_dominated (bound := fun u => ‖g u‖) ?_ ?_ hg.norm ?_
+    · refine Eventually.of_forall fun y => ?_
+      exact ((by fun_prop : Continuous fun u : ℝ => (Real.exp (-(u / y)) : ℂ))
+        |>.aestronglyMeasurable).mul hg.aestronglyMeasurable
+    · filter_upwards [lt_mem_nhds hx] with y hy
+      refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun u hu => ?_)
+      rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (Real.exp_pos _).le]
+      have : Real.exp (-(u / y)) ≤ 1 := Real.exp_le_one_iff.2 (by
+        have := div_pos (show (0 : ℝ) < u from hu) hy; linarith)
+      nlinarith [norm_nonneg (g u)]
+    · refine Eventually.of_forall fun u => ?_
+      have : ContinuousAt (fun y : ℝ => -(u / y)) x :=
+        (continuousAt_const.div continuousAt_id hx.ne').neg
+      exact ((continuous_ofReal.comp Real.continuous_exp).continuousAt.comp this).mul
+        continuousAt_const
+  have hinv : ContinuousAt (fun y : ℝ => (y : ℂ)⁻¹) x :=
+    (continuous_ofReal.continuousAt).inv₀ (ofReal_ne_zero.2 hx.ne')
+  refine (hinv.mul hI).congr ?_
+  filter_upwards [lt_mem_nhds hx] with y hy
+  exact (heq y hy).symm
+
+
 /-- DLMF 2.5.41: let `h` be locally integrable on `(0, ∞)` with `h(t) = O(t^c)` as `t → 0⁺`,
 `c > -1` (2.5.20). Then for `1 < ρ < 2` and `x > 0`,
 `I₁(x) = 𝓜h₁(1) x^{-1} + (2πi)⁻¹ ∫_{ρ-i∞}^{ρ+i∞} x^{-z} Γ(1 - z) 𝓜h₁(z) dz`. -/
@@ -114,7 +256,159 @@ theorem laplace_truncLow_shift {h : ℝ → ℂ} {c ρ x : ℝ} (hc : -1 < c) (h
     (∫ t in Ioi 0, (Real.exp (-t) : ℂ) * mellinTruncLow h (x * t)) =
       mellin (mellinTruncLow h) 1 * (x : ℂ)⁻¹ +
         mellinInv ρ (fun z => Complex.Gamma (1 - z) * mellin (mellinTruncLow h) z) x := by
-  sorry
+  set g := mellinTruncLow h with hg
+  set p : ℝ := (1 - c) / 2 with hpdef
+  have hp1 : p < 1 := by rw [hpdef]; linarith
+  have hpc : -c < p := by rw [hpdef]; linarith
+  have hpρ : p < ρ := by linarith
+  have hconv : ∀ z : ℂ, p ≤ z.re → MellinConvergent g z := fun z hz =>
+    mellinConvergent_truncLow hhc h0 (by linarith)
+  have hconv1 : MellinConvergent g 1 := hconv 1 (by simp; linarith)
+  set B : ℝ := ∫ t in Ioi 0, t ^ (p - 1) * ‖g t‖
+  have hB : ∀ z : ℂ, p ≤ z.re → ‖mellin g z‖ ≤ B := fun z hz =>
+    norm_mellin_truncLow_le (hconv p (by simp)) hz
+  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB p (by simp))
+  have hdiff : ∀ z : ℂ, p ≤ z.re → DifferentiableAt ℂ (mellin g) z := fun z hz =>
+    mellin_truncLow_differentiableAt hhc h0 (by linarith)
+  set F : ℂ → ℂ := fun z => Complex.Gamma (1 - z) * mellin g z with hF
+  -- line integrability at `p`
+  have hint : VerticalIntegrable F p := by
+    have hb : 0 < 1 - p := by linarith
+    have hi := (integrable_norm_Gamma_vertical hb).comp_neg.const_mul B
+    refine hi.mono' ?_ (Eventually.of_forall fun y => ?_)
+    · refine Continuous.aestronglyMeasurable (continuous_iff_continuousAt.2 fun y => ?_)
+      have hz : ((p : ℂ) + y * I).re = p := by simp
+      refine ContinuousAt.comp (g := F) ?_ (by fun_prop)
+      refine ContinuousAt.mul ?_ (hdiff _ hz.ge).continuousAt
+      refine (differentiableAt_Gamma_of_re_pos ?_).continuousAt.comp (by fun_prop)
+      simp; linarith
+    · simp only [hF]
+      rw [norm_mul, mul_comm]
+      have e : 1 - ((p : ℂ) + y * I) = ((1 - p : ℝ) : ℂ) + I * ((-y : ℝ) : ℂ) := by
+        push_cast; ring
+      rw [e]
+      exact mul_le_mul_of_nonneg_right (hB _ (by simp)) (norm_nonneg _)
+  rw [laplace_trunc_eq_mellinInv hp1 hx (fun z hz => hconv z hz.ge) hint
+    (continuousAt_laplace_truncLow hconv1 hx)]
+  set Φ : ℂ → ℂ := fun z => -((x : ℂ) ^ (-z) * Complex.Gamma (2 - z) * mellin g z) with hΦ
+  have hΦF : ∀ z : ℂ, z ≠ 1 → Φ z / (z - 1) = (x : ℂ) ^ (-z) • F z := by
+    intro z hz
+    have h1 : 1 - z ≠ 0 := sub_ne_zero.2 (Ne.symm hz)
+    have h2 : z - 1 ≠ 0 := sub_ne_zero.2 hz
+    have hG : Complex.Gamma (2 - z) = (1 - z) * Complex.Gamma (1 - z) := by
+      rw [show 2 - z = (1 - z) + 1 by ring, Complex.Gamma_add_one _ h1]
+    simp only [hΦ, hF, hG, smul_eq_mul]
+    field_simp
+    ring
+  have hline : ∀ σ : ℝ, σ ≠ 1 → (fun y : ℝ => Φ (σ + y * I) / (σ + y * I - 1)) =
+      fun y : ℝ => (x : ℂ) ^ (-((σ : ℂ) + y * I)) • F (σ + y * I) := by
+    intro σ hσ
+    funext y
+    refine hΦF _ fun he => hσ ?_
+    have := congrArg re he; simpa using this
+  have hxpos : (x : ℂ) ≠ 0 := ofReal_ne_zero.2 hx.ne'
+  have hΦd : DifferentiableOn ℂ Φ (re ⁻¹' Icc p ρ) := by
+    intro z hz
+    have hz' : z.re ∈ Icc p ρ := hz
+    refine DifferentiableAt.differentiableWithinAt ?_
+    refine ((DifferentiableAt.mul ?_ ?_).mul (hdiff z hz'.1)).neg
+    · exact (differentiableAt_id.neg).const_cpow (Or.inl hxpos)
+    · refine (differentiableAt_Gamma_of_re_pos ?_).comp z (by fun_prop)
+      simp; linarith [hz'.2]
+  set X : ℝ := x ^ (-p) + x ^ (-ρ)
+  set M : ℝ := max (Real.Gamma (2 - ρ)) (Real.Gamma (2 - p)) / Real.Gamma (2 - p)
+  have hM0 : 0 ≤ M := div_nonneg ((Real.Gamma_pos_of_pos (by linarith)).le.trans
+    (le_max_left _ _)) (Real.Gamma_pos_of_pos (by linarith)).le
+  have hbound : ∀ σ : ℝ, σ ∈ Icc p ρ → ∀ y : ℝ, ‖Φ (σ + y * I)‖ ≤
+      X * B * M * ‖Complex.Gamma (((2 - p : ℝ) : ℂ) + I * ((-y : ℝ) : ℂ))‖ := by
+    intro σ hσ y
+    have hre : ((σ : ℂ) + y * I).re = σ := by simp
+    simp only [hΦ, norm_neg, norm_mul]
+    have hX : ‖(x : ℂ) ^ (-((σ : ℂ) + y * I))‖ ≤ X := by
+      rw [Complex.norm_cpow_eq_rpow_re_of_pos hx]
+      simp only [neg_re, add_re, ofReal_re, mul_re, I_re, mul_zero, ofReal_im, I_im, mul_one,
+        sub_self, add_zero]
+      rcases le_total 1 x with h1 | h1
+      · have := Real.rpow_le_rpow_of_exponent_le h1 (show -σ ≤ -p by linarith [hσ.1])
+        have := Real.rpow_nonneg hx.le (-ρ)
+        linarith
+      · have := Real.rpow_le_rpow_of_exponent_ge hx h1 (show -ρ ≤ -σ by linarith [hσ.2])
+        have := Real.rpow_nonneg hx.le (-p)
+        linarith
+    have hGam : ‖Complex.Gamma (2 - ((σ : ℂ) + y * I))‖ ≤
+        M * ‖Complex.Gamma (((2 - p : ℝ) : ℂ) + I * ((-y : ℝ) : ℂ))‖ := by
+      have e : 2 - ((σ : ℂ) + y * I) = ((2 - σ : ℝ) : ℂ) + I * ((-y : ℝ) : ℂ) := by
+        push_cast; ring
+      rw [e]
+      exact norm_Gamma_le_of_mem_Icc (by linarith) ⟨by linarith [hσ.2], by linarith [hσ.1]⟩ _
+    have hBz := hB _ (show p ≤ ((σ : ℂ) + y * I).re by rw [hre]; exact hσ.1)
+    calc ‖(x : ℂ) ^ (-((σ : ℂ) + y * I))‖ * ‖Complex.Gamma (2 - ((σ : ℂ) + y * I))‖ *
+          ‖mellin g (σ + y * I)‖
+        ≤ X * (M * ‖Complex.Gamma (((2 - p : ℝ) : ℂ) + I * ((-y : ℝ) : ℂ))‖) * B := by
+          gcongr
+      _ = _ := by ring
+  have hcontΦ : ∀ σ : ℝ, σ ∈ Icc p ρ → Continuous fun y : ℝ => Φ (σ + y * I) := by
+    intro σ hσ
+    refine hΦd.continuousOn.comp_continuous (by fun_prop) fun y => ?_
+    show ((σ : ℂ) + y * I).re ∈ Icc p ρ
+    simpa using hσ
+  have hli : ∀ σ : ℝ, σ ∈ Icc p ρ → σ ≠ 1 →
+      Integrable fun y : ℝ => Φ (σ + y * I) / (σ + y * I - 1) := by
+    intro σ hσ hσ1
+    have hne : ∀ y : ℝ, (σ : ℂ) + y * I - 1 ≠ 0 := fun y he => hσ1 (by
+      have := congrArg re he; simp at this; linarith)
+    have hσ1' : 0 < |σ - 1| := abs_pos.2 (sub_ne_zero.2 hσ1)
+    have hi := (integrable_norm_Gamma_vertical (b := 2 - p) (by linarith)).comp_neg.const_mul
+      (X * B * M / |σ - 1|)
+    refine hi.mono' ((hcontΦ σ hσ).div (by fun_prop) hne).aestronglyMeasurable
+      (Eventually.of_forall fun y => ?_)
+    have hden : |σ - 1| ≤ ‖(σ : ℂ) + y * I - 1‖ := by
+      refine le_trans (le_of_eq ?_) (Complex.abs_re_le_norm _)
+      simp
+    rw [norm_div, div_eq_mul_inv]
+    calc ‖Φ (σ + y * I)‖ * ‖(σ : ℂ) + y * I - 1‖⁻¹
+        ≤ (X * B * M * ‖Complex.Gamma (((2 - p : ℝ) : ℂ) + I * ((-y : ℝ) : ℂ))‖) *
+          |σ - 1|⁻¹ :=
+          mul_le_mul (hbound σ hσ y) (inv_anti₀ hσ1' hden) (by positivity)
+            (by have := hB0; positivity)
+      _ = _ := by ring
+  have hhor : Tendsto (fun T : ℝ => ∫ t in p..ρ, Φ (t + T * I) / (t + T * I - 1))
+      (cocompact ℝ) (𝓝 0) := by
+    have hG := (tendsto_norm_Gamma_vertical (b := 2 - p) (by linarith)).const_mul
+      (X * B * M * |ρ - p|)
+    rw [mul_zero] at hG
+    refine squeeze_zero_norm' ?_ hG
+    filter_upwards [(tendsto_norm_cocompact_atTop (E := ℝ)).eventually
+      (eventually_ge_atTop 1)] with T hT
+    rw [show X * B * M * |ρ - p| * ‖Complex.Gamma (((2 - p : ℝ) : ℂ) + I * ((-T : ℝ) : ℂ))‖ =
+        X * B * M * ‖Complex.Gamma (((2 - p : ℝ) : ℂ) + I * ((-T : ℝ) : ℂ))‖ * |ρ - p| by
+      ring]
+    refine intervalIntegral.norm_integral_le_of_norm_le_const fun t ht => ?_
+    have ht' : t ∈ Icc p ρ := by
+      rw [uIoc_of_le hpρ.le] at ht; exact ⟨ht.1.le, ht.2⟩
+    have hden : 1 ≤ ‖(t : ℂ) + T * I - 1‖ := by
+      refine le_trans ?_ (Complex.abs_im_le_norm _)
+      simpa [Real.norm_eq_abs] using hT
+    rw [norm_div]
+    exact (div_le_self (norm_nonneg _) hden).trans (hbound t ht' T)
+  have hs := Complex.barnesRes_vertical_shift (c₁ := p) (c₂ := ρ) (p := 1)
+    (by simpa using hp1) (by simpa using hρ1) hΦd (hli p ⟨le_rfl, hpρ.le⟩ hp1.ne)
+    (hli ρ ⟨hpρ.le, le_rfl⟩ (by linarith)) (hhor.mono_left atTop_le_cocompact)
+    (hhor.mono_left atBot_le_cocompact)
+  rw [hline p hp1.ne, hline ρ (by linarith)] at hs
+  have hΦ1 : Φ 1 = -((x : ℂ)⁻¹ * mellin g 1) := by
+    simp only [hΦ]
+    norm_num [Complex.cpow_neg_one]
+  rw [hΦ1] at hs
+  show mellinInv p F x = _
+  unfold mellinInv
+  have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
+  generalize (∫ y : ℝ, (x : ℂ) ^ (-((ρ : ℂ) + y * I)) • F (ρ + y * I)) = Iρ at hs ⊢
+  generalize (∫ y : ℝ, (x : ℂ) ^ (-((p : ℂ) + y * I)) • F (p + y * I)) = Ip at hs ⊢
+  rw [Complex.real_smul, Complex.real_smul]
+  push_cast
+  field_simp
+  linear_combination (-x : ℂ) * hs + 2 * (π : ℂ) * mellin g 1 * mul_inv_cancel₀ hxpos
 
 /-- DLMF 2.5.42: let `h` satisfy 2.5.18 and 2.5.20, `p₂ < min(1, ℜβ₀)` as in 2.5.40, and let `H`
 be the continuation of `𝓜h₂` (2.5.27, or entire if `κ ≠ 0`), so that `Γ(1 - z)H(z)` is
@@ -227,6 +521,55 @@ theorem laplace_small_parameter {h : ℝ → ℂ} {b β : ℕ → ℂ} {c : ℝ}
       =O[𝓝[>] 0] fun ζ => ζ ^ ((β N).re - 1) + ζ ^ M := by
   sorry
 
+/-- The factor `u(z) = -ζ^{z-1}/Γ(z)` of the Laplace residues 2.5.46–2.5.47. -/
+private lemma hasDerivAt_neg_cpow_div_Gamma {ζ : ℝ} (hζ : 0 < ζ) (m : ℕ) :
+    HasDerivAt (fun z : ℂ => -((ζ : ℂ) ^ (z - 1) * (Gamma z)⁻¹))
+      ((-Real.log ζ + digamma (m + 1)) * (ζ : ℂ) ^ m / m !) (m + 1) := by
+  have hζ0 : (ζ : ℂ) ≠ 0 := ofReal_ne_zero.2 hζ.ne'
+  have hpos : 0 < ((m : ℂ) + 1).re := by simp; positivity
+  have hG := (differentiableAt_Gamma_of_re_pos hpos).hasDerivAt
+  have hΓ : Gamma ((m : ℂ) + 1) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos hpos
+  have hd := ((((hasDerivAt_id' ((m : ℂ) + 1)).sub_const 1).const_cpow (c := (ζ : ℂ))
+    (Or.inl hζ0)).mul (hG.inv hΓ)).neg
+  convert hd using 1
+  simp only [Pi.inv_apply]
+  rw [digamma_def, logDeriv_apply, Complex.Gamma_nat_eq_factorial, ← ofReal_log hζ.le,
+    add_sub_cancel_right, cpow_natCast]
+  rw [Complex.Gamma_nat_eq_factorial] at hΓ
+  field_simp
+  ring
+
+/-- The truncated kernel `𝓜h₁` of `h(t) = 1/(1 + t)` is holomorphic on `ℜz > 0`. -/
+private lemma mellin_truncLow_inv_one_add_differentiableAt {z : ℂ} (hz : 0 < z.re) :
+    DifferentiableAt ℂ (mellin (mellinTruncLow fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹)) z := by
+  set h : ℝ → ℂ := mellinTruncLow fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹
+  have hbound : ∀ t : ℝ, 0 < t → ‖h t‖ ≤ 1 := by
+    intro t ht
+    simp only [h, mellinTruncLow, indicator]
+    split_ifs
+    · rw [norm_inv, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
+      exact inv_le_one_of_one_le₀ (by linarith)
+    · simp
+  have hcont : ContinuousOn (fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹) (Icc 0 1) := by
+    intro t ht
+    have : ((1 + t : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.2 (by linarith [ht.1])
+    exact ((continuous_ofReal.comp (continuous_const.add continuous_id)).continuousAt.inv₀
+      this).continuousWithinAt
+  have hli : LocallyIntegrableOn h (Ioi 0) := by
+    refine IntegrableOn.locallyIntegrableOn ?_
+    rw [IntegrableOn, show h = (Iic (1 : ℝ)).indicator _ from rfl,
+      integrable_indicator_iff measurableSet_Iic, IntegrableOn,
+      Measure.restrict_restrict measurableSet_Iic]
+    exact hcont.integrableOn_Icc.mono_set fun t ht => ⟨le_of_lt ht.2, ht.1⟩
+  refine mellin_differentiableAt_of_isBigO_rpow (a := z.re + 1) (b := 0) hli ?_
+    (by linarith) ?_ hz
+  · refine Asymptotics.IsBigO.of_bound 0 ?_
+    filter_upwards [eventually_gt_atTop (1 : ℝ)] with t ht
+    simp [h, mellinTruncLow, not_le.2 ht]
+  · refine Asymptotics.IsBigO.of_bound 1 ?_
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    simpa using hbound t ht
+
 /-- DLMF 2.5.46: for `ζ > 0` and `k ≥ 1`,
 `Res_{z=k}[-ζ^{z-1} Γ(1 - z) π csc(πz)] = (-ln ζ + ψ(k)) ζ^{k-1}/(k-1)!`; here
 `h(t) = 1/(1 + t)` (2.5.45), `𝓜h(z) = π csc(πz)`, `κ = 0`, `βₛ = s + 1`, `c = 0`. -/
@@ -235,7 +578,33 @@ theorem residueAt_laplace_inv_one_add {ζ : ℝ} (hζ : 0 < ζ) {k : ℕ} (hk : 
     DLMF.AlgebraicAnalytic.residueAt (fun z => -((ζ : ℂ) ^ (z - 1) * Complex.Gamma (1 - z) *
         (π / Complex.sin (π * z)))) k =
       (-Real.log ζ + digamma k) * (ζ : ℂ) ^ (k - 1) / (k - 1)! := by
-  sorry
+  obtain ⟨m, rfl⟩ : ∃ m, k = m + 1 := ⟨k - 1, by omega⟩
+  have hζ0 : (ζ : ℂ) ≠ 0 := ofReal_ne_zero.2 hζ.ne'
+  have hball : ∀ z ∈ ball (((m + 1 : ℕ) : ℤ) : ℂ) (1 / 2), 0 < z.re := by
+    intro z hz
+    rw [mem_ball, dist_eq_norm] at hz
+    have hre := (abs_re_le_norm _).trans_lt hz
+    simp only [sub_re, Int.cast_natCast, natCast_re, abs_lt] at hre
+    push_cast at hre
+    linarith [(m.cast_nonneg : (0 : ℝ) ≤ m)]
+  have hu : DifferentiableOn ℂ (fun z : ℂ => -((ζ : ℂ) ^ (z - 1) * (Gamma z)⁻¹))
+      (ball (((m + 1 : ℕ) : ℤ) : ℂ) (1 / 2)) := fun z _ =>
+    (((differentiableAt_id.sub_const 1).const_cpow (Or.inl hζ0)).mul
+      (differentiable_one_div_Gamma z |>.congr_of_eventuallyEq
+        (Eventually.of_forall fun _ => by simp))).neg.differentiableWithinAt
+  have h := residueAt_mul_pi_div_sin_sq_add
+    (f := fun z => -((ζ : ℂ) ^ (z - 1) * Complex.Gamma (1 - z) * (π / Complex.sin (π * z))))
+    (v := fun _ => 0) (by norm_num) hu
+    (differentiableOn_const 0) fun z hz _ => by
+      have hΓ := Complex.Gamma_ne_zero_of_re_pos (hball z hz)
+      have hr := Complex.Gamma_mul_Gamma_one_sub z
+      have : Gamma (1 - z) = π / Complex.sin (π * z) / Gamma z := by
+        rw [← hr]; field_simp
+      rw [this]; simp only [zero_div, add_zero]; field_simp
+  simp only [Int.cast_natCast, add_zero] at h
+  rw [h, show (((m + 1 : ℕ)) : ℂ) = (m : ℂ) + 1 by push_cast; ring,
+    (hasDerivAt_neg_cpow_div_Gamma hζ m).deriv]
+  simp
 
 /-- DLMF 2.5.47: for `ζ > 0`, with `h(t) = 1/(1 + t)` and the continuation
 `𝓜h₂(z) = π csc(πz) - 𝓜h₁(z)` (2.5.28),
@@ -247,7 +616,47 @@ theorem residueAt_laplace_inv_one_add_truncHigh {ζ : ℝ} (hζ : 0 < ζ) :
           mellin (mellinTruncLow fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹) z))) 1 =
       (-Real.log ζ - Real.eulerMascheroniConstant) -
         mellin (mellinTruncLow fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹) 1 := by
-  sorry
+  set M := mellin (mellinTruncLow fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹)
+  have hζ0 : (ζ : ℂ) ≠ 0 := ofReal_ne_zero.2 hζ.ne'
+  have hball : ∀ z ∈ ball ((1 : ℤ) : ℂ) (1 / 2), 0 < z.re ∧ 0 < (2 - z).re := by
+    intro z hz
+    rw [mem_ball, dist_eq_norm] at hz
+    have hre := (abs_re_le_norm _).trans_lt hz
+    simp only [sub_re, Int.cast_one, one_re, abs_lt] at hre
+    simp only [sub_re, re_ofNat]
+    constructor <;> linarith
+  have hu : DifferentiableOn ℂ (fun z : ℂ => -((ζ : ℂ) ^ (z - 1) * (Gamma z)⁻¹))
+      (ball ((1 : ℤ) : ℂ) (1 / 2)) := fun z _ =>
+    (((differentiableAt_id.sub_const 1).const_cpow (Or.inl hζ0)).mul
+      (differentiable_one_div_Gamma z |>.congr_of_eventuallyEq
+        (Eventually.of_forall fun _ => by simp))).neg.differentiableWithinAt
+  have hv : DifferentiableOn ℂ (fun z : ℂ => -((ζ : ℂ) ^ (z - 1) * Gamma (2 - z) * M z))
+      (ball ((1 : ℤ) : ℂ) (1 / 2)) := fun z hz =>
+    ((((differentiableAt_id.sub_const 1).const_cpow (Or.inl hζ0)).mul
+      ((differentiableAt_Gamma_of_re_pos (hball z hz).2).comp z
+        (differentiableAt_const _ |>.sub differentiableAt_id))).mul
+      (mellin_truncLow_inv_one_add_differentiableAt (hball z hz).1)).neg.differentiableWithinAt
+  have h := residueAt_mul_pi_div_sin_sq_add
+    (f := fun z => -((ζ : ℂ) ^ (z - 1) * Complex.Gamma (1 - z) *
+        (π / Complex.sin (π * z) - M z))) (by norm_num) hu hv fun z hz hz1 => by
+      have hΓ := Complex.Gamma_ne_zero_of_re_pos (hball z hz).1
+      have hr := Complex.Gamma_mul_Gamma_one_sub z
+      have h1 : Gamma (1 - z) = π / Complex.sin (π * z) / Gamma z := by
+        rw [← hr]; field_simp
+      have hz1' : z - 1 ≠ 0 := sub_ne_zero.2 (by simpa using hz1)
+      have h2 : Gamma (1 - z) = -(Gamma (2 - z) / (z - 1)) := by
+        have := Complex.Gamma_add_one (1 - z) (by intro h; apply hz1'; linear_combination -h)
+        rw [show 1 - z + 1 = 2 - z by ring] at this
+        rw [this]; field_simp; ring
+      simp only [Int.cast_one]
+      linear_combination (-((ζ : ℂ) ^ (z - 1) * (π / Complex.sin (π * z)))) * h1 +
+        ((ζ : ℂ) ^ (z - 1) * M z) * h2
+  simp only [Int.cast_one] at h
+  have hd := (hasDerivAt_neg_cpow_div_Gamma hζ 0).deriv
+  simp only [Nat.cast_zero, zero_add] at hd
+  rw [h, hd, show (2 : ℂ) - 1 = 1 by norm_num, Complex.Gamma_one]
+  simp [digamma_one]
+  ring
 
 /-- DLMF 2.5.45 and 2.5.49 for real `ζ > 0`: `𝓛h(ζ) = ∫₀^∞ e^{-ζt}/(1 + t) dt = e^ζ E₁(ζ)`,
 from the Stieltjes form 6.2.2 of `E₁` (`DLMF.Confluent.expIntE1_stieltjes`). -/

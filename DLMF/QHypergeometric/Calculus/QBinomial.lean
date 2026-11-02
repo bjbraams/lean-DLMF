@@ -227,7 +227,8 @@ theorem qBinom_terminating_ratio {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) {m n :
     calc
       _ = q^((-(n:ℤ))*(m:ℤ)+(m.choose 2:ℤ)+((n:ℤ)*m-(m.choose 2:ℤ))) := by
         simp only [zpow_add₀ hq0,zpow_mul,zpow_natCast]
-      _ = 1 := by rw [show (-(n:ℤ))*(m:ℤ)+(m.choose 2:ℤ)+((n:ℤ)*m-(m.choose 2:ℤ))=0 by ring,zpow_zero]
+      _ = 1 := by rw [show (-(n:ℤ))*(m:ℤ)+(m.choose 2:ℤ)+((n:ℤ)*m-(m.choose 2:ℤ))=0
+                    by ring, zpow_zero]
   have hf : (-q^(-(n:ℤ)))^m*q^(m.choose 2)*(-1:ℂ)^m*q^((n:ℤ)*m-(m.choose 2:ℤ))=1 := by
     rw [neg_pow]
     calc
@@ -295,7 +296,8 @@ theorem qBinom_fixed_lower_limit {q : ℂ} (hq : ‖q‖<1) (m : ℕ) :
   refine h.congr' (Eventually.of_forall fun n => ?_)
   simpa only [Function.comp_apply,Nat.add_comm n m] using (qBinom_eq hq m n).symm
 
-/-- Both Gaussian indices tend to infinity; s>0 is necessary (s=0 gives a different fixed-index limit). -/
+/-- Both Gaussian indices tend to infinity; s>0 is necessary (s=0 gives a different fixed-index
+limit). -/
 @[dlmf 17.2.E34]
 theorem qBinom_two_growing_indices {q : ℂ} (hq : ‖q‖<1) {r s : ℕ} (hs : 0<s) (hrs : s<r)
     (u t : ℕ) : Tendsto (fun n : ℕ => qBinom q (r*n+u) (s*n+t)) atTop
@@ -310,7 +312,8 @@ theorem qBinom_two_growing_indices {q : ℂ} (hq : ‖q‖<1) {r s : ℕ} (hs : 
       have : b+(s*n+t)≤r*n+u := by nlinarith
       omega⟩
   have hlim := ((tendsto_qPochhammer (w := q) hq).comp htop).div
-    (((tendsto_qPochhammer (w := q) hq).comp hbot).mul ((tendsto_qPochhammer (w := q) hq).comp hdiff))
+    (((tendsto_qPochhammer (w := q) hq).comp hbot).mul
+        ((tendsto_qPochhammer (w := q) hq).comp hdiff))
     (mul_ne_zero hP hP)
   have hval : qPochhammerInf q q/(qPochhammerInf q q*qPochhammerInf q q)=
       (qPochhammerInf q q)⁻¹ := by field_simp
@@ -391,7 +394,8 @@ noncomputable def qFiniteDiffCoeff (q : ℂ) (n j : ℕ) : ℂ :=
 
 /-- The q-Pascal step for the finite-difference coefficients. -/
 private lemma qFiniteDiffCoeff_succ_succ {q : ℂ} (hq0 : q≠0) (n j : ℕ) :
-    qFiniteDiffCoeff q (n+1) (j+1)=-(q^(-(n:ℤ))*qFiniteDiffCoeff q n j)+qFiniteDiffCoeff q n (j+1) := by
+    qFiniteDiffCoeff q (n+1) (j+1)=-(q^(-(n:ℤ))*qFiniteDiffCoeff q n j)+qFiniteDiffCoeff
+        q n (j+1) := by
   simp only [qFiniteDiffCoeff,qBinom_succ_succ]
   have h1 : q^(-((n+1:ℕ):ℤ)*((j+1:ℕ):ℤ)+((j+1+1).choose 2:ℤ))=
       q^(-(n:ℤ))*q^(-(n:ℤ)*j+((j+1).choose 2:ℤ)) := by
@@ -450,7 +454,8 @@ private lemma differentiable_qBinom (n k : ℕ) : Differentiable ℂ (fun q : �
       exact (ih k).add ((differentiable_id.pow _).mul (ih (k+1)))
 
 /-- An identity between entire functions of `q` that holds for `‖q‖<1` holds for all `q`. -/
-private lemma eq_of_differentiable_of_eq_on_ball {f g : ℂ → ℂ} (hf : Differentiable ℂ f) (hg : Differentiable ℂ g)
+private lemma eq_of_differentiable_of_eq_on_ball {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
+    (hg : Differentiable ℂ g)
     (h : ∀ q : ℂ, ‖q‖<1 → f q=g q) (q : ℂ) : f q=g q := by
   have hfg : AnalyticOnNhd ℂ (f-g) univ := fun z _ => (hf.sub hg).analyticAt z
   have hev : (f-g)=ᶠ[𝓝 0] 0 := by
@@ -518,7 +523,8 @@ theorem q_binomial_base_square (q : ℂ) (n : ℕ) :
   induction n with
   | zero => simp
   | succ n ih =>
-    have hrefl : ∑ j∈range (n+1), qBinom (q^2) n j*q^(n-j)=∑ j∈range (n+1), qBinom (q^2) n j*q^j := by
+    have hrefl : ∑ j∈range (n+1), qBinom (q^2) n j*q^(n-j)=∑ j∈range (n+1),
+        qBinom (q^2) n j*q^j := by
       rw [← sum_range_reflect]
       apply sum_congr rfl
       intro j hj
@@ -530,7 +536,8 @@ theorem q_binomial_base_square (q : ℂ) (n : ℕ) :
     simp only [qBinom_succ_succ',add_mul,sum_add_distrib]
     have e1 : ∑ j∈range (n+1), qBinom (q^2) n (j+1)*q^(j+1)+qBinom (q^2) (n+1) 0*q^0=
         ∑ j∈range (n+1), qBinom (q^2) n j*q^j := by
-      rw [qBinom_zero_right,← qBinom_zero_right (q^2) n,← sum_range_succ' (fun j => qBinom (q^2) n j*q^j),
+      rw [qBinom_zero_right, ← qBinom_zero_right (q^2) n,
+          ← sum_range_succ' (fun j => qBinom (q^2) n j*q^j),
         sum_range_succ,qBinom_eq_zero_of_lt _ (Nat.lt_succ_self n)]
       ring
     have e2 : ∑ j∈range (n+1), (q^2)^(n-j)*qBinom (q^2) n j*q^(j+1)=
@@ -554,7 +561,8 @@ theorem q_binomial_alternating_even (q : ℂ) (n : ℕ) :
   induction n with
   | zero => simp
   | succ n ih =>
-    rw [show 2*(n+1)=2*n+2 by ring,alternating_sum_qBinom_add_two,ih,qPochhammer_succ,← pow_mul,pow_succ]
+    rw [show 2*(n+1)=2*n+2 by ring, alternating_sum_qBinom_add_two, ih, qPochhammer_succ,
+                                ← pow_mul, pow_succ]
     ring
 
 end DLMF.QHypergeometric

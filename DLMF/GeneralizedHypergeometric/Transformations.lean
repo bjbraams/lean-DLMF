@@ -7,7 +7,13 @@ module
 
 public import DLMF.GeneralizedHypergeometric.AnalyticProperties
 public import DLMF.GeneralizedHypergeometric.GHATools
-public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
+public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence
+public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import DLMF.Hypergeometric.ArgumentContinuation
+public import DLMF.Hypergeometric.Solutions
+public import DLMF.Hypergeometric.Clausen
 
 /-!
 # Transformations, expansions and products of `ₚF_q` (DLMF §§16.6, 16.10, 16.12)
@@ -102,7 +108,8 @@ theorem genHG_fields_wimp_coeff (a b c d : Multiset ℂ) (α β γ ζ : ℂ)
         genFiniteHG k ((-k : ℂ) ::ₘ (γ + k) ::ₘ c) (α ::ₘ β ::ₘ d) ζ := by
   sorry
 
-/-- The analytic expansion under explicit absolute double-series convergence and valid original germs. -/
+/-- The analytic expansion under explicit absolute double-series convergence and valid original
+germs. -/
 @[dlmf 16.10.E1]
 theorem genHG_fields_wimp_hasSum (a b c d : Multiset ℂ) (α β γ z ζ : ℂ)
     (hb : GenDenRegular (b + d)) (hαβ : GenDenRegular {α, β})
@@ -120,7 +127,8 @@ theorem genHG_fields_wimp_hasSum (a b c d : Multiset ℂ) (α β γ z ζ : ℂ)
 
 /-- Norlund expansion with the full printed convergence half-plane and zeta disk. -/
 @[dlmf 16.10.E2]
-theorem genHG_norlund_expansion (a : ℂ) (A B : Multiset ℂ) (hcard : A.card = B.card) (hb : GenDenRegular B)
+theorem genHG_norlund_expansion (a : ℂ) (A B : Multiset ℂ) (hcard : A.card = B.card)
+    (hb : GenDenRegular B)
     {z ζ : ℂ} (hζ : ‖ζ - 1‖ < 1) (hz : z.re < 1 / 2) :
     HasSum (fun k : ℕ => (1 - z) ^ (-a) * poch a k / k.factorial *
       genFiniteHG k ((-k : ℂ) ::ₘ A) B ζ * (z / (z - 1)) ^ k)
@@ -153,7 +161,8 @@ private lemma sum_choose_mul_poch_mul_poch (a b : ℂ) (n : ℕ) :
   linear_combination (n.choose k : ℂ) * poch (a + k) (n - k) * poch (b + (n - k : ℕ)) k * this.symm
 
 /-- Cauchy-product coefficients of two `0F1` series (DLMF 16.12.1). -/
-private lemma sum_inv_poch_mul_factorial_mul_inv_poch_mul_factorial (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hb : ∀ k : ℕ, b ≠ -k)
+private lemma sum_inv_poch_mul_factorial_mul_inv_poch_mul_factorial (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k)
+    (hb : ∀ k : ℕ, b ≠ -k)
     (hab : ∀ k : ℕ, a + b - 1 ≠ -k) (n : ℕ) :
     ∑ k ∈ range (n + 1), 1 / (poch a k * k !) * (1 / (poch b (n - k) * (n - k)!)) =
       4 ^ n * poch ((a + b) / 2) n * poch ((a + b - 1) / 2) n /
@@ -192,7 +201,8 @@ private lemma sum_inv_poch_mul_factorial_mul_inv_poch_mul_factorial (a b : ℂ) 
   linear_combination (poch a n * poch b n * n !) * (hsplit.symm.trans hdup)
 
 /-- The `0F1` coefficient. -/
-private lemma genCoeff_empty_singleton (a : ℂ) (n : ℕ) : genCoeff ∅ {a} n = 1 / (poch a n * n !) := by
+private lemma genCoeff_empty_singleton (a : ℂ) (n : ℕ) : genCoeff ∅ {a} n = 1 /
+    (poch a n * n !) := by
   simp [genCoeff, genPoch]
 
 /-- Absolute summability of the `0F1` series. -/
@@ -204,7 +214,8 @@ private lemma summable_norm_genCoeff_empty_singleton_mul_pow (a z : ℂ) (ha : �
   have hp : 0 < ‖poch a n‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat ha n)
   have hf : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
   have hf1 : (1 : ℝ) ≤ n ! := by exact_mod_cast n.factorial_pos
-  rw [genCoeff_empty_singleton, norm_mul, norm_div, norm_one, norm_mul, norm_pow, Complex.norm_natCast,
+  rw [genCoeff_empty_singleton, norm_mul, norm_div, norm_one, norm_mul, norm_pow,
+      Complex.norm_natCast,
     mul_pow, div_mul_eq_mul_div, one_mul, div_le_iff₀ (by positivity)]
   have h := hC n
   calc ‖z‖ ^ n = ‖z‖ ^ n * 1 := by ring
@@ -230,12 +241,14 @@ theorem genHG_0F1_product (a b z : ℂ) (hb : GenDenRegular {a, b, a + b - 1}) :
   have hC := genHG_hasSum_entire (a := {(a + b) / 2, (a + b - 1) / 2}) (b := {a, b, a + b - 1})
     (by simp) hb (4 * z)
   rw [← hA.tsum_eq, ← hB.tsum_eq, ← hC.tsum_eq,
-    tsum_mul_tsum_eq_tsum_sum_range_of_summable_norm (summable_norm_genCoeff_empty_singleton_mul_pow a z ha')
+    tsum_mul_tsum_eq_tsum_sum_range_of_summable_norm
+        (summable_norm_genCoeff_empty_singleton_mul_pow a z ha')
       (summable_norm_genCoeff_empty_singleton_mul_pow b z hb')]
   congr 1
   funext n
   have hcoef := sum_inv_poch_mul_factorial_mul_inv_poch_mul_factorial a b ha' hb' hab' n
-  have hsum : ∑ k ∈ range (n + 1), genCoeff ∅ {a} k * z ^ k * (genCoeff ∅ {b} (n - k) * z ^ (n - k)) =
+  have hsum : ∑ k ∈ range (n + 1), genCoeff ∅ {a} k * z ^ k *
+      (genCoeff ∅ {b} (n - k) * z ^ (n - k)) =
       (∑ k ∈ range (n + 1), 1 / (poch a k * k !) * (1 / (poch b (n - k) * (n - k)!))) * z ^ n := by
     rw [Finset.sum_mul]
     refine Finset.sum_congr rfl fun k hk => ?_
@@ -254,11 +267,36 @@ theorem genHG_clausen_principal (a b : ℂ) (hb : GenDenRegular {a + b + 1 / 2, 
     {z : ℂ} (hz : z ∈ cutPlane) :
     genHG {a, b} {a + b + 1 / 2} z ^ 2 =
       genHG {2 * a, 2 * b, a + b} {a + b + 1 / 2, 2 * a + 2 * b} z := by
-  sorry
+  have hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -k := fun k => hb _ (by simp) k
+  have hd : ∀ k : ℕ, 2 * a + 2 * b ≠ -k := fun k => hb _ (by simp) k
+  have hc' : GenDenRegular {a + b + 1 / 2} := fun x hx k => by
+    rw [Multiset.mem_singleton] at hx; subst hx; exact hc k
+  refine eqOn_cutPlane_of_eqOn_disk (f := fun z => genHG {a, b} {a + b + 1 / 2} z ^ 2)
+    (g := genHG {2 * a, 2 * b, a + b} {a + b + 1 / 2, 2 * a + 2 * b})
+    ((genHG_principal_analytic (by simp)).pow 2) (genHG_principal_analytic (by simp))
+    (fun w hw => ?_) hz
+  have h1 := genHG_hasSum_disk (a := {a, b}) (b := {a + b + 1 / 2}) (by simp) hc' hw
+  have h2 := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b (a + b + 1 / 2)).hasSum_mul_pow
+    (mem_eball_one_of_norm_lt_one hw)
+  have h3 := genHG_hasSum_disk (a := {2 * a, 2 * b, a + b})
+    (b := {a + b + 1 / 2, 2 * a + 2 * b}) (by simp) hb hw
+  have h4 := clausen_formula hc hd hw
+  have e12 : genHG {a, b} {a + b + 1 / 2} w = ₂F₁ a b (a + b + 1 / 2) w := by
+    refine h1.unique (h2.congr_fun fun n => ?_)
+    simp [genCoeff, genPoch, gaussHGCoeff]
+  have e34 : genHG {2 * a, 2 * b, a + b} {a + b + 1 / 2, 2 * a + 2 * b} w =
+      ₂F₁ a b (a + b + 1 / 2) w ^ 2 := by
+    refine h3.unique (h4.congr_fun fun n => ?_)
+    simp only [genCoeff, genPoch, clausenCoeff, Multiset.insert_eq_cons, Multiset.map_cons,
+      Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton]
+    ring
+  simp only [e12, e34]
 
-/-- The full generalized square series; terminating inner sums preserve lower exceptions after termination. -/
+/-- The full generalized square series; terminating inner sums preserve lower exceptions after
+termination. -/
 @[dlmf 16.12.E3]
-theorem genHG_general_square_hasSum (a b c : ℂ) (hb : GenDenRegular {c, 2 * c - 1, a + 1 / 2, b + 1 / 2})
+theorem genHG_general_square_hasSum (a b c : ℂ)
+    (hb : GenDenRegular {c, 2 * c - 1, a + 1 / 2, b + 1 / 2})
     {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun k : ℕ => poch (2 * a) k * poch (2 * b) k * poch (c - 1 / 2) k /
       (poch c k * poch (2 * c - 1) k * k.factorial) *

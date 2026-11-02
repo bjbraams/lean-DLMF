@@ -99,7 +99,8 @@ private lemma besselLaplace_quadratic {b c s : ℂ} (hc : (1 / 2 : ℝ) < c.re)
   have hz₀ : z₀ ∈ V := by change 0 < (2 * w + 1 : ℝ); linarith
   have heq : L =ᶠ[𝓝 z₀] R := by
     have hnh : {z : ℂ | 2 * w < z.re} ∈ 𝓝 z₀ :=
-      (isOpen_lt continuous_const continuous_re).mem_nhds (by change 2 * w < (2 * w + 1 : ℝ); linarith)
+      (isOpen_lt continuous_const continuous_re).mem_nhds
+          (by change 2 * w < (2 * w + 1 : ℝ); linarith)
     filter_upwards [hnh] with z hz
     have hzp : 0 < z.re := by linarith
     have hz0 : z ≠ 0 := by intro h; simp [h] at hzp
@@ -156,7 +157,8 @@ private lemma besselLaplace_quadratic {b c s : ℂ} (hc : (1 / 2 : ℝ) < c.re)
       _ = ((z + I * w) ^ (-b) * (Gamma (2 * c - 1) *
           regularizedGaussHG b (c - 1 / 2) (2 * c - 1) u)) / Gamma c := by ring
       _ = ((z + I * w) ^ (-b) * ((1 - u / 2) ^ (-b) * (Gamma c *
-          regularizedGaussHG (b / 2) ((b + 1) / 2) c (-(w : ℂ) ^ 2 / z ^ 2)))) / Gamma c := by rw [hq]
+          regularizedGaussHG (b / 2) ((b + 1) / 2) c (-(w : ℂ) ^ 2 / z ^ 2)))) /
+              Gamma c := by rw [hq]
       _ = _ := by rw [← mul_assoc, hphase]; field_simp
   exact hL.eqOn_of_preconnected_of_eventuallyEq hR
     (convex_halfSpace_re_gt 0).isPreconnected hz₀ heq hs
@@ -182,7 +184,8 @@ private lemma laplace_regularized0F1_of_re_pos {b c s : ℂ}
   have hrepr (t : ℝ) : regularizedHGFun ∅ {c} (-(w : ℂ) ^ 2 / 4 * (t : ℂ) ^ 2) =
       C * exp (-I * w * t) * regularizedHGFun {c - 1 / 2} {2 * c - 1} ((2 * I * w) * t) := by
     have h := kummerM_eq_exp_mul_regularized0F1 (ν := c - 1)
-      (by simpa using hc0) (by simpa only [show 2 * (c - 1) + 1 = 2 * c - 1 by ring] using h2c0) ((2 * I * w) * t)
+      (by simpa using hc0) (by simpa only [show 2 * (c - 1) + 1 = 2 * c - 1 by ring] using h2c0)
+          ((2 * I * w) * t)
     rw [show c - 1 + 1 / 2 = c - 1 / 2 by ring,
       show 2 * (c - 1) + 1 = 2 * c - 1 by ring,
       show c - 1 + 1 = c by ring, kummerM_eq_mul_regularizedHGFun h2c0,

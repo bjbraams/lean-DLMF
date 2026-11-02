@@ -189,7 +189,8 @@ theorem sphProd_hasSum_alt_line (u w : ℂ) :
       have := (sphProd_hasDerivAt_sphericalJ n (2*u-v)).comp v ((hasDerivAt_id v).const_sub (2*u))
       simpa [Function.comp_def] using this
     have h := ((h1.const_mul ((-1:ℂ)^n * (2*n+1))).mul (sphProd_hasDerivAt_sphericalJ n v))
-    refine (h.congr_of_eventuallyEq (Eventually.of_forall fun v => by simp only [Pi.mul_apply])).congr_deriv ?_
+    refine (h.congr_of_eventuallyEq
+        (Eventually.of_forall fun v => by simp only [Pi.mul_apply])).congr_deriv ?_
     have h3 : (2*n+1 : ℂ) ≠ 0 := by
       have : (0:ℝ) < 2*n+1 := by positivity
       exact_mod_cast this.ne'

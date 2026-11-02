@@ -79,7 +79,8 @@ theorem kMel_integral_gauss {s : ℂ} (hs : 0 < s.re) {b : ℝ} (hb : 0 < b) :
   have h := integral_comp_rpow_Ioi
     (fun y : ℝ => (1 / 2 : ℂ) * ((y : ℂ) ^ (s / 2 - 1) * exp (-(b * y)))) (p := 2) two_ne_zero
   rw [integral_const_mul, integral_cpow_mul_exp_neg_mul_Ioi hs2 hb] at h
-  rw [show (1 / (b : ℂ)) ^ (s / 2) * Gamma (s / 2) / 2 = 1 / 2 * ((1 / (b:ℂ)) ^ (s / 2) * Gamma (s / 2)) by
+  rw [show (1 / (b : ℂ)) ^ (s / 2) * Gamma (s / 2) / 2 = 1 / 2 *
+      ((1 / (b:ℂ)) ^ (s / 2) * Gamma (s / 2)) by
     ring, ← h]
   refine setIntegral_congr_fun measurableSet_Ioi fun x hx => ?_
   have hx : 0 < x := hx

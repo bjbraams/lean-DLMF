@@ -12,6 +12,7 @@ public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.SpecialFunctions.Pow.ComplexReal
 public import Mathlib.Analysis.MellinTransform
 public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
 public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
 public import TauCeti.Analysis.Fourier.ExpNegAbs
@@ -684,26 +685,342 @@ theorem mellin_log_abs_one_add_div_one_sub {s : ℂ} (hs0 : -1 < s.re) (hs1 : s.
       Real.pi * Complex.tan (s * Real.pi / 2) / s := by
   sorry
 
+/-- A boundary term `F(t) tˢ/s` tends to zero where `|F(t)| ≤ C t^q` and `t^{q + ℜs} → 0`. -/
+private lemma tendsto_mul_cpow_div_of_abs_le {l : Filter ℝ} {F : ℝ → ℝ} {s : ℂ} {C q : ℝ}
+    (hl : ∀ᶠ t in l, 0 < t ∧ |F t| ≤ C * t ^ q)
+    (hlim : Tendsto (fun t : ℝ => t ^ (q + s.re)) l (𝓝 0)) :
+    Tendsto (fun t : ℝ => (F t : ℂ) * ((t : ℂ) ^ s / s)) l (𝓝 0) := by
+  have h2 : Tendsto (fun t : ℝ => C * t ^ (q + s.re) / ‖s‖) l (𝓝 0) := by
+    simpa using (hlim.const_mul C).div_const ‖s‖
+  refine squeeze_zero_norm' ?_ h2
+  filter_upwards [hl] with t ⟨ht, hF⟩
+  rw [norm_mul, norm_div, Complex.norm_real, Real.norm_eq_abs,
+    Complex.norm_cpow_eq_rpow_re_of_pos ht, Real.rpow_add ht]
+  have hpos : 0 ≤ t ^ s.re / ‖s‖ := by positivity
+  calc |F t| * (t ^ s.re / ‖s‖) ≤ C * t ^ q * (t ^ s.re / ‖s‖) :=
+        mul_le_mul_of_nonneg_right hF hpos
+    _ = C * (t ^ q * t ^ s.re) / ‖s‖ := by ring
+
+/-- `t^p → 0` as `t → 0⁺` for `p > 0`. -/
+private lemma tendsto_rpow_nhdsGT_zero {p : ℝ} (hp : 0 < p) :
+    Tendsto (fun t : ℝ => t ^ p) (𝓝[>] 0) (𝓝 0) := by
+  have := (Real.continuousAt_rpow_const 0 p (Or.inr hp.le)).tendsto
+  rw [Real.zero_rpow hp.ne'] at this
+  exact this.mono_left nhdsWithin_le_nhds
+
 /-- DLMF Table 1.14.5, row 8: `ln(1 + x)/x ↦ π csc(sπ)/(1 - s)`, `0 < ℜs < 1`. -/
 @[dlmf 1.14.T5]
 theorem mellin_log_one_add_div {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re < 1) :
     mellin (fun x => (Real.log (1 + x) / x : ℂ)) s =
       Real.pi / Complex.sin (s * Real.pi) / (1 - s) := by
-  sorry
+  have hs1' : s - 1 ≠ 0 := fun h => by
+    have := congrArg Complex.re h; simp at this; linarith
+  set ε := (1 - s.re) / 2 with hε
+  have hε0 : 0 < ε := by rw [hε]; linarith
+  have hε1 : ε ≤ 1 := by rw [hε]; linarith
+  -- bounds on `log (1 + t)`
+  have hlog0 : ∀ t : ℝ, 0 < t → 0 ≤ Real.log (1 + t) := fun t ht =>
+    Real.log_nonneg (by linarith)
+  have hlog1 : ∀ t : ℝ, 0 < t → Real.log (1 + t) ≤ t := fun t ht => by
+    have := Real.log_le_sub_one_of_pos (show 0 < 1 + t by linarith); linarith
+  have hlog2 : ∀ t : ℝ, 1 ≤ t → Real.log (1 + t) ≤ 2 / ε * t ^ ε := fun t ht => by
+    have h1 := Real.log_le_rpow_div (show (0 : ℝ) ≤ 1 + t by linarith) hε0
+    have h2 : (1 + t) ^ ε ≤ (2 * t) ^ ε :=
+      Real.rpow_le_rpow (by linarith) (by linarith) hε0.le
+    have h3 : (2 * t) ^ ε ≤ 2 * t ^ ε := by
+      rw [Real.mul_rpow (by norm_num) (by linarith)]
+      gcongr
+      calc (2 : ℝ) ^ ε ≤ 2 ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le (by norm_num) hε1
+        _ = 2 := Real.rpow_one 2
+    calc Real.log (1 + t) ≤ (1 + t) ^ ε / ε := h1
+      _ ≤ 2 * t ^ ε / ε := by gcongr; exact h2.trans h3
+      _ = 2 / ε * t ^ ε := by ring
+  have hcast : ∀ t : ℝ, (Real.log (1 + t) : ℂ) / (t : ℂ) = ((Real.log (1 + t) / t : ℝ) : ℂ) :=
+    fun t => by push_cast; rfl
+  -- convergence of the two Mellin integrals
+  have hc1 : MellinConvergent (fun t : ℝ => 1 / (1 + (t : ℂ))) s := by
+    have hnorm : ∀ t : ℝ, 0 < t → ‖1 / (1 + (t : ℂ))‖ = 1 / (1 + t) := fun t ht => by
+      rw [show (1 : ℂ) + (t : ℂ) = ((1 + t : ℝ) : ℂ) by push_cast; ring, norm_div,
+        norm_one, Complex.norm_real, Real.norm_of_nonneg (by linarith)]
+    refine mellinConvergent_of_isBigO_rpow (a := 1) (b := 0) ?_ ?_ hs1 ?_ hs0
+    · refine ContinuousOn.locallyIntegrableOn (fun t ht => ?_) measurableSet_Ioi
+      refine (continuousAt_const.div (continuousAt_const.add
+        Complex.continuous_ofReal.continuousAt) ?_).continuousWithinAt
+      intro h
+      have h' : ((1 + t : ℝ) : ℂ) = 0 := by push_cast; exact h
+      have : (0 : ℝ) < 1 + t := by have : (0 : ℝ) < t := ht; linarith
+      exact this.ne' (by exact_mod_cast h')
+    · refine Asymptotics.IsBigO.of_bound 1 ?_
+      filter_upwards [eventually_gt_atTop 0] with t ht
+      rw [hnorm t ht, Real.norm_of_nonneg (Real.rpow_nonneg ht.le _), Real.rpow_neg_one,
+        one_mul, one_div]
+      exact inv_anti₀ ht (by linarith)
+    · refine Asymptotics.IsBigO.of_bound 1 ?_
+      filter_upwards [self_mem_nhdsWithin] with t ht
+      have ht' : (0 : ℝ) < t := ht
+      rw [hnorm t ht', neg_zero, Real.rpow_zero, norm_one, one_mul,
+        div_le_one (by linarith)]
+      linarith
+  have hc2 : MellinConvergent (fun t : ℝ => (Real.log (1 + t) / t : ℂ)) s := by
+    refine mellinConvergent_of_isBigO_rpow (a := 1 - ε) (b := 0) ?_ ?_ (by rw [hε]; linarith)
+      ?_ hs0
+    · refine ContinuousOn.locallyIntegrableOn (fun t ht => ?_) measurableSet_Ioi
+      have ht' : (0 : ℝ) < t := ht
+      refine ContinuousAt.continuousWithinAt ?_
+      refine ContinuousAt.div ?_ Complex.continuous_ofReal.continuousAt
+        (by exact_mod_cast ht'.ne')
+      exact Complex.continuous_ofReal.continuousAt.comp
+        ((continuousAt_const.add continuousAt_id).log
+          (show (1 : ℝ) + t ≠ 0 by linarith))
+    · refine Asymptotics.IsBigO.of_bound (2 / ε) ?_
+      filter_upwards [eventually_ge_atTop 1] with t ht
+      have ht0 : (0 : ℝ) < t := by linarith
+      rw [hcast,
+        Complex.norm_real, Real.norm_of_nonneg (div_nonneg (hlog0 t ht0) ht0.le),
+        Real.norm_of_nonneg (Real.rpow_nonneg ht0.le _), neg_sub, div_le_iff₀ ht0]
+      calc Real.log (1 + t) ≤ 2 / ε * t ^ ε := hlog2 t ht
+        _ = 2 / ε * t ^ (ε - 1) * t := by
+          rw [mul_assoc, ← Real.rpow_add_one ht0.ne']; ring_nf
+    · refine Asymptotics.IsBigO.of_bound 1 ?_
+      filter_upwards [self_mem_nhdsWithin] with t ht
+      have ht0 : (0 : ℝ) < t := ht
+      rw [hcast,
+        Complex.norm_real, Real.norm_of_nonneg (div_nonneg (hlog0 t ht0) ht0.le), neg_zero,
+        Real.rpow_zero, norm_one, one_mul, div_le_one ht0]
+      exact hlog1 t ht0
+  have hibp := integral_Ioi_mul_deriv_eq_deriv_mul (a := 0) (a' := 0) (b' := 0)
+    (u := fun t => (Real.log (1 + t) : ℂ)) (u' := fun t => ((1 / (1 + t) : ℝ) : ℂ))
+    (v := fun t => (t : ℂ) ^ (s - 1) / (s - 1)) (v' := fun t => (t : ℂ) ^ (s - 1 - 1))
+    (fun t ht => by
+      have ht' : (0 : ℝ) < t := ht
+      have h := ((hasDerivAt_id t).const_add 1).log (by simp; linarith)
+      simpa using h.ofReal_comp)
+    (fun t ht => by
+      have h := (hasDerivAt_ofReal_cpow_const (ne_of_gt ht) hs1').div_const (s - 1)
+      rwa [mul_div_cancel_left₀ _ hs1'] at h)
+    (by
+      refine hc2.congr_fun (fun t ht => ?_) measurableSet_Ioi
+      have ht' : (t : ℂ) ≠ 0 := by exact_mod_cast (ne_of_gt (show (0 : ℝ) < t from ht))
+      have hcp : (t : ℂ) ^ (s - 1) = (t : ℂ) ^ (s - 1 - 1) * t := by
+        have h := Complex.cpow_add (s - 1 - 1) 1 ht'
+        rwa [Complex.cpow_one, sub_add_cancel] at h
+      simp only [Pi.mul_apply, smul_eq_mul]
+      rw [hcp]
+      field_simp)
+    (by
+      have hI : IntegrableOn (fun x : ℝ => 1 / (s - 1) *
+          ((x : ℂ) ^ (s - 1) • (1 / (1 + (x : ℂ))))) (Ioi 0) :=
+        Integrable.const_mul hc1 (1 / (s - 1))
+      refine hI.congr_fun (fun t _ => ?_) measurableSet_Ioi
+      simp only [Pi.mul_apply, smul_eq_mul]
+      push_cast; ring)
+    (tendsto_mul_cpow_div_of_abs_le (C := 1) (q := 1)
+      (by
+        filter_upwards [self_mem_nhdsWithin] with t ht
+        have ht0 : (0 : ℝ) < t := ht
+        refine ⟨ht0, ?_⟩
+        rw [Real.rpow_one, one_mul, abs_of_nonneg (hlog0 t ht0)]
+        exact hlog1 t ht0)
+      (tendsto_rpow_nhdsGT_zero (by simp; linarith)))
+    (tendsto_mul_cpow_div_of_abs_le (C := 2 / ε) (q := ε)
+      (by
+        filter_upwards [eventually_ge_atTop 1] with t ht
+        have ht0 : (0 : ℝ) < t := by linarith
+        exact ⟨ht0, by rw [abs_of_nonneg (hlog0 t ht0)]; exact hlog2 t ht⟩)
+      (by
+        have := tendsto_rpow_neg_atTop (y := ε) hε0
+        convert this using 2
+        simp only [sub_re, one_re]
+        rw [hε]; ring_nf))
+  simp only [sub_zero, zero_sub] at hibp
+  have hm : mellin (fun t : ℝ => (Real.log (1 + t) / t : ℂ)) s =
+      ∫ t in Ioi (0 : ℝ), (Real.log (1 + t) : ℂ) * (t : ℂ) ^ (s - 1 - 1) := by
+    refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
+    have ht' : (t : ℂ) ≠ 0 := by exact_mod_cast (ne_of_gt (show (0 : ℝ) < t from ht))
+    have hcp : (t : ℂ) ^ (s - 1) = (t : ℂ) ^ (s - 1 - 1) * t := by
+      have h := Complex.cpow_add (s - 1 - 1) 1 ht'
+      rwa [Complex.cpow_one, sub_add_cancel] at h
+    simp only [smul_eq_mul]
+    rw [hcp]
+    field_simp
+  have hm2 : ∫ t in Ioi (0 : ℝ), ((1 / (1 + t) : ℝ) : ℂ) * ((t : ℂ) ^ (s - 1) / (s - 1)) =
+      1 / (s - 1) * mellin (fun t : ℝ => 1 / (1 + (t : ℂ))) s := by
+    rw [mellin, ← integral_const_mul]
+    refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+    simp only [smul_eq_mul]
+    push_cast; ring
+  rw [hm, hibp, hm2, mellin_inv_one_add hs0 hs1]
+  have h1s : (1 : ℂ) - s ≠ 0 := fun h => hs1' (by linear_combination -h)
+  field_simp
+  ring
+
+/-- Mellin transform of `t ↦ 1/(1 + t²)` at `s + 1`: `π/(2 cos(½sπ))`, `-1 < ℜs < 1`. -/
+private lemma mellin_inv_one_add_sq_add_one {s : ℂ} (hs0 : -1 < s.re) (hs1 : s.re < 1) :
+    MellinConvergent (fun t : ℝ => 1 / (1 + (t : ℂ) ^ 2)) (s + 1) ∧
+      mellin (fun t : ℝ => 1 / (1 + (t : ℂ) ^ 2)) (s + 1) =
+        Real.pi / (2 * Complex.cos (s * Real.pi / 2)) := by
+  have hne : ∀ t : ℝ, 1 + (t : ℂ) ^ 2 ≠ 0 := fun t h => by
+    have h' : ((1 + t ^ 2 : ℝ) : ℂ) = 0 := by push_cast; exact h
+    have : (0 : ℝ) < 1 + t ^ 2 := by positivity
+    exact this.ne' (by exact_mod_cast h')
+  have hnorm : ∀ t : ℝ, ‖1 / (1 + (t : ℂ) ^ 2)‖ = 1 / (1 + t ^ 2) := fun t => by
+    rw [show (1 : ℂ) + (t : ℂ) ^ 2 = ((1 + t ^ 2 : ℝ) : ℂ) by push_cast; ring, norm_div,
+      norm_one, Complex.norm_real, Real.norm_of_nonneg (by positivity)]
+  refine ⟨?_, ?_⟩
+  · refine mellinConvergent_of_isBigO_rpow (a := 2) (b := 0) ?_ ?_ (by simp; linarith) ?_
+      (by simp; linarith)
+    · refine ContinuousOn.locallyIntegrableOn ?_ measurableSet_Ioi
+      exact (continuous_const.div (continuous_const.add
+        (Complex.continuous_ofReal.pow 2)) hne).continuousOn
+    · refine Asymptotics.IsBigO.of_bound 1 ?_
+      filter_upwards [eventually_gt_atTop 0] with t ht
+      rw [hnorm, Real.norm_of_nonneg (Real.rpow_nonneg ht.le _), one_mul, Real.rpow_neg ht.le,
+        Real.rpow_two, one_div]
+      exact inv_anti₀ (by positivity) (by linarith)
+    · refine Asymptotics.IsBigO.of_bound 1 ?_
+      filter_upwards [self_mem_nhdsWithin] with t ht
+      rw [hnorm, neg_zero, Real.rpow_zero, norm_one, one_mul]
+      rw [div_le_one (by positivity)]
+      nlinarith
+  · have h := mellin_comp_rpow (fun t : ℝ => 1 / (1 + (t : ℂ))) (s + 1) 2
+    simp only [Real.rpow_two, Complex.ofReal_pow] at h
+    rw [h, mellin_inv_one_add (by simp; linarith) (by simp; linarith)]
+    have hc : Complex.sin ((s + 1) / 2 * Real.pi) = Complex.cos (s * Real.pi / 2) := by
+      rw [show (s + 1) / 2 * Real.pi = s * Real.pi / 2 + Real.pi / 2 by ring,
+        Complex.sin_add_pi_div_two]
+    push_cast
+    rw [hc]
+    simp only [abs_two, Complex.real_smul]
+    push_cast
+    field_simp
+
+/-- Mellin transform by parts for `F` with `F'(t) = c/(1 + t²)`. -/
+private lemma mellin_eq_of_hasDerivAt_div_one_add_sq {F : ℝ → ℝ} {c : ℝ} {s : ℂ}
+    (hs0 : -1 < s.re) (hs1 : s.re < 1) (hs : s ≠ 0)
+    (hF : ∀ t : ℝ, 0 < t → HasDerivAt F (c / (1 + t ^ 2)) t)
+    (hconv : MellinConvergent (fun t => (F t : ℂ)) s)
+    (h0 : Tendsto (fun t : ℝ => (F t : ℂ) * ((t : ℂ) ^ s / s)) (𝓝[>] 0) (𝓝 0))
+    (hinf : Tendsto (fun t : ℝ => (F t : ℂ) * ((t : ℂ) ^ s / s)) atTop (𝓝 0)) :
+    mellin (fun t => (F t : ℂ)) s =
+      -(c * (Real.pi / Complex.cos (s * Real.pi / 2)) / (2 * s)) := by
+  obtain ⟨hgc, hg⟩ := mellin_inv_one_add_sq_add_one hs0 hs1
+  have hibp := integral_Ioi_mul_deriv_eq_deriv_mul (a := 0) (a' := 0) (b' := 0)
+    (u := fun t => (F t : ℂ)) (u' := fun t => ((c / (1 + t ^ 2) : ℝ) : ℂ))
+    (v := fun t => (t : ℂ) ^ s / s) (v' := fun t => (t : ℂ) ^ (s - 1))
+    (fun t ht => (hF t ht).ofReal_comp)
+    (fun t ht => by
+      have h := (hasDerivAt_ofReal_cpow_const (ne_of_gt ht) hs).div_const s
+      rwa [mul_div_cancel_left₀ _ hs] at h)
+    (by
+      refine hconv.congr_fun (fun t _ => ?_) measurableSet_Ioi
+      simp only [Pi.mul_apply, smul_eq_mul]; ring)
+    (by
+      have hI : IntegrableOn (fun x : ℝ => (c : ℂ) / s *
+          ((x : ℂ) ^ (s + 1 - 1) • (1 / (1 + (x : ℂ) ^ 2)))) (Ioi 0) :=
+        Integrable.const_mul hgc ((c : ℂ) / s)
+      refine hI.congr_fun (fun t _ => ?_) measurableSet_Ioi
+      simp only [Pi.mul_apply, smul_eq_mul, add_sub_cancel_right]
+      push_cast; ring)
+    h0 hinf
+  simp only [sub_zero, zero_sub] at hibp
+  have hm : mellin (fun t => (F t : ℂ)) s =
+      ∫ t in Ioi (0 : ℝ), (F t : ℂ) * (t : ℂ) ^ (s - 1) := by
+    refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+    simp only [smul_eq_mul]; ring
+  have hm2 : ∫ t in Ioi (0 : ℝ), ((c / (1 + t ^ 2) : ℝ) : ℂ) * ((t : ℂ) ^ s / s) =
+      (c / s) * mellin (fun t : ℝ => 1 / (1 + (t : ℂ) ^ 2)) (s + 1) := by
+    rw [mellin, ← integral_const_mul]
+    refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+    simp only [smul_eq_mul, add_sub_cancel_right]
+    push_cast; ring
+  rw [hm, hibp, hm2, hg]
+  field_simp
 
 /-- DLMF Table 1.14.5, row 9: `arctan x ↦ -π sec(½sπ)/(2s)`, `-1 < ℜs < 0`. -/
 @[dlmf 1.14.T5]
 theorem mellin_arctan {s : ℂ} (hs0 : -1 < s.re) (hs1 : s.re < 0) :
     mellin (fun x => (Real.arctan x : ℂ)) s =
       -(Real.pi / Complex.cos (s * Real.pi / 2)) / (2 * s) := by
-  sorry
+  have hs : s ≠ 0 := fun h => by simp [h] at hs1
+  have hπ := Real.pi_pos
+  have hbd : ∀ t : ℝ, |Real.arctan t| ≤ Real.pi / 2 := fun t =>
+    abs_le.mpr ⟨(Real.neg_pi_div_two_lt_arctan t).le, (Real.arctan_lt_pi_div_two t).le⟩
+  have h := mellin_eq_of_hasDerivAt_div_one_add_sq (F := Real.arctan) (c := 1) hs0 (by linarith)
+    hs (fun t _ => by simpa using Real.hasDerivAt_arctan t)
+    (by
+      refine mellinConvergent_of_isBigO_rpow (a := 0) (b := -1)
+        ((Complex.continuous_ofReal.comp Real.continuous_arctan).continuousOn.locallyIntegrableOn
+          measurableSet_Ioi) ?_ hs1 ?_ hs0
+      · refine Asymptotics.IsBigO.of_bound (Real.pi / 2) ?_
+        filter_upwards [eventually_gt_atTop 0] with t ht
+        rw [Complex.norm_real, Real.norm_eq_abs, neg_zero, Real.rpow_zero, norm_one, mul_one]
+        exact hbd t
+      · refine Asymptotics.IsBigO.of_bound 1 ?_
+        filter_upwards [self_mem_nhdsWithin] with t ht
+        rw [Complex.norm_real, Real.norm_eq_abs, neg_neg, Real.rpow_one, one_mul]
+        exact Real.abs_arctan_le_abs)
+    (tendsto_mul_cpow_div_of_abs_le (C := 1) (q := 1)
+      (by
+        filter_upwards [self_mem_nhdsWithin] with t ht
+        refine ⟨ht, ?_⟩
+        rw [Real.rpow_one, one_mul]
+        exact Real.abs_arctan_le_abs.trans (abs_of_pos (show (0 : ℝ) < t from ht)).le)
+      (tendsto_rpow_nhdsGT_zero (by linarith)))
+    (tendsto_mul_cpow_div_of_abs_le (C := Real.pi / 2) (q := 0)
+      (by
+        filter_upwards [eventually_gt_atTop 0] with t ht
+        exact ⟨ht, by rw [Real.rpow_zero, mul_one]; exact hbd t⟩)
+      (by simpa using tendsto_rpow_neg_atTop (y := -s.re) (by linarith)))
+  rw [h]
+  push_cast
+  ring
 
 /-- DLMF Table 1.14.5, row 10: `arccot x = π/2 - arctan x ↦ π sec(½sπ)/(2s)`, `0 < ℜs < 1`. -/
 @[dlmf 1.14.T5]
 theorem mellin_arccot {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re < 1) :
     mellin (fun x => ((Real.pi / 2 - Real.arctan x : ℝ) : ℂ)) s =
       Real.pi / Complex.cos (s * Real.pi / 2) / (2 * s) := by
-  sorry
+  have hs : s ≠ 0 := fun h => by simp [h] at hs0
+  have hπ := Real.pi_pos
+  have hF : ∀ t : ℝ, 0 < t → |Real.pi / 2 - Real.arctan t| ≤ t⁻¹ ∧
+      |Real.pi / 2 - Real.arctan t| ≤ Real.pi / 2 := by
+    intro t ht
+    rw [← Real.arctan_inv_of_pos ht, abs_of_pos (Real.arctan_pos.mpr (inv_pos.mpr ht))]
+    exact ⟨Real.arctan_le_self (inv_pos.mpr ht).le, (Real.arctan_lt_pi_div_two _).le⟩
+  have h := mellin_eq_of_hasDerivAt_div_one_add_sq
+    (F := fun t => Real.pi / 2 - Real.arctan t) (c := -1) (by linarith) hs1
+    hs (fun t _ => by
+      have h := (hasDerivAt_const t (Real.pi / 2)).fun_sub (Real.hasDerivAt_arctan t)
+      rwa [zero_sub, ← neg_div] at h)
+    (by
+      refine mellinConvergent_of_isBigO_rpow (a := 1) (b := 0)
+        ((Complex.continuous_ofReal.comp (continuous_const.sub
+          Real.continuous_arctan)).continuousOn.locallyIntegrableOn measurableSet_Ioi)
+        ?_ hs1 ?_ hs0
+      · refine Asymptotics.IsBigO.of_bound 1 ?_
+        filter_upwards [eventually_gt_atTop 0] with t ht
+        rw [Complex.norm_real, Real.norm_eq_abs, Real.norm_of_nonneg (Real.rpow_nonneg ht.le _),
+          Real.rpow_neg_one, one_mul]
+        exact (hF t ht).1
+      · refine Asymptotics.IsBigO.of_bound (Real.pi / 2) ?_
+        filter_upwards [self_mem_nhdsWithin] with t ht
+        rw [Complex.norm_real, Real.norm_eq_abs, neg_zero, Real.rpow_zero, norm_one, mul_one]
+        exact (hF t ht).2)
+    (tendsto_mul_cpow_div_of_abs_le (C := Real.pi / 2) (q := 0)
+      (by
+        filter_upwards [self_mem_nhdsWithin] with t ht
+        exact ⟨ht, by rw [Real.rpow_zero, mul_one]; exact (hF t ht).2⟩)
+      (by simpa using tendsto_rpow_nhdsGT_zero hs0))
+    (tendsto_mul_cpow_div_of_abs_le (C := 1) (q := -1)
+      (by
+        filter_upwards [eventually_gt_atTop 0] with t ht
+        exact ⟨ht, by rw [Real.rpow_neg_one, one_mul]; exact (hF t ht).1⟩)
+      (by
+        have := tendsto_rpow_neg_atTop (y := 1 - s.re) (by linarith)
+        simpa [neg_sub, sub_eq_neg_add] using this))
+  rw [h]
+  push_cast
+  ring
 
 /-- DLMF Table 1.14.5, row 11: `(1 + x cos θ)/(1 + 2x cos θ + x²) ↦ π cos(sθ)/sin(sπ)`,
 `-π < θ < π`, `0 < ℜs < 1`. -/

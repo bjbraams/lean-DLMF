@@ -334,7 +334,8 @@ theorem mellin_regularizedHGFun_exp {a b c : ℂ}
   have hInorm (n : ℕ) : (∫ t : ℝ in Set.Ioi 0, ‖F n t‖) =
       ‖e n‖ * Real.Gamma (b.re + n) := by
     rw [setIntegral_congr_fun measurableSet_Ioi (fun t ht => hnorm n t ht), integral_const_mul]
-    have hi := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := b.re + n) (r := 1) (by positivity) one_pos
+    have hi := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := b.re + n) (r := 1)
+        (by positivity) one_pos
     simpa using congrArg (fun u : ℝ => ‖e n‖ * u) hi
   have hsum : Summable (fun n => ∫ t : ℝ in Set.Ioi 0, ‖F n t‖) := by
     simp_rw [hInorm]
@@ -367,7 +368,8 @@ theorem mellin_regularizedHGFun_exp {a b c : ℂ}
     _ = ∑' n, ∫ t : ℝ in Set.Ioi 0, F n t := hs.tsum_eq.symm
     _ = _ := by
       simp_rw [hI]
-      rw [tsum_mul_left, (DLMF.Hypergeometric.hasSum_regularizedGauss_one (by simp at h ⊢; linarith)).tsum_eq]
+      rw [tsum_mul_left, (DLMF.Hypergeometric.hasSum_regularizedGauss_one
+          (by simp at h ⊢; linarith)).tsum_eq]
       ring
 
 /-- The Laplace transform of Tricomi U; it converges for `0 < Re z`. -/

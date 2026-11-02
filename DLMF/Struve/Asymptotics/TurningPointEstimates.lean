@@ -170,7 +170,8 @@ theorem struveSc_re_one_sub_q {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
   have hkey : ea * (1 - u ^ (-(1 / 2 : ℂ))) * Z = (r : ℂ) ^ 2 := by
     have hee : ea * ea * w ^ 2 = (r : ℂ) ^ 2 := by
       rw [hw, hea, mul_pow, ← exp_nat_mul]
-      have h1 : cexp (↑a * I) * cexp (↑a * I) * cexp (((2 : ℕ) : ℂ) * (((-a : ℝ) : ℂ) * I)) = 1 := by
+      have h1 : cexp (↑a * I) * cexp (↑a * I) *
+          cexp (((2 : ℕ) : ℂ) * (((-a : ℝ) : ℂ) * I)) = 1 := by
         rw [← exp_add, ← exp_add]; push_cast; ring_nf; exact exp_zero
       linear_combination (r : ℂ) ^ 2 * h1
     rw [hq, hZ, ← hee, show w ^ 2 = P ^ 2 - 1 by rw [hP2, hu]; ring]
@@ -582,7 +583,8 @@ theorem struveSc_re_one_sub_q_ge {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
   have hkey : ea * (1 - u ^ (-(1 / 2 : ℂ))) * Z = (r : ℂ) ^ 2 := by
     have hee : ea * ea * w ^ 2 = (r : ℂ) ^ 2 := by
       rw [hw, hea, mul_pow, ← exp_nat_mul]
-      have h1 : cexp (↑a * I) * cexp (↑a * I) * cexp (((2 : ℕ) : ℂ) * (((-a : ℝ) : ℂ) * I)) = 1 := by
+      have h1 : cexp (↑a * I) * cexp (↑a * I) *
+          cexp (((2 : ℕ) : ℂ) * (((-a : ℝ) : ℂ) * I)) = 1 := by
         rw [← exp_add, ← exp_add]; push_cast; ring_nf; exact exp_zero
       linear_combination (r : ℂ) ^ 2 * h1
     rw [hq, hZ, ← hee, show w ^ 2 = P ^ 2 - 1 by rw [hP2, hu]; ring]
@@ -703,7 +705,8 @@ theorem struveSc_phase_one_sub_cube {a : ℝ} (ha : |a| < π / 2) {K : ℝ}
     have hPp : 0 < ‖P‖ := norm_pos_iff.2 hP0
     have hKP : 1 ≤ K * ‖P‖ := by
       rwa [inv_le_iff_one_le_mul₀ hPp] at hqK
-    rw [hid, norm_div, norm_neg, norm_mul, norm_mul, norm_pow, div_le_iff₀ (mul_pos (by norm_num) hPp)]
+    rw [hid, norm_div, norm_neg, norm_mul, norm_mul, norm_pow,
+        div_le_iff₀ (mul_pos (by norm_num) hPp)]
     have h2 : ‖(2 : ℂ)‖ = 2 := by simp
     rw [h2]
     have hP2n : ‖P + 2‖ ≤ ‖P‖ + 2 := by
@@ -800,7 +803,8 @@ theorem struveSc_exp_split {c ρ r : ℝ} (hc : 0 ≤ c) (hρ : 0 ≤ ρ) (hr : 
       rw [show c / 24 * ρ * r = c * ρ * (r / 24) by ring]
       refine mul_le_mul_of_nonneg_left ?_ hcρ
       rw [div_le_div_iff₀ (by norm_num) (by positivity)]
-      nlinarith [one_le_pow₀ h (n := 2), mul_le_mul_of_nonneg_left (one_le_pow₀ h (n := 2) : 1 ≤ r ^ 2) hr]
+      nlinarith [one_le_pow₀ h (n := 2),
+          mul_le_mul_of_nonneg_left (one_le_pow₀ h (n := 2) : 1 ≤ r ^ 2) hr]
     linarith [Real.exp_le_exp.2 (neg_le_neg this), Real.exp_pos (-(c / 24 * ρ * r ^ 3))]
 
 end StruveScaled

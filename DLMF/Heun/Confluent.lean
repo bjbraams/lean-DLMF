@@ -55,7 +55,8 @@ private lemma tendsto_zpow_neg_cobounded {n : ℕ} (hn : 0 < n) :
   simp [zpow_neg, inv_pow]
 
 /-- If `f / g → c ≠ 0` and `g' / g → 0` then `f` is not `O(g')`. -/
-private lemma not_isBigO_of_tendsto_div {l : Filter ℂ} [l.NeBot] {f g g' : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
+private lemma not_isBigO_of_tendsto_div {l : Filter ℂ} [l.NeBot] {f g g' : ℂ → ℂ}
+    {c : ℂ} (hc : c ≠ 0)
     (hf : Tendsto (fun z => f z / g z) l (𝓝 c)) (hg : Tendsto (fun z => g' z / g z) l (𝓝 0)) :
     ¬ f =O[l] g' := fun h =>
   not_isBigO_of_tendsto hc hf hg

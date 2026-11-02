@@ -72,16 +72,19 @@ theorem one_apply_eq_floor {n : ℕ} (hn : 0 < n) :
   rw [floor_one_div hn, one_apply]
 
 /-- The multiplicative function with prescribed values `h(p^e)` at prime powers. -/
-def multiplicativeOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) : ArithmeticFunction R :=
+def multiplicativeOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) :
+    ArithmeticFunction R :=
   ⟨fun n ↦ if n = 0 then 0 else ∏ p ∈ n.primeFactors, h (p ^ n.factorization p), by simp⟩
 
 /-- Value of `multiplicativeOfPrimePow` at `n ≠ 0`. -/
 private lemma multiplicativeOfPrimePow_apply {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) {n : ℕ}
-    (hn : n ≠ 0) : multiplicativeOfPrimePow h n = ∏ p ∈ n.primeFactors, h (p ^ n.factorization p) := by
+    (hn : n ≠ 0) : multiplicativeOfPrimePow h n = ∏ p ∈ n.primeFactors,
+        h (p ^ n.factorization p) := by
   simp [multiplicativeOfPrimePow, hn]
 
 /-- `multiplicativeOfPrimePow h` is multiplicative. -/
-private lemma isMultiplicative_multiplicativeOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) :
+private lemma isMultiplicative_multiplicativeOfPrimePow {R : Type*}
+    [CommMonoidWithZero R] (h : ℕ → R) :
     (multiplicativeOfPrimePow h).IsMultiplicative := by
   refine ⟨by simp [multiplicativeOfPrimePow_apply], fun {m n} hmn ↦ ?_⟩
   rcases eq_or_ne m 0 with rfl | hm
@@ -116,12 +119,14 @@ private lemma isMultiplicative_of_mul_eq_one {f h : ArithmeticFunction ℂ}
       simp only [mul_apply, Nat.divisorsAntidiagonal_one, sum_singleton, one_one,
         hf.map_one, one_mul] at this
       exact this.symm
-    rw [hgdef, multiplicativeOfPrimePow_apply _ (pow_ne_zero _ hp.ne_zero), Nat.primeFactors_prime_pow
+    rw [hgdef, multiplicativeOfPrimePow_apply _ (pow_ne_zero _ hp.ne_zero),
+        Nat.primeFactors_prime_pow
       (Nat.succ_ne_zero e) hp, prod_singleton, Nat.factorization_pow_self hp]
   have hfg : f * g = 1 := by
     refine (IsMultiplicative.eq_iff_eq_on_prime_powers _ (hf.mul hg) _
       isMultiplicative_one).mpr fun p e hp ↦ ?_
-    rw [← hh, arithmeticFunction_mul_apply_prime_pow _ _ hp, arithmeticFunction_mul_apply_prime_pow _ _ hp]
+    rw [← hh, arithmeticFunction_mul_apply_prime_pow _ _ hp,
+        arithmeticFunction_mul_apply_prime_pow _ _ hp]
     exact sum_congr rfl fun i _ ↦ by rw [hgpp p _ hp]
   have : h = g := by
     calc h = h * (f * g) := by rw [hfg, mul_one]
@@ -180,7 +185,8 @@ theorem sum_vonMangoldt_and_inverse {n : ℕ} (hn : 0 < n) :
     (fun m _ ↦ vonMangoldt_sum.symm) n hn
 
 /-- `∑_{n≤N} ∑_{m≤N/n} c(n,m) = ∑_{k≤N} ∑_{ab=k} c(a,b)`. -/
-private lemma sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal {R : Type*} [AddCommMonoid R] (c : ℕ → ℕ → R) (N : ℕ) :
+private lemma sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal {R : Type*} [AddCommMonoid R]
+    (c : ℕ → ℕ → R) (N : ℕ) :
     ∑ n ∈ Icc 1 N, ∑ m ∈ Icc 1 (N / n), c n m =
       ∑ k ∈ Icc 1 N, ∑ x ∈ k.divisorsAntidiagonal, c x.1 x.2 := by
   have hP : ∀ k ∈ Icc 1 N, k.divisorsAntidiagonal =
@@ -256,7 +262,8 @@ private lemma moebius_inversion_floor_iff (F G : ℝ → ℂ) :
       refine sum_congr rfl fun n hn ↦ ?_
       rw [H _ (hdiv x hx n hn).1, (hdiv x hx n hn).2, mul_sum]
       exact sum_congr rfl fun m _ ↦ by rw [hxk]
-    rw [e1, sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal (fun n m ↦ (μ n : ℂ) * F (x / ((n * m : ℕ) : ℝ)))]
+    rw [e1, sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal
+        (fun n m ↦ (μ n : ℂ) * F (x / ((n * m : ℕ) : ℝ)))]
     have e2 : ∀ k ∈ Icc 1 ⌊x⌋₊, ∑ y ∈ k.divisorsAntidiagonal,
         (μ y.1 : ℂ) * F (x / ((y.1 * y.2 : ℕ) : ℝ)) = (if k = 1 then 1 else 0) * F (x / k) := by
       intro k _
@@ -271,7 +278,8 @@ private lemma moebius_inversion_floor_iff (F G : ℝ → ℂ) :
       refine sum_congr rfl fun n hn ↦ ?_
       rw [H _ (hdiv x hx n hn).1, (hdiv x hx n hn).2]
       exact sum_congr rfl fun m _ ↦ by rw [hxk]
-    rw [e1, sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal (fun n m ↦ (μ m : ℂ) * G (x / ((n * m : ℕ) : ℝ)))]
+    rw [e1, sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal
+        (fun n m ↦ (μ m : ℂ) * G (x / ((n * m : ℕ) : ℝ)))]
     have e2 : ∀ k ∈ Icc 1 ⌊x⌋₊, ∑ y ∈ k.divisorsAntidiagonal,
         (μ y.2 : ℂ) * G (x / ((y.1 * y.2 : ℕ) : ℝ)) = (if k = 1 then 1 else 0) * G (x / k) := by
       intro k _

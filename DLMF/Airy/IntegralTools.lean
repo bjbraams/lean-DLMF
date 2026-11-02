@@ -41,7 +41,8 @@ theorem airyInt_primitive_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) (
       have h := ((hg' (t * x)).comp (t : ℂ) ((hasDerivAt_id (t : ℂ)).mul_const (x : ℂ))).comp_ofReal
       simpa [mul_comm] using h
     have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hd t)
-      ((continuous_const.mul (hf.continuous.comp (continuous_ofReal.mul continuous_const))).intervalIntegrable 0 1)
+      ((continuous_const.mul
+          (hf.continuous.comp (continuous_ofReal.mul continuous_const))).intervalIntegrable 0 1)
     rw [intervalIntegral.integral_const_mul] at h
     simpa [primitive, segmentIntegral] using h
   rw [h1, intervalIntegral.integral_eq_sub_of_hasDerivAt (f := fun t : ℝ => g t)
@@ -129,7 +130,8 @@ theorem airyInt_norm_scorerHi_neg_sub_le {s : ℝ} (hs : 0 < s) :
     refine norm_integral_le_of_norm_le (h3i.const_mul _) ?_
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
     rw [Real.norm_eq_abs, abs_of_nonpos]
-    · have e : Real.exp (-(t ^ 3 / 3) + -s * t) = Real.exp (-(t ^ 3 / 3)) * Real.exp (-(s * t)) := by
+    · have e : Real.exp (-(t ^ 3 / 3) + -s * t) = Real.exp (-(t ^ 3 / 3)) *
+          Real.exp (-(s * t)) := by
         rw [← Real.exp_add]; ring_nf
       rw [e]
       have := Real.add_one_le_exp (-(t ^ 3 / 3))
@@ -326,7 +328,8 @@ theorem airyInt_norm_scorerGi_le {x : ℝ} (hx : 0 < x) : ‖scorerGi x‖ ≤ 2
     _ = _ := by field_simp; ring
 
 /-- `|Gi'(x)| ≤ 4/(πx²)` for `x > 0`. -/
-theorem airyInt_norm_scorerGiDeriv_le {x : ℝ} (hx : 0 < x) : ‖scorerGiDeriv x‖ ≤ 4 / (π * x ^ 2) := by
+theorem airyInt_norm_scorerGiDeriv_le {x : ℝ} (hx : 0 < x) : ‖scorerGiDeriv x‖ ≤ 4 /
+    (π * x ^ 2) := by
   have hx2 : 0 < x / 2 := by linarith
   obtain ⟨n1, n2, n3, n4⟩ := airyInt_norm_rot
   obtain ⟨r1, r2⟩ := airyInt_re_mul_omega (x := x)
@@ -364,7 +367,8 @@ theorem airyInt_norm_airyAi_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAi x‖ ≤ 1 :
     _ = 1 := by ring
 
 /-- `|Ai'(x)| ≤ 2 x^{1/4}` for `x ≥ 1`. -/
-theorem airyInt_norm_airyAiDeriv_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAiDeriv x‖ ≤ 2 * x ^ (1 / 4 : ℝ) := by
+theorem airyInt_norm_airyAiDeriv_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAiDeriv x‖ ≤ 2 *
+    x ^ (1 / 4 : ℝ) := by
   have hx0 : 0 < x := by linarith
   have h := airy_aiDeriv_bound hx0
   rw [airyAiDeriv_ofReal_eq, norm_real, Real.norm_eq_abs]

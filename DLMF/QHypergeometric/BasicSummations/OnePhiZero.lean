@@ -64,12 +64,14 @@ lemma qDenominatorRegular_mul_q {c q : ℂ} (hc : QDenominatorRegular [c] q) :
   simpa [pow_succ',mul_assoc] using hc c (by simp) (n+1)
 
 /-- Regularity of a lower parameter gives nonvanishing factorials. -/
-lemma qPochhammer_ne_zero_of_qDenominatorRegular {c q : ℂ} (hq : ‖q‖<1) (hc : QDenominatorRegular [c] q) (n : ℕ) :
+lemma qPochhammer_ne_zero_of_qDenominatorRegular {c q : ℂ} (hq : ‖q‖<1)
+    (hc : QDenominatorRegular [c] q) (n : ℕ) :
     qPochhammer c q n≠0 :=
   qPochhammer_ne_zero_of_factors hq (fun j h => hc c (by simp) j (sub_eq_zero.mp h).symm) n
 
 /-- Regularity of a lower parameter gives `1-c≠0`. -/
-lemma one_sub_ne_zero_of_qDenominatorRegular {c q : ℂ} (hc : QDenominatorRegular [c] q) : 1-c≠0 := by
+lemma one_sub_ne_zero_of_qDenominatorRegular {c q : ℂ}
+    (hc : QDenominatorRegular [c] q) : 1-c≠0 := by
   intro h; exact hc c (by simp) 0 (by simpa using (sub_eq_zero.mp h).symm)
 
 /-- Prepending a zero term to a series. -/
@@ -145,7 +147,8 @@ private lemma choose_two_add (k m : ℕ) : (k+m).choose 2=k.choose 2+m.choose 2+
     ring
 
 /-- The terminating `₂φ₁` term with the top parameter `q^{-n}` times `(c;q)_n`. -/
-private lemma qPhiTerm_neg_pow_mul_qPochhammer {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0) {n k : ℕ} (hkn : k≤n)
+private lemma qPhiTerm_neg_pow_mul_qPochhammer {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0)
+    {n k : ℕ} (hkn : k≤n)
     (hck : qPochhammer c q k≠0) (z : ℂ) :
     qPhiTerm [q^(-(n:ℤ)),a] [c] q z k*qPochhammer c q n=
       qBinom q n k*qPochhammer a q k*qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*
@@ -225,7 +228,8 @@ lemma qPhi_neg_pow_q_mul_qPochhammer {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1
   have hz : -(q*q^(-(n:ℤ)))= -q^(1-(n:ℤ)) := by
     rw [zpow_sub₀ hq0,zpow_one,zpow_neg]; field_simp
   rw [hz]
-  have hterm : ∀ k ∈ range (n+1), qBinom q n k*qPochhammer a q k*qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*
+  have hterm : ∀ k ∈ range (n+1),
+      qBinom q n k*qPochhammer a q k*qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*
       (-q^(1-(n:ℤ)))^k*(-c)^(n-k)=(-c)^n*(qBinom q n k*qPochhammer a q k*
         qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*(q^(1-(n:ℤ))/c)^k) := by
     intro k hk
@@ -244,7 +248,8 @@ lemma tendsto_qNumber_one (c : ℂ) :
     have := (Complex.hasStrictDerivAt_cpow_const (c := c) h1).hasDerivAt
     simpa using this.comp_ofReal
   have hs := hd.tendsto_slope.mono_left (nhdsWithin_mono _
-    (show Iio (1:ℝ) ⊆ {1}ᶜ from fun x hx => by simp only [Set.mem_Iio] at hx; simpa using ne_of_lt hx))
+    (show Iio (1:ℝ) ⊆ {1}ᶜ from fun x hx => by simp only [Set.mem_Iio] at hx;
+                                               simpa using ne_of_lt hx))
   refine hs.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with q hq
   have hq1 : (1:ℂ)-q≠0 := by
@@ -432,7 +437,8 @@ theorem one_phi_zero_upper_zero {q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) :
   rw [one_phi_zero hq hz]
   simp [qPochhammerInf]
 
-/-- The product quotient is analytic on its regular set, by Mathlib analytic composition/division. -/
+/-- The product quotient is analytic on its regular set, by Mathlib analytic composition/division.
+-/
 theorem one_phi_zero_continuation_analytic {a q : ℂ} (hq : ‖q‖<1) :
     AnalyticOnNhd ℂ (qOnePhiZeroContinuation a q) {z | qPochhammerInf z q≠0} := by
   intro z hz

@@ -188,7 +188,8 @@ theorem compEllIntPik_hasSum {α2 k : ℂ} (hk : ‖k‖ < 1) (hα : ‖α2‖ <
     HasSum (fun n : ℕ => (π / 2 : ℂ) * (poch (1 / 2) n / Nat.factorial n *
         ∑ m ∈ Finset.range (n + 1), poch (1 / 2) m / Nat.factorial m * k ^ (2 * m) * α2 ^ (n - m)))
         (compEllIntPik α2 k) ∧
-      compEllIntPik α2 k = (π / 2 : ℂ) * ∑' p : ℕ × ℕ, appellF1Term (1 / 2) (1 / 2) 1 1 (k ^ 2) α2 p := by
+      compEllIntPik α2 k = (π / 2 : ℂ) * ∑' p : ℕ × ℕ,
+          appellF1Term (1 / 2) (1 / 2) 1 1 (k ^ 2) α2 p := by
   sorry
 
 /-- **Admitted.** DLMF 19.5.4_1: for real `|φ| < π/2` and `|k| < 1`,
@@ -302,8 +303,9 @@ private lemma norm_landen_le_norm_sq {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
   exact div_le_self (by positivity) (one_le_pow₀ hge)
 
 /-- DLMF 19.5.10: `K(k) = (π/2) ∏_{m ≥ 1} (1 + k_m)` with the moduli of 19.5.11, in
-the principal domain `1 - k² ∈ ℂ \ (-∞, 0]` (natural-order partial products). Proved by iterating the complex descending Landen
-transformation 19.8.12 (`compEllInt_landen_descending`); `‖k_{m+1}‖ ≤ ‖k_m‖²` gives `k_m → 0`. -/
+the principal domain `1 - k² ∈ ℂ \ (-∞, 0]` (natural-order partial products). Proved by iterating
+the complex descending Landen transformation 19.8.12 (`compEllInt_landen_descending`);
+`‖k_{m+1}‖ ≤ ‖k_m‖²` gives `k_m → 0`. -/
 @[dlmf 19.5.E10]
 theorem compEllIntKk_eq_landen_prod {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
     Tendsto (fun N => (π / 2 : ℂ) * ∏ m ∈ Finset.range N, (1 + landenModulusSeq k (m + 1))) atTop

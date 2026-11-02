@@ -75,7 +75,8 @@ private lemma tendsto_rpow_one_div_atTop {c : ℝ} (hc : 0 < c) :
 
 /-- Helper: for positive weights `w` and nonnegative `c` with a maximal entry `c i₀`,
 `(∑ w_i c_i^r)^{1/r} → c i₀` as `r → ∞`. -/
-theorem tendsto_weighted_sum_rpow_rpow_inv_atTop {w c : ι → ℝ} (hw : ∀ i, 0 < w i) (hc : ∀ i, 0 ≤ c i)
+theorem tendsto_weighted_sum_rpow_rpow_inv_atTop {w c : ι → ℝ} (hw : ∀ i, 0 < w i)
+    (hc : ∀ i, 0 ≤ c i)
     {i₀ : ι} (hi₀ : ∀ i, c i ≤ c i₀) :
     Tendsto (fun r : ℝ => (∑ i, w i * c i ^ r) ^ (1 / r)) atTop (𝓝 (c i₀)) := by
   set W := ∑ i, w i with hW
@@ -139,7 +140,8 @@ theorem tendsto_weightedPowerMean_atBot [Nonempty ι] {p a : ι → ℝ} (hp : �
   have hpos : ∀ i, 0 < a i := fun i =>
     lt_of_le_of_ne (ha i) (Ne.symm fun h => h0 (prod_eq_zero (mem_univ i) h))
   have hmax : ∀ i, (a i)⁻¹ ≤ (a i₀)⁻¹ := fun i => inv_anti₀ (hpos i₀) (hi₀ i)
-  have hT := (tendsto_weighted_sum_rpow_rpow_inv_atTop hp (fun i => (inv_pos.2 (hpos i)).le) hmax).comp
+  have hT := (tendsto_weighted_sum_rpow_rpow_inv_atTop hp
+      (fun i => (inv_pos.2 (hpos i)).le) hmax).comp
     tendsto_neg_atBot_atTop
   have hT' := hT.inv₀ (inv_pos.2 (hpos i₀)).ne'
   rw [inv_inv] at hT'

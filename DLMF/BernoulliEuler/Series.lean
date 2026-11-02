@@ -7,6 +7,8 @@ module
 
 public import DLMF.BernoulliEuler.Properties
 public import Mathlib.Analysis.Complex.AbelLimit
+public import Mathlib.NumberTheory.ModularForms.EisensteinSeries.QExpansion
+public import Mathlib.NumberTheory.ModularForms.Identities
 
 /-!
 # Bernoulli and Euler polynomials: series expansions
@@ -23,7 +25,9 @@ representations of the Bernoulli and Euler numbers.
 * `hasSum_sin_odd_eulerFun`, `hasSum_cos_odd_eulerFun`: the Fourier series of the Euler
   polynomials (DLMF 24.8.4, 24.8.5).
 * `hasSum_bernoulli_four_mul_add_two`, `hasSum_bernoulli_two_mul_alt`,
-  `bernoulli_two_mul_alpha_beta`: series for `B₂ₙ` (DLMF 24.8.6–24.8.8).
+  `bernoulli_two_mul_alpha_beta`: series for `B₂ₙ` (DLMF 24.8.6–24.8.8), from the modular
+  transformation `E_k(-1/τ) = τ^k E_k(τ)` of Mathlib's level-one Eisenstein series and its
+  `q`-expansion `EisensteinSeries.q_expansion_bernoulli`.
 * `eulerNumber_two_mul_eq_series`: a series for `E₂ₙ` (DLMF 24.8.9).
 
 ## Implementation notes
@@ -61,7 +65,8 @@ private lemma eulerFun_eq_bernoulliFun_sub (n : ℕ) (x : ℝ) :
   exact_mod_cast h'
 
 /-- Restricting a series vanishing at even indices to the odd indices. -/
-private lemma hasSum_odd_of_even_eq_zero {f : ℕ → ℝ} {a : ℝ} (h : HasSum f a) (h0 : ∀ j, f (2 * j) = 0) :
+private lemma hasSum_odd_of_even_eq_zero {f : ℕ → ℝ} {a : ℝ} (h : HasSum f a)
+    (h0 : ∀ j, f (2 * j) = 0) :
     HasSum (fun k => f (2 * k + 1)) a := by
   have hinj : Function.Injective (fun m : ℕ => 2 * m + 1) := fun a b h => by simp at h; omega
   refine (hinj.hasSum_iff fun n hn => ?_).mpr h
@@ -330,23 +335,95 @@ theorem hasSum_cos_odd_eulerFun {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 ≤ 
     linear_combination (-4 * cos ((2 * k + 1) * π * x) * π ^ (2 * m + 1 + 1) * 2 ^ (2 * m + 1 + 1) -
       16 * m * cos ((2 * k + 1) * π * x) * π ^ (2 * m + 2) * 2 ^ (2 * m)) * h1
 
+section Eisenstein
+
+open Complex ModularForm EisensteinSeries ArithmeticFunction
+open UpperHalfPlane hiding I
+open scoped ArithmeticFunction.sigma MatrixGroups
+
+/-- Termwise Lambert form: `k^p/(e^{2ak} - 1) = k^p r^k/(1 - r^k)` with `r = e^{-2a}`. -/
+private lemma lambert_term_eq {a : ℝ} (ha : 0 < a) (p m : ℕ) :
+    ((m : ℝ) + 1) ^ p / (Real.exp (2 * a * (m + 1)) - 1) =
+      ((m + 1 : ℕ) : ℝ) ^ p * Real.exp (-(2 * a)) ^ (m + 1) /
+        (1 - Real.exp (-(2 * a)) ^ (m + 1)) := by
+  set u := Real.exp (-(2 * a)) ^ (m + 1)
+  set v := Real.exp (2 * a * (m + 1))
+  have he' : u * v = 1 := by
+    simp only [u, v]
+    rw [← Real.exp_nat_mul, ← Real.exp_add]; push_cast; ring_nf; simp
+  have h1 : v - 1 ≠ 0 := by
+    rw [sub_ne_zero]; simp only [v]; rw [Ne, Real.exp_eq_one_iff]; positivity
+  have h2 : 1 - u ≠ 0 := by
+    intro h; apply h1; linear_combination v * h + he'
+  clear_value u v
+  field_simp
+  push_cast
+  linear_combination (-((m:ℝ) + 1) ^ p) * he'
+
+/-- `‖e^{-2a}‖ < 1` for `a > 0`. -/
+private lemma norm_exp_neg_lt_one {a : ℝ} (ha : 0 < a) : ‖Real.exp (-(2 * a))‖ < 1 := by
+  rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+  exact Real.exp_lt_one_iff.mpr (by linarith)
+
+/-- Summability of the Lambert series `∑ k^p/(e^{2ak} - 1)`, `a > 0`. -/
+private lemma summable_lambert {a : ℝ} (ha : 0 < a) (p : ℕ) :
+    Summable fun m : ℕ => ((m : ℝ) + 1) ^ p / (Real.exp (2 * a * (m + 1)) - 1) := by
+  have h := summable_norm_pow_mul_geometric_div_one_sub (𝕜 := ℝ) p (norm_exp_neg_lt_one ha)
+  have h' : Summable fun m : ℕ => ((m + 1 : ℕ) : ℝ) ^ p * Real.exp (-(2 * a)) ^ (m + 1) /
+      (1 - Real.exp (-(2 * a)) ^ (m + 1)) :=
+    (summable_nat_add_iff 1).mpr h
+  exact h'.congr fun m => (lambert_term_eq ha p m).symm
+
+/-- The `q`-expansion of the level-one Eisenstein series `E_k` at `τ = ia/π` as a Lambert
+series. -/
+private lemma eisensteinE_I_mul {k : ℕ} (hk : 3 ≤ k) (hk2 : Even k) {a : ℝ} (ha : 0 < a) :
+    ModularForm.E hk (UpperHalfPlane.mk (I * (a / π : ℝ)) (by simpa using div_pos ha Real.pi_pos)) =
+      1 - (2 * k / bernoulli k) *
+        ((∑' m : ℕ, ((m : ℝ) + 1) ^ (k - 1) / (Real.exp (2 * a * (m + 1)) - 1) : ℝ) : ℂ) := by
+  rw [q_expansion_bernoulli hk hk2]
+  congr 2
+  set r : ℂ := cexp (2 * π * I * (I * ((a / π : ℝ) : ℂ)))
+  have hr : r = (Real.exp (-(2 * a)) : ℂ) := by
+    simp only [r, ofReal_exp]; congr 1; push_cast
+    have : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+    field_simp; ring_nf; rw [I_sq]; ring
+  have hr1 : ‖r‖ < 1 := by
+    rw [hr, norm_real]; exact norm_exp_neg_lt_one ha
+  simp only [zpow_natCast]
+  rw [← tsum_pow_div_one_sub_eq_tsum_sigma hr1, tsum_pnat_eq_tsum_succ
+    (f := fun n : ℕ => (n : ℂ) ^ (k - 1) * r ^ n / (1 - r ^ n)), ofReal_tsum]
+  refine tsum_congr fun m => ?_
+  rw [hr, lambert_term_eq ha]
+  push_cast
+  rfl
+
+/-- The modular transformation `E_k(i/y) = (iy)^k E_k(iy)`. -/
+private lemma eisensteinE_S_I_mul {k : ℕ} (hk : 3 ≤ k) {y : ℝ} (hy : 0 < y) :
+    ModularForm.E hk (UpperHalfPlane.mk (I * (1 / y : ℝ)) (by simpa using hy)) =
+      (I * y) ^ k * ModularForm.E hk (UpperHalfPlane.mk (I * y) (by simpa using hy)) := by
+  have h := SlashInvariantForm.slash_action_eqn'' (ModularForm.E hk)
+    (γ := Matrix.SpecialLinearGroup.mapGL ℝ ModularGroup.S) (MonoidHom.mem_range.mpr ⟨_, rfl⟩)
+    (UpperHalfPlane.mk (I * y) (by simpa using hy))
+  have hS : (Matrix.SpecialLinearGroup.mapGL ℝ ModularGroup.S) •
+      (UpperHalfPlane.mk (I * y) (by simpa using hy)) =
+      UpperHalfPlane.mk (I * (1 / y : ℝ)) (by simpa using hy) := by
+    have := UpperHalfPlane.modular_S_smul (UpperHalfPlane.mk (I * y) (by simpa using hy))
+    ext1
+    rw [show (Matrix.SpecialLinearGroup.mapGL ℝ ModularGroup.S) • _ = ModularGroup.S • _ from rfl,
+      this]
+    have : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
+    field_simp
+    push_cast
+    rw [I_sq]; field_simp
+  rw [hS] at h
+  rw [h]
+  congr 1
+  rw [denom, Matrix.SpecialLinearGroup.mapGL_coe_matrix, Matrix.SpecialLinearGroup.map_apply_coe]
+  simp [ModularGroup.S]
+
+end Eisenstein
+
 /-! ### §24.8(ii) Other series -/
-
-/-- **DLMF 24.8.6**: `B₄ₙ₊₂ = (8n+4) ∑_{k≥1} k^{4n+1}/(e^{2πk} - 1)`, `n ≥ 1`. -/
-@[dlmf 24.8.E6]
-theorem hasSum_bernoulli_four_mul_add_two {n : ℕ} (hn : 1 ≤ n) :
-    HasSum (fun k : ℕ => (8 * n + 4) * (((k : ℝ) + 1) ^ (4 * n + 1) / (exp (2 * π * (k + 1)) - 1)))
-      (bernoulli (4 * n + 2)) := by
-  sorry
-
-/-- **DLMF 24.8.7**: `B₂ₙ = (-1)ⁿ⁺¹ 4n/(2²ⁿ - 1) ∑_{k≥1} k^{2n-1}/(e^{πk} + (-1)^{k+n})`,
-`n ≥ 2`. -/
-@[dlmf 24.8.E7]
-theorem hasSum_bernoulli_two_mul_alt {n : ℕ} (hn : 2 ≤ n) :
-    HasSum (fun k : ℕ => (-1) ^ (n + 1) * (4 * n) / (2 ^ (2 * n) - 1) *
-        (((k : ℝ) + 1) ^ (2 * n - 1) / (exp (π * (k + 1)) + (-1) ^ (k + 1 + n))))
-      (bernoulli (2 * n)) := by
-  sorry
 
 /-- **DLMF 24.8.8**: for `α, β > 0` with `αβ = π²` and `n ≥ 2`,
 `(B₂ₙ/(4n))(αⁿ - (-β)ⁿ) = αⁿ ∑_{k≥1} k^{2n-1}/(e^{2αk} - 1) - (-β)ⁿ ∑_{k≥1} k^{2n-1}/(e^{2βk} - 1)`.
@@ -359,7 +436,193 @@ theorem bernoulli_two_mul_alpha_beta {n : ℕ} (hn : 2 ≤ n) {α β : ℝ} (hα
       (bernoulli (2 * n) : ℝ) / (4 * n) * (α ^ n - (-β) ^ n) =
         α ^ n * ∑' k : ℕ, ((k : ℝ) + 1) ^ (2 * n - 1) / (exp (2 * α * (k + 1)) - 1) -
           (-β) ^ n * ∑' k : ℕ, ((k : ℝ) + 1) ^ (2 * n - 1) / (exp (2 * β * (k + 1)) - 1) := by
-  sorry
+  refine ⟨summable_lambert hα _, summable_lambert hβ _, ?_⟩
+  have hk : 3 ≤ 2 * n := by omega
+  have hk2 : Even (2 * n) := even_two_mul n
+  have hy : 0 < α / π := div_pos hα Real.pi_pos
+  have h1 := eisensteinE_I_mul hk hk2 hα
+  have h2 := eisensteinE_I_mul hk hk2 hβ
+  have h3 := eisensteinE_S_I_mul hk hy
+  have hyβ : 1 / (α / π) = β / π := by
+    field_simp; nlinarith [hαβ]
+  simp only [hyβ] at h3
+  rw [h1, h2, mul_pow, pow_mul, Complex.I_sq] at h3
+  set Tα := ∑' k : ℕ, ((k : ℝ) + 1) ^ (2 * n - 1) / (Real.exp (2 * α * (k + 1)) - 1)
+  set Tβ := ∑' k : ℕ, ((k : ℝ) + 1) ^ (2 * n - 1) / (Real.exp (2 * β * (k + 1)) - 1)
+  clear_value Tα Tβ
+  have hB : (bernoulli (2 * n) : ℝ) ≠ 0 := by
+    have := (bernoulli_two_mul_add_one_eq_zero_and_sign
+      (n := n) (by omega)).2
+    intro h
+    have h' : bernoulli (2 * n) = 0 := by exact_mod_cast h
+    simp [h'] at this
+  have key : (1 : ℝ) - 2 * (2 * n : ℕ) / bernoulli (2 * n) * Tβ =
+      (-1) ^ n * (α / π) ^ (2 * n) * (1 - 2 * (2 * n : ℕ) / bernoulli (2 * n) * Tα) := by
+    have := h3
+    push_cast at this ⊢
+    exact_mod_cast this
+  have hyn : (α / π) ^ (2 * n) * β ^ n = α ^ n := by
+    have hπ : π ^ (2 * n) = α ^ n * β ^ n := by rw [pow_mul, ← hαβ, mul_pow]
+    rw [div_pow, hπ]
+    have : β ^ n ≠ 0 := by positivity
+    have : α ^ n ≠ 0 := by positivity
+    field_simp; ring
+  have key2 : (-β) ^ n * (1 - 2 * (2 * n : ℕ) / bernoulli (2 * n) * Tβ) =
+      α ^ n * (1 - 2 * (2 * n : ℕ) / bernoulli (2 * n) * Tα) := by
+    have h1' : ((-1 : ℝ) ^ n) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
+    rw [neg_pow, mul_assoc, key, ← hyn]
+    linear_combination ((α / π) ^ (2 * n) * β ^ n *
+      (1 - 2 * (2 * n : ℕ) / bernoulli (2 * n) * Tα)) * h1'
+  have hn0 : (n : ℝ) ≠ 0 := by positivity
+  push_cast at key2
+  field_simp at key2 ⊢
+  linear_combination (-1 : ℝ) * key2
+
+/-- **DLMF 24.8.6**: `B₄ₙ₊₂ = (8n+4) ∑_{k≥1} k^{4n+1}/(e^{2πk} - 1)`, `n ≥ 1`. -/
+@[dlmf 24.8.E6]
+theorem hasSum_bernoulli_four_mul_add_two {n : ℕ} (hn : 1 ≤ n) :
+    HasSum (fun k : ℕ => (8 * n + 4) * (((k : ℝ) + 1) ^ (4 * n + 1) / (exp (2 * π * (k + 1)) - 1)))
+      (bernoulli (4 * n + 2)) := by
+  obtain ⟨hs, -, h⟩ := bernoulli_two_mul_alpha_beta (n := 2 * n + 1) (by omega) Real.pi_pos
+    Real.pi_pos (by ring)
+  rw [show 2 * (2 * n + 1) - 1 = 4 * n + 1 by omega, show 2 * (2 * n + 1) = 4 * n + 2 by omega,
+    Odd.neg_pow (by exact odd_two_mul_add_one n)] at h
+  rw [show 2 * (2 * n + 1) - 1 = 4 * n + 1 by omega] at hs
+  have hp : π ^ (2 * n + 1) ≠ 0 := by positivity
+  set T := ∑' k : ℕ, ((k : ℝ) + 1) ^ (4 * n + 1) / (Real.exp (2 * π * (k + 1)) - 1)
+  have hT : (bernoulli (4 * n + 2) : ℝ) = (8 * n + 4) * T := by
+    clear_value T
+    have h4 : (4 * ((2 * n + 1 : ℕ) : ℝ)) ≠ 0 := by positivity
+    rw [div_mul_eq_mul_div, div_eq_iff h4] at h
+    push_cast at h
+    apply mul_left_cancel₀ hp
+    linear_combination h / 2
+  rw [hT]
+  exact hs.hasSum.mul_left _
+
+/-- **DLMF 24.8.7**: `B₂ₙ = (-1)ⁿ⁺¹ 4n/(2²ⁿ - 1) ∑_{k≥1} k^{2n-1}/(e^{πk} + (-1)^{k+n})`,
+`n ≥ 2`. -/
+@[dlmf 24.8.E7]
+theorem hasSum_bernoulli_two_mul_alt {n : ℕ} (hn : 2 ≤ n) :
+    HasSum (fun k : ℕ => (-1) ^ (n + 1) * (4 * n) / (2 ^ (2 * n) - 1) *
+        (((k : ℝ) + 1) ^ (2 * n - 1) / (exp (π * (k + 1)) + (-1) ^ (k + 1 + n))))
+      (bernoulli (2 * n)) := by
+  set p := 2 * n - 1 with hp
+  let g : ℝ → ℕ → ℝ := fun a k => ((k : ℝ) + 1) ^ p / (Real.exp (2 * a * (k + 1)) - 1)
+  have hπ2 : 0 < π / 2 := by positivity
+  have h2π : 0 < 2 * π := by positivity
+  obtain ⟨sA, sC, hAC⟩ := bernoulli_two_mul_alpha_beta hn hπ2 h2π (by ring)
+  obtain ⟨sT, -, hTT⟩ := bernoulli_two_mul_alpha_beta hn Real.pi_pos Real.pi_pos (by ring)
+  rw [← hp] at sA sC sT hAC hTT
+  set A := ∑' k : ℕ, ((k : ℝ) + 1) ^ p / (Real.exp (2 * (π / 2) * (k + 1)) - 1)
+  set C := ∑' k : ℕ, ((k : ℝ) + 1) ^ p / (Real.exp (2 * (2 * π) * (k + 1)) - 1)
+  set T := ∑' k : ℕ, ((k : ℝ) + 1) ^ p / (Real.exp (2 * π * (k + 1)) - 1)
+  -- the odd-index subseries of the `T` series
+  have hodd : HasSum (fun j : ℕ => g π (2 * j + 1)) (2 ^ p * C) := by
+    have := sC.hasSum.mul_left (2 ^ p)
+    refine this.congr_fun fun j => ?_
+    simp only [g]
+    push_cast
+    rw [show (2 * (j : ℝ) + 1 + 1) = 2 * (j + 1) by ring, mul_pow]
+    ring_nf
+  have heven : HasSum (fun j : ℕ => g π (2 * j)) (T - 2 ^ p * C) := by
+    have hs : Summable fun j : ℕ => g π (2 * j) :=
+      sT.comp_injective (mul_right_injective₀ two_ne_zero)
+    have := hs.hasSum.even_add_odd hodd
+    have hT : T = ∑' j, g π (2 * j) + 2 ^ p * C := sT.hasSum.unique this
+    rw [hT, add_sub_cancel_right]
+    exact hs.hasSum
+  let h : ℕ → ℝ := fun k => if Even (k + 1 + n) then g π k else 0
+  have hh : HasSum h (if Even n then 2 ^ p * C else T - 2 ^ p * C) := by
+    by_cases hn2 : Even n
+    · rw [show (if Even n then 2 ^ p * C else T - 2 ^ p * C) = 2 ^ p * C by simp [hn2],
+        ← zero_add (2 ^ p * C)]
+      refine HasSum.even_add_odd ?_ ?_
+      · convert hasSum_zero with j
+        simp only [h]
+        refine ite_eq_right ?_
+        rw [Nat.not_even_iff_odd]
+        exact (even_two_mul j).add_one.add_even hn2
+      · convert hodd using 1
+        funext j
+        simp only [h]
+        refine ite_eq_left ?_
+        exact (by simpa [show 2 * j + 1 + 1 = 2 * (j + 1) by ring] using
+          (even_two_mul (j + 1)).add hn2)
+    · rw [show (if Even n then 2 ^ p * C else T - 2 ^ p * C) = T - 2 ^ p * C by simp [hn2],
+        ← add_zero (T - 2 ^ p * C)]
+      refine HasSum.even_add_odd ?_ ?_
+      · convert heven using 1
+        funext j
+        simp only [h]
+        refine ite_eq_left ?_
+        exact (even_two_mul j).add_one.add_odd (Nat.not_even_iff_odd.mp hn2)
+      · convert hasSum_zero with j
+        simp only [h]
+        refine ite_eq_right ?_
+        rw [Nat.not_even_iff_odd]
+        rw [show 2 * j + 1 + 1 + n = 2 * (j + 1) + n by ring]
+        exact (even_two_mul (j + 1)).add_odd (Nat.not_even_iff_odd.mp hn2)
+  have hterm : ∀ k : ℕ, ((k : ℝ) + 1) ^ (2 * n - 1) /
+      (Real.exp (π * (k + 1)) + (-1) ^ (k + 1 + n)) = g (π / 2) k - 2 * h k := by
+    intro k
+    simp only [g, h]
+    rw [← hp]
+    set x := Real.exp (π * (k + 1)) with hx
+    have hx1 : 1 < x := Real.one_lt_exp_iff.mpr (by positivity)
+    have e1 : Real.exp (2 * (π / 2) * (k + 1)) = x := by rw [hx]; ring_nf
+    have e2 : Real.exp (2 * π * (k + 1)) = x ^ 2 := by
+      rw [hx, ← Real.exp_nat_mul]; push_cast; ring_nf
+    rw [e1, e2]
+    have h1 : x - 1 ≠ 0 := by linarith
+    have h2 : x + 1 ≠ 0 := by linarith
+    have h3 : x ^ 2 - 1 ≠ 0 := by nlinarith
+    split_ifs with he
+    · rw [he.neg_one_pow]
+      field_simp
+      ring
+    · rw [(Nat.not_even_iff_odd.mp he).neg_one_pow]
+      ring
+  have hf : HasSum (fun k : ℕ => ((k : ℝ) + 1) ^ (2 * n - 1) /
+      (Real.exp (π * (k + 1)) + (-1) ^ (k + 1 + n)))
+      (A - 2 * (if Even n then 2 ^ p * C else T - 2 ^ p * C)) := by
+    simp_rw [hterm]
+    exact sA.hasSum.sub (hh.mul_left 2)
+  have hf' := hf.mul_left ((-1 : ℝ) ^ (n + 1) * (4 * n) / (2 ^ (2 * n) - 1))
+  convert hf' using 1
+  clear_value A C T
+  have h2p : (2 : ℝ) * 2 ^ p = 4 ^ n := by
+    rw [← pow_succ', hp, show 2 * n - 1 + 1 = 2 * n by omega, pow_mul]; norm_num
+  have h4 : (2 : ℝ) ^ (2 * n) = 4 ^ n := by rw [pow_mul]; norm_num
+  have hw : (2 * π) ^ n = 4 ^ n * (π / 2) ^ n := by rw [← mul_pow]; ring_nf
+  have hu : (π / 2) ^ n ≠ 0 := by positivity
+  have hπn : π ^ n ≠ 0 := by positivity
+  have hn0 : (n : ℝ) ≠ 0 := by positivity
+  have h41 : (4 : ℝ) ^ n - 1 ≠ 0 := by
+    have : (1 : ℝ) < 4 ^ n := one_lt_pow₀ (by norm_num) (by omega)
+    linarith
+  rw [h4]
+  rcases Nat.even_or_odd n with he | ho
+  · rw [he.neg_pow, hw] at hAC
+    simp only [he, ↓reduceIte]
+    rw [(he.add_one).neg_one_pow, show (2 : ℝ) ^ p = 4 ^ n / 2 by linarith [h2p]]
+    have : (bernoulli (2 * n) : ℝ) / (4 * n) * (1 - 4 ^ n) = A - 4 ^ n * C := by
+      apply mul_left_cancel₀ hu; linear_combination hAC
+    field_simp
+    field_simp at this
+    linear_combination (-1 : ℝ) * this
+  · rw [ho.neg_pow, hw] at hAC
+    rw [ho.neg_pow] at hTT
+    have hne : ¬ Even n := Nat.not_even_iff_odd.mpr ho
+    simp only [hne, ↓reduceIte]
+    rw [(ho.add_one).neg_one_pow, show (2 : ℝ) ^ p = 4 ^ n / 2 by linarith [h2p]]
+    have e1 : (bernoulli (2 * n) : ℝ) / (4 * n) * (1 + 4 ^ n) = A + 4 ^ n * C := by
+      apply mul_left_cancel₀ hu; linear_combination hAC
+    have e2 : (bernoulli (2 * n) : ℝ) / (4 * n) = T := by
+      apply mul_left_cancel₀ hπn; linear_combination hTT / 2
+    field_simp
+    field_simp at e1 e2
+    linear_combination e1 - 2 * e2
 
 /-- **DLMF 24.8.9**: `E₂ₙ = (-1)ⁿ ∑_{k≥1} k^{2n}/cosh(πk/2) -
 4 ∑_{k≥0} (-1)ᵏ (2k+1)^{2n}/(e^{2π(2k+1)} - 1)`, `n ≥ 1`. -/

@@ -106,17 +106,17 @@ theorem hasSum_logGammaTerm {t : ℝ} (ht : 0 ≤ t) :
     rw [h0]
     simp only [zero_add, Real.Gamma_one, Real.log_one, mul_zero]
     exact hasSum_zero
-  have hW : ∀ n : ℕ, 0 < Real.weierstrassGammaTerm t n := fun n => by
-    unfold Real.weierstrassGammaTerm; positivity
-  have hlogW : ∀ n : ℕ, Real.log (Real.weierstrassGammaTerm t n) = -logGammaTerm t n := by
+  have hW : ∀ n : ℕ, 0 < Gamma.Real.weierstrassGammaTerm t n := fun n => by
+    unfold Gamma.Real.weierstrassGammaTerm; positivity
+  have hlogW : ∀ n : ℕ, Real.log (Gamma.Real.weierstrassGammaTerm t n) = -logGammaTerm t n := by
     intro n
-    unfold Real.weierstrassGammaTerm logGammaTerm
+    unfold Gamma.Real.weierstrassGammaTerm logGammaTerm
     rw [Real.log_mul (by positivity) (Real.exp_pos _).ne', Real.log_exp]
     ring
-  have hsum : Summable fun n => Real.log (Real.weierstrassGammaTerm t n) := by
+  have hsum : Summable fun n => Real.log (Gamma.Real.weierstrassGammaTerm t n) := by
     simp only [hlogW]; exact (summable_logGammaTerm ht.le).neg
   have hprod := Real.rexp_tsum_eq_tprod hW hsum
-  have hG := Real.one_div_Gamma_eq_tprod t
+  have hG := Gamma.Real.one_div_Gamma_eq_tprod t
   rw [← hprod] at hG
   simp only [hlogW, tsum_neg] at hG
   have hGpos : 0 < Real.Gamma t := Real.Gamma_pos_of_pos ht

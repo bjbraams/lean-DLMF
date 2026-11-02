@@ -225,16 +225,16 @@ Traversal: all §§4.1–4.48 checked; matching headings are §4.2, §4.14,
   [4.13.1 and branch prose](https://dlmf.nist.gov/4.13.E1):
   `DLMF.Elementary.lambertW`, `lambertWLower`, with
   `LambertBranchFamily` and `lambertPrincipalDomain`, in
-  [BranchesAndCalculus](DLMF/Elementary/LambertW/BranchesAndCalculus.lean#L393).
+  [Basic/LambertW](DLMF/Elementary/Basic/LambertW.lean#L464).
   The family is selected using `exists_lambertBranchFamily` in
-  [BranchesAndCalculus](DLMF/Elementary/LambertW/BranchesAndCalculus.lean#L343),
-  which remains admitted. The structure specifies analytic domains,
+  [Basic/LambertW](DLMF/Elementary/Basic/LambertW.lean#L412),
+  which is proved. The structure specifies analytic domains,
   basepoint normalization and upper-side boundary values; `lambertWLower`
   applies conjugation and k→−k. Nonprincipal values at zero are totalized.
 - **Wright omega and tree T**,
   [4.13.1_2–1_3](https://dlmf.nist.gov/4.13.E1_2):
   `DLMF.Elementary.wrightOmega`, `treeT` in
-  [BranchesAndCalculus](DLMF/Elementary/LambertW/BranchesAndCalculus.lean#L400).
+  [Basic/LambertW](DLMF/Elementary/Basic/LambertW.lean#L476).
   Omega selects the integer unwinding branch using the imaginary part of z;
   T is −W₀(−z). Both inherit the admitted branch-family construction.
 
@@ -309,7 +309,7 @@ Traversal: all §§5.1–5.24 checked; the matching section is §5.2.
 - **Psi/digamma**, [5.2.2](https://dlmf.nist.gov/5.2.E2): Mathlib
   `Complex.digamma = logDeriv Complex.Gamma` in
   [Digamma](.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Digamma.lean#L48),
-  and the independently defined real quotient `Real.digamma` in
+  and the independently defined real quotient `DLMF.Gamma.Real.digamma` in
   [Gamma/Digamma](DLMF/Gamma/Digamma.lean#L40).
 - **Euler's constant**, [exact limit in 5.2.3](https://dlmf.nist.gov/5.2.E3):
   Mathlib `Real.eulerMascheroniConstant` in

@@ -82,7 +82,8 @@ theorem cos_mul_le_norm_one_add_sq (r y : ℝ) :
       Real.sin_sq_add_cos_sq y
   calc Real.cos y * (1 + r ^ 2) ≤ |Real.cos y * (1 + r ^ 2)| := le_abs_self _
     _ = Real.sqrt ((Real.cos y * (1 + r ^ 2)) ^ 2) := (Real.sqrt_sq_eq_abs _).symm
-    _ ≤ Real.sqrt (‖w‖ ^ 2) := Real.sqrt_le_sqrt (by rw [hsq]; nlinarith [sq_nonneg (Real.sin y * (1 - r ^ 2))])
+    _ ≤ Real.sqrt (‖w‖ ^ 2) :=
+        Real.sqrt_le_sqrt (by rw [hsq]; nlinarith [sq_nonneg (Real.sin y * (1 - r ^ 2))])
     _ = ‖w‖ := Real.sqrt_sq (norm_nonneg _)
 
 /-- `1 + (r e^{iy})²` lies in the slit plane for `|y| < π/2`. -/
@@ -406,7 +407,8 @@ theorem struveK_coeff_eq (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
     rw [show ν - 2 * k - 1 = ν - ((2 * k + 1 : ℕ) : ℂ) by push_cast; ring, cpow_sub _ _ hz2,
       cpow_natCast, div_pow]
     field_simp
-  rw [struveAsymptoticTerm, hpow, Complex.Gamma_nat_eq_factorial, hch, div_eq_mul_inv _ (Gamma (ν + 1 / 2 - k)), ← hG]
+  rw [struveAsymptoticTerm, hpow, Complex.Gamma_nat_eq_factorial, hch,
+      div_eq_mul_inv _ (Gamma (ν + 1 / 2 - k)), ← hG]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by
     rw [ofReal_ne_zero]; exact (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpi : (π : ℂ) = Real.sqrt π * Real.sqrt π := by
@@ -586,7 +588,8 @@ theorem exists_of_eventually_rotSectorAtTop {δ α : ℝ} {p : ℂ → Prop}
   obtain ⟨R, hR⟩ := h
   refine ⟨R, fun z hz hzs => ?_⟩
   have hn : ‖z * exp (α * I)‖ = ‖z‖ := by rw [norm_mul, norm_exp_ofReal_mul_I, mul_one]
-  exact hR ‖z‖ hz (z * exp (α * I)) hn (by show δ * ‖z * exp (α * I)‖ ≤ (z * exp (α * I)).re; rw [hn]; exact hzs) z rfl
+  exact hR ‖z‖ hz (z * exp (α * I)) hn
+      (by show δ * ‖z * exp (α * I)‖ ≤ (z * exp (α * I)).re; rw [hn]; exact hzs) z rfl
 
 /-- The closed sector `|arg z| ≤ π - δ` is covered by two rotated Watson sectors. -/
 theorem sector_le_sup_rotSectorAtTop {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
@@ -880,7 +883,8 @@ end WatsonExpansions
 Finset.range N, struveAsymptoticTerm ν z k) =O[sector (π-δ)] (fun z : ℂ => z^(ν-2*N-1))`. -/
 @[dlmf 11.6.E1]
 theorem struveK_asymptotic (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
-    (fun z : ℂ => struveK ν z-∑ k ∈ Finset.range N, struveAsymptoticTerm ν z k) =O[sector (π-δ)] (fun z : ℂ => z^(ν-2*N-1)) := by
+    (fun z : ℂ => struveK ν z-∑ k ∈ Finset.range N, struveAsymptoticTerm ν z k) =O[sector (π-δ)]
+        (fun z : ℂ => z^(ν-2*N-1)) := by
   have hs : 0 < Real.sin (δ / 2) := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
   have hα : |(π - δ) / 2| < π / 2 := by rw [abs_lt]; constructor <;> linarith
   have hα' : |-((π - δ) / 2)| < π / 2 := by rwa [abs_neg]
@@ -892,7 +896,8 @@ Finset.range N, (-1)^(k+1)*struveAsymptoticTerm ν z k) =O[sector (π/2-δ)] (fu
 z^(ν-2*N-1))`. -/
 @[dlmf 11.6.E2]
 theorem struveM_asymptotic (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun z : ℂ => struveM ν z-∑ k ∈ Finset.range N, (-1)^(k+1)*struveAsymptoticTerm ν z k) =O[sector (π/2-δ)] (fun z : ℂ => z^(ν-2*N-1)) :=
+    (fun z : ℂ => struveM ν z-∑ k ∈ Finset.range N, (-1)^(k+1)*struveAsymptoticTerm ν z k)
+        =O[sector (π/2-δ)] (fun z : ℂ => z^(ν-2*N-1)) :=
   (struveM_asymptotic_sectorAtTop ν (Real.sin_pos_of_pos_of_lt_pi hδ (by linarith)) N).mono
     (sector_le_sectorAtTop hδ hδπ)
 

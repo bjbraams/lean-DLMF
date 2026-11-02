@@ -22,7 +22,8 @@ with the initial values 12.2.6 and 12.2.7. This makes `U(a, ·)` entire for ever
 * `pcfU_zero`, `pcfUDeriv_zero`: the initial values.
 * `pcfU_neg_half`: `U(-1/2, z) = e^{-z²/4}`.
 * `pcfU_eq_kummerU`: `U(a,z) = 2^{-1/4-a/2} e^{-z²/4} U(a/2 + 1/4, 1/2, z²/2)` for `re z > 0`.
-* `hasAsymptoticExpansion_pcfU`: `U(a,x) ~ e^{-x²/4} x^{-a-1/2} ∑ (-1)^s (a + 1/2)_{2s}/(s! (2x²)^s)`.
+* `hasAsymptoticExpansion_pcfU`:
+  `U(a,x) ~ e^{-x²/4} x^{-a-1/2} ∑ (-1)^s (a + 1/2)_{2s}/(s! (2x²)^s)`.
 * `IsWeberSol.eq_of_initial`: solutions of Weber's equation are determined by `w(0), w'(0)`
   (via constancy of Wronskians against `u₁, u₂`).
 * `pcfU_three_term`, `pcfU_recurrence_add`, `pcfU_recurrence_sub`, `pcfU_deriv_recurrence`:

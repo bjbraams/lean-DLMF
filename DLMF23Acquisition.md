@@ -79,21 +79,21 @@ way (§§23.2–23.3, 23.5–23.7, 23.9–23.10, 23.12 and 23.15–23.19) agree 
 - [23.2.E6](https://dlmf.nist.gov/23.2.E6): [`DLMF.Weierstrass.weierstrassSigma`](DLMF/Weierstrass/Basic/Functions.lean#L55) (definition).
 - [23.2.E7](https://dlmf.nist.gov/23.2.E7): [`DLMF.Weierstrass.hasDerivAt_weierstrassZeta`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L445) (proved).
 - [23.2.E8](https://dlmf.nist.gov/23.2.E8): [`DLMF.Weierstrass.weierstrassZeta_eq_deriv_div`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L508) (proved).
-- [23.2.E9](https://dlmf.nist.gov/23.2.E9): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_add_two_mul_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L278) (proved); Mathlib: [`PeriodPair.weierstrassP_add_coe`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L257) (exact: ℘(z + 2ω_j) = ℘(z); stated for every lattice vector). local half-period form plus the Mathlib lattice-vector form.
-- [23.2.E10](https://dlmf.nist.gov/23.2.E10): [`DLMF.Weierstrass.HalfPeriods.derivWeierstrassP_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L285) (proved).
-- [23.2.E11](https://dlmf.nist.gov/23.2.E11): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_add_two_mul_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L296) (proved).
+- [23.2.E9](https://dlmf.nist.gov/23.2.E9): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_add_two_mul_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L289) (proved); Mathlib: [`PeriodPair.weierstrassP_add_coe`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L257) (exact: ℘(z + 2ω_j) = ℘(z); stated for every lattice vector). local half-period form plus the Mathlib lattice-vector form.
+- [23.2.E10](https://dlmf.nist.gov/23.2.E10): [`DLMF.Weierstrass.HalfPeriods.derivWeierstrassP_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L296) (proved).
+- [23.2.E11](https://dlmf.nist.gov/23.2.E11): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_add_two_mul_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L307) (proved).
 - [23.2.E12](https://dlmf.nist.gov/23.2.E12): [`DLMF.Weierstrass.HalfPeriods.eta`](DLMF/Weierstrass/Basic/Functions.lean#L97) (definition).
-- [23.2.E13](https://dlmf.nist.gov/23.2.E13): [`DLMF.Weierstrass.HalfPeriods.eta_one_add_eta_two_add_eta_three`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L310) (proved).
-- [23.2.E14](https://dlmf.nist.gov/23.2.E14): [`DLMF.Weierstrass.HalfPeriods.legendre_relation`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L398) (proved).
-- [23.2.E15](https://dlmf.nist.gov/23.2.E15): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_add_two_mul_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L338) (proved).
-- [23.2.E16](https://dlmf.nist.gov/23.2.E16): [`DLMF.Weierstrass.HalfPeriods.deriv_weierstrassSigma_two_mul_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L369) (proved).
-- [23.2.E17](https://dlmf.nist.gov/23.2.E17): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_add_lattice`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L448) (proved).
+- [23.2.E13](https://dlmf.nist.gov/23.2.E13): [`DLMF.Weierstrass.HalfPeriods.eta_one_add_eta_two_add_eta_three`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L321) (proved).
+- [23.2.E14](https://dlmf.nist.gov/23.2.E14): [`DLMF.Weierstrass.HalfPeriods.legendre_relation`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L408) (proved).
+- [23.2.E15](https://dlmf.nist.gov/23.2.E15): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_add_two_mul_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L349) (proved).
+- [23.2.E16](https://dlmf.nist.gov/23.2.E16): [`DLMF.Weierstrass.HalfPeriods.deriv_weierstrassSigma_two_mul_halfPeriod`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L382) (proved).
+- [23.2.E17](https://dlmf.nist.gov/23.2.E17): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_add_lattice`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L459) (proved).
 
 ## [§23.3 Differential Equations](https://dlmf.nist.gov/23.3)
 
 - [23.3.E1](https://dlmf.nist.gov/23.3.E1): Mathlib: [`PeriodPair.g₂`](DLMF/Weierstrass/MathlibCoverage.lean#L49) (exact: g₂ = 60 Σ' w⁻⁴).
 - [23.3.E2](https://dlmf.nist.gov/23.3.E2): Mathlib: [`PeriodPair.g₃`](DLMF/Weierstrass/MathlibCoverage.lean#L51) (exact: g₃ = 140 Σ' w⁻⁶).
-- [23.3.E3](https://dlmf.nist.gov/23.3.E3): [`DLMF.Weierstrass.HalfPeriods.e_isRoot`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L403) (proved).
+- [23.3.E3](https://dlmf.nist.gov/23.3.E3): [`DLMF.Weierstrass.HalfPeriods.e_isRoot`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L416) (proved).
 - [23.3.E4](https://dlmf.nist.gov/23.3.E4): [`DLMF.Weierstrass.latticeDiscriminant`](DLMF/Weierstrass/Basic/Functions.lean#L103) (definition); [`DLMF.Weierstrass.HalfPeriods.latticeDiscriminant_eq`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L485) (proved from admitted dependencies).
 - [23.3.E5](https://dlmf.nist.gov/23.3.E5): [`DLMF.Weierstrass.HalfPeriods.e_sum`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L409) (proved from admitted dependencies).
 - [23.3.E6](https://dlmf.nist.gov/23.3.E6): [`DLMF.Weierstrass.HalfPeriods.g₂_eq_e`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L446) (proved from admitted dependencies).
@@ -107,54 +107,54 @@ way (§§23.2–23.3, 23.5–23.7, 23.9–23.10, 23.12 and 23.15–23.19) agree 
 
 ## [§23.5 Special Lattices](https://dlmf.nist.gov/23.5)
 
-- [23.5.E1](https://dlmf.nist.gov/23.5.E1): [`DLMF.Weierstrass.HalfPeriods.IsRectangular.roots`](DLMF/Weierstrass/SpecialLattices.lean#L272) (proved).
-- [23.5.E2](https://dlmf.nist.gov/23.5.E2): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.eta`](DLMF/Weierstrass/SpecialLattices.lean#L339) (proved).
-- [23.5.E3](https://dlmf.nist.gov/23.5.E3): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.roots`](DLMF/Weierstrass/SpecialLattices.lean#L364) (proved).
-- [23.5.E4](https://dlmf.nist.gov/23.5.E4): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.invariants`](DLMF/Weierstrass/SpecialLattices.lean#L423) (proved).
-- [23.5.E5](https://dlmf.nist.gov/23.5.E5): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.modulus_sq`](DLMF/Weierstrass/SpecialLattices.lean#L422) (proved from admitted dependencies); [`DLMF.Weierstrass.HalfPeriods.compEllIntKm_lemniscatic`](DLMF/Weierstrass/SpecialLattices.lean#L530) (proved). derived from the admitted root formula 23.5.3.
-- [23.5.E6](https://dlmf.nist.gov/23.5.E6): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.eta`](DLMF/Weierstrass/SpecialLattices.lean#L619) (proved).
-- [23.5.E7](https://dlmf.nist.gov/23.5.E7): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.roots`](DLMF/Weierstrass/SpecialLattices.lean#L659) (admitted).
-- [23.5.E8](https://dlmf.nist.gov/23.5.E8): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.invariants`](DLMF/Weierstrass/SpecialLattices.lean#L667) (admitted).
-- [23.5.E9](https://dlmf.nist.gov/23.5.E9): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.modulus_sq`](DLMF/Weierstrass/SpecialLattices.lean#L592) (proved from admitted dependencies); [`DLMF.Weierstrass.HalfPeriods.compEllIntKk_equianharmonic`](DLMF/Weierstrass/SpecialLattices.lean#L734) (admitted). the lattice-side identity is derived from the admitted 23.5.7; the principal-K form compEllIntKk_equianharmonic is admitted.
+- [23.5.E1](https://dlmf.nist.gov/23.5.E1): [`DLMF.Weierstrass.HalfPeriods.IsRectangular.roots`](DLMF/Weierstrass/SpecialLattices.lean#L277) (proved).
+- [23.5.E2](https://dlmf.nist.gov/23.5.E2): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.eta`](DLMF/Weierstrass/SpecialLattices.lean#L345) (proved).
+- [23.5.E3](https://dlmf.nist.gov/23.5.E3): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.roots`](DLMF/Weierstrass/SpecialLattices.lean#L370) (proved).
+- [23.5.E4](https://dlmf.nist.gov/23.5.E4): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.invariants`](DLMF/Weierstrass/SpecialLattices.lean#L429) (proved).
+- [23.5.E5](https://dlmf.nist.gov/23.5.E5): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.modulus_sq`](DLMF/Weierstrass/SpecialLattices.lean#L422) (proved from admitted dependencies); [`DLMF.Weierstrass.HalfPeriods.compEllIntKm_lemniscatic`](DLMF/Weierstrass/SpecialLattices.lean#L536) (proved). derived from the admitted root formula 23.5.3.
+- [23.5.E6](https://dlmf.nist.gov/23.5.E6): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.eta`](DLMF/Weierstrass/SpecialLattices.lean#L625) (proved).
+- [23.5.E7](https://dlmf.nist.gov/23.5.E7): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.roots`](DLMF/Weierstrass/SpecialLattices.lean#L665) (admitted).
+- [23.5.E8](https://dlmf.nist.gov/23.5.E8): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.invariants`](DLMF/Weierstrass/SpecialLattices.lean#L673) (admitted).
+- [23.5.E9](https://dlmf.nist.gov/23.5.E9): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.modulus_sq`](DLMF/Weierstrass/SpecialLattices.lean#L592) (proved from admitted dependencies); [`DLMF.Weierstrass.HalfPeriods.compEllIntKk_equianharmonic`](DLMF/Weierstrass/SpecialLattices.lean#L740) (admitted). the lattice-side identity is derived from the admitted 23.5.7; the principal-K form compEllIntKk_equianharmonic is admitted.
 
 ## [§23.6 Relations to Other Functions](https://dlmf.nist.gov/23.6)
 
 - [23.6.E1](https://dlmf.nist.gov/23.6.E1): [`DLMF.Weierstrass.HalfPeriods.tau`](DLMF/Weierstrass/Basic/Periods.lean#L76) (definition); [`DLMF.Weierstrass.HalfPeriods.nome`](DLMF/Weierstrass/Basic/Periods.lean#L80) (definition).
-- [23.6.E2](https://dlmf.nist.gov/23.6.E2): [`DLMF.Weierstrass.HalfPeriods.e_one_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L890) (proved).
-- [23.6.E3](https://dlmf.nist.gov/23.6.E3): [`DLMF.Weierstrass.HalfPeriods.e_two_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L897) (proved).
-- [23.6.E4](https://dlmf.nist.gov/23.6.E4): [`DLMF.Weierstrass.HalfPeriods.e_three_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L910) (proved).
-- [23.6.E5](https://dlmf.nist.gov/23.6.E5): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_one_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L923) (proved).
-- [23.6.E6](https://dlmf.nist.gov/23.6.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_two_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L933) (proved).
-- [23.6.E7](https://dlmf.nist.gov/23.6.E7): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_three_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L943) (proved).
-- [23.6.E8](https://dlmf.nist.gov/23.6.E8): [`DLMF.Weierstrass.HalfPeriods.eta_one_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L953) (proved).
-- [23.6.E9](https://dlmf.nist.gov/23.6.E9): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L960) (proved).
-- [23.6.E10](https://dlmf.nist.gov/23.6.E10): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_ω₁_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L967) (proved). q^{1/4} read as e^{iπτ/4}.
-- [23.6.E11](https://dlmf.nist.gov/23.6.E11): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_ω₂_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L978) (proved). q^{1/4} read as e^{iπτ/4}.
-- [23.6.E12](https://dlmf.nist.gov/23.6.E12): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_ω₃_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L999) (proved). q^{1/4} read as e^{iπτ/4}.
+- [23.6.E2](https://dlmf.nist.gov/23.6.E2): [`DLMF.Weierstrass.HalfPeriods.e_one_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L905) (proved).
+- [23.6.E3](https://dlmf.nist.gov/23.6.E3): [`DLMF.Weierstrass.HalfPeriods.e_two_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L912) (proved).
+- [23.6.E4](https://dlmf.nist.gov/23.6.E4): [`DLMF.Weierstrass.HalfPeriods.e_three_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L925) (proved).
+- [23.6.E5](https://dlmf.nist.gov/23.6.E5): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_one_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L938) (proved).
+- [23.6.E6](https://dlmf.nist.gov/23.6.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_two_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L948) (proved).
+- [23.6.E7](https://dlmf.nist.gov/23.6.E7): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_three_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L958) (proved).
+- [23.6.E8](https://dlmf.nist.gov/23.6.E8): [`DLMF.Weierstrass.HalfPeriods.eta_one_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L968) (proved).
+- [23.6.E9](https://dlmf.nist.gov/23.6.E9): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L975) (proved).
+- [23.6.E10](https://dlmf.nist.gov/23.6.E10): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_ω₁_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L982) (proved). q^{1/4} read as e^{iπτ/4}.
+- [23.6.E11](https://dlmf.nist.gov/23.6.E11): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_ω₂_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L993) (proved). q^{1/4} read as e^{iπτ/4}.
+- [23.6.E12](https://dlmf.nist.gov/23.6.E12): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_ω₃_eq_theta`](DLMF/Weierstrass/Relations/ThetaIdentities.lean#L1014) (proved). q^{1/4} read as e^{iπτ/4}.
 - [23.6.E13](https://dlmf.nist.gov/23.6.E13): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_eq_theta`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L67) (proved).
 - [23.6.E14](https://dlmf.nist.gov/23.6.E14): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_eq_theta`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L76) (proved).
-- [23.6.E15](https://dlmf.nist.gov/23.6.E15): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_add_halfPeriod_eq_theta`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L90) (proved).
-- [23.6.E16](https://dlmf.nist.gov/23.6.E16): [`DLMF.Weierstrass.HalfPeriods.modulus_sq_eq`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L195) (proved).
-- [23.6.E17](https://dlmf.nist.gov/23.6.E17): [`DLMF.Weierstrass.HalfPeriods.quarterK_sq_eq`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L214) (proved); [`DLMF.Weierstrass.HalfPeriods.compEllIntKk_sq_eq`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L232) (proved). **Corrected** (DLMF erratum, principal K): with the principal K(k) of §19.2 the identity fails for some generator pairs (for 2ω₁+4ω₃, 2ω₃: K² - ω₁²(e₁-e₃) ≈ 11.0 - 13.7i). It holds for every pair in the lattice form K = (π/2)θ₃²(0|τ) (quarterK_sq_eq); the literal form compEllIntKk_sq_eq assumes τ = iK'/K.
-- [23.6.E18](https://dlmf.nist.gov/23.6.E18): [`DLMF.Weierstrass.HalfPeriods.e_one_eq_jacobi`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L256) (proved).
-- [23.6.E19](https://dlmf.nist.gov/23.6.E19): [`DLMF.Weierstrass.HalfPeriods.e_two_eq_jacobi`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L270) (proved).
-- [23.6.E20](https://dlmf.nist.gov/23.6.E20): [`DLMF.Weierstrass.HalfPeriods.e_three_eq_jacobi`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L284) (proved).
-- [23.6.E21](https://dlmf.nist.gov/23.6.E21): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_one_eq_cs`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L314) (proved).
-- [23.6.E22](https://dlmf.nist.gov/23.6.E22): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_two_eq_ds`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L327) (proved).
-- [23.6.E23](https://dlmf.nist.gov/23.6.E23): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_three_eq_ns`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L340) (proved).
-- [23.6.E24](https://dlmf.nist.gov/23.6.E24): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_add_ω₁_sub_e_one_eq_sc`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L353) (proved).
-- [23.6.E25](https://dlmf.nist.gov/23.6.E25): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_add_ω₂_sub_e_two_eq_sd`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L374) (proved).
-- [23.6.E26](https://dlmf.nist.gov/23.6.E26): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_add_ω₃_sub_e_three_eq_sn`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L406) (proved).
-- [23.6.E27](https://dlmf.nist.gov/23.6.E27): [`DLMF.Weierstrass.weierstrassZeta_ns`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L656) (proved).
-- [23.6.E28](https://dlmf.nist.gov/23.6.E28): [`DLMF.Weierstrass.weierstrassZeta_ds`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L688) (proved).
-- [23.6.E29](https://dlmf.nist.gov/23.6.E29): [`DLMF.Weierstrass.weierstrassZeta_cs`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L733) (proved). **Corrected** (DLMF erratum): the sign is +ζ(2iK'|𝕃₃); the printed - fails (difference about -0.49i at k² = 0.3).
-- [23.6.E30](https://dlmf.nist.gov/23.6.E30): [`DLMF.Weierstrass.HalfPeriods.rectangular_integral_one`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L778) (admitted).
-- [23.6.E31](https://dlmf.nist.gov/23.6.E31): [`DLMF.Weierstrass.HalfPeriods.rectangular_integral_two`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L789) (admitted).
-- [23.6.E32](https://dlmf.nist.gov/23.6.E32): [`DLMF.Weierstrass.HalfPeriods.rectangular_integral_three`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L800) (admitted).
-- [23.6.E33](https://dlmf.nist.gov/23.6.E33): [`DLMF.Weierstrass.HalfPeriods.rectangular_integral_four`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L811) (admitted).
-- [23.6.E34](https://dlmf.nist.gov/23.6.E34): [`DLMF.Weierstrass.HalfPeriods.rectangular_two_ω₁`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L821) (admitted).
-- [23.6.E35](https://dlmf.nist.gov/23.6.E35): [`DLMF.Weierstrass.HalfPeriods.rectangular_two_ω₃`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L832) (admitted).
-- [23.6.E36](https://dlmf.nist.gov/23.6.E36): [`DLMF.Weierstrass.weierstrassP_inverse_integral`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L846) (admitted).
+- [23.6.E15](https://dlmf.nist.gov/23.6.E15): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_add_halfPeriod_eq_theta`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L91) (proved).
+- [23.6.E16](https://dlmf.nist.gov/23.6.E16): [`DLMF.Weierstrass.HalfPeriods.modulus_sq_eq`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L202) (proved).
+- [23.6.E17](https://dlmf.nist.gov/23.6.E17): [`DLMF.Weierstrass.HalfPeriods.quarterK_sq_eq`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L221) (proved); [`DLMF.Weierstrass.HalfPeriods.compEllIntKk_sq_eq`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L239) (proved). **Corrected** (DLMF erratum, principal K): with the principal K(k) of §19.2 the identity fails for some generator pairs (for 2ω₁+4ω₃, 2ω₃: K² - ω₁²(e₁-e₃) ≈ 11.0 - 13.7i). It holds for every pair in the lattice form K = (π/2)θ₃²(0|τ) (quarterK_sq_eq); the literal form compEllIntKk_sq_eq assumes τ = iK'/K.
+- [23.6.E18](https://dlmf.nist.gov/23.6.E18): [`DLMF.Weierstrass.HalfPeriods.e_one_eq_jacobi`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L264) (proved).
+- [23.6.E19](https://dlmf.nist.gov/23.6.E19): [`DLMF.Weierstrass.HalfPeriods.e_two_eq_jacobi`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L278) (proved).
+- [23.6.E20](https://dlmf.nist.gov/23.6.E20): [`DLMF.Weierstrass.HalfPeriods.e_three_eq_jacobi`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L292) (proved).
+- [23.6.E21](https://dlmf.nist.gov/23.6.E21): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_one_eq_cs`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L322) (proved).
+- [23.6.E22](https://dlmf.nist.gov/23.6.E22): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_two_eq_ds`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L336) (proved).
+- [23.6.E23](https://dlmf.nist.gov/23.6.E23): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_sub_e_three_eq_ns`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L350) (proved).
+- [23.6.E24](https://dlmf.nist.gov/23.6.E24): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_add_ω₁_sub_e_one_eq_sc`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L364) (proved).
+- [23.6.E25](https://dlmf.nist.gov/23.6.E25): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_add_ω₂_sub_e_two_eq_sd`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L386) (proved).
+- [23.6.E26](https://dlmf.nist.gov/23.6.E26): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_add_ω₃_sub_e_three_eq_sn`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L419) (proved).
+- [23.6.E27](https://dlmf.nist.gov/23.6.E27): [`DLMF.Weierstrass.weierstrassZeta_ns`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L670) (proved).
+- [23.6.E28](https://dlmf.nist.gov/23.6.E28): [`DLMF.Weierstrass.weierstrassZeta_ds`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L702) (proved).
+- [23.6.E29](https://dlmf.nist.gov/23.6.E29): [`DLMF.Weierstrass.weierstrassZeta_cs`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L747) (proved). **Corrected** (DLMF erratum): the sign is +ζ(2iK'|𝕃₃); the printed - fails (difference about -0.49i at k² = 0.3).
+- [23.6.E30](https://dlmf.nist.gov/23.6.E30): [`DLMF.Weierstrass.HalfPeriods.rectangular_integral_one`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L792) (admitted).
+- [23.6.E31](https://dlmf.nist.gov/23.6.E31): [`DLMF.Weierstrass.HalfPeriods.rectangular_integral_two`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L803) (admitted).
+- [23.6.E32](https://dlmf.nist.gov/23.6.E32): [`DLMF.Weierstrass.HalfPeriods.rectangular_integral_three`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L814) (admitted).
+- [23.6.E33](https://dlmf.nist.gov/23.6.E33): [`DLMF.Weierstrass.HalfPeriods.rectangular_integral_four`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L825) (admitted).
+- [23.6.E34](https://dlmf.nist.gov/23.6.E34): [`DLMF.Weierstrass.HalfPeriods.rectangular_two_ω₁`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L835) (admitted).
+- [23.6.E35](https://dlmf.nist.gov/23.6.E35): [`DLMF.Weierstrass.HalfPeriods.rectangular_two_ω₃`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L846) (admitted).
+- [23.6.E36](https://dlmf.nist.gov/23.6.E36): [`DLMF.Weierstrass.weierstrassP_inverse_integral`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L860) (admitted).
 
 ## [§23.7 Quarter Periods](https://dlmf.nist.gov/23.7)
 
@@ -164,46 +164,46 @@ way (§§23.2–23.3, 23.5–23.7, 23.9–23.10, 23.12 and 23.15–23.19) agree 
 
 ## [§23.8 Trigonometric Series and Products](https://dlmf.nist.gov/23.8)
 
-- [23.8.E1](https://dlmf.nist.gov/23.8.E1): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_fourier`](DLMF/Weierstrass/Series.lean#L143) (proved). **Corrected** (DLMF erratum): the condition must be |ℑ(z/ω₁)| < 2ℑτ (the series diverges otherwise: terms 10⁵, 10¹¹, 10²¹ at n = 10, 20, 40).
-- [23.8.E2](https://dlmf.nist.gov/23.8.E2): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_fourier`](DLMF/Weierstrass/Series.lean#L70) (proved). **Corrected** (DLMF erratum): condition corrected as in 23.8.E1.
-- [23.8.E3](https://dlmf.nist.gov/23.8.E3): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_csc_series`](DLMF/Weierstrass/Series.lean#L209) (admitted).
-- [23.8.E4](https://dlmf.nist.gov/23.8.E4): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_cot_series`](DLMF/Weierstrass/Series.lean#L217) (admitted). the conditionally convergent sum brackets the terms n and -n (Eisenstein summation).
-- [23.8.E5](https://dlmf.nist.gov/23.8.E5): [`DLMF.Weierstrass.HalfPeriods.eta_one_csc_series`](DLMF/Weierstrass/Series.lean#L247) (proved).
-- [23.8.E6](https://dlmf.nist.gov/23.8.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_prod`](DLMF/Weierstrass/Series.lean#L310) (proved).
-- [23.8.E7](https://dlmf.nist.gov/23.8.E7): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_sin_prod`](DLMF/Weierstrass/Series.lean#L276) (proved).
+- [23.8.E1](https://dlmf.nist.gov/23.8.E1): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_fourier`](DLMF/Weierstrass/Series.lean#L145) (proved). **Corrected** (DLMF erratum): the condition must be |ℑ(z/ω₁)| < 2ℑτ (the series diverges otherwise: terms 10⁵, 10¹¹, 10²¹ at n = 10, 20, 40).
+- [23.8.E2](https://dlmf.nist.gov/23.8.E2): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_fourier`](DLMF/Weierstrass/Series.lean#L71) (proved). **Corrected** (DLMF erratum): condition corrected as in 23.8.E1.
+- [23.8.E3](https://dlmf.nist.gov/23.8.E3): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_csc_series`](DLMF/Weierstrass/Series.lean#L289) (proved).
+- [23.8.E4](https://dlmf.nist.gov/23.8.E4): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_cot_series`](DLMF/Weierstrass/Series.lean#L328) (proved). the conditionally convergent sum brackets the terms n and -n (Eisenstein summation).
+- [23.8.E5](https://dlmf.nist.gov/23.8.E5): [`DLMF.Weierstrass.HalfPeriods.eta_one_csc_series`](DLMF/Weierstrass/Series.lean#L387) (proved).
+- [23.8.E6](https://dlmf.nist.gov/23.8.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_prod`](DLMF/Weierstrass/Series.lean#L450) (proved).
+- [23.8.E7](https://dlmf.nist.gov/23.8.E7): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_sin_prod`](DLMF/Weierstrass/Series.lean#L416) (proved).
 
 ## [§23.9 Laurent and Other Power Series](https://dlmf.nist.gov/23.9)
 
-- [23.9.E1](https://dlmf.nist.gov/23.9.E1): [`DLMF.Weierstrass.laurentCoeff`](DLMF/Weierstrass/Series.lean#L363) (definition).
-- [23.9.E2](https://dlmf.nist.gov/23.9.E2): [`DLMF.Weierstrass.weierstrassP_laurent`](DLMF/Weierstrass/Series.lean#L378) (proved).
-- [23.9.E3](https://dlmf.nist.gov/23.9.E3): [`DLMF.Weierstrass.weierstrassZeta_laurent`](DLMF/Weierstrass/Series.lean#L417) (proved).
-- [23.9.E4](https://dlmf.nist.gov/23.9.E4): [`DLMF.Weierstrass.laurentCoeff_two`](DLMF/Weierstrass/Series.lean#L368) (proved); [`DLMF.Weierstrass.laurentCoeff_three`](DLMF/Weierstrass/Series.lean#L373) (proved).
-- [23.9.E5](https://dlmf.nist.gov/23.9.E5): [`DLMF.Weierstrass.laurentCoeff_recursion`](DLMF/Weierstrass/Series.lean#L582) (proved).
-- [23.9.E6](https://dlmf.nist.gov/23.9.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_halfPeriod_expansion`](DLMF/Weierstrass/Series.lean#L704) (proved). stated as a big-O remainder O(t⁸) as t → 0.
-- [23.9.E7](https://dlmf.nist.gov/23.9.E7): [`DLMF.Weierstrass.weierstrassSigma_series`](DLMF/Weierstrass/Series.lean#L769) (admitted).
-- [23.9.E8](https://dlmf.nist.gov/23.9.E8): [`DLMF.Weierstrass.sigmaCoeff`](DLMF/Weierstrass/Series.lean#L755) (definition). the recursion is a well-founded definition on 2m + 3n.
+- [23.9.E1](https://dlmf.nist.gov/23.9.E1): [`DLMF.Weierstrass.laurentCoeff`](DLMF/Weierstrass/Series.lean#L503) (definition).
+- [23.9.E2](https://dlmf.nist.gov/23.9.E2): [`DLMF.Weierstrass.weierstrassP_laurent`](DLMF/Weierstrass/Series.lean#L518) (proved).
+- [23.9.E3](https://dlmf.nist.gov/23.9.E3): [`DLMF.Weierstrass.weierstrassZeta_laurent`](DLMF/Weierstrass/Series.lean#L557) (proved).
+- [23.9.E4](https://dlmf.nist.gov/23.9.E4): [`DLMF.Weierstrass.laurentCoeff_two`](DLMF/Weierstrass/Series.lean#L508) (proved); [`DLMF.Weierstrass.laurentCoeff_three`](DLMF/Weierstrass/Series.lean#L513) (proved).
+- [23.9.E5](https://dlmf.nist.gov/23.9.E5): [`DLMF.Weierstrass.laurentCoeff_recursion`](DLMF/Weierstrass/Series.lean#L722) (proved).
+- [23.9.E6](https://dlmf.nist.gov/23.9.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_halfPeriod_expansion`](DLMF/Weierstrass/Series.lean#L844) (proved). stated as a big-O remainder O(t⁸) as t → 0.
+- [23.9.E7](https://dlmf.nist.gov/23.9.E7): [`DLMF.Weierstrass.weierstrassSigma_series`](DLMF/Weierstrass/Series.lean#L909) (admitted).
+- [23.9.E8](https://dlmf.nist.gov/23.9.E8): [`DLMF.Weierstrass.sigmaCoeff`](DLMF/Weierstrass/Series.lean#L895) (definition). the recursion is a well-founded definition on 2m + 3n.
 
 ## [§23.10 Addition Theorems and Other Identities](https://dlmf.nist.gov/23.10)
 
-- [23.10.E1](https://dlmf.nist.gov/23.10.E1): [`DLMF.Weierstrass.weierstrassP_add`](DLMF/Weierstrass/Addition.lean#L563) (proved).
-- [23.10.E2](https://dlmf.nist.gov/23.10.E2): [`DLMF.Weierstrass.weierstrassZeta_add`](DLMF/Weierstrass/Addition.lean#L571) (proved).
-- [23.10.E3](https://dlmf.nist.gov/23.10.E3): [`DLMF.Weierstrass.weierstrassSigma_add_mul_sub`](DLMF/Weierstrass/Addition.lean#L583) (proved).
-- [23.10.E4](https://dlmf.nist.gov/23.10.E4): [`DLMF.Weierstrass.weierstrassSigma_three_term`](DLMF/Weierstrass/Addition.lean#L594) (proved).
-- [23.10.E5](https://dlmf.nist.gov/23.10.E5): [`DLMF.Weierstrass.weierstrassP_det_eq_zero`](DLMF/Weierstrass/Addition.lean#L636) (proved).
-- [23.10.E6](https://dlmf.nist.gov/23.10.E6): [`DLMF.Weierstrass.weierstrassZeta_sum_sq`](DLMF/Weierstrass/Addition.lean#L661) (proved).
-- [23.10.E7](https://dlmf.nist.gov/23.10.E7): [`DLMF.Weierstrass.weierstrassP_two_mul`](DLMF/Weierstrass/Addition.lean#L708) (proved).
-- [23.10.E8](https://dlmf.nist.gov/23.10.E8): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_two_mul_sub_e`](DLMF/Weierstrass/Addition.lean#L737) (proved).
-- [23.10.E9](https://dlmf.nist.gov/23.10.E9): [`DLMF.Weierstrass.weierstrassZeta_two_mul`](DLMF/Weierstrass/Addition.lean#L766) (proved).
-- [23.10.E10](https://dlmf.nist.gov/23.10.E10): [`DLMF.Weierstrass.weierstrassSigma_two_mul`](DLMF/Weierstrass/Addition.lean#L798) (proved).
-- [23.10.E11](https://dlmf.nist.gov/23.10.E11): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_nsmul`](DLMF/Weierstrass/Addition.lean#L850) (admitted).
-- [23.10.E12](https://dlmf.nist.gov/23.10.E12): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_nsmul`](DLMF/Weierstrass/Addition.lean#L857) (admitted).
-- [23.10.E13](https://dlmf.nist.gov/23.10.E13): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_nsmul`](DLMF/Weierstrass/Addition.lean#L875) (admitted).
-- [23.10.E14](https://dlmf.nist.gov/23.10.E14): [`DLMF.Weierstrass.HalfPeriods.nTupleConst`](DLMF/Weierstrass/Addition.lean#L866) (definition). **Corrected** (DLMF erratum): the product runs over (j, ℓ) ≠ (0, 0); the printed ℓ ≠ j gives relative error 0.71 at n = 2.
-- [23.10.E15](https://dlmf.nist.gov/23.10.E15): [`DLMF.Weierstrass.HalfPeriods.nTupleConst_eq`](DLMF/Weierstrass/Addition.lean#L888) (admitted). **Corrected** (DLMF erratum): π² should be π; the corrected ratio is exactly π^{-(n²-1)} for n = 2, 3, 4 on three lattices.
-- [23.10.E16](https://dlmf.nist.gov/23.10.E16): [`DLMF.Weierstrass.HalfPeriods.nTupleG`](DLMF/Weierstrass/Addition.lean#L884) (definition).
-- [23.10.E17](https://dlmf.nist.gov/23.10.E17): [`DLMF.Weierstrass.weierstrassP_scale`](DLMF/Weierstrass/Addition.lean#L905) (proved).
-- [23.10.E18](https://dlmf.nist.gov/23.10.E18): [`DLMF.Weierstrass.weierstrassZeta_scale`](DLMF/Weierstrass/Addition.lean#L917) (proved).
-- [23.10.E19](https://dlmf.nist.gov/23.10.E19): [`DLMF.Weierstrass.weierstrassSigma_scale`](DLMF/Weierstrass/Addition.lean#L929) (proved).
+- [23.10.E1](https://dlmf.nist.gov/23.10.E1): [`DLMF.Weierstrass.weierstrassP_add`](DLMF/Weierstrass/Addition.lean#L587) (proved).
+- [23.10.E2](https://dlmf.nist.gov/23.10.E2): [`DLMF.Weierstrass.weierstrassZeta_add`](DLMF/Weierstrass/Addition.lean#L595) (proved).
+- [23.10.E3](https://dlmf.nist.gov/23.10.E3): [`DLMF.Weierstrass.weierstrassSigma_add_mul_sub`](DLMF/Weierstrass/Addition.lean#L609) (proved).
+- [23.10.E4](https://dlmf.nist.gov/23.10.E4): [`DLMF.Weierstrass.weierstrassSigma_three_term`](DLMF/Weierstrass/Addition.lean#L620) (proved).
+- [23.10.E5](https://dlmf.nist.gov/23.10.E5): [`DLMF.Weierstrass.weierstrassP_det_eq_zero`](DLMF/Weierstrass/Addition.lean#L662) (proved).
+- [23.10.E6](https://dlmf.nist.gov/23.10.E6): [`DLMF.Weierstrass.weierstrassZeta_sum_sq`](DLMF/Weierstrass/Addition.lean#L688) (proved).
+- [23.10.E7](https://dlmf.nist.gov/23.10.E7): [`DLMF.Weierstrass.weierstrassP_two_mul`](DLMF/Weierstrass/Addition.lean#L737) (proved).
+- [23.10.E8](https://dlmf.nist.gov/23.10.E8): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_two_mul_sub_e`](DLMF/Weierstrass/Addition.lean#L767) (proved).
+- [23.10.E9](https://dlmf.nist.gov/23.10.E9): [`DLMF.Weierstrass.weierstrassZeta_two_mul`](DLMF/Weierstrass/Addition.lean#L796) (proved).
+- [23.10.E10](https://dlmf.nist.gov/23.10.E10): [`DLMF.Weierstrass.weierstrassSigma_two_mul`](DLMF/Weierstrass/Addition.lean#L829) (proved).
+- [23.10.E11](https://dlmf.nist.gov/23.10.E11): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_nsmul`](DLMF/Weierstrass/Addition.lean#L882) (admitted).
+- [23.10.E12](https://dlmf.nist.gov/23.10.E12): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_nsmul`](DLMF/Weierstrass/Addition.lean#L889) (admitted).
+- [23.10.E13](https://dlmf.nist.gov/23.10.E13): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_nsmul`](DLMF/Weierstrass/Addition.lean#L907) (admitted).
+- [23.10.E14](https://dlmf.nist.gov/23.10.E14): [`DLMF.Weierstrass.HalfPeriods.nTupleConst`](DLMF/Weierstrass/Addition.lean#L898) (definition). **Corrected** (DLMF erratum): the product runs over (j, ℓ) ≠ (0, 0); the printed ℓ ≠ j gives relative error 0.71 at n = 2.
+- [23.10.E15](https://dlmf.nist.gov/23.10.E15): [`DLMF.Weierstrass.HalfPeriods.nTupleConst_eq`](DLMF/Weierstrass/Addition.lean#L920) (admitted). **Corrected** (DLMF erratum): π² should be π; the corrected ratio is exactly π^{-(n²-1)} for n = 2, 3, 4 on three lattices.
+- [23.10.E16](https://dlmf.nist.gov/23.10.E16): [`DLMF.Weierstrass.HalfPeriods.nTupleG`](DLMF/Weierstrass/Addition.lean#L916) (definition).
+- [23.10.E17](https://dlmf.nist.gov/23.10.E17): [`DLMF.Weierstrass.weierstrassP_scale`](DLMF/Weierstrass/Addition.lean#L937) (proved).
+- [23.10.E18](https://dlmf.nist.gov/23.10.E18): [`DLMF.Weierstrass.weierstrassZeta_scale`](DLMF/Weierstrass/Addition.lean#L949) (proved).
+- [23.10.E19](https://dlmf.nist.gov/23.10.E19): [`DLMF.Weierstrass.weierstrassSigma_scale`](DLMF/Weierstrass/Addition.lean#L961) (proved).
 
 ## [§23.11 Integral Representations](https://dlmf.nist.gov/23.11)
 
@@ -235,37 +235,37 @@ way (§§23.2–23.3, 23.5–23.7, 23.9–23.10, 23.12 and 23.15–23.19) agree 
 - [23.15.E4](https://dlmf.nist.gov/23.15.E4): [`DLMF.Weierstrass.mobius_det`](DLMF/Weierstrass/Basic/Modular.lean#L66) (proved); Mathlib: [`Matrix.SpecialLinearGroup`](DLMF/Weierstrass/ModularFunctions.lean#L75) (exact: SL(2,ℤ), integer matrices with ad - bc = 1).
 - [23.15.E5](https://dlmf.nist.gov/23.15.E5): [`DLMF.Weierstrass.IsModularFunction`](DLMF/Weierstrass/Basic/Modular.lean#L80) (definition). the level ℓ is encoded as ℓ₂ = 2ℓ with the principal power (cτ+d)^ℓ.
 - [23.15.E6](https://dlmf.nist.gov/23.15.E6): [`DLMF.Weierstrass.modularLambda`](DLMF/Weierstrass/Basic/Modular.lean#L104) (definition); [`DLMF.Weierstrass.modularLambda_eq_modulus_sq`](DLMF/Weierstrass/Basic/Modular.lean#L108) (proved). the θ₂⁴ branch of q^{1/4} in DLMF's nome form does not matter.
-- [23.15.E7](https://dlmf.nist.gov/23.15.E7): [`DLMF.Weierstrass.kleinJ_eq_jacobiTheta`](DLMF/Weierstrass/ModularFunctions.lean#L285) (proved). J is `ModularForm.kleinJ` = E₄³/(E₄³ − E₆²); eighth powers remove the q^{1/4} branch of the nome form.
+- [23.15.E7](https://dlmf.nist.gov/23.15.E7): [`DLMF.Weierstrass.kleinJ_eq_jacobiTheta`](DLMF/Weierstrass/ModularFunctions.lean#L288) (proved). J is `ModularForm.kleinJ` = E₄³/(E₄³ − E₆²); eighth powers remove the q^{1/4} branch of the nome form.
 - [23.15.E8](https://dlmf.nist.gov/23.15.E8): [`DLMF.Weierstrass.jacobiThetaOneDerivNullTau_eq`](DLMF/Weierstrass/Basic/Modular.lean#L113) (proved).
-- [23.15.E9](https://dlmf.nist.gov/23.15.E9): [`DLMF.Weierstrass.eta_pow_three_eq_theta`](DLMF/Weierstrass/ModularFunctions.lean#L321) (proved); [`DLMF.Weierstrass.eta_pos_of_re_eq_zero`](DLMF/Weierstrass/ModularFunctions.lean#L330) (proved); Mathlib: [`ModularForm.eta`](DLMF/Weierstrass/ModularFunctions.lean#L295) (definition: η(τ) = e^{2πiτ/24} ∏ (1 - e^{2πi(n+1)τ}); equals DLMF 23.17.8). η³ = θ₁'(0|τ)/2 fixes the cube-root branch as DLMF requires.
+- [23.15.E9](https://dlmf.nist.gov/23.15.E9): [`DLMF.Weierstrass.eta_pow_three_eq_theta`](DLMF/Weierstrass/ModularFunctions.lean#L325) (proved); [`DLMF.Weierstrass.eta_pos_of_re_eq_zero`](DLMF/Weierstrass/ModularFunctions.lean#L334) (proved); Mathlib: [`ModularForm.eta`](DLMF/Weierstrass/ModularFunctions.lean#L295) (definition: η(τ) = e^{2πiτ/24} ∏ (1 - e^{2πi(n+1)τ}); equals DLMF 23.17.8). η³ = θ₁'(0|τ)/2 fixes the cube-root branch as DLMF requires.
 
 ## [§23.17 Elementary Properties](https://dlmf.nist.gov/23.17)
 
-- [23.17.E1](https://dlmf.nist.gov/23.17.E1): [`DLMF.Weierstrass.modularLambda_special`](DLMF/Weierstrass/ModularFunctions.lean#L382) (proved).
-- [23.17.E2](https://dlmf.nist.gov/23.17.E2): [`DLMF.Weierstrass.kleinJ_special`](DLMF/Weierstrass/ModularFunctions.lean#L436) (proved).
-- [23.17.E3](https://dlmf.nist.gov/23.17.E3): [`DLMF.Weierstrass.eta_special`](DLMF/Weierstrass/ModularFunctions.lean#L456) (admitted). values from DLMF, numerically checked.
-- [23.17.E4](https://dlmf.nist.gov/23.17.E4): [`DLMF.Weierstrass.modularLambda_isBigO`](DLMF/Weierstrass/ModularFunctions.lean#L466) (admitted).
-- [23.17.E5](https://dlmf.nist.gov/23.17.E5): [`DLMF.Weierstrass.kleinJ_isBigO`](DLMF/Weierstrass/ModularFunctions.lean#L474) (admitted).
-- [23.17.E6](https://dlmf.nist.gov/23.17.E6): [`DLMF.Weierstrass.eta_hasSum`](DLMF/Weierstrass/ModularFunctions.lean#L483) (proved).
-- [23.17.E7](https://dlmf.nist.gov/23.17.E7): [`DLMF.Weierstrass.modularLambda_hasProd`](DLMF/Weierstrass/ModularFunctions.lean#L499) (proved).
+- [23.17.E1](https://dlmf.nist.gov/23.17.E1): [`DLMF.Weierstrass.modularLambda_special`](DLMF/Weierstrass/ModularFunctions.lean#L391) (proved).
+- [23.17.E2](https://dlmf.nist.gov/23.17.E2): [`DLMF.Weierstrass.kleinJ_special`](DLMF/Weierstrass/ModularFunctions.lean#L446) (proved).
+- [23.17.E3](https://dlmf.nist.gov/23.17.E3): [`DLMF.Weierstrass.eta_special`](DLMF/Weierstrass/ModularFunctions.lean#L466) (admitted). values from DLMF, numerically checked.
+- [23.17.E4](https://dlmf.nist.gov/23.17.E4): [`DLMF.Weierstrass.modularLambda_isBigO`](DLMF/Weierstrass/ModularFunctions.lean#L476) (admitted).
+- [23.17.E5](https://dlmf.nist.gov/23.17.E5): [`DLMF.Weierstrass.kleinJ_isBigO`](DLMF/Weierstrass/ModularFunctions.lean#L484) (admitted).
+- [23.17.E6](https://dlmf.nist.gov/23.17.E6): [`DLMF.Weierstrass.eta_hasSum`](DLMF/Weierstrass/ModularFunctions.lean#L493) (proved).
+- [23.17.E7](https://dlmf.nist.gov/23.17.E7): [`DLMF.Weierstrass.modularLambda_hasProd`](DLMF/Weierstrass/ModularFunctions.lean#L509) (proved).
 - [23.17.E8](https://dlmf.nist.gov/23.17.E8): [`DLMF.Weierstrass.eta_hasProd`](DLMF/Weierstrass/ModularFunctions.lean#L106) (proved); Mathlib: [`ModularForm.eta`](DLMF/Weierstrass/ModularFunctions.lean#L140) (exact: q^{1/12} ∏ (1 - q^{2n}) with q = e^{iπτ}, q^{1/12} = e^{iπτ/12}); Mathlib: [`ModularForm.eta_ne_zero`](DLMF/Weierstrass/ModularFunctions.lean#L140) (related: η has no zeros in ℍ). proved directly from Mathlib's definition of η.
 
 ## [§23.18 Modular Transformations](https://dlmf.nist.gov/23.18)
 
-- [23.18.E1](https://dlmf.nist.gov/23.18.E1): [`DLMF.Weierstrass.modularLambda_smul`](DLMF/Weierstrass/ModularFunctions.lean#L673) (proved).
-- [23.18.E2](https://dlmf.nist.gov/23.18.E2): [`DLMF.Weierstrass.modularLambda_smul`](DLMF/Weierstrass/ModularFunctions.lean#L673) (proved).
-- [23.18.E3](https://dlmf.nist.gov/23.18.E3): [`DLMF.Weierstrass.modularLambda_smul_of_even`](DLMF/Weierstrass/ModularFunctions.lean#L658) (proved from admitted dependencies); [`DLMF.Weierstrass.isCuspForm_modularLambda`](DLMF/Weierstrass/ModularFunctions.lean#L707) (proved). the subgroup is the principal congruence subgroup Γ(2).
-- [23.18.E4](https://dlmf.nist.gov/23.18.E4): [`ModularForm.kleinJ_smul`](DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective.lean#L48) (proved); [`DLMF.Weierstrass.isModularFunction_kleinJ`](DLMF/Weierstrass/ModularFunctions.lean#L984) (proved). **Corrected** (DLMF terminology): DLMF calls J a modular form, but J has the pole q⁻²/1728 (23.17.5), so it is a modular function in the sense of 23.15(i).
-- [23.18.E5](https://dlmf.nist.gov/23.18.E5): [`DLMF.Weierstrass.eta_smul`](DLMF/Weierstrass/ModularFunctions.lean#L788) (admitted); [`DLMF.Weierstrass.isModularFunction_eta`](DLMF/Weierstrass/ModularFunctions.lean#L816) (proved). c > 0; principal square root.
+- [23.18.E1](https://dlmf.nist.gov/23.18.E1): [`DLMF.Weierstrass.modularLambda_smul`](DLMF/Weierstrass/ModularFunctions.lean#L684) (proved).
+- [23.18.E2](https://dlmf.nist.gov/23.18.E2): [`DLMF.Weierstrass.modularLambda_smul`](DLMF/Weierstrass/ModularFunctions.lean#L684) (proved).
+- [23.18.E3](https://dlmf.nist.gov/23.18.E3): [`DLMF.Weierstrass.modularLambda_smul_of_even`](DLMF/Weierstrass/ModularFunctions.lean#L658) (proved from admitted dependencies); [`DLMF.Weierstrass.isCuspForm_modularLambda`](DLMF/Weierstrass/ModularFunctions.lean#L718) (proved). the subgroup is the principal congruence subgroup Γ(2).
+- [23.18.E4](https://dlmf.nist.gov/23.18.E4): [`ModularForm.kleinJ_smul`](DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective.lean#L48) (proved); [`DLMF.Weierstrass.isModularFunction_kleinJ`](DLMF/Weierstrass/ModularFunctions.lean#L997) (proved). **Corrected** (DLMF terminology): DLMF calls J a modular form, but J has the pole q⁻²/1728 (23.17.5), so it is a modular function in the sense of 23.15(i).
+- [23.18.E5](https://dlmf.nist.gov/23.18.E5): [`DLMF.Weierstrass.eta_smul`](DLMF/Weierstrass/ModularFunctions.lean#L800) (admitted); [`DLMF.Weierstrass.isModularFunction_eta`](DLMF/Weierstrass/ModularFunctions.lean#L828) (proved). c > 0; principal square root.
 - [23.18.E6](https://dlmf.nist.gov/23.18.E6): [`DLMF.Weierstrass.etaMultiplier`](DLMF/Weierstrass/Basic/Modular.lean#L127) (definition).
 - [23.18.E7](https://dlmf.nist.gov/23.18.E7): [`DLMF.Weierstrass.dedekindSum`](DLMF/Weierstrass/Basic/Modular.lean#L121) (definition). follows the V1.0.11 erratum: no coprimality condition on r.
 
 ## [§23.19 Interrelations](https://dlmf.nist.gov/23.19)
 
-- [23.19.E1](https://dlmf.nist.gov/23.19.E1): [`DLMF.Weierstrass.modularLambda_eq_eta`](DLMF/Weierstrass/ModularFunctions.lean#L947) (proved).
-- [23.19.E2](https://dlmf.nist.gov/23.19.E2): [`DLMF.Weierstrass.kleinJ_eq_modularLambda`](DLMF/Weierstrass/ModularFunctions.lean#L968) (proved).
-- [23.19.E3](https://dlmf.nist.gov/23.19.E3): [`DLMF.Weierstrass.kleinJ_eq_invariants`](DLMF/Weierstrass/ModularFunctions.lean#L975) (proved). lattice with generators 1, τ: HalfPeriods.ofTau (1/2) τ.
-- [23.19.E4](https://dlmf.nist.gov/23.19.E4): [`DLMF.Weierstrass.latticeDiscriminant_eq_eta`](DLMF/Weierstrass/ModularFunctions.lean#L996) (proved); Mathlib: [`ModularForm.discriminant`](DLMF/Weierstrass/ModularFunctions.lean#L1034) (normalized: Mathlib's Δ(τ) = η(τ)²⁴, i.e. DLMF's Δ/(2π)¹² for the lattice 1, τ); Mathlib: [`ModularForm.discriminant_eq_E₄_cube_sub_E₆_sq`](DLMF/Weierstrass/ModularFunctions.lean#L1034) (related: η²⁴ = (E₄³ - E₆²)/1728, the Eisenstein-series form of g₂³ - 27g₃²). lattice with generators 1, τ; Mathlib's discriminant is the normalized η²⁴.
+- [23.19.E1](https://dlmf.nist.gov/23.19.E1): [`DLMF.Weierstrass.modularLambda_eq_eta`](DLMF/Weierstrass/ModularFunctions.lean#L960) (proved).
+- [23.19.E2](https://dlmf.nist.gov/23.19.E2): [`DLMF.Weierstrass.kleinJ_eq_modularLambda`](DLMF/Weierstrass/ModularFunctions.lean#L981) (proved).
+- [23.19.E3](https://dlmf.nist.gov/23.19.E3): [`DLMF.Weierstrass.kleinJ_eq_invariants`](DLMF/Weierstrass/ModularFunctions.lean#L988) (proved). lattice with generators 1, τ: HalfPeriods.ofTau (1/2) τ.
+- [23.19.E4](https://dlmf.nist.gov/23.19.E4): [`DLMF.Weierstrass.latticeDiscriminant_eq_eta`](DLMF/Weierstrass/ModularFunctions.lean#L1009) (proved); Mathlib: [`ModularForm.discriminant`](DLMF/Weierstrass/ModularFunctions.lean#L1034) (normalized: Mathlib's Δ(τ) = η(τ)²⁴, i.e. DLMF's Δ/(2π)¹² for the lattice 1, τ); Mathlib: [`ModularForm.discriminant_eq_E₄_cube_sub_E₆_sq`](DLMF/Weierstrass/ModularFunctions.lean#L1034) (related: η²⁴ = (E₄³ - E₆²)/1728, the Eisenstein-series form of g₂³ - 27g₃²). lattice with generators 1, τ; Mathlib's discriminant is the normalized η²⁴.
 
 ## Analytical prose and exclusions
 
@@ -285,27 +285,27 @@ equations they introduce.
 - [23.2.ii](https://dlmf.nist.gov/23.2.ii): [`DLMF.Weierstrass.analyticAt_weierstrassP_sub`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L607) (proved); [`DLMF.Weierstrass.analyticAt_weierstrassZeta_sub`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L553) (proved); [`DLMF.Weierstrass.analyticOnNhd_weierstrassZeta`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L601) (proved); [`DLMF.Weierstrass.deriv_weierstrassSigma_ne_zero`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L720) (proved); [`DLMF.Weierstrass.differentiableOn_weierstrassZeta`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L436) (proved); [`DLMF.Weierstrass.differentiable_weierstrassSigma`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L478) (proved); [`DLMF.Weierstrass.hasSumLocallyUniformly_weierstrassZeta`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L265) (proved); [`DLMF.Weierstrass.multipliable_weierstrassSigma`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L419) (proved); [`DLMF.Weierstrass.weierstrassSigma_eq_zero_iff`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L494) (proved); [`DLMF.Weierstrass.weierstrassSigma_eq_zero_of_mem`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L256) (proved); [`DLMF.Weierstrass.weierstrassSigma_neg`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L246) (proved); [`DLMF.Weierstrass.weierstrassZeta_neg`](DLMF/Weierstrass/Basic/LatticesAndSigma.lean#L235) (proved); Mathlib: [`PeriodPair.weierstrassP_neg`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Elliptic/Weierstrass.html#PeriodPair.weierstrassP_neg); Mathlib: [`PeriodPair.derivWeierstrassP_neg`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Elliptic/Weierstrass.html#PeriodPair.derivWeierstrassP_neg); Mathlib: [`PeriodPair.meromorphic_weierstrassP`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Elliptic/Weierstrass.html#PeriodPair.meromorphic_weierstrassP); Mathlib: [`PeriodPair.analyticOnNhd_weierstrassP`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Elliptic/Weierstrass.html#PeriodPair.analyticOnNhd_weierstrassP); Mathlib: [`PeriodPair.order_weierstrassP`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Elliptic/Weierstrass.html#PeriodPair.order_weierstrassP).
 - [23.3.i.p1](https://dlmf.nist.gov/23.3#i.p1): Introduces 23.3.E1–E2 (Mathlib pointers).
 - [23.3.i.p2](https://dlmf.nist.gov/23.3#i.p2): Introduces 23.3.E3–E7; covered there.
-- [23.3.i.p3](https://dlmf.nist.gov/23.3#i.p3): Δ ≠ 0, distinct roots, and the unique lattice with given invariants: [`DLMF.Weierstrass.HalfPeriods.e_distinct`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L415) (proved); [`DLMF.Weierstrass.HalfPeriods.latticeDiscriminant_ne_zero`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L499) (proved from admitted dependencies); [`DLMF.Weierstrass.latticeDiscriminant_ne_zero'`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L583) (proved); [`DLMF.Weierstrass.exists_periodPair_invariants`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L647) (proved); [`DLMF.Weierstrass.lattice_eq_of_invariants_eq`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L872) (proved); [`DLMF.Weierstrass.periodPairOfInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L40) (definition); [`DLMF.Weierstrass.weierstrassZetaInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L48) (definition); [`DLMF.Weierstrass.weierstrassSigmaInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L52) (definition); [`DLMF.Weierstrass.exists_entire_weierstrassSigmaInvariants`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L917) (admitted); 23.3.E8.
-- [23.3.i.p4](https://dlmf.nist.gov/23.3#i.p4): Invariants and root set determined by the lattice, independent of generators: [`DLMF.Weierstrass.HalfPeriods.invariants_roots_eq_of_lattice_eq`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L531) (proved); [`DLMF.Weierstrass.HalfPeriods.cubic_eq_mul`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L469) (proved from admitted dependencies).
+- [23.3.i.p3](https://dlmf.nist.gov/23.3#i.p3): Δ ≠ 0, distinct roots, and the unique lattice with given invariants: [`DLMF.Weierstrass.HalfPeriods.e_distinct`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L429) (proved); [`DLMF.Weierstrass.HalfPeriods.latticeDiscriminant_ne_zero`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L499) (proved from admitted dependencies); [`DLMF.Weierstrass.latticeDiscriminant_ne_zero'`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L598) (proved); [`DLMF.Weierstrass.exists_periodPair_invariants`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L662) (proved); [`DLMF.Weierstrass.lattice_eq_of_invariants_eq`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L887) (proved); [`DLMF.Weierstrass.periodPairOfInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L40) (definition); [`DLMF.Weierstrass.weierstrassZetaInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L48) (definition); [`DLMF.Weierstrass.weierstrassSigmaInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L52) (definition); [`DLMF.Weierstrass.exists_entire_weierstrassSigmaInvariants`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L932) (admitted); 23.3.E8.
+- [23.3.i.p4](https://dlmf.nist.gov/23.3#i.p4): Invariants and root set determined by the lattice, independent of generators: [`DLMF.Weierstrass.HalfPeriods.invariants_roots_eq_of_lattice_eq`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L545) (proved); [`DLMF.Weierstrass.HalfPeriods.cubic_eq_mul`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L469) (proved from admitted dependencies).
 - [23.3.i.p5](https://dlmf.nist.gov/23.3#i.p5): Convention that 23.3.E9 applies: definition `HalfPeriods.e`.
 - [23.3.ii.p1](https://dlmf.nist.gov/23.3#ii.p1): Introduces 23.3.E10–E13; covered there.
-- [23.3.i](https://dlmf.nist.gov/23.3.i): [`DLMF.Weierstrass.HalfPeriods.cubic_eq_mul`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L490) (proved); [`DLMF.Weierstrass.HalfPeriods.e_distinct`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L415) (proved); [`DLMF.Weierstrass.HalfPeriods.invariants_roots_eq_of_lattice_eq`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L531) (proved); [`DLMF.Weierstrass.HalfPeriods.latticeDiscriminant_ne_zero`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L520) (proved); [`DLMF.Weierstrass.exists_entire_weierstrassSigmaInvariants`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L917) (admitted); [`DLMF.Weierstrass.exists_periodPair_invariants`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L647) (proved); [`DLMF.Weierstrass.latticeDiscriminant_ne_zero'`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L583) (proved); [`DLMF.Weierstrass.lattice_eq_of_invariants_eq`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L872) (proved); [`DLMF.Weierstrass.weierstrassSigmaInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L52) (definition); [`DLMF.Weierstrass.weierstrassZetaInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L48) (definition).
+- [23.3.i](https://dlmf.nist.gov/23.3.i): [`DLMF.Weierstrass.HalfPeriods.cubic_eq_mul`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L504) (proved); [`DLMF.Weierstrass.HalfPeriods.e_distinct`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L429) (proved); [`DLMF.Weierstrass.HalfPeriods.invariants_roots_eq_of_lattice_eq`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L545) (proved); [`DLMF.Weierstrass.HalfPeriods.latticeDiscriminant_ne_zero`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L534) (proved); [`DLMF.Weierstrass.exists_entire_weierstrassSigmaInvariants`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L932) (admitted); [`DLMF.Weierstrass.exists_periodPair_invariants`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L662) (proved); [`DLMF.Weierstrass.latticeDiscriminant_ne_zero'`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L598) (proved); [`DLMF.Weierstrass.lattice_eq_of_invariants_eq`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L887) (proved); [`DLMF.Weierstrass.weierstrassSigmaInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L52) (definition); [`DLMF.Weierstrass.weierstrassZetaInvariants`](DLMF/Weierstrass/Basic/Invariants.lean#L48) (definition).
 - [23.5.i.p1](https://dlmf.nist.gov/23.5#i.p1): Real values on the real axis iff 𝕃 = conj 𝕃 iff g₂, g₃ real: [`DLMF.Weierstrass.weierstrassP_real_iff`](DLMF/Weierstrass/SpecialLattices.lean#L114) (proved).
-- [23.5.ii.p1](https://dlmf.nist.gov/23.5#ii.p1): Rectangular lattice, Δ > 0: [`DLMF.Weierstrass.HalfPeriods.IsRectangular`](DLMF/Weierstrass/SpecialLattices.lean#L194) (definition); [`DLMF.Weierstrass.HalfPeriods.rectangular`](DLMF/Weierstrass/SpecialLattices.lean#L286) (definition); [`DLMF.Weierstrass.HalfPeriods.IsRectangular.discriminant_pos`](DLMF/Weierstrass/SpecialLattices.lean#L254) (proved).
-- [23.5.ii.p2](https://dlmf.nist.gov/23.5#ii.p2): Real distinct roots, ordering 23.5.E1: [`DLMF.Weierstrass.HalfPeriods.IsRectangular.e_two_g₃`](DLMF/Weierstrass/SpecialLattices.lean#L500) (proved); 23.5.E1.
-- [23.5.ii.p3](https://dlmf.nist.gov/23.5#ii.p3): Monotonicity of e₁, e₂, e₃ in ℑω₃: [`DLMF.Weierstrass.HalfPeriods.rectangular_roots_monotone`](DLMF/Weierstrass/SpecialLattices.lean#L290) (admitted).
+- [23.5.ii.p1](https://dlmf.nist.gov/23.5#ii.p1): Rectangular lattice, Δ > 0: [`DLMF.Weierstrass.HalfPeriods.IsRectangular`](DLMF/Weierstrass/SpecialLattices.lean#L194) (definition); [`DLMF.Weierstrass.HalfPeriods.rectangular`](DLMF/Weierstrass/SpecialLattices.lean#L292) (definition); [`DLMF.Weierstrass.HalfPeriods.IsRectangular.discriminant_pos`](DLMF/Weierstrass/SpecialLattices.lean#L258) (proved).
+- [23.5.ii.p2](https://dlmf.nist.gov/23.5#ii.p2): Real distinct roots, ordering 23.5.E1: [`DLMF.Weierstrass.HalfPeriods.IsRectangular.e_two_g₃`](DLMF/Weierstrass/SpecialLattices.lean#L506) (proved); 23.5.E1.
+- [23.5.ii.p3](https://dlmf.nist.gov/23.5#ii.p3): Monotonicity of e₁, e₂, e₃ in ℑω₃: [`DLMF.Weierstrass.HalfPeriods.rectangular_roots_monotone`](DLMF/Weierstrass/SpecialLattices.lean#L296) (admitted).
 - [23.5.iii.p1](https://dlmf.nist.gov/23.5#iii.p1): Lemniscatic lattice: [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic`](DLMF/Weierstrass/SpecialLattices.lean#L198) (definition); 23.5.E2–E4.
-- [23.5.iii.p2](https://dlmf.nist.gov/23.5#iii.p2): τ = i: [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.tau`](DLMF/Weierstrass/SpecialLattices.lean#L434) (proved); 23.5.E5.
-- [23.5.iv.p1](https://dlmf.nist.gov/23.5#iv.p1): Rhombic lattice; the printed condition Δ < 0 is a consequence of the other conditions, not an extra hypothesis: [`DLMF.Weierstrass.HalfPeriods.IsRhombic`](DLMF/Weierstrass/SpecialLattices.lean#L203) (definition); [`DLMF.Weierstrass.HalfPeriods.rhombic`](DLMF/Weierstrass/SpecialLattices.lean#L607) (definition); [`DLMF.Weierstrass.HalfPeriods.IsRhombic.discriminant_neg`](DLMF/Weierstrass/SpecialLattices.lean#L571) (proved).
-- [23.5.iv.p2](https://dlmf.nist.gov/23.5#iv.p2): e₁ real, e₃ = conj e₂, sign of e₁ and g₃, pseudo-lemniscatic case, monotonicity: [`DLMF.Weierstrass.HalfPeriods.IsRhombic.roots`](DLMF/Weierstrass/SpecialLattices.lean#L596) (admitted); [`DLMF.Weierstrass.HalfPeriods.rhombic_e_one_monotone`](DLMF/Weierstrass/SpecialLattices.lean#L611) (admitted).
+- [23.5.iii.p2](https://dlmf.nist.gov/23.5#iii.p2): τ = i: [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.tau`](DLMF/Weierstrass/SpecialLattices.lean#L440) (proved); 23.5.E5.
+- [23.5.iv.p1](https://dlmf.nist.gov/23.5#iv.p1): Rhombic lattice; the printed condition Δ < 0 is a consequence of the other conditions, not an extra hypothesis: [`DLMF.Weierstrass.HalfPeriods.IsRhombic`](DLMF/Weierstrass/SpecialLattices.lean#L203) (definition); [`DLMF.Weierstrass.HalfPeriods.rhombic`](DLMF/Weierstrass/SpecialLattices.lean#L613) (definition); [`DLMF.Weierstrass.HalfPeriods.IsRhombic.discriminant_neg`](DLMF/Weierstrass/SpecialLattices.lean#L577) (proved).
+- [23.5.iv.p2](https://dlmf.nist.gov/23.5#iv.p2): e₁ real, e₃ = conj e₂, sign of e₁ and g₃, pseudo-lemniscatic case, monotonicity: [`DLMF.Weierstrass.HalfPeriods.IsRhombic.roots`](DLMF/Weierstrass/SpecialLattices.lean#L602) (admitted); [`DLMF.Weierstrass.HalfPeriods.rhombic_e_one_monotone`](DLMF/Weierstrass/SpecialLattices.lean#L617) (admitted).
 - [23.5.v.p1](https://dlmf.nist.gov/23.5#v.p1): Equianharmonic lattice: [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic`](DLMF/Weierstrass/SpecialLattices.lean#L207) (definition); 23.5.E6–E8.
 - [23.5.v.p2](https://dlmf.nist.gov/23.5#v.p2): Introduces 23.5.E6–E8.
-- [23.5.v.p3](https://dlmf.nist.gov/23.5#v.p3): τ = e^{iπ/3}: [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.tau`](DLMF/Weierstrass/SpecialLattices.lean#L673) (proved); 23.5.E9.
+- [23.5.v.p3](https://dlmf.nist.gov/23.5#v.p3): τ = e^{iπ/3}: [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.tau`](DLMF/Weierstrass/SpecialLattices.lean#L679) (proved); 23.5.E9.
 - [23.5.i](https://dlmf.nist.gov/23.5.i): [`DLMF.Weierstrass.weierstrassP_real_iff`](DLMF/Weierstrass/SpecialLattices.lean#L114) (proved).
-- [23.5.ii](https://dlmf.nist.gov/23.5.ii): [`DLMF.Weierstrass.HalfPeriods.IsRectangular.discriminant_pos`](DLMF/Weierstrass/SpecialLattices.lean#L254) (proved); [`DLMF.Weierstrass.HalfPeriods.IsRectangular.e_two_g₃`](DLMF/Weierstrass/SpecialLattices.lean#L500) (proved); [`DLMF.Weierstrass.HalfPeriods.rectangular_roots_monotone`](DLMF/Weierstrass/SpecialLattices.lean#L290) (admitted).
-- [23.5.iii](https://dlmf.nist.gov/23.5.iii): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.tau`](DLMF/Weierstrass/SpecialLattices.lean#L434) (proved).
-- [23.5.iv](https://dlmf.nist.gov/23.5.iv): [`DLMF.Weierstrass.HalfPeriods.IsRhombic.discriminant_neg`](DLMF/Weierstrass/SpecialLattices.lean#L571) (proved); [`DLMF.Weierstrass.HalfPeriods.IsRhombic.roots`](DLMF/Weierstrass/SpecialLattices.lean#L596) (admitted); [`DLMF.Weierstrass.HalfPeriods.rhombic_e_one_monotone`](DLMF/Weierstrass/SpecialLattices.lean#L611) (admitted).
-- [23.5.v](https://dlmf.nist.gov/23.5.v): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.tau`](DLMF/Weierstrass/SpecialLattices.lean#L673) (proved).
+- [23.5.ii](https://dlmf.nist.gov/23.5.ii): [`DLMF.Weierstrass.HalfPeriods.IsRectangular.discriminant_pos`](DLMF/Weierstrass/SpecialLattices.lean#L258) (proved); [`DLMF.Weierstrass.HalfPeriods.IsRectangular.e_two_g₃`](DLMF/Weierstrass/SpecialLattices.lean#L506) (proved); [`DLMF.Weierstrass.HalfPeriods.rectangular_roots_monotone`](DLMF/Weierstrass/SpecialLattices.lean#L296) (admitted).
+- [23.5.iii](https://dlmf.nist.gov/23.5.iii): [`DLMF.Weierstrass.HalfPeriods.IsLemniscatic.tau`](DLMF/Weierstrass/SpecialLattices.lean#L440) (proved).
+- [23.5.iv](https://dlmf.nist.gov/23.5.iv): [`DLMF.Weierstrass.HalfPeriods.IsRhombic.discriminant_neg`](DLMF/Weierstrass/SpecialLattices.lean#L577) (proved); [`DLMF.Weierstrass.HalfPeriods.IsRhombic.roots`](DLMF/Weierstrass/SpecialLattices.lean#L602) (admitted); [`DLMF.Weierstrass.HalfPeriods.rhombic_e_one_monotone`](DLMF/Weierstrass/SpecialLattices.lean#L617) (admitted).
+- [23.5.v](https://dlmf.nist.gov/23.5.v): [`DLMF.Weierstrass.HalfPeriods.IsEquianharmonic.tau`](DLMF/Weierstrass/SpecialLattices.lean#L679) (proved).
 - [23.6.i.p1](https://dlmf.nist.gov/23.6#i.p1): Convention: arbitrary generators, roots by 23.3.E9; built into the statements of 23.6.E1–E15.
 - [23.6.i.p2](https://dlmf.nist.gov/23.6#i.p2): excluded: reference only (Lawden).
 - [23.6.ii.p1](https://dlmf.nist.gov/23.6#ii.p1): Convention for 23.6.E16–E26; built into the statements.
@@ -313,7 +313,7 @@ equations they introduce.
 - [23.6.ii.p3](https://dlmf.nist.gov/23.6#ii.p3): excluded: reference only (the nine other Jacobi functions via Table 22.4.3 are not stated).
 - [23.6.ii.p4](https://dlmf.nist.gov/23.6#ii.p4): excluded: reference only (Lawden).
 - [23.6.iii.p1](https://dlmf.nist.gov/23.6#iii.p1): excluded: reference only (Lawden).
-- [23.6.Px1.p1](https://dlmf.nist.gov/23.6#Px1.p1): Rectangle perimeter with t = ℘(z) real; introduces 23.6.E30–E35: [`DLMF.Weierstrass.HalfPeriods.eRe`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L776) (definition).
+- [23.6.Px1.p1](https://dlmf.nist.gov/23.6#Px1.p1): Rectangle perimeter with t = ℘(z) real; introduces 23.6.E30–E35: [`DLMF.Weierstrass.HalfPeriods.eRe`](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L790) (definition).
 - [23.6.Px1.p2](https://dlmf.nist.gov/23.6#Px1.p2): excluded: reference only.
 - [23.6.Px1.p3](https://dlmf.nist.gov/23.6#Px1.p3): excluded: reference only (§19.25(vi)).
 - [23.6.Px2.p1](https://dlmf.nist.gov/23.6#Px2.p1): Introduces 23.6.E36; covered there.
@@ -327,12 +327,12 @@ equations they introduce.
 - [23.10.i.p1](https://dlmf.nist.gov/23.10#i.p1): Introduces 23.10.E1–E4.
 - [23.10.i.p2](https://dlmf.nist.gov/23.10#i.p2): Hypothesis u + v + w = 0 of 23.10.E5–E6; built into those statements.
 - [23.10.ii.p1](https://dlmf.nist.gov/23.10#ii.p1): Introduces 23.10.E7–E10.
-- [23.10.iii.p1](https://dlmf.nist.gov/23.10#iii.p1): Introduces 23.10.E11–E14 (n ≥ 2); definition [`DLMF.Weierstrass.HalfPeriods.divisionPoint`](DLMF/Weierstrass/Addition.lean#L848) (definition).
+- [23.10.iii.p1](https://dlmf.nist.gov/23.10#iii.p1): Introduces 23.10.E11–E14 (n ≥ 2); definition [`DLMF.Weierstrass.HalfPeriods.divisionPoint`](DLMF/Weierstrass/Addition.lean#L880) (definition).
 - [23.10.iii.p2](https://dlmf.nist.gov/23.10#iii.p2): Introduces 23.10.E15.
 - [23.10.iii.p3](https://dlmf.nist.gov/23.10#iii.p3): Introduces 23.10.E16.
-- [23.10.iv.p1](https://dlmf.nist.gov/23.10#iv.p1): Homogeneity for c ≠ 0, 23.10.E17–E19; also the scaling of the invariants: [`DLMF.Weierstrass.scalePeriodPair`](DLMF/Weierstrass/Basic/Periods.lean#L164) (definition); [`DLMF.Weierstrass.invariants_scale`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L602) (proved).
+- [23.10.iv.p1](https://dlmf.nist.gov/23.10#iv.p1): Homogeneity for c ≠ 0, 23.10.E17–E19; also the scaling of the invariants: [`DLMF.Weierstrass.scalePeriodPair`](DLMF/Weierstrass/Basic/Periods.lean#L164) (definition); [`DLMF.Weierstrass.invariants_scale`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L617) (proved).
 - [23.10.iv.p2](https://dlmf.nist.gov/23.10#iv.p2): excluded: reference only (Lawden, Apostol).
-- [23.10.iv](https://dlmf.nist.gov/23.10.iv): [`DLMF.Weierstrass.invariants_scale`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L602) (proved).
+- [23.10.iv](https://dlmf.nist.gov/23.10.iv): [`DLMF.Weierstrass.invariants_scale`](DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean#L617) (proved).
 - [23.11.p1](https://dlmf.nist.gov/23.11#p1): τ = ω₃/ω₁ and the kernels 23.11.E1.
 - [23.11.p2](https://dlmf.nist.gov/23.11#p2): Introduces 23.11.E2–E3.
 - [23.12.p1](https://dlmf.nist.gov/23.12#p1): q → 0 with ω₁ and z fixed: τ → i∞ (`UpperHalfPlane.atImInfty`); built into 23.12.E1–E4.
@@ -344,16 +344,16 @@ equations they introduce.
 - [23.15.i.p3](https://dlmf.nist.gov/23.15#i.p3): Modular function, level, modular form, cusp form: [`DLMF.Weierstrass.IsModularFunction`](DLMF/Weierstrass/Basic/Modular.lean#L80) (definition); [`DLMF.Weierstrass.IsModularForm`](DLMF/Weierstrass/Basic/Modular.lean#L89) (definition); [`DLMF.Weierstrass.IsCuspForm`](DLMF/Weierstrass/Basic/Modular.lean#L96) (definition).
 - [23.15.Px1.p1](https://dlmf.nist.gov/23.15#Px1.p1): Heading for 23.15.E6.
 - [23.15.Px2.p1](https://dlmf.nist.gov/23.15#Px2.p1): Heading for 23.15.E7–E8.
-- [23.15.Px3.p1](https://dlmf.nist.gov/23.15#Px3.p1): Heading for 23.15.E9; the cube-root branch statement (real and positive on the imaginary axis): [`DLMF.Weierstrass.eta_pos_of_re_eq_zero`](DLMF/Weierstrass/ModularFunctions.lean#L330) (proved).
+- [23.15.Px3.p1](https://dlmf.nist.gov/23.15#Px3.p1): Heading for 23.15.E9; the cube-root branch statement (real and positive on the imaginary axis): [`DLMF.Weierstrass.eta_pos_of_re_eq_zero`](DLMF/Weierstrass/ModularFunctions.lean#L334) (proved).
 - [23.15.i](https://dlmf.nist.gov/23.15.i): [`DLMF.Weierstrass.IsCuspForm`](DLMF/Weierstrass/Basic/Modular.lean#L96) (definition); [`DLMF.Weierstrass.IsModularForm`](DLMF/Weierstrass/Basic/Modular.lean#L89) (definition).
 - [23.17.i.p1](https://dlmf.nist.gov/23.17#i.p1): Introduces 23.17.E1–E3.
 - [23.17.i.p2](https://dlmf.nist.gov/23.17#i.p2): excluded: reference only (Cohen).
 - [23.17.ii.p1](https://dlmf.nist.gov/23.17#ii.p1): Condition |q| < 1 for 23.17.E4–E6; formalized as big-O at τ → i∞ (E4–E5) and HasSum for ℑτ > 0 (E6).
 - [23.17.ii.p2](https://dlmf.nist.gov/23.17#ii.p2): excluded: reference only (higher coefficients of 1728J; numerical tables).
 - [23.17.iii.p1](https://dlmf.nist.gov/23.17#iii.p1): Introduces 23.17.E7–E8.
-- [23.18.Px1.p1](https://dlmf.nist.gov/23.18#Px1.p1): Introduces 23.18.E1–E3; the cusp-form statement after 23.18.E3: [`DLMF.Weierstrass.isCuspForm_modularLambda`](DLMF/Weierstrass/ModularFunctions.lean#L707) (proved).
-- [23.18.Px2.p1](https://dlmf.nist.gov/23.18#Px2.p1): 23.18.E4 and "J is a modular form of level zero": [`DLMF.Weierstrass.isModularFunction_kleinJ`](DLMF/Weierstrass/ModularFunctions.lean#L984) (proved) (modular function; see the terminology note at 23.18.E4).
-- [23.18.Px3.p1](https://dlmf.nist.gov/23.18#Px3.p1): 23.18.E5–E7 and "η is of level 1/2": [`DLMF.Weierstrass.isModularFunction_eta`](DLMF/Weierstrass/ModularFunctions.lean#L816) (proved).
+- [23.18.Px1.p1](https://dlmf.nist.gov/23.18#Px1.p1): Introduces 23.18.E1–E3; the cusp-form statement after 23.18.E3: [`DLMF.Weierstrass.isCuspForm_modularLambda`](DLMF/Weierstrass/ModularFunctions.lean#L718) (proved).
+- [23.18.Px2.p1](https://dlmf.nist.gov/23.18#Px2.p1): 23.18.E4 and "J is a modular form of level zero": [`DLMF.Weierstrass.isModularFunction_kleinJ`](DLMF/Weierstrass/ModularFunctions.lean#L997) (proved) (modular function; see the terminology note at 23.18.E4).
+- [23.18.Px3.p1](https://dlmf.nist.gov/23.18#Px3.p1): 23.18.E5–E7 and "η is of level 1/2": [`DLMF.Weierstrass.isModularFunction_eta`](DLMF/Weierstrass/ModularFunctions.lean#L828) (proved).
 - [23.19.p1](https://dlmf.nist.gov/23.19#p1): Introduces 23.19.E1–E3 (lattice with generators 1, τ).
 - [23.19.p2](https://dlmf.nist.gov/23.19#p2): Introduces 23.19.E4.
 

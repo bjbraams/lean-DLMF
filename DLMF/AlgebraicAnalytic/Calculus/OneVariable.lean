@@ -218,7 +218,8 @@ theorem setIntegral_withDensity_add_dirac {w : ℝ → ℝ≥0} (hw : Measurable
       (∫ x in Ioo a b, (w x : ℝ) * f x) + ∑ n, (wn n : ℝ) * f (xn n) := by
   have hd : Integrable f ((volume.withDensity (fun x => (w x : ℝ≥0∞))).restrict (Ioo a b)) := by
     rw [restrict_withDensity measurableSet_Ioo]
-    exact (integrable_withDensity_iff_integrable_coe_smul hw).mpr (by simpa only [smul_eq_mul, IntegrableOn] using hfw)
+    exact (integrable_withDensity_iff_integrable_coe_smul hw).mpr
+        (by simpa only [smul_eq_mul, IntegrableOn] using hfw)
   have hatom (j : Fin N) : Integrable f ((wn j : ℝ≥0∞) • Measure.dirac (xn j)) :=
     (integrable_dirac' hfm.stronglyMeasurable (by simp)).smul_measure ENNReal.coe_ne_top
   have hdisc : (∑ j, (wn j : ℝ≥0∞) • Measure.dirac (xn j)).restrict (Ioo a b) =

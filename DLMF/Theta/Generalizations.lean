@@ -142,10 +142,12 @@ theorem summable_ramanujanThetaF {a b : ℂ} (hab : ‖a * b‖ < 1) :
       · simp
       · push_cast; ring_nf
     symm
-    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow, mul_succ_div_two_eq, pow_add,
+    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow,
+        mul_succ_div_two_eq, pow_add,
       norm_mul, mul_pow]
     ring
-  · have hs := (summable_nat_add_iff 1).mpr (summable_pow_triangular_mul_pow hr0 hab (norm_nonneg b))
+  · have hs := (summable_nat_add_iff 1).mpr
+        (summable_pow_triangular_mul_pow hr0 hab (norm_nonneg b))
     refine hs.congr fun m => ?_
     have e1 : (-((m : ℤ) + 1)) * (-((m : ℤ) + 1) + 1) / 2 = ((m * (m + 1) / 2 : ℕ) : ℤ) := by
       push_cast; ring_nf
@@ -153,7 +155,8 @@ theorem summable_ramanujanThetaF {a b : ℂ} (hab : ‖a * b‖ < 1) :
         (((m + 1) * (m + 1 + 1) / 2 : ℕ) : ℤ) := by
       push_cast; ring_nf
     symm
-    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow, mul_succ_div_two_eq (m + 1),
+    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow,
+        mul_succ_div_two_eq (m + 1),
       pow_add, norm_mul, mul_pow, Nat.add_sub_cancel, show (m + 1) * m = m * (m + 1) by ring]
     ring
 
@@ -231,7 +234,8 @@ theorem combinedTheta_symmetry {m n : ℕ} {z τ : ℂ}
   refine ⟨?_, ?_, ?_, ?_⟩ <;> field_simp
 
 /-- The normalizing constants of the combined theta functions do not vanish for `Im τ > 0`. -/
-private lemma combinedThetaConst_ne_zero {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj1 : 1 ≤ j) (hj4 : j ≤ 4) :
+private lemma combinedThetaConst_ne_zero {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj1 : 1 ≤ j)
+    (hj4 : j ≤ 4) :
     combinedThetaConst j τ ≠ 0 := by
   obtain ⟨h2, h3, h4⟩ := jacobiThetaNullTau_ne_zero hτ
   interval_cases j

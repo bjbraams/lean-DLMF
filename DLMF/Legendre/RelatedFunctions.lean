@@ -38,9 +38,11 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Legendre
 
-/-- Gegenbauer function at regular parameters; gamma singularities of representations are handled by limits of the complete expression. -/
+/-- Gegenbauer function at regular parameters; gamma singularities of representations are handled by
+limits of the complete expression. -/
 def gegenbauerFunction (α β z : ℂ) : ℂ :=
-  Gamma (α+2*β)*Gamma (β+1/2)/(Gamma (2*β)*Gamma (α+1))*regularizedGaussHG (-α) (α+2*β) (β+1/2) ((1-z)/2)
+  Gamma (α+2*β)*Gamma (β+1/2)/(Gamma (2*β)*Gamma (α+1))*regularizedGaussHG (-α) (α+2*β)
+      (β+1/2) ((1-z)/2)
 
 /-- Jacobi function at regular alpha, with Gauss continuation. -/
 def jacobiFunction (α β lam t : ℂ) : ℂ :=
@@ -49,16 +51,21 @@ def jacobiFunction (α β lam t : ℂ) : ℂ :=
 /-- Removable exceptional parameters use the limit of the whole representation. -/
 @[dlmf 14.3.E21]
 theorem ferrersP_gegenbauer (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Tendsto (fun m : ℂ => 2^m*Gamma (1-2*m)*Gamma (ν+m+1)/(Gamma (ν-m+1)*Gamma (1-m)*(1-x^2:ℂ)^(m/2))*gegenbauerFunction (ν+m) (1/2-m) x) (𝓝[≠] μ) (𝓝 (ferrersP ν μ x)) := by
+    Tendsto (fun m : ℂ =>
+        2^m*Gamma (1-2*m)*Gamma
+        (ν+m+1)/(Gamma (ν-m+1)*Gamma (1-m)*(1-x^2:ℂ)^(m/2))*gegenbauerFunction (ν+m) (1/2-m) x)
+        (𝓝[≠] μ) (𝓝 (ferrersP ν μ x)) := by
   have hne := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hx)
   have ht : ((1:ℂ)-x)/2 ∈ cutPlane := by
     rw [mem_cutPlane, show (1:ℂ) - (1-(x:ℂ))/2 = (((1+x)/2 : ℝ) : ℂ) by push_cast; ring]
     exact Or.inl (by simp only [ofReal_re]; linarith [hx.1])
-  set g : ℂ → ℂ := fun m => 2^m*((1-(x:ℂ)^2)^(m/2))⁻¹*regularizedGaussHG (-(ν+m)) (ν-m+1) (1-m) ((1-(x:ℂ))/2)
+  set g : ℂ → ℂ := fun m =>
+      2^m*((1-(x:ℂ)^2)^(m/2))⁻¹*regularizedGaussHG (-(ν+m)) (ν-m+1) (1-m) ((1-(x:ℂ))/2)
   have hg : Continuous g := by
     have h1 : Continuous fun m : ℂ => (2:ℂ)^m := continuous_const_cpow' (by norm_num)
     have h2 : Continuous fun m : ℂ => ((1-(x:ℂ)^2)^(m/2))⁻¹ :=
-      ((continuous_const_cpow' hne).comp (by fun_prop)).inv₀ (fun m => cpow_ne_zero_iff.mpr (Or.inl hne))
+      ((continuous_const_cpow' hne).comp (by fun_prop)).inv₀
+          (fun m => cpow_ne_zero_iff.mpr (Or.inl hne))
     have h3 := (differentiable_regularizedGaussHG_comp (A := fun m => -(ν+m)) (B := fun m => ν-m+1)
       (C := fun m => 1-m) (by fun_prop) (by fun_prop) (by fun_prop) ht).continuous
     exact (h1.mul h2).mul h3
@@ -74,7 +81,8 @@ theorem ferrersP_gegenbauer (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) 
     have hpp : ((1+(x:ℂ))/2)^(-μ)*((1+(x:ℂ))/2)^μ = 1 := by
       rw [cpow_neg]; exact inv_mul_cancel₀ (cpow_ne_zero_iff.mpr (Or.inl hp))
     rw [← cpow_neg, show -(μ/2) = -μ/2 by ring, ← hq]
-    linear_combination (((((1+x)/(1-x)):ℝ):ℂ)^(μ/2)*regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-(x:ℂ))/2))*hpp
+    linear_combination (((((1+x)/(1-x)):ℝ):ℂ)^(μ/2)*regularizedGaussHG (ν+1) (-ν) (1-μ)
+        ((1-(x:ℂ))/2))*hpp
   rw [← hgμ]
   refine (hg.tendsto μ).mono_left nhdsWithin_le_nhds |>.congr' ?_
   filter_upwards [eventually_affine_ne_neg_nat (a := -2) (by norm_num) 1 μ,
@@ -95,14 +103,19 @@ theorem ferrersP_gegenbauer (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) 
 /-- Removable exceptional parameters use the limit of the whole representation. -/
 @[dlmf 14.3.E22]
 theorem associatedP_gegenbauer (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    Tendsto (fun m : ℂ => 2^m*Gamma (1-2*m)*Gamma (ν+m+1)/(Gamma (ν-m+1)*Gamma (1-m)*legendreBranchPower m z)*gegenbauerFunction (ν+m) (1/2-m) z) (𝓝[≠] μ) (𝓝 (associatedP ν μ z)) := by
+    Tendsto (fun m : ℂ =>
+        2^m*Gamma (1-2*m)*Gamma
+        (ν+m+1)/(Gamma (ν-m+1)*Gamma (1-m)*legendreBranchPower m z)*gegenbauerFunction (ν+m) (1/2-m)
+        z) (𝓝[≠] μ) (𝓝 (associatedP ν μ z)) := by
   have hz' := one_add_mem_slitPlane_of_sub_one hz
   have ht := mem_cutPlane_of_one_add hz'
-  set g : ℂ → ℂ := fun m => 2^m*(legendreBranchPower m z)⁻¹*regularizedGaussHG (-(ν+m)) (ν-m+1) (1-m) ((1-z)/2)
+  set g : ℂ → ℂ := fun m =>
+      2^m*(legendreBranchPower m z)⁻¹*regularizedGaussHG (-(ν+m)) (ν-m+1) (1-m) ((1-z)/2)
   have hg : Continuous g := by
     have h1 : Continuous fun m : ℂ => (2:ℂ)^m := continuous_const_cpow' (by norm_num)
     have h2 : Continuous fun m : ℂ => (legendreBranchPower m z)⁻¹ :=
-      (by unfold legendreBranchPower; fun_prop : Continuous fun m : ℂ => legendreBranchPower m z).inv₀
+      (by unfold legendreBranchPower; fun_prop : Continuous fun m : ℂ =>
+            legendreBranchPower m z).inv₀
         (fun m => exp_ne_zero _)
     have h3 := (differentiable_regularizedGaussHG_comp (A := fun m => -(ν+m)) (B := fun m => ν-m+1)
       (C := fun m => 1-m) (by fun_prop) (by fun_prop) (by fun_prop) ht).continuous
@@ -145,7 +158,9 @@ theorem associatedP_gegenbauer (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
 the limit removes the poles of `1/Γ(1-m)` at positive integers. -/
 @[dlmf 14.3.E23]
 theorem associatedP_jacobi (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
-    Tendsto (fun m : ℂ => 1/Gamma (1-m)*((x+1)/(x-1):ℂ)^(m/2)*jacobiFunction (-m) m (-I*(2*ν+1)) (Real.arsinh (Real.sqrt (x/2-1/2)))) (𝓝[≠] μ) (𝓝 (associatedP ν μ x)) := by
+    Tendsto (fun m : ℂ =>
+        1/Gamma (1-m)*((x+1)/(x-1):ℂ)^(m/2)*jacobiFunction (-m) m (-I*(2*ν+1))
+        (Real.arsinh (Real.sqrt (x/2-1/2)))) (𝓝[≠] μ) (𝓝 (associatedP ν μ x)) := by
   have hsh : -(sinh ((Real.arsinh (Real.sqrt (x/2-1/2)) : ℝ) : ℂ))^2 = (1-(x:ℂ))/2 := by
     rw [← ofReal_sinh, Real.sinh_arsinh, ← ofReal_pow, Real.sq_sqrt (by linarith)]
     push_cast; ring
@@ -167,7 +182,8 @@ theorem associatedP_jacobi (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
     congr 1
     have h1 : (0:ℝ) < x+1 := by linarith
     have h2 : (0:ℝ) < x-1 := by linarith
-    rw [show ((x+1)/(x-1):ℂ) = (((x+1)/(x-1):ℝ):ℂ) by push_cast; ring, ← ofReal_log (div_pos h1 h2).le,
+    rw [show ((x+1)/(x-1):ℂ) = (((x+1)/(x-1):ℝ):ℂ) by push_cast; ring,
+                                                        ← ofReal_log (div_pos h1 h2).le,
       Real.log_div h1.ne' h2.ne', show (x:ℂ)+1 = ((x+1:ℝ):ℂ) by push_cast; ring,
       show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring, ← ofReal_log h1.le, ← ofReal_log h2.le]
     push_cast; ring
@@ -182,14 +198,17 @@ theorem associatedP_jacobi (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
 
 /-- The outside-interval degree-derivative series, convergent when abs(1-z) is less than two. -/
 def associatedDegreeA (ν μ z : ℂ) : ℂ :=
-  sin (ν*π)*exp (μ/2*(log (z+1)-log (z-1)))*∑' k : ℕ, ((1-z)/2)^k*Gamma (k-ν)*Gamma (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*(digamma (k+ν+1)-digamma (k-ν))
+  sin (ν*π)*exp (μ/2*(log (z+1)-log (z-1)))*∑' k : ℕ,
+      ((1-z)/2)^k*Gamma (k-ν)*Gamma
+      (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*(digamma (k+ν+1)-digamma (k-ν))
 
 /-- DLMF 14.11.1 (associated case): for non-integer `ν`, `z ∉ (-∞, 1]` and `|1-z| < 2`,
 `∂P^μ_ν(z)/∂ν = π cot(νπ) P^μ_ν(z) - (1/π) A^μ_ν(z)`, with `A^μ_ν` the series 14.11.3 continued to
 complex `z`. -/
 @[dlmf 14.11.E1]
 theorem associatedP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {z : ℂ} (hdisk : ‖1-z‖ < 2) :
-    HasDerivAt (fun ν => associatedP ν μ z) (π*cos (ν*π)/sin (ν*π)*associatedP ν μ z-associatedDegreeA ν μ z/π) ν := by
+    HasDerivAt (fun ν => associatedP ν μ z)
+        (π*cos (ν*π)/sin (ν*π)*associatedP ν μ z-associatedDegreeA ν μ z/π) ν := by
   have hw : ‖(1-z)/2‖ < 1 := by
     rw [norm_div, norm_ofNat]
     exact (div_lt_one (by norm_num)).mpr hdisk

@@ -123,7 +123,8 @@ local macro "poly_derivative_simp" : tactic =>
 
 /-- One step of the recurrence 32.8.6: if `Q_{n+1} Q_{n-1}` equals the right-hand side then
 `yablonskiiVorobievQ (n + 2)` is that polynomial. -/
-private lemma yablonskiiVorobievQ_add_two_eq_of_mul {n : ℕ} {R : ℂ[X]} (hn : yablonskiiVorobievQ n ≠ 0)
+private lemma yablonskiiVorobievQ_add_two_eq_of_mul {n : ℕ} {R : ℂ[X]}
+    (hn : yablonskiiVorobievQ n ≠ 0)
     (h : X * yablonskiiVorobievQ (n + 1) ^ 2 +
         C 4 * (derivative (yablonskiiVorobievQ (n + 1))) ^ 2 -
         C 4 * yablonskiiVorobievQ (n + 1) * derivative (derivative (yablonskiiVorobievQ (n + 1))) =
@@ -164,14 +165,16 @@ private lemma yablonskiiVorobievQ_three_poly_ne_zero : (X ^ 6 + 20 * X ^ 3 - 80 
   norm_num at this
 
 /-- Nonvanishing under the stated hypotheses: `(X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) ≠ 0`. -/
-private lemma yablonskiiVorobievQ_four_poly_ne_zero : (X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) ≠ 0 := by
+private lemma yablonskiiVorobievQ_four_poly_ne_zero :
+    (X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) ≠ 0 := by
   intro h
   have := congrArg (eval 1) h
   norm_num at this
 
 /-- Nonvanishing under the stated hypotheses: `(X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^
 6 - 3136000 * X ^ 3 - 6272000 : ℂ[X]) ≠ 0`. -/
-private lemma yablonskiiVorobievQ_five_poly_ne_zero : (X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 - 3136000 * X ^ 3 -
+private lemma yablonskiiVorobievQ_five_poly_ne_zero :
+    (X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 - 3136000 * X ^ 3 -
     6272000 : ℂ[X]) ≠ 0 := by
   intro h
   have := congrArg (eval 0) h
@@ -181,9 +184,12 @@ private lemma yablonskiiVorobievQ_five_poly_ne_zero : (X ^ 15 + 140 * X ^ 12 + 2
 @[dlmf 32.8.E7]
 theorem yablonskiiVorobievQ_four :
     yablonskiiVorobievQ 4 = X ^ 10 + 60 * X ^ 7 + 11200 * X := by
-  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 2) (by rw [yablonskiiVorobievQ_two]; exact yablonskiiVorobievQ_two_poly_ne_zero)
-  have h1 : derivative (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]) = 6 * X ^ 5 + 60 * X ^ 2 := by poly_derivative_simp
-  have h2 : derivative (6 * X ^ 5 + 60 * X ^ 2 : ℂ[X]) = 30 * X ^ 4 + 120 * X := by poly_derivative_simp
+  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 2)
+      (by rw [yablonskiiVorobievQ_two]; exact yablonskiiVorobievQ_two_poly_ne_zero)
+  have h1 : derivative (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]) = 6 * X ^ 5 + 60 * X ^ 2 :=
+      by poly_derivative_simp
+  have h2 : derivative (6 * X ^ 5 + 60 * X ^ 2 : ℂ[X]) = 30 * X ^ 4 + 120 * X :=
+      by poly_derivative_simp
   rw [yablonskiiVorobievQ_three, yablonskiiVorobievQ_two, h1, h2, C_four_eq]
   ring
 
@@ -192,7 +198,8 @@ theorem yablonskiiVorobievQ_four :
 theorem yablonskiiVorobievQ_five :
     yablonskiiVorobievQ 5 = X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 -
       3136000 * X ^ 3 - 6272000 := by
-  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 3) (by rw [yablonskiiVorobievQ_three]; exact yablonskiiVorobievQ_three_poly_ne_zero)
+  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 3)
+      (by rw [yablonskiiVorobievQ_three]; exact yablonskiiVorobievQ_three_poly_ne_zero)
   have h1 : derivative (X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) =
       10 * X ^ 9 + 420 * X ^ 6 + 11200 := by poly_derivative_simp
   have h2 : derivative (10 * X ^ 9 + 420 * X ^ 6 + 11200 : ℂ[X]) =
@@ -206,7 +213,8 @@ theorem yablonskiiVorobievQ_five :
 theorem yablonskiiVorobievQ_six :
     yablonskiiVorobievQ 6 = X ^ 21 + 280 * X ^ 18 + 18480 * X ^ 15 + 627200 * X ^ 12 -
       17248000 * X ^ 9 + 1448832000 * X ^ 6 + 19317760000 * X ^ 3 - 38635520000 := by
-  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 4) (by rw [yablonskiiVorobievQ_four]; exact yablonskiiVorobievQ_four_poly_ne_zero)
+  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 4)
+      (by rw [yablonskiiVorobievQ_four]; exact yablonskiiVorobievQ_four_poly_ne_zero)
   have h1 : derivative (X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 -
       3136000 * X ^ 3 - 6272000 : ℂ[X]) =
       15 * X ^ 14 + 1680 * X ^ 11 + 25200 * X ^ 8 + 470400 * X ^ 5 - 9408000 * X ^ 2 := by
@@ -268,9 +276,12 @@ private lemma isOpen_setOf_eval_ne_zero (P : ℂ[X]) : IsOpen {z : ℂ | P.eval 
 @[dlmf 32.8.E2]
 theorem painleveII_rational_two :
     IsPainleveIIOn 2 (fun z => 1 / z - 3 * z ^ 2 / (z ^ 3 + 4)) {z | z ≠ 0 ∧ z ^ 3 + 4 ≠ 0} := by
-  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := 2) (A := X) (B := X ^ 3 + 4) (A1 := 1) (A2 := 0)
-    (A3 := 0) (B1 := 3 * X ^ 2) (B2 := 6 * X) (B3 := 6) (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp)
-    (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp) (by rw [show (C 2 : ℂ[X]) = 2 from rfl]; ring)
+  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := 2) (A := X) (B := X ^ 3 + 4)
+      (A1 := 1) (A2 := 0)
+    (A3 := 0) (B1 := 3 * X ^ 2) (B2 := 6 * X) (B3 := 6) (by poly_derivative_simp)
+        (by poly_derivative_simp) (by poly_derivative_simp)
+    (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp)
+        (by rw [show (C 2 : ℂ[X]) = 2 from rfl]; ring)
   have hs : {z : ℂ | (X : ℂ[X]).eval z ≠ 0 ∧ (X ^ 3 + 4 : ℂ[X]).eval z ≠ 0} =
       {z | z ≠ 0 ∧ z ^ 3 + 4 ≠ 0} := by ext z; simp
   rw [hs] at h
@@ -285,10 +296,13 @@ theorem painleveII_rational_three :
     IsPainleveIIOn 3 (fun z => 3 * z ^ 2 / (z ^ 3 + 4) -
         6 * z ^ 2 * (z ^ 3 + 10) / (z ^ 6 + 20 * z ^ 3 - 80))
       {z | z ^ 3 + 4 ≠ 0 ∧ z ^ 6 + 20 * z ^ 3 - 80 ≠ 0} := by
-  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := 3) (A := X ^ 3 + 4) (B := X ^ 6 + 20 * X ^ 3 - 80)
+  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := 3) (A := X ^ 3 + 4)
+      (B := X ^ 6 + 20 * X ^ 3 - 80)
     (A1 := 3 * X ^ 2) (A2 := 6 * X) (A3 := 6) (B1 := 6 * X ^ 5 + 60 * X ^ 2)
-    (B2 := 30 * X ^ 4 + 120 * X) (B3 := 120 * X ^ 3 + 120) (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp)
-    (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp) (by rw [show (C 3 : ℂ[X]) = 3 from rfl]; ring)
+    (B2 := 30 * X ^ 4 + 120 * X) (B3 := 120 * X ^ 3 + 120) (by poly_derivative_simp)
+        (by poly_derivative_simp) (by poly_derivative_simp)
+    (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp)
+        (by rw [show (C 3 : ℂ[X]) = 3 from rfl]; ring)
   have hs : {z : ℂ | (X ^ 3 + 4 : ℂ[X]).eval z ≠ 0 ∧
       (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]).eval z ≠ 0} =
       {z | z ^ 3 + 4 ≠ 0 ∧ z ^ 6 + 20 * z ^ 3 - 80 ≠ 0} := by ext z; simp
@@ -309,8 +323,10 @@ theorem painleveII_rational_four :
     (B := X ^ 10 + 60 * X ^ 7 + 11200 * X)
     (A1 := 6 * X ^ 5 + 60 * X ^ 2) (A2 := 30 * X ^ 4 + 120 * X) (A3 := 120 * X ^ 3 + 120)
     (B1 := 10 * X ^ 9 + 420 * X ^ 6 + 11200) (B2 := 90 * X ^ 8 + 2520 * X ^ 5)
-    (B3 := 720 * X ^ 7 + 12600 * X ^ 4) (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp)
-    (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp) (by rw [show (C 4 : ℂ[X]) = 4 from rfl]; ring)
+    (B3 := 720 * X ^ 7 + 12600 * X ^ 4) (by poly_derivative_simp) (by poly_derivative_simp)
+        (by poly_derivative_simp)
+    (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp)
+        (by rw [show (C 4 : ℂ[X]) = 4 from rfl]; ring)
   have hs : {z : ℂ | (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]).eval z ≠ 0 ∧
       (X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]).eval z ≠ 0} =
       {z | z ≠ 0 ∧ z ^ 6 + 20 * z ^ 3 - 80 ≠ 0 ∧ z ^ 9 + 60 * z ^ 6 + 11200 ≠ 0} := by
@@ -353,7 +369,8 @@ private lemma dvd_of_roots_simple {v N : ℂ[X]} (hv : v ≠ 0)
 
 /-- A nonzero solution `f` of the bilinear equation `D²(f·g) = 0` has only simple zeros
 away from the zeros of `g`. -/
-private lemma eval_derivative_ne_zero_of_bilinear {f g : ℂ[X]} (hf : f ≠ 0) {c : ℂ} (hg : g.eval c ≠ 0)
+private lemma eval_derivative_ne_zero_of_bilinear {f g : ℂ[X]} (hf : f ≠ 0) {c : ℂ}
+    (hg : g.eval c ≠ 0)
     (hD : derivative (derivative f) * g - 2 * derivative f * derivative g +
       f * derivative (derivative g) = 0) (h0 : f.eval c = 0) :
     (derivative f).eval c ≠ 0 := by
@@ -388,7 +405,8 @@ private lemma eval_derivative_ne_zero_of_bilinear {f g : ℂ[X]} (hf : f ≠ 0) 
   omega
 /-- The bilinear equations propagate through one step of the Yablonskii–Vorob'ev recurrence:
 with jets of `u`, `v`, `s` and `s v = z u² - 4 u u'' + 4 u'²`. -/
-private lemma yablonskiiVorobiev_bilinear_step {u u1 u2 u3 u4 u5 v v1 v2 v3 v4 s s1 s2 s3 : ℂ[X]} {α : ℂ}
+private lemma yablonskiiVorobiev_bilinear_step
+    {u u1 u2 u3 u4 u5 v v1 v2 v3 v4 s s1 s2 s3 : ℂ[X]} {α : ℂ}
     (hu1 : derivative u = u1) (hu2 : derivative u1 = u2) (hu3 : derivative u2 = u3)
     (hu4 : derivative u3 = u4) (hu5 : derivative u4 = u5)
     (hv1 : derivative v = v1) (hv2 : derivative v1 = v2) (hv3 : derivative v2 = v3)
@@ -504,7 +522,9 @@ private lemma yablonskiiVorobiev_invariant_step {u v : ℂ[X]} {α : ℂ} (hv : 
     have : N = v * s := hs
     simp only [N, h4] at this
     linear_combination -this
-  obtain ⟨hD', hE'⟩ := yablonskiiVorobiev_bilinear_step (u := u) (v := v) (s := s) rfl rfl rfl rfl rfl rfl rfl rfl rfl
+  obtain ⟨hD', hE'⟩ :=
+      yablonskiiVorobiev_bilinear_step (u := u) (v := v) (s := s) rfl rfl rfl rfl rfl
+      rfl rfl rfl rfl
     rfl rfl rfl hv.ne_zero hR hD hE
   refine ⟨by rw [mul_comm]; exact hs.symm, hsm, fun c hc => ?_, hD', hE'⟩
   by_cases huc : u.eval c = 0
@@ -588,7 +608,8 @@ theorem rationalPainleveII_isPainleveIIOn (n : ℕ) (hn : 1 ≤ n) :
   obtain ⟨-, -, -, -, hD, hE⟩ := yablonskiiVorobievQ_bilinear m
   set v := yablonskiiVorobievQ m
   set u := yablonskiiVorobievQ (m + 1)
-  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := (m : ℂ) + 1) (A := v) (B := u) rfl rfl rfl rfl rfl
+  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := (m : ℂ) + 1) (A := v) (B := u) rfl
+      rfl rfl rfl rfl
     rfl (by
       linear_combination (-3 * v * derivative v * u ^ 2 + 3 * u * derivative u * v ^ 2) * hD +
         (u ^ 2 * v ^ 2) * hE)

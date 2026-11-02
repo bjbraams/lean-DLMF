@@ -321,10 +321,12 @@ theorem IsTriad.symm23 {a b c : ℚ} (h : IsTriad a b c) : IsTriad a c b :=
   ⟨h.2.1.of_eq (by ring), h.1.of_eq (by ring), h.2.2.of_eq (by ring)⟩
 
 /-- Swapping the first two entries of a triad. -/
-theorem isTriad_comm12 {a b c : ℚ} : IsTriad a b c ↔ IsTriad b a c := ⟨IsTriad.symm12, IsTriad.symm12⟩
+theorem isTriad_comm12 {a b c : ℚ} : IsTriad a b c ↔ IsTriad b a c :=
+    ⟨IsTriad.symm12, IsTriad.symm12⟩
 
 /-- Swapping the last two entries of a triad. -/
-theorem isTriad_comm23 {a b c : ℚ} : IsTriad a b c ↔ IsTriad a c b := ⟨IsTriad.symm23, IsTriad.symm23⟩
+theorem isTriad_comm23 {a b c : ℚ} : IsTriad a b c ↔ IsTriad a c b :=
+    ⟨IsTriad.symm23, IsTriad.symm23⟩
 
 /-- `triangleDelta` is symmetric in its first two arguments. -/
 theorem triangleDelta_comm12 (a b c : ℚ) : triangleDelta a b c = triangleDelta b a c := by

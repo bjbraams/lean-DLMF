@@ -204,12 +204,14 @@ theorem pcfLG_bernoulli_half (n : ℕ) (hn : n ≤ 5) :
   have hb4 : _root_.bernoulli 4 = -1/30 := by
     rw [bernoulli_eq_bernoulli'_of_ne_one (by norm_num), bernoulli'_four]
   interval_cases n <;>
-    simp [aeval_bernoulli_eq_sum, Finset.sum_range_succ, _root_.bernoulli_one, _root_.bernoulli_two, hb3, hb4, hb5,
+    simp [aeval_bernoulli_eq_sum, Finset.sum_range_succ, _root_.bernoulli_one,
+        _root_.bernoulli_two, hb3, hb4, hb5,
       Nat.choose] <;> norm_num
 
 open DLMF.Gamma in
 /-- The first five coefficients `γ_s`. -/
-theorem pcfLG_gammaG_values : pcfLG_gammaG 0 = 1 ∧ pcfLG_gammaG 1 = -1/24 ∧ pcfLG_gammaG 2 = 1/1152 ∧
+theorem pcfLG_gammaG_values : pcfLG_gammaG 0 = 1 ∧ pcfLG_gammaG 1 = -1/24 ∧
+    pcfLG_gammaG 2 = 1/1152 ∧
     pcfLG_gammaG 3 = 1003/414720 ∧ pcfLG_gammaG 4 = -4027/39813120 := by
   have h2 := pcfLG_bernoulli_half 2 (by norm_num)
   have h3 := pcfLG_bernoulli_half 3 (by norm_num)
@@ -237,7 +239,8 @@ theorem pcfLG_gammaCoeff_eq (s : ℕ) : pcfGammaCoeff s = pcfLG_gammaG s :=
 s/(z:ℂ)^s) =O[atTop] (fun z : ℝ => (z:ℂ)^(-(N:ℤ)))`. -/
 @[dlmf 12.10.E16]
 theorem pcfGammaCoeff_expansion (N : ℕ) :
-    (fun z : ℝ => Gamma (1/2+z)/((Real.sqrt (2*π):ℂ)*exp (-z)*(z:ℂ)^(z:ℂ))-∑ s ∈ Finset.range N, pcfGammaCoeff s/(z:ℂ)^s) =O[atTop] (fun z : ℝ => (z:ℂ)^(-(N:ℤ))) := by
+    (fun z : ℝ => Gamma (1/2+z)/((Real.sqrt (2*π):ℂ)*exp (-z)*(z:ℂ)^(z:ℂ))-∑ s ∈ Finset.range N,
+        pcfGammaCoeff s/(z:ℂ)^s) =O[atTop] (fun z : ℝ => (z:ℂ)^(-(N:ℤ))) := by
   simp only [pcfLG_gammaCoeff_eq]; exact pcfLG_gamma_expansion N
 
 /-- Identity under the stated parameter and domain assumptions: `pcfGammaCoeff 0=1 ∧ pcfGammaCoeff
@@ -245,11 +248,12 @@ theorem pcfGammaCoeff_expansion (N : ℕ) :
 4=-4027/39813120`. -/
 @[dlmf 12.10.E17]
 theorem pcfGammaCoeff_initial  :
-    pcfGammaCoeff 0=1 ∧ pcfGammaCoeff 1=-1/24 ∧ pcfGammaCoeff 2=1/1152 ∧ pcfGammaCoeff 3=1003/414720 ∧ pcfGammaCoeff 4=-4027/39813120 := by
+    pcfGammaCoeff 0=1 ∧ pcfGammaCoeff 1=-1/24 ∧ pcfGammaCoeff 2=1/1152 ∧
+        pcfGammaCoeff 3=1003/414720 ∧ pcfGammaCoeff 4=-4027/39813120 := by
   simp only [pcfLG_gammaCoeff_eq]; exact pcfLG_gammaG_values
 
-/-- Polynomial pairs `(u_s,r_{s-1})`; the polynomial degree condition fixes the integration constant.
-Existence of the chosen polynomial is asserted separately, not inferred from choice.
+/-- Polynomial pairs `(u_s,r_{s-1})`; the polynomial degree condition fixes the integration
+constant. Existence of the chosen polynomial is asserted separately, not inferred from choice.
 The `u`-equation coefficient is `3(s+1)` as in DLMF 12.10.11 (corrected 2026-10-20 from
 `3/2(s+1)`, for which no polynomial solution exists at `s = 0`). -/
 def pcfOlverPair : ℕ → Polynomial ℝ × Polynomial ℝ
@@ -666,7 +670,8 @@ theorem pcfLG_olverPair_inv (s : ℕ) :
 (s+1) then 3*(s+1)-2 else 3*(s+1)`. -/
 @[dlmf 12.10.E11]
 theorem pcfOlverU_spec (s : ℕ) :
-    (X^2-1)*derivative (pcfOlverU (s+1))-C (3*(s+1:ℝ))*X*pcfOlverU (s+1)=pcfOlverR s ∧ (pcfOlverU (s+1)).natDegree ≤ if Even (s+1) then 3*(s+1)-2 else 3*(s+1) := by
+    (X^2-1)*derivative (pcfOlverU (s+1))-C (3*(s+1:ℝ))*X*pcfOlverU (s+1)=pcfOlverR s ∧
+        (pcfOlverU (s+1)).natDegree ≤ if Even (s+1) then 3*(s+1)-2 else 3*(s+1) := by
   obtain ⟨hu, hρ⟩ := pcfLG_olverPair_inv s
   obtain ⟨p, hp, -, hpu⟩ := pcfLG_olver_step s (pcfLG_r_good hu hρ)
   rw [pcfOlverU, pcfOlverR, pcfOlverPair]
@@ -678,7 +683,8 @@ theorem pcfOlverU_spec (s : ℕ) :
 theorem pcfOlverPair_one :
     pcfOlverPair 1 = (X*(X^2-C 6)*C (1/24:ℝ), C (1/8:ℝ)*(C 3*X^2+C 2)) := by
   simp only [pcfOlverPair]
-  have hw : (X^2-1)*derivative (X*(X^2-C 6)*C (1/24:ℝ))-C (3*((0:ℕ)+1:ℝ))*X*(X*(X^2-C 6)*C (1/24:ℝ)) =
+  have hw : (X^2-1)*derivative (X*(X^2-C 6)*C (1/24:ℝ))-C
+      (3*((0:ℕ)+1:ℝ))*X*(X*(X^2-C 6)*C (1/24:ℝ)) =
       C (1/8:ℝ)*(C 3*X^2+C 2)*1 - C (3/2*((0:ℕ)+1:ℝ))*X*0 + C (1/2:ℝ)*(X^2-1)*derivative 0 := by
     apply Polynomial.funext; intro x
     simp [derivative_mul]; ring
@@ -696,7 +702,8 @@ theorem pcfOlverPair_one :
 theorem olver_epsilon_of {k : ℝ} {N : ℕ} {r w : Polynomial ℝ}
     (hw : (X^2-1)*derivative w-C k*X*w=r) (hwd : w.natDegree ≤ N)
     (hu : ∀ q : Polynomial ℝ, (X^2-1)*derivative q-C k*X*q=0 → q.natDegree ≤ N → q = 0) :
-    Classical.epsilon (fun p : Polynomial ℝ => (X^2-1)*derivative p-C k*X*p=r ∧ p.natDegree ≤ N) = w :=
+    Classical.epsilon (fun p : Polynomial ℝ => (X^2-1)*derivative p-C k*X*p=r ∧
+        p.natDegree ≤ N) = w :=
   olver_epsilon_eq ⟨hw, hwd⟩ fun _ hp => sub_eq_zero.mp
     (hu _ (olver_sub_eq hp.1 hw) ((natDegree_sub_le _ _).trans (max_le hp.2 hwd)))
 
@@ -718,14 +725,18 @@ theorem pcfOlverU_two : pcfOlverU 2 = (-C 9*X^4+C 249*X^2+C 145)*C (1/1152:ℝ) 
 ∧ pcfOlverV 1=X*(X^2+C 6)*C (1/24:ℝ) ∧ pcfOlverV 2=(C 15*X^4-C 327*X^2-C 143)*C (1/1152:ℝ)`. -/
 @[dlmf 12.10.E9, dlmf 12.10.E10]
 theorem pcfOlverUV_initial  :
-    pcfOlverU 0=1 ∧ pcfOlverU 1=X*(X^2-C 6)*C (1/24:ℝ) ∧ pcfOlverU 2=(-C 9*X^4+C 249*X^2+C 145)*C (1/1152:ℝ) ∧ pcfOlverV 0=1 ∧ pcfOlverV 1=X*(X^2+C 6)*C (1/24:ℝ) ∧ pcfOlverV 2=(C 15*X^4-C 327*X^2-C 143)*C (1/1152:ℝ) := by
+    pcfOlverU 0=1 ∧ pcfOlverU 1=X*(X^2-C 6)*C (1/24:ℝ) ∧
+        pcfOlverU 2=(-C 9*X^4+C 249*X^2+C 145)*C (1/1152:ℝ) ∧ pcfOlverV 0=1 ∧
+        pcfOlverV 1=X*(X^2+C 6)*C (1/24:ℝ) ∧
+        pcfOlverV 2=(C 15*X^4-C 327*X^2-C 143)*C (1/1152:ℝ) := by
   have hU1 : pcfOlverU 1 = X*(X^2-C 6)*C (1/24:ℝ) := by rw [pcfOlverU, pcfOlverPair_one]
   refine ⟨by simp [pcfOlverU, pcfOlverPair], hU1, pcfOlverU_two, by simp [pcfOlverV], ?_, ?_⟩
   · rw [show pcfOlverV 1 = pcfOlverU 1 + C (1/2:ℝ)*X*pcfOlverU 0 - (pcfOlverPair 0).2 from rfl, hU1]
     simp only [pcfOlverU, pcfOlverPair]
     apply Polynomial.funext; intro x
     simp; ring
-  · rw [show pcfOlverV 2 = pcfOlverU 2 + C (1/2:ℝ)*X*pcfOlverU 1 - (pcfOlverPair 1).2 from rfl, hU1, pcfOlverU_two, pcfOlverPair_one]
+  · rw [show pcfOlverV 2 = pcfOlverU 2 + C (1/2:ℝ)*X*pcfOlverU 1 - (pcfOlverPair 1).2 from rfl, hU1,
+        pcfOlverU_two, pcfOlverPair_one]
     apply Polynomial.funext; intro x
     simp; ring
 

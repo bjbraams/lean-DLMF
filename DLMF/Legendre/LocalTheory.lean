@@ -46,7 +46,9 @@ def legendreEquationQ (ν μ z : ℂ) : ℂ :=
 
 /-- Regular singularity and the exponent pair minus/plus order over two, DLMF 14.2(iii). -/
 theorem legendre_finite_singular_exponents_1 (ν μ : ℂ) :
-    Tendsto (fun z : ℂ => (z-1)*legendreEquationP z) (𝓝[≠] (1:ℂ)) (𝓝 1) ∧ Tendsto (fun z : ℂ => (z-1)^2*legendreEquationQ ν μ z) (𝓝[≠] (1:ℂ)) (𝓝 (-μ^2/4)) ∧ ∀ r : ℂ, r*(r-1)+r-μ^2/4=(r-μ/2)*(r+μ/2) := by
+    Tendsto (fun z : ℂ => (z-1)*legendreEquationP z) (𝓝[≠] (1:ℂ)) (𝓝 1) ∧
+        Tendsto (fun z : ℂ => (z-1)^2*legendreEquationQ ν μ z) (𝓝[≠] (1:ℂ)) (𝓝 (-μ^2/4)) ∧ ∀ r : ℂ,
+        r*(r-1)+r-μ^2/4=(r-μ/2)*(r+μ/2) := by
   have hev : ∀ᶠ z in 𝓝[≠] (1:ℂ), z ≠ 1 ∧ z + 1 ≠ 0 := by
     have h1 : ∀ᶠ z in 𝓝 (1:ℂ), z + 1 ≠ 0 :=
       (continuous_id.add continuous_const).continuousAt.eventually_ne (by norm_num)
@@ -71,25 +73,30 @@ theorem legendre_finite_singular_exponents_1 (ν μ : ℂ) :
       field_simp
       ring
     apply Tendsto.congr' heq.symm
-    have := (by fun_prop (disch := norm_num) : ContinuousAt (fun z : ℂ => (ν*(ν+1)*(1-z^2)-μ^2)/(1+z)^2) 1).tendsto
+    have := (by fun_prop (disch := norm_num) : ContinuousAt
+                  (fun z : ℂ => (ν*(ν+1)*(1-z^2)-μ^2)/(1+z)^2) 1).tendsto
     norm_num at this
     exact this.mono_left nhdsWithin_le_nhds
 
 /-- Regular singularity and the exponent pair minus/plus order over two, DLMF 14.2(iii). -/
 theorem legendre_finite_singular_exponents_2 (ν μ : ℂ) :
-    Tendsto (fun z : ℂ => (z-(-1))*legendreEquationP z) (𝓝[≠] (-1:ℂ)) (𝓝 1) ∧ Tendsto (fun z : ℂ => (z-(-1))^2*legendreEquationQ ν μ z) (𝓝[≠] (-1:ℂ)) (𝓝 (-μ^2/4)) ∧ ∀ r : ℂ, r*(r-1)+r-μ^2/4=(r-μ/2)*(r+μ/2) := by
+    Tendsto (fun z : ℂ => (z-(-1))*legendreEquationP z) (𝓝[≠] (-1:ℂ)) (𝓝 1) ∧
+        Tendsto (fun z : ℂ => (z-(-1))^2*legendreEquationQ ν μ z) (𝓝[≠] (-1:ℂ)) (𝓝 (-μ^2/4)) ∧
+        ∀ r : ℂ, r*(r-1)+r-μ^2/4=(r-μ/2)*(r+μ/2) := by
   have hev : ∀ᶠ z in 𝓝[≠] (-1:ℂ), z ≠ -1 ∧ 1 - z ≠ 0 := by
     have h1 : ∀ᶠ z in 𝓝 (-1:ℂ), 1 - z ≠ 0 :=
       (continuous_const.sub continuous_id).continuousAt.eventually_ne (by norm_num)
     filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds h1] with z hz h2 using ⟨hz, h2⟩
   refine ⟨?_, ?_, fun r => by ring⟩
-  · have heq : (fun z : ℂ => (z-(-1))*legendreEquationP z) =ᶠ[𝓝[≠] (-1)] (fun z => -(2*z)/(1-z)) := by
+  · have heq : (fun z : ℂ => (z-(-1))*legendreEquationP z) =ᶠ[𝓝[≠] (-1)]
+        (fun z => -(2*z)/(1-z)) := by
       filter_upwards [hev] with z ⟨hz1, hz2⟩
       have : z + 1 ≠ 0 := by intro h; apply hz1; linear_combination h
       rw [legendreEquationP, show (1:ℂ) - z^2 = (1-z)*(z+1) by ring, sub_neg_eq_add]
       field_simp
     apply Tendsto.congr' heq.symm
-    have := (by fun_prop (disch := norm_num) : ContinuousAt (fun z : ℂ => -(2*z)/(1-z)) (-1)).tendsto
+    have := (by fun_prop (disch := norm_num) : ContinuousAt
+                  (fun z : ℂ => -(2*z)/(1-z)) (-1)).tendsto
     norm_num at this
     exact this.mono_left nhdsWithin_le_nhds
   · have heq : (fun z : ℂ => (z-(-1))^2*legendreEquationQ ν μ z) =ᶠ[𝓝[≠] (-1)]
@@ -99,15 +106,19 @@ theorem legendre_finite_singular_exponents_2 (ν μ : ℂ) :
       rw [legendreEquationQ, show (1:ℂ) - z^2 = (1-z)*(z+1) by ring, sub_neg_eq_add]
       field_simp
     apply Tendsto.congr' heq.symm
-    have := (by fun_prop (disch := norm_num) : ContinuousAt (fun z : ℂ => (ν*(ν+1)*(1-z^2)-μ^2)/(1-z)^2) (-1)).tendsto
+    have := (by fun_prop (disch := norm_num) : ContinuousAt
+                  (fun z : ℂ => (ν*(ν+1)*(1-z^2)-μ^2)/(1-z)^2) (-1)).tendsto
     norm_num at this
     exact this.mono_left nhdsWithin_le_nhds
 
 /-- Reciprocal-coordinate equation has exponents minus degree and degree plus one at infinity. -/
 theorem legendre_infinite_singular_exponents (ν μ : ℂ) :
-    Tendsto (fun t : ℂ => t*(2*t/(t^2-1))) (𝓝[≠] 0) (𝓝 0) ∧ Tendsto (fun t : ℂ => t^2*(ν*(ν+1)/(t^2*(t^2-1))-μ^2/(t^2-1)^2)) (𝓝[≠] 0) (𝓝 (-ν*(ν+1))) ∧ ∀ r : ℂ, r*(r-1)-ν*(ν+1)=(r+ν)*(r-ν-1) := by
+    Tendsto (fun t : ℂ => t*(2*t/(t^2-1))) (𝓝[≠] 0) (𝓝 0) ∧
+        Tendsto (fun t : ℂ => t^2*(ν*(ν+1)/(t^2*(t^2-1))-μ^2/(t^2-1)^2)) (𝓝[≠] 0) (𝓝 (-ν*(ν+1))) ∧
+        ∀ r : ℂ, r*(r-1)-ν*(ν+1)=(r+ν)*(r-ν-1) := by
   constructor
-  · simpa using (by fun_prop (disch := norm_num) : ContinuousAt (fun t : ℂ => t*(2*t/(t^2-1))) 0).tendsto.mono_left (nhdsWithin_le_nhds : 𝓝[≠] (0:ℂ) ≤ 𝓝 (0:ℂ))
+  · simpa using (by fun_prop (disch := norm_num) : ContinuousAt (fun t : ℂ => t*(2*t/(t^2-1)))
+                      0).tendsto.mono_left (nhdsWithin_le_nhds : 𝓝[≠] (0:ℂ) ≤ 𝓝 (0:ℂ))
   · constructor
     · have heq : (fun t : ℂ => t^2*(ν*(ν+1)/(t^2*(t^2-1))-μ^2/(t^2-1)^2)) =ᶠ[𝓝[≠] 0]
           (fun t => ν*(ν+1)/(t^2-1)-t^2*μ^2/(t^2-1)^2) := by
@@ -115,12 +126,17 @@ theorem legendre_infinite_singular_exponents (ν μ : ℂ) :
         have ht0 : t ≠ 0 := ht
         field_simp
       apply Tendsto.congr' heq.symm
-      simpa [div_neg] using (by fun_prop (disch := norm_num) : ContinuousAt (fun t : ℂ => ν*(ν+1)/(t^2-1)-t^2*μ^2/(t^2-1)^2) 0).tendsto.mono_left (nhdsWithin_le_nhds : 𝓝[≠] (0:ℂ) ≤ 𝓝 (0:ℂ))
+      simpa [div_neg] using
+          (by fun_prop (disch := norm_num) : ContinuousAt
+                (fun t : ℂ => ν*(ν+1)/(t^2-1)-t^2*μ^2/(t^2-1)^2) 0).tendsto.mono_left
+          (nhdsWithin_le_nhds : 𝓝[≠] (0:ℂ) ≤ 𝓝 (0:ℂ))
     · intro r; ring
 
-/-- The reflected first-kind pair is dependent exactly at the exceptional parameters in DLMF 14.2(iii). -/
+/-- The reflected first-kind pair is dependent exactly at the exceptional parameters in DLMF
+14.2(iii). -/
 theorem ferrersP_reflected_dependence (ν μ : ℂ) :
-    (∃ A B : ℂ, (A ≠ 0 ∨ B ≠ 0) ∧ ∀ x ∈ Ioo (-1:ℝ) 1, A*ferrersP ν (-μ) x+B*ferrersP ν (-μ) (-x)=0) ↔ (∃ n : ℕ, μ-ν=-n) ∨ (∃ n : ℕ, μ+ν=-(n+1)) := by
+    (∃ A B : ℂ, (A ≠ 0 ∨ B ≠ 0) ∧ ∀ x ∈ Ioo (-1:ℝ) 1, A*ferrersP ν (-μ) x+B*ferrersP ν (-μ) (-x)=0)
+        ↔ (∃ n : ℕ, μ-ν=-n) ∨ (∃ n : ℕ, μ+ν=-(n+1)) := by
   set α : ℂ := 2^(-μ)*π*((Gamma ((1-ν+μ)/2))⁻¹*(Gamma ((ν+μ+2)/2))⁻¹) with hα
   set β : ℂ := 2^(-μ)*π*((Gamma ((μ-ν)/2))⁻¹*(Gamma ((ν+μ+1)/2))⁻¹) with hβ
   have hf : EqOn (ferrersP ν (-μ)) (fun y => α*ferrersEven ν μ y + -β*ferrersOdd ν μ y)
@@ -155,16 +171,19 @@ theorem ferrersP_reflected_dependence (ν μ : ℂ) :
     by_contra hne
     have hα0 : α ≠ 0 := left_ne_zero_of_mul hne
     have hβ0 : β ≠ 0 := right_ne_zero_of_mul hne
-    have hz : EqOn (fun _ : ℝ => (0:ℂ)) (fun y => ((A+B)*α)*ferrersEven ν μ y+((B-A)*β)*ferrersOdd ν μ y)
+    have hz : EqOn (fun _ : ℝ => (0:ℂ))
+        (fun y => ((A+B)*α)*ferrersEven ν μ y+((B-A)*β)*ferrersOdd ν μ y)
         (Ioo (-1:ℝ) 1) := by
       intro y hy
       have := hrel y hy
       simp only at this ⊢
       rw [hf hy, hg' y hy] at this
       linear_combination -this
-    have hE : EqOn (ferrersEven ν μ) (fun y => (1:ℂ)*ferrersEven ν μ y+0*ferrersOdd ν μ y) (Ioo (-1:ℝ) 1) :=
+    have hE : EqOn (ferrersEven ν μ) (fun y => (1:ℂ)*ferrersEven ν μ y+0*ferrersOdd ν μ y)
+        (Ioo (-1:ℝ) 1) :=
       fun y _ => by simp
-    have hO : EqOn (ferrersOdd ν μ) (fun y => (0:ℂ)*ferrersEven ν μ y+1*ferrersOdd ν μ y) (Ioo (-1:ℝ) 1) :=
+    have hO : EqOn (ferrersOdd ν μ) (fun y => (0:ℂ)*ferrersEven ν μ y+1*ferrersOdd ν μ y)
+        (Ioo (-1:ℝ) 1) :=
       fun y _ => by simp
     have w1 := ferrersWronskian_of_even_odd hz hO h0
     have w2 := ferrersWronskian_of_even_odd hz hE h0
@@ -227,7 +246,8 @@ theorem associatedPQ_independent {ν μ : ℂ} (hν : -1/2 ≤ ν.re) (hμ : 0 �
     exact (mul_eq_zero.mp this).resolve_left hA
   · have : B * (associatedP ν (-μ) ((2:ℝ):ℂ) * deriv (olverQ ν μ) ((2:ℝ):ℂ) -
         olverQ ν μ ((2:ℝ):ℂ) * deriv (associatedP ν (-μ)) ((2:ℝ):ℂ)) = 0 := by
-      linear_combination associatedP ν (-μ) ((2:ℝ):ℂ) * e1 - deriv (associatedP ν (-μ)) ((2:ℝ):ℂ) * e0
+      linear_combination associatedP ν (-μ) ((2:ℝ):ℂ) * e1 -
+          deriv (associatedP ν (-μ)) ((2:ℝ):ℂ) * e0
     exact (mul_eq_zero.mp this).resolve_left hB
 
 end DLMF.Legendre

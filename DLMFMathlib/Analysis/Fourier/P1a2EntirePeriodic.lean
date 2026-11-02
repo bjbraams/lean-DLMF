@@ -23,13 +23,16 @@ for rectangles, the vertical sides cancel by periodicity) shows that the Fourier
 * `Complex.intervalIntegral_add_mul_I_of_periodic`: `∫₀^{2π} F(x + iy) dx = ∫₀^{2π} F(x) dx`.
 * `Complex.fourierIntegral_periodic_decay`: `|c_k| ≤ C e^{-R|k|}` for every `R`.
 * `Complex.hasSum_fourier_of_differentiable_periodic`: the exponential Fourier series on all of `ℂ`.
-* `Complex.hasSum_cos_of_differentiable_periodic_even`, `Complex.hasSum_sin_of_differentiable_periodic_odd`: the cosine (sine) series of an even
-  (odd) entire `2π`-periodic function, with coefficients `π⁻¹ ∫₀^{2π} F(x) cos mx dx` (halved
-  for `m = 0`), resp. `π⁻¹ ∫₀^{2π} F(x) sin mx dx`.
-* `Complex.hasSum_cos_coeff_sq_of_differentiable_periodic_even`, `Complex.hasSum_sin_coeff_sq_of_differentiable_periodic_odd`: Parseval's identity in the form
+* `Complex.hasSum_cos_of_differentiable_periodic_even`,
+  `Complex.hasSum_sin_of_differentiable_periodic_odd`: the cosine (sine) series of an even (odd)
+  entire `2π`-periodic function, with coefficients `π⁻¹ ∫₀^{2π} F(x) cos mx dx` (halved for
+  `m = 0`), resp. `π⁻¹ ∫₀^{2π} F(x) sin mx dx`.
+* `Complex.hasSum_cos_coeff_sq_of_differentiable_periodic_even`,
+  `Complex.hasSum_sin_coeff_sq_of_differentiable_periodic_odd`: Parseval's identity in the form
   `∑ a_m ∫ F cos mx = ∫ F²` (squares, not absolute squares).
 * `Complex.hasSum_mul_sin_coeff_deriv_zero`: `F'(0) = ∑ m b_m` for odd `F`.
-* `Complex.intervalIntegral_eq_zero_of_antiperiodic`, `Complex.intervalIntegral_eq_zero_of_periodic_odd`,
+* `Complex.intervalIntegral_eq_zero_of_antiperiodic`,
+  `Complex.intervalIntegral_eq_zero_of_periodic_odd`,
   `Complex.intervalIntegral_deriv_mul_cos_eq_mul_sin`: elementary period integrals.
 
 These are used for the Fourier series of the Mathieu functions (DLMF §28.4).
@@ -45,7 +48,8 @@ namespace Complex
 variable {F : ℂ → ℂ}
 
 /-- Contour shift for an entire `2π`-periodic function. -/
-private lemma intervalIntegral_add_mul_I_of_periodic (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+private lemma intervalIntegral_add_mul_I_of_periodic (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (y : ℝ) : ∫ x in (0 : ℝ)..2 * π, F (x + y * I) = ∫ x in (0 : ℝ)..2 * π, F x := by
   have h := integral_boundary_rect_eq_zero_of_differentiableOn F 0 (2 * π + y * I)
     hF.differentiableOn
@@ -67,7 +71,8 @@ private lemma exp_neg_int_mul_add_two_pi_mul_I (k : ℤ) (z : ℂ) :
     Complex.exp_int_mul_two_pi_mul_I, mul_one]
 
 /-- Shift of the Fourier integral of an entire `2π`-periodic function. -/
-private lemma fourierIntegral_periodic_eq_exp_mul_shift (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+private lemma fourierIntegral_periodic_eq_exp_mul_shift (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (k : ℤ) (y : ℝ) :
     ∫ x in (0 : ℝ)..2 * π, F x * Complex.exp (-(k * x * I)) =
       Real.exp (k * y) * ∫ x in (0 : ℝ)..2 * π, F (x + y * I) * Complex.exp (-(k * x * I)) := by
@@ -103,11 +108,13 @@ theorem fourierIntegral_periodic_decay (hF : Differentiable ℂ F) (hper : ∀ z
   obtain ⟨M₂, hM₂, h₂⟩ := exists_bound_fourierIntegral_horizontal_line hF R
   refine ⟨M₁ + M₂, by positivity, fun k => ?_⟩
   rcases le_or_gt 0 k with hk | hk
-  · rw [fourierIntegral_periodic_eq_exp_mul_shift hF hper k (-R), norm_mul, Complex.norm_real, Real.norm_eq_abs,
+  · rw [fourierIntegral_periodic_eq_exp_mul_shift hF hper k (-R), norm_mul, Complex.norm_real,
+        Real.norm_eq_abs,
       Real.abs_exp, Int.cast_abs, abs_of_nonneg (by exact_mod_cast hk : (0 : ℝ) ≤ k),
       mul_comm (Real.exp _), show (k : ℝ) * -R = -(R * k) by ring]
     exact mul_le_mul_of_nonneg_right ((h₁ k).trans (by linarith)) (Real.exp_pos _).le
-  · rw [fourierIntegral_periodic_eq_exp_mul_shift hF hper k R, norm_mul, Complex.norm_real, Real.norm_eq_abs,
+  · rw [fourierIntegral_periodic_eq_exp_mul_shift hF hper k R, norm_mul, Complex.norm_real,
+        Real.norm_eq_abs,
       Real.abs_exp, Int.cast_abs, abs_of_neg (by exact_mod_cast hk : (k : ℝ) < 0),
       mul_comm (Real.exp _), show (k : ℝ) * R = -(R * -k) by ring]
     exact mul_le_mul_of_nonneg_right ((h₂ k).trans (by linarith)) (Real.exp_pos _).le
@@ -120,7 +127,8 @@ theorem summable_exp_neg_abs_int : Summable fun k : ℤ => Real.exp (-|(k : ℝ)
 
 /-- **Fourier series of an entire `2π`-periodic function**: for every `z ∈ ℂ`,
 `F(z) = ∑_{k ∈ ℤ} c_k e^{ikz}` with `c_k = (2π)⁻¹ ∫₀^{2π} F(x) e^{-ikx} dx`. -/
-theorem hasSum_fourier_of_differentiable_periodic (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+theorem hasSum_fourier_of_differentiable_periodic (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (z : ℂ) :
     HasSum (fun k : ℤ => (1 / (2 * π) : ℂ) *
       (∫ x in (0 : ℝ)..2 * π, F x * Complex.exp (-(k * x * I))) * Complex.exp (k * z * I))
@@ -137,7 +145,8 @@ theorem hasSum_fourier_of_differentiable_periodic (hF : Differentiable ℂ F) (h
   have hcoef : ∀ k : ℤ, fourierCoeff Φ k = (1 / (2 * π) : ℂ) * Real.exp (-(k * y)) *
       ∫ x in (0 : ℝ)..2 * π, F x * Complex.exp (-(k * x * I)) := by
     intro k
-    rw [fourierCoeff_eq_intervalIntegral Φ k 0, zero_add, fourierIntegral_periodic_eq_exp_mul_shift hF hper k y]
+    rw [fourierCoeff_eq_intervalIntegral Φ k 0, zero_add,
+        fourierIntegral_periodic_eq_exp_mul_shift hF hper k y]
     have e : ∀ x : ℝ, fourier (-k) (x : AddCircle (2 * π)) • Φ x =
         F (x + y * I) * Complex.exp (-(k * x * I)) := by
       intro x
@@ -235,7 +244,8 @@ theorem periodic_mul_cos_int_mul (hper : ∀ z, F (z + 2 * π) = F z) (k : ℤ) 
 
 /-- **Cosine series of an even entire `2π`-periodic function**:
 `F(z) = ∑_{m ≥ 0} a_m cos mz`, `a_0 = (2π)⁻¹ ∫₀^{2π} F`, `a_m = π⁻¹ ∫₀^{2π} F(x) cos mx dx`. -/
-theorem hasSum_cos_of_differentiable_periodic_even (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+theorem hasSum_cos_of_differentiable_periodic_even (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (hev : ∀ z, F (-z) = F z) (z : ℂ) :
     HasSum (fun m : ℕ => (if m = 0 then 1 / (2 * π) else 1 / π : ℂ) *
       (∫ x in (0 : ℝ)..2 * π, F x * Complex.cos (m * x)) * Complex.cos (m * z)) (F z) := by
@@ -273,7 +283,8 @@ theorem hasSum_cos_of_differentiable_periodic_even (hF : Differentiable ℂ F) (
 
 /-- **Sine series of an odd entire `2π`-periodic function**:
 `F(z) = ∑_{m ≥ 0} b_m sin mz`, `b_m = π⁻¹ ∫₀^{2π} F(x) sin mx dx`. -/
-theorem hasSum_sin_of_differentiable_periodic_odd (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+theorem hasSum_sin_of_differentiable_periodic_odd (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (hodd : ∀ z, F (-z) = -F z) (z : ℂ) :
     HasSum (fun m : ℕ => (1 / π : ℂ) *
       (∫ x in (0 : ℝ)..2 * π, F x * Complex.sin (m * x)) * Complex.sin (m * z)) (F z) := by
@@ -306,7 +317,8 @@ theorem hasSum_sin_of_differentiable_periodic_odd (hF : Differentiable ℂ F) (h
   rw [Complex.I_sq]; ring
 
 /-- The integral over `[0, 2π]` of a continuous `π`-antiperiodic function vanishes. -/
-theorem intervalIntegral_eq_zero_of_antiperiodic {g : ℝ → ℂ} (hg : Continuous g) (hanti : ∀ x, g (x + π) = -g x) :
+theorem intervalIntegral_eq_zero_of_antiperiodic {g : ℝ → ℂ} (hg : Continuous g)
+    (hanti : ∀ x, g (x + π) = -g x) :
     ∫ x in (0 : ℝ)..2 * π, g x = 0 := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := π) (hg.intervalIntegrable _ _)
     (hg.intervalIntegrable _ _)]
@@ -317,7 +329,8 @@ theorem intervalIntegral_eq_zero_of_antiperiodic {g : ℝ → ℂ} (hg : Continu
   ring
 
 /-- Integration by parts over a period: `∫₀^{2π} F'(x) cos kx dx = k ∫₀^{2π} F(x) sin kx dx`. -/
-private lemma intervalIntegral_deriv_mul_cos_eq_mul_sin (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+private lemma intervalIntegral_deriv_mul_cos_eq_mul_sin (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (k : ℤ) :
     ∫ x in (0 : ℝ)..2 * π, deriv F x * Complex.cos (k * x) =
       k * ∫ x in (0 : ℝ)..2 * π, F x * Complex.sin (k * x) := by
@@ -349,7 +362,8 @@ private lemma intervalIntegral_deriv_mul_cos_eq_mul_sin (hF : Differentiable ℂ
   linear_combination hint
 
 /-- Summability of the cosine coefficients of an even entire `2π`-periodic function. -/
-theorem summable_cos_coeff_of_differentiable_periodic_even (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+theorem summable_cos_coeff_of_differentiable_periodic_even (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (hev : ∀ z, F (-z) = F z) :
     Summable fun m : ℕ => ‖∫ x in (0 : ℝ)..2 * π, F x * Complex.cos (m * x)‖ := by
   have hc := hF.continuous
@@ -367,7 +381,8 @@ theorem summable_cos_coeff_of_differentiable_periodic_even (hF : Differentiable 
   simpa using h
 
 /-- Summability of the sine coefficients of an odd entire `2π`-periodic function. -/
-theorem summable_sin_coeff_of_differentiable_periodic_odd (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+theorem summable_sin_coeff_of_differentiable_periodic_odd (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (hodd : ∀ z, F (-z) = -F z) :
     Summable fun m : ℕ => ‖∫ x in (0 : ℝ)..2 * π, F x * Complex.sin (m * x)‖ := by
   have hc := hF.continuous
@@ -380,13 +395,15 @@ theorem summable_sin_coeff_of_differentiable_periodic_odd (hF : Differentiable �
     push_cast
     rw [hodd, show (m : ℂ) * -x = -(m * x) by ring, Complex.cos_neg]; ring
   have h := hC m
-  rw [fourierIntegral_eq_cos_sub_I_mul_sin hc, hc0, zero_sub, norm_neg, norm_mul, Complex.norm_I, one_mul] at h
+  rw [fourierIntegral_eq_cos_sub_I_mul_sin hc, hc0, zero_sub, norm_neg, norm_mul,
+      Complex.norm_I, one_mul] at h
   push_cast at h
   simpa using h
 
 /-- **Parseval** for the cosine series of an even entire `2π`-periodic function:
 `2a_0² + ∑_{m ≥ 1} a_m² = π⁻¹ ∫₀^{2π} F²` (squares, not absolute squares). -/
-theorem hasSum_cos_coeff_sq_of_differentiable_periodic_even (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+theorem hasSum_cos_coeff_sq_of_differentiable_periodic_even (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (hev : ∀ z, F (-z) = F z) :
     HasSum (fun m : ℕ => (if m = 0 then 2 else 1) * ((if m = 0 then 1 / (2 * π) else 1 / π : ℂ) *
       (∫ x in (0 : ℝ)..2 * π, F x * Complex.cos (m * x))) ^ 2)
@@ -443,7 +460,8 @@ theorem hasSum_cos_coeff_sq_of_differentiable_periodic_even (hF : Differentiable
 
 /-- **Parseval** for the sine series of an odd entire `2π`-periodic function:
 `∑_{m} b_m² = π⁻¹ ∫₀^{2π} F²` (squares, not absolute squares). -/
-theorem hasSum_sin_coeff_sq_of_differentiable_periodic_odd (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+theorem hasSum_sin_coeff_sq_of_differentiable_periodic_odd (hF : Differentiable ℂ F)
+    (hper : ∀ z, F (z + 2 * π) = F z)
     (hodd : ∀ z, F (-z) = -F z) :
     HasSum (fun m : ℕ => ((1 / π : ℂ) * (∫ x in (0 : ℝ)..2 * π, F x * Complex.sin (m * x))) ^ 2)
       ((1 / π : ℂ) * ∫ x in (0 : ℝ)..2 * π, F x ^ 2) := by

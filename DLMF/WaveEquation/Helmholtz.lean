@@ -135,8 +135,10 @@ theorem helmholtz_cylinderWave (n : ℕ) (k : ℂ) (x y : ℝ) :
   have Dy := iteratedDeriv_two_mul_regularizedHG01 (hasDerivAt_pow_affine (x : ℂ) I n)
     (hasDerivAt_pow_affine' (x : ℂ) I n) c a (a * (x : ℂ) ^ 2) y
   have hcont : regularizedHG01 c (a * ((x : ℂ) ^ 2 + (y : ℂ) ^ 2)) =
-      c * regularizedHG01 (c + 1) (a * ((x : ℂ) ^ 2 + (y : ℂ) ^ 2)) + a * ((x : ℂ) ^ 2 + (y : ℂ) ^ 2) *
-        regularizedHG01 (c + 1 + 1) (a * ((x : ℂ) ^ 2 + (y : ℂ) ^ 2)) := regularized0F1_contiguous _ _
+      c * regularizedHG01 (c + 1) (a * ((x : ℂ) ^ 2 + (y : ℂ) ^ 2)) + a *
+          ((x : ℂ) ^ 2 + (y : ℂ) ^ 2) *
+        regularizedHG01 (c + 1 + 1) (a * ((x : ℂ) ^ 2 + (y : ℂ) ^ 2)) :=
+            regularized0F1_contiguous _ _
   have hk : k ^ 2 = -4 * a := by simp only [a]; ring
   have hZ := natCast_mul_pow_pred_mul n ((x : ℂ) + I * y)
   rw [laplacian2, hx, hy, Dx, Dy]
@@ -172,10 +174,12 @@ theorem helmholtz_sphericalWave (n : ℕ) (k : ℂ) (x y z : ℝ) :
   set a : ℂ := -(k ^ 2) / 4
   set R : ℂ := (x : ℂ) ^ 2 + (y : ℂ) ^ 2 + (z : ℂ) ^ 2
   have hx : (fun t => sphericalWave n k t y z) = fun t : ℝ =>
-      (I * y + 1 * t) ^ n * regularizedHG01 c (a * (t : ℂ) ^ 2 + a * ((y : ℂ) ^ 2 + (z : ℂ) ^ 2)) := by
+      (I * y + 1 * t) ^ n *
+          regularizedHG01 c (a * (t : ℂ) ^ 2 + a * ((y : ℂ) ^ 2 + (z : ℂ) ^ 2)) := by
     funext t; simp only [sphericalWave, c, a]; ring_nf
   have hy : (fun t => sphericalWave n k x t z) = fun t : ℝ =>
-      ((x : ℂ) + I * t) ^ n * regularizedHG01 c (a * (t : ℂ) ^ 2 + a * ((x : ℂ) ^ 2 + (z : ℂ) ^ 2)) := by
+      ((x : ℂ) + I * t) ^ n *
+          regularizedHG01 c (a * (t : ℂ) ^ 2 + a * ((x : ℂ) ^ 2 + (z : ℂ) ^ 2)) := by
     funext t; simp only [sphericalWave, c, a]; ring_nf
   have hz : (fun t => sphericalWave n k x y t) = fun t : ℝ =>
       (fun _ : ℝ => ((x : ℂ) + I * y) ^ n) t *
@@ -188,7 +192,8 @@ theorem helmholtz_sphericalWave (n : ℕ) (k : ℂ) (x y z : ℝ) :
   have Dz := iteratedDeriv_two_mul_regularizedHG01 (h := fun _ : ℝ => ((x : ℂ) + I * y) ^ n)
     (h1 := fun _ => 0) (h2 := fun _ => 0) (fun t => hasDerivAt_const t _)
     (fun t => hasDerivAt_const t _) c a (a * ((x : ℂ) ^ 2 + (y : ℂ) ^ 2)) z
-  have hcont : regularizedHG01 c (a * R) = c * regularizedHG01 (c + 1) (a * R) + a * R * regularizedHG01 (c + 1 + 1) (a * R) :=
+  have hcont : regularizedHG01 c (a * R) = c * regularizedHG01 (c + 1) (a * R) + a * R *
+      regularizedHG01 (c + 1 + 1) (a * R) :=
     regularized0F1_contiguous _ _
   have hk : k ^ 2 = -4 * a := by simp only [a]; ring
   have hZ := natCast_mul_pow_pred_mul n ((x : ℂ) + I * y)
@@ -315,7 +320,8 @@ theorem heatMode_pde (j t : ℝ) {r : ℝ} (hr : r ≠ 0) :
       exact this.congr_deriv (by simp; ring)
     simp only [heatMode]
     exact (he.const_mul _).deriv
-  have hcont : regularizedHG01 1 (a * (r : ℂ) ^ 2 + 0) = 1 * regularizedHG01 (1 + 1) (a * (r : ℂ) ^ 2 + 0) +
+  have hcont : regularizedHG01 1 (a * (r : ℂ) ^ 2 + 0) = 1 *
+      regularizedHG01 (1 + 1) (a * (r : ℂ) ^ 2 + 0) +
       (a * (r : ℂ) ^ 2 + 0) * regularizedHG01 (1 + 1 + 1) (a * (r : ℂ) ^ 2 + 0) :=
     regularized0F1_contiguous _ _
   have hJ0 : besselJ 0 (j * r) = regularizedHG01 1 (a * (r : ℂ) ^ 2 + 0) := by

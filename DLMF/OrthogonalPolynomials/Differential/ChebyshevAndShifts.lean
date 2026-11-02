@@ -668,7 +668,8 @@ theorem hermitePolyH_weighted_derivative (n : ℕ) (x : ℝ) :
 theorem hermite_weighted_derivative (n : ℕ) (x : ℝ) :
     deriv (fun t : ℝ => Real.exp (-(t ^ 2) / 2) * aeval t (hermite n)) x =
       -Real.exp (-(x ^ 2) / 2) * aeval x (hermite (n + 1)) := by
-  have hd := ((((hasDerivAt_id x).pow 2).neg.div_const 2).exp).fun_mul ((hermite n).hasDerivAt_aeval x)
+  have hd := ((((hasDerivAt_id x).pow 2).neg.div_const 2).exp).fun_mul
+      ((hermite n).hasDerivAt_aeval x)
   simp only [Pi.pow_apply, Pi.neg_apply, id_eq] at hd
   rw [hd.deriv]
   simp only [hermite_succ, map_sub, map_mul, aeval_X, mul_one]
@@ -679,7 +680,8 @@ theorem hasDerivAt_ultrasphPoly {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) {
     (hx : ‖(1 - x) / 2‖ < 1) :
     HasDerivAt (ultrasphPoly lam n)
       (poch (2 * lam) n / n.factorial * (-(n : ℂ) * ((n : ℂ) + 2 * lam) / (lam + 1 / 2) *
-        ₂F₁ (-(n : ℂ) + 1) ((n : ℂ) + 2 * lam + 1) (lam + 1 / 2 + 1) ((1 - x) / 2) * (-1 / 2))) x := by
+        ₂F₁ (-(n : ℂ) + 1) ((n : ℂ) + 2 * lam + 1) (lam + 1 / 2 + 1) ((1 - x) / 2) *
+            (-1 / 2))) x := by
   have hc : ∀ k : ℕ, lam + 1 / 2 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by
     simp only [Complex.add_re, Complex.div_ofNat_re, Complex.one_re]
     linarith)
@@ -795,7 +797,8 @@ theorem ultrasphPoly_weighted_identity {lam : ℂ} (hlam : 1 / 2 < lam.re) (n : 
       field_simp
     have hD : deriv (ultrasphPoly lam n) x
         * (n.factorial * (n + 1) * (lam + 1 / 2) * (2 * lam - 1 + n)) =
-        poch (2 * lam) n * (n + 1) * (-(n : ℂ) * ((n : ℂ) + 2 * lam)) * (-1 / 2) * (2 * lam - 1 + n) *
+        poch (2 * lam) n * (n + 1) * (-(n : ℂ) * ((n : ℂ) + 2 * lam)) * (-1 / 2) *
+            (2 * lam - 1 + n) *
           ₂F₁ (-((n : ℂ) + 1) + 2) ((n : ℂ) + 2 * lam - 1 + 2) (lam - 1 / 2 + 2) ((1 - x) / 2) := by
       rw [(hasDerivAt_ultrasphPoly hlam' n hx).deriv,
         show -((n : ℂ) + 1) + 2 = -(n : ℂ) + 1 by ring,
@@ -821,7 +824,8 @@ theorem ultrasphPoly_weighted_identity {lam : ℂ} (hlam : 1 / 2 < lam.re) (n : 
         (2 * lam - 1) * x * ultrasphPoly lam n x) +
         (n + 1) * (n + 2 * lam - 1) * ultrasphPoly (lam - 1) (n + 1) x) *
         (n.factorial * (n + 1) * (lam + 1 / 2) * (2 * lam - 1 + n)) = 0 := by
-      linear_combination (2 * (lam - 1) * (1 - x ^ 2)) * hD - (2 * (lam - 1) * (2 * lam - 1) * x) * hP +
+      linear_combination (2 * (lam - 1) * (1 - x ^ 2)) * hD -
+          (2 * (lam - 1) * (2 * lam - 1) * x) * hP +
         ((n + 1) * (n + 2 * lam - 1)) * hQ +
         (-4 * (lam - 1) * poch (2 * lam) n * (n + 1) * (2 * lam - 1 + n)) * hdiag
     exact (mul_eq_zero.mp this).resolve_right hM
@@ -831,7 +835,8 @@ theorem ultrasphPoly_weighted_identity {lam : ℂ} (hlam : 1 / 2 < lam.re) (n : 
 ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ) * jacobiPolyP α β n t) x = -2 * (n + 1) * (1 - (x : ℂ)) ^
 ((α : ℂ) - 1) * (1 + (x : ℂ)) ^ ((β : ℂ) - 1) * jacobiPolyP (α - 1) (β - 1) (n + 1) x`. -/
 @[dlmf 18.9.E16]
-theorem jacobi_weighted_derivative {α β : ℝ} (hα : 0 < α) (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
+theorem jacobi_weighted_derivative {α β : ℝ} (hα : 0 < α) (n : ℕ) {x : ℝ}
+    (hx : x ∈ Set.Ioo (-1) 1) :
     deriv (fun t : ℝ => (1 - (t : ℂ)) ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ) * jacobiPolyP α β n t) x =
       -2 * (n + 1) * (1 - (x : ℂ)) ^ ((α : ℂ) - 1) * (1 + (x : ℂ)) ^ ((β : ℂ) - 1) *
         jacobiPolyP (α - 1) (β - 1) (n + 1) x := by
@@ -930,7 +935,8 @@ theorem chebyshevU_weighted_derivative (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (
   have hprod := hS.mul hU
   change deriv ((fun t : ℝ => Real.sqrt (1 - t ^ 2)) * fun t : ℝ => (Chebyshev.U ℝ n).eval t) x = _
   rw [hprod.deriv]
-  have hid := congrArg (Polynomial.eval x) (Polynomial.Chebyshev.add_one_mul_T_eq_poly_in_U (R := ℝ) n)
+  have hid := congrArg (Polynomial.eval x)
+      (Polynomial.Chebyshev.add_one_mul_T_eq_poly_in_U (R := ℝ) n)
   simp only [Polynomial.eval_mul, Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_one,
     Polynomial.eval_X, Polynomial.eval_pow, Polynomial.eval_intCast] at hid
   push_cast at hid ⊢

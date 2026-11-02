@@ -88,7 +88,8 @@ theorem aeval_complex_eq_eval_map (p : ℚ[X]) (z : ℂ) :
 
 /-- The identity theorem for polynomial functions: a function of `z ∈ ℂ` given by a complex
 polynomial that vanishes at every real point vanishes everywhere. -/
-private lemma eq_zero_of_polynomial_of_real_eq_zero {f : ℂ → ℂ} (F : ℂ[X]) (hF : ∀ z, F.eval z = f z)
+private lemma eq_zero_of_polynomial_of_real_eq_zero {f : ℂ → ℂ} (F : ℂ[X])
+    (hF : ∀ z, F.eval z = f z)
     (hreal : ∀ x : ℝ, f x = 0) (z : ℂ) : f z = 0 := by
   have hF0 : F = 0 := by
     refine Polynomial.eq_zero_of_infinite_isRoot F ?_
@@ -594,13 +595,16 @@ private lemma altBinomialShiftPowSum_eq_fwdDiff_iter (n k : ℕ) (y : ℂ) :
 
 /-- Pascal recursion for `altBinomialShiftPowSum`. -/
 private lemma altBinomialShiftPowSum_add_one (n k : ℕ) (y : ℂ) :
-    altBinomialShiftPowSum n k (y + 1) = altBinomialShiftPowSum n k y - altBinomialShiftPowSum n (k + 1) y := by
-  rw [altBinomialShiftPowSum_eq_fwdDiff_iter, altBinomialShiftPowSum_eq_fwdDiff_iter, altBinomialShiftPowSum_eq_fwdDiff_iter, Function.iterate_succ_apply',
+    altBinomialShiftPowSum n k (y + 1) = altBinomialShiftPowSum n k y -
+        altBinomialShiftPowSum n (k + 1) y := by
+  rw [altBinomialShiftPowSum_eq_fwdDiff_iter, altBinomialShiftPowSum_eq_fwdDiff_iter,
+      altBinomialShiftPowSum_eq_fwdDiff_iter, Function.iterate_succ_apply',
     fwdDiff, pow_succ]
   ring
 
 /-- `altBinomialShiftPowSum n n = 0`: the `n`-th difference of `y^{n-1}` vanishes. -/
-private lemma altBinomialShiftPowSum_self {n : ℕ} (hn : 1 ≤ n) (y : ℂ) : altBinomialShiftPowSum n n y = 0 := by
+private lemma altBinomialShiftPowSum_self {n : ℕ} (hn : 1 ≤ n) (y : ℂ) : altBinomialShiftPowSum
+    n n y = 0 := by
   rw [altBinomialShiftPowSum_eq_fwdDiff_iter, fwdDiff_iter_pow_eq_zero_of_lt (by omega)]
   simp
 
@@ -616,8 +620,10 @@ private lemma twistedDiffSolution_add_one {n : ℕ} (hn : 1 ≤ n) {ζ : ℂ} (h
   have ha : a ≠ 0 := inv_ne_zero h1
   have hζa : ζ = 1 - a⁻¹ := by simp [a]
   have key : y ^ (n - 1) =
-      ∑ k ∈ range n, (a ^ k * altBinomialShiftPowSum n k y - a ^ (k + 1) * altBinomialShiftPowSum n (k + 1) y) := by
-    rw [sum_range_sub' (fun k : ℕ => a ^ k * altBinomialShiftPowSum n k y) n, altBinomialShiftPowSum_self hn]
+      ∑ k ∈ range n, (a ^ k * altBinomialShiftPowSum n k y - a ^ (k + 1) *
+          altBinomialShiftPowSum n (k + 1) y) := by
+    rw [sum_range_sub' (fun k : ℕ => a ^ k * altBinomialShiftPowSum n k y) n,
+        altBinomialShiftPowSum_self hn]
     simp [altBinomialShiftPowSum]
   rw [twistedDiffSolution, twistedDiffSolution, key, mul_sum, ← sum_add_distrib]
   refine sum_congr rfl fun k _ => ?_
@@ -626,7 +632,8 @@ private lemma twistedDiffSolution_add_one {n : ℕ} (hn : 1 ≤ n) {ζ : ℂ} (h
   ring
 
 /-- Iterating `f(z+1) = ζ f(z) + q(z)`. -/
-private lemma apply_add_natCast_of_apply_add_one {f q : ℂ → ℂ} {ζ : ℂ} (hf : ∀ z, f (z + 1) = ζ * f z + q z) (y : ℂ) (s : ℕ) :
+private lemma apply_add_natCast_of_apply_add_one {f q : ℂ → ℂ} {ζ : ℂ}
+    (hf : ∀ z, f (z + 1) = ζ * f z + q z) (y : ℂ) (s : ℕ) :
     f (y + s) = ζ ^ s * f y + ∑ t ∈ range s, ζ ^ (s - 1 - t) * q (y + (t : ℂ)) := by
   induction s with
   | zero => simp
@@ -695,10 +702,12 @@ private lemma exp_two_pi_I_mul_div_pow_self (m r : ℕ) (hm : m ≠ 0) :
 private lemma sum_range_exp_two_pi_I_mul_div_pow {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
     ∑ s ∈ range m, Complex.exp (2 * π * Complex.I * r / m) ^ s = 0 := by
   have hm : m ≠ 0 := by simp only [mem_Icc] at hr; omega
-  rw [geom_sum_eq (exp_two_pi_I_mul_div_ne_one hr), exp_two_pi_I_mul_div_pow_self m r hm, sub_self, zero_div]
+  rw [geom_sum_eq (exp_two_pi_I_mul_div_ne_one hr), exp_two_pi_I_mul_div_pow_self m r hm,
+      sub_self, zero_div]
 
 /-- A polynomial function with a nonzero period is constant. -/
-private lemma polynomial_eval_eq_of_periodic (P : ℂ[X]) {c : ℂ} (hc : c ≠ 0) (hP : ∀ y, P.eval (y + c) = P.eval y)
+private lemma polynomial_eval_eq_of_periodic (P : ℂ[X]) {c : ℂ} (hc : c ≠ 0)
+    (hP : ∀ y, P.eval (y + c) = P.eval y)
     (y z : ℂ) : P.eval y = P.eval z := by
   set Q := P - Polynomial.C (P.eval z)
   have hroot : ∀ k : ℕ, Q.eval (z + k * c) = 0 := by
@@ -748,13 +757,16 @@ theorem bernoulliPolyB_mul_eq_roots_of_unity {n m : ℕ} (hn : 1 ≤ n) (hm : 2 
     ring
   have hζ1 : ∀ r ∈ R, ζ r ≠ 1 := fun r hr => exp_two_pi_I_mul_div_ne_one hr
   -- shifts of `G`
-  have hGs : ∀ (y : ℂ) (s : ℕ), G (y + s) = ∑ r ∈ R, ζ r * (ζ r ^ s * twistedDiffSolution n (ζ r) y) +
+  have hGs : ∀ (y : ℂ) (s : ℕ), G (y + s) = ∑ r ∈ R, ζ r *
+      (ζ r ^ s * twistedDiffSolution n (ζ r) y) +
       ∑ t ∈ range s, (y + t) ^ (n - 1) * ∑ r ∈ R, ζ r ^ (s - t) := by
     intro y s
-    have : ∀ r ∈ R, ζ r * twistedDiffSolution n (ζ r) (y + s) = ζ r * (ζ r ^ s * twistedDiffSolution n (ζ r) y) +
+    have : ∀ r ∈ R, ζ r * twistedDiffSolution n (ζ r) (y + s) = ζ r *
+        (ζ r ^ s * twistedDiffSolution n (ζ r) y) +
         ∑ t ∈ range s, (y + t) ^ (n - 1) * ζ r ^ (s - t) := by
       intro r hr
-      rw [apply_add_natCast_of_apply_add_one (f := twistedDiffSolution n (ζ r)) (q := fun z => z ^ (n - 1))
+      rw [apply_add_natCast_of_apply_add_one (f := twistedDiffSolution n (ζ r))
+          (q := fun z => z ^ (n - 1))
         (twistedDiffSolution_add_one hn (hζ1 r hr)) y s, mul_add, mul_sum]
       congr 1
       refine sum_congr rfl fun t ht => ?_
@@ -804,7 +816,8 @@ theorem bernoulliPolyB_mul_eq_roots_of_unity {n m : ℕ} (hn : 1 ≤ n) (hm : 2 
   have hB : ∀ (y : ℂ) (s : ℕ), bernoulliPolyB n (y + s) =
       bernoulliPolyB n y + ∑ t ∈ range s, n * (y + t) ^ (n - 1) := by
     intro y s
-    have := apply_add_natCast_of_apply_add_one (f := bernoulliPolyB n) (q := fun z => n * z ^ (n - 1)) (ζ := 1)
+    have := apply_add_natCast_of_apply_add_one (f := bernoulliPolyB n)
+        (q := fun z => n * z ^ (n - 1)) (ζ := 1)
       (fun z => by rw [one_mul, ← bernoulliPolyB_add_one_sub]; ring) y s
     simpa using this
   set Φ : ℂ → ℂ := fun y => bernoulliPolyB n y + n * G y - (m : ℂ) ^ n * bernoulliPolyB n (y / m)
@@ -845,7 +858,8 @@ theorem bernoulliPolyB_mul_eq_roots_of_unity {n m : ℕ} (hn : 1 ≤ n) (hm : 2 
       Polynomial.C ((m : ℂ) ^ n) * Bp.comp (Polynomial.C (m : ℂ)⁻¹ * X)
   have hP : ∀ y, P.eval y = Φ y := by
     intro y
-    simp only [P, Φ, G, twistedDiffSolution, altBinomialShiftPowSum, Polynomial.eval_add, Polynomial.eval_sub,
+    simp only [P, Φ, G, twistedDiffSolution, altBinomialShiftPowSum, Polynomial.eval_add,
+        Polynomial.eval_sub,
       Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_finsetSum, Polynomial.eval_pow,
       Polynomial.eval_X, Polynomial.eval_comp, bernoulliPolyB, aeval_complex_eq_eval_map, Bp,
       div_eq_inv_mul]
@@ -1048,7 +1062,8 @@ theorem eulerPolyE_third {n : ℕ} (hn : 1 ≤ n) :
 /-! ### Helpers for §24.4(iv) -/
 
 /-- Splitting a sum over `range (2m)` into even and odd indices. -/
-private lemma sum_range_two_mul_eq_sum_even_add_odd {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m : ℕ) :
+private lemma sum_range_two_mul_eq_sum_even_add_odd {M : Type*} [AddCommMonoid M]
+    (f : ℕ → M) (m : ℕ) :
     ∑ k ∈ range (2 * m), f k = ∑ j ∈ range m, (f (2 * j) + f (2 * j + 1)) := by
   induction m with
   | zero => simp
@@ -1088,7 +1103,8 @@ private lemma two_mul_add_one_mul_eulerNumber_two_mul (n : ℕ) :
   linear_combination h1 + S * h3
 
 /-- Splitting `range (2n+2)` when the odd terms beyond the first vanish. -/
-private lemma sum_range_two_mul_add_two_of_odd_eq_zero (g : ℕ → ℂ) (n : ℕ) (hg : ∀ j, 1 ≤ j → g (2 * j + 1) = 0) :
+private lemma sum_range_two_mul_add_two_of_odd_eq_zero (g : ℕ → ℂ) (n : ℕ)
+    (hg : ∀ j, 1 ≤ j → g (2 * j + 1) = 0) :
     ∑ k ∈ range (2 * n + 2), g k = g 0 + g 1 + ∑ j ∈ range n, g (2 * (j + 1)) := by
   rw [show 2 * n + 2 = 2 * (n + 1) by ring, sum_range_two_mul_eq_sum_even_add_odd, sum_range_succ',
     sum_add_distrib, sum_congr rfl fun j _ => hg (j + 1) (by omega)]
@@ -1275,16 +1291,17 @@ private lemma umbralFunctional_monomial (F : ℕ → ℂ) (n : ℕ) (a : ℂ) :
     umbralFunctional F (Polynomial.monomial n a) = a * F n :=
   Polynomial.sum_monomial_index _ _ (by simp)
 
-/-- Formula under the stated hypotheses: `umbralFunctional F (∑ i ∈ s, p i) = ∑ i ∈ s, umbralFunctional F (p
-i)`. -/
+/-- Formula under the stated hypotheses:
+`umbralFunctional F (∑ i ∈ s, p i) = ∑ i ∈ s, umbralFunctional F (p i)`. -/
 private lemma umbralFunctional_sum (F : ℕ → ℂ) (s : Finset ℕ) (p : ℕ → ℂ[X]) :
     umbralFunctional F (∑ i ∈ s, p i) = ∑ i ∈ s, umbralFunctional F (p i) := by
   induction s using Finset.induction_on with
   | empty => simp [umbralFunctional]
   | insert a s ha ih => rw [sum_insert ha, sum_insert ha, umbralFunctional_add, ih]
 
-/-- Formula under the stated hypotheses: `umbralFunctional F (C a * (X + C h) ^ n) = a * ∑ k ∈ range (n
-+ 1), (n.choose k : ℂ) * F k * h ^ (n - k)`. -/
+/-- Formula under the stated hypotheses:
+`umbralFunctional F (C a * (X + C h) ^ n) = a * ∑ k ∈ range (n + 1), (n.choose k : ℂ) * F k * h ^ (n
+- k)`. -/
 private lemma umbralFunctional_C_mul_X_add_C_pow (F : ℕ → ℂ) (n : ℕ) (a h : ℂ) :
     umbralFunctional F (C a * (X + C h) ^ n) =
       a * ∑ k ∈ range (n + 1), (n.choose k : ℂ) * F k * h ^ (n - k) := by
@@ -1313,12 +1330,14 @@ theorem umbralBernoulli_comp_add_one_sub (x : ℂ) (P : ℂ[X]) :
       (Polynomial.derivative P).eval x := by
   induction P using Polynomial.induction_on' with
   | add p q hp hq =>
-    simp only [umbralBernoulli, Polynomial.add_comp, umbralFunctional_add, Polynomial.derivative_add,
+    simp only [umbralBernoulli, Polynomial.add_comp, umbralFunctional_add,
+        Polynomial.derivative_add,
       Polynomial.eval_add] at *
     linear_combination hp + hq
   | monomial n a =>
     rw [umbralBernoulli, umbralBernoulli, Polynomial.monomial_comp,
-      show (X + 1 : ℂ[X]) = X + C 1 by simp, umbralFunctional_C_mul_X_add_C_pow, umbralFunctional_monomial,
+      show (X + 1 : ℂ[X]) = X + C 1 by simp, umbralFunctional_C_mul_X_add_C_pow,
+                                         umbralFunctional_monomial,
       Polynomial.derivative_monomial, Polynomial.eval_monomial]
     have h := bernoulliPolyB_add n x 1
     rw [← h]
@@ -1341,7 +1360,8 @@ theorem umbralEuler_comp_add_one_add (x : ℂ) (P : ℂ[X]) :
     linear_combination hp + hq
   | monomial n a =>
     rw [umbralEuler, umbralEuler, Polynomial.monomial_comp,
-      show (X + 1 : ℂ[X]) = X + C 1 by simp, umbralFunctional_C_mul_X_add_C_pow, umbralFunctional_monomial,
+      show (X + 1 : ℂ[X]) = X + C 1 by simp, umbralFunctional_C_mul_X_add_C_pow,
+                                         umbralFunctional_monomial,
       Polynomial.eval_monomial]
     have h := eulerPolyE_add n x 1
     rw [← h]

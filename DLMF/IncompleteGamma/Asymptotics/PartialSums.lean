@@ -139,7 +139,8 @@ theorem igAsy_tendsto_sqrt_mul_integral_E :
     congr 1
     refine setIntegral_congr_fun measurableSet_Icc fun t ht => ?_
     rw [igAsy_exp_q_eq k (by rw [abs_lt]; constructor <;> linarith [ht.1, ht.2])]
-  have H3 : Tendsto (fun k : ℕ => ((Real.sqrt k * ∫ t in Icc (-(1/8:ℝ)) (1/8), igAsy_E k t : ℝ) : ℂ))
+  have H3 : Tendsto (fun k : ℕ =>
+      ((Real.sqrt k * ∫ t in Icc (-(1/8:ℝ)) (1/8), igAsy_E k t : ℝ) : ℂ))
       atTop (𝓝 (Real.sqrt (2*π) : ℂ)) := by
     simp only [hE]; exact H2
   have H4 := (Complex.continuous_re.tendsto _).comp H3
@@ -188,7 +189,8 @@ theorem igAsy_F_one_le (m : ℕ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
 
 /-- The tail `√n ∫₀^{7/8} s^n e^{n(1-s)} ds → 0`. -/
 theorem igAsy_tendsto_tail :
-    Tendsto (fun m : ℕ => Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s) atTop (𝓝 0) := by
+    Tendsto (fun m : ℕ => Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s)
+        atTop (𝓝 0) := by
   have hb : ∀ m : ℕ, ∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s ≤ 7/8 * Real.exp (-(((m:ℝ)+1)/128)) := by
     intro m
     have := intervalIntegral.integral_mono_on (g := fun _ => Real.exp (-(((m:ℝ)+1)/128)))
@@ -269,20 +271,24 @@ theorem igAsy_pow_div_factorial_le (n : ℕ) {x : ℝ} (hx0 : 0 ≤ x) :
 
 /-- 8.11.13 for `0 ≤ x < 1`. -/
 theorem igAsy_poisson_lt {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
-    Tendsto (fun m : ℕ => ((m+1)*x)^(m+1)/((m+1).factorial) * ((m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s) /
+    Tendsto (fun m : ℕ => ((m+1)*x)^(m+1)/((m+1).factorial) *
+        ((m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s) /
         Real.exp ((m+1)*x)) atTop (𝓝 0) := by
   set r := x*Real.exp (1-x)
   have hr0 : 0 ≤ r := by positivity
   have hr1 : r < 1 := igAsy_mul_exp_lt_one hx1.ne
   have hlim : Tendsto (fun m : ℕ => r^(m+1) * (x/(1-x))) atTop (𝓝 0) := by
-    have := ((tendsto_pow_atTop_nhds_zero_of_lt_one hr0 hr1).comp (tendsto_add_atTop_nat 1)).mul_const
+    have := ((tendsto_pow_atTop_nhds_zero_of_lt_one hr0 hr1).comp
+        (tendsto_add_atTop_nat 1)).mul_const
       (x/(1-x))
     simpa [Function.comp_def] using this
   refine squeeze_zero (fun m => ?_) (fun m => ?_) hlim
-  · have := intervalIntegral.integral_nonneg (μ := volume) (zero_le_one' ℝ) fun s hs => igAsy_F_nonneg m x hs.1
+  · have := intervalIntegral.integral_nonneg (μ := volume) (zero_le_one' ℝ) fun s hs =>
+        igAsy_F_nonneg m x hs.1
     positivity
   · have hJ := igAsy_integral_F_le m hx1
-    have hJ0 := intervalIntegral.integral_nonneg (μ := volume) (zero_le_one' ℝ) fun s hs => igAsy_F_nonneg m x hs.1
+    have hJ0 := intervalIntegral.integral_nonneg (μ := volume) (zero_le_one' ℝ) fun s hs =>
+        igAsy_F_nonneg m x hs.1
     have hP := igAsy_pow_div_factorial_le (m+1) hx0
     push_cast at hP
     have h1 : (m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s ≤ x/(1-x) := by
@@ -295,7 +301,8 @@ theorem igAsy_poisson_lt {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
 
 /-- 8.11.13 at `x = 1`. -/
 theorem igAsy_poisson_one :
-    Tendsto (fun m : ℕ => ((m+1)*1)^(m+1)/((m+1).factorial) * ((m+1)*1*∫ s in (0:ℝ)..1, igAsy_F m 1 s) /
+    Tendsto (fun m : ℕ => ((m+1)*1)^(m+1)/((m+1).factorial) *
+        ((m+1)*1*∫ s in (0:ℝ)..1, igAsy_F m 1 s) /
         Real.exp ((m+1)*1)) atTop (𝓝 (1/2)) := by
   have hst := (Stirling.tendsto_stirlingSeq_sqrt_pi.comp (tendsto_add_atTop_nat 1)).inv₀
     (by positivity : Real.sqrt π ≠ 0)
@@ -340,7 +347,8 @@ theorem igAsy_term_le {k : ℕ} {y : ℝ} : ∀ n, k ≤ n → (n:ℝ) ≤ y →
 
 /-- 8.11.13 for `x > 1`. -/
 theorem igAsy_poisson_gt {x : ℝ} (hx : 1 < x) :
-    Tendsto (fun m : ℕ => Elementary.expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x)) atTop (𝓝 0) := by
+    Tendsto (fun m : ℕ => Elementary.expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x))
+        atTop (𝓝 0) := by
   set r := x*Real.exp (1-x)
   have hr0 : 0 ≤ r := by have : 0 ≤ x := by linarith
                          positivity
@@ -358,7 +366,8 @@ theorem igAsy_poisson_gt {x : ℝ} (hx : 1 < x) :
   refine squeeze_zero (fun m => by positivity) (fun m => ?_) hlim
   set n := m+1
   have hy : (n:ℝ) ≤ n*x := by nlinarith [show (0:ℝ) ≤ n by positivity]
-  have hsum : ∑ k ∈ Finset.range (n+1), ((n:ℝ)*x)^k/k.factorial ≤ (n+1) * (((n:ℝ)*x)^n/n.factorial) := by
+  have hsum : ∑ k ∈ Finset.range (n+1), ((n:ℝ)*x)^k/k.factorial ≤ (n+1) *
+      (((n:ℝ)*x)^n/n.factorial) := by
     have := Finset.sum_le_card_nsmul (Finset.range (n+1)) (fun k => ((n:ℝ)*x)^k/k.factorial)
       (((n:ℝ)*x)^n/n.factorial) (fun k hk => igAsy_term_le n
         (Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)) hy)
@@ -370,17 +379,19 @@ theorem igAsy_poisson_gt {x : ℝ} (hx : 1 < x) :
     _ ≤ (n+1) * r^n := by gcongr
     _ = (n:ℝ)*r^n + r^n := by ring
 
-/-- The map `(fun n : ℕ => Elementary.expPartialSum n (n*x)/exp (n*x : ℂ))` tends to `(𝓝 (if 1 < x then 0
-else if x=1 then 1/2 else 1))` along `atTop`. -/
+/-- The map `(fun n : ℕ => Elementary.expPartialSum n (n*x)/exp (n*x : ℂ))` tends to
+`(𝓝 (if 1 < x then 0 else if x=1 then 1/2 else 1))` along `atTop`. -/
 @[dlmf 8.11.E13]
 theorem expPartialSum_poisson_limit {x : ℝ} (hx : 0 ≤ x) :
-    Tendsto (fun n : ℕ => Elementary.expPartialSum n (n*x)/exp (n*x : ℂ)) atTop (𝓝 (if 1 < x then 0 else if x=1 then 1/2 else 1)) := by
+    Tendsto (fun n : ℕ => Elementary.expPartialSum n (n*x)/exp (n*x : ℂ)) atTop
+        (𝓝 (if 1 < x then 0 else if x=1 then 1/2 else 1)) := by
   rw [← tendsto_add_atTop_iff_nat 1]
   split_ifs with h1 h2
   · exact igAsy_poisson_gt h1
   · subst h2
     simp only [igAsy_ratio_eq]
-    have := (continuous_ofReal.tendsto _).comp (tendsto_const_nhds (x := (1:ℝ)) |>.sub igAsy_poisson_one)
+    have := (continuous_ofReal.tendsto _).comp
+        (tendsto_const_nhds (x := (1:ℝ)) |>.sub igAsy_poisson_one)
     rw [show (1/2:ℂ) = ((1 - 1/2 : ℝ) : ℂ) by push_cast; norm_num]
     exact this
   · have hx1 : x < 1 := by
@@ -389,7 +400,8 @@ theorem expPartialSum_poisson_limit {x : ℝ} (hx : 0 ≤ x) :
       · exact absurd h h2
       · exact absurd h h1
     simp only [igAsy_ratio_eq]
-    have := (continuous_ofReal.tendsto _).comp (tendsto_const_nhds (x := (1:ℝ)) |>.sub (igAsy_poisson_lt hx hx1))
+    have := (continuous_ofReal.tendsto _).comp
+        (tendsto_const_nhds (x := (1:ℝ)) |>.sub (igAsy_poisson_lt hx hx1))
     rw [show (1:ℂ) = ((1 - 0 : ℝ) : ℂ) by push_cast; norm_num]
     exact this
 
@@ -398,11 +410,13 @@ theorem expPartialSum_poisson_limit {x : ℝ} (hx : 0 ≤ x) :
 def expPartialSumRemainderS (n : ℕ) (x : ℝ) : ℂ :=
   lowerIncGamma (n+1) (n*x)/((n*x : ℂ)^n*exp (-n*x : ℂ))
 
-/-- Identity under the stated parameter and domain assumptions: `exp (n*x : ℂ)=Elementary.expPartialSum n
-(n*x)+(n*x : ℂ)^n/n.factorial*expPartialSumRemainderS n x`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`exp (n*x : ℂ)=Elementary.expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*expPartialSumRemainderS n
+x`. -/
 @[dlmf 8.11.E14]
 theorem expPartialSumRemainderS_identity (n : ℕ) (x : ℝ) :
-    exp (n*x : ℂ)=Elementary.expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*expPartialSumRemainderS n x := by
+    exp (n*x : ℂ)=Elementary.expPartialSum n
+        (n*x)+(n*x : ℂ)^n/n.factorial*expPartialSumRemainderS n x := by
   rw [expPartialSumRemainderS]
   exact igAsy_exp_identity n x
 
@@ -418,7 +432,8 @@ noncomputable def igAsy_d (k : ℕ) (x : ℝ) : ℝ := (-1)^k * (x * igAsy_h k x
 /-- The exact remainder of 8.11.18. -/
 theorem igAsy_S_remainder (m N : ℕ) {x : ℝ} (hx : x < 1) :
     expPartialSumRemainderS (m+1) x - ∑ k ∈ Finset.range N, (igAsy_d k x : ℂ)/((m:ℂ)+1)^k =
-      (((m+1)*x*((-1)^N/((m:ℝ)+1)^N * ∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h N (x*s)) : ℝ) : ℂ) := by
+      (((m+1)*x*((-1)^N/((m:ℝ)+1)^N * ∫ s in (0:ℝ)..1, igAsy_F m x s *
+          igAsy_h N (x*s)) : ℝ) : ℂ) := by
   rw [igAsy_S_eq, igAsy_iter m hx N]
   have hm : (m:ℝ)+1 ≠ 0 := by positivity
   have hcast : ∀ k : ℕ, ((m:ℂ)+1)^k = (((m:ℝ)+1)^k : ℝ) := fun k => by push_cast; ring
@@ -468,8 +483,10 @@ theorem igAsy_S_remainder_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
       have h3 : 1 ≤ (1/δ)*(1-x) := by rw [div_mul_eq_mul_div, one_mul, le_div_iff₀ hδ]; linarith
       nlinarith
   have hpos : 0 < ((m:ℝ)+1)^N := by positivity
-  rw [abs_mul, abs_mul, abs_mul, abs_div, abs_pow, abs_neg, abs_one, one_pow, abs_of_pos hm, abs_of_pos hpos]
-  calc ((m:ℝ)+1)*|x| * (1/((m:ℝ)+1)^N*|I|) ≤ ((m:ℝ)+1)*|x| * (1/((m:ℝ)+1)^N*(K*(1/((m+1)*(1-x))))) := by
+  rw [abs_mul, abs_mul, abs_mul, abs_div, abs_pow, abs_neg, abs_one, one_pow, abs_of_pos hm,
+      abs_of_pos hpos]
+  calc ((m:ℝ)+1)*|x| * (1/((m:ℝ)+1)^N*|I|) ≤ ((m:ℝ)+1)*|x| *
+         (1/((m:ℝ)+1)^N*(K*(1/((m+1)*(1-x))))) := by
         gcongr
     _ = K*(|x|/(1-x))*(1/((m:ℝ)+1)^N) := by field_simp
     _ ≤ K*max 1 (1/δ)*(1/((m:ℝ)+1)^N) := by gcongr
@@ -491,7 +508,7 @@ theorem igAsy_analyticAt_Q : AnalyticAt ℝ igAsy_Q 0 :=
 
 /-- `φ(u) = u² Q(u)`. -/
 theorem igAsy_phi_eq (u : ℝ) : igAsy_phi u = u^2 * igAsy_Q u := by
-  have h := dblZero_eq_sq_mul_dslope (g := igAsy_phi) (x₀ := 0) (by simp [igAsy_phi]) ?_ u
+  have h := DoubleZeroSqrt.eq_sq_mul_dslope (g := igAsy_phi) (x₀ := 0) (by simp [igAsy_phi]) ?_ u
   · simpa [igAsy_Q] using h
   · have : HasDerivAt igAsy_phi (1 - 1/(1+0)) 0 :=
       (hasDerivAt_id 0).sub (((hasDerivAt_id (0:ℝ)).const_add 1).log (by norm_num))
@@ -542,7 +559,7 @@ theorem igAsy_sqrtPhi_zero : igAsy_sqrtPhi 0 = 0 := by simp [igAsy_sqrtPhi]
 /-- The signed square root is analytic at `0` with derivative `1`, and `φ = V²/2` near `0`. -/
 theorem igAsy_sqrtPhi_props : AnalyticAt ℝ igAsy_sqrtPhi 0 ∧ HasDerivAt igAsy_sqrtPhi 1 0 ∧
     ∀ᶠ x in 𝓝 0, igAsy_phi x = igAsy_sqrtPhi x ^ 2 / 2 := by
-  obtain ⟨h1, h2, h3⟩ := dblZero_signedSqrt (g := igAsy_phi) igAsy_analyticAt_Q
+  obtain ⟨h1, h2, h3⟩ := DoubleZeroSqrt.signedSqrt (g := igAsy_phi) igAsy_analyticAt_Q
     (by rw [igAsy_Q_zero]; norm_num) (Eventually.of_forall fun x => by rw [igAsy_phi_eq]; ring)
   refine ⟨h1, ?_, h3.mono fun x hx => hx.1⟩
   have : Real.sqrt (2 * igAsy_Q 0) = 1 := by rw [igAsy_Q_zero]; norm_num
@@ -565,7 +582,61 @@ theorem igAsy_sum_Pc (v : ℝ) : ∑ k ∈ Finset.range 9, igAsy_Pc k * v^k = v 
   ring
 
 /-- The residual polynomial of the inverse-series verification. -/
-noncomputable def igAsy_R (v : ℝ) : ℝ := -v^62/2768104942150133660519356040269823606784000000000 + 139*v^61/8201792421185581216353647526725403279360000000000 - 64363*v^60/164035848423711624327072950534508065587200000000000 + 8414711*v^59/1458096430432992216240648449195627249664000000000000 - 39398720783*v^58/699886286607836263795511255613901079838720000000000000 + 800844031091*v^57/2666233472791757195411471449957718399385600000000000000 + 203207581524653*v^56/319948016735010863449376573994926207926272000000000000000 - 589903790773392367*v^55/19907876596845120392405653493017630715412480000000000000000 + 1812135294676417436239*v^54/6370520510990438525569809117765641828931993600000000000000000 - 61536180983488037268223*v^53/56626848986581675782842747713472371812728832000000000000000000 - 3200028968192764058201*v^52/530876709249203210464150759813803485744332800000000000000000 + 311443135429997527330939*v^51/2831342449329083789142137385673618590636441600000000000000000 - 44454799605418997643991*v^50/75839529892743315780592965687686212249190400000000000000000 - 559676526517695375461*v^49/674129154602162806938604139446099664437248000000000000000 + 198376372993988324996513*v^48/5898630102768924560712786220153372063825920000000000000000 - 128833516499331115639963*v^47/655403344752102728968087357794819118202880000000000000000 - 3667317918596362552760177*v^46/15729680274050465495234096587075658836869120000000000000000 + 324230753132416786833013*v^45/32770167237605136448404367889740955910144000000000000000 - 14952974654565356951124521*v^44/294931505138446228035639311007668603191296000000000000000 - 13252544188014095919239*v^43/130040346180972763684144317022781571072000000000000000 + 27771663040102917607741*v^42/10403227694477821094731545361822525685760000000000000 - 11954991339734226940007*v^41/1083669551508106364034535975189846425600000000000000 - 36449936144571194043961*v^40/722446367672070909356357316793230950400000000000000 + 75166882097473144608997*v^39/120407727945345151559392886132205158400000000000000 - 22315566379032504120787*v^38/16054363726046020207919051484294021120000000000000 - 120052626821536535467*v^37/7963474070459335420594767601336320000000000000 + 6103713633575949013303*v^36/47780844422756012523568605608017920000000000000 - 29626459559588237*v^35/530898271363955694706317840089088000000000 - 517463897990836994347*v^34/106179654272791138941263568017817600000000000 + 121286984931364029473*v^33/8848304522732594911771964001484800000000000 + 17223711251174594586739*v^32/309690658295640821912018740051968000000000000 - 25997842511592509407*v^31/35112319534653154411793507942400000000000 + 252464389076981274511*v^30/140449278138612617647174031769600000000000 + 58750710510092643809*v^29/2926026627887762867649458995200000000000 - 11171106973961039807*v^28/65022813953061397058876866560000000000 - 522621430896224857*v^27/602063092157975898693304320000000000 + 6291240544991059709*v^26/6095888808099505974269706240000000000 - 181301900023966397*v^25/20158362460646514465177600000000000 - 17454651767210771*v^24/368610056423250550220390400000000 + 696576869128085983*v^23/1075112664567814104809472000000000 - 200522812574221273*v^22/179185444094635684134912000000000 - 35470128327336733*v^21/597284813648785613783040000000 - 132577309851169703*v^20/398189875765857075855360000000 - 510374274227141*v^19/493787048320755302400000000 - 2858145000327557*v^18/967419523240663449600000000 + 517628494375877*v^17/131676546218868080640000000 + 2490219288582629*v^16/65838273109434040320000000 - 14261288811003299*v^15/10973045518239006720000000 - 7688700092268269*v^14/438921820729560268800000 - 469646448720269*v^13/4354383142158336000000 - 1797913715932633*v^12/4354383142158336000000 - 713769681139453*v^11/725730523693056000000 - 7696763934359*v^10/7679688081408000000 - 16218691291337*v^9/1343945414246400000 - 408540701317127*v^8/1511938591027200000 - 8497883956229*v^7/3199870033920000 - 1823729366989*v^6/114281072640000 - 17479190864627*v^5/266655836160000 - 16977567694037*v^4/88885278720000 - 58412710933*v^3/148142131200 - 15240966109*v^2/27433728000 - 158347621*v/326592000 - 235145669/1175731200
+noncomputable def igAsy_R (v : ℝ) : ℝ := -v^62/2768104942150133660519356040269823606784000000000 +
+    139*v^61/8201792421185581216353647526725403279360000000000 -
+    64363*v^60/164035848423711624327072950534508065587200000000000 +
+    8414711*v^59/1458096430432992216240648449195627249664000000000000 -
+    39398720783*v^58/699886286607836263795511255613901079838720000000000000 +
+    800844031091*v^57/2666233472791757195411471449957718399385600000000000000 +
+    203207581524653*v^56/319948016735010863449376573994926207926272000000000000000 -
+    589903790773392367*v^55/19907876596845120392405653493017630715412480000000000000000 +
+    1812135294676417436239*v^54/6370520510990438525569809117765641828931993600000000000000000 -
+    61536180983488037268223*v^53/56626848986581675782842747713472371812728832000000000000000000 -
+    3200028968192764058201*v^52/530876709249203210464150759813803485744332800000000000000000 +
+    311443135429997527330939*v^51/2831342449329083789142137385673618590636441600000000000000000 -
+    44454799605418997643991*v^50/75839529892743315780592965687686212249190400000000000000000 -
+    559676526517695375461*v^49/674129154602162806938604139446099664437248000000000000000 +
+    198376372993988324996513*v^48/5898630102768924560712786220153372063825920000000000000000 -
+    128833516499331115639963*v^47/655403344752102728968087357794819118202880000000000000000 -
+    3667317918596362552760177*v^46/15729680274050465495234096587075658836869120000000000000000 +
+    324230753132416786833013*v^45/32770167237605136448404367889740955910144000000000000000 -
+    14952974654565356951124521*v^44/294931505138446228035639311007668603191296000000000000000 -
+    13252544188014095919239*v^43/130040346180972763684144317022781571072000000000000000 +
+    27771663040102917607741*v^42/10403227694477821094731545361822525685760000000000000 -
+    11954991339734226940007*v^41/1083669551508106364034535975189846425600000000000000 -
+    36449936144571194043961*v^40/722446367672070909356357316793230950400000000000000 +
+    75166882097473144608997*v^39/120407727945345151559392886132205158400000000000000 -
+    22315566379032504120787*v^38/16054363726046020207919051484294021120000000000000 -
+    120052626821536535467*v^37/7963474070459335420594767601336320000000000000 +
+    6103713633575949013303*v^36/47780844422756012523568605608017920000000000000 -
+    29626459559588237*v^35/530898271363955694706317840089088000000000 -
+    517463897990836994347*v^34/106179654272791138941263568017817600000000000 +
+    121286984931364029473*v^33/8848304522732594911771964001484800000000000 +
+    17223711251174594586739*v^32/309690658295640821912018740051968000000000000 -
+    25997842511592509407*v^31/35112319534653154411793507942400000000000 +
+    252464389076981274511*v^30/140449278138612617647174031769600000000000 +
+    58750710510092643809*v^29/2926026627887762867649458995200000000000 -
+    11171106973961039807*v^28/65022813953061397058876866560000000000 -
+    522621430896224857*v^27/602063092157975898693304320000000000 +
+    6291240544991059709*v^26/6095888808099505974269706240000000000 -
+    181301900023966397*v^25/20158362460646514465177600000000000 -
+    17454651767210771*v^24/368610056423250550220390400000000 +
+    696576869128085983*v^23/1075112664567814104809472000000000 -
+    200522812574221273*v^22/179185444094635684134912000000000 -
+    35470128327336733*v^21/597284813648785613783040000000 -
+    132577309851169703*v^20/398189875765857075855360000000 -
+    510374274227141*v^19/493787048320755302400000000 -
+    2858145000327557*v^18/967419523240663449600000000 +
+    517628494375877*v^17/131676546218868080640000000 +
+    2490219288582629*v^16/65838273109434040320000000 -
+    14261288811003299*v^15/10973045518239006720000000 -
+    7688700092268269*v^14/438921820729560268800000 - 469646448720269*v^13/4354383142158336000000 -
+    1797913715932633*v^12/4354383142158336000000 - 713769681139453*v^11/725730523693056000000 -
+    7696763934359*v^10/7679688081408000000 - 16218691291337*v^9/1343945414246400000 -
+    408540701317127*v^8/1511938591027200000 - 8497883956229*v^7/3199870033920000 -
+    1823729366989*v^6/114281072640000 - 17479190864627*v^5/266655836160000 -
+    16977567694037*v^4/88885278720000 - 58412710933*v^3/148142131200 - 15240966109*v^2/27433728000 -
+    158347621*v/326592000 - 235145669/1175731200
 
 /-- The polynomial identity behind the inverse-series verification. -/
 theorem igAsy_residual_identity (v : ℝ) :
@@ -699,7 +770,7 @@ theorem igAsy_saddle : ∃ (U : ℝ → ℝ) (p : FormalMultilinearSeries ℝ �
     (∀ v ∈ Icc (-v₀) v₀, HasDerivAt U (deriv U v) v ∧ ContinuousAt (deriv U) v ∧
       -1/2 < U v ∧ igAsy_phi (U v) = v^2/2) ∧ U (-v₀) < 0 ∧ 0 < U v₀ := by
   obtain ⟨hVa, hVd, hVphi⟩ := igAsy_sqrtPhi_props
-  obtain ⟨U, hUa, -, hU0, hl, hr⟩ := dblZero_exists_analytic_inverse hVa hVd one_ne_zero
+  obtain ⟨U, hUa, -, hU0, hl, hr⟩ := DoubleZeroSqrt.exists_analytic_inverse hVa hVd one_ne_zero
   rw [igAsy_sqrtPhi_zero] at hUa hU0 hr
   obtain ⟨p, hp⟩ := hUa
   have hUt : Tendsto U (𝓝 0) (𝓝 0) := by
@@ -882,7 +953,8 @@ theorem igAsy_one_decomp {U : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀) (hU0 
   rw [hibp hIcc2] at h2
   rw [hU0, add_zero] at h1 h2
   -- reflection
-  have hrefl : ∫ v in (-v₀)..0, (-n * v * g v) * U v = ∫ v in (0:ℝ)..v₀, (n * v * g v) * U (-v) := by
+  have hrefl : ∫ v in (-v₀)..0, (-n * v * g v) * U v = ∫ v in (0:ℝ)..v₀,
+      (n * v * g v) * U (-v) := by
     have := intervalIntegral.integral_comp_neg (a := 0) (b := v₀)
       (fun v => (-n * v * g v) * U v)
     rw [neg_zero] at this
@@ -965,7 +1037,10 @@ n=([-2/3,4/135,-8/2835,-16/8505] : List ℂ)[n]!) ∧ HasAsymptoticExpansion atT
 : ℂ)/(2*(n+1 : ℂ)^(n+1)))`. -/
 @[dlmf 8.11.E16]
 theorem expPartialSumRemainderS_one_asymptotic  :
-    ∃ c : ℕ → ℂ, (∀ n < 4, c n=([-2/3,4/135,-8/2835,-16/8505] : List ℂ)[n]!) ∧ HasAsymptoticExpansion atTop (fun j (n : ℕ) => (n+1 : ℂ)^(-(j : ℤ))) c (fun n => expPartialSumRemainderS (n+1) 1-(n+1).factorial*exp (n+1 : ℂ)/(2*(n+1 : ℂ)^(n+1))) := by
+    ∃ c : ℕ → ℂ, (∀ n < 4, c n=([-2/3, 4/135, -8/2835, -16/8505] : List ℂ)[n]!) ∧
+        HasAsymptoticExpansion atTop (fun j (n : ℕ) => (n+1 : ℂ)^(-(j : ℤ))) c
+        (fun n => expPartialSumRemainderS (n+1) 1-(n+1).factorial*exp
+        (n+1 : ℂ)/(2*(n+1 : ℂ)^(n+1))) := by
   obtain ⟨U, p, v₀, hv₀, hp, hc, hd, hb, ha⟩ := igAsy_saddle
   have hc0 : p.coeff 0 = 0 := (hc 0 (by norm_num)).trans (by simp [igAsy_Pc])
   have hU0 : U 0 = 0 := by rw [← hp.coeff_zero 1]; exact hc0
@@ -1076,7 +1151,9 @@ n=([-1/2,1/8,1/32,-1/128,-13/512] : List ℂ)[n]!) ∧ HasAsymptoticExpansion at
 => (n+1 : ℂ)^(-(j : ℤ))) c (fun n => expPartialSumRemainderS (n+1) (-1))`. -/
 @[dlmf 8.11.E17]
 theorem expPartialSumRemainderS_neg_one_asymptotic  :
-    ∃ c : ℕ → ℂ, (∀ n < 5, c n=([-1/2,1/8,1/32,-1/128,-13/512] : List ℂ)[n]!) ∧ HasAsymptoticExpansion atTop (fun j (n : ℕ) => (n+1 : ℂ)^(-(j : ℤ))) c (fun n => expPartialSumRemainderS (n+1) (-1)) := by
+    ∃ c : ℕ → ℂ, (∀ n < 5, c n=([-1/2, 1/8, 1/32, -1/128, -13/512] : List ℂ)[n]!) ∧
+        HasAsymptoticExpansion atTop (fun j (n : ℕ) => (n+1 : ℂ)^(-(j : ℤ))) c
+        (fun n => expPartialSumRemainderS (n+1) (-1)) := by
   refine ⟨fun k => (igAsy_d k (-1) : ℂ), ?_, ?_⟩
   · intro n hn
     interval_cases n <;>
@@ -1142,7 +1219,9 @@ Finset.range N, expPartialSumRemainderCoeff k p.2/(p.1+1 : ℂ)^k) (fun p => (p.
 ℤ)))`. -/
 @[dlmf 8.11.E18]
 theorem expPartialSumRemainderS_uniform_asymptotic {δ : ℝ} (hδ : 0 < δ) (N : ℕ) :
-    IsBigO (comap (fun p : ℕ × ℝ => p.1) atTop ⊓ 𝓟 {p : ℕ × ℝ | p.2 ≤ 1-δ}) (fun p => expPartialSumRemainderS (p.1+1) p.2-∑ k ∈ Finset.range N, expPartialSumRemainderCoeff k p.2/(p.1+1 : ℂ)^k) (fun p => (p.1+1 : ℝ)^(-(N : ℤ))) := by
+    IsBigO (comap (fun p : ℕ × ℝ => p.1) atTop ⊓ 𝓟 {p : ℕ × ℝ | p.2 ≤ 1-δ})
+        (fun p => expPartialSumRemainderS (p.1+1) p.2-∑ k ∈ Finset.range N,
+        expPartialSumRemainderCoeff k p.2/(p.1+1 : ℂ)^k) (fun p => (p.1+1 : ℝ)^(-(N : ℤ))) := by
   obtain ⟨C, hC⟩ := igAsy_S_remainder_bound N hδ
   refine IsBigO.of_bound C ?_
   filter_upwards [mem_inf_of_right (mem_principal_self _)] with p hp

@@ -301,7 +301,8 @@ theorem struveAs_kernel_sub_sum_isBigO (ν : ℂ) (N : ℕ) :
 `c ≤ |1+s²|`. -/
 theorem struveAs_norm_kernel_le (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) {c : ℝ} (hc : 0 < c)
     (hcs : c ≤ ‖1 + s ^ 2‖) :
-    ‖struveAs_kernel ν s‖ ≤ c ^ (-(1 / 2 : ℝ)) * (1 + 2 * ‖s‖) ^ |ν.re| * Real.exp (π * |ν.im|) := by
+    ‖struveAs_kernel ν s‖ ≤ c ^ (-(1 / 2 : ℝ)) * (1 + 2 * ‖s‖) ^ |ν.re| *
+        Real.exp (π * |ν.im|) := by
   set w := (1 + s ^ 2) ^ (1 / 2 : ℂ) with hw
   have hw2 : w ^ 2 = 1 + s ^ 2 := Carlson.cpow_half_sq _
   have hv0 := slitPlane_ne_zero (struveAs_add_sqrt_mem hs)

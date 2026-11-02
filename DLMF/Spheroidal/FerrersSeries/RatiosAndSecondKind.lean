@@ -48,7 +48,8 @@ private lemma spheroidalRecA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (h�
     (mul_ne_zero h3' h4')
 
 /-- For `γ² ≠ 0` the coefficients `a^m_{n,k}`, `k ≥ -R`, are not eventually zero. -/
-private lemma not_eventually_spheroidalCoeff_eq_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+private lemma not_eventually_spheroidalCoeff_eq_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ}
+    (hγ : γ2 ≠ 0) :
     ¬ ∃ J : ℕ, ∀ j : ℕ, J ≤ j → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 := by
   rintro ⟨J, hJ⟩
   have hall : ∀ d j : ℕ, J ≤ j + d → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 := by
@@ -78,7 +79,8 @@ private lemma not_eventually_spheroidalCoeff_eq_zero {n m : ℕ} (hmn : m ≤ n)
           ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
           (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
         (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m y).re) = 0 := by
+          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m
+              y).re) = 0 := by
       intro j
       have := hz j
       rw [spheroidalCoeff_eq_integral_factor_mul_jet hmn γ2 j] at this
@@ -101,7 +103,8 @@ private lemma eventually_abs_spheroidalCoeff_succ_le {n m : ℕ} (hmn : m ≤ n)
     ∃ J : ℕ, ∀ j : ℕ, J ≤ j →
       |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
         |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| / 4 := by
-  obtain ⟨J, hJ⟩ := eventually_abs_spheroidalCoeff_succ_le_eps hmn γ2 (by norm_num : (0 : ℝ) < 1 / 8)
+  obtain ⟨J, hJ⟩ := eventually_abs_spheroidalCoeff_succ_le_eps hmn γ2
+      (by norm_num : (0 : ℝ) < 1 / 8)
   obtain ⟨M, hM0, hM⟩ := exists_abs_spheroidalCoeff_le_linear hmn γ2
   refine ⟨J, fun j0 hj0 => ?_⟩
   set a : ℕ → ℝ := fun j => |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| with ha
@@ -166,7 +169,8 @@ private lemma abs_spheroidalRecB_sub_le {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 
   gcongr
 
 /-- `|-4A_k - γ²| ≤ |γ²|(4m²+12m+7)/k` for `k ≥ 2`. -/
-private lemma abs_neg_four_mul_spheroidalRecA_sub_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 2 ≤ k) :
+private lemma abs_neg_four_mul_spheroidalRecA_sub_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
+    {k : ℤ} (hk : 2 ≤ k) :
     |-4 * spheroidalRecA n m γ2 k - γ2| ≤ |γ2| * (4 * m ^ 2 + 12 * m + 7) / k := by
   have kr : (2 : ℝ) ≤ k := by exact_mod_cast hk
   have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
@@ -223,7 +227,8 @@ private lemma abs_le_of_sixteen_mul_eq {k D X Y E γ2 c₂ c₃ : ℝ} (hk : 1 �
   nlinarith
 
 /-- For `γ² ≠ 0`, eventually `a_j ≠ 0` and `|a_{j+1}| ≤ |a_j|/4`. -/
-private lemma eventually_spheroidalCoeff_ne_zero_and_ratio_le {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+private lemma eventually_spheroidalCoeff_ne_zero_and_ratio_le {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ}
+    (hγ : γ2 ≠ 0) :
     ∃ J : ℕ, ∀ j : ℕ, J ≤ j → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) ≠ 0 ∧
       |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
         |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| / 4 := by
@@ -353,7 +358,8 @@ theorem spheroidalCoeff_ratio_isBigO {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
   exact hfin
 
 /-- For `γ² ≠ 0`, eventually `a_{k-1} ≠ 0`, `a_k ≠ 0` and `|a_k/a_{k-1}| ≤ |γ²|/k²`. -/
-private lemma eventually_abs_spheroidalCoeff_ratio_le {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+private lemma eventually_abs_spheroidalCoeff_ratio_le {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ}
+    (hγ : γ2 ≠ 0) :
     ∃ K : ℕ, ∀ k : ℕ, K ≤ k → spheroidalCoeff n m γ2 ((k : ℤ) - 1) ≠ 0 ∧
       spheroidalCoeff n m γ2 (k : ℤ) ≠ 0 ∧
       |spheroidalCoeff n m γ2 (k : ℤ) / spheroidalCoeff n m γ2 ((k : ℤ) - 1)| ≤

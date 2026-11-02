@@ -36,7 +36,8 @@ This file covers DLMF §§24.13–24.14. DLMF's `Bₙ(t)`, `Eₙ(t)` on the real
   convolutions (DLMF 24.14.1–24.14.6).
 * `sum_choose_mul_bernoulli_mul_bernoulli_div`: DLMF 24.14.7.
 * `sum_antidiagonal_bernoulli_triple`, `sum_antidiagonal_eulerNumber_triple`,
-  `sum_antidiagonal_bernoulli_quadruple`: triple and quadruple sums (DLMF 24.14.8–24.14.10).
+  `sum_antidiagonal_eulerNumber_triple'`, `sum_antidiagonal_bernoulli_quadruple`: triple and
+  quadruple sums (DLMF 24.14.8–24.14.10).
 * `det_hankel_bernoulli`, `det_hankel_eulerNumber`: Hankel determinants (DLMF 24.14.11–24.14.12).
 
 ## Implementation notes
@@ -187,7 +188,8 @@ private lemma integral_bernoulliFun_mul_bernoulliFun_succ (m : ℕ) :
   induction m with
   | zero =>
     intro n hn
-    rw [integral_bernoulliFun_mul_bernoulliFun_succ_parts, intervalIntegral.integral_congr (g := fun t =>
+    rw [integral_bernoulliFun_mul_bernoulliFun_succ_parts, intervalIntegral.integral_congr
+        (g := fun t =>
       bernoulliFun (n + 1) t) (fun t _ => by simp [bernoulliFun]),
       integral_bernoulliFun_eq_zero (Nat.succ_ne_zero n), bernoulliFun_eval_one,
       bernoulliFun_endpoints_eq_of_ne_one (show n + 1 ≠ 1 by omega), bernoulliFun_eval_zero]
@@ -728,7 +730,8 @@ theorem sum_choose_two_pow_bernoulli_mul_eulerNumber (n : ℕ) :
   set P := egf fun n => aeval (0 : ℚ) (Polynomial.bernoulli n)
   set Q := egf fun n => aeval (1 / 2 : ℚ) (Polynomial.euler n)
   have k1 : P * ((PowerSeries.exp ℚ) - 1) = PowerSeries.X := by
-    rw [egf_aeval_bernoulli_mul_exp_sub_one, PowerSeries.rescale_zero_apply, PowerSeries.constantCoeff_exp, map_one,
+    rw [egf_aeval_bernoulli_mul_exp_sub_one, PowerSeries.rescale_zero_apply,
+        PowerSeries.constantCoeff_exp, map_one,
       mul_one]
   have hE2 : PowerSeries.rescale (2 : ℚ) (PowerSeries.exp ℚ) = (PowerSeries.exp ℚ) ^ 2 := by
     rw [PowerSeries.exp_pow_eq_rescale_exp]; norm_num
@@ -865,7 +868,8 @@ private lemma egf_sub {A : Type*} [CommRing A] [Algebra ℚ A] (a b : ℕ → A)
 
 /-- The triple binomial convolution of a sequence vanishing at odd indices, at an even index,
 as a sum over `j + k + ℓ = n`. -/
-private lemma sum_triple_binomialConv_two_mul_of_odd_eq_zero (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
+private lemma sum_triple_binomialConv_two_mul_of_odd_eq_zero (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0)
+    (n : ℕ) :
     ∑ i ∈ range (2 * n + 1), ((2 * n).choose i : ℚ) * b i *
         ∑ j ∈ range (2 * n - i + 1), ((2 * n - i).choose j : ℚ) * b j * b (2 * n - i - j) =
       ∑ v ∈ Finset.Nat.antidiagonalTuple 3 n,
@@ -930,7 +934,8 @@ private lemma sum_antidiagonalTuple_four {M : Type*} [AddCommMonoid M] (n : ℕ)
 
 /-- The fourfold binomial convolution of a sequence vanishing at odd indices, at an even
 index, as a sum over `j + k + ℓ + m = n`. -/
-private lemma sum_quadruple_binomialConv_two_mul_of_odd_eq_zero (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
+private lemma sum_quadruple_binomialConv_two_mul_of_odd_eq_zero (b : ℕ → ℚ)
+    (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
     ∑ i ∈ range (2 * n + 1), ((2 * n).choose i : ℚ) * b i *
         ∑ j ∈ range (2 * n - i + 1), ((2 * n - i).choose j : ℚ) * b j *
           ∑ k ∈ range (2 * n - i - j + 1), ((2 * n - i - j).choose k : ℚ) * b k *
@@ -944,7 +949,8 @@ private lemma sum_quadruple_binomialConv_two_mul_of_odd_eq_zero (b : ℕ → ℚ
   rw [show 2 * n / 2 = n by omega]
   refine sum_congr rfl fun a ha => ?_
   have han : a ≤ n := Nat.lt_succ_iff.mp (mem_range.mp ha)
-  rw [show 2 * n - 2 * a = 2 * (n - a) by omega, sum_triple_binomialConv_two_mul_of_odd_eq_zero b hb (n - a), mul_sum]
+  rw [show 2 * n - 2 * a = 2 * (n - a) by omega, sum_triple_binomialConv_two_mul_of_odd_eq_zero b hb
+                                            (n - a), mul_sum]
   refine sum_congr rfl fun w _ => ?_
   rw [Nat.cast_choose ℚ (show 2 * a ≤ 2 * n by omega),
     show 2 * n - 2 * a = 2 * (n - a) by omega]
@@ -1021,21 +1027,22 @@ theorem sum_antidiagonal_bernoulli_triple {n : ℕ} (hn : 2 ≤ n) :
       exact bernoulli_eq_zero_of_odd hj (by obtain ⟨k, hk⟩ := hj; omega)
   have hbe : ∀ k, b (2 * k) = _root_.bernoulli (2 * k) := fun k => by
     simp only [b, show 2 * k ≠ 1 by omega, ite_false]
-  rw [sum_triple_binomialConv_two_mul_of_odd_eq_zero b hbodd n, show 2 * n - 2 = 2 * (n - 1) by omega] at hc'
+  rw [sum_triple_binomialConv_two_mul_of_odd_eq_zero b hbodd n, show 2 * n - 2 = 2 * (n - 1) by
+      omega] at hc'
   simp only [hbe] at hc'
   rw [show 2 * n - 2 = 2 * (n - 1) by omega]
   push_cast [show 1 ≤ 2 * n by omega] at hc'
   linear_combination hc'
 
 /-- DLMF 24.14.9: for `n ≥ 2`, summing over `j + k + ℓ = n`,
-`∑ (2n)!/((2j)!(2k)!(2ℓ)!) E₂ⱼ E₂ₖ E₂ₗ = (E₂ₙ - E₂ₙ₊₂)/2`. -/
+`∑ (2n)!/((2j)!(2k)!(2ℓ)!) E₂ⱼ E₂ₖ E₂ₗ = (E₂ₙ - E₂ₙ₊₂)/2`. This is stronger than DLMF, which assumes
+`n ≥ 2`. -/
 @[dlmf 24.14.E9]
-theorem sum_antidiagonal_eulerNumber_triple {n : ℕ} (hn : 2 ≤ n) :
+theorem sum_antidiagonal_eulerNumber_triple' {n : ℕ} :
     ∑ v ∈ Finset.Nat.antidiagonalTuple 3 n,
         ((2 * n)! / ((2 * v 0)! * (2 * v 1)! * (2 * v 2)!) : ℚ) *
           eulerNumber (2 * v 0) * eulerNumber (2 * v 1) * eulerNumber (2 * v 2) =
       (eulerNumber (2 * n) - eulerNumber (2 * n + 2)) / 2 := by
-  have _ := hn
   set F := egf fun N => eulerNumber N
   have hE2 : PowerSeries.rescale (2 : ℚ) (PowerSeries.exp ℚ) = PowerSeries.exp ℚ ^ 2 := by
     rw [PowerSeries.exp_pow_eq_rescale_exp]; norm_num
@@ -1073,11 +1080,22 @@ theorem sum_antidiagonal_eulerNumber_triple {n : ℕ} (hn : 2 ≤ n) :
     PowerSeries.coeff_C_mul, coeff_egf, coeff_egf] at hc
   have hf : ((2 * n)! : ℚ) ≠ 0 := by positivity
   simp only [Algebra.algebraMap_self, RingHom.id_apply] at hc
-  rw [← sum_triple_binomialConv_two_mul_of_odd_eq_zero _ (fun j hj => eulerNumber_eq_zero_of_odd hj) n]
+  rw [← sum_triple_binomialConv_two_mul_of_odd_eq_zero _ (fun j hj => eulerNumber_eq_zero_of_odd hj)
+      n]
   have hc' := congrArg (fun t => ((2 * n)! : ℚ) * t / 2) hc
   simp only [← mul_assoc, mul_comm _ (2 : ℚ)] at hc'
   rw [mul_assoc 2, mul_inv_cancel₀ hf, mul_one] at hc'
   linear_combination hc'
+
+/-- DLMF 24.14.9: for `n ≥ 2`, summing over `j + k + ℓ = n`,
+`∑ (2n)!/((2j)!(2k)!(2ℓ)!) E₂ⱼ E₂ₖ E₂ₗ = (E₂ₙ - E₂ₙ₊₂)/2`. -/
+@[dlmf 24.14.E9]
+theorem sum_antidiagonal_eulerNumber_triple {n : ℕ} (_hn : 2 ≤ n) :
+    ∑ v ∈ Finset.Nat.antidiagonalTuple 3 n,
+        ((2 * n)! / ((2 * v 0)! * (2 * v 1)! * (2 * v 2)!) : ℚ) *
+          eulerNumber (2 * v 0) * eulerNumber (2 * v 1) * eulerNumber (2 * v 2) =
+      (eulerNumber (2 * n) - eulerNumber (2 * n + 2)) / 2 :=
+  sum_antidiagonal_eulerNumber_triple'
 
 /-- DLMF 24.14.10: for `n ≥ 4`, summing over positive `j + k + ℓ + m = n`,
 `∑ (2n)!/((2j)!(2k)!(2ℓ)!(2m)!) B₂ⱼ B₂ₖ B₂ₗ B₂ₘ = -(2n+3 choose 3) B₂ₙ - (4/3) n²(2n-1) B₂ₙ₋₂`. -/

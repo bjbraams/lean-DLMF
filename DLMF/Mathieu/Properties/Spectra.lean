@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Properties.Floquet
+public import DLMF.Mathieu.Hill.Floquet
 
 /-!
 # Mathieu characteristic spectra
@@ -40,6 +41,57 @@ namespace DLMF.Mathieu
 
 /-! ### Eigenvalues (§28.2(v)) -/
 
+/-- The restriction of a solution of Mathieu's equation to the real axis, as a first-order
+system. -/
+private lemma IsMathieuSolution.hasDerivAt_ofReal {a q : ℂ} {w : ℂ → ℂ}
+    (hw : IsMathieuSolution a q w) (x : ℝ) :
+    HasDerivAt (fun x : ℝ => w x) (deriv w x) x ∧
+      HasDerivAt (fun x : ℝ => deriv w x)
+        (-(a + -2 * q * Complex.cos (2 * (x : ℂ))) * w x) x := by
+  refine ⟨((hw.differentiable x).hasDerivAt).comp_ofReal, ?_⟩
+  exact ((hw.hasDerivAt_deriv x).comp_ofReal).congr_deriv (by ring)
+
+/-- `‖cos 2x‖ ≤ 1` for real `x`. -/
+private lemma norm_cos_two_mul_ofReal_le (x : ℝ) : ‖Complex.cos (2 * (x : ℂ))‖ ≤ 1 := by
+  rw [show (2 * (x : ℂ)) = ((2 * x : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_cos,
+    Complex.norm_real, Real.norm_eq_abs]
+  exact Real.abs_cos_le_one _
+
+/-- Growth of `w_I(π; a, q)` in `a`: `‖w_I(π; a, q)‖ ≤ e^{‖q‖π} e^{π ‖a‖^{1/2}}` for
+`‖a‖ ≥ 1`. -/
+private lemma norm_mathieuWI_pi_le (q : ℂ) {a : ℂ} (ha : 1 ≤ ‖a‖) :
+    ‖mathieuWI a q π‖ ≤ Real.exp (‖q‖ * π) * Real.exp (π * Real.sqrt ‖a‖) := by
+  set k := Real.sqrt ‖a‖
+  set M := 2 * ‖q‖
+  have hM : 0 ≤ M := by positivity
+  have hk : 1 ≤ k := by rw [show (1 : ℝ) = Real.sqrt 1 by simp]; exact Real.sqrt_le_sqrt ha
+  have hk2 : k ^ 2 = ‖a‖ := Real.sq_sqrt (by linarith)
+  have hw := isMathieuSolution_mathieuWI a q
+  have hP : ∀ x ∈ Icc 0 π, ‖-(a + -2 * q * Complex.cos (2 * (x : ℂ)))‖ ≤ M + k ^ 2 := by
+    intro x _
+    rw [norm_neg, hk2]
+    calc ‖a + -2 * q * Complex.cos (2 * (x : ℂ))‖ ≤ ‖a‖ + 2 * ‖q‖ * 1 := by
+          refine (norm_add_le _ _).trans ?_
+          rw [norm_mul, norm_mul, norm_neg]
+          gcongr
+          · simp
+          · exact norm_cos_two_mul_ofReal_le x
+      _ = M + ‖a‖ := by ring
+  have hπ : π ∈ Icc 0 π := ⟨Real.pi_pos.le, le_rfl⟩
+  have e := ODE.norm_deriv_sq_add_sq_mul_norm_sq_le_exp hM hk hP
+    (fun x => (hw.hasDerivAt_ofReal x).1) (fun x => (hw.hasDerivAt_ofReal x).2) hπ
+  simp only [ofReal_zero, mathieuWI_apply_zero, deriv_mathieuWI_apply_zero, norm_zero,
+    norm_one] at e
+  have hB : Real.exp ((M + 2 * k) * π) =
+      (Real.exp (‖q‖ * π) * Real.exp (π * k)) ^ 2 := by
+    rw [← Real.exp_add, sq, ← Real.exp_add]; simp only [M]; ring_nf
+  refine (pow_le_pow_iff_left₀ (norm_nonneg _) (by positivity) two_ne_zero).mp ?_
+  rw [← hB]
+  have hk2' : 0 < k ^ 2 := by positivity
+  have : k ^ 2 * ‖mathieuWI a q π‖ ^ 2 ≤ k ^ 2 * Real.exp ((M + 2 * k) * π) := by
+    nlinarith [sq_nonneg ‖deriv (mathieuWI a q) (π : ℂ)‖]
+  exact le_of_mul_le_mul_left this hk2'
+
 /-- **Discrete set of eigenvalues** (DLMF §28.2(v)): for given `ν` and `q`, the set of `a`
 satisfying the characteristic equation 28.2.16 is infinite and has no finite accumulation
 point. -/
@@ -47,7 +99,98 @@ point. -/
 theorem charExp_set_infinite_discrete (q ν : ℂ) :
     {a : ℂ | IsMathieuCharExp a q ν}.Infinite ∧
       ∀ K : Set ℂ, IsCompact K → (K ∩ {a : ℂ | IsMathieuCharExp a q ν}).Finite := by
-  sorry
+  set D : ℂ → ℂ := fun a => 2 * mathieuWI a q π
+  have hD : Differentiable ℂ D := by
+    have h := differentiable_mathieuWI_mathieuWII.1
+    have : Differentiable ℂ fun a : ℂ => ((π : ℂ), a, q) := by fun_prop
+    exact (h.comp this).const_mul 2
+  -- growth
+  have hgrowth : ∀ z, max 1 (π ^ 4) ≤ ‖z‖ →
+      ‖D z‖ ≤ 2 * Real.exp (‖q‖ * π) * Real.exp (‖z‖ ^ ((3 : ℝ) / 4)) := by
+    intro z hz
+    have h1 : 1 ≤ ‖z‖ := (le_max_left _ _).trans hz
+    have hr : 0 < ‖z‖ := by linarith
+    simp only [D, norm_mul, Complex.norm_ofNat, mul_assoc]
+    gcongr
+    refine (norm_mathieuWI_pi_le q h1).trans ?_
+    gcongr
+    have hpi : π ≤ ‖z‖ ^ ((1 : ℝ) / 4) := by
+      calc π = (π ^ 4) ^ ((1 : ℝ) / 4) := by
+            rw [← Real.rpow_natCast, ← Real.rpow_mul Real.pi_pos.le]; norm_num
+        _ ≤ ‖z‖ ^ ((1 : ℝ) / 4) := Real.rpow_le_rpow (by positivity)
+            ((le_max_right _ _).trans hz) (by norm_num)
+    rw [show ((3 : ℝ) / 4) = 1 / 4 + 1 / 2 by norm_num, Real.rpow_add hr, Real.sqrt_eq_rpow]
+    exact mul_le_mul_of_nonneg_right hpi (by positivity)
+  -- asymptotics on the positive axis
+  have hlim : Tendsto (fun k : ℝ => D ((k : ℂ) ^ 2) - 2 * Real.cos (k * Real.pi)) atTop
+      (𝓝 0) := by
+    set M := 2 * ‖q‖
+    have hM : 0 ≤ M := by positivity
+    set B := M * Real.exp ((M + 1) * Real.pi / 2)
+    have hB : 0 ≤ B := by positivity
+    have hB2 : B ^ 2 = M ^ 2 * Real.exp ((M + 1) * Real.pi) := by
+      simp only [B]; rw [mul_pow, ← Real.exp_nat_mul]; ring_nf
+    have hπ : Real.pi ∈ Icc 0 Real.pi := ⟨Real.pi_pos.le, le_rfl⟩
+    have hQ : ∀ x ∈ Icc 0 Real.pi, ‖-2 * q * Complex.cos (2 * (x : ℂ))‖ ≤ M := by
+      intro x _
+      rw [norm_mul, norm_mul, norm_neg]
+      simp only [Complex.norm_ofNat, M]
+      nlinarith [norm_cos_two_mul_ofReal_le x, norm_nonneg q]
+    have key : ∀ k : ℝ, 1 ≤ k →
+        ‖D ((k : ℂ) ^ 2) - 2 * Real.cos (k * Real.pi)‖ ≤ 2 * B / k := by
+      intro k hk
+      have hk0 : 0 < k := by linarith
+      have hw := isMathieuSolution_mathieuWI ((k : ℂ) ^ 2) q
+      have e := ODE.energy_sub_harmonic_le (Q := fun x : ℝ => -2 * q * Complex.cos (2 * (x : ℂ)))
+        (a := 1) (b := 0) hM hk hQ (fun x => (hw.hasDerivAt_ofReal x).1)
+        (fun x => ((hw.hasDerivAt_ofReal x).2).congr_deriv (by ring))
+        (by simpa using mathieuWI_apply_zero ((k : ℂ) ^ 2) q)
+        (by simpa using deriv_mathieuWI_apply_zero ((k : ℂ) ^ 2) q) hπ
+      simp only [norm_one, norm_zero, one_mul, zero_mul, one_pow, zero_add, add_zero,
+        zero_div, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_one] at e
+      have hk2 : 0 < k ^ 2 := by positivity
+      rw [show M ^ 2 * k ^ 2 * Real.exp ((M + 1) * Real.pi) / k ^ 2 =
+        M ^ 2 * Real.exp ((M + 1) * Real.pi) by field_simp] at e
+      have h1 : ‖mathieuWI ((k : ℂ) ^ 2) q π - Real.cos (k * Real.pi)‖ ≤ B / k := by
+        refine (pow_le_pow_iff_left₀ (norm_nonneg _) (by positivity) two_ne_zero).mp ?_
+        rw [div_pow, hB2, le_div_iff₀ hk2]
+        nlinarith [sq_nonneg ‖deriv (mathieuWI ((k : ℂ) ^ 2) q) (Real.pi : ℂ) -
+          -(k * Real.sin (k * Real.pi) : ℂ)‖]
+      calc ‖D ((k : ℂ) ^ 2) - 2 * Real.cos (k * Real.pi)‖ =
+            2 * ‖mathieuWI ((k : ℂ) ^ 2) q π - Real.cos (k * Real.pi)‖ := by
+            simp only [D]
+            rw [← mul_sub, norm_mul, Complex.norm_ofNat]
+        _ ≤ 2 * (B / k) := by gcongr
+        _ = 2 * B / k := by ring
+    refine squeeze_zero_norm' (eventually_atTop.2 ⟨1, key⟩) ?_
+    exact tendsto_const_nhds.div_atTop tendsto_id
+  have hinf := setOf_eq_infinite_of_tendsto_sub_two_cos hD (by norm_num) (by norm_num)
+    hgrowth hlim
+  have hset : {a : ℂ | IsMathieuCharExp a q ν} = {a | D a = 2 * Complex.cos (π * ν)} := by
+    ext a
+    simp only [IsMathieuCharExp, mem_ofPred_eq, D]
+    constructor
+    · intro h; linear_combination -2 * h
+    · intro h; linear_combination -h / 2
+  refine ⟨hset ▸ hinf _, fun K hK => ?_⟩
+  by_contra hfin
+  obtain ⟨x, -, hx⟩ := Set.Infinite.exists_accPt_of_subset_isCompact
+    (s := K ∩ {a | IsMathieuCharExp a q ν}) hfin hK inter_subset_left
+  have hfreq : ∃ᶠ z in 𝓝[≠] x, D z - 2 * Complex.cos (π * ν) = 0 := by
+    rw [accPt_iff_frequently_nhdsNE] at hx
+    refine hx.mono fun z hz => ?_
+    have := hz.2
+    rw [hset] at this
+    exact sub_eq_zero.mpr this
+  have han : AnalyticOnNhd ℂ (fun z => D z - 2 * Complex.cos (π * ν)) univ := fun z _ =>
+    (hD.sub_const (2 * Complex.cos (π * ν))).analyticAt z
+  have hzero := han.eqOn_zero_of_preconnected_of_frequently_eq_zero isPreconnected_univ
+    (mem_univ x) hfreq
+  obtain ⟨z, hz⟩ := (hinf (2 * Complex.cos (π * ν) + 1)).nonempty
+  have := hzero (mem_univ z)
+  simp only [Pi.zero_apply, mem_ofPred_eq] at this hz
+  rw [hz] at this
+  norm_num at this
 
 /-- **DLMF 28.2.21** (even `n`): `w_I'(π/2; a_{2n}(q), q) = 0`. -/
 @[dlmf 28.2.E21]
@@ -112,7 +255,8 @@ theorem exists_eq_nthLeast {S : Set ℝ} {a : ℝ} (ha : a ∈ S) (hfin : (S ∩
   ⟨(S ∩ Iio a).ncard, (nthLeast_eq_of ha hfin.cast_ncard_eq.symm).symm⟩
 
 /-- The least element of a spectrum. -/
-private lemma le_of_encard_inter_Iio_eq_zero {S : Set ℝ} {x₀ : ℝ} (h : (S ∩ Iio x₀).encard = (0 : ℕ)) :
+private lemma le_of_encard_inter_Iio_eq_zero {S : Set ℝ} {x₀ : ℝ}
+    (h : (S ∩ Iio x₀).encard = (0 : ℕ)) :
     ∀ y ∈ S, x₀ ≤ y := by
   intro y hy
   by_contra hlt
@@ -128,7 +272,8 @@ private lemma differentiable_mathieuWI_mathieuWII_a (z q : ℂ) :
     differentiable_mathieuWI_mathieuWII.2.comp hl⟩
 
 /-- A spectrum with an element having no smaller elements is bounded below. -/
-private lemma exists_lower_bound_of_encard_inter_Iio_eq_zero (S : Set ℝ) (h : ∃ x ∈ S, (S ∩ Iio x).encard = (0 : ℕ)) :
+private lemma exists_lower_bound_of_encard_inter_Iio_eq_zero (S : Set ℝ)
+    (h : ∃ x ∈ S, (S ∩ Iio x).encard = (0 : ℕ)) :
     ∃ x₀, ∀ y ∈ S, x₀ ≤ y := by
   obtain ⟨x, -, hx⟩ := h; exact ⟨x, le_of_encard_inter_Iio_eq_zero hx⟩
 
@@ -152,7 +297,8 @@ theorem exists_solution_neumann_iff (a q : ℝ) :
       intro k; simp [S, mathieuSpecA]
     have haS : a ∈ S := by simpa [S, mathieuSpecA] using hA'
     obtain ⟨x₀, hx₀⟩ := exists_lower_bound_of_encard_inter_Iio_eq_zero S (mathieuSpecA_exists 0 q 0)
-    obtain ⟨y₀, hy₀⟩ := exists_lower_bound_of_encard_inter_Iio_eq_zero (mathieuSpecB 2 q) (mathieuSpecB_exists 2 q 0)
+    obtain ⟨y₀, hy₀⟩ := exists_lower_bound_of_encard_inter_Iio_eq_zero (mathieuSpecB 2 q)
+        (mathieuSpecB_exists 2 q 0)
     have hfin : (S ∩ Iio a).Finite := by
       refine finite_inter_Iio_of_zeros (g := fun b => mathieuWI b q π - 1)
         ((differentiable_mathieuWI_mathieuWII_a _ _).1.sub_const 1) (fun x hx => ?_) hx₀
@@ -231,7 +377,8 @@ theorem exists_solution_dirichlet_neumann_iff (a q : ℝ) :
     have hmemA : ∀ x : ℝ, x ∈ mathieuSpecA 1 q ↔ mathieuWI x q (π / 2) = 0 := by
       intro x; simp only [mathieuSpecA, Nat.not_even_one, ↓reduceIte, Set.mem_ofPred_eq]
     obtain ⟨x₀, hx₀⟩ := exists_lower_bound_of_encard_inter_Iio_eq_zero S (mathieuSpecB_exists 1 q 0)
-    obtain ⟨y₀, hy₀⟩ := exists_lower_bound_of_encard_inter_Iio_eq_zero (mathieuSpecA 1 q) (mathieuSpecA_exists 1 q 0)
+    obtain ⟨y₀, hy₀⟩ := exists_lower_bound_of_encard_inter_Iio_eq_zero (mathieuSpecA 1 q)
+        (mathieuSpecA_exists 1 q 0)
     have hfin : (S ∩ Iio a).Finite := by
       refine finite_inter_Iio_of_zeros (g := fun b => mathieuWI b q π + 1)
         ((differentiable_mathieuWI_mathieuWII_a _ _).1.add_const 1) (fun x hx => ?_) hx₀
@@ -454,7 +601,8 @@ private lemma nthLeast_range_of_strictMono {f : ℕ → ℝ} (hf : StrictMono f)
   simp [Set.encard_eq_coe_toFinset_card]
 
 /-- `s` with `s ⋅ π/2 = m π` is `2m`. -/
-private lemma exists_eq_two_mul_of_sin_mul_pi_div_two_eq_zero {s : ℂ} (h : Complex.sin (s * (π / 2)) = 0) :
+private lemma exists_eq_two_mul_of_sin_mul_pi_div_two_eq_zero {s : ℂ}
+    (h : Complex.sin (s * (π / 2)) = 0) :
     ∃ m : ℤ, s = 2 * m := by
   obtain ⟨m, hm⟩ := Complex.sin_eq_zero_iff.mp h
   refine ⟨m, ?_⟩
@@ -462,7 +610,8 @@ private lemma exists_eq_two_mul_of_sin_mul_pi_div_two_eq_zero {s : ℂ} (h : Com
   apply mul_right_cancel₀ hπ; linear_combination 2 * hm
 
 /-- `s` with `cos(s ⋅ π/2) = 0` is `2m + 1`. -/
-private lemma exists_eq_two_mul_add_one_of_cos_mul_pi_div_two_eq_zero {s : ℂ} (h : Complex.cos (s * (π / 2)) = 0) :
+private lemma exists_eq_two_mul_add_one_of_cos_mul_pi_div_two_eq_zero {s : ℂ}
+    (h : Complex.cos (s * (π / 2)) = 0) :
     ∃ m : ℤ, s = 2 * m + 1 := by
   obtain ⟨m, hm⟩ := Complex.cos_eq_zero_iff.mp h
   refine ⟨m, ?_⟩
@@ -475,7 +624,8 @@ private lemma natCast_natAbs_sq_eq (m : ℤ) : ((m.natAbs : ℕ) : ℂ) ^ 2 = (m
   simpa only [Int.cast_pow, Int.cast_natCast] using this
 
 /-- An odd integer squared is `(2j+1)²` for a natural `j`. -/
-private lemma exists_two_mul_add_one_sq_eq_natCast (m : ℤ) : ∃ j : ℕ, ((2 * m + 1 : ℂ)) ^ 2 = ((2 * j + 1 : ℕ) : ℂ) ^ 2 := by
+private lemma exists_two_mul_add_one_sq_eq_natCast (m : ℤ) : ∃ j : ℕ, ((2 * m + 1 : ℂ)) ^ 2 =
+    ((2 * j + 1 : ℕ) : ℂ) ^ 2 := by
   rcases le_or_gt 0 m with hm | hm
   · refine ⟨m.toNat, ?_⟩
     have : ((m.toNat : ℕ) : ℤ) = m := Int.toNat_of_nonneg hm

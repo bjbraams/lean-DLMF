@@ -9,7 +9,7 @@ public import Mathlib.Analysis.Calculus.Deriv.Polynomial
 public import DLMF.Gamma.Basic.ScaledGamma
 public import DLMF.Gamma.ComplexBinet
 public import DLMF.Gamma.MellinBarnes
-public import DLMF.Hypergeometric.SeriesProperties
+public import DLMF.Hypergeometric.Basic.SpecialValues
 public import Mathlib.NumberTheory.BernoulliPolynomials
 
 /-!
@@ -369,7 +369,7 @@ open Set in
 /-- The remainder in the digamma expansion is the negative Laplace integral of
 Binet's Bernoulli remainder; this identity holds at every positive real argument. -/
 theorem digamma_sub_stirling_eq_integral (n : ℕ) {z : ℝ} (hz0 : 0 < z) :
-    Real.digamma z - (Real.log z - 1 / (2 * z) -
+    Gamma.Real.digamma z - (Real.log z - 1 / (2 * z) -
       ∑ k ∈ Finset.Icc 1 n, (bernoulli (2 * k) : ℝ) / ((2 * k) * z ^ (2 * k))) =
       -∫ s in Ioi (0 : ℝ), Real.exp (-z * s) *
         (s ^ 1 * (binetBeta s / s - binetPoly n s)) := by
@@ -383,7 +383,7 @@ theorem digamma_sub_stirling_eq_integral (n : ℕ) {z : ℝ} (hz0 : 0 < z) :
     have : ((2 * k - 1).factorial : ℝ) ≠ 0 := by positivity
     have hk0 : (k : ℝ) ≠ 0 := by positivity
     field_simp
-  have hdiff : Real.digamma z - (Real.log z - 1 / (2 * z) -
+  have hdiff : Gamma.Real.digamma z - (Real.log z - 1 / (2 * z) -
       ∑ k ∈ Finset.Icc 1 n, (bernoulli (2 * k) : ℝ) / ((2 * k) * z ^ (2 * k))) =
       -∫ s in Ioi (0 : ℝ), Real.exp (-z * s) * (s ^ 1 * (binetBeta s / s - binetPoly n s)) := by
     have hI : ∫ s in Ioi (0 : ℝ), Real.exp (-z * s) * (s ^ 1 * (binetBeta s / s -
@@ -403,7 +403,7 @@ x`, `t → ∞`. -/
 @[dlmf 5.11.E2]
 theorem digamma_stirling (n : ℕ) {x : ℝ} (hx : 1 < x) :
     Asymptotics.IsBigO atTop
-      (fun t : ℝ => Real.digamma (t + x) -
+      (fun t : ℝ => Gamma.Real.digamma (t + x) -
         (Real.log (t + x) - 1 / (2 * (t + x)) -
           ∑ k ∈ Finset.Icc 1 n, bernoulli (2 * k) / ((2 * k) * (t + x) ^ (2 * k))))
       (fun t : ℝ => (t : ℝ) ^ (-(2 * n : ℝ) - 2)) := by

@@ -88,7 +88,8 @@ theorem hasDerivAt_struveBinomRem (a : ℝ) (m : ℕ) {u : ℝ} (hu : -1 < u) :
   ring
 
 /-- The binomial remainder is continuous on `[0, ∞)`. -/
-theorem continuousOn_struveBinomRem (a : ℝ) (m : ℕ) : ContinuousOn (struveBinomRem a m) (Ici 0) := by
+theorem continuousOn_struveBinomRem (a : ℝ) (m : ℕ) : ContinuousOn
+    (struveBinomRem a m) (Ici 0) := by
   refine ((continuousOn_const.add continuousOn_id).rpow_const fun x hx => Or.inl ?_).sub
     (by fun_prop)
   have : (0 : ℝ) ≤ x := hx
@@ -105,18 +106,21 @@ theorem struveBinomRem_succ_eq_integral (a : ℝ) (m : ℕ) {u : ℝ} (hu : 0 �
   have hint : IntervalIntegrable (fun s => a * struveBinomRem (a - 1) m s) volume 0 u :=
     ((continuousOn_struveBinomRem (a - 1) m).mono (by
       rw [uIcc_of_le hu]; exact Icc_subset_Ici_self)).intervalIntegrable.const_mul a
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (f := struveBinomRem a (m + 1)) (fun s hs => ?_)
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (f := struveBinomRem a (m + 1))
+      (fun s hs => ?_)
     hint, struveBinomRem_succ_zero, sub_zero]
   rw [uIcc_of_le hu] at hs
   exact hasDerivAt_struveBinomRem a m (by linarith [hs.1])
 
 /-- Sign and size of the binomial remainder for `a ≤ m` and `u ≥ 0`. -/
 theorem struveBinomRem_bound (m : ℕ) : ∀ a : ℝ, a ≤ m → ∀ u : ℝ, 0 ≤ u →
-    0 ≤ Ring.choose a m * struveBinomRem a m u ∧ |struveBinomRem a m u| ≤ |Ring.choose a m| * u ^ m := by
+    0 ≤ Ring.choose a m *
+        struveBinomRem a m u ∧ |struveBinomRem a m u| ≤ |Ring.choose a m| * u ^ m := by
   induction m with
   | zero =>
     intro a ha u hu
-    simp only [struveBinomRem, Finset.range_zero, Finset.sum_empty, sub_zero, Ring.choose_zero_right,
+    simp only [struveBinomRem, Finset.range_zero, Finset.sum_empty, sub_zero,
+        Ring.choose_zero_right,
       one_mul, pow_zero, abs_one, mul_one]
     have h0 : 0 ≤ (1 + u) ^ a := Real.rpow_nonneg (by linarith) _
     refine ⟨h0, ?_⟩
@@ -135,8 +139,10 @@ theorem struveBinomRem_bound (m : ℕ) : ∀ a : ℝ, a ≤ m → ∀ u : ℝ, 0
       (hcont.mono (by rw [uIcc_of_le hu])).intervalIntegrable
     rw [struveBinomRem_succ_eq_integral a m hu, hc']
     constructor
-    · have : a * Ring.choose (a - 1) m / (m + 1) * (a * ∫ s in (0 : ℝ)..u, struveBinomRem (a - 1) m s)
-          = a ^ 2 / (m + 1) * ∫ s in (0 : ℝ)..u, Ring.choose (a - 1) m * struveBinomRem (a - 1) m s := by
+    · have : a * Ring.choose (a - 1) m / (m + 1) *
+          (a * ∫ s in (0 : ℝ)..u, struveBinomRem (a - 1) m s)
+          = a ^ 2 / (m + 1) * ∫ s in (0 : ℝ)..u, Ring.choose (a - 1) m *
+              struveBinomRem (a - 1) m s := by
         rw [intervalIntegral.integral_const_mul]; ring
       rw [this]
       refine mul_nonneg (by positivity) (intervalIntegral.integral_nonneg hu fun s hs => ?_)
@@ -160,7 +166,8 @@ end BinomialRemainder
 
 /-- First omitted term bounds the real positive-argument remainder. -/
 theorem struveK_remainder_sign {ν x : ℝ} (hx : 0 < x) (m : ℕ) (hm : ν ≤ m+1/2) :
-    let R := struveK ν x-∑ k ∈ Finset.range m, struveAsymptoticTerm ν x k; R.im=0 ∧ R.re*(struveAsymptoticTerm ν x m).re ≥ 0 ∧ ‖R‖ ≤ ‖struveAsymptoticTerm ν x m‖ := by
+    let R := struveK ν x-∑ k ∈ Finset.range m, struveAsymptoticTerm ν x k; R.im=0 ∧
+        R.re*(struveAsymptoticTerm ν x m).re ≥ 0 ∧ ‖R‖ ≤ ‖struveAsymptoticTerm ν x m‖ := by
   intro R
   set a : ℝ := ν - 1 / 2 with ha
   have hxC : 0 < ((x : ℂ)).re := by simpa using hx
@@ -186,7 +193,8 @@ theorem struveK_remainder_sign {ν x : ℝ} (hx : 0 < x) (m : ℕ) (hm : ν ≤ 
       (by positivity) hx
     rw [show (∫ t in Ioi (0 : ℝ), e t * (t ^ 2) ^ k) = ∫ t in Ioi (0 : ℝ),
       Real.exp (-x * t) * t ^ (((2 * k + 1 : ℕ) : ℝ) - 1) from
-      setIntegral_congr_fun measurableSet_Ioi (fun t ht => by simp only [he, hpow k t ht]), h, show ((2 * k + 1 : ℕ) : ℝ) = ((2 * k : ℕ) : ℝ) + 1 by push_cast; ring,
+      setIntegral_congr_fun measurableSet_Ioi (fun t ht => by simp only [he, hpow k t ht]), h,
+          show ((2 * k + 1 : ℕ) : ℝ) = ((2 * k : ℕ) : ℝ) + 1 by push_cast; ring,
       Real.Gamma_nat_eq_factorial, Real.rpow_neg hx.le, show ((2 * k : ℕ) : ℝ) + 1 =
       ((2 * k + 1 : ℕ) : ℝ) by push_cast; ring, Real.rpow_natCast, hLdef]
     rfl
@@ -291,7 +299,8 @@ def angerG (ν : ℂ) (k : ℕ) : ℂ :=
 (1/2-ν/2) k*poch (1/2+ν/2) k ∧ angerG ν k = (-4)^k*poch (1-ν/2) k*poch (1+ν/2) k`. -/
 @[dlmf 11.11.E1]
 theorem angerFG_poch (ν : ℂ) (k : ℕ) :
-    angerF ν k = (-4)^k*poch (1/2-ν/2) k*poch (1/2+ν/2) k ∧ angerG ν k = (-4)^k*poch (1-ν/2) k*poch (1+ν/2) k := by
+    angerF ν k = (-4)^k*poch (1/2-ν/2) k*poch (1/2+ν/2) k ∧ angerG ν k =
+        (-4)^k*poch (1-ν/2) k*poch (1+ν/2) k := by
   induction k with
   | zero => simp [angerF, angerG, poch_zero]
   | succ k ih =>
@@ -349,7 +358,9 @@ theorem struveAs_sum_range_two_mul (c : ℕ → ℂ) (N : ℕ) :
 
 /-- The paired form of the `A_ν` expansion. -/
 theorem struveAs_angerA_paired (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
-    (fun z : ℂ => angerA ν z-(∑ k ∈ Finset.range N, 1/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2)))) =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
+    (fun z : ℂ => angerA ν
+        z-(∑ k ∈ Finset.range N, 1/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2))))
+        =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
   have h := struveAs_angerA_sector ν hδ hδπ (2 * N)
   refine (h.congr' ?_ ?_)
   · filter_upwards [struveAs_eventually_sector hδ] with z hz
@@ -376,7 +387,9 @@ z-(∑ k ∈ Finset.range N, sin (π*ν)/π*(angerF ν k/z^(2*k+1)-ν*angerG ν 
 (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ)))`. -/
 @[dlmf 11.11.E2]
 theorem angerJ_large_argument (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
-    (fun z : ℂ => angerJ ν z-besselJ ν z-(∑ k ∈ Finset.range N, sin (π*ν)/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2)))) =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
+    (fun z : ℂ => angerJ ν z-besselJ ν
+        z-(∑ k ∈ Finset.range N, sin (π*ν)/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2))))
+        =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
   refine ((struveAs_angerA_paired ν hδ hδπ N).const_mul_left (sin (π * ν))).congr' ?_
     EventuallyEq.rfl
   filter_upwards [struveAs_eventually_sector hδ] with z hz
@@ -391,7 +404,10 @@ theorem angerJ_large_argument (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ <
 transcription bound only the `F_k` terms, leaving an auto-bound `k` in the `G_k` term. -/
 @[dlmf 11.11.E3]
 theorem weberE_large_argument (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
-    (fun z : ℂ => weberE ν z+besselY ν z-(∑ k ∈ Finset.range N, (-(1+cos (π*ν))/π*angerF ν k/z^(2*k+1)-ν*(1-cos (π*ν))/π*angerG ν k/z^(2*k+2)))) =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
+    (fun z : ℂ => weberE ν z+besselY ν
+        z-(∑ k ∈ Finset.range N,
+        (-(1+cos (π*ν))/π*angerF ν k/z^(2*k+1)-ν*(1-cos (π*ν))/π*angerG ν k/z^(2*k+2))))
+        =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
   have h1 := (struveAs_angerA_paired ν hδ hδπ N).const_mul_left (-cos (π * ν))
   have h2 := (struveAs_angerA_paired (-ν) hδ hδπ N).neg_left
   refine (h1.add h2).congr' ?_ EventuallyEq.rfl
@@ -418,7 +434,9 @@ Finset.range N, 1/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2)))) =O[secto
 ℂ => z^(-(2*N+1:ℤ)))`. -/
 @[dlmf 11.11.E4]
 theorem angerA_large_argument (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
-    (fun z : ℂ => angerA ν z-(∑ k ∈ Finset.range N, 1/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2)))) =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) :=
+    (fun z : ℂ => angerA ν
+        z-(∑ k ∈ Finset.range N, 1/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2))))
+        =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) :=
   struveAs_angerA_paired ν hδ hδπ N
 
 /-- Large orders separated from all integers. -/
@@ -747,7 +765,8 @@ theorem struveAs_angerJ_large_order_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
 z-1+ν*z/(ν^2-1)) =O[nonintegerOrderSector ε] (fun ν : ℂ => ν^(-2:ℤ))`. -/
 @[dlmf 11.11.E5]
 theorem angerJ_large_order (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
-    (fun ν : ℂ => π*ν/sin (π*ν)*angerJ ν z-1+ν*z/(ν^2-1)) =O[nonintegerOrderSector ε] (fun ν : ℂ => ν^(-2:ℤ)) := by
+    (fun ν : ℂ => π*ν/sin (π*ν)*angerJ ν z-1+ν*z/(ν^2-1)) =O[nonintegerOrderSector ε]
+        (fun ν : ℂ => ν^(-2:ℤ)) := by
   obtain ⟨K, hK⟩ := struveAs_angerJ_large_order_bound z hε
   have hev : ∀ᶠ ν : ℂ in nonintegerOrderSector ε, 4 ≤ ‖ν‖ ∧ ∀ n : ℤ, ε ≤ ‖ν - n‖ := by
     rw [nonintegerOrderSector, sector, eventually_inf_principal, eventually_inf_principal]

@@ -102,7 +102,8 @@ theorem legInt_analyticOnNhd_integral {F : ℂ → ℂ} (hF : AnalyticOnNhd ℂ 
       (continuous_ofReal.continuousAt)).continuousWithinAt
   have h := intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le
     (F := fun z s => w s * F (z * s)) (F' := fun z s => w s * (deriv F (z * s) * s))
-    (x₀ := z0) (bound := fun s => ‖w s‖ * C) (μ := volume) (a := 0) (b := 1) (Metric.ball_mem_nhds z0 hεpos)
+    (x₀ := z0) (bound := fun s => ‖w s‖ * C) (μ := volume) (a := 0) (b := 1)
+        (Metric.ball_mem_nhds z0 hεpos)
     (by
       filter_upwards [isOpen_cutPlane.mem_nhds hz0] with z hz
       exact (hw.mul_continuousOn (hcont z hz)).def'.aestronglyMeasurable)
@@ -122,7 +123,8 @@ theorem legInt_analyticOnNhd_integral {F : ℂ → ℂ} (hF : AnalyticOnNhd ℂ 
     (hw.norm.mul_const C)
     (Eventually.of_forall fun s hs z hz => by
       have hs' := hIcc s hs
-      have hzc : z * s ∈ cutPlane := legInt_mul_mem_cutPlane (hcb (Metric.ball_subset_closedBall hz)) hs'
+      have hzc : z * s ∈ cutPlane :=
+          legInt_mul_mem_cutPlane (hcb (Metric.ball_subset_closedBall hz)) hs'
       have hd := ((hF _ hzc).differentiableAt.hasDerivAt).comp z (hasDerivAt_mul_const (s:ℂ))
       exact hd.const_mul (w s))
   exact h.2.differentiableAt
@@ -180,7 +182,8 @@ theorem legInt_hasDerivAt_g (ν : ℂ) (k : ℕ) (hk : ν ≠ k) {z : ℂ} (hz :
   have L := legInt_olverQ_order_deriv ν (-((k+1:ℕ):ℂ)) hz
   rw [show -((k+1:ℕ):ℂ)+1 = -(k:ℂ) by push_cast; ring] at L
   have hz2 := legendre_sq_sub_one_ne_zero hz
-  have hb : legendreBranchPower ((k+1:ℕ):ℂ) z = legendreBranchPower k z * legendreBranchPower 1 z := by
+  have hb : legendreBranchPower ((k+1:ℕ):ℂ) z = legendreBranchPower k z *
+      legendreBranchPower 1 z := by
     rw [legendreBranchPower_mul]; push_cast; ring_nf
   have hb2 : legendreBranchPower 1 z * legendreBranchPower 1 z = z^2-1 := by
     rw [legendreBranchPower_mul, show (1:ℂ)+1 = 2 by norm_num, legendreBranchPower_two hz]
@@ -256,7 +259,8 @@ theorem legInt_one_lt_mem {t : ℝ} (ht : 1 < t) : (t:ℂ)-1 ∈ slitPlane :=
 theorem legInt_hasIntegralAtTop_g (ν : ℂ) (j : ℕ) (hj : (j:ℝ) < ν.re) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => legInt_g ν j t) x (-legInt_g ν (j+1) x) := by
   have hne : ν ≠ j := fun h => by rw [h] at hj; simp at hj
-  have hFTC : ∀ R, x ≤ R → ∫ t in x..R, legInt_g ν j t = legInt_g ν (j+1) R - legInt_g ν (j+1) x := by
+  have hFTC : ∀ R, x ≤ R → ∫ t in x..R, legInt_g ν j t = legInt_g ν (j+1) R -
+      legInt_g ν (j+1) x := by
     intro R hR
     have hsub : ∀ t ∈ uIcc x R, 1 < t := fun t ht => by
       rw [uIcc_of_le hR] at ht; linarith [ht.1]
@@ -374,7 +378,8 @@ noncomputable def legInt_L (ν : ℂ) (x : ℝ) (m : ℕ) : ℂ :=
 
 /-- Continuity of the integrand of `legInt_L`. -/
 theorem legInt_cont_L (ν : ℂ) {x : ℝ} (hx : 1 < x) (c : ℝ) :
-    Continuous fun θ : ℝ => (((x + Real.sqrt (x^2-1) * Real.cos θ : ℝ)) : ℂ)^ν * Real.cos (c*θ) := by
+    Continuous fun θ : ℝ => (((x + Real.sqrt (x^2-1) * Real.cos θ : ℝ)) : ℂ)^ν *
+        Real.cos (c*θ) := by
   refine Continuous.mul ?_ (by fun_prop)
   refine continuous_iff_continuousAt.2 fun θ => ?_
   refine ContinuousAt.cpow (by fun_prop) continuousAt_const ( ?_)
@@ -411,7 +416,8 @@ theorem legInt_L_rec (ν : ℂ) {x : ℝ} (hx : 1 < x) (m : ℕ) :
     · refine continuous_iff_continuousAt.2 fun θ => ?_
       exact ContinuousAt.cpow (by fun_prop) continuousAt_const ( (ofReal_mem_slitPlane.2 (hwpos θ)))
     · refine continuous_iff_continuousAt.2 fun θ => ?_
-      exact ContinuousAt.cpow (by fun_prop) continuousAt_const ( (ofReal_mem_slitPlane.2 (hwpos θ))))
+      exact ContinuousAt.cpow (by fun_prop) continuousAt_const
+          ( (ofReal_mem_slitPlane.2 (hwpos θ))))
   have hsin0 : Real.sin ((m+1)*π) = 0 := by
     rw [show ((m:ℝ)+1)*π = ((m+1:ℕ):ℝ)*π by push_cast; ring]; exact Real.sin_nat_mul_pi _
   simp only [mul_zero, Real.sin_zero, ofReal_zero, hsin0, mul_zero, sub_zero] at hint
@@ -431,7 +437,8 @@ theorem legInt_L_rec (ν : ℂ) {x : ℝ} (hx : 1 < x) (m : ℕ) :
         Real.sin ((m+1)*θ) * Real.sin θ := by
       rw [← Real.cos_sub]; ring_nf
     rw [hp, e1, e2]; push_cast; ring
-  rw [intervalIntegral.integral_congr (fun θ _ => hpt θ), intervalIntegral.integral_const_mul] at hint
+  rw [intervalIntegral.integral_congr (fun θ _ => hpt θ),
+      intervalIntegral.integral_const_mul] at hint
   have hc := fun k : ℕ => (legInt_cont_L ν hx (k:ℝ)).intervalIntegrable (μ := volume) 0 π
   rw [intervalIntegral.integral_add ((((hc _).const_mul _)).add ((hc _).const_mul _))
     ((hc _).const_mul _), intervalIntegral.integral_add ((hc _).const_mul _) ((hc _).const_mul _),
@@ -780,7 +787,8 @@ theorem legInt_M_ord {x : ℝ} (hx : 1 < x) (n m : ℕ) :
     have hV : HasDerivAt (legInt_V x) (-(s * Real.sinh t)) t := by
       unfold legInt_V
       simpa using ((Real.hasDerivAt_cosh t).const_mul s).const_sub x
-    have h3 : HasDerivAt (fun t : ℝ => Real.sinh ((m+1)*t)) (((m:ℝ)+1) * Real.cosh ((m+1)*t)) t := by
+    have h3 : HasDerivAt (fun t : ℝ => Real.sinh ((m+1)*t))
+        (((m:ℝ)+1) * Real.cosh ((m+1)*t)) t := by
       have := (Real.hasDerivAt_sinh ((m+1)*t)).comp t ((hasDerivAt_id t).const_mul ((m:ℝ)+1))
       simpa [mul_comm, Function.comp_def] using this
     have h := (hV.pow (n+1)).mul h3
@@ -818,7 +826,8 @@ theorem legInt_M_base {x : ℝ} (hx : 1 < x) :
     legInt_M x 0 0 = legInt_u x ∧ legInt_M x 1 0 = x * legInt_u x - 1 := by
   constructor
   · simp [legInt_M, legInt_f]
-  · have hd : ∀ t, HasDerivAt (fun t => x*t - Real.sqrt (x^2-1) * Real.sinh t) (legInt_f x 1 0 t) t :=
+  · have hd : ∀ t, HasDerivAt (fun t => x*t - Real.sqrt (x^2-1) * Real.sinh t)
+        (legInt_f x 1 0 t) t :=
       fun t => by
         have := ((hasDerivAt_id t).const_mul x).sub ((Real.hasDerivAt_sinh t).const_mul
           (Real.sqrt (x^2-1)))
@@ -838,7 +847,8 @@ theorem legInt_M_one (x : ℝ) (n : ℕ) :
   simp only [legInt_f, legInt_V, Nat.cast_one, one_mul, Nat.cast_zero, zero_mul, Real.cosh_zero]
   ring
 
-/-- The Legendre recurrence `(k+2) Q_{k+2} = (2k+3) x Q_{k+1} - (k+1) Q_k` on the principal sheet. -/
+/-- The Legendre recurrence `(k+2) Q_{k+2} = (2k+3) x Q_{k+1} - (k+1) Q_k` on the principal sheet.
+-/
 theorem legInt_legendreQ_rec (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     ((k:ℂ)+2) * legendreQ ((k+2:ℕ):ℂ) z =
       (2*k+3)*z*legendreQ ((k+1:ℕ):ℂ) z - ((k:ℂ)+1) * legendreQ k z := by
@@ -860,7 +870,8 @@ theorem legInt_legendreQ_rec (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 /-- `Q_n(x) = M(n,0)` for `x > 1`. -/
 theorem legInt_legendreQ_M {x : ℝ} (hx : 1 < x) (n : ℕ) : legendreQ n x = legInt_M x n 0 := by
   have hx1 : (x:ℂ)-1 ∈ slitPlane := legInt_one_lt_mem hx
-  have key : ∀ n : ℕ, legendreQ n x = legInt_M x n 0 ∧ legendreQ (n+1:ℕ) x = legInt_M x (n+1) 0 := by
+  have key : ∀ n : ℕ, legendreQ n x = legInt_M x n 0 ∧ legendreQ (n+1:ℕ) x =
+      legInt_M x (n+1) 0 := by
     intro n
     induction n with
     | zero =>
@@ -943,7 +954,8 @@ theorem legInt_A_R2 {x : ℝ} (hx : 1 < x) (n p : ℕ) :
     refine ((((hi _ _).const_mul _)).sub ((((hi _ _).const_mul _).sub (hi _ _)).const_mul _)))
   rw [intervalIntegral.integral_sub ((hi _ _).const_mul _)
     ((((hi _ _).const_mul _).sub (hi _ _)).const_mul _), intervalIntegral.integral_const_mul,
-    intervalIntegral.integral_const_mul, intervalIntegral.integral_sub ((hi _ _).const_mul _) (hi _ _),
+    intervalIntegral.integral_const_mul,
+        intervalIntegral.integral_sub ((hi _ _).const_mul _) (hi _ _),
     intervalIntegral.integral_const_mul] at hint
   norm_num at hint
   simp only [legInt_A]
@@ -1090,7 +1102,8 @@ theorem legInt_Ks_star (x : ℝ) (r q : ℕ) :
   have hc := fun p k : ℕ => (legInt_cont_Ks x p k).intervalIntegrable (μ := volume) 0 π
   rw [intervalIntegral.integral_add (((hc _ _).const_mul _).add ((hc _ _).const_mul _))
     ((hc _ _).const_mul _), intervalIntegral.integral_add ((hc _ _).const_mul _)
-    ((hc _ _).const_mul _), intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
+    ((hc _ _).const_mul _), intervalIntegral.integral_const_mul,
+        intervalIntegral.integral_const_mul,
     intervalIntegral.integral_const_mul] at hint
   simp only [Real.sin_pi, Real.sin_zero, ne_eq, Nat.add_eq_zero_iff, one_ne_zero, and_false,
     not_false_eq_true, zero_pow, zero_mul, mul_zero, sub_zero] at hint
@@ -1102,7 +1115,8 @@ theorem legInt_Ks_star (x : ℝ) (r q : ℕ) :
 theorem legInt_Ks_ibp (x : ℝ) (p q : ℕ) :
     ((p:ℝ)+1) * Real.sqrt (x^2-1)^2 * legInt_Ks x p (q+1) =
       (2*q+1) * (legInt_Ks x (p+2) q - x * legInt_Ks x (p+1) q) := by
-  have hd : ∀ θ, HasDerivAt (fun θ => Real.sqrt (x^2-1) * (legInt_w x θ ^ (p+1) * Real.sin θ ^ (2*q+1)))
+  have hd : ∀ θ, HasDerivAt
+      (fun θ => Real.sqrt (x^2-1) * (legInt_w x θ ^ (p+1) * Real.sin θ ^ (2*q+1)))
       (-(((p:ℝ)+1) * Real.sqrt (x^2-1)^2) * (legInt_w x θ ^ p * Real.sin θ ^ (2*(q+1))) +
         (2*q+1) * (legInt_w x θ ^ (p+2) * Real.sin θ ^ (2*q)) -
         (2*q+1) * x * (legInt_w x θ ^ (p+1) * Real.sin θ ^ (2*q))) θ := by
@@ -1124,7 +1138,8 @@ theorem legInt_Ks_ibp (x : ℝ) (p q : ℕ) :
   have hc := fun p k : ℕ => (legInt_cont_Ks x p k).intervalIntegrable (μ := volume) 0 π
   rw [intervalIntegral.integral_sub (((hc _ _).const_mul _).add ((hc _ _).const_mul _))
     ((hc _ _).const_mul _), intervalIntegral.integral_add ((hc _ _).const_mul _)
-    ((hc _ _).const_mul _), intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
+    ((hc _ _).const_mul _), intervalIntegral.integral_const_mul,
+        intervalIntegral.integral_const_mul,
     intervalIntegral.integral_const_mul] at hint
   simp only [Real.sin_pi, Real.sin_zero, ne_eq, Nat.add_eq_zero_iff, one_ne_zero, and_false,
     not_false_eq_true, zero_pow, mul_zero, sub_zero] at hint
@@ -1133,7 +1148,8 @@ theorem legInt_Ks_ibp (x : ℝ) (p q : ℕ) :
 
 /-- `K(r+2,0) - x K(r+1,0) = (r+1) s² K(r,1)`. -/
 theorem legInt_Ks_one (x : ℝ) (r : ℕ) :
-    legInt_Ks x (r+2) 0 - x * legInt_Ks x (r+1) 0 = (r+1) * Real.sqrt (x^2-1)^2 * legInt_Ks x r 1 := by
+    legInt_Ks x (r+2) 0 - x * legInt_Ks x (r+1) 0 = (r+1) * Real.sqrt (x^2-1)^2 *
+        legInt_Ks x r 1 := by
   have := legInt_Ks_ibp x r 0
   simp only [CharP.cast_eq_zero, mul_zero, zero_add, one_mul] at this
   linarith

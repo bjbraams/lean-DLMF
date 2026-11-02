@@ -96,7 +96,8 @@ private lemma cexp_neg_I_mul_eq_cos_sub_sin (n : ℤ) (x : ℝ) :
 /-- Identity under the stated parameter and domain assumptions: `∫ x in (-π)..π, f x * Complex.exp
 (-(Complex.I * n * x)) = (∫ x in (-π)..π, f x * (Real.cos (n * x) : ℂ)) - Complex.I * ∫ x in
 (-π)..π, f x * (Real.sin (n * x) : ℂ)`. -/
-private lemma integral_mul_cexp_neg_eq_cos_sub_sin {f : ℝ → ℂ} (hf : IntervalIntegrable f volume (-π) π)
+private lemma integral_mul_cexp_neg_eq_cos_sub_sin {f : ℝ → ℂ}
+    (hf : IntervalIntegrable f volume (-π) π)
     (n : ℤ) :
     ∫ x in (-π)..π, f x * Complex.exp (-(Complex.I * n * x)) =
       (∫ x in (-π)..π, f x * (Real.cos (n * x) : ℂ)) -

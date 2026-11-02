@@ -133,7 +133,8 @@ theorem PcfLG2HasExp.unique {f : ℝ → ℂ} {a b : ℕ → ℂ} (ha : PcfLG2Ha
 theorem PcfLG2HasExp.mul {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : PcfLG2HasExp f a)
     (hb : PcfLG2HasExp g b) : PcfLG2HasExp (fun u => f u * g u) (pcfLG2_cauchy a b) := by
   intro N
-  have hQ : ∀ n < N, (pcfLG2_trunc N a * pcfLG2_trunc N b - pcfLG2_trunc N (pcfLG2_cauchy a b)).coeff n = 0 := by
+  have hQ : ∀ n < N, (pcfLG2_trunc N a * pcfLG2_trunc N b -
+      pcfLG2_trunc N (pcfLG2_cauchy a b)).coeff n = 0 := by
     intro n hn
     rw [coeff_sub, coeff_mul, pcfLG2_trunc_coeff]
     simp only [hn, ↓reduceIte]

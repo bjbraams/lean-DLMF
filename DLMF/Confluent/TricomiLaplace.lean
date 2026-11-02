@@ -154,7 +154,8 @@ theorem laplace_kummerU_gauss {a b c z : ℂ}
             regularizedGaussHG b (b - c + 1) (a + b - c + 1) (1 - z) := by
     intro N
     induction N with
-    | zero => intro a b c z ha hb hbc hz; exact laplace_kummerU_gauss_of_re_pos (by simpa using ha) hb hbc hz
+    | zero => intro a b c z ha hb hbc hz;
+              exact laplace_kummerU_gauss_of_re_pos (by simpa using ha) hb hbc hz
     | succ N ih =>
       intro a b c z ha hb hbc hz
       have hi1 := ih (a + 1) (b + 1) (c + 1) z (by simp at ha ⊢; linarith)

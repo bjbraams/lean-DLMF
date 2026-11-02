@@ -35,8 +35,9 @@ the change to the complementary modulus.
 ## Implementation notes
 
 The ordinary points are found from the zeros of `θ₄` (§20.2(iv)); the functions 29.10.4 solve
-29.2.1 because `sn(K + is, k) = nd(s, k')`, and their periods come from Table 29.3.2. The identification of 29.2.2 with Heun's equation and
-the reduction of the Lamé wave equation are in `DLMF.Lame.Basic.EquationForms`.
+29.2.1 because `sn(K + is, k) = nd(s, k')`, and their periods come from Table 29.3.2. The
+identification of 29.2.2 with Heun's equation and the reduction of the Lamé wave equation are in
+`DLMF.Lame.Basic.EquationForms`.
 -/
 
 @[expose] public section
@@ -312,7 +313,8 @@ theorem Real.isLameSolution_comp_lamePhi (hk0 : 0 < k) (hk1 : k < 1) {W : ℝ �
 `(e₂ - e₃)/(e₁ - e₃) = k²`, `g = (e₁ - e₃)h + ν(ν+1)e₃` (29.2.7), `η = (e₁-e₃)^{-1/2}(z - iK')`
 (29.2.8) and `g₂ = -4(e₂e₃ + e₃e₁ + e₁e₂)`, `g₃ = 4e₁e₂e₃` (29.2.12). If `w` solves Lamé's
 equation 29.2.1 on `U`, then `η ↦ w((e₁-e₃)^{1/2} η + iK')` solves the Weierstrass form 29.2.9
-on the corresponding set. Proved in `DLMF.Lame.WeierstrassForm` (`lameWeierstrassForm_of_isLameSolutionOn`). -/
+on the corresponding set. Proved in `DLMF.Lame.WeierstrassForm`
+(`lameWeierstrassForm_of_isLameSolutionOn`). -/
 @[dlmf 29.2.E6, dlmf 29.2.E7, dlmf 29.2.E8, dlmf 29.2.E9, dlmf 29.2.E12]
 theorem isLameWeierstrassSolutionOn_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1)
     {e₁ e₂ e₃ : ℝ} (h12 : e₂ < e₁) (h23 : e₃ < e₂) (hsum : e₁ + e₂ + e₃ = 0)
@@ -446,7 +448,8 @@ private lemma comodulus_sq_mul_jacobiSnk_sq_imag (hk0 : 0 < k) (hk1 : k < 1) (z 
 
 /-- A solution of Lamé's equation on an open set containing a pole `2pK + (2q+1)iK'` of `sn`
 vanishes there (for `ν(ν+1) ≠ 0`). -/
-private lemma isLameSolutionOn_eq_zero_at_pole (hk0 : 0 < k) (hk1 : k < 1) {a b : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
+private lemma isLameSolutionOn_eq_zero_at_pole (hk0 : 0 < k) (hk1 : k < 1) {a b : ℂ}
+    {w : ℂ → ℂ} {U : Set ℂ}
     (hU : IsOpen U) (hw : IsLameSolutionOn a b k w U) (hb : b * (b + 1) ≠ 0) (p q : ℤ)
     (hz : (2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2) :
       ℂ) ∈ U) :
@@ -564,7 +567,8 @@ theorem isLameSolutionOn_imaginary (hk0 : 0 < k) (hk1 : k < 1) {h' : ℂ} {w : �
         ring
       have hz' : φ z ∈ U := hz
       rw [e] at hz'
-      rw [show w (φ z) = 0 by rw [e]; exact isLameSolutionOn_eq_zero_at_pole hc0 hc1 hU hw hb _ _ hz',
+      rw [show w (φ z) = 0 by rw [e];
+                              exact isLameSolutionOn_eq_zero_at_pole hc0 hc1 hU hw hb _ _ hz',
         mul_zero]
   linear_combination hkey + (-(h' - ν * (ν + 1) * (c : ℂ) ^ 2 *
     jacobiSnk (φ z) c ^ 2) * w (φ z)) * I_sq

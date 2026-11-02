@@ -26,7 +26,8 @@ open Finset
 noncomputable section
 
 /-- Summing a doubly indexed series `∑_k c_k x^{ek} (1 - bx)^{-(2k+1)}` by diagonals. -/
-theorem Real.hasSum_quadraticTransform (c : ℕ → ℝ) {e : ℕ} (he : 1 ≤ e) {b x g : ℝ} (hbx : |b * x| < 1)
+theorem Real.hasSum_quadraticTransform (c : ℕ → ℝ) {e : ℕ} (he : 1 ≤ e) {b x g : ℝ}
+    (hbx : |b * x| < 1)
     (hs : Summable fun k => |c k| * (|x| ^ e / (1 - |b * x|) ^ 2) ^ k)
     (hg : HasSum (fun k => c k * (x ^ e / (1 - b * x) ^ 2) ^ k) g) :
     HasSum (fun n => (∑ k ∈ range (n + 1), c k *

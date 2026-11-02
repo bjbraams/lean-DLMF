@@ -156,7 +156,8 @@ theorem mathieuFourierB_even_two_ne_zero (n : ℕ) {q : ℝ} (hq : q ≠ 0) :
 
 /-- Termwise integration of `g ∑ c_n φ_n` over `[a, b]`, for `∑ ‖c_n‖ < ∞`, `‖φ_n‖ ≤ 1`
 (dominated interchange of sum and integral). -/
-private lemma hasSum_intervalIntegral_mul_of_summable_norm {c : ℕ → ℂ} (hc : Summable fun n => ‖c n‖)
+private lemma hasSum_intervalIntegral_mul_of_summable_norm {c : ℕ → ℂ}
+    (hc : Summable fun n => ‖c n‖)
     {φ : ℕ → ℝ → ℂ} (hφc : ∀ n, Continuous (φ n)) (hφ : ∀ n x, ‖φ n x‖ ≤ 1)
     {g f : ℝ → ℂ} (hg : Continuous g) (hf : ∀ x, HasSum (fun n => c n * φ n x) (f x))
     (a b : ℝ) :
@@ -228,7 +229,8 @@ lemma hasSum_mathieuFourierA_even_mul_besselJ_sq (n : ℕ) {h : ℝ} (hh : 0 < h
     have hJ0 : Continuous (besselJ 0) := continuous_iff_continuousAt.2 fun x => by
       simpa using (Complex.analyticAt_besselJ_int 0 x).continuousAt
     exact hJ0.comp (by fun_prop)
-  have hsum := hasSum_intervalIntegral_mul_of_summable_norm hsA (φ := fun ℓ θ => Complex.cos (2 * ℓ * θ))
+  have hsum := hasSum_intervalIntegral_mul_of_summable_norm hsA
+      (φ := fun ℓ θ => Complex.cos (2 * ℓ * θ))
     (fun ℓ => by fun_prop) (fun ℓ x => by
       rw [show (2 * (ℓ : ℂ) * (x : ℂ)) = ((2 * ℓ * x : ℝ) : ℂ) by push_cast; ring,
         ← Complex.ofReal_cos, Complex.norm_real, Real.norm_eq_abs]
@@ -349,7 +351,8 @@ lemma hasSum_mathieuFourierA_odd_mul_besselJ_mul (n : ℕ) {h : ℝ} (hh : 0 < h
   have hJ1 : Continuous (besselJ 1) := continuous_iff_continuousAt.2 fun x => by
     simpa using (Complex.analyticAt_besselJ_int 1 x).continuousAt
   have hgc : Continuous g := hJ1.comp (by fun_prop)
-  have hsum := hasSum_intervalIntegral_mul_of_summable_norm hsA (φ := fun ℓ θ => Complex.cos ((2 * ℓ + 1) * θ))
+  have hsum := hasSum_intervalIntegral_mul_of_summable_norm hsA
+      (φ := fun ℓ θ => Complex.cos ((2 * ℓ + 1) * θ))
     (fun ℓ => by fun_prop) (fun ℓ x => by
       rw [show ((2 * (ℓ : ℂ) + 1) * (x : ℂ)) = (((2 * ℓ + 1) * x : ℝ) : ℂ) by push_cast; ring,
         ← Complex.ofReal_cos, Complex.norm_real, Real.norm_eq_abs]
@@ -526,7 +529,8 @@ lemma hasSum_mathieuFourierB_odd_mul_besselJ_I_mul (n : ℕ) {h : ℝ} (hh : 0 <
   have hJ1 : Continuous (besselJ 1) := continuous_iff_continuousAt.2 fun x => by
     simpa using (Complex.analyticAt_besselJ_int 1 x).continuousAt
   have hGc : Continuous G := hJ1.comp (by fun_prop)
-  have hsum := hasSum_intervalIntegral_mul_of_summable_norm hsB (φ := fun ℓ θ => Complex.cos ((2 * ℓ + 1) * θ))
+  have hsum := hasSum_intervalIntegral_mul_of_summable_norm hsB
+      (φ := fun ℓ θ => Complex.cos ((2 * ℓ + 1) * θ))
     (fun ℓ => by fun_prop) (fun ℓ x => by
       rw [show ((2 * (ℓ : ℂ) + 1) * (x : ℂ)) = (((2 * ℓ + 1) * x : ℝ) : ℂ) by push_cast; ring,
         ← Complex.ofReal_cos, Complex.norm_real, Real.norm_eq_abs]
@@ -699,7 +703,8 @@ private lemma integral_sin_mul_cos_mul_mathieuSe_even_pi_div_two_sub (n : ℕ) (
   ring
 
 /-- `J_a(h) J_b(h)` for integers `a, b` with `a + b = s ≥ 0`, as a product integral. -/
-private lemma besselJ_intCast_mul_besselJ_eq_integral {a b : ℤ} {s : ℕ} (hab : a + b = s) {h : ℂ} (hh : h ∈ slitPlane) :
+private lemma besselJ_intCast_mul_besselJ_eq_integral {a b : ℤ} {s : ℕ} (hab : a + b = s) {h : ℂ}
+    (hh : h ∈ slitPlane) :
     besselJ (a : ℂ) h * besselJ (b : ℂ) h = 2 / π * ∫ θ in (0 : ℝ)..π / 2,
       besselJ (s : ℂ) (2 * h * (Real.cos θ : ℂ)) * Complex.cos (((a - b : ℤ) : ℂ) * θ) := by
   have h1 := DLMF.Bessel.besselJ_mul_besselJ_eq_integral (a : ℂ) (b : ℂ) (by
@@ -707,8 +712,8 @@ private lemma besselJ_intCast_mul_besselJ_eq_integral {a b : ℤ} {s : ℕ} (hab
   rw [h1, show (a : ℂ) + b = (s : ℂ) by exact_mod_cast hab]
   congr 2; funext θ; push_cast; ring_nf
 
-/-- The Bessel-product terms of the sum in `hasSum_mathieuFourierB_even_mul_besselJ_comb` as Fourier integrals:
-`(-1)^ℓ (4 J_ℓ J_{ℓ+2} + 2h (J_{ℓ+1} J_{ℓ+2} - J_ℓ J_{ℓ+3}))(h)`
+/-- The Bessel-product terms of the sum in `hasSum_mathieuFourierB_even_mul_besselJ_comb` as Fourier
+integrals: `(-1)^ℓ (4 J_ℓ J_{ℓ+2} + 2h (J_{ℓ+1} J_{ℓ+2} - J_ℓ J_{ℓ+3}))(h)`
 `= (2/π) ∫₀^{π/2} g(θ) sin((2ℓ+2)θ) dθ` with `g(θ) = 2h (J₁ + J₃)(2h cos θ) sin θ`. -/
 private lemma besselJ_prod_combination_eq_integral {h : ℝ} (hh : 0 < h) (ℓ : ℕ) :
     (-1 : ℂ) ^ ℓ * (4 * (besselJ (ℓ : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h) +
@@ -730,21 +735,24 @@ private lemma besselJ_prod_combination_eq_integral {h : ℝ} (hh : 0 < h) (ℓ :
   have hP : (-1 : ℂ) ^ ℓ * (-1) ^ ℓ = 1 := by rw [← pow_add, ← two_mul, pow_mul]; simp
   have P1 : besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h) =
       2 / π * ∫ θ in (0 : ℝ)..π / 2, besselJ 2 (Y θ) * Complex.cos ((2 * ℓ + 2) * θ) := by
-    have := besselJ_intCast_mul_besselJ_eq_integral (a := ((ℓ + 2 : ℕ) : ℤ)) (b := -(ℓ : ℤ)) (s := 2) (by push_cast; ring)
+    have := besselJ_intCast_mul_besselJ_eq_integral (a := ((ℓ + 2 : ℕ) : ℤ)) (b := -(ℓ : ℤ))
+        (s := 2) (by push_cast; ring)
       hslit
     rw [hneg] at this
     simp only [Int.cast_natCast] at this
     rw [this]; congr 2; funext θ; simp only [Y]; push_cast; ring_nf
   have P2 : besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ (ℓ + 1) * besselJ ((ℓ + 1 : ℕ) : ℂ) h) =
       2 / π * ∫ θ in (0 : ℝ)..π / 2, besselJ 1 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ) := by
-    have := besselJ_intCast_mul_besselJ_eq_integral (a := ((ℓ + 2 : ℕ) : ℤ)) (b := -((ℓ + 1 : ℕ) : ℤ)) (s := 1)
+    have := besselJ_intCast_mul_besselJ_eq_integral (a := ((ℓ + 2 : ℕ) : ℤ))
+        (b := -((ℓ + 1 : ℕ) : ℤ)) (s := 1)
       (by push_cast; ring) hslit
     rw [hneg] at this
     simp only [Int.cast_natCast] at this
     rw [this]; congr 2; funext θ; simp only [Y]; push_cast; ring_nf
   have P3 : besselJ ((ℓ + 3 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h) =
       2 / π * ∫ θ in (0 : ℝ)..π / 2, besselJ 3 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ) := by
-    have := besselJ_intCast_mul_besselJ_eq_integral (a := ((ℓ + 3 : ℕ) : ℤ)) (b := -(ℓ : ℤ)) (s := 3) (by push_cast; ring)
+    have := besselJ_intCast_mul_besselJ_eq_integral (a := ((ℓ + 3 : ℕ) : ℤ)) (b := -(ℓ : ℤ))
+        (s := 3) (by push_cast; ring)
       hslit
     rw [hneg] at this
     simp only [Int.cast_natCast] at this
@@ -842,7 +850,8 @@ lemma hasSum_mathieuFourierB_even_mul_besselJ_comb (n : ℕ) {h : ℝ} (hh : 0 <
   have hgc : Continuous g := by
     simp only [g]
     exact (continuous_const.mul ((hJ1.comp hY).add (hJ3.comp hY))).mul (by fun_prop)
-  have hsum := hasSum_intervalIntegral_mul_of_summable_norm hsB (φ := fun ℓ θ => Complex.sin ((2 * ℓ + 2) * θ))
+  have hsum := hasSum_intervalIntegral_mul_of_summable_norm hsB
+      (φ := fun ℓ θ => Complex.sin ((2 * ℓ + 2) * θ))
     (fun ℓ => by fun_prop) (fun ℓ x => by
       rw [show ((2 * (ℓ : ℂ) + 2) * (x : ℂ)) = (((2 * ℓ + 2) * x : ℝ) : ℂ) by push_cast; ring,
         ← Complex.ofReal_sin, Complex.norm_real, Real.norm_eq_abs]

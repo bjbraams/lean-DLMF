@@ -167,7 +167,8 @@ theorem riemannZeta_eq_integral_exp_sub_one {s : ℂ} (hs : 1 < s.re) :
       riemannZeta s = 1 / Gamma s * ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ (s - 1) / (cexp x - 1) := by
   refine ⟨integrableOn_cpow_div_exp_sub_one hs, ?_⟩
   have hval := DLMF.Gamma.integral_cpow_mul_exp_div_one_sub_exp hs (x := 1) one_pos
-  rw [setIntegral_congr_fun measurableSet_Ioi (fun t ht => cpow_mul_exp_neg_div_one_sub_exp_neg ht)] at hval
+  rw [setIntegral_congr_fun measurableSet_Ioi
+      (fun t ht => cpow_mul_exp_neg_div_one_sub_exp_neg ht)] at hval
   rw [hval, show (∑' k : ℕ, 1 / ((k : ℂ) + ((1 : ℝ) : ℂ)) ^ s) = riemannZeta s by
       rw [zeta_eq_tsum_one_div_nat_add_one_cpow hs]; push_cast; rfl]
   have hG : Gamma s ≠ 0 := Gamma_ne_zero_of_re_pos (by linarith)
@@ -477,7 +478,8 @@ theorem riemannZeta_eq_integral_exp_add_one_sq {s : ℂ} (hs : 0 < s.re) (hs1 : 
     intro z hz
     have hI := integrableOn_exp_mul_cpow_div_exp_sub_one_sq hz
     obtain ⟨hI2, hV2⟩ := integrableOn_comp_two_mul_and_integral_eq hI
-    rw [setIntegral_congr_fun measurableSet_Ioi (fun x hx => exp_mul_cpow_div_exp_add_one_sq_eq_sub hx),
+    rw [setIntegral_congr_fun measurableSet_Ioi
+        (fun x hx => exp_mul_cpow_div_exp_add_one_sq_eq_sub hx),
       integral_sub hI (hI2.const_mul _), integral_const_mul, hV2,
       integral_exp_mul_cpow_div_exp_sub_one_sq hz]
     have h1s : (2 : ℂ) ^ (1 - z) = 2 * (2 : ℂ) ^ (-z) := by
@@ -501,7 +503,8 @@ theorem riemannZeta_eq_integral_exp_add_one_sq {s : ℂ} (hs : 0 < s.re) (hs1 : 
       have := congrArg re hm; simp at this; linarith [(m.cast_nonneg : (0 : ℝ) ≤ m)]
   have hG : DifferentiableOn ℂ
       (fun z => ∫ x in Ioi (0 : ℝ), cexp x * (x : ℂ) ^ z / (cexp x + 1) ^ 2) U := by
-    have hM := differentiableOn_mellin_of_norm_le_exp_neg hφc (fun x _ => norm_exp_div_exp_add_one_sq_le)
+    have hM := differentiableOn_mellin_of_norm_le_exp_neg hφc
+        (fun x _ => norm_exp_div_exp_add_one_sq_le)
     have hcomp := hM.comp (differentiableOn_id.add_const (1 : ℂ))
       (fun z (hz : z ∈ U) => show 0 < (z + 1).re by have : 0 < z.re := hz.1; simp; linarith)
     refine hcomp.congr fun z _ => ?_
@@ -530,7 +533,8 @@ theorem riemannZeta_eq_integral_exp_add_one_sq {s : ℂ} (hs : 0 < s.re) (hs1 : 
 open DLMF.BernoulliEuler in
 /-- `binom(s+2, 3) = (s+2)(s+1)s/6`. -/
 private lemma choose_add_two_three (s : ℂ) : Ring.choose (s + 2) 3 = (s + 2) * (s + 1) * s / 6 := by
-  simp only [Ring.choose_eq_descPochhammer_div, descPochhammer_succ_right, descPochhammer_zero, Polynomial.eval_mul,
+  simp only [Ring.choose_eq_descPochhammer_div, descPochhammer_succ_right, descPochhammer_zero,
+      Polynomial.eval_mul,
     Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_natCast, Polynomial.eval_one,
     Polynomial.eval_ofNat, Nat.factorial, Nat.cast_ofNat]
   push_cast
@@ -541,9 +545,11 @@ open DLMF.BernoulliEuler in
 private lemma riemannZeta_eq_integral_periodicBernoulli_two {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠ 1) :
     riemannZeta s = 1 / 2 + 1 / (s - 1) + s / 12 - s * (s + 1) / 2 *
       ∫ x in Ioi (1 : ℝ), (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2) := by
-  have h := riemannZeta_eq_eulerMaclaurinZetaRHS (n := 1) (N := 1) le_rfl le_rfl (by simp; linarith) hs1
+  have h := riemannZeta_eq_eulerMaclaurinZetaRHS (n := 1) (N := 1) le_rfl le_rfl
+      (by simp; linarith) hs1
   simp [eulerMaclaurinZetaRHS, Ring.choose_one_right] at h
-  have hr := integral_Ioi_periodicBernoulli_div_cpow_recursion (p := 2) (by norm_num) (w := s + 2) (by simp; linarith)
+  have hr := integral_Ioi_periodicBernoulli_div_cpow_recursion (p := 2) (by norm_num) (w := s + 2)
+      (by simp; linarith)
     (a := 1) one_pos
   have hB3 : periodicBernoulli 3 1 = 0 := by
     simp [periodicBernoulli, bernoulliFun_eval_zero, bernoulli_eq_zero_of_odd (n := 3)
@@ -859,7 +865,8 @@ theorem riemannZeta_eq_integral_sinh {s : ℂ} (hs : 1 < s.re) :
     rw [ofReal_mul, mul_cpow_ofReal_nonneg (by norm_num) hx.le, ofReal_ofNat]
     have hE := exp_ofReal_sub_one_ne_zero hx
     have hE2 : cexp (2 * (x : ℂ)) - 1 ≠ 0 := by
-      have := exp_ofReal_sub_one_ne_zero (by linarith : (0 : ℝ) < 2 * x); push_cast at this; exact this
+      have := exp_ofReal_sub_one_ne_zero (by linarith : (0 : ℝ) < 2 * x);
+          push_cast at this; exact this
     have hc : (2 : ℂ) ^ (1 - s) * (2 : ℂ) ^ (s - 1) = 1 := by
       rw [← cpow_add _ _ h2]; simp
     have hsh : sinh (x : ℂ) = (cexp x - 1) * (cexp x + 1) / (2 * cexp x) := by

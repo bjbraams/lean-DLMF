@@ -87,10 +87,12 @@ theorem legInt_md_cov {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (g : ℝ → ℂ)
   exact hcov.symm
 
 /-- `√r = e^{(log r)/2}` for `r > 0`, as complex numbers. -/
-theorem legInt_sqrt_eq_exp {r : ℝ} (hr : 0 < r) : ((Real.sqrt r : ℝ) : ℂ) = exp (Real.log r / 2) := by
+theorem legInt_sqrt_eq_exp {r : ℝ} (hr : 0 < r) : ((Real.sqrt r : ℝ) : ℂ) =
+    exp (Real.log r / 2) := by
   rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos hr, ofReal_exp]; push_cast; ring_nf
 
-/-- The integrand of 15.6.8 after the substitution `u = (1 - cos s)/(1 - cos θ)`, by DLMF 15.4.14. -/
+/-- The integrand of 15.6.8 after the substitution `u = (1 - cos s)/(1 - cos θ)`, by DLMF 15.4.14.
+-/
 theorem legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ) (hπ : θ < π) :
     |Real.sin s / (1 - Real.cos θ)| • (regularizedGaussHGFun (ν+1) (-ν) (1/2)
       ((1 - (Real.cos θ:ℂ))/2 * (legInt_md θ s : ℂ)) * (legInt_md θ s : ℂ)^((1/2:ℂ)-1) *
@@ -126,7 +128,8 @@ theorem legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ)
   have hF := sin_sq_cos_quotient (ν+1) (x := s/2) (by rw [abs_of_pos (by linarith)]; linarith)
   rw [show (1:ℂ) - (ν+1) = -ν by ring, ← hc2] at hF
   rw [hz, regularizedGaussHGFun_eq_div_Gamma hc12, hF, legendre_Gamma_one_half,
-    show (1 - (legInt_md θ s : ℂ)) = ((1 - legInt_md θ s : ℝ):ℂ) by rw [ofReal_sub, ofReal_one], hmd1,
+    show (1 - (legInt_md θ s : ℂ)) =
+        ((1 - legInt_md θ s : ℝ):ℂ) by rw [ofReal_sub, ofReal_one], hmd1,
     Complex.ofReal_cpow_eq_exp (div_pos hB hD),
     show ((1/2:ℂ)-1) = (((-1/2:ℝ)):ℂ) by push_cast; ring,
     ← ofReal_cpow (by rw [hmd]; positivity),
@@ -140,7 +143,8 @@ theorem legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ)
     rw [legInt_sqrt_eq_exp hD, eq_div_iff (exp_ne_zero _), ← exp_add, ← exp_add]
     congr 1; push_cast; ring
   rw [ht, hE, abs_of_pos (div_pos (by rw [hsin]; positivity) hD), hsin,
-    show (2:ℂ)*(ν+1)-1 = 2*(ν+1/2) by ring, show 2*(ν+1/2)*((s/2:ℝ):ℂ) = (ν+1/2)*s by push_cast; ring]
+    show (2:ℂ)*(ν+1)-1 = 2*(ν+1/2) by ring, show 2*(ν+1/2)*((s/2:ℝ):ℂ) =
+                                        (ν+1/2)*s by push_cast; ring]
   have hsq2 : (Real.sqrt 2:ℂ)^2 = 2 := by
     rw [← ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num
   have hsqD : (Real.sqrt D:ℂ)^2 = D := by
@@ -158,8 +162,10 @@ theorem legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ)
 /-- ferrersP Mehler–Dirichlet integral, from the fractional integral 15.6.8 with `d = 1/2` and
 DLMF 15.4.14, by the substitution `u = (1 - cos t)/(1 - cos θ)`. -/
 @[dlmf 14.12.E1]
-theorem ferrersP_mehler_dirichlet {μ : ℂ} (hμ : μ.re < 1/2) (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    ferrersP ν μ (Real.cos θ)=Real.sqrt 2*(Real.sin θ:ℂ)^μ/(Real.sqrt π*Gamma (1/2-μ))*∫ t : ℝ in 0..θ, cos ((ν+1/2)*t)/(Real.cos t-Real.cos θ:ℂ)^(μ+1/2) := by
+theorem ferrersP_mehler_dirichlet {μ : ℂ} (hμ : μ.re < 1/2) (ν : ℂ) {θ : ℝ}
+    (h0 : 0 < θ) (hπ : θ < π) :
+    ferrersP ν μ (Real.cos θ)=Real.sqrt 2*(Real.sin θ:ℂ)^μ/(Real.sqrt π*Gamma (1/2-μ))*∫ t : ℝ in
+        0..θ, cos ((ν+1/2)*t)/(Real.cos t-Real.cos θ:ℂ)^(μ+1/2) := by
   have hD : 0 < 1 - Real.cos θ := by
     have := Real.cos_lt_cos_of_nonneg_of_le_pi le_rfl hπ.le h0; rw [Real.cos_zero] at this; linarith
   have hP : 0 < 1 + Real.cos θ := by
@@ -177,13 +183,15 @@ theorem ferrersP_mehler_dirichlet {μ : ℂ} (hμ : μ.re < 1/2) (ν : ℂ) {θ 
     ← legInt_md_cov h0 hπ, setIntegral_congr_fun measurableSet_Ioo
       (fun s hs => legInt_md_point ν μ hs.1 hs.2 hπ), integral_const_mul,
     intervalIntegral.integral_of_le h0.le, integral_Ioc_eq_integral_Ioo]
-  have hlog : Real.log (Real.sin θ) = (Real.log (1 - Real.cos θ) + Real.log (1 + Real.cos θ))/2 := by
+  have hlog : Real.log (Real.sin θ) =
+      (Real.log (1 - Real.cos θ) + Real.log (1 + Real.cos θ))/2 := by
     have h2 : Real.sin θ ^ 2 = (1 - Real.cos θ) * (1 + Real.cos θ) := by
       nlinarith [Real.sin_sq_add_cos_sq θ]
     have := congrArg Real.log h2
     rw [Real.log_pow, Real.log_mul hD.ne' hP.ne'] at this
     push_cast at this; linarith
-  rw [Complex.ofReal_cpow_eq_exp (div_pos hP hD), Complex.ofReal_cpow_eq_exp hS, hlog, Real.log_div hP.ne' hD.ne',
+  rw [Complex.ofReal_cpow_eq_exp (div_pos hP hD), Complex.ofReal_cpow_eq_exp hS, hlog,
+      Real.log_div hP.ne' hD.ne',
     show (1:ℂ) - μ - 1/2 = 1/2 - μ by ring]
   have hπ0 : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hG : Gamma (1/2 - μ) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
@@ -197,7 +205,8 @@ theorem ferrersP_mehler_dirichlet {μ : ℂ} (hμ : μ.re < 1/2) (ν : ℂ) {θ 
 /-- DLMF 14.12.2: for `Re μ > 0` and `-1 < x < 1`, `𝖯^{−μ}_ν(x) = (1−x²)^{−μ/2}/Γ(μ) ∫_x^1 𝖯_ν(t)
 (t−x)^{μ−1} dt`. -/
 @[dlmf 14.12.E2]
-theorem ferrersP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν (-μ) x=(1-x^2:ℂ)^(-μ/2)/Gamma μ*∫ t : ℝ in x..1, ferrersP ν 0 t*(t-x:ℂ)^(μ-1) := by
   have h1 : (0:ℝ) < 1 + x := by linarith [hx.1]
   have h2 : (0:ℝ) < 1 - x := by linarith [hx.2]
@@ -248,7 +257,8 @@ theorem ferrersP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x 
   have hpow : (((1+x)/(1-x):ℝ):ℂ)^(-μ/2) = (1-(x:ℂ)^2)^(-μ/2) * ((1-x:ℝ):ℂ)^μ := by
     rw [show (1-(x:ℂ)^2) = (((1+x)*(1-x):ℝ):ℂ) by push_cast; ring,
       Complex.ofReal_cpow_eq_exp (div_pos h1 h2), Complex.ofReal_cpow_eq_exp (mul_pos h1 h2),
-      Complex.ofReal_cpow_eq_exp h2, ← exp_add, Real.log_div h1.ne' h2.ne', Real.log_mul h1.ne' h2.ne']
+      Complex.ofReal_cpow_eq_exp h2, ← exp_add, Real.log_div h1.ne' h2.ne',
+          Real.log_mul h1.ne' h2.ne']
     congr 1; push_cast; ring
   rw [hsub, hI, ferrersP, show (1:ℂ) - -μ = 1+μ by ring,
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hzn, show -μ/2 = (-μ)/2 by ring]
@@ -259,7 +269,8 @@ theorem ferrersP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x 
 (x−t)^{μ−1} dt`. -/
 @[dlmf 14.12.E5]
 theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x : ℝ} (hx : 1 < x) :
-    associatedP ν (-μ) x=(x^2-1:ℂ)^(-μ/2)/Gamma μ*∫ t : ℝ in 1..x, associatedP ν 0 t*(x-t:ℂ)^(μ-1) := by
+    associatedP ν (-μ) x=(x^2-1:ℂ)^(-μ/2)/Gamma μ*∫ t : ℝ in 1..x,
+        associatedP ν 0 t*(x-t:ℂ)^(μ-1) := by
   have h1 : (0:ℝ) < x - 1 := by linarith
   have h2 : (0:ℝ) < x + 1 := by linarith
   set z : ℂ := (1-(x:ℂ))/2 with hz
@@ -273,7 +284,8 @@ theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) 
       (fun t : ℝ => associatedP ν 0 t*(x-t:ℂ)^(μ-1)) (a := 0) (b := 1) hc 1
     simp only [mul_one, mul_zero, add_zero, add_sub_cancel] at h
     rw [show (∫ t : ℝ in (1:ℝ)..x, associatedP ν 0 t*(x-t:ℂ)^(μ-1)) =
-      (x-1) • ∫ s : ℝ in (0:ℝ)..1, associatedP ν 0 ((1+(x-1)*s : ℝ))*(x-((1+(x-1)*s : ℝ)):ℂ)^(μ-1) by
+      (x-1) • ∫ s : ℝ in (0:ℝ)..1,
+          associatedP ν 0 ((1+(x-1)*s : ℝ))*(x-((1+(x-1)*s : ℝ)):ℂ)^(μ-1) by
       rw [h, smul_inv_smul₀ hc]]
     rw [real_smul, ← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr fun s hs => ?_
@@ -294,7 +306,8 @@ theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) 
   rw [hsub, ← legInt_fractional_cutPlane _ _ hμ hzc]
   have hpow : exp (-μ/2*(log ((x:ℂ)+1)-log ((x:ℂ)-1))) = ((x:ℂ)^2-1)^(-μ/2) * ((x-1:ℝ):ℂ)^μ := by
     rw [show ((x:ℂ)^2-1) = (((x+1)*(x-1):ℝ):ℂ) by push_cast; ring,
-      Complex.ofReal_cpow_eq_exp (mul_pos h2 h1), Complex.ofReal_cpow_eq_exp h1, ← exp_add, Real.log_mul h2.ne' h1.ne',
+      Complex.ofReal_cpow_eq_exp (mul_pos h2 h1), Complex.ofReal_cpow_eq_exp h1, ← exp_add,
+          Real.log_mul h2.ne' h1.ne',
       show (x:ℂ)+1 = ((x+1:ℝ):ℂ) by push_cast; ring, show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log h2.le, ← ofReal_log h1.le]
     congr 1; push_cast; ring
@@ -302,20 +315,27 @@ theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) 
   rw [show (-μ)/2 = -μ/2 by ring, hpow, hz]
   field_simp
 
--- DLMF 14.12.3 `ferrersQ_complex_integral` is in `DLMF.Legendre.FourierTools` (needs the boundary values).
+-- DLMF 14.12.3 `ferrersQ_complex_integral` is in `DLMF.Legendre.FourierTools` (needs the boundary
+-- values).
 
 /-- associatedP cosh integral. The hypothesis `hν` is implied by `hconv` and is not used. -/
 @[dlmf 14.12.E4]
-theorem associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re) {x : ℝ} (hx : 1 < x) :
-    HasIntegralAtTop (fun t : ℝ => Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) 0 (associatedP ν (-μ) x) :=
+theorem associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re)
+    {x : ℝ} (hx : 1 < x) :
+    HasIntegralAtTop (fun t : ℝ =>
+        Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh
+        ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) 0 (associatedP ν (-μ) x) :=
   legInt_associatedP_cosh_integral h hconv hx
 
 /-- DLMF 14.12.6: for `−1/2 < Re μ < Re ν + 1` and `x > 1`, `𝑸^μ_ν(x) = π^{1/2} (x²−1)^{μ/2}/(2^μ
 Γ(μ+1/2) Γ(ν−μ+1)) ∫_0^∞ sinh^{2μ} t/(x + (x²−1)^{1/2} cosh t)^{ν+μ+1} dt`, as an improper integral
 over `(0, ∞)`. -/
 @[dlmf 14.12.E6]
-theorem olverQ_real_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {x : ℝ} (hx : 1 < x) :
-    HasIntegralAtTop (fun t : ℝ => Real.sqrt π*(x^2-1:ℂ)^(μ/2)/(2^μ*Gamma (μ+1/2)*Gamma (ν-μ+1))*(Real.sinh t:ℂ)^(2*μ)/(x+Real.sqrt (x^2-1)*Real.cosh t:ℂ)^(ν+μ+1)) 0 (olverQ ν μ x) := by
+theorem olverQ_real_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re)
+    {x : ℝ} (hx : 1 < x) :
+    HasIntegralAtTop (fun t : ℝ =>
+        Real.sqrt π*(x^2-1:ℂ)^(μ/2)/(2^μ*Gamma (μ+1/2)*Gamma (ν-μ+1))*(Real.sinh
+        t:ℂ)^(2*μ)/(x+Real.sqrt (x^2-1)*Real.cosh t:ℂ)^(ν+μ+1)) 0 (olverQ ν μ x) := by
   have h := olverQ_complex_integral h0 h1 (legInt_one_lt_mem hx)
   have hr : exp ((log ((x:ℂ)-1)+log ((x:ℂ)+1))/2) = (Real.sqrt (x^2-1) : ℂ) := by
     have := legInt_zeta_real hx
@@ -330,7 +350,8 @@ theorem olverQ_real_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν
 cos(mθ) dθ`. -/
 @[dlmf 14.12.E7]
 theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x) :
-    associatedP ν m x=poch (ν+1) m/π*∫ θ : ℝ in 0..π, (x+Real.sqrt (x^2-1)*Real.cos θ:ℂ)^ν*Real.cos (m*θ) := by
+    associatedP ν m x=poch (ν+1) m/π*∫ θ : ℝ in 0..π,
+        (x+Real.sqrt (x^2-1)*Real.cos θ:ℂ)^ν*Real.cos (m*θ) := by
   have hx1 : ((x:ℂ)-1) ∈ slitPlane := legInt_one_lt_mem hx
   set s := Real.sqrt (x^2-1) with hs_def
   have hs : (s:ℂ) ≠ 0 := ofReal_ne_zero.2 (Real.sqrt_pos.2 (by nlinarith)).ne'
@@ -378,7 +399,8 @@ theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x)
       simp only [poch_succ] at h6 ⊢
       simp only [show k+1+1 = k+2 by ring] at h6 hr ⊢
       push_cast at h6 hr ⊢
-      linear_combination (s:ℂ) * h6 - 2*((k:ℂ)+1)*x*(poch (ν+1) k*(ν+1+k)/π*legInt_L ν x (k+1)) * hbm
+      linear_combination (s:ℂ) * h6 -
+          2*((k:ℂ)+1)*x*(poch (ν+1) k*(ν+1+k)/π*legInt_L ν x (k+1)) * hbm
         - poch (ν+1) k*(ν+1+k)/π * hr
   rw [(key m).1, legInt_L]; push_cast; rfl
 
@@ -386,7 +408,9 @@ theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x)
 (x²−1)^{m/2}/((2m)! (n−m)! π) ∫_0^π (x + (x²−1)^{1/2} cos θ)^{n−m} sin^{2m} θ dθ`. -/
 @[dlmf 14.12.E8]
 theorem associatedP_nat_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx : 1 < x) :
-    associatedP n m x=2^m*(m.factorial:ℂ)*(n+m).factorial*(x^2-1:ℂ)^((m:ℂ)/2)/(((2*m).factorial:ℂ)*(n-m).factorial*π)*∫ θ : ℝ in 0..π, (x+Real.sqrt (x^2-1)*Real.cos θ:ℂ)^(n-m)*(Real.sin θ:ℂ)^(2*m) := by
+    associatedP n m x=2^m*(m.factorial:ℂ)*(n+m).factorial*(x^2-1:ℂ)^((m:ℂ)/2)
+      /(((2*m).factorial:ℂ)*(n-m).factorial*π)
+      *∫ θ : ℝ in 0..π, (x+Real.sqrt (x^2-1)*Real.cos θ:ℂ)^(n-m)*(Real.sin θ:ℂ)^(2*m) := by
   obtain ⟨p, rfl⟩ := Nat.exists_eq_add_of_le hmn
   have hpow : ((x:ℂ)^2-1)^((m:ℂ)/2) = (Real.sqrt (x^2-1):ℂ)^m := by
     rw [show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by push_cast; ring,
@@ -414,7 +438,8 @@ def legendreUCoordinate (x : ℝ) : ℝ :=
 cosh(mt) dt`, where `u = ½ ln((x+1)/(x−1))` (`legendreUCoordinate`). -/
 @[dlmf 14.12.E9]
 theorem olverQ_nat_finite_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
-    olverQ n m x=1/(n.factorial:ℂ)*∫ t : ℝ in 0..legendreUCoordinate x, (x-Real.sqrt (x^2-1)*Real.cosh t:ℂ)^n*Real.cosh (m*t) := by
+    olverQ n m x=1/(n.factorial:ℂ)*∫ t : ℝ in 0..legendreUCoordinate x,
+        (x-Real.sqrt (x^2-1)*Real.cosh t:ℂ)^n*Real.cosh (m*t) := by
   rw [show legendreUCoordinate x = legInt_u x from rfl]
   have hx1 : (x:ℂ)-1 ∈ slitPlane := legInt_one_lt_mem hx
   set s := Real.sqrt (x^2-1) with hs_def
@@ -471,7 +496,8 @@ theorem olverQ_nat_finite_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
 (1−t²)^n/(x−t)^{n+m+1} dt`. -/
 @[dlmf 14.12.E11]
 theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
-    olverQ n m x=(x^2-1:ℂ)^((m:ℂ)/2)/(2^(n+1)*(n.factorial:ℂ))*∫ t : ℝ in -1..1, (1-t^2:ℂ)^n/(x-t:ℂ)^(n+m+1) := by
+    olverQ n m x=(x^2-1:ℂ)^((m:ℂ)/2)/(2^(n+1)*(n.factorial:ℂ))*∫ t : ℝ in -1..1,
+        (1-t^2:ℂ)^n/(x-t:ℂ)^(n+m+1) := by
   have hx1 : (x:ℂ)-1 ∈ slitPlane := legInt_one_lt_mem hx
   set s := Real.sqrt (x^2-1) with hs_def
   have hs : (s:ℂ) ≠ 0 := ofReal_ne_zero.2 (Real.sqrt_pos.2 (by nlinarith)).ne'
@@ -543,16 +569,21 @@ theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
 theorem legIR_sum_re_ge (N n c : ℕ) {w : ℝ} (hw : 0 ≤ w) :
     1 ≤ (∑ k ∈ Finset.range (N+1), gaussHGCoeff (-(N:ℂ)) (-(n:ℂ)) ((c:ℂ)+1) k * (w:ℂ)^k).re := by
   have hterm : ∀ k, gaussHGCoeff (-(N:ℂ)) (-(n:ℂ)) ((c:ℂ)+1) k * (w:ℂ)^k =
-      ((((N.descFactorial k * n.descFactorial k : ℕ):ℝ) / (((c+1).ascFactorial k * k ! : ℕ):ℝ) * w^k : ℝ) : ℂ) := by
+      ((((N.descFactorial k * n.descFactorial k : ℕ):ℝ) / (((c+1).ascFactorial k * k ! : ℕ):ℝ) *
+          w^k : ℝ) : ℂ) := by
     intro k
     have h1 : ((-1:ℂ))^k * (-1)^k = 1 := by rw [← mul_pow]; norm_num
-    rw [gaussHGCoeff, poch_neg_coe_nat, poch_neg_coe_nat, show (c:ℂ)+1 = ((c+1:ℕ):ℂ) by push_cast; ring,
+    rw [gaussHGCoeff, poch_neg_coe_nat, poch_neg_coe_nat, show (c:ℂ)+1 =
+        ((c+1:ℕ):ℂ) by push_cast; ring,
       poch, ascPochhammer_nat_eq_natCast_ascFactorial]
     push_cast
-    linear_combination ((N.descFactorial k:ℂ) * n.descFactorial k / (((c+1).ascFactorial k:ℂ) * k !) * (w:ℂ)^k) * h1
+    linear_combination ((N.descFactorial k:ℂ) * n.descFactorial k /
+        (((c+1).ascFactorial k:ℂ) * k !) * (w:ℂ)^k) * h1
   simp_rw [hterm]
   rw [← ofReal_sum, ofReal_re]
-  have h0 : ∀ k ∈ Finset.range (N+1), 0 ≤ (((N.descFactorial k * n.descFactorial k : ℕ):ℝ) / (((c+1).ascFactorial k * k ! : ℕ):ℝ) * w^k) :=
+  have h0 : ∀ k ∈ Finset.range (N+1), 0 ≤
+      (((N.descFactorial k * n.descFactorial k : ℕ):ℝ) /
+      (((c+1).ascFactorial k * k ! : ℕ):ℝ) * w^k) :=
     fun k _ => by positivity
   refine le_trans ?_ (Finset.single_le_sum h0 (Finset.mem_range.2 (Nat.succ_pos N)))
   simp
@@ -561,7 +592,8 @@ theorem legIR_sum_re_ge (N n c : ℕ) {w : ℝ} (hw : 0 ≤ w) :
 theorem legIR_norm_bp (m : ℕ) {t : ℝ} (ht : 1 < t) :
     ‖legendreBranchPower m t‖ = Real.exp (m/2*(Real.log (t-1) + Real.log (t+1))) := by
   rw [legendreBranchPower, norm_exp, show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring,
-    show (t:ℂ)+1 = ((t+1:ℝ):ℂ) by push_cast; ring, ← ofReal_log (by linarith), ← ofReal_log (by linarith)]
+    show (t:ℂ)+1 = ((t+1:ℝ):ℂ) by push_cast; ring, ← ofReal_log (by linarith),
+                                    ← ofReal_log (by linarith)]
   simp
 
 /-- For integers `0 ≤ m ≤ n`, `|P^m_n(t)| ≥ C (t²-1)^{m/2}` on `t > 1`, via Pfaff to a
@@ -588,7 +620,8 @@ theorem legIR_norm_associatedP_ge (n m : ℕ) (hmn : m ≤ n) : ∃ C > 0, ∀ t
     have : (t:ℂ)+1 ≠ 0 := by
       rw [show (t:ℂ)+1 = ((t+1:ℝ):ℂ) by push_cast; ring]; exact ofReal_ne_zero.2 (by linarith)
     have hd : (1-(t:ℂ))/2-1 ≠ 0 := by
-      rw [show (1-(t:ℂ))/2-1 = -((t:ℂ)+1)/2 by ring]; exact div_ne_zero (neg_ne_zero.2 this) two_ne_zero
+      rw [show (1-(t:ℂ))/2-1 = -((t:ℂ)+1)/2 by ring];
+          exact div_ne_zero (neg_ne_zero.2 this) two_ne_zero
     push_cast; rw [div_eq_div_iff hd this]; ring
   have hwn : ‖(1-(t:ℂ))/2/((1-(t:ℂ))/2-1)‖ < 1 := by
     rw [hw, norm_real, Real.norm_eq_abs, abs_lt]
@@ -618,9 +651,11 @@ theorem legIR_olverQ_tendsto_zero (n m : ℕ) :
   have hν : ∀ k : ℕ, (n:ℂ) ≠ -k-3/2 := fun k h => by
     have := congrArg re h; simp at this; linarith
   refine (legendre_singular_15 (n:ℂ) (m:ℂ) hν).symm.tendsto_nhds ?_
-  have h : Tendsto (fun x : ℝ => (Real.sqrt π/Gamma ((n:ℂ)+3/2)) * ((((2*x)^(n+1))⁻¹ : ℝ) : ℂ)) atTop (𝓝 0) := by
+  have h : Tendsto (fun x : ℝ => (Real.sqrt π/Gamma ((n:ℂ)+3/2)) * ((((2*x)^(n+1))⁻¹ : ℝ) : ℂ))
+      atTop (𝓝 0) := by
     have := (continuous_ofReal.tendsto 0).comp (tendsto_inv_atTop_zero.comp
-      ((tendsto_pow_atTop (Nat.succ_ne_zero n)).comp (tendsto_id.const_mul_atTop (two_pos (α := ℝ)))))
+      ((tendsto_pow_atTop (Nat.succ_ne_zero n)).comp
+          (tendsto_id.const_mul_atTop (two_pos (α := ℝ)))))
     simpa using this.const_mul (Real.sqrt π/Gamma ((n:ℂ)+3/2))
   refine h.congr' ?_
   filter_upwards with x
@@ -631,7 +666,9 @@ theorem legIR_olverQ_tendsto_zero (n m : ℕ) :
 dt/((t²−1)(P^m_n(t))²)`, as an improper integral over `(x, ∞)`. -/
 @[dlmf 14.12.E12]
 theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx : 1 < x) :
-    HasIntegralAtTop (fun t : ℝ => associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2)) x (olverQ n m x) := by
+    HasIntegralAtTop (fun t : ℝ =>
+        associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2)) x
+        (olverQ n m x) := by
   obtain ⟨C, hC, hPC⟩ := legIR_norm_associatedP_ge n m hmn
   have hPne : ∀ t : ℝ, 1 < t → associatedP n m t ≠ 0 := fun t ht h => by
     have h1 := hPC t ht
@@ -639,7 +676,8 @@ theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx 
     have : 0 < C * Real.exp (m/2*(Real.log (t-1) + Real.log (t+1))) := by positivity
     linarith
   have hfac : Gamma ((n:ℂ)-m+1) = ((n-m).factorial:ℂ) := by
-    rw [show (n:ℂ)-m+1 = ((n-m:ℕ):ℂ)+1 by push_cast [Nat.cast_sub hmn]; ring, Gamma_nat_eq_factorial]
+    rw [show (n:ℂ)-m+1 = ((n-m:ℕ):ℂ)+1 by push_cast [Nat.cast_sub hmn]; ring,
+                                            Gamma_nat_eq_factorial]
   have hfac0 : ((n-m).factorial:ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos _).ne'
   set F : ℝ → ℂ := fun s => -associatedP n m x * (olverQ n m s / associatedP n m s) with hF
   have hderiv : ∀ t : ℝ, 1 < t → HasDerivAt F
@@ -656,18 +694,23 @@ theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx 
     convert h using 1
     have hP := hPne t ht
     rw [show deriv (olverQ n m) t * associatedP n m t - olverQ n m t * deriv (associatedP n m) t
-      = associatedP n m t * deriv (olverQ n m) t - olverQ n m t * deriv (associatedP n m) t by ring, hw]
+      = associatedP n m t * deriv (olverQ n m) t - olverQ n m t *
+          deriv (associatedP n m) t by ring, hw]
     field_simp
-  have hcont : ∀ t : ℝ, 1 < t → ContinuousAt (fun t : ℝ => associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2)) t := by
+  have hcont : ∀ t : ℝ, 1 < t →
+      ContinuousAt (fun t : ℝ =>
+      associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2)) t := by
     intro t ht
     have hs := legInt_one_lt_mem ht
     have hPc : ContinuousAt (fun s : ℝ => associatedP n m s) t :=
       ((associatedP_analytic n m) _ hs).continuousAt.comp continuous_ofReal.continuousAt
     have ht2 : (t:ℂ)^2-1 ≠ 0 := by
       rw [show (t:ℂ)^2-1 = ((t^2-1:ℝ):ℂ) by push_cast; ring]; exact ofReal_ne_zero.2 (by nlinarith)
-    exact continuousAt_const.div (((continuous_ofReal.continuousAt.pow 2).sub continuousAt_const).mul
+    exact continuousAt_const.div
+        (((continuous_ofReal.continuousAt.pow 2).sub continuousAt_const).mul
       (hPc.pow 2)) (mul_ne_zero ht2 (pow_ne_zero _ (hPne t ht)))
-  have hint : ∀ R, x ≤ R → ∫ t in x..R, associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2) = F R - F x := by
+  have hint : ∀ R, x ≤ R → ∫ t in x..R,
+      associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2) = F R - F x := by
     intro R hR
     have hmem : ∀ t ∈ uIcc x R, 1 < t := fun t ht => by
       rw [uIcc_of_le hR] at ht; linarith [ht.1]
@@ -721,7 +764,8 @@ theorem olverQ_nat_neumann (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 (x²−1)^{1/2} cosh t)^{n+1}`, as an improper integral over `(0, ∞)`. -/
 @[dlmf 14.12.E14]
 theorem olverQ_nat_heine (n : ℕ) {x : ℝ} (hx : 1 < x) :
-    HasIntegralAtTop (fun t : ℝ => 1/((n.factorial:ℂ)*(x+Real.sqrt (x^2-1)*Real.cosh t:ℂ)^(n+1))) 0 (olverQ n 0 x) := by
+    HasIntegralAtTop (fun t : ℝ => 1/((n.factorial:ℂ)*(x+Real.sqrt (x^2-1)*Real.cosh t:ℂ)^(n+1))) 0
+        (olverQ n 0 x) := by
   rw [legInt_olverQ_nat_zero_order _]
   refine ((legInt_heine x hx n).div_const (n.factorial:ℂ)).congr fun R => ?_
   rw [← intervalIntegral.integral_ofReal, ← intervalIntegral.integral_div]
@@ -733,7 +777,8 @@ theorem olverQ_nat_heine (n : ℕ) {x : ℝ} (hx : 1 < x) :
 (dx)^m`, the `m`-fold iterated integral over `(x, 1)`. -/
 @[dlmf 14.6.E6]
 theorem ferrersP_negative_order_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP ν (-m) x=(1-x^2:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in x..1, f t)^[m]) (ferrersP ν 0) x := by
+    ferrersP ν (-m) x=(1-x^2:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in x..1, f t)^[m])
+        (ferrersP ν 0) x := by
   rw [legInt_iterate_ferrers ν m ⟨hx.1, hx.2.le⟩, legInt_H, ferrersP]
   have h1 : (0:ℝ) < 1 + x := by linarith [hx.1]
   have h2 : (0:ℝ) < 1 - x := by linarith [hx.2]
@@ -753,7 +798,8 @@ theorem ferrersP_negative_order_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x 
 the `m`-fold iterated integral over `(1, x)`. -/
 @[dlmf 14.6.E7]
 theorem associatedP_negative_order_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x) :
-    associatedP ν (-m) x=(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in 1..x, f t)^[m]) (fun x : ℝ => associatedP ν 0 x) x := by
+    associatedP ν (-m) x=(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in 1..x, f t)^[m])
+        (fun x : ℝ => associatedP ν 0 x) x := by
   have hz : (x:ℂ)-1 ∈ slitPlane := Or.inl (by simp; linarith)
   rw [legInt_iterate_associated ν m hx.le, legInt_associatedP_neg_nat ν m hz,
     legInt_legendreBranchPower_real _ hx]
@@ -761,8 +807,10 @@ theorem associatedP_negative_order_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx :
 /-- DLMF 14.6.8: for `m ≥ 1`, `Re ν > m − 1` and `x > 1`, `Q^{−m}_ν(x) = (−1)^m (x²−1)^{−m/2} ∫_x^∞
 ⋯ ∫_x^∞ Q_ν(x) (dx)^m`, the `m`-fold iterated improper integral over `(x, ∞)`. -/
 @[dlmf 14.6.E8]
-theorem associatedQ_negative_order_integral (ν : ℂ) (m : ℕ) (hν : (m:ℝ)-1 < ν.re) {x : ℝ} (hx : 1 < x) :
-    associatedQ ν (-m) x=(-1)^m*(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => improperAtTop f x)^[m]) (fun x : ℝ => associatedQ ν 0 x) x := by
+theorem associatedQ_negative_order_integral (ν : ℂ) (m : ℕ) (hν : (m:ℝ)-1 < ν.re)
+    {x : ℝ} (hx : 1 < x) :
+    associatedQ ν (-m) x=(-1)^m*(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x =>
+        improperAtTop f x)^[m]) (fun x : ℝ => associatedQ ν 0 x) x := by
   rw [legInt_iterate_Q ν m hν hx, legInt_g, legInt_legendreBranchPower_real _ hx]
   have hne : ((x:ℂ)^2-1) ≠ 0 := by
     rw [show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by push_cast; ring]

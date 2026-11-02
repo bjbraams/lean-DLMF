@@ -5328,3 +5328,204 @@ declaration	DLMF.Lame.continuous_jacobiDnm	DLMF.Elliptic.Real.continuous_jacobiD
 declaration	DLMF.OrthogonalPolynomials.deriv_kummerM_regular	DLMF.Confluent.deriv_kummerM	removed wrapper
 statement	DLMF.Coulomb.hasSum_coulombHPlus_log	DLMF.Coulomb.hasSum_coulombHPlus_log	hypothesis η ≠ 0 added (false at η = 0 in Lean's totalized form)
 statement	DLMF.Coulomb.hasSum_coulombHMinus_log	DLMF.Coulomb.hasSum_coulombHMinus_log	hypothesis η ≠ 0 added (false at η = 0 in Lean's totalized form)
+statement	DLMF.AsymptoticApproximations.bleisteinW_hasDerivAt_self	DLMF.AsymptoticApproximations.bleisteinW_hasDerivAt_self'	stronger form added without the unused hypotheses; bleisteinW_hasDerivAt_self is derived from it
+statement	DLMF.AsymptoticApproximations.bleistein_transform	DLMF.AsymptoticApproximations.bleistein_transform'	stronger form added without the unused hypotheses; bleistein_transform is derived from it
+statement	DLMF.AsymptoticApproximations.difference_distinct_roots_independent	DLMF.AsymptoticApproximations.difference_distinct_roots_independent'	stronger form added without the unused hypotheses; difference_distinct_roots_independent is derived from it
+statement	DLMF.AsymptoticApproximations.tendsto_functionPairing_stieltjesTestFunction	DLMF.AsymptoticApproximations.tendsto_functionPairing_stieltjesTestFunction'	stronger form added without the unused hypotheses; tendsto_functionPairing_stieltjesTestFunction is derived from it
+statement	DLMF.BernoulliEuler.sum_antidiagonal_eulerNumber_triple	DLMF.BernoulliEuler.sum_antidiagonal_eulerNumber_triple'	stronger form added without the unused hypotheses; sum_antidiagonal_eulerNumber_triple is derived from it
+statement	DLMF.Confluent.pcfU_barnes_integral	DLMF.Confluent.pcfU_barnes_integral'	stronger form added without the unused hypotheses; pcfU_barnes_integral is derived from it
+statement	DLMF.Confluent.pcfV_barnes_integral	DLMF.Confluent.pcfV_barnes_integral'	stronger form added without the unused hypotheses; pcfV_barnes_integral is derived from it
+statement	DLMF.Coulomb.coulombf_eq_coulombF_neg	DLMF.Coulomb.coulombf_eq_coulombF_neg'	stronger form added without the unused hypotheses; coulombf_eq_coulombF_neg is derived from it
+statement	DLMF.Coulomb.coulombf_eq_coulombF_pos	DLMF.Coulomb.coulombf_eq_coulombF_pos'	stronger form added without the unused hypotheses; coulombf_eq_coulombF_pos is derived from it
+statement	DLMF.EllipticIntegrals.compEllIntKk_eq_symEllIntRF	DLMF.EllipticIntegrals.compEllIntKk_eq_symEllIntRF'	stronger form added without the unused hypotheses; compEllIntKk_eq_symEllIntRF is derived from it
+statement	DLMF.EllipticIntegrals.duplication_half_angle	DLMF.EllipticIntegrals.duplication_half_angle'	stronger form added without the unused hypotheses; duplication_half_angle is derived from it
+statement	DLMF.EllipticIntegrals.incEllIntDk_eq_symEllIntRD	DLMF.EllipticIntegrals.incEllIntDk_eq_symEllIntRD'	stronger form added without the unused hypotheses; incEllIntDk_eq_symEllIntRD is derived from it
+statement	DLMF.EllipticIntegrals.incEllIntFk_eq_symEllIntRF	DLMF.EllipticIntegrals.incEllIntFk_eq_symEllIntRF'	stronger form added without the unused hypotheses; incEllIntFk_eq_symEllIntRF is derived from it
+statement	DLMF.EllipticIntegrals.jacobiAmm_eq_symEllIntRC	DLMF.EllipticIntegrals.jacobiAmm_eq_symEllIntRC'	stronger form added without the unused hypotheses; jacobiAmm_eq_symEllIntRC is derived from it
+statement	DLMF.EllipticIntegrals.sqrt_mul_symEllIntRF_eq_incEllIntFk	DLMF.EllipticIntegrals.sqrt_mul_symEllIntRF_eq_incEllIntFk'	stronger form added without the unused hypotheses; sqrt_mul_symEllIntRF_eq_incEllIntFk is derived from it
+statement	DLMF.Lame.Real.lameAk_zero	DLMF.Lame.Real.lameAk_zero'	stronger form added without the unused hypotheses; lameAk_zero is derived from it
+statement	DLMF.Lame.Real.lameBk_zero	DLMF.Lame.Real.lameBk_zero'	stronger form added without the unused hypotheses; lameBk_zero is derived from it
+statement	DLMF.Lame.Real.lameEck_modulus_zero	DLMF.Lame.Real.lameEck_modulus_zero'	stronger form added without the unused hypotheses; lameEck_modulus_zero is derived from it
+statement	DLMF.Lame.Real.lameEck_zero_zero	DLMF.Lame.Real.lameEck_zero_zero'	stronger form added without the unused hypotheses; lameEck_zero_zero is derived from it
+statement	DLMF.Lame.Real.lameEsk_modulus_zero	DLMF.Lame.Real.lameEsk_modulus_zero'	stronger form added without the unused hypotheses; lameEsk_modulus_zero is derived from it
+statement	DLMF.Lame.lamePolyH_strictMono	DLMF.Lame.lamePolyH_strictMono'	stronger form added without the unused hypotheses; lamePolyH_strictMono is derived from it
+statement	DLMF.OrthogonalPolynomials.laguerrePolyL_turan	DLMF.OrthogonalPolynomials.laguerrePolyL_turan'	stronger form added without the unused hypotheses; laguerrePolyL_turan is derived from it
+statement	DLMF.Spheroidal.exists_spheroidalEigenvalue	DLMF.Spheroidal.exists_spheroidalEigenvalue'	stronger form added without the unused hypotheses; exists_spheroidalEigenvalue is derived from it
+statement	DLMF.Zeta.LFunction_one_sub_conj_eq_zero	DLMF.Zeta.LFunction_one_sub_conj_eq_zero'	stronger form added without the unused hypotheses; LFunction_one_sub_conj_eq_zero is derived from it
+statement	DLMF.Zeta.exists_lerchPhi_continuation	DLMF.Zeta.exists_lerchPhi_continuation'	stronger form added without the unused hypotheses; exists_lerchPhi_continuation is derived from it
+statement	DLMF.Zeta.hasSum_hurwitzZetaComplex	DLMF.Zeta.hasSum_hurwitzZetaComplex'	stronger form added without the unused hypotheses; hasSum_hurwitzZetaComplex is derived from it
+statement	DLMF.Zeta.hasSum_lerchPhi_of_norm_eq_one	DLMF.Zeta.hasSum_lerchPhi_of_norm_eq_one'	stronger form added without the unused hypotheses; hasSum_lerchPhi_of_norm_eq_one is derived from it
+statement	DLMF.Zeta.hurwitzZetaComplex_eulerMaclaurin	DLMF.Zeta.hurwitzZetaComplex_eulerMaclaurin'	stronger form added without the unused hypotheses; hurwitzZetaComplex_eulerMaclaurin is derived from it
+statement	DLMF.Zeta.hurwitzZetaComplex_neg_nat	DLMF.Zeta.hurwitzZetaComplex_neg_nat'	stronger form added without the unused hypotheses; hurwitzZetaComplex_neg_nat is derived from it
+statement	DLMF.Zeta.hurwitzZetaComplex_zero	DLMF.Zeta.hurwitzZetaComplex_zero'	stronger form added without the unused hypotheses; hurwitzZetaComplex_zero is derived from it
+statement	DLMF.Zeta.tendsto_hurwitzZetaComplex	DLMF.Zeta.tendsto_hurwitzZetaComplex'	stronger form added without the unused hypotheses; tendsto_hurwitzZetaComplex is derived from it
+statement	DLMF.Struve.angerJ_int_aux	DLMF.Struve.angerJ_int_aux'	stronger form added without the unused hypotheses; angerJ_int_aux is derived from it
+module	DLMF.Hypergeometric.SeriesProperties	DLMF.Hypergeometric.Basic.SpecialValues	moved to Basic
+module	DLMF.Hypergeometric.Series	DLMF.Hypergeometric.Basic.RealPochhammer	moved to Basic
+module	DLMF.Hypergeometric.Generalized	DLMF.Hypergeometric.Basic.GeneralizedEquation	moved to Basic
+module	DLMF.Hypergeometric.GeneralizedCalculus	DLMF.Hypergeometric.Basic.GeneralizedCalculus	moved to Basic
+module	DLMF.Hypergeometric.GeneralizedIntegral	DLMF.Hypergeometric.Basic.GeneralizedIntegral	moved to Basic
+module	DLMF.GeneralizedHypergeometric.PrincipalContinuationExistence	DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence	moved to Basic
+module	DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties	DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence	merged; three theorems moved unchanged
+declaration	Complex.Gamma_mul_nat	DLMF.Gamma.Gamma_mul_nat	namespace DLMF.Gamma
+declaration	Complex.Gamma_prod_add_div	DLMF.Gamma.Gamma_prod_add_div	namespace DLMF.Gamma
+declaration	Complex.differentiable_mul_cpow_one_div_Gamma	DLMF.Gamma.differentiable_mul_cpow_one_div_Gamma	namespace DLMF.Gamma
+declaration	Complex.differentiable_prod_one_div_Gamma_add_div	DLMF.Gamma.differentiable_prod_one_div_Gamma_add_div	namespace DLMF.Gamma
+declaration	Complex.exp_sum_pi_div	DLMF.Gamma.exp_sum_pi_div	namespace DLMF.Gamma
+declaration	Complex.gaussMulConst	DLMF.Gamma.gaussMulConst	namespace DLMF.Gamma
+declaration	Complex.gaussMulConst_eq_cpow	DLMF.Gamma.gaussMulConst_eq_cpow	namespace DLMF.Gamma
+declaration	Complex.gaussMulConst_ne_zero	DLMF.Gamma.gaussMulConst_ne_zero	namespace DLMF.Gamma
+declaration	Complex.harmonic_coe_eq_sum	DLMF.Gamma.harmonic_coe_eq_sum	namespace DLMF.Gamma
+declaration	Complex.multipliable_weierstrassGammaTerm	DLMF.Gamma.multipliable_weierstrassGammaTerm	namespace DLMF.Gamma
+declaration	Complex.one_div_Gamma_eq_tprod	DLMF.Gamma.one_div_Gamma_eq_tprod	namespace DLMF.Gamma
+declaration	Complex.one_sub_exp_mul_I	DLMF.Gamma.one_sub_exp_mul_I	namespace DLMF.Gamma
+declaration	Complex.one_sub_root_eq_sin	DLMF.Gamma.one_sub_root_eq_sin	namespace DLMF.Gamma
+declaration	Complex.pow_neg_two_I_mul_I	DLMF.Gamma.pow_neg_two_I_mul_I	namespace DLMF.Gamma
+declaration	Complex.prod_one_sub_exp_two_pi	DLMF.Gamma.prod_one_sub_exp_two_pi	namespace DLMF.Gamma
+declaration	Complex.sum_range_id_complex	DLMF.Gamma.sum_range_id_complex	namespace DLMF.Gamma
+declaration	Complex.sum_range_succ_coe	DLMF.Gamma.sum_range_succ_coe	namespace DLMF.Gamma
+declaration	Complex.summable_weierstrassGammaTerm_sub_one	DLMF.Gamma.summable_weierstrassGammaTerm_sub_one	namespace DLMF.Gamma
+declaration	Complex.tendsto_weierstrassGamma_prod	DLMF.Gamma.tendsto_weierstrassGamma_prod	namespace DLMF.Gamma
+declaration	Complex.weierstrassGammaTerm	DLMF.Gamma.weierstrassGammaTerm	namespace DLMF.Gamma
+declaration	Complex.weierstrassGamma_partial_eq	DLMF.Gamma.weierstrassGamma_partial_eq	namespace DLMF.Gamma
+declaration	MeasureTheory.volume_l1_unitBall	DLMF.Gamma.volume_l1_unitBall	namespace DLMF.Gamma
+declaration	MeasureTheory.volume_lp_ball_eq_gamma	DLMF.Gamma.volume_lp_ball_eq_gamma	namespace DLMF.Gamma
+declaration	Real.Gamma_add_le_mul_rpow	DLMF.Gamma.Real.Gamma_add_le_mul_rpow	namespace DLMF.Gamma
+declaration	Real.Gamma_mul_nat	DLMF.Gamma.Real.Gamma_mul_nat	namespace DLMF.Gamma
+declaration	Real.Gamma_mul_nat_of_pos	DLMF.Gamma.Real.Gamma_mul_nat_of_pos	namespace DLMF.Gamma
+declaration	Real.Gamma_nat_succ_isEquivalent_stirling	DLMF.Gamma.Real.Gamma_nat_succ_isEquivalent_stirling	namespace DLMF.Gamma
+declaration	Real.Gamma_nat_succ_isEquivalent_stirlingGamma	DLMF.Gamma.Real.Gamma_nat_succ_isEquivalent_stirlingGamma	namespace DLMF.Gamma
+declaration	Real.Gamma_prod_add_div	DLMF.Gamma.Real.Gamma_prod_add_div	namespace DLMF.Gamma
+declaration	Real.Gamma_prod_add_div_of_pos	DLMF.Gamma.Real.Gamma_prod_add_div_of_pos	namespace DLMF.Gamma
+declaration	Real.continuousOn_digamma	DLMF.Gamma.Real.continuousOn_digamma	namespace DLMF.Gamma
+declaration	Real.convexOn_log_GammaSeq	DLMF.Gamma.Real.convexOn_log_GammaSeq	namespace DLMF.Gamma
+declaration	Real.convexOn_log_Gamma_comp_add_div	DLMF.Gamma.Real.convexOn_log_Gamma_comp_add_div	namespace DLMF.Gamma
+declaration	Real.convexOn_sum_log_Gamma_div	DLMF.Gamma.Real.convexOn_sum_log_Gamma_div	namespace DLMF.Gamma
+declaration	Real.cot_pi_div_four	DLMF.Gamma.Real.cot_pi_div_four	namespace DLMF.Gamma
+declaration	Real.cot_pi_div_three	DLMF.Gamma.Real.cot_pi_div_three	namespace DLMF.Gamma
+declaration	Real.digamma	DLMF.Gamma.Real.digamma	namespace DLMF.Gamma
+declaration	Real.digammaSeriesTerm	DLMF.Gamma.Real.digammaSeriesTerm	namespace DLMF.Gamma
+declaration	Real.digamma_add_digamma_add_half	DLMF.Gamma.Real.digamma_add_digamma_add_half	namespace DLMF.Gamma
+declaration	Real.digamma_add_nat	DLMF.Gamma.Real.digamma_add_nat	namespace DLMF.Gamma
+declaration	Real.digamma_add_one	DLMF.Gamma.Real.digamma_add_one	namespace DLMF.Gamma
+declaration	Real.digamma_eq_deriv_log	DLMF.Gamma.Real.digamma_eq_deriv_log	namespace DLMF.Gamma
+declaration	Real.digamma_eq_re_digamma	DLMF.Gamma.Real.digamma_eq_re_digamma	namespace DLMF.Gamma
+declaration	Real.digamma_eq_tsum	DLMF.Gamma.Real.digamma_eq_tsum	namespace DLMF.Gamma
+declaration	Real.digamma_nat_add_one	DLMF.Gamma.Real.digamma_nat_add_one	namespace DLMF.Gamma
+declaration	Real.digamma_one	DLMF.Gamma.Real.digamma_one	namespace DLMF.Gamma
+declaration	Real.digamma_one_div_four	DLMF.Gamma.Real.digamma_one_div_four	namespace DLMF.Gamma
+declaration	Real.digamma_one_div_three	DLMF.Gamma.Real.digamma_one_div_three	namespace DLMF.Gamma
+declaration	Real.digamma_one_div_two	DLMF.Gamma.Real.digamma_one_div_two	namespace DLMF.Gamma
+declaration	Real.digamma_sum_add_div	DLMF.Gamma.Real.digamma_sum_add_div	namespace DLMF.Gamma
+declaration	Real.digamma_three_div_four	DLMF.Gamma.Real.digamma_three_div_four	namespace DLMF.Gamma
+declaration	Real.digamma_two_div_three	DLMF.Gamma.Real.digamma_two_div_three	namespace DLMF.Gamma
+declaration	Real.eq_partial_digammaSeries	DLMF.Gamma.Real.eq_partial_digammaSeries	namespace DLMF.Gamma
+declaration	Real.hasDerivAt_digamma	DLMF.Gamma.Real.hasDerivAt_digamma	namespace DLMF.Gamma
+declaration	Real.hasDerivAt_digammaSeriesTerm	DLMF.Gamma.Real.hasDerivAt_digammaSeriesTerm	namespace DLMF.Gamma
+declaration	Real.hasDerivAt_log_Gamma	DLMF.Gamma.Real.hasDerivAt_log_Gamma	namespace DLMF.Gamma
+declaration	Real.hasDerivAt_log_GammaSeq	DLMF.Gamma.Real.hasDerivAt_log_GammaSeq	namespace DLMF.Gamma
+declaration	Real.hasDerivAt_log_Gamma_add_div	DLMF.Gamma.Real.hasDerivAt_log_Gamma_add_div	namespace DLMF.Gamma
+declaration	Real.hasDerivAt_log_Gamma_mul	DLMF.Gamma.Real.hasDerivAt_log_Gamma_mul	namespace DLMF.Gamma
+declaration	Real.hasDerivAt_log_sin_pi	DLMF.Gamma.Real.hasDerivAt_log_sin_pi	namespace DLMF.Gamma
+declaration	Real.hasDerivAt_sum_log_Gamma_add_div	DLMF.Gamma.Real.hasDerivAt_sum_log_Gamma_add_div	namespace DLMF.Gamma
+declaration	Real.integral_log_sin_pi_zero_one	DLMF.Gamma.Real.integral_log_sin_pi_zero_one	namespace DLMF.Gamma
+declaration	Real.integral_rpow_zero_of_pos	DLMF.Gamma.Real.integral_rpow_zero_of_pos	namespace DLMF.Gamma
+declaration	Real.intervalIntegrable_digamma	DLMF.Gamma.Real.intervalIntegrable_digamma	namespace DLMF.Gamma
+declaration	Real.intervalIntegrable_log_Gamma	DLMF.Gamma.Real.intervalIntegrable_log_Gamma	namespace DLMF.Gamma
+declaration	Real.intervalIntegral_digamma	DLMF.Gamma.Real.intervalIntegral_digamma	namespace DLMF.Gamma
+declaration	Real.log_GammaSeq	DLMF.Gamma.Real.log_GammaSeq	namespace DLMF.Gamma
+declaration	Real.log_Gamma_add_log_Gamma_one_sub	DLMF.Gamma.Real.log_Gamma_add_log_Gamma_one_sub	namespace DLMF.Gamma
+declaration	Real.log_Gamma_add_one	DLMF.Gamma.Real.log_Gamma_add_one	namespace DLMF.Gamma
+declaration	Real.log_multiplicationGamma_eq	DLMF.Gamma.Real.log_multiplicationGamma_eq	namespace DLMF.Gamma
+declaration	Real.log_stirlingGamma	DLMF.Gamma.Real.log_stirlingGamma	namespace DLMF.Gamma
+declaration	Real.log_stirlingGamma_mul_rpow_div	DLMF.Gamma.Real.log_stirlingGamma_mul_rpow_div	namespace DLMF.Gamma
+declaration	Real.mul_rpow_le_Gamma_add	DLMF.Gamma.Real.mul_rpow_le_Gamma_add	namespace DLMF.Gamma
+declaration	Real.multipliable_weierstrassGammaTerm	DLMF.Gamma.Real.multipliable_weierstrassGammaTerm	namespace DLMF.Gamma
+declaration	Real.multiplicationGamma	DLMF.Gamma.Real.multiplicationGamma	namespace DLMF.Gamma
+declaration	Real.multiplicationGamma_add_one	DLMF.Gamma.Real.multiplicationGamma_add_one	namespace DLMF.Gamma
+declaration	Real.multiplicationGamma_eq_Gamma	DLMF.Gamma.Real.multiplicationGamma_eq_Gamma	namespace DLMF.Gamma
+declaration	Real.multiplicationGamma_log_convex_Ioi	DLMF.Gamma.Real.multiplicationGamma_log_convex_Ioi	namespace DLMF.Gamma
+declaration	Real.multiplicationGamma_one	DLMF.Gamma.Real.multiplicationGamma_one	namespace DLMF.Gamma
+declaration	Real.multiplicationGamma_pos	DLMF.Gamma.Real.multiplicationGamma_pos	namespace DLMF.Gamma
+declaration	Real.ofReal_weierstrassGammaTerm	DLMF.Gamma.Real.ofReal_weierstrassGammaTerm	namespace DLMF.Gamma
+declaration	Real.one_div_Gamma_eq_tprod	DLMF.Gamma.Real.one_div_Gamma_eq_tprod	namespace DLMF.Gamma
+declaration	Real.prod_Gamma_div	DLMF.Gamma.Real.prod_Gamma_div	namespace DLMF.Gamma
+declaration	Real.prod_sin_pi_div	DLMF.Gamma.Real.prod_sin_pi_div	namespace DLMF.Gamma
+declaration	Real.sin_pi_div_pos	DLMF.Gamma.Real.sin_pi_div_pos	namespace DLMF.Gamma
+declaration	Real.sqrt_two_pi_n_div_stirlingGamma_succ	DLMF.Gamma.Real.sqrt_two_pi_n_div_stirlingGamma_succ	namespace DLMF.Gamma
+declaration	Real.stirlingGamma	DLMF.Gamma.Real.stirlingGamma	namespace DLMF.Gamma
+declaration	Real.stirlingGamma_ne_zero	DLMF.Gamma.Real.stirlingGamma_ne_zero	namespace DLMF.Gamma
+declaration	Real.stirlingGamma_pos	DLMF.Gamma.Real.stirlingGamma_pos	namespace DLMF.Gamma
+declaration	Real.sum_recip_sub_recip_range	DLMF.Gamma.Real.sum_recip_sub_recip_range	namespace DLMF.Gamma
+declaration	Real.summable_digammaSeriesTerm	DLMF.Gamma.Real.summable_digammaSeriesTerm	namespace DLMF.Gamma
+declaration	Real.summable_trigamma	DLMF.Gamma.Real.summable_trigamma	namespace DLMF.Gamma
+declaration	Real.tendsto_Gamma_add_nat_div_stirlingGamma	DLMF.Gamma.Real.tendsto_Gamma_add_nat_div_stirlingGamma	namespace DLMF.Gamma
+declaration	Real.tendsto_Gamma_nat_div_stirlingGamma	DLMF.Gamma.Real.tendsto_Gamma_nat_div_stirlingGamma	namespace DLMF.Gamma
+declaration	Real.tendsto_Gamma_nat_succ_div_stirlingGamma	DLMF.Gamma.Real.tendsto_Gamma_nat_succ_div_stirlingGamma	namespace DLMF.Gamma
+declaration	Real.tendsto_deriv_log_GammaSeq	DLMF.Gamma.Real.tendsto_deriv_log_GammaSeq	namespace DLMF.Gamma
+declaration	Real.tendsto_log_GammaSeq	DLMF.Gamma.Real.tendsto_log_GammaSeq	namespace DLMF.Gamma
+declaration	Real.tendsto_log_sub_harmonic_succ	DLMF.Gamma.Real.tendsto_log_sub_harmonic_succ	namespace DLMF.Gamma
+declaration	Real.tendsto_log_sub_sum_recip	DLMF.Gamma.Real.tendsto_log_sub_sum_recip	namespace DLMF.Gamma
+declaration	Real.tendsto_n_div_succ_pow	DLMF.Gamma.Real.tendsto_n_div_succ_pow	namespace DLMF.Gamma
+declaration	Real.tendsto_nat_mul_log_one_add_div	DLMF.Gamma.Real.tendsto_nat_mul_log_one_add_div	namespace DLMF.Gamma
+declaration	Real.tendsto_one_add_div	DLMF.Gamma.Real.tendsto_one_add_div	namespace DLMF.Gamma
+declaration	Real.tendsto_partial_digammaSeries	DLMF.Gamma.Real.tendsto_partial_digammaSeries	namespace DLMF.Gamma
+declaration	Real.tendsto_stirlingGamma_mul_pred_rpow_div	DLMF.Gamma.Real.tendsto_stirlingGamma_mul_pred_rpow_div	namespace DLMF.Gamma
+declaration	Real.tendsto_stirlingGamma_mul_rpow_div	DLMF.Gamma.Real.tendsto_stirlingGamma_mul_rpow_div	namespace DLMF.Gamma
+declaration	Real.tendsto_stirling_n_div_stirlingGamma_succ	DLMF.Gamma.Real.tendsto_stirling_n_div_stirlingGamma_succ	namespace DLMF.Gamma
+declaration	Real.tendsto_weierstrassGamma_prod	DLMF.Gamma.Real.tendsto_weierstrassGamma_prod	namespace DLMF.Gamma
+declaration	Real.trigamma	DLMF.Gamma.Real.trigamma	namespace DLMF.Gamma
+declaration	Real.trigamma_eq_tsum	DLMF.Gamma.Real.trigamma_eq_tsum	namespace DLMF.Gamma
+declaration	Real.two_mul_integral_log_Gamma	DLMF.Gamma.Real.two_mul_integral_log_Gamma	namespace DLMF.Gamma
+declaration	Real.uIcc_subset_Ioi	DLMF.Gamma.Real.uIcc_subset_Ioi	namespace DLMF.Gamma
+declaration	Real.weierstrassGammaTerm	DLMF.Gamma.Real.weierstrassGammaTerm	namespace DLMF.Gamma
+declaration	dblZero_airyAvg	DoubleZeroSqrt.airyAvg	namespace
+declaration	dblZero_airyAvg_nonneg	DoubleZeroSqrt.airyAvg_nonneg	namespace
+declaration	dblZero_airyAvg_self	DoubleZeroSqrt.airyAvg_self	namespace
+declaration	dblZero_airyCoord	DoubleZeroSqrt.airyCoord	namespace
+declaration	dblZero_airyCoord_of_gt	DoubleZeroSqrt.airyCoord_of_gt	namespace
+declaration	dblZero_airyCoord_of_lt	DoubleZeroSqrt.airyCoord_of_lt	namespace
+declaration	dblZero_analyticAt_airyAvg	DoubleZeroSqrt.analyticAt_airyAvg	namespace
+declaration	dblZero_analyticAt_airyCoord	DoubleZeroSqrt.analyticAt_airyCoord	namespace
+declaration	dblZero_continuous_airyCoord	DoubleZeroSqrt.continuous_airyCoord	namespace
+declaration	dblZero_eq_sq_mul_dslope	DoubleZeroSqrt.eq_sq_mul_dslope	namespace
+declaration	dblZero_exists_analytic_inverse	DoubleZeroSqrt.exists_analytic_inverse	namespace
+declaration	dblZero_exists_analytic_inverse_airyCoord	DoubleZeroSqrt.exists_analytic_inverse_airyCoord	namespace
+declaration	dblZero_exists_eq_of_tendsto	DoubleZeroSqrt.exists_eq_of_tendsto	namespace
+declaration	dblZero_hasDerivAt_airyCoord	DoubleZeroSqrt.hasDerivAt_airyCoord	namespace
+declaration	dblZero_integral_rpow_mul_left	DoubleZeroSqrt.integral_rpow_mul_left	namespace
+declaration	dblZero_integral_rpow_mul_right	DoubleZeroSqrt.integral_rpow_mul_right	namespace
+declaration	dblZero_signedSqrt	DoubleZeroSqrt.signedSqrt	namespace
+declaration	dblZero_strictMonoOn_signedSqrt	DoubleZeroSqrt.strictMonoOn_signedSqrt	namespace
+declaration	stRem_c	StieltjesRemainder.normLowerBound	namespace
+declaration	stRem_c_le_norm	StieltjesRemainder.normLowerBound_le_norm	namespace
+declaration	stRem_c_le_one	StieltjesRemainder.normLowerBound_le_one	namespace
+declaration	stRem_c_pos	StieltjesRemainder.normLowerBound_pos	namespace
+declaration	stRem_chi_ray	StieltjesRemainder.chi_ray	namespace
+declaration	stRem_even	StieltjesRemainder.even	namespace
+declaration	stRem_even_core	StieltjesRemainder.even_core	namespace
+declaration	stRem_even_remainder	StieltjesRemainder.even_remainder	namespace
+declaration	stRem_geom	StieltjesRemainder.geom	namespace
+declaration	stRem_integrableOn	StieltjesRemainder.integrableOn	namespace
+declaration	stRem_integrableOn_real	StieltjesRemainder.integrableOn_real	namespace
+declaration	stRem_integrableOn_rpow_exp	StieltjesRemainder.integrableOn_rpow_exp	namespace
+declaration	stRem_mix_chi	StieltjesRemainder.mix_chi	namespace
+declaration	stRem_moment	StieltjesRemainder.moment	namespace
+declaration	stRem_norm_add_exp	StieltjesRemainder.norm_add_exp	namespace
+declaration	stRem_norm_one_add_div	StieltjesRemainder.norm_one_add_div	namespace
+declaration	stRem_norm_recip_le	StieltjesRemainder.norm_recip_le	namespace
+declaration	stRem_odd	StieltjesRemainder.odd	namespace
+declaration	stRem_odd_remainder	StieltjesRemainder.odd_remainder	namespace
+declaration	stRem_one_add_ne_zero	StieltjesRemainder.one_add_ne_zero	namespace
+declaration	stRem_recip_eq_integral	StieltjesRemainder.recip_eq_integral	namespace
+declaration	stRem_remainder_eq	StieltjesRemainder.remainder_eq	namespace
+declaration	stRem_remainder_le	StieltjesRemainder.remainder_le	namespace
+declaration	stRem_remainder_le_csc	StieltjesRemainder.remainder_le_csc	namespace
+declaration	stRem_remainder_le_of_re_nonneg	StieltjesRemainder.remainder_le_of_re_nonneg	namespace
+declaration	stRem_signed_of_core	StieltjesRemainder.signed_of_core	namespace
+declaration	stRem_transform	StieltjesRemainder.transform	namespace
+declaration	stRem_transform_I_mul	StieltjesRemainder.transform_I_mul	namespace
+declaration	tendsto_ordinaryHypergeometric_nhdsWithin_one	DLMF.Hypergeometric.tendsto_ordinaryHypergeometric_nhdsWithin_one	namespace
+declaration	Real.digamma_one_sub	DLMF.Gamma.Real.digamma_one_sub	namespace DLMF.Gamma
+statement	arctan_general_integral	arctan_general_integral'	stronger form added
+statement	arctanh_path_values	arctanh_path_values'	stronger form added

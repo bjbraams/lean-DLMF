@@ -320,7 +320,51 @@ theorem abelMean_eq_integral {f : ℝ → ℂ} (hf : IntervalIntegrable f volume
     {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) (θ : ℝ) :
     abelMean f r θ = ((2 * Real.pi : ℝ)⁻¹ : ℂ) *
       ∫ t in (0 : ℝ)..2 * Real.pi, (abelPoissonKernel r (θ - t) : ℂ) * f t := by
-  sorry
+  set F : ℤ → ℝ → ℂ := fun n t => ((r ^ n.natAbs : ℝ) : ℂ) * cexp (n * (θ - t) * I) * f t
+    with hFdef
+  have hgeo : Summable fun n : ℕ => r ^ n := summable_geometric_of_lt_one hr0 hr1
+  have hsum : Summable fun n : ℤ => r ^ n.natAbs :=
+    Summable.of_nat_of_neg (by simpa using hgeo) (by simpa using hgeo)
+  have hmeas : ∀ n, AEStronglyMeasurable (F n) (volume.restrict (uIoc 0 (2 * Real.pi))) := by
+    intro n
+    have : IntervalIntegrable (fun t => ((r ^ n.natAbs : ℝ) : ℂ) * cexp (n * (θ - t) * I) * f t)
+        volume 0 (2 * Real.pi) := by
+      have h := hf.continuousOn_mul (g := fun t : ℝ =>
+        ((r ^ n.natAbs : ℝ) : ℂ) * cexp (n * (θ - t) * I)) (by fun_prop)
+      simpa only using h
+    exact (intervalIntegrable_iff.1 this).aestronglyMeasurable
+  have hbound : ∀ n, ∀ᵐ t ∂volume, t ∈ uIoc 0 (2 * Real.pi) →
+      ‖F n t‖ ≤ r ^ n.natAbs * ‖f t‖ := by
+    intro n
+    refine Eventually.of_forall fun t _ => ?_
+    simp only [hFdef, norm_mul, Complex.norm_real, Real.norm_of_nonneg (pow_nonneg hr0 _)]
+    rw [show (n : ℂ) * ((θ : ℂ) - t) * I = ((n * (θ - t) : ℝ) : ℂ) * I by push_cast; ring,
+      Complex.norm_exp_ofReal_mul_I, mul_one]
+  have hlim : ∀ᵐ t ∂volume, t ∈ uIoc 0 (2 * Real.pi) →
+      HasSum (fun n => F n t) ((abelPoissonKernel r (θ - t) : ℂ) * f t) := by
+    refine Eventually.of_forall fun t _ => ?_
+    have h := (hasSum_abelPoissonKernel hr0 hr1 (θ - t)).mul_right (f t)
+    refine h.congr_fun fun n => ?_
+    simp only [hFdef]
+    push_cast
+    ring_nf
+  have hint : IntervalIntegrable (fun t => ∑' n : ℤ, r ^ n.natAbs * ‖f t‖) volume 0
+      (2 * Real.pi) := by
+    simp_rw [tsum_mul_right]
+    exact hf.norm.const_mul _
+  have key := intervalIntegral.hasSum_integral_of_dominated_convergence
+    (fun n t => r ^ n.natAbs * ‖f t‖) hmeas hbound
+    (Eventually.of_forall fun t _ => hsum.mul_right _) hint hlim
+  unfold abelMean
+  rw [← key.tsum_eq, ← tsum_mul_left]
+  refine tsum_congr fun n => ?_
+  rw [fourierCoeffOn_two_pi_eq]
+  simp only [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_mul_const]
+  refine intervalIntegral.integral_congr fun t _ => ?_
+  simp only [hFdef]
+  have he : cexp (-(n * t * I)) * cexp (n * θ * I) = cexp (n * (θ - t) * I) := by
+    rw [← Complex.exp_add]; ring_nf
+  linear_combination (((r ^ n.natAbs : ℝ) : ℂ) * ((2 * Real.pi : ℝ)⁻¹ : ℂ) * f t) * he
 
 /-- DLMF §1.15(iii): `A(r, θ)` is a harmonic function in polar coordinates: `z ↦ A(|z|, arg z)` is
 harmonic in the open unit disc. -/
@@ -329,6 +373,66 @@ theorem harmonicOnNhd_abelMean {f : ℝ → ℂ} (hf : IntervalIntegrable f volu
     InnerProductSpace.HarmonicOnNhd (fun z : ℂ => abelMean f ‖z‖ (arg z)) (Metric.ball 0 1) := by
   sorry
 
+/-- The Dirichlet kernel as a finite exponential sum. -/
+private lemma sum_cexp_Icc (m : ℕ) (x : ℝ) :
+    ∑ k ∈ Finset.Icc (-(m : ℤ)) m, cexp (k * x * I) =
+      ((1 + 2 * ∑ j ∈ range m, Real.cos ((j + 1) * x) : ℝ) : ℂ) := by
+  induction m with
+  | zero => simp
+  | succ m ih =>
+    have hset : Finset.Icc (-((m + 1 : ℕ) : ℤ)) ((m + 1 : ℕ) : ℤ) =
+        insert (-((m + 1 : ℕ) : ℤ)) (insert ((m + 1 : ℕ) : ℤ) (Finset.Icc (-(m : ℤ)) m)) := by
+      ext k; simp only [Finset.mem_Icc, Finset.mem_insert]; push_cast; omega
+    have h1 : ((m + 1 : ℕ) : ℤ) ∉ Finset.Icc (-(m : ℤ)) m := by simp
+    have h2 : -((m + 1 : ℕ) : ℤ) ∉ insert ((m + 1 : ℕ) : ℤ) (Finset.Icc (-(m : ℤ)) m) := by
+      simp only [Finset.mem_insert, Finset.mem_Icc]; push_cast; omega
+    rw [hset, sum_insert h2, sum_insert h1, ih, sum_range_succ]
+    have hc : (Real.cos ((m + 1 : ℝ) * x) : ℂ) =
+        (cexp ((m + 1 : ℝ) * x * I) + cexp (-((m + 1 : ℝ) * x * I))) / 2 := by
+      rw [Complex.ofReal_cos, Complex.cos]; push_cast; ring_nf
+    push_cast at hc ⊢
+    rw [hc]
+    ring_nf
+
+/-- The sum of the first `n + 1` Dirichlet kernels. -/
+private lemma sum_range_dirichlet (n : ℕ) (x : ℝ) :
+    ∑ m ∈ range (n + 1), (1 + 2 * ∑ j ∈ range m, Real.cos ((j + 1) * x)) =
+      (n + 1) + 2 * ∑ k ∈ range n, ((n : ℝ) - k) * Real.cos ((k + 1) * x) := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    rw [sum_range_succ, ih, sum_range_succ (fun k : ℕ => ((n + 1 : ℕ) - (k : ℝ)) * _)]
+    have : ∑ k ∈ range n, (((n + 1 : ℕ) : ℝ) - k) * Real.cos ((k + 1) * x) =
+        ∑ k ∈ range n, ((n : ℝ) - k) * Real.cos ((k + 1) * x) +
+          ∑ k ∈ range n, Real.cos ((k + 1) * x) := by
+      rw [← sum_add_distrib]; refine sum_congr rfl fun k _ => ?_; push_cast; ring
+    rw [this, sum_range_succ (fun j : ℕ => Real.cos ((j + 1) * x))]
+    push_cast
+    ring
+
+/-- The partial sum `s_m(θ)` as an integral against the Dirichlet kernel. -/
+private lemma fourierPartialSum_eq_integral {f : ℝ → ℂ}
+    (hf : IntervalIntegrable f volume 0 (2 * Real.pi)) (m : ℕ) (θ : ℝ) :
+    fourierPartialSum f m θ = ((2 * Real.pi : ℝ)⁻¹ : ℂ) * ∫ t in (0 : ℝ)..2 * Real.pi,
+      f t * ((1 + 2 * ∑ j ∈ range m, Real.cos ((j + 1) * (θ - t)) : ℝ) : ℂ) := by
+  unfold fourierPartialSum
+  simp_rw [fourierCoeffOn_two_pi_eq]
+  conv_lhs => arg 2; ext k; rw [mul_assoc]
+  rw [← Finset.mul_sum]
+  congr 1
+  have hint : ∀ k ∈ Finset.Icc (-(m : ℤ)) m, IntervalIntegrable
+      (fun t => f t * cexp (-(k * t * I)) * cexp (k * θ * I)) volume 0 (2 * Real.pi) :=
+    fun k _ => (hf.mul_continuousOn (by fun_prop)).mul_const _
+  simp_rw [← intervalIntegral.integral_mul_const]
+  rw [← intervalIntegral.integral_finsetSum hint]
+  refine intervalIntegral.integral_congr fun t _ => ?_
+  rw [← sum_cexp_Icc, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [mul_assoc, ← Complex.exp_add]
+  congr 2
+  push_cast
+  ring
+
 /-- DLMF 1.15.23: `σ_n(θ) = (1/2π) ∫₀^{2π} K_n(θ - t) f(t) dt` for `f` integrable on
 `[0, 2π]`. -/
 @[dlmf 1.15.E23]
@@ -336,7 +440,31 @@ theorem fourierCesaroMean_eq_integral {f : ℝ → ℂ}
     (hf : IntervalIntegrable f volume 0 (2 * Real.pi)) (n : ℕ) (θ : ℝ) :
     fourierCesaroMean f n θ = ((2 * Real.pi : ℝ)⁻¹ : ℂ) *
       ∫ t in (0 : ℝ)..2 * Real.pi, (fejerKernel n (θ - t) : ℂ) * f t := by
-  sorry
+  unfold fourierCesaroMean
+  simp_rw [fourierPartialSum_eq_integral hf]
+  rw [← Finset.mul_sum, ← intervalIntegral.integral_finsetSum (fun m _ =>
+    hf.mul_continuousOn (by fun_prop)), mul_div_assoc, ← intervalIntegral.integral_div]
+  congr 1
+  refine intervalIntegral.integral_congr_ae ?_
+  have hnull : ∀ᵐ t ∂volume, Real.sin ((θ - t) / 2) ≠ 0 := by
+    have hc : {t : ℝ | Real.sin ((θ - t) / 2) = 0} ⊆
+        Set.range (fun k : ℤ => θ - 2 * (k * Real.pi)) := by
+      intro t ht
+      obtain ⟨k, hk⟩ := Real.sin_eq_zero_iff.1 ht
+      exact ⟨k, by linarith⟩
+    have := ((Set.countable_range _).mono hc).measure_zero volume
+    exact measure_eq_zero_iff_ae_notMem.1 this
+  filter_upwards [hnull] with t ht _
+  rw [← Finset.mul_sum, ← Complex.ofReal_sum, sum_range_dirichlet]
+  have hK : fejerKernel n (θ - t) = (1 / (n + 1 : ℝ)) *
+      ((n + 1) + 2 * ∑ k ∈ range n, ((n : ℝ) - k) * Real.cos ((k + 1) * (θ - t))) := by
+    simp only [fejerKernel]
+    rw [div_pow, ← sin_half_sq_mul_fejer (θ - t) n]
+    field_simp
+  rw [hK]
+  generalize ((n : ℝ) + 1 + 2 * ∑ k ∈ range n, ((n : ℝ) - k) * Real.cos ((k + 1) * (θ - t))) = E
+  push_cast
+  field_simp
 
 /-- DLMF 1.15.24 (Abel means): if `f` is `2π`-periodic and integrable on `[0, 2π]`, then
 `A(r, θ) → ½(f(θ+) + f(θ-))` as `r → 1-` at every `θ` where both one-sided limits exist. -/
