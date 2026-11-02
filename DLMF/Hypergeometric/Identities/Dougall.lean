@@ -15,15 +15,15 @@ final Gamma form `dougall_bilateral` is in `DLMF.Hypergeometric.Identities.Whipp
 
 ## Main definitions
 
-* `DougallAux.term`: the terms of Dougall's bilateral series.
+* `DougallSeries.term`: the terms of Dougall's bilateral series.
 
 ## Main results
 
-* `DougallAux.summable_term`, `DougallAux.differentiableOn_tsum`: absolute convergence and
+* `DougallSeries.summable_term`, `DougallSeries.differentiableOn_tsum`: absolute convergence and
   holomorphy in `d` on the half-plane of convergence.
-* `DougallAux.tsum_recurrence`: the first-order recurrence in `d`.
-* `DougallAux.tsum_at_int`: the sum at integer `d`, from Gauss's summation.
-* `DougallAux.tsum_eq_of_not_int`: Dougall's sum for non-integral `c`, by Carlson's theorem in
+* `DougallSeries.tsum_recurrence`: the first-order recurrence in `d`.
+* `DougallSeries.tsum_at_int`: the sum at integer `d`, from Gauss's summation.
+* `DougallSeries.tsum_eq_of_not_int`: Dougall's sum for non-integral `c`, by Carlson's theorem in
   `d`.
 
 See `DLMF.Hypergeometric.Identities` for the overview.
@@ -45,9 +45,9 @@ open Filter Set
 
 open scoped Topology
 
-namespace DougallAux
+namespace DougallSeries
 
-open CarlsonAux
+open CarlsonTheorem
 
 variable {a b c : ℂ}
 
@@ -545,7 +545,7 @@ theorem tsum_eq_of_not_int (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ 
             rw [← Real.exp_add]; ring_nf
           linear_combination (S * (C₁ * C₂ * C₃) * (1 + |y|) ^ (K₁ + K₂ + K₃)) * this
   -- Carlson
-  have hzero := CarlsonAux.eq_zero_of_periodic_of_bound (by norm_num : (0 : ℝ) < 1 / 2) hFd hper
+  have hzero := CarlsonTheorem.eq_zero_of_periodic_of_bound (by norm_num : (0 : ℝ) < 1 / 2) hFd hper
     (σ := π / 2) (by linarith [Real.pi_pos]) hstrip hF0
   -- hence `L = R` on `Re d ≥ m₀`
   have hLR : ∀ d : ℂ, (m₀ : ℝ) ≤ d.re → L d = R d := by
@@ -616,15 +616,15 @@ theorem tsum_at_int_int (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) 
   have := Int.cast_injective h'
   omega
 
-end DougallAux
+end DougallSeries
 
-namespace DixonAux
+namespace DixonWZ
 
-open CarlsonAux
+open CarlsonTheorem
 
 variable {a b : ℂ}
 
-end DixonAux
+end DixonWZ
 end CarlsonApplications
 end DLMF.Hypergeometric
 end

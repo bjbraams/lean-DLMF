@@ -23,10 +23,10 @@ generalized hypergeometric functions (§7.11).
 ## Main results
 
 * `erf_negative`, `erfc_negative`, `faddeevaW_negative`, `dawsonF_negative`, `fresnel_negative`,
-  `fresnel_mul_I`, `fresnelAux_mul_I`, `fresnelAux_negative`: DLMF 7.4.1–7.4.8.
+  `fresnel_mul_I`, `FresnelAuxiliary.mul_I`, `FresnelAuxiliary.negative`: DLMF 7.4.1–7.4.8.
 * `dawsonF_faddeeva`, `fresnel_sum_tail`, `fresnelCosInt_aux`, `fresnelSinInt_aux`,
   `fresnelTail_aux`, `fresnel_signed_tail`: DLMF 7.5.1–7.5.6.
-* `fresnel_signed_erf`, `fresnel_signed_faddeeva`, `fresnelAux_signed_erfc`: the Fresnel
+* `fresnel_signed_erf`, `fresnel_signed_faddeeva`, `FresnelAuxiliary.signed_erfc`: the Fresnel
   integrals through `erf`, `w` and `erfc` (DLMF 7.5.8–7.5.10).
 * `fresnelTail_norm_sq_nonneg`, `fresnelTail_norm_sq_nonpos`: DLMF 7.5.11, 7.5.12.
 * `iteratedDeriv_erf_hermite`, `hasDerivAt_faddeevaW`, `iteratedDeriv_faddeevaW_recurrence`,
@@ -47,6 +47,8 @@ termwise-integrated sine and cosine series.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Identity under the stated parameter and domain assumptions: `erf (-z)=-erf z`. -/
@@ -110,7 +112,7 @@ theorem fresnel_mul_I (z : ℂ) :
 (π*I/4-π*I*z^2/2)/Real.sqrt 2-I*fresnelAuxFComplex z ∧ fresnelAuxGComplex (I*z)=exp
 (-π*I/4-π*I*z^2/2)/Real.sqrt 2+I*fresnelAuxGComplex z`. -/
 @[dlmf 7.4.E7]
-theorem fresnelAux_mul_I (z : ℂ) :
+theorem FresnelAuxiliary.mul_I (z : ℂ) :
     fresnelAuxFComplex (I*z)=exp (π*I/4-π*I*z^2/2)/Real.sqrt 2-I*fresnelAuxFComplex z ∧
         fresnelAuxGComplex (I*z)=exp (-π*I/4-π*I*z^2/2)/Real.sqrt 2+I*fresnelAuxGComplex z := by
   have hc : cos ((π:ℂ)/4)=(Real.sqrt 2:ℂ)/2 := by exact_mod_cast Real.cos_pi_div_four
@@ -145,7 +147,7 @@ theorem fresnelAux_mul_I (z : ℂ) :
 2*cos (π/4+π*z^2/2)-fresnelAuxFComplex z ∧ fresnelAuxGComplex (-z)=Real.sqrt 2*sin
 (π/4+π*z^2/2)-fresnelAuxGComplex z`. -/
 @[dlmf 7.4.E8]
-theorem fresnelAux_negative (z : ℂ) :
+theorem FresnelAuxiliary.negative (z : ℂ) :
     fresnelAuxFComplex (-z)=Real.sqrt 2*cos (π/4+π*z^2/2)-fresnelAuxFComplex z ∧
         fresnelAuxGComplex (-z)=Real.sqrt 2*sin (π/4+π*z^2/2)-fresnelAuxGComplex z := by
   have hc : cos ((π:ℂ)/4)=(Real.sqrt 2:ℂ)/2 := by exact_mod_cast Real.cos_pi_div_four
@@ -317,7 +319,7 @@ theorem fresnel_signed_faddeeva (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
 z+ε*I*fresnelAuxFComplex z=(1+ε*I)/2*exp ((fresnelZetaComplex ε z)^2)*erfc (fresnelZetaComplex
 ε z)`. -/
 @[dlmf 7.5.E10]
-theorem fresnelAux_signed_erfc (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
+theorem FresnelAuxiliary.signed_erfc (z : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     fresnelAuxGComplex z+ε*I*fresnelAuxFComplex z=(1+ε*I)/2*exp ((fresnelZetaComplex ε z)^2)*erfc
         (fresnelZetaComplex ε z) := by
   have h := fresnel_signed_tail z hε
@@ -360,7 +362,7 @@ theorem fresnelTail_norm_sq_nonneg {x : ℝ} :
 theorem fresnelTail_norm_sq_nonpos {x : ℝ} :
     ‖fresnelTail x‖^2 = 2+fresnelAuxF (-x)^2+fresnelAuxG (-x)^2-2*Real.sqrt 2*Real.cos
         (π/4+π*x^2/2)*fresnelAuxF (-x)-2*Real.sqrt 2*Real.cos (π/4-π*x^2/2)*fresnelAuxG (-x) := by
-  have h := fresnelAux_negative ((-x:ℝ):ℂ)
+  have h := FresnelAuxiliary.negative ((-x:ℝ):ℂ)
   rw [fresnelAuxFComplex_ofReal (-x), fresnelAuxGComplex_ofReal (-x)] at h
   have hF : fresnelAuxF x=Real.sqrt 2*Real.cos (π/4+π*x^2/2)-fresnelAuxF (-x) := by
     apply Complex.ofReal_injective

@@ -28,7 +28,7 @@ Euler's integral, and parabolic zero-free regions (AAR §4.16).
 * `tendsto_ordinaryHypergeometric_div_atTop`: confluence,
   `M(a,c,z) = lim_{b→∞} ₂F₁(a,b;c;z/b)`.
 * `kummerM_eq_euler_integral`: Euler's integral for `M` (DLMF 13.4.1).
-* `parab_partialSums`: the Saff–Varga theorem for partial sums (AAR Theorem 4.16.1).
+* `SaffVarga.partialSums`: the Saff–Varga theorem for partial sums (AAR Theorem 4.16.1).
 * `kummerM_ne_zero_of_mem_parabolicRegion`: the parabolic zero-free regions of AAR
   Corollary 4.16.4.
 
@@ -260,14 +260,14 @@ theorem kummerM_eq_euler_integral {a c z : ℂ}
 
 section ParabolicRegion
 
-/-! Saff–Varga zero-free parabolic regions (AAR §4.16); helper prefix `parab_`. -/
+/-! Saff–Varga zero-free parabolic regions (AAR §4.16); helpers in `SaffVarga`. -/
 
 open Set Metric
 open scoped NNReal
 
 /-- The basic step of Saff–Varga: if `z` lies in the parabolic region `P_α` and `Re β ≥ α > 0`,
 then `z + β ≠ 0` and `Re (z / (z + β)) < 1`. -/
-theorem parab_step {α : ℝ} (hα : 0 < α) {z β : ℂ} (hz : z.im ^ 2 < 4 * α * (z.re + α))
+theorem SaffVarga.step {α : ℝ} (hα : 0 < α) {z β : ℂ} (hz : z.im ^ 2 < 4 * α * (z.re + α))
     (hβ : α ≤ β.re) : z + β ≠ 0 ∧ (z / (z + β)).re < 1 := by
   have key : 0 < z.re * β.re + z.im * β.im + (β.re ^ 2 + β.im ^ 2) := by
     have h1 : 0 < z.re + β.re + α := by nlinarith [sq_nonneg z.im]
@@ -288,7 +288,7 @@ theorem parab_step {α : ℝ} (hα : 0 < α) {z β : ℂ} (hz : z.im ^ 2 < 4 * �
 /-- **Saff–Varga for partial sums** (AAR Theorem 4.16.1 and Corollary 4.16.3). Let `A k > 0`
 and `b (k+1) = A k / A (k+1)`. If `0 < α ≤ b 1` and `α ≤ b (k+2) - b (k+1)` for all `k`, then
 no partial sum `∑_{k ≤ n} A k z^k` vanishes in the parabolic region `y² < 4α(x+α)`. -/
-theorem parab_partialSums {A b : ℕ → ℝ} (hA : ∀ k, 0 < A k) (hb : ∀ k, 0 < b (k + 1))
+theorem SaffVarga.partialSums {A b : ℕ → ℝ} (hA : ∀ k, 0 < A k) (hb : ∀ k, 0 < b (k + 1))
     (hbA : ∀ k, b (k + 1) * A (k + 1) = A k) {α : ℝ} (hα : 0 < α) (h1 : α ≤ b 1)
     (h2 : ∀ k, α ≤ b (k + 2) - b (k + 1)) {z : ℂ} (hz : z.im ^ 2 < 4 * α * (z.re + α)) (n : ℕ) :
     (∑ k ∈ Finset.range (n + 1), (A k : ℂ) * z ^ k) ≠ 0 := by
@@ -307,7 +307,7 @@ theorem parab_partialSums {A b : ℕ → ℝ} (hA : ∀ k, 0 < A k) (hb : ∀ k,
       have hrec1 : (b 1 : ℂ) * S 1 = (z + b 1) * S 0 := by
         simp only [hS, Finset.sum_range_succ, Finset.sum_range_zero]
         linear_combination z * hbA' 0
-      obtain ⟨hne, hlt⟩ := parab_step hα (β := (b 1 : ℂ)) hz (by simpa using h1)
+      obtain ⟨hne, hlt⟩ := SaffVarga.step hα (β := (b 1 : ℂ)) hz (by simpa using h1)
       have hA0 : S 0 ≠ 0 := by rw [hS0]; exact_mod_cast (hA 0).ne'
       have hS1 : S 1 = (z + b 1) * S 0 / b 1 := by
         rw [eq_div_iff (hb' 0), mul_comm, hrec1]
@@ -324,7 +324,7 @@ theorem parab_partialSums {A b : ℕ → ℝ} (hA : ∀ k, 0 < A k) (hb : ∀ k,
         rw [this]
         have := h2 n
         nlinarith [hb n]
-      obtain ⟨hzβ, hlt'⟩ := parab_step hα hz hβre
+      obtain ⟨hzβ, hlt'⟩ := SaffVarga.step hα hz hβre
       have hμS : (b (n + 1) : ℂ) * μ * S (n + 1) = z * S n := by
         rw [hμ]; field_simp [hb' n]
       have hrec' : (b (n + 2) : ℂ) * S (n + 2) = S (n + 1) * (z + β) := by
@@ -344,7 +344,7 @@ theorem parab_partialSums {A b : ℕ → ℝ} (hA : ∀ k, 0 < A k) (hb : ∀ k,
 converge to `f` uniformly on every ball about `0`, and let `f` be analytic and not locally zero
 at `z₀ ∈ U`. Then `f z₀ ≠ 0`. The proof applies the maximum modulus principle to `1 / s n` on a
 small disk about `z₀`. -/
-theorem parab_hurwitz {f : ℂ → ℂ} {s : ℕ → ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) {z₀ : ℂ}
+theorem SaffVarga.hurwitz {f : ℂ → ℂ} {s : ℕ → ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) {z₀ : ℂ}
     (hz₀ : z₀ ∈ U) (hf : AnalyticAt ℂ f z₀) (hfne : ¬∀ᶠ z in 𝓝 z₀, f z = 0)
     (hs : ∀ n, Differentiable ℂ (s n)) (hsU : ∀ᶠ n in atTop, ∀ z ∈ U, s n z ≠ 0)
     (hconv : ∀ R : ℝ≥0, TendstoUniformlyOn s f atTop (ball 0 R)) : f z₀ ≠ 0 := by
@@ -410,26 +410,28 @@ theorem parab_hurwitz {f : ℂ → ℂ} {s : ℕ → ℂ → ℂ} {U : Set ℂ} 
   linarith
 
 /-- The three parameter cases of AAR Corollary 4.16.4 give the Saff–Varga conditions. -/
-theorem parab_params {a c α : ℝ}
+theorem SaffVarga.params {a c α : ℝ}
     (hparams : (0 < c ∧ c ≤ a ∧ α = c / a) ∨
       (1 ≤ a ∧ a ≤ c ∧ α = 1) ∨
       (0 < a ∧ a < 1 ∧ a ≤ c ∧ c < 2 * a / (1 - a) ∧
         α = (2 * a - c + c * a) / (a ^ 2 + a))) :
-    0 < a ∧ 0 < c ∧ 0 < α ∧ α ≤ parab_b a c 1 ∧
-      ∀ k : ℕ, α ≤ parab_b a c (k + 2) - parab_b a c (k + 1) := by
-  have hdiff : ∀ k : ℕ, 0 < a → parab_b a c (k + 2) - parab_b a c (k + 1) =
+    0 < a ∧ 0 < c ∧ 0 < α ∧ α ≤ SaffVarga.kummerCoeffRatio a c 1 ∧
+      ∀ k : ℕ, α ≤ SaffVarga.kummerCoeffRatio a c (k + 2) -
+          SaffVarga.kummerCoeffRatio a c (k + 1) := by
+  have hdiff : ∀ k : ℕ, 0 < a → SaffVarga.kummerCoeffRatio a c (k + 2) -
+      SaffVarga.kummerCoeffRatio a c (k + 1) =
       (a * c + 2 * a * (k + 1) - c + (k + 1) ^ 2 - (k + 1)) / ((a + (k + 1)) * (a + k)) := by
     intro k ha
     have h1 : 0 < a + k := by positivity
     have h2 : 0 < a + (k + 1) := by positivity
-    simp only [parab_b]
+    simp only [SaffVarga.kummerCoeffRatio]
     push_cast
     rw [div_sub_div _ _ (by ring_nf; positivity) (by ring_nf; positivity), div_eq_div_iff
       (by ring_nf; positivity) (by positivity)]
     ring
   rcases hparams with ⟨hc, hca, rfl⟩ | ⟨ha, hac, rfl⟩ | ⟨ha, ha1, hac, hc2, rfl⟩
   · have ha : 0 < a := lt_of_lt_of_le hc hca
-    refine ⟨ha, hc, div_pos hc ha, by simp [parab_b], fun k => ?_⟩
+    refine ⟨ha, hc, div_pos hc ha, by simp [SaffVarga.kummerCoeffRatio], fun k => ?_⟩
     rw [hdiff k ha, div_le_div_iff₀ ha (by positivity)]
     have : (a * c + 2 * a * (k + 1) - c + (k + 1) ^ 2 - (k + 1)) * a -
         c * ((a + (k + 1)) * (a + k)) = (k + 1) * (a - c) * (2 * a + k) := by ring
@@ -440,7 +442,7 @@ theorem parab_params {a c α : ℝ}
   · have ha0 : 0 < a := by linarith
     have hc : 0 < c := by linarith
     refine ⟨ha0, hc, one_pos, ?_, fun k => ?_⟩
-    · have : parab_b a c 1 = c / a := by simp [parab_b]
+    · have : SaffVarga.kummerCoeffRatio a c 1 = c / a := by simp [SaffVarga.kummerCoeffRatio]
       rw [this, le_div_iff₀ ha0]; linarith
     · rw [hdiff k ha0, le_div_iff₀ (by positivity)]
       have : (a * c + 2 * a * (k + 1) - c + (k + 1) ^ 2 - (k + 1)) -
@@ -452,7 +454,7 @@ theorem parab_params {a c α : ℝ}
       rw [lt_div_iff₀ h1a] at hc2; nlinarith
     have hden : 0 < a ^ 2 + a := by positivity
     refine ⟨ha, hc, div_pos hα hden, ?_, fun k => ?_⟩
-    · simp only [parab_b]; push_cast
+    · simp only [SaffVarga.kummerCoeffRatio]; push_cast
       rw [div_le_div_iff₀ hden (by linarith)]
       nlinarith [mul_nonneg (show 0 ≤ c - a by linarith) ha.le]
     · rw [hdiff k ha, div_le_div_iff₀ hden (by positivity)]
@@ -465,8 +467,8 @@ theorem parab_params {a c α : ℝ}
       nlinarith
 
 /-- The parabolic zero-free regions of AAR Corollary 4.16.4. The partial sums are
-zero-free there by Saff–Varga (`parab_partialSums`), and the limit by a Hurwitz-type
-argument (`parab_hurwitz`). The hypothesis `hre` is implied by `him`. -/
+zero-free there by Saff–Varga (`SaffVarga.partialSums`), and the limit by a Hurwitz-type
+argument (`SaffVarga.hurwitz`). The hypothesis `hre` is implied by `him`. -/
 theorem kummerM_ne_zero_of_mem_parabolicRegion {a c α : ℝ} {z : ℂ}
     (hparams : (0 < c ∧ c ≤ a ∧ α = c / a) ∨
       (1 ≤ a ∧ a ≤ c ∧ α = 1) ∨
@@ -474,21 +476,22 @@ theorem kummerM_ne_zero_of_mem_parabolicRegion {a c α : ℝ} {z : ℂ}
         α = (2 * a - c + c * a) / (a ^ 2 + a)))
     (him : z.im ^ 2 < 4 * α * (z.re + α)) :
     kummerM a c z ≠ 0 := by
-  obtain ⟨ha, hc, hα, h1, h2⟩ := parab_params hparams
+  obtain ⟨ha, hc, hα, h1, h2⟩ := SaffVarga.params hparams
   have hck : ∀ k : ℕ, (c : ℂ) ≠ -k := fun k h => by
     have : c = -(k : ℝ) := by exact_mod_cast h
     have := k.cast_nonneg (α := ℝ); linarith
-  have hA : ∀ k, 0 < parab_A a c k := fun k => by
-    unfold parab_A
+  have hA : ∀ k, 0 < SaffVarga.kummerCoeff a c k := fun k => by
+    unfold SaffVarga.kummerCoeff
     have := ascPochhammer_pos k a ha
     have := ascPochhammer_pos k c hc
     positivity
-  have hb : ∀ k, 0 < parab_b a c (k + 1) := fun k => by
-    unfold parab_b; push_cast
+  have hb : ∀ k, 0 < SaffVarga.kummerCoeffRatio a c (k + 1) := fun k => by
+    unfold SaffVarga.kummerCoeffRatio; push_cast
     have : (0:ℝ) ≤ k := k.cast_nonneg
     apply div_pos (mul_pos (by linarith) (by linarith)) (by linarith)
-  have hbA : ∀ k, parab_b a c (k + 1) * parab_A a c (k + 1) = parab_A a c k := fun k => by
-    unfold parab_b parab_A
+  have hbA : ∀ k, SaffVarga.kummerCoeffRatio a c (k + 1) * SaffVarga.kummerCoeff a c (k + 1) =
+      SaffVarga.kummerCoeff a c k := fun k => by
+    unfold SaffVarga.kummerCoeffRatio SaffVarga.kummerCoeff
     rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval, Nat.factorial_succ]
     have h1 : 0 < a + k := by positivity
     have h2 : 0 < c + k := by positivity
@@ -498,19 +501,19 @@ theorem kummerM_ne_zero_of_mem_parabolicRegion {a c α : ℝ} {z : ℂ}
     rw [show a + ((k:ℝ) + 1) - 1 = a + k by ring, show c + ((k:ℝ) + 1) - 1 = c + k by ring,
       div_mul_div_comm, div_eq_div_iff (by positivity) (by positivity)]
     ring
-  have hcoef : ∀ k, kummerMCoeff a c k = (parab_A a c k : ℂ) := fun k => by
-    simp only [kummerMCoeff, parab_A, poch_ofReal]
+  have hcoef : ∀ k, kummerMCoeff a c k = (SaffVarga.kummerCoeff a c k : ℂ) := fun k => by
+    simp only [kummerMCoeff, SaffVarga.kummerCoeff, poch_ofReal]
     push_cast; ring
   set p := FormalMultilinearSeries.ofScalars ℂ (kummerMCoeff a c) with hp
   have hps := hasFPowerSeriesOnBall_kummerM (a := (a : ℂ)) hck
   have hsum : ∀ n, (fun y => p.partialSum n y) =
-      fun y => ∑ k ∈ Finset.range n, (parab_A a c k : ℂ) * y ^ k := fun n => by
+      fun y => ∑ k ∈ Finset.range n, (SaffVarga.kummerCoeff a c k : ℂ) * y ^ k := fun n => by
     funext y
     simp only [FormalMultilinearSeries.partialSum, hp, FormalMultilinearSeries.ofScalars_apply_eq,
       hcoef, smul_eq_mul]
   set U : Set ℂ := {z | z.im ^ 2 < 4 * α * (z.re + α)} with hU
   have hUo : IsOpen U := isOpen_lt (by fun_prop) (by fun_prop)
-  refine parab_hurwitz (s := fun n y => p.partialSum n y) hUo him
+  refine SaffVarga.hurwitz (s := fun n y => p.partialSum n y) hUo him
     (hps.analyticAt_of_mem (by simp)) ?_ (fun n => ?_) ?_ (fun R => ?_)
   · intro hev
     have hon : AnalyticOnNhd ℂ (kummerM a c) univ := fun w _ => hps.analyticAt_of_mem (by simp)
@@ -521,7 +524,7 @@ theorem kummerM_ne_zero_of_mem_parabolicRegion {a c α : ℝ} {z : ℂ}
   · filter_upwards [eventually_ge_atTop 1] with n hn w hw
     obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le' hn
     simp only [hsum (m + 1)]
-    exact parab_partialSums hA hb hbA hα h1 h2 hw m
+    exact SaffVarga.partialSums hA hb hbA hα h1 h2 hw m
   · have := hps.tendstoUniformlyOn (r' := R) ENNReal.coe_lt_top
     simpa using this
 

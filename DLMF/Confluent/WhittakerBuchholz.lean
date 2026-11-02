@@ -367,7 +367,8 @@ private lemma whittakerGenD_zero (μ z : ℂ) : whittakerGenD μ 0 z=whittakerBe
   simp [whittakerGenD]
 
 /-- `(t f)^{(n+1)}(0) = (n+1) f^{(n)}(0)` for `f` analytic at `0`. -/
-private lemma buchholz_iteratedDeriv_id_mul_zero {f : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (n : ℕ) :
+private lemma BuchholzExpansion.iteratedDeriv_id_mul_zero {f : ℂ → ℂ}
+    (hf : AnalyticAt ℂ f 0) (n : ℕ) :
     iteratedDeriv (n+1) (fun t : ℂ => t*f t) 0 = (n+1)*iteratedDeriv n f 0 := by
   rw [iteratedDeriv_fun_mul (f:=fun t:ℂ=>t) (g:=f) contDiffAt_id hf.contDiffAt]
   simp only [iteratedDeriv_fun_id_zero,mul_ite,mul_one,mul_zero,ite_mul,zero_mul]
@@ -425,9 +426,10 @@ private lemma whittakerTaylorD_recurrence (μ z : ℂ) (s : ℕ) :
   rw [iteratedDeriv_sub (hR1.sub hR2).contDiffAt hR3.contDiffAt,
     iteratedDeriv_sub hR1.contDiffAt hR2.contDiffAt] at h
   simp only [iteratedDeriv_const_mul_field] at h
-  rw [buchholz_iteratedDeriv_id_mul_zero hG.deriv,
-    buchholz_iteratedDeriv_id_mul_zero (hF 2),buchholz_iteratedDeriv_id_mul_zero (hF 1),
-    buchholz_iteratedDeriv_id_mul_zero (hF 0)] at h
+  rw [BuchholzExpansion.iteratedDeriv_id_mul_zero hG.deriv,
+    BuchholzExpansion.iteratedDeriv_id_mul_zero (hF 2),
+        BuchholzExpansion.iteratedDeriv_id_mul_zero (hF 1),
+    BuchholzExpansion.iteratedDeriv_id_mul_zero (hF 0)] at h
   simp only [←iteratedDeriv_succ'] at h
   dsimp only [G] at h
   rw [←whittakerGenD_zero μ z] at h
@@ -634,7 +636,7 @@ private lemma buchholzC_eq (μ z : ℂ) (s : ℕ) :
   ring
 
 /-- The shifted regularized `₀F₁` functions have a factorial bound on each closed disc. -/
-private lemma buchholz_0F1_uniform_bound (κ ν : ℂ) {R : ℝ} (hR : 0 ≤ R) :
+private lemma BuchholzExpansion.uniform_bound_0F1 (κ ν : ℂ) {R : ℝ} (hR : 0 ≤ R) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ s : ℕ, ∀ z : ℂ, ‖z‖ ≤ R →
       ‖regularizedHGFun (∅ : Multiset ℂ) {ν+s+1} (-(κ*z))‖ ≤ M*(2^s/s !) := by
   obtain ⟨C,hC,hcoef⟩ := exists_norm_regularized0F1Coeff_le ν
@@ -717,7 +719,7 @@ private lemma buchholzTerm_uniform_bound (κ μ : ℂ) {R : ℝ} (hR : 0 ≤ R) 
     ∃ u : ℕ → ℝ, Summable u ∧ ∀ s : ℕ, ∀ z : ℂ, ‖z‖ ≤ R →
       ‖buchholzTerm κ μ s z‖ ≤ u s := by
   obtain ⟨M,hM,hC⟩ := buchholzC_uniform_bound μ hR
-  obtain ⟨N,hN,hF⟩ := buchholz_0F1_uniform_bound κ (2*μ) hR
+  obtain ⟨N,hN,hF⟩ := BuchholzExpansion.uniform_bound_0F1 κ (2*μ) hR
   refine ⟨fun s => M*N*((2*R)^s/s !),
     (Real.summable_pow_div_factorial (2*R)).mul_left _,fun s z hz => ?_⟩
   calc ‖buchholzTerm κ μ s z‖ = ‖buchholzC μ s z‖*
@@ -729,12 +731,12 @@ private lemma buchholzTerm_uniform_bound (κ μ : ℂ) {R : ℝ} (hR : 0 ≤ R) 
         ring
 
 /-- The boundary term of the Buchholz telescoping relation tends to zero. -/
-private lemma buchholz_boundary_tendsto (κ μ z : ℂ) :
+private lemma BuchholzExpansion.boundary_tendsto (κ μ z : ℂ) :
     Tendsto (fun s : ℕ => buchholzA μ s z*
       regularizedHGFun (∅ : Multiset ℂ) {2*μ+s} (-(κ*z))) atTop (𝓝 0) := by
   let R := ‖z‖
   obtain ⟨M,hM,hA⟩ := buchholzA_uniform_bound μ (norm_nonneg z)
-  obtain ⟨N,hN,hF⟩ := buchholz_0F1_uniform_bound κ (2*μ-1) (norm_nonneg z)
+  obtain ⟨N,hN,hF⟩ := BuchholzExpansion.uniform_bound_0F1 κ (2*μ-1) (norm_nonneg z)
   apply Summable.tendsto_atTop_zero
   refine Summable.of_norm_bounded
     ((Real.summable_pow_div_factorial (4*R)).mul_left (M*N)) fun s => ?_
@@ -806,7 +808,7 @@ private lemma buchholzA_zero (μ z : ℂ) : buchholzA μ 0 z=0 := by
   simp [buchholzA,whittakerTaylorD,whittakerGenD,whittakerBesselGenerating]
 
 /-- The partial sums satisfy the normalized Whittaker equation up to a single boundary term. -/
-private lemma buchholz_partial_ode (κ μ : ℂ) (N : ℕ) (z : ℂ) :
+private lemma BuchholzExpansion.partial_ode (κ μ : ℂ) (N : ℕ) (z : ℂ) :
     z*(z*deriv (deriv (fun w => ∑ s ∈ Finset.range N, buchholzTerm κ μ s w)) z+
       (2*μ+1)*deriv (fun w => ∑ s ∈ Finset.range N, buchholzTerm κ μ s w) z+
       (κ-z/4)*(∑ s ∈ Finset.range N, buchholzTerm κ μ s z)) =
@@ -827,7 +829,7 @@ private lemma buchholz_partial_ode (κ μ : ℂ) (N : ℕ) (z : ℂ) :
     _ = _ := by rw [Finset.sum_range_sub']; simp [buchholzA_zero]
 
 /-- The Buchholz series defines an entire function. -/
-private lemma buchholz_sum_differentiable (κ μ : ℂ) :
+private lemma BuchholzExpansion.sum_differentiable (κ μ : ℂ) :
     Differentiable ℂ (fun z => ∑' s, buchholzTerm κ μ s z) := by
   intro z
   obtain ⟨u,hu,hb⟩ := buchholzTerm_uniform_bound κ μ (show 0 ≤ ‖z‖+1 by positivity)
@@ -838,7 +840,7 @@ private lemma buchholz_sum_differentiable (κ μ : ℂ) :
 
 /-- Uniform convergence on a disc is preserved through two complex differentiations, so the
  telescoping differential equation passes to the full Buchholz sum. -/
-private lemma buchholz_sum_weighted_ode (κ μ z : ℂ) :
+private lemma BuchholzExpansion.sum_weighted_ode (κ μ z : ℂ) :
     z*(z*deriv (deriv (fun w => ∑' s, buchholzTerm κ μ s w)) z+
       (2*μ+1)*deriv (fun w => ∑' s, buchholzTerm κ μ s w) z+
       (κ-z/4)*(∑' s, buchholzTerm κ μ s z))=0 := by
@@ -867,29 +869,29 @@ private lemma buchholz_sum_weighted_ode (κ μ z : ℂ) :
     (tendsto_const_nhds.mul ((tendsto_const_nhds.mul (hconv''.tendsto_at hz)).add
     (tendsto_const_nhds.mul (hconv'.tendsto_at hz)) |>.add
     (tendsto_const_nhds.mul (hconv.tendsto_at hz))))
-  have ht' := (buchholz_boundary_tendsto κ μ z).neg
+  have ht' := (BuchholzExpansion.boundary_tendsto κ μ z).neg
   have he := tendsto_nhds_unique (ht.congr' (Eventually.of_forall fun N =>
-    buchholz_partial_ode κ μ N z)) ht'
+    BuchholzExpansion.partial_ode κ μ N z)) ht'
   simpa using he
 
 /-- The removable equation at the origin follows by continuity from the punctured plane. -/
-private lemma buchholz_sum_ode (κ μ z : ℂ) :
+private lemma BuchholzExpansion.sum_ode (κ μ z : ℂ) :
     z*deriv (deriv (fun w => ∑' s, buchholzTerm κ μ s w)) z+
       (2*μ+1)*deriv (fun w => ∑' s, buchholzTerm κ μ s w) z+
       (κ-z/4)*(∑' s, buchholzTerm κ μ s z)=0 := by
   let S : ℂ → ℂ := fun w => ∑' s, buchholzTerm κ μ s w
-  have hs := buchholz_sum_differentiable κ μ
+  have hs := BuchholzExpansion.sum_differentiable κ μ
   have hc : Continuous (fun w : ℂ =>
       w*deriv (deriv S) w+(2*μ+1)*deriv S w+(κ-w/4)*S w) := by
     exact ((continuous_id.mul hs.deriv.deriv.continuous).add
       (continuous_const.mul hs.deriv.continuous)).add
       ((continuous_const.sub (continuous_id.div_const 4)).mul hs.continuous)
   have he := Continuous.ext_on (dense_compl_singleton (0:ℂ)) hc continuous_const (fun w hw =>
-    (mul_eq_zero.mp (buchholz_sum_weighted_ode κ μ w)).resolve_left (by simpa using hw))
+    (mul_eq_zero.mp (BuchholzExpansion.sum_weighted_ode κ μ w)).resolve_left (by simpa using hw))
   exact congrFun he z
 
 /-- Taylor coefficients of an entire solution satisfy a two-step recurrence at the origin. -/
-private lemma buchholz_normalized_ode_jet {f : ℂ → ℂ} (hf : Differentiable ℂ f) (b κ : ℂ)
+private lemma BuchholzExpansion.normalized_ode_jet {f : ℂ → ℂ} (hf : Differentiable ℂ f) (b κ : ℂ)
     (hode : ∀ z, z*deriv (deriv f) z+b*deriv f z+κ*f z-(1/4:ℂ)*(z*f z)=0)
     (n : ℕ) :
     (n+1+b)*iteratedDeriv (n+2) f 0+κ*iteratedDeriv (n+1) f 0-
@@ -911,15 +913,15 @@ private lemma buchholz_normalized_ode_jet {f : ℂ → ℂ} (hf : Differentiable
     ((analyticAt_const (v := b)).fun_mul hda).contDiffAt
   simp only [id_eq] at hs ha ha'
   rw [hs,ha,ha'] at h
-  simp only [iteratedDeriv_const_mul_field, buchholz_iteratedDeriv_id_mul_zero hdda,
-      buchholz_iteratedDeriv_id_mul_zero hfa,
+  simp only [iteratedDeriv_const_mul_field, BuchholzExpansion.iteratedDeriv_id_mul_zero hdda,
+      BuchholzExpansion.iteratedDeriv_id_mul_zero hfa,
     iteratedDeriv_const,Nat.add_eq_zero_iff,Nat.one_ne_zero,and_false,↓reduceIte,
     ← iteratedDeriv_succ',show n+1+1=n+2 by omega] at h
   linear_combination h
 
 /-- An entire solution of the normalized Whittaker equation vanishes when its initial value
  vanishes and the indicial parameter avoids the nonpositive integers. -/
-private lemma buchholz_normalized_ode_zero {f : ℂ → ℂ} (hf : Differentiable ℂ f) {b κ : ℂ}
+private lemma BuchholzExpansion.normalized_ode_zero {f : ℂ → ℂ} (hf : Differentiable ℂ f) {b κ : ℂ}
     (hb : ∀ n : ℕ, b ≠ -(n:ℂ))
     (hode : ∀ z, z*deriv (deriv f) z+b*deriv f z+κ*f z-(1/4:ℂ)*(z*f z)=0)
     (h0 : f 0=0) : f=0 := by
@@ -932,7 +934,7 @@ private lemma buchholz_normalized_ode_zero {f : ℂ → ℂ} (hf : Differentiabl
       · have hz := hode 0
         have hb0 : b ≠ 0 := by simpa using hb 0
         simpa [h0,hb0] using hz
-      · have hz := buchholz_normalized_ode_jet hf b κ hode n
+      · have hz := BuchholzExpansion.normalized_ode_jet hf b κ hode n
         rw [ih n (by omega), ih (n+1) (by omega)] at hz
         have hne : (n:ℂ)+1+b ≠ 0 := by
           intro hh
@@ -944,7 +946,7 @@ private lemma buchholz_normalized_ode_zero {f : ℂ → ℂ} (hf : Differentiabl
   exact hs.unique hasSum_zero
 
 /-- Removing the elementary power prefactor from Whittaker M gives the normalized equation. -/
-private lemma buchholz_normalized_confluent_ode (κ μ z : ℂ) :
+private lemma BuchholzExpansion.normalized_confluent_ode (κ μ z : ℂ) :
     let H : ℂ → ℂ := fun w => exp (-w/2)*regularizedHGFun {μ-κ+1/2} {2*μ+1} w
     z*deriv (deriv H) z+(2*μ+1)*deriv H z+(κ-z/4)*H z=0 := by
   let a := μ-κ+1/2
@@ -985,14 +987,14 @@ private lemma buchholz_normalized_confluent_ode (κ μ z : ℂ) :
 
 /-- The entire Buchholz sum and normalized Whittaker M have the same initial value and satisfy
  the same differential equation, so their Taylor series agree. -/
-private lemma buchholz_sum_eq_normalized (κ μ z : ℂ)
+private lemma BuchholzExpansion.sum_eq_normalized (κ μ z : ℂ)
     (hμ : ∀ k : ℕ, 1+2*μ ≠ -(k:ℂ)) :
     (∑' s, buchholzTerm κ μ s z)=
       exp (-z/2)*regularizedHGFun {μ-κ+1/2} {2*μ+1} z := by
   let S : ℂ → ℂ := fun w => ∑' s, buchholzTerm κ μ s w
   let H : ℂ → ℂ := fun w => exp (-w/2)*regularizedHGFun {μ-κ+1/2} {2*μ+1} w
   let d : ℂ → ℂ := fun w => S w-H w
-  have hs := buchholz_sum_differentiable κ μ
+  have hs := BuchholzExpansion.sum_differentiable κ μ
   have hh : Differentiable ℂ H := by
     exact ((differentiable_id.neg.div_const 2).cexp).mul
       (fun w => differentiableAt_regularizedConfluent _ _ w)
@@ -1017,13 +1019,13 @@ private lemma buchholz_sum_eq_normalized (κ μ z : ℂ)
     intro w
     rw [hdd,hd]
     dsimp only [d]
-    have heS := buchholz_sum_ode κ μ w
-    have heH := buchholz_normalized_confluent_ode κ μ w
+    have heS := BuchholzExpansion.sum_ode κ μ w
+    have heH := BuchholzExpansion.normalized_confluent_ode κ μ w
     change w*deriv (deriv H) w+(2*μ+1)*deriv H w+(κ-w/4)*H w=0 at heH
     change w*deriv (deriv S) w+(2*μ+1)*deriv S w+(κ-w/4)*S w=0 at heS
     linear_combination heS-heH
   have hd0 : d 0=0 := by dsimp only [d]; rw [hS0,hH0,sub_self]
-  have he := buchholz_normalized_ode_zero (hs.fun_sub hh)
+  have he := BuchholzExpansion.normalized_ode_zero (hs.fun_sub hh)
     (b:=2*μ+1) (κ:=κ) (fun n => by simpa only [add_comm] using hμ n) hode hd0
   have hz := congrFun he z
   exact sub_eq_zero.mp hz
@@ -1042,7 +1044,7 @@ theorem whittakerM_besselJ_series {κ μ z : ℂ} (hz : z ∈ slitPlane)
   have hz0 := slitPlane_ne_zero hz
   have hκ0 : κ ≠ 0 := by intro h; simp [h] at hκ
   have hb := whittakerBessel_series_eq_regularized hκ0 hz0 μ
-  have hs := buchholz_sum_eq_normalized κ μ z hμ
+  have hs := BuchholzExpansion.sum_eq_normalized κ μ z hμ
   have hs' : exp (-z/2)*regularizedHGFun {μ-κ+1/2} {2*μ+1} z =
       ∑' s : ℕ, whittakerBesselCoeff μ z s/(2:ℂ)^s*
         regularizedHGFun (∅ : Multiset ℂ) {2*μ+s+1} (-(κ*z)) := by

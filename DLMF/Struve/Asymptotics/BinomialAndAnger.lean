@@ -19,7 +19,8 @@ the Anger–Weber functions, and the large-order expansion of the Anger function
 * `angerF`, `angerG`: the products of the factors `ν² - (2j+1)²` and `ν² - (2j+2)²` in the
   coefficients of DLMF 11.11.1.
 * `nonintegerOrderSector`: large orders separated from all integers.
-* `struveAs_P1`, `struveAs_P2`: the products in the series of `π ν/sin(π ν) · 𝐉_ν(z)`.
+* `AngerAsymptotics.integerProduct`, `AngerAsymptotics.halfIntegerProduct`: the products in the
+  series of `π ν/sin(π ν) · 𝐉_ν(z)`.
 
 ## Main results
 
@@ -27,10 +28,10 @@ the Anger–Weber functions, and the large-order expansion of the Anger function
 * `struveK_remainder_sign`: the first omitted term bounds the remainder of the expansion of
   `𝐊_ν` for real positive argument.
 * `angerFG_poch`: `F_k`, `G_k` as Pochhammer symbols (DLMF 11.11.1).
-* `struveAs_angerA_sector`: DLMF 11.11.4 as an asymptotic expansion in `z^{-n-1}`.
+* `AngerAsymptotics.angerA_sector`: DLMF 11.11.4 as an asymptotic expansion in `z^{-n-1}`.
 * `angerJ_large_argument`, `weberE_large_argument`, `angerA_large_argument`: the
   large-argument expansions DLMF 11.11.2–11.11.4.
-* `struveAs_angerJ_large_order_bound`: the quantitative form of DLMF 11.11.5.
+* `AngerAsymptotics.angerJ_large_order_bound`: the quantitative form of DLMF 11.11.5.
 * `angerJ_large_order`: the large-order expansion DLMF 11.11.5.
 -/
 
@@ -39,6 +40,8 @@ the Anger–Weber functions, and the large-order expansion of the Anger function
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
+
+open DLMF.Core
 
 namespace DLMF.Struve
 
@@ -314,19 +317,20 @@ theorem angerFG_poch (ν : ℂ) (k : ℕ) :
     constructor <;> ring
 
 /-- The Taylor data of the Anger kernel in terms of `F_k`, `G_k`. -/
-theorem struveAs_coeffD_even_odd (ν : ℂ) (k : ℕ) :
-    struveAs_coeffD ν (2 * k) = angerF ν k ∧ struveAs_coeffD ν (2 * k + 1) = -ν * angerG ν k := by
+theorem AngerAsymptotics.coeffD_even_odd (ν : ℂ) (k : ℕ) :
+    AngerAsymptotics.coeffD ν (2 * k) = angerF ν k ∧ AngerAsymptotics.coeffD ν (2 * k + 1) = -ν *
+        angerG ν k := by
   induction k with
-  | zero => simp [struveAs_coeffD, angerF, angerG]
+  | zero => simp [AngerAsymptotics.coeffD, angerF, angerG]
   | succ k ih =>
     rw [show 2 * (k + 1) = 2 * k + 2 by ring, show 2 * k + 2 + 1 = (2 * k + 1) + 2 by ring,
-      struveAs_coeffD, struveAs_coeffD, ih.1, ih.2]
+      AngerAsymptotics.coeffD, AngerAsymptotics.coeffD, ih.1, ih.2]
     simp only [angerF, angerG, Finset.prod_range_succ]
     push_cast
     constructor <;> ring
 
 /-- Points of a closed sector `|arg z| ≤ π - δ` near infinity are nonzero and in the slit plane. -/
-theorem struveAs_eventually_sector {δ : ℝ} (hδ : 0 < δ) :
+theorem AngerAsymptotics.eventually_sector {δ : ℝ} (hδ : 0 < δ) :
     ∀ᶠ z in sector (π - δ), z ≠ 0 ∧ z ∈ slitPlane := by
   rw [sector, eventually_inf_principal]
   refine Eventually.of_forall fun z hz => ⟨hz.1, ?_⟩
@@ -337,17 +341,18 @@ theorem struveAs_eventually_sector {δ : ℝ} (hδ : 0 < δ) :
   linarith
 
 /-- DLMF 11.11.4 in the form of an asymptotic expansion in `z^{-n-1}`. -/
-theorem struveAs_angerA_sector (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
+theorem AngerAsymptotics.angerA_sector (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
     HasAsymptoticExpansion (sector (π - δ)) (fun (n : ℕ) (z : ℂ) => z ^ (-((n : ℂ) + 1)))
-      (fun n => struveAs_coeffD ν n / π) (angerA ν) := by
+      (fun n => AngerAsymptotics.coeffD ν n / π) (angerA ν) := by
   have hs : 0 < Real.sin (δ / 2) := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
   have hα : |(π - δ) / 2| < π / 2 := by rw [abs_lt]; constructor <;> linarith
   have hα' : |-((π - δ) / 2)| < π / 2 := by rwa [abs_neg]
-  exact ((struveAs_angerA_hasAsymptoticExpansion ν hs hα').sup
-    (struveAs_angerA_hasAsymptoticExpansion ν hs hα)).mono (sector_le_sup_rotSectorAtTop hδ hδπ)
+  exact ((AngerAsymptotics.angerA_hasAsymptoticExpansion ν hs hα').sup
+    (AngerAsymptotics.angerA_hasAsymptoticExpansion ν hs hα)).mono
+        (sector_le_sup_rotSectorAtTop hδ hδπ)
 
 /-- Pairing consecutive terms of a finite sum. -/
-theorem struveAs_sum_range_two_mul (c : ℕ → ℂ) (N : ℕ) :
+theorem AngerAsymptotics.sum_range_two_mul (c : ℕ → ℂ) (N : ℕ) :
     ∑ n ∈ Finset.range (2 * N), c n = ∑ k ∈ Finset.range N, (c (2 * k) + c (2 * k + 1)) := by
   induction N with
   | zero => simp
@@ -357,27 +362,27 @@ theorem struveAs_sum_range_two_mul (c : ℕ → ℂ) (N : ℕ) :
     ring
 
 /-- The paired form of the `A_ν` expansion. -/
-theorem struveAs_angerA_paired (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
+theorem AngerAsymptotics.angerA_paired (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
     (fun z : ℂ => angerA ν
         z-(∑ k ∈ Finset.range N, 1/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2))))
         =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
-  have h := struveAs_angerA_sector ν hδ hδπ (2 * N)
+  have h := AngerAsymptotics.angerA_sector ν hδ hδπ (2 * N)
   refine (h.congr' ?_ ?_)
-  · filter_upwards [struveAs_eventually_sector hδ] with z hz
+  · filter_upwards [AngerAsymptotics.eventually_sector hδ] with z hz
     congr 1
-    have hterm : ∀ m : ℕ, z ^ (-((m : ℂ) + 1)) • (struveAs_coeffD ν m / π) =
-        1 / π * (struveAs_coeffD ν m / z ^ (m + 1)) := by
+    have hterm : ∀ m : ℕ, z ^ (-((m : ℂ) + 1)) • (AngerAsymptotics.coeffD ν m / π) =
+        1 / π * (AngerAsymptotics.coeffD ν m / z ^ (m + 1)) := by
       intro m
       rw [cpow_neg, show (m : ℂ) + 1 = ((m + 1 : ℕ) : ℂ) by push_cast; ring, cpow_natCast,
         smul_eq_mul]
       field_simp
     simp_rw [hterm]
-    rw [struveAs_sum_range_two_mul]
+    rw [AngerAsymptotics.sum_range_two_mul]
     refine Finset.sum_congr rfl fun k _ => ?_
-    rw [(struveAs_coeffD_even_odd ν k).1, (struveAs_coeffD_even_odd ν k).2,
+    rw [(AngerAsymptotics.coeffD_even_odd ν k).1, (AngerAsymptotics.coeffD_even_odd ν k).2,
       show 2 * k + 1 + 1 = 2 * k + 2 by ring]
     ring
-  · filter_upwards [struveAs_eventually_sector hδ] with z hz
+  · filter_upwards [AngerAsymptotics.eventually_sector hδ] with z hz
     rw [cpow_neg, show ((2 * N : ℕ) : ℂ) + 1 = ((2 * N + 1 : ℕ) : ℂ) by push_cast; ring,
       cpow_natCast, zpow_neg, show ((2 * N + 1 : ℤ)) = ((2 * N + 1 : ℕ) : ℤ) by push_cast; ring,
       zpow_natCast]
@@ -390,9 +395,9 @@ theorem angerJ_large_argument (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ <
     (fun z : ℂ => angerJ ν z-besselJ ν
         z-(∑ k ∈ Finset.range N, sin (π*ν)/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2))))
         =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
-  refine ((struveAs_angerA_paired ν hδ hδπ N).const_mul_left (sin (π * ν))).congr' ?_
+  refine ((AngerAsymptotics.angerA_paired ν hδ hδπ N).const_mul_left (sin (π * ν))).congr' ?_
     EventuallyEq.rfl
-  filter_upwards [struveAs_eventually_sector hδ] with z hz
+  filter_upwards [AngerAsymptotics.eventually_sector hδ] with z hz
   rw [anger_bessel ν hz.2, mul_sub, Finset.mul_sum]
   have : ∀ k ∈ Finset.range N, sin (π * ν) * (1 / π * (angerF ν k / z ^ (2 * k + 1) -
       ν * angerG ν k / z ^ (2 * k + 2))) = sin (π * ν) / π * (angerF ν k / z ^ (2 * k + 1) -
@@ -408,10 +413,10 @@ theorem weberE_large_argument (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ <
         z-(∑ k ∈ Finset.range N,
         (-(1+cos (π*ν))/π*angerF ν k/z^(2*k+1)-ν*(1-cos (π*ν))/π*angerG ν k/z^(2*k+2))))
         =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
-  have h1 := (struveAs_angerA_paired ν hδ hδπ N).const_mul_left (-cos (π * ν))
-  have h2 := (struveAs_angerA_paired (-ν) hδ hδπ N).neg_left
+  have h1 := (AngerAsymptotics.angerA_paired ν hδ hδπ N).const_mul_left (-cos (π * ν))
+  have h2 := (AngerAsymptotics.angerA_paired (-ν) hδ hδπ N).neg_left
   refine (h1.add h2).congr' ?_ EventuallyEq.rfl
-  filter_upwards [struveAs_eventually_sector hδ] with z hz
+  filter_upwards [AngerAsymptotics.eventually_sector hδ] with z hz
   have hF : ∀ k, angerF (-ν) k = angerF ν k := fun k => by simp [angerF]
   have hG : ∀ k, angerG (-ν) k = angerG ν k := fun k => by simp [angerG]
   simp only [hF, hG]
@@ -437,14 +442,14 @@ theorem angerA_large_argument (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ <
     (fun z : ℂ => angerA ν
         z-(∑ k ∈ Finset.range N, 1/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2))))
         =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) :=
-  struveAs_angerA_paired ν hδ hδπ N
+  AngerAsymptotics.angerA_paired ν hδ hδπ N
 
 /-- Large orders separated from all integers. -/
 def nonintegerOrderSector (ε : ℝ) : Filter ℂ :=
   sector π ⊓ 𝓟 {ν : ℂ | ∀ n : ℤ, ε ≤ ‖ν-n‖}
 
 /-- `Γ(a+k)⁻¹ Γ(b+k)⁻¹ ∏_{j<k} (a+j)(b+j) = Γ(a)⁻¹ Γ(b)⁻¹`, valid for all `a`, `b`. -/
-theorem struveAs_recipGamma_mul_prod (a b : ℂ) (k : ℕ) :
+theorem AngerAsymptotics.recipGamma_mul_prod (a b : ℂ) (k : ℕ) :
     (Gamma (a + k))⁻¹ * (Gamma (b + k))⁻¹ * ∏ j ∈ Finset.range k, ((a + j) * (b + j)) =
       (Gamma a)⁻¹ * (Gamma b)⁻¹ := by
   induction k with
@@ -458,14 +463,15 @@ theorem struveAs_recipGamma_mul_prod (a b : ℂ) (k : ℕ) :
     ring
 
 /-- The product `∏_{j<k} ((j+1)² - (ν/2)²)`. -/
-def struveAs_P1 (ν : ℂ) (k : ℕ) : ℂ := ∏ j ∈ Finset.range k, (((j : ℂ) + 1) ^ 2 - (ν / 2) ^ 2)
+def AngerAsymptotics.integerProduct (ν : ℂ) (k : ℕ) : ℂ := ∏ j ∈ Finset.range k,
+    (((j : ℂ) + 1) ^ 2 - (ν / 2) ^ 2)
 
 /-- The product `∏_{j≤k} ((j+1/2)² - (ν/2)²)`. -/
-def struveAs_P2 (ν : ℂ) (k : ℕ) : ℂ :=
+def AngerAsymptotics.halfIntegerProduct (ν : ℂ) (k : ℕ) : ℂ :=
   ∏ j ∈ Finset.range (k + 1), (((j : ℂ) + 1 / 2) ^ 2 - (ν / 2) ^ 2)
 
 /-- Reflection: `Γ(1+x)⁻¹ Γ(1-x)⁻¹ = sin(πx)/(πx)`. -/
-theorem struveAs_recipGamma_one_add_mul {x : ℂ} (hx : x ≠ 0) :
+theorem AngerAsymptotics.recipGamma_one_add_mul {x : ℂ} (hx : x ≠ 0) :
     (Gamma (x + 1))⁻¹ * (Gamma (1 - x))⁻¹ = sin (π * x) / (π * x) := by
   have h := Complex.Gamma_mul_Gamma_one_sub x
   rw [Complex.Gamma_add_one x hx]
@@ -481,61 +487,67 @@ theorem struveAs_recipGamma_one_add_mul {x : ℂ} (hx : x ≠ 0) :
     field_simp
 
 /-- Reflection: `Γ(1/2+x)⁻¹ Γ(1/2-x)⁻¹ = cos(πx)/π`. -/
-theorem struveAs_recipGamma_half_add_mul (x : ℂ) :
+theorem AngerAsymptotics.recipGamma_half_add_mul (x : ℂ) :
     (Gamma (x + 1 / 2))⁻¹ * (Gamma (1 / 2 - x))⁻¹ = cos (π * x) / π := by
   have h := Complex.Gamma_mul_Gamma_one_sub (x + 1 / 2)
   rw [show 1 - (x + 1 / 2) = 1 / 2 - x by ring,
     show (π : ℂ) * (x + 1 / 2) = π * x + π / 2 by ring, Complex.sin_add_pi_div_two] at h
   rw [← mul_inv, h, inv_div]
 
-/-- Nonvanishing under the stated hypotheses: `struveAs_P1 ν k ≠ 0`. -/
-theorem struveAs_P1_ne_zero {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (k : ℕ) : struveAs_P1 ν k ≠ 0 := by
+/-- Nonvanishing under the stated hypotheses: `AngerAsymptotics.integerProduct ν k ≠ 0`. -/
+theorem AngerAsymptotics.integerProduct_ne_zero {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (k : ℕ) :
+    AngerAsymptotics.integerProduct ν k ≠ 0 := by
   refine Finset.prod_ne_zero_iff.mpr fun j _ h => ?_
   have h' : ((j : ℂ) + 1 - ν / 2) * ((j : ℂ) + 1 + ν / 2) = 0 := by linear_combination h
   rcases mul_eq_zero.mp h' with h | h
   · exact hν (2 * j + 2) (by push_cast; linear_combination -2 * h)
   · exact hν (-(2 * j + 2)) (by push_cast; linear_combination 2 * h)
 
-/-- Nonvanishing under the stated hypotheses: `struveAs_P2 ν k ≠ 0`. -/
-theorem struveAs_P2_ne_zero {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (k : ℕ) : struveAs_P2 ν k ≠ 0 := by
+/-- Nonvanishing under the stated hypotheses: `AngerAsymptotics.halfIntegerProduct ν k ≠ 0`. -/
+theorem AngerAsymptotics.halfIntegerProduct_ne_zero {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (k : ℕ) :
+    AngerAsymptotics.halfIntegerProduct ν k ≠ 0 := by
   refine Finset.prod_ne_zero_iff.mpr fun j _ h => ?_
   have h' : ((j : ℂ) + 1 / 2 - ν / 2) * ((j : ℂ) + 1 / 2 + ν / 2) = 0 := by linear_combination h
   rcases mul_eq_zero.mp h' with h | h
   · exact hν (2 * j + 1) (by push_cast; linear_combination -2 * h)
   · exact hν (-(2 * j + 1)) (by push_cast; linear_combination 2 * h)
 
-/-- The series with terms `(fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k) / struveAs_P1 ν k)`
-converges to `(π * (ν / 2) / sin (π * (ν / 2)) * angerS1 ν z)`. -/
-theorem struveAs_hasSum_S1 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
-    HasSum (fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k) / struveAs_P1 ν k)
+/-- The series with terms
+`(fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k) / AngerAsymptotics.integerProduct ν k)` converges to
+`(π * (ν / 2) / sin (π * (ν / 2)) * angerS1 ν z)`. -/
+theorem AngerAsymptotics.hasSum_S1 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
+    HasSum (fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k) / AngerAsymptotics.integerProduct ν k)
       (π * (ν / 2) / sin (π * (ν / 2)) * angerS1 ν z) := by
   have hx : ν / 2 ≠ 0 := fun h => hν 0 (by push_cast; linear_combination 2 * h)
   have hs : sin (π * (ν / 2)) ≠ 0 := sin_pi_mul_ne_zero_of_not_int (not_int_half hν)
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
   refine ((hasSum_angerS1 ν z).mul_left _).congr_fun fun k => ?_
-  have h := struveAs_recipGamma_mul_prod (ν / 2 + 1) (1 - ν / 2) k
-  rw [struveAs_recipGamma_one_add_mul hx] at h
-  have hP : ∏ j ∈ Finset.range k, ((ν / 2 + 1 + j) * (1 - ν / 2 + j)) = struveAs_P1 ν k :=
+  have h := AngerAsymptotics.recipGamma_mul_prod (ν / 2 + 1) (1 - ν / 2) k
+  rw [AngerAsymptotics.recipGamma_one_add_mul hx] at h
+  have hP : ∏ j ∈ Finset.range k, ((ν / 2 + 1 + j) * (1 - ν / 2 + j)) =
+      AngerAsymptotics.integerProduct ν k :=
     Finset.prod_congr rfl fun j _ => by ring
   rw [hP] at h
-  have hP0 := struveAs_P1_ne_zero hν k
+  have hP0 := AngerAsymptotics.integerProduct_ne_zero hν k
   have e : (Gamma (k + ν / 2 + 1) * Gamma (k - ν / 2 + 1))⁻¹ =
-      sin (π * (ν / 2)) / (π * (ν / 2)) / struveAs_P1 ν k := by
+      sin (π * (ν / 2)) / (π * (ν / 2)) / AngerAsymptotics.integerProduct ν k := by
     rw [← h, mul_inv, show ν / 2 + 1 + (k : ℂ) = k + ν / 2 + 1 by ring,
       show 1 - ν / 2 + (k : ℂ) = k - ν / 2 + 1 by ring]
     field_simp
   have e' : (-1) ^ k * (z / 2) ^ (2 * k) / (Gamma (k + ν / 2 + 1) * Gamma (k - ν / 2 + 1)) =
-      (-1) ^ k * (z / 2) ^ (2 * k) * (sin (π * (ν / 2)) / (π * (ν / 2)) / struveAs_P1 ν k) := by
+      (-1) ^ k * (z / 2) ^ (2 * k) *
+          (sin (π * (ν / 2)) / (π * (ν / 2)) / AngerAsymptotics.integerProduct ν k) := by
     rw [div_eq_mul_inv, e]
   rw [e']
   have hs' : sin (π * ν / 2) ≠ 0 := by rwa [mul_div_assoc]
   have hν0 : ν ≠ 0 := fun h0 => hx (by rw [h0, zero_div])
   field_simp
 
-/-- The series with terms `(fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k + 1) / struveAs_P2 ν k)`
+/-- The series with terms
+`(fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k + 1) / AngerAsymptotics.halfIntegerProduct ν k)`
 converges to `(π / cos (π * (ν / 2)) * angerS2 ν z)`. -/
-theorem struveAs_hasSum_S2 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
-    HasSum (fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k + 1) / struveAs_P2 ν k)
+theorem AngerAsymptotics.hasSum_S2 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
+    HasSum (fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k + 1) / AngerAsymptotics.halfIntegerProduct ν k)
       (π / cos (π * (ν / 2)) * angerS2 ν z) := by
   have hs : sin (π * ν) ≠ 0 := sin_pi_mul_ne_zero_of_not_int hν
   have hc : cos (π * (ν / 2)) ≠ 0 := by
@@ -543,14 +555,14 @@ theorem struveAs_hasSum_S2 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
     rw [show (π : ℂ) * ν = 2 * (π * (ν / 2)) by ring, Complex.sin_two_mul, h, mul_zero]
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
   refine ((hasSum_angerS2 ν z).mul_left _).congr_fun fun k => ?_
-  have h := struveAs_recipGamma_mul_prod (ν / 2 + 1 / 2) (1 / 2 - ν / 2) (k + 1)
-  rw [struveAs_recipGamma_half_add_mul] at h
+  have h := AngerAsymptotics.recipGamma_mul_prod (ν / 2 + 1 / 2) (1 / 2 - ν / 2) (k + 1)
+  rw [AngerAsymptotics.recipGamma_half_add_mul] at h
   have hP : ∏ j ∈ Finset.range (k + 1), ((ν / 2 + 1 / 2 + j) * (1 / 2 - ν / 2 + j)) =
-      struveAs_P2 ν k := Finset.prod_congr rfl fun j _ => by ring
+      AngerAsymptotics.halfIntegerProduct ν k := Finset.prod_congr rfl fun j _ => by ring
   rw [hP] at h
-  have hP0 := struveAs_P2_ne_zero hν k
+  have hP0 := AngerAsymptotics.halfIntegerProduct_ne_zero hν k
   have e : (Gamma (k + ν / 2 + 3 / 2) * Gamma (k - ν / 2 + 3 / 2))⁻¹ =
-      cos (π * (ν / 2)) / π / struveAs_P2 ν k := by
+      cos (π * (ν / 2)) / π / AngerAsymptotics.halfIntegerProduct ν k := by
     rw [← h, mul_inv]
     push_cast
     rw [show ν / 2 + 1 / 2 + ((k : ℂ) + 1) = k + ν / 2 + 3 / 2 by ring,
@@ -558,14 +570,15 @@ theorem struveAs_hasSum_S2 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
     field_simp
   have e' : (-1) ^ k * (z / 2) ^ (2 * k + 1) /
       (Gamma (k + ν / 2 + 3 / 2) * Gamma (k - ν / 2 + 3 / 2)) =
-      (-1) ^ k * (z / 2) ^ (2 * k + 1) * (cos (π * (ν / 2)) / π / struveAs_P2 ν k) := by
+      (-1) ^ k * (z / 2) ^ (2 * k + 1) *
+          (cos (π * (ν / 2)) / π / AngerAsymptotics.halfIntegerProduct ν k) := by
     rw [div_eq_mul_inv, e]
   rw [e']
   have hc' : cos (π * ν / 2) ≠ 0 := by rwa [mul_div_assoc]
   field_simp
 
 /-- `π ν / sin(π ν) · 𝐉_ν(z)` as a pair of series rational in `ν`. -/
-theorem struveAs_angerJ_scaled_eq {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
+theorem AngerAsymptotics.angerJ_scaled_eq {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
     π * ν / sin (π * ν) * angerJ ν z =
       π * (ν / 2) / sin (π * (ν / 2)) * angerS1 ν z +
         ν / 2 * (π / cos (π * (ν / 2)) * angerS2 ν z) := by
@@ -580,7 +593,7 @@ theorem struveAs_angerJ_scaled_eq {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : 
   field_simp
 
 /-- Estimate under the stated parameter and domain assumptions: `e * m ≤ ‖u * v‖`. -/
-theorem struveAs_norm_mul_ge {u v : ℂ} {e m : ℝ} (he : 0 ≤ e) (hu : e ≤ ‖u‖)
+theorem AngerAsymptotics.norm_mul_ge {u v : ℂ} {e m : ℝ} (he : 0 ≤ e) (hu : e ≤ ‖u‖)
     (hv : e ≤ ‖v‖) (huv : 2 * m ≤ ‖u‖ + ‖v‖) : e * m ≤ ‖u * v‖ := by
   rw [norm_mul]
   rcases le_total ‖u‖ ‖v‖ with h | h
@@ -591,7 +604,8 @@ theorem struveAs_norm_mul_ge {u v : ℂ} {e m : ℝ} (he : 0 ≤ e) (hu : e ≤ 
 
 /-- Estimate under the stated parameter and domain assumptions: `ε / 2 * ((a : ℝ) / 2) ≤ ‖((a : ℂ)
 / 2) ^ 2 - (ν / 2) ^ 2‖ ∨ (a : ℝ) < 0`. -/
-theorem struveAs_factor_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖) (a : ℤ) :
+theorem AngerAsymptotics.factor_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε)
+    (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖) (a : ℤ) :
     ε / 2 * ((a : ℝ) / 2) ≤ ‖((a : ℂ) / 2) ^ 2 - (ν / 2) ^ 2‖ ∨ (a : ℝ) < 0 := by
   rcases lt_or_ge (a : ℝ) 0 with h | h
   · exact Or.inr h
@@ -608,27 +622,29 @@ theorem struveAs_factor_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : �
     rw [show (a : ℂ) / 2 - ν / 2 + ((a : ℂ) / 2 + ν / 2) = ((a : ℝ) : ℂ) by push_cast; ring,
       norm_real, Real.norm_eq_abs, abs_of_nonneg h] at this
     linarith
-  have := struveAs_norm_mul_ge (by linarith) hu hv huv
+  have := AngerAsymptotics.norm_mul_ge (by linarith) hu hv huv
   rw [show ((a : ℂ) / 2 - ν / 2) * ((a : ℂ) / 2 + ν / 2) = ((a : ℂ) / 2) ^ 2 - (ν / 2) ^ 2 by
     ring] at this
   exact this
 
 /-- Estimate under the stated parameter and domain assumptions: `‖x‖ ^ 2 - ‖c‖ ^ 2 ≤ ‖c ^ 2 - x ^
 2‖`. -/
-theorem struveAs_factor_ge_sq (c x : ℂ) : ‖x‖ ^ 2 - ‖c‖ ^ 2 ≤ ‖c ^ 2 - x ^ 2‖ := by
+theorem AngerAsymptotics.factor_ge_sq (c x : ℂ) : ‖x‖ ^ 2 - ‖c‖ ^ 2 ≤ ‖c ^ 2 - x ^ 2‖ := by
   have := norm_sub_norm_le (x ^ 2) (c ^ 2)
   rw [norm_pow, norm_pow, norm_sub_rev] at this
   exact this
 
 /-- Estimate under the stated parameter and domain assumptions: `‖ν / 2‖ ^ 2 / 4 * ((ε / 2) ^ k *
-k !) ≤ ‖struveAs_P1 ν (k + 1)‖`. -/
-theorem struveAs_P1_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖)
+k !) ≤ ‖AngerAsymptotics.integerProduct ν (k + 1)‖`. -/
+theorem AngerAsymptotics.integerProduct_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε)
+    (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖)
     (hx : 2 ≤ ‖ν / 2‖) (k : ℕ) :
-    ‖ν / 2‖ ^ 2 / 4 * ((ε / 2) ^ k * k !) ≤ ‖struveAs_P1 ν (k + 1)‖ := by
-  rw [struveAs_P1, Finset.prod_range_succ', norm_mul, norm_prod, mul_comm (‖ν / 2‖ ^ 2 / 4)]
+    ‖ν / 2‖ ^ 2 / 4 * ((ε / 2) ^ k * k !) ≤ ‖AngerAsymptotics.integerProduct ν (k + 1)‖ := by
+  rw [AngerAsymptotics.integerProduct, Finset.prod_range_succ', norm_mul, norm_prod,
+      mul_comm (‖ν / 2‖ ^ 2 / 4)]
   refine mul_le_mul ?_ ?_ (by positivity) (Finset.prod_nonneg fun _ _ => norm_nonneg _)
   rotate_left
-  · have := struveAs_factor_ge_sq (((0 : ℕ) : ℂ) + 1) (ν / 2)
+  · have := AngerAsymptotics.factor_ge_sq (((0 : ℕ) : ℂ) + 1) (ν / 2)
     simp only [Nat.cast_zero, zero_add, norm_one, one_pow] at this ⊢
     nlinarith
   · rw [show (ε / 2) ^ k * (k ! : ℝ) = ∏ i ∈ Finset.range k, (ε / 2 * ((i : ℝ) + 1)) by
@@ -636,7 +652,7 @@ theorem struveAs_P1_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : 
       congr 1
       rw [← Finset.prod_range_add_one_eq_factorial]; push_cast; rfl]
     refine Finset.prod_le_prod₀ (fun i _ => by positivity) fun i _ => ?_
-    rcases struveAs_factor_ge hε hν (2 * ((i + 1 : ℕ) : ℤ) + 2) with h | h
+    rcases AngerAsymptotics.factor_ge hε hν (2 * ((i + 1 : ℕ) : ℤ) + 2) with h | h
     · push_cast at h ⊢
       rw [show (2 * ((i : ℂ) + 1) + 2) / 2 = (i : ℂ) + 1 + 1 by ring] at h
       refine le_trans ?_ h
@@ -645,14 +661,17 @@ theorem struveAs_P1_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : 
     · push_cast at h; linarith
 
 /-- Estimate under the stated parameter and domain assumptions: `(‖ν / 2‖ ^ 2 / 4) ^ 2 * ((ε / 2)
-^ k * k !) ≤ ‖struveAs_P2 ν (k + 1)‖`. -/
-theorem struveAs_P2_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖)
+^ k * k !) ≤ ‖AngerAsymptotics.halfIntegerProduct ν (k + 1)‖`. -/
+theorem AngerAsymptotics.halfIntegerProduct_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε)
+    (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖)
     (hx : 2 ≤ ‖ν / 2‖) (k : ℕ) :
-    (‖ν / 2‖ ^ 2 / 4) ^ 2 * ((ε / 2) ^ k * k !) ≤ ‖struveAs_P2 ν (k + 1)‖ := by
-  rw [struveAs_P2, Finset.prod_range_succ', Finset.prod_range_succ', norm_mul, norm_mul,
+    (‖ν / 2‖ ^ 2 / 4) ^ 2 * ((ε / 2) ^ k * k !) ≤
+        ‖AngerAsymptotics.halfIntegerProduct ν (k + 1)‖ := by
+  rw [AngerAsymptotics.halfIntegerProduct, Finset.prod_range_succ', Finset.prod_range_succ',
+      norm_mul, norm_mul,
     norm_prod]
-  have h0 := struveAs_factor_ge_sq (((0 : ℕ) : ℂ) + 1 / 2) (ν / 2)
-  have h1 := struveAs_factor_ge_sq ((((0 + 1 : ℕ) : ℕ) : ℂ) + 1 / 2) (ν / 2)
+  have h0 := AngerAsymptotics.factor_ge_sq (((0 : ℕ) : ℂ) + 1 / 2) (ν / 2)
+  have h1 := AngerAsymptotics.factor_ge_sq ((((0 + 1 : ℕ) : ℕ) : ℂ) + 1 / 2) (ν / 2)
   have hc0 : ‖(((0 : ℕ) : ℂ) + 1 / 2)‖ = 1 / 2 := by simp
   have hc1 : ‖((((0 + 1 : ℕ) : ℕ) : ℂ) + 1 / 2)‖ = 3 / 2 := by
     rw [show (((0 + 1 : ℕ) : ℕ) : ℂ) + 1 / 2 = ((3 / 2 : ℝ) : ℂ) by push_cast; ring, norm_real,
@@ -665,7 +684,7 @@ theorem struveAs_P2_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : 
       congr 1
       rw [← Finset.prod_range_add_one_eq_factorial]; push_cast; rfl]
     refine Finset.prod_le_prod₀ (fun i _ => by positivity) fun i _ => ?_
-    rcases struveAs_factor_ge hε hν (2 * ((i + 1 + 1 : ℕ) : ℤ) + 1) with h | h
+    rcases AngerAsymptotics.factor_ge hε hν (2 * ((i + 1 + 1 : ℕ) : ℤ) + 1) with h | h
     · push_cast at h ⊢
       rw [show (2 * ((i : ℂ) + 1 + 1) + 1) / 2 = (i : ℂ) + 1 + 1 + 1 / 2 by ring] at h
       refine le_trans ?_ h
@@ -684,7 +703,7 @@ theorem struveAs_P2_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : 
 
 /-- The quantitative form of DLMF 11.11.5: for `|ν| ≥ 4` at distance `≥ ε` from the integers,
 `|πν/sin(πν) 𝐉_ν(z) - 1 + νz/(ν²-1)| ≤ K/|ν/2|²`. -/
-theorem struveAs_angerJ_large_order_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
+theorem AngerAsymptotics.angerJ_large_order_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
     ∃ K, ∀ ν : ℂ, (∀ n : ℤ, ε ≤ ‖ν - n‖) → 2 ≤ ‖ν / 2‖ →
       ‖π * ν / sin (π * ν) * angerJ ν z - 1 + ν * z / (ν ^ 2 - 1)‖ ≤ K / ‖ν / 2‖ ^ 2 := by
   set c := ‖z / 2‖ ^ 2 * (2 / ε)
@@ -695,35 +714,37 @@ theorem struveAs_angerJ_large_order_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
     have := hν n; rw [h, sub_self, norm_zero] at this; linarith
   have hx0 : 0 < ‖ν / 2‖ := by linarith
   have hε0 : ε ≠ 0 := hε.ne'
-  have h1 := struveAs_hasSum_S1 hν' z
-  have h2 := struveAs_hasSum_S2 hν' z
+  have h1 := AngerAsymptotics.hasSum_S1 hν' z
+  have h2 := AngerAsymptotics.hasSum_S2 hν' z
   rw [← hasSum_nat_add_iff' 1] at h1 h2
-  have e1 : struveAs_P1 ν 0 = 1 := by simp [struveAs_P1]
-  have e2 : struveAs_P2 ν 0 = (1 / 2 : ℂ) ^ 2 - (ν / 2) ^ 2 := by simp [struveAs_P2]
+  have e1 : AngerAsymptotics.integerProduct ν 0 = 1 := by simp [AngerAsymptotics.integerProduct]
+  have e2 : AngerAsymptotics.halfIntegerProduct ν 0 = (1 / 2 : ℂ) ^ 2 - (ν / 2) ^ 2 := by
+      simp [AngerAsymptotics.halfIntegerProduct]
   simp only [Finset.range_one, Finset.sum_singleton, e1, e2, pow_zero, mul_zero, div_one,
     one_mul] at h1 h2
   -- the identity
   have hP20 : ((1 / 2 : ℂ)) ^ 2 - (ν / 2) ^ 2 ≠ 0 := by
-    have := struveAs_P2_ne_zero hν' 0
-    simpa [struveAs_P2] using this
+    have := AngerAsymptotics.halfIntegerProduct_ne_zero hν' 0
+    simpa [AngerAsymptotics.halfIntegerProduct] using this
   have hν2 : ν ^ 2 - 1 ≠ 0 := fun h => hP20 (by linear_combination (-1 / 4 : ℂ) * h)
   have hid : π * ν / sin (π * ν) * angerJ ν z - 1 + ν * z / (ν ^ 2 - 1) =
       (π * (ν / 2) / sin (π * (ν / 2)) * angerS1 ν z - 1) +
         ν / 2 * (π / cos (π * (ν / 2)) * angerS2 ν z - (z / 2) ^ (0 + 1) /
           ((1 / 2 : ℂ) ^ 2 - (ν / 2) ^ 2)) := by
     have h1ν : 1 - ν ^ 2 ≠ 0 := fun h => hν2 (by linear_combination -h)
-    rw [struveAs_angerJ_scaled_eq hν' z]
+    rw [AngerAsymptotics.angerJ_scaled_eq hν' z]
     field_simp
     ring
   rw [hid]
   -- the bounds
-  have hb1 : ∀ k : ℕ, ‖(-1) ^ (k + 1) * (z / 2) ^ (2 * (k + 1)) / struveAs_P1 ν (k + 1)‖ ≤
+  have hb1 : ∀ k : ℕ, ‖(-1) ^ (k + 1) * (z / 2) ^ (2 * (k + 1)) /
+      AngerAsymptotics.integerProduct ν (k + 1)‖ ≤
       4 * ‖z / 2‖ ^ 2 / ‖ν / 2‖ ^ 2 * (c ^ k / k !) := by
     intro k
-    have hP := struveAs_P1_tail_ge hε hν hx k
+    have hP := AngerAsymptotics.integerProduct_tail_ge hε hν hx k
     have hpos : 0 < ‖ν / 2‖ ^ 2 / 4 * ((ε / 2) ^ k * k !) := by positivity
     rw [norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul, norm_pow]
-    calc ‖z / 2‖ ^ (2 * (k + 1)) / ‖struveAs_P1 ν (k + 1)‖
+    calc ‖z / 2‖ ^ (2 * (k + 1)) / ‖AngerAsymptotics.integerProduct ν (k + 1)‖
         ≤ ‖z / 2‖ ^ (2 * (k + 1)) / (‖ν / 2‖ ^ 2 / 4 * ((ε / 2) ^ k * k !)) :=
           div_le_div_of_nonneg_left (by positivity) hpos hP
       _ = _ := by
@@ -732,13 +753,14 @@ theorem struveAs_angerJ_large_order_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
           field_simp
           ring
   have hb2 : ∀ k : ℕ, ‖ν / 2 * ((-1) ^ (k + 1) * (z / 2) ^ (2 * (k + 1) + 1) /
-      struveAs_P2 ν (k + 1))‖ ≤ 16 * ‖z / 2‖ ^ 3 / ‖ν / 2‖ ^ 2 * (c ^ k / k !) := by
+      AngerAsymptotics.halfIntegerProduct ν (k + 1))‖ ≤ 16 * ‖z / 2‖ ^ 3 / ‖ν / 2‖ ^ 2 *
+          (c ^ k / k !) := by
     intro k
-    have hP := struveAs_P2_tail_ge hε hν hx k
+    have hP := AngerAsymptotics.halfIntegerProduct_tail_ge hε hν hx k
     have hpos : 0 < (‖ν / 2‖ ^ 2 / 4) ^ 2 * ((ε / 2) ^ k * k !) := by positivity
     rw [norm_mul (ν / 2), norm_div ((-1 : ℂ) ^ (k + 1) * (z / 2) ^ (2 * (k + 1) + 1)),
       norm_mul ((-1 : ℂ) ^ (k + 1)), norm_pow, norm_neg, norm_one, one_pow, one_mul, norm_pow]
-    calc ‖ν / 2‖ * (‖z / 2‖ ^ (2 * (k + 1) + 1) / ‖struveAs_P2 ν (k + 1)‖)
+    calc ‖ν / 2‖ * (‖z / 2‖ ^ (2 * (k + 1) + 1) / ‖AngerAsymptotics.halfIntegerProduct ν (k + 1)‖)
         ≤ ‖ν / 2‖ * (‖z / 2‖ ^ (2 * (k + 1) + 1) /
             ((‖ν / 2‖ ^ 2 / 4) ^ 2 * ((ε / 2) ^ k * k !))) := by
           gcongr
@@ -767,7 +789,7 @@ z-1+ν*z/(ν^2-1)) =O[nonintegerOrderSector ε] (fun ν : ℂ => ν^(-2:ℤ))`. 
 theorem angerJ_large_order (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
     (fun ν : ℂ => π*ν/sin (π*ν)*angerJ ν z-1+ν*z/(ν^2-1)) =O[nonintegerOrderSector ε]
         (fun ν : ℂ => ν^(-2:ℤ)) := by
-  obtain ⟨K, hK⟩ := struveAs_angerJ_large_order_bound z hε
+  obtain ⟨K, hK⟩ := AngerAsymptotics.angerJ_large_order_bound z hε
   have hev : ∀ᶠ ν : ℂ in nonintegerOrderSector ε, 4 ≤ ‖ν‖ ∧ ∀ n : ℤ, ε ≤ ‖ν - n‖ := by
     rw [nonintegerOrderSector, sector, eventually_inf_principal, eventually_inf_principal]
     exact (tendsto_comap.eventually (eventually_ge_atTop 4)).mono fun ν h4 _ hn => ⟨h4, hn⟩

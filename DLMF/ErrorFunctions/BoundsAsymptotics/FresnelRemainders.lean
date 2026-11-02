@@ -25,10 +25,10 @@ remainders.
   asymptotic expansions of `f(z)` and `g(z)` (DLMF 7.12.2, 7.12.3).
 * `fresnelAuxFComplex_remainder_integral`, `fresnelAuxGComplex_remainder_integral`: the
   remainders as Laplace-type integrals (DLMF 7.12.6, 7.12.7).
-* `fresnelAux_laplace_open`: the Laplace forms of `f` and `g` on the open sector
+* `FresnelAuxiliary.laplace_open`: the Laplace forms of `f` and `g` on the open sector
   `|ph z| < π/4` (DLMF 7.7.10–7.7.11).
-* `fresnelAux_remainder_bound`, `fresnelAux_remainder_sign`: sector-dependent bounds for the
-  remainders and their sign for real positive argument.
+* `FresnelAuxiliary.remainder_bound`, `FresnelAuxiliary.remainder_sign`: sector-dependent bounds for
+  the remainders and their sign for real positive argument.
 * `exp_sq_mul_erfc_sector_asymptotic`: the asymptotic expansion of `e^{ζ²} erfc ζ` in the
   sector `|ph ζ| ≤ 3π/4 - δ`, from which the Fresnel expansions are derived.
 -/
@@ -38,6 +38,8 @@ remainders.
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat Interval
+
+open DLMF.Core
 
 namespace DLMF.Confluent
 
@@ -165,7 +167,7 @@ theorem fresnel_coeff_algebra {w : ℂ} (hw : w ^ 2 = -1) (p : ℂ) (m : ℕ) :
     _ = _ := by rw [hA, show 2 * w / (π : ℂ) = w * (2 / π) by ring, mul_pow, pow_succ]; ring
 
 /-- Signed combination `g(z) + εi f(z)` in the sector `|arg z| ≤ π/2 - δ`. -/
-lemma fresnelAux_signed_sector_asymptotic {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ)
+lemma FresnelAuxiliary.signed_sector_asymptotic {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ)
     (hδ1 : δ < π/2) :
     HasAsymptoticExpansion (sector (π/2-δ)) (fun n z => z^(-(2*(n : ℂ)+1)))
       (fun n => (-1 : ℂ)^n * poch (1/2) n * (ε*I)^(n+1) * (2/π)^n / π)
@@ -192,7 +194,7 @@ lemma fresnelAux_signed_sector_asymptotic {ε : ℝ} (hε : ε = 1 ∨ ε = -1) 
       fun z => fresnelAuxGComplex z + ε*I*fresnelAuxFComplex z := by
     funext z
     simp only [Pi.smul_apply, smul_eq_mul, Function.comp]
-    rw [fresnelAux_signed_erfc z hε]; ring
+    rw [FresnelAuxiliary.signed_erfc z hε]; ring
   rw [hcoef, hfun] at h3
   exact h3
 
@@ -203,8 +205,8 @@ lemma fresnelAux_signed_sector_asymptotic {ε : ℝ} (hε : ε = 1 ∨ ε = -1) 
 theorem fresnelAuxFComplex_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/2) :
     HasAsymptoticExpansion (sector (π/2-δ)) (fun n z => z^(-(4*(n : ℂ)+1)))
         (fun n => (-1 : ℂ)^n*poch (1/2) (2*n+0)*(2/π)^(2*n+0)/π) fresnelAuxFComplex := by
-  have hp := fresnelAux_signed_sector_asymptotic (Or.inl rfl) hδ hδ1
-  have hm := fresnelAux_signed_sector_asymptotic (Or.inr rfl) hδ hδ1
+  have hp := FresnelAuxiliary.signed_sector_asymptotic (Or.inl rfl) hδ hδ1
+  have hm := FresnelAuxiliary.signed_sector_asymptotic (Or.inr rfl) hδ hδ1
   have h := (hp.sub hm).const_smul (1 / (2 * I))
   have hf : ((1 / (2 * I)) • ((fun z => fresnelAuxGComplex z + ((1:ℝ):ℂ)*I*fresnelAuxFComplex z) -
       (fun z => fresnelAuxGComplex z + ((-1:ℝ):ℂ)*I*fresnelAuxFComplex z))) =
@@ -257,7 +259,7 @@ theorem exp_sign_mul_pi_div_two_mul_I' {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
 /-- **Laplace forms of `g ± i f`** (from DLMF 7.7.2 rotated by `±π/2`): for `z ≠ 0` with
 `|arg z| < π/4` and `ε = ±1`,
 `g(z) + εi f(z) = εi √2/(2π) ∫₀^∞ e^{-πz²r/2} r^{-1/2}/(1 + εir) dr`. -/
-lemma fresnelAux_signed_laplace {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} (hz0 : z ≠ 0)
+lemma FresnelAuxiliary.signed_laplace {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} (hz0 : z ≠ 0)
     (hz : |arg z| < π/4) :
     fresnelAuxGComplex z + ε*I*fresnelAuxFComplex z = ε*I*(Real.sqrt 2/(2*π)) *
       ∫ r in Ioi (0:ℝ), cexp (-(π*z^2/2*r)) * ((r:ℂ)^(-1/2:ℂ) * (1 + ε*I*r)⁻¹) := by
@@ -309,7 +311,7 @@ lemma fresnelAux_signed_laplace {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} 
     intro r hr
     rw [hζ2, ofReal_mul_exp_cpow hr hθ1 hθ2, he]
     ring_nf
-  have hsum := fresnelAux_signed_erfc z hε
+  have hsum := FresnelAuxiliary.signed_erfc z hε
   rw [← hζ] at hsum
   rw [hsum, hrep, setIntegral_congr_fun measurableSet_Ioi hpt, integral_const_mul]
   have hex : exp (θ * I) * exp (θ * I * (-1/2 : ℂ)) = (1 + ε * I) / Real.sqrt 2 := by
@@ -463,12 +465,12 @@ theorem integrableOn_fresnel_signed (s : ℝ) {z : ℂ} (hz0 : z ≠ 0)
 
 /-- **Laplace forms of `f` and `g`** (DLMF 7.7.10–7.7.11, on the open sector `|arg z| < π/4`):
 `f(z), g(z) = 1/(π√2) ∫₀^∞ e^{-πz²t/2} t^{∓1/2}/(t²+1) dt`. -/
-theorem fresnelAux_laplace_open (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) :
+theorem FresnelAuxiliary.laplace_open (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) :
     (if aux then fresnelAuxGComplex z else fresnelAuxFComplex z) = 1/(π*Real.sqrt 2) *
       ∫ t in Ioi (0:ℝ), exp (-π*z^2*t/2) * (t:ℂ)^(((if aux then 1 else 0 : ℕ) : ℂ) - 1/2) /
         ((t:ℂ)^2+1) := by
-  have hp := fresnelAux_signed_laplace (ε := 1) (Or.inl rfl) hz0 hz
-  have hm := fresnelAux_signed_laplace (ε := -1) (Or.inr rfl) hz0 hz
+  have hp := FresnelAuxiliary.signed_laplace (ε := 1) (Or.inl rfl) hz0 hz
+  have hm := FresnelAuxiliary.signed_laplace (ε := -1) (Or.inr rfl) hz0 hz
   have ip := integrableOn_fresnel_signed 1 hz0 hz
   have im := integrableOn_fresnel_signed (-1) hz0 hz
   set fp : ℝ → ℂ := fun r => cexp (-(π*z^2/2*r)) * ((r:ℂ)^(-1/2:ℂ) * (1 + ((1:ℝ):ℂ)*I*r)⁻¹)
@@ -552,7 +554,7 @@ theorem fresnel_remainder_eq (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z
   induction N with
   | zero =>
     rw [fresnelAsymptoticRemainder, Finset.range_zero, Finset.sum_empty, sub_zero,
-      fresnelAux_laplace_open aux hz0 hz]
+      FresnelAuxiliary.laplace_open aux hz0 hz]
     simp
   | succ N ih =>
     set M : ℕ := 2*N + if aux then 1 else 0 with hM
@@ -598,8 +600,8 @@ theorem fresnelAuxFComplex_remainder_integral {z : ℂ} (hz0 : z ≠ 0) (hz : |a
 theorem fresnelAuxGComplex_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/2) :
     HasAsymptoticExpansion (sector (π/2-δ)) (fun n z => z^(-(4*(n : ℂ)+3)))
         (fun n => (-1 : ℂ)^n*poch (1/2) (2*n+1)*(2/π)^(2*n+1)/π) fresnelAuxGComplex := by
-  have hp := fresnelAux_signed_sector_asymptotic (Or.inl rfl) hδ hδ1
-  have hm := fresnelAux_signed_sector_asymptotic (Or.inr rfl) hδ hδ1
+  have hp := FresnelAuxiliary.signed_sector_asymptotic (Or.inl rfl) hδ hδ1
+  have hm := FresnelAuxiliary.signed_sector_asymptotic (Or.inr rfl) hδ hδ1
   have h := (hp.add hm).const_smul (1 / 2 : ℂ)
   have hf : ((1 / 2 : ℂ) • ((fun z => fresnelAuxGComplex z + ((1:ℝ):ℂ)*I*fresnelAuxFComplex z) +
       (fun z => fresnelAuxGComplex z + ((-1:ℝ):ℂ)*I*fresnelAuxFComplex z))) =
@@ -639,7 +641,8 @@ theorem fresnelAuxGComplex_remainder_integral {z : ℂ} (hz0 : z ≠ 0) (hz : |a
   simp
 
 /-- Sector-dependent Fresnel next-term bounds. -/
-lemma fresnelAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (N : ℕ) :
+lemma FresnelAuxiliary.remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < π/4) (N : ℕ) :
     ‖fresnelAsymptoticRemainder aux N z‖ ≤
         (if |arg z| ≤ π/8 then 1 else |1/Real.sin (4*arg z)|)*‖fresnelAsymptoticTerm aux N z‖ := by
   set M : ℕ := 2*N + if aux then 1 else 0 with hM
@@ -809,7 +812,7 @@ lemma fresnelAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |a
         field_simp
 
 /-- Signed real Fresnel remainder. -/
-lemma fresnelAux_remainder_sign (aux : Bool) {x : ℝ} (hx : 0 < x) (N : ℕ) :
+lemma FresnelAuxiliary.remainder_sign (aux : Bool) {x : ℝ} (hx : 0 < x) (N : ℕ) :
     0 ≤ (-1 : ℝ)^N*(fresnelAsymptoticRemainder aux N x).re := by
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   have harg : |arg (x:ℂ)| < π/4 := by

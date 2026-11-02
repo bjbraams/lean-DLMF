@@ -13,6 +13,7 @@ public import DLMF.Mathieu.Basic.FundamentalSolutions
 public import DLMF.Mathieu.Basic.Properties
 public import DLMF.Mathieu.Basic.Floquet
 public import DLMF.Mathieu.Basic.Eigenfunctions
+public import DLMF.Mathieu.Basic.SpectralExistence
 
 /-!
 # Mathieu's equation and the Mathieu functions of integer order (DLMF §28.2)
@@ -24,6 +25,6 @@ truncated continued fractions in `ContinuedFractions`. The initial-value and nor
 in `FundamentalSolutions`, and the symmetries, parity, Wronskian and half-period relations of the
 basic solutions (§28.2(i)–(ii)) are in `Properties`, Floquet's theorem and the characteristic
 equation (§28.2(iii)–(iv)) in `Floquet`, and the normalization and parity of `ce_n`, `se_n`
-(§28.2(vi)) in `Eigenfunctions`. The existence and enumeration of
-characteristic values are in `DLMF.Mathieu.SpectralExistence`.
+(§28.2(vi)) in `Eigenfunctions`, and the existence and enumeration of the characteristic values
+(§28.2(v)) in `SpectralExistence`.
 -/

@@ -85,7 +85,7 @@ theorem spheroidalPsi_one_eq (k : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
       norm_num]
     rw [Real.log_rpow (by positivity), mul_div_cancel_left₀ _ (by norm_num : (2 : ℝ) ≠ 0),
       Real.exp_log (by positivity)]
-  simp only [spheroidalPsi, ↓reduceIte, DLMF.sphericalJ]
+  simp only [spheroidalPsi, ↓reduceIte, DLMF.Bessel.sphericalJ]
   rw [DLMF.Bessel.besselJ_eq_regularized,
     Complex.cpow_add _ _ (by simpa [w] using hw0), Complex.cpow_natCast]
   rw [show (k : ℂ) + 1 / 2 + 1 = (k : ℂ) + 3 / 2 by ring]
@@ -384,7 +384,7 @@ theorem summable_spheroidalRadial_series {j n m : ℕ} (hmn : m ≤ n) {z γ : �
         have := Real.sqrt_pos.2 Real.pi_pos
         positivity
       refine ⟨B, hBpos, fun N => ?_, 0, ?_, by simp⟩
-      · simpa [spheroidalPsi] using DLMF.sphSeries_norm_sphericalJ_le N w
+      · simpa [spheroidalPsi] using DLMF.Bessel.SphericalSeries.norm_sphericalJ_le N w
       have key : ∀ k : ℕ, B (n + 2 * (k + 1)) / B (n + 2 * k) / ((k : ℝ) + 1) ^ 2 =
           r ^ 2 / 4 * (1 / ((k : ℝ) + 1)) ^ 4 /
             ((((n : ℝ) - 1 / 2) + 2 * ((k : ℝ) + 1)) * (((n : ℝ) + 1 / 2) + 2 * ((k : ℝ) + 1)) /
@@ -522,7 +522,8 @@ theorem spheroidalRadial_three_four {n m : ℕ} (hmn : m ≤ n) {z γ : ℂ} (h�
 @[dlmf 30.11.E6]
 theorem spheroidalRadial_isBigO_one_two {j n m : ℕ} (hmn : m ≤ n) {γ δ : ℝ} (hγ : 0 < γ)
     (hδ : 0 < δ) (hj : j = 1 ∨ j = 2) :
-    (fun z : ℂ => spheroidalRadial j n m z γ - spheroidalPsi j n (γ * z)) =O[DLMF.sector (π - δ)]
+    (fun z : ℂ => spheroidalRadial j n m z γ - spheroidalPsi j n (γ * z))
+        =O[DLMF.Core.sector (π - δ)]
       (fun z : ℂ => z ^ (-2 : ℤ) * Real.exp |(γ * z).im|) := by
   sorry
 
@@ -531,7 +532,8 @@ theorem spheroidalRadial_isBigO_one_two {j n m : ℕ} (hmn : m ≤ n) {γ δ : �
 @[dlmf 30.11.E6]
 theorem spheroidalRadial_isBigO_three_four {j n m : ℕ} (hmn : m ≤ n) {γ δ : ℝ} (hγ : 0 < γ)
     (hδ : 0 < δ) (hj : j = 3 ∨ j = 4) :
-    (fun z : ℂ => spheroidalRadial j n m z γ - spheroidalPsi j n (γ * z)) =O[DLMF.sector (π - δ)]
+    (fun z : ℂ => spheroidalRadial j n m z γ - spheroidalPsi j n (γ * z))
+        =O[DLMF.Core.sector (π - δ)]
       (fun z : ℂ => spheroidalPsi j n (γ * z) * z⁻¹) := by
   sorry
 

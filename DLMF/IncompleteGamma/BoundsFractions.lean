@@ -49,6 +49,8 @@ form of 8.10.11 excludes the automatic equality at `x = 0`.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 open DLMF.Statistical
@@ -85,16 +87,16 @@ theorem scIncGamma_continuedFraction {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(n+1)) 
     push_cast; ring
   by_cases hz : z = 0
   · subst hz
-    unfold DLMF.HasContinuedFraction
+    unfold DLMF.Core.HasContinuedFraction
     rw [kummerM_zero]
     refine tendsto_const_nhds.congr' ?_
     filter_upwards [eventually_ge_atTop 1] with n hn
-    rw [incGF_cfTail_freeze (by simp [A]) hn, hA0]
+    rw [IncompleteGammaFractions.cfTail_freeze (by simp [A]) hn, hA0]
     simp
-  · refine (incGF_hasContinuedFraction_iff ?_ _).mpr ?_
+  · refine (IncompleteGammaFractions.hasContinuedFraction_iff ?_ _).mpr ?_
     · intro k _
-      exact incGF_gammaStar_A_ne ha hz hA0 hA1 hAo hAe k
-    exact incGF_gammaStar_tendsto ha hz hA0 hA1 hAo hAe (by simp)
+      exact IncompleteGammaFractions.gammaStar_A_ne ha hz hA0 hA1 hAo hAe k
+    exact IncompleteGammaFractions.gammaStar_tendsto ha hz hA0 hA1 hAo hAe (by simp)
       (fun k hk => by simp [show k ≠ 0 by omega])
 
 /-- Continued-fraction representation: `HasContinuedFraction (fun k => if k=0 then z⁻¹ else (if
@@ -112,7 +114,7 @@ a x).re ≤ 1`. -/
 @[dlmf 8.10.E1]
 theorem upperIncGamma_bound_le_one {a x : ℝ} (ha1 : a ≤ 1) (hx : 0 < x) :
     x^(1-a)*Real.exp x*(upperIncGamma a x).re ≤ 1 := by
-  have h := incG_upperIncGamma_re_le ha1 hx
+  have h := IncompleteGammaRealIntegrals.upperIncGamma_re_le ha1 hx
   have e : x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) = 1 := by
     rw [show x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) =
         (x^(1-a)*x^(a-1))*(Real.exp x*Real.exp (-x)) by ring,
@@ -125,14 +127,14 @@ x^(a-1)/a*(1-Real.exp (-x))`. -/
 @[dlmf 8.10.E2]
 theorem lowerIncGamma_bound_ge {a x : ℝ} (ha : 0 < a) (ha1 : a ≤ 1) (hx : 0 < x) :
     (lowerIncGamma a x).re ≥ x^(a-1)/a*(1-Real.exp (-x)) :=
-  incG_lowerIncGamma_bound_ge ha ha1 hx
+  IncompleteGammaRealIntegrals.lowerIncGamma_bound_ge ha ha1 hx
 
 /-- Estimate under the stated parameter and domain assumptions: `1 ≤ x^(1-a)*Real.exp
 x*(upperIncGamma a x).re`. -/
 @[dlmf 8.10.E1]
 theorem upperIncGamma_bound_ge_one {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
     1 ≤ x^(1-a)*Real.exp x*(upperIncGamma a x).re := by
-  have h := incG_upperIncGamma_re_ge ha hx
+  have h := IncompleteGammaRealIntegrals.upperIncGamma_re_ge ha hx
   have e : x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) = 1 := by
     rw [show x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) =
         (x^(1-a)*x^(a-1))*(Real.exp x*Real.exp (-x)) by ring,
@@ -145,7 +147,7 @@ x^(a-1)/a*(1-Real.exp (-x))`. -/
 @[dlmf 8.10.E2]
 theorem lowerIncGamma_bound_le {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
     (lowerIncGamma a x).re ≤ x^(a-1)/a*(1-Real.exp (-x)) :=
-  incG_lowerIncGamma_bound_le ha hx
+  IncompleteGammaRealIntegrals.lowerIncGamma_bound_le ha hx
 
 /-- The first-order real incomplete-Gamma remainder ratio. -/
 @[dlmf 8.10.E3]
@@ -254,9 +256,9 @@ theorem Real.upperGammaTheta_bounds {a x : ℝ} (ha : a ≤ 2) (hx : 0 < x) :
     rw [hv]
     field_simp
     linear_combination Real.exp x*Real.exp (-x)*hu + hee
-  have hle := incG_upperIncGamma_re_le (a := a-1) (by linarith) hx
-  have hpos := incG_upperIncGamma_re_pos (a := a-1) hx
-      (incG_integrableOn_rpow_exp_of_le_one (by linarith) hx)
+  have hle := IncompleteGammaRealIntegrals.upperIncGamma_re_le (a := a-1) (by linarith) hx
+  have hpos := IncompleteGammaRealIntegrals.upperIncGamma_re_pos (a := a-1) hx
+      (IncompleteGammaRealIntegrals.integrableOn_rpow_exp_of_le_one (by linarith) hx)
   rw [hθ]
   refine ⟨by positivity, ?_⟩
   calc x^(2-a)*Real.exp x*(upperIncGamma ((a-1:ℝ):ℂ) x).re ≤
@@ -280,13 +282,15 @@ theorem Real.upperGammaPade_bounds {a x : ℝ} (ha : a < 1) (hx : 0 < x) {n : �
     Real.upperGammaPade false n a x < x^(1-a)*Real.exp x*(upperIncGamma a x).re ∧
         x^(1-a)*Real.exp x*(upperIncGamma a x).re < Real.upperGammaPade true n a x := by
   have key : ∀ (u : Bool), Real.upperGammaPade u n a x =
-      (GenContFract.cfConv_ofFun 0 (incGF_padeNum a x) (DLMF.Statistical.gammaIncCFDen x)).convs
+      (GenContFract.ofFun 0 (IncompleteGammaFractions.padeNumerator a x)
+          (DLMF.Statistical.gammaIncCFDen x)).convs
         (2*n+if u then 1 else 0) := by
     intro u
-    rw [Real.upperGammaPade, incGF_cfTail_ofReal (a := incGF_padeNum a x)
+    rw [Real.upperGammaPade,
+        IncompleteGammaFractions.cfTail_ofReal (a := IncompleteGammaFractions.padeNumerator a x)
       (b := DLMF.Statistical.gammaIncCFDen x) (fun k => ?_) (fun k => ?_)
-      (fun k _ => (incGF_padeNum_pos ha hx k).ne'), ofReal_re]
-    · simp only [incGF_padeNum, DLMF.Statistical.gammaIncCFNum]
+      (fun k _ => (IncompleteGammaFractions.padeNumerator_pos ha hx k).ne'), ofReal_re]
+    · simp only [IncompleteGammaFractions.padeNumerator, DLMF.Statistical.gammaIncCFNum]
       rcases Nat.even_or_odd k with hk | hk
       · have h2 : k % 2 = 0 := Nat.even_iff.mp hk
         have : ¬ Odd k := Nat.not_odd_iff_even.mpr hk
@@ -303,7 +307,8 @@ theorem Real.upperGammaPade_bounds {a x : ℝ} (ha : a < 1) (hx : 0 < x) {n : �
         have h2 : ¬ k % 2 = 0 := by have := Nat.odd_iff.mp hk; omega
         simp [h1, h2]
   rw [key, key]
-  exact ⟨incGF_pade_lt ha hx hn, by simpa using incGF_lt_pade ha hx n⟩
+  exact ⟨IncompleteGammaFractions.pade_lt ha hx hn, by
+      simpa using IncompleteGammaFractions.lt_pade ha hx n⟩
 
 /-- Identity under the stated parameter and domain assumptions: `Real.upperGammaPade false 1 a
 x=x/(x+1-a) ∧ Real.upperGammaPade true 1 a x=(x+1)/(x+2-a) ∧ Real.upperGammaPade false 2 a
@@ -374,7 +379,7 @@ theorem incompleteGamma_positive_exponential_integral {a : ℂ} (ha : 0 < a.re) 
 
 /-- A function continuous on `[0,∞)`, vanishing at `0`, with positive derivative on `(0,∞)`
 is positive on `(0,∞)`. -/
-theorem incG_pos_of_hasDerivAt {f f' : ℝ → ℝ} (hc : ContinuousOn f (Ici 0))
+theorem IncompleteGammaBounds.pos_of_hasDerivAt {f f' : ℝ → ℝ} (hc : ContinuousOn f (Ici 0))
     (hd : ∀ x, 0 < x → HasDerivAt f (f' x) x) (hp : ∀ x, 0 < x → 0 < f' x) (h0 : f 0 = 0)
     {x : ℝ} (hx : 0 < x) : 0 < f x := by
   have hm : StrictMonoOn f (Ici 0) := strictMonoOn_of_deriv_pos (convex_Ici 0) hc
@@ -384,61 +389,63 @@ theorem incG_pos_of_hasDerivAt {f f' : ℝ → ℝ} (hc : ContinuousOn f (Ici 0)
 
 /-- At `x`, the function `(fun x : ℝ => x^a*Real.exp x)` has derivative `((a/x+1)*(x^a*Real.exp
 x))`. -/
-theorem incG_hasDerivAt_rpow_mul_exp {a x : ℝ} (hx : 0 < x) :
+theorem IncompleteGammaBounds.hasDerivAt_rpow_mul_exp {a x : ℝ} (hx : 0 < x) :
     HasDerivAt (fun x : ℝ => x^a*Real.exp x) ((a/x+1)*(x^a*Real.exp x)) x := by
   have h := ((Real.hasDerivAt_rpow_const (p := a) (Or.inl hx.ne')).mul (Real.hasDerivAt_exp x))
   convert h using 1
   rw [Real.rpow_sub hx, Real.rpow_one]; field_simp
 
 /-- The function `(fun x : ℝ => x^a*Real.exp x)` is continuous. -/
-theorem incG_continuous_rpow_mul_exp {a : ℝ} (ha : 0 < a) :
+theorem IncompleteGammaBounds.continuous_rpow_mul_exp {a : ℝ} (ha : 0 < a) :
     Continuous (fun x : ℝ => x^a*Real.exp x) :=
   (Real.continuous_rpow_const ha.le).mul Real.continuous_exp
 
 /-- Integrability between the indicated endpoints: `IntervalIntegrable (fun t : ℝ =>
 t^(a-1)*Real.exp t) volume u v`. -/
-theorem incG_intervalIntegrable_rpow_mul_exp {a : ℝ} (ha : 0 < a) (u v : ℝ) :
+theorem IncompleteGammaBounds.intervalIntegrable_rpow_mul_exp {a : ℝ} (ha : 0 < a) (u v : ℝ) :
     IntervalIntegrable (fun t : ℝ => t^(a-1)*Real.exp t) volume u v :=
   (intervalIntegral.intervalIntegrable_rpow' (by linarith)).mul_continuousOn
     Real.continuous_exp.continuousOn
 
 /-- The function `(fun x : ℝ => ∫ t in (0:ℝ)..x, t^(a-1)*Real.exp t)` is continuous. -/
-theorem incG_continuous_primitive_rpow_mul_exp {a : ℝ} (ha : 0 < a) :
+theorem IncompleteGammaBounds.continuous_primitive_rpow_mul_exp {a : ℝ} (ha : 0 < a) :
     Continuous (fun x : ℝ => ∫ t in (0:ℝ)..x, t^(a-1)*Real.exp t) :=
-  intervalIntegral.continuous_primitive (incG_intervalIntegrable_rpow_mul_exp ha) 0
+  intervalIntegral.continuous_primitive (IncompleteGammaBounds.intervalIntegrable_rpow_mul_exp ha) 0
 
 /-- At `x`, the function `(fun x : ℝ => ∫ t in (0:ℝ)..x, t^(a-1)*Real.exp t)` has derivative
 `(x^(a-1)*Real.exp x)`. -/
-theorem incG_hasDerivAt_primitive_rpow_mul_exp {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
+theorem IncompleteGammaBounds.hasDerivAt_primitive_rpow_mul_exp {a x : ℝ}
+    (ha : 0 < a) (hx : 0 < x) :
     HasDerivAt (fun x : ℝ => ∫ t in (0:ℝ)..x, t^(a-1)*Real.exp t) (x^(a-1)*Real.exp x) x := by
   have hcont : ContinuousOn (fun t : ℝ => t^(a-1)*Real.exp t) (Ioi 0) := fun t ht =>
     ((Real.continuousAt_rpow_const _ _ (Or.inl (ne_of_gt ht))).mul
       Real.continuous_exp.continuousAt).continuousWithinAt
-  exact intervalIntegral.integral_hasDerivAt_right (incG_intervalIntegrable_rpow_mul_exp ha 0 x)
+  exact intervalIntegral.integral_hasDerivAt_right
+      (IncompleteGammaBounds.intervalIntegrable_rpow_mul_exp ha 0 x)
     (hcont.stronglyMeasurableAtFilter isOpen_Ioi x hx)
     (hcont.continuousAt (isOpen_Ioi.mem_nhds hx))
 
 /-- Estimate under the stated parameter and domain assumptions: `(a+1)*(a+2)-x <
 ((a+1)*(a+2+x))*(a*x^(-a)*Real.exp (-x)*(∫ t in (0 : ℝ)..x, t^(a-1)*Real.exp t)) ∧
 a*x^(-a)*Real.exp (-x)*(∫ t in (0 : ℝ)..x, t^(a-1)*Real.exp t) < (a+1)/(a+1+x)`. -/
-theorem incG_positive_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
+theorem IncompleteGammaBounds.positive_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     (a+1)*(a+2)-x < ((a+1)*(a+2+x))*(a*x^(-a)*Real.exp (-x)*(∫ t in (0 : ℝ)..x, t^(a-1)*Real.exp t))
         ∧ a*x^(-a)*Real.exp (-x)*(∫ t in (0 : ℝ)..x, t^(a-1)*Real.exp t) < (a+1)/(a+1+x) := by
   set P : ℝ → ℝ := fun x => x^a*Real.exp x with hPdef
   set G : ℝ → ℝ := fun x => ∫ t in (0:ℝ)..x, t^(a-1)*Real.exp t with hGdef
-  have hP := fun y (hy : 0 < y) => incG_hasDerivAt_rpow_mul_exp (a := a) hy
-  have hG := fun y (hy : 0 < y) => incG_hasDerivAt_primitive_rpow_mul_exp ha hy
+  have hP := fun y (hy : 0 < y) => IncompleteGammaBounds.hasDerivAt_rpow_mul_exp (a := a) hy
+  have hG := fun y (hy : 0 < y) => IncompleteGammaBounds.hasDerivAt_primitive_rpow_mul_exp ha hy
   have hGd : ∀ y, 0 < y → y^(a-1)*Real.exp y = P y / y := by
     intro y hy; simp only [P]; rw [Real.rpow_sub hy, Real.rpow_one]; ring
-  have hPc : Continuous P := incG_continuous_rpow_mul_exp ha
-  have hGc : Continuous G := incG_continuous_primitive_rpow_mul_exp ha
+  have hPc : Continuous P := IncompleteGammaBounds.continuous_rpow_mul_exp ha
+  have hGc : Continuous G := IncompleteGammaBounds.continuous_primitive_rpow_mul_exp ha
   have hP0 : P 0 = 0 := by simp [P, Real.zero_rpow ha.ne']
   have hG0 : G 0 = 0 := by simp [G]
   have hPpos : ∀ y, 0 < y → 0 < P y := fun y hy => by simp only [P]; positivity
   -- k = P - aG
   have hk : ∀ y, 0 < y → 0 < P y - a*G y := by
     intro y hy
-    refine incG_pos_of_hasDerivAt (f := fun y => P y - a*G y) (f' := P)
+    refine IncompleteGammaBounds.pos_of_hasDerivAt (f := fun y => P y - a*G y) (f' := P)
       (hPc.sub (continuous_const.mul hGc)).continuousOn (fun z hz => ?_) hPpos
       (by simp [hP0, hG0]) hy
     convert (hP z hz).sub ((hG z hz).const_mul a) using 1
@@ -446,7 +453,7 @@ theorem incG_positive_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
   -- m1 = xP - (a+1)k
   have hm1 : ∀ y, 0 < y → 0 < y*P y - (a+1)*(P y - a*G y) := by
     intro y hy
-    refine incG_pos_of_hasDerivAt (f := fun y => y*P y - (a+1)*(P y - a*G y))
+    refine IncompleteGammaBounds.pos_of_hasDerivAt (f := fun y => y*P y - (a+1)*(P y - a*G y))
       (f' := fun y => y * P y)
       ((continuous_id.mul hPc).sub (continuous_const.mul
         (hPc.sub (continuous_const.mul hGc)))).continuousOn (fun z hz => ?_)
@@ -457,7 +464,8 @@ theorem incG_positive_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     · rw [hGd z hz]; simp only [id]; field_simp; ring
   -- m = a(a+1)(a+2+x)G - ((a+1)(a+2)-x)P
   have hm : 0 < a*(a+1)*(a+2+x)*G x - ((a+1)*(a+2)-x)*P x := by
-    refine incG_pos_of_hasDerivAt (f := fun y => a*(a+1)*(a+2+y)*G y - ((a+1)*(a+2)-y)*P y)
+    refine IncompleteGammaBounds.pos_of_hasDerivAt
+        (f := fun y => a*(a+1)*(a+2+y)*G y - ((a+1)*(a+2)-y)*P y)
       (f' := fun y => y*P y - (a+1)*(P y - a*G y))
       (((continuous_const.mul (continuous_const.add continuous_id)).mul hGc).sub
         ((continuous_const.sub continuous_id).mul hPc)).continuousOn (fun z hz => ?_)
@@ -468,7 +476,7 @@ theorem incG_positive_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     · rw [hGd z hz]; simp only [id]; field_simp; ring
   -- h = (a+1)P - a(a+1+x)G
   have hh : 0 < (a+1)*P x - a*(a+1+x)*G x := by
-    refine incG_pos_of_hasDerivAt (f := fun y => (a+1)*P y - a*(a+1+y)*G y)
+    refine IncompleteGammaBounds.pos_of_hasDerivAt (f := fun y => (a+1)*P y - a*(a+1+y)*G y)
       (f' := fun y => P y - a*G y)
       ((continuous_const.mul hPc).sub ((continuous_const.mul
         (continuous_const.add continuous_id)).mul hGc)).continuousOn (fun z hz => ?_)
@@ -490,7 +498,7 @@ theorem incG_positive_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
 theorem incompleteGamma_positive_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     (a+1)*(a+2)-x < ((a+1)*(a+2+x))*(a*x^(-a)*Real.exp (-x)*(∫ t in (0 : ℝ)..x, t^(a-1)*Real.exp t))
         ∧ a*x^(-a)*Real.exp (-x)*(∫ t in (0 : ℝ)..x, t^(a-1)*Real.exp t) < (a+1)/(a+1+x) :=
-  incG_positive_exponential_bounds ha hx
+  IncompleteGammaBounds.positive_exponential_bounds ha hx
 
 /-- The map `(fun a : ℝ => (exp (-x : ℂ)*Gamma (a+1)*scIncGamma a (-x)).re)` tends to `(𝓝
 (Real.exp (-x)))` along `(𝓝[>] 0)`. -/
@@ -560,12 +568,12 @@ theorem upperIncGamma_power_bounds {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 
   rw [hu]
   constructor
   · rw [mul_comm 2 a, key 2 two_pos]
-    exact mul_lt_mul_of_pos_left (igBd_upper_gt ha ha1 hx) hP
+    exact mul_lt_mul_of_pos_left (IncompleteGammaBounds.upper_gt ha ha1 hx) hP
   · rw [Real.upperGammaCa]
     have hc : 0 < Real.Gamma (1+a)^(1/(a-1)) :=
       Real.rpow_pos_of_pos (Real.Gamma_pos_of_pos (by linarith)) _
     rw [key _ hc]
-    exact (mul_lt_mul_of_pos_left (igBd_upper_lt ha ha1 hx) hP).le
+    exact (mul_lt_mul_of_pos_left (IncompleteGammaBounds.upper_lt ha ha1 hx) hP).le
 
 /-- The map `(fun x : ℝ => x^(1-a)*Real.exp x*(upperIncGamma a x).re)` tends to `(𝓝 0)` along
 `(𝓝[>] 0)`. -/
@@ -605,20 +613,25 @@ def Real.gammaPBeta (a : ℝ) : ℝ :=
   if a < 1 then Real.upperGammaDa a else 1
 
 /-- Alzer's strict bounds behind DLMF 8.10.11 (helper for the two tagged statements). -/
-theorem igBd_exponential_bounds_strict {a x : ℝ} (ha : 0 < a) (ha1 : a ≠ 1) (hx : 0 < x) :
+theorem IncompleteGammaBounds.exponential_bounds_strict {a x : ℝ} (ha : 0 < a)
+    (ha1 : a ≠ 1) (hx : 0 < x) :
     (1-Real.exp (-Real.gammaPAlpha a*x))^a < (normIncGammaPContinued a x).re ∧
         (normIncGammaPContinued a x).re < (1-Real.exp (-Real.gammaPBeta a*x))^a := by
-  rw [igBd_normIncGammaP_re ha hx.le]
+  rw [IncompleteGammaBounds.normIncGammaP_re ha hx.le]
   have hγ : 0 < Real.Gamma (1+a)^(-1/a) :=
     Real.rpow_pos_of_pos (Real.Gamma_pos_of_pos (by linarith)) _
   rcases lt_or_gt_of_ne ha1 with h | h
   · simp only [Real.gammaPAlpha, Real.gammaPBeta, h, ↓reduceIte, Real.upperGammaDa, neg_mul]
-    refine ⟨?_, igBd_regGamma_lt_pow ha hγ (igBd_prop_da_lt_one ha h) hx⟩
-    simpa using igBd_pow_lt_regGamma ha one_pos (igBd_prop_one_lt_one h) hx
+    refine ⟨?_, IncompleteGammaBounds.regGamma_lt_pow ha hγ
+        (IncompleteGammaBounds.leftPropagation_alzerConst_lt_one ha h) hx⟩
+    simpa using IncompleteGammaBounds.pow_lt_regGamma ha one_pos
+        (IncompleteGammaBounds.leftPropagation_one_lt_one h) hx
   · simp only [Real.gammaPAlpha, Real.gammaPBeta, not_lt.mpr h.le, ↓reduceIte, Real.upperGammaDa,
       neg_mul]
-    refine ⟨igBd_pow_lt_regGamma ha hγ (igBd_prop_da_gt_one h) hx, ?_⟩
-    simpa using igBd_regGamma_lt_pow ha one_pos (igBd_prop_one_gt_one h) hx
+    refine ⟨IncompleteGammaBounds.pow_lt_regGamma ha hγ
+        (IncompleteGammaBounds.leftPropagation_alzerConst_gt_one h) hx, ?_⟩
+    simpa using IncompleteGammaBounds.regGamma_lt_pow ha one_pos
+        (IncompleteGammaBounds.leftPropagation_one_gt_one h) hx
 
 /-- Estimate under the stated parameter and domain assumptions: `(1-Real.exp (-Real.gammaPAlpha
 a*x))^a ≤ (normIncGammaPContinued a x).re ∧ (normIncGammaPContinued a x).re ≤ (1-Real.exp
@@ -629,13 +642,13 @@ theorem normIncGammaP_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 ≤ x)
         (normIncGammaPContinued a x).re ≤ (1-Real.exp (-Real.gammaPBeta a*x))^a := by
   rcases hx.eq_or_lt with h0 | h0
   · subst h0
-    rw [igBd_normIncGammaP_re ha le_rfl]
+    rw [IncompleteGammaBounds.normIncGammaP_re ha le_rfl]
     simp [Real.zero_rpow ha.ne']
   by_cases ha1 : a = 1
   · subst ha1
-    rw [igBd_normIncGammaP_re ha hx, TauCeti.regularizedGamma_one hx]
+    rw [IncompleteGammaBounds.normIncGammaP_re ha hx, TauCeti.regularizedGamma_one hx]
     simp [Real.gammaPAlpha, Real.gammaPBeta, Real.upperGammaDa, one_add_one_eq_two]
-  · have := igBd_exponential_bounds_strict ha ha1 h0
+  · have := IncompleteGammaBounds.exponential_bounds_strict ha ha1 h0
     exact ⟨this.1.le, this.2.le⟩
 
 /-- The source equality condition excludes the automatic equality at x=0. -/
@@ -643,7 +656,7 @@ theorem normIncGammaP_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 ≤ x)
 theorem normIncGammaP_exponential_bounds_strict {a x : ℝ} (ha : 0 < a) (ha1 : a ≠ 1) (hx : 0 < x) :
     (1-Real.exp (-Real.gammaPAlpha a*x))^a < (normIncGammaPContinued a x).re ∧
         (normIncGammaPContinued a x).re < (1-Real.exp (-Real.gammaPBeta a*x))^a :=
-  igBd_exponential_bounds_strict ha ha1 hx
+  IncompleteGammaBounds.exponential_bounds_strict ha ha1 hx
 
 /-- Estimate under the stated parameter and domain assumptions: `(normIncGammaQContinued n n).re <
 1/2 ∧ 1/2 < (normIncGammaQContinued n (n-1 : ℕ)).re`. -/
@@ -654,14 +667,15 @@ theorem normIncGammaQ_diagonal_bounds {n : ℕ} (hn : 1 ≤ n) :
   have hG := Real.Gamma_pos_of_pos hn0
   have e1 : (n:ℂ) = ((n:ℝ):ℂ) := (ofReal_natCast n).symm
   have e2 : ((n-1:ℕ):ℂ) = (((n-1:ℕ):ℝ):ℂ) := (ofReal_natCast _).symm
-  rw [e1, e2, igBd_normIncGammaQ_re hn0 hn0.le, igBd_normIncGammaQ_re hn0 (Nat.cast_nonneg _)]
+  rw [e1, e2, IncompleteGammaBounds.normIncGammaQ_re hn0 hn0.le,
+      IncompleteGammaBounds.normIncGammaQ_re hn0 (Nat.cast_nonneg _)]
   constructor
-  · have := igBd_Gamma_lt_two_lower_self hn0
+  · have := IncompleteGammaBounds.Gamma_lt_two_lower_self hn0
     rw [sub_lt_iff_lt_add, ← sub_lt_iff_lt_add', lt_div_iff₀ hG]; linarith
   · rw [lt_sub_iff_add_lt, ← lt_sub_iff_add_lt', div_lt_iff₀ hG]
     rcases Nat.lt_or_ge 1 n with h | h
     · have h1 : (1:ℝ) < n := by exact_mod_cast h
-      have := igBd_two_lower_mode_lt_Gamma h1
+      have := IncompleteGammaBounds.two_lower_mode_lt_Gamma h1
       rw [Nat.cast_sub hn, Nat.cast_one]; linarith
     · have : n = 1 := le_antisymm h hn
       subst this

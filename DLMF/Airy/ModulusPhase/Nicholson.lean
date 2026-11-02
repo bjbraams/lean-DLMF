@@ -16,18 +16,18 @@ remainder estimates for the expansions of `M²` and `N²` at `-∞` (DLMF §9.8(
 
 ## Main definitions
 
-* `airyMod_kernel`, `airyMod_kernel1`, `airyMod_kernel2`: the Nicholson kernels.
-* `airyMod_rem`: the remainder of the exponential series for `e^{-w}`.
+* `ModulusPhase.kernel`, `ModulusPhase.kernel1`, `ModulusPhase.kernel2`: the Nicholson kernels.
+* `ModulusPhase.remainder`: the remainder of the exponential series for `e^{-w}`.
 
 ## Main results
 
-* `airyMod_sq_eq_integral`: Nicholson's formula `M(x)² = π^{-3/2} ∫₀^∞ e^{xt - t³/12} t^{-1/2} dt`
-  (DLMF 9.11.4).
-* `airyMod_derivSq_eq_integral`, `airyMod_cross_eq_integral`: Nicholson-type formulas for `N²`
-  and `Ai Ai' + Bi Bi'`.
-* `airyMod_sq_strictMono`: `M²` is strictly increasing on `ℝ`.
-* `airyMod_sq_error_bound`, `airyMod_derivSq_error`: error bounds for the expansions of `M²`
-  and `N²` at `-∞`.
+* `ModulusPhase.sq_eq_integral`: Nicholson's formula
+  `M(x)² = π^{-3/2} ∫₀^∞ e^{xt - t³/12} t^{-1/2} dt` (DLMF 9.11.4).
+* `ModulusPhase.derivSq_eq_integral`, `ModulusPhase.cross_eq_integral`: Nicholson-type formulas for
+  `N²` and `Ai Ai' + Bi Bi'`.
+* `ModulusPhase.sq_strictMono`: `M²` is strictly increasing on `ℝ`.
+* `ModulusPhase.sq_error_bound`, `ModulusPhase.derivSq_error`: error bounds for the expansions of
+  `M²` and `N²` at `-∞`.
 * `airy_modulus_monotone`, `airy_modulus_deriv_monotone`: `M` and `M'` are strictly increasing
   on `(-∞, 0]` (DLMF §9.8(iii)).
 -/
@@ -47,24 +47,24 @@ section Nicholson
 open scoped Nat
 
 /-- The real Nicholson kernel `e^{xt} e^{-t³/12} t^{-1/2}`. -/
-noncomputable def airyMod_kernel (x t : ℝ) : ℝ :=
+noncomputable def ModulusPhase.kernel (x t : ℝ) : ℝ :=
   Real.exp (x * t) * (Real.exp (-(t ^ 3 / 12)) * t ^ (-(1 / 2) : ℝ))
 
 /-- The real Nicholson kernel is positive on `(0, ∞)`. -/
-theorem airyMod_kernel_pos (x : ℝ) {t : ℝ} (ht : 0 < t) : 0 < airyMod_kernel x t := by
-  unfold airyMod_kernel; positivity
+theorem ModulusPhase.kernel_pos (x : ℝ) {t : ℝ} (ht : 0 < t) : 0 < ModulusPhase.kernel x t := by
+  unfold ModulusPhase.kernel; positivity
 
 /-- **Nicholson's formula on the real line** (DLMF 9.11.4):
 `M(x)² = π^{-3/2} ∫₀^∞ e^{xt - t³/12} t^{-1/2} dt`. -/
-theorem airyMod_sq_eq_integral (x : ℝ) :
-    airyModulus x ^ 2 = (∫ t in Ioi (0 : ℝ), airyMod_kernel x t) / (π * Real.sqrt π) := by
-  have h := (airyMod_modulus_sq_exp_integral x).2
-  rw [airyAi_ofReal_eq, airyBi_ofReal_eq, airyMod_pi_cpow] at h
+theorem ModulusPhase.sq_eq_integral (x : ℝ) :
+    airyModulus x ^ 2 = (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel x t) / (π * Real.sqrt π) := by
+  have h := (ModulusPhase.modulus_sq_exp_integral x).2
+  rw [airyAi_ofReal_eq, airyBi_ofReal_eq, ModulusPhase.pi_cpow] at h
   have hI : (∫ t : ℝ in Ioi 0, exp ((x : ℂ) * t - (t : ℂ) ^ 3 / 12) * (t : ℂ) ^ (-1 / 2 : ℂ)) =
-      ((∫ t in Ioi (0 : ℝ), airyMod_kernel x t : ℝ) : ℂ) := by
+      ((∫ t in Ioi (0 : ℝ), ModulusPhase.kernel x t : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
-    simp only [airyMod_kernel]
+    simp only [ModulusPhase.kernel]
     rw [ofReal_mul, ofReal_mul, ofReal_exp, ofReal_exp, ofReal_cpow ht.le]
     push_cast
     rw [sub_eq_add_neg, Complex.exp_add, show (-(1 / 2) : ℂ) = -1 / 2 by ring]; ring
@@ -73,11 +73,11 @@ theorem airyMod_sq_eq_integral (x : ℝ) :
   exact_mod_cast h
 
 /-- The real Nicholson kernel is integrable on `(0, ∞)`. -/
-theorem airyMod_kernel_integrable (x : ℝ) : IntegrableOn (airyMod_kernel x) (Ioi 0) :=
-  airyMod_integrableOn_exp x
+theorem ModulusPhase.kernel_integrable (x : ℝ) : IntegrableOn (ModulusPhase.kernel x) (Ioi 0) :=
+  ModulusPhase.integrableOn_exp x
 
 /-- A function positive on `(0, ∞)` and integrable there has positive integral. -/
-theorem airyMod_integral_pos {f : ℝ → ℝ} (hf : IntegrableOn f (Ioi 0))
+theorem ModulusPhase.integral_pos {f : ℝ → ℝ} (hf : IntegrableOn f (Ioi 0))
     (hpos : ∀ t, 0 < t → 0 < f t) : 0 < ∫ t in Ioi (0 : ℝ), f t := by
   refine (setIntegral_pos_iff_support_of_nonneg_ae ?_ hf).2 ?_
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
@@ -88,34 +88,36 @@ theorem airyMod_integral_pos {f : ℝ → ℝ} (hf : IntegrableOn f (Ioi 0))
     rw [Real.volume_Ioi]; exact ENNReal.zero_lt_top
 
 /-- `M²` is strictly increasing on the whole real line. -/
-theorem airyMod_sq_strictMono : StrictMono fun x => airyModulus x ^ 2 := by
+theorem ModulusPhase.sq_strictMono : StrictMono fun x => airyModulus x ^ 2 := by
   intro x y hxy
-  simp only [airyMod_sq_eq_integral]
+  simp only [ModulusPhase.sq_eq_integral]
   have hπ : 0 < π * Real.sqrt π := by positivity
   refine div_lt_div_of_pos_right ?_ hπ
-  rw [← sub_pos, ← integral_sub (airyMod_kernel_integrable y) (airyMod_kernel_integrable x)]
-  refine airyMod_integral_pos ((airyMod_kernel_integrable y).sub (airyMod_kernel_integrable x))
+  rw [← sub_pos, ← integral_sub (ModulusPhase.kernel_integrable y)
+      (ModulusPhase.kernel_integrable x)]
+  refine ModulusPhase.integral_pos
+      ((ModulusPhase.kernel_integrable y).sub (ModulusPhase.kernel_integrable x))
     fun t ht => ?_
-  simp only [airyMod_kernel]
+  simp only [ModulusPhase.kernel]
   have h1 : Real.exp (x * t) < Real.exp (y * t) := Real.exp_lt_exp.2 (by nlinarith)
   have h2 : 0 < Real.exp (-(t ^ 3 / 12)) * t ^ (-(1 / 2) : ℝ) := by positivity
   nlinarith
 
 /-- Scaling form of Nicholson's formula: for `s > 0`,
 `s^{1/2} M(-s)² = π^{-3/2} ∫₀^∞ e^{-u} e^{-u³/(12 s³)} u^{-1/2} du`. -/
-theorem airyMod_sqrt_mul_sq {s : ℝ} (hs : 0 < s) :
+theorem ModulusPhase.sqrt_mul_sq {s : ℝ} (hs : 0 < s) :
     s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2 = (∫ u in Ioi (0 : ℝ),
       Real.exp (-u) * (Real.exp (-(u ^ 3 / (12 * s ^ 3))) * u ^ (-(1 / 2) : ℝ))) /
         (π * Real.sqrt π) := by
-  rw [airyMod_sq_eq_integral, mul_div_assoc']
+  rw [ModulusPhase.sq_eq_integral, mul_div_assoc']
   congr 1
-  have h := integral_comp_mul_left_Ioi (airyMod_kernel (-s)) 0 (inv_pos.mpr hs)
+  have h := integral_comp_mul_left_Ioi (ModulusPhase.kernel (-s)) 0 (inv_pos.mpr hs)
   rw [mul_zero, smul_eq_mul, inv_inv] at h
   have hs12 : 0 < s ^ (1 / 2 : ℝ) := by positivity
-  have key : ∀ u ∈ Ioi (0 : ℝ), airyMod_kernel (-s) (s⁻¹ * u) = s ^ (1 / 2 : ℝ) *
+  have key : ∀ u ∈ Ioi (0 : ℝ), ModulusPhase.kernel (-s) (s⁻¹ * u) = s ^ (1 / 2 : ℝ) *
       (Real.exp (-u) * (Real.exp (-(u ^ 3 / (12 * s ^ 3))) * u ^ (-(1 / 2) : ℝ))) := by
     intro u (hu : 0 < u)
-    simp only [airyMod_kernel]
+    simp only [ModulusPhase.kernel]
     rw [Real.mul_rpow (inv_pos.mpr hs).le hu.le, Real.inv_rpow hs.le, Real.rpow_neg hs.le,
       inv_inv]
     have : -s * (s⁻¹ * u) = -u := by field_simp
@@ -128,7 +130,7 @@ theorem airyMod_sqrt_mul_sq {s : ℝ} (hs : 0 < s) :
   rw [← mul_assoc, hs0, h]
 
 /-- The scaled Nicholson integrand is integrable. -/
-theorem airyMod_scaled_integrable {s : ℝ} (hs : 0 ≤ s) : IntegrableOn (fun u : ℝ =>
+theorem ModulusPhase.scaled_integrable {s : ℝ} (hs : 0 ≤ s) : IntegrableOn (fun u : ℝ =>
     Real.exp (-u) * (Real.exp (-(u ^ 3 / (12 * s ^ 3))) * u ^ (-(1 / 2) : ℝ))) (Ioi 0) := by
   have hint := Real.GammaIntegral_convergent (s := 1 / 2) (by norm_num)
   refine hint.mono' ?_ ?_
@@ -147,11 +149,11 @@ theorem airyMod_scaled_integrable {s : ℝ} (hs : 0 ≤ s) : IntegrableOn (fun u
       _ = _ := by ring
 
 /-- The remainder of the exponential series for `e^{-w}` after `K` terms. -/
-noncomputable def airyMod_rem (K : ℕ) (w : ℝ) : ℝ :=
+noncomputable def ModulusPhase.remainder (K : ℕ) (w : ℝ) : ℝ :=
   Real.exp (-w) - ∑ k ∈ Finset.range K, (-w) ^ k / k !
 
 /-- Derivative of the partial sums of `e^{-w}`. -/
-theorem airyMod_hasDerivAt_partial (K : ℕ) (w : ℝ) :
+theorem ModulusPhase.hasDerivAt_partial (K : ℕ) (w : ℝ) :
     HasDerivAt (fun w : ℝ => ∑ k ∈ Finset.range (K + 1), (-w) ^ k / k !)
       (-∑ k ∈ Finset.range K, (-w) ^ k / k !) w := by
   induction K with
@@ -166,33 +168,35 @@ theorem airyMod_hasDerivAt_partial (K : ℕ) (w : ℝ) :
     ring
 
 /-- Derivative of the exponential remainder: `R_{K+1}' = -R_K`. -/
-theorem airyMod_hasDerivAt_rem (K : ℕ) (w : ℝ) :
-    HasDerivAt (airyMod_rem (K + 1)) (-airyMod_rem K w) w := by
+theorem ModulusPhase.hasDerivAt_remainder (K : ℕ) (w : ℝ) :
+    HasDerivAt (ModulusPhase.remainder (K + 1)) (-ModulusPhase.remainder K w) w := by
   have h := ((Real.hasDerivAt_exp (-w)).comp w (hasDerivAt_neg w)).sub
-    (airyMod_hasDerivAt_partial K w)
-  unfold airyMod_rem
+    (ModulusPhase.hasDerivAt_partial K w)
+  unfold ModulusPhase.remainder
   exact h.congr_deriv (by ring)
 
 /-- `R_{K+1}(0) = 0`. -/
-theorem airyMod_rem_zero (K : ℕ) : airyMod_rem (K + 1) 0 = 0 := by
-  simp [airyMod_rem, Finset.sum_range_succ']
+theorem ModulusPhase.remainder_zero (K : ℕ) : ModulusPhase.remainder (K + 1) 0 = 0 := by
+  simp [ModulusPhase.remainder, Finset.sum_range_succ']
 
 /-- The alternating bound for the exponential remainder: for `w ≥ 0`,
 `0 ≤ (-1)^K R_K(w) ≤ w^K / K!`. -/
-theorem airyMod_rem_bounds (K : ℕ) {w : ℝ} (hw : 0 ≤ w) :
-    0 ≤ (-1) ^ K * airyMod_rem K w ∧ (-1) ^ K * airyMod_rem K w ≤ w ^ K / K ! := by
+theorem ModulusPhase.remainder_bounds (K : ℕ) {w : ℝ} (hw : 0 ≤ w) :
+    0 ≤ (-1) ^ K * ModulusPhase.remainder K w ∧ (-1) ^ K * ModulusPhase.remainder K w ≤
+        w ^ K / K ! := by
   induction K generalizing w with
   | zero =>
-    simp only [pow_zero, one_mul, airyMod_rem, Finset.range_zero, Finset.sum_empty, sub_zero,
+    simp only [pow_zero, one_mul, ModulusPhase.remainder, Finset.range_zero,
+        Finset.sum_empty, sub_zero,
       Nat.factorial_zero, Nat.cast_one, div_one]
     exact ⟨(Real.exp_pos _).le, Real.exp_le_one_iff.mpr (by linarith)⟩
   | succ K ih =>
-    have hg : ∀ v : ℝ, HasDerivAt (fun v => (-1) ^ (K + 1) * airyMod_rem (K + 1) v)
-        ((-1) ^ K * airyMod_rem K v) v := fun v => by
-      convert (airyMod_hasDerivAt_rem K v).const_mul ((-1 : ℝ) ^ (K + 1)) using 1; ring
+    have hg : ∀ v : ℝ, HasDerivAt (fun v => (-1) ^ (K + 1) * ModulusPhase.remainder (K + 1) v)
+        ((-1) ^ K * ModulusPhase.remainder K v) v := fun v => by
+      convert (ModulusPhase.hasDerivAt_remainder K v).const_mul ((-1 : ℝ) ^ (K + 1)) using 1; ring
     have hh : ∀ v : ℝ, HasDerivAt (fun v => v ^ (K + 1) / (Nat.factorial (K + 1) : ℝ) -
-        (-1) ^ (K + 1) * airyMod_rem (K + 1) v)
-            (v ^ K / (Nat.factorial K : ℝ) - (-1) ^ K * airyMod_rem K v) v :=
+        (-1) ^ (K + 1) * ModulusPhase.remainder (K + 1) v)
+            (v ^ K / (Nat.factorial K : ℝ) - (-1) ^ K * ModulusPhase.remainder K v) v :=
       fun v => by
         convert ((hasDerivAt_pow (K + 1) v).div_const (Nat.factorial (K + 1) : ℝ)).sub (hg v)
           using 1
@@ -210,14 +214,15 @@ theorem airyMod_rem_bounds (K : ℕ) {w : ℝ} (hw : 0 ≤ w) :
       exact hm (Set.self_mem_Ici) hw hw
     constructor
     · have := mono hg (fun v hv => (ih hv).1)
-      simpa [airyMod_rem_zero] using this
+      simpa [ModulusPhase.remainder_zero] using this
     · have := mono hh (fun v hv => sub_nonneg.mpr (ih hv).2)
-      simp only [airyMod_rem_zero, mul_zero, sub_zero, ne_eq, Nat.add_eq_zero_iff, one_ne_zero,
+      simp only [ModulusPhase.remainder_zero, mul_zero, sub_zero, ne_eq,
+          Nat.add_eq_zero_iff, one_ne_zero,
         and_false, not_false_eq_true, zero_pow, zero_div] at this
       linarith
 
 /-- `Γ(m + 1/2) = √π ∏_{j<m} (2j+1) / 2^m`. -/
-theorem airyMod_gamma_half (m : ℕ) :
+theorem ModulusPhase.gamma_half (m : ℕ) :
     Real.Gamma (m + 1 / 2) = Real.sqrt π * (∏ j ∈ Finset.range m, (2 * (j : ℝ) + 1)) / 2 ^ m := by
   induction m with
   | zero => simpa using Real.Gamma_one_half_eq
@@ -227,13 +232,13 @@ theorem airyMod_gamma_half (m : ℕ) :
     field_simp
 
 /-- The moment terms of the expansion of `M²` at `-∞`. -/
-theorem airyMod_term_identity (k : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem ModulusPhase.term_identity (k : ℕ) {s : ℝ} (hs : 0 < s) :
     (π * Real.sqrt π)⁻¹ * (Real.Gamma ((3 * k : ℕ) + 1 / 2) * s ^ (-(((3 * k : ℕ) : ℝ) + 1 / 2)) *
       ((-1) ^ k / (12 ^ k * k !))) =
       s ^ (-1 / 2 : ℝ) / π * airyModulusCoeff k * (-s) ^ (-(3 * k : ℤ)) := by
   have hπ := Real.pi_pos
   have hsp : 0 < Real.sqrt π := Real.sqrt_pos.mpr hπ
-  rw [airyMod_gamma_half, airyModulusCoeff, Real.rpow_neg hs.le, Real.rpow_add hs,
+  rw [ModulusPhase.gamma_half, airyModulusCoeff, Real.rpow_neg hs.le, Real.rpow_add hs,
     Real.rpow_natCast, zpow_neg, show (3 * (k : ℤ)) = ((3 * k : ℕ) : ℤ) by push_cast; ring,
     zpow_natCast, neg_pow s, show (-1 : ℝ) ^ (3 * k) = (-1) ^ k by
       rw [pow_mul]; norm_num,
@@ -247,7 +252,7 @@ theorem airyMod_term_identity (k : ℕ) {s : ℝ} (hs : 0 < s) :
   exact neg_one_pow_eq_or ℝ k
 
 /-- The terms `e^{-st} t^{3k-1/2}` integrate to `Γ(3k+1/2) s^{-(3k+1/2)}`. -/
-theorem airyMod_term_integral (k : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem ModulusPhase.term_integral (k : ℕ) {s : ℝ} (hs : 0 < s) :
     IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ ((((3 * k : ℕ) : ℝ) + 1 / 2) - 1)) (Ioi 0) ∧
     ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ ((((3 * k : ℕ) : ℝ) + 1 / 2) - 1) =
       Real.Gamma ((3 * k : ℕ) + 1 / 2) * s ^ (-(((3 * k : ℕ) : ℝ) + 1 / 2)) :=
@@ -257,24 +262,26 @@ theorem airyMod_term_integral (k : ℕ) {s : ℝ} (hs : 0 < s) :
 /-- The error of the truncated expansion of `M²` at `-∞` as an integral of the exponential
 remainder: for `s > 0`, `M(-s)² - (s^{-1/2}/π) ∑_{k<N} c_k (-s)^{-3k} =
 π^{-3/2} ∫₀^∞ e^{-st} t^{-1/2} R_N(t³/12) dt`. -/
-theorem airyMod_sq_error_integral {s : ℝ} (hs : 0 < s) (N : ℕ) :
-    IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * airyMod_rem N (t ^ 3 / 12))
+theorem ModulusPhase.sq_error_integral {s : ℝ} (hs : 0 < s) (N : ℕ) :
+    IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
+        ModulusPhase.remainder N (t ^ 3 / 12))
       (Ioi 0) ∧
     airyModulus (-s) ^ 2 - s ^ (-1 / 2 : ℝ) / π * airyModulusSum false N (-s) =
       (π * Real.sqrt π)⁻¹ * ∫ t in Ioi (0 : ℝ),
-        Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * airyMod_rem N (t ^ 3 / 12) := by
+        Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * ModulusPhase.remainder N (t ^ 3 / 12) := by
   set B : ℕ → ℝ → ℝ := fun k t => Real.exp (-s * t) * t ^ ((((3 * k : ℕ) : ℝ) + 1 / 2) - 1) *
     ((-1) ^ k / (12 ^ k * k !))
-  have hB : ∀ k, IntegrableOn (B k) (Ioi 0) := fun k => (airyMod_term_integral k hs).1.mul_const _
+  have hB : ∀ k, IntegrableOn (B k) (Ioi 0) := fun k =>
+      (ModulusPhase.term_integral k hs).1.mul_const _
   have hBi : ∀ k, ∫ t in Ioi (0 : ℝ), B k t =
       Real.Gamma ((3 * k : ℕ) + 1 / 2) * s ^ (-(((3 * k : ℕ) : ℝ) + 1 / 2)) *
         ((-1) ^ k / (12 ^ k * k !)) := fun k => by
-    rw [integral_mul_const, (airyMod_term_integral k hs).2]
-  have hpt : ∀ t : ℝ, 0 < t → airyMod_kernel (-s) t =
-      Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * airyMod_rem N (t ^ 3 / 12) +
+    rw [integral_mul_const, (ModulusPhase.term_integral k hs).2]
+  have hpt : ∀ t : ℝ, 0 < t → ModulusPhase.kernel (-s) t =
+      Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * ModulusPhase.remainder N (t ^ 3 / 12) +
         ∑ k ∈ Finset.range N, B k t := by
     intro t ht
-    simp only [airyMod_kernel, airyMod_rem, B]
+    simp only [ModulusPhase.kernel, ModulusPhase.remainder, B]
     have : ∀ k ∈ Finset.range N, Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
         ((-(t ^ 3 / 12)) ^ k / k !) = Real.exp (-s * t) * t ^ ((((3 * k : ℕ) : ℝ) + 1 / 2) - 1) *
           ((-1) ^ k / (12 ^ k * k !)) := by
@@ -285,14 +292,14 @@ theorem airyMod_sq_error_integral {s : ℝ} (hs : 0 < s) (N : ℕ) :
     rw [← Finset.sum_congr rfl this, ← Finset.mul_sum]
     ring
   have hA : IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-      airyMod_rem N (t ^ 3 / 12)) (Ioi 0) := by
-    refine ((airyMod_kernel_integrable (-s)).sub
+      ModulusPhase.remainder N (t ^ 3 / 12)) (Ioi 0) := by
+    refine ((ModulusPhase.kernel_integrable (-s)).sub
         (integrable_finsetSum (Finset.range N) fun k _ => hB k)).congr_fun
       (fun t (ht : 0 < t) => ?_) measurableSet_Ioi
     simp only [Pi.sub_apply, hpt t ht]
     ring
   refine ⟨hA, ?_⟩
-  rw [airyMod_sq_eq_integral, setIntegral_congr_fun measurableSet_Ioi hpt,
+  rw [ModulusPhase.sq_eq_integral, setIntegral_congr_fun measurableSet_Ioi hpt,
     integral_add hA (integrable_finsetSum (Finset.range N) fun k _ => hB k),
         integral_finsetSum (Finset.range N) fun k _ => hB k]
   simp only [hBi, airyModulusSum, Bool.false_eq_true, ite_false]
@@ -300,12 +307,12 @@ theorem airyMod_sq_error_integral {s : ℝ} (hs : 0 < s) (N : ℕ) :
   have : ∀ k ∈ Finset.range N, (π * Real.sqrt π)⁻¹ * (Real.Gamma ((3 * k : ℕ) + 1 / 2) *
       s ^ (-(((3 * k : ℕ) : ℝ) + 1 / 2)) * ((-1) ^ k / (12 ^ k * k !))) =
       s ^ (-1 / 2 : ℝ) / π * (airyModulusCoeff k * (-s) ^ (-(3 * k : ℤ))) := by
-    intro k _; rw [airyMod_term_identity k hs]; ring
+    intro k _; rw [ModulusPhase.term_identity k hs]; ring
   rw [Finset.sum_congr rfl this]
   ring
 
 /-- Signed first-neglected-term bound for the expansion of `M²` at `-∞` (DLMF §9.8(iv)). -/
-theorem airyMod_sq_error_bound {x : ℝ} (hx : x < 0) (N : ℕ) :
+theorem ModulusPhase.sq_error_bound {x : ℝ} (hx : x < 0) (N : ℕ) :
     |(airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) *
         airyModulusSum false N x| ≤ |((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N *
         x ^ (-(3 * N : ℤ))| ∧
@@ -315,24 +322,25 @@ theorem airyMod_sq_error_bound {x : ℝ} (hx : x < 0) (N : ℕ) :
   rw [neg_neg]
   have hπ := Real.pi_pos
   have hc : 0 < (π * Real.sqrt π)⁻¹ := by positivity
-  obtain ⟨hA, hE⟩ := airyMod_sq_error_integral hs N
-  rw [hE, ← airyMod_term_identity N hs]
-  set J := ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * airyMod_rem N (t ^ 3 / 12)
+  obtain ⟨hA, hE⟩ := ModulusPhase.sq_error_integral hs N
+  rw [hE, ← ModulusPhase.term_identity N hs]
+  set J := ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
+      ModulusPhase.remainder N (t ^ 3 / 12)
   set G := Real.Gamma ((3 * N : ℕ) + 1 / 2) * s ^ (-(((3 * N : ℕ) : ℝ) + 1 / 2))
   have hJ1 : 0 ≤ (-1) ^ N * J := by
     rw [← integral_const_mul]
     refine setIntegral_nonneg measurableSet_Ioi fun t (ht : 0 < t) => ?_
-    have := (airyMod_rem_bounds N (w := t ^ 3 / 12) (by positivity)).1
+    have := (ModulusPhase.remainder_bounds N (w := t ^ 3 / 12) (by positivity)).1
     have : 0 ≤ Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) := by positivity
     nlinarith
   have hJ2 : (-1) ^ N * J ≤ G / (12 ^ N * N !) := by
-    have hI := (airyMod_term_integral N hs)
+    have hI := (ModulusPhase.term_integral N hs)
     rw [show G / (12 ^ N * N !) = ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) *
         t ^ ((((3 * N : ℕ) : ℝ) + 1 / 2) - 1) / (12 ^ N * N !) by
       rw [integral_div, hI.2], ← integral_const_mul]
     refine setIntegral_mono_on (hA.const_mul _) (hI.1.div_const _) measurableSet_Ioi
       fun t (ht : 0 < t) => ?_
-    have hb := (airyMod_rem_bounds N (w := t ^ 3 / 12) (by positivity)).2
+    have hb := (ModulusPhase.remainder_bounds N (w := t ^ 3 / 12) (by positivity)).2
     have h0 : 0 ≤ Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) := by positivity
     have e : Real.exp (-s * t) * t ^ ((((3 * N : ℕ) : ℝ) + 1 / 2) - 1) / (12 ^ N * N !) =
         Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * ((t ^ 3 / 12) ^ N / N !) := by
@@ -340,8 +348,9 @@ theorem airyMod_sq_error_bound {x : ℝ} (hx : x < 0) (N : ℕ) :
         Real.rpow_add ht, Real.rpow_natCast, div_pow, pow_mul]
       field_simp
     rw [e]
-    calc (-1) ^ N * (Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * airyMod_rem N (t ^ 3 / 12))
-        = Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * ((-1) ^ N * airyMod_rem N (t ^ 3 / 12)) := by
+    calc (-1) ^ N * (Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * ModulusPhase.remainder N (t ^ 3 / 12))
+        = Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
+            ((-1) ^ N * ModulusPhase.remainder N (t ^ 3 / 12)) := by
           ring
       _ ≤ _ := mul_le_mul_of_nonneg_left hb h0
   have hsq : ((-1 : ℝ) ^ N) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
@@ -364,60 +373,60 @@ theorem airyMod_sq_error_bound {x : ℝ} (hx : x < 0) (N : ℕ) :
     exact mul_nonneg (mul_nonneg hc.le hJ1) (mul_nonneg hc.le hG)
 
 /-- The second Nicholson kernel `e^{xt} e^{-t³/12} t^{3/2}`. -/
-noncomputable def airyMod_kernel2 (x t : ℝ) : ℝ :=
+noncomputable def ModulusPhase.kernel2 (x t : ℝ) : ℝ :=
   Real.exp (x * t) * (Real.exp (-(t ^ 3 / 12)) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)))
 
 /-- The second Nicholson kernel is integrable on `(0, ∞)`. -/
-theorem airyMod_kernel2_integrable (x : ℝ) : IntegrableOn (airyMod_kernel2 x) (Ioi 0) :=
-  airyMod_integrableOn_exp_pow x 2
+theorem ModulusPhase.kernel2_integrable (x : ℝ) : IntegrableOn (ModulusPhase.kernel2 x) (Ioi 0) :=
+  ModulusPhase.integrableOn_exp_pow x 2
 
 /-- **Nicholson-type formula for `N²`** on the real line:
 `N(x)² = π^{-3/2} (½ ∫₀^∞ e^{xt - t³/12} t^{3/2} dt - x ∫₀^∞ e^{xt - t³/12} t^{-1/2} dt)`. -/
-theorem airyMod_derivSq_eq_integral (x : ℝ) :
-    airyDerivModulus x ^ 2 = ((∫ t in Ioi (0 : ℝ), airyMod_kernel2 x t) / 2 -
-      x * ∫ t in Ioi (0 : ℝ), airyMod_kernel x t) / (π * Real.sqrt π) := by
-  have h := airyMod_derivModulus_sq_integral x
-  rw [airyAiDeriv_ofReal_eq, airyBiDeriv_ofReal_eq, airyMod_pi_cpow] at h
+theorem ModulusPhase.derivSq_eq_integral (x : ℝ) :
+    airyDerivModulus x ^ 2 = ((∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 x t) / 2 -
+      x * ∫ t in Ioi (0 : ℝ), ModulusPhase.kernel x t) / (π * Real.sqrt π) := by
+  have h := ModulusPhase.derivModulus_sq_integral x
+  rw [airyAiDeriv_ofReal_eq, airyBiDeriv_ofReal_eq, ModulusPhase.pi_cpow] at h
   have hc : ∀ t : ℝ, 0 < t → ((t : ℂ) ^ (-1 / 2 : ℂ)) = ((t ^ (-(1 / 2) : ℝ) : ℝ) : ℂ) := by
     intro t ht; rw [ofReal_cpow ht.le]; push_cast; ring_nf
   have hI : (∫ t : ℝ in Ioi 0, exp ((x : ℂ) * t - (t : ℂ) ^ 3 / 12) * (t : ℂ) ^ (-1 / 2 : ℂ)) =
-      ((∫ t in Ioi (0 : ℝ), airyMod_kernel x t : ℝ) : ℂ) := by
+      ((∫ t in Ioi (0 : ℝ), ModulusPhase.kernel x t : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
-    simp only [airyMod_kernel]
+    simp only [ModulusPhase.kernel]
     rw [hc t ht]; push_cast
     rw [sub_eq_add_neg, Complex.exp_add]; ring
   have hI2 : (∫ t : ℝ in Ioi 0, exp ((x : ℂ) * t - (t : ℂ) ^ 3 / 12) *
       ((t : ℂ) ^ 2 * (t : ℂ) ^ (-1 / 2 : ℂ))) =
-          ((∫ t in Ioi (0 : ℝ), airyMod_kernel2 x t : ℝ) : ℂ) := by
+          ((∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 x t : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
-    simp only [airyMod_kernel2]
+    simp only [ModulusPhase.kernel2]
     rw [hc t ht]; push_cast
     rw [sub_eq_add_neg, Complex.exp_add]; ring
   rw [hI, hI2] at h
   rw [airyDerivModulus_sq]
   have h' : ((airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2 : ℝ) : ℂ) =
-      ((((∫ t in Ioi (0 : ℝ), airyMod_kernel2 x t) / 2 - x * ∫ t in Ioi (0 : ℝ),
-          airyMod_kernel x t) /
+      ((((∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 x t) / 2 - x * ∫ t in Ioi (0 : ℝ),
+          ModulusPhase.kernel x t) /
         (π * Real.sqrt π) : ℝ) : ℂ) := by
     push_cast; rw [h]; push_cast; ring
   exact_mod_cast h'
 
 /-- Strict monotonicity of Laplace-type integrals `∫₀^∞ e^{xt} w(t) dt` in `x` for a positive
 weight `w`. -/
-theorem airyMod_integral_exp_strictMono {w : ℝ → ℝ} (hw : ∀ t, 0 < t → 0 < w t)
+theorem ModulusPhase.integral_exp_strictMono {w : ℝ → ℝ} (hw : ∀ t, 0 < t → 0 < w t)
     (hint : ∀ a : ℝ, IntegrableOn (fun t => Real.exp (a * t) * w t) (Ioi 0)) {x y : ℝ}
     (hxy : x < y) :
     ∫ t in Ioi (0 : ℝ), Real.exp (x * t) * w t < ∫ t in Ioi (0 : ℝ), Real.exp (y * t) * w t := by
   rw [← sub_pos, ← integral_sub (hint y) (hint x)]
-  refine airyMod_integral_pos ((hint y).sub (hint x)) fun t ht => ?_
+  refine ModulusPhase.integral_pos ((hint y).sub (hint x)) fun t ht => ?_
   have h1 : Real.exp (x * t) < Real.exp (y * t) := Real.exp_lt_exp.2 (by nlinarith)
   have := hw t ht
   nlinarith
 
 /-- The moment terms `e^{-st} t^{m-1/2}` integrate to `Γ(m+1/2) s^{-(m+1/2)}`. -/
-theorem airyMod_mom_integral (m : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem ModulusPhase.moment_integral (m : ℕ) {s : ℝ} (hs : 0 < s) :
     IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ (((m : ℝ) + 1 / 2) - 1)) (Ioi 0) ∧
     ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (((m : ℝ) + 1 / 2) - 1) =
       Real.Gamma (m + 1 / 2) * s ^ (-((m : ℝ) + 1 / 2)) :=
@@ -425,7 +434,7 @@ theorem airyMod_mom_integral (m : ℕ) {s : ℝ} (hs : 0 < s) :
     integral_exp_neg_mul_mul_rpow_sub_one (by positivity) hs⟩
 
 /-- The moment terms of the expansion of `N²` at `-∞` coming from `∫ e^{-st} t^{3/2} e^{-t³/12}`. -/
-theorem airyMod_deriv_term_identity (j : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem ModulusPhase.deriv_term_identity (j : ℕ) {s : ℝ} (hs : 0 < s) :
     (π * Real.sqrt π)⁻¹ / 2 * (Real.Gamma ((3 * j + 2 : ℕ) + 1 / 2) *
       s ^ (-(((3 * j + 2 : ℕ) : ℝ) + 1 / 2)) * ((-1) ^ j / (12 ^ j * j !))) =
       s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
@@ -435,7 +444,7 @@ theorem airyMod_deriv_term_identity (j : ℕ) {s : ℝ} (hs : 0 < s) :
   have hP : ∏ i ∈ Finset.range (3 * (j + 1)), (2 * (i : ℝ) + 1) =
       (∏ i ∈ Finset.range (3 * j + 2), (2 * (i : ℝ) + 1)) * (6 * j + 5) := by
     rw [show 3 * (j + 1) = (3 * j + 2) + 1 by ring, Finset.prod_range_succ]; push_cast; ring
-  rw [airyDerivModulusCoeff, airyModulusCoeff, hP, airyMod_gamma_half (3 * j + 2)]
+  rw [airyDerivModulusCoeff, airyModulusCoeff, hP, ModulusPhase.gamma_half (3 * j + 2)]
   generalize ∏ i ∈ Finset.range (3 * j + 2), (2 * (i : ℝ) + 1) = P
   rw [Real.rpow_neg hs.le, Real.rpow_add hs, Real.rpow_natCast, zpow_neg,
     show (3 * ((j + 1 : ℕ) : ℤ)) = ((3 * j + 3 : ℕ) : ℤ) by push_cast; ring, zpow_natCast,
@@ -458,8 +467,8 @@ theorem airyMod_deriv_term_identity (j : ℕ) {s : ℝ} (hs : 0 < s) :
   ring
 
 /-- The truncation error of `π^{-3/2}/2 ∫₀^∞ e^{-st} t^{3/2} e^{-t³/12} dt` at `s → +∞`. -/
-theorem airyMod_kernel2_error {s : ℝ} (hs : 0 < s) (N : ℕ) :
-    |(π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) -
+theorem ModulusPhase.kernel2_error {s : ℝ} (hs : 0 < s) (N : ℕ) :
+    |(π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 (-s) t) -
       ∑ j ∈ Finset.range N, s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
         (airyDerivModulusCoeff (j + 1) - airyModulusCoeff (j + 1))| ≤
       (π * Real.sqrt π)⁻¹ / 2 * (Real.Gamma ((3 * N + 2 : ℕ) + 1 / 2) *
@@ -469,20 +478,20 @@ theorem airyMod_kernel2_error {s : ℝ} (hs : 0 < s) (N : ℕ) :
   set B : ℕ → ℝ → ℝ := fun j t => Real.exp (-s * t) * t ^ ((((3 * j + 2 : ℕ) : ℝ) + 1 / 2) - 1) *
     ((-1) ^ j / (12 ^ j * j !))
   have hB : ∀ j, IntegrableOn (B j) (Ioi 0) := fun j =>
-    (airyMod_mom_integral (3 * j + 2) hs).1.mul_const _
+    (ModulusPhase.moment_integral (3 * j + 2) hs).1.mul_const _
   have hBi : ∀ j, ∫ t in Ioi (0 : ℝ), B j t =
       Real.Gamma ((3 * j + 2 : ℕ) + 1 / 2) * s ^ (-(((3 * j + 2 : ℕ) : ℝ) + 1 / 2)) *
         ((-1) ^ j / (12 ^ j * j !)) := fun j => by
-    rw [integral_mul_const, (airyMod_mom_integral (3 * j + 2) hs).2]
+    rw [integral_mul_const, (ModulusPhase.moment_integral (3 * j + 2) hs).2]
   have hpw : ∀ t : ℝ, 0 < t → ∀ j : ℕ, t ^ ((((3 * j + 2 : ℕ) : ℝ) + 1 / 2) - 1) =
       t ^ (3 * j) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) := fun t ht j => by
     rw [show (((3 * j + 2 : ℕ) : ℝ) + 1 / 2) - 1 = ((3 * j + 2 : ℕ) : ℝ) + (-(1 / 2)) by ring,
       Real.rpow_add ht, Real.rpow_natCast, pow_add]; ring
-  have hpt : ∀ t : ℝ, 0 < t → airyMod_kernel2 (-s) t =
-      Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) * airyMod_rem N (t ^ 3 / 12) +
+  have hpt : ∀ t : ℝ, 0 < t → ModulusPhase.kernel2 (-s) t =
+      Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) * ModulusPhase.remainder N (t ^ 3 / 12) +
         ∑ j ∈ Finset.range N, B j t := by
     intro t ht
-    simp only [airyMod_kernel2, airyMod_rem, B]
+    simp only [ModulusPhase.kernel2, ModulusPhase.remainder, B]
     have : ∀ j ∈ Finset.range N, Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
         ((-(t ^ 3 / 12)) ^ j / j !) = Real.exp (-s * t) *
           t ^ ((((3 * j + 2 : ℕ) : ℝ) + 1 / 2) - 1) * ((-1) ^ j / (12 ^ j * j !)) := by
@@ -493,10 +502,10 @@ theorem airyMod_kernel2_error {s : ℝ} (hs : 0 < s) (N : ℕ) :
     ring
   have hg : IntegrableOn
       (fun t : ℝ => Real.exp (-s * t) * t ^ ((((3 * N + 2 : ℕ) : ℝ) + 1 / 2) - 1) /
-      (12 ^ N * N !)) (Ioi 0) := (airyMod_mom_integral (3 * N + 2) hs).1.div_const _
+      (12 ^ N * N !)) (Ioi 0) := (ModulusPhase.moment_integral (3 * N + 2) hs).1.div_const _
   have hA : IntegrableOn (fun t : ℝ => Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
-      airyMod_rem N (t ^ 3 / 12)) (Ioi 0) := by
-    refine ((airyMod_kernel2_integrable (-s)).sub
+      ModulusPhase.remainder N (t ^ 3 / 12)) (Ioi 0) := by
+    refine ((ModulusPhase.kernel2_integrable (-s)).sub
       (integrable_finsetSum (Finset.range N) fun k _ => hB k)).congr_fun
       (fun t (ht : 0 < t) => ?_) measurableSet_Ioi
     simp only [Pi.sub_apply, hpt t ht]
@@ -504,30 +513,31 @@ theorem airyMod_kernel2_error {s : ℝ} (hs : 0 < s) (N : ℕ) :
   rw [setIntegral_congr_fun measurableSet_Ioi hpt,
     integral_add hA (integrable_finsetSum (Finset.range N) fun k _ => hB k),
     integral_finsetSum (Finset.range N) fun k _ => hB k, mul_add, Finset.mul_sum]
-  simp only [hBi, airyMod_deriv_term_identity _ hs, add_sub_cancel_right]
+  simp only [hBi, ModulusPhase.deriv_term_identity _ hs, add_sub_cancel_right]
   rw [abs_mul, abs_of_pos hc]
   refine mul_le_mul_of_nonneg_left ?_ hc.le
   rw [show Real.Gamma ((3 * N + 2 : ℕ) + 1 / 2) * s ^ (-(((3 * N + 2 : ℕ) : ℝ) + 1 / 2)) /
       (12 ^ N * N !) = ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) *
         t ^ ((((3 * N + 2 : ℕ) : ℝ) + 1 / 2) - 1) / (12 ^ N * N !) by
-    rw [integral_div, (airyMod_mom_integral (3 * N + 2) hs).2]]
+    rw [integral_div, (ModulusPhase.moment_integral (3 * N + 2) hs).2]]
   rw [← Real.norm_eq_abs]
   refine norm_integral_le_of_norm_le hg ?_
   filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
-  have hb := airyMod_rem_bounds N (w := t ^ 3 / 12) (by positivity)
+  have hb := ModulusPhase.remainder_bounds N (w := t ^ 3 / 12) (by positivity)
   have h0 : 0 ≤ Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) := by positivity
-  have habs : |airyMod_rem N (t ^ 3 / 12)| ≤ (t ^ 3 / 12) ^ N / N ! := by
-    have : |airyMod_rem N (t ^ 3 / 12)| = (-1) ^ N * airyMod_rem N (t ^ 3 / 12) := by
+  have habs : |ModulusPhase.remainder N (t ^ 3 / 12)| ≤ (t ^ 3 / 12) ^ N / N ! := by
+    have : |ModulusPhase.remainder N (t ^ 3 / 12)| = (-1) ^ N *
+        ModulusPhase.remainder N (t ^ 3 / 12) := by
       rw [← abs_of_nonneg hb.1, abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul]
     rw [this]; exact hb.2
   rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg h0, hpw t ht N]
-  calc Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) * |airyMod_rem N (t ^ 3 / 12)|
+  calc Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) * |ModulusPhase.remainder N (t ^ 3 / 12)|
       ≤ Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) * ((t ^ 3 / 12) ^ N / N !) :=
         mul_le_mul_of_nonneg_left habs h0
     _ = _ := by rw [div_pow, pow_mul]; field_simp
 
 /-- Error bound for the truncated expansion of `N²` at `-∞` with `N + 1` terms. -/
-theorem airyMod_derivSq_error {x : ℝ} (hx : x < 0) (N : ℕ) :
+theorem ModulusPhase.derivSq_error {x : ℝ} (hx : x < 0) (N : ℕ) :
     |airyDerivModulus x ^ 2 - ∑ k ∈ Finset.range (N + 1),
         (-x) ^ (1 / 2 : ℝ) / π * x ^ (-(3 * k : ℤ)) * airyDerivModulusCoeff k| ≤
       (|airyModulusCoeff (N + 1)| + π * ((π * Real.sqrt π)⁻¹ / 2 *
@@ -542,8 +552,8 @@ theorem airyMod_derivSq_error {x : ℝ} (hx : x < 0) (N : ℕ) :
       ← Real.rpow_add hs]; norm_num
   -- decomposition of `N²`
   have hN : airyDerivModulus (-s) ^ 2 = (π * Real.sqrt π)⁻¹ / 2 *
-      (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) + s * airyModulus (-s) ^ 2 := by
-    rw [airyMod_derivSq_eq_integral, airyMod_sq_eq_integral]; ring
+      (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 (-s) t) + s * airyModulus (-s) ^ 2 := by
+    rw [ModulusPhase.derivSq_eq_integral, ModulusPhase.sq_eq_integral]; ring
   have hsum : ∑ k ∈ Finset.range (N + 1),
       s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * k : ℤ)) * airyDerivModulusCoeff k =
       s * (s ^ (-1 / 2 : ℝ) / π * airyModulusSum false (N + 1) (-s)) +
@@ -560,15 +570,15 @@ theorem airyMod_derivSq_error {x : ℝ} (hx : x < 0) (N : ℕ) :
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [← hsq]; push_cast; ring
   rw [hN, hsum]
-  have e1 := (airyMod_sq_error_bound (x := -s) (by linarith) (N + 1)).1
+  have e1 := (ModulusPhase.sq_error_bound (x := -s) (by linarith) (N + 1)).1
   rw [neg_neg] at e1
-  have e2 := airyMod_kernel2_error hs N
-  have key : (π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) +
+  have e2 := ModulusPhase.kernel2_error hs N
+  have key : (π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 (-s) t) +
       s * airyModulus (-s) ^ 2 - (s * (s ^ (-1 / 2 : ℝ) / π * airyModulusSum false (N + 1) (-s)) +
         ∑ j ∈ Finset.range N, s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
           (airyDerivModulusCoeff (j + 1) - airyModulusCoeff (j + 1))) =
       s * (airyModulus (-s) ^ 2 - s ^ (-1 / 2 : ℝ) / π * airyModulusSum false (N + 1) (-s)) +
-      ((π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) -
+      ((π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 (-s) t) -
         ∑ j ∈ Finset.range N, s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
           (airyDerivModulusCoeff (j + 1) - airyModulusCoeff (j + 1))) := by ring
   rw [key]
@@ -602,41 +612,45 @@ theorem airyMod_derivSq_error {x : ℝ} (hx : x < 0) (N : ℕ) :
   nlinarith [this, e2]
 
 /-- The exponential remainder is continuous. -/
-theorem airyMod_rem_continuous (K : ℕ) : Continuous (airyMod_rem K) := by
-  unfold airyMod_rem; fun_prop
+theorem ModulusPhase.remainder_continuous (K : ℕ) : Continuous (ModulusPhase.remainder K) := by
+  unfold ModulusPhase.remainder; fun_prop
 
 /-- `|R_K(w)| ≤ w^K / K!` for `w ≥ 0`. -/
-theorem airyMod_rem_abs_le (K : ℕ) {w : ℝ} (hw : 0 ≤ w) : |airyMod_rem K w| ≤ w ^ K / K ! := by
-  have hb := airyMod_rem_bounds K hw
-  have : |airyMod_rem K w| = (-1) ^ K * airyMod_rem K w := by
+theorem ModulusPhase.remainder_abs_le (K : ℕ) {w : ℝ} (hw : 0 ≤ w) : |ModulusPhase.remainder K w| ≤
+    w ^ K / K ! := by
+  have hb := ModulusPhase.remainder_bounds K hw
+  have : |ModulusPhase.remainder K w| = (-1) ^ K * ModulusPhase.remainder K w := by
     rw [← abs_of_nonneg hb.1, abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul]
   rw [this]; exact hb.2
 
 /-- The moment `t^{3K+3/2}` written in the kernel's factored form. -/
-theorem airyMod_pow_factor {t : ℝ} (ht : 0 < t) (K : ℕ) :
+theorem ModulusPhase.pow_factor {t : ℝ} (ht : 0 < t) (K : ℕ) :
     t ^ ((((3 * K + 2 : ℕ) : ℝ) + 1 / 2) - 1) = t ^ (3 * K) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) := by
   rw [show (((3 * K + 2 : ℕ) : ℝ) + 1 / 2) - 1 = ((3 * K + 2 : ℕ) : ℝ) + (-(1 / 2)) by ring,
     Real.rpow_add ht, Real.rpow_natCast, pow_add]; ring
 
 /-- The pointwise first-neglected-term bound for the `N²` error integrand. -/
-theorem airyMod_derivErr_pointwise (s : ℝ) (K : ℕ) {t : ℝ} (ht : 0 < t) :
+theorem ModulusPhase.derivError_pointwise (s : ℝ) (K : ℕ) {t : ℝ} (ht : 0 < t) :
     0 ≤ (-1) ^ K * (Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-        (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))) ∧
+        (t ^ 2 * ModulusPhase.remainder K (t ^ 3 / 12) / 4 -
+            ModulusPhase.remainder (K + 1) (t ^ 3 / 12) / (2 * t))) ∧
     (-1) ^ K * (Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-        (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))) ≤
+        (t ^ 2 * ModulusPhase.remainder K (t ^ 3 / 12) / 4 -
+            ModulusPhase.remainder (K + 1) (t ^ 3 / 12) / (2 * t))) ≤
       Real.exp (-s * t) * t ^ ((((3 * K + 2 : ℕ) : ℝ) + 1 / 2) - 1) *
         ((6 * K + 7) / (24 * 12 ^ K * (K + 1 : ℕ)!)) := by
   have hu : 0 ≤ t ^ 3 / 12 := by positivity
-  obtain ⟨p0, p1⟩ := airyMod_rem_bounds K hu
-  obtain ⟨q0, q1⟩ := airyMod_rem_bounds (K + 1) hu
-  set p := (-1) ^ K * airyMod_rem K (t ^ 3 / 12)
-  set q := (-1) ^ (K + 1) * airyMod_rem (K + 1) (t ^ 3 / 12)
+  obtain ⟨p0, p1⟩ := ModulusPhase.remainder_bounds K hu
+  obtain ⟨q0, q1⟩ := ModulusPhase.remainder_bounds (K + 1) hu
+  set p := (-1) ^ K * ModulusPhase.remainder K (t ^ 3 / 12)
+  set q := (-1) ^ (K + 1) * ModulusPhase.remainder (K + 1) (t ^ 3 / 12)
   have ex : 0 < Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) := by positivity
   have e : (-1) ^ K * (Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-      (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))) =
+      (t ^ 2 * ModulusPhase.remainder K (t ^ 3 / 12) / 4 -
+          ModulusPhase.remainder (K + 1) (t ^ 3 / 12) / (2 * t))) =
       Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * (t ^ 2 * p / 4 + q / (2 * t)) := by
     simp only [p, q, pow_succ]; ring
-  rw [e, airyMod_pow_factor ht K]
+  rw [e, ModulusPhase.pow_factor ht K]
   constructor
   · positivity
   · have hb : t ^ 2 * p / 4 + q / (2 * t) ≤ t ^ (3 * K) * t ^ 2 *
@@ -654,38 +668,38 @@ theorem airyMod_derivErr_pointwise (s : ℝ) (K : ℕ) {t : ℝ} (ht : 0 < t) :
 
 /-- The truncation error of `π^{-3/2}/2 ∫₀^∞ e^{-st} t^{3/2} e^{-t³/12} dt` as an integral of the
 exponential remainder. -/
-theorem airyMod_kernel2_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
+theorem ModulusPhase.kernel2_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
     IntegrableOn (fun t : ℝ => Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
-      airyMod_rem K (t ^ 3 / 12)) (Ioi 0) ∧
-    (π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) -
+      ModulusPhase.remainder K (t ^ 3 / 12)) (Ioi 0) ∧
+    (π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 (-s) t) -
       ∑ j ∈ Finset.range K, s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
         (airyDerivModulusCoeff (j + 1) - airyModulusCoeff (j + 1)) =
       (π * Real.sqrt π)⁻¹ / 2 * ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) *
-        (t ^ 2 * t ^ (-(1 / 2) : ℝ)) * airyMod_rem K (t ^ 3 / 12) := by
+        (t ^ 2 * t ^ (-(1 / 2) : ℝ)) * ModulusPhase.remainder K (t ^ 3 / 12) := by
   set B : ℕ → ℝ → ℝ := fun j t => Real.exp (-s * t) * t ^ ((((3 * j + 2 : ℕ) : ℝ) + 1 / 2) - 1) *
     ((-1) ^ j / (12 ^ j * j !))
   have hB : ∀ j, IntegrableOn (B j) (Ioi 0) := fun j =>
-    (airyMod_mom_integral (3 * j + 2) hs).1.mul_const _
+    (ModulusPhase.moment_integral (3 * j + 2) hs).1.mul_const _
   have hBi : ∀ j, ∫ t in Ioi (0 : ℝ), B j t =
       Real.Gamma ((3 * j + 2 : ℕ) + 1 / 2) * s ^ (-(((3 * j + 2 : ℕ) : ℝ) + 1 / 2)) *
         ((-1) ^ j / (12 ^ j * j !)) := fun j => by
-    rw [integral_mul_const, (airyMod_mom_integral (3 * j + 2) hs).2]
-  have hpt : ∀ t : ℝ, 0 < t → airyMod_kernel2 (-s) t =
-      Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) * airyMod_rem K (t ^ 3 / 12) +
+    rw [integral_mul_const, (ModulusPhase.moment_integral (3 * j + 2) hs).2]
+  have hpt : ∀ t : ℝ, 0 < t → ModulusPhase.kernel2 (-s) t =
+      Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) * ModulusPhase.remainder K (t ^ 3 / 12) +
         ∑ j ∈ Finset.range K, B j t := by
     intro t ht
-    simp only [airyMod_kernel2, airyMod_rem, B]
+    simp only [ModulusPhase.kernel2, ModulusPhase.remainder, B]
     have : ∀ j ∈ Finset.range K, Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
         ((-(t ^ 3 / 12)) ^ j / j !) = Real.exp (-s * t) *
           t ^ ((((3 * j + 2 : ℕ) : ℝ) + 1 / 2) - 1) * ((-1) ^ j / (12 ^ j * j !)) := by
       intro j _
-      rw [airyMod_pow_factor ht j, neg_pow, div_pow, pow_mul]
+      rw [ModulusPhase.pow_factor ht j, neg_pow, div_pow, pow_mul]
       field_simp
     rw [← Finset.sum_congr rfl this, ← Finset.mul_sum]
     ring
   have hA : IntegrableOn (fun t : ℝ => Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
-      airyMod_rem K (t ^ 3 / 12)) (Ioi 0) := by
-    refine ((airyMod_kernel2_integrable (-s)).sub
+      ModulusPhase.remainder K (t ^ 3 / 12)) (Ioi 0) := by
+    refine ((ModulusPhase.kernel2_integrable (-s)).sub
       (integrable_finsetSum (Finset.range K) fun k _ => hB k)).congr_fun
       (fun t (ht : 0 < t) => ?_) measurableSet_Ioi
     simp only [Pi.sub_apply, hpt t ht]
@@ -694,15 +708,16 @@ theorem airyMod_kernel2_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
   rw [setIntegral_congr_fun measurableSet_Ioi hpt,
     integral_add hA (integrable_finsetSum (Finset.range K) fun k _ => hB k),
     integral_finsetSum (Finset.range K) fun k _ => hB k, mul_add, Finset.mul_sum]
-  simp only [hBi, airyMod_deriv_term_identity _ hs, add_sub_cancel_right]
+  simp only [hBi, ModulusPhase.deriv_term_identity _ hs, add_sub_cancel_right]
 
 /-- The `N²` error integrand `e^{-st} t^{-1/2} (t² R_K/4 - R_{K+1}/(2t))` is integrable. -/
-theorem airyMod_derivErr_integrable (s : ℝ) (hs : 0 < s) (K : ℕ) :
+theorem ModulusPhase.derivError_integrable (s : ℝ) (hs : 0 < s) (K : ℕ) :
     IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-      (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t)))
+      (t ^ 2 * ModulusPhase.remainder K (t ^ 3 / 12) / 4 -
+          ModulusPhase.remainder (K + 1) (t ^ 3 / 12) / (2 * t)))
       (Ioi 0) := by
-  have hc := airyMod_rem_continuous
-  refine ((airyMod_mom_integral (3 * K + 2) hs).1.mul_const
+  have hc := ModulusPhase.remainder_continuous
+  refine ((ModulusPhase.moment_integral (3 * K + 2) hs).1.mul_const
     ((6 * K + 7) / (24 * 12 ^ K * (K + 1 : ℕ)!))).mono' ?_ ?_
   · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
     intro t (ht : 0 < t)
@@ -710,20 +725,22 @@ theorem airyMod_derivErr_integrable (s : ℝ) (hs : 0 < s) (K : ℕ) :
     refine ContinuousAt.continuousWithinAt ?_
     have h1 : ContinuousAt (fun t : ℝ => t ^ (-(1 / 2) : ℝ)) t :=
       Real.continuousAt_rpow_const _ _ (Or.inl this)
-    have h2 : ContinuousAt (fun t : ℝ => airyMod_rem K (t ^ 3 / 12)) t :=
+    have h2 : ContinuousAt (fun t : ℝ => ModulusPhase.remainder K (t ^ 3 / 12)) t :=
       ((hc K).comp (by fun_prop)).continuousAt
-    have h3 : ContinuousAt (fun t : ℝ => airyMod_rem (K + 1) (t ^ 3 / 12)) t :=
+    have h3 : ContinuousAt (fun t : ℝ => ModulusPhase.remainder (K + 1) (t ^ 3 / 12)) t :=
       ((hc (K + 1)).comp (by fun_prop)).continuousAt
     have h5 : ContinuousAt (fun t : ℝ => 2 * t) t := by fun_prop
     exact (((Real.continuous_exp.continuousAt).comp (by fun_prop)).mul h1).mul
       ((((continuousAt_id.pow 2).mul h2).div_const 4).sub
         (h3.div h5 (by simpa using this)))
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
-    obtain ⟨h0, h1⟩ := airyMod_derivErr_pointwise s K ht
+    obtain ⟨h0, h1⟩ := ModulusPhase.derivError_pointwise s K ht
     have e : ‖Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-        (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))‖ =
+        (t ^ 2 * ModulusPhase.remainder K (t ^ 3 / 12) / 4 -
+            ModulusPhase.remainder (K + 1) (t ^ 3 / 12) / (2 * t))‖ =
         (-1) ^ K * (Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-        (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))) := by
+        (t ^ 2 * ModulusPhase.remainder K (t ^ 3 / 12) / 4 -
+            ModulusPhase.remainder (K + 1) (t ^ 3 / 12) / (2 * t))) := by
       rw [← abs_of_nonneg h0, abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul,
         Real.norm_eq_abs]
     rw [e]
@@ -732,32 +749,34 @@ theorem airyMod_derivErr_integrable (s : ℝ) (hs : 0 < s) (K : ℕ) :
 /-- Integration by parts for the `M²` error integrand:
 `s ∫ e^{-st} t^{-1/2} R_{K+1}(t³/12) = ∫ e^{-st} t^{-1/2}(t² R_K/4 - R_{K+1}/(2t)) - ½ ∫ e^{-st}
 t^{3/2} R_K`. -/
-theorem airyMod_derivErr_ibp {s : ℝ} (hs : 0 < s) (K : ℕ) :
+theorem ModulusPhase.derivError_byParts {s : ℝ} (hs : 0 < s) (K : ℕ) :
     s * ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-        airyMod_rem (K + 1) (t ^ 3 / 12) =
+        ModulusPhase.remainder (K + 1) (t ^ 3 / 12) =
       (∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-        (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))) -
+        (t ^ 2 * ModulusPhase.remainder K (t ^ 3 / 12) / 4 -
+            ModulusPhase.remainder (K + 1) (t ^ 3 / 12) / (2 * t))) -
       (∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
-        airyMod_rem K (t ^ 3 / 12)) / 2 := by
+        ModulusPhase.remainder K (t ^ 3 / 12)) / 2 := by
   set F : ℝ → ℝ := fun t => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-      airyMod_rem (K + 1) (t ^ 3 / 12)
+      ModulusPhase.remainder (K + 1) (t ^ 3 / 12)
   set E : ℝ → ℝ := fun t => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-    (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))
+    (t ^ 2 * ModulusPhase.remainder K (t ^ 3 / 12) / 4 -
+        ModulusPhase.remainder (K + 1) (t ^ 3 / 12) / (2 * t))
   set B : ℝ → ℝ := fun t => Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
-    airyMod_rem K (t ^ 3 / 12)
-  have hA : IntegrableOn F (Ioi 0) := (airyMod_sq_error_integral hs (K + 1)).1
-  have hE : IntegrableOn E (Ioi 0) := airyMod_derivErr_integrable s hs K
-  have hB : IntegrableOn B (Ioi 0) := (airyMod_kernel2_error_integral hs K).1
+    ModulusPhase.remainder K (t ^ 3 / 12)
+  have hA : IntegrableOn F (Ioi 0) := (ModulusPhase.sq_error_integral hs (K + 1)).1
+  have hE : IntegrableOn E (Ioi 0) := ModulusPhase.derivError_integrable s hs K
+  have hB : IntegrableOn B (Ioi 0) := (ModulusPhase.kernel2_error_integral hs K).1
   have hderiv : ∀ t ∈ Ioi (0 : ℝ), HasDerivAt F (-s * F t + (E t - B t / 2)) t := by
     intro t (ht : 0 < t)
     have h1 : HasDerivAt (fun t : ℝ => Real.exp (-s * t)) (Real.exp (-s * t) * (-s)) t := by
       simpa using ((hasDerivAt_id t).const_mul (-s)).exp
     have h2 := Real.hasDerivAt_rpow_const (p := (-(1 / 2) : ℝ)) (Or.inl ht.ne')
-    have h3 : HasDerivAt (fun t : ℝ => airyMod_rem (K + 1) (t ^ 3 / 12))
-        (-airyMod_rem K (t ^ 3 / 12) * (3 * t ^ 2 / 12)) t := by
+    have h3 : HasDerivAt (fun t : ℝ => ModulusPhase.remainder (K + 1) (t ^ 3 / 12))
+        (-ModulusPhase.remainder K (t ^ 3 / 12) * (3 * t ^ 2 / 12)) t := by
       have h4 : HasDerivAt (fun t : ℝ => t ^ 3 / 12) (3 * t ^ 2 / 12) t := by
         simpa using (hasDerivAt_pow 3 t).div_const 12
-      exact (airyMod_hasDerivAt_rem K (t ^ 3 / 12)).comp t h4
+      exact (ModulusPhase.hasDerivAt_remainder K (t ^ 3 / 12)).comp t h4
     convert (h1.mul h2).mul h3 using 1
     simp only [F, E, B, Pi.mul_apply]
     rw [Real.rpow_sub_one ht.ne']
@@ -781,7 +800,7 @@ theorem airyMod_derivErr_ibp {s : ℝ} (hs : 0 < s) (K : ℕ) :
     filter_upwards [self_mem_nhdsWithin] with t (ht : 0 ≤ t)
     rcases ht.eq_or_lt with rfl | ht
     · rw [hF0, norm_zero, Real.zero_rpow hp.ne', zero_div]
-    · have hb := airyMod_rem_abs_le (K + 1) (w := t ^ 3 / 12) (by positivity)
+    · have hb := ModulusPhase.remainder_abs_le (K + 1) (w := t ^ 3 / 12) (by positivity)
       have he : Real.exp (-s * t) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith)
       have hw : 0 < t ^ (-(1 / 2) : ℝ) := by positivity
       simp only [F, Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _), abs_of_pos hw]
@@ -791,7 +810,7 @@ theorem airyMod_derivErr_ibp {s : ℝ} (hs : 0 < s) (K : ℕ) :
         rw [Real.rpow_add ht, Real.rpow_natCast, div_pow, pow_mul]
         field_simp
       rw [e]
-      calc Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * |airyMod_rem (K + 1) (t ^ 3 / 12)|
+      calc Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * |ModulusPhase.remainder (K + 1) (t ^ 3 / 12)|
           ≤ 1 * t ^ (-(1 / 2) : ℝ) * ((t ^ 3 / 12) ^ (K + 1) / (K + 1)!) := by gcongr
         _ = _ := by ring
   have key := integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv f'int hlim
@@ -806,7 +825,7 @@ theorem airyMod_derivErr_ibp {s : ℝ} (hs : 0 < s) (K : ℕ) :
   linarith
 
 /-- `d_{K+1} = (d_{K+1} - a_{K+1}) (6K+7)/(12(K+1))` for the `N²` and `M²` coefficients. -/
-theorem airyMod_derivCoeff_eq (K : ℕ) :
+theorem ModulusPhase.derivCoeff_eq (K : ℕ) :
     airyDerivModulusCoeff (K + 1) = (airyDerivModulusCoeff (K + 1) - airyModulusCoeff (K + 1)) *
       ((6 * K + 7) / (12 * (K + 1))) := by
   have hK : (0 : ℝ) ≤ K := Nat.cast_nonneg K
@@ -818,13 +837,13 @@ theorem airyMod_derivCoeff_eq (K : ℕ) :
   ring
 
 /-- The first neglected term of the `N²` expansion as a moment integral. -/
-theorem airyMod_derivMod_term_identity (K : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem ModulusPhase.derivModulus_term_identity (K : ℕ) {s : ℝ} (hs : 0 < s) :
     (π * Real.sqrt π)⁻¹ * (Real.Gamma ((3 * K + 2 : ℕ) + 1 / 2) *
       s ^ (-(((3 * K + 2 : ℕ) : ℝ) + 1 / 2)) * ((6 * K + 7) / (24 * 12 ^ K * (K + 1 : ℕ)!))) *
         (-1) ^ K =
       s ^ (1 / 2 : ℝ) / π * airyDerivModulusCoeff (K + 1) * (-s) ^ (-(3 * (K + 1 : ℕ) : ℤ)) := by
-  have h := airyMod_deriv_term_identity K hs
-  rw [airyMod_derivCoeff_eq K]
+  have h := ModulusPhase.deriv_term_identity K hs
+  rw [ModulusPhase.derivCoeff_eq K]
   have e : s ^ (1 / 2 : ℝ) / π * ((airyDerivModulusCoeff (K + 1) - airyModulusCoeff (K + 1)) *
       ((6 * K + 7) / (12 * (K + 1)))) * (-s) ^ (-(3 * (K + 1 : ℕ) : ℤ)) =
       (s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (K + 1 : ℕ) : ℤ)) *
@@ -836,7 +855,7 @@ theorem airyMod_derivMod_term_identity (K : ℕ) {s : ℝ} (hs : 0 < s) :
   norm_num
 
 /-- Splitting the truncated `N²` series into the `M²` series and the kernel-2 series. -/
-theorem airyMod_derivSum_split {s : ℝ} (hs : 0 < s) (K : ℕ) :
+theorem ModulusPhase.derivSum_split {s : ℝ} (hs : 0 < s) (K : ℕ) :
     s ^ (1 / 2 : ℝ) / π * airyModulusSum true (K + 1) (-s) =
       s * (s ^ (-1 / 2 : ℝ) / π * airyModulusSum false (K + 1) (-s)) +
         ∑ j ∈ Finset.range K, s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
@@ -858,62 +877,63 @@ theorem airyMod_derivSum_split {s : ℝ} (hs : 0 < s) (K : ℕ) :
 /-- The error of the truncated expansion of `N²` at `-∞` as a single integral:
 `N(-s)² - (s^{1/2}/π) ∑_{k<K+1} d_k (-s)^{-3k} =
 π^{-3/2} ∫₀^∞ e^{-st} t^{-1/2} (t² R_K(t³/12)/4 - R_{K+1}(t³/12)/(2t)) dt`. -/
-theorem airyMod_derivSq_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
+theorem ModulusPhase.derivSq_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
     airyDerivModulus (-s) ^ 2 - s ^ (1 / 2 : ℝ) / π * airyModulusSum true (K + 1) (-s) =
       (π * Real.sqrt π)⁻¹ * ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-        (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t)) := by
+        (t ^ 2 * ModulusPhase.remainder K (t ^ 3 / 12) / 4 -
+            ModulusPhase.remainder (K + 1) (t ^ 3 / 12) / (2 * t)) := by
   have hN : airyDerivModulus (-s) ^ 2 = (π * Real.sqrt π)⁻¹ / 2 *
-      (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) + s * airyModulus (-s) ^ 2 := by
-    rw [airyMod_derivSq_eq_integral, airyMod_sq_eq_integral]; ring
-  have h1 := (airyMod_sq_error_integral hs (K + 1)).2
-  have h2 := (airyMod_kernel2_error_integral hs K).2
-  have h3 := airyMod_derivErr_ibp hs K
-  rw [hN, airyMod_derivSum_split hs K]
-  have : (π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) +
+      (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 (-s) t) + s * airyModulus (-s) ^ 2 := by
+    rw [ModulusPhase.derivSq_eq_integral, ModulusPhase.sq_eq_integral]; ring
+  have h1 := (ModulusPhase.sq_error_integral hs (K + 1)).2
+  have h2 := (ModulusPhase.kernel2_error_integral hs K).2
+  have h3 := ModulusPhase.derivError_byParts hs K
+  rw [hN, ModulusPhase.derivSum_split hs K]
+  have : (π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 (-s) t) +
       s * airyModulus (-s) ^ 2 - (s * (s ^ (-1 / 2 : ℝ) / π * airyModulusSum false (K + 1) (-s)) +
         ∑ j ∈ Finset.range K, s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
           (airyDerivModulusCoeff (j + 1) - airyModulusCoeff (j + 1))) =
       s * (airyModulus (-s) ^ 2 - s ^ (-1 / 2 : ℝ) / π * airyModulusSum false (K + 1) (-s)) +
-      ((π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) -
+      ((π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 (-s) t) -
         ∑ j ∈ Finset.range K, s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
           (airyDerivModulusCoeff (j + 1) - airyModulusCoeff (j + 1))) := by ring
   rw [this, h1, h2]
   have e : s * ((π * Real.sqrt π)⁻¹ * ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) *
-      t ^ (-(1 / 2) : ℝ) * airyMod_rem (K + 1) (t ^ 3 / 12)) = (π * Real.sqrt π)⁻¹ *
+      t ^ (-(1 / 2) : ℝ) * ModulusPhase.remainder (K + 1) (t ^ 3 / 12)) = (π * Real.sqrt π)⁻¹ *
       (s * ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
-        airyMod_rem (K + 1) (t ^ 3 / 12)) := by ring
+        ModulusPhase.remainder (K + 1) (t ^ 3 / 12)) := by ring
   rw [e, h3]
   ring
 
 /-- The cross-term Nicholson kernel `e^{xt} e^{-t³/12} t^{1/2}`. -/
-noncomputable def airyMod_kernel1 (x t : ℝ) : ℝ :=
+noncomputable def ModulusPhase.kernel1 (x t : ℝ) : ℝ :=
   Real.exp (x * t) * (Real.exp (-(t ^ 3 / 12)) * (t ^ 1 * t ^ (-(1 / 2) : ℝ)))
 
 /-- Nicholson-type formula for `Ai Ai' + Bi Bi'` on the real line. -/
-theorem airyMod_cross_eq_integral (x : ℝ) :
+theorem ModulusPhase.cross_eq_integral (x : ℝ) :
     airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x =
-      (∫ t in Ioi (0 : ℝ), airyMod_kernel1 x t) / (2 * (π * Real.sqrt π)) := by
-  have h := airyMod_cross_integral x
+      (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel1 x t) / (2 * (π * Real.sqrt π)) := by
+  have h := ModulusPhase.cross_integral x
   rw [airyAi_ofReal_eq, airyBi_ofReal_eq, airyAiDeriv_ofReal_eq, airyBiDeriv_ofReal_eq,
-    airyMod_pi_cpow] at h
+    ModulusPhase.pi_cpow] at h
   have hI : (∫ t : ℝ in Ioi 0, exp ((x : ℂ) * t - (t : ℂ) ^ 3 / 12) *
       ((t : ℂ) ^ 1 * (t : ℂ) ^ (-1 / 2 : ℂ))) =
-          ((∫ t in Ioi (0 : ℝ), airyMod_kernel1 x t : ℝ) : ℂ) := by
+          ((∫ t in Ioi (0 : ℝ), ModulusPhase.kernel1 x t : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
     have hc : ((t : ℂ) ^ (-1 / 2 : ℂ)) = ((t ^ (-(1 / 2) : ℝ) : ℝ) : ℂ) := by
       rw [ofReal_cpow ht.le]; push_cast; ring_nf
-    simp only [airyMod_kernel1]
+    simp only [ModulusPhase.kernel1]
     rw [hc]; push_cast
     rw [sub_eq_add_neg, Complex.exp_add]; ring
   rw [hI] at h
   exact_mod_cast h
 
 /-- `|x|^{1/2} M(x)² < 1/π` for `x < 0`. -/
-theorem airyMod_sqrt_mul_sq_lt {s : ℝ} (hs : 0 < s) : s ^ (1 / 2 : ℝ) *
+theorem ModulusPhase.sqrt_mul_sq_lt {s : ℝ} (hs : 0 < s) : s ^ (1 / 2 : ℝ) *
     airyModulus (-s) ^ 2 < 1 / π := by
   have hπ := Real.pi_pos
-  rw [airyMod_sqrt_mul_sq hs]
+  rw [ModulusPhase.sqrt_mul_sq hs]
   have hG : ∫ u in Ioi (0 : ℝ), Real.exp (-u) * u ^ (-(1 / 2) : ℝ) = Real.sqrt π := by
     rw [← Real.Gamma_one_half_eq, Real.Gamma_eq_integral (by norm_num)]
     norm_num
@@ -921,8 +941,9 @@ theorem airyMod_sqrt_mul_sq_lt {s : ℝ} (hs : 0 < s) : s ^ (1 / 2 : ℝ) *
   rw [show (1 / 2 : ℝ) - 1 = -(1 / 2) by norm_num] at hint
   have hlt : (∫ u in Ioi (0 : ℝ), Real.exp (-u) * (Real.exp (-(u ^ 3 / (12 * s ^ 3))) *
       u ^ (-(1 / 2) : ℝ))) < ∫ u in Ioi (0 : ℝ), Real.exp (-u) * u ^ (-(1 / 2) : ℝ) := by
-    rw [← sub_pos, ← integral_sub hint (airyMod_scaled_integrable hs.le)]
-    refine airyMod_integral_pos (hint.sub (airyMod_scaled_integrable hs.le)) fun u hu => ?_
+    rw [← sub_pos, ← integral_sub hint (ModulusPhase.scaled_integrable hs.le)]
+    refine ModulusPhase.integral_pos
+        (hint.sub (ModulusPhase.scaled_integrable hs.le)) fun u hu => ?_
     have : Real.exp (-(u ^ 3 / (12 * s ^ 3))) < 1 := Real.exp_lt_one_iff.mpr
       (neg_lt_zero.mpr (by positivity))
     have h2 : 0 < Real.exp (-u) * u ^ (-(1 / 2) : ℝ) := by positivity
@@ -938,7 +959,7 @@ end Nicholson
 theorem airy_modulus_monotone :
     StrictMonoOn (airyModulus) (Iic 0) := by
   intro x _ y _ hxy
-  exact lt_of_pow_lt_pow_left₀ 2 (airyModulus_pos y).le (airyMod_sq_strictMono hxy)
+  exact lt_of_pow_lt_pow_left₀ 2 (airyModulus_pos y).le (ModulusPhase.sq_strictMono hxy)
 
 /-- `M'(x)` is strictly increasing on `(-∞, 0]`, DLMF §9.8(iii). -/
 theorem airy_modulus_deriv_monotone :
@@ -962,7 +983,7 @@ theorem airy_modulus_deriv_monotone :
   have hM := airyModulus_pos x
   have hL := airy_lagrange x
   rw [← airyModulus_sq, ← airyDerivModulus_sq] at hL
-  have hb := airyMod_sqrt_mul_sq_lt (s := -x) (by linarith)
+  have hb := ModulusPhase.sqrt_mul_sq_lt (s := -x) (by linarith)
   rw [neg_neg] at hb
   have hsq : ((-x) ^ (1 / 2 : ℝ)) ^ 2 = -x := by
     rw [← Real.rpow_natCast, ← Real.rpow_mul (by linarith)]; norm_num

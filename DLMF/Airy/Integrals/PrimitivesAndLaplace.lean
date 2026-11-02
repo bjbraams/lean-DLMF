@@ -51,6 +51,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF.Confl
 
 open scoped Real Topology
 
+open DLMF.Core
+
 namespace DLMF.Airy
 
 /-- `Gi' = Bi'(1/3 - ∫Ai) + Ai' ∫Bi`, the derivative of 9.12.4. -/
@@ -129,29 +131,32 @@ theorem airyBi_integral_scorer (z : ℂ) :
 @[dlmf 9.10.E2]
 theorem airyAi_lower_integral_scorerHi (x : ℝ) :
     HasIntegralAtBot (fun t => airyAi t) x (2 / 3 + primitive airyAi x) :=
-  airyInt_hasIntegralAtBot_of_cross differentiable_airyAi
+  IntegralRepresentation.hasIntegralAtBot_of_cross differentiable_airyAi
     (g := fun z => airyAi z * scorerHiDeriv z - airyAiDeriv z * scorerHi z)
     (fun x => airyAi_integral_scorerHi x)
-    (airyInt_tendsto_cross_atBot airyInt_ai_neg_isBigO airyInt_aiDeriv_neg_isBigO) x
+    (IntegralRepresentation.tendsto_cross_atBot IntegralRepresentation.ai_neg_isBigO
+        IntegralRepresentation.aiDeriv_neg_isBigO) x
 
 /-- For real `x`, `∫_{-∞}^x Bi = ∫₀^x Bi` as a convergent improper integral (DLMF 9.10.3). -/
 @[dlmf 9.10.E3]
 theorem airyBi_lower_integral_scorer (x : ℝ) :
     HasIntegralAtBot (fun t => airyBi t) x (primitive airyBi x) := by
-  have h := airyInt_hasIntegralAtBot_of_cross differentiable_airyBi (c := 0)
+  have h := IntegralRepresentation.hasIntegralAtBot_of_cross differentiable_airyBi (c := 0)
     (g := fun z => airyBi z * scorerHiDeriv z - airyBiDeriv z * scorerHi z)
     (fun x => by rw [zero_add]; exact (airyBi_integral_scorer x).2)
-    (airyInt_tendsto_cross_atBot airyInt_bi_neg_isBigO airyInt_biDeriv_neg_isBigO) x
+    (IntegralRepresentation.tendsto_cross_atBot IntegralRepresentation.bi_neg_isBigO
+        IntegralRepresentation.biDeriv_neg_isBigO) x
   simpa using h
 
 /-- `∫₀^∞ Ai(t) dt = 1/3` (DLMF 9.10.11). -/
 @[dlmf 9.10.E11]
 theorem airyAi_positive_integral  :
     HasIntegralAtTop (fun t => airyAi t) 0 (1 / 3) := by
-  have h := ((airyInt_tendsto_cross_gi_atTop.const_mul (π : ℂ)).const_sub (1 / 3 : ℂ))
+  have h := ((IntegralRepresentation.tendsto_cross_gi_atTop.const_mul
+      (π : ℂ)).const_sub (1 / 3 : ℂ))
   simp only [mul_zero, sub_zero] at h
   refine h.congr fun R => ?_
-  rw [← airyAi_integral_scorerGi, ← airyInt_primitive_ofReal differentiable_airyAi]
+  rw [← airyAi_integral_scorerGi, ← IntegralRepresentation.primitive_ofReal differentiable_airyAi]
   ring
 
 /-- `∫_x^∞ Ai(t) dt ∼ e^{-ζ}/(2√π x^{3/4})` as `x → ∞`, with `ζ = (2/3) x^{3/2}` (DLMF 9.10.4). -/
@@ -172,17 +177,18 @@ theorem airyAi_tail_integral_asymptotic  :
     have hI : HasIntegralAtTop (fun t => airyAi t) x (1 / 3 - primitive airyAi x) := by
       have h := airyAi_positive_integral.sub_const (primitive airyAi x)
       refine h.congr fun R => ?_
-      rw [airyInt_primitive_ofReal differentiable_airyAi,
+      rw [IntegralRepresentation.primitive_ofReal differentiable_airyAi,
         intervalIntegral.integral_interval_sub_left (hc.intervalIntegrable _ _)
           (hc.intervalIntegrable _ _)]
     unfold improperAtTop
     exact hI.limUnder_eq.trans (airyAi_integral_scorerGi x)
   refine IsEquivalent.congr_left ?_ (Eventually.of_forall fun x => (hval x).symm)
-  refine airyInt_cross_equiv_atTop (A := fun x => airyAi x) (A' := fun x => airyAiDeriv x) ?_ ?_
-  · refine (airyInt_poincare0_real .ai).trans (IsBigO.of_bound 1 ?_)
+  refine IntegralRepresentation.cross_equiv_atTop (A := fun x => airyAi x)
+      (A' := fun x => airyAiDeriv x) ?_ ?_
+  · refine (IntegralRepresentation.poincare0_real .ai).trans (IsBigO.of_bound 1 ?_)
     filter_upwards [eventually_gt_atTop 0] with x hx
-    rw [airyReal_norm_prefactor_ai hx, one_mul, Real.norm_of_nonneg (by positivity), hv x hx]
-    obtain ⟨-, h2, -⟩ := airyInt_quarter_rpow hx
+    rw [RealRemainders.norm_prefactor_ai hx, one_mul, Real.norm_of_nonneg (by positivity), hv x hx]
+    obtain ⟨-, h2, -⟩ := IntegralRepresentation.quarter_rpow hx
     have p1 : 0 < x ^ (1 / 4 : ℝ) := by positivity
     have p3 : 0 < x ^ (3 / 4 : ℝ) := by positivity
     have ps : 0 < Real.sqrt π := Real.sqrt_pos.2 hπ
@@ -192,7 +198,7 @@ theorem airyAi_tail_integral_asymptotic  :
   · have hP : ∀ x : ℝ, 0 < x → airyAiDeriv x + x * v x =
         airyFunction .aiDeriv x - airyPrefactor .aiDeriv x := by
       intro x hx
-      obtain ⟨h1, -, -⟩ := airyInt_quarter_rpow hx
+      obtain ⟨h1, -, -⟩ := IntegralRepresentation.quarter_rpow hx
       have p3 : 0 < x ^ (3 / 4 : ℝ) := by positivity
       have ps : 0 < Real.sqrt π := Real.sqrt_pos.2 hπ
       simp only [airyFunction, airyPrefactor, hvdef]
@@ -206,15 +212,16 @@ theorem airyAi_tail_integral_asymptotic  :
           ((Real.exp (-airyZeta x) / (2 * Real.sqrt π * x ^ (3 / 4 : ℝ)) : ℝ) : ℂ) =
           (((x ^ (1 / 4 : ℝ)) * Real.exp (-airyZeta x) / (2 * Real.sqrt π) : ℝ) : ℂ) := by
         rw [← ofReal_mul, R]
-      rw [key, airyInt_cpow_quarter_ofReal hx, airyReal_zeta_ofReal hx]
+      rw [key, IntegralRepresentation.cpow_quarter_ofReal hx, RealRemainders.zeta_ofReal hx]
       push_cast; ring
-    refine ((airyInt_poincare_real .aiDeriv).congr' ?_ EventuallyEq.rfl).trans
+    refine ((IntegralRepresentation.poincare_real .aiDeriv).congr' ?_ EventuallyEq.rfl).trans
       (IsBigO.of_bound (3 / 2) ?_)
     · filter_upwards [eventually_gt_atTop 0] with x hx
       exact (hP x hx).symm
     · filter_upwards [eventually_gt_atTop 0] with x hx
-      obtain ⟨-, -, h3⟩ := airyInt_quarter_rpow hx
-      rw [airyInt_norm_div_zeta .aiDeriv hx, airyReal_norm_prefactor_aiDeriv hx,
+      obtain ⟨-, -, h3⟩ := IntegralRepresentation.quarter_rpow hx
+      rw [IntegralRepresentation.norm_div_zeta .aiDeriv hx,
+          RealRemainders.norm_prefactor_aiDeriv hx,
         Real.norm_of_nonneg (by positivity), hv x hx]
       have p3 : 0 < x ^ (3 / 4 : ℝ) := by positivity
       have ps : 0 < Real.sqrt π := Real.sqrt_pos.2 hπ
@@ -237,11 +244,12 @@ theorem airyBi_integral_asymptotic  :
     refine hmain.congr_left (Eventually.of_forall fun x => ?_)
     simp only
     rw [(airyBi_integral_scorer x).1]; ring
-  refine airyInt_cross_equiv_atTop (A := fun x => -airyBi x) (A' := fun x => -airyBiDeriv x) ?_ ?_
-  · refine (airyInt_poincare0_real .bi).neg_left.trans (IsBigO.of_bound 1 ?_)
+  refine IntegralRepresentation.cross_equiv_atTop (A := fun x => -airyBi x)
+      (A' := fun x => -airyBiDeriv x) ?_ ?_
+  · refine (IntegralRepresentation.poincare0_real .bi).neg_left.trans (IsBigO.of_bound 1 ?_)
     filter_upwards [eventually_gt_atTop 0] with x hx
-    rw [airySt_norm_prefactor_bi hx, one_mul, Real.norm_of_nonneg (by positivity), hv x hx]
-    obtain ⟨-, h2, -⟩ := airyInt_quarter_rpow hx
+    rw [StieltjesBounds.norm_prefactor_bi hx, one_mul, Real.norm_of_nonneg (by positivity), hv x hx]
+    obtain ⟨-, h2, -⟩ := IntegralRepresentation.quarter_rpow hx
     have p1 : 0 < x ^ (1 / 4 : ℝ) := by positivity
     have p3 : 0 < x ^ (3 / 4 : ℝ) := by positivity
     have ps : 0 < Real.sqrt π := Real.sqrt_pos.2 hπ
@@ -251,7 +259,7 @@ theorem airyBi_integral_asymptotic  :
   · have hP : ∀ x : ℝ, 0 < x → -airyBiDeriv x + x * v x =
         -(airyFunction .biDeriv x - airyPrefactor .biDeriv x) := by
       intro x hx
-      obtain ⟨h1, -, -⟩ := airyInt_quarter_rpow hx
+      obtain ⟨h1, -, -⟩ := IntegralRepresentation.quarter_rpow hx
       have p3 : 0 < x ^ (3 / 4 : ℝ) := by positivity
       have ps : 0 < Real.sqrt π := Real.sqrt_pos.2 hπ
       simp only [airyFunction, airyPrefactor, hvdef]
@@ -264,15 +272,17 @@ theorem airyBi_integral_asymptotic  :
       have key : (x : ℂ) * ((Real.exp (airyZeta x) / (Real.sqrt π * x ^ (3 / 4 : ℝ)) : ℝ) : ℂ) =
           (((x ^ (1 / 4 : ℝ)) * Real.exp (airyZeta x) / Real.sqrt π : ℝ) : ℂ) := by
         rw [← ofReal_mul, R]
-      rw [key, airyInt_cpow_quarter_ofReal hx, airyReal_zeta_ofReal hx]
+      rw [key, IntegralRepresentation.cpow_quarter_ofReal hx, RealRemainders.zeta_ofReal hx]
       push_cast; ring
-    refine ((airyInt_poincare_real .biDeriv).neg_left.congr' ?_ EventuallyEq.rfl).trans
+    refine ((IntegralRepresentation.poincare_real .biDeriv).neg_left.congr' ?_
+        EventuallyEq.rfl).trans
       (IsBigO.of_bound (3 / 2) ?_)
     · filter_upwards [eventually_gt_atTop 0] with x hx
       exact (hP x hx).symm
     · filter_upwards [eventually_gt_atTop 0] with x hx
-      obtain ⟨-, -, h3⟩ := airyInt_quarter_rpow hx
-      rw [airyInt_norm_div_zeta .biDeriv hx, airyInt_norm_prefactor_biDeriv hx,
+      obtain ⟨-, -, h3⟩ := IntegralRepresentation.quarter_rpow hx
+      rw [IntegralRepresentation.norm_div_zeta .biDeriv hx,
+          IntegralRepresentation.norm_prefactor_biDeriv hx,
         Real.norm_of_nonneg (by positivity), hv x hx]
       have p3 : 0 < x ^ (3 / 4 : ℝ) := by positivity
       have ps : 0 < Real.sqrt π := Real.sqrt_pos.2 hπ
@@ -288,9 +298,10 @@ theorem airyAi_negative_integral_asymptotic  :
       ((Real.cos (2 / 3 * (-x) ^ (3 / 2 : ℝ) + π / 4) /
         (Real.sqrt π * (-x) ^ (3 / 4 : ℝ)) : ℝ) : ℂ))
       (fun x : ℝ => |x| ^ (-9 / 4 : ℝ)) := by
-  have h := (airyInt_cross_expansion (f := airyAi) (f' := airyAiDeriv)
+  have h := (IntegralRepresentation.cross_expansion (f := airyAi) (f' := airyAiDeriv)
     (φ := fun s => Real.sin (airyZeta s - π / 4)) (fun s => Real.abs_sin_le_one _)
-    airyInt_ai_neg_isBigO airyInt_aiDeriv_neg_sub).comp_tendsto tendsto_neg_atBot_atTop
+    IntegralRepresentation.ai_neg_isBigO IntegralRepresentation.aiDeriv_neg_sub).comp_tendsto
+        tendsto_neg_atBot_atTop
   refine h.congr' ?_ ?_
   · filter_upwards [eventually_lt_atBot 0] with x hx
     have hs : 0 < -x := by linarith
@@ -324,9 +335,10 @@ theorem airyBi_negative_integral_asymptotic :
       ((Real.sin (2 / 3 * (-x) ^ (3 / 2 : ℝ) + π / 4) /
         (Real.sqrt π * (-x) ^ (3 / 4 : ℝ)) : ℝ) : ℂ))
       (fun x : ℝ => |x| ^ (-9 / 4 : ℝ)) := by
-  have h := (airyInt_cross_expansion (f := airyBi) (f' := airyBiDeriv)
+  have h := (IntegralRepresentation.cross_expansion (f := airyBi) (f' := airyBiDeriv)
     (φ := fun s => Real.cos (airyZeta s - π / 4)) (fun s => Real.abs_cos_le_one _)
-    airyInt_bi_neg_isBigO airyInt_biDeriv_neg_sub).comp_tendsto tendsto_neg_atBot_atTop
+    IntegralRepresentation.bi_neg_isBigO IntegralRepresentation.biDeriv_neg_sub).comp_tendsto
+        tendsto_neg_atBot_atTop
   refine h.congr' ?_ ?_
   · filter_upwards [eventually_lt_atBot 0] with x hx
     have hs : 0 < -x := by linarith
@@ -393,7 +405,7 @@ theorem airyBi_negative_integral  :
 section AiryLaplace
 
 /-- `|Ai(x)| ≤ e^{-ζ}` and `|Ai'(x)| ≤ 2 x^{1/4} e^{-ζ}` for `x ≥ 1`. -/
-theorem airyLap_norm_le_exp {x : ℝ} (hx : 1 ≤ x) :
+theorem LaplaceTransforms.norm_le_exp {x : ℝ} (hx : 1 ≤ x) :
     ‖airyAi x‖ ≤ Real.exp (-airyZeta x) ∧
       ‖airyAiDeriv x‖ ≤ 2 * x ^ (1 / 4 : ℝ) * Real.exp (-airyZeta x) := by
   have hx0 : 0 < x := by linarith
@@ -402,14 +414,15 @@ theorem airyLap_norm_le_exp {x : ℝ} (hx : 1 ≤ x) :
     exact Real.sqrt_le_sqrt (by linarith [Real.pi_gt_three])
   have hq1 : 1 ≤ x ^ (1 / 4 : ℝ) := Real.one_le_rpow hx (by norm_num)
   constructor
-  · have h := (airy_ai_real_error hx0 (N := 0)).1
+  · have h := (airyAi_real_error hx0 (N := 0)).1
     simp only [airyRemainder, airyExponentialSum, Finset.range_zero, Finset.sum_empty, sub_zero,
-      airyExpansionCoeff, pow_zero, div_one, one_mul, airyReal_airyU_zero, ofReal_one, norm_one,
+      airyExpansionCoeff, pow_zero, div_one, one_mul, RealRemainders.airyU_zero,
+          ofReal_one, norm_one,
       airyFunction] at h
     have hp : airyPrefactor .ai x ≠ 0 :=
-      airyRot_prefactor_ne_zero .ai (ofReal_ne_zero.mpr hx0.ne')
+      RotatedExpansions.prefactor_ne_zero .ai (ofReal_ne_zero.mpr hx0.ne')
     have hpn : ‖airyPrefactor .ai x‖ ≤ Real.exp (-airyZeta x) := by
-      rw [airyReal_norm_prefactor_ai hx0, div_le_iff₀ (by positivity)]
+      rw [RealRemainders.norm_prefactor_ai hx0, div_le_iff₀ (by positivity)]
       have : 0 < Real.exp (-airyZeta x) := Real.exp_pos _
       have h2 : 1 ≤ 2 * Real.sqrt π * x ^ (1 / 4 : ℝ) := by nlinarith
       nlinarith [mul_le_mul_of_nonneg_left h2 this.le]
@@ -417,9 +430,9 @@ theorem airyLap_norm_le_exp {x : ℝ} (hx : 1 ≤ x) :
           rw [← norm_mul, mul_div_cancel₀ _ hp]
       _ ≤ Real.exp (-airyZeta x) * 1 := by gcongr
       _ = _ := mul_one _
-  · have h := airy_aiDeriv_bound hx0
+  · have h := airyAiDeriv_bound hx0
     rw [airyAiDeriv_ofReal_eq, norm_real, Real.norm_eq_abs]
-    have hz := airyInt_two_thirds_le_airyZeta hx
+    have hz := IntegralRepresentation.two_thirds_le_airyZeta hx
     have h3 : 7 / (72 * airyZeta x) ≤ 1 := by rw [div_le_one (by positivity)]; linarith
     have hq : 0 ≤ x ^ (1 / 4 : ℝ) * Real.exp (-airyZeta x) := by positivity
     calc _ ≤ _ := h
@@ -428,7 +441,7 @@ theorem airyLap_norm_le_exp {x : ℝ} (hx : 1 ≤ x) :
 
 /-- **Superexponential decay on the positive axis**: for every `b` there is `C` with
 `|Ai(t)|, |Ai'(t)| ≤ C e^{-bt}` for `t ≥ 0`. -/
-theorem airyLap_pos_bound (b : ℝ) : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, 0 ≤ t →
+theorem LaplaceTransforms.pos_bound (b : ℝ) : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, 0 ≤ t →
     ‖airyAi t‖ ≤ C * Real.exp (-b * t) ∧ ‖airyAiDeriv t‖ ≤ C * Real.exp (-b * t) := by
   set B := max b 0
   set T := max 1 ((3 * (B + 1) / 2) ^ 2)
@@ -459,7 +472,7 @@ theorem airyLap_pos_bound (b : ℝ) : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, 0 ≤ t �
     constructor <;> nlinarith [norm_nonneg (airyAi t), norm_nonneg (airyAiDeriv t)]
   · have ht1 : 1 ≤ t := le_trans (le_max_left _ _) htT.le
     have ht0 : 0 < t := by linarith
-    obtain ⟨hA, hD⟩ := airyLap_norm_le_exp ht1
+    obtain ⟨hA, hD⟩ := LaplaceTransforms.norm_le_exp ht1
     -- `ζ(t) ≥ (B+1) t`
     have hsq : 3 * (B + 1) / 2 ≤ Real.sqrt t := by
       rw [show 3 * (B + 1) / 2 = Real.sqrt ((3 * (B + 1) / 2) ^ 2) by
@@ -494,10 +507,10 @@ theorem airyLap_pos_bound (b : ℝ) : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, 0 ≤ t �
         _ ≤ _ := by nlinarith
 
 /-- **Bounds on the negative axis**: `|Ai(t)| ≤ C` and `|Ai'(t)| ≤ C (1 + |t|)` for `t ≤ 0`. -/
-theorem airyLap_neg_bound : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, t ≤ 0 →
+theorem LaplaceTransforms.neg_bound : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, t ≤ 0 →
     ‖airyAi t‖ ≤ C ∧ ‖airyAiDeriv t‖ ≤ C * (1 + |t|) := by
-  obtain ⟨c1, hc1⟩ := airyInt_ai_neg_isBigO.bound
-  obtain ⟨c2, hc2⟩ := airyInt_aiDeriv_neg_isBigO.bound
+  obtain ⟨c1, hc1⟩ := IntegralRepresentation.ai_neg_isBigO.bound
+  obtain ⟨c2, hc2⟩ := IntegralRepresentation.aiDeriv_neg_isBigO.bound
   obtain ⟨S, hS⟩ := eventually_atTop.1 ((hc1.and hc2).and (eventually_ge_atTop 1))
   set S' := max S 1
   have hcont : ContinuousOn (fun t : ℝ => ‖airyAi t‖ + ‖airyAiDeriv t‖) (Icc (-S') 0) := by
@@ -551,19 +564,20 @@ theorem airyLap_neg_bound : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, t ≤ 0 →
         _ ≤ _ := by nlinarith [abs_nonneg c1]
 
 /-- `1 + |t| ≤ c⁻¹ e^{c|t|}` for `0 < c ≤ 1`. -/
-theorem airyLap_one_add_abs_le {c : ℝ} (hc : 0 < c) (hc1 : c ≤ 1) (t : ℝ) :
+theorem LaplaceTransforms.one_add_abs_le {c : ℝ} (hc : 0 < c) (hc1 : c ≤ 1) (t : ℝ) :
     1 + |t| ≤ c⁻¹ * Real.exp (c * |t|) := by
   have h := Real.add_one_le_exp (c * |t|)
   rw [le_inv_mul_iff₀ hc]
   nlinarith [abs_nonneg t]
 
 /-- `|e^{qt}| = e^{(Re q) t}`. -/
-theorem airyLap_norm_exp (q : ℂ) (t : ℝ) : ‖exp (q * t)‖ = Real.exp (q.re * t) := by
+theorem LaplaceTransforms.norm_exp (q : ℂ) (t : ℝ) : ‖exp (q * t)‖ = Real.exp (q.re * t) := by
   rw [Complex.norm_exp]; simp
 
 /-- **The dominating function**: for `a ≤ Re q ≤ b` with `a > 0`,
 `(1 + |t|) |e^{qt} Ai(t)|` and `|e^{qt} Ai'(t)|` are at most `K e^{-c|t|}`, `c = min a 1 / 2`. -/
-theorem airyLap_dom {a : ℝ} (ha : 0 < a) (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, a ≤ q.re → q.re ≤ b →
+theorem LaplaceTransforms.dominating {a : ℝ} (ha : 0 < a) (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, a ≤
+    q.re → q.re ≤ b →
     ∀ t : ℝ, (1 + |t|) * ‖exp (q * t) * airyAi t‖ ≤ K * Real.exp (-(min a 1 / 2) * |t|) ∧
       ‖exp (q * t) * airyAiDeriv t‖ ≤ K * Real.exp (-(min a 1 / 2) * |t|) := by
   set c := min a 1 / 2 with hcdef
@@ -571,12 +585,12 @@ theorem airyLap_dom {a : ℝ} (ha : 0 < a) (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q 
   have hc1 : c ≤ 1 := by have := min_le_right a 1; linarith
   have h2a : 2 * c ≤ a := by have := min_le_left a 1; linarith
   have h21 : 2 * c ≤ 1 := by have := min_le_right a 1; linarith
-  obtain ⟨Cp, hCp0, hCp⟩ := airyLap_pos_bound (b + 1)
-  obtain ⟨Cn, hCn0, hCn⟩ := airyLap_neg_bound
+  obtain ⟨Cp, hCp0, hCp⟩ := LaplaceTransforms.pos_bound (b + 1)
+  obtain ⟨Cn, hCn0, hCn⟩ := LaplaceTransforms.neg_bound
   refine ⟨c⁻¹ * (Cp + Cn), by positivity, fun q hqa hqb t => ?_⟩
-  have hone := airyLap_one_add_abs_le hc hc1 t
+  have hone := LaplaceTransforms.one_add_abs_le hc hc1 t
   have hci : 0 < c⁻¹ := inv_pos.mpr hc
-  rw [norm_mul, norm_mul, airyLap_norm_exp]
+  rw [norm_mul, norm_mul, LaplaceTransforms.norm_exp]
   have hE := Real.exp_pos (q.re * t)
   rcases le_total t 0 with ht | ht
   · obtain ⟨hA, hD⟩ := hCn t ht
@@ -630,7 +644,7 @@ theorem airyLap_dom {a : ℝ} (ha : 0 < a) (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q 
         _ ≤ _ := by gcongr
 
 /-- `e^{-c|t|}` is integrable on `ℝ` for `c > 0`. -/
-theorem airyLap_integrable_exp_abs {c : ℝ} (hc : 0 < c) :
+theorem LaplaceTransforms.integrable_exp_abs {c : ℝ} (hc : 0 < c) :
     Integrable (fun t : ℝ => Real.exp (-c * |t|)) := by
   have h1 : IntegrableOn (fun t : ℝ => Real.exp (-c * |t|)) (Iic 0) := by
     refine (integrableOn_exp_mul_Iic hc 0).congr_fun (fun t ht => ?_) measurableSet_Iic
@@ -644,21 +658,21 @@ theorem airyLap_integrable_exp_abs {c : ℝ} (hc : 0 < c) :
   rwa [Iic_union_Ioi, integrableOn_univ] at this
 
 /-- Continuity of `t ↦ Ai(t)` and `t ↦ Ai'(t)` on the real line. -/
-theorem airyLap_continuous : Continuous (fun t : ℝ => airyAi t) ∧
+theorem LaplaceTransforms.continuous : Continuous (fun t : ℝ => airyAi t) ∧
     Continuous (fun t : ℝ => airyAiDeriv t) :=
   ⟨(differentiable_airyAi.continuous).comp continuous_ofReal,
     (continuous_iff_continuousAt.mpr fun z => (hasDerivAt_airyAiDeriv z).continuousAt).comp
       continuous_ofReal⟩
 
 /-- Integrability of `e^{pt} Ai(t)` and `t e^{pt} Ai(t)` on `ℝ` for `Re p > 0`. -/
-theorem airyLap_integrable {p : ℂ} (hp : 0 < p.re) :
+theorem LaplaceTransforms.integrable {p : ℂ} (hp : 0 < p.re) :
     Integrable (fun t : ℝ => exp (p * t) * airyAi t) ∧
       Integrable (fun t : ℝ => (t : ℂ) * (exp (p * t) * airyAi t)) := by
-  obtain ⟨K, hK0, hK⟩ := airyLap_dom hp p.re
+  obtain ⟨K, hK0, hK⟩ := LaplaceTransforms.dominating hp p.re
   have hc : 0 < min p.re 1 / 2 := by positivity
-  have hI := (airyLap_integrable_exp_abs hc).const_mul K
+  have hI := (LaplaceTransforms.integrable_exp_abs hc).const_mul K
   have hm1 : Continuous fun t : ℝ => exp (p * t) * airyAi t := by
-    have := airyLap_continuous.1; fun_prop
+    have := LaplaceTransforms.continuous.1; fun_prop
   constructor
   · refine hI.mono' hm1.aestronglyMeasurable (Eventually.of_forall fun t => ?_)
     have h := (hK p le_rfl le_rfl t).1
@@ -674,19 +688,19 @@ theorem airyLap_integrable {p : ℂ} (hp : 0 < p.re) :
 noncomputable def airyLapF (q : ℂ) : ℂ := ∫ t : ℝ, exp (q * t) * airyAi t
 
 /-- `F` is differentiable on `Re q > 0`, with `F'(q) = ∫ t e^{qt} Ai(t) dt`. -/
-theorem airyLap_hasDerivAt {p : ℂ} (hp : 0 < p.re) :
+theorem LaplaceTransforms.hasDerivAt {p : ℂ} (hp : 0 < p.re) :
     HasDerivAt airyLapF (∫ t : ℝ, (t : ℂ) * (exp (p * t) * airyAi t)) p := by
-  obtain ⟨K, hK0, hK⟩ := airyLap_dom (a := p.re / 2) (by positivity) (3 * p.re / 2)
+  obtain ⟨K, hK0, hK⟩ := LaplaceTransforms.dominating (a := p.re / 2) (by positivity) (3 * p.re / 2)
   have hc : 0 < min (p.re / 2) 1 / 2 := by positivity
-  have hI := (airyLap_integrable_exp_abs hc).const_mul K
+  have hI := (LaplaceTransforms.integrable_exp_abs hc).const_mul K
   have hball : Metric.ball p (p.re / 2) ∈ 𝓝 p := Metric.ball_mem_nhds p (by positivity)
-  have hAc := airyLap_continuous.1
+  have hAc := LaplaceTransforms.continuous.1
   have h := hasDerivAt_integral_of_dominated_loc_of_deriv_le (μ := volume) hball
     (F := fun q (t : ℝ) => exp (q * t) * airyAi t)
     (F' := fun q (t : ℝ) => (t : ℂ) * (exp (q * t) * airyAi t))
     (Eventually.of_forall fun q => (by fun_prop : Continuous fun t : ℝ =>
       exp (q * t) * airyAi t).aestronglyMeasurable)
-    (airyLap_integrable hp).1
+    (LaplaceTransforms.integrable hp).1
     ((by fun_prop : Continuous fun t : ℝ => (t : ℂ) *
            (exp (p * t) * airyAi t)).aestronglyMeasurable)
     (Eventually.of_forall fun t q hq => ?_) hI
@@ -707,7 +721,7 @@ theorem airyLap_hasDerivAt {p : ℂ} (hp : 0 < p.re) :
     ring
 
 /-- The antiderivative `e^{pt}(Ai'(t) - p Ai(t))` of `e^{pt}(t - p²) Ai(t)`. -/
-theorem airyLap_hasDerivAt_g (p : ℂ) (t : ℝ) :
+theorem LaplaceTransforms.hasDerivAt_g (p : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => exp (p * t) * (airyAiDeriv t - p * airyAi t))
       (exp (p * t) * (((t : ℂ) - p ^ 2) * airyAi t)) t := by
   have he : HasDerivAt (fun t : ℝ => exp (p * t)) (exp (p * t) * p) t := by
@@ -721,12 +735,12 @@ theorem airyLap_hasDerivAt_g (p : ℂ) (t : ℝ) :
   simp only [Pi.sub_apply]; ring
 
 /-- **The transform equation**: `∫ t e^{pt} Ai(t) dt = p² F(p)` for `Re p > 0`. -/
-theorem airyLap_moment {p : ℂ} (hp : 0 < p.re) :
+theorem LaplaceTransforms.moment {p : ℂ} (hp : 0 < p.re) :
     (∫ t : ℝ, (t : ℂ) * (exp (p * t) * airyAi t)) = p ^ 2 * airyLapF p := by
-  obtain ⟨K, hK0, hK⟩ := airyLap_dom hp p.re
+  obtain ⟨K, hK0, hK⟩ := LaplaceTransforms.dominating hp p.re
   set c := min p.re 1 / 2
   have hc : 0 < c := by positivity
-  obtain ⟨i1, i2⟩ := airyLap_integrable hp
+  obtain ⟨i1, i2⟩ := LaplaceTransforms.integrable hp
   have hint : Integrable fun t : ℝ => exp (p * t) * (((t : ℂ) - p ^ 2) * airyAi t) := by
     refine (i2.sub (i1.const_mul (p ^ 2))).congr (Eventually.of_forall fun t => ?_)
     simp only [Pi.sub_apply]; ring
@@ -751,7 +765,7 @@ theorem airyLap_moment {p : ℂ} (hp : 0 < p.re) :
         (by linarith) hl |>.congr' (Eventually.of_forall fun t => rfl)))
       simpa using this.const_mul (K + ‖p‖ * K)
     exact squeeze_zero_norm hg h0
-  have hftc := integral_of_hasDerivAt_of_tendsto (fun t => airyLap_hasDerivAt_g p t) hint
+  have hftc := integral_of_hasDerivAt_of_tendsto (fun t => LaplaceTransforms.hasDerivAt_g p t) hint
     (hdec atBot tendsto_abs_atBot_atTop) (hdec atTop tendsto_abs_atTop_atTop)
   have e : (fun t : ℝ => exp (p * t) * (((t : ℂ) - p ^ 2) * airyAi t)) =
       fun t : ℝ => (t : ℂ) * (exp (p * t) * airyAi t) - p ^ 2 * (exp (p * t) * airyAi t) := by
@@ -761,14 +775,14 @@ theorem airyLap_moment {p : ℂ} (hp : 0 < p.re) :
   exact sub_eq_zero.mp hftc
 
 /-- **Constancy**: `F(q) e^{-q³/3}` is constant on `Re q > 0`. -/
-theorem airyLap_const {p q : ℂ} (hp : 0 < p.re) (hq : 0 < q.re) :
+theorem LaplaceTransforms.const {p q : ℂ} (hp : 0 < p.re) (hq : 0 < q.re) :
     airyLapF p * exp (-p ^ 3 / 3) = airyLapF q * exp (-q ^ 3 / 3) := by
   set U := {c : ℂ | 0 < c.re}
   have hU : IsOpen U := isOpen_lt continuous_const Complex.continuous_re
   have hD : ∀ z ∈ U, HasDerivAt (fun q => airyLapF q * exp (-q ^ 3 / 3)) 0 z := by
     intro z hz
-    have h1 := airyLap_hasDerivAt hz
-    rw [airyLap_moment hz] at h1
+    have h1 := LaplaceTransforms.hasDerivAt hz
+    rw [LaplaceTransforms.moment hz] at h1
     have h2 : HasDerivAt (fun q : ℂ => exp (-q ^ 3 / 3)) (exp (-z ^ 3 / 3) * (-z ^ 2)) z := by
       have := (((hasDerivAt_pow 3 z).neg).div_const 3).cexp
       convert this using 1; simp only [Pi.neg_apply]; ring
@@ -778,27 +792,27 @@ theorem airyLap_const {p q : ℂ} (hp : 0 < p.re) (hq : 0 < q.re) :
     (fun z hz => (hD z hz).deriv) hp hq
 
 /-- `∫₀^∞ Ai = 1/3` as a Lebesgue integral, with integrability. -/
-theorem airyLap_integral_Ioi :
+theorem LaplaceTransforms.integral_Ioi :
     IntegrableOn (fun t : ℝ => airyAi t) (Ioi 0) ∧ (∫ t : ℝ in Ioi 0, airyAi t) = 1 / 3 := by
-  obtain ⟨C, hC0, hC⟩ := airyLap_pos_bound 1
+  obtain ⟨C, hC0, hC⟩ := LaplaceTransforms.pos_bound 1
   have hi : IntegrableOn (fun t : ℝ => airyAi t) (Ioi 0) := by
     refine ((exp_neg_integrableOn_Ioi 0 one_pos).const_mul C).mono'
-      airyLap_continuous.1.aestronglyMeasurable.restrict ?_
+      LaplaceTransforms.continuous.1.aestronglyMeasurable.restrict ?_
     refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht => ?_)
     exact (hC t (le_of_lt ht)).1
   refine ⟨hi, tendsto_nhds_unique (intervalIntegral_tendsto_integral_Ioi 0 hi tendsto_id) ?_⟩
   exact airyAi_positive_integral
 
 /-- **Positive half of the Abelian limit**: `∫₀^∞ e^{xt} Ai(t) dt → 1/3` as `x → 0+`. -/
-theorem airyLap_pos_tendsto :
+theorem LaplaceTransforms.pos_tendsto :
     Tendsto (fun x : ℝ => ∫ t : ℝ in Ioi 0, exp ((x : ℂ) * t) * airyAi t) (𝓝[>] 0)
       (𝓝 (1 / 3)) := by
-  obtain ⟨C, hC0, hC⟩ := airyLap_pos_bound 2
-  rw [← airyLap_integral_Ioi.2]
+  obtain ⟨C, hC0, hC⟩ := LaplaceTransforms.pos_bound 2
+  rw [← LaplaceTransforms.integral_Ioi.2]
   refine tendsto_integral_filter_of_dominated_convergence (fun t => C * Real.exp (-1 * t)) ?_ ?_
     ((exp_neg_integrableOn_Ioi 0 one_pos).const_mul C) ?_
   · refine Eventually.of_forall fun x => ?_
-    have := airyLap_continuous.1
+    have := LaplaceTransforms.continuous.1
     exact (by fun_prop : Continuous fun t : ℝ => exp ((x : ℂ) * t) * airyAi t).aestronglyMeasurable
   · filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with x hx
     refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht => ?_)
@@ -812,7 +826,7 @@ theorem airyLap_pos_tendsto :
   · refine Eventually.of_forall fun t => ?_
     have : Tendsto (fun x : ℝ => exp ((x : ℂ) * t) * airyAi t) (𝓝 0)
         (𝓝 (exp (((0 : ℝ) : ℂ) * t) * airyAi t)) := by
-      have := airyLap_continuous.1; exact ((by fun_prop : Continuous fun x : ℝ =>
+      have := LaplaceTransforms.continuous.1; exact ((by fun_prop : Continuous fun x : ℝ =>
         exp ((x : ℂ) * t) * airyAi t).tendsto 0)
     simpa using this.mono_left nhdsWithin_le_nhds
 
@@ -854,11 +868,11 @@ theorem airyLapA_bound : ∃ M, 0 ≤ M ∧ ∀ s : ℝ, 0 ≤ s → ‖airyLapA
 
 /-- For `x > 0`, integration by parts and `u = xs` give
 `∫_{-∞}^0 e^{xt} Ai(t) dt = ∫₀^∞ e^{-u} A(u/x) du`, with `A(s) = ∫₀^s Ai(-v) dv`. -/
-private lemma airyLap_neg_eq_integral_A {x : ℝ} (hx : 0 < x) :
+private lemma LaplaceTransforms.neg_eq_integral_A {x : ℝ} (hx : 0 < x) :
     (∫ t : ℝ in Iic 0, exp ((x : ℂ) * t) * airyAi t) =
       ∫ u : ℝ in Ioi 0, (Real.exp (-u) : ℂ) * airyLapA (u / x) := by
   obtain ⟨M, hM0, hM⟩ := airyLapA_bound
-  obtain ⟨Cn, hCn0, hCn⟩ := airyLap_neg_bound
+  obtain ⟨Cn, hCn0, hCn⟩ := LaplaceTransforms.neg_bound
   have hAc : Continuous airyLapA :=
     continuous_iff_continuousAt.mpr fun s => (airyLapA_hasDerivAt s).continuousAt
   rw [show (Iic (0 : ℝ)) = Iic (-0) by simp, ← integral_comp_neg_Ioi]
@@ -933,7 +947,7 @@ private lemma airyLap_neg_eq_integral_A {x : ℝ} (hx : 0 < x) :
   field_simp
 
 /-- Dominated convergence: `∫₀^∞ e^{-u} A(u/x) du → ∫₀^∞ e^{-u} (2/3) du` as `x → 0+`. -/
-private lemma airyLap_integral_A_tendsto :
+private lemma LaplaceTransforms.integral_A_tendsto :
     Tendsto (fun x : ℝ => ∫ u : ℝ in Ioi 0, (Real.exp (-u) : ℂ) * airyLapA (u / x))
       (𝓝[>] 0) (𝓝 (∫ u : ℝ in Ioi 0, (Real.exp (-u) : ℂ) * (2 / 3))) := by
   obtain ⟨M, hM0, hM⟩ := airyLapA_bound
@@ -956,44 +970,44 @@ private lemma airyLap_integral_A_tendsto :
     exact this.congr fun x => by simp [div_eq_mul_inv]
 
 /-- **Negative half of the Abelian limit**: `∫₋∞^0 e^{xt} Ai(t) dt → 2/3` as `x → 0+`. -/
-theorem airyLap_neg_tendsto :
+theorem LaplaceTransforms.neg_tendsto :
     Tendsto (fun x : ℝ => ∫ t : ℝ in Iic 0, exp ((x : ℂ) * t) * airyAi t) (𝓝[>] 0)
       (𝓝 (2 / 3)) := by
-  have hlim := airyLap_integral_A_tendsto
+  have hlim := LaplaceTransforms.integral_A_tendsto
   have hv : (∫ u : ℝ in Ioi 0, (Real.exp (-u) : ℂ) * (2 / 3)) = 2 / 3 := by
     rw [integral_mul_const, integral_complex_ofReal, integral_exp_neg_Ioi_zero]; simp
   rw [hv] at hlim
   refine hlim.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with x hx
-  exact (airyLap_neg_eq_integral_A hx).symm
+  exact (LaplaceTransforms.neg_eq_integral_A hx).symm
 
 /-- **The Abelian limit**: `F(x) → 1` as `x → 0+`. -/
-theorem airyLap_tendsto_zero :
+theorem LaplaceTransforms.tendsto_zero :
     Tendsto (fun x : ℝ => airyLapF x) (𝓝[>] 0) (𝓝 1) := by
-  have h := airyLap_neg_tendsto.add airyLap_pos_tendsto
+  have h := LaplaceTransforms.neg_tendsto.add LaplaceTransforms.pos_tendsto
   rw [show (2 / 3 + 1 / 3 : ℂ) = 1 by norm_num] at h
   refine h.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with x hx
-  have hi := (airyLap_integrable (p := (x : ℂ)) (by simpa using hx)).1
+  have hi := (LaplaceTransforms.integrable (p := (x : ℂ)) (by simpa using hx)).1
   have e := setIntegral_union (Iic_disjoint_Ioi (a := (0 : ℝ)) le_rfl) measurableSet_Ioi
     hi.integrableOn hi.integrableOn
   rw [Iic_union_Ioi, setIntegral_univ] at e
   rw [airyLapF, e]
 
 /-- **9.10.13 (proof)**: `∫ e^{pt} Ai(t) dt = e^{p³/3}` for `Re p > 0`. -/
-theorem airyLap_bilateral {p : ℂ} (hp : 0 < p.re) : airyLapF p = exp (p ^ 3 / 3) := by
+theorem LaplaceTransforms.bilateral {p : ℂ} (hp : 0 < p.re) : airyLapF p = exp (p ^ 3 / 3) := by
   have hH : Tendsto (fun x : ℝ => airyLapF x * exp (-(x : ℂ) ^ 3 / 3)) (𝓝[>] 0) (𝓝 1) := by
     have hc : Tendsto (fun x : ℝ => exp (-(x : ℂ) ^ 3 / 3)) (𝓝[>] 0) (𝓝 1) := by
       have : Tendsto (fun x : ℝ => exp (-(x : ℂ) ^ 3 / 3)) (𝓝 0)
           (𝓝 (exp (-((0 : ℝ) : ℂ) ^ 3 / 3))) :=
         ((by fun_prop : Continuous fun x : ℝ => exp (-(x : ℂ) ^ 3 / 3)).tendsto 0)
       simpa using this.mono_left nhdsWithin_le_nhds
-    simpa using airyLap_tendsto_zero.mul hc
+    simpa using LaplaceTransforms.tendsto_zero.mul hc
   have hconst : Tendsto (fun x : ℝ => airyLapF x * exp (-(x : ℂ) ^ 3 / 3)) (𝓝[>] 0)
       (𝓝 (airyLapF p * exp (-p ^ 3 / 3))) := by
     refine tendsto_const_nhds.congr' ?_
     filter_upwards [self_mem_nhdsWithin] with x hx
-    exact airyLap_const hp (by simpa using hx)
+    exact LaplaceTransforms.const hp (by simpa using hx)
   have h1 := tendsto_nhds_unique hconst hH
   have : airyLapF p = airyLapF p * exp (-p ^ 3 / 3) * exp (p ^ 3 / 3) := by
     rw [mul_assoc, ← Complex.exp_add]; ring_nf; simp
@@ -1007,7 +1021,7 @@ end AiryLaplace
 theorem airyAi_bilateral_laplace {p : ℂ} (hp : 0 < p.re) :
     Integrable (fun t : ℝ => exp (p * t) * airyAi t) ∧
       (∫ t : ℝ, exp (p * t) * airyAi t) = exp (p ^ 3 / 3) :=
-  ⟨(airyLap_integrable hp).1, airyLap_bilateral hp⟩
+  ⟨(LaplaceTransforms.integrable hp).1, LaplaceTransforms.bilateral hp⟩
 
 end DLMF.Airy
 end

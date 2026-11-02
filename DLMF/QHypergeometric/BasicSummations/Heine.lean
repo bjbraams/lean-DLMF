@@ -12,6 +12,7 @@ public import Mathlib.Analysis.Analytic.IsolatedZeros
 public import DLMF.QHypergeometric.BasicSummations.OnePhiZero
 public import DLMF.QSeries.RamanujanPsi
 public import DLMF.QSeries.Saalschutz
+public import DLMF.QHypergeometric.Transformations
 
 /-!
 # Heine's transformations and related two-phi-one identities (DLMF 17.6.5–17.6.29)
@@ -426,7 +427,60 @@ theorem heine_fine_expansion_second {a b q z : ℂ} (ha : a≠0) (hq : ‖q‖<1
     (hd : QDenominatorRegular [b*q] q) :
     (1-z)*qPhi [q,a*q] [b*q] q z=
       ∑' n : ℕ, qPochhammer (b/a) q n*(-a*z)^n*q^((n*(n+1))/2)/qPochhammerList [b*q,z*q] q n := by
-  sorry
+  by_cases hq0 : q = 0
+  · subst hq0
+    have hL : qPhi [0,a*0] [b*0] 0 z = (1-z)⁻¹ := by
+      rw [← tsum_geometric_of_norm_lt_one hz]
+      refine tsum_congr fun n => ?_
+      simp [qPhiTerm, qPochhammerList, qPhiExponent, qPochhammer_zero_param]
+    rw [hL, mul_inv_cancel₀ (one_sub_ne_zero_of_norm_lt_one hz)]
+    rw [tsum_eq_single 0]
+    · simp [qPochhammerList]
+    · intro n hn
+      have : n*(n+1)/2 ≠ 0 := by
+        have : 2 ≤ n*(n+1) := by nlinarith [Nat.pos_of_ne_zero hn]
+        omega
+      simp [zero_pow this]
+  have hqz : ‖q*z‖ < 1 := by rw [norm_mul]; nlinarith [norm_nonneg q, norm_nonneg z]
+  have hden : QDenominatorRegular [b*q, q*z, z] q := by
+    intro x hx n
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl
+    · exact hd _ (by simp) n
+    · intro h
+      have := norm_mul_pow_lt_one hqz hq n
+      rw [h] at this; simp at this
+    · intro h
+      have := norm_mul_pow_lt_one hz hq n
+      rw [h] at this; simp at this
+  have h := qPhi2_to_qPhi2_2' q (a*q) (b*q) q z hq (by simp [ha, hq0]) hden hz
+  rw [h]
+  have hzq : qProductRatioInf [z*q] [z] q = (1-z)⁻¹ := by
+    have h1 := qPochhammerInf_shift (a := z) hq
+    have h2 : qPochhammerInf (z*q) q ≠ 0 :=
+      qPochhammerInf_ne_zero_of_norm_lt_one (by rwa [mul_comm]) hq
+    have h3 : 1 - z ≠ 0 := one_sub_ne_zero_of_norm_lt_one hz
+    simp only [qProductRatioInf, qPochhammerListInf, List.map_cons, List.map_nil,
+      List.prod_cons, List.prod_nil, mul_one]
+    rw [h1]; field_simp
+  rw [hzq, ← mul_assoc, mul_inv_cancel₀ (one_sub_ne_zero_of_norm_lt_one hz), one_mul]
+  unfold qPhi
+  refine tsum_congr fun n => ?_
+  have hqq := qPochhammer_self_ne_zero hq n
+  simp only [qPhiTerm, qPochhammerList, qPhiExponent, List.map_cons, List.map_nil,
+    List.prod_cons, List.prod_nil, mul_one, List.length_cons, List.length_nil]
+  rw [show b*q/(a*q) = b/a by field_simp, show q*z = z*q by ring]
+  norm_num
+  have hexp : q ^ TripleProduct.tri (n:ℤ) * q^n = q^((n*(n+1))/2) := by
+    rw [← zpow_natCast q n, ← zpow_natCast q (n*(n+1)/2), ← zpow_add₀ hq0]
+    congr 1
+    simp only [TripleProduct.tri]
+    rw [Int.natCast_div]
+    push_cast
+    rw [show (n:ℤ)*(n+1) = n*(n-1) + n*2 by ring, Int.add_mul_ediv_right _ _ (by norm_num)]
+  rw [← hexp]
+  field_simp
+  ring
 
 /-- Fine's third expansion of `(1-z)/(1-b) 2φ1(q,aq;bq;q,z)` (DLMF 17.6.E11). -/
 @[dlmf 17.6.E11]

@@ -8,6 +8,7 @@ module
 public import DLMF.GeneralizedHypergeometric.Appell.Basic.EulerBranches
 
 public import DLMF.GeneralizedHypergeometric.Appell.SeriesAndDifferentialEquations
+public import DLMF.GeneralizedHypergeometric.Appell.TriangleDirichlet
 
 /-!
 # Euler integrals for Appell functions (DLMF §§16.15–16.16)
@@ -29,8 +30,10 @@ follow.
 
 ## Implementation notes
 
-The `F₃`-to-`F₁` reduction and the `F₁`/`F₂` Pfaff transformations use Gauss-series fiber sums
-and `pfaff_transformation_of_ne_neg_nat`, retaining all regular lower parameters.
+The simplex integral of `F₃` uses Dirichlet's integral on the triangle
+(`DLMF.GeneralizedHypergeometric.Appell.TriangleDirichlet`). The `F₃`-to-`F₁` reduction and the
+`F₁`/`F₂` Pfaff transformations use Gauss-series fiber sums and
+`pfaff_transformation_of_ne_neg_nat`, retaining all regular lower parameters.
 -/
 
 @[expose] public noncomputable section
@@ -642,26 +645,204 @@ theorem appF2_euler_germ (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb 
         rw [appF2Coeff]; field_simp
     _ = _ := by rw [← hG]; simp only [hddef]; ring
 
+/-- `appellTriangle` is measurable. -/
+private lemma measurableSet_appellTriangle : MeasurableSet appellTriangle := by
+  refine IsClosed.measurableSet ?_
+  simp only [appellTriangle, ofPred_and]
+  exact (isClosed_le continuous_const continuous_fst).inter
+    ((isClosed_le continuous_const continuous_snd).inter
+      (isClosed_le (continuous_fst.add continuous_snd) continuous_const))
+
+/-- Both coordinates of a point of the triangle lie in `[0,1]`. -/
+private lemma mem_Icc_of_mem_appellTriangle {p : ℝ × ℝ} (hp : p ∈ appellTriangle) :
+    p.1 ∈ Icc (0:ℝ) 1 ∧ p.2 ∈ Icc (0:ℝ) 1 :=
+  ⟨⟨hp.1, by linarith [hp.2.1, hp.2.2]⟩, ⟨hp.2.1, by linarith [hp.1, hp.2.2]⟩⟩
+
 /-- 16.15.E3: appF3 euler integrable. -/
 @[dlmf 16.15.E3]
 theorem appF3_euler_integrable (a a' b b' c : ℂ) (hb : 0<b.re) (hb' : 0<b'.re)
     (hrest : 0<(c-b-b').re) {x y : ℂ} (hxy : (x, y)∈appellEulerDomain) :
     IntegrableOn (appF3EulerKernel a a' b b' c x y) appellTriangle := by
-  sorry
+  obtain ⟨M1, hM1⟩ := exists_norm_inv_cpow_le_of_isCompact
+      (f := fun u : ℝ => 1 - (u:ℂ) * x) isCompact_Icc
+    (by fun_prop) (fun u hu => one_sub_mul_mem_slitPlane_of_one_sub_mem hxy.1 hu) a
+  obtain ⟨M2, hM2⟩ := exists_norm_inv_cpow_le_of_isCompact
+      (f := fun u : ℝ => 1 - (u:ℂ) * y) isCompact_Icc
+    (by fun_prop) (fun u hu => one_sub_mul_mem_slitPlane_of_one_sub_mem hxy.2 hu) a'
+  refine ((integrableOn_appellTriangleKernel hb hb' hrest).norm.mul_const (M1 * M2)).mono' ?_ ?_
+  · exact (by unfold appF3EulerKernel; fun_prop : Measurable _).aestronglyMeasurable
+  · filter_upwards [ae_restrict_mem measurableSet_appellTriangle] with p hp
+    obtain ⟨hu, hv⟩ := mem_Icc_of_mem_appellTriangle hp
+    have h1 := hM1 p.1 hu
+    have h2 := hM2 p.2 hv
+    have h10 := (norm_nonneg _).trans h1
+    have e : appF3EulerKernel a a' b b' c x y p =
+        appellTriangleKernel b b' (c - b - b') p * ((1 - (p.1:ℂ) * x) ^ a)⁻¹ *
+          ((1 - (p.2:ℂ) * y) ^ a')⁻¹ := by
+      simp only [appF3EulerKernel, appellTriangleKernel, div_eq_mul_inv]
+    rw [e, norm_mul, norm_mul, mul_assoc]
+    gcongr
+
+/-- The F3 Euler domain is open. -/
+private lemma isOpen_appellEulerDomain : IsOpen appellEulerDomain :=
+  (isOpen_slitPlane.preimage (by fun_prop)).inter (isOpen_slitPlane.preimage (by fun_prop))
 
 /-- 16.15.E3: appF3 euler analytic. -/
 @[dlmf 16.15.E3]
 theorem appF3_euler_analytic (a a' b b' c : ℂ) (hb : 0<b.re) (hb' : 0<b'.re)
     (hrest : 0<(c-b-b').re) :
     AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF3Euler a a' b b' c p.1 p.2) appellEulerDomain := by
-  sorry
+  have hU := isOpen_appellEulerDomain
+  have hT := measurableSet_appellTriangle
+  have hd : DifferentiableOn ℂ (fun p : ℂ × ℂ =>
+      ∫ q in appellTriangle, appF3EulerKernel a a' b b' c p.1 p.2 q) appellEulerDomain := by
+    refine differentiableOn_integral_of_locally_dominated hU
+      (fun p _ => (by unfold appF3EulerKernel; fun_prop : Measurable _).aestronglyMeasurable)
+      ?_ ?_
+    · filter_upwards [ae_restrict_mem hT] with q hq
+      intro p hp
+      obtain ⟨hu, hv⟩ := mem_Icc_of_mem_appellTriangle hq
+      have h1 := (differentiableAt_inv_one_sub_mul_cpow hu hp.1 a).comp p differentiableAt_fst
+      have h2 := (differentiableAt_inv_one_sub_mul_cpow hv hp.2 a').comp p differentiableAt_snd
+      have e : (fun p : ℂ × ℂ => appF3EulerKernel a a' b b' c p.1 p.2 q) = fun p =>
+          appellTriangleKernel b b' (c - b - b') q * ((1 - (q.1:ℂ) * p.1) ^ a)⁻¹ *
+            ((1 - (q.2:ℂ) * p.2) ^ a')⁻¹ := by
+        funext p
+        simp only [appF3EulerKernel, appellTriangleKernel, div_eq_mul_inv]
+      rw [e]
+      exact (((differentiableAt_const _).mul h1).mul h2).differentiableWithinAt
+    · intro p hp
+      obtain ⟨r1, hr1, hs1⟩ := exists_closedBall_one_sub_mem_slitPlane hp.1
+      obtain ⟨r2, hr2, hs2⟩ := exists_closedBall_one_sub_mem_slitPlane hp.2
+      obtain ⟨M1, hM1⟩ := exists_norm_inv_one_sub_mul_cpow_le hs1 a
+      obtain ⟨M2, hM2⟩ := exists_norm_inv_one_sub_mul_cpow_le hs2 a'
+      refine ⟨Metric.ball p.1 r1 ×ˢ Metric.ball p.2 r2,
+        prod_mem_nhds (Metric.ball_mem_nhds _ hr1) (Metric.ball_mem_nhds _ hr2),
+        fun q => ‖appellTriangleKernel b b' (c - b - b') q‖ * (M1 * M2), ?_, ?_⟩
+      · exact (integrableOn_appellTriangleKernel hb hb' hrest).norm.mul_const _
+      · filter_upwards [ae_restrict_mem hT] with q hq
+        intro z hz
+        obtain ⟨hu, hv⟩ := mem_Icc_of_mem_appellTriangle hq
+        have h1 := hM1 q.1 hu z.1 (Metric.ball_subset_closedBall hz.1)
+        have h2 := hM2 q.2 hv z.2 (Metric.ball_subset_closedBall hz.2)
+        have h10 := (norm_nonneg _).trans h1
+        have e : appF3EulerKernel a a' b b' c z.1 z.2 q =
+            appellTriangleKernel b b' (c - b - b') q * ((1 - (q.1:ℂ) * z.1) ^ a)⁻¹ *
+              ((1 - (q.2:ℂ) * z.2) ^ a')⁻¹ := by
+          simp only [appF3EulerKernel, appellTriangleKernel, div_eq_mul_inv]
+        rw [e, norm_mul, norm_mul, mul_assoc]
+        gcongr
+  have : DifferentiableOn ℂ (fun p : ℂ × ℂ => appF3Euler a a' b b' c p.1 p.2)
+      appellEulerDomain := (differentiableOn_const _).mul hd
+  exact this.analyticOnNhd_of_finiteDimensional hU
+
+/-- `u^(β-1) uᵐ = u^(β+m-1)` for `u ≥ 0` and `Re β > 0`. -/
+private lemma ofReal_cpow_sub_one_mul_pow {u : ℝ} (hu : 0 ≤ u) {β : ℂ} (hβ : 0 < β.re) (m : ℕ) :
+    (u:ℂ) ^ (β - 1) * (u:ℂ) ^ m = (u:ℂ) ^ (β + m - 1) := by
+  rcases hu.lt_or_eq with hu | rfl
+  · have hu0 : (u:ℂ) ≠ 0 := ofReal_ne_zero.mpr hu.ne'
+    rw [show β + (m:ℂ) - 1 = (β - 1) + (m:ℂ) by ring, cpow_add _ _ hu0, cpow_natCast]
+  · rcases m with _ | m
+    · simp
+    · have hne : β + ((m + 1 : ℕ) : ℂ) - 1 ≠ 0 := by
+        intro h
+        have := congrArg Complex.re h
+        simp at this
+        linarith
+      rw [ofReal_zero, zero_pow (Nat.succ_ne_zero m), mul_zero, zero_cpow hne]
 
 /-- 16.15.E3: appF3 euler germ. -/
 @[dlmf 16.15.E3]
 theorem appF3_euler_germ (a a' b b' c : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hrest : 0<(c-b-b').re) :
     (fun p : ℂ × ℂ => appF3 a a' b b' c p.1 p.2)=ᶠ[𝓝 (0, 0)]
         (fun p => appF3Euler a a' b b' c p.1 p.2) := by
-  sorry
+  set γ := c - b - b' with hγdef
+  have hcre : 0 < c.re := by
+    have : c = b + b' + γ := by rw [hγdef]; ring
+    rw [this]; simp only [add_re]; linarith
+  have hc : AppellRegular c := not_neg_nat_of_re_pos hcre
+  have hT := measurableSet_appellTriangle
+  have hU : {p : ℂ × ℂ | ‖p.1‖ < 1 ∧ ‖p.2‖ < 1} ∈ 𝓝 ((0:ℂ), (0:ℂ)) :=
+    ((isOpen_lt (continuous_norm.comp continuous_fst) continuous_const).inter
+      (isOpen_lt (continuous_norm.comp continuous_snd) continuous_const)).mem_nhds (by simp)
+  filter_upwards [hU] with p hp
+  obtain ⟨x, y⟩ := p
+  obtain ⟨hx, hy⟩ := hp
+  simp only at hx hy ⊢
+  set w : ℝ × ℝ → ℂ := appellTriangleKernel b b' γ with hwdef
+  set d : ℕ × ℕ → ℂ := fun q => poch a q.1 / q.1 ! * x ^ q.1 * (poch a' q.2 / q.2 ! * y ^ q.2)
+    with hddef
+  have hw : Integrable w (volume.restrict appellTriangle) :=
+    integrableOn_appellTriangleKernel hb hb' hrest
+  have hs1 := summable_norm_poch_div_factorial_mul_pow_of_norm_lt_one a hx
+  have hs2 := summable_norm_poch_div_factorial_mul_pow_of_norm_lt_one a' hy
+  have hd : Summable fun q => ‖d q‖ := by
+    refine (hs1.mul_of_nonneg hs2 (fun _ => norm_nonneg _) (fun _ => norm_nonneg _)).congr
+      fun q => ?_
+    simp only [hddef, norm_mul]
+  have hbd : ∀ q : ℕ × ℕ, ∀ᵐ z ∂(volume.restrict appellTriangle),
+      ‖(z.1:ℂ) ^ q.1 * (z.2:ℂ) ^ q.2‖ ≤ 1 := fun q => by
+    filter_upwards [ae_restrict_mem hT] with z hz
+    obtain ⟨hu, hv⟩ := mem_Icc_of_mem_appellTriangle hz
+    rw [norm_mul, norm_pow, norm_pow, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs,
+      Real.norm_eq_abs, abs_of_nonneg hu.1, abs_of_nonneg hv.1]
+    calc z.1 ^ q.1 * z.2 ^ q.2 ≤ 1 * 1 :=
+          mul_le_mul (pow_le_one₀ hu.1 hu.2) (pow_le_one₀ hv.1 hv.2)
+            (pow_nonneg hv.1 _) zero_le_one
+      _ = 1 := one_mul 1
+  have hg : ∀ᵐ z ∂(volume.restrict appellTriangle), HasSum
+      (fun q : ℕ × ℕ => d q * ((z.1:ℂ) ^ q.1 * (z.2:ℂ) ^ q.2))
+      (((1 - (z.1:ℂ) * x) ^ a)⁻¹ * ((1 - (z.2:ℂ) * y) ^ a')⁻¹) := by
+    filter_upwards [ae_restrict_mem hT] with z hz
+    obtain ⟨hu, hv⟩ := mem_Icc_of_mem_appellTriangle hz
+    have hn1 : ‖x * z.1‖ < 1 := by
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hu.1]
+      nlinarith [norm_nonneg x, hu.2]
+    have hn2 : ‖y * z.2‖ < 1 := by
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hv.1]
+      nlinarith [norm_nonneg y, hv.2]
+    have h1 := hasSum_poch_div_factorial (β := a) hn1
+    have h2 := hasSum_poch_div_factorial (β := a') hn2
+    have hm := h1.mul h2 (summable_mul_of_summable_norm
+      (summable_norm_poch_div_factorial_mul_pow_of_norm_lt_one a hn1)
+      (summable_norm_poch_div_factorial_mul_pow_of_norm_lt_one a' hn2))
+    rw [cpow_neg, cpow_neg, mul_comm x, mul_comm y] at hm
+    refine hm.congr_fun fun q => ?_
+    simp only [hddef, mul_pow]
+    ring
+  have key := hasSum_integral_mul_of_norm_le_one (μ := volume.restrict appellTriangle) hw hd
+    (e := fun q z => (z.1:ℂ) ^ q.1 * (z.2:ℂ) ^ q.2) (fun q => by fun_prop) hbd hg
+  have hsum := hasSum_appF3 a a' b b' c hc (x := x) (y := y) ⟨hx, hy⟩
+  refine hsum.unique ?_
+  unfold appF3Euler
+  have e1 : (∫ z in appellTriangle, appF3EulerKernel a a' b b' c x y z) =
+      ∫ z in appellTriangle, w z * (((1 - (z.1:ℂ) * x) ^ a)⁻¹ * ((1 - (z.2:ℂ) * y) ^ a')⁻¹) := by
+    congr 1; funext z; simp only [appF3EulerKernel, hwdef, appellTriangleKernel, div_eq_mul_inv]
+    ring
+  rw [e1]
+  refine (key.mul_left (Gamma c / (Gamma b * Gamma b' * Gamma γ))).congr_fun fun q => ?_
+  obtain ⟨m, n⟩ := q
+  simp only
+  have hI : (∫ z in appellTriangle, w z * ((z.1:ℂ) ^ m * (z.2:ℂ) ^ n)) =
+      Gamma (b + m) * Gamma (b' + n) * Gamma γ / Gamma (b + m + (b' + n) + γ) := by
+    rw [← setIntegral_appellTriangleKernel (by simp; linarith) (by simp; linarith) hrest]
+    refine setIntegral_congr_fun hT fun z hz => ?_
+    obtain ⟨hu, hv⟩ := mem_Icc_of_mem_appellTriangle hz
+    simp only [hwdef, appellTriangleKernel]
+    rw [← ofReal_cpow_sub_one_mul_pow hu.1 hb m, ← ofReal_cpow_sub_one_mul_pow hv.1 hb' n]
+    ring
+  rw [hI, show b + m + (b' + n) + γ = c + ((m + n : ℕ) : ℂ) by rw [hγdef]; push_cast; ring,
+    Gamma_add_nat_eq_poch_mul_Gamma hb, Gamma_add_nat_eq_poch_mul_Gamma hb',
+    Gamma_add_nat_eq_poch_mul_Gamma hcre]
+  have hm : (m ! : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero
+  have hn : (n ! : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
+  have hpc := poch_ne_zero_of_not_neg_nat hc (m + n)
+  have hGb := Gamma_ne_zero_of_re_pos hb
+  have hGb' := Gamma_ne_zero_of_re_pos hb'
+  have hGγ := Gamma_ne_zero_of_re_pos hrest
+  have hGc := Gamma_ne_zero_of_re_pos hcre
+  simp only [appF3Coeff, hddef]
+  field_simp
 
 /-- 16.15.E4: appF4 euler integrable. -/
 @[dlmf 16.15.E4]

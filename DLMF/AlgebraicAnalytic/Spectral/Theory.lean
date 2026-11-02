@@ -16,6 +16,7 @@ public import DLMFMathlib.MeasureTheory.Function.L2Space
 public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.Oscillator
 public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.HilbertBasis
 public import Mathlib.Analysis.Complex.RealDeriv
+public import DLMFMathlib.Analysis.Fourier.DirichletKernel
 
 /-!
 # Linear second-order differential operators and eigenfunction expansions (DLMF §1.18)
@@ -604,6 +605,24 @@ theorem tendsto_hankel_kernel {ν : ℝ} (hν : -1 < ν) {f : ℝ → ℂ} {x : 
         Complex.besselJ ν (y * t)) atTop (𝓝 ((1 / 2 : ℂ) * (fp + fm))) := by
   sorry
 
+/-- `∫₀^R (cos(xt) cos(yt) + sin(xt) sin(yt)) dt = sin(R(x - y))/(x - y)` for `x ≠ y`. -/
+private lemma integral_cos_mul_cos_add_sin_mul_sin {x y : ℝ} (h : x - y ≠ 0) (R : ℝ) :
+    ∫ t in (0 : ℝ)..R, (Real.cos (x * t) * Real.cos (y * t) + Real.sin (x * t) *
+      Real.sin (y * t)) = Real.sin (R * (x - y)) / (x - y) := by
+  have hd : ∀ t ∈ uIcc (0 : ℝ) R, HasDerivAt (fun t => Real.sin ((x - y) * t) / (x - y))
+      (Real.cos (x * t) * Real.cos (y * t) + Real.sin (x * t) * Real.sin (y * t)) t := by
+    intro t _
+    convert ((hasDerivAt_id t).const_mul (x - y)).sin.div_const (x - y) using 1
+    simp only [id]
+    rw [sub_mul, Real.cos_sub]
+    field_simp
+    simp only [id, mul_comm t y]
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd (by
+    exact (by fun_prop : Continuous fun t => Real.cos (x * t) * Real.cos (y * t) +
+      Real.sin (x * t) * Real.sin (y * t)).intervalIntegrable _ _)]
+  simp only [mul_zero, Real.sin_zero, zero_div, sub_zero]
+  rw [mul_comm R]
+
 /-- DLMF 1.18.59 (Fourier integral theorem in cosine–sine form, Titchmarsh 1962a, pp. 71–72):
 `f(x) = π⁻¹ ∫ (∫_0^∞ cos(xt) cos(yt) dt) f(y) dy + π⁻¹ ∫ (∫_0^∞ sin(xt) sin(yt) dt) f(y) dy`,
 with the inner integrals over `[0, R]` and `R → ∞`, for `f ∈ L¹(ℝ)` differentiable at `x`. -/
@@ -613,7 +632,15 @@ theorem tendsto_fourier_cos_sin {f : ℝ → ℂ} (hf : Integrable f) {x : ℝ}
     Tendsto (fun R : ℝ => (1 / Real.pi : ℂ) * ∫ y, ((∫ t in (0 : ℝ)..R,
         Real.cos (x * t) * Real.cos (y * t) + Real.sin (x * t) * Real.sin (y * t) : ℝ) : ℂ) *
           f y) atTop (𝓝 (f x)) := by
-  sorry
+  refine (Real.tendsto_integral_mul_sin_div_of_differentiableAt hf hx).congr fun R => ?_
+  rw [← MeasureTheory.integral_const_mul]
+  refine integral_congr_ae ?_
+  filter_upwards [Measure.ae_ne volume x] with y hy
+  rw [integral_cos_mul_cos_add_sin_mul_sin (sub_ne_zero.2 (Ne.symm hy))]
+  have : Real.pi ≠ 0 := Real.pi_ne_zero
+  have h1 : (x : ℂ) - y ≠ 0 := by exact_mod_cast sub_ne_zero.2 (Ne.symm hy)
+  push_cast
+  field_simp
 
 /-- §1.18(viii), Example 1 (Simon 1976, Thm. 2.5): in one dimension a potential with
 `∫ (1 + x²)|q| < ∞`, `q ≢ 0` and `∫ q ≤ 0` has a bound state: there are `λ < 0` and a nonzero

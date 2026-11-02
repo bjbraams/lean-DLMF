@@ -390,7 +390,7 @@ theorem arccos_left_cut_limit {x : ℝ} (hx : x≤ -1) (upper : Bool) :
 @[dlmf 4.23.E26]
 theorem arctan_principal_log {z : ℂ} (hz : z∈arctanCutPlane) :
     Complex.arctan z=I/2*Complex.log ((I+z)/(I-z)) := by
-  have hs := trig_arctan_quotient_slit hz
+  have hs := Trigonometric.arctan_quotient_slit hz
   have hv : (I+z)/(I-z) = ((1+z*I)/(1-z*I))⁻¹ := by
     rw [inv_div, show (1-z*I) = (-I)*(I+z) by linear_combination Complex.I_sq,
       show (1+z*I) = (-I)*(I-z) by linear_combination Complex.I_sq,
@@ -498,8 +498,8 @@ theorem reciprocal_reverses_real_cut_bank {x : ℝ} (hx : x≠0) :
 @[dlmf 4.23.E28]
 theorem sin_arcsin_principal (z : ℂ) : Complex.sin (arcsinPrincipal z)=z := by
   let w:=Complex.sqrt (1-z^2)+I*z
-  have hw:w≠0 := trig_arcsin_log_arg_ne z
-  have hp:w*(Complex.sqrt (1-z^2)-I*z)=1 := trig_arcsin_product z
+  have hw:w≠0 := Trigonometric.arcsin_log_arg_ne z
+  have hp:w*(Complex.sqrt (1-z^2)-I*z)=1 := Trigonometric.arcsin_product z
   have hi:w⁻¹=Complex.sqrt (1-z^2)-I*z := by
     apply (mul_left_cancel₀ hw)
     rw [mul_inv_cancel₀ hw,hp]
@@ -519,7 +519,7 @@ theorem cos_arccos_principal (z : ℂ) : Complex.cos (arccosPrincipal z)=z := by
   rw [arccosPrincipal,Complex.cos_pi_div_two_sub,sin_arcsin_principal]
 
 /-- Mathlib gives the two sine fibers separately; this combines them using integer parity. -/
-private lemma trig_sine_fiber_forms (A w : ℂ) :
+private lemma Trigonometric.sine_fiber_forms (A w : ℂ) :
     (∃ k : ℤ,w=2*k*π+A ∨ w=(2*k+1)*π-A) ↔
       ∃ k : ℤ,w=(-1:ℂ)^k*A+k*π := by
   constructor
@@ -555,9 +555,9 @@ theorem arcsin_general_values (z w : ℂ) :
   have hb:=sin_arcsin_principal z
   constructor
   · intro h
-    exact (trig_sine_fiber_forms _ _).mp (Complex.sin_eq_sin_iff.mp (hb.trans h.symm))
+    exact (Trigonometric.sine_fiber_forms _ _).mp (Complex.sin_eq_sin_iff.mp (hb.trans h.symm))
   · intro h
-    exact (Complex.sin_eq_sin_iff.mpr ((trig_sine_fiber_forms _ _).mpr h)).symm.trans hb
+    exact (Complex.sin_eq_sin_iff.mpr ((Trigonometric.sine_fiber_forms _ _).mpr h)).symm.trans hb
 
 end DLMF.Elementary
 end

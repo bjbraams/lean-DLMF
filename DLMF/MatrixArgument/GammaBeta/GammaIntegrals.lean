@@ -20,12 +20,11 @@ public import DLMF.MatrixArgument.GammaBeta.CholeskyCoordinates
 # Integrals for the multivariate gamma function (DLMF §35.3)
 
 The integral representations of `Γ_m(a)` and `Γ_m(s₁, …, s_m)` for complex parameters, and
-the scaled Laplace integrals over `Ω` used for 35.3.8 and 35.4.8.
+the scaled Laplace integrals over `Ω` used for 35.3.8 and 35.4.8. The bridge to Tau Ceti's real
+`Γ_m` and the case `m = 1` (35.3.4) are in `DLMF.MatrixArgument.Basic`.
 
 ## Main results
 
-* `multivariateGamma_ofReal`, `multivariateGamma_one`: the bridge to Tau Ceti's real `Γ_m` and
-  the case `m = 1` (35.3.4).
 * `multivariateGamma_eq_integral`, `multivariateGammaVec_eq_integral`: 35.3.1 and 35.3.2.
 * `hasIntegralOn_laplace_leadingMinorPowProd`:
   `∫_Ω etr(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)` for the leading-minor
@@ -42,27 +41,9 @@ namespace DLMF.MatrixArgument
 
 /-! ## §35.3 Multivariate gamma and beta functions -/
 
-/-- DLMF 35.3.4: on real arguments `Γ_m` is Tau Ceti's real multivariate gamma function. -/
-@[dlmf 35.3.E4]
-theorem multivariateGamma_ofReal (m : ℕ) (x : ℝ) :
-    ((TauCeti.multivariateGamma m x : ℝ) : ℂ) = multivariateGamma m x := by
-  rw [TauCeti.multivariateGamma_def, multivariateGamma, Complex.ofReal_mul,
-    Complex.ofReal_cpow Real.pi_pos.le, Complex.ofReal_prod]
-  push_cast
-  congr 1
-  refine Finset.prod_congr rfl fun j _ => ?_
-  rw [← Complex.Gamma_ofReal]
-  push_cast
-  rfl
-
-/-- DLMF 35.3.4 for `m = 1`: `Γ₁(a) = Γ(a)`. -/
-@[dlmf 35.3.E4]
-theorem multivariateGamma_one (a : ℂ) : multivariateGamma 1 a = Complex.Gamma a := by
-  simp [multivariateGamma]
-
 /-- DLMF 35.3.1: `Γ_m(a) = ∫_Ω etr(-X) |X|^{a-(m+1)/2} dX` for `ℜa > (m-1)/2`, the integral
 converging absolutely. For real `a` this is Tau Ceti's `TauCeti.integral_posDef_multivariateGamma`
-(see `multivariateGamma_ofReal`). -/
+(see `DLMF.MatrixArgument.multivariateGamma_ofReal`). -/
 @[dlmf 35.3.E1]
 theorem multivariateGamma_eq_integral {m : ℕ} {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re) :
     HasIntegralOn (posDefCone m)

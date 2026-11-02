@@ -18,13 +18,13 @@ produce the substitution.
 
 ## Main results
 
-* `Asymptotics.lapSad_hasAsymptoticExpansion_gauss_odd`: if `G(v) ~ ∑ bⱼ v^{2j+1}` as `v → 0⁺`,
-  then `∫₀^{v₀} e^{-z v²/2} G(v) dv ~ ∑ j! 2ʲ bⱼ z^{-(j+1)}` as `z → +∞`.
-* `Asymptotics.lapSad_hasAsymptoticExpansion_gauss_analytic`: the same for the odd amplitude
+* `Asymptotics.LaplaceSaddle.hasAsymptoticExpansion_gauss_odd`: if `G(v) ~ ∑ bⱼ v^{2j+1}` as
+  `v → 0⁺`, then `∫₀^{v₀} e^{-z v²/2} G(v) dv ~ ∑ j! 2ʲ bⱼ z^{-(j+1)}` as `z → +∞`.
+* `Asymptotics.LaplaceSaddle.hasAsymptoticExpansion_gauss_analytic`: the same for the odd amplitude
   `v (-U(-v) - U(v))` built from an analytic substitution `U`, with coefficients read off from
-  the power series of `U` (`Asymptotics.lapSad_isBigO_odd_part`).
-* `Asymptotics.lapSad_coeff_eq_zero_of_isBigO`: uniqueness of truncated power expansions, used
-  to identify Taylor coefficients of implicitly defined substitutions.
+  the power series of `U` (`Asymptotics.LaplaceSaddle.isBigO_odd_part`).
+* `Asymptotics.LaplaceSaddle.coeff_eq_zero_of_isBigO`: uniqueness of truncated power expansions,
+  used to identify Taylor coefficients of implicitly defined substitutions.
 -/
 
 @[expose] public noncomputable section
@@ -35,7 +35,7 @@ open scoped Topology
 namespace Asymptotics
 
 /-- The map `v ↦ v²/2` sends `(0, v₀]` onto `(0, v₀²/2]`. -/
-theorem lapSad_image_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) :
+theorem LaplaceSaddle.image_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) :
     (fun v : ℝ => v^2/2) '' Ioc 0 v₀ = Ioc 0 (v₀^2/2) := by
   ext τ
   constructor
@@ -48,9 +48,9 @@ theorem lapSad_image_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) :
       rw [Real.sq_sqrt (by linarith)]; ring
 
 /-- Change of variables `τ = v²/2` on `(0, v₀]`. -/
-theorem lapSad_integral_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) (g : ℝ → ℝ) :
+theorem LaplaceSaddle.integral_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) (g : ℝ → ℝ) :
     ∫ τ in Ioc 0 (v₀^2/2), g τ = ∫ v in Ioc 0 v₀, v * g (v^2/2) := by
-  rw [← lapSad_image_half_sq hv₀, integral_image_eq_integral_abs_deriv_smul measurableSet_Ioc
+  rw [← LaplaceSaddle.image_half_sq hv₀, integral_image_eq_integral_abs_deriv_smul measurableSet_Ioc
     (f' := fun v => v)]
   · refine setIntegral_congr_fun measurableSet_Ioc fun v hv => ?_
     simp [abs_of_pos hv.1]
@@ -65,7 +65,7 @@ theorem lapSad_integral_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) (g : ℝ → ℝ
 /-- **Watson's lemma in Gaussian form, odd amplitude.** If `G` is continuous on `[0, v₀]` and
 `G(v) - ∑_{j<N} bⱼ v^{2j+1} = O(v^{2N+1})` as `v → 0⁺` for every `N`, then
 `∫₀^{v₀} e^{-z v²/2} G(v) dv ~ ∑ Γ(j+1) 2ʲ bⱼ z^{-(j+1)}` as `z → +∞`. -/
-theorem lapSad_hasAsymptoticExpansion_gauss_odd {G : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀)
+theorem LaplaceSaddle.hasAsymptoticExpansion_gauss_odd {G : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀)
     (hG : ContinuousOn G (Icc 0 v₀)) {b : ℕ → ℝ}
     (hexp : ∀ N : ℕ, (fun v => G v - ∑ j ∈ Finset.range N, b j * v^(2*j+1)) =O[𝓝[>] 0]
       fun v => v^(2*N+1)) :
@@ -92,7 +92,7 @@ theorem lapSad_hasAsymptoticExpansion_gauss_odd {G : ℝ → ℝ} {v₀ : ℝ} (
         by_cases h' : τ ∈ Ioi (0:ℝ)
         · simp [indicator_of_mem h', indicator_of_notMem h]
         · simp [indicator_of_notMem h']
-    rw [h1, lapSad_integral_half_sq hv₀, intervalIntegral.integral_of_le hv₀.le]
+    rw [h1, LaplaceSaddle.integral_half_sq hv₀, intervalIntegral.integral_of_le hv₀.le]
     refine setIntegral_congr_fun measurableSet_Ioc fun v hv => ?_
     rw [hsq v hv.1]
     field_simp [hv.1.ne']
@@ -101,7 +101,7 @@ theorem lapSad_hasAsymptoticExpansion_gauss_odd {G : ℝ → ℝ} {v₀ : ℝ} (
     have hGi : IntegrableOn G (Ioc 0 v₀) :=
       (hG.integrableOn_compact isCompact_Icc).mono_set Ioc_subset_Icc_self
     have hI : IntegrableOn (fun τ => G (Real.sqrt (2*τ)) / Real.sqrt (2*τ)) (Ioc 0 T) := by
-      rw [← lapSad_image_half_sq hv₀, integrableOn_image_iff_integrableOn_abs_deriv_smul
+      rw [← LaplaceSaddle.image_half_sq hv₀, integrableOn_image_iff_integrableOn_abs_deriv_smul
         measurableSet_Ioc (f' := fun v => v)]
       · refine hGi.congr_fun (fun v hv => ?_) measurableSet_Ioc
         simp only [smul_eq_mul]
@@ -162,7 +162,7 @@ theorem lapSad_hasAsymptoticExpansion_gauss_odd {G : ℝ → ℝ} {v₀ : ℝ} (
 
 /-- Uniqueness of truncated expansions: if `∑_{k<M} eₖ vᵏ = O(v^M)` as `v → 0`, `v ≠ 0`,
 then `eₖ = 0` for every `k < M`. -/
-theorem lapSad_coeff_eq_zero_of_isBigO : ∀ (M : ℕ) {e : ℕ → ℝ},
+theorem LaplaceSaddle.coeff_eq_zero_of_isBigO : ∀ (M : ℕ) {e : ℕ → ℝ},
     (fun v : ℝ => ∑ k ∈ Finset.range M, e k * v^k) =O[𝓝[≠] 0] (fun v => v^M) →
     ∀ k < M, e k = 0
   | 0, _, _, k, hk => absurd hk (Nat.not_lt_zero k)
@@ -177,7 +177,7 @@ theorem lapSad_coeff_eq_zero_of_isBigO : ∀ (M : ℕ) {e : ℕ → ℝ},
       have := (h.trans h1).sub ((isBigO_refl (fun v : ℝ => v^M) (𝓝[≠] 0)).const_mul_left (e M))
       exact this.congr' (Eventually.of_forall fun v => by simp [Finset.sum_range_succ])
         EventuallyEq.rfl
-    have hlow := lapSad_coeff_eq_zero_of_isBigO M hM
+    have hlow := LaplaceSaddle.coeff_eq_zero_of_isBigO M hM
     have hEM : e M = 0 := by
       have h3 : (fun v : ℝ => e M * v^M) =O[𝓝[≠] 0] (fun v => v^(M+1)) := by
         refine h.congr' (Eventually.of_forall fun v => ?_) EventuallyEq.rfl
@@ -202,7 +202,7 @@ theorem lapSad_coeff_eq_zero_of_isBigO : ∀ (M : ℕ) {e : ℕ → ℝ},
 
 /-- Pairing the terms of degree `2j` and `2j+1`: `-T(-v) - T(v) = ∑_{j<N} -2 c_{2j} v^{2j}` for
 the polynomial `T(v) = ∑_{k<2N} c_k vᵏ`. -/
-theorem lapSad_sum_even_part (c : ℕ → ℝ) (v : ℝ) (N : ℕ) :
+theorem LaplaceSaddle.sum_even_part (c : ℕ → ℝ) (v : ℝ) (N : ℕ) :
     -(∑ k ∈ Finset.range (2*N), c k * (-v)^k) - ∑ k ∈ Finset.range (2*N), c k * v^k =
       ∑ j ∈ Finset.range N, (-2 * c (2*j)) * v^(2*j) := by
   induction N with
@@ -218,7 +218,7 @@ theorem lapSad_sum_even_part (c : ℕ → ℝ) (v : ℝ) (N : ℕ) :
 
 /-- Odd part of an analytic function: if `U` has the power series `p` at `0`, then
 `v (-U(-v) - U(v)) = ∑_{j<N} (-2 p_{2j}) v^{2j+1} + O(v^{2N+1})` as `v → 0`. -/
-theorem lapSad_isBigO_odd_part {U : ℝ → ℝ} {p : FormalMultilinearSeries ℝ ℝ ℝ}
+theorem LaplaceSaddle.isBigO_odd_part {U : ℝ → ℝ} {p : FormalMultilinearSeries ℝ ℝ ℝ}
     (hU : HasFPowerSeriesAt U p 0) (N : ℕ) :
     (fun v => v * (-U (-v) - U v) - ∑ j ∈ Finset.range N, (-2 * p.coeff (2*j)) * v^(2*j+1))
       =O[𝓝 0] fun v => v^(2*N+1) := by
@@ -234,7 +234,7 @@ theorem lapSad_isBigO_odd_part {U : ℝ → ℝ} {p : FormalMultilinearSeries �
       =O[𝓝 0] fun v => ‖v‖^(2*N) := by
     refine (h'.neg_left.sub h).congr' (Eventually.of_forall fun v => ?_) EventuallyEq.rfl
     dsimp only
-    rw [← lapSad_sum_even_part]
+    rw [← LaplaceSaddle.sum_even_part]
     simp only [mul_comm (p.coeff _)]
     ring
   refine ((isBigO_refl (fun v : ℝ => v) (𝓝 0)).mul hW).congr' (Eventually.of_forall fun v => ?_)
@@ -251,14 +251,14 @@ theorem lapSad_isBigO_odd_part {U : ℝ → ℝ} {p : FormalMultilinearSeries �
 `∫₀^{v₀} e^{-z v²/2} v (-U(-v) - U(v)) dv ~ ∑ Γ(j+1) 2ʲ (-2 p_{2j}) z^{-(j+1)}` as `z → +∞`.
 This is the form taken by `∫ e^{-z ψ}` across a quadratic minimum of `ψ` after the substitution
 `ψ = v²/2` and an integration by parts. -/
-theorem lapSad_hasAsymptoticExpansion_gauss_analytic {U : ℝ → ℝ}
+theorem LaplaceSaddle.hasAsymptoticExpansion_gauss_analytic {U : ℝ → ℝ}
     {p : FormalMultilinearSeries ℝ ℝ ℝ} (hU : HasFPowerSeriesAt U p 0) {v₀ : ℝ} (hv₀ : 0 < v₀)
     (hc : ContinuousOn U (Icc (-v₀) v₀)) :
     HasAsymptoticExpansion atTop (fun (j : ℕ) (z : ℝ) => z ^ (-((j : ℝ) + 1)))
       (fun j => Real.Gamma ((j : ℝ) + 1) * (2^j * (-2 * p.coeff (2*j))))
       (fun z => ∫ v in (0:ℝ)..v₀, Real.exp (-z * v^2/2) * (v * (-U (-v) - U v))) := by
-  refine lapSad_hasAsymptoticExpansion_gauss_odd hv₀ ?_ fun N =>
-    (lapSad_isBigO_odd_part hU N).mono nhdsWithin_le_nhds
+  refine LaplaceSaddle.hasAsymptoticExpansion_gauss_odd hv₀ ?_ fun N =>
+    (LaplaceSaddle.isBigO_odd_part hU N).mono nhdsWithin_le_nhds
   have h1 : ContinuousOn U (Icc 0 v₀) := hc.mono (Icc_subset_Icc (by linarith) le_rfl)
   have h2 : ContinuousOn (fun v => U (-v)) (Icc 0 v₀) :=
     hc.comp continuousOn_neg fun v hv => ⟨by linarith [hv.2], by linarith [hv.1]⟩

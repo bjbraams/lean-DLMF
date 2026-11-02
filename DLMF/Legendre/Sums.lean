@@ -57,8 +57,9 @@ theorem ferrersP_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 
         (ferrersP ν 0 (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos phi)-ferrersP ν 0
         (Real.cos θ₁)*ferrersP ν 0 (Real.cos θ₂)) := by
   -- Fourier expansion in `phi`; coefficients by Carlson's theorem (type `θ₁ + θ₂ < π`) from
-  -- the integer case `legAdd_fer_nat`.
-  exact legAdd_ferrersP_addition_of_nat h1 h2 hs (legAdd_fer_nat h1 h2 hs) ν phi
+  -- the integer case `AdditionTheorem.ferrers_nat`.
+  exact AdditionTheorem.ferrersP_addition_of_nat h1 h2 hs
+      (AdditionTheorem.ferrers_nat h1 h2 hs) ν phi
 
 /-- DLMF 14.18.3: for `0 < θ₁ < θ₂` with `θ₁ < π/2`, `θ₁ + θ₂ < π`, real `φ` and `ν` not a negative
 integer, `𝖰_ν(cos θ₁ cos θ₂ + sin θ₁ sin θ₂ cos φ) = 𝖯_ν(cos θ₁) 𝖰_ν(cos θ₂) + 2 Σ_{m≥1} (-1)^m
@@ -72,7 +73,7 @@ theorem ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 < θ₁) (hs : 
         (Real.cos θ₁)*ferrersQ ν 0 (Real.cos θ₂)) := by
   -- Non-real `ν`: 14.18.1 at `(θ₁, θ₂)` and `(θ₁, π - θ₂)` with 14.9.10; then continuity in `ν`.
   -- The hypothesis `θ₁ < π/2` is not needed.
-  exact legQAdd_ferrersQ_addition ν h1.le h12 hs hr phi
+  exact SecondKindAddition.ferrersQ_addition ν h1.le h12 hs hr phi
 
 /-- DLMF 14.18.2: for natural `n`, `θ₁, θ₂ ≥ 0` with `θ₁ + θ₂ < π` and real `φ`, `P_n(cos θ₁ cos θ₂
 + sin θ₁ sin θ₂ cos φ) = Σ_{m=-n}^{n} (-1)^m 𝖯^{-m}_n(cos θ₁) 𝖯^m_n(cos θ₂) cos(mφ)`. -/
@@ -119,9 +120,10 @@ theorem ferrersP_nat_addition (n : ℕ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (
         (-1)^k * DLMF.OrthogonalPolynomials.LegendreAddition.coeff n k (Real.cos θ₁) (Real.cos θ₂)
             (Real.sin θ₁) (Real.sin θ₂) := by
     intro k hkn
-    rw [legAdd_ferrersP_neg_nat_eq_ferrersPNat n k hkn hx1,
-      legAdd_ferrersP_neg_nat_eq_ferrersPNat n k hkn hx2,
-      legAdd_ferrersP_nat_eq_ferrersPNat n k hx1, legAdd_ferrersP_nat_eq_ferrersPNat n k hx2,
+    rw [AdditionTheorem.ferrersP_neg_nat_eq_ferrersPNat n k hkn hx1,
+      AdditionTheorem.ferrersP_neg_nat_eq_ferrersPNat n k hkn hx2,
+      AdditionTheorem.ferrersP_nat_eq_ferrersPNat n k hx1,
+          AdditionTheorem.ferrersP_nat_eq_ferrersPNat n k hx2,
       hF k θ₁ h1 hθ1, hF k θ₂ h2 hθ2]
     have hs : ((-1:ℂ))^k * (-1)^k = 1 := by rw [← mul_pow]; norm_num
     simp only [DLMF.OrthogonalPolynomials.LegendreAddition.coeff,
@@ -170,7 +172,7 @@ theorem associatedP_addition (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2
         (associatedP ν 0 (Real.cosh ξ₁*Real.cosh ξ₂-Real.sinh ξ₁*Real.sinh ξ₂*Real.cos
         phi)-associatedP ν 0 (Real.cosh ξ₁)*associatedP ν 0 (Real.cosh ξ₂)) := by
   -- Fourier expansion in `phi`; coefficients by Carlson's theorem from the integer case.
-  exact legAdd_associatedP_addition ν h1 h2 phi
+  exact AdditionTheorem.associatedP_addition ν h1 h2 phi
 
 /-- DLMF 14.18.5: for `0 < ξ₁ < ξ₂`, real `φ` and `ν` not a negative integer, `Q_ν(cosh ξ₁ cosh ξ₂ -
 sinh ξ₁ sinh ξ₂ cos φ) = P_ν(cosh ξ₁) Q_ν(cosh ξ₂) + 2 Σ_{m≥1} (-1)^m P^{-m}_ν(cosh ξ₁) Q^m_ν(cosh
@@ -946,6 +948,6 @@ theorem associatedP_complex_addition (ν : ℂ) {z₁ z₂ : ℂ} (h1 : 0 < z₁
         ((log (z₂-1)+log (z₂+1))/2)*Real.cos phi)-associatedP ν 0 z₁*associatedP ν 0 z₂) := by
   -- The combined argument avoids `(-∞, -1]` for every angle, so 14.18.4 continues analytically in
   -- `z₁` and `z₂`; the hypothesis `harg` is not needed.
-  exact legQAdd_associatedP_complex_addition ν h1 h2 hz1 hz2 phi
+  exact SecondKindAddition.associatedP_complex_addition ν h1 h2 hz1 hz2 phi
 
 end DLMF.Legendre

@@ -33,6 +33,8 @@ definite integrals of products.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF.Confluent
 open scoped Real Topology
+open DLMF.Core
+
 namespace DLMF.Airy
 
 /-- The derivative of a product of Airy solutions. -/
@@ -88,7 +90,7 @@ theorem airy_modulus_sq_exp_integral (z : ℂ) :
       airyAi z ^ 2 + airyBi z ^ 2 =
         (∫ t : ℝ in Ioi 0, exp (z * t - (t : ℂ) ^ 3 / 12) * (t : ℂ) ^ (-1 / 2 : ℂ)) /
           (π : ℂ) ^ (3 / 2 : ℂ) :=
-  airyMod_modulus_sq_exp_integral z
+  ModulusPhase.modulus_sq_exp_integral z
 
 /-- For Airy solutions `f, g`, an antiderivative of `f g` is `-f' g' + z f g` (DLMF 9.11.5). -/
 @[dlmf 9.11.E5]
@@ -235,10 +237,12 @@ theorem airyAi_sq_mellin {α : ℂ} (hα : 0 < α.re) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ (α - 1) * airyAi t ^ 2) (Ioi 0) ∧
       (∫ t : ℝ in Ioi 0, (t : ℂ) ^ (α - 1) * airyAi t ^ 2) =
         2 * Gamma α / (Real.sqrt π * (12 : ℂ) ^ ((2 * α + 5) / 6) * Gamma (α / 3 + 5 / 6)) := by
-  refine ⟨airySq_integrableOn_mellin hα, ?_⟩
+  refine ⟨AiSquare.integrableOn_mellin hα, ?_⟩
   have hw : 0 < (α + 1 / 2).re := by simp; linarith
-  rw [setIntegral_congr_fun measurableSet_Ioi (fun x _ => airySq_mellin_pt α x), integral_const_mul,
-    airySq_double hα, show α + 1 / 2 - 1 = (α + 1 / 2) - 1 by ring, airySq_scaled_mellin hw,
+  rw [setIntegral_congr_fun measurableSet_Ioi (fun x _ => AiSquare.mellin_pt α x),
+      integral_const_mul,
+    AiSquare.integral_integral_mellinKernel hα, show α + 1 / 2 - 1 = (α + 1 / 2) - 1 by
+        ring, AiSquare.scaled_mellin hw,
     show (α + 1 / 2 + 2) / 3 = (2 * α + 5) / 6 by ring,
     show (α + 1 / 2) / 3 + 2 / 3 = α / 3 + 5 / 6 by ring]
   have hB := Gamma_mul_Gamma_eq_betaIntegral hα (show (0 : ℝ) < (1 / 2 : ℂ).re by norm_num)
@@ -252,8 +256,8 @@ theorem airyAi_sq_mellin {α : ℂ} (hα : 0 < α.re) :
     rw [← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
   have hsp : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_pos.ne'
-  have hlc : Real.log airySq_c = 2 / 3 * Real.log 2 := by
-    rw [airySq_c, Real.log_rpow two_pos]
+  have hlc : Real.log AiSquare.scale = 2 / 3 * Real.log 2 := by
+    rw [AiSquare.scale, Real.log_rpow two_pos]
   have hl12 : Real.log 12 = 2 * Real.log 2 + Real.log 3 := by
     rw [show (12 : ℝ) = 2 ^ 2 * 3 by norm_num, Real.log_mul (by norm_num) (by norm_num),
       Real.log_pow]; push_cast; ring
@@ -262,9 +266,9 @@ theorem airyAi_sq_mellin {α : ℂ} (hα : 0 < α.re) :
         norm_num)]
   have h3 : (3 : ℂ) ^ ((2 * α + 5) / 6) = exp ((Real.log 3 : ℂ) * ((2 * α + 5) / 6)) := by
     rw [show (3 : ℂ) = ((3 : ℝ) : ℂ) by norm_num, Complex.ofReal_cpow_eq_exp (by norm_num)]
-  have hc : ((airySq_c : ℝ) : ℂ) = exp (Real.log airySq_c : ℂ) := by
-    rw [← ofReal_exp, Real.exp_log airySq_c_pos]
-  have key : ((airySq_c : ℝ) : ℂ) * exp (-(Real.log airySq_c : ℂ) * (α + 1 / 2)) *
+  have hc : ((AiSquare.scale : ℝ) : ℂ) = exp (Real.log AiSquare.scale : ℂ) := by
+    rw [← ofReal_exp, Real.exp_log AiSquare.scale_pos]
+  have key : ((AiSquare.scale : ℝ) : ℂ) * exp (-(Real.log AiSquare.scale : ℂ) * (α + 1 / 2)) *
       (12 : ℂ) ^ ((2 * α + 5) / 6) = 4 * (3 : ℂ) ^ ((2 * α + 5) / 6) := by
     rw [h12, h3, hc, ← Complex.exp_add, ← Complex.exp_add, hlc, hl12,
       show (4 : ℂ) = exp ((Real.log 4 : ℂ)) by
@@ -278,18 +282,18 @@ theorem airyAi_sq_mellin {α : ℂ} (hα : 0 < α.re) :
   have hB' : betaIntegral α (1 / 2) = Gamma α * (Real.sqrt π : ℂ) / Gamma (α + 1 / 2) := by
     rw [eq_div_iff hGw]; linear_combination -hB
   rw [hB']
-  have hCE : ((airySq_c : ℝ) : ℂ) * exp (-(Real.log airySq_c : ℂ) * (α + 1 / 2)) ≠ 0 :=
-    mul_ne_zero (ofReal_ne_zero.mpr airySq_c_pos.ne') (Complex.exp_ne_zero _)
+  have hCE : ((AiSquare.scale : ℝ) : ℂ) * exp (-(Real.log AiSquare.scale : ℂ) * (α + 1 / 2)) ≠ 0 :=
+    mul_ne_zero (ofReal_ne_zero.mpr AiSquare.scale_pos.ne') (Complex.exp_ne_zero _)
   have hT : (12 : ℂ) ^ ((2 * α + 5) / 6) = 4 * (3 : ℂ) ^ ((2 * α + 5) / 6) /
-      (((airySq_c : ℝ) : ℂ) * exp (-(Real.log airySq_c : ℂ) * (α + 1 / 2))) := by
+      (((AiSquare.scale : ℝ) : ℂ) * exp (-(Real.log AiSquare.scale : ℂ) * (α + 1 / 2))) := by
     rw [eq_div_iff hCE]; linear_combination key
   rw [hT, ofReal_div, ofReal_mul, ← hs]
   generalize Gamma α = Ga at *
   generalize Gamma (α + 1 / 2) = Gw at *
   generalize Gamma (α / 3 + 5 / 6) = G5 at *
-  generalize exp (-(Real.log airySq_c : ℂ) * (α + 1 / 2)) = E at *
+  generalize exp (-(Real.log AiSquare.scale : ℂ) * (α + 1 / 2)) = E at *
   generalize (3 : ℂ) ^ ((2 * α + 5) / 6) = T3 at *
-  generalize ((airySq_c : ℝ) : ℂ) = C at *
+  generalize ((AiSquare.scale : ℝ) : ℂ) = C at *
   generalize ((Real.sqrt π : ℝ) : ℂ) = S at *
   have hE : E ≠ 0 := right_ne_zero_of_mul hCE
   have hC : C ≠ 0 := left_ne_zero_of_mul hCE
@@ -381,7 +385,7 @@ theorem arctan_recip_sqrt_three : Real.arctan (1 / Real.sqrt 3) = π / 6 := by
       Real.arctan_tan (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])]
 
 /-- `Ai(0)/Bi(0) = 1/√3`. -/
-theorem airyReal_zero_ratio : airyAiReal 0 / airyBiReal 0 = 1 / Real.sqrt 3 := by
+theorem RealRemainders.zero_ratio : airyAiReal 0 / airyBiReal 0 = 1 / Real.sqrt 3 := by
   have hA : airyAiReal 0 = 1 / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) := by
     have h := airyAi_zero
     rw [Gamma_two_thirds_eq, ← ofReal_mul, ← ofReal_one, ← ofReal_div] at h
@@ -472,7 +476,7 @@ theorem airy_modulus_reciprocal_integrals  :
     (fun x hx => div_nonneg (le_of_lt hx) (airyDerivModulusSq_pos x).le)
     (by simpa [Real.arctan_zero] using
       ((Real.continuous_arctan.tendsto 0).comp tendsto_airyAiDeriv_div_airyBiDeriv).const_mul π)
-  rw [i1, i2, airyReal_zero_ratio, airyDerivReal_zero_ratio, Real.arctan_neg,
+  rw [i1, i2, RealRemainders.zero_ratio, airyDerivReal_zero_ratio, Real.arctan_neg,
     arctan_recip_sqrt_three]
   constructor <;> push_cast <;> ring
 

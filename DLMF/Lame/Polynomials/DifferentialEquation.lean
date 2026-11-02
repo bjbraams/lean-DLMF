@@ -26,6 +26,8 @@ The Lamé polynomial `lamePolyEk t n m` of type `t` (Chebyshev series 29.15.43�
 ## Main results
 
 * `lamePolyEk_isLameSolutionOn`: the Lamé polynomials solve Lamé's equation.
+* `exists_lameSnOperator_eq_zero`: Lamé's equation for the Chebyshev series as a polynomial
+  in `s = sn`.
 * `lamePolyH_lt_of_lt`: `H_m < H_{m'}` for `m < m' ≤ n` (29.15.3).
 * `jacobiRegulark_ofReal`, `jacobiRegulark_K_add_I_mul`: the real axis and the line `K + iℝ`
   contain no poles of `sn, cn, dn`.
@@ -853,6 +855,98 @@ theorem lamePolyEk_isLameSolutionOn {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : L
   · convert isLameSolutionOn_of_lameSnOperator_cn_dn hk _ _ _
         (lameSnOperator_scdE_eq_zero hk0 hm) using 2 with z
     lame_poly_eq_tac
+
+/-- Lamé's equation for the Chebyshev series of type `t` as a polynomial `G` in `s = sn`:
+the operator `(1-s²)(1-k²s²)G'' - sMG' + (N + h - ν(ν+1)k²s²)G` annihilates `G`, with
+`M = 1 + k² - 2k²s² + 2σ'(1 - k²s²) + 2τ'k²(1 - s²)`, where `σ' = 1` for the types with a
+factor `cn` and `τ' = 1` for the types with a factor `dn` (and `0` otherwise). -/
+theorem exists_lameSnOperator_eq_zero {k : ℝ} (hk0 : 0 < k) (t : LamePolyType) {n m : ℕ}
+    (hm : m ≤ n) {G : ℂ[X]}
+    (hG : ∀ s : ℂ, G.eval s =
+      ∑ p ∈ Finset.range (n + 1), (lamePolyCoeff t n m k p : ℂ) * t.basis p s) :
+    ∃ N : ℂ → ℂ, ∀ s : ℂ, lameSnOperator k ((lamePolyH t n m k + t.order n *
+        (t.order n + 1) * k ^ 2) / 2) ((t.order n : ℂ) * ((t.order n : ℂ) + 1))
+      (1 + (k : ℂ) ^ 2 - 2 * k ^ 2 * s ^ 2 +
+        (if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then 2 * (1 - k ^ 2 * s ^ 2) else 0) +
+        (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 2 * k ^ 2 * (1 - s ^ 2) else 0))
+      (N s) G s = 0 := by
+  cases t
+  · refine ⟨fun s => 0, fun s => ?_⟩
+    have e : G = ∑ p ∈ Finset.range (n + 1),
+        C ((lamePolyCoeff .uE n m k p : ℂ) * (if p = 0 then 1 / 2 else 1)) *
+        Chebyshev.T ℂ ((2 * p + 0 : ℕ) : ℤ) := by
+      refine Polynomial.funext fun s => ?_
+      rw [hG]
+      simp only [LamePolyType.basis, eval_finsetSum, eval_mul, eval_C, Nat.add_zero]
+      exact Finset.sum_congr rfl fun p _ => by ring
+    rw [e]
+    convert lameSnOperator_uE_eq_zero hk0 hm s using 2
+    simp
+  · refine ⟨fun s => 0, fun s => ?_⟩
+    have e : G = ∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .sE n m k p : ℂ) *
+        Chebyshev.T ℂ ((2 * p + 1 : ℕ) : ℤ) := by
+      refine Polynomial.funext fun s => ?_
+      rw [hG]
+      simp only [LamePolyType.basis, eval_finsetSum, eval_mul, eval_C]
+    rw [e]
+    convert lameSnOperator_sE_eq_zero hk0 hm s using 2
+    simp
+  · refine ⟨fun s => 2 * (k : ℂ) ^ 2 * s ^ 2 - 1, fun s => ?_⟩
+    have e : G = ∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .cE n m k p : ℂ) *
+        Chebyshev.U ℂ ((2 * p + 0 : ℕ) : ℤ) := by
+      refine Polynomial.funext fun s => ?_
+      rw [hG]
+      simp only [LamePolyType.basis, eval_finsetSum, eval_mul, eval_C, Nat.add_zero]
+    rw [e]
+    convert lameSnOperator_cE_eq_zero hk0 hm s using 2
+    simp
+  · refine ⟨fun s => -(k : ℂ) ^ 2 * (1 - 2 * s ^ 2), fun s => ?_⟩
+    have e : G = ∑ p ∈ Finset.range (n + 1),
+        C ((lamePolyCoeff .dE n m k p : ℂ) * (if p = 0 then 1 / 2 else 1)) *
+        Chebyshev.T ℂ ((2 * p + 0 : ℕ) : ℤ) := by
+      refine Polynomial.funext fun s => ?_
+      rw [hG]
+      simp only [LamePolyType.basis, eval_finsetSum, eval_mul, eval_C, Nat.add_zero]
+      exact Finset.sum_congr rfl fun p _ => by ring
+    rw [e]
+    convert lameSnOperator_dE_eq_zero hk0 hm s using 2
+    simp
+  · refine ⟨fun s => 2 * (k : ℂ) ^ 2 * s ^ 2 - 1, fun s => ?_⟩
+    have e : G = ∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .scE n m k p : ℂ) *
+        Chebyshev.U ℂ ((2 * p + 1 : ℕ) : ℤ) := by
+      refine Polynomial.funext fun s => ?_
+      rw [hG]
+      simp only [LamePolyType.basis, eval_finsetSum, eval_mul, eval_C]
+    rw [e]
+    convert lameSnOperator_scE_eq_zero hk0 hm s using 2
+    simp
+  · refine ⟨fun s => -(k : ℂ) ^ 2 * (1 - 2 * s ^ 2), fun s => ?_⟩
+    have e : G = ∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .sdE n m k p : ℂ) *
+        Chebyshev.T ℂ ((2 * p + 1 : ℕ) : ℤ) := by
+      refine Polynomial.funext fun s => ?_
+      rw [hG]
+      simp only [LamePolyType.basis, eval_finsetSum, eval_mul, eval_C]
+    rw [e]
+    convert lameSnOperator_sdE_eq_zero hk0 hm s using 2
+    simp
+  · refine ⟨fun s => 4 * (k : ℂ) ^ 2 * s ^ 2 - (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2), fun s => ?_⟩
+    have e : G = ∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .cdE n m k p : ℂ) *
+        Chebyshev.U ℂ ((2 * p + 0 : ℕ) : ℤ) := by
+      refine Polynomial.funext fun s => ?_
+      rw [hG]
+      simp only [LamePolyType.basis, eval_finsetSum, eval_mul, eval_C, Nat.add_zero]
+    rw [e]
+    convert lameSnOperator_cdE_eq_zero hk0 hm s using 2
+    simp; ring
+  · refine ⟨fun s => 4 * (k : ℂ) ^ 2 * s ^ 2 - (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2), fun s => ?_⟩
+    have e : G = ∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff .scdE n m k p : ℂ) *
+        Chebyshev.U ℂ ((2 * p + 1 : ℕ) : ℤ) := by
+      refine Polynomial.funext fun s => ?_
+      rw [hG]
+      simp only [LamePolyType.basis, eval_finsetSum, eval_mul, eval_C]
+    rw [e]
+    convert lameSnOperator_scdE_eq_zero hk0 hm s using 2
+    simp; ring
 
 /-- For real `0 < k < 1`, a point other than `2pK + (2q+1)iK'` is not a pole of `sn, cn, dn`. -/
 lemma jacobiRegulark_of_ne_pole {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {z : ℂ}

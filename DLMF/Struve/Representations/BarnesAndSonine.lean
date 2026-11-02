@@ -24,7 +24,8 @@ of DLMF 11.7.8.
 
 * `struveH_barnes`: the Barnes integral for `H_ν`, DLMF 11.5.8.
 * `struveHPrimitive_recurrence`: DLMF 11.7.6.
-* `trig_beta_integral`: the trigonometric Beta integral, with integrability.
+* `intervalIntegrable_and_integral_sin_cpow_mul_cos_cpow`: the trigonometric Beta integral, with
+  integrability.
 * `struveH_sonine`: DLMF 11.7.7.
 * `tendsto_integral_integral_mul_sinc`: Dirichlet's integral under a parametric integral.
 * `struveH_integral_zero_div`, `struveH_integral_one_div_sq`: the integrals
@@ -42,6 +43,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Struve
 
 open DLMF.Bessel
@@ -49,20 +52,21 @@ open DLMF.Bessel
 /-! ### The Barnes integral for `H_ν` (DLMF 11.5.8) -/
 
 /-- `-(ix)²/4 = x²/4`. -/
-theorem struveBar_w (x : ℝ) : -(I * x) ^ 2 / 4 = ((x ^ 2 / 4 : ℝ) : ℂ) := by
+theorem BarnesIntegrand.w (x : ℝ) : -(I * x) ^ 2 / 4 = ((x ^ 2 / 4 : ℝ) : ℂ) := by
   push_cast; ring_nf; rw [I_sq]; ring
 
 /-- The modulus of the 11.5.8 integrand `F(s)` at `s = t + iy`. -/
-theorem struveBar_norm_F (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
-    ‖struveLoop_F ν (I * x) (t + y * I)‖ = (x ^ 2 / 4) ^ t * (π / ‖sin (π * ((t : ℂ) + y * I))‖ *
+theorem BarnesIntegrand.norm_F (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
+    ‖BarnesLoop.integrand ν (I * x) (t + y * I)‖ = (x ^ 2 / 4) ^ t *
+        (π / ‖sin (π * ((t : ℂ) + y * I))‖ *
       (‖Gamma (((3 / 2 + t : ℝ) : ℂ) + y * I)‖)⁻¹ *
       (‖Gamma (((3 / 2 + ν.re + t : ℝ) : ℂ) + ((y : ℂ) + ν.im) * I)‖)⁻¹) := by
   have e1 : (3 / 2 : ℂ) + (t + y * I) = ((3 / 2 + t : ℝ) : ℂ) + y * I := by push_cast; ring
   have e2 : (3 / 2 : ℂ) + ν + (t + y * I) =
       ((3 / 2 + ν.re + t : ℝ) : ℂ) + ((y : ℂ) + ν.im) * I := by
     apply Complex.ext <;> simp; ring
-  simp only [struveLoop_F]
-  rw [struveBar_w, e1, e2, norm_mul, norm_div, norm_div, norm_mul,
+  simp only [BarnesLoop.integrand]
+  rw [BarnesIntegrand.w, e1, e2, norm_mul, norm_div, norm_div, norm_mul,
     norm_cpow_eq_rpow_re_of_pos (by positivity)]
   simp only [norm_real, Real.norm_eq_abs, abs_of_pos Real.pi_pos, add_re, ofReal_re, mul_re,
     I_re, mul_zero, ofReal_im, I_im, mul_one, sub_self, add_zero]
@@ -70,11 +74,11 @@ theorem struveBar_norm_F (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
   ring
 
 /-- The modulus of the 11.5.8 integrand at `s = t - iy`, by conjugation. -/
-theorem struveBar_norm_F_neg (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
-    ‖struveLoop_F ν (I * x) (t + (-y : ℝ) * I)‖ = (x ^ 2 / 4) ^ t *
+theorem BarnesIntegrand.norm_F_neg (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
+    ‖BarnesLoop.integrand ν (I * x) (t + (-y : ℝ) * I)‖ = (x ^ 2 / 4) ^ t *
       (π / ‖sin (π * ((t : ℂ) + y * I))‖ * (‖Gamma (((3 / 2 + t : ℝ) : ℂ) + y * I)‖)⁻¹ *
       (‖Gamma (((3 / 2 + ν.re + t : ℝ) : ℂ) + ((y : ℂ) + ((-ν.im : ℝ) : ℂ)) * I)‖)⁻¹) := by
-  rw [struveBar_norm_F ν hx]
+  rw [BarnesIntegrand.norm_F ν hx]
   have h1 : (π : ℂ) * ((t : ℂ) + ((-y : ℝ) : ℂ) * I) = (starRingEnd ℂ) (π * ((t : ℂ) + y * I)) := by
     apply Complex.ext <;> simp
   have h2 : ((3 / 2 + t : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I =
@@ -88,8 +92,9 @@ theorem struveBar_norm_F_neg (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
 /-- **The horizontal sides vanish.** If `‖G h t‖` is the modulus of the 11.5.8 integrand at
 `t ± ih` (with shift `m = ±Im ν`), then `∫_{(c,∞)} G h → 0` as `h → ∞`: dominated convergence
 with the uniform bounds `DLMF.Gamma.shiftB_norm_recip_Gamma_le` and the pointwise Stirling decay
-`struveBar_isBigO`. -/
-theorem struveBar_tendsto_horizontal (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
+`BarnesIntegrand.isBigO`. -/
+theorem BarnesIntegrand.tendsto_horizontal (ν : ℂ) {x c : ℝ} (hx : 0 < x)
+    (hc : -1 < c) (hc0 : c < 0)
     (hv : -1 < ν.re + 2 * c) (m : ℝ) (G : ℝ → ℝ → ℂ)
     (hG : ∀ h t : ℝ, ‖G h t‖ = (x ^ 2 / 4) ^ t * (π / ‖sin (π * ((t : ℂ) + h * I))‖ *
       (‖Gamma (((3 / 2 + t : ℝ) : ℂ) + h * I)‖)⁻¹ *
@@ -100,7 +105,7 @@ theorem struveBar_tendsto_horizontal (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -
   set D : ℝ → ℝ := fun t => 4 * π * Real.exp (π * |m| / 2) *
     ((x ^ 2 / 4) ^ t / (Real.Gamma (3 / 2 + t) * Real.Gamma (3 / 2 + ν.re + t))) with hD
   have hDi : IntegrableOn D (Ioi c) :=
-    (struveBar_integrableOn_rpow_div_Gamma (α := 3 / 2) (β := 3 / 2 + ν.re) (by linarith)
+    (BarnesIntegrand.integrableOn_rpow_div_Gamma (α := 3 / 2) (β := 3 / 2 + ν.re) (by linarith)
       (by linarith) hw).const_mul _
   have hlim := tendsto_integral_filter_of_dominated_convergence (μ := volume.restrict (Ioi c))
     (F := fun h t => G h t) (f := fun _ => (0 : ℂ)) (l := atTop) D ?_ ?_ hDi ?_
@@ -120,7 +125,7 @@ theorem struveBar_tendsto_horizontal (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -
     rw [norm_inv] at g1 g2
     have e : ((h : ℂ) + m) = ((h + m : ℝ) : ℂ) := by push_cast; ring
     rw [e]
-    have hS := struveBar_pi_div_sin_le t hh
+    have hS := BarnesIntegrand.pi_div_sin_le t hh
     have hexp : Real.exp (-(π * h)) * Real.exp (π * |h| / 2) * Real.exp (π * |h + m| / 2) ≤
         Real.exp (π * |m| / 2) := by
       rw [← Real.exp_add, ← Real.exp_add]
@@ -143,7 +148,7 @@ theorem struveBar_tendsto_horizontal (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -
           gcongr
   · refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
     have ht' : c < t := ht
-    have hO := struveBar_isBigO t (3 / 2 + t) (3 / 2 + ν.re + t) m
+    have hO := BarnesIntegrand.isBigO t (3 / 2 + t) (3 / 2 + ν.re + t) m
     have hq : 0 < 2 + ν.re + 2 * t := by linarith
     have hO' : (fun h : ℝ => G h t) =O[atTop] fun h : ℝ => h ^ (-(2 + ν.re + 2 * t)) := by
       refine Asymptotics.IsBigO.of_norm_left ?_
@@ -154,7 +159,7 @@ theorem struveBar_tendsto_horizontal (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -
     exact hO'.trans_tendsto (tendsto_rpow_neg_atTop hq)
 
 /-- `L_ν`'s normalized series at `iz` is `H_ν`'s at `z`. -/
-theorem struveBar_LCore_I (ν z : ℂ) : struveLCore ν (I * z) = struveHCore ν z := by
+theorem BarnesIntegrand.LCore_I (ν z : ℂ) : struveLCore ν (I * z) = struveHCore ν z := by
   unfold struveLCore struveHCore
   congr 1; funext n
   have e : (I * z / 2) ^ 2 = -1 * (z / 2) ^ 2 := by ring_nf; rw [I_sq]; ring
@@ -162,13 +167,14 @@ theorem struveBar_LCore_I (ν z : ℂ) : struveLCore ν (I * z) = struveHCore ν
   ring
 
 /-- The 11.5.8 integrand is continuous on the vertical line `Re s = c`, `-1 < c < 0`. -/
-theorem struveBar_continuous_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0) :
-    Continuous fun y : ℝ => struveLoop_F ν (I * x) (c + y * I) := by
+theorem BarnesIntegrand.continuous_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c)
+    (hc0 : c < 0) :
+    Continuous fun y : ℝ => BarnesLoop.integrand ν (I * x) (c + y * I) := by
   have hz : I * (x : ℂ) ≠ 0 := mul_ne_zero I_ne_zero (ofReal_ne_zero.mpr hx.ne')
-  simp_rw [struveLoop_F_eq]
+  simp_rw [BarnesLoop.integrand_eq]
   refine Continuous.mul (Continuous.div continuous_const (by fun_prop) fun y h0 => ?_)
-    ((struveLoop_continuous_G ν hz).comp (by fun_prop))
-  obtain ⟨k, hk⟩ := struveLoop_sin_eq_zero h0
+    ((BarnesLoop.continuous_G ν hz).comp (by fun_prop))
+  obtain ⟨k, hk⟩ := BarnesLoop.sin_eq_zero h0
   have hre : c = (k : ℝ) := by simpa using congrArg Complex.re hk
   have h1 : (-1 : ℝ) < k := hre ▸ hc
   have h2 : (k : ℝ) < 0 := hre ▸ hc0
@@ -177,41 +183,44 @@ theorem struveBar_continuous_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : 
   omega
 
 /-- The 11.5.8 integrand is integrable on the vertical line: it is `O(|y|^{-2-Re ν-2c})`. -/
-theorem struveBar_integrable_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
+theorem BarnesIntegrand.integrable_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x)
+    (hc : -1 < c) (hc0 : c < 0)
     (hv : -1 < ν.re + 2 * c) :
-    Integrable fun y : ℝ => struveLoop_F ν (I * x) (c + y * I) := by
+    Integrable fun y : ℝ => BarnesLoop.integrand ν (I * x) (c + y * I) := by
   have hp : -(2 + ν.re + 2 * c) < -1 := by linarith
   have e : (1 - (3 / 2 + c) - (3 / 2 + ν.re + c)) = -(2 + ν.re + 2 * c) := by ring
-  refine struveBar_integrable_of_isBigO (struveBar_continuous_vertical ν hx hc hc0) hp ?_ ?_
+  refine BarnesIntegrand.integrable_of_isBigO
+      (BarnesIntegrand.continuous_vertical ν hx hc hc0) hp ?_ ?_
   · refine Asymptotics.IsBigO.of_norm_left ?_
-    simp_rw [struveBar_norm_F ν hx]
-    have := (struveBar_isBigO c (3 / 2 + c) (3 / 2 + ν.re + c) ν.im).const_mul_left
+    simp_rw [BarnesIntegrand.norm_F ν hx]
+    have := (BarnesIntegrand.isBigO c (3 / 2 + c) (3 / 2 + ν.re + c) ν.im).const_mul_left
       ((x ^ 2 / 4) ^ c)
     rwa [e] at this
   · refine Asymptotics.IsBigO.of_norm_left ?_
-    simp_rw [struveBar_norm_F_neg ν hx]
-    have := (struveBar_isBigO c (3 / 2 + c) (3 / 2 + ν.re + c) (-ν.im)).const_mul_left
+    simp_rw [BarnesIntegrand.norm_F_neg ν hx]
+    have := (BarnesIntegrand.isBigO c (3 / 2 + c) (3 / 2 + ν.re + c) (-ν.im)).const_mul_left
       ((x ^ 2 / 4) ^ c)
     rwa [e] at this
 
 /-- The closed rectangle identity at height `h`, after `R → ∞`: the two horizontal half-line
 integrals and the vertical segment give `2πi` times the residue sum `H`-core. -/
-theorem struveBar_rect_identity (ν : ℂ) {x c h : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
+theorem BarnesIntegrand.rect_identity (ν : ℂ) {x c h : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
     (hh : 0 < h) :
-    (∫ t in Ioi c, struveLoop_F ν (I * x) (t + (-h : ℝ) * I)) -
-      (∫ t in Ioi c, struveLoop_F ν (I * x) (t + h * I)) -
-      I * ∫ y in (-h)..h, struveLoop_F ν (I * x) (c + y * I) = 2 * π * I * struveHCore ν x := by
+    (∫ t in Ioi c, BarnesLoop.integrand ν (I * x) (t + (-h : ℝ) * I)) -
+      (∫ t in Ioi c, BarnesLoop.integrand ν (I * x) (t + h * I)) -
+      I * ∫ y in (-h)..h, BarnesLoop.integrand ν (I * x) (c + y * I) = 2 * π * I *
+          struveHCore ν x := by
   have hz : I * (x : ℂ) ≠ 0 := mul_ne_zero I_ne_zero (ofReal_ne_zero.mpr hx.ne')
-  set F := struveLoop_F ν (I * x) with hFdef
+  set F := BarnesLoop.integrand ν (I * x) with hFdef
   have hloop := struveL_barnes_loop ν hz hc hc0 hh
   change Tendsto (fun R => positiveBarnesLoop F c h R) atTop _ at hloop
   have hint : ∀ t : ℝ, t ≠ 0 → IntegrableOn (fun x : ℝ => F (x + t * I)) (Ioi c) :=
-    fun t ht => struveLoop_integrableOn ν hz c ht
+    fun t ht => BarnesLoop.integrableOn ν hz c ht
   have hform : ∀ R : ℝ, positiveBarnesLoop F c h R =
       (∫ x : ℝ in c..R, F (x + (-h : ℝ) * I)) - (∫ x : ℝ in c..R, F (x + h * I)) -
         I * ∫ y : ℝ in (-h)..h, F (c + y * I) := by
     intro R
-    rw [struveLoop_loop_eq, struveLoop_rect, smul_eq_mul, smul_eq_mul]
+    rw [BarnesLoop.loop_eq, BarnesLoop.rectIntegral, smul_eq_mul, smul_eq_mul]
     ring
   have hL : Tendsto (fun R => positiveBarnesLoop F c h R) atTop
       (𝓝 ((∫ t in Ioi c, F (t + (-h : ℝ) * I)) - (∫ t in Ioi c, F (t + h * I)) -
@@ -220,7 +229,7 @@ theorem struveBar_rect_identity (ν : ℂ) {x c h : ℝ} (hx : 0 < x) (hc : -1 <
     exact ((intervalIntegral_tendsto_integral_Ioi c (hint _ (by linarith)) tendsto_id).sub
       (intervalIntegral_tendsto_integral_Ioi c (hint _ hh.ne') tendsto_id)).sub
       tendsto_const_nhds
-  rw [tendsto_nhds_unique hL hloop, struveL, struveBar_LCore_I]
+  rw [tendsto_nhds_unique hL hloop, struveL, BarnesIntegrand.LCore_I]
   have hz2 : I * (x : ℂ) / 2 ≠ 0 := div_ne_zero hz two_ne_zero
   have hpow : (I * (x : ℂ) / 2) ^ (-ν - 1) * (I * (x : ℂ) / 2) ^ (ν + 1) = 1 := by
     rw [← cpow_add _ _ hz2]; simp
@@ -228,10 +237,10 @@ theorem struveBar_rect_identity (ν : ℂ) {x c h : ℝ} (hx : 0 < x) (hc : -1 <
 
 /-- struveH barnes (DLMF 11.5.8). Proof: the residue theorem on the rectangles
 `[c, N + 1/2] × [-h, h]` (as for 11.5.9, `struveL_barnes_loop` at `z = ix`) gives the identity
-`struveBar_rect_identity` for every height `h`; the horizontal half-line integrals tend to `0` as
-`h → ∞` by dominated convergence (`struveBar_tendsto_horizontal`), and the vertical integrand is
-`O(|y|^{-2-Re ν-2c})` by Stirling's formula on vertical lines, hence integrable
-(`struveBar_integrable_vertical`). A 30-digit numerical check (2026-10-22) is recorded in
+`BarnesIntegrand.rect_identity` for every height `h`; the horizontal half-line integrals tend to `0`
+as `h → ∞` by dominated convergence (`BarnesIntegrand.tendsto_horizontal`), and the vertical
+integrand is `O(|y|^{-2-Re ν-2c})` by Stirling's formula on vertical lines, hence integrable
+(`BarnesIntegrand.integrable_vertical`). A 30-digit numerical check (2026-10-22) is recorded in
 REVIEW.md. -/
 @[dlmf 11.5.E8]
 theorem struveH_barnes {ν : ℂ} {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
@@ -239,11 +248,11 @@ theorem struveH_barnes {ν : ℂ} {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : 
     HasIntegralWholeLine
         (fun y : ℝ => let s : ℂ := c+y*I; π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(x^2/4:ℂ)^s)
         (-2*π*(x/2:ℂ)^(-ν-1)*struveH ν x) := by
-  set f : ℝ → ℂ := fun y => struveLoop_F ν (I * x) (c + y * I) with hfdef
+  set f : ℝ → ℂ := fun y => BarnesLoop.integrand ν (I * x) (c + y * I) with hfdef
   have hfe : (fun y : ℝ => let s : ℂ := c+y*I;
       π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(x^2/4:ℂ)^s) = f := by
     funext y
-    simp only [hfdef, struveLoop_F]
+    simp only [hfdef, BarnesLoop.integrand]
     congr 2
     ring_nf; rw [I_sq]; ring
   have hval : -2*π*(x/2:ℂ)^(-ν-1)*struveH ν x = -2 * π * struveHCore ν x := by
@@ -253,18 +262,18 @@ theorem struveH_barnes {ν : ℂ} {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : 
     rw [struveH]
     linear_combination (-2 * π * struveHCore ν x) * hpow
   rw [hfe, hval]
-  have hfi : Integrable f := struveBar_integrable_vertical ν hx hc hc0 hv
+  have hfi : Integrable f := BarnesIntegrand.integrable_vertical ν hx hc hc0 hv
   -- the symmetric integrals
   have hJ : Tendsto (fun h : ℝ => ∫ y in (-h)..h, f y) atTop (𝓝 (-2 * π * struveHCore ν x)) := by
-    have hP := struveBar_tendsto_horizontal ν hx hc hc0 hv ν.im
-      (fun h t => struveLoop_F ν (I * x) (t + h * I))
-      (fun h t => struveBar_norm_F ν hx t h)
-      (fun h hh => struveLoop_continuous_line ν (mul_ne_zero I_ne_zero (ofReal_ne_zero.mpr hx.ne'))
+    have hP := BarnesIntegrand.tendsto_horizontal ν hx hc hc0 hv ν.im
+      (fun h t => BarnesLoop.integrand ν (I * x) (t + h * I))
+      (fun h t => BarnesIntegrand.norm_F ν hx t h)
+      (fun h hh => BarnesLoop.continuous_line ν (mul_ne_zero I_ne_zero (ofReal_ne_zero.mpr hx.ne'))
         (by linarith))
-    have hM := struveBar_tendsto_horizontal ν hx hc hc0 hv (-ν.im)
-      (fun h t => struveLoop_F ν (I * x) (t + (-h : ℝ) * I))
-      (fun h t => struveBar_norm_F_neg ν hx t h)
-      (fun h hh => struveLoop_continuous_line ν (mul_ne_zero I_ne_zero (ofReal_ne_zero.mpr hx.ne'))
+    have hM := BarnesIntegrand.tendsto_horizontal ν hx hc hc0 hv (-ν.im)
+      (fun h t => BarnesLoop.integrand ν (I * x) (t + (-h : ℝ) * I))
+      (fun h t => BarnesIntegrand.norm_F_neg ν hx t h)
+      (fun h hh => BarnesLoop.continuous_line ν (mul_ne_zero I_ne_zero (ofReal_ne_zero.mpr hx.ne'))
         (by linarith))
     have hlim := ((hM.sub hP).sub
         (tendsto_const_nhds (x := 2 * π * I * struveHCore ν x))).const_mul (-I)
@@ -273,9 +282,10 @@ theorem struveH_barnes {ν : ℂ} {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : 
     rw [e] at hlim
     refine hlim.congr' ?_
     filter_upwards [eventually_gt_atTop 0] with h hh
-    have := struveBar_rect_identity ν hx hc hc0 hh
+    have := BarnesIntegrand.rect_identity ν hx hc hc0 hh
     simp only [hfdef]
-    linear_combination (-I) * this - (I_sq) * (∫ y in (-h)..h, struveLoop_F ν (I * x) (c + y * I))
+    linear_combination (-I) * this - (I_sq) *
+        (∫ y in (-h)..h, BarnesLoop.integrand ν (I * x) (c + y * I))
   have hint := intervalIntegral_tendsto_integral hfi tendsto_neg_atTop_atBot tendsto_id
   have hI : ∫ y, f y = -2 * π * struveHCore ν x := tendsto_nhds_unique hint hJ
   rw [← hI]
@@ -457,7 +467,8 @@ theorem trigBeta_integrand_eq {a b : ℂ} {θ : ℝ} (hθ : θ ∈ Ioo 0 (π/2))
   rw [← e1, ← e2]; push_cast; ring
 
 /-- **Trigonometric Beta integral**, with integrability. -/
-theorem trig_beta_integral {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
+theorem intervalIntegrable_and_integral_sin_cpow_mul_cos_cpow {a b : ℂ} (ha : 0 < a.re)
+    (hb : 0 < b.re) :
     IntervalIntegrable (fun θ : ℝ => (Real.sin θ:ℂ)^(2*a-1)*(Real.cos θ:ℂ)^(2*b-1)) volume 0 (π/2) ∧
     (∫ θ : ℝ in 0..π/2, (Real.sin θ:ℂ)^(2*a-1)*(Real.cos θ:ℂ)^(2*b-1)) =
       Gamma a * Gamma b / (2*Gamma (a+b)) := by
@@ -507,7 +518,7 @@ theorem struveH_sonine {ν : ℂ} (hν0 : -3/2 < ν.re) (hν1 : ν.re < 1/2) {z 
     simp; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   set W : ℕ → ℝ → ℂ := fun k θ =>
     (Real.sin θ:ℂ)^(2*((k:ℂ)+ν+3/2)-1)*(Real.cos θ:ℂ)^(2*(1/2-ν)-1)
-  have hTB := fun k => trig_beta_integral (ha k) hb
+  have hTB := fun k => intervalIntegrable_and_integral_sin_cpow_mul_cos_cpow (ha k) hb
   set c : ℕ → ℂ := fun k => (z/2)^(ν+1)*((-1)^k*(z/2)^(2*k)*struveCoeff ν k)
   have hc : Summable fun k => ‖c k‖ := by
     rw [summable_norm_iff]

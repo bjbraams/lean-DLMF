@@ -233,7 +233,7 @@ theorem genAsymptoticC_recurrence {p q : ℕ} (a : Fin p → ℂ) (b : Fin q →
 private lemma analyticAt_Gamma_of_ne_neg_nat {c : ℂ} (hc : ∀ m : ℕ, c ≠ -m) : AnalyticAt
     ℂ Gamma c := by
   have hU : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -m} := by
-    simpa using barnesRes_isOpen_ne_sub_nat (0 : ℂ)
+    simpa using BarnesResidue.isOpen_ne_sub_nat (0 : ℂ)
   exact DifferentiableOn.analyticAt
       (fun s hs => (differentiableAt_Gamma s hs).differentiableWithinAt)
     (hU.mem_nhds hc)
@@ -266,7 +266,7 @@ private lemma gammaPoleFactor_neg_nat (m : ℕ) :
   unfold gammaPoleFactor
   rw [show (-(m : ℂ)) + m + 1 = 1 by ring, Gamma_one]
   have : ∏ k ∈ range m, (-(m : ℂ) + k) = (-1) ^ m * m.factorial := by
-    rw [← barnesRes_prod_sub_nat]; exact prod_congr rfl fun k _ => by ring
+    rw [← BarnesResidue.prod_sub_nat]; exact prod_congr rfl fun k _ => by ring
   rw [this]
   have h1 : ((-1 : ℂ) ^ m) * (-1) ^ m = 1 := by rw [← mul_pow]; simp
   have h2 : (m.factorial : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero
@@ -299,7 +299,7 @@ private lemma Gamma_eq_zpow_mul_gammaPoleFactor (m : ℕ) :
           linarith
         · omega
       linarith
-  have hG := barnesRes_Gamma_add_nat_succ x m hnp
+  have hG := BarnesResidue.Gamma_add_nat_succ x m hnp
   unfold gammaPoleFactor
   rw [hG, prod_range_succ]
   have hxm : x + m ≠ 0 := hnp m le_rfl
@@ -581,7 +581,7 @@ theorem genHG_equal_order_asymptotic {q : ℕ} (a b : Fin q → ℂ)
 @[dlmf 16.11.E8]
 theorem genHG_one_lower_asymptotic {p : ℕ} (a : Fin p → ℂ) (b : Fin (p + 1) → ℂ)
     (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b)) (N : ℕ) :
-    Asymptotics.IsBigO (DLMF.logSector Real.pi)
+    Asymptotics.IsBigO (DLMF.Core.logSector Real.pi)
       (fun w => genGamma (genParams a) / genGamma (genParams b) *
         genHG (genParams a) (genParams b) (-Complex.exp w) - genHTruncLog a b w N -
         ∑ k ∈ range N, (genETermLog a b (w - Real.pi * I) k + genETermLog a b (w + Real.pi * I) k))
@@ -593,7 +593,7 @@ theorem genHG_one_lower_asymptotic {p : ℕ} (a : Fin p → ℂ) (b : Fin (p + 1
 @[dlmf 16.11.E9]
 theorem genHG_fewer_upper_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p + 2 ≤ q)
     (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b)) (N : ℕ) :
-    Asymptotics.IsBigO (DLMF.logSector Real.pi)
+    Asymptotics.IsBigO (DLMF.Core.logSector Real.pi)
       (fun w => genGamma (genParams a) / genGamma (genParams b) *
         genHG (genParams a) (genParams b) (-Complex.exp w) -
         ∑ k ∈ range N, (genETermLog a b (w - Real.pi * I) k + genETermLog a b (w + Real.pi * I) k))

@@ -14,14 +14,14 @@ public import DLMF.Struve.Asymptotics.IntegratedExpansions
 
 * `struveScaledCoeff`: the finite polynomial formula for the coefficients `c_k(λ)` of
   DLMF 11.6.8.
-* `struveLO_P`, `struveLO_Q`: the polynomials `∏_{r<j} (X - (1/2 + r))` and the polynomial in
-  `w = 1/ν` collecting the binomial terms.
+* `LargeOrder.halfShiftProduct`, `LargeOrder.binomialPoly`: the polynomials
+  `∏_{r<j} (X - (1/2 + r))` and the polynomial in `w = 1/ν` collecting the binomial terms.
 
 ## Main results
 
 * `struveH_large_order`, `struveL_large_order`: the leading behavior DLMF 11.6.5.
-* `struveLO_coeff_Q`, `struveLO_poly_bound`: the binomial terms reproduce the coefficients of
-  DLMF 11.6.6–11.6.7 up to `O(ν^{-N})`.
+* `LargeOrder.coeff_binomialPoly`, `LargeOrder.poly_bound`: the binomial terms reproduce the
+  coefficients of DLMF 11.6.6–11.6.7 up to `O(ν^{-N})`.
 * `struveK_scaled_asymptotic`, `struveM_scaled_asymptotic`: the large-order expansions
   DLMF 11.6.6–11.6.7.
 * `struveScaledCoeff_initial`: the initial coefficients DLMF 11.6.8.
@@ -32,8 +32,8 @@ public import DLMF.Struve.Asymptotics.IntegratedExpansions
 The expansions 11.6.6–11.6.7 follow from the integrals 11.5.2 and 11.5.4 by a binomial
 expansion of `(1 ± t²)^{ν-1/2}` with the uniform remainder bounds of
 `DLMF.Struve.LargeOrderTools`; the binomial terms are regrouped into powers of `1/ν` through
-the reflected polynomials `struveLO_Q`. The leading behavior 11.6.5 uses Binet's formula for the
-leading term of the Struve series.
+the reflected polynomials `LargeOrder.binomialPoly`. The leading behavior 11.6.5 uses Binet's
+formula for the leading term of the Struve series.
 -/
 
 @[expose] public noncomputable section
@@ -41,6 +41,8 @@ leading term of the Struve series.
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
+
+open DLMF.Core
 
 namespace DLMF.Struve
 
@@ -166,7 +168,7 @@ theorem struve_series_tail_isBigO {z : ℂ} (hz : z ≠ 0) {ε : ℂ} (hε : ‖
       tendsto_const_nhds)
   set A := ∑' k, a k
   refine IsBigO.of_bound A ?_
-  rw [DLMF.sector, eventually_inf_principal]
+  rw [DLMF.Core.sector, eventually_inf_principal]
   refine Eventually.of_forall fun ν hν => ?_
   obtain ⟨-, harg⟩ := hν
   have htail : S ν - ∑ n ∈ Finset.range N, ε ^ n * (z / 2) ^ (2 * n) * struveCoeff ν n =
@@ -292,7 +294,7 @@ theorem tendsto_struve_stirling_exponent {δ : ℝ} (hδ : 0 < δ) (hδπ : δ <
   have hb : Tendsto (fun ν : ℂ => C * ‖ν‖⁻¹) (sector (π - δ)) (𝓝 0) := by
     simpa using (tendsto_inv_atTop_zero.comp (tendsto_norm_sector (π - δ))).const_mul C
   refine squeeze_zero_norm' ?_ hb
-  rw [DLMF.sector, eventually_inf_principal]
+  rw [DLMF.Core.sector, eventually_inf_principal]
   filter_upwards [tendsto_comap.eventually (eventually_gt_atTop (0 : ℝ))]
     with ν hν0 hν
   obtain ⟨hν, harg⟩ := hν
@@ -397,7 +399,7 @@ theorem struve_lead_isEquivalent {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < 
   have h := (Complex.continuous_exp.tendsto 0).comp (tendsto_struve_stirling_exponent hδ hδπ)
   rw [Complex.exp_zero] at h
   refine h.congr' ?_
-  rw [EventuallyEq, DLMF.sector, eventually_inf_principal]
+  rw [EventuallyEq, DLMF.Core.sector, eventually_inf_principal]
   refine Eventually.of_forall fun ν hν => ?_
   obtain ⟨hν0, harg⟩ := hν
   have hw : ν + 3 / 2 ∈ slitPlane := by
@@ -425,7 +427,7 @@ theorem isEquivalent_of_struve_order_expansion {f : ℂ → ℂ} {z : ℂ} (hz :
       simpa using (tendsto_inv_atTop_zero.comp (tendsto_norm_sector (π - δ))).const_mul
         (‖Gamma (3 / 2)‖ / Real.sin δ)
     refine squeeze_zero_norm' ?_ hb
-    rw [DLMF.sector, eventually_inf_principal]
+    rw [DLMF.Core.sector, eventually_inf_principal]
     filter_upwards [tendsto_comap.eventually (eventually_gt_atTop (0 : ℝ))] with ν hν0 hν
     obtain ⟨-, harg⟩ := hν
     have h1 := norm_mul_sin_le_norm_add_ofReal hδ harg (s := 3 / 2) (by norm_num)
@@ -438,7 +440,7 @@ theorem isEquivalent_of_struve_order_expansion {f : ℂ → ℂ} {z : ℂ} (hz :
   have hrem : (fun ν : ℂ => (z / 2) ^ (ν + 1) / Gamma (ν + ((1 : ℕ) : ℂ) + 3 / 2))
       =ᶠ[sector (π - δ)]
       fun ν => lead ν * k ν := by
-    rw [EventuallyEq, DLMF.sector, eventually_inf_principal]
+    rw [EventuallyEq, DLMF.Core.sector, eventually_inf_principal]
     refine Eventually.of_forall fun ν hν => ?_
     obtain ⟨hν0, harg⟩ := hν
     have hw0 : ν + 3 / 2 ≠ 0 := slitPlane_ne_zero (by
@@ -494,18 +496,20 @@ section StruveLOScaled
 open Polynomial Metric
 
 /-- The polynomial `∏_{r<j} (X - (1/2 + r))` of `struveScaledCoeff`. -/
-noncomputable def struveLO_P (j : ℕ) : ℂ[X] :=
+noncomputable def LargeOrder.halfShiftProduct (j : ℕ) : ℂ[X] :=
   ∏ r ∈ Finset.range j, (Polynomial.X - Polynomial.C (1/2 + r : ℂ))
 
 /-- `deg P_j ≤ j`. -/
-theorem struveLO_natDegree_P (j : ℕ) : (struveLO_P j).natDegree ≤ j := by
-  rw [struveLO_P, natDegree_prod_of_monic _ _ (fun r _ => monic_X_sub_C _)]
+theorem LargeOrder.natDegree_halfShiftProduct (j : ℕ) :
+    (LargeOrder.halfShiftProduct j).natDegree ≤ j := by
+  rw [LargeOrder.halfShiftProduct, natDegree_prod_of_monic _ _ (fun r _ => monic_X_sub_C _)]
   simp only [natDegree_X_sub_C, Finset.sum_const, Finset.card_range, smul_eq_mul, mul_one, le_refl]
 
 /-- `(ν - 1/2 choose j) = P_j(ν)/j!`. -/
-theorem struveLO_b_eq_eval (ν : ℂ) (j : ℕ) :
-    struveLO_b (ν - 1/2) j = (struveLO_P j).eval ν / (j.factorial : ℂ) := by
-  unfold struveLO_b struveLO_P
+theorem LargeOrder.binomialCoeff_eq_eval (ν : ℂ) (j : ℕ) :
+    LargeOrder.binomialCoeff (ν - 1/2) j = (LargeOrder.halfShiftProduct j).eval ν /
+        (j.factorial : ℂ) := by
+  unfold LargeOrder.binomialCoeff LargeOrder.halfShiftProduct
   rw [eval_prod]
   congr 1
   refine Finset.prod_congr rfl fun r _ => ?_
@@ -513,52 +517,55 @@ theorem struveLO_b_eq_eval (ν : ℂ) (j : ℕ) :
   ring
 
 /-- The polynomial in `w = 1/ν` collecting the binomial terms. -/
-noncomputable def struveLO_Q (μ : ℂ) (N : ℕ) : ℂ[X] :=
+noncomputable def LargeOrder.binomialPoly (μ : ℂ) (N : ℕ) : ℂ[X] :=
   ∑ j ∈ Finset.range N, C (((2 * j).factorial : ℂ) / ((j.factorial : ℂ) * μ ^ (2 * j))) *
-    reflect (2 * j) (struveLO_P j)
+    reflect (2 * j) (LargeOrder.halfShiftProduct j)
 
 /-- At `w = 1/ν`, `Q` is the sum of the binomial terms `(ν-1/2 choose j) (2j)!/(μν)^{2j}`. -/
-theorem struveLO_eval_Q (μ : ℂ) (N : ℕ) {ν : ℂ} (hν : ν ≠ 0) :
-    (struveLO_Q μ N).eval ν⁻¹ = ∑ j ∈ Finset.range N,
-      struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) / (μ * ν) ^ (2 * j) := by
-  unfold struveLO_Q
+theorem LargeOrder.eval_binomialPoly (μ : ℂ) (N : ℕ) {ν : ℂ} (hν : ν ≠ 0) :
+    (LargeOrder.binomialPoly μ N).eval ν⁻¹ = ∑ j ∈ Finset.range N,
+      LargeOrder.binomialCoeff (ν - 1/2) j * ((2 * j).factorial : ℂ) / (μ * ν) ^ (2 * j) := by
+  unfold LargeOrder.binomialPoly
   rw [eval_finsetSum]
   refine Finset.sum_congr rfl fun j _ => ?_
   let _ : Invertible ν := invertibleOfNonzero hν
-  have h := eval₂_reflect_mul_pow (RingHom.id ℂ) ν (2 * j) (struveLO_P j)
-    ((struveLO_natDegree_P j).trans (by omega))
+  have h := eval₂_reflect_mul_pow (RingHom.id ℂ) ν (2 * j) (LargeOrder.halfShiftProduct j)
+    ((LargeOrder.natDegree_halfShiftProduct j).trans (by omega))
   rw [invOf_eq_inv] at h
-  have h' : (reflect (2 * j) (struveLO_P j)).eval ν⁻¹ = (struveLO_P j).eval ν / ν ^ (2 * j) := by
+  have h' : (reflect (2 * j) (LargeOrder.halfShiftProduct j)).eval ν⁻¹ =
+      (LargeOrder.halfShiftProduct j).eval ν / ν ^ (2 * j) := by
     rw [eq_div_iff (pow_ne_zero _ hν)]; exact h
-  rw [eval_mul, eval_C, h', struveLO_b_eq_eval]
+  rw [eval_mul, eval_C, h', LargeOrder.binomialCoeff_eq_eval]
   have : (j.factorial : ℂ) ≠ 0 := by exact_mod_cast j.factorial_ne_zero
   rw [mul_pow]
   field_simp
 
 /-- The coefficients of `Q` below degree `N` are `k! c_k(μ)` of DLMF 11.6.8. -/
-theorem struveLO_coeff_Q (μ : ℂ) {N k : ℕ} (hk : k < N) :
-    (struveLO_Q μ N).coeff k = (k.factorial : ℂ) * struveScaledCoeff μ k := by
+theorem LargeOrder.coeff_binomialPoly (μ : ℂ) {N k : ℕ} (hk : k < N) :
+    (LargeOrder.binomialPoly μ N).coeff k = (k.factorial : ℂ) * struveScaledCoeff μ k := by
   have hkf : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
-  unfold struveLO_Q struveScaledCoeff
+  unfold LargeOrder.binomialPoly struveScaledCoeff
   rw [finsetSum_coeff, mul_div_cancel₀ _ hkf]
   set f : ℕ → ℂ := fun j => (C (((2 * j).factorial : ℂ) / ((j.factorial : ℂ) * μ ^ (2 * j))) *
-    reflect (2 * j) (struveLO_P j)).coeff k with hf
+    reflect (2 * j) (LargeOrder.halfShiftProduct j)).coeff k with hf
   have hf0 : ∀ j, k < j → f j = 0 := by
     intro j hj
     simp only [hf, coeff_C_mul, coeff_reflect]
     rw [revAt_le (by omega)]
-    rw [coeff_eq_zero_of_natDegree_lt ((struveLO_natDegree_P j).trans_lt (by omega)), mul_zero]
+    rw [coeff_eq_zero_of_natDegree_lt
+        ((LargeOrder.natDegree_halfShiftProduct j).trans_lt (by omega)), mul_zero]
   have hfe : ∀ j, f j = if k ≤ 2 * j then ((2 * j).factorial : ℂ) / (j.factorial : ℂ) *
       (∏ r ∈ Finset.range j, (Polynomial.X - Polynomial.C (1/2 + r : ℂ))).coeff (2 * j - k) /
       μ ^ (2 * j) else 0 := by
     intro j
     simp only [hf, coeff_C_mul, coeff_reflect]
     split_ifs with h
-    · rw [revAt_le h, struveLO_P]
+    · rw [revAt_le h, LargeOrder.halfShiftProduct]
       ring
     · have hr : (revAt (2 * j)) k = k := by
         rw [← revAtFun_eq]; simp [revAtFun, h]
-      rw [hr, coeff_eq_zero_of_natDegree_lt ((struveLO_natDegree_P j).trans_lt (by omega)),
+      rw [hr, coeff_eq_zero_of_natDegree_lt
+          ((LargeOrder.natDegree_halfShiftProduct j).trans_lt (by omega)),
         mul_zero]
   calc ∑ j ∈ Finset.range N, f j = ∑ j ∈ Finset.range (k + 1), f j := by
         refine (Finset.sum_subset (Finset.range_subset_range.2 (by omega)) fun j _ hj => ?_).symm
@@ -567,11 +574,12 @@ theorem struveLO_coeff_Q (μ : ℂ) {N k : ℕ} (hk : k < N) :
     _ = _ := Finset.sum_congr rfl fun j _ => hfe j
 
 /-- The binomial terms reproduce the coefficients of DLMF 11.6.6–11.6.7 up to `O(ν^{-N})`. -/
-theorem struveLO_poly_bound (μ : ℂ) (N : ℕ) : ∃ B : ℝ, ∀ ν : ℂ, 1 ≤ ‖ν‖ →
-    ‖∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) / (μ * ν) ^ (2 * j) -
+theorem LargeOrder.poly_bound (μ : ℂ) (N : ℕ) : ∃ B : ℝ, ∀ ν : ℂ, 1 ≤ ‖ν‖ →
+    ‖∑ j ∈ Finset.range N, LargeOrder.binomialCoeff (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+        (μ * ν) ^ (2 * j) -
       ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff μ k / ν ^ k‖ ≤
       B * ‖ν‖⁻¹ ^ N := by
-  set Q := struveLO_Q μ N
+  set Q := LargeOrder.binomialPoly μ N
   set T : ℂ[X] := ∑ k ∈ Finset.range N, C (Q.coeff k) * X ^ k with hT
   have hdvd : X ^ N ∣ Q - T := by
     rw [X_pow_dvd_iff]
@@ -590,14 +598,16 @@ theorem struveLO_poly_bound (μ : ℂ) (N : ℕ) : ∃ B : ℝ, ∀ ν : ℂ, 1 
       T.eval ν⁻¹ := by
     rw [hT, eval_finsetSum]
     refine Finset.sum_congr rfl fun k hk => ?_
-    rw [eval_mul, eval_C, eval_pow, eval_X, struveLO_coeff_Q μ (Finset.mem_range.1 hk), inv_pow,
+    rw [eval_mul, eval_C, eval_pow, eval_X,
+        LargeOrder.coeff_binomialPoly μ (Finset.mem_range.1 hk), inv_pow,
       div_eq_mul_inv]
-  rw [← struveLO_eval_Q μ N hν0, h1, ← eval_sub, hS, eval_mul, eval_pow, eval_X, norm_mul,
+  rw [← LargeOrder.eval_binomialPoly μ N hν0, h1, ← eval_sub, hS, eval_mul, eval_pow,
+      eval_X, norm_mul,
     norm_pow, norm_inv, mul_comm]
   exact mul_le_mul_of_nonneg_right (hB _ hw) (by positivity)
 
 /-- In the closed sector `|arg ν| ≤ π/2 - δ`, `re ν ≥ sin δ · |ν|`. -/
-theorem struveLO_re_ge {ν : ℂ} {δ : ℝ} (hν : ν ≠ 0) (h : |arg ν| ≤ π / 2 - δ) (hδ : 0 < δ) :
+theorem LargeOrder.re_ge {ν : ℂ} {δ : ℝ} (hν : ν ≠ 0) (h : |arg ν| ≤ π / 2 - δ) (hδ : 0 < δ) :
     Real.sin δ * ‖ν‖ ≤ ν.re := by
   have hc : Real.cos (π / 2 - δ) ≤ Real.cos (arg ν) := by
     rw [← Real.cos_abs (arg ν)]
@@ -606,7 +616,7 @@ theorem struveLO_re_ge {ν : ℂ} {δ : ℝ} (hν : ν ≠ 0) (h : |arg ν| ≤ 
   exact hc
 
 /-- `log (z/2) = log z - log 2` for `z ≠ 0`. -/
-theorem struveLO_log_div_two {z : ℂ} (hz : z ≠ 0) : log (z / 2) = log z - log 2 := by
+theorem LargeOrder.log_div_two {z : ℂ} (hz : z ≠ 0) : log (z / 2) = log z - log 2 := by
   have h := log_mul_ofReal (1 / 2) (by norm_num) z hz
   rw [show z * ((1 / 2 : ℝ) : ℂ) = z / 2 by push_cast; ring] at h
   rw [h, show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num, ← ofReal_log (by norm_num), one_div,
@@ -614,21 +624,21 @@ theorem struveLO_log_div_two {z : ℂ} (hz : z ≠ 0) : log (z / 2) = log z - lo
   push_cast; ring
 
 /-- The normalization in DLMF 11.6.6–11.6.7: `e^{(1-ν)(log z - log 2)} · 2 (z/2)^ν = z`. -/
-theorem struveLO_normalize {z : ℂ} (hz : z ≠ 0) (ν : ℂ) :
+theorem LargeOrder.normalize {z : ℂ} (hz : z ≠ 0) (ν : ℂ) :
     exp ((1 - ν) * (log z - log 2)) * (2 * (z / 2) ^ ν) = z := by
   have hz2 : z / 2 ≠ 0 := div_ne_zero hz two_ne_zero
-  rw [cpow_def_of_ne_zero hz2, struveLO_log_div_two hz]
+  rw [cpow_def_of_ne_zero hz2, LargeOrder.log_div_two hz]
   have : exp ((1 - ν) * (log z - log 2)) * exp ((log z - log 2) * ν) = exp (log z - log 2) := by
     rw [← exp_add]; ring_nf
   rw [show exp ((1 - ν) * (log z - log 2)) * (2 * exp ((log z - log 2) * ν)) =
     2 * (exp ((1 - ν) * (log z - log 2)) * exp ((log z - log 2) * ν)) by ring, this,
-    ← struveLO_log_div_two hz, exp_log hz2]
+    ← LargeOrder.log_div_two hz, exp_log hz2]
   ring
 
 /-- `‖(a choose j)‖ ≤ (2|ν|)^j` for `a = ν - 1/2`, `j ≤ N ≤ |ν|`. -/
-theorem struveLO_norm_b_le {ν : ℂ} {N j : ℕ} (hj : j ≤ N) (hN : (N : ℝ) ≤ ‖ν‖) :
-    ‖struveLO_b (ν - 1 / 2) j‖ ≤ (2 * ‖ν‖) ^ j := by
-  unfold struveLO_b
+theorem LargeOrder.norm_binomialCoeff_le {ν : ℂ} {N j : ℕ} (hj : j ≤ N) (hN : (N : ℝ) ≤ ‖ν‖) :
+    ‖LargeOrder.binomialCoeff (ν - 1 / 2) j‖ ≤ (2 * ‖ν‖) ^ j := by
+  unfold LargeOrder.binomialCoeff
   rw [norm_div, norm_prod, Complex.norm_natCast]
   have h1 : (1 : ℝ) ≤ j.factorial := by exact_mod_cast j.factorial_pos
   calc (∏ i ∈ Finset.range j, ‖ν - 1 / 2 - i‖) / j.factorial ≤ ∏ i ∈ Finset.range j,
@@ -648,7 +658,7 @@ theorem struveLO_norm_b_le {ν : ℂ} {N j : ℕ} (hj : j ≤ N) (hN : (N : ℝ)
     _ = (2 * ‖ν‖) ^ j := by rw [Finset.prod_const, Finset.card_range]
 
 /-- The exponentially small tail terms are `O(|ν|^{-N})`. -/
-theorem struveLO_tail_term_le {x κ L : ℝ} (hx : 1 ≤ x) (hκ : 0 < κ) (hL : 0 < L) {c : ℝ}
+theorem LargeOrder.tail_term_le {x κ L : ℝ} (hx : 1 ≤ x) (hκ : 0 < κ) (hL : 0 < L) {c : ℝ}
     (hc : 2 * κ * x ≤ c) (N j : ℕ) :
     L * x * ((2 * x) ^ j * (Real.exp (-(c / 2)) * ((2 * j).factorial * (2 / c) ^ (2 * j + 1)))) ≤
       (L * 2 ^ j * (2 * j).factorial * (1 / κ) ^ (2 * j + 1) * (N + j + 1).factorial /
@@ -656,7 +666,7 @@ theorem struveLO_tail_term_le {x κ L : ℝ} (hx : 1 ≤ x) (hκ : 0 < κ) (hL :
   have hx0 : 0 < x := by linarith
   have hc0 : 0 < c := by nlinarith
   have he : Real.exp (-(c / 2)) ≤ (N + j + 1).factorial / (κ * x) ^ (N + j + 1) :=
-    (Real.exp_le_exp.2 (by nlinarith)).trans (struveLO_exp_neg_le (by positivity) _)
+    (Real.exp_le_exp.2 (by nlinarith)).trans (LargeOrder.exp_neg_le (by positivity) _)
   have h2c : 2 / c ≤ 1 / κ := by
     rw [div_le_div_iff₀ hc0 hκ]; nlinarith
   calc L * x * ((2 * x) ^ j * (Real.exp (-(c / 2)) * ((2 * j).factorial * (2 / c) ^ (2 * j + 1))))
@@ -679,7 +689,7 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
     (fun ν : ℂ => Real.sqrt π*Gamma (ν+1/2)*exp ((1-ν)*(log (lam*ν)-log 2))*struveK ν (lam*ν)-∑ k ∈
         Finset.range N, (k.factorial:ℂ)*struveScaledCoeff (lam) k/ν^k) =O[sector (π/2-δ)]
         (fun ν : ℂ => ν^(-(N:ℤ))) := by
-  obtain ⟨B, hB⟩ := struveLO_poly_bound (lam : ℂ) N
+  obtain ⟨B, hB⟩ := LargeOrder.poly_bound (lam : ℂ) N
   set s := Real.sin δ with hs_def
   have hs : 0 < s := Real.sin_pos_of_pos_of_lt_pi hδ (by linarith [Real.pi_pos])
   have hl1 : 0 < lam - 1 := by linarith
@@ -687,10 +697,10 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
   set C' : ℝ := lam * 2 ^ N * (2 * N).factorial / ((lam - 1) * s) ^ (2 * N + 1) with hC'
   set R : ℝ := max (max 1 N) ((N + 1) / s) with hR
   refine IsBigO.of_bound (B + C') ?_
-  rw [DLMF.sector, eventually_inf_principal]
+  rw [DLMF.Core.sector, eventually_inf_principal]
   filter_upwards [tendsto_comap.eventually (eventually_ge_atTop R)] with ν hνR hν
   obtain ⟨hν0, harg⟩ := hν
-  have hre := struveLO_re_ge hν0 harg hδ
+  have hre := LargeOrder.re_ge hν0 harg hδ
   have hR1 : 1 ≤ ‖ν‖ := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hνR
   have hRN : (N : ℝ) ≤ ‖ν‖ := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hνR
   have hRs : (N : ℝ) + 1 ≤ s * ‖ν‖ := by
@@ -705,7 +715,7 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
   have hνre : 0 < ν.re := by linarith
   have hza : a.re < z.re := by rw [hare, hzre]; nlinarith
   have hz0 : z ≠ 0 := mul_ne_zero (ofReal_ne_zero.2 hl0.ne') hν0
-  have hK := struveLO_K_integral_bound N ha hza
+  have hK := LargeOrder.K_integral_bound N ha hza
   have hrep := DLMF.Bessel.struveK_eq_integral ν (z := z) (by rw [hzre]; positivity)
   set J := ∫ t in Ioi (0 : ℝ), exp (-z * t) * (1 + (t : ℂ) ^ 2) ^ (ν - 1 / 2) with hJ
   have hG : Gamma (ν + 1 / 2) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
@@ -716,9 +726,10 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
     have hc : (Real.sqrt π : ℂ) * Gamma (ν + 1 / 2) ≠ 0 := mul_ne_zero hsq hG
     calc _ = ((Real.sqrt π : ℂ) * Gamma (ν + 1 / 2) / ((Real.sqrt π : ℂ) * Gamma (ν + 1 / 2))) *
           ((exp ((1 - ν) * (log z - log 2)) * (2 * (z / 2) ^ ν)) * J) := by ring
-      _ = z * J := by rw [div_self hc, one_mul, struveLO_normalize hz0 ν]
-  have hsum : z * ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) =
-      ∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+      _ = z * J := by rw [div_self hc, one_mul, LargeOrder.normalize hz0 ν]
+  have hsum : z * ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * ((2 * j).factorial : ℂ) /
+      z ^ (2 * j + 1) =
+      ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff (ν - 1/2) j * ((2 * j).factorial : ℂ) /
           ((lam : ℂ) * ν) ^ (2 * j) := by
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
@@ -738,7 +749,8 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
       _ = (2 * ‖ν‖) ^ N := by rw [Finset.prod_const, Finset.card_range]
   have hden : (lam - 1) * s * ‖ν‖ ≤ z.re - a.re := by rw [hzre, hare]; nlinarith
   have hpos : 0 < (lam - 1) * s * ‖ν‖ := by positivity
-  have hE : ‖z‖ * ‖J - ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) /
+  have hE : ‖z‖ * ‖J - ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j *
+      ((2 * j).factorial : ℂ) /
       z ^ (2 * j + 1)‖ ≤
       C' * ‖ν‖⁻¹ ^ N := by
     have hzn : ‖z‖ = lam * ‖ν‖ := by rw [hz, norm_mul, norm_real, Real.norm_of_nonneg hl0.le]
@@ -756,17 +768,17 @@ theorem struveK_scaled_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ :
           field_simp
   rw [hid]
   have hsplit : z * J - ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff lam k / ν ^ k =
-      (∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+      (∑ j ∈ Finset.range N, LargeOrder.binomialCoeff (ν - 1/2) j * ((2 * j).factorial : ℂ) /
           ((lam : ℂ) * ν) ^ (2 * j) -
         ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff lam k / ν ^ k) +
-      z * (J - ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) /
+      z * (J - ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * ((2 * j).factorial : ℂ) /
           z ^ (2 * j + 1)) := by
     rw [mul_sub, hsum]; ring
   rw [hsplit, norm_zpow, zpow_neg, zpow_natCast, ← inv_pow]
-  calc _ ≤ ‖∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+  calc _ ≤ ‖∑ j ∈ Finset.range N, LargeOrder.binomialCoeff (ν - 1/2) j * ((2 * j).factorial : ℂ) /
          ((lam : ℂ) * ν) ^ (2 * j) -
         ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff lam k / ν ^ k‖ +
-      ‖z‖ * ‖J - ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) /
+      ‖z‖ * ‖J - ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * ((2 * j).factorial : ℂ) /
           z ^ (2 * j + 1)‖ := by
         rw [← norm_mul]; exact norm_add_le _ _
     _ ≤ B * ‖ν‖⁻¹ ^ N + C' * ‖ν‖⁻¹ ^ N := add_le_add (hB ν hR1) hE
@@ -782,7 +794,7 @@ theorem struveM_scaled_asymptotic {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ :
     (fun ν : ℂ => -Real.sqrt π*Gamma (ν+1/2)*exp ((1-ν)*(log (lam*ν)-log 2))*struveM ν (lam*ν)-∑ k ∈
         Finset.range N, (k.factorial:ℂ)*struveScaledCoeff (I*lam) k/ν^k) =O[sector (π/2-δ)]
         (fun ν : ℂ => ν^(-(N:ℤ))) := by
-  obtain ⟨B, hB⟩ := struveLO_poly_bound (I * lam : ℂ) N
+  obtain ⟨B, hB⟩ := LargeOrder.poly_bound (I * lam : ℂ) N
   set s := Real.sin δ with hs_def
   have hs : 0 < s := Real.sin_pos_of_pos_of_lt_pi hδ (by linarith [Real.pi_pos])
   set κ : ℝ := lam * s / 2 with hκ
@@ -792,10 +804,10 @@ theorem struveM_scaled_asymptotic {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ :
     (N + j + 1).factorial / κ ^ (N + j + 1)) with hC2
   set R : ℝ := max (max 1 N) ((N + 1) / s) with hR
   refine IsBigO.of_bound (B + C1 + C2) ?_
-  rw [DLMF.sector, eventually_inf_principal]
+  rw [DLMF.Core.sector, eventually_inf_principal]
   filter_upwards [tendsto_comap.eventually (eventually_ge_atTop R)] with ν hνR hν
   obtain ⟨hν0, harg⟩ := hν
-  have hre := struveLO_re_ge hν0 harg hδ
+  have hre := LargeOrder.re_ge hν0 harg hδ
   have hR1 : 1 ≤ ‖ν‖ := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hνR
   have hRN : (N : ℝ) ≤ ‖ν‖ := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hνR
   have hRs : (N : ℝ) + 1 ≤ s * ‖ν‖ := by
@@ -810,7 +822,7 @@ theorem struveM_scaled_asymptotic {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ :
   have hνre : 0 < ν.re := by linarith
   have hzpos : 0 < z.re := by rw [hzre]; positivity
   have hz0 : z ≠ 0 := mul_ne_zero (ofReal_ne_zero.2 hlam.ne') hν0
-  have hK := struveLO_M_integral_bound N ha hzpos
+  have hK := LargeOrder.M_integral_bound N ha hzpos
   have hrep := struveM_integral (ν := ν) (by linarith) (z := z) (by
     rw [mem_slitPlane_iff]; left; exact hzpos)
   set J := ∫ t : ℝ in (0 : ℝ)..1, exp (-z * t) * (1 - (t : ℂ) ^ 2) ^ (ν - 1 / 2) with hJ
@@ -822,10 +834,10 @@ theorem struveM_scaled_asymptotic {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ :
     have hc : (Real.sqrt π : ℂ) * Gamma (ν + 1 / 2) ≠ 0 := mul_ne_zero hsq hG
     calc _ = ((Real.sqrt π : ℂ) * Gamma (ν + 1 / 2) / ((Real.sqrt π : ℂ) * Gamma (ν + 1 / 2))) *
           ((exp ((1 - ν) * (log z - log 2)) * (2 * (z / 2) ^ ν)) * J) := by ring
-      _ = z * J := by rw [div_self hc, one_mul, struveLO_normalize hz0 ν]
+      _ = z * J := by rw [div_self hc, one_mul, LargeOrder.normalize hz0 ν]
   have hsum : z * ∑ j ∈ Finset.range N,
-        struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) =
-      ∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+        LargeOrder.binomialCoeff a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) =
+      ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff (ν - 1/2) j * ((2 * j).factorial : ℂ) /
         ((I * lam : ℂ) * ν) ^ (2 * j) := by
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
@@ -833,11 +845,12 @@ theorem struveM_scaled_asymptotic {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ :
       rw [hz, mul_pow, mul_pow, mul_pow, pow_mul I, I_sq]; ring
     have hinv : ((-1 : ℂ) ^ j)⁻¹ = (-1) ^ j := by rw [← inv_pow, inv_neg, inv_one]
     rw [← ha_def, hI, div_eq_mul_inv, div_eq_mul_inv, mul_inv, hinv, pow_succ, mul_inv]
-    linear_combination (struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) * (z ^ (2 * j))⁻¹) *
+    linear_combination (LargeOrder.binomialCoeff a j * (-1) ^ j * ((2 * j).factorial : ℂ) *
+        (z ^ (2 * j))⁻¹) *
       (mul_inv_cancel₀ hz0)
   have hcre : lam * s * ‖ν‖ ≤ z.re := by rw [hzre]; nlinarith
   have hE : ‖z‖ * ‖J - ∑ j ∈ Finset.range N,
-        struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)‖ ≤
+        LargeOrder.binomialCoeff a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)‖ ≤
       (C1 + C2) * ‖ν‖⁻¹ ^ N := by
     have hzn : ‖z‖ = lam * ‖ν‖ := by rw [hz, norm_mul, norm_real, Real.norm_of_nonneg hlam.le]
     rw [hzn]
@@ -864,31 +877,32 @@ theorem struveM_scaled_asymptotic {lam : ℝ} (hlam : 0 < lam) {δ : ℝ} (hδ :
             have hn0 : ‖ν‖ ≠ 0 := hnorm0.ne'
             rw [hC1, mul_pow (lam * s) ‖ν‖, hx, mul_pow 2 ‖ν‖, inv_pow]
             field_simp
-    have h2 : lam * ‖ν‖ * ∑ j ∈ Finset.range N, ‖struveLO_b a j‖ *
+    have h2 : lam * ‖ν‖ * ∑ j ∈ Finset.range N, ‖LargeOrder.binomialCoeff a j‖ *
         (Real.exp (-(z.re / 2)) * ((2 * j).factorial * (2 / z.re) ^ (2 * j + 1))) ≤
         C2 * ‖ν‖⁻¹ ^ N := by
       rw [Finset.mul_sum, hC2, Finset.sum_mul]
       refine Finset.sum_le_sum fun j hj => ?_
-      have hb := struveLO_norm_b_le (ν := ν) (j := j) (le_of_lt (Finset.mem_range.1 hj)) hRN
-      calc lam * ‖ν‖ * (‖struveLO_b a j‖ *
+      have hb := LargeOrder.norm_binomialCoeff_le (ν := ν) (j := j)
+          (le_of_lt (Finset.mem_range.1 hj)) hRN
+      calc lam * ‖ν‖ * (‖LargeOrder.binomialCoeff a j‖ *
             (Real.exp (-(z.re / 2)) * ((2 * j).factorial * (2 / z.re) ^ (2 * j + 1))))
           ≤ lam * ‖ν‖ * ((2 * ‖ν‖) ^ j *
             (Real.exp (-(z.re / 2)) * ((2 * j).factorial * (2 / z.re) ^ (2 * j + 1)))) := by
             gcongr
-        _ ≤ _ := struveLO_tail_term_le hR1 hκ0 hlam (by rw [hκ]; linarith) N j
+        _ ≤ _ := LargeOrder.tail_term_le hR1 hκ0 hlam (by rw [hκ]; linarith) N j
     calc lam * ‖ν‖ * ‖J - _‖ ≤ lam * ‖ν‖ * ((∏ i ∈ Finset.range N, ‖a - i‖) * (2 * N).factorial /
-          z.re ^ (2 * N + 1) + ∑ j ∈ Finset.range N, ‖struveLO_b a j‖ *
+          z.re ^ (2 * N + 1) + ∑ j ∈ Finset.range N, ‖LargeOrder.binomialCoeff a j‖ *
           (Real.exp (-(z.re / 2)) * ((2 * j).factorial * (2 / z.re) ^ (2 * j + 1)))) := by gcongr
       _ ≤ C1 * ‖ν‖⁻¹ ^ N + C2 * ‖ν‖⁻¹ ^ N := by rw [mul_add]; exact add_le_add h1 h2
       _ = (C1 + C2) * ‖ν‖⁻¹ ^ N := by ring
   rw [hid]
   have hsplit : z * J - ∑ k ∈ Finset.range N, (k.factorial : ℂ) *
       struveScaledCoeff (I * lam) k / ν ^ k =
-      (∑ j ∈ Finset.range N, struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) /
+      (∑ j ∈ Finset.range N, LargeOrder.binomialCoeff (ν - 1/2) j * ((2 * j).factorial : ℂ) /
           ((I * lam : ℂ) * ν) ^ (2 * j) -
         ∑ k ∈ Finset.range N, (k.factorial : ℂ) * struveScaledCoeff (I * lam) k / ν ^ k) +
       z * (J - ∑ j ∈ Finset.range N,
-        struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)) := by
+        LargeOrder.binomialCoeff a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)) := by
     rw [mul_sub, hsum]; ring
   rw [hsplit, norm_zpow, zpow_neg, zpow_natCast, ← inv_pow]
   calc _ ≤ _ + _ := norm_add_le _ _

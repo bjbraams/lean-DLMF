@@ -6,13 +6,17 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Transforms.Basic
+public import DLMF.AlgebraicAnalytic.Transforms.Fourier
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.Integral.LaplaceRay
 public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 public import Mathlib.Analysis.Calculus.ParametricIntegral
+public import Mathlib.Analysis.BoundedVariation
 public import Mathlib.Analysis.Convolution
+public import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
 public import Mathlib.Analysis.MellinTransform
+public import Mathlib.MeasureTheory.Integral.Asymptotics
 public import Mathlib.MeasureTheory.Integral.ExpDecay
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
 
@@ -26,6 +30,9 @@ Statements of DLMF §1.14(iii) for `laplaceTransform f s = ∫₀^∞ e^{-st} f(
 * `integrableOn_laplace_integrand`, `differentiableOn_laplaceTransform`: absolute convergence
   and analyticity for `ℜs > α`.
 * `tendsto_laplaceTransform_re_atTop`: `𝓛(f)(s) → 0` as `ℜs → ∞` (DLMF 1.14.19).
+* `laplaceTransform_eq_fourierTransform`, `integral_laplaceTransform_bromwich_eq_dirichlet`: the
+  Laplace transform on a vertical line as a Fourier transform, and the Bromwich partial integral
+  as a Dirichlet-kernel integral.
 * `tendsto_laplaceTransform_inversion`, `laplaceTransform_inversion_of_isBigO`: Bromwich
   inversion (DLMF 1.14.20).
 * `laplaceTransform_sub`, `laplaceTransform_heaviside_shift`: translation (DLMF 1.14.21–1.14.22).
@@ -141,6 +148,61 @@ theorem tendsto_laplaceTransform_re_atTop {f : ℝ → ℂ} {α : ℝ}
   filter_upwards [hre.eventually_gt_atTop α] with s hs
   exact norm_laplaceTransform_le hM hs
 
+/-- On the line `ℜs = σ`, the Laplace transform is a Fourier transform:
+`𝓛(f)(σ + iy) = (2π)^{1/2} 𝓕(G)(-y)` with `G(u) = e^{-σu} f(u)` for `u > 0` and `G(u) = 0`
+otherwise. -/
+theorem laplaceTransform_eq_fourierTransform (f : ℝ → ℂ) (σ y : ℝ) :
+    laplaceTransform f (σ + y * I) = ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ)⁻¹ *
+      fourierTransform ((Ioi 0).indicator (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u)) (-y) := by
+  have hc0 : ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) ≠ 0 :=
+    inv_ne_zero (ofReal_ne_zero.2 (Real.sqrt_pos.2 (by positivity)).ne')
+  rw [fourierTransform, ← mul_assoc, inv_mul_cancel₀ hc0, one_mul, laplaceTransform]
+  rw [show (fun u : ℝ => (Ioi 0).indicator (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) u *
+      cexp (I * ((-y : ℝ) : ℂ) * u)) = (Ioi 0).indicator (fun u : ℝ =>
+        cexp (-(σ : ℂ) * u) * f u * cexp (I * ((-y : ℝ) : ℂ) * u)) from funext fun u => by
+      by_cases hu : u ∈ Ioi (0 : ℝ) <;> simp [hu],
+    integral_indicator measurableSet_Ioi]
+  refine setIntegral_congr_fun measurableSet_Ioi fun u _ => ?_
+  rw [mul_comm (cexp _) (f u), mul_assoc, mul_left_comm, ← Complex.exp_add]
+  congr 2
+  push_cast
+  ring
+
+/-- The Bromwich partial integral of a Laplace transform is a Dirichlet-kernel integral of
+`G(u) = e^{-σu} f(u)` (extended by `0` to `u ≤ 0`). -/
+theorem integral_laplaceTransform_bromwich_eq_dirichlet {f : ℝ → ℂ} {σ : ℝ}
+    (hG : IntegrableOn (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) (Ioi 0)) {T : ℝ} (hT : 0 ≤ T)
+    (t : ℝ) :
+    (1 / (2 * Real.pi) : ℂ) *
+        ∫ y in -T..T, cexp (t * (σ + y * I)) * laplaceTransform f (σ + y * I) =
+      cexp (σ * t) * ∫ u, (Ioi 0).indicator (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) u *
+        ((Real.sin (T * (t - u)) / (Real.pi * (t - u)) : ℝ) : ℂ) := by
+  set G : ℝ → ℂ := (Ioi 0).indicator (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) with hGdef
+  have hGi : Integrable G := (integrable_indicator_iff measurableSet_Ioi).2 hG
+  set c : ℂ := ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) with hc
+  have hc0 : c ≠ 0 := by
+    rw [hc]; exact inv_ne_zero (ofReal_ne_zero.2 (Real.sqrt_pos.2 (by positivity)).ne')
+  have hcc : c * c = ((2 * Real.pi : ℝ) : ℂ)⁻¹ := by
+    rw [hc, ← mul_inv, ← ofReal_mul, Real.mul_self_sqrt (by positivity)]
+  have hL : ∀ y : ℝ, laplaceTransform f (σ + y * I) = c⁻¹ * fourierTransform G (-y) :=
+    laplaceTransform_eq_fourierTransform f σ
+  rw [← integral_fourierTransform_mul_cexp_eq_dirichlet hGi hT t, ← hc]
+  simp_rw [hL]
+  have h := intervalIntegral.integral_comp_neg (a := -T) (b := T)
+    (fun x : ℝ => cexp (t * (σ + ((-x : ℝ) : ℂ) * I)) * (c⁻¹ * fourierTransform G x))
+  simp only [neg_neg] at h
+  rw [h, ← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul,
+    ← intervalIntegral.integral_const_mul]
+  refine intervalIntegral.integral_congr fun x _ => ?_
+  have h2 : (1 / (2 * Real.pi) : ℂ) * c⁻¹ = c := by
+    have h3 : (1 / (2 * Real.pi) : ℂ) = c * c := by rw [hcc]; push_cast; ring
+    rw [h3, mul_assoc, mul_inv_cancel₀ hc0, mul_one]
+  rw [show cexp (t * (σ + ((-x : ℝ) : ℂ) * I)) = cexp (σ * t) * cexp (-(I * x * t)) by
+    rw [← Complex.exp_add]; congr 1; push_cast; ring]
+  linear_combination (cexp (σ * t) * cexp (-(I * x * t)) * fourierTransform G x) * h2
+
+
+
 /-- DLMF 1.14.20 (Bromwich inversion): if `f` is continuous on `[0, ∞)`, of exponential growth
 `α`, and of locally bounded variation (as when `f'` is piecewise continuous), then for `t > 0`
 and `σ > α`,
@@ -153,7 +215,46 @@ theorem tendsto_laplaceTransform_inversion {f : ℝ → ℂ} {α : ℝ} (hf : Co
     Tendsto (fun T : ℝ => (1 / (2 * Real.pi) : ℂ) *
         ∫ y in -T..T, cexp (t * (σ + y * I)) * laplaceTransform f (σ + y * I)) atTop
       (𝓝 (f t)) := by
-  sorry
+  have hG : IntegrableOn (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) (Ioi 0) := by
+    have := integrableOn_laplace_integrand (hf.locallyIntegrableOn measurableSet_Ici) hg
+      (s := σ) (by simpa using hσ)
+    simpa using this
+  set G : ℝ → ℂ := (Ioi 0).indicator (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) with hGdef
+  have hGi : Integrable G := (integrable_indicator_iff measurableSet_Ioi).2 hG
+  have hEq : ∀ u, 0 < u → G u = (Real.exp (-σ * u) : ℝ) • f u := fun u hu => by
+    rw [hGdef, indicator_of_mem (show u ∈ Ioi 0 from hu), Complex.real_smul, ofReal_exp]
+    push_cast
+    ring_nf
+  have hsub : Icc (t - t / 2) (t + t / 2) ⊆ Ioi 0 := fun u hu => by
+    simp only [mem_Ioi]; linarith [hu.1]
+  have hbvG : BoundedVariationOn G (Icc (t - t / 2) (t + t / 2)) := by
+    have hf' : BoundedVariationOn f (Icc (t - t / 2) (t + t / 2)) := by
+      have := hbv (t - t / 2) (t + t / 2) (by simp only [mem_Ici]; linarith)
+        (by simp only [mem_Ici]; linarith)
+      rwa [inter_eq_right.2 (fun u hu => mem_Ici.2 (le_of_lt (hsub hu)))] at this
+    have hprod := BoundedVariationOn.smul
+      (Real.boundedVariationOn_exp_neg_mul σ (t - t / 2) (t + t / 2)) hf'
+    unfold BoundedVariationOn at hprod ⊢
+    rwa [eVariationOn.eq_of_eqOn (fun u hu => hEq u (hsub hu))]
+  have hcont : ContinuousAt G t := by
+    have h1 : ContinuousAt (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) t :=
+      (by fun_prop : Continuous fun u : ℝ => cexp (-(σ : ℂ) * u)).continuousAt.mul
+        (hf.continuousAt (Ici_mem_nhds ht))
+    refine h1.congr ?_
+    filter_upwards [Ioi_mem_nhds ht] with u hu
+    rw [hGdef, indicator_of_mem (show u ∈ Ioi 0 from hu)]
+  have hlim := (Real.tendsto_integral_mul_sin_div_of_boundedVariationOn hGi (half_pos ht) hbvG
+    (hcont.tendsto.mono_left nhdsWithin_le_nhds)
+    (hcont.tendsto.mono_left nhdsWithin_le_nhds)).const_mul (cexp (σ * t))
+  have hval : cexp (σ * t) * ((G t + G t) / 2) = f t := by
+    rw [← two_mul, mul_div_cancel_left₀ _ two_ne_zero, hGdef,
+      indicator_of_mem (show t ∈ Ioi 0 from ht), ← mul_assoc, ← Complex.exp_add]
+    ring_nf
+    simp
+  rw [hval] at hlim
+  refine hlim.congr' ?_
+  filter_upwards [eventually_ge_atTop 0] with T hT
+  exact (integral_laplaceTransform_bromwich_eq_dirichlet hG hT t).symm
 
 /-- DLMF §1.14(iii), after 1.14.20: if moreover `𝓛(f)(s) = O(s^{-K})` with `K > 1` in a
 half-plane `ℜs ≥ γ` (here `γ > α`), then for every `σ > γ` and `t > 0` the inversion integral
@@ -166,7 +267,77 @@ theorem laplaceTransform_inversion_of_isBigO {f : ℝ → ℂ} {α γ K C : ℝ}
     (hσ : γ < σ) {t : ℝ} (ht : 0 < t) :
     f t = (1 / (2 * Real.pi) : ℂ) *
       ∫ y : ℝ, cexp (t * (σ + y * I)) * laplaceTransform f (σ + y * I) := by
-  sorry
+  have hG : IntegrableOn (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) (Ioi 0) := by
+    have := integrableOn_laplace_integrand (hf.locallyIntegrableOn measurableSet_Ici) hg
+      (s := σ) (by simpa using hγ.trans hσ)
+    simpa using this
+  set G : ℝ → ℂ := (Ioi 0).indicator (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) with hGdef
+  have hGi : Integrable G := (integrable_indicator_iff measurableSet_Ioi).2 hG
+  set c : ℂ := ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) with hc
+  have hc0 : c ≠ 0 := by
+    rw [hc]; exact inv_ne_zero (ofReal_ne_zero.2 (Real.sqrt_pos.2 (by positivity)).ne')
+  have hcc : c * c = ((2 * Real.pi : ℝ) : ℂ)⁻¹ := by
+    rw [hc, ← mul_inv, ← ofReal_mul, Real.mul_self_sqrt (by positivity)]
+  have hL : ∀ y : ℝ, laplaceTransform f (σ + y * I) = c⁻¹ * fourierTransform G (-y) :=
+    laplaceTransform_eq_fourierTransform f σ
+  have hFG : ∀ x : ℝ, fourierTransform G x = c * laplaceTransform f (σ + ((-x : ℝ) : ℂ) * I) := by
+    intro x
+    rw [hL, neg_neg, ← mul_assoc, mul_inv_cancel₀ hc0, one_mul]
+  -- integrability of the transform
+  have hFi : Integrable (fourierTransform G) := by
+    refine LocallyIntegrable.integrable_of_isBigO_cocompact
+      (continuous_fourierTransform hGi).locallyIntegrable (g := fun x : ℝ => (1 + ‖x‖) ^ (-K)) ?_
+      ((integrable_one_add_norm (by simp; linarith)).integrableAtFilter _)
+    refine IsBigO.of_bound (‖c‖ * |C| * 2 ^ K) ?_
+    filter_upwards [tendsto_norm_cocompact_atTop.eventually (eventually_ge_atTop (1 : ℝ))]
+      with x hx
+    rw [hFG, norm_mul]
+    have hs := hbound (σ + ((-x : ℝ) : ℂ) * I) (by simp; linarith)
+    have hx0 : 0 < ‖x‖ := by linarith
+    have him : ‖x‖ ≤ ‖(σ : ℂ) + ((-x : ℝ) : ℂ) * I‖ := by
+      have := Complex.abs_im_le_norm ((σ : ℂ) + ((-x : ℝ) : ℂ) * I)
+      simpa using this
+    have h1 : ‖(σ : ℂ) + ((-x : ℝ) : ℂ) * I‖ ^ (-K) ≤ ‖x‖ ^ (-K) :=
+      Real.rpow_le_rpow_of_nonpos hx0 him (by linarith)
+    have h2 : ‖x‖ ^ (-K) ≤ 2 ^ K * (1 + ‖x‖) ^ (-K) := by
+      have h3 : (1 + ‖x‖) ^ (-K) ≥ (2 * ‖x‖) ^ (-K) :=
+        Real.rpow_le_rpow_of_nonpos (by linarith) (by linarith) (by linarith)
+      rw [Real.mul_rpow (by norm_num) hx0.le, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2)] at h3
+      have h4 : (2 : ℝ) ^ K * ((2 : ℝ) ^ K)⁻¹ = 1 := mul_inv_cancel₀ (by positivity)
+      nlinarith [Real.rpow_nonneg hx0.le (-K), Real.rpow_pos_of_pos (by norm_num : (0 : ℝ) < 2) K]
+    have hnn : 0 ≤ ‖(σ : ℂ) + ((-x : ℝ) : ℂ) * I‖ ^ (-K) := Real.rpow_nonneg (norm_nonneg _) _
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (by positivity) _)]
+    calc ‖c‖ * ‖laplaceTransform f (σ + ((-x : ℝ) : ℂ) * I)‖
+        ≤ ‖c‖ * (|C| * ‖(σ : ℂ) + ((-x : ℝ) : ℂ) * I‖ ^ (-K)) := by
+          gcongr
+          exact hs.trans (by gcongr; exact le_abs_self C)
+      _ ≤ ‖c‖ * (|C| * (2 ^ K * (1 + ‖x‖) ^ (-K))) := by gcongr; exact h1.trans h2
+      _ = ‖c‖ * |C| * 2 ^ K * (1 + ‖x‖) ^ (-K) := by ring
+  -- continuity of `G` at `t` and inversion
+  have hcont : ContinuousAt G t := by
+    have h1 : ContinuousAt (fun u : ℝ => cexp (-(σ : ℂ) * u) * f u) t :=
+      (by fun_prop : Continuous fun u : ℝ => cexp (-(σ : ℂ) * u)).continuousAt.mul
+        (hf.continuousAt (Ici_mem_nhds ht))
+    refine h1.congr ?_
+    filter_upwards [Ioi_mem_nhds ht] with u hu
+    rw [hGdef, indicator_of_mem (show u ∈ Ioi 0 from hu)]
+  have hinv := fourierTransform_inversion_of_continuousAt hGi hFi hcont
+  have hval : f t = cexp (σ * t) * G t := by
+    rw [hGdef, indicator_of_mem (show t ∈ Ioi 0 from ht), ← mul_assoc, ← Complex.exp_add]
+    ring_nf
+    simp
+  rw [hval, hinv, ← hc]
+  simp_rw [hL]
+  rw [← integral_neg_eq_self, ← integral_const_mul, ← integral_const_mul, ← integral_const_mul]
+  refine integral_congr_ae (Eventually.of_forall fun x => ?_)
+  simp only
+  have h2 : (1 / (2 * Real.pi) : ℂ) * c⁻¹ = c := by
+    have h3 : (1 / (2 * Real.pi) : ℂ) = c * c := by rw [hcc]; push_cast; ring
+    rw [h3, mul_assoc, mul_inv_cancel₀ hc0, mul_one]
+  rw [show cexp (t * (σ + x * I)) = cexp (σ * t) * cexp (-(I * ((-x : ℝ) : ℂ) * t)) by
+    rw [← Complex.exp_add]; congr 1; push_cast; ring]
+  linear_combination (-(cexp (σ * t) * cexp (-(I * ((-x : ℝ) : ℂ) * t)) *
+    fourierTransform G (-x))) * h2
 
 /-- DLMF 1.14.21 (translation): `𝓛(f)(s - a) = 𝓛(f_a)(s)` with `f_a(t) = e^{at} f(t)`. This holds
 identically (also when the integrals diverge, both sides being `0`). -/
@@ -608,6 +779,75 @@ theorem eqOn_of_laplaceTransform_eq {f g : ℝ → ℂ} {α : ℝ} (hf : Continu
     (hge : IsOfExponentialGrowth g α)
     (h : ∀ s : ℝ, α < s → laplaceTransform f s = laplaceTransform g s) :
     EqOn f g (Ici 0) := by
-  sorry
+  have hfl := hf.locallyIntegrableOn (μ := volume) measurableSet_Ici
+  have hgl := hg.locallyIntegrableOn (μ := volume) measurableSet_Ici
+  set U : Set ℂ := {s : ℂ | α < s.re} with hU
+  have hUo : IsOpen U := isOpen_lt continuous_const Complex.continuous_re
+  -- the transforms agree on the half-plane
+  have hEq : EqOn (laplaceTransform f) (laplaceTransform g) U := by
+    refine AnalyticOnNhd.eqOn_of_preconnected_of_frequently_eq
+      ((differentiableOn_laplaceTransform hfl hfe).analyticOnNhd hUo)
+      ((differentiableOn_laplaceTransform hgl hge).analyticOnNhd hUo)
+      (convex_halfSpace_re_gt α).isPreconnected (z₀ := ((α + 1 : ℝ) : ℂ)) (by simp [hU]) ?_
+    have ht : Tendsto (fun s : ℝ => (s : ℂ)) (𝓝[≠] (α + 1)) (𝓝[≠] ((α + 1 : ℝ) : ℂ)) :=
+      tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _
+        (Complex.continuous_ofReal.continuousAt.mono_left nhdsWithin_le_nhds)
+        (eventually_nhdsWithin_of_forall fun s hs => by
+          simp only [mem_compl_iff, mem_singleton_iff] at hs ⊢
+          exact_mod_cast hs)
+    refine ht.frequently (Eventually.frequently ?_)
+    filter_upwards [nhdsWithin_le_nhds (Ioi_mem_nhds (show α < α + 1 by linarith))] with s hs
+    exact h s hs
+  -- the difference
+  set d : ℝ → ℂ := fun t => f t - g t with hd
+  have hdc : ContinuousOn d (Ici 0) := hf.sub hg
+  have hdz : ∀ t, 0 < t → d t = 0 := by
+    intro t ht
+    set σ : ℝ := α + 1 with hσ
+    have hG : IntegrableOn (fun u : ℝ => cexp (-(σ : ℂ) * u) * d u) (Ioi 0) := by
+      have h1 := integrableOn_laplace_integrand hfl hfe (s := σ) (by simp [hσ])
+      have h2 := integrableOn_laplace_integrand hgl hge (s := σ) (by simp [hσ])
+      refine (h1.sub h2).congr_fun (fun u _ => ?_) measurableSet_Ioi
+      simp only [hd, Pi.sub_apply]
+      ring
+    set G : ℝ → ℂ := (Ioi 0).indicator (fun u : ℝ => cexp (-(σ : ℂ) * u) * d u) with hGdef
+    have hGi : Integrable G := (integrable_indicator_iff measurableSet_Ioi).2 hG
+    have hF0 : fourierTransform G = fun _ => 0 := by
+      funext x
+      have h1 := laplaceTransform_eq_fourierTransform d σ (-x)
+      have hc0 : ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ)⁻¹ ≠ 0 :=
+        inv_ne_zero (inv_ne_zero (ofReal_ne_zero.2 (Real.sqrt_pos.2 (by positivity)).ne'))
+      have hld : laplaceTransform d (σ + ((-x : ℝ) : ℂ) * I) = 0 := by
+        have hmem : (σ : ℂ) + ((-x : ℝ) : ℂ) * I ∈ U := by simp [hU, hσ]
+        have h3 := hEq hmem
+        have hfi := integrableOn_laplace_integrand hfl hfe hmem
+        have hgi := integrableOn_laplace_integrand hgl hge hmem
+        simp only [laplaceTransform] at h3 ⊢
+        simp only [hd, mul_sub]
+        rw [integral_sub hfi hgi, h3, sub_self]
+      rw [hld, neg_neg] at h1
+      exact ((mul_eq_zero.1 h1.symm).resolve_left hc0)
+    have hcont : ContinuousAt G t := by
+      have h1 : ContinuousAt (fun u : ℝ => cexp (-(σ : ℂ) * u) * d u) t :=
+        (by fun_prop : Continuous fun u : ℝ => cexp (-(σ : ℂ) * u)).continuousAt.mul
+          (hdc.continuousAt (Ici_mem_nhds ht))
+      refine h1.congr ?_
+      filter_upwards [Ioi_mem_nhds ht] with u hu
+      rw [hGdef, indicator_of_mem (show u ∈ Ioi 0 from hu)]
+    have hinv := fourierTransform_inversion_of_continuousAt hGi
+      (by rw [hF0]; exact integrable_zero _ _ _) hcont
+    rw [hF0] at hinv
+    simp only [zero_mul, integral_zero, mul_zero, hGdef,
+      indicator_of_mem (show t ∈ Ioi 0 from ht)] at hinv
+    exact (mul_eq_zero.1 hinv).resolve_left (Complex.exp_ne_zero _)
+  intro t ht
+  rcases (mem_Ici.1 ht).eq_or_lt with h0 | h0
+  · subst h0
+    have hlim : Tendsto d (𝓝[>] 0) (𝓝 (d 0)) :=
+      (hdc 0 self_mem_Ici).tendsto.mono_left (nhdsWithin_mono _ Ioi_subset_Ici_self)
+    have hlim0 : Tendsto d (𝓝[>] 0) (𝓝 0) :=
+      tendsto_const_nhds.congr' (eventually_nhdsWithin_of_forall fun s hs => (hdz s hs).symm)
+    exact sub_eq_zero.1 (tendsto_nhds_unique hlim hlim0)
+  · exact sub_eq_zero.1 (hdz t h0)
 
 end DLMF.AlgebraicAnalytic

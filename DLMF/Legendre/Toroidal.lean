@@ -34,14 +34,17 @@ the Fourier series in `φ`, and Whipple's formulas.
 ## Implementation notes
 
 The hypergeometric forms rest on a composite quadratic transformation (DLMF 15.8.21 followed by
-15.8.13, `legTor_quad`). DLMF 14.19.4 follows from the Euler half-line integral of `₂F₁` with the
-substitution `u = tan²(θ/2)`, and DLMF 14.19.5 from Whipple's formula (DLMF 14.9.16) and
-DLMF 14.12.4. Helper names carry the prefixes `legTor_`, `legInt_` and `legFS_`.
+15.8.13, `ToroidalWhipple.quadraticTransformation`). DLMF 14.19.4 follows from the Euler half-line
+integral of `₂F₁` with the substitution `u = tan²(θ/2)`, and DLMF 14.19.5 from Whipple's formula
+(DLMF 14.9.16) and DLMF 14.12.4. Helper names live in the namespaces `ToroidalWhipple`,
+`ToroidalIntegral` and `ToroidalFourier`.
 -/
 
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Legendre
 
 /-- DLMF 14.19.1: the toroidal coordinates map `(η, θ, φ) ↦ (x, y, z) = (c sinh η cos φ, c sinh η
@@ -59,11 +62,11 @@ def toroidalP (n : ℕ) (μ : ℂ) (x : ℝ) : ℂ :=
 def toroidalQ (n : ℕ) (μ : ℂ) (x : ℝ) : ℂ :=
   olverQ (n-1/2) μ x
 
-/-! ### Helpers for Whipple's formulas (prefix `legTor_`) -/
+/-! ### Helpers for Whipple's formulas (namespace `ToroidalWhipple`) -/
 
 /-- For real `t > 1` with `t² - 1 = u²`, `u > 0`: the Whipple point of `t` is `t/u` and
 `(t²-1)^{-1/4} = exp(-(log u)/2)`. -/
-theorem legTor_point {t u : ℝ} (ht : 1 < t) (hu : 0 < u) (htu : t^2 - 1 = u^2) :
+theorem ToroidalWhipple.point {t u : ℝ} (ht : 1 < t) (hu : 0 < u) (htu : t^2 - 1 = u^2) :
     (t:ℂ)/exp ((log ((t:ℂ)-1)+log ((t:ℂ)+1))/2) = ((t/u:ℝ):ℂ) ∧
       legendreBranchPower (-1/2) t = exp (-(Real.log u:ℂ)/2) := by
   have hl : log ((t:ℂ)-1)+log ((t:ℂ)+1) = 2*(Real.log u:ℂ) := by
@@ -80,7 +83,7 @@ theorem legTor_point {t u : ℝ} (ht : 1 < t) (hu : 0 < u) (htu : t^2 - 1 = u^2)
     rw [hl]; congr 1; ring
 
 /-- `P^μ_{-ν-1} = P^μ_ν` (DLMF 14.9.11 for `P`) on `(1,∞)`. -/
-theorem legTor_P_neg_degree (ν μ : ℂ) {y : ℝ} (hy : 1 < y) :
+theorem ToroidalWhipple.P_neg_degree (ν μ : ℂ) {y : ℝ} (hy : 1 < y) :
     associatedP (-ν-1) μ y = associatedP ν μ y := by
   have hz : 1 + (y:ℂ) ∈ slitPlane := Or.inl (by simp; linarith)
   unfold associatedP
@@ -88,7 +91,7 @@ theorem legTor_P_neg_degree (ν μ : ℂ) {y : ℝ} (hy : 1 < y) :
   congr 2 <;> ring
 
 /-- `(c/(s))^{1/2}` for positive reals as an exponential of logarithms. -/
-theorem legTor_cpow_half {c s : ℝ} (hc : 0 < c) (hs : 0 < s) :
+theorem ToroidalWhipple.cpow_half {c s : ℝ} (hc : 0 < c) (hs : 0 < s) :
     ((c/s:ℝ):ℂ)^(1/2:ℂ) = (c:ℂ)^(1/2:ℂ) * exp (-(Real.log s:ℂ)/2) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr (div_pos hc hs).ne'),
     cpow_def_of_ne_zero (ofReal_ne_zero.mpr hc.ne'), ← ofReal_log (div_pos hc hs).le,
@@ -96,7 +99,7 @@ theorem legTor_cpow_half {c s : ℝ} (hc : 0 < c) (hs : 0 < s) :
   congr 1; push_cast; ring
 
 /-- `Γ(k + 1/2) ≠ 0` for integer `k`. -/
-theorem legTor_Gamma_half_ne (k : ℤ) : Gamma ((k:ℂ) + 1/2) ≠ 0 := by
+theorem ToroidalWhipple.Gamma_half_ne (k : ℤ) : Gamma ((k:ℂ) + 1/2) ≠ 0 := by
   refine Gamma_ne_zero fun j hj => ?_
   have := congrArg Complex.re hj
   simp at this
@@ -109,7 +112,8 @@ theorem legTor_Gamma_half_ne (k : ℤ) : Gamma ((k:ℂ) + 1/2) ≠ 0 := by
 /-- Composite quadratic transformation (DLMF 15.8.21 then 15.8.13) behind DLMF 14.19.3:
 for `0 < q < 1` and `x = (1+q²)/(2q)`,
 `F(μ+½, ν+μ+½; ν+1; q²) = (1+q²)^{-(ν+μ+½)} F(a/2, (a+1)/2; ν+1; x^{-2})`, `a = ν+μ+½`. -/
-theorem legTor_quad (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
+theorem ToroidalWhipple.quadraticTransformation (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ))
+    (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
     {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     ₂F₁ (μ+1/2) (ν+μ+1/2) (ν+1) ((q^2:ℝ):ℂ) =
       exp (-(Real.log (1+q^2):ℂ)*(ν+μ+1/2)) *
@@ -157,7 +161,7 @@ theorem legTor_quad (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : 
   rw [hl]; push_cast; ring
 
 /-- DLMF 14.19.3 off the half-integer degrees `2ν ∈ ℤ`. -/
-theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ))
+theorem ToroidalWhipple.Q_hypergeometric_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ))
     (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
     {ξ : ℝ} (hξ : 0 < ξ) :
     olverQ (ν-1/2) μ (Real.cosh ξ)=Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp
@@ -191,7 +195,7 @@ theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn1,
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn2,
     regularizedGaussHGFun_eq_div_Gamma hc, regularizedGaussHGFun_eq_div_Gamma hc',
-    legTor_quad ν μ hc ht hq0 hq1, ordinaryHypergeometric_symm,
+    ToroidalWhipple.quadraticTransformation ν μ hc ht hq0 hq1, ordinaryHypergeometric_symm,
     show (ν-1/2+μ+2)/2 = (ν+μ+1/2+1)/2 by ring, show (ν-1/2+μ+1)/2 = (ν+μ+1/2)/2 by ring,
     show ν-1/2+3/2 = ν+1 by ring]
   set G := ₂F₁ ((ν+μ+1/2)/2) ((ν+μ+1/2+1)/2) (ν+1) (((2*q/(1+q^2))^2:ℝ):ℂ) / Gamma (ν+1)
@@ -231,7 +235,7 @@ theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ
   rw [hl1, hl2, hlq]; push_cast; ring
 
 /-- DLMF 14.19.2 off the half-integer orders `2μ ∈ ℤ`. -/
-theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:ℂ))
+theorem ToroidalWhipple.P_hypergeometric_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:ℂ))
     (hc2 : ∀ k : ℕ, 1 - μ ≠ -(k:ℂ))
     {ξ : ℝ} (hξ : 0 < ξ) :
     associatedP (ν-1/2) μ (Real.cosh ξ)=Gamma
@@ -255,7 +259,7 @@ theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:
   have hz : ((Real.cosh ξ:ℝ):ℂ) - 1 ∈ slitPlane :=
       Or.inl (by simp only [sub_re, ofReal_re, one_re]; linarith)
   -- step 1: degree reflection and DLMF 14.3.18
-  have hrefl := legTor_P_neg_degree (-ν-1/2) μ ht1
+  have hrefl := ToroidalWhipple.P_neg_degree (-ν-1/2) μ ht1
   rw [show -(-ν-1/2)-1 = ν-1/2 by ring] at hrefl
   rw [hrefl]
   rw [show associatedP (-ν-1/2) μ (Real.cosh ξ) = associatedP (-ν-1/2) (-(-μ)) (Real.cosh ξ) by
@@ -383,7 +387,8 @@ theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2)
   · have hG : Gamma (1/2-μ) ≠ 0 := Gamma_ne_zero fun m hm => hμ' ⟨2*(m:ℤ)+1, by
       push_cast; linear_combination hm⟩
     show (Gamma (1/2-μ))⁻¹ * associatedP (ν-1/2) μ (Real.cosh ξ) = _
-    rw [legTor_P_hyp_generic ν μ (fun k hk => hμ' ⟨(k:ℤ)+1, by push_cast; linear_combination hk/2⟩)
+    rw [ToroidalWhipple.P_hypergeometric_generic ν μ
+        (fun k hk => hμ' ⟨(k:ℤ)+1, by push_cast; linear_combination hk/2⟩)
       (fun k hk => hμ' ⟨2*(k:ℤ)+2, by push_cast; linear_combination hk⟩) hξ]
     rw [← mul_assoc, ← mul_div_assoc, inv_mul_cancel₀ hG, one_div]
 
@@ -410,7 +415,7 @@ theorem toroidalQ_hypergeometric (ν μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     exact (differentiable_regularizedGaussHG_comp (A := fun _ : ℂ => μ+1/2)
       (B := fun ν : ℂ => ν+μ+1/2) (C := fun ν : ℂ => ν+1) (by fun_prop) (by fun_prop) (by fun_prop)
       hcut).continuous
-  · refine legTor_Q_hyp_generic ν μ (fun k hk => hν ⟨-2*(k:ℤ)-2, ?_⟩)
+  · refine ToroidalWhipple.Q_hypergeometric_generic ν μ (fun k hk => hν ⟨-2*(k:ℤ)-2, ?_⟩)
         (fun k hk => hν ⟨-(k:ℤ)-1, ?_⟩) hξ
     · push_cast; linear_combination -hk
     · push_cast; linear_combination -hk/2
@@ -418,40 +423,45 @@ theorem toroidalQ_hypergeometric (ν μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
 /-! ### Helpers for DLMF 14.19.4 -/
 
 /-- The half-angle substitution `u = tan²(θ/2) = (1 - cos θ)/(1 + cos θ)`. -/
-noncomputable def legInt_ht (θ : ℝ) : ℝ := (1 - Real.cos θ) / (1 + Real.cos θ)
+noncomputable def ToroidalIntegral.halfAngle (θ : ℝ) : ℝ := (1 - Real.cos θ) / (1 + Real.cos θ)
 
 /-- Its derivative `2 sin θ/(1 + cos θ)²`. -/
-noncomputable def legInt_ht' (θ : ℝ) : ℝ := 2 * Real.sin θ / (1 + Real.cos θ) ^ 2
+noncomputable def ToroidalIntegral.halfAngleDeriv (θ : ℝ) : ℝ := 2 * Real.sin θ /
+    (1 + Real.cos θ) ^ 2
 
 /-- `-1 < cos θ < 1` and `0 < sin θ` on `(0, π)`. -/
-theorem legInt_cos_bounds {θ : ℝ} (hθ : θ ∈ Ioo (0:ℝ) π) :
+theorem ToroidalIntegral.cos_bounds {θ : ℝ} (hθ : θ ∈ Ioo (0:ℝ) π) :
     -1 < Real.cos θ ∧ Real.cos θ < 1 ∧ 0 < Real.sin θ := by
   have hs := Real.sin_pos_of_pos_of_lt_pi hθ.1 hθ.2
   have h := Real.sin_sq_add_cos_sq θ
   refine ⟨?_, ?_, hs⟩ <;> nlinarith [Real.cos_le_one θ, Real.neg_one_le_cos θ]
 
 /-- Change of variables `u = tan²(θ/2)` from `(0, ∞)` to `(0, π)`. -/
-theorem legInt_ht_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
-    IntegrableOn (fun θ => |legInt_ht' θ| • g (legInt_ht θ)) (Ioo 0 π) ∧
-      ∫ θ in Ioo 0 π, |legInt_ht' θ| • g (legInt_ht θ) = ∫ u in Ioi 0, g u := by
-  have hd : ∀ θ ∈ Ioo (0:ℝ) π, HasDerivWithinAt legInt_ht (legInt_ht' θ) (Ioo 0 π) θ := by
+theorem ToroidalIntegral.halfAngle_changeOfVariables {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
+    IntegrableOn (fun θ => |ToroidalIntegral.halfAngleDeriv θ| •
+        g (ToroidalIntegral.halfAngle θ)) (Ioo 0 π) ∧
+      ∫ θ in Ioo 0 π, |ToroidalIntegral.halfAngleDeriv θ| • g (ToroidalIntegral.halfAngle θ) =
+          ∫ u in Ioi 0, g u := by
+  have hd : ∀ θ ∈ Ioo (0:ℝ) π,
+      HasDerivWithinAt ToroidalIntegral.halfAngle (ToroidalIntegral.halfAngleDeriv θ)
+      (Ioo 0 π) θ := by
     intro θ hθ
-    have hc : 0 < 1 + Real.cos θ := by linarith [(legInt_cos_bounds hθ).1]
+    have hc : 0 < 1 + Real.cos θ := by linarith [(ToroidalIntegral.cos_bounds hθ).1]
     have h := ((Real.hasDerivAt_cos θ).const_sub 1).div ((Real.hasDerivAt_cos θ).const_add 1) hc.ne'
-    unfold legInt_ht legInt_ht'
+    unfold ToroidalIntegral.halfAngle ToroidalIntegral.halfAngleDeriv
     convert h.hasDerivWithinAt using 1
     field_simp; ring
-  have hinj : InjOn legInt_ht (Ioo 0 π) := by
+  have hinj : InjOn ToroidalIntegral.halfAngle (Ioo 0 π) := by
     intro a ha b hb he
-    have ha1 : 0 < 1 + Real.cos a := by linarith [(legInt_cos_bounds ha).1]
-    have hb1 : 0 < 1 + Real.cos b := by linarith [(legInt_cos_bounds hb).1]
-    simp only [legInt_ht] at he
+    have ha1 : 0 < 1 + Real.cos a := by linarith [(ToroidalIntegral.cos_bounds ha).1]
+    have hb1 : 0 < 1 + Real.cos b := by linarith [(ToroidalIntegral.cos_bounds hb).1]
+    simp only [ToroidalIntegral.halfAngle] at he
     rw [div_eq_div_iff ha1.ne' hb1.ne'] at he
     exact Real.injOn_cos ⟨ha.1.le, ha.2.le⟩ ⟨hb.1.le, hb.2.le⟩ (by linarith)
-  have him : legInt_ht '' Ioo 0 π = Ioi 0 := by
+  have him : ToroidalIntegral.halfAngle '' Ioo 0 π = Ioi 0 := by
     ext u; constructor
     · rintro ⟨θ, hθ, rfl⟩
-      obtain ⟨h1, h2, -⟩ := legInt_cos_bounds hθ
+      obtain ⟨h1, h2, -⟩ := ToroidalIntegral.cos_bounds hθ
       show 0 < (1 - Real.cos θ)/(1 + Real.cos θ)
       exact div_pos (by linarith) (by linarith)
     · intro hu
@@ -459,7 +469,7 @@ theorem legInt_ht_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
       have hy1 : -1 < (1-u)/(1+u) := by rw [lt_div_iff₀ (by linarith)]; linarith
       have hy2 : (1-u)/(1+u) < 1 := by rw [div_lt_one (by linarith)]; linarith
       refine ⟨Real.arccos ((1-u)/(1+u)), ⟨Real.arccos_pos.mpr hy2, Real.arccos_lt_pi.mpr hy1⟩, ?_⟩
-      rw [legInt_ht, Real.cos_arccos hy1.le hy2.le]
+      rw [ToroidalIntegral.halfAngle, Real.cos_arccos hy1.le hy2.le]
       field_simp; ring
   have hcov := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioo hd hinj g
   have hcovI := integrableOn_image_iff_integrableOn_abs_deriv_smul measurableSet_Ioo hd hinj g
@@ -468,15 +478,17 @@ theorem legInt_ht_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
 
 /-- The Euler half-line kernel of DLMF 14.19.4 at `u = tan²(θ/2)`, with `2qx = 1+q²`,
 `2qs = 1-q²`. -/
-theorem legInt_toroidal_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q) (hqx : 1 + q^2 = 2*q*x)
+theorem ToroidalIntegral.eulerKernel_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q)
+    (hqx : 1 + q^2 = 2*q*x)
     (hqs : 1 - q^2 = 2*q*s) (hq1 : q < 1) (hθ : θ ∈ Ioo (0:ℝ) π) :
-    |legInt_ht' θ| • eulerHalfLineKernel a (m+1/2) (m+1/2) (((q^2)⁻¹:ℝ):ℂ) (legInt_ht θ) =
+    |ToroidalIntegral.halfAngleDeriv θ| •
+        eulerHalfLineKernel a (m+1/2) (m+1/2) (((q^2)⁻¹:ℝ):ℂ) (ToroidalIntegral.halfAngle θ) =
       (2:ℂ)^(-(2*m:ℂ)) * (q:ℂ)^a * ((Real.sin θ:ℂ)^(2*m) / ((x + Real.cos θ * s : ℝ):ℂ)^a) := by
-  obtain ⟨h1, h2, hS⟩ := legInt_cos_bounds hθ
+  obtain ⟨h1, h2, hS⟩ := ToroidalIntegral.cos_bounds hθ
   set C := Real.cos θ
   set S := Real.sin θ
-  have hht : legInt_ht θ = (1-C)/(1+C) := rfl
-  have hht' : legInt_ht' θ = 2*S/(1+C)^2 := rfl
+  have hht : ToroidalIntegral.halfAngle θ = (1-C)/(1+C) := rfl
+  have hht' : ToroidalIntegral.halfAngleDeriv θ = 2*S/(1+C)^2 := rfl
   have hp : 0 < 1 + C := by linarith
   have hm : 0 < 1 - C := by linarith
   have hs0 : 0 < s := by nlinarith
@@ -486,34 +498,38 @@ theorem legInt_toroidal_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q) 
     have : 0 < 2*q*(x + C*s) := by rw [this]; positivity
     exact pos_of_mul_pos_right this (by positivity)
   have hSC : S^2 = (1-C)*(1+C) := by have := Real.sin_sq_add_cos_sq θ; nlinarith
-  have hu : 0 < legInt_ht θ := by rw [hht]; exact div_pos hm hp
-  have hd : 0 < |legInt_ht' θ| := abs_pos.mpr (by rw [hht']; positivity)
+  have hu : 0 < ToroidalIntegral.halfAngle θ := by rw [hht]; exact div_pos hm hp
+  have hd : 0 < |ToroidalIntegral.halfAngleDeriv θ| := abs_pos.mpr (by rw [hht']; positivity)
   have l0 : 2 * Real.log S = Real.log (1-C) + Real.log (1+C) := by
     rw [← Real.log_mul hm.ne' hp.ne', ← hSC, Real.log_pow]; push_cast; ring
-  have l1 : Real.log (legInt_ht θ) = Real.log (1-C) - Real.log (1+C) := by
+  have l1 : Real.log (ToroidalIntegral.halfAngle θ) = Real.log (1-C) - Real.log (1+C) := by
     rw [hht]; exact Real.log_div hm.ne' hp.ne'
-  have l2 : Real.log (1 + legInt_ht θ) = Real.log 2 - Real.log (1+C) := by
+  have l2 : Real.log (1 + ToroidalIntegral.halfAngle θ) = Real.log 2 - Real.log (1+C) := by
     rw [← Real.log_div two_ne_zero hp.ne']; congr 1; rw [hht]; field_simp; ring
-  have l3 : Real.log ((q^2)⁻¹ + legInt_ht θ) =
+  have l3 : Real.log ((q^2)⁻¹ + ToroidalIntegral.halfAngle θ) =
       Real.log 2 + Real.log (x + C*s) - Real.log q - Real.log (1+C) := by
     rw [← Real.log_mul two_ne_zero hW.ne', ← Real.log_div (by positivity) hq.ne',
       ← Real.log_div (by positivity) hp.ne']
     congr 1; rw [hht]; field_simp; nlinarith
-  have l4 : Real.log |legInt_ht' θ| = Real.log 2 + Real.log S - 2 * Real.log (1+C) := by
+  have l4 : Real.log |ToroidalIntegral.halfAngleDeriv θ| = Real.log 2 + Real.log S - 2 *
+      Real.log (1+C) := by
     rw [hht', abs_of_pos (by positivity), Real.log_div (by positivity) (by positivity),
       Real.log_mul two_ne_zero hS.ne', Real.log_pow]; push_cast; ring
   unfold eulerHalfLineKernel
-  rw [show (1:ℂ) + ((legInt_ht θ:ℝ):ℂ) = ((1 + legInt_ht θ : ℝ):ℂ) by push_cast; ring,
-    show (((q^2)⁻¹:ℝ):ℂ) + ((legInt_ht θ:ℝ):ℂ) = (((q^2)⁻¹ + legInt_ht θ : ℝ):ℂ) by push_cast; ring,
+  rw [show (1:ℂ) + ((ToroidalIntegral.halfAngle θ:ℝ):ℂ) =
+      ((1 + ToroidalIntegral.halfAngle θ : ℝ):ℂ) by push_cast; ring,
+    show (((q^2)⁻¹:ℝ):ℂ) + ((ToroidalIntegral.halfAngle θ:ℝ):ℂ) =
+        (((q^2)⁻¹ + ToroidalIntegral.halfAngle θ : ℝ):ℂ) by push_cast; ring,
     show (2:ℂ)^(-(2*m:ℂ)) = ((2:ℝ):ℂ)^(-(2*m:ℂ)) by norm_num,
     show (S:ℂ)^(2*m) = (S:ℂ)^(((2*m:ℕ):ℂ)) by rw [cpow_natCast],
     Complex.ofReal_cpow_eq_exp hu,
-        Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1 + legInt_ht θ),
-    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (q^2)⁻¹ + legInt_ht θ),
+        Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1 + ToroidalIntegral.halfAngle θ),
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (q^2)⁻¹ + ToroidalIntegral.halfAngle θ),
         Complex.ofReal_cpow_eq_exp hq,
     Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hS,
         Complex.ofReal_cpow_eq_exp hW, real_smul,
-    show ((|legInt_ht' θ|:ℝ):ℂ) = exp (Real.log |legInt_ht' θ| : ℂ) by
+    show ((|ToroidalIntegral.halfAngleDeriv θ|:ℝ):ℂ) =
+        exp (Real.log |ToroidalIntegral.halfAngleDeriv θ| : ℂ) by
       rw [← ofReal_exp, Real.exp_log hd]]
   rw [← Complex.exp_sub]
   simp only [← exp_add]
@@ -524,7 +540,7 @@ theorem legInt_toroidal_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q) 
   linear_combination (-(m:ℂ)+1/2) * l0'
 
 /-- The constant in DLMF 14.19.4, by the duplication formula. -/
-theorem legInt_toroidal_value (n m : ℕ) (F : ℂ) {q c s : ℝ} (hq0 : 0 < q) (hc0 : 0 < c)
+theorem ToroidalIntegral.eulerKernel_const (n m : ℕ) (F : ℂ) {q c s : ℝ} (hq0 : 0 < q) (hc0 : 0 < c)
     (hs0 : 0 < s) :
     Gamma (n+m+1/2)*(s:ℂ)^m/(2^m*Real.sqrt π*Gamma (n-m+1/2)*Gamma (m+1/2)) *
       ((2:ℂ)^(2*m:ℂ) * (q:ℂ)^(-((n:ℂ)+m+1/2)) * (Gamma (m+1/2) * Gamma (m+1/2) *
@@ -541,7 +557,7 @@ theorem legInt_toroidal_value (n m : ℕ) (F : ℂ) {q c s : ℝ} (hq0 : 0 < q) 
   have hGa : Gamma ((m:ℂ)+1/2) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; positivity)
   have hG2 : Gamma (2*(m:ℂ)+1) ≠ 0 := Gamma_ne_zero hc
   have hGb : Gamma ((n:ℂ)-m+1/2) ≠ 0 := by
-    have := legTor_Gamma_half_ne ((n:ℤ)-m); push_cast at this; exact this
+    have := ToroidalWhipple.Gamma_half_ne ((n:ℤ)-m); push_cast at this; exact this
   have hpi : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hG1 : Gamma ((m:ℂ)+1) / Gamma (2*(m:ℂ)+1) = 2^(1-(2*(m:ℂ)+1)) * Real.sqrt π /
       Gamma ((m:ℂ)+1/2) := by
@@ -595,7 +611,7 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
   have hha : 0 < ((m:ℂ)+1/2).re := by simp; positivity
   have hz : 0 < ((((q^2)⁻¹:ℝ)):ℂ).re := by simp only [ofReal_re]; positivity
   obtain ⟨hKI, hKv⟩ := eulerHalfLine_integrable_integral (p := a) hha hha hz
-  obtain ⟨hI, hE⟩ := legInt_ht_cov hKI
+  obtain ⟨hI, hE⟩ := ToroidalIntegral.halfAngle_changeOfVariables hKI
   have hw : 1 - (((q^2)⁻¹:ℝ):ℂ) ∈ cutPlane := by
     rw [mem_cutPlane, sub_sub_cancel]; exact Or.inl (by simp only [ofReal_re]; positivity)
   have hF : regularizedGaussHG a ((m:ℂ)+1/2) (2*(m:ℂ)+1) (1 - (((q^2)⁻¹:ℝ):ℂ)) =
@@ -604,12 +620,14 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
         regularizedGaussHG (((m:ℂ)-(-n-1/2))/2) (((m:ℂ)-(-n-1/2)+1)/2) ((m:ℂ)+1)
             (1 - 1/(c:ℂ)^2) := by
     rw [regularizedGaussHG_symm _ _ _ hw, show a = (m:ℂ) - (-n-1/2) by rw [hadef]; ring,
-      legInt_cosh_hyp (-n-1/2) m (by simp only [natCast_re]; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)])
+      ExteriorIntegral.cosh_hypergeometric (-n-1/2) m
+          (by simp only [natCast_re]; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)])
         hq0 hq1 hqx]
   rw [show (m:ℂ)+1/2+((m:ℂ)+1/2) = 2*(m:ℂ)+1 by ring, hF] at hKv
   -- the integral over `(0, π)`
   have hf : ∀ θ ∈ Ioo (0:ℝ) π, (2:ℂ)^(2*m:ℂ) * (q:ℂ)^(-a) *
-      (|legInt_ht' θ| • eulerHalfLineKernel a (m+1/2) (m+1/2) (((q^2)⁻¹:ℝ):ℂ) (legInt_ht θ)) =
+      (|ToroidalIntegral.halfAngleDeriv θ| •
+          eulerHalfLineKernel a (m+1/2) (m+1/2) (((q^2)⁻¹:ℝ):ℂ) (ToroidalIntegral.halfAngle θ)) =
       (Real.sin θ:ℂ)^(2*m)/(Real.cosh ξ+Real.cos θ*Real.sinh ξ:ℂ)^(n+m+1/2:ℂ) := by
     intro θ hθ
     have h1 : (2:ℂ)^(2*m:ℂ) * (2:ℂ)^(-(2*m:ℂ)) = 1 := by
@@ -619,7 +637,7 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
     have key : ∀ X : ℂ, (2:ℂ)^(2*m:ℂ) * (q:ℂ)^(-a) * ((2:ℂ)^(-(2*m:ℂ)) * (q:ℂ)^a * X) =
         X := fun X => by
       linear_combination X * ((2:ℂ)^(2*m:ℂ) * (2:ℂ)^(-(2*m:ℂ)) * h2 + h1)
-    rw [legInt_toroidal_point a m hq0 hqx hqs hq1 hθ, key,
+    rw [ToroidalIntegral.eulerKernel_point a m hq0 hqx hqs hq1 hθ, key,
       show ((c + Real.cos θ * s : ℝ):ℂ) = (Real.cosh ξ:ℂ) + (Real.cos θ:ℂ) * (Real.sinh ξ:ℂ) by
         rw [ofReal_add, ofReal_mul]]
   have hint : ∫ θ : ℝ in 0..π,
@@ -637,27 +655,27 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
     have := congrArg re hk; simp at this
     have h' : ((2*n+1+2*k : ℤ):ℝ) = ((2*m:ℤ):ℝ) := by push_cast; linarith
     have := Int.cast_inj.mp h'; omega
-  have hP := associatedP_negative_integer_order ((n:ℂ)-1/2) m hnon (legInt_one_lt_mem hc1)
+  have hP := associatedP_negative_integer_order ((n:ℂ)-1/2) m hnon (LaplaceIntegrals.one_lt_mem hc1)
   have hGb : Gamma ((n:ℂ)-1/2-m+1) ≠ 0 := by
-    have := legTor_Gamma_half_ne ((n:ℤ)-m); push_cast at this
+    have := ToroidalWhipple.Gamma_half_ne ((n:ℤ)-m); push_cast at this
     rwa [show (n:ℂ)-1/2-m+1 = (n:ℂ)-m+1/2 by ring]
   have hPm : associatedP ((n:ℂ)-1/2) m c = Gamma ((n:ℂ)-1/2+m+1)/Gamma ((n:ℂ)-1/2-m+1) *
       associatedP ((n:ℂ)-1/2) (-(m:ℂ)) c := by
     have hGa : Gamma ((n:ℂ)-1/2+m+1) ≠ 0 := by
-      have := legTor_Gamma_half_ne ((n:ℤ)+m); push_cast at this
+      have := ToroidalWhipple.Gamma_half_ne ((n:ℤ)+m); push_cast at this
       rwa [show (n:ℂ)-1/2+m+1 = (n:ℂ)+m+1/2 by ring]
     rw [hP, ← mul_assoc, div_mul_div_comm, mul_comm (Gamma ((n:ℂ)-1/2+m+1)),
       div_self (mul_ne_zero hGb hGa), one_mul]
   unfold toroidalP
-  rw [hPm, ← legTor_P_neg_degree _ _ hc1, show -((n:ℂ)-1/2)-1 = -n-1/2 by ring,
-    associated_hypergeometric_18 _ _ (legInt_one_lt_mem hc1) (by simp; linarith),
-    legInt_legendreBranchPower_real _ hc1,
+  rw [hPm, ← ToroidalWhipple.P_neg_degree _ _ hc1, show -((n:ℂ)-1/2)-1 = -n-1/2 by ring,
+    associated_hypergeometric_18 _ _ (LaplaceIntegrals.one_lt_mem hc1) (by simp; linarith),
+    OrthogonalityIntegrals.legendreBranchPower_real _ hc1,
     show ((c:ℂ))^2 - 1 = ((s^2:ℝ):ℂ) by
       rw [hcdef, hsdef]; push_cast; linear_combination (Complex.cosh_sq_sub_sinh_sq (ξ:ℂ)),
     Complex.ofReal_cpow_eq_exp (q := s^2) (by positivity), Real.log_pow,
     show (Real.sinh ξ:ℂ) = (s:ℂ) from rfl, show (Real.cosh ξ:ℂ) = (c:ℂ) from rfl,
     show (n:ℂ)-1/2+m+1 = n+m+1/2 by ring, show (n:ℂ)-1/2-m+1 = n-m+1/2 by ring,
-    legInt_toroidal_value n m _ hq0 (by linarith) hs0,
+    ToroidalIntegral.eulerKernel_const n m _ hq0 (by linarith) hs0,
     show (-(m:ℂ)) = -(m:ℂ) from rfl]
   congr 2
   push_cast; ring_nf
@@ -674,12 +692,12 @@ theorem toroidalQ_integral (n m : ℕ) (hmn : m ≤ n) {ξ : ℝ} (hξ : 0 < ξ)
   set c := Real.cosh ξ with hcdef
   set s := Real.sinh ξ with hsdef
   have hcs : c^2 - 1 = s^2 := by rw [hcdef, hsdef]; nlinarith [Real.cosh_sq_sub_sinh_sq ξ]
-  obtain ⟨hpt, hbp⟩ := legTor_point hc1 hs hcs
+  obtain ⟨hpt, hbp⟩ := ToroidalWhipple.point hc1 hs hcs
   have hy : 1 < c/s := by
     rw [one_lt_div hs]; nlinarith [Real.cosh_sq_sub_sinh_sq ξ, Real.sinh_lt_cosh ξ]
   have hW := olverQ_whipple_real ((n:ℂ)-1/2) (m:ℂ) c hc1
   rw [hpt, hbp, show -((n:ℂ)-1/2)-1/2 = -(n:ℂ) by ring] at hW
-  have hI := legInt_associatedP_cosh_integral (ν := -(m:ℂ)-1/2) (μ := (n:ℂ))
+  have hI := ExteriorIntegral.associatedP_cosh_integral (ν := -(m:ℂ)-1/2) (μ := (n:ℂ))
     (by simp; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)])
     (by simp; have : (m:ℝ) ≤ n := by exact_mod_cast hmn
         linarith) hy
@@ -728,11 +746,11 @@ theorem toroidalQ_integral (n m : ℕ) (hmn : m ≤ n) {ξ : ℝ} (hξ : 0 < ξ)
         exp (Real.log (c + Real.cosh t * s) * ((n:ℂ)+1/2))) := by ring
     _ = _ := by rw [e, div_self hne, one_mul]
 
-/-! ### Helpers for the Fourier series 14.19.6 (prefix `legFS_`) -/
+/-! ### Helpers for the Fourier series 14.19.6 (namespace `ToroidalFourier`) -/
 
 /-- Regrouping a summable double series on `ℕ × ℕ` along the diagonals `j - k = n ≥ 0` and
 `k - j = n + 1`. -/
-theorem legFS_diag_split {F : ℕ × ℕ → ℂ} {P : ℂ} {gp gm : ℕ → ℂ} (hF : HasSum F P)
+theorem ToroidalFourier.diag_split {F : ℕ × ℕ → ℂ} {P : ℂ} {gp gm : ℕ → ℂ} (hF : HasSum F P)
     (hp : ∀ n, HasSum (fun k => F (k+n, k)) (gp n))
     (hm : ∀ n, HasSum (fun k => F (k, k+n+1)) (gm n)) :
     ∃ a b, HasSum gp a ∧ HasSum gm b ∧ a + b = P := by
@@ -766,7 +784,7 @@ theorem legFS_diag_split {F : ℕ × ℕ → ℂ} {P : ℂ} {gp gm : ℕ → ℂ
   · exact sm.hasSum.prod_fiberwise fun n => by simpa [hem, add_comm, add_assoc] using hm n
 
 /-- Absolute convergence of the binomial series `∑ (α)_j z^j/j!` for `|z| < 1`. -/
-theorem legFS_binom_norm_summable (α : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem ToroidalFourier.binomial_norm_summable (α : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable (fun j : ℕ => ‖poch α j / (j ! : ℂ) * z^j‖) := by
   set t := ‖z‖
   set r := (1 + t)/2
@@ -799,7 +817,8 @@ theorem legFS_binom_norm_summable (α : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
 
 /-- The diagonal `j = k + m` of the product of the binomial series in `tE` and `tE⁻¹`:
 `∑_k (α)_{k+m}(α)_k t^{2k+m} E^m/((k+m)! k!) = E^m t^m (α)_m 𝐅(α, α+m; m+1; t²)`. -/
-theorem legFS_fiber (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ} (hE : E ≠ 0) (m : ℕ) :
+theorem ToroidalFourier.fiber (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ}
+    (hE : E ≠ 0) (m : ℕ) :
     HasSum (fun k : ℕ => (poch α (k+m) / ((k+m) ! : ℂ) * ((t:ℂ)*E)^(k+m)) *
         (poch α k / (k ! : ℂ) * ((t:ℂ)*E⁻¹)^k))
       (E^m * (t:ℂ)^m * poch α m * regularizedGaussHGFun α (α+m) (m+1) ((t:ℂ)^2)) := by
@@ -824,7 +843,8 @@ theorem legFS_fiber (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ}
 
 /-- The Fourier modes of `(1 - tE)^{-α} (1 - t/E)^{-α}`, `0 ≤ t < 1`, `|E| = 1`: with
 `c_n = t^n (α)_n 𝐅(α, α+n; n+1; t²)`, `∑_{n ≥ 1} (Eⁿ + E⁻ⁿ) c_n = (1-tE)^{-α}(1-t/E)^{-α} - c_0`. -/
-theorem legFS_binom_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ} (hE : ‖E‖ = 1) :
+theorem ToroidalFourier.binomial_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ}
+    (hE : ‖E‖ = 1) :
     HasSum (fun j : ℕ => (E^(j+1) + E⁻¹^(j+1)) * ((t:ℂ)^(j+1) * poch α (j+1) *
         regularizedGaussHGFun α (α+(j+1:ℕ)) ((j+1:ℕ)+1) ((t:ℂ)^2)))
       ((1 - (t:ℂ)*E)^(-α) * (1 - (t:ℂ)*E⁻¹)^(-α) -
@@ -841,17 +861,17 @@ theorem legFS_binom_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {
       (poch α x.2 / (x.2 ! : ℂ) * ((t:ℂ)*E⁻¹)^x.2)) :=
     summable_mul_of_summable_norm (f := fun j : ℕ => poch α j / (j ! : ℂ) * ((t:ℂ)*E)^j)
       (g := fun j : ℕ => poch α j / (j ! : ℂ) * ((t:ℂ)*E⁻¹)^j)
-      (legFS_binom_norm_summable α hn1) (legFS_binom_norm_summable α hn2)
+      (ToroidalFourier.binomial_norm_summable α hn1) (ToroidalFourier.binomial_norm_summable α hn2)
   have hF := HasSum.mul hs1 hs2 hsm
-  obtain ⟨a, b, ha, hb, hab⟩ := legFS_diag_split hF
+  obtain ⟨a, b, ha, hb, hab⟩ := ToroidalFourier.diag_split hF
     (gp := fun n => E^n * (t:ℂ)^n * poch α n * regularizedGaussHGFun α (α+n) (n+1) ((t:ℂ)^2))
     (gm := fun n => E⁻¹^(n+1) * (t:ℂ)^(n+1) * poch α (n+1) *
       regularizedGaussHGFun α (α+(n+1:ℕ)) ((n+1:ℕ)+1) ((t:ℂ)^2))
     (fun n => by
-      have h := legFS_fiber α ht0 ht1 hE0 n
+      have h := ToroidalFourier.fiber α ht0 ht1 hE0 n
       exact h)
     (fun n => by
-      have h := legFS_fiber α ht0 ht1 (inv_ne_zero hE0) (n+1)
+      have h := ToroidalFourier.fiber α ht0 ht1 (inv_ne_zero hE0) (n+1)
       rw [inv_inv] at h
       convert h using 1
       funext k
@@ -867,7 +887,7 @@ theorem legFS_binom_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {
   ring
 
 /-- `w^s (w̄)^s = (|w|²)^s` for `w ∉ (-∞, 0]`. -/
-theorem legFS_cpow_mul_conj {w : ℂ} (hw : w ∈ slitPlane) (s : ℂ) :
+theorem ToroidalFourier.cpow_mul_conj {w : ℂ} (hw : w ∈ slitPlane) (s : ℂ) :
     w^s * (starRingEnd ℂ w)^s = exp (((2 * Real.log ‖w‖ : ℝ) : ℂ) * s) := by
   have hw0 : w ≠ 0 := slitPlane_ne_zero hw
   have hc0 : starRingEnd ℂ w ≠ 0 := (map_ne_zero _).mpr hw0
@@ -881,7 +901,7 @@ theorem legFS_cpow_mul_conj {w : ℂ} (hw : w ∈ slitPlane) (s : ℂ) :
 /-- The closed form behind DLMF 14.19.6: with `t = e^{-ξ}`, `E = e^{iphi}`,
 `√π (1-t²)^μ e^{-ξ/2} (1-tE)^{-μ-1/2} (1-t/E)^{-μ-1/2} = (π/2)^{1/2} sinh^μ ξ (cosh ξ - cos
 phi)^{-μ-1/2}`. -/
-theorem legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
+theorem ToroidalFourier.rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
     Real.sqrt π * (1 - (Real.exp (-2*ξ):ℂ))^μ / exp (ξ/2) *
       ((1 - (Real.exp (-ξ):ℂ)*exp (phi*I))^(-(μ+1/2)) *
           (1 - (Real.exp (-ξ):ℂ)*(exp (phi*I))⁻¹)^(-(μ+1/2))) =
@@ -910,7 +930,7 @@ theorem legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
   have hm0 : 0 < m := by rw [← hnorm]; positivity
   have hlogm : 2 * Real.log ‖w‖ = Real.log m := by
     rw [← hnorm, Real.log_pow]; push_cast; ring
-  rw [hconj, legFS_cpow_mul_conj hw, hlogm]
+  rw [hconj, ToroidalFourier.cpow_mul_conj hw, hlogm]
   -- real logarithms
   have h2t : Real.exp (-2*ξ) = t^2 := by rw [htdef, ← Real.exp_nat_mul]; congr 1; push_cast; ring
   have hsinh : Real.sinh ξ = (1 - t^2) / (2*t) := by
@@ -941,7 +961,7 @@ theorem legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
   ring
 
 /-- The hypergeometric form of `𝑸^μ_{n-1/2}(cosh ξ)` in terms of `t = e^{-ξ}` (DLMF 14.19.3). -/
-theorem legFS_toroidal_coef (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (n : ℕ) :
+theorem ToroidalFourier.coeff (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (n : ℕ) :
     olverQ ((n:ℂ)-1/2) μ (Real.cosh ξ) = Real.sqrt π * (1 - (Real.exp (-2*ξ):ℂ))^μ / exp (ξ/2) *
       ((Real.exp (-ξ):ℂ)^n *
           regularizedGaussHGFun (μ+1/2) (μ+1/2+n) (n+1) ((Real.exp (-ξ):ℂ)^2)) := by
@@ -974,18 +994,18 @@ theorem toroidalQ_fourier {μ : ℂ} (hμ : -1/2 < μ.re) {ξ : ℝ} (hξ : 0 < 
   have ht0 : 0 ≤ Real.exp (-ξ) := (Real.exp_pos _).le
   have ht1 : Real.exp (-ξ) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
   have hE : ‖exp ((phi:ℂ)*I)‖ = 1 := norm_exp_ofReal_mul_I phi
-  have h := (legFS_binom_product (μ+1/2) ht0 ht1 hE).mul_left
+  have h := (ToroidalFourier.binomial_product (μ+1/2) ht0 ht1 hE).mul_left
     (Real.sqrt π * (1 - (Real.exp (-2*ξ):ℂ))^μ / exp (ξ/2))
   have hα : ∀ k : ℕ, μ+1/2 ≠ -(k:ℂ) := fun k hk => by
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
-  have h0 := legFS_toroidal_coef μ hξ 0
+  have h0 := ToroidalFourier.coeff μ hξ 0
   simp only [Nat.cast_zero, pow_zero, one_mul, add_zero, zero_add, zero_sub] at h0
-  rw [mul_sub, legFS_toroidal_rhs μ hξ phi] at h
+  rw [mul_sub, ToroidalFourier.rhs μ hξ phi] at h
   rw [show (-1/2:ℂ) = -(1/2) by ring, h0]
   convert h using 1
   funext j
   simp only
-  rw [legFS_toroidal_coef μ hξ (j+1)]
+  rw [ToroidalFourier.coeff μ hξ (j+1)]
   have hG := Gamma_add_nat_div_Gamma_eq (n := j+1) (μ+1/2) hα
   rw [show μ+((j+1:ℕ):ℂ)+1/2 = μ+1/2+((j+1:ℕ):ℂ) by ring, mul_div_assoc, hG]
   have hc : ((Real.cos (((j+1:ℕ):ℝ)*phi) : ℝ) : ℂ) =
@@ -1009,18 +1029,18 @@ theorem toroidal_whipple_P (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
     rw [lt_div_iff₀ hs]; linarith [Real.sinh_lt_cosh ξ]
   have hys : (Real.cosh ξ / Real.sinh ξ)^2 - 1 = (1/Real.sinh ξ)^2 := by
     field_simp; linarith
-  obtain ⟨h1, h2⟩ := legTor_point hy (by positivity) hys
+  obtain ⟨h1, h2⟩ := ToroidalWhipple.point hy (by positivity) hys
   rw [show Real.cosh ξ / Real.sinh ξ / (1 / Real.sinh ξ) = Real.cosh ξ by field_simp] at h1
   have hG1 : Gamma ((n:ℂ)+m+1/2) ≠ 0 := by
-    have := legTor_Gamma_half_ne ((n:ℤ)+m); push_cast at this; exact this
+    have := ToroidalWhipple.Gamma_half_ne ((n:ℤ)+m); push_cast at this; exact this
   have hG2 : Gamma ((n:ℂ)-m+1/2) ≠ 0 := by
-    have := legTor_Gamma_half_ne ((n:ℤ)-m); push_cast at this; exact this
+    have := ToroidalWhipple.Gamma_half_ne ((n:ℤ)-m); push_cast at this; exact this
   unfold toroidalQ toroidalP
   rw [olverQ_whipple_real _ _ _ hy, h1, h2, show -((m:ℂ)-1/2)-1/2 = -(m:ℂ) by ring,
-    show -(n:ℂ)-1/2 = -((n:ℂ)-1/2)-1 by ring, legTor_P_neg_degree _ _ ht,
+    show -(n:ℂ)-1/2 = -((n:ℂ)-1/2)-1 by ring, ToroidalWhipple.P_neg_degree _ _ ht,
     associatedP_negative_integer_order _ m ?_ (Or.inl (by simp; linarith))]
   · rw [show (2/(π*Real.sinh ξ):ℂ) = ((2/π/Real.sinh ξ:ℝ):ℂ) by push_cast; ring,
-      legTor_cpow_half (by positivity) hs,
+      ToroidalWhipple.cpow_half (by positivity) hs,
       show (n:ℂ)-1/2-m+1 = n-m+1/2 by ring, show (n:ℂ)-1/2+m+1 = n+m+1/2 by ring,
       Real.log_div one_ne_zero hs.ne', Real.log_one]
     have hpi : ((2/π:ℝ):ℂ)^(1/2:ℂ) * (π/2:ℂ)^(1/2:ℂ) = 1 := by
@@ -1056,15 +1076,15 @@ theorem toroidal_whipple_Q (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
   have hcs : Real.cosh ξ^2 - 1 = Real.sinh ξ^2 := by rw [Real.cosh_sq]; ring
   have hy : 1 < Real.cosh ξ / Real.sinh ξ := by
     rw [lt_div_iff₀ hs]; linarith [Real.sinh_lt_cosh ξ]
-  obtain ⟨h1, h2⟩ := legTor_point ht hs hcs
+  obtain ⟨h1, h2⟩ := ToroidalWhipple.point ht hs hcs
   unfold toroidalQ toroidalP
   rw [olverQ_whipple_real _ _ _ ht, h1, h2, show -((n:ℂ)-1/2)-1/2 = -(n:ℂ) by ring,
-    show -(m:ℂ)-1/2 = -((m:ℂ)-1/2)-1 by ring, legTor_P_neg_degree _ _ hy,
+    show -(m:ℂ)-1/2 = -((m:ℂ)-1/2)-1 by ring, ToroidalWhipple.P_neg_degree _ _ hy,
     associatedP_negative_integer_order _ n ?_ (Or.inl (by
       rw [show ((Real.cosh ξ / Real.sinh ξ : ℝ):ℂ) - 1 = ((Real.cosh ξ / Real.sinh ξ - 1 : ℝ):ℂ) by
         push_cast; ring, ofReal_re]; linarith))]
   · rw [show (π/(2*Real.sinh ξ):ℂ) = ((π/2/Real.sinh ξ:ℝ):ℂ) by push_cast; ring,
-      legTor_cpow_half (by positivity) hs,
+      ToroidalWhipple.cpow_half (by positivity) hs,
       show ((π/2:ℝ):ℂ) = (π/2:ℂ) by push_cast; ring,
       show (m:ℂ)-1/2-n+1 = m-n+1/2 by ring, show (m:ℂ)-1/2+n+1 = m+n+1/2 by ring]
     ring

@@ -93,12 +93,12 @@ def conicalEta (α x : ℝ) : ℝ :=
   Classical.epsilon (fun η : ℝ => 0 < η ∧ ConicalEtaRelation α x η)
 
 /-- The left side of DLMF 14.20.21 as a function of `η`. -/
-noncomputable def conE_L (α η : ℝ) : ℝ :=
+noncomputable def ConicalEta.lhs (α η : ℝ) : ℝ :=
   Real.sqrt (α^2+η)+α/2*Real.log η-α*Real.log (Real.sqrt (α^2+η)+α)
 
 /-- `L'(η) = √(α²+η)/(2η)`. -/
-theorem conE_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
-    HasDerivAt (conE_L α) (Real.sqrt (α^2+η)/(2*η)) η := by
+theorem ConicalEta.lhs_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
+    HasDerivAt (ConicalEta.lhs α) (Real.sqrt (α^2+η)/(2*η)) η := by
   have hp : 0 < α^2+η := by positivity
   set s := Real.sqrt (α^2+η) with hs
   have hs0 : 0 < s := Real.sqrt_pos.2 hp
@@ -110,34 +110,37 @@ theorem conE_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
   have h := (hsd.add ((Real.hasDerivAt_log hη.ne').const_mul (α/2))).sub
     ((hsd.add_const α).log hsa.ne' |>.const_mul α)
   convert h using 1
-  · funext y; simp only [conE_L, Pi.add_apply, Pi.sub_apply]
+  · funext y; simp only [ConicalEta.lhs, Pi.add_apply, Pi.sub_apply]
   · rw [← hs]
     field_simp
     linear_combination s * hs2
 
 /-- `L` increases strictly on `(0, ∞)`. -/
-theorem conE_strictMonoOn {α : ℝ} (hα : 0 ≤ α) : StrictMonoOn (conE_L α) (Ioi 0) := by
+theorem ConicalEta.lhs_strictMonoOn {α : ℝ} (hα : 0 ≤ α) : StrictMonoOn
+    (ConicalEta.lhs α) (Ioi 0) := by
   refine strictMonoOn_of_deriv_pos (convex_Ioi 0)
-    (fun η hη => (conE_hasDerivAt hα hη).continuousAt.continuousWithinAt) fun η hη => ?_
+    (fun η hη => (ConicalEta.lhs_hasDerivAt hα hη).continuousAt.continuousWithinAt) fun η hη => ?_
   rw [interior_Ioi] at hη
   have hη : (0:ℝ) < η := hη
-  rw [(conE_hasDerivAt hα hη).deriv]
+  rw [(ConicalEta.lhs_hasDerivAt hα hη).deriv]
   have : 0 < Real.sqrt (α^2+η) := Real.sqrt_pos.2 (by positivity)
   positivity
 
 /-- `L → -∞` as `η → 0⁺` when `α > 0`. -/
-theorem conE_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (conE_L α) (𝓝[>] 0) atBot := by
+theorem ConicalEta.lhs_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (ConicalEta.lhs α)
+    (𝓝[>] 0) atBot := by
   have hg : ContinuousAt (fun η : ℝ => Real.sqrt (α^2+η) - α*Real.log (Real.sqrt (α^2+η)+α)) 0 := by
     have h : Real.sqrt (α^2+0)+α ≠ 0 := by positivity
     fun_prop (disch := exact h)
   have := (Real.tendsto_log_nhdsGT_zero.const_mul_atBot (show 0 < α/2 by positivity)).atBot_add
     (hg.tendsto.mono_left nhdsWithin_le_nhds)
   refine this.congr fun η => ?_
-  simp only [conE_L]; ring
+  simp only [ConicalEta.lhs]; ring
 
 /-- `L → ∞` as `η → ∞`. -/
-theorem conE_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (conE_L α) atTop atTop := by
-  have hb : ∀ᶠ η in atTop, Real.sqrt η - α/2*Real.log 3 ≤ conE_L α η := by
+theorem ConicalEta.lhs_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (ConicalEta.lhs α)
+    atTop atTop := by
+  have hb : ∀ᶠ η in atTop, Real.sqrt η - α/2*Real.log 3 ≤ ConicalEta.lhs α η := by
     filter_upwards [eventually_ge_atTop (3*α^2+1)] with η hη
     have hη0 : 0 < η := by nlinarith [sq_nonneg α]
     have hp : 0 < α^2+η := by positivity
@@ -155,7 +158,7 @@ theorem conE_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (conE_L α) atT
         ← Real.log_div hη0.ne' (by positivity)]
       exact Real.log_le_log (by norm_num) hq
     rw [one_div, Real.log_inv] at hl
-    simp only [conE_L]
+    simp only [ConicalEta.lhs]
     rw [← hs]
     nlinarith
   exact tendsto_atTop_mono' _ hb
@@ -167,15 +170,15 @@ defining relation 14.20.21, and is the unique positive solution of that relation
 theorem conicalEta_spec {α x : ℝ} (hα : 0 ≤ α) (hx : x ∈ Ioo (-1:ℝ) 1) :
     0 < conicalEta α x ∧ ConicalEtaRelation α x (conicalEta α x) ∧ ∀ η : ℝ, 0 < η →
         ConicalEtaRelation α x η → η=conicalEta α x := by
-  have hrel : ∀ η, ConicalEtaRelation α x η ↔ conE_L α η =
+  have hrel : ∀ η, ConicalEtaRelation α x η ↔ ConicalEta.lhs α η =
       Real.arccos (x/Real.sqrt (1+α^2))+α/2*Real.log
       ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2))) :=
     fun η => Iff.rfl
   have hex : ∃ η : ℝ, 0 < η ∧ ConicalEtaRelation α x η := by
     rcases hα.lt_or_eq with hα | hα
     · obtain ⟨η, hη, h⟩ := DoubleZeroSqrt.exists_eq_of_tendsto
-        (fun η hη => (conE_hasDerivAt hα.le hη).continuousAt.continuousWithinAt)
-        (conE_tendsto_zero hα) (conE_tendsto_atTop hα.le) _
+        (fun η hη => (ConicalEta.lhs_hasDerivAt hα.le hη).continuousAt.continuousWithinAt)
+        (ConicalEta.lhs_tendsto_zero hα) (ConicalEta.lhs_tendsto_atTop hα.le) _
       exact ⟨η, hη, (hrel η).2 h⟩
     · subst hα
       have hac : 0 < Real.arccos x := Real.arccos_pos.2 hx.2
@@ -183,15 +186,15 @@ theorem conicalEta_spec {α x : ℝ} (hα : 0 ≤ α) (hx : x ∈ Ioo (-1:ℝ) 1
       simp [ConicalEtaRelation, Real.sqrt_sq hac.le]
   have hs := Classical.epsilon_spec hex
   refine ⟨hs.1, hs.2, fun η hη h => ?_⟩
-  exact (conE_strictMonoOn hα).injOn hη hs.1 (((hrel η).1 h).trans ((hrel _).1 hs.2).symm)
+  exact (ConicalEta.lhs_strictMonoOn hα).injOn hη hs.1 (((hrel η).1 h).trans ((hrel _).1 hs.2).symm)
 
 /-- The right side of DLMF 14.20.21 as a function of `x`. -/
-noncomputable def conE_R (α x : ℝ) : ℝ :=
+noncomputable def ConicalEta.rhs (α x : ℝ) : ℝ :=
   Real.arccos (x/Real.sqrt (1+α^2))+α/2*Real.log
       ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2)))
 
 /-- The argument of the logarithm in DLMF 14.20.21 is positive. -/
-theorem conE_Q_pos {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ConicalEta.logArg_pos {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
     0 < 1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2) := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hS : Real.sqrt (1+α^2-x^2) ^ 2 = 1+α^2-x^2 := Real.sq_sqrt (by nlinarith [sq_nonneg α])
@@ -208,8 +211,8 @@ theorem conE_Q_pos {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
   nlinarith
 
 /-- `R'(x) = -√(1+α²-x²)/(1-x²)`. -/
-theorem conE_R_hasDerivAt {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
-    HasDerivAt (conE_R α) (-(Real.sqrt (1+α^2-x^2)/(1-x^2))) x := by
+theorem ConicalEta.rhs_hasDerivAt {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
+    HasDerivAt (ConicalEta.rhs α) (-(Real.sqrt (1+α^2-x^2)/(1-x^2))) x := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hA : 0 < 1 + α^2 := by positivity
   have hR : 0 < 1+α^2-x^2 := by nlinarith [sq_nonneg α]
@@ -219,7 +222,7 @@ theorem conE_R_hasDerivAt {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1
   set r := Real.sqrt (1+α^2) with hr
   have hr0 : 0 < r := Real.sqrt_pos.2 hA
   have hr2 : r^2 = 1+α^2 := Real.sq_sqrt hA.le
-  have hQ := conE_Q_pos hα hx
+  have hQ := ConicalEta.logArg_pos hα hx
   have hu1 : x / r < 1 := by
     rw [div_lt_one hr0]; nlinarith [sq_nonneg α]
   have hu2 : -1 < x / r := by
@@ -242,7 +245,7 @@ theorem conE_R_hasDerivAt {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1
   have hL := (hQd.div hDd (by positivity)).log (div_pos hQ (by positivity)).ne'
   have := hac.add (hL.const_mul (α/2))
   convert this using 1
-  · funext y; simp [conE_R, Function.comp, ← hr]
+  · funext y; simp [ConicalEta.rhs, Function.comp, ← hr]
   · simp only [Pi.div_apply]
     rw [← hSdef]
     have h1u : 1 - (x/r)^2 = S^2/r^2 := by
@@ -256,14 +259,14 @@ theorem conE_R_hasDerivAt {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1
     linear_combination (2*S*α*x + x^2 - 1) * hS
 
 /-- `R(-x) = π - R(x)`. -/
-theorem conE_R_symm {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
-    conE_R α (-x) = π - conE_R α x := by
+theorem ConicalEta.rhs_symm {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
+    ConicalEta.rhs α (-x) = π - ConicalEta.rhs α x := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hS : Real.sqrt (1+α^2-x^2) ^ 2 = 1+α^2-x^2 := Real.sq_sqrt (by nlinarith [sq_nonneg α])
-  have hQ := conE_Q_pos hα hx
-  have hQ' := conE_Q_pos hα (x := -x) ⟨by linarith [hx.2], by linarith [hx.1]⟩
+  have hQ := ConicalEta.logArg_pos hα hx
+  have hQ' := ConicalEta.logArg_pos hα (x := -x) ⟨by linarith [hx.2], by linarith [hx.1]⟩
   simp only [neg_sq, neg_mul, mul_neg, sub_neg_eq_add] at hQ'
-  unfold conE_R
+  unfold ConicalEta.rhs
   simp only [neg_sq, neg_mul, mul_neg, sub_neg_eq_add, neg_div, Real.arccos_neg]
   set S := Real.sqrt (1+α^2-x^2)
   set Q := 1+α^2+(α^2-1)*x^2-2*α*x*S
@@ -275,8 +278,8 @@ theorem conE_R_symm {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
   ring
 
 /-- `R → ∞` as `x → -1⁺`. -/
-theorem conE_R_tendsto_neg_one {α : ℝ} (hα : 0 < α) :
-    Tendsto (conE_R α) (𝓝[>] (-1:ℝ)) atTop := by
+theorem ConicalEta.rhs_tendsto_neg_one {α : ℝ} (hα : 0 < α) :
+    Tendsto (ConicalEta.rhs α) (𝓝[>] (-1:ℝ)) atTop := by
   have hQc : Tendsto (fun x : ℝ => 1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))
       (𝓝[>] (-1:ℝ)) (𝓝 (4*α^2)) := by
     have hc : Continuous fun x : ℝ => 1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2) := by
@@ -305,12 +308,12 @@ theorem conE_R_tendsto_neg_one {α : ℝ} (hα : 0 < α) :
     ((Real.continuous_arccos.comp (continuous_id.div_const _)).tendsto _).mono_left
       nhdsWithin_le_nhds
   refine (hl.atTop_add hac).congr fun x => ?_
-  simp only [conE_R, Function.comp, div_eq_mul_inv]
+  simp only [ConicalEta.rhs, Function.comp, div_eq_mul_inv]
   ring
 
 /-- `R → -∞` as `x → 1⁻`. -/
-theorem conE_R_tendsto_one {α : ℝ} (hα : 0 < α) :
-    Tendsto (conE_R α) (𝓝[<] (1:ℝ)) atBot := by
+theorem ConicalEta.rhs_tendsto_one {α : ℝ} (hα : 0 < α) :
+    Tendsto (ConicalEta.rhs α) (𝓝[<] (1:ℝ)) atBot := by
   have hneg : Tendsto (fun x : ℝ => -x) (𝓝[<] (1:ℝ)) (𝓝[>] (-1:ℝ)) := by
     rw [tendsto_nhdsWithin_iff]
     refine ⟨?_, ?_⟩
@@ -321,26 +324,27 @@ theorem conE_R_tendsto_one {α : ℝ} (hα : 0 < α) :
       have : x < 1 := hx
       linarith
   have h := (tendsto_atBot_add_const_left _ π
-    (tendsto_neg_atTop_atBot.comp ((conE_R_tendsto_neg_one hα).comp hneg)))
+    (tendsto_neg_atTop_atBot.comp ((ConicalEta.rhs_tendsto_neg_one hα).comp hneg)))
   refine h.congr' ?_
   filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
   simp only [Function.comp]
-  rw [conE_R_symm hα hx]; ring
+  rw [ConicalEta.rhs_symm hα hx]; ring
 
 /-- Mapping and endpoints in DLMF 14.20(viii). The hypothesis is `0 < α` (corrected
 2026-10-20): at `α = 0` the relation is `sqrt η = arccos x`, so `η → π^2` as `x → -1`. -/
 theorem conicalEta_mapping {α : ℝ} (hα : 0 < α) :
     Set.BijOn (conicalEta α) (Ioo (-1:ℝ) 1) (Ioi 0) ∧ StrictAntiOn (conicalEta α) (Ioo (-1:ℝ) 1) ∧
         Tendsto (conicalEta α) (𝓝[>] (-1:ℝ)) atTop ∧ Tendsto (conicalEta α) (𝓝[<] (1:ℝ)) (𝓝 0) := by
-  have hE : ∀ x ∈ Ioo (-1:ℝ) 1, 0 < conicalEta α x ∧ conE_L α (conicalEta α x) = conE_R α x :=
+  have hE : ∀ x ∈ Ioo (-1:ℝ) 1, 0 < conicalEta α x ∧ ConicalEta.lhs α (conicalEta α x) =
+      ConicalEta.rhs α x :=
     fun x hx => ⟨(conicalEta_spec hα.le hx).1, (conicalEta_spec hα.le hx).2.1⟩
-  have hL := conE_strictMonoOn hα.le
-  have hRc : ContinuousOn (conE_R α) (Ioo (-1:ℝ) 1) :=
-    fun x hx => (conE_R_hasDerivAt hα hx).continuousAt.continuousWithinAt
-  have hR : StrictAntiOn (conE_R α) (Ioo (-1:ℝ) 1) := by
+  have hL := ConicalEta.lhs_strictMonoOn hα.le
+  have hRc : ContinuousOn (ConicalEta.rhs α) (Ioo (-1:ℝ) 1) :=
+    fun x hx => (ConicalEta.rhs_hasDerivAt hα hx).continuousAt.continuousWithinAt
+  have hR : StrictAntiOn (ConicalEta.rhs α) (Ioo (-1:ℝ) 1) := by
     refine strictAntiOn_of_deriv_neg (convex_Ioo _ _) hRc fun x hx => ?_
     rw [interior_Ioo] at hx
-    rw [(conE_R_hasDerivAt hα hx).deriv, neg_lt_zero]
+    rw [(ConicalEta.rhs_hasDerivAt hα hx).deriv, neg_lt_zero]
     have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
     have : 0 < Real.sqrt (1+α^2-x^2) := Real.sqrt_pos.2 (by nlinarith [sq_nonneg α])
     positivity
@@ -353,10 +357,10 @@ theorem conicalEta_mapping {α : ℝ} (hα : 0 < α) :
   have hIoo' : ∀ᶠ x in 𝓝[<] (1:ℝ), x ∈ Ioo (-1:ℝ) 1 := Ioo_mem_nhdsLT (by norm_num)
   refine ⟨⟨fun x hx => (hE x hx).1, hanti.injOn, fun e he => ?_⟩, hanti, ?_, ?_⟩
   · have he : (0:ℝ) < e := he
-    obtain ⟨a, ha, haI⟩ := (((conE_R_tendsto_neg_one hα).eventually
-      (eventually_gt_atTop (conE_L α e))).and hIoo).exists
-    obtain ⟨b, hb, hbI⟩ := (((conE_R_tendsto_one hα).eventually
-      (eventually_lt_atBot (conE_L α e))).and hIoo').exists
+    obtain ⟨a, ha, haI⟩ := (((ConicalEta.rhs_tendsto_neg_one hα).eventually
+      (eventually_gt_atTop (ConicalEta.lhs α e))).and hIoo).exists
+    obtain ⟨b, hb, hbI⟩ := (((ConicalEta.rhs_tendsto_one hα).eventually
+      (eventually_lt_atBot (ConicalEta.lhs α e))).and hIoo').exists
     have hab : a ≤ b := by
       by_contra h
       push Not at h
@@ -368,14 +372,15 @@ theorem conicalEta_mapping {α : ℝ} (hα : 0 < α) :
     exact ((conicalEta_spec hα.le (hsub hc)).2.2 e he hcy.symm).symm
   · refine tendsto_atTop.2 fun M => ?_
     have hM : (0:ℝ) < max M 1 := lt_max_of_lt_right one_pos
-    filter_upwards [(conE_R_tendsto_neg_one hα).eventually
-      (eventually_gt_atTop (conE_L α (max M 1))), hIoo] with x hx hxI
+    filter_upwards [(ConicalEta.rhs_tendsto_neg_one hα).eventually
+      (eventually_gt_atTop (ConicalEta.lhs α (max M 1))), hIoo] with x hx hxI
     rw [← (hE x hxI).2] at hx
     exact (le_max_left _ _).trans ((hL.lt_iff_lt hM (hE x hxI).1).1 hx).le
   · refine tendsto_order.2 ⟨fun a ha => ?_, fun b hb => ?_⟩
     · filter_upwards [hIoo'] with x hxI
       exact ha.trans (hE x hxI).1
-    · filter_upwards [(conE_R_tendsto_one hα).eventually (eventually_lt_atBot (conE_L α b)),
+    · filter_upwards [(ConicalEta.rhs_tendsto_one hα).eventually
+          (eventually_lt_atBot (ConicalEta.lhs α b)),
         hIoo'] with x hx hxI
       rw [← (hE x hxI).2] at hx
       exact (hL.lt_iff_lt (hE x hxI).1 hb).1 hx
@@ -420,7 +425,7 @@ def conicalRho (β x : ℝ) : ℝ :=
       (β*x/Real.sqrt (1+β^2-β^2*x^2))-Real.log (1+β^2)/2
 
 /-- `ρ'(x) = √(1+β²-β²x²)/(1-x²)` on `(-1, 1)`. -/
-theorem conR_hasDerivAt (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ConicalRho.hasDerivAt (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (conicalRho β) (Real.sqrt (1+β^2-β^2*x^2)/(1-x^2)) x := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hR : 1 ≤ 1+β^2-β^2*x^2 := by nlinarith [sq_nonneg β]
@@ -469,7 +474,7 @@ theorem conR_hasDerivAt (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     linear_combination (-x*(-2*S*β^2*x^2 - 2*S + β^4*x^3 - β^4*x - β^2*x^3 + β^2*x)) * hS
 
 /-- The argument of the logarithm in `ρ` is positive on `(-1, 1)`. -/
-theorem conR_N_pos (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ConicalRho.logArg_pos (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     0 < (1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2) := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hS : Real.sqrt (1+β^2-β^2*x^2) ^ 2 = 1+β^2-β^2*x^2 :=
@@ -486,12 +491,13 @@ theorem conR_N_pos (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   nlinarith
 
 /-- `ρ` is odd. -/
-theorem conR_odd (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : conicalRho β (-x) = -conicalRho β x := by
+theorem ConicalRho.odd (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : conicalRho β (-x) =
+    -conicalRho β x := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hS : Real.sqrt (1+β^2-β^2*x^2) ^ 2 = 1+β^2-β^2*x^2 :=
     Real.sq_sqrt (by nlinarith [sq_nonneg β, mul_nonneg (sq_nonneg β) hx2.le])
-  have hN := conR_N_pos β hx
-  have hN' := conR_N_pos β (x := -x) ⟨by linarith [hx.2], by linarith [hx.1]⟩
+  have hN := ConicalRho.logArg_pos β hx
+  have hN' := ConicalRho.logArg_pos β (x := -x) ⟨by linarith [hx.2], by linarith [hx.1]⟩
   simp only [neg_sq, neg_mul, mul_neg] at hN' ⊢
   set S := Real.sqrt (1+β^2-β^2*x^2)
   set N := (1-β^2)*x^2+1+β^2+2*x*S
@@ -507,7 +513,7 @@ theorem conR_odd (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : conicalRho �
   ring
 
 /-- `ρ → ∞` as `x → 1⁻`. -/
-theorem conR_tendsto_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[<] (1:ℝ)) atTop := by
+theorem ConicalRho.tendsto_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[<] (1:ℝ)) atTop := by
   have hcN : Tendsto (fun x : ℝ => (1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2))
       (𝓝[<] (1:ℝ)) (𝓝 4) := by
     have : Continuous fun x : ℝ => (1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2) := by
@@ -542,7 +548,7 @@ theorem conR_tendsto_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[<] (1:ℝ)) 
   ring
 
 /-- `ρ → -∞` as `x → -1⁺`. -/
-theorem conR_tendsto_neg_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[>] (-1:ℝ)) atBot := by
+theorem ConicalRho.tendsto_neg_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[>] (-1:ℝ)) atBot := by
   have hneg : Tendsto (fun x : ℝ => -x) (𝓝[>] (-1:ℝ)) (𝓝[<] (1:ℝ)) := by
     rw [tendsto_nhdsWithin_iff]
     refine ⟨?_, ?_⟩
@@ -553,11 +559,11 @@ theorem conR_tendsto_neg_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[>] (-1:�
       show -x < 1
       have : (-1:ℝ) < x := hx
       linarith
-  have h := tendsto_neg_atTop_atBot.comp ((conR_tendsto_one β).comp hneg)
+  have h := tendsto_neg_atTop_atBot.comp ((ConicalRho.tendsto_one β).comp hneg)
   refine h.congr' ?_
   filter_upwards [Ioo_mem_nhdsGT (show (-1:ℝ) < 1 by norm_num)] with x hx
   simp only [Function.comp]
-  rw [conR_odd β hx, neg_neg]
+  rw [ConicalRho.odd β hx, neg_neg]
 
 /-- Mapping and endpoints in DLMF 14.20(ix). -/
 theorem conicalRho_mapping (β : ℝ) :
@@ -565,21 +571,21 @@ theorem conicalRho_mapping (β : ℝ) :
         conicalRho β 0=0 ∧ Tendsto (conicalRho β) (𝓝[>] (-1:ℝ)) atBot ∧
         Tendsto (conicalRho β) (𝓝[<] (1:ℝ)) atTop := by
   have hcont : ContinuousOn (conicalRho β) (Ioo (-1:ℝ) 1) :=
-    fun x hx => (conR_hasDerivAt β hx).continuousAt.continuousWithinAt
+    fun x hx => (ConicalRho.hasDerivAt β hx).continuousAt.continuousWithinAt
   have hmono : StrictMonoOn (conicalRho β) (Ioo (-1:ℝ) 1) := by
     refine strictMonoOn_of_deriv_pos (convex_Ioo _ _) hcont fun x hx => ?_
     rw [interior_Ioo] at hx
-    rw [(conR_hasDerivAt β hx).deriv]
+    rw [(ConicalRho.hasDerivAt β hx).deriv]
     have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
     have : 0 < Real.sqrt (1+β^2-β^2*x^2) :=
       Real.sqrt_pos.2 (by nlinarith [sq_nonneg β, mul_nonneg (sq_nonneg β) hx2.le])
     positivity
   have h0 : conicalRho β 0 = 0 := by simp [conicalRho]
-  refine ⟨⟨mapsTo_univ _ _, hmono.injOn, fun y _ => ?_⟩, hmono, h0, conR_tendsto_neg_one β,
-    conR_tendsto_one β⟩
-  obtain ⟨a, ha, hay⟩ := (((conR_tendsto_neg_one β).eventually (eventually_lt_atBot y)).and
+  refine ⟨⟨mapsTo_univ _ _, hmono.injOn, fun y _ => ?_⟩, hmono, h0, ConicalRho.tendsto_neg_one β,
+    ConicalRho.tendsto_one β⟩
+  obtain ⟨a, ha, hay⟩ := (((ConicalRho.tendsto_neg_one β).eventually (eventually_lt_atBot y)).and
     (Ioo_mem_nhdsGT (show (-1:ℝ) < 1 by norm_num))).exists
-  obtain ⟨b, hb, hby⟩ := (((conR_tendsto_one β).eventually (eventually_gt_atTop y)).and
+  obtain ⟨b, hb, hby⟩ := (((ConicalRho.tendsto_one β).eventually (eventually_gt_atTop y)).and
     (Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num))).exists
   have hab : a ≤ b := by
     by_contra h

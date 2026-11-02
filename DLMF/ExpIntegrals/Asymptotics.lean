@@ -32,14 +32,16 @@ by Watson's lemma.
   integrals (DLMF 6.12.7, 6.12.8).
 * `expIntE1_remainder_bound`, `expIntE1_remainder_sign`, `expIntEi_remainder_bound`: remainder
   bounds and signs for `E₁` and `Ei` (DLMF §6.12(i)).
-* `expIntAux_remainder_bound`, `expIntAux_remainder_sign`: remainder bounds and signs for `f`
-  and `g` (DLMF §6.12(ii)).
+* `ExpIntegralAuxiliary.remainder_bound`, `ExpIntegralAuxiliary.remainder_sign`: remainder bounds
+  and signs for `f` and `g` (DLMF §6.12(ii)).
 * `genExpIntE_one_eq_integral_rotate`: the rotated Laplace representation of `E₁`.
 -/
 
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat Interval
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- The n-th auxiliary-function asymptotic term; aux=true means g. -/
@@ -52,7 +54,7 @@ def expIntAsymptoticRemainder (aux : Bool) (N : ℕ) (z : ℂ) : ℂ :=
   (if aux then expIntAuxG z else expIntAuxF z) - ∑ n ∈ Finset.range N, expIntAsymptoticTerm aux n z
 
 /-- A convergent improper integral of an integrable function is its Lebesgue integral. -/
-theorem _root_.DLMF.HasIntegralAtTop.eq_integral_Ioi {f : ℝ → ℂ} {a : ℝ} {v : ℂ}
+theorem _root_.DLMF.Core.HasIntegralAtTop.eq_integral_Ioi {f : ℝ → ℂ} {a : ℝ} {v : ℂ}
     (h : HasIntegralAtTop f a v) (hi : IntegrableOn f (Ioi a)) : ∫ t in Ioi a, f t = v :=
   tendsto_nhds_unique (intervalIntegral_tendsto_integral_Ioi a hi tendsto_id) h
 
@@ -109,17 +111,17 @@ theorem laplace_rational_succ {z : ℂ} (hz : 0 < z.re) (m : ℕ) :
   ring
 
 /-- Real Laplace representations of `f` and `g` for `re z > 0`. -/
-theorem expIntAux_laplace_Ioi {z : ℂ} (hz : 0 < z.re) :
+theorem ExpIntegralAuxiliary.laplace_Ioi {z : ℂ} (hz : 0 < z.re) :
     expIntAuxF z = ∫ t : ℝ in Ioi 0, exp (-z*t)*(t:ℂ)^0/((t:ℂ)^2+1) ∧
     expIntAuxG z = ∫ t : ℝ in Ioi 0, exp (-z*t)*(t:ℂ)^1/((t:ℂ)^2+1) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
-  obtain ⟨h1, h2⟩ := expIntAux_laplace_hasIntegralAtTop hz0 hz.le
+  obtain ⟨h1, h2⟩ := ExpIntegralAuxiliary.laplace_hasIntegralAtTop hz0 hz.le
   constructor
   · rw [← (h1.congr fun t _ => by simp).eq_integral_Ioi (integrableOn_laplace_rational hz 0)]
   · rw [← (h2.congr fun t _ => by ring).eq_integral_Ioi (integrableOn_laplace_rational hz 1)]
 
 /-- The auxiliary-function remainders as Laplace integrals, for both `f` and `g`. -/
-lemma expIntAux_remainder_integral_general (aux : Bool) {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
+lemma ExpIntegralAuxiliary.remainder_integral_general (aux : Bool) {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
     expIntAsymptoticRemainder aux N z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0,
       exp (-z*t)*(t : ℂ)^(2*N+if aux then 1 else 0)/((t : ℂ)^2+1) := by
   induction N with
@@ -127,8 +129,8 @@ lemma expIntAux_remainder_integral_general (aux : Bool) {z : ℂ} (hz : 0 < z.re
     simp only [expIntAsymptoticRemainder, Finset.range_zero, Finset.sum_empty, sub_zero, pow_zero,
       one_mul, mul_zero, zero_add]
     cases aux
-    · simpa using (expIntAux_laplace_Ioi hz).1
-    · simpa using (expIntAux_laplace_Ioi hz).2
+    · simpa using (ExpIntegralAuxiliary.laplace_Ioi hz).1
+    · simpa using (ExpIntegralAuxiliary.laplace_Ioi hz).2
   | succ N ih =>
     have hs := laplace_rational_succ hz (2*N+if aux then 1 else 0)
     rw [show 2*N+(if aux = true then 1 else 0)+2 =
@@ -222,7 +224,7 @@ lemma exists_sum_expIntAuxCoeff (m N : ℕ) : ∃ M : ℕ, N ≤ m + 2 * M ∧ �
         rw [show N = m + 2 * M + 1 by omega]; exact (sum_expIntAuxCoeff m t M).2⟩
 
 /-- Taylor remainders of `tᵐ/(t²+1)` along a ray, in the form required by Watson's lemma. -/
-lemma expIntAux_kernel_sub_sum_isBigO (m : ℕ) {θ : ℝ} (hθ : |θ| < π / 2) (N : ℕ) :
+lemma ExpIntegralAuxiliary.kernel_sub_sum_isBigO (m : ℕ) {θ : ℝ} (hθ : |θ| < π / 2) (N : ℕ) :
     (fun r : ℝ => ((r : ℂ) * exp (θ * I)) ^ m / (((r : ℂ) * exp (θ * I)) ^ 2 + 1) -
       ∑ n ∈ Finset.range N, (((r : ℂ) * exp (θ * I)) ^ ((n : ℂ) + 1 - 1)) • expIntAuxCoeff m n)
       =O[𝓝[>] 0] fun r => r ^ ((N : ℝ) + (1 : ℂ).re - 1) := by
@@ -279,7 +281,7 @@ theorem ofReal_mul_exp_sq_add_one_ne {θ c : ℝ} (hc0 : 0 < c)
 /-- **Rotated Laplace representations of `f` and `g`** (DLMF 6.7.13–6.7.14 continued): for
 `|θ| < π/2` and `re (z e^{iθ}) > 0`, with `m = 0` for `f` and `m = 1` for `g`,
 `f(z), g(z) = e^{iθ} ∫₀^∞ e^{-z e^{iθ} r} (r e^{iθ})ᵐ/((r e^{iθ})² + 1) dr`. -/
-lemma expIntAux_eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ| < π / 2) {z : ℂ}
+lemma ExpIntegralAuxiliary.eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ| < π / 2) {z : ℂ}
     (hz : 0 < (z * exp (θ * I)).re) :
     (if aux then expIntAuxG z else expIntAuxF z) = exp (θ * I) * ∫ r in Ioi (0 : ℝ),
       cexp (-(z * exp (θ * I) * r)) * (((r : ℂ) * exp (θ * I)) ^ (if aux then 1 else 0) /
@@ -334,7 +336,7 @@ lemma expIntAux_eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ| < π / 2)
     intro w hw hwU
     have hlap : (if aux then expIntAuxG w else expIntAuxF w) =
         ∫ t : ℝ in Ioi 0, cexp (-(w * t)) * ((t : ℂ) ^ m / ((t : ℂ) ^ 2 + 1)) := by
-      have h := expIntAux_laplace_Ioi hw
+      have h := ExpIntegralAuxiliary.laplace_Ioi hw
       rw [hm]
       cases aux
       · simp only [Bool.false_eq_true, ite_false, h.1]
@@ -373,7 +375,8 @@ lemma expIntAux_eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ| < π / 2)
     hUc.isPreconnected hz₀U hev hz
 
 /-- Watson's expansion of `f` and `g` in a rotated sector. -/
-lemma expIntAux_rotSector_asymptotic (aux : Bool) {θ δ : ℝ} (hθ : |θ| < π / 2) (hδ : 0 < δ) :
+lemma ExpIntegralAuxiliary.rotatedSector_asymptotic (aux : Bool) {θ δ : ℝ}
+    (hθ : |θ| < π / 2) (hδ : 0 < δ) :
     HasAsymptoticExpansion (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ))
       (fun (n : ℕ) (z : ℂ) => z ^ (-((n : ℂ) + 1)))
       (fun n => Gamma ((n : ℂ) + 1) • expIntAuxCoeff (if aux then 1 else 0) n)
@@ -401,13 +404,13 @@ lemma expIntAux_rotSector_asymptotic (aux : Bool) {θ δ : ℝ} (hθ : |θ| < π
       _ = _ := by ring
   have hW := hasAsymptoticExpansion_integral_cexp_smul_rotate_comap
     (F := fun t : ℂ => t ^ m / (t ^ 2 + 1)) (a := expIntAuxCoeff m) (μ := 1) (c := 1) hθ
-    (by norm_num) hδ hint (expIntAux_kernel_sub_sum_isBigO m hθ)
+    (by norm_num) hδ hint (ExpIntegralAuxiliary.kernel_sub_sum_isBigO m hθ)
   refine hW.congr' ?_
   have h := (tendsto_comap : Tendsto (fun z : ℂ => z * exp (θ * I))
     (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ)) (sectorAtTop δ)).eventually
     (eventually_sectorAtTop (R := 1) (p := fun w : ℂ => 0 < w.re) fun w hw hws => by nlinarith)
   filter_upwards [h] with z hz
-  rw [expIntAux_eq_integral_rotate aux hθ hz]
+  rw [ExpIntegralAuxiliary.eq_integral_rotate aux hθ hz]
   simp only [smul_eq_mul, hm]
 
 /-- The two rotated sectors `|arg (z e^{∓iβ})| ≤ β`, `β = π/2 - d/2`, cover `|arg z| ≤ π - δ`. -/
@@ -517,8 +520,9 @@ theorem expIntAuxF_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
   have hodd : ∀ n : ℕ, Gamma (((2 * n + 1 : ℕ) : ℂ) + 1) • expIntAuxCoeff 0 (2 * n + 1) = 0 := by
     intro n
     simp [expIntAuxCoeff]
-  have h1 := (expIntAux_rotSector_asymptotic false (θ := -β) (by rwa [abs_neg]) hcos).even hodd
-  have h2 := (expIntAux_rotSector_asymptotic false (θ := β) hβ hcos).even hodd
+  have h1 := (ExpIntegralAuxiliary.rotatedSector_asymptotic false (θ := -β) (by rwa [abs_neg])
+      hcos).even hodd
+  have h2 := (ExpIntegralAuxiliary.rotatedSector_asymptotic false (θ := β) hβ hcos).even hodd
   refine (((h1.sup h2).mono hcov).congr_scale fun n => Eventually.of_forall fun z =>
       ?_).congr_coeff ?_
   · simp only; push_cast; ring_nf
@@ -534,7 +538,7 @@ z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0, exp (-z*t)*(t : ℂ)^(2*N+0)/((t : ℂ)
 theorem expIntAuxF_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
     expIntAsymptoticRemainder false N z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0,
         exp (-z*t)*(t : ℂ)^(2*N+0)/((t : ℂ)^2+1) := by
-  simpa using expIntAux_remainder_integral_general false hz N
+  simpa using ExpIntegralAuxiliary.remainder_integral_general false hz N
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
 (π-δ)) (fun n z => z^(-(2*(n : ℂ)+2))) (fun n => (-1 : ℂ)^n*((2*n+1).factorial : ℂ))
@@ -551,8 +555,9 @@ theorem expIntAuxG_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
     · have : ¬ Even (2 * n - 1) := by
         rw [show 2 * n - 1 = 2 * (n - 1) + 1 by omega]; simp
       simp [expIntAuxCoeff, this]
-  have h1 := (expIntAux_rotSector_asymptotic true (θ := -β) (by rwa [abs_neg]) hcos).odd hev
-  have h2 := (expIntAux_rotSector_asymptotic true (θ := β) hβ hcos).odd hev
+  have h1 := (ExpIntegralAuxiliary.rotatedSector_asymptotic true (θ := -β)
+      (by rwa [abs_neg]) hcos).odd hev
+  have h2 := (ExpIntegralAuxiliary.rotatedSector_asymptotic true (θ := β) hβ hcos).odd hev
   refine (((h1.sup h2).mono hcov).congr_scale fun n => Eventually.of_forall fun z =>
       ?_).congr_coeff ?_
   · simp only; push_cast; ring_nf
@@ -568,7 +573,7 @@ z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0, exp (-z*t)*(t : ℂ)^(2*N+1)/((t : ℂ)
 theorem expIntAuxG_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
     expIntAsymptoticRemainder true N z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0,
         exp (-z*t)*(t : ℂ)^(2*N+1)/((t : ℂ)^2+1) := by
-  simpa using expIntAux_remainder_integral_general true hz N
+  simpa using ExpIntegralAuxiliary.remainder_integral_general true hz N
 
 /-- Rotated Laplace representation of `E₁`: for `z ≠ 0` with `|arg z| < π`,
 `E₁(z) = e^{-z} e^{iθ} ∫₀^∞ e^{-|z| r}/(1 + r e^{iθ}) dr` with `θ = -arg z`. -/
@@ -807,7 +812,8 @@ theorem expIntEi_remainder_bound {x : ℝ} (hx : 0 < x) (N : ℕ) :
   sorry
 
 /-- First omitted term and csc multiplier in DLMF §6.12(ii). -/
-lemma expIntAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (N : ℕ) :
+lemma ExpIntegralAuxiliary.remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < π/2) (N : ℕ) :
     ‖expIntAsymptoticRemainder aux N z‖ ≤ (if |arg z| ≤ π/4 then 1 else 1/Real.sin (2*|arg z|)) *
         ‖expIntAsymptoticTerm aux N z‖ := by
   set m := 2 * N + if aux then 1 else 0 with hm
@@ -817,7 +823,7 @@ lemma expIntAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |ar
     rcases this with h | h
     · exact h
     · exact absurd h hz0
-  have hr := expIntAux_remainder_integral_general aux hre N
+  have hr := ExpIntegralAuxiliary.remainder_integral_general aux hre N
   obtain ⟨c, hc0, hc⟩ := exists_pos_le_norm_one_add_ofReal_mul_exp (Φ := 2 * |θ|)
     (by rw [hθ, abs_neg]; linarith)
   have hden : ∀ r : ℝ, ∀ y : ℝ, |y| ≤ |θ| →
@@ -931,10 +937,10 @@ lemma expIntAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |ar
   split_ifs <;> field_simp
 
 /-- Signed real auxiliary-function remainder. -/
-lemma expIntAux_remainder_sign (aux : Bool) {x : ℝ} (hx : 0 < x) (N : ℕ) :
+lemma ExpIntegralAuxiliary.remainder_sign (aux : Bool) {x : ℝ} (hx : 0 < x) (N : ℕ) :
     0 ≤ (expIntAsymptoticRemainder aux N x).re * (expIntAsymptoticTerm aux N x).re := by
   set m := 2*N+if aux then 1 else 0
-  have hr := expIntAux_remainder_integral_general aux (z := x) (by simpa using hx) N
+  have hr := ExpIntegralAuxiliary.remainder_integral_general aux (z := x) (by simpa using hx) N
   have hI : (∫ t : ℝ in Ioi 0, exp (-(x:ℂ)*t)*(t : ℂ)^m/((t : ℂ)^2+1)) =
       ((∫ t : ℝ in Ioi 0, Real.exp (-x*t)*t^m/(t^2+1) : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]

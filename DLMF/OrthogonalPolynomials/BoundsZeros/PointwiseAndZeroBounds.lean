@@ -380,7 +380,7 @@ private lemma bernstein_even_bound {lam : ℝ} (hlam : 0 < lam) (hlam1 : lam < 1
         (Real.Gamma (m + lam) / Real.Gamma lam / Real.Gamma (m + 1)) <
       (2 : ℝ) ^ (1 - lam) / Real.Gamma lam := by
   have hGl : 0 < Real.Gamma lam := Real.Gamma_pos_of_pos hlam
-  have hG := opIneq_Gamma_even hlam hlam1 m
+  have hG := ClassicalInequalities.Gamma_even hlam hlam1 m
   have hN2 : (2 * m + lam : ℝ) = 2 * (m + lam / 2) := by ring
   have hmpos : 0 < (m : ℝ) + lam / 2 := by positivity
   rw [hN2, Real.mul_rpow (by norm_num) hmpos.le]
@@ -409,7 +409,7 @@ private lemma bernstein_odd_bound {lam : ℝ} (hlam : 0 < lam) (hlam1 : lam < 1)
   have hc0 : 0 < c := by have : 0 < 1 - lam := by linarith
                          positivity
   set r := Real.Gamma (m + 1 + lam) / Real.Gamma (m + 1) with hr
-  have hG := opIneq_Gamma_odd hlam hlam1 m
+  have hG := ClassicalInequalities.Gamma_odd hlam hlam1 m
   have hNc : 0 < N ^ 2 + c := by positivity
   have hi2 : (N / 2) ^ (2 * lam) = N ^ (2 * lam) / 2 ^ (2 * lam) :=
     Real.div_rpow hNpos.le (by norm_num) _
@@ -446,10 +446,10 @@ private lemma bernstein_odd_bound {lam : ℝ} (hlam : 0 < lam) (hlam1 : lam < 1)
       field_simp
 
 /-- Lorch's sharpened Bernstein inequality for Gegenbauer polynomials, `0 < λ < 1`.
-Proof: the Sonine-type function of `opIneq_gegenbauer_sonine` bounds
+Proof: the Sonine-type function of `ClassicalInequalities.gegenbauer_sonine` bounds
 `(1 - x²)^λ C_n^{(λ)}(x)²` by its value at `x = 0`, and the values `C_n^{(λ)}(0)`,
-`C_n^{(λ)}′(0)` are controlled by the sharp Gamma-ratio bounds `opIneq_Gamma_even`,
-`opIneq_Gamma_odd`. -/
+`C_n^{(λ)}′(0)` are controlled by the sharp Gamma-ratio bounds `ClassicalInequalities.Gamma_even`,
+`ClassicalInequalities.Gamma_odd`. -/
 @[dlmf 18.14.E7]
 theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam < 1) (hx : |x| ≤ 1)
     (n : ℕ) :
@@ -477,7 +477,7 @@ theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam
     have h := jacobiPolyPR_ode (α := lam - 1 / 2) (by linarith) (lam - 1 / 2) n t
     simp only [hqdef, ultrasphPolyR, derivative_C_mul, eval_mul, eval_C]
     linear_combination (ultrasphCoeffR lam n) * h
-  have hS := opIneq_gegenbauer_sonine hlam hlam1 (n := n) (y := fun t => q.eval t)
+  have hS := ClassicalInequalities.gegenbauer_sonine hlam hlam1 (n := n) (y := fun t => q.eval t)
     (y' := fun t => (derivative q).eval t) (y'' := fun t => (derivative (derivative q)).eval t)
     (fun t => q.hasDerivAt t) (fun t => (derivative q).hasDerivAt t) hode hxa
 
@@ -509,7 +509,8 @@ theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam
     exact_mod_cast h
   have hasc (a : ℝ) (ha : 0 < a) (k : ℕ) :
       (ascPochhammer ℝ k).eval a = Real.Gamma (k + a) / Real.Gamma a := by
-    rw [add_comm, opIneq_Gamma_add_nat ha, mul_div_assoc, div_self (Real.Gamma_pos_of_pos ha).ne',
+    rw [add_comm, ClassicalInequalities.Gamma_add_nat ha, mul_div_assoc,
+        div_self (Real.Gamma_pos_of_pos ha).ne',
       mul_one]
   have hNsq : (N ^ (1 - lam)) ^ 2 = N ^ (2 - 2 * lam) := by
     rw [← Real.rpow_natCast, ← Real.rpow_mul hNpos.le]; norm_num; ring_nf

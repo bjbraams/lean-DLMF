@@ -21,14 +21,14 @@ public import Mathlib.MeasureTheory.Covering.Besicovitch
 # Changes of variables and products of solutions (DLMF §§1.13(iv)–1.13(v))
 
 Transformations of `w'' + f(z) w' + g(z) w = 0` on an open set `D ⊆ ℂ`
-(`IsLinODE2SolOn f g 0 w D`), the Schwarzian derivative and products of solutions.
+(`IsLinearODE2SolutionOn f g 0 w D`), the Schwarzian derivative and products of solutions.
 
 ## Main results
 
-* `isLinODE2SolOn_inv`: the inversion `ξ = 1/z` (DLMF 1.13.11–1.13.12).
-* `isLinODE2SolOn_elim_first`: elimination of the first derivative by a change of the dependent
-  variable (DLMF 1.13.13–1.13.15).
-* `hasDerivAt_deriv_comp_eta`, `isLinODE2SolOn_comp_eta_iff`: change of the independent
+* `isLinearODE2SolutionOn_inv`: the inversion `ξ = 1/z` (DLMF 1.13.11–1.13.12).
+* `isLinearODE2SolutionOn_elim_first`: elimination of the first derivative by a change of the
+  dependent variable (DLMF 1.13.13–1.13.15).
+* `hasDerivAt_deriv_comp_eta`, `isLinearODE2SolutionOn_comp_eta_iff`: change of the independent
   variable (DLMF 1.13.16–1.13.17).
 * `liouville_transformation`: the Liouville transformation (DLMF 1.13.18–1.13.19).
 * `schwarzian_eq_sqrt`, `schwarzian_comp`, `schwarzian_inverse`: the square-root form of the
@@ -58,9 +58,9 @@ variable {f g : ℂ → ℂ} {D : Set ℂ}
 `W(ξ) = w(1/ξ)` solves `W'' + F(ξ) W' + G(ξ) W = 0` with `F(ξ) = 2/ξ - ξ⁻² f(1/ξ)`,
 `G(ξ) = ξ⁻⁴ g(1/ξ)`, on `{ξ : 1/ξ ∈ D}`. -/
 @[dlmf 1.13.E11, dlmf 1.13.E12]
-theorem isLinODE2SolOn_inv (hD : IsOpen D) (h0 : (0 : ℂ) ∉ D) {w : ℂ → ℂ}
-    (hw : IsLinODE2SolOn f g 0 w D) :
-    IsLinODE2SolOn (fun ξ => 2 / ξ - f ξ⁻¹ / ξ ^ 2) (fun ξ => g ξ⁻¹ / ξ ^ 4) 0
+theorem isLinearODE2SolutionOn_inv (hD : IsOpen D) (h0 : (0 : ℂ) ∉ D) {w : ℂ → ℂ}
+    (hw : IsLinearODE2SolutionOn f g 0 w D) :
+    IsLinearODE2SolutionOn (fun ξ => 2 / ξ - f ξ⁻¹ / ξ ^ 2) (fun ξ => g ξ⁻¹ / ξ ^ 4) 0
       (fun ξ => w ξ⁻¹) ((fun ξ => ξ⁻¹) ⁻¹' D) := by
   have hne : ∀ ξ ∈ (fun ξ : ℂ => ξ⁻¹) ⁻¹' D, ξ ≠ 0 := by
     rintro ξ hξ rfl
@@ -91,10 +91,10 @@ theorem isLinODE2SolOn_inv (hD : IsOpen D) (h0 : (0 : ℂ) ∉ D) {w : ℂ → �
 on `D` (`∫ f dz`), then `W = w e^{F/2}` (so `w = W exp(-½∫ f dz)`) solves `W'' - H W = 0` with
 `H = ¼ f² + ½ f' - g`. -/
 @[dlmf 1.13.E13, dlmf 1.13.E14, dlmf 1.13.E15]
-theorem isLinODE2SolOn_elim_first (hD : IsOpen D) {F : ℂ → ℂ}
+theorem isLinearODE2SolutionOn_elim_first (hD : IsOpen D) {F : ℂ → ℂ}
     (hF : ∀ z ∈ D, HasDerivAt F (f z) z) (hf : DifferentiableOn ℂ f D) {w : ℂ → ℂ}
-    (hw : IsLinODE2SolOn f g 0 w D) :
-    IsLinODE2SolOn 0 (fun z => -(f z ^ 2 / 4 + deriv f z / 2 - g z)) 0
+    (hw : IsLinearODE2SolutionOn f g 0 w D) :
+    IsLinearODE2SolutionOn 0 (fun z => -(f z ^ 2 / 4 + deriv f z / 2 - g z)) 0
       (fun z => w z * Complex.exp (F z / 2)) D := by
   have he : ∀ z ∈ D, HasDerivAt (fun y => Complex.exp (F y / 2))
       (Complex.exp (F z / 2) * (f z / 2)) z := fun z hz => ((hF z hz).div_const 2).cexp
@@ -151,10 +151,10 @@ theorem hasDerivAt_deriv_comp_eta (hD : IsOpen D) {F η v : ℂ → ℂ}
 /-- DLMF 1.13.17: with `η` as in 1.13.16, `w = v ∘ η` solves 1.13.1 on `D` iff
 `d²v/dη² + g e^{2∫f} v = 0` at `η(z)` for every `z ∈ D`. -/
 @[dlmf 1.13.E17]
-theorem isLinODE2SolOn_comp_eta_iff (hD : IsOpen D) {F η v : ℂ → ℂ}
+theorem isLinearODE2SolutionOn_comp_eta_iff (hD : IsOpen D) {F η v : ℂ → ℂ}
     (hF : ∀ z ∈ D, HasDerivAt F (f z) z) (hη : ∀ z ∈ D, HasDerivAt η (Complex.exp (-F z)) z)
     (hv : ∀ z ∈ D, DifferentiableAt ℂ v (η z) ∧ DifferentiableAt ℂ (deriv v) (η z)) :
-    IsLinODE2SolOn f g 0 (v ∘ η) D ↔
+    IsLinearODE2SolutionOn f g 0 (v ∘ η) D ↔
       ∀ z ∈ D, deriv (deriv v) (η z) + g z * Complex.exp (2 * F z) * v (η z) = 0 := by
   constructor
   · intro hw z hz
@@ -180,7 +180,7 @@ Then `U = σ W` satisfies `d²U/dζ² = (ż² H - ½{z, ζ}) U`, where `d/dζ = 
 `ż = 1/ζ'` and, by 1.13.22, `-½{z, ζ} = {ζ, z}/(2ζ'²)`. -/
 @[dlmf 1.13.E18, dlmf 1.13.E19]
 theorem liouville_transformation (hD : IsOpen D) {H W ζ σ : ℂ → ℂ}
-    (hW : IsLinODE2SolOn 0 (fun z => -H z) 0 W D) (hζ : ContDiffOn ℂ 3 ζ D)
+    (hW : IsLinearODE2SolutionOn 0 (fun z => -H z) 0 W D) (hζ : ContDiffOn ℂ 3 ζ D)
     (hζ' : ∀ z ∈ D, deriv ζ z ≠ 0) (hσ : ∀ z ∈ D, DifferentiableAt ℂ σ z)
     (hσ2 : ∀ z ∈ D, σ z ^ 2 = deriv ζ z) (z : ℂ) (hz : z ∈ D) :
     deriv (fun y => deriv (fun x => σ x * W x) y / deriv ζ y) z / deriv ζ z =
@@ -384,8 +384,8 @@ theorem schwarzian_inverse {z ζf : ℂ → ℂ} {ζ₀ : ℂ} (hz : ContDiffAt 
 `w''' + 3f w'' + (2f² + f' + 4g) w' + (4fg + 2g') w = 0`. -/
 @[dlmf 1.13.E23]
 theorem product_solution_ode3 (hD : IsOpen D) (hf : DifferentiableOn ℂ f D)
-    (hg : DifferentiableOn ℂ g D) {w₁ w₂ : ℂ → ℂ} (h₁ : IsLinODE2SolOn f g 0 w₁ D)
-    (h₂ : IsLinODE2SolOn f g 0 w₂ D) {z : ℂ} (hz : z ∈ D) :
+    (hg : DifferentiableOn ℂ g D) {w₁ w₂ : ℂ → ℂ} (h₁ : IsLinearODE2SolutionOn f g 0 w₁ D)
+    (h₂ : IsLinearODE2SolutionOn f g 0 w₂ D) {z : ℂ} (hz : z ∈ D) :
     iteratedDeriv 3 (fun y => w₁ y * w₂ y) z + 3 * f z * iteratedDeriv 2 (fun y => w₁ y * w₂ y) z +
         (2 * f z ^ 2 + deriv f z + 4 * g z) * deriv (fun y => w₁ y * w₂ y) z +
         (4 * f z * g z + 2 * deriv g z) * (w₁ z * w₂ z) = 0 := by
@@ -425,7 +425,7 @@ theorem product_solution_ode3 (hD : IsOpen D) (hf : DifferentiableOn ℂ f D)
 
 /-- Differentiating a reduced second-order equation gives the third derivative of its solution. -/
 private lemma iteratedDeriv_three_solution {p u : ℂ → ℂ} {D : Set ℂ}
-    (hD : IsOpen D) (hp : DifferentiableOn ℂ p D) (hu : IsLinODE2SolOn 0 p 0 u D)
+    (hD : IsOpen D) (hp : DifferentiableOn ℂ p D) (hu : IsLinearODE2SolutionOn 0 p 0 u D)
     {z : ℂ} (hz : z ∈ D) :
     iteratedDeriv 3 u z = -deriv p z * u z - p z * deriv u z := by
   have he : deriv (deriv u) =ᶠ[𝓝 z] fun y => -p y * u y := by
@@ -442,7 +442,8 @@ private lemma iteratedDeriv_three_solution {p u : ℂ → ℂ} {D : Set ℂ}
 /-- The numerator in the product equation factors as the potential difference times a Wronskian. -/
 private lemma product_ode_numerator {D : Set ℂ} (hD : IsOpen D) {I J U V : ℂ → ℂ}
     (hI : DifferentiableOn ℂ I D) (hJ : DifferentiableOn ℂ J D)
-    (hU : IsLinODE2SolOn 0 I 0 U D) (hV : IsLinODE2SolOn 0 J 0 V D) {z : ℂ} (hz : z ∈ D) :
+    (hU : IsLinearODE2SolutionOn 0 I 0 U D) (hV : IsLinearODE2SolutionOn 0 J 0 V D)
+        {z : ℂ} (hz : z ∈ D) :
     iteratedDeriv 3 (fun x => U x * V x) z +
       2 * (I z + J z) * deriv (fun x => U x * V x) z +
       (deriv I z + deriv J z) * (U z * V z) =
@@ -471,8 +472,8 @@ private lemma product_ode_numerator {D : Set ℂ} (hD : IsOpen D) {I J U V : ℂ
 `d/dz ((W''' + 2(I + J) W' + (I' + J') W)/(I - J)) = -(I - J) W`. -/
 @[dlmf 1.13.E24, dlmf 1.13.E25]
 theorem product_solution_IJ (hD : IsOpen D) {I J U V : ℂ → ℂ} (hI : DifferentiableOn ℂ I D)
-    (hJ : DifferentiableOn ℂ J D) (hIJ : ∀ z ∈ D, I z ≠ J z) (hU : IsLinODE2SolOn 0 I 0 U D)
-    (hV : IsLinODE2SolOn 0 J 0 V D) {z : ℂ} (hz : z ∈ D) :
+    (hJ : DifferentiableOn ℂ J D) (hIJ : ∀ z ∈ D, I z ≠ J z) (hU : IsLinearODE2SolutionOn 0 I 0 U D)
+    (hV : IsLinearODE2SolutionOn 0 J 0 V D) {z : ℂ} (hz : z ∈ D) :
     deriv (fun y => (iteratedDeriv 3 (fun x => U x * V x) y +
         2 * (I y + J y) * deriv (fun x => U x * V x) y +
         (deriv I y + deriv J y) * (U y * V y)) / (I y - J y)) z =

@@ -25,7 +25,8 @@ public import Mathlib.RingTheory.Binomial
 * `rankOneExponent`, `rankOneCoeff`, `IsRankOneAtInfinity`, `rankOneScale`, `logSectorFilter`:
   the exponent 2.7.10 and the recursion 2.7.11 of the formal solutions 2.7.8 at an irregular
   singularity of rank 1 at infinity, with the data, scale and sector filter of 2.7.14–2.7.16.
-* `lgApproximant`, `IsLGSolOn`, `IsLGData`: the Liouville–Green setting of 2.7.20.
+* `lgApproximant`, `IsLiouvilleGreenSolutionOn`, `IsLiouvilleGreenData`: the Liouville–Green setting
+  of 2.7.20.
 * `airyEnvCrit`, `envAi`, `envBi` (2.8.19–2.8.21) and `besselEnvCrit`, `envJ`, `envY`
   (2.8.32–2.8.34): the envelope functions of §2.8.
 * `IsAiryCoeffs`, `IsBesselCoeffs`: the coefficient relations 2.8.17–2.8.18 and 2.8.27–2.8.28,
@@ -261,12 +262,12 @@ def lgApproximant (f ξ : ℝ → ℝ) (σ : ℝ) (x : ℝ) : ℝ :=
   f x ^ (-(1 / 4) : ℝ) * Real.exp (σ * ξ x)
 
 /-- `w` is a twice-differentiable solution of `w'' = (f + g) w` (DLMF 2.7.20) on `S`. -/
-def IsLGSolOn (f g w : ℝ → ℝ) (S : Set ℝ) : Prop :=
+def IsLiouvilleGreenSolutionOn (f g w : ℝ → ℝ) (S : Set ℝ) : Prop :=
   ∃ w' : ℝ → ℝ, ∀ x ∈ S, HasDerivAt w (w' x) x ∧ HasDerivAt w' ((f x + g x) * w x) x
 
 /-- The regularity hypotheses of the Liouville–Green theorem on `S`: `f > 0` with derivatives
 `f'`, `f''`, `f''` and `g` continuous, and `ξ' = f^{1/2}` (`ξ = ∫ f^{1/2} dx`). -/
-structure IsLGData (f f' f'' g ξ : ℝ → ℝ) (S : Set ℝ) : Prop where
+structure IsLiouvilleGreenData (f f' f'' g ξ : ℝ → ℝ) (S : Set ℝ) : Prop where
   /-- The leading Liouville-Green coefficient f is strictly positive on S. -/
   pos : ∀ x ∈ S, 0 < f x
   /-- The displayed function f-prime is the derivative of f on S. -/

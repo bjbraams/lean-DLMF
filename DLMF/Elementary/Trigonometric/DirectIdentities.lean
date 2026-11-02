@@ -48,10 +48,11 @@ are in `DLMF.Elementary.Basic.Trigonometric`.
 ## Main results
 
 * `cos_le_sinc_le_one`, `sine_parabolic_bounds`, `norm_sin_le_sinh_norm`,
-  `trig_unit_disc_bounds`: inequalities (DLMF 4.18.3–4.18.10).
+  `Trigonometric.unit_disc_bounds`: inequalities (DLMF 4.18.3–4.18.10).
 * `hasSum_sec_euler`: the secant series (DLMF 4.19.5).
-* `trig_linear_ode_general`, `trig_energy_ode_general`, `trig_riccati_ode_general`: general
-  solutions of DLMF 4.20.12–4.20.14, including the singular constant solutions.
+* `Trigonometric.linear_ode_general`, `Trigonometric.energy_ode_general`,
+  `Trigonometric.riccati_ode_general`: general solutions of DLMF 4.20.12–4.20.14, including the
+  singular constant solutions.
 * `sin_add_cos_phase`, `cot_add_sub`, `two_sin_mul_sin`, `sin_half_roots`, `cos_half_roots`,
   `tan_half_roots_and_ratios`: addition and half-angle identities (DLMF §4.21).
 * `de_moivre_int`, `de_moivre_complex`: De Moivre's formula (DLMF 4.21.34).
@@ -80,7 +81,7 @@ namespace DLMF.Elementary
 
 /-- Identity under the stated parameter and domain assumptions: `Real.sqrt (1-x⁻¹^2)=Real.sqrt
 (x^2-1)/x`. -/
-lemma trig_sqrt_inverse {x:ℝ} (hx:1<x) :
+lemma Trigonometric.sqrt_inverse {x:ℝ} (hx:1<x) :
     Real.sqrt (1-x⁻¹^2)=Real.sqrt (x^2-1)/x := by
   have hx0 : 0<x := lt_trans zero_lt_one hx
   have hs : 0<x^2-1 := by nlinarith
@@ -93,7 +94,7 @@ lemma trig_sqrt_inverse {x:ℝ} (hx:1<x) :
 
 /-- Identity under the stated parameter and domain assumptions: `‖Complex.sin z‖^2=(Real.sin
 z.re)^2+(Real.sinh z.im)^2`. -/
-private lemma trig_norm_sq_sin (z : ℂ) : ‖Complex.sin
+private lemma Trigonometric.norm_sq_sin (z : ℂ) : ‖Complex.sin
     z‖^2=(Real.sin z.re)^2+(Real.sinh z.im)^2 := by
   rw [Complex.sq_norm]
   conv_lhs => rw [← Complex.re_add_im z,Complex.sin_add_mul_I]
@@ -104,7 +105,7 @@ private lemma trig_norm_sq_sin (z : ℂ) : ‖Complex.sin
 
 /-- Identity under the stated parameter and domain assumptions: `‖Complex.cos z‖^2=(Real.cos
 z.re)^2+(Real.sinh z.im)^2`. -/
-private lemma trig_norm_sq_cos (z : ℂ) : ‖Complex.cos
+private lemma Trigonometric.norm_sq_cos (z : ℂ) : ‖Complex.cos
     z‖^2=(Real.cos z.re)^2+(Real.sinh z.im)^2 := by
   rw [Complex.sq_norm]
   conv_lhs => rw [← Complex.re_add_im z,Complex.cos_add_mul_I]
@@ -219,7 +220,7 @@ theorem sine_parabolic_bounds {x : ℝ} (hx : 0<x) (h1 : x<1) :
 @[dlmf 4.18.E5]
 theorem sinh_im_le_norm_sin_le_cosh_im (z : ℂ) :
     |Real.sinh z.im| ≤ ‖Complex.sin z‖ ∧ ‖Complex.sin z‖≤Real.cosh z.im := by
-  have hn:=trig_norm_sq_sin z
+  have hn:=Trigonometric.norm_sq_sin z
   have hc:=Real.cosh_sq_sub_sinh_sq z.im
   have hs:=Real.sin_sq_add_cos_sq z.re
   have hp:=norm_nonneg (Complex.sin z)
@@ -232,7 +233,7 @@ theorem sinh_im_le_norm_sin_le_cosh_im (z : ℂ) :
 @[dlmf 4.18.E6]
 theorem sinh_im_le_norm_cos_le_cosh_im (z : ℂ) :
     |Real.sinh z.im| ≤ ‖Complex.cos z‖ ∧ ‖Complex.cos z‖≤Real.cosh z.im := by
-  have hn:=trig_norm_sq_cos z
+  have hn:=Trigonometric.norm_sq_cos z
   have hc:=Real.cosh_sq_sub_sinh_sq z.im
   have hs:=Real.sin_sq_add_cos_sq z.re
   have hp:=norm_nonneg (Complex.cos z)
@@ -271,7 +272,7 @@ theorem norm_sin_le_sinh_norm (z : ℂ) : ‖Complex.sin z‖ ≤ Real.sinh ‖z
 
 /-- DLMF 4.18.E10: trig unit disc bounds. -/
 @[dlmf 4.18.E10]
-theorem trig_unit_disc_bounds {z : ℂ} (hz : ‖z‖<1) :
+theorem Trigonometric.unit_disc_bounds {z : ℂ} (hz : ‖z‖<1) :
     ‖Complex.cos z‖<2 ∧ ‖Complex.sin z‖≤(6/5:ℝ)*‖z‖ := by
   have he := Real.exp_one_lt_d9
   have he' := Real.exp_one_gt_d9
@@ -409,7 +410,7 @@ private lemma eqOn_zero_of_deriv_eq_mul {U : Set ℂ} (hU : IsOpen U) (hc : IsPr
 
 /-- DLMF 4.20.E12: trig linear ode general. -/
 @[dlmf 4.20.E12]
-theorem trig_linear_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
+theorem Trigonometric.linear_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
     {a : ℂ} (ha : a≠0) {w : ℂ→ℂ} (hw : AnalyticOnNhd ℂ w U)
         (h : ∀ z∈U, deriv (deriv w) z+a^2*w z=0) :
     ∃ A B : ℂ,∀ z∈U,w z=A*Complex.cos (a*z)+B*Complex.sin (a*z) := by
@@ -466,7 +467,7 @@ private lemma exists_cos_eq_sin_eq_of_sq_add_sq_eq_one {p q : ℂ} (h : p^2+q^2=
 
 /-- The energy equation has the displayed sine family and two singular constant solutions. -/
 @[dlmf 4.20.E13]
-theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
+theorem Trigonometric.energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
     (hne : U.Nonempty)
     {a : ℂ} (ha : a≠0) {w : ℂ→ℂ} (hw : AnalyticOnNhd ℂ w U)
         (h : ∀ z∈U, (deriv w z)^2+a^2*(w z)^2=1) :
@@ -498,7 +499,7 @@ theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnect
     · left; intro z hz; rw [hk z hz]; field_simp; linear_combination e
     · right; intro z hz; rw [hk z hz]; field_simp; linear_combination e
   · left
-    obtain ⟨A, B, hAB⟩ := trig_linear_ode_general hU hc ha hw
+    obtain ⟨A, B, hAB⟩ := Trigonometric.linear_ode_general hU hc ha hw
       (fun z hz => by simpa using h0 z hz)
     have hder : ∀ z∈U, deriv w z = a*(-A*Complex.sin (a*z)+B*Complex.cos (a*z)) := by
       intro z hz
@@ -523,7 +524,7 @@ theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnect
 
 /-- The Riccati equation has the displayed tangent family and two omitted constant solutions. -/
 @[dlmf 4.20.E14]
-theorem trig_riccati_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
+theorem Trigonometric.riccati_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
     (hne : U.Nonempty)
     {a : ℂ} (ha : a≠0) {w : ℂ→ℂ} (hw : AnalyticOnNhd ℂ w U) (h : ∀ z∈U,deriv w z-a^2*(w z)^2=1) :
     (∃ c : ℂ,∀ z∈U,Complex.cos (a*z+c)≠0 ∧ w z=Complex.tan (a*z+c)/a) ∨
@@ -737,7 +738,7 @@ theorem cos_sq_sub_sin_sq (u v : ℂ) : (Complex.cos u)^2-(Complex.sin v)^2=Comp
 theorem sin_half_roots (z : ℂ) : Complex.sin (z/2)=Complex.sqrt ((1-Complex.cos z)/2) ∨
     Complex.sin (z/2)= -Complex.sqrt ((1-Complex.cos z)/2) := by
   apply (sq_eq_sq_iff_eq_or_eq_neg).mp
-  rw [trig_sqrt_sq]
+  rw [Trigonometric.complexSqrt_sq]
   have h := Complex.cos_two_mul_eq_one_sub (z/2)
   rw [show (2:ℂ)*(z/2)=z by ring] at h
   linear_combination h/2
@@ -747,7 +748,7 @@ theorem sin_half_roots (z : ℂ) : Complex.sin (z/2)=Complex.sqrt ((1-Complex.co
 theorem cos_half_roots (z : ℂ) : Complex.cos (z/2)=Complex.sqrt ((1+Complex.cos z)/2) ∨
     Complex.cos (z/2)= -Complex.sqrt ((1+Complex.cos z)/2) := by
   apply (sq_eq_sq_iff_eq_or_eq_neg).mp
-  rw [trig_sqrt_sq]
+  rw [Trigonometric.complexSqrt_sq]
   have h := Complex.cos_two_mul (z/2)
   rw [show (2:ℂ)*(z/2)=z by ring] at h
   linear_combination -h/2
@@ -780,7 +781,7 @@ theorem tan_half_roots_and_ratios {z : ℂ} (hs : Complex.sin z≠0) :
     ring
   refine ⟨?_,hr1,hr2⟩
   apply (sq_eq_sq_iff_eq_or_eq_neg).mp
-  rw [trig_sqrt_sq,Complex.tan]
+  rw [Trigonometric.complexSqrt_sq,Complex.tan]
   field_simp [hc,hp]
   rw [hcos]
   linear_combination 2*(Complex.cos (z/2))^2*hcircle
@@ -980,7 +981,7 @@ theorem norm_sin_explicit (z : ℂ) :
     ‖Complex.sin z‖=Real.sqrt ((Real.sin z.re)^2+(Real.sinh z.im)^2) ∧
     ‖Complex.sin z‖=Real.sqrt ((Real.cosh (2*z.im)-Real.cos (2*z.re))/2) := by
   have h : ‖Complex.sin z‖=Real.sqrt ((Real.sin z.re)^2+(Real.sinh z.im)^2) := by
-    rw [← trig_norm_sq_sin,Real.sqrt_sq (norm_nonneg _)]
+    rw [← Trigonometric.norm_sq_sin,Real.sqrt_sq (norm_nonneg _)]
   refine ⟨h,?_⟩
   rw [h]
   congr 1
@@ -993,7 +994,7 @@ theorem norm_cos_explicit (z : ℂ) :
     ‖Complex.cos z‖=Real.sqrt ((Real.cos z.re)^2+(Real.sinh z.im)^2) ∧
     ‖Complex.cos z‖=Real.sqrt ((Real.cosh (2*z.im)+Real.cos (2*z.re))/2) := by
   have h : ‖Complex.cos z‖=Real.sqrt ((Real.cos z.re)^2+(Real.sinh z.im)^2) := by
-    rw [← trig_norm_sq_cos,Real.sqrt_sq (norm_nonneg _)]
+    rw [← Trigonometric.norm_sq_cos,Real.sqrt_sq (norm_nonneg _)]
   refine ⟨h,?_⟩
   rw [h]
   congr 1

@@ -43,9 +43,9 @@ private lemma continuous_deriv_airyBi : Continuous (deriv airyBi) := by
 /-- The real-axis pair in DLMF Table 9.2.1 is numerically independent. -/
 theorem airy_pair_wellConditioned_real  :
     IsWellConditionedPairOn airyAi airyBi {z : ℂ | z.im = 0} := by
-  obtain ⟨R, B, h⟩ := airyErr_far_real
+  obtain ⟨R, B, h⟩ := UniformBounds.far_real
   have hπ : (1 / π : ℂ) ≠ 0 := one_div_ne_zero (ofReal_ne_zero.mpr Real.pi_ne_zero)
-  refine airyErr_wellConditioned_of_far differentiable_airyAi.continuous
+  refine UniformBounds.wellConditioned_of_far differentiable_airyAi.continuous
     differentiable_airyBi.continuous continuous_deriv_airyAi continuous_deriv_airyBi hπ ?_
     (R := R) (B := B) ?_
   · intro z; rw [deriv_airyAi, deriv_airyBi]; exact wronskian_airyAi_airyBi z
@@ -56,10 +56,10 @@ theorem airy_pair_wellConditioned_real  :
 /-- The first complex-sector pair in DLMF Table 9.2.1. -/
 theorem airy_pair_wellConditioned_sector  :
     IsWellConditionedPairOn airyAi airyBi {z : ℂ | |arg z| ≤ π / 3 ∨ (z.im = 0 ∧ z.re ≤ 0)} := by
-  obtain ⟨R, B, h⟩ := airyErr_far_real
-  obtain ⟨R', B', h'⟩ := airyErr_far_sector
+  obtain ⟨R, B, h⟩ := UniformBounds.far_real
+  obtain ⟨R', B', h'⟩ := UniformBounds.far_sector
   have hπ : (1 / π : ℂ) ≠ 0 := one_div_ne_zero (ofReal_ne_zero.mpr Real.pi_ne_zero)
-  refine airyErr_wellConditioned_of_far differentiable_airyAi.continuous
+  refine UniformBounds.wellConditioned_of_far differentiable_airyAi.continuous
     differentiable_airyBi.continuous continuous_deriv_airyAi continuous_deriv_airyBi hπ ?_
     (R := max (max R R') 1) (B := max B B') ?_
   · intro z; rw [deriv_airyAi, deriv_airyBi]; exact wronskian_airyAi_airyBi z
@@ -90,21 +90,21 @@ private lemma airy_rotated_pair_re_nonneg {ε : ℝ} (hε : ε = 1 ∨ ε = -1) 
         simp only [c]
         rw [show (((4 * π / 3 : ℝ) : ℂ) * I) = -((1 : ℝ) : ℂ) * (2 * π * I / 3) + 2 * π * I by
           push_cast; ring, exp_add, exp_two_pi_mul_I, mul_one]
-      rw [hcc, airyErr_zeta_rot hz0 (α := 4 * π / 3) (by linarith) (by linarith)
+      rw [hcc, UniformBounds.zeta_rotation hz0 (α := 4 * π / 3) (by linarith) (by linarith)
         (κ := 1) (by rw [show (((4 * π / 3 : ℝ) : ℂ) * I * (3 / 2)) = 2 * π * I by push_cast; ring,
           exp_two_pi_mul_I]), mul_one]
-      have := airyErr_re_zeta_nonneg hz0 (abs_le.mpr ⟨by linarith, by linarith⟩)
+      have := UniformBounds.re_zeta_nonneg hz0 (abs_le.mpr ⟨by linarith, by linarith⟩)
       linarith
     · have hcc : c = exp (((-(2 * π / 3)) : ℝ) * I) := by
         simp only [c]; congr 1; push_cast; ring
-      rw [hcc, airyErr_zeta_rot hz0 (α := -(2 * π / 3)) (by linarith) (by linarith)
+      rw [hcc, UniformBounds.zeta_rotation hz0 (α := -(2 * π / 3)) (by linarith) (by linarith)
         (κ := -1) (by rw [show ((((-(2 * π / 3)) : ℝ) : ℂ) * I * (3 / 2)) = -(π * I) by
           push_cast; ring, exp_neg, exp_pi_mul_I]; norm_num)]
       simp
   · have hcc : c = exp (((2 * π / 3 : ℝ)) * I) := by
       simp only [c]; congr 1; push_cast; ring
     have : arg z ≤ π / 3 := by linarith
-    rw [hcc, airyErr_zeta_rot hz0 (α := 2 * π / 3) (by linarith) (by linarith)
+    rw [hcc, UniformBounds.zeta_rotation hz0 (α := 2 * π / 3) (by linarith) (by linarith)
       (κ := -1) (by rw [show (((2 * π / 3 : ℝ) : ℂ) * I * (3 / 2)) = π * I by
         push_cast; ring, exp_pi_mul_I])]
     simp
@@ -114,7 +114,7 @@ theorem airy_rotated_pair_wellConditioned {ε : ℝ} (hε : ε = 1 ∨ ε = -1) 
     IsWellConditionedPairOn airyAi (fun z => airyAi (z * exp (-ε * (2 * π * I / 3))))
       {z : ℂ | -π / 3 ≤ ε * arg z ∧ ε * arg z ≤ π} := by
   have hπ := Real.pi_pos
-  obtain ⟨C, R, hC, hU⟩ := airyErr_ai_uniform
+  obtain ⟨C, R, hC, hU⟩ := UniformBounds.ai_uniform
   set c := exp (-ε * (2 * π * I / 3))
   have hc : ‖c‖ = 1 := by
     rw [show c = exp (((-ε * (2 * π / 3) : ℝ) : ℂ) * I) by simp only [c]; congr 1; push_cast; ring]
@@ -122,10 +122,11 @@ theorem airy_rotated_pair_wellConditioned {ε : ℝ} (hε : ε = 1 ∨ ε = -1) 
   have hW := wronskian_airyAi_rotated (z := 0) hε
   have hW0 : exp (ε * (π * I / 6)) / (2 * π) ≠ 0 :=
     div_ne_zero (exp_ne_zero _) (mul_ne_zero two_ne_zero (ofReal_ne_zero.mpr Real.pi_ne_zero))
-  refine airyErr_wellConditioned_of_far differentiable_airyAi.continuous (airyErr_continuous_rot c)
+  refine UniformBounds.wellConditioned_of_far differentiable_airyAi.continuous
+      (UniformBounds.continuous_rotation c)
     continuous_deriv_airyAi
-    (by rw [airyErr_deriv_rot]; exact airyErr_continuous_deriv_rot c) hW0
-    (fun z => by rw [deriv_airyAi, airyErr_deriv_rot]
+    (by rw [UniformBounds.deriv_rotation]; exact UniformBounds.continuous_deriv_rotation c) hW0
+    (fun z => by rw [deriv_airyAi, UniformBounds.deriv_rotation]
                  have := wronskian_airyAi_rotated z hε
                  simp only at this ⊢
                  linear_combination this) (R := max R 1) (B := 2 * (C ^ 2 / (4 * π))) ?_
@@ -136,11 +137,11 @@ theorem airy_rotated_pair_wellConditioned {ε : ℝ} (hε : ε = 1 ∨ ε = -1) 
   have hzc0 : z * c ≠ 0 := mul_ne_zero hz0 (exp_ne_zero _)
   have hzcn : ‖z‖ = ‖z * c‖ := by rw [norm_mul, hc, mul_one]
   have hre := airy_rotated_pair_re_nonneg hε hz0 hz
-  rw [deriv_airyAi, airyErr_deriv_rot]
+  rw [deriv_airyAi, UniformBounds.deriv_rotation]
   simp only
   rw [norm_mul, hc, mul_one]
-  have k1 := airyErr_cross_le hC hU hz0 hzc0 hzcn hRz hre
-  have k2 := airyErr_cross_le hC hU hzc0 hz0 hzcn.symm (hzcn ▸ hRz) (by linarith)
+  have k1 := UniformBounds.cross_le hC hU hz0 hzc0 hzcn hRz hre
+  have k2 := UniformBounds.cross_le hC hU hzc0 hz0 hzcn.symm (hzcn ▸ hRz) (by linarith)
   linarith [mul_comm ‖airyAiDeriv z‖ ‖airyAi (z * c)‖]
 
 /-- For `|ph u| ≤ 2π/3`, `ℜζ(u e^{πi/3}) + ℜζ(u e^{-πi/3}) ≥ 0`, where `ζ = (2/3) z^{3/2}`. -/
@@ -151,7 +152,7 @@ private lemma airy_two_rotations_re_nonneg {u : ℂ} (hu0 : u ≠ 0) (hz' : |arg
   have hlt := Complex.neg_pi_lt_arg u
   have hb := abs_le.mp hz'
   have hζ₁ : airyZetaComplex (u * exp (((π / 3 : ℝ) : ℂ) * I)) = airyZetaComplex u * I := by
-    rw [airyErr_zeta_rot hu0 (by linarith) (by linarith)
+    rw [UniformBounds.zeta_rotation hu0 (by linarith) (by linarith)
       (by rw [show (((π / 3 : ℝ) : ℂ) * I * (3 / 2)) = π / 2 * I by push_cast; ring,
         exp_pi_div_two_mul_I])]
   rw [hζ₁]
@@ -160,15 +161,15 @@ private lemma airy_two_rotations_re_nonneg {u : ℂ} (hu0 : u ≠ 0) (hz' : |arg
     have e₂' : u * exp (((-(π / 3)) : ℝ) * I) = u * exp (((5 * π / 3 : ℝ) : ℂ) * I) := by
       rw [show (((5 * π / 3 : ℝ) : ℂ) * I) = (((-(π / 3)) : ℝ) : ℂ) * I + 2 * π * I by
         push_cast; ring, exp_add, exp_two_pi_mul_I, mul_one]
-    rw [e₂', airyErr_zeta_rot hu0 (α := 5 * π / 3) (by linarith) (by linarith) (κ := I)
+    rw [e₂', UniformBounds.zeta_rotation hu0 (α := 5 * π / 3) (by linarith) (by linarith) (κ := I)
       (by rw [show (((5 * π / 3 : ℝ) : ℂ) * I * (3 / 2)) = π / 2 * I + 2 * π * I by
         push_cast; ring, exp_add, exp_two_pi_mul_I, mul_one, exp_pi_div_two_mul_I])]
-    have him := airyErr_im_two_zeta hu0
+    have him := UniformBounds.im_two_zeta hu0
     rw [← h, show 3 / 2 * (-(2 * π / 3)) = -π by ring, Real.sin_neg, Real.sin_pi, neg_zero,
       mul_zero] at him
     have : (airyZetaComplex u).im = 0 := by simpa using him
     simp [this]
-  · rw [airyErr_zeta_rot hu0 (α := -(π / 3)) (by linarith) (by linarith) (κ := -I)
+  · rw [UniformBounds.zeta_rotation hu0 (α := -(π / 3)) (by linarith) (by linarith) (κ := -I)
       (by rw [show ((((-(π / 3)) : ℝ) : ℂ) * I * (3 / 2)) = -(π / 2 * I) by push_cast; ring,
         exp_neg, exp_pi_div_two_mul_I, inv_I])]
     simp
@@ -178,7 +179,7 @@ theorem airy_two_rotations_wellConditioned  :
     IsWellConditionedPairOn (fun z => airyAi (z * exp (-2 * π * I / 3)))
       (fun z => airyAi (z * exp (2 * π * I / 3))) {z : ℂ | |arg (-z)| ≤ 2 * π / 3} := by
   have hπ := Real.pi_pos
-  obtain ⟨C, R, hC, hU⟩ := airyErr_ai_uniform
+  obtain ⟨C, R, hC, hU⟩ := UniformBounds.ai_uniform
   set c₁ := exp (-2 * π * I / 3)
   set c₂ := exp (2 * π * I / 3)
   have hc₁ : c₁ = -exp (((π / 3 : ℝ) : ℂ) * I) := by
@@ -193,10 +194,11 @@ theorem airy_two_rotations_wellConditioned  :
   have hn₂ : ‖c₂‖ = 1 := by rw [hc₂, norm_neg]; exact Complex.norm_exp_ofReal_mul_I _
   have hW0 : (1 / (2 * π * I) : ℂ) ≠ 0 := one_div_ne_zero (mul_ne_zero (mul_ne_zero two_ne_zero
     (ofReal_ne_zero.mpr Real.pi_ne_zero)) I_ne_zero)
-  refine airyErr_wellConditioned_of_far (airyErr_continuous_rot c₁) (airyErr_continuous_rot c₂)
-    (by rw [airyErr_deriv_rot]; exact airyErr_continuous_deriv_rot c₁)
-    (by rw [airyErr_deriv_rot]; exact airyErr_continuous_deriv_rot c₂) hW0
-    (fun z => by rw [airyErr_deriv_rot, airyErr_deriv_rot]
+  refine UniformBounds.wellConditioned_of_far (UniformBounds.continuous_rotation c₁)
+      (UniformBounds.continuous_rotation c₂)
+    (by rw [UniformBounds.deriv_rotation]; exact UniformBounds.continuous_deriv_rotation c₁)
+    (by rw [UniformBounds.deriv_rotation]; exact UniformBounds.continuous_deriv_rotation c₂) hW0
+    (fun z => by rw [UniformBounds.deriv_rotation, UniformBounds.deriv_rotation]
                  have := wronskian_airyAi_rotations z
                  simp only at this ⊢
                  linear_combination this) (R := max R 1) (B := 2 * (C ^ 2 / (4 * π))) ?_
@@ -214,11 +216,11 @@ theorem airy_two_rotations_wellConditioned  :
   have hR₁ : R ≤ ‖z * c₁‖ := by rw [norm_mul, hn₁, mul_one]; exact hRz
   have hre : 0 ≤ (airyZetaComplex (z * c₁)).re + (airyZetaComplex (z * c₂)).re := by
     rw [e₁, e₂]; exact airy_two_rotations_re_nonneg hu0 hz
-  rw [airyErr_deriv_rot, airyErr_deriv_rot]
+  rw [UniformBounds.deriv_rotation, UniformBounds.deriv_rotation]
   simp only
   rw [norm_mul, norm_mul, hn₁, hn₂, mul_one, mul_one]
-  have k1 := airyErr_cross_le hC hU h₁0 h₂0 hn hR₁ hre
-  have k2 := airyErr_cross_le hC hU h₂0 h₁0 hn.symm (hn ▸ hR₁) (by linarith)
+  have k1 := UniformBounds.cross_le hC hU h₁0 h₂0 hn hR₁ hre
+  have k2 := UniformBounds.cross_le hC hU h₂0 h₁0 hn.symm (hn ▸ hR₁) (by linarith)
   linarith [mul_comm ‖airyAiDeriv (z * c₁)‖ ‖airyAi (z * c₂)‖]
 
 end DLMF.Airy

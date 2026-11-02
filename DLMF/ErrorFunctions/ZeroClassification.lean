@@ -17,25 +17,25 @@ enumerations there.
 
 ## Main results
 
-* `zcnt_erf_conj`, `zcnt_erfc_conj`: `erf (z̄) = conj (erf z)`, by the identity theorem for the
+* `Core.erf_conj`, `Core.erfc_conj`: `erf (z̄) = conj (erf z)`, by the identity theorem for the
   derivative (`HasDerivAt.conj_conj`).
-* `zcnt_erfc_ne_zero_of_re_pos`, `zcnt_erfc_ne_zero_of_re_nonneg`: `erfc z ≠ 0` for
+* `Core.erfc_ne_zero_of_re_pos`, `Core.erfc_ne_zero_of_re_nonneg`: `erfc z ≠ 0` for
   `Re z ≥ 0`, from the Cauchy integral `∫ e^{-t²}/(t - u) dt = π i w(u)` (DLMF 7.7.2) of the
   Faddeeva function at `u = iz`, whose imaginary part is a positive integral.
-* `zcnt_norm_erfc_le_one`: `‖erfc z‖ ≤ 1` for `Re z ≥ 0`, `Re z² ≥ 0`, from the Laplace form
+* `Core.norm_erfc_le_one`: `‖erfc z‖ ≤ 1` for `Re z ≥ 0`, `Re z² ≥ 0`, from the Laplace form
   `erfc z = π^{-1/2} e^{-z²} ∫₀^∞ e^{-zr - r²/4} dr`.
-* `zcnt_erfc_zero_arg`: every zero of `erfc` satisfies `π/2 < |ph z| < 3π/4` (DLMF §7.13(ii)).
-* `zcnt_erf_ofReal_ne_zero`, `zcnt_erf_I_mul_ofReal_ne_zero`: `erf` has no zero on the real or
+* `Core.erfc_zero_arg`: every zero of `erfc` satisfies `π/2 < |ph z| < 3π/4` (DLMF §7.13(ii)).
+* `Core.erf_ofReal_ne_zero`, `Core.erf_I_mul_ofReal_ne_zero`: `erf` has no zero on the real or
   imaginary axis other than `0`.
-* `zcnt_fresnelCosInt_neg`, `zcnt_fresnelCosInt_conj`, `zcnt_fresnelCosInt_I_mul`,
-  `zcnt_fresnelSinInt_I_mul` and their companions: the symmetries `C(-z) = -C(z)`,
+* `Core.fresnelCosInt_neg`, `Core.fresnelCosInt_conj`, `Core.fresnelCosInt_I_mul`,
+  `Core.fresnelSinInt_I_mul` and their companions: the symmetries `C(-z) = -C(z)`,
   `C(z̄) = conj C(z)`, `C(iz) = i C(z)`, `S(iz) = -i S(z)`.
-* `zcnt_fresnelCosInt_diag_ne_zero`, `zcnt_fresnelSinInt_diag_ne_zero`: no zeros on the diagonal
+* `Core.fresnelCosInt_diag_ne_zero`, `Core.fresnelSinInt_diag_ne_zero`: no zeros on the diagonal
   `ℝ(1+i)` other than `0`, since `C((1+i)x) = (1+i)x ∫₀¹ cosh(πt²x²) dt`.
-* `zcnt_fresnelCosInt_ofReal_ne_zero`, `zcnt_fresnelSinInt_ofReal_ne_zero`: no real zeros other
+* `Core.fresnelCosInt_ofReal_ne_zero`, `Core.fresnelSinInt_ofReal_ne_zero`: no real zeros other
   than `0`: for `0 < x ≤ 1` the integrand is positive, and for `x ≥ 1`
   `C = 1/2 + f sin - g cos` with `‖f‖ + ‖g‖ < 1/2` from the Laplace integrals 7.7.10–7.7.11.
-* `zcnt_octant_classification`: the eight-fold symmetry reduces a zero classification to the
+* `Core.octant_classification`: the eight-fold symmetry reduces a zero classification to the
   modulus enumeration in the octant `0 < ph z < π/4`.
 -/
 
@@ -44,10 +44,12 @@ enumerations there.
 open Complex Filter Set MeasureTheory DLMF.Hypergeometric DLMF
 open scoped Real Topology ComplexConjugate
 
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- `erf` commutes with complex conjugation. -/
-theorem zcnt_erf_conj (z : ℂ) : erf (conj z) = conj (erf z) := by
+theorem Core.erf_conj (z : ℂ) : erf (conj z) = conj (erf z) := by
   have hd : ∀ w, HasDerivAt (fun w => conj (erf (conj w)) - erf w) 0 w := by
     intro w
     have h1 := (hasDerivAt_erf_complex (conj w)).conj_conj
@@ -63,16 +65,16 @@ theorem zcnt_erf_conj (z : ℂ) : erf (conj z) = conj (erf z) := by
   rw [← conj_conj (erf (conj z)), sub_eq_zero.mp hc]
 
 /-- `erfc` is entire. -/
-theorem zcnt_differentiable_erfc : Differentiable ℂ erfc := by
+theorem Core.differentiable_erfc : Differentiable ℂ erfc := by
   unfold erfc
   exact (differentiable_const _).sub differentiable_erf_complex
 
 /-- `erfc` commutes with complex conjugation. -/
-theorem zcnt_erfc_conj (z : ℂ) : erfc (conj z) = conj (erfc z) := by
-  simp [erfc, zcnt_erf_conj]
+theorem Core.erfc_conj (z : ℂ) : erfc (conj z) = conj (erfc z) := by
+  simp [erfc, Core.erf_conj]
 
 /-- Integrability of the Cauchy kernel of the Faddeeva function off the real axis. -/
-theorem zcnt_integrable_cauchy {u : ℂ} (hu : 0 < u.im) :
+theorem Core.integrable_cauchy {u : ℂ} (hu : 0 < u.im) :
     Integrable (fun t : ℝ => exp (-(t : ℂ) ^ 2) / ((t : ℂ) - u)) := by
   have hne : ∀ t : ℝ, (t : ℂ) - u ≠ 0 := fun t h => by
     have := congrArg Complex.im h
@@ -91,7 +93,7 @@ theorem zcnt_integrable_cauchy {u : ℂ} (hu : 0 < u.im) :
     exact div_le_div_of_nonneg_left (Real.exp_pos _).le hu him
 
 /-- **No zeros of `erfc` in the open right half-plane.** -/
-theorem zcnt_erfc_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) : erfc z ≠ 0 := by
+theorem Core.erfc_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) : erfc z ≠ 0 := by
   intro h0
   set u := I * z with hu
   have hui : 0 < u.im := by simpa [hu] using hz
@@ -99,7 +101,7 @@ theorem zcnt_erfc_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) : erfc z ≠ 0 := 
     rw [faddeevaW, show -I * u = z by rw [hu]; ring_nf; rw [I_sq]; ring, h0, mul_zero]
   have hint := (faddeevaW_cauchy_integral hui).1
   rw [hW, mul_zero] at hint
-  have hInt := zcnt_integrable_cauchy hui
+  have hInt := Core.integrable_cauchy hui
   have him := integral_im (𝕜 := ℂ) hInt
   rw [hint] at him
   simp only [RCLike.im_to_complex, Complex.zero_im] at him
@@ -126,11 +128,11 @@ theorem zcnt_erfc_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) : erfc z ≠ 0 := 
   linarith
 
 /-- On the imaginary axis `Re erfc z = 1`, so `erfc` has no zero there. -/
-theorem zcnt_erfc_ne_zero_of_re_eq_zero {z : ℂ} (hz : z.re = 0) : erfc z ≠ 0 := by
+theorem Core.erfc_ne_zero_of_re_eq_zero {z : ℂ} (hz : z.re = 0) : erfc z ≠ 0 := by
   have hc : conj z = -z := by
     apply Complex.ext <;> simp [hz]
   have hre : (erf z).re = 0 := by
-    have h := zcnt_erf_conj z
+    have h := Core.erf_conj z
     rw [hc, erf_negative] at h
     have := congrArg Complex.re h
     simp at this
@@ -140,14 +142,14 @@ theorem zcnt_erfc_ne_zero_of_re_eq_zero {z : ℂ} (hz : z.re = 0) : erfc z ≠ 0
   simp [erfc, hre] at this
 
 /-- **No zeros of `erfc` in the closed right half-plane.** -/
-theorem zcnt_erfc_ne_zero_of_re_nonneg {z : ℂ} (hz : 0 ≤ z.re) : erfc z ≠ 0 := by
+theorem Core.erfc_ne_zero_of_re_nonneg {z : ℂ} (hz : 0 ≤ z.re) : erfc z ≠ 0 := by
   rcases hz.lt_or_eq with h | h
-  · exact zcnt_erfc_ne_zero_of_re_pos h
-  · exact zcnt_erfc_ne_zero_of_re_eq_zero h.symm
+  · exact Core.erfc_ne_zero_of_re_pos h
+  · exact Core.erfc_ne_zero_of_re_eq_zero h.symm
 
 /-- `‖erfc z‖ ≤ 1` in the closed quarter-plane sector `Re z ≥ 0`, `Re z² ≥ 0`
 (that is, `|ph z| ≤ π/4`). -/
-theorem zcnt_norm_erfc_le_one {z : ℂ} (hz : 0 ≤ z.re) (hz2 : 0 ≤ (z ^ 2).re) :
+theorem Core.norm_erfc_le_one {z : ℂ} (hz : 0 ≤ z.re) (hz2 : 0 ≤ (z ^ 2).re) :
     ‖erfc z‖ ≤ 1 := by
   have h := erfc_eq_integral_rotate (θ := 0) (by simp [Real.pi_pos]) z
   simp only [ofReal_zero, zero_mul, Complex.exp_zero, mul_one, one_mul] at h
@@ -190,7 +192,7 @@ theorem zcnt_norm_erfc_le_one {z : ℂ} (hz : 0 ≤ z.re) (hz2 : 0 ≤ (z ^ 2).r
     _ = 1 := by field_simp
 
 /-- `(z²).re = ‖z‖² cos (2 ph z)`. -/
-theorem zcnt_re_sq (z : ℂ) : (z ^ 2).re = ‖z‖ ^ 2 * Real.cos (2 * arg z) := by
+theorem Core.re_sq (z : ℂ) : (z ^ 2).re = ‖z‖ ^ 2 * Real.cos (2 * arg z) := by
   rw [Real.cos_two_mul, pow_two, mul_re]
   have hc := norm_mul_cos_arg z
   have hs := norm_mul_sin_arg z
@@ -199,11 +201,11 @@ theorem zcnt_re_sq (z : ℂ) : (z ^ 2).re = ‖z‖ ^ 2 * Real.cos (2 * arg z) :
   nlinarith [hsc]
 
 /-- **Zeros of `erfc` lie in the sectors `π/2 < |ph z| < 3π/4`** (DLMF §7.13(ii)). -/
-theorem zcnt_erfc_zero_arg {z : ℂ} (h0 : erfc z = 0) :
+theorem Core.erfc_zero_arg {z : ℂ} (h0 : erfc z = 0) :
     π / 2 < |arg z| ∧ |arg z| < 3 * π / 4 := by
   have hre : z.re < 0 := by
     by_contra h
-    exact zcnt_erfc_ne_zero_of_re_nonneg (not_lt.mp h) h0
+    exact Core.erfc_ne_zero_of_re_nonneg (not_lt.mp h) h0
   have hz0 : z ≠ 0 := fun h => by simp [h] at hre
   have hcos : Real.cos (arg z) < 0 := by
     rw [← norm_mul_cos_arg z] at hre
@@ -224,22 +226,22 @@ theorem zcnt_erfc_zero_arg {z : ℂ} (h0 : erfc z = 0) :
     -- `ζ = -z` lies in `|ph ζ| ≤ π/4`
     have hre' : 0 ≤ (-z).re := by simp; linarith
     have hre2 : 0 ≤ ((-z) ^ 2).re := by
-      rw [neg_sq, zcnt_re_sq]
+      rw [neg_sq, Core.re_sq]
       have hc2 : 0 ≤ Real.cos (2 * arg z) := by
         rw [← Real.cos_abs, abs_mul, abs_two,
           show 2 * |arg z| = (2 * |arg z| - 2 * π) + 2 * π by ring, Real.cos_add_two_pi]
         exact Real.cos_nonneg_of_mem_Icc ⟨by linarith, by linarith⟩
       positivity
-    have hle := zcnt_norm_erfc_le_one hre' hre2
+    have hle := Core.norm_erfc_le_one hre' hre2
     have h2 : erfc (-z) = 2 := by rw [erfc_negative, h0, sub_zero]
     rw [h2] at hle
     norm_num at hle
 
 /-- A zero of `erfc` lies in the open sector `π/2 < ph z < 3π/4` or its conjugate does. -/
-theorem zcnt_erfc_zero_mem_sector {z : ℂ} (h0 : erfc z = 0) :
+theorem Core.erfc_zero_mem_sector {z : ℂ} (h0 : erfc z = 0) :
     (π / 2 < arg z ∧ arg z < 3 * π / 4) ∨
       (π / 2 < arg (conj z) ∧ arg (conj z) < 3 * π / 4) := by
-  obtain ⟨h1, h2⟩ := zcnt_erfc_zero_arg h0
+  obtain ⟨h1, h2⟩ := Core.erfc_zero_arg h0
   have hpi : arg z ≠ π := fun h => by rw [h, abs_of_pos Real.pi_pos] at h2; linarith [Real.pi_pos]
   rcases le_or_gt 0 (arg z) with h | h
   · left
@@ -251,7 +253,7 @@ theorem zcnt_erfc_zero_mem_sector {z : ℂ} (h0 : erfc z = 0) :
     exact ⟨h1, h2⟩
 
 /-- `erf` has no zero on the real axis other than `0`. -/
-theorem zcnt_erf_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : erf (x : ℂ) ≠ 0 := by
+theorem Core.erf_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : erf (x : ℂ) ≠ 0 := by
   rw [erf_ofReal, Complex.ofReal_ne_zero]
   rcases hx.lt_or_gt with h | h
   · have := TauCeti.Real.erf_pos (neg_pos.mpr h)
@@ -260,7 +262,7 @@ theorem zcnt_erf_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : erf (x : ℂ) ≠ 0 :
   · exact (TauCeti.Real.erf_pos h).ne'
 
 /-- `erf (i y) = (2/√π) i e^{y²} F(y)` with Dawson's integral `F`. -/
-theorem zcnt_erf_I_mul (z : ℂ) :
+theorem Core.erf_I_mul (z : ℂ) :
     erf (I * z) = 2 / Real.sqrt π * I * (exp (z ^ 2) * dawsonF z) := by
   have he : erf (I*z)=2/Real.sqrt π*I*primitive (fun t => exp (t^2)) z := by
     rw [erf_complex_segment_integral]
@@ -272,7 +274,7 @@ theorem zcnt_erf_I_mul (z : ℂ) :
   simp
 
 /-- `erf` has no zero on the imaginary axis other than `0`. -/
-theorem zcnt_erf_I_mul_ofReal_ne_zero {y : ℝ} (hy : y ≠ 0) : erf (I * (y : ℂ)) ≠ 0 := by
+theorem Core.erf_I_mul_ofReal_ne_zero {y : ℝ} (hy : y ≠ 0) : erf (I * (y : ℂ)) ≠ 0 := by
   have hD : ∀ x : ℝ, 0 < x → 0 < Real.dawsonF x := by
     intro x hx
     have h := (Real.dawsonF_integral_bounds hx).1
@@ -289,14 +291,14 @@ theorem zcnt_erf_I_mul_ofReal_ne_zero {y : ℝ} (hy : y ≠ 0) : erf (I * (y : �
         exact_mod_cast hc
       linarith
     · exact (hD y h).ne'
-  rw [zcnt_erf_I_mul, dawsonF_ofReal]
+  rw [Core.erf_I_mul, dawsonF_ofReal]
   have hsp : (Real.sqrt π : ℂ) ≠ 0 := by
     exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   refine mul_ne_zero (mul_ne_zero (div_ne_zero two_ne_zero hsp) I_ne_zero)
     (mul_ne_zero (Complex.exp_ne_zero _) (by exact_mod_cast hne))
 
 /-- Two functions with the same derivative everywhere and the same value at `0` agree. -/
-theorem zcnt_eq_of_hasDerivAt {f g f' : ℂ → ℂ} (hf : ∀ z, HasDerivAt f (f' z) z)
+theorem Core.eq_of_hasDerivAt {f g f' : ℂ → ℂ} (hf : ∀ z, HasDerivAt f (f' z) z)
     (hg : ∀ z, HasDerivAt g (f' z) z) (h0 : f 0 = g 0) (z : ℂ) : f z = g z := by
   have hd : ∀ w, HasDerivAt (fun w => f w - g w) 0 w := fun w => by
     have h := (hf w).sub (hg w)
@@ -307,8 +309,8 @@ theorem zcnt_eq_of_hasDerivAt {f g f' : ℂ → ℂ} (hf : ∀ z, HasDerivAt f (
   exact sub_eq_zero.mp hc
 
 /-- `C` is odd. -/
-theorem zcnt_fresnelCosInt_neg (z : ℂ) : fresnelCosInt (-z) = -fresnelCosInt z :=
-  zcnt_eq_of_hasDerivAt (f' := fun z => -cos (π * z ^ 2 / 2))
+theorem Core.fresnelCosInt_neg (z : ℂ) : fresnelCosInt (-z) = -fresnelCosInt z :=
+  Core.eq_of_hasDerivAt (f' := fun z => -cos (π * z ^ 2 / 2))
     (fun z => by
       have := (hasDerivAt_fresnelCosInt_complex (-z)).comp z (hasDerivAt_neg z)
       simpa [neg_sq] using this)
@@ -316,8 +318,8 @@ theorem zcnt_fresnelCosInt_neg (z : ℂ) : fresnelCosInt (-z) = -fresnelCosInt z
     (by simp [fresnelCosInt, primitive_zero]) z
 
 /-- `S` is odd. -/
-theorem zcnt_fresnelSinInt_neg (z : ℂ) : fresnelSinInt (-z) = -fresnelSinInt z :=
-  zcnt_eq_of_hasDerivAt (f' := fun z => -sin (π * z ^ 2 / 2))
+theorem Core.fresnelSinInt_neg (z : ℂ) : fresnelSinInt (-z) = -fresnelSinInt z :=
+  Core.eq_of_hasDerivAt (f' := fun z => -sin (π * z ^ 2 / 2))
     (fun z => by
       have := (hasDerivAt_fresnelSinInt_complex (-z)).comp z (hasDerivAt_neg z)
       simpa [neg_sq] using this)
@@ -325,8 +327,8 @@ theorem zcnt_fresnelSinInt_neg (z : ℂ) : fresnelSinInt (-z) = -fresnelSinInt z
     (by simp [fresnelSinInt, primitive_zero]) z
 
 /-- `C` commutes with conjugation. -/
-theorem zcnt_fresnelCosInt_conj (z : ℂ) : fresnelCosInt (conj z) = conj (fresnelCosInt z) := by
-  have h := zcnt_eq_of_hasDerivAt (f' := fun z => cos (π * z ^ 2 / 2))
+theorem Core.fresnelCosInt_conj (z : ℂ) : fresnelCosInt (conj z) = conj (fresnelCosInt z) := by
+  have h := Core.eq_of_hasDerivAt (f' := fun z => cos (π * z ^ 2 / 2))
     (f := fun z => conj (fresnelCosInt (conj z)))
     (fun z => by
       have h1 := (hasDerivAt_fresnelCosInt_complex (conj z)).conj_conj
@@ -339,8 +341,8 @@ theorem zcnt_fresnelCosInt_conj (z : ℂ) : fresnelCosInt (conj z) = conj (fresn
   rw [← h, conj_conj]
 
 /-- `S` commutes with conjugation. -/
-theorem zcnt_fresnelSinInt_conj (z : ℂ) : fresnelSinInt (conj z) = conj (fresnelSinInt z) := by
-  have h := zcnt_eq_of_hasDerivAt (f' := fun z => sin (π * z ^ 2 / 2))
+theorem Core.fresnelSinInt_conj (z : ℂ) : fresnelSinInt (conj z) = conj (fresnelSinInt z) := by
+  have h := Core.eq_of_hasDerivAt (f' := fun z => sin (π * z ^ 2 / 2))
     (f := fun z => conj (fresnelSinInt (conj z)))
     (fun z => by
       have h1 := (hasDerivAt_fresnelSinInt_complex (conj z)).conj_conj
@@ -353,8 +355,8 @@ theorem zcnt_fresnelSinInt_conj (z : ℂ) : fresnelSinInt (conj z) = conj (fresn
   rw [← h, conj_conj]
 
 /-- `C(iz) = i C(z)`. -/
-theorem zcnt_fresnelCosInt_I_mul (z : ℂ) : fresnelCosInt (I * z) = I * fresnelCosInt z :=
-  zcnt_eq_of_hasDerivAt (f' := fun z => I * cos (π * z ^ 2 / 2))
+theorem Core.fresnelCosInt_I_mul (z : ℂ) : fresnelCosInt (I * z) = I * fresnelCosInt z :=
+  Core.eq_of_hasDerivAt (f' := fun z => I * cos (π * z ^ 2 / 2))
     (fun z => by
       have := (hasDerivAt_fresnelCosInt_complex (I * z)).comp z ((hasDerivAt_id z).const_mul I)
       convert this using 1
@@ -365,8 +367,8 @@ theorem zcnt_fresnelCosInt_I_mul (z : ℂ) : fresnelCosInt (I * z) = I * fresnel
     (by simp [fresnelCosInt, primitive_zero]) z
 
 /-- `S(iz) = -i S(z)`. -/
-theorem zcnt_fresnelSinInt_I_mul (z : ℂ) : fresnelSinInt (I * z) = -I * fresnelSinInt z :=
-  zcnt_eq_of_hasDerivAt (f' := fun z => -I * sin (π * z ^ 2 / 2))
+theorem Core.fresnelSinInt_I_mul (z : ℂ) : fresnelSinInt (I * z) = -I * fresnelSinInt z :=
+  Core.eq_of_hasDerivAt (f' := fun z => -I * sin (π * z ^ 2 / 2))
     (fun z => by
       have := (hasDerivAt_fresnelSinInt_complex (I * z)).comp z ((hasDerivAt_id z).const_mul I)
       convert this using 1
@@ -377,7 +379,7 @@ theorem zcnt_fresnelSinInt_I_mul (z : ℂ) : fresnelSinInt (I * z) = -I * fresne
     (by simp [fresnelSinInt, primitive_zero]) z
 
 /-- On the diagonal, `C((1+i)x) = (1+i) x ∫₀¹ cosh(π t² x²) dt`. -/
-theorem zcnt_fresnelCosInt_diag (x : ℝ) :
+theorem Core.fresnelCosInt_diag (x : ℝ) :
     fresnelCosInt ((1 + I) * x) =
       (1 + I) * x * ((∫ t in (0 : ℝ)..1, Real.cosh (π * t ^ 2 * x ^ 2) : ℝ) : ℂ) := by
   rw [fresnelCosInt, primitive, segmentIntegral, sub_zero, ← intervalIntegral.integral_ofReal]
@@ -394,7 +396,7 @@ theorem zcnt_fresnelCosInt_diag (x : ℝ) :
   rfl
 
 /-- On the diagonal, `S((1+i)x) = (1+i) x i ∫₀¹ sinh(π t² x²) dt`. -/
-theorem zcnt_fresnelSinInt_diag (x : ℝ) :
+theorem Core.fresnelSinInt_diag (x : ℝ) :
     fresnelSinInt ((1 + I) * x) =
       (1 + I) * x * (I * ((∫ t in (0 : ℝ)..1, Real.sinh (π * t ^ 2 * x ^ 2) : ℝ) : ℂ)) := by
   rw [fresnelSinInt, primitive, segmentIntegral, sub_zero, ← intervalIntegral.integral_ofReal,
@@ -412,9 +414,9 @@ theorem zcnt_fresnelSinInt_diag (x : ℝ) :
   ring
 
 /-- `C` has no zero on the diagonal `ℝ(1+i)` other than `0`. -/
-theorem zcnt_fresnelCosInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
+theorem Core.fresnelCosInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
     fresnelCosInt ((1 + I) * x) ≠ 0 := by
-  rw [zcnt_fresnelCosInt_diag]
+  rw [Core.fresnelCosInt_diag]
   have hpos : 0 < ∫ t in (0 : ℝ)..1, Real.cosh (π * t ^ 2 * x ^ 2) :=
     intervalIntegral.intervalIntegral_pos_of_pos_on
         (Continuous.intervalIntegrable (by fun_prop) _ _)
@@ -423,9 +425,9 @@ theorem zcnt_fresnelCosInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
   exact mul_ne_zero (mul_ne_zero h1 (by exact_mod_cast hx)) (by exact_mod_cast hpos.ne')
 
 /-- `S` has no zero on the diagonal `ℝ(1+i)` other than `0`. -/
-theorem zcnt_fresnelSinInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
+theorem Core.fresnelSinInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
     fresnelSinInt ((1 + I) * x) ≠ 0 := by
-  rw [zcnt_fresnelSinInt_diag]
+  rw [Core.fresnelSinInt_diag]
   have hpos : 0 < ∫ t in (0 : ℝ)..1, Real.sinh (π * t ^ 2 * x ^ 2) :=
     intervalIntegral.intervalIntegral_pos_of_pos_on
         (Continuous.intervalIntegrable (by fun_prop) _ _)
@@ -438,7 +440,7 @@ theorem zcnt_fresnelSinInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
     (mul_ne_zero I_ne_zero (by exact_mod_cast hpos.ne'))
 
 /-- A Laplace-type integral with a kernel bounded by `t^{s-1} e^{-at}` is at most `a^{-s} Γ(s)`. -/
-theorem zcnt_norm_laplace_le {s a : ℝ} (hs : 0 < s) (ha : 0 < a) {g : ℝ → ℂ}
+theorem Core.norm_laplace_le {s a : ℝ} (hs : 0 < s) (ha : 0 < a) {g : ℝ → ℂ}
     (hg : ∀ t : ℝ, 0 < t → ‖g t‖ ≤ t ^ (s - 1) * Real.exp (-(a * t))) :
     ‖∫ t in Ioi (0 : ℝ), g t‖ ≤ (1 / a) ^ s * Real.Gamma s := by
   rw [← Real.integral_rpow_mul_exp_neg_mul_Ioi hs ha]
@@ -451,7 +453,7 @@ theorem zcnt_norm_laplace_le {s a : ℝ} (hs : 0 < s) (ha : 0 < a) {g : ℝ → 
 
 /-- The Fresnel auxiliary functions on the positive axis: `‖f(x)‖ ≤ 1/(πx)` and
 `‖g(x)‖ ≤ (π√2)⁻¹ (2/(πx²))^{3/2} Γ(3/2)`. -/
-lemma zcnt_fresnelAux_norm_le {x : ℝ} (hx : 0 < x) :
+lemma Core.fresnelAux_norm_le {x : ℝ} (hx : 0 < x) :
     ‖fresnelAuxFComplex x‖ ≤ 1 / (π * Real.sqrt 2) * ((1 / (π * x ^ 2 / 2)) ^ (1 / 2 : ℝ) *
         Real.Gamma (1 / 2)) ∧
       ‖fresnelAuxGComplex x‖ ≤ 1 / (π * Real.sqrt 2) * ((1 / (π * x ^ 2 / 2)) ^ (3 / 2 : ℝ) *
@@ -485,19 +487,19 @@ lemma zcnt_fresnelAux_norm_le {x : ℝ} (hx : 0 < x) :
         Complex.norm_real, Real.norm_eq_abs, abs_of_pos hc]
     rw [h1]
     gcongr
-    exact zcnt_norm_laplace_le (by norm_num) ha (hkey _ _ (by norm_num))
+    exact Core.norm_laplace_le (by norm_num) ha (hkey _ _ (by norm_num))
   · rw [fresnelAuxGComplex_laplace_integral harg, norm_mul]
     have h1 : ‖(1 : ℂ) / (π * Real.sqrt 2)‖ = 1 / (π * Real.sqrt 2) := by
       rw [show (1 : ℂ) / (π * Real.sqrt 2) = ((1 / (π * Real.sqrt 2) : ℝ) : ℂ) by push_cast; rfl,
         Complex.norm_real, Real.norm_eq_abs, abs_of_pos hc]
     rw [h1]
     gcongr
-    exact zcnt_norm_laplace_le (by norm_num) ha (hkey _ _ (by norm_num))
+    exact Core.norm_laplace_le (by norm_num) ha (hkey _ _ (by norm_num))
 
 /-- For `x ≥ 1`, `‖f(x)‖ + ‖g(x)‖ < 1/2`. -/
-lemma zcnt_fresnelAux_sum_lt {x : ℝ} (hx : 1 ≤ x) :
+lemma Core.fresnelAux_sum_lt {x : ℝ} (hx : 1 ≤ x) :
     ‖fresnelAuxFComplex x‖ + ‖fresnelAuxGComplex x‖ < 1 / 2 := by
-  obtain ⟨hF, hG⟩ := zcnt_fresnelAux_norm_le (by linarith : (0 : ℝ) < x)
+  obtain ⟨hF, hG⟩ := Core.fresnelAux_norm_le (by linarith : (0 : ℝ) < x)
   have hpi := Real.pi_gt_d2
   have hs2 : (1.41 : ℝ) < Real.sqrt 2 := by
     rw [Real.lt_sqrt (by norm_num)]; norm_num
@@ -542,11 +544,11 @@ lemma zcnt_fresnelAux_sum_lt {x : ℝ} (hx : 1 ≤ x) :
   linarith
 
 /-- `C(x) ≠ 0` for real `x ≠ 0`. -/
-theorem zcnt_fresnelCosInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelCosInt (x : ℂ) ≠ 0 := by
+theorem Core.fresnelCosInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelCosInt (x : ℂ) ≠ 0 := by
   wlog hpos : 0 < x generalizing x
   · have hneg : 0 < -x := neg_pos.mpr (lt_of_le_of_ne (not_lt.mp hpos) hx)
     have := this (neg_ne_zero.mpr hx) hneg
-    rwa [ofReal_neg, zcnt_fresnelCosInt_neg, neg_ne_zero] at this
+    rwa [ofReal_neg, Core.fresnelCosInt_neg, neg_ne_zero] at this
   rcases le_or_gt x 1 with h1 | h1
   · rw [fresnelCosInt_ofReal, Complex.ofReal_ne_zero]
     refine (intervalIntegral.intervalIntegral_pos_of_pos_on
@@ -561,7 +563,7 @@ theorem zcnt_fresnelCosInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelCosI
   · intro h0
     have h := fresnelCosInt_aux (x : ℂ)
     rw [h0] at h
-    have hsum := zcnt_fresnelAux_sum_lt h1.le
+    have hsum := Core.fresnelAux_sum_lt h1.le
     have hsin : ‖sin (π * (x : ℂ) ^ 2 / 2)‖ ≤ 1 := by
       rw [show π * (x : ℂ) ^ 2 / 2 = ((π * x ^ 2 / 2 : ℝ) : ℂ) by push_cast; ring,
         ← ofReal_sin, Complex.norm_real, Real.norm_eq_abs]
@@ -582,11 +584,11 @@ theorem zcnt_fresnelCosInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelCosI
     linarith
 
 /-- `S(x) ≠ 0` for real `x ≠ 0`. -/
-theorem zcnt_fresnelSinInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelSinInt (x : ℂ) ≠ 0 := by
+theorem Core.fresnelSinInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelSinInt (x : ℂ) ≠ 0 := by
   wlog hpos : 0 < x generalizing x
   · have hneg : 0 < -x := neg_pos.mpr (lt_of_le_of_ne (not_lt.mp hpos) hx)
     have := this (neg_ne_zero.mpr hx) hneg
-    rwa [ofReal_neg, zcnt_fresnelSinInt_neg, neg_ne_zero] at this
+    rwa [ofReal_neg, Core.fresnelSinInt_neg, neg_ne_zero] at this
   rcases le_or_gt x 1 with h1 | h1
   · rw [fresnelSinInt_ofReal, Complex.ofReal_ne_zero]
     refine (intervalIntegral.intervalIntegral_pos_of_pos_on
@@ -599,7 +601,7 @@ theorem zcnt_fresnelSinInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelSinI
   · intro h0
     have h := fresnelSinInt_aux (x : ℂ)
     rw [h0] at h
-    have hsum := zcnt_fresnelAux_sum_lt h1.le
+    have hsum := Core.fresnelAux_sum_lt h1.le
     have hsin : ‖sin (π * (x : ℂ) ^ 2 / 2)‖ ≤ 1 := by
       rw [show π * (x : ℂ) ^ 2 / 2 = ((π * x ^ 2 / 2 : ℝ) : ℂ) by push_cast; ring,
         ← ofReal_sin, Complex.norm_real, Real.norm_eq_abs]
@@ -620,7 +622,7 @@ theorem zcnt_fresnelSinInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelSinI
     linarith
 
 /-- `0 < Im w < Re w` places `w` in the open sector `0 < ph w < π/4`. -/
-theorem zcnt_arg_mem_of_im_lt_re {w : ℂ} (h0 : 0 < w.im) (h1 : w.im < w.re) :
+theorem Core.arg_mem_of_im_lt_re {w : ℂ} (h0 : 0 < w.im) (h1 : w.im < w.re) :
     0 < arg w ∧ arg w < π / 4 := by
   have hre : 0 < w.re := h0.trans h1
   have hw : w ≠ 0 := fun h => by simp [h] at hre
@@ -642,7 +644,7 @@ theorem zcnt_arg_mem_of_im_lt_re {w : ℂ} (h0 : 0 < w.im) (h1 : w.im < w.re) :
 `w ↦ w̄` and `w ↦ iw`, and have no zero on the real axis or the diagonal `ℝ(1+i)` other than `0`.
 If the modulus enumeration of its zeros in the octant `0 < ph z < π/4` is well defined, every zero
 of `f` is `0` or one of the eight images `±u, ±ū, ±iu, ±iū` of an enumerated zero `u`. -/
-theorem zcnt_octant_classification {f : ℂ → ℂ}
+theorem Core.octant_classification {f : ℂ → ℂ}
     (hfin : ∀ r : ℝ, {w : ℂ | w ∈ {z : ℂ | 0 < arg z ∧ arg z < π / 4} ∧ f w = 0 ∧
       ‖w‖ < r}.Finite)
     (hspec : ∀ k : ℕ, 1 ≤ k →
@@ -660,7 +662,7 @@ theorem zcnt_octant_classification {f : ℂ → ℂ}
   set S : Set ℂ := {z : ℂ | 0 < arg z ∧ arg z < π / 4}
   have henum : ∀ w : ℂ, 0 < w.im → w.im < w.re → f w = 0 →
       ∃ k : ℕ, 1 ≤ k ∧ w = orderedZero f S k := fun w h1 h2 h0 =>
-    zcnt_eq_orderedZero hfin hspec (zcnt_arg_mem_of_im_lt_re h1 h2) h0
+    Core.eq_orderedZero hfin hspec (Core.arg_mem_of_im_lt_re h1 h2) h0
   have hnegI : ∀ w, f (-I * w) = 0 ↔ f w = 0 := fun w => by
     rw [show -I * w = -(I * w) by ring, hneg, hI]
   constructor

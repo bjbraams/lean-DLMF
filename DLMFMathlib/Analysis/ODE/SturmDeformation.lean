@@ -25,11 +25,11 @@ zero crosses the ends.
 
 ## Main results
 
-* `ODE.sturmDef_finite`: simple zeros in a compact interval are finite in number.
-* `ODE.sturmDef_eventually_ncard_eq`: local constancy of the zero count in `[a, b]`.
-* `ODE.sturmDef_ncard_eq_of_isPreconnected`: constancy along a preconnected parameter set.
-* `ODE.sturmDef_ncard_Ici_eq_of_isPreconnected`: the same for `[a, ∞)` with a zero-free region
-  `[b, ∞)` that is uniform in the parameter.
+* `ODE.SturmDeformation.finite`: simple zeros in a compact interval are finite in number.
+* `ODE.SturmDeformation.eventually_ncard_eq`: local constancy of the zero count in `[a, b]`.
+* `ODE.SturmDeformation.ncard_eq_of_isPreconnected`: constancy along a preconnected parameter set.
+* `ODE.SturmDeformation.ncard_Ici_eq_of_isPreconnected`: the same for `[a, ∞)` with a zero-free
+  region `[b, ∞)` that is uniform in the parameter.
 -/
 
 @[expose] public section
@@ -41,7 +41,7 @@ namespace ODE
 variable {T : Type*} [TopologicalSpace T] {Y Y' : T → ℝ → ℝ} {Λ : Set T} {U : Set ℝ}
 
 /-- Simple zeros of a differentiable function in a compact interval are finite in number. -/
-theorem sturmDef_finite {f f' : ℝ → ℝ} {a b : ℝ} (hd : ∀ x ∈ Icc a b, HasDerivAt f (f' x) x)
+theorem SturmDeformation.finite {f f' : ℝ → ℝ} {a b : ℝ} (hd : ∀ x ∈ Icc a b, HasDerivAt f (f' x) x)
     (hs : ∀ x ∈ Icc a b, f x = 0 → f' x ≠ 0) : {x | x ∈ Icc a b ∧ f x = 0}.Finite := by
   have hc : ContinuousOn f (Icc a b) := fun x hx => (hd x hx).continuousAt.continuousWithinAt
   have hK : IsCompact {x | x ∈ Icc a b ∧ f x = 0} :=
@@ -58,14 +58,14 @@ theorem sturmDef_finite {f f' : ℝ → ℝ} {a b : ℝ} (hd : ∀ x ∈ Icc a b
   exact hne.ne this
 
 /-- Continuity of `t ↦ y(t, x)` and joint continuity at interior points. -/
-theorem sturmDef_continuousAt (hΛ : IsOpen Λ) (hU : IsOpen U)
+theorem SturmDeformation.continuousAt (hΛ : IsOpen Λ) (hU : IsOpen U)
     (hc : ContinuousOn (Function.uncurry Y) (Λ ×ˢ U)) {t : T} {x : ℝ} (ht : t ∈ Λ) (hx : x ∈ U) :
     ContinuousAt (Function.uncurry Y) (t, x) :=
   hc.continuousAt ((hΛ.prod hU).mem_nhds ⟨ht, hx⟩)
 
 /-- One zero, positive slope: for every small `δ`, nearby members of the family have exactly one
 zero in `(z - δ, z + δ)`. -/
-theorem sturmDef_local_pos (hΛ : IsOpen Λ) (hU : IsOpen U)
+theorem SturmDeformation.local_pos (hΛ : IsOpen Λ) (hU : IsOpen U)
     (hcY : ContinuousOn (Function.uncurry Y) (Λ ×ˢ U))
     (hcY' : ContinuousOn (Function.uncurry Y') (Λ ×ˢ U))
     (hd : ∀ t ∈ Λ, ∀ x ∈ U, HasDerivAt (Y t) (Y' t x) x) {t₀ : T} {z : ℝ} (ht₀ : t₀ ∈ Λ)
@@ -73,7 +73,8 @@ theorem sturmDef_local_pos (hΛ : IsOpen Λ) (hU : IsOpen U)
     ∃ δ₀ > 0, ∀ δ, 0 < δ → δ ≤ δ₀ → ∀ᶠ t in 𝓝 t₀, ∃! x, x ∈ Ioo (z - δ) (z + δ) ∧ Y t x = 0 := by
   have hmem : Λ ×ˢ U ∈ 𝓝 (t₀, z) := (hΛ.prod hU).mem_nhds ⟨ht₀, hz⟩
   have hev : ∀ᶠ p in 𝓝 (t₀, z), p.1 ∈ Λ ∧ p.2 ∈ U ∧ 0 < Y' p.1 p.2 := by
-    filter_upwards [hmem, (sturmDef_continuousAt hΛ hU hcY' ht₀ hz).eventually (lt_mem_nhds hpos)]
+    filter_upwards [hmem,
+        (SturmDeformation.continuousAt hΛ hU hcY' ht₀ hz).eventually (lt_mem_nhds hpos)]
       with p hp hp'
     exact ⟨hp.1, hp.2, hp'⟩
   rw [nhds_prod_eq] at hev
@@ -100,11 +101,11 @@ theorem sturmDef_local_pos (hΛ : IsOpen Λ) (hU : IsOpen U)
   have h2 : 0 < Y t₀ (z + δ) := hz0 ▸ hmono t₀ hu0 hz' hp (by linarith)
   have hcm : ContinuousAt (fun t => Y t (z - δ)) t₀ :=
     ContinuousAt.comp (g := Function.uncurry Y) (f := fun t => (t, z - δ))
-      (sturmDef_continuousAt hΛ hU hcY ht₀ (hgood t₀ hu0 _ hm).2.1)
+      (SturmDeformation.continuousAt hΛ hU hcY ht₀ (hgood t₀ hu0 _ hm).2.1)
       (continuousAt_id.prodMk continuousAt_const)
   have hcp : ContinuousAt (fun t => Y t (z + δ)) t₀ :=
     ContinuousAt.comp (g := Function.uncurry Y) (f := fun t => (t, z + δ))
-      (sturmDef_continuousAt hΛ hU hcY ht₀ (hgood t₀ hu0 _ hp).2.1)
+      (SturmDeformation.continuousAt hΛ hU hcY ht₀ (hgood t₀ hu0 _ hp).2.1)
       (continuousAt_id.prodMk continuousAt_const)
   filter_upwards [hu, hcm.eventually (gt_mem_nhds h1), hcp.eventually (lt_mem_nhds h2)]
     with t ht htm htp
@@ -114,25 +115,26 @@ theorem sturmDef_local_pos (hΛ : IsOpen Λ) (hU : IsOpen U)
 
 /-- One simple zero: for every small `δ`, nearby members of the family have exactly one zero in
 `(z - δ, z + δ)`. -/
-theorem sturmDef_local (hΛ : IsOpen Λ) (hU : IsOpen U)
+theorem SturmDeformation.local (hΛ : IsOpen Λ) (hU : IsOpen U)
     (hcY : ContinuousOn (Function.uncurry Y) (Λ ×ˢ U))
     (hcY' : ContinuousOn (Function.uncurry Y') (Λ ×ˢ U))
     (hd : ∀ t ∈ Λ, ∀ x ∈ U, HasDerivAt (Y t) (Y' t x) x) {t₀ : T} {z : ℝ} (ht₀ : t₀ ∈ Λ)
     (hz : z ∈ U) (hz0 : Y t₀ z = 0) (hne : Y' t₀ z ≠ 0) :
     ∃ δ₀ > 0, ∀ δ, 0 < δ → δ ≤ δ₀ → ∀ᶠ t in 𝓝 t₀, ∃! x, x ∈ Ioo (z - δ) (z + δ) ∧ Y t x = 0 := by
   rcases hne.lt_or_gt with hneg | hpos
-  · obtain ⟨δ₀, hδ₀, h⟩ := sturmDef_local_pos (Y := fun t x => -Y t x) (Y' := fun t x => -Y' t x)
+  · obtain ⟨δ₀, hδ₀, h⟩ :=
+        SturmDeformation.local_pos (Y := fun t x => -Y t x) (Y' := fun t x => -Y' t x)
       hΛ hU (by simpa [Function.uncurry_def] using hcY.neg)
       (by simpa [Function.uncurry_def] using hcY'.neg)
       (fun t ht x hx => (hd t ht x hx).neg) ht₀ hz (by simp [hz0]) (by linarith)
     refine ⟨δ₀, hδ₀, fun δ hδ hδ₀' => (h δ hδ hδ₀').mono fun t ht => ?_⟩
     simpa only [neg_eq_zero] using ht
-  · exact sturmDef_local_pos hΛ hU hcY hcY' hd ht₀ hz hz0 hpos
+  · exact SturmDeformation.local_pos hΛ hU hcY hcY' hd ht₀ hz hz0 hpos
 
 /-- **Local constancy of the zero count.** Let `y` and `∂ₓ y` be jointly continuous on `Λ × U`
 (both open), with simple zeros, and let `[a, b] ⊆ U`. If `y(t₀, a) ≠ 0` and `y(t₀, b) ≠ 0`, then
 for `t` near `t₀` the number of zeros of `y(t, ·)` in `[a, b]` equals that of `y(t₀, ·)`. -/
-theorem sturmDef_eventually_ncard_eq (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : ℝ}
+theorem SturmDeformation.eventually_ncard_eq (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : ℝ}
     (hab : Icc a b ⊆ U) (hcY : ContinuousOn (Function.uncurry Y) (Λ ×ˢ U))
     (hcY' : ContinuousOn (Function.uncurry Y') (Λ ×ˢ U))
     (hd : ∀ t ∈ Λ, ∀ x ∈ U, HasDerivAt (Y t) (Y' t x) x)
@@ -140,7 +142,7 @@ theorem sturmDef_eventually_ncard_eq (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : �
     (ha : Y t₀ a ≠ 0) (hb : Y t₀ b ≠ 0) :
     ∀ᶠ t in 𝓝 t₀, {x | x ∈ Icc a b ∧ Y t x = 0}.ncard = {x | x ∈ Icc a b ∧ Y t₀ x = 0}.ncard := by
   set Z := {x | x ∈ Icc a b ∧ Y t₀ x = 0} with hZ
-  have hZf : Z.Finite := sturmDef_finite (fun x hx => hd t₀ ht₀ x (hab hx))
+  have hZf : Z.Finite := SturmDeformation.finite (fun x hx => hd t₀ ht₀ x (hab hx))
     fun x hx => hs t₀ ht₀ x (hab hx)
   have hZo : ∀ z ∈ Z, z ∈ Ioo a b := fun z hz =>
     ⟨lt_of_le_of_ne hz.1.1 fun h => ha (h ▸ hz.2), lt_of_le_of_ne hz.1.2 fun h => hb (h ▸ hz.2)⟩
@@ -150,7 +152,7 @@ theorem sturmDef_eventually_ncard_eq (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : �
       (∀ w ∈ Z, w ≠ z → 2 * δ < |w - z|) ∧
       ∀ᶠ t in 𝓝 t₀, ∃! x, x ∈ Ioo (z - δ) (z + δ) ∧ Y t x = 0 := by
     intro z hz
-    obtain ⟨δ₀, hδ₀, hloc⟩ := sturmDef_local hΛ hU hcY hcY' hd ht₀ (hab hz.1) hz.2
+    obtain ⟨δ₀, hδ₀, hloc⟩ := SturmDeformation.local hΛ hU hcY hcY' hd ht₀ (hab hz.1) hz.2
       (hs t₀ ht₀ z (hab hz.1) hz.2)
     have hclosed : IsClosed (Z \ {z}) := (hZf.sdiff).isClosed
     have hnot : z ∉ Z \ {z} := fun h => h.2 rfl
@@ -180,7 +182,7 @@ theorem sturmDef_eventually_ncard_eq (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : �
     exact ⟨by linarith, by linarith⟩
   have hKev : ∀ᶠ t in 𝓝 t₀, ∀ x ∈ K, Y t x ≠ 0 := by
     refine hKc.eventually_forall_of_forall_eventually fun x hx => ?_
-    have hc := sturmDef_continuousAt hΛ hU hcY ht₀ (hab hx.1)
+    have hc := SturmDeformation.continuousAt hΛ hU hcY ht₀ (hab hx.1)
     exact hc.eventually (isOpen_ne.mem_nhds (hK0 x hx))
   filter_upwards [hKev, (hZf.eventually_all).mpr hδev] with t hKt hzt
   -- the bijection between the zeros of `y(t₀, ·)` and those of `y(t, ·)`
@@ -210,7 +212,7 @@ theorem sturmDef_eventually_ncard_eq (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : �
 
 /-- **Constancy of the zero count along a preconnected parameter set** on which the ends of
 `[a, b]` are never zeros. -/
-theorem sturmDef_ncard_eq_of_isPreconnected (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : ℝ}
+theorem SturmDeformation.ncard_eq_of_isPreconnected (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : ℝ}
     (hab : Icc a b ⊆ U) (hcY : ContinuousOn (Function.uncurry Y) (Λ ×ˢ U))
     (hcY' : ContinuousOn (Function.uncurry Y') (Λ ×ˢ U))
     (hd : ∀ t ∈ Λ, ∀ x ∈ U, HasDerivAt (Y t) (Y' t x) x)
@@ -220,13 +222,13 @@ theorem sturmDef_ncard_eq_of_isPreconnected (hΛ : IsOpen Λ) (hU : IsOpen U) {a
     {x | x ∈ Icc a b ∧ Y t₁ x = 0}.ncard = {x | x ∈ Icc a b ∧ Y t₂ x = 0}.ncard := by
   refine hS.constant (f := fun t => {x | x ∈ Icc a b ∧ Y t x = 0}.ncard) (fun t ht => ?_) h₁ h₂
   refine ContinuousAt.continuousWithinAt ?_
-  have := sturmDef_eventually_ncard_eq hΛ hU hab hcY hcY' hd hs (hSΛ ht) (hend t ht).1
+  have := SturmDeformation.eventually_ncard_eq hΛ hU hab hcY hcY' hd hs (hSΛ ht) (hend t ht).1
     (hend t ht).2
   exact tendsto_nhds_of_eventually_eq this
 
 /-- **Constancy of the zero count on `[a, ∞)`** along a preconnected parameter set, when `y(t, a)`
 never vanishes and `[b, ∞)` is zero-free for every parameter in the set. -/
-theorem sturmDef_ncard_Ici_eq_of_isPreconnected (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : ℝ}
+theorem SturmDeformation.ncard_Ici_eq_of_isPreconnected (hΛ : IsOpen Λ) (hU : IsOpen U) {a b : ℝ}
     (hab : Icc a b ⊆ U) (hcY : ContinuousOn (Function.uncurry Y) (Λ ×ˢ U))
     (hcY' : ContinuousOn (Function.uncurry Y') (Λ ×ˢ U))
     (hd : ∀ t ∈ Λ, ∀ x ∈ U, HasDerivAt (Y t) (Y' t x) x)
@@ -241,7 +243,7 @@ theorem sturmDef_ncard_Ici_eq_of_isPreconnected (hΛ : IsOpen Λ) (hU : IsOpen U
     by_contra hlt
     exact hfar t ht x (not_le.mp hlt).le hx0
   rw [hset t₁ h₁, hset t₂ h₂]
-  exact sturmDef_ncard_eq_of_isPreconnected hΛ hU hab hcY hcY' hd hs hS hSΛ
+  exact SturmDeformation.ncard_eq_of_isPreconnected hΛ hU hab hcY hcY' hd hs hS hSΛ
     (fun t ht => ⟨ha t ht, hfar t ht b le_rfl⟩) h₁ h₂
 
 end ODE

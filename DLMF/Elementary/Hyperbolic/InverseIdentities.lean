@@ -248,7 +248,7 @@ theorem arctanh_transformed_region (z : ℂ) : (z^2).re<1/2 ↔ z.re^2-z.im^2<1/
 @[dlmf 4.38.E9]
 theorem hasDerivAt_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) : HasDerivAt arcsinh
     ((Complex.sqrt (1+z^2))⁻¹) z := by
-  exact hyper_hasDerivAt_arcsinh hz
+  exact Hyperbolic.hasDerivAt_arcsinh hz
 
 /-- At `z`, the function `arccosh` has derivative `((Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹)`. -/
 @[dlmf 4.38.E10]
@@ -269,13 +269,13 @@ theorem hasDerivAt_arccosh_signed {z : ℂ} (hz : z∈arccoshDomain) (hre : z.re
 /-- At `z`, the function `arctanh` has derivative `(1/(1-z^2))`. -/
 @[dlmf 4.38.E11]
 theorem hasDerivAt_arctanh {z : ℂ} (hz : z∈arctanhDomain) : HasDerivAt arctanh (1/(1-z^2)) z := by
-  exact hyper_hasDerivAt_arctanh hz
+  exact Hyperbolic.hasDerivAt_arctanh hz
 
 /-- At `z`, the function `arccsch` has derivative `(-1/(z^2*Complex.sqrt (1+z⁻¹^2)))`. -/
 @[dlmf 4.38.E12]
 theorem hasDerivAt_arccsch {z : ℂ} (hz : z∈arccschDomain) : HasDerivAt arccsch
     (-1/(z^2*Complex.sqrt (1+z⁻¹^2))) z := by
-  have hd:=(hyper_hasDerivAt_arcsinh hz.2).comp z ((hasDerivAt_id z).inv hz.1)
+  have hd:=(Hyperbolic.hasDerivAt_arcsinh hz.2).comp z ((hasDerivAt_id z).inv hz.1)
   convert hd using 1
   · rfl
   · dsimp only [id]
@@ -322,10 +322,10 @@ private lemma mul_sqrt_one_add_inv_sq_of_re_pos {z : ℂ} (hre : 0 < z.re) :
   refine eqOn_of_sq_eq_of_analyticOnNhd hVo hVc hr hs ?_ h1V ?_ ?_ z hre
   · intro w hw
     have hw0 : w ≠ 0 := fun h => by subst h; exact absurd (show (0:ℝ) < (0:ℂ).re from hw) (by simp)
-    rw [mul_pow, trig_sqrt_sq, trig_sqrt_sq]; field_simp; ring
+    rw [mul_pow, Trigonometric.complexSqrt_sq, Trigonometric.complexSqrt_sq]; field_simp; ring
   · norm_num
   · intro h
-    have := trig_sqrt_sq (1+(1:ℂ)^2)
+    have := Trigonometric.complexSqrt_sq (1+(1:ℂ)^2)
     rw [h] at this; norm_num at this
 
 /-- `z √(1+z⁻²) = ±√(1+z²)` according to the sign of `Re z`. -/
@@ -368,8 +368,8 @@ theorem hasDerivAt_arcsech {z : ℂ} (hz : z∈arcsechDomain) : HasDerivAt arcse
 /-- At `z`, the function `arccoth` has derivative `(1/(1-z^2))`. -/
 @[dlmf 4.38.E14]
 theorem hasDerivAt_arccoth {z : ℂ} (hz : z∈arccothDomain) : HasDerivAt arccoth (1/(1-z^2)) z := by
-  obtain ⟨hz0,hi⟩:=hyper_acoth_inv_mem hz
-  have hd:=(hyper_hasDerivAt_arctanh hi).comp z ((hasDerivAt_id z).inv hz0)
+  obtain ⟨hz0,hi⟩:=Hyperbolic.acoth_inv_mem hz
+  have hd:=(Hyperbolic.hasDerivAt_arctanh hi).comp z ((hasDerivAt_id z).inv hz0)
   have hd':HasDerivAt (fun w:ℂ=>arctanh w⁻¹) (1/(1-z^2)) z := by
     convert hd using 1
     · rfl
@@ -419,7 +419,7 @@ theorem arcsinh_values_add (u v : ℂ) :
       ring
     · rw [Complex.cosh_add,ha,hb] <;> ring
   · rintro ⟨r,s,hr,hs,hw,hc⟩
-    have ha:=hyper_sinh_cosh_log_lift u s hs
+    have ha:=Hyperbolic.sinh_cosh_log_lift u s hs
     let a:=Complex.log (s+u)
     refine ⟨a,ha.1,w-a,?_,by ring⟩
     change Complex.sinh (w-a)=v
@@ -445,18 +445,18 @@ theorem arccosh_values_add (u v : ℂ) :
   · rintro ⟨r,hr,hc⟩
     change Complex.cosh w=u*v+r at hc
     have hs:(v-u*Complex.cosh w)^2=(Complex.sinh w*Complex.sinh (arccosh u))^2 := by
-      simp only [mul_pow,Complex.sinh_sq,hyper_cosh_arccosh,hc]
+      simp only [mul_pow,Complex.sinh_sq,Hyperbolic.cosh_arccosh,hc]
       linear_combination hr
     rcases sq_eq_sq_iff_eq_or_eq_neg.mp hs with hs|hs
     · refine ⟨-arccosh u,?_,w+arccosh u,?_,by ring⟩
       · change Complex.cosh (-arccosh u)=u
-        rw [Complex.cosh_neg,hyper_cosh_arccosh]
+        rw [Complex.cosh_neg,Hyperbolic.cosh_arccosh]
       · change Complex.cosh (w+arccosh u)=v
-        rw [Complex.cosh_add,hyper_cosh_arccosh]
+        rw [Complex.cosh_add,Hyperbolic.cosh_arccosh]
         linear_combination -hs
-    · refine ⟨arccosh u,hyper_cosh_arccosh u,w-arccosh u,?_,by ring⟩
+    · refine ⟨arccosh u,Hyperbolic.cosh_arccosh u,w-arccosh u,?_,by ring⟩
       change Complex.cosh (w-arccosh u)=v
-      rw [Complex.cosh_sub,hyper_cosh_arccosh]
+      rw [Complex.cosh_sub,Hyperbolic.cosh_arccosh]
       linear_combination -hs
 
 /-- The finite inverse-tanh values are the solutions of `exp (2w) (1-z) = 1+z`; at `z = ±1`
@@ -635,7 +635,7 @@ theorem arcsinh_arccosh_values_add (u v : ℂ) :
         {w | ∃ r s : ℂ,r^2=1+u^2 ∧ s^2=v^2-1 ∧
           w∈arcsinhValues (u*v + r*s) ∧ Complex.cosh w=v*r + u*s} := by
     simpa only [one_mul,neg_one_mul,sub_eq_add_neg,arcsinhValues,Set.mem_setOf_eq] using
-      hyper_mixed_inverse_fiber u v 1 (Or.inl rfl)
+      Hyperbolic.mixed_inverse_fiber u v 1 (Or.inl rfl)
   refine ⟨hfirst,?_⟩
   rw [hfirst]
   ext w
@@ -727,7 +727,7 @@ theorem arcsinh_values_sub (u v : ℂ) :
       ring
     · rw [Complex.cosh_sub,ha,hb] <;> ring
   · rintro ⟨r,s,hr,hs,hw,hc⟩
-    have ha:=hyper_sinh_cosh_log_lift u s hs
+    have ha:=Hyperbolic.sinh_cosh_log_lift u s hs
     let a:=Complex.log (s+u)
     refine ⟨a,ha.1,a-w,?_,by ring⟩
     change Complex.sinh (a-w)=v
@@ -753,19 +753,19 @@ theorem arccosh_values_sub (u v : ℂ) :
   · rintro ⟨r,hr,hc⟩
     change Complex.cosh w=u*v-r at hc
     have hs:(v-u*Complex.cosh w)^2=(Complex.sinh w*Complex.sinh (arccosh u))^2 := by
-      simp only [mul_pow,Complex.sinh_sq,hyper_cosh_arccosh,hc]
+      simp only [mul_pow,Complex.sinh_sq,Hyperbolic.cosh_arccosh,hc]
       linear_combination hr
     rcases sq_eq_sq_iff_eq_or_eq_neg.mp hs with hs|hs
     · refine ⟨-arccosh u,?_, -w-arccosh u,?_,by ring⟩
       · change Complex.cosh (-arccosh u)=u
-        rw [Complex.cosh_neg,hyper_cosh_arccosh]
+        rw [Complex.cosh_neg,Hyperbolic.cosh_arccosh]
       · change Complex.cosh (-w-arccosh u)=v
         rw [show -w-arccosh u= -(w+arccosh u) by ring,Complex.cosh_neg,
-          Complex.cosh_add,hyper_cosh_arccosh]
+          Complex.cosh_add,Hyperbolic.cosh_arccosh]
         linear_combination -hs
-    · refine ⟨arccosh u,hyper_cosh_arccosh u,arccosh u-w,?_,by ring⟩
+    · refine ⟨arccosh u,Hyperbolic.cosh_arccosh u,arccosh u-w,?_,by ring⟩
       change Complex.cosh (arccosh u-w)=v
-      rw [Complex.cosh_sub,hyper_cosh_arccosh]
+      rw [Complex.cosh_sub,Hyperbolic.cosh_arccosh]
       linear_combination -hs
 
 /-- Identity under the stated parameter and domain assumptions: `Set.image2 (fun a b : ℂ => a-b)
@@ -812,7 +812,7 @@ theorem arcsinh_arccosh_values_sub (u v : ℂ) :
         {w | ∃ r s : ℂ,r^2=1+u^2 ∧ s^2=v^2-1 ∧
           w∈arcsinhValues (u*v - r*s) ∧ Complex.cosh w=v*r - u*s} := by
     simpa only [one_mul,neg_one_mul,sub_eq_add_neg,arcsinhValues,Set.mem_setOf_eq] using
-      hyper_mixed_inverse_fiber u v (-1) (Or.inr rfl)
+      Hyperbolic.mixed_inverse_fiber u v (-1) (Or.inr rfl)
   refine ⟨hfirst,?_⟩
   rw [hfirst]
   ext w

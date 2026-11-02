@@ -42,6 +42,8 @@ source; their decimal values are out of scope.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 open DLMF.Airy

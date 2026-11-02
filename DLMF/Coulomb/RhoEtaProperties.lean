@@ -543,7 +543,7 @@ private lemma analyticAt_exp_mul_coulombHPlus_eta (ℓ : ℕ) {ρ : ℝ} (hρ : 
       (by fun_prop : Differentiable ℂ fun e : ℂ => (ℓ : ℂ) + 1 + I * e).const_cpow (Or.inl hz0)
     have h3 : Differentiable ℂ fun e : ℂ =>
         kummerU ((ℓ : ℂ) + 1 + I * e) (2 * ℓ + 2) (-2 * I * ρ) :=
-      (cfInt_differentiable_kummerU_fst (2 * ℓ + 2) hz0).comp
+      (KummerIntegrals.differentiable_kummerU_fst (2 * ℓ + 2) hz0).comp
         (f := fun e : ℂ => (ℓ : ℂ) + 1 + I * e) (by fun_prop)
     exact (h1.mul h2).mul h3
   refine ((hg.analyticAt (η : ℂ)).restrictScalars.comp (ofRealCLM.analyticAt η)).congr
@@ -570,7 +570,7 @@ private lemma analyticAt_exp_mul_coulombHMinus_eta (ℓ : ℕ) {ρ : ℝ} (hρ :
       (by fun_prop : Differentiable ℂ fun e : ℂ => (ℓ : ℂ) + 1 - I * e).const_cpow (Or.inl hz0)
     have h3 : Differentiable ℂ fun e : ℂ =>
         kummerU ((ℓ : ℂ) + 1 - I * e) (2 * ℓ + 2) (2 * I * ρ) :=
-      (cfInt_differentiable_kummerU_fst (2 * ℓ + 2) hz0).comp
+      (KummerIntegrals.differentiable_kummerU_fst (2 * ℓ + 2) hz0).comp
         (f := fun e : ℂ => (ℓ : ℂ) + 1 - I * e) (by fun_prop)
     exact (h1.mul h2).mul h3
   refine ((hg.analyticAt (η : ℂ)).restrictScalars.comp (ofRealCLM.analyticAt η)).congr

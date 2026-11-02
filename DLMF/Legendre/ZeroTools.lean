@@ -15,26 +15,27 @@ public import DLMFMathlib.Analysis.ODE.SturmDeformation
 
 Tools for the real zero counts of DLMF §14.16(ii). The Ferrers functions of real parameters
 satisfy the self-adjoint equation `((1-x²)y')' + (ν(ν+1) - μ²/(1-x²)) y = 0` on `(-1, 1)`
-(`lzt_ferrersP_sol`). For two solutions `y`, `u` with coefficients `qy < qu`, the weighted
-Wronskian `W = (1-x²)(u'y - uy')` is strictly monotone wherever `u y > 0`.
+(`LegendreSturm.ferrersP_solution`). For two solutions `y`, `u` with coefficients `qy < qu`, the
+weighted Wronskian `W = (1-x²)(u'y - uy')` is strictly monotone wherever `u y > 0`.
 
 ## Main definitions
 
-* `LztIsSol`: `y` with derivative `y'` solves `((1-x²) y')' + q y = 0` on `(-1, 1)`.
-* `lzt_W`: the weighted Wronskian `(1-x²)(u'y - uy')`.
+* `IsLegendreTypeSolution`: `y` with derivative `y'` solves `((1-x²) y')' + q y = 0` on `(-1, 1)`.
+* `LegendreSturm.weightedWronskian`: the weighted Wronskian `(1-x²)(u'y - uy')`.
 
 ## Main results
 
-* `lzt_between`: the classical Sturm comparison between consecutive zeros.
-* `lzt_upper_right`, `lzt_lower_right`, `lzt_lower_left`, `lzt_lower_whole`: comparisons at the
-  ends `x = ±1`, where a sign of `W` forces `y/u` to diverge like `log(1∓x)` as soon as
-  `(1-x²)u² = O(1∓x)`.
-* `lzt_lower_count`, `lzt_upper_count`: lower and upper zero counts from an exactly known
-  comparison function.
-* `lzt_ferrersP_base`: the polynomial cases `𝖯^{-m}_{m+j}(x) = B (1-x²)^{m/2} C_j^{(m+1/2)}(x)`.
-* `lzt_ferrersP_simple`, `lzt_ferrersP_near_one`: zeros of `𝖯^{-m}_ν` are simple, and there are
-  none near `1`.
-* `lzt_ferrersP_neg_order_zero_count`: `𝖯^{-m}_ν` (`m ≥ 0`, `ν ≥ -1/2`) has exactly
+* `LegendreSturm.between`: the classical Sturm comparison between consecutive zeros.
+* `LegendreSturm.upper_right`, `LegendreSturm.lower_right`, `LegendreSturm.lower_left`,
+  `LegendreSturm.lower_whole`: comparisons at the ends `x = ±1`, where a sign of `W` forces `y/u` to
+  diverge like `log(1∓x)` as soon as `(1-x²)u² = O(1∓x)`.
+* `LegendreSturm.lower_count`, `LegendreSturm.upper_count`: lower and upper zero counts from an
+  exactly known comparison function.
+* `LegendreSturm.ferrersP_polynomial`: the polynomial cases
+  `𝖯^{-m}_{m+j}(x) = B (1-x²)^{m/2} C_j^{(m+1/2)}(x)`.
+* `LegendreSturm.ferrersP_simple`, `LegendreSturm.ferrersP_near_one`: zeros of `𝖯^{-m}_ν` are
+  simple, and there are none near `1`.
+* `LegendreSturm.ferrersP_neg_order_zero_count`: `𝖯^{-m}_ν` (`m ≥ 0`, `ν ≥ -1/2`) has exactly
   `max(⌈ν - m⌉, 0)` zeros in `(-1, 1)` (DLMF §14.16(ii)).
 
 ## Implementation notes
@@ -43,7 +44,7 @@ The end comparisons use `ODE.sturmCount_exists_pos_of_deriv_ge`. The comparison 
 the polynomial cases, obtained from DLMF 14.3.1 and Euler's transformation 15.8.1, whose zeros
 are those of the Gegenbauer polynomial (`ultrasphPoly_zeros_Ioo`, DLMF §18.16(i)). Simplicity of
 the zeros follows from the Wronskians DLMF 14.2.3–14.2.4. The zero count needs no continuity in
-the parameters. All helper names carry the prefix `lzt_`.
+the parameters. Helper names live in the namespace `LegendreSturm`.
 -/
 
 @[expose] public noncomputable section
@@ -53,13 +54,13 @@ open Set Filter Topology
 namespace DLMF.Legendre
 
 /-- `y` (with derivative `y'`) solves `((1-x²) y')' + q y = 0` on `(-1, 1)`. -/
-def LztIsSol (q y y' : ℝ → ℝ) : Prop :=
+def IsLegendreTypeSolution (q y y' : ℝ → ℝ) : Prop :=
   ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x ∧
     HasDerivAt (fun t => (1 - t ^ 2) * y' t) (-(q x * y x)) x
 
 /-- The negative of a solution is a solution. -/
-theorem LztIsSol.neg {q y y' : ℝ → ℝ} (h : LztIsSol q y y') :
-    LztIsSol q (fun x => -y x) (fun x => -y' x) := fun x hx => by
+theorem IsLegendreTypeSolution.neg {q y y' : ℝ → ℝ} (h : IsLegendreTypeSolution q y y') :
+    IsLegendreTypeSolution q (fun x => -y x) (fun x => -y' x) := fun x hx => by
   refine ⟨(h x hx).1.neg, ?_⟩
   have := (h x hx).2.neg
   convert this using 1
@@ -67,27 +68,32 @@ theorem LztIsSol.neg {q y y' : ℝ → ℝ} (h : LztIsSol q y y') :
   · ring
 
 /-- The weighted Wronskian `(1-x²)(u'y - uy')` of two solutions. -/
-def lzt_W (u u' y y' : ℝ → ℝ) (x : ℝ) : ℝ := (1 - x ^ 2) * (u' x * y x - u x * y' x)
+def LegendreSturm.weightedWronskian (u u' y y' : ℝ → ℝ) (x : ℝ) : ℝ := (1 - x ^ 2) *
+    (u' x * y x - u x * y' x)
 
 /-- Derivative of the weighted Wronskian: `W' = (qy - qu) u y`. -/
-theorem lzt_hasDerivAt_W {qy qu y y' u u' : ℝ → ℝ} (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
+theorem LegendreSturm.hasDerivAt_weightedWronskian {qy qu y y' u u' : ℝ → ℝ}
+    (hy : IsLegendreTypeSolution qy y y')
+    (hu : IsLegendreTypeSolution qu u u')
     {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    HasDerivAt (lzt_W u u' y y') ((qy x - qu x) * u x * y x) x := by
+    HasDerivAt (LegendreSturm.weightedWronskian u u' y y') ((qy x - qu x) * u x * y x) x := by
   have h1 := (hu x hx).2.mul (hy x hx).1
   have h2 := (hu x hx).1.mul (hy x hx).2
   have := h1.sub h2
   convert this using 1
-  · funext t; simp only [lzt_W, Pi.mul_apply, Pi.sub_apply]; ring
+  · funext t; simp only [LegendreSturm.weightedWronskian, Pi.mul_apply, Pi.sub_apply]; ring
   · ring
 
 /-- The weighted Wronskian is continuous on subsets of `(-1, 1)`. -/
-theorem lzt_W_continuousOn {qy qu y y' u u' : ℝ → ℝ} (hy : LztIsSol qy y y')
-    (hu : LztIsSol qu u u') {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) :
-    ContinuousOn (lzt_W u u' y y') s := fun _x hx =>
-  (lzt_hasDerivAt_W hy hu (hs hx)).continuousAt.continuousWithinAt
+theorem LegendreSturm.weightedWronskian_continuousOn {qy qu y y' u u' : ℝ → ℝ}
+    (hy : IsLegendreTypeSolution qy y y')
+    (hu : IsLegendreTypeSolution qu u u') {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) :
+    ContinuousOn (LegendreSturm.weightedWronskian u u' y y') s := fun _x hx =>
+  (LegendreSturm.hasDerivAt_weightedWronskian hy hu (hs hx)).continuousAt.continuousWithinAt
 
 /-- At a zero `a` followed by positive values, the derivative is nonnegative. -/
-theorem lzt_deriv_nonneg_right {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt y d a) (h0 : y a = 0)
+theorem LegendreSturm.deriv_nonneg_right {y : ℝ → ℝ} {d a b : ℝ}
+    (hd : HasDerivAt y d a) (h0 : y a = 0)
     (hab : a < b) (hpos : ∀ x ∈ Ioo a b, 0 < y x) : 0 ≤ d := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsGT_le_nhdsNE a)
   refine ge_of_tendsto hs ?_
@@ -96,7 +102,8 @@ theorem lzt_deriv_nonneg_right {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt 
   exact (div_pos (hpos x hx) (sub_pos.mpr hx.1)).le
 
 /-- At a zero `b` preceded by positive values, the derivative is nonpositive. -/
-theorem lzt_deriv_nonpos_left {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt y d b) (h0 : y b = 0)
+theorem LegendreSturm.deriv_nonpos_left {y : ℝ → ℝ} {d a b : ℝ}
+    (hd : HasDerivAt y d b) (h0 : y b = 0)
     (hab : a < b) (hpos : ∀ x ∈ Ioo a b, 0 < y x) : d ≤ 0 := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsLT_le_nhdsNE b)
   refine le_of_tendsto hs ?_
@@ -105,19 +112,19 @@ theorem lzt_deriv_nonpos_left {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt y
   exact (div_neg_of_pos_of_neg (hpos x hx) (sub_neg.mpr hx.2)).le
 
 /-- Nonnegativity at the left end by continuity. -/
-theorem lzt_nonneg_left {u : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt u a) (hab : a < b)
+theorem LegendreSturm.nonneg_left {u : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt u a) (hab : a < b)
     (hpos : ∀ x ∈ Ioo a b, 0 < u x) : 0 ≤ u a := by
   refine ge_of_tendsto (hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Ioi a))) ?_
   filter_upwards [Ioo_mem_nhdsGT hab] with x hx using (hpos x hx).le
 
 /-- Nonnegativity at the right end by continuity. -/
-theorem lzt_nonneg_right {u : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt u b) (hab : a < b)
+theorem LegendreSturm.nonneg_right {u : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt u b) (hab : a < b)
     (hpos : ∀ x ∈ Ioo a b, 0 < u x) : 0 ≤ u b := by
   refine ge_of_tendsto (hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Iio b))) ?_
   filter_upwards [Ioo_mem_nhdsLT hab] with x hx using (hpos x hx).le
 
 /-- A continuous function without zeros on an interval has constant sign there. -/
-theorem lzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : ContinuousOn f s)
+theorem LegendreSturm.sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : ContinuousOn f s)
     (hne : ∀ x ∈ s, f x ≠ 0) : (∀ x ∈ s, 0 < f x) ∨ (∀ x ∈ s, f x < 0) := by
   by_contra h
   push Not at h
@@ -134,18 +141,19 @@ theorem lzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : Con
 
 /-- **Divergence of a ratio at the right end.** If `u > 0`, `(1-x²)u² ≤ K(1-x)` and the
 weighted Wronskian satisfies `W ≤ -c₀ < 0` on `[s, 1)`, then `y/u` is unbounded above there. -/
-theorem lzt_ratio_right {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : s < 1) (hK : 0 < K) (hc₀ : 0 < c₀)
+theorem LegendreSturm.ratio_right {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : s < 1)
+    (hK : 0 < K) (hc₀ : 0 < c₀)
     (hyd : ∀ x ∈ Ico s 1, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ico s 1, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ico s 1, 0 < u x) (hp : ∀ x ∈ Ico s 1, 0 < 1 - x ^ 2)
     (hb : ∀ x ∈ Ico s 1, (1 - x ^ 2) * u x ^ 2 ≤ K * (1 - x))
-    (hW : ∀ x ∈ Ico s 1, lzt_W u u' y y' x ≤ -c₀) (C : ℝ) :
+    (hW : ∀ x ∈ Ico s 1, LegendreSturm.weightedWronskian u u' y y' x ≤ -c₀) (C : ℝ) :
     ∃ x ∈ Ioo s 1, C < y x / u x := by
   have hge : ∀ x ∈ Ico s 1, c₀ / K / (1 - x) ≤ (y' x * u x - y x * u' x) / u x ^ 2 := by
     intro x hx
     have h1x : 0 < 1 - x := by linarith [hx.2]
     have hu2 : 0 < u x ^ 2 := pow_pos (hup x hx) 2
     have hWx := hW x hx
-    simp only [lzt_W] at hWx
+    simp only [LegendreSturm.weightedWronskian] at hWx
     set D := y' x * u x - y x * u' x
     have hD : c₀ ≤ (1 - x ^ 2) * D := by simp only [D]; linarith
     have hDp : 0 < D := by
@@ -160,11 +168,12 @@ theorem lzt_ratio_right {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : s < 1) 
 
 /-- **Divergence of a ratio at the left end.** If `u > 0`, `(1-x²)u² ≤ K(1+x)` and `W ≤ -c₀ < 0`
 on `(-1, s]`, then `y/u` takes negative values there. -/
-theorem lzt_ratio_left {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : -1 < s) (hK : 0 < K) (hc₀ : 0 < c₀)
+theorem LegendreSturm.ratio_left {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : -1 < s)
+    (hK : 0 < K) (hc₀ : 0 < c₀)
     (hyd : ∀ x ∈ Ioc (-1) s, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ioc (-1) s, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ioc (-1) s, 0 < u x) (hp : ∀ x ∈ Ioc (-1) s, 0 < 1 - x ^ 2)
     (hb : ∀ x ∈ Ioc (-1) s, (1 - x ^ 2) * u x ^ 2 ≤ K * (1 + x))
-    (hW : ∀ x ∈ Ioc (-1) s, lzt_W u u' y y' x ≤ -c₀) :
+    (hW : ∀ x ∈ Ioc (-1) s, LegendreSturm.weightedWronskian u u' y y' x ≤ -c₀) :
     ∃ x ∈ Ioo (-1) s, y x / u x < 0 := by
   refine ODE.sturmCount_exists_neg_of_deriv_ge (r := fun x => y x / u x)
     (r' := fun x => (y' x * u x - y x * u' x) / u x ^ 2) (c := c₀ / K) hs (div_pos hc₀ hK)
@@ -172,7 +181,7 @@ theorem lzt_ratio_left {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : -1 < s) 
   have h1x : 0 < x - -1 := by linarith [hx.1]
   have hu2 : 0 < u x ^ 2 := pow_pos (hup x hx) 2
   have hWx := hW x hx
-  simp only [lzt_W] at hWx
+  simp only [LegendreSturm.weightedWronskian] at hWx
   set D := y' x * u x - y x * u' x
   have hD : c₀ ≤ (1 - x ^ 2) * D := by simp only [D]; linarith
   have hDp : 0 < D := by
@@ -186,54 +195,63 @@ section Comparison
 variable {qy qu y y' u u' : ℝ → ℝ}
 
 /-- `1 - x² > 0` on `(-1, 1)`. -/
-theorem lzt_p_pos {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 0 < 1 - x ^ 2 := by
+theorem LegendreSturm.one_sub_sq_pos {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 0 < 1 - x ^ 2 := by
   nlinarith [hx.1, hx.2]
 
 /-- Solutions are continuous on subsets of `(-1, 1)`. -/
-theorem LztIsSol.continuousOn {q y y' : ℝ → ℝ} (h : LztIsSol q y y') {s : Set ℝ}
+theorem IsLegendreTypeSolution.continuousOn {q y y' : ℝ → ℝ}
+    (h : IsLegendreTypeSolution q y y') {s : Set ℝ}
     (hs : s ⊆ Ioo (-1:ℝ) 1) : ContinuousOn y s := fun _x hx =>
   (h _ (hs hx)).1.continuousAt.continuousWithinAt
 
 /-- `W = (1-x²)(u'y-uy')` is strictly decreasing where `u, y > 0` and `qy < qu`. -/
-theorem lzt_W_strictAntiOn (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
+theorem LegendreSturm.weightedWronskian_strictAntiOn (hy : IsLegendreTypeSolution qy y y')
+    (hu : IsLegendreTypeSolution qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) (hcv : Convex ℝ s)
-    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn (lzt_W u u' y y') s := by
-  refine strictAntiOn_of_deriv_neg hcv (lzt_W_continuousOn hy hu hs) fun x hx => ?_
+    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn
+        (LegendreSturm.weightedWronskian u u' y y') s := by
+  refine strictAntiOn_of_deriv_neg hcv
+      (LegendreSturm.weightedWronskian_continuousOn hy hu hs) fun x hx => ?_
   have hx' := hs (interior_subset hx)
-  rw [(lzt_hasDerivAt_W hy hu hx').deriv]
+  rw [(LegendreSturm.hasDerivAt_weightedWronskian hy hu hx').deriv]
   have := hq x hx'
   have h2 := mul_pos (hpos x hx).1 (hpos x hx).2
   nlinarith
 
 /-- `W = (1-x²)(u'y-uy')` is strictly increasing where `u, y > 0` and `qu < qy`. -/
-theorem lzt_W_strictMonoOn (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
+theorem LegendreSturm.weightedWronskian_strictMonoOn (hy : IsLegendreTypeSolution qy y y')
+    (hu : IsLegendreTypeSolution qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qu x < qy x) {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) (hcv : Convex ℝ s)
-    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn (lzt_W u u' y y') s := by
-  refine strictMonoOn_of_deriv_pos hcv (lzt_W_continuousOn hy hu hs) fun x hx => ?_
+    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn
+        (LegendreSturm.weightedWronskian u u' y y') s := by
+  refine strictMonoOn_of_deriv_pos hcv
+      (LegendreSturm.weightedWronskian_continuousOn hy hu hs) fun x hx => ?_
   have hx' := hs (interior_subset hx)
-  rw [(lzt_hasDerivAt_W hy hu hx').deriv]
+  rw [(LegendreSturm.hasDerivAt_weightedWronskian hy hu hx').deriv]
   have := hq x hx'
   have h2 := mul_pos (hpos x hx).1 (hpos x hx).2
   nlinarith
 
-/-- Sign-normalized core of `lzt_between`. -/
-theorem lzt_between_core (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
+/-- Sign-normalized core of `LegendreSturm.between`. -/
+theorem LegendreSturm.between_core (hy : IsLegendreTypeSolution qy y y')
+    (hu : IsLegendreTypeSolution qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {a b : ℝ} (ha : -1 < a) (hb : b < 1) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (ypos : ∀ x ∈ Ioo a b, 0 < y x)
     (upos : ∀ x ∈ Ioo a b, 0 < u x) : False := by
   have hsub : Icc a b ⊆ Ioo (-1:ℝ) 1 := Icc_subset_Ioo ha hb
-  have hanti := lzt_W_strictAntiOn hy hu hq hsub (convex_Icc a b) fun x hx => by
+  have hanti := LegendreSturm.weightedWronskian_strictAntiOn hy hu hq hsub
+      (convex_Icc a b) fun x hx => by
     rw [interior_Icc] at hx; exact ⟨upos x hx, ypos x hx⟩
   have hWab := hanti (left_mem_Icc.2 hab.le) (right_mem_Icc.2 hab.le) hab
   have ha' := hsub (left_mem_Icc.2 hab.le)
   have hb' := hsub (right_mem_Icc.2 hab.le)
-  have hua := lzt_nonneg_left (hu a ha').1.continuousAt hab upos
-  have hub := lzt_nonneg_right (hu b hb').1.continuousAt hab upos
-  have hya := lzt_deriv_nonneg_right (hy a ha').1 ya hab ypos
-  have hyb := lzt_deriv_nonpos_left (hy b hb').1 yb hab ypos
-  have pa := lzt_p_pos ha'
-  have pb := lzt_p_pos hb'
-  simp only [lzt_W, ya, yb, mul_zero, zero_sub] at hWab
+  have hua := LegendreSturm.nonneg_left (hu a ha').1.continuousAt hab upos
+  have hub := LegendreSturm.nonneg_right (hu b hb').1.continuousAt hab upos
+  have hya := LegendreSturm.deriv_nonneg_right (hy a ha').1 ya hab ypos
+  have hyb := LegendreSturm.deriv_nonpos_left (hy b hb').1 yb hab ypos
+  have pa := LegendreSturm.one_sub_sq_pos ha'
+  have pb := LegendreSturm.one_sub_sq_pos hb'
+  simp only [LegendreSturm.weightedWronskian, ya, yb, mul_zero, zero_sub] at hWab
   have h1 : 0 ≤ (1 - b ^ 2) * -(u b * y' b) := mul_nonneg pb.le (by nlinarith)
   have h2 : (1 - a ^ 2) * -(u a * y' a) ≤ 0 :=
     mul_nonpos_of_nonneg_of_nonpos pa.le (by nlinarith [mul_nonneg hua hya])
@@ -241,48 +259,57 @@ theorem lzt_between_core (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
 
 /-- **Sturm comparison.** If `qy < qu`, then between two consecutive zeros of `y` the function
 `u` has a zero. -/
-theorem lzt_between (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
+theorem LegendreSturm.between (hy : IsLegendreTypeSolution qy y y')
+    (hu : IsLegendreTypeSolution qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {a b : ℝ} (ha : -1 < a) (hb : b < 1) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (hyne : ∀ x ∈ Ioo a b, y x ≠ 0) :
     ∃ c ∈ Ioo a b, u c = 0 := by
   by_contra hcon
   push Not at hcon
   have hsub : Ioo a b ⊆ Ioo (-1:ℝ) 1 := Ioo_subset_Ioo ha.le hb.le
-  rcases lzt_sign ordConnected_Ioo (hy.continuousOn hsub) hyne with hy1 | hy1 <;>
-  rcases lzt_sign ordConnected_Ioo (hu.continuousOn hsub) hcon with hu1 | hu1
-  · exact lzt_between_core hy hu hq ha hb hab ya yb hy1 hu1
-  · exact lzt_between_core hy hu.neg hq ha hb hab ya yb hy1 fun x hx => neg_pos.mpr (hu1 x hx)
-  · exact lzt_between_core hy.neg hu hq ha hb hab (by simp [ya]) (by simp [yb])
+  rcases LegendreSturm.sign ordConnected_Ioo (hy.continuousOn hsub) hyne with hy1 | hy1 <;>
+  rcases LegendreSturm.sign ordConnected_Ioo (hu.continuousOn hsub) hcon with hu1 | hu1
+  · exact LegendreSturm.between_core hy hu hq ha hb hab ya yb hy1 hu1
+  · exact LegendreSturm.between_core hy hu.neg hq ha hb hab ya yb hy1 fun x hx =>
+        neg_pos.mpr (hu1 x hx)
+  · exact LegendreSturm.between_core hy.neg hu hq ha hb hab (by simp [ya]) (by simp [yb])
       (fun x hx => neg_pos.mpr (hy1 x hx)) hu1
-  · exact lzt_between_core hy.neg hu.neg hq ha hb hab (by simp [ya]) (by simp [yb])
+  · exact LegendreSturm.between_core hy.neg hu.neg hq ha hb hab (by simp [ya]) (by simp [yb])
       (fun x hx => neg_pos.mpr (hy1 x hx)) fun x hx => neg_pos.mpr (hu1 x hx)
 
-/-- Sign-normalized core of `lzt_upper_right`. -/
-theorem lzt_upper_right_core (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
+/-- Sign-normalized core of `LegendreSturm.upper_right`. -/
+theorem LegendreSturm.upper_right_core (hy : IsLegendreTypeSolution qy y y')
+    (hu : IsLegendreTypeSolution qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {z s₀ C K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (yz : y z = 0) (ypos : ∀ x ∈ Ioo z 1, 0 < y x) (upos : ∀ x ∈ Ioo z 1, 0 < u x)
     (hC : ∀ x ∈ Ioo s₀ 1, y x ≤ C * u x)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * u x ^ 2 ≤ K * (1 - x)) : False := by
   have hsub : Ico z 1 ⊆ Ioo (-1:ℝ) 1 := fun x hx => ⟨by linarith [hz.1, hx.1], hx.2⟩
-  have hanti := lzt_W_strictAntiOn hy hu hq hsub (convex_Ico z 1) fun x hx => by
+  have hanti := LegendreSturm.weightedWronskian_strictAntiOn hy hu hq hsub
+      (convex_Ico z 1) fun x hx => by
     rw [interior_Ico] at hx; exact ⟨upos x hx, ypos x hx⟩
-  have hWz : lzt_W u u' y y' z ≤ 0 := by
-    have hua := lzt_nonneg_left (hu z hz).1.continuousAt hz.2 upos
-    have hya := lzt_deriv_nonneg_right (hy z hz).1 yz hz.2 ypos
-    simp only [lzt_W, yz, mul_zero, zero_sub]
-    exact mul_nonpos_of_nonneg_of_nonpos (lzt_p_pos hz).le (by nlinarith [mul_nonneg hua hya])
+  have hWz : LegendreSturm.weightedWronskian u u' y y' z ≤ 0 := by
+    have hua := LegendreSturm.nonneg_left (hu z hz).1.continuousAt hz.2 upos
+    have hya := LegendreSturm.deriv_nonneg_right (hy z hz).1 yz hz.2 ypos
+    simp only [LegendreSturm.weightedWronskian, yz, mul_zero, zero_sub]
+    exact mul_nonpos_of_nonneg_of_nonpos (LegendreSturm.one_sub_sq_pos hz).le
+        (by nlinarith [mul_nonneg hua hya])
   set s₁ := (max z s₀ + 1) / 2 with hs₁
   have hm : max z s₀ < 1 := max_lt hz.2 hs₀
   have hzs : z < s₁ := by have := le_max_left z s₀; linarith
   have hs0s : s₀ < s₁ := by have := le_max_right z s₀; linarith
   have hs1 : s₁ < 1 := by linarith
-  have hW1 : lzt_W u u' y y' s₁ < lzt_W u u' y y' z :=
+  have hW1 : LegendreSturm.weightedWronskian u u' y y' s₁ <
+      LegendreSturm.weightedWronskian u u' y y' z :=
     hanti ⟨le_rfl, hz.2⟩ ⟨hzs.le, hs1⟩ hzs
   have hIco : ∀ x ∈ Ico s₁ 1, x ∈ Ioo z 1 := fun x hx => ⟨by linarith [hx.1], hx.2⟩
-  obtain ⟨x, hx, hxC⟩ := lzt_ratio_right (y := y) (u := u) (c₀ := -lzt_W u u' y y' s₁) hs1 hK
+  obtain ⟨x, hx, hxC⟩ :=
+      LegendreSturm.ratio_right (y := y) (u := u)
+      (c₀ := -LegendreSturm.weightedWronskian u u' y y' s₁) hs1 hK
     (by linarith) (fun x hx => (hy x (hsub (Ico_subset_Ico_left hzs.le hx))).1)
     (fun x hx => (hu x (hsub (Ico_subset_Ico_left hzs.le hx))).1)
-    (fun x hx => upos x (hIco x hx)) (fun x hx => lzt_p_pos (hsub (Ico_subset_Ico_left hzs.le hx)))
+    (fun x hx => upos x (hIco x hx))
+        (fun x hx => LegendreSturm.one_sub_sq_pos (hsub (Ico_subset_Ico_left hzs.le hx)))
     (fun x hx => hb x ⟨by linarith [hx.1], hx.2⟩)
     (fun x hx => by
       have := hanti.antitoneOn ⟨hzs.le, hs1⟩ (Ico_subset_Ico_left hzs.le hx) hx.1
@@ -294,7 +321,8 @@ theorem lzt_upper_right_core (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
 
 /-- **Comparison at the right end.** Let `qy < qu`, let `z` be the last zero of `y`, and let
 `y/u` stay bounded and `(1-x²)u² = O(1-x)` near `1`. Then `u` has a zero in `(z, 1)`. -/
-theorem lzt_upper_right (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
+theorem LegendreSturm.upper_right (hy : IsLegendreTypeSolution qy y y')
+    (hu : IsLegendreTypeSolution qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {z s₀ C K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (yz : y z = 0) (hyne : ∀ x ∈ Ioo z 1, y x ≠ 0)
     (hC : ∀ x ∈ Ioo s₀ 1, |y x| ≤ C * |u x|)
@@ -304,12 +332,14 @@ theorem lzt_upper_right (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
   have hsub : Ioo z 1 ⊆ Ioo (-1:ℝ) 1 := Ioo_subset_Ioo hz.1.le le_rfl
   have hb' : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * (-u x) ^ 2 ≤ K * (1 - x) := fun x hx => by
     rw [neg_sq]; exact hb x hx
-  have key : ∀ (y₁ y₁' u₁ u₁' : ℝ → ℝ), LztIsSol qy y₁ y₁' → LztIsSol qu u₁ u₁' → y₁ z = 0 →
+  have key : ∀ (y₁ y₁' u₁ u₁' : ℝ → ℝ), IsLegendreTypeSolution qy y₁ y₁' →
+      IsLegendreTypeSolution qu u₁ u₁' → y₁ z = 0 →
       (∀ x ∈ Ioo z 1, 0 < y₁ x) → (∀ x ∈ Ioo z 1, 0 < u₁ x) →
       (∀ x ∈ Ioo s₀ 1, |y₁ x| ≤ C * |u₁ x|) →
       (∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * u₁ x ^ 2 ≤ K * (1 - x)) → False := by
     intro y₁ y₁' u₁ u₁' h1 h2 h3 h4 h5 h6 h7
-    refine lzt_upper_right_core (C := C) h1 h2 hq hz (max_lt hz.2 hs₀) hK h3 h4 h5 (fun x hx => ?_)
+    refine LegendreSturm.upper_right_core (C := C) h1 h2 hq hz (max_lt hz.2 hs₀) hK h3 h4 h5
+        (fun x hx => ?_)
       (fun x hx => h7 x ⟨lt_of_le_of_lt (le_max_right _ _) hx.1, hx.2⟩)
     have hxz : x ∈ Ioo z 1 := ⟨lt_of_le_of_lt (le_max_left _ _) hx.1, hx.2⟩
     have := h6 x ⟨lt_of_le_of_lt (le_max_right _ _) hx.1, hx.2⟩
@@ -320,8 +350,8 @@ theorem lzt_upper_right (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
     rw [abs_neg]; exact hC x hx
   have hCn3 : ∀ x ∈ Ioo s₀ 1, |-y x| ≤ C * |-u x| := fun x hx => by
     rw [abs_neg, abs_neg]; exact hC x hx
-  rcases lzt_sign ordConnected_Ioo (hy.continuousOn hsub) hyne with hy1 | hy1 <;>
-  rcases lzt_sign ordConnected_Ioo (hu.continuousOn hsub) hcon with hu1 | hu1
+  rcases LegendreSturm.sign ordConnected_Ioo (hy.continuousOn hsub) hyne with hy1 | hy1 <;>
+  rcases LegendreSturm.sign ordConnected_Ioo (hu.continuousOn hsub) hcon with hu1 | hu1
   · exact key _ _ _ _ hy hu yz hy1 hu1 hC hb
   · exact key _ _ _ _ hy hu.neg yz hy1 (fun x hx => neg_pos.mpr (hu1 x hx)) hCn2 hb'
   · exact key _ _ _ _ hy.neg hu (by simp [yz]) (fun x hx => neg_pos.mpr (hy1 x hx)) hu1 hCn1 hb
@@ -329,72 +359,82 @@ theorem lzt_upper_right (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
       (fun x hx => neg_pos.mpr (hu1 x hx)) hCn3 hb'
 
 /-- The weighted Wronskian is odd in `y`. -/
-theorem lzt_W_neg (u u' y y' : ℝ → ℝ) (x : ℝ) :
-    lzt_W u u' (fun x => -y x) (fun x => -y' x) x = -lzt_W u u' y y' x := by
-  simp only [lzt_W]; ring
+theorem LegendreSturm.weightedWronskian_neg (u u' y y' : ℝ → ℝ) (x : ℝ) :
+    LegendreSturm.weightedWronskian u u' (fun x => -y x) (fun x => -y' x) x =
+        -LegendreSturm.weightedWronskian u u' y y' x := by
+  simp only [LegendreSturm.weightedWronskian]; ring
 
 variable {qw w w' : ℝ → ℝ}
 
-/-- Sign-normalized core of `lzt_lower_right`. -/
-theorem lzt_lower_right_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
+/-- Sign-normalized core of `LegendreSturm.lower_right`. -/
+theorem LegendreSturm.lower_right_core (hy : IsLegendreTypeSolution qy y y')
+    (hw : IsLegendreTypeSolution qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioo z 1, 0 < y x) (wpos : ∀ x ∈ Ioo z 1, 0 < w x)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x)) : False := by
   have hsub : Ico z 1 ⊆ Ioo (-1:ℝ) 1 := fun x hx => ⟨by linarith [hz.1, hx.1], hx.2⟩
-  have hmono := lzt_W_strictMonoOn hy hw hq hsub (convex_Ico z 1) fun x hx => by
+  have hmono := LegendreSturm.weightedWronskian_strictMonoOn hy hw hq hsub
+      (convex_Ico z 1) fun x hx => by
     rw [interior_Ico] at hx; exact ⟨wpos x hx, ypos x hx⟩
-  have hWz : 0 ≤ lzt_W w w' y y' z := by
-    have hya := lzt_nonneg_left (hy z hz).1.continuousAt hz.2 ypos
-    have hwa := lzt_deriv_nonneg_right (hw z hz).1 wz hz.2 wpos
-    simp only [lzt_W, wz, zero_mul, sub_zero]
-    exact mul_nonneg (lzt_p_pos hz).le (mul_nonneg hwa hya)
+  have hWz : 0 ≤ LegendreSturm.weightedWronskian w w' y y' z := by
+    have hya := LegendreSturm.nonneg_left (hy z hz).1.continuousAt hz.2 ypos
+    have hwa := LegendreSturm.deriv_nonneg_right (hw z hz).1 wz hz.2 wpos
+    simp only [LegendreSturm.weightedWronskian, wz, zero_mul, sub_zero]
+    exact mul_nonneg (LegendreSturm.one_sub_sq_pos hz).le (mul_nonneg hwa hya)
   set s₁ := (max z s₀ + 1) / 2 with hs₁
   have hm : max z s₀ < 1 := max_lt hz.2 hs₀
   have hzs : z < s₁ := by have := le_max_left z s₀; linarith
   have hs0s : s₀ < s₁ := by have := le_max_right z s₀; linarith
   have hs1 : s₁ < 1 := by linarith
-  have hW1 : lzt_W w w' y y' z < lzt_W w w' y y' s₁ := hmono ⟨le_rfl, hz.2⟩ ⟨hzs.le, hs1⟩ hzs
+  have hW1 : LegendreSturm.weightedWronskian w w' y y' z <
+      LegendreSturm.weightedWronskian w w' y y' s₁ := hmono ⟨le_rfl, hz.2⟩ ⟨hzs.le, hs1⟩ hzs
   have hIco : ∀ x ∈ Ico s₁ 1, x ∈ Ioo z 1 := fun x hx => ⟨by linarith [hx.1], hx.2⟩
-  obtain ⟨x, hx, hxC⟩ := lzt_ratio_right (y := fun x => -y x) (y' := fun x => -y' x) (u := w)
-    (c₀ := lzt_W w w' y y' s₁) hs1 hK (by linarith)
+  obtain ⟨x, hx, hxC⟩ :=
+      LegendreSturm.ratio_right (y := fun x => -y x) (y' := fun x => -y' x) (u := w)
+    (c₀ := LegendreSturm.weightedWronskian w w' y y' s₁) hs1 hK (by linarith)
     (fun x hx => (hy x (hsub (Ico_subset_Ico_left hzs.le hx))).1.neg)
     (fun x hx => (hw x (hsub (Ico_subset_Ico_left hzs.le hx))).1)
-    (fun x hx => wpos x (hIco x hx)) (fun x hx => lzt_p_pos (hsub (Ico_subset_Ico_left hzs.le hx)))
+    (fun x hx => wpos x (hIco x hx))
+        (fun x hx => LegendreSturm.one_sub_sq_pos (hsub (Ico_subset_Ico_left hzs.le hx)))
     (fun x hx => hb x ⟨by linarith [hx.1], hx.2⟩)
     (fun x hx => by
-      rw [lzt_W_neg]
+      rw [LegendreSturm.weightedWronskian_neg]
       have := hmono.monotoneOn ⟨hzs.le, hs1⟩ (Ico_subset_Ico_left hzs.le hx) hx.1
       linarith) 0
   have hx' : x ∈ Ioo z 1 := ⟨by linarith [hx.1], hx.2⟩
   rw [neg_div, lt_neg, neg_zero] at hxC
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
-/-- Sign-normalized core of `lzt_lower_left`. -/
-theorem lzt_lower_left_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
+/-- Sign-normalized core of `LegendreSturm.lower_left`. -/
+theorem LegendreSturm.lower_left_core (hy : IsLegendreTypeSolution qy y y')
+    (hw : IsLegendreTypeSolution qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : -1 < s₀)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioo (-1) z, 0 < y x)
     (wpos : ∀ x ∈ Ioo (-1) z, 0 < w x)
     (hb : ∀ x ∈ Ioo (-1) s₀, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 + x)) : False := by
   have hsub : Ioc (-1) z ⊆ Ioo (-1:ℝ) 1 := fun x hx => ⟨hx.1, by linarith [hz.2, hx.2]⟩
-  have hmono := lzt_W_strictMonoOn hy hw hq hsub (convex_Ioc (-1) z) fun x hx => by
+  have hmono := LegendreSturm.weightedWronskian_strictMonoOn hy hw hq hsub
+      (convex_Ioc (-1) z) fun x hx => by
     rw [interior_Ioc] at hx; exact ⟨wpos x hx, ypos x hx⟩
-  have hWz : lzt_W w w' y y' z ≤ 0 := by
-    have hya := lzt_nonneg_right (hy z hz).1.continuousAt hz.1 ypos
-    have hwa := lzt_deriv_nonpos_left (hw z hz).1 wz hz.1 wpos
-    simp only [lzt_W, wz, zero_mul, sub_zero]
-    exact mul_nonpos_of_nonneg_of_nonpos (lzt_p_pos hz).le
+  have hWz : LegendreSturm.weightedWronskian w w' y y' z ≤ 0 := by
+    have hya := LegendreSturm.nonneg_right (hy z hz).1.continuousAt hz.1 ypos
+    have hwa := LegendreSturm.deriv_nonpos_left (hw z hz).1 wz hz.1 wpos
+    simp only [LegendreSturm.weightedWronskian, wz, zero_mul, sub_zero]
+    exact mul_nonpos_of_nonneg_of_nonpos (LegendreSturm.one_sub_sq_pos hz).le
         (by nlinarith [mul_nonneg hya (neg_nonneg.mpr hwa)])
   set s₁ := (-1 + min z s₀) / 2 with hs₁
   have hm : -1 < min z s₀ := lt_min hz.1 hs₀
   have hzs : s₁ < z := by have := min_le_left z s₀; linarith
   have hs0s : s₁ < s₀ := by have := min_le_right z s₀; linarith
   have hs1 : -1 < s₁ := by linarith
-  have hW1 : lzt_W w w' y y' s₁ < lzt_W w w' y y' z := hmono ⟨hs1, hzs.le⟩ ⟨hz.1, le_rfl⟩ hzs
+  have hW1 : LegendreSturm.weightedWronskian w w' y y' s₁ <
+      LegendreSturm.weightedWronskian w w' y y' z := hmono ⟨hs1, hzs.le⟩ ⟨hz.1, le_rfl⟩ hzs
   have hIoc : ∀ x ∈ Ioc (-1) s₁, x ∈ Ioc (-1) z := fun x hx => ⟨hx.1, by linarith [hx.2]⟩
-  obtain ⟨x, hx, hxC⟩ := lzt_ratio_left (y := y) (u := w)
-    (c₀ := -lzt_W w w' y y' s₁) hs1 hK (by linarith)
+  obtain ⟨x, hx, hxC⟩ := LegendreSturm.ratio_left (y := y) (u := w)
+    (c₀ := -LegendreSturm.weightedWronskian w w' y y' s₁) hs1 hK (by linarith)
     (fun x hx => (hy x (hsub (hIoc x hx))).1) (fun x hx => (hw x (hsub (hIoc x hx))).1)
-    (fun x hx => wpos x ⟨hx.1, by linarith [hx.2]⟩) (fun x hx => lzt_p_pos (hsub (hIoc x hx)))
+    (fun x hx => wpos x ⟨hx.1, by linarith [hx.2]⟩)
+        (fun x hx => LegendreSturm.one_sub_sq_pos (hsub (hIoc x hx)))
     (fun x hx => hb x ⟨hx.1, by linarith [hx.2]⟩)
     (fun x hx => by
       have := hmono.monotoneOn (hIoc x hx) ⟨hs1, hzs.le⟩ hx.2
@@ -402,29 +442,35 @@ theorem lzt_lower_left_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
   have hx' : x ∈ Ioo (-1) z := ⟨hx.1, by linarith [hx.2]⟩
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
-/-- Sign-normalized core of `lzt_lower_whole`. -/
-theorem lzt_lower_whole_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
+/-- Sign-normalized core of `LegendreSturm.lower_whole`. -/
+theorem LegendreSturm.lower_whole_core (hy : IsLegendreTypeSolution qy y y')
+    (hw : IsLegendreTypeSolution qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {s₀ s₀' K : ℝ} (hs₀ : s₀ < 1) (hs₀' : -1 < s₀')
     (hK : 0 < K) (ypos : ∀ x ∈ Ioo (-1) 1, 0 < y x) (wpos : ∀ x ∈ Ioo (-1) 1, 0 < w x)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x))
     (hb' : ∀ x ∈ Ioo (-1) s₀', (1 - x ^ 2) * w x ^ 2 ≤ K * (1 + x)) : False := by
-  have hmono := lzt_W_strictMonoOn hy hw hq subset_rfl (convex_Ioo (-1) 1) fun x hx => by
+  have hmono := LegendreSturm.weightedWronskian_strictMonoOn hy hw hq subset_rfl
+      (convex_Ioo (-1) 1) fun x hx => by
     rw [interior_Ioo] at hx; exact ⟨wpos x hx, ypos x hx⟩
   have h0 : (0:ℝ) ∈ Ioo (-1:ℝ) 1 := ⟨by norm_num, by norm_num⟩
-  by_cases hW0 : 0 ≤ lzt_W w w' y y' 0
+  by_cases hW0 : 0 ≤ LegendreSturm.weightedWronskian w w' y y' 0
   · set s₁ := (max 0 s₀ + 1) / 2 with hs₁
     have hm : max 0 s₀ < 1 := max_lt (by norm_num) hs₀
     have hzs : 0 < s₁ := by have := le_max_left 0 s₀; linarith
     have hs0s : s₀ < s₁ := by have := le_max_right 0 s₀; linarith
     have hs1 : s₁ < 1 := by linarith
     have hS : ∀ x ∈ Ico s₁ 1, x ∈ Ioo (-1:ℝ) 1 := fun x hx => ⟨by linarith [hx.1], hx.2⟩
-    have hW1 : lzt_W w w' y y' 0 < lzt_W w w' y y' s₁ := hmono h0 (hS s₁ ⟨le_rfl, hs1⟩) hzs
-    obtain ⟨x, hx, hxC⟩ := lzt_ratio_right (y := fun x => -y x) (y' := fun x => -y' x) (u := w)
-      (c₀ := lzt_W w w' y y' s₁) hs1 hK (by linarith) (fun x hx => (hy x (hS x hx)).1.neg)
+    have hW1 : LegendreSturm.weightedWronskian w w' y y' 0 <
+        LegendreSturm.weightedWronskian w w' y y' s₁ := hmono h0 (hS s₁ ⟨le_rfl, hs1⟩) hzs
+    obtain ⟨x, hx, hxC⟩ :=
+        LegendreSturm.ratio_right (y := fun x => -y x) (y' := fun x => -y' x) (u := w)
+      (c₀ := LegendreSturm.weightedWronskian w w' y y' s₁) hs1 hK (by linarith)
+          (fun x hx => (hy x (hS x hx)).1.neg)
       (fun x hx => (hw x (hS x hx)).1) (fun x hx => wpos x (hS x hx))
-      (fun x hx => lzt_p_pos (hS x hx)) (fun x hx => hb x ⟨by linarith [hx.1], hx.2⟩)
+      (fun x hx => LegendreSturm.one_sub_sq_pos (hS x hx))
+          (fun x hx => hb x ⟨by linarith [hx.1], hx.2⟩)
       (fun x hx => by
-        rw [lzt_W_neg]
+        rw [LegendreSturm.weightedWronskian_neg]
         have := hmono.monotoneOn (hS s₁ ⟨le_rfl, hs1⟩) (hS x hx) hx.1
         linarith) 0
     have hx' := hS x (Ioo_subset_Ico_self hx)
@@ -437,11 +483,12 @@ theorem lzt_lower_whole_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     have hs0s : s₁ < s₀' := by have := min_le_right 0 s₀'; linarith
     have hs1 : -1 < s₁ := by linarith
     have hS : ∀ x ∈ Ioc (-1) s₁, x ∈ Ioo (-1:ℝ) 1 := fun x hx => ⟨hx.1, by linarith [hx.2]⟩
-    have hW1 : lzt_W w w' y y' s₁ < lzt_W w w' y y' 0 := hmono (hS s₁ ⟨hs1, le_rfl⟩) h0 hzs
-    obtain ⟨x, hx, hxC⟩ := lzt_ratio_left (y := y) (u := w)
-      (c₀ := -lzt_W w w' y y' s₁) hs1 hK (by linarith)
+    have hW1 : LegendreSturm.weightedWronskian w w' y y' s₁ <
+        LegendreSturm.weightedWronskian w w' y y' 0 := hmono (hS s₁ ⟨hs1, le_rfl⟩) h0 hzs
+    obtain ⟨x, hx, hxC⟩ := LegendreSturm.ratio_left (y := y) (u := w)
+      (c₀ := -LegendreSturm.weightedWronskian w w' y y' s₁) hs1 hK (by linarith)
       (fun x hx => (hy x (hS x hx)).1) (fun x hx => (hw x (hS x hx)).1)
-      (fun x hx => wpos x (hS x hx)) (fun x hx => lzt_p_pos (hS x hx))
+      (fun x hx => wpos x (hS x hx)) (fun x hx => LegendreSturm.one_sub_sq_pos (hS x hx))
       (fun x hx => hb' x ⟨hx.1, by linarith [hx.2]⟩)
       (fun x hx => by
         have := hmono.monotoneOn (hS x hx) (hS s₁ ⟨hs1, le_rfl⟩) hx.2
@@ -450,13 +497,14 @@ theorem lzt_lower_whole_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
 /-- Bounds on `(1-x²)w²` are unchanged by `w ↦ -w`. -/
-theorem lzt_neg_sq_bound {w : ℝ → ℝ} {S : Set ℝ} {g : ℝ → ℝ}
+theorem LegendreSturm.neg_sq_bound {w : ℝ → ℝ} {S : Set ℝ} {g : ℝ → ℝ}
     (hb : ∀ x ∈ S, (1 - x ^ 2) * w x ^ 2 ≤ g x) : ∀ x ∈ S, (1 - x ^ 2) * (-w x) ^ 2 ≤ g x :=
   fun x hx => by rw [neg_sq]; exact hb x hx
 
 /-- **Comparison at the right end (lower function).** Let `qw < qy`, let `z` be the last zero of
 `w`, and let `(1-x²)w² = O(1-x)` near `1`. Then `y` has a zero in `(z, 1)`. -/
-theorem lzt_lower_right (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
+theorem LegendreSturm.lower_right (hy : IsLegendreTypeSolution qy y y')
+    (hw : IsLegendreTypeSolution qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (wz : w z = 0) (hwne : ∀ x ∈ Ioo z 1, w x ≠ 0)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x)) : ∃ c ∈ Ioo z 1, y c = 0 := by
@@ -464,18 +512,22 @@ theorem lzt_lower_right (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
   push Not at hcon
   have hsub : Ioo z 1 ⊆ Ioo (-1:ℝ) 1 := Ioo_subset_Ioo hz.1.le le_rfl
   have wz' : (fun x => -w x) z = 0 := by simp [wz]
-  rcases lzt_sign ordConnected_Ioo (hy.continuousOn hsub) hcon with hy1 | hy1 <;>
-  rcases lzt_sign ordConnected_Ioo (hw.continuousOn hsub) hwne with hu1 | hu1
-  · exact lzt_lower_right_core hy hw hq hz hs₀ hK wz hy1 hu1 hb
-  · exact lzt_lower_right_core hy hw.neg hq hz hs₀ hK wz' hy1 (fun x hx => neg_pos.mpr (hu1 x hx))
-      (lzt_neg_sq_bound hb)
-  · exact lzt_lower_right_core hy.neg hw hq hz hs₀ hK wz (fun x hx => neg_pos.mpr (hy1 x hx)) hu1 hb
-  · exact lzt_lower_right_core hy.neg hw.neg hq hz hs₀ hK wz' (fun x hx => neg_pos.mpr (hy1 x hx))
-      (fun x hx => neg_pos.mpr (hu1 x hx)) (lzt_neg_sq_bound hb)
+  rcases LegendreSturm.sign ordConnected_Ioo (hy.continuousOn hsub) hcon with hy1 | hy1 <;>
+  rcases LegendreSturm.sign ordConnected_Ioo (hw.continuousOn hsub) hwne with hu1 | hu1
+  · exact LegendreSturm.lower_right_core hy hw hq hz hs₀ hK wz hy1 hu1 hb
+  · exact LegendreSturm.lower_right_core hy hw.neg hq hz hs₀ hK wz' hy1
+        (fun x hx => neg_pos.mpr (hu1 x hx))
+      (LegendreSturm.neg_sq_bound hb)
+  · exact LegendreSturm.lower_right_core hy.neg hw hq hz hs₀ hK wz
+        (fun x hx => neg_pos.mpr (hy1 x hx)) hu1 hb
+  · exact LegendreSturm.lower_right_core hy.neg hw.neg hq hz hs₀ hK wz'
+        (fun x hx => neg_pos.mpr (hy1 x hx))
+      (fun x hx => neg_pos.mpr (hu1 x hx)) (LegendreSturm.neg_sq_bound hb)
 
 /-- **Comparison at the left end (lower function).** Let `qw < qy`, let `z` be the first zero of
 `w`, and let `(1-x²)w² = O(1+x)` near `-1`. Then `y` has a zero in `(-1, z)`. -/
-theorem lzt_lower_left (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
+theorem LegendreSturm.lower_left (hy : IsLegendreTypeSolution qy y y')
+    (hw : IsLegendreTypeSolution qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : -1 < s₀)
     (hK : 0 < K) (wz : w z = 0) (hwne : ∀ x ∈ Ioo (-1) z, w x ≠ 0)
     (hb : ∀ x ∈ Ioo (-1) s₀, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 + x)) :
@@ -484,18 +536,22 @@ theorem lzt_lower_left (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
   push Not at hcon
   have hsub : Ioo (-1) z ⊆ Ioo (-1:ℝ) 1 := Ioo_subset_Ioo le_rfl hz.2.le
   have wz' : (fun x => -w x) z = 0 := by simp [wz]
-  rcases lzt_sign ordConnected_Ioo (hy.continuousOn hsub) hcon with hy1 | hy1 <;>
-  rcases lzt_sign ordConnected_Ioo (hw.continuousOn hsub) hwne with hu1 | hu1
-  · exact lzt_lower_left_core hy hw hq hz hs₀ hK wz hy1 hu1 hb
-  · exact lzt_lower_left_core hy hw.neg hq hz hs₀ hK wz' hy1 (fun x hx => neg_pos.mpr (hu1 x hx))
-      (lzt_neg_sq_bound hb)
-  · exact lzt_lower_left_core hy.neg hw hq hz hs₀ hK wz (fun x hx => neg_pos.mpr (hy1 x hx)) hu1 hb
-  · exact lzt_lower_left_core hy.neg hw.neg hq hz hs₀ hK wz' (fun x hx => neg_pos.mpr (hy1 x hx))
-      (fun x hx => neg_pos.mpr (hu1 x hx)) (lzt_neg_sq_bound hb)
+  rcases LegendreSturm.sign ordConnected_Ioo (hy.continuousOn hsub) hcon with hy1 | hy1 <;>
+  rcases LegendreSturm.sign ordConnected_Ioo (hw.continuousOn hsub) hwne with hu1 | hu1
+  · exact LegendreSturm.lower_left_core hy hw hq hz hs₀ hK wz hy1 hu1 hb
+  · exact LegendreSturm.lower_left_core hy hw.neg hq hz hs₀ hK wz' hy1
+        (fun x hx => neg_pos.mpr (hu1 x hx))
+      (LegendreSturm.neg_sq_bound hb)
+  · exact LegendreSturm.lower_left_core hy.neg hw hq hz hs₀ hK wz
+        (fun x hx => neg_pos.mpr (hy1 x hx)) hu1 hb
+  · exact LegendreSturm.lower_left_core hy.neg hw.neg hq hz hs₀ hK wz'
+        (fun x hx => neg_pos.mpr (hy1 x hx))
+      (fun x hx => neg_pos.mpr (hu1 x hx)) (LegendreSturm.neg_sq_bound hb)
 
 /-- **Comparison on the whole interval.** Let `qw < qy`, let `w` have no zeros in `(-1, 1)` and
 `(1-x²)w² = O(1∓x)` near `±1`. Then `y` has a zero in `(-1, 1)`. -/
-theorem lzt_lower_whole (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
+theorem LegendreSturm.lower_whole (hy : IsLegendreTypeSolution qy y y')
+    (hw : IsLegendreTypeSolution qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {s₀ s₀' K : ℝ} (hs₀ : s₀ < 1) (hs₀' : -1 < s₀')
     (hK : 0 < K) (hwne : ∀ x ∈ Ioo (-1) 1, w x ≠ 0)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x))
@@ -503,20 +559,25 @@ theorem lzt_lower_whole (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     ∃ c ∈ Ioo (-1) 1, y c = 0 := by
   by_contra hcon
   push Not at hcon
-  rcases lzt_sign ordConnected_Ioo (hy.continuousOn subset_rfl) hcon with hy1 | hy1 <;>
-  rcases lzt_sign ordConnected_Ioo (hw.continuousOn subset_rfl) hwne with hu1 | hu1
-  · exact lzt_lower_whole_core hy hw hq hs₀ hs₀' hK hy1 hu1 hb hb'
-  · exact lzt_lower_whole_core hy hw.neg hq hs₀ hs₀' hK hy1 (fun x hx => neg_pos.mpr (hu1 x hx))
-      (lzt_neg_sq_bound hb) (lzt_neg_sq_bound hb')
-  · exact lzt_lower_whole_core hy.neg hw hq hs₀ hs₀' hK (fun x hx => neg_pos.mpr (hy1 x hx)) hu1
+  rcases LegendreSturm.sign ordConnected_Ioo (hy.continuousOn subset_rfl) hcon with hy1 | hy1 <;>
+  rcases LegendreSturm.sign ordConnected_Ioo (hw.continuousOn subset_rfl) hwne with hu1 | hu1
+  · exact LegendreSturm.lower_whole_core hy hw hq hs₀ hs₀' hK hy1 hu1 hb hb'
+  · exact LegendreSturm.lower_whole_core hy hw.neg hq hs₀ hs₀' hK hy1
+        (fun x hx => neg_pos.mpr (hu1 x hx))
+      (LegendreSturm.neg_sq_bound hb) (LegendreSturm.neg_sq_bound hb')
+  · exact LegendreSturm.lower_whole_core hy.neg hw hq hs₀ hs₀' hK
+        (fun x hx => neg_pos.mpr (hy1 x hx)) hu1
       hb hb'
-  · exact lzt_lower_whole_core hy.neg hw.neg hq hs₀ hs₀' hK (fun x hx => neg_pos.mpr (hy1 x hx))
-      (fun x hx => neg_pos.mpr (hu1 x hx)) (lzt_neg_sq_bound hb) (lzt_neg_sq_bound hb')
+  · exact LegendreSturm.lower_whole_core hy.neg hw.neg hq hs₀ hs₀' hK
+        (fun x hx => neg_pos.mpr (hy1 x hx))
+      (fun x hx => neg_pos.mpr (hu1 x hx)) (LegendreSturm.neg_sq_bound hb)
+          (LegendreSturm.neg_sq_bound hb')
 
 /-- **Lower zero count by comparison.** If `qw < qy` and the zeros of `w` in `(-1, 1)` are
 exactly `e₀ < ⋯ < e_{j-1}`, with `(1-x²)w² = O(1∓x)` at `±1`, then `y` has `j+1` distinct zeros,
 one in each gap. -/
-theorem lzt_lower_count (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
+theorem LegendreSturm.lower_count (hy : IsLegendreTypeSolution qy y y')
+    (hw : IsLegendreTypeSolution qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {j : ℕ} {e : Fin j → ℝ} (he : StrictMono e)
     (heI : ∀ i, e i ∈ Ioo (-1:ℝ) 1) (hwz : ∀ x ∈ Ioo (-1:ℝ) 1, w x = 0 ↔ ∃ i, x = e i)
     {s₀ s₀' K : ℝ} (hs₀ : s₀ < 1) (hs₀' : -1 < s₀') (hK : 0 < K)
@@ -547,18 +608,18 @@ theorem lzt_lower_count (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     · have hl : lo i = -1 := dite_eq_left a
       have hh : hi i = 1 := dite_eq_left b
       rw [hl, hh] at hne ⊢
-      exact lzt_lower_whole hy hw hq hs₀ hs₀' hK (fun x hx => hne x hx hx) hb hb'
+      exact LegendreSturm.lower_whole hy hw hq hs₀ hs₀' hK (fun x hx => hne x hx hx) hb hb'
     · have hl : lo i = -1 := dite_eq_left a
       have hh : hi i = e ⟨i.val, by omega⟩ := dite_eq_right b
       have hz := heI ⟨i.val, by omega⟩
       rw [hl, hh] at hne ⊢
-      exact lzt_lower_left hy hw hq hz hs₀' hK ((hwz _ hz).2 ⟨_, rfl⟩)
+      exact LegendreSturm.lower_left hy hw hq hz hs₀' hK ((hwz _ hz).2 ⟨_, rfl⟩)
         (fun x hx => hne x hx ⟨hx.1, hx.2.trans hz.2⟩) hb'
     · have hl : lo i = e ⟨i.val - 1, by omega⟩ := dite_eq_right a
       have hh : hi i = 1 := dite_eq_left b
       have hz := heI ⟨i.val - 1, by omega⟩
       rw [hl, hh] at hne ⊢
-      exact lzt_lower_right hy hw hq hz hs₀ hK ((hwz _ hz).2 ⟨_, rfl⟩)
+      exact LegendreSturm.lower_right hy hw hq hz hs₀ hK ((hwz _ hz).2 ⟨_, rfl⟩)
         (fun x hx => hne x hx ⟨hz.1.trans hx.1, hx.2⟩) hb
     · have hl : lo i = e ⟨i.val - 1, by omega⟩ := dite_eq_right a
       have hh : hi i = e ⟨i.val, by omega⟩ := dite_eq_right b
@@ -567,7 +628,7 @@ theorem lzt_lower_count (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
       have hlt : e ⟨i.val - 1, by omega⟩ < e ⟨i.val, by omega⟩ :=
         he (Fin.mk_lt_mk.2 (by omega))
       rw [hl, hh] at hne ⊢
-      exact lzt_between hw hy hq hz1.1 hz2.2 hlt ((hwz _ hz1).2 ⟨_, rfl⟩)
+      exact LegendreSturm.between hw hy hq hz1.1 hz2.2 hlt ((hwz _ hz1).2 ⟨_, rfl⟩)
         ((hwz _ hz2).2 ⟨_, rfl⟩) fun x hx => hne x hx ⟨hz1.1.trans hx.1, hx.2.trans hz2.2⟩
   choose c hc hc0 using hgap
   have hlo : ∀ i, -1 ≤ lo i := fun i => by
@@ -592,7 +653,8 @@ theorem lzt_lower_count (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
 /-- **Upper zero count by comparison.** If `qy < qu`, the zeros of `u` in `(-1, 1)` are among
 `e₀, …, e_{k-1}`, the zeros of `y` are simple and stay away from `1`, `y/u` is bounded and
 `(1-x²)u² = O(1-x)` near `1`, then `y` has at most `k` zeros in `(-1, 1)`. -/
-theorem lzt_upper_count (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
+theorem LegendreSturm.upper_count (hy : IsLegendreTypeSolution qy y y')
+    (hu : IsLegendreTypeSolution qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {k : ℕ} {e : Fin k → ℝ}
     (huz : ∀ x ∈ Ioo (-1:ℝ) 1, u x = 0 → ∃ i, x = e i)
     (hsimple : ∀ x ∈ Ioo (-1:ℝ) 1, y x = 0 → y' x ≠ 0) {δ : ℝ} (hδ : δ < 1)
@@ -617,7 +679,7 @@ theorem lzt_upper_count (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
         have hb' := hfZ ⟨i.val + 1, h⟩
         have hab : f i < f ⟨i.val + 1, h⟩ := f.strictMono (Fin.mk_lt_mk.2 (by omega))
         have hsub : Icc (f i) (f ⟨i.val + 1, h⟩) ⊆ Ioo (-1:ℝ) 1 := Icc_subset_Ioo ha.1.1 hb'.1.2
-        have hfin := ODE.sturmDef_finite (f' := y') (fun x hx => (hy x (hsub hx)).1)
+        have hfin := ODE.SturmDeformation.finite (f' := y') (fun x hx => (hy x (hsub hx)).1)
           (fun x hx h0 => hsimple x (hsub hx) h0)
         set S := {x | x ∈ Ioc (f i) (f ⟨i.val + 1, h⟩) ∧ y x = 0} with hS
         have hSfin : S.Finite := hfin.subset fun x hx => ⟨Ioc_subset_Icc_self hx.1, hx.2⟩
@@ -626,7 +688,8 @@ theorem lzt_upper_count (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
         have hzS : hSfin.toFinset.min' hSne ∈ S := hSfin.mem_toFinset.1 (Finset.min'_mem _ _)
         have hmin : ∀ x ∈ S, hSfin.toFinset.min' hSne ≤ x := fun x hx =>
           Finset.min'_le _ _ (hSfin.mem_toFinset.2 hx)
-        obtain ⟨c, hc, hc0⟩ := lzt_between hy hu hq ha.1.1 (hzS.1.2.trans_lt hb'.1.2) hzS.1.1
+        obtain ⟨c, hc, hc0⟩ :=
+            LegendreSturm.between hy hu hq ha.1.1 (hzS.1.2.trans_lt hb'.1.2) hzS.1.1
           ha.2 hzS.2 fun x hx h0 => by
             have := hmin x ⟨⟨hx.1, hx.2.le.trans hzS.1.2⟩, h0⟩
             linarith [hx.2]
@@ -635,14 +698,14 @@ theorem lzt_upper_count (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
         set d := max δ (f i) with hd
         have hd1 : d < 1 := max_lt hδ ha.1.2
         have hsub : Icc (f i) d ⊆ Ioo (-1:ℝ) 1 := Icc_subset_Ioo ha.1.1 hd1
-        have hfin := ODE.sturmDef_finite (f' := y') (fun x hx => (hy x (hsub hx)).1)
+        have hfin := ODE.SturmDeformation.finite (f' := y') (fun x hx => (hy x (hsub hx)).1)
           (fun x hx h0 => hsimple x (hsub hx) h0)
         have hSne : hfin.toFinset.Nonempty :=
           (Set.Finite.toFinset_nonempty hfin).2 ⟨_, ⟨⟨le_rfl, le_max_right _ _⟩, ha.2⟩⟩
         have hzS := hfin.mem_toFinset.1 (Finset.max'_mem _ hSne)
         have hmax : ∀ x ∈ {x | x ∈ Icc (f i) d ∧ y x = 0}, x ≤ hfin.toFinset.max' hSne :=
           fun x hx => Finset.le_max' _ _ (hfin.mem_toFinset.2 hx)
-        obtain ⟨c, hc, hc0⟩ := lzt_upper_right hy hu hq (hsub hzS.1) hs₀ hK hzS.2
+        obtain ⟨c, hc, hc0⟩ := LegendreSturm.upper_right hy hu hq (hsub hzS.1) hs₀ hK hzS.2
           (fun x hx h0 => by
             by_cases hxd : x ≤ d
             · have := hmax x ⟨⟨hzS.1.1.trans hx.1.le, hxd⟩, h0⟩
@@ -685,21 +748,23 @@ open Complex DLMF.Hypergeometric DLMF.OrthogonalPolynomials
 open scoped Real Nat
 
 /-- The normalizing constant in `𝖯^{-m}_{m+j} = B (1-x²)^{m/2} C_j^{(m+1/2)}`. -/
-noncomputable def lzt_baseConst (m : ℝ) (j : ℕ) : ℝ :=
+noncomputable def LegendreSturm.polynomialConst (m : ℝ) (j : ℕ) : ℝ :=
   j ! / (2 ^ m * Real.Gamma (m + 1) * (ascPochhammer ℝ j).eval (2 * m + 1))
 
 /-- The normalizing constant of the polynomial case is positive. -/
-theorem lzt_baseConst_pos {m : ℝ} (hm : 0 ≤ m) (j : ℕ) : 0 < lzt_baseConst m j := by
-  unfold lzt_baseConst
+theorem LegendreSturm.polynomialConst_pos {m : ℝ} (hm : 0 ≤ m) (j : ℕ) : 0 <
+    LegendreSturm.polynomialConst m j := by
+  unfold LegendreSturm.polynomialConst
   have h1 : 0 < (ascPochhammer ℝ j).eval (2 * m + 1) := ascPochhammer_pos _ _ (by linarith)
   have h2 := Real.Gamma_pos_of_pos (show 0 < m + 1 by linarith)
   have h3 : (0:ℝ) < 2 ^ m := Real.rpow_pos_of_pos (by norm_num) m
   positivity
 
 /-- **Polynomial case.** `𝖯^{-m}_{m+j}(x) = B (1-x²)^{m/2} C_j^{(m+1/2)}(x)` for `m ≥ 0`. -/
-theorem lzt_ferrersP_base {m : ℝ} (hm : 0 ≤ m) (j : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem LegendreSturm.ferrersP_polynomial {m : ℝ} (hm : 0 ≤ m) (j : ℕ) {x : ℝ}
+    (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ((m + j : ℝ) : ℂ) ((-m : ℝ) : ℂ) x =
-      ((lzt_baseConst m j * (1 - x ^ 2) ^ (m / 2) *
+      ((LegendreSturm.polynomialConst m j * (1 - x ^ 2) ^ (m / 2) *
         (ultrasphPolyR (m + 1 / 2) j).eval x : ℝ) : ℂ) := by
   have ht : ((1:ℂ) - x) / 2 ∈ cutPlane := by
     rw [mem_cutPlane, show (1:ℂ) - (1 - (x:ℂ)) / 2 = (((1 + x) / 2 : ℝ) : ℂ) by push_cast; ring]
@@ -741,7 +806,7 @@ theorem lzt_ferrersP_base {m : ℝ} (hm : 0 ≤ m) (j : ℕ) {x : ℝ} (hx : x �
     ← ofReal_cpow (by nlinarith [hx.1, hx.2] : (0:ℝ) ≤ 1 - x ^ 2),
     show ((m + 1/2 : ℝ) : ℂ) + 1/2 = ((m + 1 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal,
     show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, ← ofReal_cpow (by norm_num : (0:ℝ) ≤ 2)]
-  unfold lzt_baseConst
+  unfold LegendreSturm.polynomialConst
   have h2 := Real.Gamma_pos_of_pos (show 0 < m + 1 by linarith)
   have h3 : (0:ℝ) < 2 ^ m := Real.rpow_pos_of_pos (by norm_num) m
   rw [Real.rpow_neg (by norm_num)]
@@ -749,7 +814,7 @@ theorem lzt_ferrersP_base {m : ℝ} (hm : 0 ≤ m) (j : ℕ) {x : ℝ} (hx : x �
   field_simp
 
 /-- Real form of the associated Legendre equation for the real parts of `𝖯^μ_ν`. -/
-theorem lzt_ferrersP_sol (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem LegendreSturm.ferrersP_solution (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun t => (ferrersP ν μ t).re) (deriv (ferrersP ν μ) x).re x ∧
     HasDerivAt (fun t => (1 - t ^ 2) * (deriv (ferrersP ν μ) t).re)
       (-((ν * (ν + 1) - μ ^ 2 / (1 - x ^ 2)) * (ferrersP ν μ x).re)) x := by
@@ -773,7 +838,7 @@ theorem lzt_ferrersP_sol (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   linarith [this]
 
 /-- A real-valued `𝖯^μ_ν` agrees with its real part, together with its derivative. -/
-theorem lzt_ferrersP_real_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem LegendreSturm.ferrersP_real_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν μ x = ((ferrersP ν μ x).re : ℂ) ∧
       deriv (ferrersP ν μ) x = ((deriv (ferrersP ν μ) x).re : ℂ) := by
   have hd := ((ferrersP_isFerrersSolution ν μ) x hx).1
@@ -790,11 +855,11 @@ theorem lzt_ferrersP_real_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 
 
 /-- The zeros of `𝖯^{-m}_ν` in `(-1, 1)` are simple (`m ≥ 0`, `ν ≥ -1/2`), by the Wronskians
 DLMF 14.2.4 (with `𝖰^{-m}_ν`) and 14.2.3 (with `𝖯^{-m}_ν(-x)`). -/
-theorem lzt_ferrersP_simple {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/2 ≤ ν) {x : ℝ}
+theorem LegendreSturm.ferrersP_simple {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/2 ≤ ν) {x : ℝ}
     (hx : x ∈ Ioo (-1:ℝ) 1) (h0 : (ferrersP ν (-m : ℝ) x).re = 0) :
     (deriv (ferrersP ν (-m : ℝ)) x).re ≠ 0 := by
   intro h1
-  obtain ⟨e0, e1⟩ := lzt_ferrersP_real_data ν (-m) hx
+  obtain ⟨e0, e1⟩ := LegendreSturm.ferrersP_real_data ν (-m) hx
   rw [h0] at e0
   rw [h1] at e1
   simp only [Complex.ofReal_zero] at e0 e1
@@ -824,7 +889,7 @@ theorem lzt_ferrersP_simple {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/2 ≤ ν) {x :
     exact (div_ne_zero two_ne_zero (mul_ne_zero (mul_ne_zero hG1 hG2) hx2)) hW.symm
 
 /-- `((1+x)/(1-x))^{-m/2} ≤ (1-x²)^{m/2}` for `0 ≤ x < 1`, `m ≥ 0`. -/
-theorem lzt_rpow_le {m x : ℝ} (hm : 0 ≤ m) (hx0 : 0 ≤ x) (hx1 : x < 1) :
+theorem LegendreSturm.rpow_le {m x : ℝ} (hm : 0 ≤ m) (hx0 : 0 ≤ x) (hx1 : x < 1) :
     ((1 + x) / (1 - x)) ^ (-m / 2) ≤ (1 - x ^ 2) ^ (m / 2) := by
   have h1 : 0 < 1 + x := by linarith
   have h2 : 0 < 1 - x := by linarith
@@ -835,7 +900,7 @@ theorem lzt_rpow_le {m x : ℝ} (hm : 0 ≤ m) (hx0 : 0 ≤ x) (hx1 : x < 1) :
   exact Real.exp_le_exp.2 (by nlinarith)
 
 /-- Near `x = 1`, `𝖯^{-m}_ν` (`m ≥ 0`) has no zeros and is `O((1-x²)^{m/2})`. -/
-theorem lzt_ferrersP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
+theorem LegendreSturm.ferrersP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
     ∃ s₀ < 1, ∃ M, ∀ x ∈ Ioo s₀ 1, (ferrersP ν (-m : ℝ) x).re ≠ 0 ∧
       |(ferrersP ν (-m : ℝ) x).re| ≤ M * (1 - x ^ 2) ^ (m / 2) := by
   set g : ℝ → ℂ := fun x => regularizedGaussHG ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ))
@@ -878,14 +943,14 @@ theorem lzt_ferrersP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
     Real.rpow_pos_of_pos (div_pos (by linarith) (by linarith [hx.2])) _
   refine ⟨by rw [hrep]; exact (mul_pos hr hgr).ne', ?_⟩
   rw [hrep, abs_mul, abs_of_pos hr]
-  have hle := lzt_rpow_le hm hx0 hx.2
+  have hle := LegendreSturm.rpow_le hm hx0 hx.2
   have hq : 0 ≤ (1 - x ^ 2) ^ (m / 2) := Real.rpow_nonneg (by nlinarith [hx.2]) _
   calc ((1 + x) / (1 - x)) ^ (-m / 2) * |(g x).re| ≤ (1 - x ^ 2) ^ (m / 2) * (‖g 1‖ + 1) :=
         mul_le_mul hle ((Complex.abs_re_le_norm _).trans hgn.le) (abs_nonneg _) hq
     _ = (‖g 1‖ + 1) * (1 - x ^ 2) ^ (m / 2) := by ring
 
 /-- Zeros, boundedness and the behaviour at `1` of the polynomial case `𝖯^{-m}_{m+j}`. -/
-theorem lzt_base_data {m : ℝ} (hm : 0 ≤ m) (j : ℕ) :
+theorem LegendreSturm.polynomial_data {m : ℝ} (hm : 0 ≤ m) (j : ℕ) :
     ∃ e : Fin j → ℝ, StrictMono e ∧ (∀ i, e i ∈ Ioo (-1:ℝ) 1) ∧
       (∀ x ∈ Ioo (-1:ℝ) 1, (ferrersP ((m + j : ℝ) : ℂ) ((-m : ℝ) : ℂ) x).re = 0 ↔
         ∃ i, x = e i) ∧
@@ -897,11 +962,11 @@ theorem lzt_base_data {m : ℝ} (hm : 0 ≤ m) (j : ℕ) :
   obtain ⟨e, he, heI, hz⟩ := ultrasphPoly_zeros_Ioo (lam := m + 1/2) (by linarith)
     (by linarith) j
   set P := ultrasphPolyR (m + 1 / 2) j with hP
-  set B := lzt_baseConst m j with hB
-  have hB0 : 0 < B := lzt_baseConst_pos hm j
+  set B := LegendreSturm.polynomialConst m j with hB
+  have hB0 : 0 < B := LegendreSturm.polynomialConst_pos hm j
   have hval : ∀ x ∈ Ioo (-1:ℝ) 1, (ferrersP ((m + j : ℝ) : ℂ) ((-m : ℝ) : ℂ) x).re =
       B * (1 - x ^ 2) ^ (m / 2) * P.eval x := fun x hx => by
-    rw [lzt_ferrersP_base hm j hx, ofReal_re]
+    rw [LegendreSturm.ferrersP_polynomial hm j hx, ofReal_re]
   have hrp : ∀ x ∈ Ioo (-1:ℝ) 1, 0 < (1 - x ^ 2) ^ (m / 2) := fun x hx =>
     Real.rpow_pos_of_pos (by nlinarith [hx.1, hx.2]) _
   have hr1 : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) ^ (m / 2) ≤ 1 := fun x hx =>
@@ -954,7 +1019,7 @@ theorem lzt_base_data {m : ℝ} (hm : 0 ≤ m) (j : ℕ) :
 function `𝖯^{-m}_ν` has exactly `max(⌈ν - m⌉, 0)` zeros in `(-1, 1)`. With
 `k = max(⌈ν - m⌉, 0)`, the count is squeezed between Sturm comparisons with the polynomial cases
 of degrees `m + k - 1` and `m + k`. -/
-theorem lzt_ferrersP_neg_order_zero_count {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/2 ≤ ν) :
+theorem LegendreSturm.ferrersP_neg_order_zero_count {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/2 ≤ ν) :
     {x | x ∈ Ioo (-1:ℝ) 1 ∧ (ferrersP ν (-m : ℝ) x).re = 0}.Finite ∧
       {x | x ∈ Ioo (-1:ℝ) 1 ∧ (ferrersP ν (-m : ℝ) x).re = 0}.ncard =
         (max ⌈ν - m⌉ 0).toNat := by
@@ -965,14 +1030,16 @@ theorem lzt_ferrersP_neg_order_zero_count {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/
     have h1 : (⌈ν - m⌉ : ℝ) ≤ k := by exact_mod_cast hkz ▸ le_max_left _ _
     exact (Int.le_ceil _).trans h1
   set q : ℝ → ℝ → ℝ := fun a x => a * (a + 1) - (-m) ^ 2 / (1 - x ^ 2) with hq
-  have hsol : ∀ a : ℝ, LztIsSol (q a) (fun x => (ferrersP a (-m : ℝ) x).re)
-      (fun x => (deriv (ferrersP a (-m : ℝ)) x).re) := fun a x hx => lzt_ferrersP_sol a (-m) hx
+  have hsol : ∀ a : ℝ, IsLegendreTypeSolution (q a) (fun x => (ferrersP a (-m : ℝ) x).re)
+      (fun x => (deriv (ferrersP a (-m : ℝ)) x).re) := fun a x hx =>
+          LegendreSturm.ferrersP_solution a (-m) hx
   have hqlt : ∀ a b : ℝ, -1/2 ≤ a → a < b → ∀ x ∈ Ioo (-1:ℝ) 1, q a x < q b x := by
     intro a b ha hab x _
     simp only [hq]
     nlinarith
   -- the upper bound, by comparison with the polynomial case of degree `m + k`
-  obtain ⟨e, he, heI, hez, ⟨K, hK, hKb⟩, ⟨s₁, hs₁, c, hc, hcb⟩⟩ := lzt_base_data hm k
+  obtain ⟨e, he, heI, hez, ⟨K, hK, hKb⟩, ⟨s₁, hs₁, c, hc, hcb⟩⟩ :=
+      LegendreSturm.polynomial_data hm k
   have hupper : Z.Finite ∧ Z.ncard ≤ k := by
     rcases eq_or_lt_of_le (show ν ≤ m + k by linarith) with heq | hlt
     · have hc : (ν : ℂ) = ((m + k : ℝ) : ℂ) := by rw [heq]
@@ -988,7 +1055,7 @@ theorem lzt_ferrersP_neg_order_zero_count {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/
       rw [hZe]
       refine ⟨finite_range e, ?_⟩
       rw [ncard_range_of_injective he.injective, Nat.card_eq_fintype_card, Fintype.card_fin]
-    · obtain ⟨s₀, hs₀, M, hM⟩ := lzt_ferrersP_near_one ν hm
+    · obtain ⟨s₀, hs₀, M, hM⟩ := LegendreSturm.ferrersP_near_one ν hm
       set t := max (max s₀ s₁) 0 with ht
       have ht1 : t < 1 := max_lt (max_lt hs₀ hs₁) (by norm_num)
       have htI : ∀ x ∈ Ioo t 1, x ∈ Ioo (-1:ℝ) 1 ∧ x ∈ Ioo s₀ 1 ∧ x ∈ Ioo s₁ 1 := by
@@ -998,8 +1065,8 @@ theorem lzt_ferrersP_neg_order_zero_count {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/
         have a3 := le_max_left s₀ s₁
         have a4 := le_max_right s₀ s₁
         exact ⟨⟨by linarith [hx.1], hx.2⟩, ⟨by linarith [hx.1], hx.2⟩, ⟨by linarith [hx.1], hx.2⟩⟩
-      refine lzt_upper_count (hsol ν) (hsol (m + k)) (hqlt ν (m + k) hν hlt) (e := e)
-        (fun x hx h0 => (hez x hx).1 h0) (fun x hx h0 => lzt_ferrersP_simple hm hν hx h0)
+      refine LegendreSturm.upper_count (hsol ν) (hsol (m + k)) (hqlt ν (m + k) hν hlt) (e := e)
+        (fun x hx h0 => (hez x hx).1 h0) (fun x hx h0 => LegendreSturm.ferrersP_simple hm hν hx h0)
         hs₀ (fun x hx => (hM x hx).1) ht1 hK (C := |M| / c) (fun x hx => ?_)
         (fun x hx => (hKb x (htI x hx).1).1)
       obtain ⟨hxI, hx0, hx1⟩ := htI x hx
@@ -1028,8 +1095,8 @@ theorem lzt_ferrersP_neg_order_zero_count {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/
     rw [h1, hj] at h2
     push_cast at h2
     linarith
-  obtain ⟨e', he', heI', hez', ⟨K', hK', hKb'⟩, -⟩ := lzt_base_data hm j
-  obtain ⟨cz, hcz, hczZ⟩ := lzt_lower_count (hsol ν) (hsol (m + j))
+  obtain ⟨e', he', heI', hez', ⟨K', hK', hKb'⟩, -⟩ := LegendreSturm.polynomial_data hm j
+  obtain ⟨cz, hcz, hczZ⟩ := LegendreSturm.lower_count (hsol ν) (hsol (m + j))
     (hqlt (m + j) ν (by have := (j.cast_nonneg : (0:ℝ) ≤ j); linarith) hνj) he' heI' hez'
     (s₀ := 0) (s₀' := 0) (by norm_num) (by norm_num) hK'
     (fun x hx => (hKb' x ⟨by linarith [hx.1], hx.2⟩).1)

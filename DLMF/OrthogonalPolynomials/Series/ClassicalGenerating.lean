@@ -142,7 +142,7 @@ section JacobiLagrange
 open Metric Set
 
 /-- Iterated derivatives of `(1 + a t)^s` on the slit-plane region. -/
-theorem jacGen_iteratedDeriv_cpow (a s : ℂ) (k : ℕ) {t : ℂ} (ht : 1 + a * t ∈ slitPlane) :
+theorem JacobiGenerating.iteratedDeriv_cpow (a s : ℂ) (k : ℕ) {t : ℂ} (ht : 1 + a * t ∈ slitPlane) :
     iteratedDeriv k (fun t => (1 + a * t) ^ s) t =
       a ^ k * ((-1) ^ k * poch (-s) k) * (1 + a * t) ^ (s - k) := by
   have hU : IsOpen {t : ℂ | 1 + a * t ∈ slitPlane} :=
@@ -164,7 +164,7 @@ theorem jacGen_iteratedDeriv_cpow (a s : ℂ) (k : ℕ) {t : ℂ} (ht : 1 + a * 
     ring
 
 /-- `(-1)^k (-s)_k = (s - k + 1)_k`. -/
-theorem jacGen_neg_one_pow_mul_poch_neg (s : ℂ) (k : ℕ) :
+theorem JacobiGenerating.neg_one_pow_mul_poch_neg (s : ℂ) (k : ℕ) :
     (-1 : ℂ) ^ k * poch (-s) k = poch (s - k + 1) k := by
   have h := poch_one_sub_sub (s - k + 1) k
   rw [show 1 - (s - k + 1) - (k : ℂ) = -s by ring] at h
@@ -172,7 +172,7 @@ theorem jacGen_neg_one_pow_mul_poch_neg (s : ℂ) (k : ℕ) :
   simp
 
 /-- `(2/u)^α = 2^α / u^α` in the right half-plane. -/
-theorem jacGen_two_div_cpow (α : ℂ) {u : ℂ} (hu : 0 < u.re) :
+theorem JacobiGenerating.two_div_cpow (α : ℂ) {u : ℂ} (hu : 0 < u.re) :
     (2 / u) ^ α = 2 ^ α / u ^ α := by
   have hu0 : u ≠ 0 := fun h => by simp [h] at hu
   have harg : u.arg ≠ π := by
@@ -188,21 +188,21 @@ theorem jacGen_two_div_cpow (α : ℂ) {u : ℂ} (hu : 0 < u.re) :
   ring
 
 /-- Analyticity of `(1 + a t)^s` at `0`. -/
-theorem jacGen_analyticAt_cpow (a s : ℂ) : AnalyticAt ℂ (fun t => (1 + a * t) ^ s) 0 :=
+theorem JacobiGenerating.analyticAt_cpow (a s : ℂ) : AnalyticAt ℂ (fun t => (1 + a * t) ^ s) 0 :=
   AnalyticAt.cpow (by fun_prop) analyticAt_const (by simp [one_mem_slitPlane])
 
 /-- Taylor coefficients of `(1 + a t)^s (1 + b t)^u` at `0`. -/
-theorem jacGen_coeff_cpow_mul_cpow (a b s u : ℂ) (n : ℕ) :
+theorem JacobiGenerating.coeff_cpow_mul_cpow (a b s u : ℂ) (n : ℕ) :
     iteratedDeriv n (fun t => (1 + a * t) ^ s * (1 + b * t) ^ u) 0 / n ! =
       ∑ i ∈ Finset.range (n + 1), (poch (s - i + 1) i / i !) *
         (poch (u - (n - i : ℕ) + 1) (n - i) / (n - i)!) * a ^ i * b ^ (n - i) := by
-  rw [iteratedDeriv_fun_mul (jacGen_analyticAt_cpow a s).contDiffAt
-    (jacGen_analyticAt_cpow b u).contDiffAt, Finset.sum_div]
+  rw [iteratedDeriv_fun_mul (JacobiGenerating.analyticAt_cpow a s).contDiffAt
+    (JacobiGenerating.analyticAt_cpow b u).contDiffAt, Finset.sum_div]
   refine Finset.sum_congr rfl fun i hi => ?_
   have hin : i ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
-  rw [jacGen_iteratedDeriv_cpow a s i (by simp [one_mem_slitPlane]),
-    jacGen_iteratedDeriv_cpow b u (n - i) (by simp [one_mem_slitPlane]),
-    jacGen_neg_one_pow_mul_poch_neg, jacGen_neg_one_pow_mul_poch_neg]
+  rw [JacobiGenerating.iteratedDeriv_cpow a s i (by simp [one_mem_slitPlane]),
+    JacobiGenerating.iteratedDeriv_cpow b u (n - i) (by simp [one_mem_slitPlane]),
+    JacobiGenerating.neg_one_pow_mul_poch_neg, JacobiGenerating.neg_one_pow_mul_poch_neg]
   simp only [mul_zero, add_zero, one_cpow, mul_one]
   rw [Nat.cast_choose ℂ hin]
   have h1 : (i ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr i.factorial_ne_zero
@@ -213,7 +213,7 @@ theorem jacGen_coeff_cpow_mul_cpow (a b s u : ℂ) (n : ℕ) :
 /-- The Lagrange–Bürmann coefficient `[tⁿ] F φⁿ` for the Jacobi generating function
 (`F = (1 + (x+1)t/2)^α (1 + (x-1)t/2)^β`, `φ = (1 + (x+1)t/2)(1 + (x-1)t/2)`) is
 `P_n^{(α,β)}(x)`, by the binomial form 18.5.8. -/
-theorem jacGen_coeff_eq_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (x : ℂ) (n : ℕ) :
+theorem JacobiGenerating.coeff_eq_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (x : ℂ) (n : ℕ) :
     iteratedDeriv n (fun t => (1 + (x + 1) / 2 * t) ^ α * (1 + (x - 1) / 2 * t) ^ β *
       ((1 + (x + 1) / 2 * t) * (1 + (x - 1) / 2 * t)) ^ n) 0 / n ! = jacobiPolyP α β n x := by
   have hev : (fun t => (1 + (x + 1) / 2 * t) ^ α * (1 + (x - 1) / 2 * t) ^ β *
@@ -231,7 +231,7 @@ theorem jacGen_coeff_eq_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (x : ℂ) (
     ring
   rw [← iteratedDerivWithin_univ, Filter.EventuallyEq.iteratedDerivWithin_eq
     (by simpa using hev) (hev.eq_of_nhds), iteratedDerivWithin_univ,
-    jacGen_coeff_cpow_mul_cpow, jacobi_binomial_sum hα, Finset.mul_sum]
+    JacobiGenerating.coeff_cpow_mul_cpow, jacobi_binomial_sum hα, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i hi => ?_
   have hin : i ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
   have hb : β + n - ((n - i : ℕ) : ℂ) + 1 = β + i + 1 := by push_cast [hin]; ring
@@ -241,7 +241,7 @@ theorem jacGen_coeff_eq_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (x : ℂ) (
   field_simp
 
 /-- For `|x| ≤ 1` and `|z| < 1`, `1 - 2xz + z²` lies in the slit plane. -/
-theorem jacGen_mem_slitPlane {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem JacobiGenerating.mem_slitPlane {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     1 - 2 * x * z + z ^ 2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_contra h
@@ -269,7 +269,8 @@ noncomputable def jacGenRhs (α β : ℂ) (x : ℝ) (z : ℂ) : ℂ :=
     (1 + (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ β)
 
 /-- A point of the closed disc of radius `1/2` keeps `1 + c t` in the right half-plane. -/
-theorem jacGen_re_pos {c t : ℂ} (hc : ‖c‖ ≤ 1) (ht : ‖t‖ ≤ 1 / 2) : 0 < (1 + c * t).re := by
+theorem JacobiGenerating.re_pos {c t : ℂ} (hc : ‖c‖ ≤ 1) (ht : ‖t‖ ≤ 1 / 2) : 0 <
+    (1 + c * t).re := by
   have h1 : ‖c * t‖ ≤ 1 / 2 := by
     rw [norm_mul]; nlinarith [norm_nonneg c, norm_nonneg t]
   have h2 := neg_abs_le (c * t).re
@@ -279,7 +280,7 @@ theorem jacGen_re_pos {c t : ℂ} (hc : ‖c‖ ≤ 1) (ht : ‖t‖ ≤ 1 / 2) 
 
 /-- On the circle `|t| = 1/2`, `|z (1 + a t)(1 + b t)| ≤ 1/4` when `|a|, |b| ≤ 1` and
 `|z| ≤ 1/10`. -/
-private lemma jacGen_norm_mul_le {a b z t : ℂ} (ha1 : ‖a‖ ≤ 1) (hb1 : ‖b‖ ≤ 1)
+private lemma JacobiGenerating.norm_mul_le {a b z t : ℂ} (ha1 : ‖a‖ ≤ 1) (hb1 : ‖b‖ ≤ 1)
     (hzn : ‖z‖ ≤ 1 / 10) (htn : ‖t‖ = 1 / 2) : ‖z * ((1 + a * t) * (1 + b * t))‖ ≤ 1 / 4 := by
   have h1 : ‖1 + a * t‖ ≤ 3 / 2 := (norm_add_le _ _).trans (by
     rw [norm_one, norm_mul, htn]; nlinarith)
@@ -291,7 +292,7 @@ private lemma jacGen_norm_mul_le {a b z t : ℂ} (ha1 : ‖a‖ ≤ 1) (hb1 : �
 
 /-- The factor `c - z a b (t + w)` does not vanish on `|t| ≤ 1/2` when `|a|, |b| ≤ 1`,
 `|z| ≤ 1/10`, `|c| ≥ 9/10` and `|w| ≤ 2/9`. -/
-private lemma jacGen_sub_ne_zero {a b c z w t : ℂ} (ha1 : ‖a‖ ≤ 1) (hb1 : ‖b‖ ≤ 1)
+private lemma JacobiGenerating.sub_ne_zero {a b c z w t : ℂ} (ha1 : ‖a‖ ≤ 1) (hb1 : ‖b‖ ≤ 1)
     (hzn : ‖z‖ ≤ 1 / 10) (hcn : 9 / 10 ≤ ‖c‖) (hwn : ‖w‖ ≤ 2 / 9) (htn : ‖t‖ ≤ 1 / 2) :
     c - z * a * b * (t + w) ≠ 0 := by
   intro h
@@ -305,7 +306,7 @@ private lemma jacGen_sub_ne_zero {a b c z w t : ℂ} (ha1 : ‖a‖ ≤ 1) (hb1 
   linarith
 
 /-- The Jacobi generating function for small `|z|`, by the Lagrange–Bürmann formula. -/
-theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x| ≤ 1) {z : ℂ}
+theorem JacobiGenerating.hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x| ≤ 1) {z : ℂ}
     (hz : ‖z‖ < 1 / 10) :
     HasSum (fun n : ℕ => jacobiPolyP α β n x * z ^ n) (jacGenRhs α β x z) := by
   set a : ℂ := ((x : ℂ) + 1) / 2 with ha
@@ -321,7 +322,7 @@ theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x|
       Complex.norm_real, Real.norm_eq_abs, abs_le]
     constructor <;> linarith
   set u : ℂ := 1 - 2 * x * z + z ^ 2 with hu
-  have huS : u ∈ slitPlane := jacGen_mem_slitPlane hx (by linarith)
+  have huS : u ∈ slitPlane := JacobiGenerating.mem_slitPlane hx (by linarith)
   set R : ℂ := u ^ (1 / 2 : ℂ) with hR
   have hRre : 0 < R.re := Carlson.re_cpow_half_pos huS
   have hR2 : R ^ 2 = u := DLMF.Hypergeometric.cpow_half_sq (slitPlane_ne_zero huS)
@@ -351,8 +352,8 @@ theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x|
   have hFd : DifferentiableOn ℂ (fun t => (1 + a * t) ^ α * (1 + b * t) ^ β)
       (closedBall 0 (1 / 2)) := by
     intro t ht
-    have h1 : 1 + a * t ∈ slitPlane := Or.inl (jacGen_re_pos ha1 (hball t ht))
-    have h2 : 1 + b * t ∈ slitPlane := Or.inl (jacGen_re_pos hb1 (hball t ht))
+    have h1 : 1 + a * t ∈ slitPlane := Or.inl (JacobiGenerating.re_pos ha1 (hball t ht))
+    have h2 : 1 + b * t ∈ slitPlane := Or.inl (JacobiGenerating.re_pos hb1 (hball t ht))
     exact ((DifferentiableAt.cpow (f := fun t => 1 + a * t) (by fun_prop)
       (differentiableAt_const _) h1).mul (DifferentiableAt.cpow (f := fun t => 1 + b * t)
       (by fun_prop) (differentiableAt_const _) h2)).differentiableWithinAt
@@ -367,9 +368,9 @@ theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x|
     rw [norm_one] at h2
     rw [hc]; linarith
   have hg0 : ∀ t ∈ closedBall (0 : ℂ) (1 / 2), c - z * a * b * (t + w) ≠ 0 :=
-    fun t ht => jacGen_sub_ne_zero ha1 hb1 hzn hcn hwn (hball t ht)
+    fun t ht => JacobiGenerating.sub_ne_zero ha1 hb1 hzn hcn hwn (hball t ht)
   have hzΦ : ∀ t ∈ sphere (0 : ℂ) (1 / 2), ‖z * ((1 + a * t) * (1 + b * t))‖ ≤ 1 / 4 :=
-    fun t ht => jacGen_norm_mul_le ha1 hb1 hzn (by simpa using ht)
+    fun t ht => JacobiGenerating.norm_mul_le ha1 hb1 hzn (by simpa using ht)
   have hfac : ∀ t ∈ sphere (0 : ℂ) (1 / 2),
       t - z * ((1 + a * t) * (1 + b * t)) = (t - w) * (c - z * a * b * (t + w)) := by
     intro t _
@@ -380,7 +381,7 @@ theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x|
   -- the coefficients
   have hcoef : ∀ n : ℕ, iteratedDeriv n (fun t => (1 + a * t) ^ α * (1 + b * t) ^ β *
       ((1 + a * t) * (1 + b * t)) ^ n) 0 / n ! = jacobiPolyP α β n x :=
-    fun n => jacGen_coeff_eq_jacobiPolyP hα (x : ℂ) n
+    fun n => JacobiGenerating.coeff_eq_jacobiPolyP hα (x : ℂ) n
   simp only [hcoef] at key
   -- the value
   have hA : 0 < (1 + R - z).re := by
@@ -404,18 +405,19 @@ theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x|
     linear_combination hR2
   convert key using 1
   · funext n; ring
-  · rw [hgw, h1, h2, jacGen_two_div_cpow α hA, jacGen_two_div_cpow β hB, jacGenRhs,
+  · rw [hgw, h1, h2, JacobiGenerating.two_div_cpow α hA,
+        JacobiGenerating.two_div_cpow β hB, jacGenRhs,
       cpow_add _ _ two_ne_zero, ← hu, ← hR]
     have hAα : (1 + R - z) ^ α ≠ 0 := fun h => hA0 ((cpow_eq_zero_iff _ _).mp h).1
     have hBβ : (1 + R + z) ^ β ≠ 0 := fun h => hB0 ((cpow_eq_zero_iff _ _).mp h).1
     field_simp
 
 /-- The right side of 18.12.1 is holomorphic on the unit disc. -/
-theorem jacGen_differentiableOn (α β : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
+theorem JacobiGenerating.differentiableOn (α β : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
     DifferentiableOn ℂ (jacGenRhs α β x) (ball 0 1) := by
   intro z hz
   have hz1 : ‖z‖ < 1 := by simpa using hz
-  have huS := jacGen_mem_slitPlane hx hz1
+  have huS := JacobiGenerating.mem_slitPlane hx hz1
   have hRre := Carlson.re_cpow_half_pos huS
   have hzre := Complex.abs_re_le_norm z
   have hRd : DifferentiableAt ℂ (fun z : ℂ => (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ)) z :=
@@ -456,8 +458,8 @@ theorem jacobi_generating_function {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < 
         (1 + (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ β)) := by
   have _hβ := hβ  -- 18.12.1 holds without a restriction on β
   exact Complex.lagB_hasSum_of_differentiableOn (c := fun n => jacobiPolyP α β n x)
-    (by norm_num : (0 : ℝ) < 1 / 10) (jacGen_differentiableOn α β hx)
-    (fun w hw => jacGen_hasSum_small hα hx (by simpa using hw)) (by simpa using hz)
+    (by norm_num : (0 : ℝ) < 1 / 10) (JacobiGenerating.differentiableOn α β hx)
+    (fun w hw => JacobiGenerating.hasSum_small hα hx (by simpa using hw)) (by simpa using hz)
 
 /-- The series with terms `(fun n : ℕ => ultrasphPoly lam n x * z ^ n)` converges to `((1 - 2 * x
 * z + z ^ 2) ^ (-lam))`. -/

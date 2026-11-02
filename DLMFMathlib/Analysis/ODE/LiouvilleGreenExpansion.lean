@@ -136,7 +136,7 @@ theorem exists_solution_of_approx {a κ : ℝ} {k : 𝕜} {A A' A'' E g P P' P''
     exact mul_le_mul_of_nonneg_right (hK x t hx hxt) (norm_nonneg _)
   -- the forcing term
   have hρr0 : ∀ t, a < t → 0 ≤ κ * ‖r t‖ := fun t _ => by positivity
-  have hσ := lg_volterraOp_step (𝕜 := 𝕜)
+  have hσ := volterraOp_step (𝕜 := 𝕜)
     (p₁ := fun _ => -(2 * k)⁻¹) (q₁ := fun _ => 1)
     (p₂ := fun x => (2 * k)⁻¹ * (E x ^ 2)⁻¹) (q₂ := fun t => E t ^ 2) (ψ := r)
     (ρ := fun t => κ * ‖r t‖) (a := a) (B := fun _ => 1)
@@ -154,7 +154,7 @@ theorem exists_solution_of_approx {a κ : ℝ} {k : 𝕜} {A A' A'' E g P P' P''
   have hρ0 : ∀ t, a < t → 0 ≤ ρ t := fun t _ => by positivity
   set B : ℝ → ℝ := fun x => ∫ t in Ioi x, κ * ‖r t‖ with hB
   have hBa : ∀ x t, a < x → x ≤ t → B t ≤ B x := fun x t hx hxt =>
-    lg_tail_anti hρr0 (fun c hc => (hri c hc).const_mul κ) hx hxt
+    tail_anti hρr0 (fun c hc => (hri c hc).const_mul κ) hx hxt
   obtain ⟨h, hhm, hhb, hheq⟩ := exists_volterra_solution_add (𝕜 := 𝕜)
     (p₁ := fun _ => -(2 * k)⁻¹) (q₁ := fun _ => 1)
     (p₂ := fun x => (2 * k)⁻¹ * (E x ^ 2)⁻¹) (q₂ := fun t => E t ^ 2) (ψ := F')
@@ -166,7 +166,7 @@ theorem exists_solution_of_approx {a κ : ℝ} {k : 𝕜} {A A' A'' E g P P' P''
   have hRx : ∀ x, R x = κ * ∫ t in Ioi x, ‖F' t‖ := fun x => integral_const_mul _ _
   have hBx : ∀ x, B x = κ * ∫ t in Ioi x, ‖r t‖ := fun x => integral_const_mul _ _
   have hB0 : ∀ x, a < x → 0 ≤ B x := fun x hx =>
-    lg_tail_nonneg hρr0 hx.le
+    tail_nonneg hρr0 hx.le
   have hhb' : ∀ t, a < t → ‖h t‖ ≤ B t * Real.exp (R t) := fun t ht => by
     have h1 := hhb t ht
     have h2 := hσ.2.2.2 t ht
@@ -175,7 +175,7 @@ theorem exists_solution_of_approx {a κ : ℝ} {k : 𝕜} {A A' A'' E g P P' P''
       _ = B t * Real.exp (R t) := by ring
   have hhbx : ∀ x, a < x → ∀ t ∈ Ioi x, ‖h t‖ ≤ B x * Real.exp (R x) := fun x hx t ht =>
     (hhb' t (hx.trans ht)).trans (mul_le_mul (hBa x t hx (le_of_lt ht))
-      (Real.exp_le_exp.2 (lg_tail_anti hρ0 hρi hx (le_of_lt ht))) (Real.exp_pos _).le
+      (Real.exp_le_exp.2 (tail_anti hρ0 hρi hx (le_of_lt ht))) (Real.exp_pos _).le
       (hB0 x hx))
   have hmulb : ∀ {q : ℝ → 𝕜}, (∀ c, a < c → IntegrableOn (fun t => q t * F' t) (Ioi c)) →
       ∀ c, a < c → IntegrableOn (fun t => q t * F' t * h t) (Ioi c) := by
@@ -206,13 +206,13 @@ theorem exists_solution_of_approx {a κ : ℝ} {k : 𝕜} {A A' A'' E g P P' P''
     rw [hheq x hx, hσdef, volterraOp, volterraOp, e1, e2]
     ring
   have hhc : ContinuousOn h (Ioi a) :=
-    ((continuousOn_const.mul (lg_continuousOn_integral_Ioi hI₁i)).add
-      (hp₂c.mul (lg_continuousOn_integral_Ioi hI₂i))).congr fun x hx => hheq' x hx
+    ((continuousOn_const.mul (continuousOn_integral_Ioi hI₁i)).add
+      (hp₂c.mul (continuousOn_integral_Ioi hI₂i))).congr fun x hx => hheq' x hx
   have hI₁d : ∀ x, a < x → HasDerivAt I₁ (-(F' x * h x + r x)) x := fun x hx =>
-    lg_hasDerivAt_integral_Ioi hI₁i hx ((hF'c.mul hhc).add hrc |>.continuousAt
+    hasDerivAt_integral_Ioi hI₁i hx ((hF'c.mul hhc).add hrc |>.continuousAt
       (Ioi_mem_nhds hx))
   have hI₂d : ∀ x, a < x → HasDerivAt I₂ (-(E x ^ 2 * (F' x * h x + r x))) x := fun x hx =>
-    lg_hasDerivAt_integral_Ioi hI₂i hx ((hEc.pow 2).mul ((hF'c.mul hhc).add hrc) |>.continuousAt
+    hasDerivAt_integral_Ioi hI₂i hx ((hEc.pow 2).mul ((hF'c.mul hhc).add hrc) |>.continuousAt
       (Ioi_mem_nhds hx))
   have hEinv : ∀ x, a < x → HasDerivAt (fun y => (E y ^ 2)⁻¹)
       (-((2 : ℕ) * E x ^ (2 - 1) * -(k * (A x ^ 2)⁻¹ * E x)) / (E x ^ 2) ^ 2) x :=
@@ -267,7 +267,7 @@ theorem exists_solution_of_approx {a κ : ℝ} {k : 𝕜} {A A' A'' E g P P' P''
       rw [integral_const_mul, hε'def]
       field_simp
       rfl
-    have hexpt := lg_integral_Ioi_mul_exp_tail hρc hρ0 hρi hx
+    have hexpt := integral_Ioi_mul_exp_tail hρc hρ0 hρi hx
     have hEx : 0 < ‖E x‖ ^ 2 := by have := hE0 x hx; positivity
     have hWx : ∫ t in Ioi x, ‖r t‖ = κ⁻¹ * B x := by rw [hBx]; field_simp
     have hbint : IntegrableOn (fun t => κ⁻¹ * B x * (ρ t * Real.exp (R t)) + ‖r t‖) (Ioi x) :=
@@ -426,7 +426,7 @@ theorem exists_solution_expansion_exp {a u : ℝ} (hu : 0 < u) {A A' A'' ξ g : 
         Real.exp ((∫ t in Ioi x, |A t * A'' t - g t * A t ^ 2|) / (2 * u)) ∧
       |A x ^ 2 * ε' x| ≤ 2 * u * ((∫ t in Ioi x, |Ad n t|) / u ^ n) *
         Real.exp ((∫ t in Ioi x, |A t * A'' t - g t * A t ^ 2|) / (2 * u)) := by
-  obtain ⟨hE0, hE, hEle, hK⟩ := lg_exp_kernel (a := a) hu hξ
+  obtain ⟨hE0, hE, hEle, hK⟩ := exp_kernel (a := a) hu hξ
   obtain ⟨ε, ε', w', H⟩ := exists_solution_expansion (𝕜 := ℝ) (a := a)
     (κ := 1 / (2 * u)) (k := u) (A := A) (A' := A') (A'' := A'')
     (E := fun y => Real.exp (-(u * ξ y))) (g := g)

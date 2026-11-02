@@ -34,8 +34,8 @@ equation (§30.3(iii)), the power series in `γ²` (§30.3(iv)) and the asymptot
 
 ## Implementation notes
 
-The continued fraction 30.3.5 is written with the project's continuants (`DLMF.cfTail`,
-`DLMF.HasContinuedFraction`, which assert convergence of the finite truncations). The
+The continued fraction 30.3.5 is written with the project's continuants (`DLMF.Core.cfTail`,
+`DLMF.Core.HasContinuedFraction`, which assert convergence of the finite truncations). The
 equivalence "`λ` solves 30.3.5 iff `λ` is an eigenvalue of the right parity" is split into two
 directions with explicit nondegeneracy hypotheses (nonvanishing finite continuant,
 nonvanishing expansion coefficient), which DLMF leaves implicit.
@@ -131,17 +131,17 @@ theorem spheroidal_cf_of_eigenvalue {m : ℕ} {γ2 : ℝ} (alt : Bool) (p j : �
       let β : ℕ → ℝ := if alt then spheroidalCFBetaAlt m γ2 else spheroidalCFBeta m γ2
       let γ : ℕ → ℝ := if alt then spheroidalCFGammaAlt m γ2 else spheroidalCFGamma m γ2
       let lam : ℝ := spheroidalEigenvalue (m + p % 2 + 2 * j) m γ2
-      (DLMF.cfContinuants
+      (DLMF.Core.cfContinuants
         (fun i => ((if i = 0 then 1 else -1) * (α (p - 2 - 2 * i) * γ (p - 2 * i)) : ℂ))
         (fun i => ((β (p - 2 - 2 * i) - lam : ℝ) : ℂ)) 0 (p / 2)).2.1 ≠ 0) :
     let α : ℕ → ℝ := if alt then spheroidalCFAlphaAlt m γ2 else spheroidalCFAlpha m γ2
     let β : ℕ → ℝ := if alt then spheroidalCFBetaAlt m γ2 else spheroidalCFBeta m γ2
     let γ : ℕ → ℝ := if alt then spheroidalCFGammaAlt m γ2 else spheroidalCFGamma m γ2
     let lam : ℝ := spheroidalEigenvalue (m + p % 2 + 2 * j) m γ2
-    ∃ v : ℂ, DLMF.HasContinuedFraction
+    ∃ v : ℂ, DLMF.Core.HasContinuedFraction
         (fun i => ((if i = 0 then 1 else -1) * (α (p + 2 * i) * γ (p + 2 * i + 2)) : ℂ))
         (fun i => ((β (p + 2 * i + 2) - lam : ℝ) : ℂ)) v ∧
-      ((β p - lam : ℝ) : ℂ) - DLMF.cfTail
+      ((β p - lam : ℝ) : ℂ) - DLMF.Core.cfTail
         (fun i => ((if i = 0 then 1 else -1) * (α (p - 2 - 2 * i) * γ (p - 2 * i)) : ℂ))
         (fun i => ((β (p - 2 - 2 * i) - lam : ℝ) : ℂ)) 0 (p / 2) = v := by
   sorry
@@ -154,13 +154,13 @@ theorem spheroidal_eigenvalue_of_cf {m : ℕ} {γ2 : ℝ} (alt : Bool) (p : ℕ)
     let α : ℕ → ℝ := if alt then spheroidalCFAlphaAlt m γ2 else spheroidalCFAlpha m γ2
     let β : ℕ → ℝ := if alt then spheroidalCFBetaAlt m γ2 else spheroidalCFBeta m γ2
     let γ : ℕ → ℝ := if alt then spheroidalCFGammaAlt m γ2 else spheroidalCFGamma m γ2
-    (DLMF.cfContinuants
+    (DLMF.Core.cfContinuants
         (fun i => ((if i = 0 then 1 else -1) * (α (p - 2 - 2 * i) * γ (p - 2 * i)) : ℂ))
         (fun i => ((β (p - 2 - 2 * i) - lam : ℝ) : ℂ)) 0 (p / 2)).2.1 ≠ 0 →
-    DLMF.HasContinuedFraction
+    DLMF.Core.HasContinuedFraction
         (fun i => ((if i = 0 then 1 else -1) * (α (p + 2 * i) * γ (p + 2 * i + 2)) : ℂ))
         (fun i => ((β (p + 2 * i + 2) - lam : ℝ) : ℂ)) v →
-    ((β p - lam : ℝ) : ℂ) - DLMF.cfTail
+    ((β p - lam : ℝ) : ℂ) - DLMF.Core.cfTail
         (fun i => ((if i = 0 then 1 else -1) * (α (p - 2 - 2 * i) * γ (p - 2 * i)) : ℂ))
         (fun i => ((β (p - 2 - 2 * i) - lam : ℝ) : ℂ)) 0 (p / 2) = v →
     ∃ j : ℕ, lam = spheroidalEigenvalue (m + p % 2 + 2 * j) m γ2 := by

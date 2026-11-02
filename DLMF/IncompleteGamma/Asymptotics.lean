@@ -18,10 +18,10 @@ This umbrella imports the large-argument and large-parameter expansions
 (`DLMF.IncompleteGamma.Asymptotics.Central`). Results already in Mathlib are referenced, not
 reproved.
 
-Proof methods (helper prefix `igAsy_`): 8.11.5 combines 8.11.4 with Binet's form of Stirling's
-formula (`DLMF.Gamma.Gamma_eq_exp_binetExponent`, `DLMF.Gamma.norm_binetMu_le`); 8.11.6 and
-8.11.18 (hence 8.11.17) use repeated integration by parts in `∫₀¹ t^{a-1} e^{λa(1-t)} dt`, whose
-boundary terms produce the polynomials `b_k` of 8.11.9; 8.11.13 at `x = 1` uses the
-finite-interval Laplace method of `ToMathlib.Analysis.Integral.Laplace` (lean-codes) and
-Stirling's formula from Mathlib.
+Proof methods (helpers in `DLMF.Confluent.IncompleteGammaAsymptotics`): 8.11.5 combines 8.11.4 with
+Binet's form of Stirling's formula (`DLMF.Gamma.Gamma_eq_exp_binetExponent`,
+`DLMF.Gamma.norm_binetMu_le`); 8.11.6 and 8.11.18 (hence 8.11.17) use repeated integration by parts
+in `∫₀¹ t^{a-1} e^{λa(1-t)} dt`, whose boundary terms produce the polynomials `b_k` of 8.11.9;
+8.11.13 at `x = 1` uses the finite-interval Laplace method of `ToMathlib.Analysis.Integral.Laplace`
+(lean-codes) and Stirling's formula from Mathlib.
 -/

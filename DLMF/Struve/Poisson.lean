@@ -33,6 +33,8 @@ The `I_ν` case reuses `DLMF.Bessel.besselI_eq_poisson_integral`.
 open Complex Filter Set MeasureTheory DLMF
 open scoped Real Topology Nat Interval
 
+open DLMF.Core
+
 namespace DLMF.Struve
 
 

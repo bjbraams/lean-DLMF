@@ -30,13 +30,15 @@ negative real axis, and the relations of `Ei` to `E₁`, `Shi` and `Chi`.
   negative real axis and `Ei` as their average (DLMF 6.5.1, 6.5.2).
 * `sinhInt_eq_Ei`, `coshInt_eq_Ei`: `Shi` and `Chi` in terms of `Ei` and `E₁` (DLMF 6.5.3,
   6.5.4).
-* `expIntAux_laplace_hasIntegralAtTop`: Laplace representations of `f` and `g` on the closed
-  right half-plane minus the origin.
+* `ExpIntegralAuxiliary.laplace_hasIntegralAtTop`: Laplace representations of `f` and `g` on the
+  closed right half-plane minus the origin.
 -/
 
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- E₁ on the logarithmic plane. -/
@@ -377,7 +379,7 @@ theorem hasIntegralAtTop_exp_neg_mul_div_sub {z : ℂ} (hz0 : z ≠ 0) (hz : 0 �
 
 /-- Laplace representations of the auxiliary functions `f` and `g` on the closed right
 half-plane minus the origin, as improper integrals. -/
-theorem expIntAux_laplace_hasIntegralAtTop {z : ℂ} (hz0 : z ≠ 0) (hz : 0 ≤ z.re) :
+theorem ExpIntegralAuxiliary.laplace_hasIntegralAtTop {z : ℂ} (hz0 : z ≠ 0) (hz : 0 ≤ z.re) :
     HasIntegralAtTop (fun t : ℝ => exp (-z*t)/((t:ℂ)^2+1)) 0 (expIntAuxF z) ∧
     HasIntegralAtTop (fun t : ℝ => (t:ℂ)*exp (-z*t)/((t:ℂ)^2+1)) 0 (expIntAuxG z) := by
   have hs1 : ∀ t : ℝ, 0 ≤ t → (t:ℂ)-I ∈ slitPlane := fun t _ => by right; simp

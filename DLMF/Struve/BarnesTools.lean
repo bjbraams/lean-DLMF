@@ -17,14 +17,14 @@ This file provides estimates for the Barnes integral of `𝐇_ν` (DLMF 11.5.8),
 
 ## Main results
 
-* `struveBar_recip_Gamma_isBigO`: on a shifted vertical line,
+* `BarnesIntegrand.recip_Gamma_isBigO`: on a shifted vertical line,
   `1/|Γ(a + i(y+m))| = O(y^{1/2-a} e^{πy/2})` as `y → +∞` (Stirling, DLMF 5.11.9, from
   `DLMF.Gamma.tendsto_norm_Gamma_vertical_div`).
-* `struveBar_pi_div_sin_le`, `struveBar_pi_div_sin_isBigO`: `π/|sin(π(t+iy))| ≤ 4π e^{-πy}` for
-  `y ≥ 1`.
-* `struveBar_isBigO`: the product `π/|sin| · 1/|Γ(a+iy)| · 1/|Γ(b+i(y+m))|` is `O(y^{1-a-b})`.
-* `struveBar_integrableOn_rpow_div_Gamma`: `w^t/(Γ(α+t)Γ(β+t))` is integrable on `(c, ∞)`.
-* `struveBar_integrable_of_isBigO`: continuous functions with `O(|y|^p)` tails, `p < -1`, are
+* `BarnesIntegrand.pi_div_sin_le`, `BarnesIntegrand.pi_div_sin_isBigO`:
+  `π/|sin(π(t+iy))| ≤ 4π e^{-πy}` for `y ≥ 1`.
+* `BarnesIntegrand.isBigO`: the product `π/|sin| · 1/|Γ(a+iy)| · 1/|Γ(b+i(y+m))|` is `O(y^{1-a-b})`.
+* `BarnesIntegrand.integrableOn_rpow_div_Gamma`: `w^t/(Γ(α+t)Γ(β+t))` is integrable on `(c, ∞)`.
+* `BarnesIntegrand.integrable_of_isBigO`: continuous functions with `O(|y|^p)` tails, `p < -1`, are
   integrable on `ℝ`.
 -/
 
@@ -38,7 +38,7 @@ open scoped Real Topology
 namespace DLMF.Struve
 
 /-- `(y + m)^q ≤ 2^|q| y^q` once `y ≥ 2|m|`, `y > 0`. -/
-theorem struveBar_rpow_shift_le {y m q : ℝ} (hy : 0 < y) (hym : 2 * |m| ≤ y) :
+theorem BarnesIntegrand.rpow_shift_le {y m q : ℝ} (hy : 0 < y) (hym : 2 * |m| ≤ y) :
     (y + m) ^ q ≤ (2 : ℝ) ^ |q| * y ^ q := by
   have h1 : y / 2 ≤ y + m := by linarith [neg_abs_le m]
   have h2 : y + m ≤ 2 * y := by linarith [le_abs_self m, abs_nonneg m]
@@ -53,7 +53,7 @@ theorem struveBar_rpow_shift_le {y m q : ℝ} (hy : 0 < y) (hym : 2 * |m| ≤ y)
           div_eq_mul_inv, mul_comm]
 
 /-- Stirling on a shifted vertical line: `1/|Γ(a + i(y+m))| = O(y^{1/2-a} e^{πy/2})`. -/
-theorem struveBar_recip_Gamma_isBigO (a m : ℝ) :
+theorem BarnesIntegrand.recip_Gamma_isBigO (a m : ℝ) :
     (fun y : ℝ => (‖Gamma ((a : ℂ) + ((y : ℂ) + m) * I)‖)⁻¹) =O[atTop]
       (fun y : ℝ => y ^ (1 / 2 - a) * Real.exp (π * y / 2)) := by
   have hE := (Asymptotics.isEquivalent_of_tendsto_one
@@ -76,7 +76,7 @@ theorem struveBar_recip_Gamma_isBigO (a m : ℝ) :
   rw [mul_inv, mul_inv, ← Real.rpow_neg hym.le, ← Real.exp_neg,
     show -(a - 1 / 2) = 1 / 2 - a by ring,
     show -(-π * (y + m) / 2) = π * m / 2 + π * y / 2 by ring, Real.exp_add]
-  have hs := struveBar_rpow_shift_le (q := 1 / 2 - a) hy0 (by linarith)
+  have hs := BarnesIntegrand.rpow_shift_le (q := 1 / 2 - a) hy0 (by linarith)
   have hp : 0 ≤ (√(2 * π))⁻¹ * rexp (π * m / 2) := by positivity
   calc (√(2 * π))⁻¹ * (y + m) ^ (1 / 2 - a) * (rexp (π * m / 2) * rexp (π * y / 2))
       = ((√(2 * π))⁻¹ * rexp (π * m / 2)) * (y + m) ^ (1 / 2 - a) * rexp (π * y / 2) := by ring
@@ -86,10 +86,10 @@ theorem struveBar_recip_Gamma_isBigO (a m : ℝ) :
 
 
 /-- `π/|sin(π(t+iy))| ≤ 4π e^{-πy}` for `y ≥ 1`. -/
-theorem struveBar_pi_div_sin_le (t : ℝ) {y : ℝ} (hy : 1 ≤ y) :
+theorem BarnesIntegrand.pi_div_sin_le (t : ℝ) {y : ℝ} (hy : 1 ≤ y) :
     π / ‖sin (π * ((t : ℂ) + y * I))‖ ≤ 4 * π * Real.exp (-(π * y)) := by
   have hpy : π ≤ π * y := by nlinarith [Real.pi_pos]
-  have hs := Complex.barnesRes_abs_sinh_le_norm_sin (π * t) (π * y)
+  have hs := Complex.BarnesResidue.abs_sinh_le_norm_sin (π * t) (π * y)
   rw [show (π : ℂ) * ((t : ℂ) + y * I) = ((π * t : ℝ) : ℂ) + ((π * y : ℝ) : ℂ) * I by
     push_cast; ring]
   have he : 2 ≤ Real.exp (π * y) := by
@@ -106,23 +106,23 @@ theorem struveBar_pi_div_sin_le (t : ℝ) {y : ℝ} (hy : 1 ≤ y) :
         rw [Real.exp_neg]; field_simp
 
 /-- `π/|sin(π(t+iy))| = O(e^{-πy})` as `y → +∞`. -/
-theorem struveBar_pi_div_sin_isBigO (t : ℝ) :
+theorem BarnesIntegrand.pi_div_sin_isBigO (t : ℝ) :
     (fun y : ℝ => π / ‖sin (π * ((t : ℂ) + y * I))‖) =O[atTop]
       (fun y : ℝ => Real.exp (-(π * y))) := by
   refine Asymptotics.IsBigO.of_bound (4 * π) ?_
   filter_upwards [eventually_ge_atTop 1] with y hy
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _),
     abs_of_nonneg (div_nonneg Real.pi_pos.le (norm_nonneg _))]
-  exact struveBar_pi_div_sin_le t hy
+  exact BarnesIntegrand.pi_div_sin_le t hy
 
 /-- **Decay of the Barnes integrand of `H_ν` on horizontal lines** (Stirling, DLMF 5.11.9):
 `π/|sin(π(t+iy))| · 1/|Γ(a+iy)| · 1/|Γ(b+i(y+m))| = O(y^{1-a-b})` as `y → +∞`. -/
-theorem struveBar_isBigO (t a b m : ℝ) :
+theorem BarnesIntegrand.isBigO (t a b m : ℝ) :
     (fun y : ℝ => π / ‖sin (π * ((t : ℂ) + y * I))‖ * (‖Gamma ((a : ℂ) + y * I)‖)⁻¹ *
       (‖Gamma ((b : ℂ) + ((y : ℂ) + m) * I)‖)⁻¹) =O[atTop] (fun y : ℝ => y ^ (1 - a - b)) := by
-  have h1 := struveBar_pi_div_sin_isBigO t
-  have h2 := struveBar_recip_Gamma_isBigO a 0
-  have h3 := struveBar_recip_Gamma_isBigO b m
+  have h1 := BarnesIntegrand.pi_div_sin_isBigO t
+  have h2 := BarnesIntegrand.recip_Gamma_isBigO a 0
+  have h3 := BarnesIntegrand.recip_Gamma_isBigO b m
   simp only [ofReal_zero, add_zero] at h2
   refine ((h1.mul h2).mul h3).trans (Filter.EventuallyEq.isBigO ?_)
   filter_upwards [eventually_gt_atTop 0] with y hy
@@ -132,7 +132,7 @@ theorem struveBar_isBigO (t a b m : ℝ) :
   linear_combination (y ^ (1 / 2 - a) * y ^ (1 / 2 - b)) * this
 
 /-- `t ↦ w^t / (Γ(α+t) Γ(β+t))` is continuous on `[c, ∞)` when `α + c, β + c > 0`. -/
-theorem struveBar_continuousOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c) (hβ : 0 < β + c)
+theorem BarnesIntegrand.continuousOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c) (hβ : 0 < β + c)
     (hw : 0 < w) :
     ContinuousOn (fun t : ℝ => w ^ t / (Real.Gamma (α + t) * Real.Gamma (β + t))) (Ici c) := by
   intro t ht
@@ -150,11 +150,11 @@ theorem struveBar_continuousOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + 
 
 /-- `t ↦ w^t / (Γ(α+t) Γ(β+t))` is integrable on `(c, ∞)` when `α + c, β + c > 0`
 (factorial decay, `DLMF.Gamma.shiftB_Gamma_ge`). -/
-theorem struveBar_integrableOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c) (hβ : 0 < β + c)
+theorem BarnesIntegrand.integrableOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c) (hβ : 0 < β + c)
     (hw : 0 < w) :
     IntegrableOn (fun t : ℝ => w ^ t / (Real.Gamma (α + t) * Real.Gamma (β + t))) (Ioi c) := by
   set f := fun t : ℝ => w ^ t / (Real.Gamma (α + t) * Real.Gamma (β + t)) with hf
-  have hcont := struveBar_continuousOn_rpow_div_Gamma hα hβ hw
+  have hcont := BarnesIntegrand.continuousOn_rpow_div_Gamma hα hβ hw
   set T : ℝ := max (max c 0) (max (1 - α) (1 - β)) with hT
   have hcT : c ≤ T := le_trans (le_max_left _ _) (le_max_left _ _)
   have h1 : IntegrableOn f (Icc c T) :=
@@ -203,7 +203,7 @@ theorem struveBar_integrableOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + 
   · exact Or.inr (lt_of_not_ge htT)
 
 /-- `y^p = O((1 + |y|)^p)` as `y → +∞`, for `p ≤ 0`. -/
-theorem struveBar_rpow_isBigO_one_add {p : ℝ} (hp : p ≤ 0) :
+theorem BarnesIntegrand.rpow_isBigO_one_add {p : ℝ} (hp : p ≤ 0) :
     (fun y : ℝ => y ^ p) =O[atTop] (fun y : ℝ => (1 + ‖y‖) ^ p) := by
   refine Asymptotics.IsBigO.of_bound ((2 : ℝ) ^ (-p)) ?_
   filter_upwards [eventually_ge_atTop 1] with y hy
@@ -221,7 +221,7 @@ theorem struveBar_rpow_isBigO_one_add {p : ℝ} (hp : p ≤ 0) :
     _ ≤ (2 : ℝ) ^ (-p) * (1 + y) ^ p := mul_le_mul_of_nonneg_left h h3
 
 /-- A continuous function on `ℝ` with `O(|y|^p)` tails at both ends, `p < -1`, is integrable. -/
-theorem struveBar_integrable_of_isBigO {E : Type*} [NormedAddCommGroup E] {f : ℝ → E}
+theorem BarnesIntegrand.integrable_of_isBigO {E : Type*} [NormedAddCommGroup E] {f : ℝ → E}
     (hf : Continuous f) {p : ℝ} (hp : p < -1)
     (h1 : f =O[atTop] (fun y : ℝ => y ^ p))
         (h2 : (fun y => f (-y)) =O[atTop] (fun y : ℝ => y ^ p)) :
@@ -229,7 +229,7 @@ theorem struveBar_integrable_of_isBigO {E : Type*} [NormedAddCommGroup E] {f : �
   have hg : Integrable (fun y : ℝ => (1 + ‖y‖) ^ p) := by
     have := integrable_one_add_norm (E := ℝ) (μ := volume) (r := -p) (by simp; linarith)
     simpa using this
-  have hO := struveBar_rpow_isBigO_one_add (by linarith : p ≤ 0)
+  have hO := BarnesIntegrand.rpow_isBigO_one_add (by linarith : p ≤ 0)
   have hbot : f =O[atBot] (fun y : ℝ => (1 + ‖y‖) ^ p) := by
     have := (h2.trans hO).comp_tendsto tendsto_neg_atBot_atTop
     simpa [Function.comp_def] using this

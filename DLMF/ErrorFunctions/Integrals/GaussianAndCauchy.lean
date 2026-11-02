@@ -26,7 +26,7 @@ quadratic Gaussian integrals and their tails, and Laplace-type representations.
 * `erf_primitive`: the primitive of `erf` (DLMF 7.7.9).
 * `fresnelAuxFComplex_laplace_integral`, `fresnelAuxGComplex_laplace_integral`: Laplace forms of
   the Fresnel auxiliary functions (DLMF 7.7.10, 7.7.11).
-* `fresnelAux_contour_tail`: the contour representation of `g + i f` (DLMF 7.7.12).
+* `FresnelAuxiliary.contour_tail`: the contour representation of `g + i f` (DLMF 7.7.12).
 * `goodwinStatonG_dawson`: the Goodwin–Staton integral in terms of Dawson's function and the
   exponential integral (DLMF 7.5.13).
 -/
@@ -36,6 +36,8 @@ quadratic Gaussian integrals and their tails, and Laplace-type representations.
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
+
+open DLMF.Core
 
 namespace DLMF.Confluent
 
@@ -318,7 +320,7 @@ theorem erfc_rational_gaussian_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
 /-! ### Tools for DLMF 7.7.2 -/
 
 /-- `1/(t-z) = i ∫₀^∞ e^{i(z-t)s} ds` for `Im z > 0`. -/
-theorem erfInt_recip_sub_eq_integral {z : ℂ} (hz : 0 < z.im) (t : ℝ) :
+theorem ErrorFunctionIntegrals.recip_sub_eq_integral {z : ℂ} (hz : 0 < z.im) (t : ℝ) :
     1/((t:ℂ)-z) = I * ∫ s in Ioi (0:ℝ), exp (I*(z-t)*s) := by
   have hre : (I*(z-t)).re < 0 := by simp; linarith
   have hne : z - (t:ℂ) ≠ 0 := fun h => by
@@ -330,7 +332,7 @@ theorem erfInt_recip_sub_eq_integral {z : ℂ} (hz : 0 < z.im) (t : ℝ) :
   ring_nf
 
 /-- The Gaussian Fourier integral `∫ e^{-t²} e^{-its} dt = √π e^{-s²/4}`. -/
-theorem erfInt_gauss_fourier (s : ℝ) :
+theorem ErrorFunctionIntegrals.gauss_fourier (s : ℝ) :
     ∫ t : ℝ, exp (-(t:ℂ)^2) * exp (-I*s*t) = Real.sqrt π * exp (-(s:ℂ)^2/4) := by
   have h := integral_cexp_quadratic (b := -1) (by simp) (-I*s) 0
   have hc : (π / -(-1:ℂ)) ^ (1/2:ℂ) = Real.sqrt π := by
@@ -346,7 +348,7 @@ theorem erfInt_gauss_fourier (s : ℝ) :
   ring_nf; rw [I_sq]; ring
 
 /-- `√π ∫₀^∞ e^{izs} e^{-s²/4} ds = π w(z)`. -/
-theorem erfInt_half_line_faddeeva (z : ℂ) :
+theorem ErrorFunctionIntegrals.half_line_faddeeva (z : ℂ) :
     ∫ s in Ioi (0:ℝ), exp (I*z*s) * (Real.sqrt π * exp (-(s:ℂ)^2/4)) = π * faddeevaW z := by
   have h := gaussian_quadratic_tail_aux (a := 1/4) (by norm_num) (-I*z/2) 0 0
   have h4 : ((1/4:ℂ))^(1/2:ℂ) = 1/2 := by
@@ -365,7 +367,7 @@ theorem erfInt_half_line_faddeeva (z : ℂ) :
   linear_combination (exp (-z^2) * erfc (-I*z)) * hπ
 
 /-- **DLMF 7.7.2, first form**: `∫_{-∞}^{∞} e^{-t²}/(t-z) dt = πi w(z)` for `Im z > 0`. -/
-theorem erfInt_faddeeva_cauchy {z : ℂ} (hz : 0 < z.im) :
+theorem ErrorFunctionIntegrals.faddeeva_cauchy {z : ℂ} (hz : 0 < z.im) :
     ∫ t : ℝ, exp (-(t : ℂ)^2)/(t-z) = π*I*faddeevaW z := by
   set F : ℝ → ℝ → ℂ := fun t s => exp (-(t:ℂ)^2) * exp (I*(z-t)*s) with hF
   have hint : Integrable (Function.uncurry F) (volume.prod (volume.restrict (Ioi 0))) := by
@@ -380,23 +382,23 @@ theorem erfInt_faddeeva_cauchy {z : ℂ} (hz : 0 < z.im) :
       · simp
   have hinner : ∀ t : ℝ, exp (-(t : ℂ)^2)/(t-z) = I * ∫ s in Ioi (0:ℝ), F t s := by
     intro t
-    rw [div_eq_mul_one_div, erfInt_recip_sub_eq_integral hz t, hF]
+    rw [div_eq_mul_one_div, ErrorFunctionIntegrals.recip_sub_eq_integral hz t, hF]
     simp only
     rw [integral_const_mul]; ring
   simp_rw [hinner]
   rw [integral_const_mul, integral_integral_swap hint]
   have hs : ∀ s : ℝ, ∫ t : ℝ, F t s = exp (I*z*s) * (Real.sqrt π * exp (-(s:ℂ)^2/4)) := by
     intro s
-    rw [← erfInt_gauss_fourier s, ← integral_const_mul]
+    rw [← ErrorFunctionIntegrals.gauss_fourier s, ← integral_const_mul]
     refine integral_congr_ae (Eventually.of_forall fun t => ?_)
     simp only [hF]
     rw [mul_left_comm, ← Complex.exp_add, ← Complex.exp_add, ← Complex.exp_add]
     congr 1; ring
   simp_rw [hs]
-  rw [erfInt_half_line_faddeeva]; ring
+  rw [ErrorFunctionIntegrals.half_line_faddeeva]; ring
 
 /-- `e^{-t²}/(t-z)` is integrable on `ℝ` for `Im z > 0`. -/
-theorem erfInt_integrable_gauss_div {z : ℂ} (hz : 0 < z.im) :
+theorem ErrorFunctionIntegrals.integrable_gauss_div {z : ℂ} (hz : 0 < z.im) :
     Integrable (fun t : ℝ => exp (-(t : ℂ)^2)/(t-z)) := by
   have hne : ∀ t : ℝ, (t:ℂ) - z ≠ 0 := fun t h => by
     have := congrArg im h; simp at this; linarith
@@ -414,17 +416,17 @@ theorem erfInt_integrable_gauss_div {z : ℂ} (hz : 0 < z.im) :
     gcongr
 
 /-- **DLMF 7.7.2** (both forms). -/
-theorem erfInt_faddeeva_cauchy_both {z : ℂ} (hz : 0 < z.im) :
+theorem ErrorFunctionIntegrals.faddeeva_cauchy_both {z : ℂ} (hz : 0 < z.im) :
     (∫ t : ℝ, exp (-(t : ℂ)^2)/(t-z))=π*I*faddeevaW z ∧
       (∫ t : ℝ in Ioi 0, exp (-(t : ℂ)^2)/((t : ℂ)^2-z^2))=π*I/(2*z)*faddeevaW z := by
-  refine ⟨erfInt_faddeeva_cauchy hz, ?_⟩
+  refine ⟨ErrorFunctionIntegrals.faddeeva_cauchy hz, ?_⟩
   have hz0 : z ≠ 0 := fun h => by rw [h] at hz; simp at hz
   have hne : ∀ t : ℝ, (t:ℂ) - z ≠ 0 := fun t h => by
     have := congrArg im h; simp at this; linarith
   have hne' : ∀ t : ℝ, (t:ℂ) + z ≠ 0 := fun t h => by
     have := congrArg im h; simp at this; linarith
   set g : ℝ → ℂ := fun t => exp (-(t : ℂ)^2)/(t-z) with hg
-  have hgi := erfInt_integrable_gauss_div hz
+  have hgi := ErrorFunctionIntegrals.integrable_gauss_div hz
   have hg2 : Integrable (fun t : ℝ => exp (-(t : ℂ)^2)/(t+z)) := by
     have := (hgi.comp_neg).neg
     refine this.congr (Eventually.of_forall fun t => ?_)
@@ -449,7 +451,7 @@ theorem erfInt_faddeeva_cauchy_both {z : ℂ} (hz : 0 < z.im) :
     rw [show -(t:ℂ) - z = -((t:ℂ)+z) by ring, div_neg, neg_neg]
   rw [hsplit, hneg, sub_neg_eq_add, add_comm,
     intervalIntegral.integral_Iic_add_Ioi hgi.integrableOn hgi.integrableOn,
-    erfInt_faddeeva_cauchy hz]
+    ErrorFunctionIntegrals.faddeeva_cauchy hz]
   field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ, exp (-(t :
@@ -459,10 +461,10 @@ theorem erfInt_faddeeva_cauchy_both {z : ℂ} (hz : 0 < z.im) :
 theorem faddeevaW_cauchy_integral {z : ℂ} (hz : 0 < z.im) :
     (∫ t : ℝ, exp (-(t : ℂ)^2)/(t-z))=π*I*faddeevaW z ∧
         (∫ t : ℝ in Ioi 0, exp (-(t : ℂ)^2)/((t : ℂ)^2-z^2))=π*I/(2*z)*faddeevaW z :=
-  erfInt_faddeeva_cauchy_both hz
+  ErrorFunctionIntegrals.faddeeva_cauchy_both hz
 
 /-- The Gaussian rational integral with numerator `2t` is an exponential integral. -/
-theorem erfInt_goodwin_gaussian_e1 {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
+theorem ErrorFunctionIntegrals.goodwin_gaussian_e1 {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     (∫ t : ℝ in Ioi 0, (2*(t:ℂ))*exp (-(t:ℂ)^2)/((t:ℂ)^2-z^2)) =
       exp (-z^2)*genExpIntE 1 (-z^2) := by
   have hzi : 0 < (z^2).im := by
@@ -502,7 +504,7 @@ theorem erfInt_goodwin_gaussian_e1 {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
 theorem goodwinStatonG_eq_E1_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     goodwinStatonG z = exp (-z^2)/2*genExpIntE 1 (-z^2)-π*I/2*faddeevaW z := by
   let A := ∫ t : ℝ in Ioi 0, exp (-(t:ℂ)^2)/((t:ℂ)-z)
-  have hA := (erfInt_integrable_gauss_div hi).integrableOn (s := Ioi (0:ℝ))
+  have hA := (ErrorFunctionIntegrals.integrable_gauss_div hi).integrableOn (s := Ioi (0:ℝ))
   have hB := goodwinStatonG_integrable (z := z) (Or.inl hr)
   have hne (t : ℝ) : (t:ℂ)-z ≠ 0 := by
     intro h
@@ -516,7 +518,7 @@ theorem goodwinStatonG_eq_E1_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi :
     exact hi.ne' this
   have hsum : A + goodwinStatonG z = exp (-z^2)*genExpIntE 1 (-z^2) := by
     dsimp only [A]
-    rw [goodwinStatonG, ← integral_add hA hB, ← erfInt_goodwin_gaussian_e1 hr hi]
+    rw [goodwinStatonG, ← integral_add hA hB, ← ErrorFunctionIntegrals.goodwin_gaussian_e1 hr hi]
     refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
     have hden : (t:ℂ)^2-z^2 ≠ 0 := by
       rw [sq_sub_sq]; exact mul_ne_zero (hne' t) (hne t)
@@ -532,12 +534,13 @@ theorem goodwinStatonG_eq_E1_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi :
   have hdiff : A-goodwinStatonG z = π*I*faddeevaW z := by
     dsimp only [A]
     rw [sub_eq_add_neg, ← hneg, add_comm,
-      intervalIntegral.integral_Iic_add_Ioi (erfInt_integrable_gauss_div hi).integrableOn hA,
-      erfInt_faddeeva_cauchy hi]
+      intervalIntegral.integral_Iic_add_Ioi
+          (ErrorFunctionIntegrals.integrable_gauss_div hi).integrableOn hA,
+      ErrorFunctionIntegrals.faddeeva_cauchy hi]
   linear_combination (hsum-hdiff)/2
 
 /-- The principal logarithm needed when approaching the positive axis from above. -/
-theorem erfInt_goodwin_log_neg_sq {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
+theorem ErrorFunctionIntegrals.goodwin_log_neg_sq {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     log (-z^2) = 2*log z-π*I := by
   have hz : z ≠ 0 := fun h => by simp [h] at hr
   have ha : 0 < arg z := lt_of_le_of_ne (arg_nonneg_iff.mpr hi.le)
@@ -558,7 +561,7 @@ theorem goodwinStatonG_eq_Ein_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi 
   have hz : z ≠ 0 := fun h => by simp [h] at hr
   rw [goodwinStatonG_eq_E1_of_re_pos_of_im_pos hr hi,
       expIntE1_eq_Ein_complex (neg_ne_zero.mpr (pow_ne_zero 2 hz)),
-    erfInt_goodwin_log_neg_sq hr hi, (dawsonF_faddeeva z).1]
+    ErrorFunctionIntegrals.goodwin_log_neg_sq hr hi, (dawsonF_faddeeva z).1]
   have hsq : (Real.sqrt π:ℂ)^2 = π := by exact_mod_cast Real.sq_sqrt Real.pi_pos.le
   linear_combination -(I/2*(exp (-z^2)-faddeevaW z))*hsq
 
@@ -1079,7 +1082,7 @@ z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(-1/2 : ℂ)*exp (-π*z^2*
 theorem fresnelAuxFComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
     fresnelAuxFComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
         (t : ℂ)^(-1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1)) := by
-  have h := erfInt_fresnelAux_laplace false hz
+  have h := ErrorFunctionIntegrals.fresnelAux_laplace false hz
   simp only [Bool.false_eq_true, ite_false, Nat.cast_zero, zero_sub] at h
   rw [h]; congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
@@ -1091,7 +1094,7 @@ z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(1/2 : ℂ)*exp (-π*z^2*t
 theorem fresnelAuxGComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
     fresnelAuxGComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
         (t : ℂ)^(1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1)) := by
-  have h := erfInt_fresnelAux_laplace true hz
+  have h := ErrorFunctionIntegrals.fresnelAux_laplace true hz
   simp only [ite_true, Nat.cast_one] at h
   rw [h]; congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
@@ -1100,7 +1103,7 @@ theorem fresnelAuxGComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
 /-- The map `(fun R : ℝ => exp (-π*I*z^2/2)*segmentIntegral (fun t => exp (π*I*t^2/2)) z R)` tends
 to `(𝓝 (fresnelAuxGComplex z+I*fresnelAuxFComplex z))` along `atTop`. -/
 @[dlmf 7.7.E12]
-theorem fresnelAux_contour_tail (z : ℂ) :
+theorem FresnelAuxiliary.contour_tail (z : ℂ) :
     Tendsto (fun R : ℝ => exp (-π*I*z^2/2)*segmentIntegral (fun t => exp (π*I*t^2/2)) z R) atTop
         (𝓝 (fresnelAuxGComplex z+I*fresnelAuxFComplex z)) := by
   have h := (fresnelTail_horizontal_integral z).const_mul (exp (-π*I*z^2/2))

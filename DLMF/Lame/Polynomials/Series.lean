@@ -664,11 +664,450 @@ theorem lamePolyEk_algebraic_form (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
         (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) :=
   exists_poly_roots_lamePolyEk hk0 hk1 t hm
 
+/-- Logarithmic derivative of `∏ (X - a)` at a point `r` that is not a root. -/
+private lemma eval_derivative_prod_X_sub_C {T : Multiset ℝ} {r : ℝ} (hr : r ∉ T) :
+    eval r (derivative (T.map fun a => X - C a).prod) =
+      eval r (T.map fun a => X - C a).prod * (T.map fun a => 1 / (r - a)).sum := by
+  induction T using Multiset.induction_on with
+  | empty => simp
+  | cons a T ih =>
+    have ha : r - a ≠ 0 := sub_ne_zero.2 fun h => hr (h ▸ Multiset.mem_cons_self _ _)
+    have hT : r ∉ T := fun h => hr (Multiset.mem_cons_of_mem h)
+    simp only [Multiset.map_cons, Multiset.prod_cons, Multiset.sum_cons, derivative_mul,
+      derivative_sub, derivative_X, derivative_C, eval_add, eval_mul, eval_sub, eval_X, eval_C,
+      ih hT, sub_zero, one_mul]
+    field_simp
+
+/-- At a simple root `r` of a split real polynomial, `P'(r) ≠ 0` and
+`P''(r) = 2P'(r) ∑_{η ≠ r} 1/(r - η)`. -/
+private lemma eval_derivative_derivative_of_mem_roots {P : ℝ[X]}
+    (hc : Multiset.card P.roots = P.natDegree) (hnd : P.roots.Nodup) {r : ℝ}
+    (hr : r ∈ P.roots) :
+    eval r (derivative P) ≠ 0 ∧ eval r (derivative (derivative P)) =
+      2 * eval r (derivative P) * ((P.roots.erase r).map fun η => 1 / (r - η)).sum := by
+  have hP0 : P ≠ 0 := ne_zero_of_mem_roots hr
+  have hrT : r ∉ P.roots.erase r := hnd.notMem_erase
+  set T := P.roots.erase r with hT
+  set Q := (T.map fun a => X - C a).prod with hQdef
+  have hPe : P = C P.leadingCoeff * ((X - C r) * Q) := by
+    conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C hc, ← Multiset.cons_erase hr]
+    rw [Multiset.map_cons, Multiset.prod_cons]
+  have hQ : eval r Q ≠ 0 := by
+    rw [hQdef, eval_multiset_prod, Multiset.map_map]
+    refine Multiset.prod_ne_zero fun h => ?_
+    obtain ⟨a, ha, h0⟩ := Multiset.mem_map.1 h
+    simp only [Function.comp, eval_sub, eval_X, eval_C] at h0
+    exact hrT (sub_eq_zero.1 h0 ▸ ha)
+  have hD := eval_derivative_prod_X_sub_C hrT
+  rw [← hQdef] at hD
+  have hlc : P.leadingCoeff ≠ 0 := leadingCoeff_ne_zero.2 hP0
+  rw [hPe]
+  simp only [derivative_mul, derivative_add, derivative_C, derivative_sub, derivative_X,
+    eval_add, eval_mul, eval_C, eval_sub, eval_X, sub_self, zero_mul, zero_add, add_zero,
+    sub_zero, one_mul]
+  refine ⟨mul_ne_zero hlc hQ, ?_⟩
+  rw [hD]; ring
+
+
+/-- The algebra turning the differential equation at a zero into the relation 29.12.13. -/
+private lemma lame_equilibrium_of_ode {ξ k e a b S : ℝ} (hξ : ξ ≠ 0) (h1 : ξ - 1 ≠ 0)
+    (hk : 1 - k ^ 2 * ξ ≠ 0) (hk0 : k ≠ 0)
+    (h : (1 - ξ) * (1 - k ^ 2 * ξ) * ((2 * e + 1) + 4 * ξ * S) =
+      ξ * (1 + k ^ 2 - 2 * k ^ 2 * ξ + 2 * a * (1 - k ^ 2 * ξ) + 2 * b * k ^ 2 * (1 - ξ))) :
+    (e / 2 + 1 / 4) / ξ + (a / 2 + 1 / 4) / (ξ - 1) + (b / 2 + 1 / 4) / (ξ - (k ^ 2)⁻¹) + S =
+      0 := by
+  have h2 : (b / 2 + 1 / 4) / (ξ - (k ^ 2)⁻¹) = -((b / 2 + 1 / 4) * k ^ 2) / (1 - k ^ 2 * ξ) := by
+    rw [show ξ - (k ^ 2)⁻¹ = -(1 - k ^ 2 * ξ) / k ^ 2 by field_simp; ring]
+    field_simp
+  have h1' : 1 - ξ ≠ 0 := fun h0 => h1 (by linarith)
+  have hk' : 1 - ξ * k ^ 2 ≠ 0 := by rwa [mul_comm]
+  rw [h2, show ξ - 1 = -(1 - ξ) by ring]
+  field_simp
+  linear_combination 2 * h
+
+/-- The polynomial form 29.12.9 with the explicit polynomial `lameSqPoly t n m k`. -/
+private lemma lamePolyEk_eq_lameSqPoly (t : LamePolyType) (n m : ℕ) (k : ℝ) (z : ℂ) :
+    lamePolyEk t n m z k = t.prefactor z k *
+      (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
+      ((lameSqPoly t n m k).map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) := by
+  rw [lamePolyEk, mul_assoc, sum_lamePolyCoeff_mul_basis]
+
+/-- The zeros of `lameSqPoly t n m k`: `n` simple real zeros, `m` in `(0, 1)` and `n - m` in
+`(1, k⁻²)`. -/
+private lemma roots_lameSqPoly (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
+    (hm : m ≤ n) :
+    (lameSqPoly t n m k).natDegree = n ∧ (lameSqPoly t n m k).roots.Nodup ∧
+      (lameSqPoly t n m k).roots.card = n ∧
+      ((lameSqPoly t n m k).roots.filter (· ∈ Ioo (0 : ℝ) 1)).card = m ∧
+      ((lameSqPoly t n m k).roots.filter (· ∈ Ioo (1 : ℝ) (k ^ 2)⁻¹)).card = n - m :=
+  roots_of_lamePolyEk_eq hk0 hk1 t hm (degree_lameSqPoly hk0 hk1 t hm)
+    (lamePolyEk_eq_lameSqPoly t n m k)
+
+/-- Every zero of `lameSqPoly t n m k` lies in `(0, 1)` or in `(1, k⁻²)`. -/
+private lemma mem_Ioo_of_mem_roots_lameSqPoly (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n m : ℕ} (hm : m ≤ n) {ξ : ℝ} (hξ : ξ ∈ (lameSqPoly t n m k).roots) :
+    ξ ∈ Ioo (0 : ℝ) 1 ∨ ξ ∈ Ioo (1 : ℝ) (k ^ 2)⁻¹ := by
+  set P := lameSqPoly t n m k
+  obtain ⟨-, -, hcard, hA, hB⟩ := roots_lameSqPoly hk0 hk1 t hm
+  have hsum := Multiset.filter_add_filter (· ∈ Ioo (0 : ℝ) 1) (· ∈ Ioo (1 : ℝ) (k ^ 2)⁻¹)
+    P.roots
+  have h0 : P.roots.filter (fun x => x ∈ Ioo (0 : ℝ) 1 ∧ x ∈ Ioo (1 : ℝ) (k ^ 2)⁻¹) = 0 :=
+    Multiset.filter_eq_nil.2 fun x _ hx => by linarith [hx.1.2, hx.2.1]
+  rw [h0, add_zero] at hsum
+  have hc := congrArg Multiset.card hsum
+  rw [Multiset.card_add, hA, hB] at hc
+  have hall := Multiset.filter_eq_self.1 (Multiset.eq_of_le_of_card_le
+    (Multiset.filter_le _ P.roots) (by rw [← hc, hcard]; omega))
+  exact hall ξ hξ
+
+/-- The equilibrium relation 29.12.13 at a zero `ξ` of `lameSqPoly t n m k`. -/
+private lemma lameSqPoly_equilibrium (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n m : ℕ} (hm : m ≤ n) {ξ : ℝ} (hξ : ξ ∈ (lameSqPoly t n m k).roots) :
+    ((if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4) / ξ +
+      ((if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4) / (ξ - 1) +
+      ((if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4) /
+        (ξ - (k ^ 2)⁻¹) +
+      (((lameSqPoly t n m k).roots.erase ξ).map fun η => 1 / (ξ - η)).sum = 0 := by
+  set P := lameSqPoly t n m k with hPdef
+  obtain ⟨hnat, hnd, hcard, -, -⟩ := roots_lameSqPoly hk0 hk1 t hm
+  have hloc := mem_Ioo_of_mem_roots_lameSqPoly hk0 hk1 t hm hξ
+  have hξ0 : 0 < ξ := by rcases hloc with h | h <;> linarith [h.1]
+  have hk2 : k ^ 2 < 1 := by nlinarith
+  have hξ1 : ξ - 1 ≠ 0 := by
+    rcases hloc with h | h <;> [linarith [h.2]; linarith [h.1]]
+  have hξk : 1 - k ^ 2 * ξ ≠ 0 := by
+    rcases hloc with h | h
+    · nlinarith [h.2]
+    · have := h.2
+      rw [lt_inv_comm₀ hξ0 (by positivity)] at this
+      have : k ^ 2 * ξ < 1 := by
+        calc k ^ 2 * ξ < ξ⁻¹ * ξ := by gcongr
+          _ = 1 := inv_mul_cancel₀ hξ0.ne'
+      linarith
+  obtain ⟨hp1, hp2⟩ := eval_derivative_derivative_of_mem_roots (hcard.trans hnat.symm) hnd hξ
+  set S := ((P.roots.erase ξ).map fun η => 1 / (ξ - η)).sum
+  set p1 := eval ξ (derivative P)
+  -- the differential equation at `s = √ξ`
+  set G : ℂ[X] := (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then X else 1) *
+    (P.map (algebraMap ℝ ℂ)).comp (X ^ 2) with hGdef
+  have hG : ∀ s : ℂ, G.eval s =
+      ∑ p ∈ Finset.range (n + 1), (lamePolyCoeff t n m k p : ℂ) * t.basis p s := fun s => by
+    rw [sum_lamePolyCoeff_mul_basis, hGdef, eval_mul, eval_comp, eval_pow, eval_X]
+    split_ifs <;> simp only [eval_X, eval_one, hPdef]
+  obtain ⟨N, hN⟩ := exists_lameSnOperator_eq_zero hk0 t hm hG
+  set s₀ : ℂ := ((Real.sqrt ξ : ℝ) : ℂ)
+  have hs2 : s₀ ^ 2 = (ξ : ℂ) := by
+    simp only [s₀]; rw [← Complex.ofReal_pow, Real.sq_sqrt hξ0.le]
+  have hs0 : s₀ ≠ 0 := by
+    simp only [s₀, ne_eq, Complex.ofReal_eq_zero]; exact (Real.sqrt_pos.2 hξ0).ne'
+  have hev : ∀ Q : ℝ[X], (Q.map (algebraMap ℝ ℂ)).eval (s₀ ^ 2) = ((Q.eval ξ : ℝ) : ℂ) :=
+    fun Q => by
+      rw [hs2, eval_map_algebraMap, show (ξ : ℂ) = algebraMap ℝ ℂ ξ from rfl,
+        aeval_algebraMap_apply, coe_aeval_eq_eval]; rfl
+  have hP0 : (P.map (algebraMap ℝ ℂ)).eval (s₀ ^ 2) = 0 := by
+    rw [hev, (mem_roots (ne_zero_of_mem_roots hξ)).1 hξ]; simp
+  have hP1 : ((derivative P).map (algebraMap ℝ ℂ)).eval (s₀ ^ 2) = (p1 : ℂ) := hev _
+  have hP2 : ((derivative (derivative P)).map (algebraMap ℝ ℂ)).eval (s₀ ^ 2) =
+      ((2 * p1 * S : ℝ) : ℂ) := by rw [hev, hp2]
+  have hop := hN s₀
+  set e : ℝ := if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then 1 else 0 with he
+  set a : ℝ := if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then 1 else 0 with ha
+  set b : ℝ := if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 1 else 0 with hb
+  have hM : (1 + (k : ℂ) ^ 2 - 2 * k ^ 2 * s₀ ^ 2 +
+      (if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then 2 * (1 - k ^ 2 * s₀ ^ 2) else 0) +
+      (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 2 * k ^ 2 * (1 - s₀ ^ 2) else 0)) =
+      ((1 + k ^ 2 - 2 * k ^ 2 * ξ + 2 * a * (1 - k ^ 2 * ξ) + 2 * b * k ^ 2 * (1 - ξ) : ℝ) :
+        ℂ) := by
+    rw [hs2, ha, hb]; split_ifs <;> push_cast <;> ring
+  rw [hM] at hop
+  set Mr : ℝ := 1 + k ^ 2 - 2 * k ^ 2 * ξ + 2 * a * (1 - k ^ 2 * ξ) + 2 * b * k ^ 2 * (1 - ξ)
+  have hode : (1 - ξ) * (1 - k ^ 2 * ξ) * ((2 * e + 1) * p1 + 2 * ξ * (2 * p1 * S)) -
+      ξ * Mr * p1 = 0 := by
+    have key : s₀ ^ (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then 1 else 0) *
+        ((1 - s₀ ^ 2) * (1 - k ^ 2 * s₀ ^ 2) *
+          ((2 * e + 1) * p1 + 2 * s₀ ^ 2 * ((2 * p1 * S : ℝ) : ℂ)) - s₀ ^ 2 * Mr * p1) = 0 := by
+      simp only [lameSnOperator, hGdef] at hop
+      rw [he]
+      split_ifs at hop ⊢ with ht
+      · simp only [derivative_mul, derivative_add, derivative_X, derivative_C, derivative_comp,
+          derivative_X_pow, derivative_map, eval_add, eval_mul, eval_comp, eval_X, eval_pow,
+          eval_C, one_mul, zero_mul, zero_add, Nat.cast_ofNat, hP0, hP1, hP2] at hop
+        push_cast at hop ⊢
+        linear_combination (1 / 2) * hop
+      · simp only [derivative_mul, derivative_C, derivative_comp, derivative_X_pow,
+          derivative_map, eval_add, eval_mul, eval_comp, eval_X, eval_pow, eval_C, one_mul,
+          zero_mul, zero_add, Nat.cast_ofNat, hP0, hP1, hP2] at hop
+        push_cast at hop ⊢
+        linear_combination (1 / 2) * hop
+    rw [mul_eq_zero, hs2] at key
+    rcases key with h | h
+    · split_ifs at h <;> simp [hs0] at h
+    · exact_mod_cast h
+  have hode' : (1 - ξ) * (1 - k ^ 2 * ξ) * ((2 * e + 1) + 4 * ξ * S) = ξ * Mr := by
+    apply mul_right_cancel₀ hp1
+    linear_combination hode
+  have := lame_equilibrium_of_ode hξ0.ne' hξ1 hξk hk0.ne' hode'
+  convert this using 4 <;> simp only [e, a, b] <;> split_ifs <;> norm_num
+
+
+
+/-- 29.12.13: the zeros `ξ_p` of `P` satisfy the equilibrium relations
+`(ρ+¼)/ξ_p + (σ+¼)/(ξ_p - 1) + (τ+¼)/(ξ_p - k⁻²) + ∑_{q ≠ p} 1/(ξ_p - ξ_q) = 0`
+(electrostatic interpretation, §29.12(iii)). Proved from Lamé's equation for the Chebyshev
+series `G(s) = s^ε P(s²)` (`exists_lameSnOperator_eq_zero`), evaluated at `s = √ξ_p`, and
+`P''(ξ_p) = 2P'(ξ_p) ∑_{q ≠ p} 1/(ξ_p - ξ_q)` at a simple zero. -/
+@[dlmf 29.12.E13, dlmf 29.12.iii]
+theorem lamePolyEk_zeros_equilibrium (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n m : ℕ} (hm : m ≤ n) :
+    ∃ P : ℝ[X], (P.natDegree = n ∧ P.roots.Nodup ∧ ∀ z : ℂ, lamePolyEk t n m z k =
+        t.prefactor z k *
+        (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
+        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2)) ∧
+      ∀ ξ ∈ P.roots,
+        ((if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4) / ξ +
+          ((if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4) / (ξ - 1) +
+          ((if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4) /
+            (ξ - (k ^ 2)⁻¹) +
+          ((P.roots.erase ξ).map fun η => 1 / (ξ - η)).sum = 0 :=
+  ⟨lameSqPoly t n m k, ⟨(roots_lameSqPoly hk0 hk1 t hm).1, (roots_lameSqPoly hk0 hk1 t hm).2.1,
+    lamePolyEk_eq_lameSqPoly t n m k⟩, fun _ hξ => lameSqPoly_equilibrium hk0 hk1 t hm hξ⟩
+
+section ZeroEnergy
+
+variable {n m : ℕ} {c₀ c₁ c₂ K : ℝ}
+
+open Finset
+
+/-- Antisymmetrization of the gradient of `∑_{q<r} log(s_r - s_q)`. -/
+private lemma sum_ite_lt_div_sub {n : ℕ} (d ξ : Fin n → ℝ) :
+    ∑ q, ∑ r, (if q < r then (d r - d q) / (ξ r - ξ q) else 0) =
+      ∑ p, d p * ∑ q, (if q ≠ p then 1 / (ξ p - ξ q) else 0) := by
+  have h1 : ∀ p : Fin n, d p * ∑ q, (if q ≠ p then 1 / (ξ p - ξ q) else 0) =
+      ∑ q, (if q < p then d p / (ξ p - ξ q) else 0) +
+        ∑ q, (if p < q then d p / (ξ p - ξ q) else 0) := fun p => by
+    rw [mul_sum, ← sum_add_distrib]
+    refine sum_congr rfl fun q _ => ?_
+    rcases lt_trichotomy q p with h | h | h
+    · simp [h, h.ne, not_lt.2 h.le, div_eq_mul_inv]
+    · simp [h]
+    · simp [h, h.ne', not_lt.2 h.le, div_eq_mul_inv]
+  simp_rw [h1, sum_add_distrib]
+  rw [sum_comm (f := fun p q => if q < p then d p / (ξ p - ξ q) else 0), ← sum_add_distrib]
+  refine sum_congr rfl fun q _ => ?_
+  rw [← sum_add_distrib]
+  refine sum_congr rfl fun r _ => ?_
+  split_ifs
+  · rw [show ξ q - ξ r = -(ξ r - ξ q) by ring, div_neg]; ring
+  · simp
+
+/-- `log y - log x ≤ (y - x)/x`, strictly unless `y = x`. -/
+private lemma log_sub_log_le_div {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
+    Real.log y - Real.log x ≤ (y - x) / x := by
+  rw [← Real.log_div hy.ne' hx.ne']
+  have := Real.log_le_sub_one_of_pos (div_pos hy hx)
+  rwa [sub_div, div_self hx.ne'] 
+
+/-- `log y - log x < (y - x)/x` for `y ≠ x`. -/
+private lemma log_sub_log_lt_div {x y : ℝ} (hx : 0 < x) (hy : 0 < y) (hxy : y ≠ x) :
+    Real.log y - Real.log x < (y - x) / x := by
+  rw [← Real.log_div hy.ne' hx.ne']
+  have := Real.log_lt_sub_one_of_pos (div_pos hy hx) (by
+    rw [Ne, div_eq_one_iff_eq hx.ne']; exact hxy)
+  rwa [sub_div, div_self hx.ne']
+
+
+
+/-- The one-variable part of the logarithm of the energy. -/
+private noncomputable def lameLogTerm (c₀ c₁ c₂ K x : ℝ) : ℝ :=
+  c₀ * Real.log x + c₁ * Real.log |x - 1| + c₂ * Real.log (K - x)
+
+/-- The concavity estimate for the one-variable part of the logarithm of the energy. -/
+private lemma lameLogTerm_sub_le (hc₀ : 0 < c₀) (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) (hK : 1 < K) {x y : ℝ}
+    (hxy : (0 < x ∧ x < 1 ∧ 0 < y ∧ y < 1) ∨ (1 < x ∧ x < K ∧ 1 < y ∧ y < K)) :
+    lameLogTerm c₀ c₁ c₂ K y - lameLogTerm c₀ c₁ c₂ K x ≤
+      (y - x) * (c₀ / x + c₁ / (x - 1) + c₂ / (x - K)) ∧
+    (y ≠ x → lameLogTerm c₀ c₁ c₂ K y - lameLogTerm c₀ c₁ c₂ K x <
+      (y - x) * (c₀ / x + c₁ / (x - 1) + c₂ / (x - K))) := by
+  have hx0 : 0 < x := by rcases hxy with h | h <;> linarith [h.1]
+  have hy0 : 0 < y := by rcases hxy with h | h <;> linarith [h.2.2.1]
+  have hxK : 0 < K - x := by rcases hxy with h | h <;> linarith [h.2.1]
+  have hyK : 0 < K - y := by rcases hxy with h | h <;> linarith [h.2.2.2]
+  have hx1 : 0 < |x - 1| := abs_pos.2 (by rcases hxy with h | h <;> linarith [h.2.1, h.1])
+  have hy1 : 0 < |y - 1| := abs_pos.2 (by rcases hxy with h | h <;> linarith [h.2.2.2, h.2.2.1])
+  have e1 : (|y - 1| - |x - 1|) / |x - 1| = (y - x) / (x - 1) := by
+    rcases hxy with h | h
+    · rw [abs_of_neg (by linarith [h.2.2.2]), abs_of_neg (by linarith [h.2.1]),
+        show x - 1 = -(-(x - 1)) by ring, div_neg (y - x)]
+      ring
+    · rw [abs_of_pos (by linarith [h.2.2.1]), abs_of_pos (by linarith [h.1])]; ring
+  have e2 : ((K - y) - (K - x)) / (K - x) = (y - x) / (x - K) := by
+    rw [show x - K = -(K - x) by ring, div_neg]; ring
+  have b1 := mul_le_mul_of_nonneg_left (log_sub_log_le_div hx1 hy1) hc₁.le
+  have b2 := mul_le_mul_of_nonneg_left (log_sub_log_le_div hxK hyK) hc₂.le
+  rw [e1] at b1
+  rw [e2] at b2
+  have hexp : (y - x) * (c₀ / x + c₁ / (x - 1) + c₂ / (x - K)) =
+      c₀ * ((y - x) / x) + c₁ * ((y - x) / (x - 1)) + c₂ * ((y - x) / (x - K)) := by ring
+  rw [hexp]
+  unfold lameLogTerm
+  refine ⟨?_, fun hne => ?_⟩
+  · have b0 := mul_le_mul_of_nonneg_left (log_sub_log_le_div hx0 hy0) hc₀.le
+    nlinarith
+  · have b0 := mul_lt_mul_of_pos_left (log_sub_log_lt_div hx0 hy0 hne) hc₀
+    nlinarith
+
+
+/-- The energy `g` of 29.12.11. -/
+private noncomputable def lameEnergy (c₀ c₁ c₂ K : ℝ) (s : Fin n → ℝ) : ℝ :=
+  (∏ p, s p ^ c₀ * |s p - 1| ^ c₁ * (K - s p) ^ c₂) * ∏ q, ∏ r, if q < r then s r - s q else 1
+
+/-- The interior of the region of 29.12.11. -/
+private def IsLameZeroInterior (m : ℕ) (K : ℝ) (s : Fin n → ℝ) : Prop :=
+  StrictMono s ∧ ∀ j : Fin n, ((j : ℕ) < m → 0 < s j ∧ s j < 1) ∧ (m ≤ (j : ℕ) → 1 < s j ∧ s j < K)
+
+/-- The factors of the energy are positive in the interior. -/
+private lemma IsLameZeroInterior.pos (hK : 1 < K) {s : Fin n → ℝ}
+    (hs : IsLameZeroInterior m K s) (p : Fin n) :
+    0 < s p ∧ 0 < |s p - 1| ∧ 0 < K - s p := by
+  rcases lt_or_ge (p : ℕ) m with h | h
+  · obtain ⟨h1, h2⟩ := (hs.2 p).1 h
+    exact ⟨h1, abs_pos.2 (by linarith), by linarith⟩
+  · obtain ⟨h1, h2⟩ := (hs.2 p).2 h
+    exact ⟨by linarith, abs_pos.2 (by linarith), by linarith⟩
+
+/-- The energy is positive in the interior. -/
+private lemma IsLameZeroInterior.lameEnergy_pos (hK : 1 < K) {s : Fin n → ℝ}
+    (hs : IsLameZeroInterior m K s) :
+    0 < lameEnergy c₀ c₁ c₂ K s := by
+  refine mul_pos (prod_pos fun p _ => ?_) (prod_pos fun q _ => prod_pos fun r _ => ?_)
+  · obtain ⟨h1, h2, h3⟩ := hs.pos hK p
+    positivity
+  · split_ifs with h
+    · exact sub_pos.2 (hs.1 h)
+    · exact one_pos
+
+/-- The logarithm of the energy in the interior. -/
+private lemma IsLameZeroInterior.log_lameEnergy (hK : 1 < K) {s : Fin n → ℝ}
+    (hs : IsLameZeroInterior m K s) :
+    Real.log (lameEnergy c₀ c₁ c₂ K s) = ∑ p, lameLogTerm c₀ c₁ c₂ K (s p) +
+      ∑ q, ∑ r, (if q < r then Real.log (s r - s q) else 0) := by
+  have hv : ∀ q r : Fin n, (if q < r then s r - s q else 1) ≠ 0 := fun q r => by
+    split_ifs with h
+    · exact (sub_pos.2 (hs.1 h)).ne'
+    · exact one_ne_zero
+  have hf : ∀ p, s p ^ c₀ * |s p - 1| ^ c₁ * (K - s p) ^ c₂ ≠ 0 := fun p => by
+    obtain ⟨h1, h2, h3⟩ := hs.pos hK p
+    positivity
+  rw [lameEnergy, Real.log_mul (prod_ne_zero_iff.2 fun p _ => hf p)
+    (prod_ne_zero_iff.2 fun q _ => prod_ne_zero_iff.2 fun r _ => hv q r),
+    Real.log_prod (fun p _ => hf p)]
+  rw [Real.log_prod (fun q _ => prod_ne_zero_iff.2 fun r _ => hv q r)]
+  congr 1
+  · refine sum_congr rfl fun p _ => ?_
+    obtain ⟨h1, h2, h3⟩ := hs.pos hK p
+    rw [Real.log_mul (by positivity) (by positivity), Real.log_mul (by positivity) (by positivity),
+      Real.log_rpow h1, Real.log_rpow h2, Real.log_rpow h3, lameLogTerm]
+  · refine sum_congr rfl fun q _ => ?_
+    rw [Real.log_prod (fun r _ => hv q r)]
+    refine sum_congr rfl fun r _ => ?_
+    split_ifs <;> simp
+
+
+/-- On the closed region of 29.12.11 the energy is nonnegative, and positive only inside. -/
+private lemma lameEnergy_nonneg_of_mem (hc₀ : 0 < c₀) (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) (hK : 1 < K)
+    {s : Fin n → ℝ} (hmono : Monotone s)
+    (hs : ∀ j : Fin n, ((j : ℕ) < m → 0 ≤ s j ∧ s j ≤ 1) ∧ (m ≤ (j : ℕ) → 1 ≤ s j ∧ s j ≤ K)) :
+    0 ≤ lameEnergy c₀ c₁ c₂ K s ∧ (lameEnergy c₀ c₁ c₂ K s ≠ 0 → IsLameZeroInterior m K s) := by
+  have hb : ∀ p, 0 ≤ s p ∧ s p ≤ K := fun p => by
+    rcases lt_or_ge (p : ℕ) m with h | h
+    · obtain ⟨h1, h2⟩ := (hs p).1 h; exact ⟨h1, by linarith⟩
+    · obtain ⟨h1, h2⟩ := (hs p).2 h; exact ⟨by linarith, h2⟩
+  refine ⟨mul_nonneg (prod_nonneg fun p _ => ?_) (prod_nonneg fun q _ => prod_nonneg fun r _ => ?_),
+    fun hne => ?_⟩
+  · have := hb p
+    have : 0 ≤ K - s p := by linarith [this.2]
+    have := (hb p).1
+    positivity
+  · split_ifs with h
+    · exact sub_nonneg.2 (hmono h.le)
+    · exact zero_le_one
+  · obtain ⟨hne1, hne2⟩ := mul_ne_zero_iff.1 hne
+    have hf := prod_ne_zero_iff.1 hne1
+    have hv := prod_ne_zero_iff.1 hne2
+    refine ⟨fun q r hqr => lt_of_le_of_ne (hmono hqr.le) fun he => ?_, fun j => ?_⟩
+    · have := prod_ne_zero_iff.1 (hv q (mem_univ _)) r (mem_univ _)
+      simp [hqr, he] at this
+    · have h := hf j (mem_univ _)
+      simp only [mul_ne_zero_iff] at h
+      obtain ⟨⟨h0, h1⟩, h2⟩ := h
+      have e0 : s j ≠ 0 := fun he => h0 (by rw [he, Real.zero_rpow hc₀.ne'])
+      have e1 : s j ≠ 1 := fun he => h1 (by rw [he, sub_self, abs_zero, Real.zero_rpow hc₁.ne'])
+      have e2 : s j ≠ K := fun he => h2 (by rw [he, sub_self, Real.zero_rpow hc₂.ne'])
+      refine ⟨fun hj => ?_, fun hj => ?_⟩
+      · obtain ⟨a, b⟩ := (hs j).1 hj
+        exact ⟨lt_of_le_of_ne a (Ne.symm e0), lt_of_le_of_ne b e1⟩
+      · obtain ⟨a, b⟩ := (hs j).2 hj
+        exact ⟨lt_of_le_of_ne a (Ne.symm e1), lt_of_le_of_ne b e2⟩
+
+/-- The interior critical point is the strict maximum of the energy. -/
+private lemma lameEnergy_le_of_equilibrium (hc₀ : 0 < c₀) (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) (hK : 1 < K)
+    {ξ s : Fin n → ℝ} (hξ : IsLameZeroInterior m K ξ) (hs : IsLameZeroInterior m K s)
+    (heq : ∀ p, c₀ / ξ p + c₁ / (ξ p - 1) + c₂ / (ξ p - K) +
+      ∑ q, (if q ≠ p then 1 / (ξ p - ξ q) else 0) = 0) :
+    lameEnergy c₀ c₁ c₂ K s ≤ lameEnergy c₀ c₁ c₂ K ξ ∧
+      (s ≠ ξ → lameEnergy c₀ c₁ c₂ K s < lameEnergy c₀ c₁ c₂ K ξ) := by
+  have hside : ∀ p, (0 < ξ p ∧ ξ p < 1 ∧ 0 < s p ∧ s p < 1) ∨
+      (1 < ξ p ∧ ξ p < K ∧ 1 < s p ∧ s p < K) := fun p => by
+    rcases lt_or_ge (p : ℕ) m with h | h
+    · exact Or.inl ⟨((hξ.2 p).1 h).1, ((hξ.2 p).1 h).2, ((hs.2 p).1 h).1, ((hs.2 p).1 h).2⟩
+    · exact Or.inr ⟨((hξ.2 p).2 h).1, ((hξ.2 p).2 h).2, ((hs.2 p).2 h).1, ((hs.2 p).2 h).2⟩
+  set F : Fin n → ℝ := fun p => c₀ / ξ p + c₁ / (ξ p - 1) + c₂ / (ξ p - K)
+  have hV : ∑ q, ∑ r, ((if q < r then Real.log (s r - s q) else 0) -
+      (if q < r then Real.log (ξ r - ξ q) else 0)) ≤
+      ∑ q, ∑ r, (if q < r then ((s r - ξ r) - (s q - ξ q)) / (ξ r - ξ q) else 0) := by
+    refine sum_le_sum fun q _ => sum_le_sum fun r _ => ?_
+    split_ifs with h
+    · have := log_sub_log_le_div (sub_pos.2 (hξ.1 h)) (sub_pos.2 (hs.1 h))
+      convert this using 2; ring
+    · simp
+  have hsum : ∑ p, (s p - ξ p) * F p +
+      ∑ q, ∑ r, (if q < r then ((s r - ξ r) - (s q - ξ q)) / (ξ r - ξ q) else 0) = 0 := by
+    rw [sum_ite_lt_div_sub (fun p => s p - ξ p) ξ, ← sum_add_distrib]
+    refine sum_eq_zero fun p _ => ?_
+    rw [← mul_add, heq p, mul_zero]
+  have hlog : Real.log (lameEnergy c₀ c₁ c₂ K s) - Real.log (lameEnergy c₀ c₁ c₂ K ξ) =
+      ∑ p, (lameLogTerm c₀ c₁ c₂ K (s p) - lameLogTerm c₀ c₁ c₂ K (ξ p)) +
+      ∑ q, ∑ r, ((if q < r then Real.log (s r - s q) else 0) -
+        (if q < r then Real.log (ξ r - ξ q) else 0)) := by
+    rw [hs.log_lameEnergy hK, hξ.log_lameEnergy hK, sum_sub_distrib]
+    simp only [sum_sub_distrib]
+    ring
+  have hpos := hs.lameEnergy_pos (c₀ := c₀) (c₁ := c₁) (c₂ := c₂) hK
+  have hξpos := hξ.lameEnergy_pos (c₀ := c₀) (c₁ := c₁) (c₂ := c₂) hK
+  refine ⟨?_, fun hne => ?_⟩
+  · have hT : ∑ p, (lameLogTerm c₀ c₁ c₂ K (s p) - lameLogTerm c₀ c₁ c₂ K (ξ p)) ≤
+        ∑ p, (s p - ξ p) * F p :=
+      sum_le_sum fun p _ => (lameLogTerm_sub_le hc₀ hc₁ hc₂ hK (hside p)).1
+    rw [← Real.log_le_log_iff hpos hξpos]
+    linarith
+  · obtain ⟨p, hp⟩ := Function.ne_iff.1 hne
+    have hT : ∑ p, (lameLogTerm c₀ c₁ c₂ K (s p) - lameLogTerm c₀ c₁ c₂ K (ξ p)) <
+        ∑ p, (s p - ξ p) * F p :=
+      sum_lt_sum (fun p _ => (lameLogTerm_sub_le hc₀ hc₁ hc₂ hK (hside p)).1)
+        ⟨p, mem_univ _, (lameLogTerm_sub_le hc₀ hc₁ hc₂ hK (hside p)).2 hp⟩
+    rw [← Real.log_lt_log_iff hpos hξpos]
+    linarith
+
+end ZeroEnergy
+
 /-- 29.12.11–29.12.12: with `ξ₁ < ⋯ < ξₙ` the zeros of `P` (29.12.10) and `ρ, σ, τ` as in
 29.12.9, the function
 `g(t) = (∏_p t_p^{ρ+¼} |t_p - 1|^{σ+¼} (k⁻² - t_p)^{τ+¼}) ∏_{q<r} (t_r - t_q)` on the region
 `0 ≤ t₁ ≤ ⋯ ≤ t_m ≤ 1 ≤ t_{m+1} ≤ ⋯ ≤ t_n ≤ k⁻²` attains its absolute maximum exactly at
-`t = ξ`. Admitted. -/
+`t = ξ`. Proved from the equilibrium relations 29.12.13: `g` vanishes on the boundary of the
+region, and in the interior `log g` is a sum of logarithms of positive affine functions, so
+`log y - log x ≤ (y - x)/x` bounds `log g(t) - log g(ξ)` by the gradient term, which vanishes
+at `ξ`. -/
 @[dlmf 29.12.E11, dlmf 29.12.E12]
 theorem lamePolyEk_zeros_maximize (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
     {n m : ℕ} (hm : m ≤ n) :
@@ -685,25 +1124,100 @@ theorem lamePolyEk_zeros_maximize (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
           (∏ p, s p ^ (ρ + 1 / 4) * |s p - 1| ^ (σ + 1 / 4) * ((k ^ 2)⁻¹ - s p) ^ (τ + 1 / 4)) *
             ∏ q, ∏ r, if q < r then s r - s q else 1
         ξ ∈ R ∧ ∀ s ∈ R, g s ≤ g ξ ∧ (g s = g ξ → s = ξ) := by
-  sorry
-
-/-- 29.12.13: the zeros `ξ_p` of `P` satisfy the equilibrium relations
-`(ρ+¼)/ξ_p + (σ+¼)/(ξ_p - 1) + (τ+¼)/(ξ_p - k⁻²) + ∑_{q ≠ p} 1/(ξ_p - ξ_q) = 0`
-(electrostatic interpretation, §29.12(iii)). Admitted. -/
-@[dlmf 29.12.E13, dlmf 29.12.iii]
-theorem lamePolyEk_zeros_equilibrium (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
-    {n m : ℕ} (hm : m ≤ n) :
-    ∃ P : ℝ[X], (P.natDegree = n ∧ P.roots.Nodup ∧ ∀ z : ℂ, lamePolyEk t n m z k =
-        t.prefactor z k *
-        (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
-        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2)) ∧
-      ∀ ξ ∈ P.roots,
-        ((if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4) / ξ +
-          ((if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4) / (ξ - 1) +
-          ((if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4) /
-            (ξ - (k ^ 2)⁻¹) +
-          ((P.roots.erase ξ).map fun η => 1 / (ξ - η)).sum = 0 := by
-  sorry
+  set P := lameSqPoly t n m k with hPdef
+  obtain ⟨hnat, hnd, hcard, hA, -⟩ := roots_lameSqPoly hk0 hk1 t hm
+  have hk2 : k ^ 2 < 1 := by nlinarith
+  have hK : 1 < (k ^ 2)⁻¹ := by rw [lt_inv_comm₀ one_pos (by positivity), inv_one]; exact hk2
+  have hcardF : P.roots.toFinset.card = n := by
+    rw [Multiset.toFinset_card_of_nodup hnd, hcard]
+  set ξ : Fin n → ℝ := ⇑(P.roots.toFinset.orderEmbOfFin hcardF) with hξdef
+  have hξmono : StrictMono ξ := (P.roots.toFinset.orderEmbOfFin hcardF).strictMono
+  have hξmem : ∀ j, ξ j ∈ P.roots := fun j =>
+    Multiset.mem_toFinset.1 (Finset.orderEmbOfFin_mem _ hcardF j)
+  have hloc := fun j => mem_Ioo_of_mem_roots_lameSqPoly hk0 hk1 t hm (hξmem j)
+  -- exactly the first `m` zeros lie in `(0, 1)`
+  have hAc : (Finset.univ.filter fun j : Fin n => ξ j < 1).card = m := by
+    rw [← Finset.card_image_of_injective _ hξmono.injective]
+    have himg : (Finset.univ.filter fun j : Fin n => ξ j < 1).image ξ =
+        P.roots.toFinset.filter (· ∈ Ioo (0 : ℝ) 1) := by
+      ext x
+      simp only [Finset.mem_image, Finset.mem_filter, Finset.mem_univ, true_and]
+      constructor
+      · rintro ⟨j, hj, rfl⟩
+        refine ⟨Finset.orderEmbOfFin_mem _ hcardF j, ?_⟩
+        rcases hloc j with h | h
+        · exact h
+        · exact absurd h.1 (not_lt.2 hj.le)
+      · rintro ⟨hx, hx01⟩
+        have : x ∈ Set.range ξ := by
+          rw [hξdef, Finset.range_orderEmbOfFin]; exact hx
+        obtain ⟨j, rfl⟩ := this
+        exact ⟨j, hx01.2, rfl⟩
+    rw [himg, ← Multiset.toFinset_filter, Multiset.toFinset_card_of_nodup (hnd.filter _), hA]
+  have hlt : ∀ j : Fin n, ((j : ℕ) < m ↔ ξ j < 1) := fun j => by
+    constructor
+    · intro hj
+      by_contra hc
+      have hsub : (Finset.univ.filter fun i : Fin n => ξ i < 1) ⊆ Finset.Iio j := fun i hi => by
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
+        exact Finset.mem_Iio.2 (hξmono.lt_iff_lt.1 (lt_of_lt_of_le hi (not_lt.1 hc)))
+      have := Finset.card_le_card hsub
+      rw [hAc, Fin.card_Iio] at this
+      omega
+    · intro hj
+      by_contra hc
+      have hsub : Finset.Iic j ⊆ (Finset.univ.filter fun i : Fin n => ξ i < 1) := fun i hi => by
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+        exact lt_of_le_of_lt (hξmono.monotone (Finset.mem_Iic.1 hi)) hj
+      have := Finset.card_le_card hsub
+      rw [hAc, Fin.card_Iic] at this
+      omega
+  have hint : IsLameZeroInterior m (k ^ 2)⁻¹ ξ := by
+    refine ⟨hξmono, fun j => ⟨fun hj => ?_, fun hj => ?_⟩⟩
+    · rcases hloc j with h | h
+      · exact h
+      · exact absurd ((hlt j).1 hj) (not_lt.2 h.1.le)
+    · rcases hloc j with h | h
+      · exact absurd ((hlt j).2 h.2) (not_lt.2 hj)
+      · exact h
+  -- the equilibrium relations in terms of `ξ`
+  have hsumF : ∀ (p : Fin n) (f : ℝ → ℝ),
+      ∑ q, (if q ≠ p then f (ξ q) else 0) = ((P.roots.erase (ξ p)).map f).sum := fun p f => by
+    rw [← Finset.sum_filter, Finset.filter_ne']
+    have hmap := Finset.sum_map (Finset.univ.erase p)
+      (P.roots.toFinset.orderEmbOfFin hcardF).toEmbedding f
+    rw [Finset.map_erase, Finset.map_orderEmbOfFin_univ] at hmap
+    calc ∑ a ∈ Finset.univ.erase p, f (ξ a)
+        = ∑ x ∈ P.roots.toFinset.erase (ξ p), f x := hmap.symm
+      _ = _ := by
+        rw [Finset.sum_eq_multiset_sum, Finset.erase_val, Multiset.toFinset_val, hnd.dedup]
+  set c₀ : ℝ := (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4
+  set c₁ : ℝ := (if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4
+  set c₂ : ℝ := (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 1 / 2 else 0) + 1 / 4
+  have hc₀ : 0 < c₀ := by simp only [c₀]; split_ifs <;> norm_num
+  have hc₁ : 0 < c₁ := by simp only [c₁]; split_ifs <;> norm_num
+  have hc₂ : 0 < c₂ := by simp only [c₂]; split_ifs <;> norm_num
+  have heq : ∀ p, c₀ / ξ p + c₁ / (ξ p - 1) + c₂ / (ξ p - (k ^ 2)⁻¹) +
+      ∑ q, (if q ≠ p then 1 / (ξ p - ξ q) else 0) = 0 := fun p => by
+    rw [hsumF p (fun η => 1 / (ξ p - η))]
+    exact lameSqPoly_equilibrium hk0 hk1 t hm (hξmem p)
+  refine ⟨P, ⟨hnat, lamePolyEk_eq_lameSqPoly t n m k⟩, ξ, hξmono,
+    fun j => (mem_roots (ne_zero_of_mem_roots (hξmem j))).1 (hξmem j), ?_⟩
+  intro ρ σ τ R g
+  have hg : ∀ s, g s = lameEnergy c₀ c₁ c₂ (k ^ 2)⁻¹ s := fun s => rfl
+  refine ⟨⟨hξmono.monotone, fun j => ⟨fun hj => ?_, fun hj => ?_⟩⟩, fun s hs => ?_⟩
+  · exact ⟨((hint.2 j).1 hj).1.le, ((hint.2 j).1 hj).2.le⟩
+  · exact ⟨((hint.2 j).2 hj).1.le, ((hint.2 j).2 hj).2.le⟩
+  rw [hg, hg]
+  have hξpos := hint.lameEnergy_pos (c₀ := c₀) (c₁ := c₁) (c₂ := c₂) hK
+  obtain ⟨hs0, hsint⟩ := lameEnergy_nonneg_of_mem hc₀ hc₁ hc₂ hK hs.1 hs.2
+  by_cases h0 : lameEnergy c₀ c₁ c₂ (k ^ 2)⁻¹ s = 0
+  · rw [h0]
+    exact ⟨hξpos.le, fun h => absurd h.symm hξpos.ne'⟩
+  · have := lameEnergy_le_of_equilibrium hc₀ hc₁ hc₂ hK hint (hsint h0) heq
+    refine ⟨this.1, fun he => ?_⟩
+    by_contra hne
+    exact (this.2 hne).ne he
 
 /-! ### The terminating Fourier series of §29.6(i) -/
 

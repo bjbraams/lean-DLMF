@@ -17,12 +17,12 @@ For a real phase `φ` on `[0, b]` with `φ(x) = c x³ + O(x⁴)` (`c > 0`), `φ'
 `λ^{1/3} ∫₀^b e^{iλφ(x)} dx → Γ(4/3) c^{-1/3} e^{iπ/6}`   (`λ → +∞`).
 
 The proof splits `[0, b]` at `δ = λ^{-3/10}`. On `[δ, b]` one integration by parts
-(`statPh_norm_integral_le`, the first-derivative test) gives `O(λ^{-1/15})` after scaling; on
-`[0, δ]` the phase is replaced by `c x³` at cost `O(λ^{-1/6})`, and the model integral is
-rescaled to `∫₀^R e^{it³} dt`. Its limit `Γ(4/3) e^{iπ/6}` (`statPh_tendsto_integral_exp_cube`)
-is obtained by rotating the ray `arg t = α`, `0 < α < π/9`, to `arg t = π/6`
-(`Complex.integral_Ioi_eq_exp_mul_integral_Ioi_rotate`) and letting `α → 0` with a uniform
-tail bound `4/(3R²)`.
+(`StationaryPhase.norm_integral_le`, the first-derivative test) gives `O(λ^{-1/15})` after scaling;
+on `[0, δ]` the phase is replaced by `c x³` at cost `O(λ^{-1/6})`, and the model integral is
+rescaled to `∫₀^R e^{it³} dt`. Its limit `Γ(4/3) e^{iπ/6}`
+(`StationaryPhase.tendsto_integral_exp_cube`) is obtained by rotating the ray `arg t = α`,
+`0 < α < π/9`, to `arg t = π/6` (`Complex.integral_Ioi_eq_exp_mul_integral_Ioi_rotate`) and letting
+`α → 0` with a uniform tail bound `4/(3R²)`.
 
 This is the leading term of the classical stationary-phase method at a degenerate stationary
 point (Olver, *Asymptotics and Special Functions*, Ch. 3, §13; Temme, *Special Functions*,
@@ -30,9 +30,10 @@ point (Olver, *Asymptotics and Special Functions*, Ch. 3, §13; Temme, *Special 
 
 ## Main results
 
-* `Complex.statPh_norm_integral_le`: `‖∫_a^b ψ φ' e^{iφ}‖ ≤ 2ψ(a)` for nonincreasing `ψ ≥ 0`.
-* `Complex.statPh_tendsto_integral_exp_cube`: `∫₀^R e^{it³} dt → Γ(4/3) e^{iπ/6}`.
-* `Complex.statPh_tendsto_cubic`: the stationary-phase limit above.
+* `Complex.StationaryPhase.norm_integral_le`: `‖∫_a^b ψ φ' e^{iφ}‖ ≤ 2ψ(a)` for nonincreasing
+  `ψ ≥ 0`.
+* `Complex.StationaryPhase.tendsto_integral_exp_cube`: `∫₀^R e^{it³} dt → Γ(4/3) e^{iπ/6}`.
+* `Complex.StationaryPhase.tendsto_cubic`: the stationary-phase limit above.
 -/
 
 @[expose] public section
@@ -48,7 +49,7 @@ namespace Complex
 /-- **First-derivative bound for oscillatory integrals.** If `ψ` is nonincreasing (`ψ' ≤ 0`,
 continuous) on `[a, b]` with `ψ(b) ≥ 0`, then `‖∫_a^b ψ φ' e^{iφ}‖ ≤ 2 ψ(a)` for any real
 `C¹` phase `φ`. -/
-theorem statPh_norm_integral_le {a b : ℝ} (hab : a ≤ b) {φ φ' ψ ψ' : ℝ → ℝ}
+theorem StationaryPhase.norm_integral_le {a b : ℝ} (hab : a ≤ b) {φ φ' ψ ψ' : ℝ → ℝ}
     (hφ : ∀ x ∈ Icc a b, HasDerivAt φ (φ' x) x) (hψ : ∀ x ∈ Icc a b, HasDerivAt ψ (ψ' x) x)
     (hφ'c : ContinuousOn φ' (Icc a b)) (hψ'c : ContinuousOn ψ' (Icc a b))
     (hψ' : ∀ x ∈ Icc a b, ψ' x ≤ 0) (hψb : 0 ≤ ψ b) :
@@ -112,7 +113,8 @@ theorem statPh_norm_integral_le {a b : ℝ} (hab : a ≤ b) {φ φ' ψ ψ' : ℝ
 
 
 /-- Tail bound for a damped cubic phase: `‖∫_R^S e^{-s r³ + i c r³} dr‖ ≤ 2/(3 c R²)`. -/
-theorem statPh_norm_integral_damped_cube {s c R S : ℝ} (hs : 0 ≤ s) (hc : 0 < c) (hR : 0 < R)
+theorem StationaryPhase.norm_integral_damped_cube {s c R S : ℝ} (hs : 0 ≤ s)
+    (hc : 0 < c) (hR : 0 < R)
     (hRS : R ≤ S) :
     ‖∫ r in R..S, exp ((-(s * r ^ 3) : ℝ) + ((c * r ^ 3 : ℝ) : ℂ) * I)‖ ≤ 2 / (3 * c * R ^ 2) := by
   set ψ : ℝ → ℝ := fun r => Real.exp (-(s * r ^ 3)) / (3 * c * r ^ 2) with hψd
@@ -137,7 +139,7 @@ theorem statPh_norm_integral_damped_cube {s c R S : ℝ} (hs : 0 ≤ s) (hc : 0 
     intro x _
     have := (hasDerivAt_pow 3 x).const_mul c
     convert this using 1; push_cast; ring
-  have hb := statPh_norm_integral_le hRS hφ hψ (by fun_prop)
+  have hb := StationaryPhase.norm_integral_le hRS hφ hψ (by fun_prop)
     (ContinuousOn.div (by fun_prop) (by fun_prop) fun x hx => pow_ne_zero 2 (hden x hx))
     (fun x hx => by
       have := hpos x hx
@@ -165,7 +167,7 @@ theorem statPh_norm_integral_damped_cube {s c R S : ℝ} (hs : 0 ≤ s) (hc : 0 
   linarith
 
 /-- `|exp(i (r e^{iθ})³)| = e^{-r³ sin 3θ}`. -/
-theorem statPh_norm_exp_cube_ray (r θ : ℝ) :
+theorem StationaryPhase.norm_exp_cube_ray (r θ : ℝ) :
     ‖exp (((r : ℂ) * exp (θ * I)) ^ 3 * I)‖ = Real.exp (-(r ^ 3 * Real.sin (3 * θ))) := by
   rw [norm_exp]
   congr 1
@@ -177,7 +179,7 @@ theorem statPh_norm_exp_cube_ray (r θ : ℝ) :
 
 /-- The value of the cubic oscillatory integral along a ray `arg t = α`, `0 < α < π/6`:
 `e^{iα} ∫₀^∞ exp(i (r e^{iα})³) dr = Γ(4/3) e^{iπ/6}`. -/
-theorem statPh_integral_ray {α : ℝ} (hα0 : 0 < α) (hα : α < π / 6) :
+theorem StationaryPhase.integral_ray {α : ℝ} (hα0 : 0 < α) (hα : α < π / 6) :
     exp (α * I) * ∫ r in Ioi (0 : ℝ), exp (((r : ℂ) * exp (α * I)) ^ 3 * I) =
       (Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I) := by
   set β := π / 6 - α with hβ
@@ -197,12 +199,12 @@ theorem statPh_integral_ray {α : ℝ} (hα0 : 0 < α) (hα : α < π / 6) :
       exp ((w * exp (α * I)) ^ 3 * I)) (α := β) (σ := 1) (κ := Real.sin (3 * α)) (C := 1)
     one_pos hκ (fun r _ y _ => by fun_prop)
     (fun r hr _ y hy => by
-      simp only [hrw, statPh_norm_exp_cube_ray, sub_self, Real.rpow_zero, mul_one]
+      simp only [hrw, StationaryPhase.norm_exp_cube_ray, sub_self, Real.rpow_zero, mul_one]
       rw [Real.exp_le_one_iff, neg_nonpos]
       have := hκ.trans_le (hsin y hy)
       positivity)
     (fun r hr y hy => by
-      simp only [hrw, statPh_norm_exp_cube_ray, one_mul]
+      simp only [hrw, StationaryPhase.norm_exp_cube_ray, one_mul]
       rw [Real.exp_le_exp, neg_mul, neg_le_neg_iff]
       have h3 : r ≤ r ^ 3 := by nlinarith [mul_le_mul hr hr zero_le_one (by linarith)]
       have := hsin y hy
@@ -230,7 +232,7 @@ theorem statPh_integral_ray {α : ℝ} (hα0 : 0 < α) (hα : α < π / 6) :
 
 /-- The improper integral `∫₀^∞ e^{i t³} dt = Γ(4/3) e^{iπ/6}`, with the explicit rate
 `‖∫₀^R e^{it³} dt - Γ(4/3) e^{iπ/6}‖ ≤ 4/(3R²)`. -/
-theorem statPh_norm_integral_exp_cube_sub_le {R : ℝ} (hR : 0 < R) :
+theorem StationaryPhase.norm_integral_exp_cube_sub_le {R : ℝ} (hR : 0 < R) :
     ‖(∫ t in (0 : ℝ)..R, exp ((t : ℂ) ^ 3 * I)) -
       (Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I)‖ ≤ 4 / (3 * R ^ 2) := by
   set L : ℂ := (Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I)
@@ -264,10 +266,11 @@ theorem statPh_norm_integral_exp_cube_sub_le {R : ℝ} (hR : 0 < R) :
     have hgi : IntegrableOn g (Ioi 0) := by
       refine integrableOn_ray_of_bounds (f := fun w => exp (w ^ 3 * I)) (σ := 1) (C := 1)
         one_pos hs (fun r _ => by fun_prop) (fun r hr _ => ?_) (fun r hr => ?_)
-      · rw [statPh_norm_exp_cube_ray, sub_self, Real.rpow_zero, mul_one, Real.exp_le_one_iff,
+      · rw [StationaryPhase.norm_exp_cube_ray, sub_self, Real.rpow_zero, mul_one,
+            Real.exp_le_one_iff,
           neg_nonpos]
         positivity
-      · rw [statPh_norm_exp_cube_ray, one_mul, Real.exp_le_exp, neg_mul, neg_le_neg_iff]
+      · rw [StationaryPhase.norm_exp_cube_ray, one_mul, Real.exp_le_exp, neg_mul, neg_le_neg_iff]
         have h3 : r ≤ r ^ 3 := by nlinarith [mul_le_mul hr hr zero_le_one (by linarith)]
         nlinarith [mul_le_mul_of_nonneg_left h3 hs.le]
     have htail : ∀ S, R ≤ S → ‖(∫ r in (0 : ℝ)..S, g r) - ∫ r in (0 : ℝ)..R, g r‖ ≤
@@ -277,7 +280,7 @@ theorem statPh_norm_integral_exp_cube_sub_le {R : ℝ} (hR : 0 < R) :
         (by fun_prop : Continuous g).intervalIntegrable a b
       rw [← intervalIntegral.integral_add_adjacent_intervals (hii 0 R) (hii R S),
           add_sub_cancel_left]
-      have := statPh_norm_integral_damped_cube hs.le (by linarith : 0 < c) hR hS
+      have := StationaryPhase.norm_integral_damped_cube hs.le (by linarith : 0 < c) hR hS
       simp only [hg]
       refine this.trans ?_
       rw [div_le_div_iff₀ (by positivity) (by positivity)]
@@ -286,7 +289,7 @@ theorem statPh_norm_integral_exp_cube_sub_le {R : ℝ} (hR : 0 < R) :
       intervalIntegral_tendsto_integral_Ioi 0 hgi tendsto_id
     have hI : ‖(∫ r in Ioi (0 : ℝ), g r) - ∫ r in (0 : ℝ)..R, g r‖ ≤ 4 / (3 * R ^ 2) :=
       le_of_tendsto ((hlim.sub_const _).norm) (eventually_atTop.2 ⟨R, htail⟩)
-    have hval := statPh_integral_ray hα0 (by linarith)
+    have hval := StationaryPhase.integral_ray hα0 (by linarith)
     have : F α - L = exp (α * I) * ((∫ r in (0 : ℝ)..R, g r) - ∫ r in Ioi (0 : ℝ), g r) := by
       simp only [F, L, ← hval, g]; ring
     rw [this, norm_mul, norm_exp_ofReal_mul_I, one_mul, norm_sub_rev]
@@ -300,12 +303,12 @@ theorem statPh_norm_integral_exp_cube_sub_le {R : ℝ} (hR : 0 < R) :
   exact le_of_tendsto ((hlim.sub_const L).norm) (eventually_nhdsWithin_of_forall hbound)
 
 /-- `∫₀^R e^{i t³} dt → Γ(4/3) e^{iπ/6}` as `R → ∞`. -/
-theorem statPh_tendsto_integral_exp_cube :
+theorem StationaryPhase.tendsto_integral_exp_cube :
     Tendsto (fun R : ℝ => ∫ t in (0 : ℝ)..R, exp ((t : ℂ) ^ 3 * I)) atTop
       (𝓝 ((Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I))) := by
   rw [tendsto_iff_norm_sub_tendsto_zero]
   refine squeeze_zero' (Eventually.of_forall fun _ => norm_nonneg _)
-    ((eventually_gt_atTop 0).mono fun R hR => statPh_norm_integral_exp_cube_sub_le hR) ?_
+    ((eventually_gt_atTop 0).mono fun R hR => StationaryPhase.norm_integral_exp_cube_sub_le hR) ?_
   have : Tendsto (fun R : ℝ => (4 / 3) * (R ^ 2)⁻¹) atTop (𝓝 ((4 / 3) * 0)) :=
     ((tendsto_pow_atTop two_ne_zero).inv_tendsto_atTop).const_mul _
   rw [mul_zero] at this
@@ -315,7 +318,7 @@ theorem statPh_tendsto_integral_exp_cube :
 
 /-- Rescaling of the model integral:
 `λ^{1/3} ∫₀^δ e^{iλc x³} dx = c^{-1/3} ∫₀^{(λc)^{1/3} δ} e^{it³} dt`. -/
-theorem statPh_integral_model {lam c δ : ℝ} (hlam : 0 < lam) (hc : 0 < c) :
+theorem StationaryPhase.integral_model {lam c δ : ℝ} (hlam : 0 < lam) (hc : 0 < c) :
     ((lam ^ (1 / 3 : ℝ) : ℝ) : ℂ) * ∫ x in (0 : ℝ)..δ, exp (((lam * (c * x ^ 3) : ℝ) : ℂ) * I) =
       ((c ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) *
         ∫ t in (0 : ℝ)..((lam * c) ^ (1 / 3 : ℝ) * δ), exp ((t : ℂ) ^ 3 * I) := by
@@ -343,7 +346,7 @@ theorem statPh_integral_model {lam c δ : ℝ} (hlam : 0 < lam) (hc : 0 < c) :
   field_simp
 
 /-- `‖e^{ia} - e^{ib}‖ ≤ |a - b|` for real `a`, `b`. -/
-theorem statPh_norm_exp_sub_exp_le (a b : ℝ) :
+theorem StationaryPhase.norm_exp_sub_exp_le (a b : ℝ) :
     ‖exp ((a : ℂ) * I) - exp ((b : ℂ) * I)‖ ≤ |a - b| := by
   have : exp ((a : ℂ) * I) - exp ((b : ℂ) * I) = exp ((b : ℂ) * I) *
       (exp (I * ((a - b : ℝ) : ℂ)) - 1) := by
@@ -354,7 +357,7 @@ theorem statPh_norm_exp_sub_exp_le (a b : ℝ) :
 /-- **Stationary phase at a cubic point.** Let `φ` be `C²` on `[0, b]` with `φ'' ≥ 0`,
 `φ'(x) ≥ m x²` (`m > 0`) and `|φ(x) - c x³| ≤ K x⁴` (`c > 0`). Then, as `λ → +∞`,
 `λ^{1/3} ∫₀^b e^{iλφ(x)} dx → Γ(4/3) c^{-1/3} e^{iπ/6}`. -/
-theorem statPh_tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 < m)
+theorem StationaryPhase.tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 < m)
     {φ φ' φ'' : ℝ → ℝ}
     (hφ : ∀ x ∈ Icc 0 b, HasDerivAt φ (φ' x) x) (hφ' : ∀ x ∈ Icc 0 b, HasDerivAt φ' (φ'' x) x)
     (hφ''c : ContinuousOn φ'' (Icc 0 b)) (hφ''0 : ∀ x ∈ Icc 0 b, 0 ≤ φ'' x)
@@ -396,7 +399,8 @@ theorem statPh_tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 <
       (by fun_prop : Continuous fun x : ℝ =>
             exp (((lam * (c * x ^ 3) : ℝ) : ℂ) * I)).intervalIntegrable _ _
     simp only [A, B, C]
-    rw [← statPh_integral_model hl hc, intervalIntegral.integral_sub (i1 le_rfl hδ0.le hδb.le) i2,
+    rw [← StationaryPhase.integral_model hl hc,
+        intervalIntegral.integral_sub (i1 le_rfl hδ0.le hδb.le) i2,
       ← intervalIntegral.integral_add_adjacent_intervals (i1 le_rfl hδ0.le hδb.le)
         (i1 hδ0.le hδb.le le_rfl)]
     ring
@@ -404,7 +408,7 @@ theorem statPh_tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 <
   have hA : Tendsto A atTop
       (𝓝 (((c ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) *
           ((Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I)))) := by
-    refine (statPh_tendsto_integral_exp_cube.comp ?_).const_mul _
+    refine (StationaryPhase.tendsto_integral_exp_cube.comp ?_).const_mul _
     have h30 : Tendsto (fun lam : ℝ => c ^ (1 / 3 : ℝ) * lam ^ (1 / 30 : ℝ)) atTop atTop :=
       (tendsto_rpow_atTop (by norm_num)).const_mul_atTop (by positivity)
     refine h30.congr' ?_
@@ -421,7 +425,7 @@ theorem statPh_tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 <
           exp (((lam * (c * x ^ 3) : ℝ) : ℂ) * I)‖ ≤ lam * K * δ lam ^ 4 := by
         intro x hx
         rw [uIoc_of_le hδ0.le] at hx
-        refine (statPh_norm_exp_sub_exp_le _ _).trans ?_
+        refine (StationaryPhase.norm_exp_sub_exp_le _ _).trans ?_
         rw [← mul_sub, abs_mul, abs_of_pos hl, mul_assoc]
         gcongr
         refine (hφK x ⟨hx.1.le, hx.2.trans hδb.le⟩).trans ?_
@@ -456,7 +460,7 @@ theorem statPh_tendsto_cubic {b c m K : ℝ} (hb : 0 < b) (hc : 0 < c) (hm : 0 <
         nlinarith [mul_pos hm (mul_pos this this)]
       have hne : ∀ x ∈ Icc (δ lam) b, lam * φ' x ≠ 0 := fun x hx =>
         (mul_pos hl (hpos x hx)).ne'
-      have key := statPh_norm_integral_le hδb.le (φ := fun x => lam * φ x)
+      have key := StationaryPhase.norm_integral_le hδb.le (φ := fun x => lam * φ x)
         (φ' := fun x => lam * φ' x) (ψ := fun x => (lam * φ' x)⁻¹)
         (ψ' := fun x => -(lam * φ'' x) / (lam * φ' x) ^ 2)
         (fun x hx => (hφ x (hsub hx)).const_mul lam)

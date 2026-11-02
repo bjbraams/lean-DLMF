@@ -16,45 +16,49 @@ public import DLMFMathlib.Analysis.ODE.SturmDeformation
 # Zero counts of Tricomi's `U` by Sturm comparison
 
 Tools for the real zero counts of DLMF §13.9(ii). For real parameters `a`, `b` and `x > 0`,
-`U(a,b,x)` is real (`kzt_U_im`, `kzt_U_eq`) and satisfies the self-adjoint form
-`(x^b e^{-x} y')' - a x^{b-1} e^{-x} y = 0` of Kummer's equation on `(0, ∞)` (`kzt_U_isSol`).
+`U(a,b,x)` is real (`KummerUZeroCount.realU_im`, `KummerUZeroCount.realU_eq`) and satisfies the
+self-adjoint form `(x^b e^{-x} y')' - a x^{b-1} e^{-x} y = 0` of Kummer's equation on `(0, ∞)`
+(`KummerUZeroCount.realU_isSol`).
 
 ## Main definitions
 
-* `KztIsSol`: `y`, with derivative `y'`, solves `(p y')' + q y = 0` on `(0, ∞)`.
-* `kzt_U`, `kzt_dU`: `U(a,b,·)` and its derivative on the positive real axis, as real functions.
-* `kzt_q`: the coefficient `q(x) = -a x^{b-1} e^{-x}` of the self-adjoint form.
+* `IsSturmTypeSolutionIoi`: `y`, with derivative `y'`, solves `(p y')' + q y = 0` on `(0, ∞)`.
+* `KummerUZeroCount.realU`, `KummerUZeroCount.derivRealU`: `U(a,b,·)` and its derivative on the
+  positive real axis, as real functions.
+* `KummerUZeroCount.selfAdjointCoeff`: the coefficient `q(x) = -a x^{b-1} e^{-x}` of the
+  self-adjoint form.
 
 ## Main results
 
-* `kzt_between`: Sturm comparison between consecutive zeros.
-* `kzt_upper_right`, `kzt_lower_right`, `kzt_lower_left`, `kzt_lower_whole`: comparisons at the
-  ends of the half-line and on the whole half-line.
-* `kzt_lower_count`, `kzt_upper_count`: lower and upper zero counts from exactly known
-  comparison functions.
-* `kzt_U_simple`: for `a ∉ -ℕ` the zeros of `U(a,b,·)` on `(0, ∞)` are simple.
-* `kzt_U_asymp`: `U(a,b,x) x^a → 1` as `x → ∞` (DLMF 13.2.6), for real parameters.
-* `kzt_U_posZeros_count`: for `b ≥ 1` and `a < 0` nonintegral, `U(a,b,·)` has exactly `⌈-a⌉`
-  positive zeros.
-* `kzt_connection_neg`, `kzt_wronskian_neg`: the connection formula 13.2.41 and the Wronskian
-  13.2.34 on the negative real axis.
-* `kzt_U_neg_ne_zero`: for real `a ∉ -ℕ` and real `b ≤ a + 1`, the principal branch of `U` has
-  no zeros on the negative axis (DLMF 13.9.13 in pointwise form).
+* `KummerUZeroCount.between`: Sturm comparison between consecutive zeros.
+* `KummerUZeroCount.upper_right`, `KummerUZeroCount.lower_right`, `KummerUZeroCount.lower_left`,
+  `KummerUZeroCount.lower_whole`: comparisons at the ends of the half-line and on the whole
+  half-line.
+* `KummerUZeroCount.lower_count`, `KummerUZeroCount.upper_count`: lower and upper zero counts from
+  exactly known comparison functions.
+* `KummerUZeroCount.realU_simple`: for `a ∉ -ℕ` the zeros of `U(a,b,·)` on `(0, ∞)` are simple.
+* `KummerUZeroCount.realU_asymp`: `U(a,b,x) x^a → 1` as `x → ∞` (DLMF 13.2.6), for real parameters.
+* `KummerUZeroCount.realU_posZeros_count`: for `b ≥ 1` and `a < 0` nonintegral, `U(a,b,·)` has
+  exactly `⌈-a⌉` positive zeros.
+* `KummerUZeroCount.connection_neg`, `KummerUZeroCount.wronskian_neg`: the connection formula
+  13.2.41 and the Wronskian 13.2.34 on the negative real axis.
+* `KummerUZeroCount.realU_neg_ne_zero`: for real `a ∉ -ℕ` and real `b ≤ a + 1`, the principal branch
+  of `U` has no zeros on the negative axis (DLMF 13.9.13 in pointwise form).
 
 ## Implementation notes
 
-The comparison theory is that of `DLMF/Legendre/ZeroTools.lean` (prefix `lzt_`), transplanted
-from `(-1, 1)` to `(0, ∞)` with a general positive weight `p`: for two solutions `y`, `u` of
-`(p y')' + q y = 0` with coefficients `qy < qu`, the weighted Wronskian `W = p (u'y - uy')` is
-strictly monotone wherever `u y > 0`. At the ends, a sign of `W` forces `y/u` to diverge as soon
-as `p u² = O(x)` at `0` or `p u² = O(1)` at `∞`.
+The comparison theory is that of `DLMF/Legendre/ZeroTools.lean` (namespace
+`DLMF.Legendre.LegendreSturm`), transplanted from `(-1, 1)` to `(0, ∞)` with a general positive
+weight `p`: for two solutions `y`, `u` of `(p y')' + q y = 0` with coefficients `qy < qu`, the
+weighted Wronskian `W = p (u'y - uy')` is strictly monotone wherever `u y > 0`. At the ends, a sign
+of `W` forces `y/u` to diverge as soon as `p u² = O(x)` at `0` or `p u² = O(1)` at `∞`.
 
 The comparison functions are the polynomial cases `U(-n,b,x) = (-1)ⁿ n! L_n^{(b-1)}(x)`
 (DLMF 13.6.19), whose zeros are those of the Laguerre polynomial (`laguerrePolyL_zeros_pos`,
 DLMF 18.16(iv)). Simplicity of zeros comes from the Wronskian 13.2.34. The positive-zero count
 gives DLMF 13.9.14 by Kummer's transformation.
 
-All helper names carry the prefix `kzt_`.
+The helpers live in the namespace `KummerUZeroCount`.
 -/
 
 @[expose] public noncomputable section
@@ -66,13 +70,13 @@ namespace DLMF.Confluent
 /-! ### Sturm comparison on `(0, ∞)` -/
 
 /-- `y` (with derivative `y'`) solves `(p y')' + q y = 0` on `(0, ∞)`. -/
-def KztIsSol (p q y y' : ℝ → ℝ) : Prop :=
+def IsSturmTypeSolutionIoi (p q y y' : ℝ → ℝ) : Prop :=
   ∀ x ∈ Ioi (0:ℝ), HasDerivAt y (y' x) x ∧
     HasDerivAt (fun t => p t * y' t) (-(q x * y x)) x
 
 /-- The negative of a solution is a solution. -/
-theorem KztIsSol.neg {p q y y' : ℝ → ℝ} (h : KztIsSol p q y y') :
-    KztIsSol p q (fun x => -y x) (fun x => -y' x) := fun x hx => by
+theorem IsSturmTypeSolutionIoi.neg {p q y y' : ℝ → ℝ} (h : IsSturmTypeSolutionIoi p q y y') :
+    IsSturmTypeSolutionIoi p q (fun x => -y x) (fun x => -y' x) := fun x hx => by
   refine ⟨(h x hx).1.neg, ?_⟩
   have := (h x hx).2.neg
   convert this using 1
@@ -80,12 +84,13 @@ theorem KztIsSol.neg {p q y y' : ℝ → ℝ} (h : KztIsSol p q y y') :
   · ring
 
 /-- Solutions are continuous on subsets of `(0, ∞)`. -/
-theorem KztIsSol.continuousOn {p q y y' : ℝ → ℝ} (h : KztIsSol p q y y') {s : Set ℝ}
+theorem IsSturmTypeSolutionIoi.continuousOn {p q y y' : ℝ → ℝ}
+    (h : IsSturmTypeSolutionIoi p q y y') {s : Set ℝ}
     (hs : s ⊆ Ioi (0:ℝ)) : ContinuousOn y s := fun _x hx =>
   (h _ (hs hx)).1.continuousAt.continuousWithinAt
 
 /-- The weighted Wronskian is odd in `y`. -/
-theorem kzt_W_neg (p u u' y y' : ℝ → ℝ) (x : ℝ) :
+theorem KummerUZeroCount.weightedWronskian_neg (p u u' y y' : ℝ → ℝ) (x : ℝ) :
     ODE.sturmWronskian p u u' (fun x => -y x) (fun x => -y' x) x =
         -ODE.sturmWronskian p u u' y y' x := by
   simp only [ODE.sturmWronskian]; ring
@@ -95,7 +100,8 @@ section Comparison
 variable {p qy qu qw y y' u u' w w' : ℝ → ℝ}
 
 /-- Derivative of the weighted Wronskian: `W' = (qy - qu) u y`. -/
-theorem kzt_hasDerivAt_W (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
+theorem KummerUZeroCount.hasDerivAt_weightedWronskian (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hu : IsSturmTypeSolutionIoi p qu u u')
     {x : ℝ} (hx : x ∈ Ioi (0:ℝ)) :
     HasDerivAt (ODE.sturmWronskian p u u' y y') ((qy x - qu x) * u x * y x) x := by
   have h1 := (hu x hx).2.mul (hy x hx).1
@@ -106,12 +112,14 @@ theorem kzt_hasDerivAt_W (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
   · ring
 
 /-- The weighted Wronskian is continuous on subsets of `(0, ∞)`. -/
-theorem kzt_W_continuousOn (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u') {s : Set ℝ}
+theorem KummerUZeroCount.weightedWronskian_continuousOn (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hu : IsSturmTypeSolutionIoi p qu u u') {s : Set ℝ}
     (hs : s ⊆ Ioi (0:ℝ)) : ContinuousOn (ODE.sturmWronskian p u u' y y') s := fun _x hx =>
-  (kzt_hasDerivAt_W hy hu (hs hx)).continuousAt.continuousWithinAt
+  (KummerUZeroCount.hasDerivAt_weightedWronskian hy hu (hs hx)).continuousAt.continuousWithinAt
 
 /-- At a zero `a` followed by positive values, the derivative is nonnegative. -/
-theorem kzt_deriv_nonneg_right {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt f d a) (h0 : f a = 0)
+theorem KummerUZeroCount.deriv_nonneg_right {f : ℝ → ℝ} {d a b : ℝ}
+    (hd : HasDerivAt f d a) (h0 : f a = 0)
     (hab : a < b) (hpos : ∀ x ∈ Ioo a b, 0 < f x) : 0 ≤ d := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsGT_le_nhdsNE a)
   refine ge_of_tendsto hs ?_
@@ -120,7 +128,8 @@ theorem kzt_deriv_nonneg_right {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt 
   exact (div_pos (hpos x hx) (sub_pos.mpr hx.1)).le
 
 /-- At a zero `b` preceded by positive values, the derivative is nonpositive. -/
-theorem kzt_deriv_nonpos_left {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt f d b) (h0 : f b = 0)
+theorem KummerUZeroCount.deriv_nonpos_left {f : ℝ → ℝ} {d a b : ℝ}
+    (hd : HasDerivAt f d b) (h0 : f b = 0)
     (hab : a < b) (hpos : ∀ x ∈ Ioo a b, 0 < f x) : d ≤ 0 := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsLT_le_nhdsNE b)
   refine le_of_tendsto hs ?_
@@ -129,19 +138,20 @@ theorem kzt_deriv_nonpos_left {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt f
   exact (div_neg_of_pos_of_neg (hpos x hx) (sub_neg.mpr hx.2)).le
 
 /-- Nonnegativity at the left end by continuity. -/
-theorem kzt_nonneg_left {f : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt f a) (hab : a < b)
+theorem KummerUZeroCount.nonneg_left {f : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt f a) (hab : a < b)
     (hpos : ∀ x ∈ Ioo a b, 0 < f x) : 0 ≤ f a := by
   refine ge_of_tendsto (hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Ioi a))) ?_
   filter_upwards [Ioo_mem_nhdsGT hab] with x hx using (hpos x hx).le
 
 /-- Nonnegativity at the right end by continuity. -/
-theorem kzt_nonneg_right {f : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt f b) (hab : a < b)
+theorem KummerUZeroCount.nonneg_right {f : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt f b) (hab : a < b)
     (hpos : ∀ x ∈ Ioo a b, 0 < f x) : 0 ≤ f b := by
   refine ge_of_tendsto (hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Iio b))) ?_
   filter_upwards [Ioo_mem_nhdsLT hab] with x hx using (hpos x hx).le
 
 /-- A continuous function without zeros on an order-connected set has constant sign there. -/
-theorem kzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : ContinuousOn f s)
+theorem KummerUZeroCount.constant_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected)
+    (hc : ContinuousOn f s)
     (hne : ∀ x ∈ s, f x ≠ 0) : (∀ x ∈ s, 0 < f x) ∨ (∀ x ∈ s, f x < 0) := by
   by_contra h
   push Not at h
@@ -158,7 +168,7 @@ theorem kzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : Con
 
 /-- **Divergence of a ratio at `∞`.** If `u > 0`, `p u² ≤ K` and the weighted Wronskian
 satisfies `W ≤ -c₀ < 0` on `[s, ∞)`, then `y/u` is unbounded above there. -/
-theorem kzt_ratio_top {s K c₀ : ℝ} (hK : 0 < K) (hc₀ : 0 < c₀)
+theorem KummerUZeroCount.ratio_top {s K c₀ : ℝ} (hK : 0 < K) (hc₀ : 0 < c₀)
     (hyd : ∀ x ∈ Ici s, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ici s, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ici s, 0 < u x) (hp : ∀ x ∈ Ici s, 0 < p x)
     (hb : ∀ x ∈ Ici s, p x * u x ^ 2 ≤ K)
@@ -202,7 +212,7 @@ theorem kzt_ratio_top {s K c₀ : ℝ} (hK : 0 < K) (hc₀ : 0 < c₀)
 
 /-- **Divergence of a ratio at `0`.** If `u > 0`, `p u² ≤ K x` and `W ≤ -c₀ < 0` on `(0, s]`,
 then `y/u` takes negative values there. -/
-theorem kzt_ratio_zero {s K c₀ : ℝ} (hs : 0 < s) (hK : 0 < K) (hc₀ : 0 < c₀)
+theorem KummerUZeroCount.ratio_zero {s K c₀ : ℝ} (hs : 0 < s) (hK : 0 < K) (hc₀ : 0 < c₀)
     (hyd : ∀ x ∈ Ioc 0 s, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ioc 0 s, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ioc 0 s, 0 < u x) (hp : ∀ x ∈ Ioc 0 s, 0 < p x)
     (hb : ∀ x ∈ Ioc 0 s, p x * u x ^ 2 ≤ K * x)
@@ -228,45 +238,51 @@ include hp
 
 omit hp in
 /-- `W = p (u'y - uy')` is strictly decreasing where `u, y > 0` and `qy < qu`. -/
-theorem kzt_W_strictAntiOn (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
+theorem KummerUZeroCount.weightedWronskian_strictAntiOn (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hu : IsSturmTypeSolutionIoi p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {s : Set ℝ} (hs : s ⊆ Ioi (0:ℝ)) (hcv : Convex ℝ s)
     (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn
         (ODE.sturmWronskian p u u' y y') s := by
-  refine strictAntiOn_of_deriv_neg hcv (kzt_W_continuousOn hy hu hs) fun x hx => ?_
+  refine strictAntiOn_of_deriv_neg hcv
+      (KummerUZeroCount.weightedWronskian_continuousOn hy hu hs) fun x hx => ?_
   have hx' := hs (interior_subset hx)
-  rw [(kzt_hasDerivAt_W hy hu hx').deriv]
+  rw [(KummerUZeroCount.hasDerivAt_weightedWronskian hy hu hx').deriv]
   have := hq x hx'
   have h2 := mul_pos (hpos x hx).1 (hpos x hx).2
   nlinarith
 
 omit hp in
 /-- `W = p (u'y - uy')` is strictly increasing where `u, y > 0` and `qu < qy`. -/
-theorem kzt_W_strictMonoOn (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
+theorem KummerUZeroCount.weightedWronskian_strictMonoOn (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hu : IsSturmTypeSolutionIoi p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qu x < qy x) {s : Set ℝ} (hs : s ⊆ Ioi (0:ℝ)) (hcv : Convex ℝ s)
     (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn
         (ODE.sturmWronskian p u u' y y') s := by
-  refine strictMonoOn_of_deriv_pos hcv (kzt_W_continuousOn hy hu hs) fun x hx => ?_
+  refine strictMonoOn_of_deriv_pos hcv
+      (KummerUZeroCount.weightedWronskian_continuousOn hy hu hs) fun x hx => ?_
   have hx' := hs (interior_subset hx)
-  rw [(kzt_hasDerivAt_W hy hu hx').deriv]
+  rw [(KummerUZeroCount.hasDerivAt_weightedWronskian hy hu hx').deriv]
   have := hq x hx'
   have h2 := mul_pos (hpos x hx).1 (hpos x hx).2
   nlinarith
 
-/-- Sign-normalized core of `kzt_between`. -/
-theorem kzt_between_core (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
+/-- Sign-normalized core of `KummerUZeroCount.between`. -/
+theorem KummerUZeroCount.between_core (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hu : IsSturmTypeSolutionIoi p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {a b : ℝ} (ha : 0 < a) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (ypos : ∀ x ∈ Ioo a b, 0 < y x)
     (upos : ∀ x ∈ Ioo a b, 0 < u x) : False := by
   have hsub : Icc a b ⊆ Ioi (0:ℝ) := fun x hx => lt_of_lt_of_le ha hx.1
-  have hanti := kzt_W_strictAntiOn hy hu hq hsub (convex_Icc a b) fun x hx => by
+  have hanti := KummerUZeroCount.weightedWronskian_strictAntiOn hy hu hq hsub
+      (convex_Icc a b) fun x hx => by
     rw [interior_Icc] at hx; exact ⟨upos x hx, ypos x hx⟩
   have hWab := hanti (left_mem_Icc.2 hab.le) (right_mem_Icc.2 hab.le) hab
   have ha' := hsub (left_mem_Icc.2 hab.le)
   have hb' := hsub (right_mem_Icc.2 hab.le)
-  have hua := kzt_nonneg_left (hu a ha').1.continuousAt hab upos
-  have hub := kzt_nonneg_right (hu b hb').1.continuousAt hab upos
-  have hya := kzt_deriv_nonneg_right (hy a ha').1 ya hab ypos
-  have hyb := kzt_deriv_nonpos_left (hy b hb').1 yb hab ypos
+  have hua := KummerUZeroCount.nonneg_left (hu a ha').1.continuousAt hab upos
+  have hub := KummerUZeroCount.nonneg_right (hu b hb').1.continuousAt hab upos
+  have hya := KummerUZeroCount.deriv_nonneg_right (hy a ha').1 ya hab ypos
+  have hyb := KummerUZeroCount.deriv_nonpos_left (hy b hb').1 yb hab ypos
   have pa := hp a ha'
   have pb := hp b hb'
   simp only [ODE.sturmWronskian, ya, yb, mul_zero, zero_sub] at hWab
@@ -277,37 +293,42 @@ theorem kzt_between_core (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
 
 /-- **Sturm comparison.** If `qy < qu`, then between two consecutive zeros of `y` the function
 `u` has a zero. -/
-theorem kzt_between (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
+theorem KummerUZeroCount.between (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hu : IsSturmTypeSolutionIoi p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {a b : ℝ} (ha : 0 < a) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (hyne : ∀ x ∈ Ioo a b, y x ≠ 0) :
     ∃ c ∈ Ioo a b, u c = 0 := by
   by_contra hcon
   push Not at hcon
   have hsub : Ioo a b ⊆ Ioi (0:ℝ) := fun x hx => ha.trans hx.1
-  rcases kzt_sign ordConnected_Ioo (hy.continuousOn hsub) hyne with hy1 | hy1 <;>
-  rcases kzt_sign ordConnected_Ioo (hu.continuousOn hsub) hcon with hu1 | hu1
-  · exact kzt_between_core hp hy hu hq ha hab ya yb hy1 hu1
-  · exact kzt_between_core hp hy hu.neg hq ha hab ya yb hy1 fun x hx => neg_pos.mpr (hu1 x hx)
-  · exact kzt_between_core hp hy.neg hu hq ha hab (by simp [ya]) (by simp [yb])
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioo (hy.continuousOn hsub) hyne
+      with hy1 | hy1 <;>
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioo (hu.continuousOn hsub) hcon with hu1 | hu1
+  · exact KummerUZeroCount.between_core hp hy hu hq ha hab ya yb hy1 hu1
+  · exact KummerUZeroCount.between_core hp hy hu.neg hq ha hab ya yb hy1 fun x hx =>
+        neg_pos.mpr (hu1 x hx)
+  · exact KummerUZeroCount.between_core hp hy.neg hu hq ha hab (by simp [ya]) (by simp [yb])
       (fun x hx => neg_pos.mpr (hy1 x hx)) hu1
-  · exact kzt_between_core hp hy.neg hu.neg hq ha hab (by simp [ya]) (by simp [yb])
+  · exact KummerUZeroCount.between_core hp hy.neg hu.neg hq ha hab (by simp [ya]) (by simp [yb])
       (fun x hx => neg_pos.mpr (hy1 x hx)) fun x hx => neg_pos.mpr (hu1 x hx)
 
-/-- Sign-normalized core of `kzt_upper_right`. -/
-theorem kzt_upper_right_core (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
+/-- Sign-normalized core of `KummerUZeroCount.upper_right`. -/
+theorem KummerUZeroCount.upper_right_core (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hu : IsSturmTypeSolutionIoi p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {z s₀ C K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (yz : y z = 0) (ypos : ∀ x ∈ Ioi z, 0 < y x) (upos : ∀ x ∈ Ioi z, 0 < u x)
     (hC : ∀ x ∈ Ioi s₀, y x ≤ C * u x)
     (hb : ∀ x ∈ Ioi s₀, p x * u x ^ 2 ≤ K) : False := by
   have hsub : Ici z ⊆ Ioi (0:ℝ) := fun x hx => lt_of_lt_of_le hz hx
-  have hanti := kzt_W_strictAntiOn hy hu hq hsub (convex_Ici z) fun x hx => by
+  have hanti := KummerUZeroCount.weightedWronskian_strictAntiOn hy hu hq hsub
+      (convex_Ici z) fun x hx => by
     rw [interior_Ici] at hx; exact ⟨upos x hx, ypos x hx⟩
   have hz1 : z < z + 1 := by linarith
   have hWz : ODE.sturmWronskian p u u' y y' z ≤ 0 := by
     have hpz : ∀ x ∈ Ioo z (z + 1), 0 < u x := fun x hx => upos x hx.1
     have hpy : ∀ x ∈ Ioo z (z + 1), 0 < y x := fun x hx => ypos x hx.1
-    have hua := kzt_nonneg_left (hu z hz).1.continuousAt hz1 hpz
-    have hya := kzt_deriv_nonneg_right (hy z hz).1 yz hz1 hpy
+    have hua := KummerUZeroCount.nonneg_left (hu z hz).1.continuousAt hz1 hpz
+    have hya := KummerUZeroCount.deriv_nonneg_right (hy z hz).1 yz hz1 hpy
     simp only [ODE.sturmWronskian, yz, mul_zero, zero_sub]
     exact mul_nonpos_of_nonneg_of_nonpos (hp z hz).le (by nlinarith [mul_nonneg hua hya])
   set s₁ := max z s₀ + 1 with hs₁
@@ -318,7 +339,8 @@ theorem kzt_upper_right_core (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
   have hIci : ∀ x ∈ Ici s₁, x ∈ Ioi z := fun x hx => lt_of_lt_of_le hzs hx
   have hIci0 : ∀ x ∈ Ici s₁, x ∈ Ioi s₀ := fun x hx => lt_of_lt_of_le hs0s hx
   obtain ⟨x, hx, hxC⟩ :=
-      kzt_ratio_top (p := p) (y := y) (u := u) (c₀ := -ODE.sturmWronskian p u u' y y' s₁)
+      KummerUZeroCount.ratio_top (p := p) (y := y) (u := u)
+          (c₀ := -ODE.sturmWronskian p u u' y y' s₁)
     hK (by linarith)
     (fun x hx => (hy x (hsub (le_of_lt (hIci x hx)))).1)
     (fun x hx => (hu x (hsub (le_of_lt (hIci x hx)))).1)
@@ -334,7 +356,8 @@ theorem kzt_upper_right_core (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
 
 /-- **Comparison at `∞`.** Let `qy < qu`, let `z` be the last zero of `y`, and let `y/u` stay
 bounded and `p u² = O(1)` near `∞`. Then `u` has a zero in `(z, ∞)`. -/
-theorem kzt_upper_right (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
+theorem KummerUZeroCount.upper_right (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hu : IsSturmTypeSolutionIoi p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {z s₀ C K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (yz : y z = 0) (hyne : ∀ x ∈ Ioi z, y x ≠ 0)
     (hC : ∀ x ∈ Ioi s₀, |y x| ≤ C * |u x|)
@@ -344,12 +367,13 @@ theorem kzt_upper_right (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
   have hsub : Ioi z ⊆ Ioi (0:ℝ) := fun x hx => hz.trans hx
   have hb' : ∀ x ∈ Ioi s₀, p x * (-u x) ^ 2 ≤ K := fun x hx => by
     rw [neg_sq]; exact hb x hx
-  have key : ∀ (y₁ y₁' u₁ u₁' : ℝ → ℝ), KztIsSol p qy y₁ y₁' → KztIsSol p qu u₁ u₁' →
+  have key : ∀ (y₁ y₁' u₁ u₁' : ℝ → ℝ), IsSturmTypeSolutionIoi p qy y₁ y₁' →
+      IsSturmTypeSolutionIoi p qu u₁ u₁' →
       y₁ z = 0 → (∀ x ∈ Ioi z, 0 < y₁ x) → (∀ x ∈ Ioi z, 0 < u₁ x) →
       (∀ x ∈ Ioi s₀, |y₁ x| ≤ C * |u₁ x|) →
       (∀ x ∈ Ioi s₀, p x * u₁ x ^ 2 ≤ K) → False := by
     intro y₁ y₁' u₁ u₁' h1 h2 h3 h4 h5 h6 h7
-    refine kzt_upper_right_core (s₀ := max z s₀) (C := C) hp h1 h2 hq hz hK h3 h4 h5
+    refine KummerUZeroCount.upper_right_core (s₀ := max z s₀) (C := C) hp h1 h2 hq hz hK h3 h4 h5
       (fun x hx => ?_) (fun x hx => h7 x (lt_of_le_of_lt (le_max_right _ _) hx))
     have hxz : x ∈ Ioi z := lt_of_le_of_lt (le_max_left _ _) hx
     have := h6 x (lt_of_le_of_lt (le_max_right _ _) hx)
@@ -360,26 +384,29 @@ theorem kzt_upper_right (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     rw [abs_neg]; exact hC x hx
   have hCn3 : ∀ x ∈ Ioi s₀, |-y x| ≤ C * |-u x| := fun x hx => by
     rw [abs_neg, abs_neg]; exact hC x hx
-  rcases kzt_sign ordConnected_Ioi (hy.continuousOn hsub) hyne with hy1 | hy1 <;>
-  rcases kzt_sign ordConnected_Ioi (hu.continuousOn hsub) hcon with hu1 | hu1
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioi (hy.continuousOn hsub) hyne
+      with hy1 | hy1 <;>
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioi (hu.continuousOn hsub) hcon with hu1 | hu1
   · exact key _ _ _ _ hy hu yz hy1 hu1 hC hb
   · exact key _ _ _ _ hy hu.neg yz hy1 (fun x hx => neg_pos.mpr (hu1 x hx)) hCn2 hb'
   · exact key _ _ _ _ hy.neg hu (by simp [yz]) (fun x hx => neg_pos.mpr (hy1 x hx)) hu1 hCn1 hb
   · exact key _ _ _ _ hy.neg hu.neg (by simp [yz]) (fun x hx => neg_pos.mpr (hy1 x hx))
       (fun x hx => neg_pos.mpr (hu1 x hx)) hCn3 hb'
 
-/-- Sign-normalized core of `kzt_lower_right`. -/
-theorem kzt_lower_right_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
+/-- Sign-normalized core of `KummerUZeroCount.lower_right`. -/
+theorem KummerUZeroCount.lower_right_core (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hw : IsSturmTypeSolutionIoi p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioi z, 0 < y x) (wpos : ∀ x ∈ Ioi z, 0 < w x)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K) : False := by
   have hsub : Ici z ⊆ Ioi (0:ℝ) := fun x hx => lt_of_lt_of_le hz hx
-  have hmono := kzt_W_strictMonoOn hy hw hq hsub (convex_Ici z) fun x hx => by
+  have hmono := KummerUZeroCount.weightedWronskian_strictMonoOn hy hw hq hsub
+      (convex_Ici z) fun x hx => by
     rw [interior_Ici] at hx; exact ⟨wpos x hx, ypos x hx⟩
   have hz1 : z < z + 1 := by linarith
   have hWz : 0 ≤ ODE.sturmWronskian p w w' y y' z := by
-    have hya := kzt_nonneg_left (hy z hz).1.continuousAt hz1 fun x hx => ypos x hx.1
-    have hwa := kzt_deriv_nonneg_right (hw z hz).1 wz hz1 fun x hx => wpos x hx.1
+    have hya := KummerUZeroCount.nonneg_left (hy z hz).1.continuousAt hz1 fun x hx => ypos x hx.1
+    have hwa := KummerUZeroCount.deriv_nonneg_right (hw z hz).1 wz hz1 fun x hx => wpos x hx.1
     simp only [ODE.sturmWronskian, wz, zero_mul, sub_zero]
     exact mul_nonneg (hp z hz).le (mul_nonneg hwa hya)
   set s₁ := max z s₀ + 1 with hs₁
@@ -389,32 +416,35 @@ theorem kzt_lower_right_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     hmono (mem_Ici.2 le_rfl) (mem_Ici.2 hzs.le) hzs
   have hIci : ∀ x ∈ Ici s₁, x ∈ Ioi z := fun x hx => lt_of_lt_of_le hzs hx
   have hIci0 : ∀ x ∈ Ici s₁, x ∈ Ioi s₀ := fun x hx => lt_of_lt_of_le hs0s hx
-  obtain ⟨x, hx, hxC⟩ := kzt_ratio_top (p := p) (y := fun x => -y x) (y' := fun x => -y' x)
+  obtain ⟨x, hx, hxC⟩ :=
+      KummerUZeroCount.ratio_top (p := p) (y := fun x => -y x) (y' := fun x => -y' x)
     (u := w) (c₀ := ODE.sturmWronskian p w w' y y' s₁) hK (by linarith)
     (fun x hx => (hy x (hsub (le_of_lt (hIci x hx)))).1.neg)
     (fun x hx => (hw x (hsub (le_of_lt (hIci x hx)))).1)
     (fun x hx => wpos x (hIci x hx)) (fun x hx => hp x (hsub (le_of_lt (hIci x hx))))
     (fun x hx => hb x (hIci0 x hx))
     (fun x hx => by
-      rw [kzt_W_neg]
+      rw [KummerUZeroCount.weightedWronskian_neg]
       have := hmono.monotoneOn (mem_Ici.2 hzs.le) (mem_Ici.2 (le_of_lt (hIci x hx))) hx
       linarith) 0
   have hx' : x ∈ Ioi z := hIci x (le_of_lt hx)
   rw [neg_div, lt_neg, neg_zero] at hxC
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
-/-- Sign-normalized core of `kzt_lower_left`. -/
-theorem kzt_lower_left_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
+/-- Sign-normalized core of `KummerUZeroCount.lower_left`. -/
+theorem KummerUZeroCount.lower_left_core (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hw : IsSturmTypeSolutionIoi p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z) (hs₀ : 0 < s₀)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioo 0 z, 0 < y x)
     (wpos : ∀ x ∈ Ioo 0 z, 0 < w x)
     (hb : ∀ x ∈ Ioo 0 s₀, p x * w x ^ 2 ≤ K * x) : False := by
   have hsub : Ioc 0 z ⊆ Ioi (0:ℝ) := fun x hx => hx.1
-  have hmono := kzt_W_strictMonoOn hy hw hq hsub (convex_Ioc 0 z) fun x hx => by
+  have hmono := KummerUZeroCount.weightedWronskian_strictMonoOn hy hw hq hsub
+      (convex_Ioc 0 z) fun x hx => by
     rw [interior_Ioc] at hx; exact ⟨wpos x hx, ypos x hx⟩
   have hWz : ODE.sturmWronskian p w w' y y' z ≤ 0 := by
-    have hya := kzt_nonneg_right (hy z hz).1.continuousAt hz ypos
-    have hwa := kzt_deriv_nonpos_left (hw z hz).1 wz hz wpos
+    have hya := KummerUZeroCount.nonneg_right (hy z hz).1.continuousAt hz ypos
+    have hwa := KummerUZeroCount.deriv_nonpos_left (hw z hz).1 wz hz wpos
     simp only [ODE.sturmWronskian, wz, zero_mul, sub_zero]
     exact mul_nonpos_of_nonneg_of_nonpos (hp z hz).le
       (by nlinarith [mul_nonneg hya (neg_nonneg.mpr hwa)])
@@ -426,7 +456,7 @@ theorem kzt_lower_left_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
   have hW1 : ODE.sturmWronskian p w w' y y' s₁ < ODE.sturmWronskian p w w' y y' z :=
     hmono ⟨hs1, hzs.le⟩ ⟨hz, le_rfl⟩ hzs
   have hIoc : ∀ x ∈ Ioc 0 s₁, x ∈ Ioc 0 z := fun x hx => ⟨hx.1, by linarith [hx.2]⟩
-  obtain ⟨x, hx, hxC⟩ := kzt_ratio_zero (p := p) (y := y) (u := w)
+  obtain ⟨x, hx, hxC⟩ := KummerUZeroCount.ratio_zero (p := p) (y := y) (u := w)
     (c₀ := -ODE.sturmWronskian p w w' y y' s₁) hs1 hK (by linarith)
     (fun x hx => (hy x (hsub (hIoc x hx))).1) (fun x hx => (hw x (hsub (hIoc x hx))).1)
     (fun x hx => wpos x ⟨hx.1, by linarith [hx.2]⟩) (fun x hx => hp x (hsub (hIoc x hx)))
@@ -437,13 +467,15 @@ theorem kzt_lower_left_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
   have hx' : x ∈ Ioo 0 z := ⟨hx.1, by linarith [hx.2]⟩
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
-/-- Sign-normalized core of `kzt_lower_whole`. -/
-theorem kzt_lower_whole_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
+/-- Sign-normalized core of `KummerUZeroCount.lower_whole`. -/
+theorem KummerUZeroCount.lower_whole_core (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hw : IsSturmTypeSolutionIoi p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {s₀ s₀' K : ℝ} (hs₀' : 0 < s₀')
     (hK : 0 < K) (ypos : ∀ x ∈ Ioi 0, 0 < y x) (wpos : ∀ x ∈ Ioi 0, 0 < w x)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K)
     (hb' : ∀ x ∈ Ioo 0 s₀', p x * w x ^ 2 ≤ K * x) : False := by
-  have hmono := kzt_W_strictMonoOn hy hw hq subset_rfl (convex_Ioi 0) fun x hx => by
+  have hmono := KummerUZeroCount.weightedWronskian_strictMonoOn hy hw hq subset_rfl
+      (convex_Ioi 0) fun x hx => by
     rw [interior_Ioi] at hx; exact ⟨wpos x hx, ypos x hx⟩
   have h1 : (1:ℝ) ∈ Ioi (0:ℝ) := by norm_num
   by_cases hW0 : 0 ≤ ODE.sturmWronskian p w w' y y' 1
@@ -455,13 +487,14 @@ theorem kzt_lower_whole_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
       exact lt_of_lt_of_le this hx
     have hW1 : ODE.sturmWronskian p w w' y y' 1 < ODE.sturmWronskian p w w' y y' s₁ :=
         hmono h1 (hS s₁ (mem_Ici.2 le_rfl)) hzs
-    obtain ⟨x, hx, hxC⟩ := kzt_ratio_top (p := p) (y := fun x => -y x) (y' := fun x => -y' x)
+    obtain ⟨x, hx, hxC⟩ :=
+        KummerUZeroCount.ratio_top (p := p) (y := fun x => -y x) (y' := fun x => -y' x)
       (u := w) (c₀ := ODE.sturmWronskian p w w' y y' s₁) hK (by linarith)
       (fun x hx => (hy x (hS x hx)).1.neg)
       (fun x hx => (hw x (hS x hx)).1) (fun x hx => wpos x (hS x hx))
       (fun x hx => hp x (hS x hx)) (fun x hx => hb x (lt_of_lt_of_le hs0s hx))
       (fun x hx => by
-        rw [kzt_W_neg]
+        rw [KummerUZeroCount.weightedWronskian_neg]
         have := hmono.monotoneOn (hS s₁ (mem_Ici.2 le_rfl)) (hS x hx) hx
         linarith) 0
     have hx' := hS x (le_of_lt hx)
@@ -476,7 +509,7 @@ theorem kzt_lower_whole_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     have hS : ∀ x ∈ Ioc 0 s₁, x ∈ Ioi (0:ℝ) := fun x hx => hx.1
     have hW1 : ODE.sturmWronskian p w w' y y' s₁ < ODE.sturmWronskian p w w' y y' 1 :=
         hmono hs1 h1 hzs
-    obtain ⟨x, hx, hxC⟩ := kzt_ratio_zero (p := p) (y := y) (u := w)
+    obtain ⟨x, hx, hxC⟩ := KummerUZeroCount.ratio_zero (p := p) (y := y) (u := w)
       (c₀ := -ODE.sturmWronskian p w w' y y' s₁) hs1 hK (by linarith)
       (fun x hx => (hy x (hS x hx)).1) (fun x hx => (hw x (hS x hx)).1)
       (fun x hx => wpos x (hS x hx)) (fun x hx => hp x (hS x hx))
@@ -488,13 +521,14 @@ theorem kzt_lower_whole_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
 
 omit hp in
 /-- Bounds on `p w²` are unchanged by `w ↦ -w`. -/
-theorem kzt_neg_sq_bound {S : Set ℝ} {g : ℝ → ℝ}
+theorem KummerUZeroCount.neg_sq_bound {S : Set ℝ} {g : ℝ → ℝ}
     (hb : ∀ x ∈ S, p x * w x ^ 2 ≤ g x) : ∀ x ∈ S, p x * (-w x) ^ 2 ≤ g x :=
   fun x hx => by rw [neg_sq]; exact hb x hx
 
 /-- **Comparison at `∞` (lower function).** Let `qw < qy`, let `z` be the last zero of `w`, and
 let `p w² = O(1)` near `∞`. Then `y` has a zero in `(z, ∞)`. -/
-theorem kzt_lower_right (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
+theorem KummerUZeroCount.lower_right (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hw : IsSturmTypeSolutionIoi p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (wz : w z = 0) (hwne : ∀ x ∈ Ioi z, w x ≠ 0)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K) : ∃ c ∈ Ioi z, y c = 0 := by
@@ -502,20 +536,24 @@ theorem kzt_lower_right (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
   push Not at hcon
   have hsub : Ioi z ⊆ Ioi (0:ℝ) := fun x hx => hz.trans hx
   have wz' : (fun x => -w x) z = 0 := by simp [wz]
-  rcases kzt_sign ordConnected_Ioi (hy.continuousOn hsub) hcon with hy1 | hy1 <;>
-  rcases kzt_sign ordConnected_Ioi (hw.continuousOn hsub) hwne with hu1 | hu1
-  · exact kzt_lower_right_core hp hy hw hq hz hK wz hy1 hu1 hb
-  · exact kzt_lower_right_core hp hy hw.neg hq hz hK wz' hy1 (fun x hx => neg_pos.mpr (hu1 x hx))
-      (kzt_neg_sq_bound hb)
-  · exact kzt_lower_right_core hp hy.neg hw hq hz hK wz (fun x hx => neg_pos.mpr (hy1 x hx))
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioi (hy.continuousOn hsub) hcon
+      with hy1 | hy1 <;>
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioi (hw.continuousOn hsub) hwne with hu1 | hu1
+  · exact KummerUZeroCount.lower_right_core hp hy hw hq hz hK wz hy1 hu1 hb
+  · exact KummerUZeroCount.lower_right_core hp hy hw.neg hq hz hK wz' hy1
+        (fun x hx => neg_pos.mpr (hu1 x hx))
+      (KummerUZeroCount.neg_sq_bound hb)
+  · exact KummerUZeroCount.lower_right_core hp hy.neg hw hq hz hK wz
+        (fun x hx => neg_pos.mpr (hy1 x hx))
       hu1 hb
-  · exact kzt_lower_right_core hp hy.neg hw.neg hq hz hK wz'
+  · exact KummerUZeroCount.lower_right_core hp hy.neg hw.neg hq hz hK wz'
       (fun x hx => neg_pos.mpr (hy1 x hx)) (fun x hx => neg_pos.mpr (hu1 x hx))
-      (kzt_neg_sq_bound hb)
+      (KummerUZeroCount.neg_sq_bound hb)
 
 /-- **Comparison at `0` (lower function).** Let `qw < qy`, let `z` be the first zero of `w`, and
 let `p w² = O(x)` near `0`. Then `y` has a zero in `(0, z)`. -/
-theorem kzt_lower_left (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
+theorem KummerUZeroCount.lower_left (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hw : IsSturmTypeSolutionIoi p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z) (hs₀ : 0 < s₀)
     (hK : 0 < K) (wz : w z = 0) (hwne : ∀ x ∈ Ioo 0 z, w x ≠ 0)
     (hb : ∀ x ∈ Ioo 0 s₀, p x * w x ^ 2 ≤ K * x) :
@@ -524,20 +562,23 @@ theorem kzt_lower_left (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
   push Not at hcon
   have hsub : Ioo 0 z ⊆ Ioi (0:ℝ) := fun x hx => hx.1
   have wz' : (fun x => -w x) z = 0 := by simp [wz]
-  rcases kzt_sign ordConnected_Ioo (hy.continuousOn hsub) hcon with hy1 | hy1 <;>
-  rcases kzt_sign ordConnected_Ioo (hw.continuousOn hsub) hwne with hu1 | hu1
-  · exact kzt_lower_left_core hp hy hw hq hz hs₀ hK wz hy1 hu1 hb
-  · exact kzt_lower_left_core hp hy hw.neg hq hz hs₀ hK wz' hy1
-      (fun x hx => neg_pos.mpr (hu1 x hx)) (kzt_neg_sq_bound hb)
-  · exact kzt_lower_left_core hp hy.neg hw hq hz hs₀ hK wz (fun x hx => neg_pos.mpr (hy1 x hx))
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioo (hy.continuousOn hsub) hcon
+      with hy1 | hy1 <;>
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioo (hw.continuousOn hsub) hwne with hu1 | hu1
+  · exact KummerUZeroCount.lower_left_core hp hy hw hq hz hs₀ hK wz hy1 hu1 hb
+  · exact KummerUZeroCount.lower_left_core hp hy hw.neg hq hz hs₀ hK wz' hy1
+      (fun x hx => neg_pos.mpr (hu1 x hx)) (KummerUZeroCount.neg_sq_bound hb)
+  · exact KummerUZeroCount.lower_left_core hp hy.neg hw hq hz hs₀ hK wz
+        (fun x hx => neg_pos.mpr (hy1 x hx))
       hu1 hb
-  · exact kzt_lower_left_core hp hy.neg hw.neg hq hz hs₀ hK wz'
+  · exact KummerUZeroCount.lower_left_core hp hy.neg hw.neg hq hz hs₀ hK wz'
       (fun x hx => neg_pos.mpr (hy1 x hx)) (fun x hx => neg_pos.mpr (hu1 x hx))
-      (kzt_neg_sq_bound hb)
+      (KummerUZeroCount.neg_sq_bound hb)
 
 /-- **Comparison on the whole half-line.** Let `qw < qy`, let `w` have no zeros in `(0, ∞)`,
 `p w² = O(x)` near `0` and `p w² = O(1)` near `∞`. Then `y` has a zero in `(0, ∞)`. -/
-theorem kzt_lower_whole (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
+theorem KummerUZeroCount.lower_whole (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hw : IsSturmTypeSolutionIoi p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {s₀ s₀' K : ℝ} (hs₀' : 0 < s₀')
     (hK : 0 < K) (hwne : ∀ x ∈ Ioi 0, w x ≠ 0)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K)
@@ -545,20 +586,27 @@ theorem kzt_lower_whole (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     ∃ c ∈ Ioi 0, y c = 0 := by
   by_contra hcon
   push Not at hcon
-  rcases kzt_sign ordConnected_Ioi (hy.continuousOn subset_rfl) hcon with hy1 | hy1 <;>
-  rcases kzt_sign ordConnected_Ioi (hw.continuousOn subset_rfl) hwne with hu1 | hu1
-  · exact kzt_lower_whole_core hp hy hw hq hs₀' hK hy1 hu1 hb hb'
-  · exact kzt_lower_whole_core hp hy hw.neg hq hs₀' hK hy1 (fun x hx => neg_pos.mpr (hu1 x hx))
-      (kzt_neg_sq_bound hb) (kzt_neg_sq_bound hb')
-  · exact kzt_lower_whole_core hp hy.neg hw hq hs₀' hK (fun x hx => neg_pos.mpr (hy1 x hx)) hu1
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioi (hy.continuousOn subset_rfl) hcon
+      with hy1 | hy1 <;>
+  rcases KummerUZeroCount.constant_sign ordConnected_Ioi (hw.continuousOn subset_rfl)
+      hwne with hu1 | hu1
+  · exact KummerUZeroCount.lower_whole_core hp hy hw hq hs₀' hK hy1 hu1 hb hb'
+  · exact KummerUZeroCount.lower_whole_core hp hy hw.neg hq hs₀' hK hy1
+        (fun x hx => neg_pos.mpr (hu1 x hx))
+      (KummerUZeroCount.neg_sq_bound hb) (KummerUZeroCount.neg_sq_bound hb')
+  · exact KummerUZeroCount.lower_whole_core hp hy.neg hw hq hs₀' hK
+        (fun x hx => neg_pos.mpr (hy1 x hx)) hu1
       hb hb'
-  · exact kzt_lower_whole_core hp hy.neg hw.neg hq hs₀' hK (fun x hx => neg_pos.mpr (hy1 x hx))
-      (fun x hx => neg_pos.mpr (hu1 x hx)) (kzt_neg_sq_bound hb) (kzt_neg_sq_bound hb')
+  · exact KummerUZeroCount.lower_whole_core hp hy.neg hw.neg hq hs₀' hK
+        (fun x hx => neg_pos.mpr (hy1 x hx))
+      (fun x hx => neg_pos.mpr (hu1 x hx)) (KummerUZeroCount.neg_sq_bound hb)
+          (KummerUZeroCount.neg_sq_bound hb')
 
 /-- **Lower zero count by comparison.** If `qw < qy` and the zeros of `w` in `(0, ∞)` are
 exactly `e₀ < ⋯ < e_{j-1}`, with `p w² = O(x)` at `0` and `p w² = O(1)` at `∞`, then `y` has
 `j+1` distinct zeros, one in each gap. -/
-theorem kzt_lower_count (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
+theorem KummerUZeroCount.lower_count (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hw : IsSturmTypeSolutionIoi p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {j : ℕ} {e : Fin j → ℝ} (he : StrictMono e)
     (heI : ∀ i, 0 < e i) (hwz : ∀ x ∈ Ioi (0:ℝ), w x = 0 ↔ ∃ i, x = e i)
     {s₀ s₀' K : ℝ} (hs₀' : 0 < s₀') (hK : 0 < K)
@@ -573,7 +621,7 @@ theorem kzt_lower_count (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     · have hwne : ∀ x ∈ Ioi (0:ℝ), w x ≠ 0 := fun x hx h0 => by
         obtain ⟨k, -⟩ := (hwz x hx).1 h0
         exact absurd k.isLt (by omega)
-      obtain ⟨c, hc, hc0⟩ := kzt_lower_whole hp hy hw hq hs₀' hK hwne hb hb'
+      obtain ⟨c, hc, hc0⟩ := KummerUZeroCount.lower_whole hp hy hw hq hs₀' hK hwne hb hb'
       exact ⟨c, hc, fun h => absurd a h, fun h => absurd b h, hc0⟩
     · have hz := heI ⟨i.val, by omega⟩
       have hwne : ∀ x ∈ Ioo 0 (e ⟨i.val, by omega⟩), w x ≠ 0 := fun x hx h0 => by
@@ -581,7 +629,8 @@ theorem kzt_lower_count (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
         have := he.lt_iff_lt.1 hx.2
         have : k.val < i.val := this
         omega
-      obtain ⟨c, hc, hc0⟩ := kzt_lower_left hp hy hw hq hz hs₀' hK ((hwz _ hz).2 ⟨_, rfl⟩)
+      obtain ⟨c, hc, hc0⟩ :=
+          KummerUZeroCount.lower_left hp hy hw hq hz hs₀' hK ((hwz _ hz).2 ⟨_, rfl⟩)
         hwne hb'
       exact ⟨c, hc.1, fun h => absurd a h, fun _ => hc.2, hc0⟩
     · have hz := heI ⟨i.val - 1, by omega⟩
@@ -591,13 +640,14 @@ theorem kzt_lower_count (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
         have : i.val - 1 < k.val := this
         have := k.isLt
         omega
-      obtain ⟨c, hc, hc0⟩ := kzt_lower_right hp hy hw hq hz hK ((hwz _ hz).2 ⟨_, rfl⟩) hwne hb
+      obtain ⟨c, hc, hc0⟩ :=
+          KummerUZeroCount.lower_right hp hy hw hq hz hK ((hwz _ hz).2 ⟨_, rfl⟩) hwne hb
       exact ⟨c, hz.trans hc, fun _ => hc, fun h => absurd b h, hc0⟩
     · have hz1 := heI ⟨i.val - 1, by omega⟩
       have hz2 := heI ⟨i.val, by omega⟩
       have hlt : e ⟨i.val - 1, by omega⟩ < e ⟨i.val, by omega⟩ :=
         he (Fin.mk_lt_mk.2 (by omega))
-      obtain ⟨c, hc, hc0⟩ := kzt_between hp hw hy hq hz1 hlt ((hwz _ hz1).2 ⟨_, rfl⟩)
+      obtain ⟨c, hc, hc0⟩ := KummerUZeroCount.between hp hw hy hq hz1 hlt ((hwz _ hz1).2 ⟨_, rfl⟩)
         ((hwz _ hz2).2 ⟨_, rfl⟩) fun x hx h0 => by
           obtain ⟨k, rfl⟩ := (hwz x (hz1.trans hx.1)).1 h0
           have h1 : i.val - 1 < k.val := he.lt_iff_lt.1 hx.1
@@ -618,7 +668,8 @@ theorem kzt_lower_count (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
 /-- **Upper zero count by comparison.** If `qy < qu`, the zeros of `u` in `(0, ∞)` are among
 `e₀, …, e_{k-1}`, the zeros of `y` are simple and stay away from `∞`, `y/u` is bounded and
 `p u² = O(1)` near `∞`, then `y` has at most `k` zeros in `(0, ∞)`. -/
-theorem kzt_upper_count (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
+theorem KummerUZeroCount.upper_count (hy : IsSturmTypeSolutionIoi p qy y y')
+    (hu : IsSturmTypeSolutionIoi p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {k : ℕ} {e : Fin k → ℝ}
     (huz : ∀ x ∈ Ioi (0:ℝ), u x = 0 → ∃ i, x = e i)
     (hsimple : ∀ x ∈ Ioi (0:ℝ), y x = 0 → y' x ≠ 0) {δ : ℝ}
@@ -643,7 +694,7 @@ theorem kzt_upper_count (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
         have hab : f i < f ⟨i.val + 1, h⟩ := f.strictMono (Fin.mk_lt_mk.2 (by omega))
         have hsub : Icc (f i) (f ⟨i.val + 1, h⟩) ⊆ Ioi (0:ℝ) := fun x hx =>
           lt_of_lt_of_le ha.1 hx.1
-        have hfin := ODE.sturmDef_finite (f' := y') (fun x hx => (hy x (hsub hx)).1)
+        have hfin := ODE.SturmDeformation.finite (f' := y') (fun x hx => (hy x (hsub hx)).1)
           (fun x hx h0 => hsimple x (hsub hx) h0)
         set S := {x | x ∈ Ioc (f i) (f ⟨i.val + 1, h⟩) ∧ y x = 0} with hS
         have hSfin : S.Finite := hfin.subset fun x hx => ⟨Ioc_subset_Icc_self hx.1, hx.2⟩
@@ -652,21 +703,21 @@ theorem kzt_upper_count (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
         have hzS : hSfin.toFinset.min' hSne ∈ S := hSfin.mem_toFinset.1 (Finset.min'_mem _ _)
         have hmin : ∀ x ∈ S, hSfin.toFinset.min' hSne ≤ x := fun x hx =>
           Finset.min'_le _ _ (hSfin.mem_toFinset.2 hx)
-        obtain ⟨c, hc, hc0⟩ := kzt_between hp hy hu hq ha.1 hzS.1.1
+        obtain ⟨c, hc, hc0⟩ := KummerUZeroCount.between hp hy hu hq ha.1 hzS.1.1
           ha.2 hzS.2 fun x hx h0 => by
             have := hmin x ⟨⟨hx.1, hx.2.le.trans hzS.1.2⟩, h0⟩
             linarith [hx.2]
         exact ⟨c, hc.1, fun _ => hc.2.trans_le hzS.1.2, hc0⟩
       · set d := max δ (f i) with hd
         have hsub : Icc (f i) d ⊆ Ioi (0:ℝ) := fun x hx => lt_of_lt_of_le ha.1 hx.1
-        have hfin := ODE.sturmDef_finite (f' := y') (fun x hx => (hy x (hsub hx)).1)
+        have hfin := ODE.SturmDeformation.finite (f' := y') (fun x hx => (hy x (hsub hx)).1)
           (fun x hx h0 => hsimple x (hsub hx) h0)
         have hSne : hfin.toFinset.Nonempty :=
           (Set.Finite.toFinset_nonempty hfin).2 ⟨_, ⟨⟨le_rfl, le_max_right _ _⟩, ha.2⟩⟩
         have hzS := hfin.mem_toFinset.1 (Finset.max'_mem _ hSne)
         have hmax : ∀ x ∈ {x | x ∈ Icc (f i) d ∧ y x = 0}, x ≤ hfin.toFinset.max' hSne :=
           fun x hx => Finset.le_max' _ _ (hfin.mem_toFinset.2 hx)
-        obtain ⟨c, hc, hc0⟩ := kzt_upper_right hp hy hu hq (hsub hzS.1) hK hzS.2
+        obtain ⟨c, hc, hc0⟩ := KummerUZeroCount.upper_right hp hy hu hq (hsub hzS.1) hK hzS.2
           (fun x hx h0 => by
             by_cases hxd : x ≤ d
             · have := hmax x ⟨⟨hzS.1.1.trans (le_of_lt hx), hxd⟩, h0⟩
@@ -703,52 +754,56 @@ section Kummer
 open Complex DLMF.Hypergeometric DLMF.OrthogonalPolynomials
 
 /-- `U(a,b,x)` on the positive real axis, as a real function (its real part). -/
-def kzt_U (a b : ℝ) (x : ℝ) : ℝ := (kummerU (a : ℂ) (b : ℂ) (x : ℂ)).re
+def KummerUZeroCount.realU (a b : ℝ) (x : ℝ) : ℝ := (kummerU (a : ℂ) (b : ℂ) (x : ℂ)).re
 
-/-- The derivative `-a U(a+1,b+1,x)` of `kzt_U` (DLMF 13.3.22). -/
-def kzt_dU (a b : ℝ) (x : ℝ) : ℝ := -a * (kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) (x : ℂ)).re
+/-- The derivative `-a U(a+1,b+1,x)` of `KummerUZeroCount.realU` (DLMF 13.3.22). -/
+def KummerUZeroCount.derivRealU (a b : ℝ) (x : ℝ) : ℝ := -a *
+    (kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) (x : ℂ)).re
 
 /-- The coefficient `q(x) = -a x^{b-1} e^{-x}` of the self-adjoint form of Kummer's equation. -/
-def kzt_q (a b : ℝ) (x : ℝ) : ℝ := -a * (x ^ (b - 1) * Real.exp (-x))
+def KummerUZeroCount.selfAdjointCoeff (a b : ℝ) (x : ℝ) : ℝ := -a * (x ^ (b - 1) * Real.exp (-x))
 
 /-- The weight `x^b e^{-x}` is positive on `(0, ∞)`. -/
-theorem kzt_p_pos (b : ℝ) : ∀ x ∈ Ioi (0:ℝ), 0 < laguerreWeight b x := fun _ hx =>
+theorem KummerUZeroCount.laguerreWeight_pos (b : ℝ) : ∀ x ∈ Ioi (0:ℝ), 0 <
+    laguerreWeight b x := fun _ hx =>
   mul_pos (Real.rpow_pos_of_pos hx b) (Real.exp_pos _)
 
 /-- `U(a,b,x)` is real for real `a`, `b` and `x > 0`. -/
-theorem kzt_U_im (a b : ℝ) {x : ℝ} (hx : 0 < x) : (kummerU (a : ℂ) (b : ℂ) (x : ℂ)).im = 0 := by
+theorem KummerUZeroCount.realU_im (a b : ℝ) {x : ℝ} (hx : 0 < x) :
+    (kummerU (a : ℂ) (b : ℂ) (x : ℂ)).im = 0 := by
   have h := conj_kummerU (a : ℂ) (b : ℂ) (z := (x : ℂ)) (ofReal_mem_slitPlane.2 hx)
   simp only [conj_ofReal] at h
   exact conj_eq_iff_im.mp h
 
-/-- `U(a,b,x)` equals the real number `kzt_U a b x` for `x > 0`. -/
-theorem kzt_U_eq (a b : ℝ) {x : ℝ} (hx : 0 < x) :
-    kummerU (a : ℂ) (b : ℂ) (x : ℂ) = (kzt_U a b x : ℂ) :=
-  Complex.ext (by simp [kzt_U]) (by simp [kzt_U_im a b hx])
+/-- `U(a,b,x)` equals the real number `KummerUZeroCount.realU a b x` for `x > 0`. -/
+theorem KummerUZeroCount.realU_eq (a b : ℝ) {x : ℝ} (hx : 0 < x) :
+    kummerU (a : ℂ) (b : ℂ) (x : ℂ) = (KummerUZeroCount.realU a b x : ℂ) :=
+  Complex.ext (by simp [KummerUZeroCount.realU]) (by simp [KummerUZeroCount.realU_im a b hx])
 
 /-- The shifted values `U(a+k, b+k, x)` are real. -/
-theorem kzt_U_eq_add (a b : ℝ) (k : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem KummerUZeroCount.realU_eq_add (a b : ℝ) (k : ℕ) {x : ℝ} (hx : 0 < x) :
     kummerU ((a : ℂ) + k) ((b : ℂ) + k) (x : ℂ) =
       ((kummerU ((a : ℂ) + k) ((b : ℂ) + k) (x : ℂ)).re : ℂ) := by
-  have h := kzt_U_eq (a + k) (b + k) hx
+  have h := KummerUZeroCount.realU_eq (a + k) (b + k) hx
   push_cast at h
-  rw [h]; simp [kzt_U]
+  rw [h]; simp [KummerUZeroCount.realU]
 
 /-- **Self-adjoint form of Kummer's equation.** For real `a`, `b`, the function `U(a,b,·)`
 solves `(x^b e^{-x} y')' - a x^{b-1} e^{-x} y = 0` on `(0, ∞)` (DLMF 13.2.1 with 13.3.22). -/
-theorem kzt_U_isSol (a b : ℝ) : KztIsSol (laguerreWeight b) (kzt_q a b) (kzt_U a b)
-    (kzt_dU a b) := by
+theorem KummerUZeroCount.realU_isSol (a b : ℝ) : IsSturmTypeSolutionIoi (laguerreWeight b)
+    (KummerUZeroCount.selfAdjointCoeff a b) (KummerUZeroCount.realU a b)
+    (KummerUZeroCount.derivRealU a b) := by
   intro x hx
   have hx' : (0:ℝ) < x := hx
   have hz : (x : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 hx'
   refine ⟨?_, ?_⟩
   · have h := (hasDerivAt_kummerU (a : ℂ) (b : ℂ) hz).real_of_complex
     refine h.congr_deriv ?_
-    simp only [kzt_dU]
+    simp only [KummerUZeroCount.derivRealU]
     rw [show -(a : ℂ) * kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) x =
       ((-a : ℝ) : ℂ) * kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) x by push_cast; ring, re_ofReal_mul]
   · have h1 := (hasDerivAt_kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) hz).real_of_complex
-    have hdU : HasDerivAt (kzt_dU a b)
+    have hdU : HasDerivAt (KummerUZeroCount.derivRealU a b)
         (-a * (-(a + 1) * (kummerU ((a : ℂ) + 2) ((b : ℂ) + 2) (x : ℂ)).re)) x := by
       refine (h1.const_mul (-a)).congr_deriv ?_
       rw [show -((a : ℂ) + 1) * kummerU ((a : ℂ) + 1 + 1) ((b : ℂ) + 1 + 1) x =
@@ -763,35 +818,36 @@ theorem kzt_U_isSol (a b : ℝ) : KztIsSol (laguerreWeight b) (kzt_q a b) (kzt_U
     convert hprod using 1
     -- the contiguous relation 13.3.14 at `x`
     have hc := kummerU_ode_contiguous (a : ℂ) (b : ℂ) (x : ℂ) (ofReal_ne_zero.2 hx'.ne')
-    have e1 := kzt_U_eq_add a b 1 hx'
-    have e2 := kzt_U_eq_add a b 2 hx'
+    have e1 := KummerUZeroCount.realU_eq_add a b 1 hx'
+    have e2 := KummerUZeroCount.realU_eq_add a b 2 hx'
     push_cast at e1 e2
-    rw [e1, e2, kzt_U_eq a b hx'] at hc
-    set U0 := kzt_U a b x
+    rw [e1, e2, KummerUZeroCount.realU_eq a b hx'] at hc
+    set U0 := KummerUZeroCount.realU a b x
     set U1 := (kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) (x : ℂ)).re
     set U2 := (kummerU ((a : ℂ) + 2) ((b : ℂ) + 2) (x : ℂ)).re
     have hr : (a + 1) * x * U2 + (x - b) * U1 - U0 = 0 := by exact_mod_cast hc
     have hxb : x ^ b = x * x ^ (b - 1) := by
       rw [Real.rpow_sub_one hx'.ne']; field_simp
-    simp only [kzt_q, laguerreWeight, kzt_dU]
+    simp only [KummerUZeroCount.selfAdjointCoeff, laguerreWeight, KummerUZeroCount.derivRealU]
     rw [hxb]
     linear_combination (-(a * x ^ (b - 1) * Real.exp (-x))) * hr
 
 /-- **Simple zeros.** For `a ∉ -ℕ`, the zeros of `U(a,b,·)` on `(0, ∞)` are simple, by the
 Wronskian 13.2.34 of `𝐌(a,b,·)` and `U(a,b,·)`. -/
-theorem kzt_U_simple (a b : ℝ) (ha : ∀ n : ℕ, a ≠ -(n : ℝ)) :
-    ∀ x ∈ Ioi (0:ℝ), kzt_U a b x = 0 → kzt_dU a b x ≠ 0 := by
+theorem KummerUZeroCount.realU_simple (a b : ℝ) (ha : ∀ n : ℕ, a ≠ -(n : ℝ)) :
+    ∀ x ∈ Ioi (0:ℝ), KummerUZeroCount.realU a b x = 0 → KummerUZeroCount.derivRealU a b x ≠ 0 := by
   intro x hx h0 hd
   have hx' : (0:ℝ) < x := hx
   have hz : (x : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 hx'
   have ha' : ∀ k : ℕ, (a : ℂ) ≠ -(k : ℂ) := fun k h => ha k (by exact_mod_cast h)
   have hW := wronskian_regularizedHGFun_kummerU (a : ℂ) (b : ℂ) hz
-  have hU : kummerU (a : ℂ) (b : ℂ) (x : ℂ) = 0 := by rw [kzt_U_eq a b hx', h0]; simp
+  have hU : kummerU (a : ℂ) (b : ℂ) (x : ℂ) = 0 := by
+      rw [KummerUZeroCount.realU_eq a b hx', h0]; simp
   have hdU : deriv (kummerU (a : ℂ) (b : ℂ)) (x : ℂ) = 0 := by
-    have e1 := kzt_U_eq_add a b 1 hx'
+    have e1 := KummerUZeroCount.realU_eq_add a b 1 hx'
     push_cast at e1
     rw [deriv_kummerU _ _ hz, e1]
-    simp only [kzt_dU] at hd
+    simp only [KummerUZeroCount.derivRealU] at hd
     rw [show -(a : ℂ) * ((kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) (x : ℂ)).re : ℂ) =
       ((-a * (kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) (x : ℂ)).re : ℝ) : ℂ) by push_cast; ring, hd]
     simp
@@ -805,18 +861,20 @@ theorem kzt_U_simple (a b : ℝ) (ha : ∀ n : ℕ, a ≠ -(n : ℝ)) :
   exact this hW.symm
 
 /-- **Behaviour at `∞`.** `U(a,b,x) x^a → 1` as `x → ∞` (DLMF 13.2.6), for real parameters. -/
-theorem kzt_U_asymp (a b : ℝ) : Tendsto (fun x => kzt_U a b x * x ^ a) atTop (𝓝 1) := by
+theorem KummerUZeroCount.realU_asymp (a b : ℝ) : Tendsto
+    (fun x => KummerUZeroCount.realU a b x * x ^ a) atTop (𝓝 1) := by
   have h := (Complex.continuous_re.tendsto _).comp (tendsto_kummerU_mul_cpow_atTop (a : ℂ) (b : ℂ))
   rw [one_re] at h
   refine h.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with x hx
   simp only [Function.comp_apply]
-  rw [kzt_U_eq a b hx, ← ofReal_cpow hx.le, ← ofReal_mul, ofReal_re]
+  rw [KummerUZeroCount.realU_eq a b hx, ← ofReal_cpow hx.le, ← ofReal_mul, ofReal_re]
 
 /-- Two-sided bounds `x^{-a}/2 ≤ U(a,b,x) ≤ 2 x^{-a}` for large `x`. -/
-theorem kzt_U_eventually (a b : ℝ) :
-    ∀ᶠ x in atTop, x ^ (-a) / 2 ≤ kzt_U a b x ∧ kzt_U a b x ≤ 2 * x ^ (-a) := by
-  have h := kzt_U_asymp a b
+theorem KummerUZeroCount.realU_eventually (a b : ℝ) :
+    ∀ᶠ x in atTop, x ^ (-a) / 2 ≤ KummerUZeroCount.realU a b x ∧ KummerUZeroCount.realU a b x ≤
+        2 * x ^ (-a) := by
+  have h := KummerUZeroCount.realU_asymp a b
   filter_upwards [h.eventually (Ioo_mem_nhds (show (1:ℝ)/2 < 1 by norm_num)
     (show (1:ℝ) < 2 by norm_num)), eventually_gt_atTop 0] with x hx hx0
   have hp : 0 < x ^ a := Real.rpow_pos_of_pos hx0 a
@@ -829,9 +887,9 @@ theorem kzt_U_eventually (a b : ℝ) :
 
 /-- **Polynomial case.** For `b > 0` and `n ∈ ℕ`, the positive zeros of `U(-n,b,·)` are those of
 the Laguerre polynomial `L_n^{(b-1)}` (DLMF 13.6.19 and 18.16(iv)), `n` simple points. -/
-theorem kzt_base_zeros {b : ℝ} (hb : 0 < b) (n : ℕ) :
+theorem KummerUZeroCount.base_zeros {b : ℝ} (hb : 0 < b) (n : ℕ) :
     ∃ e : Fin n → ℝ, StrictMono e ∧ (∀ i, 0 < e i) ∧
-      ∀ x ∈ Ioi (0:ℝ), kzt_U (-(n : ℝ)) b x = 0 ↔ ∃ i, x = e i := by
+      ∀ x ∈ Ioi (0:ℝ), KummerUZeroCount.realU (-(n : ℝ)) b x = 0 ↔ ∃ i, x = e i := by
   obtain ⟨e, he, hpos, hz⟩ := laguerrePolyL_zeros_pos (α := b - 1) (by linarith) n
   refine ⟨e, he, hpos, fun x hx => ?_⟩
   have hα : ∀ k : ℕ, (((b - 1 : ℝ) : ℂ)) + 1 ≠ -(k : ℂ) := fun k h => by
@@ -841,15 +899,16 @@ theorem kzt_base_zeros {b : ℝ} (hb : 0 < b) (n : ℕ) :
   have hL := (kummerU_laguerrePolyL n ((b - 1 : ℝ) : ℂ) (x : ℂ) hα).2
   rw [show ((b - 1 : ℝ) : ℂ) + 1 = (b : ℂ) by push_cast; ring] at hL
   have hcast : ((-(n : ℝ) : ℝ) : ℂ) = -(n : ℂ) := by push_cast; ring
-  rw [← ofReal_eq_zero, ← kzt_U_eq _ _ (show (0:ℝ) < x from hx), hcast, hL]
+  rw [← ofReal_eq_zero, ← KummerUZeroCount.realU_eq _ _ (show (0:ℝ) < x from hx), hcast, hL]
   have hne : (-1 : ℂ) ^ n * (n.factorial : ℂ) ≠ 0 :=
     mul_ne_zero (pow_ne_zero _ (by norm_num)) (by exact_mod_cast n.factorial_ne_zero)
   rw [mul_eq_zero, or_iff_right hne, hz]
   simp only [ofReal_inj]
 
 /-- `U(-n,b,x)` is a real polynomial in `x`, times `(-1)ⁿ n!`. -/
-theorem kzt_base_poly {b : ℝ} (hb : 0 < b) (n : ℕ) {x : ℝ} (hx : 0 < x) :
-    kzt_U (-(n : ℝ)) b x = (-1) ^ n * n.factorial * (laguerrePolyLR (b - 1) n).eval x := by
+theorem KummerUZeroCount.base_poly {b : ℝ} (hb : 0 < b) (n : ℕ) {x : ℝ} (hx : 0 < x) :
+    KummerUZeroCount.realU (-(n : ℝ)) b x = (-1) ^ n * n.factorial *
+        (laguerrePolyLR (b - 1) n).eval x := by
   have hα : ∀ k : ℕ, (((b - 1 : ℝ) : ℂ)) + 1 ≠ -(k : ℂ) := fun k h => by
     have : ((b : ℝ) : ℂ) = -(k : ℂ) := by push_cast at h ⊢; linear_combination h
     have h2 : b = -(k : ℝ) := by exact_mod_cast this
@@ -862,21 +921,22 @@ theorem kzt_base_poly {b : ℝ} (hb : 0 < b) (n : ℕ) {x : ℝ} (hx : 0 < x) :
     rw [← eval_map_laguerrePolyLR, Polynomial.eval_map_algebraMap,
       ← Complex.coe_algebraMap, Polynomial.aeval_algebraMap_apply_eq_algebraMap_eval]
   apply ofReal_injective
-  rw [← kzt_U_eq _ _ hx, hcast, hL, hP]
+  rw [← KummerUZeroCount.realU_eq _ _ hx, hcast, hL, hP]
   push_cast; ring
 
 /-- **Weight bounds for the polynomial case.** For `b ≥ 1`, `p U(-n,b,·)² = O(x)` on `(0, 1)` and
 `p U(-n,b,·)² = O(1)` near `∞`. -/
-theorem kzt_base_bounds {b : ℝ} (hb : 1 ≤ b) (n : ℕ) :
-    ∃ K > 0, (∀ x ∈ Ioo (0:ℝ) 1, laguerreWeight b x * kzt_U (-(n : ℝ)) b x ^ 2 ≤ K * x) ∧
-      ∃ s₀, ∀ x ∈ Ioi s₀, laguerreWeight b x * kzt_U (-(n : ℝ)) b x ^ 2 ≤ K := by
+theorem KummerUZeroCount.base_bounds {b : ℝ} (hb : 1 ≤ b) (n : ℕ) :
+    ∃ K > 0, (∀ x ∈ Ioo (0:ℝ) 1, laguerreWeight b x *
+        KummerUZeroCount.realU (-(n : ℝ)) b x ^ 2 ≤ K * x) ∧
+      ∃ s₀, ∀ x ∈ Ioi s₀, laguerreWeight b x * KummerUZeroCount.realU (-(n : ℝ)) b x ^ 2 ≤ K := by
   set P := laguerrePolyLR (b - 1) n
   obtain ⟨Mp, hMp⟩ := isCompact_Icc.exists_bound_of_continuousOn
     (P.continuous.continuousOn (s := Icc (0:ℝ) 1))
   set K := (n.factorial : ℝ) ^ 2 * Mp ^ 2 + 1 with hK
   have hK0 : 0 < K := by positivity
   refine ⟨K, hK0, fun x hx => ?_, ?_⟩
-  · rw [kzt_base_poly (by linarith) n hx.1]
+  · rw [KummerUZeroCount.base_poly (by linarith) n hx.1]
     have hM := hMp x (Ioo_subset_Icc_self hx)
     rw [Real.norm_eq_abs] at hM
     have hsq : ((-1) ^ n * (n.factorial : ℝ) * P.eval x) ^ 2 ≤ K := by
@@ -892,12 +952,12 @@ theorem kzt_base_bounds {b : ℝ} (hb : 1 ≤ b) (n : ℕ) :
       have h2 : Real.exp (-x) ≤ 1 := Real.exp_le_one_iff.2 (by linarith [hx.1])
       have h3 : 0 ≤ x ^ b := (Real.rpow_pos_of_pos hx.1 b).le
       nlinarith [Real.exp_pos (-x)]
-    have hp0 : 0 ≤ laguerreWeight b x := (kzt_p_pos b x hx.1).le
+    have hp0 : 0 ≤ laguerreWeight b x := (KummerUZeroCount.laguerreWeight_pos b x hx.1).le
     calc laguerreWeight b x * _ ≤ x * K := mul_le_mul hp1 hsq (sq_nonneg _) hx.1.le
       _ = K * x := by ring
   · have hlim := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (b + 2 * n) 1 one_pos
     have hev := (hlim.eventually (gt_mem_nhds (show (0:ℝ) < 1 / 4 by norm_num))).and
-      ((kzt_U_eventually (-(n : ℝ)) b).and (eventually_gt_atTop 0))
+      ((KummerUZeroCount.realU_eventually (-(n : ℝ)) b).and (eventually_gt_atTop 0))
     obtain ⟨s₀, hs₀⟩ := eventually_atTop.1 hev
     refine ⟨s₀, fun x hx => ?_⟩
     obtain ⟨h1, ⟨h2, h3⟩, hx0⟩ := hs₀ x (le_of_lt hx)
@@ -905,40 +965,42 @@ theorem kzt_base_bounds {b : ℝ} (hb : 1 ≤ b) (n : ℕ) :
     have hxn : x ^ (n : ℝ) = x ^ n := Real.rpow_natCast x n
     rw [hxn] at h2 h3
     have hxn0 : 0 < x ^ n := pow_pos hx0 n
-    have hU2 : kzt_U (-(n : ℝ)) b x ^ 2 ≤ 4 * (x ^ n) ^ 2 := by
-      have : 0 ≤ kzt_U (-(n : ℝ)) b x := by linarith
+    have hU2 : KummerUZeroCount.realU (-(n : ℝ)) b x ^ 2 ≤ 4 * (x ^ n) ^ 2 := by
+      have : 0 ≤ KummerUZeroCount.realU (-(n : ℝ)) b x := by linarith
       nlinarith
     have hpow : x ^ (b + 2 * n) = x ^ b * (x ^ n) ^ 2 := by
       rw [Real.rpow_add hx0, ← pow_mul, show (2 * (n : ℝ)) = ((n * 2 : ℕ) : ℝ) by push_cast; ring,
         Real.rpow_natCast]
     rw [hpow, neg_one_mul] at h1
-    have hp0 : 0 ≤ laguerreWeight b x := (kzt_p_pos b x hx0).le
+    have hp0 : 0 ≤ laguerreWeight b x := (KummerUZeroCount.laguerreWeight_pos b x hx0).le
     simp only [laguerreWeight] at hp0 ⊢
-    calc x ^ b * Real.exp (-x) * kzt_U (-(n : ℝ)) b x ^ 2
+    calc x ^ b * Real.exp (-x) * KummerUZeroCount.realU (-(n : ℝ)) b x ^ 2
         ≤ x ^ b * Real.exp (-x) * (4 * (x ^ n) ^ 2) := mul_le_mul_of_nonneg_left hU2 hp0
       _ = 4 * (x ^ b * (x ^ n) ^ 2 * Real.exp (-x)) := by ring
       _ ≤ 4 * (1 / 4) := by linarith
       _ ≤ K := by rw [hK]; nlinarith [sq_nonneg ((n.factorial : ℝ) * Mp)]
 
 /-- The coefficients `q` are ordered by the first parameter. -/
-theorem kzt_q_lt {a a' : ℝ} (b : ℝ) (h : a' < a) : ∀ x ∈ Ioi (0:ℝ), kzt_q a b x < kzt_q a' b x :=
+theorem KummerUZeroCount.selfAdjointCoeff_lt {a a' : ℝ} (b : ℝ) (h : a' < a) : ∀ x ∈ Ioi (0:ℝ),
+    KummerUZeroCount.selfAdjointCoeff a b x < KummerUZeroCount.selfAdjointCoeff a' b x :=
   fun x hx => by
     have : 0 < x ^ (b - 1) * Real.exp (-x) :=
       mul_pos (Real.rpow_pos_of_pos hx _) (Real.exp_pos _)
-    simp only [kzt_q]; nlinarith
+    simp only [KummerUZeroCount.selfAdjointCoeff]; nlinarith
 
 /-- **Zero count of `U(a,b,·)` on `(0, ∞)`.** For `b ≥ 1` and `a < 0` nonintegral, `U(a,b,x)`
 has exactly `⌈-a⌉` positive zeros. With `n = ⌊-a⌋`, the count is squeezed between Sturm
 comparisons with the polynomial cases `U(-n,b,·)` and `U(-n-1,b,·)`. -/
-theorem kzt_U_posZeros_count {a b : ℝ} (hb : 1 ≤ b) (ha : a < 0) (hai : ∀ n : ℤ, a ≠ n) :
+theorem KummerUZeroCount.realU_posZeros_count {a b : ℝ} (hb : 1 ≤ b) (ha : a < 0)
+    (hai : ∀ n : ℤ, a ≠ n) :
     {x : ℝ | 0 < x ∧ kummerU (a : ℂ) (b : ℂ) (x : ℂ) = 0}.encard = Int.toNat ⌈-a⌉ := by
   set Z := {x : ℝ | 0 < x ∧ kummerU (a : ℂ) (b : ℂ) (x : ℂ) = 0} with hZ
-  have hZ' : Z = {x | 0 < x ∧ kzt_U a b x = 0} := by
+  have hZ' : Z = {x | 0 < x ∧ KummerUZeroCount.realU a b x = 0} := by
     ext x
     simp only [hZ, mem_ofPred_eq]
     constructor
-    · rintro ⟨hx, h0⟩; exact ⟨hx, by simp [kzt_U, h0]⟩
-    · rintro ⟨hx, h0⟩; exact ⟨hx, by rw [kzt_U_eq a b hx, h0]; simp⟩
+    · rintro ⟨hx, h0⟩; exact ⟨hx, by simp [KummerUZeroCount.realU, h0]⟩
+    · rintro ⟨hx, h0⟩; exact ⟨hx, by rw [KummerUZeroCount.realU_eq a b hx, h0]; simp⟩
   -- `n = ⌊-a⌋`, so that `n < -a < n + 1`
   set n := (⌊-a⌋).toNat with hn
   have hfl : (0:ℤ) ≤ ⌊-a⌋ := Int.floor_nonneg.2 (by linarith)
@@ -960,19 +1022,22 @@ theorem kzt_U_posZeros_count {a b : ℝ} (hb : 1 ≤ b) (ha : a < 0) (hai : ∀ 
     omega
   have hai' : ∀ m : ℕ, a ≠ -(m : ℝ) := fun m h => hai (-(m : ℤ)) (by push_cast; exact h)
   have hb0 : 0 < b := by linarith
-  have hp := kzt_p_pos b
-  have hy := kzt_U_isSol a b
+  have hp := KummerUZeroCount.laguerreWeight_pos b
+  have hy := KummerUZeroCount.realU_isSol a b
   -- the upper bound, by comparison with `U(-n-1,b,·)`
   have hupper : Z.Finite ∧ Z.ncard ≤ n + 1 := by
     rw [hZ']
-    obtain ⟨e, -, -, hez⟩ := kzt_base_zeros hb0 (n + 1)
-    obtain ⟨K, hK, -, s₁, hs₁⟩ := kzt_base_bounds hb (n + 1)
-    have hev := ((kzt_U_eventually a b).and (kzt_U_eventually (-((n + 1 : ℕ) : ℝ)) b)).and
+    obtain ⟨e, -, -, hez⟩ := KummerUZeroCount.base_zeros hb0 (n + 1)
+    obtain ⟨K, hK, -, s₁, hs₁⟩ := KummerUZeroCount.base_bounds hb (n + 1)
+    have hev := ((KummerUZeroCount.realU_eventually a b).and
+        (KummerUZeroCount.realU_eventually (-((n + 1 : ℕ) : ℝ)) b)).and
       (eventually_ge_atTop (1:ℝ))
     obtain ⟨s₂, hs₂⟩ := eventually_atTop.1 hev
-    refine kzt_upper_count hp hy (kzt_U_isSol (-((n + 1 : ℕ) : ℝ)) b)
-      (kzt_q_lt b (by push_cast; linarith)) (e := e) (fun x hx h0 => (hez x hx).1 h0)
-      (kzt_U_simple a b hai') (δ := s₂) (fun x hx => ?_) (s₀ := max s₁ s₂) (C := 4) hK
+    refine KummerUZeroCount.upper_count hp hy (KummerUZeroCount.realU_isSol (-((n + 1 : ℕ) : ℝ)) b)
+      (KummerUZeroCount.selfAdjointCoeff_lt b (by push_cast; linarith)) (e := e)
+          (fun x hx h0 => (hez x hx).1 h0)
+      (KummerUZeroCount.realU_simple a b hai') (δ := s₂) (fun x hx => ?_)
+          (s₀ := max s₁ s₂) (C := 4) hK
       (fun x hx => ?_) (fun x hx => hs₁ x (lt_of_le_of_lt (le_max_left _ _) hx))
     · obtain ⟨⟨⟨h1, -⟩, -⟩, h3⟩ := hs₂ x (le_of_lt hx)
       have : 0 < x ^ (-a) / 2 := by
@@ -985,15 +1050,17 @@ theorem kzt_U_posZeros_count {a b : ℝ} (hb : 1 ≤ b) (ha : a < 0) (hai : ∀ 
       have hpa : 0 < x ^ (-a) := Real.rpow_pos_of_pos hx0 _
       have hle : x ^ (-a) ≤ x ^ (((n + 1 : ℕ) : ℝ)) :=
         Real.rpow_le_rpow_of_exponent_le h5 (by push_cast; linarith)
-      have hu0 : 0 < kzt_U (-((n + 1 : ℕ) : ℝ)) b x := by
+      have hu0 : 0 < KummerUZeroCount.realU (-((n + 1 : ℕ) : ℝ)) b x := by
         have := Real.rpow_pos_of_pos hx0 (((n + 1 : ℕ) : ℝ)); linarith
       rw [abs_of_pos (by linarith), abs_of_pos hu0]
       linarith
   -- the lower bound, by comparison with `U(-n,b,·)`
-  obtain ⟨e, he, heI, hez⟩ := kzt_base_zeros hb0 n
-  obtain ⟨K, hK, hK0, s₁, hs₁⟩ := kzt_base_bounds hb n
-  obtain ⟨cz, hcz, hczZ⟩ := kzt_lower_count hp hy (kzt_U_isSol (-(n : ℝ)) b)
-    (kzt_q_lt b (by linarith)) he heI hez (s₀ := s₁) (s₀' := 1) one_pos hK hs₁ hK0
+  obtain ⟨e, he, heI, hez⟩ := KummerUZeroCount.base_zeros hb0 n
+  obtain ⟨K, hK, hK0, s₁, hs₁⟩ := KummerUZeroCount.base_bounds hb n
+  obtain ⟨cz, hcz, hczZ⟩ :=
+      KummerUZeroCount.lower_count hp hy (KummerUZeroCount.realU_isSol (-(n : ℝ)) b)
+    (KummerUZeroCount.selfAdjointCoeff_lt b (by linarith)) he heI hez (s₀ := s₁) (s₀' := 1)
+        one_pos hK hs₁ hK0
   have hsub : range cz ⊆ Z := by
     rintro _ ⟨i, rfl⟩
     rw [hZ']
@@ -1015,7 +1082,7 @@ open scoped _root_.Real
 `ph x = π`, the lower-sign connection formula
 `𝐌(a,b,x) = e^{πia} U(a,b,x)/Γ(b-a) + e^{-πi(b-a)} e^x U(b-a,b,-x)/Γ(a)` holds for all complex
 `a`, `b`. -/
-theorem kzt_connection_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
+theorem KummerUZeroCount.connection_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
     regularizedHGFun {a} {b} (x : ℂ) =
       exp (a * π * I) / Gamma (b - a) * kummerU a b x +
         exp (-(b - a) * π * I) / Gamma a * exp (x : ℂ) * kummerU (b - a) b (-(x : ℂ)) := by
@@ -1048,7 +1115,8 @@ theorem kzt_connection_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
     congr 3 <;> ring_nf
 
 /-- `𝐌(a,b,x)` is real for real `a`, `b`, `x`. -/
-theorem kzt_regM_im (a b x : ℝ) : (regularizedHGFun {(a : ℂ)} {(b : ℂ)} (x : ℂ)).im = 0 := by
+theorem KummerUZeroCount.regM_im (a b x : ℝ) :
+    (regularizedHGFun {(a : ℂ)} {(b : ℂ)} (x : ℂ)).im = 0 := by
   rw [regularizedConfluent_eq_tsum]
   have : ∀ n : ℕ, poch (a : ℂ) n * (x : ℂ) ^ n / n.factorial * (Gamma ((b : ℂ) + n))⁻¹ =
       (((ascPochhammer ℝ n).eval a * x ^ n / n.factorial * (Real.Gamma (b + n))⁻¹ : ℝ) : ℂ) := by
@@ -1058,7 +1126,7 @@ theorem kzt_regM_im (a b x : ℝ) : (regularizedHGFun {(a : ℂ)} {(b : ℂ)} (x
   simp_rw [this, ← ofReal_tsum, ofReal_im]
 
 /-- Continuity of `z ↦ z^s` at a negative real point within the closed upper half-plane. -/
-theorem kzt_cpow_continuousWithinAt (s : ℂ) {x : ℝ} (hx : x < 0) :
+theorem KummerUZeroCount.cpow_continuousWithinAt (s : ℂ) {x : ℝ} (hx : x < 0) :
     ContinuousWithinAt (fun z : ℂ => z ^ s) {z : ℂ | 0 ≤ z.im} (x : ℂ) := by
   have hl := continuousWithinAt_log_of_re_neg_of_im_zero (z := (x : ℂ)) (by simpa using hx)
     (by simp)
@@ -1071,7 +1139,8 @@ theorem kzt_cpow_continuousWithinAt (s : ℂ) {x : ℝ} (hx : x < 0) :
 
 /-- For noninteger `b`, `U(a,b,·)` is continuous at a negative real point within the closed upper
 half-plane (its connection formula is). -/
-theorem kzt_U_continuousWithinAt (a : ℂ) {b : ℂ} (hb : ∀ n : ℤ, b ≠ n) {x : ℝ} (hx : x < 0) :
+theorem KummerUZeroCount.realU_continuousWithinAt (a : ℂ) {b : ℂ} (hb : ∀ n : ℤ, b ≠ n)
+    {x : ℝ} (hx : x < 0) :
     ContinuousWithinAt (kummerU a b) {z : ℂ | 0 ≤ z.im} (x : ℂ) := by
   have hbk : ∀ k : ℕ, b ≠ -k := fun k h => hb (-k) (by simp [h])
   have h2b : ∀ k : ℕ, 2 - b ≠ -k := fun k h => hb (k + 2) (by push_cast; linear_combination -h)
@@ -1084,13 +1153,13 @@ theorem kzt_U_continuousWithinAt (a : ℂ) {b : ℂ} (hb : ∀ n : ℤ, b ≠ n)
   have hM2 := (hasFPowerSeriesOnBall_kummerM (a := a - b + 1) h2b).analyticAt_of_mem
     (y := (x : ℂ)) (by simp)
   exact (continuousWithinAt_const.mul hM1.continuousAt.continuousWithinAt).add
-    ((continuousWithinAt_const.mul (kzt_cpow_continuousWithinAt (1 - b) hx)).mul
+    ((continuousWithinAt_const.mul (KummerUZeroCount.cpow_continuousWithinAt (1 - b) hx)).mul
       hM2.continuousAt.continuousWithinAt)
 
 /-- **The Wronskian 13.2.34 on the negative real axis**, written with the principal values of the
 contiguous functions: for `x < 0` and all complex `a`, `b`,
 `𝐌(a,b,x)(-a U(a+1,b+1,x)) - U(a,b,x)(a 𝐌(a+1,b+1,x)) = -x^{-b} e^x / Γ(a)`. -/
-theorem kzt_wronskian_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
+theorem KummerUZeroCount.wronskian_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
     regularizedHGFun {a} {b} (x : ℂ) * (-a * kummerU (a + 1) (b + 1) x) -
       kummerU a b x * (a * regularizedHGFun {a + 1} {b + 1} (x : ℂ)) =
         -((x : ℂ) ^ (-b) * exp (x : ℂ)) / Gamma a := by
@@ -1111,11 +1180,11 @@ theorem kzt_wronskian_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
       continuous_regularizedConfluent.comp (by fun_prop : Continuous fun z : ℂ => (p, q, z))
     have hFc : ContinuousWithinAt F H (x : ℂ) :=
       ((hMc a c).continuousWithinAt.mul (continuousWithinAt_const.mul
-        (kzt_U_continuousWithinAt (a + 1) hc1 hx))).sub
-        ((kzt_U_continuousWithinAt a hcz hx).mul
+        (KummerUZeroCount.realU_continuousWithinAt (a + 1) hc1 hx))).sub
+        ((KummerUZeroCount.realU_continuousWithinAt a hcz hx).mul
           (continuousWithinAt_const.mul (hMc (a + 1) (c + 1)).continuousWithinAt))
     have hGc : ContinuousWithinAt G H (x : ℂ) :=
-      (((kzt_cpow_continuousWithinAt (-c) hx).mul
+      (((KummerUZeroCount.cpow_continuousWithinAt (-c) hx).mul
         (Complex.continuous_exp.continuousWithinAt)).neg).div_const _
     -- the path `ε ↦ x + iε`
     set g : ℝ → ℂ := fun ε => (x : ℂ) + ε * I with hg
@@ -1152,10 +1221,10 @@ theorem kzt_wronskian_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
   · exact (((continuousAt_id.neg.const_cpow (Or.inl hz0)).mul continuousAt_const).neg).div_const _
 
 /-- `U(a,b,·)` and `𝐌(a,b,·)` have no common zero on the negative axis when `a ∉ -ℕ`, by
-`kzt_wronskian_neg`. -/
-theorem kzt_neg_no_common_zero {a b : ℂ} (ha : ∀ m : ℕ, a ≠ -m) {x : ℝ} (hx : x < 0)
+`KummerUZeroCount.wronskian_neg`. -/
+theorem KummerUZeroCount.neg_no_common_zero {a b : ℂ} (ha : ∀ m : ℕ, a ≠ -m) {x : ℝ} (hx : x < 0)
     (hU : kummerU a b x = 0) (hM : regularizedHGFun {a} {b} (x : ℂ) = 0) : False := by
-  have hW := kzt_wronskian_neg a b hx
+  have hW := KummerUZeroCount.wronskian_neg a b hx
   rw [hU, hM] at hW
   have hz0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.2 hx.ne
   have hpw : (x : ℂ) ^ (-b) ≠ 0 := by
@@ -1164,13 +1233,13 @@ theorem kzt_neg_no_common_zero {a b : ℂ} (ha : ∀ m : ℕ, a ≠ -m) {x : ℝ
     div_ne_zero (neg_ne_zero.2 (mul_ne_zero hpw (exp_ne_zero _))) (Gamma_ne_zero ha)
   exact this (by simpa using hW.symm)
 
-/-- The term `e^{-πi s} e^x U(b-a,b,-x)/Γ(a)` of `kzt_connection_neg` is `e^{-πi s}` times a real
-number. -/
-theorem kzt_neg_second_term (a b : ℝ) {x : ℝ} (hx : x < 0) (θ : ℂ) :
+/-- The term `e^{-πi s} e^x U(b-a,b,-x)/Γ(a)` of `KummerUZeroCount.connection_neg` is `e^{-πi s}`
+times a real number. -/
+theorem KummerUZeroCount.neg_second_term (a b : ℝ) {x : ℝ} (hx : x < 0) (θ : ℂ) :
     θ / Gamma (a : ℂ) * exp (x : ℂ) * kummerU ((b : ℂ) - a) b (-(x : ℂ)) =
-      θ * ((Real.exp x * kzt_U (b - a) b (-x) / Real.Gamma a : ℝ) : ℂ) := by
+      θ * ((Real.exp x * KummerUZeroCount.realU (b - a) b (-x) / Real.Gamma a : ℝ) : ℂ) := by
   have ht : (0:ℝ) < -x := by linarith
-  have hU := kzt_U_eq (b - a) b ht
+  have hU := KummerUZeroCount.realU_eq (b - a) b ht
   push_cast at hU
   rw [hU, Complex.Gamma_ofReal]
   push_cast
@@ -1178,14 +1247,14 @@ theorem kzt_neg_second_term (a b : ℝ) {x : ℝ} (hx : x < 0) (θ : ℂ) :
 
 /-- **No zeros on the negative axis, noninteger `b - a`.** For real `a ∉ -ℕ` and real `b` with
 `b - a ∉ ℤ`, the principal branch of `U(a,b,·)` has no zeros on `(-∞, 0)`. -/
-theorem kzt_U_neg_ne_zero_of_nonint (a b : ℝ) (ha : ∀ m : ℕ, a ≠ -(m : ℝ))
+theorem KummerUZeroCount.realU_neg_ne_zero_of_nonint (a b : ℝ) (ha : ∀ m : ℕ, a ≠ -(m : ℝ))
     (hba : ∀ n : ℤ, b - a ≠ n) {x : ℝ} (hx : x < 0) : kummerU (a : ℂ) b x ≠ 0 := by
   intro hU
   have ha' : ∀ m : ℕ, (a : ℂ) ≠ -(m : ℂ) := fun m h => ha m (by exact_mod_cast h)
-  have hL := kzt_connection_neg (a : ℂ) b hx
-  rw [hU, mul_zero, zero_add, kzt_neg_second_term a b hx] at hL
-  set Q := Real.exp x * kzt_U (b - a) b (-x) / Real.Gamma a with hQ
-  have him := kzt_regM_im a b x
+  have hL := KummerUZeroCount.connection_neg (a : ℂ) b hx
+  rw [hU, mul_zero, zero_add, KummerUZeroCount.neg_second_term a b hx] at hL
+  set Q := Real.exp x * KummerUZeroCount.realU (b - a) b (-x) / Real.Gamma a with hQ
+  have him := KummerUZeroCount.regM_im a b x
   rw [hL] at him
   have hE : exp (-((b : ℂ) - a) * π * I) = exp (((-(b - a) * π : ℝ) : ℂ) * I) := by
     push_cast; ring_nf
@@ -1202,12 +1271,12 @@ theorem kzt_U_neg_ne_zero_of_nonint (a b : ℝ) (ha : ∀ m : ℕ, a ≠ -(m : �
     · linarith
     · linarith
   have hQ0 : Q = 0 := (mul_eq_zero.1 him).resolve_left hsin
-  refine kzt_neg_no_common_zero ha' hx hU ?_
+  refine KummerUZeroCount.neg_no_common_zero ha' hx hU ?_
   rw [hL, hQ0]; simp
 
 /-- **Imaginary part on the negative axis, integer `b`.** For `n, k ∈ ℕ` with `k ≤ n` and
 `x < 0`, `Im U(n,k,x) = (-1)^k π 𝐌(n,k,x) / Γ(n-k+1)`. -/
-theorem kzt_U_neg_im_nat (n k : ℕ) (hkn : k ≤ n) {x : ℝ} (hx : x < 0) :
+theorem KummerUZeroCount.realU_neg_im_nat (n k : ℕ) (hkn : k ≤ n) {x : ℝ} (hx : x < 0) :
     (kummerU (n : ℂ) (k : ℂ) x).im =
       (-1) ^ k * π * (regularizedHGFun {((n : ℝ) : ℂ)} {(k : ℂ)} (x : ℂ)).re /
         Real.Gamma (n - k + 1) := by
@@ -1232,12 +1301,13 @@ theorem kzt_U_neg_im_nat (n k : ℕ) (hkn : k ≤ n) {x : ℝ} (hx : x < 0) :
       hai (k - 1 - m) (by push_cast; linarith)
     have hG2 : Real.Gamma (k - a) ≠ 0 := Real.Gamma_ne_zero fun m h =>
       hka (-m) (by push_cast; linarith)
-    have hL := kzt_connection_neg (a : ℂ) (k : ℂ) hx
-    rw [show ((k : ℂ)) = ((k : ℝ) : ℂ) by push_cast; rfl, kzt_neg_second_term a k hx] at hL
-    set Q := Real.exp x * kzt_U (k - a) k (-x) / Real.Gamma a
+    have hL := KummerUZeroCount.connection_neg (a : ℂ) (k : ℂ) hx
+    rw [show ((k : ℂ)) = ((k : ℝ) : ℂ) by push_cast; rfl,
+                                            KummerUZeroCount.neg_second_term a k hx] at hL
+    set Q := Real.exp x * KummerUZeroCount.realU (k - a) k (-x) / Real.Gamma a
     set Mr := (regularizedHGFun {(a : ℂ)} {((k : ℝ) : ℂ)} (x : ℂ)).re with hMr
     have hMc : regularizedHGFun {(a : ℂ)} {((k : ℝ) : ℂ)} (x : ℂ) = (Mr : ℂ) :=
-      Complex.ext (by simp [hMr]) (by have := kzt_regM_im a k x; simpa using this)
+      Complex.ext (by simp [hMr]) (by have := KummerUZeroCount.regM_im a k x; simpa using this)
     rw [hMc, show ((k : ℝ) : ℂ) - a = ((k - a : ℝ) : ℂ) by push_cast; ring,
       Complex.Gamma_ofReal] at hL
     -- solve for `U`
@@ -1310,10 +1380,11 @@ theorem kzt_U_neg_im_nat (n k : ℕ) (hkn : k ≤ n) {x : ℝ} (hx : x < 0) :
 
 /-- **No zeros on the negative axis, integer parameters.** For `n, k ∈ ℕ` with `1 ≤ n` and
 `k ≤ n`, `U(n,k,·)` has no zeros on `(-∞, 0)`. -/
-theorem kzt_U_neg_ne_zero_nat (n k : ℕ) (hn : 1 ≤ n) (hkn : k ≤ n) {x : ℝ} (hx : x < 0) :
+theorem KummerUZeroCount.realU_neg_ne_zero_nat (n k : ℕ) (hn : 1 ≤ n) (hkn : k ≤ n)
+    {x : ℝ} (hx : x < 0) :
     kummerU (n : ℂ) (k : ℂ) x ≠ 0 := by
   intro hU
-  have him := kzt_U_neg_im_nat n k hkn hx
+  have him := KummerUZeroCount.realU_neg_im_nat n k hkn hx
   rw [hU, zero_im] at him
   have hpos : (0:ℝ) < n - k + 1 := by
     have : (k:ℝ) ≤ n := by exact_mod_cast hkn
@@ -1325,23 +1396,24 @@ theorem kzt_U_neg_ne_zero_nat (n k : ℕ) (hn : 1 ≤ n) (hkn : k ≤ n) {x : �
     rw [div_eq_zero_iff, or_iff_left hG.ne', mul_eq_zero, or_iff_right hpk] at h
     exact h
   have hM : regularizedHGFun {(n : ℂ)} {(k : ℂ)} (x : ℂ) = 0 := by
-    have hi := kzt_regM_im n k x
+    have hi := KummerUZeroCount.regM_im n k x
     push_cast at hMr hi
     exact Complex.ext hMr hi
-  refine kzt_neg_no_common_zero (a := (n : ℂ)) (fun m h => ?_) hx hU hM
+  refine KummerUZeroCount.neg_no_common_zero (a := (n : ℂ)) (fun m h => ?_) hx hU hM
   have : (n : ℝ) = -(m : ℝ) := by exact_mod_cast h
   have : (1:ℝ) ≤ n := by exact_mod_cast hn
   linarith [(m.cast_nonneg : (0:ℝ) ≤ m)]
 
 /-- **No zeros on the negative axis (DLMF 13.9.13 in pointwise form).** For real `a ∉ -ℕ` and
 real `b ≤ a + 1`, the principal branch of `U(a,b,·)` has no zeros on `(-∞, 0)`. -/
-theorem kzt_U_neg_ne_zero {a b : ℝ} (h : a + 1 ≥ b) (ha : ∀ m : ℕ, a ≠ -(m : ℝ)) {x : ℝ}
+theorem KummerUZeroCount.realU_neg_ne_zero {a b : ℝ} (h : a + 1 ≥ b)
+    (ha : ∀ m : ℕ, a ≠ -(m : ℝ)) {x : ℝ}
     (hx : x < 0) : kummerU (a : ℂ) b x ≠ 0 := by
   have hz0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.2 hx.ne
   have hpw : ∀ c : ℂ, (x : ℂ) ^ c ≠ 0 := fun c => by
     rw [Ne, cpow_eq_zero_iff]; exact fun h => hz0 h.1
   by_cases hba : ∀ n : ℤ, b - a ≠ n
-  · exact kzt_U_neg_ne_zero_of_nonint a b ha hba hx
+  · exact KummerUZeroCount.realU_neg_ne_zero_of_nonint a b ha hba hx
   push Not at hba
   obtain ⟨j, hj⟩ := hba
   have hj1 : j ≤ 1 := by
@@ -1366,7 +1438,8 @@ theorem kzt_U_neg_ne_zero {a b : ℝ} (h : a + 1 ≥ b) (ha : ∀ m : ℕ, a ≠
   · rw [kummerU_kummer_transform_all _ _ hz0]
     refine mul_ne_zero (hpw _) ?_
     rw [ha', hb']
-    refine kzt_U_neg_ne_zero_of_nonint _ _ (fun m hm => ?_) (fun m hm => hai (1 - m) ?_) hx
+    refine KummerUZeroCount.realU_neg_ne_zero_of_nonint _ _ (fun m hm => ?_)
+        (fun m hm => hai (1 - m) ?_) hx
     · have : ((1 - j : ℤ) : ℝ) ≥ 1 := by
         have : (1 : ℤ) ≤ 1 - j := by omega
         exact_mod_cast this
@@ -1387,7 +1460,7 @@ theorem kzt_U_neg_ne_zero {a b : ℝ} (h : a + 1 ≥ b) (ha : ∀ m : ℕ, a ≠
     have hB : (b : ℂ) = (((m + j).toNat : ℕ) : ℂ) := by
       rw [hnat _ hbn, hb, hm]; push_cast; ring
     rw [hA, hB]
-    exact kzt_U_neg_ne_zero_nat _ _ (by omega) (by omega) hx
+    exact KummerUZeroCount.realU_neg_ne_zero_nat _ _ (by omega) (by omega) hx
   · rw [kummerU_kummer_transform_all _ _ hz0]
     refine mul_ne_zero (hpw _) ?_
     have hn : (a : ℂ) - b + 1 = (((1 - j).toNat : ℕ) : ℂ) := by
@@ -1395,7 +1468,7 @@ theorem kzt_U_neg_ne_zero {a b : ℝ} (h : a + 1 ≥ b) (ha : ∀ m : ℕ, a ≠
     have hk : (2 : ℂ) - b = (((2 - m - j).toNat : ℕ) : ℂ) := by
       rw [hnat _ (by omega), hb, hm]; push_cast; ring
     rw [hn, hk]
-    exact kzt_U_neg_ne_zero_nat _ _ (by omega) (by omega) hx
+    exact KummerUZeroCount.realU_neg_ne_zero_nat _ _ (by omega) (by omega) hx
 
 end NegativeAxis
 

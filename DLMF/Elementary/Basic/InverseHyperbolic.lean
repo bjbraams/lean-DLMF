@@ -21,9 +21,9 @@ agreement with Mathlib's real inverse functions on the uncut real intervals, and
 ## Main results
 
 * `arccoth_eq_inv`: `arccoth z = arctanh z⁻¹` (DLMF 4.37.9).
-* `hyper_sinh_arcsinh`, `hyper_cosh_arccosh`: the inverse equations.
-* `hyper_arcsinh_rotation`: `arcsinh z = i arcsin(-i z)`.
-* `hyper_hasDerivAt_arcsinh`, `hasDerivAt_arccosh_of_mem`, `hyper_hasDerivAt_arctanh`:
+* `Hyperbolic.sinh_arcsinh`, `Hyperbolic.cosh_arccosh`: the inverse equations.
+* `Hyperbolic.arcsinh_rotation`: `arcsinh z = i arcsin(-i z)`.
+* `Hyperbolic.hasDerivAt_arcsinh`, `hasDerivAt_arccosh_of_mem`, `Hyperbolic.hasDerivAt_arctanh`:
   derivatives on the cut domains.
 * `arcsinh_analytic`, `arccosh_analytic`, `arctanh_analytic`, `arccsch_analytic`,
   `arcsech_analytic`, `arccoth_analytic`: analyticity on precisely the open cut domains.
@@ -57,7 +57,7 @@ theorem arccoth_eq_inv {z : ℂ} (hz : z≠0) : arccoth z=arctanh z⁻¹ := by
 
 /-- A chosen hyperbolic cosine value lifts a sine value to a compatible logarithm branch.
 This uses Mathlib's principal logarithm and hyperbolic exponential definitions. -/
-lemma hyper_sinh_cosh_log_lift (u s : ℂ) (hs : s^2=1+u^2) :
+lemma Hyperbolic.sinh_cosh_log_lift (u s : ℂ) (hs : s^2=1+u^2) :
     Complex.sinh (Complex.log (s+u))=u ∧ Complex.cosh (Complex.log (s+u))=s := by
   have hprod:(s+u)*(s-u)=1 := by linear_combination hs
   have hne:s+u≠0 := by
@@ -71,25 +71,25 @@ lemma hyper_sinh_cosh_log_lift (u s : ℂ) (hs : s^2=1+u^2) :
   constructor <;> ring
 
 /-- The factored principal square root in inverse cosh has its prescribed square. -/
-private lemma hyper_arccosh_root_sq (z : ℂ) :
+private lemma Hyperbolic.arccosh_root_sq (z : ℂ) :
     (Complex.sqrt (z-1)*Complex.sqrt (z+1))^2=z^2-1 := by
-  rw [mul_pow,trig_sqrt_sq,trig_sqrt_sq]
+  rw [mul_pow,Trigonometric.complexSqrt_sq,Trigonometric.complexSqrt_sq]
   ring
 
 /-- The logarithmic inverse-cosh definition is a right inverse even at its cut values. -/
-lemma hyper_cosh_arccosh (z : ℂ) : Complex.cosh (arccosh z)=z := by
+lemma Hyperbolic.cosh_arccosh (z : ℂ) : Complex.cosh (arccosh z)=z := by
   have hs:z^2=1+(Complex.sqrt (z-1)*Complex.sqrt (z+1))^2 := by
-    rw [hyper_arccosh_root_sq]
+    rw [Hyperbolic.arccosh_root_sq]
     ring
-  exact (hyper_sinh_cosh_log_lift _ z hs).2
+  exact (Hyperbolic.sinh_cosh_log_lift _ z hs).2
 
 /-- The logarithmic inverse sinh is a right inverse also at the cut and branch points. -/
-lemma hyper_sinh_arcsinh (z:ℂ) : Complex.sinh (arcsinh z)=z := by
-  exact (hyper_sinh_cosh_log_lift z (Complex.sqrt (z^2+1))
-    (by rw [trig_sqrt_sq];ring)).1
+lemma Hyperbolic.sinh_arcsinh (z:ℂ) : Complex.sinh (arcsinh z)=z := by
+  exact (Hyperbolic.sinh_cosh_log_lift z (Complex.sqrt (z^2+1))
+    (by rw [Trigonometric.complexSqrt_sq];ring)).1
 
 /-- Rotation of Mathlib's two sine fibers preserves the integer branch parity. -/
-lemma hyper_sinh_fiber_forms (A w:ℂ) :
+lemma Hyperbolic.sinh_fiber_forms (A w:ℂ) :
     Complex.sinh w=Complex.sinh A ↔
       ∃ k:ℤ,w=(-1:ℂ)^k*A+(k:ℂ)*π*I := by
   have hrot : Complex.sinh w=Complex.sinh A ↔
@@ -126,7 +126,7 @@ lemma hyper_sinh_fiber_forms (A w:ℂ) :
       linear_combination I*hn+((2*k+1)*π)*Complex.I_sq
 
 /-- Rotation identifies the chosen logarithm/square-root inverse with the trigonometric one. -/
-lemma hyper_arcsinh_rotation (z:ℂ) : arcsinh z=I*arcsinPrincipal (-I*z) := by
+lemma Hyperbolic.arcsinh_rotation (z:ℂ) : arcsinh z=I*arcsinPrincipal (-I*z) := by
   have hq:1-(-I*z)^2=z^2+1 := by linear_combination -z^2*Complex.I_sq
   have hi:I*(-I*z)=z := by linear_combination -z*Complex.I_sq
   unfold arcsinh arcsinPrincipal
@@ -138,35 +138,35 @@ rays beyond `±i`. -/
 theorem arcsinhDomain_eq_arctanCutPlane : arcsinhDomain = arctanCutPlane := rfl
 
 /-- Rotation maps the inverse-sinh cut plane to the inverse-sine cut plane. -/
-private lemma hyper_asinh_coord {z:ℂ} (hz:z∈arcsinhDomain) : -I*z∈arcsinCutPlane := by
+private lemma Hyperbolic.asinh_coord {z:ℂ} (hz:z∈arcsinhDomain) : -I*z∈arcsinCutPlane := by
   simpa [arcsinhDomain,arcsinCutPlane,Complex.mul_re,Complex.mul_im] using hz
 
 /-- The inverse-sinh derivative follows from the proved rotated inverse-sine derivative. -/
-lemma hyper_hasDerivAt_arcsinh {z:ℂ} (hz:z∈arcsinhDomain) :
+lemma Hyperbolic.hasDerivAt_arcsinh {z:ℂ} (hz:z∈arcsinhDomain) :
     HasDerivAt arcsinh (Complex.sqrt (1+z^2))⁻¹ z := by
-  have hd:=((trig_hasDerivAt_arcsin (hyper_asinh_coord hz)).comp z
+  have hd:=((Trigonometric.hasDerivAt_arcsin (Hyperbolic.asinh_coord hz)).comp z
     ((hasDerivAt_id z).const_mul (-I))).const_mul I
   convert hd using 1
   · ext w
-    exact hyper_arcsinh_rotation w
+    exact Hyperbolic.arcsinh_rotation w
   · have hq:1-(-I*z)^2=1+z^2 := by linear_combination -z^2*Complex.I_sq
     rw [hq]
     linear_combination (Complex.sqrt (1+z^2))⁻¹*Complex.I_sq
 
 /-- The two logarithm factors multiply to one, including the square-root cut. -/
-private lemma hyper_asinh_product (z:ℂ) :
+private lemma Hyperbolic.asinh_product (z:ℂ) :
     (Complex.sqrt (z^2+1)+z)*(Complex.sqrt (z^2+1)-z)=1 := by
-  linear_combination trig_sqrt_sq (z^2+1)
+  linear_combination Trigonometric.complexSqrt_sq (z^2+1)
 
 /-- The inverse-sinh logarithm argument is nonzero. -/
-private lemma hyper_asinh_log_ne (z:ℂ) : Complex.sqrt (z^2+1)+z≠0 := by
+private lemma Hyperbolic.asinh_log_ne (z:ℂ) : Complex.sqrt (z^2+1)+z≠0 := by
   intro h
-  have hp:=hyper_asinh_product z
+  have hp:=Hyperbolic.asinh_product z
   rw [h,zero_mul] at hp
   exact zero_ne_one hp
 
 /-- The inverse-sinh logarithm argument avoids the negative real axis. -/
-private lemma hyper_asinh_log_slit (z:ℂ) : Complex.sqrt (z^2+1)+z∈Complex.slitPlane := by
+private lemma Hyperbolic.asinh_log_slit (z:ℂ) : Complex.sqrt (z^2+1)+z∈Complex.slitPlane := by
   let r:=Complex.sqrt (z^2+1)
   change r+z∈Complex.slitPlane
   rw [Complex.mem_slitPlane_iff]
@@ -181,14 +181,14 @@ private lemma hyper_asinh_log_slit (z:ℂ) : Complex.sqrt (z^2+1)+z∈Complex.sl
       dsimp [r]
       rw [Complex.sqrt,Complex.cpow_inv_two_re]
       positivity
-    have hp:=congrArg Complex.re (hyper_asinh_product z)
+    have hp:=congrArg Complex.re (Hyperbolic.asinh_product z)
     change ((r+z)*(r-z)).re=1 at hp
     simp only [Complex.mul_re,Complex.add_re,Complex.sub_re,Complex.add_im,Complex.sub_im,him] at hp
     simp only [Complex.add_re]
     nlinarith
 
 /-- The inverse-tanh Möbius argument lies in the principal logarithm cut plane. -/
-private lemma hyper_atanh_slit {z:ℂ} (hz:z∈arctanhDomain) : (1+z)/(1-z)∈Complex.slitPlane := by
+private lemma Hyperbolic.atanh_slit {z:ℂ} (hz:z∈arctanhDomain) : (1+z)/(1-z)∈Complex.slitPlane := by
   have hre:((1+z)/(1-z)).re=(1-z.re^2-z.im^2)/((1-z.re)^2+z.im^2) := by
     simp [Complex.div_re,Complex.normSq]
     ring
@@ -211,7 +211,7 @@ private lemma hyper_atanh_slit {z:ℂ} (hz:z∈arctanhDomain) : (1+z)/(1-z)∈Co
     · positivity
 
 /-- Neither linear factor vanishes on the inverse-tanh cut plane. -/
-private lemma hyper_atanh_nonzero {z:ℂ} (hz:z∈arctanhDomain) : 1+z≠0 ∧ 1-z≠0 := by
+private lemma Hyperbolic.atanh_nonzero {z:ℂ} (hz:z∈arctanhDomain) : 1+z≠0 ∧ 1-z≠0 := by
   constructor
   · intro h
     have he:z= -1 := by linear_combination h
@@ -223,11 +223,11 @@ private lemma hyper_atanh_nonzero {z:ℂ} (hz:z∈arctanhDomain) : 1+z≠0 ∧ 1
     norm_num [arctanhDomain] at hz
 
 /-- Differentiate the principal inverse-tanh logarithm on its full cut plane. -/
-lemma hyper_hasDerivAt_arctanh {z:ℂ} (hz:z∈arctanhDomain) :
+lemma Hyperbolic.hasDerivAt_arctanh {z:ℂ} (hz:z∈arctanhDomain) :
     HasDerivAt arctanh (1/(1-z^2)) z := by
-  obtain ⟨hp,hm⟩:=hyper_atanh_nonzero hz
+  obtain ⟨hp,hm⟩:=Hyperbolic.atanh_nonzero hz
   have hd0:=((hasDerivAt_id z).const_add 1).div ((hasDerivAt_id z).const_sub 1) hm
-  have hd:=((Complex.hasDerivAt_log (hyper_atanh_slit hz)).comp z hd0).div_const 2
+  have hd:=((Complex.hasDerivAt_log (Hyperbolic.atanh_slit hz)).comp z hd0).div_const 2
   convert hd using 1
   · rfl
   · dsimp only [id]
@@ -237,7 +237,7 @@ lemma hyper_hasDerivAt_arctanh {z:ℂ} (hz:z∈arctanhDomain) :
     ring
 
 /-- Inversion maps the inverse-coth cut plane into the inverse-tanh cut plane. -/
-lemma hyper_acoth_inv_mem {z:ℂ} (hz:z∈arccothDomain) : z≠0 ∧ z⁻¹∈arctanhDomain := by
+lemma Hyperbolic.acoth_inv_mem {z:ℂ} (hz:z∈arccothDomain) : z≠0 ∧ z⁻¹∈arctanhDomain := by
   have hz0:z≠0 := by intro h;rw [h] at hz;norm_num [arccothDomain] at hz
   refine ⟨hz0,?_⟩
   by_cases hi:z.im≠0
@@ -255,7 +255,7 @@ lemma hyper_acoth_inv_mem {z:ℂ} (hz:z∈arccothDomain) : z≠0 ∧ z⁻¹∈ar
     exact inv_lt_one_of_one_lt₀ hx
 
 /-- The principal complex square root agrees with the nonnegative real square root. -/
-lemma hyper_sqrt_ofReal (x:ℝ) (hx:0≤x) : Complex.sqrt (x:ℂ)=(Real.sqrt x:ℂ) := by
+lemma Hyperbolic.sqrt_ofReal (x:ℝ) (hx:0≤x) : Complex.sqrt (x:ℂ)=(Real.sqrt x:ℂ) := by
   exact Complex.sqrt_of_nonneg (by exact_mod_cast hx)
 
 /-- Analyticity of the principal inverse on precisely its open cut domain. -/
@@ -265,7 +265,7 @@ theorem arcsinh_analytic  : AnalyticOnNhd ℂ arcsinh arcsinhDomain := by
     exact (isOpen_ne.preimage Complex.continuous_re).union
       (isOpen_lt (continuous_abs.comp Complex.continuous_im) continuous_const)
   exact (show DifferentiableOn ℂ arcsinh arcsinhDomain from fun z hz=>
-    (hyper_hasDerivAt_arcsinh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
+    (Hyperbolic.hasDerivAt_arcsinh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
 
 /-- Both linear factors of the factored inverse-cosh root lie in the principal slit plane. -/
 lemma sub_one_add_one_mem_slitPlane_of_mem_arccoshDomain {z : ℂ} (hz : z ∈ arccoshDomain) :
@@ -278,7 +278,7 @@ lemma sub_one_add_one_mem_slitPlane_of_mem_arccoshDomain {z : ℂ} (hz : z ∈ a
 lemma sqrt_sub_one_mul_sqrt_add_one_ne_zero {z : ℂ} (hz : z ∈ arccoshDomain) :
     Complex.sqrt (z-1)*Complex.sqrt (z+1) ≠ 0 := by
   intro h
-  have hs := hyper_arccosh_root_sq z
+  have hs := Hyperbolic.arccosh_root_sq z
   rw [h, zero_pow two_ne_zero] at hs
   have h1 : (z-1)*(z+1) = 0 := by linear_combination -hs
   rcases mul_eq_zero.mp h1 with h1 | h1
@@ -292,7 +292,7 @@ private lemma hyperBasic_add_sqrt_mul_sqrt_mem_slitPlane {z : ℂ} (hz : z ∈ a
     z+Complex.sqrt (z-1)*Complex.sqrt (z+1) ∈ Complex.slitPlane := by
   set s := Complex.sqrt (z-1)*Complex.sqrt (z+1)
   have hprod : (z+s)*(z-s) = 1 := by
-    have := hyper_arccosh_root_sq z; linear_combination -this
+    have := Hyperbolic.arccosh_root_sq z; linear_combination -this
   rw [Complex.mem_slitPlane_iff]
   by_contra hcon
   push Not at hcon
@@ -337,8 +337,8 @@ lemma hasDerivAt_arccosh_of_mem {z : ℂ} (hz : z ∈ arccoshDomain) :
       (1 + ((Complex.sqrt (z-1))⁻¹/2*Complex.sqrt (z+1) +
         Complex.sqrt (z-1)*((Complex.sqrt (z+1))⁻¹/2)))
       = (Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹ := by
-    have eA := trig_sqrt_sq (z-1)
-    have eB := trig_sqrt_sq (z+1)
+    have eA := Trigonometric.complexSqrt_sq (z-1)
+    have eB := Trigonometric.complexSqrt_sq (z+1)
     generalize Complex.sqrt (z-1) = A at *
     generalize Complex.sqrt (z+1) = B at *
     field_simp
@@ -362,7 +362,7 @@ theorem arctanh_analytic  : AnalyticOnNhd ℂ arctanh arctanhDomain := by
     exact (isOpen_ne.preimage Complex.continuous_im).union
       (isOpen_lt (continuous_abs.comp Complex.continuous_re) continuous_const)
   exact (show DifferentiableOn ℂ arctanh arctanhDomain from fun z hz=>
-    (hyper_hasDerivAt_arctanh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
+    (Hyperbolic.hasDerivAt_arctanh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
 
 /-- Analyticity of the principal inverse on precisely its open cut domain. -/
 theorem arccsch_analytic  : AnalyticOnNhd ℂ arccsch arccschDomain := by
@@ -377,7 +377,7 @@ theorem arcsech_analytic  : AnalyticOnNhd ℂ arcsech arcsechDomain := by
 /-- Analyticity of the principal inverse on precisely its open cut domain. -/
 theorem arccoth_analytic  : AnalyticOnNhd ℂ arccoth arccothDomain := by
   intro z hz
-  obtain ⟨hz0,hi⟩:=hyper_acoth_inv_mem hz
+  obtain ⟨hz0,hi⟩:=Hyperbolic.acoth_inv_mem hz
   have hh:AnalyticAt ℂ (fun w=>arctanh w⁻¹) z :=
     (arctanh_analytic _ hi).comp (analyticAt_id.inv hz0)
   apply hh.congr
@@ -411,13 +411,13 @@ lemma exp_two_mul_arctanh_mul_one_sub (z : ℂ) (h1 : z ≠ 1) (h2 : z ≠ -1) :
 /-- The two inverse branch points stated in the definition prose. -/
 theorem arcsinh_branch_points  : ¬AnalyticAt ℂ arcsinh I ∧ ¬AnalyticAt ℂ arcsinh (-I) := by
   have hc : ∀ w, Complex.cosh (arcsinh w)^2 = 1+w^2 := fun w => by
-    rw [Complex.cosh_sq, hyper_sinh_arcsinh]; ring
+    rw [Complex.cosh_sq, Hyperbolic.sinh_arcsinh]; ring
   constructor
-  · refine hyperBasic_not_analyticAt_of_rightInverse_deriv_zero hyper_sinh_arcsinh
+  · refine hyperBasic_not_analyticAt_of_rightInverse_deriv_zero Hyperbolic.sinh_arcsinh
       Complex.hasDerivAt_sinh ?_
     have := hc I; rw [Complex.I_sq] at this
     exact pow_eq_zero_iff two_ne_zero |>.mp (by rw [this]; ring)
-  · refine hyperBasic_not_analyticAt_of_rightInverse_deriv_zero hyper_sinh_arcsinh
+  · refine hyperBasic_not_analyticAt_of_rightInverse_deriv_zero Hyperbolic.sinh_arcsinh
       Complex.hasDerivAt_sinh ?_
     have := hc (-I); rw [neg_sq, Complex.I_sq] at this
     exact pow_eq_zero_iff two_ne_zero |>.mp (by rw [this]; ring)
@@ -425,12 +425,12 @@ theorem arcsinh_branch_points  : ¬AnalyticAt ℂ arcsinh I ∧ ¬AnalyticAt ℂ
 /-- The two inverse branch points stated in the definition prose. -/
 theorem arccosh_branch_points  : ¬AnalyticAt ℂ arccosh (1:ℂ) ∧ ¬AnalyticAt ℂ arccosh (-(1:ℂ)) := by
   have hc : ∀ w, Complex.sinh (arccosh w)^2 = w^2-1 := fun w => by
-    rw [Complex.sinh_sq, hyper_cosh_arccosh]
+    rw [Complex.sinh_sq, Hyperbolic.cosh_arccosh]
   constructor
-  · refine hyperBasic_not_analyticAt_of_rightInverse_deriv_zero hyper_cosh_arccosh
+  · refine hyperBasic_not_analyticAt_of_rightInverse_deriv_zero Hyperbolic.cosh_arccosh
       Complex.hasDerivAt_cosh ?_
     exact pow_eq_zero_iff two_ne_zero |>.mp (by rw [hc]; ring)
-  · refine hyperBasic_not_analyticAt_of_rightInverse_deriv_zero hyper_cosh_arccosh
+  · refine hyperBasic_not_analyticAt_of_rightInverse_deriv_zero Hyperbolic.cosh_arccosh
       Complex.hasDerivAt_cosh ?_
     exact pow_eq_zero_iff two_ne_zero |>.mp (by rw [hc]; ring)
 
@@ -525,7 +525,7 @@ theorem arccoth_branch_points  : ¬AnalyticAt ℂ arccoth (1:ℂ) ∧ ¬Analytic
 theorem arcsinh_ofReal (x : ℝ)  : arcsinh x=(Real.arsinh x:ℂ) := by
   have hq:Complex.sqrt ((x:ℂ)^2+1)=(Real.sqrt (1+x^2):ℂ) := by
     rw [show (x:ℂ)^2+1=((1+x^2:ℝ):ℂ) by push_cast;ring]
-    exact hyper_sqrt_ofReal _ (by positivity)
+    exact Hyperbolic.sqrt_ofReal _ (by positivity)
   have hp:0≤x+Real.sqrt (1+x^2) := by
     apply le_of_lt
     rw [← neg_lt_iff_pos_add']
@@ -537,9 +537,9 @@ theorem arcsinh_ofReal (x : ℝ)  : arcsinh x=(Real.arsinh x:ℂ) := by
 /-- Reality and agreement with the existing real inverse on the uncut real interval. -/
 theorem arccosh_ofReal (x : ℝ) (hx : 1≤x) : arccosh x=(Real.arcosh x:ℂ) := by
   have h1 : Complex.sqrt ((x:ℂ)-1) = (Real.sqrt (x-1):ℂ) := by
-    rw [show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring]; exact hyper_sqrt_ofReal _ (by linarith)
+    rw [show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring]; exact Hyperbolic.sqrt_ofReal _ (by linarith)
   have h2 : Complex.sqrt ((x:ℂ)+1) = (Real.sqrt (x+1):ℂ) := by
-    rw [show (x:ℂ)+1 = ((x+1:ℝ):ℂ) by push_cast; ring]; exact hyper_sqrt_ofReal _ (by linarith)
+    rw [show (x:ℂ)+1 = ((x+1:ℝ):ℂ) by push_cast; ring]; exact Hyperbolic.sqrt_ofReal _ (by linarith)
   rw [arccosh, h1, h2, ← Complex.ofReal_mul, ← Real.sqrt_mul (by linarith),
     show (x-1)*(x+1) = x^2-1 by ring, ← Complex.ofReal_add,
     ← Complex.ofReal_log (by positivity), Real.arcosh]
@@ -558,11 +558,11 @@ theorem arctanh_ofReal (x : ℝ) (hx : |x|<1) : arctanh x=(Real.artanh x:ℂ) :=
 @[dlmf 4.37.E10]
 theorem arcsinh_neg (z : ℂ) : arcsinh (-z)= -arcsinh z := by
   have hn:Complex.sqrt ((-z)^2+1)+(-z)=(Complex.sqrt (z^2+1)+z)⁻¹ := by
-    apply mul_left_cancel₀ (hyper_asinh_log_ne z)
-    rw [mul_inv_cancel₀ (hyper_asinh_log_ne z)]
-    convert hyper_asinh_product z using 1 <;> ring
+    apply mul_left_cancel₀ (Hyperbolic.asinh_log_ne z)
+    rw [mul_inv_cancel₀ (Hyperbolic.asinh_log_ne z)]
+    convert Hyperbolic.asinh_product z using 1 <;> ring
   unfold arcsinh
-  rw [hn,Complex.log_inv _ (Complex.mem_slitPlane_iff_arg.mp (hyper_asinh_log_slit z)).1]
+  rw [hn,Complex.log_inv _ (Complex.mem_slitPlane_iff_arg.mp (Hyperbolic.asinh_log_slit z)).1]
 
 /-- Oddness on the open cut plane; cut-side values are given separately. -/
 @[dlmf 4.37.E12]
@@ -570,7 +570,7 @@ theorem arctanh_neg {z : ℂ} (hz : z ∈ arctanhDomain) : arctanh (-z)= -arctan
   have hn:(1+(-z))/(1-(-z))=((1+z)/(1-z))⁻¹ := by
     simp only [sub_eq_add_neg,inv_div,neg_neg]
   unfold arctanh
-  rw [hn,Complex.log_inv _ (Complex.mem_slitPlane_iff_arg.mp (hyper_atanh_slit hz)).1]
+  rw [hn,Complex.log_inv _ (Complex.mem_slitPlane_iff_arg.mp (Hyperbolic.atanh_slit hz)).1]
   ring
 
 /-- Oddness on the open cut plane; cut-side values are given separately. -/
@@ -582,7 +582,7 @@ theorem arccsch_neg (z : ℂ) : arccsch (-z)= -arccsch z := by
 /-- Oddness on the open cut plane; cut-side values are given separately. -/
 @[dlmf 4.37.E15]
 theorem arccoth_neg {z : ℂ} (hz : z ∈ arccothDomain) : arccoth (-z)= -arccoth z := by
-  obtain ⟨hz0,hi⟩:=hyper_acoth_inv_mem hz
+  obtain ⟨hz0,hi⟩:=Hyperbolic.acoth_inv_mem hz
   rw [arccoth_eq_inv (neg_ne_zero.mpr hz0),arccoth_eq_inv hz0,inv_neg,arctanh_neg hi]
 
 /-- `arcsinh 0 = 0`. -/

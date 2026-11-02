@@ -18,7 +18,7 @@ public import Mathlib.Analysis.Complex.Order
 * `cutPlane`: the cut plane `ℂ ∖ [1, ∞)`, the natural domain of `₂F₁` in its argument.
 * `eulerKernel`, `regularizedGaussHGIntegral`: Euler's integral 15.6.1 in the regularized
   normalization.
-* `shiftB`, `shiftC`, `shiftMeasure`, `regularizedGaussHGAux`: the contiguous shifts into the
+* `shiftB`, `shiftC`, `shiftMeasure`, `regularizedGaussHGByShifts`: the contiguous shifts into the
   Euler region and the recursion.
 * `regularizedGaussHG`: the continuation of the regularized function `𝐅(a,b;c;z)` to the cut
   plane, for all parameters.
@@ -148,20 +148,20 @@ def shiftMeasure (b c : ℂ) : ℕ := shiftB b + shiftC b c
 
 /-- The recursion with fuel: shift `c` while `shiftC > 0`, then shift `b` while `shiftB > 0`,
 then use Euler's integral. -/
-def regularizedGaussHGAux : ℕ → ℂ → ℂ → ℂ → ℂ → ℂ
+def regularizedGaussHGByShifts : ℕ → ℂ → ℂ → ℂ → ℂ → ℂ
   | 0, a, b, c, z => regularizedGaussHGIntegral a b c z
   | n + 1, a, b, c, z =>
     if 0 < shiftC b c then
-      (c - a) * regularizedGaussHGAux n a b (c + 1) z + a
-          * regularizedGaussHGAux n (a + 1) b (c + 1) z
+      (c - a) * regularizedGaussHGByShifts n a b (c + 1) z + a
+          * regularizedGaussHGByShifts n (a + 1) b (c + 1) z
     else if 0 < shiftB b then
-      regularizedGaussHGAux n a (b + 1) c z - a * z
-          * regularizedGaussHGAux n (a + 1) (b + 1) (c + 1) z
+      regularizedGaussHGByShifts n a (b + 1) c z - a * z
+          * regularizedGaussHGByShifts n (a + 1) (b + 1) (c + 1) z
     else regularizedGaussHGIntegral a b c z
 
 /-- The regularized Gauss function `𝐅(a,b;c;z) = ₂F₁(a,b;c;z)/Γ(c)` continued to the cut
 plane `ℂ ∖ [1, ∞)`, for all parameters (DLMF §15.2(i)). Its domain is `cutPlane`; the series is
 Mathlib's `regularizedGaussHGFun` and the Euler integral is `regularizedGaussHGIntegral`. -/
-def regularizedGaussHG (a b c z : ℂ) : ℂ := regularizedGaussHGAux (shiftMeasure b c) a b c z
+def regularizedGaussHG (a b c z : ℂ) : ℂ := regularizedGaussHGByShifts (shiftMeasure b c) a b c z
 
 end DLMF.Hypergeometric

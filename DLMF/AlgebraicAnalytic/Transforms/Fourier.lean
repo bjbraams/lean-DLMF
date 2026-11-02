@@ -11,6 +11,8 @@ public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
 public import DLMFMathlib.Analysis.Fourier.L2Compatibility
 public import DLMFMathlib.MeasureTheory.Integral.HalfLine
+public import DLMFMathlib.Analysis.Fourier.DirichletJordan
+public import DLMFMathlib.Analysis.Fourier.L1Inversion
 
 /-!
 # Fourier, Fourier cosine and Fourier sine transforms (DLMF §1.14(i)–(ii))
@@ -24,17 +26,19 @@ transforms on `(0, ∞)`.
 * `norm_fourierTransform_le`: `|F(x)| ≤ (2π)^{-1/2} ∫ |f(t)| dt` (DLMF 1.14.2).
 * `continuous_fourierTransform`, `tendsto_fourierTransform_cocompact`: continuity and the
   Riemann–Lebesgue lemma (§1.14(i)).
+* `integral_fourierTransform_mul_cexp_eq_dirichlet`: the symmetric partial inversion integral as
+  a Dirichlet-kernel integral.
 * `tendsto_fourierTransform_inversion_pv`: inversion at points of bounded variation
-  (DLMF 1.14.3).
-* `fourierTransform_inversion`, `tendsto_fourierTransform_inversion_of_contDiff`: Fourier
-  inversion (DLMF 1.14.4).
+  (DLMF 1.14.3), from the Dirichlet–Jordan theorem.
+* `fourierTransform_inversion`, `fourierTransform_inversion_of_continuousAt`,
+  `tendsto_fourierTransform_inversion_of_contDiff`: Fourier inversion (DLMF 1.14.4).
 * `integrable_fourierConvolution`, `fourierTransform_fourierConvolution`: the convolution
   theorem (§1.14(i)).
 * `fourierConvolution_eq_integral`, `integral_fourierTransform_mul`,
   `integral_fourierTransform_mul_conj`, `integral_norm_fourierTransform_sq`: DLMF 1.14.6–1.14.8.
 * `eq_of_fourierTransform_eq`: uniqueness.
-* `tendsto_fourierCosTransform_inversion`, `tendsto_fourierSinTransform_inversion`:
-  DLMF 1.14.11–1.14.12.
+* `tendsto_fourierCosTransform_inversion`, `tendsto_fourierSinTransform_inversion`,
+  `fourierCosTransform_inversion`, `fourierSinTransform_inversion`: DLMF 1.14.11–1.14.12.
 * `integral_fourierCosTransform_mul`, `integral_fourierSinTransform_mul`,
   `integral_fourierCosTransform_sq`, `integral_fourierSinTransform_sq`: DLMF 1.14.13–1.14.16.
 
@@ -110,6 +114,79 @@ theorem fourierTransform_comp_sub (f : ℝ → ℂ) (t x : ℝ) :
   rw [integral_mul_const]
   ring
 
+/-- The inner integral `∫_{-R}^{R} e^{iax} dx = 2 sin(Ra)/a` for `a ≠ 0`. -/
+theorem intervalIntegral_cexp_mul_I_symm {a : ℝ} (ha : a ≠ 0) (R : ℝ) :
+    ∫ x in -R..R, cexp (((a : ℂ) * I) * x) = ((2 * (Real.sin (R * a) / a) : ℝ) : ℂ) := by
+  have haI : (a : ℂ) * I ≠ 0 := mul_ne_zero (by exact_mod_cast ha) I_ne_zero
+  rw [integral_exp_mul_complex haI]
+  have h1 : (a : ℂ) * I * (R : ℂ) = ((R * a : ℝ) : ℂ) * I := by push_cast; ring
+  have h2 : (a : ℂ) * I * ((-R : ℝ) : ℂ) = ((-(R * a) : ℝ) : ℂ) * I := by push_cast; ring
+  rw [h1, h2, exp_mul_I, exp_mul_I, ← ofReal_cos, ← ofReal_sin, ← ofReal_cos, ← ofReal_sin,
+    Real.cos_neg, Real.sin_neg]
+  have ha' : (a : ℂ) ≠ 0 := by exact_mod_cast ha
+  field_simp
+  push_cast
+  ring_nf
+  field_simp
+
+/-- The symmetric partial inversion integral of the Fourier transform is a Dirichlet-kernel
+integral: `(2π)^{-1/2} ∫_{-R}^{R} F(x) e^{-ixt} dx = ∫ f(u) sin(R(t-u))/(π(t-u)) du`. -/
+theorem integral_fourierTransform_mul_cexp_eq_dirichlet {f : ℝ → ℂ} (hf : Integrable f)
+    {R : ℝ} (hR : 0 ≤ R) (t : ℝ) :
+    ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) *
+        ∫ x in -R..R, fourierTransform f x * cexp (-(I * x * t)) =
+      ∫ u, f u * ((Real.sin (R * (t - u)) / (Real.pi * (t - u)) : ℝ) : ℂ) := by
+  set c : ℂ := ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) with hc
+  have hcc : c * c = ((2 * Real.pi : ℝ) : ℂ)⁻¹ := by
+    rw [hc, ← mul_inv, ← ofReal_mul, Real.mul_self_sqrt (by positivity)]
+  set F : ℝ → ℝ → ℂ := fun x u => f u * cexp (((u - t : ℝ) : ℂ) * I * x) with hF
+  have hFi : Integrable (Function.uncurry F) ((volume.restrict (uIoc (-R) R)).prod volume) := by
+    have : IsFiniteMeasure (volume.restrict (uIoc (-R) R)) := ⟨by
+      rw [Measure.restrict_apply_univ, uIoc_of_le (by linarith)]
+      exact measure_Ioc_lt_top⟩
+    have hb : Integrable (fun p : ℝ × ℝ => (1 : ℝ) * ‖f p.2‖)
+        ((volume.restrict (uIoc (-R) R)).prod volume) :=
+      (integrable_const (1 : ℝ)).mul_prod hf.norm
+    refine hb.mono' ?_ (Eventually.of_forall fun p => ?_)
+    · exact hf.aestronglyMeasurable.comp_snd.mul (Continuous.aestronglyMeasurable (by fun_prop))
+    · simp only [Function.uncurry, hF, norm_mul, one_mul]
+      rw [show ((p.2 - t : ℝ) : ℂ) * I * p.1 = ((((p.2 - t) * p.1 : ℝ)) : ℂ) * I by
+        push_cast; ring, norm_exp_ofReal_mul_I, mul_one]
+  calc c * ∫ x in -R..R, fourierTransform f x * cexp (-(I * x * t))
+      = ((2 * Real.pi : ℝ) : ℂ)⁻¹ * ∫ x in -R..R, ∫ u, F x u := by
+        rw [← hcc, mul_assoc]
+        congr 1
+        rw [← intervalIntegral.integral_const_mul]
+        refine intervalIntegral.integral_congr fun x _ => ?_
+        simp only [fourierTransform, hF, ← hc]
+        rw [mul_assoc, ← integral_mul_const]
+        congr 2
+        funext u
+        rw [mul_assoc, ← Complex.exp_add]
+        congr 2
+        push_cast
+        ring
+    _ = ((2 * Real.pi : ℝ) : ℂ)⁻¹ * ∫ u, ∫ x in -R..R, F x u := by
+        rw [intervalIntegral_integral_swap hFi]
+    _ = ∫ u, f u * ((Real.sin (R * (t - u)) / (Real.pi * (t - u)) : ℝ) : ℂ) := by
+        rw [← integral_const_mul]
+        refine integral_congr_ae ?_
+        filter_upwards [Measure.ae_ne volume t] with u hu
+        simp only [hF]
+        rw [intervalIntegral.integral_const_mul,
+          intervalIntegral_cexp_mul_I_symm (sub_ne_zero.2 hu)]
+        have : Real.pi ≠ 0 := Real.pi_ne_zero
+        have h1 : t - u ≠ 0 := sub_ne_zero.2 (Ne.symm hu)
+        have h2 : u - t ≠ 0 := sub_ne_zero.2 hu
+        rw [show Real.sin (R * (u - t)) = -Real.sin (R * (t - u)) by
+          rw [← Real.sin_neg]; ring_nf]
+        have h1c : (t : ℂ) - u ≠ 0 := by exact_mod_cast h1
+        have h2c : (u : ℂ) - t ≠ 0 := by exact_mod_cast h2
+        push_cast
+        field_simp
+        ring
+
+
 /-- DLMF 1.14.2: `|F(x)| ≤ (2π)^{-1/2} ∫ |f(t)| dt`. -/
 @[dlmf 1.14.E2]
 theorem norm_fourierTransform_le (f : ℝ → ℂ) (x : ℝ) :
@@ -166,7 +243,9 @@ theorem tendsto_fourierTransform_inversion_pv {f : ℝ → ℂ} (hf : Integrable
     Tendsto (fun R : ℝ => ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) *
         ∫ x in -R..R, fourierTransform f x * cexp (-(I * x * u))) atTop
       (𝓝 ((fp + fm) / 2)) := by
-  sorry
+  refine (Real.tendsto_integral_mul_sin_div_of_boundedVariationOn hf hδ hbv hp hm).congr' ?_
+  filter_upwards [eventually_ge_atTop 0] with R hR
+  exact (integral_fourierTransform_mul_cexp_eq_dirichlet hf hR u).symm
 
 /-- DLMF 1.14.4, principal-value form: if `f` is absolutely integrable and continuously
 differentiable, then `f(t) = (2π)^{-1/2} lim_{R→∞} ∫_{-R}^{R} F(x) e^{-ixt} dx`. (DLMF writes an
@@ -177,14 +256,17 @@ theorem tendsto_fourierTransform_inversion_of_contDiff {f : ℝ → ℂ} (hf : I
     (hf' : ContDiff ℝ 1 f) (t : ℝ) :
     Tendsto (fun R : ℝ => ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) *
         ∫ x in -R..R, fourierTransform f x * cexp (-(I * x * t))) atTop (𝓝 (f t)) := by
-  sorry
+  refine (Real.tendsto_integral_mul_sin_div_of_differentiableAt hf
+    ((hf'.differentiable one_ne_zero) t)).congr' ?_
+  filter_upwards [eventually_ge_atTop 0] with R hR
+  exact (integral_fourierTransform_mul_cexp_eq_dirichlet hf hR t).symm
 
-/-- DLMF 1.14.4 (Fourier inversion): if `f` is continuous and absolutely integrable and
-`F = 𝓕(f)` is absolutely integrable, then `f(t) = (2π)^{-1/2} ∫ F(x) e^{-ixt} dx`. Proved from
-Mathlib's `Continuous.fourierInv_fourier_eq`. -/
+/-- DLMF 1.14.4 (Fourier inversion) at a point of continuity: if `f` and `F = 𝓕(f)` are
+absolutely integrable and `f` is continuous at `t`, then
+`f(t) = (2π)^{-1/2} ∫ F(x) e^{-ixt} dx`. Stronger than DLMF, which assumes `f` continuous. -/
 @[dlmf 1.14.E4]
-theorem fourierTransform_inversion {f : ℝ → ℂ} (hf : Continuous f) (hfi : Integrable f)
-    (hF : Integrable (fourierTransform f)) (t : ℝ) :
+theorem fourierTransform_inversion_of_continuousAt {f : ℝ → ℂ} (hfi : Integrable f)
+    (hF : Integrable (fourierTransform f)) {t : ℝ} (hf : ContinuousAt f t) :
     f t = ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) *
       ∫ x, fourierTransform f x * cexp (-(I * x * t)) := by
   set c : ℂ := ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) with hc
@@ -207,7 +289,18 @@ theorem fourierTransform_inversion {f : ℝ → ℂ} (hf : Continuous f) (hfi : 
       simp only
       rw [← mul_assoc, inv_mul_cancel₀ inv_sqrt_two_pi_ne_zero, one_mul]
     exact (integrable_comp_mul_left_iff (𝓕 f) ha0).mp h1
-  have hinv := congrFun (hf.fourierInv_fourier_eq hfi hFF) t
+  have hinv : 𝓕⁻ (𝓕 f) t = f t := by
+    have hc : Continuous (𝓕⁻ (𝓕 f)) := by
+      rw [Real.fourierInv_eq_fourier_comp_neg]
+      exact VectorFourier.fourierIntegral_continuous Real.continuous_fourierChar
+        (innerSL ℝ).continuous₂ hFF.comp_neg
+    by_contra hne
+    have hev : ∀ᶠ u in 𝓝 t, 𝓕⁻ (𝓕 f) u ≠ f u :=
+      (hc.continuousAt.sub hf).eventually_ne (sub_ne_zero.2 hne) |>.mono fun u hu =>
+        sub_ne_zero.1 hu
+    obtain ⟨u, hu1, hu2⟩ := (Measure.dense_of_ae (μ := volume)
+      (Real.ae_fourierInv_fourier_eq hfi hFF)).inter_nhds_nonempty hev
+    exact hu2 hu1
   rw [Real.fourierInv_eq'] at hinv
   set g : ℝ → ℂ := fun v => cexp (↑(2 * Real.pi * v * t) * I) * 𝓕 f v with hg
   have hstep : ∀ x : ℝ, fourierTransform f x * cexp (-(I * x * t)) = c * g (a * x) := by
@@ -232,6 +325,16 @@ theorem fourierTransform_inversion {f : ℝ → ℂ} (hf : Continuous f) (hfi : 
   simp only [RCLike.re_to_real, star_trivial]
   push_cast
   ring
+
+/-- DLMF 1.14.4 (Fourier inversion): if `f` is continuous and absolutely integrable and
+`F = 𝓕(f)` is absolutely integrable, then `f(t) = (2π)^{-1/2} ∫ F(x) e^{-ixt} dx`. Proved from
+Mathlib's `Continuous.fourierInv_fourier_eq`. -/
+@[dlmf 1.14.E4]
+theorem fourierTransform_inversion {f : ℝ → ℂ} (hf : Continuous f) (hfi : Integrable f)
+    (hF : Integrable (fourierTransform f)) (t : ℝ) :
+    f t = ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) *
+      ∫ x, fourierTransform f x * cexp (-(I * x * t)) := by
+  exact fourierTransform_inversion_of_continuousAt hfi hF hf.continuousAt
 
 /-- DLMF §1.14(i): the convolution 1.14.5 of absolutely integrable functions is absolutely
 integrable. -/
@@ -461,6 +564,36 @@ private theorem fourierSinTransform_mul_abs (f g : ℝ → ℂ) (x : ℝ) :
       simp only [fourierSinTransform, neg_mul, Real.sin_neg, ofReal_neg, mul_neg, integral_neg]
     rw [abs_of_neg hx, he, he, neg_mul_neg]
 
+/-- A symmetric interval integral as an integral over `[0, R]` of the even part. -/
+private lemma intervalIntegral_neg_eq_add {h : ℝ → ℂ} (hh : Continuous h) (R : ℝ) :
+    ∫ x in -R..R, h x = ∫ x in (0 : ℝ)..R, (h x + h (-x)) := by
+  have hn : IntervalIntegrable (fun x => h (-x)) volume 0 R :=
+    (hh.comp continuous_neg).intervalIntegrable _ _
+  rw [intervalIntegral.integral_add (hh.intervalIntegrable _ _) hn,
+    ← intervalIntegral.integral_add_adjacent_intervals (b := 0) (hh.intervalIntegrable _ _)
+    (hh.intervalIntegrable _ _)]
+  have := intervalIntegral.integral_comp_neg (a := 0) (b := R) h
+  rw [neg_zero] at this
+  rw [this, add_comm]
+
+/-- Near a point `u > 0`, the data of 1.14.11–1.14.12 transfer from a half-line function `f` to
+an extension `F` that agrees with `f` on `(0, ∞)`. -/
+private lemma extension_data {f F : ℝ → ℂ} (hF : ∀ t, 0 < t → F t = f t) {u δ : ℝ}
+    (hu : 0 < u) (hbv : BoundedVariationOn f (Icc (u - δ) (u + δ))) {fp fm : ℂ}
+    (hp : Tendsto f (𝓝[>] u) (𝓝 fp)) (hm : Tendsto f (𝓝[<] u) (𝓝 fm)) :
+    BoundedVariationOn F (Icc (u - min δ (u / 2)) (u + min δ (u / 2))) ∧
+      Tendsto F (𝓝[>] u) (𝓝 fp) ∧ Tendsto F (𝓝[<] u) (𝓝 fm) := by
+  have hev : F =ᶠ[𝓝 u] f := by
+    filter_upwards [Ioi_mem_nhds hu] with t ht using hF t ht
+  refine ⟨?_, hp.congr' (nhdsWithin_le_nhds hev.symm), hm.congr' (nhdsWithin_le_nhds hev.symm)⟩
+  have hsub : Icc (u - min δ (u / 2)) (u + min δ (u / 2)) ⊆ Icc (u - δ) (u + δ) :=
+    Icc_subset_Icc (by linarith [min_le_left δ (u / 2)]) (by linarith [min_le_left δ (u / 2)])
+  have hEq : EqOn F f (Icc (u - min δ (u / 2)) (u + min δ (u / 2))) := fun t ht =>
+    hF t (by linarith [ht.1, min_le_right δ (u / 2)])
+  unfold BoundedVariationOn at hbv ⊢
+  rw [eVariationOn.eq_of_eqOn hEq]
+  exact ne_top_of_le_ne_top hbv (eVariationOn.mono f hsub)
+
 /-- DLMF 1.14.11: if `f` is absolutely integrable on `[0, ∞)` and of bounded variation near
 `u > 0`, then `½(f(u+) + f(u-)) = √(2/π) ∫₀^∞ F_c(x) cos(ux) dx`, the integral taken as
 `lim_{R→∞} ∫₀^R`. -/
@@ -471,7 +604,26 @@ theorem tendsto_fourierCosTransform_inversion {f : ℝ → ℂ} (hf : Integrable
     Tendsto (fun R : ℝ => (Real.sqrt (2 / Real.pi) : ℂ) *
         ∫ x in (0 : ℝ)..R, fourierCosTransform f x * (Real.cos (u * x) : ℂ)) atTop
       (𝓝 ((fp + fm) / 2)) := by
-  sorry
+  have hfe := integrable_evenExtension hf
+  obtain ⟨hbv', hp', hm'⟩ := extension_data (F := fun t => f |t|)
+    (fun t ht => by rw [abs_of_pos ht]) hu hbv hp hm
+  refine (Real.tendsto_integral_mul_sin_div_of_boundedVariationOn hfe
+    (lt_min hδ (half_pos hu)) hbv' hp' hm').congr' ?_
+  filter_upwards [eventually_ge_atTop 0] with R hR
+  rw [← integral_fourierTransform_mul_cexp_eq_dirichlet hfe hR u]
+  simp only [fourierTransform_evenExtension hf]
+  have hc : Continuous (fourierCosTransform f) := by
+    have h := continuous_fourierTransform hfe
+    rwa [show fourierTransform (fun t : ℝ => f |t|) = fourierCosTransform f from
+      funext (fourierTransform_evenExtension hf)] at h
+  rw [intervalIntegral_neg_eq_add (by fun_prop) R, ← inv_sqrt_two_pi_mul_two, mul_assoc]
+  congr 1
+  rw [← intervalIntegral.integral_const_mul]
+  refine intervalIntegral.integral_congr fun x _ => ?_
+  rw [← fourierCosTransform_abs f (-x), abs_neg, fourierCosTransform_abs, ofReal_cos,
+    Complex.cos]
+  push_cast
+  ring_nf
 
 /-- DLMF 1.14.12: the sine analogue of 1.14.11,
 `½(f(u+) + f(u-)) = √(2/π) ∫₀^∞ F_s(x) sin(ux) dx`, for `u > 0`. -/
@@ -482,7 +634,67 @@ theorem tendsto_fourierSinTransform_inversion {f : ℝ → ℂ} (hf : Integrable
     Tendsto (fun R : ℝ => (Real.sqrt (2 / Real.pi) : ℂ) *
         ∫ x in (0 : ℝ)..R, fourierSinTransform f x * (Real.sin (u * x) : ℂ)) atTop
       (𝓝 ((fp + fm) / 2)) := by
-  sorry
+  have hfo : Integrable (fun t : ℝ => if 0 ≤ t then f |t| else -f |t|) :=
+    memLp_one_iff_integrable.mp (memLp_oddExtension (memLp_one_iff_integrable.mpr hf))
+  obtain ⟨hbv', hp', hm'⟩ := extension_data (F := fun t => if 0 ≤ t then f |t| else -f |t|)
+    (fun t ht => by simp only [ht.le, ite_true, abs_of_pos ht]) hu hbv hp hm
+  refine (Real.tendsto_integral_mul_sin_div_of_boundedVariationOn hfo
+    (lt_min hδ (half_pos hu)) hbv' hp' hm').congr' ?_
+  filter_upwards [eventually_ge_atTop 0] with R hR
+  rw [← integral_fourierTransform_mul_cexp_eq_dirichlet hfo hR u]
+  simp only [fourierTransform_oddExtension hf]
+  have hc : Continuous (fourierSinTransform f) := by
+    have h := (continuous_fourierTransform hfo).const_mul (-I)
+    rw [show fourierTransform (fun t : ℝ => if 0 ≤ t then f |t| else -f |t|) =
+      fun x => I * fourierSinTransform f x from funext (fourierTransform_oddExtension hf)] at h
+    simpa only [← mul_assoc, neg_mul, I_mul_I, neg_neg, one_mul] using h
+  have hodd : ∀ x, fourierSinTransform f (-x) = -fourierSinTransform f x := fun x => by
+    simp only [fourierSinTransform, neg_mul, Real.sin_neg, ofReal_neg, mul_neg, integral_neg]
+  rw [intervalIntegral_neg_eq_add (by fun_prop) R, ← inv_sqrt_two_pi_mul_two, mul_assoc]
+  congr 1
+  rw [← intervalIntegral.integral_const_mul]
+  refine intervalIntegral.integral_congr fun x _ => ?_
+  rw [hodd, ofReal_sin, Complex.sin]
+  push_cast
+  ring_nf
+
+/-- DLMF 1.14.11 in absolutely convergent form: if `f` is integrable on `(0, ∞)`, continuous and
+of bounded variation near `u > 0`, and `F_c` is integrable on `(0, ∞)`, then
+`f(u) = √(2/π) ∫₀^∞ F_c(x) cos(ux) dx`. -/
+@[dlmf 1.14.E11]
+theorem fourierCosTransform_inversion {f : ℝ → ℂ} (hf : IntegrableOn f (Ioi 0))
+    {u δ : ℝ} (hu : 0 < u) (hδ : 0 < δ) (hbv : BoundedVariationOn f (Icc (u - δ) (u + δ)))
+    (hc : ContinuousAt f u) (hF : IntegrableOn (fourierCosTransform f) (Ioi 0)) :
+    f u = (Real.sqrt (2 / Real.pi) : ℂ) *
+      ∫ x in Ioi (0 : ℝ), fourierCosTransform f x * (Real.cos (u * x) : ℂ) := by
+  have h := tendsto_fourierCosTransform_inversion hf hu hδ hbv
+    (hc.tendsto.mono_left nhdsWithin_le_nhds) (hc.tendsto.mono_left nhdsWithin_le_nhds)
+  rw [← two_mul, mul_div_cancel_left₀ _ two_ne_zero] at h
+  refine tendsto_nhds_unique h (((intervalIntegral_tendsto_integral_Ioi 0 ?_
+    tendsto_id)).const_mul _)
+  exact hF.mul_bdd (c := 1) (by fun_prop : Continuous fun x : ℝ =>
+    (Real.cos (u * x) : ℂ)).aestronglyMeasurable
+    (Eventually.of_forall fun x => by
+      rw [Complex.norm_real, Real.norm_eq_abs]; exact Real.abs_cos_le_one _)
+
+/-- DLMF 1.14.12 in absolutely convergent form: if `f` is integrable on `(0, ∞)`, continuous and
+of bounded variation near `u > 0`, and `F_s` is integrable on `(0, ∞)`, then
+`f(u) = √(2/π) ∫₀^∞ F_s(x) sin(ux) dx`. -/
+@[dlmf 1.14.E12]
+theorem fourierSinTransform_inversion {f : ℝ → ℂ} (hf : IntegrableOn f (Ioi 0))
+    {u δ : ℝ} (hu : 0 < u) (hδ : 0 < δ) (hbv : BoundedVariationOn f (Icc (u - δ) (u + δ)))
+    (hc : ContinuousAt f u) (hF : IntegrableOn (fourierSinTransform f) (Ioi 0)) :
+    f u = (Real.sqrt (2 / Real.pi) : ℂ) *
+      ∫ x in Ioi (0 : ℝ), fourierSinTransform f x * (Real.sin (u * x) : ℂ) := by
+  have h := tendsto_fourierSinTransform_inversion hf hu hδ hbv
+    (hc.tendsto.mono_left nhdsWithin_le_nhds) (hc.tendsto.mono_left nhdsWithin_le_nhds)
+  rw [← two_mul, mul_div_cancel_left₀ _ two_ne_zero] at h
+  refine tendsto_nhds_unique h (((intervalIntegral_tendsto_integral_Ioi 0 ?_
+    tendsto_id)).const_mul _)
+  exact hF.mul_bdd (c := 1) (by fun_prop : Continuous fun x : ℝ =>
+    (Real.sin (u * x) : ℂ)).aestronglyMeasurable
+    (Eventually.of_forall fun x => by
+      rw [Complex.norm_real, Real.norm_eq_abs]; exact Real.abs_sin_le_one _)
 
 /-- DLMF 1.14.13: for `f`, `g` absolutely and square integrable on `[0, ∞)`,
 `∫₀^∞ F_c(x) G_c(x) dx = ∫₀^∞ f(t) g(t) dt`. -/

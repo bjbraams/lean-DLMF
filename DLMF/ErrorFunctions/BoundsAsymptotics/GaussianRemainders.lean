@@ -36,6 +36,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat Interval
 
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Continued-fraction representation: `HasContinuedFraction (fun k => if k=0 then I/Real.sqrt π
@@ -53,10 +55,10 @@ theorem faddeevaW_continuedFraction {z : ℂ} (hz : 0 < z.im) :
   set b1 : ℕ → ℂ := fun k => if Even k then ζ^2 else 1 with hb1
   set aE : ℕ → ℂ := fun k => if k=0 then I else -(k : ℂ)/2 with haE
   have h1 := erfc_continuedFraction_one hζre
-  rw [incGF_hasContinuedFraction_iff (fun k hk => by
+  rw [IncompleteGammaFractions.hasContinuedFraction_iff (fun k hk => by
     simp only [show k ≠ 0 by omega, ↓reduceIte]
     exact div_ne_zero (Nat.cast_ne_zero.mpr (by omega)) two_ne_zero)] at h1
-  rw [incGF_hasContinuedFraction_iff (fun k hk => by
+  rw [IncompleteGammaFractions.hasContinuedFraction_iff (fun k hk => by
     simp only [show k ≠ 0 by omega, ↓reduceIte]
     exact div_ne_zero (neg_ne_zero.mpr (Nat.cast_ne_zero.mpr (by omega))) two_ne_zero)]
   set r : ℕ → ℂ := fun k => if Even k then I / ζ else I * ζ with hr
@@ -86,9 +88,9 @@ theorem faddeevaW_continuedFraction {z : ℂ} (hz : 0 < z.im) :
     split_ifs
     · rw [← hIζ]; field_simp
     · rw [mul_one, hIζ]
-  have hconv : ∀ n, (GenContFract.cfConv_ofFun 0
+  have hconv : ∀ n, (GenContFract.ofFun 0
       (fun k => if k=0 then I/Real.sqrt π else -(k : ℂ)/2) (fun _ => z)).convs n =
-      (Real.sqrt π : ℂ)⁻¹ * (GenContFract.cfConv_ofFun 0 a1 b1).convs n := by
+      (Real.sqrt π : ℂ)⁻¹ * (GenContFract.ofFun 0 a1 b1).convs n := by
     intro n
     have e : (fun k : ℕ => if k=0 then I/Real.sqrt π else -(k : ℂ)/2) =
         fun k : ℕ => if k = 0 then (Real.sqrt π : ℂ)⁻¹ * aE 0 else aE k := by
@@ -96,10 +98,10 @@ theorem faddeevaW_continuedFraction {z : ℂ} (hz : 0 < z.im) :
       split_ifs with hk
       · simp [aE, div_eq_inv_mul]
       · simp [aE, hk]
-    rw [e, GenContFract.cfConv_convs_smul_a0, hEa, hEb, GenContFract.cfConv_equiv_convs r hr0]
-  rw [show (GenContFract.cfConv_ofFun 0
+    rw [e, GenContFract.ofFun_convs_mul_first_num, hEa, hEb, GenContFract.ofFun_convs_equiv r hr0]
+  rw [show (GenContFract.ofFun 0
       (fun k => if k=0 then I/Real.sqrt π else -(k : ℂ)/2) (fun _ => z)).convs =
-      fun n => (Real.sqrt π : ℂ)⁻¹ * (GenContFract.cfConv_ofFun 0 a1 b1).convs n from
+      fun n => (Real.sqrt π : ℂ)⁻¹ * (GenContFract.ofFun 0 a1 b1).convs n from
       funext hconv]
   convert h1.const_mul ((Real.sqrt π : ℂ)⁻¹) using 2
   simp only [faddeevaW, ζ]

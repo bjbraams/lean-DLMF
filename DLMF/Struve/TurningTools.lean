@@ -16,18 +16,18 @@ For real `ν`, DLMF 11.10.1–11.10.2 at `z = ν` read
 `𝐉_ν(ν) = π⁻¹ Re ∫₀^π e^{iν(θ - sin θ)} dθ`,  `𝐄_ν(ν) = π⁻¹ Im ∫₀^π e^{iν(θ - sin θ)} dθ`.
 
 The phase `θ - sin θ = θ³/6 + O(θ⁴)` has a cubic stationary point at `θ = 0`, so the
-stationary-phase lemma `Complex.statPh_tendsto_cubic` gives the limit of
+stationary-phase lemma `Complex.StationaryPhase.tendsto_cubic` gives the limit of
 `ν^{1/3} ∫₀^π e^{iν(θ - sin θ)} dθ`. These are the inputs of DLMF 11.11.18 and 11.11.19 in
 `DLMF.Struve.Asymptotics`.
 
 ## Main results
 
-* `struveTP_angerJ_eq`, `struveTP_weberE_eq`: DLMF 11.10.1–11.10.2 at `z = ν`.
-* `struveTP_tendsto_integral`:
+* `TurningPoint.angerJ_eq`, `TurningPoint.weberE_eq`: DLMF 11.10.1–11.10.2 at `z = ν`.
+* `TurningPoint.tendsto_integral`:
   `ν^{1/3} ∫₀^π e^{iν(θ - sin θ)} dθ → 6^{1/3} Γ(4/3) e^{iπ/6}`.
-* `struveTP_Gamma_four_thirds_mul`: `Γ(4/3) Γ(2/3) = 2π/(3√3)`.
-* `struveTP_const_J`, `struveTP_const_E`: the constants in the DLMF form.
-* `struveTP_isEquivalent_of_tendsto`: asymptotic equivalence from a real limit.
+* `TurningPoint.Gamma_four_thirds_mul`: `Γ(4/3) Γ(2/3) = 2π/(3√3)`.
+* `TurningPoint.const_J`, `TurningPoint.const_E`: the constants in the DLMF form.
+* `TurningPoint.isEquivalent_of_tendsto`: asymptotic equivalence from a real limit.
 -/
 
 @[expose] public noncomputable section
@@ -36,7 +36,8 @@ open scoped Real Topology Interval
 namespace DLMF.Struve
 
 /-- `|x - sin x - x³/6| ≤ 3 x⁴` for `x ≥ 0`. -/
-theorem struveTP_sub_sin_bound {x : ℝ} (hx : 0 ≤ x) : |x - Real.sin x - x ^ 3 / 6| ≤ 3 * x ^ 4 := by
+theorem TurningPoint.sub_sin_bound {x : ℝ} (hx : 0 ≤ x) : |x - Real.sin x - x ^ 3 / 6| ≤
+    3 * x ^ 4 := by
   rcases le_or_gt x 1 with h1 | h1
   · have h := Real.sin_bound (x := x) (by rw [abs_of_nonneg hx]; exact h1)
     rw [abs_of_nonneg hx] at h
@@ -52,7 +53,7 @@ theorem struveTP_sub_sin_bound {x : ℝ} (hx : 0 ≤ x) : |x - Real.sin x - x ^ 
     rw [abs_le]; constructor <;> nlinarith [pow_nonneg hx 3]
 
 /-- `(2/π²) x² ≤ 1 - cos x` on `[0, π]`. -/
-theorem struveTP_one_sub_cos_ge {x : ℝ} (hx : 0 ≤ x) (hxπ : x ≤ π) :
+theorem TurningPoint.one_sub_cos_ge {x : ℝ} (hx : 0 ≤ x) (hxπ : x ≤ π) :
     2 / π ^ 2 * x ^ 2 ≤ 1 - Real.cos x := by
   have hc : Real.cos x = 1 - 2 * Real.sin (x / 2) ^ 2 := by
     rw [← Real.cos_two_mul_eq_one_sub]; ring_nf
@@ -68,7 +69,7 @@ theorem struveTP_one_sub_cos_ge {x : ℝ} (hx : 0 ≤ x) (hxπ : x ≤ π) :
 
 /-- The Anger–Weber turning-point integral:
 `ν^{1/3} ∫₀^π e^{iν(θ - sin θ)} dθ → 6^{1/3} Γ(4/3) e^{iπ/6}`. -/
-theorem struveTP_tendsto_integral :
+theorem TurningPoint.tendsto_integral :
     Tendsto (fun ν : ℝ => ((ν ^ (1 / 3 : ℝ) : ℝ) : ℂ) *
         ∫ x in (0 : ℝ)..π, exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I)) atTop
       (𝓝 ((((1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) *
@@ -78,15 +79,15 @@ theorem struveTP_tendsto_integral :
   have hd2 : ∀ x ∈ Icc 0 π, HasDerivAt (fun x => 1 - Real.cos x) (Real.sin x) x :=
     fun x _ => by simpa using (Real.hasDerivAt_cos x).const_sub 1
   have hK : ∀ x ∈ Icc 0 π, |(x - Real.sin x) - 1 / 6 * x ^ 3| ≤ 3 * x ^ 4 := fun x hx => by
-    have := struveTP_sub_sin_bound hx.1
+    have := TurningPoint.sub_sin_bound hx.1
     rwa [show x ^ 3 / 6 = 1 / 6 * x ^ 3 by ring] at this
-  exact Complex.statPh_tendsto_cubic Real.pi_pos (by norm_num) (by positivity) hd1 hd2
+  exact Complex.StationaryPhase.tendsto_cubic Real.pi_pos (by norm_num) (by positivity) hd1 hd2
     Real.continuous_sin.continuousOn
     (fun x hx => Real.sin_nonneg_of_nonneg_of_le_pi hx.1 hx.2)
-    (fun x hx => struveTP_one_sub_cos_ge hx.1 hx.2) hK
+    (fun x hx => TurningPoint.one_sub_cos_ge hx.1 hx.2) hK
 
 /-- `Γ(4/3) Γ(2/3) = 2π/(3√3)`. -/
-theorem struveTP_Gamma_four_thirds_mul :
+theorem TurningPoint.Gamma_four_thirds_mul :
     Real.Gamma (4 / 3) * Real.Gamma (2 / 3) = 2 * π / (3 * Real.sqrt 3) := by
   have h1 : Real.Gamma (4 / 3) = 1 / 3 * Real.Gamma (1 / 3) := by
     rw [show (4 / 3 : ℝ) = 1 / 3 + 1 by norm_num, Real.Gamma_add_one (by norm_num)]
@@ -98,13 +99,14 @@ theorem struveTP_Gamma_four_thirds_mul :
   field_simp
 
 /-- `(1/6)^{-1/3} = 2^{1/3} 3^{1/3}`. -/
-theorem struveTP_sixth_rpow : (1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) = 2 ^ (1 / 3 : ℝ) * 3 ^ (1 / 3 : ℝ) := by
+theorem TurningPoint.sixth_rpow : (1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) = 2 ^ (1 / 3 : ℝ) *
+    3 ^ (1 / 3 : ℝ) := by
   rw [Real.rpow_neg (by norm_num), one_div, Real.inv_rpow (by norm_num), inv_inv,
     show (6 : ℝ) = 2 * 3 by norm_num, Real.mul_rpow (by norm_num) (by norm_num)]
 
 /-- DLMF 11.10.1 at `z = ν` for real `ν`: `𝐉_ν(ν)` as the real part of
 `π⁻¹ ∫₀^π e^{iν(θ - sin θ)} dθ`. -/
-theorem struveTP_angerJ_eq (ν : ℝ) :
+theorem TurningPoint.angerJ_eq (ν : ℝ) :
     angerJ ν ν = (((1 / π) * (∫ x in (0 : ℝ)..π,
       exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I)).re : ℝ) : ℂ) := by
   have hint : IntervalIntegrable (fun x : ℝ => exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I))
@@ -121,7 +123,7 @@ theorem struveTP_angerJ_eq (ν : ℝ) :
 
 /-- DLMF 11.10.2 at `z = ν` for real `ν`: `𝐄_ν(ν)` as the imaginary part of
 `π⁻¹ ∫₀^π e^{iν(θ - sin θ)} dθ`. -/
-theorem struveTP_weberE_eq (ν : ℝ) :
+theorem TurningPoint.weberE_eq (ν : ℝ) :
     weberE ν ν = (((1 / π) * (∫ x in (0 : ℝ)..π,
       exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I)).im : ℝ) : ℂ) := by
   have hint : IntervalIntegrable (fun x : ℝ => exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I))
@@ -138,7 +140,7 @@ theorem struveTP_weberE_eq (ν : ℝ) :
 
 /-- Equivalence from a real limit: if `ν^{1/3} f(ν) → K` (real, `K ≠ 0`) then
 `f(ν) ~ K ν^{-1/3}`, stated for the complex casts used in DLMF 11.11.18–19. -/
-theorem struveTP_isEquivalent_of_tendsto {f : ℝ → ℝ} {K : ℝ} (hK : K ≠ 0)
+theorem TurningPoint.isEquivalent_of_tendsto {f : ℝ → ℝ} {K : ℝ} (hK : K ≠ 0)
     (h : Tendsto (fun ν : ℝ => ν ^ (1 / 3 : ℝ) * f ν) atTop (𝓝 K)) :
     (fun ν : ℝ => (f ν : ℂ)) ~[atTop] (fun ν : ℝ => ((K / ν ^ (1 / 3 : ℝ) : ℝ) : ℂ)) := by
   refine isEquivalent_of_tendsto_one ?_
@@ -155,16 +157,16 @@ theorem struveTP_isEquivalent_of_tendsto {f : ℝ → ℝ} {K : ℝ} (hK : K ≠
   field_simp
 
 /-- `π⁻¹ 6^{1/3} Γ(4/3) cos(π/6) = 2^{1/3}/(3^{2/3} Γ(2/3))`. -/
-theorem struveTP_const_J :
+theorem TurningPoint.const_J :
     1 / π * ((1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.Gamma (4 / 3) * Real.cos (π / 6)) =
       2 ^ (1 / 3 : ℝ) / (3 ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) := by
-  have hG := struveTP_Gamma_four_thirds_mul
+  have hG := TurningPoint.Gamma_four_thirds_mul
   have hG23 : 0 < Real.Gamma (2 / 3) := Real.Gamma_pos_of_pos (by norm_num)
   have h3 : (3 : ℝ) ^ (1 / 3 : ℝ) * 3 ^ (2 / 3 : ℝ) = 3 := by
     rw [← Real.rpow_add (by norm_num)]; norm_num
   have hs : 0 < Real.sqrt 3 := by positivity
   have hss : Real.sqrt 3 * Real.sqrt 3 = 3 := Real.mul_self_sqrt (by norm_num)
-  rw [struveTP_sixth_rpow, Real.cos_pi_div_six,
+  rw [TurningPoint.sixth_rpow, Real.cos_pi_div_six,
     show Real.Gamma (4 / 3) = 2 * π / (3 * Real.sqrt 3) / Real.Gamma (2 / 3) by
       rw [← hG]; field_simp]
   have h23 : 0 < (3 : ℝ) ^ (2 / 3 : ℝ) := by positivity
@@ -172,17 +174,17 @@ theorem struveTP_const_J :
   linear_combination h3
 
 /-- `π⁻¹ 6^{1/3} Γ(4/3) sin(π/6) = 2^{1/3}/(3^{7/6} Γ(2/3))`. -/
-theorem struveTP_const_E :
+theorem TurningPoint.const_E :
     1 / π * ((1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.Gamma (4 / 3) * Real.sin (π / 6)) =
       2 ^ (1 / 3 : ℝ) / (3 ^ (7 / 6 : ℝ) * Real.Gamma (2 / 3)) := by
-  have hG := struveTP_Gamma_four_thirds_mul
+  have hG := TurningPoint.Gamma_four_thirds_mul
   have hG23 : 0 < Real.Gamma (2 / 3) := Real.Gamma_pos_of_pos (by norm_num)
   have h3 : (3 : ℝ) ^ (1 / 3 : ℝ) * 3 ^ (7 / 6 : ℝ) = 3 * Real.sqrt 3 := by
     rw [← Real.rpow_add (by norm_num), Real.sqrt_eq_rpow,
       show (1 / 3 : ℝ) + 7 / 6 = 1 + 1 / 2 by norm_num, Real.rpow_add (by norm_num),
       Real.rpow_one]
   have hs : 0 < Real.sqrt 3 := by positivity
-  rw [struveTP_sixth_rpow, Real.sin_pi_div_six,
+  rw [TurningPoint.sixth_rpow, Real.sin_pi_div_six,
     show Real.Gamma (4 / 3) = 2 * π / (3 * Real.sqrt 3) / Real.Gamma (2 / 3) by
       rw [← hG]; field_simp]
   have h76 : 0 < (3 : ℝ) ^ (7 / 6 : ℝ) := by positivity
@@ -190,7 +192,7 @@ theorem struveTP_const_E :
   linear_combination h3
 
 /-- The DLMF right-hand side `2^{1/3}/(3^a Γ(2/3) ν^{1/3})` as a real cast for `ν > 0`. -/
-theorem struveTP_rhs_eq (a : ℝ) {ν : ℝ} (hν : 0 < ν) :
+theorem TurningPoint.rhs_eq (a : ℝ) {ν : ℝ} (hν : 0 < ν) :
     (2 : ℂ) ^ (1 / 3 : ℂ) / ((3 : ℂ) ^ (a : ℂ) * Gamma (2 / 3) * (ν : ℂ) ^ (1 / 3 : ℂ)) =
       (((2 ^ (1 / 3 : ℝ) / (3 ^ a * Real.Gamma (2 / 3))) / ν ^ (1 / 3 : ℝ) : ℝ) : ℂ) := by
   have e2 : (2 : ℂ) ^ (1 / 3 : ℂ) = ((2 ^ (1 / 3 : ℝ) : ℝ) : ℂ) := by

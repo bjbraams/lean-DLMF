@@ -673,8 +673,9 @@ This upstream gamma-ratio identity is not reproved here. -/
 
 /-- `s₁ + i s₂` of DLMF 12.14.17–18 is the normalized `e^{ζ²/4} ζ^{ia+1/2} U(ia, ζ)` at
 `ζ = x e^{-iπ/4}` (from the connection formula DLMF 12.14.4). -/
-theorem pcfSect_pcfWS_eq (a : ℝ) {x : ℝ} (hx : 0 < x) :
-    pcfWS a x = pcfSect_G (I * a) (exp ((Real.log x : ℂ) + ((-(π/4) : ℝ) : ℂ) * I)) := by
+theorem CylinderSectorAsymptotics.pcfWS_eq (a : ℝ) {x : ℝ} (hx : 0 < x) :
+    pcfWS a x = CylinderSectorAsymptotics.normalizedU (I * a)
+        (exp ((Real.log x : ℂ) + ((-(π/4) : ℝ) : ℂ) * I)) := by
   set v : ℂ := (Real.log x : ℂ) + ((-(π/4) : ℝ) : ℂ) * I
   have hv1 : -π < v.im := by simp [v]; linarith [Real.pi_pos]
   have hv2 : v.im ≤ π := by simp [v]; linarith [Real.pi_pos]
@@ -701,9 +702,9 @@ theorem pcfSect_pcfWS_eq (a : ℝ) {x : ℝ} (hx : 0 < x) :
     rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos hx, Complex.ofReal_exp]; push_cast; ring_nf
   have hW1 := pcfW_connection a x
   have hW2 := pcfW_connection_neg a x
-  rw [hζ, pcfSect_pcfU_exp (I * a) hv1 hv2] at hW1 hW2
+  rw [hζ, CylinderSectorAsymptotics.pcfU_exp (I * a) hv1 hv2] at hW1 hW2
   set P := exp (-exp (2 * v) / 4 - (I * a + 1 / 2) * v)
-  set G := pcfSect_G (I * a) (exp v)
+  set G := CylinderSectorAsymptotics.normalizedU (I * a) (exp v)
   set U2 := pcfU (-I * a) (x * exp (π * I / 4))
   set eA := exp (π * (a:ℂ) / 4)
   set eρ := exp (I * (pcfWRho a : ℂ))
@@ -743,13 +744,15 @@ theorem pcfWS_asymptotic (a : ℝ) (N : ℕ) :
     refine tendsto_id.congr' ?_
     filter_upwards [eventually_gt_atTop 0] with x hx
     simp [Real.exp_log hx]
-  have hS := (pcfSect_tendsto_exp_logWedge (δ := π/4) (by positivity) (-(π/4)) (lo := 0) (hi := 0)
+  have hS := (CylinderSectorAsymptotics.tendsto_exp_logWedge (δ := π/4) (by positivity) (-(π/4))
+      (lo := 0) (hi := 0)
     (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])).comp hT
-  have h := (pcfSect_U_sector (I * a) (δ := π/4) (by positivity) N).comp_tendsto hS
+  have h := (CylinderSectorAsymptotics.U_sector (I * a) (δ := π/4) (by positivity)
+      N).comp_tendsto hS
   refine IsBigO.trans (h.congr' ?_ EventuallyEq.rfl) ?_
   · filter_upwards [eventually_gt_atTop 0] with x hx
     simp only [Function.comp_apply]
-    rw [pcfSect_pcfWS_eq a hx]
+    rw [CylinderSectorAsymptotics.pcfWS_eq a hx]
     congr 1
     refine Finset.sum_congr rfl fun r _ => ?_
     have hsq : (exp ((Real.log x : ℂ) + ((-(π/4) : ℝ) : ℂ) * I)) ^ 2 = -I * (x : ℂ) ^ 2 := by
@@ -759,7 +762,7 @@ theorem pcfWS_asymptotic (a : ℝ) (N : ℕ) :
     have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
     have hII : (-I) ^ r * (-I) ^ r = (-1) ^ r := by rw [← mul_pow]; simp
     have hf : (r.factorial : ℂ) ≠ 0 := by exact_mod_cast r.factorial_ne_zero
-    rw [pcfSect_uTerm, hsq, pcfWCoeff, mul_pow, mul_pow, ← pow_mul, ← hII]
+    rw [CylinderSectorAsymptotics.uTerm, hsq, pcfWCoeff, mul_pow, mul_pow, ← pow_mul, ← hII]
     have hI : (-I) ^ r ≠ 0 := pow_ne_zero _ (neg_ne_zero.mpr I_ne_zero)
     field_simp
   · refine IsBigO.of_bound 1 ?_

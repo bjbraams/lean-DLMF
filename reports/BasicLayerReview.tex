@@ -141,9 +141,10 @@ home, the general analysis (improper integrals, principal values, segment primit
 filters, continued fractions, \lean{asymptoticCoeff}) in \module{DLMFMathlib} in the namespaces
 of the Mathlib APIs it extends, \lean{sphericalJ}, \lean{sphericalI} and \lean{oddProduct} in
 \file{Bessel/Basic.lean} (DLMF \S10.47), and \lean{orderedZero} in AlgebraicAnalytic or
-AsymptoticApproximations. The new namespace policy adds a reason: the declarations of
-\module{DLMF.Core.Basic} live directly in \lean{DLMF} (\lean{DLMF.sphericalJ},
-\lean{DLMF.primitive}), not in \lean{DLMF.<Area>}. The remaining Core modules
+AsymptoticApproximations. The namespace part is resolved later on 2026-11-02:
+\lean{sphericalJ} and \lean{sphericalI} moved to \lean{DLMF.Bessel} in
+\file{Bessel/Basic.lean}, and the remaining declarations of \module{DLMF.Core.Basic} are in
+\lean{DLMF.Core}. The remaining Core modules
 (\module{MathlibCoverage}, \module{Upstream}, \module{UpstreamElementary},
 \module{ZeroCounting}) are not imported by any Basic file.
 
@@ -311,7 +312,9 @@ Appell files in \lean{DLMF.Hypergeometric}; the complex incomplete beta function
 \file{IncompleteGamma/Basic/IncompleteBeta.lean} in \lean{DLMF.Statistical}; and
 \file{Elliptic/Basic/ThetaPeriodicity.lean} in \lean{DLMF.JacobiElliptic}. Each is a
 legitimate choice, but a contribution should either align namespace and directory or state the
-rule. The declarations of \module{DLMF.Core.Basic} sit directly in \lean{DLMF}.
+rule. \emph{Decided later on 2026-11-02:} the Confluent and Hypergeometric namespaces stay, and
+\file{AGENTS.md} states that an area namespace may span several directories; the declarations
+of \module{DLMF.Core.Basic} moved to \lean{DLMF.Core}.
 
 \begin{RaggedRight}
 \resolved{2026-11-02} New foundational bridges: \lean{DLMF.Bessel.besselI\_ofReal} and
@@ -325,8 +328,8 @@ files:
 \begin{itemize}
   \item \lean{DLMF.MatrixArgument.multivariateGamma\_ofReal} (to
     \lean{TauCeti.multivariateGamma}), in \file{MatrixArgument/GammaBeta/GammaIntegrals.lean};
-    its proof only unfolds both definitions, so it can move to
-    \file{MatrixArgument/Basic.lean} as it stands.
+    its proof only unfolds both definitions. \emph{Resolved later on 2026-11-02:} it moved to
+    \file{MatrixArgument/Basic.lean} unchanged, with \lean{multivariateGamma\_one}.
   \item \lean{DLMF.Confluent.lowerIncGamma\_ofReal} (to \lean{TauCeti.lowerIncompleteGamma}) in
     \file{Confluent/IncompleteGamma.lean}, and \lean{normIncGammaP\_ofReal},
     \lean{normIncGammaQ\_ofReal} (to \lean{TauCeti.regularizedGamma}) in
@@ -363,7 +366,7 @@ files:
   \item Definitions by choice. \open{} Mathieu, Lam\'e and spheroidal characteristic values
     and functions are defined by choice from spectral data. Their existence theorems are in
     the theorem layer: \lean{mathieuSpecA\_exists}, \lean{mathieuSpecB\_exists},
-    \lean{mathieuA\_spec} and \lean{mathieuB\_spec} in \module{DLMF.Mathieu.SpectralExistence},
+    \lean{mathieuA\_spec} and \lean{mathieuB\_spec} in \module{DLMF.Mathieu.Basic.SpectralExistence},
     which is fully proved and has no theorem module below it, so it can move to
     \file{Mathieu/Basic} unchanged; \lean{exists\_spheroidalEigenvalue} and
     \lean{existsUnique\_isSpheroidalPsFactor} in \module{DLMF.Spheroidal.Existence} (four
@@ -458,7 +461,7 @@ import closure, and of lean-codes modules, is:
 \begin{itemize}
   \item shallow (proved results that can move almost unchanged):
     \begin{itemize}
-      \item \module{DLMF.Mathieu.SpectralExistence}: 0 theorem modules, 0 lean-codes modules;
+      \item \module{DLMF.Mathieu.Basic.SpectralExistence}: 0 theorem modules, 0 lean-codes modules;
       \item \module{DLMF.Weierstrass.EllipticFunctionsAndInvariants}: 0 and 0 (6 proved);
       \item \module{DLMF.RiemannTheta.Scaled} and \module{Characteristics}: 0--1 and 0;
       \item \module{DLMF.QSeries.Pochhammer}, \module{QBinomial}, \module{Saalschutz},
@@ -515,7 +518,7 @@ or the Carlson-based Hypergeometric files) for a few lemmas.
   \item \resolved{2026-11-01} Properties go in files below \file{Basic/}, for example
     \file{Airy/Basic/Properties.lean}, and the survey covers them.
   \item \open{} Move the shallow cases above, starting with
-    \module{DLMF.Mathieu.SpectralExistence} (which also answers the reviewer's question about
+    \module{DLMF.Mathieu.Basic.SpectralExistence} (which also answers the reviewer's question about
     definitions by choice) and \module{DLMF.Weierstrass.EllipticFunctionsAndInvariants}.
   \item \open{} For the deep cases, prove the key properties again from the Basic definitions
     instead of moving the existing proofs, as was done for Airy, Bessel, Gauss and Kummer. The
@@ -536,10 +539,10 @@ families; Lambert \(W\) and the \({}_{q+1}F_q\) continuation in the foundational
 Gamma namespace move and the Bessel \(I\) bridge. What remains, in order:
 
 \begin{enumerate}
-  \item Shallow moves, one build: \module{DLMF.Mathieu.SpectralExistence},
+  \item Shallow moves, one build: \module{DLMF.Mathieu.Basic.SpectralExistence},
     \module{DLMF.Weierstrass.EllipticFunctionsAndInvariants}, the proved \S\(n\).2 results of
-    the shallow QSeries, RiemannTheta, OrthogonalPolynomials and Zeta modules, and
-    \lean{multivariateGamma\_ofReal}.
+    the shallow QSeries, RiemannTheta, OrthogonalPolynomials and Zeta modules
+    (\lean{multivariateGamma\_ofReal} is done).
   \item The remaining central definitions of \S\ref{sec:definitions}, moved unchanged where
     the body allows (\lean{qFactorial}, \lean{qBeta}, \lean{bernoulliChar},
     \lean{IsBaileyPair}, \lean{riemannOperator}, \lean{genNormalizedODE}), and new bridges

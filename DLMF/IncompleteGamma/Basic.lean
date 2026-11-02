@@ -33,6 +33,8 @@ The continued incomplete Beta functions `incBeta` and `normIncBetaI` (DLMF §8.1
 open Complex DLMF.Statistical DLMF
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Upper incomplete Gamma on the logarithmic plane, also at integral a. -/

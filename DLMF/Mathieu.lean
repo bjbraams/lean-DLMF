@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.Mathieu.SpectralExistence
+public import DLMF.Mathieu.Basic.SpectralExistence
 public import DLMF.Mathieu.Basic.ContinuedFractions
 public import DLMF.Mathieu.Properties
 public import DLMF.Mathieu.FourierSeries
@@ -45,6 +45,8 @@ public import DLMF.Mathieu.SmallQGeneral
 public import DLMF.Mathieu.SmallQVector
 public import DLMF.Mathieu.SmallQCeSe
 public import DLMF.Mathieu.SmallQCeSeGeneral
+public import DLMF.Mathieu.ContinuedFractionTails
+public import DLMF.Mathieu.SmallQContinuedFractions
 
 /-!
 # Mathieu functions and Hill's equation (DLMF Chapter 28)

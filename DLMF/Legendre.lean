@@ -15,6 +15,7 @@ public import DLMF.Legendre.IntegralTools
 public import DLMF.Legendre.BoundaryAsymptotics
 public import DLMF.Legendre.Integrals
 public import DLMF.Legendre.SeriesTools
+public import DLMF.Legendre.FourierEstimates
 public import DLMF.Legendre.Series
 public import DLMF.Legendre.Singularities
 public import DLMF.Legendre.IntegerTheory
@@ -42,6 +43,7 @@ public import DLMF.Legendre.SecondKind
 public import DLMF.Legendre.MathlibCoverage
 public import DLMF.Legendre.ZeroTools
 public import DLMF.Legendre.ZeroCounts
+public import DLMF.Legendre.FourierCoefficients
 public import DLMF.Legendre.AdditionTools
 public import DLMF.Legendre.QAdditionTools
 public import DLMF.Legendre.FourierTools

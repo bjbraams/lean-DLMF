@@ -17,8 +17,8 @@ finite Kummer–Bessel expansion and for zero-free regions of parabolic type.
 ## Main definitions
 
 * `kummerBesselCoeff`: the entire coefficient of the normalized finite Kummer–Bessel expansion.
-* `parab_A`: the real coefficients `(a)_k / ((c)_k k!)` of Kummer's series.
-* `parab_b`: the ratio of consecutive coefficients `parab_A`.
+* `SaffVarga.kummerCoeff`: the real coefficients `(a)_k / ((c)_k k!)` of Kummer's series.
+* `SaffVarga.kummerCoeffRatio`: the ratio of consecutive coefficients `SaffVarga.kummerCoeff`.
 -/
 
 @[expose] public noncomputable section
@@ -35,10 +35,10 @@ noncomputable def kummerBesselCoeff (ν : ℂ) (n k : ℕ) : ℂ :=
     (1 / Gamma (2 * ν + 1 + n + k))
 /-- The ratio `b (k+1) = A k / A (k+1) = (k+1)(c+k)/(a+k)` of consecutive coefficients of
 Kummer's series. -/
-noncomputable def parab_b (a c : ℝ) (k : ℕ) : ℝ := k * (c + k - 1) / (a + k - 1)
+noncomputable def SaffVarga.kummerCoeffRatio (a c : ℝ) (k : ℕ) : ℝ := k * (c + k - 1) / (a + k - 1)
 
 /-- The real coefficients `(a)_k / ((c)_k k!)` of Kummer's series. -/
-noncomputable def parab_A (a c : ℝ) (k : ℕ) : ℝ :=
+noncomputable def SaffVarga.kummerCoeff (a c : ℝ) (k : ℕ) : ℝ :=
   (ascPochhammer ℝ k).eval a / ((ascPochhammer ℝ k).eval c * k !)
 
 end DLMF.Confluent

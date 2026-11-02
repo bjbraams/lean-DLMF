@@ -67,6 +67,8 @@ DLMF 8.12.18 is for bounded transition variable `χ` and closed right-half-plane
 @[expose] public noncomputable section
 open Topology Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat ENNReal
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 open DLMF.Statistical
@@ -90,7 +92,7 @@ def gammaUniformEtaOnLog (w : ℂ) : ℂ :=
 
 /-- Real core of the zero-free strip: `e^x sin u = u`, `e^x cos u = 1+x` has no solution with
 `0 < u < 2π`. -/
-lemma incG_no_root_aux {x u : ℝ} (hu0 : 0 < u) (hu : u < 2*π)
+lemma IncompleteGammaUniform.no_real_root_of_strip {x u : ℝ} (hu0 : 0 < u) (hu : u < 2*π)
     (hs : Real.exp x * Real.sin u = u) (hc : Real.exp x * Real.cos u = 1+x) : False := by
   have hex := Real.exp_pos x
   by_cases hπ : π ≤ u
@@ -119,7 +121,7 @@ lemma incG_no_root_aux {x u : ℝ} (hu0 : 0 < u) (hu : u < 2*π)
   nlinarith
 
 /-- `e^w = 1 + w` has no nonzero root in the strip `|Im w| < 2π`. -/
-theorem incG_exp_sub_one_sub_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
+theorem IncompleteGammaUniform.exp_sub_one_sub_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     exp w - 1 - w ≠ 0 := by
   intro h
   have hre := congrArg Complex.re h
@@ -127,7 +129,8 @@ theorem incG_exp_sub_one_sub_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠
   simp only [sub_re, sub_im, Complex.exp_re, Complex.exp_im, one_re, one_im, zero_re,
       zero_im] at hre him
   rcases lt_trichotomy w.im 0 with hy | hy | hy
-  · refine incG_no_root_aux (x := w.re) (u := -w.im) (by linarith) (by rw [abs_lt] at hw; linarith)
+  · refine IncompleteGammaUniform.no_real_root_of_strip (x := w.re) (u := -w.im) (by linarith)
+        (by rw [abs_lt] at hw; linarith)
       ?_ ?_
     · rw [Real.sin_neg]; linarith
     · rw [Real.cos_neg]; linarith
@@ -135,11 +138,12 @@ theorem incG_exp_sub_one_sub_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠
     rw [hy, Real.cos_zero, mul_one] at hre
     have := Real.add_one_lt_exp hx
     linarith
-  · exact incG_no_root_aux (x := w.re) (u := w.im) hy (by rw [abs_lt] at hw; linarith)
+  · exact IncompleteGammaUniform.no_real_root_of_strip (x := w.re) (u := w.im) hy
+        (by rw [abs_lt] at hw; linarith)
       (by linarith) (by linarith)
 
 /-- `(e^w-1-w)/w² → 1/2` as `w → 0`. -/
-theorem incG_tendsto_etaQuot :
+theorem IncompleteGammaUniform.tendsto_etaQuot :
     Tendsto (fun w : ℂ => (exp w - 1 - w)/w^2) (𝓝[≠] 0) (𝓝 (1/2)) := by
   rw [tendsto_iff_norm_sub_tendsto_zero]
   refine squeeze_zero' (Eventually.of_forall fun _ => norm_nonneg _) ?_
@@ -160,7 +164,7 @@ theorem incG_tendsto_etaQuot :
     _ ≤ ‖w‖ * ‖w‖^2 := by nlinarith [norm_nonneg w]
 
 /-- The factor `2(e^w-1-w)/w²`, filled in by `1` at the origin, is entire. -/
-theorem incG_gammaEtaFactor_differentiable : Differentiable ℂ gammaEtaFactor := by
+theorem IncompleteGammaUniform.gammaEtaFactor_differentiable : Differentiable ℂ gammaEtaFactor := by
   have hne : ∀ w : ℂ, w ≠ 0 → gammaEtaFactor =ᶠ[𝓝 w] fun v => 2*(exp v-1-v)/v^2 := by
     intro w hw
     filter_upwards [isOpen_compl_singleton.mem_nhds hw] with v hv
@@ -175,7 +179,7 @@ theorem incG_gammaEtaFactor_differentiable : Differentiable ℂ gammaEtaFactor :
   · subst hw
     have hc : ContinuousAt gammaEtaFactor 0 := by
       rw [← continuousWithinAt_compl_self, ContinuousWithinAt]
-      have h := incG_tendsto_etaQuot.const_mul (2:ℂ)
+      have h := IncompleteGammaUniform.tendsto_etaQuot.const_mul (2:ℂ)
       rw [show (2:ℂ)*(1/2) = gammaEtaFactor 0 by simp [gammaEtaFactor]] at h
       refine h.congr' ?_
       filter_upwards [self_mem_nhdsWithin] with v hv
@@ -185,16 +189,17 @@ theorem incG_gammaEtaFactor_differentiable : Differentiable ℂ gammaEtaFactor :
   · exact hd w hw
 
 /-- The strip `|Im w| < 2π`. -/
-def incG_strip : Set ℂ := {w : ℂ | |w.im| < 2*π}
+def IncompleteGammaUniform.strip : Set ℂ := {w : ℂ | |w.im| < 2*π}
 
-/-- The indicated domain is open: `IsOpen incG_strip`. -/
-theorem incG_strip_isOpen : IsOpen incG_strip :=
+/-- The indicated domain is open: `IsOpen IncompleteGammaUniform.strip`. -/
+theorem IncompleteGammaUniform.strip_isOpen : IsOpen IncompleteGammaUniform.strip :=
   isOpen_lt (continuous_abs.comp continuous_im) continuous_const
 
-/-- The stated relation follows from the given hypotheses: `Convex ℝ incG_strip`. -/
-theorem incG_strip_convex : Convex ℝ incG_strip := by
+/-- The stated relation follows from the given hypotheses: `Convex ℝ IncompleteGammaUniform.strip`.
+-/
+theorem IncompleteGammaUniform.strip_convex : Convex ℝ IncompleteGammaUniform.strip := by
   intro u hu v hv a b ha hb hab
-  simp only [incG_strip, Set.mem_ofPred_eq] at *
+  simp only [IncompleteGammaUniform.strip, Set.mem_ofPred_eq] at *
   have : (a • u + b • v).im = a*u.im + b*v.im := by simp
   rw [this]
   calc |a*u.im + b*v.im| ≤ a*|u.im| + b*|v.im| := by
@@ -208,54 +213,61 @@ theorem incG_strip_convex : Convex ℝ incG_strip := by
           have hs : a*(2*π)+b*(2*π) = 2*π := by rw [← add_mul, hab, one_mul]
           linarith
 
-/-- Formula under the stated hypotheses: `(0:ℂ) ∈ incG_strip`. -/
-theorem incG_zero_mem_strip : (0:ℂ) ∈ incG_strip := by simp [incG_strip, Real.pi_pos]
+/-- Formula under the stated hypotheses: `(0:ℂ) ∈ IncompleteGammaUniform.strip`. -/
+theorem IncompleteGammaUniform.zero_mem_strip : (0:ℂ) ∈ IncompleteGammaUniform.strip := by
+    simp [IncompleteGammaUniform.strip, Real.pi_pos]
 
 /-- Nonvanishing under the stated hypotheses: `gammaEtaFactor w ≠ 0`. -/
-theorem incG_gammaEtaFactor_ne_zero {w : ℂ} (hw : w ∈ incG_strip) : gammaEtaFactor w ≠ 0 := by
+theorem IncompleteGammaUniform.gammaEtaFactor_ne_zero {w : ℂ}
+    (hw : w ∈ IncompleteGammaUniform.strip) : gammaEtaFactor w ≠ 0 := by
   by_cases h0 : w = 0
   · simp [gammaEtaFactor, h0]
   · simp only [gammaEtaFactor, h0, ↓reduceIte]
-    exact div_ne_zero (mul_ne_zero two_ne_zero (incG_exp_sub_one_sub_ne_zero hw h0))
+    exact div_ne_zero (mul_ne_zero two_ne_zero
+        (IncompleteGammaUniform.exp_sub_one_sub_ne_zero hw h0))
       (pow_ne_zero 2 h0)
 
 /-- The logarithmic derivative of the factor is holomorphic on the strip. -/
-theorem incG_logDeriv_differentiableOn :
-    DifferentiableOn ℂ (fun t => deriv gammaEtaFactor t/gammaEtaFactor t) incG_strip := by
-  have hd := incG_gammaEtaFactor_differentiable
+theorem IncompleteGammaUniform.logDeriv_differentiableOn :
+    DifferentiableOn ℂ (fun t => deriv gammaEtaFactor t/gammaEtaFactor t)
+        IncompleteGammaUniform.strip := by
+  have hd := IncompleteGammaUniform.gammaEtaFactor_differentiable
   have hdd : Differentiable ℂ (deriv gammaEtaFactor) := fun w =>
     ((hd.differentiableOn.analyticOnNhd isOpen_univ).deriv w (mem_univ w)).differentiableAt
-  exact (hdd.differentiableOn).div hd.differentiableOn fun w hw => incG_gammaEtaFactor_ne_zero hw
+  exact (hdd.differentiableOn).div hd.differentiableOn fun w hw =>
+      IncompleteGammaUniform.gammaEtaFactor_ne_zero hw
 
 /-- The primitive in the definition of η has the expected derivative on the strip. -/
-theorem incG_hasDerivAt_etaPrimitive {w : ℂ} (hw : w ∈ incG_strip) :
+theorem IncompleteGammaUniform.hasDerivAt_etaPrimitive {w : ℂ}
+    (hw : w ∈ IncompleteGammaUniform.strip) :
     HasDerivAt (primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t))
       (deriv gammaEtaFactor w/gammaEtaFactor w) w := by
   have he : primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t) =
       fun v => v * ∫ t in (0:ℝ)..1, (fun t => deriv gammaEtaFactor t/gammaEtaFactor t) (t*v) := by
     funext v; simp [primitive, segmentIntegral]
   rw [he]
-  exact Complex.starPrim_hasDerivAt incG_strip_isOpen
-      (incG_strip_convex.starConvex incG_zero_mem_strip)
-    incG_logDeriv_differentiableOn hw
+  exact Complex.starPrim_hasDerivAt IncompleteGammaUniform.strip_isOpen
+      (IncompleteGammaUniform.strip_convex.starConvex IncompleteGammaUniform.zero_mem_strip)
+    IncompleteGammaUniform.logDeriv_differentiableOn hw
 
 /-- `exp` of the primitive of the logarithmic derivative recovers the factor on the strip. -/
-theorem incG_exp_etaPrimitive {w : ℂ} (hw : w ∈ incG_strip) :
+theorem IncompleteGammaUniform.exp_etaPrimitive {w : ℂ} (hw : w ∈ IncompleteGammaUniform.strip) :
     exp (primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t) w) = gammaEtaFactor w := by
   set P := primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t)
   set f := gammaEtaFactor
-  have hf := incG_gammaEtaFactor_differentiable
-  have hD : ∀ v ∈ incG_strip, HasDerivAt (fun v => f v * exp (-P v)) 0 v := by
+  have hf := IncompleteGammaUniform.gammaEtaFactor_differentiable
+  have hD : ∀ v ∈ IncompleteGammaUniform.strip, HasDerivAt (fun v => f v * exp (-P v)) 0 v := by
     intro v hv
     have h1 := (hf v).hasDerivAt
-    have h2 := ((incG_hasDerivAt_etaPrimitive hv).neg).cexp
+    have h2 := ((IncompleteGammaUniform.hasDerivAt_etaPrimitive hv).neg).cexp
     have := h1.mul h2
     convert this using 1
-    have := incG_gammaEtaFactor_ne_zero hv
+    have := IncompleteGammaUniform.gammaEtaFactor_ne_zero hv
     field_simp; ring
-  have hc := incG_strip_isOpen.is_const_of_deriv_eq_zero (incG_strip_convex.isPreconnected)
+  have hc := IncompleteGammaUniform.strip_isOpen.is_const_of_deriv_eq_zero
+      (IncompleteGammaUniform.strip_convex.isPreconnected)
     (fun v hv => (hD v hv).differentiableAt.differentiableWithinAt)
-    (fun v hv => (hD v hv).deriv) hw incG_zero_mem_strip
+    (fun v hv => (hD v hv).deriv) hw IncompleteGammaUniform.zero_mem_strip
   simp only [P, primitive_zero, neg_zero, Complex.exp_zero, mul_one] at hc
   have h0 : f 0 = 1 := by simp [f, gammaEtaFactor]
   rw [h0] at hc
@@ -266,9 +278,9 @@ theorem incG_exp_etaPrimitive {w : ℂ} (hw : w ∈ incG_strip) :
 
 /-- Identity under the stated parameter and domain assumptions: `gammaUniformEtaOnLog w^2/2=exp
 w-1-w`. -/
-theorem incG_gammaUniformEta_sq {w : ℂ} (hw : |w.im| < 2*π) :
+theorem IncompleteGammaUniform.gammaUniformEta_sq {w : ℂ} (hw : |w.im| < 2*π) :
     gammaUniformEtaOnLog w^2/2=exp w-1-w := by
-  have he := incG_exp_etaPrimitive (w := w) hw
+  have he := IncompleteGammaUniform.exp_etaPrimitive (w := w) hw
   unfold gammaUniformEtaOnLog
   rw [mul_pow, ← Complex.exp_nat_mul, show ((2:ℕ):ℂ) *
       (primitive (fun t => deriv gammaEtaFactor t / gammaEtaFactor t) w / 2) =
@@ -280,10 +292,10 @@ theorem incG_gammaUniformEta_sq {w : ℂ} (hw : |w.im| < 2*π) :
 
 /-- Derivative formula at the specified argument: `HasDerivAt gammaUniformEtaOnLog 1 0 ∧
 gammaUniformEtaOnLog 0=0`. -/
-theorem incG_gammaUniformEta_normalization :
+theorem IncompleteGammaUniform.gammaUniformEta_normalization :
     HasDerivAt gammaUniformEtaOnLog 1 0 ∧ gammaUniformEtaOnLog 0=0 := by
   refine ⟨?_, by simp [gammaUniformEtaOnLog]⟩
-  have hP := incG_hasDerivAt_etaPrimitive incG_zero_mem_strip
+  have hP := IncompleteGammaUniform.hasDerivAt_etaPrimitive IncompleteGammaUniform.zero_mem_strip
   have h := (hasDerivAt_id (0:ℂ)).mul ((hP.div_const 2).cexp)
   have e : gammaUniformEtaOnLog = fun w => id w *
       exp (primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t) w/2) := rfl
@@ -293,10 +305,11 @@ theorem incG_gammaUniformEta_normalization :
 
 /-- At `w`, the function `gammaUniformEtaOnLog` has derivative `((exp w-1)/gammaUniformEtaOnLog
 w)`. -/
-theorem incG_gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
+theorem IncompleteGammaUniform.gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π)
+    (hw0 : w ≠ 0) :
     HasDerivAt gammaUniformEtaOnLog ((exp w-1)/gammaUniformEtaOnLog w) w := by
-  have hws : w ∈ incG_strip := hw
-  have hP := incG_hasDerivAt_etaPrimitive hws
+  have hws : w ∈ IncompleteGammaUniform.strip := hw
+  have hP := IncompleteGammaUniform.hasDerivAt_etaPrimitive hws
   have h := (hasDerivAt_id w).mul ((hP.div_const 2).cexp)
   have e : gammaUniformEtaOnLog = fun w => id w *
       exp (primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t) w/2) := rfl
@@ -312,15 +325,15 @@ theorem incG_gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w 
       have := (((Complex.hasDerivAt_exp w).sub_const 1).sub (hasDerivAt_id w)).const_mul (2:ℂ)
       simpa using this
     refine h2.congr_of_eventuallyEq ?_
-    filter_upwards [incG_strip_isOpen.mem_nhds hws] with v hv
-    have := incG_gammaUniformEta_sq (w := v) hv
+    filter_upwards [IncompleteGammaUniform.strip_isOpen.mem_nhds hws] with v hv
+    have := IncompleteGammaUniform.gammaUniformEta_sq (w := v) hv
     linear_combination 2*this
   have huniq := hsq.unique hsq'
   have hη0 : gammaUniformEtaOnLog w ≠ 0 := by
     intro h0
-    have := incG_gammaUniformEta_sq hw
+    have := IncompleteGammaUniform.gammaUniformEta_sq hw
     rw [h0] at this
-    exact incG_exp_sub_one_sub_ne_zero hw hw0 (by rw [← this]; ring)
+    exact IncompleteGammaUniform.exp_sub_one_sub_ne_zero hw hw0 (by rw [← this]; ring)
   have : d = (exp w-1)/gammaUniformEtaOnLog w := by
     field_simp
     linear_combination huniq/2
@@ -331,21 +344,21 @@ w-1-w`. -/
 @[dlmf 8.12.E2]
 theorem gammaUniformEta_equation {w : ℂ} (hw : |w.im| < 2*π) :
     gammaUniformEtaOnLog w^2/2=exp w-1-w :=
-  incG_gammaUniformEta_sq hw
+  IncompleteGammaUniform.gammaUniformEta_sq hw
 
 /-- At `w`, the function `gammaUniformEtaOnLog` has derivative `((exp w-1)/gammaUniformEtaOnLog
 w)`. -/
 @[dlmf 8.12.E2]
 theorem gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     HasDerivAt gammaUniformEtaOnLog ((exp w-1)/gammaUniformEtaOnLog w) w :=
-  incG_gammaUniformEta_derivative hw hw0
+  IncompleteGammaUniform.gammaUniformEta_derivative hw hw0
 
 /-- Derivative formula at the specified argument: `HasDerivAt gammaUniformEtaOnLog 1 0 ∧
 gammaUniformEtaOnLog 0=0`. -/
 @[dlmf 8.12.E1]
 theorem gammaUniformEta_normalization  :
     HasDerivAt gammaUniformEtaOnLog 1 0 ∧ gammaUniformEtaOnLog 0=0 :=
-  incG_gammaUniformEta_normalization
+  IncompleteGammaUniform.gammaUniformEta_normalization
 
 /-- The exact S remainder, with w the logarithm of λ. -/
 @[dlmf 8.12.E4]
@@ -496,7 +509,7 @@ def gammaUniformC : ℕ → ℂ → ℂ
     else deriv (gammaUniformC k) w/(exp w-1)+(-1 : ℂ)^(k+1)*gammaStirlingCoeff (k+1)/(exp w-1)
 
 /-- On the positive axis the scaled Gamma function is `exp` of Binet's integral. -/
-theorem incG_gammaScaled_ofReal {t : ℝ} (ht : 0 < t) :
+theorem IncompleteGammaUniform.gammaScaled_ofReal {t : ℝ} (ht : 0 < t) :
     gammaScaled t = ((Real.exp (DLMF.Gamma.binetIntegral t) : ℝ) : ℂ) := by
   have hG : Real.Gamma t = (2*π)^(1/2:ℝ) * Real.exp ((t-1/2)*Real.log t - t) *
       Real.exp (DLMF.Gamma.binetIntegral t) := by
@@ -515,7 +528,7 @@ theorem incG_gammaScaled_ofReal {t : ℝ} (ht : 0 < t) :
   field_simp
 
 /-- The map `DLMF.Gamma.binetIntegral` tends to `(𝓝 0)` along `atTop`. -/
-theorem incG_tendsto_binetIntegral :
+theorem IncompleteGammaUniform.tendsto_binetIntegral :
     Tendsto DLMF.Gamma.binetIntegral atTop (𝓝 0) := by
   have hu : Tendsto (fun t : ℝ => 1/(12*t)) atTop (𝓝 0) := by
     exact tendsto_const_nhds.div_atTop (tendsto_id.const_mul_atTop (by norm_num : (0:ℝ) < 12))
@@ -524,7 +537,7 @@ theorem incG_tendsto_binetIntegral :
   · filter_upwards [eventually_gt_atTop 0] with t ht using (DLMF.Gamma.binetIntegral_mem ht).2
 
 /-- The map `(fun t : ℝ => t * DLMF.Gamma.binetIntegral t)` tends to `(𝓝 (1/12))` along `atTop`. -/
-theorem incG_tendsto_mul_binetIntegral :
+theorem IncompleteGammaUniform.tendsto_mul_binetIntegral :
     Tendsto (fun t : ℝ => t * DLMF.Gamma.binetIntegral t) atTop (𝓝 (1/12)) := by
   have h := DLMF.Gamma.hasAsymptoticExpansion_binetIntegral 1
   simp only [Finset.range_one, Finset.sum_singleton, CharP.cast_eq_zero, zero_add, smul_eq_mul,
@@ -550,7 +563,7 @@ theorem incG_tendsto_mul_binetIntegral :
 
 /-- The map `(fun t : ℝ => t * (Real.exp (DLMF.Gamma.binetIntegral t) - 1))` tends to `(𝓝 (1/12))`
 along `atTop`. -/
-theorem incG_tendsto_mul_exp_binet_sub_one :
+theorem IncompleteGammaUniform.tendsto_mul_exp_binet_sub_one :
     Tendsto (fun t : ℝ => t * (Real.exp (DLMF.Gamma.binetIntegral t) - 1)) atTop (𝓝 (1/12)) := by
   have hr : Tendsto (fun t : ℝ => t * (Real.exp (DLMF.Gamma.binetIntegral t) - 1 -
       DLMF.Gamma.binetIntegral t)) atTop (𝓝 0) := by
@@ -571,38 +584,39 @@ theorem incG_tendsto_mul_exp_binet_sub_one :
     calc t * |Real.exp (DLMF.Gamma.binetIntegral t) - 1 - DLMF.Gamma.binetIntegral t|
         ≤ t * (1/(12*t))^2 := mul_le_mul_of_nonneg_left (hq.trans hsq) ht0.le
       _ = 1/(144*t) := by field_simp; ring
-  have := hr.add incG_tendsto_mul_binetIntegral
+  have := hr.add IncompleteGammaUniform.tendsto_mul_binetIntegral
   rw [zero_add] at this
   exact this.congr fun t => by ring
 
 /-- `g₀ = 1`. -/
-theorem incG_gammaStirlingCoeff_zero : gammaStirlingCoeff 0 = 1 := by
+theorem IncompleteGammaUniform.gammaStirlingCoeff_zero : gammaStirlingCoeff 0 = 1 := by
   rw [gammaStirlingCoeff, asymptoticCoeff]
   refine Tendsto.limUnder_eq ?_
   have h1 : Tendsto (fun t => Real.exp (DLMF.Gamma.binetIntegral t)) atTop (𝓝 1) := by
-    have := (Real.continuous_exp.tendsto 0).comp incG_tendsto_binetIntegral
+    have := (Real.continuous_exp.tendsto 0).comp IncompleteGammaUniform.tendsto_binetIntegral
     rwa [Real.exp_zero] at this
   have h := (continuous_ofReal.tendsto 1).comp h1
   simp only [ofReal_one] at h
   refine h.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with t ht
-  simp [incG_gammaScaled_ofReal ht]
+  simp [IncompleteGammaUniform.gammaScaled_ofReal ht]
 
 /-- `g₁ = 1/12`. -/
-theorem incG_gammaStirlingCoeff_one : gammaStirlingCoeff 1 = 1/12 := by
-  have h0 := incG_gammaStirlingCoeff_zero
+theorem IncompleteGammaUniform.gammaStirlingCoeff_one : gammaStirlingCoeff 1 = 1/12 := by
+  have h0 := IncompleteGammaUniform.gammaStirlingCoeff_zero
   rw [gammaStirlingCoeff] at h0 ⊢
   rw [asymptoticCoeff]
   simp only [Finset.range_one, Finset.sum_singleton, Nat.sub_zero, h0, CharP.cast_eq_zero,
     neg_zero, zpow_zero, mul_one, zero_add, pow_one]
   refine Tendsto.limUnder_eq ?_
-  have h := (continuous_ofReal.tendsto _).comp incG_tendsto_mul_exp_binet_sub_one
+  have h := (continuous_ofReal.tendsto _).comp IncompleteGammaUniform.tendsto_mul_exp_binet_sub_one
   refine (by simpa using h : Tendsto _ _ (𝓝 ((1:ℂ)/12))).congr' ?_
   filter_upwards [eventually_gt_atTop 0] with t ht
-  simp [incG_gammaScaled_ofReal ht]
+  simp [IncompleteGammaUniform.gammaScaled_ofReal ht]
 
 /-- `e^w ≠ 1` on the punctured strip `0 < |Im w| < 2π` or real `w ≠ 0`. -/
-theorem incG_exp_sub_one_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) : exp w - 1 ≠ 0 := by
+theorem IncompleteGammaUniform.exp_sub_one_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) : exp
+    w - 1 ≠ 0 := by
   intro h
   obtain ⟨n, hn⟩ := Complex.exp_eq_one_iff.mp (sub_eq_zero.mp h)
   have him : w.im = n*(2*π) := by rw [hn]; simp
@@ -614,25 +628,25 @@ theorem incG_exp_sub_one_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) 
   exact hw0 (by rw [hn, hn0]; simp)
 
 /-- η does not vanish on the punctured strip. -/
-theorem incG_gammaUniformEta_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
+theorem IncompleteGammaUniform.gammaUniformEta_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     gammaUniformEtaOnLog w ≠ 0 := by
   intro h0
   have := gammaUniformEta_equation hw
   rw [h0] at this
-  exact incG_exp_sub_one_sub_ne_zero hw hw0 (by rw [← this]; ring)
+  exact IncompleteGammaUniform.exp_sub_one_sub_ne_zero hw hw0 (by rw [← this]; ring)
 
 /-- Identity under the stated parameter and domain assumptions: `gammaUniformC 0 w=1/(exp
 w-1)-1/gammaUniformEtaOnLog w ∧ gammaUniformC 1 w=1/gammaUniformEtaOnLog w^3-1/(exp
 w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1))`. -/
-theorem incG_gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
+theorem IncompleteGammaUniform.gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     gammaUniformC 0 w=1/(exp w-1)-1/gammaUniformEtaOnLog w ∧
         gammaUniformC 1 w=1/gammaUniformEtaOnLog
         w^3-1/(exp w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1)) := by
   have h0 : ∀ v : ℂ, v ≠ 0 → gammaUniformC 0 v = 1/(exp v-1)-1/gammaUniformEtaOnLog v := by
     intro v hv; simp [gammaUniformC, hv]
   refine ⟨h0 w hw0, ?_⟩
-  have hE := incG_exp_sub_one_ne_zero hw hw0
-  have hη := incG_gammaUniformEta_ne_zero hw hw0
+  have hE := IncompleteGammaUniform.exp_sub_one_ne_zero hw hw0
+  have hη := IncompleteGammaUniform.gammaUniformEta_ne_zero hw hw0
   have hD : HasDerivAt (gammaUniformC 0)
       (-exp w/(exp w-1)^2 + ((exp w-1)/gammaUniformEtaOnLog w)/gammaUniformEtaOnLog w^2) w := by
     have h1 : HasDerivAt (fun v => 1/(exp v-1)) (-exp w/(exp w-1)^2) w := by
@@ -648,7 +662,7 @@ theorem incG_gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) 
     exact h0 v hv
   rw [show (1:ℕ) = 0+1 from rfl, gammaUniformC]
   simp only [hw0, ↓reduceIte]
-  rw [hD.deriv, incG_gammaStirlingCoeff_one]
+  rw [hD.deriv, IncompleteGammaUniform.gammaStirlingCoeff_one]
   field_simp
   ring
 
@@ -659,13 +673,14 @@ w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1))`. -/
 theorem gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     gammaUniformC 0 w=1/(exp w-1)-1/gammaUniformEtaOnLog w ∧
         gammaUniformC 1 w=1/gammaUniformEtaOnLog w^3-1/(exp w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1)) :=
-  incG_gammaUniformC_first hw hw0
+  IncompleteGammaUniform.gammaUniformC_first hw hw0
 
 /-- The normalized η coordinate is holomorphic throughout the zero-free strip. -/
-theorem incG_gammaUniformEta_analyticOnNhd :
-    AnalyticOnNhd ℂ gammaUniformEtaOnLog incG_strip := by
-  refine (show DifferentiableOn ℂ gammaUniformEtaOnLog incG_strip from ?_).analyticOnNhd
-    incG_strip_isOpen
+theorem IncompleteGammaUniform.gammaUniformEta_analyticOnNhd :
+    AnalyticOnNhd ℂ gammaUniformEtaOnLog IncompleteGammaUniform.strip := by
+  refine (show DifferentiableOn ℂ gammaUniformEtaOnLog IncompleteGammaUniform.strip
+      from ?_).analyticOnNhd
+    IncompleteGammaUniform.strip_isOpen
   intro w hw
   by_cases hw0 : w = 0
   · subst w
@@ -673,23 +688,26 @@ theorem incG_gammaUniformEta_analyticOnNhd :
   · exact (gammaUniformEta_derivative hw hw0).differentiableAt.differentiableWithinAt
 
 /-- The derivative of η has no zeros in the strip. -/
-theorem incG_gammaUniformEta_deriv_ne_zero {w : ℂ} (hw : w ∈ incG_strip) :
+theorem IncompleteGammaUniform.gammaUniformEta_deriv_ne_zero {w : ℂ}
+    (hw : w ∈ IncompleteGammaUniform.strip) :
     deriv gammaUniformEtaOnLog w ≠ 0 := by
   by_cases hw0 : w = 0
   · subst w
     rw [gammaUniformEta_normalization.1.deriv]
     exact one_ne_zero
   · rw [(gammaUniformEta_derivative hw hw0).deriv]
-    exact div_ne_zero (incG_exp_sub_one_ne_zero hw hw0)
-      (incG_gammaUniformEta_ne_zero hw hw0)
+    exact div_ne_zero (IncompleteGammaUniform.exp_sub_one_ne_zero hw hw0)
+      (IncompleteGammaUniform.gammaUniformEta_ne_zero hw hw0)
 
 /-- η has a normalized analytic inverse in some neighborhood of zero. -/
-theorem incG_gammaUniformEta_exists_local_inverse :
+theorem IncompleteGammaUniform.gammaUniformEta_exists_local_inverse :
     ∃ f : ℂ → ℂ, AnalyticAt ℂ f 0 ∧ HasDerivAt f 1 0 ∧ f 0 = 0 ∧
       (∀ᶠ w in 𝓝 (0 : ℂ), f (gammaUniformEtaOnLog w) = w) ∧
       ∀ᶠ η in 𝓝 (0 : ℂ), gammaUniformEtaOnLog (f η) = η := by
-  have ha := incG_gammaUniformEta_analyticOnNhd 0 incG_zero_mem_strip
-  have hd := incG_gammaUniformEta_deriv_ne_zero incG_zero_mem_strip
+  have ha := IncompleteGammaUniform.gammaUniformEta_analyticOnNhd 0
+      IncompleteGammaUniform.zero_mem_strip
+  have hd := IncompleteGammaUniform.gammaUniformEta_deriv_ne_zero
+      IncompleteGammaUniform.zero_mem_strip
   have hs := ha.hasStrictDerivAt
   have hl := hs.eventually_left_inverse hd
   refine ⟨hs.localInverse _ _ _ hd, ?_, ?_, ?_, hl, ?_⟩
@@ -743,7 +761,8 @@ def gammaUniformD (k n : ℕ) : ℂ :=
   iteratedDeriv n (fun η => gammaUniformC k (gammaUniformInverseLog η)) 0/(n.factorial : ℂ)
 
 /-- A bounded image of the saddle coordinate in the closed strip has bounded preimage. -/
-theorem gammaInv_norm_bound {w : ℂ} {M : ℝ} (hw : |w.im| ≤ 2*π) (hF : ‖exp w-1-w‖ ≤ M) :
+theorem IncompleteGammaEtaInverse.norm_bound {w : ℂ} {M : ℝ} (hw : |w.im| ≤ 2*π)
+    (hF : ‖exp w-1-w‖ ≤ M) :
     ‖w‖ ≤ M+4*π+2 := by
   have hnorm := norm_le_abs_re_add_abs_im w
   have hexp : Real.exp w.re ≤ M+1+‖w‖ := by
@@ -768,7 +787,7 @@ theorem gammaInv_norm_bound {w : ℂ} {M : ℝ} (hw : |w.im| ≤ 2*π) (hF : ‖
     linarith
 
 /-- Points on the strip boundary map outside the Maclaurin disk. -/
-theorem gammaInv_boundary_norm {w : ℂ} (hw : |w.im|=2*π) :
+theorem IncompleteGammaEtaInverse.boundary_norm {w : ℂ} (hw : |w.im|=2*π) :
     2*π ≤ ‖exp w-1-w‖ := by
   have hsin : Real.sin w.im = 0 := by
     rcases abs_eq (by positivity : (0:ℝ) ≤ 2*π) |>.mp hw with h | h
@@ -778,9 +797,9 @@ theorem gammaInv_boundary_norm {w : ℂ} (hw : |w.im|=2*π) :
   simpa [Complex.exp_im, hsin, hw] using hi
 
 /-- A sublevel set below the first critical image stays compactly inside the strip. -/
-theorem gammaInv_compact_sublevel {M : ℝ} (hMπ : M < 2*π) :
+theorem IncompleteGammaEtaInverse.compact_sublevel {M : ℝ} (hMπ : M < 2*π) :
     IsCompact {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} ∧
-      {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} ⊆ incG_strip := by
+      {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} ⊆ IncompleteGammaUniform.strip := by
   have hc : IsClosed {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} :=
     (isClosed_le (f := fun w : ℂ => |w.im|) (g := fun _ => 2*π)
       (by fun_prop) continuous_const).inter
@@ -790,15 +809,16 @@ theorem gammaInv_compact_sublevel {M : ℝ} (hMπ : M < 2*π) :
   · refine Metric.isCompact_iff_isClosed_bounded.mpr ⟨hc, ?_⟩
     refine (Metric.isBounded_closedBall (x := (0:ℂ)) (r := M+4*π+2)).subset ?_
     intro w hw
-    simpa using gammaInv_norm_bound hw.1 hw.2
+    simpa using IncompleteGammaEtaInverse.norm_bound hw.1 hw.2
   · intro w hw
     change |w.im| < 2*π
-    exact lt_of_le_of_ne hw.1 (fun he => not_le.mpr hMπ ((gammaInv_boundary_norm he).trans hw.2))
+    exact lt_of_le_of_ne hw.1
+        (fun he => not_le.mpr hMπ ((IncompleteGammaEtaInverse.boundary_norm he).trans hw.2))
 
 /-- Compact subsets of the inverse disk have compact preimage in the strip. -/
-theorem gammaInv_compact_preimage {K : Set ℂ}
+theorem IncompleteGammaEtaInverse.compact_preimage {K : Set ℂ}
     (hKsub : K ⊆ Metric.ball (0:ℂ) (2*Real.sqrt π)) (hK : IsCompact K) :
-    IsCompact (incG_strip ∩ gammaUniformEtaOnLog ⁻¹' K) := by
+    IsCompact (IncompleteGammaUniform.strip ∩ gammaUniformEtaOnLog ⁻¹' K) := by
   rcases K.eq_empty_or_nonempty with rfl | hne
   · simp
   obtain ⟨η₀, hη₀, hmax⟩ := hK.exists_isMaxOn hne continuous_norm.continuousOn
@@ -811,21 +831,21 @@ theorem gammaInv_compact_preimage {K : Set ℂ}
     have hn := norm_nonneg η₀
     dsimp [M]; nlinarith
   let C : Set ℂ := {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M}
-  obtain ⟨hCc, hCs⟩ := gammaInv_compact_sublevel hMπ
-  let S : Set ℂ := incG_strip ∩ gammaUniformEtaOnLog ⁻¹' K
+  obtain ⟨hCc, hCs⟩ := IncompleteGammaEtaInverse.compact_sublevel hMπ
+  let S : Set ℂ := IncompleteGammaUniform.strip ∩ gammaUniformEtaOnLog ⁻¹' K
   have hSC : S ⊆ C := by
     intro w hw
     refine ⟨hw.1.le, ?_⟩
-    rw [← incG_gammaUniformEta_sq hw.1, norm_div, norm_pow, Complex.norm_two]
+    rw [← IncompleteGammaUniform.gammaUniformEta_sq hw.1, norm_div, norm_pow, Complex.norm_two]
     dsimp [M]
     exact div_le_div_of_nonneg_right
       (pow_le_pow_left₀ (norm_nonneg _) (hmax hw.2) 2) (by norm_num)
   have hclosed : IsClosed S := by
     refine isClosed_of_closure_subset fun w hw => ?_
     have hwC : w ∈ C := hCc.isClosed.closure_subset_iff.mpr hSC hw
-    have hws : w ∈ incG_strip := hCs hwC
+    have hws : w ∈ IncompleteGammaUniform.strip := hCs hwC
     refine ⟨hws, ?_⟩
-    have hcont := (incG_gammaUniformEta_analyticOnNhd w hws).continuousAt
+    have hcont := (IncompleteGammaUniform.gammaUniformEta_analyticOnNhd w hws).continuousAt
     have hi := mem_closure_image hcont hw
     have hmap : gammaUniformEtaOnLog '' S ⊆ K := by
       rintro _ ⟨v, hv, rfl⟩
@@ -835,38 +855,41 @@ theorem gammaInv_compact_preimage {K : Set ℂ}
   exact Metric.isCompact_iff_isClosed_bounded.mpr ⟨hclosed, hCc.isBounded.subset hSC⟩
 
 /-- The saddle coordinate is locally a homeomorphism on its zero-free strip. -/
-theorem gammaInv_isLocalHomeomorphOn : IsLocalHomeomorphOn gammaUniformEtaOnLog incG_strip := by
+theorem IncompleteGammaEtaInverse.isLocalHomeomorphOn : IsLocalHomeomorphOn gammaUniformEtaOnLog
+    IncompleteGammaUniform.strip := by
   refine IsLocalHomeomorphOn.mk _ _ fun w hw => ?_
-  have hs := (incG_gammaUniformEta_analyticOnNhd w hw).hasStrictDerivAt
-  have hd := incG_gammaUniformEta_deriv_ne_zero hw
+  have hs := (IncompleteGammaUniform.gammaUniformEta_analyticOnNhd w hw).hasStrictDerivAt
+  have hd := IncompleteGammaUniform.gammaUniformEta_deriv_ne_zero hw
   have he := hs.hasStrictFDerivAt_equiv hd
   exact ⟨he.toOpenPartialHomeomorph _, he.mem_toOpenPartialHomeomorph_source,
     fun v _ => by rw [he.toOpenPartialHomeomorph_coe]⟩
 
 /-- The saddle coordinate is a covering over the entire Maclaurin disk, using the
 Tau Ceti contributors' proper local-homeomorphism criterion. -/
-theorem gammaInv_isCoveringMapOn :
-    IsCoveringMapOn (fun w : incG_strip => gammaUniformEtaOnLog w)
+theorem IncompleteGammaEtaInverse.isCoveringMapOn :
+    IsCoveringMapOn (fun w : IncompleteGammaUniform.strip => gammaUniformEtaOnLog w)
       (Metric.ball (0:ℂ) (2*Real.sqrt π)) := by
-  have hl : IsLocalHomeomorph (fun w : incG_strip => gammaUniformEtaOnLog w) :=
+  have hl : IsLocalHomeomorph (fun w : IncompleteGammaUniform.strip => gammaUniformEtaOnLog w) :=
     isLocalHomeomorph_iff_isLocalHomeomorphOn_univ.mpr <|
-      gammaInv_isLocalHomeomorphOn.comp
-        incG_strip_isOpen.isOpenEmbedding_subtypeVal.isLocalHomeomorph.isLocalHomeomorphOn
+      IncompleteGammaEtaInverse.isLocalHomeomorphOn.comp
+        (IncompleteGammaUniform.strip_isOpen.isOpenEmbedding_subtypeVal
+          |>.isLocalHomeomorph.isLocalHomeomorphOn)
         (fun w _ => w.property)
   refine IsCoveringMapOn.of_isLocalHomeomorph_of_isCompact_preimage Metric.isOpen_ball
     (hl.isLocalHomeomorphOn.mono (subset_univ _)) fun K hKs hK => ?_
   rw [IsEmbedding.subtypeVal.isCompact_iff]
-  have heq : Subtype.val '' ((fun w : incG_strip => gammaUniformEtaOnLog w) ⁻¹' K) =
-      incG_strip ∩ gammaUniformEtaOnLog ⁻¹' K := by
+  have heq : Subtype.val ''
+      ((fun w : IncompleteGammaUniform.strip => gammaUniformEtaOnLog w) ⁻¹' K) =
+      IncompleteGammaUniform.strip ∩ gammaUniformEtaOnLog ⁻¹' K := by
     ext w
     constructor
     · rintro ⟨v, hv, rfl⟩; exact ⟨v.property, hv⟩
     · rintro ⟨hw, hη⟩; exact ⟨⟨w, hw⟩, hη, rfl⟩
   rw [heq]
-  exact gammaInv_compact_preimage hKs hK
+  exact IncompleteGammaEtaInverse.compact_preimage hKs hK
 
 /-- The local inverse continues single-valuedly over its full Maclaurin disk. -/
-theorem gammaInv_exists_global : ∃ f : ℂ → ℂ,
+theorem IncompleteGammaEtaInverse.exists_global : ∃ f : ℂ → ℂ,
     f 0=0 ∧ deriv f 0=1 ∧ ∀ η : ℂ, ‖η‖ < 2*Real.sqrt π →
       DifferentiableAt ℂ f η ∧ |(f η).im| < 2*π ∧ gammaUniformEtaOnLog (f η)=η := by
   classical
@@ -877,9 +900,10 @@ theorem gammaInv_exists_global : ∃ f : ℂ → ℂ,
   have : LocallyPathConnectedSpace D := Metric.isOpen_ball.locallyPathConnectedSpace
   let g : C(D,ℂ) := ⟨Subtype.val,continuous_subtype_val⟩
   let d₀ : D := ⟨0,h0⟩
-  let e₀ : incG_strip := ⟨0,incG_zero_mem_strip⟩
+  let e₀ : IncompleteGammaUniform.strip := ⟨0,IncompleteGammaUniform.zero_mem_strip⟩
   have he : gammaUniformEtaOnLog e₀ = g d₀ := gammaUniformEta_normalization.2
-  obtain ⟨G,⟨hG0,hG⟩,_⟩ := gammaInv_isCoveringMapOn.existsUnique_continuousMap_lifts g he
+  obtain ⟨G, ⟨hG0, hG⟩, _⟩ :=
+      IncompleteGammaEtaInverse.isCoveringMapOn.existsUnique_continuousMap_lifts g he
     (fun η => η.property)
   let f : ℂ → ℂ := fun η => if hη : η ∈ D then (G ⟨η,hη⟩ : ℂ) else 0
   have hf (η : ℂ) (hη : η ∈ D) : f η = (G ⟨η,hη⟩ : ℂ) := by simp only [f, dite_eq_left hη]
@@ -898,11 +922,11 @@ theorem gammaInv_exists_global : ∃ f : ℂ → ℂ,
     exact congrFun hG ⟨η,hη⟩
   have hderiv (η : ℂ) (hη : η ∈ D) :
       HasStrictDerivAt f (deriv gammaUniformEtaOnLog (f η))⁻¹ η := by
-    have hws : f η ∈ incG_strip := (hspec η hη).1
-    have hs := (incG_gammaUniformEta_analyticOnNhd (f η) hws).hasStrictDerivAt
+    have hws : f η ∈ IncompleteGammaUniform.strip := (hspec η hη).1
+    have hs := (IncompleteGammaUniform.gammaUniformEta_analyticOnNhd (f η) hws).hasStrictDerivAt
     refine HasStrictDerivAt.of_local_left_inverse
       (hfc.continuousAt (Metric.isOpen_ball.mem_nhds hη)) hs
-      (incG_gammaUniformEta_deriv_ne_zero hws) ?_
+      (IncompleteGammaUniform.gammaUniformEta_deriv_ne_zero hws) ?_
     filter_upwards [Metric.isOpen_ball.mem_nhds hη] with v hv
     exact (hspec v hv).2
   refine ⟨f,hf0,?_,?_⟩
@@ -920,7 +944,7 @@ theorem gammaUniformInverseLog_spec  :
     gammaUniformInverseLog 0=0 ∧ deriv gammaUniformInverseLog 0=1 ∧ ∀ η : ℂ, ‖η‖ < 2*Real.sqrt π →
         DifferentiableAt ℂ gammaUniformInverseLog η ∧ |(gammaUniformInverseLog η).im| < 2*π ∧
         gammaUniformEtaOnLog (gammaUniformInverseLog η)=η := by
-  exact Classical.epsilon_spec gammaInv_exists_global
+  exact Classical.epsilon_spec IncompleteGammaEtaInverse.exists_global
 
 /-- The series with terms `(fun n : ℕ => gammaUniformD k n*η^n)` converges to `(gammaUniformC k
 (gammaUniformInverseLog η))`. -/
@@ -1118,7 +1142,8 @@ def gammaQInverse (a q : ℝ) : ℝ≥0∞ :=
       ENNReal.ofReal (Classical.epsilon (fun x : ℝ => 0 ≤ x ∧ (normIncGammaQContinued a x).re=q))
 
 /-- The continued `P(a,x)` for real `a > 0`, `x ≥ 0` is TauCeti's regularized lower Gamma. -/
-theorem incG_normIncGammaPContinued_ofReal {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) :
+theorem IncompleteGammaUniform.normIncGammaPContinued_ofReal {a : ℝ} (ha : 0 < a)
+    {x : ℝ} (hx : 0 ≤ x) :
     normIncGammaPContinued a x = ((TauCeti.lowerIncompleteGamma a x / Real.Gamma a : ℝ) : ℂ) := by
   rcases hx.eq_or_lt with h0 | h0
   · subst h0
@@ -1132,7 +1157,8 @@ theorem incG_normIncGammaPContinued_ofReal {a : ℝ} (ha : 0 < a) {x : ℝ} (hx 
     push_cast; rfl
 
 /-- Existence of a real point `x ≥ 0` with `Q(a,x) = q` for `0 < q < 1`. -/
-theorem incG_exists_normIncGammaQ_eq {a : ℝ} (ha : 0 < a) {q : ℝ} (hq : 0 < q) (hq1 : q < 1) :
+theorem IncompleteGammaUniform.exists_normIncGammaQ_eq {a : ℝ} (ha : 0 < a) {q : ℝ} (hq : 0 < q)
+    (hq1 : q < 1) :
     ∃ x : ℝ, 0 ≤ x ∧ (normIncGammaQContinued a x).re = q := by
   set f : ℝ → ℝ := fun x => TauCeti.lowerIncompleteGamma a x / Real.Gamma a
   have hf : Continuous f := (TauCeti.continuous_lowerIncompleteGamma a).div_const _
@@ -1149,7 +1175,8 @@ theorem incG_exists_normIncGammaQ_eq {a : ℝ} (ha : 0 < a) {q : ℝ} (hq : 0 < 
   obtain ⟨x, hx, hfx⟩ := intermediate_value_Icc (le_max_right R 0) hf.continuousOn
     ⟨by rw [h0]; linarith, hR'.le⟩
   refine ⟨x, hx.1, ?_⟩
-  rw [normIncGammaQContinued, incG_normIncGammaPContinued_ofReal ha hx.1, sub_re, one_re, ofReal_re]
+  rw [normIncGammaQContinued, IncompleteGammaUniform.normIncGammaPContinued_ofReal ha hx.1, sub_re,
+      one_re, ofReal_re]
   change 1 - f x = q
   rw [hfx]; ring
 
@@ -1168,7 +1195,7 @@ theorem gammaQInverse_spec {a q : ℝ} (ha : 0 < a) (hq : 0 ≤ q) (hq1 : q ≤ 
     simp only [this, ENNReal.zero_ne_top, ite_false, ENNReal.toReal_zero, ofReal_zero,
       normIncGammaQContinued, normIncGammaPContinued, zero_cpow (ofReal_ne_zero.mpr ha.ne')]
     simp
-  have hex := incG_exists_normIncGammaQ_eq ha h0 h1
+  have hex := IncompleteGammaUniform.exists_normIncGammaQ_eq ha h0 h1
   have hs := Classical.epsilon_spec
       (p := fun x : ℝ => 0 ≤ x ∧ (normIncGammaQContinued a x).re = q) hex
   have hg : gammaQInverse a q =

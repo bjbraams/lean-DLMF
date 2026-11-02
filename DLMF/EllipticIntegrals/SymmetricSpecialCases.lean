@@ -555,37 +555,6 @@ theorem symEllIntRJ_zero_self_self {y : ℂ} (hy : y ∈ slitPlane) {p : ℝ} (h
     field_simp
     ring
 
-/-- Symmetric excision of a shrinking interval about `c` does not change the limit of a set
-integral of an integrable function. -/
-theorem tendsto_setIntegral_diff_Icc_nhdsGT {g : ℝ → ℂ} {s : Set ℝ}
-    (hg : IntegrableOn g s) (c : ℝ) :
-    Tendsto (fun ε : ℝ => ∫ t in s \ Icc (c - ε) (c + ε), g t) (𝓝[>] 0)
-      (𝓝 (∫ t in s, g t)) := by
-  have he : ∀ ε : ℝ, ∫ t in s \ Icc (c - ε) (c + ε), g t =
-      ∫ t in s, (Icc (c - ε) (c + ε))ᶜ.indicator g t := by
-    intro ε
-    rw [setIntegral_indicator measurableSet_Icc.compl, sdiff_eq]
-  simp only [he]
-  refine tendsto_integral_filter_of_dominated_convergence (fun t => ‖g t‖) ?_ ?_ hg.norm ?_
-  · exact Eventually.of_forall fun ε =>
-      (hg.aestronglyMeasurable.indicator measurableSet_Icc.compl)
-  · refine Eventually.of_forall fun ε => Eventually.of_forall fun t => ?_
-    by_cases ht : t ∈ (Icc (c - ε) (c + ε))ᶜ
-    · simp [indicator_of_mem ht]
-    · simp [indicator_of_notMem ht]
-  · have hae : ∀ᵐ t ∂(volume.restrict s), t ≠ c :=
-      ae_restrict_of_ae (by
-        rw [ae_iff]; simp only [ne_eq, not_not, ofPred_eq_eq_singleton]; exact measure_singleton c)
-    filter_upwards [hae] with t htc
-    have hpos : 0 < |t - c| := abs_pos.mpr (sub_ne_zero.mpr htc)
-    refine tendsto_const_nhds.congr' ?_
-    filter_upwards [Ioo_mem_nhdsGT hpos] with ε hε
-    have hmem : t ∈ (Icc (c - ε) (c + ε))ᶜ := by
-      intro h
-      have : |t - c| ≤ ε := abs_le.mpr ⟨by linarith [h.1], by linarith [h.2]⟩
-      linarith [hε.2]
-    rw [indicator_of_mem hmem]
-
 /-- DLMF 19.20.8 (third), principal-value case, by partial fractions in the truncated
 integrals. -/
 private lemma symEllIntRJ_self_right_of_neg_aux {x y p : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hp : p < 0) :

@@ -489,7 +489,7 @@ theorem lambertC_recurrence {n : ℕ} (hn : 2 ≤ n) :
 /-- The exact relation with the Gamma Stirling coefficients. -/
 @[dlmf 4.13.E9]
 theorem lambertC_stirling (n : ℕ) :
-    (DLMF.oddProduct n) * lambertC (2 * n + 1) = DLMF.Gamma.stirlingG n := by
+    (DLMF.Core.oddProduct n) * lambertC (2 * n + 1) = DLMF.Gamma.stirlingG n := by
   sorry
 
 /-- Convergent analytic branch-point parametrization on the full complex t-disk. -/

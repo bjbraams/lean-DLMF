@@ -37,6 +37,8 @@ This file treats the large-argument expansions of `U(a,z)` and `V(a,z)` in secto
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- The order-`s` term `(-1)^s (a+1/2)_{2s}/(s! (2z²)^s)` in the large-argument expansion of the
@@ -56,7 +58,7 @@ def pcfVTerm (a z : ℂ) (s : ℕ) : ℂ :=
 theorem pcfU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (N : ℕ) :
     (fun z : ℂ => exp (z^2/4)*z^(a+1/2)*pcfU a z-∑ s ∈ Finset.range N, pcfUTerm a z s)
         =O[sector (3*π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
-  exact pcfSect_U_sector a hδ N
+  exact CylinderSectorAsymptotics.U_sector a hδ N
 
 /-- Asymptotic bound with the indicated comparison function: `(fun z : ℂ => (Real.sqrt
 (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*pcfV a z-∑ s ∈ Finset.range N, pcfVTerm a z s) =O[sector
@@ -65,7 +67,7 @@ theorem pcfU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (N : ℕ) :
 theorem pcfV_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/4) (N : ℕ) :
     (fun z : ℂ => (Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*pcfV a z-∑ s ∈ Finset.range N,
         pcfVTerm a z s) =O[sector (π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
-  exact pcfSect_V_sector a hδ hδπ N
+  exact CylinderSectorAsymptotics.V_sector a hδ hδπ N
 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E3]
@@ -77,18 +79,20 @@ theorem pcfU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
         =O[pcfLogWedge (π/4+δ) (5*π/4-δ)]
         (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp
         (-2*N*w.re):ℝ)) := by
-  have h1 := pcfSect_U_logWedge a hδ (-π) (lo := π/4+δ) (hi := 5*π/4-δ) (by linarith)
+  have h1 := CylinderSectorAsymptotics.U_logWedge a hδ (-π) (lo := π/4+δ)
+      (hi := 5*π/4-δ) (by linarith)
       (by linarith) N
-  have h2 := pcfSect_U_logWedge (-a) hδ (-(π/2)) (lo := π/4+δ) (hi := 5*π/4-δ) (by linarith)
+  have h2 := CylinderSectorAsymptotics.U_logWedge (-a) hδ (-(π/2)) (lo := π/4+δ)
+      (hi := 5*π/4-δ) (by linarith)
       (by linarith) N
   set C1 : ℂ := (-1:ℂ)*I*exp ((-1:ℂ)*I*π*a)
   set C2 : ℂ := (Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((-1:ℂ)*I*π*(a/2-1/4))
   have e2a : ∀ w : ℂ, exp (2 * (w + ((-π : ℝ) : ℂ) * I)) = exp (2 * w) := fun w => by
-    rw [pcfSect_exp_two_mul_add]
+    rw [CylinderSectorAsymptotics.exp_two_mul_add]
     rw [show (((2 * -π : ℝ)) : ℂ) * I = ((-1 : ℤ) : ℂ) * (2 * π * I) by push_cast; ring,
       Complex.exp_int_mul_two_pi_mul_I, mul_one]
   have e2b : ∀ w : ℂ, exp (2 * (w + ((-(π/2) : ℝ) : ℂ) * I)) = -exp (2 * w) := fun w => by
-    rw [pcfSect_exp_two_mul_add]
+    rw [CylinderSectorAsymptotics.exp_two_mul_add]
     rw [show (((2 * -(π/2) : ℝ)) : ℂ) * I = -(π * I) by push_cast; ring, Complex.exp_neg,
       Complex.exp_pi_mul_I]; ring
   have hIexp : I = exp (π / 2 * I) := Complex.exp_pi_div_two_mul_I.symm
@@ -98,7 +102,7 @@ theorem pcfU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     have hC1 : C1 = exp (π * I + π / 2 * I + (-1:ℂ) * I * π * a) := by
       rw [Complex.exp_add, Complex.exp_add, Complex.exp_pi_mul_I, Complex.exp_pi_div_two_mul_I]
     rw [hC1, e2a, ← Complex.exp_add]
-    exact pcfSect_exp_eq_of_eq_add 1 (by push_cast; ring)
+    exact CylinderSectorAsymptotics.exp_eq_of_eq_add 1 (by push_cast; ring)
   have hB : ∀ w, C2 * exp (-exp (2 * (w + ((-(π/2) : ℝ) : ℂ) * I)) / 4 -
       (-a + 1 / 2) * (w + ((-(π/2) : ℝ) : ℂ) * I)) =
           (1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(1:ℂ)*I*π*a) *
@@ -115,12 +119,13 @@ theorem pcfU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
         Complex.exp_pi_div_two_mul_I]; ring
     rw [h1, h2, e2b]
     congr 1
-    exact pcfSect_exp_eq_of_eq_add 0 (by push_cast; ring)
+    exact CylinderSectorAsymptotics.exp_eq_of_eq_add 0 (by push_cast; ring)
   have he : ∀ w : ℂ, 0 ≤ Real.exp (-2 * N * w.re) := fun w => (Real.exp_pos _).le
-  have g1 := pcfSect_isBigO_const_mul_envelope C1 zero_le_one h1 he (T := fun w : ℂ =>
+  have g1 := CylinderSectorAsymptotics.isBigO_const_mul_envelope C1 zero_le_one h1 he
+      (T := fun w : ℂ =>
     ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ))
     (fun w => by rw [hA w]; nlinarith [norm_nonneg (exp (exp (2*w)/4+(a-1/2)*w)), he w])
-  have g2 := pcfSect_isBigO_const_mul_envelope C2
+  have g2 := CylinderSectorAsymptotics.isBigO_const_mul_envelope C2
     (norm_nonneg ((1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(1:ℂ)*I*π*a))) h2 he
     (T := fun w : ℂ =>
     ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ))
@@ -135,13 +140,15 @@ theorem pcfU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
   have z2 : exp (w + ((-(π/2):ℝ):ℂ)*I) = (-1:ℂ)*I*exp w := by
     rw [Complex.exp_add, show ((-(π/2):ℝ):ℂ)*I = -(π/2*I) by push_cast; ring, Complex.exp_neg,
       Complex.exp_pi_div_two_mul_I, Complex.inv_I]; ring
-  have s1 : ∑ s ∈ Finset.range N, pcfSect_uTerm a (exp (w + ((-π:ℝ):ℂ)*I)) s =
+  have s1 : ∑ s ∈ Finset.range N, CylinderSectorAsymptotics.uTerm a (exp (w + ((-π:ℝ):ℂ)*I)) s =
       ∑ j ∈ Finset.range N, pcfUTerm a (exp w) j :=
-    Finset.sum_congr rfl fun s _ => by rw [z1]; exact pcfSect_uTerm_congr_sq a (by ring) s
-  have s2 : ∑ s ∈ Finset.range N, pcfSect_uTerm (-a) (exp (w + ((-(π/2):ℝ):ℂ)*I)) s =
+    Finset.sum_congr rfl fun s _ => by rw [z1];
+                                       exact CylinderSectorAsymptotics.uTerm_congr_sq a (by ring) s
+  have s2 : ∑ s ∈ Finset.range N,
+      CylinderSectorAsymptotics.uTerm (-a) (exp (w + ((-(π/2):ℝ):ℂ)*I)) s =
       ∑ j ∈ Finset.range N, pcfVTerm a (exp w) j :=
     Finset.sum_congr rfl fun s _ => by
-      rw [z2]; exact pcfSect_uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
+      rw [z2]; exact CylinderSectorAsymptotics.uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
   dsimp only
   rw [s1, s2, pcfU_rotated_connection_entire_neg a (exp w), ← z1, ← z2]
   linear_combination (-(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)) * hA w -
@@ -157,18 +164,20 @@ theorem pcfU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
         =O[pcfLogWedge (-(5*π/4-δ)) (-(π/4+δ))]
         (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp
         (-2*N*w.re):ℝ)) := by
-  have h1 := pcfSect_U_logWedge a hδ π (lo := -(5*π/4-δ)) (hi := -(π/4+δ)) (by linarith)
+  have h1 := CylinderSectorAsymptotics.U_logWedge a hδ π (lo := -(5*π/4-δ))
+      (hi := -(π/4+δ)) (by linarith)
       (by linarith) N
-  have h2 := pcfSect_U_logWedge (-a) hδ (π/2) (lo := -(5*π/4-δ)) (hi := -(π/4+δ)) (by linarith)
+  have h2 := CylinderSectorAsymptotics.U_logWedge (-a) hδ (π/2) (lo := -(5*π/4-δ))
+      (hi := -(π/4+δ)) (by linarith)
       (by linarith) N
   set C1 : ℂ := (1:ℂ)*I*exp ((1:ℂ)*I*π*a)
   set C2 : ℂ := (Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((1:ℂ)*I*π*(a/2-1/4))
   have e2a : ∀ w : ℂ, exp (2 * (w + ((π : ℝ) : ℂ) * I)) = exp (2 * w) := fun w => by
-    rw [pcfSect_exp_two_mul_add]
+    rw [CylinderSectorAsymptotics.exp_two_mul_add]
     rw [show (((2 * π : ℝ)) : ℂ) * I = ((1 : ℤ) : ℂ) * (2 * π * I) by push_cast; ring,
       Complex.exp_int_mul_two_pi_mul_I, mul_one]
   have e2b : ∀ w : ℂ, exp (2 * (w + ((π/2 : ℝ) : ℂ) * I)) = -exp (2 * w) := fun w => by
-    rw [pcfSect_exp_two_mul_add]
+    rw [CylinderSectorAsymptotics.exp_two_mul_add]
     rw [show (((2 * (π/2) : ℝ)) : ℂ) * I = π * I by push_cast; ring,
       Complex.exp_pi_mul_I]; ring
   have hIexp : I = exp (π / 2 * I) := Complex.exp_pi_div_two_mul_I.symm
@@ -178,7 +187,7 @@ theorem pcfU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     have hC1 : C1 = exp (π / 2 * I + (1:ℂ) * I * π * a) := by
       rw [Complex.exp_add, Complex.exp_pi_div_two_mul_I]; simp only [C1]; ring
     rw [hC1, e2a, ← Complex.exp_add]
-    exact pcfSect_exp_eq_of_eq_add 0 (by push_cast; ring)
+    exact CylinderSectorAsymptotics.exp_eq_of_eq_add 0 (by push_cast; ring)
   have hB : ∀ w, C2 * exp (-exp (2 * (w + ((π/2 : ℝ) : ℂ) * I)) / 4 -
       (-a + 1 / 2) * (w + ((π/2 : ℝ) : ℂ) * I)) =
           (-1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(-1:ℂ)*I*π*a) *
@@ -195,12 +204,13 @@ theorem pcfU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
         Complex.exp_neg, Complex.exp_pi_div_two_mul_I, Complex.inv_I]; ring
     rw [h1, h2, e2b]
     congr 1
-    exact pcfSect_exp_eq_of_eq_add 0 (by push_cast; ring)
+    exact CylinderSectorAsymptotics.exp_eq_of_eq_add 0 (by push_cast; ring)
   have he : ∀ w : ℂ, 0 ≤ Real.exp (-2 * N * w.re) := fun w => (Real.exp_pos _).le
-  have g1 := pcfSect_isBigO_const_mul_envelope C1 zero_le_one h1 he (T := fun w : ℂ =>
+  have g1 := CylinderSectorAsymptotics.isBigO_const_mul_envelope C1 zero_le_one h1 he
+      (T := fun w : ℂ =>
     ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ))
     (fun w => by rw [hA w]; nlinarith [norm_nonneg (exp (exp (2*w)/4+(a-1/2)*w)), he w])
-  have g2 := pcfSect_isBigO_const_mul_envelope C2
+  have g2 := CylinderSectorAsymptotics.isBigO_const_mul_envelope C2
     (norm_nonneg ((-1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(-1:ℂ)*I*π*a))) h2 he
     (T := fun w : ℂ =>
     ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ))
@@ -215,13 +225,14 @@ theorem pcfU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
   have z2 : exp (w + ((π/2:ℝ):ℂ)*I) = (1:ℂ)*I*exp w := by
     rw [Complex.exp_add, show ((π/2:ℝ):ℂ)*I = π/2*I by push_cast; ring,
       Complex.exp_pi_div_two_mul_I]; ring
-  have s1 : ∑ s ∈ Finset.range N, pcfSect_uTerm a (exp (w + ((π:ℝ):ℂ)*I)) s =
+  have s1 : ∑ s ∈ Finset.range N, CylinderSectorAsymptotics.uTerm a (exp (w + ((π:ℝ):ℂ)*I)) s =
       ∑ j ∈ Finset.range N, pcfUTerm a (exp w) j :=
-    Finset.sum_congr rfl fun s _ => by rw [z1]; exact pcfSect_uTerm_congr_sq a (by ring) s
-  have s2 : ∑ s ∈ Finset.range N, pcfSect_uTerm (-a) (exp (w + ((π/2:ℝ):ℂ)*I)) s =
+    Finset.sum_congr rfl fun s _ => by rw [z1];
+                                       exact CylinderSectorAsymptotics.uTerm_congr_sq a (by ring) s
+  have s2 : ∑ s ∈ Finset.range N, CylinderSectorAsymptotics.uTerm (-a) (exp (w + ((π/2:ℝ):ℂ)*I)) s =
       ∑ j ∈ Finset.range N, pcfVTerm a (exp w) j :=
     Finset.sum_congr rfl fun s _ => by
-      rw [z2]; exact pcfSect_uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
+      rw [z2]; exact CylinderSectorAsymptotics.uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
   dsimp only
   rw [s1, s2, pcfU_rotated_connection_entire_pos a (exp w), ← z1, ← z2]
   linear_combination (-(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)) * hA w -
@@ -237,14 +248,16 @@ theorem pcfV_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
         =O[pcfLogWedge (-π/4+δ) (3*π/4-δ)]
         (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp
         (-2*N*w.re):ℝ)) := by
-  have h1 := pcfSect_U_logWedge a hδ 0 (lo := -π/4+δ) (hi := 3*π/4-δ) (by linarith) (by linarith) N
-  have h2 := pcfSect_U_logWedge (-a) hδ (-(π/2)) (lo := -π/4+δ) (hi := 3*π/4-δ) (by linarith)
+  have h1 := CylinderSectorAsymptotics.U_logWedge a hδ 0 (lo := -π/4+δ) (hi := 3*π/4-δ)
+      (by linarith) (by linarith) N
+  have h2 := CylinderSectorAsymptotics.U_logWedge (-a) hδ (-(π/2)) (lo := -π/4+δ)
+      (hi := 3*π/4-δ) (by linarith)
       (by linarith) N
   set C1 : ℂ := (1:ℂ)*I/Gamma (1/2-a)
   set C2 : ℂ := (Real.sqrt (2/π):ℂ)*exp (I*π*(a/2-1/4))
   have z1 : ∀ w : ℂ, w + ((0:ℝ):ℂ)*I = w := fun w => by simp
   have e2b : ∀ w : ℂ, exp (2 * (w + ((-(π/2) : ℝ) : ℂ) * I)) = -exp (2 * w) := fun w => by
-    rw [pcfSect_exp_two_mul_add]
+    rw [CylinderSectorAsymptotics.exp_two_mul_add]
     rw [show (((2 * -(π/2) : ℝ)) : ℂ) * I = -(π * I) by push_cast; ring, Complex.exp_neg,
       Complex.exp_pi_mul_I]; ring
   have hA : ∀ w, C1 * exp (-exp (2 * (w + ((0 : ℝ) : ℂ) * I)) / 4 -
@@ -256,15 +269,16 @@ theorem pcfV_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     simp only [C2]
     rw [e2b, mul_assoc, ← Complex.exp_add]
     congr 1
-    exact pcfSect_exp_eq_of_eq_add 0 (by push_cast; ring)
+    exact CylinderSectorAsymptotics.exp_eq_of_eq_add 0 (by push_cast; ring)
   have he : ∀ w : ℂ, 0 ≤ Real.exp (-2 * N * w.re) := fun w => (Real.exp_pos _).le
-  have g1 := pcfSect_isBigO_const_mul_envelope C1 (norm_nonneg C1) h1 he (T := fun w : ℂ =>
+  have g1 := CylinderSectorAsymptotics.isBigO_const_mul_envelope C1 (norm_nonneg C1) h1 he
+      (T := fun w : ℂ =>
     ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ))
     (fun w => by
       rw [hA w, norm_mul, mul_assoc]
       gcongr
       nlinarith [norm_nonneg (exp (exp (2*w)/4+(a-1/2)*w)), he w])
-  have g2 := pcfSect_isBigO_const_mul_envelope C2
+  have g2 := CylinderSectorAsymptotics.isBigO_const_mul_envelope C2
     (norm_nonneg (Real.sqrt (2/π):ℂ)) h2 he
     (T := fun w : ℂ =>
     ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ))
@@ -276,14 +290,15 @@ theorem pcfV_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
   have z2 : exp (w + ((-(π/2):ℝ):ℂ)*I) = -I*exp w := by
     rw [Complex.exp_add, show ((-(π/2):ℝ):ℂ)*I = -(π/2*I) by push_cast; ring, Complex.exp_neg,
       Complex.exp_pi_div_two_mul_I, Complex.inv_I]; ring
-  have s2 : ∑ s ∈ Finset.range N, pcfSect_uTerm (-a) (exp (w + ((-(π/2):ℝ):ℂ)*I)) s =
+  have s2 : ∑ s ∈ Finset.range N,
+      CylinderSectorAsymptotics.uTerm (-a) (exp (w + ((-(π/2):ℝ):ℂ)*I)) s =
       ∑ j ∈ Finset.range N, pcfVTerm a (exp w) j :=
     Finset.sum_congr rfl fun s _ => by
-      rw [z2]; exact pcfSect_uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
+      rw [z2]; exact CylinderSectorAsymptotics.uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
   dsimp only
   rw [z1, s2, pcfV_eq_mul_neg_I a (exp w), ← z2]
   simp only [C1, C2]
-  have hu : ∑ s ∈ Finset.range N, pcfSect_uTerm a (exp w) s =
+  have hu : ∑ s ∈ Finset.range N, CylinderSectorAsymptotics.uTerm a (exp w) s =
       ∑ j ∈ Finset.range N, pcfUTerm a (exp w) j := rfl
   rw [hu]
   linear_combination (-(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)) * hB w
@@ -298,15 +313,17 @@ theorem pcfV_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
         =O[pcfLogWedge (-(3*π/4-δ)) (-(-π/4+δ))]
         (fun w : ℂ => ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp
         (-2*N*w.re):ℝ)) := by
-  have h1 := pcfSect_U_logWedge a hδ 0 (lo := -(3*π/4-δ)) (hi := -(-π/4+δ)) (by linarith)
+  have h1 := CylinderSectorAsymptotics.U_logWedge a hδ 0 (lo := -(3*π/4-δ))
+      (hi := -(-π/4+δ)) (by linarith)
       (by linarith) N
-  have h2 := pcfSect_U_logWedge (-a) hδ (π/2) (lo := -(3*π/4-δ)) (hi := -(-π/4+δ)) (by linarith)
+  have h2 := CylinderSectorAsymptotics.U_logWedge (-a) hδ (π/2) (lo := -(3*π/4-δ))
+      (hi := -(-π/4+δ)) (by linarith)
       (by linarith) N
   set C1 : ℂ := (-1:ℂ)*I/Gamma (1/2-a)
   set C2 : ℂ := (Real.sqrt (2/π):ℂ)*exp (-I*π*(a/2-1/4))
   have z1 : ∀ w : ℂ, w + ((0:ℝ):ℂ)*I = w := fun w => by simp
   have e2b : ∀ w : ℂ, exp (2 * (w + ((π/2 : ℝ) : ℂ) * I)) = -exp (2 * w) := fun w => by
-    rw [pcfSect_exp_two_mul_add]
+    rw [CylinderSectorAsymptotics.exp_two_mul_add]
     rw [show (((2 * (π/2) : ℝ)) : ℂ) * I = π * I by push_cast; ring,
       Complex.exp_pi_mul_I]; ring
   have hA : ∀ w, C1 * exp (-exp (2 * (w + ((0 : ℝ) : ℂ) * I)) / 4 -
@@ -318,15 +335,16 @@ theorem pcfV_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     simp only [C2]
     rw [e2b, mul_assoc, ← Complex.exp_add]
     congr 1
-    exact pcfSect_exp_eq_of_eq_add 0 (by push_cast; ring)
+    exact CylinderSectorAsymptotics.exp_eq_of_eq_add 0 (by push_cast; ring)
   have he : ∀ w : ℂ, 0 ≤ Real.exp (-2 * N * w.re) := fun w => (Real.exp_pos _).le
-  have g1 := pcfSect_isBigO_const_mul_envelope C1 (norm_nonneg C1) h1 he (T := fun w : ℂ =>
+  have g1 := CylinderSectorAsymptotics.isBigO_const_mul_envelope C1 (norm_nonneg C1) h1 he
+      (T := fun w : ℂ =>
     ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ))
     (fun w => by
       rw [hA w, norm_mul, mul_assoc]
       gcongr
       nlinarith [norm_nonneg (exp (exp (2*w)/4+(a-1/2)*w)), he w])
-  have g2 := pcfSect_isBigO_const_mul_envelope C2
+  have g2 := CylinderSectorAsymptotics.isBigO_const_mul_envelope C2
     (norm_nonneg (Real.sqrt (2/π):ℂ)) h2 he
     (T := fun w : ℂ =>
     ((‖exp (-exp (2*w)/4-(a+1/2)*w)‖+‖exp (exp (2*w)/4+(a-1/2)*w)‖)*Real.exp (-2*N*w.re):ℝ))
@@ -338,14 +356,14 @@ theorem pcfV_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
   have z2 : exp (w + ((π/2:ℝ):ℂ)*I) = I*exp w := by
     rw [Complex.exp_add, show ((π/2:ℝ):ℂ)*I = π/2*I by push_cast; ring,
       Complex.exp_pi_div_two_mul_I]; ring
-  have s2 : ∑ s ∈ Finset.range N, pcfSect_uTerm (-a) (exp (w + ((π/2:ℝ):ℂ)*I)) s =
+  have s2 : ∑ s ∈ Finset.range N, CylinderSectorAsymptotics.uTerm (-a) (exp (w + ((π/2:ℝ):ℂ)*I)) s =
       ∑ j ∈ Finset.range N, pcfVTerm a (exp w) j :=
     Finset.sum_congr rfl fun s _ => by
-      rw [z2]; exact pcfSect_uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
+      rw [z2]; exact CylinderSectorAsymptotics.uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
   dsimp only
   rw [z1, s2, pcfV_eq_mul_I a (exp w), ← z2]
   simp only [C1, C2]
-  have hu : ∑ s ∈ Finset.range N, pcfSect_uTerm a (exp w) s =
+  have hu : ∑ s ∈ Finset.range N, CylinderSectorAsymptotics.uTerm a (exp w) s =
       ∑ j ∈ Finset.range N, pcfUTerm a (exp w) j := rfl
   rw [hu]
   linear_combination (-(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)) * hB w
@@ -440,7 +458,7 @@ theorem pcfU_hermite_zero_count (n : ℕ) :
 /-! ### Positive zeros of `U(a,x)` by parameter deformation -/
 
 /-- Joint continuity of Kummer's `M` in the first parameter and the argument. -/
-theorem pcfPZ_kummerM_continuous {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
+theorem CylinderRealZeros.kummerM_continuous {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
     Continuous (fun p : ℂ × ℂ => kummerM p.1 c p.2) := by
   rw [continuous_iff_continuousAt]
   rintro ⟨a₀, z₀⟩
@@ -468,28 +486,28 @@ theorem pcfPZ_kummerM_continuous {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
       gcongr
   exact (hc'.continuousAt (hs.mem_nhds hmem))
 
-/-- Composition form of `pcfPZ_kummerM_continuous`. -/
-theorem pcfPZ_kummerM_comp {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) {f g : ℂ × ℂ → ℂ}
+/-- Composition form of `CylinderRealZeros.kummerM_continuous`. -/
+theorem CylinderRealZeros.kummerM_comp {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) {f g : ℂ × ℂ → ℂ}
     (hf : Continuous f) (hg : Continuous g) :
     Continuous (fun p => kummerM (f p) c (g p)) :=
-  (pcfPZ_kummerM_continuous hc).comp (hf.prodMk hg)
+  (CylinderRealZeros.kummerM_continuous hc).comp (hf.prodMk hg)
 
 /-- Continuity of `1/Γ` along a continuous map. -/
-theorem pcfPZ_recipGamma_comp {f : ℂ × ℂ → ℂ} (hf : Continuous f) :
+theorem CylinderRealZeros.recipGamma_comp {f : ℂ × ℂ → ℂ} (hf : Continuous f) :
     Continuous (fun p => (Gamma (f p))⁻¹) :=
   differentiable_one_div_Gamma.continuous.comp hf |>.congr fun p => by simp
 
 /-- `U(a,z)` is jointly continuous in `(a,z)`. -/
-theorem pcfPZ_pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) := by
+theorem CylinderRealZeros.pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) := by
   have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := Complex.one_div_two_ne_neg_natCast
   have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := Complex.three_div_two_ne_neg_natCast
   unfold pcfU pcfEven pcfOdd
-  have k1 := pcfPZ_kummerM_comp hb1 (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4)
+  have k1 := CylinderRealZeros.kummerM_comp hb1 (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4)
     (g := fun p => p.2 ^ 2 / 2) (by fun_prop) (by fun_prop)
-  have k3 := pcfPZ_kummerM_comp hb3 (f := fun p : ℂ × ℂ => p.1 / 2 + 3 / 4)
+  have k3 := CylinderRealZeros.kummerM_comp hb3 (f := fun p : ℂ × ℂ => p.1 / 2 + 3 / 4)
     (g := fun p => p.2 ^ 2 / 2) (by fun_prop) (by fun_prop)
-  have g1 := pcfPZ_recipGamma_comp (f := fun p : ℂ × ℂ => 3 / 4 + p.1 / 2) (by fun_prop)
-  have g2 := pcfPZ_recipGamma_comp (f := fun p : ℂ × ℂ => 1 / 4 + p.1 / 2) (by fun_prop)
+  have g1 := CylinderRealZeros.recipGamma_comp (f := fun p : ℂ × ℂ => 3 / 4 + p.1 / 2) (by fun_prop)
+  have g2 := CylinderRealZeros.recipGamma_comp (f := fun p : ℂ × ℂ => 1 / 4 + p.1 / 2) (by fun_prop)
   have c1 : Continuous fun p : ℂ × ℂ => (2 : ℂ) ^ (-(p.1 / 2 + 1 / 4)) :=
     Continuous.const_cpow (by fun_prop) (Or.inl two_ne_zero)
   have c2 : Continuous fun p : ℂ × ℂ => (2 : ℂ) ^ (-(p.1 / 2 - 1 / 4)) :=
@@ -497,23 +515,24 @@ theorem pcfPZ_pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) 
   fun_prop
 
 /-- `U'(a,z)` is jointly continuous in `(a,z)`. -/
-theorem pcfPZ_pcfUDeriv_continuous : Continuous (fun p : ℂ × ℂ => pcfUDeriv p.1 p.2) := by
+theorem CylinderRealZeros.pcfUDeriv_continuous : Continuous
+    (fun p : ℂ × ℂ => pcfUDeriv p.1 p.2) := by
   have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := Complex.one_div_two_ne_neg_natCast
   have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := Complex.three_div_two_ne_neg_natCast
   have hb3' : ∀ k : ℕ, (1 / 2 + 1 : ℂ) ≠ -k := by norm_num;
                                                   exact Complex.three_div_two_ne_neg_natCast
   have hb5 : ∀ k : ℕ, (3 / 2 + 1 : ℂ) ≠ -k := by norm_num; exact five_halves_ne_neg_nat
   unfold pcfUDeriv pcfEvenDeriv pcfOddDeriv
-  have k1 := pcfPZ_kummerM_comp hb1 (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4)
+  have k1 := CylinderRealZeros.kummerM_comp hb1 (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4)
     (g := fun p => p.2 ^ 2 / 2) (by fun_prop) (by fun_prop)
-  have k3 := pcfPZ_kummerM_comp hb3 (f := fun p : ℂ × ℂ => p.1 / 2 + 3 / 4)
+  have k3 := CylinderRealZeros.kummerM_comp hb3 (f := fun p : ℂ × ℂ => p.1 / 2 + 3 / 4)
     (g := fun p => p.2 ^ 2 / 2) (by fun_prop) (by fun_prop)
-  have k1' := pcfPZ_kummerM_comp hb3' (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4 + 1)
+  have k1' := CylinderRealZeros.kummerM_comp hb3' (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4 + 1)
     (g := fun p => p.2 ^ 2 / 2) (by fun_prop) (by fun_prop)
-  have k3' := pcfPZ_kummerM_comp hb5 (f := fun p : ℂ × ℂ => p.1 / 2 + 3 / 4 + 1)
+  have k3' := CylinderRealZeros.kummerM_comp hb5 (f := fun p : ℂ × ℂ => p.1 / 2 + 3 / 4 + 1)
     (g := fun p => p.2 ^ 2 / 2) (by fun_prop) (by fun_prop)
-  have g1 := pcfPZ_recipGamma_comp (f := fun p : ℂ × ℂ => 3 / 4 + p.1 / 2) (by fun_prop)
-  have g2 := pcfPZ_recipGamma_comp (f := fun p : ℂ × ℂ => 1 / 4 + p.1 / 2) (by fun_prop)
+  have g1 := CylinderRealZeros.recipGamma_comp (f := fun p : ℂ × ℂ => 3 / 4 + p.1 / 2) (by fun_prop)
+  have g2 := CylinderRealZeros.recipGamma_comp (f := fun p : ℂ × ℂ => 1 / 4 + p.1 / 2) (by fun_prop)
   have c1 : Continuous fun p : ℂ × ℂ => (2 : ℂ) ^ (-(p.1 / 2 + 1 / 4)) :=
     Continuous.const_cpow (by fun_prop) (Or.inl two_ne_zero)
   have c2 : Continuous fun p : ℂ × ℂ => (2 : ℂ) ^ (-(p.1 / 2 - 1 / 4)) :=
@@ -522,7 +541,7 @@ theorem pcfPZ_pcfUDeriv_continuous : Continuous (fun p : ℂ × ℂ => pcfUDeriv
 
 /-- A solution of `f'' = q f` with `q ≥ 0` on `[X, ∞)` that decays at infinity and has only
 simple zeros has no zero in `[X, ∞)`. -/
-theorem pcfPZ_no_zero_of_decay {f f' q : ℝ → ℝ} {X : ℝ}
+theorem CylinderRealZeros.no_zero_of_decay {f f' q : ℝ → ℝ} {X : ℝ}
     (hf : ∀ x, X ≤ x → HasDerivAt f (f' x) x)
     (hf' : ∀ x, X ≤ x → HasDerivAt f' (q x * f x) x) (hq : ∀ x, X ≤ x → 0 ≤ q x)
     (hlim : Tendsto f atTop (𝓝 0)) (hs : ∀ x, X ≤ x → f x = 0 → f' x ≠ 0) :
@@ -577,7 +596,7 @@ theorem pcfPZ_no_zero_of_decay {f f' q : ℝ → ℝ} {X : ℝ}
   exact hs x₀ hx₀ h0 (tendsto_nhds_unique hsl hc)
 
 /-- `U(a,x) → 0` as `x → +∞` for real `a`. -/
-theorem pcfPZ_tendsto_pcfU (a : ℝ) : Tendsto (fun x : ℝ => pcfU a x) atTop (𝓝 0) := by
+theorem CylinderRealZeros.tendsto_pcfU (a : ℝ) : Tendsto (fun x : ℝ => pcfU a x) atTop (𝓝 0) := by
   have h0 := hasAsymptoticExpansion_pcfU (a : ℂ) 0
   simp only [Finset.range_zero, Finset.sum_empty, sub_zero, CharP.cast_eq_zero, mul_zero,
     sub_zero] at h0
@@ -599,37 +618,38 @@ theorem pcfPZ_tendsto_pcfU (a : ℝ) : Tendsto (fun x : ℝ => pcfU a x) atTop (
   ring_nf
 
 /-- The real derivative family of `U` along real arguments. -/
-theorem pcfPZ_hasDerivAt_re (t x : ℝ) :
+theorem CylinderRealZeros.hasDerivAt_re (t x : ℝ) :
     HasDerivAt (fun y : ℝ => (pcfU t y).re) (pcfUDeriv t x).re x :=
   (hasDerivAt_pcfU t x).real_of_complex
 
 /-- Weber's equation for the real parts. -/
-theorem pcfPZ_hasDerivAt_deriv_re (t x : ℝ) :
+theorem CylinderRealZeros.hasDerivAt_deriv_re (t x : ℝ) :
     HasDerivAt (fun y : ℝ => (pcfUDeriv t y).re) ((x ^ 2 / 4 + t) * (pcfU t x).re) x := by
   have h := (hasDerivAt_pcfUDeriv t x).real_of_complex
   rwa [show ((x : ℂ) ^ 2 / 4 + t) = ((x ^ 2 / 4 + t : ℝ) : ℂ) by push_cast; ring,
     Complex.re_ofReal_mul] at h
 
 /-- `U(t,x)` is real for real `t, x`. -/
-theorem pcfPZ_eq_re (t x : ℝ) : pcfU t x = ((pcfU t x).re : ℂ) :=
+theorem CylinderRealZeros.eq_re (t x : ℝ) : pcfU t x = ((pcfU t x).re : ℂ) :=
   Complex.ext (by simp) (by simp [pcfU_real])
 
 /-- `U'(t,x)` is real for real `t, x`. -/
-theorem pcfPZ_deriv_eq_re (t x : ℝ) : pcfUDeriv t x = ((pcfUDeriv t x).re : ℂ) := by
+theorem CylinderRealZeros.deriv_eq_re (t x : ℝ) : pcfUDeriv t x = ((pcfUDeriv t x).re : ℂ) := by
   have h1 : HasDerivAt (fun y : ℝ => pcfU t y) (pcfUDeriv t x) x :=
       (hasDerivAt_pcfU t x).comp_ofReal
   have h2 : HasDerivAt (fun y : ℝ => (((pcfU t y).re : ℝ) : ℂ)) ((pcfUDeriv t x).re : ℂ) x :=
-    (pcfPZ_hasDerivAt_re t x).ofReal_comp
+    (CylinderRealZeros.hasDerivAt_re t x).ofReal_comp
   have he : (fun y : ℝ => (((pcfU t y).re : ℝ) : ℂ)) = fun y : ℝ => pcfU t y :=
-    funext fun y => (pcfPZ_eq_re t y).symm
+    funext fun y => (CylinderRealZeros.eq_re t y).symm
   rw [he] at h2
   exact h1.unique h2
 
 /-- Real zeros of `U(t,·)` are simple (Wronskian with `V`). -/
-theorem pcfPZ_simple (t x : ℝ) (h : (pcfU t x).re = 0) : (pcfUDeriv t x).re ≠ 0 := by
+theorem CylinderRealZeros.zero_simple (t x : ℝ) (h : (pcfU t x).re = 0) :
+    (pcfUDeriv t x).re ≠ 0 := by
   intro h'
-  have hU : pcfU t x = 0 := by rw [pcfPZ_eq_re, h, Complex.ofReal_zero]
-  have hU' : pcfUDeriv t x = 0 := by rw [pcfPZ_deriv_eq_re, h', Complex.ofReal_zero]
+  have hU : pcfU t x = 0 := by rw [CylinderRealZeros.eq_re, h, Complex.ofReal_zero]
+  have hU' : pcfUDeriv t x = 0 := by rw [CylinderRealZeros.deriv_eq_re, h', Complex.ofReal_zero]
   have hW := pcfV_wronskian (t : ℂ) (x : ℂ)
   rw [deriv_pcfU, hU, hU'] at hW
   have : (0 : ℝ) < Real.sqrt (2 / π) := Real.sqrt_pos.mpr (by positivity)
@@ -637,36 +657,38 @@ theorem pcfPZ_simple (t x : ℝ) (h : (pcfU t x).re = 0) : (pcfUDeriv t x).re �
   exact h0 (by rw [← hW]; ring)
 
 /-- `U(t,0) ≠ 0` away from the poles of `Γ(3/4 + t/2)`. -/
-theorem pcfPZ_zero_ne {t : ℝ} (h : ∀ m : ℕ, (3 / 4 + t / 2 : ℂ) ≠ -m) : pcfU t 0 ≠ 0 := by
+theorem CylinderRealZeros.zero_ne {t : ℝ} (h : ∀ m : ℕ, (3 / 4 + t / 2 : ℂ) ≠ -m) :
+    pcfU t 0 ≠ 0 := by
   rw [pcfU_zero]
   refine div_ne_zero ?_ (mul_ne_zero ?_ (Complex.Gamma_ne_zero h))
   · exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   · exact (Complex.cpow_ne_zero_iff.mpr (Or.inl two_ne_zero))
 
 /-- No zeros of `U(t,x)` where `x²/4 + t ≥ 0` beyond `X`. -/
-theorem pcfPZ_far {t : ℝ} {X : ℝ} (hX : ∀ x, X ≤ x → 0 ≤ x ^ 2 / 4 + t) :
+theorem CylinderRealZeros.no_zero_far {t : ℝ} {X : ℝ} (hX : ∀ x, X ≤ x → 0 ≤ x ^ 2 / 4 + t) :
     ∀ x, X ≤ x → (pcfU t x).re ≠ 0 :=
-  pcfPZ_no_zero_of_decay (f := fun y : ℝ => (pcfU t y).re) (f' := fun y : ℝ => (pcfUDeriv t y).re)
-    (q := fun y => y ^ 2 / 4 + t) (fun x _ => pcfPZ_hasDerivAt_re t x)
-    (fun x _ => pcfPZ_hasDerivAt_deriv_re t x) hX
-    (by have h := (Complex.continuous_re.tendsto 0).comp (pcfPZ_tendsto_pcfU t);
+  CylinderRealZeros.no_zero_of_decay (f := fun y : ℝ => (pcfU t y).re)
+      (f' := fun y : ℝ => (pcfUDeriv t y).re)
+    (q := fun y => y ^ 2 / 4 + t) (fun x _ => CylinderRealZeros.hasDerivAt_re t x)
+    (fun x _ => CylinderRealZeros.hasDerivAt_deriv_re t x) hX
+    (by have h := (Complex.continuous_re.tendsto 0).comp (CylinderRealZeros.tendsto_pcfU t);
         rw [Complex.zero_re] at h; exact h)
-    (fun x _ h => pcfPZ_simple t x h)
+    (fun x _ h => CylinderRealZeros.zero_simple t x h)
 
 /-- Vanishing of `U(t,x)` through its real part. -/
-theorem pcfPZ_re_eq_zero_iff (t x : ℝ) : (pcfU t x).re = 0 ↔ pcfU t x = 0 := by
+theorem CylinderRealZeros.re_eq_zero_iff (t x : ℝ) : (pcfU t x).re = 0 ↔ pcfU t x = 0 := by
   constructor
-  · intro h; rw [pcfPZ_eq_re, h, Complex.ofReal_zero]
+  · intro h; rw [CylinderRealZeros.eq_re, h, Complex.ofReal_zero]
   · intro h; rw [h, Complex.zero_re]
 
 /-- Base count: `U(-2n-1/2, x)` has exactly `n` positive zeros. -/
-theorem pcfPZ_base (n : ℕ) :
+theorem CylinderRealZeros.zero_count_base (n : ℕ) :
     {x : ℝ | x ∈ Ici 0 ∧ (pcfU ((-2 * n - 1 / 2 : ℝ) : ℂ) x).re = 0}.ncard = n := by
   obtain ⟨hfin, hcard, -⟩ := pcfU_hermite_zero_count (2 * n)
   have hc : ((-2 * n - 1 / 2 : ℝ) : ℂ) = -((2 * n : ℕ) : ℂ) - 1 / 2 := by push_cast; ring
   set Z := {x : ℝ | pcfU (-((2 * n : ℕ) : ℂ) - 1 / 2) x = 0} with hZ
   have h0 : (0 : ℝ) ∉ Z := by
-    have := pcfPZ_zero_ne (t := -2 * n - 1 / 2) (fun m h => by
+    have := CylinderRealZeros.zero_ne (t := -2 * n - 1 / 2) (fun m h => by
       have h' := congrArg Complex.re h
       simp at h'
       have h2 : ((1 : ℤ) : ℝ) = ((2 * ((n : ℤ) - m) : ℤ) : ℝ) := by push_cast; linarith
@@ -684,7 +706,7 @@ theorem pcfPZ_base (n : ℕ) :
     ext x
     simp only [mem_ofPred_eq, mem_Ici, P]
     rw [show (((-2 * n - 1 / 2 : ℝ) : ℂ)) = (((-2 * n - 1 / 2 : ℝ) : ℝ) : ℂ) from rfl,
-      pcfPZ_re_eq_zero_iff, hc]
+      CylinderRealZeros.re_eq_zero_iff, hc]
     constructor
     · rintro ⟨hx, hz⟩
       refine ⟨lt_of_le_of_ne hx ?_, hz⟩
@@ -725,15 +747,15 @@ theorem pcfU_positive_zero_count {a : ℝ} (n : ℕ) (hn : 0 < n) (h0 : -2*n-3/2
   set Y' : ℝ → ℝ → ℝ := fun t x => (pcfUDeriv t x).re with hY'
   have hcR : Continuous (fun p : ℝ × ℝ => ((p.1 : ℂ), (p.2 : ℂ))) := by fun_prop
   have hcY : ContinuousOn (Function.uncurry Y) (S ×ˢ univ) :=
-    (Complex.continuous_re.comp (pcfPZ_pcfU_continuous.comp hcR)).continuousOn
+    (Complex.continuous_re.comp (CylinderRealZeros.pcfU_continuous.comp hcR)).continuousOn
   have hcY' : ContinuousOn (Function.uncurry Y') (S ×ˢ univ) :=
-    (Complex.continuous_re.comp (pcfPZ_pcfUDeriv_continuous.comp hcR)).continuousOn
+    (Complex.continuous_re.comp (CylinderRealZeros.pcfUDeriv_continuous.comp hcR)).continuousOn
   have hY0 : ∀ t ∈ S, Y t 0 ≠ 0 := by
     intro t ht h
     have h' : pcfU t 0 = 0 := by
-      have := (pcfPZ_re_eq_zero_iff t 0).mp h
+      have := (CylinderRealZeros.re_eq_zero_iff t 0).mp h
       simpa using this
-    refine pcfPZ_zero_ne (t := t) (fun m hm => ?_) h'
+    refine CylinderRealZeros.zero_ne (t := t) (fun m hm => ?_) h'
     have hre := congrArg Complex.re hm
     simp at hre
     have hm1 : (m : ℝ) < n := by linarith [ht.1]
@@ -743,24 +765,25 @@ theorem pcfU_positive_zero_count {a : ℝ} (n : ℕ) (hn : 0 < n) (h0 : -2*n-3/2
     omega
   have hfar : ∀ t ∈ S, ∀ x, (4 * n + 4 : ℝ) ≤ x → Y t x ≠ 0 := by
     intro t ht
-    refine pcfPZ_far (fun x hx => ?_)
+    refine CylinderRealZeros.no_zero_far (fun x hx => ?_)
     have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
     nlinarith [ht.1]
   have hmem : (-2 * n - 1 / 2 : ℝ) ∈ S := ⟨by linarith, by linarith⟩
-  have heq := ODE.sturmDef_ncard_Ici_eq_of_isPreconnected (Y := Y) (Y' := Y') (Λ := S)
+  have heq := ODE.SturmDeformation.ncard_Ici_eq_of_isPreconnected (Y := Y) (Y' := Y') (Λ := S)
     (U := univ) (a := 0) (b := 4 * n + 4) isOpen_Ioo isOpen_univ (subset_univ _) hcY hcY'
-    (fun t _ x _ => pcfPZ_hasDerivAt_re t x) (fun t _ x _ h => pcfPZ_simple t x h)
+    (fun t _ x _ => CylinderRealZeros.hasDerivAt_re t x)
+        (fun t _ x _ h => CylinderRealZeros.zero_simple t x h)
     isPreconnected_Ioo subset_rfl hY0 hfar (t₁ := a) (t₂ := -2 * n - 1 / 2) ⟨h0, h1⟩ hmem
-  have hbase := pcfPZ_base n
+  have hbase := CylinderRealZeros.zero_count_base n
   have hset : {x : ℝ | 0 < x ∧ pcfU a x = 0} = {x | x ∈ Ici 0 ∧ Y a x = 0} := by
     ext x
-    simp only [mem_ofPred_eq, mem_Ici, hY, pcfPZ_re_eq_zero_iff]
+    simp only [mem_ofPred_eq, mem_Ici, hY, CylinderRealZeros.re_eq_zero_iff]
     constructor
     · rintro ⟨hx, hz⟩; exact ⟨hx.le, hz⟩
     · rintro ⟨hx, hz⟩
       refine ⟨lt_of_le_of_ne hx ?_, hz⟩
       rintro rfl
-      exact hY0 a ⟨h0, h1⟩ ((pcfPZ_re_eq_zero_iff a 0).mpr (by simpa using hz))
+      exact hY0 a ⟨h0, h1⟩ ((CylinderRealZeros.re_eq_zero_iff a 0).mpr (by simpa using hz))
   have hcard : ({x : ℝ | 0 < x ∧ pcfU a x = 0} : Set ℝ).ncard = n := by
     rw [hset, heq]
     exact hbase

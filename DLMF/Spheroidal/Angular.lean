@@ -359,7 +359,7 @@ private lemma ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolyP (n m : ℕ) {x : 
       ((-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) x) := by
   rw [ferrersP_nat (n : ℂ) m hx]
   have : DLMF.Legendre.legendreP (n : ℂ) = DLMF.OrthogonalPolynomials.legendrePolyP n :=
-    funext fun z => DLMF.Legendre.legSer_legendreP_nat n z
+    funext fun z => DLMF.Legendre.GeneratingSeries.legendreP_nat n z
   rw [this]
   ring
 
@@ -789,7 +789,7 @@ private lemma integral_re_ferrersP_mul_re_ferrersP {m n ν : ℕ} (hn : m ≤ n)
   rw [← integral_weight_mul_jet_mul_jet hn ν]
   apply intervalIntegral_neg_one_one_congr_Ioo
   intro x hx
-  have h := congrArg Complex.re (legInt_ferrersP_mul n ν m hx)
+  have h := congrArg Complex.re (OrthogonalityIntegrals.ferrersP_mul n ν m hx)
   rw [jet_ofReal_eq_re n m x, jet_ofReal_eq_re ν m x,
     show ((1 : ℂ) - (x : ℂ) ^ 2) ^ m = (((1 - x ^ 2) ^ m : ℝ) : ℂ) by push_cast; rfl,
     ← ofReal_mul, ← ofReal_mul, ofReal_re, Complex.mul_re, im_ferrersP_natCast n m hx,
@@ -1206,18 +1206,6 @@ theorem spheroidalPsC_gamma_zero {n m : ℕ} (hmn : m ≤ n) {z : ℂ} (hz : z �
     spheroidalPsC n m z 0 = associatedP n m z ∧ spheroidalQsC n m z 0 = associatedQ n m z := by
   sorry
 
-/-- **Wronskian** (DLMF 30.6.3):
-`𝒲{𝑃s^m_n, 𝑄s^m_n} = (-1)^m (n+m)!/((1-z²)(n-m)!) A^m_n A^{-m}_n` on `ℂ ∖ (-∞, 1]`. -/
-@[dlmf 30.6.E3]
-theorem wronskian_spheroidalPsC_spheroidalQsC {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
-    (hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) {z : ℂ}
-    (hz : z ∈ spheroidalCutPlane) :
-    spheroidalPsC n m z γ2 * deriv (fun t => spheroidalQsC n m t γ2) z -
-        deriv (fun t => spheroidalPsC n m t γ2) z * spheroidalQsC n m z γ2 =
-      (-1) ^ m * ((n + m).factorial : ℂ) / ((1 - z ^ 2) * (n - m).factorial) *
-        spheroidalA n m γ2 * spheroidalANeg n m γ2 := by
-  sorry
-
 /-- Boundary limits of `𝑃s` along a filter on `ε` approaching `0`, given the limit of
 `log(x + εi - 1)`. -/
 private lemma tendsto_spheroidalPsC_of_tendsto_log {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {x : ℝ}
@@ -1336,6 +1324,67 @@ theorem tendsto_spheroidalQsC_boundary_lower {n m : ℕ} (hmn : m ≤ n) (γ2 : 
     Tendsto (fun ε : ℝ => spheroidalQsC n m (x + ε * I) γ2) (𝓝[<] 0)
       (𝓝 (I ^ m * (spheroidalQs n m x γ2 + I * π / 2 * spheroidalPs n m x γ2))) := by
   sorry
+
+/-- **Wronskian** (DLMF 30.6.3):
+`𝒲{𝑃s^m_n, 𝑄s^m_n} = (-1)^m (n+m)!/((1-z²)(n-m)!) A^m_n A^{-m}_n` on `ℂ ∖ (-∞, 1]`. Stronger than
+DLMF, which assumes that the forward recursion of §30.8(ii) does not vanish. Both sides are
+computed from the boundary values from above (`wronskian_cutPlane_of_boundary`) and 30.5.4. -/
+@[dlmf 30.6.E3]
+theorem wronskian_spheroidalPsC_spheroidalQsC' {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {z : ℂ}
+    (hz : z ∈ spheroidalCutPlane) :
+    spheroidalPsC n m z γ2 * deriv (fun t => spheroidalQsC n m t γ2) z -
+        deriv (fun t => spheroidalPsC n m t γ2) z * spheroidalQsC n m z γ2 =
+      (-1) ^ m * ((n + m).factorial : ℂ) / ((1 - z ^ 2) * (n - m).factorial) *
+        spheroidalA n m γ2 * spheroidalANeg n m γ2 := by
+  have hP := isSpheroidalSolutionReal_spheroidalPs hmn γ2
+  have hQs := spheroidalQs_spec' hmn γ2
+  have hQC := spheroidalQsC_spec' hmn γ2
+  have hPC : IsSpheroidalSolutionOn (spheroidalEigenvalue n m γ2 : ℝ) (γ2 : ℝ) ((m : ℝ) : ℂ)
+      spheroidalCutPlane (fun z => spheroidalPsC n m z γ2) := by
+    simpa using isSpheroidalSolutionOn_spheroidalPsC hmn γ2
+  have hQC' : IsSpheroidalSolutionOn (spheroidalEigenvalue n m γ2 : ℝ) (γ2 : ℝ) ((m : ℝ) : ℂ)
+      spheroidalCutPlane (fun z => spheroidalQsC n m z γ2) := by
+    simpa using hQC.ode
+  have h0 : (0 : ℝ) ∈ Ioo (-1 : ℝ) 1 := by norm_num
+  have hW := wronskian_cutPlane_of_boundary hPC hQC' hP hP hQs.ode hP
+    (c₁ := (-I) ^ m) (c₂ := 0) (d₁ := (-I) ^ m) (d₂ := -((-I) ^ m * (I * π / 2)))
+    (fun x hx => by convert (tendsto_spheroidalPsC_boundary hmn γ2 hx).1 using 2; ring)
+    (fun x hx => by convert hQC.boundary x hx using 2; ring) hz h0
+  have hw0 := hQs.wronskian 0 h0
+  have hz1 := one_sub_sq_ne_zero_of_mem_spheroidalCutPlane hz
+  have hI : ((-I) ^ m) ^ 2 = (-1 : ℂ) ^ m := by
+    rw [← pow_mul, mul_comm, pow_mul]; simp
+  have hw0' : ((spheroidalPs n m 0 γ2 : ℝ) : ℂ) *
+        ((deriv (fun t => spheroidalQs n m t γ2) 0 : ℝ) : ℂ) -
+        ((deriv (fun t => spheroidalPs n m t γ2) 0 : ℝ) : ℂ) * ((spheroidalQs n m 0 γ2 : ℝ) : ℂ) =
+      ((n + m).factorial : ℂ) / (n - m).factorial * spheroidalA n m γ2 *
+        spheroidalANeg n m γ2 := by
+    have := congrArg (fun r : ℝ => (r : ℂ)) hw0
+    push_cast at this ⊢
+    rw [this]; ring
+  have key : (1 - z ^ 2) * (spheroidalPsC n m z γ2 * deriv (fun t => spheroidalQsC n m t γ2) z -
+        deriv (fun t => spheroidalPsC n m t γ2) z * spheroidalQsC n m z γ2) =
+      (-1) ^ m * (((n + m).factorial : ℂ) / (n - m).factorial * spheroidalA n m γ2 *
+        spheroidalANeg n m γ2) := by
+    rw [hW, ← hw0', ← hI]
+    push_cast
+    ring
+  field_simp
+  linear_combination key
+
+
+/-- **Wronskian** (DLMF 30.6.3):
+`𝒲{𝑃s^m_n, 𝑄s^m_n} = (-1)^m (n+m)!/((1-z²)(n-m)!) A^m_n A^{-m}_n` on `ℂ ∖ (-∞, 1]`. Proved by
+`wronskian_spheroidalPsC_spheroidalQsC'`, which does not need the hypothesis. -/
+@[dlmf 30.6.E3]
+theorem wronskian_spheroidalPsC_spheroidalQsC {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
+    (_hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) {z : ℂ}
+    (hz : z ∈ spheroidalCutPlane) :
+    spheroidalPsC n m z γ2 * deriv (fun t => spheroidalQsC n m t γ2) z -
+        deriv (fun t => spheroidalPsC n m t γ2) z * spheroidalQsC n m z γ2 =
+      (-1) ^ m * ((n + m).factorial : ℂ) / ((1 - z ^ 2) * (n - m).factorial) *
+        spheroidalA n m γ2 * spheroidalANeg n m γ2 :=
+  wronskian_spheroidalPsC_spheroidalQsC' hmn γ2 hz
 
 /-! ### Flammer's normalization (§30.1) -/
 

@@ -42,6 +42,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF.Confl
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Airy
 
 /-- The determinant of the value/first-derivative/second-derivative matrix. -/

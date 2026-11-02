@@ -26,10 +26,10 @@ gaps in the special functions coverage of Mathlib and then we attempt to fill in
 DLMF has the focus of our attention. Results that come only from AAR or the other
 supporting sources and have no DLMF counterpart (for example Apéry's theorem, the
 Hasse–Davenport relation, the finite-field Selberg integral, Siegel's inequality,
-Vietoris's inequality and Favard's theorem) are retained, admissions included, but have lower priority: plan proof
-rounds and new development around DLMF statements first. The Askey–Gasper inequality
-has a DLMF counterpart in 16.23.E1, and the Ramanujan partition congruences are stated in
-DLMF 27.14(v); both remain in the DLMF priority scope.
+Vietoris's inequality and Favard's theorem) are retained, admissions included, but have
+lower priority: plan proof rounds and new development around DLMF statements first. The
+Askey–Gasper inequality has a DLMF counterpart in 16.23.E1, and the Ramanujan partition
+congruences are stated in DLMF 27.14(v); both remain in the DLMF priority scope.
 
 ## Dependencies and import layers
 
@@ -111,15 +111,38 @@ and the meaning of totalized series and integrals when adopting upstream stateme
 
 - Every declaration under `DLMF/` lives in `DLMF.<Area>`; real-variable forms go in the
   `Real` sub-namespace of the area (`DLMF.Gamma.Real.digamma`, `DLMF.Confluent.Real.sinInt`).
-  The only exception is a dot-notation lemma whose namespace is fixed by the head symbol of its
+  An area namespace may span several directories: `DLMF.Confluent` covers `Confluent/`,
+  `ParabolicCylinder/`, `IncompleteGamma/`, `ErrorFunctions/` and `ExpIntegrals/`, and
+  `DLMF.Hypergeometric` covers `Hypergeometric/` and `GeneralizedHypergeometric/`. The shared
+  conventions and infrastructure of `DLMF/Core/` live in `DLMF.Core`; files that use them
+  `open DLMF.Core`. Nothing is declared directly in `DLMF`.
+- Helper families go in a descriptive sub-namespace of the area
+  (`DLMF.Bessel.SphericalSeries`, `DLMF.Hypergeometric.DixonWZ`), never behind an abbreviated
+  name prefix (`sphSeries_`) and never in an `…Aux` namespace. The only exception to the
+  area namespace is a dot-notation lemma whose namespace is fixed by the head symbol of its
   conclusion (`DifferentiableOn.regularizedGaussHG`, `DirichletCharacter.…`). Never declare a
   new name in a Mathlib or TauCeti namespace from `DLMF/`: a later upstream declaration of the
   same name breaks the build.
+- Every declaration name is spelled out: predicates and structures (`HasParityDegreeSupport`,
+  not `PcfLGGood`), definitions (`ContinuedFractionTail.numerator`, not `num`) and lemmas.
+  Lemma names follow Mathlib's conclusion-first style (`continuous_numerator`, not
+  `num_continuous`). Names never carry identifiers of development rounds or agents, neither
+  in declarations nor in file names.
+- Record every rename of a public declaration or module in
+  `reports/RenameMap20261101.tsv` (tab-separated: kind, old name, new name, reason).
+- Every new module must be reachable from its area umbrella (`DLMF/<Area>.lean`, or the
+  sub-umbrella that collects its directory); a new file below `Basic/` is imported by the
+  area's `Basic.lean`. Register a new module in the same change that creates it.
 - `DLMFMathlib/` holds results that extend a Mathlib API and are not specific to DLMF; they use
   the Mathlib namespace of that API and Mathlib-style names, as candidates for upstreaming.
   Definitions there follow Mathlib's placement (root-level `eulerNumber` beside Mathlib's
   `bernoulli`); file-local helper families go in a descriptive namespace, never behind an
   abbreviated prefix such as `stRem_`.
+- A lemma that is not specific to special functions (real analysis, measure theory,
+  filters, complex analysis, linear algebra) goes in `DLMFMathlib/` under its Mathlib
+  namespace, not in an area: for example `Real.tendsto_integral_mul_sin_div_of_boundedVariationOn`
+  in `DLMFMathlib/Analysis/Fourier/DirichletJordan.lean`. Register a new `DLMFMathlib` module
+  in `DLMFMathlib.lean` together with a line in its module docstring.
 - When Mathlib or TauCeti already has a DLMF function, one of three patterns applies:
   1. Upstream matches DLMF (same normalization, domain and branch): use it directly, define
      nothing locally, and record each DLMF item it covers with
@@ -138,6 +161,25 @@ and the meaning of totalized series and integrals when adopting upstream stateme
   or, if the definitions agree, replace the local definition by the upstream one, keeping the
   local name as a deprecated alias for one cleanup round. Check new Mathlib and TauCeti
   versions for such overlaps when updating dependencies.
+
+## Statements and style
+
+- A stronger form of a DLMF statement (weaker hypotheses, a wider domain) goes in a primed
+  declaration `foo'` whose docstring says "stronger than DLMF, which assumes …"; the
+  original `foo` remains as the DLMF statement and becomes a corollary. Both carry the
+  `@[dlmf]` tag, the primed one with a comment beginning `"stronger than DLMF: …"`. Never
+  drop a tag because the Lean statement is more general; do flag a statement that is weaker
+  than DLMF (a restricted range, `o(1)` in place of `O(…)`).
+- Drop a DLMF exclusion of poles or singular points when Lean's totalized statement still
+  holds there.
+- Changing the statement of a tagged theorem or the body of a definition needs the user's
+  approval. Report a suspected-false statement with the evidence, and do not silently weaken
+  or repair it.
+- Lines are at most 100 characters and files at most 1,500 lines
+  (`python3 scripts/check_file_lengths.py`); split a long file along its DLMF subsections.
+- Module and declaration docstrings follow Mathlib style: state the mathematics, the DLMF
+  references and the hypotheses. They contain no history (no dates, development rounds,
+  former names or "previously admitted" remarks); history belongs in `REVIEW.md`.
 
 ## DLMF statement acquisition
 

@@ -40,6 +40,8 @@ open Complex MeasureTheory Set Filter
 
 open scoped Real Topology ComplexConjugate
 
+open DLMF.Core
+
 namespace DLMF.CoalescingSaddles
 
 /-! ### Agreement with the oscillatory integrals of DLMF (§36.2(i)) -/
@@ -158,7 +160,7 @@ private lemma norm_integral_cuspoidPotential_arc_le (K : ℕ) (x : Fin K → ℝ
           (Eventually.of_forall hbound) (Continuous.intervalIntegrable (by fun_prop) _ _)
     _ = R * ∫ y in (0 : ℝ)..cuspoidAngle K, Real.exp (-(a * y)) :=
         intervalIntegral.integral_const_mul _ _
-    _ ≤ R * (1 / a) := by gcongr; exact DLMF.Airy.airyInt_integral_exp_neg_le ha0 _
+    _ ≤ R * (1 / a) := by gcongr; exact DLMF.Airy.IntegralRepresentation.integral_exp_neg_le ha0 _
     _ = π / (κ * R) := by rw [ha]; field_simp
 
 /-- An entire function has an entire primitive. -/
@@ -184,9 +186,9 @@ private lemma tendsto_intervalIntegral_cuspoidPotential_atTop (K : ℕ) (x : Fin
       (∫ r in (0 : ℝ)..R, u * f (r * u)) -
         ∫ y in (0 : ℝ)..cuspoidAngle K, I * R * exp (y * I) * f (R * exp (y * I)) := by
     intro R
-    have h1 := DLMF.Airy.airyInt_integral_segment hG hfc 1 0 R
-    have h2 := DLMF.Airy.airyInt_integral_segment hG hfc u 0 R
-    have h3 := DLMF.Airy.airyInt_integral_arc hG hfc R 0 (cuspoidAngle K)
+    have h1 := DLMF.Airy.IntegralRepresentation.integral_segment hG hfc 1 0 R
+    have h2 := DLMF.Airy.IntegralRepresentation.integral_segment hG hfc u 0 R
+    have h3 := DLMF.Airy.IntegralRepresentation.integral_arc hG hfc R 0 (cuspoidAngle K)
     simp only [one_mul, mul_one, ofReal_zero, zero_mul] at h1 h2 h3
     rw [h1, h2, h3, exp_zero, mul_one]
     ring
@@ -453,10 +455,10 @@ private lemma integral_foldContourIntegrand_eq_airyAi (c : ℂ) :
     exp (I * (cuspoidContour 1 r ^ 3 + c * cuspoidContour 1 r)) with hF
   have hint : Integrable F := integrable_foldContourIntegrand c
   set u : ℂ := exp (((π / 6 : ℝ) : ℂ) * I) with hu
-  have hu3 : u ^ 3 = I := DLMF.Airy.airyInt_exp_sixth_cube
+  have hu3 : u ^ 3 = I := DLMF.Airy.IntegralRepresentation.exp_sixth_cube
   have hθ : (cuspoidAngle 1 : ℂ) = ((π / 6 : ℝ) : ℂ) := by
     unfold cuspoidAngle; push_cast; ring
-  have hv : exp (((-π / 3 : ℝ) : ℂ) * I) = -I * u := DLMF.Airy.airyInt_exp_neg_third
+  have hv : exp (((-π / 3 : ℝ) : ℂ) * I) = -I * u := DLMF.Airy.IntegralRepresentation.exp_neg_third
   have hv' : exp (((π / 3 : ℝ) : ℂ) * I) = u ^ 2 := by
     rw [hu, ← exp_nat_mul]; congr 1; push_cast; ring
   have hm : exp (-(cuspoidAngle 1 : ℂ) * I) = -I * u ^ 2 := by
@@ -509,10 +511,12 @@ private lemma integral_foldContourIntegrand_eq_airyAi (c : ℂ) :
   -- the Airy contour integral as two rays
   obtain ⟨G, hG⟩ := exists_hasDerivAt_primitive (f := Kf) (by rw [hKf]; fun_prop)
   have hKc : Continuous Kf := by rw [hKf]; fun_prop
-  have hcont := DLMF.Airy.airyInt_contourIntegral_eq_rays hG hKc (-π / 3) (π / 3)
-    (DLMF.Airy.airyInt_integrableOn_ray w (DLMF.Airy.airyInt_exp_three_mul _ (-1)
+  have hcont := DLMF.Airy.IntegralRepresentation.contourIntegral_eq_rays hG hKc (-π / 3) (π / 3)
+    (DLMF.Airy.IntegralRepresentation.integrableOn_ray w
+        (DLMF.Airy.IntegralRepresentation.exp_three_mul _ (-1)
       (by push_cast; ring)))
-    (DLMF.Airy.airyInt_integrableOn_ray w (DLMF.Airy.airyInt_exp_three_mul _ 0
+    (DLMF.Airy.IntegralRepresentation.integrableOn_ray w
+        (DLMF.Airy.IntegralRepresentation.exp_three_mul _ 0
       (by push_cast; ring)))
   have hAi := DLMF.Airy.airyAi_contour_integral w
   rw [← hKf, hcont] at hAi
@@ -750,7 +754,8 @@ theorem hyperbolicUmbilicIntegral_eq_airy (x y z : ℝ) :
     rw [hh0]
     exact (by fun_prop : Continuous fun s : ℂ => exp (I * (s ^ 3 + x * s))).mul
       (DLMF.Airy.differentiable_airyAi.continuous.comp (by fun_prop))
-  rw [DLMF.Airy.airyInt_contourIntegral_eq_rays hG hc (5 * π / 6) (π / 6) hray2 hray1, hval,
+  rw [DLMF.Airy.IntegralRepresentation.contourIntegral_eq_rays hG hc (5 * π / 6) (π / 6)
+      hray2 hray1, hval,
     ← intervalIntegral.integral_Iic_add_Ioi hfint.integrableOn hfint.integrableOn (b := 0),
     hL, hR]
 
@@ -908,20 +913,23 @@ private lemma airyAi_airyBi_eq_rayIntegral (w : ℂ) :
   set Kf : ℂ → ℂ := fun t => exp (t ^ 3 / 3 - w * t) with hKf
   obtain ⟨G, hG⟩ := exists_hasDerivAt_primitive (f := Kf) (by rw [hKf]; fun_prop)
   have hKc : Continuous Kf := by rw [hKf]; fun_prop
-  have i1 := DLMF.Airy.airyInt_integrableOn_ray w (DLMF.Airy.airyInt_exp_three_mul (-π / 3) (-1)
+  have i1 := DLMF.Airy.IntegralRepresentation.integrableOn_ray w
+      (DLMF.Airy.IntegralRepresentation.exp_three_mul (-π / 3) (-1)
     (by push_cast; ring))
-  have i2 := DLMF.Airy.airyInt_integrableOn_ray w (DLMF.Airy.airyInt_exp_three_mul (π / 3) 0
+  have i2 := DLMF.Airy.IntegralRepresentation.integrableOn_ray w
+      (DLMF.Airy.IntegralRepresentation.exp_three_mul (π / 3) 0
     (by push_cast; ring))
-  have i3 := DLMF.Airy.airyInt_integrableOn_ray w (DLMF.Airy.airyInt_exp_three_mul π 1
+  have i3 := DLMF.Airy.IntegralRepresentation.integrableOn_ray w
+      (DLMF.Airy.IntegralRepresentation.exp_three_mul π 1
     (by push_cast; ring))
   have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   constructor
   · rw [DLMF.Airy.airyAi_contour_integral, ← hKf,
-      DLMF.Airy.airyInt_contourIntegral_eq_rays hG hKc _ _ i1 i2]
+      DLMF.Airy.IntegralRepresentation.contourIntegral_eq_rays hG hKc _ _ i1 i2]
     field_simp; ring
   · rw [DLMF.Airy.airyBi_contour_integral, ← hKf,
-      DLMF.Airy.airyInt_contourIntegral_eq_rays hG hKc _ _ i3 i2,
-      DLMF.Airy.airyInt_contourIntegral_eq_rays hG hKc _ _ i3 i1]
+      DLMF.Airy.IntegralRepresentation.contourIntegral_eq_rays hG hKc _ _ i3 i2,
+      DLMF.Airy.IntegralRepresentation.contourIntegral_eq_rays hG hKc _ _ i3 i1]
     field_simp; ring
 
 /-- The constant `β = 12^{1/3}/2` of 36.2.20: `β > 0`, `β³ = 3/2`, `12^{1/3} = 2β` and

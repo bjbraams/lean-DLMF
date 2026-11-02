@@ -51,7 +51,7 @@ namespace DLMF.Elementary
 /-- Characterization of the principal square root by a root with positive real part. -/
 private lemma complexSqrt_eq_of_sq_of_re_pos {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) :
     Complex.sqrt a = w := by
-  have h1 := trig_sqrt_sq a
+  have h1 := Trigonometric.complexSqrt_sq a
   have h : (Complex.sqrt a - w)*(Complex.sqrt a + w) = 0 := by linear_combination h1 - hw
   rcases mul_eq_zero.mp h with h | h
   · exact sub_eq_zero.mp h
@@ -66,7 +66,7 @@ private lemma complexSqrt_eq_of_sq_of_re_pos {a w : ℂ} (hw : w^2 = a) (hre : 0
 private lemma complexSqrt_neg_of_im_pos {w : ℂ} (h : 0 < w.im) :
     Complex.sqrt (-w) = -I*Complex.sqrt w := by
   apply complexSqrt_eq_of_sq_of_re_pos
-  · rw [mul_pow, trig_sqrt_sq]; simp
+  · rw [mul_pow, Trigonometric.complexSqrt_sq]; simp
   · have him : (Complex.sqrt w).im = Real.sqrt ((‖w‖ - w.re)/2) := by
       rw [Complex.sqrt]; exact Complex.cpow_inv_two_im_eq_sqrt h.le
     have hlt : w.re < ‖w‖ := lt_of_le_of_lt (le_abs_self _) (Complex.abs_re_lt_norm.mpr h.ne')
@@ -78,7 +78,7 @@ private lemma complexSqrt_neg_of_im_pos {w : ℂ} (h : 0 < w.im) :
 private lemma complexSqrt_neg_of_im_neg {w : ℂ} (h : w.im < 0) :
     Complex.sqrt (-w) = I*Complex.sqrt w := by
   apply complexSqrt_eq_of_sq_of_re_pos
-  · rw [mul_pow, trig_sqrt_sq]; simp
+  · rw [mul_pow, Trigonometric.complexSqrt_sq]; simp
   · have him : (Complex.sqrt w).im = -Real.sqrt ((‖w‖ - w.re)/2) := by
       rw [Complex.sqrt]; exact Complex.cpow_inv_two_im_eq_neg_sqrt h
     have hlt : w.re < ‖w‖ := lt_of_le_of_lt (le_abs_self _) (Complex.abs_re_lt_norm.mpr h.ne)
@@ -250,7 +250,8 @@ theorem arcsinh_upper_cut {y : ℝ} (hy : 1≤y) :
   have hry : r < y := by nlinarith
   have hw : -((I*(y:ℂ))^2+1) = ((y^2-1:ℝ):ℂ) := by
     push_cast; linear_combination -(y:ℂ)^2*(by simp : (I:ℂ)^2 = -1)
-  have hsq : Complex.sqrt (-((I*(y:ℂ))^2+1)) = r := by rw [hw, hyper_sqrt_ofReal _ (by nlinarith)]
+  have hsq : Complex.sqrt (-((I*(y:ℂ))^2+1)) = r := by
+      rw [hw, Hyperbolic.sqrt_ofReal _ (by nlinarith)]
   have hinv : y - r = (r+y)⁻¹ := eq_inv_of_mul_eq_one_left (by linear_combination -hr2)
   have hz : ∀ {l : Filter ℝ}, l ≤ 𝓝 0 →
       Tendsto (fun ε : ℝ => ((ε:ℂ)+I*y)^2+1) l (𝓝 ((I*(y:ℂ))^2+1)) := fun hl =>
@@ -295,7 +296,8 @@ theorem arcsinh_lower_cut {y : ℝ} (hy : y≤ -1) :
   have hry : r < -y := by nlinarith
   have hw : -((I*(y:ℂ))^2+1) = ((y^2-1:ℝ):ℂ) := by
     push_cast; linear_combination -(y:ℂ)^2*(by simp : (I:ℂ)^2 = -1)
-  have hsq : Complex.sqrt (-((I*(y:ℂ))^2+1)) = r := by rw [hw, hyper_sqrt_ofReal _ (by nlinarith)]
+  have hsq : Complex.sqrt (-((I*(y:ℂ))^2+1)) = r := by
+      rw [hw, Hyperbolic.sqrt_ofReal _ (by nlinarith)]
   have hinv : -y - r = (r-y)⁻¹ := eq_inv_of_mul_eq_one_left (by linear_combination -hr2)
   have hz : ∀ {l : Filter ℝ}, l ≤ 𝓝 0 →
       Tendsto (fun ε : ℝ => ((ε:ℂ)+I*y)^2+1) l (𝓝 ((I*(y:ℂ))^2+1)) := fun hl =>
@@ -383,10 +385,11 @@ private lemma sqrt_sub_one_mul_sqrt_add_one_of_re_pos {z : ℂ} (hz : z ∈ arcc
       (by fun_prop : DifferentiableAt ℂ (fun w : ℂ => w^2-1) w)).differentiableWithinAt
   have h1 : Complex.sqrt 1 = 1 := by simp [Complex.sqrt]
   refine eqOn_of_sq_eq_of_analyticOnNhd hVo hVc hr hs ?_ h2V ?_ ?_ z ⟨hz, hre⟩
-  · intro w _; rw [mul_pow, trig_sqrt_sq, trig_sqrt_sq, trig_sqrt_sq]; ring
+  · intro w _; rw [mul_pow, Trigonometric.complexSqrt_sq, Trigonometric.complexSqrt_sq,
+        Trigonometric.complexSqrt_sq]; ring
   · norm_num [h1]
   · intro h
-    have := trig_sqrt_sq ((2:ℂ)^2-1)
+    have := Trigonometric.complexSqrt_sq ((2:ℂ)^2-1)
     rw [h] at this; norm_num at this
 
 /-- The factored inverse-cosh root is `±√(z²-1)` according to the sign of `Re z`. -/
@@ -433,7 +436,7 @@ theorem arccosh_imaginary {y : ℝ} (hy : y≠0) :
     rw [hr, ← Real.sqrt_sq_eq_abs]; exact Real.sqrt_lt_sqrt (sq_nonneg _) (by linarith)
   set S := Complex.sqrt (I*y-1)*Complex.sqrt (I*y+1) with hSdef
   have hS2 : S^2 = -((r:ℂ)^2) := by
-    rw [hSdef, mul_pow, trig_sqrt_sq, trig_sqrt_sq]
+    rw [hSdef, mul_pow, Trigonometric.complexSqrt_sq, Trigonometric.complexSqrt_sq]
     have : ((r:ℂ))^2 = ((y^2+1:ℝ):ℂ) := by rw [← Complex.ofReal_pow, hr2]
     rw [this]; push_cast; linear_combination (y:ℂ)^2*hI
   have hfac : (S - I*r)*(S + I*r) = 0 := by linear_combination hS2 - (r:ℂ)^2*hI
@@ -529,7 +532,8 @@ theorem arccosh_log_half {z : ℂ} (hz : z ∈ arccoshDomain) :
       · left; simpa using h
       · right; simp; linarith [show 0 < (z+1).re from h, show (z+1).re = z.re+1 by simp])
     linarith [complexSqrt_re_nonneg ((z-1)/2)]
-  rw [← complexLog_sq_of_re_pos hre, hsum, mul_pow, h2, add_sq, trig_sqrt_sq, trig_sqrt_sq]
+  rw [← complexLog_sq_of_re_pos hre, hsum, mul_pow, h2, add_sq, Trigonometric.complexSqrt_sq,
+      Trigonometric.complexSqrt_sq]
   unfold arccosh
   congr 1
   ring
@@ -555,7 +559,7 @@ theorem arccosh_inner_cut {x : ℝ} (hx : -1<x ∧ x≤1) :
       simpa using this.tendsto 0
     have := (continuousAt_complexSqrt (w := ((x+1:ℝ):ℂ))
         (Or.inl (by simp; linarith))).tendsto.comp hc
-    rwa [hyper_sqrt_ofReal _ (by linarith)] at this
+    rwa [Hyperbolic.sqrt_ofReal _ (by linarith)] at this
   have hm : Tendsto (fun ε : ℝ => (x:ℂ)+I*ε-1) (𝓝 0) (𝓝 ((x:ℂ)-1)) := by
     have : Continuous (fun ε : ℝ => (x:ℂ)+I*ε-1) := by fun_prop
     simpa using this.tendsto 0
@@ -564,7 +568,7 @@ theorem arccosh_inner_cut {x : ℝ} (hx : -1<x ∧ x≤1) :
     simpa using this.tendsto 0
   have hmre : ((x:ℂ)-1).re ≤ 0 := by simp; linarith
   have hneg : Complex.sqrt (-((x:ℂ)-1)) = (Real.sqrt (1-x):ℂ) := by
-    rw [show -((x:ℂ)-1) = ((1-x:ℝ):ℂ) by push_cast; ring, hyper_sqrt_ofReal _ (by linarith)]
+    rw [show -((x:ℂ)-1) = ((1-x:ℝ):ℂ) by push_cast; ring, Hyperbolic.sqrt_ofReal _ (by linarith)]
   have hslit : I*(s:ℂ)+x ∈ Complex.slitPlane := by
     rw [Complex.mem_slitPlane_iff]
     by_cases h0 : s = 0
@@ -656,9 +660,9 @@ theorem arccosh_outer_cut {x : ℝ} (hx : x≤ -1) :
   have hmre : ((x:ℂ)-1).re ≤ 0 := by simp; linarith
   have hpre : ((x:ℂ)+1).re ≤ 0 := by simp; linarith
   have hneg1 : Complex.sqrt (-((x:ℂ)-1)) = (Real.sqrt (1-x):ℂ) := by
-    rw [show -((x:ℂ)-1) = ((1-x:ℝ):ℂ) by push_cast; ring, hyper_sqrt_ofReal _ (by linarith)]
+    rw [show -((x:ℂ)-1) = ((1-x:ℝ):ℂ) by push_cast; ring, Hyperbolic.sqrt_ofReal _ (by linarith)]
   have hneg2 : Complex.sqrt (-((x:ℂ)+1)) = (Real.sqrt (-1-x):ℂ) := by
-    rw [show -((x:ℂ)+1) = ((-1-x:ℝ):ℂ) by push_cast; ring, hyper_sqrt_ofReal _ (by linarith)]
+    rw [show -((x:ℂ)+1) = ((-1-x:ℝ):ℂ) by push_cast; ring, Hyperbolic.sqrt_ofReal _ (by linarith)]
   have hxr : x - r < 0 := by linarith
   have hI : (I:ℂ)^2 = -1 := by simp
   constructor
@@ -798,7 +802,7 @@ w=(-1:ℂ)^k*arcsinh z+(k:ℂ)*π*I`. -/
 @[dlmf 4.37.E26, dlmf 4.37.E29]
 theorem sinh_inverse_family (z w : ℂ) :
     Complex.sinh w=z ↔ ∃ k : ℤ, w=(-1:ℂ)^k*arcsinh z+(k:ℂ)*π*I := by
-  simpa only [hyper_sinh_arcsinh] using hyper_sinh_fiber_forms (arcsinh z) w
+  simpa only [Hyperbolic.sinh_arcsinh] using Hyperbolic.sinh_fiber_forms (arcsinh z) w
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.cosh w=z ↔ ∃ k : ℤ,
 w=arccosh z+2*(k:ℂ)*π*I ∨ w= -arccosh z+2*(k:ℂ)*π*I`. -/
@@ -806,7 +810,7 @@ w=arccosh z+2*(k:ℂ)*π*I ∨ w= -arccosh z+2*(k:ℂ)*π*I`. -/
 theorem cosh_inverse_family (z w : ℂ) :
     Complex.cosh w=z ↔ ∃ k : ℤ, w=arccosh z+2*(k:ℂ)*π*I ∨ w= -arccosh z+2*(k:ℂ)*π*I := by
   have hrot:Complex.cosh w=z ↔ Complex.cos (arccosh z*I)=Complex.cos (w*I) := by
-    rw [Complex.cos_mul_I,Complex.cos_mul_I,hyper_cosh_arccosh]
+    rw [Complex.cos_mul_I,Complex.cos_mul_I,Hyperbolic.cosh_arccosh]
     exact eq_comm
   rw [hrot,Complex.cos_eq_cos_iff]
   constructor
@@ -962,7 +966,7 @@ lemma mul_sqrt_inv_sub_one_mul_sqrt_inv_add_one {z : ℂ} (hz : z ∈ arcsechDom
     rw [show (1/2:ℂ)⁻¹-1 = 1 by norm_num, show (1/2:ℂ)⁻¹+1 = 3 by norm_num, h1, one_mul]
     symm
     apply complexSqrt_eq_of_sq_of_re_pos
-    · rw [mul_pow, trig_sqrt_sq]; norm_num
+    · rw [mul_pow, Trigonometric.complexSqrt_sq]; norm_num
     · have : 0 < (Complex.sqrt 3).re := by
         rw [Complex.sqrt, Complex.cpow_inv_two_re]
         apply Real.sqrt_pos.mpr; norm_num
@@ -970,9 +974,10 @@ lemma mul_sqrt_inv_sub_one_mul_sqrt_inv_add_one {z : ℂ} (hz : z ∈ arcsechDom
   refine eqOn_of_sq_eq_of_analyticOnNhd hVo hVc hr hs ?_ hhalf hanchor ?_ z hz
   · intro w hw
     have hw0 := hw.1
-    rw [mul_pow, mul_pow, trig_sqrt_sq, trig_sqrt_sq, trig_sqrt_sq]; field_simp; ring
+    rw [mul_pow, mul_pow, Trigonometric.complexSqrt_sq, Trigonometric.complexSqrt_sq,
+        Trigonometric.complexSqrt_sq]; field_simp; ring
   · intro h
-    have := trig_sqrt_sq (1-(1/2:ℂ)^2)
+    have := Trigonometric.complexSqrt_sq (1-(1/2:ℂ)^2)
     rw [h] at this; norm_num at this
 
 /-- On the inverse-sech domain, `1-z²` lies in the slit plane. -/
@@ -993,7 +998,7 @@ theorem arcsech_arccoth_interrelation {a : ℂ} (hre : 0<a.re) (ha : a∈arcsech
     arcsech a=arccoth ((Complex.sqrt (1-a^2))⁻¹) := by
   have ha0 : a ≠ 0 := ha.1
   set q := Complex.sqrt (1-a^2) with hqdef
-  have hq2 : q^2 = 1-a^2 := trig_sqrt_sq _
+  have hq2 : q^2 = 1-a^2 := Trigonometric.complexSqrt_sq _
   have hqre : 0 ≤ q.re := by
     rw [hqdef, Complex.sqrt, Complex.cpow_inv_two_re]; exact Real.sqrt_nonneg _
   have hq0 : q ≠ 0 := by
@@ -1063,9 +1068,10 @@ private lemma arccosh_half_right {z : ℂ} (hz : 0<z.re) :
     rw [Complex.add_re]
     linarith [complexSqrt_re_pos (Or.inr hp), complexSqrt_re_nonneg ((z-1)/2)]
   have hlog := complexLog_sq_of_re_pos hre
-  rw [hs,hs,add_sq,mul_pow,mul_pow,hc2,trig_sqrt_sq,trig_sqrt_sq] at hlog
+  rw [hs, hs, add_sq, mul_pow, mul_pow, hc2, Trigonometric.complexSqrt_sq,
+      Trigonometric.complexSqrt_sq] at hlog
   unfold arccosh arcsinh
-  rw [trig_sqrt_sq,show (z-1)/2+1=(z+1)/2 by ring]
+  rw [Trigonometric.complexSqrt_sq,show (z-1)/2+1=(z+1)/2 by ring]
   rw [hs,hs,← hlog]
   congr 1
   linear_combination -2*Complex.sqrt (z+1)*Complex.sqrt (z-1)*hc2
@@ -1079,7 +1085,7 @@ lemma hasSum_arcsinh_closed_disk {z : ℂ} (hz : ‖z‖≤1) :
       (arcsinh z) := by
   have hn : ‖-I*z‖≤1 := by simpa using hz
   have h := (hasSum_arcsin_principal hn).mul_left I
-  rw [← hyper_arcsinh_rotation] at h
+  rw [← Hyperbolic.arcsinh_rotation] at h
   convert h using 1
   ext n
   rw [mul_pow, pow_add, pow_mul, pow_add, pow_mul, show (-I:ℂ)^2 = -1 by simp, pow_one]
@@ -1434,7 +1440,7 @@ theorem hasSum_arccosh_near_one {z : ℂ} (hz : 0<z.re) (hn : ‖z-1‖≤2) : H
       · simp [hn]
     · simp
   let w := Complex.sqrt ((z-1)/2)
-  have hw2 : w^2=(z-1)/2 := trig_sqrt_sq _
+  have hw2 : w^2=(z-1)/2 := Trigonometric.complexSqrt_sq _
   have hw0 : w≠0 := by intro h; rw [h] at hw2; apply hz1; linear_combination -2*hw2
   have hwn : ‖w‖≤1 := by
     have he : ‖w‖^2=‖z-1‖/2 := by

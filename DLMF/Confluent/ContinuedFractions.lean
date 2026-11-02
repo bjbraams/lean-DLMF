@@ -43,15 +43,17 @@ Partial numerators follow DLMF 13.5.2, 13.5.4, 13.17.2 and 13.17.4.
 ## Implementation notes
 
 Kummer's fraction is proved by Pincherle's theorem in the form
-`GenContFract.cfConv_tendsto_of_ratio`: the backward solution `M(a+m, b+2m, z)`,
-`M(a+m+1, b+2m+1, z)` comes from two contiguous relations (`kumCF_contig_I`, `kumCF_contig_II`),
-it tends to `e^{z/2}` (`kumCF_tendsto_exp_half`, by dominated convergence), and the partial
-numerators tend to `0`. `kummerM_continued_fraction_tendsto_of_ne` attaches the head of the
-fraction through the Pincherle invariant (`GenContFract.cfConv_tendsto_of_tail_invariant`).
+`GenContFract.tendsto_ofFun_convs_of_ratio`: the backward solution `M(a+m, b+2m, z)`,
+`M(a+m+1, b+2m+1, z)` comes from two contiguous relations (`KummerContinuedFraction.contiguous_I`,
+`KummerContinuedFraction.contiguous_II`), it tends to `e^{z/2}`
+(`KummerContinuedFraction.tendsto_exp_half`, by dominated convergence), and the partial numerators
+tend to `0`. `kummerM_continued_fraction_tendsto_of_ne` attaches the head of the fraction through
+the Pincherle invariant (`GenContFract.tendsto_ofFun_convs_of_tail_invariant`).
 
 For the Tricomi fraction the backward solution `x^n U(a+n, b-1, x)`, `x^{n+1} U(a+n+1, b, x)`
-(`kumCF_UW`, contiguous relations 13.3.9–13.3.10) is positive far out, where the fraction is a
-positive S-fraction with linearly growing elements (`GenContFract.cfConv_tendsto_of_pos_linear`).
+(`KummerContinuedFraction.backwardU`, contiguous relations 13.3.9–13.3.10) is positive far out,
+where the fraction is a positive S-fraction with linearly growing elements
+(`GenContFract.tendsto_ofFun_convs_of_pos_linear`).
 
 The Whittaker fractions are stated with nonzero denominators because Lean's `x / 0 = 0`.
 -/
@@ -100,7 +102,7 @@ def kummerUContinuedFraction (a b z : ℂ) : GenContFract ℂ where
 
 /-- Coefficient form of the contiguous relation `M(c,d) - M(c+1,d+1) = (c-d) z M(c+1,d+2) /
 (d(d+1))`. -/
-theorem kumCF_coeff_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (n : ℕ) :
+theorem KummerContinuedFraction.coeff_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (n : ℕ) :
     d * (d + 1) * (kummerMCoeff c d n - kummerMCoeff (c + 1) (d + 1) n) =
       (c - d) * (if n = 0 then 0 else kummerMCoeff (c + 1) (d + 2) (n - 1)) := by
   rcases n with _ | m
@@ -131,7 +133,7 @@ theorem kumCF_coeff_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (n : ℕ) :
     ring
 
 /-- Coefficient form of the contiguous relation `M(c,d) - M(c,d+1) = c z M(c+1,d+2) / (d(d+1))`. -/
-theorem kumCF_coeff_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (n : ℕ) :
+theorem KummerContinuedFraction.coeff_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (n : ℕ) :
     d * (d + 1) * (kummerMCoeff c d n - kummerMCoeff c (d + 1) n) =
       c * (if n = 0 then 0 else kummerMCoeff (c + 1) (d + 2) (n - 1)) := by
   rcases n with _ | m
@@ -159,7 +161,7 @@ theorem kumCF_coeff_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (n : ℕ) :
     ring
 
 /-- `(d+1)(M(1,d+1,z) - 1) = z M(1,d+2,z)`, valid also at `d = 0`. -/
-theorem kumCF_one_sub {d : ℂ} (hd : ∀ k : ℕ, d + 1 ≠ -k) (z : ℂ) :
+theorem KummerContinuedFraction.one_sub {d : ℂ} (hd : ∀ k : ℕ, d + 1 ≠ -k) (z : ℂ) :
     (d + 1) * (kummerM 1 (d + 1) z - 1) = z * kummerM 1 (d + 2) z := by
   have hd2 : ∀ k : ℕ, d + 2 ≠ -k := by
     intro k h; apply hd (k + 1); push_cast; linear_combination h
@@ -182,7 +184,7 @@ theorem kumCF_one_sub {d : ℂ} (hd : ∀ k : ℕ, d + 1 ≠ -k) (z : ℂ) :
     field_simp
 
 /-- Contiguous relation `d(d+1)(M(c,d,z) - M(c+1,d+1,z)) = (c-d) z M(c+1,d+2,z)`. -/
-theorem kumCF_contig_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
+theorem KummerContinuedFraction.contiguous_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
     d * (d + 1) * (kummerM c d z - kummerM (c + 1) (d + 1) z) =
       (c - d) * (z * kummerM (c + 1) (d + 2) z) := by
   have hd1 : ∀ k : ℕ, d + 1 ≠ -k := by simpa using DLMF.Hypergeometric.not_neg_nat_add_nat hd 1
@@ -193,11 +195,11 @@ theorem kumCF_contig_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
   refine h.unique ?_
   convert h' using 1
   funext n
-  rw [← mul_sub_right_distrib, ← mul_assoc, kumCF_coeff_I hd n]
+  rw [← mul_sub_right_distrib, ← mul_assoc, KummerContinuedFraction.coeff_I hd n]
   ring
 
 /-- Contiguous relation `d(d+1)(M(c,d,z) - M(c,d+1,z)) = c z M(c+1,d+2,z)`. -/
-theorem kumCF_contig_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
+theorem KummerContinuedFraction.contiguous_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
     d * (d + 1) * (kummerM c d z - kummerM c (d + 1) z) =
       c * (z * kummerM (c + 1) (d + 2) z) := by
   have hd1 : ∀ k : ℕ, d + 1 ≠ -k := by simpa using DLMF.Hypergeometric.not_neg_nat_add_nat hd 1
@@ -208,11 +210,11 @@ theorem kumCF_contig_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
   refine h.unique ?_
   convert h' using 1
   funext n
-  rw [← mul_sub_right_distrib, ← mul_assoc, kumCF_coeff_II hd n]
+  rw [← mul_sub_right_distrib, ← mul_assoc, KummerContinuedFraction.coeff_II hd n]
   ring
 
 /-- `(c + m + n)/(d + 2m + n) → 1/2` as `m → ∞`. -/
-theorem kumCF_ratio_tendsto (c d : ℂ) (n : ℕ) :
+theorem KummerContinuedFraction.ratio_tendsto (c d : ℂ) (n : ℕ) :
     Tendsto (fun m : ℕ => (c + m + n) / (d + 2 * m + n)) atTop (𝓝 (1 / 2)) := by
   have h1 : Tendsto (fun m : ℕ => ((c + n) / (m : ℂ) + 1) / ((d + n) / (m : ℂ) + 2)) atTop
       (𝓝 ((0 + 1) / (0 + 2))) :=
@@ -226,18 +228,18 @@ theorem kumCF_ratio_tendsto (c d : ℂ) (n : ℕ) :
   ring_nf
 
 /-- `(c+m)_n / (d+2m)_n → 2^{-n}` as `m → ∞`. -/
-theorem kumCF_poch_ratio_tendsto (c d : ℂ) (n : ℕ) :
+theorem KummerContinuedFraction.poch_ratio_tendsto (c d : ℂ) (n : ℕ) :
     Tendsto (fun m : ℕ => poch (c + m) n / poch (d + 2 * m) n) atTop (𝓝 ((1 / 2) ^ n)) := by
   induction n with
   | zero => simp [poch_zero]
   | succ n ih =>
-    have := ih.mul (kumCF_ratio_tendsto c d n)
+    have := ih.mul (KummerContinuedFraction.ratio_tendsto c d n)
     rw [← pow_succ] at this
     refine this.congr fun m => ?_
     rw [poch_succ, poch_succ, mul_div_mul_comm]
 
 /-- If `|c| + |d| ≤ m`, then `|(c+m)_n| ≤ |(d+2m)_n|`. -/
-theorem kumCF_norm_poch_le {c d : ℂ} {m : ℕ} (hm : ‖c‖ + ‖d‖ ≤ m) (n : ℕ) :
+theorem KummerContinuedFraction.norm_poch_le {c d : ℂ} {m : ℕ} (hm : ‖c‖ + ‖d‖ ≤ m) (n : ℕ) :
     ‖poch (c + m) n‖ ≤ ‖poch (d + 2 * m) n‖ := by
   induction n with
   | zero => simp [poch_zero]
@@ -258,7 +260,7 @@ theorem kumCF_norm_poch_le {c d : ℂ} {m : ℕ} (hm : ‖c‖ + ‖d‖ ≤ m) 
     linarith
 
 /-- `M(c+m, d+2m, z) → e^{z/2}` as `m → ∞`. -/
-theorem kumCF_tendsto_exp_half (c d z : ℂ) :
+theorem KummerContinuedFraction.tendsto_exp_half (c d z : ℂ) :
     Tendsto (fun m : ℕ => kummerM (c + m) (d + 2 * m) z) atTop (𝓝 (exp (z / 2))) := by
   have hexp : (∑' n : ℕ, (1 / 2 : ℂ) ^ n / n ! * z ^ n) = exp (z / 2) := by
     rw [Complex.exp_eq_exp_ℂ, ← (NormedSpace.expSeries_div_hasSum_exp (z / 2)).tsum_eq]
@@ -267,7 +269,8 @@ theorem kumCF_tendsto_exp_half (c d z : ℂ) :
   unfold kummerM
   refine tendsto_tsum_of_dominated_convergence (bound := fun n => ‖z‖ ^ n / n !)
     (Real.summable_pow_div_factorial ‖z‖) (fun n => ?_) ?_
-  · have := ((kumCF_poch_ratio_tendsto c d n).div_const (n ! : ℂ)).mul_const (z ^ n)
+  · have := ((KummerContinuedFraction.poch_ratio_tendsto c d n).div_const
+        (n ! : ℂ)).mul_const (z ^ n)
     refine this.congr fun m => ?_
     rw [div_div]
   · obtain ⟨M, hM⟩ := exists_nat_ge (‖c‖ + ‖d‖)
@@ -278,13 +281,13 @@ theorem kumCF_tendsto_exp_half (c d z : ℂ) :
       rw [Complex.norm_natCast]; exact_mod_cast n.factorial_pos
     rw [Complex.norm_natCast]
     have hr : ‖poch (c + m) n‖ / ‖poch (d + 2 * m) n‖ ≤ 1 :=
-      div_le_one_of_le₀ (kumCF_norm_poch_le hcm n) (norm_nonneg _)
+      div_le_one_of_le₀ (KummerContinuedFraction.norm_poch_le hcm n) (norm_nonneg _)
     rw [div_mul_eq_mul_div, div_le_div_iff_of_pos_right (by exact_mod_cast n.factorial_pos)]
     calc ‖poch (c + m) n‖ / ‖poch (d + 2 * m) n‖ * ‖z‖ ^ n ≤ 1 * ‖z‖ ^ n := by gcongr
       _ = _ := one_mul _
 
 /-- `1/(d + 2m + n) → 0` as `m → ∞`. -/
-theorem kumCF_recip_tendsto (d : ℂ) (n : ℕ) :
+theorem KummerContinuedFraction.recip_tendsto (d : ℂ) (n : ℕ) :
     Tendsto (fun m : ℕ => 1 / (d + 2 * m + n)) atTop (𝓝 0) := by
   have h1 : Tendsto (fun m : ℕ => (1 / (m : ℂ)) / ((d + n) / (m : ℂ) + 2)) atTop
       (𝓝 (0 / (0 + 2))) :=
@@ -298,7 +301,8 @@ theorem kumCF_recip_tendsto (d : ℂ) (n : ℕ) :
   ring_nf
 
 /-- A property holding eventually along even and along odd indices holds eventually. -/
-theorem kumCF_eventually_of_even_odd {P : ℕ → Prop} (he : ∀ᶠ m in atTop, P (2 * m))
+theorem KummerContinuedFraction.eventually_of_even_odd {P : ℕ → Prop}
+    (he : ∀ᶠ m in atTop, P (2 * m))
     (ho : ∀ᶠ m in atTop, P (2 * m + 1)) : ∀ᶠ j in atTop, P j := by
   obtain ⟨M1, h1⟩ := eventually_atTop.mp he
   obtain ⟨M2, h2⟩ := eventually_atTop.mp ho
@@ -308,26 +312,29 @@ theorem kumCF_eventually_of_even_odd {P : ℕ → Prop} (he : ∀ᶠ m in atTop,
   · exact h2 m (by omega)
 
 /-- The backward solution `F_{2m} = M(a+m, b+2m)`, `F_{2m+1} = M(a+m+1, b+2m+1)`. -/
-def kumCF_F (a b z : ℂ) (j : ℕ) : ℂ := kummerM (a + ((j + 1) / 2 : ℕ)) (b + j) z
+def KummerContinuedFraction.backwardM (a b z : ℂ) (j : ℕ) : ℂ :=
+    kummerM (a + ((j + 1) / 2 : ℕ)) (b + j) z
 
 /-- The even-indexed Kummer function in the continued-fraction chain is `M(a+m, b+2m, z)`. -/
-theorem kumCF_F_even (a b z : ℂ) (m : ℕ) :
-    kumCF_F a b z (2 * m) = kummerM (a + m) (b + 2 * m) z := by
-  simp only [kumCF_F, show (2 * m + 1) / 2 = m by omega]; push_cast; rfl
+theorem KummerContinuedFraction.backwardM_even (a b z : ℂ) (m : ℕ) :
+    KummerContinuedFraction.backwardM a b z (2 * m) = kummerM (a + m) (b + 2 * m) z := by
+  simp only [KummerContinuedFraction.backwardM, show (2 * m + 1) / 2 = m by omega]; push_cast; rfl
 
 /-- The odd-indexed Kummer function in the continued-fraction chain is `M(a+1+m, b+1+2m, z)`. -/
-theorem kumCF_F_odd (a b z : ℂ) (m : ℕ) :
-    kumCF_F a b z (2 * m + 1) = kummerM (a + 1 + m) (b + 1 + 2 * m) z := by
-  simp only [kumCF_F, show (2 * m + 1 + 1) / 2 = m + 1 by omega]; push_cast; ring_nf
+theorem KummerContinuedFraction.backwardM_odd (a b z : ℂ) (m : ℕ) :
+    KummerContinuedFraction.backwardM a b z (2 * m + 1) =
+        kummerM (a + 1 + m) (b + 1 + 2 * m) z := by
+  simp only [KummerContinuedFraction.backwardM, show (2 * m + 1 + 1) / 2 = m + 1 by omega];
+      push_cast; ring_nf
 
 /-- The even Kummer continued-fraction coefficient is `(a-b-m)/((b+2m)(b+2m+1))`. -/
-theorem kumCF_coeff_even (a b : ℂ) (m : ℕ) :
+theorem KummerContinuedFraction.coeff_even (a b : ℂ) (m : ℕ) :
     kummerMContFractCoeff a b (2 * m) = (a - b - m) / ((b + 2 * m) * (b + 2 * m + 1)) := by
   simp only [kummerMContFractCoeff, show (2 * m + 1) % 2 = 1 by omega, ↓reduceIte,
     show 2 * m / 2 = m by omega]
 
 /-- The odd Kummer continued-fraction coefficient is `(a+1+m)/((b+1+2m)(b+2m+2))`. -/
-theorem kumCF_coeff_odd (a b : ℂ) (m : ℕ) :
+theorem KummerContinuedFraction.coeff_odd (a b : ℂ) (m : ℕ) :
     kummerMContFractCoeff a b (2 * m + 1) =
       (a + 1 + m) / ((b + 1 + 2 * m) * (b + 1 + 2 * m + 1)) := by
   have h : ¬ ((2 * m + 1 + 1) % 2 = 1) := by omega
@@ -335,10 +342,10 @@ theorem kumCF_coeff_odd (a b : ℂ) (m : ℕ) :
   push_cast; ring_nf
 
 /-- The contiguous relation `M(c,d,z) = M(c+1,d+1,z) + (c-d) z M(c+1,d+2,z)/(d(d+1))`. -/
-theorem kumCF_rel_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
+theorem KummerContinuedFraction.relation_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
     kummerM c d z = kummerM (c + 1) (d + 1) z +
       (c - d) / (d * (d + 1)) * z * kummerM (c + 1) (d + 2) z := by
-  have h := kumCF_contig_I (c := c) hd z
+  have h := KummerContinuedFraction.contiguous_I (c := c) hd z
   have h1 : d ≠ 0 := by simpa using hd 0
   have h2 : d + 1 ≠ 0 := by
     have := hd 1; intro h; apply this; push_cast; linear_combination h
@@ -346,10 +353,10 @@ theorem kumCF_rel_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
   linear_combination h
 
 /-- The contiguous relation `M(c,d,z) = M(c,d+1,z) + c z M(c+1,d+2,z)/(d(d+1))`. -/
-theorem kumCF_rel_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
+theorem KummerContinuedFraction.relation_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
     kummerM c d z = kummerM c (d + 1) z +
       c / (d * (d + 1)) * z * kummerM (c + 1) (d + 2) z := by
-  have h := kumCF_contig_II (c := c) hd z
+  have h := KummerContinuedFraction.contiguous_II (c := c) hd z
   have h1 : d ≠ 0 := by simpa using hd 0
   have h2 : d + 1 ≠ 0 := by
     have := hd 1; intro h; apply this; push_cast; linear_combination h
@@ -357,79 +364,91 @@ theorem kumCF_rel_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
   linear_combination h
 
 /-- The three-term relation `F_j = F_{j+1} + u_{j+1} z F_{j+2}`. -/
-theorem kumCF_F_rec' {a b : ℂ} (z : ℂ) (j : ℕ) (hbj : ∀ k : ℕ, b + j ≠ -k) :
-    kumCF_F a b z j = kumCF_F a b z (j + 1) +
-      kummerMContFractCoeff a b j * z * kumCF_F a b z (j + 2) := by
+theorem KummerContinuedFraction.backwardM_rec' {a b : ℂ} (z : ℂ) (j : ℕ)
+    (hbj : ∀ k : ℕ, b + j ≠ -k) :
+    KummerContinuedFraction.backwardM a b z j = KummerContinuedFraction.backwardM a b z (j + 1) +
+      kummerMContFractCoeff a b j * z * KummerContinuedFraction.backwardM a b z (j + 2) := by
   rcases Nat.even_or_odd' j with ⟨m, rfl | rfl⟩
   · have hd := hbj
     push_cast at hd
-    have e := kumCF_rel_I (c := a + m) hd z
-    rw [kumCF_F_even, kumCF_F_odd, show 2 * m + 2 = 2 * (m + 1) by ring, kumCF_F_even,
-      kumCF_coeff_even]
+    have e := KummerContinuedFraction.relation_I (c := a + m) hd z
+    rw [KummerContinuedFraction.backwardM_even, KummerContinuedFraction.backwardM_odd, show 2 * m +
+        2 = 2 * (m + 1) by ring, KummerContinuedFraction.backwardM_even,
+      KummerContinuedFraction.coeff_even]
     push_cast at e ⊢; ring_nf at e ⊢; linear_combination e
   · have hd := hbj
     push_cast at hd
-    have e := kumCF_rel_II (c := a + 1 + m) hd z
-    rw [kumCF_F_odd, show 2 * m + 1 + 1 = 2 * (m + 1) by ring, kumCF_F_even,
-      show 2 * m + 1 + 2 = 2 * (m + 1) + 1 by ring, kumCF_F_odd, kumCF_coeff_odd]
+    have e := KummerContinuedFraction.relation_II (c := a + 1 + m) hd z
+    rw [KummerContinuedFraction.backwardM_odd, show 2 * m + 1 + 1 = 2 * (m + 1) by
+        ring, KummerContinuedFraction.backwardM_even,
+      show 2 * m + 1 + 2 = 2 * (m + 1) + 1 by ring, KummerContinuedFraction.backwardM_odd,
+                                                KummerContinuedFraction.coeff_odd]
     push_cast at e ⊢; ring_nf at e ⊢; linear_combination e
 
 /-- The three-term relation for all indices when `b` is not a nonpositive integer. -/
-theorem kumCF_F_rec {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) (j : ℕ) :
-    kumCF_F a b z j = kumCF_F a b z (j + 1) +
-      kummerMContFractCoeff a b j * z * kumCF_F a b z (j + 2) :=
-  kumCF_F_rec' z j (DLMF.Hypergeometric.not_neg_nat_add_nat hb j)
+theorem KummerContinuedFraction.backwardM_rec {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) (j : ℕ) :
+    KummerContinuedFraction.backwardM a b z j = KummerContinuedFraction.backwardM a b z (j + 1) +
+      kummerMContFractCoeff a b j * z * KummerContinuedFraction.backwardM a b z (j + 2) :=
+  KummerContinuedFraction.backwardM_rec' z j (DLMF.Hypergeometric.not_neg_nat_add_nat hb j)
 
 /-- The even and odd Kummer continued-fraction coefficients tend to `0`. -/
-theorem kumCF_coeff_tendsto (a b : ℂ) :
+theorem KummerContinuedFraction.coeff_tendsto (a b : ℂ) :
     Tendsto (fun m : ℕ => kummerMContFractCoeff a b (2 * m)) atTop (𝓝 0) ∧
       Tendsto (fun m : ℕ => kummerMContFractCoeff a b (2 * m + 1)) atTop (𝓝 0) := by
   constructor
-  · have := ((kumCF_ratio_tendsto (-(a - b)) b 0).neg).mul (kumCF_recip_tendsto b 1)
+  · have := ((KummerContinuedFraction.ratio_tendsto (-(a - b)) b 0).neg).mul
+        (KummerContinuedFraction.recip_tendsto b 1)
     rw [mul_zero] at this
     refine this.congr fun m => ?_
-    rw [kumCF_coeff_even]; simp only [div_eq_mul_inv, mul_inv]; push_cast; ring
-  · have := (kumCF_ratio_tendsto (a + 1) (b + 1) 0).mul (kumCF_recip_tendsto (b + 1) 1)
+    rw [KummerContinuedFraction.coeff_even]; simp only [div_eq_mul_inv, mul_inv]; push_cast; ring
+  · have := (KummerContinuedFraction.ratio_tendsto (a + 1) (b + 1) 0).mul
+        (KummerContinuedFraction.recip_tendsto (b + 1) 1)
     rw [mul_zero] at this
     refine this.congr fun m => ?_
-    rw [kumCF_coeff_odd]; simp only [div_eq_mul_inv, mul_inv]; push_cast; ring
+    rw [KummerContinuedFraction.coeff_odd]; simp only [div_eq_mul_inv, mul_inv]; push_cast; ring
 
 /-- Under the stated nondegeneracy conditions, every Kummer continued-fraction coefficient is
 nonzero. -/
-theorem kumCF_coeff_ne_zero {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (ha1 : ∀ m : ℕ, a + 1 + m ≠ 0)
+theorem KummerContinuedFraction.coeff_ne_zero {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k)
+    (ha1 : ∀ m : ℕ, a + 1 + m ≠ 0)
     (hab : ∀ m : ℕ, a - b - m ≠ 0) (j : ℕ) : kummerMContFractCoeff a b j ≠ 0 := by
   have hb' : ∀ n : ℕ, b + n ≠ 0 := fun n h => hb n (by linear_combination h)
   rcases Nat.even_or_odd' j with ⟨m, rfl | rfl⟩
-  · rw [kumCF_coeff_even]
+  · rw [KummerContinuedFraction.coeff_even]
     refine div_ne_zero (hab m) (mul_ne_zero ?_ ?_)
     · simpa using hb' (2 * m)
     · simpa [add_assoc] using hb' (2 * m + 1)
-  · rw [kumCF_coeff_odd]
+  · rw [KummerContinuedFraction.coeff_odd]
     refine div_ne_zero (ha1 m) (mul_ne_zero ?_ ?_)
     · have := hb' (2 * m + 1); push_cast at this; intro h; apply this; linear_combination h
     · have := hb' (2 * m + 2); push_cast at this; intro h; apply this; linear_combination h
 
 /-- Eventually `F_j ≠ 0` and `3 ‖u_{j+1} z F_{j+2}‖ ≤ ‖F_j‖`: the tails of Kummer's fraction
 are small. -/
-theorem kumCF_eventually_ratio (a b z : ℂ) :
-    ∀ᶠ j in atTop, kumCF_F a b z j ≠ 0 ∧
-      3 * ‖kummerMContFractCoeff a b j * z * kumCF_F a b z (j + 2)‖ ≤ ‖kumCF_F a b z j‖ := by
-  set F := kumCF_F a b z with hFdef
+theorem KummerContinuedFraction.eventually_ratio (a b z : ℂ) :
+    ∀ᶠ j in atTop, KummerContinuedFraction.backwardM a b z j ≠ 0 ∧
+      3 * ‖kummerMContFractCoeff a b j * z * KummerContinuedFraction.backwardM a b z (j + 2)‖ ≤
+          ‖KummerContinuedFraction.backwardM a b z j‖ := by
+  set F := KummerContinuedFraction.backwardM a b z with hFdef
   set E := exp (z / 2)
   have hE : 0 < ‖E‖ := norm_pos_iff.mpr (exp_ne_zero _)
   have hFe : Tendsto (fun m : ℕ => F (2 * m)) atTop (𝓝 E) := by
-    simpa [F, kumCF_F_even] using kumCF_tendsto_exp_half a b z
+    simpa [F, KummerContinuedFraction.backwardM_even] using
+        KummerContinuedFraction.tendsto_exp_half a b z
   have hFo : Tendsto (fun m : ℕ => F (2 * m + 1)) atTop (𝓝 E) := by
-    simpa [F, kumCF_F_odd] using kumCF_tendsto_exp_half (a + 1) (b + 1) z
+    simpa [F, KummerContinuedFraction.backwardM_odd] using KummerContinuedFraction.tendsto_exp_half
+        (a + 1) (b + 1) z
   have hball : ∀ᶠ j in atTop, ‖F j - E‖ < ‖E‖ / 2 :=
-    kumCF_eventually_of_even_odd
+    KummerContinuedFraction.eventually_of_even_odd
       ((tendsto_iff_norm_sub_tendsto_zero.mp hFe).eventually (gt_mem_nhds (half_pos hE)))
       ((tendsto_iff_norm_sub_tendsto_zero.mp hFo).eventually (gt_mem_nhds (half_pos hE)))
   have hc9 : (0 : ℝ) < 1 / (9 * (‖z‖ + 1)) := by positivity
   have hcoef : ∀ᶠ j in atTop, ‖kummerMContFractCoeff a b j‖ < 1 / (9 * (‖z‖ + 1)) :=
-    kumCF_eventually_of_even_odd
-      ((kumCF_coeff_tendsto a b).1.norm.eventually (gt_mem_nhds (by simpa using hc9)))
-      ((kumCF_coeff_tendsto a b).2.norm.eventually (gt_mem_nhds (by simpa using hc9)))
+    KummerContinuedFraction.eventually_of_even_odd
+      ((KummerContinuedFraction.coeff_tendsto a b).1.norm.eventually
+          (gt_mem_nhds (by simpa using hc9)))
+      ((KummerContinuedFraction.coeff_tendsto a b).2.norm.eventually
+          (gt_mem_nhds (by simpa using hc9)))
   have hlow : ∀ j, ‖F j - E‖ < ‖E‖ / 2 → ‖E‖ / 2 < ‖F j‖ := by
     intro j hj
     have := norm_sub_norm_le E (E - F j)
@@ -462,36 +481,38 @@ theorem kummerM_continued_fraction_tendsto {a b z : ℂ} (hb : ∀ k : ℕ, b �
     (hM : kummerM (a + 1) (b + 1) z ≠ 0) :
     Tendsto (kummerMContinuedFraction a b z).convs atTop
       (𝓝 (kummerM a b z / kummerM (a + 1) (b + 1) z)) := by
-  set F := kumCF_F a b z with hFdef
-  obtain ⟨N, hN⟩ := eventually_atTop.mp (kumCF_eventually_ratio a b z)
+  set F := KummerContinuedFraction.backwardM a b z with hFdef
+  obtain ⟨N, hN⟩ := eventually_atTop.mp (KummerContinuedFraction.eventually_ratio a b z)
   have hw : ∀ k, F (k + 1) = (fun _ => (1 : ℂ)) k * F (k + 1 + 1) +
       (fun k => kummerMContFractCoeff a b k * z) (k + 1) * F (k + 1 + 2) := by
     intro k
-    have := kumCF_F_rec (a := a) hb z (k + 1)
+    have := KummerContinuedFraction.backwardM_rec (a := a) hb z (k + 1)
     simp only [one_mul]
     exact this
   have hw0 : F (0 + 1) ≠ 0 := by
-    have := kumCF_F_odd a b z 0
+    have := KummerContinuedFraction.backwardM_odd a b z 0
     simp only [mul_zero, zero_add, Nat.cast_zero, add_zero] at this
-    show kumCF_F a b z 1 ≠ 0
+    show KummerContinuedFraction.backwardM a b z 1 ≠ 0
     rw [this]; exact hM
   have ha : ∀ k, (fun k => kummerMContFractCoeff a b k * z) k ≠ 0 :=
-    fun k => mul_ne_zero (kumCF_coeff_ne_zero hb ha1 hab k) hz
+    fun k => mul_ne_zero (KummerContinuedFraction.coeff_ne_zero hb ha1 hab k) hz
   have hwN : ∀ k ≥ N, F (k + 1) ≠ 0 := fun k hk => (hN (k + 1) (by omega)).1
   have hrat : ∀ k ≥ N, (3 : ℝ) * ‖(fun k => kummerMContFractCoeff a b k * z) (k + 1) *
       F (k + 2 + 1)‖ ≤ ‖F (k + 1)‖ := by
     intro k hk
     have := (hN (k + 1) (by omega)).2
     simpa [show k + 1 + 2 = k + 2 + 1 by ring, mul_assoc] using this
-  have key := GenContFract.cfConv_tendsto_of_ratio (h := (1 : ℂ))
+  have key := GenContFract.tendsto_ofFun_convs_of_ratio (h := (1 : ℂ))
     (a := fun k => kummerMContFractCoeff a b k * z) (b := fun _ => (1 : ℂ))
     (w := fun k => F (k + 1)) hw hw0 ha (N := N) hwN (q := 3) (by norm_num) hrat
   have hval : (1 : ℂ) + kummerMContFractCoeff a b 0 * z * F (1 + 1) / F (0 + 1) =
       kummerM a b z / kummerM (a + 1) (b + 1) z := by
     have h0 : F 0 = F (0 + 1) + kummerMContFractCoeff a b 0 * z * F (1 + 1) :=
-      kumCF_F_rec (a := a) hb z 0
-    have e0 : F 0 = kummerM a b z := by simpa [F] using kumCF_F_even a b z 0
-    have e1 : F (0 + 1) = kummerM (a + 1) (b + 1) z := by simpa [F] using kumCF_F_odd a b z 0
+      KummerContinuedFraction.backwardM_rec (a := a) hb z 0
+    have e0 : F 0 = kummerM a b z := by
+        simpa [F] using KummerContinuedFraction.backwardM_even a b z 0
+    have e1 : F (0 + 1) = kummerM (a + 1) (b + 1) z := by
+        simpa [F] using KummerContinuedFraction.backwardM_odd a b z 0
     rw [← e0, ← e1, h0]
     field_simp
   rw [← hval]
@@ -517,7 +538,7 @@ theorem kummerM_continued_fraction_limit {a b x : ℝ} (ha : 0 < a)
 
 /-- Tricomi's function is real and positive for real `c > 0` and `x > 0` (Laplace integral
 DLMF 13.4.4 with a positive integrand). -/
-theorem kumCF_U_real_pos {c d x : ℝ} (hc : 0 < c) (hx : 0 < x) :
+theorem KummerContinuedFraction.U_real_pos {c d x : ℝ} (hc : 0 < c) (hx : 0 < x) :
     ∃ r : ℝ, 0 < r ∧ kummerU c d x = r := by
   have hl := kummerU_laplace (a := (c : ℂ)) (b := d) (z := x) (by simpa using hc)
     (by simpa using hx)
@@ -562,19 +583,20 @@ theorem kumCF_U_real_pos {c d x : ℝ} (hc : 0 < c) (hx : 0 < x) :
 
 /-- The backward solution of the recurrence behind DLMF 13.5.3:
 `w_{2n} = z^n U(a+n, b-1, z)` and `w_{2n+1} = z^{n+1} U(a+n+1, b, z)`. -/
-def kumCF_UW (a b z : ℂ) (k : ℕ) : ℂ :=
+def KummerContinuedFraction.backwardU (a b z : ℂ) (k : ℕ) : ℂ :=
   if k % 2 = 0 then z ^ (k / 2) * kummerU (a + ((k / 2 : ℕ) : ℂ)) (b - 1) z
   else z ^ ((k + 1) / 2) * kummerU (a + (((k + 1) / 2 : ℕ) : ℂ)) b z
 
-/-- The recurrence `w_k = w_{k+1} + (u_{k+2}/z) w_{k+2}` for `kumCF_UW`, from the contiguous
-relations DLMF 13.3.9 and 13.3.10. -/
-theorem kumCF_UW_rec (a b : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
-    kumCF_UW a b z k = kumCF_UW a b z (k + 1) +
-      kummerUContFractCoeff a b (k + 1) / z * kumCF_UW a b z (k + 2) := by
+/-- The recurrence `w_k = w_{k+1} + (u_{k+2}/z) w_{k+2}` for `KummerContinuedFraction.backwardU`,
+from the contiguous relations DLMF 13.3.9 and 13.3.10. -/
+theorem KummerContinuedFraction.backwardU_rec (a b : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
+    KummerContinuedFraction.backwardU a b z k = KummerContinuedFraction.backwardU a b z (k + 1) +
+      kummerUContFractCoeff a b (k + 1) / z * KummerContinuedFraction.backwardU a b z (k + 2) := by
   rcases Nat.even_or_odd' k with ⟨n, rfl | rfl⟩
   · have h := kummerU_contiguous_shift_a (a + ((n + 1 : ℕ) : ℂ)) (b - 1) z hz
     rw [show a + ((n + 1 : ℕ) : ℂ) - 1 = a + (n : ℂ) by push_cast; ring, sub_add_cancel] at h
-    simp only [kumCF_UW, kummerUContFractCoeff, show (2 * n) % 2 = 0 by omega,
+    simp only [KummerContinuedFraction.backwardU, kummerUContFractCoeff,
+        show (2 * n) % 2 = 0 by omega,
       show ¬ ((2 * n + 1) % 2 = 0) by omega, show (2 * n + 2) % 2 = 0 by omega,
       show ¬ ((2 * n + 1 + 1) % 2 = 1) by omega, show (2 * n) / 2 = n by omega,
       show (2 * n + 1 + 1) / 2 = n + 1 by omega, show (2 * n + 2) / 2 = n + 1 by omega,
@@ -586,7 +608,8 @@ theorem kumCF_UW_rec (a b : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
     linear_combination (z ^ n) * h
   · have h := kummerU_contiguous_a_b (a + ((n + 1 : ℕ) : ℂ)) b z hz
     rw [show a + ((n + 1 : ℕ) : ℂ) + 1 = a + ((n + 2 : ℕ) : ℂ) by push_cast; ring] at h
-    simp only [kumCF_UW, kummerUContFractCoeff, show ¬ ((2 * n + 1) % 2 = 0) by omega,
+    simp only [KummerContinuedFraction.backwardU, kummerUContFractCoeff,
+        show ¬ ((2 * n + 1) % 2 = 0) by omega,
       show (2 * n + 1 + 1) % 2 = 0 by omega, show ¬ ((2 * n + 1 + 2) % 2 = 0) by omega,
       show (2 * n + 1 + 1 + 1) % 2 = 1 by omega, show (2 * n + 1 + 1) / 2 = n + 1 by omega,
       show (2 * n + 1 + 2 + 1) / 2 = n + 2 by omega, ↓reduceIte]
@@ -604,18 +627,20 @@ theorem kummerU_continued_fraction_limit {a b x : ℝ} (ha : 0 < a) (hb : 1 < b)
     Tendsto (kummerUContinuedFraction a b x).convs atTop
       (𝓝 (kummerU a b x / kummerU a (b - 1) x)) := by
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
-  set W := kumCF_UW (a : ℂ) (b : ℂ) (x : ℂ) with hW
+  set W := KummerContinuedFraction.backwardU (a : ℂ) (b : ℂ) (x : ℂ) with hW
   have hWr : ∀ k, ∃ r : ℝ, 0 < r ∧ W k = r := by
     intro k
-    simp only [W, kumCF_UW]
+    simp only [W, KummerContinuedFraction.backwardU]
     split_ifs
-    · obtain ⟨r, hr, e⟩ := kumCF_U_real_pos (c := a + ((k / 2 : ℕ) : ℝ)) (d := b - 1) (x := x)
+    · obtain ⟨r, hr, e⟩ :=
+          KummerContinuedFraction.U_real_pos (c := a + ((k / 2 : ℕ) : ℝ)) (d := b - 1) (x := x)
         (by positivity) hx
       refine ⟨x ^ (k / 2) * r, by positivity, ?_⟩
       rw [show (a : ℂ) + ((k / 2 : ℕ) : ℂ) = ((a + ((k / 2 : ℕ) : ℝ) : ℝ) : ℂ) by push_cast; ring,
         show (b : ℂ) - 1 = ((b - 1 : ℝ) : ℂ) by push_cast; ring, e]
       push_cast; ring
-    · obtain ⟨r, hr, e⟩ := kumCF_U_real_pos (c := a + (((k + 1) / 2 : ℕ) : ℝ)) (d := b)
+    · obtain ⟨r, hr, e⟩ :=
+          KummerContinuedFraction.U_real_pos (c := a + (((k + 1) / 2 : ℕ) : ℝ)) (d := b)
         (x := x) (by positivity) hx
       refine ⟨x ^ ((k + 1) / 2) * r, by positivity, ?_⟩
       rw [show (a : ℂ) + (((k + 1) / 2 : ℕ) : ℂ) = ((a + (((k + 1) / 2 : ℕ) : ℝ) : ℝ) : ℂ) by
@@ -631,7 +656,7 @@ theorem kummerU_continued_fraction_limit {a b x : ℝ} (ha : 0 < a) (hb : 1 < b)
   set aR : ℕ → ℝ := fun k => cR k / x with haRdef
   have hrecR : ∀ k, wR k = 1 * wR (k + 1) + aR (k + 1) * wR (k + 2) := by
     intro k
-    have := kumCF_UW_rec (a : ℂ) (b : ℂ) hx0 k
+    have := KummerContinuedFraction.backwardU_rec (a : ℂ) (b : ℂ) hx0 k
     rw [← hW, hwR k, hwR (k + 1), hwR (k + 2), hcR] at this
     simp only [aR, one_mul]
     exact_mod_cast this
@@ -671,33 +696,33 @@ theorem kummerU_continued_fraction_limit {a b x : ℝ} (ha : 0 < a) (hb : 1 < b)
     have hK0 : (0 : ℝ) ≤ K := Nat.cast_nonneg K
     nlinarith [mul_nonneg (sub_nonneg.2 hM1) (by positivity : (0 : ℝ) ≤ 2 * K + k),
       mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ M) hK0) hk]
-  have ht := GenContFract.cfConv_tendsto_of_pos_linear (h := (0 : ℝ))
+  have ht := GenContFract.tendsto_ofFun_convs_of_pos_linear (h := (0 : ℝ))
     (a := fun k => aR (k + 2 * K)) (w := fun k => wR (k + 2 * K)) hpos (fun k => hwpos _)
     (fun k => by
       have := hrecR (k + 2 * K)
       simpa [show k + 2 * K + 1 = k + 1 + 2 * K by ring,
         show k + 2 * K + 2 = k + 2 + 2 * K by ring] using this) hlin
-  have hD : ∀ᶠ N in atTop, (GenContFract.cfConv_ofFun 0 (fun k => aR (k + 2 * K))
+  have hD : ∀ᶠ N in atTop, (GenContFract.ofFun 0 (fun k => aR (k + 2 * K))
       (fun k => (fun _ => (1 : ℝ)) (k + 2 * K))).dens N ≠ 0 :=
     Eventually.of_forall fun N =>
-      (GenContFract.cfConv_dens_pos hpos (fun _ => one_pos) N).ne'
-  obtain ⟨hfull, hDfull⟩ := GenContFract.cfConv_tendsto_of_tail (a := aR)
+      (GenContFract.ofFun_dens_pos hpos (fun _ => one_pos) N).ne'
+  obtain ⟨hfull, hDfull⟩ := GenContFract.tendsto_ofFun_convs_of_tail (a := aR)
     (b := fun _ => (1 : ℝ)) (w := wR) hrecR (fun k => (hwpos k).ne') (2 * K) hD (by
       convert ht using 2
       simp [add_comm])
-  have hR1 : Tendsto (GenContFract.cfConv_ofFun 1 aR (fun _ => (1 : ℝ))).convs atTop
+  have hR1 : Tendsto (GenContFract.ofFun 1 aR (fun _ => (1 : ℝ))).convs atTop
       (𝓝 (1 + aR 0 * wR 1 / wR 0)) := by
     refine (hfull.const_add 1).congr' ?_
     filter_upwards [hDfull] with N hN
-    exact (GenContFract.cfConv_convs_eq 1 aR (fun _ => 1) N hN).symm
+    exact (GenContFract.ofFun_convs_eq_add_convs 1 aR (fun _ => 1) N hN).symm
   have hC : ∀ n, (kummerUContinuedFraction a b x).convs n =
-      ((GenContFract.cfConv_ofFun 1 aR (fun _ => (1 : ℝ))).convs n : ℂ) := by
+      ((GenContFract.ofFun 1 aR (fun _ => (1 : ℝ))).convs n : ℂ) := by
     intro n
-    have := GenContFract.cfConv_convs_map (h := (1 : ℝ)) (a := aR) (b := fun _ => (1 : ℝ))
+    have := GenContFract.ofFun_convs_map (h := (1 : ℝ)) (a := aR) (b := fun _ => (1 : ℝ))
       Complex.ofRealHom n
     simp only [Complex.ofRealHom_eq_coe, ofReal_one] at this
     rw [← this]
-    show (GenContFract.cfConv_ofFun 1 (fun k => kummerUContFractCoeff a b k / x)
+    show (GenContFract.ofFun 1 (fun k => kummerUContFractCoeff a b k / x)
       (fun _ => 1)).convs n = _
     congr 2
     funext k
@@ -706,9 +731,9 @@ theorem kummerU_continued_fraction_limit {a b x : ℝ} (ha : 0 < a) (hb : 1 < b)
   simp_rw [hC]
   have hU := kummerU_contiguous_a_b (a : ℂ) b x hx0
   have e0 : (wR 0 : ℂ) = kummerU a (b - 1) x := by
-    rw [← hwR 0]; simp [W, kumCF_UW]
+    rw [← hwR 0]; simp [W, KummerContinuedFraction.backwardU]
   have e1 : (wR 1 : ℂ) = x * kummerU (a + 1) b x := by
-    rw [← hwR 1]; simp [W, kumCF_UW]
+    rw [← hwR 1]; simp [W, KummerContinuedFraction.backwardU]
   have hc0 : cR 0 = a := by simp [cR]
   have hU0 : kummerU (a : ℂ) (b - 1) x ≠ 0 := by
     rw [← e0]; exact_mod_cast (hwpos 0).ne'
@@ -726,8 +751,8 @@ theorem kummerU_continued_fraction_limit {a b x : ℝ} (ha : 0 < a) (hb : 1 < b)
 /-- **DLMF 13.5.3 for all real parameters** (stronger than DLMF's stated range): for real
 `a`, `b` and `x > 0` with `U(a, b-1, x) ≠ 0`, the convergents of
 `1 + u₁/x/(1 + u₂/x/(1 + ⋯))` tend to `U(a,b,x)/U(a,b-1,x)`. The far tails are positive
-S-fractions (`GenContFract.cfConv_tendsto_of_pos_linear`), and the head is attached by the
-Pincherle invariant (`GenContFract.cfConv_tendsto_of_tail_invariant`); the elements and the
+S-fractions (`GenContFract.tendsto_ofFun_convs_of_pos_linear`), and the head is attached by the
+Pincherle invariant (`GenContFract.tendsto_ofFun_convs_of_tail_invariant`); the elements and the
 backward solution before the tail may vanish. -/
 @[dlmf 13.5.E3 "stronger than DLMF: all real a, b with U(a,b-1,x) ≠ 0"]
 theorem kummerU_continued_fraction_tendsto_real {a b x : ℝ} (hx : 0 < x)
@@ -735,7 +760,7 @@ theorem kummerU_continued_fraction_tendsto_real {a b x : ℝ} (hx : 0 < x)
     Tendsto (kummerUContinuedFraction a b x).convs atTop
       (𝓝 (kummerU a b x / kummerU a (b - 1) x)) := by
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
-  set W := kumCF_UW (a : ℂ) (b : ℂ) (x : ℂ) with hW
+  set W := KummerContinuedFraction.backwardU (a : ℂ) (b : ℂ) (x : ℂ) with hW
   set aC : ℕ → ℂ := fun k => kummerUContFractCoeff a b k / x with haC
   obtain ⟨K, hK⟩ := exists_nat_gt (|a| + |b|)
   have hKa : 0 < a + K := by have := neg_abs_le a; have := abs_nonneg b; linarith
@@ -745,11 +770,12 @@ theorem kummerU_continued_fraction_tendsto_real {a b x : ℝ} (hx : 0 < x)
   -- the tail of the backward solution is real and positive
   have hWr : ∀ k, ∃ r : ℝ, 0 < r ∧ W (k + (J + 1)) = r := by
     intro k
-    simp only [W, kumCF_UW]
+    simp only [W, KummerContinuedFraction.backwardU]
     split_ifs
     · have hK' : (K : ℝ) ≤ (((k + (J + 1)) / 2 : ℕ) : ℝ) := by
         exact_mod_cast (by omega : K ≤ (k + (J + 1)) / 2)
-      obtain ⟨r, hr, e⟩ := kumCF_U_real_pos (c := a + (((k + (J + 1)) / 2 : ℕ) : ℝ))
+      obtain ⟨r, hr, e⟩ :=
+          KummerContinuedFraction.U_real_pos (c := a + (((k + (J + 1)) / 2 : ℕ) : ℝ))
         (d := b - 1) (x := x) (by linarith) hx
       refine ⟨x ^ ((k + (J + 1)) / 2) * r, by positivity, ?_⟩
       rw [show (a : ℂ) + (((k + (J + 1)) / 2 : ℕ) : ℂ) =
@@ -758,7 +784,8 @@ theorem kummerU_continued_fraction_tendsto_real {a b x : ℝ} (hx : 0 < x)
       push_cast; ring
     · have hK' : (K : ℝ) ≤ (((k + (J + 1) + 1) / 2 : ℕ) : ℝ) := by
         exact_mod_cast (by omega : K ≤ (k + (J + 1) + 1) / 2)
-      obtain ⟨r, hr, e⟩ := kumCF_U_real_pos (c := a + (((k + (J + 1) + 1) / 2 : ℕ) : ℝ))
+      obtain ⟨r, hr, e⟩ :=
+          KummerContinuedFraction.U_real_pos (c := a + (((k + (J + 1) + 1) / 2 : ℕ) : ℝ))
         (d := b) (x := x) (by linarith) hx
       refine ⟨x ^ ((k + (J + 1) + 1) / 2) * r, by positivity, ?_⟩
       rw [show (a : ℂ) + (((k + (J + 1) + 1) / 2 : ℕ) : ℂ) =
@@ -775,7 +802,7 @@ theorem kummerU_continued_fraction_tendsto_real {a b x : ℝ} (hx : 0 < x)
   have haTC : ∀ k, aC (k + (J + 1)) = (aT k : ℂ) := fun k => by
     simp only [aC, aT, hcR]; push_cast; ring
   have hrec : ∀ k, W k = 1 * W (k + 1) + aC (k + 1) * W (k + 2) := fun k => by
-    rw [one_mul]; exact kumCF_UW_rec (a : ℂ) (b : ℂ) hx0 k
+    rw [one_mul]; exact KummerContinuedFraction.backwardU_rec (a : ℂ) (b : ℂ) hx0 k
   have hrecT : ∀ k, wT k = 1 * wT (k + 1) + aT (k + 1) * wT (k + 2) := by
     intro k
     have := hrec (k + (J + 1))
@@ -821,33 +848,33 @@ theorem kummerU_continued_fraction_tendsto_real {a b x : ℝ} (hx : 0 < x)
     nlinarith [mul_nonneg (sub_nonneg.2 hM1) (by positivity : (0 : ℝ) ≤ 2 * K + 1 + k),
       mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ M) (by positivity : (0 : ℝ) ≤ 2 * K + 1))
         hk]
-  have htR := GenContFract.cfConv_tendsto_of_pos_linear (h := (0 : ℝ)) (a := aT) (w := wT) hpos
+  have htR := GenContFract.tendsto_ofFun_convs_of_pos_linear (h := (0 : ℝ)) (a := aT) (w := wT) hpos
     hwTpos hrecT hlin
   -- transfer the tail to `ℂ`
   have hTfun : (fun k => aC (k + (J + 1))) = fun k => ((aT k : ℝ) : ℂ) := funext haTC
-  have hTconv : ∀ n, (GenContFract.cfConv_ofFun 0 (fun k => aC (k + (J + 1)))
+  have hTconv : ∀ n, (GenContFract.ofFun 0 (fun k => aC (k + (J + 1)))
       (fun k => (fun _ => (1 : ℂ)) (k + (J + 1)))).convs n =
-      ((GenContFract.cfConv_ofFun 0 aT (fun _ => (1 : ℝ))).convs n : ℂ) := by
+      ((GenContFract.ofFun 0 aT (fun _ => (1 : ℝ))).convs n : ℂ) := by
     intro n
-    have := GenContFract.cfConv_convs_map (h := (0 : ℝ)) (a := aT) (b := fun _ => (1 : ℝ))
+    have := GenContFract.ofFun_convs_map (h := (0 : ℝ)) (a := aT) (b := fun _ => (1 : ℝ))
       Complex.ofRealHom n
     simp only [Complex.ofRealHom_eq_coe, ofReal_zero, ofReal_one] at this
     rw [← this, hTfun]
-  have hTdens : ∀ n, (GenContFract.cfConv_ofFun 0 (fun k => aC (k + (J + 1)))
+  have hTdens : ∀ n, (GenContFract.ofFun 0 (fun k => aC (k + (J + 1)))
       (fun k => (fun _ => (1 : ℂ)) (k + (J + 1)))).dens n ≠ 0 := by
     intro n
-    have := GenContFract.cfConv_dens_map (h := (0 : ℝ)) (a := aT) (b := fun _ => (1 : ℝ))
+    have := GenContFract.ofFun_dens_map (h := (0 : ℝ)) (a := aT) (b := fun _ => (1 : ℝ))
       Complex.ofRealHom n
     simp only [Complex.ofRealHom_eq_coe, ofReal_zero, ofReal_one] at this
     rw [hTfun, this]
-    exact_mod_cast (GenContFract.cfConv_dens_pos hpos (fun _ => one_pos) n).ne'
-  have hW0 : W 0 = kummerU (a : ℂ) ((b : ℂ) - 1) x := by simp [W, kumCF_UW]
-  have hW1 : W 1 = x * kummerU ((a : ℂ) + 1) b x := by simp [W, kumCF_UW]
-  have key := GenContFract.cfConv_tendsto_of_tail_invariant (h := (1 : ℂ)) (a := aC)
+    exact_mod_cast (GenContFract.ofFun_dens_pos hpos (fun _ => one_pos) n).ne'
+  have hW0 : W 0 = kummerU (a : ℂ) ((b : ℂ) - 1) x := by simp [W, KummerContinuedFraction.backwardU]
+  have hW1 : W 1 = x * kummerU ((a : ℂ) + 1) b x := by simp [W, KummerContinuedFraction.backwardU]
+  have key := GenContFract.tendsto_ofFun_convs_of_tail_invariant (h := (1 : ℂ)) (a := aC)
     (b := fun _ => (1 : ℂ)) (w := W) hrec (by rw [hW0]; exact hU) J
     (by rw [show J + 1 = 0 + (J + 1) by ring, hwTR 0]; exact_mod_cast (hwTpos 0).ne')
     (Eventually.of_forall hTdens) (by
-      show Tendsto (fun n => (GenContFract.cfConv_ofFun 0 (fun k => aC (k + (J + 1)))
+      show Tendsto (fun n => (GenContFract.ofFun 0 (fun k => aC (k + (J + 1)))
         (fun k => (fun _ => (1 : ℂ)) (k + (J + 1)))).convs n) atTop _
       simp_rw [hTconv]
       have hv : aC (J + 1) * W (J + 2) / W (J + 1) =
@@ -857,7 +884,7 @@ theorem kummerU_continued_fraction_tendsto_real {a b x : ℝ} (hx : 0 < x)
         push_cast; ring
       rw [hv]
       exact (continuous_ofReal.tendsto _).comp htR)
-  show Tendsto (GenContFract.cfConv_ofFun 1 aC (fun _ => 1)).convs atTop _
+  show Tendsto (GenContFract.ofFun 1 aC (fun _ => 1)).convs atTop _
   convert key using 2
   have hc0 : kummerUContFractCoeff (a : ℂ) b 0 = a := by simp [kummerUContFractCoeff]
   have hUab := kummerU_contiguous_a_b (a : ℂ) b x hx0
@@ -899,7 +926,7 @@ def whittakerWContinuedFraction (κ μ z : ℂ) : GenContFract ℂ where
   s := Stream'.Seq.ofStream fun k => ⟨whittakerWContFractCoeff κ μ k / z, 1⟩
 
 /-- `x^{s+1/2} = √x · x^s` for `x > 0`. -/
-theorem kumCF_cpow_add_half {x : ℝ} (hx : 0 < x) (s : ℂ) :
+theorem KummerContinuedFraction.cpow_add_half {x : ℝ} (hx : 0 < x) (s : ℂ) :
     (x : ℂ) ^ (s + 1 / 2) = (Real.sqrt x : ℂ) * (x : ℂ) ^ s := by
   rw [cpow_add _ _ (ofReal_ne_zero.mpr hx.ne'), Real.sqrt_eq_rpow, ofReal_cpow hx.le]
   push_cast
@@ -910,16 +937,16 @@ the partial numerators: if `b` is not a nonpositive integer, `z ≠ 0` and `M(a+
 the convergents of `1 + u₁z/(1 + u₂z/(1 + ⋯))` tend to `M(a,b,z)/M(a+1,b+1,z)`. Stronger than
 `kummerM_continued_fraction_tendsto`: vanishing (terminating) partial numerators are allowed.
 The far tail is handled by Pincherle's ratio criterion and the head by the Pincherle invariant
-(`GenContFract.cfConv_tendsto_of_tail_invariant`). -/
+(`GenContFract.tendsto_ofFun_convs_of_tail_invariant`). -/
 @[dlmf 13.5.E1 "stronger than DLMF: complex parameters, terminating fractions included"]
 theorem kummerM_continued_fraction_tendsto_of_ne {a b z : ℂ} (hb : ∀ k : ℕ, b ≠ -k)
     (hz : z ≠ 0) (hM : kummerM (a + 1) (b + 1) z ≠ 0) :
     Tendsto (kummerMContinuedFraction a b z).convs atTop
       (𝓝 (kummerM a b z / kummerM (a + 1) (b + 1) z)) := by
-  set F := kumCF_F a b z with hFdef
+  set F := KummerContinuedFraction.backwardM a b z with hFdef
   set aC : ℕ → ℂ := fun k => kummerMContFractCoeff a b k * z with haC
   set w : ℕ → ℂ := fun k => F (k + 1) with hwdef
-  obtain ⟨N, hN⟩ := eventually_atTop.mp (kumCF_eventually_ratio a b z)
+  obtain ⟨N, hN⟩ := eventually_atTop.mp (KummerContinuedFraction.eventually_ratio a b z)
   -- the partial numerators are eventually nonzero
   obtain ⟨L, hL⟩ := exists_nat_gt (‖a‖ + ‖b‖ + 1)
   have hcoeff : ∀ j ≥ 2 * L, kummerMContFractCoeff a b j ≠ 0 := by
@@ -928,7 +955,7 @@ theorem kummerM_continued_fraction_tendsto_of_ne {a b z : ℂ} (hb : ∀ k : ℕ
     have hab := norm_sub_le a b
     have h1 := norm_add_le a 1
     rcases Nat.even_or_odd' j with ⟨m, rfl | rfl⟩
-    · rw [kumCF_coeff_even]
+    · rw [KummerContinuedFraction.coeff_even]
       refine div_ne_zero ?_ (mul_ne_zero ?_ ?_)
       · intro h0
         have : ‖a - b‖ = m := by
@@ -937,7 +964,7 @@ theorem kummerM_continued_fraction_tendsto_of_ne {a b z : ℂ} (hb : ∀ k : ℕ
         linarith
       · simpa using hb' (2 * m)
       · simpa [add_assoc] using hb' (2 * m + 1)
-    · rw [kumCF_coeff_odd]
+    · rw [KummerContinuedFraction.coeff_odd]
       refine div_ne_zero ?_ (mul_ne_zero ?_ ?_)
       · intro h0
         have : ‖a + 1‖ = m := by
@@ -952,7 +979,7 @@ theorem kummerM_continued_fraction_tendsto_of_ne {a b z : ℂ} (hb : ∀ k : ℕ
   have hrec : ∀ k, w k = (fun _ => (1 : ℂ)) k * w (k + 1) + aC (k + 1) * w (k + 2) := by
     intro k
     simp only [w, aC, one_mul]
-    exact kumCF_F_rec (a := a) hb z (k + 1)
+    exact KummerContinuedFraction.backwardM_rec (a := a) hb z (k + 1)
   -- the tail from index `J + 1`
   set aT : ℕ → ℂ := fun k => aC (k + (J + 1)) with haT
   set wT : ℕ → ℂ := fun k => w (k + (J + 1)) with hwT
@@ -974,27 +1001,29 @@ theorem kummerM_continued_fraction_tendsto_of_ne {a b z : ℂ} (hb : ∀ k : ℕ
     rw [show k + 1 + (J + 1) = k + (J + 1) + 1 by ring,
       show k + 2 + (J + 1) + 1 = k + (J + 1) + 1 + 2 by ring, mul_assoc] at *
     simpa [mul_assoc] using this
-  have hT := GenContFract.cfConv_tendsto_of_ratio (h := (0 : ℂ)) (a := aT)
+  have hT := GenContFract.tendsto_ofFun_convs_of_ratio (h := (0 : ℂ)) (a := aT)
     (b := fun k => (fun _ => (1 : ℂ)) (k + (J + 1))) (w := wT) hrecT (hwT 0) haT0
     (N := 0) (fun k _ => hwT k) (q := 3) (by norm_num) hratT
-  have hDT := GenContFract.cfConv_dens_eventually_ne_of_ratio (h := (0 : ℂ)) (a := aT)
+  have hDT := GenContFract.ofFun_dens_eventually_ne_of_ratio (h := (0 : ℂ)) (a := aT)
     (b := fun k => (fun _ => (1 : ℂ)) (k + (J + 1))) (w := wT) hrecT (hwT 0) haT0
     (N := 0) (fun k _ => hwT k) (q := 3) (by norm_num) hratT
   have hw0 : w 0 ≠ 0 := by
-    have := kumCF_F_odd a b z 0
+    have := KummerContinuedFraction.backwardM_odd a b z 0
     simp only [mul_zero, zero_add, Nat.cast_zero, add_zero] at this
-    show kumCF_F a b z 1 ≠ 0
+    show KummerContinuedFraction.backwardM a b z 1 ≠ 0
     rw [this]; exact hM
-  have key := GenContFract.cfConv_tendsto_of_tail_invariant (h := (1 : ℂ)) (a := aC)
+  have key := GenContFract.tendsto_ofFun_convs_of_tail_invariant (h := (1 : ℂ)) (a := aC)
     (b := fun _ => (1 : ℂ)) (w := w) hrec hw0 J (by simpa [wT] using hwT 0) hDT (by
       convert hT using 2
       simp only [aT, wT, zero_add]
       rw [show 1 + (J + 1) = J + 2 by ring])
   have hval : (1 : ℂ) + aC 0 * w 1 / w 0 = kummerM a b z / kummerM (a + 1) (b + 1) z := by
     have h0 : F 0 = F (0 + 1) + kummerMContFractCoeff a b 0 * z * F (1 + 1) :=
-      kumCF_F_rec (a := a) hb z 0
-    have e0 : F 0 = kummerM a b z := by simpa [F] using kumCF_F_even a b z 0
-    have e1 : F (0 + 1) = kummerM (a + 1) (b + 1) z := by simpa [F] using kumCF_F_odd a b z 0
+      KummerContinuedFraction.backwardM_rec (a := a) hb z 0
+    have e0 : F 0 = kummerM a b z := by
+        simpa [F] using KummerContinuedFraction.backwardM_even a b z 0
+    have e1 : F (0 + 1) = kummerM (a + 1) (b + 1) z := by
+        simpa [F] using KummerContinuedFraction.backwardM_odd a b z 0
     have hF1 : F (0 + 1) ≠ 0 := by rw [e1]; exact hM
     simp only [w, aC]
     rw [← e0, ← e1, h0]
@@ -1031,7 +1060,8 @@ theorem whittakerM_continued_fraction_limit {κ μ x : ℝ} (hμ : 0 < μ)
       exp (-(x : ℂ) / 2) * (Real.sqrt x : ℂ) * (x : ℂ) ^ ((μ : ℂ) + 1 / 2) *
         kummerM (a + 1) (b + 1) x := by
     simp only [whittakerM, a, b]
-    rw [show (μ : ℂ) + 1 / 2 + 1 / 2 = (μ + 1 / 2) + 1 / 2 by ring, kumCF_cpow_add_half hx]
+    rw [show (μ : ℂ) + 1 / 2 + 1 / 2 = (μ + 1 / 2) + 1 / 2 by
+        ring, KummerContinuedFraction.cpow_add_half hx]
     rw [show (μ : ℂ) + 1 / 2 - (κ - 1 / 2) + 1 / 2 = μ - κ + 1 / 2 + 1 by ring,
       show 1 + 2 * ((μ : ℂ) + 1 / 2) = 1 + 2 * μ + 1 by ring]
     ring
@@ -1091,7 +1121,7 @@ theorem whittakerW_continued_fraction_limit {κ μ x : ℝ} (hx : 0 < x)
     rw [Ne, cpow_eq_zero_iff]; exact fun h => (ofReal_ne_zero.mpr hx.ne') h.1
   simp only [whittakerW, a, b]
   push_cast
-  rw [show (1 : ℂ) / 2 + μ = μ + 1 / 2 by ring, kumCF_cpow_add_half hx]
+  rw [show (1 : ℂ) / 2 + μ = μ + 1 / 2 by ring, KummerContinuedFraction.cpow_add_half hx]
   field_simp
 
 end DLMF.Confluent

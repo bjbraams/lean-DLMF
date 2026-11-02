@@ -53,6 +53,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Generalized lower sine integral on the logarithmic plane away from its parameter poles. -/
@@ -142,33 +144,36 @@ theorem summable_genTrig_coeff (a z : ℂ) (ε : ℕ) :
     _ = _ := by simp only [Function.comp_apply,mul_one]
 
 /-- Terms of the generalized trigonometric series, with a finite set of indices removed. -/
-noncomputable def incG_trigTerm (z : ℂ) (ε : ℕ) (s : Finset ℕ) (k : ℕ) (a : ℂ) : ℂ :=
+noncomputable def GeneralizedTrigIntegrals.trigTerm (z : ℂ) (ε : ℕ) (s : Finset ℕ)
+    (k : ℕ) (a : ℂ) : ℂ :=
   if k ∈ s then 0 else (-1:ℂ)^k*z^(2*k+ε)/(((2*k+ε).factorial : ℂ)*(((2*k+ε:ℕ):ℂ)+a))
 
 /-- Summability of the modified trigonometric series for every parameter. -/
-theorem incG_trigTerm_summable (z : ℂ) (ε : ℕ) (s : Finset ℕ) (a : ℂ) :
-    Summable (fun k => incG_trigTerm z ε s k a) := by
+theorem GeneralizedTrigIntegrals.trigTerm_summable (z : ℂ) (ε : ℕ) (s : Finset ℕ) (a : ℂ) :
+    Summable (fun k => GeneralizedTrigIntegrals.trigTerm z ε s k a) := by
   have h := (summable_genTrig_coeff a z ε).indicator ((↑s : Set ℕ)ᶜ)
   refine h.congr fun k => ?_
-  simp only [incG_trigTerm, Set.indicator, Set.mem_compl_iff, Finset.mem_coe]
+  simp only [GeneralizedTrigIntegrals.trigTerm, Set.indicator, Set.mem_compl_iff, Finset.mem_coe]
   split_ifs <;> rfl
 
 /-- The modified trigonometric series is analytic in the parameter at every point which is
 not a pole of a retained term. -/
-theorem incG_trigTerm_analyticAt (z : ℂ) (ε : ℕ) (s : Finset ℕ) {a₀ : ℂ}
+theorem GeneralizedTrigIntegrals.trigTerm_analyticAt (z : ℂ) (ε : ℕ) (s : Finset ℕ) {a₀ : ℂ}
     (ha : ∀ k ∉ s, ((2*k+ε:ℕ):ℂ)+a₀ ≠ 0) :
-    AnalyticAt ℂ (fun a => ∑' k, incG_trigTerm z ε s k a) a₀ := by
+    AnalyticAt ℂ (fun a => ∑' k, GeneralizedTrigIntegrals.trigTerm z ε s k a) a₀ := by
   rw [Complex.analyticAt_iff_eventually_differentiableAt]
   obtain ⟨K, hK⟩ := exists_nat_gt (‖a₀‖+1)
-  have hsplit : (fun a => ∑' k, incG_trigTerm z ε s k a) = fun a =>
-      (∑ k ∈ Finset.range K, incG_trigTerm z ε s k a) + ∑' j, incG_trigTerm z ε s (j+K) a := by
-    funext a; exact ((incG_trigTerm_summable z ε s a).sum_add_tsum_nat_add K).symm
+  have hsplit : (fun a => ∑' k, GeneralizedTrigIntegrals.trigTerm z ε s k a) = fun a =>
+      (∑ k ∈ Finset.range K, GeneralizedTrigIntegrals.trigTerm z ε s k a) + ∑' j,
+          GeneralizedTrigIntegrals.trigTerm z ε s (j+K) a := by
+    funext a; exact ((GeneralizedTrigIntegrals.trigTerm_summable z ε s
+        a).sum_add_tsum_nat_add K).symm
   rw [hsplit]
   -- each term is differentiable where its denominator does not vanish
   have hterm : ∀ k, ∀ a, (k ∉ s → ((2*k+ε:ℕ):ℂ)+a ≠ 0) →
-      DifferentiableAt ℂ (fun a => incG_trigTerm z ε s k a) a := by
+      DifferentiableAt ℂ (fun a => GeneralizedTrigIntegrals.trigTerm z ε s k a) a := by
     intro k a h
-    unfold incG_trigTerm
+    unfold GeneralizedTrigIntegrals.trigTerm
     by_cases hk : k ∈ s
     · simp only [hk, ite_true]; exact differentiableAt_const _
     · simp only [hk, ite_false]
@@ -176,7 +181,7 @@ theorem incG_trigTerm_analyticAt (z : ℂ) (ε : ℕ) (s : Finset ℕ) {a₀ : �
         ((differentiableAt_const _).add differentiableAt_id)) ?_
       exact mul_ne_zero (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)) (h hk)
   have hfin : ∀ᶠ a in 𝓝 a₀, ∀ k ∈ Finset.range K,
-      DifferentiableAt ℂ (fun a => incG_trigTerm z ε s k a) a := by
+      DifferentiableAt ℂ (fun a => GeneralizedTrigIntegrals.trigTerm z ε s k a) a := by
     rw [Filter.eventually_all_finset]
     intro k _
     by_cases hk : k ∈ s
@@ -185,7 +190,7 @@ theorem incG_trigTerm_analyticAt (z : ℂ) (ε : ℕ) (s : Finset ℕ) {a₀ : �
       filter_upwards [hc.eventually_ne (ha k hk)] with a ha'
       exact hterm k a fun _ => ha'
   -- the tail is a locally uniform limit on the ball of radius 1/2
-  have htail : DifferentiableOn ℂ (fun a => ∑' j, incG_trigTerm z ε s (j+K) a)
+  have htail : DifferentiableOn ℂ (fun a => ∑' j, GeneralizedTrigIntegrals.trigTerm z ε s (j+K) a)
       (Metric.ball a₀ (1/2)) := by
     have hinj : Function.Injective (fun j : ℕ => 2*(j+K)+ε) := by
       intro i j h; dsimp only at h; omega
@@ -206,7 +211,7 @@ theorem incG_trigTerm_analyticAt (z : ℂ) (ε : ℕ) (s : Finset ℕ) {a₀ : �
       (fun j a ha' => (hterm (j+K) a fun _ h0 => by
         have := hlow j a ha'; rw [h0, norm_zero] at this; linarith).differentiableWithinAt)
       Metric.isOpen_ball fun j a ha' => ?_
-    unfold incG_trigTerm
+    unfold GeneralizedTrigIntegrals.trigTerm
     split_ifs
     · simp only [norm_zero, Function.comp_apply]; positivity
     · simp only [Function.comp_apply, norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow,
@@ -219,59 +224,62 @@ theorem incG_trigTerm_analyticAt (z : ℂ) (ε : ℕ) (s : Finset ℕ) {a₀ : �
         _ ≤ ‖z‖^(2*(j+K)+ε) * (((2*(j+K)+ε).factorial : ℝ) * ‖((2*(j+K)+ε:ℕ):ℂ)+a‖) := by
           rw [← mul_assoc]; gcongr
   have htail' : ∀ᶠ a in 𝓝 a₀,
-      DifferentiableAt ℂ (fun a => ∑' j, incG_trigTerm z ε s (j+K) a) a := by
+      DifferentiableAt ℂ (fun a => ∑' j, GeneralizedTrigIntegrals.trigTerm z ε s (j+K) a) a := by
     filter_upwards [Metric.ball_mem_nhds a₀ (by norm_num : (0:ℝ) < 1/2)] with a ha'
     exact htail.differentiableAt (Metric.isOpen_ball.mem_nhds ha')
   filter_upwards [hfin, htail'] with a h1 h2
   exact (DifferentiableAt.fun_sum fun k hk => h1 k hk).add h2
 
-/-- The lower sine series in terms of `incG_trigTerm`. -/
-theorem incG_genSinIntOnLog_eq (b w : ℂ) :
-    genSinIntOnLog b w = exp (b*w)*∑' k, incG_trigTerm (exp w) 1 ∅ k b := by
-  unfold genSinIntOnLog incG_trigTerm
+/-- The lower sine series in terms of `GeneralizedTrigIntegrals.trigTerm`. -/
+theorem GeneralizedTrigIntegrals.genSinIntOnLog_eq (b w : ℂ) :
+    genSinIntOnLog b w = exp (b*w)*∑' k, GeneralizedTrigIntegrals.trigTerm (exp w) 1 ∅ k b := by
+  unfold genSinIntOnLog GeneralizedTrigIntegrals.trigTerm
   congr 1; refine tsum_congr fun k => ?_
   simp only [Finset.notMem_empty, ite_false]
   rw [show (2*k+1:ℂ)*w = ((2*k+1:ℕ):ℂ)*w by push_cast; ring, exp_nat_mul]
   push_cast; ring
 
-/-- The lower cosine series in terms of `incG_trigTerm`. -/
-theorem incG_genCosIntOnLog_eq (b w : ℂ) :
-    genCosIntOnLog b w = exp (b*w)*∑' k, incG_trigTerm (exp w) 0 ∅ k b := by
-  unfold genCosIntOnLog incG_trigTerm
+/-- The lower cosine series in terms of `GeneralizedTrigIntegrals.trigTerm`. -/
+theorem GeneralizedTrigIntegrals.genCosIntOnLog_eq (b w : ℂ) :
+    genCosIntOnLog b w = exp (b*w)*∑' k, GeneralizedTrigIntegrals.trigTerm (exp w) 0 ∅ k b := by
+  unfold genCosIntOnLog GeneralizedTrigIntegrals.trigTerm
   congr 1; refine tsum_congr fun k => ?_
   simp only [Finset.notMem_empty, ite_false]
   rw [show (2*k:ℂ)*w = ((2*k:ℕ):ℂ)*w by push_cast; ring, exp_nat_mul]
   push_cast; ring_nf
 
 /-- Residue of the modified series at the pole `a = -(2n+ε)`. -/
-theorem incG_trig_residue (w : ℂ) (ε n : ℕ) :
-    Tendsto (fun a : ℂ => (a+((2*n+ε:ℕ):ℂ))*(exp (a*w)*∑' k, incG_trigTerm (exp w) ε ∅ k a))
+theorem GeneralizedTrigIntegrals.trig_residue (w : ℂ) (ε n : ℕ) :
+    Tendsto (fun a : ℂ =>
+        (a+((2*n+ε:ℕ):ℂ))*(exp (a*w)*∑' k, GeneralizedTrigIntegrals.trigTerm (exp w) ε ∅ k a))
       (𝓝[≠] (-((2*n+ε:ℕ):ℂ))) (𝓝 ((-1 : ℂ)^n/(2*n+ε).factorial)) := by
   set d : ℂ := ((2*n+ε:ℕ):ℂ)
-  have hR := (incG_trigTerm_analyticAt (exp w) ε {n} (a₀ := -d) (fun k hk => by
+  have hR := (GeneralizedTrigIntegrals.trigTerm_analyticAt (exp w) ε {n} (a₀ := -d) (fun k hk => by
     have hk' : k ≠ n := by simpa using hk
     simp only [d]; intro h
     have : ((2*k+ε:ℕ):ℂ) = ((2*n+ε:ℕ):ℂ) := by linear_combination h
     have := Nat.cast_injective this; omega)).continuousAt
-  have hsplit : ∀ a, ∑' k, incG_trigTerm (exp w) ε ∅ k a =
-      (∑' k, incG_trigTerm (exp w) ε {n} k a) +
+  have hsplit : ∀ a, ∑' k, GeneralizedTrigIntegrals.trigTerm (exp w) ε ∅ k a =
+      (∑' k, GeneralizedTrigIntegrals.trigTerm (exp w) ε {n} k a) +
         (-1:ℂ)^n*(exp w)^(2*n+ε)/(((2*n+ε).factorial : ℂ)*(d+a)) := by
     intro a
     rw [← (hasSum_ite_eq n ((-1:ℂ)^n*(exp w)^(2*n+ε)/(((2*n+ε).factorial : ℂ)*(d+a)))).tsum_eq,
-      ← Summable.tsum_add (incG_trigTerm_summable _ _ _ _) (hasSum_ite_eq _ _).summable]
+      ← Summable.tsum_add (GeneralizedTrigIntegrals.trigTerm_summable _ _ _ _)
+          (hasSum_ite_eq _ _).summable]
     refine tsum_congr fun k => ?_
-    unfold incG_trigTerm
+    unfold GeneralizedTrigIntegrals.trigTerm
     by_cases hk : k = n
     · subst hk; simp [d]
     · simp [hk]
-  have hlim : Tendsto (fun a : ℂ => exp (a*w)*((a+d)*(∑' k, incG_trigTerm (exp w) ε {n} k a) +
+  have hlim : Tendsto (fun a : ℂ =>
+      exp (a*w)*((a+d)*(∑' k, GeneralizedTrigIntegrals.trigTerm (exp w) ε {n} k a) +
       (-1:ℂ)^n*(exp w)^(2*n+ε)/((2*n+ε).factorial : ℂ))) (𝓝 (-d))
-      (𝓝 (exp (-d*w)*((-d+d)*(∑' k, incG_trigTerm (exp w) ε {n} k (-d)) +
+      (𝓝 (exp (-d*w)*((-d+d)*(∑' k, GeneralizedTrigIntegrals.trigTerm (exp w) ε {n} k (-d)) +
         (-1:ℂ)^n*(exp w)^(2*n+ε)/((2*n+ε).factorial : ℂ)))) := by
     refine ((continuous_exp.comp (continuous_id.mul continuous_const)).continuousAt.tendsto).mul
       ((((continuous_id.add continuous_const).continuousAt.tendsto).mul hR.tendsto).add
           tendsto_const_nhds)
-  have hval : exp (-d*w)*((-d+d)*(∑' k, incG_trigTerm (exp w) ε {n} k (-d)) +
+  have hval : exp (-d*w)*((-d+d)*(∑' k, GeneralizedTrigIntegrals.trigTerm (exp w) ε {n} k (-d)) +
       (-1:ℂ)^n*(exp w)^(2*n+ε)/((2*n+ε).factorial : ℂ)) = (-1 : ℂ)^n/(2*n+ε).factorial := by
     have : exp (-d*w)*(exp w)^(2*n+ε) = 1 := by
       rw [← exp_nat_mul, ← Complex.exp_add, show -d*w + ((2*n+ε:ℕ):ℂ)*w = 0 by simp only [d]; ring,
@@ -290,17 +298,17 @@ theorem incG_trig_residue (w : ℂ) (ε n : ℕ) :
 /-- The function `(fun b => genSinIntOnLog b w)` is analytic over `ℂ` at `a`. -/
 theorem genSinInt_parameter_analytic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) (w : ℂ) :
     AnalyticAt ℂ (fun b => genSinIntOnLog b w) a := by
-  simp_rw [incG_genSinIntOnLog_eq]
+  simp_rw [GeneralizedTrigIntegrals.genSinIntOnLog_eq]
   refine (analyticAt_cexp.comp ((analyticAt_id).mul analyticAt_const)).mul
-    (incG_trigTerm_analyticAt (exp w) 1 ∅ fun k _ h => ha k ?_)
+    (GeneralizedTrigIntegrals.trigTerm_analyticAt (exp w) 1 ∅ fun k _ h => ha k ?_)
   push_cast at h; linear_combination h
 
 /-- The function `(fun b => genCosIntOnLog b w)` is analytic over `ℂ` at `a`. -/
 theorem genCosInt_parameter_analytic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) (w : ℂ) :
     AnalyticAt ℂ (fun b => genCosIntOnLog b w) a := by
-  simp_rw [incG_genCosIntOnLog_eq]
+  simp_rw [GeneralizedTrigIntegrals.genCosIntOnLog_eq]
   refine (analyticAt_cexp.comp ((analyticAt_id).mul analyticAt_const)).mul
-    (incG_trigTerm_analyticAt (exp w) 0 ∅ fun k _ h => ha k ?_)
+    (GeneralizedTrigIntegrals.trigTerm_analyticAt (exp w) 0 ∅ fun k _ h => ha k ?_)
   push_cast at h; linear_combination h
 
 /-- The map `(fun a : ℂ => (a+(2*n+1))*genSinIntOnLog a w)` tends to `(𝓝 ((-1 :
@@ -308,9 +316,9 @@ theorem genCosInt_parameter_analytic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : 
 theorem genSinInt_parameter_residue (n : ℕ) (w : ℂ) :
     Tendsto (fun a : ℂ => (a+(2*n+1))*genSinIntOnLog a w) (𝓝[≠] (-(2*n+1 : ℂ)))
         (𝓝 ((-1 : ℂ)^n/(2*n+1).factorial)) := by
-  have h := incG_trig_residue w 1 n
+  have h := GeneralizedTrigIntegrals.trig_residue w 1 n
   push_cast at h
-  simp_rw [incG_genSinIntOnLog_eq]
+  simp_rw [GeneralizedTrigIntegrals.genSinIntOnLog_eq]
   exact h
 
 /-- The map `(fun a : ℂ => (a+2*n)*genCosIntOnLog a w)` tends to `(𝓝 ((-1 :
@@ -318,9 +326,9 @@ theorem genSinInt_parameter_residue (n : ℕ) (w : ℂ) :
 theorem genCosInt_parameter_residue (n : ℕ) (w : ℂ) :
     Tendsto (fun a : ℂ => (a+2*n)*genCosIntOnLog a w) (𝓝[≠] (-(2*n : ℂ)))
         (𝓝 ((-1 : ℂ)^n/(2*n).factorial)) := by
-  have h := incG_trig_residue w 0 n
+  have h := GeneralizedTrigIntegrals.trig_residue w 0 n
   push_cast at h
-  simp_rw [incG_genCosIntOnLog_eq]
+  simp_rw [GeneralizedTrigIntegrals.genCosIntOnLog_eq]
   simpa using h
 
 /-- `Γ(a, ε i (z+t)) → 0` along horizontal rays when `re a < 1`. -/
@@ -436,7 +444,8 @@ theorem tendsto_genTrigTail_add_ofReal {a : ℂ} (ha : a.re < 1) (z : ℂ) :
     rw [(genTrigTail_eq_upperIncGamma a ht).2]; push_cast; ring_nf
 
 /-- `∫₀^R t^{a-1} e^{iεt} dt = (-iε)^{-a} (Γ(a) - Γ(a, -iεR))` for `R > 0`. -/
-theorem incG_integral_rpow_mul_exp_I {a : ℂ} (ha0 : 0 < a.re) {ε : ℝ} (hε : ε=1 ∨ ε = -1)
+theorem GeneralizedTrigIntegrals.integral_rpow_mul_exp_I {a : ℂ} (ha0 : 0 < a.re) {ε : ℝ}
+    (hε : ε=1 ∨ ε = -1)
     {R : ℝ} (hR : 0 < R) :
     (∫ t in (0:ℝ)..R, (t : ℂ)^(a-1)*exp (ε*I*t)) =
       (-(ε*I))^(-a) * (Gamma a - upperIncGamma a (-(ε*I)*R)) := by
@@ -487,7 +496,8 @@ theorem incG_integral_rpow_mul_exp_I {a : ℂ} (ha0 : 0 < a.re) {ε : ℝ} (hε 
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (t : ℂ)^(a-1)*exp
 (ε*I*t)) 0 (exp (ε*π*I*a/2)*Gamma a)`. -/
-theorem incG_gamma_rotated_oscillatory_integral {a : ℂ} (ha0 : 0 < a.re) (ha1 : a.re < 1) {ε : ℝ}
+theorem GeneralizedTrigIntegrals.gamma_rotated_oscillatory_integral {a : ℂ} (ha0 : 0 < a.re)
+    (ha1 : a.re < 1) {ε : ℝ}
     (hε : ε=1 ∨ ε = -1) :
     HasIntegralAtTop (fun t : ℝ => (t : ℂ)^(a-1)*exp (ε*I*t)) 0 (exp (ε*π*I*a/2)*Gamma a) := by
   have hε' : -ε = 1 ∨ -ε = -1 := by rcases hε with rfl | rfl <;> simp
@@ -503,7 +513,7 @@ theorem incG_gamma_rotated_oscillatory_integral {a : ℂ} (ha0 : 0 < a.re) (ha1 
   unfold HasIntegralAtTop
   refine hL.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with R hR
-  rw [incG_integral_rpow_mul_exp_I ha0 hε hR, hc]
+  rw [GeneralizedTrigIntegrals.integral_rpow_mul_exp_I ha0 hε hR, hc]
   congr 3
   push_cast; ring
 
@@ -513,7 +523,7 @@ theorem incG_gamma_rotated_oscillatory_integral {a : ℂ} (ha0 : 0 < a.re) (ha1 
 theorem gamma_rotated_oscillatory_integral {a : ℂ} (ha0 : 0 < a.re) (ha1 : a.re < 1) {ε : ℝ}
     (hε : ε=1 ∨ ε = -1) :
     HasIntegralAtTop (fun t : ℝ => (t : ℂ)^(a-1)*exp (ε*I*t)) 0 (exp (ε*π*I*a/2)*Gamma a) :=
-  incG_gamma_rotated_oscillatory_integral ha0 ha1 hε
+  GeneralizedTrigIntegrals.gamma_rotated_oscillatory_integral ha0 ha1 hε
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (z+t)^(a-1)*sin (z+t))
 0 (genSinIntTail a z)`. -/
@@ -562,7 +572,8 @@ def gammaCosHalfPiContinued (a : ℂ) : ℂ :=
   limUnder (𝓝[≠] a) (fun b : ℂ => Gamma b*cos (π*b/2))
 
 /-- Punctured neighbourhoods avoid the nonpositive integers. -/
-theorem incG_eventually_nhdsNE_regular (a : ℂ) : ∀ᶠ b : ℂ in 𝓝[≠] a, ∀ m : ℕ, b ≠ -m := by
+theorem GeneralizedTrigIntegrals.eventually_nhdsNE_regular (a : ℂ) : ∀ᶠ b : ℂ in 𝓝[≠] a,
+    ∀ m : ℕ, b ≠ -m := by
   by_cases h : ∃ n : ℕ, a = -n
   · obtain ⟨n, rfl⟩ := h; exact eventually_nhdsNE_neg_nat_ne n
   · push Not at h
@@ -571,31 +582,35 @@ theorem incG_eventually_nhdsNE_regular (a : ℂ) : ∀ᶠ b : ℂ in 𝓝[≠] a
     apply hb; rw [hm, Gamma_neg_nat_eq_zero, inv_zero]
 
 /-- Identity under the stated parameter and domain assumptions: `exp (log z - π*I/2) = -I*z`. -/
-theorem incG_exp_log_sub_half_pi {z : ℂ} (hz : z ≠ 0) : exp (log z - π*I/2) = -I*z := by
+theorem GeneralizedTrigIntegrals.exp_log_sub_half_pi {z : ℂ} (hz : z ≠ 0) : exp
+    (log z - π*I/2) = -I*z := by
   have hI : exp (π*I/2) = I := by
     rw [show (π:ℂ)*I/2 = ((π/2:ℝ):ℂ)*I by push_cast; ring, Complex.exp_mul_I]; simp
   rw [Complex.exp_sub, Complex.exp_log hz, hI]; field_simp; rw [I_sq]; ring
 
 /-- Identity under the stated parameter and domain assumptions: `exp (log z + π*I/2) = I*z`. -/
-theorem incG_exp_log_add_half_pi {z : ℂ} (hz : z ≠ 0) : exp (log z + π*I/2) = I*z := by
+theorem GeneralizedTrigIntegrals.exp_log_add_half_pi {z : ℂ} (hz : z ≠ 0) : exp
+    (log z + π*I/2) = I*z := by
   have hI : exp (π*I/2) = I := by
     rw [show (π:ℂ)*I/2 = ((π/2:ℝ):ℂ)*I by push_cast; ring, Complex.exp_mul_I]; simp
   rw [Complex.exp_add, Complex.exp_log hz, hI]; ring
 
 /-- `si(a,z) + Si(a,z) = Γ(a) sin(πa/2)` at regular parameters. -/
-theorem incG_genSin_add_tail {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ≠ 0) :
+theorem GeneralizedTrigIntegrals.genSin_add_tail {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n)
+    {z : ℂ} (hz : z ≠ 0) :
     genSinInt a z + genSinIntTail a z = Gamma a * sin (π*a/2) := by
   have hG := Gamma_ne_zero ha
   have hs₁ := scIncGamma_hasSum_alternating ha (-I*z)
   have hs₂ := scIncGamma_hasSum_alternating ha (I*z)
   have hD := (hs₁.sub hs₂).mul_left (Gamma a/(2*I))
-  have hodd : HasSum (fun m : ℕ => incG_trigTerm z 1 ∅ m a)
+  have hodd : HasSum (fun m : ℕ => GeneralizedTrigIntegrals.trigTerm z 1 ∅ m a)
       (Gamma a/(2*I)*(DLMF.Statistical.scIncGamma a (-I*z) -
           DLMF.Statistical.scIncGamma a (I*z))) := by
     have hinj : Function.Injective (fun m : ℕ => 2*m+1) := fun m n h => by simp at h; omega
     rw [← hinj.hasSum_iff] at hD
     · refine hD.congr_fun fun m => ?_
-      simp only [Function.comp_apply, incG_trigTerm, Finset.notMem_empty, ite_false]
+      simp only [Function.comp_apply, GeneralizedTrigIntegrals.trigTerm,
+          Finset.notMem_empty, ite_false]
       have hk : a + ((2*m+1:ℕ):ℂ) ≠ 0 := by
         intro h; exact ha (2*m+1) (by linear_combination h)
       have hI2 : I^(2*m+1) = I*(-1)^m := by rw [pow_succ, pow_mul, I_sq]; ring
@@ -617,10 +632,11 @@ theorem incG_genSin_add_tail {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (h
   have hsi : genSinInt a z = exp (a*log z) *
       (Gamma a/(2*I)*(DLMF.Statistical.scIncGamma a (-I*z) -
       DLMF.Statistical.scIncGamma a (I*z))) := by
-    rw [genSinInt, incG_genSinIntOnLog_eq, Complex.exp_log hz, hodd.tsum_eq]
+    rw [genSinInt, GeneralizedTrigIntegrals.genSinIntOnLog_eq, Complex.exp_log hz, hodd.tsum_eq]
   rw [hsi, genSinIntTail, genSinIntTailOnLog, upperIncGammaOnLog_eq_Gamma_sub ha,
     upperIncGammaOnLog_eq_Gamma_sub ha, lowerIncGammaOnLog, lowerIncGammaOnLog,
-    incG_exp_log_sub_half_pi hz, incG_exp_log_add_half_pi hz,
+    GeneralizedTrigIntegrals.exp_log_sub_half_pi hz,
+        GeneralizedTrigIntegrals.exp_log_add_half_pi hz,
     show a*(log z - π*I/2) = a*log z + (-π*I*a/2) by ring,
     show a*(log z + π*I/2) = a*log z + π*I*a/2 by ring, Complex.exp_add, Complex.exp_add]
   have hE : exp (π*I*a/2) * exp (-π*I*a/2) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
@@ -635,18 +651,20 @@ theorem incG_genSin_add_tail {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (h
       X*DLMF.Statistical.scIncGamma a (I*z))*hE + (E - E')*I_sq
 
 /-- `ci(a,z) + Ci(a,z) = Γ(a) cos(πa/2)` at regular parameters. -/
-theorem incG_genCos_add_tail {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ≠ 0) :
+theorem GeneralizedTrigIntegrals.genCos_add_tail {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n)
+    {z : ℂ} (hz : z ≠ 0) :
     genCosInt a z + genCosIntTail a z = Gamma a * cos (π*a/2) := by
   have hG := Gamma_ne_zero ha
   have hs₁ := scIncGamma_hasSum_alternating ha (-I*z)
   have hs₂ := scIncGamma_hasSum_alternating ha (I*z)
   have hD := (hs₁.add hs₂).mul_left (Gamma a/2)
-  have heven : HasSum (fun m : ℕ => incG_trigTerm z 0 ∅ m a)
+  have heven : HasSum (fun m : ℕ => GeneralizedTrigIntegrals.trigTerm z 0 ∅ m a)
       (Gamma a/2*(DLMF.Statistical.scIncGamma a (-I*z) + DLMF.Statistical.scIncGamma a (I*z))) := by
     have hinj : Function.Injective (fun m : ℕ => 2*m) := fun m n h => by simp at h; omega
     rw [← hinj.hasSum_iff] at hD
     · refine hD.congr_fun fun m => ?_
-      simp only [Function.comp_apply, incG_trigTerm, Finset.notMem_empty, ite_false, add_zero]
+      simp only [Function.comp_apply, GeneralizedTrigIntegrals.trigTerm, Finset.notMem_empty,
+          ite_false, add_zero]
       have hk : a + ((2*m:ℕ):ℂ) ≠ 0 := by
         intro h; exact ha (2*m) (by linear_combination h)
       have hI2 : I^(2*m) = (-1)^m := by rw [pow_mul, I_sq]
@@ -667,10 +685,11 @@ theorem incG_genCos_add_tail {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (h
       ring
   have hci : genCosInt a z = exp (a*log z) *
       (Gamma a/2*(DLMF.Statistical.scIncGamma a (-I*z) + DLMF.Statistical.scIncGamma a (I*z))) := by
-    rw [genCosInt, incG_genCosIntOnLog_eq, Complex.exp_log hz, heven.tsum_eq]
+    rw [genCosInt, GeneralizedTrigIntegrals.genCosIntOnLog_eq, Complex.exp_log hz, heven.tsum_eq]
   rw [hci, genCosIntTail, genCosIntTailOnLog, upperIncGammaOnLog_eq_Gamma_sub ha,
     upperIncGammaOnLog_eq_Gamma_sub ha, lowerIncGammaOnLog, lowerIncGammaOnLog,
-    incG_exp_log_sub_half_pi hz, incG_exp_log_add_half_pi hz,
+    GeneralizedTrigIntegrals.exp_log_sub_half_pi hz,
+        GeneralizedTrigIntegrals.exp_log_add_half_pi hz,
     show a*(log z - π*I/2) = a*log z + (-π*I*a/2) by ring,
     show a*(log z + π*I/2) = a*log z + π*I*a/2 by ring, Complex.exp_add, Complex.exp_add]
   have hE : exp (π*I*a/2) * exp (-π*I*a/2) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
@@ -685,7 +704,8 @@ theorem incG_genCos_add_tail {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (h
       X*DLMF.Statistical.scIncGamma a (I*z))*hE
 
 /-- Continuity of the indicated function: `Continuous fun b => genSinIntTail b z`. -/
-theorem incG_genSinIntTail_continuous (z : ℂ) : Continuous fun b => genSinIntTail b z := by
+theorem GeneralizedTrigIntegrals.genSinIntTail_continuous (z : ℂ) : Continuous fun b =>
+    genSinIntTail b z := by
   unfold genSinIntTail genSinIntTailOnLog
   have h1 := continuous_upperIncGammaOnLog_param (log z - π*I/2)
   have h2 := continuous_upperIncGammaOnLog_param (log z + π*I/2)
@@ -693,7 +713,8 @@ theorem incG_genSinIntTail_continuous (z : ℂ) : Continuous fun b => genSinIntT
     ((by fun_prop : Continuous fun b : ℂ => exp (-π*I*b/2)).mul h2)).div_const _
 
 /-- Continuity of the indicated function: `Continuous fun b => genCosIntTail b z`. -/
-theorem incG_genCosIntTail_continuous (z : ℂ) : Continuous fun b => genCosIntTail b z := by
+theorem GeneralizedTrigIntegrals.genCosIntTail_continuous (z : ℂ) : Continuous fun b =>
+    genCosIntTail b z := by
   unfold genCosIntTail genCosIntTailOnLog
   have h1 := continuous_upperIncGammaOnLog_param (log z - π*I/2)
   have h2 := continuous_upperIncGammaOnLog_param (log z + π*I/2)
@@ -702,65 +723,69 @@ theorem incG_genCosIntTail_continuous (z : ℂ) : Continuous fun b => genCosIntT
 
 /-- Identity under the stated parameter and domain assumptions: `genSinInt a
 z=gammaSinHalfPiContinued a-genSinIntTail a z`. -/
-theorem incG_genSinInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) {z : ℂ} (hz : z ≠ 0) :
+theorem GeneralizedTrigIntegrals.genSinInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1))
+    {z : ℂ} (hz : z ≠ 0) :
     genSinInt a z=gammaSinHalfPiContinued a-genSinIntTail a z := by
   have hcont : ContinuousAt (fun b => genSinInt b z + genSinIntTail b z) a :=
     (genSinInt_parameter_analytic ha (log z)).continuousAt.add
-      (incG_genSinIntTail_continuous z).continuousAt
+      (GeneralizedTrigIntegrals.genSinIntTail_continuous z).continuousAt
   have hlim : Tendsto (fun b : ℂ => Gamma b*sin (π*b/2)) (𝓝[≠] a)
       (𝓝 (genSinInt a z + genSinIntTail a z)) := by
     refine (hcont.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
-    filter_upwards [incG_eventually_nhdsNE_regular a] with b hb
-    exact incG_genSin_add_tail hb hz
+    filter_upwards [GeneralizedTrigIntegrals.eventually_nhdsNE_regular a] with b hb
+    exact GeneralizedTrigIntegrals.genSin_add_tail hb hz
   rw [gammaSinHalfPiContinued, hlim.limUnder_eq]; ring
 
 /-- Identity under the stated parameter and domain assumptions: `genCosInt a
 z=gammaCosHalfPiContinued a-genCosIntTail a z`. -/
-theorem incG_genCosInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) {z : ℂ} (hz : z ≠ 0) :
+theorem GeneralizedTrigIntegrals.genCosInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ))
+    {z : ℂ} (hz : z ≠ 0) :
     genCosInt a z=gammaCosHalfPiContinued a-genCosIntTail a z := by
   have hcont : ContinuousAt (fun b => genCosInt b z + genCosIntTail b z) a :=
     (genCosInt_parameter_analytic ha (log z)).continuousAt.add
-      (incG_genCosIntTail_continuous z).continuousAt
+      (GeneralizedTrigIntegrals.genCosIntTail_continuous z).continuousAt
   have hlim : Tendsto (fun b : ℂ => Gamma b*cos (π*b/2)) (𝓝[≠] a)
       (𝓝 (genCosInt a z + genCosIntTail a z)) := by
     refine (hcont.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
-    filter_upwards [incG_eventually_nhdsNE_regular a] with b hb
-    exact incG_genCos_add_tail hb hz
+    filter_upwards [GeneralizedTrigIntegrals.eventually_nhdsNE_regular a] with b hb
+    exact GeneralizedTrigIntegrals.genCos_add_tail hb hz
   rw [gammaCosHalfPiContinued, hlim.limUnder_eq]; ring
 
 /-- The map `(fun x : ℝ => genSinInt a x)` tends to `(𝓝 (gammaSinHalfPiContinued a))` along
 `atTop`. -/
-theorem incG_genSinInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) (ha1 : a.re < 1) :
+theorem GeneralizedTrigIntegrals.genSinInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1))
+    (ha1 : a.re < 1) :
     Tendsto (fun x : ℝ => genSinInt a x) atTop (𝓝 (gammaSinHalfPiContinued a)) := by
   have h := ((tendsto_genTrigTail_add_ofReal ha1 0).1).const_sub (gammaSinHalfPiContinued a)
   rw [sub_zero] at h
   refine h.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with x hx
-  rw [zero_add, incG_genSinInt_complement ha (ofReal_ne_zero.mpr hx.ne')]
+  rw [zero_add, GeneralizedTrigIntegrals.genSinInt_complement ha (ofReal_ne_zero.mpr hx.ne')]
 
 /-- The map `(fun x : ℝ => genCosInt a x)` tends to `(𝓝 (gammaCosHalfPiContinued a))` along
 `atTop`. -/
-theorem incG_genCosInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) (ha1 : a.re < 1) :
+theorem GeneralizedTrigIntegrals.genCosInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ))
+    (ha1 : a.re < 1) :
     Tendsto (fun x : ℝ => genCosInt a x) atTop (𝓝 (gammaCosHalfPiContinued a)) := by
   have h := ((tendsto_genTrigTail_add_ofReal ha1 0).2).const_sub (gammaCosHalfPiContinued a)
   rw [sub_zero] at h
   refine h.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with x hx
-  rw [zero_add, incG_genCosInt_complement ha (ofReal_ne_zero.mpr hx.ne')]
+  rw [zero_add, GeneralizedTrigIntegrals.genCosInt_complement ha (ofReal_ne_zero.mpr hx.ne')]
 
 /-- Identity under the stated parameter and domain assumptions: `genSinInt a
 z=gammaSinHalfPiContinued a-genSinIntTail a z`. -/
 @[dlmf 8.21.E8]
 theorem genSinInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) {z : ℂ} (hz : z ≠ 0) :
     genSinInt a z=gammaSinHalfPiContinued a-genSinIntTail a z :=
-  incG_genSinInt_complement ha hz
+  GeneralizedTrigIntegrals.genSinInt_complement ha hz
 
 /-- Identity under the stated parameter and domain assumptions: `genCosInt a
 z=gammaCosHalfPiContinued a-genCosIntTail a z`. -/
 @[dlmf 8.21.E9]
 theorem genCosInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) {z : ℂ} (hz : z ≠ 0) :
     genCosInt a z=gammaCosHalfPiContinued a-genCosIntTail a z :=
-  incG_genCosInt_complement ha hz
+  GeneralizedTrigIntegrals.genCosInt_complement ha hz
 
 /-- Ein at the negative rotated argument, by the parities of Cin and Si. -/
 theorem expIntEin_neg_mul_I_eq (z : ℂ) : expIntEin (-I*z)=cosIntCin z-I*sinInt z := by
@@ -806,14 +831,14 @@ theorem genSinInt_order_zero {z : ℂ} (hz : z ≠ 0) :
 @[dlmf 8.21.E12]
 theorem genSinInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) (ha1 : a.re < 1) :
     Tendsto (fun x : ℝ => genSinInt a x) atTop (𝓝 (gammaSinHalfPiContinued a)) :=
-  incG_genSinInt_value_at_infinity ha ha1
+  GeneralizedTrigIntegrals.genSinInt_value_at_infinity ha ha1
 
 /-- The map `(fun x : ℝ => genCosInt a x)` tends to `(𝓝 (gammaCosHalfPiContinued a))` along
 `atTop`. -/
 @[dlmf 8.21.E13]
 theorem genCosInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) (ha1 : a.re < 1) :
     Tendsto (fun x : ℝ => genCosInt a x) atTop (𝓝 (gammaCosHalfPiContinued a)) :=
-  incG_genCosInt_value_at_infinity ha ha1
+  GeneralizedTrigIntegrals.genCosInt_value_at_infinity ha ha1
 
 /-- The logarithmic cosine series is absolutely convergent at every logarithmic argument. -/
 theorem genCosIntOnLog_hasSum (a w : ℂ) :

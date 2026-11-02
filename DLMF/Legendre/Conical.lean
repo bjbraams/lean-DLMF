@@ -45,6 +45,8 @@ convergence assertion of DLMF 14.20.10.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Legendre
 
 /-- DLMF 14.20.1: for `μ, τ ≥ 0`, the conical function `w = 𝖯^{-μ}_{-1/2+iτ}(x)` satisfies `(1-x²)
@@ -338,7 +340,8 @@ theorem legCon_tendsto_P (ν μ : ℂ) :
 theorem legCon_tendsto_P_neg (ν : ℂ) {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^((μ:ℂ)/2) * ferrersP ν (-(μ:ℂ)) (-x)) (𝓝[<] 1)
       (𝓝 ((2:ℂ)^(μ:ℂ) * (Gamma (μ:ℂ) * ((Gamma ((μ:ℂ)-ν))⁻¹ * (Gamma ((μ:ℂ)+ν+1))⁻¹)))) := by
-  have hF := legBd_tendsto_rGHG_one (a := ν+1) (b := -ν) (c := 1-(-(μ:ℂ)))
+  have hF := BoundaryAsymptotics.tendsto_regularizedGaussHG_one (a := ν+1) (b := -ν)
+      (c := 1-(-(μ:ℂ)))
     (by simp only [sub_re, neg_re, add_re, one_re, ofReal_re]; linarith)
   rw [show 1-(-(μ:ℂ))-(ν+1)-(-ν) = (μ:ℂ) by ring, show 1-(-(μ:ℂ))-(ν+1) = (μ:ℂ)-ν by ring,
     show 1-(-(μ:ℂ))-(-ν) = (μ:ℂ)+ν+1 by ring] at hF
@@ -377,7 +380,7 @@ theorem conical_singular_7 {τ μ : ℝ} (hμ : 0 < μ) :
   set ν : ℂ := -1/2+I*τ with hνdef
   have hreg : LegendreQRegular ν (μ:ℂ) := fun n hn => by
     have := congrArg Complex.re hn; simp [hνdef] at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
-  have hQ := legBd_ferrersQ_tendsto hreg (by simpa using hμ)
+  have hQ := BoundaryAsymptotics.ferrersQ_tendsto hreg (by simpa using hμ)
   have hP := legCon_tendsto_P ν μ
   set E : ℂ := exp ((((-1*μ)*π:ℝ):ℂ)*I)
   set c : ℂ := ((π/2*Real.sin (μ*π):ℝ):ℂ)
@@ -431,12 +434,13 @@ theorem conical_singular_7 {τ μ : ℝ} (hμ : 0 < μ) :
     push_cast; ring
   have hK : (2:ℂ)^((μ:ℂ)-1) * Gamma (μ:ℂ) ≠ 0 :=
     mul_ne_zero (by simp) (Gamma_ne_zero_of_re_pos (by simpa using hμ))
-  have := legBd_isEquivalent_of_tendsto hu (legBd_tendsto_weight_left (μ:ℂ)) hK (by simp)
+  have := BoundaryAsymptotics.isEquivalent_of_tendsto hu
+      (BoundaryAsymptotics.tendsto_weight_left (μ:ℂ)) hK (by simp)
   refine this.congr_right (Eventually.of_forall fun x => ?_)
   simp only
   rw [show (2:ℂ)^((μ:ℂ)-1) * Gamma (μ:ℂ) / 2^(μ:ℂ) = (2:ℂ)^((μ:ℂ)-1) / 2^(μ:ℂ) *
       Gamma (μ:ℂ) by ring,
-    legBd_two_cpow_sub_one_div]
+    BoundaryAsymptotics.two_cpow_sub_one_div]
   ring
 
 /-- DLMF 14.20.8: for `τ ≥ 0` and `μ > 0` (excluding `τ = 0` with `μ` a positive half-odd integer),
@@ -488,7 +492,7 @@ theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : 
   have hcos : τ = 0 → Real.cos (μ*π) ≠ 0 := by
     intro h0
     have hh : ∀ n : ℕ, μ ≠ n+1/2 := hex.resolve_left (fun h => h h0)
-    have := legBd_cos_ne_zero (μ := (μ:ℂ)) (by simpa using hμ)
+    have := BoundaryAsymptotics.cos_ne_zero (μ := (μ:ℂ)) (by simpa using hμ)
       (fun n hn => hh n (by have := congrArg Complex.re hn; simpa using this))
     intro hc; apply this;
         rw [show (μ:ℂ)*π = ((μ*π:ℝ):ℂ) by push_cast; ring, ← ofReal_cos, hc, ofReal_zero]
@@ -522,7 +526,8 @@ theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : 
       (Gamma (μ:ℂ) * ((Gamma ((μ:ℂ)-ν))⁻¹ * (Gamma ((μ:ℂ)+ν+1))⁻¹))) ≠ 0 := by
     refine mul_ne_zero hB0 (mul_ne_zero (by simp) (mul_ne_zero hGm (mul_ne_zero ?_ ?_))) <;>
       exact inv_ne_zero (by assumption)
-  have := legBd_isEquivalent_of_tendsto hsum (legBd_tendsto_weight_left (μ:ℂ)) hK (by simp)
+  have := BoundaryAsymptotics.isEquivalent_of_tendsto hsum
+      (BoundaryAsymptotics.tendsto_weight_left (μ:ℂ)) hK (by simp)
   refine this.congr_right (Eventually.of_forall fun x => ?_)
   have hg : Gamma ((μ:ℂ)-ν) * Gamma ((μ:ℂ)+ν+1) = (‖Gamma ((μ:ℂ)+1/2+I*τ)‖:ℂ)^2 := by
     rw [show (μ:ℂ)+ν+1 = (μ:ℂ)+1/2+I*τ by rw [hνdef]; ring,

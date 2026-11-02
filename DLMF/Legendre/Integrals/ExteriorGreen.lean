@@ -14,24 +14,27 @@ This file evaluates the integrals of products of Legendre functions of order zer
 `(1, ∞)` (DLMF 14.17.18–14.17.20). The off-diagonal integrals come from Green's identity, with
 the logarithmic expansions DLMF 14.8.9 at `1⁺` and the power bounds DLMF 14.8.12, 14.8.15 at
 `∞`; the diagonal integral 14.17.20 follows by dominated convergence from bounds on `𝑸_λ` that
-are uniform for `λ` near `ν`. Helper names carry the prefixes `legExt_` and `legPIU_`.
+are uniform for `λ` near `ν`. Helper names live in the namespaces `ExteriorGreen` and
+`UniformBound`.
 
 ## Main definitions
 
-* `legExtU`: the domain `{z | z - 1 ∈ slitPlane}` of `P_ν` and `𝑸_ν`.
-* `legExtR`: the polynomial remainder of the Green boundary form at `1⁺`.
+* `ExteriorGreen.domain`: the domain `{z | z - 1 ∈ slitPlane}` of `P_ν` and `𝑸_ν`.
+* `ExteriorGreen.boundaryRemainder`: the polynomial remainder of the Green boundary form at `1⁺`.
 
 ## Main results
 
-* `legExt_green`, `legExt_integral_green`: Green's identity for two order-zero solutions, and
-  its improper-integral form on `(1, ∞)`.
-* `legExt_bdry`, `legExt_tendsto_zero_atTop`: limits of the boundary form at `1⁺` and at `∞`.
-* `legExt_Q_isBigO`: DLMF 14.8.9 in the variable `τ = (x-1)/2`.
-* `legExt_olverQ_isBigO_atTop`, `legExt_associatedP_isBigO_atTop`,
-  `legExt_associatedQ_isBigO_atTop`: power bounds at `∞`.
-* `legExt_rec_P`, `legExt_rec_Q`: the case `μ = 0` of DLMF 14.10.5 on `(1, ∞)`.
-* `legPIU_bound_Qext`, `legPIU_continuousAt_Qext`: bounds and continuity of `𝑄_λ(x)` uniform in
-  `λ` near a regular `ν`.
+* `ExteriorGreen.green`, `ExteriorGreen.integral_green`: Green's identity for two order-zero
+  solutions, and its improper-integral form on `(1, ∞)`.
+* `ExteriorGreen.boundary`, `ExteriorGreen.tendsto_zero_atTop`: limits of the boundary form at `1⁺`
+  and at `∞`.
+* `ExteriorGreen.Q_isBigO`: DLMF 14.8.9 in the variable `τ = (x-1)/2`.
+* `ExteriorGreen.olverQ_isBigO_atTop`, `ExteriorGreen.associatedP_isBigO_atTop`,
+  `ExteriorGreen.associatedQ_isBigO_atTop`: power bounds at `∞`.
+* `ExteriorGreen.recurrence_P`, `ExteriorGreen.recurrence_Q`: the case `μ = 0` of DLMF 14.10.5 on
+  `(1, ∞)`.
+* `UniformBound.bound_exteriorQ`, `UniformBound.continuousAt_exteriorQ`: bounds and continuity of
+  `𝑄_λ(x)` uniform in `λ` near a regular `ν`.
 * `legendre_product_integral_18`, `legendre_product_integral_19`,
   `legendre_product_integral_20`: DLMF 14.17.18, 14.17.19, 14.17.20.
 -/
@@ -42,16 +45,18 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Legendre
 
 /-! ### Green's identity on `(1, ∞)`
 
 Integrals of products of order-zero Legendre functions over `(1,∞)` (DLMF 14.17.18–20) are
 obtained from Green's identity, the boundary variable `x = 1 + 2τ` at `1⁺` with the
-logarithmic expansions DLMF 14.8.9 (`legBd_olverQ_log_isBigO`), and the power bounds
-DLMF 14.8.12, 14.8.15 at `∞`. Helper names carry the prefix `legExt_`. -/
+logarithmic expansions DLMF 14.8.9 (`BoundaryAsymptotics.olverQ_log_isBigO`), and the power bounds
+DLMF 14.8.12, 14.8.15 at `∞`. Helper names live in the namespace `ExteriorGreen`. -/
 /-- Complex Green identity for two order-zero Legendre solutions on an open set. -/
-theorem legExt_green {ν lam : ℂ} {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+theorem ExteriorGreen.green {ν lam : ℂ} {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hf : DifferentiableOn ℂ f U) (hg : DifferentiableOn ℂ g U)
     (ef : ∀ z ∈ U, (1-z^2)*iteratedDeriv 2 f z-2*z*deriv f z+(ν*(ν+1)-0^2/(1-z^2))*f z=0)
     (eg : ∀ z ∈ U, (1-z^2)*iteratedDeriv 2 g z-2*z*deriv g z+(lam*(lam+1)-0^2/(1-z^2))*g z=0)
@@ -74,22 +79,25 @@ theorem legExt_green {ν lam : ℂ} {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOp
   linear_combination (f z)*e2-(g z)*e1
 
 /-- The domain `{z | z - 1 ∈ slitPlane}` of the Legendre functions `P_ν, 𝑸_ν`. -/
-def legExtU : Set ℂ := {z : ℂ | z-1 ∈ slitPlane}
+def ExteriorGreen.domain : Set ℂ := {z : ℂ | z-1 ∈ slitPlane}
 
-/-- The domain `legExtU = {z | z - 1 ∈ slitPlane}` is open. -/
-theorem legExt_isOpen_U : IsOpen legExtU := isOpen_sub_one_mem_slitPlane
+/-- The domain `ExteriorGreen.domain = {z | z - 1 ∈ slitPlane}` is open. -/
+theorem ExteriorGreen.isOpen_domain : IsOpen ExteriorGreen.domain := isOpen_sub_one_mem_slitPlane
 
-/-- Every real `x > 1` lies in `legExtU`. -/
-theorem legExt_mem_U {x : ℝ} (hx : 1 < x) : (x:ℂ) ∈ legExtU := by
+/-- Every real `x > 1` lies in `ExteriorGreen.domain`. -/
+theorem ExteriorGreen.mem_domain {x : ℝ} (hx : 1 < x) : (x:ℂ) ∈ ExteriorGreen.domain := by
   show (x:ℂ) - 1 ∈ slitPlane
   exact Or.inl (by simp; linarith)
 
 /-- Green's identity on `(1,∞)`: the improper integral of `f g` is given by the limits of the
 boundary form `(λ+1) f (x g - g₁) - (ν+1) g (x f - f₁)` at `1⁺` and at `∞`. -/
-theorem legExt_integral_green {f g f1 g1 : ℂ → ℂ} {ν lam B1 : ℂ}
-    (hf : DifferentiableOn ℂ f legExtU) (hg : DifferentiableOn ℂ g legExtU)
-    (ef : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 f z-2*z*deriv f z+(ν*(ν+1)-0^2/(1-z^2))*f z=0)
-    (eg : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 g z-2*z*deriv g z+(lam*(lam+1)-0^2/(1-z^2))*g z=0)
+theorem ExteriorGreen.integral_green {f g f1 g1 : ℂ → ℂ} {ν lam B1 : ℂ}
+    (hf : DifferentiableOn ℂ f ExteriorGreen.domain)
+        (hg : DifferentiableOn ℂ g ExteriorGreen.domain)
+    (ef : ∀ z ∈ ExteriorGreen.domain,
+        (1-z^2)*iteratedDeriv 2 f z-2*z*deriv f z+(ν*(ν+1)-0^2/(1-z^2))*f z=0)
+    (eg : ∀ z ∈ ExteriorGreen.domain,
+        (1-z^2)*iteratedDeriv 2 g z-2*z*deriv g z+(lam*(lam+1)-0^2/(1-z^2))*g z=0)
     (hrf : ∀ x : ℝ, 1 < x → (1-(x:ℂ)^2)*deriv f x = (ν+1)*(x*f x - f1 x))
     (hrg : ∀ x : ℝ, 1 < x → (1-(x:ℂ)^2)*deriv g x = (lam+1)*(x*g x - g1 x))
     (hint : ∀ R : ℝ, 1 < R → IntervalIntegrable (fun x : ℝ => f x * g x) volume 1 R)
@@ -103,7 +111,8 @@ theorem legExt_integral_green {f g f1 g1 : ℂ → ℂ} {ν lam B1 : ℂ}
   set B : ℝ → ℂ := fun x => (lam+1)*f x*(x*g x - g1 x) - (ν+1)*g x*(x*f x - f1 x) with hB
   set W : ℝ → ℂ := fun y => (fun w : ℂ => (1-w^2)*(f w*deriv g w-g w*deriv f w)) (y:ℂ) with hW
   have hd : ∀ y : ℝ, 1 < y → HasDerivAt W (c * (f y * g y)) y := fun y hy =>
-    (legExt_green legExt_isOpen_U hf hg ef eg (legExt_mem_U hy)).comp_ofReal
+    (ExteriorGreen.green ExteriorGreen.isOpen_domain hf hg ef eg
+        (ExteriorGreen.mem_domain hy)).comp_ofReal
   have hWB : ∀ y : ℝ, 1 < y → W y = B y := by
     intro y hy
     simp only [hW, hB]
@@ -126,7 +135,7 @@ theorem legExt_integral_green {f g f1 g1 : ℂ → ℂ} {ν lam B1 : ℂ}
 
 /-- A function continuous on `(1,∞)` and `O(((x-1)/2)^{-1/2})` at `1⁺` is integrable on every
 `[1,R]`. -/
-theorem legExt_intervalIntegrable {h : ℝ → ℂ} (hc : ContinuousOn h (Ioi 1))
+theorem ExteriorGreen.intervalIntegrable {h : ℝ → ℂ} (hc : ContinuousOn h (Ioi 1))
     (hO : h =O[𝓝[>] (1:ℝ)] (fun x : ℝ => ((x-1)/2)^(-(1/2:ℝ)))) {R : ℝ} (hR : 1 < R) :
     IntervalIntegrable h volume 1 R := by
   have hw : IntervalIntegrable (fun x : ℝ => (x-1)^(-(1/2:ℝ))) volume 1 2 := by
@@ -164,7 +173,7 @@ theorem legExt_intervalIntegrable {h : ℝ → ℂ} (hc : ContinuousOn h (Ioi 1)
   exact h1.trans h2
 
 /-- An expansion `f = -k ln τ + c + O(τ ln τ)` with `τ = (x-1)/2` gives `f = O(τ^{-1/4})`. -/
-theorem legExt_isBigO_weight {f : ℝ → ℂ} {k c : ℂ}
+theorem ExteriorGreen.isBigO_weight {f : ℝ → ℂ} {k c : ℂ}
     (hf : (fun x => f x + k * Real.log ((x-1)/2) - c) =O[𝓝[>] (1:ℝ)]
       (fun x : ℝ => (x-1)/2 * Real.log ((x-1)/2))) :
     f =O[𝓝[>] (1:ℝ)] (fun x : ℝ => ((x-1)/2)^(-(1/4:ℝ))) := by
@@ -183,13 +192,13 @@ theorem legExt_isBigO_weight {f : ℝ → ℂ} {k c : ℂ}
     filter_upwards [hev] with x hx
     rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_one, one_mul,
       abs_of_pos (Real.rpow_pos_of_pos hx.1 _)]
-    exact legPI_rpow_ge_one hx.1 hx.2
+    exact FerrersGreen.rpow_ge_one hx.1 hx.2
   have hlog : (fun x : ℝ => Real.log ((x-1)/2)) =O[𝓝[>] (1:ℝ)]
       (fun x : ℝ => ((x-1)/2)^(-(1/4:ℝ))) := by
     refine Asymptotics.IsBigO.of_bound 4 ?_
     filter_upwards [hev] with x hx
     rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hx.1 _)]
-    exact legPI_abs_log_le hx.1 hx.2
+    exact FerrersGreen.abs_log_le hx.1 hx.2
   have htl : Tendsto (fun x : ℝ => (x-1)/2 * Real.log ((x-1)/2)) (𝓝[>] (1:ℝ)) (𝓝 0) := by
     have := (Real.continuous_mul_log.tendsto 0).comp (hτ.mono_right nhdsWithin_le_nhds)
     simpa [Function.comp_def] using this
@@ -199,20 +208,20 @@ theorem legExt_isBigO_weight {f : ℝ → ℂ} {k c : ℂ}
   exact ((h1.sub h2).add h3).congr_left fun _ => by ring
 
 /-- Product of two functions with logarithmic expansions at `1⁺` is integrable on `[1,R]`. -/
-theorem legExt_intervalIntegrable_mul {f g : ℝ → ℂ} {kf cf kg cg : ℂ}
+theorem ExteriorGreen.intervalIntegrable_mul {f g : ℝ → ℂ} {kf cf kg cg : ℂ}
     (hfc : ContinuousOn f (Ioi 1)) (hgc : ContinuousOn g (Ioi 1))
     (hf : (fun x => f x + kf * Real.log ((x-1)/2) - cf) =O[𝓝[>] (1:ℝ)]
       (fun x : ℝ => (x-1)/2 * Real.log ((x-1)/2)))
     (hg : (fun x => g x + kg * Real.log ((x-1)/2) - cg) =O[𝓝[>] (1:ℝ)]
       (fun x : ℝ => (x-1)/2 * Real.log ((x-1)/2))) {R : ℝ} (hR : 1 < R) :
     IntervalIntegrable (fun x => f x * g x) volume 1 R := by
-  refine legExt_intervalIntegrable (hfc.mul hgc) (((legExt_isBigO_weight hf).mul
-    (legExt_isBigO_weight hg)).congr' (EventuallyEq.refl _ _) ?_) hR
+  refine ExteriorGreen.intervalIntegrable (hfc.mul hgc) (((ExteriorGreen.isBigO_weight hf).mul
+    (ExteriorGreen.isBigO_weight hg)).congr' (EventuallyEq.refl _ _) ?_) hR
   filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
   rw [← Real.rpow_add (by linarith)]; norm_num
 
 /-- The polynomial remainder in the boundary form at `1⁺` (`x = 1 + 2τ`). -/
-def legExtR (kf kg cf cg rf rg n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
+def ExteriorGreen.boundaryRemainder (kf kg cf cg rf rg n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
   (2*kf*kg*l - 2*kf*kg*n)*v 2 +
     (-2*kg*l + 2*kg*n)*v 7*v 0 +
     (-2*kf*l + 2*kf*n)*v 8*v 0 +
@@ -233,15 +242,16 @@ def legExtR (kf kg cf cg rf rg n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (-cf*l - cf)*v 5 +
     (cg*n + cg)*v 6
 
-/-- The boundary-form remainder `legExtR kf kg cf cg rf rg n l` is continuous in `v`. -/
-theorem legExt_continuous_R (kf kg cf cg rf rg n l : ℂ) : Continuous
-    (legExtR kf kg cf cg rf rg n l) := by
-  unfold legExtR; fun_prop
+/-- The boundary-form remainder `ExteriorGreen.boundaryRemainder kf kg cf cg rf rg n l` is
+continuous in `v`. -/
+theorem ExteriorGreen.continuous_boundaryRemainder (kf kg cf cg rf rg n l : ℂ) : Continuous
+    (ExteriorGreen.boundaryRemainder kf kg cf cg rf rg n l) := by
+  unfold ExteriorGreen.boundaryRemainder; fun_prop
 
 /-- Limit of the Green boundary form at an endpoint `x = 1 + 2τ`, `τ → 0⁺`, for expansions
 `f = -k_f ln τ + c_f + O(τ ln τ)` with `k_{f₁} = k_f`, `c_{f₁} = c_f + r_f`, `(ν+1) r_f = -2 k_f`.
 -/
-theorem legExt_bdry {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (𝓝[>] 0))
+theorem ExteriorGreen.boundary {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (𝓝[>] 0))
     (hx : ∀ᶠ x : ℝ in l, (x:ℂ) = 1 + 2*τ x) {f g g1 f1 : ℝ → ℂ} {ν lam kf kg cf cg rf rg : ℂ}
     (hf : (fun x => f x + kf * Real.log (τ x) - cf) =O[l] (fun x => τ x * Real.log (τ x)))
     (hg : (fun x => g x + kg * Real.log (τ x) - cg) =O[l] (fun x => τ x * Real.log (τ x)))
@@ -252,11 +262,11 @@ theorem legExt_bdry {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (�
     (hrg : (lam+1)*rg = -2*kg) (hrf : (ν+1)*rf = -2*kf) :
     Tendsto (fun x : ℝ => (lam+1)*f x*(x*g x - g1 x) - (ν+1)*g x*(x*f x - f1 x)) l
       (𝓝 (2*(kg*cf - kf*cg))) := by
-  obtain ⟨cT, cTU, cTUU, -, -⟩ := legPI_basic_limits hτ
-  obtain ⟨c1, d1⟩ := legPI_err_limits hτ hf
-  obtain ⟨c2, d2⟩ := legPI_err_limits hτ hg
-  obtain ⟨c3, d3⟩ := legPI_err_limits hτ hg1
-  obtain ⟨c4, d4⟩ := legPI_err_limits hτ hf1
+  obtain ⟨cT, cTU, cTUU, -, -⟩ := FerrersGreen.basic_limits hτ
+  obtain ⟨c1, d1⟩ := FerrersGreen.error_limits hτ hf
+  obtain ⟨c2, d2⟩ := FerrersGreen.error_limits hτ hg
+  obtain ⟨c3, d3⟩ := FerrersGreen.error_limits hτ hg1
+  obtain ⟨c4, d4⟩ := FerrersGreen.error_limits hτ hf1
   set U : ℝ → ℂ := fun x => ((Real.log (τ x) : ℝ) : ℂ) with hU
   set V : ℝ → Fin 11 → ℂ := fun x => ![(τ x : ℂ), (τ x : ℂ) * U x, (τ x : ℂ) * U x * U x,
     f x + kf * U x - cf, g x + kg * U x - cg, g1 x + kg * U x - (cg + rg),
@@ -276,19 +286,21 @@ theorem legExt_bdry {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (�
     · exact d2
     · exact d3
     · exact d4
-  have cR := ((legExt_continuous_R kf kg cf cg rf rg ν lam).tendsto 0).comp cV
-  have hR0 : legExtR kf kg cf cg rf rg ν lam 0 = 0 := by simp [legExtR]
+  have cR := ((ExteriorGreen.continuous_boundaryRemainder kf kg cf cg rf rg ν
+      lam).tendsto 0).comp cV
+  have hR0 : ExteriorGreen.boundaryRemainder kf kg cf cg rf rg ν lam 0 = 0 := by
+      simp [ExteriorGreen.boundaryRemainder]
   rw [hR0] at cR
   have key := (tendsto_const_nhds (x := 2*(kg*cf - kf*cg))).add cR
   rw [add_zero] at key
   refine key.congr' ?_
   filter_upwards [hx] with x hx
-  simp only [Function.comp_apply, hV, legExtR, Matrix.cons_val, hU]
+  simp only [Function.comp_apply, hV, ExteriorGreen.boundaryRemainder, Matrix.cons_val, hU]
   rw [hx]
   linear_combination (cf - kf*U x) * hrg - (cg - kg*U x) * hrf
 
 /-- The map `x ↦ (x-1)/2` sends `x → 1⁺` to `τ → 0⁺`. -/
-theorem legExt_tendsto_half :
+theorem ExteriorGreen.tendsto_half :
     Tendsto (fun x : ℝ => (x-1)/2) (𝓝[>] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun x : ℝ => (x-1)/2) (𝓝 1) (𝓝 ((1-1)/2)) :=
@@ -298,11 +310,12 @@ theorem legExt_tendsto_half :
     simp only [mem_Ioi]; linarith
 
 /-- The identity `x = 1 + 2·((x-1)/2)` (as complex numbers), stated eventually as `x → 1⁺`. -/
-theorem legExt_hx : ∀ᶠ x : ℝ in 𝓝[>] (1:ℝ), (x:ℂ) = 1 + 2*(((x-1)/2 : ℝ) : ℂ) :=
+theorem ExteriorGreen.eventually_ofReal_eq : ∀ᶠ x : ℝ in 𝓝[>] (1:ℝ), (x:ℂ) = 1 +
+    2*(((x-1)/2 : ℝ) : ℂ) :=
   Eventually.of_forall fun x => by push_cast; ring
 
 /-- `(x-1) ln(x-1) = O(τ ln τ)` with `τ = (x-1)/2`, as `x → 1⁺`. -/
-theorem legExt_sub_one_log_isBigO :
+theorem ExteriorGreen.sub_one_log_isBigO :
     (fun x : ℝ => (x-1)*Real.log (x-1)) =O[𝓝[>] (1:ℝ)] (fun x => (x-1)/2 * Real.log ((x-1)/2)) := by
   refine Asymptotics.IsBigO.of_bound 4 ?_
   filter_upwards [Ioo_mem_nhdsGT (show (1:ℝ) < 2 by norm_num)] with x hx
@@ -321,17 +334,17 @@ theorem legExt_sub_one_log_isBigO :
   linarith
 
 /-- `P_α(z) = 𝐅(α+1,-α;1;(1-z)/2)` for every `z`. -/
-theorem legExt_associatedP_eq (α z : ℂ) :
+theorem ExteriorGreen.associatedP_eq (α z : ℂ) :
     associatedP α 0 z = regularizedGaussHG (α+1) (-α) 1 ((1-z)/2) := by
   simp [associatedP]
 
 /-- `P_α - 1 = O(τ ln τ)` with `τ = (x-1)/2`, as `x → 1⁺`. -/
-theorem legExt_P_isBigO (α : ℂ) :
+theorem ExteriorGreen.P_isBigO (α : ℂ) :
     (fun x : ℝ => associatedP α 0 x + (0:ℂ) * Real.log ((x-1)/2) - 1) =O[𝓝[>] (1:ℝ)]
       (fun x => (x-1)/2 * Real.log ((x-1)/2)) := by
   have hfun : (fun y : ℝ => associatedP α 0 y) =
       fun y : ℝ => regularizedGaussHG (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
-    funext fun y => legExt_associatedP_eq α y
+    funext fun y => ExteriorGreen.associatedP_eq α y
   have hw : ((1-((1:ℝ):ℂ))/2) ∈ cutPlane := by simpa using zero_mem_cutPlane
   have hd : DifferentiableAt ℝ (fun y : ℝ => associatedP α 0 y) 1 := by
     rw [hfun]
@@ -339,24 +352,24 @@ theorem legExt_P_isBigO (α : ℂ) :
       (by fun_prop)
   have h1 := hd.isBigO_sub.mono (nhdsWithin_le_nhds (s := Ioi (1:ℝ)))
   have hv : associatedP α 0 ((1:ℝ):ℂ) = 1 := by
-    rw [legExt_associatedP_eq]; simp [regularizedGaussHG_at_zero]
+    rw [ExteriorGreen.associatedP_eq]; simp [regularizedGaussHG_at_zero]
   simp only [hv] at h1
   have h2 : (fun x : ℝ => x - 1) =O[𝓝[>] (1:ℝ)] (fun x : ℝ => (((x-1)/2 : ℝ) : ℂ)) := by
     refine Asymptotics.IsBigO.of_bound 2 (Eventually.of_forall fun x => ?_)
     rw [Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs, abs_div, abs_two]
     linarith [abs_nonneg (x-1)]
-  have h3 := legBd_isBigO_self_mul_log.comp_tendsto legExt_tendsto_half
+  have h3 := BoundaryAsymptotics.isBigO_self_mul_log.comp_tendsto ExteriorGreen.tendsto_half
   refine (h1.trans (h2.trans h3)).congr_left fun x => ?_
   ring
 
 /-- DLMF 14.8.9 in the variable `τ = (x-1)/2`: `Q_α + ½ ln τ - (-γ - ψ(α+1)) = O(τ ln τ)`. -/
-theorem legExt_Q_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
-    (fun x : ℝ => associatedQ α 0 x + (1/2:ℂ) * Real.log ((x-1)/2) - legPIcpos α)
+theorem ExteriorGreen.Q_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
+    (fun x : ℝ => associatedQ α 0 x + (1/2:ℂ) * Real.log ((x-1)/2) - FerrersGreen.constPos α)
       =O[𝓝[>] (1:ℝ)] (fun x => (x-1)/2 * Real.log ((x-1)/2)) := by
-  have hp := legHyp_nu h
+  have hp := DegreeDerivative.add_one_ne_neg_nat h
   have hG : Gamma (α+1) ≠ 0 := Gamma_ne_zero hp
-  refine (((legBd_olverQ_log_isBigO α).const_mul_left (Gamma (α+1))).trans
-    legExt_sub_one_log_isBigO).congr' ?_ (EventuallyEq.refl _ _)
+  refine (((BoundaryAsymptotics.olverQ_log_isBigO α).const_mul_left (Gamma (α+1))).trans
+    ExteriorGreen.sub_one_log_isBigO).congr' ?_ (EventuallyEq.refl _ _)
   filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
   have h1 : (0:ℝ) < x - 1 := by linarith
   have hl : log ((x:ℂ)-1) = ((Real.log (x-1) : ℝ) : ℂ) := by
@@ -366,26 +379,27 @@ theorem legExt_Q_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
   have h2 : log (2:ℂ) = ((Real.log 2 : ℝ) : ℂ) := by
     rw [ofReal_log (by norm_num : (0:ℝ) ≤ 2)]; norm_num
   rw [DLMF.Gamma.recipGammaDeriv_one_eq hp, hl, hl2, h2]
-  simp only [associatedQ, zero_mul, Complex.exp_zero, one_mul, legPIcpos]
+  simp only [associatedQ, zero_mul, Complex.exp_zero, one_mul, FerrersGreen.constPos]
   push_cast
   field_simp
   ring_nf
 
-/-- Expansion of `P_{α+1}` at `1⁺` in the shape required by `legExt_bdry`. -/
-theorem legExt_P_isBigO_succ (α : ℂ) :
+/-- Expansion of `P_{α+1}` at `1⁺` in the shape required by `ExteriorGreen.boundary`. -/
+theorem ExteriorGreen.P_isBigO_succ (α : ℂ) :
     (fun x : ℝ => associatedP (α+1) 0 x + (0:ℂ) * Real.log ((x-1)/2) - (1 + 0)) =O[𝓝[>] (1:ℝ)]
       (fun x => (x-1)/2 * Real.log ((x-1)/2)) :=
-  (legExt_P_isBigO (α+1)).congr_left fun x => by ring
+  (ExteriorGreen.P_isBigO (α+1)).congr_left fun x => by ring
 
-/-- Expansion of `Q_{α+1}` at `1⁺` in the shape required by `legExt_bdry`. -/
-theorem legExt_Q_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
+/-- Expansion of `Q_{α+1}` at `1⁺` in the shape required by `ExteriorGreen.boundary`. -/
+theorem ExteriorGreen.Q_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
     (fun x : ℝ => associatedQ (α+1) 0 x + (1/2:ℂ) * Real.log ((x-1)/2) -
-      (legPIcpos α + (legPIcpos (α+1) - legPIcpos α))) =O[𝓝[>] (1:ℝ)]
+      (FerrersGreen.constPos α +
+          (FerrersGreen.constPos (α+1) - FerrersGreen.constPos α))) =O[𝓝[>] (1:ℝ)]
       (fun x => (x-1)/2 * Real.log ((x-1)/2)) :=
-  (legExt_Q_isBigO (legPI_regular_succ h)).congr_left fun x => by ring
+  (ExteriorGreen.Q_isBigO (FerrersGreen.regular_succ h)).congr_left fun x => by ring
 
 /-- `𝑸_ν(x) = O(x^{-Re ν - 1})` as `x → ∞`, for every degree `ν`. -/
-theorem legExt_olverQ_isBigO_atTop (ν : ℂ) :
+theorem ExteriorGreen.olverQ_isBigO_atTop (ν : ℂ) :
     (fun x : ℝ => olverQ ν 0 x) =O[atTop] (fun x : ℝ => x^(-(ν.re+1))) := by
   set G := regularizedGaussHG ((ν+0+2)/2) ((ν+0+1)/2) (ν+3/2)
   have hG : Tendsto (fun x : ℝ => G (1/(x:ℂ)^2)) atTop (𝓝 (G 0)) :=
@@ -409,9 +423,9 @@ theorem legExt_olverQ_isBigO_atTop (ν : ℂ) :
   field_simp
 
 /-- `P_ν(x) = O(x^{Re ν})` as `x → ∞`, when `Re ν > -1/2`. -/
-theorem legExt_associatedP_isBigO_atTop {ν : ℂ} (hν : -1/2 < ν.re) :
+theorem ExteriorGreen.associatedP_isBigO_atTop {ν : ℂ} (hν : -1/2 < ν.re) :
     (fun x : ℝ => associatedP ν 0 x) =O[atTop] (fun x : ℝ => x^(ν.re)) := by
-  have h1 := (legBd_associatedP_tendsto_atTop hν 0).isBigO_one ℝ
+  have h1 := (BoundaryAsymptotics.associatedP_tendsto_atTop hν 0).isBigO_one ℝ
   have hP : (fun x : ℝ => (x:ℂ)^ν) =O[atTop] (fun x : ℝ => x^(ν.re)) := by
     refine Asymptotics.IsBigO.of_bound 1 ?_
     filter_upwards [eventually_gt_atTop 0] with x hx
@@ -423,7 +437,7 @@ theorem legExt_associatedP_isBigO_atTop {ν : ℂ} (hν : -1/2 < ν.re) :
   rw [← mul_assoc, ← cpow_add _ _ hx0]; simp
 
 /-- The Green boundary form tends to `0` at `∞` under power bounds with `a < b`. -/
-theorem legExt_tendsto_zero_atTop {f g f1 g1 : ℝ → ℂ} {ν lam : ℂ} {a b : ℝ} (hab : a < b)
+theorem ExteriorGreen.tendsto_zero_atTop {f g f1 g1 : ℝ → ℂ} {ν lam : ℂ} {a b : ℝ} (hab : a < b)
     (hf : f =O[atTop] (fun x : ℝ => x^a)) (hf1 : f1 =O[atTop] (fun x : ℝ => x^(a+1)))
     (hg : g =O[atTop] (fun x : ℝ => x^(-b-1))) (hg1 : g1 =O[atTop] (fun x : ℝ => x^(-b-1))) :
     Tendsto (fun x : ℝ => (lam+1)*f x*(x*g x - g1 x) - (ν+1)*g x*(x*f x - f1 x)) atTop
@@ -460,61 +474,67 @@ theorem legExt_tendsto_zero_atTop {f g f1 g1 : ℝ → ℂ} {ν lam : ℂ} {a b 
   ring
 
 /-- `𝑸_ν = Γ(ν+1) 𝑸_ν` at order zero. -/
-theorem legExt_associatedQ_eq (α : ℂ) :
+theorem ExteriorGreen.associatedQ_eq (α : ℂ) :
     associatedQ α 0 = fun z => Gamma (α+1) * olverQ α 0 z := by
   funext z; simp [associatedQ]
 
-/-- The Legendre function `associatedP α 0` is complex differentiable on `legExtU`. -/
-theorem legExt_differentiableOn_P (α : ℂ) : DifferentiableOn ℂ (associatedP α 0) legExtU :=
+/-- The Legendre function `associatedP α 0` is complex differentiable on `ExteriorGreen.domain`. -/
+theorem ExteriorGreen.differentiableOn_P (α : ℂ) : DifferentiableOn ℂ (associatedP α 0)
+    ExteriorGreen.domain :=
   (associatedP_analytic α 0).differentiableOn
 
-/-- The Legendre function `associatedQ α 0` is complex differentiable on `legExtU`. -/
-theorem legExt_differentiableOn_Q (α : ℂ) : DifferentiableOn ℂ (associatedQ α 0) legExtU := by
-  rw [legExt_associatedQ_eq]
+/-- The Legendre function `associatedQ α 0` is complex differentiable on `ExteriorGreen.domain`. -/
+theorem ExteriorGreen.differentiableOn_Q (α : ℂ) : DifferentiableOn ℂ (associatedQ α 0)
+    ExteriorGreen.domain := by
+  rw [ExteriorGreen.associatedQ_eq]
   exact (olverQ_analytic α 0).differentiableOn.const_mul _
 
-/-- On `legExtU`, `P_α = associatedP α 0` satisfies Legendre's equation `(1-z²)w'' - 2z w' + α(α+1)
-w = 0`. -/
-theorem legExt_ode_P (α : ℂ) : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 (associatedP α 0) z -
+/-- On `ExteriorGreen.domain`, `P_α = associatedP α 0` satisfies Legendre's equation
+`(1-z²)w'' - 2z w' + α(α+1) w = 0`. -/
+theorem ExteriorGreen.ode_P (α : ℂ) : ∀ z ∈ ExteriorGreen.domain,
+    (1-z^2)*iteratedDeriv 2 (associatedP α 0) z -
     2*z*deriv (associatedP α 0) z + (α*(α+1)-0^2/(1-z^2))*associatedP α 0 z = 0 :=
   fun _ hz => associatedP_ode α 0 hz
 
-/-- On `legExtU`, `Q_α = associatedQ α 0` satisfies Legendre's equation `(1-z²)w'' - 2z w' + α(α+1)
-w = 0`. -/
-theorem legExt_ode_Q (α : ℂ) : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 (associatedQ α 0) z -
+/-- On `ExteriorGreen.domain`, `Q_α = associatedQ α 0` satisfies Legendre's equation
+`(1-z²)w'' - 2z w' + α(α+1) w = 0`. -/
+theorem ExteriorGreen.ode_Q (α : ℂ) : ∀ z ∈ ExteriorGreen.domain,
+    (1-z^2)*iteratedDeriv 2 (associatedQ α 0) z -
     2*z*deriv (associatedQ α 0) z + (α*(α+1)-0^2/(1-z^2))*associatedQ α 0 z = 0 := by
   intro z hz
   have e := olverQ_ode α 0 hz
-  rw [legExt_associatedQ_eq, iteratedDeriv_const_mul_field, deriv_const_mul_field]
+  rw [ExteriorGreen.associatedQ_eq, iteratedDeriv_const_mul_field, deriv_const_mul_field]
   linear_combination Gamma (α+1) * e
 
 /-- For real `x > 1`, `(1-x²) P_α'(x) = (α+1)(x P_α(x) - P_{α+1}(x))` (`μ = 0` case of DLMF
 14.10.5). -/
-theorem legExt_rec_P (α : ℂ) : ∀ x : ℝ, 1 < x →
+theorem ExteriorGreen.recurrence_P (α : ℂ) : ∀ x : ℝ, 1 < x →
     (1-(x:ℂ)^2)*deriv (associatedP α 0) x = (α+1)*(x*associatedP α 0 x - associatedP (α+1) 0 x) :=
-  fun x hx => by rw [associatedP_recurrence_4 α 0 (legExt_mem_U hx)]; ring
+  fun x hx => by rw [associatedP_recurrence_4 α 0 (ExteriorGreen.mem_domain hx)]; ring
 
 /-- For `LegendreQRegular α 0` and real `x > 1`, `(1-x²) Q_α'(x) = (α+1)(x Q_α(x) - Q_{α+1}(x))` (`μ
 = 0` case of DLMF 14.10.5). -/
-theorem legExt_rec_Q {α : ℂ} (h : LegendreQRegular α 0) : ∀ x : ℝ, 1 < x →
+theorem ExteriorGreen.recurrence_Q {α : ℂ} (h : LegendreQRegular α 0) : ∀ x : ℝ, 1 < x →
     (1-(x:ℂ)^2)*deriv (associatedQ α 0) x = (α+1)*(x*associatedQ α 0 x - associatedQ (α+1) 0 x) :=
-  fun x hx => by rw [associatedQ_recurrence_4 α 0 h (legExt_mem_U hx)]; ring
+  fun x hx => by rw [associatedQ_recurrence_4 α 0 h (ExteriorGreen.mem_domain hx)]; ring
 
-/-- If `f` is complex differentiable on `legExtU`, then `x ↦ f x` is continuous on `(1, ∞)`. -/
-theorem legExt_continuousOn {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f legExtU) :
+/-- If `f` is complex differentiable on `ExteriorGreen.domain`, then `x ↦ f x` is continuous on
+`(1, ∞)`. -/
+theorem ExteriorGreen.continuousOn {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f ExteriorGreen.domain) :
     ContinuousOn (fun x : ℝ => f x) (Ioi 1) := fun _ hx =>
-  ((hf _ (legExt_mem_U hx)).differentiableAt (legExt_isOpen_U.mem_nhds (legExt_mem_U hx))
+  ((hf _ (ExteriorGreen.mem_domain hx)).differentiableAt
+      (ExteriorGreen.isOpen_domain.mem_nhds (ExteriorGreen.mem_domain hx))
     ).continuousAt.comp_of_eq continuous_ofReal.continuousAt rfl |>.continuousWithinAt
 
 /-- `Q_ν(x) = O(x^{-Re ν - 1})` as `x → ∞`. -/
-theorem legExt_associatedQ_isBigO_atTop (α : ℂ) :
+theorem ExteriorGreen.associatedQ_isBigO_atTop (α : ℂ) :
     (fun x : ℝ => associatedQ α 0 x) =O[atTop] (fun x : ℝ => x^(-α.re-1)) := by
-  rw [legExt_associatedQ_eq]
-  exact ((legExt_olverQ_isBigO_atTop α).const_mul_left _).congr' (EventuallyEq.refl _ _)
+  rw [ExteriorGreen.associatedQ_eq]
+  exact ((ExteriorGreen.olverQ_isBigO_atTop α).const_mul_left _).congr' (EventuallyEq.refl _ _)
     (by filter_upwards with x; ring_nf)
 
 /-- Lowering the exponent of a power bound at `∞`. -/
-theorem legExt_isBigO_rpow_mono {f : ℝ → ℂ} {p q : ℝ} (hpq : p ≤ q)
+theorem ExteriorGreen.isBigO_rpow_mono {f : ℝ → ℂ} {p q : ℝ} (hpq : p ≤ q)
     (h : f =O[atTop] (fun x : ℝ => x^p)) : f =O[atTop] (fun x : ℝ => x^q) := by
   refine h.trans (Asymptotics.IsBigO.of_bound 1 ?_)
   filter_upwards [eventually_ge_atTop 1] with x hx
@@ -525,7 +545,7 @@ theorem legExt_isBigO_rpow_mono {f : ℝ → ℂ} {p q : ℝ} (hpq : p ≤ q)
 /-! ### Uniform bounds on `(1,∞)` and the diagonal integral 14.17.20 -/
 
 /-- `𝑄_λ(x) = Γ(λ+1) √π 2^{-λ-1} x^{-λ-1} 𝐅(λ/2+1, λ/2+1/2; λ+3/2; x^{-2})` for `x > 0`. -/
-theorem legPIU_associatedQ_ext (lam : ℂ) {x : ℝ} (hx0 : 0 < x) :
+theorem UniformBound.associatedQ_exterior (lam : ℂ) {x : ℝ} (hx0 : 0 < x) :
     associatedQ lam 0 x = Gamma (lam+1) * ((Real.sqrt π : ℂ) * ((2:ℂ)^(lam+1))⁻¹ *
       ((x:ℂ)^(lam+1))⁻¹ * regularizedGaussHG ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2)
           (1/(x:ℂ)^2)) := by
@@ -537,13 +557,14 @@ theorem legPIU_associatedQ_ext (lam : ℂ) {x : ℝ} (hx0 : 0 < x) :
   field_simp
 
 /-- `𝐅(a,b;a+b;y)` is `O((1-y)^{-1/4})` on `[0,1)`, uniformly for `‖a‖, ‖b‖ ≤ R`. -/
-theorem legPIU_bound_real (R : ℝ) : ∃ M : ℝ, 0 ≤ M ∧ ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ y : ℝ, 0 ≤ y →
+theorem UniformBound.bound_real (R : ℝ) : ∃ M : ℝ, 0 ≤ M ∧ ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R →
+    ∀ y : ℝ, 0 ≤ y →
     y < 1 → ‖regularizedGaussHG a b (a+b) (y:ℂ)‖ ≤ M * (1-y)^(-(1/4:ℝ)) := by
-  obtain ⟨C, hC0, hC⟩ := legPIU_bound_zb R
-  obtain ⟨MF, hMF⟩ := legPIU_bound_F (2*|R| + 1)
+  obtain ⟨C, hC0, hC⟩ := UniformBound.bound_zeroBalanced R
+  obtain ⟨MF, hMF⟩ := UniformBound.bound_F (2*|R| + 1)
   refine ⟨max MF 0 + C, by positivity, fun a b ha hb y hy0 hy1 => ?_⟩
   have hR1 : R ≤ |R| := le_abs_self R
-  have hp : 1 ≤ (1-y)^(-(1/4:ℝ)) := legPI_rpow_ge_one (by linarith) (by linarith)
+  have hp : 1 ≤ (1-y)^(-(1/4:ℝ)) := FerrersGreen.rpow_ge_one (by linarith) (by linarith)
   have hn : ‖(y:ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hy0]; exact hy1
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn]
   by_cases hyh : y ≤ 1/2
@@ -565,11 +586,11 @@ theorem legPIU_bound_real (R : ℝ) : ∃ M : ℝ, 0 ≤ M ∧ ∀ a b : ℂ, �
 
 /-- Uniform bound on `(1,∞)`: `‖𝑄_λ(x)‖ ≤ M (x-1)^{-1/4} x^{-(Re ν - r) - 3/4}` for `λ` near a
 regular `ν`, with `r ≤ r₀` prescribed. -/
-theorem legPIU_bound_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {r0 : ℝ} (hr0 : 0 < r0) :
+theorem UniformBound.bound_exteriorQ {ν : ℂ} (hν : LegendreQRegular ν 0) {r0 : ℝ} (hr0 : 0 < r0) :
     ∃ r : ℝ, 0 < r ∧ r ≤ r0 ∧ ∃ M : ℝ, 0 ≤ M ∧
     ∀ lam : ℂ, ‖lam - ν‖ ≤ r → LegendreQRegular lam 0 ∧ ∀ x : ℝ, 1 < x →
       ‖associatedQ lam 0 x‖ ≤ M * ((x-1)^(-(1/4:ℝ)) * x^(-(ν.re-r)-3/4)) := by
-  have hν1 := legHyp_nu hν
+  have hν1 := DegreeDerivative.add_one_ne_neg_nat hν
   have o : IsOpen {lam : ℂ | (Gamma (lam+0+1))⁻¹ ≠ 0} :=
     isOpen_ne_fun (continuous_recip_Gamma.comp (by fun_prop)) continuous_const
   obtain ⟨ε, hε, hball⟩ := Metric.isOpen_iff.mp o ν (by simpa using inv_ne_zero (Gamma_ne_zero hν1))
@@ -577,17 +598,20 @@ theorem legPIU_bound_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {r0 : ℝ} (h
   have hr : 0 < r := lt_min (by positivity) hr0
   set K := Metric.closedBall ν r
   have hK : IsCompact K := isCompact_closedBall _ _
-  have hreg : ∀ lam ∈ K, LegendreQRegular lam 0 := fun lam hl => legHyp_regular_of_recip (hball (by
+  have hreg : ∀ lam ∈ K, LegendreQRegular lam 0 := fun lam hl =>
+      DegreeDerivative.regular_of_recip (hball (by
     rw [Metric.mem_ball]; have := Metric.mem_closedBall.mp hl
     have : r ≤ ε/2 := min_le_left _ _; linarith))
-  obtain ⟨B1, hB10, hB1⟩ := legPIU_bound_on (f := fun lam : ℂ => Gamma (lam+1)) hK
+  obtain ⟨B1, hB10, hB1⟩ := UniformBound.bound_of_isCompact (f := fun lam : ℂ => Gamma (lam+1)) hK
     (fun lam hl => (ContinuousAt.comp (g := Gamma) (f := fun l : ℂ => l + 1)
-      (differentiableAt_Gamma _ (by simpa using legHyp_nu (hreg lam hl))).continuousAt
+      (differentiableAt_Gamma _
+          (by simpa using DegreeDerivative.add_one_ne_neg_nat (hreg lam hl))).continuousAt
       (by fun_prop)).continuousWithinAt)
-  obtain ⟨B2, hB20, hB2⟩ := legPIU_bound_on (f := fun lam : ℂ => ((2:ℂ)^(lam+1))⁻¹) hK
+  obtain ⟨B2, hB20, hB2⟩ :=
+      UniformBound.bound_of_isCompact (f := fun lam : ℂ => ((2:ℂ)^(lam+1))⁻¹) hK
     ((continuous_const_cpow' two_ne_zero |>.comp (continuous_id.add continuous_const)).inv₀
       (fun lam => cpow_ne_zero_iff.mpr (Or.inl two_ne_zero))).continuousOn
-  obtain ⟨MS, hMS0, hMS⟩ := legPIU_bound_real (‖ν‖ + r + 2)
+  obtain ⟨MS, hMS0, hMS⟩ := UniformBound.bound_real (‖ν‖ + r + 2)
   refine ⟨r, hr, min_le_right _ _, Real.sqrt π * B1 * B2 * MS, by positivity, fun lam hl => ?_⟩
   have hlK : lam ∈ K := Metric.mem_closedBall.mpr (by rw [dist_eq_norm]; exact hl)
   refine ⟨hreg lam hlK, fun x hx => ?_⟩
@@ -631,7 +655,7 @@ theorem legPIU_bound_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {r0 : ℝ} (h
   have e2 := hB2 lam hlK
   have hsq : ‖(Real.sqrt π : ℂ)‖ = Real.sqrt π := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
-  rw [legPIU_associatedQ_ext lam hx0, norm_mul, norm_mul, norm_mul, norm_mul, hsq]
+  rw [UniformBound.associatedQ_exterior lam hx0, norm_mul, norm_mul, norm_mul, norm_mul, hsq]
   calc ‖Gamma (lam+1)‖ * (Real.sqrt π * ‖((2:ℂ)^(lam+1))⁻¹‖ * ‖((x:ℂ)^(lam+1))⁻¹‖ *
         ‖regularizedGaussHG ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2) (1/(x:ℂ)^2)‖)
       ≤ B1 * (Real.sqrt π * B2 * x^(-(ν.re-r)-1) * (MS * (1-1/x^2)^(-(1/4:ℝ)))) := by
@@ -640,14 +664,15 @@ theorem legPIU_bound_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {r0 : ℝ} (h
     _ ≤ _ := mul_le_mul_of_nonneg_left hw (by positivity)
 
 /-- `λ ↦ 𝑄_λ(x)` is continuous at a regular `ν`, for `x > 1`. -/
-theorem legPIU_continuousAt_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ} (hx : 1 < x) :
+theorem UniformBound.continuousAt_exteriorQ {ν : ℂ} (hν : LegendreQRegular ν 0)
+    {x : ℝ} (hx : 1 < x) :
     ContinuousAt (fun lam : ℂ => associatedQ lam 0 x) ν := by
   have hx0 : 0 < x := by linarith
   have hx0' : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx0.ne'
   have heq : (fun lam : ℂ => associatedQ lam 0 x) = fun lam => Gamma (lam+1) *
       ((Real.sqrt π : ℂ) * ((2:ℂ)^(lam+1))⁻¹ * ((x:ℂ)^(lam+1))⁻¹ *
         regularizedGaussHG ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2) (1/(x:ℂ)^2)) :=
-    funext fun lam => legPIU_associatedQ_ext lam hx0
+    funext fun lam => UniformBound.associatedQ_exterior lam hx0
   rw [heq]
   have hz : 1/(x:ℂ)^2 ∈ cutPlane := by
     refine mem_cutPlane_of_norm_lt_one ?_
@@ -658,7 +683,8 @@ theorem legPIU_continuousAt_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {x : �
     (B := fun lam : ℂ => (lam+0+1)/2) (C := fun lam : ℂ => lam+3/2) (by fun_prop) (by fun_prop)
     (by fun_prop) hz).continuous.continuousAt (x := ν)
   refine ContinuousAt.mul (ContinuousAt.comp (g := Gamma) (f := fun l : ℂ => l + 1)
-      (differentiableAt_Gamma _ (by simpa using legHyp_nu hν)).continuousAt (by fun_prop)) ?_
+      (differentiableAt_Gamma _
+          (by simpa using DegreeDerivative.add_one_ne_neg_nat hν)).continuousAt (by fun_prop)) ?_
   refine ContinuousAt.mul (ContinuousAt.mul (ContinuousAt.mul continuousAt_const ?_) ?_) hG
   · exact ((continuous_const_cpow' two_ne_zero |>.comp (continuous_id.add continuous_const)).inv₀
       (fun lam => cpow_ne_zero_iff.mpr (Or.inl two_ne_zero))).continuousAt
@@ -666,7 +692,7 @@ theorem legPIU_continuousAt_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {x : �
       (fun lam => cpow_ne_zero_iff.mpr (Or.inl hx0'))).continuousAt
 
 /-- `(x-1)^{-1/2} x^p` is integrable on `(1,∞)` for `p < -1/2`. -/
-theorem legPIU_integrableOn_weight {p : ℝ} (hp : p < -1/2) :
+theorem UniformBound.integrableOn_weight {p : ℝ} (hp : p < -1/2) :
     IntegrableOn (fun x : ℝ => (x-1)^(-(1/2:ℝ)) * x^p) (Ioi 1) := by
   have hw : IntervalIntegrable (fun x : ℝ => (x-1)^(-(1/2:ℝ))) volume 1 2 := by
     have := (intervalIntegral.intervalIntegrable_rpow' (r := -(1/2:ℝ)) (by norm_num)
@@ -709,7 +735,7 @@ theorem legendre_product_integral_18 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (h
     HasIntegralAtTop (fun x : ℝ => associatedP ν 0 x*associatedQ lam 0 x) 1
         (1/((lam-ν)*(ν+lam+1))) := by
   have hl0 : 0 < lam.re := by linarith
-  have hr := legPI_regular_of_re_pos hl0
+  have hr := FerrersGreen.regular_of_re_pos hl0
   have hd1 : ν - lam ≠ 0 := fun h => by
     have := congrArg Complex.re h; simp at this; linarith
   have hd2 : ν + lam + 1 ≠ 0 := fun h => by
@@ -719,20 +745,26 @@ theorem legendre_product_integral_18 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (h
   have hinf : Tendsto (fun x : ℝ => (lam+1)*associatedP ν 0 x*(x*associatedQ lam 0 x -
       associatedQ (lam+1) 0 x) - (ν+1)*associatedQ lam 0 x*(x*associatedP ν 0 x -
       associatedP (ν+1) 0 x)) atTop (𝓝 0) := by
-    refine legExt_tendsto_zero_atTop (a := ν.re) (b := lam.re) hlam
-      (legExt_associatedP_isBigO_atTop (by linarith)) ?_ (legExt_associatedQ_isBigO_atTop lam) ?_
-    · have := legExt_associatedP_isBigO_atTop (ν := ν+1) (by simp; linarith)
+    refine ExteriorGreen.tendsto_zero_atTop (a := ν.re) (b := lam.re) hlam
+      (ExteriorGreen.associatedP_isBigO_atTop (by linarith)) ?_
+          (ExteriorGreen.associatedQ_isBigO_atTop lam) ?_
+    · have := ExteriorGreen.associatedP_isBigO_atTop (ν := ν+1) (by simp; linarith)
       simpa using this
-    · exact legExt_isBigO_rpow_mono (by simp) (legExt_associatedQ_isBigO_atTop (lam+1))
-  have h1 := legExt_bdry (ν := ν) legExt_tendsto_half legExt_hx (legExt_P_isBigO ν)
-      (legExt_Q_isBigO hr)
-    (legExt_Q_isBigO_succ hr) (legExt_P_isBigO_succ ν)
-    (by rw [legPI_cpos_succ hr]; ring) (by ring)
-  have := legExt_integral_green (legExt_differentiableOn_P ν) (legExt_differentiableOn_Q lam)
-    (legExt_ode_P ν) (legExt_ode_Q lam) (legExt_rec_P ν) (legExt_rec_Q hr)
-    (fun R hR => legExt_intervalIntegrable_mul (legExt_continuousOn (legExt_differentiableOn_P ν))
-      (legExt_continuousOn (legExt_differentiableOn_Q lam)) (legExt_P_isBigO ν)
-      (legExt_Q_isBigO hr) hR) h1 hinf hc
+    · exact ExteriorGreen.isBigO_rpow_mono (by simp)
+          (ExteriorGreen.associatedQ_isBigO_atTop (lam+1))
+  have h1 := ExteriorGreen.boundary (ν := ν) ExteriorGreen.tendsto_half
+      ExteriorGreen.eventually_ofReal_eq (ExteriorGreen.P_isBigO ν)
+      (ExteriorGreen.Q_isBigO hr)
+    (ExteriorGreen.Q_isBigO_succ hr) (ExteriorGreen.P_isBigO_succ ν)
+    (by rw [FerrersGreen.constPos_succ hr]; ring) (by ring)
+  have := ExteriorGreen.integral_green (ExteriorGreen.differentiableOn_P ν)
+      (ExteriorGreen.differentiableOn_Q lam)
+    (ExteriorGreen.ode_P ν) (ExteriorGreen.ode_Q lam) (ExteriorGreen.recurrence_P ν)
+        (ExteriorGreen.recurrence_Q hr)
+    (fun R hR => ExteriorGreen.intervalIntegrable_mul
+        (ExteriorGreen.continuousOn (ExteriorGreen.differentiableOn_P ν))
+      (ExteriorGreen.continuousOn (ExteriorGreen.differentiableOn_Q lam)) (ExteriorGreen.P_isBigO ν)
+      (ExteriorGreen.Q_isBigO hr) hR) h1 hinf hc
   convert this using 1
   rw [show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(ν+lam+1)) by ring]
   have : (lam - ν) ≠ 0 := fun h => hd1 (by linear_combination -h)
@@ -755,22 +787,28 @@ theorem legendre_product_integral_19 (ν : ℂ) (lam : ℂ) (h : -1 < (lam+ν).r
   have hinf : Tendsto (fun x : ℝ => (lam+1)*associatedQ ν 0 x*(x*associatedQ lam 0 x -
       associatedQ (lam+1) 0 x) - (ν+1)*associatedQ lam 0 x*(x*associatedQ ν 0 x -
       associatedQ (ν+1) 0 x)) atTop (𝓝 0) := by
-    refine legExt_tendsto_zero_atTop (a := -ν.re-1) (b := lam.re) (by simp at h; linarith)
-      (legExt_associatedQ_isBigO_atTop ν) ?_ (legExt_associatedQ_isBigO_atTop lam) ?_
-    · exact legExt_isBigO_rpow_mono (by simp) (legExt_associatedQ_isBigO_atTop (ν+1))
-    · exact legExt_isBigO_rpow_mono (by simp) (legExt_associatedQ_isBigO_atTop (lam+1))
-  have h1 := legExt_bdry (ν := ν) legExt_tendsto_half legExt_hx (legExt_Q_isBigO hν)
-      (legExt_Q_isBigO hlam)
-    (legExt_Q_isBigO_succ hlam) (legExt_Q_isBigO_succ hν)
-    (by rw [legPI_cpos_succ hlam]; ring) (by rw [legPI_cpos_succ hν]; ring)
-  have := legExt_integral_green (legExt_differentiableOn_Q ν) (legExt_differentiableOn_Q lam)
-    (legExt_ode_Q ν) (legExt_ode_Q lam) (legExt_rec_Q hν) (legExt_rec_Q hlam)
-    (fun R hR => legExt_intervalIntegrable_mul (legExt_continuousOn (legExt_differentiableOn_Q ν))
-      (legExt_continuousOn (legExt_differentiableOn_Q lam)) (legExt_Q_isBigO hν)
-      (legExt_Q_isBigO hlam) hR) h1 hinf hc
+    refine ExteriorGreen.tendsto_zero_atTop (a := -ν.re-1) (b := lam.re) (by simp at h; linarith)
+      (ExteriorGreen.associatedQ_isBigO_atTop ν) ?_ (ExteriorGreen.associatedQ_isBigO_atTop lam) ?_
+    · exact ExteriorGreen.isBigO_rpow_mono (by simp) (ExteriorGreen.associatedQ_isBigO_atTop (ν+1))
+    · exact ExteriorGreen.isBigO_rpow_mono (by simp)
+          (ExteriorGreen.associatedQ_isBigO_atTop (lam+1))
+  have h1 := ExteriorGreen.boundary (ν := ν) ExteriorGreen.tendsto_half
+      ExteriorGreen.eventually_ofReal_eq (ExteriorGreen.Q_isBigO hν)
+      (ExteriorGreen.Q_isBigO hlam)
+    (ExteriorGreen.Q_isBigO_succ hlam) (ExteriorGreen.Q_isBigO_succ hν)
+    (by rw [FerrersGreen.constPos_succ hlam]; ring) (by rw [FerrersGreen.constPos_succ hν]; ring)
+  have := ExteriorGreen.integral_green (ExteriorGreen.differentiableOn_Q ν)
+      (ExteriorGreen.differentiableOn_Q lam)
+    (ExteriorGreen.ode_Q ν) (ExteriorGreen.ode_Q lam) (ExteriorGreen.recurrence_Q hν)
+        (ExteriorGreen.recurrence_Q hlam)
+    (fun R hR => ExteriorGreen.intervalIntegrable_mul
+        (ExteriorGreen.continuousOn (ExteriorGreen.differentiableOn_Q ν))
+      (ExteriorGreen.continuousOn (ExteriorGreen.differentiableOn_Q lam))
+          (ExteriorGreen.Q_isBigO hν)
+      (ExteriorGreen.Q_isBigO hlam) hR) h1 hinf hc
   convert this using 1
   rw [show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(lam+ν+1)) by ring]
-  unfold legPIcpos
+  unfold FerrersGreen.constPos
   field_simp
   ring
 
@@ -781,15 +819,16 @@ theorem legendre_product_integral_20 (ν : ℂ) (hν : -1/2 < ν.re) :
     HasIntegralAtTop (fun x : ℝ => (associatedQ ν 0 x)^2) 1 (deriv digamma (ν+1)/(2*ν+1)) := by
   have hreg : LegendreQRegular ν 0 := fun n h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
-  have hν1 := legHyp_nu hreg
+  have hν1 := DegreeDerivative.add_one_ne_neg_nat hreg
   have h2ν : 2*ν+1 ≠ 0 := fun h => by have := congrArg Complex.re h; simp at this; linarith
-  obtain ⟨r, hr, hrr0, M, hM0, hM⟩ := legPIU_bound_Qext hreg (r0 := (ν.re + 1/2)/2) (by linarith)
+  obtain ⟨r, hr, hrr0, M, hM0, hM⟩ :=
+      UniformBound.bound_exteriorQ hreg (r0 := (ν.re + 1/2)/2) (by linarith)
   set q := -(ν.re - r) - 3/4
   set g : ℝ → ℝ := fun x => M^2 * ((x-1)^(-(1/2:ℝ)) * x^(2*q))
-  have hgI : IntegrableOn g (Ioi (1:ℝ)) := (legPIU_integrableOn_weight (p := 2*q) (by
+  have hgI : IntegrableOn g (Ioi (1:ℝ)) := (UniformBound.integrableOn_weight (p := 2*q) (by
     simp only [q]; linarith)).const_mul _
   have hQc : ∀ lam : ℂ, ContinuousOn (fun x : ℝ => associatedQ lam 0 x) (Ioi (1:ℝ)) :=
-    fun lam => legExt_continuousOn (legExt_differentiableOn_Q lam)
+    fun lam => ExteriorGreen.continuousOn (ExteriorGreen.differentiableOn_Q lam)
   have hbd : ∀ lam : ℂ, ‖lam - ν‖ ≤ r → ∀ x : ℝ, 1 < x →
       ‖associatedQ ν 0 x * associatedQ lam 0 x‖ ≤ g x := by
     intro lam hl x hx
@@ -824,7 +863,7 @@ theorem legendre_product_integral_20 (ν : ℂ) (hν : -1/2 < ν.re) :
       exact (ae_restrict_iff' measurableSet_Ioi).2
           (Eventually.of_forall fun x hx => hbd lam hl x hx)
     · refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun x (hx : 1 < x) => ?_)
-      exact tendsto_const_nhds.mul (legPIU_continuousAt_Qext hreg hx).tendsto
+      exact tendsto_const_nhds.mul (UniformBound.continuousAt_exteriorQ hreg hx).tendsto
   -- the off-diagonal value
   have hψ := (DLMF.Gamma.differentiableAt_digamma hν1).hasDerivAt
   have hψ' : HasDerivAt (fun lam : ℂ => digamma (lam+1)) (deriv digamma (ν+1)) ν := by

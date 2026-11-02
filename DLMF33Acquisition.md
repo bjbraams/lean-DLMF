@@ -147,7 +147,7 @@ declarations:
 
 - [33.5.E1](https://dlmf.nist.gov/33.5.E1): [`DLMF.Coulomb.coulombF_isEquivalent_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L77) (proved)
 - [33.5.E2](https://dlmf.nist.gov/33.5.E2): [`DLMF.Coulomb.coulombG_isEquivalent_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L324) (proved). The derivative part for `ℓ ≥ 1` as printed.
-- [33.5.E3](https://dlmf.nist.gov/33.5.E3): [`DLMF.Coulomb.coulombF_zero_eq_sphericalJ`](DLMF/Coulomb/RhoEtaLimits.lean#L401) (proved); [`DLMF.Coulomb.coulombG_zero_eq_sphericalY`](DLMF/Coulomb/RhoEtaLimits.lean#L537) (proved). `j_ℓ` is `DLMF.sphericalJ`; `y_ℓ` is written out by 10.47.3.
+- [33.5.E3](https://dlmf.nist.gov/33.5.E3): [`DLMF.Coulomb.coulombF_zero_eq_sphericalJ`](DLMF/Coulomb/RhoEtaLimits.lean#L401) (proved); [`DLMF.Coulomb.coulombG_zero_eq_sphericalY`](DLMF/Coulomb/RhoEtaLimits.lean#L537) (proved). `j_ℓ` is `DLMF.Bessel.sphericalJ`; `y_ℓ` is written out by 10.47.3.
 - [33.5.E4](https://dlmf.nist.gov/33.5.E4): [`DLMF.Coulomb.coulombFG_zero_eq_bessel`](DLMF/Coulomb/RhoEtaLimits.lean#L551) (proved)
 - [33.5.E5](https://dlmf.nist.gov/33.5.E5): [`DLMF.Coulomb.coulomb_zero_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L562) (proved)
 - [33.5.E6](https://dlmf.nist.gov/33.5.E6): [`DLMF.Coulomb.coulombC_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L383) (proved)
@@ -172,7 +172,7 @@ declarations:
 
 ## [§33.8 Continued Fractions](https://dlmf.nist.gov/33.8)
 
-- [33.8.E1](https://dlmf.nist.gov/33.8.E1): [`DLMF.Coulomb.coulombF_logDeriv_contFrac`](DLMF/Coulomb/RhoEtaRepresentations.lean#L824) (proved). `DLMF.HasContinuedFraction`; `ρ > 0`, `F_ℓ ≠ 0`.
+- [33.8.E1](https://dlmf.nist.gov/33.8.E1): [`DLMF.Coulomb.coulombF_logDeriv_contFrac`](DLMF/Coulomb/RhoEtaRepresentations.lean#L824) (proved). `DLMF.Core.HasContinuedFraction`; `ρ > 0`, `F_ℓ ≠ 0`.
 - [33.8.E2](https://dlmf.nist.gov/33.8.E2): [`DLMF.Coulomb.coulombHPlus_logDeriv_contFrac`](DLMF/Coulomb/RhoEtaRepresentations.lean#L839) (admitted); [`DLMF.Coulomb.coulombHMinus_logDeriv_contFrac`](DLMF/Coulomb/RhoEtaRepresentations.lean#L850) (admitted)
 - [33.8.E3](https://dlmf.nist.gov/33.8.E3): [`DLMF.Coulomb.coulombHPlus_logDeriv_contFrac`](DLMF/Coulomb/RhoEtaRepresentations.lean#L839) (admitted); [`DLMF.Coulomb.coulombHMinus_logDeriv_contFrac`](DLMF/Coulomb/RhoEtaRepresentations.lean#L850) (admitted). The constants `a`, `b`, `c` are written into the statements of 33.8.2.
 - [33.8.E4](https://dlmf.nist.gov/33.8.E4): [`DLMF.Coulomb.coulomb_barnett`](DLMF/Coulomb/RhoEtaRepresentations.lean#L861) (proved). Stated as `F_ℓ² (q⁻¹(u-p)² + q) = 1` (both signs of the square root).

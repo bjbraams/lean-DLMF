@@ -69,7 +69,8 @@ need the Ferrers functions are in `DLMF.Spheroidal.Basic.Ferrers`.
 * `𝑃s^m_n(z, γ²) = (-1)^m (z-1)^{m/2} (z+1)^{m/2} g(z)` with principal powers: this is real on
   `(1, ∞)`, analytic on `ℂ ∖ (-∞, 1]`, and has the boundary values 30.6.4; at `γ = 0` it is
   `P^m_n(z) = (z²-1)^{m/2} dᵐP_n/dzᵐ` (DLMF 14.6.5, 30.6.2).
-* For `j = 1` the function `ψ_k^{(1)}` is the entire `j_k`, `DLMF.sphericalJ` from `DLMF.Core`.
+* For `j = 1` the function `ψ_k^{(1)}` is the entire `j_k`, `DLMF.Bessel.sphericalJ` from
+  `DLMF.Core`.
 * Series in the definitions are `tsum`s (totalized); their convergence is stated separately.
 -/
 
@@ -405,12 +406,12 @@ def spheroidalCylinder (j : ℕ) (ν z : ℂ) : ℂ :=
 /-- `ψ_k^{(j)}(z) = (π/(2z))^{1/2} 𝒞^{(j)}_{k+1/2}(z)`, `j = 1, 2, 3, 4` (DLMF 30.11.1), with the
 principal square root; these are the spherical Bessel functions `j_k`, `y_k`, `h_k^{(1)}`,
 `h_k^{(2)}` of DLMF 10.47.3–10.47.4. For `j = 1` the entire function `j_k` is used (the project's
-`DLMF.sphericalJ`), since DLMF allows every `z ≠ 0` in 30.11.3 for `j = 1`; it agrees with the
-principal-branch formula off `(-∞, 0]` (`spheroidalPsi_one_eq`), where the formula would change
+`DLMF.Bessel.sphericalJ`), since DLMF allows every `z ≠ 0` in 30.11.3 for `j = 1`; it agrees with
+the principal-branch formula off `(-∞, 0]` (`spheroidalPsi_one_eq`), where the formula would change
 sign. -/
 @[dlmf 30.11.E1]
 def spheroidalPsi (j k : ℕ) (z : ℂ) : ℂ :=
-  if j = 1 then DLMF.sphericalJ k z
+  if j = 1 then DLMF.Bessel.sphericalJ k z
   else ((π : ℂ) / (2 * z)) ^ (1 / 2 : ℂ) * spheroidalCylinder j ((k : ℂ) + 1 / 2) z
 
 end DLMF.Spheroidal

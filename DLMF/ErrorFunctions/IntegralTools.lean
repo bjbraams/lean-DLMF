@@ -15,12 +15,12 @@ Supporting results for `DLMF.ErrorFunctions.Integrals`, mainly on the closed sec
 
 ## Main results
 
-* `erfInt_fresnelAux_laplace`: the Laplace forms of the Fresnel auxiliary functions
+* `ErrorFunctionIntegrals.fresnelAux_laplace`: the Laplace forms of the Fresnel auxiliary functions
   (DLMF 7.7.10–7.7.11) on the closed sector `|ph z| ≤ π/4`, including `z = 0`, extending
-  `fresnelAux_laplace_open` by continuity.
-* `erfInt_abs_arg_lt_of_re_sq`, `erfInt_re_nonneg_of_abs_arg_le`: sector conditions in terms
-  of `Re z` and `Re z²`.
-* `erfInt_integrableOn_rpow_div`: integrability of `t^{k-1/2}/(t²+1)` on `(0, ∞)`.
+  `FresnelAuxiliary.laplace_open` by continuity.
+* `ErrorFunctionIntegrals.abs_arg_lt_of_re_sq`, `ErrorFunctionIntegrals.re_nonneg_of_abs_arg_le`:
+  sector conditions in terms of `Re z` and `Re z²`.
+* `ErrorFunctionIntegrals.integrableOn_rpow_div`: integrability of `t^{k-1/2}/(t²+1)` on `(0, ∞)`.
 -/
 
 @[expose] public noncomputable section
@@ -29,7 +29,7 @@ open scoped Real Topology Nat
 namespace DLMF.Confluent
 
 /-- If `Re w > 0` and `Re w² > 0`, then `|arg w| < π/4`. -/
-theorem erfInt_abs_arg_lt_of_re_sq {w : ℂ} (hw : 0 < w.re) (hw2 : 0 < (w^2).re) :
+theorem ErrorFunctionIntegrals.abs_arg_lt_of_re_sq {w : ℂ} (hw : 0 < w.re) (hw2 : 0 < (w^2).re) :
     |arg w| < π/4 := by
   have h1 : |arg w| < π/2 := Complex.abs_arg_lt_pi_div_two_iff.2 (Or.inl hw)
   have hre : (w^2).re = ‖w‖^2*Real.cos (2*arg w) := by
@@ -48,7 +48,7 @@ theorem erfInt_abs_arg_lt_of_re_sq {w : ℂ} (hw : 0 < w.re) (hw2 : 0 < (w^2).re
   linarith
 
 /-- In the closed sector `|arg z| ≤ π/4`, `Re z ≥ 0` and `Re z² ≥ 0`. -/
-theorem erfInt_re_nonneg_of_abs_arg_le {z : ℂ} (hz : |arg z| ≤ π/4) :
+theorem ErrorFunctionIntegrals.re_nonneg_of_abs_arg_le {z : ℂ} (hz : |arg z| ≤ π/4) :
     0 ≤ z.re ∧ 0 ≤ (z^2).re := by
   constructor
   · rw [← Complex.norm_mul_cos_arg z]
@@ -58,17 +58,17 @@ theorem erfInt_re_nonneg_of_abs_arg_le {z : ℂ} (hz : |arg z| ≤ π/4) :
     rwa [show 2*(π/4) = π/2 by ring, Real.cos_pi_div_two, mul_zero] at h
 
 /-- For `|arg z| ≤ π/4` and `ε > 0`, the shifted point `z + ε` lies in the open sector. -/
-theorem erfInt_shift_mem_open {z : ℂ} (hz : |arg z| ≤ π/4) {ε : ℝ} (hε : 0 < ε) :
+theorem ErrorFunctionIntegrals.shift_mem_open {z : ℂ} (hz : |arg z| ≤ π/4) {ε : ℝ} (hε : 0 < ε) :
     z + ε ≠ 0 ∧ |arg (z+ε)| < π/4 := by
-  obtain ⟨h1, h2⟩ := erfInt_re_nonneg_of_abs_arg_le hz
+  obtain ⟨h1, h2⟩ := ErrorFunctionIntegrals.re_nonneg_of_abs_arg_le hz
   have hr : 0 < (z+ε).re := by simp; linarith
   have hr2 : 0 < ((z+ε)^2).re := by
     have : ((z+ε)^2).re = (z^2).re + 2*ε*z.re + ε^2 := by simp [sq, mul_re]; ring
     rw [this]; positivity
-  exact ⟨fun h => by rw [h] at hr; simp at hr, erfInt_abs_arg_lt_of_re_sq hr hr2⟩
+  exact ⟨fun h => by rw [h] at hr; simp at hr, ErrorFunctionIntegrals.abs_arg_lt_of_re_sq hr hr2⟩
 
 /-- Integrability of `t^{k-1/2}/(t²+1)` on `(0, ∞)` for `k ∈ {0, 1}`. -/
-theorem erfInt_integrableOn_rpow_div (k : ℕ) (hk : k ≤ 1) :
+theorem ErrorFunctionIntegrals.integrableOn_rpow_div (k : ℕ) (hk : k ≤ 1) :
     IntegrableOn (fun t : ℝ => t ^ ((k:ℝ) - 1/2) / (t^2+1)) (Ioi 0) := by
   have hs : Ioi (0:ℝ) = Ioc 0 1 ∪ Ioi 1 := (Ioc_union_Ioi_eq_Ioi zero_le_one).symm
   rw [hs]
@@ -114,8 +114,8 @@ theorem erfInt_integrableOn_rpow_div (k : ℕ) (hk : k ≤ 1) :
         _ ≤ _ := h1
 
 /-- **DLMF 7.7.10–7.7.11 on the closed sector** `|arg z| ≤ π/4` (including `z = 0`): the open-sector
-Laplace forms `fresnelAux_laplace_open` extend by continuity along `z + ε`, `ε → 0⁺`. -/
-theorem erfInt_fresnelAux_laplace (aux : Bool) {z : ℂ} (hz : |arg z| ≤ π/4) :
+Laplace forms `FresnelAuxiliary.laplace_open` extend by continuity along `z + ε`, `ε → 0⁺`. -/
+theorem ErrorFunctionIntegrals.fresnelAux_laplace (aux : Bool) {z : ℂ} (hz : |arg z| ≤ π/4) :
     (if aux then fresnelAuxGComplex z else fresnelAuxFComplex z) = 1/(π*Real.sqrt 2) *
       ∫ t in Ioi (0:ℝ), exp (-π*z^2*t/2) * (t:ℂ)^(((if aux then 1 else 0 : ℕ) : ℂ) - 1/2) /
         ((t:ℂ)^2+1) := by
@@ -154,7 +154,8 @@ theorem erfInt_fresnelAux_laplace (aux : Bool) {z : ℂ} (hz : |arg z| ≤ π/4)
       _ = _ := one_mul _
   have hR : Tendsto (fun ε : ℝ => F (z+ε)) (𝓝[>] 0) (𝓝 (F z)) := by
     refine tendsto_integral_filter_of_dominated_convergence
-      (fun t => t ^ ((k:ℝ) - 1/2) / (t^2+1)) ?_ ?_ (erfInt_integrableOn_rpow_div k hk) ?_
+      (fun t => t ^ ((k:ℝ) - 1/2) / (t^2+1)) ?_ ?_
+          (ErrorFunctionIntegrals.integrableOn_rpow_div k hk) ?_
     · refine Eventually.of_forall fun ε => ContinuousOn.aestronglyMeasurable
         (fun t ht => ?_) measurableSet_Ioi
       have ht : (0:ℝ) < t := ht
@@ -166,7 +167,7 @@ theorem erfInt_fresnelAux_laplace (aux : Bool) {z : ℂ} (hz : |arg z| ≤ π/4)
     · filter_upwards [self_mem_nhdsWithin] with ε hε
       have hε' : (0:ℝ) < ε := hε
       refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht => ?_)
-      obtain ⟨h1, h2⟩ := erfInt_re_nonneg_of_abs_arg_le hz
+      obtain ⟨h1, h2⟩ := ErrorFunctionIntegrals.re_nonneg_of_abs_arg_le hz
       have : 0 ≤ ((z+ε)^2).re := by
         have : ((z+ε)^2).re = (z^2).re + 2*ε*z.re + ε^2 := by simp [sq, mul_re]; ring
         rw [this]; positivity
@@ -179,8 +180,8 @@ theorem erfInt_fresnelAux_laplace (aux : Bool) {z : ℂ} (hz : |arg z| ≤ π/4)
       exact h.mono_left nhdsWithin_le_nhds
   have heq : (fun ε : ℝ => Φ (z+ε)) =ᶠ[𝓝[>] 0] fun ε => 1/(π*Real.sqrt 2) * F (z+ε) := by
     filter_upwards [self_mem_nhdsWithin] with ε hε
-    obtain ⟨h0, ha⟩ := erfInt_shift_mem_open hz hε
-    exact fresnelAux_laplace_open aux h0 ha
+    obtain ⟨h0, ha⟩ := ErrorFunctionIntegrals.shift_mem_open hz hε
+    exact FresnelAuxiliary.laplace_open aux h0 ha
   have := tendsto_nhds_unique hL ((hR.const_mul ((1:ℂ)/(π*Real.sqrt 2))).congr' heq.symm)
   exact this
 

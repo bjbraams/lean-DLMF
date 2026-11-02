@@ -77,7 +77,7 @@ theorem isSpheroidalSolutionReal_ferrersP (n m : ℕ) :
     IsSpheroidalSolutionReal ((n : ℝ) * (n + 1)) 0 m
       (fun x => (DLMF.Legendre.ferrersP n m x).re) := by
   have key : ∀ x ∈ Ioo (-1 : ℝ) 1, _ := fun x hx =>
-    DLMF.Legendre.lzt_ferrersP_sol (n : ℝ) (m : ℝ) hx
+    DLMF.Legendre.LegendreSturm.ferrersP_solution (n : ℝ) (m : ℝ) hx
   simp only [Complex.ofReal_natCast] at key
   have hd : ∀ x ∈ Ioo (-1 : ℝ) 1, deriv (fun t => (DLMF.Legendre.ferrersP n m t).re) x =
       (deriv (DLMF.Legendre.ferrersP n m) x).re := fun x hx => (key x hx).1.deriv
@@ -89,10 +89,10 @@ theorem isSpheroidalSolutionReal_ferrersP (n m : ℕ) :
 
 /-- **`γ = 0` in 30.2.4: the spherical Bessel equation** (DLMF §30.2(iii), 10.47.1): with `γ = 0`
 and `μ` arbitrary, 30.2.4 reads `ζ² w'' + 2ζ w' + (ζ² - λ) w = 0`, which for `λ = n(n+1)` is
-satisfied by the spherical Bessel function `j_n` (`DLMF.sphericalJ`). -/
+satisfied by the spherical Bessel function `j_n` (`DLMF.Bessel.sphericalJ`). -/
 @[dlmf 30.2.iii]
 theorem isSpheroidalZetaSolution_sphericalJ (n : ℕ) (μ : ℂ) :
-    IsSpheroidalZetaSolution ((n : ℂ) * (n + 1)) 0 μ univ (DLMF.sphericalJ n) := by
+    IsSpheroidalZetaSolution ((n : ℂ) * (n + 1)) 0 μ univ (DLMF.Bessel.sphericalJ n) := by
   set b : ℂ := (n : ℂ) + 3 / 2
   set c : ℂ := Real.sqrt π / (2 : ℂ) ^ (n + 1)
   let F : ℕ → ℂ → ℂ := fun j => regularizedHGFun (∅ : Multiset ℂ) {b + j}
@@ -109,18 +109,19 @@ theorem isSpheroidalZetaSolution_sphericalJ (n : ℕ) (μ : ℂ) :
   have hP' : ∀ z : ℂ, HasDerivAt (fun z : ℂ => (n : ℂ) * z ^ (n - 1))
       ((n : ℂ) * (((n - 1 : ℕ) : ℂ) * z ^ (n - 1 - 1))) z := by
     intro z; exact (by simpa using hasDerivAt_pow (n - 1) z : HasDerivAt _ _ z).const_mul _
-  have hw : DLMF.sphericalJ n = fun z => c * (z ^ n * F 0 (-z ^ 2 / 4)) := by
-    funext z; simp only [DLMF.sphericalJ, F, c, b]; simp; ring_nf
-  have hd1 : ∀ z, HasDerivAt (DLMF.sphericalJ n)
+  have hw : DLMF.Bessel.sphericalJ n = fun z => c * (z ^ n * F 0 (-z ^ 2 / 4)) := by
+    funext z; simp only [DLMF.Bessel.sphericalJ, F, c, b]; simp; ring_nf
+  have hd1 : ∀ z, HasDerivAt (DLMF.Bessel.sphericalJ n)
       (c * ((n : ℂ) * z ^ (n - 1) * F 0 (-z ^ 2 / 4) +
         z ^ n * (F 1 (-z ^ 2 / 4) * (-z / 2)))) z := by
     intro z; rw [hw]
     exact ((hP z).mul ((hF 0 _).comp z (hu z))).const_mul c
-  have hD1 : deriv (DLMF.sphericalJ n) = fun z => c * ((n : ℂ) * z ^ (n - 1) * F 0 (-z ^ 2 / 4) +
+  have hD1 : deriv (DLMF.Bessel.sphericalJ n) = fun z => c *
+      ((n : ℂ) * z ^ (n - 1) * F 0 (-z ^ 2 / 4) +
         z ^ n * (F 1 (-z ^ 2 / 4) * (-z / 2))) := funext fun z => (hd1 z).deriv
   have hm : ∀ z : ℂ, HasDerivAt (fun z : ℂ => -z / 2) (-1 / 2) z := by
     intro z; simpa using ((hasDerivAt_id z).neg.div_const 2)
-  have hd2 : ∀ z, HasDerivAt (deriv (DLMF.sphericalJ n))
+  have hd2 : ∀ z, HasDerivAt (deriv (DLMF.Bessel.sphericalJ n))
       (c * (((n : ℂ) * (((n - 1 : ℕ) : ℂ) * z ^ (n - 1 - 1)) * F 0 (-z ^ 2 / 4) +
           (n : ℂ) * z ^ (n - 1) * (F 1 (-z ^ 2 / 4) * (-z / 2))) +
         ((n : ℂ) * z ^ (n - 1) * (F 1 (-z ^ 2 / 4) * (-z / 2)) +

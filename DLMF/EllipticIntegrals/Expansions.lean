@@ -180,7 +180,214 @@ theorem compEllIntDk_hasSum {k : ℂ} (hk : ‖k‖ < 1) :
   convert this using 2 with m
   rw [gaussHGCoeff, poch_two_eq_factorial]; ring
 
-/-- **Admitted.** DLMF 19.5.4: for `|k| < 1` and `|α| < 1` (here `|α²| < 1`),
+/-- Wallis's integral `∫₀^{π/2} sin^{2n} θ dθ = (π/2) ∏_{i<n} (2i+1)/(2i+2)`. -/
+private lemma integral_sin_pow_two_mul_real (n : ℕ) :
+    ∫ θ in (0 : ℝ)..(π / 2), Real.sin θ ^ (2 * n) =
+      π / 2 * ∏ i ∈ Finset.range n, ((2 * i + 1 : ℝ) / (2 * i + 2)) := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    rw [show 2 * (n + 1) = 2 * n + 2 by ring, integral_sin_pow, ih, Finset.prod_range_succ]
+    simp
+    ring
+
+/-- The ratio recurrence of `(1/2)ₙ/n!`. -/
+private lemma poch_half_div_factorial_succ (n : ℕ) :
+    poch (1 / 2) (n + 1) / ((n + 1).factorial : ℂ) =
+      poch (1 / 2) n / (n.factorial : ℂ) * ((2 * n + 1) / (2 * n + 2)) := by
+  rw [poch, ascPochhammer_succ_eval, ← poch, Nat.factorial_succ]
+  push_cast
+  field_simp
+  ring
+
+/-- Wallis's integral `∫₀^{π/2} sin^{2n} θ dθ = (π/2) (1/2)ₙ/n!`. -/
+private lemma integral_sin_pow_two_mul (n : ℕ) :
+    ∫ θ in (0 : ℝ)..(π / 2), (Real.sin θ : ℂ) ^ (2 * n) =
+      (π / 2 : ℂ) * (poch (1 / 2) n / (n.factorial : ℂ)) := by
+  have h : ∫ θ in (0 : ℝ)..(π / 2), (Real.sin θ : ℂ) ^ (2 * n) =
+      ((∫ θ in (0 : ℝ)..(π / 2), Real.sin θ ^ (2 * n) : ℝ) : ℂ) := by
+    rw [← intervalIntegral.integral_ofReal]; push_cast; rfl
+  rw [h, integral_sin_pow_two_mul_real]
+  push_cast
+  congr 1
+  clear h
+  induction n with
+  | zero => simp [poch]
+  | succ n ih => rw [Finset.prod_range_succ, ih, poch_half_div_factorial_succ]
+
+
+/-- `|(1/2)ₙ/n!| ≤ 1`. -/
+private lemma norm_poch_half_div_factorial_le (n : ℕ) :
+    ‖poch (1 / 2) n / (n.factorial : ℂ)‖ ≤ 1 := by
+  induction n with
+  | zero => simp [poch]
+  | succ n ih =>
+    rw [poch_half_div_factorial_succ, norm_mul]
+    have h : ‖((2 * n + 1) / (2 * n + 2) : ℂ)‖ ≤ 1 := by
+      rw [show ((2 * n + 1) / (2 * n + 2) : ℂ) = (((2 * n + 1) / (2 * n + 2) : ℝ) : ℂ) by
+        push_cast; rfl, norm_real, Real.norm_eq_abs, abs_le]
+      constructor
+      · have : (0 : ℝ) ≤ (2 * n + 1) / (2 * n + 2) := by positivity
+        linarith
+      · rw [div_le_one (by positivity)]; linarith
+    calc _ ≤ 1 * 1 := mul_le_mul ih h (norm_nonneg _) zero_le_one
+      _ = 1 := one_mul 1
+
+/-- The Cauchy-product coefficients of `(1 - α² s)⁻¹ (1 - k² s)^{-1/2}`. -/
+private noncomputable def piSeriesCoeff (α2 k : ℂ) (n : ℕ) : ℂ :=
+  ∑ m ∈ Finset.range (n + 1), poch (1 / 2) m / (m.factorial : ℂ) * (k ^ 2) ^ m * α2 ^ (n - m)
+
+/-- Absolute convergence of the binomial series of `(1 - k² s)^{-1/2}` for `|s| ≤ 1`. -/
+private lemma summable_norm_binomial_half {k : ℂ} (hk : ‖k‖ < 1) {s : ℂ} (hs : ‖s‖ ≤ 1) :
+    Summable fun m : ℕ => ‖poch (1 / 2) m / (m.factorial : ℂ) * (k ^ 2) ^ m * s ^ m‖ := by
+  have hr : ‖k‖ ^ 2 < 1 := pow_lt_one₀ (norm_nonneg _) hk (by decide)
+  refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun m => ?_)
+    (summable_geometric_of_lt_one (by positivity) hr)
+  rw [norm_mul, norm_mul, norm_pow, norm_pow, norm_pow]
+  calc _ ≤ 1 * (‖k‖ ^ 2) ^ m * 1 ^ m := by
+        gcongr
+        · exact norm_poch_half_div_factorial_le m
+      _ = (‖k‖ ^ 2) ^ m := by ring
+
+/-- Absolute convergence of the geometric series of `(1 - α² s)⁻¹` for `|s| ≤ 1`. -/
+private lemma summable_norm_geometric_mul {α2 : ℂ} (hα : ‖α2‖ < 1) {s : ℂ} (hs : ‖s‖ ≤ 1) :
+    Summable fun j : ℕ => ‖α2 ^ j * s ^ j‖ := by
+  refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun j => ?_)
+    (summable_geometric_of_lt_one (norm_nonneg _) hα)
+  rw [norm_mul, norm_pow, norm_pow]
+  calc _ ≤ ‖α2‖ ^ j * 1 ^ j := by gcongr
+    _ = _ := by ring
+
+/-- The coefficients `piSeriesCoeff` are absolutely summable. -/
+private lemma summable_norm_piSeriesCoeff {α2 k : ℂ} (hk : ‖k‖ < 1) (hα : ‖α2‖ < 1) :
+    Summable fun n => ‖piSeriesCoeff α2 k n‖ := by
+  have h := summable_norm_sum_mul_range_of_summable_norm
+    (summable_norm_binomial_half hk (s := 1) (by simp))
+    (summable_norm_geometric_mul hα (s := 1) (by simp))
+  simpa [piSeriesCoeff] using h
+
+/-- The Cauchy product of the two series of the integrand of `Π`. -/
+private lemma hasSum_piSeriesCoeff_mul {α2 k : ℂ} (hk : ‖k‖ < 1) (hα : ‖α2‖ < 1) {s : ℂ}
+    (hs : ‖s‖ ≤ 1) :
+    HasSum (fun n => piSeriesCoeff α2 k n * s ^ n)
+      ((1 - α2 * s)⁻¹ * (1 - k ^ 2 * s) ^ (-(1 / 2 : ℂ))) := by
+  have hks : ‖k ^ 2 * s‖ < 1 := by
+    rw [norm_mul, norm_pow]
+    calc ‖k‖ ^ 2 * ‖s‖ ≤ ‖k‖ ^ 2 * 1 := by gcongr
+      _ < 1 := by rw [mul_one]; exact pow_lt_one₀ (norm_nonneg _) hk (by decide)
+  have has : ‖α2 * s‖ < 1 := by
+    rw [norm_mul]
+    calc ‖α2‖ * ‖s‖ ≤ ‖α2‖ * 1 := by gcongr
+      _ < 1 := by rwa [mul_one]
+  have h1 := hasSum_poch_div_factorial (β := 1 / 2) hks
+  have h2 := hasSum_geometric_of_norm_lt_one has
+  have hf := summable_norm_binomial_half hk hs
+  have hg := summable_norm_geometric_mul hα hs
+  have hprod := tsum_mul_tsum_eq_tsum_sum_range_of_summable_norm hf hg
+  have hsum := (summable_norm_sum_mul_range_of_summable_norm hf hg).of_norm
+  have e1 : ∑' m : ℕ, poch (1 / 2) m / (m.factorial : ℂ) * (k ^ 2) ^ m * s ^ m =
+      (1 - k ^ 2 * s) ^ (-(1 / 2 : ℂ)) := by
+    rw [← h1.tsum_eq]; congr 1; funext m; rw [mul_pow]; ring
+  have e2 : ∑' j : ℕ, α2 ^ j * s ^ j = (1 - α2 * s)⁻¹ := by
+    rw [← h2.tsum_eq]; congr 1; funext j; rw [mul_pow]
+  rw [e1, e2] at hprod
+  rw [mul_comm, hprod]
+  convert hsum.hasSum using 1
+  funext n
+  rw [piSeriesCoeff, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun m hm => ?_
+  have hmn : m ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
+  rw [show s ^ n = s ^ m * s ^ (n - m) by rw [← pow_add, Nat.add_sub_cancel' hmn]]
+  ring
+
+
+/-- For `|α²| < 1` no principal value is needed in `Π(α², k)`. -/
+private lemma compEllIntPik_eq_integral_of_norm_lt_one {α2 : ℂ} (hα : ‖α2‖ < 1) (k : ℂ) :
+    compEllIntPik α2 k = ∫ θ in (0 : ℝ)..(π / 2), (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
+      (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
+  rw [compEllIntPik, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
+    incEllIntPik_eq_segmentIntegral (δ := 1 - ‖α2‖) (by linarith), segmentIntegral_ofReal]
+  · simp only [← Complex.ofReal_sin]
+  · intro t _
+    rw [← Complex.ofReal_mul, ← Complex.ofReal_sin]
+    have hs : ‖((Real.sin (t * (π / 2)) : ℂ)) ^ 2‖ ≤ 1 := by
+      rw [norm_pow, norm_real, Real.norm_eq_abs, sq_abs]; exact Real.sin_sq_le_one _
+    calc 1 - ‖α2‖ ≤ ‖(1 : ℂ)‖ - ‖α2 * (Real.sin (t * (π / 2)) : ℂ) ^ 2‖ := by
+          rw [norm_one, norm_mul]
+          nlinarith [norm_nonneg α2, norm_nonneg ((Real.sin (t * (π / 2)) : ℂ) ^ 2)]
+      _ ≤ _ := norm_sub_norm_le _ _
+
+/-- Termwise integration of the series of the integrand of `Π(α², k)`. -/
+private lemma hasSum_compEllIntPik_piSeriesCoeff {α2 k : ℂ} (hk : ‖k‖ < 1) (hα : ‖α2‖ < 1) :
+    HasSum (fun n => piSeriesCoeff α2 k n * ((π / 2 : ℂ) * (poch (1 / 2) n / (n.factorial : ℂ))))
+      (compEllIntPik α2 k) := by
+  rw [compEllIntPik_eq_integral_of_norm_lt_one hα]
+  have hs (θ : ℝ) : ‖(Real.sin θ : ℂ) ^ 2‖ ≤ 1 := by
+    rw [norm_pow, norm_real, Real.norm_eq_abs, sq_abs]; exact Real.sin_sq_le_one _
+  have h := intervalIntegral.hasSum_integral_of_dominated_convergence
+    (F := fun n θ => piSeriesCoeff α2 k n * (Real.sin θ : ℂ) ^ (2 * n))
+    (fun n _ => ‖piSeriesCoeff α2 k n‖) (μ := MeasureTheory.volume) (a := 0) (b := π / 2)
+    (f := fun θ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
+      (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)))
+    (fun n => (by fun_prop : Continuous fun θ : ℝ =>
+      piSeriesCoeff α2 k n * (Real.sin θ : ℂ) ^ (2 * n)).aestronglyMeasurable)
+    (fun n => Filter.Eventually.of_forall fun θ _ => by
+      rw [norm_mul, pow_mul]
+      calc _ ≤ ‖piSeriesCoeff α2 k n‖ * 1 := by
+            gcongr; rw [norm_pow]; exact pow_le_one₀ (norm_nonneg _) (hs θ)
+        _ = _ := mul_one _)
+    (Filter.Eventually.of_forall fun θ _ => summable_norm_piSeriesCoeff hk hα)
+    intervalIntegrable_const
+    (Filter.Eventually.of_forall fun θ _ => by
+      simpa only [pow_mul] using hasSum_piSeriesCoeff_mul hk hα (hs θ))
+  simpa only [intervalIntegral.integral_const_mul, integral_sin_pow_two_mul] using h
+
+
+/-- The terms of `F₁(1/2; 1/2, 1; 1; k², α²)`. -/
+private lemma appellF1Term_half_half_one_one (k α2 : ℂ) (p : ℕ × ℕ) :
+    appellF1Term (1 / 2) (1 / 2) 1 1 (k ^ 2) α2 p =
+      poch (1 / 2) (p.1 + p.2) / ((p.1 + p.2).factorial : ℂ) *
+        (poch (1 / 2) p.1 / (p.1.factorial : ℂ) * (k ^ 2) ^ p.1 * α2 ^ p.2) := by
+  rw [appellF1Term, poch_one_eq_factorial, poch_one_eq_factorial]
+  have h1 : ((p.1 + p.2).factorial : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos _).ne'
+  have h2 : (p.1.factorial : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos _).ne'
+  have h3 : (p.2.factorial : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos _).ne'
+  field_simp
+
+/-- Summing `F₁(1/2; 1/2, 1; 1; k², α²)` along antidiagonals. -/
+private lemma hasSum_appellF1Term_half_half_one_one {α2 k : ℂ} (hk : ‖k‖ < 1) (hα : ‖α2‖ < 1) :
+    HasSum (fun n => piSeriesCoeff α2 k n * (poch (1 / 2) n / (n.factorial : ℂ)))
+      (∑' p : ℕ × ℕ, appellF1Term (1 / 2) (1 / 2) 1 1 (k ^ 2) α2 p) := by
+  set G := fun p : ℕ × ℕ => appellF1Term (1 / 2) (1 / 2) 1 1 (k ^ 2) α2 p with hG
+  have hr : ‖k‖ ^ 2 < 1 := pow_lt_one₀ (norm_nonneg _) hk (by decide)
+  have hsum : Summable G := by
+    refine Summable.of_norm_bounded
+      ((summable_geometric_of_lt_one (by positivity) hr).mul_of_nonneg
+        (summable_geometric_of_lt_one (norm_nonneg _) hα) (fun _ => by positivity)
+        (fun _ => by positivity)) (fun p => ?_)
+    rw [hG]
+    dsimp only
+    rw [appellF1Term_half_half_one_one, norm_mul, norm_mul, norm_mul, norm_pow, norm_pow,
+      norm_pow]
+    calc _ ≤ 1 * (1 * (‖k‖ ^ 2) ^ p.1 * ‖α2‖ ^ p.2) := by
+          gcongr
+          · exact norm_poch_half_div_factorial_le _
+          · exact norm_poch_half_div_factorial_le _
+      _ = _ := by ring
+  have h1 := (Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd.hasSum_iff (f := G)).mpr
+    hsum.hasSum
+  have h2 := h1.sigma (fun n => Finset.hasSum (Finset.antidiagonal n) G)
+  convert h2 using 1
+  funext n
+  rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk, piSeriesCoeff, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun m hm => ?_
+  have hmn : m ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
+  rw [hG]
+  dsimp only
+  rw [appellF1Term_half_half_one_one, Nat.add_sub_cancel' hmn]
+  ring
+
+/-- DLMF 19.5.4: for `|k| < 1` and `|α| < 1` (here `|α²| < 1`),
 `Π(α², k) = (π/2) ∑ₙ (1/2)ₙ/n! ∑_{m ≤ n} (1/2)ₘ/m! k^{2m} α^{2n-2m}
 = (π/2) F₁(1/2; 1/2, 1; 1; k², α²)`. -/
 @[dlmf 19.5.E4]
@@ -190,7 +397,16 @@ theorem compEllIntPik_hasSum {α2 k : ℂ} (hk : ‖k‖ < 1) (hα : ‖α2‖ <
         (compEllIntPik α2 k) ∧
       compEllIntPik α2 k = (π / 2 : ℂ) * ∑' p : ℕ × ℕ,
           appellF1Term (1 / 2) (1 / 2) 1 1 (k ^ 2) α2 p := by
-  sorry
+  have h := hasSum_compEllIntPik_piSeriesCoeff hk hα
+  refine ⟨?_, ?_⟩
+  · convert h using 1
+    funext n
+    simp only [piSeriesCoeff, pow_mul]
+    ring
+  · refine h.unique ?_
+    convert (hasSum_appellF1Term_half_half_one_one hk hα).mul_left (π / 2 : ℂ) using 1
+    funext n
+    ring
 
 /-- **Admitted.** DLMF 19.5.4_1: for real `|φ| < π/2` and `|k| < 1`,
 `F(φ, k) = ∑ₘ (1/2)ₘ sin^{2m+1}φ/((2m+1) m!) ₂F₁(m + 1/2, 1/2; m + 3/2; sin²φ) k^{2m}

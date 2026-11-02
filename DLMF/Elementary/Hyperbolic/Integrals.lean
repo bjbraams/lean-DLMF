@@ -59,29 +59,32 @@ open scoped Real Topology
 
 namespace DLMF.Elementary
 
-/-- Identity under the stated parameter and domain assumptions: `DLMF.HasContinuedFraction (fun n
-=> if n=0 then z else z^2) (fun n => (2*n+1:ℂ)) (Complex.tanh z)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else z^2) (fun n => (2*n+1:ℂ)) (Complex.tanh
+z)`. -/
 @[dlmf 4.39.E1]
 theorem tanh_continued_fraction {z : ℂ} (hz : Complex.cosh z≠0) :
-    DLMF.HasContinuedFraction (fun n => if n=0 then z else z^2) (fun n => (2*n+1:ℂ))
+    DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else z^2) (fun n => (2*n+1:ℂ))
         (Complex.tanh z) :=
   hasContinuedFraction_tanh hz
 
-/-- Identity under the stated parameter and domain assumptions: `DLMF.HasContinuedFraction (fun n
-=> if n=0 then z else ((2*((n+1)/2)-1:ℕ):ℂ)*(2*((n+1)/2):ℂ)*z^2) (fun n => (2*n+1:ℂ)) (arcsinh
-z/Complex.sqrt (1+z^2))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else
+((2*((n+1)/2)-1:ℕ):ℂ)*(2*((n+1)/2):ℂ)*z^2) (fun n => (2*n+1:ℂ)) (arcsinh z/Complex.sqrt
+(1+z^2))`. -/
 @[dlmf 4.39.E2]
 theorem arcsinh_continued_fraction {z : ℂ} (hz : z∈arcsinhDomain) :
-    DLMF.HasContinuedFraction
+    DLMF.Core.HasContinuedFraction
       (fun n => if n=0 then z else ((2*((n+1)/2)-1:ℕ):ℂ)*(2*((n+1)/2):ℂ)*z^2)
       (fun n => (2*n+1:ℂ)) (arcsinh z/Complex.sqrt (1+z^2)) := by
   sorry
 
-/-- Identity under the stated parameter and domain assumptions: `DLMF.HasContinuedFraction (fun n
-=> if n=0 then z else -(n:ℂ)^2*z^2) (fun n => (2*n+1:ℂ)) (arctanh z)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else -(n:ℂ)^2*z^2) (fun n => (2*n+1:ℂ))
+(arctanh z)`. -/
 @[dlmf 4.39.E3]
 theorem arctanh_continued_fraction {z : ℂ} (hz : z∈arctanhDomain) :
-    DLMF.HasContinuedFraction (fun n => if n=0 then z else -(n:ℂ)^2*z^2)
+    DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else -(n:ℂ)^2*z^2)
       (fun n => (2*n+1:ℂ)) (arctanh z) := by
   sorry
 
@@ -591,7 +594,7 @@ theorem complex_antiderivative_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) :
       nlinarith [abs_lt.mp hi, sq_nonneg z.re]
   have hr : Complex.sqrt (1+z^2) ≠ 0 := by
     intro h
-    have hs := trig_sqrt_sq (1+z^2)
+    have hs := Trigonometric.complexSqrt_sq (1+z^2)
     rw [h, zero_pow two_ne_zero] at hs
     exact Complex.slitPlane_ne_zero hq hs.symm
   have hp : HasDerivAt (fun w : ℂ => 1+w^2) (2*z) z := by
@@ -599,7 +602,7 @@ theorem complex_antiderivative_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) :
   have dS := (Complex.hasDerivAt_sqrt hq).comp z hp
   have hv : (1+z^2)^(-1/2:ℂ) = (Complex.sqrt (1+z^2))⁻¹ := by
     rw [Complex.sqrt, show (-1/2:ℂ) = -(2⁻¹) by norm_num, Complex.cpow_neg]
-  have hd := ((hasDerivAt_id z).mul (hyper_hasDerivAt_arcsinh hz)).sub dS
+  have hd := ((hasDerivAt_id z).mul (Hyperbolic.hasDerivAt_arcsinh hz)).sub dS
   rw [hv] at hd
   convert hd using 1
   · funext w; simp [Function.comp_def]
@@ -625,8 +628,8 @@ theorem complex_antiderivative_arccosh {z : ℂ} (hz : z∈arccoshDomain) :
   have hd := ((hasDerivAt_id z).mul (hasDerivAt_arccosh_of_mem hz)).sub (dA.mul dB)
   convert hd using 1
   · rfl
-  have eA := trig_sqrt_sq (z-1)
-  have eB := trig_sqrt_sq (z+1)
+  have eA := Trigonometric.complexSqrt_sq (z-1)
+  have eB := Trigonometric.complexSqrt_sq (z+1)
   simp only [id_eq]
   generalize Complex.sqrt (z-1) = A at *
   generalize Complex.sqrt (z+1) = B at *
@@ -649,7 +652,7 @@ theorem complex_antiderivative_arctanh {z : ℂ} (hz : z∈arctanhDomain) :
   have hq0 : 1-z^2 ≠ 0 := Complex.slitPlane_ne_zero hq
   have dL := ((Complex.hasDerivAt_log hq).comp z
       (((hasDerivAt_id z).pow 2).const_sub 1)).div_const 2
-  have hd := ((hasDerivAt_id z).mul (hyper_hasDerivAt_arctanh hz)).add dL
+  have hd := ((hasDerivAt_id z).mul (Hyperbolic.hasDerivAt_arctanh hz)).add dL
   convert hd using 1
   · funext w; simp [Function.comp_def]
   · simp only [id_eq, Pi.pow_apply]
@@ -796,7 +799,7 @@ theorem exists_hyperbolic_logarithms :
 private lemma sqrt_one_sub_sq_add_I_mul_mem_slitPlane (z : ℂ) :
     Complex.sqrt (1-z^2)+I*z ∈ Complex.slitPlane := by
   set q := Complex.sqrt (1-z^2) with hq
-  have hq2 : q^2 = 1-z^2 := trig_sqrt_sq _
+  have hq2 : q^2 = 1-z^2 := Trigonometric.complexSqrt_sq _
   have hqre : 0 ≤ q.re := by
     rw [hq, Complex.sqrt, Complex.cpow_inv_two_re]; exact Real.sqrt_nonneg _
   rw [Complex.mem_slitPlane_iff]
@@ -829,10 +832,10 @@ theorem complex_antiderivatives_reciprocal_inverse {z : ℂ}
   have hzs : z ∈ arcsinhDomain := Or.inl hre.ne'
   constructor
   · have hd := ((hasDerivAt_id z).mul (hasDerivAt_arccsch_signed hs hre.ne')).add
-      (hyper_hasDerivAt_arcsinh hzs)
+      (Hyperbolic.hasDerivAt_arcsinh hzs)
     have hq : Complex.sqrt (1+z^2) ≠ 0 := by
       intro h
-      have hsq := trig_sqrt_sq (1+z^2)
+      have hsq := Trigonometric.complexSqrt_sq (1+z^2)
       rw [h, zero_pow two_ne_zero] at hsq
       have hzs' := hzs
       rcases hzs' with h1 | h1
@@ -862,7 +865,7 @@ theorem complex_antiderivatives_reciprocal_inverse {z : ℂ}
     set q := Complex.sqrt (1-z^2) with hqdef
     have hq0 : q ≠ 0 := by
       intro h
-      have hs2 := trig_sqrt_sq (1-z^2)
+      have hs2 := Trigonometric.complexSqrt_sq (1-z^2)
       rw [← hqdef, h, zero_pow two_ne_zero] at hs2
       exact Complex.slitPlane_ne_zero hsl hs2.symm
     have hp : HasDerivAt (fun w : ℂ => 1-w^2) (-(2*z)) z := by

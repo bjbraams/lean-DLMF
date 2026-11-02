@@ -32,12 +32,16 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Confluent.IncompleteGammaAsymptotics
+
 namespace DLMF.Confluent
 
 open DLMF.Statistical
 
+namespace IncompleteGammaAsymptotics
+
 /-- The identity 8.11.14 with `S_n` unfolded. -/
-theorem igAsy_exp_identity (n : ℕ) (x : ℝ) :
+theorem exp_identity (n : ℕ) (x : ℝ) :
     exp (n*x : ℂ)=Elementary.expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*
       (lowerIncGamma (n+1) (n*x)/((n*x : ℂ)^n*exp (-n*x : ℂ))) := by
   rw [show (-n*x : ℂ) = -(n*x : ℂ) by ring]
@@ -59,11 +63,12 @@ theorem igAsy_exp_identity (n : ℕ) (x : ℝ) :
     ring
 
 /-- `q(u) = -(log(1-u)+u)/u²`, extended by `1/2` at `0`. -/
-noncomputable def igAsy_q (u : ℝ) : ℝ := if u = 0 then 1/2 else -(Real.log (1-u) + u)/u^2
+noncomputable def logQuotient (u : ℝ) : ℝ := if u = 0 then 1/2 else -(Real.log (1-u) + u)/u^2
 
 /-- `|q(u) - 1/2| ≤ 2u` on `[0, 1/8]`. -/
-theorem igAsy_q_sub_half {u : ℝ} (hu0 : 0 ≤ u) (hu : u ≤ 1/8) : |igAsy_q u - 1/2| ≤ 2*u := by
-  unfold igAsy_q
+theorem logQuotient_sub_half {u : ℝ} (hu0 : 0 ≤ u) (hu : u ≤ 1/8) : |logQuotient u -
+    1/2| ≤ 2*u := by
+  unfold logQuotient
   split_ifs with h
   · simp [h]
   have hu' : 0 < u := lt_of_le_of_ne hu0 (Ne.symm h)
@@ -79,12 +84,12 @@ theorem igAsy_q_sub_half {u : ℝ} (hu0 : 0 ≤ u) (hu : u ≤ 1/8) : |igAsy_q u
   nlinarith
 
 /-- The even integrand `(1-|t|)^k e^{k|t|}`. -/
-noncomputable def igAsy_E (k : ℕ) (t : ℝ) : ℝ := (1-|t|)^k * Real.exp (k*|t|)
+noncomputable def evenIntegrand (k : ℕ) (t : ℝ) : ℝ := (1-|t|)^k * Real.exp (k*|t|)
 
 /-- The Gaussian form `e^{-k t² q(|t|)} = (1-|t|)^k e^{k|t|}`. -/
-theorem igAsy_exp_q_eq (k : ℕ) {t : ℝ} (ht : |t| < 1) :
-    exp (-((k:ℝ):ℂ) * (t:ℂ)^2 * ((igAsy_q |t| : ℝ) : ℂ)) = (igAsy_E k t : ℂ) := by
-  unfold igAsy_E igAsy_q
+theorem exp_logQuotient_eq (k : ℕ) {t : ℝ} (ht : |t| < 1) :
+    exp (-((k:ℝ):ℂ) * (t:ℂ)^2 * ((logQuotient |t| : ℝ) : ℂ)) = (evenIntegrand k t : ℂ) := by
+  unfold evenIntegrand logQuotient
   split_ifs with h
   · have : t = 0 := abs_eq_zero.mp h
     subst this; simp
@@ -101,29 +106,30 @@ theorem igAsy_exp_q_eq (k : ℕ) {t : ℝ} (ht : |t| < 1) :
     rw [Real.exp_add, Real.exp_nat_mul, Real.exp_log hpos]
 
 /-- Laplace's method at the endpoint maximum: `√k ∫_{-1/8}^{1/8} E_k → √(2π)`. -/
-theorem igAsy_tendsto_sqrt_mul_integral_E :
-    Tendsto (fun k : ℕ => Real.sqrt k * ∫ t in Icc (-(1/8:ℝ)) (1/8), igAsy_E k t) atTop
+theorem tendsto_sqrt_mul_integral_evenIntegrand :
+    Tendsto (fun k : ℕ => Real.sqrt k * ∫ t in Icc (-(1/8:ℝ)) (1/8), evenIntegrand k t) atTop
       (𝓝 (Real.sqrt (2*π))) := by
-  have hqm : Measurable igAsy_q := by
-    unfold igAsy_q
+  have hqm : Measurable logQuotient := by
+    unfold logQuotient
     exact Measurable.ite (measurableSet_singleton 0) measurable_const (by fun_prop)
   have H := (Complex.tendstoUniformlyOn_sqrt_mul_integral_laplace_Icc (S := (univ : Set Unit))
-    (A := fun _ _ => (1:ℂ)) (q := fun _ t => ((igAsy_q |t| : ℝ) : ℂ)) (c := 1/4) (L := 0) (M := 1)
+    (A := fun _ _ => (1:ℂ)) (q := fun _ t => ((logQuotient |t| : ℝ) : ℂ)) (c := 1/4)
+        (L := 0) (M := 1)
     (B := 2) (δ := 1/8) (by norm_num) (by norm_num) (fun _ _ => measurable_const)
     (fun _ _ => (Complex.measurable_ofReal.comp (hqm.comp continuous_abs.measurable)))
     (fun _ _ t ht => ?_) (fun _ _ => by simp) (fun _ _ t _ => by simp)
     (fun _ _ t ht => ?_)).tendsto_at (mem_univ ())
   rotate_left
-  · have h := igAsy_q_sub_half (abs_nonneg t) (abs_le.mpr ⟨by linarith [ht.1], ht.2⟩)
+  · have h := logQuotient_sub_half (abs_nonneg t) (abs_le.mpr ⟨by linarith [ht.1], ht.2⟩)
     simp only [ofReal_re]
     have := (abs_le.mp h).1
     have : |t| ≤ 1/8 := abs_le.mpr ⟨by linarith [ht.1], ht.2⟩
     linarith
-  · have h := igAsy_q_sub_half (abs_nonneg t) (abs_le.mpr ⟨by linarith [ht.1], ht.2⟩)
-    rw [abs_zero, show igAsy_q 0 = 1/2 by simp [igAsy_q], ← ofReal_sub, Complex.norm_real,
+  · have h := logQuotient_sub_half (abs_nonneg t) (abs_le.mpr ⟨by linarith [ht.1], ht.2⟩)
+    rw [abs_zero, show logQuotient 0 = 1/2 by simp [logQuotient], ← ofReal_sub, Complex.norm_real,
       Real.norm_eq_abs]
     exact h
-  have hq0 : igAsy_q |0| = 1/2 := by simp [igAsy_q]
+  have hq0 : logQuotient |0| = 1/2 := by simp [logQuotient]
   simp only [hq0, one_mul] at H
   have hC : ((Real.pi : ℂ) / ((1/2 : ℝ) : ℂ)) ^ (1/2 : ℂ) = (Real.sqrt (2*π) : ℂ) := by
     rw [show ((Real.pi : ℂ) / ((1/2 : ℝ) : ℂ)) = ((2*π : ℝ) : ℂ) by push_cast; ring,
@@ -131,16 +137,16 @@ theorem igAsy_tendsto_sqrt_mul_integral_E :
       Real.sqrt_eq_rpow]
   rw [hC] at H
   have H2 := H.comp tendsto_natCast_atTop_atTop
-  have hE : ∀ k : ℕ, ((Real.sqrt k * ∫ t in Icc (-(1/8:ℝ)) (1/8), igAsy_E k t : ℝ) : ℂ) =
+  have hE : ∀ k : ℕ, ((Real.sqrt k * ∫ t in Icc (-(1/8:ℝ)) (1/8), evenIntegrand k t : ℝ) : ℂ) =
       (Real.sqrt k : ℂ) * ∫ t in Icc (-(1/8:ℝ)) (1/8),
-        exp (-((k:ℝ):ℂ) * (t:ℂ)^2 * ((igAsy_q |t| : ℝ) : ℂ)) := by
+        exp (-((k:ℝ):ℂ) * (t:ℂ)^2 * ((logQuotient |t| : ℝ) : ℂ)) := by
     intro k
     rw [ofReal_mul, ← integral_complex_ofReal]
     congr 1
     refine setIntegral_congr_fun measurableSet_Icc fun t ht => ?_
-    rw [igAsy_exp_q_eq k (by rw [abs_lt]; constructor <;> linarith [ht.1, ht.2])]
+    rw [exp_logQuotient_eq k (by rw [abs_lt]; constructor <;> linarith [ht.1, ht.2])]
   have H3 : Tendsto (fun k : ℕ =>
-      ((Real.sqrt k * ∫ t in Icc (-(1/8:ℝ)) (1/8), igAsy_E k t : ℝ) : ℂ))
+      ((Real.sqrt k * ∫ t in Icc (-(1/8:ℝ)) (1/8), evenIntegrand k t : ℝ) : ℂ))
       atTop (𝓝 (Real.sqrt (2*π) : ℂ)) := by
     simp only [hE]; exact H2
   have H4 := (Complex.continuous_re.tendsto _).comp H3
@@ -148,33 +154,36 @@ theorem igAsy_tendsto_sqrt_mul_integral_E :
   exact H4
 
 /-- Folding the even integrand: `∫_{-1/8}^{1/8} E_{m+1} = 2 ∫_{7/8}^1 s^{m+1} e^{(m+1)(1-s)} ds`. -/
-theorem igAsy_integral_E_eq (m : ℕ) :
-    ∫ t in Icc (-(1/8:ℝ)) (1/8), igAsy_E (m+1) t = 2 * ∫ s in (7/8:ℝ)..1, igAsy_F m 1 s := by
-  have hc : Continuous (igAsy_E (m+1)) := by unfold igAsy_E; fun_prop
+theorem integral_evenIntegrand_eq (m : ℕ) :
+    ∫ t in Icc (-(1/8:ℝ)) (1/8), evenIntegrand (m+1) t = 2 * ∫ s in (7/8:ℝ)..1,
+        laplaceIntegrand m 1 s := by
+  have hc : Continuous (evenIntegrand (m+1)) := by unfold evenIntegrand; fun_prop
   rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le (by norm_num),
     ← intervalIntegral.integral_add_adjacent_intervals (b := 0) (hc.intervalIntegrable _ _)
       (hc.intervalIntegrable _ _)]
-  have h1 : ∫ t in (-(1/8:ℝ))..0, igAsy_E (m+1) t = ∫ t in (0:ℝ)..(1/8), igAsy_E (m+1) t := by
-    have := intervalIntegral.integral_comp_neg (a := 0) (b := 1/8) (igAsy_E (m+1))
+  have h1 : ∫ t in (-(1/8:ℝ))..0, evenIntegrand (m+1) t = ∫ t in (0:ℝ)..(1/8),
+      evenIntegrand (m+1) t := by
+    have := intervalIntegral.integral_comp_neg (a := 0) (b := 1/8) (evenIntegrand (m+1))
     rw [neg_zero] at this
     rw [← this]
-    congr 1; funext t; simp [igAsy_E]
-  have h2 : ∫ t in (0:ℝ)..(1/8), igAsy_E (m+1) t = ∫ s in (7/8:ℝ)..1, igAsy_F m 1 s := by
-    have := intervalIntegral.integral_comp_sub_left (a := 0) (b := 1/8) (igAsy_F m 1) 1
+    congr 1; funext t; simp [evenIntegrand]
+  have h2 : ∫ t in (0:ℝ)..(1/8), evenIntegrand (m+1) t = ∫ s in (7/8:ℝ)..1,
+      laplaceIntegrand m 1 s := by
+    have := intervalIntegral.integral_comp_sub_left (a := 0) (b := 1/8) (laplaceIntegrand m 1) 1
     rw [show (1:ℝ) - 1/8 = 7/8 by norm_num, sub_zero] at this
     rw [← this]
     refine intervalIntegral.integral_congr fun t ht => ?_
     rw [uIcc_of_le (by norm_num)] at ht
-    simp only [igAsy_E, igAsy_F, abs_of_nonneg ht.1]
+    simp only [evenIntegrand, laplaceIntegrand, abs_of_nonneg ht.1]
     push_cast
     ring_nf
   rw [h1, h2]; ring
 
 /-- `s^n e^{n(1-s)} ≤ e^{-n(1-s)²/2}` on `[0,1]`. -/
-theorem igAsy_F_one_le (m : ℕ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
-    igAsy_F m 1 s ≤ Real.exp (-((m+1)*(1-s)^2/2)) := by
+theorem laplaceIntegrand_one_le (m : ℕ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
+    laplaceIntegrand m 1 s ≤ Real.exp (-((m+1)*(1-s)^2/2)) := by
   rcases hs0.eq_or_lt with h | h
-  · subst h; simp [igAsy_F]; positivity
+  · subst h; simp [laplaceIntegrand]; positivity
   have hu : |1-s| < 1 := by rw [abs_lt]; constructor <;> linarith
   have hS := Real.hasSum_pow_div_log_of_abs_lt_one hu
   have hle := sum_le_hasSum (Finset.range 2) (fun i _ => by
@@ -182,28 +191,30 @@ theorem igAsy_F_one_le (m : ℕ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
     positivity) hS
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, sub_sub_cancel] at hle
   norm_num at hle
-  unfold igAsy_F
+  unfold laplaceIntegrand
   rw [← Real.exp_log (pow_pos h (m+1)), ← Real.exp_add, Real.exp_le_exp, Real.log_pow]
   push_cast
   nlinarith [show (0:ℝ) ≤ (m:ℝ)+1 by positivity]
 
 /-- The tail `√n ∫₀^{7/8} s^n e^{n(1-s)} ds → 0`. -/
-theorem igAsy_tendsto_tail :
-    Tendsto (fun m : ℕ => Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s)
+theorem tendsto_tail :
+    Tendsto (fun m : ℕ => Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..(7/8), laplaceIntegrand m 1 s)
         atTop (𝓝 0) := by
-  have hb : ∀ m : ℕ, ∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s ≤ 7/8 * Real.exp (-(((m:ℝ)+1)/128)) := by
+  have hb : ∀ m : ℕ, ∫ s in (0:ℝ)..(7/8), laplaceIntegrand m 1 s ≤ 7/8 *
+      Real.exp (-(((m:ℝ)+1)/128)) := by
     intro m
     have := intervalIntegral.integral_mono_on (g := fun _ => Real.exp (-(((m:ℝ)+1)/128)))
       (by norm_num : (0:ℝ) ≤ 7/8)
-      ((by unfold igAsy_F; fun_prop : Continuous (igAsy_F m 1)).intervalIntegrable _ _)
+      ((by unfold laplaceIntegrand;
+           fun_prop : Continuous (laplaceIntegrand m 1)).intervalIntegrable _ _)
       (continuous_const.intervalIntegrable (μ := volume) _ _) (fun s hs => by
-        refine (igAsy_F_one_le m hs.1 (by linarith [hs.2])).trans ?_
+        refine (laplaceIntegrand_one_le m hs.1 (by linarith [hs.2])).trans ?_
         rw [Real.exp_le_exp]
         have : 1/64 ≤ (1-s)^2 := by nlinarith [hs.2]
         nlinarith [show (0:ℝ) ≤ (m:ℝ)+1 by positivity])
     simpa using this
-  have hnn : ∀ m : ℕ, 0 ≤ ∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s := fun m =>
-    intervalIntegral.integral_nonneg (by norm_num) fun s hs => igAsy_F_nonneg m 1 hs.1
+  have hnn : ∀ m : ℕ, 0 ≤ ∫ s in (0:ℝ)..(7/8), laplaceIntegrand m 1 s := fun m =>
+    intervalIntegral.integral_nonneg (by norm_num) fun s hs => laplaceIntegrand_nonneg m 1 hs.1
   have hlim : Tendsto (fun m : ℕ => 7/8 * 128 * ((((m:ℝ)+1)/128)^1 * Real.exp (-(((m:ℝ)+1)/128))))
       atTop (𝓝 0) := by
     have h1 : Tendsto (fun m : ℕ => ((m:ℝ)+1)/128) atTop atTop :=
@@ -214,37 +225,37 @@ theorem igAsy_tendsto_tail :
   have hm : (1:ℝ) ≤ (m:ℝ)+1 := by simp
   have hs : Real.sqrt ((m:ℝ)+1) ≤ (m:ℝ)+1 := by
     rw [Real.sqrt_le_left (by positivity)]; nlinarith
-  calc Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s
+  calc Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..(7/8), laplaceIntegrand m 1 s
       ≤ ((m:ℝ)+1) * (7/8 * Real.exp (-(((m:ℝ)+1)/128))) :=
         mul_le_mul hs (hb m) (hnn m) (by positivity)
     _ = 7/8 * 128 * ((((m:ℝ)+1)/128)^1 * Real.exp (-(((m:ℝ)+1)/128))) := by ring
 
 /-- `√n ∫₀¹ s^n e^{n(1-s)} ds → √(π/2)`, written as `√(2π)/2`. -/
-theorem igAsy_tendsto_sqrt_J :
-    Tendsto (fun m : ℕ => Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..1, igAsy_F m 1 s) atTop
+theorem tendsto_sqrt_J :
+    Tendsto (fun m : ℕ => Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..1, laplaceIntegrand m 1 s) atTop
       (𝓝 (Real.sqrt (2*π)/2)) := by
-  have hE := (igAsy_tendsto_sqrt_mul_integral_E.comp (tendsto_add_atTop_nat 1)).div_const 2
-  have hc : Continuous (igAsy_F 0 1) := by unfold igAsy_F; fun_prop
-  have H := igAsy_tendsto_tail.add hE
+  have hE := (tendsto_sqrt_mul_integral_evenIntegrand.comp (tendsto_add_atTop_nat 1)).div_const 2
+  have hc : Continuous (laplaceIntegrand 0 1) := by unfold laplaceIntegrand; fun_prop
+  have H := tendsto_tail.add hE
   rw [zero_add] at H
   refine H.congr fun m => ?_
-  have hcF : Continuous (igAsy_F m 1) := by unfold igAsy_F; fun_prop
-  have hsplit : ∫ s in (0:ℝ)..1, igAsy_F m 1 s =
-      (∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s) + ∫ s in (7/8:ℝ)..1, igAsy_F m 1 s :=
+  have hcF : Continuous (laplaceIntegrand m 1) := by unfold laplaceIntegrand; fun_prop
+  have hsplit : ∫ s in (0:ℝ)..1, laplaceIntegrand m 1 s =
+      (∫ s in (0:ℝ)..(7/8), laplaceIntegrand m 1 s) + ∫ s in (7/8:ℝ)..1, laplaceIntegrand m 1 s :=
     (intervalIntegral.integral_add_adjacent_intervals (hcF.intervalIntegrable _ _)
       (hcF.intervalIntegrable _ _)).symm
-  simp only [Function.comp_apply, igAsy_integral_E_eq]
+  simp only [Function.comp_apply, integral_evenIntegrand_eq]
   rw [hsplit]
   push_cast
   ring
 
 /-- `e_n(nx)/e^{nx} = 1 - (nx)^n/n! · S_n(x)/e^{nx}` with the integral form of `S_n`. -/
-theorem igAsy_ratio_eq (m : ℕ) (x : ℝ) :
+theorem ratio_eq (m : ℕ) (x : ℝ) :
     Elementary.expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x) =
-      ((1 - ((m+1)*x)^(m+1)/((m+1).factorial) * ((m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s) /
+      ((1 - ((m+1)*x)^(m+1)/((m+1).factorial) * ((m+1)*x*∫ s in (0:ℝ)..1, laplaceIntegrand m x s) /
         Real.exp ((m+1)*x) : ℝ) : ℂ) := by
-  have hI := igAsy_exp_identity (m+1) x
-  rw [igAsy_lowerIncGamma_ratio_eq] at hI
+  have hI := exp_identity (m+1) x
+  rw [lowerIncGamma_ratio_eq] at hI
   have he : exp (((m+1:ℕ):ℂ)*x) ≠ 0 := Complex.exp_ne_zero _
   rw [div_eq_iff he]
   push_cast at hI ⊢
@@ -253,14 +264,14 @@ theorem igAsy_ratio_eq (m : ℕ) (x : ℝ) :
   linear_combination -hI
 
 /-- `x e^{1-x} < 1` for `x ≠ 1`. -/
-theorem igAsy_mul_exp_lt_one {x : ℝ} (hx1 : x ≠ 1) : x * Real.exp (1-x) < 1 := by
+theorem mul_exp_lt_one {x : ℝ} (hx1 : x ≠ 1) : x * Real.exp (1-x) < 1 := by
   have h := Real.add_one_lt_exp (sub_ne_zero.mpr hx1)
   have he : Real.exp (x-1) * Real.exp (1-x) = 1 := by rw [← Real.exp_add]; simp
   have hp := Real.exp_pos (1-x)
   nlinarith
 
 /-- `(nx)^n/(n! e^{nx}) ≤ (x e^{1-x})^n` for `x ≥ 0`. -/
-theorem igAsy_pow_div_factorial_le (n : ℕ) {x : ℝ} (hx0 : 0 ≤ x) :
+theorem pow_div_factorial_le (n : ℕ) {x : ℝ} (hx0 : 0 ≤ x) :
     ((n:ℝ)*x)^n/n.factorial/Real.exp (n*x) ≤ (x*Real.exp (1-x))^n := by
   have h := Real.pow_div_factorial_le_exp (n:ℝ) (n.cast_nonneg) n
   rw [div_le_iff₀ (Real.exp_pos _), mul_pow, mul_pow, ← Real.exp_nat_mul]
@@ -270,13 +281,13 @@ theorem igAsy_pow_div_factorial_le (n : ℕ) {x : ℝ} (hx0 : 0 ≤ x) :
     _ = x^n * Real.exp (n*(1-x)) * Real.exp (n*x) := by rw [mul_assoc, he]
 
 /-- 8.11.13 for `0 ≤ x < 1`. -/
-theorem igAsy_poisson_lt {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
+theorem poisson_lt {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
     Tendsto (fun m : ℕ => ((m+1)*x)^(m+1)/((m+1).factorial) *
-        ((m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s) /
+        ((m+1)*x*∫ s in (0:ℝ)..1, laplaceIntegrand m x s) /
         Real.exp ((m+1)*x)) atTop (𝓝 0) := by
   set r := x*Real.exp (1-x)
   have hr0 : 0 ≤ r := by positivity
-  have hr1 : r < 1 := igAsy_mul_exp_lt_one hx1.ne
+  have hr1 : r < 1 := mul_exp_lt_one hx1.ne
   have hlim : Tendsto (fun m : ℕ => r^(m+1) * (x/(1-x))) atTop (𝓝 0) := by
     have := ((tendsto_pow_atTop_nhds_zero_of_lt_one hr0 hr1).comp
         (tendsto_add_atTop_nat 1)).mul_const
@@ -284,29 +295,29 @@ theorem igAsy_poisson_lt {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
     simpa [Function.comp_def] using this
   refine squeeze_zero (fun m => ?_) (fun m => ?_) hlim
   · have := intervalIntegral.integral_nonneg (μ := volume) (zero_le_one' ℝ) fun s hs =>
-        igAsy_F_nonneg m x hs.1
+        laplaceIntegrand_nonneg m x hs.1
     positivity
-  · have hJ := igAsy_integral_F_le m hx1
+  · have hJ := integral_laplaceIntegrand_le m hx1
     have hJ0 := intervalIntegral.integral_nonneg (μ := volume) (zero_le_one' ℝ) fun s hs =>
-        igAsy_F_nonneg m x hs.1
-    have hP := igAsy_pow_div_factorial_le (m+1) hx0
+        laplaceIntegrand_nonneg m x hs.1
+    have hP := pow_div_factorial_le (m+1) hx0
     push_cast at hP
-    have h1 : (m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s ≤ x/(1-x) := by
+    have h1 : (m+1)*x*∫ s in (0:ℝ)..1, laplaceIntegrand m x s ≤ x/(1-x) := by
       have hm : (0:ℝ) < m+1 := by positivity
       have hx' : 0 < 1-x := by linarith
-      calc (m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s ≤ (m+1)*x*(1/((m+1)*(1-x))) := by gcongr
+      calc (m+1)*x*∫ s in (0:ℝ)..1, laplaceIntegrand m x s ≤ (m+1)*x*(1/((m+1)*(1-x))) := by gcongr
         _ = x/(1-x) := by field_simp
     rw [mul_div_right_comm]
     exact mul_le_mul hP h1 (by positivity) (by positivity)
 
 /-- 8.11.13 at `x = 1`. -/
-theorem igAsy_poisson_one :
+theorem poisson_one :
     Tendsto (fun m : ℕ => ((m+1)*1)^(m+1)/((m+1).factorial) *
-        ((m+1)*1*∫ s in (0:ℝ)..1, igAsy_F m 1 s) /
+        ((m+1)*1*∫ s in (0:ℝ)..1, laplaceIntegrand m 1 s) /
         Real.exp ((m+1)*1)) atTop (𝓝 (1/2)) := by
   have hst := (Stirling.tendsto_stirlingSeq_sqrt_pi.comp (tendsto_add_atTop_nat 1)).inv₀
     (by positivity : Real.sqrt π ≠ 0)
-  have H := (hst.mul igAsy_tendsto_sqrt_J).div_const (Real.sqrt 2)
+  have H := (hst.mul tendsto_sqrt_J).div_const (Real.sqrt 2)
   have hval : (Real.sqrt π)⁻¹ * (Real.sqrt (2*π)/2) / Real.sqrt 2 = 1/2 := by
     rw [Real.sqrt_mul (by norm_num)]
     have : Real.sqrt π ≠ 0 := by positivity
@@ -327,7 +338,7 @@ theorem igAsy_poisson_one :
   rw [Real.sq_sqrt hm.le]
 
 /-- Exponential-series terms increase up to index `n` when `n ≤ y`. -/
-theorem igAsy_term_le {k : ℕ} {y : ℝ} : ∀ n, k ≤ n → (n:ℝ) ≤ y →
+theorem term_le {k : ℕ} {y : ℝ} : ∀ n, k ≤ n → (n:ℝ) ≤ y →
     y^k/k.factorial ≤ y^n/n.factorial := by
   intro n hkn
   induction n, hkn using Nat.le_induction with
@@ -346,13 +357,13 @@ theorem igAsy_term_le {k : ℕ} {y : ℝ} : ∀ n, k ≤ n → (n:ℝ) ≤ y →
     nlinarith
 
 /-- 8.11.13 for `x > 1`. -/
-theorem igAsy_poisson_gt {x : ℝ} (hx : 1 < x) :
+theorem poisson_gt {x : ℝ} (hx : 1 < x) :
     Tendsto (fun m : ℕ => Elementary.expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x))
         atTop (𝓝 0) := by
   set r := x*Real.exp (1-x)
   have hr0 : 0 ≤ r := by have : 0 ≤ x := by linarith
                          positivity
-  have hr1 : r < 1 := igAsy_mul_exp_lt_one hx.ne'
+  have hr1 : r < 1 := mul_exp_lt_one hx.ne'
   have heq : ∀ m : ℕ, Elementary.expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x) =
       (((∑ k ∈ Finset.range (m+1+1), ((m+1:ℕ)*x)^k/k.factorial)/Real.exp ((m+1:ℕ)*x) : ℝ) : ℂ) := by
     intro m; simp only [Elementary.expPartialSum]; push_cast; rfl
@@ -369,15 +380,17 @@ theorem igAsy_poisson_gt {x : ℝ} (hx : 1 < x) :
   have hsum : ∑ k ∈ Finset.range (n+1), ((n:ℝ)*x)^k/k.factorial ≤ (n+1) *
       (((n:ℝ)*x)^n/n.factorial) := by
     have := Finset.sum_le_card_nsmul (Finset.range (n+1)) (fun k => ((n:ℝ)*x)^k/k.factorial)
-      (((n:ℝ)*x)^n/n.factorial) (fun k hk => igAsy_term_le n
+      (((n:ℝ)*x)^n/n.factorial) (fun k hk => term_le n
         (Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)) hy)
     simpa using this
-  have hP := igAsy_pow_div_factorial_le n (by linarith : 0 ≤ x)
+  have hP := pow_div_factorial_le n (by linarith : 0 ≤ x)
   calc (∑ k ∈ Finset.range (n+1), ((n:ℝ)*x)^k/k.factorial)/Real.exp (n*x)
       ≤ (n+1) * (((n:ℝ)*x)^n/n.factorial) / Real.exp (n*x) := by gcongr
     _ = (n+1) * (((n:ℝ)*x)^n/n.factorial/Real.exp (n*x)) := by ring
     _ ≤ (n+1) * r^n := by gcongr
     _ = (n:ℝ)*r^n + r^n := by ring
+
+end IncompleteGammaAsymptotics
 
 /-- The map `(fun n : ℕ => Elementary.expPartialSum n (n*x)/exp (n*x : ℂ))` tends to
 `(𝓝 (if 1 < x then 0 else if x=1 then 1/2 else 1))` along `atTop`. -/
@@ -387,11 +400,11 @@ theorem expPartialSum_poisson_limit {x : ℝ} (hx : 0 ≤ x) :
         (𝓝 (if 1 < x then 0 else if x=1 then 1/2 else 1)) := by
   rw [← tendsto_add_atTop_iff_nat 1]
   split_ifs with h1 h2
-  · exact igAsy_poisson_gt h1
+  · exact poisson_gt h1
   · subst h2
-    simp only [igAsy_ratio_eq]
+    simp only [ratio_eq]
     have := (continuous_ofReal.tendsto _).comp
-        (tendsto_const_nhds (x := (1:ℝ)) |>.sub igAsy_poisson_one)
+        (tendsto_const_nhds (x := (1:ℝ)) |>.sub poisson_one)
     rw [show (1/2:ℂ) = ((1 - 1/2 : ℝ) : ℂ) by push_cast; norm_num]
     exact this
   · have hx1 : x < 1 := by
@@ -399,9 +412,9 @@ theorem expPartialSum_poisson_limit {x : ℝ} (hx : 0 ≤ x) :
       · exact h
       · exact absurd h h2
       · exact absurd h h1
-    simp only [igAsy_ratio_eq]
+    simp only [ratio_eq]
     have := (continuous_ofReal.tendsto _).comp
-        (tendsto_const_nhds (x := (1:ℝ)) |>.sub (igAsy_poisson_lt hx hx1))
+        (tendsto_const_nhds (x := (1:ℝ)) |>.sub (poisson_lt hx hx1))
     rw [show (1:ℂ) = ((1 - 0 : ℝ) : ℂ) by push_cast; norm_num]
     exact this
 
@@ -418,61 +431,64 @@ theorem expPartialSumRemainderS_identity (n : ℕ) (x : ℝ) :
     exp (n*x : ℂ)=Elementary.expPartialSum n
         (n*x)+(n*x : ℂ)^n/n.factorial*expPartialSumRemainderS n x := by
   rw [expPartialSumRemainderS]
-  exact igAsy_exp_identity n x
+  exact exp_identity n x
+
+namespace IncompleteGammaAsymptotics
 
 /-- `S_n(x) = n x ∫₀¹ s^n e^{n x (1-s)} ds`. -/
-theorem igAsy_S_eq (m : ℕ) (x : ℝ) :
-    expPartialSumRemainderS (m+1) x = (((m+1)*x * ∫ s in (0:ℝ)..1, igAsy_F m x s : ℝ) : ℂ) := by
+theorem S_eq (m : ℕ) (x : ℝ) :
+    expPartialSumRemainderS (m+1) x =
+        (((m+1)*x * ∫ s in (0:ℝ)..1, laplaceIntegrand m x s : ℝ) : ℂ) := by
   unfold expPartialSumRemainderS
-  exact igAsy_lowerIncGamma_ratio_eq m x
+  exact lowerIncGamma_ratio_eq m x
 
 /-- The real coefficients `d_k(x) = (-1)^k x h_k(x)/(1-x)` of 8.11.18. -/
-noncomputable def igAsy_d (k : ℕ) (x : ℝ) : ℝ := (-1)^k * (x * igAsy_h k x/(1-x))
+noncomputable def remainderCoeff (k : ℕ) (x : ℝ) : ℝ := (-1)^k * (x * ibpRational k x/(1-x))
 
 /-- The exact remainder of 8.11.18. -/
-theorem igAsy_S_remainder (m N : ℕ) {x : ℝ} (hx : x < 1) :
-    expPartialSumRemainderS (m+1) x - ∑ k ∈ Finset.range N, (igAsy_d k x : ℂ)/((m:ℂ)+1)^k =
-      (((m+1)*x*((-1)^N/((m:ℝ)+1)^N * ∫ s in (0:ℝ)..1, igAsy_F m x s *
-          igAsy_h N (x*s)) : ℝ) : ℂ) := by
-  rw [igAsy_S_eq, igAsy_iter m hx N]
+theorem S_remainder (m N : ℕ) {x : ℝ} (hx : x < 1) :
+    expPartialSumRemainderS (m+1) x - ∑ k ∈ Finset.range N, (remainderCoeff k x : ℂ)/((m:ℂ)+1)^k =
+      (((m+1)*x*((-1)^N/((m:ℝ)+1)^N * ∫ s in (0:ℝ)..1, laplaceIntegrand m x s *
+          ibpRational N (x*s)) : ℝ) : ℂ) := by
+  rw [S_eq, ibp_iterate m hx N]
   have hm : (m:ℝ)+1 ≠ 0 := by positivity
   have hcast : ∀ k : ℕ, ((m:ℂ)+1)^k = (((m:ℝ)+1)^k : ℝ) := fun k => by push_cast; ring
-  simp only [igAsy_d, hcast, ← ofReal_div, ← ofReal_sum, ← ofReal_sub]
+  simp only [remainderCoeff, hcast, ← ofReal_div, ← ofReal_sum, ← ofReal_sub]
   congr 1
   rw [mul_add, Finset.mul_sum, add_sub_right_comm]
-  rw [show ∑ i ∈ Finset.range N, ((m:ℝ)+1)*x*((-1)^i/((m:ℝ)+1)^(i+1)*(igAsy_h i x/(1-x))) -
-      ∑ k ∈ Finset.range N, (-1)^k*(x*igAsy_h k x/(1-x))/((m:ℝ)+1)^k = 0 by
+  rw [show ∑ i ∈ Finset.range N, ((m:ℝ)+1)*x*((-1)^i/((m:ℝ)+1)^(i+1)*(ibpRational i x/(1-x))) -
+      ∑ k ∈ Finset.range N, (-1)^k*(x*ibpRational k x/(1-x))/((m:ℝ)+1)^k = 0 by
     rw [sub_eq_zero]; refine Finset.sum_congr rfl fun k _ => ?_
     rw [pow_succ]; field_simp]
   ring
 
 /-- The remainder bound behind 8.11.18. -/
-theorem igAsy_S_remainder_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
+theorem S_remainder_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
     ∃ C, ∀ m : ℕ, ∀ x : ℝ, x ≤ 1-δ →
-      ‖expPartialSumRemainderS (m+1) x - ∑ k ∈ Finset.range N, (igAsy_d k x : ℂ)/((m:ℂ)+1)^k‖
+      ‖expPartialSumRemainderS (m+1) x - ∑ k ∈ Finset.range N, (remainderCoeff k x : ℂ)/((m:ℂ)+1)^k‖
         ≤ C * (1/((m:ℝ)+1)^N) := by
-  obtain ⟨K, hK0, hK⟩ := igAsy_h_bound N hδ
+  obtain ⟨K, hK0, hK⟩ := ibpRational_bound N hδ
   refine ⟨K * max 1 (1/δ), fun m x hxδ => ?_⟩
   have hx : x < 1 := by linarith
   have hx1 : 0 < 1 - x := by linarith
   have hm : (0:ℝ) < (m:ℝ)+1 := by positivity
-  rw [igAsy_S_remainder m N hx, Complex.norm_real, Real.norm_eq_abs]
-  set I := ∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h N (x*s)
-  have hFc : Continuous (igAsy_F m x) := by unfold igAsy_F; fun_prop
+  rw [S_remainder m N hx, Complex.norm_real, Real.norm_eq_abs]
+  set I := ∫ s in (0:ℝ)..1, laplaceIntegrand m x s * ibpRational N (x*s)
+  have hFc : Continuous (laplaceIntegrand m x) := by unfold laplaceIntegrand; fun_prop
   have hI : |I| ≤ K * (1/((m+1)*(1-x))) := by
     refine (intervalIntegral.abs_integral_le_integral_abs zero_le_one).trans ?_
-    refine le_trans ?_ (mul_le_mul_of_nonneg_left (igAsy_integral_F_le m hx) hK0)
+    refine le_trans ?_ (mul_le_mul_of_nonneg_left (integral_laplaceIntegrand_le m hx) hK0)
     rw [← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_mono_on zero_le_one ?_
       ((hFc.const_smul K).intervalIntegrable _ _) ?_
-    · exact ((hFc.continuousOn.mul (igAsy_continuousOn_h N hx)).abs).intervalIntegrable
+    · exact ((hFc.continuousOn.mul (continuousOn_ibpRational N hx)).abs).intervalIntegrable
     · intro s hs
       have hy : x*s ≤ max 0 (1-δ) := by
         rcases le_or_gt x 0 with h | h
         · exact (mul_nonpos_of_nonpos_of_nonneg h hs.1).trans (le_max_left _ _)
         · exact (le_trans (by nlinarith [hs.2]) hxδ).trans (le_max_right _ _)
-      rw [abs_mul, abs_of_nonneg (igAsy_F_nonneg m x hs.1), mul_comm K]
-      exact mul_le_mul_of_nonneg_left (hK _ hy) (igAsy_F_nonneg m x hs.1)
+      rw [abs_mul, abs_of_nonneg (laplaceIntegrand_nonneg m x hs.1), mul_comm K]
+      exact mul_le_mul_of_nonneg_left (hK _ hy) (laplaceIntegrand_nonneg m x hs.1)
   have hxr : |x|/(1-x) ≤ max 1 (1/δ) := by
     rw [div_le_iff₀ hx1]
     rcases le_or_gt x 0 with h | h
@@ -492,35 +508,35 @@ theorem igAsy_S_remainder_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
     _ ≤ K*max 1 (1/δ)*(1/((m:ℝ)+1)^N) := by gcongr
 
 /-- The phase `φ(u) = u - log(1+u)`, with `(1+u)^n e^{-nu} = e^{-n φ(u)}`. -/
-noncomputable def igAsy_phi (u : ℝ) : ℝ := u - Real.log (1+u)
+noncomputable def phi (u : ℝ) : ℝ := u - Real.log (1+u)
 
 /-- The quotient `φ(u)/u²`, extended analytically to `u = 0`. -/
-noncomputable def igAsy_Q : ℝ → ℝ := dslope (dslope igAsy_phi 0) 0
+noncomputable def phiQuotient : ℝ → ℝ := dslope (dslope phi 0) 0
 
 /-- `φ` is analytic at `0`. -/
-theorem igAsy_analyticAt_phi : AnalyticAt ℝ igAsy_phi 0 := by
-  unfold igAsy_phi
+theorem analyticAt_phi : AnalyticAt ℝ phi 0 := by
+  unfold phi
   exact analyticAt_id.sub ((analyticAt_const.add analyticAt_id).log (by norm_num))
 
 /-- `Q` is analytic at `0`. -/
-theorem igAsy_analyticAt_Q : AnalyticAt ℝ igAsy_Q 0 :=
-  (igAsy_analyticAt_phi.dslope 0).dslope 0
+theorem analyticAt_phiQuotient : AnalyticAt ℝ phiQuotient 0 :=
+  (analyticAt_phi.dslope 0).dslope 0
 
 /-- `φ(u) = u² Q(u)`. -/
-theorem igAsy_phi_eq (u : ℝ) : igAsy_phi u = u^2 * igAsy_Q u := by
-  have h := DoubleZeroSqrt.eq_sq_mul_dslope (g := igAsy_phi) (x₀ := 0) (by simp [igAsy_phi]) ?_ u
-  · simpa [igAsy_Q] using h
-  · have : HasDerivAt igAsy_phi (1 - 1/(1+0)) 0 :=
+theorem phi_eq (u : ℝ) : phi u = u^2 * phiQuotient u := by
+  have h := DoubleZeroSqrt.eq_sq_mul_dslope (g := phi) (x₀ := 0) (by simp [phi]) ?_ u
+  · simpa [phiQuotient] using h
+  · have : HasDerivAt phi (1 - 1/(1+0)) 0 :=
       (hasDerivAt_id 0).sub (((hasDerivAt_id (0:ℝ)).const_add 1).log (by norm_num))
     rw [this.deriv]; norm_num
 
 /-- `|φ(u) - u²/2| ≤ 2|u|³` for `|u| ≤ 1/2`. -/
-theorem igAsy_phi_sub_le {u : ℝ} (hu : |u| ≤ 1/2) : |igAsy_phi u - u^2/2| ≤ 2*|u|^3 := by
+theorem phi_sub_le {u : ℝ} (hu : |u| ≤ 1/2) : |phi u - u^2/2| ≤ 2*|u|^3 := by
   have h := Real.abs_log_sub_add_sum_range_le (x := -u) (by rw [abs_neg]; linarith) 2
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, abs_neg, sub_neg_eq_add] at h
-  have h1 : |igAsy_phi u - u^2/2| = |(0 + (-u)^(0+1)/((0:ℕ)+1) + (-u)^(1+1)/((1:ℕ)+1))
+  have h1 : |phi u - u^2/2| = |(0 + (-u)^(0+1)/((0:ℕ)+1) + (-u)^(1+1)/((1:ℕ)+1))
       + Real.log (1+u)| := by
-    rw [← abs_neg]; unfold igAsy_phi; congr 1; push_cast; ring
+    rw [← abs_neg]; unfold phi; congr 1; push_cast; ring
   rw [h1]
   refine h.trans ?_
   show |u|^3/(1-|u|) ≤ 2*|u|^3
@@ -529,60 +545,65 @@ theorem igAsy_phi_sub_le {u : ℝ} (hu : |u| ≤ 1/2) : |igAsy_phi u - u^2/2| �
   nlinarith [abs_nonneg u]
 
 /-- `Q(0) = 1/2`. -/
-theorem igAsy_Q_zero : igAsy_Q 0 = 1/2 := by
-  have hc : Tendsto (fun u => |igAsy_Q u - 1/2|) (𝓝[≠] 0) (𝓝 |igAsy_Q 0 - 1/2|) :=
-    ((igAsy_analyticAt_Q.continuousAt.sub continuousAt_const).abs).tendsto.mono_left
+theorem phiQuotient_zero : phiQuotient 0 = 1/2 := by
+  have hc : Tendsto (fun u => |phiQuotient u - 1/2|) (𝓝[≠] 0) (𝓝 |phiQuotient 0 - 1/2|) :=
+    ((analyticAt_phiQuotient.continuousAt.sub continuousAt_const).abs).tendsto.mono_left
       nhdsWithin_le_nhds
   have h2 : Tendsto (fun u : ℝ => 2*|u|) (𝓝[≠] 0) (𝓝 0) := by
     have : Tendsto (fun u : ℝ => 2*|u|) (𝓝 0) (𝓝 (2*|0|)) :=
       (continuous_const.mul continuous_abs).tendsto 0
     simpa using this.mono_left nhdsWithin_le_nhds
-  have hle : ∀ᶠ u in 𝓝[≠] (0:ℝ), |igAsy_Q u - 1/2| ≤ 2*|u| := by
+  have hle : ∀ᶠ u in 𝓝[≠] (0:ℝ), |phiQuotient u - 1/2| ≤ 2*|u| := by
     filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds (Metric.ball_mem_nhds (0:ℝ)
       (by norm_num : (0:ℝ) < 1/2))] with u hu hb
     have hu0 : u ≠ 0 := hu
     have hb' : |u| ≤ 1/2 := by simpa [Real.dist_eq] using (Metric.mem_ball.1 hb).le
-    have h := igAsy_phi_sub_le hb'
-    rw [igAsy_phi_eq, show u^2 * igAsy_Q u - u^2/2 = u^2 * (igAsy_Q u - 1/2) by ring, abs_mul,
+    have h := phi_sub_le hb'
+    rw [phi_eq, show u^2 * phiQuotient u - u^2/2 = u^2 * (phiQuotient u - 1/2) by ring, abs_mul,
       abs_of_nonneg (sq_nonneg u), ← sq_abs, show 2*|u|^3 = |u|^2 * (2*|u|) by ring] at h
     exact le_of_mul_le_mul_left h (by positivity)
   have := le_of_tendsto_of_tendsto hc h2 hle
-  have h0 : |igAsy_Q 0 - 1/2| = 0 := le_antisymm this (abs_nonneg _)
+  have h0 : |phiQuotient 0 - 1/2| = 0 := le_antisymm this (abs_nonneg _)
   linarith [abs_eq_zero.1 h0]
 
 /-- The signed square root `u √(2 Q(u))` of `2φ(u)`. -/
-noncomputable def igAsy_sqrtPhi (u : ℝ) : ℝ := (u - 0) * Real.sqrt (2 * igAsy_Q u)
+noncomputable def sqrtPhi (u : ℝ) : ℝ := (u - 0) * Real.sqrt (2 * phiQuotient u)
 
 /-- The signed square root vanishes at `0`. -/
-theorem igAsy_sqrtPhi_zero : igAsy_sqrtPhi 0 = 0 := by simp [igAsy_sqrtPhi]
+theorem sqrtPhi_zero : sqrtPhi 0 = 0 := by simp [sqrtPhi]
 
 /-- The signed square root is analytic at `0` with derivative `1`, and `φ = V²/2` near `0`. -/
-theorem igAsy_sqrtPhi_props : AnalyticAt ℝ igAsy_sqrtPhi 0 ∧ HasDerivAt igAsy_sqrtPhi 1 0 ∧
-    ∀ᶠ x in 𝓝 0, igAsy_phi x = igAsy_sqrtPhi x ^ 2 / 2 := by
-  obtain ⟨h1, h2, h3⟩ := DoubleZeroSqrt.signedSqrt (g := igAsy_phi) igAsy_analyticAt_Q
-    (by rw [igAsy_Q_zero]; norm_num) (Eventually.of_forall fun x => by rw [igAsy_phi_eq]; ring)
-  refine ⟨h1, ?_, h3.mono fun x hx => hx.1⟩
-  have : Real.sqrt (2 * igAsy_Q 0) = 1 := by rw [igAsy_Q_zero]; norm_num
+theorem sqrtPhi_props : AnalyticAt ℝ sqrtPhi 0 ∧ HasDerivAt sqrtPhi 1 0 ∧
+    ∀ᶠ x in 𝓝 0, phi x = sqrtPhi x ^ 2 / 2 := by
+  have hQ0 : 0 < phiQuotient 0 := by rw [phiQuotient_zero]; norm_num
+  have hg : ∀ᶠ x in 𝓝 (0 : ℝ), phi x = (x - 0) ^ 2 * phiQuotient x :=
+    Eventually.of_forall fun x => by rw [phi_eq]; ring
+  have h1 := DoubleZeroSqrt.analyticAt_signedSqrt analyticAt_phiQuotient hQ0
+  have h2 := DoubleZeroSqrt.hasDerivAt_signedSqrt analyticAt_phiQuotient hQ0
+  have h3 := DoubleZeroSqrt.eventually_eq_sq_signedSqrt analyticAt_phiQuotient hQ0 hg
+  have : Real.sqrt (2 * phiQuotient 0) = 1 := by rw [phiQuotient_zero]; norm_num
   rw [this] at h2
-  exact h2
+  exact ⟨h1, h2, h3⟩
 
 /-- Taylor coefficients of the inverse of `u ↦ u √(2Q(u))` up to degree `8`. -/
-noncomputable def igAsy_Pc : ℕ → ℝ
+noncomputable def inverseCoeff : ℕ → ℝ
   | 1 => 1 | 2 => 1/3 | 3 => 1/36 | 4 => -1/270 | 5 => 1/4320 | 6 => 1/17010
   | 7 => -139/5443200 | 8 => 1/204120 | _ => 0
 
 /-- The degree-`8` polynomial `P(v) = ∑_{k<9} P_k v^k` divided by `v`. -/
-noncomputable def igAsy_P1 (v : ℝ) : ℝ :=
+noncomputable def inversePolyDivX (v : ℝ) : ℝ :=
   1 + v/3 + v^2/36 - v^3/270 + v^4/4320 + v^5/17010 - 139*v^6/5443200 + v^7/204120
 
-/-- Formula under the stated hypotheses: `∑ k ∈ Finset.range 9, igAsy_Pc k * v^k = v * igAsy_P1
-v`. -/
-theorem igAsy_sum_Pc (v : ℝ) : ∑ k ∈ Finset.range 9, igAsy_Pc k * v^k = v * igAsy_P1 v := by
-  simp only [Finset.sum_range_succ, Finset.sum_range_zero, igAsy_Pc, igAsy_P1]
+/-- Formula under the stated hypotheses:
+`∑ k ∈ Finset.range 9, inverseCoeff k * v^k = v * inversePolyDivX v`. -/
+theorem sum_inverseCoeff (v : ℝ) : ∑ k ∈ Finset.range 9, inverseCoeff k * v^k = v *
+    inversePolyDivX v := by
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero, inverseCoeff, inversePolyDivX]
   ring
 
 /-- The residual polynomial of the inverse-series verification. -/
-noncomputable def igAsy_R (v : ℝ) : ℝ := -v^62/2768104942150133660519356040269823606784000000000 +
+noncomputable def residualPoly (v : ℝ) : ℝ :=
+    -v^62/2768104942150133660519356040269823606784000000000 +
     139*v^61/8201792421185581216353647526725403279360000000000 -
     64363*v^60/164035848423711624327072950534508065587200000000000 +
     8414711*v^59/1458096430432992216240648449195627249664000000000000 -
@@ -639,27 +660,29 @@ noncomputable def igAsy_R (v : ℝ) : ℝ := -v^62/27681049421501336605193560402
     158347621*v/326592000 - 235145669/1175731200
 
 /-- The polynomial identity behind the inverse-series verification. -/
-theorem igAsy_residual_identity (v : ℝ) :
-    2*(v * igAsy_P1 v - (-∑ i ∈ Finset.range 9, (-(v * igAsy_P1 v))^(i+1)/((i:ℝ)+1))) - v^2 =
-      v^10 * igAsy_R v := by
-  simp only [Finset.sum_range_succ, Finset.sum_range_zero, igAsy_P1, igAsy_R]
+theorem residual_identity (v : ℝ) :
+    2*(v * inversePolyDivX v -
+        (-∑ i ∈ Finset.range 9, (-(v * inversePolyDivX v))^(i+1)/((i:ℝ)+1))) - v^2 =
+      v^10 * residualPoly v := by
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero, inversePolyDivX, residualPoly]
   norm_num
   ring
 
 /-- `P₁` is continuous. -/
-theorem igAsy_continuous_P1 : Continuous igAsy_P1 := by unfold igAsy_P1; fun_prop
+theorem continuous_inversePolyDivX : Continuous inversePolyDivX := by
+    unfold inversePolyDivX; fun_prop
 
 /-- The residual polynomial is continuous. -/
-theorem igAsy_continuous_R : Continuous igAsy_R := by unfold igAsy_R; fun_prop
+theorem continuous_residualPoly : Continuous residualPoly := by unfold residualPoly; fun_prop
 
 /-- `2φ(P(v)) - v² = O(v^{10})`. -/
-theorem igAsy_isBigO_residual :
-    (fun v => 2 * igAsy_phi (v * igAsy_P1 v) - v^2) =O[𝓝 0] fun v => v^10 := by
-  set Pn : ℝ → ℝ := fun v => v * igAsy_P1 v with hPn
-  have hPc : Continuous Pn := continuous_id.mul igAsy_continuous_P1
+theorem isBigO_residual :
+    (fun v => 2 * phi (v * inversePolyDivX v) - v^2) =O[𝓝 0] fun v => v^10 := by
+  set Pn : ℝ → ℝ := fun v => v * inversePolyDivX v with hPn
+  have hPc : Continuous Pn := continuous_id.mul continuous_inversePolyDivX
   have hP0 : Tendsto Pn (𝓝 0) (𝓝 0) := by simpa [hPn] using hPc.tendsto 0
-  have hP1 : Tendsto igAsy_P1 (𝓝 0) (𝓝 1) := by
-    simpa [igAsy_P1] using igAsy_continuous_P1.tendsto 0
+  have hP1 : Tendsto inversePolyDivX (𝓝 0) (𝓝 1) := by
+    simpa [inversePolyDivX] using continuous_inversePolyDivX.tendsto 0
   set E : ℝ → ℝ := fun v => ∑ i ∈ Finset.range 9, (-(Pn v))^(i+1)/((i:ℝ)+1) +
     Real.log (1 + Pn v) with hE
   have hEO : E =O[𝓝 0] fun v => v^10 := by
@@ -667,10 +690,10 @@ theorem igAsy_isBigO_residual :
     filter_upwards [hP0.eventually (Metric.closedBall_mem_nhds (0:ℝ) (by norm_num : (0:ℝ) < 1/2)),
       hP1.eventually (Metric.closedBall_mem_nhds (1:ℝ) one_pos)] with v hv h1
     have hv' : |Pn v| ≤ 1/2 := by simpa [Real.dist_eq] using Metric.mem_closedBall.1 hv
-    have h1' : |igAsy_P1 v| ≤ 2 := by
+    have h1' : |inversePolyDivX v| ≤ 2 := by
       have := Metric.mem_closedBall.1 h1
       rw [Real.dist_eq] at this
-      have := abs_sub_abs_le_abs_sub (igAsy_P1 v) 1
+      have := abs_sub_abs_le_abs_sub (inversePolyDivX v) 1
       norm_num at this ⊢; linarith
     have hb := Real.abs_log_sub_add_sum_range_le (x := -(Pn v)) (by rw [abs_neg]; linarith) 9
     rw [abs_neg, sub_neg_eq_add] at hb
@@ -685,42 +708,42 @@ theorem igAsy_isBigO_residual :
     calc |E v| ≤ 2 * |Pn v|^10 := hb.trans h2
       _ ≤ 2 * (2*|v|)^10 := by gcongr
       _ = 2*2^10 * |v|^10 := by ring
-  have hRO : (fun v => v^10 * igAsy_R v) =O[𝓝 0] fun v => v^10 := by
+  have hRO : (fun v => v^10 * residualPoly v) =O[𝓝 0] fun v => v^10 := by
     have := (isBigO_refl (fun v : ℝ => v^10) (𝓝 0)).mul
-      ((igAsy_continuous_R.tendsto 0).isBigO_one ℝ)
+      ((continuous_residualPoly.tendsto 0).isBigO_one ℝ)
     simpa using this
   refine (hRO.sub (hEO.const_mul_left 2)).congr' (Eventually.of_forall fun v => ?_)
     EventuallyEq.rfl
-  have := igAsy_residual_identity v
-  simp only [hE, hPn, igAsy_phi] at this ⊢
+  have := residual_identity v
+  simp only [hE, hPn, phi] at this ⊢
   rw [← this]
   ring
 
 /-- `V(P(v)) - v = O(v⁹)` as `v → 0`, `v ≠ 0`. -/
-theorem igAsy_isBigO_sqrtPhi_P :
-    (fun v => igAsy_sqrtPhi (v * igAsy_P1 v) - v) =O[𝓝[≠] 0] fun v => v^9 := by
-  set Pn : ℝ → ℝ := fun v => v * igAsy_P1 v with hPn
-  set A : ℝ → ℝ := fun v => igAsy_P1 v * Real.sqrt (2 * igAsy_Q (Pn v)) with hA
-  have hPc : Continuous Pn := continuous_id.mul igAsy_continuous_P1
+theorem isBigO_sqrtPhi_P :
+    (fun v => sqrtPhi (v * inversePolyDivX v) - v) =O[𝓝[≠] 0] fun v => v^9 := by
+  set Pn : ℝ → ℝ := fun v => v * inversePolyDivX v with hPn
+  set A : ℝ → ℝ := fun v => inversePolyDivX v * Real.sqrt (2 * phiQuotient (Pn v)) with hA
+  have hPc : Continuous Pn := continuous_id.mul continuous_inversePolyDivX
   have hP0 : Tendsto Pn (𝓝 0) (𝓝 0) := by simpa [hPn] using hPc.tendsto 0
-  have hQP : Tendsto (fun v => igAsy_Q (Pn v)) (𝓝 0) (𝓝 (1/2)) := by
-    rw [← igAsy_Q_zero]; exact igAsy_analyticAt_Q.continuousAt.tendsto.comp hP0
+  have hQP : Tendsto (fun v => phiQuotient (Pn v)) (𝓝 0) (𝓝 (1/2)) := by
+    rw [← phiQuotient_zero]; exact analyticAt_phiQuotient.continuousAt.tendsto.comp hP0
   have hAt : Tendsto A (𝓝 0) (𝓝 1) := by
-    have h1 : Tendsto igAsy_P1 (𝓝 0) (𝓝 1) := by
-      simpa [igAsy_P1] using igAsy_continuous_P1.tendsto 0
+    have h1 : Tendsto inversePolyDivX (𝓝 0) (𝓝 1) := by
+      simpa [inversePolyDivX] using continuous_inversePolyDivX.tendsto 0
     have := h1.mul ((hQP.const_mul 2).sqrt)
     rw [show (1:ℝ) * Real.sqrt (2*(1/2)) = 1 by norm_num] at this
     exact this
   have hsq : (fun v => A v ^ 2 - 1 ^ 2) =O[𝓝[≠] 0] fun v => v^8 := by
-    have h := (igAsy_isBigO_residual.mono nhdsWithin_le_nhds).mul
+    have h := (isBigO_residual.mono nhdsWithin_le_nhds).mul
       (isBigO_refl (fun v : ℝ => (v^2)⁻¹) (𝓝[≠] 0))
     refine h.congr' ?_ ?_
     · filter_upwards [self_mem_nhdsWithin, Eventually.filter_mono nhdsWithin_le_nhds
         (hQP.eventually (lt_mem_nhds (by norm_num : (0:ℝ) < 1/2)))] with v hv hq
       have hv : v ≠ 0 := hv
       simp only [hA]
-      rw [mul_pow, Real.sq_sqrt (by linarith : (0:ℝ) ≤ 2 * igAsy_Q (Pn v))]
-      simp only [igAsy_phi_eq, hPn]
+      rw [mul_pow, Real.sq_sqrt (by linarith : (0:ℝ) ≤ 2 * phiQuotient (Pn v))]
+      simp only [phi_eq, hPn]
       field_simp
     · filter_upwards [self_mem_nhdsWithin] with v hv
       have hv : v ≠ 0 := hv
@@ -729,25 +752,26 @@ theorem igAsy_isBigO_sqrtPhi_P :
     (hAt.mono_left nhdsWithin_le_nhds) tendsto_const_nhds hsq
   refine ((isBigO_refl (fun v : ℝ => v) _).mul h1).congr' (Eventually.of_forall fun v => ?_)
     (Eventually.of_forall fun v => by ring)
-  simp only [hA, hPn, igAsy_sqrtPhi]
+  simp only [hA, hPn, sqrtPhi]
   ring
 
 /-- The Taylor coefficients of a local inverse of `u ↦ u √(2Q(u))` up to degree `8`. -/
-theorem igAsy_coeff_of_inverse {U : ℝ → ℝ} {p : FormalMultilinearSeries ℝ ℝ ℝ}
-    (hp : HasFPowerSeriesAt U p 0) (hl : ∀ᶠ x in 𝓝 0, U (igAsy_sqrtPhi x) = x) :
-    ∀ k < 9, p.coeff k = igAsy_Pc k := by
-  have hs : HasStrictDerivAt U (deriv U 0) (igAsy_sqrtPhi 0) := by
-    rw [igAsy_sqrtPhi_zero]; exact hp.analyticAt.hasStrictDerivAt
-  have hPt : Tendsto (fun v => v * igAsy_P1 v) (𝓝[≠] 0) (𝓝 0) := by
-    have h : Continuous fun v : ℝ => v * igAsy_P1 v := continuous_id.mul igAsy_continuous_P1
+theorem coeff_of_inverse {U : ℝ → ℝ} {p : FormalMultilinearSeries ℝ ℝ ℝ}
+    (hp : HasFPowerSeriesAt U p 0) (hl : ∀ᶠ x in 𝓝 0, U (sqrtPhi x) = x) :
+    ∀ k < 9, p.coeff k = inverseCoeff k := by
+  have hs : HasStrictDerivAt U (deriv U 0) (sqrtPhi 0) := by
+    rw [sqrtPhi_zero]; exact hp.analyticAt.hasStrictDerivAt
+  have hPt : Tendsto (fun v => v * inversePolyDivX v) (𝓝[≠] 0) (𝓝 0) := by
+    have h : Continuous fun v : ℝ => v * inversePolyDivX v :=
+        continuous_id.mul continuous_inversePolyDivX
     have := h.tendsto 0
     simp only [zero_mul] at this
     exact this.mono_left nhdsWithin_le_nhds
-  have hid : Tendsto (fun v : ℝ => v) (𝓝[≠] 0) (𝓝 (igAsy_sqrtPhi 0)) := by
-    rw [igAsy_sqrtPhi_zero]; exact tendsto_id.mono_left nhdsWithin_le_nhds
-  have ha : (fun v => v * igAsy_P1 v - U v) =O[𝓝[≠] 0] fun v => v^9 :=
-    (invSer_isBigO_sub_of_leftInverse hs hl igAsy_sqrtPhi_props.1.continuousAt hPt hid).trans
-      igAsy_isBigO_sqrtPhi_P
+  have hid : Tendsto (fun v : ℝ => v) (𝓝[≠] 0) (𝓝 (sqrtPhi 0)) := by
+    rw [sqrtPhi_zero]; exact tendsto_id.mono_left nhdsWithin_le_nhds
+  have ha : (fun v => v * inversePolyDivX v - U v) =O[𝓝[≠] 0] fun v => v^9 :=
+    (invSer_isBigO_sub_of_leftInverse hs hl sqrtPhi_props.1.continuousAt hPt hid).trans
+      isBigO_sqrtPhi_P
   have hc := (hp.isBigO_sub_partialSum_pow 9).mono (nhdsWithin_le_nhds (s := {0}ᶜ))
   simp only [zero_add, FormalMultilinearSeries.partialSum,
     FormalMultilinearSeries.apply_eq_pow_smul_coeff, smul_eq_mul] at hc
@@ -755,28 +779,28 @@ theorem igAsy_coeff_of_inverse {U : ℝ → ℝ} {p : FormalMultilinearSeries �
       fun y => y^9 :=
     hc.trans (IsBigO.of_bound 1 (Eventually.of_forall fun y => by simp))
   have H := hc'.neg_left.sub ha
-  have H' : (fun v : ℝ => ∑ k ∈ Finset.range 9, (fun k => p.coeff k - igAsy_Pc k) k * v^k)
+  have H' : (fun v : ℝ => ∑ k ∈ Finset.range 9, (fun k => p.coeff k - inverseCoeff k) k * v^k)
       =O[𝓝[≠] 0] fun v => v^9 := by
     refine H.congr' (Eventually.of_forall fun v => ?_) EventuallyEq.rfl
-    simp only [sub_mul, Finset.sum_sub_distrib, igAsy_sum_Pc, mul_comm (p.coeff _)]
+    simp only [sub_mul, Finset.sum_sub_distrib, sum_inverseCoeff, mul_comm (p.coeff _)]
     ring
   intro k hk
-  exact sub_eq_zero.1 (lapSad_coeff_eq_zero_of_isBigO 9 H' k hk)
+  exact sub_eq_zero.1 (LaplaceSaddle.coeff_eq_zero_of_isBigO 9 H' k hk)
 
 /-- **The saddle substitution for `φ(u) = u - log(1+u)`.** There is an analytic `U` with
-`φ(U(v)) = v²/2` near `0`, `sign U(v) = sign v`, and Taylor coefficients `igAsy_Pc`. -/
-theorem igAsy_saddle : ∃ (U : ℝ → ℝ) (p : FormalMultilinearSeries ℝ ℝ ℝ) (v₀ : ℝ), 0 < v₀ ∧
-    HasFPowerSeriesAt U p 0 ∧ (∀ k < 9, p.coeff k = igAsy_Pc k) ∧
+`φ(U(v)) = v²/2` near `0`, `sign U(v) = sign v`, and Taylor coefficients `inverseCoeff`. -/
+theorem saddle_substitution : ∃ (U : ℝ → ℝ) (p : FormalMultilinearSeries ℝ ℝ ℝ) (v₀ : ℝ), 0 < v₀ ∧
+    HasFPowerSeriesAt U p 0 ∧ (∀ k < 9, p.coeff k = inverseCoeff k) ∧
     (∀ v ∈ Icc (-v₀) v₀, HasDerivAt U (deriv U v) v ∧ ContinuousAt (deriv U) v ∧
-      -1/2 < U v ∧ igAsy_phi (U v) = v^2/2) ∧ U (-v₀) < 0 ∧ 0 < U v₀ := by
-  obtain ⟨hVa, hVd, hVphi⟩ := igAsy_sqrtPhi_props
+      -1/2 < U v ∧ phi (U v) = v^2/2) ∧ U (-v₀) < 0 ∧ 0 < U v₀ := by
+  obtain ⟨hVa, hVd, hVphi⟩ := sqrtPhi_props
   obtain ⟨U, hUa, -, hU0, hl, hr⟩ := DoubleZeroSqrt.exists_analytic_inverse hVa hVd one_ne_zero
-  rw [igAsy_sqrtPhi_zero] at hUa hU0 hr
+  rw [sqrtPhi_zero] at hUa hU0 hr
   obtain ⟨p, hp⟩ := hUa
   have hUt : Tendsto U (𝓝 0) (𝓝 0) := by
     simpa [hU0] using hp.analyticAt.continuousAt.tendsto
-  have hev : ∀ᶠ v in 𝓝 (0:ℝ), AnalyticAt ℝ U v ∧ -1/2 < U v ∧ igAsy_phi (U v) = v^2/2 ∧
-      igAsy_sqrtPhi (U v) = v := by
+  have hev : ∀ᶠ v in 𝓝 (0:ℝ), AnalyticAt ℝ U v ∧ -1/2 < U v ∧ phi (U v) = v^2/2 ∧
+      sqrtPhi (U v) = v := by
     filter_upwards [hp.analyticAt.eventually_analyticAt,
       hUt.eventually (lt_mem_nhds (by norm_num : (-1/2:ℝ) < 0)), hUt.eventually hVphi, hr]
       with v h1 h2 h3 h4
@@ -784,43 +808,43 @@ theorem igAsy_saddle : ∃ (U : ℝ → ℝ) (p : FormalMultilinearSeries ℝ �
   obtain ⟨ε, hε, hball⟩ := Metric.eventually_nhds_iff.1 hev
   have hmem : ∀ v ∈ Icc (-(ε/2)) (ε/2), dist v 0 < ε := fun v hv => by
     rw [Real.dist_eq, sub_zero, abs_lt]; constructor <;> linarith [hv.1, hv.2]
-  refine ⟨U, p, ε/2, by positivity, hp, igAsy_coeff_of_inverse hp hl, fun v hv => ?_, ?_, ?_⟩
+  refine ⟨U, p, ε/2, by positivity, hp, coeff_of_inverse hp hl, fun v hv => ?_, ?_, ?_⟩
   · obtain ⟨h1, h2, h3, -⟩ := hball (hmem v hv)
     exact ⟨h1.differentiableAt.hasDerivAt, h1.deriv.continuousAt, h2, h3⟩
   · obtain ⟨-, -, -, h4⟩ := hball (hmem (-(ε/2)) ⟨le_rfl, by linarith⟩)
     by_contra hc
     replace hc := not_lt.1 hc
-    have : 0 ≤ igAsy_sqrtPhi (U (-(ε/2))) := by
-      unfold igAsy_sqrtPhi; rw [sub_zero]; exact mul_nonneg hc (Real.sqrt_nonneg _)
+    have : 0 ≤ sqrtPhi (U (-(ε/2))) := by
+      unfold sqrtPhi; rw [sub_zero]; exact mul_nonneg hc (Real.sqrt_nonneg _)
     linarith
   · obtain ⟨-, -, -, h4⟩ := hball (hmem (ε/2) ⟨by linarith, le_rfl⟩)
     by_contra hc
     replace hc := not_lt.1 hc
-    have : igAsy_sqrtPhi (U (ε/2)) ≤ 0 := by
-      unfold igAsy_sqrtPhi; rw [sub_zero]
+    have : sqrtPhi (U (ε/2)) ≤ 0 := by
+      unfold sqrtPhi; rw [sub_zero]
       exact mul_nonpos_of_nonpos_of_nonneg hc (Real.sqrt_nonneg _)
     linarith
 
 /-- `s^n e^{n(1-s)} = e^{-n φ(s-1)}` at `s = 1 + u > 0`. -/
-theorem igAsy_F_one_add (m : ℕ) {u : ℝ} (hu : -1 < u) :
-    igAsy_F m 1 (1+u) = Real.exp (-((m:ℝ)+1) * igAsy_phi u) := by
+theorem laplaceIntegrand_one_add (m : ℕ) {u : ℝ} (hu : -1 < u) :
+    laplaceIntegrand m 1 (1+u) = Real.exp (-((m:ℝ)+1) * phi u) := by
   have h : 0 < 1+u := by linarith
-  unfold igAsy_F igAsy_phi
+  unfold laplaceIntegrand phi
   rw [← Real.exp_log (pow_pos h (m+1)), ← Real.exp_add, Real.log_pow]
   congr 1; push_cast; ring
 
 /-- `∫₀^∞ s^n e^{n(1-s)} ds = eⁿ n!/n^{n+1}`. -/
-theorem igAsy_integral_F_Ioi (m : ℕ) :
-    IntegrableOn (igAsy_F m 1) (Ioi 0) ∧ ∫ s in Ioi (0:ℝ), igAsy_F m 1 s =
+theorem integral_laplaceIntegrand_Ioi (m : ℕ) :
+    IntegrableOn (laplaceIntegrand m 1) (Ioi 0) ∧ ∫ s in Ioi (0:ℝ), laplaceIntegrand m 1 s =
       Real.exp ((m:ℝ)+1) * ((m+1).factorial * (((m:ℝ)+1)^(m+2))⁻¹) := by
   have hs : (0:ℝ) < (m:ℝ)+2 := by positivity
   have hz : (0:ℝ) < (m:ℝ)+1 := by positivity
-  have heq : EqOn (igAsy_F m 1) (fun s => Real.exp ((m:ℝ)+1) *
+  have heq : EqOn (laplaceIntegrand m 1) (fun s => Real.exp ((m:ℝ)+1) *
       (Real.exp (-((m:ℝ)+1) * s) * s ^ ((m:ℝ)+2-1))) (Ioi 0) := by
     intro s _
     dsimp only
     rw [show (m:ℝ)+2-1 = ((m+1:ℕ):ℝ) by push_cast; ring, Real.rpow_natCast]
-    unfold igAsy_F
+    unfold laplaceIntegrand
     rw [show ((m:ℝ)+1)*1*(1-s) = ((m:ℝ)+1) + (-((m:ℝ)+1) * s) by ring, Real.exp_add]
     ring
   have hI : IntegrableOn (fun s => Real.exp ((m:ℝ)+1) *
@@ -833,12 +857,12 @@ theorem igAsy_integral_F_Ioi (m : ℕ) :
     Real.rpow_neg hz.le, show ((m+1:ℕ):ℝ)+1 = ((m+2:ℕ):ℝ) by push_cast; ring, Real.rpow_natCast]
 
 /-- `φ` decreases on `(-1, 0]`: `φ(t-1) ≤ φ(s-1)` for `0 < s ≤ t ≤ 1`. -/
-theorem igAsy_phi_anti {s t : ℝ} (hs : 0 < s) (hst : s ≤ t) (ht : t ≤ 1) :
-    igAsy_phi (t-1) ≤ igAsy_phi (s-1) := by
+theorem phi_anti {s t : ℝ} (hs : 0 < s) (hst : s ≤ t) (ht : t ≤ 1) :
+    phi (t-1) ≤ phi (s-1) := by
   have ht0 : 0 < t := hs.trans_le hst
   have h := Real.one_sub_inv_le_log_of_pos (div_pos ht0 hs)
   rw [Real.log_div ht0.ne' hs.ne', inv_div] at h
-  unfold igAsy_phi
+  unfold phi
   simp only [add_sub_cancel]
   have h2 : 0 ≤ (t - s) * (1/t - 1) := mul_nonneg (by linarith) (by
     rw [sub_nonneg, le_div_iff₀ ht0]; linarith)
@@ -847,73 +871,73 @@ theorem igAsy_phi_anti {s t : ℝ} (hs : 0 < s) (hst : s ≤ t) (ht : t ≤ 1) :
   nlinarith
 
 /-- Left tail: `∫₀ᵗ F ≤ t e^{-n φ(t-1)}` for `0 < t ≤ 1`. -/
-theorem igAsy_left_tail (m : ℕ) {t : ℝ} (ht0 : 0 < t) (ht1 : t ≤ 1) :
-    0 ≤ ∫ s in (0:ℝ)..t, igAsy_F m 1 s ∧
-      ∫ s in (0:ℝ)..t, igAsy_F m 1 s ≤ t * Real.exp (-((m:ℝ)+1) * igAsy_phi (t-1)) := by
-  have hc : Continuous (igAsy_F m 1) := by unfold igAsy_F; fun_prop
-  refine ⟨intervalIntegral.integral_nonneg ht0.le fun s hs => igAsy_F_nonneg m 1 hs.1, ?_⟩
+theorem left_tail (m : ℕ) {t : ℝ} (ht0 : 0 < t) (ht1 : t ≤ 1) :
+    0 ≤ ∫ s in (0:ℝ)..t, laplaceIntegrand m 1 s ∧
+      ∫ s in (0:ℝ)..t, laplaceIntegrand m 1 s ≤ t * Real.exp (-((m:ℝ)+1) * phi (t-1)) := by
+  have hc : Continuous (laplaceIntegrand m 1) := by unfold laplaceIntegrand; fun_prop
+  refine ⟨intervalIntegral.integral_nonneg ht0.le fun s hs => laplaceIntegrand_nonneg m 1 hs.1, ?_⟩
   have := intervalIntegral.integral_mono_on ht0.le (hc.intervalIntegrable _ _)
     (continuous_const.intervalIntegrable (μ := volume) _ _)
-    (g := fun _ => Real.exp (-((m:ℝ)+1) * igAsy_phi (t-1))) fun s hs => by
+    (g := fun _ => Real.exp (-((m:ℝ)+1) * phi (t-1))) fun s hs => by
       rcases hs.1.eq_or_lt with h | h
-      · subst h; simp [igAsy_F]; positivity
-      · have := igAsy_F_one_add m (u := s-1) (by linarith)
+      · subst h; simp [laplaceIntegrand]; positivity
+      · have := laplaceIntegrand_one_add m (u := s-1) (by linarith)
         rw [add_sub_cancel] at this
         rw [this, Real.exp_le_exp]
-        have := igAsy_phi_anti h hs.2 ht1
+        have := phi_anti h hs.2 ht1
         nlinarith [show (0:ℝ) ≤ (m:ℝ)+1 by positivity]
   simpa using this
 
 /-- Right tail: `∫_{1+a}^∞ F ≤ e^{-n φ(a)} (1+a)/(n a)` for `a > 0`. -/
-theorem igAsy_right_tail (m : ℕ) {a : ℝ} (ha : 0 < a) :
-    0 ≤ ∫ s in Ioi (1+a), igAsy_F m 1 s ∧ ∫ s in Ioi (1+a), igAsy_F m 1 s ≤
-      Real.exp (-((m:ℝ)+1) * igAsy_phi a) * ((1+a)/(((m:ℝ)+1)*a)) := by
+theorem right_tail (m : ℕ) {a : ℝ} (ha : 0 < a) :
+    0 ≤ ∫ s in Ioi (1+a), laplaceIntegrand m 1 s ∧ ∫ s in Ioi (1+a), laplaceIntegrand m 1 s ≤
+      Real.exp (-((m:ℝ)+1) * phi a) * ((1+a)/(((m:ℝ)+1)*a)) := by
   set n : ℝ := (m:ℝ)+1 with hn
   have hn0 : 0 < n := by positivity
   set t := 1+a with ht
   have ht0 : 0 < t := by linarith
   set θ := a/t with hθ
   have hθ0 : 0 < θ := div_pos ha ht0
-  have hFi : IntegrableOn (igAsy_F m 1) (Ioi t) :=
-    (igAsy_integral_F_Ioi m).1.mono_set (Ioi_subset_Ioi ht0.le)
+  have hFi : IntegrableOn (laplaceIntegrand m 1) (Ioi t) :=
+    (integral_laplaceIntegrand_Ioi m).1.mono_set (Ioi_subset_Ioi ht0.le)
   refine ⟨setIntegral_nonneg measurableSet_Ioi fun s hs =>
-    igAsy_F_nonneg m 1 (ht0.trans hs).le, ?_⟩
-  set C := Real.exp (-n * igAsy_phi a + n*θ*t) with hC
+    laplaceIntegrand_nonneg m 1 (ht0.trans hs).le, ?_⟩
+  set C := Real.exp (-n * phi a + n*θ*t) with hC
   have hgi : IntegrableOn (fun s => C * Real.exp ((-(n*θ)) * s)) (Ioi t) :=
     (integrableOn_exp_mul_Ioi (by nlinarith) t).const_mul C
   have hle := setIntegral_mono_on hFi hgi measurableSet_Ioi fun s (hs : t < s) => by
     have hs0 : 0 < s := ht0.trans hs
-    have h1 := igAsy_F_one_add m (u := s-1) (by linarith)
+    have h1 := laplaceIntegrand_one_add m (u := s-1) (by linarith)
     rw [add_sub_cancel] at h1
     rw [h1, hC, ← Real.exp_add, Real.exp_le_exp]
     have h2 := Real.log_le_sub_one_of_pos (div_pos hs0 ht0)
     rw [Real.log_div hs0.ne' ht0.ne'] at h2
-    have h3 : igAsy_phi (s-1) - igAsy_phi a ≥ θ * (s - t) := by
-      unfold igAsy_phi
+    have h3 : phi (s-1) - phi a ≥ θ * (s - t) := by
+      unfold phi
       rw [show 1 + (s-1) = s by ring, ← ht]
       have : s/t - 1 = (s - t) - θ*(s-t) := by rw [hθ, ht]; field_simp; ring
       linarith
     nlinarith
   rw [integral_const_mul, integral_exp_mul_Ioi (by nlinarith) t, hC] at hle
   refine hle.trans (le_of_eq ?_)
-  rw [neg_div_neg_eq, mul_div_assoc', ← Real.exp_add, show -n * igAsy_phi a + n*θ*t + -(n*θ)*t =
-    -n * igAsy_phi a by ring, hθ]
+  rw [neg_div_neg_eq, mul_div_assoc', ← Real.exp_add, show -n * phi a + n*θ*t + -(n*θ)*t =
+    -n * phi a by ring, hθ]
   field_simp
 
 /-- The exact decomposition behind 8.11.16: the Gaussian integral after the saddle substitution
 plus exponentially small boundary terms. -/
-theorem igAsy_one_decomp {U : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀) (hU0 : U 0 = 0)
+theorem one_decomp {U : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀) (hU0 : U 0 = 0)
     (hd : ∀ v ∈ Icc (-v₀) v₀, HasDerivAt U (deriv U v) v ∧ ContinuousAt (deriv U) v ∧
-      -1/2 < U v ∧ igAsy_phi (U v) = v^2/2) (ha : 0 < U v₀) (m : ℕ) :
-    ((m:ℝ)+1)*1 * (∫ s in (0:ℝ)..1, igAsy_F m 1 s) -
+      -1/2 < U v ∧ phi (U v) = v^2/2) (ha : 0 < U v₀) (m : ℕ) :
+    ((m:ℝ)+1)*1 * (∫ s in (0:ℝ)..1, laplaceIntegrand m 1 s) -
         (m+1).factorial * Real.exp ((m:ℝ)+1) / (2*((m:ℝ)+1)^(m+1)) =
       ((m:ℝ)+1)^2/2 * (∫ v in (0:ℝ)..v₀, Real.exp (-((m:ℝ)+1) * v^2/2) * (v * (-U (-v) - U v))) +
-      ((m:ℝ)+1)/2 * ((∫ s in (0:ℝ)..(1 + U (-v₀)), igAsy_F m 1 s) -
-        (∫ s in Ioi (1 + U v₀), igAsy_F m 1 s) +
+      ((m:ℝ)+1)/2 * ((∫ s in (0:ℝ)..(1 + U (-v₀)), laplaceIntegrand m 1 s) -
+        (∫ s in Ioi (1 + U v₀), laplaceIntegrand m 1 s) +
         Real.exp (-((m:ℝ)+1) * v₀^2/2) * (-U (-v₀) - U v₀)) := by
   set n : ℝ := (m:ℝ)+1 with hn
-  set F := igAsy_F m 1 with hF
-  have hFc : Continuous F := by rw [hF]; unfold igAsy_F; fun_prop
+  set F := laplaceIntegrand m 1 with hF
+  have hFc : Continuous F := by rw [hF]; unfold laplaceIntegrand; fun_prop
   set g : ℝ → ℝ := fun v => Real.exp (-n * v^2/2) with hg
   have hgd : ∀ v, HasDerivAt g (-n * v * g v) v := fun v => by
     have := (((hasDerivAt_pow 2 v).const_mul (-n)).div_const 2).exp
@@ -929,7 +953,7 @@ theorem igAsy_one_decomp {U : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀) (hU0 
   have hIcc2 : uIcc 0 v₀ ⊆ Icc (-v₀) v₀ := by
     rw [uIcc_of_le hv₀.le]; exact Icc_subset_Icc (by linarith) le_rfl
   have hFU : ∀ v ∈ Icc (-v₀) v₀, F (1 + U v) = g v := fun v hv => by
-    rw [hF, igAsy_F_one_add m (by linarith [(hd v hv).2.2.1]), (hd v hv).2.2.2, hg]
+    rw [hF, laplaceIntegrand_one_add m (by linarith [(hd v hv).2.2.1]), (hd v hv).2.2.2, hg]
     congr 1; ring
   -- substitution
   have hsub : ∀ {a b : ℝ}, uIcc a b ⊆ Icc (-v₀) v₀ →
@@ -979,7 +1003,7 @@ theorem igAsy_one_decomp {U : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀) (hU0 
     refine intervalIntegral.integral_congr fun v _ => ?_
     simp only [hg]; ring
   -- splitting the integrals
-  obtain ⟨hFi, hFI⟩ := igAsy_integral_F_Ioi m
+  obtain ⟨hFi, hFI⟩ := integral_laplaceIntegrand_Ioi m
   have hb1 : 0 < 1 + U (-v₀) := by linarith [(hd (-v₀) ⟨le_rfl, by linarith⟩).2.2.1]
   have ha1 : (1:ℝ) ≤ 1 + U v₀ := by linarith
   have hs1 : ∫ s in (0:ℝ)..1, F s = (∫ s in (0:ℝ)..(1 + U (-v₀)), F s) +
@@ -1009,11 +1033,11 @@ theorem igAsy_one_decomp {U : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀) (hU0 
   linear_combination (n/2) * (h2 - h1 - hI)
 
 /-- `x^{-(j+1)} = (x^{j+1})⁻¹` for `x > 0`. -/
-theorem igAsy_rpow_neg_succ {x : ℝ} (hx : 0 < x) (j : ℕ) : x ^ (-((j:ℝ)+1)) = (x^(j+1))⁻¹ := by
+theorem rpow_neg_succ {x : ℝ} (hx : 0 < x) (j : ℕ) : x ^ (-((j:ℝ)+1)) = (x^(j+1))⁻¹ := by
   rw [Real.rpow_neg hx.le, show (j:ℝ)+1 = ((j+1:ℕ):ℝ) by push_cast; ring, Real.rpow_natCast]
 
 /-- `n e^{-n κ} = O(n^{-N})`. -/
-theorem igAsy_exp_small {κ : ℝ} (hκ : 0 < κ) (N : ℕ) :
+theorem exp_small {κ : ℝ} (hκ : 0 < κ) (N : ℕ) :
     ∀ᶠ m : ℕ in atTop, ((m:ℝ)+1) * Real.exp (-((m:ℝ)+1) * κ) ≤
       κ⁻¹^(N+1) * (((m:ℝ)+1)^N)⁻¹ := by
   have h1 : Tendsto (fun m : ℕ => ((m:ℝ)+1) * κ) atTop atTop :=
@@ -1031,6 +1055,8 @@ theorem igAsy_exp_small {κ : ℝ} (hκ : 0 < κ) (N : ℕ) :
     _ = ((m:ℝ)+1)^N * (κ^(N+1) * (κ⁻¹^(N+1) * (((m:ℝ)+1)^N)⁻¹)) := by
       rw [inv_pow]; field_simp
 
+end IncompleteGammaAsymptotics
+
 /-- Estimate under the stated parameter and domain assumptions: `∃ c : ℕ → ℂ, (∀ n < 4, c
 n=([-2/3,4/135,-8/2835,-16/8505] : List ℂ)[n]!) ∧ HasAsymptoticExpansion atTop (fun j (n : ℕ)
 => (n+1 : ℂ)^(-(j : ℤ))) c (fun n => expPartialSumRemainderS (n+1) 1-(n+1).factorial*exp (n+1
@@ -1041,8 +1067,8 @@ theorem expPartialSumRemainderS_one_asymptotic  :
         HasAsymptoticExpansion atTop (fun j (n : ℕ) => (n+1 : ℂ)^(-(j : ℤ))) c
         (fun n => expPartialSumRemainderS (n+1) 1-(n+1).factorial*exp
         (n+1 : ℂ)/(2*(n+1 : ℂ)^(n+1))) := by
-  obtain ⟨U, p, v₀, hv₀, hp, hc, hd, hb, ha⟩ := igAsy_saddle
-  have hc0 : p.coeff 0 = 0 := (hc 0 (by norm_num)).trans (by simp [igAsy_Pc])
+  obtain ⟨U, p, v₀, hv₀, hp, hc, hd, hb, ha⟩ := saddle_substitution
+  have hc0 : p.coeff 0 = 0 := (hc 0 (by norm_num)).trans (by simp [inverseCoeff])
   have hU0 : U 0 = 0 := by rw [← hp.coeff_zero 1]; exact hc0
   have hUc : ContinuousOn U (Icc (-v₀) v₀) := fun v hv =>
     (hd v hv).1.continuousAt.continuousWithinAt
@@ -1054,12 +1080,12 @@ theorem expPartialSumRemainderS_one_asymptotic  :
     rw [show ((k+1:ℕ):ℝ)+1 = ((k+1:ℕ):ℝ)+1 from rfl, Real.Gamma_nat_eq_factorial,
       show 2*(k+1) = 2*k+2 by ring]
     ring
-  have H := lapSad_hasAsymptoticExpansion_gauss_analytic hp hv₀ hUc
+  have H := LaplaceSaddle.hasAsymptoticExpansion_gauss_analytic hp hv₀ hUc
   refine ⟨fun k => ((γ (k+1) / 2 : ℝ) : ℂ), ?_, ?_⟩
   · intro k hk
     interval_cases k <;>
       norm_num [hγs, hc 2 (by norm_num), hc 4 (by norm_num), hc 6 (by norm_num),
-        hc 8 (by norm_num), igAsy_Pc, Nat.factorial]
+        hc 8 (by norm_num), inverseCoeff, Nat.factorial]
   intro N
   have hnat : Tendsto (fun m : ℕ => (m:ℝ)+1) atTop atTop :=
     tendsto_natCast_atTop_atTop.atTop_add tendsto_const_nhds
@@ -1069,31 +1095,31 @@ theorem expPartialSumRemainderS_one_asymptotic  :
   set a := U v₀
   set b := U (-v₀)
   set K : ℝ := (1 + b) + (1 + a)/a + |-b - a| with hK
-  have hφb : igAsy_phi b = κ := by
+  have hφb : phi b = κ := by
     rw [(hd (-v₀) ⟨le_rfl, by linarith⟩).2.2.2]; ring
-  have hφa : igAsy_phi a = κ := (hd v₀ ⟨by linarith, le_rfl⟩).2.2.2
+  have hφa : phi a = κ := (hd v₀ ⟨by linarith, le_rfl⟩).2.2.2
   have hb1 : 0 < 1 + b := by linarith [(hd (-v₀) ⟨le_rfl, by linarith⟩).2.2.1]
   refine IsBigO.of_bound (C/2 + K/2 * κ⁻¹^(N+1)) ?_
-  filter_upwards [hC, igAsy_exp_small hκ0 N] with m hCm hEm
+  filter_upwards [hC, exp_small hκ0 N] with m hCm hEm
   simp only [Function.comp_apply] at hCm
   set n : ℝ := (m:ℝ)+1 with hn
   have hn0 : 0 < n := by positivity
   have hn1 : 1 ≤ n := by simp [hn]
-  have hdec := igAsy_one_decomp hv₀ hU0 hd ha m
-  obtain ⟨hL0, hL1⟩ := igAsy_left_tail m hb1 (by linarith)
-  obtain ⟨hR0, hR1⟩ := igAsy_right_tail m ha
+  have hdec := one_decomp hv₀ hU0 hd ha m
+  obtain ⟨hL0, hL1⟩ := left_tail m hb1 (by linarith)
+  obtain ⟨hR0, hR1⟩ := right_tail m ha
   rw [add_sub_cancel_left, hφb] at hL1
   rw [hφa] at hR1
   set I := ∫ v in (0:ℝ)..v₀, Real.exp (-n * v^2/2) * (v * (-U (-v) - U v))
-  set TL := ∫ s in (0:ℝ)..(1 + b), igAsy_F m 1 s
-  set TR := ∫ s in Ioi (1 + a), igAsy_F m 1 s
+  set TL := ∫ s in (0:ℝ)..(1 + b), laplaceIntegrand m 1 s
+  set TR := ∫ s in Ioi (1 + a), laplaceIntegrand m 1 s
   set E := Real.exp (-n * κ) with hE
   have hE' : Real.exp (-n * v₀^2/2) = E := by rw [hE, hκ]; congr 1; ring
   rw [hE'] at hdec
   -- the real form of the function
   have hfun : expPartialSumRemainderS (m+1) 1 - ((m+1).factorial : ℂ) * Complex.exp ((m:ℂ)+1) /
       (2*((m:ℂ)+1)^(m+1)) = ((n^2/2 * I + n/2 * (TL - TR + E * (-b - a)) : ℝ) : ℂ) := by
-    rw [← hdec, igAsy_S_eq]
+    rw [← hdec, S_eq]
     push_cast
     rfl
   have hsumC : ∑ j ∈ Finset.range N, ((m:ℂ)+1)^(-(j:ℤ)) • (((γ (j+1) / 2 : ℝ)) : ℂ) =
@@ -1107,13 +1133,13 @@ theorem expPartialSumRemainderS_one_asymptotic  :
       n^2/2 * ∑ j ∈ Finset.range (N+1), n ^ (-((j:ℝ)+1)) • γ j := by
     rw [Finset.sum_range_succ', hγ0, smul_zero, add_zero, Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
-    rw [smul_eq_mul, igAsy_rpow_neg_succ hn0 (j+1)]
+    rw [smul_eq_mul, rpow_neg_succ hn0 (j+1)]
     field_simp
     ring
   have hnorm : ‖((m:ℂ)+1)^(-(N:ℤ))‖ = (n^N)⁻¹ := by
     rw [zpow_neg, zpow_natCast, norm_inv, norm_pow,
       show ‖(m:ℂ)+1‖ = (m:ℝ)+1 by exact_mod_cast Complex.norm_natCast (m+1)]
-  rw [igAsy_rpow_neg_succ hn0 (N+1), Real.norm_eq_abs, Real.norm_eq_abs,
+  rw [rpow_neg_succ hn0 (N+1), Real.norm_eq_abs, Real.norm_eq_abs,
     abs_of_pos (inv_pos.2 (pow_pos hn0 _))] at hCm
   rw [hfun, hsumC, ← Complex.ofReal_sub, Complex.norm_real, Real.norm_eq_abs, hsumR, hnorm]
   set T := TL - TR + E * (-b - a) with hT
@@ -1154,16 +1180,16 @@ theorem expPartialSumRemainderS_neg_one_asymptotic  :
     ∃ c : ℕ → ℂ, (∀ n < 5, c n=([-1/2, 1/8, 1/32, -1/128, -13/512] : List ℂ)[n]!) ∧
         HasAsymptoticExpansion atTop (fun j (n : ℕ) => (n+1 : ℂ)^(-(j : ℤ))) c
         (fun n => expPartialSumRemainderS (n+1) (-1)) := by
-  refine ⟨fun k => (igAsy_d k (-1) : ℂ), ?_, ?_⟩
+  refine ⟨fun k => (remainderCoeff k (-1) : ℂ), ?_, ?_⟩
   · intro n hn
     interval_cases n <;>
-      norm_num [igAsy_d, igAsy_h, igAsy_poly, Polynomial.derivative_mul]
+      norm_num [remainderCoeff, ibpRational, ibpPoly, Polynomial.derivative_mul]
   · intro N
-    obtain ⟨C, hC⟩ := igAsy_S_remainder_bound N (δ := 1) one_pos
+    obtain ⟨C, hC⟩ := S_remainder_bound N (δ := 1) one_pos
     refine IsBigO.of_bound C (Eventually.of_forall fun n => ?_)
     have hm : (0:ℝ) < (n:ℝ)+1 := by positivity
-    have hsum : ∑ j ∈ Finset.range N, ((n:ℂ)+1)^(-(j:ℤ)) • (igAsy_d j (-1) : ℂ) =
-        ∑ k ∈ Finset.range N, (igAsy_d k (-1) : ℂ)/((n:ℂ)+1)^k := by
+    have hsum : ∑ j ∈ Finset.range N, ((n:ℂ)+1)^(-(j:ℤ)) • (remainderCoeff j (-1) : ℂ) =
+        ∑ k ∈ Finset.range N, (remainderCoeff k (-1) : ℂ)/((n:ℂ)+1)^k := by
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [smul_eq_mul, zpow_neg, zpow_natCast, div_eq_mul_inv, mul_comm]
     rw [hsum]
@@ -1177,14 +1203,16 @@ theorem expPartialSumRemainderS_neg_one_asymptotic  :
 def expPartialSumRemainderCoeff (k : ℕ) (x : ℝ) : ℂ :=
   if k=0 then x/(1-x) else (-1 : ℂ)^k*(incGammaLambdaPolynomial k).eval (x : ℂ)/(1-x : ℂ)^(2*k+1)
 
+namespace IncompleteGammaAsymptotics
+
 /-- `b_k = X p_k` for `k ≥ 1`. -/
-theorem igAsy_lambdaPoly_eq {k : ℕ} (hk : 1 ≤ k) :
-    incGammaLambdaPolynomial k = Polynomial.X * (igAsy_poly k).map (algebraMap ℝ ℂ) := by
+theorem lambdaPoly_eq {k : ℕ} (hk : 1 ≤ k) :
+    incGammaLambdaPolynomial k = Polynomial.X * (ibpPoly k).map (algebraMap ℝ ℂ) := by
   induction k, hk using Nat.le_induction with
   | base =>
-    simp [incGammaLambdaPolynomial, igAsy_poly]
+    simp [incGammaLambdaPolynomial, ibpPoly]
   | succ k hk ih =>
-    rw [incGammaLambdaPolynomial, ih, igAsy_poly]
+    rw [incGammaLambdaPolynomial, ih, ibpPoly]
     simp only [Polynomial.derivative_mul, Polynomial.derivative_X, Polynomial.map_add,
       Polynomial.map_mul, Polynomial.map_sub, Polynomial.map_one, Polynomial.map_X,
       Polynomial.map_C, Polynomial.derivative_map]
@@ -1192,26 +1220,28 @@ theorem igAsy_lambdaPoly_eq {k : ℕ} (hk : 1 ≤ k) :
     ring
 
 /-- `b_k(x) = x p_k(x)` for `k ≥ 1`, evaluated at a real point. -/
-theorem igAsy_lambdaPoly_eval {k : ℕ} (hk : 1 ≤ k) (x : ℝ) :
-    (incGammaLambdaPolynomial k).eval (x : ℂ) = x * (((igAsy_poly k).eval x : ℝ) : ℂ) := by
-  rw [igAsy_lambdaPoly_eq hk, Polynomial.eval_mul, Polynomial.eval_X, Polynomial.eval_map,
+theorem lambdaPoly_eval {k : ℕ} (hk : 1 ≤ k) (x : ℝ) :
+    (incGammaLambdaPolynomial k).eval (x : ℂ) = x * (((ibpPoly k).eval x : ℝ) : ℂ) := by
+  rw [lambdaPoly_eq hk, Polynomial.eval_mul, Polynomial.eval_X, Polynomial.eval_map,
     show (x:ℂ) = algebraMap ℝ ℂ x from rfl, Polynomial.eval₂_at_apply]
   rfl
 
 /-- The coefficients `d_k(x)` of 8.11.19 in terms of `h_k`. -/
-theorem igAsy_coeff_eq (k : ℕ) {x : ℝ} (hx : x ≠ 1) :
-    expPartialSumRemainderCoeff k x = (igAsy_d k x : ℂ) := by
-  unfold igAsy_d
+theorem coeff_eq (k : ℕ) {x : ℝ} (hx : x ≠ 1) :
+    expPartialSumRemainderCoeff k x = (remainderCoeff k x : ℂ) := by
+  unfold remainderCoeff
   have hx1 : (1:ℂ) - x ≠ 0 := by
     rw [sub_ne_zero]; exact_mod_cast hx.symm
   unfold expPartialSumRemainderCoeff
   rcases Nat.eq_zero_or_pos k with rfl | hk
-  · simp [igAsy_h_zero]
+  · simp [ibpRational_zero]
   · simp only [hk.ne', ↓reduceIte]
-    rw [igAsy_lambdaPoly_eval hk, igAsy_h]
+    rw [lambdaPoly_eval hk, ibpRational]
     push_cast
     rw [pow_succ]
     field_simp
+
+end IncompleteGammaAsymptotics
 
 /-- Estimate under the stated parameter and domain assumptions: `IsBigO (comap (fun p : ℕ × ℝ =>
 p.1) atTop ⊓ 𝓟 {p : ℕ × ℝ | p.2 ≤ 1-δ}) (fun p => expPartialSumRemainderS (p.1+1) p.2-∑ k ∈
@@ -1222,11 +1252,11 @@ theorem expPartialSumRemainderS_uniform_asymptotic {δ : ℝ} (hδ : 0 < δ) (N 
     IsBigO (comap (fun p : ℕ × ℝ => p.1) atTop ⊓ 𝓟 {p : ℕ × ℝ | p.2 ≤ 1-δ})
         (fun p => expPartialSumRemainderS (p.1+1) p.2-∑ k ∈ Finset.range N,
         expPartialSumRemainderCoeff k p.2/(p.1+1 : ℂ)^k) (fun p => (p.1+1 : ℝ)^(-(N : ℤ))) := by
-  obtain ⟨C, hC⟩ := igAsy_S_remainder_bound N hδ
+  obtain ⟨C, hC⟩ := S_remainder_bound N hδ
   refine IsBigO.of_bound C ?_
   filter_upwards [mem_inf_of_right (mem_principal_self _)] with p hp
   have hp' : p.2 ≠ 1 := fun h => by have : p.2 ≤ 1-δ := hp; linarith
-  rw [Finset.sum_congr rfl fun k _ => by rw [igAsy_coeff_eq k hp']]
+  rw [Finset.sum_congr rfl fun k _ => by rw [coeff_eq k hp']]
   have hm : (0:ℝ) < (p.1:ℝ)+1 := by positivity
   rw [Real.norm_eq_abs, zpow_neg, zpow_natCast, abs_inv, abs_of_pos (by positivity), ← one_div]
   exact hC p.1 p.2 hp

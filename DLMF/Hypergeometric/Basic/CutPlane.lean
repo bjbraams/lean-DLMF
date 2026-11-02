@@ -315,25 +315,25 @@ theorem euler_region_of_shift_eq_zero {b c : ℂ} (hB : shiftB b = 0) (hC : shif
   constructor <;> linarith
 
 /-- Unfolding the recursion when a `c`-shift is needed: the contiguous relation in `c`. -/
-theorem regularizedGaussHGAux_succ_of_pos_c {n : ℕ} {a b c z : ℂ} (h : 0 < shiftC b c) :
-    regularizedGaussHGAux (n + 1) a b c z =
-      (c - a) * regularizedGaussHGAux n a b (c + 1) z + a
-          * regularizedGaussHGAux n (a + 1) b (c + 1) z := by
-  simp only [regularizedGaussHGAux, h, ↓reduceIte]
+theorem regularizedGaussHGByShifts_succ_of_pos_c {n : ℕ} {a b c z : ℂ} (h : 0 < shiftC b c) :
+    regularizedGaussHGByShifts (n + 1) a b c z =
+      (c - a) * regularizedGaussHGByShifts n a b (c + 1) z + a
+          * regularizedGaussHGByShifts n (a + 1) b (c + 1) z := by
+  simp only [regularizedGaussHGByShifts, h, ↓reduceIte]
 
 /-- Unfolding the recursion when only a `b`-shift is needed: the contiguous relation in `b`. -/
-lemma regularizedGaussHGAux_succ_of_pos_b {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
+lemma regularizedGaussHGByShifts_succ_of_pos_b {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
     (hb : 0 < shiftB b) :
-    regularizedGaussHGAux (n + 1) a b c z =
-      regularizedGaussHGAux n a (b + 1) c z - a * z
-          * regularizedGaussHGAux n (a + 1) (b + 1) (c + 1) z := by
-  simp only [regularizedGaussHGAux, hc, hb, ↓reduceIte]
+    regularizedGaussHGByShifts (n + 1) a b c z =
+      regularizedGaussHGByShifts n a (b + 1) c z - a * z
+          * regularizedGaussHGByShifts n (a + 1) (b + 1) (c + 1) z := by
+  simp only [regularizedGaussHGByShifts, hc, hb, ↓reduceIte]
 
 /-- Unfolding the recursion when no shift is needed: Euler's integral. -/
-theorem regularizedGaussHGAux_succ_of_zero {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
-    (hb : ¬ 0 < shiftB b) : regularizedGaussHGAux (n + 1) a b c z
+theorem regularizedGaussHGByShifts_succ_of_zero {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
+    (hb : ¬ 0 < shiftB b) : regularizedGaussHGByShifts (n + 1) a b c z
         = regularizedGaussHGIntegral a b c z := by
-  simp only [regularizedGaussHGAux, hc, hb, ↓reduceIte]
+  simp only [regularizedGaussHGByShifts, hc, hb, ↓reduceIte]
 
 /-- The measures of the recursive calls in the `b`-shift branch. -/
 theorem shiftMeasure_b_step {b c : ℂ} (hc : ¬ 0 < shiftC b c) (hb : 0 < shiftB b) :
@@ -359,8 +359,9 @@ theorem shiftMeasure_b_step {b c : ℂ} (hc : ¬ 0 < shiftC b c) (hb : 0 < shift
   omega
 
 /-- On the unit disk, every stage of the recursion agrees with `𝐅` once the fuel suffices. -/
-lemma regularizedGaussHGAux_eq_regularized (n : ℕ) {a b c : ℂ} (hn : shiftMeasure b c ≤ n) {z : ℂ}
-    (hz : ‖z‖ < 1) : regularizedGaussHGAux n a b c z = regularizedGaussHGFun a b c z := by
+lemma regularizedGaussHGByShifts_eq_regularized (n : ℕ) {a b c : ℂ}
+    (hn : shiftMeasure b c ≤ n) {z : ℂ}
+    (hz : ‖z‖ < 1) : regularizedGaussHGByShifts n a b c z = regularizedGaussHGFun a b c z := by
   induction n generalizing a b c with
   | zero =>
     have h0 : shiftB b = 0 ∧ shiftC b c = 0 := by unfold shiftMeasure at hn; omega
@@ -368,24 +369,24 @@ lemma regularizedGaussHGAux_eq_regularized (n : ℕ) {a b c : ℂ} (hn : shiftMe
     exact regularizedGaussHGIntegral_eq_regularizedGaussHGFun (by linarith) (by linarith) hz
   | succ n ih =>
     by_cases hc : 0 < shiftC b c
-    · rw [regularizedGaussHGAux_succ_of_pos_c hc]
+    · rw [regularizedGaussHGByShifts_succ_of_pos_c hc]
       have hlt := shiftC_add_one_lt hc
       have hn' : shiftMeasure b (c + 1) ≤ n := by unfold shiftMeasure at hn ⊢; omega
       rw [ih hn', ih hn', regularizedGaussHGFun_contiguous_c a b c hz]
     · by_cases hb : 0 < shiftB b
-      · rw [regularizedGaussHGAux_succ_of_pos_b hc hb]
+      · rw [regularizedGaussHGByShifts_succ_of_pos_b hc hb]
         obtain ⟨hm1, hm2⟩ := shiftMeasure_b_step hc hb
         rw [ih (a := a) (b := b + 1) (c := c) (by omega),
           ih (a := a + 1) (b := b + 1) (c := c + 1) (by omega)]
         linear_combination (-1 : ℂ) * regularizedGaussHGFun_contiguous_shift_b a b c hz
-      · rw [regularizedGaussHGAux_succ_of_zero hc hb]
+      · rw [regularizedGaussHGByShifts_succ_of_zero hc hb]
         obtain ⟨h1, h2⟩ := euler_region_of_shift_eq_zero (Nat.eq_zero_of_not_pos hb)
           (Nat.eq_zero_of_not_pos hc)
         exact regularizedGaussHGIntegral_eq_regularizedGaussHGFun (by linarith) (by linarith) hz
 
 /-- Every stage of the recursion is analytic on the cut plane once the fuel suffices. -/
 lemma analyticOnNhd_regularizedGaussHGAux (n : ℕ) {a b c : ℂ} (hn : shiftMeasure b c ≤ n) :
-    AnalyticOnNhd ℂ (fun z => regularizedGaussHGAux n a b c z) cutPlane := by
+    AnalyticOnNhd ℂ (fun z => regularizedGaussHGByShifts n a b c z) cutPlane := by
   induction n generalizing a b c with
   | zero =>
     have h0 : shiftB b = 0 ∧ shiftC b c = 0 := by unfold shiftMeasure at hn; omega
@@ -393,17 +394,17 @@ lemma analyticOnNhd_regularizedGaussHGAux (n : ℕ) {a b c : ℂ} (hn : shiftMea
     exact analyticOnNhd_regularizedGaussHGIntegral a (by linarith) (by linarith)
   | succ n ih =>
     by_cases hc : 0 < shiftC b c
-    · simp_rw [regularizedGaussHGAux_succ_of_pos_c hc]
+    · simp_rw [regularizedGaussHGByShifts_succ_of_pos_c hc]
       have hlt := shiftC_add_one_lt hc
       have hn' : shiftMeasure b (c + 1) ≤ n := by unfold shiftMeasure at hn ⊢; omega
       exact (analyticOnNhd_const.mul (ih hn')).add (analyticOnNhd_const.mul (ih hn'))
     · by_cases hb : 0 < shiftB b
-      · simp_rw [regularizedGaussHGAux_succ_of_pos_b hc hb]
+      · simp_rw [regularizedGaussHGByShifts_succ_of_pos_b hc hb]
         obtain ⟨hm1, hm2⟩ := shiftMeasure_b_step hc hb
         exact (ih (a := a) (b := b + 1) (c := c) (by omega)).sub
           ((analyticOnNhd_const.mul analyticOnNhd_id).mul
             (ih (a := a + 1) (b := b + 1) (c := c + 1) (by omega)))
-      · simp_rw [regularizedGaussHGAux_succ_of_zero hc hb]
+      · simp_rw [regularizedGaussHGByShifts_succ_of_zero hc hb]
         obtain ⟨h1, h2⟩ := euler_region_of_shift_eq_zero (Nat.eq_zero_of_not_pos hb)
           (Nat.eq_zero_of_not_pos hc)
         exact analyticOnNhd_regularizedGaussHGIntegral a (by linarith) (by linarith)
@@ -411,7 +412,7 @@ lemma analyticOnNhd_regularizedGaussHGAux (n : ℕ) {a b c : ℂ} (hn : shiftMea
 /-- On the unit disk the continuation is the regularized Gauss series. -/
 theorem regularizedGaussHG_eq_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHG a b c z = regularizedGaussHGFun a b c z :=
-  regularizedGaussHGAux_eq_regularized _ le_rfl hz
+  regularizedGaussHGByShifts_eq_regularized _ le_rfl hz
 
 /-- The continuation is analytic on the cut plane. -/
 theorem analyticOnNhd_regularizedGaussHG (a b c : ℂ) : AnalyticOnNhd ℂ (regularizedGaussHG a b c)

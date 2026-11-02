@@ -32,8 +32,8 @@ Its spectrum `ODE.separatedSpectrum V L odd0 oddK` is the set of `h` with a nonz
   (`ODE.differentiable_param_of_linear_ode`) that does not vanish identically.
 * `ODE.not_bddAbove_separatedSpectrum`: the spectrum is unbounded above. The zero count of the basic
   solution (or of its derivative) on `[-L, L]` is locally constant in `h` as long as `h` is not
-  an eigenvalue (`ODE.sturmDef_ncard_eq_of_isPreconnected`, using joint continuity in `(h, x)`
-  from an energy estimate), while it tends to infinity by Sturm comparison with
+  an eigenvalue (`ODE.SturmDeformation.ncard_eq_of_isPreconnected`, using joint continuity in
+  `(h, x)` from an energy estimate), while it tends to infinity by Sturm comparison with
   `sin(ω(x + L))`.
 -/
 
@@ -621,7 +621,7 @@ private lemma isSturmLiouvilleSolution_exists_strictMono_zeros (hB : ∀ x, |V x
 theorem isSturmLiouvilleSolution_zeros_Icc_finite (hV : Continuous V) {w : ℝ → ℝ}
     (hw : IsSturmLiouvilleSolution V h w) (hne : w ≠ 0)
     (a b : ℝ) : {x | x ∈ Icc a b ∧ w x = 0}.Finite :=
-  sturmDef_finite (fun x _ => hw.hasDerivAt x) fun _ _ h0 h1 =>
+  SturmDeformation.finite (fun x _ => hw.hasDerivAt x) fun _ _ h0 h1 =>
       hne (isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV hw h0 h1)
 
 /-- Estimate under the stated parameter and domain assumptions: `n ≤ {x | P x}.ncard`. -/
@@ -644,7 +644,8 @@ private lemma zero_count_deformation {Y Y' : ℝ → ℝ → ℝ} {H H₀ a b : 
   have hsub : Ici t₁ ⊆ Ioi H := fun h hh => by
     simp only [mem_Ici, mem_Ioi] at hh ⊢; linarith [le_max_right H₀ H]
   obtain ⟨h₀, hh₀⟩ := hmany ({x | x ∈ Icc a b ∧ Y t₁ x = 0}.ncard + 1)
-  have hc := sturmDef_ncard_eq_of_isPreconnected (Y := Y) (Y' := Y') (Λ := Ioi H) (U := univ)
+  have hc := SturmDeformation.ncard_eq_of_isPreconnected (Y := Y) (Y' := Y')
+      (Λ := Ioi H) (U := univ)
     isOpen_Ioi isOpen_univ (subset_univ _) hcY.continuousOn hcY'.continuousOn
     (fun t ht x _ => hd t ht x) (fun t ht x _ => hs t ht x) isPreconnected_Ici hsub
     (fun t ht => hend t (by simp only [mem_Ici] at ht; linarith [le_max_left H₀ H]))
@@ -687,7 +688,7 @@ theorem not_bddAbove_separatedSpectrum (hV : Continuous V) (hB : ∀ x, |V x| �
       have hcm : StrictMono c := Fin.strictMono_iff_lt_succ.2 fun j =>
         (hc j.castSucc).2.trans (hc j.succ).1
       have hfin : {x | x ∈ Icc (-L) L ∧ deriv (basicSolution V odd0 h) x = 0}.Finite :=
-        sturmDef_finite (fun x _ => (hY h).2.2.2 x) fun x _ h0 h1 => by
+        SturmDeformation.finite (fun x _ => (hY h).2.2.2 x) fun x _ h0 h1 => by
           rcases mul_eq_zero.1 h1 with h2 | h2
           · have := le_abs_self (V x)
             have : 0 ≤ ((N + 1 + 1) * Real.pi / (2 * L)) ^ 2 := sq_nonneg _

@@ -36,8 +36,6 @@ continued fractions, orthogonality, and the stability criterion of DLMF §29.9.
   `Real.lameBk_lt_lameAk_succ`: the interlacing 29.3.1–29.3.4.
 * `Real.lameAk_eq_lameBk`, `Real.lameAk_sub_lameBk_mul_pos`: coalescence and sign,
   29.3.5–29.3.6.
-* `Real.lameAk_add_lameAk_comodulus`, `Real.lameBk_add_lameBk_comodulus`: the duality
-  29.3.7–29.3.8.
 * `Real.lameCF_A0`, `Real.lameCF_A1`, `Real.lameCF_B1`, `Real.lameCF_B2`,
   `Real.lameCF_A0_terminating`: the continued-fraction equation 29.3.10.
 * `Real.lameEck_even_orthogonal`, `Real.lameEck_odd_orthogonal`, `Real.lameEsk_odd_orthogonal`,
@@ -46,6 +44,9 @@ continued fractions, orthogonality, and the stability criterion of DLMF §29.9.
   DLMF §29.9.
 
 ## Implementation notes
+
+The relations 29.3.7–29.3.8 between the moduli `k` and `√(1 - k²)` are proved from the Lamé
+polynomials in `DLMF.Lame.Polynomials.Comodulus`.
 
 The spectral theorems are proved from the separated Sturm–Liouville theory of
 `DLMFMathlib.Analysis.ODE.SturmLiouville`, with Lamé's equation written as `w'' = (V - h) w` for
@@ -996,21 +997,6 @@ theorem Real.lameAk_eq_lameBk (hk0 : 0 < k) (hk1 : k < 1) {m n : ℕ} (hn : n < 
 theorem Real.lameAk_sub_lameBk_mul_pos (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ}
     (hm : 1 ≤ m) (hνm : ∀ j : ℕ, j < m → ν ≠ j) :
     0 < (Real.lameAk ν m k - Real.lameBk ν m k) * ∏ j ∈ Finset.range m, (ν - j) := by
-  sorry
-
-/-- 29.3.7: for a nonnegative integer `ν = n`, `a^m_n(k²) + a^{n-m}_n(1 - k²) = n(n+1)`,
-`m = 0, 1, …, n` (the second eigenvalue has modulus `k' = √(1 - k²)`). Admitted. -/
-@[dlmf 29.3.E7]
-theorem Real.lameAk_add_lameAk_comodulus (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) :
-    Real.lameAk n m k + Real.lameAk n (n - m) (Real.sqrt (1 - k ^ 2)) = n * (n + 1) := by
-  sorry
-
-/-- 29.3.8: for a nonnegative integer `ν = n`, `b^m_n(k²) + b^{n-m+1}_n(1 - k²) = n(n+1)`,
-`m = 1, …, n`. Admitted. -/
-@[dlmf 29.3.E8]
-theorem Real.lameBk_add_lameBk_comodulus (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm1 : 1 ≤ m)
-    (hm : m ≤ n) :
-    Real.lameBk n m k + Real.lameBk n (n - m + 1) (Real.sqrt (1 - k ^ 2)) = n * (n + 1) := by
   sorry
 
 /-! ### Continued fractions (§29.3(iii)) -/

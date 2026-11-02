@@ -19,7 +19,7 @@ MacMahon's generating functions, the recurrence and the asymptotic form of `pp(n
 * `sum_planePartitionsIn_pow`: the `q`-analogue of the box formula (DLMF 26.12.21).
 * `sum_symmetric_planePartitionsIn_pow`, `sum_cyclicallySymmetric_planePartitionsIn_pow`:
   DLMF 26.12.22, 26.12.23.
-* `sum_descendingPPIn_pow`: descending plane partitions (DLMF 26.12.24, corrected).
+* `sum_descendingPlanePartitionIn_pow`: descending plane partitions (DLMF 26.12.24, corrected).
 * `planePartitionCount_recurrence`: `n pp(n) = ∑_{j=1}^n pp(n-j) σ₂(j)` (DLMF 26.12.25).
 * `planePartitionCount_isEquivalent`: the asymptotic form of `pp(n)` (DLMF 26.12.26).
 
@@ -727,8 +727,8 @@ theorem sum_cyclicallySymmetric_planePartitionsIn_pow {q : ℂ}
 `∏_{1≤h≤j≤r} (1-q^{r+h+j-1})/(1-q^{2h+j-1})` (DLMF prints `h < j`; see the module docstring),
 for `q` not a root of unity. -/
 @[dlmf 26.12.E24 "corrected: product over 1 ≤ h ≤ j ≤ r (printed h < j)"]
-theorem sum_descendingPPIn_pow {q : ℂ} (hq : ∀ m : ℕ, 0 < m → q ^ m ≠ 1) (r : ℕ) :
-    ∑ᶠ d : DescendingPPIn r, q ^ (d.1.map List.sum).sum =
+theorem sum_descendingPlanePartitionIn_pow {q : ℂ} (hq : ∀ m : ℕ, 0 < m → q ^ m ≠ 1) (r : ℕ) :
+    ∑ᶠ d : DescendingPlanePartitionIn r, q ^ (d.1.map List.sum).sum =
       ∏ h ∈ Icc 1 r, ∏ j ∈ Icc h r, (1 - q ^ (r + h + j - 1)) / (1 - q ^ (2 * h + j - 1)) := by
   sorry
 

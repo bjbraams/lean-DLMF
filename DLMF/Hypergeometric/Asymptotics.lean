@@ -27,7 +27,7 @@ public import DLMF.Hypergeometric.Continuation
 * `large_denominator_expansion`: the large-`c` expansion, DLMF 15.12.2.
 * `large_denominator_shift_expansion`: DLMF 15.12.3.
 * `large_denominator_generating_hasSum`: convergence of the generating function, DLMF 15.12.4.
-* `hcub_large_denominator_shift`: the expansion 15.12.2 along a shifted ray `c + λ` with
+* `LargeDenominator.large_denominator_shift`: the expansion 15.12.2 along a shifted ray `c + λ` with
   complex `c`.
 * `large_opposite_parameters_bessel`: the Bessel approximation, DLMF 15.12.5–15.12.6.
 
@@ -207,14 +207,14 @@ theorem large_denominator_generating_hasSum (a b c z : ℂ) :
 
 For `re b > 0`, Euler's integral 15.6.1 in the variable `s = 1 - e^{-t}` is the Laplace transform
 `∫₀^∞ e^{-λt} t^{b-1} q(t) dt` of the generating function 15.12.4, and Watson's lemma gives 15.12.3
-(`hcub_largeDen_base`). For every `b`, the expansion 15.12.2 along the ray `c + λ`
-(`hcub_large_denominator_shift`) multiplied by the Gamma-ratio expansion 5.11.13 gives an
-expansion of the same function with explicit coefficients `hcub_largeDenMix`
-(`hcub_largeDen_mix`). Uniqueness of asymptotic expansions identifies the coefficients for
-`re b > 0`; both sides are entire in `b` (the Taylor coefficients `q_k` through Cauchy's integral
-formula, `hcub_differentiable_iteratedDeriv`), so the identity theorem gives the coefficient
-identity for all `b` (`hcub_largeDenMix_eq`). The same scheme proves 13.8.2 in
-`DLMF.Confluent.Asymptotics`.
+(`LargeDenominator.isBigO_base`). For every `b`, the expansion 15.12.2 along the ray `c + λ`
+(`LargeDenominator.large_denominator_shift`) multiplied by the Gamma-ratio expansion 5.11.13 gives
+an expansion of the same function with explicit coefficients `LargeDenominator.mixedCoeff`
+(`LargeDenominator.isBigO_mixed`). Uniqueness of asymptotic expansions identifies the coefficients
+for `re b > 0`; both sides are entire in `b` (the Taylor coefficients `q_k` through Cauchy's
+integral formula, `LargeDenominator.differentiable_iteratedDeriv`), so the identity theorem gives
+the coefficient identity for all `b` (`LargeDenominator.mixedCoeff_eq`). The same scheme proves
+13.8.2 in `DLMF.Confluent.Asymptotics`.
 -/
 
 section ShiftExpansion
@@ -223,7 +223,7 @@ open MeasureTheory Set Asymptotics
 open scoped Nat
 
 /-- The map `t ↦ 1 - e^{-t}` sends `(0, ∞)` onto `(0, 1)`. -/
-theorem hcub_image : (fun t : ℝ => 1 - Real.exp (-t)) '' Ioi 0 = Ioo 0 1 := by
+theorem LargeDenominator.image : (fun t : ℝ => 1 - Real.exp (-t)) '' Ioi 0 = Ioo 0 1 := by
   ext s
   simp only [mem_image, mem_Ioi, mem_Ioo]
   constructor
@@ -238,21 +238,21 @@ theorem hcub_image : (fun t : ℝ => 1 - Real.exp (-t)) '' Ioi 0 = Ioo 0 1 := by
     · rw [neg_neg, Real.exp_log (by linarith)]; ring
 
 /-- The derivative of `t ↦ 1 - e^{-t}` is `e^{-t}`. -/
-theorem hcub_hasDerivWithinAt (t : ℝ) :
+theorem LargeDenominator.hasDerivWithinAt (t : ℝ) :
     HasDerivWithinAt (fun t : ℝ => 1 - Real.exp (-t)) (Real.exp (-t)) (Ioi 0) t := by
   have h := ((Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)).const_sub 1
   refine (h.congr_deriv ?_).hasDerivWithinAt
   simp
 
 /-- The map `t ↦ 1 - e^{-t}` is injective on `(0, ∞)`. -/
-theorem hcub_injOn : InjOn (fun t : ℝ => 1 - Real.exp (-t)) (Ioi 0) := by
+theorem LargeDenominator.injOn : InjOn (fun t : ℝ => 1 - Real.exp (-t)) (Ioi 0) := by
   intro x _ y _ h
   have : Real.exp (-x) = Real.exp (-y) := by simp only at h; linarith
   have := Real.exp_injective this
   linarith
 
 /-- For `b > 0`, `b^a b^{-(s + a)} = (1/b)^s`. -/
-theorem hcub_cpow_mul_cpow_neg {b : ℝ} (hb : 0 < b) (a : ℂ) (s : ℕ) :
+theorem LargeDenominator.cpow_mul_cpow_neg {b : ℝ} (hb : 0 < b) (a : ℂ) (s : ℕ) :
     (b : ℂ) ^ a * (b : ℂ) ^ (-((s : ℂ) + a)) = ((b : ℂ)⁻¹) ^ s := by
   have hb0 : (b : ℂ) ≠ 0 := by exact_mod_cast hb.ne'
   rw [← cpow_add _ _ hb0, show a + -((s : ℂ) + a) = -(s : ℂ) by ring, cpow_neg, cpow_natCast,
@@ -260,7 +260,7 @@ theorem hcub_cpow_mul_cpow_neg {b : ℝ} (hb : 0 < b) (a : ℂ) (s : ℕ) :
 
 /-- `b^p Γ(b+c-p)/Γ(b+c+s) = ∑_{k<n-s} G_k b^{-s-k} + O(b^{-n})`, from the Gamma-ratio
 expansion 5.11.13. -/
-theorem hcub_ratio_shift (p c : ℂ) {s n : ℕ} (hs : s ≤ n) :
+theorem LargeDenominator.ratio_shift (p c : ℂ) {s n : ℕ} (hs : s ≤ n) :
     (fun b : ℝ => (b : ℂ) ^ p * Gamma ((b : ℂ) + (c - p)) / Gamma ((b : ℂ) + (c + s)) -
       ∑ k ∈ Finset.range (n - s),
         DLMF.Gamma.stirlingRatioG (c - p) (c + s) k * ((b : ℂ)⁻¹) ^ (s + k))
@@ -274,15 +274,15 @@ theorem hcub_ratio_shift (p c : ℂ) {s n : ℕ} (hs : s ≤ n) :
     congr 1
     · ring
     · refine Finset.sum_congr rfl fun k _ => ?_
-      have := hcub_cpow_mul_cpow_neg hb p s
+      have := LargeDenominator.cpow_mul_cpow_neg hb p s
       rw [show c - p - (c + s) = -((s : ℂ) + p) by ring, pow_add, ← this, inv_pow]
       ring
   · filter_upwards [eventually_gt_atTop 0] with b hb
     rw [show c - p - (c + s) - ((n - s : ℕ) : ℂ) = -((n : ℂ) + p) by push_cast [hs]; ring,
-      hcub_cpow_mul_cpow_neg hb]
+      LargeDenominator.cpow_mul_cpow_neg hb]
 
 /-- The scale `b ↦ b^{-n}` (complex-valued) at `+∞`. -/
-theorem hcub_isAsymptoticScale :
+theorem LargeDenominator.isAsymptoticScale :
     IsAsymptoticScale atTop (fun (n : ℕ) (b : ℝ) => ((b : ℂ)⁻¹) ^ n) := by
   intro n
   have h0 : (fun b : ℝ => (b : ℂ)⁻¹) =o[atTop] (fun _ => (1 : ℂ)) := by
@@ -293,12 +293,12 @@ theorem hcub_isAsymptoticScale :
   simpa [pow_succ, mul_comm] using this
 
 /-- The powers `(1/b)ⁿ` are frequently nonzero as `b → ∞`. -/
-theorem hcub_frequently_ne (n : ℕ) : ∃ᶠ b : ℝ in atTop, ((b : ℂ)⁻¹) ^ n ≠ 0 := by
+theorem LargeDenominator.frequently_ne (n : ℕ) : ∃ᶠ b : ℝ in atTop, ((b : ℂ)⁻¹) ^ n ≠ 0 := by
   refine (eventually_gt_atTop (0 : ℝ)).mono (fun b hb => ?_) |>.frequently
   exact pow_ne_zero _ (inv_ne_zero (by exact_mod_cast hb.ne'))
 
 /-- The Stirling-ratio coefficient `stirlingRatioG x c k` is entire in `x`. -/
-theorem hcub_differentiable_stirlingRatioG (c : ℂ) (k : ℕ) :
+theorem LargeDenominator.differentiable_stirlingRatioG (c : ℂ) (k : ℕ) :
     Differentiable ℂ (fun x => DLMF.Gamma.stirlingRatioG x c k) := by
   induction k using Nat.strong_induction_on with
   | _ k ih =>
@@ -318,7 +318,8 @@ theorem hcub_differentiable_stirlingRatioG (c : ℂ) (k : ℕ) :
         (differentiable_const _))).div_const _).mul (ih _ (by omega))
 
 /-- For `‖t‖ ≤ 1/2`, `(eᵗ - 1)/t` has positive real part. -/
-theorem hcub_expSubOneDiv_re_pos {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : 0 < (expSubOneDiv t).re := by
+theorem LargeDenominator.expSubOneDiv_re_pos {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : 0 <
+    (expSubOneDiv t).re := by
   rcases eq_or_ne t 0 with rfl | ht0
   · simp [expSubOneDiv]
   have h := Complex.norm_exp_sub_one_sub_id_le (x := t) (by linarith)
@@ -334,12 +335,13 @@ theorem hcub_expSubOneDiv_re_pos {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : 0 < (expSu
   linarith [h2.1]
 
 /-- For `‖t‖ ≤ 1/2`, `(eᵗ - 1)/t` lies in the slit plane. -/
-theorem hcub_expSubOneDiv_mem_slitPlane {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : expSubOneDiv t ∈ slitPlane :=
-  mem_slitPlane_iff.mpr (Or.inl (hcub_expSubOneDiv_re_pos ht))
+theorem LargeDenominator.expSubOneDiv_mem_slitPlane {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : expSubOneDiv
+    t ∈ slitPlane :=
+  mem_slitPlane_iff.mpr (Or.inl (LargeDenominator.expSubOneDiv_re_pos ht))
 
 /-- Holomorphy in a parameter of Taylor coefficients, through Cauchy's integral formula on the
 circle of radius `r`. -/
-theorem hcub_differentiable_iteratedDeriv {G : ℂ → ℂ → ℂ} {r : ℝ} (hr : 0 < r)
+theorem LargeDenominator.differentiable_iteratedDeriv {G : ℂ → ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hcont : ∀ a : ℂ, ∀ t : ℂ, ‖t‖ = r → ContinuousAt (fun p : ℂ × ℂ => G p.1 p.2) (a, t))
     (hdt : ∀ a : ℂ, DifferentiableOn ℂ (G a) (Metric.closedBall 0 r))
     (hda : ∀ t : ℂ, ‖t‖ = r → Differentiable ℂ (fun a => G a t)) (N : ℕ) :
@@ -347,7 +349,8 @@ theorem hcub_differentiable_iteratedDeriv {G : ℂ → ℂ → ℂ} {r : ℝ} (h
   Complex.differentiable_iteratedDeriv_param hr hcont hdt hda N
 
 /-- An elementary bound `A/(P F) ≤ M R⁻¹ (A'/F²)` used in the error estimates. -/
-lemma hcub_div_le_aux {A A' P F M R : ℝ} (hA : 0 ≤ A) (hAA' : A ≤ A') (hP : 0 < P) (hF : 0 < F)
+lemma LargeDenominator.div_mul_le {A A' P F M R : ℝ} (hA : 0 ≤ A) (hAA' : A ≤ A')
+    (hP : 0 < P) (hF : 0 < F)
     (hR : 0 < R) (hRF : R * F ≤ M * P) : A / (P * F) ≤ M * R⁻¹ * (A' / (F * F)) := by
   have hA' : 0 ≤ A' := hA.trans hAA'
   calc A / (P * F) ≤ A' / (P * F) := div_le_div_of_nonneg_right hAA' (by positivity)
@@ -358,7 +361,7 @@ lemma hcub_div_le_aux {A A' P F M R : ℝ} (hA : 0 ≤ A) (hAA' : A ≤ A') (hP 
 
 /-- The large-denominator expansion 15.12.2 along a shifted ray `c + λ`, `λ → +∞`, with complex
 `c`. -/
-theorem hcub_large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
+theorem LargeDenominator.large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
     (fun l : ℝ => ₂F₁ a b (c + l) z - ∑ k ∈ Finset.range m, gaussHGCoeff a b (c + l) k * z ^ k)
       =O[atTop] fun l : ℝ => ((l : ℂ)⁻¹) ^ m := by
   set g : ℕ → ℝ := fun k => ‖gaussHGCoeff (‖a‖ : ℂ) (‖b‖ : ℂ) 1 k * z ^ k‖ with hg
@@ -400,7 +403,7 @@ theorem hcub_large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) 
       simp only [hg, gaussHGCoeff, norm_mul, norm_div, norm_pow, Complex.norm_natCast,
         poch_nat_one]; ring
     rw [e1, e2]
-    refine hcub_div_le_aux (by positivity) ?_ hPC hfac (by positivity) ?_
+    refine LargeDenominator.div_mul_le (by positivity) ?_ hPC hfac (by positivity) ?_
     · gcongr
     · nlinarith [hpos, hpc, (by positivity : (0 : ℝ) ≤ m.factorial)]
   have hgs' : Summable fun k => g (k + m) := (summable_nat_add_iff m).mpr hgs
@@ -427,7 +430,7 @@ theorem hcub_large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) 
 
 /-- Taylor's theorem for the generating function: the remainder after `N` terms is `O(‖t‖^N)` at
   `0`. -/
-theorem hcub_largeDen_taylor (a b c z : ℂ) (N : ℕ) :
+theorem LargeDenominator.isBigO_taylor (a b c z : ℂ) (N : ℕ) :
     (fun t => largeDenominatorGenerating a b c z t -
       ∑ n ∈ Finset.range N, largeDenominatorCoeff a b c z n * t ^ n) =O[𝓝 0] fun t => ‖t‖ ^ N := by
   have h := (analyticAt_largeDenominatorGenerating a b c
@@ -438,7 +441,7 @@ theorem hcub_largeDen_taylor (a b c z : ℂ) (N : ℕ) :
     FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, largeDenominatorCoeff]
 
 /-- Euler's integrand for `F(a,b;c+λ;z)` in the variable `s = 1 - e^{-t}`. -/
-theorem hcub_subst₂ (a b c z : ℂ) (l : ℝ) {t : ℝ} (ht : 0 < t) :
+theorem LargeDenominator.subst (a b c z : ℂ) (l : ℝ) {t : ℝ} (ht : 0 < t) :
     |Real.exp (-t)| • (((1 - Real.exp (-t) : ℝ) : ℂ) ^ (b - 1) *
       (1 - ((1 - Real.exp (-t) : ℝ) : ℂ)) ^ (c + l - b - 1) *
         (1 - z * ((1 - Real.exp (-t) : ℝ) : ℂ)) ^ (-a)) =
@@ -479,19 +482,22 @@ theorem hcub_subst₂ (a b c z : ℂ) (l : ℝ) {t : ℝ} (ht : 0 < t) :
 
 /-- Euler's integral with denominator `c + l`, rewritten under `s = 1 - e^{-t}` as a Laplace
   integral of the generating function. -/
-theorem hcub_euler_eq_laplace₂ (a b c z : ℂ) (l : ℝ) :
+theorem LargeDenominator.euler_eq_laplace (a b c z : ℂ) (l : ℝ) :
     ∫ s : ℝ in (0 : ℝ)..1, (s : ℂ) ^ (b - 1) * (1 - (s : ℂ)) ^ (c + l - b - 1) *
       (1 - z * s) ^ (-a) =
       ∫ t in Ioi (0 : ℝ), Real.exp (-l * t) •
         ((t : ℂ) ^ (b - 1) * largeDenominatorGenerating a b c z t) := by
-  rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo, ← hcub_image,
-    integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi (fun t _ => hcub_hasDerivWithinAt t)
-      hcub_injOn]
+  rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo,
+      ← LargeDenominator.image,
+    integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi
+        (fun t _ => LargeDenominator.hasDerivWithinAt t)
+      LargeDenominator.injOn]
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
-  exact hcub_subst₂ a b c z l ht
+  exact LargeDenominator.subst a b c z l ht
 
 /-- For `‖z‖ < 1` and `s ∈ [0, 1]`, `1 - z s` lies in the slit plane. -/
-theorem hcub_one_sub_mul_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ} (hs : s ∈ Icc (0 : ℝ) 1) :
+theorem LargeDenominator.one_sub_mul_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ}
+    (hs : s ∈ Icc (0 : ℝ) 1) :
     1 - z * s ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
   have h1 : ‖z * s‖ < 1 := by
@@ -503,27 +509,27 @@ theorem hcub_one_sub_mul_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ} (h
 
 /-- The Laplace integrand `e^{-l t} t^{b-1} G(t)` is integrable on `(0, ∞)` when `Re b > 0` and `l >
   Re (b - c)`. -/
-theorem hcub_integrableOn₂ (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re) {l : ℝ}
+theorem LargeDenominator.integrableOn (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re) {l : ℝ}
     (hl : (b - c).re < l) :
     IntegrableOn (fun t : ℝ => Real.exp (-l * t) •
       ((t : ℂ) ^ (b - 1) * largeDenominatorGenerating a b c z t)) (Ioi 0) := by
   have hβ := betaIntegral_convergent (u := b) (v := c + l - b) hb (by simp at hl ⊢; linarith)
   have hcont : ContinuousOn (fun s : ℝ => (1 - z * s) ^ (-a)) (Icc 0 1) := fun s hs =>
     ((continuous_const.sub (continuous_const.mul continuous_ofReal)).continuousAt.cpow
-      continuousAt_const (hcub_one_sub_mul_mem_slitPlane hz hs)).continuousWithinAt
+      continuousAt_const (LargeDenominator.one_sub_mul_mem_slitPlane hz hs)).continuousWithinAt
   have h1 : IntervalIntegrable (fun s : ℝ => (s : ℂ) ^ (b - 1) * (1 - (s : ℂ)) ^ (c + l - b - 1) *
       (1 - z * s) ^ (-a)) volume 0 1 := by
     refine hβ.mul_continuousOn ?_
     rwa [uIcc_of_le zero_le_one]
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one] at h1
   have h2 := h1.mono_set Ioo_subset_Ioc_self
-  rw [← hcub_image, integrableOn_image_iff_integrableOn_abs_deriv_smul measurableSet_Ioi
-    (fun t _ => hcub_hasDerivWithinAt t) hcub_injOn] at h2
-  refine h2.congr_fun (fun t ht => hcub_subst₂ a b c z l ht) measurableSet_Ioi
+  rw [← LargeDenominator.image, integrableOn_image_iff_integrableOn_abs_deriv_smul measurableSet_Ioi
+    (fun t _ => LargeDenominator.hasDerivWithinAt t) LargeDenominator.injOn] at h2
+  refine h2.congr_fun (fun t ht => LargeDenominator.subst a b c z l ht) measurableSet_Ioi
 
 
 /-- Watson's lemma for the Laplace form of Euler's integral: 15.12.3 when `re b > 0`. -/
-theorem hcub_largeDen_base (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re) (m : ℕ) :
+theorem LargeDenominator.isBigO_base (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re) (m : ℕ) :
     (fun l : ℝ => Gamma (c - b + l) / Gamma (c + l) * (l : ℂ) ^ b * ₂F₁ a b (c + l) z -
        ∑ k ∈ Finset.range m, poch b k * largeDenominatorCoeff a b c z k * ((l : ℂ)⁻¹) ^ k)
       =O[atTop] fun l => ((l : ℂ)⁻¹) ^ m := by
@@ -538,7 +544,7 @@ theorem hcub_largeDen_base (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < 
       have hc : Tendsto (fun t : ℝ => (t : ℂ)) (𝓝[>] 0) (𝓝 0) := by
         have := (continuous_ofReal.tendsto (0 : ℝ)).mono_left (nhdsWithin_le_nhds (s := Ioi 0))
         simpa using this
-      exact (hcub_largeDen_taylor a b c z N).comp_tendsto hc
+      exact (LargeDenominator.isBigO_taylor a b c z N).comp_tendsto hc
     have hT' : (fun t : ℝ => largeDenominatorGenerating a b c z t - ∑ k ∈ Finset.range N,
         largeDenominatorCoeff a b c z k * (t : ℂ) ^ k) =O[𝓝[>] 0] fun t : ℝ => (t : ℂ) ^ N :=
       hT.trans (IsBigO.of_bound 1 (Eventually.of_forall fun t => by simp))
@@ -559,7 +565,7 @@ theorem hcub_largeDen_base (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < 
         show (N : ℝ) + b.re - 1 = (b - 1).re + N by simp; ring, Real.rpow_add ht',
         Real.rpow_natCast]
   have hW := hasAsymptoticExpansion_integral_exp_smul_cpow (μ := b) (c := (b - c).re + 1) hb
-    (hcub_integrableOn₂ a b c hz hb (by linarith)) hF m
+    (LargeDenominator.integrableOn a b c hz hb (by linarith)) hF m
   have hm := (isBigO_refl (fun l : ℝ => (l : ℂ) ^ b / Gamma b) atTop).mul hW
   have hGb : Gamma b ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos hb)
   refine (hm.congr' ?_ ?_).trans (isBigO_const_mul_self (Gamma b)⁻¹ _ atTop)
@@ -570,7 +576,7 @@ theorem hcub_largeDen_base (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < 
       linarith
     have hG1 : Gamma (c + l) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos hcl)
     have hG2 : Gamma (c + l - b) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos hcb)
-    rw [ordinaryHypergeometric_eq_integral hb hcb hz, hcub_euler_eq_laplace₂,
+    rw [ordinaryHypergeometric_eq_integral hb hcb hz, LargeDenominator.euler_eq_laplace,
       show c - b + (l : ℂ) = c + l - b by ring]
     simp only [smul_eq_mul, mul_sub, Finset.mul_sum]
     congr 1
@@ -582,27 +588,27 @@ theorem hcub_largeDen_base (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < 
         rw [add_comm]
         field_simp at h1
         linear_combination -h1
-      rw [hp, ← hcub_cpow_mul_cpow_neg hl0 b s]
+      rw [hp, ← LargeDenominator.cpow_mul_cpow_neg hl0 b s]
       field_simp
   · filter_upwards [eventually_gt_atTop 0] with l hl
-    rw [← hcub_cpow_mul_cpow_neg hl b m]
+    rw [← LargeDenominator.cpow_mul_cpow_neg hl b m]
     field_simp
 
 /-- Coefficients of 15.12.2 (on the ray `c + λ`) re-expanded in powers of `1/λ` after
 multiplication by `λ^b Γ(c-b+λ)/Γ(c+λ)`. -/
-noncomputable def hcub_largeDenMix (a b c z : ℂ) (N : ℕ) : ℂ :=
+noncomputable def LargeDenominator.mixedCoeff (a b c z : ℂ) (N : ℕ) : ℂ :=
   ∑ k ∈ Finset.range (N + 1), poch a k * poch b k * z ^ k / k ! *
     DLMF.Gamma.stirlingRatioG (c - b) (c + k) (N - k)
 
 /-- 15.12.2 on the ray `c + λ` re-expanded, for all `b`. -/
-theorem hcub_largeDen_mix (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
+theorem LargeDenominator.isBigO_mixed (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
     (fun l : ℝ => Gamma (c - b + l) / Gamma (c + l) * (l : ℂ) ^ b * ₂F₁ a b (c + l) z -
-       ∑ N ∈ Finset.range m, hcub_largeDenMix a b c z N * ((l : ℂ)⁻¹) ^ N)
+       ∑ N ∈ Finset.range m, LargeDenominator.mixedCoeff a b c z N * ((l : ℂ)⁻¹) ^ N)
       =O[atTop] fun l => ((l : ℂ)⁻¹) ^ m := by
-  have h1 := hcub_large_denominator_shift a b c hz m
+  have h1 := LargeDenominator.large_denominator_shift a b c hz m
   have hR : (fun l : ℝ => (l : ℂ) ^ b * Gamma ((l : ℂ) + (c - b)) / Gamma ((l : ℂ) + (c + 0)))
       =O[atTop] fun _ => (1 : ℂ) := by
-    have h := hcub_ratio_shift b c (s := 0) (n := 0) le_rfl
+    have h := LargeDenominator.ratio_shift b c (s := 0) (n := 0) le_rfl
     simpa using h
   have h2 := (hR.mul h1).congr_right fun l => one_mul _
   have h3 : (fun l : ℝ => ∑ k ∈ Finset.range m, poch a k * poch b k * z ^ k / k ! *
@@ -610,7 +616,7 @@ theorem hcub_largeDen_mix (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
         ∑ j ∈ Finset.range (m - k),
           DLMF.Gamma.stirlingRatioG (c - b) (c + k) j * ((l : ℂ)⁻¹) ^ (k + j)))
       =O[atTop] fun l => ((l : ℂ)⁻¹) ^ m :=
-    IsBigO.fun_sum fun k hk => (hcub_ratio_shift b c
+    IsBigO.fun_sum fun k hk => (LargeDenominator.ratio_shift b c
       (Finset.mem_range.mp hk).le).const_mul_left _
   refine (h2.add h3).congr' ?_ EventuallyEq.rfl
   filter_upwards [eventually_gt_atTop (|c.re| + 1)] with l hl
@@ -620,7 +626,7 @@ theorem hcub_largeDen_mix (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
   have hflip := Finset.sum_range_diag_flip m fun k j =>
     poch a k * poch b k * z ^ k / k ! *
       (DLMF.Gamma.stirlingRatioG (c - b) (c + k) j * ((l : ℂ)⁻¹) ^ (k + j))
-  simp only [hcub_largeDenMix, Finset.sum_mul]
+  simp only [LargeDenominator.mixedCoeff, Finset.sum_mul]
   have hN : ∀ n ∈ Finset.range m, ∑ k ∈ Finset.range (n + 1),
       poch a k * poch b k * z ^ k / k ! * DLMF.Gamma.stirlingRatioG (c - b) (c + k) (n - k) *
         ((l : ℂ)⁻¹) ^ n =
@@ -657,28 +663,33 @@ theorem hcub_largeDen_mix (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
 
 
 /-- For `re b > 0` the re-expanded coefficients of 15.12.2 are those of 15.12.3. -/
-theorem hcub_largeDenMix_eq_of_re_pos (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re)
-    (N : ℕ) : hcub_largeDenMix a b c z N = poch b N * largeDenominatorCoeff a b c z N := by
-  have h := HasAsymptoticExpansion.unique hcub_isAsymptoticScale hcub_frequently_ne
-    (a := hcub_largeDenMix a b c z) (b := fun N => poch b N * largeDenominatorCoeff a b c z N)
+theorem LargeDenominator.mixedCoeff_eq_of_re_pos (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re)
+    (N : ℕ) : LargeDenominator.mixedCoeff a b c z N = poch b N *
+        largeDenominatorCoeff a b c z N := by
+  have h := HasAsymptoticExpansion.unique LargeDenominator.isAsymptoticScale
+      LargeDenominator.frequently_ne
+    (a := LargeDenominator.mixedCoeff a b c z)
+        (b := fun N => poch b N * largeDenominatorCoeff a b c z N)
     (f := fun l : ℝ => Gamma (c - b + l) / Gamma (c + l) * (l : ℂ) ^ b * ₂F₁ a b (c + l) z)
-    (fun n => (hcub_largeDen_mix a b c hz n).congr_left fun l => by
+    (fun n => (LargeDenominator.isBigO_mixed a b c hz n).congr_left fun l => by
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
-    (fun n => (hcub_largeDen_base a b c hz hb n).congr_left fun l => by
+    (fun n => (LargeDenominator.isBigO_base a b c hz hb n).congr_left fun l => by
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
   exact congrFun h N
 
-/-- The finite mixed sum `hcub_largeDenMix a b c z N` is entire in `b`. -/
-theorem hcub_differentiable_largeDenMix (a c z : ℂ) (N : ℕ) :
-    Differentiable ℂ (fun b => hcub_largeDenMix a b c z N) := by
-  unfold hcub_largeDenMix
+/-- The finite mixed sum `LargeDenominator.mixedCoeff a b c z N` is entire in `b`. -/
+theorem LargeDenominator.differentiable_mixedCoeff (a c z : ℂ) (N : ℕ) :
+    Differentiable ℂ (fun b => LargeDenominator.mixedCoeff a b c z N) := by
+  unfold LargeDenominator.mixedCoeff
   refine Differentiable.fun_sum fun k _ => ?_
   exact ((((differentiable_const _).mul (Polynomial.differentiable _)).mul
     (differentiable_const _)).div_const _).mul
-    ((hcub_differentiable_stirlingRatioG _ _).comp ((differentiable_const _).sub differentiable_id))
+    ((LargeDenominator.differentiable_stirlingRatioG _ _).comp
+        ((differentiable_const _).sub differentiable_id))
 
 /-- For `‖z‖ < 1` and `‖t‖ ≤ 1/2`, `1 - z + z e^{-t}` lies in the slit plane. -/
-theorem hcub_one_sub_exp_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) :
+theorem LargeDenominator.one_sub_exp_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {t : ℂ}
+    (ht : ‖t‖ ≤ 1 / 2) :
     1 - z + z * exp (-t) ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
   have h1 : ‖exp (-t) - 1‖ ≤ 1 := by
@@ -692,7 +703,8 @@ theorem hcub_one_sub_exp_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {t : ℂ} (h
   linarith [h3.1]
 
 /-- The large-denominator coefficients are entire functions of `b`. -/
-theorem hcub_differentiable_largeDenominatorCoeff (a c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (N : ℕ) :
+theorem LargeDenominator.differentiable_largeDenominatorCoeff (a c : ℂ) {z : ℂ}
+    (hz : ‖z‖ < 1) (N : ℕ) :
     Differentiable ℂ (fun b => largeDenominatorCoeff a b c z N) := by
   have hE : ∀ t : ℂ, DifferentiableAt ℂ expSubOneDiv t := fun t =>
     (analyticAt_expSubOneDiv t).differentiableAt
@@ -700,8 +712,9 @@ theorem hcub_differentiable_largeDenominatorCoeff (a c : ℂ) {z : ℂ} (hz : �
       (fun t : ℂ => exp (t * (1 - c)) * (1 - z + z * exp (-t)) ^ (-a)) t := fun t ht =>
     (by fun_prop : DifferentiableAt ℂ (fun t : ℂ => exp (t * (1 - c))) t).mul
       ((by fun_prop : DifferentiableAt ℂ (fun t : ℂ => 1 - z + z * exp (-t)) t).cpow
-        (differentiableAt_const _) (hcub_one_sub_exp_mem_slitPlane hz ht))
-  have h := hcub_differentiable_iteratedDeriv (G := fun b t => largeDenominatorGenerating a b c z t)
+        (differentiableAt_const _) (LargeDenominator.one_sub_exp_mem_slitPlane hz ht))
+  have h := LargeDenominator.differentiable_iteratedDeriv
+      (G := fun b t => largeDenominatorGenerating a b c z t)
     (r := 1 / 2) (by norm_num)
     (fun b t ht => by
       have hEc : ContinuousAt (fun p : ℂ × ℂ => expSubOneDiv p.2) (b, t) :=
@@ -709,7 +722,7 @@ theorem hcub_differentiable_largeDenominatorCoeff (a c : ℂ) {z : ℂ} (hz : �
           continuous_snd.continuousAt
       have hpow : ContinuousAt (fun p : ℂ × ℂ => expSubOneDiv p.2 ^ (p.1 - 1)) (b, t) :=
         hEc.cpow (continuous_fst.sub continuous_const).continuousAt
-          (hcub_expSubOneDiv_mem_slitPlane ht.le)
+          (LargeDenominator.expSubOneDiv_mem_slitPlane ht.le)
       have hr : ContinuousAt (fun p : ℂ × ℂ =>
           exp (p.2 * (1 - c)) * (1 - z + z * exp (-p.2)) ^ (-a)) (b, t) :=
         ContinuousAt.comp (f := fun p : ℂ × ℂ => p.2)
@@ -722,10 +735,12 @@ theorem hcub_differentiable_largeDenominatorCoeff (a c : ℂ) {z : ℂ} (hz : �
       have h1 : DifferentiableAt ℂ (fun t => expSubOneDiv t ^ (b - 1) *
           (exp (t * (1 - c)) * (1 - z + z * exp (-t)) ^ (-a))) t :=
         ((hE t).cpow (differentiableAt_const (b - 1))
-          (hcub_expSubOneDiv_mem_slitPlane (by simpa using ht))).mul (hrest t (by simpa using ht))
+          (LargeDenominator.expSubOneDiv_mem_slitPlane (by simpa using ht))).mul
+              (hrest t (by simpa using ht))
       simpa only [largeDenominatorGenerating, mul_assoc] using h1.differentiableWithinAt)
     (fun t ht => by
-      have h0 : expSubOneDiv t ≠ 0 := slitPlane_ne_zero (hcub_expSubOneDiv_mem_slitPlane ht.le)
+      have h0 : expSubOneDiv t ≠ 0 :=
+          slitPlane_ne_zero (LargeDenominator.expSubOneDiv_mem_slitPlane ht.le)
       intro b
       simp only [largeDenominatorGenerating]
       exact (((differentiableAt_id.sub (differentiableAt_const _)).const_cpow
@@ -733,17 +748,19 @@ theorem hcub_differentiable_largeDenominatorCoeff (a c : ℂ) {z : ℂ} (hz : �
   exact h.div_const _
 
 /-- The coefficient identity behind 15.12.3, for all `b`. -/
-theorem hcub_largeDenMix_eq (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (N : ℕ) :
-    hcub_largeDenMix a b c z N = poch b N * largeDenominatorCoeff a b c z N := by
-  set f : ℂ → ℂ := fun b => hcub_largeDenMix a b c z N - poch b N * largeDenominatorCoeff a b c z N
+theorem LargeDenominator.mixedCoeff_eq (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (N : ℕ) :
+    LargeDenominator.mixedCoeff a b c z N = poch b N * largeDenominatorCoeff a b c z N := by
+  set f : ℂ → ℂ := fun b => LargeDenominator.mixedCoeff a b c z N - poch b N *
+      largeDenominatorCoeff a b c z N
     with hfdef
-  have hf : Differentiable ℂ f := (hcub_differentiable_largeDenMix a c z N).sub
-    ((Polynomial.differentiable _).mul (hcub_differentiable_largeDenominatorCoeff a c hz N))
+  have hf : Differentiable ℂ f := (LargeDenominator.differentiable_mixedCoeff a c z N).sub
+    ((Polynomial.differentiable _).mul
+        (LargeDenominator.differentiable_largeDenominatorCoeff a c hz N))
   have hA : AnalyticOnNhd ℂ f univ := fun x _ => hf.analyticAt x
   have h0 : f =ᶠ[𝓝 1] 0 := by
     have hopen : IsOpen {b : ℂ | 0 < b.re} := isOpen_lt continuous_const continuous_re
     filter_upwards [hopen.mem_nhds (by simp : (1 : ℂ) ∈ {b : ℂ | 0 < b.re})] with x hx
-    simp [hfdef, hcub_largeDenMix_eq_of_re_pos a x c hz hx N]
+    simp [hfdef, LargeDenominator.mixedCoeff_eq_of_re_pos a x c hz hx N]
   have := hA.eqOn_zero_of_preconnected_of_eventuallyEq_zero isPreconnected_univ (mem_univ 1) h0
     (mem_univ b)
   simpa [hfdef, sub_eq_zero] using this
@@ -759,8 +776,8 @@ theorem large_denominator_shift_expansion (a b c : ℂ) {z : ℂ} (hz : ‖z‖ 
       (fun l : ℝ => Gamma (c - b + l) / Gamma (c + l) * (l : ℂ) ^ b * ₂F₁ a b (c + l) z -
         ∑ k ∈ Finset.range m, largeDenominatorCoeff a b c z k * poch b k / (l : ℂ) ^ k)
       (fun l : ℝ => (l : ℂ)⁻¹ ^ m) := by
-  have hK := hcub_largeDen_mix a b c hz m
-  simp only [hcub_largeDenMix_eq a _ c hz] at hK
+  have hK := LargeDenominator.isBigO_mixed a b c hz m
+  simp only [LargeDenominator.mixedCoeff_eq a _ c hz] at hK
   refine hK.congr_left fun l => ?_
   congr 1
   refine Finset.sum_congr rfl fun k _ => ?_

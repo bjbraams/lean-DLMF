@@ -34,7 +34,7 @@ continued fraction DLMF 4.9.3 for `exp` follow.
 ## Implementation notes
 
 Convergence follows from the ratio form of Pincherle's theorem,
-`GenContFract.cfConv_tendsto_of_ratio`, since `1·3···(2k-1) w_k(c) = 1 + O(1/k)`.
+`GenContFract.tendsto_ofFun_convs_of_ratio`, since `1·3···(2k-1) w_k(c) = 1 + O(1/k)`.
 -/
 
 @[expose] public section
@@ -240,55 +240,55 @@ theorem eventually_oddFractionTail_ratio (c : ℂ) :
 
 /-- Without vanishing partial numerators the project's continuants are Mathlib's. -/
 private lemma cfContinuants_eq_cfConv {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k ≠ 0) (n : ℕ) :
-    DLMF.cfContinuants a b 0 n =
-      ((cfConv_ofFun 0 a b).nums n, (cfConv_ofFun 0 a b).dens n, false) := by
+    DLMF.Core.cfContinuants a b 0 n =
+      ((ofFun 0 a b).nums n, (ofFun 0 a b).dens n, false) := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     rcases n with _ | _ | n
-    · simp [DLMF.cfContinuants]; rfl
-    · simp [DLMF.cfContinuants, cfConv_nums_one, cfConv_dens_one]
+    · simp [DLMF.Core.cfContinuants]; rfl
+    · simp [DLMF.Core.cfContinuants, ofFun_nums_one, ofFun_dens_one]
     · have h1 := ih (n + 1) (by omega)
       have h0 := ih n (by omega)
       have han : a (n + 1) ≠ 0 := ha (n + 1) (by omega)
-      rw [DLMF.cfContinuants, h1, h0, cfConv_nums_step, cfConv_dens_step]
+      rw [DLMF.Core.cfContinuants, h1, h0, ofFun_nums_add_two, ofFun_dens_add_two]
       simp [han, GenContFract.nextConts, GenContFract.nextNum, GenContFract.nextDen]
 
 /-- `HasContinuedFraction` in terms of Mathlib convergents, without vanishing numerators. -/
 private lemma hasContinuedFraction_iff_convs {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k ≠ 0) (v : ℂ) :
-    DLMF.HasContinuedFraction a b v ↔ Tendsto (cfConv_ofFun 0 a b).convs atTop (𝓝 v) := by
-  unfold DLMF.HasContinuedFraction
-  have : DLMF.cfTail a b 0 = fun N => (cfConv_ofFun 0 a b).convs N := by
+    DLMF.Core.HasContinuedFraction a b v ↔ Tendsto (ofFun 0 a b).convs atTop (𝓝 v) := by
+  unfold DLMF.Core.HasContinuedFraction
+  have : DLMF.Core.cfTail a b 0 = fun N => (ofFun 0 a b).convs N := by
     funext N
-    simp only [DLMF.cfTail, cfContinuants_eq_cfConv ha]
+    simp only [DLMF.Core.cfTail, cfContinuants_eq_cfConv ha]
     rfl
   rw [this]
 
 /-- A continued fraction all of whose partial numerators vanish has value `0`. -/
 theorem hasContinuedFraction_of_forall_eq_zero {a b : ℕ → ℂ} (ha : ∀ k, a k = 0) :
-    DLMF.HasContinuedFraction a b 0 := by
-  have h : ∀ N, (DLMF.cfContinuants a b 0 N).1 = 0 := by
+    DLMF.Core.HasContinuedFraction a b 0 := by
+  have h : ∀ N, (DLMF.Core.cfContinuants a b 0 N).1 = 0 := by
     intro N
     induction N using Nat.strong_induction_on with
     | _ N ih =>
       rcases N with _ | _ | N
-      · simp [DLMF.cfContinuants]
-      · simp [DLMF.cfContinuants, ha]
-      · rw [DLMF.cfContinuants]
+      · simp [DLMF.Core.cfContinuants]
+      · simp [DLMF.Core.cfContinuants, ha]
+      · rw [DLMF.Core.cfContinuants]
         simp only [ha, zero_add, or_true, ↓reduceIte]
         exact ih (N + 1) (by omega)
-  unfold DLMF.HasContinuedFraction
-  have : DLMF.cfTail a b 0 = fun _ => 0 := by
-    funext N; simp [DLMF.cfTail, h N]
+  unfold DLMF.Core.HasContinuedFraction
+  have : DLMF.Core.cfTail a b 0 = fun _ => 0 := by
+    funext N; simp [DLMF.Core.cfTail, h N]
   rw [this]; exact tendsto_const_nhds
 
 /-- The continued fraction `a₀/(1 + c/(3 + c/(5 + ⋯)))` converges to `a₀ w₁(c)/w₀(c)`. -/
 theorem hasContinuedFraction_oddFractionTail {a₀ c : ℂ} (ha₀ : a₀ ≠ 0) (hc : c ≠ 0)
     (hw₀ : oddFractionTail c 0 ≠ 0) :
-    DLMF.HasContinuedFraction (fun n => if n = 0 then a₀ else c) (fun n => 2 * n + 1)
+    DLMF.Core.HasContinuedFraction (fun n => if n = 0 then a₀ else c) (fun n => 2 * n + 1)
       (a₀ * oddFractionTail c 1 / oddFractionTail c 0) := by
   rw [hasContinuedFraction_iff_convs (fun k hk => by simp [show k ≠ 0 by omega, hc])]
   obtain ⟨N, hN⟩ := eventually_oddFractionTail_ratio c
-  have key := cfConv_tendsto_of_ratio (h := 0) (a := fun n => if n = 0 then a₀ else c)
+  have key := tendsto_ofFun_convs_of_ratio (h := 0) (a := fun n => if n = 0 then a₀ else c)
     (b := fun n => 2 * n + 1) (w := oddFractionTail c)
     (fun k => by simpa using oddFractionTail_recurrence c k) hw₀
     (fun k => by by_cases hk : k = 0 <;> simp [hk, ha₀, hc]) (N := N)
@@ -317,7 +317,7 @@ theorem mul_oddFractionTail_neg_sq_one (y : ℂ) :
 
 /-- Lambert's continued fraction `tan y = y/(1 - y²/(3 - y²/(5 - ⋯)))`. -/
 theorem hasContinuedFraction_tan {y : ℂ} (hy : Complex.cos y ≠ 0) :
-    DLMF.HasContinuedFraction (fun n => if n = 0 then y else -y ^ 2) (fun n => 2 * n + 1)
+    DLMF.Core.HasContinuedFraction (fun n => if n = 0 then y else -y ^ 2) (fun n => 2 * n + 1)
       (Complex.tan y) := by
   rcases eq_or_ne y 0 with rfl | hy0
   · rw [Complex.tan_zero]
@@ -340,7 +340,7 @@ theorem mul_oddFractionTail_sq_one (z : ℂ) : z * oddFractionTail (z ^ 2) 1 = C
 
 /-- Lambert's continued fraction `tanh z = z/(1 + z²/(3 + z²/(5 + ⋯)))`. -/
 theorem hasContinuedFraction_tanh {z : ℂ} (hz : Complex.cosh z ≠ 0) :
-    DLMF.HasContinuedFraction (fun n => if n = 0 then z else z ^ 2) (fun n => 2 * n + 1)
+    DLMF.Core.HasContinuedFraction (fun n => if n = 0 then z else z ^ 2) (fun n => 2 * n + 1)
       (Complex.tanh z) := by
   rcases eq_or_ne z 0 with rfl | hz0
   · rw [Complex.tanh_zero]
@@ -353,7 +353,7 @@ theorem hasContinuedFraction_tanh {z : ℂ} (hz : Complex.cosh z ≠ 0) :
 /-- The continued fraction `1 + z/((1 - z/2) + (z²/12)/(1 + (z²/60)/(1 + ⋯)))` for `exp z`, whose
 partial numerators are `z²/(4(4k²-1))`. -/
 theorem tendsto_one_add_cfTail_exp (z : ℂ) :
-    Tendsto (fun N => 1 + DLMF.cfTail
+    Tendsto (fun N => 1 + DLMF.Core.cfTail
       (fun k => if k = 0 then z else z ^ 2 / (4 * (4 * (k : ℂ) ^ 2 - 1)))
       (fun k => if k = 0 then 1 - z / 2 else 1) 0 N) atTop (𝓝 (Complex.exp z)) := by
   set a : ℕ → ℂ := fun k => if k = 0 then z else z ^ 2 / (4 * (4 * (k : ℂ) ^ 2 - 1))
@@ -409,7 +409,7 @@ theorem tendsto_one_add_cfTail_exp (z : ℂ) :
     intro k hk
     simp only [w, show k ≠ 0 by omega, ↓reduceIte]
     exact norm_pos_iff.mp (by linarith [(hN k (by omega)).1])
-  have key := cfConv_tendsto_of_ratio (h := 0) (a := a) (b := b) (w := w) hw
+  have key := tendsto_ofFun_convs_of_ratio (h := 0) (a := a) (b := b) (w := w) hw
     (by rw [hw0]; exact Complex.exp_ne_zero _) ha (N := N + 1) hwN (q := 3) (by norm_num)
     (fun k hk => by
       simp only [w, show k ≠ 0 by omega, show k + 2 ≠ 0 by omega, ↓reduceIte, hak]
@@ -448,7 +448,7 @@ theorem tendsto_one_add_cfTail_exp (z : ℂ) :
   rw [add_sub_cancel] at h
   refine h.congr fun n => ?_
   congr 1
-  simp only [DLMF.cfTail, cfContinuants_eq_cfConv (fun k _ => ha k)]
+  simp only [DLMF.Core.cfTail, cfContinuants_eq_cfConv (fun k _ => ha k)]
   rfl
 
 end DLMF.Elementary

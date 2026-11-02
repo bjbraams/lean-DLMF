@@ -47,7 +47,7 @@ of the function `η ↦ X(η, c/η)` along `atTop` (`atBot`); derivatives are in
 `ρ = c/η`. The phase shift in 33.5.7, 33.10.6 and 33.10.10 is DLMF's continuous branch
 `phaseShift`; the principal-branch `coulombSigma` does not satisfy 33.10.6 or 33.10.10.
 Bessel functions are Mathlib's `Complex.besselJ` and the project's `DLMF.Bessel.besselY`,
-`besselI`, `besselK`; the spherical `j_ℓ` is `DLMF.sphericalJ`, and the spherical `y_ℓ` is
+`besselI`, `besselK`; the spherical `j_ℓ` is `DLMF.Bessel.sphericalJ`, and the spherical `y_ℓ` is
 written out by DLMF 10.47.3, `y_ℓ(ρ) = (π/(2ρ))^{1/2} Y_{ℓ+1/2}(ρ)`.
 -/
 
@@ -401,7 +401,7 @@ theorem coulombC_zero (ℓ : ℕ) :
 /-- **DLMF 33.5.3, regular function**: `F_ℓ(0,ρ) = ρ j_ℓ(ρ)`. -/
 @[dlmf 33.5.E3]
 theorem coulombF_zero_eq_sphericalJ (ℓ : ℕ) (ρ : ℝ) :
-    (coulombF ℓ 0 ρ : ℂ) = ρ * DLMF.sphericalJ ℓ ρ := by
+    (coulombF ℓ 0 ρ : ℂ) = ρ * DLMF.Bessel.sphericalJ ℓ ρ := by
   set ν : ℂ := (ℓ : ℂ) + 1 / 2
   have hν : ∀ k : ℕ, ν + 1 ≠ -k := fun k h => by
     have := congrArg Complex.re h; simp [ν] at this
@@ -416,7 +416,7 @@ theorem coulombF_zero_eq_sphericalJ (ℓ : ℕ) (ρ : ℝ) :
     show ν + 1 = (ℓ : ℂ) + 3 / 2 by simp [ν]; ring] at hK
   have hG : Gamma ((ℓ : ℂ) + 3 / 2) = (((2 * (ℓ + 1) - 1 : ℕ)‼ : ℝ) * √π / 2 ^ (ℓ + 1) : ℝ) := by
     rw [← Real.Gamma_nat_add_half, ← Complex.Gamma_ofReal]; congr 1; push_cast; ring
-  rw [ofReal_coulombF, coulombWave, hK, (coulombC_zero ℓ).2, DLMF.sphericalJ, hG,
+  rw [ofReal_coulombF, coulombWave, hK, (coulombC_zero ℓ).2, DLMF.Bessel.sphericalJ, hG,
     show 2 * (ℓ + 1) - 1 = 2 * ℓ + 1 by omega]
   have he : exp (-I * ρ) * exp (2 * I * ρ / 2) = 1 := by
     rw [← Complex.exp_add]; ring_nf; exact Complex.exp_zero
@@ -514,7 +514,7 @@ private lemma coulombHPlus_eta_zero_eq_bessel (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < 
 /-- `F_ℓ(0,ρ) = (πρ/2)^{1/2} J_{ℓ+1/2}(ρ)`, `ρ > 0`. -/
 private lemma coulombF_eta_zero_eq_besselJ (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
     (coulombF ℓ 0 ρ : ℂ) = Real.sqrt (π * ρ / 2) * Complex.besselJ (ℓ + 1 / 2) ρ := by
-  rw [coulombF_zero_eq_sphericalJ, DLMF.sphericalJ, DLMF.Bessel.besselJ_eq_regularized]
+  rw [coulombF_zero_eq_sphericalJ, DLMF.Bessel.sphericalJ, DLMF.Bessel.besselJ_eq_regularized]
   have hρ2 : (0 : ℝ) < ρ / 2 := by positivity
   have hc : ((ρ : ℂ) / 2) ^ ((ℓ : ℂ) + 1 / 2) =
       ((ρ : ℂ) / 2) ^ ℓ * (Real.sqrt (ρ / 2) : ℂ) := by

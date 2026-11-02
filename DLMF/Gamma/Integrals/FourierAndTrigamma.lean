@@ -55,7 +55,7 @@ open Set FourierTransform
 
 open scoped Interval
 
-namespace RamanujanAux
+namespace RamanujanIntegral
 
 /-! ### Fourier transforms of the kernels `cos^p φ e^{iζφ}` on `(-π/2, π/2]` -/
 
@@ -332,9 +332,9 @@ theorem ramanujan_step (b c d : ℂ) {x₀ : ℝ} (hx₀ : 3 - (b + c + d).re �
   refine eqOn_of_real_halfline hf hg hx₀ h ?_
   rw [e, add_re] at ha; linarith
 
-end RamanujanAux
+end RamanujanIntegral
 
-open RamanujanAux
+open RamanujanIntegral
 
 /-- DLMF 5.13.4, Ramanujan's integral: `∫ dt / (Γ(a + t) Γ(b + t) Γ(c - t) Γ(d - t)) = Γ(a + b + c +
 d - 3) / (Γ(a + c - 1) Γ(a + d - 1) Γ(b + c - 1) Γ(b + d - 1))` for `Re(a + b + c + d) > 3`. -/

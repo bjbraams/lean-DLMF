@@ -56,7 +56,7 @@ private lemma integral_exp_cpow_regularized0F1_complex_scaled {a c w b : ℂ}
   have hb0 : b ≠ 0 := by intro h; simp [h] at hb
   have han (n : ℕ) : 0 < (a + n).re := by simp; positivity
   have hFi (n : ℕ) : IntegrableOn (F n) (Ioi 0) :=
-    (DLMF.Gamma.vb_integrableOn_cpow_exp (han n) hb).const_mul _
+    (DLMF.Gamma.VerticalBeta.integrableOn_cpow_exp (han n) hb).const_mul _
   have hnorm (n : ℕ) : (∫ t : ℝ in Ioi 0, ‖F n t‖) =
       ‖d n * w ^ n‖ * (r ^ (a.re + n) * Real.Gamma (a.re + n)) := by
     rw [show r = 1 / b.re by simp [r],

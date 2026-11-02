@@ -223,7 +223,7 @@ theorem associatedP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : 
   have hd : HasDerivAt (fun ν' => associatedP ν' μ z) (pref * deriv F ν) ν := by
     simp only [hP]; exact ((hFd ν).hasDerivAt).const_mul pref
   refine hd.congr_deriv ?_
-  have hR := legHyp_hasSum_A_complex hν μ hw
+  have hR := DegreeDerivative.hasSum_A_complex hν μ hw
   unfold associatedDegreeA
   rw [hR.tsum_eq, hP ν, mul_comm (ν:ℂ) π]
   have hs := DLMF.Hypergeometric.sin_pi_mul_ne_zero_of_not_int hν

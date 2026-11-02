@@ -16,7 +16,8 @@ parametrizations of the asymptotic expansions 9.9.6–9.9.13.
 
 ## Main definitions
 
-* `airyZ_Z`, `airyZ_W`, `airyZ_Fbi`, `airyZ_Fbid`, `airyZ_ctr`: the variable `u = -2ζ`, the
+* `ComplexBiZeros.Z`, `ComplexBiZeros.W`, `ComplexBiZeros.normalizedBi`,
+  `ComplexBiZeros.normalizedBiDeriv`, `ComplexBiZeros.center`: the variable `u = -2ζ`, the
   normalized `Bi`, `Bi'` and the model zeros.
 
 ## Main results
@@ -52,10 +53,10 @@ section UpperZeros
 open Metric
 
 /-- The inverse of `z ↦ -2ζ(z)` on the upper sector. -/
-noncomputable def airyZ_Z (u : ℂ) : ℂ := exp (2 / 3 * log (-(3 / 4 : ℂ) * u))
+noncomputable def ComplexBiZeros.Z (u : ℂ) : ℂ := exp (2 / 3 * log (-(3 / 4 : ℂ) * u))
 
 /-- The imaginary part of `(2/3) log(-(3/4) u)` lies in `(-π, π]`. -/
-theorem airyZ_im_bound (u : ℂ) :
+theorem ComplexBiZeros.im_bound (u : ℂ) :
     -π < (2 / 3 * log (-(3 / 4 : ℂ) * u)).im ∧ (2 / 3 * log (-(3 / 4 : ℂ) * u)).im ≤ π := by
   have h1 := neg_pi_lt_arg (-(3 / 4 : ℂ) * u)
   have h2 := arg_le_pi (-(3 / 4 : ℂ) * u)
@@ -65,39 +66,43 @@ theorem airyZ_im_bound (u : ℂ) :
   rw [this]; constructor <;> nlinarith
 
 /-- `log Z(u) = (2/3) log(-(3/4) u)`. -/
-theorem airyZ_log_Z (u : ℂ) : log (airyZ_Z u) = 2 / 3 * log (-(3 / 4 : ℂ) * u) :=
-  log_exp (airyZ_im_bound u).1 (airyZ_im_bound u).2
+theorem ComplexBiZeros.log_Z (u : ℂ) : log (ComplexBiZeros.Z u) = 2 / 3 * log (-(3 / 4 : ℂ) * u) :=
+  log_exp (ComplexBiZeros.im_bound u).1 (ComplexBiZeros.im_bound u).2
 
 /-- `arg Z(u) = (2/3) arg(-(3/4) u)`. -/
-theorem airyZ_arg_Z (u : ℂ) : arg (airyZ_Z u) = 2 / 3 * arg (-(3 / 4 : ℂ) * u) := by
-  rw [← log_im, airyZ_log_Z]; simp [log_im]
+theorem ComplexBiZeros.arg_Z (u : ℂ) : arg (ComplexBiZeros.Z u) = 2 / 3 *
+    arg (-(3 / 4 : ℂ) * u) := by
+  rw [← log_im, ComplexBiZeros.log_Z]; simp [log_im]
 
 /-- `Z(u) ≠ 0`. -/
-theorem airyZ_Z_ne_zero (u : ℂ) : airyZ_Z u ≠ 0 := exp_ne_zero _
+theorem ComplexBiZeros.Z_ne_zero (u : ℂ) : ComplexBiZeros.Z u ≠ 0 := exp_ne_zero _
 
 /-- Complex powers of `Z(u)`: `Z(u)^w = exp((2/3) log(-(3/4) u) w)`. -/
-theorem airyZ_cpow_Z (u w : ℂ) :
-    airyZ_Z u ^ w = exp (2 / 3 * log (-(3 / 4 : ℂ) * u) * w) := by
-  rw [cpow_def_of_ne_zero (airyZ_Z_ne_zero u), airyZ_log_Z]
+theorem ComplexBiZeros.cpow_Z (u w : ℂ) :
+    ComplexBiZeros.Z u ^ w = exp (2 / 3 * log (-(3 / 4 : ℂ) * u) * w) := by
+  rw [cpow_def_of_ne_zero (ComplexBiZeros.Z_ne_zero u), ComplexBiZeros.log_Z]
 
 /-- `ζ(Z(u)) = -u/2` for `u ≠ 0`, so `Z` inverts `z ↦ -2ζ(z)`. -/
-theorem airyZ_zeta_Z {u : ℂ} (hu : u ≠ 0) : airyZetaComplex (airyZ_Z u) = -u / 2 := by
+theorem ComplexBiZeros.zeta_Z {u : ℂ} (hu : u ≠ 0) : airyZetaComplex
+    (ComplexBiZeros.Z u) = -u / 2 := by
   unfold airyZetaComplex
-  rw [airyZ_cpow_Z, show 2 / 3 * log (-(3 / 4 : ℂ) * u) * (3 / 2) = log (-(3 / 4 : ℂ) * u) by ring,
+  rw [ComplexBiZeros.cpow_Z, show 2 / 3 * log (-(3 / 4 : ℂ) * u) * (3 / 2) =
+      log (-(3 / 4 : ℂ) * u) by ring,
     exp_log (mul_ne_zero (by norm_num) hu)]
   ring
 
 /-- `Z(u)^{1/4} = exp(log(-(3/4) u)/6)`. -/
-theorem airyZ_quarter_Z (u : ℂ) :
-    airyZ_Z u ^ (1 / 4 : ℂ) = exp (log (-(3 / 4 : ℂ) * u) / 6) := by
-  rw [airyZ_cpow_Z]; congr 1; ring
+theorem ComplexBiZeros.quarter_Z (u : ℂ) :
+    ComplexBiZeros.Z u ^ (1 / 4 : ℂ) = exp (log (-(3 / 4 : ℂ) * u) / 6) := by
+  rw [ComplexBiZeros.cpow_Z]; congr 1; ring
 
 /-- `‖Z(u)‖ = exp((2/3) log ‖(3/4) u‖)`, the modulus `‖(3/4) u‖^{2/3}` for `u ≠ 0`. -/
-theorem airyZ_norm_Z (u : ℂ) : ‖airyZ_Z u‖ = Real.exp (2 / 3 * Real.log ‖-(3 / 4 : ℂ) * u‖) := by
-  rw [airyZ_Z, norm_exp]; congr 1; simp [log_re]
+theorem ComplexBiZeros.norm_Z (u : ℂ) : ‖ComplexBiZeros.Z u‖ =
+    Real.exp (2 / 3 * Real.log ‖-(3 / 4 : ℂ) * u‖) := by
+  rw [ComplexBiZeros.Z, norm_exp]; congr 1; simp [log_re]
 
 /-- Upper-sector bounds on the argument. -/
-theorem airyZ_arg_bounds {v : ℂ} (h1 : v.re < 0) (h2 : -v.re < v.im) :
+theorem ComplexBiZeros.arg_bounds {v : ℂ} (h1 : v.re < 0) (h2 : -v.re < v.im) :
     π / 2 < arg v ∧ arg v < 3 * π / 4 := by
   have hπ := Real.pi_pos
   have hv : v ≠ 0 := fun h => by simp [h] at h1
@@ -118,7 +123,7 @@ theorem airyZ_arg_bounds {v : ℂ} (h1 : v.re < 0) (h2 : -v.re < v.im) :
   rw [hrot] at this; linarith
 
 /-- `1/ζ(z) → 0` as `z → ∞` in the sector `|arg z| ≤ α`. -/
-theorem airyZ_zeta_recip_tendsto (α : ℝ) :
+theorem ComplexBiZeros.zeta_inv_tendsto (α : ℝ) :
     Tendsto (fun z => ((airyZetaComplex z) ^ 1)⁻¹) (airySector α) (𝓝 0) := by
   rw [tendsto_zero_iff_norm_tendsto_zero]
   have hn : ∀ z : ℂ, ‖((airyZetaComplex z) ^ 1)⁻¹‖ = (2 / 3 * ‖z‖ ^ (3 / 2 : ℝ))⁻¹ := by
@@ -132,11 +137,11 @@ theorem airyZ_zeta_recip_tendsto (α : ℝ) :
         (by norm_num : (0 : ℝ) < 2 / 3))).inv_tendsto_atTop
 
 /-- The leading-order part of a normalized expansion, in quantitative form. -/
-theorem airyZ_small {F : ℂ → ℂ} {c : ℕ → ℂ} {α : ℝ}
+theorem ComplexBiZeros.small {F : ℂ → ℂ} {c : ℕ → ℂ} {α : ℝ}
     (h : HasAsymptoticExpansion (airySector α) (fun (n : ℕ) z => ((airyZetaComplex z) ^ n)⁻¹) c F)
     (hc : c 0 = 1) {η : ℝ} (hη : 0 < η) :
     ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ α → R ≤ ‖w‖ → ‖F w - 1‖ < η := by
-  have h1 := (h 1).trans_tendsto (airyZ_zeta_recip_tendsto α)
+  have h1 := (h 1).trans_tendsto (ComplexBiZeros.zeta_inv_tendsto α)
   have h2 : ∀ᶠ w in airySector α, ‖F w - 1‖ < η := by
     filter_upwards [(tendsto_zero_iff_norm_tendsto_zero.mp h1).eventually (gt_mem_nhds hη)]
       with w hw
@@ -146,67 +151,77 @@ theorem airyZ_small {F : ℂ → ℂ} {c : ℕ → ℂ} {α : ℝ}
   exact ⟨R, fun w hw0 hwa hwR => hsub (hR _ hwR) ⟨hw0, hwa⟩⟩
 
 /-- `e^{-πi/6} e^{-πi/3} = -i`. -/
-theorem airyZ_exp_neg_pi_half : exp (-(π * I / 6)) * exp (-(π * I / 3)) = -I := by
+theorem ComplexBiZeros.exp_neg_pi_half : exp (-(π * I / 6)) * exp (-(π * I / 3)) = -I := by
   rw [← exp_add, show -(π * I / 6) + -(π * I / 3) = -((π / 2 : ℂ) * I) by ring, exp_neg,
     exp_pi_div_two_mul_I, inv_I]
 
 /-- `Bi(z) = 2 e^{-πi/6} Ai(z e^{-2πi/3}) + i Ai(z)`, a rearranged connection formula. -/
-theorem airyZ_bi_eq (z : ℂ) :
+theorem ComplexBiZeros.bi_eq (z : ℂ) :
     airyBi z = 2 * exp (-(π * I / 6)) * airyAi (z * exp (-(2 * π * I / 3))) + I *
         airyAi (z * 1) := by
   rw [airyAi_mul_omega_recip, mul_one]
-  have h := airyZ_exp_neg_pi_half
+  have h := ComplexBiZeros.exp_neg_pi_half
   linear_combination (-(airyAi z + I * airyBi z)) * h + airyBi z * I_sq
 
-/-- The derivative form of `airyZ_bi_eq`:
+/-- The derivative form of `ComplexBiZeros.bi_eq`:
 `Bi'(z) = 2 e^{-πi/6} e^{-2πi/3} Ai'(z e^{-2πi/3}) + i Ai'(z)`. -/
-theorem airyZ_biDeriv_eq (z : ℂ) :
+theorem ComplexBiZeros.biDeriv_eq (z : ℂ) :
     airyBiDeriv z = 2 * exp (-(π * I / 6)) * exp (-(2 * π * I / 3)) *
       airyAiDeriv (z * exp (-(2 * π * I / 3))) + I * 1 * airyAiDeriv (z * 1) :=
-  airyRot_deriv_of_eq hasDerivAt_airyBi hasDerivAt_airyAi _ _ _ _ airyZ_bi_eq z
+  RotatedExpansions.deriv_of_eq hasDerivAt_airyBi hasDerivAt_airyAi _ _ _ _ ComplexBiZeros.bi_eq z
 
 /-- The rotated point `Z(u) e^{-2πi/3}`. -/
-noncomputable def airyZ_W (u : ℂ) : ℂ := airyZ_Z u * exp (((-(2 * π / 3)) : ℝ) * I)
+noncomputable def ComplexBiZeros.W (u : ℂ) : ℂ := ComplexBiZeros.Z u *
+    exp (((-(2 * π / 3)) : ℝ) * I)
 
 /-- For `arg(-(3/4) u) ≥ 0`, the rotation of `Z(u)` by `-2π/3` stays within the principal
 argument range. -/
-theorem airyZ_arg_ok {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
-    -π < arg (airyZ_Z u) + (-(2 * π / 3)) ∧ arg (airyZ_Z u) + (-(2 * π / 3)) ≤ π := by
-  rw [airyZ_arg_Z]
+theorem ComplexBiZeros.arg_rotation_bounds {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+    -π < arg (ComplexBiZeros.Z u) + (-(2 * π / 3)) ∧ arg (ComplexBiZeros.Z u) +
+        (-(2 * π / 3)) ≤ π := by
+  rw [ComplexBiZeros.arg_Z]
   have := arg_le_pi (-(3 / 4 : ℂ) * u)
   have hπ := Real.pi_pos
   constructor <;> nlinarith
 
 /-- `ζ(W(u)) = u/2` when `u ≠ 0` and `arg(-(3/4) u) ≥ 0`. -/
-theorem airyZ_zeta_W {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
-    airyZetaComplex (airyZ_W u) = u / 2 := by
-  rw [airyZ_W, airyRot_zeta_mul_exp (airyZ_Z_ne_zero u) (airyZ_arg_ok hu).1 (airyZ_arg_ok hu).2,
-    airyZ_zeta_Z hu0, show (((-(2 * π / 3)) : ℝ) : ℂ) * I * (3 / 2) = -(π * I) by push_cast; ring,
+theorem ComplexBiZeros.zeta_W {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+    airyZetaComplex (ComplexBiZeros.W u) = u / 2 := by
+  rw [ComplexBiZeros.W,
+      RotatedExpansions.zeta_mul_exp (ComplexBiZeros.Z_ne_zero u)
+      (ComplexBiZeros.arg_rotation_bounds hu).1 (ComplexBiZeros.arg_rotation_bounds hu).2,
+    ComplexBiZeros.zeta_Z hu0, show (((-(2 * π / 3)) : ℝ) : ℂ) * I * (3 / 2) = -(π * I) by
+        push_cast; ring,
     exp_neg, exp_pi_mul_I]
   ring
 
 /-- `W(u)^{1/4} = exp(log(-(3/4) u)/6) e^{-πi/6}` when `arg(-(3/4) u) ≥ 0`. -/
-theorem airyZ_quarter_W {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
-    airyZ_W u ^ (1 / 4 : ℂ) = exp (log (-(3 / 4 : ℂ) * u) / 6) * exp (-(π * I / 6)) := by
-  rw [airyZ_W, Complex.cpow_mul_exp_ofReal_mul_I (airyZ_Z_ne_zero u) (airyZ_arg_ok hu).1
-    (airyZ_arg_ok hu).2, airyZ_quarter_Z]
+theorem ComplexBiZeros.quarter_W {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+    ComplexBiZeros.W u ^ (1 / 4 : ℂ) = exp (log (-(3 / 4 : ℂ) * u) / 6) * exp (-(π * I / 6)) := by
+  rw [ComplexBiZeros.W,
+      Complex.cpow_mul_exp_ofReal_mul_I (ComplexBiZeros.Z_ne_zero u)
+      (ComplexBiZeros.arg_rotation_bounds hu).1
+    (ComplexBiZeros.arg_rotation_bounds hu).2, ComplexBiZeros.quarter_Z]
   congr 2; push_cast; ring
 
 /-- `W(u) = Z(u) e^{-2πi/3}`. -/
-theorem airyZ_W_eq (u : ℂ) : airyZ_W u = airyZ_Z u * exp (-(2 * π * I / 3)) := by
-  rw [airyZ_W, airyRot_exp_two_pi_div_three.2]
+theorem ComplexBiZeros.W_eq (u : ℂ) : ComplexBiZeros.W u = ComplexBiZeros.Z u *
+    exp (-(2 * π * I / 3)) := by
+  rw [ComplexBiZeros.W, RotatedExpansions.exp_two_pi_div_three.2]
 
 /-- The normalized `Bi` in the variable `u = -2ζ`. -/
-noncomputable def airyZ_Fbi (u : ℂ) : ℂ :=
-  airyBi (airyZ_Z u) * (Real.sqrt π * exp (log (-(3 / 4 : ℂ) * u) / 6) * exp (u / 2))
+noncomputable def ComplexBiZeros.normalizedBi (u : ℂ) : ℂ :=
+  airyBi (ComplexBiZeros.Z u) * (Real.sqrt π * exp (log (-(3 / 4 : ℂ) * u) / 6) * exp (u / 2))
 
 /-- The normalized `Bi` as a combination of the normalized `Ai` at `W(u)` and at `Z(u)`. -/
-theorem airyZ_Fbi_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
-    airyZ_Fbi u = airyAi (airyZ_W u) / airyPrefactor .ai (airyZ_W u) +
-      I / 2 * exp u * (airyAi (airyZ_Z u) / airyPrefactor .ai (airyZ_Z u)) := by
-  simp only [airyZ_Fbi, airyPrefactor]
-  rw [airyZ_zeta_W hu0 hu, airyZ_quarter_W hu, airyZ_zeta_Z hu0, airyZ_quarter_Z, airyZ_bi_eq,
-    mul_one, ← airyZ_W_eq]
+theorem ComplexBiZeros.normalizedBi_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+    ComplexBiZeros.normalizedBi u = airyAi (ComplexBiZeros.W u) /
+        airyPrefactor .ai (ComplexBiZeros.W u) +
+      I / 2 * exp u * (airyAi (ComplexBiZeros.Z u) / airyPrefactor .ai (ComplexBiZeros.Z u)) := by
+  simp only [ComplexBiZeros.normalizedBi, airyPrefactor]
+  rw [ComplexBiZeros.zeta_W hu0 hu, ComplexBiZeros.quarter_W hu, ComplexBiZeros.zeta_Z hu0,
+      ComplexBiZeros.quarter_Z, ComplexBiZeros.bi_eq,
+    mul_one, ← ComplexBiZeros.W_eq]
   have hπs : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   set a := exp (u / 2)
   set b := exp (log (-(3 / 4 : ℂ) * u) / 6)
@@ -220,16 +235,21 @@ theorem airyZ_Fbi_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) *
   field_simp
 
 /-- The normalized `Bi'` in the variable `u = -2ζ`. -/
-noncomputable def airyZ_Fbid (u : ℂ) : ℂ :=
-  airyBiDeriv (airyZ_Z u) * (Real.sqrt π * exp (-(log (-(3 / 4 : ℂ) * u) / 6)) * exp (u / 2))
+noncomputable def ComplexBiZeros.normalizedBiDeriv (u : ℂ) : ℂ :=
+  airyBiDeriv (ComplexBiZeros.Z u) *
+      (Real.sqrt π * exp (-(log (-(3 / 4 : ℂ) * u) / 6)) * exp (u / 2))
 
 /-- The normalized `Bi'` as a combination of the normalized `Ai'` at `W(u)` and `Z(u)`. -/
-theorem airyZ_Fbid_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
-    airyZ_Fbid u = airyAiDeriv (airyZ_W u) / airyPrefactor .aiDeriv (airyZ_W u) -
-      I / 2 * exp u * (airyAiDeriv (airyZ_Z u) / airyPrefactor .aiDeriv (airyZ_Z u)) := by
-  simp only [airyZ_Fbid, airyPrefactor]
-  rw [airyZ_zeta_W hu0 hu, airyZ_quarter_W hu, airyZ_zeta_Z hu0, airyZ_quarter_Z, airyZ_biDeriv_eq,
-    mul_one, mul_one, ← airyZ_W_eq]
+theorem ComplexBiZeros.normalizedBiDeriv_eq {u : ℂ} (hu0 : u ≠ 0)
+    (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+    ComplexBiZeros.normalizedBiDeriv u = airyAiDeriv (ComplexBiZeros.W u) /
+        airyPrefactor .aiDeriv (ComplexBiZeros.W u) -
+      I / 2 * exp u * (airyAiDeriv (ComplexBiZeros.Z u) /
+          airyPrefactor .aiDeriv (ComplexBiZeros.Z u)) := by
+  simp only [ComplexBiZeros.normalizedBiDeriv, airyPrefactor]
+  rw [ComplexBiZeros.zeta_W hu0 hu, ComplexBiZeros.quarter_W hu, ComplexBiZeros.zeta_Z hu0,
+      ComplexBiZeros.quarter_Z, ComplexBiZeros.biDeriv_eq,
+    mul_one, mul_one, ← ComplexBiZeros.W_eq]
   have hπs : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   set a := exp (u / 2)
   set L := log (-(3 / 4 : ℂ) * u)
@@ -246,39 +266,44 @@ theorem airyZ_Fbid_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) 
   have hb0 : exp (L / 6) ≠ 0 := exp_ne_zero _
   rw [ha, ha', hu2, hb']
   field_simp
-  linear_combination 2 * airyAiDeriv (airyZ_W u) * hq
+  linear_combination 2 * airyAiDeriv (ComplexBiZeros.W u) * hq
 
 /-- Centres of the model zeros in the variable `u = -2ζ`. -/
-noncomputable def airyZ_ctr (θ : ℝ) (k : ℕ) : ℂ :=
+noncomputable def ComplexBiZeros.center (θ : ℝ) (k : ℕ) : ℂ :=
   ((Real.log 2 : ℝ) : ℂ) - ((2 * π * (k + θ) : ℝ) : ℂ) * I
 
 /-- The model-zero centres have real part `log 2`. -/
-theorem airyZ_ctr_re (θ : ℝ) (k : ℕ) : (airyZ_ctr θ k).re = Real.log 2 := by
-  simp only [airyZ_ctr, sub_re, mul_re, ofReal_re, ofReal_im, I_re, I_im]; ring
+theorem ComplexBiZeros.center_re (θ : ℝ) (k : ℕ) : (ComplexBiZeros.center θ k).re = Real.log 2 := by
+  simp only [ComplexBiZeros.center, sub_re, mul_re, ofReal_re, ofReal_im, I_re, I_im]; ring
 
 /-- The model-zero centre `u_k` has imaginary part `-2π(k + θ)`. -/
-theorem airyZ_ctr_im (θ : ℝ) (k : ℕ) : (airyZ_ctr θ k).im = -(2 * π * (k + θ)) := by
-  simp only [airyZ_ctr, sub_im, mul_im, ofReal_re, ofReal_im, I_re, I_im]; ring
+theorem ComplexBiZeros.center_im (θ : ℝ) (k : ℕ) : (ComplexBiZeros.center θ k).im =
+    -(2 * π * (k + θ)) := by
+  simp only [ComplexBiZeros.center, sub_im, mul_im, ofReal_re, ofReal_im, I_re, I_im]; ring
 
 /-- `e^{u_k}` does not depend on `k`. -/
-theorem airyZ_exp_ctr (θ : ℝ) (k : ℕ) : exp (airyZ_ctr θ k) = exp (airyZ_ctr θ 0) := by
-  have : airyZ_ctr θ k = airyZ_ctr θ 0 + ((-(k : ℤ) : ℤ) : ℂ) * (2 * π * I) := by
+theorem ComplexBiZeros.exp_center (θ : ℝ) (k : ℕ) : exp (ComplexBiZeros.center θ k) =
+    exp (ComplexBiZeros.center θ 0) := by
+  have : ComplexBiZeros.center θ k = ComplexBiZeros.center θ 0 + ((-(k : ℤ) : ℤ) : ℂ) *
+      (2 * π * I) := by
     apply Complex.ext
-    · simp only [airyZ_ctr_re, add_re, mul_re, intCast_re, intCast_im, ofReal_re, ofReal_im,
+    · simp only [ComplexBiZeros.center_re, add_re, mul_re, intCast_re, intCast_im,
+          ofReal_re, ofReal_im,
         I_re, I_im, re_ofNat, im_ofNat]; simp
-    · simp only [airyZ_ctr_im, add_im, mul_im, mul_re, intCast_re, intCast_im, ofReal_re,
+    · simp only [ComplexBiZeros.center_im, add_im, mul_im, mul_re, intCast_re,
+          intCast_im, ofReal_re,
         ofReal_im, I_re, I_im, re_ofNat, im_ofNat]; push_cast; ring
   rw [this, exp_add, exp_int_mul_two_pi_mul_I, mul_one]
 
 /-- Geometry of the discs `|u - u_k| ≤ 1/2`. -/
-theorem airyZ_geom {θ : ℝ} (hθ : |θ| ≤ 1 / 4) {k : ℕ} (hk : 1 ≤ k) {u : ℂ}
-    (hu : u ∈ closedBall (airyZ_ctr θ k) (1 / 2)) :
+theorem ComplexBiZeros.geometric {θ : ℝ} (hθ : |θ| ≤ 1 / 4) {k : ℕ} (hk : 1 ≤ k) {u : ℂ}
+    (hu : u ∈ closedBall (ComplexBiZeros.center θ k) (1 / 2)) :
     (-(3 / 4 : ℂ) * u).re < 0 ∧ -(-(3 / 4 : ℂ) * u).re < (-(3 / 4 : ℂ) * u).im ∧
       (k : ℝ) ≤ ‖-(3 / 4 : ℂ) * u‖ ∧ u.im < 0 := by
   rw [mem_closedBall, dist_eq_norm] at hu
-  have h1 := (abs_le.mp ((abs_re_le_norm (u - airyZ_ctr θ k)).trans hu))
-  have h2 := (abs_le.mp ((abs_im_le_norm (u - airyZ_ctr θ k)).trans hu))
-  simp only [sub_re, sub_im, airyZ_ctr_re, airyZ_ctr_im] at h1 h2
+  have h1 := (abs_le.mp ((abs_re_le_norm (u - ComplexBiZeros.center θ k)).trans hu))
+  have h2 := (abs_le.mp ((abs_im_le_norm (u - ComplexBiZeros.center θ k)).trans hu))
+  simp only [sub_re, sub_im, ComplexBiZeros.center_re, ComplexBiZeros.center_im] at h1 h2
   have hl1 := Real.log_two_gt_d9
   have hl2 := Real.log_two_lt_d9
   have hπ := Real.pi_gt_three
@@ -293,21 +318,21 @@ theorem airyZ_geom {θ : ℝ} (hθ : |θ| ≤ 1 / 4) {k : ℕ} (hk : 1 ≤ k) {u
   nlinarith
 
 /-- `e^{1/2} < 2`. -/
-theorem airyZ_exp_half_lt_two : Real.exp (1 / 2) < 2 := by
+theorem ComplexBiZeros.exp_half_lt_two : Real.exp (1 / 2) < 2 := by
   have h := Real.exp_one_lt_d9
   have h2 : Real.exp (1 / 2) * Real.exp (1 / 2) = Real.exp 1 := by
     rw [← Real.exp_add]; norm_num
   nlinarith [Real.exp_pos (1 / 2)]
 
 /-- Zeros near the model zeros, for a function of the shape `G(W u) + c e^u G(Z u)`. -/
-theorem airyZ_zero_near {F G₁ G₂ : ℂ → ℂ} {c : ℂ} {θ : ℝ} (hθ : |θ| ≤ 1 / 4)
+theorem ComplexBiZeros.zero_near {F G₁ G₂ : ℂ → ℂ} {c : ℂ} {θ : ℝ} (hθ : |θ| ≤ 1 / 4)
     (hFd : DifferentiableOn ℂ F {u | u.im < 0})
     (hG₁ : ∀ η > 0, ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ → ‖G₁ w - 1‖ < η)
     (hG₂ : ∀ η > 0, ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ → ‖G₂ w - 1‖ < η)
     (hF : ∀ u : ℂ, u ≠ 0 → 0 ≤ arg (-(3 / 4 : ℂ) * u) →
-      F u = G₁ (airyZ_W u) + c * exp u * G₂ (airyZ_Z u))
-    (hc : c * exp (airyZ_ctr θ 0) = -1) :
-    ∃ K : ℕ, 1 ≤ K ∧ ∀ k, K ≤ k → ∃ u ∈ ball (airyZ_ctr θ k) (1 / 2), F u = 0 := by
+      F u = G₁ (ComplexBiZeros.W u) + c * exp u * G₂ (ComplexBiZeros.Z u))
+    (hc : c * exp (ComplexBiZeros.center θ 0) = -1) :
+    ∃ K : ℕ, 1 ≤ K ∧ ∀ k, K ≤ k → ∃ u ∈ ball (ComplexBiZeros.center θ k) (1 / 2), F u = 0 := by
   have hπ := Real.pi_pos
   obtain ⟨R₁, hR₁⟩ := hG₁ (1 / 13) (by norm_num)
   obtain ⟨R₂, hR₂⟩ := hG₂ (1 / 13) (by norm_num)
@@ -316,48 +341,57 @@ theorem airyZ_zero_near {F G₁ G₂ : ℂ → ℂ} {c : ℂ} {θ : ℝ} (hθ : 
   have hk1 : 1 ≤ k := (le_max_left _ _).trans hk
   have hkR : Real.exp (3 / 2 * R) ≤ k :=
     (Nat.le_ceil _).trans (by exact_mod_cast (le_max_right _ _).trans hk)
-  refine erfZ_exists_zero_of_expModel (A := -1) (by norm_num) le_rfl (by norm_num) ?_ ?_
+  refine Confluent.ErfZeros.exists_zero_of_expModel (A := -1) (by norm_num) le_rfl
+      (by norm_num) ?_ ?_
   · refine (hFd.analyticOnNhd (isOpen_lt continuous_im continuous_const)).mono fun u hu => ?_
-    exact (airyZ_geom hθ hk1 hu).2.2.2
+    exact (ComplexBiZeros.geometric hθ hk1 hu).2.2.2
   · intro u hu
-    have hu' : u ∈ closedBall (airyZ_ctr θ k) (1 / 2) := sphere_subset_closedBall hu
-    obtain ⟨g1, g2, g3, -⟩ := airyZ_geom hθ hk1 hu'
+    have hu' : u ∈ closedBall (ComplexBiZeros.center θ k) (1 / 2) := sphere_subset_closedBall hu
+    obtain ⟨g1, g2, g3, -⟩ := ComplexBiZeros.geometric hθ hk1 hu'
     have hv0 : -(3 / 4 : ℂ) * u ≠ 0 := fun h => by simp [h] at g1
     have hu0 : u ≠ 0 := fun h => by simp [h] at hv0
-    obtain ⟨a1, a2⟩ := airyZ_arg_bounds g1 g2
-    have hargZ : π / 3 < arg (airyZ_Z u) ∧ arg (airyZ_Z u) < π / 2 := by
-      rw [airyZ_arg_Z]; constructor <;> linarith
-    have hargW : arg (airyZ_W u) = arg (airyZ_Z u) + (-(2 * π / 3)) :=
-      Complex.arg_mul_exp_ofReal_mul_I (airyZ_Z_ne_zero u) (airyZ_arg_ok (by linarith)).1
-        (airyZ_arg_ok (by linarith)).2
-    have hnormZ : R ≤ ‖airyZ_Z u‖ := by
-      rw [airyZ_norm_Z]
+    obtain ⟨a1, a2⟩ := ComplexBiZeros.arg_bounds g1 g2
+    have hargZ : π / 3 < arg (ComplexBiZeros.Z u) ∧ arg (ComplexBiZeros.Z u) < π / 2 := by
+      rw [ComplexBiZeros.arg_Z]; constructor <;> linarith
+    have hargW : arg (ComplexBiZeros.W u) = arg (ComplexBiZeros.Z u) + (-(2 * π / 3)) :=
+      Complex.arg_mul_exp_ofReal_mul_I (ComplexBiZeros.Z_ne_zero u)
+          (ComplexBiZeros.arg_rotation_bounds (by linarith)).1
+        (ComplexBiZeros.arg_rotation_bounds (by linarith)).2
+    have hnormZ : R ≤ ‖ComplexBiZeros.Z u‖ := by
+      rw [ComplexBiZeros.norm_Z]
       have hpos : 0 < ‖-(3 / 4 : ℂ) * u‖ := norm_pos_iff.mpr hv0
       have hlog : 3 / 2 * R ≤ Real.log ‖-(3 / 4 : ℂ) * u‖ := by
         rw [Real.le_log_iff_exp_le hpos]; linarith
       have := Real.add_one_le_exp (2 / 3 * Real.log ‖-(3 / 4 : ℂ) * u‖)
       linarith
-    have hnormW : ‖airyZ_W u‖ = ‖airyZ_Z u‖ := by
-      rw [airyZ_W, norm_mul, norm_exp_ofReal_mul_I, mul_one]
-    have hW0 : airyZ_W u ≠ 0 := mul_ne_zero (airyZ_Z_ne_zero u) (exp_ne_zero _)
-    have e1 := hR₁ (airyZ_W u) hW0 (by rw [hargW]; exact abs_le.mpr ⟨by linarith, by linarith⟩)
+    have hnormW : ‖ComplexBiZeros.W u‖ = ‖ComplexBiZeros.Z u‖ := by
+      rw [ComplexBiZeros.W, norm_mul, norm_exp_ofReal_mul_I, mul_one]
+    have hW0 : ComplexBiZeros.W u ≠ 0 := mul_ne_zero (ComplexBiZeros.Z_ne_zero u) (exp_ne_zero _)
+    have e1 := hR₁ (ComplexBiZeros.W u) hW0
+        (by rw [hargW]; exact abs_le.mpr ⟨by linarith, by linarith⟩)
       (by rw [hnormW]; exact (le_max_left _ _ |>.trans (le_max_left _ _)).trans hnormZ)
-    have e2 := hR₂ (airyZ_Z u) (airyZ_Z_ne_zero u) (abs_le.mpr ⟨by linarith, by linarith⟩)
+    have e2 := hR₂ (ComplexBiZeros.Z u) (ComplexBiZeros.Z_ne_zero u)
+        (abs_le.mpr ⟨by linarith, by linarith⟩)
       ((le_max_right _ _ |>.trans (le_max_left _ _)).trans hnormZ)
-    have hexp : c * exp u = -exp (u - airyZ_ctr θ k) := by
-      rw [show u = airyZ_ctr θ k + (u - airyZ_ctr θ k) by ring, exp_add, airyZ_exp_ctr]
+    have hexp : c * exp u = -exp (u - ComplexBiZeros.center θ k) := by
+      rw [show u = ComplexBiZeros.center θ k + (u - ComplexBiZeros.center θ k) by
+          ring, exp_add, ComplexBiZeros.exp_center]
       simp only [add_sub_cancel_left]
-      linear_combination exp (u - airyZ_ctr θ k) * hc
-    have hd : ‖exp (u - airyZ_ctr θ k)‖ < 2 := by
+      linear_combination exp (u - ComplexBiZeros.center θ k) * hc
+    have hd : ‖exp (u - ComplexBiZeros.center θ k)‖ < 2 := by
       rw [norm_exp]
-      have := (re_le_norm (u - airyZ_ctr θ k)).trans (le_of_eq (mem_sphere_iff_norm.mp hu))
-      exact (Real.exp_le_exp.mpr this).trans_lt airyZ_exp_half_lt_two
+      have := (re_le_norm (u - ComplexBiZeros.center θ k)).trans
+          (le_of_eq (mem_sphere_iff_norm.mp hu))
+      exact (Real.exp_le_exp.mpr this).trans_lt ComplexBiZeros.exp_half_lt_two
     rw [hF u hu0 (by linarith), hexp]
-    have : G₁ (airyZ_W u) + -exp (u - airyZ_ctr θ k) * G₂ (airyZ_Z u) -
-        -1 * (exp (u - airyZ_ctr θ k) - 1) =
-        (G₁ (airyZ_W u) - 1) + (-exp (u - airyZ_ctr θ k)) * (G₂ (airyZ_Z u) - 1) := by ring
+    have : G₁ (ComplexBiZeros.W u) + -exp (u - ComplexBiZeros.center θ k) *
+        G₂ (ComplexBiZeros.Z u) -
+        -1 * (exp (u - ComplexBiZeros.center θ k) - 1) =
+        (G₁ (ComplexBiZeros.W u) - 1) + (-exp (u - ComplexBiZeros.center θ k)) *
+            (G₂ (ComplexBiZeros.Z u) - 1) := by ring
     rw [this]
-    calc _ ≤ ‖G₁ (airyZ_W u) - 1‖ + ‖exp (u - airyZ_ctr θ k)‖ * ‖G₂ (airyZ_Z u) - 1‖ := by
+    calc _ ≤ ‖G₁ (ComplexBiZeros.W u) - 1‖ + ‖exp (u - ComplexBiZeros.center θ k)‖ *
+           ‖G₂ (ComplexBiZeros.Z u) - 1‖ := by
           refine (norm_add_le _ _).trans ?_
           rw [norm_mul, norm_neg]
       _ < 1 / 13 + 2 * (1 / 13) := by
@@ -365,72 +399,77 @@ theorem airyZ_zero_near {F G₁ G₂ : ℂ → ℂ} {c : ℂ} {θ : ℝ} (hθ : 
       _ < ‖(-1 : ℂ)‖ * (1 / 2) / 2 := by norm_num
 
 /-- `u ↦ log(-(3/4) u)` is holomorphic on the lower half-plane. -/
-theorem airyZ_differentiableAt_Z {u : ℂ} (hu : u.im < 0) :
+theorem ComplexBiZeros.differentiableAt_Z {u : ℂ} (hu : u.im < 0) :
     DifferentiableAt ℂ (fun u => log (-(3 / 4 : ℂ) * u)) u := by
   have hs : -(3 / 4 : ℂ) * u ∈ slitPlane := by
     rw [mem_slitPlane_iff]; right; simp; linarith
   exact ((differentiableAt_id.const_mul _).clog hs)
 
 /-- The normalized `Bi` is holomorphic on the lower half-plane. -/
-theorem airyZ_Fbi_differentiableOn : DifferentiableOn ℂ airyZ_Fbi {u | u.im < 0} := by
+theorem ComplexBiZeros.normalizedBi_differentiableOn : DifferentiableOn ℂ
+    ComplexBiZeros.normalizedBi {u | u.im < 0} := by
   intro u hu
-  have hL := airyZ_differentiableAt_Z hu
-  have hZ : DifferentiableAt ℂ airyZ_Z u := (hL.const_mul _).cexp
+  have hL := ComplexBiZeros.differentiableAt_Z hu
+  have hZ : DifferentiableAt ℂ ComplexBiZeros.Z u := (hL.const_mul _).cexp
   refine DifferentiableAt.differentiableWithinAt ?_
-  unfold airyZ_Fbi
+  unfold ComplexBiZeros.normalizedBi
   exact ((differentiable_airyBi _).comp u hZ).mul
     (((differentiableAt_const _).mul (hL.div_const _).cexp).mul
       ((differentiableAt_id.div_const _).cexp))
 
 /-- The normalized `Bi'` is holomorphic on the lower half-plane. -/
-theorem airyZ_Fbid_differentiableOn : DifferentiableOn ℂ airyZ_Fbid {u | u.im < 0} := by
+theorem ComplexBiZeros.normalizedBiDeriv_differentiableOn : DifferentiableOn ℂ
+    ComplexBiZeros.normalizedBiDeriv {u | u.im < 0} := by
   intro u hu
-  have hL := airyZ_differentiableAt_Z hu
-  have hZ : DifferentiableAt ℂ airyZ_Z u := (hL.const_mul _).cexp
+  have hL := ComplexBiZeros.differentiableAt_Z hu
+  have hZ : DifferentiableAt ℂ ComplexBiZeros.Z u := (hL.const_mul _).cexp
   refine DifferentiableAt.differentiableWithinAt ?_
-  unfold airyZ_Fbid
+  unfold ComplexBiZeros.normalizedBiDeriv
   exact ((hasDerivAt_airyBiDeriv _).differentiableAt.comp u hZ).mul
     (((differentiableAt_const _).mul (hL.div_const _).neg.cexp).mul
       ((differentiableAt_id.div_const _).cexp))
 
 /-- `Ai(w)/(leading term) → 1` uniformly as `w → ∞` in `|arg w| ≤ π/2` (quantitative form). -/
-theorem airyZ_small_ai {η : ℝ} (hη : 0 < η) :
+theorem ComplexBiZeros.small_ai {η : ℝ} (hη : 0 < η) :
     ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ →
       ‖airyAi w / airyPrefactor .ai w - 1‖ < η := by
-  have h := airyRot_airyAi_expansion (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
+  have h := RotatedExpansions.airyAi_expansion (δ := π / 2) (by positivity)
+      (by linarith [Real.pi_pos])
   rw [show π - π / 2 = π / 2 by ring] at h
-  exact airyZ_small h (by simp [airyExpansionCoeff, airyReal_airyU_zero]) hη
+  exact ComplexBiZeros.small h (by simp [airyExpansionCoeff, RealRemainders.airyU_zero]) hη
 
 /-- `Ai'(w)/(leading term) → 1` as `w → ∞` in `|arg w| ≤ π/2` (quantitative form). -/
-theorem airyZ_small_aiDeriv {η : ℝ} (hη : 0 < η) :
+theorem ComplexBiZeros.small_aiDeriv {η : ℝ} (hη : 0 < η) :
     ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ →
       ‖airyAiDeriv w / airyPrefactor .aiDeriv w - 1‖ < η := by
-  have h := airyRot_airyAiDeriv_expansion (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
+  have h := RotatedExpansions.airyAiDeriv_expansion (δ := π / 2) (by positivity)
+      (by linarith [Real.pi_pos])
   rw [show π - π / 2 = π / 2 by ring] at h
-  exact airyZ_small h (by simp [airyExpansionCoeff, airyReal_airyV_zero]) hη
+  exact ComplexBiZeros.small h (by simp [airyExpansionCoeff, RealRemainders.airyV_zero]) hη
 
 /-- From zeros near the model zeros to infinitely many zeros in the upper sector. -/
-theorem airyZ_infinite {f : ℂ → ℂ} {F : ℂ → ℂ} {θ : ℝ} (hθ : |θ| ≤ 1 / 4)
-    (hfF : ∀ u, F u = 0 → f (airyZ_Z u) = 0)
-    (hK : ∃ K : ℕ, 1 ≤ K ∧ ∀ k, K ≤ k → ∃ u ∈ ball (airyZ_ctr θ k) (1 / 2), F u = 0) :
+theorem ComplexBiZeros.infinite {f : ℂ → ℂ} {F : ℂ → ℂ} {θ : ℝ} (hθ : |θ| ≤ 1 / 4)
+    (hfF : ∀ u, F u = 0 → f (ComplexBiZeros.Z u) = 0)
+    (hK : ∃ K : ℕ, 1 ≤ K ∧ ∀ k, K ≤ k → ∃ u ∈ ball (ComplexBiZeros.center θ k) (1 / 2), F u = 0) :
     Set.Infinite (airyUpperZeroSet f) := by
   obtain ⟨K, hK1, hK⟩ := hK
   choose! g hgb hg0 using hK
-  have hmem : ∀ n : ℕ, airyZ_Z (g (n + K)) ∈ airyUpperZeroSet f := by
+  have hmem : ∀ n : ℕ, ComplexBiZeros.Z (g (n + K)) ∈ airyUpperZeroSet f := by
     intro n
     have hk : K ≤ n + K := Nat.le_add_left K n
-    obtain ⟨g1, g2, -, -⟩ := airyZ_geom hθ (hK1.trans hk) (ball_subset_closedBall (hgb _ hk))
-    obtain ⟨a1, a2⟩ := airyZ_arg_bounds g1 g2
-    refine ⟨?_, ?_, hfF _ (hg0 _ hk)⟩ <;> rw [airyZ_arg_Z] <;> linarith
-  refine Set.infinite_of_injective_forall_mem (f := fun n => airyZ_Z (g (n + K))) ?_ hmem
+    obtain ⟨g1, g2, -, -⟩ :=
+        ComplexBiZeros.geometric hθ (hK1.trans hk) (ball_subset_closedBall (hgb _ hk))
+    obtain ⟨a1, a2⟩ := ComplexBiZeros.arg_bounds g1 g2
+    refine ⟨?_, ?_, hfF _ (hg0 _ hk)⟩ <;> rw [ComplexBiZeros.arg_Z] <;> linarith
+  refine Set.infinite_of_injective_forall_mem (f := fun n => ComplexBiZeros.Z (g (n + K))) ?_ hmem
   intro m n hmn
   have hu0 : ∀ j : ℕ, g (j + K) ≠ 0 := by
     intro j h
-    obtain ⟨g1, -⟩ := airyZ_geom hθ (hK1.trans (Nat.le_add_left K j))
+    obtain ⟨g1, -⟩ := ComplexBiZeros.geometric hθ (hK1.trans (Nat.le_add_left K j))
       (ball_subset_closedBall (hgb _ (Nat.le_add_left K j)))
     simp [h] at g1
   have hz := congrArg airyZetaComplex hmn
-  simp only [airyZ_zeta_Z (hu0 _)] at hz
+  simp only [ComplexBiZeros.zeta_Z (hu0 _)] at hz
   have he : g (m + K) = g (n + K) := by linear_combination -2 * hz
   have hm := hgb _ (Nat.le_add_left K m)
   have hn := hgb _ (Nat.le_add_left K n)
@@ -438,7 +477,7 @@ theorem airyZ_infinite {f : ℂ → ℂ} {F : ℂ → ℂ} {θ : ℝ} (hθ : |θ
   rw [mem_ball, dist_eq_norm] at hn
   have h1 := abs_lt.mp ((abs_im_le_norm _).trans_lt hm)
   have h2 := abs_lt.mp ((abs_im_le_norm _).trans_lt hn)
-  simp only [sub_im, airyZ_ctr_im] at h1 h2
+  simp only [sub_im, ComplexBiZeros.center_im] at h1 h2
   have hπ := Real.pi_gt_three
   have hlt : ((m : ℝ) - n) * (2 * π) < 1 ∧ -1 < ((m : ℝ) - n) * (2 * π) := by
     push_cast at h1 h2; constructor <;> nlinarith
@@ -458,16 +497,19 @@ theorem airyBi_complex_zeros_sector {z : ℂ} (hz : airyBi z = 0) (him : z.im �
 /-- Infinitely many zeros in the upper sector, DLMF §9.9(i). -/
 theorem airyBi_infinite_complex_zeros :
     Set.Infinite (airyUpperZeroSet airyBi) := by
-  refine airyZ_infinite (F := airyZ_Fbi) (θ := -(1 / 4)) (by norm_num [abs_of_neg]) ?_ ?_
+  refine ComplexBiZeros.infinite (F := ComplexBiZeros.normalizedBi) (θ := -(1 / 4))
+      (by norm_num [abs_of_neg]) ?_ ?_
   · intro u hu
-    simp only [airyZ_Fbi, mul_eq_zero, ofReal_eq_zero, exp_ne_zero, or_false] at hu
+    simp only [ComplexBiZeros.normalizedBi, mul_eq_zero, ofReal_eq_zero, exp_ne_zero,
+        or_false] at hu
     rcases hu with h | h
     · exact h
     · exact absurd h (Real.sqrt_pos.mpr Real.pi_pos).ne'
-  refine airyZ_zero_near (by norm_num [abs_of_neg]) airyZ_Fbi_differentiableOn
-    (fun η hη => airyZ_small_ai hη) (fun η hη => airyZ_small_ai hη)
-    (fun u hu0 hu => airyZ_Fbi_eq hu0 hu) ?_
-  rw [airyZ_ctr, exp_sub, ← ofReal_exp, Real.exp_log (by norm_num : (0 : ℝ) < 2)]
+  refine ComplexBiZeros.zero_near (by norm_num [abs_of_neg])
+      ComplexBiZeros.normalizedBi_differentiableOn
+    (fun η hη => ComplexBiZeros.small_ai hη) (fun η hη => ComplexBiZeros.small_ai hη)
+    (fun u hu0 hu => ComplexBiZeros.normalizedBi_eq hu0 hu) ?_
+  rw [ComplexBiZeros.center, exp_sub, ← ofReal_exp, Real.exp_log (by norm_num : (0 : ℝ) < 2)]
   have : exp (((2 * π * ((0 : ℕ) + -(1 / 4)) : ℝ) : ℂ) * I) = -I := by
     rw [show (((2 * π * ((0 : ℕ) + -(1 / 4)) : ℝ) : ℂ) * I) = -((π / 2 : ℂ) * I) by push_cast; ring,
       exp_neg, exp_pi_div_two_mul_I, inv_I]
@@ -492,16 +534,19 @@ theorem airyBiDeriv_complex_zeros_sector {z : ℂ} (hz : airyBiDeriv z = 0) (him
 /-- Infinitely many zeros in the upper sector, DLMF §9.9(i). -/
 theorem airyBiDeriv_infinite_complex_zeros :
     Set.Infinite (airyUpperZeroSet airyBiDeriv) := by
-  refine airyZ_infinite (F := airyZ_Fbid) (θ := 1 / 4) (by norm_num [abs_of_pos]) ?_ ?_
+  refine ComplexBiZeros.infinite (F := ComplexBiZeros.normalizedBiDeriv) (θ := 1 / 4)
+      (by norm_num [abs_of_pos]) ?_ ?_
   · intro u hu
-    simp only [airyZ_Fbid, mul_eq_zero, ofReal_eq_zero, exp_ne_zero, or_false] at hu
+    simp only [ComplexBiZeros.normalizedBiDeriv, mul_eq_zero, ofReal_eq_zero, exp_ne_zero,
+        or_false] at hu
     rcases hu with h | h
     · exact h
     · exact absurd h (Real.sqrt_pos.mpr Real.pi_pos).ne'
-  refine airyZ_zero_near (c := -(I / 2)) (by norm_num [abs_of_pos]) airyZ_Fbid_differentiableOn
-    (fun η hη => airyZ_small_aiDeriv hη) (fun η hη => airyZ_small_aiDeriv hη)
-    (fun u hu0 hu => by rw [airyZ_Fbid_eq hu0 hu]; ring) ?_
-  rw [airyZ_ctr, exp_sub, ← ofReal_exp, Real.exp_log (by norm_num : (0 : ℝ) < 2)]
+  refine ComplexBiZeros.zero_near (c := -(I / 2)) (by norm_num [abs_of_pos])
+      ComplexBiZeros.normalizedBiDeriv_differentiableOn
+    (fun η hη => ComplexBiZeros.small_aiDeriv hη) (fun η hη => ComplexBiZeros.small_aiDeriv hη)
+    (fun u hu0 hu => by rw [ComplexBiZeros.normalizedBiDeriv_eq hu0 hu]; ring) ?_
+  rw [ComplexBiZeros.center, exp_sub, ← ofReal_exp, Real.exp_log (by norm_num : (0 : ℝ) < 2)]
   have : exp (((2 * π * ((0 : ℕ) + 1 / 4) : ℝ) : ℂ) * I) = I := by
     rw [show (((2 * π * ((0 : ℕ) + 1 / 4) : ℝ) : ℂ) * I) = ((π / 2 : ℂ) * I) by push_cast; ring,
       exp_pi_div_two_mul_I]
@@ -823,7 +868,8 @@ theorem airy_zero_common_asymptotic_coefficients :
   sorry
 
 /-- Interpolation on three disjoint injectively parametrized families of points. -/
-private lemma airyZeros_exists_interp3 {a b c : ℕ → ℂ} (ha : Function.Injective a)
+private lemma ZeroParametrization.exists_interpolation_three {a b c : ℕ → ℂ}
+    (ha : Function.Injective a)
     (hb : Function.Injective b) (hc : Function.Injective c) (hab : ∀ k j, a k ≠ b j)
     (hac : ∀ k j, a k ≠ c j) (hbc : ∀ k j, b k ≠ c j) (fa fb fc : ℕ → ℂ) :
     ∃ F : ℂ → ℂ, ∀ k, F (a k) = fa k ∧ F (b k) = fb k ∧ F (c k) = fc k := by
@@ -844,26 +890,26 @@ private lemma airyZeros_exists_interp3 {a b c : ℕ → ℂ} (ha : Function.Inje
     rw [hc h.choose_spec]
 
 /-- Real part of the real zero argument. -/
-private lemma airyZeros_re_arg (o : ℝ) (k : ℕ) :
+private lemma ZeroParametrization.re_arg (o : ℝ) (k : ℕ) :
     (airyZeroArgument o k).re = 3 * π / 8 * (4 * (k + 1 : ℝ) - o) := by
   simp [airyZeroArgument]
 
 /-- The real zero argument is real. -/
-private lemma airyZeros_im_arg (o : ℝ) (k : ℕ) : (airyZeroArgument o k).im = 0 := by
+private lemma ZeroParametrization.im_arg (o : ℝ) (k : ℕ) : (airyZeroArgument o k).im = 0 := by
   simp [airyZeroArgument]
 
 /-- Real part of the complex argument. -/
-private lemma airyZeros_re_carg (o : ℝ) (k : ℕ) :
+private lemma ZeroParametrization.re_complexArg (o : ℝ) (k : ℕ) :
     (airyComplexZeroArgument o k).re = 3 * π / 8 * (4 * (k + 1 : ℝ) - o) := by
   simp [airyComplexZeroArgument, airyZeroArgument, -ofNat_log]
 
 /-- Imaginary part of the complex zero argument. -/
-private lemma airyZeros_im_carg (o : ℝ) (k : ℕ) :
+private lemma ZeroParametrization.im_complexArg (o : ℝ) (k : ℕ) :
     (airyComplexZeroArgument o k).im = 3 * Real.log 2 / 4 := by
   simp [airyComplexZeroArgument, airyZeroArgument, -ofNat_log]
 
 /-- Cancelling the common factor `3π/8`. -/
-private lemma airyZeros_re_inj {o o' : ℝ} {k j : ℕ}
+private lemma ZeroParametrization.re_injective {o o' : ℝ} {k j : ℕ}
     (h : 3 * π / 8 * (4 * (k + 1 : ℝ) - o) = 3 * π / 8 * (4 * (j + 1 : ℝ) - o')) :
     4 * (k : ℝ) - o = 4 * j - o' := by
   have hπ : (3 * π / 8 : ℝ) ≠ 0 := by positivity
@@ -871,34 +917,40 @@ private lemma airyZeros_re_inj {o o' : ℝ} {k j : ℕ}
   linarith
 
 /-- The real zero arguments are injective in `k`. -/
-private lemma airyZeros_inj (o : ℝ) : Function.Injective (airyZeroArgument o) := fun k j h => by
-  have := airyZeros_re_inj (congrArg re h |>.trans (airyZeros_re_arg o j) |>.symm.trans
-    (airyZeros_re_arg o k) |>.symm)
+private lemma ZeroParametrization.injective (o : ℝ) : Function.Injective (airyZeroArgument o) :=
+    fun k j h => by
+  have := ZeroParametrization.re_injective
+      (congrArg re h |>.trans (ZeroParametrization.re_arg o j) |>.symm.trans
+    (ZeroParametrization.re_arg o k) |>.symm)
   exact_mod_cast (by linarith : (k : ℝ) = j)
 
 /-- The complex zero arguments are injective in `k`. -/
-private lemma airyZeros_cinj (o : ℝ) : Function.Injective (airyComplexZeroArgument o) :=
+private lemma ZeroParametrization.injective_complex (o : ℝ) : Function.Injective
+    (airyComplexZeroArgument o) :=
   fun k j h => by
-  have := airyZeros_re_inj (congrArg re h |>.trans (airyZeros_re_carg o j) |>.symm.trans
-    (airyZeros_re_carg o k) |>.symm)
+  have := ZeroParametrization.re_injective
+      (congrArg re h |>.trans (ZeroParametrization.re_complexArg o j) |>.symm.trans
+    (ZeroParametrization.re_complexArg o k) |>.symm)
   exact_mod_cast (by linarith : (k : ℝ) = j)
 
 /-- The offsets `1` and `3` give disjoint real arguments. -/
-private lemma airyZeros_ne13 (k j : ℕ) : airyZeroArgument 1 k ≠ airyZeroArgument 3 j := by
+private lemma ZeroParametrization.one_ne_three (k j : ℕ) : airyZeroArgument 1 k ≠
+    airyZeroArgument 3 j := by
   intro h
-  have := airyZeros_re_inj (congrArg re h |>.trans (airyZeros_re_arg 3 j) |>.symm.trans
-    (airyZeros_re_arg 1 k) |>.symm)
+  have := ZeroParametrization.re_injective
+      (congrArg re h |>.trans (ZeroParametrization.re_arg 3 j) |>.symm.trans
+    (ZeroParametrization.re_arg 1 k) |>.symm)
   have h3 : (2 * ((j : ℤ) - k) - 1 : ℤ) = 0 := by
     have : (2 * ((j : ℝ) - k) - 1) = 0 := by linarith
     exact_mod_cast this
   omega
 
 /-- Real and complex zero arguments never coincide. -/
-private lemma airyZeros_rcne (o o' : ℝ) (k j : ℕ) :
+private lemma ZeroParametrization.real_ne_complex (o o' : ℝ) (k j : ℕ) :
     airyZeroArgument o k ≠ airyComplexZeroArgument o' j := by
   intro h
   have := congrArg im h
-  rw [airyZeros_im_arg, airyZeros_im_carg] at this
+  rw [ZeroParametrization.im_arg, ZeroParametrization.im_complexArg] at this
   have : 0 < Real.log 2 := Real.log_pos one_lt_two
   linarith
 
@@ -923,30 +975,38 @@ theorem exists_airy_zero_parametrizations :
       airyBiDerivComplexZero (k + 1) = exp (π * I / 3) * U (airyComplexZeroArgument 3 k) ∧
       airyBi (airyBiDerivComplexZero (k + 1)) =
         (-1 : ℂ) ^ k * Real.sqrt 2 * exp (π * I / 6) * W (airyComplexZeroArgument 3 k) := by
-  have i1 := airyZeros_inj 1
-  have i3 := airyZeros_inj 3
-  have c1 := airyZeros_cinj 1
-  have c3 := airyZeros_cinj 3
+  have i1 := ZeroParametrization.injective 1
+  have i3 := ZeroParametrization.injective 3
+  have c1 := ZeroParametrization.injective_complex 1
+  have c3 := ZeroParametrization.injective_complex 3
   have hsgn (k : ℕ) : ((-1 : ℂ) ^ k) * (-1 : ℂ) ^ k = 1 := by
     rw [← mul_pow]; norm_num
   have hs2 : (Real.sqrt 2 : ℂ) ≠ 0 := by
     exact_mod_cast (Real.sqrt_pos.mpr two_pos).ne'
-  obtain ⟨T, hT⟩ := airyZeros_exists_interp3 i1 i3 c1 airyZeros_ne13
-    (fun k j => airyZeros_rcne 1 1 k j) (fun k j => airyZeros_rcne 3 1 k j)
+  obtain ⟨T, hT⟩ := ZeroParametrization.exists_interpolation_three i1 i3 c1
+      ZeroParametrization.one_ne_three
+    (fun k j => ZeroParametrization.real_ne_complex 1 1 k j)
+        (fun k j => ZeroParametrization.real_ne_complex 3 1 k j)
     (fun k => -(airyAiZero (k + 1) : ℂ)) (fun k => -(airyBiZero (k + 1) : ℂ))
     (fun k => exp (-(π * I / 3)) * airyBiComplexZero (k + 1))
-  obtain ⟨U, hU⟩ := airyZeros_exists_interp3 i3 i1 c3 (fun k j => (airyZeros_ne13 j k).symm)
-    (fun k j => airyZeros_rcne 3 3 k j) (fun k j => airyZeros_rcne 1 3 k j)
+  obtain ⟨U, hU⟩ := ZeroParametrization.exists_interpolation_three i3 i1 c3
+      (fun k j => (ZeroParametrization.one_ne_three j k).symm)
+    (fun k j => ZeroParametrization.real_ne_complex 3 3 k j)
+        (fun k j => ZeroParametrization.real_ne_complex 1 3 k j)
     (fun k => -(airyAiDerivZero (k + 1) : ℂ)) (fun k => -(airyBiDerivZero (k + 1) : ℂ))
     (fun k => exp (-(π * I / 3)) * airyBiDerivComplexZero (k + 1))
-  obtain ⟨V, hV⟩ := airyZeros_exists_interp3 i1 i3 c1 airyZeros_ne13
-    (fun k j => airyZeros_rcne 1 1 k j) (fun k j => airyZeros_rcne 3 1 k j)
+  obtain ⟨V, hV⟩ := ZeroParametrization.exists_interpolation_three i1 i3 c1
+      ZeroParametrization.one_ne_three
+    (fun k j => ZeroParametrization.real_ne_complex 1 1 k j)
+        (fun k j => ZeroParametrization.real_ne_complex 3 1 k j)
     (fun k => (-1 : ℂ) ^ k * airyAiDeriv (airyAiZero (k + 1)))
     (fun k => (-1 : ℂ) ^ k * airyBiDeriv (airyBiZero (k + 1)))
     (fun k => airyBiDeriv (airyBiComplexZero (k + 1)) /
       ((-1 : ℂ) ^ (k + 1) * Real.sqrt 2 * exp (-π * I / 6)))
-  obtain ⟨W, hW⟩ := airyZeros_exists_interp3 i3 i1 c3 (fun k j => (airyZeros_ne13 j k).symm)
-    (fun k j => airyZeros_rcne 3 3 k j) (fun k j => airyZeros_rcne 1 3 k j)
+  obtain ⟨W, hW⟩ := ZeroParametrization.exists_interpolation_three i3 i1 c3
+      (fun k j => (ZeroParametrization.one_ne_three j k).symm)
+    (fun k j => ZeroParametrization.real_ne_complex 3 3 k j)
+        (fun k j => ZeroParametrization.real_ne_complex 1 3 k j)
     (fun k => (-1 : ℂ) ^ k * airyAi (airyAiDerivZero (k + 1)))
     (fun k => (-1 : ℂ) ^ (k + 1) * airyBi (airyBiDerivZero (k + 1)))
     (fun k => airyBi (airyBiDerivComplexZero (k + 1)) /

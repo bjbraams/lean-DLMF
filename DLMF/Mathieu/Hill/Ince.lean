@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Hill.Basic
-public import DLMF.Mathieu.SpectralExistence
+public import DLMF.Mathieu.Basic.SpectralExistence
 public import DLMF.Mathieu.Noninteger.Properties
 
 /-!

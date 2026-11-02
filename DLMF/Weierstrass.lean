@@ -8,6 +8,8 @@ module -- shake: keep-all
 public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 public import DLMF.Weierstrass.DifferentialEquations
 public import DLMF.Weierstrass.SpecialLattices
+public import DLMF.Weierstrass.RealPaths
+public import DLMF.Weierstrass.RectangularIntegrals
 public import DLMF.Weierstrass.Relations
 public import DLMF.Weierstrass.QuarterPeriods
 public import DLMF.Weierstrass.Series

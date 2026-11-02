@@ -17,16 +17,16 @@ Liouville–Green expansion with error bounds (`LiouvilleGreen.exists_solution_e
 Olver, *Asymptotics and Special Functions*, Ch. 10, Thm. 3.1) with `u = μ²`,
 `A = (t²-1)^{-1/4}`, `g = 0` and the coefficients `(-1)^s A_s(t)`, `A_s = u_s(t)/(t²-1)^{3s/2}`
 (DLMF 12.10.8). The polynomial recursions DLMF 12.10.11–12.10.12 are exactly the Liouville–Green
-recursion `A² A_s'' + 2AA'A_s' + AA''A_s = 2A_{s+1}'` (`pcfLG_recursion`). The constructed
-solution is identified with `U` as the recessive solution at `+∞`: a Wronskian argument
-(`pcfLG_eq_mul_of_tendsto`) together with the large-`t` limit
-`U/(A e^{-μ²ξ}) → h(μ)` (`pcfLG_tendsto_U_div`, from DLMF 12.9.1). The normalizer is
-`g = h/Φ(μ²)`, where `Φ` realizes the formal series `∑ c_s u^{-s}`, `c_s = lim_{t→∞} A_s(t)`
-(`pcfLG_exists_asymptotic`, a Borel-type lemma).
+recursion `A² A_s'' + 2AA'A_s' + AA''A_s = 2A_{s+1}'` (`CylinderLiouvilleGreen.recursion`). The
+constructed solution is identified with `U` as the recessive solution at `+∞`: a Wronskian argument
+(`CylinderLiouvilleGreen.eq_mul_of_tendsto`) together with the large-`t` limit
+`U/(A e^{-μ²ξ}) → h(μ)` (`CylinderLiouvilleGreen.tendsto_U_div`, from DLMF 12.9.1). The normalizer
+is `g = h/Φ(μ²)`, where `Φ` realizes the formal series `∑ c_s u^{-s}`, `c_s = lim_{t→∞} A_s(t)`
+(`CylinderLiouvilleGreen.exists_asymptotic`, a Borel-type lemma).
 
 ## Main results
 
-* `pcfLG_core`: the uniform estimate for each truncation order.
+* `CylinderLiouvilleGreen.core`: the uniform estimate for each truncation order.
 * `pcf_negative_parameter_uniform_U`: DLMF 12.10.3 with the normalizer
   `g(μ) ∼ h(μ)/∑ c_s μ^{-2s}`.
 
@@ -37,11 +37,14 @@ DLMF 12.10.14 (`IsCylinderGNormalizer`) additionally requires the identity
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 open Polynomial
 
 /-- A function with vanishing derivative on `(b, ∞)` is constant there. -/
-theorem pcfLG_const_of_hasDerivAt_zero {b : ℝ} {f : ℝ → ℂ} (h : ∀ t, b < t → HasDerivAt f 0 t) :
+theorem CylinderLiouvilleGreen.const_of_hasDerivAt_zero {b : ℝ} {f : ℝ → ℂ}
+    (h : ∀ t, b < t → HasDerivAt f 0 t) :
     ∃ a, ∀ t, b < t → f t = a := by
   obtain ⟨a, ha⟩ := (isOpen_Ioi (a := b)).exists_is_const_of_deriv_eq_zero isPreconnected_Ioi
     (fun t ht => (h t ht).differentiableAt.differentiableWithinAt)
@@ -51,7 +54,7 @@ theorem pcfLG_const_of_hasDerivAt_zero {b : ℝ} {f : ℝ → ℂ} (h : ∀ t, b
 /-- **Uniqueness of the recessive solution.** Let `U` (complex) and `W` (real, nonvanishing,
 tending to `0`) solve `w'' = q w` on `(b, ∞)`. If `U / W` has a limit at `+∞`, then `U` is a
 constant multiple of `W` on `(b, ∞)`. -/
-theorem pcfLG_eq_mul_of_tendsto {b : ℝ} {q : ℝ → ℝ} {U U' : ℝ → ℂ} {W W' : ℝ → ℝ}
+theorem CylinderLiouvilleGreen.eq_mul_of_tendsto {b : ℝ} {q : ℝ → ℝ} {U U' : ℝ → ℂ} {W W' : ℝ → ℝ}
     (hU : ∀ t, b < t → HasDerivAt U (U' t) t) (hU' : ∀ t, b < t → HasDerivAt U' (q t * U t) t)
     (hW : ∀ t, b < t → HasDerivAt W (W' t) t) (hW' : ∀ t, b < t → HasDerivAt W' (q t * W t) t)
     (hW0 : ∀ t, b < t → W t ≠ 0) (hWl : Tendsto W atTop (𝓝 0)) {L : ℂ}
@@ -62,7 +65,7 @@ theorem pcfLG_eq_mul_of_tendsto {b : ℝ} {q : ℝ → ℝ} {U U' : ℝ → ℂ}
   have hWc' : ∀ t, b < t → HasDerivAt (fun s => (W' s : ℂ)) ((q t : ℂ) * W t) t := fun t ht => by
     simpa using (hW' t ht).ofReal_comp
   -- the Wronskian is constant
-  obtain ⟨C, hC⟩ := pcfLG_const_of_hasDerivAt_zero (b := b)
+  obtain ⟨C, hC⟩ := CylinderLiouvilleGreen.const_of_hasDerivAt_zero (b := b)
     (f := fun t => U t * W' t - U' t * W t) (fun t ht => by
       have := ((hU t ht).mul (hWc' t ht)).sub ((hU' t ht).mul (hWc t ht))
       convert this using 1; ring)
@@ -74,7 +77,8 @@ theorem pcfLG_eq_mul_of_tendsto {b : ℝ} {q : ℝ → ℝ} {U U' : ℝ → ℂ}
     convert this using 1
     rw [← hC t ht]; push_cast; field_simp; ring
   by_cases hC0 : C = 0
-  · obtain ⟨κ, hκ⟩ := pcfLG_const_of_hasDerivAt_zero (b := b) (f := fun s => U s / W s)
+  · obtain ⟨κ, hκ⟩ := CylinderLiouvilleGreen.const_of_hasDerivAt_zero (b := b)
+        (f := fun s => U s / W s)
       (fun t ht => by simpa [hC0] using hg t ht)
     refine ⟨κ, fun t ht => ?_⟩
     have := hκ t ht
@@ -131,7 +135,7 @@ theorem pcfLG_eq_mul_of_tendsto {b : ℝ} {q : ℝ → ℝ} {U U' : ℝ → ℂ}
 /-- **Borel's lemma at infinity** (real coefficients): every formal series `∑ c_s u^{-s}` is
 the asymptotic expansion of some function, here a truncation `∑_{s<n(u)} c_s u^{-s}` with
 `n(u)` the largest `n ≤ ⌊u⌋` for which `∑_{s<n} |c_s| ≤ u`. -/
-theorem pcfLG_exists_asymptotic (c : ℕ → ℝ) : ∃ F : ℝ → ℝ, ∀ N : ℕ,
+theorem CylinderLiouvilleGreen.exists_asymptotic (c : ℕ → ℝ) : ∃ F : ℝ → ℝ, ∀ N : ℕ,
     (fun u : ℝ => F u - ∑ s ∈ Finset.range N, c s / u^s) =O[atTop] (fun u : ℝ => (u^N)⁻¹) := by
   classical
   let n : ℝ → ℕ := fun u => Nat.findGreatest (fun m => ∑ s ∈ Finset.range m, |c s| ≤ u) ⌊u⌋₊
@@ -171,12 +175,13 @@ theorem pcfLG_exists_asymptotic (c : ℕ → ℝ) : ∃ F : ℝ → ℝ, ∀ N :
   · rw [Finset.Ico_eq_empty (by omega), Finset.sum_empty, abs_zero]; positivity
 
 /-- Combining real powers of a positive base. -/
-theorem pcfLG_rpow_mul {y : ℝ} (hy : 0 < y) {a b c : ℝ} (h : a + b = c) :
+theorem CylinderLiouvilleGreen.rpow_mul {y : ℝ} (hy : 0 < y) {a b c : ℝ} (h : a + b = c) :
     y ^ a * y ^ b = y ^ c := by
   rw [← Real.rpow_add hy, h]
 
 /-- Derivative of `P(t) (t²-1)^c` on `t > 1`. -/
-theorem pcfLG_hasDerivAt_poly_rpow (P : Polynomial ℝ) (c : ℝ) {t : ℝ} (ht : 1 < t) :
+theorem CylinderLiouvilleGreen.hasDerivAt_poly_rpow (P : Polynomial ℝ) (c : ℝ)
+    {t : ℝ} (ht : 1 < t) :
     HasDerivAt (fun t => P.eval t * (t^2-1) ^ c)
       (((derivative P).eval t * (t^2-1) + 2*c*t*P.eval t) * (t^2-1) ^ (c-1)) t := by
   have hy : 0 < t^2-1 := by nlinarith
@@ -191,35 +196,38 @@ theorem pcfLG_hasDerivAt_poly_rpow (P : Polynomial ℝ) (c : ℝ) {t : ℝ} (ht 
   rw [e]; ring
 
 /-- The Liouville–Green amplitude `A = (t²-1)^{-1/4}`. -/
-def pcfLG_A (t : ℝ) : ℝ := (t^2-1) ^ (-1/4:ℝ)
+def CylinderLiouvilleGreen.amplitude (t : ℝ) : ℝ := (t^2-1) ^ (-1/4:ℝ)
 /-- `A'`. -/
-def pcfLG_A1 (t : ℝ) : ℝ := -(t/2) * (t^2-1) ^ (-5/4:ℝ)
+def CylinderLiouvilleGreen.amplitudeDeriv (t : ℝ) : ℝ := -(t/2) * (t^2-1) ^ (-5/4:ℝ)
 /-- `A''`. -/
-def pcfLG_A2 (t : ℝ) : ℝ := (3*t^2+2)/4 * (t^2-1) ^ (-9/4:ℝ)
+def CylinderLiouvilleGreen.amplitudeDeriv2 (t : ℝ) : ℝ := (3*t^2+2)/4 * (t^2-1) ^ (-9/4:ℝ)
 
 /-- Olver's coefficient `A_s(t) = u_s(t)/(t²-1)^{3s/2}` (DLMF 12.10.8), real form. -/
-def pcfLG_hatA (s : ℕ) (t : ℝ) : ℝ := (pcfOlverU s).eval t * (t^2-1) ^ (-(3*s/2:ℝ))
+def CylinderLiouvilleGreen.coeff (s : ℕ) (t : ℝ) : ℝ := (pcfOlverU s).eval t *
+    (t^2-1) ^ (-(3*s/2:ℝ))
 /-- `A_s'(t) = r_{s-1}(t)/(t²-1)^{(3s+2)/2}`. -/
-def pcfLG_hatAd (s : ℕ) (t : ℝ) : ℝ :=
+def CylinderLiouvilleGreen.coeffDeriv (s : ℕ) (t : ℝ) : ℝ :=
   (pcfOlverPair s).2.eval t * (t^2-1) ^ (-((3*s+2)/2:ℝ))
 /-- `A_s''`. -/
-def pcfLG_hatAd2 (s : ℕ) (t : ℝ) : ℝ :=
+def CylinderLiouvilleGreen.coeffDeriv2 (s : ℕ) (t : ℝ) : ℝ :=
   ((derivative (pcfOlverPair s).2).eval t * (t^2-1) - (3*s+2)*t*(pcfOlverPair s).2.eval t) *
     (t^2-1) ^ (-((3*s+4)/2):ℝ)
 
 /-- `A' = -(t/2)(t²-1)^{-5/4}`. -/
-theorem pcfLG_hasDerivAt_A {t : ℝ} (ht : 1 < t) : HasDerivAt pcfLG_A (pcfLG_A1 t) t := by
-  have := pcfLG_hasDerivAt_poly_rpow 1 (-1/4) ht
+theorem CylinderLiouvilleGreen.hasDerivAt_amplitude {t : ℝ} (ht : 1 < t) : HasDerivAt
+    CylinderLiouvilleGreen.amplitude (CylinderLiouvilleGreen.amplitudeDeriv t) t := by
+  have := CylinderLiouvilleGreen.hasDerivAt_poly_rpow 1 (-1/4) ht
   simp only [eval_one, one_mul, derivative_one, eval_zero, zero_mul, zero_add, mul_one] at this
-  unfold pcfLG_A pcfLG_A1
+  unfold CylinderLiouvilleGreen.amplitude CylinderLiouvilleGreen.amplitudeDeriv
   convert this using 1
   rw [show (-1/4:ℝ) - 1 = -5/4 by norm_num]; ring
 
 /-- `A'' = (3t²+2)/4 · (t²-1)^{-9/4}`. -/
-theorem pcfLG_hasDerivAt_A1 {t : ℝ} (ht : 1 < t) : HasDerivAt pcfLG_A1 (pcfLG_A2 t) t := by
+theorem CylinderLiouvilleGreen.hasDerivAt_amplitudeDeriv {t : ℝ} (ht : 1 < t) : HasDerivAt
+    CylinderLiouvilleGreen.amplitudeDeriv (CylinderLiouvilleGreen.amplitudeDeriv2 t) t := by
   have hy : 0 < t^2-1 := by nlinarith
-  have := pcfLG_hasDerivAt_poly_rpow (C (-1/2:ℝ) * X) (-5/4) ht
-  unfold pcfLG_A1 pcfLG_A2
+  have := CylinderLiouvilleGreen.hasDerivAt_poly_rpow (C (-1/2:ℝ) * X) (-5/4) ht
+  unfold CylinderLiouvilleGreen.amplitudeDeriv CylinderLiouvilleGreen.amplitudeDeriv2
   convert this using 1
   · funext t; simp; ring
   · rw [show (-5/4:ℝ) - 1 = -9/4 by norm_num]
@@ -228,7 +236,7 @@ theorem pcfLG_hasDerivAt_A1 {t : ℝ} (ht : 1 < t) : HasDerivAt pcfLG_A1 (pcfLG_
     ring
 
 /-- `A_s' ` from the Olver recursion (DLMF 12.10.11). -/
-theorem pcfLG_olverU_eq (s : ℕ) :
+theorem CylinderLiouvilleGreen.olverU_eq (s : ℕ) :
     (X^2-1)*derivative (pcfOlverU s)-C (3*(s:ℝ))*X*pcfOlverU s = (pcfOlverPair s).2 := by
   rcases s with _ | s
   · simp [pcfOlverU, pcfOlverPair]
@@ -237,50 +245,58 @@ theorem pcfLG_olverU_eq (s : ℕ) :
     push_cast; exact this
 
 /-- `A_s' = r_{s-1}(t)/(t²-1)^{(3s+2)/2}`, from DLMF 12.10.11. -/
-theorem pcfLG_hasDerivAt_hatA (s : ℕ) {t : ℝ} (ht : 1 < t) :
-    HasDerivAt (pcfLG_hatA s) (pcfLG_hatAd s t) t := by
-  have := pcfLG_hasDerivAt_poly_rpow (pcfOlverU s) (-(3*s/2)) ht
-  have he := congrArg (Polynomial.eval t) (pcfLG_olverU_eq s)
+theorem CylinderLiouvilleGreen.hasDerivAt_coeff (s : ℕ) {t : ℝ} (ht : 1 < t) :
+    HasDerivAt (CylinderLiouvilleGreen.coeff s) (CylinderLiouvilleGreen.coeffDeriv s t) t := by
+  have := CylinderLiouvilleGreen.hasDerivAt_poly_rpow (pcfOlverU s) (-(3*s/2)) ht
+  have he := congrArg (Polynomial.eval t) (CylinderLiouvilleGreen.olverU_eq s)
   simp only [eval_sub, eval_mul, eval_pow, eval_X, eval_one, eval_C] at he
-  unfold pcfLG_hatA pcfLG_hatAd
+  unfold CylinderLiouvilleGreen.coeff CylinderLiouvilleGreen.coeffDeriv
   convert this using 1
   rw [← he, show -(3*(s:ℝ)/2) - 1 = -((3*s+2)/2) by ring]; ring
 
 /-- The derivative of `A_s'`. -/
-theorem pcfLG_hasDerivAt_hatAd (s : ℕ) {t : ℝ} (ht : 1 < t) :
-    HasDerivAt (pcfLG_hatAd s) (pcfLG_hatAd2 s t) t := by
-  have := pcfLG_hasDerivAt_poly_rpow (pcfOlverPair s).2 (-((3*s+2)/2)) ht
-  unfold pcfLG_hatAd pcfLG_hatAd2
+theorem CylinderLiouvilleGreen.hasDerivAt_coeffDeriv (s : ℕ) {t : ℝ} (ht : 1 < t) :
+    HasDerivAt (CylinderLiouvilleGreen.coeffDeriv s)
+        (CylinderLiouvilleGreen.coeffDeriv2 s t) t := by
+  have := CylinderLiouvilleGreen.hasDerivAt_poly_rpow (pcfOlverPair s).2 (-((3*s+2)/2)) ht
+  unfold CylinderLiouvilleGreen.coeffDeriv CylinderLiouvilleGreen.coeffDeriv2
   convert this using 1
   rw [show -((3*(s:ℝ)+2)/2) - 1 = -((3*s+4)/2) by ring]; ring
 
 /-- The second Olver polynomial of the pair is `r_s` (DLMF 12.10.12). -/
-theorem pcfLG_olverPair_snd_succ (s : ℕ) : (pcfOlverPair (s+1)).2 =
+theorem CylinderLiouvilleGreen.olverPair_snd_succ (s : ℕ) : (pcfOlverPair (s+1)).2 =
     C (1/8:ℝ)*(C 3*X^2+C 2)*(pcfOlverPair s).1 - C (3/2*(s+1:ℝ))*X*(pcfOlverPair s).2 +
       C (1/2:ℝ)*(X^2-1)*derivative (pcfOlverPair s).2 := by
   rw [pcfOlverPair]
 
 /-- **The Liouville–Green recursion for Olver's coefficients**: with `A = (t²-1)^{-1/4}`,
 `A² A_s'' + 2 A A' A_s' + A A'' A_s = 2 A_{s+1}'`. -/
-theorem pcfLG_recursion (s : ℕ) {t : ℝ} (ht : 1 < t) :
-    pcfLG_A t ^ 2 * pcfLG_hatAd2 s t + 2 * pcfLG_A t * pcfLG_A1 t * pcfLG_hatAd s t +
-      pcfLG_A t * pcfLG_A2 t * pcfLG_hatA s t = 2 * pcfLG_hatAd (s+1) t := by
+theorem CylinderLiouvilleGreen.recursion (s : ℕ) {t : ℝ} (ht : 1 < t) :
+    CylinderLiouvilleGreen.amplitude t ^ 2 * CylinderLiouvilleGreen.coeffDeriv2 s t + 2 *
+        CylinderLiouvilleGreen.amplitude t * CylinderLiouvilleGreen.amplitudeDeriv t *
+        CylinderLiouvilleGreen.coeffDeriv s t +
+      CylinderLiouvilleGreen.amplitude t * CylinderLiouvilleGreen.amplitudeDeriv2 t *
+          CylinderLiouvilleGreen.coeff s t = 2 * CylinderLiouvilleGreen.coeffDeriv (s+1) t := by
   have hy : 0 < t^2-1 := by nlinarith
   set y := t^2-1
   set Z := y ^ (-((3*(s:ℝ)+5)/2))
-  have e1 : pcfLG_A t ^ 2 * y ^ (-((3*(s:ℝ)+4)/2)) = Z := by
-    rw [pcfLG_A, ← Real.rpow_natCast, ← Real.rpow_mul hy.le]
-    exact pcfLG_rpow_mul hy (by push_cast; ring)
-  have e2 : pcfLG_A t * y ^ (-5/4:ℝ) * y ^ (-((3*(s:ℝ)+2)/2)) = Z := by
-    rw [pcfLG_A, pcfLG_rpow_mul hy (c := -3/2) (by norm_num)]
-    exact pcfLG_rpow_mul hy (by ring)
-  have e3 : pcfLG_A t * y ^ (-9/4:ℝ) * y ^ (-(3*(s:ℝ)/2)) = Z := by
-    rw [pcfLG_A, pcfLG_rpow_mul hy (c := -5/2) (by norm_num)]
-    exact pcfLG_rpow_mul hy (by ring)
+  have e1 : CylinderLiouvilleGreen.amplitude t ^ 2 * y ^ (-((3*(s:ℝ)+4)/2)) = Z := by
+    rw [CylinderLiouvilleGreen.amplitude, ← Real.rpow_natCast, ← Real.rpow_mul hy.le]
+    exact CylinderLiouvilleGreen.rpow_mul hy (by push_cast; ring)
+  have e2 : CylinderLiouvilleGreen.amplitude t * y ^ (-5/4:ℝ) * y ^ (-((3*(s:ℝ)+2)/2)) = Z := by
+    rw [CylinderLiouvilleGreen.amplitude,
+        CylinderLiouvilleGreen.rpow_mul hy (c := -3/2) (by norm_num)]
+    exact CylinderLiouvilleGreen.rpow_mul hy (by ring)
+  have e3 : CylinderLiouvilleGreen.amplitude t * y ^ (-9/4:ℝ) * y ^ (-(3*(s:ℝ)/2)) = Z := by
+    rw [CylinderLiouvilleGreen.amplitude,
+        CylinderLiouvilleGreen.rpow_mul hy (c := -5/2) (by norm_num)]
+    exact CylinderLiouvilleGreen.rpow_mul hy (by ring)
   have e4 : y ^ (-((3*((s+1:ℕ):ℝ)+2)/2)) = Z := by simp only [Z]; congr 1; push_cast; ring
-  have hp := congrArg (Polynomial.eval t) (pcfLG_olverPair_snd_succ s)
+  have hp := congrArg (Polynomial.eval t) (CylinderLiouvilleGreen.olverPair_snd_succ s)
   simp only [eval_add, eval_sub, eval_mul, eval_pow, eval_X, eval_one, eval_C] at hp
-  simp only [pcfLG_hatAd2, pcfLG_hatAd, pcfLG_hatA, pcfLG_A1, pcfLG_A2]
+  simp only [CylinderLiouvilleGreen.coeffDeriv2, CylinderLiouvilleGreen.coeffDeriv,
+      CylinderLiouvilleGreen.coeff, CylinderLiouvilleGreen.amplitudeDeriv,
+      CylinderLiouvilleGreen.amplitudeDeriv2]
   rw [e4, hp]
   have : pcfOlverU s = (pcfOlverPair s).1 := rfl
   rw [this]
@@ -289,7 +305,7 @@ theorem pcfLG_recursion (s : ℕ) {t : ℝ} (ht : 1 < t) :
     (-t * (pcfOlverPair s).2.eval t) * e2 + ((3*t^2+2)/4 * (pcfOlverPair s).1.eval t) * e3
 
 /-- `ξ' = √(t²-1)` (DLMF 12.10.7). -/
-theorem pcfLG_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
+theorem CylinderLiouvilleGreen.hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
     HasDerivAt pcfXi (Real.sqrt (t^2-1)) t := by
   have hy : 0 < t^2-1 := by nlinarith
   set r := Real.sqrt (t^2-1) with hr
@@ -314,25 +330,31 @@ theorem pcfLG_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
   nlinarith [hr2]
 
 /-- `A⁻² = √(t²-1)`. -/
-theorem pcfLG_A_sq_recip {t : ℝ} (ht : 1 < t) : (pcfLG_A t ^ 2)⁻¹ = Real.sqrt (t^2-1) := by
+theorem CylinderLiouvilleGreen.amplitude_sq_recip {t : ℝ} (ht : 1 < t) :
+    (CylinderLiouvilleGreen.amplitude t ^ 2)⁻¹ = Real.sqrt (t^2-1) := by
   have hy : 0 < t^2-1 := by nlinarith
-  rw [pcfLG_A, ← Real.rpow_natCast, ← Real.rpow_mul hy.le, ← Real.rpow_neg hy.le,
+  rw [CylinderLiouvilleGreen.amplitude, ← Real.rpow_natCast, ← Real.rpow_mul hy.le,
+      ← Real.rpow_neg hy.le,
     Real.sqrt_eq_rpow]
   norm_num
 
 /-- `A⁻⁴ = t²-1`. -/
-theorem pcfLG_A_pow_four_recip {t : ℝ} (ht : 1 < t) : (pcfLG_A t ^ 4)⁻¹ = t^2-1 := by
+theorem CylinderLiouvilleGreen.amplitude_pow_four_recip {t : ℝ} (ht : 1 < t) :
+    (CylinderLiouvilleGreen.amplitude t ^ 4)⁻¹ = t^2-1 := by
   have hy : 0 < t^2-1 := by nlinarith
-  rw [pcfLG_A, ← Real.rpow_natCast, ← Real.rpow_mul hy.le, ← Real.rpow_neg hy.le]
+  rw [CylinderLiouvilleGreen.amplitude, ← Real.rpow_natCast, ← Real.rpow_mul hy.le,
+      ← Real.rpow_neg hy.le]
   norm_num
 
 /-- `A(t) > 0` for `t > 1`. -/
-theorem pcfLG_A_pos {t : ℝ} (ht : 1 < t) : 0 < pcfLG_A t := by
+theorem CylinderLiouvilleGreen.amplitude_pos {t : ℝ} (ht : 1 < t) : 0 <
+    CylinderLiouvilleGreen.amplitude t := by
   have hy : 0 < t^2-1 := by nlinarith
   exact Real.rpow_pos_of_pos hy _
 
 /-- A polynomial bound for `t ≥ 1`. -/
-theorem pcfLG_abs_eval_le (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {t : ℝ} (ht : 1 ≤ t) :
+theorem CylinderLiouvilleGreen.abs_eval_le (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d)
+    {t : ℝ} (ht : 1 ≤ t) :
     |P.eval t| ≤ (∑ i ∈ Finset.range (d+1), |P.coeff i|) * t^d := by
   rw [eval_eq_sum_range' (Nat.lt_succ_of_le hd), Finset.sum_mul]
   refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun i hi => ?_)
@@ -341,7 +363,8 @@ theorem pcfLG_abs_eval_le (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d
     (Finset.mem_range.1 hi))) (abs_nonneg _)
 
 /-- `|P(t)| (t²-1)^{-e} ≤ K t^{d-2e}` for `t ≥ c > 1`. -/
-theorem pcfLG_poly_rpow_bound (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {e c : ℝ}
+theorem CylinderLiouvilleGreen.poly_rpow_bound (P : Polynomial ℝ) {d : ℕ}
+    (hd : P.natDegree ≤ d) {e c : ℝ}
     (he : 0 ≤ e) (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ t, c ≤ t →
       |P.eval t * (t^2-1) ^ (-e)| ≤ K * t ^ ((d:ℝ) - 2*e) := by
   set S := ∑ i ∈ Finset.range (d+1), |P.coeff i|
@@ -357,7 +380,7 @@ theorem pcfLG_poly_rpow_bound (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree �
     nlinarith
   have hy0 : 0 < (1 - 1/c^2) * t^2 := by positivity
   rw [abs_mul, abs_of_pos (Real.rpow_pos_of_pos (lt_of_lt_of_le hy0 hy) _)]
-  have h1 := pcfLG_abs_eval_le P hd (by linarith : 1 ≤ t)
+  have h1 := CylinderLiouvilleGreen.abs_eval_le P hd (by linarith : 1 ≤ t)
   have h2 : (t^2-1) ^ (-e) ≤ ((1 - 1/c^2) * t^2) ^ (-e) :=
     Real.rpow_le_rpow_of_nonpos hy0 hy (by linarith)
   have h3 : ((1 - 1/c^2) * t^2) ^ (-e) = (1 - 1/c^2) ^ (-e) * t ^ (-2*e) := by
@@ -372,10 +395,11 @@ theorem pcfLG_poly_rpow_bound (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree �
     _ = S * (1 - 1/c^2) ^ (-e) * t ^ ((d:ℝ) - 2*e) := by rw [h3, ← h4]; ring
 
 /-- Integrability of `|P(t)|(t²-1)^{-e}` on `(c,∞)`, `c > 1`, when `d - 2e < -1`. -/
-theorem pcfLG_integrableOn_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {e c : ℝ}
+theorem CylinderLiouvilleGreen.integrableOn_poly_rpow (P : Polynomial ℝ) {d : ℕ}
+    (hd : P.natDegree ≤ d) {e c : ℝ}
     (he : 0 ≤ e) (hde : (d:ℝ) - 2*e < -1) (hc : 1 < c) :
     IntegrableOn (fun t => |P.eval t * (t^2-1) ^ (-e)|) (Ioi c) := by
-  obtain ⟨K, hK, hb⟩ := pcfLG_poly_rpow_bound P hd he hc
+  obtain ⟨K, hK, hb⟩ := CylinderLiouvilleGreen.poly_rpow_bound P hd he hc
   refine Integrable.mono' ((integrableOn_Ioi_rpow_of_lt hde (by linarith)).const_mul K) ?_
     (ae_restrict_of_forall_mem measurableSet_Ioi fun t ht => ?_)
   · refine ContinuousOn.aestronglyMeasurable (fun t ht => ?_) measurableSet_Ioi
@@ -386,36 +410,43 @@ theorem pcfLG_integrableOn_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natD
   · rw [Real.norm_eq_abs, abs_abs]; exact hb t (le_of_lt ht)
 
 /-- Tail bound for `|P(t)|(t²-1)^{-e}`: `∫_x^∞ ≤ K x^{d-2e+1}/(-(d-2e+1))` for `x ≥ c > 1`. -/
-theorem pcfLG_tail_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {e c : ℝ}
+theorem CylinderLiouvilleGreen.tail_poly_rpow (P : Polynomial ℝ) {d : ℕ}
+    (hd : P.natDegree ≤ d) {e c : ℝ}
     (he : 0 ≤ e) (hde : (d:ℝ) - 2*e < -1) (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x →
       ∫ t in Ioi x, |P.eval t * (t^2-1) ^ (-e)| ≤ K * x ^ ((d:ℝ) - 2*e + 1) := by
-  obtain ⟨K, hK, hb⟩ := pcfLG_poly_rpow_bound P hd he hc
+  obtain ⟨K, hK, hb⟩ := CylinderLiouvilleGreen.poly_rpow_bound P hd he hc
   refine ⟨K / (-((d:ℝ) - 2*e + 1)), div_nonneg hK (by linarith), fun x hx => ?_⟩
   have hx0 : 0 < x := by linarith
   calc ∫ t in Ioi x, |P.eval t * (t^2-1) ^ (-e)| ≤ ∫ t in Ioi x, K * t ^ ((d:ℝ) - 2*e) := by
-        refine setIntegral_mono_on ((pcfLG_integrableOn_poly_rpow P hd he hde hc).mono_set
+        refine setIntegral_mono_on
+            ((CylinderLiouvilleGreen.integrableOn_poly_rpow P hd he hde hc).mono_set
           (Ioi_subset_Ioi hx)) ((integrableOn_Ioi_rpow_of_lt hde hx0).const_mul K)
           measurableSet_Ioi fun t ht => hb t (hx.trans (le_of_lt ht))
     _ = K / (-((d:ℝ) - 2*e + 1)) * x ^ ((d:ℝ) - 2*e + 1) := by
         rw [integral_const_mul, integral_Ioi_rpow_of_lt hde hx0]; field_simp
 
 /-- The parity–degree class bounds the degree. -/
-theorem pcfLG_good_natDegree {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood e D f) :
+theorem HasParityDegreeSupport.natDegree_le {e D : ℕ} {f : Polynomial ℝ}
+    (hf : HasParityDegreeSupport e D f) :
     f.natDegree ≤ D :=
   natDegree_le_iff_coeff_eq_zero.2 fun n hn => by
     by_contra h; have := (hf n h).2; exact absurd hn (not_lt.2 (by exact_mod_cast this))
 
 /-- `deg u_s ≤ 3s`. -/
-theorem pcfLG_natDegree_olverU (s : ℕ) : (pcfOlverU s).natDegree ≤ 3*s :=
-  pcfLG_good_natDegree (pcfLG_olverPair_inv s).1
+theorem CylinderLiouvilleGreen.natDegree_olverU (s : ℕ) : (pcfOlverU s).natDegree ≤ 3*s :=
+  HasParityDegreeSupport.natDegree_le (CylinderLiouvilleGreen.olverPair_inv s).1
 
 /-- `deg r_{s} ≤ 3s+2`, i.e. `deg (pcfOlverPair (s+1)).2 ≤ 3s+2`. -/
-theorem pcfLG_natDegree_olverPair_snd (s : ℕ) : (pcfOlverPair (s+1)).2.natDegree ≤ 3*s+2 := by
-  rw [pcfLG_olverPair_snd_succ]
-  exact pcfLG_good_natDegree (pcfLG_r_good (pcfLG_olverPair_inv s).1 (pcfLG_olverPair_inv s).2)
+theorem CylinderLiouvilleGreen.natDegree_olverPair_snd (s : ℕ) :
+    (pcfOlverPair (s+1)).2.natDegree ≤ 3*s+2 := by
+  rw [CylinderLiouvilleGreen.olverPair_snd_succ]
+  exact HasParityDegreeSupport.natDegree_le
+      (CylinderLiouvilleGreen.r_hasParityDegreeSupport (CylinderLiouvilleGreen.olverPair_inv s).1
+      (CylinderLiouvilleGreen.olverPair_inv s).2)
 
 /-- `P(t)/t^d → coeff_d P` when `deg P ≤ d`. -/
-theorem pcfLG_tendsto_eval_div_pow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) :
+theorem CylinderLiouvilleGreen.tendsto_eval_div_pow (P : Polynomial ℝ) {d : ℕ}
+    (hd : P.natDegree ≤ d) :
     Tendsto (fun t => P.eval t / t^d) atTop (𝓝 (P.coeff d)) := by
   have e : ∀ᶠ t in atTop, P.eval t / t^d =
       ∑ i ∈ Finset.range (d+1), P.coeff i * (if i = d then 1 else (t^(d-i))⁻¹) := by
@@ -441,10 +472,10 @@ theorem pcfLG_tendsto_eval_div_pow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDeg
     exact (tendsto_pow_atTop (by omega : d - i ≠ 0)).inv_tendsto_atTop
 
 /-- The limit `c_s = lim_{t→∞} A_s(t)`, the coefficient of `t^{3s}` in `u_s`. -/
-def pcfLG_c (s : ℕ) : ℝ := (pcfOlverU s).coeff (3*s)
+def CylinderLiouvilleGreen.limitCoeff (s : ℕ) : ℝ := (pcfOlverU s).coeff (3*s)
 
 /-- `t²/(t²-1) → 1`. -/
-theorem pcfLG_tendsto_sq_div : Tendsto (fun t : ℝ => t^2/(t^2-1)) atTop (𝓝 1) := by
+theorem CylinderLiouvilleGreen.tendsto_sq_div : Tendsto (fun t : ℝ => t^2/(t^2-1)) atTop (𝓝 1) := by
   have h : Tendsto (fun t : ℝ => 1/(1 - (t^2)⁻¹)) atTop (𝓝 (1/(1-0))) :=
     tendsto_const_nhds.div (tendsto_const_nhds.sub
       ((tendsto_pow_atTop two_ne_zero).inv_tendsto_atTop)) (by norm_num)
@@ -456,10 +487,12 @@ theorem pcfLG_tendsto_sq_div : Tendsto (fun t : ℝ => t^2/(t^2-1)) atTop (𝓝 
   field_simp
 
 /-- `A_s(t) → c_s` as `t → ∞`. -/
-theorem pcfLG_tendsto_hatA (s : ℕ) : Tendsto (pcfLG_hatA s) atTop (𝓝 (pcfLG_c s)) := by
-  have h1 := pcfLG_tendsto_eval_div_pow (pcfOlverU s) (pcfLG_natDegree_olverU s)
+theorem CylinderLiouvilleGreen.tendsto_coeff (s : ℕ) : Tendsto (CylinderLiouvilleGreen.coeff s)
+    atTop (𝓝 (CylinderLiouvilleGreen.limitCoeff s)) := by
+  have h1 := CylinderLiouvilleGreen.tendsto_eval_div_pow (pcfOlverU s)
+      (CylinderLiouvilleGreen.natDegree_olverU s)
   have h2 : Tendsto (fun t : ℝ => (t^2/(t^2-1)) ^ (3*s/2:ℝ)) atTop (𝓝 1) := by
-    have := pcfLG_tendsto_sq_div.rpow_const (p := 3*s/2) (Or.inl one_ne_zero)
+    have := CylinderLiouvilleGreen.tendsto_sq_div.rpow_const (p := 3*s/2) (Or.inl one_ne_zero)
     simpa using this
   have := h1.mul h2
   rw [mul_one] at this
@@ -467,22 +500,24 @@ theorem pcfLG_tendsto_hatA (s : ℕ) : Tendsto (pcfLG_hatA s) atTop (𝓝 (pcfLG
   filter_upwards [eventually_gt_atTop 1] with t ht
   have hy : 0 < t^2-1 := by nlinarith
   have ht0 : 0 < t := by linarith
-  rw [pcfLG_hatA, Real.div_rpow (by positivity) hy.le, Real.rpow_neg hy.le,
+  rw [CylinderLiouvilleGreen.coeff, Real.div_rpow (by positivity) hy.le, Real.rpow_neg hy.le,
     show (t^2) ^ (3*(s:ℝ)/2) = t ^ (3*s) by
       rw [← Real.rpow_natCast t 2, ← Real.rpow_mul ht0.le, ← Real.rpow_natCast]; push_cast; ring_nf]
   have : t ^ (3*s) ≠ 0 := by positivity
   field_simp
 
 /-- `A(t) → 0` as `t → ∞`. -/
-theorem pcfLG_tendsto_A : Tendsto pcfLG_A atTop (𝓝 0) := by
+theorem CylinderLiouvilleGreen.tendsto_amplitude : Tendsto CylinderLiouvilleGreen.amplitude
+    atTop (𝓝 0) := by
   have h : Tendsto (fun t : ℝ => t^2-1) atTop atTop :=
     tendsto_atTop_add_const_right _ _ (tendsto_pow_atTop two_ne_zero)
   have := (tendsto_rpow_neg_atTop (y := 1/4) (by norm_num)).comp h
   refine this.congr fun t => ?_
-  simp [pcfLG_A, Function.comp]; ring_nf
+  simp [CylinderLiouvilleGreen.amplitude, Function.comp]; ring_nf
 
 /-- `√(t²-1)/t → 1`. -/
-theorem pcfLG_tendsto_sqrt_div : Tendsto (fun t : ℝ => Real.sqrt (t^2-1) / t) atTop (𝓝 1) := by
+theorem CylinderLiouvilleGreen.tendsto_sqrt_div : Tendsto (fun t : ℝ => Real.sqrt (t^2-1) / t)
+    atTop (𝓝 1) := by
   have h : Tendsto (fun t : ℝ => Real.sqrt (1 - (t^2)⁻¹)) atTop (𝓝 (Real.sqrt (1 - 0))) :=
     (tendsto_const_nhds.sub ((tendsto_pow_atTop two_ne_zero).inv_tendsto_atTop)).sqrt
   rw [sub_zero, Real.sqrt_one] at h
@@ -493,23 +528,27 @@ theorem pcfLG_tendsto_sqrt_div : Tendsto (fun t : ℝ => Real.sqrt (t^2-1) / t) 
     Real.sqrt_sq ht0.le]
 
 /-- The real normalizing constant `h(μ)` of DLMF 12.10.15. -/
-def pcfLG_h (μ : ℝ) : ℝ := 2 ^ (-μ^2/4-1/4) * Real.exp (-μ^2/4) * μ ^ (μ^2/2-1/2)
+def CylinderLiouvilleGreen.normalizer (μ : ℝ) : ℝ := 2 ^ (-μ^2/4-1/4) * Real.exp (-μ^2/4) *
+    μ ^ (μ^2/2-1/2)
 
 /-- `h(μ) > 0`. -/
-theorem pcfLG_h_pos {μ : ℝ} (hμ : 0 < μ) : 0 < pcfLG_h μ := by unfold pcfLG_h; positivity
+theorem CylinderLiouvilleGreen.normalizer_pos {μ : ℝ} (hμ : 0 < μ) : 0 <
+    CylinderLiouvilleGreen.normalizer μ := by unfold CylinderLiouvilleGreen.normalizer; positivity
 
 /-- `pcfH μ` is the real number `h(μ)` for `μ > 0`. -/
-theorem pcfLG_pcfH_eq {μ : ℝ} (hμ : 0 < μ) : pcfH μ = (pcfLG_h μ : ℂ) := by
-  unfold pcfH pcfLG_h
+theorem CylinderLiouvilleGreen.pcfH_eq {μ : ℝ} (hμ : 0 < μ) : pcfH μ =
+    (CylinderLiouvilleGreen.normalizer μ : ℂ) := by
+  unfold pcfH CylinderLiouvilleGreen.normalizer
   push_cast
   rw [Complex.ofReal_cpow (by norm_num), Complex.ofReal_cpow hμ.le]
   push_cast; ring_nf
 
 /-- **The normalization at infinity**: `e^{z²/4} z^{a+1/2} A(t) e^{-μ²ξ(t)} → 1/h(μ)` as
 `t → ∞`, where `z = μ t √2`, `a = -μ²/2`. -/
-theorem pcfLG_tendsto_R {μ : ℝ} (hμ : 0 < μ) :
+theorem CylinderLiouvilleGreen.tendsto_normalization {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun t : ℝ => Real.exp ((μ*t*Real.sqrt 2)^2/4) * (μ*t*Real.sqrt 2) ^ (1/2-μ^2/2) *
-      pcfLG_A t * Real.exp (-(μ^2 * pcfXi t))) atTop (𝓝 (pcfLG_h μ)⁻¹) := by
+      CylinderLiouvilleGreen.amplitude t *
+          Real.exp (-(μ^2 * pcfXi t))) atTop (𝓝 (CylinderLiouvilleGreen.normalizer μ)⁻¹) := by
   set p : ℝ := 1/2-μ^2/2
   set C₀ : ℝ := p * Real.log μ + p/2 * Real.log 2 + μ^2/2 * Real.log 2
   set r : ℝ → ℝ := fun t => Real.sqrt (t^2-1)
@@ -517,20 +556,21 @@ theorem pcfLG_tendsto_R {μ : ℝ} (hμ : 0 < μ) :
     μ^2/2 * Real.log ((1 + r t / t)/2)
   have hlim : Tendsto E atTop (𝓝 (μ^2/2 * (1/(1+1)) + C₀ + 1/4 * Real.log 1 +
       μ^2/2 * Real.log ((1+1)/2))) := by
-    have hq := pcfLG_tendsto_sqrt_div
+    have hq := CylinderLiouvilleGreen.tendsto_sqrt_div
     refine ((((tendsto_const_nhds.mul (tendsto_const_nhds.div (tendsto_const_nhds.add hq)
       (by norm_num))).add tendsto_const_nhds).add (tendsto_const_nhds.mul
-      (pcfLG_tendsto_sq_div.log one_ne_zero))).add (tendsto_const_nhds.mul
+      (CylinderLiouvilleGreen.tendsto_sq_div.log one_ne_zero))).add (tendsto_const_nhds.mul
       (((tendsto_const_nhds.add hq).div_const 2).log (by norm_num))))
   have hval : μ^2/2 * (1/(1+1)) + C₀ + 1/4 * Real.log 1 + μ^2/2 * Real.log ((1+1)/2) =
-      Real.log (pcfLG_h μ)⁻¹ := by
-    rw [Real.log_inv, pcfLG_h, Real.log_mul (by positivity) (by positivity),
+      Real.log (CylinderLiouvilleGreen.normalizer μ)⁻¹ := by
+    rw [Real.log_inv, CylinderLiouvilleGreen.normalizer,
+        Real.log_mul (by positivity) (by positivity),
       Real.log_mul (by positivity) (by positivity), Real.log_rpow (by norm_num),
       Real.log_rpow hμ, Real.log_exp]
     simp only [C₀, p]; norm_num; ring
   rw [hval] at hlim
   have := (Real.continuous_exp.tendsto _).comp hlim
-  rw [Real.exp_log (inv_pos.2 (pcfLG_h_pos hμ))] at this
+  rw [Real.exp_log (inv_pos.2 (CylinderLiouvilleGreen.normalizer_pos hμ))] at this
   refine this.congr' ?_
   filter_upwards [eventually_gt_atTop 1] with t ht
   have ht0 : 0 < t := by linarith
@@ -539,7 +579,7 @@ theorem pcfLG_tendsto_R {μ : ℝ} (hμ : 0 < μ) :
   have hr2 : r t ^ 2 = t^2-1 := Real.sq_sqrt hy.le
   have hs2 : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
   have hz : 0 < μ*t*Real.sqrt 2 := by positivity
-  simp only [Function.comp, pcfLG_A]
+  simp only [Function.comp, CylinderLiouvilleGreen.amplitude]
   rw [Real.rpow_def_of_pos hz, Real.rpow_def_of_pos hy, ← Real.exp_add, ← Real.exp_add,
     ← Real.exp_add]
   congr 1
@@ -562,7 +602,7 @@ theorem pcfLG_tendsto_R {μ : ℝ} (hμ : 0 < μ) :
   ring
 
 /-- The positive real axis tends to infinity inside every sector. -/
-theorem pcfLG_tendsto_sector {α : ℝ} (hα : 0 ≤ α) {μ : ℝ} (hμ : 0 < μ) :
+theorem CylinderLiouvilleGreen.tendsto_sector {α : ℝ} (hα : 0 ≤ α) {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun t : ℝ => ((μ*t*Real.sqrt 2 : ℝ) : ℂ)) atTop (sector α) := by
   have hm : 0 < μ * Real.sqrt 2 := by positivity
   refine tendsto_inf.2 ⟨tendsto_comap_iff.2 ?_, tendsto_principal.2 ?_⟩
@@ -579,9 +619,10 @@ theorem pcfLG_tendsto_sector {α : ℝ} (hα : 0 ≤ α) {μ : ℝ} (hμ : 0 < �
 
 /-- **The normalization of `U` at infinity** (from DLMF 12.9.1): for fixed `μ > 0`,
 `U(-μ²/2, μ t √2) / (A(t) e^{-μ² ξ(t)}) → h(μ)` as `t → ∞`. -/
-theorem pcfLG_tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
+theorem CylinderLiouvilleGreen.tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun t : ℝ => pcfU (-μ^2/2) (μ*t*Real.sqrt 2) /
-      ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) atTop (𝓝 (pcfH μ)) := by
+      ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) atTop
+          (𝓝 (pcfH μ)) := by
   set a : ℂ := -(μ:ℂ)^2/2
   have hO := pcfU_sector_asymptotic a (δ := π/4) (by positivity) 1
   have hz2 : Tendsto (fun z : ℂ => z ^ (-(2*(1:ℕ):ℤ))) (sector (3*π/4-π/4)) (𝓝 0) := by
@@ -597,11 +638,15 @@ theorem pcfLG_tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
       (𝓝 1) := by
     refine hE.congr fun z => ?_
     simp [pcfUTerm, poch_zero]
-  have hT := hE'.comp (pcfLG_tendsto_sector (α := 3*π/4-π/4) (by linarith [Real.pi_pos]) hμ)
-  have hR := (Complex.continuous_ofReal.tendsto _).comp (pcfLG_tendsto_R hμ)
-  have hRne : ((pcfLG_h μ)⁻¹ : ℝ) ≠ 0 := inv_ne_zero (pcfLG_h_pos hμ).ne'
+  have hT := hE'.comp (CylinderLiouvilleGreen.tendsto_sector (α := 3*π/4-π/4)
+      (by linarith [Real.pi_pos]) hμ)
+  have hR := (Complex.continuous_ofReal.tendsto _).comp
+      (CylinderLiouvilleGreen.tendsto_normalization hμ)
+  have hRne : ((CylinderLiouvilleGreen.normalizer μ)⁻¹ : ℝ) ≠ 0 :=
+      inv_ne_zero (CylinderLiouvilleGreen.normalizer_pos hμ).ne'
   have := hT.div hR (by exact_mod_cast hRne)
-  rw [pcfLG_pcfH_eq hμ, show (pcfLG_h μ : ℂ) = 1 / (((pcfLG_h μ)⁻¹ : ℝ) : ℂ) by
+  rw [CylinderLiouvilleGreen.pcfH_eq hμ, show (CylinderLiouvilleGreen.normalizer μ : ℂ) = 1 /
+      (((CylinderLiouvilleGreen.normalizer μ)⁻¹ : ℝ) : ℂ) by
     push_cast; field_simp]
   refine this.congr' ?_
   filter_upwards [eventually_gt_atTop 1] with t ht
@@ -610,101 +655,114 @@ theorem pcfLG_tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
   have hcp : ((μ*t*Real.sqrt 2 : ℝ):ℂ)^(a+1/2) = (((μ*t*Real.sqrt 2)^(1/2-μ^2/2) : ℝ) : ℂ) := by
     rw [Complex.ofReal_cpow hx.le]; congr 1; simp only [a]; push_cast; ring
   have hp : 0 < (μ*t*Real.sqrt 2)^(1/2-μ^2/2) := Real.rpow_pos_of_pos hx _
-  have hA : 0 < pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) :=
-    mul_pos (pcfLG_A_pos ht) (Real.exp_pos _)
-  have hden : ((Real.exp ((μ*t*Real.sqrt 2)^2/4) * (μ*t*Real.sqrt 2)^(1/2-μ^2/2) * pcfLG_A t *
+  have hA : 0 < CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) :=
+    mul_pos (CylinderLiouvilleGreen.amplitude_pos ht) (Real.exp_pos _)
+  have hden : ((Real.exp ((μ*t*Real.sqrt 2)^2/4) * (μ*t*Real.sqrt 2)^(1/2-μ^2/2) *
+      CylinderLiouvilleGreen.amplitude t *
       Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) = cexp (((μ*t*Real.sqrt 2 : ℝ) : ℂ)^2/4) *
-      ((μ*t*Real.sqrt 2 : ℝ):ℂ)^(a+1/2) * ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) := by
+      ((μ*t*Real.sqrt 2 : ℝ):ℂ)^(a+1/2) *
+          ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) := by
     rw [hcp]; push_cast; ring
   have hp' : ((μ*t*Real.sqrt 2 : ℝ):ℂ)^(a+1/2) ≠ 0 := by rw [hcp]; exact_mod_cast hp.ne'
-  have hA' : ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hA.ne'
+  have hA' : ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
+      exact_mod_cast hA.ne'
   have he : cexp (((μ*t*Real.sqrt 2 : ℝ) : ℂ)^2/4) ≠ 0 := Complex.exp_ne_zero _
   simp only [Function.comp, Pi.div_apply]
   rw [hden, mul_div_mul_left _ _ (mul_ne_zero he hp')]
   push_cast; ring
 
 /-- Continuity of `P(t) (t²-1)^c` on `(1, ∞)`. -/
-theorem pcfLG_continuousOn_poly_rpow (P : Polynomial ℝ) (c : ℝ) :
+theorem CylinderLiouvilleGreen.continuousOn_poly_rpow (P : Polynomial ℝ) (c : ℝ) :
     ContinuousOn (fun t => P.eval t * (t^2-1) ^ c) (Ioi 1) := fun _t ht =>
-  ((pcfLG_hasDerivAt_poly_rpow P c ht).continuousAt).continuousWithinAt
+  ((CylinderLiouvilleGreen.hasDerivAt_poly_rpow P c ht).continuousAt).continuousWithinAt
 
 /-- Continuity of `A''` on `(1, ∞)`. -/
-theorem pcfLG_continuousOn_A2 : ContinuousOn pcfLG_A2 (Ioi 1) := by
-  have := pcfLG_continuousOn_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (-9/4)
+theorem CylinderLiouvilleGreen.continuousOn_amplitudeDeriv2 : ContinuousOn
+    CylinderLiouvilleGreen.amplitudeDeriv2 (Ioi 1) := by
+  have := CylinderLiouvilleGreen.continuousOn_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (-9/4)
   refine this.congr fun t _ => ?_
-  simp only [pcfLG_A2, eval_add, eval_mul, eval_C, eval_pow, eval_X]; ring
+  simp only [CylinderLiouvilleGreen.amplitudeDeriv2, eval_add, eval_mul, eval_C,
+      eval_pow, eval_X]; ring
 
 /-- Continuity of `A_s''` on `(1, ∞)`. -/
-theorem pcfLG_continuousOn_hatAd2 (s : ℕ) : ContinuousOn (pcfLG_hatAd2 s) (Ioi 1) := by
-  have := pcfLG_continuousOn_poly_rpow
+theorem CylinderLiouvilleGreen.continuousOn_coeffDeriv2 (s : ℕ) : ContinuousOn
+    (CylinderLiouvilleGreen.coeffDeriv2 s) (Ioi 1) := by
+  have := CylinderLiouvilleGreen.continuousOn_poly_rpow
     (derivative (pcfOlverPair s).2 * (X^2 - 1) - C (3*(s:ℝ)+2) * X * (pcfOlverPair s).2)
     (-((3*s+4)/2))
   refine this.congr fun t _ => ?_
-  simp [pcfLG_hatAd2]
+  simp [CylinderLiouvilleGreen.coeffDeriv2]
 
 /-- `A A'' = (3t²+2)/4 · (t²-1)^{-5/2}`. -/
-theorem pcfLG_A_mul_A2 {t : ℝ} (ht : 1 < t) :
-    pcfLG_A t * pcfLG_A2 t = (C (3/4:ℝ) * X^2 + C (1/2:ℝ)).eval t * (t^2-1) ^ (-(5/2):ℝ) := by
+theorem CylinderLiouvilleGreen.amplitude_mul_amplitudeDeriv2 {t : ℝ} (ht : 1 < t) :
+    CylinderLiouvilleGreen.amplitude t * CylinderLiouvilleGreen.amplitudeDeriv2 t =
+        (C (3/4:ℝ) * X^2 + C (1/2:ℝ)).eval t * (t^2-1) ^ (-(5/2):ℝ) := by
   have hy : 0 < t^2-1 := by nlinarith
-  unfold pcfLG_A pcfLG_A2
+  unfold CylinderLiouvilleGreen.amplitude CylinderLiouvilleGreen.amplitudeDeriv2
   rw [show (t^2-1) ^ (-1/4:ℝ) * ((3*t^2+2)/4 * (t^2-1) ^ (-9/4:ℝ)) =
     (3*t^2+2)/4 * ((t^2-1) ^ (-1/4:ℝ) * (t^2-1) ^ (-9/4:ℝ)) by ring,
-    pcfLG_rpow_mul hy (c := -(5/2)) (by norm_num)]
+    CylinderLiouvilleGreen.rpow_mul hy (c := -(5/2)) (by norm_num)]
   simp only [eval_add, eval_mul, eval_C, eval_pow, eval_X]; ring
 
 /-- The error-control integrand `|A A''|` is integrable at infinity. -/
-theorem pcfLG_integrableOn_V {c : ℝ} (hc : 1 < c) :
-    IntegrableOn (fun t => |pcfLG_A t * pcfLG_A2 t - (fun _ => (0:ℝ)) t *
-                              pcfLG_A t ^ 2|) (Ioi c) := by
-  have := pcfLG_integrableOn_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (d := 2) (by compute_degree)
+theorem CylinderLiouvilleGreen.integrableOn_V {c : ℝ} (hc : 1 < c) :
+    IntegrableOn (fun t => |CylinderLiouvilleGreen.amplitude t *
+                              CylinderLiouvilleGreen.amplitudeDeriv2 t - (fun _ => (0:ℝ)) t *
+                              CylinderLiouvilleGreen.amplitude t ^ 2|) (Ioi c) := by
+  have := CylinderLiouvilleGreen.integrableOn_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (d := 2)
+      (by compute_degree)
     (e := 5/2) (by norm_num) (by norm_num) hc
   refine this.congr_fun (fun t ht => ?_) measurableSet_Ioi
   have : 1 < t := hc.trans ht
-  simp only [zero_mul, sub_zero, pcfLG_A_mul_A2 this]
+  simp only [zero_mul, sub_zero, CylinderLiouvilleGreen.amplitude_mul_amplitudeDeriv2 this]
 
 /-- Tail bound for the error-control integral. -/
-theorem pcfLG_tail_V {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x →
-    ∫ t in Ioi x, |pcfLG_A t * pcfLG_A2 t - (fun _ => (0:ℝ)) t * pcfLG_A t ^ 2| ≤ K := by
-  obtain ⟨K, hK, hb⟩ := pcfLG_tail_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (d := 2)
+theorem CylinderLiouvilleGreen.tail_V {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x →
+    ∫ t in Ioi x, |CylinderLiouvilleGreen.amplitude t * CylinderLiouvilleGreen.amplitudeDeriv2 t -
+                     (fun _ => (0:ℝ)) t * CylinderLiouvilleGreen.amplitude t ^ 2| ≤ K := by
+  obtain ⟨K, hK, hb⟩ := CylinderLiouvilleGreen.tail_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (d := 2)
     (by compute_degree) (e := 5/2) (by norm_num) (by norm_num) hc
   refine ⟨K, hK, fun x hx => ?_⟩
   have hx1 : 1 ≤ x := by linarith
   rw [setIntegral_congr_fun measurableSet_Ioi (g := fun t =>
     |(C (3/4:ℝ) * X^2 + C (1/2:ℝ)).eval t * (t^2-1) ^ (-(5/2):ℝ)|) (fun t ht => by
       have : 1 < t := lt_of_lt_of_le hc (hx.trans (le_of_lt ht))
-      simp only [zero_mul, sub_zero, pcfLG_A_mul_A2 this])]
+      simp only [zero_mul, sub_zero, CylinderLiouvilleGreen.amplitude_mul_amplitudeDeriv2 this])]
   refine (hb x hx).trans ?_
   have : x ^ ((2:ℕ) - 2*(5/2:ℝ) + 1) ≤ 1 :=
     Real.rpow_le_one_of_one_le_of_nonpos hx1 (by norm_num)
   nlinarith
 
 /-- Integrability of `|A_n'|` at infinity. -/
-theorem pcfLG_integrableOn_hatAd (n : ℕ) {c : ℝ} (hc : 1 < c) :
-    IntegrableOn (fun t => |pcfLG_hatAd n t|) (Ioi c) := by
+theorem CylinderLiouvilleGreen.integrableOn_coeffDeriv (n : ℕ) {c : ℝ} (hc : 1 < c) :
+    IntegrableOn (fun t => |CylinderLiouvilleGreen.coeffDeriv n t|) (Ioi c) := by
   rcases n with _ | m
-  · simp [pcfLG_hatAd, pcfOlverPair]
-  · have := pcfLG_integrableOn_poly_rpow (pcfOlverPair (m+1)).2 (d := 3*m+2)
-      (pcfLG_natDegree_olverPair_snd m) (e := (3*((m+1:ℕ):ℝ)+2)/2) (by positivity)
+  · simp [CylinderLiouvilleGreen.coeffDeriv, pcfOlverPair]
+  · have := CylinderLiouvilleGreen.integrableOn_poly_rpow (pcfOlverPair (m+1)).2 (d := 3*m+2)
+      (CylinderLiouvilleGreen.natDegree_olverPair_snd m) (e := (3*((m+1:ℕ):ℝ)+2)/2) (by positivity)
       (by push_cast; linarith) hc
-    simpa [pcfLG_hatAd] using this
+    simpa [CylinderLiouvilleGreen.coeffDeriv] using this
 
 /-- Tail bound for `∫_x^∞ |A_n'|`: `≤ K x^{-2}` for `x ≥ c > 1`. -/
-theorem pcfLG_tail_hatAd (n : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x →
-    ∫ t in Ioi x, |pcfLG_hatAd n t| ≤ K * x ^ (-2:ℝ) := by
+theorem CylinderLiouvilleGreen.tail_coeffDeriv (n : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤
+    K ∧ ∀ x, c ≤ x →
+    ∫ t in Ioi x, |CylinderLiouvilleGreen.coeffDeriv n t| ≤ K * x ^ (-2:ℝ) := by
   rcases n with _ | m
-  · exact ⟨0, le_rfl, fun x _ => by simp [pcfLG_hatAd, pcfOlverPair]⟩
-  · obtain ⟨K, hK, hb⟩ := pcfLG_tail_poly_rpow (pcfOlverPair (m+1)).2 (d := 3*m+2)
-      (pcfLG_natDegree_olverPair_snd m) (e := (3*((m+1:ℕ):ℝ)+2)/2) (by positivity)
+  · exact ⟨0, le_rfl, fun x _ => by simp [CylinderLiouvilleGreen.coeffDeriv, pcfOlverPair]⟩
+  · obtain ⟨K, hK, hb⟩ := CylinderLiouvilleGreen.tail_poly_rpow (pcfOlverPair (m+1)).2 (d := 3*m+2)
+      (CylinderLiouvilleGreen.natDegree_olverPair_snd m) (e := (3*((m+1:ℕ):ℝ)+2)/2) (by positivity)
       (by push_cast; linarith) hc
     refine ⟨K, hK, fun x hx => ?_⟩
     have := hb x hx
     rw [show ((3*m+2:ℕ):ℝ) - 2*((3*((m+1:ℕ):ℝ)+2)/2) + 1 = -2 by push_cast; ring] at this
-    simpa [pcfLG_hatAd] using this
+    simpa [CylinderLiouvilleGreen.coeffDeriv] using this
 
 /-- `A_s` is bounded on `[c, ∞)`, `c > 1`. -/
-theorem pcfLG_bound_hatA (s : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ t, c ≤ t →
-    |pcfLG_hatA s t| ≤ K := by
-  obtain ⟨K, hK, hb⟩ := pcfLG_poly_rpow_bound (pcfOlverU s) (pcfLG_natDegree_olverU s)
+theorem CylinderLiouvilleGreen.bound_coeff (s : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ t, c ≤ t →
+    |CylinderLiouvilleGreen.coeff s t| ≤ K := by
+  obtain ⟨K, hK, hb⟩ :=
+      CylinderLiouvilleGreen.poly_rpow_bound (pcfOlverU s)
+      (CylinderLiouvilleGreen.natDegree_olverU s)
     (e := 3*s/2) (by positivity) hc
   refine ⟨K, hK, fun t ht => ?_⟩
   have := hb t ht
@@ -712,30 +770,33 @@ theorem pcfLG_bound_hatA (s : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ �
   exact this
 
 /-- `A_0 = 1`. -/
-theorem pcfLG_hatA_zero (t : ℝ) : pcfLG_hatA 0 t = 1 := by
-  simp [pcfLG_hatA, pcfOlverU, pcfOlverPair]
+theorem CylinderLiouvilleGreen.coeff_zero (t : ℝ) : CylinderLiouvilleGreen.coeff 0 t = 1 := by
+  simp [CylinderLiouvilleGreen.coeff, pcfOlverU, pcfOlverPair]
 
 /-- `c_0 = 1`. -/
-theorem pcfLG_c_zero : pcfLG_c 0 = 1 := by
-  simp [pcfLG_c, pcfOlverU, pcfOlverPair]
+theorem CylinderLiouvilleGreen.limitCoeff_zero : CylinderLiouvilleGreen.limitCoeff 0 = 1 := by
+  simp [CylinderLiouvilleGreen.limitCoeff, pcfOlverU, pcfOlverPair]
 
 /-- `|c_s| ≤ K` whenever `|A_s| ≤ K` near infinity. -/
-theorem pcfLG_abs_c_le {s : ℕ} {c K : ℝ} (hb : ∀ t, c ≤ t → |pcfLG_hatA s t| ≤ K) :
-    |pcfLG_c s| ≤ K :=
-  le_of_tendsto (pcfLG_tendsto_hatA s).abs (eventually_atTop.2 ⟨c, hb⟩)
+theorem CylinderLiouvilleGreen.abs_limitCoeff_le {s : ℕ} {c K : ℝ}
+    (hb : ∀ t, c ≤ t → |CylinderLiouvilleGreen.coeff s t| ≤ K) :
+    |CylinderLiouvilleGreen.limitCoeff s| ≤ K :=
+  le_of_tendsto (CylinderLiouvilleGreen.tendsto_coeff s).abs (eventually_atTop.2 ⟨c, hb⟩)
 
 /-- `ξ` is monotone on `(1, ∞)`. -/
-theorem pcfLG_xi_mono {x t : ℝ} (hx : 1 < x) (hxt : x ≤ t) : pcfXi x ≤ pcfXi t := by
+theorem CylinderLiouvilleGreen.xi_mono {x t : ℝ} (hx : 1 < x) (hxt : x ≤ t) : pcfXi x
+    ≤ pcfXi t := by
   have hm : MonotoneOn pcfXi (Ioi 1) := by
     refine monotoneOn_of_hasDerivWithinAt_nonneg (f' := fun t => Real.sqrt (t^2-1))
-      (convex_Ioi 1) (fun t ht => (pcfLG_hasDerivAt_xi ht).continuousAt.continuousWithinAt)
+      (convex_Ioi 1) (fun t ht =>
+          (CylinderLiouvilleGreen.hasDerivAt_xi ht).continuousAt.continuousWithinAt)
       (fun t ht => ?_) (fun t _ => Real.sqrt_nonneg _)
     rw [interior_Ioi] at ht
-    exact (pcfLG_hasDerivAt_xi ht).hasDerivWithinAt
+    exact (CylinderLiouvilleGreen.hasDerivAt_xi ht).hasDerivWithinAt
   exact hm hx (lt_of_lt_of_le hx hxt) hxt
 
 /-- `U(-μ²/2, μt√2)` as a function of `t`: first derivative. -/
-theorem pcfLG_hasDerivAt_U (μ t : ℝ) :
+theorem CylinderLiouvilleGreen.hasDerivAt_U (μ t : ℝ) :
     HasDerivAt (fun t : ℝ => pcfU (-μ^2/2) (μ*t*Real.sqrt 2))
       ((μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2)) t := by
   have h1 : HasDerivAt (fun w : ℂ => (μ:ℂ) * w * Real.sqrt 2) ((μ:ℂ) * Real.sqrt 2) (t:ℂ) := by
@@ -744,7 +805,7 @@ theorem pcfLG_hasDerivAt_U (μ t : ℝ) :
   exact this.congr_deriv (by ring)
 
 /-- `U(-μ²/2, μt√2)` as a function of `t`: Weber's equation `w'' = μ⁴(t²-1) w`. -/
-theorem pcfLG_hasDerivAt_U' (μ t : ℝ) :
+theorem CylinderLiouvilleGreen.hasDerivAt_U' (μ t : ℝ) :
     HasDerivAt (fun t : ℝ => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
       (((μ^4*(t^2-1) : ℝ) : ℂ) * pcfU (-μ^2/2) (μ*t*Real.sqrt 2)) t := by
   have h1 : HasDerivAt (fun w : ℂ => (μ:ℂ) * w * Real.sqrt 2) ((μ:ℂ) * Real.sqrt 2) (t:ℂ) := by
@@ -759,20 +820,24 @@ theorem pcfLG_hasDerivAt_U' (μ t : ℝ) :
     pcfU (-(μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2) * hs2
 
 /-- The truncated Olver series `∑_{s<N} A_s(t)/u^s`. -/
-def pcfLG_ser (N : ℕ) (u t : ℝ) : ℝ := ∑ s ∈ Finset.range N, pcfLG_hatA s t / u^s
+def CylinderLiouvilleGreen.coeffSum (N : ℕ) (u t : ℝ) : ℝ := ∑ s ∈ Finset.range N,
+    CylinderLiouvilleGreen.coeff s t / u^s
 /-- Its value at `t = ∞`: `∑_{s<N} c_s/u^s`. -/
-def pcfLG_S (N : ℕ) (u : ℝ) : ℝ := ∑ s ∈ Finset.range N, pcfLG_c s / u^s
+def CylinderLiouvilleGreen.limitCoeffSum (N : ℕ) (u : ℝ) : ℝ := ∑ s ∈ Finset.range N,
+    CylinderLiouvilleGreen.limitCoeff s / u^s
 
 /-- The Liouville–Green series with coefficients `(-1)^s A_s` is the Olver series. -/
-theorem pcfLG_lgSeries_eq (N : ℕ) (u t : ℝ) :
-    LiouvilleGreen.lgSeries u (fun s t => (-1)^s * pcfLG_hatA s t) N t = pcfLG_ser N u t := by
-  unfold LiouvilleGreen.lgSeries pcfLG_ser
+theorem CylinderLiouvilleGreen.lgSeries_eq (N : ℕ) (u t : ℝ) :
+    LiouvilleGreen.lgSeries u (fun s t => (-1)^s * CylinderLiouvilleGreen.coeff s t) N t =
+        CylinderLiouvilleGreen.coeffSum N u t := by
+  unfold LiouvilleGreen.lgSeries CylinderLiouvilleGreen.coeffSum
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [← mul_assoc, ← mul_pow]; norm_num
 
 /-- A truncated series with leading term `1` and bounded higher coefficients is within
 `K/u` of `1`. -/
-theorem pcfLG_abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : ℕ → ℝ} (hf0 : f 0 = 1) {K : ℕ → ℝ}
+theorem CylinderLiouvilleGreen.abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : ℕ → ℝ}
+    (hf0 : f 0 = 1) {K : ℕ → ℝ}
     (hK : ∀ s, |f s| ≤ K s) {u : ℝ} (hu : 1 ≤ u) :
     |∑ s ∈ Finset.range N, f s / u^s - 1| ≤ (∑ s ∈ Finset.range N, K s) / u := by
   obtain ⟨M, rfl⟩ : ∃ M, N = M + 1 := ⟨N - 1, by omega⟩
@@ -796,18 +861,20 @@ theorem pcfLG_abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : ℕ → ℝ} (hf0
 
 /-- **Core estimate for DLMF 12.10.3.** For `t ≥ 1+δ` and `μ` large,
 `U(-μ²/2, μt√2) S_N(μ²)/(h(μ) A(t) e^{-μ²ξ(t)}) = ∑_{s<N} A_s(t) μ^{-2s} + O(μ^{-2N})`. -/
-theorem pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ : ℝ, 1 ≤ μ₀ ∧ 0 ≤ C ∧
-    ∀ μ, μ₀ ≤ μ → |pcfLG_S N (μ^2) - 1| ≤ 1/2 ∧ ∀ t, 1 + δ ≤ t →
-      ‖pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (pcfLG_S N (μ^2) : ℂ) /
-        (pcfH μ * ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) -
-          (pcfLG_ser N (μ^2) t : ℂ)‖ ≤ C / (μ^2)^N ∧ |pcfLG_ser N (μ^2) t| ≤ 3/2 := by
+theorem CylinderLiouvilleGreen.core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ : ℝ,
+    1 ≤ μ₀ ∧ 0 ≤ C ∧
+    ∀ μ, μ₀ ≤ μ → |CylinderLiouvilleGreen.limitCoeffSum N (μ^2) - 1| ≤ 1/2 ∧ ∀ t, 1 + δ ≤ t →
+      ‖pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) /
+        (pcfH μ * ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) -
+          (CylinderLiouvilleGreen.coeffSum N (μ^2) t : ℂ)‖ ≤ C /
+              (μ^2)^N ∧ |CylinderLiouvilleGreen.coeffSum N (μ^2) t| ≤ 3/2 := by
   set c : ℝ := 1 + δ/2 with hcdef
   have hc : 1 < c := by linarith
-  choose KA hKA0 hKA using fun s => pcfLG_bound_hatA s hc
+  choose KA hKA0 hKA using fun s => CylinderLiouvilleGreen.bound_coeff s hc
   set KS := ∑ s ∈ Finset.range N, KA s
   have hKS : 0 ≤ KS := Finset.sum_nonneg fun s _ => hKA0 s
-  obtain ⟨I, hI0, hI⟩ := pcfLG_tail_hatAd N hc
-  obtain ⟨V0, hV00, hV⟩ := pcfLG_tail_V hc
+  obtain ⟨I, hI0, hI⟩ := CylinderLiouvilleGreen.tail_coeffDeriv N hc
+  obtain ⟨V0, hV00, hV⟩ := CylinderLiouvilleGreen.tail_V hc
   set Cε := I * Real.exp (V0/2)
   have hCε : 0 ≤ Cε := by positivity
   refine ⟨Cε, max 1 (2*(KS+Cε)+1), le_max_left _ _, hCε, fun μ hμ => ?_⟩
@@ -819,32 +886,39 @@ theorem pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ
   have huK : 2*(KS+Cε) ≤ u := by nlinarith [le_max_right 1 (2*(KS+Cε)+1)]
   have hsmall : (KS + Cε)/u ≤ 1/2 := by rw [div_le_iff₀ hu0]; linarith
   -- bounds on the series and on `S`
-  have hser : ∀ t, c ≤ t → |pcfLG_ser N u t - 1| ≤ KS/u := fun t ht =>
-    pcfLG_abs_sum_sub_one_le hN (pcfLG_hatA_zero t) (fun s => hKA s t ht) hu1
-  have hS : |pcfLG_S N u - 1| ≤ KS/u :=
-    pcfLG_abs_sum_sub_one_le hN pcfLG_c_zero (fun s => pcfLG_abs_c_le (hKA s)) hu1
+  have hser : ∀ t, c ≤ t → |CylinderLiouvilleGreen.coeffSum N u t - 1| ≤ KS/u := fun t ht =>
+    CylinderLiouvilleGreen.abs_sum_sub_one_le hN (CylinderLiouvilleGreen.coeff_zero t)
+        (fun s => hKA s t ht) hu1
+  have hS : |CylinderLiouvilleGreen.limitCoeffSum N u - 1| ≤ KS/u :=
+    CylinderLiouvilleGreen.abs_sum_sub_one_le hN CylinderLiouvilleGreen.limitCoeff_zero
+        (fun s => CylinderLiouvilleGreen.abs_limitCoeff_le (hKA s)) hu1
   have hKSu : KS/u ≤ 1/2 := le_trans (div_le_div_of_nonneg_right (by linarith) hu0.le) hsmall
   refine ⟨hS.trans hKSu, ?_⟩
   -- the Liouville–Green solution
   obtain ⟨ε, ε', w', H⟩ := LiouvilleGreen.exists_solution_expansion_exp (a := 1) hu0
-    (A := pcfLG_A) (A' := pcfLG_A1) (A'' := pcfLG_A2) (ξ := pcfXi) (g := fun _ => 0)
-    (fun x hx => (pcfLG_A_pos hx).ne') (fun x hx => pcfLG_hasDerivAt_A hx)
-    (fun x hx => pcfLG_hasDerivAt_A1 hx) pcfLG_continuousOn_A2 continuousOn_const
-    (fun x hx => by rw [pcfLG_A_sq_recip hx]; exact pcfLG_hasDerivAt_xi hx)
-    (fun c' hc' => pcfLG_integrableOn_V hc') (n := N)
-    (As := fun s t => (-1)^s * pcfLG_hatA s t) (Ad := fun s t => (-1)^s * pcfLG_hatAd s t)
-    (Ad2 := fun s t => (-1)^s * pcfLG_hatAd2 s t)
-    (fun s _ x hx => (pcfLG_hasDerivAt_hatA s hx).const_mul _)
-    (fun s _ x hx => (pcfLG_hasDerivAt_hatAd s hx).const_mul _)
-    (fun s _ => continuousOn_const.mul (pcfLG_continuousOn_hatAd2 s))
-    (fun x _ => by simp [pcfLG_hatAd, pcfOlverPair])
+    (A := CylinderLiouvilleGreen.amplitude) (A' := CylinderLiouvilleGreen.amplitudeDeriv)
+        (A'' := CylinderLiouvilleGreen.amplitudeDeriv2) (ξ := pcfXi) (g := fun _ => 0)
+    (fun x hx => (CylinderLiouvilleGreen.amplitude_pos hx).ne')
+        (fun x hx => CylinderLiouvilleGreen.hasDerivAt_amplitude hx)
+    (fun x hx => CylinderLiouvilleGreen.hasDerivAt_amplitudeDeriv hx)
+        CylinderLiouvilleGreen.continuousOn_amplitudeDeriv2 continuousOn_const
+    (fun x hx => by rw [CylinderLiouvilleGreen.amplitude_sq_recip hx];
+                    exact CylinderLiouvilleGreen.hasDerivAt_xi hx)
+    (fun c' hc' => CylinderLiouvilleGreen.integrableOn_V hc') (n := N)
+    (As := fun s t => (-1)^s * CylinderLiouvilleGreen.coeff s t)
+        (Ad := fun s t => (-1)^s * CylinderLiouvilleGreen.coeffDeriv s t)
+    (Ad2 := fun s t => (-1)^s * CylinderLiouvilleGreen.coeffDeriv2 s t)
+    (fun s _ x hx => (CylinderLiouvilleGreen.hasDerivAt_coeff s hx).const_mul _)
+    (fun s _ x hx => (CylinderLiouvilleGreen.hasDerivAt_coeffDeriv s hx).const_mul _)
+    (fun s _ => continuousOn_const.mul (CylinderLiouvilleGreen.continuousOn_coeffDeriv2 s))
+    (fun x _ => by simp [CylinderLiouvilleGreen.coeffDeriv, pcfOlverPair])
     (fun s _ x hx => by
-      have := pcfLG_recursion s hx
+      have := CylinderLiouvilleGreen.recursion s hx
       simp only [zero_mul, sub_zero]
       rw [pow_succ]
       linear_combination (-1:ℝ)^s * this)
-    (fun c' hc' => by simpa [abs_mul] using pcfLG_integrableOn_hatAd N hc')
-  simp only [pcfLG_lgSeries_eq] at H
+    (fun c' hc' => by simpa [abs_mul] using CylinderLiouvilleGreen.integrableOn_coeffDeriv N hc')
+  simp only [CylinderLiouvilleGreen.lgSeries_eq] at H
   -- the error bound on `[c, ∞)`
   have hεb : ∀ t, c ≤ t → |ε t| ≤ Cε * t ^ (-2:ℝ) / u^N := by
     intro t ht
@@ -854,17 +928,20 @@ theorem pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ
     have hV' := hV t ht
     simp only [zero_mul, sub_zero, abs_mul] at hV'
     refine h4.trans ?_
-    have e1 : Real.exp ((∫ x in Ioi t, |pcfLG_A x| * |pcfLG_A2 x|) / (2*u)) ≤ Real.exp (V0/2) := by
+    have e1 : Real.exp ((∫ x in Ioi t, |CylinderLiouvilleGreen.amplitude
+        x| * |CylinderLiouvilleGreen.amplitudeDeriv2 x|) / (2*u)) ≤ Real.exp (V0/2) := by
       refine Real.exp_le_exp.2 ?_
       rw [div_le_div_iff₀ (by positivity) (by norm_num)]
-      have : 0 ≤ ∫ x in Ioi t, |pcfLG_A x| * |pcfLG_A2 x| :=
+      have : 0 ≤ ∫ x in Ioi t, |CylinderLiouvilleGreen.amplitude
+          x| * |CylinderLiouvilleGreen.amplitudeDeriv2 x| :=
         setIntegral_nonneg measurableSet_Ioi fun _ _ => by positivity
       nlinarith
     have e2 := hI t ht
-    have hnn : 0 ≤ ∫ x in Ioi t, |pcfLG_hatAd N x| :=
+    have hnn : 0 ≤ ∫ x in Ioi t, |CylinderLiouvilleGreen.coeffDeriv N x| :=
       setIntegral_nonneg measurableSet_Ioi fun _ _ => abs_nonneg _
-    calc (∫ x in Ioi t, |pcfLG_hatAd N x|) / u^N *
-          Real.exp ((∫ x in Ioi t, |pcfLG_A x| * |pcfLG_A2 x|) / (2*u))
+    calc (∫ x in Ioi t, |CylinderLiouvilleGreen.coeffDeriv N x|) / u^N *
+          Real.exp ((∫ x in Ioi t, |CylinderLiouvilleGreen.amplitude
+              x| * |CylinderLiouvilleGreen.amplitudeDeriv2 x|) / (2*u))
         ≤ (I * t ^ (-2:ℝ)) / u^N * Real.exp (V0/2) := by
           gcongr
       _ = Cε * t ^ (-2:ℝ) / u^N := by simp only [Cε]; ring
@@ -878,27 +955,34 @@ theorem pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ
     refine (hεb t ht).trans ?_
     calc Cε * t ^ (-2:ℝ) / u^N ≤ Cε * 1 / u^N := by gcongr
       _ ≤ Cε / u := by rw [mul_one]; exact div_le_div_of_nonneg_left hCε hu0 h2
-  have hsum : ∀ t, c ≤ t → |pcfLG_ser N u t + ε t - 1| ≤ 1/2 := by
+  have hsum : ∀ t, c ≤ t → |CylinderLiouvilleGreen.coeffSum N u t + ε t - 1| ≤ 1/2 := by
     intro t ht
     have := hser t ht; have := hεb' t ht
-    have : |pcfLG_ser N u t + ε t - 1| ≤ |pcfLG_ser N u t - 1| + |ε t| := by
-      rw [show pcfLG_ser N u t + ε t - 1 = (pcfLG_ser N u t - 1) + ε t by ring]
+    have : |CylinderLiouvilleGreen.coeffSum N u t + ε t -
+        1| ≤ |CylinderLiouvilleGreen.coeffSum N u t - 1| + |ε t| := by
+      rw [show CylinderLiouvilleGreen.coeffSum N u t + ε t - 1 =
+          (CylinderLiouvilleGreen.coeffSum N u t - 1) + ε t by ring]
       exact abs_add_le _ _
     have : KS/u + Cε/u ≤ 1/2 := by rw [← add_div]; exact hsmall
     linarith
-  have hpos : ∀ t, c ≤ t → 1/2 ≤ pcfLG_ser N u t + ε t := fun t ht => by
+  have hpos : ∀ t, c ≤ t → 1/2 ≤ CylinderLiouvilleGreen.coeffSum N u t + ε t := fun t ht => by
     have := abs_le.1 (hsum t ht); linarith [this.1]
-  set W : ℝ → ℝ := fun t => pcfLG_A t * Real.exp (-(u * pcfXi t)) * (pcfLG_ser N u t + ε t)
+  set W : ℝ → ℝ := fun t => CylinderLiouvilleGreen.amplitude t * Real.exp (-(u * pcfXi t)) *
+      (CylinderLiouvilleGreen.coeffSum N u t + ε t)
     with hWdef
-  set q : ℝ → ℝ := fun t => u^2 * (pcfLG_A t ^ 4)⁻¹ + (fun _ => (0:ℝ)) t with hq
-  have hAe : ∀ t, 1 < t → 0 < pcfLG_A t * Real.exp (-(u * pcfXi t)) := fun t ht =>
-    mul_pos (pcfLG_A_pos ht) (Real.exp_pos _)
-  have hS0 : pcfLG_S N u ≠ 0 := by
+  set q : ℝ → ℝ := fun t => u^2 * (CylinderLiouvilleGreen.amplitude t ^ 4)⁻¹ +
+      (fun _ => (0:ℝ)) t with hq
+  have hAe : ∀ t, 1 < t → 0 < CylinderLiouvilleGreen.amplitude t *
+      Real.exp (-(u * pcfXi t)) := fun t ht =>
+    mul_pos (CylinderLiouvilleGreen.amplitude_pos ht) (Real.exp_pos _)
+  have hS0 : CylinderLiouvilleGreen.limitCoeffSum N u ≠ 0 := by
     have := abs_le.1 (hS.trans hKSu); intro h; rw [h] at this; linarith [this.1]
   -- `W → 0`
   have hWl : Tendsto W atTop (𝓝 0) := by
-    have hb : Tendsto (fun t => (3/2 * Real.exp (-(u * pcfXi c))) * pcfLG_A t) atTop (𝓝 0) := by
-      simpa using pcfLG_tendsto_A.const_mul (3/2 * Real.exp (-(u * pcfXi c)))
+    have hb : Tendsto (fun t => (3/2 * Real.exp (-(u * pcfXi c))) *
+        CylinderLiouvilleGreen.amplitude t) atTop (𝓝 0) := by
+      simpa using CylinderLiouvilleGreen.tendsto_amplitude.const_mul
+          (3/2 * Real.exp (-(u * pcfXi c)))
     refine squeeze_zero' ?_ ?_ hb
     · filter_upwards [eventually_ge_atTop c] with t ht
       have ht1 : 1 < t := lt_of_lt_of_le hc ht
@@ -906,16 +990,17 @@ theorem pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ
     · filter_upwards [eventually_ge_atTop c] with t ht
       have ht1 : 1 < t := lt_of_lt_of_le hc ht
       have h1 : Real.exp (-(u * pcfXi t)) ≤ Real.exp (-(u * pcfXi c)) :=
-        Real.exp_le_exp.2 (by nlinarith [pcfLG_xi_mono hc ht])
-      have h2 : pcfLG_ser N u t + ε t ≤ 3/2 := by
+        Real.exp_le_exp.2 (by nlinarith [CylinderLiouvilleGreen.xi_mono hc ht])
+      have h2 : CylinderLiouvilleGreen.coeffSum N u t + ε t ≤ 3/2 := by
         have := abs_le.1 (hsum t ht); linarith [this.2]
-      have hA := (pcfLG_A_pos ht1).le
+      have hA := (CylinderLiouvilleGreen.amplitude_pos ht1).le
       simp only [hWdef]
-      calc pcfLG_A t * Real.exp (-(u * pcfXi t)) * (pcfLG_ser N u t + ε t)
-          ≤ pcfLG_A t * Real.exp (-(u * pcfXi c)) * (3/2) := by
+      calc CylinderLiouvilleGreen.amplitude t * Real.exp (-(u * pcfXi t)) *
+             (CylinderLiouvilleGreen.coeffSum N u t + ε t)
+          ≤ CylinderLiouvilleGreen.amplitude t * Real.exp (-(u * pcfXi c)) * (3/2) := by
             gcongr
             linarith [hpos t ht]
-        _ = 3/2 * Real.exp (-(u * pcfXi c)) * pcfLG_A t := by ring
+        _ = 3/2 * Real.exp (-(u * pcfXi c)) * CylinderLiouvilleGreen.amplitude t := by ring
   -- `ε → 0` and the limit of the series
   have hεl : Tendsto ε atTop (𝓝 0) := by
     have hb : Tendsto (fun t : ℝ => Cε * t ^ (-2:ℝ) / u^N) atTop (𝓝 0) := by
@@ -924,62 +1009,68 @@ theorem pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ
     refine squeeze_zero_norm' ?_ hb
     filter_upwards [eventually_ge_atTop c] with t ht
     rw [Real.norm_eq_abs]; exact hεb t ht
-  have hserl : Tendsto (fun t => pcfLG_ser N u t) atTop (𝓝 (pcfLG_S N u)) :=
-    tendsto_finsetSum _ fun s _ => (pcfLG_tendsto_hatA s).div_const _
-  have hsl : Tendsto (fun t => ((pcfLG_ser N u t + ε t : ℝ) : ℂ)) atTop (𝓝 (pcfLG_S N u : ℂ)) := by
+  have hserl : Tendsto (fun t => CylinderLiouvilleGreen.coeffSum N u t) atTop
+      (𝓝 (CylinderLiouvilleGreen.limitCoeffSum N u)) :=
+    tendsto_finsetSum _ fun s _ => (CylinderLiouvilleGreen.tendsto_coeff s).div_const _
+  have hsl : Tendsto (fun t => ((CylinderLiouvilleGreen.coeffSum N u t + ε t : ℝ) : ℂ)) atTop
+      (𝓝 (CylinderLiouvilleGreen.limitCoeffSum N u : ℂ)) := by
     have := (hserl.add hεl); rw [add_zero] at this
     exact (Complex.continuous_ofReal.tendsto _).comp this
-  have hUl := pcfLG_tendsto_U_div hμ0
-  have hS0' : (pcfLG_S N u : ℂ) ≠ 0 := by exact_mod_cast hS0
+  have hUl := CylinderLiouvilleGreen.tendsto_U_div hμ0
+  have hS0' : (CylinderLiouvilleGreen.limitCoeffSum N u : ℂ) ≠ 0 := by exact_mod_cast hS0
   have hl : Tendsto (fun t : ℝ => pcfU (-μ^2/2) (μ*t*Real.sqrt 2) / (W t : ℂ)) atTop
-      (𝓝 (pcfH μ / pcfLG_S N u)) := by
+      (𝓝 (pcfH μ / CylinderLiouvilleGreen.limitCoeffSum N u)) := by
     refine (hUl.div hsl hS0').congr' ?_
     filter_upwards [eventually_gt_atTop 1] with t ht
     simp only [Pi.div_apply, hWdef, hu]
     push_cast
     rw [div_div]
   -- identification with `U`
-  obtain ⟨κ, hκ⟩ := pcfLG_eq_mul_of_tendsto (b := c) (q := q)
+  obtain ⟨κ, hκ⟩ := CylinderLiouvilleGreen.eq_mul_of_tendsto (b := c) (q := q)
     (U := fun t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2))
     (U' := fun t => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2)) (W := W) (W' := w')
-    (fun t _ => pcfLG_hasDerivAt_U μ t)
+    (fun t _ => CylinderLiouvilleGreen.hasDerivAt_U μ t)
     (fun t ht => by
       have h1 : 1 < t := lt_trans hc ht
-      have := pcfLG_hasDerivAt_U' μ t
+      have := CylinderLiouvilleGreen.hasDerivAt_U' μ t
       refine this.congr_deriv ?_
       congr 2
-      simp only [hq, pcfLG_A_pow_four_recip h1, hu]; ring)
+      simp only [hq, CylinderLiouvilleGreen.amplitude_pow_four_recip h1, hu]; ring)
     (fun t ht => (H t (lt_trans hc ht)).2.1)
     (fun t ht => (H t (lt_trans hc ht)).2.2.1)
     (fun t ht => (mul_pos (hAe t (lt_trans hc ht)) (by linarith [hpos t ht.le])).ne') hWl hl
   -- the constant
-  have hκS : κ * pcfLG_S N u = pcfH μ := by
+  have hκS : κ * CylinderLiouvilleGreen.limitCoeffSum N u = pcfH μ := by
     refine tendsto_nhds_unique ((hsl.const_mul κ).congr' ?_) hUl
     filter_upwards [eventually_gt_atTop c] with t ht
     have ht1 : 1 < t := lt_trans hc ht
-    have hne : ((pcfLG_A t * Real.exp (-(u * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
+    have hne : ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(u * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
       exact_mod_cast (hAe t ht1).ne'
     rw [hκ t ht]
-    have hA0 : (pcfLG_A t : ℂ) ≠ 0 := by exact_mod_cast (pcfLG_A_pos ht1).ne'
+    have hA0 : (CylinderLiouvilleGreen.amplitude t : ℂ) ≠ 0 := by
+        exact_mod_cast (CylinderLiouvilleGreen.amplitude_pos ht1).ne'
     simp only [hWdef, hu]
     push_cast
     field_simp
-  have hh0 : pcfH μ ≠ 0 := by rw [pcfLG_pcfH_eq hμ0]; exact_mod_cast (pcfLG_h_pos hμ0).ne'
+  have hh0 : pcfH μ ≠ 0 := by rw [CylinderLiouvilleGreen.pcfH_eq hμ0];
+                              exact_mod_cast (CylinderLiouvilleGreen.normalizer_pos hμ0).ne'
   intro t ht
   have htc : c < t := by linarith
   have ht1 : 1 < t := lt_trans hc htc
-  have hne : ((pcfLG_A t * Real.exp (-(u * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
+  have hne : ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(u * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
     exact_mod_cast (hAe t ht1).ne'
   refine ⟨?_, ?_⟩
-  · have heq : pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (pcfLG_S N u : ℂ) /
-        (pcfH μ * ((pcfLG_A t * Real.exp (-(u * pcfXi t)) : ℝ) : ℂ)) - (pcfLG_ser N u t : ℂ) =
+  · have heq : pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (CylinderLiouvilleGreen.limitCoeffSum N u : ℂ) /
+        (pcfH μ * ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(u * pcfXi t)) : ℝ) : ℂ)) -
+            (CylinderLiouvilleGreen.coeffSum N u t : ℂ) =
         (ε t : ℂ) := by
       rw [hκ t htc, ← hκS]
-      have hA0 : (pcfLG_A t : ℂ) ≠ 0 := by exact_mod_cast (pcfLG_A_pos ht1).ne'
+      have hA0 : (CylinderLiouvilleGreen.amplitude t : ℂ) ≠ 0 := by
+          exact_mod_cast (CylinderLiouvilleGreen.amplitude_pos ht1).ne'
       simp only [hWdef, hu]
       push_cast
       have hκ0 : κ ≠ 0 := by rintro rfl; rw [zero_mul] at hκS; exact hh0 hκS.symm
-      have hS1 : ((pcfLG_S N (μ^2) : ℝ) : ℂ) ≠ 0 := hS0'
+      have hS1 : ((CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℝ) : ℂ) ≠ 0 := hS0'
       field_simp
       ring
     rw [heq, Complex.norm_real, Real.norm_eq_abs]
@@ -991,7 +1082,7 @@ theorem pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ
     rw [abs_le]; constructor <;> linarith [this.1, this.2]
 
 /-- Eventual statements for the uniform filter. -/
-theorem pcfLG_eventually_uniform {S : Set ℝ} {P : ℝ × ℝ → Prop} (μ₀ : ℝ)
+theorem CylinderLiouvilleGreen.eventually_uniform {S : Set ℝ} {P : ℝ × ℝ → Prop} (μ₀ : ℝ)
     (h : ∀ μ, μ₀ ≤ μ → ∀ t ∈ S, P (μ, t)) : ∀ᶠ p in pcfUniformFilter S, P p := by
   unfold pcfUniformFilter
   rw [eventually_inf_principal]
@@ -999,52 +1090,56 @@ theorem pcfLG_eventually_uniform {S : Set ℝ} {P : ℝ × ℝ → Prop} (μ₀ 
   exact h p.1 hp p.2 hpS
 
 /-- The complex denominator of DLMF 12.10.3 is real. -/
-theorem pcfLG_denom_eq {μ t : ℝ} (ht : 1 < t) (G : ℂ) :
+theorem CylinderLiouvilleGreen.denominator_eq {μ t : ℝ} (ht : 1 < t) (G : ℂ) :
     G * cexp (-(μ:ℂ)^2 * (pcfXi t : ℂ)) / ((t:ℂ)^2-1)^(1/4:ℂ) =
-      G * ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) := by
+      G * ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) := by
   have hy : 0 < t^2-1 := by nlinarith
   have e1 : ((t:ℂ)^2-1)^(1/4:ℂ) = (((t^2-1) ^ (1/4:ℝ) : ℝ) : ℂ) := by
     rw [Complex.ofReal_cpow hy.le]; push_cast; rfl
   have hp : 0 < (t^2-1) ^ (1/4:ℝ) := Real.rpow_pos_of_pos hy _
-  rw [e1, pcfLG_A, show (-1/4:ℝ) = -(1/4) by norm_num, Real.rpow_neg hy.le]
+  rw [e1, CylinderLiouvilleGreen.amplitude, show (-1/4:ℝ) = -(1/4) by norm_num, Real.rpow_neg hy.le]
   have hp' : (((t^2-1) ^ (1/4:ℝ) : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hp.ne'
   push_cast
   field_simp
 
 /-- `pcfOlverA` is the real coefficient `A_s` for `t > 1`. -/
-theorem pcfLG_olverA_eq (s : ℕ) {t : ℝ} (ht : 1 < t) : pcfOlverA s t = (pcfLG_hatA s t : ℂ) := by
+theorem CylinderLiouvilleGreen.olverA_eq (s : ℕ) {t : ℝ} (ht : 1 < t) : pcfOlverA s t =
+    (CylinderLiouvilleGreen.coeff s t : ℂ) := by
   have hy : 0 < t^2-1 := by nlinarith
   have e1 : ((t:ℂ)^2-1)^(3*(s:ℂ)/2) = (((t^2-1) ^ (3*(s:ℝ)/2) : ℝ) : ℂ) := by
     rw [Complex.ofReal_cpow hy.le]; push_cast; rfl
-  rw [pcfOlverA, e1, pcfLG_hatA, Real.rpow_neg hy.le]
+  rw [pcfOlverA, e1, CylinderLiouvilleGreen.coeff, Real.rpow_neg hy.le]
   push_cast
   rw [div_eq_mul_inv]
 
-/-- The series of `pcfOlverA` is the real series `pcfLG_ser`. -/
-theorem pcfLG_sum_olverA_eq (N : ℕ) (μ : ℝ) {t : ℝ} (ht : 1 < t) :
-    ∑ s ∈ Finset.range N, pcfOlverA s t / (μ:ℂ)^(2*s) = (pcfLG_ser N (μ^2) t : ℂ) := by
-  rw [pcfLG_ser]; push_cast
+/-- The series of `pcfOlverA` is the real series `CylinderLiouvilleGreen.coeffSum`. -/
+theorem CylinderLiouvilleGreen.sum_olverA_eq (N : ℕ) (μ : ℝ) {t : ℝ} (ht : 1 < t) :
+    ∑ s ∈ Finset.range N, pcfOlverA s t / (μ:ℂ)^(2*s) =
+        (CylinderLiouvilleGreen.coeffSum N (μ^2) t : ℂ) := by
+  rw [CylinderLiouvilleGreen.coeffSum]; push_cast
   refine Finset.sum_congr rfl fun s _ => ?_
-  rw [pcfLG_olverA_eq s ht, pow_mul]
+  rw [CylinderLiouvilleGreen.olverA_eq s ht, pow_mul]
 
 /-- The complex series `∑ c_s μ^{-2s}` is real. -/
-theorem pcfLG_sum_c_eq (N : ℕ) (μ : ℝ) :
-    ∑ s ∈ Finset.range N, (pcfLG_c s : ℂ) / (μ:ℂ)^(2*s) = (pcfLG_S N (μ^2) : ℂ) := by
-  rw [pcfLG_S]; push_cast
+theorem CylinderLiouvilleGreen.sum_limitCoeff_eq (N : ℕ) (μ : ℝ) :
+    ∑ s ∈ Finset.range N, (CylinderLiouvilleGreen.limitCoeff s : ℂ) / (μ:ℂ)^(2*s) =
+        (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) := by
+  rw [CylinderLiouvilleGreen.limitCoeffSum]; push_cast
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [pow_mul]
 
 /-- `‖μ^{-2N}‖ = (μ²)^{-N}` for `μ > 0`. -/
-theorem pcfLG_norm_zpow {μ : ℝ} (hμ : 0 < μ) (N : ℕ) :
+theorem CylinderLiouvilleGreen.norm_zpow {μ : ℝ} (hμ : 0 < μ) (N : ℕ) :
     ‖(μ:ℂ)^(-(2*N:ℤ))‖ = ((μ^2)^N)⁻¹ := by
   rw [norm_zpow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hμ, zpow_neg,
     show (2*N:ℤ) = ((2*N:ℕ):ℤ) by push_cast; ring, zpow_natCast, pow_mul]
 
 /-- The Borel sum of the coefficients `c_s`, composed with `u = μ²`. -/
-theorem pcfLG_borel_bound {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ,
-    (fun u : ℝ => Φ u - ∑ s ∈ Finset.range N, pcfLG_c s / u^s) =O[atTop] (fun u : ℝ => (u^N)⁻¹))
+theorem CylinderLiouvilleGreen.borel_bound {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ,
+    (fun u : ℝ => Φ u - ∑ s ∈ Finset.range N, CylinderLiouvilleGreen.limitCoeff s / u^s) =O[atTop]
+        (fun u : ℝ => (u^N)⁻¹))
     (N : ℕ) : ∃ B μ₁ : ℝ, 0 ≤ B ∧ 1 ≤ μ₁ ∧ ∀ μ, μ₁ ≤ μ →
-      |Φ (μ^2) - pcfLG_S N (μ^2)| ≤ B / (μ^2)^N := by
+      |Φ (μ^2) - CylinderLiouvilleGreen.limitCoeffSum N (μ^2)| ≤ B / (μ^2)^N := by
   obtain ⟨B, hB⟩ := (hΦ N).bound
   obtain ⟨u₁, hu₁⟩ := eventually_atTop.1 (hB.and (eventually_ge_atTop (1:ℝ)))
   refine ⟨max B 0, max 1 u₁, le_max_right _ _, le_max_left _ _, fun μ hμ => ?_⟩
@@ -1053,7 +1148,7 @@ theorem pcfLG_borel_bound {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ,
   obtain ⟨h1, h2⟩ := hu₁ (μ^2) hμu
   have hpos : 0 < (μ^2)^N := by positivity
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_inv, abs_of_pos hpos] at h1
-  rw [pcfLG_S]
+  rw [CylinderLiouvilleGreen.limitCoeffSum]
   calc _ ≤ B * ((μ^2)^N)⁻¹ := h1
     _ ≤ max B 0 * ((μ^2)^N)⁻¹ := by gcongr; exact le_max_left _ _
     _ = max B 0 / (μ^2)^N := by rw [div_eq_mul_inv]
@@ -1069,19 +1164,21 @@ Liouville–Green expansion with error bounds (Olver, Ch. 10, Thm. 3.1) for
 @[dlmf 12.10.E3]
 theorem pcf_negative_parameter_uniform_U :
     ∃ g : ℝ → ℂ, (∀ N : ℕ, (fun μ : ℝ => g μ / pcfH μ *
-        (∑ s ∈ Finset.range N, (pcfLG_c s : ℂ) / (μ:ℂ)^(2*s)) - 1) =O[atTop]
+        (∑ s ∈ Finset.range N, (CylinderLiouvilleGreen.limitCoeff s : ℂ) /
+            (μ:ℂ)^(2*s)) - 1) =O[atTop]
         (fun μ : ℝ => (μ:ℂ)^(-(2*N:ℤ)))) ∧
       ∀ δ : ℝ, 0 < δ → HasCylinderUniformExpansion
         (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
         (fun s t => pcfOlverA s t) (Ici (1+δ)) := by
-  obtain ⟨Φ, hΦ⟩ := pcfLG_exists_asymptotic pcfLG_c
+  obtain ⟨Φ, hΦ⟩ := CylinderLiouvilleGreen.exists_asymptotic CylinderLiouvilleGreen.limitCoeff
   -- `Φ(μ²)` stays near `1`
   have hΦ1 : ∃ μ₁ : ℝ, 1 ≤ μ₁ ∧ ∀ μ, μ₁ ≤ μ → 1/2 ≤ Φ (μ^2) ∧ Φ (μ^2) ≤ 2 := by
-    obtain ⟨B, μ₁, hB, hμ₁, hb⟩ := pcfLG_borel_bound hΦ 1
+    obtain ⟨B, μ₁, hB, hμ₁, hb⟩ := CylinderLiouvilleGreen.borel_bound hΦ 1
     refine ⟨max μ₁ (2*B+1), le_trans hμ₁ (le_max_left _ _), fun μ hμ => ?_⟩
     have hμ1 : μ₁ ≤ μ := (le_max_left _ _).trans hμ
     have h := hb μ hμ1
-    have hS : pcfLG_S 1 (μ^2) = 1 := by simp [pcfLG_S, pcfLG_c_zero]
+    have hS : CylinderLiouvilleGreen.limitCoeffSum 1 (μ^2) = 1 := by
+        simp [CylinderLiouvilleGreen.limitCoeffSum, CylinderLiouvilleGreen.limitCoeff_zero]
     rw [hS, pow_one] at h
     have hμB : 2*B+1 ≤ μ := (le_max_right _ _).trans hμ
     have hμ2 : 2*B ≤ μ^2 := by nlinarith
@@ -1091,23 +1188,25 @@ theorem pcf_negative_parameter_uniform_U :
   obtain ⟨μ₁, hμ₁, hΦb⟩ := hΦ1
   refine ⟨fun μ => pcfH μ / (Φ (μ^2) : ℂ), fun N => ?_, fun δ hδ => ?_⟩
   · -- the normalizer
-    obtain ⟨B, μ₂, hB, hμ₂, hb⟩ := pcfLG_borel_bound hΦ N
+    obtain ⟨B, μ₂, hB, hμ₂, hb⟩ := CylinderLiouvilleGreen.borel_bound hΦ N
     refine IsBigO.of_bound (2*B) ?_
     filter_upwards [eventually_ge_atTop (max μ₁ μ₂)] with μ hμ
     have hμ0 : 0 < μ := by linarith [le_max_left μ₁ μ₂]
     obtain ⟨hΦl, -⟩ := hΦb μ ((le_max_left _ _).trans hμ)
-    have hh0 : pcfH μ ≠ 0 := by rw [pcfLG_pcfH_eq hμ0]; exact_mod_cast (pcfLG_h_pos hμ0).ne'
+    have hh0 : pcfH μ ≠ 0 := by rw [CylinderLiouvilleGreen.pcfH_eq hμ0];
+                                exact_mod_cast (CylinderLiouvilleGreen.normalizer_pos hμ0).ne'
     have hΦ0 : (Φ (μ^2) : ℂ) ≠ 0 := by exact_mod_cast (by linarith : (0:ℝ) < Φ (μ^2)).ne'
-    rw [pcfLG_sum_c_eq, pcfLG_norm_zpow hμ0]
-    have heq : pcfH μ / (Φ (μ^2) : ℂ) / pcfH μ * (pcfLG_S N (μ^2) : ℂ) - 1 =
-        (((pcfLG_S N (μ^2) - Φ (μ^2)) / Φ (μ^2) : ℝ) : ℂ) := by
+    rw [CylinderLiouvilleGreen.sum_limitCoeff_eq, CylinderLiouvilleGreen.norm_zpow hμ0]
+    have heq : pcfH μ / (Φ (μ^2) : ℂ) / pcfH μ *
+        (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) - 1 =
+        (((CylinderLiouvilleGreen.limitCoeffSum N (μ^2) - Φ (μ^2)) / Φ (μ^2) : ℝ) : ℂ) := by
       push_cast; field_simp
     rw [heq, Complex.norm_real, Real.norm_eq_abs, abs_div,
         abs_of_pos (show (0:ℝ) < Φ (μ^2) by linarith),
       abs_sub_comm]
     have := hb μ ((le_max_right _ _).trans hμ)
     rw [div_le_iff₀ (by linarith)]
-    calc |Φ (μ^2) - pcfLG_S N (μ^2)| ≤ B / (μ^2)^N := this
+    calc |Φ (μ^2) - CylinderLiouvilleGreen.limitCoeffSum N (μ^2)| ≤ B / (μ^2)^N := this
       _ = 2*B * ((μ^2)^N)⁻¹ * (1/2) := by ring
       _ ≤ 2*B * ((μ^2)^N)⁻¹ * Φ (μ^2) := by gcongr
   · -- the expansion
@@ -1116,9 +1215,10 @@ theorem pcf_negative_parameter_uniform_U :
         ∑ s ∈ Finset.range N, pcfOlverA s p.2 / (p.1:ℂ)^(2*s)) =O[pcfUniformFilter (Ici (1+δ))]
         (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) := by
       intro N hN
-      obtain ⟨C, μ₀, hμ₀, hC, hcore⟩ := pcfLG_core hδ hN
-      obtain ⟨B, μ₂, hB, hμ₂, hb⟩ := pcfLG_borel_bound hΦ N
-      refine IsBigO.of_bound (4*C + 3*B) (pcfLG_eventually_uniform (max μ₀ (max μ₁ μ₂))
+      obtain ⟨C, μ₀, hμ₀, hC, hcore⟩ := CylinderLiouvilleGreen.core hδ hN
+      obtain ⟨B, μ₂, hB, hμ₂, hb⟩ := CylinderLiouvilleGreen.borel_bound hΦ N
+      refine IsBigO.of_bound (4*C + 3*B)
+          (CylinderLiouvilleGreen.eventually_uniform (max μ₀ (max μ₁ μ₂))
         fun μ hμ t ht => ?_)
       have hμ0 : 0 < μ := by linarith [le_max_left μ₀ (max μ₁ μ₂)]
       have ht1 : 1 < t := by have : 1 + δ ≤ t := ht; linarith
@@ -1126,41 +1226,60 @@ theorem pcf_negative_parameter_uniform_U :
       obtain ⟨hX, hser⟩ := hct t ht
       obtain ⟨hΦl, hΦu⟩ := hΦb μ ((le_max_left _ _).trans ((le_max_right _ _).trans hμ))
       have hbo := hb μ ((le_max_right _ _).trans ((le_max_right _ _).trans hμ))
-      have hh0 : pcfH μ ≠ 0 := by rw [pcfLG_pcfH_eq hμ0]; exact_mod_cast (pcfLG_h_pos hμ0).ne'
-      have hSpos : 1/2 ≤ pcfLG_S N (μ^2) := by linarith [(abs_le.1 hS).1]
-      have hS0 : (pcfLG_S N (μ^2) : ℂ) ≠ 0 := by exact_mod_cast (by linarith : (0:ℝ) < _).ne'
+      have hh0 : pcfH μ ≠ 0 := by rw [CylinderLiouvilleGreen.pcfH_eq hμ0];
+                                  exact_mod_cast (CylinderLiouvilleGreen.normalizer_pos hμ0).ne'
+      have hSpos : 1/2 ≤ CylinderLiouvilleGreen.limitCoeffSum N (μ^2) := by
+          linarith [(abs_le.1 hS).1]
+      have hS0 : (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) ≠ 0 := by
+          exact_mod_cast (by linarith : (0:ℝ) < _).ne'
       have hΦ0 : (Φ (μ^2) : ℂ) ≠ 0 := by exact_mod_cast (by linarith : (0:ℝ) < Φ (μ^2)).ne'
-      have hAe : ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
-        exact_mod_cast (mul_pos (pcfLG_A_pos ht1) (Real.exp_pos _)).ne'
+      have hAe : ((CylinderLiouvilleGreen.amplitude t *
+          Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
+        exact_mod_cast (mul_pos (CylinderLiouvilleGreen.amplitude_pos ht1) (Real.exp_pos _)).ne'
       simp only
-      rw [pcfLG_denom_eq ht1, pcfLG_sum_olverA_eq N μ ht1, pcfLG_norm_zpow hμ0]
-      set X := pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (pcfLG_S N (μ^2) : ℂ) /
-        (pcfH μ * ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) with hXdef
+      rw [CylinderLiouvilleGreen.denominator_eq ht1, CylinderLiouvilleGreen.sum_olverA_eq N μ ht1,
+          CylinderLiouvilleGreen.norm_zpow hμ0]
+      set X := pcfU (-μ^2/2) (μ*t*Real.sqrt 2) *
+          (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) /
+        (pcfH μ * ((CylinderLiouvilleGreen.amplitude t *
+            Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) with hXdef
       have hF : pcfU (-μ^2/2) (μ*t*Real.sqrt 2) / (pcfH μ / (Φ (μ^2) : ℂ) *
-          ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) - (pcfLG_ser N (μ^2) t : ℂ) =
-          (Φ (μ^2) / pcfLG_S N (μ^2) : ℂ) * (X - pcfLG_ser N (μ^2) t) +
-          (((Φ (μ^2) - pcfLG_S N (μ^2)) / pcfLG_S N (μ^2) : ℝ) : ℂ) *
-              (pcfLG_ser N (μ^2) t : ℂ) := by
+          ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) -
+              (CylinderLiouvilleGreen.coeffSum N (μ^2) t : ℂ) =
+          (Φ (μ^2) / CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) *
+              (X - CylinderLiouvilleGreen.coeffSum N (μ^2) t) +
+          (((Φ (μ^2) - CylinderLiouvilleGreen.limitCoeffSum N (μ^2)) /
+              CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℝ) : ℂ) *
+              (CylinderLiouvilleGreen.coeffSum N (μ^2) t : ℂ) := by
         rw [hXdef]; push_cast; field_simp; ring
       rw [hF]
       refine (norm_add_le _ _).trans ?_
       rw [norm_mul, norm_mul, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs,
-        Real.norm_eq_abs, abs_div, abs_of_pos (by linarith : (0:ℝ) < pcfLG_S N (μ^2))]
-      have hn1 : ‖(Φ (μ^2) / pcfLG_S N (μ^2) : ℂ)‖ ≤ 4 := by
-        rw [show (Φ (μ^2) / pcfLG_S N (μ^2) : ℂ) = ((Φ (μ^2) / pcfLG_S N (μ^2) : ℝ) : ℂ) by
+        Real.norm_eq_abs, abs_div,
+            abs_of_pos (by linarith : (0:ℝ) < CylinderLiouvilleGreen.limitCoeffSum N (μ^2))]
+      have hn1 : ‖(Φ (μ^2) / CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ)‖ ≤ 4 := by
+        rw [show (Φ (μ^2) / CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) =
+            ((Φ (μ^2) / CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℝ) : ℂ) by
           push_cast; rfl, Complex.norm_real, Real.norm_eq_abs, abs_div,
           abs_of_pos (by linarith : (0:ℝ) < Φ (μ^2)), abs_of_pos (by linarith : (0:ℝ) < _),
           div_le_iff₀ (by linarith)]
         linarith
       have hp : 0 < (μ^2)^N := by positivity
-      have h2 : |Φ (μ^2) - pcfLG_S N (μ^2)| / pcfLG_S N (μ^2) * |pcfLG_ser N (μ^2) t| ≤
+      have h2 : |Φ (μ^2) - CylinderLiouvilleGreen.limitCoeffSum N (μ^2)| /
+          CylinderLiouvilleGreen.limitCoeffSum N (μ^2)
+          * |CylinderLiouvilleGreen.coeffSum N (μ^2) t| ≤
           3*B / (μ^2)^N := by
-        calc |Φ (μ^2) - pcfLG_S N (μ^2)| / pcfLG_S N (μ^2) * |pcfLG_ser N (μ^2) t|
+        calc |Φ (μ^2) - CylinderLiouvilleGreen.limitCoeffSum N (μ^2)| /
+               CylinderLiouvilleGreen.limitCoeffSum N (μ^2)
+               * |CylinderLiouvilleGreen.coeffSum N (μ^2) t|
             ≤ (B / (μ^2)^N) / (1/2) * (3/2) := by
               gcongr
           _ = 3*B / (μ^2)^N := by ring
-      calc ‖(Φ (μ^2) / pcfLG_S N (μ^2) : ℂ)‖ * ‖X - (pcfLG_ser N (μ^2) t : ℂ)‖ +
-            |Φ (μ^2) - pcfLG_S N (μ^2)| / pcfLG_S N (μ^2) * |pcfLG_ser N (μ^2) t|
+      calc ‖(Φ (μ^2) / CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ)‖ * ‖X -
+             (CylinderLiouvilleGreen.coeffSum N (μ^2) t : ℂ)‖ +
+            |Φ (μ^2) - CylinderLiouvilleGreen.limitCoeffSum N (μ^2)| /
+                CylinderLiouvilleGreen.limitCoeffSum N (μ^2)
+                * |CylinderLiouvilleGreen.coeffSum N (μ^2) t|
           ≤ 4 * (C / (μ^2)^N) + 3*B / (μ^2)^N := by
             gcongr
       _ = (4*C + 3*B) * ((μ^2)^N)⁻¹ := by ring
@@ -1170,8 +1289,9 @@ theorem pcf_negative_parameter_uniform_U :
       have h1 := key 1 le_rfl
       have hb : (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(1:ℕ):ℤ))) =O[pcfUniformFilter (Ici (1+δ))]
           (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(0:ℕ):ℤ))) := by
-        refine IsBigO.of_bound 1 (pcfLG_eventually_uniform 1 fun μ hμ t _ => ?_)
-        rw [pcfLG_norm_zpow (by linarith), pcfLG_norm_zpow (by linarith)]
+        refine IsBigO.of_bound 1 (CylinderLiouvilleGreen.eventually_uniform 1 fun μ hμ t _ => ?_)
+        rw [CylinderLiouvilleGreen.norm_zpow (by linarith),
+            CylinderLiouvilleGreen.norm_zpow (by linarith)]
         simp only [pow_zero, inv_one, one_mul, pow_one]
         exact inv_le_one_of_one_le₀ (by nlinarith)
       have hc : (fun _ : ℝ × ℝ => (1:ℂ)) =O[pcfUniformFilter (Ici (1+δ))]

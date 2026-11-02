@@ -15,12 +15,12 @@ bounds of Kershaw type, and a Sonine-type bound for the Gegenbauer equation.
 
 ## Main results
 
-* `opIneq_logRatio_even`, `opIneq_logRatio_odd`: logarithmic inequalities, by monotonicity
-  from `0`.
-* `opIneq_Gamma_even`, `opIneq_Gamma_odd`: sharp Gamma-ratio bounds of Kershaw type, from a
-  strictly increasing sequence dominated by Gautschi's bounds (DLMF 5.6.4).
-* `opIneq_gegenbauer_sonine`: a Sonine-type bound for solutions of the Gegenbauer equation
-  with `0 < λ < 1`, the core of Lorch's inequality DLMF 18.14.7.
+* `ClassicalInequalities.log_ratio_even`, `ClassicalInequalities.log_ratio_odd`: logarithmic
+  inequalities, by monotonicity from `0`.
+* `ClassicalInequalities.Gamma_even`, `ClassicalInequalities.Gamma_odd`: sharp Gamma-ratio bounds of
+  Kershaw type, from a strictly increasing sequence dominated by Gautschi's bounds (DLMF 5.6.4).
+* `ClassicalInequalities.gegenbauer_sonine`: a Sonine-type bound for solutions of the Gegenbauer
+  equation with `0 < λ < 1`, the core of Lorch's inequality DLMF 18.14.7.
 -/
 
 @[expose] public section
@@ -33,7 +33,7 @@ noncomputable section
 namespace DLMF.OrthogonalPolynomials
 
 /-- `Γ(x + m) = (x)_m Γ(x)` for real `x > 0`. -/
-theorem opIneq_Gamma_add_nat {x : ℝ} (hx : 0 < x) (m : ℕ) :
+theorem ClassicalInequalities.Gamma_add_nat {x : ℝ} (hx : 0 < x) (m : ℕ) :
     Real.Gamma (x + m) = (ascPochhammer ℝ m).eval x * Real.Gamma x := by
   induction m with
   | zero => simp
@@ -43,7 +43,7 @@ theorem opIneq_Gamma_add_nat {x : ℝ} (hx : 0 < x) (m : ℕ) :
     ring
 
 /-- A function vanishing at `0` with positive derivative on `(0, T)` is positive at `T`. -/
-theorem opIneq_pos_of_hasDerivAt {F F' : ℝ → ℝ} {T : ℝ} (hT : 0 < T) (h0 : F 0 = 0)
+theorem ClassicalInequalities.pos_of_hasDerivAt {F F' : ℝ → ℝ} {T : ℝ} (hT : 0 < T) (h0 : F 0 = 0)
     (hF : ∀ s ∈ Icc 0 T, HasDerivAt F (F' s) s) (hF' : ∀ s ∈ Ioo 0 T, 0 < F' s) : 0 < F T := by
   have hmono : StrictMonoOn F (Icc 0 T) :=
     strictMonoOn_of_hasDerivWithinAt_pos (convex_Icc 0 T)
@@ -56,7 +56,7 @@ theorem opIneq_pos_of_hasDerivAt {F F' : ℝ → ℝ} {T : ℝ} (hT : 0 < T) (h0
   rwa [h0] at this
 
 /-- Derivative of `log (1 + a s) - log (1 - a s)`. -/
-theorem opIneq_hasDerivAt_logRatio (a : ℝ) {s : ℝ} (hs : |a * s| < 1) :
+theorem ClassicalInequalities.hasDerivAt_log_ratio (a : ℝ) {s : ℝ} (hs : |a * s| < 1) :
     HasDerivAt (fun s => Real.log (1 + a * s) - Real.log (1 - a * s))
       (a / (1 + a * s) + a / (1 - a * s)) s := by
   have h1 : 0 < 1 + a * s := by linarith [neg_abs_le (a * s)]
@@ -71,18 +71,21 @@ theorem opIneq_hasDerivAt_logRatio (a : ℝ) {s : ℝ} (hs : |a * s| < 1) :
 
 /-- The logarithmic inequality behind the even case: for `0 < p < 1` and `0 < t < 1`,
 `log((1 + p t)/(1 - p t)) < p log((1 + t)/(1 - t))`. -/
-theorem opIneq_logRatio_even {p t : ℝ} (hp0 : 0 < p) (hp1 : p < 1) (ht0 : 0 < t) (ht1 : t < 1) :
+theorem ClassicalInequalities.log_ratio_even {p t : ℝ} (hp0 : 0 < p) (hp1 : p < 1) (ht0 : 0 < t)
+    (ht1 : t < 1) :
     Real.log (1 + p * t) - Real.log (1 - p * t) <
       p * (Real.log (1 + 1 * t) - Real.log (1 - 1 * t)) := by
   set F : ℝ → ℝ := fun s => p * (Real.log (1 + 1 * s) - Real.log (1 - 1 * s)) -
     (Real.log (1 + p * s) - Real.log (1 - p * s))
   have hpos : 0 < F t := by
-    refine opIneq_pos_of_hasDerivAt (F' := fun s => p * (1 / (1 + 1 * s) + 1 / (1 - 1 * s)) -
+    refine ClassicalInequalities.pos_of_hasDerivAt
+        (F' := fun s => p * (1 / (1 + 1 * s) + 1 / (1 - 1 * s)) -
       (p / (1 + p * s) + p / (1 - p * s))) ht0 (by simp [F]) (fun s hs => ?_) (fun s hs => ?_)
     · have hs1 : |1 * s| < 1 := by rw [one_mul, abs_of_nonneg hs.1]; linarith [hs.2]
       have hsp : |p * s| < 1 := by
         rw [abs_of_nonneg (mul_nonneg hp0.le hs.1)]; nlinarith [hs.2, hs.1]
-      exact ((opIneq_hasDerivAt_logRatio 1 hs1).const_mul p).sub (opIneq_hasDerivAt_logRatio p hsp)
+      exact ((ClassicalInequalities.hasDerivAt_log_ratio 1 hs1).const_mul p).sub
+          (ClassicalInequalities.hasDerivAt_log_ratio p hsp)
     · obtain ⟨hs0, hs1⟩ := hs
       have a1 : 0 < 1 - s := by linarith
       have a2 : 0 < 1 - p * s := by nlinarith
@@ -106,7 +109,8 @@ theorem opIneq_logRatio_even {p t : ℝ} (hp0 : 0 < p) (hp1 : p < 1) (ht0 : 0 < 
 /-- The logarithmic inequality behind the odd case: for `0 < λ < 1`, `c = λ(1-λ)` and
 `0 < t ≤ 1/2`,
 `½ log(((1+t)² + c t²)/((1-t)² + c t²)) < log((1+λt)/(1-λt)) + (1-λ) log((1+t)/(1-t))`. -/
-theorem opIneq_logRatio_odd {l t : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (ht0 : 0 < t) (ht1 : t ≤ 1 / 2) :
+theorem ClassicalInequalities.log_ratio_odd {l t : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (ht0 : 0 < t)
+    (ht1 : t ≤ 1 / 2) :
     (Real.log ((1 + t) ^ 2 + l * (1 - l) * t ^ 2) -
         Real.log ((1 - t) ^ 2 + l * (1 - l) * t ^ 2)) / 2 <
       (Real.log (1 + l * t) - Real.log (1 - l * t)) +
@@ -117,7 +121,8 @@ theorem opIneq_logRatio_odd {l t : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (ht0 : 0 < t
         (1 - l) * (Real.log (1 + 1 * s) - Real.log (1 - 1 * s)) -
       (Real.log ((1 + s) ^ 2 + c * s ^ 2) - Real.log ((1 - s) ^ 2 + c * s ^ 2)) / 2
   have hpos : 0 < F t := by
-    refine opIneq_pos_of_hasDerivAt (F' := fun s => (l / (1 + l * s) + l / (1 - l * s)) +
+    refine ClassicalInequalities.pos_of_hasDerivAt
+        (F' := fun s => (l / (1 + l * s) + l / (1 - l * s)) +
         (1 - l) * (1 / (1 + 1 * s) + 1 / (1 - 1 * s)) -
         ((2 * (1 + s) + 2 * c * s) / ((1 + s) ^ 2 + c * s ^ 2) -
           (-(2 * (1 - s)) + 2 * c * s) / ((1 - s) ^ 2 + c * s ^ 2)) / 2)
@@ -135,8 +140,8 @@ theorem opIneq_logRatio_odd {l t : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (ht0 : 0 < t
         refine ((((hasDerivAt_id' s).const_sub 1).pow 2).add
           ((hasDerivAt_pow 2 s).const_mul c)).congr_deriv ?_
         simp; ring
-      exact (((opIneq_hasDerivAt_logRatio l hsl).add
-        ((opIneq_hasDerivAt_logRatio 1 hs1').const_mul (1 - l))).sub
+      exact (((ClassicalInequalities.hasDerivAt_log_ratio l hsl).add
+        ((ClassicalInequalities.hasDerivAt_log_ratio 1 hs1').const_mul (1 - l))).sub
         (((d1.log q1.ne').sub (d2.log q2.ne')).div_const 2))
     · obtain ⟨hs0, hs1⟩ := hs
       have a1 : 0 < 1 - s := by linarith
@@ -182,7 +187,7 @@ theorem opIneq_logRatio_odd {l t : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (ht0 : 0 < t
 
 /-- A strictly increasing sequence dominated eventually by a sequence tending to `0` is
 negative. -/
-theorem opIneq_neg_of_strictMono {s U : ℕ → ℝ} (hs : ∀ k, s k < s (k + 1))
+theorem ClassicalInequalities.neg_of_strictMono {s U : ℕ → ℝ} (hs : ∀ k, s k < s (k + 1))
     (hU : ∀ K, 1 ≤ K → s K ≤ U K) (hlim : Tendsto U atTop (𝓝 0)) (m : ℕ) : s m < 0 := by
   have hmono : StrictMono s := strictMono_nat_of_lt_succ hs
   have hle : s (m + 1) ≤ 0 := by
@@ -192,12 +197,12 @@ theorem opIneq_neg_of_strictMono {s U : ℕ → ℝ} (hs : ∀ k, s k < s (k + 1
   exact (hs m).trans_le hle
 
 /-- `log Γ(x + 1) = log x + log Γ(x)` for `x > 0`. -/
-theorem opIneq_log_Gamma_succ {x : ℝ} (hx : 0 < x) :
+theorem ClassicalInequalities.log_Gamma_succ {x : ℝ} (hx : 0 < x) :
     Real.log (Real.Gamma (x + 1)) = Real.log x + Real.log (Real.Gamma x) := by
   rw [Real.Gamma_add_one hx.ne', Real.log_mul hx.ne' (Real.Gamma_pos_of_pos hx).ne']
 
 /-- `log(x/y) → 0` when `x/y → 1` along `ℕ`. -/
-theorem opIneq_tendsto_log_ratio {a : ℝ} (ha : 0 < a) (u v : ℝ) :
+theorem ClassicalInequalities.tendsto_log_ratio {a : ℝ} (ha : 0 < a) (u v : ℝ) :
     Tendsto (fun K : ℕ => Real.log ((a * K + u) / (a * K + v))) atTop (𝓝 0) := by
   have h1 : Tendsto (fun K : ℕ => (a * K + u) / (a * K + v)) atTop (𝓝 1) := by
     have hK : Tendsto (fun K : ℕ => (K : ℝ)) atTop atTop := tendsto_natCast_atTop_atTop
@@ -218,7 +223,7 @@ theorem opIneq_tendsto_log_ratio {a : ℝ} (ha : 0 < a) (u v : ℝ) :
 
 /-- Kershaw-type bound used for the even Gegenbauer case:
 `Γ(m + λ)/Γ(m + 1) < (m + λ/2)^{λ - 1}` for `0 < λ < 1`. -/
-theorem opIneq_Gamma_even {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
+theorem ClassicalInequalities.Gamma_even {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
     Real.Gamma (m + l) / Real.Gamma (m + 1) < ((m : ℝ) + l / 2) ^ (l - 1) := by
   set s : ℕ → ℝ := fun k => Real.log (Real.Gamma (k + l)) - Real.log (Real.Gamma (k + 1)) +
     (1 - l) * Real.log (k + l / 2) with hsdef
@@ -228,17 +233,18 @@ theorem opIneq_Gamma_even {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
     have g1 : Real.log (Real.Gamma (((k + 1 : ℕ) : ℝ) + l)) =
         Real.log (k + l) + Real.log (Real.Gamma (k + l)) := by
       rw [show ((k + 1 : ℕ) : ℝ) + l = (k + l) + 1 by push_cast; ring]
-      exact opIneq_log_Gamma_succ (by positivity)
+      exact ClassicalInequalities.log_Gamma_succ (by positivity)
     have g2 : Real.log (Real.Gamma (((k + 1 : ℕ) : ℝ) + 1)) =
         Real.log (k + 1) + Real.log (Real.Gamma (k + 1)) := by
       rw [show ((k + 1 : ℕ) : ℝ) + 1 = (k + 1) + 1 by push_cast; ring]
-      exact opIneq_log_Gamma_succ (by positivity)
+      exact ClassicalInequalities.log_Gamma_succ (by positivity)
     set M : ℝ := (2 * k + 1 + l) / 2 with hM
     have hMpos : 0 < M := by positivity
     set t : ℝ := 1 / (2 * k + 1 + l) with ht
     have ht0 : 0 < t := by positivity
     have ht1 : t < 1 := by rw [ht, div_lt_one (by positivity)]; linarith
-    have key := opIneq_logRatio_even (p := 1 - l) (by linarith) (by linarith) ht0 ht1
+    have key := ClassicalInequalities.log_ratio_even (p := 1 - l) (by linarith)
+        (by linarith) ht0 ht1
     have hD : (2 * (k : ℝ) + 1 + l) ≠ 0 := by positivity
     have e1 : 1 + (1 - l) * t = (k + 1) / M := by rw [ht, hM]; field_simp; ring
     have e2 : 1 - (1 - l) * t = (k + l) / M := by rw [ht, hM]; field_simp; ring
@@ -264,8 +270,8 @@ theorem opIneq_Gamma_even {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
     nlinarith
   have hlim : Tendsto (fun K : ℕ => (1 - l) * Real.log ((1 * K + l / 2) / (1 * K + 0)))
       atTop (𝓝 0) := by
-    simpa using (opIneq_tendsto_log_ratio one_pos (l / 2) 0).const_mul (1 - l)
-  have hneg := opIneq_neg_of_strictMono hs hU hlim m
+    simpa using (ClassicalInequalities.tendsto_log_ratio one_pos (l / 2) 0).const_mul (1 - l)
+  have hneg := ClassicalInequalities.neg_of_strictMono hs hU hlim m
   have hpos : 0 < Real.Gamma (m + l) := Real.Gamma_pos_of_pos (by positivity)
   have hpos1 : 0 < Real.Gamma (m + 1) := Real.Gamma_pos_of_pos (by positivity)
   rw [Real.lt_rpow_iff_log_lt (by positivity) (by positivity), Real.log_div hpos.ne' hpos1.ne']
@@ -275,7 +281,7 @@ theorem opIneq_Gamma_even {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
 
 /-- Gamma-ratio bound used for the odd Gegenbauer case: with `N = 2m + 1 + λ`, `0 < λ < 1`,
 `(Γ(m + 1 + λ)/Γ(m + 1))² N² < (N/2)^{2λ} (N² + λ(1 - λ))`. -/
-theorem opIneq_Gamma_odd {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
+theorem ClassicalInequalities.Gamma_odd {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
     (Real.Gamma (m + 1 + l) / Real.Gamma (m + 1)) ^ 2 * (2 * m + 1 + l) ^ 2 <
       ((2 * m + 1 + l) / 2) ^ (2 * l) * ((2 * m + 1 + l) ^ 2 + l * (1 - l)) := by
   set c := l * (1 - l) with hc
@@ -289,11 +295,11 @@ theorem opIneq_Gamma_odd {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
     have g1 : Real.log (Real.Gamma (((k + 1 : ℕ) : ℝ) + 1 + l)) =
         Real.log (k + 1 + l) + Real.log (Real.Gamma (k + 1 + l)) := by
       rw [show ((k + 1 : ℕ) : ℝ) + 1 + l = (k + 1 + l) + 1 by push_cast; ring]
-      exact opIneq_log_Gamma_succ (by positivity)
+      exact ClassicalInequalities.log_Gamma_succ (by positivity)
     have g2 : Real.log (Real.Gamma (((k + 1 : ℕ) : ℝ) + 1)) =
         Real.log (k + 1) + Real.log (Real.Gamma (k + 1)) := by
       rw [show ((k + 1 : ℕ) : ℝ) + 1 = (k + 1) + 1 by push_cast; ring]
-      exact opIneq_log_Gamma_succ (by positivity)
+      exact ClassicalInequalities.log_Gamma_succ (by positivity)
     set N : ℝ := 2 * k + 1 + l with hN
     have hNpos : 0 < N := by positivity
     set b : ℝ := N + 1 with hb
@@ -302,7 +308,7 @@ theorem opIneq_Gamma_odd {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
     have ht0 : 0 < t := by positivity
     have ht1 : t ≤ 1 / 2 := by
       rw [ht, div_le_div_iff₀ hbpos (by norm_num)]; linarith
-    have key := opIneq_logRatio_odd hl0 hl1 ht0 ht1
+    have key := ClassicalInequalities.log_ratio_odd hl0 hl1 ht0 ht1
     have hbne : b ≠ 0 := hbpos.ne'
     have e1 : 1 + l * t = (k + 1 + l) / (b / 2) := by
       rw [ht]; field_simp; rw [hb, hN]; ring
@@ -350,8 +356,9 @@ theorem opIneq_Gamma_odd {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
     nlinarith
   have hlim : Tendsto (fun K : ℕ => 2 * l * Real.log ((2 * K + (2 + 2 * l)) / (2 * K + (1 + l))))
       atTop (𝓝 0) := by
-    simpa using (opIneq_tendsto_log_ratio two_pos (2 + 2 * l) (1 + l)).const_mul (2 * l)
-  have hneg := opIneq_neg_of_strictMono hs hU hlim m
+    simpa using (ClassicalInequalities.tendsto_log_ratio two_pos (2 + 2 * l)
+        (1 + l)).const_mul (2 * l)
+  have hneg := ClassicalInequalities.neg_of_strictMono hs hU hlim m
   have hpos : 0 < Real.Gamma (m + 1 + l) := Real.Gamma_pos_of_pos (by positivity)
   have hpos1 : 0 < Real.Gamma (m + 1) := Real.Gamma_pos_of_pos (by positivity)
   have hN : (0 : ℝ) < 2 * m + 1 + l := by positivity
@@ -368,7 +375,7 @@ theorem opIneq_Gamma_odd {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) (m : ℕ) :
 `(1 - x²)^λ y(x)² ≤ y(0)² + y'(0)² / ((n + λ)² + λ(1 - λ))`. In the variable `θ = arccos x`
 this is the monotonicity of `u² + u'²/Q` for `u = sin^λ θ · y(cos θ)`,
 `Q = (n + λ)² + λ(1 - λ)/sin² θ` (Lorch's argument for DLMF 18.14.7). -/
-theorem opIneq_gegenbauer_sonine {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) {n : ℕ}
+theorem ClassicalInequalities.gegenbauer_sonine {l : ℝ} (hl0 : 0 < l) (hl1 : l < 1) {n : ℕ}
     {y y' y'' : ℝ → ℝ} (hy : ∀ x, HasDerivAt y (y' x) x) (hy' : ∀ x, HasDerivAt y' (y'' x) x)
     (hode : ∀ x, (1 - x ^ 2) * y'' x - (2 * l + 1) * x * y' x + n * (n + 2 * l) * y x = 0)
     {x : ℝ} (hx : |x| < 1) :

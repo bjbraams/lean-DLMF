@@ -7,7 +7,9 @@ module
 
 public import DLMF.BernoulliEuler.Basic
 public import DLMF.BernoulliEuler.GeneratingFunctions
+public import DLMF.BernoulliEuler.IntegralKernels
 public import DLMF.BernoulliEuler.Properties
+public import DLMFMathlib.Analysis.Complex.IdentityTheoremStrip
 public import ToMathlib.Analysis.SpecialFunctions.RamanujanMaster
 public import Mathlib.Analysis.SpecialFunctions.PolynomialExp
 
@@ -35,6 +37,8 @@ The integrals over `(0, ∞)` are Lebesgue (Bochner) integrals `∫ t in Set.Ioi
 integrands are integrable on the stated ranges, so Lean's totalization of non-integrable
 integrals to `0` plays no role. The polynomial representations 24.7.7–24.7.10 are stated for
 complex `x` with `0 < Re x < 1` (DLMF §24.7(ii)); 24.7.7 for `n ≥ 1`, 24.7.8–24.7.10 for `n ≥ 0`.
+They are proved at real `x` from the Fourier series of DLMF §24.8, with the kernel moments of
+`DLMF.BernoulliEuler.IntegralKernels`, and extended to the strip by the identity theorem.
 
 The Mellin–Barnes representation 24.7.11 is proved by shifting the integration line to
 `Re t = -1/2` and expanding against the moments of `sech²(πs)`. With `t = -c + is`, the contour
@@ -583,6 +587,90 @@ theorem eulerNumber_two_mul_eq_integral_sech (n : ℕ) :
 
 /-! ### §24.7(ii) Bernoulli and Euler polynomials -/
 
+private lemma exists_eventually_norm_le {f : ℂ → ℂ} (hf : Continuous f) (x₀ : ℂ) :
+    ∃ C, 0 ≤ C ∧ ∀ᶠ y in 𝓝 x₀, ‖f y‖ ≤ C :=
+  ⟨‖f x₀‖ + 1, by positivity, ((hf.norm.tendsto x₀).eventually
+    (gt_mem_nhds (lt_add_one _))).mono fun _ h => h.le⟩
+
+private lemma norm_cexp_neg_two_pi_le (t : ℝ) (ht : 0 < t) :
+    ‖Complex.exp (-(2 * π * t))‖ ≤ Real.exp (π * t) := by
+  rw [Complex.norm_exp]
+  simp only [Complex.neg_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, mul_zero,
+    sub_zero, Complex.re_ofNat, Complex.im_ofNat]
+  exact Real.exp_le_exp.mpr (by nlinarith [Real.pi_pos])
+
+private lemma norm_cosh_pi_le {t : ℝ} (ht : 0 < t) :
+    ‖Complex.cosh (π * t)‖ ≤ Real.exp (π * t) := by
+  rw [show (π : ℂ) * t = ((π * t : ℝ) : ℂ) by push_cast; ring,
+    ← Complex.ofReal_cosh, Complex.norm_real, Real.norm_of_nonneg (Real.cosh_pos _).le,
+    Real.cosh_eq]
+  have : Real.exp (-(π * t)) ≤ Real.exp (π * t) :=
+    Real.exp_le_exp.mpr (by nlinarith [Real.pi_pos])
+  linarith
+
+private lemma norm_sinh_pi_le {t : ℝ} (ht : 0 < t) :
+    ‖Complex.sinh (π * t)‖ ≤ Real.exp (π * t) := by
+  rw [show (π : ℂ) * t = ((π * t : ℝ) : ℂ) by push_cast; ring,
+    ← Complex.ofReal_sinh, Complex.norm_real, Real.norm_eq_abs, Real.sinh_eq]
+  have : Real.exp (-(π * t)) ≤ Real.exp (π * t) :=
+    Real.exp_le_exp.mpr (by nlinarith [Real.pi_pos])
+  have h0 := Real.exp_pos (-(π * t))
+  rw [abs_le]; constructor <;> linarith
+
+
+/-- Shift of a series whose zeroth term vanishes. -/
+private lemma hasSum_succ_of_zero {f : ℕ → ℝ} {a : ℝ} (h : HasSum f a) (h0 : f 0 = 0) :
+    HasSum (fun k => f (k + 1)) a := by
+  simpa [h0] using (hasSum_nat_add_iff' 1).mpr h
+
+/-- `∑_{k ≥ 1} sin(k y)/k = (π - y)/2` for `0 < y < 2π`, as a limit of partial sums. -/
+private lemma tendsto_sum_sin_div {y : ℝ} (hy0 : 0 < y) (hy1 : y < 2 * π) :
+    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, Real.sin ((k + 1) * y) / (k + 1)) atTop
+      (𝓝 ((π - y) / 2)) := by
+  have hπ : (π : ℝ) ≠ 0 := Real.pi_ne_zero
+  have h := (tendsto_sum_sin_div_eq_bernoulliFun_one (x := y / (2 * π)) (by positivity)
+    (by rw [div_lt_one (by positivity)]; exact hy1)).const_mul (-π)
+  rw [bernoulliFun_one] at h
+  convert h using 2 with N
+  · rw [← mul_assoc]
+    have : -π * -(2 / (2 * π)) = 1 := by field_simp
+    rw [this, one_mul]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    congr 2; field_simp
+  · field_simp; ring
+
+/-- The square-wave series: `∑_{k ≥ 0} sin((2k+1)y)/(2k+1) = π/4` for `0 < y < π`. -/
+private lemma tendsto_sum_sin_odd_div {y : ℝ} (hy0 : 0 < y) (hy1 : y < π) :
+    Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, Real.sin ((2 * k + 1) * y) / (2 * k + 1))
+      atTop (𝓝 (π / 4)) := by
+  have h1 := (tendsto_sum_sin_div hy0 (by linarith)).comp
+    (Filter.tendsto_atTop_mono (fun N : ℕ => (by omega : N ≤ 2 * N)) tendsto_id)
+  have h2 := tendsto_sum_sin_div (y := 2 * y) (by positivity) (by linarith)
+  have h := h1.sub (h2.const_mul (1 / 2))
+  rw [show (π - y) / 2 - 1 / 2 * ((π - 2 * y) / 2) = π / 4 by ring] at h
+  have key : ∀ N : ℕ, ∑ k ∈ Finset.range (2 * N), Real.sin ((k + 1) * y) / (k + 1) =
+      ∑ k ∈ Finset.range N, Real.sin ((2 * k + 1) * y) / (2 * k + 1) +
+        1 / 2 * ∑ k ∈ Finset.range N, Real.sin ((k + 1) * (2 * y)) / (k + 1) := by
+    intro N
+    induction N with
+    | zero => simp
+    | succ N ih =>
+      rw [show 2 * (N + 1) = 2 * N + 1 + 1 by ring, Finset.sum_range_succ, Finset.sum_range_succ,
+        ih, Finset.sum_range_succ, Finset.sum_range_succ]
+      generalize ∑ k ∈ Finset.range N, Real.sin ((2 * (k : ℝ) + 1) * y) / (2 * k + 1) = A
+      generalize ∑ k ∈ Finset.range N, Real.sin (((k : ℝ) + 1) * (2 * y)) / (k + 1) = B
+      have h1 : (2 * (N : ℝ) + 1) ≠ 0 := by positivity
+      have h2 : ((N : ℝ) + 1) ≠ 0 := by positivity
+      push_cast
+      rw [show ((2 * (N : ℝ) + 1 + 1) * y) = ((N : ℝ) + 1) * (2 * y) by ring,
+        show (2 * (N : ℝ) + 1 + 1) = 2 * ((N : ℝ) + 1) by ring]
+      field_simp
+      ring
+  refine h.congr fun N => ?_
+  simp only [Function.comp_apply, key]
+  ring
+
+
 /-- **DLMF 24.7.7**: for `0 < Re x < 1` and `n ≥ 1`, `B₂ₙ(x) = (-1)ⁿ⁺¹ 2n
 ∫₀^∞ (cos 2πx - e^{-2πt})/(cosh 2πt - cos 2πx) t^{2n-1} dt`. -/
 @[dlmf 24.7.E7]
@@ -591,7 +679,53 @@ theorem bernoulliPolyB_two_mul_eq_integral {n : ℕ} (hn : 1 ≤ n) {x : ℂ} (h
     bernoulliPolyB (2 * n) x = (-1) ^ (n + 1) * (2 * n) *
       ∫ t in Set.Ioi (0 : ℝ), (Complex.cos (2 * π * x) - Complex.exp (-(2 * π * t))) /
         (Complex.cosh (2 * π * t) - Complex.cos (2 * π * x)) * (t : ℂ) ^ (2 * n - 1) := by
-  sorry
+  obtain ⟨n, rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
+  rw [show 2 * (n + 1) - 1 = 2 * n + 1 by omega]
+  refine Complex.eqOn_strip_of_eq_ofReal (differentiable_bernoulliPolyB _).differentiableOn
+    ((differentiableOn_integral_div_cosh_sub_cos (2 * n + 1)
+      (fun y t => Complex.cos (2 * π * y) - Complex.exp (-(2 * π * t))) (fun t => by fun_prop)
+      (fun y => by fun_prop) (fun x₀ => ?_)).const_mul _) (fun x hx0 hx1 => ?_) ⟨hx0, hx1⟩
+  · obtain ⟨C, hC0, hC⟩ := exists_eventually_norm_le
+      (f := fun y : ℂ => Complex.cos (2 * π * y)) (by fun_prop) x₀
+    refine ⟨C + 1, hC.mono fun y hy t ht => ?_⟩
+    have h1 := norm_cexp_neg_two_pi_le t ht
+    have h2 : 1 ≤ Real.exp (π * t) :=
+      Real.one_le_exp (by nlinarith [Real.pi_pos, show (0:ℝ) < t from ht])
+    calc _ ≤ ‖Complex.cos (2 * π * y)‖ + ‖Complex.exp (-(2 * π * t))‖ := norm_sub_le _ _
+      _ ≤ (C + 1) * Real.exp (π * t) := by nlinarith
+  · have hT := tendsto_sum_cos_integral_bernoulliKernel (2 * n + 1) hx0 hx1
+    have hS := hasSum_succ_of_zero (hasSum_one_div_nat_pow_mul_cos (k := n + 1) (by omega)
+      (x := x) ⟨hx0.le, hx1.le⟩) (by simp)
+    have hT2 := (Complex.continuous_ofReal.tendsto _).comp
+      ((hS.mul_left (2 * (2 * n + 1)! / (2 * π) ^ (2 * n + 2))).tendsto_sum_nat)
+    have heq := tendsto_nhds_unique hT (hT2.congr fun N => ?_)
+    · rw [heq, bernoulliPolyB_ofReal]
+      have hb : bernoulliFun (2 * (n + 1)) x = (-1) ^ (n + 1 + 1) * (2 * ((n + 1 : ℕ) : ℝ)) *
+          (2 * (2 * n + 1)! / (2 * π) ^ (2 * n + 2) * ((-1) ^ (n + 1 + 1) *
+            (2 * π) ^ (2 * (n + 1)) / 2 / (2 * (n + 1))! * (Polynomial.map (algebraMap ℚ ℝ)
+              (Polynomial.bernoulli (2 * (n + 1)))).eval x)) := by
+        unfold bernoulliFun
+        rw [show 2 * (n + 1) = 2 * n + 1 + 1 by ring, Nat.factorial_succ (2 * n + 1)]
+        have hπ : (π : ℝ) ≠ 0 := Real.pi_ne_zero
+        have hf : ((2 * n + 1)! : ℝ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+        have h1 : ((-1 : ℝ) ^ (n + 1 + 1)) ^ 2 = 1 := by
+          rw [← pow_mul, mul_comm, pow_mul]; simp
+        push_cast
+        generalize (-1 : ℝ) ^ (n + 1 + 1) = s at *
+        field_simp
+        linear_combination (-(2 * (n : ℝ) + 2) * (Polynomial.map (algebraMap ℚ ℝ)
+          (Polynomial.bernoulli (2 * n + 1 + 1))).eval x) * h1
+      rw [hb]
+      push_cast
+      ring
+    · simp only [Function.comp_apply, Complex.ofReal_sum]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      congr 1
+      have hk : (k : ℝ) + 1 ≠ 0 := by positivity
+      have hπ : (π : ℝ) ≠ 0 := Real.pi_ne_zero
+      push_cast
+      rw [mul_pow (2 * π) ((k : ℝ) + 1), show 2 * (n + 1) = 2 * n + 1 + 1 by ring]
+      field_simp
 
 /-- **DLMF 24.7.8**: for `0 < Re x < 1`, `B₂ₙ₊₁(x) = (-1)ⁿ⁺¹ (2n+1)
 ∫₀^∞ sin(2πx)/(cosh 2πt - cos 2πx) t^{2n} dt`. -/
@@ -601,7 +735,62 @@ theorem bernoulliPolyB_two_mul_add_one_eq_integral (n : ℕ) {x : ℂ} (hx0 : 0 
     bernoulliPolyB (2 * n + 1) x = (-1) ^ (n + 1) * (2 * n + 1) *
       ∫ t in Set.Ioi (0 : ℝ), Complex.sin (2 * π * x) /
         (Complex.cosh (2 * π * t) - Complex.cos (2 * π * x)) * (t : ℂ) ^ (2 * n) := by
-  sorry
+  refine Complex.eqOn_strip_of_eq_ofReal (differentiable_bernoulliPolyB _).differentiableOn
+    ((differentiableOn_integral_div_cosh_sub_cos (2 * n)
+      (fun y _ => Complex.sin (2 * π * y)) (fun t => by fun_prop)
+      (fun y => by fun_prop) (fun x₀ => ?_)).const_mul _) (fun x hx0 hx1 => ?_) ⟨hx0, hx1⟩
+  · obtain ⟨C, hC0, hC⟩ := exists_eventually_norm_le
+      (f := fun y : ℂ => Complex.sin (2 * π * y)) (by fun_prop) x₀
+    refine ⟨C, hC.mono fun y hy t ht => ?_⟩
+    have h2 : 1 ≤ Real.exp (π * t) := Real.one_le_exp (by nlinarith [Real.pi_pos,
+      show (0 : ℝ) < t from ht])
+    exact hy.trans (le_mul_of_one_le_right hC0 h2)
+  have hT := tendsto_sum_sin_integral_bernoulliKernel (2 * n) hx0 hx1
+  have hπ : (π : ℝ) ≠ 0 := Real.pi_ne_zero
+  rcases n with _ | n
+  · have hT2 := (Complex.continuous_ofReal.tendsto _).comp
+      ((tendsto_sum_sin_div_eq_bernoulliFun_one hx0 hx1).neg)
+    have heq := tendsto_nhds_unique hT (hT2.congr fun N => ?_)
+    · rw [heq, bernoulliPolyB_ofReal]; push_cast; ring
+    · simp only [Function.comp_apply, ← Complex.ofReal_sum]
+      congr 1
+      rw [Finset.mul_sum, ← Finset.sum_neg_distrib]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      have hk : (k : ℝ) + 1 ≠ 0 := by positivity
+      field_simp
+      ring
+  · have hS := hasSum_succ_of_zero (hasSum_one_div_nat_pow_mul_sin (k := n + 1) (by omega)
+      (x := x) ⟨hx0.le, hx1.le⟩) (by simp)
+    have hT2 := (Complex.continuous_ofReal.tendsto _).comp
+      ((hS.mul_left (2 * (2 * n + 2)! / (2 * π) ^ (2 * n + 3))).tendsto_sum_nat)
+    have heq := tendsto_nhds_unique hT (hT2.congr fun N => ?_)
+    · rw [heq, bernoulliPolyB_ofReal]
+      have hb : bernoulliFun (2 * (n + 1) + 1) x =
+          (-1) ^ (n + 1 + 1) * (2 * ((n + 1 : ℕ) : ℝ) + 1) *
+          (2 * (2 * n + 2)! / (2 * π) ^ (2 * n + 3) * ((-1) ^ (n + 1 + 1) *
+            (2 * π) ^ (2 * (n + 1) + 1) / 2 / (2 * (n + 1) + 1)! * (Polynomial.map (algebraMap ℚ ℝ)
+              (Polynomial.bernoulli (2 * (n + 1) + 1))).eval x)) := by
+        unfold bernoulliFun
+        rw [show 2 * (n + 1) + 1 = 2 * n + 2 + 1 by ring, Nat.factorial_succ (2 * n + 2)]
+        have hf : ((2 * n + 2)! : ℝ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+        have h1 : ((-1 : ℝ) ^ (n + 1 + 1)) ^ 2 = 1 := by
+          rw [← pow_mul, mul_comm, pow_mul]; simp
+        push_cast
+        generalize (-1 : ℝ) ^ (n + 1 + 1) = s at *
+        field_simp
+        linear_combination (-(Polynomial.map (algebraMap ℚ ℝ)
+          (Polynomial.bernoulli (2 * n + 2 + 1))).eval x) * h1
+      rw [hb]
+      push_cast
+      ring
+    · simp only [Function.comp_apply, Complex.ofReal_sum]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      congr 1
+      have hk : (k : ℝ) + 1 ≠ 0 := by positivity
+      push_cast
+      rw [mul_pow (2 * π) ((k : ℝ) + 1), show 2 * (n + 1) + 1 = 2 * n + 2 + 1 by ring,
+        show 2 * (n + 1) = 2 * n + 2 by ring]
+      field_simp
 
 /-- **DLMF 24.7.9**: for `0 < Re x < 1`, `E₂ₙ(x) = (-1)ⁿ 4
 ∫₀^∞ sin(πx) cosh(πt)/(cosh 2πt - cos 2πx) t^{2n} dt`. -/
@@ -610,7 +799,54 @@ theorem eulerPolyE_two_mul_eq_integral (n : ℕ) {x : ℂ} (hx0 : 0 < x.re) (hx1
     eulerPolyE (2 * n) x = (-1) ^ n * 4 *
       ∫ t in Set.Ioi (0 : ℝ), Complex.sin (π * x) * Complex.cosh (π * t) /
         (Complex.cosh (2 * π * t) - Complex.cos (2 * π * x)) * (t : ℂ) ^ (2 * n) := by
-  sorry
+  refine Complex.eqOn_strip_of_eq_ofReal (differentiable_eulerPolyE _).differentiableOn
+    ((differentiableOn_integral_div_cosh_sub_cos (2 * n)
+      (fun y t => Complex.sin (π * y) * Complex.cosh (π * t)) (fun t => by fun_prop)
+      (fun y => by fun_prop) (fun x₀ => ?_)).const_mul _) (fun x hx0 hx1 => ?_) ⟨hx0, hx1⟩
+  · obtain ⟨C, hC0, hC⟩ := exists_eventually_norm_le
+      (f := fun y : ℂ => Complex.sin (π * y)) (by fun_prop) x₀
+    refine ⟨C, hC.mono fun y hy t ht => ?_⟩
+    rw [norm_mul]
+    exact mul_le_mul hy (norm_cosh_pi_le ht) (norm_nonneg _) hC0
+  have hT := tendsto_sum_sin_integral_eulerKernel (2 * n) hx0 hx1
+  have hπ : (π : ℝ) ≠ 0 := Real.pi_ne_zero
+  rcases n with _ | n
+  · have hT2 := (Complex.continuous_ofReal.tendsto _).comp
+      ((tendsto_sum_sin_odd_div (y := π * x) (by positivity)
+        (by nlinarith [Real.pi_pos])).div_const π)
+    have heq := tendsto_nhds_unique hT (hT2.congr fun N => ?_)
+    · rw [heq, eulerPolyE_zero]; push_cast; field_simp
+    · simp only [Function.comp_apply, ← Complex.ofReal_sum]
+      congr 1
+      rw [Finset.sum_div]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      have hk : 2 * (k : ℝ) + 1 ≠ 0 := by positivity
+      rw [show (2 * (k : ℝ) + 1) * (π * x) = (2 * k + 1) * π * x by ring]
+      field_simp
+      ring
+  · have hT2 := (Complex.continuous_ofReal.tendsto _).comp
+      ((hasSum_sin_odd_eulerFun (n := n + 1) (by omega) hx0.le hx1.le).tendsto_sum_nat.const_mul
+        ((-1) ^ (n + 1) / 4))
+    have heq := tendsto_nhds_unique hT (hT2.congr fun N => ?_)
+    · rw [heq, eulerPolyE_ofReal]
+      have h1 : ((-1 : ℂ) ^ (n + 1)) ^ 2 = 1 := by
+        rw [← pow_mul, mul_comm, pow_mul]; simp
+      push_cast
+      generalize (-1 : ℂ) ^ (n + 1) = s at *
+      linear_combination (-(eulerFun (2 * (n + 1)) x : ℂ)) * h1
+    · simp only [Function.comp_apply, ← Complex.ofReal_sum]
+      congr 1
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      have hk : 2 * (k : ℝ) + 1 ≠ 0 := by positivity
+      have h1 : ((-1 : ℝ) ^ (n + 1)) ^ 2 = 1 := by
+        rw [← pow_mul, mul_comm, pow_mul]; simp
+      rw [mul_pow ((2 * (k : ℝ) + 1)) π]
+      generalize (-1 : ℝ) ^ (n + 1) = s at *
+      generalize 2 * (k : ℝ) + 1 = c at *
+      generalize Real.sin (c * π * x) = S
+      field_simp
+      linear_combination S * h1
 
 /-- **DLMF 24.7.10**: for `0 < Re x < 1`, `E₂ₙ₊₁(x) = (-1)ⁿ⁺¹ 4
 ∫₀^∞ cos(πx) sinh(πt)/(cosh 2πt - cos 2πx) t^{2n+1} dt`. -/
@@ -620,7 +856,41 @@ theorem eulerPolyE_two_mul_add_one_eq_integral (n : ℕ) {x : ℂ} (hx0 : 0 < x.
     eulerPolyE (2 * n + 1) x = (-1) ^ (n + 1) * 4 *
       ∫ t in Set.Ioi (0 : ℝ), Complex.cos (π * x) * Complex.sinh (π * t) /
         (Complex.cosh (2 * π * t) - Complex.cos (2 * π * x)) * (t : ℂ) ^ (2 * n + 1) := by
-  sorry
+  refine Complex.eqOn_strip_of_eq_ofReal (differentiable_eulerPolyE _).differentiableOn
+    ((differentiableOn_integral_div_cosh_sub_cos (2 * n + 1)
+      (fun y t => Complex.cos (π * y) * Complex.sinh (π * t)) (fun t => by fun_prop)
+      (fun y => by fun_prop) (fun x₀ => ?_)).const_mul _) (fun x hx0 hx1 => ?_) ⟨hx0, hx1⟩
+  · obtain ⟨C, hC0, hC⟩ := exists_eventually_norm_le
+      (f := fun y : ℂ => Complex.cos (π * y)) (by fun_prop) x₀
+    refine ⟨C, hC.mono fun y hy t ht => ?_⟩
+    rw [norm_mul]
+    exact mul_le_mul hy (norm_sinh_pi_le ht) (norm_nonneg _) hC0
+  have hT := tendsto_sum_cos_integral_eulerKernel (2 * n + 1) hx0 hx1
+  have hπ : (π : ℝ) ≠ 0 := Real.pi_ne_zero
+  have hT2 := (Complex.continuous_ofReal.tendsto _).comp
+    ((hasSum_cos_odd_eulerFun (n := n + 1) (by omega) hx0.le hx1.le).tendsto_sum_nat.const_mul
+      ((-1) ^ (n + 1) / 4))
+  have heq := tendsto_nhds_unique hT (hT2.congr fun N => ?_)
+  · rw [heq, eulerPolyE_ofReal, show 2 * (n + 1) - 1 = 2 * n + 1 by omega]
+    have h1 : ((-1 : ℂ) ^ (n + 1)) ^ 2 = 1 := by
+      rw [← pow_mul, mul_comm, pow_mul]; simp
+    push_cast
+    generalize (-1 : ℂ) ^ (n + 1) = s at *
+    linear_combination (-(eulerFun (2 * n + 1) x : ℂ)) * h1
+  · simp only [Function.comp_apply, ← Complex.ofReal_sum]
+    congr 1
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    have hk : 2 * (k : ℝ) + 1 ≠ 0 := by positivity
+    have h1 : ((-1 : ℝ) ^ (n + 1)) ^ 2 = 1 := by
+      rw [← pow_mul, mul_comm, pow_mul]; simp
+    rw [mul_pow ((2 * (k : ℝ) + 1)) π, show 2 * (n + 1) - 1 = 2 * n + 1 by omega,
+      show 2 * (n + 1) = 2 * n + 1 + 1 by omega]
+    generalize (-1 : ℝ) ^ (n + 1) = s at *
+    generalize 2 * (k : ℝ) + 1 = c at *
+    generalize Real.cos (c * π * x) = S
+    field_simp
+    linear_combination S * h1
 
 /-! ### Mellin–Barnes representation -/
 

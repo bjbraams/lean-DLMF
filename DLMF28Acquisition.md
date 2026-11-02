@@ -65,7 +65,7 @@ declarations:
 - [Properties](DLMF/Mathieu/Properties.lean): 0 admissions. 71 tagged: 35 proved, 36 admitted.
 - [FourierSeries](DLMF/Mathieu/FourierSeries.lean): 9 admissions. 36 tagged: 36 admitted.
 - [SecondSolutions](DLMF/Mathieu/SecondSolutions.lean): 1 admissions. 20 tagged: 5 proved, 15 admitted.
-- [SmallQ](DLMF/Mathieu/SmallQ.lean): 9 admissions. 31 tagged: 31 admitted.
+- [SmallQ](DLMF/Mathieu/SmallQ.lean): 4 admissions. 31 tagged: 31 admitted.
 - [Continuation](DLMF/Mathieu/Continuation.lean): 7 admissions. 7 tagged: 7 admitted.
 - [LargeQ](DLMF/Mathieu/LargeQ.lean): 5 admissions. 5 tagged: 5 admitted.
 - [Zeros](DLMF/Mathieu/Zeros.lean): 7 admissions. 9 tagged: 9 admitted.
@@ -135,7 +135,7 @@ declarations:
 - [28.2.ii](https://dlmf.nist.gov/28.2.ii): [`DLMF.Mathieu.exists_isMathieuSolution`](DLMF/Mathieu/Basic/FundamentalSolutions.lean#L118) (proved); [`DLMF.Mathieu.mathieuWI_neg`](DLMF/Mathieu/Basic/Properties.lean#L387) (proved); [`DLMF.Mathieu.mathieuWII_neg`](DLMF/Mathieu/Basic/Properties.lean#L395) (proved); [`DLMF.Mathieu.differentiable_mathieuWI_mathieuWII`](DLMF/Mathieu/Properties/BasicSolutions.lean#L66) (proved).
 - [28.2.iii](https://dlmf.nist.gov/28.2.iii): [`DLMF.Mathieu.exists_entire_mathieuWI_pi`](DLMF/Mathieu/Properties/Floquet.lean#L104) (proved); [`DLMF.Mathieu.isMathieuCharExp_iff`](DLMF/Mathieu/Properties/Floquet.lean#L125) (proved); [`DLMF.Mathieu.re_arccosPrincipal_mathieuWI_div_pi_mem`](DLMF/Mathieu/Properties/Floquet.lean#L200) (proved); [`DLMF.Mathieu.isMathieuCharExp_double_iff`](DLMF/Mathieu/Properties/Floquet.lean#L207) (proved).
 - [28.2.iv](https://dlmf.nist.gov/28.2.iv): [`DLMF.Mathieu.IsMathieuSolution.isFloquet_or`](DLMF/Mathieu/Basic/Floquet.lean#L151) (proved); [`DLMF.Mathieu.IsFloquetSolution.unique`](DLMF/Mathieu/Properties/Floquet.lean#L608) (proved).
-- [28.2.v](https://dlmf.nist.gov/28.2.v): [`DLMF.Mathieu.mathieuSpecA_exists`](DLMF/Mathieu/SpectralExistence.lean#L267) (proved); [`DLMF.Mathieu.mathieuSpecB_exists`](DLMF/Mathieu/SpectralExistence.lean#L280) (proved); [`DLMF.Mathieu.charExp_set_infinite_discrete`](DLMF/Mathieu/Properties/Spectra.lean#L95) (proved); [`DLMF.Mathieu.mathieuA_lt_mathieuA_add_two`](DLMF/Mathieu/Properties/Spectra.lean#L455) (proved); [`DLMF.Mathieu.mathieuB_lt_mathieuB_add_two`](DLMF/Mathieu/Properties/Spectra.lean#L464) (proved).
+- [28.2.v](https://dlmf.nist.gov/28.2.v): [`DLMF.Mathieu.mathieuSpecA_exists`](DLMF/Mathieu/Basic/SpectralExistence.lean#L267) (proved); [`DLMF.Mathieu.mathieuSpecB_exists`](DLMF/Mathieu/Basic/SpectralExistence.lean#L280) (proved); [`DLMF.Mathieu.charExp_set_infinite_discrete`](DLMF/Mathieu/Properties/Spectra.lean#L95) (proved); [`DLMF.Mathieu.mathieuA_lt_mathieuA_add_two`](DLMF/Mathieu/Properties/Spectra.lean#L455) (proved); [`DLMF.Mathieu.mathieuB_lt_mathieuB_add_two`](DLMF/Mathieu/Properties/Spectra.lean#L464) (proved).
 - [28.2.E1](https://dlmf.nist.gov/28.2.E1): [`DLMF.Mathieu.IsMathieuSolution`](DLMF/Mathieu/Basic/EquationAndSolutions.lean#L63) (definition).
 - [28.2.E2](https://dlmf.nist.gov/28.2.E2): [`DLMF.Mathieu.algebraic_form_sin_sq`](DLMF/Mathieu/Basic/Properties.lean#L52) (proved).
 - [28.2.E3](https://dlmf.nist.gov/28.2.E3): [`DLMF.Mathieu.algebraic_form_cos`](DLMF/Mathieu/Basic/Properties.lean#L94) (proved).
@@ -180,35 +180,35 @@ declarations:
 
 ## [§28.4 Fourier Series](https://dlmf.nist.gov/28.4)
 
-- [28.4.i](https://dlmf.nist.gov/28.4.i): [`DLMF.Mathieu.mathieu_fourier_locallyUniform`](DLMF/Mathieu/FourierSeries.lean#L491) (proved).
-- [28.4.iii](https://dlmf.nist.gov/28.4.iii): [`DLMF.Mathieu.mathieuFourier_sign`](DLMF/Mathieu/FourierSeries.lean#L694) (proved).
+- [28.4.i](https://dlmf.nist.gov/28.4.i): [`DLMF.Mathieu.mathieu_fourier_locallyUniform`](DLMF/Mathieu/FourierSeries.lean#L513) (proved).
+- [28.4.iii](https://dlmf.nist.gov/28.4.iii): [`DLMF.Mathieu.mathieuFourier_sign`](DLMF/Mathieu/FourierSeries.lean#L716) (proved).
 - [28.4.E1](https://dlmf.nist.gov/28.4.E1): [`DLMF.Mathieu.mathieuFourierA`](DLMF/Mathieu/Basic/Functions.lean#L149) (definition); [`DLMF.Mathieu.hasSum_mathieuCe_even`](DLMF/Mathieu/FourierSeries.lean#L356) (proved).
 - [28.4.E2](https://dlmf.nist.gov/28.4.E2): [`DLMF.Mathieu.hasSum_mathieuCe_odd`](DLMF/Mathieu/FourierSeries.lean#L370) (proved).
 - [28.4.E3](https://dlmf.nist.gov/28.4.E3): [`DLMF.Mathieu.mathieuFourierB`](DLMF/Mathieu/Basic/Functions.lean#L157) (definition); [`DLMF.Mathieu.hasSum_mathieuSe_odd`](DLMF/Mathieu/FourierSeries.lean#L384) (proved).
 - [28.4.E4](https://dlmf.nist.gov/28.4.E4): [`DLMF.Mathieu.hasSum_mathieuSe_even`](DLMF/Mathieu/FourierSeries.lean#L398) (proved).
-- [28.4.E5](https://dlmf.nist.gov/28.4.E5): [`DLMF.Mathieu.mathieuFourierA_even_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L521) (proved); [`DLMF.Mathieu.mathieuFourierA_even_rec_one`](DLMF/Mathieu/FourierSeries.lean#L533) (proved); [`DLMF.Mathieu.mathieuFourierA_even_rec`](DLMF/Mathieu/FourierSeries.lean#L544) (proved).
-- [28.4.E6](https://dlmf.nist.gov/28.4.E6): [`DLMF.Mathieu.mathieuFourierA_odd_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L559) (proved); [`DLMF.Mathieu.mathieuFourierA_odd_rec`](DLMF/Mathieu/FourierSeries.lean#L569) (proved).
-- [28.4.E7](https://dlmf.nist.gov/28.4.E7): [`DLMF.Mathieu.mathieuFourierB_odd_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L586) (proved); [`DLMF.Mathieu.mathieuFourierB_odd_rec`](DLMF/Mathieu/FourierSeries.lean#L596) (proved).
-- [28.4.E8](https://dlmf.nist.gov/28.4.E8): [`DLMF.Mathieu.mathieuFourierB_even_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L612) (proved); [`DLMF.Mathieu.mathieuFourierB_even_rec`](DLMF/Mathieu/FourierSeries.lean#L622) (proved).
-- [28.4.E9](https://dlmf.nist.gov/28.4.E9): [`DLMF.Mathieu.hasSum_mathieuFourierA_even_sq`](DLMF/Mathieu/FourierSeries.lean#L640) (proved).
-- [28.4.E10](https://dlmf.nist.gov/28.4.E10): [`DLMF.Mathieu.hasSum_mathieuFourierA_odd_sq`](DLMF/Mathieu/FourierSeries.lean#L653) (proved).
-- [28.4.E11](https://dlmf.nist.gov/28.4.E11): [`DLMF.Mathieu.hasSum_mathieuFourierB_odd_sq`](DLMF/Mathieu/FourierSeries.lean#L666) (proved).
-- [28.4.E12](https://dlmf.nist.gov/28.4.E12): [`DLMF.Mathieu.hasSum_mathieuFourierB_even_sq`](DLMF/Mathieu/FourierSeries.lean#L679) (proved).
-- [28.4.E13](https://dlmf.nist.gov/28.4.E13): [`DLMF.Mathieu.mathieuFourierA_even_q_zero`](DLMF/Mathieu/FourierSeries.lean#L714) (proved).
-- [28.4.E14](https://dlmf.nist.gov/28.4.E14): [`DLMF.Mathieu.mathieuFourierA_odd_q_zero`](DLMF/Mathieu/FourierSeries.lean#L745) (proved).
-- [28.4.E15](https://dlmf.nist.gov/28.4.E15): [`DLMF.Mathieu.mathieuFourierB_odd_q_zero`](DLMF/Mathieu/FourierSeries.lean#L754) (proved).
-- [28.4.E16](https://dlmf.nist.gov/28.4.E16): [`DLMF.Mathieu.mathieuFourierB_even_q_zero`](DLMF/Mathieu/FourierSeries.lean#L763) (proved).
-- [28.4.E17](https://dlmf.nist.gov/28.4.E17): [`DLMF.Mathieu.mathieuFourierA_even_neg_q`](DLMF/Mathieu/FourierSeries.lean#L774) (proved).
-- [28.4.E18](https://dlmf.nist.gov/28.4.E18): [`DLMF.Mathieu.mathieuFourierB_even_neg_q`](DLMF/Mathieu/FourierSeries.lean#L793) (proved).
-- [28.4.E19](https://dlmf.nist.gov/28.4.E19): [`DLMF.Mathieu.mathieuFourierA_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L813) (proved).
-- [28.4.E20](https://dlmf.nist.gov/28.4.E20): [`DLMF.Mathieu.mathieuFourierB_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L832) (proved).
-- [28.4.E21](https://dlmf.nist.gov/28.4.E21): [`DLMF.Mathieu.mathieuFourierA_zero_small_q`](DLMF/Mathieu/FourierSeries.lean#L853) (admitted).
-- [28.4.E22](https://dlmf.nist.gov/28.4.E22): [`DLMF.Mathieu.mathieuFourierA_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L862) (admitted); [`DLMF.Mathieu.mathieuFourierB_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L872) (admitted).
-- [28.4.E23](https://dlmf.nist.gov/28.4.E23): [`DLMF.Mathieu.mathieuFourierA_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L882) (admitted); [`DLMF.Mathieu.mathieuFourierB_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L892) (admitted).
-- [28.4.E24](https://dlmf.nist.gov/28.4.E24): [`DLMF.Mathieu.mathieuFourierA_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L904) (admitted).
-- [28.4.E25](https://dlmf.nist.gov/28.4.E25): [`DLMF.Mathieu.mathieuFourierA_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L914) (admitted).
-- [28.4.E26](https://dlmf.nist.gov/28.4.E26): [`DLMF.Mathieu.mathieuFourierB_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L925) (admitted).
-- [28.4.E27](https://dlmf.nist.gov/28.4.E27): [`DLMF.Mathieu.mathieuFourierB_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L936) (admitted).
+- [28.4.E5](https://dlmf.nist.gov/28.4.E5): [`DLMF.Mathieu.mathieuFourierA_even_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L543) (proved); [`DLMF.Mathieu.mathieuFourierA_even_rec_one`](DLMF/Mathieu/FourierSeries.lean#L555) (proved); [`DLMF.Mathieu.mathieuFourierA_even_rec`](DLMF/Mathieu/FourierSeries.lean#L566) (proved).
+- [28.4.E6](https://dlmf.nist.gov/28.4.E6): [`DLMF.Mathieu.mathieuFourierA_odd_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L581) (proved); [`DLMF.Mathieu.mathieuFourierA_odd_rec`](DLMF/Mathieu/FourierSeries.lean#L591) (proved).
+- [28.4.E7](https://dlmf.nist.gov/28.4.E7): [`DLMF.Mathieu.mathieuFourierB_odd_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L608) (proved); [`DLMF.Mathieu.mathieuFourierB_odd_rec`](DLMF/Mathieu/FourierSeries.lean#L618) (proved).
+- [28.4.E8](https://dlmf.nist.gov/28.4.E8): [`DLMF.Mathieu.mathieuFourierB_even_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L634) (proved); [`DLMF.Mathieu.mathieuFourierB_even_rec`](DLMF/Mathieu/FourierSeries.lean#L644) (proved).
+- [28.4.E9](https://dlmf.nist.gov/28.4.E9): [`DLMF.Mathieu.hasSum_mathieuFourierA_even_sq`](DLMF/Mathieu/FourierSeries.lean#L662) (proved).
+- [28.4.E10](https://dlmf.nist.gov/28.4.E10): [`DLMF.Mathieu.hasSum_mathieuFourierA_odd_sq`](DLMF/Mathieu/FourierSeries.lean#L675) (proved).
+- [28.4.E11](https://dlmf.nist.gov/28.4.E11): [`DLMF.Mathieu.hasSum_mathieuFourierB_odd_sq`](DLMF/Mathieu/FourierSeries.lean#L688) (proved).
+- [28.4.E12](https://dlmf.nist.gov/28.4.E12): [`DLMF.Mathieu.hasSum_mathieuFourierB_even_sq`](DLMF/Mathieu/FourierSeries.lean#L701) (proved).
+- [28.4.E13](https://dlmf.nist.gov/28.4.E13): [`DLMF.Mathieu.mathieuFourierA_even_q_zero`](DLMF/Mathieu/FourierSeries.lean#L736) (proved).
+- [28.4.E14](https://dlmf.nist.gov/28.4.E14): [`DLMF.Mathieu.mathieuFourierA_odd_q_zero`](DLMF/Mathieu/FourierSeries.lean#L767) (proved).
+- [28.4.E15](https://dlmf.nist.gov/28.4.E15): [`DLMF.Mathieu.mathieuFourierB_odd_q_zero`](DLMF/Mathieu/FourierSeries.lean#L776) (proved).
+- [28.4.E16](https://dlmf.nist.gov/28.4.E16): [`DLMF.Mathieu.mathieuFourierB_even_q_zero`](DLMF/Mathieu/FourierSeries.lean#L785) (proved).
+- [28.4.E17](https://dlmf.nist.gov/28.4.E17): [`DLMF.Mathieu.mathieuFourierA_even_neg_q`](DLMF/Mathieu/FourierSeries.lean#L796) (proved).
+- [28.4.E18](https://dlmf.nist.gov/28.4.E18): [`DLMF.Mathieu.mathieuFourierB_even_neg_q`](DLMF/Mathieu/FourierSeries.lean#L815) (proved).
+- [28.4.E19](https://dlmf.nist.gov/28.4.E19): [`DLMF.Mathieu.mathieuFourierA_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L835) (proved).
+- [28.4.E20](https://dlmf.nist.gov/28.4.E20): [`DLMF.Mathieu.mathieuFourierB_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L854) (proved).
+- [28.4.E21](https://dlmf.nist.gov/28.4.E21): [`DLMF.Mathieu.mathieuFourierA_zero_small_q`](DLMF/Mathieu/FourierSeries.lean#L875) (admitted).
+- [28.4.E22](https://dlmf.nist.gov/28.4.E22): [`DLMF.Mathieu.mathieuFourierA_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L884) (admitted); [`DLMF.Mathieu.mathieuFourierB_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L894) (admitted).
+- [28.4.E23](https://dlmf.nist.gov/28.4.E23): [`DLMF.Mathieu.mathieuFourierA_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L904) (admitted); [`DLMF.Mathieu.mathieuFourierB_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L914) (admitted).
+- [28.4.E24](https://dlmf.nist.gov/28.4.E24): [`DLMF.Mathieu.mathieuFourierA_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L926) (admitted).
+- [28.4.E25](https://dlmf.nist.gov/28.4.E25): [`DLMF.Mathieu.mathieuFourierA_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L936) (admitted).
+- [28.4.E26](https://dlmf.nist.gov/28.4.E26): [`DLMF.Mathieu.mathieuFourierB_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L947) (admitted).
+- [28.4.E27](https://dlmf.nist.gov/28.4.E27): [`DLMF.Mathieu.mathieuFourierB_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L958) (admitted).
 
 ## [§28.5 Second Solutions fe_n, ge_n](https://dlmf.nist.gov/28.5)
 
@@ -225,33 +225,33 @@ declarations:
 
 ## [§28.6 Expansions for Small q](https://dlmf.nist.gov/28.6)
 
-- [28.6.ii](https://dlmf.nist.gov/28.6.ii): [`DLMF.Mathieu.mathieuSe_small_q`](DLMF/Mathieu/SmallQ.lean#L1297) (proved); [`DLMF.Mathieu.mathieuCe_radius_eq`](DLMF/Mathieu/SmallQ.lean#L1313) (admitted); [`DLMF.Mathieu.mathieuSe_radius_eq`](DLMF/Mathieu/SmallQ.lean#L1324) (admitted).
-- [28.6.E1](https://dlmf.nist.gov/28.6.E1): [`DLMF.Mathieu.mathieuA_zero_small_q`](DLMF/Mathieu/SmallQ.lean#L76) (proved).
-- [28.6.E2](https://dlmf.nist.gov/28.6.E2): [`DLMF.Mathieu.mathieuA_one_small_q`](DLMF/Mathieu/SmallQ.lean#L146) (proved).
-- [28.6.E3](https://dlmf.nist.gov/28.6.E3): [`DLMF.Mathieu.mathieuB_one_small_q`](DLMF/Mathieu/SmallQ.lean#L233) (proved).
-- [28.6.E4](https://dlmf.nist.gov/28.6.E4): [`DLMF.Mathieu.mathieuA_two_small_q`](DLMF/Mathieu/SmallQ.lean#L320) (proved).
-- [28.6.E5](https://dlmf.nist.gov/28.6.E5): [`DLMF.Mathieu.mathieuB_two_small_q`](DLMF/Mathieu/SmallQ.lean#L406) (proved).
-- [28.6.E6](https://dlmf.nist.gov/28.6.E6): [`DLMF.Mathieu.mathieuA_three_small_q`](DLMF/Mathieu/SmallQ.lean#L481) (proved).
-- [28.6.E7](https://dlmf.nist.gov/28.6.E7): [`DLMF.Mathieu.mathieuB_three_small_q`](DLMF/Mathieu/SmallQ.lean#L564) (proved).
-- [28.6.E8](https://dlmf.nist.gov/28.6.E8): [`DLMF.Mathieu.mathieuA_four_small_q`](DLMF/Mathieu/SmallQ.lean#L647) (proved).
-- [28.6.E9](https://dlmf.nist.gov/28.6.E9): [`DLMF.Mathieu.mathieuB_four_small_q`](DLMF/Mathieu/SmallQ.lean#L723) (proved).
-- [28.6.E10](https://dlmf.nist.gov/28.6.E10): [`DLMF.Mathieu.mathieuA_five_small_q`](DLMF/Mathieu/SmallQ.lean#L791) (proved).
-- [28.6.E11](https://dlmf.nist.gov/28.6.E11): [`DLMF.Mathieu.mathieuB_five_small_q`](DLMF/Mathieu/SmallQ.lean#L871) (proved).
-- [28.6.E12](https://dlmf.nist.gov/28.6.E12): [`DLMF.Mathieu.mathieuA_six_small_q`](DLMF/Mathieu/SmallQ.lean#L951) (proved).
-- [28.6.E13](https://dlmf.nist.gov/28.6.E13): [`DLMF.Mathieu.mathieuB_six_small_q`](DLMF/Mathieu/SmallQ.lean#L1036) (proved).
-- [28.6.E14](https://dlmf.nist.gov/28.6.E14): [`DLMF.Mathieu.mathieuA_small_q`](DLMF/Mathieu/SmallQ.lean#L1114) (proved); [`DLMF.Mathieu.mathieuB_small_q`](DLMF/Mathieu/SmallQ.lean#L1130) (proved).
-- [28.6.E15](https://dlmf.nist.gov/28.6.E15): [`DLMF.Mathieu.mathieuA_sub_mathieuB_small_q`](DLMF/Mathieu/SmallQ.lean#L1145) (admitted).
-- [28.6.E16](https://dlmf.nist.gov/28.6.E16): [`DLMF.Mathieu.mathieuA_even_contFrac`](DLMF/Mathieu/SmallQ.lean#L1155) (admitted); [`DLMF.Mathieu.mathieuA_zero_contFrac`](DLMF/Mathieu/SmallQ.lean#L1168) (admitted). Stated for `n ≥ 1`; for `n = 0` a separate version carries the factor 2.
-- [28.6.E17](https://dlmf.nist.gov/28.6.E17): [`DLMF.Mathieu.mathieuA_odd_contFrac`](DLMF/Mathieu/SmallQ.lean#L1176) (admitted).
-- [28.6.E18](https://dlmf.nist.gov/28.6.E18): [`DLMF.Mathieu.mathieuB_odd_contFrac`](DLMF/Mathieu/SmallQ.lean#L1189) (admitted).
-- [28.6.E19](https://dlmf.nist.gov/28.6.E19): [`DLMF.Mathieu.mathieuB_even_contFrac`](DLMF/Mathieu/SmallQ.lean#L1202) (admitted).
-- [28.6.E20](https://dlmf.nist.gov/28.6.E20): [`DLMF.Mathieu.mathieu_radius_liminf`](DLMF/Mathieu/SmallQ.lean#L1214) (admitted).
-- [28.6.E21](https://dlmf.nist.gov/28.6.E21): [`DLMF.Mathieu.mathieuCe_zero_small_q`](DLMF/Mathieu/SmallQ.lean#L1232) (proved).
-- [28.6.E22](https://dlmf.nist.gov/28.6.E22): [`DLMF.Mathieu.mathieuCe_one_small_q`](DLMF/Mathieu/SmallQ.lean#L1242) (proved).
-- [28.6.E23](https://dlmf.nist.gov/28.6.E23): [`DLMF.Mathieu.mathieuSe_one_small_q`](DLMF/Mathieu/SmallQ.lean#L1252) (proved).
-- [28.6.E24](https://dlmf.nist.gov/28.6.E24): [`DLMF.Mathieu.mathieuCe_two_small_q`](DLMF/Mathieu/SmallQ.lean#L1262) (proved).
-- [28.6.E25](https://dlmf.nist.gov/28.6.E25): [`DLMF.Mathieu.mathieuSe_two_small_q`](DLMF/Mathieu/SmallQ.lean#L1272) (proved).
-- [28.6.E26](https://dlmf.nist.gov/28.6.E26): [`DLMF.Mathieu.mathieuCe_small_q`](DLMF/Mathieu/SmallQ.lean#L1281) (proved).
+- [28.6.ii](https://dlmf.nist.gov/28.6.ii): [`DLMF.Mathieu.mathieuSe_small_q`](DLMF/Mathieu/SmallQ.lean#L1235) (proved); [`DLMF.Mathieu.mathieuCe_radius_eq`](DLMF/Mathieu/SmallQ.lean#L1251) (admitted); [`DLMF.Mathieu.mathieuSe_radius_eq`](DLMF/Mathieu/SmallQ.lean#L1262) (admitted).
+- [28.6.E1](https://dlmf.nist.gov/28.6.E1): [`DLMF.Mathieu.mathieuA_zero_small_q`](DLMF/Mathieu/SmallQ.lean#L73) (proved).
+- [28.6.E2](https://dlmf.nist.gov/28.6.E2): [`DLMF.Mathieu.mathieuA_one_small_q`](DLMF/Mathieu/SmallQ.lean#L143) (proved).
+- [28.6.E3](https://dlmf.nist.gov/28.6.E3): [`DLMF.Mathieu.mathieuB_one_small_q`](DLMF/Mathieu/SmallQ.lean#L230) (proved).
+- [28.6.E4](https://dlmf.nist.gov/28.6.E4): [`DLMF.Mathieu.mathieuA_two_small_q`](DLMF/Mathieu/SmallQ.lean#L317) (proved).
+- [28.6.E5](https://dlmf.nist.gov/28.6.E5): [`DLMF.Mathieu.mathieuB_two_small_q`](DLMF/Mathieu/SmallQ.lean#L403) (proved).
+- [28.6.E6](https://dlmf.nist.gov/28.6.E6): [`DLMF.Mathieu.mathieuA_three_small_q`](DLMF/Mathieu/SmallQ.lean#L478) (proved).
+- [28.6.E7](https://dlmf.nist.gov/28.6.E7): [`DLMF.Mathieu.mathieuB_three_small_q`](DLMF/Mathieu/SmallQ.lean#L561) (proved).
+- [28.6.E8](https://dlmf.nist.gov/28.6.E8): [`DLMF.Mathieu.mathieuA_four_small_q`](DLMF/Mathieu/SmallQ.lean#L644) (proved).
+- [28.6.E9](https://dlmf.nist.gov/28.6.E9): [`DLMF.Mathieu.mathieuB_four_small_q`](DLMF/Mathieu/SmallQ.lean#L720) (proved).
+- [28.6.E10](https://dlmf.nist.gov/28.6.E10): [`DLMF.Mathieu.mathieuA_five_small_q`](DLMF/Mathieu/SmallQ.lean#L788) (proved).
+- [28.6.E11](https://dlmf.nist.gov/28.6.E11): [`DLMF.Mathieu.mathieuB_five_small_q`](DLMF/Mathieu/SmallQ.lean#L868) (proved).
+- [28.6.E12](https://dlmf.nist.gov/28.6.E12): [`DLMF.Mathieu.mathieuA_six_small_q`](DLMF/Mathieu/SmallQ.lean#L948) (proved).
+- [28.6.E13](https://dlmf.nist.gov/28.6.E13): [`DLMF.Mathieu.mathieuB_six_small_q`](DLMF/Mathieu/SmallQ.lean#L1033) (proved).
+- [28.6.E14](https://dlmf.nist.gov/28.6.E14): [`DLMF.Mathieu.mathieuA_small_q`](DLMF/Mathieu/SmallQ.lean#L1111) (proved); [`DLMF.Mathieu.mathieuB_small_q`](DLMF/Mathieu/SmallQ.lean#L1127) (proved).
+- [28.6.E15](https://dlmf.nist.gov/28.6.E15): [`DLMF.Mathieu.mathieuA_sub_mathieuB_small_q`](DLMF/Mathieu/SmallQ.lean#L1142) (admitted).
+- [28.6.E16](https://dlmf.nist.gov/28.6.E16): [`DLMF.Mathieu.mathieuA_even_contFrac`](DLMF/Mathieu/SmallQContinuedFractions.lean#L51) (proved); [`DLMF.Mathieu.mathieuA_zero_contFrac`](DLMF/Mathieu/SmallQContinuedFractions.lean#L107) (proved). Stated for `n ≥ 1`; for `n = 0` a separate version carries the factor 2.
+- [28.6.E17](https://dlmf.nist.gov/28.6.E17): [`DLMF.Mathieu.mathieuA_odd_contFrac`](DLMF/Mathieu/SmallQContinuedFractions.lean#L157) (proved).
+- [28.6.E18](https://dlmf.nist.gov/28.6.E18): [`DLMF.Mathieu.mathieuB_odd_contFrac`](DLMF/Mathieu/SmallQContinuedFractions.lean#L203) (proved).
+- [28.6.E19](https://dlmf.nist.gov/28.6.E19): [`DLMF.Mathieu.mathieuB_even_contFrac`](DLMF/Mathieu/SmallQContinuedFractions.lean#L249) (proved).
+- [28.6.E20](https://dlmf.nist.gov/28.6.E20): [`DLMF.Mathieu.mathieu_radius_liminf`](DLMF/Mathieu/SmallQ.lean#L1152) (admitted).
+- [28.6.E21](https://dlmf.nist.gov/28.6.E21): [`DLMF.Mathieu.mathieuCe_zero_small_q`](DLMF/Mathieu/SmallQ.lean#L1170) (proved).
+- [28.6.E22](https://dlmf.nist.gov/28.6.E22): [`DLMF.Mathieu.mathieuCe_one_small_q`](DLMF/Mathieu/SmallQ.lean#L1180) (proved).
+- [28.6.E23](https://dlmf.nist.gov/28.6.E23): [`DLMF.Mathieu.mathieuSe_one_small_q`](DLMF/Mathieu/SmallQ.lean#L1190) (proved).
+- [28.6.E24](https://dlmf.nist.gov/28.6.E24): [`DLMF.Mathieu.mathieuCe_two_small_q`](DLMF/Mathieu/SmallQ.lean#L1200) (proved).
+- [28.6.E25](https://dlmf.nist.gov/28.6.E25): [`DLMF.Mathieu.mathieuSe_two_small_q`](DLMF/Mathieu/SmallQ.lean#L1210) (proved).
+- [28.6.E26](https://dlmf.nist.gov/28.6.E26): [`DLMF.Mathieu.mathieuCe_small_q`](DLMF/Mathieu/SmallQ.lean#L1219) (proved).
 
 ## [§28.7 Analytic Continuation of Eigenvalues](https://dlmf.nist.gov/28.7)
 
@@ -367,7 +367,7 @@ C, below. The Lean code is in `DLMF/Mathieu/Noninteger/` and `DLMF/Mathieu/Hill/
 [Hill/Floquet](DLMF/Mathieu/Hill/Floquet.lean) (§28.29; uses Hill/Basic and the global, parameter-dependent and spectral ODE APIs in
 `DLMFMathlib.Analysis.ODE`),
 [Hill/Eigenfunctions](DLMF/Mathieu/Hill/Eigenfunctions.lean) (§28.30) and
-[Hill/Ince](DLMF/Mathieu/Hill/Ince.lean) (§28.31; uses Hill/Basic, `DLMF.Mathieu.SpectralExistence` and
+[Hill/Ince](DLMF/Mathieu/Hill/Ince.lean) (§28.31; uses Hill/Basic, `DLMF.Mathieu.Basic.SpectralExistence` and
 `DLMF.Mathieu.Noninteger.Properties`). Nothing is upstream (Mathlib and TauCeti have no Mathieu, Hill or Ince
 functions), so there is no `dlmf_upstream` file for part B.
 

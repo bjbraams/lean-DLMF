@@ -48,6 +48,8 @@ Excluded as numerical: DLMF 2.11.4, 2.11.25–2.11.28, 2.11.31 and Table 2.11.1.
 open Set Filter Asymptotics MeasureTheory Complex
 open scoped Topology Real Nat
 
+open DLMF.Core
+
 namespace DLMF.AsymptoticApproximations
 
 open DLMF.Confluent DLMF.Hypergeometric

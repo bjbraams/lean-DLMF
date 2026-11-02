@@ -36,6 +36,8 @@ sectors of the logarithmic plane, and for large order `p` (DLMF §8.20).
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat Interval
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Formula under the stated hypotheses: `genExpIntE p z=exp (-z)/z*(∑ k ∈ Finset.range N, (-1 :

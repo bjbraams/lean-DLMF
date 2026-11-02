@@ -15,14 +15,14 @@ Dixon's well-poised `₃F₂(1)` evaluation, proved by a WZ pair in `c`, the ter
 
 ## Main definitions
 
-* `DixonAux.s`, `DixonAux.wzCertificate`: the normalized terms of Dixon's series and the WZ
+* `DixonWZ.s`, `DixonWZ.wzCertificate`: the normalized terms of Dixon's series and the WZ
   certificate.
-* `DixonAux.periodicNormalization`: the normalization, invariant under `c ↦ c - 1`.
+* `DixonWZ.periodicNormalization`: the normalization, invariant under `c ↦ c - 1`.
 
 ## Main results
 
-* `DixonAux.recurrence`: the recurrence in `c`, from the WZ pair.
-* `DixonAux.periodicNormalization_neg_nat`: the terminating Dixon sum in normalized form.
+* `DixonWZ.recurrence`: the recurrence in `c`, from the WZ pair.
+* `DixonWZ.periodicNormalization_neg_nat`: the terminating Dixon sum in normalized form.
 * `dixon_sum`: Dixon's sum, DLMF 16.4.4.
 
 See `DLMF.Hypergeometric.Identities` for the overview.
@@ -44,9 +44,9 @@ open Filter Set
 
 open scoped Topology
 
-namespace DixonAux
+namespace DixonWZ
 
-open CarlsonAux
+open CarlsonTheorem
 
 variable {a b : ℂ}
 
@@ -613,11 +613,11 @@ theorem normalizedRhs_recurrence {c : ℂ} (hc : 1 + a / 2 - b - c ≠ 0) :
   rw [g1, ← g2, ← g3]
   ring
 
-end DixonAux
+end DixonWZ
 
 end CarlsonApplications
 
-open DixonAux in
+open DixonWZ in
 /-- Dixon's well-poised `₃F₂(1)` evaluation (AAR Theorem 3.4.1). -/
 @[dlmf 16.4.E4]
 theorem dixon_sum {a b c : ℂ}

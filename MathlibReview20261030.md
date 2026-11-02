@@ -131,7 +131,7 @@ Examples with a clear API benefit:
   does not need `_hD : IsOpen D`.
 - [integrableOn_powKernel_mul_rpow_iff](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L45)
   does not need `_hα1 : α ≤ 1`.
-- [airy_ai_real_error](DLMF/Airy/Asymptotics/RealRemainders.lean#L489) includes the
+- [airyAi_real_error](DLMF/Airy/Asymptotics/RealRemainders.lean#L489) includes the
   automatic fact `0 ≤ N` for a natural number `N`. Similar occurrences appear in the
   other Airy remainder interfaces.
 - [integral_eq_integral_Ioi_add_neg](DLMFMathlib/MeasureTheory/Integral/HalfLine.lean#L26)
@@ -282,7 +282,7 @@ There remain substantial exceptions in auxiliary APIs:
   `p22R1_*`, `q27_*`, `s26a_*` and `je22a_*`. This count is a candidate inventory, not
   4,966 independently adjudicated violations. Source chapter numbers belong in docstrings
   and DLMF attributes; names should identify the operation, hypothesis or conclusion.
-- Names such as `airy_ai_real_error` and `airy_aiDeriv_real_error` are inconsistent with
+- Names such as `airyAi_real_error` and `airyAiDeriv_real_error` are inconsistent with
   the existing `airyAi`/`airyAiDeriv` vocabulary. Choose one vocabulary for the family.
   Where names like `jacobi_at_one` omit the actual function name, improve searchability
   with `jacobiPolyP_one` rather than preserving an informal abbreviation.

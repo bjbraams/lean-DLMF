@@ -12,7 +12,7 @@ public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 
 DLMF writes `C = b₀ + a₁/(b₁ + a₂/(b₂ + ⋯))` with partial numerators `a_n` (`n ≥ 1`) and partial
 denominators `b_n` (`n ≥ 0`). Mathlib's `GenContFract K` is `h + a₀'/(b₀' + a₁'/(b₁' + ⋯))` with
-pairs indexed from `0`, and `GenContFract.cfConv_ofFun h a b` (DLMFMathlib) builds it from two
+pairs indexed from `0`, and `GenContFract.ofFun h a b` (DLMFMathlib) builds it from two
 sequences.
 
 ## Main definitions
@@ -52,7 +52,7 @@ indexing (partial numerators `a n`, `n ≥ 1`; partial denominators `b n`, `n �
 `a 0` is not used). DLMF assumes `a_n ≠ 0`; statements carry this hypothesis where needed. -/
 @[dlmf 1.12.E1, dlmf 1.12.E2, dlmf 1.12.E3]
 def contFrac [DivisionRing K] (a b : ℕ → K) : GenContFract K :=
-  GenContFract.cfConv_ofFun (b 0) (fun k => a (k + 1)) (fun k => b (k + 1))
+  GenContFract.ofFun (b 0) (fun k => a (k + 1)) (fun k => b (k + 1))
 
 /-- The `k`-th nested tail `b_k + a_{k+1}/(b_{k+1} + ⋯ + a_n/b_n)` of the `n`-th approximant,
 the nested finite fraction of the shifted sequences. The nested form of the `n`-th approximant

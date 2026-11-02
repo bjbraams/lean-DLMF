@@ -29,7 +29,8 @@ public import DLMF.Hypergeometric.Clausen
 
 * `genHG_quadratic_transformation`, `genHG_cubic_transformation`: DLMF 16.6.1–16.6.2.
 * `genHG_fields_wimp_coeff`, `genHG_fields_wimp_hasSum`: the Fields–Wimp expansion,
-  DLMF 16.10.1.
+  DLMF 16.10.1, with the stronger forms `genHG_fields_wimp_coeff'` and
+  `genHG_fields_wimp_hasSum'`.
 * `genHG_norlund_expansion`: Nørlund's expansion, DLMF 16.10.2.
 * `genHG_0F1_product`: the product of two `₀F₁` functions, DLMF 16.12.1.
 * `genHG_clausen_principal`: Clausen's formula on the principal slit plane, DLMF 16.12.2.
@@ -96,24 +97,210 @@ theorem genHG_cubic_transformation (a b : ℂ) (hb : GenDenRegular {b, a - b + 3
         {b, a - b + 3 / 2} (-27 * z / (4 * (1 - z) ^ 3)) := by
   sorry
 
-/-- The formal coefficient identity has no analytic convergence restriction. -/
+/-- `(g + r + 1)ₙ ≠ 0` when `g` avoids the negative integers. -/
+private lemma poch_ne_zero_of_add_succ {g : ℂ} (hg : ∀ i : ℕ, g + (i + 1) ≠ 0) (r : ℕ) (n : ℕ) :
+    poch (g + (r + 1)) n ≠ 0 := by
+  refine poch_ne_zero_of_not_neg_nat (fun k hk => hg (r + k) ?_) n
+  push_cast; linear_combination hk
+
+private lemma fieldsWimp_inner_sum_eq_zero {g : ℂ} (hg : ∀ i : ℕ, g + (i + 1) ≠ 0) (M : ℕ) :
+    ∑ m ∈ range (M + 2), (-1 : ℂ) ^ m * ((M + 1).choose m : ℂ) /
+      (poch (g + m) m * poch (g + 2 * m + 1) (M + 1 - m)) = 0 := by
+  let T : ℕ → ℂ := fun m => match m with
+    | 0 => 0
+    | m + 1 => (-1 : ℂ) ^ m * (M.choose m : ℂ) / poch (g + m + 1) (M + 1)
+  have hterm : ∀ m ∈ range (M + 2), (-1 : ℂ) ^ m * ((M + 1).choose m : ℂ) /
+      (poch (g + m) m * poch (g + 2 * m + 1) (M + 1 - m)) = T (m + 1) - T m := by
+    intro m hm
+    rcases m with _ | m
+    · simp [T, poch_zero]
+    · have hmM : m ≤ M := by simp at hm; omega
+      set x : ℂ := g + m + 1 with hx
+      have hx0 : x ≠ 0 := by rw [hx]; simpa [add_assoc] using hg m
+      have hxM : x + 1 + M ≠ 0 := by
+        have := hg (m + 1 + M); push_cast at this; rw [hx]
+        exact fun h => this (by linear_combination h)
+      have hxm : x + (m + 1) ≠ 0 := by
+        have := hg (m + 1 + m); push_cast at this; rw [hx]
+        exact fun h => this (by linear_combination h)
+      have hP : poch (x + 1) M ≠ 0 := by
+        have := poch_ne_zero_of_add_succ hg (m + 1) M
+        rw [hx]; push_cast at this; convert this using 2; ring
+      have hQ : poch x (m + 1) * (x + (m + 1)) * poch (x + (m + 1) + 1) (M - m) =
+          x * poch (x + 1) M * (x + 1 + M) := by
+        have h1 : poch x (m + 1 + 1 + (M - m)) = poch x (m + 1) * (x + (m + 1)) *
+            poch (x + (m + 1) + 1) (M - m) := by
+          rw [poch_add, poch_succ]; push_cast; ring_nf
+        have h2 : poch x (M + 1 + 1) = x * poch (x + 1) M * (x + 1 + M) := by
+          rw [poch_succ_left, poch_succ]; ring
+        rw [← h1, show m + 1 + 1 + (M - m) = M + 1 + 1 by omega, h2]
+      have hQ0 : poch x (m + 1) * poch (x + (m + 1) + 1) (M - m) ≠ 0 := by
+        intro h0
+        have : x * poch (x + 1) M * (x + 1 + M) = 0 := by
+          rw [← hQ]; linear_combination (x + (m + 1)) * h0
+        simp [hx0, hP, hxM] at this
+      have hT1 : poch (g + ((m + 1 : ℕ) : ℂ) + 1) (M + 1) = poch (x + 1) M * (x + 1 + M) := by
+        rw [poch_succ, hx]; push_cast; ring_nf
+      have hT0 : poch (g + (m : ℂ) + 1) (M + 1) = x * poch (x + 1) M := by
+        rw [poch_succ_left]
+      have hc : ((M.choose (m + 1) : ℕ) : ℂ) * (m + 1) = (M.choose m : ℂ) * ((M - m : ℕ) : ℂ) := by
+        exact_mod_cast Nat.choose_succ_right_eq M m
+      have hc2 : ((M + 1).choose (m + 1) : ℂ) = M.choose m + M.choose (m + 1) := by
+        exact_mod_cast Nat.choose_succ_succ' M m
+      simp only [T]
+      rw [hT1, hT0]
+      rw [show g + ((m + 1 : ℕ) : ℂ) = x by rw [hx]; push_cast; ring,
+        show g + 2 * ((m + 1 : ℕ) : ℂ) + 1 = x + (m + 1) + 1 by rw [hx]; push_cast; ring,
+        show M + 1 - (m + 1) = M - m by omega]
+      push_cast [hmM] at hc ⊢
+      rw [hc2]
+      field_simp
+      rw [div_eq_iff hQ0]
+      linear_combination (-(-1 : ℂ) ^ (m + 1) * ((M.choose m : ℂ) + M.choose (m + 1))) * hQ +
+        (-1 : ℂ) ^ (m + 1) * poch x (m + 1) * poch (x + (m + 1) + 1) (M - m) * hc
+  rw [sum_congr rfl hterm, sum_range_sub]
+  simp [T]
+
+/-- Splitting `genPoch` at `k`. -/
+private lemma genPoch_add_shift (a : Multiset ℂ) (k n : ℕ) :
+    genPoch a (k + n) = genPoch a k * genPoch (genShift a k) n := by
+  simp only [genPoch, genShift, Multiset.map_map, Function.comp_def, poch_add,
+    ← Multiset.prod_map_mul]
+
+/-- `genPoch` of a cons. -/
+private lemma genPoch_cons (x : ℂ) (s : Multiset ℂ) (n : ℕ) :
+    genPoch (x ::ₘ s) n = poch x n * genPoch s n := by
+  simp [genPoch]
+
+/-- `genPoch` of a sum of multisets. -/
+private lemma genPoch_add' (s t : Multiset ℂ) (n : ℕ) :
+    genPoch (s + t) n = genPoch s n * genPoch t n := by
+  simp [genPoch]
+
+/-- The kernel of the Fields–Wimp inversion. -/
+private lemma fieldsWimp_kernel {γ : ℂ} (hγ : ∀ i : ℕ, γ + (i + 1) ≠ 0) {N j : ℕ}
+    (hj : j ≤ N) :
+    ∑ k ∈ range (N + 1), (-1 : ℂ) ^ k * poch (-(k : ℂ)) j * poch (γ + k) j /
+      (poch (γ + k) k * poch (γ + 2 * k + 1) (N - k) * k.factorial * (N - k).factorial) =
+      if j = N then 1 else 0 := by
+  obtain ⟨M, rfl⟩ := Nat.exists_eq_add_of_le hj
+  rw [show j + M + 1 = j + (M + 1) by ring, sum_range_add]
+  have h0 : ∑ k ∈ range j, (-1 : ℂ) ^ k * poch (-(k : ℂ)) j * poch (γ + k) j /
+      (poch (γ + k) k * poch (γ + 2 * k + 1) (j + M - k) * k.factorial *
+        (j + M - k).factorial) = 0 := by
+    refine sum_eq_zero fun k hk => ?_
+    rw [poch_neg_nat_eq_zero (Finset.mem_range.mp hk)]
+    simp
+  rw [h0, zero_add]
+  set g : ℂ := γ + 2 * j with hgdef
+  have hg : ∀ i : ℕ, g + (i + 1) ≠ 0 := fun i h => hγ (2 * j + i) (by
+    rw [hgdef] at h; push_cast; linear_combination h)
+  have hterm : ∀ m ∈ range (M + 1), (-1 : ℂ) ^ (j + m) * poch (-((j + m : ℕ) : ℂ)) j *
+      poch (γ + (j + m : ℕ)) j / (poch (γ + (j + m : ℕ)) (j + m) *
+        poch (γ + 2 * (j + m : ℕ) + 1) (j + M - (j + m)) * (j + m).factorial *
+        (j + M - (j + m)).factorial) =
+      (M.factorial : ℂ)⁻¹ * ((-1 : ℂ) ^ m * (M.choose m : ℂ) /
+        (poch (g + m) m * poch (g + 2 * m + 1) (M - m))) := by
+    intro m hm
+    have hmM : m ≤ M := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
+    rw [show j + M - (j + m) = M - m by omega, poch_add, poch_neg_coe_nat]
+    have hP : poch (γ + (j + m : ℕ)) j ≠ 0 := by
+      rcases j with _ | j
+      · simp [poch_zero]
+      · refine poch_ne_zero_of_not_neg_nat (fun n hn => hγ (j + m + n) ?_) _
+        push_cast at hn ⊢; linear_combination hn
+    have hd : ((j + m).descFactorial j : ℂ) * m.factorial = (j + m).factorial := by
+      have := Nat.factorial_mul_descFactorial (show j ≤ j + m by omega)
+      rw [show j + m - j = m by omega] at this
+      exact_mod_cast (by rw [mul_comm]; exact this)
+    have hc : (M.choose m : ℂ) * m.factorial * (M - m).factorial = M.factorial := by
+      exact_mod_cast Nat.choose_mul_factorial_mul_factorial hmM
+    have e1 : γ + ((j + m : ℕ) : ℂ) + j = g + m := by rw [hgdef]; push_cast; ring
+    have e2 : γ + 2 * ((j + m : ℕ) : ℂ) + 1 = g + 2 * m + 1 := by rw [hgdef]; push_cast; ring
+    rw [e1, e2]
+    have hf1 : (m.factorial : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero
+    have hf2 : ((M - m).factorial : ℂ) ≠ 0 := by exact_mod_cast (M - m).factorial_ne_zero
+    have hf3 : (M.factorial : ℂ) ≠ 0 := by exact_mod_cast M.factorial_ne_zero
+    have hf4 : ((j + m).factorial : ℂ) ≠ 0 := by exact_mod_cast (j + m).factorial_ne_zero
+    rw [← hc, ← hd]
+    field_simp
+    have hC : (M.choose m : ℂ) ≠ 0 := by exact_mod_cast (Nat.choose_pos hmM).ne'
+    have hj2 : (-1 : ℂ) ^ j * (-1) ^ j = 1 := by rw [← mul_pow]; simp
+    rw [pow_add, mul_comm (M.choose m : ℂ), mul_div_mul_right _ _ hC]
+    congr 1
+    linear_combination (-1 : ℂ) ^ m * hj2
+  rw [sum_congr rfl hterm, ← mul_sum]
+  rcases M with _ | M
+  · simp [poch_zero]
+  · have hne : j ≠ j + (M + 1) := by omega
+    simp only [hne, ↓reduceIte, fieldsWimp_inner_sum_eq_zero hg M, mul_zero]
+
+/-- The formal coefficient identity has no analytic convergence restriction. Stronger than DLMF,
+which assumes regular lower parameters `b + d` and `γ + 2k + 1` and `(γ + k)ₖ ≠ 0` for all `k`;
+only `α, β` and `γ + 1` need to avoid the nonpositive integers. -/
 @[dlmf 16.10.E1]
-theorem genHG_fields_wimp_coeff (a b c d : Multiset ℂ) (α β γ ζ : ℂ)
-    (hb : GenDenRegular (b + d)) (hαβ : GenDenRegular {α, β})
-    (hγ : ∀ k : ℕ, poch (γ + k) k ≠ 0 ∧ GenDenRegular {γ + 2 * k + 1}) (N : ℕ) :
+theorem genHG_fields_wimp_coeff' (a b c d : Multiset ℂ) (α β γ ζ : ℂ)
+    (hαβ : GenDenRegular {α, β}) (hγ : GenDenRegular {γ + 1}) (N : ℕ) :
     genCoeff (a + c) (b + d) N * ζ ^ N =
       ∑ k ∈ range (N + 1), genFieldsWimpCoeff a b α β γ k *
         genCoeff ((α + k) ::ₘ (β + k) ::ₘ genShift a k)
           ((γ + 2 * k + 1) ::ₘ genShift b k) (N - k) *
         genFiniteHG k ((-k : ℂ) ::ₘ (γ + k) ::ₘ c) (α ::ₘ β ::ₘ d) ζ := by
-  sorry
+  have hγ' : ∀ i : ℕ, γ + (i + 1) ≠ 0 := fun i h =>
+    hγ (γ + 1) (by simp) i (by linear_combination h)
+  have hα : poch α N ≠ 0 := poch_ne_zero_of_not_neg_nat (hαβ α (by simp)) N
+  have hβ : poch β N ≠ 0 := poch_ne_zero_of_not_neg_nat (hαβ β (by simp)) N
+  let A : ℕ → ℂ := fun j => genPoch a N * poch α N * poch β N / genPoch b N *
+    (genPoch c j / (poch α j * poch β j * genPoch d j * j.factorial)) * ζ ^ j
+  let B : ℕ → ℕ → ℂ := fun k j => (-1 : ℂ) ^ k * poch (-(k : ℂ)) j * poch (γ + k) j /
+      (poch (γ + k) k * poch (γ + 2 * k + 1) (N - k) * k.factorial * (N - k).factorial)
+  have hterm : ∀ k ∈ range (N + 1), genFieldsWimpCoeff a b α β γ k *
+        genCoeff ((α + k) ::ₘ (β + k) ::ₘ genShift a k)
+          ((γ + 2 * k + 1) ::ₘ genShift b k) (N - k) *
+        genFiniteHG k ((-k : ℂ) ::ₘ (γ + k) ::ₘ c) (α ::ₘ β ::ₘ d) ζ =
+      ∑ j ∈ range (N + 1), A j * B k j := by
+    intro k hk
+    have hkN : k ≤ N := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
+    unfold genFiniteHG
+    rw [← sum_subset (range_subset_range.mpr (by omega : k + 1 ≤ N + 1)) ?_, mul_sum]
+    · refine sum_congr rfl fun j _ => ?_
+      obtain ⟨n, rfl⟩ := Nat.exists_eq_add_of_le hkN
+      rw [show k + n - k = n by omega]
+      simp only [A, B, genFieldsWimpCoeff, genCoeff, genPoch_cons, genPoch_add_shift,
+        poch_add, show k + n - k = n by omega]
+      ring
+    · intro j hj hj'
+      have hkj : k < j := by simp at hj hj'; omega
+      simp [B, poch_neg_nat_eq_zero hkj]
+  rw [sum_congr rfl hterm, sum_comm]
+  have hW : ∀ j ∈ range (N + 1), ∑ k ∈ range (N + 1), A j * B k j =
+      A j * if j = N then 1 else 0 := fun j hj => by
+    rw [← mul_sum]; congr 1
+    exact fieldsWimp_kernel hγ' (Nat.lt_succ_iff.mp (Finset.mem_range.mp hj))
+  rw [sum_congr rfl hW]
+  simp only [mul_ite, mul_one, mul_zero, sum_ite_eq', Finset.mem_range, Nat.lt_succ_self,
+    ↓reduceIte]
+  simp only [A, genCoeff, genPoch_add']
+  field_simp
+
+/-- The formal coefficient identity has no analytic convergence restriction. -/
+@[dlmf 16.10.E1]
+theorem genHG_fields_wimp_coeff (a b c d : Multiset ℂ) (α β γ ζ : ℂ)
+    (_hb : GenDenRegular (b + d)) (hαβ : GenDenRegular {α, β})
+    (hγ : ∀ k : ℕ, poch (γ + k) k ≠ 0 ∧ GenDenRegular {γ + 2 * k + 1}) (N : ℕ) :
+    genCoeff (a + c) (b + d) N * ζ ^ N =
+      ∑ k ∈ range (N + 1), genFieldsWimpCoeff a b α β γ k *
+        genCoeff ((α + k) ::ₘ (β + k) ::ₘ genShift a k)
+          ((γ + 2 * k + 1) ::ₘ genShift b k) (N - k) *
+        genFiniteHG k ((-k : ℂ) ::ₘ (γ + k) ::ₘ c) (α ::ₘ β ::ₘ d) ζ :=
+  genHG_fields_wimp_coeff' a b c d α β γ ζ hαβ (by simpa using (hγ 0).2) N
 
 /-- The analytic expansion under explicit absolute double-series convergence and valid original
-germs. -/
+germs. Stronger than DLMF, which assumes regular lower parameters `b + d` and `γ + 2k + 1` and
+`(γ + k)ₖ ≠ 0` for all `k`; only `α, β` and `γ + 1` need to avoid the nonpositive integers. -/
 @[dlmf 16.10.E1]
-theorem genHG_fields_wimp_hasSum (a b c d : Multiset ℂ) (α β γ z ζ : ℂ)
-    (hb : GenDenRegular (b + d)) (hαβ : GenDenRegular {α, β})
-    (hγ : ∀ k : ℕ, poch (γ + k) k ≠ 0 ∧ GenDenRegular {γ + 2 * k + 1})
+theorem genHG_fields_wimp_hasSum' (a b c d : Multiset ℂ) (α β γ z ζ : ℂ)
+    (hαβ : GenDenRegular {α, β}) (hγ : GenDenRegular {γ + 1})
     (hleft : HasSum (fun n => genCoeff (a + c) (b + d) n * (z * ζ) ^ n)
       (genHG (a + c) (b + d) (z * ζ)))
     (hinner : ∀ k : ℕ, HasSum (fun n =>
@@ -123,7 +310,51 @@ theorem genHG_fields_wimp_hasSum (a b c d : Multiset ℂ) (α β γ z ζ : ℂ)
         ((γ + 2 * k + 1) ::ₘ genShift b k) z))
     (habs : Summable (fun kn : ℕ × ℕ => ‖genFieldsWimpDoubleTerm a b c d α β γ z ζ kn‖)) :
     HasSum (genFieldsWimpTerm a b c d α β γ z ζ) (genHG (a + c) (b + d) (z * ζ)) := by
-  sorry
+  have hf : Summable (genFieldsWimpDoubleTerm a b c d α β γ z ζ) := habs.of_norm
+  have h1 : HasSum (genFieldsWimpTerm a b c d α β γ z ζ)
+      (∑' kn, genFieldsWimpDoubleTerm a b c d α β γ z ζ kn) :=
+    hf.hasSum.prod_fiberwise fun k => by
+      have := (hinner k).mul_left (genFieldsWimpCoeff a b α β γ k * z ^ k *
+        genFiniteHG k ((-k : ℂ) ::ₘ (γ + k) ::ₘ c) (α ::ₘ β ::ₘ d) ζ)
+      convert this using 1
+      · funext n; simp only [genFieldsWimpDoubleTerm]; ring
+      · simp only [genFieldsWimpTerm]; ring
+  have h2 : HasSum (fun N => genCoeff (a + c) (b + d) N * (z * ζ) ^ N)
+      (∑' kn, genFieldsWimpDoubleTerm a b c d α β γ z ζ kn) := by
+    have hs := (Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd (A := ℕ)).hasSum_iff.mpr
+      hf.hasSum
+    refine hs.sigma fun N => ?_
+    convert hasSum_fintype _ using 1
+    change _ = ∑ x : antidiagonal N, genFieldsWimpDoubleTerm a b c d α β γ z ζ (x : ℕ × ℕ)
+    rw [Finset.sum_coe_sort (antidiagonal N)
+      (fun x => genFieldsWimpDoubleTerm a b c d α β γ z ζ x),
+      Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk,
+      show genCoeff (a + c) (b + d) N * (z * ζ) ^ N =
+        z ^ N * (genCoeff (a + c) (b + d) N * ζ ^ N) by ring,
+      genHG_fields_wimp_coeff' a b c d α β γ ζ hαβ hγ N, mul_sum]
+    refine sum_congr rfl fun k hk => ?_
+    have hkN : k ≤ N := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
+    simp only [genFieldsWimpDoubleTerm]
+    rw [show z ^ N = z ^ k * z ^ (N - k) by rw [← pow_add, Nat.add_sub_cancel' hkN]]
+    ring
+  rwa [h2.unique hleft] at h1
+
+/-- The analytic expansion under explicit absolute double-series convergence and valid original
+germs. -/
+@[dlmf 16.10.E1]
+theorem genHG_fields_wimp_hasSum (a b c d : Multiset ℂ) (α β γ z ζ : ℂ)
+    (_hb : GenDenRegular (b + d)) (hαβ : GenDenRegular {α, β})
+    (hγ : ∀ k : ℕ, poch (γ + k) k ≠ 0 ∧ GenDenRegular {γ + 2 * k + 1})
+    (hleft : HasSum (fun n => genCoeff (a + c) (b + d) n * (z * ζ) ^ n)
+      (genHG (a + c) (b + d) (z * ζ)))
+    (hinner : ∀ k : ℕ, HasSum (fun n =>
+        genCoeff ((α + k) ::ₘ (β + k) ::ₘ genShift a k)
+          ((γ + 2 * k + 1) ::ₘ genShift b k) n * z ^ n)
+      (genHG ((α + k) ::ₘ (β + k) ::ₘ genShift a k)
+        ((γ + 2 * k + 1) ::ₘ genShift b k) z))
+    (habs : Summable (fun kn : ℕ × ℕ => ‖genFieldsWimpDoubleTerm a b c d α β γ z ζ kn‖)) :
+    HasSum (genFieldsWimpTerm a b c d α β γ z ζ) (genHG (a + c) (b + d) (z * ζ)) :=
+  genHG_fields_wimp_hasSum' a b c d α β γ z ζ hαβ (by simpa using (hγ 0).2) hleft hinner habs
 
 /-- Norlund expansion with the full printed convergence half-plane and zeta disk. -/
 @[dlmf 16.10.E2]

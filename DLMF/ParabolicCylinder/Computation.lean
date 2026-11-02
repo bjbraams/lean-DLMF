@@ -35,6 +35,8 @@ integrations by parts then give Chebyshev coefficients of order `n⁻²`.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- DLMF 12.20: Chebyshev expansion on a compact interval; coefficients and degree are not supplied

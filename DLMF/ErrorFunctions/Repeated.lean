@@ -49,6 +49,8 @@ Watson's lemma.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat Interval
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Jeffreys probability function Hh_n with its Gaussian-tail normalization. -/
@@ -763,15 +765,15 @@ theorem iteratedErfc_continuedFraction (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     positivity
   have hne : ∀ k, 1 ≤ k → aR n k ≠ 0 := fun k hk => by
     rw [hpos n k hk]; exact_mod_cast (hpos' n k hk).ne'
-  rw [incGF_hasContinuedFraction_iff hne]
-  suffices H : ∀ m, Tendsto (GenContFract.cfConv_ofFun 0 (aR m) (fun _ => z)).convs atTop
+  rw [IncompleteGammaFractions.hasContinuedFraction_iff hne]
+  suffices H : ∀ m, Tendsto (GenContFract.ofFun 0 (aR m) (fun _ => z)).convs atTop
       (𝓝 (ρ m)) from H n
   intro m
   induction m with
   | zero =>
     -- the case `n = 0` is DLMF 7.9.1 after an equivalence transformation
     have h1 := erfc_continuedFraction_one hz
-    rw [incGF_hasContinuedFraction_iff (fun k hk => by
+    rw [IncompleteGammaFractions.hasContinuedFraction_iff (fun k hk => by
       simp only [show k ≠ 0 by omega, ↓reduceIte]
       exact div_ne_zero (Nat.cast_ne_zero.mpr (by omega)) two_ne_zero)] at h1
     set r : ℕ → ℂ := fun k => if Even k then z⁻¹ else z with hr
@@ -802,13 +804,14 @@ theorem iteratedErfc_continuedFraction (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
       · rw [mul_one]
     have e0 : aR 0 = fun k : ℕ => if k = 0 then (1/2 : ℂ) * A1 0 else A1 k := by
       funext k; rcases k with _ | k <;> simp [aR, A1]
-    have hconv : ∀ N, (GenContFract.cfConv_ofFun 0 (aR 0) (fun _ => z)).convs N =
-        (1/2 : ℂ) * (GenContFract.cfConv_ofFun 0 (fun k => if k=0 then z else (k : ℂ)/2)
+    have hconv : ∀ N, (GenContFract.ofFun 0 (aR 0) (fun _ => z)).convs N =
+        (1/2 : ℂ) * (GenContFract.ofFun 0 (fun k => if k=0 then z else (k : ℂ)/2)
           (fun k => if Even k then z^2 else 1)).convs N := by
       intro N
-      rw [e0, GenContFract.cfConv_convs_smul_a0, hEa, hEb, GenContFract.cfConv_equiv_convs r hr0]
-    rw [show (GenContFract.cfConv_ofFun 0 (aR 0) (fun _ => z)).convs = fun N =>
-      (1/2 : ℂ) * (GenContFract.cfConv_ofFun 0 (fun k => if k=0 then z else (k : ℂ)/2)
+      rw [e0, GenContFract.ofFun_convs_mul_first_num, hEa, hEb,
+          GenContFract.ofFun_convs_equiv r hr0]
+    rw [show (GenContFract.ofFun 0 (aR 0) (fun _ => z)).convs = fun N =>
+      (1/2 : ℂ) * (GenContFract.ofFun 0 (fun k => if k=0 then z else (k : ℂ)/2)
           (fun k => if Even k then z^2 else 1)).convs N from funext hconv]
     convert h1.const_mul (1/2 : ℂ) using 2
     obtain ⟨hm1, h0⟩ := iteratedErfc_initial z
@@ -818,9 +821,10 @@ theorem iteratedErfc_continuedFraction (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     rw [h0, hm1, show -z ^ 2 = -(z ^ 2) by ring, Complex.exp_neg]
     field_simp
   | succ m ih =>
-    have hv : ρ m ≠ 0 := GenContFract.cfConv_sfrac_const_ne_zero hz (c := fun k => (m + k : ℝ) / 2)
+    have hv : ρ m ≠ 0 :=
+        GenContFract.ofFun_sFraction_const_limit_ne_zero hz (c := fun k => (m + k : ℝ) / 2)
       (fun k hk => hpos' m k hk) (fun k hk => hpos m k hk) (by simp [aR]) ih
-    have ht := GenContFract.cfConv_tail_tendsto hv ih
+    have ht := GenContFract.tendsto_ofFun_tail_convs hv ih
     have e : aR (m + 1) = fun k => if k = 0 then ((m : ℂ) + 1)⁻¹ * aR m (0 + 1)
         else aR m (k + 1) := by
       funext k
@@ -829,11 +833,11 @@ theorem iteratedErfc_continuedFraction (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
         have : (m : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero m
         field_simp
       · simp only [aR, Nat.succ_ne_zero, ↓reduceIte]; push_cast; ring
-    rw [show (GenContFract.cfConv_ofFun 0 (aR (m + 1)) (fun _ => z)).convs = fun N =>
-      ((m : ℂ) + 1)⁻¹ * (GenContFract.cfConv_ofFun 0 (fun k => aR m (k + 1))
+    rw [show (GenContFract.ofFun 0 (aR (m + 1)) (fun _ => z)).convs = fun N =>
+      ((m : ℂ) + 1)⁻¹ * (GenContFract.ofFun 0 (fun k => aR m (k + 1))
         (fun _ => z)).convs N from funext fun N => by
           rw [e]
-          exact GenContFract.cfConv_convs_smul_a0 (a := fun k => aR m (k + 1))
+          exact GenContFract.ofFun_convs_mul_first_num (a := fun k => aR m (k + 1))
             (b := fun _ => z) _ N]
     convert ht.const_mul ((m : ℂ) + 1)⁻¹ using 2
     -- the three-term recurrence DLMF 7.18.7
@@ -856,7 +860,8 @@ theorem iteratedErfc_continuedFraction (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
 
 /-- Integrability of the weighted Gaussian kernel `tⁿ e^{-t²/4}` along a ray `|arg t| < π/4`,
 against any real exponential. -/
-theorem erfRecip_integrableOn_pow_gauss_rotate (n : ℕ) (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 4) :
+theorem IteratedErfcLaplace.integrableOn_pow_gauss_rotate (n : ℕ) (c : ℝ) {θ : ℝ}
+    (hθ : |θ| < π / 4) :
     IntegrableOn (fun r : ℝ => Real.exp (-c * r) •
       ((((r : ℂ) * exp (θ * I)) ^ n) * cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)))) (Ioi 0) := by
   obtain ⟨K, hK0, hK⟩ := exists_rpow_mul_exp_neg_le' (n : ℝ) one_pos
@@ -891,7 +896,7 @@ theorem erfRecip_integrableOn_pow_gauss_rotate (n : ℕ) (c : ℝ) {θ : ℝ} (h
         gcongr
 /-- Laplace form of the repeated erfc integral:
 `iⁿerfc z = 2 π^{-1/2} e^{-z²} / (2^{n+1} n!) ∫₀^∞ e^{-zs} sⁿ e^{-s²/4} ds`. -/
-theorem erfRecip_iteratedErfc_eq_laplace (n : ℕ) (z : ℂ) :
+theorem IteratedErfcLaplace.iteratedErfc_eq_laplace (n : ℕ) (z : ℂ) :
     iteratedErfc n z = 2 / Real.sqrt π * cexp (-z ^ 2) / (2 ^ (n + 1) * (n.factorial : ℂ)) *
       ∫ s in Ioi (0 : ℝ), cexp (-(z * s)) * ((s : ℂ) ^ n * cexp (-((s : ℂ) ^ 2 / 4))) := by
   have hn1 : (n : ℤ) ≠ -1 := by omega
@@ -932,14 +937,14 @@ theorem erfRecip_iteratedErfc_eq_laplace (n : ℕ) (z : ℂ) :
 
 /-- Rotated Laplace form of the repeated erfc integral, valid for every complex `z` and
 `|θ| < π/4`. -/
-theorem erfRecip_iteratedErfc_eq_rotate (n : ℕ) {θ : ℝ} (hθ : |θ| < π / 4) (z : ℂ) :
+theorem IteratedErfcLaplace.iteratedErfc_eq_rotate (n : ℕ) {θ : ℝ} (hθ : |θ| < π / 4) (z : ℂ) :
     iteratedErfc n z = 2 / Real.sqrt π * cexp (-z ^ 2) / (2 ^ (n + 1) * (n.factorial : ℂ)) *
       (exp (θ * I) * ∫ r in Ioi (0 : ℝ), cexp (-(z * exp (θ * I) * r)) *
         ((((r : ℂ) * exp (θ * I)) ^ n) * cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)))) := by
   have hL : Differentiable ℂ (fun w : ℂ => ∫ r in Ioi (0 : ℝ), cexp (-(w * r)) •
       ((((r : ℂ) * exp (θ * I)) ^ n) * cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)))) := fun w =>
     (differentiableOn_integral_cexp_neg_mul_smul
-      (erfRecip_integrableOn_pow_gauss_rotate n (w.re - 1) hθ)).differentiableAt
+      (IteratedErfcLaplace.integrableOn_pow_gauss_rotate n (w.re - 1) hθ)).differentiableAt
       ((isOpen_lt continuous_const continuous_re).mem_nhds (by simp))
   simp only [smul_eq_mul] at hL
   have hd2 : Differentiable ℂ (fun z : ℂ => 2 / Real.sqrt π * cexp (-z ^ 2) /
@@ -954,7 +959,7 @@ theorem erfRecip_iteratedErfc_eq_rotate (n : ℕ) {θ : ℝ} (hθ : |θ| < π / 
         cexp (-((x : ℂ) * exp (θ * I) * r)) *
         ((((r : ℂ) * exp (θ * I)) ^ n) * cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)))) := by
     intro x hx
-    rw [erfRecip_iteratedErfc_eq_laplace n x]
+    rw [IteratedErfcLaplace.iteratedErfc_eq_laplace n x]
     congr 1
     have hy : ∀ y ∈ [[0, θ]], |y| ≤ π / 4 := fun y hy =>
       (abs_le_abs_of_mem_uIcc_zero hy).trans hθ.le
@@ -998,7 +1003,7 @@ theorem erfRecip_iteratedErfc_eq_rotate (n : ℕ) {θ : ℝ} (hθ : |θ| < π / 
 
 /-- Taylor remainders of `tⁿ e^{-t²/4}` along a ray, in the form required by Watson's lemma
 with `μ = n + 1`. -/
-theorem erfRecip_pow_gauss_sub_sum_isBigO (n : ℕ) (θ : ℝ) (N : ℕ) :
+theorem IteratedErfcLaplace.pow_gauss_sub_sum_isBigO (n : ℕ) (θ : ℝ) (N : ℕ) :
     (fun r : ℝ => ((r : ℂ) * exp (θ * I)) ^ n * cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)) -
       ∑ k ∈ Finset.range N,
         (((r : ℂ) * exp (θ * I)) ^ ((k : ℂ) + ((n : ℂ) + 1) - 1)) • gaussQuarterCoeff k)
@@ -1023,7 +1028,8 @@ theorem erfRecip_pow_gauss_sub_sum_isBigO (n : ℕ) (θ : ℝ) (N : ℕ) :
     ring
 
 /-- `iⁿerfc z ~ 2π^{-1/2} e^{-z²} ∑ (-1)ᵐ (2m+n)!/(n! m!) (2z)^{-n-1-2m}` in a rotated sector. -/
-theorem erfRecip_iteratedErfc_rotSector (n : ℕ) {θ δ : ℝ} (hθ : |θ| < π / 4) (hδ : 0 < δ) :
+theorem IteratedErfcLaplace.iteratedErfc_rotatedSector (n : ℕ) {θ δ : ℝ}
+    (hθ : |θ| < π / 4) (hδ : 0 < δ) :
     HasAsymptoticExpansion (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ))
       (fun m z => 2 / Real.sqrt π * exp (-z ^ 2) / (2 * z) ^ (n + 1 + 2 * m))
       (fun m => (-1 : ℂ) ^ m * (2 * m + n).factorial / ((n.factorial : ℂ) * m.factorial))
@@ -1031,8 +1037,8 @@ theorem erfRecip_iteratedErfc_rotSector (n : ℕ) {θ δ : ℝ} (hθ : |θ| < π
   have hθ' : |θ| < π / 2 := by linarith [Real.pi_pos]
   have hW := hasAsymptoticExpansion_integral_cexp_smul_rotate_comap
     (F := fun t => t ^ n * cexp (-(t ^ 2 / 4))) (a := gaussQuarterCoeff) (μ := (n : ℂ) + 1)
-    (c := 0) hθ' (by simp; positivity) hδ (erfRecip_integrableOn_pow_gauss_rotate n 0 hθ)
-    (erfRecip_pow_gauss_sub_sum_isBigO n θ)
+    (c := 0) hθ' (by simp; positivity) hδ (IteratedErfcLaplace.integrableOn_pow_gauss_rotate n 0 hθ)
+    (IteratedErfcLaplace.pow_gauss_sub_sum_isBigO n θ)
   have hE := hW.even (fun m => by
     have : ¬ Even (2 * m + 1) := by simp
     simp [gaussQuarterCoeff, this])
@@ -1045,7 +1051,7 @@ theorem erfRecip_iteratedErfc_rotSector (n : ℕ) {θ δ : ℝ} (hθ : |θ| < π
     (ψ := fun m z => 2 / Real.sqrt π * exp (-z ^ 2) / (2 * z) ^ (n + 1 + 2 * m))
     fun m => Eventually.of_forall fun z => ?_).congr_coeff ?_
   · simp only [Pi.smul_apply, smul_eq_mul]
-    rw [erfRecip_iteratedErfc_eq_rotate n hθ z, hc0]
+    rw [IteratedErfcLaplace.iteratedErfc_eq_rotate n hθ z, hc0]
     ring
   · simp only
     rw [show -(((2 * m : ℕ) : ℂ) + ((n : ℂ) + 1)) = -((n + 1 + 2 * m : ℕ) : ℂ) by push_cast; ring,
@@ -1080,8 +1086,9 @@ theorem iteratedErfc_asymptotic (n : ℕ) {δ : ℝ} (hδ : 0 < δ) :
     Real.cos_pos_of_mem_Ioo ⟨by linarith [Real.pi_pos], by linarith⟩
   have hβ : |π / 4 - d / 2| < π / 4 := by
     rw [abs_lt]; constructor <;> linarith
-  have h1 := erfRecip_iteratedErfc_rotSector n (θ := -(π / 4 - d / 2)) (by rwa [abs_neg]) hcos
-  have h2 := erfRecip_iteratedErfc_rotSector n (θ := π / 4 - d / 2) hβ hcos
+  have h1 := IteratedErfcLaplace.iteratedErfc_rotatedSector n (θ := -(π / 4 - d / 2))
+      (by rwa [abs_neg]) hcos
+  have h2 := IteratedErfcLaplace.iteratedErfc_rotatedSector n (θ := π / 4 - d / 2) hβ hcos
   exact (h1.sup h2).mono hcov
 
 end DLMF.Confluent

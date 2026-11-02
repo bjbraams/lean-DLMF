@@ -24,7 +24,7 @@ Integral representations of `E₁`, `Ei`, `Ein`, `si` and the auxiliary function
 * `expIntEin_real_integral_7`, `expIntEin_real_integral_8`, `expIntEin_real_integral_11`:
   DLMF 6.7.7, 6.7.8, 6.7.11.
 * `sinIntTail_angular_integral`, `Ein_sub_Cin_angular_integral`: DLMF 6.7.9, 6.7.10.
-* `expIntAux_horizontal_integral`: DLMF 6.7.12.
+* `ExpIntegralAuxiliary.horizontal_integral`: DLMF 6.7.12.
 * `expIntAuxF_oscillatory_integral`, `expIntAuxF_laplace_integral`,
   `expIntAuxG_oscillatory_integral`, `expIntAuxG_laplace_integral`: oscillatory and Laplace
   representations of `f` and `g` (DLMF 6.7.13, 6.7.14).
@@ -38,6 +38,8 @@ Integral representations of `E₁`, `Ei`, `Ein`, `si` and the auxiliary function
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- The Fourier-type ray integral `∫_x^∞ e^{it}/(t-c) dt = e^{ic} E₁(-i(x-c))`. -/
@@ -421,7 +423,7 @@ theorem expIntEin_real_integral_11 (a b : ℝ) :
 section AngularTools
 
 /-- `cos t + i s sin t ≠ 0` for `s = ±1`. -/
-theorem eiIn_arc_ne_zero {s : ℂ} (hs : s = 1 ∨ s = -1) (t : ℝ) :
+theorem ExpIntegralRepresentations.arc_ne_zero {s : ℂ} (hs : s = 1 ∨ s = -1) (t : ℝ) :
     (Real.cos t : ℂ) + I*s*Real.sin t ≠ 0 := by
   intro h
   have h1 := congrArg Complex.re h
@@ -433,7 +435,7 @@ theorem eiIn_arc_ne_zero {s : ℂ} (hs : s = 1 ∨ s = -1) (t : ℝ) :
 
 /-- The quarter-circle integral of `1 - e^{-w}` along `w = z(cos t + i s sin t)`, `s = ±1`:
 `∫₀^{π/2} (1 - e^{-w(t)}) dt = (Ein(isz) - Ein z)/(is)`. -/
-theorem eiIn_arc_integral {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
+theorem ExpIntegralRepresentations.arc_integral {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
     ∫ t : ℝ in 0..(π/2), (1 - exp (-(z*((Real.cos t : ℂ) + I*s*Real.sin t)))) =
       (expIntEin (I*s*z) - expIntEin z)/(I*s) := by
   have hs0 : I*s ≠ 0 := by rcases hs with rfl | rfl <;> simp
@@ -442,7 +444,7 @@ theorem eiIn_arc_integral {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
   by_cases hz : z = 0
   · subst hz; simp
   set w : ℝ → ℂ := fun t => z*((Real.cos t : ℂ) + I*s*Real.sin t) with hw
-  have hw0 : ∀ t, w t ≠ 0 := fun t => mul_ne_zero hz (eiIn_arc_ne_zero hs t)
+  have hw0 : ∀ t, w t ≠ 0 := fun t => mul_ne_zero hz (ExpIntegralRepresentations.arc_ne_zero hs t)
   have hwd : ∀ t : ℝ, HasDerivAt w (I*s*w t) t := by
     intro t
     have hc := (Real.hasDerivAt_cos t).ofReal_comp
@@ -455,7 +457,7 @@ theorem eiIn_arc_integral {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
     intro t _
     refine (((hasDerivAt_expIntEin_complex (hw0 t)).comp t (hwd t)).div_const (I*s)).congr_deriv ?_
     simp only [hw]; field_simp
-    exact mul_div_cancel_left₀ _ (eiIn_arc_ne_zero hs t)
+    exact mul_div_cancel_left₀ _ (ExpIntegralRepresentations.arc_ne_zero hs t)
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd (by
     apply Continuous.intervalIntegrable; fun_prop)]
   simp only [hw, Real.cos_zero, Real.sin_zero, Real.cos_pi_div_two, Real.sin_pi_div_two]
@@ -463,15 +465,16 @@ theorem eiIn_arc_integral {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
   rw [← sub_div]; congr 2 <;> ring_nf
 
 /-- The quarter-circle integral of `e^{-w}`. -/
-theorem eiIn_arc_integral_exp {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
+theorem ExpIntegralRepresentations.arc_integral_exp {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
     ∫ t : ℝ in 0..(π/2), exp (-(z*((Real.cos t : ℂ) + I*s*Real.sin t))) =
       π/2 - (expIntEin (I*s*z) - expIntEin z)/(I*s) := by
-  rw [← eiIn_arc_integral hs, intervalIntegral.integral_sub (by simp)
+  rw [← ExpIntegralRepresentations.arc_integral hs, intervalIntegral.integral_sub (by simp)
     (by apply Continuous.intervalIntegrable; fun_prop)]
   simp
 
 /-- `Ein(-iz) = Cin z - i Si z`. -/
-theorem eiIn_Ein_neg_I (z : ℂ) : expIntEin (I*(-1)*z) = cosIntCin z - I*sinInt z := by
+theorem ExpIntegralRepresentations.Ein_neg_I (z : ℂ) : expIntEin (I*(-1)*z) = cosIntCin z -
+    I*sinInt z := by
   rw [show I*(-1)*z = I*(-z) by ring, expIntEin_mul_I, cosIntCin_even, sinInt_odd]; ring
 
 end AngularTools
@@ -491,7 +494,9 @@ theorem sinIntTail_angular_integral (z : ℂ) :
   rw [intervalIntegral.integral_div, intervalIntegral.integral_add
     (by apply Continuous.intervalIntegrable; fun_prop)
         (by apply Continuous.intervalIntegrable; fun_prop),
-    eiIn_arc_integral_exp (Or.inl rfl), eiIn_arc_integral_exp (Or.inr rfl), eiIn_Ein_neg_I,
+    ExpIntegralRepresentations.arc_integral_exp (Or.inl rfl),
+        ExpIntegralRepresentations.arc_integral_exp (Or.inr rfl),
+        ExpIntegralRepresentations.Ein_neg_I,
     show I*(1:ℂ)*z = I*z by ring, expIntEin_mul_I, sinIntTail]
   field_simp
   ring_nf
@@ -512,7 +517,9 @@ theorem Ein_sub_Cin_angular_integral (z : ℂ) :
       intervalIntegral.integral_sub
     (by apply Continuous.intervalIntegrable; fun_prop)
         (by apply Continuous.intervalIntegrable; fun_prop),
-    eiIn_arc_integral_exp (Or.inl rfl), eiIn_arc_integral_exp (Or.inr rfl), eiIn_Ein_neg_I,
+    ExpIntegralRepresentations.arc_integral_exp (Or.inl rfl),
+        ExpIntegralRepresentations.arc_integral_exp (Or.inr rfl),
+        ExpIntegralRepresentations.Ein_neg_I,
     show I*(1:ℂ)*z = I*z by ring, expIntEin_mul_I]
   field_simp
   ring_nf
@@ -520,7 +527,7 @@ theorem Ein_sub_Cin_angular_integral (z : ℂ) :
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp (I*(z+t))/(z+t)) 0
 (exp (I*z)*(expIntAuxG z+I*expIntAuxF z))`. -/
 @[dlmf 6.7.E12]
-theorem expIntAux_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
+theorem ExpIntegralAuxiliary.horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => exp (I*(z+t))/(z+t)) 0
         (exp (I*z)*(expIntAuxG z+I*expIntAuxF z)) := by
   have hd : ∀ t : ℝ, 0 ≤ t →
@@ -547,7 +554,7 @@ theorem expIntAux_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     rw [neg_zero] at h
     refine h.congr' ?_
     filter_upwards [eventually_re_add_ofReal_pos z] with t ht
-    have he := expIntAux_eq_E1 ht (ε := 1) (Or.inl rfl)
+    have he := ExpIntegralAuxiliary.eq_E1 ht (ε := 1) (Or.inl rfl)
     push_cast at he ⊢
     simp only [one_mul, neg_mul] at he
     rw [he, mul_comm (genExpIntE 1 _), ← mul_assoc, ← Complex.exp_add]
@@ -606,7 +613,7 @@ theorem expIntAuxF_laplace_integral {z : ℂ} (hz : 0 ≤ z.re) :
     convert h using 1
     have : sinInt 0 = 0 := by simp [sinInt]
     simp [expIntAuxF, sinIntTail, this]
-  · exact (expIntAux_laplace_hasIntegralAtTop hz0 hz).1.congr fun t _ => by simp
+  · exact (ExpIntegralAuxiliary.laplace_hasIntegralAtTop hz0 hz).1.congr fun t _ => by simp
 
 section BesselKZeroIntegrals
 
@@ -775,11 +782,11 @@ theorem two_mul_integral_besselK_zero_mul {x : ℝ} (hx : 0 < x) {wt : ℝ → �
   ring
 
 /-- The Laplace representations of `f(x)` and `g(x)` as Lebesgue integrals, for `x > 0`. -/
-theorem expIntAux_ofReal_laplace_Ioi {x : ℝ} (hx : 0 < x) :
+theorem ExpIntegralAuxiliary.ofReal_laplace_Ioi {x : ℝ} (hx : 0 < x) :
     expIntAuxF x = ∫ u : ℝ in Ioi 0, exp (-(x : ℂ) * u) / ((u : ℂ) ^ 2 + 1) ∧
     expIntAuxG x = ∫ u : ℝ in Ioi 0, (u : ℂ) * exp (-(x : ℂ) * u) / ((u : ℂ) ^ 2 + 1) := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
-  obtain ⟨h1, h2⟩ := expIntAux_laplace_hasIntegralAtTop hx0 (by simp [hx.le])
+  obtain ⟨h1, h2⟩ := ExpIntegralAuxiliary.laplace_hasIntegralAtTop hx0 (by simp [hx.le])
   have hden : ∀ u : ℝ, 1 ≤ ‖(u : ℂ) ^ 2 + 1‖ := fun u => by
     rw [show ((u : ℂ) ^ 2 + 1) = ((u ^ 2 + 1 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
       Real.norm_eq_abs, abs_of_pos (by positivity)]
@@ -844,7 +851,7 @@ lemma expIntAuxF_ofReal_eq_integral_besselK {x : ℝ} (hx : 0 < x) :
     rw [show ((x : ℂ) * u) ^ 2 + x ^ 2 = x ^ 2 * (u ^ 2 + 1) by ring, neg_mul]
     field_simp
   rw [h1, h2]
-  exact (expIntAux_ofReal_laplace_Ioi hx).1
+  exact (ExpIntegralAuxiliary.ofReal_laplace_Ioi hx).1
 
 /-- Real-variable form of DLMF 6.7.16. -/
 lemma expIntAuxG_ofReal_eq_integral_besselK {x : ℝ} (hx : 0 < x) :
@@ -882,7 +889,7 @@ lemma expIntAuxG_ofReal_eq_integral_besselK {x : ℝ} (hx : 0 < x) :
     rw [show ((x : ℂ) * u) ^ 2 + x ^ 2 = x ^ 2 * (u ^ 2 + 1) by ring, neg_mul]
     field_simp
   rw [h1, h2]
-  exact (expIntAux_ofReal_laplace_Ioi hx).2
+  exact (ExpIntegralAuxiliary.ofReal_laplace_Ioi hx).2
 
 /-- Holomorphy on the slit plane of `z ↦ ∫₀^∞ K₀(2√(zt)) wt(t) dt` for a bounded continuous `wt`. -/
 theorem differentiableOn_integral_besselK_zero_mul {wt : ℝ → ℂ} (hwc : Continuous wt)
@@ -1031,7 +1038,7 @@ theorem expIntAuxG_oscillatory_integral {z : ℂ} (hz : z ∈ slitPlane) :
 @[dlmf 6.7.E14]
 theorem expIntAuxG_laplace_integral {z : ℂ} (hz : 0 ≤ z.re) (hz0 : z ≠ 0) :
     HasIntegralAtTop (fun t : ℝ => (t : ℂ)^1*exp (-z*t)/((t : ℂ)^2+1)) 0 (expIntAuxG z) :=
-  (expIntAux_laplace_hasIntegralAtTop hz0 hz).2.congr fun t _ => by simp
+  (ExpIntegralAuxiliary.laplace_hasIntegralAtTop hz0 hz).2.congr fun t _ => by simp
 
 /-- Identity under the stated parameter and domain assumptions: `expIntAuxG z = 2*∫ t : ℝ in Ioi
 0, DLMF.Bessel.besselK 0 (2*(z*t)^(1/2 : ℂ))*sin t`. -/
@@ -1045,7 +1052,7 @@ theorem expIntAuxG_besselK_integral {z : ℂ} (hz : z ∈ slitPlane) :
 section InequalityTools
 
 /-- The real part of `E₁` on the positive axis has derivative `-e^{-t}/t`. -/
-theorem eiIn_hasDerivAt_re {t : ℝ} (ht : 0 < t) :
+theorem ExpIntegralRepresentations.hasDerivAt_re {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => (genExpIntE 1 s).re) (-(Real.exp (-t)/t)) t := by
   have hs : (t:ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 ht
   have h := (hasDerivAt_genExpIntE 1 hs).real_of_complex
@@ -1054,13 +1061,13 @@ theorem eiIn_hasDerivAt_re {t : ℝ} (ht : 0 < t) :
     ← ofReal_div, neg_re, ofReal_re]
 
 /-- `E₁(t) → 0` along the positive axis (real part). -/
-theorem eiIn_tendsto_re :
+theorem ExpIntegralRepresentations.tendsto_re :
     Tendsto (fun s : ℝ => (genExpIntE 1 s).re) atTop (𝓝 0) := by
   have h := (Complex.continuous_re.tendsto 0).comp (tendsto_expIntE1_add_ofReal 0)
   simpa [Function.comp_def] using h
 
 /-- A function with negative derivative on `(0,∞)` and limit `0` at `+∞` is positive. -/
-theorem eiIn_pos_of_deriv_neg {g g' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
+theorem ExpIntegralRepresentations.pos_of_deriv_neg {g g' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
     (hd : ∀ t, 0 < t → HasDerivAt g (g' t) t) (hneg : ∀ t, 0 < t → g' t < 0)
     (hlim : Tendsto g atTop (𝓝 0)) : 0 < g x := by
   have hanti : StrictAntiOn g (Ici x) := by
@@ -1079,48 +1086,51 @@ theorem eiIn_pos_of_deriv_neg {g g' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
 
 /-- Comparison principle for `f(x) = eˣE₁(x)`, which solves `f' = f - 1/x`: if `R - R' - 1/t < 0`
 on `(0,∞)` and `R → 0`, then `R < f`. -/
-theorem eiIn_lt_of_sub_neg {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
+theorem ExpIntegralRepresentations.lt_of_sub_neg {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
     (hd : ∀ t, 0 < t → HasDerivAt R (R' t) t) (hs : ∀ t, 0 < t → R t - R' t - 1/t < 0)
     (hlim : Tendsto R atTop (𝓝 0)) : R x < Real.exp x*(genExpIntE 1 x).re := by
   have key : 0 < (genExpIntE 1 x).re - Real.exp (-x)*R x := by
-    refine eiIn_pos_of_deriv_neg (g := fun t => (genExpIntE 1 t).re - Real.exp (-t)*R t)
+    refine ExpIntegralRepresentations.pos_of_deriv_neg
+        (g := fun t => (genExpIntE 1 t).re - Real.exp (-t)*R t)
       (g' := fun t => Real.exp (-t)*(R t - R' t - 1/t)) hx ?_ ?_ ?_
     · intro t ht
       have he : HasDerivAt (fun s : ℝ => Real.exp (-s)) (-Real.exp (-t)) t := by
         simpa using (hasDerivAt_neg t).exp
-      refine ((eiIn_hasDerivAt_re ht).sub (he.mul (hd t ht))).congr_deriv ?_
+      refine ((ExpIntegralRepresentations.hasDerivAt_re ht).sub (he.mul (hd t ht))).congr_deriv ?_
       field_simp; ring
     · intro t ht; exact mul_neg_of_pos_of_neg (Real.exp_pos _) (hs t ht)
     · have h0 : Tendsto (fun t : ℝ => Real.exp (-t)) atTop (𝓝 0) :=
         Real.tendsto_exp_neg_atTop_nhds_zero
-      simpa using eiIn_tendsto_re.sub (h0.mul hlim)
+      simpa using ExpIntegralRepresentations.tendsto_re.sub (h0.mul hlim)
   have := mul_lt_mul_of_pos_left key (Real.exp_pos x)
   rw [mul_sub, ← mul_assoc, ← Real.exp_add, add_neg_cancel, Real.exp_zero, one_mul] at this
   linarith
 
 /-- Comparison principle, upper form: if `R - R' - 1/t > 0` on `(0,∞)` and `R → 0`, then
 `eˣE₁(x) < R(x)`. -/
-theorem eiIn_gt_of_sub_pos {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
+theorem ExpIntegralRepresentations.gt_of_sub_pos {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
     (hd : ∀ t, 0 < t → HasDerivAt R (R' t) t) (hs : ∀ t, 0 < t → 0 < R t - R' t - 1/t)
     (hlim : Tendsto R atTop (𝓝 0)) : Real.exp x*(genExpIntE 1 x).re < R x := by
   have key : 0 < Real.exp (-x)*R x - (genExpIntE 1 x).re := by
-    refine eiIn_pos_of_deriv_neg (g := fun t => Real.exp (-t)*R t - (genExpIntE 1 t).re)
+    refine ExpIntegralRepresentations.pos_of_deriv_neg
+        (g := fun t => Real.exp (-t)*R t - (genExpIntE 1 t).re)
       (g' := fun t => -(Real.exp (-t)*(R t - R' t - 1/t))) hx ?_ ?_ ?_
     · intro t ht
       have he : HasDerivAt (fun s : ℝ => Real.exp (-s)) (-Real.exp (-t)) t := by
         simpa using (hasDerivAt_neg t).exp
-      refine ((he.mul (hd t ht)).sub (eiIn_hasDerivAt_re ht)).congr_deriv ?_
+      refine ((he.mul (hd t ht)).sub (ExpIntegralRepresentations.hasDerivAt_re ht)).congr_deriv ?_
       field_simp; ring
     · intro t ht; exact neg_neg_of_pos (mul_pos (Real.exp_pos _) (hs t ht))
     · have h0 : Tendsto (fun t : ℝ => Real.exp (-t)) atTop (𝓝 0) :=
         Real.tendsto_exp_neg_atTop_nhds_zero
-      simpa using (h0.mul hlim).sub eiIn_tendsto_re
+      simpa using (h0.mul hlim).sub ExpIntegralRepresentations.tendsto_re
   have := mul_lt_mul_of_pos_left key (Real.exp_pos x)
   rw [mul_sub, ← mul_assoc, ← Real.exp_add, add_neg_cancel, Real.exp_zero, one_mul] at this
   linarith
 
 /-- `ln y < (y - 1/y)/2` for `y > 1`. -/
-theorem eiIn_log_lt_half_sub_recip {y : ℝ} (hy : 1 < y) : Real.log y < (y - 1/y)/2 := by
+theorem ExpIntegralRepresentations.log_lt_half_sub_recip {y : ℝ} (hy : 1 < y) : Real.log y <
+    (y - 1/y)/2 := by
   let h : ℝ → ℝ := fun s => (s - 1/s)/2 - Real.log s
   have hmono : StrictMonoOn h (Ici 1) := by
     refine strictMonoOn_of_deriv_pos (convex_Ici 1) ?_ ?_
@@ -1145,7 +1155,8 @@ theorem eiIn_log_lt_half_sub_recip {y : ℝ} (hy : 1 < y) : Real.log y < (y - 1/
   linarith
 
 /-- `t⁻¹ → 0` packaged for rational limits. -/
-theorem eiIn_tendsto_rat {F : ℝ → ℝ} {R : ℝ → ℝ} (hF : ContinuousAt F 0) (hF0 : F 0 = 0)
+theorem ExpIntegralRepresentations.tendsto_rat {F : ℝ → ℝ} {R : ℝ → ℝ} (hF : ContinuousAt F 0)
+    (hF0 : F 0 = 0)
     (hR : ∀ t : ℝ, 0 < t → R t = F t⁻¹) : Tendsto R atTop (𝓝 0) := by
   have h := hF.tendsto.comp (tendsto_inv_atTop_zero : Tendsto (fun t : ℝ => t⁻¹) atTop (𝓝 0))
   rw [hF0] at h
@@ -1162,7 +1173,7 @@ theorem expIntE1_inequality_1 {x : ℝ} (hx : 0 < x) :
     Real.log (1+2/x)/2 < Real.exp x*(genExpIntE 1 x).re ∧ Real.exp x*(genExpIntE 1 x).re <
         Real.log (1+1/x) := by
   constructor
-  · refine eiIn_lt_of_sub_neg (R := fun t => Real.log (1+2/t)/2)
+  · refine ExpIntegralRepresentations.lt_of_sub_neg (R := fun t => Real.log (1+2/t)/2)
         (R' := fun t => -(1/(t*(t+2)))) hx ?_ ?_ ?_
     · intro t ht
       have h1 : (1:ℝ)+2/t ≠ 0 := by positivity
@@ -1171,7 +1182,8 @@ theorem expIntE1_inequality_1 {x : ℝ} (hx : 0 < x) :
       refine ((hd.log h1).div_const 2).congr_deriv ?_
       field_simp
     · intro t ht
-      have hl := eiIn_log_lt_half_sub_recip (y := 1+2/t) (by linarith [show 0 < 2/t by positivity])
+      have hl := ExpIntegralRepresentations.log_lt_half_sub_recip (y := 1+2/t)
+          (by linarith [show 0 < 2/t by positivity])
       have : (1+2/t - 1/(1+2/t))/2 = 2*(t+1)/(t*(t+2)) := by field_simp; ring
       have h2 : -(1/(t*(t+2))) = -(2/(2*t*(t+2))) := by field_simp
       rw [this] at hl
@@ -1179,10 +1191,11 @@ theorem expIntE1_inequality_1 {x : ℝ} (hx : 0 < x) :
           (Real.log (1+2/t) - 2*(t+1)/(t*(t+2)))/2 := by
         field_simp; ring
       rw [this]; linarith
-    · refine eiIn_tendsto_rat (F := fun u => Real.log (1+2*u)/2) ?_ (by simp) fun t ht => by
+    · refine ExpIntegralRepresentations.tendsto_rat (F := fun u => Real.log (1+2*u)/2) ?_
+          (by simp) fun t ht => by
         simp [div_eq_mul_inv]
       exact ((Real.continuousAt_log (by norm_num)).comp (by fun_prop)).div_const 2
-  · refine eiIn_gt_of_sub_pos (R := fun t => Real.log (1+1/t))
+  · refine ExpIntegralRepresentations.gt_of_sub_pos (R := fun t => Real.log (1+1/t))
         (R' := fun t => -(1/(t*(t+1)))) hx ?_ ?_ ?_
     · intro t ht
       have h1 : (1:ℝ)+1/t ≠ 0 := by positivity
@@ -1203,7 +1216,8 @@ theorem expIntE1_inequality_1 {x : ℝ} (hx : 0 < x) :
       have : Real.log (1+1/t) - -(1/(t*(t+1))) - 1/t = Real.log (1+1/t) - 1/(t+1) := by
         field_simp; ring
       rw [this]; linarith
-    · refine eiIn_tendsto_rat (F := fun u => Real.log (1+u)) ?_ (by simp) fun t ht => by
+    · refine ExpIntegralRepresentations.tendsto_rat (F := fun u => Real.log (1+u)) ?_
+          (by simp) fun t ht => by
         simp [div_eq_mul_inv]
       exact (Real.continuousAt_log (by norm_num)).comp (by fun_prop)
 
@@ -1214,7 +1228,8 @@ theorem expIntE1_inequality_2 {x : ℝ} (hx : 0 < x) :
     x/(x+1) < x*Real.exp x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re <
         (x+1)/(x+2) := by
   have hlo : 1/(x+1) < Real.exp x*(genExpIntE 1 x).re := by
-    refine eiIn_lt_of_sub_neg (R := fun t => 1/(t+1)) (R' := fun t => -(1/(t+1)^2)) hx ?_ ?_ ?_
+    refine ExpIntegralRepresentations.lt_of_sub_neg (R := fun t => 1/(t+1))
+        (R' := fun t => -(1/(t+1)^2)) hx ?_ ?_ ?_
     · intro t ht
       have h0 : t+1 ≠ 0 := by positivity
       refine (((hasDerivAt_id t).add_const 1).inv h0).congr_deriv ?_ |>.congr_of_eventuallyEq ?_
@@ -1224,10 +1239,11 @@ theorem expIntE1_inequality_2 {x : ℝ} (hx : 0 < x) :
       rw [show 1/(t+1) - -(1/(t+1)^2) - 1/t = -(1/(t*(t+1)^2)) by field_simp; ring]
       have : 0 < 1/(t*(t+1)^2) := by positivity
       linarith
-    · exact eiIn_tendsto_rat (F := fun u => u/(1+u)) (by fun_prop (disch := norm_num)) (by simp)
+    · exact ExpIntegralRepresentations.tendsto_rat (F := fun u => u/(1+u))
+          (by fun_prop (disch := norm_num)) (by simp)
         fun t ht => by field_simp
   have hhi : Real.exp x*(genExpIntE 1 x).re < (x+1)/(x*(x+2)) := by
-    refine eiIn_gt_of_sub_pos (R := fun t => (t+1)/(t*(t+2)))
+    refine ExpIntegralRepresentations.gt_of_sub_pos (R := fun t => (t+1)/(t*(t+2)))
         (R' := fun t => (1*(t*(t+2)) - (t+1)*(2*t+2))/(t*(t+2))^2) hx ?_ ?_ ?_
     · intro t ht
       have h0 : t*(t+2) ≠ 0 := by positivity
@@ -1240,7 +1256,7 @@ theorem expIntE1_inequality_2 {x : ℝ} (hx : 0 < x) :
       rw [show (t+1)/(t*(t+2)) - (1*(t*(t+2)) - (t+1)*(2*t+2))/(t*(t+2))^2 - 1/t
         = 2/(t^2*(t+2)^2) by field_simp; ring]
       positivity
-    · exact eiIn_tendsto_rat (F := fun u => u*(1+u)/(1+2*u))
+    · exact ExpIntegralRepresentations.tendsto_rat (F := fun u => u*(1+u)/(1+2*u))
           (by fun_prop (disch := norm_num)) (by simp)
         fun t ht => by field_simp
   constructor
@@ -1256,7 +1272,7 @@ theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
     x*(x+3)/(x^2+4*x+2) < x*Real.exp x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re <
         (x^2+5*x+2)/(x^2+6*x+6) := by
   have hlo : (x+3)/(x^2+4*x+2) < Real.exp x*(genExpIntE 1 x).re := by
-    refine eiIn_lt_of_sub_neg (R := fun t => (t+3)/(t^2+4*t+2))
+    refine ExpIntegralRepresentations.lt_of_sub_neg (R := fun t => (t+3)/(t^2+4*t+2))
         (R' := fun t => (1*(t^2+4*t+2) - (t+3)*(2*t+4))/(t^2+4*t+2)^2) hx ?_ ?_ ?_
     · intro t ht
       have h0 : t^2+4*t+2 ≠ 0 := by positivity
@@ -1271,11 +1287,11 @@ theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
         = -(4/(t*(t^2+4*t+2)^2)) by field_simp; ring]
       have : 0 < 4/(t*(t^2+4*t+2)^2) := by positivity
       linarith
-    · exact eiIn_tendsto_rat (F := fun u => u*(1+3*u)/(1+4*u+2*u^2))
+    · exact ExpIntegralRepresentations.tendsto_rat (F := fun u => u*(1+3*u)/(1+4*u+2*u^2))
           (by fun_prop (disch := norm_num))
         (by simp) fun t ht => by field_simp
   have hhi : Real.exp x*(genExpIntE 1 x).re < (x^2+5*x+2)/(x*(x^2+6*x+6)) := by
-    refine eiIn_gt_of_sub_pos (R := fun t => (t^2+5*t+2)/(t*(t^2+6*t+6)))
+    refine ExpIntegralRepresentations.gt_of_sub_pos (R := fun t => (t^2+5*t+2)/(t*(t^2+6*t+6)))
         (R' := fun t => ((2*t+5)*(t*(t^2+6*t+6)) -
         (t^2+5*t+2)*(3*t^2+12*t+6))/(t*(t^2+6*t+6))^2) hx ?_ ?_ ?_
     · intro t ht
@@ -1294,7 +1310,7 @@ theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
           ((2*t+5)*(t*(t^2+6*t+6)) - (t^2+5*t+2)*(3*t^2+12*t+6))/(t*(t^2+6*t+6))^2 - 1/t
         = 12/(t^2*(t^2+6*t+6)^2) by field_simp; ring]
       positivity
-    · exact eiIn_tendsto_rat (F := fun u => u*(1+5*u+2*u^2)/(1+6*u+6*u^2))
+    · exact ExpIntegralRepresentations.tendsto_rat (F := fun u => u*(1+5*u+2*u^2)/(1+6*u+6*u^2))
           (by fun_prop (disch := norm_num))
         (by simp) fun t ht => by field_simp
   constructor
@@ -1309,18 +1325,19 @@ theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
 theorem expIntE1_continuedFraction {z : ℂ} (hz : z ∈ slitPlane) :
     HasContinuedFraction (fun k => if k=0 then exp (-z) else ((k+1)/2 : ℕ))
         (fun k => if Even k then z else 1) (genExpIntE 1 z) := by
-  have hc : ∀ k, 1 ≤ k → (((k + 1) / 2 : ℕ) : ℂ) = (incGF_c 0 k : ℂ) := by
+  have hc : ∀ k, 1 ≤ k → (((k + 1) / 2 : ℕ) : ℂ) =
+      (IncompleteGammaFractions.legendreNumerator 0 k : ℂ) := by
     intro k _
-    unfold incGF_c
+    unfold IncompleteGammaFractions.legendreNumerator
     split_ifs with h
     · have : (k + 1) / 2 = k / 2 + 1 := by omega
       rw [this]; push_cast; ring
     · have : (k + 1) / 2 = k / 2 := by omega
       rw [this]; push_cast; ring
-  rw [incGF_hasContinuedFraction_iff (fun k hk => by
+  rw [IncompleteGammaFractions.hasContinuedFraction_iff (fun k hk => by
     simp only [show k ≠ 0 by omega, ↓reduceIte]
     exact Nat.cast_ne_zero.mpr (by omega))]
-  have h := incGF_formB_tendsto (α := 0) (by norm_num) (exp (-z)) hz
+  have h := IncompleteGammaFractions.formB_tendsto (α := 0) (by norm_num) (exp (-z)) hz
     (a := fun k => if k=0 then exp (-z) else (((k+1)/2 : ℕ) : ℂ)) (by simp)
     (fun k hk => by simp only [show k ≠ 0 by omega, ↓reduceIte]; exact hc k hk)
   convert h using 2

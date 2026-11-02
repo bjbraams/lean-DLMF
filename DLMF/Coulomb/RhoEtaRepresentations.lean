@@ -727,7 +727,7 @@ private lemma scaledBackwardSolution_recurrence (ℓ : ℕ) (η : ℝ) {ρ : ℝ
 /-- **DLMF 33.8.1** via the ratio criterion, as a real convergence statement. -/
 private lemma tendsto_convs_deriv_coulombF_div_coulombF (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
     (hF : coulombF ℓ η ρ ≠ 0) :
-    Tendsto (GenContFract.cfConv_ofFun 0 (fun k => -(recurrenceR (ℓ + 1 + k) η ^ 2))
+    Tendsto (GenContFract.ofFun 0 (fun k => -(recurrenceR (ℓ + 1 + k) η ^ 2))
       (fun k => recurrenceT (ℓ + 1 + k) η ρ)).convs atTop
       (𝓝 (deriv (coulombF ℓ η) ρ / coulombF ℓ η ρ - recurrenceS (ℓ + 1) η ρ)) := by
   obtain ⟨M0, hM0⟩ := eventually_atTop.mp
@@ -809,7 +809,7 @@ private lemma tendsto_convs_deriv_coulombF_div_coulombF (ℓ : ℕ) (η : ℝ) {
           ring
       _ ≤ U0 * (coulombC m η * ρ ^ (m + 1) / p) := mul_le_mul_of_nonneg_right key hcp
       _ = coulombC m η * ρ ^ (m + 1) * U0 / p := by ring
-  have := GenContFract.cfConv_tendsto_of_ratio (h := (0 : ℝ))
+  have := GenContFract.tendsto_ofFun_convs_of_ratio (h := (0 : ℝ))
       (scaledBackwardSolution_recurrence ℓ η hρ) hw0 ha hwN
     (by norm_num : (2:ℝ) < 3) hrat
   convert this using 2
@@ -827,20 +827,20 @@ for `ρ > 0` with `F_ℓ(η,ρ) ≠ 0`; the continued fraction converges for all
 @[dlmf 33.8.E1]
 theorem coulombF_logDeriv_contFrac (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
     (hF : coulombF ℓ η ρ ≠ 0) :
-    DLMF.HasContinuedFraction (fun k => (-(recurrenceR (ℓ + 1 + k) η ^ 2) : ℝ))
+    DLMF.Core.HasContinuedFraction (fun k => (-(recurrenceR (ℓ + 1 + k) η ^ 2) : ℝ))
       (fun k => (recurrenceT (ℓ + 1 + k) η ρ : ℝ))
       ((deriv (coulombF ℓ η) ρ / coulombF ℓ η ρ - recurrenceS (ℓ + 1) η ρ : ℝ)) := by
   have ha : ∀ k, 1 ≤ k → -(recurrenceR (ℓ + 1 + k) η ^ 2) ≠ 0 := fun k _ =>
     neg_ne_zero.mpr (pow_ne_zero _ (recurrenceR_pos _ η).ne')
-  unfold DLMF.HasContinuedFraction
-  rw [funext (incGF_cfTail_ofReal (fun _ => rfl) (fun _ => rfl) ha)]
+  unfold DLMF.Core.HasContinuedFraction
+  rw [funext (IncompleteGammaFractions.cfTail_ofReal (fun _ => rfl) (fun _ => rfl) ha)]
   exact (continuous_ofReal.tendsto _).comp (tendsto_convs_deriv_coulombF_div_coulombF ℓ η hρ hF)
 
 /-- **DLMF 33.8.2–33.8.3**, upper sign: `H^+_ℓ'/H^+_ℓ = c + (i/ρ) ab/(2(ρ-η+i) +
 (a+1)(b+1)/(2(ρ-η+2i) + ⋯))` with `a = 1+ℓ+iη`, `b = -ℓ+iη`, `c = i(1-η/ρ)`, `ρ > 0`. -/
 @[dlmf 33.8.E2, dlmf 33.8.E3]
 theorem coulombHPlus_logDeriv_contFrac (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
-    DLMF.HasContinuedFraction
+    DLMF.Core.HasContinuedFraction
       (fun k : ℕ => ((1 : ℂ) + ℓ + I * η + k) * (-(ℓ : ℂ) + I * η + k))
       (fun k : ℕ => 2 * ((ρ : ℂ) - η + I * (k + 1)))
       ((deriv (fun x : ℝ => coulombHPlus ℓ η x) ρ / coulombHPlus ℓ η ρ -
@@ -851,7 +851,7 @@ theorem coulombHPlus_logDeriv_contFrac (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 
 (a+1)(b+1)/(2(ρ-η-2i) + ⋯))` with `a = 1+ℓ-iη`, `b = -ℓ-iη`, `c = -i(1-η/ρ)`, `ρ > 0`. -/
 @[dlmf 33.8.E2, dlmf 33.8.E3]
 theorem coulombHMinus_logDeriv_contFrac (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
-    DLMF.HasContinuedFraction
+    DLMF.Core.HasContinuedFraction
       (fun k : ℕ => ((1 : ℂ) + ℓ - I * η + k) * (-(ℓ : ℂ) - I * η + k))
       (fun k : ℕ => 2 * ((ρ : ℂ) - η - I * (k + 1)))
       ((deriv (fun x : ℝ => coulombHMinus ℓ η x) ρ / coulombHMinus ℓ η ρ +

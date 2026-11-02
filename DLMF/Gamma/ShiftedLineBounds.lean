@@ -69,8 +69,8 @@ theorem shiftB_norm_Gamma_le_of_le_half {x : ℝ} (hx : x ≤ 1 / 2) (hs : Real.
     ‖Complex.Gamma (x + y * I)‖ ≤
       2 * π * Real.exp (-(π * |y|) / 2) / (|Real.sin (π * x)| * Real.Gamma (1 - x)) := by
   set s : ℂ := x + y * I with hsdef
-  have h1 := barnesRes_norm_Gamma_mul_sin_le s
-  have h2 := barnesRes_sin_lower_line x y
+  have h1 := BarnesResidue.norm_Gamma_mul_sin_le s
+  have h2 := BarnesResidue.abs_sin_mul_exp_le_norm_sin x y
   have h1s : (1 : ℂ) - s = ((1 - x : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I := by
     rw [hsdef]; push_cast; ring
   have h3 := shiftB_norm_recip_Gamma_le (x := 1 - x) (by linarith) (-y)

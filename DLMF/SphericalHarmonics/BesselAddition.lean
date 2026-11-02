@@ -20,12 +20,14 @@ $$
 
 ## Main definitions
 
-* `shBes_equiv`: the reindexing `(k, l) ↦ (k - 2l, l)` from `{(k, l) : 2l ≤ k}` onto `ℕ × ℕ`.
+* `GegenbauerAddition.reindexEquiv`: the reindexing `(k, l) ↦ (k - 2l, l)` from `{(k, l) : 2l ≤ k}`
+  onto `ℕ × ℕ`.
 
 ## Main results
 
-* `shBes_hasSum_shift`: the Taylor shift `F_c(s + z) = ∑ zᵏ/k! F_{c+k}(s)` of regularized `₀F₁`.
-* `shBes_hasSum_product`: the product formula
+* `GegenbauerAddition.hasSum_shift`: the Taylor shift `F_c(s + z) = ∑ zᵏ/k! F_{c+k}(s)` of
+  regularized `₀F₁`.
+* `GegenbauerAddition.hasSum_product`: the product formula
   `F_c(x) F_c(y) = ∑ₗ (xy)ˡ/(l! Γ(c+l)) F_{c+2l}(x+y)`.
 * `besselJ_addition`: Gegenbauer's addition theorem (DLMF 10.23.8, AAR (4.10.5)).
 
@@ -35,10 +37,11 @@ The proof is by power series and works directly at complex `ν`. Write `F_c = �
 that `J_ν(w)/w^ν = 2^{-ν} F_{ν+1}(x + y + z)` with `x = -r²/4`, `y = -ρ²/4`, `z = rρ cos φ / 2`.
 Taylor's theorem for the entire function `F_{ν+1}` gives the shift formula. Each `(2t)ᵏ` is
 expanded in Gegenbauer polynomials (`monomial_ultrasphPoly_expansion`, DLMF 18.18.17), and the
-absolutely convergent double series is regrouped by the Gegenbauer degree (`shBes_equiv`,
-`shBes_norm_ultrasph_le`, `shBes_norm_F_le`). The inner sums are identified by the product
-formula, itself proved from the Taylor shift and a finite identity obtained from the
-contiguous relation of `₀F₁` (`shBes_sum_choose`, a Chu–Vandermonde sum in disguise).
+absolutely convergent double series is regrouped by the Gegenbauer degree
+(`GegenbauerAddition.reindexEquiv`, `GegenbauerAddition.norm_gegenbauer_le`,
+`GegenbauerAddition.norm_regularizedHGFun_le`). The inner sums are identified by the product
+formula, itself proved from the Taylor shift and a finite identity obtained from the contiguous
+relation of `₀F₁` (`GegenbauerAddition.sum_choose`, a Chu–Vandermonde sum in disguise).
 
 `besselJ_addition` lives here rather than in `DLMF.Bessel.Theorems` because the Gegenbauer
 polynomial API it needs is in modules that import that file.
@@ -57,7 +60,7 @@ noncomputable section
 namespace DLMF.Bessel
 
 /-- Iterated derivatives of regularized `₀F₁` raise the parameter. -/
-theorem shBes_iteratedDeriv (c : ℂ) (k : ℕ) :
+theorem GegenbauerAddition.iteratedDeriv (c : ℂ) (k : ℕ) :
     iteratedDeriv k (regularizedHGFun (∅ : Multiset ℂ) {c}) =
       regularizedHGFun (∅ : Multiset ℂ) {c + k} := by
   induction k with
@@ -71,18 +74,18 @@ theorem shBes_iteratedDeriv (c : ℂ) (k : ℕ) :
     ring
 
 /-- Taylor shift of regularized `₀F₁`: `F_c(s + z) = ∑ zᵏ/k! F_{c+k}(s)`. -/
-theorem shBes_hasSum_shift (c s z : ℂ) :
+theorem GegenbauerAddition.hasSum_shift (c s z : ℂ) :
     HasSum (fun k : ℕ => z ^ k / k ! * regularizedHGFun (∅ : Multiset ℂ) {c + k} s)
       (regularizedHGFun (∅ : Multiset ℂ) {c} (s + z)) := by
   have hf : Differentiable ℂ (regularizedHGFun (∅ : Multiset ℂ) {c}) :=
     fun w => (analyticAt_regularized0F1 c w).differentiableAt
   have h := Complex.hasSum_taylorSeries_of_entire hf s (s + z)
-  simp only [add_sub_cancel_left, shBes_iteratedDeriv, smul_eq_mul] at h
+  simp only [add_sub_cancel_left, GegenbauerAddition.iteratedDeriv, smul_eq_mul] at h
   convert h using 2 with k
   ring
 
 /-- The power series of regularized `₀F₁`. -/
-theorem shBes_hasSum_series (c w : ℂ) :
+theorem GegenbauerAddition.hasSum_series (c w : ℂ) :
     HasSum (fun m : ℕ => w ^ m / (m ! * Gamma (c + m)))
       (regularizedHGFun (∅ : Multiset ℂ) {c} w) := by
   have h := (hasFPowerSeriesOnBall_regularized0F1 c).hasSum_mul_pow (z := w) (by simp)
@@ -91,7 +94,7 @@ theorem shBes_hasSum_series (c w : ℂ) :
   ring
 
 /-- `N! ≤ ‖(c)_N‖` for `1 ≤ Re c`. -/
-theorem shBes_factorial_le_norm_poch {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
+theorem GegenbauerAddition.factorial_le_norm_poch {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
     (N ! : ℝ) ≤ ‖poch c N‖ := by
   induction N with
   | zero => simp [poch_zero]
@@ -105,7 +108,7 @@ theorem shBes_factorial_le_norm_poch {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
     gcongr
 
 /-- `‖(ν)_k‖ ≤ k! (1 + ‖ν‖)^k`. -/
-theorem shBes_norm_poch_le (ν : ℂ) (k : ℕ) :
+theorem GegenbauerAddition.norm_poch_le (ν : ℂ) (k : ℕ) :
     ‖poch ν k‖ ≤ k ! * (1 + ‖ν‖) ^ k := by
   induction k with
   | zero => simp [poch_zero]
@@ -121,10 +124,10 @@ theorem shBes_norm_poch_le (ν : ℂ) (k : ℕ) :
       _ = _ := by push_cast; ring
 
 /-- Bound for shifted regularized `₀F₁`: `‖F_{c+k}(s)‖ ≤ ‖Γ(c)⁻¹‖ E(‖s‖) / k!`. -/
-theorem shBes_norm_F_le {c : ℂ} (hc : 1 ≤ c.re) (k : ℕ) (s : ℂ) :
+theorem GegenbauerAddition.norm_regularizedHGFun_le {c : ℂ} (hc : 1 ≤ c.re) (k : ℕ) (s : ℂ) :
     ‖regularizedHGFun (∅ : Multiset ℂ) {c + k} s‖ ≤
       ‖(Gamma c)⁻¹‖ * (∑' m : ℕ, ‖s‖ ^ m / m !) / k ! := by
-  have hs := shBes_hasSum_series (c + k) s
+  have hs := GegenbauerAddition.hasSum_series (c + k) s
   have hE := (Real.summable_pow_div_factorial ‖s‖).hasSum.mul_left (‖(Gamma c)⁻¹‖ / k !)
   rw [show ‖(Gamma c)⁻¹‖ * (∑' m : ℕ, ‖s‖ ^ m / m !) / (k ! : ℝ) =
     ‖(Gamma c)⁻¹‖ / (k ! : ℝ) * ∑' m : ℕ, ‖s‖ ^ m / (m ! : ℝ) by ring]
@@ -149,7 +152,7 @@ theorem shBes_norm_F_le {c : ℂ} (hc : 1 ≤ c.re) (k : ℕ) (s : ℂ) :
     _ = _ := by field_simp
 
 /-- The contiguous relation for the shifted family `m ↦ F_{c+m}(x)`. -/
-theorem shBes_contiguous (c x : ℂ) (m : ℕ) :
+theorem GegenbauerAddition.contiguous (c x : ℂ) (m : ℕ) :
     regularizedHGFun (∅ : Multiset ℂ) {c + m} x =
       (c + m) * regularizedHGFun (∅ : Multiset ℂ) {c + ((m + 1 : ℕ) : ℂ)} x +
         x * regularizedHGFun (∅ : Multiset ℂ) {c + ((m + 2 : ℕ) : ℂ)} x := by
@@ -158,7 +161,7 @@ theorem shBes_contiguous (c x : ℂ) (m : ℕ) :
 
 /-- A finite identity behind the product formula for regularized `₀F₁`:
 `∑ₗ C(j,l) xˡ Γ(c+l)⁻¹ F_{c+l+j}(x) = Γ(c+j)⁻¹ F_c(x)`. -/
-theorem shBes_sum_choose {c : ℂ} (hc : 0 < c.re) (x : ℂ) (j : ℕ) :
+theorem GegenbauerAddition.sum_choose {c : ℂ} (hc : 0 < c.re) (x : ℂ) (j : ℕ) :
     ∑ l ∈ Finset.range (j + 1), (j.choose l : ℂ) * x ^ l * (Gamma (c + l))⁻¹ *
         regularizedHGFun (∅ : Multiset ℂ) {c + ((l + j : ℕ) : ℂ)} x =
       regularizedHGFun (∅ : Multiset ℂ) {c} x * (Gamma (c + j))⁻¹ := by
@@ -182,7 +185,7 @@ theorem shBes_sum_choose {c : ℂ} (hc : 0 < c.re) (x : ℂ) (j : ℕ) :
           ∑ l ∈ Finset.range (j + 1), (j.choose l : ℂ) * (c + l) * P (l + 1) := by
         rw [← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl fun l _ => ?_
-        have hc' := shBes_contiguous c x (l + j)
+        have hc' := GegenbauerAddition.contiguous c x (l + j)
         simp only [P, F]
         rw [hc', hgrec l]
         push_cast
@@ -233,7 +236,7 @@ theorem shBes_sum_choose {c : ℂ} (hc : 0 < c.re) (x : ℂ) (j : ℕ) :
 
 /-- Product formula for regularized `₀F₁`:
 `F_c(x) F_c(y) = ∑ₗ (xy)ˡ / (l! Γ(c+l)) F_{c+2l}(x+y)`. -/
-theorem shBes_hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
+theorem GegenbauerAddition.hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
     HasSum (fun l : ℕ => (x * y) ^ l / l ! * (Gamma (c + l))⁻¹ *
         regularizedHGFun (∅ : Multiset ℂ) {c + ((2 * l : ℕ) : ℂ)} (x + y))
       (regularizedHGFun (∅ : Multiset ℂ) {c} x * regularizedHGFun (∅ : Multiset ℂ) {c} y) := by
@@ -241,7 +244,7 @@ theorem shBes_hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
     (y ^ p.2 / p.2 ! * regularizedHGFun (∅ : Multiset ℂ) {c + ((2 * p.1 + p.2 : ℕ) : ℂ)} x) with hT
   have hrow (l : ℕ) : HasSum (fun b => T (l, b)) ((x * y) ^ l / l ! * (Gamma (c + l))⁻¹ *
       regularizedHGFun (∅ : Multiset ℂ) {c + ((2 * l : ℕ) : ℂ)} (x + y)) := by
-    have h := (shBes_hasSum_shift (c + ((2 * l : ℕ) : ℂ)) x y).mul_left
+    have h := (GegenbauerAddition.hasSum_shift (c + ((2 * l : ℕ) : ℂ)) x y).mul_left
       ((x * y) ^ l / l ! * (Gamma (c + l))⁻¹)
     convert h using 2 with b
     simp only [hT]
@@ -256,7 +259,7 @@ theorem shBes_hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
     have huv := (hu.mul_of_nonneg hv (fun _ => by positivity) (fun _ => by positivity)).mul_left K
     refine Summable.of_norm_bounded huv fun p => ?_
     have h1 := Complex.norm_inv_Gamma_add_nat_le hc p.1
-    have h2 := shBes_norm_F_le hc (2 * p.1 + p.2) x
+    have h2 := GegenbauerAddition.norm_regularizedHGFun_le hc (2 * p.1 + p.2) x
     have hf1 : (1 : ℝ) ≤ p.1 ! := by
       exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero _)
     have hf2 : (1 : ℝ) ≤ (2 * p.1 + p.2) ! := by
@@ -283,7 +286,7 @@ theorem shBes_hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
   have hdj (j : ℕ) : ∑ p ∈ Finset.antidiagonal j, T p =
       regularizedHGFun (∅ : Multiset ℂ) {c} x * (y ^ j / (j ! * Gamma (c + j))) := by
     rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk]
-    have hs := shBes_sum_choose (by linarith : 0 < c.re) x j
+    have hs := GegenbauerAddition.sum_choose (by linarith : 0 < c.re) x j
     rw [show regularizedHGFun (∅ : Multiset ℂ) {c} x * (y ^ j / (j ! * Gamma (c + j))) =
       y ^ j / j ! * (regularizedHGFun (∅ : Multiset ℂ) {c} x * (Gamma (c + j))⁻¹) by ring,
       ← hs, Finset.mul_sum]
@@ -301,14 +304,15 @@ theorem shBes_hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
     rw [show 2 * l + b = l + (l + b) by ring, ← hch']
     field_simp
     ring
-  have hcol := (shBes_hasSum_series c y).mul_left (regularizedHGFun (∅ : Multiset ℂ) {c} x)
+  have hcol := (GegenbauerAddition.hasSum_series c y).mul_left
+      (regularizedHGFun (∅ : Multiset ℂ) {c} x)
   simp_rw [← hdj] at hcol
   rw [hdiag.unique hcol] at hrows
   exact hrows
 
 /-- A crude bound for Gegenbauer polynomials on `[-1, 1]` with complex parameter:
 `‖(ν + n) C_n^ν(cos φ)‖ ≤ (‖ν‖ + 1) (4 (1 + ‖ν‖))ⁿ`. -/
-theorem shBes_norm_ultrasph_le {ν : ℂ} (hν : 0 < ν.re) (n : ℕ) (θ : ℝ) :
+theorem GegenbauerAddition.norm_gegenbauer_le {ν : ℂ} (hν : 0 < ν.re) (n : ℕ) (θ : ℝ) :
     ‖(ν + n) * ultrasphPoly ν n (Real.cos θ)‖ ≤ (‖ν‖ + 1) * (4 * (1 + ‖ν‖)) ^ n := by
   set B : ℝ := 1 + ‖ν‖
   have hB : 0 ≤ B := by positivity
@@ -320,8 +324,8 @@ theorem shBes_norm_ultrasph_le {ν : ℂ} (hν : 0 < ν.re) (n : ℕ) (θ : ℝ)
           cos (((n : ℂ) - 2 * k) * θ)‖ ≤ B ^ n := by
       intro k hk
       have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-      have h1 := shBes_norm_poch_le ν k
-      have h2 := shBes_norm_poch_le ν (n - k)
+      have h1 := GegenbauerAddition.norm_poch_le ν k
+      have h2 := GegenbauerAddition.norm_poch_le ν (n - k)
       have hcos : ‖cos (((n : ℂ) - 2 * k) * θ)‖ ≤ 1 := by
         rw [show ((n : ℂ) - 2 * k) * θ = (((n : ℝ) - 2 * k) * θ : ℝ) by push_cast; ring,
           ← ofReal_cos, Complex.norm_real, Real.norm_eq_abs]
@@ -351,7 +355,7 @@ theorem shBes_norm_ultrasph_le {ν : ℂ} (hν : 0 < ν.re) (n : ℕ) (θ : ℝ)
     _ = _ := by rw [mul_pow, show (4 : ℝ) = 2 * 2 by norm_num, mul_pow]; ring
 
 /-- The reindexing `(k, l) ↦ (k - 2l, l)` from `{(k, l) : 2l ≤ k}` onto `ℕ × ℕ`. -/
-def shBes_equiv : (Σ k : ℕ, Fin (k / 2 + 1)) ≃ ℕ × ℕ where
+def GegenbauerAddition.reindexEquiv : (Σ k : ℕ, Fin (k / 2 + 1)) ≃ ℕ × ℕ where
   toFun p := (p.1 - 2 * p.2, p.2)
   invFun q := ⟨q.1 + 2 * q.2, ⟨q.2, by omega⟩⟩
   left_inv p := by
@@ -364,7 +368,7 @@ def shBes_equiv : (Σ k : ℕ, Fin (k / 2 + 1)) ≃ ℕ × ℕ where
 
 /-- For `Re ν > 0`, the double family of the Bessel addition theorem,
 `(n, l) ↦ (ν+n) C^ν_n(cos φ) · aⁿ (a²)ˡ/l! · ν⁻¹/(ν+1)_{n+l} · F_{ν+1+n+2l}(s)`, is summable. -/
-private lemma shBes_summable_family {ν : ℂ} (hν : 0 < ν.re) (phi : ℝ) (a s : ℂ) :
+private lemma GegenbauerAddition.summable_family {ν : ℂ} (hν : 0 < ν.re) (phi : ℝ) (a s : ℂ) :
     Summable fun p : ℕ × ℕ => (ν + p.1) * ultrasphPoly ν p.1 (Real.cos phi) *
       (a ^ p.1 * (a ^ 2) ^ p.2 / p.2 !) * (ν⁻¹ * (poch (ν + 1) (p.1 + p.2))⁻¹) *
       regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + ((p.1 + 2 * p.2 : ℕ) : ℂ)} s := by
@@ -386,13 +390,13 @@ private lemma shBes_summable_family {ν : ℂ} (hν : 0 < ν.re) (phi : ℝ) (a 
     ((‖ν‖ + 1) * ‖ν‖⁻¹ * M)
   refine Summable.of_norm_bounded huv fun p => ?_
   obtain ⟨n, l⟩ := p
-  have h1 : ‖Xf n‖ ≤ (‖ν‖ + 1) * (4 * B) ^ n := shBes_norm_ultrasph_le hν n phi
+  have h1 : ‖Xf n‖ ≤ (‖ν‖ + 1) * (4 * B) ^ n := GegenbauerAddition.norm_gegenbauer_le hν n phi
   have h2 : ‖Yf n l‖ = ‖a‖ ^ n * (‖a‖ ^ 2) ^ l / l ! := by
     simp only [hYf, norm_div, norm_mul, norm_pow, Complex.norm_natCast]
   have h3 : ‖Zf n l‖ ≤ ‖ν‖⁻¹ := by
     simp only [hZf]
     rw [norm_mul, norm_inv, norm_inv]
-    have hp := shBes_factorial_le_norm_poch hre1 (n + l)
+    have hp := GegenbauerAddition.factorial_le_norm_poch hre1 (n + l)
     have hf : (1 : ℝ) ≤ (n + l) ! := by
       exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero _)
     calc ‖ν‖⁻¹ * ‖poch (ν + 1) (n + l)‖⁻¹ ≤ ‖ν‖⁻¹ * 1 := by
@@ -400,7 +404,7 @@ private lemma shBes_summable_family {ν : ℂ} (hν : 0 < ν.re) (phi : ℝ) (a 
           exact inv_le_one_of_one_le₀ (hf.trans hp)
       _ = _ := mul_one _
   have h4 : ‖Vf n l‖ ≤ M / n ! := by
-    refine (shBes_norm_F_le hre1 (n + 2 * l) s).trans ?_
+    refine (GegenbauerAddition.norm_regularizedHGFun_le hre1 (n + 2 * l) s).trans ?_
     gcongr
     omega
   simp only [hG]
@@ -480,25 +484,25 @@ theorem besselJ_addition {ν : ℂ} {r rho phi : ℝ} (hν : 0 < ν.re)
         rw [← pow_mul, ← pow_add, Nat.sub_add_cancel h2l], Nat.cast_sub h2l]
     push_cast
     ring
-  have hGs : Summable G := shBes_summable_family hν phi a s
+  have hGs : Summable G := GegenbauerAddition.summable_family hν phi a s
   -- regrouping by total degree
   have hA := hGs.hasSum
   have hk : HasSum (fun k => ∑ l ∈ Finset.range (k / 2 + 1), G (k - 2 * l, l)) (∑' p, G p) := by
-    have h := (shBes_equiv.hasSum_iff).mpr hA
+    have h := (GegenbauerAddition.reindexEquiv.hasSum_iff).mpr hA
     refine h.sigma fun k => ?_
-    have := hasSum_fintype (fun i : Fin (k / 2 + 1) => (G ∘ shBes_equiv) ⟨k, i⟩)
+    have := hasSum_fintype (fun i : Fin (k / 2 + 1) => (G ∘ GegenbauerAddition.reindexEquiv) ⟨k, i⟩)
     convert this using 1
     rw [← Fin.sum_univ_eq_sum_range (fun l => G (k - 2 * l, l))]
     rfl
   have hTG : ∑' p, G p = regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (s + z) := by
     refine hk.unique ?_
-    simpa only [hterm] using shBes_hasSum_shift (ν + 1) s z
+    simpa only [hterm] using GegenbauerAddition.hasSum_shift (ν + 1) s z
   -- regrouping by Gegenbauer degree, with the product formula
   have hrow (n : ℕ) : HasSum (fun l => G (n, l)) (a ^ n * Xf n * Gamma ν *
       (regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + n} x *
         regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + n} y)) := by
     have hc : 1 ≤ (ν + 1 + n).re := by simp; linarith
-    have h := (shBes_hasSum_product hc x y).mul_left (a ^ n * Xf n * Gamma ν)
+    have h := (GegenbauerAddition.hasSum_product hc x y).mul_left (a ^ n * Xf n * Gamma ν)
     convert h using 1
     funext l
     have hxy : x * y = a ^ 2 := by rw [hx, hy, ha]; ring

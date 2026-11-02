@@ -19,9 +19,9 @@ the count, with multiplicity, to the function.
 
 ## Main results
 
-* `DLMF.erfZ_count_eq_one_of_expModel`: exactly one zero, counted with multiplicity.
-* `DLMF.erfZ_exists_zero_of_expModel`: a zero in the open disc.
-* `DLMF.erfZ_existsUnique_zero_of_expModel`: exactly one zero in the open disc, and it is simple.
+* `DLMF.count_eq_one_of_expModel`: exactly one zero, counted with multiplicity.
+* `DLMF.exists_zero_of_expModel`: a zero in the open disc.
+* `DLMF.existsUnique_zero_of_expModel`: exactly one zero in the open disc, and it is simple.
 
 The single-point count lemma follows the private `TauCeti.count_eq_single` of
 `TauCeti.Analysis.Complex.Conformal.LocalDegree`.
@@ -32,11 +32,11 @@ The single-point count lemma follows the private `TauCeti.count_eq_single` of
 open Complex Metric Set Filter
 open scoped Topology
 
-namespace DLMF
+namespace DLMF.Confluent.ErfZeros
 
 /-- If `z₀` is the only zero of `f` in the open disc, the zero count is the order at `z₀`
 (after the private `TauCeti.count_eq_single`). -/
-theorem erfZ_count_eq_single {f : ℂ → ℂ} {c z₀ : ℂ} {R : ℝ}
+theorem count_eq_single {f : ℂ → ℂ} {c z₀ : ℂ} {R : ℝ}
     (hf : AnalyticOnNhd ℂ f (closedBall c R)) (hz₀ : z₀ ∈ ball c R)
     (hone : ∀ z ∈ ball c R, z ≠ z₀ → f z ≠ 0) :
     (∑ᶠ z ∈ ball c R, analyticOrderNatAt f z) = analyticOrderNatAt f z₀ := by
@@ -55,12 +55,12 @@ theorem erfZ_count_eq_single {f : ℂ → ℂ} {c z₀ : ℂ} {R : ℝ}
 
 /-- The exponential model `A (exp (z - w) - 1)` has exactly one zero, of order one, in the open
 disc of radius `ρ ≤ 1/2` about `w`. -/
-theorem erfZ_expModel_count {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ) (hρ2 : ρ ≤ 1 / 2) (hA : A ≠ 0) :
+theorem expModel_count {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ) (hρ2 : ρ ≤ 1 / 2) (hA : A ≠ 0) :
     (∑ᶠ z ∈ ball w ρ, analyticOrderNatAt (fun z => A * (exp (z - w) - 1)) z) = 1 := by
   have han : AnalyticOnNhd ℂ (fun z => A * (exp (z - w) - 1)) (closedBall w ρ) := by
     intro z _
     fun_prop
-  rw [erfZ_count_eq_single han (mem_ball_self hρ)]
+  rw [count_eq_single han (mem_ball_self hρ)]
   · have hd : HasDerivAt (fun z => A * (exp (z - w) - 1)) (A * (exp (w - w) * 1)) w := by
       have := (((hasDerivAt_id w).sub_const w).cexp.sub_const 1).const_mul A
       simpa using this
@@ -70,7 +70,7 @@ theorem erfZ_expModel_count {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ) (hρ2 : ρ ≤
   · intro z hz hne
     have hz' : ‖z - w‖ < ρ := mem_ball_iff_norm.mp hz
     have hpos : 0 < ‖z - w‖ := norm_pos_iff.mpr (sub_ne_zero.mpr hne)
-    have := Complex.zloc_norm_exp_sub_one_ge (ζ := z - w) (by linarith)
+    have := Complex.ZeroLocalization.norm_exp_sub_one_ge (ζ := z - w) (by linarith)
     refine mul_ne_zero hA fun h0 => ?_
     rw [h0, norm_zero] at this
     linarith
@@ -78,63 +78,63 @@ theorem erfZ_expModel_count {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ) (hρ2 : ρ ≤
 /-- **Exponential-model Rouché criterion**, count form. If `f` is analytic on `closedBall w ρ`
 with `0 < ρ ≤ 1/2`, `A ≠ 0`, and `‖f z - A (exp (z - w) - 1)‖ < ‖A‖ ρ / 2` on the circle
 `‖z - w‖ = ρ`, then `f` has exactly one zero in the open disc, counted with multiplicity. -/
-theorem erfZ_count_eq_one_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ)
+theorem count_eq_one_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ)
     (hρ2 : ρ ≤ 1 / 2) (hA : A ≠ 0) (hf : AnalyticOnNhd ℂ f (closedBall w ρ))
     (hs : ∀ z ∈ sphere w ρ, ‖f z - A * (exp (z - w) - 1)‖ < ‖A‖ * ρ / 2) :
     (∑ᶠ z ∈ ball w ρ, analyticOrderNatAt f z) = 1 := by
   have han : AnalyticOnNhd ℂ (fun z => A * (exp (z - w) - 1)) (closedBall w ρ) := by
     intro z _
     fun_prop
-  rw [← TauCeti.rouche hρ han hf (fun z hz => ?_), erfZ_expModel_count hρ hρ2 hA]
+  rw [← TauCeti.rouche hρ han hf (fun z hz => ?_), expModel_count hρ hρ2 hA]
   have hzw : ‖z - w‖ = ρ := mem_sphere_iff_norm.mp hz
-  have hlow := Complex.zloc_norm_exp_sub_one_ge (ζ := z - w) (by linarith)
+  have hlow := Complex.ZeroLocalization.norm_exp_sub_one_ge (ζ := z - w) (by linarith)
   rw [norm_sub_rev, norm_mul]
   calc ‖f z - A * (exp (z - w) - 1)‖ < ‖A‖ * ρ / 2 := hs z hz
     _ = ‖A‖ * (‖z - w‖ / 2) := by rw [hzw]; ring
     _ ≤ ‖A‖ * ‖exp (z - w) - 1‖ := by gcongr
 
 /-- Under the exponential-model hypothesis, `f` has no zero on the circle. -/
-theorem erfZ_expModel_ne_zero_sphere {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ}
+theorem expModel_ne_zero_sphere {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ}
     (hρ2 : ρ ≤ 1 / 2)
     (hs : ∀ z ∈ sphere w ρ, ‖f z - A * (exp (z - w) - 1)‖ < ‖A‖ * ρ / 2) :
     ∀ z ∈ sphere w ρ, f z ≠ 0 := by
   intro z hz h0
   have h := hs z hz
   have hzw : ‖z - w‖ = ρ := mem_sphere_iff_norm.mp hz
-  have hlow := Complex.zloc_norm_exp_sub_one_ge (ζ := z - w) (by linarith)
+  have hlow := Complex.ZeroLocalization.norm_exp_sub_one_ge (ζ := z - w) (by linarith)
   rw [h0, zero_sub, norm_neg, norm_mul] at h
   have : ‖A‖ * (ρ / 2) ≤ ‖A‖ * ‖exp (z - w) - 1‖ := by
     gcongr; linarith
   linarith
 
 /-- **Exponential-model Rouché criterion**, existence form: under the hypotheses of
-`erfZ_count_eq_one_of_expModel`, `f` has a zero in the open disc `ball w ρ`. -/
-theorem erfZ_exists_zero_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ)
+`count_eq_one_of_expModel`, `f` has a zero in the open disc `ball w ρ`. -/
+theorem exists_zero_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ)
     (hρ2 : ρ ≤ 1 / 2) (hA : A ≠ 0) (hf : AnalyticOnNhd ℂ f (closedBall w ρ))
     (hs : ∀ z ∈ sphere w ρ, ‖f z - A * (exp (z - w) - 1)‖ < ‖A‖ * ρ / 2) :
     ∃ z ∈ ball w ρ, f z = 0 := by
-  have hcount := erfZ_count_eq_one_of_expModel hρ hρ2 hA hf hs
+  have hcount := count_eq_one_of_expModel hρ hρ2 hA hf hs
   have hne : ∃ z ∈ closedBall w ρ, f z ≠ 0 :=
     TauCeti.exists_mem_closedBall_ne_zero_of_forall_mem_sphere_ne_zero hρ.le
-      (erfZ_expModel_ne_zero_sphere hρ2 hs)
+      (expModel_ne_zero_sphere hρ2 hs)
   by_contra hno
   push Not at hno
   have := (TauCeti.finsum_analyticOrderNatAt_ball_eq_zero_iff hf hne).2 hno
   omega
 
 /-- **Exponential-model Rouché criterion**, uniqueness form: under the hypotheses of
-`erfZ_count_eq_one_of_expModel`, `f` has exactly one zero in the open disc, and that zero has
+`count_eq_one_of_expModel`, `f` has exactly one zero in the open disc, and that zero has
 order one. -/
-theorem erfZ_existsUnique_zero_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ)
+theorem existsUnique_zero_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ} (hρ : 0 < ρ)
     (hρ2 : ρ ≤ 1 / 2) (hA : A ≠ 0) (hf : AnalyticOnNhd ℂ f (closedBall w ρ))
     (hs : ∀ z ∈ sphere w ρ, ‖f z - A * (exp (z - w) - 1)‖ < ‖A‖ * ρ / 2) :
     ∃! z, z ∈ ball w ρ ∧ f z = 0 ∧ analyticOrderNatAt f z = 1 := by
   classical
-  have hcount := erfZ_count_eq_one_of_expModel hρ hρ2 hA hf hs
-  obtain ⟨z, hz, hz0⟩ := erfZ_exists_zero_of_expModel hρ hρ2 hA hf hs
+  have hcount := count_eq_one_of_expModel hρ hρ2 hA hf hs
+  obtain ⟨z, hz, hz0⟩ := exists_zero_of_expModel hρ hρ2 hA hf hs
   have hne : ∃ x ∈ closedBall w ρ, f x ≠ 0 :=
     TauCeti.exists_mem_closedBall_ne_zero_of_forall_mem_sphere_ne_zero hρ.le
-      (erfZ_expModel_ne_zero_sphere hρ2 hs)
+      (expModel_ne_zero_sphere hρ2 hs)
   have hnetop : ∀ y ∈ ball w ρ, f y = 0 → 1 ≤ analyticOrderNatAt f y := by
     intro y hy hy0
     have h1 : analyticOrderAt f y ≠ 0 :=
@@ -186,4 +186,4 @@ theorem erfZ_existsUnique_zero_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : �
   rw [Finset.sum_pair hyz, hyord, hord, hcount] at h2
   omega
 
-end DLMF
+end DLMF.Confluent.ErfZeros

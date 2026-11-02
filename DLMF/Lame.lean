@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Lame.Basic
 public import DLMF.Lame.Polynomials.Basic
+public import DLMF.Lame.Polynomials.Comodulus
 public import DLMF.Lame.Eigenvalues
 public import DLMF.Lame.DifferentialEquations
 public import DLMF.Lame.FourierSeries

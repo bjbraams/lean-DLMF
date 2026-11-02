@@ -30,8 +30,8 @@ DLMF §12.10.
 ## Main results
 
 * `pcfGammaCoeff_expansion`, `pcfGammaCoeff_initial`: DLMF 12.10.16–12.10.17.
-* `pcfLG_olver_exists`, `pcfLG_olver_step`: existence and uniqueness of the polynomial
-  solutions of the Olver recursion with the degree bound.
+* `CylinderLiouvilleGreen.olver_exists`, `CylinderLiouvilleGreen.olver_step`: existence and
+  uniqueness of the polynomial solutions of the Olver recursion with the degree bound.
 * `pcfOlverU_spec`: the recurrence DLMF 12.10.11.
 * `pcfOlverUV_initial`: the initial values DLMF 12.10.9–12.10.10.
 
@@ -46,6 +46,8 @@ constant, and existence and uniqueness are proved separately.
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
+
+open DLMF.Core
 
 namespace DLMF.Confluent
 
@@ -82,7 +84,7 @@ def pcfGammaCoeff (s : ℕ) : ℂ :=
 
 /-- Coefficients identified by limits: if `f(t) = ∑_{s<N} c_s t^{-s} + O(t^{-N})` for all `N`,
 then the successive limits `asymptoticCoeff f` are the `c_s`. -/
-theorem pcfLG_asymptoticCoeff_eq {f : ℝ → ℂ} {c : ℕ → ℂ}
+theorem CylinderLiouvilleGreen.asymptoticCoeff_eq {f : ℝ → ℂ} {c : ℕ → ℂ}
     (h : ∀ N : ℕ, (fun t : ℝ => f t - ∑ s ∈ Finset.range N, c s / (t:ℂ)^s) =O[atTop]
       (fun t : ℝ => (t:ℂ)^(-(N:ℤ)))) (n : ℕ) : asymptoticCoeff f n = c n := by
   induction n using Nat.strong_induction_on with
@@ -120,23 +122,25 @@ theorem pcfLG_asymptoticCoeff_eq {f : ℝ → ℂ} {c : ℕ → ℂ}
 
 open DLMF.Gamma in
 /-- The coefficients of `exp` of the shifted Stirling series at shift `1/2`. -/
-noncomputable def pcfLG_gammaG : ℕ → ℂ
+noncomputable def CylinderLiouvilleGreen.stirlingExpCoeff : ℕ → ℂ
   | 0 => 1
   | n + 1 => (∑ k : Fin (n + 1),
       (-1 : ℂ) ^ k.val * Polynomial.aeval (1/2 : ℂ) (Polynomial.bernoulli (k.val + 2)) /
-        (k.val + 2) * pcfLG_gammaG (n - k.val)) / (n + 1)
+        (k.val + 2) * CylinderLiouvilleGreen.stirlingExpCoeff (n - k.val)) / (n + 1)
 termination_by n => n
 
 open DLMF.Gamma in
-/-- The recurrence of `pcfLG_gammaG` in the form used by the exponentiation lemma. -/
-theorem pcfLG_gammaG_recurrence (n : ℕ) :
-    ((n : ℂ) + 1) * pcfLG_gammaG (n + 1) = ∑ k ∈ Finset.range (n + 1),
-      ((k : ℂ) + 1) * stirlingShiftCoeff (1/2) k * pcfLG_gammaG (n - k) := by
-  rw [pcfLG_gammaG]
+/-- The recurrence of `CylinderLiouvilleGreen.stirlingExpCoeff` in the form used by the
+exponentiation lemma. -/
+theorem CylinderLiouvilleGreen.stirlingExpCoeff_recurrence (n : ℕ) :
+    ((n : ℂ) + 1) * CylinderLiouvilleGreen.stirlingExpCoeff (n + 1) = ∑ k ∈ Finset.range (n + 1),
+      ((k : ℂ) + 1) * stirlingShiftCoeff (1/2) k *
+          CylinderLiouvilleGreen.stirlingExpCoeff (n - k) := by
+  rw [CylinderLiouvilleGreen.stirlingExpCoeff]
   have hn : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
   rw [mul_div_cancel₀ _ hn, Fin.sum_univ_eq_sum_range (fun k => (-1 : ℂ) ^ k *
     Polynomial.aeval (1/2 : ℂ) (Polynomial.bernoulli (k + 2)) / (k + 2) *
-    pcfLG_gammaG (n - k)) (n + 1)]
+    CylinderLiouvilleGreen.stirlingExpCoeff (n - k)) (n + 1)]
   refine Finset.sum_congr rfl fun k _ => ?_
   have h1 : (k : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero k
   have h2 : (k : ℂ) + 2 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (k + 1)
@@ -145,7 +149,7 @@ theorem pcfLG_gammaG_recurrence (n : ℕ) :
 
 open DLMF.Gamma in
 /-- `Γ(1/2+t)/(√(2π) e^{-t} t^t)` is the exponential of the shifted Stirling remainder. -/
-theorem pcfLG_gamma_ratio_eq {t : ℝ} (ht : 0 < t) :
+theorem CylinderLiouvilleGreen.gamma_ratio_eq {t : ℝ} (ht : 0 < t) :
     Gamma (1/2+t)/((Real.sqrt (2*π):ℂ)*exp (-t)*(t:ℂ)^(t:ℂ)) =
       cexp (stirlingShiftRem (1/2) t) := by
   have hta : (t : ℂ) + 1/2 ∈ slitPlane := mem_slitPlane_iff.2 (Or.inl (by
@@ -162,13 +166,17 @@ theorem pcfLG_gamma_ratio_eq {t : ℝ} (ht : 0 < t) :
   congr 1; ring
 
 open DLMF.Gamma in
-/-- The `pcfGammaCoeff` expansion with the coefficients `pcfLG_gammaG`. -/
-theorem pcfLG_gamma_expansion (N : ℕ) :
+/-- The `pcfGammaCoeff` expansion with the coefficients `CylinderLiouvilleGreen.stirlingExpCoeff`.
+-/
+theorem CylinderLiouvilleGreen.gamma_expansion (N : ℕ) :
     (fun z : ℝ => Gamma (1/2+z)/((Real.sqrt (2*π):ℂ)*exp (-z)*(z:ℂ)^(z:ℂ))-∑ s ∈ Finset.range N,
-      pcfLG_gammaG s/(z:ℂ)^s) =O[atTop] (fun z : ℝ => (z:ℂ)^(-(N:ℤ))) := by
+      CylinderLiouvilleGreen.stirlingExpCoeff s/(z:ℂ)^s) =O[atTop]
+          (fun z : ℝ => (z:ℂ)^(-(N:ℤ))) := by
   have hE := isBigO_cexp_sub_of_hasAsymptoticExpansion
-    (hasAsymptoticExpansion_stirlingShiftRem (1/2)) (by rw [pcfLG_gammaG] : pcfLG_gammaG 0 = 1)
-    (fun m => by simpa using pcfLG_gammaG_recurrence m) N
+    (hasAsymptoticExpansion_stirlingShiftRem (1/2))
+        (by rw [CylinderLiouvilleGreen.stirlingExpCoeff] :
+              CylinderLiouvilleGreen.stirlingExpCoeff 0 = 1)
+    (fun m => by simpa using CylinderLiouvilleGreen.stirlingExpCoeff_recurrence m) N
   have hconv : ∀ M : ℕ, (fun t : ℝ => t ^ (-((M : ℝ)))) =O[atTop] fun t : ℝ => (t:ℂ)^(-(M:ℤ)) := by
     intro M
     refine IsBigO.of_bound 1 ?_
@@ -182,20 +190,21 @@ theorem pcfLG_gamma_expansion (N : ℕ) :
     rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos (by linarith) _),
       abs_of_pos (Real.rpow_pos_of_pos (by linarith) _), one_mul]
     exact Real.rpow_le_rpow_of_exponent_le ht (by linarith)
-  have hlast : (fun t : ℝ => pcfLG_gammaG N * ((t⁻¹ : ℝ) : ℂ) ^ N) =O[atTop]
+  have hlast : (fun t : ℝ => CylinderLiouvilleGreen.stirlingExpCoeff N *
+      ((t⁻¹ : ℝ) : ℂ) ^ N) =O[atTop]
       fun t : ℝ => (t:ℂ)^(-(N:ℤ)) := by
-    refine IsBigO.of_bound ‖pcfLG_gammaG N‖ ?_
+    refine IsBigO.of_bound ‖CylinderLiouvilleGreen.stirlingExpCoeff N‖ ?_
     filter_upwards [eventually_gt_atTop 0] with t ht
     rw [norm_mul, zpow_neg, zpow_natCast, Complex.ofReal_inv, inv_pow, norm_inv]
   refine ((hE.trans (hstep.trans (hconv N))).add hlast).congr' ?_ EventuallyEq.rfl
   filter_upwards [eventually_gt_atTop 0] with t ht
-  rw [pcfLG_gamma_ratio_eq ht, Finset.sum_range_succ]
+  rw [CylinderLiouvilleGreen.gamma_ratio_eq ht, Finset.sum_range_succ]
   simp only [Complex.ofReal_inv, inv_pow, div_eq_mul_inv]
   ring
 
 open DLMF.Gamma in
 /-- The Bernoulli polynomials `B_n(1/2)` for `n ≤ 5`. -/
-theorem pcfLG_bernoulli_half (n : ℕ) (hn : n ≤ 5) :
+theorem CylinderLiouvilleGreen.bernoulli_half (n : ℕ) (hn : n ≤ 5) :
     Polynomial.aeval (1/2 : ℂ) (Polynomial.bernoulli n) =
       [1, 0, -1/12, 0, 7/240, 0].getD n 0 := by
   have hb5 : _root_.bernoulli 5 = 0 := bernoulli_eq_zero_of_odd ⟨2, rfl⟩ (by norm_num)
@@ -210,29 +219,36 @@ theorem pcfLG_bernoulli_half (n : ℕ) (hn : n ≤ 5) :
 
 open DLMF.Gamma in
 /-- The first five coefficients `γ_s`. -/
-theorem pcfLG_gammaG_values : pcfLG_gammaG 0 = 1 ∧ pcfLG_gammaG 1 = -1/24 ∧
-    pcfLG_gammaG 2 = 1/1152 ∧
-    pcfLG_gammaG 3 = 1003/414720 ∧ pcfLG_gammaG 4 = -4027/39813120 := by
-  have h2 := pcfLG_bernoulli_half 2 (by norm_num)
-  have h3 := pcfLG_bernoulli_half 3 (by norm_num)
-  have h4 := pcfLG_bernoulli_half 4 (by norm_num)
-  have h5 := pcfLG_bernoulli_half 5 (by norm_num)
+theorem CylinderLiouvilleGreen.stirlingExpCoeff_values : CylinderLiouvilleGreen.stirlingExpCoeff 0 =
+    1 ∧ CylinderLiouvilleGreen.stirlingExpCoeff 1 = -1/24 ∧
+    CylinderLiouvilleGreen.stirlingExpCoeff 2 = 1/1152 ∧
+    CylinderLiouvilleGreen.stirlingExpCoeff 3 = 1003/414720 ∧
+        CylinderLiouvilleGreen.stirlingExpCoeff 4 = -4027/39813120 := by
+  have h2 := CylinderLiouvilleGreen.bernoulli_half 2 (by norm_num)
+  have h3 := CylinderLiouvilleGreen.bernoulli_half 3 (by norm_num)
+  have h4 := CylinderLiouvilleGreen.bernoulli_half 4 (by norm_num)
+  have h5 := CylinderLiouvilleGreen.bernoulli_half 5 (by norm_num)
   simp only [List.getD_cons_succ, List.getD_cons_zero, one_div] at h2 h3 h4 h5
-  have g0 : pcfLG_gammaG 0 = 1 := by rw [pcfLG_gammaG]
-  have g1 : pcfLG_gammaG 1 = -1/24 := by
-    rw [pcfLG_gammaG]; simp [g0]; rw [h2]; norm_num
-  have g2 : pcfLG_gammaG 2 = 1/1152 := by
-    rw [pcfLG_gammaG]; simp [Fin.sum_univ_succ, g0, g1]; rw [h2, h3]; norm_num
-  have g3 : pcfLG_gammaG 3 = 1003/414720 := by
-    rw [pcfLG_gammaG]; simp [Fin.sum_univ_succ, g0, g1, g2]; rw [h2, h3, h4]; norm_num
-  have g4 : pcfLG_gammaG 4 = -4027/39813120 := by
-    rw [pcfLG_gammaG]; simp [Fin.sum_univ_succ, g0, g1, g2, g3]; rw [h2, h3, h4, h5]; norm_num
+  have g0 : CylinderLiouvilleGreen.stirlingExpCoeff 0 = 1 := by
+      rw [CylinderLiouvilleGreen.stirlingExpCoeff]
+  have g1 : CylinderLiouvilleGreen.stirlingExpCoeff 1 = -1/24 := by
+    rw [CylinderLiouvilleGreen.stirlingExpCoeff]; simp [g0]; rw [h2]; norm_num
+  have g2 : CylinderLiouvilleGreen.stirlingExpCoeff 2 = 1/1152 := by
+    rw [CylinderLiouvilleGreen.stirlingExpCoeff]; simp [Fin.sum_univ_succ, g0, g1];
+        rw [h2, h3]; norm_num
+  have g3 : CylinderLiouvilleGreen.stirlingExpCoeff 3 = 1003/414720 := by
+    rw [CylinderLiouvilleGreen.stirlingExpCoeff]; simp [Fin.sum_univ_succ, g0, g1, g2];
+        rw [h2, h3, h4]; norm_num
+  have g4 : CylinderLiouvilleGreen.stirlingExpCoeff 4 = -4027/39813120 := by
+    rw [CylinderLiouvilleGreen.stirlingExpCoeff]; simp [Fin.sum_univ_succ, g0, g1, g2, g3];
+        rw [h2, h3, h4, h5]; norm_num
   exact ⟨g0, g1, g2, g3, g4⟩
 
 open DLMF.Gamma in
-/-- The coefficients `pcfGammaCoeff` are the `pcfLG_gammaG`. -/
-theorem pcfLG_gammaCoeff_eq (s : ℕ) : pcfGammaCoeff s = pcfLG_gammaG s :=
-  pcfLG_asymptoticCoeff_eq pcfLG_gamma_expansion s
+/-- The coefficients `pcfGammaCoeff` are the `CylinderLiouvilleGreen.stirlingExpCoeff`. -/
+theorem CylinderLiouvilleGreen.gammaCoeff_eq (s : ℕ) : pcfGammaCoeff s =
+    CylinderLiouvilleGreen.stirlingExpCoeff s :=
+  CylinderLiouvilleGreen.asymptoticCoeff_eq CylinderLiouvilleGreen.gamma_expansion s
 
 /-- Asymptotic bound with the indicated comparison function: `(fun z : ℝ => Gamma
 (1/2+z)/((Real.sqrt (2*π):ℂ)*exp (-z)*(z:ℂ)^(z:ℂ))-∑ s ∈ Finset.range N, pcfGammaCoeff
@@ -241,7 +257,7 @@ s/(z:ℂ)^s) =O[atTop] (fun z : ℝ => (z:ℂ)^(-(N:ℤ)))`. -/
 theorem pcfGammaCoeff_expansion (N : ℕ) :
     (fun z : ℝ => Gamma (1/2+z)/((Real.sqrt (2*π):ℂ)*exp (-z)*(z:ℂ)^(z:ℂ))-∑ s ∈ Finset.range N,
         pcfGammaCoeff s/(z:ℂ)^s) =O[atTop] (fun z : ℝ => (z:ℂ)^(-(N:ℤ))) := by
-  simp only [pcfLG_gammaCoeff_eq]; exact pcfLG_gamma_expansion N
+  simp only [CylinderLiouvilleGreen.gammaCoeff_eq]; exact CylinderLiouvilleGreen.gamma_expansion N
 
 /-- Identity under the stated parameter and domain assumptions: `pcfGammaCoeff 0=1 ∧ pcfGammaCoeff
 1=-1/24 ∧ pcfGammaCoeff 2=1/1152 ∧ pcfGammaCoeff 3=1003/414720 ∧ pcfGammaCoeff
@@ -250,7 +266,8 @@ theorem pcfGammaCoeff_expansion (N : ℕ) :
 theorem pcfGammaCoeff_initial  :
     pcfGammaCoeff 0=1 ∧ pcfGammaCoeff 1=-1/24 ∧ pcfGammaCoeff 2=1/1152 ∧
         pcfGammaCoeff 3=1003/414720 ∧ pcfGammaCoeff 4=-4027/39813120 := by
-  simp only [pcfLG_gammaCoeff_eq]; exact pcfLG_gammaG_values
+  simp only [CylinderLiouvilleGreen.gammaCoeff_eq];
+      exact CylinderLiouvilleGreen.stirlingExpCoeff_values
 
 /-- Polynomial pairs `(u_s,r_{s-1})`; the polynomial degree condition fixes the integration
 constant. Existence of the chosen polynomial is asserted separately, not inferred from choice.
@@ -349,7 +366,7 @@ theorem olver_sub_eq {k : ℝ} {r p w : Polynomial ℝ} (hp : (X^2-1)*derivative
   rw [derivative_sub]; linear_combination hp - hw
 
 /-- The Olver operator `T_k p = (X²-1)p' - kXp` applied to a monomial. -/
-theorem pcfLG_olverOp_X_pow (k : ℝ) (j : ℕ) :
+theorem CylinderLiouvilleGreen.olverOp_X_pow (k : ℝ) (j : ℕ) :
     (X^2-1)*derivative (X^(j+1) : Polynomial ℝ)-C k*X*X^(j+1) =
       C ((j:ℝ)+1-k) * X^(j+2) - C ((j:ℝ)+1) * X^j := by
   rw [derivative_X_pow]
@@ -357,13 +374,13 @@ theorem pcfLG_olverOp_X_pow (k : ℝ) (j : ℕ) :
   simp; ring
 
 /-- Homogeneous solutions of the Olver operator below the critical degree vanish. -/
-theorem pcfLG_olver_homog {k : ℕ} (hk : 1 ≤ k) {q : Polynomial ℝ}
+theorem CylinderLiouvilleGreen.olver_homog {k : ℕ} (hk : 1 ≤ k) {q : Polynomial ℝ}
     (hq : (X^2-1)*derivative q-C (k:ℝ)*X*q=0)
     (hd : q.natDegree ≤ if Even k then k-2 else k) : q = 0 := by
   by_contra hq0
   set d := q.natDegree with hdd
   have hlc : q.coeff d ≠ 0 := by simpa [hdd] using hq0
-  have e := pcfLG_coeff_rel hq d
+  have e := coeff_relation hq d
   have hd2 : q.coeff (d+2) = 0 := coeff_eq_zero_of_natDegree_lt (by omega)
   rw [hd2, mul_zero, sub_zero] at e
   have hdk : d = k := by
@@ -384,7 +401,7 @@ theorem pcfLG_olver_homog {k : ℕ} (hk : 1 ≤ k) {q : Polynomial ℝ}
       | succ j ih =>
         intro hj
         have h1 := ih (by omega)
-        have e' := pcfLG_coeff_rel hq (k - 2*(j+1))
+        have e' := coeff_relation hq (k - 2*(j+1))
         rw [show k - 2*(j+1) + 2 = k - 2*j by omega] at e'
         intro h0
         rw [h0, mul_zero, zero_sub, neg_eq_zero, mul_eq_zero] at e'
@@ -400,21 +417,21 @@ theorem pcfLG_olver_homog {k : ℕ} (hk : 1 ≤ k) {q : Polynomial ℝ}
     rw [hq, coeff_zero] at e0
     exact h1 (by linarith)
 where
-  pcfLG_coeff_rel {k : ℕ} {q : Polynomial ℝ} (hq : (X^2-1)*derivative q-C (k:ℝ)*X*q=0) (n : ℕ) :
+  coeff_relation {k : ℕ} {q : Polynomial ℝ} (hq : (X^2-1)*derivative q-C (k:ℝ)*X*q=0) (n : ℕ) :
       ((n:ℝ) - k) * q.coeff n - ((n:ℝ)+2) * q.coeff (n+2) = 0 := by
     have := olver_homog_coeff (k:ℝ) q n
     rw [hq, coeff_zero] at this
     linarith
 
 /-- Linearity of the Olver operator. -/
-theorem pcfLG_olverOp_sub_C_mul (k a : ℝ) (p q : Polynomial ℝ) :
+theorem CylinderLiouvilleGreen.olverOp_sub_C_mul (k a : ℝ) (p q : Polynomial ℝ) :
     (X^2-1)*derivative (p - C a * q)-C k*X*(p - C a * q) =
       ((X^2-1)*derivative p-C k*X*p) - C a * ((X^2-1)*derivative q-C k*X*q) := by
   rw [derivative_sub, derivative_C_mul]; ring
 
 /-- Existence of polynomial solutions of `(X²-1)p' - kXp = r` for `r` of parity opposite to `k`
 and degree `< k`; the solution has degree `≤ k` and the parity of `k`. -/
-lemma pcfLG_olver_exists_aux {k : ℕ} (i : ℕ) : ∀ r : Polynomial ℝ,
+lemma CylinderLiouvilleGreen.olver_exists_of_coeff_support {k : ℕ} (i : ℕ) : ∀ r : Polynomial ℝ,
     (∀ n, r.coeff n ≠ 0 → Odd (n+k) ∧ k - i ≤ n ∧ n < k) →
     ∃ p : Polynomial ℝ, (X^2-1)*derivative p-C (k:ℝ)*X*p = r ∧ p.natDegree ≤ k ∧
       ∀ n, p.coeff n ≠ 0 → Even (n+k) := by
@@ -473,7 +490,8 @@ lemma pcfLG_olver_exists_aux {k : ℕ} (i : ℕ) : ∀ r : Polynomial ℝ,
         have h := hr n hn
         exact ⟨h.1, by omega, h.2.2⟩)
     refine ⟨p' - C a * X^(m+1), ?_, ?_, ?_⟩
-    · rw [pcfLG_olverOp_sub_C_mul, hp', pcfLG_olverOp_X_pow, hr']; ring
+    · rw [CylinderLiouvilleGreen.olverOp_sub_C_mul, hp',
+          CylinderLiouvilleGreen.olverOp_X_pow, hr']; ring
     · refine (natDegree_sub_le _ _).trans (max_le hpd ?_)
       refine (natDegree_C_mul_le _ _).trans ?_
       rw [natDegree_X_pow]; omega
@@ -485,7 +503,7 @@ lemma pcfLG_olver_exists_aux {k : ℕ} (i : ℕ) : ∀ r : Polynomial ℝ,
         exact hpp n hn
 
 /-- `(X²-1)^j` solves the homogeneous Olver equation with `k = 2j`. -/
-theorem pcfLG_olver_homog_sol (j : ℕ) :
+theorem CylinderLiouvilleGreen.olver_homog_sol (j : ℕ) :
     (X^2-1)*derivative ((X^2-1)^j : Polynomial ℝ)-C ((2*j:ℕ):ℝ)*X*(X^2-1)^j = 0 := by
   rcases j with _ | j
   · simp
@@ -494,11 +512,11 @@ theorem pcfLG_olver_homog_sol (j : ℕ) :
     simp; ring
 
 /-- Existence with the Olver degree bound. -/
-theorem pcfLG_olver_exists {k : ℕ} (hk : 1 ≤ k) {r : Polynomial ℝ}
+theorem CylinderLiouvilleGreen.olver_exists {k : ℕ} (hk : 1 ≤ k) {r : Polynomial ℝ}
     (hr : ∀ n, r.coeff n ≠ 0 → Odd (n+k) ∧ n < k) :
     ∃ p : Polynomial ℝ, (X^2-1)*derivative p-C (k:ℝ)*X*p = r ∧
       (p.natDegree ≤ if Even k then k-2 else k) ∧ ∀ n, p.coeff n ≠ 0 → Even (n+k) := by
-  obtain ⟨p, hp, hpd, hpp⟩ := pcfLG_olver_exists_aux (k := k) k r
+  obtain ⟨p, hp, hpd, hpp⟩ := CylinderLiouvilleGreen.olver_exists_of_coeff_support (k := k) k r
     (fun n hn => ⟨(hr n hn).1, by omega, (hr n hn).2⟩)
   split_ifs with hke
   · obtain ⟨j, hj⟩ := hke
@@ -516,7 +534,8 @@ theorem pcfLG_olver_exists {k : ℕ} (hk : 1 ≤ k) {r : Polynomial ℝ}
       have := hqmon.coeff_natDegree
       rwa [natDegree_pow, natDegree_X_sub_C, mul_one] at this
     refine ⟨p - C (p.coeff k) * q, ?_, ?_, ?_⟩
-    · rw [pcfLG_olverOp_sub_C_mul, hp, show (k:ℝ) = ((2*j:ℕ):ℝ) by rw [hk2], pcfLG_olver_homog_sol]
+    · rw [CylinderLiouvilleGreen.olverOp_sub_C_mul, hp, show (k:ℝ) = ((2*j:ℕ):ℝ) by
+          rw [hk2], CylinderLiouvilleGreen.olver_homog_sol]
       simp
     · have hcz : ∀ n, k - 2 < n → (p - C (p.coeff k) * q).coeff n = 0 := by
         intro n hn
@@ -547,70 +566,84 @@ theorem pcfLG_olver_exists {k : ℕ} (hk : 1 ≤ k) {r : Polynomial ℝ}
   · exact ⟨p, hp, hpd, hpp⟩
 
 /-- Parity–degree class: the support of `f` lies in `{n ≤ D : n ≡ e mod 2}`. -/
-def PcfLGGood (e D : ℕ) (f : Polynomial ℝ) : Prop :=
+def HasParityDegreeSupport (e D : ℕ) (f : Polynomial ℝ) : Prop :=
   ∀ n, f.coeff n ≠ 0 → Even (n + e) ∧ n ≤ D
 
-/-- The stated relation follows from the given hypotheses: `PcfLGGood e D' f`. -/
-theorem pcfLG_good_mono {e D D' : ℕ} {f : Polynomial ℝ} (h : D ≤ D') (hf : PcfLGGood e D f) :
-    PcfLGGood e D' f := fun n hn => ⟨(hf n hn).1, (hf n hn).2.trans h⟩
+/-- The stated relation follows from the given hypotheses: `HasParityDegreeSupport e D' f`. -/
+theorem HasParityDegreeSupport.mono {e D D' : ℕ} {f : Polynomial ℝ} (h : D ≤ D')
+    (hf : HasParityDegreeSupport e D f) :
+    HasParityDegreeSupport e D' f := fun n hn => ⟨(hf n hn).1, (hf n hn).2.trans h⟩
 
-/-- The stated relation follows from the given hypotheses: `PcfLGGood e D f`. -/
-theorem pcfLG_good_add_two {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood (e+2) D f) :
-    PcfLGGood e D f := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `HasParityDegreeSupport e D f`. -/
+theorem HasParityDegreeSupport.of_add_two {e D : ℕ} {f : Polynomial ℝ}
+    (hf : HasParityDegreeSupport (e+2) D f) :
+    HasParityDegreeSupport e D f := fun n hn => by
   obtain ⟨⟨j, hj⟩, h2⟩ := hf n hn; exact ⟨⟨j-1, by omega⟩, h2⟩
 
-/-- The stated relation follows from the given hypotheses: `PcfLGGood (e+2) D f`. -/
-theorem pcfLG_good_two {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood e D f) :
-    PcfLGGood (e+2) D f := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `HasParityDegreeSupport (e+2) D f`. -/
+theorem HasParityDegreeSupport.add_two {e D : ℕ} {f : Polynomial ℝ}
+    (hf : HasParityDegreeSupport e D f) :
+    HasParityDegreeSupport (e+2) D f := fun n hn => by
   obtain ⟨⟨j, hj⟩, h2⟩ := hf n hn; exact ⟨⟨j+1, by omega⟩, h2⟩
 
-/-- The stated relation follows from the given hypotheses: `PcfLGGood e D 0`. -/
-theorem pcfLG_good_zero (e D : ℕ) : PcfLGGood e D 0 := fun n hn => by simp at hn
+/-- The stated relation follows from the given hypotheses: `HasParityDegreeSupport e D 0`. -/
+theorem HasParityDegreeSupport.zero (e D : ℕ) : HasParityDegreeSupport e D 0 :=
+    fun n hn => by simp at hn
 
-/-- The stated relation follows from the given hypotheses: `PcfLGGood e D (f + g)`. -/
-theorem pcfLG_good_add {e D : ℕ} {f g : Polynomial ℝ} (hf : PcfLGGood e D f)
-    (hg : PcfLGGood e D g) : PcfLGGood e D (f + g) := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `HasParityDegreeSupport e D (f + g)`. -/
+theorem HasParityDegreeSupport.add {e D : ℕ} {f g : Polynomial ℝ}
+    (hf : HasParityDegreeSupport e D f)
+    (hg : HasParityDegreeSupport e D g) : HasParityDegreeSupport e D (f + g) := fun n hn => by
   rw [coeff_add] at hn
   by_cases h : f.coeff n = 0
   · rw [h, zero_add] at hn; exact hg n hn
   · exact hf n h
 
-/-- The stated relation follows from the given hypotheses: `PcfLGGood e D (C a * f)`. -/
-theorem pcfLG_good_C_mul {e D : ℕ} {f : Polynomial ℝ} (a : ℝ) (hf : PcfLGGood e D f) :
-    PcfLGGood e D (C a * f) := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `HasParityDegreeSupport e D (C a * f)`.
+-/
+theorem HasParityDegreeSupport.C_mul {e D : ℕ} {f : Polynomial ℝ} (a : ℝ)
+    (hf : HasParityDegreeSupport e D f) :
+    HasParityDegreeSupport e D (C a * f) := fun n hn => by
   rw [coeff_C_mul] at hn; exact hf n (right_ne_zero_of_mul hn)
 
-/-- The stated relation follows from the given hypotheses: `PcfLGGood e D (f - g)`. -/
-theorem pcfLG_good_sub {e D : ℕ} {f g : Polynomial ℝ} (hf : PcfLGGood e D f)
-    (hg : PcfLGGood e D g) : PcfLGGood e D (f - g) := by
+/-- The stated relation follows from the given hypotheses: `HasParityDegreeSupport e D (f - g)`. -/
+theorem HasParityDegreeSupport.sub {e D : ℕ} {f g : Polynomial ℝ}
+    (hf : HasParityDegreeSupport e D f)
+    (hg : HasParityDegreeSupport e D g) : HasParityDegreeSupport e D (f - g) := by
   rw [sub_eq_add_neg, ← neg_one_mul, show (-1 : Polynomial ℝ) = C (-1) by simp]
-  exact pcfLG_good_add hf (pcfLG_good_C_mul _ hg)
+  exact HasParityDegreeSupport.add hf (HasParityDegreeSupport.C_mul _ hg)
 
-/-- The stated relation follows from the given hypotheses: `PcfLGGood (e+1) (D+1) (X * f)`. -/
-theorem pcfLG_good_X_mul {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood e D f) :
-    PcfLGGood (e+1) (D+1) (X * f) := fun n hn => by
+/-- The stated relation follows from the given hypotheses:
+`HasParityDegreeSupport (e+1) (D+1) (X * f)`. -/
+theorem HasParityDegreeSupport.X_mul {e D : ℕ} {f : Polynomial ℝ}
+    (hf : HasParityDegreeSupport e D f) :
+    HasParityDegreeSupport (e+1) (D+1) (X * f) := fun n hn => by
   rcases n with _ | n
   · simp at hn
   · rw [coeff_X_mul] at hn
     obtain ⟨⟨j, hj⟩, h2⟩ := hf n hn; exact ⟨⟨j+1, by omega⟩, by omega⟩
 
-/-- The stated relation follows from the given hypotheses: `PcfLGGood (e+1) D (derivative f)`. -/
-theorem pcfLG_good_derivative {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood e (D+1) f) :
-    PcfLGGood (e+1) D (derivative f) := fun n hn => by
+/-- The stated relation follows from the given hypotheses:
+`HasParityDegreeSupport (e+1) D (derivative f)`. -/
+theorem HasParityDegreeSupport.derivative {e D : ℕ} {f : Polynomial ℝ}
+    (hf : HasParityDegreeSupport e (D+1) f) :
+    HasParityDegreeSupport (e+1) D (derivative f) := fun n hn => by
   rw [coeff_derivative] at hn
   obtain ⟨⟨j, hj⟩, h2⟩ := hf (n+1) (left_ne_zero_of_mul hn); exact ⟨⟨j, by omega⟩, by omega⟩
 
 /-- One step of the Olver recursion: existence and uniqueness of `u_{s+1}`. -/
-theorem pcfLG_olver_step (s : ℕ) {r : Polynomial ℝ} (hr : PcfLGGood s (3*s+2) r) :
+theorem CylinderLiouvilleGreen.olver_step (s : ℕ) {r : Polynomial ℝ}
+    (hr : HasParityDegreeSupport s (3*s+2) r) :
     ∃ p : Polynomial ℝ, ((X^2-1)*derivative p-C (3*(s+1:ℝ))*X*p=r ∧
       p.natDegree ≤ if Even (s+1) then 3*(s+1)-2 else 3*(s+1)) ∧
-      PcfLGGood (s+1) (3*(s+1)) p ∧
+      HasParityDegreeSupport (s+1) (3*(s+1)) p ∧
       ∀ q : Polynomial ℝ, ((X^2-1)*derivative q-C (3*(s+1:ℝ))*X*q=r ∧
         q.natDegree ≤ if Even (s+1) then 3*(s+1)-2 else 3*(s+1)) → q = p := by
   have hk : (3*(s+1:ℝ)) = ((3*(s+1) : ℕ) : ℝ) := by push_cast; ring
   have hev : Even (3*(s+1)) ↔ Even (s+1) := by
     rw [Nat.even_mul]; simp [show ¬ Even 3 by decide]
-  obtain ⟨p, hp, hpd, hpp⟩ := pcfLG_olver_exists (k := 3*(s+1)) (by omega) (r := r) (by
+  obtain ⟨p, hp, hpd, hpp⟩ :=
+      CylinderLiouvilleGreen.olver_exists (k := 3*(s+1)) (by omega) (r := r) (by
     intro n hn
     obtain ⟨⟨j, hj⟩, h2⟩ := hr n hn
     exact ⟨⟨j+s+1, by omega⟩, by omega⟩)
@@ -621,49 +654,60 @@ theorem pcfLG_olver_step (s : ℕ) {r : Polynomial ℝ} (hr : PcfLGGood s (3*s+2
     by_contra h
     exact hn (coeff_eq_zero_of_natDegree_lt (by split_ifs at hpd <;> omega))
   · rw [hk] at hq
-    refine sub_eq_zero.mp (pcfLG_olver_homog (k := 3*(s+1)) (by omega) (olver_sub_eq hq hp) ?_)
+    refine sub_eq_zero.mp
+        (CylinderLiouvilleGreen.olver_homog (k := 3*(s+1)) (by omega) (olver_sub_eq hq hp) ?_)
     simp only [hev]
     refine (natDegree_sub_le _ _).trans (max_le hqd hpd)
 
 /-- The right-hand side `r_s` of the Olver recursion has parity `s` and degree `≤ 3s+2`. -/
-theorem pcfLG_r_good {s : ℕ} {u ρ : Polynomial ℝ} (hu : PcfLGGood s (3*s) u)
-    (hρ : PcfLGGood (s+1) (3*s+1) ρ) :
-    PcfLGGood s (3*s+2) (C (1/8:ℝ)*(C 3*X^2+C 2)*u - C (3/2*(s+1:ℝ))*X*ρ +
+theorem CylinderLiouvilleGreen.r_hasParityDegreeSupport {s : ℕ} {u ρ : Polynomial ℝ}
+    (hu : HasParityDegreeSupport s (3*s) u)
+    (hρ : HasParityDegreeSupport (s+1) (3*s+1) ρ) :
+    HasParityDegreeSupport s (3*s+2) (C (1/8:ℝ)*(C 3*X^2+C 2)*u - C (3/2*(s+1:ℝ))*X*ρ +
       C (1/2:ℝ)*(X^2-1)*derivative ρ) := by
   have e : C (1/8:ℝ)*(C 3*X^2+C 2)*u - C (3/2*(s+1:ℝ))*X*ρ + C (1/2:ℝ)*(X^2-1)*derivative ρ =
       C (1/8:ℝ)*(C 3*(X*(X*u)) + C 2*u) - C (3/2*(s+1:ℝ))*(X*ρ) +
       C (1/2:ℝ)*(X*(X*derivative ρ) - derivative ρ) := by ring
-  have hρ' : PcfLGGood (s+2) (3*s) (derivative ρ) := pcfLG_good_derivative hρ
+  have hρ' : HasParityDegreeSupport (s+2) (3*s) (derivative ρ) :=
+      HasParityDegreeSupport.derivative hρ
   rw [e]
-  refine pcfLG_good_add (pcfLG_good_sub (pcfLG_good_C_mul _ (pcfLG_good_add
-    (pcfLG_good_C_mul _ (pcfLG_good_add_two (pcfLG_good_X_mul (pcfLG_good_X_mul hu))))
-    (pcfLG_good_C_mul _ (pcfLG_good_mono (by omega) hu))))
-    (pcfLG_good_C_mul _ (pcfLG_good_add_two (pcfLG_good_mono (by omega)
-      (pcfLG_good_X_mul hρ))))) (pcfLG_good_C_mul _ (pcfLG_good_sub ?_ ?_))
-  · exact pcfLG_good_add_two (pcfLG_good_add_two (pcfLG_good_X_mul (pcfLG_good_X_mul hρ')))
-  · exact pcfLG_good_add_two (pcfLG_good_mono (by omega) hρ')
+  refine HasParityDegreeSupport.add
+      (HasParityDegreeSupport.sub (HasParityDegreeSupport.C_mul _ (HasParityDegreeSupport.add
+    (HasParityDegreeSupport.C_mul _
+        (HasParityDegreeSupport.of_add_two
+        (HasParityDegreeSupport.X_mul (HasParityDegreeSupport.X_mul hu))))
+    (HasParityDegreeSupport.C_mul _ (HasParityDegreeSupport.mono (by omega) hu))))
+    (HasParityDegreeSupport.C_mul _
+        (HasParityDegreeSupport.of_add_two (HasParityDegreeSupport.mono (by omega)
+      (HasParityDegreeSupport.X_mul hρ)))))
+          (HasParityDegreeSupport.C_mul _ (HasParityDegreeSupport.sub ?_ ?_))
+  · exact HasParityDegreeSupport.of_add_two
+        (HasParityDegreeSupport.of_add_two
+        (HasParityDegreeSupport.X_mul (HasParityDegreeSupport.X_mul hρ')))
+  · exact HasParityDegreeSupport.of_add_two (HasParityDegreeSupport.mono (by omega) hρ')
 
 /-- Parity and degree invariants of the Olver pairs `(u_s, r_{s-1})`. -/
-theorem pcfLG_olverPair_inv (s : ℕ) :
-    PcfLGGood s (3*s) (pcfOlverPair s).1 ∧ PcfLGGood (s+1) (3*s+1) (pcfOlverPair s).2 := by
+theorem CylinderLiouvilleGreen.olverPair_inv (s : ℕ) :
+    HasParityDegreeSupport s (3*s) (pcfOlverPair s).1 ∧
+        HasParityDegreeSupport (s+1) (3*s+1) (pcfOlverPair s).2 := by
   induction s with
   | zero =>
-    refine ⟨fun n hn => ?_, pcfLG_good_zero _ _⟩
+    refine ⟨fun n hn => ?_, HasParityDegreeSupport.zero _ _⟩
     simp only [pcfOlverPair, coeff_one] at hn
     split_ifs at hn with h
     · subst h; exact ⟨⟨0, rfl⟩, le_rfl⟩
     · exact absurd rfl hn
   | succ s ih =>
     obtain ⟨hu, hρ⟩ := ih
-    have hrg := pcfLG_r_good hu hρ
+    have hrg := CylinderLiouvilleGreen.r_hasParityDegreeSupport hu hρ
     set r := C (1/8:ℝ)*(C 3*X^2+C 2)*(pcfOlverPair s).1 - C (3/2*(s+1:ℝ))*X*(pcfOlverPair s).2 +
       C (1/2:ℝ)*(X^2-1)*derivative (pcfOlverPair s).2 with hr
-    obtain ⟨p, hp, hpg, hpu⟩ := pcfLG_olver_step s hrg
+    obtain ⟨p, hp, hpg, hpu⟩ := CylinderLiouvilleGreen.olver_step s hrg
     have hpair : pcfOlverPair (s+1) = (p, r) := by
       rw [pcfOlverPair]
       exact Prod.ext (olver_epsilon_eq hp hpu) rfl
     rw [hpair]
-    exact ⟨hpg, pcfLG_good_two (pcfLG_good_mono (by omega) hrg)⟩
+    exact ⟨hpg, HasParityDegreeSupport.add_two (HasParityDegreeSupport.mono (by omega) hrg)⟩
 
 /-- Estimate under the stated parameter and domain assumptions: `(X^2-1)*derivative (pcfOlverU
 (s+1))-C (3*(s+1:ℝ))*X*pcfOlverU (s+1)=pcfOlverR s ∧ (pcfOlverU (s+1)).natDegree ≤ if Even
@@ -672,8 +716,9 @@ theorem pcfLG_olverPair_inv (s : ℕ) :
 theorem pcfOlverU_spec (s : ℕ) :
     (X^2-1)*derivative (pcfOlverU (s+1))-C (3*(s+1:ℝ))*X*pcfOlverU (s+1)=pcfOlverR s ∧
         (pcfOlverU (s+1)).natDegree ≤ if Even (s+1) then 3*(s+1)-2 else 3*(s+1) := by
-  obtain ⟨hu, hρ⟩ := pcfLG_olverPair_inv s
-  obtain ⟨p, hp, -, hpu⟩ := pcfLG_olver_step s (pcfLG_r_good hu hρ)
+  obtain ⟨hu, hρ⟩ := CylinderLiouvilleGreen.olverPair_inv s
+  obtain ⟨p, hp, -, hpu⟩ :=
+      CylinderLiouvilleGreen.olver_step s (CylinderLiouvilleGreen.r_hasParityDegreeSupport hu hρ)
   rw [pcfOlverU, pcfOlverR, pcfOlverPair]
   dsimp only
   rw [olver_epsilon_eq hp hpu]

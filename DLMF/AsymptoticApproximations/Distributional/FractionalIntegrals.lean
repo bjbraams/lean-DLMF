@@ -460,7 +460,30 @@ theorem mul_comp_mul_eq_expansion (f h : ℝ → ℂ) (a b : ℕ → ℂ) (α β
         ∑ j ∈ range n, a j * ((t ^ ((j : ℝ) + α - 1) : ℝ) : ℂ) * hn (x * t) +
         ∑ k ∈ range n, b k * ((x ^ (-(k : ℝ) - β) * t ^ (-(k : ℝ) - β) : ℝ) : ℂ) * fn t +
         fn t * hn (x * t) := by
-  sorry
+  intro fn hn
+  set A : ℂ := ∑ j ∈ range n, a j * ((t ^ ((j : ℝ) + α - 1) : ℝ) : ℂ) with hA
+  set B : ℂ := ∑ k ∈ range n, b k * (((x * t) ^ (-(k : ℝ) - β) : ℝ) : ℂ) with hB
+  have hf : f t = A + fn t := by simp only [fn, hA]; ring
+  have hh : h (x * t) = B + hn (x * t) := by simp only [hn, hB]; ring
+  have hxt : ∀ k : ℕ, (x * t) ^ (-(k : ℝ) - β) = x ^ (-(k : ℝ) - β) * t ^ (-(k : ℝ) - β) :=
+    fun k => Real.mul_rpow hx.le ht.le
+  have hAB : A * B = ∑ j ∈ range n, ∑ k ∈ range n, a j * b k *
+      ((t ^ ((j : ℝ) + α - 1 - k - β) * x ^ (-(k : ℝ) - β) : ℝ) : ℂ) := by
+    rw [hA, hB, Finset.sum_mul_sum]
+    refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => ?_
+    rw [hxt k, show (j : ℝ) + α - 1 - k - β = ((j : ℝ) + α - 1) + (-(k : ℝ) - β) by ring,
+      Real.rpow_add ht]
+    push_cast
+    ring
+  have hAh : A * hn (x * t) = ∑ j ∈ range n, a j * ((t ^ ((j : ℝ) + α - 1) : ℝ) : ℂ) *
+      hn (x * t) := by rw [hA, Finset.sum_mul]
+  have hBf : B * fn t = ∑ k ∈ range n, b k * ((x ^ (-(k : ℝ) - β) * t ^ (-(k : ℝ) - β) : ℝ) : ℂ) *
+      fn t := by
+    rw [hB, Finset.sum_mul]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [hxt k]
+  rw [hf, hh, ← hAB, ← hAh, ← hBf]
+  ring
 
 /-- DLMF 2.6.59: the regularized value `∫₀^∞ t^λ dt = 0`. The integral splits as
 `∫₀^1 t^λ dt = 1/(λ+1)` (convergent for `ℜλ > -1`) and `∫₁^∞ t^λ dt = -1/(λ+1)` (convergent

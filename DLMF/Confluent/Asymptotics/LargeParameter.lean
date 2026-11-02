@@ -15,15 +15,15 @@ large-argument expansions of the Whittaker functions.
 
 ## Main definitions
 
-* `hcub_largeBMix`: the coefficients of 13.8.1 re-expanded in powers of `1/b` after
+* `KummerLargeParameter.mixedCoeff`: the coefficients of 13.8.1 re-expanded in powers of `1/b` after
   multiplication by `b^a Γ(b-a)/Γ(b)`.
 
 ## Main results
 
-* `hcub_euler_eq_laplace`: the substitution `s = 1 - e^{-t}` turns Euler's integral for `M` into
-  a Laplace integral.
-* `hcub_largeBMix_eq`: the re-expansion of 13.8.1 has the coefficients `(a)_N q_N(a,z)`, for
-  all `a`.
+* `KummerLargeParameter.euler_eq_laplace`: the substitution `s = 1 - e^{-t}` turns Euler's integral
+  for `M` into a Laplace integral.
+* `KummerLargeParameter.mixedCoeff_eq`: the re-expansion of 13.8.1 has the coefficients
+  `(a)_N q_N(a,z)`, for all `a`.
 * `kummerM_large_b_poincare`: DLMF 13.8.2 for all complex `a`: Watson's lemma for `re a > 0`,
   then uniqueness of asymptotic expansions against 13.8.1 and the identity theorem in `a`.
 * `kummerM_transition`, `kummerU_transition`: the transition region `z = b` (DLMF 13.8.6,
@@ -53,12 +53,13 @@ namespace DLMF.Confluent
 
 For `re a > 0`, Euler's integral in the variable `s = 1 - e^{-t}` is the Laplace transform
 `∫₀^∞ e^{-bt} t^{a-1} q(t) dt` of the generating function 13.8.3, and Watson's lemma gives
-`b^a Γ(b-a)/Γ(b) M(a,b,z) ~ ∑ (a)_s q_s(z) b^{-s}` (`hcub_largeB_base`). For every `a`,
-13.8.1 multiplied by the Gamma-ratio expansion 5.11.13 gives an expansion of the same function
-with explicit coefficients `hcub_largeBMix` (`hcub_largeB_mix`). Uniqueness of asymptotic
-expansions identifies the two coefficient sequences for `re a > 0`; both are entire in `a`
-(the `q_s` through Cauchy's integral formula), so the identity theorem gives the coefficient
-identity for all `a` (`hcub_largeBMix_eq`), and with it 13.8.2 without restriction on `a`.
+`b^a Γ(b-a)/Γ(b) M(a,b,z) ~ ∑ (a)_s q_s(z) b^{-s}` (`KummerLargeParameter.isBigO_base`). For every
+`a`, 13.8.1 multiplied by the Gamma-ratio expansion 5.11.13 gives an expansion of the same function
+with explicit coefficients `KummerLargeParameter.mixedCoeff` (`KummerLargeParameter.isBigO_mixed`).
+Uniqueness of asymptotic expansions identifies the two coefficient sequences for `re a > 0`; both
+are entire in `a` (the `q_s` through Cauchy's integral formula), so the identity theorem gives the
+coefficient identity for all `a` (`KummerLargeParameter.mixedCoeff_eq`), and with it 13.8.2 without
+restriction on `a`.
 -/
 
 section LargeBPoincare
@@ -66,7 +67,8 @@ section LargeBPoincare
 open Set
 
 /-- The large-`b` generating function is analytic at `t = 0`. -/
-theorem hcub_analyticAt_largeBGenerating (a z : ℂ) : AnalyticAt ℂ (largeBGenerating a z) 0 := by
+theorem KummerLargeParameter.analyticAt_largeBGenerating (a z : ℂ) : AnalyticAt ℂ
+    (largeBGenerating a z) 0 := by
   have h1 : expSubOneDiv 0 ∈ slitPlane := by simp [expSubOneDiv]
   have h2 : AnalyticAt ℂ (fun t : ℂ => exp (t + z * (1 - exp (-t)))) 0 :=
     (analyticAt_id.add (analyticAt_const.mul (analyticAt_const.sub analyticAt_id.neg.cexp))).cexp
@@ -74,17 +76,18 @@ theorem hcub_analyticAt_largeBGenerating (a z : ℂ) : AnalyticAt ℂ (largeBGen
 
 /-- The Taylor remainder of the large-`b` generating function after `N` terms is `O(|t|^N)` as `t →
 0`. -/
-theorem hcub_largeB_taylor (a z : ℂ) (N : ℕ) :
+theorem KummerLargeParameter.isBigO_taylor (a z : ℂ) (N : ℕ) :
     (fun t => largeBGenerating a z t - ∑ n ∈ Finset.range N, largeBCoeff a z n * t ^ n)
       =O[𝓝 0] fun t => ‖t‖ ^ N := by
-  have h := (hcub_analyticAt_largeBGenerating a z).hasFPowerSeriesAt.isBigO_sub_partialSum_pow N
+  have h := (KummerLargeParameter.analyticAt_largeBGenerating a
+      z).hasFPowerSeriesAt.isBigO_sub_partialSum_pow N
   refine h.congr' (Eventually.of_forall fun s => ?_) EventuallyEq.rfl
   simp only [zero_add, FormalMultilinearSeries.partialSum,
     FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, largeBCoeff]
 
 /-- The substitution `s = 1 - e^{-t}` transforms the Euler integrand of `M(a,b,z)` into `e^{-bt}
 t^{a-1} G(a,z,t)`, with `G` the large-`b` generating function. -/
-theorem hcub_subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
+theorem KummerLargeParameter.subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
     |Real.exp (-t)| • (((1 - Real.exp (-t) : ℝ) : ℂ) ^ (a - 1) *
       (1 - ((1 - Real.exp (-t) : ℝ) : ℂ)) ^ ((b : ℂ) - a - 1) *
         exp (z * ((1 - Real.exp (-t) : ℝ) : ℂ))) =
@@ -124,18 +127,20 @@ theorem hcub_subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
 
 /-- The Euler integral `∫₀¹ s^{a-1}(1-s)^{b-a-1} e^{zs} ds` equals the Laplace integral `∫₀^∞
 e^{-bt} t^{a-1} G(a,z,t) dt`. -/
-theorem hcub_euler_eq_laplace (a z : ℂ) (b : ℝ) :
+theorem KummerLargeParameter.euler_eq_laplace (a z : ℂ) (b : ℝ) :
     ∫ s : ℝ in (0 : ℝ)..1, (s : ℂ) ^ (a - 1) * (1 - (s : ℂ)) ^ ((b : ℂ) - a - 1) * exp (z * s) =
       ∫ t in Ioi (0 : ℝ), Real.exp (-b * t) • ((t : ℂ) ^ (a - 1) * largeBGenerating a z t) := by
-  rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo, ← hcub_image,
-    integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi (fun t _ => hcub_hasDerivWithinAt t)
-      hcub_injOn]
+  rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo,
+      ← LargeDenominator.image,
+    integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi
+        (fun t _ => LargeDenominator.hasDerivWithinAt t)
+      LargeDenominator.injOn]
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
-  exact hcub_subst a z b ht
+  exact KummerLargeParameter.subst a z b ht
 
 /-- For `0 < Re a < b`, the Laplace integrand `e^{-bt} t^{a-1} G(a,z,t)` is integrable on `(0, ∞)`.
 -/
-theorem hcub_integrableOn (a z : ℂ) (ha : 0 < a.re) {b : ℝ} (hb : a.re < b) :
+theorem KummerLargeParameter.integrableOn (a z : ℂ) (ha : 0 < a.re) {b : ℝ} (hb : a.re < b) :
     IntegrableOn (fun t : ℝ => Real.exp (-b * t) • ((t : ℂ) ^ (a - 1) * largeBGenerating a z t))
       (Ioi 0) := by
   have hβ := betaIntegral_convergent (u := a) (v := (b : ℂ) - a) ha (by simp; linarith)
@@ -143,13 +148,13 @@ theorem hcub_integrableOn (a z : ℂ) (ha : 0 < a.re) {b : ℝ} (hb : a.re < b) 
       exp (z * s)) volume 0 1 := hβ.mul_continuousOn (by fun_prop)
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one] at h1
   have h2 := h1.mono_set Ioo_subset_Ioc_self
-  rw [← hcub_image, integrableOn_image_iff_integrableOn_abs_deriv_smul measurableSet_Ioi
-    (fun t _ => hcub_hasDerivWithinAt t) hcub_injOn] at h2
-  refine h2.congr_fun (fun t ht => hcub_subst a z b ht) measurableSet_Ioi
+  rw [← LargeDenominator.image, integrableOn_image_iff_integrableOn_abs_deriv_smul measurableSet_Ioi
+    (fun t _ => LargeDenominator.hasDerivWithinAt t) LargeDenominator.injOn] at h2
+  refine h2.congr_fun (fun t ht => KummerLargeParameter.subst a z b ht) measurableSet_Ioi
 
 /-- Watson's lemma for the Laplace form of Euler's integral: the large-`b` expansion of
 `b^a Γ(b-a)/Γ(b) M(a,b,z)` when `re a > 0`. -/
-theorem hcub_largeB_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
+theorem KummerLargeParameter.isBigO_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
     (fun b : ℝ => (b : ℂ) ^ a * Gamma (b - a) / Gamma b * kummerM a b z -
        ∑ s ∈ Finset.range n, poch a s * largeBCoeff a z s * ((b : ℂ)⁻¹) ^ s)
       =O[atTop] fun b => ((b : ℂ)⁻¹) ^ n := by
@@ -163,7 +168,7 @@ theorem hcub_largeB_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
       have hc : Tendsto (fun t : ℝ => (t : ℂ)) (𝓝[>] 0) (𝓝 0) := by
         have := (continuous_ofReal.tendsto (0 : ℝ)).mono_left (nhdsWithin_le_nhds (s := Ioi 0))
         simpa using this
-      exact (hcub_largeB_taylor a z N).comp_tendsto hc
+      exact (KummerLargeParameter.isBigO_taylor a z N).comp_tendsto hc
     have hT' : (fun t : ℝ => largeBGenerating a z t - ∑ k ∈ Finset.range N,
         largeBCoeff a z k * (t : ℂ) ^ k) =O[𝓝[>] 0] fun t : ℝ => (t : ℂ) ^ N :=
       hT.trans (IsBigO.of_bound 1 (Eventually.of_forall fun t => by simp))
@@ -184,7 +189,7 @@ theorem hcub_largeB_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
         show (N : ℝ) + a.re - 1 = (a - 1).re + N by simp; ring, Real.rpow_add ht',
         Real.rpow_natCast]
   have hW := hasAsymptoticExpansion_integral_exp_smul_cpow (μ := a) (c := a.re + 1) ha
-    (hcub_integrableOn a z ha (by linarith)) hF n
+    (KummerLargeParameter.integrableOn a z ha (by linarith)) hF n
   have hm := (isBigO_refl (fun b : ℝ => (b : ℂ) ^ a / Gamma a) atTop).mul hW
   have hGa : Gamma a ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos ha)
   refine (hm.congr' ?_ ?_).trans (isBigO_const_mul_self (Gamma a)⁻¹ _ atTop)
@@ -193,7 +198,7 @@ theorem hcub_largeB_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
     have hba : 0 < ((b : ℂ) - a).re := by simp; linarith
     have hGb : Gamma (b : ℂ) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos (by simpa using hb0))
     have hGba : Gamma ((b : ℂ) - a) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos hba)
-    rw [kummerM_eq_euler_integral ha hba, hcub_euler_eq_laplace]
+    rw [kummerM_eq_euler_integral ha hba, KummerLargeParameter.euler_eq_laplace]
     simp only [smul_eq_mul, mul_sub, Finset.mul_sum]
     congr 1
     · field_simp
@@ -204,15 +209,15 @@ theorem hcub_largeB_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
         rw [add_comm]
         field_simp at h1
         linear_combination -h1
-      rw [hp, ← hcub_cpow_mul_cpow_neg hb0 a s]
+      rw [hp, ← LargeDenominator.cpow_mul_cpow_neg hb0 a s]
       field_simp
   · filter_upwards [eventually_gt_atTop 0] with b hb
-    rw [← hcub_cpow_mul_cpow_neg hb a n]
+    rw [← LargeDenominator.cpow_mul_cpow_neg hb a n]
     field_simp
 
 /-- `b^a Γ(b-a)/Γ(b+s) = ∑_{k<n-s} G_k b^{-s-k} + O(b^{-n})`, from the Gamma-ratio expansion
 5.11.13. -/
-theorem hcub_ratio_shift_kummer (a : ℂ) {s n : ℕ} (hs : s ≤ n) :
+theorem KummerLargeParameter.ratio_shift (a : ℂ) {s n : ℕ} (hs : s ≤ n) :
     (fun b : ℝ => (b : ℂ) ^ a * Gamma ((b : ℂ) - a) / Gamma ((b : ℂ) + s) -
       ∑ k ∈ Finset.range (n - s), DLMF.Gamma.stirlingRatioG (-a) s k * ((b : ℂ)⁻¹) ^ (s + k))
       =O[atTop] fun b => ((b : ℂ)⁻¹) ^ n := by
@@ -225,37 +230,38 @@ theorem hcub_ratio_shift_kummer (a : ℂ) {s n : ℕ} (hs : s ≤ n) :
     congr 1
     · ring
     · refine Finset.sum_congr rfl fun k _ => ?_
-      have := hcub_cpow_mul_cpow_neg hb a s
+      have := LargeDenominator.cpow_mul_cpow_neg hb a s
       rw [show -a - (s : ℂ) = -((s : ℂ) + a) by ring, pow_add, ← this, inv_pow]
       ring
   · filter_upwards [eventually_gt_atTop 0] with b hb
     rw [show -a - (s : ℂ) - ((n - s : ℕ) : ℂ) = -((n : ℂ) + a) by push_cast [hs]; ring,
-      hcub_cpow_mul_cpow_neg hb]
+      LargeDenominator.cpow_mul_cpow_neg hb]
 
 /-- `b^a Γ(b-a)/Γ(b)` is bounded as `b → +∞`. -/
-theorem hcub_ratio_isBigO_one (a : ℂ) :
+theorem KummerLargeParameter.ratio_isBigO_one (a : ℂ) :
     (fun b : ℝ => (b : ℂ) ^ a * Gamma ((b : ℂ) - a) / Gamma (b : ℂ)) =O[atTop]
       fun _ => (1 : ℂ) := by
-  have h := hcub_ratio_shift_kummer a (s := 0) (n := 0) le_rfl
+  have h := KummerLargeParameter.ratio_shift a (s := 0) (n := 0) le_rfl
   simpa using h
 
 /-- Coefficients of 13.8.1 re-expanded in powers of `1/b` after multiplication by
 `b^a Γ(b-a)/Γ(b)`. -/
-noncomputable def hcub_largeBMix (a z : ℂ) (N : ℕ) : ℂ :=
+noncomputable def KummerLargeParameter.mixedCoeff (a z : ℂ) (N : ℕ) : ℂ :=
   ∑ s ∈ Finset.range (N + 1), poch a s * z ^ s / s ! * DLMF.Gamma.stirlingRatioG (-a) s (N - s)
 
-/-- 13.8.1 re-expanded: `b^a Γ(b-a)/Γ(b) M(a,b,z) ~ ∑ hcub_largeBMix a z N b^{-N}` for all `a`. -/
-theorem hcub_largeB_mix (a z : ℂ) (n : ℕ) :
+/-- 13.8.1 re-expanded: `b^a Γ(b-a)/Γ(b) M(a,b,z) ~ ∑ KummerLargeParameter.mixedCoeff a z N b^{-N}`
+for all `a`. -/
+theorem KummerLargeParameter.isBigO_mixed (a z : ℂ) (n : ℕ) :
     (fun b : ℝ => (b : ℂ) ^ a * Gamma (b - a) / Gamma b * kummerM a b z -
-       ∑ N ∈ Finset.range n, hcub_largeBMix a z N * ((b : ℂ)⁻¹) ^ N)
+       ∑ N ∈ Finset.range n, KummerLargeParameter.mixedCoeff a z N * ((b : ℂ)⁻¹) ^ N)
       =O[atTop] fun b => ((b : ℂ)⁻¹) ^ n := by
   have h1 := kummerM_large_b a z n
-  have h2 := ((hcub_ratio_isBigO_one a).mul h1).congr_right fun b => one_mul _
+  have h2 := ((KummerLargeParameter.ratio_isBigO_one a).mul h1).congr_right fun b => one_mul _
   have h3 : (fun b : ℝ => ∑ s ∈ Finset.range n, poch a s * z ^ s / s ! *
       ((b : ℂ) ^ a * Gamma ((b : ℂ) - a) / Gamma ((b : ℂ) + s) -
         ∑ k ∈ Finset.range (n - s), DLMF.Gamma.stirlingRatioG (-a) s k * ((b : ℂ)⁻¹) ^ (s + k)))
       =O[atTop] fun b => ((b : ℂ)⁻¹) ^ n :=
-    IsBigO.fun_sum fun s hs => (hcub_ratio_shift_kummer a
+    IsBigO.fun_sum fun s hs => (KummerLargeParameter.ratio_shift a
       (Finset.mem_range.mp hs).le).const_mul_left _
   refine (h2.add h3).congr' ?_ EventuallyEq.rfl
   filter_upwards [eventually_gt_atTop 0] with b hb
@@ -263,7 +269,7 @@ theorem hcub_largeB_mix (a z : ℂ) (n : ℕ) :
   have hGb : Gamma (b : ℂ) ≠ 0 := Gamma_ne_zero hb'
   have hflip := Finset.sum_range_diag_flip n fun s k =>
     poch a s * z ^ s / s ! * (DLMF.Gamma.stirlingRatioG (-a) s k * ((b : ℂ)⁻¹) ^ (s + k))
-  simp only [hcub_largeBMix, Finset.sum_mul]
+  simp only [KummerLargeParameter.mixedCoeff, Finset.sum_mul]
   have hN : ∀ m ∈ Finset.range n, ∑ k ∈ Finset.range (m + 1),
       poch a k * z ^ k / k ! * DLMF.Gamma.stirlingRatioG (-a) k (m - k) * ((b : ℂ)⁻¹) ^ m =
       ∑ k ∈ Finset.range (m + 1), poch a k * z ^ k / k ! *
@@ -291,41 +297,43 @@ theorem hcub_largeB_mix (a z : ℂ) (n : ℕ) :
   ring
 
 /-- For `re a > 0` the re-expanded coefficients of 13.8.1 are those of 13.8.2. -/
-theorem hcub_largeBMix_eq_of_re_pos (a z : ℂ) (ha : 0 < a.re) (N : ℕ) :
-    hcub_largeBMix a z N = poch a N * largeBCoeff a z N := by
-  have h := HasAsymptoticExpansion.unique hcub_isAsymptoticScale hcub_frequently_ne
-    (a := hcub_largeBMix a z) (b := fun N => poch a N * largeBCoeff a z N)
+theorem KummerLargeParameter.mixedCoeff_eq_of_re_pos (a z : ℂ) (ha : 0 < a.re) (N : ℕ) :
+    KummerLargeParameter.mixedCoeff a z N = poch a N * largeBCoeff a z N := by
+  have h := HasAsymptoticExpansion.unique LargeDenominator.isAsymptoticScale
+      LargeDenominator.frequently_ne
+    (a := KummerLargeParameter.mixedCoeff a z) (b := fun N => poch a N * largeBCoeff a z N)
     (f := fun b : ℝ => (b : ℂ) ^ a * Gamma (b - a) / Gamma b * kummerM a b z)
-    (fun n => (hcub_largeB_mix a z n).congr_left fun b => by
+    (fun n => (KummerLargeParameter.isBigO_mixed a z n).congr_left fun b => by
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
-    (fun n => (hcub_largeB_base a z ha n).congr_left fun b => by
+    (fun n => (KummerLargeParameter.isBigO_base a z ha n).congr_left fun b => by
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
   exact congrFun h N
 
 /-- The explicit large-`b` coefficient sum is entire in `a`. -/
-theorem hcub_differentiable_largeBMix (z : ℂ) (N : ℕ) :
-    Differentiable ℂ (fun a => hcub_largeBMix a z N) := by
-  unfold hcub_largeBMix
+theorem KummerLargeParameter.differentiable_mixedCoeff (z : ℂ) (N : ℕ) :
+    Differentiable ℂ (fun a => KummerLargeParameter.mixedCoeff a z N) := by
+  unfold KummerLargeParameter.mixedCoeff
   refine Differentiable.fun_sum fun s _ => ?_
   exact (((Polynomial.differentiable _).mul (differentiable_const _)).div_const _).mul
-    ((hcub_differentiable_stirlingRatioG _ _).comp differentiable_neg)
+    ((LargeDenominator.differentiable_stirlingRatioG _ _).comp differentiable_neg)
 
 /-- The large-`b` generating function is complex differentiable in `t` for `|t| ≤ 1/2`. -/
-theorem hcub_differentiableAt_largeBGenerating (a z : ℂ) {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) :
+theorem KummerLargeParameter.differentiableAt_largeBGenerating (a z : ℂ) {t : ℂ}
+    (ht : ‖t‖ ≤ 1 / 2) :
     DifferentiableAt ℂ (largeBGenerating a z) t := by
   have hE : DifferentiableAt ℂ expSubOneDiv t := (analyticAt_expSubOneDiv t).differentiableAt
   show DifferentiableAt ℂ (fun t => expSubOneDiv t ^ (a - 1) * exp (t + z * (1 - exp (-t)))) t
-  exact (hE.cpow (differentiableAt_const _) (hcub_expSubOneDiv_mem_slitPlane ht)).mul
+  exact (hE.cpow (differentiableAt_const _) (LargeDenominator.expSubOneDiv_mem_slitPlane ht)).mul
     (by fun_prop)
 
 /-- Each large-`b` coefficient is an entire function of `a`. -/
-theorem hcub_differentiable_largeBCoeff (z : ℂ) (N : ℕ) :
+theorem KummerLargeParameter.differentiable_largeBCoeff (z : ℂ) (N : ℕ) :
     Differentiable ℂ (fun a => largeBCoeff a z N) := by
   have hE : ∀ t : ℂ, DifferentiableAt ℂ expSubOneDiv t := fun t =>
     (analyticAt_expSubOneDiv t).differentiableAt
   have hrest : ∀ t : ℂ, DifferentiableAt ℂ (fun t : ℂ => exp (t + z * (1 - exp (-t)))) t :=
     fun t => by fun_prop
-  have h := hcub_differentiable_iteratedDeriv (G := fun a t => largeBGenerating a z t)
+  have h := LargeDenominator.differentiable_iteratedDeriv (G := fun a t => largeBGenerating a z t)
     (r := 1 / 2) (by norm_num)
     (fun a t ht => by
       have hEc : ContinuousAt (fun p : ℂ × ℂ => expSubOneDiv p.2) (a, t) :=
@@ -333,16 +341,17 @@ theorem hcub_differentiable_largeBCoeff (z : ℂ) (N : ℕ) :
           continuous_snd.continuousAt
       have hpow : ContinuousAt (fun p : ℂ × ℂ => expSubOneDiv p.2 ^ (p.1 - 1)) (a, t) :=
         hEc.cpow (continuous_fst.sub continuous_const).continuousAt
-          (hcub_expSubOneDiv_mem_slitPlane ht.le)
+          (LargeDenominator.expSubOneDiv_mem_slitPlane ht.le)
       have hr : ContinuousAt (fun p : ℂ × ℂ => exp (p.2 + z * (1 - exp (-p.2)))) (a, t) :=
         ContinuousAt.comp (f := fun p : ℂ × ℂ => p.2)
           (g := fun t : ℂ => exp (t + z * (1 - exp (-t)))) (hrest t).continuousAt
           continuous_snd.continuousAt
       exact hpow.mul hr)
-    (fun a t ht => (hcub_differentiableAt_largeBGenerating a z
+    (fun a t ht => (KummerLargeParameter.differentiableAt_largeBGenerating a z
       (by simpa using ht)).differentiableWithinAt)
     (fun t ht => by
-      have h0 : expSubOneDiv t ≠ 0 := slitPlane_ne_zero (hcub_expSubOneDiv_mem_slitPlane ht.le)
+      have h0 : expSubOneDiv t ≠ 0 :=
+          slitPlane_ne_zero (LargeDenominator.expSubOneDiv_mem_slitPlane ht.le)
       intro a
       exact ((differentiableAt_id.sub (differentiableAt_const _)).const_cpow
         (Or.inl h0)).mul (differentiableAt_const _)) N
@@ -351,22 +360,23 @@ theorem hcub_differentiable_largeBCoeff (z : ℂ) (N : ℕ) :
 /-- The coefficient identity behind 13.8.2, for all `a`: the re-expansion of 13.8.1 has the
 coefficients `(a)_N q_N(a,z)`. Proved for `re a > 0` by uniqueness of asymptotic expansions
 (Watson's lemma on one side, 13.8.1 on the other) and continued by the identity theorem. -/
-theorem hcub_largeBMix_eq (a z : ℂ) (N : ℕ) :
-    hcub_largeBMix a z N = poch a N * largeBCoeff a z N := by
-  set f : ℂ → ℂ := fun a => hcub_largeBMix a z N - poch a N * largeBCoeff a z N with hfdef
-  have hf : Differentiable ℂ f := (hcub_differentiable_largeBMix z N).sub
-    ((Polynomial.differentiable _).mul (hcub_differentiable_largeBCoeff z N))
+theorem KummerLargeParameter.mixedCoeff_eq (a z : ℂ) (N : ℕ) :
+    KummerLargeParameter.mixedCoeff a z N = poch a N * largeBCoeff a z N := by
+  set f : ℂ → ℂ := fun a => KummerLargeParameter.mixedCoeff a z N - poch a N *
+      largeBCoeff a z N with hfdef
+  have hf : Differentiable ℂ f := (KummerLargeParameter.differentiable_mixedCoeff z N).sub
+    ((Polynomial.differentiable _).mul (KummerLargeParameter.differentiable_largeBCoeff z N))
   have hA : AnalyticOnNhd ℂ f univ := fun x _ => hf.analyticAt x
   have h0 : f =ᶠ[𝓝 1] 0 := by
     have hopen : IsOpen {a : ℂ | 0 < a.re} := isOpen_lt continuous_const continuous_re
     filter_upwards [hopen.mem_nhds (by simp : (1 : ℂ) ∈ {a : ℂ | 0 < a.re})] with x hx
-    simp [hfdef, hcub_largeBMix_eq_of_re_pos x z hx N]
+    simp [hfdef, KummerLargeParameter.mixedCoeff_eq_of_re_pos x z hx N]
   have := hA.eqOn_zero_of_preconnected_of_eventuallyEq_zero isPreconnected_univ (mem_univ 1) h0
     (mem_univ a)
   simpa [hfdef, sub_eq_zero] using this
 
 /-- `Γ(b)/Γ(b-a) b^{-a}` is bounded as `b → +∞`. -/
-theorem hcub_ratio_isBigO_one' (a : ℂ) :
+theorem KummerLargeParameter.ratio_isBigO_one' (a : ℂ) :
     (fun b : ℝ => Gamma (b : ℂ) / Gamma ((b : ℂ) - a) * (b : ℂ) ^ (-a)) =O[atTop]
       fun _ => (1 : ℂ) := by
   have h := DLMF.Gamma.Gamma_ratio_expansion 0 (-a) 0
@@ -390,9 +400,9 @@ theorem kummerM_large_b_poincare (a z : ℂ) (n : ℕ) :
         Gamma (b : ℂ) / Gamma ((b : ℂ) - a) *
           ∑ s ∈ Finset.range n, poch a s * largeBCoeff a z s * (b : ℂ) ^ (-(s : ℂ) - a))
       (fun b : ℝ => (b : ℂ) ^ (-(n : ℂ))) := by
-  have hK := hcub_largeB_mix a z n
-  simp only [hcub_largeBMix_eq] at hK
-  refine ((hcub_ratio_isBigO_one' a).mul hK).congr' ?_ ?_
+  have hK := KummerLargeParameter.isBigO_mixed a z n
+  simp only [KummerLargeParameter.mixedCoeff_eq] at hK
+  refine ((KummerLargeParameter.ratio_isBigO_one' a).mul hK).congr' ?_ ?_
   · filter_upwards [eventually_gt_atTop (max 0 a.re)] with b hb
     have hb0' : 0 < b := lt_of_le_of_lt (le_max_left _ _) hb
     have hb0 : (b : ℂ) ≠ 0 := by exact_mod_cast hb0'.ne'

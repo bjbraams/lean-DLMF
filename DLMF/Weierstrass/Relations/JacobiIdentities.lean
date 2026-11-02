@@ -20,7 +20,8 @@ attached to a modulus (DLMF 23.6.27–23.6.29), and the inversion of `℘` by in
 
 * `quarterK`, `modulus`, `comodulus`: the lattice quantities `K = (π/2)θ₃²(0|τ)`,
   `k = θ₂²/θ₃²` and `k' = θ₄²/θ₃²` at `z = 0`.
-* `eRe`: the real lattice roots of a rectangular lattice.
+* `eRe`: the real lattice roots of a rectangular lattice (used in
+  `DLMF.Weierstrass.RectangularIntegrals`).
 
 ## Main results
 
@@ -35,8 +36,6 @@ attached to a modulus (DLMF 23.6.27–23.6.29), and the inversion of `℘` by in
   `weierstrassP_add_ω₃_sub_e_three_eq_sn`: DLMF 23.6.24–23.6.26.
 * `weierstrassZeta_ns`, `weierstrassZeta_ds`, `weierstrassZeta_cs`: DLMF 23.6.27–23.6.29, the
   last with corrected sign.
-* `rectangular_integral_one` … `rectangular_integral_four`: DLMF 23.6.30–23.6.33.
-* `rectangular_two_ω₁`, `rectangular_two_ω₃`: DLMF 23.6.34–23.6.35.
 * `weierstrassP_inverse_integral`: DLMF 23.6.36 for a general lattice.
 
 ## Implementation notes
@@ -788,72 +787,6 @@ variable (H : HalfPeriods)
 
 /-- The real lattice roots `e_j` of a rectangular lattice, as real numbers. -/
 abbrev eRe (j : ℕ) : ℝ := (H.e j).re
-
-/-- DLMF 23.6.30: for a rectangular lattice (`ω₁ = a > 0`, `ω₃ = ib`, `b > 0`) and
-`z = x ∈ (0, ω₁]`, `t = ℘(z)` is real, `t ≥ e₁` and
-`z = ½ ∫_t^∞ du/√((u - e₁)(u - e₂)(u - e₃))`. -/
-@[dlmf 23.6.E30]
-theorem rectangular_integral_one {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (hω₁ : H.ω₁ = a)
-    (hω₃ : H.ω₃ = b * I) {x : ℝ} (hx : x ∈ Set.Ioc 0 a) :
-    (H.weierstrassP x).im = 0 ∧ H.eRe 1 ≤ (H.weierstrassP x).re ∧
-      x = 1 / 2 * ∫ u in Set.Ioi (H.weierstrassP x).re,
-        1 / Real.sqrt ((u - H.eRe 1) * (u - H.eRe 2) * (u - H.eRe 3)) := by
-  sorry
-
-/-- DLMF 23.6.31: rectangular lattice, `z = ω₁ + iy ∈ [ω₁, ω₁ + ω₃]`: `t = ℘(z)` is real,
-`e₂ ≤ t ≤ e₁` and `z - ω₁ = (i/2) ∫_t^{e₁} du/√((e₁ - u)(u - e₂)(u - e₃))`. -/
-@[dlmf 23.6.E31]
-theorem rectangular_integral_two {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (hω₁ : H.ω₁ = a)
-    (hω₃ : H.ω₃ = b * I) {y : ℝ} (hy : y ∈ Set.Icc 0 b) :
-    (H.weierstrassP (a + y * I)).im = 0 ∧ H.eRe 2 ≤ (H.weierstrassP (a + y * I)).re ∧
-      (H.weierstrassP (a + y * I)).re ≤ H.eRe 1 ∧
-      ((a + y * I : ℂ) - H.ω₁) = I / 2 * ((∫ u in (H.weierstrassP (a + y * I)).re..H.eRe 1,
-        1 / Real.sqrt ((H.eRe 1 - u) * (u - H.eRe 2) * (u - H.eRe 3)) : ℝ) : ℂ) := by
-  sorry
-
-/-- DLMF 23.6.32: rectangular lattice, `z = ω₃ + x ∈ [ω₃, ω₁ + ω₃]`: `t = ℘(z)` is real,
-`e₃ ≤ t ≤ e₂` and `z - ω₃ = ½ ∫_{e₃}^t du/√((e₁ - u)(e₂ - u)(u - e₃))`. -/
-@[dlmf 23.6.E32]
-theorem rectangular_integral_three {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (hω₁ : H.ω₁ = a)
-    (hω₃ : H.ω₃ = b * I) {x : ℝ} (hx : x ∈ Set.Icc 0 a) :
-    (H.weierstrassP (x + b * I)).im = 0 ∧ H.eRe 3 ≤ (H.weierstrassP (x + b * I)).re ∧
-      (H.weierstrassP (x + b * I)).re ≤ H.eRe 2 ∧
-      ((x + b * I : ℂ) - H.ω₃) = ((1 / 2 * ∫ u in H.eRe 3..(H.weierstrassP (x + b * I)).re,
-        1 / Real.sqrt ((H.eRe 1 - u) * (H.eRe 2 - u) * (u - H.eRe 3)) : ℝ) : ℂ) := by
-  sorry
-
-/-- DLMF 23.6.33: rectangular lattice, `z = iy ∈ (0, ω₃]`: `t = ℘(z)` is real, `t ≤ e₃` and
-`z = (i/2) ∫_{-∞}^t du/√((e₁ - u)(e₂ - u)(e₃ - u))`. -/
-@[dlmf 23.6.E33]
-theorem rectangular_integral_four {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (hω₁ : H.ω₁ = a)
-    (hω₃ : H.ω₃ = b * I) {y : ℝ} (hy : y ∈ Set.Ioc 0 b) :
-    (H.weierstrassP (y * I)).im = 0 ∧ (H.weierstrassP (y * I)).re ≤ H.eRe 3 ∧
-      (y * I : ℂ) = I / 2 * ((∫ u in Set.Iio (H.weierstrassP (y * I)).re,
-        1 / Real.sqrt ((H.eRe 1 - u) * (H.eRe 2 - u) * (H.eRe 3 - u)) : ℝ) : ℂ) := by
-  sorry
-
-/-- DLMF 23.6.34: rectangular lattice,
-`2ω₁ = ∫_{e₁}^∞ du/√((u - e₁)(u - e₂)(u - e₃)) = ∫_{e₃}^{e₂} du/√((e₁ - u)(e₂ - u)(u - e₃))`. -/
-@[dlmf 23.6.E34]
-theorem rectangular_two_ω₁ {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (hω₁ : H.ω₁ = a)
-    (hω₃ : H.ω₃ = b * I) :
-    2 * a = ∫ u in Set.Ioi (H.eRe 1),
-        1 / Real.sqrt ((u - H.eRe 1) * (u - H.eRe 2) * (u - H.eRe 3)) ∧
-      2 * a = ∫ u in H.eRe 3..H.eRe 2,
-        1 / Real.sqrt ((H.eRe 1 - u) * (H.eRe 2 - u) * (u - H.eRe 3)) := by
-  sorry
-
-/-- DLMF 23.6.35: rectangular lattice, `2ω₃ = i ∫_{e₂}^{e₁} du/√((e₁ - u)(u - e₂)(u - e₃))
-= i ∫_{-∞}^{e₃} du/√((e₁ - u)(e₂ - u)(e₃ - u))`; with `ω₃ = ib` this says `2b` equals both
-integrals. -/
-@[dlmf 23.6.E35]
-theorem rectangular_two_ω₃ {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (hω₁ : H.ω₁ = a)
-    (hω₃ : H.ω₃ = b * I) :
-    2 * b = ∫ u in H.eRe 2..H.eRe 1,
-        1 / Real.sqrt ((H.eRe 1 - u) * (u - H.eRe 2) * (u - H.eRe 3)) ∧
-      2 * b = ∫ u in Set.Iio (H.eRe 3),
-        1 / Real.sqrt ((H.eRe 1 - u) * (H.eRe 2 - u) * (H.eRe 3 - u)) := by
-  sorry
 
 end HalfPeriods
 

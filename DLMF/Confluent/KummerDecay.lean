@@ -72,7 +72,7 @@ theorem hasAsymptoticExpansion_regularizedHGFun_neg (a b : ℂ) :
     rw [regularizedConfluent_kummer_transform a b (-(t : ℂ)), neg_neg]
 
 /-- `t^s ≤ 2^{|s|} (1+t)^s` for `t ≥ 1` and every real `s`. -/
-theorem kumDec_rpow_le_one_add {t : ℝ} (ht : 1 ≤ t) (s : ℝ) :
+theorem KummerDecayBounds.rpow_le_one_add {t : ℝ} (ht : 1 ≤ t) (s : ℝ) :
     t ^ s ≤ 2 ^ |s| * (1 + t) ^ s := by
   have ht0 : 0 < t := by linarith
   rcases le_or_gt 0 s with hs | hs
@@ -136,7 +136,8 @@ theorem tendsto_cpow_mul_regularizedHGFun_neg (a b : ℂ) :
 
 /-- A function continuous on `[0,∞)` and `O(g)` at infinity, with `g` continuous and positive on
 `[0,∞)`, is bounded by a multiple of `g` on `[0,∞)`. -/
-theorem kumDec_exists_bound_of_isBigO {f : ℝ → ℂ} {g : ℝ → ℝ} (hf : ContinuousOn f (Ici 0))
+theorem KummerDecayBounds.exists_bound_of_isBigO {f : ℝ → ℂ} {g : ℝ → ℝ}
+    (hf : ContinuousOn f (Ici 0))
     (hg : ContinuousOn g (Ici 0)) (hgpos : ∀ t, 0 ≤ t → 0 < g t) (h : f =O[atTop] g) :
     ∃ C, ∀ t, 0 ≤ t → ‖f t‖ ≤ C * g t := by
   obtain ⟨C1, hC1⟩ := h.bound
@@ -155,7 +156,7 @@ theorem kumDec_exists_bound_of_isBigO {f : ℝ → ℂ} {g : ℝ → ℝ} (hf : 
     exact h1.trans (mul_le_mul_of_nonneg_right (le_max_left _ _) hg0.le)
 
 /-- `t ↦ M̃(a,b,-t)` is continuous on the real line. -/
-theorem kumDec_continuous_neg (a b : ℂ) :
+theorem KummerDecayBounds.continuous_neg (a b : ℂ) :
     Continuous fun t : ℝ => regularizedHGFun {a} {b} (-(t : ℂ)) :=
   continuous_regularizedConfluent.comp (by fun_prop :
     Continuous fun t : ℝ => (a, b, -(t : ℂ)))
@@ -164,50 +165,54 @@ theorem kumDec_continuous_neg (a b : ℂ) :
 `t ≥ 0`. -/
 theorem exists_norm_regularizedHGFun_neg_le (a b : ℂ) :
     ∃ C, ∀ t : ℝ, 0 ≤ t → ‖regularizedHGFun {a} {b} (-(t : ℂ))‖ ≤ C * (1 + t) ^ (-a.re) := by
-  refine kumDec_exists_bound_of_isBigO (kumDec_continuous_neg a b).continuousOn
+  refine KummerDecayBounds.exists_bound_of_isBigO
+      (KummerDecayBounds.continuous_neg a b).continuousOn
     ((continuousOn_const.add continuousOn_id).rpow_const fun t ht => Or.inl (by
       simp only [mem_Ici] at ht; simp only [Pi.add_apply, id_eq]; linarith))
     (fun t ht => by positivity) ((isBigO_regularizedHGFun_neg a b).trans ?_)
   refine IsBigO.of_bound (2 ^ |-a.re|) ?_
   filter_upwards [eventually_ge_atTop 1] with t ht
   rw [Real.norm_of_nonneg (by positivity), Real.norm_of_nonneg (by positivity)]
-  exact kumDec_rpow_le_one_add ht _
+  exact KummerDecayBounds.rpow_le_one_add ht _
 
 /-! ### Locally uniform bounds in the parameters -/
 
 /-- The Euler kernel of 13.4.1 at the argument `-t`. -/
-def kumDec_eulerKernel (a b : ℂ) (t s : ℝ) : ℂ :=
+def KummerDecayBounds.eulerKernel (a b : ℂ) (t s : ℝ) : ℂ :=
   exp (-(t : ℂ) * s) * (s : ℂ) ^ (a - 1) * (1 - (s : ℂ)) ^ (b - a - 1)
 
 /-- For `Re a > 0` and `Re(b-a) > 0`, the Euler kernel `e^{-ts} s^{a-1} (1-s)^{b-a-1}` is integrable
 on `[0,1]`. -/
-theorem kumDec_intervalIntegrable_eulerKernel {a b : ℂ} (ha : 0 < a.re) (hba : 0 < (b - a).re)
-    (t : ℝ) : IntervalIntegrable (kumDec_eulerKernel a b t) volume 0 1 := by
+theorem KummerDecayBounds.intervalIntegrable_eulerKernel {a b : ℂ} (ha : 0 < a.re)
+    (hba : 0 < (b - a).re)
+    (t : ℝ) : IntervalIntegrable (KummerDecayBounds.eulerKernel a b t) volume 0 1 := by
   have h := (Complex.betaIntegral_convergent (u := a) (v := b - a) ha hba).continuousOn_mul
     (g := fun s : ℝ => exp (-(t : ℂ) * s)) (by fun_prop)
   refine h.congr fun s _ => ?_
-  simp only [kumDec_eulerKernel]
+  simp only [KummerDecayBounds.eulerKernel]
   ring
 
 /-- The modulus of the Euler kernel on `(0,1)` is `e^{-ts} s^{Re a - 1} (1-s)^{Re(b-a) - 1}`. -/
-theorem kumDec_norm_eulerKernel (a b : ℂ) {t s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
-    ‖kumDec_eulerKernel a b t s‖ =
+theorem KummerDecayBounds.norm_eulerKernel (a b : ℂ) {t s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
+    ‖KummerDecayBounds.eulerKernel a b t s‖ =
       Real.exp (-(t * s)) * s ^ (a.re - 1) * (1 - s) ^ ((b - a).re - 1) := by
   have h1 : (1 - (s : ℂ)) = ((1 - s : ℝ) : ℂ) := by push_cast; ring
-  simp only [kumDec_eulerKernel, norm_mul, Complex.norm_exp]
+  simp only [KummerDecayBounds.eulerKernel, norm_mul, Complex.norm_exp]
   rw [norm_cpow_eq_rpow_re_of_pos hs.1, h1, norm_cpow_eq_rpow_re_of_pos (by linarith [hs.2])]
   simp
 
 /-- Euler's integral (DLMF 13.4.1) at negative real argument: `M̃(a,b,-t) = (Γ(a)Γ(b-a))⁻¹ ∫₀¹
 e^{-ts} s^{a-1} (1-s)^{b-a-1} ds`. -/
-theorem kumDec_regularizedHGFun_neg_eq {a b : ℂ} (ha : 0 < a.re) (hba : 0 < (b - a).re) (t : ℝ) :
+theorem KummerDecayBounds.regularizedHGFun_neg_eq {a b : ℂ} (ha : 0 < a.re)
+    (hba : 0 < (b - a).re) (t : ℝ) :
     regularizedHGFun {a} {b} (-(t : ℂ)) =
-      1 / (Gamma a * Gamma (b - a)) * ∫ s : ℝ in (0 : ℝ)..1, kumDec_eulerKernel a b t s := by
+      1 / (Gamma a * Gamma (b - a)) * ∫ s : ℝ in (0 : ℝ)..1,
+          KummerDecayBounds.eulerKernel a b t s := by
   rw [regularized_euler_integral ha hba]
   rfl
 
 /-- Base case of the locally uniform bound: the Euler region `0 < re a < re b`. -/
-theorem kumDec_bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β₀ - α₀).re) {ε : ℝ}
+theorem KummerDecayBounds.bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β₀ - α₀).re) {ε : ℝ}
     (hε : 0 < ε) :
     ∃ C, ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), ∀ t : ℝ, 0 ≤ t →
       ‖regularizedHGFun {p.1} {p.2} (-(t : ℂ))‖ ≤ C * (1 + t) ^ (-α₀.re + ε) := by
@@ -243,13 +248,13 @@ theorem kumDec_bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β
   have hσc : 0 < (σ : ℂ).re := by simpa using hσ0
   have hτc : 0 < (((σ + τ : ℝ) : ℂ) - (σ : ℂ)).re := by rw [hστ]; simpa using hτ0
   -- the real-parameter majorant
-  have hI1 := kumDec_intervalIntegrable_eulerKernel hσc hτc t
-  have hIp := kumDec_intervalIntegrable_eulerKernel hpa hpb t
-  have hle : ∫ s : ℝ in (0 : ℝ)..1, ‖kumDec_eulerKernel p.1 p.2 t s‖ ≤
-      ∫ s : ℝ in (0 : ℝ)..1, ‖kumDec_eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ := by
+  have hI1 := KummerDecayBounds.intervalIntegrable_eulerKernel hσc hτc t
+  have hIp := KummerDecayBounds.intervalIntegrable_eulerKernel hpa hpb t
+  have hle : ∫ s : ℝ in (0 : ℝ)..1, ‖KummerDecayBounds.eulerKernel p.1 p.2 t s‖ ≤
+      ∫ s : ℝ in (0 : ℝ)..1, ‖KummerDecayBounds.eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ := by
     refine intervalIntegral.integral_mono_on_of_le_Ioo (by norm_num) hIp.norm hI1.norm ?_
     intro s hs
-    rw [kumDec_norm_eulerKernel _ _ hs, kumDec_norm_eulerKernel _ _ hs, hστ]
+    rw [KummerDecayBounds.norm_eulerKernel _ _ hs, KummerDecayBounds.norm_eulerKernel _ _ hs, hστ]
     simp only [ofReal_re]
     have h1 : s ^ (p.1.re - 1) ≤ s ^ (σ - 1) :=
       Real.rpow_le_rpow_of_exponent_ge hs.1 hs.2.le (by linarith)
@@ -258,15 +263,16 @@ theorem kumDec_bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β
     exact mul_le_mul (mul_le_mul_of_nonneg_left h1 (Real.exp_pos _).le) h2
       (Real.rpow_nonneg (by linarith [hs.2]) _)
       (mul_nonneg (Real.exp_pos _).le (Real.rpow_nonneg hs.1.le _))
-  have heq1 : ∫ s : ℝ in (0 : ℝ)..1, ‖kumDec_eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ =
-      ‖∫ s : ℝ in (0 : ℝ)..1, kumDec_eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ := by
-    have hc : ∫ s : ℝ in (0 : ℝ)..1, kumDec_eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s =
-        ((∫ s : ℝ in (0 : ℝ)..1, ‖kumDec_eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ : ℝ) : ℂ) := by
+  have heq1 : ∫ s : ℝ in (0 : ℝ)..1, ‖KummerDecayBounds.eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ =
+      ‖∫ s : ℝ in (0 : ℝ)..1, KummerDecayBounds.eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ := by
+    have hc : ∫ s : ℝ in (0 : ℝ)..1, KummerDecayBounds.eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s =
+        ((∫ s : ℝ in (0 : ℝ)..1,
+            ‖KummerDecayBounds.eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ : ℝ) : ℂ) := by
       rw [← intervalIntegral.integral_ofReal]
       refine intervalIntegral.integral_congr_Ioo_of_le (by norm_num) fun s hs => ?_
-      rw [kumDec_norm_eulerKernel _ _ hs, hστ]
+      rw [KummerDecayBounds.norm_eulerKernel _ _ hs, hστ]
       have h1 : (1 - (s : ℂ)) = ((1 - s : ℝ) : ℂ) := by push_cast; ring
-      simp only [kumDec_eulerKernel, hστ, h1, ofReal_re]
+      simp only [KummerDecayBounds.eulerKernel, hστ, h1, ofReal_re]
       rw [show -(t : ℂ) * s = ((-(t * s) : ℝ) : ℂ) by push_cast; ring, ← ofReal_exp,
         show (σ : ℂ) - 1 = ((σ - 1 : ℝ) : ℂ) by push_cast; ring,
         show (τ : ℂ) - 1 = ((τ - 1 : ℝ) : ℂ) by push_cast; ring,
@@ -275,21 +281,22 @@ theorem kumDec_bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β
       ring
     rw [hc, norm_real, Real.norm_of_nonneg (intervalIntegral.integral_nonneg (by norm_num)
       fun s _ => norm_nonneg _)]
-  have hM1 := kumDec_regularizedHGFun_neg_eq hσc hτc t
+  have hM1 := KummerDecayBounds.regularizedHGFun_neg_eq hσc hτc t
   rw [hστ] at hM1
   have hΓ : Gamma (σ : ℂ) * Gamma (τ : ℂ) ≠ 0 :=
     mul_ne_zero (Gamma_ne_zero_of_re_pos hσc) (Gamma_ne_zero_of_re_pos (by simpa using hτ0))
-  have hI1eq : ∫ s : ℝ in (0 : ℝ)..1, kumDec_eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s =
+  have hI1eq : ∫ s : ℝ in (0 : ℝ)..1, KummerDecayBounds.eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s =
       Gamma (σ : ℂ) * Gamma (τ : ℂ) *
           regularizedHGFun {(σ : ℂ)} {((σ + τ : ℝ) : ℂ)} (-(t : ℂ)) := by
     rw [hM1, ← mul_assoc, one_div, mul_inv_cancel₀ hΓ, one_mul]
   have hpow : (1 + t) ^ (-σ) ≤ (1 + t) ^ (-α₀.re + ε) :=
     Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
   calc ‖regularizedHGFun {p.1} {p.2} (-(t : ℂ))‖
-      = ‖G p‖ * ‖∫ s : ℝ in (0 : ℝ)..1, kumDec_eulerKernel p.1 p.2 t s‖ := by
-        rw [kumDec_regularizedHGFun_neg_eq hpa hpb t, norm_mul, hGdef]
+      = ‖G p‖ * ‖∫ s : ℝ in (0 : ℝ)..1, KummerDecayBounds.eulerKernel p.1 p.2 t s‖ := by
+        rw [KummerDecayBounds.regularizedHGFun_neg_eq hpa hpb t, norm_mul, hGdef]
         simp only [one_div, mul_inv, norm_mul, norm_inv]
-    _ ≤ K * ∫ s : ℝ in (0 : ℝ)..1, ‖kumDec_eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ := by
+    _ ≤ K * ∫ s : ℝ in (0 : ℝ)..1,
+        ‖KummerDecayBounds.eulerKernel (σ : ℂ) ((σ + τ : ℝ) : ℂ) t s‖ := by
         gcongr
         exact (intervalIntegral.norm_integral_le_integral_norm (by norm_num)).trans hle
     _ ≤ K * (‖Gamma (σ : ℂ) * Gamma (τ : ℂ)‖ * (C0 * (1 + t) ^ (-σ))) := by
@@ -307,12 +314,12 @@ theorem kumDec_bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β
           _ ≤ _ := by gcongr
 
 /-- The locally uniform decay property of `𝐌(·,·,-t)` near `(α₀, β₀)`, with exponent loss `ε`. -/
-def KumDecBnd (α₀ β₀ : ℂ) : Prop :=
+def KummerDecayBound (α₀ β₀ : ℂ) : Prop :=
   ∀ ε : ℝ, 0 < ε → ∃ C, ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), ∀ t : ℝ, 0 ≤ t →
     ‖regularizedHGFun {p.1} {p.2} (-(t : ℂ))‖ ≤ C * (1 + t) ^ (-α₀.re + ε)
 
 /-- For `t ≥ 0`, `t (1+t)^{e-1} ≤ (1+t)^e`. -/
-theorem kumDec_t_mul_rpow_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
+theorem KummerDecayBounds.t_mul_rpow_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
     t * (1 + t) ^ (e - 1) ≤ (1 + t) ^ e := by
   have h : (1 + t) ^ e = (1 + t) ^ (e - 1) * (1 + t) := by
     rw [← Real.rpow_add_one (by linarith)]; ring_nf
@@ -320,20 +327,20 @@ theorem kumDec_t_mul_rpow_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
   exact mul_le_mul_of_nonneg_left (by linarith) (by positivity)
 
 /-- For `t ≥ 0`, `(1+t)^{e-1} ≤ (1+t)^e`. -/
-theorem kumDec_rpow_sub_one_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
+theorem KummerDecayBounds.rpow_sub_one_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
     (1 + t) ^ (e - 1) ≤ (1 + t) ^ e :=
   Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
 
 /-- A property eventually true near `(α₀+u, β₀+v)` holds eventually near `(α₀, β₀)` for the shifted
 pair. -/
-theorem kumDec_eventually_shift {P : ℂ × ℂ → Prop} (α₀ β₀ u v : ℂ)
+theorem KummerDecayBounds.eventually_shift {P : ℂ × ℂ → Prop} (α₀ β₀ u v : ℂ)
     (h : ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀ + u, β₀ + v), P p) :
     ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), P (p.1 + u, p.2 + v) := by
   have hc : Continuous fun p : ℂ × ℂ => (p.1 + u, p.2 + v) := by fun_prop
   exact hc.continuousAt.eventually h
 
 /-- Near `(α₀, β₀)`, both coordinates are bounded by `|α₀| + 1` and `|β₀| + 1`. -/
-theorem kumDec_eventually_norm_le (α₀ β₀ : ℂ) :
+theorem KummerDecayBounds.eventually_norm_le (α₀ β₀ : ℂ) :
     ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), ‖p.1‖ ≤ ‖α₀‖ + 1 ∧ ‖p.2‖ ≤ ‖β₀‖ + 1 := by
   have c1 : Continuous fun p : ℂ × ℂ => ‖p.1‖ := by fun_prop
   have c2 : Continuous fun p : ℂ × ℂ => ‖p.2‖ := by fun_prop
@@ -343,15 +350,15 @@ theorem kumDec_eventually_norm_le (α₀ β₀ : ℂ) :
 
 /-- Lowering `re (b - a)` by one: 13.3.20 with `n = 1`,
 `𝐌(a,b,z) = b 𝐌(a,b+1,z) + a z 𝐌(a+1,b+2,z)`, keeps the decay exponent. -/
-theorem kumDec_bnd_step_b {α₀ β₀ : ℂ} (h1 : KumDecBnd α₀ (β₀ + 1))
-    (h2 : KumDecBnd (α₀ + 1) (β₀ + 2)) : KumDecBnd α₀ β₀ := by
+theorem KummerDecayBounds.bound_step_b {α₀ β₀ : ℂ} (h1 : KummerDecayBound α₀ (β₀ + 1))
+    (h2 : KummerDecayBound (α₀ + 1) (β₀ + 2)) : KummerDecayBound α₀ β₀ := by
   intro ε hε
   obtain ⟨C1, hC1⟩ := h1 ε hε
   obtain ⟨C2, hC2⟩ := h2 ε hε
-  have hC1' := kumDec_eventually_shift α₀ β₀ 0 1 (by simpa using hC1)
-  have hC2' := kumDec_eventually_shift α₀ β₀ 1 2 hC2
+  have hC1' := KummerDecayBounds.eventually_shift α₀ β₀ 0 1 (by simpa using hC1)
+  have hC2' := KummerDecayBounds.eventually_shift α₀ β₀ 1 2 hC2
   refine ⟨(‖β₀‖ + 1) * |C1| + (‖α₀‖ + 1) * |C2|, ?_⟩
-  filter_upwards [hC1', hC2', kumDec_eventually_norm_le α₀ β₀] with p hp1 hp2 hpn t ht
+  filter_upwards [hC1', hC2', KummerDecayBounds.eventually_norm_le α₀ β₀] with p hp1 hp2 hpn t ht
   simp only [add_zero] at hp1 hp2
   have hrel := regularizedConfluent_contiguous_mixed_b_pred p.1 (p.2 + 1) (-(t : ℂ))
   rw [add_sub_cancel_right, show p.2 + 1 + 1 = p.2 + 2 by ring] at hrel
@@ -384,18 +391,18 @@ theorem kumDec_bnd_step_b {α₀ β₀ : ℂ} (h1 : KumDecBnd α₀ (β₀ + 1))
           (mul_le_mul hpn.1 hY (by positivity) (by positivity))
     _ ≤ (‖β₀‖ + 1) * (|C1| * (1 + t) ^ e) + (‖α₀‖ + 1) * (|C2| * (1 + t) ^ e) :=
         add_le_add le_rfl (mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left
-          (kumDec_t_mul_rpow_le ht e) (abs_nonneg C2)) (by positivity))
+          (KummerDecayBounds.t_mul_rpow_le ht e) (abs_nonneg C2)) (by positivity))
     _ = _ := by ring
 
 /-- Lowering `re a` by one: 13.3.4, `𝐌(a,b,z) = 𝐌(a+1,b,z) - z 𝐌(a+1,b+1,z)`, keeps the decay
 exponent. -/
-theorem kumDec_bnd_step_a {α₀ β₀ : ℂ} (h1 : KumDecBnd (α₀ + 1) β₀)
-    (h2 : KumDecBnd (α₀ + 1) (β₀ + 1)) : KumDecBnd α₀ β₀ := by
+theorem KummerDecayBounds.bound_step_a {α₀ β₀ : ℂ} (h1 : KummerDecayBound (α₀ + 1) β₀)
+    (h2 : KummerDecayBound (α₀ + 1) (β₀ + 1)) : KummerDecayBound α₀ β₀ := by
   intro ε hε
   obtain ⟨C1, hC1⟩ := h1 ε hε
   obtain ⟨C2, hC2⟩ := h2 ε hε
-  have hC1' := kumDec_eventually_shift α₀ β₀ 1 0 (by simpa using hC1)
-  have hC2' := kumDec_eventually_shift α₀ β₀ 1 1 hC2
+  have hC1' := KummerDecayBounds.eventually_shift α₀ β₀ 1 0 (by simpa using hC1)
+  have hC2' := KummerDecayBounds.eventually_shift α₀ β₀ 1 1 hC2
   refine ⟨|C1| + |C2|, ?_⟩
   filter_upwards [hC1', hC2'] with p hp1 hp2 t ht
   simp only [add_zero] at hp1 hp2
@@ -424,14 +431,16 @@ theorem kumDec_bnd_step_a {α₀ β₀ : ℂ} (h1 : KumDecBnd (α₀ + 1) β₀)
             ht)
     _ = |C1| * (1 + t) ^ (e - 1) + |C2| * (t * (1 + t) ^ (e - 1)) := by ring
     _ ≤ |C1| * (1 + t) ^ e + |C2| * (1 + t) ^ e :=
-        add_le_add (mul_le_mul_of_nonneg_left (kumDec_rpow_sub_one_le ht e) (abs_nonneg _))
-          (mul_le_mul_of_nonneg_left (kumDec_t_mul_rpow_le ht e) (abs_nonneg _))
+        add_le_add (mul_le_mul_of_nonneg_left (KummerDecayBounds.rpow_sub_one_le ht e)
+            (abs_nonneg _))
+          (mul_le_mul_of_nonneg_left (KummerDecayBounds.t_mul_rpow_le ht e) (abs_nonneg _))
     _ = _ := by ring
 
 /-- The locally uniform decay bound `|M̃(α,β,-t)| ≤ C (1+t)^{-Re α₀ + ε}` holds at every `(α₀, β₀)`,
 by induction on the shifts needed to reach `Re α > 0`, `Re(β-α) > 0`. -/
-theorem kumDec_bnd_all : ∀ (m k : ℕ) (α₀ β₀ : ℂ), -(m : ℝ) < α₀.re → -(k : ℝ) < (β₀ - α₀).re →
-    KumDecBnd α₀ β₀ := by
+theorem KummerDecayBounds.bound_all : ∀ (m k : ℕ) (α₀ β₀ : ℂ), -(m : ℝ) < α₀.re →
+    -(k : ℝ) < (β₀ - α₀).re →
+    KummerDecayBound α₀ β₀ := by
   intro m
   induction m with
   | zero =>
@@ -440,17 +449,18 @@ theorem kumDec_bnd_all : ∀ (m k : ℕ) (α₀ β₀ : ℂ), -(m : ℝ) < α₀
     | zero =>
       intro α₀ β₀ ha hb
       simp only [CharP.cast_eq_zero, neg_zero] at ha hb
-      exact fun ε hε => kumDec_bound_base ha hb hε
+      exact fun ε hε => KummerDecayBounds.bound_base ha hb hε
     | succ k ih =>
       intro α₀ β₀ ha hb
-      refine kumDec_bnd_step_b (ih α₀ (β₀ + 1) ha ?_) (ih (α₀ + 1) (β₀ + 2) ?_ ?_)
+      refine KummerDecayBounds.bound_step_b (ih α₀ (β₀ + 1) ha ?_) (ih (α₀ + 1) (β₀ + 2) ?_ ?_)
       · simp only [sub_re, add_re, one_re] at hb ⊢; push_cast at hb; linarith
       · simp only [CharP.cast_eq_zero, neg_zero, add_re, one_re] at ha ⊢; linarith
       · simp only [sub_re, add_re, one_re] at hb ⊢
         rw [show (2 : ℂ).re = 2 by norm_num]; push_cast at hb; linarith
   | succ m ih =>
     intro k α₀ β₀ ha hb
-    refine kumDec_bnd_step_a (ih (k + 1) (α₀ + 1) β₀ ?_ ?_) (ih (k + 1) (α₀ + 1) (β₀ + 1) ?_ ?_)
+    refine KummerDecayBounds.bound_step_a (ih (k + 1) (α₀ + 1) β₀ ?_ ?_)
+        (ih (k + 1) (α₀ + 1) (β₀ + 1) ?_ ?_)
     · simp only [add_re, one_re] at ha ⊢; push_cast at ha; linarith
     · simp only [sub_re, add_re, one_re] at hb ⊢; push_cast; linarith
     · simp only [add_re, one_re] at ha ⊢; push_cast at ha; linarith
@@ -464,7 +474,7 @@ theorem exists_eventually_norm_regularizedHGFun_neg_le (α₀ β₀ : ℂ) {ε :
       ‖regularizedHGFun {p.1} {p.2} (-(t : ℂ))‖ ≤ C * (1 + t) ^ (-α₀.re + ε) := by
   obtain ⟨m, hm⟩ := exists_nat_gt (-α₀.re)
   obtain ⟨k, hk⟩ := exists_nat_gt (-(β₀ - α₀).re)
-  exact kumDec_bnd_all m k α₀ β₀ (by linarith) (by linarith) ε hε
+  exact KummerDecayBounds.bound_all m k α₀ β₀ (by linarith) (by linarith) ε hε
 
 /-! ### Integrability -/
 
@@ -480,7 +490,7 @@ theorem integrableOn_cpow_mul_regularizedHGFun_neg_mul {a b c : ℂ} {h : ℝ �
   have hcont : ContinuousOn (fun t : ℝ => (t : ℂ) ^ (c - 1) * regularizedHGFun {a} {b} (-(t : ℂ)) *
       h t) (Ioi 0) := by
     refine ((ContinuousOn.cpow continuous_ofReal.continuousOn continuousOn_const fun t ht =>
-      ofReal_mem_slitPlane.mpr ht).mul (kumDec_continuous_neg a b).continuousOn).mul hh
+      ofReal_mem_slitPlane.mpr ht).mul (KummerDecayBounds.continuous_neg a b).continuousOn).mul hh
   refine hmaj.mono' (hcont.aestronglyMeasurable measurableSet_Ioi) ?_
   filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
   have ht0 : (0 : ℝ) < t := ht

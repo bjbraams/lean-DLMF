@@ -645,7 +645,7 @@ private lemma mathieuSpecA_even_q_zero (k : ℕ) :
   constructor
   · intro h
     set s := Complex.sqrt a
-    have hs : s ^ 2 = a := DLMF.Elementary.trig_sqrt_sq _
+    have hs : s ^ 2 = a := DLMF.Elementary.Trigonometric.complexSqrt_sq _
     rw [deriv_mathieuWI_q_zero hs] at h
     obtain ⟨m, hm⟩ : ∃ m : ℤ, s = 2 * m := by
       rcases mul_eq_zero.mp h with h | h
@@ -671,7 +671,7 @@ private lemma mathieuSpecA_odd_q_zero (k : ℕ) :
   constructor
   · intro h
     set s := Complex.sqrt a
-    have hs : s ^ 2 = a := DLMF.Elementary.trig_sqrt_sq _
+    have hs : s ^ 2 = a := DLMF.Elementary.Trigonometric.complexSqrt_sq _
     rw [mathieuWI_q_zero hs] at h
     obtain ⟨m, hm⟩ := exists_eq_two_mul_add_one_of_cos_mul_pi_div_two_eq_zero h
     obtain ⟨j, hj⟩ := exists_two_mul_add_one_sq_eq_natCast m
@@ -694,7 +694,7 @@ private lemma mathieuSpecB_odd_q_zero (k : ℕ) :
   constructor
   · intro h
     set s := Complex.sqrt a
-    have hs : s ^ 2 = a := DLMF.Elementary.trig_sqrt_sq _
+    have hs : s ^ 2 = a := DLMF.Elementary.Trigonometric.complexSqrt_sq _
     rcases eq_or_ne s 0 with hs0 | hs0
     · exfalso
       have ha : (a : ℂ) = 0 := by rw [← hs, hs0]; ring
@@ -723,7 +723,7 @@ private lemma mathieuSpecB_even_q_zero (k : ℕ) :
   constructor
   · intro h
     set s := Complex.sqrt a
-    have hs : s ^ 2 = a := DLMF.Elementary.trig_sqrt_sq _
+    have hs : s ^ 2 = a := DLMF.Elementary.Trigonometric.complexSqrt_sq _
     rcases eq_or_ne s 0 with hs0 | hs0
     · exfalso
       have ha : (a : ℂ) = 0 := by rw [← hs, hs0]; ring

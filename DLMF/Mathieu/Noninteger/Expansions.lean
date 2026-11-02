@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Noninteger.Fourier
+public import DLMF.Mathieu.ContinuedFractionTails
 public import DLMF.Mathieu.SecondSolutions
 
 /-!
@@ -20,7 +21,8 @@ has no statements here.
 ## Main results
 
 * `mathieuLambda_isBigO_zero`: the power series of `λ_ν(q)` (DLMF 28.15.1).
-* `mathieuLambda_contFrac`: the continued-fraction equation for `λ_ν(q)` (DLMF 28.15.2).
+* `mathieuLambda_contFrac`: the continued-fraction equation for `λ_ν(q)` (DLMF 28.15.2), from
+  Pincherle's theorem `tendsto_mathieuCFTail_of_tendsto_zero`.
 * `mathieuMe_isBigO_zero`: the power series of `me_ν(z, q)` (DLMF 28.15.3).
 * `mathieuLambda_isBigO_atTop`: the large-`q` expansion of `λ_ν(h²)` (DLMF 28.16.1).
 * `isMathieuStable_q_zero`, `isMathieuStable_mathieuLambda`: stable pairs (DLMF §28.17).
@@ -63,19 +65,95 @@ theorem mathieuLambda_isBigO_zero (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
       =O[𝓝 0] (fun q : ℂ => q ^ 8) := by
   sorry
 
+/-- The approximants `mathieuContFrac` are the negatives of the tails `mathieuCFTail`. -/
+theorem mathieuContFrac_eq_neg_mathieuCFTail (ν q a : ℂ) (k N : ℕ) :
+    mathieuContFrac ν q a (k + 1) N =
+      -mathieuCFTail q a (fun j => (ν + 2 * ((k + 1 + j : ℕ) : ℂ)) ^ 2) N := by
+  induction N generalizing k with
+  | zero => simp [mathieuContFrac, mathieuCFTail]
+  | succ N ih =>
+    rw [mathieuContFrac, mathieuCFTail_succ, ih (k + 1)]
+    have e : (fun j : ℕ => (ν + 2 * ((k + 1 + (j + 1) : ℕ) : ℂ)) ^ 2) =
+        fun j : ℕ => (ν + 2 * ((k + 1 + 1 + j : ℕ) : ℂ)) ^ 2 := by
+      funext j; push_cast; ring_nf
+    rw [e]
+    simp only [add_zero, Nat.cast_add, Nat.cast_one]
+    rw [show a - (ν + 2 * ((k : ℂ) + 1)) ^ 2 -
+        -mathieuCFTail q a (fun j : ℕ => (ν + 2 * ((k : ℂ) + 1 + 1 + j)) ^ 2) N =
+        -((ν + 2 * ((k : ℂ) + 1)) ^ 2 - a -
+          mathieuCFTail q a (fun j : ℕ => (ν + 2 * ((k : ℂ) + 1 + 1 + j)) ^ 2) N) by ring,
+      div_neg]
+
+/-- Convergence of `mathieuContFrac ν q a 1 N` to `q A₁/A₀` for a decaying solution `A`. -/
+theorem tendsto_mathieuContFrac_of_tendsto_zero {ν q a : ℂ} {A : ℕ → ℂ}
+    (hrec : ∀ k : ℕ, q * (A k + A (k + 2)) = (a - (ν + 2 * ((k + 1 : ℕ) : ℂ)) ^ 2) * A (k + 1))
+    (hA0 : A 0 ≠ 0) (hlim : Tendsto A atTop (𝓝 0)) :
+    Tendsto (fun N => mathieuContFrac ν q a 1 N) atTop (𝓝 (q * A 1 / A 0)) := by
+  rcases eq_or_ne q 0 with rfl | hq
+  · simp only [zero_mul, zero_div]
+    refine tendsto_const_nhds.congr' (Eventually.of_forall fun N => ?_)
+    cases N <;> simp [mathieuContFrac]
+  have hs : Tendsto (fun k : ℕ => ‖(ν + 2 * ((0 + 1 + k : ℕ) : ℂ)) ^ 2‖) atTop atTop := by
+    have h1 : Tendsto (fun k : ℕ => ‖ν + 2 * ((0 + 1 + k : ℕ) : ℂ)‖) atTop atTop := by
+      refine tendsto_atTop_mono (fun k => ?_) (tendsto_atTop_add_const_right _ (-‖ν‖)
+        ((tendsto_natCast_atTop_atTop (R := ℝ)).const_mul_atTop (by norm_num : (0 : ℝ) < 2)))
+      have h3 := norm_sub_le (ν + 2 * ((0 + 1 + k : ℕ) : ℂ)) ν
+      have h2 : ‖ν + 2 * ((0 + 1 + k : ℕ) : ℂ) - ν‖ = 2 * ((0 + 1 + k : ℕ) : ℝ) := by
+        rw [add_sub_cancel_left, norm_mul, Complex.norm_natCast]; norm_num
+      rw [h2] at h3
+      push_cast at h3 ⊢
+      linarith
+    refine (h1.atTop_mul_atTop₀ h1).congr (fun k => ?_)
+    rw [norm_pow, sq]
+  have h := tendsto_mathieuCFTail_of_tendsto_zero
+    (s := fun j => (ν + 2 * ((0 + 1 + j : ℕ) : ℂ)) ^ 2)
+    hq (fun k => by simpa [add_comm, add_left_comm] using hrec k) hA0 hlim hs
+  have := h.neg
+  rw [neg_neg] at this
+  refine this.congr (fun N => ?_)
+  rw [mathieuContFrac_eq_neg_mathieuCFTail ν q a 0 N]
+
 /-- **Continued-fraction equation** (DLMF 28.15.2): for `ν ∉ ℤ` and `q` normal along the
-segment, with `a = λ_ν(q)`, the continued fractions
+segment with `c^ν_0(q) ≠ 0` (which DLMF assumes implicitly: the forward fraction is
+`q c^ν_2/c^ν_0`), with `a = λ_ν(q)`, the continued fractions
 `F₊ = q²/(a - (ν+2)² - q²/(a - (ν+4)² - ⋯))` and `F₋ = q²/(a - (ν-2)² - q²/(a - (ν-4)² - ⋯))`
 converge (as limits of their approximants `mathieuContFrac ν q a 1 N`, resp.
 `mathieuContFrac (-ν) q a 1 N`) and `a - ν² - F₊ = F₋`. -/
 @[dlmf 28.15.E2]
 theorem mathieuLambda_contFrac (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
-    (hq : MathieuNormalSegment ν q) :
+    (hq : MathieuNormalSegment ν q) (hc₀ : mathieuMeCoeff ν q 0 ≠ 0) :
     ∃ Fp Fm : ℂ,
       Tendsto (fun N => mathieuContFrac ν q (mathieuLambda ν q) 1 N) atTop (𝓝 Fp) ∧
       Tendsto (fun N => mathieuContFrac (-ν) q (mathieuLambda ν q) 1 N) atTop (𝓝 Fm) ∧
       mathieuLambda ν q - ν ^ 2 - Fp = Fm := by
-  sorry
+  have hd := isMeCoeffSeq_mathieuLambdaData hq
+  rw [mathieuMeCoeff_of_not_int hν] at hc₀
+  rw [mathieuLambda_of_not_int hν]
+  set a := (mathieuLambdaData ν q).1
+  set c := (mathieuLambdaData ν q).2
+  have hc0 : Tendsto c cofinite (𝓝 0) :=
+    tendsto_zero_iff_norm_tendsto_zero.2 hd.2.1.tendsto_cofinite_zero
+  have hpos : Tendsto (fun k : ℕ => c k) atTop (𝓝 0) := by
+    rw [← Nat.cofinite_eq_atTop]; exact hc0.comp Nat.cast_injective.tendsto_cofinite
+  have hneg : Tendsto (fun k : ℕ => c (-(k : ℤ))) atTop (𝓝 0) := by
+    rw [← Nat.cofinite_eq_atTop]
+    exact hc0.comp ((neg_injective.comp Nat.cast_injective).tendsto_cofinite)
+  refine ⟨q * c 1 / c 0, q * c (-1) / c 0,
+    tendsto_mathieuContFrac_of_tendsto_zero (A := fun k : ℕ => c k) (fun k => ?_) hc₀ hpos,
+    tendsto_mathieuContFrac_of_tendsto_zero (A := fun k : ℕ => c (-(k : ℤ))) (fun k => ?_)
+      (by simpa using hc₀) hneg, ?_⟩
+  · have h := hd.1 (k + 1)
+    push_cast at h ⊢
+    rw [show (k : ℤ) + 1 + 1 = k + 2 by ring, show (k : ℤ) + 1 - 1 = k by ring] at h
+    linear_combination h
+  · have h := hd.1 (-(k + 1))
+    push_cast at h ⊢
+    rw [show -((k : ℤ) + 1) + 1 = -k by ring, show -((k : ℤ) + 1) - 1 = -(k + 2) by ring] at h
+    linear_combination h
+  · have h := hd.1 0
+    simp only [zero_add, zero_sub, Int.cast_zero, mul_zero, add_zero] at h
+    field_simp
+    linear_combination -h
 
 /-- **Power series of `me_ν(z, q)`** (DLMF 28.15.3): for `ν ∉ ℤ` and fixed `z`, as `q → 0`,
 `me_ν(z, q) = e^{iνz} - (q/4)(e^{i(ν+2)z}/(ν+1) - e^{i(ν-2)z}/(ν-1))

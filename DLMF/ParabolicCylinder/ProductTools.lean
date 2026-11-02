@@ -16,7 +16,7 @@ zero as a beta integral. This supplies initial data for the proof of DLMF 12.12.
 
 ## Main results
 
-* `pcfIntegral4_base_beta`: the hyperbolic weight of DLMF 12.12.4 as a beta integral.
+* `CylinderSquareIntegral.base_beta`: the hyperbolic weight of DLMF 12.12.4 as a beta integral.
 -/
 
 @[expose] public noncomputable section
@@ -25,7 +25,7 @@ open scoped Real
 namespace DLMF.Confluent
 
 /-- Exponential substitution for the hyperbolic weight in DLMF 12.12.4. -/
-theorem pcfIntegral4_base_beta (a : ℂ) :
+theorem CylinderSquareIntegral.base_beta (a : ℂ) :
     (∫ t : ℝ in Ioi 0, exp (2*a*t) / (Real.sqrt (Real.sinh (2*t)) : ℂ)) =
       betaIntegral (1/4-a/2) (1/2) / (2*Real.sqrt 2) := by
   let f : ℝ → ℝ := fun t => Real.exp (-4*t)

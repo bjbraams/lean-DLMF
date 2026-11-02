@@ -364,7 +364,7 @@ theorem whipple_7F6 {a b c d e : ℂ} (m : ℕ)
 
 end Whipple
 
-open DougallAux in
+open DougallSeries in
 /-- Dougall's bilateral `₂H₂` sum, in Gamma form (AAR Theorem 2.8.2). -/
 @[dlmf 15.4.E25, dlmf 16.4.E17]
 theorem dougall_bilateral {a b c d : ℂ}

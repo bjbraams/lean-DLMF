@@ -380,7 +380,7 @@ private lemma eventually_basicSolutionZeroCount_eq (hV : Continuous V) (hB : ∀
     · rintro ⟨⟨h1, h2⟩, h3⟩
       exact ⟨⟨hδ'.trans_le h1, h2⟩, h3⟩
   obtain ⟨c1, c2⟩ := continuous_uncurry_basicSolution hV hB odd0
-  have hst := sturmDef_eventually_ncard_eq (T := ℝ) (Y := basicSolution V odd0)
+  have hst := SturmDeformation.eventually_ncard_eq (T := ℝ) (Y := basicSolution V odd0)
     (Y' := fun h x => deriv (basicSolution V odd0 h) x) (Λ := univ) (U := univ)
         isOpen_univ isOpen_univ
     (a := δ') (b := X) (subset_univ _) c1.continuousOn c2.continuousOn

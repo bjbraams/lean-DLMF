@@ -28,7 +28,8 @@ public import Mathlib.MeasureTheory.Function.AbsolutelyContinuous
 * `genBarnesContours_exist`: separating Barnes contours exist for nonsingular upper parameters.
 * `genHG_barnes_right`, `genHG_barnes_vertical`, `genHG_barnes_formal_asymptotic`: Barnes
   integrals, DLMF 16.5.1.
-* `genHG_euler_integral`: the Euler integral, DLMF 16.5.2.
+* `genHG_euler_integral`: the Euler integral, DLMF 16.5.2 (stronger form
+  `genHG_euler_integral'`).
 * `genHG_laplace_integral`: the Laplace integral, DLMF 16.5.3.
 * `genHG_inverse_laplace`: the inverse Laplace integral, DLMF 16.5.4.
 
@@ -105,9 +106,40 @@ theorem genHG_barnes_formal_asymptotic (a b : Multiset ℂ) (ha : GenDenRegular 
       (fun w : ℂ => Real.exp (N * w.re)) := by
   sorry
 
-/-- Euler integral on the entire domain or the full continued principal slit, with convergence. -/
+/-- Off the balanced case the regularized function is the native series. -/
+private lemma genRegularizedHG_eq_of_card_ne {a b : Multiset ℂ} (h : a.card ≠ b.card + 1) :
+    genRegularizedHG a b = Complex.regularizedHGFun a b := by
+  funext w
+  unfold genRegularizedHG
+  simp only [h, ↓reduceIte]
+
+/-- The regularized function with an added Euler pair is the Euler transform. -/
+private lemma genRegularizedHG_cons_eq_eulerTransform {a b : Multiset ℂ} {a₀ b₀ : ℂ}
+    (ha₀ : 0 < a₀.re) (hab : 0 < (b₀ - a₀).re) {z : ℂ}
+    (h : a.card ≤ b.card ∨ (a.card = b.card + 1 ∧ z ∈ cutPlane)) :
+    genRegularizedHG (a₀ ::ₘ a) (b₀ ::ₘ b) z = eulerTransform a₀ b₀ (genRegularizedHG a b) z := by
+  rcases h with h | ⟨h, hz⟩
+  · rw [genRegularizedHG_eq_of_card_ne (a := a) (b := b) (by omega),
+      genRegularizedHG_eq_of_card_ne (a := a₀ ::ₘ a) (b := b₀ ::ₘ b) (by simp; omega),
+      regularizedHGFun_cons_eq_integral ha₀ hab a b
+      (by rw [Complex.radius_regularizedHGFunSeries_eq_top h]; simp), eulerTransform]
+    rfl
+  · have hc : (a₀ ::ₘ a).card = (b₀ ::ₘ b).card + 1 := by simp [h]
+    have hf := analyticOnNhd_genRegularizedHG hc
+    have hg : AnalyticOnNhd ℂ (eulerTransform a₀ b₀ (genRegularizedHG a b)) cutPlane :=
+      (differentiableOn_eulerTransform ha₀ hab
+        (analyticOnNhd_genRegularizedHG h).differentiableOn).analyticOnNhd isOpen_cutPlane
+    have h0 : (0 : ℂ) ∈ cutPlane := mem_cutPlane_of_norm_lt_one (by simp)
+    refine hf.eqOn_of_preconnected_of_eventuallyEq hg isPreconnected_cutPlane h0 ?_ hz
+    filter_upwards [Metric.ball_mem_nhds (0 : ℂ) one_pos] with w hw
+    rw [mem_ball_zero_iff] at hw
+    rw [genRegularizedHG_eq_series hw, eulerTransform_eq_regularizedHGFun ha₀ hab h
+      (fun z hz => genRegularizedHG_eq_series hz) hw]
+
+/-- Euler integral on the entire domain or the full continued principal slit, with convergence.
+Stronger than DLMF, which assumes regular lower parameters `b`. -/
 @[dlmf 16.5.E2]
-theorem genHG_euler_integral (a b : Multiset ℂ) (a₀ b₀ : ℂ) (hb : GenDenRegular b)
+theorem genHG_euler_integral' (a b : Multiset ℂ) (a₀ b₀ : ℂ)
     (ha₀ : 0 < a₀.re) (hb₀ : a₀.re < b₀.re) {z : ℂ}
     (h : a.card ≤ b.card ∨ (a.card = b.card + 1 ∧ z ∈ cutPlane)) :
     IntervalIntegrable (fun t : ℝ => (t : ℂ) ^ (a₀ - 1) *
@@ -115,7 +147,40 @@ theorem genHG_euler_integral (a b : Multiset ℂ) (a₀ b₀ : ℂ) (hb : GenDen
     genHG (a₀ ::ₘ a) (b₀ ::ₘ b) z = Gamma b₀ / (Gamma a₀ * Gamma (b₀ - a₀)) *
       ∫ t : ℝ in (0 : ℝ)..1, (t : ℂ) ^ (a₀ - 1) *
         (1 - (t : ℂ)) ^ (b₀ - a₀ - 1) * genHG a b (z * t) := by
-  sorry
+  have hab : 0 < (b₀ - a₀).re := by simp; linarith
+  have hcont : ContinuousOn (fun t : ℝ => genHG a b (z * t)) (uIcc 0 1) := by
+    rw [Set.uIcc_of_le zero_le_one]
+    refine continuousOn_const.mul ?_
+    rcases h with h | ⟨h, hz⟩
+    · rw [genRegularizedHG_eq_of_card_ne (by omega)]
+      exact ((Complex.analyticOnNhd_regularizedHGFun_of_card_le h).continuous).comp_continuousOn
+        (by fun_prop)
+    · exact (analyticOnNhd_genRegularizedHG h).continuousOn.comp (by fun_prop)
+        fun t ht => mul_ofReal_mem_cutPlane hz ht
+  refine ⟨(intervalIntegrable_eulerWeight ha₀ hab).mul_continuousOn hcont, ?_⟩
+  unfold genHG
+  rw [genRegularizedHG_cons_eq_eulerTransform ha₀ hab h, eulerTransform]
+  simp only [genGamma, Multiset.map_cons, Multiset.prod_cons, eulerWeight]
+  have e : ∫ t : ℝ in (0 : ℝ)..1, (t : ℂ) ^ (a₀ - 1) * (1 - (t : ℂ)) ^ (b₀ - a₀ - 1) *
+      ((b.map Gamma).prod * genRegularizedHG a b (z * t)) = (b.map Gamma).prod *
+      ∫ t : ℝ in (0 : ℝ)..1, (t : ℂ) ^ (a₀ - 1) * (1 - (t : ℂ)) ^ (b₀ - a₀ - 1) *
+        genRegularizedHG a b (z * t) := by
+    rw [← intervalIntegral.integral_const_mul]
+    congr 1; funext t; ring
+  rw [e]
+  ring
+
+/-- Euler integral on the entire domain or the full continued principal slit, with convergence. -/
+@[dlmf 16.5.E2]
+theorem genHG_euler_integral (a b : Multiset ℂ) (a₀ b₀ : ℂ) (_hb : GenDenRegular b)
+    (ha₀ : 0 < a₀.re) (hb₀ : a₀.re < b₀.re) {z : ℂ}
+    (h : a.card ≤ b.card ∨ (a.card = b.card + 1 ∧ z ∈ cutPlane)) :
+    IntervalIntegrable (fun t : ℝ => (t : ℂ) ^ (a₀ - 1) *
+      (1 - (t : ℂ)) ^ (b₀ - a₀ - 1) * genHG a b (z * t)) volume 0 1 ∧
+    genHG (a₀ ::ₘ a) (b₀ ::ₘ b) z = Gamma b₀ / (Gamma a₀ * Gamma (b₀ - a₀)) *
+      ∫ t : ℝ in (0 : ℝ)..1, (t : ℂ) ^ (a₀ - 1) *
+        (1 - (t : ℂ)) ^ (b₀ - a₀ - 1) * genHG a b (z * t) :=
+  genHG_euler_integral' a b a₀ b₀ ha₀ hb₀ h
 
 /-- Laplace integral with the z restriction removed whenever p<q. -/
 @[dlmf 16.5.E3]
@@ -123,7 +188,7 @@ theorem genHG_laplace_integral (a b : Multiset ℂ) (a₀ : ℂ) (hb : GenDenReg
     (ha₀ : 0 < a₀.re) (hpq : a.card ≤ b.card) {z : ℂ}
     (hz : a.card < b.card ∨ z.re < 1) :
     IntegrableOn (fun t : ℝ => Complex.exp (-t) * (t : ℂ) ^ (a₀ - 1) * genHG a b (z * t)) (Ioi 0) ∧
-    DLMF.HasIntegralAtTop
+    DLMF.Core.HasIntegralAtTop
       (fun t : ℝ => Complex.exp (-t) * (t : ℂ) ^ (a₀ - 1) * genHG a b (z * t)) 0
       (Gamma a₀ * genHG (a₀ ::ₘ a) b z) := by
   sorry
@@ -133,7 +198,7 @@ theorem genHG_laplace_integral (a b : Multiset ℂ) (a₀ : ℂ) (hb : GenDenReg
 theorem genHG_inverse_laplace (a b : Multiset ℂ) (b₀ : ℂ) (hb : GenDenRegular b) (hb₀ : 0 < b₀.re)
     {c : ℝ} (hc : 0 < c) (z : ℂ)
     (h : a.card ≤ b.card ∨ (a.card = b.card + 1 ∧ max 0 z.re < c)) :
-    DLMF.HasIntegralWholeLine (fun y : ℝ =>
+    DLMF.Core.HasIntegralWholeLine (fun y : ℝ =>
       Complex.exp (c + y * I) * (c + y * I) ^ (-b₀) * genHG a b (z / (c + y * I)))
       (2 * Real.pi / Gamma b₀ * genHG a (b₀ ::ₘ b) z) := by
   sorry

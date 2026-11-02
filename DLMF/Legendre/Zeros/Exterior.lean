@@ -18,20 +18,20 @@ self-adjoint Legendre equation by comparison with the positive solutions `P^{-m}
 
 * `associatedP_zero_count`: a nonzero `P^μ_ν` has exactly one zero in `(1, ∞)` when
   `AssociatedPOneZero ν μ` holds and none otherwise (DLMF §14.16(iii)).
-* `lzero_oneZero_iff`: `AssociatedPOneZero ν μ` holds iff `μ > 0` is not an integer and
+* `ExteriorZeros.oneZero_iff`: `AssociatedPOneZero ν μ` holds iff `μ > 0` is not an integer and
   `sin(μπ)/Γ(ν-μ+1) < 0`.
-* `lzero_ext_count`: a function with a nonzero constant Wronskian against a positive solution
+* `ExteriorZeros.count`: a function with a nonzero constant Wronskian against a positive solution
   has one or no zeros on `(1, ∞)`, according to its signs near `1` and at infinity.
-* `lzero_olverQ_pos_bound`: positivity of `𝑸^μ_ν` on `(1, ∞)` and the bound
+* `ExteriorZeros.olverQ_pos_bound`: positivity of `𝑸^μ_ν` on `(1, ∞)` and the bound
   `(x²-1)(𝑸^μ_ν)² = O(x)` at infinity.
-* `lzero_assocP_near_one`: `P^{-m}_ν` (`m ≥ 0`) is positive near `1⁺`, with
+* `ExteriorZeros.associatedP_near_one`: `P^{-m}_ν` (`m ≥ 0`) is positive near `1⁺`, with
   `(x²-1)(P^{-m}_ν)² = O(x - 1)`.
 
 ## Implementation notes
 
 `AssociatedPOneZero` is defined in `DLMF.Legendre.Zeros.FerrersAndReal`; it encodes the rule of
-DLMF §14.16(iii) as corrected there (case (b) requires `μ > 0`). Helper names carry the prefix
-`lzero_`.
+DLMF §14.16(iii) as corrected there (case (b) requires `μ > 0`). Helper names live in the
+namespace `ExteriorZeros`.
 -/
 
 @[expose] public noncomputable section
@@ -47,7 +47,7 @@ attribute [local instance] Classical.propDecidable
 /-! ### Exterior zeros of `P^μ_ν` (DLMF 14.16(iii)) -/
 
 /-- A function with zero derivative on an interval is constant there. -/
-theorem lzero_const_of_deriv_zero {r r' : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected)
+theorem ExteriorZeros.const_of_deriv_zero {r r' : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected)
     (hd : ∀ x ∈ s, HasDerivAt r (r' x) x) (h0 : ∀ x ∈ s, r' x = 0) {x y : ℝ} (hx : x ∈ s)
     (hy : y ∈ s) : r x = r y := by
   wlog hxy : x < y generalizing x y
@@ -65,7 +65,7 @@ theorem lzero_const_of_deriv_zero {r r' : ℝ → ℝ} {s : Set ℝ} (hs : s.Ord
 
 /-- On `(1, ∞)`: a function with `(x²-1)(v f' - f v') = c > 0` against a positive solution `v`
 with `(x²-1)v² = O(x-1)` is negative near `1`. -/
-theorem lzero_ext_neg_near_one {f f' v v' : ℝ → ℝ} {s K c : ℝ} (hs : 1 < s) (hK : 0 < K)
+theorem ExteriorZeros.neg_near_one {f f' v v' : ℝ → ℝ} {s K c : ℝ} (hs : 1 < s) (hK : 0 < K)
     (hc : 0 < c) (hfd : ∀ x ∈ Ioc 1 s, HasDerivAt f (f' x) x)
     (hvd : ∀ x ∈ Ioc 1 s, HasDerivAt v (v' x) x) (hv : ∀ x ∈ Ioc 1 s, 0 < v x)
     (hb : ∀ x ∈ Ioc 1 s, (x ^ 2 - 1) * v x ^ 2 ≤ K * (x - 1))
@@ -105,7 +105,7 @@ theorem lzero_ext_neg_near_one {f f' v v' : ℝ → ℝ} {s K c : ℝ} (hs : 1 <
 
 /-- On `(1, ∞)`: a function with `(x²-1)(u f' - f u') = c > 0` against a positive solution `u`
 with `(x²-1)u² = O(x)` is eventually positive. -/
-theorem lzero_ext_pos_atTop {f f' u u' : ℝ → ℝ} {X K c : ℝ} (hX : 1 < X) (hK : 0 < K)
+theorem ExteriorZeros.pos_atTop {f f' u u' : ℝ → ℝ} {X K c : ℝ} (hX : 1 < X) (hK : 0 < K)
     (hc : 0 < c) (hfd : ∀ x ∈ Ici X, HasDerivAt f (f' x) x)
     (hud : ∀ x ∈ Ici X, HasDerivAt u (u' x) x) (hu : ∀ x ∈ Ici X, 0 < u x)
     (hb : ∀ x ∈ Ici X, (x ^ 2 - 1) * u x ^ 2 ≤ K * x)
@@ -160,7 +160,7 @@ theorem lzero_ext_pos_atTop {f f' u u' : ℝ → ℝ} {X K c : ℝ} (hX : 1 < X)
   exact (div_pos_iff_of_pos_right (hu x hxX)).mp h3
 
 /-- A function with zero derivative on an interval is constant there. -/
-theorem lzero_ext_count {f f' Q Q' : ℝ → ℝ} {c t₁ T σ₁ σ₂ : ℝ} (ht₁ : 1 < t₁)
+theorem ExteriorZeros.count {f f' Q Q' : ℝ → ℝ} {c t₁ T σ₁ σ₂ : ℝ} (ht₁ : 1 < t₁)
     (hfd : ∀ x, 1 < x → HasDerivAt f (f' x) x) (hQd : ∀ x, 1 < x → HasDerivAt Q (Q' x) x)
     (hQ : ∀ x, 1 < x → 0 < Q x) (hc : c ≠ 0)
     (hW : ∀ x, 1 < x → (x ^ 2 - 1) * (Q x * f' x - f x * Q' x) = c)
@@ -250,7 +250,7 @@ theorem lzero_ext_count {f f' Q Q' : ℝ → ℝ} {c t₁ T σ₁ σ₂ : ℝ} (
     rw [hZ]; exact ⟨finite_empty, ncard_empty ℝ⟩
 
 /-- The rule of DLMF 14.16(iii) (as corrected) through the sign of `sin(μπ)/Γ(ν-μ+1)`. -/
-theorem lzero_oneZero_iff {ν μ : ℝ} : AssociatedPOneZero ν μ ↔
+theorem ExteriorZeros.oneZero_iff {ν μ : ℝ} : AssociatedPOneZero ν μ ↔
     0 < μ ∧ (∀ n : ℤ, μ ≠ n) ∧ Real.sin (μ * π) * (Real.Gamma (ν - μ + 1))⁻¹ < 0 := by
   have hinv : ν < μ → (Real.Gamma (ν - μ + 1))⁻¹ =
       Real.sin ((μ - ν) * π) * Real.Gamma (μ - ν) / π := by
@@ -283,7 +283,7 @@ theorem lzero_oneZero_iff {ν μ : ℝ} : AssociatedPOneZero ν μ ↔
       exact mul_neg_of_neg_of_pos hs (div_pos hG Real.pi_pos)
     · refine ⟨h0, hn, ?_⟩
       have hG : 0 < Real.Gamma (ν - μ + 1) := Real.Gamma_pos_of_pos (by linarith)
-      have hss := lzero_sin_sign hn
+      have hss := FerrersZeros.sin_sign hn
       rw [hodd.neg_one_zpow] at hss
       exact mul_neg_of_neg_of_pos (by linarith) (inv_pos.mpr hG)
   · rintro ⟨h0, hn, hneg⟩
@@ -304,14 +304,15 @@ theorem lzero_oneZero_iff {ν μ : ℝ} : AssociatedPOneZero ν μ ↔
         rcases mul_neg_iff.mp hneg with ⟨_, h⟩ | ⟨h, _⟩
         · linarith [inv_pos.mpr hG]
         · exact h
-      have hss := lzero_sin_sign hn
+      have hss := FerrersZeros.sin_sign hn
       rcases Int.even_or_odd ⌊μ⌋ with he | ho
       · rw [he.neg_one_zpow, one_mul] at hss; linarith
       · exact ho
 
 /-- For positive parameters the regularized Gauss series on `[0, 1)` is real, positive and
 increasing. -/
-theorem lzero_regGauss_pos_mono {a b c w w' : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
+theorem ExteriorZeros.regularizedGaussHG_pos_mono {a b c w w' : ℝ} (ha : 0 < a)
+    (hb : 0 < b) (hc : 0 < c)
     (hw0 : 0 ≤ w) (hww : w ≤ w') (hw1 : w' < 1) :
     0 < (regularizedGaussHG a b c w).re ∧ (regularizedGaussHG a b c w).im = 0 ∧
       (regularizedGaussHG a b c w).re ≤ (regularizedGaussHG a b c w').re := by
@@ -366,7 +367,7 @@ theorem lzero_regGauss_pos_mono {a b c w w' : ℝ} (ha : 0 < a) (hb : 0 < b) (hc
 
 /-- Positivity of `𝑸^μ_ν` on `(1, ∞)` (`ν > -1`) and the bound `(x²-1)(𝑸^μ_ν)² = O(x)` at
 infinity (`ν ≥ -1/2`). -/
-theorem lzero_olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
+theorem ExteriorZeros.olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
     (∀ x : ℝ, 1 < x → 0 < (olverQ ν μ x).re) ∧
       ∃ K > 0, ∀ x : ℝ, 2 ≤ x → (x ^ 2 - 1) * (olverQ ν μ x).re ^ 2 ≤ K * x := by
   -- reduce to `μ ≥ 0`
@@ -374,7 +375,7 @@ theorem lzero_olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
     intro x hx
     rcases le_or_gt 0 μ with h | h
     · rw [abs_of_nonneg h]
-    · have := associated_connection_14 (ν:ℂ) ((|μ|:ℝ):ℂ) (z := (x:ℂ)) (lzero_mem hx)
+    · have := associated_connection_14 (ν:ℂ) ((|μ|:ℝ):ℂ) (z := (x:ℂ)) (FerrersZeros.one_lt_mem hx)
       rw [← this, abs_of_neg h]; push_cast; ring_nf
   set m := |μ| with hm
   have hm0 : 0 ≤ m := abs_nonneg μ
@@ -418,7 +419,8 @@ theorem lzero_olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
   · rw [hred x hx]
     obtain ⟨hR0, hre⟩ := hdata x hx
     rw [hre]
-    exact mul_pos hR0 (lzero_regGauss_pos_mono ha hb hc (hw x hx).1 le_rfl (hw x hx).2).1
+    exact mul_pos hR0 (ExteriorZeros.regularizedGaussHG_pos_mono ha hb hc (hw x hx).1
+        le_rfl (hw x hx).2).1
   · set S := (regularizedGaussHG a b c ((1 / 4 : ℝ) : ℂ)).re
     refine ⟨π * S ^ 2 + 1, by positivity, fun x hx => ?_⟩
     have hx1 : 1 < x := by linarith
@@ -426,7 +428,7 @@ theorem lzero_olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
     rw [hred x hx1]
     obtain ⟨hR0, hre⟩ := hdata x hx1
     rw [hre]
-    obtain ⟨hF0, -, hFle⟩ := lzero_regGauss_pos_mono ha hb hc (hw x hx1).1
+    obtain ⟨hF0, -, hFle⟩ := ExteriorZeros.regularizedGaussHG_pos_mono ha hb hc (hw x hx1).1
       (show 1 / x ^ 2 ≤ 1 / 4 by
         rw [div_le_div_iff₀ (by positivity) (by norm_num)]; nlinarith) (by norm_num)
     set F := (regularizedGaussHG a b c ((1 / x ^ 2 : ℝ) : ℂ)).re
@@ -472,7 +474,7 @@ theorem lzero_olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
       _ ≤ (π * S ^ 2 + 1) * x := by nlinarith
 
 /-- Real form of a Wronskian identity on `(1, ∞)` for functions real there. -/
-theorem lzero_ext_wr {F G : ℂ → ℂ} {x c : ℝ} (hx : 1 < x) (hF : (F x).im = 0)
+theorem ExteriorZeros.wronskian_re {F G : ℂ → ℂ} {x c : ℝ} (hx : 1 < x) (hF : (F x).im = 0)
     (hG : (G x).im = 0) (h : ODE.wronskian F G x = (c : ℂ) / ((x : ℂ) ^ 2 - 1)) :
     (x ^ 2 - 1) * ((F x).re * (deriv G x).re - (G x).re * (deriv F x).re) = c := by
   have hp : x ^ 2 - 1 ≠ 0 := by nlinarith
@@ -483,7 +485,7 @@ theorem lzero_ext_wr {F G : ℂ → ℂ} {x c : ℝ} (hx : 1 < x) (hF : (F x).im
   field_simp
 
 /-- Near `x = 1⁺`, `P^{-m}_ν` (`m ≥ 0`) is positive and `O((x - 1)^{1/2}(x+1)^{-1/2})`. -/
-theorem lzero_assocP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
+theorem ExteriorZeros.associatedP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
     ∃ s : ℝ, 1 < s ∧ ∃ K : ℝ, 0 < K ∧ ∀ x : ℝ, x ∈ Ioc 1 s → 0 < (associatedP ν (-m : ℝ) x).re ∧
       (x ^ 2 - 1) * (associatedP ν (-m : ℝ) x).re ^ 2 ≤ K * (x - 1) := by
   set g : ℝ → ℂ := fun x => regularizedGaussHG ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ))
@@ -551,25 +553,25 @@ theorem lzero_assocP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
 
 /-- The Wronskian of the real parts of `𝑸^μ_ν` and `P^μ_ν` on `(1,∞)`: for real `ν, μ` and
 `x > 1`, `(x²-1)(q f' - f q') = 1/Γ(ν-μ+1)` with `f = Re P^μ_ν`, `q = Re 𝑸^μ_ν`. -/
-private lemma lzero_assocP_wronskian_re {ν μ x : ℝ} (hx : 1 < x) :
+private lemma ExteriorZeros.associatedP_wronskian_re {ν μ x : ℝ} (hx : 1 < x) :
     (x ^ 2 - 1) * ((olverQ (ν : ℂ) (μ : ℂ) x).re * (deriv (associatedP (ν : ℂ) (μ : ℂ)) x).re -
       (associatedP (ν : ℂ) (μ : ℂ) x).re * (deriv (olverQ (ν : ℂ) (μ : ℂ)) x).re) =
       (Real.Gamma (ν - μ + 1))⁻¹ := by
   set P : ℂ → ℂ := associatedP (ν : ℂ) (μ : ℂ) with hP
   set Qc : ℂ → ℂ := olverQ (ν : ℂ) (μ : ℂ) with hQc
   set cA : ℝ := (Real.Gamma (ν - μ + 1))⁻¹ with hcA
-  have h := olverQ_wronskian_pos (ν : ℂ) μ (z := x) (lzero_mem hx)
+  have h := olverQ_wronskian_pos (ν : ℂ) μ (z := x) (FerrersZeros.one_lt_mem hx)
   have h2 : ODE.wronskian Qc P x = (cA : ℂ) / ((x : ℂ) ^ 2 - 1) := by
     rw [show ODE.wronskian Qc P x = -ODE.wronskian P Qc x by
       simp only [ODE.wronskian]; ring, h,
       show (ν : ℂ) - μ + 1 = ((ν - μ + 1 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal,
       hcA]
     push_cast; ring
-  exact lzero_ext_wr hx (olverQ_real ν μ hx) (associatedP_real ν μ hx) h2
+  exact ExteriorZeros.wronskian_re hx (olverQ_real ν μ hx) (associatedP_real ν μ hx) h2
 
 /-- Sign of `Re P^μ_ν` near `x = 1⁺`: some multiple `σ₁ Re P^μ_ν` is positive on an interval
 `(1, t₁)`, and `σ₁/Γ(ν-μ+1) < 0` exactly when `P^μ_ν` has one zero in `(1,∞)`. -/
-private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
+private lemma ExteriorZeros.associatedP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
     (hA : (Real.Gamma (ν - μ + 1))⁻¹ ≠ 0) :
     ∃ σ₁ t₁ : ℝ, 1 < t₁ ∧ (∀ x ∈ Ioo 1 t₁, 0 < σ₁ * (associatedP (ν : ℂ) (μ : ℂ) x).re) ∧
       (σ₁ * (Real.Gamma (ν - μ + 1))⁻¹ < 0 ↔ AssociatedPOneZero ν μ) := by
@@ -580,31 +582,32 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
   set q : ℝ → ℝ := fun x => (Qc x).re with hq
   set q' : ℝ → ℝ := fun x => (deriv Qc x).re with hq'
   have hfd : ∀ x, 1 < x → HasDerivAt f (f' x) x := fun x hx =>
-    (associatedP_analytic (ν : ℂ) μ x (lzero_mem hx)).differentiableAt.hasDerivAt.real_of_complex
+    (associatedP_analytic (ν : ℂ) μ x
+        (FerrersZeros.one_lt_mem hx)).differentiableAt.hasDerivAt.real_of_complex
   set cA : ℝ := (Real.Gamma (ν - μ + 1))⁻¹ with hcA
   have hWA : ∀ x, 1 < x → (x ^ 2 - 1) * (q x * f' x - f x * q' x) = cA := fun x hx =>
-    lzero_assocP_wronskian_re hx
+    ExteriorZeros.associatedP_wronskian_re hx
   have hcA2 : 0 < cA ^ 2 := by positivity
   show ∃ σ₁ t₁ : ℝ, 1 < t₁ ∧ (∀ x ∈ Ioo 1 t₁, 0 < σ₁ * f x) ∧
     (σ₁ * cA < 0 ↔ AssociatedPOneZero ν μ)
   rcases le_or_gt μ 0 with hμ | hμ
-  · obtain ⟨s, hs, K1, hK1, hv⟩ := lzero_assocP_near_one ν (m := -μ) (by linarith)
+  · obtain ⟨s, hs, K1, hK1, hv⟩ := ExteriorZeros.associatedP_near_one ν (m := -μ) (by linarith)
     have hcA0 : 0 < cA := inv_pos.mpr (Real.Gamma_pos_of_pos (by linarith))
     refine ⟨1, s, hs, fun x hx => ?_, ?_⟩
     · have := (hv x (Ioo_subset_Ioc_self hx)).1
       simp only [neg_neg] at this
       simpa [hf, hP] using this
-    · rw [lzero_oneZero_iff]
+    · rw [ExteriorZeros.oneZero_iff]
       constructor
       · intro h; linarith
       · intro h; exact absurd h.1 (not_lt.mpr hμ)
-  · obtain ⟨s, hs, K1, hK1, hv⟩ := lzero_assocP_near_one ν (m := μ) hμ.le
+  · obtain ⟨s, hs, K1, hK1, hv⟩ := ExteriorZeros.associatedP_near_one ν (m := μ) hμ.le
     set V : ℂ → ℂ := associatedP (ν : ℂ) (-(μ : ℂ)) with hV
     set v : ℝ → ℝ := fun x => (V x).re with hv_def
     set v' : ℝ → ℝ := fun x => (deriv V x).re with hv'_def
     have hvd : ∀ x, 1 < x → HasDerivAt v (v' x) x := fun x hx =>
       (associatedP_analytic (ν : ℂ) (-(μ : ℂ)) x
-        (lzero_mem hx)).differentiableAt.hasDerivAt.real_of_complex
+        (FerrersZeros.one_lt_mem hx)).differentiableAt.hasDerivAt.real_of_complex
     have hVreal : ∀ x : ℝ, 1 < x → (V x).im = 0 := fun x hx => by
       have := associatedP_real ν (-μ) hx
       simpa [hV] using this
@@ -615,7 +618,7 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
     set cB : ℝ := -2 * Real.sin (μ * π) / π with hcB
     have hWB : ∀ x, 1 < x → (x ^ 2 - 1) * (v x * f' x - f x * v' x) = cB := by
       intro x hx
-      have h := associated_wronskian_7 (ν : ℂ) μ (z := x) (lzero_mem hx)
+      have h := associated_wronskian_7 (ν : ℂ) μ (z := x) (FerrersZeros.one_lt_mem hx)
       have h2 : ODE.wronskian V P x = (cB : ℂ) / ((x : ℂ) ^ 2 - 1) := by
         rw [h, hcB, show (μ : ℂ) * π = ((μ * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin]
         have hp : (x : ℂ) ^ 2 - 1 ≠ 0 := by
@@ -627,21 +630,21 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
         push_cast
         field_simp
         ring
-      exact lzero_ext_wr hx (hVreal x hx) (associatedP_real ν μ hx) h2
+      exact ExteriorZeros.wronskian_re hx (hVreal x hx) (associatedP_real ν μ hx) h2
     by_cases hint : ∀ n : ℤ, μ ≠ n
     · -- nonintegral `μ`
       have hsin : Real.sin (μ * π) ≠ 0 := by
-        have := lzero_sin_sign hint
+        have := FerrersZeros.sin_sign hint
         intro h; rw [h, mul_zero] at this; exact lt_irrefl _ this
       have hcB0 : cB ≠ 0 := by
         rw [hcB]; exact div_ne_zero (by simpa using hsin) Real.pi_pos.ne'
-      obtain ⟨t, ht, hneg⟩ := lzero_ext_neg_near_one (f := fun x => cB * f x)
+      obtain ⟨t, ht, hneg⟩ := ExteriorZeros.neg_near_one (f := fun x => cB * f x)
         (f' := fun x => cB * f' x) (v := v) (v' := v') (s := s) (K := K1) (c := cB ^ 2) hs hK1
         (by positivity) (fun x hx => (hfd x hx.1).const_mul cB) (fun x hx => hvd x hx.1)
         (fun x hx => (hv1 x hx).1) (fun x hx => (hv1 x hx).2)
         (fun x hx => by linear_combination cB * hWB x hx.1)
       refine ⟨-cB, t, ht.1, fun x hx => by have : cB * f x < 0 := hneg x hx; linarith, ?_⟩
-      rw [lzero_oneZero_iff, hcB, ← hcA]
+      rw [ExteriorZeros.oneZero_iff, hcB, ← hcA]
       have hπ := Real.pi_pos
       constructor
       · intro h
@@ -664,7 +667,7 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
       have hcC0 : 0 < cC := inv_pos.mpr (Real.Gamma_pos_of_pos (by linarith))
       have hWC : ∀ x, 1 < x → (x ^ 2 - 1) * (q x * v' x - v x * q' x) = cC := by
         intro x hx
-        have h := associated_wronskian_8 (ν : ℂ) μ (z := x) (lzero_mem hx)
+        have h := associated_wronskian_8 (ν : ℂ) μ (z := x) (FerrersZeros.one_lt_mem hx)
         have h2 : ODE.wronskian Qc V x = (cC : ℂ) / ((x : ℂ) ^ 2 - 1) := by
           rw [show ODE.wronskian Qc V x = -ODE.wronskian V Qc x by
             simp only [ODE.wronskian]; ring, h,
@@ -673,13 +676,13 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
           push_cast
           simp only [div_eq_mul_inv, mul_inv]
           ring
-        exact lzero_ext_wr hx (olverQ_real ν μ hx) (hVreal x hx) h2
+        exact ExteriorZeros.wronskian_re hx (olverQ_real ν μ hx) (hVreal x hx) h2
       set s' : ℝ := (1 + s) / 2 with hs'
       have hs'1 : 1 < s' := by linarith
       have hs's : s' < s := by linarith
       have hlam : ∀ x ∈ Ioo 1 s, f x / v x = f s' / v s' := by
         intro x hx
-        refine lzero_const_of_deriv_zero (s := Ioo 1 s) ordConnected_Ioo
+        refine ExteriorZeros.const_of_deriv_zero (s := Ioo 1 s) ordConnected_Ioo
           (fun y hy => (hfd y hy.1).div (hvd y hy.1) (hv1 y (Ioo_subset_Ioc_self hy)).1.ne')
           (fun y hy => ?_) hx ⟨hs'1, hs's⟩
         have h := hWB y hy.1
@@ -710,7 +713,7 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
       refine ⟨cA, s, hs, fun x hx => ?_, ?_⟩
       · rw [hfeq x hx, ← mul_assoc]
         exact mul_pos hpos (hv1 x (Ioo_subset_Ioc_self hx)).1
-      · rw [lzero_oneZero_iff]
+      · rw [ExteriorZeros.oneZero_iff]
         constructor
         · intro h; nlinarith
         · rintro ⟨-, h, -⟩; exact absurd hn (h n)
@@ -728,13 +731,15 @@ theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν)
   set q : ℝ → ℝ := fun x => (Qc x).re with hq
   set q' : ℝ → ℝ := fun x => (deriv Qc x).re with hq'
   have hfd : ∀ x, 1 < x → HasDerivAt f (f' x) x := fun x hx =>
-    (associatedP_analytic (ν : ℂ) μ x (lzero_mem hx)).differentiableAt.hasDerivAt.real_of_complex
+    (associatedP_analytic (ν : ℂ) μ x
+        (FerrersZeros.one_lt_mem hx)).differentiableAt.hasDerivAt.real_of_complex
   have hqd : ∀ x, 1 < x → HasDerivAt q (q' x) x := fun x hx =>
-    (olverQ_analytic (ν : ℂ) μ x (lzero_mem hx)).differentiableAt.hasDerivAt.real_of_complex
-  obtain ⟨hQpos, K, hK, hQb⟩ := lzero_olverQ_pos_bound hν μ
+    (olverQ_analytic (ν : ℂ) μ x
+        (FerrersZeros.one_lt_mem hx)).differentiableAt.hasDerivAt.real_of_complex
+  obtain ⟨hQpos, K, hK, hQb⟩ := ExteriorZeros.olverQ_pos_bound hν μ
   set cA : ℝ := (Real.Gamma (ν - μ + 1))⁻¹ with hcA
   have hWA : ∀ x, 1 < x → (x ^ 2 - 1) * (q x * f' x - f x * q' x) = cA := fun x hx =>
-    lzero_assocP_wronskian_re hx
+    ExteriorZeros.associatedP_wronskian_re hx
   have hset : {x : ℝ | 1 < x ∧ associatedP ν μ x = 0} = {x | 1 < x ∧ f x = 0} := by
     ext x
     simp only [mem_ofPred_eq]
@@ -746,7 +751,7 @@ theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν)
   · -- `P` is a multiple of `𝑸`, hence zero-free
     have hr : ∀ x, 1 < x → f x / q x = f 2 / q 2 := by
       intro x hx
-      refine lzero_const_of_deriv_zero (s := Ioi 1) ordConnected_Ioi
+      refine ExteriorZeros.const_of_deriv_zero (s := Ioi 1) ordConnected_Ioi
         (fun y hy => (hfd y hy).div (hqd y hy) (hQpos y hy).ne') (fun y hy => ?_) hx
         (show (1:ℝ) < 2 by norm_num)
       have h := hWA y hy
@@ -771,13 +776,13 @@ theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν)
       · exact hfw h2
       · exact (hQpos w hw).ne' h2
     have hno : ¬ AssociatedPOneZero ν μ := by
-      rw [lzero_oneZero_iff, ← hcA, hA, mul_zero]
+      rw [ExteriorZeros.oneZero_iff, ← hcA, hA, mul_zero]
       exact fun h => lt_irrefl _ h.2.2
     rw [hZ]
     simp [hno]
   -- sign at infinity
   have hcA2 : 0 < cA ^ 2 := by positivity
-  obtain ⟨T, hT⟩ := lzero_ext_pos_atTop (f := fun x => cA * f x) (f' := fun x => cA * f' x)
+  obtain ⟨T, hT⟩ := ExteriorZeros.pos_atTop (f := fun x => cA * f x) (f' := fun x => cA * f' x)
     (u := q) (u' := q') (X := 2) (K := K) (c := cA ^ 2) (by norm_num) hK hcA2
     (fun x hx => (hfd x (by have : (2:ℝ) ≤ x := hx; linarith)).const_mul cA)
     (fun x hx => hqd x (by have : (2:ℝ) ≤ x := hx; linarith))
@@ -787,9 +792,9 @@ theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν)
       have h := hWA x (by have : (2:ℝ) ≤ x := hx; linarith)
       linear_combination cA * h)
   -- sign near one
-  have hnear := lzero_assocP_sign_near_one hν hA
+  have hnear := ExteriorZeros.associatedP_sign_near_one hν hA
   obtain ⟨σ₁, t₁, ht₁, hl, hiff⟩ := hnear
-  have hcount := lzero_ext_count (σ₂ := cA) ht₁ hfd hqd hQpos hA hWA hl
+  have hcount := ExteriorZeros.count (σ₂ := cA) ht₁ hfd hqd hQpos hA hWA hl
     (fun x hx => hT x hx)
   rw [hcount.2]
   refine ⟨hcount.1, ?_⟩

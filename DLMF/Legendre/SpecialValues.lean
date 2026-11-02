@@ -313,7 +313,7 @@ principal logarithms. -/
 @[dlmf 14.5.E9]
 theorem olverQ_degree_0 {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ 0 0 z=1/2*(log (z+1)-log (z-1)) := by
-  have h := legInt_olverQ_nat_zero_order 0 (z := z)
+  have h := olverQ_nat_zero_order 0 (z := z)
   norm_num at h
   rw [h, legendreQ_zero hz, log_add_one_sub_log_sub_one hz]
 
@@ -322,7 +322,7 @@ theorem olverQ_degree_0 {z : ℂ} (hz : z-1 ∈ slitPlane) :
 @[dlmf 14.5.E10]
 theorem olverQ_degree_1 {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ 1 0 z=z/2*(log (z+1)-log (z-1))-1 := by
-  have h := legInt_olverQ_nat_zero_order 1 (z := z)
+  have h := olverQ_nat_zero_order 1 (z := z)
   norm_num at h
   rw [h, legendreQ_one hz, legendreQ_zero hz, log_add_one_sub_log_sub_one hz]
   ring
@@ -332,7 +332,7 @@ theorem olverQ_degree_1 {z : ℂ} (hz : z-1 ∈ slitPlane) :
 @[dlmf 14.5.E30]
 theorem olverQ_degree_2 {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ 2 0 z=(3*z^2-1)/8*(log (z+1)-log (z-1))-3*z/4 := by
-  have h := legInt_olverQ_nat_zero_order 2 (z := z)
+  have h := olverQ_nat_zero_order 2 (z := z)
   norm_num at h
   have hr := legendreQ_recurrence (ν := 1) one_ne_zero hz
   norm_num at hr

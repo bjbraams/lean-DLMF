@@ -22,16 +22,16 @@ relations and improper integrals of DLMF §4.26.
 
 ## Main results
 
-* `trig_quadrant_signs`, `trig_quarter_period_table`, `trig_interrelation_table`:
-  Tables 4.16.1–4.16.3.
-* `trig_twelfth_exact_values`, `trig_twelfth_poles`: Table 4.17.1.
+* `Trigonometric.quadrant_signs`, `Trigonometric.quarter_period_table`,
+  `Trigonometric.interrelation_table`: Tables 4.16.1–4.16.3.
+* `Trigonometric.twelfth_exact_values`, `Trigonometric.twelfth_poles`: Table 4.17.1.
 * `inverse_trig_exact_table`, `inverse_reciprocal_limits`, `arccot_zero_bank_limits`:
   Table 4.23.1.
 * `arcsec_arccot_interrelation`: the interrelation of DLMF §4.23(vii).
 * `inverse_sin_cos_branch_points`, `inverse_tan_cot_branch_points`,
   `inverse_reciprocal_branch_points`: no analytic inverse branch crosses a branch point
   (DLMF §4.23(i)).
-* `trig_phase_amplitude`: the real phase-amplitude reduction (DLMF 4.21.1_5).
+* `Trigonometric.phase_amplitude`: the real phase-amplitude reduction (DLMF 4.21.1_5).
 * `hasDerivAt_neg_log_cos`, `hasDerivAt_log_tan_half`, `hasDerivAt_inverse_gudermannian`,
   `hasDerivAt_log_sin`, `hasDerivAt_exp_sin_antiderivative`, `hasDerivAt_exp_cos_antiderivative`:
   antiderivatives (DLMF 4.26.3–4.26.8).
@@ -82,7 +82,7 @@ private lemma trigRealSign_of_neg {x : ℝ} (h : x < 0) : trigRealSign x = -1 :=
 
 /-- DLMF 4.16.T1: trig quadrant signs. -/
 @[dlmf 4.16.T1]
-theorem trig_quadrant_signs (q : Fin 4) {θ : ℝ}
+theorem Trigonometric.quadrant_signs (q : Fin 4) {θ : ℝ}
     (hθ : θ∈Ioo ((q:ℝ)*π/2) (((q:ℝ)+1)*π/2)) (j : Fin 6) :
     trigRealSign (trigRealVector θ j)=trigQuadrantSigns q j := by
   have hp := Real.pi_pos
@@ -127,7 +127,7 @@ theorem trig_quadrant_signs (q : Fin 4) {θ : ℝ}
 /-- All quarter-period identities; reflection and the full period supply both signs in Table 4.16.2.
 -/
 @[dlmf 4.16.T2]
-theorem trig_quarter_period_table (θ : ℝ) (q : Fin 4) :
+theorem Trigonometric.quarter_period_table (θ : ℝ) (q : Fin 4) :
     trigRealVector (θ+(q:ℝ)*π/2)=
     (![trigRealVector θ,
       ![Real.cos θ,-Real.sin θ,-Real.cot θ,(Real.cos θ)⁻¹,-(Real.sin θ)⁻¹,-Real.tan θ],
@@ -155,7 +155,8 @@ def trigInterrelationTable (a : ℝ) : Fin 6→Fin 6→ℝ :=
 
 /-- Every cell of the interrelation table, with its nonnegative finite principal-root convention. -/
 @[dlmf 4.16.T3]
-theorem trig_interrelation_table {θ : ℝ} (hs : 0<Real.sin θ) (hc : 0<Real.cos θ) (i j : Fin 6) :
+theorem Trigonometric.interrelation_table {θ : ℝ} (hs : 0<Real.sin θ) (hc : 0<Real.cos θ)
+    (i j : Fin 6) :
     trigRealVector θ i=trigInterrelationTable (trigRealVector θ j) i j := by
   have key : trigRealVector θ = ![Real.sin θ, Real.cos θ, Real.sin θ / Real.cos θ,
       (Real.sin θ)⁻¹, (Real.cos θ)⁻¹, Real.cos θ / Real.sin θ] := by
@@ -214,7 +215,7 @@ private lemma sin_cos_pi_div_twelve :
 
 /-- DLMF 4.17.T1: trig twelfth exact values. -/
 @[dlmf 4.17.T1]
-theorem trig_twelfth_exact_values (q : Fin 13) (j : Fin 6) (h : ¬TrigTwelfthPole q j) :
+theorem Trigonometric.twelfth_exact_values (q : Fin 13) (j : Fin 6) (h : ¬TrigTwelfthPole q j) :
     trigRealVector ((q:ℝ)*π/12) j=trigTwelfthTable q j := by
   obtain ⟨s1, c1⟩ := sin_cos_pi_div_twelve
   have hr : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
@@ -316,7 +317,7 @@ private lemma tendsto_abs_mul_inv_atTop_of_simple_zero {g h : ℝ → ℝ} {a : 
 
 /-- DLMF 4.17.T1: trig twelfth poles. -/
 @[dlmf 4.17.T1]
-theorem trig_twelfth_poles (q : Fin 13) (j : Fin 6) (h : TrigTwelfthPole q j) :
+theorem Trigonometric.twelfth_poles (q : Fin 13) (j : Fin 6) (h : TrigTwelfthPole q j) :
     Tendsto (fun θ : ℝ => |trigRealVector θ j|) (𝓝[≠] ((q:ℝ)*π/12)) atTop := by
   have hsin : ∀ a : ℝ, Real.sin a = 0 → Real.cos a ≠ 0 →
       Tendsto (fun θ : ℝ => |1 * (Real.sin θ)⁻¹|) (𝓝[≠] a) atTop ∧
@@ -400,7 +401,7 @@ theorem arccot_zero_bank_limits :
 @[dlmf 4.23.vii]
 theorem arcsec_arccot_interrelation {a : ℝ} (ha : 1<a) :
     Real.arccos a⁻¹=Real.arctan (Real.sqrt (a^2-1)) := by
-  rw [Real.arccos_eq_arctan (inv_pos.mpr (lt_trans zero_lt_one ha)),trig_sqrt_inverse ha]
+  rw [Real.arccos_eq_arctan (inv_pos.mpr (lt_trans zero_lt_one ha)),Trigonometric.sqrt_inverse ha]
   congr 1
   field_simp
 
@@ -650,7 +651,7 @@ theorem hasDerivAt_arccsc_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt
   convert hd using 1
   · rfl
   · dsimp only [id,Pi.mul_apply,Pi.add_apply]
-    rw [trig_sqrt_inverse hx]
+    rw [Trigonometric.sqrt_inverse hx]
     field_simp
     ring
 
@@ -671,7 +672,7 @@ theorem hasDerivAt_arcsec_antiderivative {x : ℝ} (hx : 1<x) : HasDerivAt
   convert hd using 1
   · rfl
   · dsimp only [id,Pi.mul_apply,Pi.sub_apply]
-    rw [trig_sqrt_inverse hx]
+    rw [Trigonometric.sqrt_inverse hx]
     field_simp
     ring
 
@@ -765,7 +766,7 @@ theorem complex_trig_log_primitives {U : Set ℂ} (hU : IsOpen U) {L : ℂ→ℂ
 
 /-- Real phase-amplitude reduction with its argument convention made explicit. -/
 @[dlmf 4.21.E1_5]
-theorem trig_phase_amplitude (A B : ℝ) (u : ℂ) :
+theorem Trigonometric.phase_amplitude (A B : ℝ) (u : ℂ) :
     (A:ℂ)*Complex.cos u+B*Complex.sin u=(Real.sqrt (A^2+B^2):ℂ)*
       Complex.cos (u-(Complex.arg ((A:ℂ)+B*I):ℂ)) := by
   let z:ℂ:=(A:ℂ)+B*I
@@ -889,19 +890,20 @@ theorem complex_inverse_sin_cos_primitives {z : ℂ} (hz : z∈arcsinCutPlane) :
       (z*arcsinPrincipal z) z ∧
     HasDerivAt (fun w : ℂ => (w^2/2-1/4)*arccosPrincipal w-w/4*Complex.sqrt (1-w^2))
       (z*arccosPrincipal z) z := by
-  have hq:=trig_one_sub_sq_slit hz
+  have hq:=Trigonometric.one_sub_sq_slit hz
   have hr:Complex.sqrt (1-z^2)≠0 := by
     intro h
-    have hs:=trig_sqrt_sq (1-z^2)
+    have hs:=Trigonometric.complexSqrt_sq (1-z^2)
     rw [h,zero_pow two_ne_zero] at hs
     exact (Complex.mem_slitPlane_iff_arg.mp hq).2 hs.symm
   have hS:HasDerivAt (fun w:ℂ=>Complex.sqrt (1-w^2)) (-z/Complex.sqrt (1-z^2)) z := by
-    convert (trig_hasDerivAt_sqrt hq).comp z (((hasDerivAt_id z).pow 2).const_sub 1) using 1 <;>
+    convert (Trigonometric.hasDerivAt_complexSqrt hq).comp z
+        (((hasDerivAt_id z).pow 2).const_sub 1) using 1 <;>
       simp only [id_eq, Function.comp_def, Pi.pow_apply, Nat.cast_ofNat, Nat.reduceSub, pow_one,
           mul_one] <;> ring
-  have hA:=trig_hasDerivAt_arcsin hz
+  have hA:=Trigonometric.hasDerivAt_arcsin hz
   have hC:=hasDerivAt_arccos_principal hz
-  have hroot:=trig_sqrt_sq (1-z^2)
+  have hroot:=Trigonometric.complexSqrt_sq (1-z^2)
   refine ⟨?_,?_,?_,?_⟩
   · have hd:=((hasDerivAt_id z).mul hA).add hS
     convert hd using 1
@@ -938,9 +940,9 @@ theorem complex_inverse_sin_cos_primitives {z : ℂ} (hz : z∈arcsinCutPlane) :
 @[dlmf 4.26.i]
 theorem complex_arctan_primitive {z : ℂ} (hz : z∈arctanCutPlane) :
     HasDerivAt (fun w : ℂ => w*Complex.arctan w-Complex.log (1+w^2)/2) (Complex.arctan z) z := by
-  have hlog := (Complex.hasDerivAt_log (trig_one_add_sq_slit hz)).comp z
+  have hlog := (Complex.hasDerivAt_log (Trigonometric.one_add_sq_slit hz)).comp z
     (((hasDerivAt_id z).pow 2).const_add 1)
-  have hd := ((hasDerivAt_id z).mul (trig_hasDerivAt_arctan hz)).sub (hlog.div_const 2)
+  have hd := ((hasDerivAt_id z).mul (Trigonometric.hasDerivAt_arctan hz)).sub (hlog.div_const 2)
   convert hd using 1
   · rfl
   · dsimp only [id,Pi.mul_apply,Pi.sub_apply,Pi.pow_apply]
@@ -976,7 +978,7 @@ theorem complex_reciprocal_inverse_primitives {z : ℂ} (hz : z∈arccscCutPlane
     rw [Complex.mem_slitPlane_iff]; left; simp only [Complex.add_re]; linarith
   have hb0 : Complex.sqrt (z^2-1) ≠ 0 := by
     intro h
-    have := trig_sqrt_sq (z^2-1); rw [h, zero_pow two_ne_zero] at this
+    have := Trigonometric.complexSqrt_sq (z^2-1); rw [h, zero_pow two_ne_zero] at this
     exact Complex.slitPlane_ne_zero hq this.symm
   have hp0 : z + Complex.sqrt (z^2-1) ≠ 0 := Complex.slitPlane_ne_zero hp
   have hS : HasDerivAt (fun w : ℂ => Complex.sqrt (w^2-1)) (z/Complex.sqrt (z^2-1)) z := by
@@ -992,7 +994,7 @@ theorem complex_reciprocal_inverse_primitives {z : ℂ} (hz : z∈arccscCutPlane
   have hA := hasDerivAt_arccsc_principal hz hr.ne'
   have hzero : z ≠ 0 := hz.1
   simp only [hr, ite_true] at hA
-  have hroot := trig_sqrt_sq (z^2-1)
+  have hroot := Trigonometric.complexSqrt_sq (z^2-1)
   constructor
   · have hd := ((hasDerivAt_id z).mul hA).add hL
     convert hd using 1
@@ -1016,7 +1018,7 @@ theorem complex_reciprocal_inverse_primitives {z : ℂ} (hz : z∈arccscCutPlane
 @[dlmf 4.26.i]
 theorem complex_arccot_primitive {z : ℂ} (hz : z∈arccotCutPlane) (hr : z.re≠0) :
     HasDerivAt (fun w : ℂ => w*arccotPrincipal w+Complex.log (1+w^2)/2) (arccotPrincipal z) z := by
-  have hlog := (Complex.hasDerivAt_log (trig_one_add_sq_slit (Or.inl hr))).comp z
+  have hlog := (Complex.hasDerivAt_log (Trigonometric.one_add_sq_slit (Or.inl hr))).comp z
     (((hasDerivAt_id z).pow 2).const_add 1)
   have hd := ((hasDerivAt_id z).mul (hasDerivAt_arccot_principal hz)).add (hlog.div_const 2)
   convert hd using 1

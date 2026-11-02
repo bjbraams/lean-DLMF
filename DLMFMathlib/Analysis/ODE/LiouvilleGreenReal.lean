@@ -23,7 +23,7 @@ error-control function. Then, for a parameter `u`,
   `|ε| ≤ exp (V/|u|) - 1` and `|ε'| ≤ |u| f^{1/2} (exp (V/|u|) - 1)`.
 
 For `u = 1` these are Olver's Theorems 2.1 (recessive solution) and 2.2; for large `u` they give
-`ε = O(1/u)` uniformly in `x` (`LiouvilleGreen.lg_exp_sub_one_le_mul_exp`). Both are stated
+`ε = O(1/u)` uniformly in `x` (`LiouvilleGreen.exp_sub_one_le_mul_exp`). Both are stated
 first in terms of an amplitude `A` with `ξ' = A⁻²` (`f = A⁻⁴`), then with `A = f^{-1/4}`.
 
 ## Main results
@@ -41,7 +41,7 @@ open Set Filter Topology MeasureTheory
 namespace LiouvilleGreen
 
 /-- A function with nonnegative derivative on `(a, ∞)` is monotone there. -/
-theorem lg_le_of_hasDerivAt_nonneg {a : ℝ} {ξ d : ℝ → ℝ}
+theorem le_of_hasDerivAt_nonneg {a : ℝ} {ξ d : ℝ → ℝ}
     (hξ : ∀ x, a < x → HasDerivAt ξ (d x) x) (hd : ∀ x, a < x → 0 ≤ d x)
     {x t : ℝ} (hx : a < x) (hxt : x ≤ t) : ξ x ≤ ξ t := by
   have hmono : MonotoneOn ξ (Ioi a) := by
@@ -56,7 +56,7 @@ theorem lg_le_of_hasDerivAt_nonneg {a : ℝ} {ξ d : ℝ → ℝ}
   exact hmono hx (lt_of_lt_of_le hx hxt) hxt
 
 /-- `exp y - 1 ≤ y exp y`; turns the Liouville–Green bounds into `O(1/u)`. -/
-theorem lg_exp_sub_one_le_mul_exp (y : ℝ) :
+theorem exp_sub_one_le_mul_exp (y : ℝ) :
     Real.exp y - 1 ≤ y * Real.exp y := by
   have h := Real.add_one_le_exp (-y)
   have h2 : Real.exp (-y) * Real.exp y = 1 := by rw [← Real.exp_add]; simp
@@ -64,7 +64,7 @@ theorem lg_exp_sub_one_le_mul_exp (y : ℝ) :
 
 /-- The exponential Liouville–Green kernel: for `ξ' = A⁻²` and `u > 0`, `E = exp (-u ξ)` solves
 `E' = -u A⁻² E`, `|E|` is nonincreasing and `|(1 - E(t)²/E(x)²)/(2u)| ≤ 1/(2u)` for `x < t`. -/
-theorem lg_exp_kernel {a u : ℝ} (hu : 0 < u) {A ξ : ℝ → ℝ}
+theorem exp_kernel {a u : ℝ} (hu : 0 < u) {A ξ : ℝ → ℝ}
     (hξ : ∀ x, a < x → HasDerivAt ξ ((A x ^ 2)⁻¹) x) :
     (∀ x, a < x → Real.exp (-(u * ξ x)) ≠ 0) ∧
     (∀ x, a < x → HasDerivAt (fun y => Real.exp (-(u * ξ y)))
@@ -74,7 +74,7 @@ theorem lg_exp_kernel {a u : ℝ} (hu : 0 < u) {A ξ : ℝ → ℝ}
       ‖(1 - Real.exp (-(u * ξ t)) ^ 2 / Real.exp (-(u * ξ x)) ^ 2) / (2 * u)‖ ≤ 1 / (2 * u)) := by
   set E : ℝ → ℝ := fun y => Real.exp (-(u * ξ y)) with hEdef
   have hξle : ∀ x t, a < x → x ≤ t → ξ x ≤ ξ t := fun x t hx hxt =>
-    lg_le_of_hasDerivAt_nonneg hξ (fun y _ => by positivity) hx hxt
+    le_of_hasDerivAt_nonneg hξ (fun y _ => by positivity) hx hxt
   have hEle' : ∀ x t, a < x → x ≤ t → E t ≤ E x := fun x t hx hxt => by
     simp only [hEdef]
     gcongr
@@ -120,7 +120,7 @@ theorem exists_solution_exp {a u : ℝ} (hu : 0 < u) {A A' A'' ξ g : ℝ → �
       |ε x| ≤ Real.exp ((∫ t in Ioi x, |A t * A'' t - g t * A t ^ 2|) / (2 * u)) - 1 ∧
       |A x ^ 2 * ε' x| ≤
         2 * u * (Real.exp ((∫ t in Ioi x, |A t * A'' t - g t * A t ^ 2|) / (2 * u)) - 1) := by
-  obtain ⟨hE0, hE, hEle, hK⟩ := lg_exp_kernel (a := a) hu hξ
+  obtain ⟨hE0, hE, hEle, hK⟩ := exp_kernel (a := a) hu hξ
   obtain ⟨ε, ε', w', H⟩ := exists_solution_of_kernel_bound (𝕜 := ℝ) (a := a)
     (κ := 1 / (2 * u)) (k := u) (A := A) (A' := A') (A'' := A'')
     (E := fun y => Real.exp (-(u * ξ y))) (g := g)
@@ -227,7 +227,7 @@ noncomputable def errorDensity (f f' f'' g : ℝ → ℝ) (x : ℝ) : ℝ :=
 
 /-- The amplitude `A = f^{-1/4}`: its first two derivatives, `A⁻² = f^{1/2}`, `A⁻⁴ = f`, and
 `A A'' - g A² = errorDensity f f' f'' g`. -/
-theorem lg_amplitude {a : ℝ} {f f' f'' g : ℝ → ℝ} (hf : ∀ x, a < x → 0 < f x)
+theorem amplitude {a : ℝ} {f f' f'' g : ℝ → ℝ} (hf : ∀ x, a < x → 0 < f x)
     (hf' : ∀ x, a < x → HasDerivAt f (f' x) x) (hf'' : ∀ x, a < x → HasDerivAt f' (f'' x) x)
     (hf''c : ContinuousOn f'' (Ioi a)) {x : ℝ} (hx : a < x) :
     f x ^ (-(1 / 4) : ℝ) ≠ 0 ∧
@@ -281,14 +281,14 @@ theorem lg_amplitude {a : ℝ} {f f' f'' g : ℝ → ℝ} (hf : ∀ x, a < x →
 
 /-- The variation of the error-control function computed from `A = f^{-1/4}` agrees with the
 integral of `|errorDensity|`. -/
-theorem lg_integral_errorDensity {a : ℝ} {f f' f'' g : ℝ → ℝ} (hf : ∀ x, a < x → 0 < f x)
+theorem integral_errorDensity {a : ℝ} {f f' f'' g : ℝ → ℝ} (hf : ∀ x, a < x → 0 < f x)
     (hf' : ∀ x, a < x → HasDerivAt f (f' x) x) (hf'' : ∀ x, a < x → HasDerivAt f' (f'' x) x)
     (hf''c : ContinuousOn f'' (Ioi a)) {c : ℝ} (hc : a ≤ c) :
     EqOn (fun t => |f t ^ (-(1 / 4) : ℝ) * (-(1 / 4) * f'' t * f t ^ (-(5 / 4) : ℝ) +
         5 / 16 * f' t ^ 2 * f t ^ (-(9 / 4) : ℝ)) - g t * (f t ^ (-(1 / 4) : ℝ)) ^ 2|)
       (fun t => |errorDensity f f' f'' g t|) (Ioi c) := fun t ht => by
   show |_| = |_|
-  rw [(lg_amplitude (g := g) hf hf' hf'' hf''c (lt_of_le_of_lt hc ht)).2.2.2.2.2.2.2]
+  rw [(amplitude (g := g) hf hf' hf'' hf''c (lt_of_le_of_lt hc ht)).2.2.2.2.2.2.2]
 
 /-- **Olver's Liouville–Green theorem, exponential case** (Olver, *Asymptotics and Special
 Functions*, Ch. 6, Thm. 2.1 for `u = 1`; Ch. 10, Thm. 3.1). Let `f > 0` be twice differentiable
@@ -299,7 +299,7 @@ then for `u > 0` the equation `w'' = (u² f + g) w` has the solution
 
 `|ε x| ≤ exp (V x / (2u)) - 1`,   `|ε' x| ≤ 2u f(x)^{1/2} (exp (V x / (2u)) - 1)`.
 
-In particular `ε = O(1/u)` uniformly in `x` when `V` is bounded (`lg_exp_sub_one_le_mul_exp`). -/
+In particular `ε = O(1/u)` uniformly in `x` when `V` is bounded (`exp_sub_one_le_mul_exp`). -/
 theorem exists_solution_exp_of_pos {a u : ℝ} (hu : 0 < u) {f f' f'' g ξ : ℝ → ℝ}
     (hf : ∀ x, a < x → 0 < f x)
     (hf' : ∀ x, a < x → HasDerivAt f (f' x) x) (hf'' : ∀ x, a < x → HasDerivAt f' (f'' x) x)
@@ -315,16 +315,16 @@ theorem exists_solution_exp_of_pos {a u : ℝ} (hu : 0 < u) {f f' f'' g ξ : ℝ
       |ε' x| ≤
         2 * u * √(f x) *
           (Real.exp ((∫ t in Ioi x, |errorDensity f f' f'' g t|) / (2 * u)) - 1) := by
-  have H := fun x (hx : a < x) => lg_amplitude (g := g) hf hf' hf'' hf''c hx
+  have H := fun x (hx : a < x) => amplitude (g := g) hf hf' hf'' hf''c hx
   obtain ⟨ε, ε', w', H'⟩ := exists_solution_exp hu (fun x hx => (H x hx).1)
     (fun x hx => (H x hx).2.1) (fun x hx => (H x hx).2.2.1) (H (a + 1) (by linarith)).2.2.2.1 hgc
     (fun x hx => by rw [(H x hx).2.2.2.2.1]; exact hξ x hx)
-    (fun c hc => (hFi c hc).congr_fun (lg_integral_errorDensity hf hf' hf'' hf''c hc.le).symm
+    (fun c hc => (hFi c hc).congr_fun (integral_errorDensity hf hf' hf'' hf''c hc.le).symm
       measurableSet_Ioi)
   refine ⟨ε, ε', w', fun x hx => ?_⟩
   obtain ⟨h1, h2, h3, h4, h5⟩ := H' x hx
   have hV := setIntegral_congr_fun (μ := volume) measurableSet_Ioi
-    (lg_integral_errorDensity (g := g) hf hf' hf'' hf''c hx.le)
+    (integral_errorDensity (g := g) hf hf' hf'' hf''c hx.le)
   rw [hV] at h4 h5
   refine ⟨h1, h2, ?_, h4, ?_⟩
   · rwa [(H x hx).2.2.2.2.2.1] at h3
@@ -354,16 +354,16 @@ theorem exists_solution_osc_of_pos {a u : ℝ} (hu : u ≠ 0) {f f' f'' g ξ : �
       ‖ε x‖ ≤ Real.exp ((∫ t in Ioi x, |errorDensity f f' f'' g t|) / |u|) - 1 ∧
       ‖ε' x‖ ≤ |u| * √(f x) *
         (Real.exp ((∫ t in Ioi x, |errorDensity f f' f'' g t|) / |u|) - 1) := by
-  have H := fun x (hx : a < x) => lg_amplitude (g := g) hf hf' hf'' hf''c hx
+  have H := fun x (hx : a < x) => amplitude (g := g) hf hf' hf'' hf''c hx
   obtain ⟨ε, ε', w', H'⟩ := exists_solution_osc hu (fun x hx => (H x hx).1)
     (fun x hx => (H x hx).2.1) (fun x hx => (H x hx).2.2.1) (H (a + 1) (by linarith)).2.2.2.1 hgc
     (fun x hx => by rw [(H x hx).2.2.2.2.1]; exact hξ x hx)
-    (fun c hc => (hFi c hc).congr_fun (lg_integral_errorDensity hf hf' hf'' hf''c hc.le).symm
+    (fun c hc => (hFi c hc).congr_fun (integral_errorDensity hf hf' hf'' hf''c hc.le).symm
       measurableSet_Ioi)
   refine ⟨ε, ε', w', fun x hx => ?_⟩
   obtain ⟨h1, h2, h3, h4, h5⟩ := H' x hx
   have hV := setIntegral_congr_fun (μ := volume) measurableSet_Ioi
-    (lg_integral_errorDensity (g := g) hf hf' hf'' hf''c hx.le)
+    (integral_errorDensity (g := g) hf hf' hf'' hf''c hx.le)
   rw [hV] at h4 h5
   refine ⟨h1, h2, ?_, h4, ?_⟩
   · rwa [(H x hx).2.2.2.2.2.1] at h3

@@ -25,7 +25,8 @@ method with `𝓜(e^{-t})(z) = Γ(z)`.
 ## Main results
 
 * `laplace_eq_trunc_add`, `laplace_trunc_eq_mellinInv`: DLMF 2.5.37–2.5.40.
-* `laplace_truncLow_shift`, `laplace_truncHigh_shift`: contour shifts (DLMF 2.5.41–2.5.42).
+* `laplace_truncLow_shift`, `laplace_truncHigh_shift`, `laplace_truncHigh_shift'`: contour shifts
+  (DLMF 2.5.41–2.5.42).
 * `laplace_remainder_isBigO`, `laplace_expansion_residues`: the remainder estimate
   `O(ζ^{l-δ-1})` and the expansion 2.5.43.
 * `laplace_small_parameter`: the expansion 2.5.44.
@@ -391,7 +392,7 @@ theorem laplace_truncLow_shift {h : ℝ → ℂ} {c ρ x : ℝ} (hc : -1 < c) (h
       simpa [Real.norm_eq_abs] using hT
     rw [norm_div]
     exact (div_le_self (norm_nonneg _) hden).trans (hbound t ht' T)
-  have hs := Complex.barnesRes_vertical_shift (c₁ := p) (c₂ := ρ) (p := 1)
+  have hs := Complex.BarnesResidue.vertical_shift (c₁ := p) (c₂ := ρ) (p := 1)
     (by simpa using hp1) (by simpa using hρ1) hΦd (hli p ⟨le_rfl, hpρ.le⟩ hp1.ne)
     (hli ρ ⟨hpρ.le, le_rfl⟩ (by linarith)) (hhor.mono_left atTop_le_cocompact)
     (hhor.mono_left atBot_le_cocompact)
@@ -410,14 +411,15 @@ theorem laplace_truncLow_shift {h : ℝ → ℂ} {c ρ x : ℝ} (hc : -1 < c) (h
   field_simp
   linear_combination (-x : ℂ) * hs + 2 * (π : ℂ) * mellin g 1 * mul_inv_cancel₀ hxpos
 
-/-- DLMF 2.5.42: let `h` satisfy 2.5.18 and 2.5.20, `p₂ < min(1, ℜβ₀)` as in 2.5.40, and let `H`
-be the continuation of `𝓜h₂` (2.5.27, or entire if `κ ≠ 0`), so that `Γ(1 - z)H(z)` is
-analytic in `p₂ ≤ ℜz ≤ ρ` (`1 < ρ < 2`) except at the finite set `P` of poles with
-`ℜβ₀ ≤ ℜz ≤ 1`, and decays as `ℑz → ±∞` uniformly in the strip. Then
+/-- DLMF 2.5.42, stronger than DLMF, which assumes `ρ < 2`: let `h` satisfy 2.5.18 and 2.5.20,
+`p₂ < min(1, ℜβ₀)` as in 2.5.40, and let `H` be the continuation of `𝓜h₂` (2.5.27, or entire if
+`κ ≠ 0`), so that `Γ(1 - z)H(z)` is analytic in `p₂ ≤ ℜz ≤ ρ` (`1 < ρ`) except
+at the finite set `P` of poles with `ℜβ₀ ≤ ℜz ≤ 1`, and decays as `ℑz → ±∞` uniformly in
+the strip. Then
 `I₂(x) = ∑_{q ∈ P} Res_{z=q}[-x^{-z} Γ(1 - z) H(z)] + (2πi)⁻¹ ∫_{(ρ)} x^{-z} Γ(1 - z) H(z) dz`. -/
 @[dlmf 2.5.E42, dlmf 2.5.iii]
-theorem laplace_truncHigh_shift {h : ℝ → ℂ} {H : ℂ → ℂ} {p ρ x : ℝ} (P : Finset ℂ)
-    (hρ1 : 1 < ρ) (hρ2 : ρ < 2) (hp : p < 1) (hx : 0 < x)
+theorem laplace_truncHigh_shift' {h : ℝ → ℂ} {H : ℂ → ℂ} {p ρ x : ℝ} (P : Finset ℂ)
+    (hρ1 : 1 < ρ) (hp : p < 1) (hx : 0 < x)
     (hconv : ∀ z : ℂ, z.re = p → MellinConvergent (mellinTruncHigh h) z)
     (hH : ∀ z : ℂ, z.re ≤ p → H z = mellin (mellinTruncHigh h) z)
     (hP : ∀ q ∈ P, p < q.re ∧ q.re ≤ 1)
@@ -433,7 +435,63 @@ theorem laplace_truncHigh_shift {h : ℝ → ℂ} {H : ℂ → ℂ} {p ρ x : �
       ∑ q ∈ P, DLMF.AlgebraicAnalytic.residueAt
         (fun z => -((x : ℂ) ^ (-z) * Complex.Gamma (1 - z) * H z)) q +
         mellinInv ρ (fun z => Complex.Gamma (1 - z) * H z) x := by
-  sorry
+  set G : ℂ → ℂ := fun z => Complex.Gamma (1 - z) * H z with hGdef
+  have hpρ : p < ρ := by linarith
+  have hHp : ∀ y : ℝ, mellin (mellinTruncHigh h) (p + y * I) = H (p + y * I) := fun y =>
+    (hH _ (by simp)).symm
+  have hint : VerticalIntegrable
+      (fun z => Complex.Gamma (1 - z) * mellin (mellinTruncHigh h) z) p := by
+    unfold VerticalIntegrable at hp_int ⊢
+    simpa only [hHp] using hp_int
+  rw [laplace_trunc_eq_mellinInv hp hx hconv hint hcont]
+  have hlineq : mellinInv p (fun z => Complex.Gamma (1 - z) * mellin (mellinTruncHigh h) z) x =
+      mellinInv p G x := by
+    unfold mellinInv
+    simp only [hHp, hGdef]
+  have hP' : ∀ q ∈ P, p < q.re ∧ q.re < ρ := fun q hq => ⟨(hP q hq).1, by linarith [(hP q hq).2]⟩
+  rw [hlineq, mellinInv_shift (G := G) hpρ hx P hP' hHd hdecay hρ_int hp_int]
+  have hxpos : (x : ℂ) ≠ 0 := ofReal_ne_zero.2 hx.ne'
+  have hneg : ∀ q ∈ P, DLMF.AlgebraicAnalytic.residueAt
+      (fun z => -((x : ℂ) ^ (-z) * Complex.Gamma (1 - z) * H z)) q =
+        -DLMF.AlgebraicAnalytic.residueAt (fun z => (x : ℂ) ^ (-z) * G z) q := by
+    intro q hq
+    have hF : DifferentiableOn ℂ (fun z => (x : ℂ) ^ (-z) * G z)
+        (re ⁻¹' Icc p ρ \ (P : Set ℂ)) := fun z hz =>
+      (((differentiableAt_id.neg).const_cpow (Or.inl hxpos)).differentiableWithinAt).mul
+        (hHd z hz)
+    obtain ⟨ε, hε, hball⟩ := exists_punctured_differentiableAt hP' hF hq
+    rw [← residueAt_neg_of_differentiableAt hε hball]
+    congr 1
+    funext z
+    simp only [hGdef]
+    ring
+  rw [Finset.sum_congr rfl hneg, Finset.sum_neg_distrib]
+  ring
+
+/-- DLMF 2.5.42: let `h` satisfy 2.5.18 and 2.5.20, `p₂ < min(1, ℜβ₀)` as in 2.5.40, and let `H`
+be the continuation of `𝓜h₂` (2.5.27, or entire if `κ ≠ 0`), so that `Γ(1 - z)H(z)` is
+analytic in `p₂ ≤ ℜz ≤ ρ` (`1 < ρ < 2`) except at the finite set `P` of poles with
+`ℜβ₀ ≤ ℜz ≤ 1`, and decays as `ℑz → ±∞` uniformly in the strip. Then
+`I₂(x) = ∑_{q ∈ P} Res_{z=q}[-x^{-z} Γ(1 - z) H(z)] + (2πi)⁻¹ ∫_{(ρ)} x^{-z} Γ(1 - z) H(z) dz`. -/
+@[dlmf 2.5.E42, dlmf 2.5.iii]
+theorem laplace_truncHigh_shift {h : ℝ → ℂ} {H : ℂ → ℂ} {p ρ x : ℝ} (P : Finset ℂ)
+    (hρ1 : 1 < ρ) (_hρ2 : ρ < 2) (hp : p < 1) (hx : 0 < x)
+    (hconv : ∀ z : ℂ, z.re = p → MellinConvergent (mellinTruncHigh h) z)
+    (hH : ∀ z : ℂ, z.re ≤ p → H z = mellin (mellinTruncHigh h) z)
+    (hP : ∀ q ∈ P, p < q.re ∧ q.re ≤ 1)
+    (hHd : DifferentiableOn ℂ (fun z => Complex.Gamma (1 - z) * H z)
+      ({z : ℂ | p ≤ z.re ∧ z.re ≤ ρ} \ (P : Set ℂ)))
+    (hdecay : Tendsto (fun y : ℝ => ⨆ σ : Icc p ρ, ‖Complex.Gamma (1 - (σ + y * I)) *
+      H (σ + y * I)‖) (cocompact ℝ) (𝓝 0))
+    (hp_int : VerticalIntegrable (fun z => Complex.Gamma (1 - z) * H z) p)
+    (hρ_int : VerticalIntegrable (fun z => Complex.Gamma (1 - z) * H z) ρ)
+    (hcont : ContinuousAt (fun x => ∫ t in Ioi 0,
+      (Real.exp (-t) : ℂ) * mellinTruncHigh h (x * t)) x) :
+    (∫ t in Ioi 0, (Real.exp (-t) : ℂ) * mellinTruncHigh h (x * t)) =
+      ∑ q ∈ P, DLMF.AlgebraicAnalytic.residueAt
+        (fun z => -((x : ℂ) ^ (-z) * Complex.Gamma (1 - z) * H z)) q +
+        mellinInv ρ (fun z => Complex.Gamma (1 - z) * H z) x :=
+  laplace_truncHigh_shift' P hρ1 hp hx hconv hH hP hHd hdecay hp_int hρ_int hcont
 
 /-- Bound for the inverse Mellin integral: `|(2πi)⁻¹ ∫_{(σ)} x^{-z} G(z) dz| ≤ x^{-σ} C` with
 `C = (2π)⁻¹ ∫ |G(σ + iy)| dy`, for `x > 0`. -/
@@ -474,7 +532,8 @@ theorem laplace_remainder_isBigO (σ : ℝ) (G : ℂ → ℂ) :
 /-- DLMF 2.5.43: under the hypotheses of 2.5.41–2.5.42, with `H` the continuation of `𝓜h₂`,
 `P₂` the poles of `Γ(1 - z)H(z)` in `ℜβ₀ ≤ ℜz ≤ 1`, `P` the poles of `Γ(1 - z)𝓜h(z)`
 (`𝓜h = 𝓜h₁ + H`) in `1 < ℜz < l` (`l ≥ 2` an integer, `0 < δ` small, no poles on
-`ℜz = l - δ`), and decay of these products along vertical lines uniformly in strips,
+`ℜz = l - δ`), decay of these products along vertical lines uniformly in strips, and
+integrability of `Γ(1 - z)𝓜h(z)` on the line `ℜz = l - δ` (which DLMF assumes implicitly),
 `𝓛h(ζ) = 𝓜h₁(1) + ∑_{P₂} Res[-ζ^{z-1}Γ(1 - z)H(z)] + ∑_{P} Res[-ζ^{z-1}Γ(1 - z)𝓜h(z)]
 + (2πi)⁻¹ ∫_{(l-δ)} ζ^{z-1}Γ(1 - z)𝓜h(z) dz` for `ζ > 0`. -/
 @[dlmf 2.5.E43]
@@ -488,7 +547,9 @@ theorem laplace_expansion_residues {h : ℝ → ℂ} {H : ℂ → ℂ} {c p : �
         (mellin (mellinTruncLow h) z + H z))
       ({z : ℂ | p ≤ z.re ∧ z.re ≤ l - δ} \ ((P₂ : Set ℂ) ∪ P ∪ {1})))
     (hdecay : Tendsto (fun y : ℝ => ⨆ σ : Icc p (l - δ), ‖Complex.Gamma (1 - (σ + y * I)) *
-      (mellin (mellinTruncLow h) (σ + y * I) + H (σ + y * I))‖) (cocompact ℝ) (𝓝 0)) :
+      (mellin (mellinTruncLow h) (σ + y * I) + H (σ + y * I))‖) (cocompact ℝ) (𝓝 0))
+    (hl_int : VerticalIntegrable (fun z => Complex.Gamma (1 - z) *
+        (mellin (mellinTruncLow h) z + H z)) (l - δ)) :
     laplaceTransform h ζ = mellin (mellinTruncLow h) 1 +
       ∑ q ∈ P₂, DLMF.AlgebraicAnalytic.residueAt
         (fun z => -((ζ : ℂ) ^ (z - 1) * Complex.Gamma (1 - z) * H z)) q +

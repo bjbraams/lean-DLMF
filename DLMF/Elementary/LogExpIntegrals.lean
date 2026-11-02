@@ -54,7 +54,7 @@ namespace DLMF.Elementary
 /-- Logarithm continued fraction on its full principal slit domain. -/
 @[dlmf 4.9.E1]
 theorem log_one_add_continuedFraction {z : ℂ} (hz : 1 + z ∈ Complex.slitPlane) :
-    DLMF.HasContinuedFraction
+    DLMF.Core.HasContinuedFraction
       (fun k => if k = 0 then z else (((k + 1) / 2 : ℕ) : ℂ) ^ 2 * z)
       (fun k => (k + 1 : ℂ)) (Complex.log (1 + z)) := by
   sorry
@@ -62,7 +62,7 @@ theorem log_one_add_continuedFraction {z : ℂ} (hz : 1 + z ∈ Complex.slitPlan
 /-- Odd logarithm fraction outside the two real exterior rays. -/
 @[dlmf 4.9.E2]
 theorem log_ratio_continuedFraction {z : ℂ} (hz : z.im ≠ 0 ∨ |z.re| < 1) :
-    DLMF.HasContinuedFraction
+    DLMF.Core.HasContinuedFraction
       (fun k => if k = 0 then 2 * z else -(k : ℂ) ^ 2 * z ^ 2)
       (fun k => (2 * k + 1 : ℂ)) (Complex.log ((1 + z) / (1 - z))) := by
   sorry
@@ -74,19 +74,20 @@ open scoped Nat
 
 /-- The finite continued fraction is eventually `a₀/b₀` when `a₁ = 0`. -/
 private lemma hasContinuedFraction_of_one_eq_zero {a b : ℕ → ℂ} (h1 : a 1 = 0) :
-    DLMF.HasContinuedFraction a b (a 0 / b 0) := by
-  unfold DLMF.HasContinuedFraction
+    DLMF.Core.HasContinuedFraction a b (a 0 / b 0) := by
+  unfold DLMF.Core.HasContinuedFraction
   refine tendsto_const_nhds.congr' ?_
   filter_upwards [eventually_ge_atTop 1] with n hn
-  exact (incGF_cfTail_freeze h1 hn).symm
+  exact (IncompleteGammaFractions.cfTail_freeze h1 hn).symm
 
 /-- The elements of the fraction DLMF 8.9.1 for `M(1, a+1, z)`. -/
 private lemma tendsto_convs_kummer {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -(n + 1)) (hz : z ≠ 0) :
-    Tendsto (cfConv_ofFun 0
+    Tendsto (ofFun 0
       (fun k => if k = 0 then 1 else if k = 1 then -z else if k % 2 = 0 then ((k / 2 : ℕ) : ℂ) * z
         else -(((k / 2 : ℕ) : ℂ) + a) * z)
       (fun k => if k = 0 then 1 else a + k)).convs atTop (𝓝 (kummerM 1 (a + 1) z)) := by
-  refine incGF_gammaStar_tendsto ha hz (by simp) (by simp) (fun m hm => ?_) (fun m hm => ?_)
+  refine IncompleteGammaFractions.gammaStar_tendsto ha hz (by simp) (by simp) (fun m hm => ?_)
+      (fun m hm => ?_)
     (by simp) (fun k hk => by simp [show k ≠ 0 by omega])
   · simp only [show 2 * m + 1 ≠ 0 by omega, show 2 * m + 1 ≠ 1 by omega, ↓reduceIte,
       show (2 * m + 1) % 2 ≠ 0 by omega, show (2 * m + 1) / 2 = m by omega]
@@ -123,7 +124,7 @@ private lemma natCast_ne_neg_succ (n : ℕ) : ∀ j : ℕ, (n : ℂ) ≠ -(j + 1
 /-- First exponential continued fraction, valid for every complex argument. -/
 @[dlmf 4.9.E3]
 theorem exp_continuedFraction_one (z : ℂ) :
-    DLMF.HasContinuedFraction
+    DLMF.Core.HasContinuedFraction
       (fun k => if k = 0 then 1 else (-1 : ℂ) ^ k * z)
       (fun k => if k = 0 then 1 else if k % 2 = 0 then 2 else (k : ℂ))
       (Complex.exp z) := by
@@ -131,7 +132,7 @@ theorem exp_continuedFraction_one (z : ℂ) :
   · simpa using hasContinuedFraction_of_one_eq_zero
       (a := fun k => if k = 0 then 1 else (-1 : ℂ) ^ k * 0)
       (b := fun k => if k = 0 then 1 else if k % 2 = 0 then 2 else (k : ℂ)) (by simp)
-  rw [incGF_hasContinuedFraction_iff (fun k hk => by
+  rw [IncompleteGammaFractions.hasContinuedFraction_iff (fun k hk => by
     simp [show k ≠ 0 by omega, hz])]
   have h0 : ∀ n : ℕ, (0 : ℂ) ≠ -(n + 1) := fun n h => by
     have := congrArg Complex.re h; simp at this; linarith
@@ -144,7 +145,7 @@ theorem exp_continuedFraction_one (z : ℂ) :
     · exact one_div_ne_zero (by norm_cast; omega)
     · exact one_ne_zero
   refine key.congr fun n => ?_
-  rw [← cfConv_equiv_convs r hr n]
+  rw [← ofFun_convs_equiv r hr n]
   congr 2
   · funext k
     rcases Nat.even_or_odd' k with ⟨m, rfl | rfl⟩
@@ -181,7 +182,7 @@ theorem exp_continuedFraction_one (z : ℂ) :
 /-- Second exponential continued fraction, valid for every complex argument. -/
 @[dlmf 4.9.E3]
 theorem exp_continuedFraction_two (z : ℂ) :
-    Tendsto (fun N => 1 + DLMF.cfTail
+    Tendsto (fun N => 1 + DLMF.Core.cfTail
       (fun k => if k = 0 then z else (-1 : ℂ) ^ k * z)
       (fun k => if k = 0 then 1 else if k % 2 = 1 then 2 else (k + 1 : ℂ)) 0 N)
       atTop (𝓝 (Complex.exp z)) := by
@@ -210,7 +211,8 @@ theorem exp_continuedFraction_two (z : ℂ) :
   rw [add_sub_cancel] at key3
   refine key3.congr fun N => ?_
   congr 1
-  rw [incGF_cfTail_eq ha, ← cfConv_equiv_convs r hr N, ← cfConv_convs_smul_a0]
+  rw [IncompleteGammaFractions.cfTail_eq ha, ← ofFun_convs_equiv r hr N,
+      ← ofFun_convs_mul_first_num]
   congr 2
   · funext k
     rcases Nat.even_or_odd' k with ⟨m, rfl | rfl⟩
@@ -247,7 +249,7 @@ theorem exp_continuedFraction_two (z : ℂ) :
 /-- Third exponential continued fraction, valid for every complex argument. -/
 @[dlmf 4.9.E3]
 theorem exp_continuedFraction_three (z : ℂ) :
-    Tendsto (fun N => 1 + DLMF.cfTail
+    Tendsto (fun N => 1 + DLMF.Core.cfTail
       (fun k => if k = 0 then z else z ^ 2 / (4 * (4 * (k : ℂ) ^ 2 - 1)))
       (fun k => if k = 0 then 1 - z / 2 else 1) 0 N) atTop (𝓝 (Complex.exp z)) :=
   tendsto_one_add_cfTail_exp z
@@ -260,7 +262,7 @@ def expPartialSum (n : ℕ) (z : ℂ) : ℂ := ∑ k ∈ range (n + 1), z ^ k / 
 /-- The full n-parameter remainder fraction for every complex argument. -/
 @[dlmf 4.9.E4]
 theorem exp_remainder_continuedFraction (n : ℕ) (hn : 1 ≤ n) (z : ℂ) :
-    DLMF.HasContinuedFraction
+    DLMF.Core.HasContinuedFraction
       (fun k => if k = 0 then z ^ n else if k = 1 then -(n.factorial : ℂ) * z
         else if k % 2 = 0 then (k / 2 : ℕ) * z
         else -((n + (k - 1) / 2 : ℕ) : ℂ) * z)
@@ -275,7 +277,7 @@ theorem exp_remainder_continuedFraction (n : ℕ) (hn : 1 ≤ n) (z : ℂ) :
     convert h using 1
     rw [expPartialSum, show n - 1 + 1 = n by omega, ← pow_mul_kummerM_one_div_factorial]
     simp [zero_pow (by omega : n ≠ 0)]
-  rw [incGF_hasContinuedFraction_iff (fun k hk => by
+  rw [IncompleteGammaFractions.hasContinuedFraction_iff (fun k hk => by
     have hf : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos n).ne'
     simp only [show k ≠ 0 by omega, ↓reduceIte]
     split_ifs with h1 h2
@@ -294,7 +296,7 @@ theorem exp_remainder_continuedFraction (n : ℕ) (hn : 1 ≤ n) (z : ℂ) :
     rw [expPartialSum, show n - 1 + 1 = n by omega]
   rw [pow_mul_kummerM_one_div_factorial, hE] at key2
   refine key2.congr fun N => ?_
-  rw [← cfConv_equiv_convs r hr N, ← cfConv_convs_smul_a0]
+  rw [← ofFun_convs_equiv r hr N, ← ofFun_convs_mul_first_num]
   congr 2
   · funext k
     have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos n).ne'

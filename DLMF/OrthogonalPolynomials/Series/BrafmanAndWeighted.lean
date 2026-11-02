@@ -19,11 +19,12 @@ generating function DLMF 18.12.3, on the unit disc with principal branches.
 
 ## Main results
 
-* `jacB_re_pos`, `jacB_norm_sq_le`, `jacB_norm_sq_le'`: `Re(R conj(1 - z)) > 0` and the bounds
-  `|U|², |V|² ≤ |z|` on the unit disc, where `R = (1 - 2xz + z²)^{1/2}`.
+* `JacobiBrafman.re_pos`, `JacobiBrafman.norm_sq_le`, `JacobiBrafman.norm_sq_le'`:
+  `Re(R conj(1 - z)) > 0` and the bounds `|U|², |V|² ≤ |z|` on the unit disc, where
+  `R = (1 - 2xz + z²)^{1/2}`.
 * `jacobi_brafman_generating_function`: DLMF 18.12.2_5.
-* `jacW_hasSum_small`, `jacW_one_le_radius`: DLMF 18.12.3 for small `|z|`, and the radius of
-  convergence of its coefficient series.
+* `JacobiWeightedGenerating.hasSum_small`, `JacobiWeightedGenerating.one_le_radius`: DLMF 18.12.3
+  for small `|z|`, and the radius of convergence of its coefficient series.
 * `jacobi_weighted_generating_function`: DLMF 18.12.3.
 
 ## Implementation notes
@@ -66,7 +67,7 @@ open scoped ComplexConjugate
 
 /-- The square of `R conj(1 - w)`, `R² = 1 - 2xw + w²`, is never a nonpositive real for
 `|w| < 1`, `|x| ≤ 1`. -/
-theorem jacB_sq_not_nonpos {x : ℝ} (hx : |x| ≤ 1) {w : ℂ} (hw : ‖w‖ < 1) :
+theorem JacobiBrafman.sq_not_nonpos {x : ℝ} (hx : |x| ≤ 1) {w : ℂ} (hw : ‖w‖ < 1) :
     ¬ (((1 - 2 * x * w + w ^ 2) * conj (1 - w) ^ 2).im = 0 ∧
       ((1 - 2 * x * w + w ^ 2) * conj (1 - w) ^ 2).re ≤ 0) := by
   rintro ⟨him, hre⟩
@@ -118,14 +119,14 @@ theorem jacB_sq_not_nonpos {x : ℝ} (hx : |x| ≤ 1) {w : ℂ} (hw : ‖w‖ < 
     linarith
 
 /-- `Re(R conj(1 - z)) > 0` on the unit disc, `R = (1 - 2xz + z²)^{1/2}` (principal branch). -/
-theorem jacB_re_pos {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem JacobiBrafman.re_pos {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     0 < ((1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) * conj (1 - z)).re := by
   set g : ℂ → ℝ := fun w => ((1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ) * conj (1 - w)).re with hg
   have hne : ∀ w ∈ ball (0 : ℂ) 1, g w ≠ 0 := by
     intro w hw h0
     have hw1 : ‖w‖ < 1 := by simpa using hw
     have hR2 : ((1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ)) ^ 2 = 1 - 2 * x * w + w ^ 2 :=
-      cpow_half_sq (slitPlane_ne_zero (jacGen_mem_slitPlane hx hw1))
+      cpow_half_sq (slitPlane_ne_zero (JacobiGenerating.mem_slitPlane hx hw1))
     set s := (1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ) * conj (1 - w) with hs
     have hs2 : s ^ 2 = (1 - 2 * x * w + w ^ 2) * conj (1 - w) ^ 2 := by
       rw [hs, mul_pow, hR2]
@@ -134,13 +135,13 @@ theorem jacB_re_pos {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     have hre : (s ^ 2).re ≤ 0 := by
       rw [pow_two, mul_re, hsre]; nlinarith [sq_nonneg s.im]
     rw [hs2] at him hre
-    exact jacB_sq_not_nonpos hx hw1 ⟨him, hre⟩
+    exact JacobiBrafman.sq_not_nonpos hx hw1 ⟨him, hre⟩
   have hcont : ContinuousOn g (ball 0 1) := by
     intro w hw
     have hw1 : ‖w‖ < 1 := by simpa using hw
     have hRd : DifferentiableAt ℂ (fun w : ℂ => (1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ)) w :=
       DifferentiableAt.cpow (f := fun w : ℂ => 1 - 2 * x * w + w ^ 2) (by fun_prop)
-        (differentiableAt_const _) (jacGen_mem_slitPlane hx hw1)
+        (differentiableAt_const _) (JacobiGenerating.mem_slitPlane hx hw1)
     have : ContinuousAt (fun w : ℂ => (1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ) * conj (1 - w)) w :=
       hRd.continuousAt.mul ((Complex.continuous_conj.comp (by fun_prop)).continuousAt)
     exact (Complex.continuous_re.continuousAt.comp this).continuousWithinAt
@@ -156,12 +157,12 @@ theorem jacB_re_pos {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
 
 /-- `|(1 - R - z)/2|² ≤ |z|` on the unit disc (the two roots of `4U² - 4(1-z)U + 2(1-x)z`
 have product `(x-1)z/2`, and the one with the minus sign is the smaller). -/
-theorem jacB_norm_sq_le {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem JacobiBrafman.norm_sq_le {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     ‖(1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2‖ ^ 2 ≤ ‖z‖ := by
   set R := (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) with hR
   have hR2 : R ^ 2 = 1 - 2 * x * z + z ^ 2 :=
-    cpow_half_sq (slitPlane_ne_zero (jacGen_mem_slitPlane hx hz))
-  have hre := jacB_re_pos hx hz
+    cpow_half_sq (slitPlane_ne_zero (JacobiGenerating.mem_slitPlane hx hz))
+  have hre := JacobiBrafman.re_pos hx hz
   rw [← hR] at hre
   set A := 1 - z with hA
   have hle : ‖A - R‖ ≤ ‖A + R‖ := by
@@ -189,9 +190,9 @@ theorem jacB_norm_sq_le {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) 
     _ = ‖z‖ := one_mul _
 
 /-- The companion bound `|(1 - R + z)/2|² ≤ |z|`, by `(x, z) ↦ (-x, -z)`. -/
-theorem jacB_norm_sq_le' {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem JacobiBrafman.norm_sq_le' {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     ‖(1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) / 2‖ ^ 2 ≤ ‖z‖ := by
-  have h := jacB_norm_sq_le (x := -x) (by rwa [abs_neg]) (z := -z) (by rwa [norm_neg])
+  have h := JacobiBrafman.norm_sq_le (x := -x) (by rwa [abs_neg]) (z := -z) (by rwa [norm_neg])
   have e : (1 - 2 * ((-x : ℝ) : ℂ) * -z + (-z) ^ 2) = 1 - 2 * x * z + z ^ 2 := by
     push_cast; ring
   rw [e, norm_neg, sub_neg_eq_add] at h
@@ -199,7 +200,7 @@ theorem jacB_norm_sq_le' {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1)
 
 /-- The antidiagonal sums of Appell's `F₄` at `((x-1)/2, (x+1)/2)` are Jacobi polynomials
 (by 18.5.8). -/
-theorem jacB_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ x : ℂ) (N : ℕ) :
+theorem JacobiBrafman.coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ x : ℂ) (N : ℕ) :
     ∑ p ∈ Finset.antidiagonal N, appF4Coeff γ (α + β + 1 - γ) (α + 1) (β + 1) p.1 p.2 *
         ((x - 1) / 2) ^ p.1 * ((x + 1) / 2) ^ p.2 =
       poch γ N * poch (α + β + 1 - γ) N / (poch (α + 1) N * poch (β + 1) N) *
@@ -229,7 +230,7 @@ theorem jacB_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ x : �
   field_simp
 
 /-- Regrouping a summable double series along antidiagonals. -/
-theorem jacB_hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h : HasSum A S) :
+theorem JacobiBrafman.hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h : HasSum A S) :
     HasSum (fun n => ∑ p ∈ Finset.antidiagonal n, A p) S := by
   have h' := (Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd.hasSum_iff (f := A)).mpr h
   refine h'.sigma fun n => ?_
@@ -239,7 +240,7 @@ theorem jacB_hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h : HasSum 
 /-- Brafman's generating function for small `|z|`, from Bailey's product formula
 `appF4_bailey`: with `U = (1 - R - z)/2`, `V = (1 - R + z)/2` one has `U(1 - V) = (x-1)z/2`
 and `V(1 - U) = (x+1)z/2`. -/
-theorem jacB_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ : ℂ) {x : ℝ}
+theorem JacobiBrafman.hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ : ℂ) {x : ℝ}
     (hx : |x| ≤ 1) : ∃ ε > 0, ∀ z ∈ ball (0 : ℂ) ε,
     HasSum (fun n : ℕ => poch γ n * poch (α + β + 1 - γ) n /
       (poch (α + 1) n * poch (β + 1) n) * jacobiPolyP α β n x * z ^ n)
@@ -252,11 +253,11 @@ theorem jacB_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (�
   have hz' : ‖z‖ < min (δ ^ 2) 1 := by simpa using hz
   have hz1 : ‖z‖ < 1 := lt_of_lt_of_le hz' (min_le_right _ _)
   have hzδ : ‖z‖ < δ ^ 2 := lt_of_lt_of_le hz' (min_le_left _ _)
-  have hUs := jacB_norm_sq_le hx hz1
-  have hVs := jacB_norm_sq_le' hx hz1
+  have hUs := JacobiBrafman.norm_sq_le hx hz1
+  have hVs := JacobiBrafman.norm_sq_le' hx hz1
   set R := (1 - 2 * (x : ℂ) * z + z ^ 2) ^ (1 / 2 : ℂ) with hR
   have hR2 : R ^ 2 = 1 - 2 * x * z + z ^ 2 :=
-    cpow_half_sq (slitPlane_ne_zero (jacGen_mem_slitPlane hx hz1))
+    cpow_half_sq (slitPlane_ne_zero (JacobiGenerating.mem_slitPlane hx hz1))
   have hU : ‖(1 - R - z) / 2‖ < δ :=
     (pow_lt_pow_iff_left₀ (norm_nonneg _) hδ.le two_ne_zero).mp (by linarith)
   have hV : ‖(1 - R + z) / 2‖ < δ :=
@@ -267,16 +268,16 @@ theorem jacB_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (�
   have e2 : (1 - R + z) / 2 * (1 - (1 - R - z) / 2) = (x + 1) / 2 * z := by
     linear_combination (-1 / 4 : ℂ) * hR2
   rw [e1, e2] at h
-  have h2 := jacB_hasSum_antidiagonal h
+  have h2 := JacobiBrafman.hasSum_antidiagonal h
   refine h2.congr_fun fun N => ?_
-  rw [← jacB_coeff hα hβ γ x N, Finset.sum_mul]
+  rw [← JacobiBrafman.coeff hα hβ γ x N, Finset.sum_mul]
   refine Finset.sum_congr rfl fun p hp => ?_
   rw [Finset.mem_antidiagonal] at hp
   rw [← hp, mul_pow, mul_pow, pow_add]
   ring
 
 /-- The right side of Brafman's formula is holomorphic on the unit disc. -/
-theorem jacB_differentiableOn (α β γ : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
+theorem JacobiBrafman.differentiableOn (α β γ : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
     DifferentiableOn ℂ (fun z : ℂ =>
       ₂F₁ γ (α + β + 1 - γ) (α + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2) *
        ₂F₁ γ (α + β + 1 - γ) (β + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) / 2))
@@ -285,13 +286,13 @@ theorem jacB_differentiableOn (α β γ : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
   have hw1 : ‖w‖ < 1 := by simpa using hw
   have hRd : DifferentiableAt ℂ (fun w : ℂ => (1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ)) w :=
     DifferentiableAt.cpow (f := fun w : ℂ => 1 - 2 * x * w + w ^ 2) (by fun_prop)
-      (differentiableAt_const _) (jacGen_mem_slitPlane hx hw1)
+      (differentiableAt_const _) (JacobiGenerating.mem_slitPlane hx hw1)
   have hU1 : ‖(1 - (1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ) - w) / 2‖ < 1 :=
     (pow_lt_one_iff_of_nonneg (norm_nonneg _) two_ne_zero).mp
-      (lt_of_le_of_lt (jacB_norm_sq_le hx hw1) hw1)
+      (lt_of_le_of_lt (JacobiBrafman.norm_sq_le hx hw1) hw1)
   have hV1 : ‖(1 - (1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ) + w) / 2‖ < 1 :=
     (pow_lt_one_iff_of_nonneg (norm_nonneg _) two_ne_zero).mp
-      (lt_of_le_of_lt (jacB_norm_sq_le' hx hw1) hw1)
+      (lt_of_le_of_lt (JacobiBrafman.norm_sq_le' hx hw1) hw1)
   have hUd : DifferentiableAt ℂ
       (fun w : ℂ => (1 - (1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ) - w) / 2) w :=
     (((differentiableAt_const _).sub hRd).sub differentiableAt_id).div_const 2
@@ -316,20 +317,20 @@ theorem jacobi_brafman_generating_function {α β : ℂ} (hα : -1 < α.re)
       (poch (α + 1) n * poch (β + 1) n) * jacobiPolyP α β n x * z ^ n)
       (₂F₁ γ (α + β + 1 - γ) (α + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2) *
        ₂F₁ γ (α + β + 1 - γ) (β + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) / 2)) := by
-  -- `hu` and `hv` are redundant: they follow from `|z| < 1` (`jacB_norm_sq_le`).
+  -- `hu` and `hv` are redundant: they follow from `|z| < 1` (`JacobiBrafman.norm_sq_le`).
   have _hu := hu
   have _hv := hv
-  obtain ⟨ε, hε, hsmall⟩ := jacB_hasSum_small hα hβ γ hx
+  obtain ⟨ε, hε, hsmall⟩ := JacobiBrafman.hasSum_small hα hβ γ hx
   exact Complex.lagB_hasSum_of_differentiableOn (c := fun n => poch γ n *
       poch (α + β + 1 - γ) n / (poch (α + 1) n * poch (β + 1) n) * jacobiPolyP α β n x)
-    hε (jacB_differentiableOn α β γ hx) hsmall (by simpa using hz)
+    hε (JacobiBrafman.differentiableOn α β γ hx) hsmall (by simpa using hz)
 
 section JacobiWeighted
 
 open Metric Set
 
 /-- `k! ≤ (1 + 1/(Re β + 1))^k |(β+1)_k|` for `Re β > -1`. -/
-theorem jacW_factorial_le_norm_poch {β : ℂ} (hβ : -1 < β.re) (k : ℕ) :
+theorem JacobiWeightedGenerating.factorial_le_norm_poch {β : ℂ} (hβ : -1 < β.re) (k : ℕ) :
     (k ! : ℝ) ≤ (1 + 1 / (β.re + 1)) ^ k * ‖poch (β + 1) k‖ := by
   have hσ : 0 < β.re + 1 := by linarith
   induction k with
@@ -352,7 +353,7 @@ theorem jacW_factorial_le_norm_poch {β : ℂ} (hβ : -1 < β.re) (k : ℕ) :
       _ = _ := by ring
 
 /-- `(2k+m)! ≤ 2^{2k+m} 4^k k!² m!`. -/
-theorem jacW_factorial_two_mul_add_le (k m : ℕ) :
+theorem JacobiWeightedGenerating.factorial_two_mul_add_le (k m : ℕ) :
     ((2 * k + m)! : ℝ) ≤ 2 ^ (2 * k + m) * 4 ^ k * (k ! * k ! * m !) := by
   have h1 : (2 * k + m)! = (2 * k + m).choose m * ((2 * k)! * m !) := by
     have := Nat.choose_mul_factorial_mul_factorial (Nat.le_add_left m (2 * k))
@@ -387,7 +388,7 @@ theorem jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy :
   obtain ⟨k, m⟩ := p
   simp only
   have hσ : 0 < β.re + 1 := by linarith
-  have hP := jacW_factorial_le_norm_poch hβ k
+  have hP := JacobiWeightedGenerating.factorial_le_norm_poch hβ k
   have hPpos : 0 < ‖poch (β + 1) k‖ := by
     by_contra h
     push Not at h
@@ -395,7 +396,7 @@ theorem jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy :
     rw [h0, mul_zero] at hP
     exact absurd hP (not_le.mpr (by exact_mod_cast k.factorial_pos))
   have hL := appF4_norm_poch_le l (2 * k + m)
-  have hF := jacW_factorial_two_mul_add_le k m
+  have hF := JacobiWeightedGenerating.factorial_two_mul_add_le k m
   have hk : (0 : ℝ) < k ! := by exact_mod_cast k.factorial_pos
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
   unfold jacWTerm
@@ -418,7 +419,7 @@ theorem jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy :
       ring
 
 /-- Duplication for rising factorials: `(2a)_{2m} = 4^m (a)_m (a + 1/2)_m`. -/
-theorem jacW_poch_two_mul (a : ℂ) (m : ℕ) :
+theorem JacobiWeightedGenerating.poch_two_mul (a : ℂ) (m : ℕ) :
     poch (2 * a) (2 * m) = 4 ^ m * poch a m * poch (a + 1 / 2) m := by
   exact poch_two_mul_two_mul a m
 
@@ -455,7 +456,7 @@ theorem jacWTerm_hasSum_outer (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
     (β + 1)).hasSum_mul_pow (mem_eball_one_of_norm_lt_one hv)).mul_left ((1 + z) ^ (-l))
   refine h.congr_fun fun k => ?_
   have hpoch : poch l (2 * k) = 4 ^ k * poch (l / 2) k * poch (l / 2 + 1 / 2) k := by
-    have := jacW_poch_two_mul (l / 2) k
+    have := JacobiWeightedGenerating.poch_two_mul (l / 2) k
     rwa [show 2 * (l / 2) = l by ring] at this
   have hcp : (1 + z) ^ (-(l + 2 * k)) = (1 + z) ^ (-l) * (((1 + z) ^ 2) ^ k)⁻¹ := by
     rw [neg_add, cpow_add _ _ hz0, cpow_neg (1 + z) (2 * k),
@@ -468,7 +469,8 @@ theorem jacWTerm_hasSum_outer (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
   field_simp
 
 /-- The Jacobi coefficient of 18.12.3 as an antidiagonal sum of `jacWTerm`. -/
-theorem jacW_coeff_eq_sum_antidiagonal {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (x z : ℂ)
+theorem JacobiWeightedGenerating.coeff_eq_sum_antidiagonal {α β : ℂ} (hα : -1 < α.re)
+    (hβ : -1 < β.re) (x z : ℂ)
     (n : ℕ) :
     poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x * z ^ n =
       ∑ p ∈ Finset.antidiagonal n, jacWTerm (α + β + 1) β ((x + 1) / 2) z p := by
@@ -508,7 +510,8 @@ theorem jacW_coeff_eq_sum_antidiagonal {α β : ℂ} (hα : -1 < α.re) (hβ : -
     _ = _ := by rw [hsq, mul_one]
 
 /-- 18.12.3 for small `|z|`, by summing the double series in two ways. -/
-theorem jacW_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1)
+theorem JacobiWeightedGenerating.hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
+    {x : ℝ} (hx : |x| ≤ 1)
     {z : ℂ} (hz : ‖z‖ < 1 / (32 * ((1 + ‖α + β + 1‖) ^ 2 * (1 + 1 / (β.re + 1))))) :
     HasSum (fun n : ℕ => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x * z ^ n)
       ((1 + z) ^ (-α - β - 1) * ₂F₁ ((α + β + 1) / 2) ((α + β + 2) / 2)
@@ -568,18 +571,19 @@ theorem jacW_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x
   -- sum by fibres and by antidiagonals
   have hfib := hsum.hasSum.prod_fiberwise (fun k => jacWTerm_hasSum_fiber l β y hz1 k)
   have hval := (jacWTerm_hasSum_outer l β y hz1 hv).unique hfib
-  have hanti := jacB_hasSum_antidiagonal hsum.hasSum
+  have hanti := JacobiBrafman.hasSum_antidiagonal hsum.hasSum
   rw [← hval] at hanti
   convert hanti using 1
   · funext n
-    exact jacW_coeff_eq_sum_antidiagonal hα hβ (x : ℂ) z n
+    exact JacobiWeightedGenerating.coeff_eq_sum_antidiagonal hα hβ (x : ℂ) z n
   · rw [show -α - β - 1 = -l by rw [hl]; ring, show (α + β + 1) / 2 = l / 2 by rw [hl],
       show (α + β + 2) / 2 = l / 2 + 1 / 2 by rw [hl]; ring,
       show 2 * ((x : ℂ) + 1) * z = 4 * y * z by rw [hy]; ring]
 
 /-- The coefficients of 18.12.3 have radius of convergence at least `1`: for `0 ≤ r < 1`,
 `|(α+β+1)_n/(β+1)_n P_n^{(α,β)}(x)| rⁿ → 0`, by 18.12.1 and the Gauss series. -/
-theorem jacW_tendsto_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1)
+theorem JacobiWeightedGenerating.tendsto_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
+    {x : ℝ} (hx : |x| ≤ 1)
     {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
     Tendsto (fun n : ℕ => ‖poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x‖ * r ^ n)
       atTop (𝓝 0) := by
@@ -609,7 +613,8 @@ theorem jacW_tendsto_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {
 
 /-- Star-convexity of the domain of 18.12.3: shrinking `z` towards `0` decreases
 `|z / (1 + z)²|` (`|1 + bz|² - b|1 + z|² = (1 - b)(1 - b|z|²)`). -/
-theorem jacW_norm_div_sq_le {z : ℂ} (hz : ‖z‖ < 1) {b : ℝ} (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+theorem JacobiWeightedGenerating.norm_div_sq_le {z : ℂ} (hz : ‖z‖ < 1) {b : ℝ} (hb0 : 0 ≤ b)
+    (hb1 : b ≤ 1) :
     ‖(b : ℂ) * z / (1 + (b : ℂ) * z) ^ 2‖ ≤ ‖z / (1 + z) ^ 2‖ := by
   have hz2 : z.re ^ 2 + z.im ^ 2 < 1 := by
     have := Complex.sq_norm z
@@ -634,13 +639,14 @@ theorem jacW_norm_div_sq_le {z : ℂ} (hz : ‖z‖ < 1) {b : ℝ} (hb0 : 0 ≤ 
   nlinarith [norm_nonneg z]
 
 /-- The coefficient series of 18.12.3 has radius at least `1`. -/
-theorem jacW_one_le_radius {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1) :
+theorem JacobiWeightedGenerating.one_le_radius {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ}
+    (hx : |x| ≤ 1) :
     1 ≤ (FormalMultilinearSeries.ofScalars ℂ
       (fun n : ℕ => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x)).radius := by
   refine ENNReal.le_of_forall_nnreal_lt fun r hr => ?_
   have hr1 : (r : ℝ) < 1 := by exact_mod_cast hr
   refine FormalMultilinearSeries.le_radius_of_tendsto _ (l := 0) ?_
-  refine (jacW_tendsto_coeff hα hβ hx r.2 hr1).congr fun n => ?_
+  refine (JacobiWeightedGenerating.tendsto_coeff hα hβ hx r.2 hr1).congr fun n => ?_
   rw [FormalMultilinearSeries.ofScalars_norm]
   rfl
 
@@ -659,7 +665,7 @@ theorem jacobi_weighted_generating_function {α β : ℂ} (hα : -1 < α.re)
         (β + 1) (2 * (x + 1 : ℂ) * z / (1 + z) ^ 2)) := by
   set c : ℕ → ℂ := fun n => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x with hc
   set p := FormalMultilinearSeries.ofScalars ℂ c with hp
-  have hrad : 1 ≤ p.radius := jacW_one_le_radius hα hβ hx
+  have hrad : 1 ≤ p.radius := JacobiWeightedGenerating.one_le_radius hα hβ hx
   have hF : HasFPowerSeriesOnBall p.sum p 0 1 :=
     (p.hasFPowerSeriesOnBall (lt_of_lt_of_le one_pos hrad)).mono one_pos hrad
   have hFsum : ∀ w : ℂ, ‖w‖ < 1 → HasSum (fun n => c n * w ^ n) (p.sum w) := by
@@ -686,7 +692,7 @@ theorem jacobi_weighted_generating_function {α β : ℂ} (hα : -1 < α.re)
       nlinarith [norm_nonneg w]
     · have h2 : ‖v w‖ < 1 := by simpa using hw2
       rw [Set.mem_preimage, mem_ball_zero_iff]
-      have hle := jacW_norm_div_sq_le hw1' hb hb1
+      have hle := JacobiWeightedGenerating.norm_div_sq_le hw1' hb hb1
       have e1 : v (b * w) = 2 * (x + 1 : ℂ) * ((b : ℂ) * w / (1 + (b : ℂ) * w) ^ 2) := by
         rw [hv]; ring
       have e2 : v w = 2 * (x + 1 : ℂ) * (w / (1 + w) ^ 2) := by rw [hv]; ring
@@ -722,7 +728,7 @@ theorem jacobi_weighted_generating_function {α β : ℂ} (hα : -1 < α.re)
     filter_upwards [ball_mem_nhds (0 : ℂ) (lt_min hδ0 one_pos)] with w hw
     have hw' : ‖w‖ < min δ 1 := by simpa using hw
     exact (hFsum w (lt_of_lt_of_le hw' (min_le_right _ _))).unique
-      (jacW_hasSum_small hα hβ hx (lt_of_lt_of_le hw' (min_le_left _ _)))
+      (JacobiWeightedGenerating.hasSum_small hα hβ hx (lt_of_lt_of_le hw' (min_le_left _ _)))
   have heq := hFa.eqOn_of_preconnected_of_eventuallyEq hGa
     (StarConvex.isPathConnected hDs hD0).isConnected.isPreconnected hD0 hev
   have hzD : z ∈ D := ⟨by simpa using hz, by simpa [hv] using hu⟩

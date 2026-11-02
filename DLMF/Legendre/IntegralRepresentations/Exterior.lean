@@ -18,25 +18,26 @@ This file proves the hyperbolic integral representations of the associated Legen
 outside the cut `(-∞, 1]`: DLMF 14.25.1 and 14.25.2 on `ℂ ∖ (-∞, 1]`, and the half-line
 integral behind DLMF 14.12.4. The proofs use the half-angle substitution `s = tanh²(t/2)`,
 Euler's integral for `𝐅`, Pfaff's transformation and, for `𝑸^μ_ν`, the inverse Joukowski map
-`ζ = z - √(z²-1)`. Helper names carry the prefix `legInt_`.
+`ζ = z - √(z²-1)`. Helper names live in the namespace `ExteriorIntegral`.
 
 ## Main definitions
 
-* `legInt_hs`: the half-angle substitution `s = tanh²(t/2)`.
-* `legInt_root`: the branch of `√(z²-1)` on `ℂ ∖ (-∞, 1]` continued from `z > 1`.
-* `legInt_zeta`: the inverse Joukowski map `ζ = z - √(z²-1)`, with `|ζ| < 1`.
-* `legInt_QForm`: the `ζ`-form `√π (z²-1)^{μ/2} 2^μ ζ^{ν+μ+1} 𝐅(ν+μ+1, μ+1/2; ν+3/2; ζ²)`.
+* `ExteriorIntegral.halfAngle`: the half-angle substitution `s = tanh²(t/2)`.
+* `ExteriorIntegral.sqrtSqSubOne`: the branch of `√(z²-1)` on `ℂ ∖ (-∞, 1]` continued from `z > 1`.
+* `ExteriorIntegral.invJoukowski`: the inverse Joukowski map `ζ = z - √(z²-1)`, with `|ζ| < 1`.
+* `ExteriorIntegral.zetaForm`: the `ζ`-form
+  `√π (z²-1)^{μ/2} 2^μ ζ^{ν+μ+1} 𝐅(ν+μ+1, μ+1/2; ν+3/2; ζ²)`.
 
 ## Main results
 
 * `associatedP_complex_integral`: DLMF 14.25.1.
-* `legInt_norm_zeta_lt_one`, `legInt_zeta_analyticAt`: `ζ` is analytic with `|ζ| < 1` on
-  `ℂ ∖ (-∞, 1]`.
-* `legInt_olverQ_eq_QForm`: the `ζ`-form of `𝑸^μ_ν` on `ℂ ∖ (-∞, 1]`, from the quadratic
-  transformation DLMF 15.8.15 on `(1, ∞)`.
+* `ExteriorIntegral.norm_invJoukowski_lt_one`, `ExteriorIntegral.invJoukowski_analyticAt`: `ζ` is
+  analytic with `|ζ| < 1` on `ℂ ∖ (-∞, 1]`.
+* `ExteriorIntegral.olverQ_eq_zetaForm`: the `ζ`-form of `𝑸^μ_ν` on `ℂ ∖ (-∞, 1]`, from the
+  quadratic transformation DLMF 15.8.15 on `(1, ∞)`.
 * `olverQ_complex_integral`: DLMF 14.25.2.
-* `legInt_associatedP_cosh_integral`: DLMF 14.12.4, by the substitution `v = e^{±t}/q`, Euler's
-  half-line integral, Pfaff, the quadratic transformation 15.8.13 and DLMF 14.3.18.
+* `ExteriorIntegral.associatedP_cosh_integral`: DLMF 14.12.4, by the substitution `v = e^{±t}/q`,
+  Euler's half-line integral, Pfaff, the quadratic transformation 15.8.13 and DLMF 14.3.18.
 -/
 
 @[expose] public noncomputable section
@@ -45,10 +46,12 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Legendre
 
 /-- Splitting a principal power of a product when the imaginary parts have opposite signs. -/
-theorem legInt_cpow_mul_of_im {A B : ℂ} (hA : A ∈ slitPlane) (hB : B ≠ 0)
+theorem ExteriorIntegral.cpow_mul_of_im {A B : ℂ} (hA : A ∈ slitPlane) (hB : B ≠ 0)
     (h : A.im = 0 ∨ A.im * B.im < 0) (p : ℂ) : (A * B) ^ p = A ^ p * B ^ p := by
   have hA0 : A ≠ 0 := slitPlane_ne_zero hA
   have hlog : log (A * B) = log A + log B := by
@@ -75,21 +78,23 @@ theorem legInt_cpow_mul_of_im {A B : ℂ} (hA : A ∈ slitPlane) (hB : B ≠ 0)
     hlog, add_mul, exp_add]
 
 /-- The half-angle substitution `s = tanh²(t/2) = (cosh t - 1)/(cosh t + 1)`. -/
-noncomputable def legInt_hs (t : ℝ) : ℝ := (Real.cosh t - 1) / (Real.cosh t + 1)
+noncomputable def ExteriorIntegral.halfAngle (t : ℝ) : ℝ := (Real.cosh t - 1) / (Real.cosh t + 1)
 
 /-- Its derivative `2 sinh t/(cosh t + 1)²`. -/
-noncomputable def legInt_hs' (t : ℝ) : ℝ := 2 * Real.sinh t / (Real.cosh t + 1) ^ 2
+noncomputable def ExteriorIntegral.halfAngleDeriv (t : ℝ) : ℝ := 2 * Real.sinh t /
+    (Real.cosh t + 1) ^ 2
 
 /-- Derivative of the half-angle substitution. -/
-theorem legInt_hasDerivAt_hs (t : ℝ) : HasDerivAt legInt_hs (legInt_hs' t) t := by
+theorem ExteriorIntegral.hasDerivAt_halfAngle (t : ℝ) : HasDerivAt ExteriorIntegral.halfAngle
+    (ExteriorIntegral.halfAngleDeriv t) t := by
   have hc : 0 < Real.cosh t + 1 := by linarith [Real.cosh_pos t]
   have h := ((Real.hasDerivAt_cosh t).sub_const 1).div ((Real.hasDerivAt_cosh t).add_const 1) hc.ne'
-  unfold legInt_hs legInt_hs'
+  unfold ExteriorIntegral.halfAngle ExteriorIntegral.halfAngleDeriv
   convert h using 1
   field_simp; ring
 
 /-- The half-angle substitution maps `(0, ∞)` onto `(0, 1)`. -/
-theorem legInt_image_hs : legInt_hs '' Ioi 0 = Ioo 0 1 := by
+theorem ExteriorIntegral.image_halfAngle : ExteriorIntegral.halfAngle '' Ioi 0 = Ioo 0 1 := by
   ext s; constructor
   · rintro ⟨t, ht, rfl⟩
     have h1 : 1 < Real.cosh t := Real.one_lt_cosh.mpr (ne_of_gt ht)
@@ -97,16 +102,16 @@ theorem legInt_image_hs : legInt_hs '' Ioi 0 = Ioo 0 1 := by
   · rintro ⟨h0, h1⟩
     have hq : 1 < (1+s)/(1-s) := by rw [one_lt_div (by linarith)]; linarith
     refine ⟨Real.arcosh ((1+s)/(1-s)), Real.arcosh_pos hq, ?_⟩
-    rw [legInt_hs, Real.cosh_arcosh hq.le]
+    rw [ExteriorIntegral.halfAngle, Real.cosh_arcosh hq.le]
     have : (1:ℝ) - s ≠ 0 := by linarith
     field_simp; ring
 
 /-- The half-angle substitution is injective on `(0, ∞)`. -/
-theorem legInt_injOn_hs : InjOn legInt_hs (Ioi 0) := by
+theorem ExteriorIntegral.injOn_halfAngle : InjOn ExteriorIntegral.halfAngle (Ioi 0) := by
   intro u hu v hv he
   have hu1 : 0 < Real.cosh u + 1 := by linarith [Real.cosh_pos u]
   have hv1 : 0 < Real.cosh v + 1 := by linarith [Real.cosh_pos v]
-  simp only [legInt_hs] at he
+  simp only [ExteriorIntegral.halfAngle] at he
   rw [div_eq_div_iff hu1.ne' hv1.ne'] at he
   have hc : Real.cosh u = Real.cosh v := by linarith
   have : |u| = |v| := by
@@ -117,25 +122,30 @@ theorem legInt_injOn_hs : InjOn legInt_hs (Ioi 0) := by
   rwa [abs_of_pos (show (0:ℝ) < u from hu), abs_of_pos (show (0:ℝ) < v from hv)] at this
 
 /-- Change of variables `s = tanh²(t/2)` from `(0,1)` to `(0,∞)`. -/
-theorem legInt_hs_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioo 0 1)) :
-    IntegrableOn (fun t => |legInt_hs' t| • g (legInt_hs t)) (Ioi 0) ∧
-      ∫ t in Ioi 0, |legInt_hs' t| • g (legInt_hs t) = ∫ s in Ioo 0 1, g s := by
-  have hd : ∀ t ∈ Ioi (0:ℝ), HasDerivWithinAt legInt_hs (legInt_hs' t) (Ioi 0) t :=
-    fun t _ => (legInt_hasDerivAt_hs t).hasDerivWithinAt
-  have hcov := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi hd legInt_injOn_hs g
+theorem ExteriorIntegral.halfAngle_changeOfVariables {g : ℝ → ℂ} (hg : IntegrableOn g (Ioo 0 1)) :
+    IntegrableOn (fun t => |ExteriorIntegral.halfAngleDeriv t| •
+        g (ExteriorIntegral.halfAngle t)) (Ioi 0) ∧
+      ∫ t in Ioi 0, |ExteriorIntegral.halfAngleDeriv t| • g (ExteriorIntegral.halfAngle t) =
+          ∫ s in Ioo 0 1, g s := by
+  have hd : ∀ t ∈ Ioi (0:ℝ),
+      HasDerivWithinAt ExteriorIntegral.halfAngle (ExteriorIntegral.halfAngleDeriv t) (Ioi 0) t :=
+    fun t _ => (ExteriorIntegral.hasDerivAt_halfAngle t).hasDerivWithinAt
+  have hcov := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi hd
+      ExteriorIntegral.injOn_halfAngle g
   have hcovI := integrableOn_image_iff_integrableOn_abs_deriv_smul measurableSet_Ioi hd
-    legInt_injOn_hs g
-  rw [legInt_image_hs] at hcov hcovI
+    ExteriorIntegral.injOn_halfAngle g
+  rw [ExteriorIntegral.image_halfAngle] at hcov hcovI
   exact ⟨hcovI.mp hg, hcov.symm⟩
 
 /-- `z + c = (z+1) (c+1)/2 (1 - x s)`, `x = (z-1)/(z+1)`, `s = (c-1)/(c+1)`, split into powers. -/
-theorem legInt_cpow_z_add_cosh {z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) (p : ℂ) :
+theorem ExteriorIntegral.cpow_z_add_cosh {z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ}
+    (ht : 0 < t) (p : ℂ) :
     (z + Real.cosh t) ^ p = (z+1)^p * (((Real.cosh t + 1)/2 : ℝ) : ℂ)^p *
-      (1 - (z-1)/(z+1) * (legInt_hs t : ℂ))^p := by
+      (1 - (z-1)/(z+1) * (ExteriorIntegral.halfAngle t : ℂ))^p := by
   have hc1 : 1 < Real.cosh t := Real.one_lt_cosh.mpr (ne_of_gt ht)
   have hA0 : z + 1 ≠ 0 := slitPlane_ne_zero hz
   have hcp : (Real.cosh t : ℂ) + 1 ≠ 0 := by exact_mod_cast (show Real.cosh t + 1 ≠ 0 by linarith)
-  set B : ℂ := 1 - (z-1)/(z+1) * (legInt_hs t : ℂ)
+  set B : ℂ := 1 - (z-1)/(z+1) * (ExteriorIntegral.halfAngle t : ℂ)
   have hzc : z + Real.cosh t ≠ 0 := by
     intro h0
     have h1 := congrArg re h0; have h2 := congrArg im h0
@@ -144,13 +154,14 @@ theorem legInt_cpow_z_add_cosh {z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht 
     · simp at h; linarith
     · simp at h; exact h h2
   have hBe : B = 2 * (z + Real.cosh t) / ((z+1) * (Real.cosh t + 1)) := by
-    simp only [B, legInt_hs, ofReal_div, ofReal_sub, ofReal_add, ofReal_one]; field_simp; ring
+    simp only [B, ExteriorIntegral.halfAngle, ofReal_div, ofReal_sub, ofReal_add, ofReal_one];
+        field_simp; ring
   have hB0 : B ≠ 0 := by rw [hBe];
                          exact div_ne_zero (mul_ne_zero two_ne_zero hzc) (mul_ne_zero hA0 hcp)
   have hr : (0:ℝ) < (Real.cosh t + 1)/2 := by linarith
   have hrB : (((Real.cosh t + 1)/2 : ℝ) : ℂ) * B = (z + Real.cosh t)/(z+1) := by
     rw [hBe, ofReal_div, ofReal_add, ofReal_one, ofReal_ofNat]; field_simp
-  have hsplit2 := legInt_cpow_mul_of_im (A := (((Real.cosh t + 1)/2 : ℝ) : ℂ)) (B := B)
+  have hsplit2 := ExteriorIntegral.cpow_mul_of_im (A := (((Real.cosh t + 1)/2 : ℝ) : ℂ)) (B := B)
     (Or.inl hr) hB0 (Or.inl (by simp)) p
   have him : (z+1).im = 0 ∨ (z+1).im * ((z + Real.cosh t)/(z+1)).im < 0 := by
     by_cases h0 : (z+1).im = 0
@@ -167,16 +178,18 @@ theorem legInt_cpow_z_add_cosh {z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht 
           -((Real.cosh t - 1) * (z+1).im^2 / normSq (z+1)) := by ring
       rw [this, neg_lt_zero]
       exact div_pos (mul_pos (by linarith) (by positivity)) hn
-  have hsplit1 := legInt_cpow_mul_of_im hz (div_ne_zero hzc hA0) him p
+  have hsplit1 := ExteriorIntegral.cpow_mul_of_im hz (div_ne_zero hzc hA0) him p
   rw [mul_div_cancel₀ _ hA0] at hsplit1
   rw [hsplit1, ← hrB, hsplit2, mul_assoc]
 
 /-- Real logarithms along the half-angle substitution. -/
-theorem legInt_hs_logs {t : ℝ} (ht : 0 < t) :
+theorem ExteriorIntegral.halfAngle_logs {t : ℝ} (ht : 0 < t) :
     2 * Real.log (Real.sinh t) = Real.log (Real.cosh t - 1) + Real.log (Real.cosh t + 1) ∧
-    Real.log |legInt_hs' t| = Real.log 2 + Real.log (Real.sinh t) - 2 * Real.log (Real.cosh t + 1) ∧
-    Real.log (legInt_hs t) = Real.log (Real.cosh t - 1) - Real.log (Real.cosh t + 1) ∧
-    Real.log (1 - legInt_hs t) = Real.log 2 - Real.log (Real.cosh t + 1) ∧
+    Real.log |ExteriorIntegral.halfAngleDeriv t| = Real.log 2 + Real.log (Real.sinh t) - 2 *
+        Real.log (Real.cosh t + 1) ∧
+    Real.log (ExteriorIntegral.halfAngle t) = Real.log (Real.cosh t - 1) -
+        Real.log (Real.cosh t + 1) ∧
+    Real.log (1 - ExteriorIntegral.halfAngle t) = Real.log 2 - Real.log (Real.cosh t + 1) ∧
     Real.log ((Real.cosh t + 1)/2) = Real.log (Real.cosh t + 1) - Real.log 2 := by
   have hc1 : 1 < Real.cosh t := Real.one_lt_cosh.mpr (ne_of_gt ht)
   have hs : 0 < Real.sinh t := Real.sinh_pos_iff.mpr ht
@@ -186,28 +199,33 @@ theorem legInt_hs_logs {t : ℝ} (ht : 0 < t) :
   · rw [← Real.log_mul hm.ne' hp.ne', show (Real.cosh t - 1) * (Real.cosh t + 1) =
         Real.sinh t ^ 2 by
       nlinarith [Real.cosh_sq_sub_sinh_sq t], Real.log_pow]; push_cast; ring
-  · rw [legInt_hs', abs_of_pos (by positivity), Real.log_div (by positivity) (by positivity),
+  · rw [ExteriorIntegral.halfAngleDeriv, abs_of_pos (by positivity),
+        Real.log_div (by positivity) (by positivity),
       Real.log_mul two_ne_zero hs.ne', Real.log_pow]; push_cast; ring
-  · rw [legInt_hs, Real.log_div hm.ne' hp.ne']
-  · rw [show 1 - legInt_hs t = 2 / (Real.cosh t + 1) by rw [legInt_hs]; field_simp; ring,
+  · rw [ExteriorIntegral.halfAngle, Real.log_div hm.ne' hp.ne']
+  · rw [show 1 - ExteriorIntegral.halfAngle t = 2 / (Real.cosh t + 1) by
+        rw [ExteriorIntegral.halfAngle]; field_simp; ring,
       Real.log_div two_ne_zero hp.ne']
   · rw [Real.log_div hp.ne' two_ne_zero]
 
 /-- The integrand of DLMF 14.25.1 after the substitution `s = tanh²(t/2)`. -/
-theorem legInt_kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
+theorem ExteriorIntegral.kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
     (Real.sinh t:ℂ)^(2*ν+1) / (z+Real.cosh t)^(ν+μ+1) = 2^(2*ν+1) * ((z+1)^(ν+μ+1))⁻¹ *
-      (|legInt_hs' t| • eulerKernel (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) (legInt_hs t)) := by
+      (|ExteriorIntegral.halfAngleDeriv t| •
+          eulerKernel (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) (ExteriorIntegral.halfAngle t)) := by
   have hc1 : 1 < Real.cosh t := Real.one_lt_cosh.mpr (ne_of_gt ht)
   have hs : 0 < Real.sinh t := Real.sinh_pos_iff.mpr ht
-  have hs0 : 0 < legInt_hs t := div_pos (by linarith) (by linarith)
-  have hs1 : 0 < 1 - legInt_hs t := by
-    rw [show 1 - legInt_hs t = 2 / (Real.cosh t + 1) by rw [legInt_hs]; field_simp; ring]
+  have hs0 : 0 < ExteriorIntegral.halfAngle t := div_pos (by linarith) (by linarith)
+  have hs1 : 0 < 1 - ExteriorIntegral.halfAngle t := by
+    rw [show 1 - ExteriorIntegral.halfAngle t = 2 / (Real.cosh t + 1) by
+        rw [ExteriorIntegral.halfAngle]; field_simp; ring]
     exact div_pos two_pos (by linarith)
   have hr : 0 < (Real.cosh t + 1)/2 := by linarith
-  have hd : 0 < |legInt_hs' t| := abs_pos.mpr (by rw [legInt_hs']; positivity)
-  obtain ⟨l1, l2, l3, l4, l5⟩ := legInt_hs_logs ht
+  have hd : 0 < |ExteriorIntegral.halfAngleDeriv t| :=
+      abs_pos.mpr (by rw [ExteriorIntegral.halfAngleDeriv]; positivity)
+  obtain ⟨l1, l2, l3, l4, l5⟩ := ExteriorIntegral.halfAngle_logs ht
   have hA0 : z + 1 ≠ 0 := slitPlane_ne_zero hz
-  have hX0 : 1 - (z-1)/(z+1) * (legInt_hs t : ℂ) ≠ 0 := by
+  have hX0 : 1 - (z-1)/(z+1) * (ExteriorIntegral.halfAngle t : ℂ) ≠ 0 := by
     have hc : (z-1)/(z+1) ∈ cutPlane := by
       rw [mem_cutPlane, show 1 - (z-1)/(z+1) = 2 * (z+1)⁻¹ by field_simp; ring]
       have := recip_mem_slitPlane' hz
@@ -215,19 +233,23 @@ theorem legInt_kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht :
       · exact Or.inl (by simpa using h)
       · exact Or.inr (by simpa using h)
     exact slitPlane_ne_zero (one_sub_mul_mem_slitPlane hc ⟨hs0.le, by linarith⟩)
-  rw [legInt_cpow_z_add_cosh hz ht, eulerKernel, real_smul,
-    show (1:ℂ) - (legInt_hs t : ℂ) = ((1 - legInt_hs t : ℝ) : ℂ) by push_cast; ring,
+  rw [ExteriorIntegral.cpow_z_add_cosh hz ht, eulerKernel, real_smul,
+    show (1:ℂ) - (ExteriorIntegral.halfAngle t : ℂ) =
+        ((1 - ExteriorIntegral.halfAngle t : ℝ) : ℂ) by push_cast; ring,
     cpow_neg, show (2:ℂ)^(2*ν+1) = ((2:ℝ):ℂ)^(2*ν+1) by norm_num,
     Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos,
         Complex.ofReal_cpow_eq_exp hr,
     Complex.ofReal_cpow_eq_exp hs0, Complex.ofReal_cpow_eq_exp hs1,
-    show ((|legInt_hs' t| : ℝ) : ℂ) = exp (Real.log |legInt_hs' t| : ℂ) by
+    show ((|ExteriorIntegral.halfAngleDeriv t| : ℝ) : ℂ) =
+        exp (Real.log |ExteriorIntegral.halfAngleDeriv t| : ℂ) by
       rw [← ofReal_exp, Real.exp_log hd]]
   have hA : (z+1)^(ν+μ+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hA0)
-  have hX : (1 - (z-1)/(z+1) * (legInt_hs t : ℂ))^(ν+μ+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hX0)
+  have hX : (1 - (z-1)/(z+1) * (ExteriorIntegral.halfAngle t : ℂ))^(ν+μ+1) ≠ 0 :=
+      cpow_ne_zero_iff.mpr (Or.inl hX0)
   have key : exp (Real.log (Real.sinh t) * (2*ν+1)) = exp (Real.log 2 * (2*ν+1)) *
-      exp (Real.log |legInt_hs' t| : ℂ) * exp (Real.log (legInt_hs t) * (ν+1-1)) *
-      exp (Real.log (1 - legInt_hs t) * (μ+1-(ν+1)-1)) *
+      exp (Real.log |ExteriorIntegral.halfAngleDeriv t| : ℂ) *
+          exp (Real.log (ExteriorIntegral.halfAngle t) * (ν+1-1)) *
+      exp (Real.log (1 - ExteriorIntegral.halfAngle t) * (μ+1-(ν+1)-1)) *
       exp (Real.log ((Real.cosh t + 1)/2) * (ν+μ+1)) := by
     simp only [← exp_add]
     congr 1
@@ -241,7 +263,8 @@ theorem legInt_kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht :
   field_simp
 
 /-- `x = (z-1)/(z+1)` lies in the cut plane. -/
-theorem legInt_ratio_mem_cutPlane {z : ℂ} (hz : z+1 ∈ slitPlane) : (z-1)/(z+1) ∈ cutPlane := by
+theorem ExteriorIntegral.ratio_mem_cutPlane {z : ℂ} (hz : z+1 ∈ slitPlane) : (z-1)/(z+1)
+    ∈ cutPlane := by
   have hA0 : z + 1 ≠ 0 := slitPlane_ne_zero hz
   rw [mem_cutPlane, show 1 - (z-1)/(z+1) = 2 * (z+1)⁻¹ by field_simp; ring]
   have := recip_mem_slitPlane' hz
@@ -250,7 +273,7 @@ theorem legInt_ratio_mem_cutPlane {z : ℂ} (hz : z+1 ∈ slitPlane) : (z-1)/(z+
   · exact Or.inr (by simpa using h)
 
 /-- Pfaff's transformation in the form needed for DLMF 14.25.1. -/
-theorem legInt_associatedP_pfaff (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem ExteriorIntegral.associatedP_pfaff (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (-μ) z = exp (-μ/2*(log (z+1)-log (z-1))) * ((z+1)/2)^(-(ν+1)) *
       regularizedGaussHG (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) := by
   have hz1 := one_add_mem_slitPlane_of_sub_one hz
@@ -260,7 +283,7 @@ theorem legInt_associatedP_pfaff (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   rw [associatedP, regularizedGaussHG_pfaff _ _ _ hw,
     show (1-z)/2/((1-z)/2-1) = (z-1)/(z+1) by
       rw [show (1-z)/2 - 1 = -((z+1)/2) by ring]; field_simp; ring,
-    regularizedGaussHG_symm _ _ _ (legInt_ratio_mem_cutPlane hz1'),
+    regularizedGaussHG_symm _ _ _ (ExteriorIntegral.ratio_mem_cutPlane hz1'),
     show (1:ℂ) - (1-z)/2 = (z+1)/2 by ring, show (1:ℂ) - -μ - -ν = ν+μ+1 by ring,
     show (1:ℂ) - -μ = μ+1 by ring, show -μ/2 = (-μ)/2 by ring]
   ring
@@ -275,20 +298,21 @@ theorem associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re
         (associatedP ν (-μ) z) := by
   have hz1' : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
   have hA0 : z + 1 ≠ 0 := slitPlane_ne_zero hz1'
-  have hx := legInt_ratio_mem_cutPlane hz1'
+  have hx := ExteriorIntegral.ratio_mem_cutPlane hz1'
   have hb : 0 < (ν+1).re := by simp; linarith
   have hcb : 0 < (μ+1-(ν+1)).re := by simp; linarith
   have hg := intervalIntegrable_eulerKernel (a := ν+μ+1) hb hcb hx
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one,
     integrableOn_Ioc_iff_integrableOn_Ioo] at hg
-  obtain ⟨hI, hE⟩ := legInt_hs_cov hg
+  obtain ⟨hI, hE⟩ := ExteriorIntegral.halfAngle_changeOfVariables hg
   set K : ℂ := legendreBranchPower μ z/(2^ν*Gamma (μ-ν)*Gamma (ν+1)) *
     (2^(2*ν+1) * ((z+1)^(ν+μ+1))⁻¹)
-  have hf : ∀ t ∈ Ioi (0:ℝ), K * (|legInt_hs' t| • eulerKernel (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1))
-      (legInt_hs t)) = legendreBranchPower μ z/(2^ν*Gamma (μ-ν)*Gamma (ν+1))*
+  have hf : ∀ t ∈ Ioi (0:ℝ), K *
+      (|ExteriorIntegral.halfAngleDeriv t| • eulerKernel (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1))
+      (ExteriorIntegral.halfAngle t)) = legendreBranchPower μ z/(2^ν*Gamma (μ-ν)*Gamma (ν+1))*
         ((Real.sinh t:ℂ)^(2*ν+1)/(z+Real.cosh t)^(ν+μ+1)) := by
     intro t ht
-    rw [legInt_kernel_P hz1' ht]; simp only [K]; ring
+    rw [ExteriorIntegral.kernel_P hz1' ht]; simp only [K]; ring
   have hint := IntegrableOn.congr_fun (hI.const_mul K) hf measurableSet_Ioi
   have hval := setIntegral_congr_fun (μ := volume) measurableSet_Ioi hf
   rw [integral_const_mul, hE] at hval
@@ -306,7 +330,7 @@ theorem associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re
   suffices hv : K * (Gamma (ν + 1) * Gamma (μ - ν) *
       regularizedGaussHG (ν + μ + 1) (ν + 1) (μ + 1) ((z - 1) / (z + 1))) = associatedP ν (-μ) z by
     rw [hv] at hlim; exact hlim
-  rw [legInt_associatedP_pfaff ν μ hz]
+  rw [ExteriorIntegral.associatedP_pfaff ν μ hz]
   simp only [K]
   have h2 : (2:ℂ) = ((2:ℝ):ℂ) := by norm_num
   have hl : log ((z+1)/2) = log (z+1) - Real.log 2 := by
@@ -326,62 +350,68 @@ theorem associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re
 
 /-! ### The inverse Joukowski map (copied from `Legendre/FourierTools.lean`, which is downstream) -/
 /-- The square root `√(z²-1)` continued from `z > 1` to `ℂ ∖ (-∞, 1]`. -/
-noncomputable def legInt_root (z : ℂ) : ℂ := exp ((log (z-1) + log (z+1))/2)
+noncomputable def ExteriorIntegral.sqrtSqSubOne (z : ℂ) : ℂ := exp ((log (z-1) + log (z+1))/2)
 
 /-- The inverse Joukowski map `ζ = z - √(z²-1)`, so that `z = (ζ + ζ⁻¹)/2` and `|ζ| < 1`. -/
-noncomputable def legInt_zeta (z : ℂ) : ℂ := z - legInt_root z
+noncomputable def ExteriorIntegral.invJoukowski (z : ℂ) : ℂ := z - ExteriorIntegral.sqrtSqSubOne z
 
 /-- `z+1 ∈ slitPlane` when `z-1 ∈ slitPlane`. -/
-theorem legInt_add_one {z : ℂ} (hz : z-1 ∈ slitPlane) : z+1 ∈ slitPlane := by
+theorem ExteriorIntegral.add_one {z : ℂ} (hz : z-1 ∈ slitPlane) : z+1 ∈ slitPlane := by
   simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
 
 /-- `(√(z²-1))² = z²-1`. -/
-theorem legInt_root_sq {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_root z ^ 2 = z^2 - 1 := by
-  rw [legInt_root, ← exp_nat_mul, show ((2:ℕ):ℂ) * ((log (z-1) + log (z+1))/2) =
+theorem ExteriorIntegral.sqrtSqSubOne_sq {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    ExteriorIntegral.sqrtSqSubOne z ^ 2 = z^2 - 1 := by
+  rw [ExteriorIntegral.sqrtSqSubOne, ← exp_nat_mul, show ((2:ℕ):ℂ) * ((log (z-1) + log (z+1))/2) =
     log (z-1) + log (z+1) by push_cast; ring, exp_add, exp_log (slitPlane_ne_zero hz),
-    exp_log (slitPlane_ne_zero (legInt_add_one hz))]
+    exp_log (slitPlane_ne_zero (ExteriorIntegral.add_one hz))]
   ring
 
 /-- `ζ (z + √(z²-1)) = 1`, written as `ζ (2z - ζ) = 1`. -/
-theorem legInt_zeta_mul {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z *
-    (2*z - legInt_zeta z) = 1 := by
-  have := legInt_root_sq hz
-  rw [legInt_zeta]; linear_combination -this
+theorem ExteriorIntegral.invJoukowski_mul {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    ExteriorIntegral.invJoukowski z *
+    (2*z - ExteriorIntegral.invJoukowski z) = 1 := by
+  have := ExteriorIntegral.sqrtSqSubOne_sq hz
+  rw [ExteriorIntegral.invJoukowski]; linear_combination -this
 
 /-- `ζ ≠ 0`. -/
-theorem legInt_zeta_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z ≠ 0 := by
-  intro h; have := legInt_zeta_mul hz; rw [h, zero_mul] at this; exact zero_ne_one this
+theorem ExteriorIntegral.invJoukowski_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    ExteriorIntegral.invJoukowski z ≠ 0 := by
+  intro h; have := ExteriorIntegral.invJoukowski_mul hz; rw [h, zero_mul] at this;
+      exact zero_ne_one this
 
 /-- `2z = ζ + ζ⁻¹`. -/
-theorem legInt_two_mul_eq {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    2*z = legInt_zeta z + (legInt_zeta z)⁻¹ := by
-  have h0 := legInt_zeta_ne_zero hz
-  have := legInt_zeta_mul hz
+theorem ExteriorIntegral.two_mul_eq {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    2*z = ExteriorIntegral.invJoukowski z + (ExteriorIntegral.invJoukowski z)⁻¹ := by
+  have h0 := ExteriorIntegral.invJoukowski_ne_zero hz
+  have := ExteriorIntegral.invJoukowski_mul hz
   field_simp
   linear_combination this
 
 /-- A point of `ℂ ∖ (-∞, 1]` is not a real number `≤ 1`. -/
-theorem legInt_not_real_le_one {z : ℂ} (hz : z-1 ∈ slitPlane) {r : ℝ} (hr : r ≤ 1) : z ≠ r := by
+theorem ExteriorIntegral.not_real_le_one {z : ℂ} (hz : z-1 ∈ slitPlane) {r : ℝ}
+    (hr : r ≤ 1) : z ≠ r := by
   rintro rfl
   rw [mem_slitPlane_iff] at hz
   simp at hz; linarith
 
 /-- `|ζ| ≠ 1` off `(-∞, 1]`: otherwise `z = Re ζ ∈ [-1, 1]`. -/
-theorem legInt_norm_zeta_ne_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legInt_zeta z‖ ≠ 1 := by
+theorem ExteriorIntegral.norm_invJoukowski_ne_one {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    ‖ExteriorIntegral.invJoukowski z‖ ≠ 1 := by
   intro h1
-  set w := legInt_zeta z
-  have h0 : w ≠ 0 := legInt_zeta_ne_zero hz
+  set w := ExteriorIntegral.invJoukowski z
+  have h0 : w ≠ 0 := ExteriorIntegral.invJoukowski_ne_zero hz
   have hinv : w⁻¹ = (starRingEnd ℂ) w := by
     rw [inv_def, normSq_eq_norm_sq, h1]; simp
-  have h2 := legInt_two_mul_eq hz
+  have h2 := ExteriorIntegral.two_mul_eq hz
   rw [hinv, add_conj] at h2
   have hz' : z = ((w.re:ℝ):ℂ) := by
     push_cast at h2; linear_combination h2/2
-  refine legInt_not_real_le_one hz (r := w.re) ?_ hz'
+  refine ExteriorIntegral.not_real_le_one hz (r := w.re) ?_ hz'
   have := re_le_norm w; linarith
 
 /-- For real `t > 1`, `ζ(t) = t - √(t²-1)`. -/
-theorem legInt_zeta_real {t : ℝ} (ht : 1 < t) : legInt_zeta t =
+theorem ExteriorIntegral.invJoukowski_real {t : ℝ} (ht : 1 < t) : ExteriorIntegral.invJoukowski t =
     ((t - Real.sqrt (t^2-1) : ℝ) : ℂ) := by
   have hl : log ((t:ℂ)-1) + log ((t:ℂ)+1) = ((Real.log (t^2-1) : ℝ) : ℂ) := by
     rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring, show (t:ℂ)+1 =
@@ -389,21 +419,24 @@ theorem legInt_zeta_real {t : ℝ} (ht : 1 < t) : legInt_zeta t =
       ← ofReal_log (by linarith), ← ofReal_log (by linarith), ← ofReal_add,
       ← Real.log_mul (by linarith) (by linarith)]
     congr 2; ring
-  rw [legInt_zeta, legInt_root, hl, show ((Real.log (t^2-1) : ℝ) : ℂ)/2 =
+  rw [ExteriorIntegral.invJoukowski, ExteriorIntegral.sqrtSqSubOne, hl,
+      show ((Real.log (t^2-1) : ℝ) : ℂ)/2 =
       ((Real.log (t^2-1)/2 : ℝ) : ℂ)
     by push_cast; ring, ← ofReal_exp, Real.sqrt_eq_rpow, Real.rpow_def_of_pos (by nlinarith)]
   push_cast; ring_nf
 
 /-- `ζ` is analytic on `ℂ ∖ (-∞, 1]`. -/
-theorem legInt_zeta_analyticAt {z : ℂ} (hz : z-1 ∈ slitPlane) : AnalyticAt ℂ legInt_zeta z := by
+theorem ExteriorIntegral.invJoukowski_analyticAt {z : ℂ} (hz : z-1 ∈ slitPlane) : AnalyticAt ℂ
+    ExteriorIntegral.invJoukowski z := by
   have h1 : AnalyticAt ℂ (fun w : ℂ => log (w-1)) z :=
     (analyticAt_clog hz).comp_of_eq (f := fun w : ℂ => w - 1) (by fun_prop) rfl
   have h2 : AnalyticAt ℂ (fun w : ℂ => log (w+1)) z :=
-    (analyticAt_clog (legInt_add_one hz)).comp_of_eq (f := fun w : ℂ => w + 1) (by fun_prop) rfl
+    (analyticAt_clog (ExteriorIntegral.add_one hz)).comp_of_eq (f := fun w : ℂ => w + 1)
+        (by fun_prop) rfl
   exact analyticAt_id.sub ((h1.add h2).div_const.cexp)
 
 /-- `0 < t - √(t²-1) < 1` for `t > 1`. -/
-theorem legInt_real_bounds {t : ℝ} (ht : 1 < t) :
+theorem ExteriorIntegral.real_bounds {t : ℝ} (ht : 1 < t) :
     0 < t - Real.sqrt (t^2-1) ∧ t - Real.sqrt (t^2-1) < 1 := by
   have h0 : 0 ≤ t^2 - 1 := by nlinarith
   have hs := Real.sq_sqrt h0
@@ -414,74 +447,82 @@ theorem legInt_real_bounds {t : ℝ} (ht : 1 < t) :
     nlinarith
 
 /-- `|ζ| < 1` on `ℂ ∖ (-∞, 1]` (connectedness and `|ζ| ≠ 1`). -/
-theorem legInt_norm_zeta_lt_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legInt_zeta z‖ < 1 := by
+theorem ExteriorIntegral.norm_invJoukowski_lt_one {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    ‖ExteriorIntegral.invJoukowski z‖ < 1 := by
   by_contra h
   push Not at h
   set D : Set ℂ := {w : ℂ | w-1 ∈ slitPlane}
   have h2 : ((2:ℝ):ℂ) ∈ D := by show ((2:ℝ):ℂ) - 1 ∈ slitPlane; norm_num
-  have hc : ContinuousOn (fun w => ‖legInt_zeta w‖) D := fun w hw =>
-    (legInt_zeta_analyticAt hw).continuousAt.norm.continuousWithinAt
-  have hlt : ‖legInt_zeta ((2:ℝ):ℂ)‖ < 1 := by
-    obtain ⟨hp, hl⟩ := legInt_real_bounds (show (1:ℝ) < 2 by norm_num)
-    rw [legInt_zeta_real (by norm_num), norm_real, Real.norm_eq_abs, abs_of_pos hp]
+  have hc : ContinuousOn (fun w => ‖ExteriorIntegral.invJoukowski w‖) D := fun w hw =>
+    (ExteriorIntegral.invJoukowski_analyticAt hw).continuousAt.norm.continuousWithinAt
+  have hlt : ‖ExteriorIntegral.invJoukowski ((2:ℝ):ℂ)‖ < 1 := by
+    obtain ⟨hp, hl⟩ := ExteriorIntegral.real_bounds (show (1:ℝ) < 2 by norm_num)
+    rw [ExteriorIntegral.invJoukowski_real (by norm_num), norm_real,
+        Real.norm_eq_abs, abs_of_pos hp]
     exact hl
   obtain ⟨w, hw, hw1⟩ := isPreconnected_sub_one_mem_slitPlane.intermediate_value h2 hz hc
     ⟨hlt.le, h⟩
-  exact legInt_norm_zeta_ne_one hw hw1
+  exact ExteriorIntegral.norm_invJoukowski_ne_one hw hw1
 
 /-- `ζ ∉ (-∞, 0]` on `ℂ ∖ (-∞, 1]`. -/
-theorem legInt_zeta_mem_slitPlane {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z ∈ slitPlane := by
+theorem ExteriorIntegral.invJoukowski_mem_slitPlane {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    ExteriorIntegral.invJoukowski z ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_contra h
   push Not at h
   obtain ⟨hre, him⟩ := h
-  set w := legInt_zeta z
-  have h0 : w ≠ 0 := legInt_zeta_ne_zero hz
+  set w := ExteriorIntegral.invJoukowski z
+  have h0 : w ≠ 0 := ExteriorIntegral.invJoukowski_ne_zero hz
   have hw : w = ((w.re:ℝ):ℂ) := by apply Complex.ext <;> simp [him]
   have hre' : w.re < 0 := lt_of_le_of_ne hre (fun h => h0 (by rw [hw, h]; simp))
-  have h2 : 2*z = w + w⁻¹ := legInt_two_mul_eq hz
+  have h2 : 2*z = w + w⁻¹ := ExteriorIntegral.two_mul_eq hz
   have hz' : z = (((w.re + (w.re)⁻¹)/2 : ℝ) : ℂ) := by
     rw [hw] at h2
     push_cast at h2 ⊢; linear_combination h2/2
-  refine legInt_not_real_le_one hz ?_ hz'
+  refine ExteriorIntegral.not_real_le_one hz ?_ hz'
   have : (w.re)⁻¹ < 0 := inv_lt_zero.mpr hre'
   linarith
 
 /-! ### DLMF 14.25.2 -/
 
 /-- `z + √(z²-1) cosh t = ζ⁻¹ ((cosh t + 1)/2) (1 - ζ² s)`, split into principal powers. -/
-theorem legInt_cpow_root_cosh {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) (p : ℂ) :
-    (z + legInt_root z * Real.cosh t) ^ p = ((legInt_zeta z) ^ p)⁻¹ *
-      (((Real.cosh t + 1)/2 : ℝ) : ℂ)^p * (1 - (legInt_zeta z)^2 * (legInt_hs t : ℂ))^p := by
-  set ζ := legInt_zeta z with hζ
-  have hζ0 : ζ ≠ 0 := legInt_zeta_ne_zero hz
-  have hζs : ζ ∈ slitPlane := legInt_zeta_mem_slitPlane hz
-  have hζ1 : ‖ζ‖ < 1 := legInt_norm_zeta_lt_one hz
+theorem ExteriorIntegral.cpow_sqrtSqSubOne_cosh {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ}
+    (ht : 0 < t) (p : ℂ) :
+    (z + ExteriorIntegral.sqrtSqSubOne z * Real.cosh t) ^ p =
+        ((ExteriorIntegral.invJoukowski z) ^ p)⁻¹ *
+      (((Real.cosh t + 1)/2 : ℝ) : ℂ)^p *
+          (1 - (ExteriorIntegral.invJoukowski z)^2 * (ExteriorIntegral.halfAngle t : ℂ))^p := by
+  set ζ := ExteriorIntegral.invJoukowski z with hζ
+  have hζ0 : ζ ≠ 0 := ExteriorIntegral.invJoukowski_ne_zero hz
+  have hζs : ζ ∈ slitPlane := ExteriorIntegral.invJoukowski_mem_slitPlane hz
+  have hζ1 : ‖ζ‖ < 1 := ExteriorIntegral.norm_invJoukowski_lt_one hz
   have hc1 : 1 < Real.cosh t := Real.one_lt_cosh.mpr (ne_of_gt ht)
-  have hs0 : 0 < legInt_hs t := div_pos (by linarith) (by linarith)
-  have hs1 : legInt_hs t < 1 := (div_lt_one (by linarith)).mpr (by linarith)
+  have hs0 : 0 < ExteriorIntegral.halfAngle t := div_pos (by linarith) (by linarith)
+  have hs1 : ExteriorIntegral.halfAngle t < 1 := (div_lt_one (by linarith)).mpr (by linarith)
   have hr : (0:ℝ) < (Real.cosh t + 1)/2 := by linarith
-  set B : ℂ := 1 - ζ^2 * (legInt_hs t : ℂ) with hB
+  set B : ℂ := 1 - ζ^2 * (ExteriorIntegral.halfAngle t : ℂ) with hB
   have hBre : 0 < B.re := by
-    have : ‖ζ^2 * (legInt_hs t : ℂ)‖ < 1 := by
+    have : ‖ζ^2 * (ExteriorIntegral.halfAngle t : ℂ)‖ < 1 := by
       rw [norm_mul, norm_pow, norm_real, Real.norm_eq_abs, abs_of_pos hs0]
       have : ‖ζ‖^2 < 1 := by nlinarith [norm_nonneg ζ]
       nlinarith
-    have := re_le_norm (ζ^2 * (legInt_hs t : ℂ))
+    have := re_le_norm (ζ^2 * (ExteriorIntegral.halfAngle t : ℂ))
     simp only [hB, sub_re, one_re]; linarith
   have hB0 : B ≠ 0 := fun h => by simp [h] at hBre
-  have hroot : legInt_root z = z - ζ := by simp [hζ, legInt_zeta]
-  have h2z := legInt_two_mul_eq hz
+  have hroot : ExteriorIntegral.sqrtSqSubOne z = z - ζ := by
+      simp [hζ, ExteriorIntegral.invJoukowski]
+  have h2z := ExteriorIntegral.two_mul_eq hz
   rw [← hζ] at h2z
-  have halg : z + legInt_root z * Real.cosh t = (((Real.cosh t + 1)/2 : ℝ) : ℂ) * (ζ⁻¹ * B) := by
+  have halg : z + ExteriorIntegral.sqrtSqSubOne z * Real.cosh t = (((Real.cosh t + 1)/2 : ℝ) : ℂ) *
+      (ζ⁻¹ * B) := by
     have hcp : (Real.cosh t : ℂ) + 1 ≠ 0 := by
       exact_mod_cast (show Real.cosh t + 1 ≠ 0 by linarith)
     have hz' : z = (ζ + ζ⁻¹)/2 := by linear_combination h2z/2
-    rw [hroot, hB, legInt_hs, hz']
+    rw [hroot, hB, ExteriorIntegral.halfAngle, hz']
     simp only [ofReal_div, ofReal_sub, ofReal_add, ofReal_one, ofReal_ofNat]
     field_simp; ring
   have hW0 : ζ⁻¹ * B ≠ 0 := mul_ne_zero (inv_ne_zero hζ0) hB0
-  rw [halg, legInt_cpow_mul_of_im (Or.inl hr) hW0 (Or.inl (by simp)) p]
+  rw [halg, ExteriorIntegral.cpow_mul_of_im (Or.inl hr) hW0 (Or.inl (by simp)) p]
   have hsplit : (ζ⁻¹ * B)^p = (ζ⁻¹)^p * B^p := by
     rcases lt_or_ge 0 ζ.re with h | h
     · refine Complex.mul_cpow_of_re_pos ?_ hBre p
@@ -490,59 +531,68 @@ theorem legInt_cpow_root_cosh {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht :
         rcases mem_slitPlane_iff.mp hζs with h' | h'
         · linarith
         · exact h'
-      have hBim : B.im = -(legInt_hs t * (2 * ζ.re * ζ.im)) := by
+      have hBim : B.im = -(ExteriorIntegral.halfAngle t * (2 * ζ.re * ζ.im)) := by
         simp only [hB, sub_im, one_im, zero_sub, pow_two, mul_im, ofReal_re, ofReal_im]
         ring
       rcases lt_or_eq_of_le h with h' | h'
-      · refine legInt_cpow_mul_of_im (recip_mem_slitPlane' hζs) hB0 (Or.inr ?_) p
+      · refine ExteriorIntegral.cpow_mul_of_im (recip_mem_slitPlane' hζs) hB0 (Or.inr ?_) p
         rw [inv_im, hBim]
         have hn := normSq_pos.mpr hζ0
-        have : -ζ.im / normSq ζ * -(legInt_hs t * (2 * ζ.re * ζ.im)) =
-            2 * legInt_hs t * ζ.re * ζ.im^2 / normSq ζ := by ring
+        have : -ζ.im / normSq ζ * -(ExteriorIntegral.halfAngle t * (2 * ζ.re * ζ.im)) =
+            2 * ExteriorIntegral.halfAngle t * ζ.re * ζ.im^2 / normSq ζ := by ring
         rw [this]
         exact div_neg_of_neg_of_pos (by
           have : 0 < ζ.im^2 := by positivity
-          have : 2 * legInt_hs t * ζ.re < 0 := by nlinarith
+          have : 2 * ExteriorIntegral.halfAngle t * ζ.re < 0 := by nlinarith
           nlinarith) hn
-      · rw [mul_comm, legInt_cpow_mul_of_im (Or.inl hBre) (inv_ne_zero hζ0)
+      · rw [mul_comm, ExteriorIntegral.cpow_mul_of_im (Or.inl hBre) (inv_ne_zero hζ0)
           (Or.inl (by rw [hBim, h']; ring)) p, mul_comm]
   rw [hsplit, inv_cpow _ _ (slitPlane_arg_ne_pi hζs)]
   ring
 
 /-- The integrand of DLMF 14.25.2 after the substitution `s = tanh²(t/2)`. -/
-theorem legInt_kernel_Q {ν μ z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
-    (Real.sinh t:ℂ)^(2*μ) / (z + legInt_root z * Real.cosh t)^(ν+μ+1) =
-      2^(2*μ) * (legInt_zeta z)^(ν+μ+1) *
-      (|legInt_hs' t| • eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2) (legInt_hs t)) := by
+theorem ExteriorIntegral.kernel_Q {ν μ z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
+    (Real.sinh t:ℂ)^(2*μ) / (z + ExteriorIntegral.sqrtSqSubOne z * Real.cosh t)^(ν+μ+1) =
+      2^(2*μ) * (ExteriorIntegral.invJoukowski z)^(ν+μ+1) *
+      (|ExteriorIntegral.halfAngleDeriv t| •
+          eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2)
+          (ExteriorIntegral.halfAngle t)) := by
   have hc1 : 1 < Real.cosh t := Real.one_lt_cosh.mpr (ne_of_gt ht)
   have hs : 0 < Real.sinh t := Real.sinh_pos_iff.mpr ht
-  have hs0 : 0 < legInt_hs t := div_pos (by linarith) (by linarith)
-  have hs1 : 0 < 1 - legInt_hs t := by
-    rw [show 1 - legInt_hs t = 2 / (Real.cosh t + 1) by rw [legInt_hs]; field_simp; ring]
+  have hs0 : 0 < ExteriorIntegral.halfAngle t := div_pos (by linarith) (by linarith)
+  have hs1 : 0 < 1 - ExteriorIntegral.halfAngle t := by
+    rw [show 1 - ExteriorIntegral.halfAngle t = 2 / (Real.cosh t + 1) by
+        rw [ExteriorIntegral.halfAngle]; field_simp; ring]
     exact div_pos two_pos (by linarith)
   have hr : 0 < (Real.cosh t + 1)/2 := by linarith
-  have hd : 0 < |legInt_hs' t| := abs_pos.mpr (by rw [legInt_hs']; positivity)
-  obtain ⟨l1, l2, l3, l4, l5⟩ := legInt_hs_logs ht
-  have hζ0 := legInt_zeta_ne_zero hz
-  have hX0 : 1 - (legInt_zeta z)^2 * (legInt_hs t : ℂ) ≠ 0 := by
-    have hc : (legInt_zeta z)^2 ∈ cutPlane := by
+  have hd : 0 < |ExteriorIntegral.halfAngleDeriv t| :=
+      abs_pos.mpr (by rw [ExteriorIntegral.halfAngleDeriv]; positivity)
+  obtain ⟨l1, l2, l3, l4, l5⟩ := ExteriorIntegral.halfAngle_logs ht
+  have hζ0 := ExteriorIntegral.invJoukowski_ne_zero hz
+  have hX0 : 1 - (ExteriorIntegral.invJoukowski z)^2 * (ExteriorIntegral.halfAngle t : ℂ) ≠ 0 := by
+    have hc : (ExteriorIntegral.invJoukowski z)^2 ∈ cutPlane := by
       refine mem_cutPlane_of_norm_lt_one ?_
-      rw [norm_pow]; have := legInt_norm_zeta_lt_one hz; nlinarith [norm_nonneg (legInt_zeta z)]
+      rw [norm_pow]; have := ExteriorIntegral.norm_invJoukowski_lt_one hz;
+          nlinarith [norm_nonneg (ExteriorIntegral.invJoukowski z)]
     exact slitPlane_ne_zero (one_sub_mul_mem_slitPlane hc ⟨hs0.le, by linarith⟩)
-  rw [legInt_cpow_root_cosh hz ht, eulerKernel, real_smul,
-    show (1:ℂ) - (legInt_hs t : ℂ) = ((1 - legInt_hs t : ℝ) : ℂ) by push_cast; ring,
+  rw [ExteriorIntegral.cpow_sqrtSqSubOne_cosh hz ht, eulerKernel, real_smul,
+    show (1:ℂ) - (ExteriorIntegral.halfAngle t : ℂ) =
+        ((1 - ExteriorIntegral.halfAngle t : ℝ) : ℂ) by push_cast; ring,
     cpow_neg, show (2:ℂ)^(2*μ) = ((2:ℝ):ℂ)^(2*μ) by norm_num,
     Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos,
         Complex.ofReal_cpow_eq_exp hr,
     Complex.ofReal_cpow_eq_exp hs0, Complex.ofReal_cpow_eq_exp hs1,
-    show ((|legInt_hs' t| : ℝ) : ℂ) = exp (Real.log |legInt_hs' t| : ℂ) by
+    show ((|ExteriorIntegral.halfAngleDeriv t| : ℝ) : ℂ) =
+        exp (Real.log |ExteriorIntegral.halfAngleDeriv t| : ℂ) by
       rw [← ofReal_exp, Real.exp_log hd]]
-  have hA : (legInt_zeta z)^(ν+μ+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hζ0)
-  have hX : (1 - (legInt_zeta z)^2 * (legInt_hs t : ℂ))^(ν+μ+1) ≠ 0 :=
+  have hA : (ExteriorIntegral.invJoukowski z)^(ν+μ+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hζ0)
+  have hX : (1 - (ExteriorIntegral.invJoukowski z)^2 *
+      (ExteriorIntegral.halfAngle t : ℂ))^(ν+μ+1) ≠ 0 :=
     cpow_ne_zero_iff.mpr (Or.inl hX0)
   have key : exp (Real.log (Real.sinh t) * (2*μ)) = exp (Real.log 2 * (2*μ)) *
-      exp (Real.log |legInt_hs' t| : ℂ) * exp (Real.log (legInt_hs t) * (μ+1/2-1)) *
-      exp (Real.log (1 - legInt_hs t) * (ν+3/2-(μ+1/2)-1)) *
+      exp (Real.log |ExteriorIntegral.halfAngleDeriv t| : ℂ) *
+          exp (Real.log (ExteriorIntegral.halfAngle t) * (μ+1/2-1)) *
+      exp (Real.log (1 - ExteriorIntegral.halfAngle t) * (ν+3/2-(μ+1/2)-1)) *
       exp (Real.log ((Real.cosh t + 1)/2) * (ν+μ+1)) := by
     simp only [← exp_add]
     congr 1
@@ -557,38 +607,40 @@ theorem legInt_kernel_Q {ν μ z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht :
 
 /-- The closed form produced by the integral in DLMF 14.25.2:
 `√π (z²-1)^{μ/2} 2^μ ζ^{ν+μ+1} 𝐅(ν+μ+1, μ+1/2; ν+3/2; ζ²)`. -/
-noncomputable def legInt_QForm (ν μ z : ℂ) : ℂ :=
-  Real.sqrt π * legendreBranchPower μ z * 2^μ * (legInt_zeta z)^(ν+μ+1) *
-    regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2)
+noncomputable def ExteriorIntegral.zetaForm (ν μ z : ℂ) : ℂ :=
+  Real.sqrt π * legendreBranchPower μ z * 2^μ * (ExteriorIntegral.invJoukowski z)^(ν+μ+1) *
+    regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2)
 
-/-- `legInt_QForm ν μ` is analytic on `ℂ ∖ (-∞, 1]`. -/
-theorem legInt_QForm_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    AnalyticAt ℂ (legInt_QForm ν μ) z := by
-  have hp : z+1 ∈ slitPlane := legInt_add_one hz
-  have hζ := legInt_zeta_analyticAt hz
+/-- `ExteriorIntegral.zetaForm ν μ` is analytic on `ℂ ∖ (-∞, 1]`. -/
+theorem ExteriorIntegral.zetaForm_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    AnalyticAt ℂ (ExteriorIntegral.zetaForm ν μ) z := by
+  have hp : z+1 ∈ slitPlane := ExteriorIntegral.add_one hz
+  have hζ := ExteriorIntegral.invJoukowski_analyticAt hz
   have hB : AnalyticAt ℂ (legendreBranchPower μ) z := by
     unfold legendreBranchPower
     fun_prop (disch := assumption)
-  have hc : (legInt_zeta z)^2 ∈ cutPlane := by
+  have hc : (ExteriorIntegral.invJoukowski z)^2 ∈ cutPlane := by
     refine mem_cutPlane_of_norm_lt_one ?_
-    rw [norm_pow]; have := legInt_norm_zeta_lt_one hz; nlinarith [norm_nonneg (legInt_zeta z)]
+    rw [norm_pow]; have := ExteriorIntegral.norm_invJoukowski_lt_one hz;
+        nlinarith [norm_nonneg (ExteriorIntegral.invJoukowski z)]
   have hF : AnalyticAt ℂ
-      (fun w => regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta w)^2)) z :=
+      (fun w => regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2)
+          ((ExteriorIntegral.invJoukowski w)^2)) z :=
     (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (hζ.pow 2) rfl
-  have hP : AnalyticAt ℂ (fun w => (legInt_zeta w)^(ν+μ+1)) z :=
-    hζ.cpow analyticAt_const (legInt_zeta_mem_slitPlane hz)
-  unfold legInt_QForm
+  have hP : AnalyticAt ℂ (fun w => (ExteriorIntegral.invJoukowski w)^(ν+μ+1)) z :=
+    hζ.cpow analyticAt_const (ExteriorIntegral.invJoukowski_mem_slitPlane hz)
+  unfold ExteriorIntegral.zetaForm
   exact (((analyticAt_const.mul hB).mul analyticAt_const).mul hP).mul hF
 
 /-- The `ζ`-form of `𝑸^μ_ν` on `(1, ∞)`, by the quadratic transformation DLMF 15.8.15. -/
-theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ))
+theorem ExteriorIntegral.olverQ_eq_zetaForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ))
     {x : ℝ} (hx : 1 < x) :
-    olverQ ν μ x = legInt_QForm ν μ x := by
-  have hz : (x:ℂ) - 1 ∈ slitPlane := legInt_one_lt_mem hx
-  obtain ⟨hq0, hq1⟩ := legInt_real_bounds hx
+    olverQ ν μ x = ExteriorIntegral.zetaForm ν μ x := by
+  have hz : (x:ℂ) - 1 ∈ slitPlane := LaplaceIntegrals.one_lt_mem hx
+  obtain ⟨hq0, hq1⟩ := ExteriorIntegral.real_bounds hx
   set q := x - Real.sqrt (x^2-1) with hqdef
-  have hζ : legInt_zeta x = (q:ℂ) := legInt_zeta_real hx
-  have h2x : 2 * (x:ℂ) = q + (q:ℂ)⁻¹ := by rw [← hζ]; exact legInt_two_mul_eq hz
+  have hζ : ExteriorIntegral.invJoukowski x = (q:ℂ) := ExteriorIntegral.invJoukowski_real hx
+  have h2x : 2 * (x:ℂ) = q + (q:ℂ)⁻¹ := by rw [← hζ]; exact ExteriorIntegral.two_mul_eq hz
   have hq0' : (q:ℂ) ≠ 0 := ofReal_ne_zero.mpr hq0.ne'
   have hxr : x = (1+q^2)/(2*q) := by
     have : (2*x:ℝ) = q + q⁻¹ := by exact_mod_cast h2x
@@ -608,7 +660,7 @@ theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 �
     intro k; rw [show ν + μ + 1 - (μ + 1/2) + 1 = ν + 3/2 by ring]; exact hc k
   have hqt := quadratic_well_poised_plus (a := ν+μ+1) (b := μ+1/2) hc' hn1 hn2
   rw [show ν + μ + 1 - (μ + 1/2) + 1 = ν + 3/2 by ring] at hqt
-  unfold olverQ legInt_QForm
+  unfold olverQ ExteriorIntegral.zetaForm
   rw [hζ, harg, show ((q:ℂ))^2 = ((q^2:ℝ):ℂ) by push_cast; ring,
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn1,
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn2,
@@ -634,13 +686,14 @@ theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 �
   field_simp
 
 /-- The `ζ`-form of `𝑸^μ_ν` on `ℂ ∖ (-∞, 1]` (identity theorem from `(1, ∞)`). -/
-theorem legInt_olverQ_eq_QForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)) {z : ℂ}
+theorem ExteriorIntegral.olverQ_eq_zetaForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)) {z : ℂ}
     (hz : z-1 ∈ slitPlane) :
-    olverQ ν μ z = legInt_QForm ν μ z := by
+    olverQ ν μ z = ExteriorIntegral.zetaForm ν μ z := by
   set D : Set ℂ := {w : ℂ | w-1 ∈ slitPlane}
   have h2 : ((2 : ℝ) : ℂ) ∈ D := by show ((2 : ℝ) : ℂ) - 1 ∈ slitPlane; norm_num
   refine (olverQ_analytic ν μ).eqOn_of_preconnected_of_frequently_eq
-    (fun w hw => legInt_QForm_analyticAt ν μ hw) isPreconnected_sub_one_mem_slitPlane h2 ?_ hz
+    (fun w hw => ExteriorIntegral.zetaForm_analyticAt ν μ hw)
+        isPreconnected_sub_one_mem_slitPlane h2 ?_ hz
   have ht : Tendsto (fun r : ℝ => (r : ℂ)) (𝓝[≠] (2 : ℝ)) (𝓝[≠] ((2 : ℝ) : ℂ)) := by
     apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
     · exact (continuous_ofReal.tendsto _).mono_left nhdsWithin_le_nhds
@@ -649,7 +702,7 @@ theorem legInt_olverQ_eq_QForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k
   apply ht.frequently
   apply Eventually.frequently
   filter_upwards [nhdsWithin_le_nhds (Ioi_mem_nhds (show (1 : ℝ) < 2 by norm_num))] with t ht
-  exact legInt_olverQ_eq_QForm_real ν μ hc ht
+  exact ExteriorIntegral.olverQ_eq_zetaForm_real ν μ hc ht
 
 /-- DLMF 14.25.2, proved by the substitution `s = tanh²(t/2)`, Euler's integral and the `ζ`-form. -/
 @[dlmf 14.25.E2]
@@ -660,24 +713,27 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
         z/(2^μ*Gamma (μ+1/2)*Gamma
         (ν-μ+1))*((Real.sinh t:ℂ)^(2*μ)/(z+exp ((log (z-1)+log (z+1))/2)*Real.cosh t)^(ν+μ+1))) 0
         (olverQ ν μ z) := by
-  have hx : (legInt_zeta z)^2 ∈ cutPlane := by
+  have hx : (ExteriorIntegral.invJoukowski z)^2 ∈ cutPlane := by
     refine mem_cutPlane_of_norm_lt_one ?_
-    rw [norm_pow]; have := legInt_norm_zeta_lt_one hz; nlinarith [norm_nonneg (legInt_zeta z)]
+    rw [norm_pow]; have := ExteriorIntegral.norm_invJoukowski_lt_one hz;
+        nlinarith [norm_nonneg (ExteriorIntegral.invJoukowski z)]
   have hb : 0 < (μ+1/2).re := by simp; linarith
   have hcb : 0 < (ν+3/2-(μ+1/2)).re := by simp at h1 ⊢; linarith
   have hg := intervalIntegrable_eulerKernel (a := ν+μ+1) hb hcb hx
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one,
     integrableOn_Ioc_iff_integrableOn_Ioo] at hg
-  obtain ⟨hI, hE⟩ := legInt_hs_cov hg
+  obtain ⟨hI, hE⟩ := ExteriorIntegral.halfAngle_changeOfVariables hg
   set K : ℂ := Real.sqrt π*legendreBranchPower μ z/(2^μ*Gamma (μ+1/2)*Gamma (ν-μ+1)) *
-    (2^(2*μ) * (legInt_zeta z)^(ν+μ+1))
-  have hf : ∀ t ∈ Ioi (0:ℝ), K * (|legInt_hs' t| • eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2)
-      ((legInt_zeta z)^2) (legInt_hs t)) = Real.sqrt π*legendreBranchPower μ z/(2^μ*Gamma (μ+1/2)*
+    (2^(2*μ) * (ExteriorIntegral.invJoukowski z)^(ν+μ+1))
+  have hf : ∀ t ∈ Ioi (0:ℝ), K *
+      (|ExteriorIntegral.halfAngleDeriv t| • eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2)
+      ((ExteriorIntegral.invJoukowski z)^2) (ExteriorIntegral.halfAngle t)) =
+          Real.sqrt π*legendreBranchPower μ z/(2^μ*Gamma (μ+1/2)*
         Gamma (ν-μ+1))*((Real.sinh t:ℂ)^(2*μ)/(z+exp ((log (z-1)+log (z+1))/2)*Real.cosh
             t)^(ν+μ+1)) := by
     intro t ht
-    have := legInt_kernel_Q (ν := ν) (μ := μ) hz ht
-    rw [legInt_root] at this
+    have := ExteriorIntegral.kernel_Q (ν := ν) (μ := μ) hz ht
+    rw [ExteriorIntegral.sqrtSqSubOne] at this
     rw [this]; simp only [K]; ring
   have hint := IntegrableOn.congr_fun (hI.const_mul K) hf measurableSet_Ioi
   have hval := setIntegral_congr_fun (μ := volume) measurableSet_Ioi hf
@@ -688,9 +744,10 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
   have hG1 : Gamma (μ+1/2) ≠ 0 := Gamma_ne_zero_of_re_pos hb
   have hG2 : Gamma (ν-μ+1) ≠ 0 := Gamma_ne_zero_of_re_pos (by
     rw [show ν-μ+1 = ν+3/2-(μ+1/2) by ring]; exact hcb)
-  have hint' : ∫ s in Ioo (0:ℝ) 1, eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2) s =
+  have hint' : ∫ s in Ioo (0:ℝ) 1,
+      eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2) s =
       Gamma (μ+1/2) * Gamma (ν-μ+1) *
-          regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2) := by
+          regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2) := by
     rw [hG, show ν+3/2-(μ+1/2) = ν-μ+1 by ring, ← mul_assoc, mul_inv_cancel₀ (mul_ne_zero hG1 hG2),
       one_mul]
   rw [hint'] at hval
@@ -701,9 +758,10 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
     have := congrArg re hk; simp at this h1
     linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   suffices hv : K * (Gamma (μ+1/2) * Gamma (ν-μ+1) *
-      regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2)) = olverQ ν μ z by
+      regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2)) =
+          olverQ ν μ z by
     rw [hv] at hlim; exact hlim
-  rw [legInt_olverQ_eq_QForm ν μ hc hz, legInt_QForm]
+  rw [ExteriorIntegral.olverQ_eq_zetaForm ν μ hc hz, ExteriorIntegral.zetaForm]
   simp only [K]
   have h22 : (2:ℂ)^(2*μ) = 2^μ * 2^μ := by
     rw [two_mul, cpow_add _ _ two_ne_zero]
@@ -712,10 +770,10 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
   have hG1' : Gamma ((μ*2+1)/2) ≠ 0 := by rwa [show (μ*2+1)/2 = μ+1/2 by ring]
   field_simp
 
-/-! ### Helpers for DLMF 14.12.4 (prefix `legInt_`) -/
+/-! ### Helpers for DLMF 14.12.4 (namespace `ExteriorIntegral`) -/
 
 /-- The half-line Euler kernel of DLMF 14.12.4 at `v = E/q`, with `2qx = 1 + q²`. -/
-theorem legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q)
+theorem ExteriorIntegral.halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q)
     (hqx : 1 + q^2 = 2*q*x) (hE : 0 < E) :
     ((E/q : ℝ):ℂ) * eulerHalfLineKernel (μ+1/2) (ν+μ+1) (μ-ν) (((q^2)⁻¹ : ℝ) : ℂ) (E/q) =
       (q:ℂ)^(μ-ν) * (2:ℂ)^(-(μ+1/2)) * (E:ℂ)^(ν+1/2) * ((x + (E + E⁻¹)/2 : ℝ):ℂ)^(-(μ+1/2)) := by
@@ -756,7 +814,7 @@ theorem legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q)
   linear_combination (-(μ+1/2)) * hsum'
 
 /-- The substitutions `v = e^{±t}/q` split a half-line integral at `1/q`. -/
-theorem legInt_exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK : IntegrableOn K (Ioi 0)) :
+theorem ExteriorIntegral.exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK : IntegrableOn K (Ioi 0)) :
     IntegrableOn (fun t => (Real.exp t / q) • K (Real.exp t / q)) (Ioi 0) ∧
     IntegrableOn (fun t => (Real.exp (-t) / q) • K (Real.exp (-t) / q)) (Ioi 0) ∧
     ∫ t in Ioi 0, ((Real.exp t / q) • K (Real.exp t / q) + (Real.exp (-t) / q) •
@@ -828,7 +886,8 @@ theorem legInt_exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK : Integrab
 /-- The hypergeometric value behind DLMF 14.12.4:
 `𝐅(μ+1/2, μ-ν; 2μ+1; 1-q⁻²) = q^{2(μ-ν)} (qx)^{ν-μ} Γ(μ+1)/Γ(2μ+1) 𝐅((μ-ν)/2, (μ-ν+1)/2; μ+1;
 1-1/x²)`. -/
-theorem legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 < q) (hq1 : q < 1)
+theorem ExteriorIntegral.cosh_hypergeometric (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ}
+    (hq0 : 0 < q) (hq1 : q < 1)
     (hqx : 1 + q^2 = 2*q*x) :
     regularizedGaussHG (μ+1/2) (μ-ν) (2*μ+1) (1 - (((q^2)⁻¹:ℝ):ℂ)) =
       exp (Real.log q * (2*(μ-ν))) * exp ((Real.log q + Real.log x) * (ν-μ)) *
@@ -889,7 +948,7 @@ theorem legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 
   ring_nf
 
 /-- The constant in DLMF 14.12.4, by the duplication formula. -/
-theorem legInt_cosh_value (ν μ F P : ℂ) {x q : ℝ} (hq0 : 0 < q) (hx0 : 0 < x)
+theorem ExteriorIntegral.cosh_value (ν μ F P : ℂ) {x q : ℝ} (hq0 : 0 < q) (hx0 : 0 < x)
     (ha : 0 < (ν+μ+1).re) (h : 0 < (μ-ν).re) (hμ : -1/2 < μ.re) :
     Real.sqrt 2*Gamma (μ+1/2)*P/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν)) /
       (2 * ((q:ℂ)^(μ-ν) * (2:ℂ)^(-(μ+1/2)))) * (Gamma (ν + μ + 1) * Gamma (μ - ν) *
@@ -934,7 +993,8 @@ theorem legInt_cosh_value (ν μ F P : ℂ) {x q : ℝ} (hq0 : 0 < q) (hx0 : 0 <
 
 /-- DLMF 14.12.4 by the substitution `v = e^{±t}/q`, Euler's half-line integral, Pfaff, the
 quadratic transformation 15.8.13 and 14.3.18. -/
-theorem legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re)
+theorem ExteriorIntegral.associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re)
+    (hconv : -1 < (μ+ν).re)
     {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ =>
         Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh
@@ -954,16 +1014,17 @@ theorem legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hco
   have ha : 0 < (ν+μ+1).re := by simp at hconv ⊢; linarith
   have hz : 0 < ((((q^2)⁻¹:ℝ)):ℂ).re := by simp only [ofReal_re]; positivity
   obtain ⟨hKI, hKv⟩ := eulerHalfLine_integrable_integral (p := μ+1/2) ha h hz
-  rw [show ν+μ+1+(μ-ν) = 2*μ+1 by ring, legInt_cosh_hyp ν μ hμ hq0 hq1 hqx] at hKv
-  obtain ⟨I1, I2, hsum⟩ := legInt_exp_split hq0 hKI
+  rw [show ν+μ+1+(μ-ν) = 2*μ+1 by ring,
+                                    ExteriorIntegral.cosh_hypergeometric ν μ hμ hq0 hq1 hqx] at hKv
+  obtain ⟨I1, I2, hsum⟩ := ExteriorIntegral.exp_split hq0 hKI
   set C : ℂ := (q:ℂ)^(μ-ν) * (2:ℂ)^(-(μ+1/2))
   have hp : ∀ t : ℝ, (Real.exp t / q) • eulerHalfLineKernel (μ+1/2) (ν+μ+1) (μ-ν) (((q^2)⁻¹:ℝ):ℂ)
       (Real.exp t / q) + (Real.exp (-t) / q) • eulerHalfLineKernel (μ+1/2) (ν+μ+1) (μ-ν)
       (((q^2)⁻¹:ℝ):ℂ) (Real.exp (-t) / q) =
       2*C * (cosh ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) := by
     intro t
-    rw [real_smul, real_smul, legInt_halfLine_point ν μ hq0 hqx (Real.exp_pos t),
-      legInt_halfLine_point ν μ hq0 hqx (Real.exp_pos (-t)), ← Real.exp_neg,
+    rw [real_smul, real_smul, ExteriorIntegral.halfLine_point ν μ hq0 hqx (Real.exp_pos t),
+      ExteriorIntegral.halfLine_point ν μ hq0 hqx (Real.exp_pos (-t)), ← Real.exp_neg,
           ← Real.exp_neg, neg_neg,
       show Real.exp (-t) + Real.exp t = Real.exp t + Real.exp (-t) by ring, ← Real.cosh_eq,
       Complex.ofReal_cpow_eq_exp (Real.exp_pos t),
@@ -1003,9 +1064,9 @@ theorem legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hco
       associatedP ν (-μ) x by
     rw [hv] at hlim; exact hlim
   have hx0 : 0 < x := by linarith
-  rw [associated_hypergeometric_18 ν μ (legInt_one_lt_mem hx) (by simp; linarith),
-    legInt_legendreBranchPower_real μ hx]
-  exact legInt_cosh_value ν μ _ _ hq0 hx0 ha h hμ
+  rw [associated_hypergeometric_18 ν μ (LaplaceIntegrals.one_lt_mem hx) (by simp; linarith),
+    OrthogonalityIntegrals.legendreBranchPower_real μ hx]
+  exact ExteriorIntegral.cosh_value ν μ _ _ hq0 hx0 ha h hμ
 
 end DLMF.Legendre
 end

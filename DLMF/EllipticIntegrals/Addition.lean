@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.Legendre
+public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Inequalities
 public import DLMF.JacobiElliptic.Related
@@ -262,6 +263,65 @@ theorem incEllIntPik_add {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ I
       incEllIntPik ψ α2 k - α2 * symEllIntRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) := by
   sorry
 
+/-- The symmetric relations of the addition theorem: with `A = sin²θ`, `B = sin²φ`,
+`C = sin²ψ` and `p = cos θ cos φ cos ψ`, `A + B + C - k²ABC = 2(1 - p)` and
+`AB + BC + CA - (1 + k²)ABC = (1 - p)²`. -/
+private lemma addition_symmetric_relations {k : ℝ} (hk : k ^ 2 < 1) (θ φ : ℝ) :
+    let A := Real.sin θ ^ 2
+    let B := Real.sin φ ^ 2
+    let C := additionSin k θ φ ^ 2
+    let p := Real.cos θ * Real.cos φ * additionCos k θ φ
+    A + B + C - k ^ 2 * A * B * C = 2 * (1 - p) ∧
+      A * B + B * C + C * A - (1 + k ^ 2) * A * B * C = (1 - p) ^ 2 := by
+  intro A B C p
+  simp only [A, B, C, p, additionSin, additionCos]
+  set a := Real.sin θ
+  set b := Real.cos θ
+  set c := Real.sin φ
+  set d := Real.cos φ
+  set P := ellDeltaReal k θ
+  set Q := ellDeltaReal k φ
+  have hP : P ^ 2 = 1 - k ^ 2 * a ^ 2 := Real.sq_sqrt (by nlinarith [Real.sin_sq_le_one θ])
+  have hQ : Q ^ 2 = 1 - k ^ 2 * c ^ 2 := Real.sq_sqrt (by nlinarith [Real.sin_sq_le_one φ])
+  have hab : b ^ 2 + a ^ 2 = 1 := by rw [add_comm]; exact Real.sin_sq_add_cos_sq θ
+  have hcd : d ^ 2 + c ^ 2 = 1 := by rw [add_comm]; exact Real.sin_sq_add_cos_sq φ
+  have ha1 : a ^ 2 ≤ 1 := Real.sin_sq_le_one θ
+  have hc1 : c ^ 2 ≤ 1 := Real.sin_sq_le_one φ
+  have hac : a ^ 2 * c ^ 2 ≤ 1 := by
+    calc a ^ 2 * c ^ 2 ≤ 1 * 1 := mul_le_mul ha1 hc1 (sq_nonneg c) zero_le_one
+      _ = 1 := by ring
+  have hD : 1 - k ^ 2 * a ^ 2 * c ^ 2 ≠ 0 := by
+    have : k ^ 2 * (a ^ 2 * c ^ 2) ≤ k ^ 2 := by
+      calc k ^ 2 * (a ^ 2 * c ^ 2) ≤ k ^ 2 * 1 := mul_le_mul_of_nonneg_left hac (sq_nonneg k)
+        _ = k ^ 2 := by ring
+    intro h; nlinarith
+  have hab' : b ^ 2 + a ^ 2 - 1 = 0 := by linarith
+  have hcd' : d ^ 2 + c ^ 2 - 1 = 0 := by linarith
+  have hP' : P ^ 2 - (1 - k ^ 2 * a ^ 2) = 0 := by linarith
+  have hQ' : Q ^ 2 - (1 - k ^ 2 * c ^ 2) = 0 := by linarith
+  have I1 : (a ^ 2 + c ^ 2) * (1 - k ^ 2 * a ^ 2 * c ^ 2) + (a * d * Q + c * b * P) ^ 2 -
+      (2 * (1 - k ^ 2 * a ^ 2 * c ^ 2) - 2 * b * d * (b * d - a * c * P * Q)) = 0 := by
+    linear_combination (P^2*c^2 + 2*d^2) * hab' + (Q^2*a^2 - 2*a^2 + 2) * hcd' +
+      (-a^2*c^2 + c^2) * hP' + (-a^2*c^2 + a^2) * hQ'
+  have I2 : a ^ 2 * c ^ 2 * (1 - k ^ 2 * a ^ 2 * c ^ 2) ^ 2 + (a * d * Q + c * b * P) ^ 2 *
+      (a ^ 2 + c ^ 2 - (1 + k ^ 2) * a ^ 2 * c ^ 2) -
+      ((1 - k ^ 2 * a ^ 2 * c ^ 2) - b * d * (b * d - a * c * P * Q)) ^ 2 = 0 := by
+    linear_combination (-P^2*Q^2*a^2*c^2*d^2 - P^2*a^2*c^4*k^2 - P^2*a^2*c^4 + P^2*a^2*c^2 +
+        P^2*c^4 + 2*P*Q*a*b*c*d^3 - 2*a^2*c^2*d^2*k^2 + a^2*d^4 - b^2*d^4 - d^4 + 2*d^2) * hab' +
+      (P^2*Q^2*a^4*c^2 - P^2*Q^2*a^2*c^2 - 2*P*Q*a^3*b*c*d + 2*P*Q*a*b*c*d - Q^2*a^4*c^2*k^2 -
+        Q^2*a^4*c^2 + Q^2*a^4 + Q^2*a^2*c^2 + 2*a^4*c^2*k^2 + a^4*c^2 - a^4*d^2 - a^4 -
+        2*a^2*c^2*k^2 - 2*a^2*c^2 + 2*a^2*d^2 + c^2 - d^2 + 1) * hcd' +
+      (-Q^2*a^4*c^4 + Q^2*a^4*c^2 + Q^2*a^2*c^4 - Q^2*a^2*c^2 + a^4*c^4*k^2 + a^4*c^4 -
+        a^4*c^2 - a^2*c^4*k^2 - 2*a^2*c^4 + a^2*c^2 + c^4) * hP' +
+      (a^6*c^4*k^2 - a^6*c^2*k^2 - a^4*c^2 + a^4) * hQ'
+  generalize hden : 1 - k ^ 2 * a ^ 2 * c ^ 2 = den at hD I1 I2 ⊢
+  constructor
+  · field_simp
+    linear_combination den * I1 + (a * d * Q + c * b * P) ^ 2 * hden
+  · field_simp
+    linear_combination I2
+
+
 /-- DLMF 19.11.6_5: for `θ, φ ∈ (0, π/2)`, `ψ` as in (19.11.1), and
 `k² < α² < min(1, (1 - cos θ cos φ cos ψ)⁻¹)`,
 `R_C(γ - δ, γ) = -δ^{-1/2} arctan(√δ sin θ sin φ sin ψ / (α² - 1 - α² cos θ cos φ cos ψ))`.
@@ -277,7 +337,54 @@ theorem symEllIntRC_addition_eq_arctan {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1)
     symEllIntRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) =
       ((-1 / Real.sqrt δ * Real.arctan (Real.sqrt δ * Real.sin θ * Real.sin φ * Real.sin ψ /
         (α2 - 1 - α2 * Real.cos θ * Real.cos φ * Real.cos ψ)) : ℝ) : ℂ) := by
-  sorry
+  intro γ δ
+  obtain ⟨h1, h2⟩ := addition_symmetric_relations hk θ φ
+  rw [← hs, ← hc] at h1 h2
+  have ha0 : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
+  have hc0 : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ.1 (by linarith [hφ.2, Real.pi_pos])
+  have hcθ : 0 < Real.cos θ := Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], hθ.2⟩
+  have hcφ : 0 < Real.cos φ := Real.cos_pos_of_mem_Ioo ⟨by linarith [hφ.1, Real.pi_pos], hφ.2⟩
+  have he0 : 0 < Real.sin ψ := by
+    rw [hs, additionSin]
+    have hP : 0 < ellDeltaReal k θ := Real.sqrt_pos.mpr (by
+      nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ)])
+    have hQ : 0 < ellDeltaReal k φ := Real.sqrt_pos.mpr (by
+      nlinarith [Real.sin_sq_le_one φ, sq_nonneg (Real.sin φ)])
+    have hden : 0 < 1 - k ^ 2 * Real.sin θ ^ 2 * Real.sin φ ^ 2 := by
+      have ha1 : Real.sin θ ^ 2 ≤ 1 := Real.sin_sq_le_one θ
+      have hc1 : Real.sin φ ^ 2 ≤ 1 := Real.sin_sq_le_one φ
+      have : Real.sin θ ^ 2 * Real.sin φ ^ 2 ≤ 1 := by nlinarith
+      nlinarith [sq_nonneg k]
+    positivity
+  have hα0 : 0 < α2 := lt_of_le_of_lt (sq_nonneg k) hkα
+  have hδ : 0 < δ := by
+    have : 0 < 1 - α2 := by linarith
+    have : 0 < α2 - k ^ 2 := by linarith
+    positivity
+  have hDn0 : α2 - 1 - α2 * Real.cos θ * Real.cos φ * Real.cos ψ < 0 := by nlinarith
+  have hγδ : γ - δ = (α2 - 1 - α2 * Real.cos θ * Real.cos φ * Real.cos ψ) ^ 2 /
+      (Real.sin θ * Real.sin φ * Real.sin ψ) ^ 2 := by
+    simp only [γ, δ]
+    field_simp
+    linear_combination (-α2) * h1 + α2 ^ 2 * h2
+  set Dn := α2 - 1 - α2 * Real.cos θ * Real.cos φ * Real.cos ψ with hDn
+  set S := Real.sin θ * Real.sin φ * Real.sin ψ with hS
+  have hS0 : 0 < S := by positivity
+  have hpos : 0 < γ - δ := by rw [hγδ]; have := hDn0.ne; positivity
+  rw [(symEllIntRC_of_lt (x := γ - δ) (y := γ) hpos.le (by linarith)).2 hpos,
+    show γ - (γ - δ) = δ by ring]
+  congr 1
+  have hsq : Real.sqrt (δ / (γ - δ)) = Real.sqrt δ * S / -Dn := by
+    have key : δ / (γ - δ) = (Real.sqrt δ * S / -Dn) ^ 2 := by
+      have h3 := Real.sq_sqrt hδ.le
+      rw [hγδ]
+      field_simp
+      rw [h3]
+    rw [key]
+    exact Real.sqrt_sq (div_nonneg (by positivity) (by linarith))
+  rw [hsq, show Real.sqrt δ * Real.sin θ * Real.sin φ * Real.sin ψ / Dn =
+      -(Real.sqrt δ * S / -Dn) by rw [hS, div_neg, neg_neg]; ring, Real.arctan_neg]
+  ring
 
 /-! ### §19.11(ii) Case `ψ = π/2` -/
 

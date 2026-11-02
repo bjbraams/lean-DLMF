@@ -16,13 +16,15 @@ transform of the regularized Kummer function (DLMF 13.10.12).
 
 ## Main results
 
-* `cfInt_exists_norm_besselJ_le`: `|J_ν(y)| ≤ C y^{re ν} (1+y)^{-re ν - 1/2}` on the positive
-  axis.
-* `cfInt_exists_norm_kernel_le`: the corresponding bound for the Hankel kernel.
-* `cfInt_laplace_kernel`: `∫₀^∞ e^{-st} t^{ν/2} J_ν(2√(xt)) dt = x^{ν/2} s^{-ν-1} e^{-x/s}`.
-* `cfInt_integral_cos_gauss`: `∫₀^∞ cos(2xt) e^{-st²} dt = (√π/2) s^{-1/2} e^{-x²/s}`.
-* `cfInt_differentiable_kummerU_fst`: `U(a,b,z)` is entire in `a` for fixed `b` and `z ≠ 0`.
-* `cfInt_bessel_M_euler`: DLMF 13.10.14 in the Euler region.
+* `KummerIntegrals.exists_norm_besselJ_le`: `|J_ν(y)| ≤ C y^{re ν} (1+y)^{-re ν - 1/2}` on the
+  positive axis.
+* `KummerIntegrals.exists_norm_kernel_le`: the corresponding bound for the Hankel kernel.
+* `KummerIntegrals.laplace_kernel`:
+  `∫₀^∞ e^{-st} t^{ν/2} J_ν(2√(xt)) dt = x^{ν/2} s^{-ν-1} e^{-x/s}`.
+* `KummerIntegrals.integral_cos_gauss`: `∫₀^∞ cos(2xt) e^{-st²} dt = (√π/2) s^{-1/2} e^{-x²/s}`.
+* `KummerIntegrals.differentiable_kummerU_fst`: `U(a,b,z)` is entire in `a` for fixed `b` and
+  `z ≠ 0`.
+* `KummerIntegrals.bessel_M_euler`: DLMF 13.10.14 in the Euler region.
 * `cosine_regularizedHGFun`: a cosine transform of `𝐌` (DLMF 13.10.12).
 
 ## Implementation notes
@@ -59,14 +61,14 @@ section HankelKernel
 open Set Asymptotics
 
 /-- `t^r e^{-st}` is integrable on `(0,∞)` for `r > -1`, `s > 0`. -/
-theorem cfInt_integrableOn_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
+theorem KummerIntegrals.integrableOn_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
     IntegrableOn (fun t : ℝ => t ^ r * Real.exp (-(s * t))) (Ioi 0) := by
   have h := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := r) (b := s) hr one_pos hs
   refine h.congr_fun (fun t ht => ?_) measurableSet_Ioi
   simp [Real.rpow_one, neg_mul]
 
 /-- `∫₀^∞ t^r e^{-st} dt = Γ(r+1) s^{-(r+1)}`. -/
-theorem cfInt_integral_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
+theorem KummerIntegrals.integral_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
     ∫ t : ℝ in Ioi 0, t ^ r * Real.exp (-(s * t)) = Real.Gamma (r + 1) * s ^ (-(r + 1)) := by
   have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := r + 1) (r := s) (by linarith) hs
   rw [add_sub_cancel_right] at h
@@ -74,7 +76,7 @@ theorem cfInt_integral_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
   ring
 
 /-- The Laplace integrand `t^r (1+t)^{-p} e^{-st}` is a.e. strongly measurable on `(0, ∞)`. -/
-private lemma cfInt_aestronglyMeasurable_laplace_rpow (r p s : ℝ) :
+private lemma KummerIntegrals.aestronglyMeasurable_laplace_rpow (r p s : ℝ) :
     AEStronglyMeasurable (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)))
       (volume.restrict (Ioi 0)) := by
   refine ContinuousOn.aestronglyMeasurable (fun t ht => ?_) measurableSet_Ioi
@@ -85,17 +87,17 @@ private lemma cfInt_aestronglyMeasurable_laplace_rpow (r p s : ℝ) :
       (continuous_const.add continuous_id).continuousAt)).mul
     (Real.continuous_exp.comp (by fun_prop)).continuousAt).continuousWithinAt
 
-/-- The case `p ≥ 0` of `cfInt_laplace_rpow_le`. -/
-private lemma cfInt_laplace_rpow_le_of_nonneg {r p : ℝ} (hr : -1 < r) (hrp : -1 < r - p)
+/-- The case `p ≥ 0` of `KummerIntegrals.laplace_rpow_le`. -/
+private lemma KummerIntegrals.laplace_rpow_le_of_nonneg {r p : ℝ} (hr : -1 < r) (hrp : -1 < r - p)
     (hp : 0 ≤ p) :
     ∃ C, ∀ s : ℝ, 0 < s →
       IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) ∧
       ∫ t : ℝ in Ioi 0, t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
         C * (s ^ (p - r - 1) * (1 + s) ^ (-p)) := by
-  have hmeas := cfInt_aestronglyMeasurable_laplace_rpow r p
+  have hmeas := KummerIntegrals.aestronglyMeasurable_laplace_rpow r p
   refine ⟨2 ^ p * max (Real.Gamma (r + 1)) (Real.Gamma (r - p + 1)), fun s hs => ?_⟩
-  have hI1 := cfInt_integrableOn_rpow_exp hr hs
-  have hI2 := cfInt_integrableOn_rpow_exp hrp hs
+  have hI1 := KummerIntegrals.integrableOn_rpow_exp hr hs
+  have hI2 := KummerIntegrals.integrableOn_rpow_exp hrp hs
   have hle1 : ∀ t ∈ Ioi (0 : ℝ), t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
       t ^ r * Real.exp (-(s * t)) := by
     intro t ht
@@ -125,8 +127,8 @@ private lemma cfInt_laplace_rpow_le_of_nonneg {r p : ℝ} (hr : -1 < r) (hrp : -
   refine ⟨hInt, ?_⟩
   have hJ1 := setIntegral_mono_on hInt hI1 measurableSet_Ioi hle1
   have hJ2 := setIntegral_mono_on hInt hI2 measurableSet_Ioi hle2
-  rw [cfInt_integral_rpow_exp hr hs] at hJ1
-  rw [cfInt_integral_rpow_exp hrp hs] at hJ2
+  rw [KummerIntegrals.integral_rpow_exp hr hs] at hJ1
+  rw [KummerIntegrals.integral_rpow_exp hrp hs] at hJ2
   have hG1 := Real.Gamma_pos_of_pos (by linarith : 0 < r + 1)
   have hG2 := Real.Gamma_pos_of_pos (by linarith : 0 < r - p + 1)
   have h2p : (1 : ℝ) ≤ 2 ^ p := Real.one_le_rpow (by norm_num) hp
@@ -167,18 +169,18 @@ private lemma cfInt_laplace_rpow_le_of_nonneg {r p : ℝ} (hr : -1 < r) (hrp : -
             _ ≤ _ := by gcongr
       _ = _ := by ring
 
-/-- The case `p < 0` of `cfInt_laplace_rpow_le`. -/
-private lemma cfInt_laplace_rpow_le_of_neg {r p : ℝ} (hr : -1 < r) (hp : p < 0) :
+/-- The case `p < 0` of `KummerIntegrals.laplace_rpow_le`. -/
+private lemma KummerIntegrals.laplace_rpow_le_of_neg {r p : ℝ} (hr : -1 < r) (hp : p < 0) :
     ∃ C, ∀ s : ℝ, 0 < s →
       IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) ∧
       ∫ t : ℝ in Ioi 0, t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
         C * (s ^ (p - r - 1) * (1 + s) ^ (-p)) := by
-  have hmeas := cfInt_aestronglyMeasurable_laplace_rpow r p
+  have hmeas := KummerIntegrals.aestronglyMeasurable_laplace_rpow r p
   set q := -p with hq
   have hq0 : 0 < q := by linarith
   refine ⟨2 ^ q * (Real.Gamma (r + 1) + Real.Gamma (r + q + 1)), fun s hs => ?_⟩
-  have hI1 := cfInt_integrableOn_rpow_exp hr hs
-  have hI2 := cfInt_integrableOn_rpow_exp (r := r + q) (by linarith) hs
+  have hI1 := KummerIntegrals.integrableOn_rpow_exp hr hs
+  have hI2 := KummerIntegrals.integrableOn_rpow_exp (r := r + q) (by linarith) hs
   have hle : ∀ t ∈ Ioi (0 : ℝ), t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
       2 ^ q * (t ^ r * Real.exp (-(s * t)) + t ^ (r + q) * Real.exp (-(s * t))) := by
     intro t ht
@@ -211,8 +213,8 @@ private lemma cfInt_laplace_rpow_le_of_neg {r p : ℝ} (hr : -1 < r) (hp : p < 0
       rw [Real.norm_of_nonneg (hnn t ht)]; exact hle t ht)
   refine ⟨hInt, ?_⟩
   have hJ := setIntegral_mono_on hInt hS measurableSet_Ioi hle
-  rw [integral_const_mul, integral_add hI1 hI2, cfInt_integral_rpow_exp hr hs,
-    cfInt_integral_rpow_exp (by linarith) hs] at hJ
+  rw [integral_const_mul, integral_add hI1 hI2, KummerIntegrals.integral_rpow_exp hr hs,
+    KummerIntegrals.integral_rpow_exp (by linarith) hs] at hJ
   refine hJ.trans ?_
   have e1 : s ^ (-(r + 1)) ≤ s ^ (p - r - 1) * (1 + s) ^ (-p) := by
     rw [show p - r - 1 = -(r + 1) - q by rw [hq]; ring, ← hq, Real.rpow_sub hs, div_mul_eq_mul_div,
@@ -229,17 +231,17 @@ private lemma cfInt_laplace_rpow_le_of_neg {r p : ℝ} (hr : -1 < r) (hp : p < 0
     _ = _ := by ring
 
 /-- `∫₀^∞ e^{-st} t^r (1+t)^{-p} dt ≤ C s^{p-r-1} (1+s)^{-p}` for `r > -1`, `r - p > -1`. -/
-theorem cfInt_laplace_rpow_le {r p : ℝ} (hr : -1 < r) (hrp : -1 < r - p) :
+theorem KummerIntegrals.laplace_rpow_le {r p : ℝ} (hr : -1 < r) (hrp : -1 < r - p) :
     ∃ C, ∀ s : ℝ, 0 < s →
       IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) ∧
       ∫ t : ℝ in Ioi 0, t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
         C * (s ^ (p - r - 1) * (1 + s) ^ (-p)) := by
   rcases le_or_gt 0 p with hp | hp
-  · exact cfInt_laplace_rpow_le_of_nonneg hr hrp hp
-  · exact cfInt_laplace_rpow_le_of_neg hr hp
+  · exact KummerIntegrals.laplace_rpow_le_of_nonneg hr hrp hp
+  · exact KummerIntegrals.laplace_rpow_le_of_neg hr hp
 
 /-- Two comparable positive quantities have comparable real powers. -/
-theorem cfInt_rpow_le_of_le_mul {A B m M : ℝ} (hA : 0 < A) (hm : 0 < m) (h1 : m * A ≤ B)
+theorem KummerIntegrals.rpow_le_of_le_mul {A B m M : ℝ} (hA : 0 < A) (hm : 0 < m) (h1 : m * A ≤ B)
     (h2 : B ≤ M * A) (u : ℝ) : B ^ u ≤ max (m ^ u) (M ^ u) * A ^ u := by
   have hB : 0 < B := lt_of_lt_of_le (by positivity) h1
   have hM : 0 < M := by
@@ -254,7 +256,8 @@ theorem cfInt_rpow_le_of_le_mul {A B m M : ℝ} (hA : 0 < A) (hm : 0 < m) (h1 : 
 
 /-- A function continuous on `[a₀,∞)` and `O(g)` at infinity, with `g` continuous and positive,
 is bounded by a multiple of `g` on `[a₀,∞)`. -/
-theorem cfInt_exists_bound_Ici {f : ℝ → ℂ} {g : ℝ → ℝ} (a₀ : ℝ) (hf : ContinuousOn f (Ici a₀))
+theorem KummerIntegrals.exists_bound_Ici {f : ℝ → ℂ} {g : ℝ → ℝ} (a₀ : ℝ)
+    (hf : ContinuousOn f (Ici a₀))
     (hg : ContinuousOn g (Ici a₀)) (hgpos : ∀ t, a₀ ≤ t → 0 < g t) (h : f =O[atTop] g) :
     ∃ C, ∀ t, a₀ ≤ t → ‖f t‖ ≤ C * g t := by
   obtain ⟨C1, hC1⟩ := h.bound
@@ -273,7 +276,7 @@ theorem cfInt_exists_bound_Ici {f : ℝ → ℂ} {g : ℝ → ℝ} (a₀ : ℝ) 
     exact h1.trans (mul_le_mul_of_nonneg_right (le_max_left _ _) hg0.le)
 
 /-- `‖cos w‖ ≤ e^{|Im w|}`. -/
-theorem cfInt_norm_cos_le (w : ℂ) : ‖Complex.cos w‖ ≤ Real.exp |w.im| := by
+theorem KummerIntegrals.norm_cos_le (w : ℂ) : ‖Complex.cos w‖ ≤ Real.exp |w.im| := by
   rw [Complex.cos]
   have h1 : ‖exp (w * I)‖ ≤ Real.exp |w.im| := by
     rw [Complex.norm_exp]; simp only [mul_re, I_re, mul_zero, I_im, mul_one, zero_sub]
@@ -287,7 +290,7 @@ theorem cfInt_norm_cos_le (w : ℂ) : ‖Complex.cos w‖ ≤ Real.exp |w.im| :=
   linarith
 
 /-- **Global bound for `J_ν` on the positive axis**: `|J_ν(y)| ≤ C y^{re ν} (1+y)^{-re ν - 1/2}`. -/
-theorem cfInt_exists_norm_besselJ_le (ν : ℂ) :
+theorem KummerIntegrals.exists_norm_besselJ_le (ν : ℂ) :
     ∃ C, ∀ y : ℝ, 0 < y → ‖besselJ ν y‖ ≤ C * (y ^ ν.re * (1 + y) ^ (-(ν.re + 1 / 2))) := by
   set σ := ν.re
   obtain ⟨M, hM⟩ := exists_norm_besselJ_mul_le ν (c := 1) one_pos
@@ -300,7 +303,7 @@ theorem cfInt_exists_norm_besselJ_le (ν : ℂ) :
       filter_upwards [eventually_gt_atTop 0] with y hy
       rw [norm_mul, norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _),
         Real.norm_of_nonneg (by positivity)]
-      have hc := cfInt_norm_cos_le ((y : ℂ) - ν * π / 2 - π / 4)
+      have hc := KummerIntegrals.norm_cos_le ((y : ℂ) - ν * π / 2 - π / 4)
       have him : (((y : ℂ) - ν * π / 2 - π / 4)).im = -((ν * π / 2).im) := by
         simp
       rw [him, abs_neg] at hc
@@ -323,7 +326,7 @@ theorem cfInt_exists_norm_besselJ_le (ν : ℂ) :
     have := continuousAt_besselJ_mul ν (c := 1) one_pos hy0
     simp only [ofReal_one, one_mul] at this
     exact this.continuousWithinAt
-  obtain ⟨C2, hC2⟩ := cfInt_exists_bound_Ici 1 hcont
+  obtain ⟨C2, hC2⟩ := KummerIntegrals.exists_bound_Ici 1 hcont
     (fun y hy => (Real.continuousAt_rpow_const _ _ (Or.inl (by
       simp only [mem_Ici] at hy; linarith))).continuousWithinAt)
     (fun y hy => by positivity) hO
@@ -350,7 +353,7 @@ theorem cfInt_exists_norm_besselJ_le (ν : ℂ) :
       _ ≤ _ := by gcongr; exact le_max_left _ _
   · have h1 := hC2 y hy1.le
     have h2 : y ^ (-(1 / 2 : ℝ)) ≤ 2 ^ |u| * (y ^ σ * (1 + y) ^ u) := by
-      have := kumDec_rpow_le_one_add hy1.le u
+      have := KummerDecayBounds.rpow_le_one_add hy1.le u
       calc y ^ (-(1 / 2 : ℝ)) = y ^ σ * y ^ u := by
             rw [← Real.rpow_add hy]; congr 1; simp only [u]; ring
         _ ≤ y ^ σ * (2 ^ |u| * (1 + y) ^ u) := by gcongr
@@ -366,7 +369,7 @@ theorem cfInt_exists_norm_besselJ_le (ν : ℂ) :
           exact le_max_right _ _
 
 /-- `‖Γ(w+k)‖ Γ(re w) ≥ ‖Γ(w)‖ Γ(re w + k)` for `re w > 0`. -/
-theorem cfInt_norm_Gamma_add_nat_ge {w : ℂ} (hw : 0 < w.re) (k : ℕ) :
+theorem KummerIntegrals.norm_Gamma_add_nat_ge {w : ℂ} (hw : 0 < w.re) (k : ℕ) :
     ‖Gamma w‖ * Real.Gamma (w.re + k) ≤ ‖Gamma (w + k)‖ * Real.Gamma w.re := by
   induction k with
   | zero => simp
@@ -389,7 +392,7 @@ theorem cfInt_norm_Gamma_add_nat_ge {w : ℂ} (hw : 0 < w.re) (k : ℕ) :
       _ = _ := by ring
 
 /-- The kernel `t^{ν/2} J_ν(2√(xt))` in power-series form. -/
-theorem cfInt_kernel_eq (ν : ℂ) {x : ℂ} (hx : x ≠ 0) {t : ℝ} (ht : 0 < t) :
+theorem KummerIntegrals.kernel_eq (ν : ℂ) {x : ℂ} (hx : x ≠ 0) {t : ℝ} (ht : 0 < t) :
     (t : ℂ) ^ (ν / 2) * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)) =
       x ^ (ν / 2) * ((t : ℂ) ^ ν * regularizedHGFun ∅ {ν + 1} (-x * t)) := by
   have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
@@ -399,7 +402,7 @@ theorem cfInt_kernel_eq (ν : ℂ) {x : ℂ} (hx : x ≠ 0) {t : ℝ} (ht : 0 < 
   linear_combination (x ^ (ν / 2) * regularizedHGFun ∅ {ν + 1} (-x * t)) * hνt
 
 /-- The Hankel kernel `t^{ν/2} J_ν(2√(xt))` is continuous on `(0,∞)`. -/
-theorem cfInt_continuousOn_kernel (ν : ℂ) {x : ℂ} (hx : x ≠ 0) :
+theorem KummerIntegrals.continuousOn_kernel (ν : ℂ) {x : ℂ} (hx : x ≠ 0) :
     ContinuousOn (fun t : ℝ => (t : ℂ) ^ (ν / 2) * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)))
       (Ioi 0) := by
   have h : ContinuousOn (fun t : ℝ => x ^ (ν / 2) * ((t : ℂ) ^ ν *
@@ -409,11 +412,12 @@ theorem cfInt_continuousOn_kernel (ν : ℂ) {x : ℂ} (hx : x ≠ 0) :
         fun t ht => ofReal_mem_slitPlane.mpr ht
     · exact (continuous_regularized0F1.comp (by fun_prop :
         Continuous fun t : ℝ => (ν + 1, -x * t))).continuousOn
-  exact h.congr fun t ht => cfInt_kernel_eq ν hx ht
+  exact h.congr fun t ht => KummerIntegrals.kernel_eq ν hx ht
 
 /-- **The Laplace transform of the Hankel kernel**:
 `∫₀^∞ e^{-st} t^{ν/2} J_ν(2√(xt)) dt = x^{ν/2} s^{-ν-1} e^{-x/s}`, for `re ν > -1`, `s > 0`. -/
-theorem cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s : ℝ} (hs : 0 < s) :
+theorem KummerIntegrals.laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0)
+    {s : ℝ} (hs : 0 < s) :
     ∫ t : ℝ in Ioi 0, exp (-(s * t : ℂ)) * ((t : ℂ) ^ (ν / 2) *
         besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ))) =
       x ^ (ν / 2) * ((s : ℂ) ^ (-(ν + 1)) * exp (-x / s)) := by
@@ -428,7 +432,8 @@ theorem cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s :
     simpa using this
   have hIk : ∀ k : ℕ, IntegrableOn (fun t : ℝ => (t : ℂ) ^ (ν + k + 1 - 1) *
       exp (-(s * t : ℂ))) (Ioi 0) := fun k => by
-    have h := cfInt_integrableOn_rpow_exp (r := (ν + k + 1).re - 1) (by linarith [hνk k]) hs
+    have h := KummerIntegrals.integrableOn_rpow_exp (r := (ν + k + 1).re - 1)
+        (by linarith [hνk k]) hs
     refine h.mono' ?_ ?_
     · exact (ContinuousOn.mul (ContinuousOn.cpow continuous_ofReal.continuousOn
         continuousOn_const fun t ht => ofReal_mem_slitPlane.mpr ht)
@@ -457,9 +462,9 @@ theorem cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s :
         have : (-(↑s * ↑t : ℂ)).re = -(s * t) := by simp
         rw [this]; ring
       rw [setIntegral_congr_fun measurableSet_Ioi this, integral_const_mul,
-        cfInt_integral_rpow_exp (by linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]) hs]
+        KummerIntegrals.integral_rpow_exp (by linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]) hs]
     rw [hint, hd, DLMF.Bessel.regularizedHGFunCoeff_empty]
-    have hGk := cfInt_norm_Gamma_add_nat_ge (w := ν + 1) (by simp; linarith) k
+    have hGk := KummerIntegrals.norm_Gamma_add_nat_ge (w := ν + 1) (by simp; linarith) k
     simp only [add_re, one_re] at hGk
     have hGnk : 0 < ‖Gamma (ν + 1 + k)‖ := by
       have := Gamma_ne_zero_of_re_pos (s := ν + 1 + k)
@@ -513,7 +518,7 @@ theorem cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s :
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
   have ht0 : (0 : ℝ) < t := ht
   have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht0.ne'
-  rw [cfInt_kernel_eq ν hx ht0]
+  rw [KummerIntegrals.kernel_eq ν hx ht0]
   have h0 := ((DLMF.Bessel.hasFPowerSeriesOnBall_regularized0F1 (ν + 1)).hasSum_mul_pow
     (z := -x * t) (by simp)).mul_left (x ^ (ν / 2) * (exp (-(s * t : ℂ)) * (t : ℂ) ^ ν))
   refine Eq.trans ?_ (h0.tsum_eq.symm.trans (tsum_congr fun k => ?_))
@@ -523,7 +528,7 @@ theorem cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s :
     ring
 
 /-- `2 ((r t)^{1/2})` as a real number. -/
-theorem cfInt_two_sqrt_eq {r t : ℝ} (hr : 0 ≤ r) (ht : 0 ≤ t) :
+theorem KummerIntegrals.two_sqrt_eq {r t : ℝ} (hr : 0 ≤ r) (ht : 0 ≤ t) :
     2 * ((r : ℂ) * t) ^ (1 / 2 : ℂ) = ((2 * (Real.sqrt r * Real.sqrt t) : ℝ) : ℂ) := by
   rw [show ((r : ℂ) * t) = ((r * t : ℝ) : ℂ) by push_cast; ring,
     show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow (by positivity),
@@ -531,11 +536,11 @@ theorem cfInt_two_sqrt_eq {r t : ℝ} (hr : 0 ≤ r) (ht : 0 ≤ t) :
   push_cast; ring
 
 /-- The Hankel kernel bound `‖t^{ν/2} J_ν(2√(rt))‖ ≤ C t^{re ν} (1+t)^{-(re ν/2+1/4)}`. -/
-theorem cfInt_exists_norm_kernel_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem KummerIntegrals.exists_norm_kernel_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
     ∃ C, ∀ t : ℝ, 0 < t →
       ‖(t : ℂ) ^ (ν / 2) * besselJ ν (2 * ((r : ℂ) * t) ^ (1 / 2 : ℂ))‖ ≤
         C * (t ^ ν.re * (1 + t) ^ (-(ν.re / 2 + 1 / 4))) := by
-  obtain ⟨C, hC⟩ := cfInt_exists_norm_besselJ_le ν
+  obtain ⟨C, hC⟩ := KummerIntegrals.exists_norm_besselJ_le ν
   set σ := ν.re with hσ
   set q := Real.sqrt r with hq
   have hq0 : 0 < q := Real.sqrt_pos.mpr hr
@@ -547,7 +552,7 @@ theorem cfInt_exists_norm_kernel_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
   have hst : 0 < Real.sqrt t := Real.sqrt_pos.mpr ht
   set y := 2 * (q * Real.sqrt t) with hy
   have hy0 : 0 < y := by positivity
-  rw [cfInt_two_sqrt_eq hr.le ht.le, norm_mul, norm_cpow_eq_rpow_re_of_pos ht]
+  rw [KummerIntegrals.two_sqrt_eq hr.le ht.le, norm_mul, norm_cpow_eq_rpow_re_of_pos ht]
   have hre : (ν / 2).re = σ / 2 := by simp [hσ]
   rw [hre]
   set A := Real.sqrt (1 + t) with hA
@@ -566,7 +571,7 @@ theorem cfInt_exists_norm_kernel_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
       _ = 1 + y := by rw [hy]; ring
   have h2 : 1 + y ≤ M * A := by
     rw [hy, hM]; nlinarith
-  have hB := cfInt_rpow_le_of_le_mul hA0 hm0 h1 h2 u
+  have hB := KummerIntegrals.rpow_le_of_le_mul hA0 hm0 h1 h2 u
   have hAu : A ^ u = (1 + t) ^ (-(σ / 2 + 1 / 4)) := by
     rw [hA, Real.sqrt_eq_rpow, ← Real.rpow_mul (by linarith), hu]; congr 1; ring
   have hyσ : y ^ σ = 2 ^ σ * q ^ σ * t ^ (σ / 2) := by
@@ -587,7 +592,7 @@ theorem cfInt_exists_norm_kernel_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
       rw [hAu, hyσ, ← htt]; ring
 
 /-- The substitution `s ↦ 1/s` turning the Hankel–Laplace integral into a Tricomi `U` integral. -/
-theorem cfInt_recip_subst_U {a b ν x : ℂ} (hx : 0 < x.re) (hA : 0 < (ν - b + 2).re) :
+theorem KummerIntegrals.recip_subst_U {a b ν x : ℂ} (hx : 0 < x.re) (hA : 0 < (ν - b + 2).re) :
     ∫ s : ℝ in Ioi 0, (s : ℂ) ^ (a - 1) * (1 + (s : ℂ)) ^ (b - a - 1) *
         ((s : ℂ) ^ (-(ν + 1)) * exp (-x / s)) =
       Gamma (ν - b + 2) * kummerU (ν - b + 2) (ν - a + 2) x := by
@@ -625,7 +630,7 @@ theorem cfInt_recip_subst_U {a b ν x : ℂ} (hx : 0 < x.re) (hA : 0 < (ν - b +
   linear_combination (-(exp (-(x / s)) * (1 + (s : ℂ)) ^ (b - a - 1))) * (e1 - e2)
 
 /-- Tricomi's `U(a,b,z)` is entire in its first parameter, for fixed `b` and `z ≠ 0`. -/
-theorem cfInt_differentiable_kummerU_fst (b : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem KummerIntegrals.differentiable_kummerU_fst (b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Differentiable ℂ (fun a => kummerU a b z) := by
   have hmem : ∀ c ∈ integerComplement, Differentiable ℂ (fun a => kummerU a c z) := by
     intro c hc
@@ -661,7 +666,7 @@ theorem cfInt_differentiable_kummerU_fst (b : ℂ) {z : ℂ} (hz : z ≠ 0) :
 
 /-- The substitution `s = 1/(1+v)` turning an Euler-type integral on `(0,1)` into a
 Tricomi `U` integral. -/
-theorem cfInt_euler_subst_U {a c ν x : ℂ} (hx : 0 < x.re) (ha : 0 < a.re) :
+theorem KummerIntegrals.euler_subst_U {a c ν x : ℂ} (hx : 0 < x.re) (ha : 0 < a.re) :
     ∫ s in Ioo (0 : ℝ) 1, (s : ℂ) ^ (c - 1) * (1 - (s : ℂ)) ^ (a - 1) *
         ((s : ℂ) ^ (-(ν + 1)) * exp (-x / s)) =
       exp (-x) * (Gamma a * kummerU a (ν + 2 - c) x) := by
@@ -732,7 +737,8 @@ theorem cfInt_euler_subst_U {a c ν x : ℂ} (hx : 0 < x.re) (ha : 0 < a.re) :
   linear_combination (exp (-x) * exp (-x * v) * (v : ℂ) ^ (a - 1)) * e
 
 /-- 13.10.14 in the Euler region `0 < re a`, in the Kummer-transformed form. -/
-theorem cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (ha : 0 < a.re)
+theorem KummerIntegrals.bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
+    (ha : 0 < a.re)
     (hν0 : -1 < ν.re) (hν1 : ν.re < 2 * (b - a).re - 3 / 2) :
     ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (ν / 2) * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)) *
         regularizedHGFun {b - a} {b} (-(t : ℂ)) =
@@ -749,17 +755,17 @@ theorem cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (
   have hGa := Gamma_ne_zero_of_re_pos ha
   have hGc := Gamma_ne_zero_of_re_pos hc0
   set K : ℝ → ℂ := fun t => (t : ℂ) ^ (ν / 2) * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)) with hK
-  set E : ℝ → ℝ → ℂ := fun t s => kumDec_eulerKernel c b t s with hE
+  set E : ℝ → ℝ → ℂ := fun t s => KummerDecayBounds.eulerKernel c b t s with hE
   set G : ℝ → ℝ → ℂ := fun t s => K t * E t s with hG
-  have hKc : ContinuousOn K (Ioi 0) := cfInt_continuousOn_kernel ν hx0
-  obtain ⟨CK, hCK⟩ := cfInt_exists_norm_kernel_le ν hx
-  obtain ⟨CL, hCL⟩ := cfInt_laplace_rpow_le (r := σ) (p := p) hν0 (by rw [hp]; linarith)
+  have hKc : ContinuousOn K (Ioi 0) := KummerIntegrals.continuousOn_kernel ν hx0
+  obtain ⟨CK, hCK⟩ := KummerIntegrals.exists_norm_kernel_le ν hx
+  obtain ⟨CL, hCL⟩ := KummerIntegrals.laplace_rpow_le (r := σ) (p := p) hν0 (by rw [hp]; linarith)
   have hKb : ∀ t : ℝ, 0 < t → ‖K t‖ ≤ CK * (t ^ σ * (1 + t) ^ (-p)) := by
     intro t ht
     have := hCK t ht
     simp only [hK]; rw [hxr]; exact this
   have hEm : Measurable (Function.uncurry E) := by
-    simp only [hE, kumDec_eulerKernel]
+    simp only [hE, KummerDecayBounds.eulerKernel]
     fun_prop
   have hm : AEStronglyMeasurable (Function.uncurry G)
       ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioo (0:ℝ) 1))) :=
@@ -776,7 +782,7 @@ theorem cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (
   set w : ℝ → ℝ := fun s => s ^ (c.re - 1) * (1 - s) ^ (a.re - 1) with hw
   have hnE : ∀ s ∈ Ioo (0:ℝ) 1, ∀ t, ‖E t s‖ = Real.exp (-(t * s)) * w s := by
     intro s hs t
-    simp only [hE, hw]; rw [kumDec_norm_eulerKernel c b hs, hbc]; ring
+    simp only [hE, hw]; rw [KummerDecayBounds.norm_eulerKernel c b hs, hbc]; ring
   have hinner : ∀ s ∈ Ioo (0:ℝ) 1, IntegrableOn (fun t => G t s) (Ioi 0) ∧
       ∫ t in Ioi 0, ‖G t s‖ ≤ CK * CL * M2 * (s ^ (p - σ - 1) * w s) := by
     intro s hs
@@ -844,7 +850,8 @@ theorem cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (
   have hts : ∀ t ∈ Ioi (0:ℝ), ∫ s in Ioo 0 1, G t s =
       K t * (Gamma c * Gamma a * regularizedHGFun {c} {b} (-(t : ℂ))) := by
     intro t ht
-    have h := kumDec_regularizedHGFun_neg_eq (a := c) (b := b) hc0 (by rw [hbc]; exact ha) t
+    have h := KummerDecayBounds.regularizedHGFun_neg_eq (a := c) (b := b) hc0
+        (by rw [hbc]; exact ha) t
     rw [hbc] at h
     simp only [hG]
     rw [integral_const_mul, h, intervalIntegral.integral_of_le zero_le_one,
@@ -855,10 +862,10 @@ theorem cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (
       (s : ℂ) ^ (c - 1) * (1 - (s : ℂ)) ^ (a - 1) *
         (x ^ (ν / 2) * ((s : ℂ) ^ (-(ν + 1)) * exp (-x / s))) := by
     intro s hs
-    have h := cfInt_laplace_kernel hν0 hx0 hs.1
+    have h := KummerIntegrals.laplace_kernel hν0 hx0 hs.1
     rw [← h, ← integral_const_mul]
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
-    simp only [hG, hE, hK, kumDec_eulerKernel]
+    simp only [hG, hE, hK, KummerDecayBounds.eulerKernel]
     rw [hbc, show -(t : ℂ) * s = -(s * t : ℂ) by ring]
     ring
   calc ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (ν / 2) * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)) *
@@ -875,12 +882,12 @@ theorem cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (
         refine setIntegral_congr_fun measurableSet_Ioo fun s _ => ?_
         ring
     _ = _ := by
-        rw [cfInt_euler_subst_U hx ha, show ν + 2 - c = a - b + ν + 2 by rw [hc]; ring]
+        rw [KummerIntegrals.euler_subst_U hx ha, show ν + 2 - c = a - b + ν + 2 by rw [hc]; ring]
         field_simp
 
 /-- The Gaussian cosine integral
 `∫₀^∞ cos(2xt) e^{-st²} dt = (√π/2) s^{-1/2} e^{-x²/s}`, for `s > 0`. -/
-theorem cfInt_integral_cos_gauss (x : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem KummerIntegrals.integral_cos_gauss (x : ℝ) {s : ℝ} (hs : 0 < s) :
     ∫ t : ℝ in Ioi 0, Complex.cos (2 * x * t) * exp (-((t ^ 2 : ℝ) : ℂ) * s) =
       (Real.sqrt π : ℂ) / 2 * ((s : ℂ) ^ (-(1 / 2 : ℂ)) * exp (-(x : ℂ) ^ 2 / s)) := by
   set g : ℝ → ℝ := fun t => Real.cos (2 * x * t) * Real.exp (-(s * t ^ 2)) with hg
@@ -937,7 +944,8 @@ theorem cfInt_integral_cos_gauss (x : ℝ) {s : ℝ} (hs : 0 < s) :
 
 /-- The cosine transform 13.10.12 in the Euler region `re (B - a) > 0`, before the Kummer
 transformation of `U`. -/
-theorem cfInt_cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a) (hB : 0 < (B - a).re) :
+theorem KummerIntegrals.cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a)
+    (hB : 0 < (B - a).re) :
     ∫ t : ℝ in Ioi 0, Complex.cos (2 * x * t) * regularizedHGFun {(a : ℂ)} {B} (-(t : ℂ) ^ 2) =
       (Real.sqrt π : ℂ) / (2 * Gamma (a : ℂ)) * exp (-(x : ℂ) ^ 2) *
         kummerU (B - a) (3 / 2 - a) ((x : ℂ) ^ 2) := by
@@ -946,10 +954,10 @@ theorem cfInt_cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a) (
   have hGA := Gamma_ne_zero_of_re_pos hA0
   have hGB := Gamma_ne_zero_of_re_pos hB
   have hBA : B - (B - A) = A := by ring
-  set E : ℝ → ℝ → ℂ := fun t s => kumDec_eulerKernel A B (t ^ 2) s with hE
+  set E : ℝ → ℝ → ℂ := fun t s => KummerDecayBounds.eulerKernel A B (t ^ 2) s with hE
   set G : ℝ → ℝ → ℂ := fun t s => Complex.cos (2 * x * t) * E t s with hG
   have hEm : Measurable (Function.uncurry G) := by
-    simp only [hG, hE, kumDec_eulerKernel]
+    simp only [hG, hE, KummerDecayBounds.eulerKernel]
     fun_prop
   have hm : AEStronglyMeasurable (Function.uncurry G)
       ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioo (0:ℝ) 1))) :=
@@ -962,7 +970,7 @@ theorem cfInt_cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a) (
   have hnG : ∀ s ∈ Ioo (0:ℝ) 1, ∀ t : ℝ, ‖G t s‖ ≤ w s * Real.exp (-s * t ^ 2) := by
     intro s hs t
     simp only [hG, hE]
-    rw [norm_mul, kumDec_norm_eulerKernel A B hs]
+    rw [norm_mul, KummerDecayBounds.norm_eulerKernel A B hs]
     have hw0 : 0 ≤ Real.exp (-(t ^ 2 * s)) * s ^ (A.re - 1) * (1 - s) ^ ((B - A).re - 1) := by
       have := hs.1; have : 0 < 1 - s := by linarith [hs.2]
       positivity
@@ -1010,7 +1018,7 @@ theorem cfInt_cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a) (
       Complex.cos (2 * x * t) * (Gamma A * Gamma (B - A) *
         regularizedHGFun {A} {B} (-(t : ℂ) ^ 2)) := by
     intro t
-    have h := kumDec_regularizedHGFun_neg_eq (a := A) (b := B) (t := t ^ 2) hA0 hB
+    have h := KummerDecayBounds.regularizedHGFun_neg_eq (a := A) (b := B) (t := t ^ 2) hA0 hB
     rw [show (((t ^ 2 : ℝ)) : ℂ) = (t : ℂ) ^ 2 by push_cast; ring] at h
     simp only [hG]
     rw [integral_const_mul, h, intervalIntegral.integral_of_le zero_le_one,
@@ -1021,14 +1029,14 @@ theorem cfInt_cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a) (
       (s : ℂ) ^ (A - 1) * (1 - (s : ℂ)) ^ ((B - A) - 1) *
         ((Real.sqrt π : ℂ) / 2 * ((s : ℂ) ^ (-(1 / 2 : ℂ)) * exp (-((x : ℂ) ^ 2) / s))) := by
     intro s hs
-    have h := cfInt_integral_cos_gauss x hs.1
+    have h := KummerIntegrals.integral_cos_gauss x hs.1
     rw [show -((x : ℂ) ^ 2) = -(x : ℂ) ^ 2 by ring, ← h, ← integral_const_mul]
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
-    simp only [hG, hE, kumDec_eulerKernel]
+    simp only [hG, hE, KummerDecayBounds.eulerKernel]
     ring
   have hX : 0 < ((x : ℂ) ^ 2).re := by
     rw [← ofReal_pow, ofReal_re]; positivity
-  have hsub := cfInt_euler_subst_U (a := B - A) (c := A) (ν := -(1 / 2)) hX hB
+  have hsub := KummerIntegrals.euler_subst_U (a := B - A) (c := A) (ν := -(1 / 2)) hX hB
   rw [show -(-(1 / 2 : ℂ) + 1) = -(1 / 2) by ring,
     show -(1 / 2 : ℂ) + 2 - A = 3 / 2 - A by ring] at hsub
   calc ∫ t : ℝ in Ioi 0, Complex.cos (2 * x * t) * regularizedHGFun {A} {B} (-(t : ℂ) ^ 2)
@@ -1068,7 +1076,8 @@ theorem cosine_regularizedHGFun {a b x : ℝ} (hx : 0 < x) (ha : 1 / 2 < a) :
     Complex.cos (2 * x * t) * regularizedHGFun {A} {B} (-(t : ℂ) ^ 2) with hF
   set H : ℂ → ℂ := fun B => (Real.sqrt π : ℂ) / (2 * Gamma A) * exp (-(x : ℂ) ^ 2) *
     kummerU (B - A) (3 / 2 - A) ((x : ℂ) ^ 2) with hH
-  have hFH : ∀ B : ℂ, 0 < (B - A).re → F B = H B := fun B hB => cfInt_cosine_euler hx ha hB
+  have hFH : ∀ B : ℂ, 0 < (B - A).re → F B = H B := fun B hB =>
+      KummerIntegrals.cosine_euler hx ha hB
   set ε := (a - 1 / 2) / 2 with hε
   have hε0 : 0 < ε := by rw [hε]; linarith
   have hFd : Differentiable ℂ F := by
@@ -1106,7 +1115,7 @@ theorem cosine_regularizedHGFun {a b x : ℝ} (hx : 0 < x) (ha : 1 / 2 < a) :
               mul_le_mul hc h (norm_nonneg _) zero_le_one
           _ = _ := one_mul _
   have hHd : Differentiable ℂ H :=
-    ((cfInt_differentiable_kummerU_fst (3 / 2 - A) hX0).comp
+    ((KummerIntegrals.differentiable_kummerU_fst (3 / 2 - A) hX0).comp
       (differentiable_id.sub_const A)).const_mul _
   have heq : F = H := by
     refine AnalyticOnNhd.eq_of_eventuallyEq (fun z _ => hFd.analyticAt z)

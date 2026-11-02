@@ -43,6 +43,8 @@ in `DLMF.Core.Basic`.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory DLMF.Hypergeometric
 open scoped Real Topology
+open DLMF.Core
+
 namespace DLMF.Airy
 
 /-- The totalized value of an improper integral with infinite lower endpoint. -/

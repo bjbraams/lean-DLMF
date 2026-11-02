@@ -19,10 +19,10 @@ which turn terminating summation identities into nonterminating ones.
 
 ## Main results
 
-* `CarlsonAux.eq_zero_of_periodic_of_bound`: Carlson's theorem for periodic functions.
-* `CarlsonAux.exists_norm_Gamma_le_strip`, `CarlsonAux.exists_norm_recip_Gamma_le_strip`:
+* `CarlsonTheorem.eq_zero_of_periodic_of_bound`: Carlson's theorem for periodic functions.
+* `CarlsonTheorem.exists_norm_Gamma_le_strip`, `CarlsonTheorem.exists_norm_recip_Gamma_le_strip`:
   uniform vertical bounds for `Γ` and `1/Γ` on strips.
-* `CarlsonAux.summable_norm_Gamma_ratio`, `CarlsonAux.isBigO_gaussHGCoeff`: growth of Gamma
+* `CarlsonTheorem.summable_norm_Gamma_ratio`, `CarlsonTheorem.isBigO_gaussHGCoeff`: growth of Gamma
   ratios and of the Gauss coefficients.
 * `kummer_theorem`: Kummer's theorem `₂F₁(a,b;1+a-b;-1)`, DLMF 15.4.26.
 
@@ -174,7 +174,7 @@ terminating case (Dixon), so it vanishes by Carlson's theorem. -/
 open Filter Set
 open scoped Topology
 
-namespace CarlsonAux
+namespace CarlsonTheorem
 
 /-- A polynomial factor is absorbed by any exponential: `(1+t)^K ≤ M e^{εt}` for `t ≥ 0`. -/
 theorem exists_one_add_pow_le_exp (K : ℕ) {ε : ℝ} (hε : 0 < ε) :
@@ -679,15 +679,15 @@ theorem exists_recip_Gamma_shift_bound (x₁ : ℝ) :
   exact ⟨B, hB0, fun n hn => by simp only [hBdef]; rw [ite_eq_left hn],
     fun n hn1 hn2 => by simp only [hBdef]; rw [ite_eq_right hn1, ite_eq_left hn2], hbound⟩
 
-end CarlsonAux
+end CarlsonTheorem
 
-namespace DougallAux
+namespace DougallSeries
 
-open CarlsonAux
+open CarlsonTheorem
 
 variable {a b c : ℂ}
 
-end DougallAux
+end DougallSeries
 end CarlsonApplications
 end DLMF.Hypergeometric
 end

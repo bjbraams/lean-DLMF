@@ -611,34 +611,37 @@ theorem hasUpperExtension_eulerTransform {α β : ℂ} (ha : 0 < α.re) (hab : 0
 /-! ### Existence by induction on the number of parameters -/
 
 /-- The properties of a continuation that are carried through the induction. -/
-private def GoodCont (a b : Multiset ℂ) (V : ℂ → ℂ) : Prop :=
+private def ContinuationInvariant (a b : Multiset ℂ) (V : ℂ → ℂ) : Prop :=
   DifferentiableOn ℂ V cutPlane ∧ (∀ z : ℂ, ‖z‖ < 1 → V z = regularizedHGFun a b z) ∧
     HasUpperExtension V
 
 /-- The case `q = 0`: `₁F₀(a;;z) = (1-z)^(-a)`. -/
-private theorem goodCont_base (a₀ : ℂ) : GoodCont {a₀} 0 fun z => (1 - z) ^ (-a₀) := by
+private theorem continuationInvariant_base (a₀ : ℂ) : ContinuationInvariant {a₀} 0 fun z =>
+    (1 - z) ^ (-a₀) := by
   refine ⟨fun z hz => ?_, fun z hz => (regularizedHGFun_singleton_zero a₀ hz).symm,
     hasUpperExtension_one_sub_cpow a₀⟩
   exact (((differentiableAt_const _).sub differentiableAt_id).cpow_const
     (mem_cutPlane.mp hz)).differentiableWithinAt
 
 /-- The induction properties pass to linear combinations. -/
-private theorem goodCont_linear_comb {a b a₁ b₁ a₂ b₂ : Multiset ℂ} {V₁ V₂ A B : ℂ → ℂ}
-    (h₁ : GoodCont a₁ b₁ V₁) (h₂ : GoodCont a₂ b₂ V₂) (hA : Differentiable ℂ A)
+private theorem continuationInvariant_linear_comb {a b a₁ b₁ a₂ b₂ : Multiset ℂ} {V₁ V₂ A B : ℂ → ℂ}
+    (h₁ : ContinuationInvariant a₁ b₁ V₁) (h₂ : ContinuationInvariant a₂ b₂ V₂)
+        (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B)
     (hrel : ∀ z : ℂ, ‖z‖ < 1 → regularizedHGFun a b z =
       A z * regularizedHGFun a₁ b₁ z + B z * regularizedHGFun a₂ b₂ z) :
-    GoodCont a b fun z => A z * V₁ z + B z * V₂ z := by
+    ContinuationInvariant a b fun z => A z * V₁ z + B z * V₂ z := by
   refine ⟨(hA.differentiableOn.mul h₁.1).add (hB.differentiableOn.mul h₂.1), fun z hz => ?_,
     h₁.2.2.linear_comb h₂.2.2 hA hB⟩
   show A z * V₁ z + B z * V₂ z = _
   rw [hrel z hz, h₁.2.1 z hz, h₂.2.1 z hz]
 
 /-- The induction step, by induction on the shift measure of the pair `(α, β)`. -/
-private theorem goodCont_step {q : ℕ}
-    (ih : ∀ a b : Multiset ℂ, b.card = q → a.card = q + 1 → ∃ V, GoodCont a b V) (n : ℕ) :
+private theorem continuationInvariant_step {q : ℕ}
+    (ih : ∀ a b : Multiset ℂ, b.card = q → a.card = q + 1 → ∃ V,
+        ContinuationInvariant a b V) (n : ℕ) :
     ∀ (α β : ℂ) (a b : Multiset ℂ), shiftMeasure α β ≤ n → b.card = q → a.card = q + 1 →
-      ∃ V, GoodCont (α ::ₘ a) (β ::ₘ b) V := by
+      ∃ V, ContinuationInvariant (α ::ₘ a) (β ::ₘ b) V := by
   induction n with
   | zero =>
     intro α β a b hn hb ha
@@ -660,7 +663,7 @@ private theorem goodCont_step {q : ℕ}
       have hn' : shiftMeasure α (β + 1) ≤ n := by unfold shiftMeasure at hn ⊢; omega
       obtain ⟨V₁, hV₁⟩ := ihn α (β + 1) (α' ::ₘ a') b hn' hb ha
       obtain ⟨V₂, hV₂⟩ := ihn α (β + 1) ((α' + 1) ::ₘ a') b hn' hb (by simpa using ha)
-      refine ⟨_, goodCont_linear_comb hV₁ hV₂ (differentiable_const (β - α'))
+      refine ⟨_, continuationInvariant_linear_comb hV₁ hV₂ (differentiable_const (β - α'))
         (differentiable_const α') fun z hz => ?_⟩
       have hcard : (α ::ₘ a').card = b.card + 1 := by simp at ha ⊢; omega
       rw [Multiset.cons_swap α α', Multiset.cons_swap α (α' + 1)]
@@ -670,7 +673,7 @@ private theorem goodCont_step {q : ℕ}
         obtain ⟨V₁, hV₁⟩ := ihn (α + 1) β a b (by omega) hb ha
         obtain ⟨V₂, hV₂⟩ := ihn (α + 1) (β + 1) (shiftParams a) (shiftParams b) (by omega)
           (by simpa using hb) (by simpa using ha)
-        refine ⟨_, goodCont_linear_comb hV₁ hV₂ (differentiable_const 1)
+        refine ⟨_, continuationInvariant_linear_comb hV₁ hV₂ (differentiable_const 1)
           (B := fun z => -(z * a.prod)) (by fun_prop) fun z hz => ?_⟩
         have hcard : a.card = (β ::ₘ b).card := by simp [ha, hb]
         have := regularizedHGFun_raise_numerator α a (β ::ₘ b) hcard hz
@@ -687,27 +690,27 @@ private theorem goodCont_step {q : ℕ}
           hasUpperExtension_eulerTransform (by linarith) (by linarith) hG.1 hG.2.2⟩
 
 /-- Existence of a continuation with the induction properties, by induction on `q`. -/
-private theorem exists_goodCont (q : ℕ) :
-    ∀ a b : Multiset ℂ, b.card = q → a.card = q + 1 → ∃ V, GoodCont a b V := by
+private theorem exists_continuationInvariant (q : ℕ) :
+    ∀ a b : Multiset ℂ, b.card = q → a.card = q + 1 → ∃ V, ContinuationInvariant a b V := by
   induction q with
   | zero =>
     intro a b hb ha
     obtain ⟨a₀, rfl⟩ := Multiset.card_eq_one.mp ha
     rw [Multiset.card_eq_zero.mp hb]
-    exact ⟨_, goodCont_base a₀⟩
+    exact ⟨_, continuationInvariant_base a₀⟩
   | succ q ih =>
     intro a b hb ha
     obtain ⟨β, hβ⟩ := Multiset.card_pos_iff_exists_mem.mp (by omega : 0 < b.card)
     obtain ⟨b', rfl⟩ := Multiset.exists_cons_of_mem hβ
     obtain ⟨α, hα⟩ := Multiset.card_pos_iff_exists_mem.mp (by omega : 0 < a.card)
     obtain ⟨a', rfl⟩ := Multiset.exists_cons_of_mem hα
-    exact goodCont_step ih _ α β a' b' le_rfl (by simpa using hb) (by simpa using ha)
+    exact continuationInvariant_step ih _ α β a' b' le_rfl (by simpa using hb) (by simpa using ha)
 
 /-- Existence of the normalized principal continuation of `q+1Fq`, for all parameters. -/
 theorem nonempty_genPrincipalContinuation (a b : Multiset ℂ) (h : a.card = b.card + 1) :
     Nonempty (GenPrincipalContinuation a b) := by
   classical
-  obtain ⟨V, hVd, hVg, hVu⟩ := exists_goodCont b.card a b rfl h
+  obtain ⟨V, hVd, hVg, hVu⟩ := exists_continuationInvariant b.card a b rfl h
   let value : ℂ → ℂ := fun z =>
     if z ∈ cutPlane then V z
     else if hz : 1 < z.re then Classical.choose (hVu z.re hz) z

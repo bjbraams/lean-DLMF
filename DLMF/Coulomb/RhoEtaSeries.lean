@@ -675,7 +675,7 @@ theorem besselSeriesCoeffA_recurrence (ℓ : ℕ) (η : ℝ) (k : ℕ) :
 `F_ℓ(η,ρ) = ρ ∑_{k ≥ 0} a_k j_{ℓ+k}(ρ)`, convergent for all real `η`, `ρ`. -/
 @[dlmf 33.9.E1]
 theorem hasSum_coulombF_sphericalJ (ℓ : ℕ) (η ρ : ℝ) :
-    HasSum (fun k : ℕ => (ρ : ℂ) * besselSeriesCoeffA ℓ η k * DLMF.sphericalJ (ℓ + k) ρ)
+    HasSum (fun k : ℕ => (ρ : ℂ) * besselSeriesCoeffA ℓ η k * DLMF.Bessel.sphericalJ (ℓ + k) ρ)
       (coulombF ℓ η ρ) := by
   sorry
 

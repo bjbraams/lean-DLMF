@@ -40,7 +40,7 @@ the unit disk, the Legendre transport along paths, and the `ζ`-form of `𝑸^μ
 * `conicalQHat_boundary`: DLMF 14.23.7, corrected.
 * `legendreTransport_exists`, `legendreTransport_unique`: existence of the transport on a
   compact path avoiding `±1`, and uniqueness.
-* `legFS_olverQ_eq_G`: the `ζ`-form of `𝑸^μ_ν`, the complex continuation of DLMF 14.19.3.
+* `OlverQZetaForm.olverQ_eq_rhs`: the `ζ`-form of `𝑸^μ_ν`, the complex continuation of DLMF 14.19.3.
 
 ## Implementation notes
 
@@ -864,12 +864,13 @@ theorem legendreTransport_unique (ν μ a b : ℂ) (γ : ℝ → ℂ) (hγ : Con
 
 /-- The right side of the `ζ`-form of `𝑸^μ_ν`:
 `√π (1-w²)^μ w^{ν+1} 𝐅(μ+1/2, ν+μ+1; ν+3/2; w²)`. -/
-def legFS_G (ν μ w : ℂ) : ℂ :=
+def OlverQZetaForm.rhs (ν μ w : ℂ) : ℂ :=
   Real.sqrt π * (1 - w^2)^μ * w^(ν+1) * regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (w^2)
 
-/-- `legFS_G ν μ` is analytic at `w` when `w ∉ (-∞, 0]` and `1 - w² ∉ (-∞, 0]`. -/
-theorem legFS_G_analyticAt (ν μ : ℂ) {w : ℂ} (hw : w ∈ slitPlane) (hw2 : 1 - w^2 ∈ slitPlane) :
-    AnalyticAt ℂ (legFS_G ν μ) w := by
+/-- `OlverQZetaForm.rhs ν μ` is analytic at `w` when `w ∉ (-∞, 0]` and `1 - w² ∉ (-∞, 0]`. -/
+theorem OlverQZetaForm.rhs_analyticAt (ν μ : ℂ) {w : ℂ} (hw : w ∈ slitPlane)
+    (hw2 : 1 - w^2 ∈ slitPlane) :
+    AnalyticAt ℂ (OlverQZetaForm.rhs ν μ) w := by
   have hF : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (w^2)) w :=
     (analyticAt_regularizedGaussHG _ _ _ (show w^2 ∈ cutPlane from hw2)).comp_of_eq
       (f := fun w : ℂ => w^2) (by fun_prop) rfl
@@ -879,7 +880,7 @@ theorem legFS_G_analyticAt (ν μ : ℂ) {w : ℂ} (hw : w ∈ slitPlane) (hw2 :
   exact ((analyticAt_const.mul h1).mul h2).mul hF
 
 /-- `1 - w² ∈ slitPlane` for `|w| < 1`. -/
-theorem legFS_one_sub_sq_mem {w : ℂ} (hw : ‖w‖ < 1) : 1 - w^2 ∈ slitPlane := by
+theorem OlverQZetaForm.one_sub_sq_mem {w : ℂ} (hw : ‖w‖ < 1) : 1 - w^2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]; left
   have : (w^2).re ≤ ‖w‖^2 := by rw [← norm_pow]; exact re_le_norm _
   simp only [sub_re, one_re]
@@ -887,12 +888,14 @@ theorem legFS_one_sub_sq_mem {w : ℂ} (hw : ‖w‖ < 1) : 1 - w^2 ∈ slitPlan
 
 /-- The `ζ`-form of `𝑸^μ_ν` (the complex continuation of DLMF 14.19.3):
 `𝑸^μ_ν(z) = √π (1-ζ²)^μ ζ^{ν+1} 𝐅(μ+1/2, ν+μ+1; ν+3/2; ζ²)`, `ζ = z - √(z²-1)`, on `ℂ ∖ (-∞, 1]`. -/
-theorem legFS_olverQ_eq_G (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    olverQ ν μ z = legFS_G ν μ (legInt_zeta z) := by
+theorem OlverQZetaForm.olverQ_eq_rhs (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    olverQ ν μ z = OlverQZetaForm.rhs ν μ (ExteriorIntegral.invJoukowski z) := by
   set D : Set ℂ := {w : ℂ | w-1 ∈ slitPlane}
-  have hg : AnalyticOnNhd ℂ (fun w => legFS_G ν μ (legInt_zeta w)) D := fun w hw =>
-    (legFS_G_analyticAt ν μ (legInt_zeta_mem_slitPlane hw)
-      (legFS_one_sub_sq_mem (legInt_norm_zeta_lt_one hw))).comp (legInt_zeta_analyticAt hw)
+  have hg : AnalyticOnNhd ℂ (fun w => OlverQZetaForm.rhs ν μ (ExteriorIntegral.invJoukowski w))
+      D := fun w hw =>
+    (OlverQZetaForm.rhs_analyticAt ν μ (ExteriorIntegral.invJoukowski_mem_slitPlane hw)
+      (OlverQZetaForm.one_sub_sq_mem (ExteriorIntegral.norm_invJoukowski_lt_one hw))).comp
+          (ExteriorIntegral.invJoukowski_analyticAt hw)
   have h2 : ((2 : ℝ) : ℂ) ∈ D := by show ((2 : ℝ) : ℂ) - 1 ∈ slitPlane; norm_num
   refine (olverQ_analytic ν μ).eqOn_of_preconnected_of_frequently_eq hg
     isPreconnected_sub_one_mem_slitPlane h2 ?_ hz
@@ -908,13 +911,13 @@ theorem legFS_olverQ_eq_G (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   set ξ := Real.arcosh t with hξ
   have hξ0 : 0 < ξ := Real.arcosh_pos ht1
   have hc : Real.cosh ξ = t := Real.cosh_arcosh ht1.le
-  have hζ : legInt_zeta t = ((Real.exp (-ξ) : ℝ) : ℂ) := by
-    rw [legInt_zeta_real ht1, Real.exp_neg, hξ, Real.exp_arcosh ht1.le,
+  have hζ : ExteriorIntegral.invJoukowski t = ((Real.exp (-ξ) : ℝ) : ℂ) := by
+    rw [ExteriorIntegral.invJoukowski_real ht1, Real.exp_neg, hξ, Real.exp_arcosh ht1.le,
       Real.add_sqrt_self_sq_sub_one_inv ht1.le]
   have key := toroidalQ_hypergeometric (ν+1/2) μ hξ0
   rw [hc, show ν+1/2-1/2 = ν by ring] at key
-  show olverQ ν μ t = legFS_G ν μ (legInt_zeta t)
-  rw [key, hζ, legFS_G]
+  show olverQ ν μ t = OlverQZetaForm.rhs ν μ (ExteriorIntegral.invJoukowski t)
+  rw [key, hζ, OlverQZetaForm.rhs]
   have he2 : ((Real.exp (-ξ) : ℝ) : ℂ)^2 = ((Real.exp (-2*ξ) : ℝ) : ℂ) := by
     rw [← ofReal_pow, ← Real.exp_nat_mul]; push_cast; ring_nf
   have hpow : ((Real.exp (-ξ) : ℝ) : ℂ)^(ν+1) = (exp ((ν+1/2+1/2)*ξ))⁻¹ := by

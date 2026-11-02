@@ -43,9 +43,9 @@ def staircaseAdd (k s : ℕ) : List ℕ → List ℕ
   | a :: t => (a + (k * t.length + s)) :: staircaseAdd k s t
 
 /-- Every entry dominates the staircase. -/
-def StaircaseGood (k s : ℕ) : List ℕ → Prop
+def DominatesStaircase (k s : ℕ) : List ℕ → Prop
   | [] => True
-  | a :: t => k * t.length + s ≤ a ∧ StaircaseGood k s t
+  | a :: t => k * t.length + s ≤ a ∧ DominatesStaircase k s t
 
 /-- Identity under the stated parameter and domain assumptions: `(staircaseSub k s l).length =
 l.length`. -/
@@ -73,12 +73,12 @@ private lemma staircaseSub_staircaseAdd (k s : ℕ) (l : List ℕ) : staircaseSu
 
 /-- Identity under the stated parameter and domain assumptions:
 `staircaseAdd k s (staircaseSub k s l) = l`. -/
-private lemma staircaseAdd_staircaseSub (k s : ℕ) {l : List ℕ} (h : StaircaseGood k s l) :
+private lemma staircaseAdd_staircaseSub (k s : ℕ) {l : List ℕ} (h : DominatesStaircase k s l) :
     staircaseAdd k s (staircaseSub k s l) = l := by
   induction l with
   | nil => rfl
   | cons a t ih =>
-    simp only [StaircaseGood] at h
+    simp only [DominatesStaircase] at h
     simp only [staircaseSub, staircaseAdd, length_staircaseSub, ih h.2, List.cons.injEq, and_true]
     omega
 
@@ -96,24 +96,25 @@ private lemma sum_staircaseAdd (k s : ℕ) (l : List ℕ) :
 
 /-- Identity under the stated parameter and domain assumptions: `(staircaseSub k s l).sum + (k *
 l.length.choose 2 + s * l.length) = l.sum`. -/
-private lemma sum_staircaseSub_add (k s : ℕ) {l : List ℕ} (h : StaircaseGood k s l) :
+private lemma sum_staircaseSub_add (k s : ℕ) {l : List ℕ} (h : DominatesStaircase k s l) :
     (staircaseSub k s l).sum + (k * l.length.choose 2 + s * l.length) = l.sum := by
   have := sum_staircaseAdd k s (staircaseSub k s l)
   rw [staircaseAdd_staircaseSub k s h, length_staircaseSub] at this
   exact this.symm
 
-/-- The stated relation follows from the given hypotheses: `StaircaseGood k s (staircaseAdd k s l)`.
+/-- The stated relation follows from the given hypotheses:
+`DominatesStaircase k s (staircaseAdd k s l)`.
 -/
-private lemma staircaseGood_staircaseAdd (k s : ℕ) (l : List ℕ) : StaircaseGood k s
+private lemma dominatesStaircase_staircaseAdd (k s : ℕ) (l : List ℕ) : DominatesStaircase k s
     (staircaseAdd k s l) := by
   induction l with
   | nil => trivial
   | cons a t ih => exact ⟨by simp, ih⟩
 
-/-- The stated relation follows from the given hypotheses: `StaircaseGood k s l`. -/
-private lemma staircaseGood_of_isChain (k s : ℕ) {l : List ℕ}
+/-- The stated relation follows from the given hypotheses: `DominatesStaircase k s l`. -/
+private lemma dominatesStaircase_of_isChain (k s : ℕ) {l : List ℕ}
     (hc : l.IsChain (fun a b => b + k ≤ a))
-    (hs : ∀ x ∈ l, s ≤ x) : StaircaseGood k s l := by
+    (hs : ∀ x ∈ l, s ≤ x) : DominatesStaircase k s l := by
   induction l with
   | nil => trivial
   | cons a t ih =>
@@ -266,10 +267,10 @@ private lemma le_of_mem_staircaseAdd (k s : ℕ) {L : List ℕ} {x : ℕ}
 
 /-- The decreasing list of parts of a partition with parts differing by at least `k`, all
 at least `s`, and `m` parts. -/
-private lemma staircaseGood_partsSortDesc (k s : ℕ) {m n : ℕ} (p : n.Partition)
+private lemma dominatesStaircase_partsSortDesc (k s : ℕ) {m n : ℕ} (p : n.Partition)
     (hd : ∀ a ∈ p.parts, ∀ b ∈ p.parts.erase a, a + k ≤ b ∨ b + k ≤ a)
     (hmin : ∀ i ∈ p.parts, s ≤ i) (hc : p.parts.card = m) :
-    StaircaseGood k s (partsSortDesc p) ∧ (partsSortDesc p).length = m ∧
+    DominatesStaircase k s (partsSortDesc p) ∧ (partsSortDesc p).length = m ∧
       (staircaseSub k s (partsSortDesc p)).sum + (k * m.choose 2 + s * m) = n ∧
       (staircaseSub k s (partsSortDesc p)).Pairwise (· ≥ ·) := by
   set l := partsSortDesc p
@@ -279,7 +280,8 @@ private lemma staircaseGood_partsSortDesc (k s : ℕ) {m n : ℕ} (p : n.Partiti
     have ha' : a ∈ p.parts := by rw [← hcoe]; exact Multiset.mem_coe.mpr ha
     have hb' : b ∈ p.parts.erase a := by rw [← hcoe, Multiset.coe_erase]; exact hb
     exact hd a ha' b hb'
-  have hG : StaircaseGood k s l := staircaseGood_of_isChain k s hP.isChain fun x hx => hmin x (by
+  have hG : DominatesStaircase k s l :=
+      dominatesStaircase_of_isChain k s hP.isChain fun x hx => hmin x (by
     rw [← hcoe]; exact Multiset.mem_coe.mpr hx)
   have hlen : l.length = m := by rw [← hc, ← hcoe, Multiset.coe_card]
   have hsum := sum_staircaseSub_add k s hG
@@ -298,11 +300,11 @@ private lemma card_partsDiffer_eq_card_card_parts_le (k s m : ℕ) (hs : 1 ≤ s
       #{q : N.Partition | q.parts.card ≤ m} := by
   have hsrc : ∀ p : n.Partition, (∀ a ∈ p.parts, ∀ b ∈ p.parts.erase a, a + k ≤ b ∨ b + k ≤ a) →
       (∀ i ∈ p.parts, s ≤ i) → p.parts.card = m →
-      StaircaseGood k s (partsSortDesc p) ∧ (partsSortDesc p).length = m ∧
+      DominatesStaircase k s (partsSortDesc p) ∧ (partsSortDesc p).length = m ∧
         (staircaseSub k s (partsSortDesc p)).sum = N ∧
         (staircaseSub k s (partsSortDesc p)).Pairwise (· ≥ ·) := by
     intro p hd hmin hc
-    obtain ⟨hG, hlen, hsum, hpw⟩ := staircaseGood_partsSortDesc k s p hd hmin hc
+    obtain ⟨hG, hlen, hsum, hpw⟩ := dominatesStaircase_partsSortDesc k s p hd hmin hc
     exact ⟨hG, hlen, by omega, hpw⟩
   -- facts about the padded list of a target partition
   have htgt : ∀ q : N.Partition, q.parts.card ≤ m →
@@ -379,7 +381,7 @@ private lemma card_partsDiffer_eq_zero (k s m : ℕ) {n : ℕ} (h : n < k * m.ch
         (∀ i ∈ p.parts, s ≤ i) ∧ p.parts.card = m} = 0 := by
   rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff]
   rintro p - ⟨hd, hmin, hc⟩
-  have := (staircaseGood_partsSortDesc k s p hd hmin hc).2.2.1
+  have := (dominatesStaircase_partsSortDesc k s p hd hmin hc).2.2.1
   omega
 
 /-- Partitions of `n` with parts differing by at least `k`, all at least `s ≥ 1`:

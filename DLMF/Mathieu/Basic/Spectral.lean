@@ -29,7 +29,7 @@ Table 28.2.1.
   problems of Table 28.2.1 are regular Sturm–Liouville problems with simple real eigenvalues, so
   the `k`-th smallest root is DLMF's `a_{2k}`, `a_{2k+1}`, `b_{2k+1}`, `b_{2k+2}`.
 * The existence of these roots is `mathieuSpecA_exists`, `mathieuSpecB_exists` in
-  `DLMF.Mathieu.SpectralExistence`, proved by Sturm–Liouville arguments
+  `DLMF.Mathieu.Basic.SpectralExistence`, proved by Sturm–Liouville arguments
   (`DLMFMathlib/Analysis/ODE/SturmSpectrum.lean`).
 * `b_0` is not defined by DLMF; `mathieuB 0 q = 0` is a junk value.
 -/

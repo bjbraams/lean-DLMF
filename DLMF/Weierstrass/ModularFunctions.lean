@@ -463,16 +463,6 @@ theorem kleinJ_special : kleinJ upperHalfPlaneI = 1 ∧ kleinJ upperHalfPlaneRho
       linear_combination hρ2]
     simp
 
-/-- DLMF 23.17.3: `η(i) = Γ(1/4)/(2π^{3/4})` and
-`η(e^{πi/3}) = 3^{1/8}Γ(1/3)^{3/2}e^{πi/24}/(2π)`. -/
-@[dlmf 23.17.E3]
-theorem eta_special :
-    η I = ((Real.Gamma (1 / 4) / (2 * π ^ (3 / 4 : ℝ)) : ℝ) : ℂ) ∧
-      η (cexp (π * I / 3)) =
-        ((3 ^ (1 / 8 : ℝ) * Real.Gamma (1 / 3) ^ (3 / 2 : ℝ) / (2 * π) : ℝ) : ℂ) *
-        cexp (π * I / 24) := by
-  sorry
-
 /-- Tail bound for a lacunary `q`-series `∑ₙ q^{e(n)}`: dropping the finitely many terms with
 `e(n) < N` leaves `O(‖q‖^N)` for `‖q‖ ≤ 1/2`. -/
 private lemma norm_tsum_pow_sub_sum_le {e : ℤ → ℕ} {N : ℕ} (F : Finset ℤ)
@@ -1235,5 +1225,140 @@ theorem latticeDiscriminant_eq_eta (τ : ℍ) :
   have : η (τ : ℂ) ^ 24 = discriminant τ := rfl
   rw [this, hΔ]
   ring
+
+open ModularForm Filter in
+/-- DLMF 23.17.3: `η(i) = Γ(1/4)/(2π^{3/4})` and
+`η(e^{πi/3}) = 3^{1/8}Γ(1/3)^{3/2}e^{πi/24}/(2π)`. -/
+@[dlmf 23.17.E3]
+theorem eta_special :
+    η I = ((Real.Gamma (1 / 4) / (2 * π ^ (3 / 4 : ℝ)) : ℝ) : ℂ) ∧
+      η (cexp (π * I / 3)) =
+        ((3 ^ (1 / 8 : ℝ) * Real.Gamma (1 / 3) ^ (3 / 2 : ℝ) / (2 * π) : ℝ) : ℂ) *
+        cexp (π * I / 24) := by
+  have hπ := Real.pi_pos
+  constructor
+  · set H := HalfPeriods.ofTau (1 / 2) (by norm_num) upperHalfPlaneI
+    have hL : H.IsLemniscatic := ⟨by simp [H], by simp [H], by simp [H, upperHalfPlaneI]; ring⟩
+    obtain ⟨hg2, hg3⟩ := hL.invariants
+    have hω : H.ω₁ = 1 / 2 := by simp [H]
+    have hΔ := latticeDiscriminant_eq_eta upperHalfPlaneI
+    obtain ⟨him, hre⟩ := eta_pos_of_re_eq_zero upperHalfPlaneI (by simp [upperHalfPlaneI])
+    change latticeDiscriminant H.periodPair = _ at hΔ
+    simp only [latticeDiscriminant] at hΔ
+    change H.g₂ ^ 3 - 27 * H.g₃ ^ 2 = _ at hΔ
+    rw [hg2, hg3, hω] at hΔ
+    have hI : ((upperHalfPlaneI : ℍ) : ℂ) = I := rfl
+    rw [hI] at hΔ him hre
+    set x := (η I).re
+    have hx : η I = (x : ℂ) := Complex.ext rfl (by simp [him])
+    rw [hx] at hΔ ⊢
+    congr 1
+    have hG := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 1 / 4)
+    have hp : 0 < π ^ (3 / 4 : ℝ) := Real.rpow_pos_of_pos hπ _
+    have hp24 : (π ^ (3 / 4 : ℝ)) ^ 24 = π ^ 18 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul hπ.le]; norm_num
+    refine (pow_left_inj₀ hre.le (by positivity) (by norm_num : (24 : ℕ) ≠ 0)).mp ?_
+    have h24 : x ^ 24 = Real.Gamma (1 / 4) ^ 24 / (2 ^ 24 * π ^ 18) := by
+      have : ((x ^ 24 : ℝ) : ℂ) = ((Real.Gamma (1 / 4) ^ 24 / (2 ^ 24 * π ^ 18) : ℝ) : ℂ) := by
+        push_cast
+        have hπc : (π : ℂ) ≠ 0 := by exact_mod_cast hπ.ne'
+        have h2π : (2 * (π : ℂ)) ^ 12 ≠ 0 := pow_ne_zero 12 (mul_ne_zero two_ne_zero hπc)
+        rw [eq_div_iff (mul_ne_zero (pow_ne_zero _ two_ne_zero) (pow_ne_zero _ hπc))]
+        apply mul_left_cancel₀ h2π
+        rw [show (2 * (π : ℂ)) ^ 12 * ((x : ℂ) ^ 24 * (2 ^ 24 * (π : ℂ) ^ 18)) =
+          ((2 * (π : ℂ)) ^ 12 * (x : ℂ) ^ 24) * (2 ^ 24 * (π : ℂ) ^ 18) by ring, ← hΔ]
+        field_simp
+        ring
+      exact_mod_cast this
+    rw [h24, div_pow, mul_pow, hp24]
+  · set ρ := cexp (π * I / 3) with hρ
+    set H := HalfPeriods.ofTau (1 / 2) (by norm_num) upperHalfPlaneRho
+    have h3 : H.ω₃ = ρ * H.ω₁ := by simp [H, upperHalfPlaneRho, hρ]; ring
+    have hE : H.IsEquianharmonic := ⟨by simp [H], by simp [H], h3⟩
+    obtain ⟨hg2, hg3⟩ := hE.invariants
+    have hω : H.ω₁ = 1 / 2 := by simp [H]
+    have hΔ := latticeDiscriminant_eq_eta upperHalfPlaneRho
+    change latticeDiscriminant H.periodPair = _ at hΔ
+    simp only [latticeDiscriminant] at hΔ
+    change H.g₂ ^ 3 - 27 * H.g₃ ^ 2 = _ at hΔ
+    rw [hg2, hg3, hω] at hΔ
+    have hR : ((upperHalfPlaneRho : ℍ) : ℂ) = ρ := rfl
+    rw [hR] at hΔ
+    obtain ⟨hm, he⟩ := eta_hasProd upperHalfPlaneRho
+    rw [hR] at hm he
+    have hρv : ρ = (1 + Real.sqrt 3 * I) / 2 := by rw [hρ]; exact HalfPeriods.exp_pi_I_div_three_eq
+    set r : ℝ := Real.exp (-(π * Real.sqrt 3)) with hr
+    have hr0 : 0 < r := Real.exp_pos _
+    have hr1 : r < 1 := Real.exp_lt_one_iff.mpr (by
+      have : 0 < π * Real.sqrt 3 := by positivity
+      linarith)
+    have hq2 : cexp (π * I * ρ) ^ 2 = ((-r : ℝ) : ℂ) := by
+      rw [← Complex.exp_nat_mul, hρv, hr, ofReal_neg, ofReal_exp,
+        show ((2 : ℕ) : ℂ) * (π * I * ((1 + Real.sqrt 3 * I) / 2)) =
+          π * I + ((-(π * Real.sqrt 3) : ℝ) : ℂ) by push_cast; ring_nf; rw [I_sq]; ring,
+        Complex.exp_add, Complex.exp_pi_mul_I]
+      ring
+    have hfac : ∀ n : ℕ, 1 - cexp (π * I * ρ) ^ (2 * (n + 1)) =
+        ((1 - (-r) ^ (n + 1) : ℝ) : ℂ) := fun n => by
+      rw [pow_mul, hq2]; push_cast; ring
+    have hgpos : ∀ n : ℕ, 0 < 1 - (-r) ^ (n + 1) := fun n => by
+      have h1 : (-r) ^ (n + 1) ≤ r ^ (n + 1) := by
+        calc (-r) ^ (n + 1) ≤ |(-r) ^ (n + 1)| := le_abs_self _
+          _ = r ^ (n + 1) := by rw [abs_pow, abs_neg, abs_of_pos hr0]
+      have h2 : r ^ (n + 1) < 1 := pow_lt_one₀ hr0.le hr1 (by omega)
+      linarith
+    -- the product is a nonnegative real
+    set P := ∏' n : ℕ, (1 - cexp (π * I * ρ) ^ (2 * (n + 1)))
+    have hS : IsClosed {z : ℂ | z.im = 0 ∧ 0 ≤ z.re} :=
+      (isClosed_eq Complex.continuous_im continuous_const).inter
+        (isClosed_le continuous_const Complex.continuous_re)
+    have hPS : P.im = 0 ∧ 0 ≤ P.re := by
+      refine hS.mem_of_tendsto hm.tendsto_prod_nat (Eventually.of_forall fun N => ?_)
+      have hN : (∏ n ∈ Finset.range N, (1 - cexp (π * I * ρ) ^ (2 * (n + 1)))) =
+          ((∏ n ∈ Finset.range N, (1 - (-r) ^ (n + 1)) : ℝ) : ℂ) := by
+        rw [Complex.ofReal_prod]; exact Finset.prod_congr rfl fun n _ => hfac n
+      rw [Set.mem_ofPred_eq, hN, ofReal_im, ofReal_re]
+      exact ⟨rfl, (Finset.prod_pos fun n _ => hgpos n).le⟩
+    have hexp : cexp (π * I * ρ / 12) =
+        cexp (π * I / 24) * ((Real.exp (-(π * Real.sqrt 3) / 24) : ℝ) : ℂ) := by
+      rw [ofReal_exp, ← Complex.exp_add, hρv]; congr 1; push_cast; ring_nf; rw [I_sq]; ring
+    set w : ℂ := ((Real.exp (-(π * Real.sqrt 3) / 24) : ℝ) : ℂ) * P with hw
+    have hηw : η ρ = cexp (π * I / 24) * w := by rw [he, hexp, hw]; ring
+    have hwim : w.im = 0 := by rw [hw, mul_im, ofReal_re, ofReal_im, hPS.1]; ring
+    have hwre : 0 ≤ w.re := by
+      simp only [hw, mul_re, ofReal_re, ofReal_im, zero_mul, sub_zero]
+      exact mul_nonneg (Real.exp_pos _).le hPS.2
+    have hη0 : η ρ ≠ 0 := ModularForm.eta_ne_zero (by rw [hρv]; simp)
+    set x := w.re
+    have hwx : w = (x : ℂ) := Complex.ext rfl (by simp [hwim])
+    have hx0 : x ≠ 0 := by
+      intro h0; apply hη0; rw [hηw, hwx, h0]; simp
+    have hx : 0 < x := lt_of_le_of_ne hwre (Ne.symm hx0)
+    rw [hηw, hwx, mul_comm]
+    congr 1
+    congr 1
+    have hG := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 1 / 3)
+    refine (pow_left_inj₀ hx.le (by positivity) (by norm_num : (24 : ℕ) ≠ 0)).mp ?_
+    have h24c : cexp (π * I / 24) ^ 24 = -1 := by
+      rw [← Complex.exp_nat_mul, show ((24 : ℕ) : ℂ) * (π * I / 24) = π * I by push_cast; ring,
+        Complex.exp_pi_mul_I]
+    rw [hηw, hwx, mul_pow (cexp _) (x : ℂ), h24c] at hΔ
+    have hπc : (π : ℂ) ≠ 0 := by exact_mod_cast hπ.ne'
+    have h24 : x ^ 24 = 27 * Real.Gamma (1 / 3) ^ 36 / (2 * π) ^ 24 := by
+      have : ((x ^ 24 : ℝ) : ℂ) = ((27 * Real.Gamma (1 / 3) ^ 36 / (2 * π) ^ 24 : ℝ) : ℂ) := by
+        push_cast
+        rw [eq_div_iff (pow_ne_zero _ (mul_ne_zero two_ne_zero hπc))]
+        have h2π : (2 * (π : ℂ)) ^ 12 ≠ 0 := pow_ne_zero 12 (mul_ne_zero two_ne_zero hπc)
+        apply mul_left_cancel₀ h2π
+        rw [show (2 * (π : ℂ)) ^ 12 * ((x : ℂ) ^ 24 * (2 * (π : ℂ)) ^ 24) =
+          -((2 * (π : ℂ)) ^ 12 * (-1 * (x : ℂ) ^ 24)) * (2 * (π : ℂ)) ^ 24 by ring, ← hΔ]
+        field_simp
+        ring
+      exact_mod_cast this
+    have h3 : ((3 : ℝ) ^ (1 / 8 : ℝ)) ^ 24 = 27 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
+    have hG3 : (Real.Gamma (1 / 3) ^ (3 / 2 : ℝ)) ^ 24 = Real.Gamma (1 / 3) ^ 36 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul hG.le]; norm_num
+    rw [h24, div_pow, mul_pow (3 ^ (1 / 8 : ℝ) : ℝ), h3, hG3]
 
 end DLMF.Weierstrass

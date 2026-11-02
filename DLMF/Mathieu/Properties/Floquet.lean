@@ -170,7 +170,7 @@ private lemma re_arccosPrincipal_div_pi_mem_Icc (c : ℂ) :
       (DLMF.Elementary.arccosPrincipal c / π).re ≤ 1 := by
   set s := Complex.sqrt (1 - c ^ 2)
   set w := s + I * c
-  have hs : s ^ 2 = 1 - c ^ 2 := DLMF.Elementary.trig_sqrt_sq _
+  have hs : s ^ 2 = 1 - c ^ 2 := DLMF.Elementary.Trigonometric.complexSqrt_sq _
   have hprod : w * (s - I * c) = 1 := by
     simp only [w]; linear_combination hs - c ^ 2 * Complex.I_sq
   have hw0 : w ≠ 0 := left_ne_zero_of_mul_eq_one hprod

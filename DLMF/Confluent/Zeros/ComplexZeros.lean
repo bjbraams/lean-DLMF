@@ -39,7 +39,7 @@ the sector `|ph z| < π` and on the positive real axis (DLMF §13.9).
 DLMF's `T(a,b)` in 13.9.11–13.9.12 counts zeros in the sector, not positive zeros; the counts
 are stated with DLMF's hypotheses `b ≤ 1`, `a < 0` and nonintegral `a`, `b`, `a-b+1`. The
 positive-zero count 13.9.14 uses Kummer's transformation and the Sturm-comparison count
-`kzt_U_posZeros_count`.
+`KummerUZeroCount.realU_posZeros_count`.
 -/
 
 @[expose] public section
@@ -57,22 +57,22 @@ namespace DLMF.Confluent
 /-! ### Large complex zeros (DLMF 13.9.9)
 
 The zeros are located by comparing `𝐌(a,b,·)` on small circles with the exponential model
-`A (exp (z - w) - 1)` (`DLMF.erfZ_exists_zero_of_expModel`, a Rouché argument), using the
-one-term sector expansion `regularizedHGFun_poincare_sector` (DLMF 13.7.2). -/
+`A (exp (z - w) - 1)` (`DLMF.Confluent.ErfZeros.exists_zero_of_expModel`, a Rouché argument), using
+the one-term sector expansion `regularizedHGFun_poincare_sector` (DLMF 13.7.2). -/
 
 section LargeZeros
 
 open Asymptotics Metric
 
 /-- `log (t i) = log t + (π/2) i` for `t > 0`. -/
-theorem kumZ_log_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
+theorem KummerZeros.log_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
     log ((t : ℂ) * I) = Real.log t + (π / 2 : ℝ) * I := by
   apply Complex.ext
   · simp [log_re, abs_of_pos ht]
   · rw [log_im, arg_real_mul I ht, arg_I]; simp
 
 /-- `log` is `2/t`-Lipschitz on the disc of radius `t/2` about `t i`. -/
-theorem kumZ_norm_log_sub_le {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : ‖z - t * I‖ ≤ t / 2) :
+theorem KummerZeros.norm_log_sub_le {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : ‖z - t * I‖ ≤ t / 2) :
     ‖log z - log ((t : ℂ) * I)‖ ≤ 2 / t * ‖z - t * I‖ := by
   have hmem : ∀ u ∈ closedBall ((t : ℂ) * I) (t / 2), t / 2 ≤ u.im := by
     intro u hu
@@ -94,13 +94,13 @@ theorem kumZ_norm_log_sub_le {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : ‖z - t * I
       _ = 2 / t := by field_simp
 
 /-- Factorization `z^s = u^s exp(s (log z - log u))`. -/
-theorem kumZ_cpow_eq {u z : ℂ} (hu : u ≠ 0) (hz : z ≠ 0) (s : ℂ) :
+theorem KummerZeros.cpow_eq {u z : ℂ} (hu : u ≠ 0) (hz : z ≠ 0) (s : ℂ) :
     z ^ s = u ^ s * exp (s * (log z - log u)) := by
   rw [cpow_def_of_ne_zero hz, cpow_def_of_ne_zero hu, ← Complex.exp_add]
   ring_nf
 
 /-- Explicit form of the sector Poincaré bound for `𝐌` (DLMF 13.7.2, one term). -/
-theorem kumZ_sector_bound (a b : ℂ) :
+theorem KummerZeros.sector_bound (a b : ℂ) :
     ∃ K₁ > 0, ∃ R : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → π / 4 ≤ z.arg → z.arg ≤ π - π / 4 →
       ‖regularizedHGFun {a} {b} z -
         (exp z * z ^ (a - b) / Gamma a + exp (π * I * a) * z ^ (-a) / Gamma (b - a))‖ ≤
@@ -117,7 +117,7 @@ theorem kumZ_sector_bound (a b : ℂ) :
     (norm_nonneg _))] using this
 
 /-- `‖exp ζ‖ ≤ 3` for `‖ζ‖ ≤ 1`. -/
-theorem kumZ_norm_exp_le_three {ζ : ℂ} (h : ‖ζ‖ ≤ 1) : ‖exp ζ‖ ≤ 3 := by
+theorem KummerZeros.norm_exp_le_three {ζ : ℂ} (h : ‖ζ‖ ≤ 1) : ‖exp ζ‖ ≤ 3 := by
   rw [Complex.norm_exp]
   have := Real.exp_one_lt_d9
   have h1 : ζ.re ≤ 1 := (re_le_norm ζ).trans h
@@ -127,13 +127,13 @@ theorem kumZ_norm_exp_le_three {ζ : ℂ} (h : ‖ζ‖ ≤ 1) : ‖exp ζ‖ �
 /-- Core localization for the large zeros of `M(a,b,·)` in the upper half-plane: every exact
 solution `w` of the model equation `exp w = -(e^{πia} Γ(a)/Γ(b-a)) (t i)^{b-2a}` with
 `‖w - t i‖ ≤ K log t` has a zero of `M(a,b,·)` within `C log t / t`, for all large `t`. -/
-theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a ≠ -k)
+theorem KummerZeros.core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a ≠ -k)
     (hba : ∀ k : ℕ, b - a ≠ -k) (K : ℝ) :
     ∃ C : ℝ, ∀ᶠ t : ℝ in atTop, ∀ w : ℂ,
       exp w = -(exp (π * I * a) * Gamma a / Gamma (b - a)) * ((t : ℂ) * I) ^ (b - 2 * a) →
       ‖w - t * I‖ ≤ K * Real.log t →
       ∃ z, ‖z - w‖ ≤ C * Real.log t / t ∧ kummerM a b z = 0 := by
-  obtain ⟨K₁, hK₁, R, hR⟩ := kumZ_sector_bound a b
+  obtain ⟨K₁, hK₁, R, hR⟩ := KummerZeros.sector_bound a b
   have hGa : Gamma a ≠ 0 := Gamma_ne_zero ha
   have hGba : Gamma (b - a) ≠ 0 := Gamma_ne_zero hba
   have hGb : Gamma b ≠ 0 := Gamma_ne_zero hb
@@ -193,7 +193,7 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
   suffices hmain : ∀ z ∈ sphere w ρ,
       ‖kummerM a b z / Gamma b - -B * (exp (z - w) - 1)‖ < ‖-B‖ * ρ / 2 by
     obtain ⟨z, hz, hz0⟩ :=
-      DLMF.erfZ_exists_zero_of_expModel hρpos hρ2 (neg_ne_zero.mpr hB0) hanM hmain
+      DLMF.Confluent.ErfZeros.exists_zero_of_expModel hρpos hρ2 (neg_ne_zero.mpr hB0) hanM hmain
     refine ⟨z, (mem_ball_iff_norm.mp hz).le, ?_⟩
     simpa [hGb] using hz0
   intro z hz
@@ -213,7 +213,7 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
     nlinarith only [this, h3, hzu, ht0]
   set ε : ℂ := log z - log u with hε
   have hεb : ‖ε‖ ≤ 2 * (1 + |K|) * lam := by
-    have := kumZ_norm_log_sub_le ht0 hzu2
+    have := KummerZeros.norm_log_sub_le ht0 hzu2
     calc ‖ε‖ ≤ 2 / t * ‖z - u‖ := this
       _ ≤ 2 / t * ((1 + |K|) * Real.log t) := by gcongr
       _ = 2 * (1 + |K|) * lam := by rw [hlam]; ring
@@ -243,7 +243,7 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
     intro h; rw [h, norm_zero] at hzn; linarith only [hzn, ht0]
   have harg : |z.arg - π / 2| ≤ 1 / 2 := by
     have h1 : ε.im = z.arg - π / 2 := by
-      rw [hε, sub_im, log_im, hu, kumZ_log_ofReal_mul_I ht0]; simp
+      rw [hε, sub_im, log_im, hu, KummerZeros.log_ofReal_mul_I ht0]; simp
     rw [← h1]
     refine (abs_im_le_norm ε).trans (hεb.trans ?_)
     nlinarith only [hηM, hM₀1, hη0]
@@ -252,8 +252,8 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
       (by rw [abs_le] at harg; linarith only [harg.1, hpi])
     (by rw [abs_le] at harg; linarith only [harg.2, hpi])
   -- algebraic identities
-  have hz1 : z ^ (a - b) = u ^ (a - b) * exp ((a - b) * ε) := kumZ_cpow_eq hu0 hz0' _
-  have hz2 : z ^ (-a) = u ^ (-a) * exp (-a * ε) := kumZ_cpow_eq hu0 hz0' _
+  have hz1 : z ^ (a - b) = u ^ (a - b) * exp ((a - b) * ε) := KummerZeros.cpow_eq hu0 hz0' _
+  have hz2 : z ^ (-a) = u ^ (-a) * exp (-a * ε) := KummerZeros.cpow_eq hu0 hz0' _
   have hz3 : z ^ (a - b - 1) = z ^ (a - b) / z := by rw [cpow_sub _ _ hz0', cpow_one]
   have hz4 : z ^ (-a - 1) = z ^ (-a) / z := by rw [cpow_sub _ _ hz0', cpow_one]
   have hu' : u ^ (a - b) * u ^ (b - 2 * a) = u ^ (-a) := by
@@ -273,11 +273,11 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
     rw [hMeq, hP1, hP2]; ring
   -- bound the model discrepancy
   have hzw1 : ‖z - w‖ ≤ 1 := by rw [hzw]; linarith only [hρ2]
-  have hexp3 := kumZ_norm_exp_le_three hzw1
+  have hexp3 := KummerZeros.norm_exp_le_three hzw1
   have hea := norm_exp_sub_one_le (x := -a * ε) (by linarith only [hεa, haη])
   have heab := norm_exp_sub_one_le (x := (a - b) * ε) (by linarith only [hεab, habη])
-  have hexpab3 := kumZ_norm_exp_le_three (ζ := (a - b) * ε) (by linarith only [hεab, habη])
-  have hexpa3 := kumZ_norm_exp_le_three (ζ := -a * ε) (by linarith only [hεa, haη])
+  have hexpab3 := KummerZeros.norm_exp_le_three (ζ := (a - b) * ε) (by linarith only [hεab, habη])
+  have hexpa3 := KummerZeros.norm_exp_le_three (ζ := -a * ε) (by linarith only [hεa, haη])
   have hmodel : ‖B * ((exp (-a * ε) - 1) - exp (z - w) * (exp ((a - b) * ε) - 1))‖ ≤
       ‖B‖ * (E * η) := by
     rw [norm_mul]
@@ -331,14 +331,14 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
         linarith only [hXl, hlampos]
 
 /-- `‖log Y‖ ≤ |log ‖Y‖| + π`. -/
-theorem kumZ_norm_log_le (Y : ℂ) : ‖log Y‖ ≤ |Real.log ‖Y‖| + π := by
+theorem KummerZeros.norm_log_le (Y : ℂ) : ‖log Y‖ ≤ |Real.log ‖Y‖| + π := by
   refine (norm_le_abs_re_add_abs_im _).trans ?_
   rw [log_re, log_im]
   gcongr
   exact abs_arg_le_pi Y
 
 /-- The distance of the model zero from the ray point grows at most logarithmically. -/
-theorem kumZ_dist_bound (G v c α : ℂ) (hG : G ≠ 0) (hv : v ≠ 0) :
+theorem KummerZeros.dist_bound (G v c α : ℂ) (hG : G ≠ 0) (hv : v ≠ 0) :
     ∃ K : ℝ, ∀ t : ℝ, Real.exp 1 ≤ t → ‖α + log (G * ((t : ℂ) * v) ^ c)‖ ≤ K * Real.log t := by
   refine ⟨‖α‖ + |Real.log ‖G‖| + |c.re| + |c.re| * |Real.log ‖v‖| + |arg v * c.im| + π,
     fun t ht => ?_⟩
@@ -358,7 +358,7 @@ theorem kumZ_dist_bound (G v c α : ℂ) (hG : G ≠ 0) (hv : v ≠ 0) :
       (Real.exp_pos _).ne', Real.log_rpow (by positivity), Real.log_exp,
       Real.log_mul ht0.ne' hvn.ne']
     ring
-  have h1 := kumZ_norm_log_le (G * ((t : ℂ) * v) ^ c)
+  have h1 := KummerZeros.norm_log_le (G * ((t : ℂ) * v) ^ c)
   rw [hlog] at h1
   have h2 : |Real.log ‖G‖ + c.re * (Real.log t + Real.log ‖v‖) - arg v * c.im| ≤
       |Real.log ‖G‖| + |c.re| * Real.log t + |c.re| * |Real.log ‖v‖| + |arg v * c.im| := by
@@ -386,7 +386,7 @@ theorem kumZ_dist_bound (G v c α : ℂ) (hG : G ≠ 0) (hv : v ≠ 0) :
     _ ≤ _ := by nlinarith
 
 /-- `log (-(t i)) = log t - (π/2) i` for `t > 0`. -/
-theorem kumZ_log_neg_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
+theorem KummerZeros.log_neg_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
     log (-((t : ℂ) * I)) = Real.log t - (π / 2 : ℝ) * I := by
   have h : -((t : ℂ) * I) = (t : ℂ) * (-I) := by ring
   apply Complex.ext
@@ -394,7 +394,7 @@ theorem kumZ_log_neg_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
   · rw [h, log_im, arg_real_mul _ ht, arg_neg_I]; simp
 
 /-- The Landau scale: `log (2πn) / (2πn) = O(n⁻¹ log n)`. -/
-theorem kumZ_scale_isBigO (C : ℝ) :
+theorem KummerZeros.scale_isBigO (C : ℝ) :
     (fun n : ℕ => C * Real.log (2 * n * π) / (2 * n * π)) =O[atTop]
       (fun n : ℕ => ‖(n : ℂ)⁻¹ * log n‖) := by
   refine IsBigO.of_bound (|C| * 4) ?_
@@ -451,8 +451,8 @@ theorem kummerM_large_zeros (a b : ℂ) (sign : Bool) (ha : ∀ k : ℕ, a ≠ -
   suffices h : ∃ C : ℝ, ∀ᶠ n : ℕ in atTop, ∃ z, ‖z - F n‖ ≤
       C * Real.log (2 * n * π) / (2 * n * π) ∧ kummerM a b z = 0 by
     obtain ⟨C, hC⟩ := h
-    obtain ⟨r, hr, hr0⟩ := Complex.zloc_eventually_exists_zero_isBigO
-      (f := fun _ => kummerM a b) (w := F) hC (kumZ_scale_isBigO C)
+    obtain ⟨r, hr, hr0⟩ := Complex.ZeroLocalization.eventually_exists_zero_isBigO
+      (f := fun _ => kummerM a b) (w := F) hC (KummerZeros.scale_isBigO C)
     exact ⟨r, Asymptotics.isBigO_norm_right.mp hr, hr0⟩
   have hGa : Gamma a ≠ 0 := Gamma_ne_zero ha
   have hGba : Gamma (b - a) ≠ 0 := Gamma_ne_zero hba
@@ -465,9 +465,9 @@ theorem kummerM_large_zeros (a b : ℂ) (sign : Bool) (ha : ∀ k : ℕ, a ≠ -
       exp_nat_mul_two_pi_mul_I, one_mul]
   cases sign with
   | true =>
-    obtain ⟨K, hK⟩ := kumZ_dist_bound (-Gamma a / Gamma (b - a)) I (b - 2 * a) (a * π * I) hG
+    obtain ⟨K, hK⟩ := KummerZeros.dist_bound (-Gamma a / Gamma (b - a)) I (b - 2 * a) (a * π * I) hG
       I_ne_zero
-    obtain ⟨C, hC⟩ := kumZ_core a b hb ha hba K
+    obtain ⟨C, hC⟩ := KummerZeros.core a b hb ha hba K
     refine ⟨C, ?_⟩
     filter_upwards [ht.eventually hC, ht.eventually (eventually_ge_atTop (Real.exp 1))]
       with n hn hn1
@@ -490,10 +490,10 @@ theorem kummerM_large_zeros (a b : ℂ) (sign : Bool) (ha : ∀ k : ℕ, a ≠ -
       rw [this]
       exact hK t hn1
   | false =>
-    obtain ⟨K, hK⟩ := kumZ_dist_bound (-Gamma a / Gamma (b - a)) (-I) (b - 2 * a)
+    obtain ⟨K, hK⟩ := KummerZeros.dist_bound (-Gamma a / Gamma (b - a)) (-I) (b - 2 * a)
       (-(a * π * I)) hG (neg_ne_zero.mpr I_ne_zero)
     have ha' : ∀ k : ℕ, b - (b - a) ≠ -k := by simpa [sub_sub_cancel] using ha
-    obtain ⟨C, hC⟩ := kumZ_core (b - a) b hb hba ha' K
+    obtain ⟨C, hC⟩ := KummerZeros.core (b - a) b hb hba ha' K
     refine ⟨C, ?_⟩
     filter_upwards [ht.eventually hC, ht.eventually (eventually_ge_atTop (Real.exp 1))]
       with n hn hn1
@@ -515,7 +515,7 @@ theorem kummerM_large_zeros (a b : ℂ) (sign : Bool) (ha : ∀ k : ℕ, a ≠ -
         sub_sub_cancel]
       have hm : (t : ℂ) * (-I) = -((t : ℂ) * I) := by ring
       rw [hm, cpow_def_of_ne_zero (neg_ne_zero.mpr htI), cpow_def_of_ne_zero htI,
-        kumZ_log_neg_ofReal_mul_I ht0, kumZ_log_ofReal_mul_I ht0]
+        KummerZeros.log_neg_ofReal_mul_I ht0, KummerZeros.log_ofReal_mul_I ht0]
       have hE : exp (π * I * a) * exp (-((↑(Real.log t) - ↑(π / 2 : ℝ) * I) * (b - 2 * a))) =
           exp (π * I * (b - a)) *
             exp ((↑(Real.log t) + ↑(π / 2 : ℝ) * I) * (b - 2 * (b - a))) := by
@@ -630,13 +630,14 @@ theorem kummerU_posZeros_none {a b : ℝ} (ha : 0 ≤ a) :
 
 /-- DLMF 13.9.14: the number `P(a,b)` of positive zeros when `a + 1 < b ≤ 1`, with `a`, `b`
 and `a-b+1` nonintegral (acquired 2026-10-20; DLMF's `P` counts positive zeros). Proved by
-Kummer's transformation and the Sturm-comparison count `kzt_U_posZeros_count`; only the
-nonintegrality of `a-b+1` is used (`hai` and `hbi` are not needed). -/
+Kummer's transformation and the Sturm-comparison count `KummerUZeroCount.realU_posZeros_count`; only
+the nonintegrality of `a-b+1` is used (`hai` and `hbi` are not needed). -/
 @[dlmf 13.9.E14]
 theorem kummerU_posZeros_ceil {a b : ℝ} (hb : b ≤ 1) (hab : a + 1 < b)
     (habi : ∀ n : ℤ, a - b + 1 ≠ n) :
     (kummerUPosZeros a b).encard = Int.toNat ⌈b - a - 1⌉ := by
-  have h := kzt_U_posZeros_count (a := a - b + 1) (b := 2 - b) (by linarith) (by linarith) habi
+  have h := KummerUZeroCount.realU_posZeros_count (a := a - b + 1) (b := 2 - b) (by linarith)
+      (by linarith) habi
   have hset : kummerUPosZeros a b =
       {x : ℝ | 0 < x ∧ kummerU ((a - b + 1 : ℝ) : ℂ) ((2 - b : ℝ) : ℂ) (x : ℂ) = 0} := by
     ext x
@@ -685,7 +686,7 @@ theorem kummerU_negZeros_none {a b : ℝ} (h : a + 1 ≥ b) (ha : ∀ n : ℕ, a
     {x : ℝ | x < 0 ∧ kummerU a b (x : ℂ) = 0}.encard = 0 := by
   rw [Set.encard_eq_zero, Set.eq_empty_iff_forall_notMem]
   rintro x ⟨hx, hU⟩
-  exact DLMF.Confluent.kzt_U_neg_ne_zero h ha hx hU
+  exact DLMF.Confluent.KummerUZeroCount.realU_neg_ne_zero h ha hx hU
 
 /-- Identity under the stated parameter and domain assumptions: `∃ α : ℕ → ℂ, Asymptotics.IsBigO
 atTop (fun n : ℕ => α n + n + 2 / π * (z * n) ^ (1 / 2 : ℂ) + 2 * z / π ^ 2 - b / 2 - 1 / 4)

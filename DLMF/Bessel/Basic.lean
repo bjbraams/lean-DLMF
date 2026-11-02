@@ -24,6 +24,8 @@ Wronskians are in `DLMF.Bessel.Basic.Equation` and `DLMF.Bessel.Basic.SecondKind
 * `besselI`: the modified Bessel function `I_ν` (DLMF 10.25.2).
 * `besselK`: Macdonald's function `K_ν` (DLMF 10.27.4).
 * `hankelH1`, `hankelH2`: the Hankel functions `H_ν^{(1,2)} = J_ν ± i Y_ν` (DLMF 10.4.3).
+* `sphericalJ`, `sphericalI`: the spherical Bessel functions `j_n` and `i_n` (DLMF §10.47), as
+  entire functions through `₀F̃₁`, with their removable values at `0`.
 -/
 
 @[expose] public noncomputable section
@@ -65,5 +67,14 @@ def hankelH1 (ν z : ℂ) : ℂ := besselJ ν z + I * besselY ν z
 /-- Hankel's function of the second kind, `H_ν^{(2)} = J_ν - i Y_ν` (DLMF 10.4.3). -/
 @[dlmf 10.4.E3]
 def hankelH2 (ν z : ℂ) : ℂ := besselJ ν z - I * besselY ν z
+
+/-- Spherical j_n, with the removable value at zero supplied explicitly. -/
+def sphericalJ (n : ℕ) (z : ℂ) : ℂ :=
+  Real.sqrt π * z ^ n / (2 : ℂ) ^ (n+1) *
+    regularizedHGFun ∅ {(n : ℂ)+3/2} (-z^2/4)
+/-- Modified spherical i_n, including its removable value at zero. -/
+def sphericalI (n : ℕ) (z : ℂ) : ℂ :=
+  Real.sqrt π * z ^ n / (2 : ℂ) ^ (n+1) *
+    regularizedHGFun ∅ {(n : ℂ)+3/2} (z^2/4)
 
 end DLMF.Bessel

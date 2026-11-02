@@ -183,17 +183,17 @@ DLMFMathlib declarations are all proved or definitions. No proved theorem depend
 
 ## [§24.7 Integral Representations](https://dlmf.nist.gov/24.7)
 
-- [24.7.E1](https://dlmf.nist.gov/24.7.E1): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_exp_add_one`](DLMF/BernoulliEuler/Integrals.lean#L253) (proved). n ≥ 1; both integral forms.
-- [24.7.E2](https://dlmf.nist.gov/24.7.E2): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_exp_sub_one`](DLMF/BernoulliEuler/Integrals.lean#L298) (proved). n ≥ 1; both integral forms.
-- [24.7.E3](https://dlmf.nist.gov/24.7.E3): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_sech_sq`](DLMF/BernoulliEuler/Integrals.lean#L418) (proved). n ≥ 1.
-- [24.7.E4](https://dlmf.nist.gov/24.7.E4): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_csch_sq`](DLMF/BernoulliEuler/Integrals.lean#L461) (proved). n ≥ 1.
-- [24.7.E5](https://dlmf.nist.gov/24.7.E5): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_log`](DLMF/BernoulliEuler/Integrals.lean#L489) (proved). n ≥ 1.
-- [24.7.E6](https://dlmf.nist.gov/24.7.E6): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_integral_sech`](DLMF/BernoulliEuler/Integrals.lean#L524) (proved). All n ≥ 0.
-- [24.7.E7](https://dlmf.nist.gov/24.7.E7): [`DLMF.BernoulliEuler.bernoulliPolyB_two_mul_eq_integral`](DLMF/BernoulliEuler/Integrals.lean#L586) (admitted). n ≥ 1, complex x with 0 < Re x < 1.
-- [24.7.E8](https://dlmf.nist.gov/24.7.E8): [`DLMF.BernoulliEuler.bernoulliPolyB_two_mul_add_one_eq_integral`](DLMF/BernoulliEuler/Integrals.lean#L596) (admitted). n ≥ 0, complex x with 0 < Re x < 1.
-- [24.7.E9](https://dlmf.nist.gov/24.7.E9): [`DLMF.BernoulliEuler.eulerPolyE_two_mul_eq_integral`](DLMF/BernoulliEuler/Integrals.lean#L606) (admitted). n ≥ 0, complex x with 0 < Re x < 1.
-- [24.7.E10](https://dlmf.nist.gov/24.7.E10): [`DLMF.BernoulliEuler.eulerPolyE_two_mul_add_one_eq_integral`](DLMF/BernoulliEuler/Integrals.lean#L615) (admitted). n ≥ 0, complex x with 0 < Re x < 1.
-- [24.7.E11](https://dlmf.nist.gov/24.7.E11): [`DLMF.BernoulliEuler.bernoulliPolyB_eq_mellinBarnes`](DLMF/BernoulliEuler/Integrals.lean#L931) (proved). Along t = -c + is, 0 < c < 1; holds for every complex x, proved by contour shifting and central hyperbolic-secant moments.
+- [24.7.E1](https://dlmf.nist.gov/24.7.E1): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_exp_add_one`](DLMF/BernoulliEuler/Integrals.lean#L256) (proved). n ≥ 1; both integral forms.
+- [24.7.E2](https://dlmf.nist.gov/24.7.E2): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_exp_sub_one`](DLMF/BernoulliEuler/Integrals.lean#L301) (proved). n ≥ 1; both integral forms.
+- [24.7.E3](https://dlmf.nist.gov/24.7.E3): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_sech_sq`](DLMF/BernoulliEuler/Integrals.lean#L421) (proved). n ≥ 1.
+- [24.7.E4](https://dlmf.nist.gov/24.7.E4): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_csch_sq`](DLMF/BernoulliEuler/Integrals.lean#L464) (proved). n ≥ 1.
+- [24.7.E5](https://dlmf.nist.gov/24.7.E5): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_integral_log`](DLMF/BernoulliEuler/Integrals.lean#L492) (proved). n ≥ 1.
+- [24.7.E6](https://dlmf.nist.gov/24.7.E6): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_integral_sech`](DLMF/BernoulliEuler/Integrals.lean#L527) (proved). All n ≥ 0.
+- [24.7.E7](https://dlmf.nist.gov/24.7.E7): [`DLMF.BernoulliEuler.bernoulliPolyB_two_mul_eq_integral`](DLMF/BernoulliEuler/Integrals.lean#L673) (proved). n ≥ 1, complex x with 0 < Re x < 1.
+- [24.7.E8](https://dlmf.nist.gov/24.7.E8): [`DLMF.BernoulliEuler.bernoulliPolyB_two_mul_add_one_eq_integral`](DLMF/BernoulliEuler/Integrals.lean#L729) (proved). n ≥ 0, complex x with 0 < Re x < 1.
+- [24.7.E9](https://dlmf.nist.gov/24.7.E9): [`DLMF.BernoulliEuler.eulerPolyE_two_mul_eq_integral`](DLMF/BernoulliEuler/Integrals.lean#L794) (proved). n ≥ 0, complex x with 0 < Re x < 1.
+- [24.7.E10](https://dlmf.nist.gov/24.7.E10): [`DLMF.BernoulliEuler.eulerPolyE_two_mul_add_one_eq_integral`](DLMF/BernoulliEuler/Integrals.lean#L850) (proved). n ≥ 0, complex x with 0 < Re x < 1.
+- [24.7.E11](https://dlmf.nist.gov/24.7.E11): [`DLMF.BernoulliEuler.bernoulliPolyB_eq_mellinBarnes`](DLMF/BernoulliEuler/Integrals.lean#L1200) (proved). Along t = -c + is, 0 < c < 1; holds for every complex x, proved by contour shifting and central hyperbolic-secant moments.
 
 ## [§24.8 Series Expansions](https://dlmf.nist.gov/24.8)
 

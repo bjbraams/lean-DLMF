@@ -415,7 +415,7 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
   where $c$ is an arbitrary constant.
 \item[Correct] these ``general solutions'' omit the constant solutions $w=\pm1/a$ (for
   \deq{4.20.13}) and $w=\pm\iu/a$ (for \deq{4.20.14}).
-\item[Lean] \lean{trig_energy_ode_general}, \lean{trig_riccati_ode_general}
+\item[Lean] \lean{Trigonometric.energy_ode_general}, \lean{Trigonometric.riccati_ode_general}
   (\file{DLMF/Elementary/Trigonometric.lean}), proved.
 \item[Found] 2026-10-24 (\file{DLMF4Acquisition.md}, 4.20 rows).
 \end{fields}
@@ -1688,7 +1688,8 @@ $8n\sqrt3\,(3^{2n-1}-1)$:
 \end{multline*}
 \item[Evidence] $n=1$: $\zeta'(-1,\tfrac13)=0.0937262017607794$; printed $0.0433428\ldots$;
 the corrected form agrees to 15 digits (also $n=2,3,4$) and with \DLMF{25.11.21} at $h=1$, $k=3$.
-\item[Lean] \lean{deriv_hurwitzZeta_one_sub_two_mul_third} (\file{DLMF/Zeta/Hurwitz.lean}), admitted.
+\item[Lean] \lean{deriv_hurwitzZeta_one_sub_two_mul_third}
+  (\file{DLMF/Zeta/Hurwitz/ValuesAndDerivatives.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1864,7 +1865,7 @@ definition.
 \end{equation*}
 \item[Evidence] at $r=2$ the printed form gives $(1+q)(1+q^2)/(1+q+q^2)$ instead of $1+q^2$.
 Brute-force generating functions agree with the corrected form for $r=1,\dots,4$.
-\item[Lean] \lean{sum_descendingPPIn_pow} (\file{DLMF/Combinatorics/PlanePartitions.lean}), admitted.
+\item[Lean] \lean{sum_descendingPlanePartitionIn_pow} (\file{DLMF/Combinatorics/PlanePartitions.lean}), admitted.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -2600,8 +2601,8 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \begin{fields}
 \item[Defect] The error multiplier was $0$ on $|\arg z|=2\pi/3$, so the bound asserted
   $\lVert R_N\rVert\le0$.
-\item[Lean] \lean{airyErrorMultiplier}, \lean{airy_ai_complex_error} (proved),
-  \lean{airy_aiDeriv_complex_error} (admitted) (\file{DLMF/Airy/Asymptotics.lean}).
+\item[Lean] \lean{airyErrorMultiplier}, \lean{airyAi_complex_error} and
+  \lean{airyAiDeriv_complex_error} (\file{DLMF/Airy/Asymptotics/}), proved.
 \item[Found] 2026-10-21 (\file{REVIEW.md}, ``Round 8'').
 \end{fields}
 
@@ -2870,7 +2871,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   Every spatial solution is locally constant and both initial-data maps are analytic,
   but $u\mapsto w(u,1)$ is conjugation and is not complex differentiable at zero.
   The check imports the ODE definitions, not the admitted parameter-dependence theorem.
-\item[Lean] \lean{isLinODE2SolOn_param_analytic}
+\item[Lean] \lean{isLinearODE2SolutionOn_param_analytic}
   (\file{DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean}) now also requires
   \lean{IsPreconnected D}. The corrected statement remains admitted.
   This corrects the formalization, not DLMF. The independent counterexample and

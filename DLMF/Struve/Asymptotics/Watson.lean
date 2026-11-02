@@ -53,6 +53,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Struve
 
 open DLMF.Bessel DLMF.Airy
@@ -593,7 +595,7 @@ theorem exists_of_eventually_rotSectorAtTop {δ α : ℝ} {p : ℂ → Prop}
 
 /-- The closed sector `|arg z| ≤ π - δ` is covered by two rotated Watson sectors. -/
 theorem sector_le_sup_rotSectorAtTop {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
-    DLMF.sector (π - δ) ≤ rotSectorAtTop (Real.sin (δ / 2)) (-((π - δ) / 2)) ⊔
+    DLMF.Core.sector (π - δ) ≤ rotSectorAtTop (Real.sin (δ / 2)) (-((π - δ) / 2)) ⊔
       rotSectorAtTop (Real.sin (δ / 2)) ((π - δ) / 2) := by
   intro U hU
   rw [mem_sup] at hU
@@ -606,8 +608,8 @@ theorem sector_le_sup_rotSectorAtTop {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π)
     refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
     rw [← Real.cos_abs, show δ / 2 = π / 2 - (π - δ) / 2 by ring, Real.sin_pi_div_two_sub]
     exact Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith) hb
-  change ∀ᶠ z in DLMF.sector (π - δ), z ∈ U
-  rw [DLMF.sector, eventually_inf_principal]
+  change ∀ᶠ z in DLMF.Core.sector (π - δ), z ∈ U
+  rw [DLMF.Core.sector, eventually_inf_principal]
   refine (tendsto_comap.eventually (eventually_ge_atTop (max R1 R2))).mono fun z hzR hzS => ?_
   obtain ⟨-, hzarg⟩ := hzS
   rcases le_total 0 (arg z) with h | h
@@ -866,7 +868,7 @@ theorem struveM_asymptotic_sectorAtTop (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (N :
 
 /-- The sector `|arg z| ≤ π/2 - δ` lies in the Watson sector `sin δ · |z| ≤ re z`. -/
 theorem sector_le_sectorAtTop {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 2) :
-    DLMF.sector (π / 2 - δ) ≤ sectorAtTop (Real.sin δ) := by
+    DLMF.Core.sector (π / 2 - δ) ≤ sectorAtTop (Real.sin δ) := by
   refine inf_le_inf_left _ (principal_mono.mpr fun z hz => ?_)
   obtain ⟨hz0, harg⟩ := hz
   change Real.sin δ * ‖z‖ ≤ z.re

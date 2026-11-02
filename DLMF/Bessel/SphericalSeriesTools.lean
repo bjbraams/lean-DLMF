@@ -21,36 +21,36 @@ telescopes to `g₀`, which is the derivative of the left-hand side.
 
 ## Main results
 
-* `sphSeries_hasSum_of_hasDerivAt`: the telescoping principle for entire terms that are
+* `hasSum_of_hasDerivAt`: the telescoping principle for entire terms that are
   bounded on balls by a summable sequence (termwise differentiation through
   `hasSum_deriv_of_summable_norm`).
-* `sphSeries_hasSum_of_euler`, `sphSeries_euler_hasSum`: the analogous principle for the Euler
+* `hasSum_of_euler`, `euler_hasSum`: the analogous principle for the Euler
   operator `z ∂ + a`.
-* `sphSeries_norm_sphericalJ_le`, `sphSeries_norm_sphericalI_le`, `sphSeries_sphericalJ_bound`,
-  `sphSeries_sphericalI_bound`: norm bounds and summability for `sphericalJ` and `sphericalI`.
-* `sphSeries_sphericalJ_recurrence`, `sphSeries_hasDerivAt_sphericalJ_succ`: the three-term
+* `norm_sphericalJ_le`, `norm_sphericalI_le`, `sphericalJ_bound`,
+  `sphericalI_bound`: norm bounds and summability for `sphericalJ` and `sphericalI`.
+* `sphericalJ_recurrence`, `hasDerivAt_sphericalJ_succ`: the three-term
   recurrence and derivative of DLMF 10.51.1–10.51.2 for `sphericalJ`, valid for all complex
   arguments (no division by `z`).
-* `sphSeries_sphericalI_recurrence`, `sphSeries_hasDerivAt_sphericalI_succ`: the same for
+* `sphericalI_recurrence`, `hasDerivAt_sphericalI_succ`: the same for
   `sphericalI` (DLMF 10.51.4–10.51.5).
-* `sphSeries_mul_sphericalJ_zero`, `sphSeries_sphericalJ_zero_sub`: `z j₀(z) = sin z` and
-  `j₀(z) - z j₁(z) = cos z`; `sphSeries_mul_sphericalI_zero`, `sphSeries_sphericalI_zero_add`
+* `mul_sphericalJ_zero`, `sphericalJ_zero_sub`: `z j₀(z) = sin z` and
+  `j₀(z) - z j₁(z) = cos z`; `mul_sphericalI_zero`, `sphericalI_zero_add`
   give the hyperbolic analogues.
-* `sphSeries_sphericalJ_neg`: the parity `j_n(-z) = (-1)ⁿ j_n(z)`.
+* `sphericalJ_neg`: the parity `j_n(-z) = (-1)ⁿ j_n(z)`.
 -/
 
 @[expose] public noncomputable section
 open Complex Filter Set
 open scoped Real Topology Nat
 
-namespace DLMF
+namespace DLMF.Bessel.SphericalSeries
 
 /-! ### The telescoping principle -/
 
 /-- Telescoping principle for series of entire functions: if `fₙ' = gₙ - gₙ₊₁`, `gₙ → 0`
 pointwise, the `fₙ` are bounded on each ball by a summable sequence, `F' = g₀`, and the
 series sums to `F` at the origin, then it sums to `F` everywhere. -/
-theorem sphSeries_hasSum_of_hasDerivAt {f g : ℕ → ℂ → ℂ} {F : ℂ → ℂ}
+theorem hasSum_of_hasDerivAt {f g : ℕ → ℂ → ℂ} {F : ℂ → ℂ}
     (hf : ∀ n w, HasDerivAt (f n) (g n w - g (n+1) w) w)
     (hg : ∀ w, Tendsto (fun n => g n w) atTop (𝓝 0))
     (hb : ∀ R : ℝ, ∃ u : ℕ → ℝ, Summable u ∧ ∀ n w, ‖w‖ < R → ‖f n w‖ ≤ u n)
@@ -101,7 +101,7 @@ theorem sphSeries_hasSum_of_hasDerivAt {f g : ℕ → ℂ → ℂ} {F : ℂ → 
 /-! ### Norm bounds -/
 
 /-- Norm bound for regularized `₀F₁` with a real parameter `c ≥ 1`. -/
-theorem sphSeries_norm_regularized0F1_le {c : ℝ} (hc : 1 ≤ c) (w : ℂ) :
+theorem norm_regularized0F1_le {c : ℝ} (hc : 1 ≤ c) (w : ℂ) :
     ‖regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} w‖ ≤ Real.exp ‖w‖ / Real.Gamma c := by
   have hG : ∀ k : ℕ, Real.Gamma c ≤ Real.Gamma (c + k) := by
     intro k
@@ -127,10 +127,10 @@ theorem sphSeries_norm_regularized0F1_le {c : ℝ} (hc : 1 ≤ c) (w : ℂ) :
   exact hG k
 
 /-- Norm bound for the spherical Bessel function `jₙ`. -/
-theorem sphSeries_norm_sphericalJ_le (n : ℕ) (z : ℂ) :
+theorem norm_sphericalJ_le (n : ℕ) (z : ℂ) :
     ‖sphericalJ n z‖ ≤ Real.sqrt π * ‖z‖^n / 2^(n+1) *
       (Real.exp (‖z‖^2/4) / Real.Gamma (n+3/2)) := by
-  have h := sphSeries_norm_regularized0F1_le (c := (n:ℝ)+3/2)
+  have h := norm_regularized0F1_le (c := (n:ℝ)+3/2)
     (by have : (0:ℝ) ≤ n := n.cast_nonneg; linarith) (-z^2/4)
   push_cast at h
   have hw : ‖-z^2/4‖ = ‖z‖^2/4 := by simp [norm_pow]
@@ -142,10 +142,10 @@ theorem sphSeries_norm_sphericalJ_le (n : ℕ) (z : ℂ) :
   gcongr
 
 /-- Norm bound for the modified spherical Bessel function `iₙ`. -/
-theorem sphSeries_norm_sphericalI_le (n : ℕ) (z : ℂ) :
+theorem norm_sphericalI_le (n : ℕ) (z : ℂ) :
     ‖sphericalI n z‖ ≤ Real.sqrt π * ‖z‖^n / 2^(n+1) *
       (Real.exp (‖z‖^2/4) / Real.Gamma (n+3/2)) := by
-  have h := sphSeries_norm_regularized0F1_le (c := (n:ℝ)+3/2)
+  have h := norm_regularized0F1_le (c := (n:ℝ)+3/2)
     (by have : (0:ℝ) ≤ n := n.cast_nonneg; linarith) (z^2/4)
   push_cast at h
   have hw : ‖z^2/4‖ = ‖z‖^2/4 := by simp [norm_pow]
@@ -156,8 +156,8 @@ theorem sphSeries_norm_sphericalI_le (n : ℕ) (z : ℂ) :
   rw [e]
   gcongr
 
-/-- The bounding sequence of `sphSeries_norm_sphericalJ_le` is summable. -/
-theorem sphSeries_summable_bound {R : ℝ} (hR : 0 ≤ R) :
+/-- The bounding sequence of `norm_sphericalJ_le` is summable. -/
+theorem summable_bound {R : ℝ} (hR : 0 ≤ R) :
     Summable (fun n : ℕ => Real.sqrt π * R^n / 2^(n+1) *
       (Real.exp (R^2/4) / Real.Gamma (n+3/2))) := by
   rw [← summable_nat_add_iff 1]
@@ -178,58 +178,58 @@ theorem sphSeries_summable_bound {R : ℝ} (hR : 0 ≤ R) :
     _ = _ := by ring
 
 /-- Uniform summable bounds for `jₙ` on closed balls. -/
-theorem sphSeries_sphericalJ_bound (R : ℝ) : ∃ u : ℕ → ℝ, Summable u ∧ (∀ n, 0 ≤ u n) ∧
+theorem sphericalJ_bound (R : ℝ) : ∃ u : ℕ → ℝ, Summable u ∧ (∀ n, 0 ≤ u n) ∧
     ∀ n z, ‖z‖ ≤ R → ‖sphericalJ n z‖ ≤ u n := by
-  refine ⟨_, sphSeries_summable_bound (abs_nonneg R), fun n => by positivity, fun n z hz => ?_⟩
+  refine ⟨_, summable_bound (abs_nonneg R), fun n => by positivity, fun n z hz => ?_⟩
   have hz' : ‖z‖ ≤ |R| := hz.trans (le_abs_self R)
-  refine (sphSeries_norm_sphericalJ_le n z).trans ?_
+  refine (norm_sphericalJ_le n z).trans ?_
   have hG : 0 < Real.Gamma ((n:ℝ) + 3/2) := Real.Gamma_pos_of_pos (by positivity)
   gcongr
 
 /-- Uniform summable bounds for `iₙ` on closed balls. -/
-theorem sphSeries_sphericalI_bound (R : ℝ) : ∃ u : ℕ → ℝ, Summable u ∧ (∀ n, 0 ≤ u n) ∧
+theorem sphericalI_bound (R : ℝ) : ∃ u : ℕ → ℝ, Summable u ∧ (∀ n, 0 ≤ u n) ∧
     ∀ n z, ‖z‖ ≤ R → ‖sphericalI n z‖ ≤ u n := by
-  refine ⟨_, sphSeries_summable_bound (abs_nonneg R), fun n => by positivity, fun n z hz => ?_⟩
+  refine ⟨_, summable_bound (abs_nonneg R), fun n => by positivity, fun n z hz => ?_⟩
   have hz' : ‖z‖ ≤ |R| := hz.trans (le_abs_self R)
-  refine (sphSeries_norm_sphericalI_le n z).trans ?_
+  refine (norm_sphericalI_le n z).trans ?_
   have hG : 0 < Real.Gamma ((n:ℝ) + 3/2) := Real.Gamma_pos_of_pos (by positivity)
   gcongr
 
 /-- `jₙ(z) → 0` as `n → ∞`. -/
-theorem sphSeries_tendsto_sphericalJ (z : ℂ) :
+theorem tendsto_sphericalJ (z : ℂ) :
     Tendsto (fun n => sphericalJ n z) atTop (𝓝 0) := by
-  obtain ⟨u, hu, -, h⟩ := sphSeries_sphericalJ_bound ‖z‖
+  obtain ⟨u, hu, -, h⟩ := sphericalJ_bound ‖z‖
   exact squeeze_zero_norm (fun n => h n z le_rfl) hu.tendsto_atTop_zero
 
 /-- `iₙ(z) → 0` as `n → ∞`. -/
-theorem sphSeries_tendsto_sphericalI (z : ℂ) :
+theorem tendsto_sphericalI (z : ℂ) :
     Tendsto (fun n => sphericalI n z) atTop (𝓝 0) := by
-  obtain ⟨u, hu, -, h⟩ := sphSeries_sphericalI_bound ‖z‖
+  obtain ⟨u, hu, -, h⟩ := sphericalI_bound ‖z‖
   exact squeeze_zero_norm (fun n => h n z le_rfl) hu.tendsto_atTop_zero
 
 /-! ### Recurrences and derivatives, DLMF 10.51.1–10.51.2 -/
 
 /-- Identity under the stated parameter and domain assumptions: `((n+1 : ℕ) : ℂ) + 3/2 = (n : ℂ) +
 3/2 + 1`. -/
-private lemma sphSeries_param_succ (n : ℕ) :
+private lemma param_succ (n : ℕ) :
     ((n+1 : ℕ) : ℂ) + 3/2 = (n : ℂ) + 3/2 + 1 := by push_cast; ring
 
 /-- Identity under the stated parameter and domain assumptions: `((n+2 : ℕ) : ℂ) + 3/2 = (n : ℂ) +
 3/2 + 1 + 1`. -/
-private lemma sphSeries_param_succ_succ (n : ℕ) :
+private lemma param_succ_succ (n : ℕ) :
     ((n+2 : ℕ) : ℂ) + 3/2 = (n : ℂ) + 3/2 + 1 + 1 := by push_cast; ring
 
 /-- Three-term recurrence `z (j_n(z) + j_{n+2}(z)) = (2n+3) j_{n+1}(z)` (DLMF 10.51.1),
 valid for all complex `z`. -/
-theorem sphSeries_sphericalJ_recurrence (n : ℕ) (z : ℂ) :
+theorem sphericalJ_recurrence (n : ℕ) (z : ℂ) :
     z * (sphericalJ n z + sphericalJ (n+2) z) = (2*n+3) * sphericalJ (n+1) z := by
   unfold sphericalJ
-  rw [sphSeries_param_succ_succ, sphSeries_param_succ,
+  rw [param_succ_succ, param_succ,
     DLMF.Bessel.regularized0F1_contiguous ((n:ℂ)+3/2)]
   ring
 
 /-- Derivative of `j₀`: `j₀' = -j₁`. -/
-theorem sphSeries_hasDerivAt_sphericalJ_zero (z : ℂ) :
+theorem hasDerivAt_sphericalJ_zero (z : ℂ) :
     HasDerivAt (sphericalJ 0) (-sphericalJ 1 z) z := by
   have hw : HasDerivAt (fun z : ℂ => -z^2/4) (-(2*z)/4) z := by
     simpa using ((hasDerivAt_pow 2 z).neg.div_const 4)
@@ -247,7 +247,7 @@ theorem sphSeries_hasDerivAt_sphericalJ_zero (z : ℂ) :
 
 /-- Derivative of `j_{n+1}` (DLMF 10.51.2 in the form
 `(2n+3) j_{n+1}' = (n+1) j_n - (n+2) j_{n+2}`), valid for all complex `z`. -/
-theorem sphSeries_hasDerivAt_sphericalJ_succ (n : ℕ) (z : ℂ) :
+theorem hasDerivAt_sphericalJ_succ (n : ℕ) (z : ℂ) :
     HasDerivAt (sphericalJ (n+1))
       (((n+1) * sphericalJ n z - (n+2) * sphericalJ (n+2) z) / (2*n+3)) z := by
   have hw : HasDerivAt (fun z : ℂ => -z^2/4) (-(2*z)/4) z := by
@@ -257,12 +257,12 @@ theorem sphSeries_hasDerivAt_sphericalJ_succ (n : ℕ) (z : ℂ) :
     ((2:ℂ)^(n+1+1))).mul hF
   have e : sphericalJ (n+1) = fun z => (Real.sqrt π * z^(n+1)) / (2:ℂ)^(n+1+1) *
       regularizedHGFun (∅ : Multiset ℂ) {(n : ℂ) + 3/2 + 1} (-z^2/4) := by
-    funext w; simp only [sphericalJ]; rw [sphSeries_param_succ]
+    funext w; simp only [sphericalJ]; rw [param_succ]
   rw [e]
   convert h using 1
   · funext w; simp only [Pi.mul_apply, Function.comp_apply]
   simp only [sphericalJ, Function.comp_apply, Nat.add_sub_cancel]
-  rw [sphSeries_param_succ_succ, DLMF.Bessel.regularized0F1_contiguous ((n:ℂ)+3/2)]
+  rw [param_succ_succ, DLMF.Bessel.regularized0F1_contiguous ((n:ℂ)+3/2)]
   have h3 : (2*n+3 : ℂ) ≠ 0 := by
     have : (0:ℝ) < 2*n+3 := by positivity
     exact_mod_cast this.ne'
@@ -273,7 +273,7 @@ theorem sphSeries_hasDerivAt_sphericalJ_succ (n : ℕ) (z : ℂ) :
 /-! ### Elementary values -/
 
 /-- Power series of `j₀`: `j₀(z) = ∑ₖ (-1)ᵏ z²ᵏ/(2k+1)!`. -/
-theorem sphSeries_hasSum_sphericalJ_zero (z : ℂ) :
+theorem hasSum_sphericalJ_zero (z : ℂ) :
     HasSum (fun k : ℕ => (-1)^k * z^(2*k) / ((2*k+1)! : ℂ)) (sphericalJ 0 z) := by
   have hs := ((DLMF.Bessel.hasFPowerSeriesOnBall_regularized0F1 ((0:ℕ) + 3/2 : ℂ)).hasSum_mul_pow
     (z := -z^2/4) (by simp)).mul_left (Real.sqrt π * z^0 / 2^(0+1) : ℂ)
@@ -295,48 +295,48 @@ theorem sphSeries_hasSum_sphericalJ_zero (z : ℂ) :
   ring
 
 /-- `z j₀(z) = sin z`. -/
-theorem sphSeries_mul_sphericalJ_zero (z : ℂ) : z * sphericalJ 0 z = sin z := by
-  refine ((sphSeries_hasSum_sphericalJ_zero z).mul_left z).unique ?_
+theorem mul_sphericalJ_zero (z : ℂ) : z * sphericalJ 0 z = sin z := by
+  refine ((hasSum_sphericalJ_zero z).mul_left z).unique ?_
   refine (Complex.hasSum_sin z).congr_fun fun k => ?_
   ring
 
 /-- `j₀(0) = 1`. -/
-theorem sphSeries_sphericalJ_zero_zero : sphericalJ 0 0 = 1 := by
-  have h := sphSeries_hasSum_sphericalJ_zero 0
+theorem sphericalJ_zero_zero : sphericalJ 0 0 = 1 := by
+  have h := hasSum_sphericalJ_zero 0
   refine h.unique ?_
   convert hasSum_ite_eq (0:ℕ) (1:ℂ) using 1
   funext k
   rcases k with _ | k <;> simp
 
 /-- `j₀(z) - z j₁(z) = cos z`. -/
-theorem sphSeries_sphericalJ_zero_sub (z : ℂ) :
+theorem sphericalJ_zero_sub (z : ℂ) :
     sphericalJ 0 z - z * sphericalJ 1 z = cos z := by
-  have h := (hasDerivAt_id z).fun_mul (sphSeries_hasDerivAt_sphericalJ_zero z)
-  have e : (fun w => id w * sphericalJ 0 w) = sin := funext sphSeries_mul_sphericalJ_zero
+  have h := (hasDerivAt_id z).fun_mul (hasDerivAt_sphericalJ_zero z)
+  have e : (fun w => id w * sphericalJ 0 w) = sin := funext mul_sphericalJ_zero
   rw [e] at h
   have h' := h.unique (Complex.hasDerivAt_sin z)
   simp only [id, one_mul] at h'
   linear_combination h'
 
 /-- `j₀` is the difference quotient of the sine at the origin. -/
-theorem sphSeries_sphericalJ_zero_eq_dslope (z : ℂ) : sphericalJ 0 z = dslope sin 0 z := by
+theorem sphericalJ_zero_eq_dslope (z : ℂ) : sphericalJ 0 z = dslope sin 0 z := by
   rcases eq_or_ne z 0 with rfl | hz
-  · rw [dslope_same, sphSeries_sphericalJ_zero_zero, Complex.deriv_sin, Complex.cos_zero]
+  · rw [dslope_same, sphericalJ_zero_zero, Complex.deriv_sin, Complex.cos_zero]
   · rw [dslope_of_ne _ hz, slope_def_field, Complex.sin_zero, sub_zero, sub_zero,
-      ← sphSeries_mul_sphericalJ_zero]
+      ← mul_sphericalJ_zero]
     field_simp
 
 /-! ### Derivatives of the terms of the harvested series -/
 
 /-- The term `w j_{n+1}(p w²)` differentiates to `x (j_n(x) - j_{n+2}(x))`, `x = p w²`. -/
-theorem sphSeries_hasDerivAt_mul_sphericalJ_succ_sq (p : ℂ) (n : ℕ) (w : ℂ) :
+theorem hasDerivAt_mul_sphericalJ_succ_sq (p : ℂ) (n : ℕ) (w : ℂ) :
     HasDerivAt (fun w => w * sphericalJ (n+1) (p*w^2))
       (p*w^2 * (sphericalJ n (p*w^2) - sphericalJ (n+2) (p*w^2))) w := by
   have hx : HasDerivAt (fun w : ℂ => p*w^2) (p*(2*w)) w := by
     simpa using (hasDerivAt_pow 2 w).const_mul p
-  have h := (hasDerivAt_id w).fun_mul ((sphSeries_hasDerivAt_sphericalJ_succ n (p*w^2)).comp w hx)
+  have h := (hasDerivAt_id w).fun_mul ((hasDerivAt_sphericalJ_succ n (p*w^2)).comp w hx)
   refine h.congr_deriv ?_
-  have hr := sphSeries_sphericalJ_recurrence n (p*w^2)
+  have hr := sphericalJ_recurrence n (p*w^2)
   have h3 : (2*n+3 : ℂ) ≠ 0 := by
     have : (0:ℝ) < 2*n+3 := by positivity
     exact_mod_cast this.ne'
@@ -346,29 +346,29 @@ theorem sphSeries_hasDerivAt_mul_sphericalJ_succ_sq (p : ℂ) (n : ℕ) (w : ℂ
     sphericalJ (n+2) (p*w^2)) - sphericalJ (n+1) (p*w^2)) * hc
 
 /-- The term `w j₀(p w²)` differentiates to `cos x - x j₁(x)`, `x = p w²`. -/
-theorem sphSeries_hasDerivAt_mul_sphericalJ_zero_sq (p : ℂ) (w : ℂ) :
+theorem hasDerivAt_mul_sphericalJ_zero_sq (p : ℂ) (w : ℂ) :
     HasDerivAt (fun w => w * sphericalJ 0 (p*w^2))
       (cos (p*w^2) - p*w^2 * sphericalJ 1 (p*w^2)) w := by
   have hx : HasDerivAt (fun w : ℂ => p*w^2) (p*(2*w)) w := by
     simpa using (hasDerivAt_pow 2 w).const_mul p
-  have h := (hasDerivAt_id w).fun_mul ((sphSeries_hasDerivAt_sphericalJ_zero (p*w^2)).comp w hx)
+  have h := (hasDerivAt_id w).fun_mul ((hasDerivAt_sphericalJ_zero (p*w^2)).comp w hx)
   refine h.congr_deriv ?_
-  rw [← sphSeries_sphericalJ_zero_sub]
+  rw [← sphericalJ_zero_sub]
   simp only [id, Function.comp_apply]
   ring
 
 /-- The term `w j_{n+1}(w/2)²` differentiates to
 `x j_n(x) j_{n+1}(x) - x j_{n+1}(x) j_{n+2}(x)`, `x = w/2`. -/
-theorem sphSeries_hasDerivAt_mul_sphericalJ_succ_half_sq (n : ℕ) (w : ℂ) :
+theorem hasDerivAt_mul_sphericalJ_succ_half_sq (n : ℕ) (w : ℂ) :
     HasDerivAt (fun w => w * sphericalJ (n+1) (w/2)^2)
       (w/2 * sphericalJ n (w/2) * sphericalJ (n+1) (w/2) -
         w/2 * sphericalJ (n+1) (w/2) * sphericalJ (n+2) (w/2)) w := by
   have hx : HasDerivAt (fun w : ℂ => w/2) (1/2) w := by
     simpa using (hasDerivAt_id w).div_const 2
   have h := (hasDerivAt_id w).fun_mul
-    (((sphSeries_hasDerivAt_sphericalJ_succ n (w/2)).comp w hx).fun_pow 2)
+    (((hasDerivAt_sphericalJ_succ n (w/2)).comp w hx).fun_pow 2)
   refine h.congr_deriv ?_
-  have hr := sphSeries_sphericalJ_recurrence n (w/2)
+  have hr := sphericalJ_recurrence n (w/2)
   have h3 : (2*n+3 : ℂ) ≠ 0 := by
     have : (0:ℝ) < 2*n+3 := by positivity
     exact_mod_cast this.ne'
@@ -378,25 +378,25 @@ theorem sphSeries_hasDerivAt_mul_sphericalJ_succ_half_sq (n : ℕ) (w : ℂ) :
     (sphericalJ n (w/2) - sphericalJ (n+2) (w/2)) - sphericalJ (n+1) (w/2)) * hc)
 
 /-- The term `w j₀(w/2)²` differentiates to `j₀(x) cos x - x j₀(x) j₁(x)`, `x = w/2`. -/
-theorem sphSeries_hasDerivAt_mul_sphericalJ_zero_half_sq (w : ℂ) :
+theorem hasDerivAt_mul_sphericalJ_zero_half_sq (w : ℂ) :
     HasDerivAt (fun w => w * sphericalJ 0 (w/2)^2)
       (sphericalJ 0 (w/2) * cos (w/2) - w/2 * sphericalJ 0 (w/2) * sphericalJ 1 (w/2)) w := by
   have hx : HasDerivAt (fun w : ℂ => w/2) (1/2) w := by
     simpa using (hasDerivAt_id w).div_const 2
   have h := (hasDerivAt_id w).fun_mul
-    (((sphSeries_hasDerivAt_sphericalJ_zero (w/2)).comp w hx).fun_pow 2)
+    (((hasDerivAt_sphericalJ_zero (w/2)).comp w hx).fun_pow 2)
   refine h.congr_deriv ?_
-  rw [← sphSeries_sphericalJ_zero_sub]
+  rw [← sphericalJ_zero_sub]
   simp only [id, Function.comp_apply]
   ring
 
 /-! ### Bounds for the terms of the harvested series -/
 
 /-- Summable bounds on balls for `w j_{σ n}(p w²)`, `σ` injective. -/
-theorem sphSeries_bound_mul_sphericalJ_sq (p : ℂ) {σ : ℕ → ℕ} (hσ : Function.Injective σ)
+theorem bound_mul_sphericalJ_sq (p : ℂ) {σ : ℕ → ℕ} (hσ : Function.Injective σ)
     (R : ℝ) : ∃ u : ℕ → ℝ, Summable u ∧
       ∀ n w, ‖w‖ < R → ‖w * sphericalJ (σ n) (p*w^2)‖ ≤ u n := by
-  obtain ⟨u, hu, hu0, h⟩ := sphSeries_sphericalJ_bound (‖p‖ * R^2)
+  obtain ⟨u, hu, hu0, h⟩ := sphericalJ_bound (‖p‖ * R^2)
   refine ⟨fun n => |R| * u (σ n), (hu.comp_injective hσ).mul_left _, fun n w hw => ?_⟩
   have hw0 : 0 ≤ ‖w‖ := norm_nonneg w
   rw [norm_mul]
@@ -405,9 +405,9 @@ theorem sphSeries_bound_mul_sphericalJ_sq (p : ℂ) {σ : ℕ → ℕ} (hσ : Fu
   gcongr
 
 /-- Summable bounds on balls for `w jₙ(w/2)²`. -/
-theorem sphSeries_bound_mul_sphericalJ_half_sq (R : ℝ) : ∃ u : ℕ → ℝ, Summable u ∧
+theorem bound_mul_sphericalJ_half_sq (R : ℝ) : ∃ u : ℕ → ℝ, Summable u ∧
     ∀ n w, ‖w‖ < R → ‖w * sphericalJ n (w/2)^2‖ ≤ u n := by
-  obtain ⟨u, hu, hu0, h⟩ := sphSeries_sphericalJ_bound R
+  obtain ⟨u, hu, hu0, h⟩ := sphericalJ_bound R
   refine ⟨fun n => |R| * (u n * ∑' k, u k), (hu.mul_right _).mul_left _, fun n w hw => ?_⟩
   have hw' : ‖w/2‖ ≤ R := by
     rw [norm_div]; simp only [Complex.norm_ofNat]
@@ -422,21 +422,21 @@ theorem sphSeries_bound_mul_sphericalJ_half_sq (R : ℝ) : ∃ u : ℕ → ℝ, 
 /-! ### The modified functions `iₙ` -/
 
 /-- `i₀(z) = j₀(iz)`. -/
-theorem sphSeries_sphericalI_zero_eq (z : ℂ) : sphericalI 0 z = sphericalJ 0 (I*z) := by
+theorem sphericalI_zero_eq (z : ℂ) : sphericalI 0 z = sphericalJ 0 (I*z) := by
   simp only [sphericalI, sphericalJ, pow_zero, mul_pow, I_sq]
   ring_nf
 
 /-- Three-term recurrence `z (i_n(z) - i_{n+2}(z)) = (2n+3) i_{n+1}(z)` (DLMF 10.51.4),
 valid for all complex `z`. -/
-theorem sphSeries_sphericalI_recurrence (n : ℕ) (z : ℂ) :
+theorem sphericalI_recurrence (n : ℕ) (z : ℂ) :
     z * (sphericalI n z - sphericalI (n+2) z) = (2*n+3) * sphericalI (n+1) z := by
   unfold sphericalI
-  rw [sphSeries_param_succ_succ, sphSeries_param_succ,
+  rw [param_succ_succ, param_succ,
     DLMF.Bessel.regularized0F1_contiguous ((n:ℂ)+3/2)]
   ring
 
 /-- Derivative of `i₀`: `i₀' = i₁`. -/
-theorem sphSeries_hasDerivAt_sphericalI_zero (z : ℂ) :
+theorem hasDerivAt_sphericalI_zero (z : ℂ) :
     HasDerivAt (sphericalI 0) (sphericalI 1 z) z := by
   have hw : HasDerivAt (fun z : ℂ => z^2/4) ((2*z)/4) z := by
     simpa using ((hasDerivAt_pow 2 z).div_const 4)
@@ -454,7 +454,7 @@ theorem sphSeries_hasDerivAt_sphericalI_zero (z : ℂ) :
 
 /-- Derivative of `i_{n+1}` (DLMF 10.51.5 in the form
 `(2n+3) i_{n+1}' = (n+1) i_n + (n+2) i_{n+2}`), valid for all complex `z`. -/
-theorem sphSeries_hasDerivAt_sphericalI_succ (n : ℕ) (z : ℂ) :
+theorem hasDerivAt_sphericalI_succ (n : ℕ) (z : ℂ) :
     HasDerivAt (sphericalI (n+1))
       (((n+1) * sphericalI n z + (n+2) * sphericalI (n+2) z) / (2*n+3)) z := by
   have hw : HasDerivAt (fun z : ℂ => z^2/4) ((2*z)/4) z := by
@@ -464,12 +464,12 @@ theorem sphSeries_hasDerivAt_sphericalI_succ (n : ℕ) (z : ℂ) :
     ((2:ℂ)^(n+1+1))).mul hF
   have e : sphericalI (n+1) = fun z => (Real.sqrt π * z^(n+1)) / (2:ℂ)^(n+1+1) *
       regularizedHGFun (∅ : Multiset ℂ) {(n : ℂ) + 3/2 + 1} (z^2/4) := by
-    funext w; simp only [sphericalI]; rw [sphSeries_param_succ]
+    funext w; simp only [sphericalI]; rw [param_succ]
   rw [e]
   convert h using 1
   · funext w; simp only [Pi.mul_apply, Function.comp_apply]
   simp only [sphericalI, Function.comp_apply, Nat.add_sub_cancel]
-  rw [sphSeries_param_succ_succ, DLMF.Bessel.regularized0F1_contiguous ((n:ℂ)+3/2)]
+  rw [param_succ_succ, DLMF.Bessel.regularized0F1_contiguous ((n:ℂ)+3/2)]
   have h3 : (2*n+3 : ℂ) ≠ 0 := by
     have : (0:ℝ) < 2*n+3 := by positivity
     exact_mod_cast this.ne'
@@ -478,32 +478,32 @@ theorem sphSeries_hasDerivAt_sphericalI_succ (n : ℕ) (z : ℂ) :
   ring
 
 /-- `z i₀(z) = sinh z`. -/
-theorem sphSeries_mul_sphericalI_zero (z : ℂ) : z * sphericalI 0 z = sinh z := by
-  rw [sphSeries_sphericalI_zero_eq, show I*z = z*I by ring]
-  have h := sphSeries_mul_sphericalJ_zero (z*I)
+theorem mul_sphericalI_zero (z : ℂ) : z * sphericalI 0 z = sinh z := by
+  rw [sphericalI_zero_eq, show I*z = z*I by ring]
+  have h := mul_sphericalJ_zero (z*I)
   rw [Complex.sin_mul_I] at h
   apply mul_left_cancel₀ I_ne_zero
   linear_combination h
 
 /-- `i₀(z) + z i₁(z) = cosh z`. -/
-theorem sphSeries_sphericalI_zero_add (z : ℂ) :
+theorem sphericalI_zero_add (z : ℂ) :
     sphericalI 0 z + z * sphericalI 1 z = cosh z := by
-  have h := (hasDerivAt_id z).fun_mul (sphSeries_hasDerivAt_sphericalI_zero z)
-  have e : (fun w => id w * sphericalI 0 w) = sinh := funext sphSeries_mul_sphericalI_zero
+  have h := (hasDerivAt_id z).fun_mul (hasDerivAt_sphericalI_zero z)
+  have e : (fun w => id w * sphericalI 0 w) = sinh := funext mul_sphericalI_zero
   rw [e] at h
   have h' := h.unique (Complex.hasDerivAt_sinh z)
   simp only [id, one_mul] at h'
   linear_combination h'
 
 /-- The term `w i_{n+1}(p w²)` differentiates to `x (i_n(x) + i_{n+2}(x))`, `x = p w²`. -/
-theorem sphSeries_hasDerivAt_mul_sphericalI_succ_sq (p : ℂ) (n : ℕ) (w : ℂ) :
+theorem hasDerivAt_mul_sphericalI_succ_sq (p : ℂ) (n : ℕ) (w : ℂ) :
     HasDerivAt (fun w => w * sphericalI (n+1) (p*w^2))
       (p*w^2 * (sphericalI n (p*w^2) + sphericalI (n+2) (p*w^2))) w := by
   have hx : HasDerivAt (fun w : ℂ => p*w^2) (p*(2*w)) w := by
     simpa using (hasDerivAt_pow 2 w).const_mul p
-  have h := (hasDerivAt_id w).fun_mul ((sphSeries_hasDerivAt_sphericalI_succ n (p*w^2)).comp w hx)
+  have h := (hasDerivAt_id w).fun_mul ((hasDerivAt_sphericalI_succ n (p*w^2)).comp w hx)
   refine h.congr_deriv ?_
-  have hr := sphSeries_sphericalI_recurrence n (p*w^2)
+  have hr := sphericalI_recurrence n (p*w^2)
   have h3 : (2*n+3 : ℂ) ≠ 0 := by
     have : (0:ℝ) < 2*n+3 := by positivity
     exact_mod_cast this.ne'
@@ -513,22 +513,22 @@ theorem sphSeries_hasDerivAt_mul_sphericalI_succ_sq (p : ℂ) (n : ℕ) (w : ℂ
     sphericalI (n+2) (p*w^2)) - sphericalI (n+1) (p*w^2)) * hc
 
 /-- The term `w i₀(p w²)` differentiates to `cosh x + x i₁(x)`, `x = p w²`. -/
-theorem sphSeries_hasDerivAt_mul_sphericalI_zero_sq (p : ℂ) (w : ℂ) :
+theorem hasDerivAt_mul_sphericalI_zero_sq (p : ℂ) (w : ℂ) :
     HasDerivAt (fun w => w * sphericalI 0 (p*w^2))
       (cosh (p*w^2) + p*w^2 * sphericalI 1 (p*w^2)) w := by
   have hx : HasDerivAt (fun w : ℂ => p*w^2) (p*(2*w)) w := by
     simpa using (hasDerivAt_pow 2 w).const_mul p
-  have h := (hasDerivAt_id w).fun_mul ((sphSeries_hasDerivAt_sphericalI_zero (p*w^2)).comp w hx)
+  have h := (hasDerivAt_id w).fun_mul ((hasDerivAt_sphericalI_zero (p*w^2)).comp w hx)
   refine h.congr_deriv ?_
-  rw [← sphSeries_sphericalI_zero_add]
+  rw [← sphericalI_zero_add]
   simp only [id, Function.comp_apply]
   ring
 
 /-- Summable bounds on balls for `w i_{σ n}(p w²)`, `σ` injective. -/
-theorem sphSeries_bound_mul_sphericalI_sq (p : ℂ) {σ : ℕ → ℕ} (hσ : Function.Injective σ)
+theorem bound_mul_sphericalI_sq (p : ℂ) {σ : ℕ → ℕ} (hσ : Function.Injective σ)
     (R : ℝ) : ∃ u : ℕ → ℝ, Summable u ∧
       ∀ n w, ‖w‖ < R → ‖w * sphericalI (σ n) (p*w^2)‖ ≤ u n := by
-  obtain ⟨u, hu, hu0, h⟩ := sphSeries_sphericalI_bound (‖p‖ * R^2)
+  obtain ⟨u, hu, hu0, h⟩ := sphericalI_bound (‖p‖ * R^2)
   refine ⟨fun n => |R| * u (σ n), (hu.comp_injective hσ).mul_left _, fun n w hw => ?_⟩
   have hw0 : 0 ≤ ‖w‖ := norm_nonneg w
   rw [norm_mul]
@@ -537,11 +537,11 @@ theorem sphSeries_bound_mul_sphericalI_sq (p : ℂ) {σ : ℕ → ℕ} (hσ : Fu
   gcongr
 
 /-- `i₀(0) = 1`. -/
-theorem sphSeries_sphericalI_zero_zero : sphericalI 0 0 = 1 := by
-  rw [sphSeries_sphericalI_zero_eq, mul_zero, sphSeries_sphericalJ_zero_zero]
+theorem sphericalI_zero_zero : sphericalI 0 0 = 1 := by
+  rw [sphericalI_zero_eq, mul_zero, sphericalJ_zero_zero]
 
 /-- `iₙ(z) = j_n(iz)/iⁿ`. -/
-theorem sphSeries_sphericalI_eq (n : ℕ) (z : ℂ) :
+theorem sphericalI_eq (n : ℕ) (z : ℂ) :
     sphericalI n z = sphericalJ n (I*z) / I^n := by
   have hI : (I:ℂ)^n ≠ 0 := pow_ne_zero _ I_ne_zero
   simp only [sphericalI, sphericalJ, mul_pow, I_sq]
@@ -551,7 +551,7 @@ theorem sphSeries_sphericalI_eq (n : ℕ) (z : ℂ) :
 
 /-- Entire functions annihilated by the Euler operator `z ∂ + a` vanish, provided their
 `m`-th derivative at the origin vanishes whenever `a = -m`. -/
-theorem sphSeries_eq_zero_of_euler {D : ℂ → ℂ} (hD : Differentiable ℂ D) (a : ℂ)
+theorem eq_zero_of_euler {D : ℂ → ℂ} (hD : Differentiable ℂ D) (a : ℂ)
     (hode : ∀ z, z * deriv D z + a * D z = 0)
     (h0 : ∀ m : ℕ, a + m = 0 → iteratedDeriv m D 0 = 0) (z : ℂ) : D z = 0 := by
   have hcd : ContDiff ℂ ⊤ D := hD.contDiff
@@ -589,7 +589,7 @@ theorem sphSeries_eq_zero_of_euler {D : ℂ → ℂ} (hD : Differentiable ℂ D)
   exact (hasSum_zero.unique hs).symm
 
 /-- Parity kills Taylor coefficients: if `D(-w) = ε D(w)` then `((-1)^m - ε) D^{(m)}(0) = 0`. -/
-theorem sphSeries_iteratedDeriv_parity {D : ℂ → ℂ} {ε : ℂ} (hD : ∀ w, D (-w) = ε * D w)
+theorem iteratedDeriv_parity {D : ℂ → ℂ} {ε : ℂ} (hD : ∀ w, D (-w) = ε * D w)
     (m : ℕ) : ((-1)^m - ε) * iteratedDeriv m D 0 = 0 := by
   have h1 := iteratedDeriv_comp_neg m D 0
   have e : (fun x => D (-x)) = fun x => ε * D x := funext hD
@@ -598,7 +598,7 @@ theorem sphSeries_iteratedDeriv_parity {D : ℂ → ℂ} {ε : ℂ} (hD : ∀ w,
 
 /-- Termwise Euler operator: for entire terms bounded on balls by summable sequences, the sum
 is entire and `w S' + a S = ∑ (w fₙ' + a fₙ)`. -/
-theorem sphSeries_euler_hasSum {f f' : ℕ → ℂ → ℂ} (a : ℂ)
+theorem euler_hasSum {f f' : ℕ → ℂ → ℂ} (a : ℂ)
     (hf : ∀ n w, HasDerivAt (f n) (f' n w) w)
     (hb : ∀ R : ℝ, ∃ u : ℕ → ℝ, Summable u ∧ ∀ n w, ‖w‖ < R → ‖f n w‖ ≤ u n) :
     Differentiable ℂ (fun w => ∑' n, f n w) ∧ ∀ w, HasSum (fun n => w * f' n w + a * f n w)
@@ -625,7 +625,7 @@ theorem sphSeries_euler_hasSum {f f' : ℕ → ℂ → ℂ} (a : ℂ)
   exact (hd.mul_left w).add (hs.hasSum.mul_left a)
 
 /-- Telescoping principle for the Euler operator `z ∂ + a`. -/
-theorem sphSeries_hasSum_of_euler {f f' g : ℕ → ℂ → ℂ} {F : ℂ → ℂ} (a : ℂ)
+theorem hasSum_of_euler {f f' g : ℕ → ℂ → ℂ} {F : ℂ → ℂ} (a : ℂ)
     (hf : ∀ n w, HasDerivAt (f n) (f' n w) w)
     (hL : ∀ n w, w * f' n w + a * f n w = g n w - g (n+1) w)
     (hg : ∀ w, Tendsto (fun n => g n w) atTop (𝓝 0))
@@ -633,7 +633,7 @@ theorem sphSeries_hasSum_of_euler {f f' g : ℕ → ℂ → ℂ} {F : ℂ → �
     (hF : Differentiable ℂ F) (hFL : ∀ w, w * deriv F w + a * F w = g 0 w)
     (h0 : ∀ m : ℕ, a + m = 0 → iteratedDeriv m (fun w => ∑' n, f n w - F w) 0 = 0)
     (z : ℂ) : HasSum (fun n => f n z) (F z) := by
-  obtain ⟨hD, hS⟩ := sphSeries_euler_hasSum a hf hb
+  obtain ⟨hD, hS⟩ := euler_hasSum a hf hb
   have hode : ∀ w, w * deriv (fun w => ∑' n, f n w - F w) w +
       a * (∑' n, f n w - F w) = 0 := by
     intro w
@@ -643,7 +643,7 @@ theorem sphSeries_hasSum_of_euler {f f' g : ℕ → ℂ → ℂ} {F : ℂ → �
     rw [sub_zero] at h2
     rw [deriv_fun_sub (hD w) (hF w)]
     linear_combination h2 - hFL w
-  have hz := sphSeries_eq_zero_of_euler (hD.sub hF) a hode h0 z
+  have hz := eq_zero_of_euler (hD.sub hF) a hode h0 z
   obtain ⟨u, hu, h⟩ := hb (‖z‖+1)
   have hs : Summable (fun n => f n z) :=
     Summable.of_norm_bounded hu (fun n => h n z (by linarith))
@@ -653,14 +653,14 @@ theorem sphSeries_hasSum_of_euler {f f' g : ℕ → ℂ → ℂ} {F : ℂ → �
   exact hs.hasSum
 
 /-- Parity `j_n(-z) = (-1)ⁿ j_n(z)`. -/
-theorem sphSeries_sphericalJ_neg (n : ℕ) (z : ℂ) :
+theorem sphericalJ_neg (n : ℕ) (z : ℂ) :
     sphericalJ n (-z) = (-1)^n * sphericalJ n z := by
   simp only [sphericalJ, neg_pow z, even_two.neg_pow, one_pow, one_mul]
   ring
 
-/-- The bounding sequence of `sphSeries_norm_sphericalJ_le` gains a factor
+/-- The bounding sequence of `norm_sphericalJ_le` gains a factor
 `R²/(4(n+3/2)(n+5/2))` when the order rises by two. -/
-private lemma sphSeries_bound_step (R : ℝ) (n : ℕ) :
+private lemma bound_step (R : ℝ) (n : ℕ) :
     Real.sqrt π * R^(n+2) / 2^(n+2+1) * (Real.exp (R^2/4) / Real.Gamma ((n+2:ℕ)+3/2)) =
       Real.sqrt π * R^n / 2^(n+1) * (Real.exp (R^2/4) / Real.Gamma (n+3/2)) *
         (R^2 / (4*((n+3/2)*(n+5/2)))) := by
@@ -674,7 +674,7 @@ private lemma sphSeries_bound_step (R : ℝ) (n : ℕ) :
   ring
 
 /-- Summable bounds on balls for `c_k j_{2k+d}(w)` when `‖c_{k+1}‖ ≤ C ‖c_k‖` eventually. -/
-theorem sphSeries_bound_coeff_mul_sphericalJ (c : ℕ → ℂ) {C : ℝ}
+theorem bound_coeff_mul_sphericalJ (c : ℕ → ℂ) {C : ℝ}
     (hc : ∀ᶠ k in atTop, ‖c (k+1)‖ ≤ C * ‖c k‖) (d : ℕ) (R : ℝ) :
     ∃ u : ℕ → ℝ, Summable u ∧ ∀ k w, ‖w‖ < R → ‖c k * sphericalJ (2*k+d) w‖ ≤ u k := by
   set B : ℕ → ℝ := fun n => Real.sqrt π * |R|^n / 2^(n+1) *
@@ -689,7 +689,7 @@ theorem sphSeries_bound_coeff_mul_sphericalJ (c : ℕ → ℂ) {C : ℝ}
     have e : 2*(k+1)+d = (2*k+d)+2 := by ring
     simp only [norm_mul, norm_norm, Real.norm_of_nonneg (hB0 _), e]
     rw [hB]; simp only
-    rw [sphSeries_bound_step]
+    rw [bound_step]
     set m : ℕ := 2*k+d
     have hm : (k:ℝ) ≤ m := by simp only [m]; push_cast; linarith [(d.cast_nonneg : (0:ℝ) ≤ d)]
     have hq : C * (|R|^2 / (4*((m+3/2)*(m+5/2)))) ≤ 1/2 := by
@@ -708,21 +708,21 @@ theorem sphSeries_bound_coeff_mul_sphericalJ (c : ℕ → ℂ) {C : ℝ}
   · rw [norm_mul]
     show ‖c k‖ * _ ≤ ‖c k‖ * B (2*k+d)
     gcongr
-    refine (sphSeries_norm_sphericalJ_le _ w).trans ?_
+    refine (norm_sphericalJ_le _ w).trans ?_
     have hw' : ‖w‖ ≤ |R| := hw.le.trans (le_abs_self R)
     have : 0 < Real.Gamma (((2*k+d : ℕ) : ℝ) + 3/2) := Real.Gamma_pos_of_pos (by positivity)
     simp only [hB]
     gcongr
 
 /-- `c_k j_{2k+d}(w) → 0` when `‖c_{k+1}‖ ≤ C ‖c_k‖` eventually. -/
-theorem sphSeries_tendsto_coeff_mul_sphericalJ (c : ℕ → ℂ) {C : ℝ}
+theorem tendsto_coeff_mul_sphericalJ (c : ℕ → ℂ) {C : ℝ}
     (hc : ∀ᶠ k in atTop, ‖c (k+1)‖ ≤ C * ‖c k‖) (d : ℕ) (w : ℂ) :
     Tendsto (fun k => c k * sphericalJ (2*k+d) w) atTop (𝓝 0) := by
-  obtain ⟨u, hu, h⟩ := sphSeries_bound_coeff_mul_sphericalJ c hc d (‖w‖+1)
+  obtain ⟨u, hu, h⟩ := bound_coeff_mul_sphericalJ c hc d (‖w‖+1)
   exact squeeze_zero_norm (fun k => h k w (by linarith)) hu.tendsto_atTop_zero
 
 /-- Eventually `‖α + k‖ ≤ 2 ‖β + k‖`. -/
-theorem sphSeries_eventually_norm_add_le (α β : ℂ) :
+theorem eventually_norm_add_le (α β : ℂ) :
     ∀ᶠ k : ℕ in atTop, ‖α + k‖ ≤ 2 * ‖β + k‖ := by
   filter_upwards [eventually_ge_atTop ⌈2*‖β‖+‖α‖⌉₊] with k hk
   have hk' : 2*‖β‖+‖α‖ ≤ k := (Nat.le_ceil _).trans (by exact_mod_cast hk)
@@ -734,9 +734,9 @@ theorem sphSeries_eventually_norm_add_le (α β : ℂ) :
     rw [add_comm] at this; linarith
   linarith
 
-/-- The bounding sequence of `sphSeries_norm_sphericalI_le` gains a factor `R/(2(n+3/2))`
+/-- The bounding sequence of `norm_sphericalI_le` gains a factor `R/(2(n+3/2))`
 when the order rises by one. -/
-private lemma sphSeries_bound_step_one (R : ℝ) (n : ℕ) :
+private lemma bound_step_one (R : ℝ) (n : ℕ) :
     Real.sqrt π * R^(n+1) / 2^(n+1+1) * (Real.exp (R^2/4) / Real.Gamma ((n+1:ℕ)+3/2)) =
       Real.sqrt π * R^n / 2^(n+1) * (Real.exp (R^2/4) / Real.Gamma (n+3/2)) *
         (R / (2*(n+3/2))) := by
@@ -749,7 +749,7 @@ private lemma sphSeries_bound_step_one (R : ℝ) (n : ℕ) :
   ring
 
 /-- Summable bounds on balls for `c_k i_{k+d}(w)` when `‖c_{k+1}‖ ≤ C ‖c_k‖` eventually. -/
-theorem sphSeries_bound_coeff_mul_sphericalI (c : ℕ → ℂ) {C : ℝ}
+theorem bound_coeff_mul_sphericalI (c : ℕ → ℂ) {C : ℝ}
     (hc : ∀ᶠ k in atTop, ‖c (k+1)‖ ≤ C * ‖c k‖) (d : ℕ) (R : ℝ) :
     ∃ u : ℕ → ℝ, Summable u ∧ ∀ k w, ‖w‖ < R → ‖c k * sphericalI (k+d) w‖ ≤ u k := by
   set B : ℕ → ℝ := fun n => Real.sqrt π * |R|^n / 2^(n+1) *
@@ -764,7 +764,7 @@ theorem sphSeries_bound_coeff_mul_sphericalI (c : ℕ → ℂ) {C : ℝ}
     have e : (k+1)+d = (k+d)+1 := by ring
     simp only [norm_mul, norm_norm, Real.norm_of_nonneg (hB0 _), e]
     rw [hB]; simp only
-    rw [sphSeries_bound_step_one]
+    rw [bound_step_one]
     set m : ℕ := k+d
     have hm : (k:ℝ) ≤ m := by simp only [m]; push_cast; linarith [(d.cast_nonneg : (0:ℝ) ≤ d)]
     have hq : C * (|R| / (2*(m+3/2))) ≤ 1/2 := by
@@ -783,17 +783,17 @@ theorem sphSeries_bound_coeff_mul_sphericalI (c : ℕ → ℂ) {C : ℝ}
   · rw [norm_mul]
     show ‖c k‖ * _ ≤ ‖c k‖ * B (k+d)
     gcongr
-    refine (sphSeries_norm_sphericalI_le _ w).trans ?_
+    refine (norm_sphericalI_le _ w).trans ?_
     have hw' : ‖w‖ ≤ |R| := hw.le.trans (le_abs_self R)
     have : 0 < Real.Gamma (((k+d : ℕ) : ℝ) + 3/2) := Real.Gamma_pos_of_pos (by positivity)
     simp only [hB]
     gcongr
 
 /-- `c_k i_{k+d}(w) → 0` when `‖c_{k+1}‖ ≤ C ‖c_k‖` eventually. -/
-theorem sphSeries_tendsto_coeff_mul_sphericalI (c : ℕ → ℂ) {C : ℝ}
+theorem tendsto_coeff_mul_sphericalI (c : ℕ → ℂ) {C : ℝ}
     (hc : ∀ᶠ k in atTop, ‖c (k+1)‖ ≤ C * ‖c k‖) (d : ℕ) (w : ℂ) :
     Tendsto (fun k => c k * sphericalI (k+d) w) atTop (𝓝 0) := by
-  obtain ⟨u, hu, h⟩ := sphSeries_bound_coeff_mul_sphericalI c hc d (‖w‖+1)
+  obtain ⟨u, hu, h⟩ := bound_coeff_mul_sphericalI c hc d (‖w‖+1)
   exact squeeze_zero_norm (fun k => h k w (by linarith)) hu.tendsto_atTop_zero
 
-end DLMF
+end DLMF.Bessel.SphericalSeries

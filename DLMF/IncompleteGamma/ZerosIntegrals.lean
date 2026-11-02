@@ -118,7 +118,7 @@ theorem scIncGamma_nonnegative_parameter_no_real_zeros {a : ℝ} (ha : 0 ≤ a) 
 monotone on each half-line. The signs at `0` and at `±∞` come from the two power series. -/
 
 /-- `e^z γ*(a,z) = ∑ zᵏ / Γ(a+k+1)`. -/
-theorem gzero_hasSum_U (a z : ℂ) :
+theorem IncompleteGammaZeros.hasSum_expScaled (a z : ℂ) :
     HasSum (fun k : ℕ => z ^ k / Gamma (a + k + 1)) (regularizedHGFun {1} {a + 1} z) := by
   have h := (scIncGamma_hasSum_exponential a z).mul_left (exp z)
   have he : exp z * exp (-z) = 1 := by rw [← Complex.exp_add]; simp
@@ -128,7 +128,7 @@ theorem gzero_hasSum_U (a z : ℂ) :
 
 /-- The series with terms `(fun k : ℕ => (k + 1) * z ^ k / Gamma (a + k + 2))` converges to
 `(regularizedHGFun {2} {a + 2} z)`. -/
-theorem gzero_hasSum_U' (a z : ℂ) :
+theorem IncompleteGammaZeros.hasSum_expScaled' (a z : ℂ) :
     HasSum (fun k : ℕ => (k + 1) * z ^ k / Gamma (a + k + 2)) (regularizedHGFun {2} {a + 2} z) := by
   have hs := (hasFPowerSeriesOnBall_regularizedConfluent 2 (a + 2)).hasSum_mul_pow
     (by simp : z ∈ Metric.eball (0 : ℂ) ⊤)
@@ -145,13 +145,13 @@ theorem gzero_hasSum_U' (a z : ℂ) :
   field_simp
 
 /-- The first-order ODE `z U' = (z - a) U + 1/Γ(a)` of `U(z) = e^z γ*(a,z)`. -/
-theorem gzero_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
+theorem IncompleteGammaZeros.ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
     z * deriv (regularizedHGFun {1} {a + 1}) z =
       (z - a) * regularizedHGFun {1} {a + 1} z + (Gamma a)⁻¹ := by
   rw [deriv_regularizedConfluent, one_mul, show (1 : ℂ) + 1 = 2 by norm_num,
     show a + 1 + 1 = a + 2 by ring]
-  have hU := gzero_hasSum_U a z
-  have hU2 := (gzero_hasSum_U' a z).mul_left z
+  have hU := IncompleteGammaZeros.hasSum_expScaled a z
+  have hU2 := (IncompleteGammaZeros.hasSum_expScaled' a z).mul_left z
   have hzU := hU.mul_left z
   have haU := (hasSum_nat_add_iff' 1).mpr (hU.mul_left a)
   simp only [Finset.sum_range_one, pow_zero, Nat.cast_zero, add_zero, one_div] at haU
@@ -176,30 +176,34 @@ theorem gzero_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
   ring
 
 /-- The real function `U(x) = e^x γ*(a,x)`. -/
-noncomputable def gzero_U (a x : ℝ) : ℝ := (regularizedHGFun {1} {(a : ℂ) + 1} x).re
+noncomputable def IncompleteGammaZeros.expScaled (a x : ℝ) : ℝ :=
+    (regularizedHGFun {1} {(a : ℂ) + 1} x).re
 
 /-- Convergent series representation: `HasSum (fun k : ℕ => x ^ k / Real.Gamma (a + k + 1))
-(gzero_U a x) ∧ regularizedHGFun {1} {(a : ℂ) + 1} x = (gzero_U a x : ℂ)`. -/
-theorem gzero_hasSum_real (a x : ℝ) :
-    HasSum (fun k : ℕ => x ^ k / Real.Gamma (a + k + 1)) (gzero_U a x) ∧
-      regularizedHGFun {1} {(a : ℂ) + 1} x = (gzero_U a x : ℂ) := by
-  have h := gzero_hasSum_U (a : ℂ) (x : ℂ)
+(IncompleteGammaZeros.expScaled a x) ∧ regularizedHGFun {1} {(a : ℂ) + 1} x =
+(IncompleteGammaZeros.expScaled a x : ℂ)`. -/
+theorem IncompleteGammaZeros.hasSum_real (a x : ℝ) :
+    HasSum (fun k : ℕ => x ^ k / Real.Gamma (a + k + 1)) (IncompleteGammaZeros.expScaled a x) ∧
+      regularizedHGFun {1} {(a : ℂ) + 1} x = (IncompleteGammaZeros.expScaled a x : ℂ) := by
+  have h := IncompleteGammaZeros.hasSum_expScaled (a : ℂ) (x : ℂ)
   have hr : HasSum (fun k : ℕ => ((x ^ k / Real.Gamma (a + k + 1) : ℝ) : ℂ))
       (regularizedHGFun {1} {(a : ℂ) + 1} x) := by
     refine h.congr_fun fun k => ?_
     rw [show (a : ℂ) + k + 1 = ((a + k + 1 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
     push_cast; ring
-  have hre : HasSum (fun k : ℕ => x ^ k / Real.Gamma (a + k + 1)) (gzero_U a x) := by
+  have hre : HasSum (fun k : ℕ => x ^ k / Real.Gamma (a + k + 1))
+      (IncompleteGammaZeros.expScaled a x) := by
     have := Complex.hasSum_re hr
     simp only [ofReal_re] at this
     exact this
   refine ⟨hre, ?_⟩
   exact hr.unique (Complex.hasSum_ofReal.mpr hre)
 
-/-- Identity under the stated parameter and domain assumptions: `gzero_U a 0 = (Real.Gamma (a +
-1))⁻¹`. -/
-theorem gzero_U_zero (a : ℝ) : gzero_U a 0 = (Real.Gamma (a + 1))⁻¹ := by
-  have h := (gzero_hasSum_real a 0).1
+/-- Identity under the stated parameter and domain assumptions:
+`IncompleteGammaZeros.expScaled a 0 = (Real.Gamma (a + 1))⁻¹`. -/
+theorem IncompleteGammaZeros.expScaled_zero (a : ℝ) : IncompleteGammaZeros.expScaled a 0 =
+    (Real.Gamma (a + 1))⁻¹ := by
+  have h := (IncompleteGammaZeros.hasSum_real a 0).1
   rw [← hasSum_nat_add_iff' 1] at h
   simp only [Finset.sum_range_one, pow_zero, Nat.cast_zero, add_zero, one_div] at h
   have h0 : HasSum (fun k : ℕ => (0 : ℝ) ^ (k + 1) / Real.Gamma (a + ↑(k + 1) + 1)) 0 := by
@@ -207,32 +211,39 @@ theorem gzero_U_zero (a : ℝ) : gzero_U a 0 = (Real.Gamma (a + 1))⁻¹ := by
   linarith [h0.unique h]
 
 /-- Identity under the stated parameter and domain assumptions: `scIncGamma a x = exp (-(x : ℂ)) *
-(gzero_U a x : ℂ)`. -/
-theorem gzero_scIncGamma (a x : ℝ) : scIncGamma a x = exp (-(x : ℂ)) * (gzero_U a x : ℂ) := by
-  rw [scIncGamma, (gzero_hasSum_real a x).2]
+(IncompleteGammaZeros.expScaled a x : ℂ)`. -/
+theorem IncompleteGammaZeros.scIncGamma (a x : ℝ) : scIncGamma a x = exp (-(x : ℂ)) *
+    (IncompleteGammaZeros.expScaled a x : ℂ) := by
+  rw [scIncGamma, (IncompleteGammaZeros.hasSum_real a x).2]
 
-/-- Identity under the stated parameter and domain assumptions: `scIncGamma a x = 0 ↔ gzero_U a x
-= 0`. -/
-theorem gzero_scIncGamma_eq_zero (a x : ℝ) : scIncGamma a x = 0 ↔ gzero_U a x = 0 := by
-  rw [gzero_scIncGamma, mul_eq_zero, ofReal_eq_zero]; simp [exp_ne_zero]
+/-- Identity under the stated parameter and domain assumptions:
+`scIncGamma a x = 0 ↔ IncompleteGammaZeros.expScaled a x = 0`. -/
+theorem IncompleteGammaZeros.scIncGamma_eq_zero (a x : ℝ) : scIncGamma a x = 0 ↔
+    IncompleteGammaZeros.expScaled a x = 0 := by
+  rw [IncompleteGammaZeros.scIncGamma, mul_eq_zero, ofReal_eq_zero]; simp [exp_ne_zero]
 
-/-- Identity under the stated parameter and domain assumptions: `∃ d : ℝ, HasDerivAt (gzero_U a) d
-x ∧ x * d = (x - a) * gzero_U a x + (Real.Gamma a)⁻¹`. -/
-theorem gzero_deriv {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) (x : ℝ) :
-    ∃ d : ℝ, HasDerivAt (gzero_U a) d x ∧ x * d = (x - a) * gzero_U a x + (Real.Gamma a)⁻¹ := by
+/-- Identity under the stated parameter and domain assumptions:
+`∃ d : ℝ, HasDerivAt (IncompleteGammaZeros.expScaled a) d x ∧ x * d = (x - a) *
+IncompleteGammaZeros.expScaled a x + (Real.Gamma a)⁻¹`. -/
+theorem IncompleteGammaZeros.deriv {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) (x : ℝ) :
+    ∃ d : ℝ, HasDerivAt (IncompleteGammaZeros.expScaled a) d x ∧ x * d = (x - a) *
+        IncompleteGammaZeros.expScaled a x + (Real.Gamma a)⁻¹ := by
   refine ⟨(deriv (regularizedHGFun {1} {(a : ℂ) + 1}) x).re,
     (differentiableAt_regularizedConfluent _ _ _).hasDerivAt.real_of_complex, ?_⟩
-  have h := congrArg re (gzero_ode ha (x : ℂ))
-  rw [(gzero_hasSum_real a x).2, show (x : ℂ) - a = ((x - a : ℝ) : ℂ) by push_cast; ring,
+  have h := congrArg re (IncompleteGammaZeros.ode ha (x : ℂ))
+  rw [(IncompleteGammaZeros.hasSum_real a x).2, show (x : ℂ) - a = ((x - a : ℝ) : ℂ) by
+      push_cast; ring,
     Complex.Gamma_ofReal, ← ofReal_inv] at h
   simpa only [re_ofReal_mul, add_re, ofReal_re] using h
 
-/-- The function `(gzero_U a)` is continuous. -/
-theorem gzero_continuous {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) : Continuous (gzero_U a) :=
-  continuous_iff_continuousAt.mpr fun x => (gzero_deriv ha x).choose_spec.1.continuousAt
+/-- The function `(IncompleteGammaZeros.expScaled a)` is continuous. -/
+theorem IncompleteGammaZeros.continuous {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) : Continuous
+    (IncompleteGammaZeros.expScaled a) :=
+  continuous_iff_continuousAt.mpr fun x =>
+      (IncompleteGammaZeros.deriv ha x).choose_spec.1.continuousAt
 
 /-- The sign of `Γ` on `(-k-1, -k)`. -/
-theorem gzero_Gamma_sign (k : ℕ) {x : ℝ} (h1 : -(k : ℝ) - 1 < x) (h2 : x < -k) :
+theorem IncompleteGammaZeros.Gamma_sign (k : ℕ) {x : ℝ} (h1 : -(k : ℝ) - 1 < x) (h2 : x < -k) :
     0 < (-1) ^ (k + 1) * Real.Gamma x := by
   induction k generalizing x with
   | zero =>
@@ -255,7 +266,8 @@ theorem gzero_Gamma_sign (k : ℕ) {x : ℝ} (h1 : -(k : ℝ) - 1 < x) (h2 : x <
 
 /-- A power series with eventually nonnegative coefficients and a positive one is eventually
 positive at `+∞`. -/
-theorem gzero_eventually_pos {c : ℕ → ℝ} {S : ℝ → ℝ} (m : ℕ) (hc : ∀ k, m ≤ k → 0 ≤ c k)
+theorem IncompleteGammaZeros.eventually_pos {c : ℕ → ℝ} {S : ℝ → ℝ} (m : ℕ)
+    (hc : ∀ k, m ≤ k → 0 ≤ c k)
     (hm : 0 < c m) (hS : ∀ y, 0 ≤ y → HasSum (fun k => c k * y ^ k) (S y)) :
     ∀ᶠ y in atTop, 0 < S y := by
   set C := ∑ k ∈ Finset.range m, |c k|
@@ -287,15 +299,17 @@ theorem gzero_eventually_pos {c : ℕ → ℝ} {S : ℝ → ℝ} (m : ℕ) (hc :
   linarith
 
 /-- Nonvanishing under the stated hypotheses: `∀ n : ℕ, (a : ℂ) ≠ -n`. -/
-theorem gzero_nonint {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) : ∀ n : ℕ, (a : ℂ) ≠ -n := by
+theorem IncompleteGammaZeros.nonInteger {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) : ∀ n : ℕ, (a : ℂ) ≠ -n := by
   intro n h
   exact ha (-n) (by exact_mod_cast congrArg re h |>.trans (by simp))
 
-/-- Estimate under the stated parameter and domain assumptions: `∀ᶠ y in atTop, 0 < gzero_U a y`. -/
-theorem gzero_U_atTop (a : ℝ) : ∀ᶠ y in atTop, 0 < gzero_U a y := by
-  refine gzero_eventually_pos (c := fun k => (Real.Gamma (a + k + 1))⁻¹) (⌈|a|⌉₊)
+/-- Estimate under the stated parameter and domain assumptions:
+`∀ᶠ y in atTop, 0 < IncompleteGammaZeros.expScaled a y`. -/
+theorem IncompleteGammaZeros.expScaled_atTop (a : ℝ) : ∀ᶠ y in atTop, 0 <
+    IncompleteGammaZeros.expScaled a y := by
+  refine IncompleteGammaZeros.eventually_pos (c := fun k => (Real.Gamma (a + k + 1))⁻¹) (⌈|a|⌉₊)
     (fun k hk => inv_nonneg.mpr (Real.Gamma_nonneg_of_nonneg ?_)) ?_ fun y _ =>
-      (gzero_hasSum_real a y).1.congr_fun fun k => by ring
+      (IncompleteGammaZeros.hasSum_real a y).1.congr_fun fun k => by ring
   · have := Nat.le_ceil |a|
     have : (⌈|a|⌉₊ : ℝ) ≤ k := by exact_mod_cast hk
     linarith [neg_abs_le a]
@@ -304,16 +318,16 @@ theorem gzero_U_atTop (a : ℝ) : ∀ᶠ y in atTop, 0 < gzero_U a y := by
     linarith [neg_abs_le a]
 
 /-- The series with terms `(fun k : ℕ => ((k ! : ℝ) * (a + k))⁻¹ * y ^ k)` converges to
-`(Real.Gamma a * Real.exp y * gzero_U a (-y))`. -/
-theorem gzero_hasSum_alt {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (y : ℝ) :
+`(Real.Gamma a * Real.exp y * IncompleteGammaZeros.expScaled a (-y))`. -/
+theorem IncompleteGammaZeros.hasSum_alternating {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (y : ℝ) :
     HasSum (fun k : ℕ => ((k ! : ℝ) * (a + k))⁻¹ * y ^ k)
-      (Real.Gamma a * Real.exp y * gzero_U a (-y)) := by
-  have ha' := gzero_nonint ha
+      (Real.Gamma a * Real.exp y * IncompleteGammaZeros.expScaled a (-y)) := by
+  have ha' := IncompleteGammaZeros.nonInteger ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
   have h := scIncGamma_hasSum_alternating ha' (((-y : ℝ)) : ℂ)
-  rw [gzero_scIncGamma] at h
+  rw [IncompleteGammaZeros.scIncGamma] at h
   have hr : HasSum (fun k : ℕ => ((((k ! : ℝ) * (a + k))⁻¹ * y ^ k / Real.Gamma a : ℝ) : ℂ))
-      (exp (-((-y : ℝ) : ℂ)) * (gzero_U a (-y) : ℂ)) := by
+      (exp (-((-y : ℝ) : ℂ)) * (IncompleteGammaZeros.expScaled a (-y) : ℂ)) := by
     refine h.congr_fun fun k => ?_
     rw [Complex.Gamma_ofReal]
     push_cast; field_simp
@@ -325,10 +339,10 @@ theorem gzero_hasSum_alt {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (y : ℝ) :
   · simp only [neg_neg]; ring
 
 /-- Estimate under the stated parameter and domain assumptions: `∀ᶠ x in atBot, 0 < Real.Gamma a *
-gzero_U a x`. -/
-theorem gzero_U_atBot {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
-    ∀ᶠ x in atBot, 0 < Real.Gamma a * gzero_U a x := by
-  have ha' := gzero_nonint ha
+IncompleteGammaZeros.expScaled a x`. -/
+theorem IncompleteGammaZeros.expScaled_atBot {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
+    ∀ᶠ x in atBot, 0 < Real.Gamma a * IncompleteGammaZeros.expScaled a x := by
+  have ha' := IncompleteGammaZeros.nonInteger ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
   set m := ⌈|a|⌉₊ + 1
   have hm : ∀ k, m ≤ k → 0 < a + k := by
@@ -337,10 +351,11 @@ theorem gzero_U_atBot {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     have : ((⌈|a|⌉₊ + 1 : ℕ) : ℝ) ≤ k := by exact_mod_cast hk
     push_cast at this
     linarith [neg_abs_le a]
-  have hpos := gzero_eventually_pos (c := fun k => ((k ! : ℝ) * (a + k))⁻¹)
-    (S := fun y => Real.Gamma a * Real.exp y * gzero_U a (-y)) m
+  have hpos := IncompleteGammaZeros.eventually_pos (c := fun k => ((k ! : ℝ) * (a + k))⁻¹)
+    (S := fun y => Real.Gamma a * Real.exp y * IncompleteGammaZeros.expScaled a (-y)) m
     (fun k hk => inv_nonneg.mpr (mul_nonneg (by positivity) (hm k hk).le))
-    (inv_pos.mpr (mul_pos (by positivity) (hm m le_rfl))) fun y _ => gzero_hasSum_alt ha y
+    (inv_pos.mpr (mul_pos (by positivity) (hm m le_rfl))) fun y _ =>
+        IncompleteGammaZeros.hasSum_alternating ha y
   filter_upwards [tendsto_neg_atBot_atTop.eventually hpos] with x hx
   simp only [neg_neg] at hx
   have he := Real.exp_pos (-x)
@@ -349,14 +364,15 @@ theorem gzero_U_atBot {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
   nlinarith
 
 /-- On each half-line `γ*(a, ·)` has at most one zero: `|x|^a e^{-x} U(x)` is strictly monotone. -/
-theorem gzero_mono_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
-    StrictMonoOn (fun t : ℝ => Real.Gamma a * (t ^ a * Real.exp (-t) * gzero_U a t)) (Ioi 0) := by
-  have ha' := gzero_nonint ha
+theorem IncompleteGammaZeros.mono_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
+    StrictMonoOn (fun t : ℝ => Real.Gamma a *
+        (t ^ a * Real.exp (-t) * IncompleteGammaZeros.expScaled a t)) (Ioi 0) := by
+  have ha' := IncompleteGammaZeros.nonInteger ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
-  set g := fun t : ℝ => Real.Gamma a * (t ^ a * Real.exp (-t) * gzero_U a t)
+  set g := fun t : ℝ => Real.Gamma a * (t ^ a * Real.exp (-t) * IncompleteGammaZeros.expScaled a t)
   have hd : ∀ t : ℝ, 0 < t → HasDerivAt g (t ^ (a - 1) * Real.exp (-t)) t := by
     intro t ht
-    obtain ⟨d, hdU, hode⟩ := gzero_deriv ha' t
+    obtain ⟨d, hdU, hode⟩ := IncompleteGammaZeros.deriv ha' t
     have h1 := Real.hasDerivAt_rpow_const (x := t) (p := a) (Or.inl ht.ne')
     have h2 := (Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)
     have h := ((h1.mul h2).mul hdU).const_mul (Real.Gamma a)
@@ -378,16 +394,17 @@ theorem gzero_mono_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
   exact hm
 
 /-- Identity under the stated parameter and domain assumptions: `StrictAntiOn (fun t : ℝ =>
-Real.Gamma a * ((-t) ^ a * Real.exp (-t) * gzero_U a t)) (Iio 0)`. -/
-theorem gzero_mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
+Real.Gamma a * ((-t) ^ a * Real.exp (-t) * IncompleteGammaZeros.expScaled a t)) (Iio 0)`. -/
+theorem IncompleteGammaZeros.mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     StrictAntiOn (fun t : ℝ => Real.Gamma a *
-        ((-t) ^ a * Real.exp (-t) * gzero_U a t)) (Iio 0) := by
-  have ha' := gzero_nonint ha
+        ((-t) ^ a * Real.exp (-t) * IncompleteGammaZeros.expScaled a t)) (Iio 0) := by
+  have ha' := IncompleteGammaZeros.nonInteger ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
-  set g := fun t : ℝ => Real.Gamma a * ((-t) ^ a * Real.exp (-t) * gzero_U a t)
+  set g := fun t : ℝ => Real.Gamma a *
+      ((-t) ^ a * Real.exp (-t) * IncompleteGammaZeros.expScaled a t)
   have hd : ∀ t : ℝ, t < 0 → HasDerivAt g (-((-t) ^ (a - 1) * Real.exp (-t))) t := by
     intro t ht
-    obtain ⟨d, hdU, hode⟩ := gzero_deriv ha' t
+    obtain ⟨d, hdU, hode⟩ := IncompleteGammaZeros.deriv ha' t
     have h1 := (Real.hasDerivAt_rpow_const (x := -t) (p := a) (Or.inl (by linarith))).comp t
       (hasDerivAt_neg t)
     have h2 := (Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)
@@ -411,17 +428,21 @@ theorem gzero_mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
   exact hm
 
 /-- Identity under the stated parameter and domain assumptions: `x = y`. -/
-theorem gzero_unique_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ} (hx : 0 < x) (hy : 0 < y)
-    (hUx : gzero_U a x = 0) (hUy : gzero_U a y = 0) : x = y :=
-  (gzero_mono_pos ha).injOn hx hy (by simp only [hUx, hUy, mul_zero])
+theorem IncompleteGammaZeros.unique_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ}
+    (hx : 0 < x) (hy : 0 < y)
+    (hUx : IncompleteGammaZeros.expScaled a x = 0)
+        (hUy : IncompleteGammaZeros.expScaled a y = 0) : x = y :=
+  (IncompleteGammaZeros.mono_pos ha).injOn hx hy (by simp only [hUx, hUy, mul_zero])
 
 /-- Identity under the stated parameter and domain assumptions: `x = y`. -/
-theorem gzero_unique_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ} (hx : x < 0) (hy : y < 0)
-    (hUx : gzero_U a x = 0) (hUy : gzero_U a y = 0) : x = y :=
-  (gzero_mono_neg ha).injOn hx hy (by simp only [hUx, hUy, mul_zero])
+theorem IncompleteGammaZeros.unique_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ}
+    (hx : x < 0) (hy : y < 0)
+    (hUx : IncompleteGammaZeros.expScaled a x = 0)
+        (hUy : IncompleteGammaZeros.expScaled a y = 0) : x = y :=
+  (IncompleteGammaZeros.mono_neg ha).injOn hx hy (by simp only [hUx, hUy, mul_zero])
 
 /-- Nonvanishing under the stated hypotheses: `∀ n : ℤ, a ≠ n`. -/
-theorem gzero_nonint_of_Ioo {a : ℝ} {m : ℤ} (h1 : (m : ℝ) < a) (h2 : a < m + 1) :
+theorem IncompleteGammaZeros.nonInteger_of_Ioo {a : ℝ} {m : ℤ} (h1 : (m : ℝ) < a) (h2 : a < m + 1) :
     ∀ n : ℤ, a ≠ n := by
   intro n hn
   rw [hn] at h1 h2
@@ -430,24 +451,26 @@ theorem gzero_nonint_of_Ioo {a : ℝ} {m : ℤ} (h1 : (m : ℝ) < a) (h2 : a < m
   omega
 
 /-- The negative zero, when it exists and is unique, is the `ε`-chosen one. -/
-theorem gzero_neg_exists {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (hs : 0 < Real.Gamma a * gzero_U a 0 → False)
-    (h0 : gzero_U a 0 ≠ 0) :
-    ∃ x, x < 0 ∧ gzero_U a x = 0 := by
-  have ha' := gzero_nonint ha
-  obtain ⟨X, hX, hX0⟩ := ((gzero_U_atBot ha).and (eventually_lt_atBot 0)).exists
-  have hc := (gzero_continuous ha').continuousOn (s := Icc X 0)
+theorem IncompleteGammaZeros.neg_exists {a : ℝ} (ha : ∀ n : ℤ, a ≠ n)
+    (hs : 0 < Real.Gamma a * IncompleteGammaZeros.expScaled a 0 → False)
+    (h0 : IncompleteGammaZeros.expScaled a 0 ≠ 0) :
+    ∃ x, x < 0 ∧ IncompleteGammaZeros.expScaled a x = 0 := by
+  have ha' := IncompleteGammaZeros.nonInteger ha
+  obtain ⟨X, hX, hX0⟩ :=
+      ((IncompleteGammaZeros.expScaled_atBot ha).and (eventually_lt_atBot 0)).exists
+  have hc := (IncompleteGammaZeros.continuous ha').continuousOn (s := Icc X 0)
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
   rcases lt_or_gt_of_ne hG with hGn | hGp
   · -- `U X < 0 < U 0`
-    have hUX : gzero_U a X < 0 := by nlinarith
-    have hU0 : 0 < gzero_U a 0 := by
+    have hUX : IncompleteGammaZeros.expScaled a X < 0 := by nlinarith
+    have hU0 : 0 < IncompleteGammaZeros.expScaled a 0 := by
       rcases lt_or_gt_of_ne h0 with h | h
       · exact absurd (mul_pos_of_neg_of_neg hGn h) hs
       · exact h
     obtain ⟨x, hx, hx0⟩ := intermediate_value_Ioo hX0.le hc ⟨hUX, hU0⟩
     exact ⟨x, hx.2, hx0⟩
-  · have hUX : 0 < gzero_U a X := by nlinarith
-    have hU0 : gzero_U a 0 < 0 := by
+  · have hUX : 0 < IncompleteGammaZeros.expScaled a X := by nlinarith
+    have hU0 : IncompleteGammaZeros.expScaled a 0 < 0 := by
       rcases lt_or_gt_of_ne h0 with h | h
       · exact h
       · exact absurd (mul_pos hGp h) hs
@@ -455,7 +478,8 @@ theorem gzero_neg_exists {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (hs : 0 < Real.Ga
     exact ⟨x, hx.2, hx0⟩
 
 /-- The series with terms `(fun k : ℕ => y ^ k / (k ! : ℝ))` converges to `(Real.exp y)`. -/
-theorem gzero_exp_series (y : ℝ) : HasSum (fun k : ℕ => y ^ k / (k ! : ℝ)) (Real.exp y) := by
+theorem IncompleteGammaZeros.exp_series (y : ℝ) : HasSum (fun k : ℕ => y ^ k / (k ! : ℝ))
+    (Real.exp y) := by
   rw [Real.exp_eq_exp_ℝ]; exact NormedSpace.expSeries_div_hasSum_exp y
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.scIncGammaNegativeZero a < 0
@@ -464,10 +488,11 @@ theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1
     (ha1 : a < 2-2*(n : ℝ)) :
     Real.scIncGammaNegativeZero a < 0 ∧ ∀ x : ℝ, scIncGamma a x=0 ↔
         x=Real.scIncGammaNegativeZero a := by
-  have ha : ∀ m : ℤ, a ≠ m := gzero_nonint_of_Ioo (m := 1 - 2 * n) (by push_cast; linarith)
+  have ha : ∀ m : ℤ, a ≠ m :=
+      IncompleteGammaZeros.nonInteger_of_Ioo (m := 1 - 2 * n) (by push_cast; linarith)
     (by push_cast; linarith)
   have hG : Real.Gamma a < 0 := by
-    have h := gzero_Gamma_sign (2 * n - 2) (x := a)
+    have h := IncompleteGammaZeros.Gamma_sign (2 * n - 2) (x := a)
         (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
       (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
     rw [show 2 * n - 2 + 1 = 2 * (n - 1) + 1 by omega, pow_succ, pow_mul] at h
@@ -477,30 +502,32 @@ theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1
   have hG1 : 0 < Real.Gamma (a + 1) := by
     rw [Real.Gamma_add_one hneg.ne]
     nlinarith
-  have hU0 : 0 < gzero_U a 0 := by rw [gzero_U_zero]; exact inv_pos.mpr hG1
-  obtain ⟨x0, hx0, hUx0⟩ := gzero_neg_exists ha (fun h => by nlinarith) hU0.ne'
+  have hU0 : 0 < IncompleteGammaZeros.expScaled a 0 := by rw [IncompleteGammaZeros.expScaled_zero];
+                                                          exact inv_pos.mpr hG1
+  obtain ⟨x0, hx0, hUx0⟩ := IncompleteGammaZeros.neg_exists ha (fun h => by nlinarith) hU0.ne'
   -- no zeros on `[0, ∞)`
-  have hpos : ∀ x, 0 < x → gzero_U a x ≠ 0 := by
+  have hpos : ∀ x, 0 < x → IncompleteGammaZeros.expScaled a x ≠ 0 := by
     intro x hx hUx
-    obtain ⟨Y, hY, hYx⟩ := ((gzero_U_atTop a).and (eventually_gt_atTop x)).exists
-    have hm := gzero_mono_pos ha hx (hx.trans hYx) hYx
+    obtain ⟨Y, hY, hYx⟩ :=
+        ((IncompleteGammaZeros.expScaled_atTop a).and (eventually_gt_atTop x)).exists
+    have hm := IncompleteGammaZeros.mono_pos ha hx (hx.trans hYx) hYx
     simp only [hUx, mul_zero] at hm
-    have : 0 < Y ^ a * Real.exp (-Y) * gzero_U a Y :=
+    have : 0 < Y ^ a * Real.exp (-Y) * IncompleteGammaZeros.expScaled a Y :=
       mul_pos (mul_pos (Real.rpow_pos_of_pos (hx.trans hYx) _) (Real.exp_pos _)) hY
     nlinarith
-  have hzero : ∀ x : ℝ, gzero_U a x = 0 ↔ x = x0 := by
+  have hzero : ∀ x : ℝ, IncompleteGammaZeros.expScaled a x = 0 ↔ x = x0 := by
     intro x
     refine ⟨fun hx => ?_, fun hx => hx ▸ hUx0⟩
     rcases lt_trichotomy x 0 with h | h | h
-    · exact gzero_unique_neg ha h hx0 hx hUx0
+    · exact IncompleteGammaZeros.unique_neg ha h hx0 hx hUx0
     · rw [h] at hx; exact absurd hx hU0.ne'
     · exact absurd hx (hpos x h)
   have he : Real.scIncGammaNegativeZero a = x0 := by
     have hs := Classical.epsilon_spec (p := fun x : ℝ => x < 0 ∧ scIncGamma a x = 0)
-      ⟨x0, hx0, (gzero_scIncGamma_eq_zero a x0).mpr hUx0⟩
-    exact (hzero _).mp ((gzero_scIncGamma_eq_zero a _).mp hs.2)
+      ⟨x0, hx0, (IncompleteGammaZeros.scIncGamma_eq_zero a x0).mpr hUx0⟩
+    exact (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero a _).mp hs.2)
   rw [he]
-  exact ⟨hx0, fun x => (gzero_scIncGamma_eq_zero a x).trans (hzero x)⟩
+  exact ⟨hx0, fun x => (IncompleteGammaZeros.scIncGamma_eq_zero a x).trans (hzero x)⟩
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.scIncGammaNegativeZero a < 0
 ∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ, scIncGamma a x=0 ↔
@@ -509,10 +536,11 @@ theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(
     (ha1 : a < 1-2*(n : ℝ)) :
     Real.scIncGammaNegativeZero a < 0 ∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ,
         scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a ∨ x=Real.scIncGammaPositiveZero a := by
-  have ha : ∀ m : ℤ, a ≠ m := gzero_nonint_of_Ioo (m := -2 * n) (by push_cast; linarith)
+  have ha : ∀ m : ℤ, a ≠ m :=
+      IncompleteGammaZeros.nonInteger_of_Ioo (m := -2 * n) (by push_cast; linarith)
     (by push_cast; linarith)
   have hG : 0 < Real.Gamma a := by
-    have h := gzero_Gamma_sign (2 * n - 1) (x := a)
+    have h := IncompleteGammaZeros.Gamma_sign (2 * n - 1) (x := a)
         (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
       (by rw [Nat.cast_sub (by omega)]; push_cast; linarith)
     rw [show 2 * n - 1 + 1 = 2 * n by omega, pow_mul] at h
@@ -521,33 +549,36 @@ theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(
   have hneg : a < 0 := by linarith
   have hG1 : Real.Gamma (a + 1) < 0 := by
     rw [Real.Gamma_add_one hneg.ne]; nlinarith
-  have hU0 : gzero_U a 0 < 0 := by rw [gzero_U_zero]; exact inv_lt_zero.mpr hG1
-  obtain ⟨x0, hx0, hUx0⟩ := gzero_neg_exists ha (fun h => by nlinarith) hU0.ne
+  have hU0 : IncompleteGammaZeros.expScaled a 0 < 0 := by rw [IncompleteGammaZeros.expScaled_zero];
+                                                          exact inv_lt_zero.mpr hG1
+  obtain ⟨x0, hx0, hUx0⟩ := IncompleteGammaZeros.neg_exists ha (fun h => by nlinarith) hU0.ne
   -- the positive zero
-  have hc : Continuous (gzero_U a) := gzero_continuous (gzero_nonint ha)
-  obtain ⟨Y, hY, hY0⟩ := ((gzero_U_atTop a).and (eventually_gt_atTop 0)).exists
+  have hc : Continuous (IncompleteGammaZeros.expScaled a) :=
+      IncompleteGammaZeros.continuous (IncompleteGammaZeros.nonInteger ha)
+  obtain ⟨Y, hY, hY0⟩ :=
+      ((IncompleteGammaZeros.expScaled_atTop a).and (eventually_gt_atTop 0)).exists
   obtain ⟨y0, hy0, hUy0⟩ := intermediate_value_Ioo hY0.le hc.continuousOn ⟨hU0, hY⟩
-  have hzero : ∀ x : ℝ, gzero_U a x = 0 ↔ x = x0 ∨ x = y0 := by
+  have hzero : ∀ x : ℝ, IncompleteGammaZeros.expScaled a x = 0 ↔ x = x0 ∨ x = y0 := by
     intro x
     refine ⟨fun hx => ?_, fun hx => hx.elim (fun h => h ▸ hUx0) (fun h => h ▸ hUy0)⟩
     rcases lt_trichotomy x 0 with h | h | h
-    · exact Or.inl (gzero_unique_neg ha h hx0 hx hUx0)
+    · exact Or.inl (IncompleteGammaZeros.unique_neg ha h hx0 hx hUx0)
     · rw [h] at hx; exact absurd hx hU0.ne
-    · exact Or.inr (gzero_unique_pos ha h hy0.1 hx hUy0)
+    · exact Or.inr (IncompleteGammaZeros.unique_pos ha h hy0.1 hx hUy0)
   have he1 : Real.scIncGammaNegativeZero a = x0 := by
     have hs := Classical.epsilon_spec (p := fun x : ℝ => x < 0 ∧ scIncGamma a x = 0)
-      ⟨x0, hx0, (gzero_scIncGamma_eq_zero a x0).mpr hUx0⟩
-    rcases (hzero _).mp ((gzero_scIncGamma_eq_zero a _).mp hs.2) with h | h
+      ⟨x0, hx0, (IncompleteGammaZeros.scIncGamma_eq_zero a x0).mpr hUx0⟩
+    rcases (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero a _).mp hs.2) with h | h
     · exact h
     · exact absurd hs.1 (not_lt.mpr (h ▸ hy0.1.le))
   have he2 : Real.scIncGammaPositiveZero a = y0 := by
     have hs := Classical.epsilon_spec (p := fun x : ℝ => 0 < x ∧ scIncGamma a x = 0)
-      ⟨y0, hy0.1, (gzero_scIncGamma_eq_zero a y0).mpr hUy0⟩
-    rcases (hzero _).mp ((gzero_scIncGamma_eq_zero a _).mp hs.2) with h | h
+      ⟨y0, hy0.1, (IncompleteGammaZeros.scIncGamma_eq_zero a y0).mpr hUy0⟩
+    rcases (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero a _).mp hs.2) with h | h
     · exact absurd hs.1 (not_lt.mpr (h ▸ hx0.le))
     · exact h
   rw [he1, he2]
-  exact ⟨hx0, hy0.1, fun x => (gzero_scIncGamma_eq_zero a x).trans (hzero x)⟩
+  exact ⟨hx0, hy0.1, fun x => (IncompleteGammaZeros.scIncGamma_eq_zero a x).trans (hzero x)⟩
 
 /-- The stated relation follows from the given hypotheses: `StrictAntiOn
 Real.scIncGammaNegativeZero (Ioo (-1) 0)`. -/
@@ -555,16 +586,17 @@ theorem Real.scIncGammaNegativeZero_strictAnti  :
     StrictAntiOn Real.scIncGammaNegativeZero (Ioo (-1) 0) := by
   intro a1 ha1 a2 ha2 h12
   have hn : ∀ a ∈ Ioo (-1 : ℝ) 0, (∀ m : ℤ, a ≠ m) := fun a ha =>
-    gzero_nonint_of_Ioo (m := -1) (by push_cast; linarith [ha.1]) (by push_cast; linarith [ha.2])
+    IncompleteGammaZeros.nonInteger_of_Ioo (m := -1) (by push_cast; linarith [ha.1])
+        (by push_cast; linarith [ha.2])
   have hz : ∀ a ∈ Ioo (-1 : ℝ) 0, Real.scIncGammaNegativeZero a < 0 ∧
-      gzero_U a (Real.scIncGammaNegativeZero a) = 0 := by
+      IncompleteGammaZeros.expScaled a (Real.scIncGammaNegativeZero a) = 0 := by
     intro a ha
     obtain ⟨hneg, hiff⟩ := scIncGamma_one_negative_zero (n := 1) le_rfl (a := a)
       (by norm_num; linarith [ha.1]) (by norm_num; linarith [ha.2])
-    exact ⟨hneg, (gzero_scIncGamma_eq_zero a _).mp ((hiff _).mpr rfl)⟩
+    exact ⟨hneg, (IncompleteGammaZeros.scIncGamma_eq_zero a _).mp ((hiff _).mpr rfl)⟩
   have hG : ∀ a ∈ Ioo (-1 : ℝ) 0, Real.Gamma a < 0 := by
     intro a ha
-    have h := gzero_Gamma_sign 0 (x := a) (by norm_num; linarith [ha.1])
+    have h := IncompleteGammaZeros.Gamma_sign 0 (x := a) (by norm_num; linarith [ha.1])
         (by norm_num; linarith [ha.2])
     norm_num at h; linarith
   obtain ⟨hx1, hU1⟩ := hz a1 ha1
@@ -573,13 +605,13 @@ theorem Real.scIncGammaNegativeZero_strictAnti  :
   set x2 := Real.scIncGammaNegativeZero a2
   set y := -x1
   have hy : 0 < y := by simp only [y]; linarith
-  have hS1 := gzero_hasSum_alt (hn a1 ha1) y
-  have hS2 := gzero_hasSum_alt (hn a2 ha2) y
+  have hS1 := IncompleteGammaZeros.hasSum_alternating (hn a1 ha1) y
+  have hS2 := IncompleteGammaZeros.hasSum_alternating (hn a2 ha2) y
   simp only [y, neg_neg, hU1, mul_zero] at hS1
   have hlt := hasSum_lt (i := 0) (fun k => ?_) ?_ hS2 hS1
   · -- `U_{a₂}(x₁) > 0`
     simp only [y, neg_neg] at hlt
-    have hU : 0 < gzero_U a2 x1 := by
+    have hU : 0 < IncompleteGammaZeros.expScaled a2 x1 := by
       have := Real.exp_pos (-x1)
       by_contra hc; push Not at hc
       nlinarith [mul_nonneg (mul_nonneg (neg_nonneg.mpr (hG a2 ha2).le) this.le)
@@ -587,7 +619,7 @@ theorem Real.scIncGammaNegativeZero_strictAnti  :
     by_contra hle
     push Not at hle
     rcases hle.lt_or_eq with hlt' | heq
-    · have := gzero_mono_neg (hn a2 ha2) hx1 hx2 hlt'
+    · have := IncompleteGammaZeros.mono_neg (hn a2 ha2) hx1 hx2 hlt'
       simp only [hU2, mul_zero] at this
       have hp : 0 < (-x1) ^ a2 * Real.exp (-x1) :=
         mul_pos (Real.rpow_pos_of_pos (by linarith) _) (Real.exp_pos _)
@@ -611,17 +643,20 @@ Real.scIncGammaNegativeZero a ∧ Real.scIncGammaNegativeZero a < Real.log |a|`.
 @[dlmf 8.13.E1]
 theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0) :
     1+1/a < Real.scIncGammaNegativeZero a ∧ Real.scIncGammaNegativeZero a < Real.log |a| := by
-  have ha : ∀ m : ℤ, a ≠ m := gzero_nonint_of_Ioo (m := -1) (by push_cast; linarith)
+  have ha : ∀ m : ℤ, a ≠ m :=
+      IncompleteGammaZeros.nonInteger_of_Ioo (m := -1) (by push_cast; linarith)
     (by push_cast; linarith)
   obtain ⟨hneg, hiff⟩ := scIncGamma_one_negative_zero (n := 1) le_rfl (a := a)
     (by norm_num; linarith) (by norm_num; linarith)
   set x0 := Real.scIncGammaNegativeZero a
-  have hUx0 : gzero_U a x0 = 0 := (gzero_scIncGamma_eq_zero a x0).mp ((hiff x0).mpr rfl)
+  have hUx0 : IncompleteGammaZeros.expScaled a x0 = 0 :=
+      (IncompleteGammaZeros.scIncGamma_eq_zero a x0).mp ((hiff x0).mpr rfl)
   have hG : Real.Gamma a < 0 := by
-    have h := gzero_Gamma_sign 0 (x := a) (by norm_num; linarith) (by norm_num; linarith)
+    have h := IncompleteGammaZeros.Gamma_sign 0 (x := a) (by norm_num; linarith)
+        (by norm_num; linarith)
     norm_num at h; linarith
-  have hm := gzero_mono_neg ha
-  have hS := gzero_hasSum_alt ha
+  have hm := IncompleteGammaZeros.mono_neg ha
+  have hS := IncompleteGammaZeros.hasSum_alternating ha
   have hpa : 0 < -a := by linarith
   have h1a : 0 < 1 + a := by linarith
   have ha0' : a ≠ 0 := ha1.ne
@@ -632,7 +667,7 @@ theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0
     have hy : 0 < y := div_pos h1a hpa
     have hpt : -y = 1 + 1 / a := by simp only [y]; field_simp; ring
     have ht := (hasSum_nat_add_iff' 2).mpr (hS y)
-    have htpos : 0 < Real.Gamma a * Real.exp y * gzero_U a (-y) -
+    have htpos : 0 < Real.Gamma a * Real.exp y * IncompleteGammaZeros.expScaled a (-y) -
         ∑ k ∈ Finset.range 2, ((k ! : ℝ) * (a + k))⁻¹ * y ^ k := by
       refine lt_of_lt_of_le ?_ (le_hasSum ht 0 fun k _ => ?_)
       · have : 0 < a + ((0 + 2 : ℕ) : ℝ) := by push_cast; linarith
@@ -647,7 +682,7 @@ theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0
       field_simp
       ring_nf
     rw [h01, sub_zero] at htpos
-    have hU : gzero_U a (1 + 1 / a) < 0 := by
+    have hU : IncompleteGammaZeros.expScaled a (1 + 1 / a) < 0 := by
       rw [← hpt]
       have := Real.exp_pos y
       by_contra hc; push Not at hc
@@ -672,12 +707,13 @@ theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0
     -- comparison series
     have hb : HasSum (fun k : ℕ => (1 + a)⁻¹ * (L ^ k / (k ! : ℝ)) +
         if k = 0 then a⁻¹ - (1 + a)⁻¹ else 0) 0 := by
-      have := ((gzero_exp_series L).mul_left (1 + a)⁻¹).add (hasSum_ite_eq 0 (a⁻¹ - (1 + a)⁻¹))
+      have := ((IncompleteGammaZeros.exp_series L).mul_left (1 + a)⁻¹).add
+          (hasSum_ite_eq 0 (a⁻¹ - (1 + a)⁻¹))
       convert this using 1
       rw [heL]; field_simp; ring
     have hlt := hasSum_lt (f := fun k : ℕ => ((k ! : ℝ) * (a + k))⁻¹ * L ^ k) (i := 2)
       (fun k => ?_) ?_ (hS L) hb
-    · have hU : 0 < gzero_U a (Real.log |a|) := by
+    · have hU : 0 < IncompleteGammaZeros.expScaled a (Real.log |a|) := by
         rw [← hpt]
         have := Real.exp_pos L
         by_contra hc; push Not at hc
@@ -1103,7 +1139,7 @@ theorem Real.gammaDiDonato_gamma (p : ℝ) {x : ℝ} (hx : 0 < x) :
   ring
 
 /-- Integrability of `exp (-t²/2) t^q` on `(x, ∞)`, `x > 0`. -/
-private lemma dd_integrableOn (q : ℝ) {x : ℝ} (hx : 0 < x) :
+private lemma DiDonatoApproximation.integrableOn (q : ℝ) {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun t : ℝ => Real.exp (-t^2/2) * t^q) (Ioi x) := by
   rcases le_or_gt 0 q with hq | hq
   · have h := (integrableOn_rpow_mul_exp_neg_mul_sq (b := 1/2) (by norm_num) (s := q)
@@ -1125,16 +1161,19 @@ private lemma dd_integrableOn (q : ℝ) {x : ℝ} (hx : 0 < x) :
       congr 1; ring
 
 /-- The integral `∫_x^∞ exp (-t²/2) t^q dt`. -/
-private noncomputable def ddG (q x : ℝ) : ℝ := ∫ t : ℝ in Ioi x, Real.exp (-t^2/2) * t^q
+private noncomputable def DiDonatoApproximation.gaussTail (q x : ℝ) : ℝ := ∫ t : ℝ in Ioi x,
+    Real.exp (-t^2/2) * t^q
 
-private lemma ddG_nonneg (q : ℝ) {x : ℝ} (hx : 0 < x) : 0 ≤ ddG q x :=
+private lemma DiDonatoApproximation.gaussTail_nonneg (q : ℝ) {x : ℝ} (hx : 0 < x) : 0 ≤
+    DiDonatoApproximation.gaussTail q x :=
   setIntegral_nonneg measurableSet_Ioi fun t ht => by
     have : 0 < t := lt_trans hx ht
     positivity
 
 /-- Integration by parts: `G(p) = x^{p-1} e^{-x²/2} + (p-1) G(p-2)`. -/
-private lemma ddG_rec (p : ℝ) {x : ℝ} (hx : 0 < x) :
-    ddG p x = x^(p-1) * Real.exp (-x^2/2) + (p-1) * ddG (p-2) x := by
+private lemma DiDonatoApproximation.gaussTail_rec (p : ℝ) {x : ℝ} (hx : 0 < x) :
+    DiDonatoApproximation.gaussTail p x = x^(p-1) * Real.exp (-x^2/2) + (p-1) *
+        DiDonatoApproximation.gaussTail (p-2) x := by
   set f : ℝ → ℝ := fun t => -(t^(p-1) * Real.exp (-t^2/2))
   have hderiv : ∀ t ∈ Ioi x, HasDerivAt f
       (Real.exp (-t^2/2) * t^p - (p-1) * (Real.exp (-t^2/2) * t^(p-2))) t := by
@@ -1158,7 +1197,8 @@ private lemma ddG_rec (p : ℝ) {x : ℝ} (hx : 0 < x) :
       (by fun_prop : Continuous fun t : ℝ => Real.exp (-t^2/2)).continuousAt).neg
   have hint : IntegrableOn
       (fun t => Real.exp (-t^2/2) * t^p - (p-1) * (Real.exp (-t^2/2) * t^(p-2))) (Ioi x) :=
-    (dd_integrableOn p hx).sub ((dd_integrableOn (p-2) hx).const_mul _)
+    (DiDonatoApproximation.integrableOn p hx).sub
+        ((DiDonatoApproximation.integrableOn (p-2) hx).const_mul _)
   have hlim : Tendsto f atTop (𝓝 0) := by
     have h := (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero ((p-1)/2) (1/2) (by norm_num)).comp
       (tendsto_pow_atTop (n := 2) (by norm_num) : Tendsto (fun t : ℝ => t^2) atTop atTop)
@@ -1172,20 +1212,24 @@ private lemma ddG_rec (p : ℝ) {x : ℝ} (hx : 0 < x) :
     · ring_nf
     · congr 1; push_cast; ring
   have h := integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv hint hlim
-  rw [integral_sub (dd_integrableOn p hx) ((dd_integrableOn (p-2) hx).const_mul _),
+  rw [integral_sub (DiDonatoApproximation.integrableOn p hx)
+      ((DiDonatoApproximation.integrableOn (p-2) hx).const_mul _),
     integral_const_mul] at h
-  simp only [ddG, f] at h ⊢
+  simp only [DiDonatoApproximation.gaussTail, f] at h ⊢
   linarith
 
 /-- `G(1) = e^{-x²/2}`. -/
-private lemma ddG_one {x : ℝ} (hx : 0 < x) : ddG 1 x = Real.exp (-x^2/2) := by
-  rw [ddG_rec 1 hx]; simp
+private lemma DiDonatoApproximation.gaussTail_one {x : ℝ} (hx : 0 < x) :
+    DiDonatoApproximation.gaussTail 1 x = Real.exp (-x^2/2) := by
+  rw [DiDonatoApproximation.gaussTail_rec 1 hx]; simp
 
 /-- For `q ≤ 1`, `G(q) ≤ x^{q-1} e^{-x²/2}`. -/
-private lemma ddG_le {q : ℝ} (hq : q ≤ 1) {x : ℝ} (hx : 0 < x) :
-    ddG q x ≤ x^(q-1) * Real.exp (-x^2/2) := by
-  rw [← ddG_one hx, ddG, ddG, ← integral_const_mul]
-  refine setIntegral_mono_on (dd_integrableOn q hx) ((dd_integrableOn 1 hx).const_mul _)
+private lemma DiDonatoApproximation.gaussTail_le {q : ℝ} (hq : q ≤ 1) {x : ℝ} (hx : 0 < x) :
+    DiDonatoApproximation.gaussTail q x ≤ x^(q-1) * Real.exp (-x^2/2) := by
+  rw [← DiDonatoApproximation.gaussTail_one hx, DiDonatoApproximation.gaussTail,
+      DiDonatoApproximation.gaussTail, ← integral_const_mul]
+  refine setIntegral_mono_on (DiDonatoApproximation.integrableOn q hx)
+      ((DiDonatoApproximation.integrableOn 1 hx).const_mul _)
     measurableSet_Ioi fun t ht => ?_
   have ht0 : 0 < t := lt_trans hx ht
   have e : t^q = t^(q-1) * t := by rw [← Real.rpow_add_one ht0.ne']; ring_nf
@@ -1194,13 +1238,14 @@ private lemma ddG_le {q : ℝ} (hq : q ≤ 1) {x : ℝ} (hx : 0 < x) :
   have h0 : 0 ≤ Real.exp (-t^2/2) * t := by positivity
   nlinarith [h0, this]
 
-private lemma dd_F_eq (p x : ℝ) :
-    Real.gammaDiDonatoF p x = x^(-p) * Real.exp (x^2/2) * ddG p x := rfl
+private lemma DiDonatoApproximation.F_eq (p x : ℝ) :
+    Real.gammaDiDonatoF p x = x^(-p) * Real.exp (x^2/2) * DiDonatoApproximation.gaussTail p x := rfl
 
 /-- `F(p) = 1/x + (p-1) x^{-2} F(p-2)`. -/
-private lemma dd_F_rec (p : ℝ) {x : ℝ} (hx : 0 < x) :
+private lemma DiDonatoApproximation.F_rec (p : ℝ) {x : ℝ} (hx : 0 < x) :
     Real.gammaDiDonatoF p x = x⁻¹ + (p-1) * x⁻¹^2 * Real.gammaDiDonatoF (p-2) x := by
-  rw [dd_F_eq p x, dd_F_eq (p-2) x, ddG_rec p hx]
+  rw [DiDonatoApproximation.F_eq p x, DiDonatoApproximation.F_eq (p-2) x,
+      DiDonatoApproximation.gaussTail_rec p hx]
   have e1 : x^(-p) * x^(p-1) = x⁻¹ := by
     rw [← Real.rpow_add hx, show -p + (p-1) = -1 by ring, Real.rpow_neg_one]
   have e2 : x^(-p) = x⁻¹^2 * x^(-(p-2)) := by
@@ -1208,19 +1253,20 @@ private lemma dd_F_rec (p : ℝ) {x : ℝ} (hx : 0 < x) :
       Real.rpow_two, inv_pow]
   have e3 : Real.exp (x^2/2) * Real.exp (-x^2/2) = 1 := by
     rw [← Real.exp_add, show x^2/2 + -x^2/2 = (0:ℝ) by ring, Real.exp_zero]
-  calc x^(-p) * Real.exp (x^2/2) * (x^(p-1) * Real.exp (-x^2/2) + (p-1) * ddG (p-2) x)
+  calc x^(-p) * Real.exp (x^2/2) *
+         (x^(p-1) * Real.exp (-x^2/2) + (p-1) * DiDonatoApproximation.gaussTail (p-2) x)
       = (x^(-p) * x^(p-1)) * (Real.exp (x^2/2) * Real.exp (-x^2/2))
-        + (p-1) * x^(-p) * Real.exp (x^2/2) * ddG (p-2) x := by ring
+        + (p-1) * x^(-p) * Real.exp (x^2/2) * DiDonatoApproximation.gaussTail (p-2) x := by ring
     _ = _ := by rw [e1, e3, e2]; ring
 
 /-- For `q ≤ 1`, `0 ≤ F(q, x) ≤ 1/x`. -/
-private lemma dd_F_le {q : ℝ} (hq : q ≤ 1) {x : ℝ} (hx : 0 < x) :
+private lemma DiDonatoApproximation.F_le {q : ℝ} (hq : q ≤ 1) {x : ℝ} (hx : 0 < x) :
     0 ≤ Real.gammaDiDonatoF q x ∧ Real.gammaDiDonatoF q x ≤ x⁻¹ := by
-  rw [dd_F_eq q x]
-  refine ⟨by have := ddG_nonneg q hx; positivity, ?_⟩
-  have h := ddG_le hq hx
+  rw [DiDonatoApproximation.F_eq q x]
+  refine ⟨by have := DiDonatoApproximation.gaussTail_nonneg q hx; positivity, ?_⟩
+  have h := DiDonatoApproximation.gaussTail_le hq hx
   have hpos : 0 ≤ x^(-q) * Real.exp (x^2/2) := by positivity
-  calc x^(-q) * Real.exp (x^2/2) * ddG q x
+  calc x^(-q) * Real.exp (x^2/2) * DiDonatoApproximation.gaussTail q x
       ≤ x^(-q) * Real.exp (x^2/2) * (x^(q-1) * Real.exp (-x^2/2)) :=
         mul_le_mul_of_nonneg_left h hpos
     _ = (x^(-q) * x^(q-1)) * (Real.exp (x^2/2) * Real.exp (-x^2/2)) := by ring
@@ -1229,14 +1275,14 @@ private lemma dd_F_le {q : ℝ} (hq : q ≤ 1) {x : ℝ} (hx : 0 < x) :
         show x^2/2 + -x^2/2 = (0:ℝ) by ring, Real.exp_zero, mul_one]
 
 /-- `F(q, x) = O(1/x)` as `x → ∞`, for every real `q`. -/
-private lemma dd_F_isBigO_aux (n : ℕ) : ∀ q : ℝ, q ≤ 1 + 2*n →
+private lemma DiDonatoApproximation.F_isBigO_of_le (n : ℕ) : ∀ q : ℝ, q ≤ 1 + 2*n →
     (fun x => Real.gammaDiDonatoF q x) =O[atTop] (fun x : ℝ => x⁻¹) := by
   induction n with
   | zero =>
     intro q hq
     refine IsBigO.of_bound 1 ?_
     filter_upwards [eventually_gt_atTop 0] with x hx
-    have h := dd_F_le (by simpa using hq) hx
+    have h := DiDonatoApproximation.F_le (by simpa using hq) hx
     rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg h.1, abs_of_pos (inv_pos.mpr hx),
       one_mul]
     exact h.2
@@ -1254,97 +1300,121 @@ private lemma dd_F_isBigO_aux (n : ℕ) : ∀ q : ℝ, q ≤ 1 + 2*n →
     have hm := (hx2.mul h2).congr_right (fun x => one_mul _)
     refine ((isBigO_refl (fun x : ℝ => x⁻¹) atTop).add hm).congr' ?_ EventuallyEq.rfl
     filter_upwards [eventually_gt_atTop 0] with x hx
-    rw [dd_F_rec q hx]
+    rw [DiDonatoApproximation.F_rec q hx]
 
-private lemma dd_F_isBigO (q : ℝ) :
+private lemma DiDonatoApproximation.F_isBigO (q : ℝ) :
     (fun x => Real.gammaDiDonatoF q x) =O[atTop] (fun x : ℝ => x⁻¹) := by
   obtain ⟨n, hn⟩ := exists_nat_ge q
-  exact dd_F_isBigO_aux n q (by nlinarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
+  exact DiDonatoApproximation.F_isBigO_of_le n q (by nlinarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
 
 
 /-- The polynomial `q` with `D P² - R² = u³ q(u)` in the proof of DLMF §8.27(i). -/
-private noncomputable def ddQ (p u : ℝ) : ℝ :=
+private noncomputable def DiDonatoApproximation.polyQ (p u : ℝ) : ℝ :=
   (104 - 168*p + 72*p^2 - 8*p^3) + u*(24*p^3 - 168*p^2 + 264*p - 120)
     + u^2*(-24*p^4 + 96*p^3 - 48*p^2 - 96*p + 72)
     + u^3*(-8*p^6 + 72*p^5 - 240*p^4 + 368*p^3 - 264*p^2 + 72*p)
 
-private noncomputable def ddP (p u : ℝ) : ℝ := 1 + (p-1)*u + (p-1)*(p-3)*u^2
-private noncomputable def ddD (p u : ℝ) : ℝ := (1 - p*u)^2 + 8*u + 8*p*u^2
-private noncomputable def ddR (p u : ℝ) : ℝ := 4 - 3*(1 - p*u)*ddP p u
-private noncomputable def ddGu (p u : ℝ) : ℝ := 3*(1 - p*u) + Real.sqrt (ddD p u)
-private noncomputable def ddW (p u : ℝ) : ℝ := Real.sqrt (ddD p u) * ddP p u + ddR p u
+private noncomputable def DiDonatoApproximation.polyP (p u : ℝ) : ℝ := 1 + (p-1)*u + (p-1)*(p-3)*u^2
+private noncomputable def DiDonatoApproximation.polyD (p u : ℝ) : ℝ := (1 - p*u)^2 + 8*u + 8*p*u^2
+private noncomputable def DiDonatoApproximation.polyR (p u : ℝ) : ℝ := 4 -
+    3*(1 - p*u)*DiDonatoApproximation.polyP p u
+private noncomputable def DiDonatoApproximation.polyG (p u : ℝ) : ℝ := 3*(1 - p*u) +
+    Real.sqrt (DiDonatoApproximation.polyD p u)
+private noncomputable def DiDonatoApproximation.polyW (p u : ℝ) : ℝ :=
+    Real.sqrt (DiDonatoApproximation.polyD p u) * DiDonatoApproximation.polyP p u +
+    DiDonatoApproximation.polyR p u
 
-private lemma dd_poly (p u : ℝ) :
-    ddD p u * ddP p u^2 - ddR p u^2 = u^3 * ddQ p u := by
-  simp only [ddD, ddP, ddR, ddQ]; ring
+private lemma DiDonatoApproximation.polyD_identity (p u : ℝ) :
+    DiDonatoApproximation.polyD p u * DiDonatoApproximation.polyP p u^2 -
+        DiDonatoApproximation.polyR p u^2 = u^3 * DiDonatoApproximation.polyQ p u := by
+  simp only [DiDonatoApproximation.polyD, DiDonatoApproximation.polyP, DiDonatoApproximation.polyR,
+      DiDonatoApproximation.polyQ]; ring
 
-private lemma dd_continuous_D (p : ℝ) : Continuous (ddD p) := by
-  unfold ddD; fun_prop
+private lemma DiDonatoApproximation.continuous_polyD (p : ℝ) : Continuous
+    (DiDonatoApproximation.polyD p) := by
+  unfold DiDonatoApproximation.polyD; fun_prop
 
-private lemma dd_tendsto (p : ℝ) :
+private lemma DiDonatoApproximation.tendsto (p : ℝ) :
     Tendsto (fun x : ℝ => x⁻¹^2) atTop (𝓝[≥] 0) ∧
-    Tendsto (fun u => ddQ p u / (ddGu p u * ddW p u)) (𝓝 0)
-      (𝓝 (ddQ p 0 / (ddGu p 0 * ddW p 0))) ∧ ddGu p 0 = 4 ∧ ddW p 0 = 2 := by
-  have hD0 : ddD p 0 = 1 := by simp [ddD]
-  have hG0 : ddGu p 0 = 4 := by rw [ddGu, hD0]; norm_num
-  have hW0 : ddW p 0 = 2 := by rw [ddW, ddR, hD0]; norm_num [ddP]
+    Tendsto (fun u => DiDonatoApproximation.polyQ p u /
+        (DiDonatoApproximation.polyG p u * DiDonatoApproximation.polyW p u)) (𝓝 0)
+      (𝓝 (DiDonatoApproximation.polyQ p 0 /
+          (DiDonatoApproximation.polyG p 0 * DiDonatoApproximation.polyW p 0))) ∧
+          DiDonatoApproximation.polyG p 0 = 4 ∧ DiDonatoApproximation.polyW p 0 = 2 := by
+  have hD0 : DiDonatoApproximation.polyD p 0 = 1 := by simp [DiDonatoApproximation.polyD]
+  have hG0 : DiDonatoApproximation.polyG p 0 = 4 := by
+      rw [DiDonatoApproximation.polyG, hD0]; norm_num
+  have hW0 : DiDonatoApproximation.polyW p 0 = 2 := by
+      rw [DiDonatoApproximation.polyW, DiDonatoApproximation.polyR, hD0];
+      norm_num [DiDonatoApproximation.polyP]
   refine ⟨?_, ?_, hG0, hW0⟩
   · refine tendsto_nhdsWithin_iff.mpr ⟨?_, Eventually.of_forall fun x => ?_⟩
     · simpa using ((tendsto_inv_atTop_zero (𝕜 := ℝ)).pow 2 :
         Tendsto (fun x : ℝ => x⁻¹^2) atTop (𝓝 (0^2)))
     · exact sq_nonneg (x⁻¹)
-  · have hc : ContinuousAt (fun u => ddQ p u / (ddGu p u * ddW p u)) 0 := by
+  · have hc : ContinuousAt
+        (fun u => DiDonatoApproximation.polyQ p u /
+        (DiDonatoApproximation.polyG p u * DiDonatoApproximation.polyW p u)) 0 := by
       refine ContinuousAt.div ?_ ?_ (by rw [hG0, hW0]; norm_num)
-      · unfold ddQ; fun_prop
-      · have hs : Continuous fun u => Real.sqrt (ddD p u) :=
-          (dd_continuous_D p).sqrt
-        unfold ddGu ddW ddR ddP
+      · unfold DiDonatoApproximation.polyQ; fun_prop
+      · have hs : Continuous fun u => Real.sqrt (DiDonatoApproximation.polyD p u) :=
+          (DiDonatoApproximation.continuous_polyD p).sqrt
+        unfold DiDonatoApproximation.polyG DiDonatoApproximation.polyW DiDonatoApproximation.polyR
+            DiDonatoApproximation.polyP
         exact (Continuous.mul (by fun_prop) (by fun_prop)).continuousAt
     exact hc.tendsto
 
 /-- The algebraic identity behind the `O(x^{-7})` estimate, in the variable `y = 1/x`. -/
-private lemma dd_identity_y (p y s : ℝ) (hy : y ≠ 0) (hs2 : s^2 = ddD p (y^2))
-    (hG : 3*(1-p*y^2)+s ≠ 0) (hW : s*ddP p (y^2) + ddR p (y^2) ≠ 0) :
+private lemma DiDonatoApproximation.identity_reciprocal (p y s : ℝ) (hy : y ≠ 0)
+    (hs2 : s^2 = DiDonatoApproximation.polyD p (y^2))
+    (hG : 3*(1-p*y^2)+s ≠ 0)
+        (hW : s*DiDonatoApproximation.polyP p (y^2) + DiDonatoApproximation.polyR p (y^2) ≠ 0) :
     y + (p-1)*y^3 + (p-1)*(p-3)*y^5 - 4*y/(3*(1-p*y^2)+s) =
-      y^7 * (ddQ p (y^2) / ((3*(1-p*y^2)+s) * (s*ddP p (y^2) + ddR p (y^2)))) := by
-  have hpoly := dd_poly p (y^2)
+      y^7 * (DiDonatoApproximation.polyQ p (y^2) /
+          ((3*(1-p*y^2)+s) * (s*DiDonatoApproximation.polyP p (y^2) +
+          DiDonatoApproximation.polyR p (y^2)))) := by
+  have hpoly := DiDonatoApproximation.polyD_identity p (y^2)
   rw [← hs2] at hpoly
   set G := 3*(1-p*y^2)+s
-  set W := s*ddP p (y^2) + ddR p (y^2) with hWdef
-  have hnum : y^7 * ddQ p (y^2) - ((y + (p-1)*y^3 + (p-1)*(p-3)*y^5) * G - 4*y) * W = 0 := by
-    simp only [G, hWdef, ddP, ddR] at hpoly ⊢
+  set W := s*DiDonatoApproximation.polyP p (y^2) + DiDonatoApproximation.polyR p (y^2) with hWdef
+  have hnum : y^7 * DiDonatoApproximation.polyQ p (y^2) -
+      ((y + (p-1)*y^3 + (p-1)*(p-3)*y^5) * G - 4*y) * W = 0 := by
+    simp only [G, hWdef, DiDonatoApproximation.polyP, DiDonatoApproximation.polyR] at hpoly ⊢
     linear_combination (-y) * hpoly
   rw [eq_comm, ← sub_eq_zero]
-  have e : y^7 * (ddQ p (y^2) / (G * W)) - (y + (p-1)*y^3 + (p-1)*(p-3)*y^5 - 4*y/G) =
-      (y^7 * ddQ p (y^2) - ((y + (p-1)*y^3 + (p-1)*(p-3)*y^5) * G - 4*y) * W) / (G * W) := by
+  have e : y^7 * (DiDonatoApproximation.polyQ p (y^2) / (G * W)) -
+      (y + (p-1)*y^3 + (p-1)*(p-3)*y^5 - 4*y/G) =
+      (y^7 * DiDonatoApproximation.polyQ p (y^2) - ((y + (p-1)*y^3 + (p-1)*(p-3)*y^5) * G - 4*y) *
+          W) / (G * W) := by
     field_simp
   rw [e, hnum, zero_div]
 
-private lemma dd_H_eq (p : ℝ) {x : ℝ} (hx : 0 < x) :
-    Real.gammaDiDonatoH p x = x^2 * ddGu p (x⁻¹^2) := by
-  have hDx : (x^2-p)^2+8*(x^2+p) = (x^2)^2 * ddD p (x⁻¹^2) := by
-    simp only [ddD]; field_simp; ring
+private lemma DiDonatoApproximation.H_eq (p : ℝ) {x : ℝ} (hx : 0 < x) :
+    Real.gammaDiDonatoH p x = x^2 * DiDonatoApproximation.polyG p (x⁻¹^2) := by
+  have hDx : (x^2-p)^2+8*(x^2+p) = (x^2)^2 * DiDonatoApproximation.polyD p (x⁻¹^2) := by
+    simp only [DiDonatoApproximation.polyD]; field_simp; ring
   rw [Real.gammaDiDonatoH, hDx, Real.sqrt_mul (by positivity), Real.sqrt_sq (by positivity),
-    ddGu]
+    DiDonatoApproximation.polyG]
   field_simp
 
 /-- The explicit O(x^-7) approximation theorem in DLMF §8.27(i). -/
 theorem Real.gammaDiDonato_approximation (p : ℝ) :
     IsBigO atTop (fun x : ℝ => Real.gammaDiDonatoF p x-4*x/Real.gammaDiDonatoH p x)
         (fun x => x^(-7 : ℤ)) := by
-  obtain ⟨hu, hφ, hG0, hW0⟩ := dd_tendsto p
+  obtain ⟨hu, hφ, hG0, hW0⟩ := DiDonatoApproximation.tendsto p
   have hu' : Tendsto (fun x : ℝ => x⁻¹^2) atTop (𝓝 0) := tendsto_nhdsWithin_iff.mp hu |>.1
-  have hDc : Continuous (ddD p) := dd_continuous_D p
-  have hD0 : ddD p 0 = 1 := by simp [ddD]
-  have hGc : Continuous (ddGu p) := by
-    have := hDc.sqrt; unfold ddGu; fun_prop
-  have hWc : Continuous (ddW p) := by
-    have := hDc.sqrt; unfold ddW ddR ddP; fun_prop
-  have hGl : Tendsto (fun x : ℝ => ddGu p (x⁻¹^2)) atTop (𝓝 4) := by
+  have hDc : Continuous (DiDonatoApproximation.polyD p) := DiDonatoApproximation.continuous_polyD p
+  have hD0 : DiDonatoApproximation.polyD p 0 = 1 := by simp [DiDonatoApproximation.polyD]
+  have hGc : Continuous (DiDonatoApproximation.polyG p) := by
+    have := hDc.sqrt; unfold DiDonatoApproximation.polyG; fun_prop
+  have hWc : Continuous (DiDonatoApproximation.polyW p) := by
+    have := hDc.sqrt; unfold DiDonatoApproximation.polyW DiDonatoApproximation.polyR
+        DiDonatoApproximation.polyP; fun_prop
+  have hGl : Tendsto (fun x : ℝ => DiDonatoApproximation.polyG p (x⁻¹^2)) atTop (𝓝 4) := by
     rw [← hG0]; exact (hGc.tendsto 0).comp hu'
-  have hWl : Tendsto (fun x : ℝ => ddW p (x⁻¹^2)) atTop (𝓝 2) := by
+  have hWl : Tendsto (fun x : ℝ => DiDonatoApproximation.polyW p (x⁻¹^2)) atTop (𝓝 2) := by
     rw [← hW0]; exact (hWc.tendsto 0).comp hu'
-  have hDl : Tendsto (fun x : ℝ => ddD p (x⁻¹^2)) atTop (𝓝 1) := by
+  have hDl : Tendsto (fun x : ℝ => DiDonatoApproximation.polyD p (x⁻¹^2)) atTop (𝓝 1) := by
     rw [← hD0]; exact (hDc.tendsto 0).comp hu'
   have hz : (fun x : ℝ => x^(-7 : ℤ)) = fun x => x⁻¹^7 := by
     funext x; rw [zpow_neg, inv_pow]; norm_cast
@@ -1352,13 +1422,14 @@ theorem Real.gammaDiDonato_approximation (p : ℝ) :
   -- the series part
   have hA : (fun x : ℝ => Real.gammaDiDonatoF p x -
       (x⁻¹ + (p-1)*x⁻¹^3 + (p-1)*(p-3)*x⁻¹^5)) =O[atTop] (fun x : ℝ => x⁻¹^7) := by
-    have h6 := ((isBigO_refl (fun x : ℝ => x⁻¹^6) atTop).mul (dd_F_isBigO (p-6))).const_mul_left
+    have h6 := ((isBigO_refl (fun x : ℝ => x⁻¹^6) atTop).mul
+        (DiDonatoApproximation.F_isBigO (p-6))).const_mul_left
       ((p-1)*(p-3)*(p-5))
     refine (h6.congr' ?_ ?_)
     · filter_upwards [eventually_gt_atTop 0] with x hx
-      have r1 := dd_F_rec p hx
-      have r2 := dd_F_rec (p-2) hx
-      have r3 := dd_F_rec (p-4) hx
+      have r1 := DiDonatoApproximation.F_rec p hx
+      have r2 := DiDonatoApproximation.F_rec (p-2) hx
+      have r3 := DiDonatoApproximation.F_rec (p-4) hx
       rw [show p-2-2 = p-4 by ring] at r2
       rw [show p-4-2 = p-6 by ring] at r3
       rw [r1, r2, r3]; ring
@@ -1372,10 +1443,11 @@ theorem Real.gammaDiDonato_approximation (p : ℝ) :
         hWl.eventually (lt_mem_nhds (by norm_num : (0:ℝ) < 2)),
         hDl.eventually (lt_mem_nhds (by norm_num : (0:ℝ) < 1))] with x hx hG hW hD
       have hy : x⁻¹ ≠ 0 := inv_ne_zero hx.ne'
-      have h := dd_identity_y p x⁻¹ (Real.sqrt (ddD p (x⁻¹^2))) hy (Real.sq_sqrt hD.le)
+      have h := DiDonatoApproximation.identity_reciprocal p x⁻¹
+          (Real.sqrt (DiDonatoApproximation.polyD p (x⁻¹^2))) hy (Real.sq_sqrt hD.le)
         hG.ne' hW.ne'
-      have hH : 4*x/Real.gammaDiDonatoH p x = 4*x⁻¹/ddGu p (x⁻¹^2) := by
-        rw [dd_H_eq p hx]; field_simp
+      have hH : 4*x/Real.gammaDiDonatoH p x = 4*x⁻¹/DiDonatoApproximation.polyG p (x⁻¹^2) := by
+        rw [DiDonatoApproximation.H_eq p hx]; field_simp
       simp only [Function.comp]
       rw [hH]
       exact h.symm

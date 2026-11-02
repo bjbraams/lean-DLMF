@@ -6,11 +6,13 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Transforms.Basic
+public import DLMF.AlgebraicAnalytic.Transforms.Fourier
 public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.MellinParseval
 public import Mathlib.Analysis.MellinInversion
 public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
+public import Mathlib.Analysis.BoundedVariation
 public import Mathlib.Basic.Real.Sign
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import TauCeti.Analysis.Complex.SlitPlane
@@ -157,7 +159,102 @@ theorem tendsto_mellin_inversion_pv {f : ℝ → ℂ} {σ u δ : ℝ} (hf : Mell
     Tendsto (fun T : ℝ => (1 / (2 * Real.pi) : ℂ) *
         ∫ y in -T..T, (u : ℂ) ^ (-(σ + y * I)) * mellin f (σ + y * I)) atTop
       (𝓝 ((fp + fm) / 2)) := by
-  sorry
+  set g : ℝ → ℂ := fun v => Real.exp (-σ * v) • f (Real.exp (-v)) with hg
+  have hgi : Integrable g := hf.integrable_log_weight
+  set c : ℂ := ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) with hc
+  have hc0 : c ≠ 0 := by
+    rw [hc]; exact inv_ne_zero (ofReal_ne_zero.2 (Real.sqrt_pos.2 (by positivity)).ne')
+  have hcc : c * c = ((2 * Real.pi : ℝ) : ℂ)⁻¹ := by
+    rw [hc, ← mul_inv, ← ofReal_mul, Real.mul_self_sqrt (by positivity)]
+  have hM : ∀ y : ℝ, mellin f (σ + y * I) = c⁻¹ * fourierTransform g (-y) := by
+    intro y
+    rw [mellin_vertical_eq_fourier, fourierTransform_eq_fourier, ← hc, ← mul_assoc,
+      inv_mul_cancel₀ hc0, one_mul, neg_neg]
+  set t : ℝ := -Real.log u with ht
+  -- bounded variation and one-sided limits of `g` at `t`
+  have hexp : ∀ v, Real.exp (-v) = u * Real.exp (t - v) := fun v => by
+    rw [ht, sub_eq_add_neg, Real.exp_add, Real.exp_neg (Real.log u), Real.exp_log hu]
+    field_simp
+  set δ' : ℝ := min (Real.log (u + δ) - Real.log u) (Real.log u - Real.log (u - δ)) with hδ'
+  have hδ'0 : 0 < δ' := lt_min (sub_pos.2 (Real.log_lt_log hu (by linarith)))
+    (sub_pos.2 (Real.log_lt_log (by linarith) (by linarith)))
+  have hmaps : MapsTo (fun v => Real.exp (-v)) (Icc (t - δ') (t + δ')) (Icc (u - δ) (u + δ)) := by
+    intro v hv
+    have h1 : -v ≤ Real.log (u + δ) := by
+      have := min_le_left (Real.log (u + δ) - Real.log u) (Real.log u - Real.log (u - δ))
+      linarith [hv.1]
+    have h2 : Real.log (u - δ) ≤ -v := by
+      have := min_le_right (Real.log (u + δ) - Real.log u) (Real.log u - Real.log (u - δ))
+      linarith [hv.2]
+    constructor
+    · calc u - δ = Real.exp (Real.log (u - δ)) := (Real.exp_log (by linarith)).symm
+        _ ≤ _ := Real.exp_le_exp.2 h2
+    · calc Real.exp (-v) ≤ Real.exp (Real.log (u + δ)) := Real.exp_le_exp.2 h1
+        _ = u + δ := Real.exp_log (by linarith)
+  have hbvg : BoundedVariationOn g (Icc (t - δ') (t + δ')) := by
+    have h1 : BoundedVariationOn (fun v => f (Real.exp (-v))) (Icc (t - δ') (t + δ')) :=
+      ne_top_of_le_ne_top hbv (eVariationOn.comp_le_of_antitoneOn f (fun v => Real.exp (-v))
+        (fun x _ y _ hxy => Real.exp_le_exp.2 (by linarith)) hmaps)
+    exact BoundedVariationOn.smul (Real.boundedVariationOn_exp_neg_mul σ _ _) h1
+  have hcomp : Tendsto (fun v => Real.exp (-v)) (𝓝 t) (𝓝 u) := by
+    have h0 : Real.exp (-t) = u := by rw [ht, neg_neg, Real.exp_log hu]
+    rw [← h0]
+    exact (Real.continuous_exp.comp continuous_neg).tendsto t
+  have hgp : Tendsto g (𝓝[>] t) (𝓝 ((Real.exp (-σ * t) : ℝ) • fm)) := by
+    refine ((Real.continuous_exp.comp (continuous_const.mul continuous_id)).tendsto t
+      |>.mono_left nhdsWithin_le_nhds).smul (hm.comp ?_)
+    refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _
+      (hcomp.mono_left nhdsWithin_le_nhds) ?_
+    filter_upwards [self_mem_nhdsWithin] with v (hv : t < v)
+    simp only [mem_Iio]
+    rw [hexp]
+    have : Real.exp (t - v) < 1 := Real.exp_lt_one_iff.2 (by linarith)
+    nlinarith
+  have hgm : Tendsto g (𝓝[<] t) (𝓝 ((Real.exp (-σ * t) : ℝ) • fp)) := by
+    refine ((Real.continuous_exp.comp (continuous_const.mul continuous_id)).tendsto t
+      |>.mono_left nhdsWithin_le_nhds).smul (hp.comp ?_)
+    refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _
+      (hcomp.mono_left nhdsWithin_le_nhds) ?_
+    filter_upwards [self_mem_nhdsWithin] with v (hv : v < t)
+    simp only [mem_Ioi]
+    rw [hexp]
+    have : 1 < Real.exp (t - v) := Real.one_lt_exp_iff.2 (by linarith)
+    nlinarith
+  have hlim := (Real.tendsto_integral_mul_sin_div_of_boundedVariationOn hgi hδ'0 hbvg hgp
+    hgm).const_mul ((u : ℂ) ^ (-(σ : ℂ)))
+  have hval : (u : ℂ) ^ (-(σ : ℂ)) * (((Real.exp (-σ * t) : ℝ) • fm +
+      (Real.exp (-σ * t) : ℝ) • fp) / 2) = (fp + fm) / 2 := by
+    have h1 : Real.exp (-σ * t) = u ^ σ := by
+      rw [ht, Real.rpow_def_of_pos hu]; ring_nf
+    have hu0 : (u : ℂ) ^ (σ : ℂ) ≠ 0 :=
+      Complex.cpow_ne_zero_iff.2 (Or.inl (ofReal_ne_zero.2 hu.ne'))
+    rw [h1, ← smul_add, Complex.real_smul, Complex.ofReal_cpow hu.le, Complex.cpow_neg]
+    field_simp
+    ring
+  rw [hval] at hlim
+  refine hlim.congr' ?_
+  filter_upwards [eventually_ge_atTop 0] with T hT
+  rw [← integral_fourierTransform_mul_cexp_eq_dirichlet hgi hT t]
+  simp_rw [hM]
+  have h := intervalIntegral.integral_comp_neg (a := -T) (b := T)
+    (fun x : ℝ => (u : ℂ) ^ (-(σ + ((-x : ℝ) : ℂ) * I)) * (c⁻¹ * fourierTransform g x))
+  simp only [neg_neg] at h
+  rw [h, ← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul,
+    ← intervalIntegral.integral_const_mul]
+  refine intervalIntegral.integral_congr fun x _ => ?_
+  have h2 : (1 / (2 * Real.pi) : ℂ) * c⁻¹ = c := by
+    have h3 : (1 / (2 * Real.pi) : ℂ) = c * c := by rw [hcc]; push_cast; ring
+    rw [h3, mul_assoc, mul_inv_cancel₀ hc0, mul_one]
+  have hpow : (u : ℂ) ^ (-(σ + ((-x : ℝ) : ℂ) * I)) =
+      (u : ℂ) ^ (-(σ : ℂ)) * cexp (-(I * x * t)) := by
+    rw [Complex.cpow_def_of_ne_zero (ofReal_ne_zero.2 hu.ne'),
+      Complex.cpow_def_of_ne_zero (ofReal_ne_zero.2 hu.ne'), ← Complex.exp_add,
+      ← Complex.ofReal_log hu.le, ht]
+    congr 1
+    push_cast
+    ring
+  rw [hpow]
+  linear_combination (-((u : ℂ) ^ (-(σ : ℂ)) * cexp (-(I * x * t)) * fourierTransform g x)) * h2
 
 /-- DLMF 1.14.36 (Parseval-type formula): if `x^{-σ} f(x)` and `x^{σ-1} g(x)` are absolutely
 integrable on `(0, ∞)` and `𝓜(g)(σ + it)` or `𝓜(f)(1 - σ - it)` is absolutely integrable, then

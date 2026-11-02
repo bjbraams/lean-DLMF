@@ -41,6 +41,8 @@ parameter.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Statistical
 
 open DLMF.Confluent
@@ -452,7 +454,8 @@ theorem betaAuxF_initial {a b ξ : ℝ} (ha : 0 < a) (hb : 0 < b) (hξ : 0 ≤ �
     linear_combination h'
 
 /-- A real-analytic function is the sum of its Taylor series near the expansion point. -/
-theorem incG_hasSum_taylor_of_analyticAt {f : ℝ → ℝ} {ξ : ℝ} (hf : AnalyticAt ℝ f ξ) :
+theorem IncompleteBetaUniform.hasSum_taylor_of_analyticAt {f : ℝ → ℝ} {ξ : ℝ}
+    (hf : AnalyticAt ℝ f ξ) :
     ∃ r : ℝ, 0 < r ∧ ∀ t : ℝ, |t-ξ| < r →
       HasSum (fun k : ℕ => iteratedDeriv k f ξ/(k.factorial : ℝ)*(t-ξ)^k) (f t) := by
   obtain ⟨p, R, hp⟩ := hf
@@ -518,7 +521,7 @@ theorem Real.betaGenerating_hasSum {b ξ : ℝ} :
     have hh : AnalyticAt ℝ h ξ := by
       simp only [h]; fun_prop
     exact analyticAt_rexp.comp (((hh.dslope 0).log (hD ξ)).mul analyticAt_const)
-  exact incG_hasSum_taylor_of_analyticAt ha
+  exact IncompleteBetaUniform.hasSum_taylor_of_analyticAt ha
 
 /-- Identity under the stated parameter and domain assumptions: `Real.betaGeneratingCoeff b
 (Real.betaXi x) 0=((1-x)/Real.betaXi x)^(b-1) ∧ Real.betaGeneratingCoeff b (Real.betaXi x)
@@ -667,7 +670,7 @@ theorem Real.betaEta_equation {x₀ x : ℝ} (hx₀ : 0 < x₀) (hx₀1 : x₀ <
     exact div_pos (by linarith) (by linarith)
 
 /-- The radicand of the transition map is continuous on `(0,1)`. -/
-theorem incG_betaEta_sqrt_continuousOn {x₀ : ℝ} (hx₀ : 0 < x₀) (hx₀1 : x₀ < 1) :
+theorem IncompleteBetaUniform.betaEta_sqrt_continuousOn {x₀ : ℝ} (hx₀ : 0 < x₀) (hx₀1 : x₀ < 1) :
     ContinuousOn (fun x : ℝ => Real.sqrt (-2*(x₀*Real.log (x/x₀)+(1-x₀)*Real.log ((1-x)/(1-x₀)))))
       (Ioo 0 1) := by
   refine Real.continuous_sqrt.comp_continuousOn (ContinuousOn.mul continuousOn_const ?_)
@@ -678,10 +681,10 @@ theorem incG_betaEta_sqrt_continuousOn {x₀ : ℝ} (hx₀ : 0 < x₀) (hx₀1 :
       fun x hx => (div_pos (by linarith [hx.2]) (by linarith)).ne'
 
 /-- Every real value is taken by the transition map on `(0,1)`. -/
-theorem incG_betaEta_exists {x₀ : ℝ} (hx₀ : 0 < x₀) (hx₀1 : x₀ < 1) (η : ℝ) :
+theorem IncompleteBetaUniform.betaEta_exists {x₀ : ℝ} (hx₀ : 0 < x₀) (hx₀1 : x₀ < 1) (η : ℝ) :
     ∃ x : ℝ, 0 < x ∧ x < 1 ∧ Real.betaEta x₀ x = η := by
   set g : ℝ → ℝ := fun x => Real.sqrt (-2*(x₀*Real.log (x/x₀)+(1-x₀)*Real.log ((1-x)/(1-x₀))))
-  have hg := incG_betaEta_sqrt_continuousOn hx₀ hx₀1
+  have hg := IncompleteBetaUniform.betaEta_sqrt_continuousOn hx₀ hx₀1
   have hgx₀ : g x₀ = 0 := by simp [g, div_self hx₀.ne', div_self (show 1-x₀ ≠ 0 by linarith)]
   have hE : ∀ x, Real.betaEta x₀ x = (if x < x₀ then -1 else 1) * g x := fun x => rfl
   have hl0 : Real.log x₀ < 0 := Real.log_neg hx₀ hx₀1
@@ -767,7 +770,7 @@ Real.betaEtaInverse x₀ η < 1 ∧ Real.betaEta x₀ (Real.betaEtaInverse x₀ 
 theorem Real.betaEtaInverse_spec {x₀ : ℝ} (hx₀ : 0 < x₀) (hx₀1 : x₀ < 1) (η : ℝ) :
     0 < Real.betaEtaInverse x₀ η ∧ Real.betaEtaInverse x₀ η < 1 ∧
         Real.betaEta x₀ (Real.betaEtaInverse x₀ η)=η := by
-  exact Classical.epsilon_spec (incG_betaEta_exists hx₀ hx₀1 η)
+  exact Classical.epsilon_spec (IncompleteBetaUniform.betaEta_exists hx₀ hx₀1 η)
 
 /-- The symmetric coefficients c_k(η), with x₀ retained as a parameter. -/
 def betaSymmetricC (k : ℕ) (x₀ η : ℝ) : ℂ :=
@@ -822,7 +825,7 @@ def Real.betaGeneralX (μ ζ : ℝ) : ℝ :=
       μ*Real.log ζ-ζ=Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ ∧ 0 < (ζ-μ)/(1/(1+μ)-x))
 
 /-- `ζ ↦ μ log ζ - ζ` increases strictly on `(0, μ]`. -/
-theorem incG_betaPhi_strictMonoOn (μ : ℝ) :
+theorem IncompleteBetaUniform.betaPhi_strictMonoOn (μ : ℝ) :
     StrictMonoOn (fun ζ : ℝ => μ*Real.log ζ-ζ) (Ioc 0 μ) := by
   refine strictMonoOn_of_deriv_pos (convex_Ioc 0 μ) ?_ ?_
   · intro ζ hζ
@@ -835,7 +838,7 @@ theorem incG_betaPhi_strictMonoOn (μ : ℝ) :
     rw [hd.deriv, sub_pos, ← div_eq_mul_inv, one_lt_div hζ.1]; exact hζ.2
 
 /-- `ζ ↦ μ log ζ - ζ` decreases strictly on `[μ, ∞)`. -/
-theorem incG_betaPhi_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
+theorem IncompleteBetaUniform.betaPhi_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
     StrictAntiOn (fun ζ : ℝ => μ*Real.log ζ-ζ) (Ici μ) := by
   refine strictAntiOn_of_deriv_neg (convex_Ici μ) ?_ ?_
   · intro ζ hζ
@@ -850,7 +853,7 @@ theorem incG_betaPhi_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
 
 /-- At `x`, the function `(fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ)` has
 derivative `(x⁻¹ - μ*(1-x)⁻¹)`. -/
-theorem incG_betaR_hasDerivAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
+theorem IncompleteBetaUniform.betaR_hasDerivAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     HasDerivAt (fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ)
       (x⁻¹ - μ*(1-x)⁻¹) x := by
   have h1 := Real.hasDerivAt_log hx.ne'
@@ -862,50 +865,50 @@ theorem incG_betaR_hasDerivAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
 
 /-- The function `(fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ)` is continuous
 at `x`. -/
-theorem incG_betaR_continuousAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
+theorem IncompleteBetaUniform.betaR_continuousAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     ContinuousAt (fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ) x :=
-  (incG_betaR_hasDerivAt hx hx1).continuousAt
+  (IncompleteBetaUniform.betaR_hasDerivAt hx hx1).continuousAt
 
 /-- `R` increases strictly on `(0, 1/(1+μ)]`. -/
-theorem incG_betaR_strictMonoOn {μ : ℝ} (hμ : 0 < μ) :
+theorem IncompleteBetaUniform.betaR_strictMonoOn {μ : ℝ} (hμ : 0 < μ) :
     StrictMonoOn (fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ)
       (Ioc 0 (1/(1+μ))) := by
   have hx0 : 1/(1+μ) < 1 := by rw [div_lt_one (by linarith)]; linarith
   refine strictMonoOn_of_deriv_pos (convex_Ioc _ _) ?_ ?_
   · intro x hx
-    exact (incG_betaR_continuousAt hx.1 (hx.2.trans_lt hx0)).continuousWithinAt
+    exact (IncompleteBetaUniform.betaR_continuousAt hx.1 (hx.2.trans_lt hx0)).continuousWithinAt
   · intro x hx
     rw [interior_Ioc] at hx
     have h1 : x < 1 := hx.2.trans hx0
-    rw [(incG_betaR_hasDerivAt hx.1 h1).deriv]
+    rw [(IncompleteBetaUniform.betaR_hasDerivAt hx.1 h1).deriv]
     have hlt : x*(1+μ) < 1 := by have h := hx.2; rw [lt_div_iff₀ (by linarith)] at h; linarith
     have : 0 < 1 - x := by linarith
     rw [sub_pos, ← div_eq_mul_inv, ← one_div, div_lt_div_iff₀ this hx.1]; nlinarith
 
 /-- `R` decreases strictly on `[1/(1+μ), 1)`. -/
-theorem incG_betaR_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
+theorem IncompleteBetaUniform.betaR_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
     StrictAntiOn (fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ)
       (Ico (1/(1+μ)) 1) := by
   have hx0 : 0 < 1/(1+μ) := by positivity
   refine strictAntiOn_of_deriv_neg (convex_Ico _ _) ?_ ?_
   · intro x hx
-    exact (incG_betaR_continuousAt (hx0.trans_le hx.1) hx.2).continuousWithinAt
+    exact (IncompleteBetaUniform.betaR_continuousAt (hx0.trans_le hx.1) hx.2).continuousWithinAt
   · intro x hx
     rw [interior_Ico] at hx
     have h0 : 0 < x := hx0.trans hx.1
-    rw [(incG_betaR_hasDerivAt h0 hx.2).deriv]
+    rw [(IncompleteBetaUniform.betaR_hasDerivAt h0 hx.2).deriv]
     have hgt : 1 < x*(1+μ) := by have h := hx.1; rw [div_lt_iff₀ (by linarith)] at h; linarith
     have : 0 < 1 - x := by linarith [hx.2]
     rw [sub_neg, ← div_eq_mul_inv, ← one_div, div_lt_div_iff₀ h0 this]; nlinarith
 
 /-- The two sides agree at the turning points. -/
-theorem incG_betaR_turning {μ : ℝ} (hμ : 0 < μ) :
+theorem IncompleteBetaUniform.betaR_turning {μ : ℝ} (hμ : 0 < μ) :
     Real.log (1/(1+μ))+μ*Real.log (1-1/(1+μ))+(1+μ)*Real.log (1+μ)-μ = μ*Real.log μ-μ := by
   have h1 : (1:ℝ) - 1/(1+μ) = μ/(1+μ) := by field_simp; ring
   rw [h1, one_div, Real.log_inv, Real.log_div hμ.ne' (by linarith)]; ring
 
 /-- Existence of the transition variable on the correct side. -/
-theorem incG_betaZeta_exists {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1)
+theorem IncompleteBetaUniform.betaZeta_exists {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1)
     (hne : x ≠ 1/(1+μ)) :
     ∃ ζ : ℝ, 0 < ζ ∧ μ*Real.log ζ-ζ=Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ ∧
       0 < (ζ-μ)/(1/(1+μ)-x) := by
@@ -913,10 +916,10 @@ theorem incG_betaZeta_exists {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x <
   have hx0 : 0 < 1/(1+μ) := by positivity
   have hx01 : 1/(1+μ) < 1 := by rw [div_lt_one (by linarith)]; linarith
   have hRlt : R < μ*Real.log μ-μ := by
-    rw [← incG_betaR_turning hμ]
+    rw [← IncompleteBetaUniform.betaR_turning hμ]
     rcases lt_or_gt_of_ne hne with h | h
-    · exact incG_betaR_strictMonoOn hμ ⟨hx, h.le⟩ ⟨hx0, le_rfl⟩ h
-    · exact incG_betaR_strictAntiOn hμ ⟨le_rfl, hx01⟩ ⟨h.le, hx1⟩ h
+    · exact IncompleteBetaUniform.betaR_strictMonoOn hμ ⟨hx, h.le⟩ ⟨hx0, le_rfl⟩ h
+    · exact IncompleteBetaUniform.betaR_strictAntiOn hμ ⟨le_rfl, hx01⟩ ⟨h.le, hx1⟩ h
   rcases lt_or_gt_of_ne hne with h | h
   · -- ζ > μ
     set s : ℝ := 2*μ + |R| + 1
@@ -954,7 +957,7 @@ theorem incG_betaZeta_exists {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x <
 μ*Real.log (Real.betaZeta μ x)-Real.betaZeta μ x=Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log
 (1+μ)-μ ∧ Real.betaGeneralX μ (Real.betaZeta μ x)=x ∧ (x ≠ 1/(1+μ) → 0 < (Real.betaZeta μ
 x-μ)/(1/(1+μ)-x))`. -/
-theorem incG_betaZeta_spec {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1) :
+theorem IncompleteBetaUniform.betaZeta_spec {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1) :
     0 < Real.betaZeta μ x ∧
         μ*Real.log (Real.betaZeta μ x)-Real.betaZeta μ x=Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log
         (1+μ)-μ ∧ Real.betaGeneralX μ (Real.betaZeta μ x)=x ∧
@@ -965,8 +968,8 @@ theorem incG_betaZeta_spec {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1
   · have hz : Real.betaZeta μ x = μ := by simp [Real.betaZeta, hne]
     rw [hz]
     refine ⟨hμ, ?_, by simp [Real.betaGeneralX, hne], fun h => absurd hne h⟩
-    rw [hne, incG_betaR_turning hμ]
-  have hspec := Classical.epsilon_spec (incG_betaZeta_exists hμ hx hx1 hne)
+    rw [hne, IncompleteBetaUniform.betaR_turning hμ]
+  have hspec := Classical.epsilon_spec (IncompleteBetaUniform.betaZeta_exists hμ hx hx1 hne)
   have hz : Real.betaZeta μ x =
       Classical.epsilon (fun ζ : ℝ => 0 < ζ ∧
       μ*Real.log ζ-ζ=Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ ∧ 0 <
@@ -998,12 +1001,14 @@ theorem incG_betaZeta_spec {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1
       rcases div_pos_iff.mp hysign with ⟨_, h⟩ | ⟨h, _⟩
       · exact h
       · linarith
-    exact (incG_betaR_strictMonoOn hμ).injOn ⟨hy0, by linarith⟩ ⟨hx, by linarith⟩ hRR
+    exact (IncompleteBetaUniform.betaR_strictMonoOn hμ).injOn ⟨hy0, by linarith⟩
+        ⟨hx, by linarith⟩ hRR
   · have h2' : 1/(1+μ) - y < 0 := by
       rcases div_pos_iff.mp hysign with ⟨h, _⟩ | ⟨_, h⟩
       · linarith
       · exact h
-    exact (incG_betaR_strictAntiOn hμ).injOn ⟨by linarith, hy1⟩ ⟨by linarith, hx1⟩ hRR
+    exact (IncompleteBetaUniform.betaR_strictAntiOn hμ).injOn ⟨by linarith, hy1⟩
+        ⟨by linarith, hx1⟩ hRR
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < Real.betaZeta μ x ∧
 μ*Real.log (Real.betaZeta μ x)-Real.betaZeta μ x=Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log
@@ -1015,7 +1020,7 @@ theorem Real.betaZeta_spec {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1
         μ*Real.log (Real.betaZeta μ x)-Real.betaZeta μ x=Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log
         (1+μ)-μ ∧ Real.betaGeneralX μ (Real.betaZeta μ x)=x ∧
         (x ≠ 1/(1+μ) → 0 < (Real.betaZeta μ x-μ)/(1/(1+μ)-x)) :=
-  incG_betaZeta_spec hμ hx hx1
+  IncompleteBetaUniform.betaZeta_spec hμ hx hx1
 
 /-- The general coefficients h_k(ζ,μ) extracted from the exact normalized remainder. -/
 def betaGeneralH (k : ℕ) (ζ μ : ℝ) : ℂ :=
@@ -1062,7 +1067,8 @@ def Real.incBetaInverse (a b p : ℝ) : ℝ :=
       Classical.epsilon (fun x : ℝ => x ∈ Icc (0 : ℝ) 1 ∧ (normIncBetaI a b x).re=p)
 
 /-- For real positive parameters, `x ↦ Re I_x(a,b)` takes every value of `[0,1]` on `[0,1]`. -/
-theorem incG_exists_normIncBetaI_eq {a b p : ℝ} (ha : 0 < a) (hb : 0 < b) (hp : 0 ≤ p)
+theorem IncompleteBetaUniform.exists_normIncBetaI_eq {a b p : ℝ} (ha : 0 < a)
+    (hb : 0 < b) (hp : 0 ≤ p)
     (hp1 : p ≤ 1) :
     ∃ x ∈ Icc (0:ℝ) 1, (Real.normIncBetaI a b x).re = p := by
   have ha' : 0 < (a:ℂ).re := by simpa using ha
@@ -1096,7 +1102,7 @@ theorem Real.incBetaInverse_spec {a b p : ℝ} (ha : 0 < a) (hb : 0 < b) (hp : 0
   · subst h1
     simp [Real.incBetaInverse, Real.normIncBetaI_one (a := (a:ℂ)) (b := (b:ℂ)) (by simpa using ha)
       (by simpa using hb)]
-  have hs := Classical.epsilon_spec (incG_exists_normIncBetaI_eq ha hb hp hp1)
+  have hs := Classical.epsilon_spec (IncompleteBetaUniform.exists_normIncBetaI_eq ha hb hp hp1)
   simp only [Real.incBetaInverse, h0.ne', h1.ne, ite_false]
   exact hs
 

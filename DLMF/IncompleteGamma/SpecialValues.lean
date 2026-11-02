@@ -41,6 +41,8 @@ plane, so the relations are stated for the logarithmic-plane functions.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 open DLMF.Statistical

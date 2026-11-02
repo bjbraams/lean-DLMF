@@ -16,9 +16,9 @@ parameter limits.
 
 ## Main results
 
-* `legTr_transport_tendsto`: continuous dependence of the transport on the degree, the order and
+* `Transport.tendsto`: continuous dependence of the transport on the degree, the order and
   the initial data (Gronwall).
-* `legTr_transport_neg_order`, `legTr_transport_degree_eq`, `legTr_transport_linear`: the
+* `Transport.neg_order`, `Transport.degree_eq`, `Transport.linear`: the
   transport depends on the parameters only through `μ²` and `ν(ν+1)`, and is linear in the
   initial data.
 * `associatedP_ellipse_continuation`: DLMF 14.24.1.
@@ -40,11 +40,11 @@ open scoped Real Topology Nat ComplexConjugate
 
 namespace DLMF.Legendre
 
-/-! ### Helpers for DLMF 14.24.1 and 14.24.4: continuity and linearity of the transport (prefix
-`legTr_`) -/
+/-! ### Helpers for DLMF 14.24.1 and 14.24.4: continuity and linearity of the transport (namespace
+`Transport`) -/
 
-/-- Gronwall step for `legTr_transport_tendsto`: the second component of the difference system. -/
-theorem legTr_diff_bound {g γ q α β α0 β0 ux vx u v : ℂ} {G Γ0 Qi A B U : ℝ}
+/-- Gronwall step for `Transport.tendsto`: the second component of the difference system. -/
+theorem Transport.diff_bound {g γ q α β α0 β0 ux vx u v : ℂ} {G Γ0 Qi A B U : ℝ}
     (hg : ‖g‖ ≤ G) (hγ : ‖γ‖ ≤ Γ0) (hq : ‖q⁻¹‖ ≤ Qi) (hα : ‖α‖ ≤ A) (hβ : ‖β‖ ≤ B) (hu : ‖u‖ ≤ U)
     (hG : 0 ≤ G) (hQi : 0 ≤ Qi) (hΓ : 0 ≤ Γ0) (hA : 0 ≤ A) (hB : 0 ≤ B) :
     ‖g*(2*γ*vx-(α-β/q)*ux)/q - g*(2*γ*v-(α0-β0/q)*u)/q‖ ≤
@@ -79,7 +79,7 @@ theorem legTr_diff_bound {g γ q α β α0 β0 ux vx u v : ℂ} {G Γ0 Qi A B U 
 
 /-- Continuous dependence of the Legendre transport on the degree, the order and the initial
 data (Gronwall). -/
-theorem legTr_transport_tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
+theorem Transport.tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
     (hreg : ∀ t ∈ Icc (0:ℝ) 1, γ t ≠ 1 ∧ γ t ≠ -1) {νf μf af bf : X → ℂ} {ν μ a b : ℂ}
     (hν : Tendsto νf l (𝓝 ν)) (hμ : Tendsto μf l (𝓝 μ)) (ha : Tendsto af l (𝓝 a))
     (hb : Tendsto bf l (𝓝 b)) :
@@ -179,7 +179,7 @@ theorem legTr_transport_tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (h
               mul_le_mul h3 h2 (norm_nonneg _) hG0
           _ ≤ K * max ‖ux x t - u t‖ ‖vx x t - v t‖ := mul_le_mul_of_nonneg_right hK1 hM
           _ ≤ _ := le_add_of_nonneg_right hε0
-      · have h := legTr_diff_bound (g := deriv γ t) (γ := γ t) (q := 1-(γ t)^2)
+      · have h := Transport.diff_bound (g := deriv γ t) (γ := γ t) (q := 1-(γ t)^2)
           (α := νf x*(νf x+1)) (β := μf x^2) (α0 := ν*(ν+1)) (β0 := μ^2)
           (ux := ux x t) (vx := vx x t) (u := u t) (v := v t)
           (hG' t htI) (hΓ' t htI) (hQ' t htI) hAx hBx (hU t htI) hG0 hQ0 hΓ0 hA0 hB0
@@ -200,12 +200,12 @@ theorem legTr_transport_tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (h
   simpa using this
 
 /-- The transport depends on the order only through `μ²`. -/
-theorem legTr_transport_neg_order (ν μ : ℂ) (γ : ℝ → ℂ) (a b : ℂ) :
+theorem Transport.neg_order (ν μ : ℂ) (γ : ℝ → ℂ) (a b : ℂ) :
     legendreTransport ν (-μ) γ a b = legendreTransport ν μ γ a b := by
   simp only [legendreTransport, IsLegendreTransport, neg_sq]
 
 /-- The transport is linear in the initial data. -/
-theorem legTr_transport_linear (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
+theorem Transport.linear (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
     (hreg : ∀ t ∈ Icc (0:ℝ) 1, γ t ≠ 1 ∧ γ t ≠ -1) (c₁ c₂ a₁ b₁ a₂ b₂ : ℂ) :
     legendreTransport ν μ γ (c₁*a₁ + c₂*a₂) (c₁*b₁ + c₂*b₂) =
       c₁*legendreTransport ν μ γ a₁ b₁ + c₂*legendreTransport ν μ γ a₂ b₂ := by
@@ -224,29 +224,29 @@ theorem legTr_transport_linear (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : ContDiff 
   exact legendreTransport_unique _ _ _ _ γ hγ hreg h
 
 /-- `legendreOneLoop` avoids `±1`. -/
-theorem legTr_loop_reg {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
+theorem Transport.loop_ne_one {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     ∀ t ∈ Icc (0:ℝ) 1, legendreOneLoop z s t ≠ 1 ∧ legendreOneLoop z s t ≠ -1 := by
   intro t ht
-  rcases legTr_loop_dom hz s ht with h | h
+  rcases Transport.loop_domain hz s ht with h | h
   · refine ⟨fun h1 => slitPlane_ne_zero h (by rw [h1]; ring), fun h1 => ?_⟩
     rw [h1] at h; norm_num [mem_slitPlane_iff] at h
   · have hn : ‖legendreOneLoop z s t‖ < 1 := by simpa using h
     refine ⟨fun h1 => by rw [h1] at hn; simp at hn, fun h1 => by rw [h1] at hn; simp at hn⟩
 
 /-- DLMF 14.24.4 for non-integer order, from 14.24.3 for `P^{±μ}_ν` and the connection formula. -/
-theorem legTr_one_olverQ_nonint (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : ℂ}
+theorem Transport.one_olverQ_of_not_int (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : ℂ}
     (hz : z-1 ∈ slitPlane) (s : ℤ) :
     legendreOneContinued (olverQ ν m) ν m z s = exp (-s*m*π*I)*olverQ ν m z-
       π*I*sin (s*m*π)/(sin (m*π)*Gamma (ν-m+1))*associatedP ν (-m) z := by
-  have hγ := legTr_contDiff_loop z s
-  have hreg := legTr_loop_reg hz s
+  have hγ := Transport.contDiff_loop z s
+  have hreg := Transport.loop_ne_one hz s
   have hP : legendreTransport ν m (legendreOneLoop z s) (associatedP ν m z)
       (deriv (associatedP ν m) z) =
       exp (-s*m*π*I) * associatedP ν m z := by
     have h := associatedP_one_continuation ν (-m) hz s
     rw [neg_neg] at h
     unfold legendreOneContinued at h
-    rw [legTr_transport_neg_order] at h
+    rw [Transport.neg_order] at h
     rw [h]; congr 1; ring_nf
   have hM : legendreTransport ν m (legendreOneLoop z s) (associatedP ν (-m) z)
       (deriv (associatedP ν (-m)) z) = exp (s*m*π*I) * associatedP ν (-m) z :=
@@ -260,7 +260,7 @@ theorem legTr_one_olverQ_nonint (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : �
       (C*g1)*associatedP ν m z + (-(C*g2))*associatedP ν (-m) z := by ring
   have e2 : C*(deriv (associatedP ν m) z*g1 - deriv (associatedP ν (-m)) z*g2) =
       (C*g1)*deriv (associatedP ν m) z + (-(C*g2))*deriv (associatedP ν (-m)) z := by ring
-  rw [e1, e2, legTr_transport_linear ν m hγ hreg, hP, hM]
+  rw [e1, e2, Transport.linear ν m hγ hreg, hP, hM]
   have hsin := legendre_sin_ne_zero hm
   have hs : sin (s*m*π) = (exp (-s*m*π*I) - exp (s*m*π*I))*I/2 := by
     rw [Complex.sin]; ring_nf
@@ -273,13 +273,13 @@ theorem legTr_one_olverQ_nonint (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : �
   ring
 
 /-- The transport depends on the degree only through `ν(ν+1)`. -/
-theorem legTr_transport_degree_eq {ν ν' : ℂ} (h : ν'*(ν'+1) = ν*(ν+1)) (μ : ℂ)
+theorem Transport.degree_eq {ν ν' : ℂ} (h : ν'*(ν'+1) = ν*(ν+1)) (μ : ℂ)
     (γ : ℝ → ℂ) (a b : ℂ) :
     legendreTransport ν' μ γ a b = legendreTransport ν μ γ a b := by
   simp only [legendreTransport, IsLegendreTransport, h]
 
 /-- The ellipse path is `C¹`. -/
-theorem legTr_contDiff_ellipse (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreEllipsePath z s) := by
+theorem Transport.contDiff_ellipse (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreEllipsePath z s) := by
   have he : legendreEllipsePath z s = fun t : ℝ =>
       ((z + exp ((log (z-1) + log (z+1))/2)) * exp ((s:ℂ)*π*I * ofRealCLM t) +
         (z + exp ((log (z-1) + log (z+1))/2))⁻¹ * exp ((-(s:ℂ))*π*I * ofRealCLM t))/2 := by
@@ -289,7 +289,7 @@ theorem legTr_contDiff_ellipse (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreEll
   fun_prop
 
 /-- `ν ↦ ∂_z P^{-μ}_ν(z)` is continuous. -/
-theorem legTr_continuous_deriv_associatedP_degree (μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem Transport.continuous_deriv_associatedP_degree (μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     Continuous fun ν => deriv (associatedP ν (-μ)) z := by
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   have e := funext fun ν => deriv_associatedP ν (-μ) hz
@@ -302,14 +302,14 @@ theorem legTr_continuous_deriv_associatedP_degree (μ : ℂ) {z : ℂ} (hz : z-1
     (continuous_const.mul hG))
 
 /-- DLMF 14.24.1 off the zeros of `cos νπ`, from 14.24.2 for `𝑸^μ_ν`, `𝑸^μ_{-ν-1}` and 14.9.12. -/
-theorem legTr_ellipse_associatedP_generic (ν μ : ℂ) (hc : cos (ν*π) ≠ 0) {z : ℂ}
+theorem Transport.ellipse_associatedP_generic (ν μ : ℂ) (hc : cos (ν*π) ≠ 0) {z : ℂ}
     (hz : z-1 ∈ slitPlane)
     (s : ℤ) :
     legendreEllipseContinued (associatedP ν (-μ)) ν μ z s = exp (s*ν*π*I)*associatedP ν (-μ) z+
       2*I*sin ((ν+1/2)*s*π)*exp (-s*π*I/2)/(cos (ν*π)*Gamma (μ-ν))*olverQ ν μ z := by
-  have hγ := legTr_contDiff_ellipse z s
+  have hγ := Transport.contDiff_ellipse z s
   have hreg : ∀ t ∈ Icc (0:ℝ) 1, legendreEllipsePath z s t ≠ 1 ∧ legendreEllipsePath z s t ≠ -1 :=
-    fun t _ => legInt_path_ne hz s t
+    fun t _ => EllipseTransport.path_ne hz s t
   set g1 := (Gamma (μ-ν))⁻¹ with hg1
   set g2 := (Gamma (ν+μ+1))⁻¹ with hg2
   set c := (cos (ν*π))⁻¹ with hcdef
@@ -331,8 +331,8 @@ theorem legTr_ellipse_associatedP_generic (ν μ : ℂ) (hc : cos (ν*π) ≠ 0)
   have hQ1 := olverQ_ellipse_continuation ν μ hz s
   have hQ2 := olverQ_ellipse_continuation (-ν-1) μ hz s
   unfold legendreEllipseContinued at hQ1 hQ2 ⊢
-  rw [legTr_transport_degree_eq (ν := ν) (by ring)] at hQ2
-  rw [hconn z hz, hd, legTr_transport_linear ν μ hγ hreg, hQ1, hQ2]
+  rw [Transport.degree_eq (ν := ν) (by ring)] at hQ2
+  rw [hconn z hz, hd, Transport.linear ν μ hγ hreg, hQ1, hQ2]
   have hs : sin ((ν+1/2)*s*π) = (exp (-((ν+1/2)*s*π)*I) - exp (((ν+1/2)*s*π)*I))*I/2 := by
     rw [Complex.sin]
   have hcos : cos (ν*π) * c = 1 := mul_inv_cancel₀ hc
@@ -358,8 +358,8 @@ theorem legTr_ellipse_associatedP_generic (ν μ : ℂ) (hc : cos (ν*π) ≠ 0)
 
 Moved within this file (round 13) below DLMF 14.24.2–14.24.3: off the zeros of `cos νπ` the
 identity follows from 14.24.2 for `𝑸^μ_ν`, `𝑸^μ_{-ν-1}` and 14.9.12
-(`legTr_ellipse_associatedP_generic`); the limit uses the continuity of the transport in the
-degree (`legTr_transport_tendsto`). -/
+(`Transport.ellipse_associatedP_generic`); the limit uses the continuity of the transport in the
+degree (`Transport.tendsto`). -/
 @[dlmf 14.24.E1]
 theorem associatedP_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     Tendsto (fun v : ℂ =>
@@ -367,16 +367,17 @@ theorem associatedP_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ s
         (-s*π*I/2)/(cos (v*π)*Gamma (μ-v))*olverQ v μ z) (𝓝[≠] ν)
         (𝓝 (legendreEllipseContinued (associatedP ν (-μ)) ν μ z s)) := by
 
-  have hγ := legTr_contDiff_ellipse z s
+  have hγ := Transport.contDiff_ellipse z s
   have hreg : ∀ t ∈ Icc (0:ℝ) 1, legendreEllipsePath z s t ≠ 1 ∧ legendreEllipsePath z s t ≠ -1 :=
-    fun t _ => legInt_path_ne hz s t
+    fun t _ => EllipseTransport.path_ne hz s t
   have hcont : Tendsto (fun v => legendreEllipseContinued (associatedP v (-μ)) v μ z s) (𝓝[≠] ν)
       (𝓝 (legendreEllipseContinued (associatedP ν (-μ)) ν μ z s)) :=
-    legTr_transport_tendsto (l := 𝓝[≠] ν) hγ hreg (νf := id) (μf := fun _ => μ)
+    Transport.tendsto (l := 𝓝[≠] ν) hγ hreg (νf := id) (μf := fun _ => μ)
       (af := fun v => associatedP v (-μ) z) (bf := fun v => deriv (associatedP v (-μ)) z)
       (tendsto_id.mono_left nhdsWithin_le_nhds) tendsto_const_nhds
       (((associatedP_entire_degree (-μ) z hz).continuous.tendsto ν).mono_left nhdsWithin_le_nhds)
-      (((legTr_continuous_deriv_associatedP_degree μ hz).tendsto ν).mono_left nhdsWithin_le_nhds)
+      (((Transport.continuous_deriv_associatedP_degree μ hz).tendsto ν).mono_left
+          nhdsWithin_le_nhds)
   refine hcont.congr' ?_
   have hf : AnalyticOnNhd ℂ (fun v : ℂ => cos (v*π)) univ := fun v _ =>
     ((Complex.differentiable_cos.comp (differentiable_id.mul_const _)).analyticAt v)
@@ -388,24 +389,24 @@ theorem associatedP_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ s
       simp at this
     · exact h
   filter_upwards [hnz] with v hv
-  rw [legTr_ellipse_associatedP_generic v μ hv hz s]
+  rw [Transport.ellipse_associatedP_generic v μ hv hz s]
 
 /-- Integer orders use the removable parameter limit of the complete expression.
 
 For non-integer order the identity follows from 14.24.3 for `P^{±μ}_ν` and the connection formula
-(`legTr_one_olverQ_nonint`); the limit uses the continuity of the transport in the order
-(`legTr_transport_tendsto`). -/
+(`Transport.one_olverQ_of_not_int`); the limit uses the continuity of the transport in the order
+(`Transport.tendsto`). -/
 @[dlmf 14.24.E4]
 theorem olverQ_one_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     Tendsto (fun m : ℂ =>
         exp (-s*m*π*I)*olverQ ν m z-π*I*sin (s*m*π)/(sin (m*π)*Gamma (ν-m+1))*associatedP ν (-m) z)
         (𝓝[≠] μ) (𝓝 (legendreOneContinued (olverQ ν μ) ν μ z s)) := by
 
-  have hγ := legTr_contDiff_loop z s
-  have hreg := legTr_loop_reg hz s
+  have hγ := Transport.contDiff_loop z s
+  have hreg := Transport.loop_ne_one hz s
   have hcont : Tendsto (fun m => legendreOneContinued (olverQ ν m) ν m z s) (𝓝[≠] μ)
       (𝓝 (legendreOneContinued (olverQ ν μ) ν μ z s)) :=
-    legTr_transport_tendsto (l := 𝓝[≠] μ) hγ hreg (νf := fun _ => ν) (μf := id)
+    Transport.tendsto (l := 𝓝[≠] μ) hγ hreg (νf := fun _ => ν) (μf := id)
       (af := fun m => olverQ ν m z) (bf := fun m => deriv (olverQ ν m) z) tendsto_const_nhds
       (tendsto_id.mono_left nhdsWithin_le_nhds)
       (((olverQ_entire_order ν z hz).continuous.tendsto μ).mono_left nhdsWithin_le_nhds)
@@ -424,7 +425,7 @@ theorem olverQ_one_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane)
     · filter_upwards [h] with m hm n hn
       apply hm; rw [hn]; exact Complex.sin_int_mul_pi n
   filter_upwards [hnint] with m hm
-  exact legTr_one_olverQ_nonint ν m hm hz s
+  exact Transport.one_olverQ_of_not_int ν m hm hz s
 
 end DLMF.Legendre
 

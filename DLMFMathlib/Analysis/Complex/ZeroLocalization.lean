@@ -30,12 +30,12 @@ Mathlib has no argument principle or Rouché theorem; for zero counting with mul
 
 ## Main results
 
-* `Complex.zloc_existsUnique_zero_closedBall`: exactly one zero in the closed disc.
-* `Complex.zloc_exists_zero_norm_sub_le`: the zero lies within `‖f z₀‖ / ((1 - κ) ‖c‖)` of `z₀`,
-  and its derivative is nonzero.
-* `Complex.zloc_eventually_exists_zero_isBigO`: a sequence (or filter) version producing zeros
-  `r k` with `r k - w k = O(ρ k)`.
-* `Complex.zloc_norm_exp_sub_one_ge`: `‖ζ‖ / 2 ≤ ‖exp ζ - 1‖` for `‖ζ‖ ≤ 1/2`.
+* `Complex.ZeroLocalization.existsUnique_zero_closedBall`: exactly one zero in the closed disc.
+* `Complex.ZeroLocalization.exists_zero_norm_sub_le`: the zero lies within `‖f z₀‖ / ((1 - κ) ‖c‖)`
+  of `z₀`, and its derivative is nonzero.
+* `Complex.ZeroLocalization.eventually_exists_zero_isBigO`: a sequence (or filter) version producing
+  zeros `r k` with `r k - w k = O(ρ k)`.
+* `Complex.ZeroLocalization.norm_exp_sub_one_ge`: `‖ζ‖ / 2 ≤ ‖exp ζ - 1‖` for `‖ζ‖ ≤ 1/2`.
 -/
 
 @[expose] public noncomputable section
@@ -47,7 +47,8 @@ namespace Complex
 
 /-- Lower bound for the exponential model near its zero: `‖ζ‖ / 2 ≤ ‖exp ζ - 1‖` when
 `‖ζ‖ ≤ 1/2`. -/
-theorem zloc_norm_exp_sub_one_ge {ζ : ℂ} (hζ : ‖ζ‖ ≤ 1 / 2) : ‖ζ‖ / 2 ≤ ‖exp ζ - 1‖ := by
+theorem ZeroLocalization.norm_exp_sub_one_ge {ζ : ℂ} (hζ : ‖ζ‖ ≤ 1 / 2) : ‖ζ‖ / 2 ≤
+    ‖exp ζ - 1‖ := by
   have h := norm_exp_sub_one_sub_id_le (x := ζ) (by linarith)
   have htri : ‖ζ‖ ≤ ‖exp ζ - 1‖ + ‖exp ζ - 1 - ζ‖ := by
     have := norm_sub_le (exp ζ - 1) (exp ζ - 1 - ζ)
@@ -56,7 +57,7 @@ theorem zloc_norm_exp_sub_one_ge {ζ : ℂ} (hζ : ‖ζ‖ ≤ 1 / 2) : ‖ζ�
 
 /-- The simplified Newton map `z ↦ z - f z / c` is `κ`-Lipschitz on a convex set on which the
 derivative of `f` stays within `κ ‖c‖` of `c`. -/
-theorem zloc_newton_lipschitz {f f' : ℂ → ℂ} {s : Set ℂ} {c : ℂ} {κ : ℝ} (hc : c ≠ 0)
+theorem ZeroLocalization.newton_lipschitz {f f' : ℂ → ℂ} {s : Set ℂ} {c : ℂ} {κ : ℝ} (hc : c ≠ 0)
     (hs : Convex ℝ s) (hf : ∀ z ∈ s, HasDerivAt f (f' z) z)
     (hf' : ∀ z ∈ s, ‖f' z - c‖ ≤ κ * ‖c‖) {x y : ℂ} (hx : x ∈ s) (hy : y ∈ s) :
     ‖(y - f y / c) - (x - f x / c)‖ ≤ κ * ‖y - x‖ := by
@@ -72,7 +73,8 @@ theorem zloc_newton_lipschitz {f f' : ℂ → ℂ} {s : Set ℂ} {c : ℂ} {κ :
 /-- **Exactly one zero in a disc** (simplified Newton–Kantorovich). Let `f` have derivative `f'`
 at every point of `closedBall z₀ r`, let `c ≠ 0` and `κ < 1` with `‖f' z - c‖ ≤ κ ‖c‖` on the
 disc, and suppose `‖f z₀‖ ≤ (1 - κ) ‖c‖ r`. Then `f` has exactly one zero in `closedBall z₀ r`. -/
-theorem zloc_existsUnique_zero_closedBall {f f' : ℂ → ℂ} {z₀ c : ℂ} {r κ : ℝ} (hc : c ≠ 0)
+theorem ZeroLocalization.existsUnique_zero_closedBall {f f' : ℂ → ℂ} {z₀ c : ℂ}
+    {r κ : ℝ} (hc : c ≠ 0)
     (hκ : κ < 1) (hf : ∀ z ∈ closedBall z₀ r, HasDerivAt f (f' z) z)
     (hf' : ∀ z ∈ closedBall z₀ r, ‖f' z - c‖ ≤ κ * ‖c‖)
     (h0 : ‖f z₀‖ ≤ (1 - κ) * ‖c‖ * r) :
@@ -90,7 +92,7 @@ theorem zloc_existsUnique_zero_closedBall {f f' : ℂ → ℂ} {z₀ c : ℂ} {r
     exact nonneg_of_mul_nonneg_left this hc'
   set T : ℂ → ℂ := fun z => z - f z / c with hT
   have hlip : ∀ x ∈ closedBall z₀ r, ∀ y ∈ closedBall z₀ r, ‖T y - T x‖ ≤ κ * ‖y - x‖ :=
-    fun x hx y hy => zloc_newton_lipschitz hc (convex_closedBall z₀ r) hf hf' hx hy
+    fun x hx y hy => ZeroLocalization.newton_lipschitz hc (convex_closedBall z₀ r) hf hf' hx hy
   have hTz₀ : ‖T z₀ - z₀‖ = ‖f z₀‖ / ‖c‖ := by
     simp [hT]
   have hmaps : MapsTo T (closedBall z₀ r) (closedBall z₀ r) := by
@@ -123,18 +125,19 @@ theorem zloc_existsUnique_zero_closedBall {f f' : ℂ → ℂ} {z₀ c : ℂ} {r
   have : ‖z - y‖ = 0 := by nlinarith [norm_nonneg (z - y)]
   exact sub_eq_zero.mp (norm_eq_zero.mp this)
 
-/-- **Localization of the zero.** Under the hypotheses of `zloc_existsUnique_zero_closedBall`,
-the zero `z` satisfies `‖z - z₀‖ ≤ ‖f z₀‖ / ((1 - κ) ‖c‖)` and `f' z ≠ 0` (it is simple). -/
-theorem zloc_exists_zero_norm_sub_le {f f' : ℂ → ℂ} {z₀ c : ℂ} {r κ : ℝ} (hc : c ≠ 0)
+/-- **Localization of the zero.** Under the hypotheses of
+`ZeroLocalization.existsUnique_zero_closedBall`, the zero `z` satisfies
+`‖z - z₀‖ ≤ ‖f z₀‖ / ((1 - κ) ‖c‖)` and `f' z ≠ 0` (it is simple). -/
+theorem ZeroLocalization.exists_zero_norm_sub_le {f f' : ℂ → ℂ} {z₀ c : ℂ} {r κ : ℝ} (hc : c ≠ 0)
     (hκ : κ < 1) (hf : ∀ z ∈ closedBall z₀ r, HasDerivAt f (f' z) z)
     (hf' : ∀ z ∈ closedBall z₀ r, ‖f' z - c‖ ≤ κ * ‖c‖)
     (h0 : ‖f z₀‖ ≤ (1 - κ) * ‖c‖ * r) :
     ∃ z ∈ closedBall z₀ r, f z = 0 ∧ ‖z - z₀‖ ≤ ‖f z₀‖ / ((1 - κ) * ‖c‖) ∧ f' z ≠ 0 := by
-  obtain ⟨z, ⟨hz, hfz⟩, -⟩ := zloc_existsUnique_zero_closedBall hc hκ hf hf' h0
+  obtain ⟨z, ⟨hz, hfz⟩, -⟩ := ZeroLocalization.existsUnique_zero_closedBall hc hκ hf hf' h0
   have hc' : 0 < ‖c‖ := norm_pos_iff.mpr hc
   have hr : 0 ≤ r := (norm_nonneg _).trans (mem_closedBall_iff_norm.mp hz)
   have hz₀ : z₀ ∈ closedBall z₀ r := mem_closedBall_self hr
-  have hle := zloc_newton_lipschitz hc (convex_closedBall z₀ r) hf hf' hz₀ hz
+  have hle := ZeroLocalization.newton_lipschitz hc (convex_closedBall z₀ r) hf hf' hz₀ hz
   rw [hfz, zero_div, sub_zero] at hle
   refine ⟨z, hz, hfz, ?_, ?_⟩
   · rw [le_div_iff₀ (mul_pos (by linarith) hc')]
@@ -155,8 +158,9 @@ theorem zloc_exists_zero_norm_sub_le {f f' : ℂ → ℂ} {z₀ c : ℂ} {r κ :
 /-- **Sequence version.** If eventually along `l` the function `f k` has a zero within `ρ k` of
 `w k`, then there is a family `r` of points with `f k (r k) = 0` eventually and
 `r k - w k = O(g k)` whenever `ρ = O(g)`. This packages pointwise localization (for instance by
-`zloc_exists_zero_norm_sub_le` or Rouché's theorem) into the form of asymptotic zero results. -/
-theorem zloc_eventually_exists_zero_isBigO {ι : Type*} {l : Filter ι} {f : ι → ℂ → ℂ}
+`ZeroLocalization.exists_zero_norm_sub_le` or Rouché's theorem) into the form of asymptotic zero
+results. -/
+theorem ZeroLocalization.eventually_exists_zero_isBigO {ι : Type*} {l : Filter ι} {f : ι → ℂ → ℂ}
     {w : ι → ℂ} {ρ g : ι → ℝ}
     (h : ∀ᶠ k in l, ∃ z, ‖z - w k‖ ≤ ρ k ∧ f k z = 0) (hρ : ρ =O[l] g) :
     ∃ r : ι → ℂ, (fun k => r k - w k) =O[l] g ∧ ∀ᶠ k in l, f k (r k) = 0 := by

@@ -39,7 +39,10 @@ Legendre integrals and of `R_C = symEllIntRC` (DLMF 19.2.17, a principal value f
 * `incEllIntPik_special`, `incEllIntPik_one_zero`, `incEllIntPik_special_RC`,
   `incEllIntPik_special_k`, `incEllIntPik_zero`: DLMF 19.6.11–19.6.13.
 * `incEllIntPik_pi_div_two`, `tendsto_incEllIntPik_div`: DLMF 19.6.14.
-* `symEllIntRC_special`, `tendsto_symEllIntRC_zero`: DLMF 19.6.15.
+* `symEllIntRC_special`, `tendsto_symEllIntRC_zero`: DLMF 19.6.15, including the homogeneity
+  of the principal value `R_C(x, y)`, `y < 0`, for complex `x ∈ ℂ \ (-∞, 0]`.
+* `tendsto_setIntegral_diff_Icc_nhdsGT`: excising a shrinking interval from an integrable
+  function does not change the limit of its integral.
 * `integral_inv_ellDelta_cube`: `∫₀^φ Δ⁻³ dθ` in terms of `E(φ, k)`.
 
 ## Implementation notes
@@ -62,6 +65,8 @@ The inverse Gudermannian of DLMF 19.6.8 is `gd⁻¹(φ) = ∫₀^φ sec t dt` (D
 
 open Complex Set Filter
 open scoped Real Topology
+
+open DLMF.Core
 
 namespace DLMF.EllipticIntegrals
 
@@ -885,7 +890,314 @@ theorem tendsto_incEllIntPik_div (α2 k : ℂ) :
 
 /-! ### §19.6(v) `R_C(x, y)` -/
 
-/-- **Admitted.** DLMF 19.6.15: `R_C(x, x) = x^{-1/2}` (`x ∈ ℂ \ (-∞, 0]`);
+/-! ### Principal values of `R_C` -/
+
+section PrincipalValue
+
+open MeasureTheory
+
+/-- Symmetric excision of a shrinking interval about `c` does not change the limit of a set
+integral of an integrable function. -/
+theorem tendsto_setIntegral_diff_Icc_nhdsGT {g : ℝ → ℂ} {s : Set ℝ}
+    (hg : IntegrableOn g s) (c : ℝ) :
+    Tendsto (fun ε : ℝ => ∫ t in s \ Icc (c - ε) (c + ε), g t) (𝓝[>] 0)
+      (𝓝 (∫ t in s, g t)) := by
+  have he : ∀ ε : ℝ, ∫ t in s \ Icc (c - ε) (c + ε), g t =
+      ∫ t in s, (Icc (c - ε) (c + ε))ᶜ.indicator g t := by
+    intro ε
+    rw [setIntegral_indicator measurableSet_Icc.compl, sdiff_eq]
+  simp only [he]
+  refine tendsto_integral_filter_of_dominated_convergence (fun t => ‖g t‖) ?_ ?_ hg.norm ?_
+  · exact Eventually.of_forall fun ε =>
+      (hg.aestronglyMeasurable.indicator measurableSet_Icc.compl)
+  · refine Eventually.of_forall fun ε => Eventually.of_forall fun t => ?_
+    by_cases ht : t ∈ (Icc (c - ε) (c + ε))ᶜ
+    · simp [indicator_of_mem ht]
+    · simp [indicator_of_notMem ht]
+  · have hae : ∀ᵐ t ∂(volume.restrict s), t ≠ c :=
+      ae_restrict_of_ae (by
+        rw [ae_iff]; simp only [ne_eq, not_not, ofPred_eq_eq_singleton]; exact measure_singleton c)
+    filter_upwards [hae] with t htc
+    have hpos : 0 < |t - c| := abs_pos.mpr (sub_ne_zero.mpr htc)
+    refine tendsto_const_nhds.congr' ?_
+    filter_upwards [Ioo_mem_nhdsGT hpos] with ε hε
+    have hmem : t ∈ (Icc (c - ε) (c + ε))ᶜ := by
+      intro h
+      have : |t - c| ≤ ε := abs_le.mpr ⟨by linarith [h.1], by linarith [h.2]⟩
+      linarith [hε.2]
+    rw [indicator_of_mem hmem]
+
+/-- Multiplying an integrable function on `(0, ∞)` by `(t + 1)/(t - q)` keeps it integrable
+off a neighbourhood of `q`. -/
+private lemma integrableOn_mul_add_one_div_sub {k : ℝ → ℂ} (hk : IntegrableOn k (Ioi 0))
+    {q ε : ℝ} (hq : 0 < q) (hε : 0 < ε) :
+    IntegrableOn (fun t : ℝ => k t * (((t : ℂ) + 1) / ((t : ℂ) - q)))
+      (Ioi 0 \ Icc (q - ε) (q + ε)) := by
+  have hm : MeasurableSet (Ioi (0 : ℝ) \ Icc (q - ε) (q + ε)) :=
+    measurableSet_Ioi.diff measurableSet_Icc
+  refine Integrable.mono' ((hk.mono_set sdiff_subset).norm.mul_const (1 + (q + 1) / ε))
+    ((hk.mono_set sdiff_subset).aestronglyMeasurable.mul
+      (by fun_prop : Measurable fun t : ℝ => ((t : ℂ) + 1) / ((t : ℂ) - q)).aestronglyMeasurable)
+    ((ae_restrict_mem hm).mono fun t ht => ?_)
+  have ht0 : 0 < t := ht.1
+  have htq : ε < |t - q| := by
+    by_contra hc
+    push Not at hc
+    exact ht.2 ⟨by linarith [(abs_le.mp hc).1], by linarith [(abs_le.mp hc).2]⟩
+  rw [norm_mul]
+  gcongr
+  rw [show ((t : ℂ) + 1) / ((t : ℂ) - q) = ((((t + 1) / (t - q)) : ℝ) : ℂ) by push_cast; rfl,
+    norm_real, Real.norm_eq_abs, abs_div, abs_of_pos (by linarith : 0 < t + 1)]
+  have hap : 0 < |t - q| := hε.trans htq
+  rw [div_le_iff₀ hap]
+  have h1 : t + 1 ≤ |t - q| + (q + 1) := by linarith [le_abs_self (t - q)]
+  have h2 : (q + 1) / ε * |t - q| ≥ q + 1 := by
+    rw [ge_iff_le, div_mul_eq_mul_div, le_div_iff₀ hε]
+    nlinarith
+  nlinarith
+
+/-- The kernel `((t + x)^{1/2} (t + 1))⁻¹` is integrable on `(0, ∞)` for admissible `x`. -/
+private lemma integrableOn_rc_kernel_one {x : ℂ} (hx : x ∈ slitPlane ∨ x = 0) :
+    IntegrableOn (fun t : ℝ => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + 1))⁻¹) (Ioi 0) := by
+  have h1 : (1 : ℂ) ∈ slitPlane := one_mem_slitPlane
+  refine (integrableOn_symEllIntRF_integrand hx h1 h1).congr_fun (fun t _ => ?_)
+    measurableSet_Ioi
+  simp only [mul_assoc, cpow_half_mul_cpow_half]
+
+/-- The `R_C` kernel with a negative pole parameter `-q` is integrable off a neighbourhood of
+the pole. -/
+private lemma integrableOn_rc_kernel_neg {x : ℂ} (hx : x ∈ slitPlane ∨ x = 0) {q ε : ℝ}
+    (hq : 0 < q) (hε : 0 < ε) :
+    IntegrableOn (fun t : ℝ => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) - q))⁻¹)
+      (Ioi 0 \ Icc (q - ε) (q + ε)) := by
+  refine (integrableOn_mul_add_one_div_sub (integrableOn_rc_kernel_one hx) hq hε).congr_fun
+    (fun t ht => ?_) (measurableSet_Ioi.diff measurableSet_Icc)
+  have h1 : (t : ℂ) + 1 ≠ 0 := by
+    rw [← ofReal_one, ← ofReal_add]; exact ofReal_ne_zero.mpr (by linarith [ht.1.out])
+  simp only [mul_inv, div_eq_mul_inv]
+  rw [mul_assoc, ← mul_assoc ((t : ℂ) + 1)⁻¹, inv_mul_cancel₀ h1]; ring
+
+
+/-- `t ↦ ((t + x)^{1/2})⁻¹` is real-differentiable at `t > 0` for admissible `x`. -/
+private lemma differentiableAt_inv_cpow_half {x : ℂ} (hx : x ∈ slitPlane ∨ x = 0) {t : ℝ}
+    (ht : 0 < t) :
+    DifferentiableAt ℝ (fun u : ℝ => (((u : ℂ) + x) ^ (1 / 2 : ℂ))⁻¹) t := by
+  have hs := ofReal_pos_add_mem_slitPlane ht hx
+  have he : DifferentiableAt ℂ (fun w : ℂ => ((w + x) ^ (1 / 2 : ℂ))⁻¹) (t : ℂ) :=
+    ((differentiableAt_id.add_const x).cpow_const hs).inv (ofReal_pos_add_cpow_half_ne_zero ht hx)
+  exact he.hasDerivAt.comp_ofReal.differentiableAt
+
+/-- For `x ∈ ℂ \ (-∞, 0]` and `q > 0` the symmetric truncations of
+`∫₀^∞ dt/(√(t + x)(t - q))` about `t = q` converge: the principal value defining
+`R_C(x, -q)` exists. -/
+private lemma exists_tendsto_integral_rc_truncated {x : ℂ} (hx : x ∈ slitPlane) {q : ℝ}
+    (hq : 0 < q) :
+    ∃ L : ℂ, Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (q - ε) (q + ε),
+      (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) - q))⁻¹) (𝓝[>] 0) (𝓝 L) := by
+  set A : ℝ → Set ℝ := fun ε => Ioi (0 : ℝ) \ Icc (q - ε) (q + ε) with hA
+  have hAm : ∀ ε, MeasurableSet (A ε) := fun ε => measurableSet_Ioi.diff measurableSet_Icc
+  set f : ℝ → ℂ := fun t => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) - q))⁻¹ with hf
+  set h : ℝ → ℂ := fun t => (((t : ℂ) + 0) ^ (1 / 2 : ℂ) * ((t : ℂ) - q))⁻¹ with hh
+  set c : ℂ := (q : ℂ) ^ (1 / 2 : ℂ) / ((q : ℂ) + x) ^ (1 / 2 : ℂ) with hc
+  set g : ℝ → ℂ := fun t => f t - c * h t with hg
+  set φ : ℝ → ℂ := fun t => (((t : ℂ) + x) ^ (1 / 2 : ℂ))⁻¹ - c * (((t : ℂ) + 0) ^ (1 / 2 : ℂ))⁻¹
+    with hφ
+  have hx' : x ∈ slitPlane ∨ x = 0 := Or.inl hx
+  have h0' : (0 : ℂ) ∈ slitPlane ∨ (0 : ℂ) = 0 := Or.inr rfl
+  have hfi : ∀ ε, 0 < ε → IntegrableOn f (A ε) := fun ε hε =>
+    integrableOn_rc_kernel_neg hx' hq hε
+  have hhi : ∀ ε, 0 < ε → IntegrableOn h (A ε) := fun ε hε =>
+    integrableOn_rc_kernel_neg h0' hq hε
+  have hφq : φ q = 0 := by
+    have h1 := ofReal_pos_add_cpow_half_ne_zero hq hx'
+    have h2 := ofReal_pos_add_cpow_half_ne_zero hq h0'
+    simp only [hφ, hc]
+    field_simp
+    simp
+  have hgφ : ∀ t, t ≠ q → g t = dslope φ q t := by
+    intro t htq
+    rw [dslope_of_ne _ htq, slope_def_module, hφq, sub_zero]
+    simp only [hg, hf, hh, hφ, mul_inv, real_smul, ofReal_inv, ofReal_sub]
+    ring
+  have hφc : ContinuousOn (dslope φ q) (Icc (q / 2) (3 * q / 2)) := by
+    intro t ht
+    have ht0 : 0 < t := by linarith [ht.1]
+    have hd : DifferentiableAt ℝ φ t :=
+      (differentiableAt_inv_cpow_half hx' ht0).sub
+        ((differentiableAt_inv_cpow_half h0' ht0).const_mul c)
+    rcases eq_or_ne t q with rfl | htq
+    · exact (continuousAt_dslope_same.mpr hd).continuousWithinAt
+    · exact ((continuousAt_dslope_of_ne htq).mpr hd.continuousAt).continuousWithinAt
+  have hgm : IntegrableOn g (Icc (q / 2) (3 * q / 2)) := by
+    refine hφc.integrableOn_Icc.congr_fun_ae ?_
+    have hae : ∀ᵐ t ∂(volume.restrict (Icc (q / 2) (3 * q / 2))), t ≠ q :=
+      ae_restrict_of_ae (by
+        rw [ae_iff]; simp only [ne_eq, not_not, ofPred_eq_eq_singleton]; exact measure_singleton q)
+    filter_upwards [hae] with t ht
+    exact (hgφ t ht).symm
+  have hgo : IntegrableOn g (A (q / 2)) :=
+    (hfi _ (by linarith)).sub ((hhi _ (by linarith)).const_mul c)
+  have hgi : IntegrableOn g (Ioi 0) := by
+    refine (hgo.union hgm).mono_set fun t ht => ?_
+    by_cases h' : t ∈ Icc (q - q / 2) (q + q / 2)
+    · right; exact ⟨by linarith [h'.1], by linarith [h'.2]⟩
+    · left; exact ⟨ht, h'⟩
+  have hlh := tendsto_integral_symEllIntRC_truncated (x := 0) (y := -q) le_rfl (by linarith)
+  simp only [neg_neg, ofReal_zero, ofReal_neg, ← sub_eq_add_neg] at hlh
+  refine ⟨(∫ t in Ioi (0 : ℝ), g t) + c * (2 * symEllIntRC 0 (-(q : ℂ))), ?_⟩
+  refine ((tendsto_setIntegral_diff_Icc_nhdsGT hgi q).add (hlh.const_mul c)).congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with ε hε
+  rw [← integral_const_mul, ← integral_add (hgi.mono_set sdiff_subset)
+    ((hhi ε hε).const_mul c)]
+  refine setIntegral_congr_fun (hAm ε) fun t _ => ?_
+  simp only [hg, hh, hf]
+  ring
+
+
+/-- Scaling of the symmetric truncations of the principal-value `R_C` integral. -/
+private lemma integral_rc_truncated_mul {l : ℝ} (hl : 0 < l) (x : ℂ) (q ε : ℝ) :
+    ∫ t in Ioi (0 : ℝ) \ Icc (l * q - ε) (l * q + ε),
+        (((t : ℂ) + l * x) ^ (1 / 2 : ℂ) * ((t : ℂ) - (l * q : ℝ)))⁻¹ =
+      (((l : ℂ) ^ (1 / 2 : ℂ))⁻¹) * ∫ s in Ioi (0 : ℝ) \ Icc (q - ε / l) (q + ε / l),
+        (((s : ℂ) + x) ^ (1 / 2 : ℂ) * ((s : ℂ) - q))⁻¹ := by
+  set F : ℝ → ℂ := fun t => (((t : ℂ) + l * x) ^ (1 / 2 : ℂ) * ((t : ℂ) - (l * q : ℝ)))⁻¹
+    with hF
+  set f : ℝ → ℂ := fun s => (((s : ℂ) + x) ^ (1 / 2 : ℂ) * ((s : ℂ) - q))⁻¹ with hf
+  have hm1 : MeasurableSet (Ioi (0 : ℝ) \ Icc (l * q - ε) (l * q + ε)) :=
+    measurableSet_Ioi.diff measurableSet_Icc
+  have hm2 : MeasurableSet (Ioi (0 : ℝ) \ Icc (q - ε / l) (q + ε / l)) :=
+    measurableSet_Ioi.diff measurableSet_Icc
+  have hFl : ∀ s, F (l * s) = ((l : ℂ) ^ (1 / 2 : ℂ))⁻¹ * (l : ℂ)⁻¹ * f s := by
+    intro s
+    simp only [hF, hf]
+    rw [show ((l * s : ℝ) : ℂ) + l * x = (l : ℂ) * ((s : ℂ) + x) by push_cast; ring,
+      TauCeti.ofReal_mul_cpow hl.le,
+      show ((l * s : ℝ) : ℂ) - (l * q : ℝ) = (l : ℂ) * ((s : ℂ) - q) by push_cast; ring]
+    simp only [mul_inv]
+    ring
+  have hind : ∀ s, (Ioi (0 : ℝ) \ Icc (l * q - ε) (l * q + ε)).indicator F (l * s) =
+      (Ioi (0 : ℝ) \ Icc (q - ε / l) (q + ε / l)).indicator
+        (fun s => ((l : ℂ) ^ (1 / 2 : ℂ))⁻¹ * (l : ℂ)⁻¹ * f s) s := by
+    intro s
+    have hmem : l * s ∈ Ioi (0 : ℝ) \ Icc (l * q - ε) (l * q + ε) ↔
+        s ∈ Ioi (0 : ℝ) \ Icc (q - ε / l) (q + ε / l) := by
+      simp only [Set.mem_sdiff, mem_Ioi, mem_Icc]
+      have e1 : l * (q - ε / l) = l * q - ε := by field_simp
+      have e2 : l * (q + ε / l) = l * q + ε := by field_simp
+      have h1 : l * q - ε ≤ l * s ↔ q - ε / l ≤ s := by
+        rw [← e1]; constructor <;> intro h <;> nlinarith
+      have h2 : l * s ≤ l * q + ε ↔ s ≤ q + ε / l := by
+        rw [← e2]; constructor <;> intro h <;> nlinarith
+      rw [mul_pos_iff_of_pos_left hl, h1, h2]
+    by_cases hs : s ∈ Ioi (0 : ℝ) \ Icc (q - ε / l) (q + ε / l)
+    · rw [indicator_of_mem (hmem.mpr hs), indicator_of_mem hs, hFl]
+    · rw [indicator_of_notMem (fun h => hs (hmem.mp h)), indicator_of_notMem hs]
+  rw [← integral_indicator hm1, ← integral_indicator hm2]
+  have h := Measure.integral_comp_mul_left
+    ((Ioi (0 : ℝ) \ Icc (l * q - ε) (l * q + ε)).indicator F) l
+  simp only [hind] at h
+  rw [integral_indicator hm2, integral_const_mul, abs_inv, abs_of_pos hl] at h
+  rw [integral_indicator hm2, show (∫ y, (Ioi (0 : ℝ) \ Icc (l * q - ε) (l * q + ε)).indicator
+      F y) = l • (l⁻¹ • ∫ y, (Ioi (0 : ℝ) \ Icc (l * q - ε) (l * q + ε)).indicator F y) by
+    rw [smul_smul, mul_inv_cancel₀ hl.ne', one_smul], ← h]
+  have hl' : (l : ℂ) ≠ 0 := ofReal_ne_zero.mpr hl.ne'
+  rw [real_smul]
+  generalize (∫ a in Ioi (0 : ℝ) \ Icc (q - ε / l) (q + ε / l), f a) = I
+  field_simp
+
+
+/-- The principal-value truncations of `R_C(x, -q)` converge for admissible `x`. -/
+private lemma exists_tendsto_integral_rc_truncated' {x : ℂ} (hx : SymEllIntArg x) {q : ℝ}
+    (hq : 0 < q) :
+    ∃ L : ℂ, Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (q - ε) (q + ε),
+      (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) - q))⁻¹) (𝓝[>] 0) (𝓝 L) := by
+  rcases hx with hx | rfl
+  · exact exists_tendsto_integral_rc_truncated hx hq
+  · have hlh := tendsto_integral_symEllIntRC_truncated (x := 0) (y := -q) le_rfl (by linarith)
+    simp only [neg_neg, ofReal_zero, ofReal_neg, ← sub_eq_add_neg] at hlh
+    exact ⟨_, hlh⟩
+
+/-- `l x ∈ ℂ \ (-∞, 0]` for real `l > 0` and `x ∈ ℂ \ (-∞, 0]`. -/
+private lemma ofReal_mul_mem_slitPlane {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
+    (l : ℂ) * x ∈ slitPlane := by
+  rw [mem_slitPlane_iff] at hx ⊢
+  simp only [re_ofReal_mul, im_ofReal_mul]
+  rcases hx with h | h
+  · exact Or.inl (mul_pos hl h)
+  · exact Or.inr (mul_ne_zero hl.ne' h)
+
+/-- DLMF 19.6.15, homogeneity of `R_C` (including the principal-value case). -/
+private lemma symEllIntRC_ofReal_mul {l : ℝ} (hl : 0 < l) {x y : ℂ} (hx : SymEllIntArg x)
+    (hy : y ≠ 0) :
+    symEllIntRC (l * x) (l * y) = (l : ℂ) ^ (-(1 / 2 : ℂ)) * symEllIntRC x y := by
+  by_cases hys : y ∈ slitPlane
+  · rcases hx with hx | rfl
+    · rw [symEllIntRC_eq_carlsonRC (ofReal_mul_mem_slitPlane hl hx)
+        (ofReal_mul_mem_slitPlane hl hys), symEllIntRC_eq_carlsonRC hx hys,
+        Carlson.TwoVariable.carlsonRC_mul_of_pos hl hx hys]
+      norm_num
+    · rw [mul_zero, symEllIntRC_eq_symEllIntRF 0
+          (not_isNegReal_of_mem_slitPlane (ofReal_mul_mem_slitPlane hl hys)),
+        symEllIntRF_zero_left (ofReal_mul_mem_slitPlane hl hys)
+          (ofReal_mul_mem_slitPlane hl hys),
+        symEllIntRC_eq_symEllIntRF 0 (not_isNegReal_of_mem_slitPlane hys),
+        symEllIntRF_zero_left hys hys]
+      have h1 : (![(l : ℂ) * y, (l : ℂ) * y] : Fin 2 → ℂ) = fun _ => (l : ℂ) * y := by
+        funext i; fin_cases i <;> rfl
+      have h2 : (![y, y] : Fin 2 → ℂ) = fun _ => y := by funext i; fin_cases i <;> rfl
+      rw [h1, h2, symEllIntR_const _ _ (ofReal_mul_mem_slitPlane hl hys) (by norm_num),
+        symEllIntR_const _ _ hys (by norm_num), TauCeti.ofReal_mul_cpow hl.le]
+      ring
+  · have hneg : IsNegReal y := by
+      rw [mem_slitPlane_iff] at hys
+      push Not at hys
+      refine ⟨hys.2, lt_of_le_of_ne hys.1 fun h => hy ?_⟩
+      exact Complex.ext h hys.2
+    set q : ℝ := -y.re with hqdef
+    have hq : 0 < q := by rw [hqdef]; linarith [hneg.2]
+    have hyq : y = -((q : ℝ) : ℂ) := by
+      apply Complex.ext <;> simp [hqdef, hneg.1]
+    have hneg' : IsNegReal ((l : ℂ) * y) := ⟨by simp [hneg.1], by
+      simp only [re_ofReal_mul]; exact mul_neg_of_pos_of_neg hl hneg.2⟩
+    obtain ⟨L, hL⟩ := exists_tendsto_integral_rc_truncated' hx hq
+    have hT1 : ∀ ε : ℝ, (∫ t in Ioi (0 : ℝ) \ Icc (-y.re - ε) (-y.re + ε),
+        (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) =
+        ∫ t in Ioi (0 : ℝ) \ Icc (q - ε) (q + ε), (((t : ℂ) + x) ^ (1 / 2 : ℂ) *
+          ((t : ℂ) - q))⁻¹ := by
+      intro ε; rw [hyq]; simp only [hqdef, neg_re, ofReal_re, neg_neg, ← sub_eq_add_neg]
+    have hTl : ∀ ε : ℝ, (∫ t in Ioi (0 : ℝ) \ Icc (-((l : ℂ) * y).re - ε)
+        (-((l : ℂ) * y).re + ε), (((t : ℂ) + l * x) ^ (1 / 2 : ℂ) * ((t : ℂ) + l * y))⁻¹) =
+        ((l : ℂ) ^ (1 / 2 : ℂ))⁻¹ * ∫ s in Ioi (0 : ℝ) \ Icc (q - ε / l) (q + ε / l),
+          (((s : ℂ) + x) ^ (1 / 2 : ℂ) * ((s : ℂ) - q))⁻¹ := by
+      intro ε
+      rw [← integral_rc_truncated_mul hl x q ε]
+      have hre : -((l : ℂ) * y).re = l * q := by
+        rw [re_ofReal_mul, hqdef]; ring
+      rw [hre]
+      congr 1
+      funext t
+      rw [hyq]
+      push_cast
+      ring_nf
+    have hdiv : Tendsto (fun ε : ℝ => ε / l) (𝓝[>] 0) (𝓝[>] 0) := by
+      refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
+      · simpa using ((continuous_id.div_const l).tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds
+      · filter_upwards [self_mem_nhdsWithin] with ε hε using div_pos hε hl
+    have hLl : Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (-((l : ℂ) * y).re - ε)
+        (-((l : ℂ) * y).re + ε), (((t : ℂ) + l * x) ^ (1 / 2 : ℂ) * ((t : ℂ) + l * y))⁻¹)
+        (𝓝[>] 0) (𝓝 (((l : ℂ) ^ (1 / 2 : ℂ))⁻¹ * L)) := by
+      simp only [hTl]
+      exact (hL.comp hdiv).const_mul _
+    have hL1 : Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (-y.re - ε) (-y.re + ε),
+        (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) (𝓝[>] 0) (𝓝 L) := by
+      simp only [hT1]; exact hL
+    rw [symEllIntRC_eq_cauchyPV hneg', symEllIntRC_eq_cauchyPV hneg, cauchyPVIoi, cauchyPVIoi,
+      hLl.limUnder_eq, hL1.limUnder_eq, cpow_neg]
+    ring
+
+end PrincipalValue
+
+/-- DLMF 19.6.15: `R_C(x, x) = x^{-1/2}` (`x ∈ ℂ \ (-∞, 0]`);
 `R_C(λx, λy) = λ^{-1/2} R_C(x, y)` (real `λ > 0`, `x` not a negative real, `y ≠ 0`);
 `R_C(0, y) = (π/2) y^{-1/2}` for `|ph y| < π`; and `R_C(0, y) = 0` for `y < 0` (principal
 value). -/
@@ -896,7 +1208,20 @@ theorem symEllIntRC_special :
         symEllIntRC (l * x) (l * y) = (l : ℂ) ^ (-(1 / 2 : ℂ)) * symEllIntRC x y) ∧
       (∀ y : ℂ, y ∈ slitPlane → symEllIntRC 0 y = π / 2 * y ^ (-(1 / 2 : ℂ))) ∧
       (∀ y : ℝ, y < 0 → symEllIntRC 0 y = 0) := by
-  sorry
+  refine ⟨fun x hx => ?_, fun l x y hl hx hy => symEllIntRC_ofReal_mul hl hx hy,
+    fun y hy => ?_, fun y hy => ?_⟩
+  · rw [symEllIntRC_eq_symEllIntR hx hx]
+    have : (![x, x] : Fin 2 → ℂ) = fun _ => x := by funext i; fin_cases i <;> rfl
+    rw [this, symEllIntR_const _ _ hx]
+    norm_num
+    rw [show (3/2 : ℂ) = 1/2 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
+    exact mul_ne_zero (by norm_num) Gamma_one_half_ne_zero
+  · rw [symEllIntRC_eq_symEllIntRF 0 (not_isNegReal_of_mem_slitPlane hy),
+      symEllIntRF_zero_left hy hy]
+    have : (![y, y] : Fin 2 → ℂ) = fun _ => y := by funext i; fin_cases i <;> rfl
+    rw [this, symEllIntR_const _ _ hy (by norm_num)]
+  · rw [← ofReal_zero, (symEllIntRC_of_neg hy le_rfl).2.2]
+    simp
 
 /-- DLMF 19.6.15: `R_C(x, y) → +∞` as `y → 0+` or `y → 0-`, for real `x > 0`. -/
 @[dlmf 19.6.E15]

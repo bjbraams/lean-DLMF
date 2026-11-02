@@ -15,24 +15,25 @@ around loops encircling the singular point `1` (DLMF 14.24.3).
 
 ## Main definitions
 
-* `legInt_ew`, `legInt_eu`: the moving point `w(t) = ζ e^{-sπit}` and the explicit transport of
-  `𝑸^μ_ν` along the ellipse path.
+* `EllipseTransport.movingPoint`, `EllipseTransport.transport`: the moving point
+  `w(t) = ζ e^{-sπit}` and the explicit transport of `𝑸^μ_ν` along the ellipse path.
 * `legendreSmoothStep`, `legendreOneLoop`: a smooth joining parameter and the loop from `z` to
   `3/2`, around `1` `s` times, and back.
 * `legendreOneContinued`: the value obtained by continuing a solution along that loop.
-* `legTr_K`, `legTr_u`, `legTr_v`, `legTr_ell`: the regular factor of `P^{-μ}_ν`, the
-  transported value and derivative, and a continuous logarithm of `γ - 1` along the loop.
+* `Transport.regularFactor`, `Transport.transportedValue`, `Transport.transportedDeriv`,
+  `Transport.loopLog`: the regular factor of `P^{-μ}_ν`, the transported value and derivative, and a
+  continuous logarithm of `γ - 1` along the loop.
 
 ## Main results
 
-* `legInt_joukowski_mem`, `legInt_zeta_joukowski`, `legInt_path_eq`: the ellipse path is the
-  Joukowski image `J(w(t))`.
-* `legInt_eu_deriv`, `legInt_eu_zero`: the explicit transport solves the Legendre system with
-  the right initial data.
+* `EllipseTransport.joukowski_mem`, `EllipseTransport.zeta_joukowski`, `EllipseTransport.path_eq`:
+  the ellipse path is the Joukowski image `J(w(t))`.
+* `EllipseTransport.transport_deriv`, `EllipseTransport.transport_zero`: the explicit transport
+  solves the Legendre system with the right initial data.
 * `olverQ_ellipse_continuation`: DLMF 14.24.2.
-* `legTr_isTransport_of_local`, `legTr_isTransport_branch`: transports from local solutions, and
-  the transport of `P^{-μ}_ν` with a continuous logarithm.
-* `legTr_contDiff_loop`: the loop is `C¹`.
+* `Transport.isTransport_of_local`, `Transport.isTransport_branch`: transports from local solutions,
+  and the transport of `P^{-μ}_ν` with a continuous logarithm.
+* `Transport.contDiff_loop`: the loop is `C¹`.
 * `associatedP_one_continuation`: DLMF 14.24.3.
 -/
 
@@ -47,7 +48,7 @@ namespace DLMF.Legendre
 /-! ### Helpers for DLMF 14.24.2: the explicit transport of `𝑸^μ_ν` along the ellipse -/
 
 /-- The Joukowski map `J(w) = (w + w⁻¹)/2` sends `{|w| < 1} ∖ (-∞, 0]` into `ℂ ∖ (-∞, 1]`. -/
-theorem legInt_joukowski_mem {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane) :
+theorem EllipseTransport.joukowski_mem {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane) :
     (w + w⁻¹)/2 - 1 ∈ slitPlane := by
   have hw0 : w ≠ 0 := slitPlane_ne_zero hw
   have hn : 0 < normSq w := normSq_pos.mpr hw0
@@ -80,79 +81,87 @@ theorem legInt_joukowski_mem {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane
       rw [div_eq_one_iff_eq hn.ne'] at this; linarith
 
 /-- `ζ(J(w)) = w` for `|w| < 1`, `w ∉ (-∞, 0]`. -/
-theorem legInt_zeta_joukowski {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane) :
-    legInt_zeta ((w + w⁻¹)/2) = w := by
-  have hm := legInt_joukowski_mem hw1 hw
+theorem EllipseTransport.zeta_joukowski {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane) :
+    ExteriorIntegral.invJoukowski ((w + w⁻¹)/2) = w := by
+  have hm := EllipseTransport.joukowski_mem hw1 hw
   have hw0 : w ≠ 0 := slitPlane_ne_zero hw
-  have h := legInt_zeta_mul hm
-  set y := legInt_zeta ((w + w⁻¹)/2)
+  have h := ExteriorIntegral.invJoukowski_mul hm
+  set y := ExteriorIntegral.invJoukowski ((w + w⁻¹)/2)
   have hy : (y - w) * (y - w⁻¹) = 0 := by
     have : w * w⁻¹ = 1 := mul_inv_cancel₀ hw0
     linear_combination -h + this
   rcases mul_eq_zero.mp hy with h1 | h1
   · linear_combination h1
   · exfalso
-    have hy1 : ‖y‖ < 1 := legInt_norm_zeta_lt_one hm
+    have hy1 : ‖y‖ < 1 := ExteriorIntegral.norm_invJoukowski_lt_one hm
     rw [show y = w⁻¹ by linear_combination h1, norm_inv] at hy1
     have := (one_lt_inv₀ (norm_pos_iff.mpr hw0)).mpr hw1
     linarith
 
 /-- The moving point `w(t) = ζ e^{-sπit}` of DLMF 14.24.2. -/
-noncomputable def legInt_ew (ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ := ζ * exp (-(s:ℂ)*π*I*t)
+noncomputable def EllipseTransport.movingPoint (ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ := ζ * exp (-(s:ℂ)*π*I*t)
 
 /-- The ellipse path is `J(w(t))`. -/
-theorem legInt_path_eq {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
+theorem EllipseTransport.path_eq {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
     legendreEllipsePath z s t =
-        (legInt_ew (legInt_zeta z) s t + (legInt_ew (legInt_zeta z) s t)⁻¹)/2 := by
-  have h0 := legInt_zeta_ne_zero hz
-  have hq : z + exp ((log (z-1) + log (z+1))/2) = (legInt_zeta z)⁻¹ := by
-    have := legInt_zeta_mul hz
-    have h2 : z + exp ((log (z-1) + log (z+1))/2) = 2*z - legInt_zeta z := by
-      simp only [legInt_zeta, legInt_root]; ring
+        (EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t +
+            (EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t)⁻¹)/2 := by
+  have h0 := ExteriorIntegral.invJoukowski_ne_zero hz
+  have hq : z + exp ((log (z-1) + log (z+1))/2) = (ExteriorIntegral.invJoukowski z)⁻¹ := by
+    have := ExteriorIntegral.invJoukowski_mul hz
+    have h2 : z + exp ((log (z-1) + log (z+1))/2) = 2*z - ExteriorIntegral.invJoukowski z := by
+      simp only [ExteriorIntegral.invJoukowski, ExteriorIntegral.sqrtSqSubOne]; ring
     rw [h2]; exact eq_inv_of_mul_eq_one_left (by rw [mul_comm]; exact this)
-  simp only [legendreEllipsePath, legInt_ew]
+  simp only [legendreEllipsePath, EllipseTransport.movingPoint]
   rw [hq, mul_inv, inv_inv, ← exp_neg, show -(-(s:ℂ)*π*I*t) = (s:ℂ)*π*I*t by ring,
     show -(s:ℂ)*π*I*t = -(s:ℂ)*π*I*t from rfl]
   ring
 
 /-- `|w(t)| = |ζ|`. -/
-theorem legInt_norm_ew (ζ : ℂ) (s : ℤ) (t : ℝ) : ‖legInt_ew ζ s t‖ = ‖ζ‖ := by
-  rw [legInt_ew, norm_mul, norm_exp]
+theorem EllipseTransport.norm_movingPoint (ζ : ℂ) (s : ℤ) (t : ℝ) : ‖EllipseTransport.movingPoint ζ
+    s t‖ = ‖ζ‖ := by
+  rw [EllipseTransport.movingPoint, norm_mul, norm_exp]
   simp
 
 /-- The derivative of `w(t)`. -/
-theorem legInt_hasDerivAt_ew (ζ : ℂ) (s : ℤ) (t : ℝ) :
-    HasDerivAt (legInt_ew ζ s) (-(s:ℂ)*π*I * legInt_ew ζ s t) t := by
+theorem EllipseTransport.hasDerivAt_movingPoint (ζ : ℂ) (s : ℤ) (t : ℝ) :
+    HasDerivAt (EllipseTransport.movingPoint ζ s)
+        (-(s:ℂ)*π*I * EllipseTransport.movingPoint ζ s t) t := by
   have h := ((hasDerivAt_id (t:ℂ)).const_mul (-(s:ℂ)*π*I)).cexp.const_mul ζ
   have h2 := h.comp_ofReal
-  simp only [legInt_ew]
+  simp only [EllipseTransport.movingPoint]
   convert h2 using 1
-  · ext t; simp only [legInt_ew, id]
+  · ext t; simp only [EllipseTransport.movingPoint, id]
   · simp only [id]; ring_nf
 
 /-- The explicit transport of `𝑸^μ_ν` along the ellipse path:
 `u(t) = √π (1-w²)^μ ζ^{ν+1} e^{-(ν+1)sπit} 𝐅(μ+1/2, ν+μ+1; ν+3/2; w²)`, `w = ζ e^{-sπit}`. -/
-noncomputable def legInt_eu (ν μ ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
-  Real.sqrt π * (1 - legInt_ew ζ s t ^ 2)^μ * (ζ^(ν+1) * exp (-(ν+1)*((s:ℂ)*π*I*t))) *
-    regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (legInt_ew ζ s t ^ 2)
+noncomputable def EllipseTransport.transport (ν μ ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
+  Real.sqrt π * (1 - EllipseTransport.movingPoint ζ s t ^ 2)^μ *
+      (ζ^(ν+1) * exp (-(ν+1)*((s:ℂ)*π*I*t))) *
+    regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (EllipseTransport.movingPoint ζ s t ^ 2)
 
 /-- Locally along the path, the transport is a constant multiple of `𝑸^μ_ν(σ z)`, `σ = ±1`. -/
-theorem legInt_eu_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {σ : ℂ}
-    (hσ : σ = 1 ∨ σ = -1) {t₀ : ℝ} (ht₀ : σ * legInt_ew (legInt_zeta z) s t₀ ∈ slitPlane) :
-    ∀ᶠ t in 𝓝 t₀, (σ * legInt_ew (legInt_zeta z) s t ∈ slitPlane) ∧
-      legInt_eu ν μ (legInt_zeta z) s t =
-      exp ((ν+1)*(log (legInt_zeta z) -
-          (log (σ * legInt_ew (legInt_zeta z) s t₀) + (s:ℂ)*π*I*t₀))) *
-        olverQ ν μ (σ * ((legInt_ew (legInt_zeta z) s t +
-            (legInt_ew (legInt_zeta z) s t)⁻¹)/2)) := by
-  set ζ := legInt_zeta z with hζ
-  have hζ0 : ζ ≠ 0 := legInt_zeta_ne_zero hz
-  have hζ1 : ‖ζ‖ < 1 := legInt_norm_zeta_lt_one hz
-  set w := legInt_ew ζ s with hw
+theorem EllipseTransport.transport_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {σ : ℂ}
+    (hσ : σ = 1 ∨ σ = -1) {t₀ : ℝ}
+        (ht₀ : σ * EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s
+        t₀ ∈ slitPlane) :
+    ∀ᶠ t in 𝓝 t₀, (σ * EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s
+        t ∈ slitPlane) ∧
+      EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s t =
+      exp ((ν+1)*(log (ExteriorIntegral.invJoukowski z) -
+          (log (σ * EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t₀) +
+              (s:ℂ)*π*I*t₀))) *
+        olverQ ν μ (σ * ((EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t +
+            (EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t)⁻¹)/2)) := by
+  set ζ := ExteriorIntegral.invJoukowski z with hζ
+  have hζ0 : ζ ≠ 0 := ExteriorIntegral.invJoukowski_ne_zero hz
+  have hζ1 : ‖ζ‖ < 1 := ExteriorIntegral.norm_invJoukowski_lt_one hz
+  set w := EllipseTransport.movingPoint ζ s with hw
   have hσ2 : σ^2 = 1 := by rcases hσ with h | h <;> rw [h] <;> norm_num
   have hσ0 : σ ≠ 0 := by rintro rfl; norm_num at hσ2
   have hwc : Continuous w := by
-    rw [hw]; unfold legInt_ew; fun_prop
+    rw [hw]; unfold EllipseTransport.movingPoint; fun_prop
   have hU : ∀ᶠ t in 𝓝 t₀, σ * w t ∈ slitPlane :=
     ((continuous_const.mul hwc).continuousAt (x := t₀)).preimage_mem_nhds
         (isOpen_slitPlane.mem_nhds ht₀)
@@ -161,14 +170,15 @@ theorem legInt_eu_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : �
   have hdh : ∀ t ∈ Ioo l r, HasDerivAt h 0 t := by
     intro t ht
     have hm : σ * w t ∈ slitPlane := hsub ht
-    have h1 := ((legInt_hasDerivAt_ew ζ s t).const_mul σ).clog_real hm
+    have h1 := ((EllipseTransport.hasDerivAt_movingPoint ζ s t).const_mul σ).clog_real hm
     have h2 : HasDerivAt (fun t : ℝ => (s:ℂ)*π*I*t) ((s:ℂ)*π*I) t := by
       have := ((hasDerivAt_id (t:ℂ)).const_mul ((s:ℂ)*π*I)).comp_ofReal
       simpa using this
     convert h1.add h2 using 1
     have hw0 : w t ≠ 0 := by
       intro h0; rw [h0, mul_zero] at hm; exact slitPlane_ne_zero hm rfl
-    have hinv : legInt_ew ζ s t * (legInt_ew ζ s t)⁻¹ = 1 := mul_inv_cancel₀ hw0
+    have hinv : EllipseTransport.movingPoint ζ s t * (EllipseTransport.movingPoint ζ s t)⁻¹ = 1 :=
+        mul_inv_cancel₀ hw0
     field_simp
     linear_combination ((s:ℂ)*π*I) * hinv
   have hconst : ∀ t ∈ Ioo l r, h t = h t₀ := fun t ht =>
@@ -180,13 +190,14 @@ theorem legInt_eu_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : �
   refine ⟨hm, ?_⟩
   have hn : ‖σ * w t‖ < 1 := by
     rw [norm_mul, show ‖σ‖ = 1 by rcases hσ with h | h <;> rw [h] <;> simp, one_mul, hw,
-      legInt_norm_ew]; exact hζ1
-  have hJ := legInt_joukowski_mem hn hm
+      EllipseTransport.norm_movingPoint]; exact hζ1
+  have hJ := EllipseTransport.joukowski_mem hn hm
   have hσJ : σ * ((w t + (w t)⁻¹)/2) = (σ * w t + (σ * w t)⁻¹)/2 := by
     rcases hσ with h | h
     · rw [h]; simp
     · rw [h]; simp; ring
-  rw [hσJ, legFS_olverQ_eq_G ν μ hJ, legInt_zeta_joukowski hn hm, legFS_G, legInt_eu]
+  rw [hσJ, OlverQZetaForm.olverQ_eq_rhs ν μ hJ, EllipseTransport.zeta_joukowski hn hm,
+      OlverQZetaForm.rhs, EllipseTransport.transport]
   have hw0 : σ * w t ≠ 0 := slitPlane_ne_zero hm
   have hsq : (σ * w t)^2 = w t ^ 2 := by rw [mul_pow, hσ2, one_mul]
   have hht := hconst t ht
@@ -202,46 +213,51 @@ theorem legInt_eu_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : �
   rw [e]; ring
 
 /-- The derivative of the ellipse path, `γ'(t) = -sπi (w - w⁻¹)/2`. -/
-noncomputable def legInt_gd (ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
-  -(s:ℂ)*π*I * (legInt_ew ζ s t - (legInt_ew ζ s t)⁻¹)/2
+noncomputable def EllipseTransport.pathDeriv (ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
+  -(s:ℂ)*π*I * (EllipseTransport.movingPoint ζ s t - (EllipseTransport.movingPoint ζ s t)⁻¹)/2
 
 /-- `w(t) ≠ 0`. -/
-theorem legInt_ew_ne_zero {ζ : ℂ} (hζ : ζ ≠ 0) (s : ℤ) (t : ℝ) : legInt_ew ζ s t ≠ 0 :=
+theorem EllipseTransport.movingPoint_ne_zero {ζ : ℂ} (hζ : ζ ≠ 0) (s : ℤ) (t : ℝ) :
+    EllipseTransport.movingPoint ζ s t ≠ 0 :=
   mul_ne_zero hζ (exp_ne_zero _)
 
-/-- The ellipse path has derivative `legInt_gd`. -/
-theorem legInt_hasDerivAt_path {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
-    HasDerivAt (legendreEllipsePath z s) (legInt_gd (legInt_zeta z) s t) t := by
-  have h0 := legInt_ew_ne_zero (legInt_zeta_ne_zero hz) s t
-  have hw := legInt_hasDerivAt_ew (legInt_zeta z) s t
+/-- The ellipse path has derivative `EllipseTransport.pathDeriv`. -/
+theorem EllipseTransport.hasDerivAt_path {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
+    HasDerivAt (legendreEllipsePath z s)
+        (EllipseTransport.pathDeriv (ExteriorIntegral.invJoukowski z) s t) t := by
+  have h0 := EllipseTransport.movingPoint_ne_zero (ExteriorIntegral.invJoukowski_ne_zero hz) s t
+  have hw := EllipseTransport.hasDerivAt_movingPoint (ExteriorIntegral.invJoukowski z) s t
   have h := (hw.add (hw.inv h0)).div_const 2
   have he : legendreEllipsePath z s = fun t =>
-      (legInt_ew (legInt_zeta z) s t + (legInt_ew (legInt_zeta z) s t)⁻¹)/2 :=
-    funext fun t => legInt_path_eq hz s t
+      (EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t +
+          (EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t)⁻¹)/2 :=
+    funext fun t => EllipseTransport.path_eq hz s t
   rw [he]
   convert h using 1
-  simp only [legInt_gd]
+  simp only [EllipseTransport.pathDeriv]
   field_simp
   ring
 
 /-- `γ'(t) ≠ 0` for `s ≠ 0`. -/
-theorem legInt_gd_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ} (hs : s ≠ 0) (t : ℝ) :
-    legInt_gd (legInt_zeta z) s t ≠ 0 := by
-  have h0 := legInt_ew_ne_zero (legInt_zeta_ne_zero hz) s t
-  have hn : ‖legInt_ew (legInt_zeta z) s t‖ < 1 := by
-    rw [legInt_norm_ew]; exact legInt_norm_zeta_lt_one hz
-  simp only [legInt_gd]
+theorem EllipseTransport.pathDeriv_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ}
+    (hs : s ≠ 0) (t : ℝ) :
+    EllipseTransport.pathDeriv (ExteriorIntegral.invJoukowski z) s t ≠ 0 := by
+  have h0 := EllipseTransport.movingPoint_ne_zero (ExteriorIntegral.invJoukowski_ne_zero hz) s t
+  have hn : ‖EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t‖ < 1 := by
+    rw [EllipseTransport.norm_movingPoint]; exact ExteriorIntegral.norm_invJoukowski_lt_one hz
+  simp only [EllipseTransport.pathDeriv]
   refine div_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (neg_ne_zero.mpr (by exact_mod_cast hs))
     (by exact_mod_cast Real.pi_ne_zero)) I_ne_zero) ?_) two_ne_zero
   intro h
-  have h1 : legInt_ew (legInt_zeta z) s t ^ 2 = 1 := by
+  have h1 : EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t ^ 2 = 1 := by
     field_simp at h; linear_combination h
   have := congrArg norm h1
   rw [norm_pow, norm_one] at this
-  nlinarith [norm_nonneg (legInt_ew (legInt_zeta z) s t)]
+  nlinarith [norm_nonneg (EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t)]
 
 /-- A nonzero point outside `ℂ ∖ (-∞, 0]` has its negative inside. -/
-theorem legInt_neg_mem_slitPlane {w : ℂ} (hw0 : w ≠ 0) (hw : w ∉ slitPlane) : -w ∈ slitPlane := by
+theorem EllipseTransport.neg_mem_slitPlane {w : ℂ} (hw0 : w ≠ 0) (hw : w ∉ slitPlane) : -w ∈
+    slitPlane := by
   rw [mem_slitPlane_iff] at hw ⊢
   push Not at hw
   left
@@ -250,51 +266,65 @@ theorem legInt_neg_mem_slitPlane {w : ℂ} (hw0 : w ≠ 0) (hw : w ∉ slitPlane
   exact neg_pos.mpr (lt_of_le_of_ne hw.1 this)
 
 /-- Local data at each point of the path: `u = c 𝑸(σ γ)` near `t₀`. -/
-theorem legInt_eu_local' (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t₀ : ℝ) :
+theorem EllipseTransport.transport_local' (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane)
+    (s : ℤ) (t₀ : ℝ) :
     ∃ c σ : ℂ, σ^2 = 1 ∧ ∀ᶠ t in 𝓝 t₀, σ * legendreEllipsePath z s t - 1 ∈ slitPlane ∧
-      legInt_eu ν μ (legInt_zeta z) s t = c * olverQ ν μ (σ * legendreEllipsePath z s t) := by
-  have h0 := legInt_ew_ne_zero (legInt_zeta_ne_zero hz) s t₀
-  have key : ∀ σ : ℂ, (σ = 1 ∨ σ = -1) → σ * legInt_ew (legInt_zeta z) s t₀ ∈ slitPlane →
+      EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s t = c *
+          olverQ ν μ (σ * legendreEllipsePath z s t) := by
+  have h0 := EllipseTransport.movingPoint_ne_zero (ExteriorIntegral.invJoukowski_ne_zero hz) s t₀
+  have key : ∀ σ : ℂ, (σ = 1 ∨ σ = -1) → σ *
+      EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t₀ ∈ slitPlane →
       ∃ c σ : ℂ, σ^2 = 1 ∧ ∀ᶠ t in 𝓝 t₀, σ * legendreEllipsePath z s t - 1 ∈ slitPlane ∧
-      legInt_eu ν μ (legInt_zeta z) s t = c * olverQ ν μ (σ * legendreEllipsePath z s t) := by
+      EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s t = c *
+          olverQ ν μ (σ * legendreEllipsePath z s t) := by
     intro σ hσ hm
-    refine ⟨exp ((ν+1)*(log (legInt_zeta z) - (log (σ * legInt_ew (legInt_zeta z) s t₀) +
+    refine ⟨exp ((ν+1)*(log (ExteriorIntegral.invJoukowski z) -
+        (log (σ * EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t₀) +
       (s:ℂ)*π*I*t₀))), σ, by rcases hσ with h | h <;> rw [h] <;> norm_num, ?_⟩
-    filter_upwards [legInt_eu_local ν μ hz s hσ hm] with t ⟨hmt, he⟩
-    have hn : ‖σ * legInt_ew (legInt_zeta z) s t‖ < 1 := by
+    filter_upwards [EllipseTransport.transport_local ν μ hz s hσ hm] with t ⟨hmt, he⟩
+    have hn : ‖σ * EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t‖ < 1 := by
       rw [norm_mul, show ‖σ‖ = 1 by rcases hσ with h | h <;> rw [h] <;> simp, one_mul,
-        legInt_norm_ew]; exact legInt_norm_zeta_lt_one hz
-    have hσJ : σ * ((legInt_ew (legInt_zeta z) s t + (legInt_ew (legInt_zeta z) s t)⁻¹)/2) =
-        (σ * legInt_ew (legInt_zeta z) s t + (σ * legInt_ew (legInt_zeta z) s t)⁻¹)/2 := by
+        EllipseTransport.norm_movingPoint]; exact ExteriorIntegral.norm_invJoukowski_lt_one hz
+    have hσJ : σ * ((EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t +
+        (EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t)⁻¹)/2) =
+        (σ * EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t +
+            (σ * EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t)⁻¹)/2 := by
       rcases hσ with h | h
       · rw [h]; simp
       · rw [h]; simp; ring
-    rw [legInt_path_eq hz s t]
+    rw [EllipseTransport.path_eq hz s t]
     refine ⟨?_, he⟩
-    rw [hσJ]; exact legInt_joukowski_mem hn hmt
-  by_cases hm : legInt_ew (legInt_zeta z) s t₀ ∈ slitPlane
+    rw [hσJ]; exact EllipseTransport.joukowski_mem hn hmt
+  by_cases hm : EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t₀ ∈ slitPlane
   · exact key 1 (Or.inl rfl) (by rwa [one_mul])
-  · exact key (-1) (Or.inr rfl) (by rw [neg_one_mul]; exact legInt_neg_mem_slitPlane h0 hm)
+  · exact key (-1) (Or.inr rfl)
+        (by rw [neg_one_mul]; exact EllipseTransport.neg_mem_slitPlane h0 hm)
 
 /-- The transport `u` satisfies the first-order Legendre system along the ellipse path, with
 `v = u'/γ'`. -/
-theorem legInt_eu_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ} (hs : s ≠ 0) (t₀ : ℝ) :
-    HasDerivAt (legInt_eu ν μ (legInt_zeta z) s)
-      (deriv (legendreEllipsePath z s) t₀ * (deriv (legInt_eu ν μ (legInt_zeta z) s) t₀ /
-        legInt_gd (legInt_zeta z) s t₀)) t₀ ∧
-    HasDerivAt (fun t => deriv (legInt_eu ν μ (legInt_zeta z) s) t / legInt_gd (legInt_zeta z) s t)
+theorem EllipseTransport.transport_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ}
+    (hs : s ≠ 0) (t₀ : ℝ) :
+    HasDerivAt (EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s)
+      (deriv (legendreEllipsePath z s) t₀ *
+          (deriv (EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s) t₀ /
+        EllipseTransport.pathDeriv (ExteriorIntegral.invJoukowski z) s t₀)) t₀ ∧
+    HasDerivAt (fun t =>
+        deriv (EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s) t /
+        EllipseTransport.pathDeriv (ExteriorIntegral.invJoukowski z) s t)
       (deriv (legendreEllipsePath z s) t₀ * (2 * legendreEllipsePath z s t₀ *
-        (deriv (legInt_eu ν μ (legInt_zeta z) s) t₀ / legInt_gd (legInt_zeta z) s t₀) -
-        (ν*(ν+1) - μ^2/(1 - (legendreEllipsePath z s t₀)^2)) * legInt_eu ν μ (legInt_zeta z) s t₀) /
+        (deriv (EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s) t₀ /
+            EllipseTransport.pathDeriv (ExteriorIntegral.invJoukowski z) s t₀) -
+        (ν*(ν+1) - μ^2/(1 - (legendreEllipsePath z s t₀)^2)) *
+            EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s t₀) /
         (1 - (legendreEllipsePath z s t₀)^2)) t₀ := by
-  obtain ⟨c, σ, hσ2, hev⟩ := legInt_eu_local' ν μ hz s t₀
+  obtain ⟨c, σ, hσ2, hev⟩ := EllipseTransport.transport_local' ν μ hz s t₀
   set γ := legendreEllipsePath z s with hγdef
-  set u := legInt_eu ν μ (legInt_zeta z) s with hudef
-  set gd := legInt_gd (legInt_zeta z) s with hgd
+  set u := EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s with hudef
+  set gd := EllipseTransport.pathDeriv (ExteriorIntegral.invJoukowski z) s with hgd
   set Q := olverQ ν μ with hQdef
-  have hγ : ∀ t, HasDerivAt γ (gd t) t := legInt_hasDerivAt_path hz s
+  have hγ : ∀ t, HasDerivAt γ (gd t) t := EllipseTransport.hasDerivAt_path hz s
   have hdγ : ∀ t, deriv γ t = gd t := fun t => (hγ t).deriv
-  have hgd0 : ∀ t, gd t ≠ 0 := legInt_gd_ne_zero hz hs
+  have hgd0 : ∀ t, gd t ≠ 0 := EllipseTransport.pathDeriv_ne_zero hz hs
   have hf : ∀ t, σ * γ t - 1 ∈ slitPlane →
       HasDerivAt (fun t => c * Q (σ * γ t)) (c * (deriv Q (σ * γ t) * (σ * gd t))) t := by
     intro t ht
@@ -345,13 +375,13 @@ theorem legInt_eu_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) {s : �
       (c * gd t₀) * hode'
 
 /-- The ellipse path avoids `±1`. -/
-theorem legInt_path_ne {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
+theorem EllipseTransport.path_ne {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
     legendreEllipsePath z s t ≠ 1 ∧ legendreEllipsePath z s t ≠ -1 := by
-  have h0 := legInt_ew_ne_zero (legInt_zeta_ne_zero hz) s t
-  have hn : ‖legInt_ew (legInt_zeta z) s t‖ < 1 := by
-    rw [legInt_norm_ew]; exact legInt_norm_zeta_lt_one hz
-  rw [legInt_path_eq hz s t]
-  set w := legInt_ew (legInt_zeta z) s t
+  have h0 := EllipseTransport.movingPoint_ne_zero (ExteriorIntegral.invJoukowski_ne_zero hz) s t
+  have hn : ‖EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t‖ < 1 := by
+    rw [EllipseTransport.norm_movingPoint]; exact ExteriorIntegral.norm_invJoukowski_lt_one hz
+  rw [EllipseTransport.path_eq hz s t]
+  set w := EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s t
   have key : ∀ σ : ℂ, σ^2 = 1 → (w + w⁻¹)/2 ≠ σ := by
     intro σ hσ h
     have h1 : (w - σ)^2 = 0 := by
@@ -364,38 +394,42 @@ theorem legInt_path_ne {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
   exact ⟨key 1 (by norm_num), key (-1) (by norm_num)⟩
 
 /-- The initial data of the transport: `u(0) = 𝑸^μ_ν(z)`, `u'(0) = γ'(0) 𝑸'(z)`. -/
-theorem legInt_eu_zero (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
-    legInt_eu ν μ (legInt_zeta z) s 0 = olverQ ν μ z ∧
-    HasDerivAt (legInt_eu ν μ (legInt_zeta z) s)
-      (deriv (olverQ ν μ) z * legInt_gd (legInt_zeta z) s 0) 0 := by
-  have hw0 : legInt_ew (legInt_zeta z) s 0 = legInt_zeta z := by simp [legInt_ew]
-  have hm : (1:ℂ) * legInt_ew (legInt_zeta z) s 0 ∈ slitPlane := by
-    rw [one_mul, hw0]; exact legInt_zeta_mem_slitPlane hz
-  have hev := legInt_eu_local ν μ hz s (Or.inl rfl) hm
+theorem EllipseTransport.transport_zero (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
+    EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s 0 = olverQ ν μ z ∧
+    HasDerivAt (EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s)
+      (deriv (olverQ ν μ) z *
+          EllipseTransport.pathDeriv (ExteriorIntegral.invJoukowski z) s 0) 0 := by
+  have hw0 : EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s 0 =
+      ExteriorIntegral.invJoukowski z := by simp [EllipseTransport.movingPoint]
+  have hm : (1:ℂ) * EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s 0 ∈
+      slitPlane := by
+    rw [one_mul, hw0]; exact ExteriorIntegral.invJoukowski_mem_slitPlane hz
+  have hev := EllipseTransport.transport_local ν μ hz s (Or.inl rfl) hm
   rw [one_mul, hw0] at hev
   simp only [ofReal_zero, mul_zero, add_zero, sub_self, exp_zero, one_mul] at hev
   have hγ0 : legendreEllipsePath z s 0 = z := by
-    rw [legInt_path_eq hz s 0, hw0, legInt_two_mul_eq hz |>.symm]; ring
-  have hev' : legInt_eu ν μ (legInt_zeta z) s =ᶠ[𝓝 0] fun t =>
+    rw [EllipseTransport.path_eq hz s 0, hw0, ExteriorIntegral.two_mul_eq hz |>.symm]; ring
+  have hev' : EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s =ᶠ[𝓝 0] fun t =>
       olverQ ν μ (legendreEllipsePath z s t) := by
     filter_upwards [hev] with t ht
-    rw [ht.2, legInt_path_eq hz s t]
+    rw [ht.2, EllipseTransport.path_eq hz s t]
   refine ⟨by rw [hev'.self_of_nhds]; show olverQ ν μ (legendreEllipsePath z s 0) = _; rw [hγ0], ?_⟩
   have hQ : HasDerivAt (olverQ ν μ) (deriv (olverQ ν μ) z) (legendreEllipsePath z s 0) := by
     rw [hγ0]; exact (olverQ_analytic ν μ z hz).differentiableAt.hasDerivAt
-  exact (hQ.comp 0 (legInt_hasDerivAt_path hz s 0)).congr_of_eventuallyEq hev'
+  exact (hQ.comp 0 (EllipseTransport.hasDerivAt_path hz s 0)).congr_of_eventuallyEq hev'
 
 -- DLMF 14.24.1 `associatedP_ellipse_continuation` is stated below, after 14.24.2 and 14.24.3, which
 -- its proof uses.
 
 /-- olverQ ellipse continuation. Along the ellipse `γ(t) = J(w(t))`, `w(t) = ζ e^{-sπit}`, the
-transport is `√π (1-w²)^μ ζ^{ν+1} e^{-(ν+1)sπit} 𝐅(μ+1/2, ν+μ+1; ν+3/2; w²)` (`legInt_eu`),
-locally a multiple of `𝑸^μ_ν(±γ)` by the `ζ`-form `legFS_olverQ_eq_G`. -/
+transport is `√π (1-w²)^μ ζ^{ν+1} e^{-(ν+1)sπit} 𝐅(μ+1/2, ν+μ+1; ν+3/2; w²)`
+(`EllipseTransport.transport`), locally a multiple of `𝑸^μ_ν(±γ)` by the `ζ`-form
+`OlverQZetaForm.olverQ_eq_rhs`. -/
 @[dlmf 14.24.E2]
 theorem olverQ_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     legendreEllipseContinued (olverQ ν μ) ν μ z s=(-1:ℂ)^s*exp (-s*ν*π*I)*olverQ ν μ z := by
   have hreg : ∀ t ∈ Icc (0:ℝ) 1, legendreEllipsePath z s t ≠ 1 ∧ legendreEllipsePath z s t ≠ -1 :=
-    fun t _ => legInt_path_ne hz s t
+    fun t _ => EllipseTransport.path_ne hz s t
   have hγc : ContDiff ℝ 1 (legendreEllipsePath z s) := by
     have he : legendreEllipsePath z s = fun t : ℝ =>
         ((z + exp ((log (z-1) + log (z+1))/2)) * exp ((s:ℂ)*π*I * ofRealCLM t) +
@@ -404,12 +438,13 @@ theorem olverQ_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPl
     rw [he]
     have h1 : ContDiff ℝ 1 (fun t : ℝ => ofRealCLM t) := ofRealCLM.contDiff
     fun_prop
-  obtain ⟨hu0, hd0⟩ := legInt_eu_zero ν μ hz s
+  obtain ⟨hu0, hd0⟩ := EllipseTransport.transport_zero ν μ hz s
   by_cases hs : s = 0
   · subst hs
     have hγ : legendreEllipsePath z 0 = fun _ => z := funext fun t => by
-      have hw : legInt_ew (legInt_zeta z) 0 t = legInt_zeta z := by simp [legInt_ew]
-      rw [legInt_path_eq hz 0 t, hw, ← legInt_two_mul_eq hz]; ring
+      have hw : EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) 0 t =
+          ExteriorIntegral.invJoukowski z := by simp [EllipseTransport.movingPoint]
+      rw [EllipseTransport.path_eq hz 0 t, hw, ← ExteriorIntegral.two_mul_eq hz]; ring
     have hd : ∀ t, deriv (legendreEllipsePath z 0) t = 0 := fun t => by rw [hγ]; simp
     have huv : IsLegendreTransport ν μ (legendreEllipsePath z 0) (olverQ ν μ z)
         (deriv (olverQ ν μ) z)
@@ -419,9 +454,9 @@ theorem olverQ_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPl
       · rw [hd, zero_mul, zero_div]; exact hasDerivWithinAt_const _ _ _
     rw [legendreEllipseContinued, legendreTransport_unique _ _ _ _ _ hγc hreg huv]
     simp
-  · set u := legInt_eu ν μ (legInt_zeta z) s with hudef
-    set gd := legInt_gd (legInt_zeta z) s with hgd
-    have hD := legInt_eu_deriv ν μ hz hs
+  · set u := EllipseTransport.transport ν μ (ExteriorIntegral.invJoukowski z) s with hudef
+    set gd := EllipseTransport.pathDeriv (ExteriorIntegral.invJoukowski z) s with hgd
+    have hD := EllipseTransport.transport_deriv ν μ hz hs
     have huv : IsLegendreTransport ν μ (legendreEllipsePath z s) (olverQ ν μ z)
         (deriv (olverQ ν μ) z)
         u (fun t => deriv u t / gd t) := by
@@ -429,11 +464,13 @@ theorem olverQ_ellipse_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPl
         fun t _ => (hD t).2.continuousAt.continuousWithinAt,
         fun t _ => ⟨(hD t).1.hasDerivWithinAt, (hD t).2.hasDerivWithinAt⟩⟩
       show deriv u 0 / gd 0 = _
-      rw [hd0.deriv, mul_div_assoc, div_self (legInt_gd_ne_zero hz hs 0), mul_one]
-    rw [legendreEllipseContinued, legendreTransport_unique _ _ _ _ _ hγc hreg huv, hudef, legInt_eu,
-      legFS_olverQ_eq_G ν μ hz, legFS_G]
-    have hw1 : legInt_ew (legInt_zeta z) s 1 ^ 2 = legInt_zeta z ^ 2 := by
-      rw [legInt_ew, mul_pow, ← exp_nat_mul]
+      rw [hd0.deriv, mul_div_assoc, div_self (EllipseTransport.pathDeriv_ne_zero hz hs 0), mul_one]
+    rw [legendreEllipseContinued, legendreTransport_unique _ _ _ _ _ hγc hreg huv, hudef,
+        EllipseTransport.transport,
+      OlverQZetaForm.olverQ_eq_rhs ν μ hz, OlverQZetaForm.rhs]
+    have hw1 : EllipseTransport.movingPoint (ExteriorIntegral.invJoukowski z) s 1 ^ 2 =
+        ExteriorIntegral.invJoukowski z ^ 2 := by
+      rw [EllipseTransport.movingPoint, mul_pow, ← exp_nat_mul]
       have : exp (((2:ℕ):ℂ) * (-(s:ℂ)*π*I*((1:ℝ):ℂ))) = 1 := by
         rw [show ((2:ℕ):ℂ) * (-(s:ℂ)*π*I*((1:ℝ):ℂ)) = ((-s:ℤ):ℂ) * (2*π*I) by push_cast; ring]
         exact exp_int_mul_two_pi_mul_I _
@@ -460,11 +497,11 @@ around `-1` (used for DLMF 14.24.3–4). -/
 def legendreOneContinued (F : ℂ → ℂ) (ν μ z : ℂ) (s : ℤ) : ℂ :=
   legendreTransport ν μ (legendreOneLoop z s) (F z) (deriv F z)
 
-/-! ### Helpers for DLMF 14.24.3: transport of `P^{-μ}_ν` around `1` (prefix `legTr_`) -/
+/-! ### Helpers for DLMF 14.24.3: transport of `P^{-μ}_ν` around `1` (namespace `Transport`) -/
 
 /-- A pair `(u, v)` is a Legendre transport along `γ` if near each `t₀` it is `(f ∘ γ, f' ∘ γ)`
 for a local solution `f` of the Legendre equation at `γ(t₀)`. -/
-theorem legTr_isTransport_of_local (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {u v : ℝ → ℂ}
+theorem Transport.isTransport_of_local (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {u v : ℝ → ℂ}
     (hloc : ∀ t₀ ∈ Icc (0:ℝ) 1, ∃ f f1 : ℂ → ℂ, ∃ f2 : ℂ, HasDerivAt f (f1 (γ t₀)) (γ t₀) ∧
       HasDerivAt f1 f2 (γ t₀) ∧ 1 - γ t₀ ^ 2 ≠ 0 ∧
       (1 - γ t₀ ^ 2) * f2 - 2 * γ t₀ * f1 (γ t₀) + (ν*(ν+1) - μ^2/(1 - γ t₀ ^ 2)) * f (γ t₀) = 0 ∧
@@ -490,7 +527,7 @@ theorem legTr_isTransport_of_local (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Diffe
 
 /-- A function continuous within `s` at `t₀` with locally constant exponential is locally
 constant. -/
-theorem legTr_eventually_eq_of_exp {d : ℝ → ℂ} {s : Set ℝ} {t₀ : ℝ}
+theorem Transport.eventually_eq_of_exp {d : ℝ → ℂ} {s : Set ℝ} {t₀ : ℝ}
     (hd : ContinuousWithinAt d s t₀) (he : ∀ᶠ t in 𝓝[s] t₀, exp (d t) = exp (d t₀)) :
     ∀ᶠ t in 𝓝[s] t₀, d t = d t₀ := by
   have hn : ∀ᶠ t in 𝓝[s] t₀, ‖d t - d t₀‖ < 2*π := by
@@ -512,24 +549,26 @@ theorem legTr_eventually_eq_of_exp {d : ℝ → ℂ} {s : Set ℝ} {t₀ : ℝ}
   rw [hn0] at hn; simp at hn; linear_combination hn
 
 /-- The regular factor `(w+1)^{-μ/2} 𝐅(ν+1, -ν; 1+μ; (1-w)/2)` of `P^{-μ}_ν`. -/
-noncomputable def legTr_K (ν μ w : ℂ) : ℂ :=
+noncomputable def Transport.regularFactor (ν μ w : ℂ) : ℂ :=
   exp (-μ/2*log (w+1)) * regularizedGaussHG (ν+1) (-ν) (1+μ) ((1-w)/2)
 
 /-- `P^{-μ}_ν(w) = e^{μ log(w-1)/2} K(w)`. -/
-theorem legTr_associatedP_eq (ν μ w : ℂ) :
-    associatedP ν (-μ) w = exp (μ/2*log (w-1)) * legTr_K ν μ w := by
-  rw [associatedP, legTr_K, show (1:ℂ) - -μ = 1+μ by ring, ← mul_assoc, ← exp_add]
+theorem Transport.associatedP_eq (ν μ w : ℂ) :
+    associatedP ν (-μ) w = exp (μ/2*log (w-1)) * Transport.regularFactor ν μ w := by
+  rw [associatedP, Transport.regularFactor, show (1:ℂ) - -μ = 1+μ by ring, ← mul_assoc, ← exp_add]
   congr 2; ring
 
 /-- `𝖯^{-μ}_ν(w) = e^{μ log(1-w)/2} K(w)` (continued into the disk). -/
-theorem legTr_ferrersPCont_eq (ν μ w : ℂ) :
-    ferrersPCont ν (-μ) w = exp (μ/2*log (1-w)) * legTr_K ν μ w := by
-  rw [ferrersPCont, legTr_K, show (1:ℂ) - -μ = 1+μ by ring, ← mul_assoc, ← exp_add, add_comm 1 w]
+theorem Transport.ferrersPCont_eq (ν μ w : ℂ) :
+    ferrersPCont ν (-μ) w = exp (μ/2*log (1-w)) * Transport.regularFactor ν μ w := by
+  rw [ferrersPCont, Transport.regularFactor, show (1:ℂ) - -μ = 1+μ by ring, ← mul_assoc,
+                                                                        ← exp_add, add_comm 1 w]
   congr 2; ring
 
 /-- `K` is analytic where `w + 1 ∉ (-∞, 0]` and `(1-w)/2 ∉ [1, ∞)`. -/
-theorem legTr_K_analyticAt (ν μ : ℂ) {w : ℂ} (hp : w+1 ∈ slitPlane) (hc : (1-w)/2 ∈ cutPlane) :
-    AnalyticAt ℂ (legTr_K ν μ) w := by
+theorem Transport.regularFactor_analyticAt (ν μ : ℂ) {w : ℂ} (hp : w+1 ∈ slitPlane)
+    (hc : (1-w)/2 ∈ cutPlane) :
+    AnalyticAt ℂ (Transport.regularFactor ν μ) w := by
   have hG : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (ν+1) (-ν) (1+μ) ((1-w)/2)) w :=
     (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
   have hE : AnalyticAt ℂ (fun w : ℂ => exp (-μ/2*log (w+1))) w := by
@@ -537,20 +576,21 @@ theorem legTr_K_analyticAt (ν μ : ℂ) {w : ℂ} (hp : w+1 ∈ slitPlane) (hc 
   exact hE.mul hG
 
 /-- Derivative of `e^{μL/2} K` for a branch `L` of `log(w-1)` (up to constants). -/
-theorem legTr_hasDerivAt_branch (ν μ : ℂ) {L : ℂ → ℂ} {w : ℂ} (hL : HasDerivAt L (1/(w-1)) w)
-    (hK : DifferentiableAt ℂ (legTr_K ν μ) w) :
-    HasDerivAt (fun w => exp (μ/2*L w) * legTr_K ν μ w)
-      (exp (μ/2*L w) * (μ/2*legTr_K ν μ w/(w-1) + deriv (legTr_K ν μ) w)) w := by
+theorem Transport.hasDerivAt_branch (ν μ : ℂ) {L : ℂ → ℂ} {w : ℂ} (hL : HasDerivAt L (1/(w-1)) w)
+    (hK : DifferentiableAt ℂ (Transport.regularFactor ν μ) w) :
+    HasDerivAt (fun w => exp (μ/2*L w) * Transport.regularFactor ν μ w)
+      (exp (μ/2*L w) * (μ/2*Transport.regularFactor ν μ w/(w-1) +
+          deriv (Transport.regularFactor ν μ) w)) w := by
   have h := ((hL.const_mul (μ/2)).cexp).mul hK.hasDerivAt
   convert h using 1; ring
 
 /-- `(log(w-1))' = 1/(w-1)`. -/
-theorem legTr_hasDerivAt_log_sub_one {w : ℂ} (hw : w-1 ∈ slitPlane) :
+theorem Transport.hasDerivAt_log_sub_one {w : ℂ} (hw : w-1 ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => log (w-1)) (1/(w-1)) w := by
   simpa using ((hasDerivAt_id w).sub_const 1).clog hw
 
 /-- `(log(1-w))' = 1/(w-1)`. -/
-theorem legTr_hasDerivAt_log_one_sub {w : ℂ} (hw : 1-w ∈ slitPlane) :
+theorem Transport.hasDerivAt_log_one_sub {w : ℂ} (hw : 1-w ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => log (1-w)) (1/(w-1)) w := by
   have h := ((hasDerivAt_id' w).const_sub 1).clog hw
   have hne : 1 - w ≠ 0 := slitPlane_ne_zero hw
@@ -560,7 +600,7 @@ theorem legTr_hasDerivAt_log_one_sub {w : ℂ} (hw : 1-w ∈ slitPlane) :
   ring
 
 /-- The Legendre equation for `𝖯^μ_ν` continued into the unit disk. -/
-theorem legTr_ferrersPCont_ode (ν μ : ℂ) {w : ℂ} (hw : w ∈ Metric.ball (0:ℂ) 1) :
+theorem Transport.ferrersPCont_ode (ν μ : ℂ) {w : ℂ} (hw : w ∈ Metric.ball (0:ℂ) 1) :
     (1-w^2)*iteratedDeriv 2 (ferrersPCont ν μ) w-2*w*deriv (ferrersPCont ν μ) w+
       (ν*(ν+1)-μ^2/(1-w^2))*ferrersPCont ν μ w=0 := by
   set F := ferrersPCont ν μ
@@ -609,28 +649,30 @@ theorem legTr_ferrersPCont_ode (ν μ : ℂ) {w : ℂ} (hw : w ∈ Metric.ball (
   exact hE.eqOn_zero_of_preconnected_of_eventuallyEq_zero (convex_ball _ _).isPreconnected hI hev hw
 
 /-- The transported value `e^{μℓ(t)/2} K(γ(t))`, with `ℓ` a continuous logarithm of `γ - 1`. -/
-noncomputable def legTr_u (ν μ : ℂ) (γ ℓ : ℝ → ℂ) (t : ℝ) : ℂ :=
-  exp (μ/2*ℓ t) * legTr_K ν μ (γ t)
+noncomputable def Transport.transportedValue (ν μ : ℂ) (γ ℓ : ℝ → ℂ) (t : ℝ) : ℂ :=
+  exp (μ/2*ℓ t) * Transport.regularFactor ν μ (γ t)
 
 /-- The transported derivative `e^{μℓ(t)/2} (μ K/(2(γ-1)) + K')(γ(t))`. -/
-noncomputable def legTr_v (ν μ : ℂ) (γ ℓ : ℝ → ℂ) (t : ℝ) : ℂ :=
-  exp (μ/2*ℓ t) * (μ/2*legTr_K ν μ (γ t)/(γ t - 1) + deriv (legTr_K ν μ) (γ t))
+noncomputable def Transport.transportedDeriv (ν μ : ℂ) (γ ℓ : ℝ → ℂ) (t : ℝ) : ℂ :=
+  exp (μ/2*ℓ t) * (μ/2*Transport.regularFactor ν μ (γ t)/(γ t - 1) +
+      deriv (Transport.regularFactor ν μ) (γ t))
 
-/-- Local data for `legTr_isTransport_of_local` from a local branch `L` of `log(w-1)` (up to a
+/-- Local data for `Transport.isTransport_of_local` from a local branch `L` of `log(w-1)` (up to a
 constant) and a solution `F = e^{μL/2} K` of the Legendre equation near `γ(t₀)`. -/
-theorem legTr_local_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {ℓ : ℝ → ℂ}
+theorem Transport.local_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {ℓ : ℝ → ℂ}
     (hℓ : ContinuousOn ℓ (Icc 0 1)) (hexp : ∀ t ∈ Icc (0:ℝ) 1, exp (ℓ t) = γ t - 1)
     {t₀ : ℝ} (ht₀ : t₀ ∈ Icc (0:ℝ) 1) {L F : ℂ → ℂ} {U : Set ℂ} {κ : ℂ} (hU : IsOpen U)
     (hw₀ : γ t₀ ∈ U) (hLd : ∀ w ∈ U, HasDerivAt L (1/(w-1)) w)
     (hLexp : ∀ w ∈ U, exp (L w) = κ * (w - 1)) (hκ : κ ≠ 0)
-    (hFeq : ∀ w, F w = exp (μ/2*L w) * legTr_K ν μ w)
-    (hKd : ∀ w ∈ U, DifferentiableAt ℂ (legTr_K ν μ) w) (hFa : AnalyticOnNhd ℂ F U)
+    (hFeq : ∀ w, F w = exp (μ/2*L w) * Transport.regularFactor ν μ w)
+    (hKd : ∀ w ∈ U, DifferentiableAt ℂ (Transport.regularFactor ν μ) w) (hFa : AnalyticOnNhd ℂ F U)
     (hode : ∀ w ∈ U, (1-w^2)*iteratedDeriv 2 F w-2*w*deriv F w+(ν*(ν+1)-μ^2/(1-w^2))*F w=0)
     (hne : ∀ w ∈ U, 1 - w^2 ≠ 0) :
     ∃ f f1 : ℂ → ℂ, ∃ f2 : ℂ, HasDerivAt f (f1 (γ t₀)) (γ t₀) ∧
       HasDerivAt f1 f2 (γ t₀) ∧ 1 - γ t₀ ^ 2 ≠ 0 ∧
       (1 - γ t₀ ^ 2) * f2 - 2 * γ t₀ * f1 (γ t₀) + (ν*(ν+1) - μ^2/(1 - γ t₀ ^ 2)) * f (γ t₀) = 0 ∧
-      ∀ᶠ t in 𝓝[Icc 0 1] t₀, legTr_u ν μ γ ℓ t = f (γ t) ∧ legTr_v ν μ γ ℓ t = f1 (γ t) := by
+      ∀ᶠ t in 𝓝[Icc 0 1] t₀, Transport.transportedValue ν μ γ ℓ t = f (γ t) ∧
+          Transport.transportedDeriv ν μ γ ℓ t = f1 (γ t) := by
   set w₀ := γ t₀
   have hne1 : ∀ w ∈ U, w - 1 ≠ 0 := fun w hw h => hne w hw (by
     rw [show w = 1 by linear_combination h]; ring)
@@ -644,15 +686,15 @@ theorem legTr_local_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiabl
     simp only [d]
     rw [exp_sub, hexp t ht, hLexp _ hU']
     field_simp [hne1 _ hU']
-  have hd := legTr_eventually_eq_of_exp hdc (by
+  have hd := Transport.eventually_eq_of_exp hdc (by
     filter_upwards [nhdsWithin_le_nhds hγU, self_mem_nhdsWithin] with t h1 h2
     rw [hdexp t h2 h1, hdexp t₀ ht₀ hw₀])
   set c := exp (μ/2*d t₀)
   have hF' : ∀ w ∈ U, deriv F w = exp (μ/2*L w) *
-      (μ/2*legTr_K ν μ w/(w-1) + deriv (legTr_K ν μ) w) := by
+      (μ/2*Transport.regularFactor ν μ w/(w-1) + deriv (Transport.regularFactor ν μ) w) := by
     intro w hw
-    have he : F = fun w => exp (μ/2*L w) * legTr_K ν μ w := funext hFeq
-    rw [he]; exact (legTr_hasDerivAt_branch ν μ (hLd w hw) (hKd w hw)).deriv
+    have he : F = fun w => exp (μ/2*L w) * Transport.regularFactor ν μ w := funext hFeq
+    rw [he]; exact (Transport.hasDerivAt_branch ν μ (hLd w hw) (hKd w hw)).deriv
   refine ⟨fun w => c * F w, fun w => c * deriv F w, c * iteratedDeriv 2 F w₀,
     ((hFa w₀ hw₀).differentiableAt.hasDerivAt).const_mul c, ?_, hne w₀ hw₀, ?_, ?_⟩
   · have h := ((hFa.deriv w₀ hw₀).differentiableAt.hasDerivAt).const_mul c
@@ -663,45 +705,49 @@ theorem legTr_local_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiabl
     have hE : exp (μ/2*ℓ t) = c * exp (μ/2*L (γ t)) := by
       rw [hl, ← exp_add]; congr 1; ring
     refine ⟨?_, ?_⟩
-    · simp only [legTr_u]; rw [hE, hFeq]; ring
-    · simp only [legTr_v]; rw [hE, hF' _ hUt]; ring
+    · simp only [Transport.transportedValue]; rw [hE, hFeq]; ring
+    · simp only [Transport.transportedDeriv]; rw [hE, hF' _ hUt]; ring
 
 /-- Transport of `P^{-μ}_ν` along a path that stays in `ℂ ∖ (-∞, 1]` or in the unit disk:
 `u = e^{μℓ/2} K(γ)`, `ℓ` a continuous logarithm of `γ - 1`. -/
-theorem legTr_isTransport_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {ℓ : ℝ → ℂ}
+theorem Transport.isTransport_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {ℓ : ℝ → ℂ}
     (hℓ : ContinuousOn ℓ (Icc 0 1)) (hexp : ∀ t ∈ Icc (0:ℝ) 1, exp (ℓ t) = γ t - 1)
     (hdom : ∀ t ∈ Icc (0:ℝ) 1, γ t - 1 ∈ slitPlane ∨ γ t ∈ Metric.ball (0:ℂ) 1) :
-    IsLegendreTransport ν μ γ (legTr_u ν μ γ ℓ 0) (legTr_v ν μ γ ℓ 0) (legTr_u ν μ γ ℓ)
-      (legTr_v ν μ γ ℓ) := by
-  refine legTr_isTransport_of_local ν μ hγ fun t₀ ht₀ => ?_
+    IsLegendreTransport ν μ γ (Transport.transportedValue ν μ γ ℓ 0)
+        (Transport.transportedDeriv ν μ γ ℓ 0) (Transport.transportedValue ν μ γ ℓ)
+      (Transport.transportedDeriv ν μ γ ℓ) := by
+  refine Transport.isTransport_of_local ν μ hγ fun t₀ ht₀ => ?_
   rcases hdom t₀ ht₀ with hs | hb
   · have hp : ∀ w : ℂ, w - 1 ∈ slitPlane → w + 1 ∈ slitPlane := fun w hw => by
       simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hw
-    refine legTr_local_branch ν μ hγ hℓ hexp ht₀ (L := fun w => log (w-1)) (F := associatedP ν (-μ))
+    refine Transport.local_branch ν μ hγ hℓ hexp ht₀ (L := fun w => log (w-1))
+        (F := associatedP ν (-μ))
       (U := {w | w-1 ∈ slitPlane}) (κ := 1) isOpen_sub_one_mem_slitPlane hs
-      (fun w hw => legTr_hasDerivAt_log_sub_one hw)
-      (fun w hw => by simp [exp_log (slitPlane_ne_zero hw)]) one_ne_zero (legTr_associatedP_eq ν μ)
-      (fun w hw => (legTr_K_analyticAt ν μ (hp w hw)
+      (fun w hw => Transport.hasDerivAt_log_sub_one hw)
+      (fun w hw => by simp [exp_log (slitPlane_ne_zero hw)]) one_ne_zero
+          (Transport.associatedP_eq ν μ)
+      (fun w hw => (Transport.regularFactor_analyticAt ν μ (hp w hw)
         (mem_cutPlane_of_one_add (by simpa [add_comm] using hp w hw))).differentiableAt)
       (associatedP_analytic ν (-μ)) (fun w hw => by
         have := associatedP_ode ν (-μ) hw; rwa [neg_sq] at this) (fun w hw => ?_)
     have h1 := slitPlane_ne_zero (show w - 1 ∈ slitPlane from hw)
     have h2 := slitPlane_ne_zero (hp w hw)
     intro h; apply mul_ne_zero h1 h2; linear_combination -h
-  · refine legTr_local_branch ν μ hγ hℓ hexp ht₀ (L := fun w => log (1-w))
+  · refine Transport.local_branch ν μ hγ hℓ hexp ht₀ (L := fun w => log (1-w))
         (F := ferrersPCont ν (-μ))
       (U := Metric.ball (0:ℂ) 1) (κ := -1) Metric.isOpen_ball hb
-      (fun w hw => legTr_hasDerivAt_log_one_sub (legendre_disk_facts hw).2.1)
+      (fun w hw => Transport.hasDerivAt_log_one_sub (legendre_disk_facts hw).2.1)
       (fun w hw => by rw [exp_log (slitPlane_ne_zero (legendre_disk_facts hw).2.1)]; ring)
-      (by norm_num) (legTr_ferrersPCont_eq ν μ)
-      (fun w hw => (legTr_K_analyticAt ν μ (by simpa [add_comm] using (legendre_disk_facts hw).1)
+      (by norm_num) (Transport.ferrersPCont_eq ν μ)
+      (fun w hw => (Transport.regularFactor_analyticAt ν μ
+          (by simpa [add_comm] using (legendre_disk_facts hw).1)
         (legendre_disk_facts hw).2.2.1).differentiableAt)
       (ferrersPCont_analytic ν (-μ)) (fun w hw => by
-        have := legTr_ferrersPCont_ode ν (-μ) hw; rwa [neg_sq] at this)
+        have := Transport.ferrersPCont_ode ν (-μ) hw; rwa [neg_sq] at this)
       (fun w hw => slitPlane_ne_zero (legendre_disk_facts hw).2.2.2.1)
 
 /-- Gluing two everywhere-differentiable functions that agree to first order at `a`. -/
-theorem legTr_hasDerivAt_piecewise {f g f' g' : ℝ → ℂ} {a : ℝ} (hf : ∀ t, HasDerivAt f (f' t) t)
+theorem Transport.hasDerivAt_piecewise {f g f' g' : ℝ → ℂ} {a : ℝ} (hf : ∀ t, HasDerivAt f (f' t) t)
     (hg : ∀ t, HasDerivAt g (g' t) t) (ha : f a = g a) (ha' : f' a = g' a) (t : ℝ) :
     HasDerivAt (fun t => if t ≤ a then f t else g t) (if t ≤ a then f' t else g' t) t := by
   rcases lt_trichotomy t a with h | h | h
@@ -727,7 +773,7 @@ theorem legTr_hasDerivAt_piecewise {f g f' g' : ℝ → ℂ} {a : ℝ} (hf : ∀
     simp [not_le.mpr (show a < x from hx)]
 
 /-- Gluing two functions continuous on adjacent closed intervals. -/
-theorem legTr_continuousOn_piecewise {f g : ℝ → ℂ} {p a q : ℝ} (hf : ContinuousOn f (Icc p a))
+theorem Transport.continuousOn_piecewise {f g : ℝ → ℂ} {p a q : ℝ} (hf : ContinuousOn f (Icc p a))
     (hg : ContinuousOn g (Icc a q)) (ha : f a = g a) :
     ContinuousOn (fun t => if t ≤ a then f t else g t) (Icc p q) := by
   have h1 : ContinuousOn (fun t => if t ≤ a then f t else g t) (Icc p a) :=
@@ -742,7 +788,7 @@ theorem legTr_continuousOn_piecewise {f g : ℝ → ℂ} {p a q : ℝ} (hf : Con
   · exact Or.inr ⟨h, hx.2⟩
 
 /-- `ℂ ∖ (-∞, 0]` is star-shaped about `1/2`. -/
-theorem legTr_star_mem {w : ℂ} (hw : w ∈ slitPlane) {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r ≤ 1) :
+theorem Transport.starConvex_mem {w : ℂ} (hw : w ∈ slitPlane) {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r ≤ 1) :
     (1 - r) * w + r * (1/2) ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hw ⊢
   rcases eq_or_lt_of_le hr1 with h | h
@@ -754,7 +800,7 @@ theorem legTr_star_mem {w : ℂ} (hw : w ∈ slitPlane) {r : ℝ} (hr0 : 0 ≤ r
     · right; simp [hi]; exact fun h' => by linarith
 
 /-- The smooth step maps `[0, 1]` into `[0, 1]`. -/
-theorem legTr_S_mem {x : ℝ} (h0 : 0 ≤ x) (h1 : x ≤ 1) :
+theorem Transport.smoothStep_mem {x : ℝ} (h0 : 0 ≤ x) (h1 : x ≤ 1) :
     0 ≤ legendreSmoothStep x ∧ legendreSmoothStep x ≤ 1 := by
   unfold legendreSmoothStep
   constructor
@@ -762,7 +808,7 @@ theorem legTr_S_mem {x : ℝ} (h0 : 0 ≤ x) (h1 : x ≤ 1) :
   · nlinarith [mul_nonneg (sq_nonneg (1-x)) (by linarith : (0:ℝ) ≤ 1+2*x)]
 
 /-- Derivative of `t ↦ S(3t-c)`. -/
-theorem legTr_hasDerivAt_S (c : ℝ) (t : ℝ) :
+theorem Transport.hasDerivAt_smoothStep (c : ℝ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => ((legendreSmoothStep (3*t-c) : ℝ) : ℂ))
       (((6*(3*t-c)-6*(3*t-c)^2)*3 : ℝ) : ℂ) t := by
   have h : HasDerivAt (fun t : ℝ => legendreSmoothStep (3*t-c)) ((6*(3*t-c)-6*(3*t-c)^2)*3) t := by
@@ -774,126 +820,132 @@ theorem legTr_hasDerivAt_S (c : ℝ) (t : ℝ) :
   exact h.ofReal_comp
 
 /-- The derivative `(6x-6x²)·3` of `t ↦ S(3t-c)`. -/
-noncomputable def legTr_Sd (c t : ℝ) : ℂ := (((6*(3*t-c)-6*(3*t-c)^2)*3 : ℝ) : ℂ)
+noncomputable def Transport.smoothStepDeriv (c t : ℝ) : ℂ := (((6*(3*t-c)-6*(3*t-c)^2)*3 : ℝ) : ℂ)
 
 /-- The derivative of `legendreOneLoop`. -/
-noncomputable def legTr_loopDeriv (z : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
-  if t ≤ 1/3 then legTr_Sd 0 t*(3/2-z) else if t ≤ 2/3 then
-    1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1))*(2*π*I*s*legTr_Sd 1 t) else legTr_Sd 2 t*(z-3/2)
+noncomputable def Transport.loopDeriv (z : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
+  if t ≤ 1/3 then Transport.smoothStepDeriv 0 t*(3/2-z) else if t ≤ 2/3 then
+    1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1))*(2*π*I*s*Transport.smoothStepDeriv 1 t) else
+        Transport.smoothStepDeriv 2 t*(z-3/2)
 
 /-- `e^{2πis S(1)} = 1`. -/
-theorem legTr_exp_two_pi_s (s : ℤ) : exp
+theorem Transport.exp_two_pi_smoothStep (s : ℤ) : exp
     (2*π*I*s*((legendreSmoothStep (3*(2/3:ℝ)-1) : ℝ) : ℂ)) = 1 := by
   rw [show legendreSmoothStep (3*(2/3:ℝ)-1) = 1 by unfold legendreSmoothStep; norm_num]
   rw [show 2*π*I*(s:ℂ)*((1:ℝ):ℂ) = (s:ℂ)*(2*π*I) by push_cast; ring]
   exact exp_int_mul_two_pi_mul_I s
 
-/-- `legendreOneLoop` is differentiable, with derivative `legTr_loopDeriv`. -/
-theorem legTr_hasDerivAt_loop (z : ℂ) (s : ℤ) (t : ℝ) :
-    HasDerivAt (legendreOneLoop z s) (legTr_loopDeriv z s t) t := by
+/-- `legendreOneLoop` is differentiable, with derivative `Transport.loopDeriv`. -/
+theorem Transport.hasDerivAt_loop (z : ℂ) (s : ℤ) (t : ℝ) :
+    HasDerivAt (legendreOneLoop z s) (Transport.loopDeriv z s t) t := by
   have hA : ∀ t, HasDerivAt (fun t : ℝ => z+legendreSmoothStep (3*t)*(3/2-z))
-      (legTr_Sd 0 t*(3/2-z)) t := by
+      (Transport.smoothStepDeriv 0 t*(3/2-z)) t := by
     intro t
-    have := ((legTr_hasDerivAt_S 0 t).mul_const (3/2-z)).const_add z
-    simpa [legTr_Sd] using this
+    have := ((Transport.hasDerivAt_smoothStep 0 t).mul_const (3/2-z)).const_add z
+    simpa [Transport.smoothStepDeriv] using this
   have hB : ∀ t, HasDerivAt (fun t : ℝ => 1+1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1)))
-      (1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1))*(2*π*I*s*legTr_Sd 1 t)) t := by
+      (1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1))*(2*π*I*s*Transport.smoothStepDeriv 1 t)) t := by
     intro t
-    have := ((((legTr_hasDerivAt_S 1 t).const_mul (2*π*I*s)).cexp).const_mul (1/2)).const_add 1
+    have := ((((Transport.hasDerivAt_smoothStep 1 t).const_mul (2*π*I*s)).cexp).const_mul
+        (1/2)).const_add 1
     convert this using 1
-    simp only [legTr_Sd]; ring
+    simp only [Transport.smoothStepDeriv]; ring
   have hC : ∀ t, HasDerivAt (fun t : ℝ => 3/2+legendreSmoothStep (3*t-2)*(z-3/2))
-      (legTr_Sd 2 t*(z-3/2)) t := by
+      (Transport.smoothStepDeriv 2 t*(z-3/2)) t := by
     intro t
-    have := ((legTr_hasDerivAt_S 2 t).mul_const (z-3/2)).const_add (3/2)
-    simpa [legTr_Sd] using this
-  have hBC := legTr_hasDerivAt_piecewise (a := 2/3) hB hC (by
-      rw [legTr_exp_two_pi_s]; unfold legendreSmoothStep; norm_num)
-    (by unfold legTr_Sd; norm_num)
-  have h := legTr_hasDerivAt_piecewise (a := 1/3) hA hBC (by
-      unfold legendreSmoothStep; norm_num) (by unfold legTr_Sd; norm_num) t
+    have := ((Transport.hasDerivAt_smoothStep 2 t).mul_const (z-3/2)).const_add (3/2)
+    simpa [Transport.smoothStepDeriv] using this
+  have hBC := Transport.hasDerivAt_piecewise (a := 2/3) hB hC (by
+      rw [Transport.exp_two_pi_smoothStep]; unfold legendreSmoothStep; norm_num)
+    (by unfold Transport.smoothStepDeriv; norm_num)
+  have h := Transport.hasDerivAt_piecewise (a := 1/3) hA hBC (by
+      unfold legendreSmoothStep; norm_num) (by unfold Transport.smoothStepDeriv; norm_num) t
   exact h
 
 /-- The derivative of `legendreOneLoop` is continuous. -/
-theorem legTr_continuous_loopDeriv (z : ℂ) (s : ℤ) : Continuous (legTr_loopDeriv z s) := by
-  have hS : ∀ c, Continuous (legTr_Sd c) := fun c => by unfold legTr_Sd; fun_prop
+theorem Transport.continuous_loopDeriv (z : ℂ) (s : ℤ) : Continuous (Transport.loopDeriv z s) := by
+  have hS : ∀ c, Continuous (Transport.smoothStepDeriv c) := fun c => by
+      unfold Transport.smoothStepDeriv; fun_prop
   have hS' : Continuous fun t : ℝ => ((legendreSmoothStep (3*t-1) : ℝ) : ℂ) := by
     unfold legendreSmoothStep; fun_prop
-  unfold legTr_loopDeriv
+  unfold Transport.loopDeriv
   refine Continuous.if_le ((hS 0).mul continuous_const)
     (Continuous.if_le (by fun_prop) ((hS 2).mul continuous_const) continuous_id continuous_const ?_)
     continuous_id continuous_const ?_
-  · intro x hx; rw [hx]; unfold legTr_Sd; norm_num
-  · intro x hx; rw [hx]; unfold legTr_Sd; norm_num
+  · intro x hx; rw [hx]; unfold Transport.smoothStepDeriv; norm_num
+  · intro x hx; rw [hx]; unfold Transport.smoothStepDeriv; norm_num
 
 /-- `legendreOneLoop` is `C¹`. -/
-theorem legTr_contDiff_loop (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreOneLoop z s) := by
+theorem Transport.contDiff_loop (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreOneLoop z s) := by
   rw [contDiff_one_iff_deriv]
-  refine ⟨fun t => (legTr_hasDerivAt_loop z s t).differentiableAt, ?_⟩
-  have : deriv (legendreOneLoop z s) = legTr_loopDeriv z s :=
-    funext fun t => (legTr_hasDerivAt_loop z s t).deriv
-  rw [this]; exact legTr_continuous_loopDeriv z s
+  refine ⟨fun t => (Transport.hasDerivAt_loop z s t).differentiableAt, ?_⟩
+  have : deriv (legendreOneLoop z s) = Transport.loopDeriv z s :=
+    funext fun t => (Transport.hasDerivAt_loop z s t).deriv
+  rw [this]; exact Transport.continuous_loopDeriv z s
 
 /-- A continuous logarithm of `γ - 1` along `legendreOneLoop`. -/
-noncomputable def legTr_ell (z : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
+noncomputable def Transport.loopLog (z : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
   if t ≤ 1/3 then log (z+legendreSmoothStep (3*t)*(3/2-z)-1) else if t ≤ 2/3 then
     log (1/2)+2*π*I*s*legendreSmoothStep (3*t-1) else
         log (3/2+legendreSmoothStep (3*t-2)*(z-3/2)-1)+2*π*I*s
 
 /-- The first leg of `legendreOneLoop` stays in `ℂ ∖ (-∞, 1]`. -/
-theorem legTr_mem_first {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) (1/3)) :
+theorem Transport.mem_first {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) (1/3)) :
     z+legendreSmoothStep (3*t)*(3/2-z)-1 ∈ slitPlane := by
-  obtain ⟨h0, h1⟩ := legTr_S_mem (x := 3*t) (by linarith [ht.1]) (by linarith [ht.2])
-  have := legTr_star_mem hz h0 h1
+  obtain ⟨h0, h1⟩ := Transport.smoothStep_mem (x := 3*t) (by linarith [ht.1]) (by linarith [ht.2])
+  have := Transport.starConvex_mem hz h0 h1
   convert this using 1; ring
 
 /-- The last leg of `legendreOneLoop` stays in `ℂ ∖ (-∞, 1]`. -/
-theorem legTr_mem_last {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (2/3:ℝ) 1) :
+theorem Transport.mem_last {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (2/3:ℝ) 1) :
     3/2+legendreSmoothStep (3*t-2)*(z-3/2)-1 ∈ slitPlane := by
-  obtain ⟨h0, h1⟩ := legTr_S_mem (x := 3*t-2) (by linarith [ht.1]) (by linarith [ht.2])
-  have := legTr_star_mem hz (r := 1 - legendreSmoothStep (3*t-2)) (by linarith) (by linarith)
+  obtain ⟨h0, h1⟩ := Transport.smoothStep_mem (x := 3*t-2) (by linarith [ht.1]) (by linarith [ht.2])
+  have := Transport.starConvex_mem hz (r := 1 - legendreSmoothStep (3*t-2))
+      (by linarith) (by linarith)
   convert this using 1; push_cast; ring
 
 /-- `e^{ℓ(t)} = γ(t) - 1` along `legendreOneLoop`. -/
-theorem legTr_exp_ell {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
-    exp (legTr_ell z s t) = legendreOneLoop z s t - 1 := by
-  unfold legTr_ell legendreOneLoop
+theorem Transport.exp_loopLog {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ}
+    (ht : t ∈ Icc (0:ℝ) 1) :
+    exp (Transport.loopLog z s t) = legendreOneLoop z s t - 1 := by
+  unfold Transport.loopLog legendreOneLoop
   split_ifs with h1 h2
-  · exact exp_log (slitPlane_ne_zero (legTr_mem_first hz ⟨ht.1, h1⟩))
+  · exact exp_log (slitPlane_ne_zero (Transport.mem_first hz ⟨ht.1, h1⟩))
   · rw [exp_add, exp_log (by norm_num)]; ring
-  · rw [exp_add, exp_log (slitPlane_ne_zero (legTr_mem_last hz ⟨by linarith, ht.2⟩)),
+  · rw [exp_add, exp_log (slitPlane_ne_zero (Transport.mem_last hz ⟨by linarith, ht.2⟩)),
       show 2*π*I*(s:ℂ) = (s:ℂ)*(2*π*I) by ring, exp_int_mul_two_pi_mul_I, mul_one]
 
-/-- `legTr_ell` is continuous on `[0, 1]`. -/
-theorem legTr_continuousOn_ell {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
-    ContinuousOn (legTr_ell z s) (Icc 0 1) := by
+/-- `Transport.loopLog` is continuous on `[0, 1]`. -/
+theorem Transport.continuousOn_loopLog {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
+    ContinuousOn (Transport.loopLog z s) (Icc 0 1) := by
   have hS : ∀ c : ℝ, Continuous fun t : ℝ => ((legendreSmoothStep (3*t-c) : ℝ) : ℂ) := fun c => by
     unfold legendreSmoothStep; fun_prop
   have hS0 : Continuous fun t : ℝ => ((legendreSmoothStep (3*t) : ℝ) : ℂ) := by
     unfold legendreSmoothStep; fun_prop
-  unfold legTr_ell
-  refine legTr_continuousOn_piecewise (p := 0) (a := 1/3) (q := 1) ?_ ?_ ?_
+  unfold Transport.loopLog
+  refine Transport.continuousOn_piecewise (p := 0) (a := 1/3) (q := 1) ?_ ?_ ?_
   · intro t ht
     have hc : Continuous (fun t : ℝ => z+(legendreSmoothStep (3*t):ℂ)*(3/2-z)-1) :=
       (continuous_const.add (hS0.mul continuous_const)).sub continuous_const
-    exact (hc.continuousAt.clog (legTr_mem_first hz ht)).continuousWithinAt
-  · refine legTr_continuousOn_piecewise (p := 1/3) (a := 2/3) (q := 1)
+    exact (hc.continuousAt.clog (Transport.mem_first hz ht)).continuousWithinAt
+  · refine Transport.continuousOn_piecewise (p := 1/3) (a := 2/3) (q := 1)
       (continuous_const.add (continuous_const.mul (hS 1))).continuousOn ?_ ?_
     · intro t ht
       have hc : Continuous (fun t : ℝ => 3/2+(legendreSmoothStep (3*t-2):ℂ)*(z-3/2)-1) :=
         (continuous_const.add ((hS 2).mul continuous_const)).sub continuous_const
-      exact ((hc.continuousAt.clog (legTr_mem_last hz ht)).add
+      exact ((hc.continuousAt.clog (Transport.mem_last hz ht)).add
         continuousAt_const).continuousWithinAt
     · unfold legendreSmoothStep; norm_num
   · simp only [show (1/3:ℝ) ≤ 2/3 by norm_num, ↓reduceIte]
     unfold legendreSmoothStep; norm_num
 
 /-- Each point of `legendreOneLoop` lies in `ℂ ∖ (-∞, 1]` or in the unit disk. -/
-theorem legTr_loop_dom {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
+theorem Transport.loop_domain {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ}
+    (ht : t ∈ Icc (0:ℝ) 1) :
     legendreOneLoop z s t - 1 ∈ slitPlane ∨ legendreOneLoop z s t ∈ Metric.ball (0:ℂ) 1 := by
   unfold legendreOneLoop
   split_ifs with h1 h2
-  · exact Or.inl (legTr_mem_first hz ⟨ht.1, h1⟩)
+  · exact Or.inl (Transport.mem_first hz ⟨ht.1, h1⟩)
   · set w : ℂ := 1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1))
     have hw : 1 + w - 1 = w := by ring
     rw [hw]
@@ -915,48 +967,52 @@ theorem legTr_loop_dom {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ} (h
       simp only [Metric.mem_ball, dist_zero_right]
       rw [show (1:ℂ) + (((-1/2:ℝ)):ℂ) = ((1/2:ℝ):ℂ) by push_cast; ring, norm_real]
       norm_num
-  · exact Or.inl (legTr_mem_last hz ⟨by linarith, ht.2⟩)
+  · exact Or.inl (Transport.mem_last hz ⟨by linarith, ht.2⟩)
 
 /-- associatedP one continuation. The transport is `e^{μℓ(t)/2} K(γ(t))`, `ℓ` a continuous
-logarithm of `γ - 1` along the loop (`legTr_isTransport_branch`), so `ℓ(1) = log(z-1) + 2πis`. -/
+logarithm of `γ - 1` along the loop (`Transport.isTransport_branch`), so `ℓ(1) = log(z-1) + 2πis`.
+-/
 @[dlmf 14.24.E3]
 theorem associatedP_one_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     legendreOneContinued (associatedP ν (-μ)) ν μ z s=exp (s*μ*π*I)*associatedP ν (-μ) z := by
   have hγd : Differentiable ℝ (legendreOneLoop z s) := fun t =>
-      (legTr_hasDerivAt_loop z s t).differentiableAt
-  have huv := legTr_isTransport_branch ν μ hγd (legTr_continuousOn_ell hz s)
-    (fun t ht => legTr_exp_ell hz s ht) (fun t ht => legTr_loop_dom hz s ht)
+      (Transport.hasDerivAt_loop z s t).differentiableAt
+  have huv := Transport.isTransport_branch ν μ hγd (Transport.continuousOn_loopLog hz s)
+    (fun t ht => Transport.exp_loopLog hz s ht) (fun t ht => Transport.loop_domain hz s ht)
   have hreg : ∀ t ∈ Icc (0:ℝ) 1, legendreOneLoop z s t ≠ 1 ∧ legendreOneLoop z s t ≠ -1 := by
     intro t ht
-    rcases legTr_loop_dom hz s ht with h | h
+    rcases Transport.loop_domain hz s ht with h | h
     · refine ⟨fun h1 => slitPlane_ne_zero h (by rw [h1]; ring), fun h1 => ?_⟩
       rw [h1] at h; norm_num [mem_slitPlane_iff] at h
     · have hn : ‖legendreOneLoop z s t‖ < 1 := by simpa using h
       refine ⟨fun h1 => by rw [h1] at hn; simp at hn, fun h1 => by rw [h1] at hn; simp at hn⟩
   have key := legendreTransport_unique ν μ _ _ (legendreOneLoop z s)
-      (legTr_contDiff_loop z s) hreg huv
+      (Transport.contDiff_loop z s) hreg huv
   have hγ0 : legendreOneLoop z s 0 = z := by
     simp only [legendreOneLoop]; unfold legendreSmoothStep; norm_num
   have hγ1 : legendreOneLoop z s 1 = z := by
     simp only [legendreOneLoop]; unfold legendreSmoothStep; norm_num
-  have hℓ0 : legTr_ell z s 0 = log (z-1) := by
-    simp only [legTr_ell]; unfold legendreSmoothStep; norm_num
-  have hℓ1 : legTr_ell z s 1 = log (z-1) + 2*π*I*s := by
-    simp only [legTr_ell]; unfold legendreSmoothStep; norm_num
+  have hℓ0 : Transport.loopLog z s 0 = log (z-1) := by
+    simp only [Transport.loopLog]; unfold legendreSmoothStep; norm_num
+  have hℓ1 : Transport.loopLog z s 1 = log (z-1) + 2*π*I*s := by
+    simp only [Transport.loopLog]; unfold legendreSmoothStep; norm_num
   have hp : z + 1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
-  have hKd : DifferentiableAt ℂ (legTr_K ν μ) z := (legTr_K_analyticAt ν μ hp
+  have hKd : DifferentiableAt ℂ (Transport.regularFactor ν μ) z :=
+      (Transport.regularFactor_analyticAt ν μ hp
     (mem_cutPlane_of_one_add (by simpa [add_comm] using hp))).differentiableAt
-  have hu0 : legTr_u ν μ (legendreOneLoop z s) (legTr_ell z s) 0 = associatedP ν (-μ) z := by
-    rw [legTr_u, hγ0, hℓ0, legTr_associatedP_eq]
-  have hv0 : legTr_v ν μ (legendreOneLoop z s) (legTr_ell z s) 0 =
+  have hu0 : Transport.transportedValue ν μ (legendreOneLoop z s) (Transport.loopLog z s) 0 =
+      associatedP ν (-μ) z := by
+    rw [Transport.transportedValue, hγ0, hℓ0, Transport.associatedP_eq]
+  have hv0 : Transport.transportedDeriv ν μ (legendreOneLoop z s) (Transport.loopLog z s) 0 =
       deriv (associatedP ν (-μ)) z := by
-    have he : associatedP ν (-μ) = fun w => exp (μ/2*log (w-1)) * legTr_K ν μ w :=
-      funext (legTr_associatedP_eq ν μ)
-    rw [he, (legTr_hasDerivAt_branch ν μ (legTr_hasDerivAt_log_sub_one hz) hKd).deriv, legTr_v,
+    have he : associatedP ν (-μ) = fun w => exp (μ/2*log (w-1)) * Transport.regularFactor ν μ w :=
+      funext (Transport.associatedP_eq ν μ)
+    rw [he, (Transport.hasDerivAt_branch ν μ (Transport.hasDerivAt_log_sub_one hz) hKd).deriv,
+        Transport.transportedDeriv,
       hγ0, hℓ0]
   rw [hu0, hv0] at key
   unfold legendreOneContinued
-  rw [key, legTr_u, hγ1, hℓ1, legTr_associatedP_eq, ← mul_assoc, ← exp_add]
+  rw [key, Transport.transportedValue, hγ1, hℓ1, Transport.associatedP_eq, ← mul_assoc, ← exp_add]
   congr 2; ring
 
 end DLMF.Legendre

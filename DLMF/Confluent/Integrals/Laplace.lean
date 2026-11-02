@@ -284,7 +284,7 @@ theorem summable_kummer_gamma_moments (a c : ℂ) {b : ℝ} (hb : 0 < b)
     (h : b < (c - a).re) :
     Summable (fun n : ℕ => ‖regularizedHGFunCoeff {a} {c} n‖ * Real.Gamma (b + n)) := by
   by_cases ha : ∀ k : ℕ, a ≠ -k
-  · have hs := (DLMF.Hypergeometric.CarlsonAux.summable_norm_Gamma_ratio a b c 1
+  · have hs := (DLMF.Hypergeometric.CarlsonTheorem.summable_norm_Gamma_ratio a b c 1
       (by simp only [sub_re, add_re, ofReal_re, one_re] at h ⊢; linarith)).mul_left ‖Gamma a‖⁻¹
     refine hs.congr fun n => ?_
     have hg := (div_eq_iff (Gamma_ne_zero ha)).mp (Gamma_add_nat_div_Gamma_eq (n := n) a ha)

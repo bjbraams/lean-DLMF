@@ -177,17 +177,17 @@ theorem tendsto_cpow_mul_exp_neg (a : ℂ) :
 @[dlmf 4.4.E16]
 theorem tendsto_cpow_mul_exp_neg_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ ≤ Real.pi / 2) :
     Tendsto (fun z : ℂ => z ^ a * Complex.exp (-z))
-      (DLMF.sector (Real.pi / 2 - δ)) (𝓝 0) := by
+      (DLMF.Core.sector (Real.pi / 2 - δ)) (𝓝 0) := by
   rw [tendsto_zero_iff_norm_tendsto_zero]
   have hsd : 0 < Real.sin δ := Real.sin_pos_of_pos_of_lt_pi hδ (by linarith [Real.pi_pos])
   set K := Real.exp (Real.pi * |a.im|) with hK
   have hg : Tendsto (fun r : ℝ => K * (r ^ a.re * Real.exp (-Real.sin δ * r))) atTop (𝓝 0) := by
     simpa using (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero a.re (Real.sin δ) hsd).const_mul K
   have hg' : Tendsto (fun z : ℂ => K * (‖z‖ ^ a.re * Real.exp (-Real.sin δ * ‖z‖)))
-      (DLMF.sector (Real.pi / 2 - δ)) (𝓝 0) :=
+      (DLMF.Core.sector (Real.pi / 2 - δ)) (𝓝 0) :=
     (hg.comp (tendsto_comap (f := fun z : ℂ => ‖z‖))).mono_left inf_le_left
   apply squeeze_zero' (Eventually.of_forall fun z => norm_nonneg _) _ hg'
-  have hmem : {z : ℂ | z ≠ 0 ∧ |arg z| ≤ Real.pi / 2 - δ} ∈ DLMF.sector (Real.pi / 2 - δ) :=
+  have hmem : {z : ℂ | z ≠ 0 ∧ |arg z| ≤ Real.pi / 2 - δ} ∈ DLMF.Core.sector (Real.pi / 2 - δ) :=
     mem_inf_of_right (mem_principal_self _)
   filter_upwards [hmem] with z ⟨hz0, harg⟩
   rw [norm_mul, Complex.norm_cpow_of_ne_zero hz0, Complex.norm_exp, Complex.neg_re]

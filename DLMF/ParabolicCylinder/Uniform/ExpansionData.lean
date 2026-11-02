@@ -35,8 +35,8 @@ polynomials, and the Airy turning-point coordinate, amplitude and coefficients.
   normalizer satisfying DLMF 12.10.14.
 * `pcf_oscillatory_parameter_uniform`: the oscillatory expansions DLMF 12.10.18–12.10.21.
 * `pcfTemmePoly_initial`, `pcfTemmePoly_recurrence`: DLMF 12.10.34 and 12.10.33.
-* `pcfZ_eq_airyCoord`, `pcfZ_zeta_strictMonoOn`, `pcfInverseZeta_spec`: properties of the
-  turning-point coordinate (DLMF 12.10.39).
+* `CylinderTurningPoint.eq_airyCoord`, `CylinderTurningPoint.zeta_strictMonoOn`,
+  `pcfInverseZeta_spec`: properties of the turning-point coordinate (DLMF 12.10.39).
 * `pcfInverseZeta_taylor`: the expansion of the inverse coordinate (DLMF 12.10.41).
 * `pcfAiryA_limit`, `pcfAiryB_limit`, `pcfAiryC_limit`, `pcfAiryD_limit`: the removable
   limits at the turning point (DLMF 12.10.42, 12.10.46).
@@ -287,7 +287,7 @@ def pcfInverseZeta (ζ : ℝ) : ℝ :=
   Classical.epsilon (fun t : ℝ => -1 < t ∧ pcfZeta t=ζ)
 
 /-- `ξ' = √(t²-1)` (DLMF 12.10.7). -/
-theorem pcfZ_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
+theorem CylinderTurningPoint.hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
     HasDerivAt pcfXi (Real.sqrt (t^2-1)) t := by
   have hy : 0 < t^2-1 := by nlinarith
   set r := Real.sqrt (t^2-1) with hr
@@ -312,7 +312,7 @@ theorem pcfZ_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
   nlinarith [hr2]
 
 /-- `η' = -√(1-t²)` (DLMF 12.10.23). -/
-theorem pcfZ_hasDerivAt_eta {t : ℝ} (ht : -1 < t) (ht1 : t < 1) :
+theorem CylinderTurningPoint.hasDerivAt_eta {t : ℝ} (ht : -1 < t) (ht1 : t < 1) :
     HasDerivAt pcfEta (-Real.sqrt (1-t^2)) t := by
   have hy : 0 < 1-t^2 := by nlinarith
   set r := Real.sqrt (1-t^2) with hr
@@ -334,11 +334,11 @@ theorem pcfZ_hasDerivAt_eta {t : ℝ} (ht : -1 < t) (ht1 : t < 1) :
   nlinarith [hr2]
 
 /-- `η` is continuous. -/
-theorem pcfZ_continuous_eta : Continuous pcfEta := by
+theorem CylinderTurningPoint.continuous_eta : Continuous pcfEta := by
   unfold pcfEta; fun_prop
 
 /-- `ξ` is continuous on `[1, ∞)`. -/
-theorem pcfZ_continuousOn_xi : ContinuousOn pcfXi (Ici 1) := by
+theorem CylinderTurningPoint.continuousOn_xi : ContinuousOn pcfXi (Ici 1) := by
   intro t ht
   have ht : (1:ℝ) ≤ t := ht
   have h0 : 0 < t + Real.sqrt (t^2-1) := by positivity
@@ -349,22 +349,22 @@ theorem pcfZ_continuousOn_xi : ContinuousOn pcfXi (Ici 1) := by
     ((continuous_id.add hs).continuousAt.log h0.ne')).div_const 2
 
 /-- `ξ(t) = ∫₁ᵗ √(s²-1) ds`. -/
-theorem pcfZ_xi_eq_integral {t : ℝ} (ht : 1 ≤ t) :
+theorem CylinderTurningPoint.xi_eq_integral {t : ℝ} (ht : 1 ≤ t) :
     pcfXi t = ∫ s in (1:ℝ)..t, Real.sqrt ((s - 1) * (s + 1)) := by
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le ht
-    (pcfZ_continuousOn_xi.mono Icc_subset_Ici_self)
+    (CylinderTurningPoint.continuousOn_xi.mono Icc_subset_Ici_self)
     (fun s hs => by
-      rw [show (s - 1) * (s + 1) = s^2 - 1 by ring]; exact pcfZ_hasDerivAt_xi hs.1)
+      rw [show (s - 1) * (s + 1) = s^2 - 1 by ring]; exact CylinderTurningPoint.hasDerivAt_xi hs.1)
     (by apply Continuous.intervalIntegrable; fun_prop)]
   simp [pcfXi]
 
 /-- `η(t) = ∫ₜ¹ √(1-s²) ds`. -/
-theorem pcfZ_eta_eq_integral {t : ℝ} (ht : -1 ≤ t) (ht1 : t ≤ 1) :
+theorem CylinderTurningPoint.eta_eq_integral {t : ℝ} (ht : -1 ≤ t) (ht1 : t ≤ 1) :
     pcfEta t = ∫ s in t..1, Real.sqrt ((1 - s) * (s + 1)) := by
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le ht1
-    pcfZ_continuous_eta.continuousOn
+    CylinderTurningPoint.continuous_eta.continuousOn
     (fun s hs => by
-      have := pcfZ_hasDerivAt_eta (lt_of_le_of_lt ht hs.1) hs.2
+      have := CylinderTurningPoint.hasDerivAt_eta (lt_of_le_of_lt ht hs.1) hs.2
       rwa [show 1 - s^2 = (1 - s) * (s + 1) by ring] at this)
     (by apply Continuous.intervalIntegrable; fun_prop)
   rw [intervalIntegral.integral_neg] at h
@@ -373,44 +373,45 @@ theorem pcfZ_eta_eq_integral {t : ℝ} (ht : -1 ≤ t) (ht1 : t ≤ 1) :
 
 /-- On `[-1, ∞)` the turning-point coordinate of DLMF 12.10.39 is the Airy coordinate of
 `t² - 1 = (t - 1)(t + 1)`. -/
-theorem pcfZ_eq_airyCoord {t : ℝ} (ht : -1 ≤ t) :
+theorem CylinderTurningPoint.eq_airyCoord {t : ℝ} (ht : -1 ≤ t) :
     pcfZeta t = DoubleZeroSqrt.airyCoord (fun s => s + 1) 1 t := by
   rcases lt_trichotomy t 1 with h | h | h
-  · rw [DoubleZeroSqrt.airyCoord_of_gt _ h, pcfZeta, pcfZ_eta_eq_integral ht h.le]
+  · rw [DoubleZeroSqrt.airyCoord_of_gt _ h, pcfZeta, CylinderTurningPoint.eta_eq_integral ht h.le]
     simp only [not_le.2 h, ↓reduceIte]
   · subst h; simp [pcfZeta, pcfXi, DoubleZeroSqrt.airyCoord]
-  · rw [DoubleZeroSqrt.airyCoord_of_lt _ h, pcfZeta, pcfZ_xi_eq_integral h.le]
+  · rw [DoubleZeroSqrt.airyCoord_of_lt _ h, pcfZeta, CylinderTurningPoint.xi_eq_integral h.le]
     simp only [h.le, ↓reduceIte]
 
 /-- `ζ` is continuous on `[-1, ∞)`. -/
-theorem pcfZ_continuousOn_zeta : ContinuousOn pcfZeta (Ici (-1)) :=
+theorem CylinderTurningPoint.continuousOn_zeta : ContinuousOn pcfZeta (Ici (-1)) :=
   (DoubleZeroSqrt.continuous_airyCoord (continuous_id.add continuous_const) 1).continuousOn.congr
-    fun _ ht => pcfZ_eq_airyCoord ht
+    fun _ ht => CylinderTurningPoint.eq_airyCoord ht
 
 /-- `η` decreases strictly on `[-1, 1]`. -/
-theorem pcfZ_eta_strictAntiOn : StrictAntiOn pcfEta (Icc (-1) 1) := by
-  refine strictAntiOn_of_deriv_neg (convex_Icc _ _) pcfZ_continuous_eta.continuousOn ?_
+theorem CylinderTurningPoint.eta_strictAntiOn : StrictAntiOn pcfEta (Icc (-1) 1) := by
+  refine strictAntiOn_of_deriv_neg (convex_Icc _ _)
+      CylinderTurningPoint.continuous_eta.continuousOn ?_
   intro t ht
   rw [interior_Icc] at ht
-  rw [(pcfZ_hasDerivAt_eta ht.1 ht.2).deriv, neg_lt_zero]
+  rw [(CylinderTurningPoint.hasDerivAt_eta ht.1 ht.2).deriv, neg_lt_zero]
   exact Real.sqrt_pos.2 (by nlinarith [ht.1, ht.2])
 
 /-- `ξ` increases strictly on `[1, ∞)`. -/
-theorem pcfZ_xi_strictMonoOn : StrictMonoOn pcfXi (Ici 1) := by
-  refine strictMonoOn_of_deriv_pos (convex_Ici _) pcfZ_continuousOn_xi ?_
+theorem CylinderTurningPoint.xi_strictMonoOn : StrictMonoOn pcfXi (Ici 1) := by
+  refine strictMonoOn_of_deriv_pos (convex_Ici _) CylinderTurningPoint.continuousOn_xi ?_
   intro t ht
   rw [interior_Ici] at ht
   have ht : (1:ℝ) < t := ht
-  rw [(pcfZ_hasDerivAt_xi ht).deriv]
+  rw [(CylinderTurningPoint.hasDerivAt_xi ht).deriv]
   exact Real.sqrt_pos.2 (by nlinarith)
 
 /-- `ξ(1) = 0`. -/
-theorem pcfZ_xi_one : pcfXi 1 = 0 := by simp [pcfXi]
+theorem CylinderTurningPoint.xi_one : pcfXi 1 = 0 := by simp [pcfXi]
 /-- `η(1) = 0`. -/
-theorem pcfZ_eta_one : pcfEta 1 = 0 := by simp [pcfEta]
+theorem CylinderTurningPoint.eta_one : pcfEta 1 = 0 := by simp [pcfEta]
 
 /-- `ζ` increases strictly on `[-1, ∞)`. -/
-theorem pcfZ_zeta_strictMonoOn : StrictMonoOn pcfZeta (Ici (-1)) := by
+theorem CylinderTurningPoint.zeta_strictMonoOn : StrictMonoOn pcfZeta (Ici (-1)) := by
   intro a ha b hb hab
   have ha : (-1:ℝ) ≤ a := ha
   have hb : (-1:ℝ) ≤ b := hb
@@ -418,39 +419,43 @@ theorem pcfZ_zeta_strictMonoOn : StrictMonoOn pcfZeta (Ici (-1)) := by
   by_cases hb1 : 1 ≤ b
   · have hxb : 0 ≤ pcfXi b := by
       rcases hb1.lt_or_eq with h | h
-      · exact (pcfZ_xi_one ▸ pcfZ_xi_strictMonoOn (le_refl (1:ℝ)) hb1 h).le
-      · rw [← h, pcfZ_xi_one]
+      · exact (CylinderTurningPoint.xi_one ▸ CylinderTurningPoint.xi_strictMonoOn
+            (le_refl (1:ℝ)) hb1 h).le
+      · rw [← h, CylinderTurningPoint.xi_one]
     by_cases ha1 : 1 ≤ a
     · simp only [pcfZeta, ha1, hb1, ↓reduceIte]
       have hxa : 0 ≤ pcfXi a := by
         rcases ha1.lt_or_eq with h | h
-        · exact (pcfZ_xi_one ▸ pcfZ_xi_strictMonoOn (le_refl (1:ℝ)) ha1 h).le
-        · rw [← h, pcfZ_xi_one]
+        · exact (CylinderTurningPoint.xi_one ▸ CylinderTurningPoint.xi_strictMonoOn
+              (le_refl (1:ℝ)) ha1 h).le
+        · rw [← h, CylinderTurningPoint.xi_one]
       exact Real.rpow_lt_rpow (by positivity)
-        (by linarith [pcfZ_xi_strictMonoOn ha1 hb1 hab]) e23
+        (by linarith [CylinderTurningPoint.xi_strictMonoOn ha1 hb1 hab]) e23
     · simp only [pcfZeta, ha1, hb1, ↓reduceIte]
-      have hea : 0 < pcfEta a := pcfZ_eta_one ▸
-        pcfZ_eta_strictAntiOn ⟨ha, (not_le.1 ha1).le⟩ ⟨by norm_num, le_refl _⟩ (not_le.1 ha1)
+      have hea : 0 < pcfEta a := CylinderTurningPoint.eta_one ▸
+        CylinderTurningPoint.eta_strictAntiOn ⟨ha, (not_le.1 ha1).le⟩
+            ⟨by norm_num, le_refl _⟩ (not_le.1 ha1)
       have := Real.rpow_pos_of_pos (by positivity : (0:ℝ) < 3/2 * pcfEta a) (2/3)
       have := Real.rpow_nonneg (by positivity : (0:ℝ) ≤ 3/2 * pcfXi b) (2/3)
       linarith
   · have ha1 : ¬ 1 ≤ a := fun h => hb1 (h.trans hab.le)
     simp only [pcfZeta, ha1, hb1, ↓reduceIte, neg_lt_neg_iff]
     have hb1' : b < 1 := not_le.1 hb1
-    have heb : 0 < pcfEta b := pcfZ_eta_one ▸
-      pcfZ_eta_strictAntiOn ⟨hb, hb1'.le⟩ ⟨by norm_num, le_refl _⟩ hb1'
+    have heb : 0 < pcfEta b := CylinderTurningPoint.eta_one ▸
+      CylinderTurningPoint.eta_strictAntiOn ⟨hb, hb1'.le⟩ ⟨by norm_num, le_refl _⟩ hb1'
     exact Real.rpow_lt_rpow (by positivity)
-      (by linarith [pcfZ_eta_strictAntiOn ⟨ha, (hab.trans hb1').le⟩ ⟨hb, hb1'.le⟩ hab]) e23
+      (by linarith [CylinderTurningPoint.eta_strictAntiOn ⟨ha, (hab.trans hb1').le⟩
+            ⟨hb, hb1'.le⟩ hab]) e23
 
 /-- `ζ(-1) = -(3π/4)^{2/3}`. -/
-theorem pcfZ_zeta_neg_one : pcfZeta (-1) = -(3*π/4)^(2/3:ℝ) := by
+theorem CylinderTurningPoint.zeta_neg_one : pcfZeta (-1) = -(3*π/4)^(2/3:ℝ) := by
   simp only [pcfZeta, show ¬ (1:ℝ) ≤ -1 by norm_num, ↓reduceIte, pcfEta, Real.arccos_neg_one]
   congr 2
   norm_num; ring
 
 /-- A crude lower bound `ξ(t) ≥ (t-1)²/2`. -/
-theorem pcfZ_xi_ge {t : ℝ} (ht : 1 ≤ t) : (t - 1)^2/2 ≤ pcfXi t := by
-  rw [pcfZ_xi_eq_integral ht]
+theorem CylinderTurningPoint.xi_ge {t : ℝ} (ht : 1 ≤ t) : (t - 1)^2/2 ≤ pcfXi t := by
+  rw [CylinderTurningPoint.xi_eq_integral ht]
   have h : ∫ s in (1:ℝ)..t, (s - 1) = (t - 1)^2/2 := by
     simp [intervalIntegral.integral_sub]; ring
   rw [← h]
@@ -459,22 +464,23 @@ theorem pcfZ_xi_ge {t : ℝ} (ht : 1 ≤ t) : (t - 1)^2/2 ≤ pcfXi t := by
   exact Real.le_sqrt_of_sq_le (by nlinarith [hs.1])
 
 /-- An exponent identity used for `ζ'`. -/
-lemma pcfZ_rpow_aux {A : ℝ} (hA : 0 < A) : (A ^ (2/3 - 1 : ℝ)) ^ 2 * A ^ (2/3 : ℝ) = 1 := by
+lemma CylinderTurningPoint.rpow_identity {A : ℝ} (hA : 0 < A) : (A ^ (2/3 - 1 : ℝ)) ^ 2 *
+    A ^ (2/3 : ℝ) = 1 := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul hA.le, ← Real.rpow_add hA]; norm_num
 
 /-- Away from the turning point, `ζ' = d > 0` with `d² ζ = t² - 1`. -/
-theorem pcfZ_hasDerivAt_zeta {t : ℝ} (ht : -1 < t) (ht1 : t ≠ 1) :
+theorem CylinderTurningPoint.hasDerivAt_zeta {t : ℝ} (ht : -1 < t) (ht1 : t ≠ 1) :
     ∃ d : ℝ, 0 < d ∧ d^2 * pcfZeta t = t^2 - 1 ∧ HasDerivAt pcfZeta d t := by
   rcases lt_or_gt_of_ne ht1 with h | h
-  · have hη : 0 < pcfEta t := pcfZ_eta_one ▸
-      pcfZ_eta_strictAntiOn ⟨ht.le, h.le⟩ ⟨by norm_num, le_refl _⟩ h
+  · have hη : 0 < pcfEta t := CylinderTurningPoint.eta_one ▸
+      CylinderTurningPoint.eta_strictAntiOn ⟨ht.le, h.le⟩ ⟨by norm_num, le_refl _⟩ h
     have hA : 0 < 3/2 * pcfEta t := by positivity
     have hr : 0 < Real.sqrt (1 - t^2) := Real.sqrt_pos.2 (by nlinarith)
-    have hd := (((pcfZ_hasDerivAt_eta ht h).const_mul (3/2)).rpow_const
+    have hd := (((CylinderTurningPoint.hasDerivAt_eta ht h).const_mul (3/2)).rpow_const
       (p := 2/3) (Or.inl hA.ne')).neg
     refine ⟨-((3/2 * -Real.sqrt (1 - t^2)) * (2/3) * (3/2 * pcfEta t) ^ (2/3 - 1 : ℝ)), ?_, ?_, ?_⟩
     · have := Real.rpow_pos_of_pos hA (2/3 - 1); nlinarith
-    · have e := pcfZ_rpow_aux hA
+    · have e := CylinderTurningPoint.rpow_identity hA
       have hs := Real.sq_sqrt (show 0 ≤ 1 - t^2 by nlinarith)
       simp only [pcfZeta, show ¬ 1 ≤ t from not_le.2 h, ↓reduceIte]
       linear_combination (-(1 - t^2)) * e +
@@ -482,13 +488,15 @@ theorem pcfZ_hasDerivAt_zeta {t : ℝ} (ht : -1 < t) (ht1 : t ≠ 1) :
     · refine hd.congr_of_eventuallyEq ?_
       filter_upwards [Iio_mem_nhds h] with s hs
       simp only [pcfZeta, show ¬ 1 ≤ s from not_le.2 hs, ↓reduceIte, Pi.neg_apply]
-  · have hξ : 0 < pcfXi t := pcfZ_xi_one ▸ pcfZ_xi_strictMonoOn (le_refl (1:ℝ)) h.le h
+  · have hξ : 0 < pcfXi t :=
+        CylinderTurningPoint.xi_one ▸ CylinderTurningPoint.xi_strictMonoOn (le_refl (1:ℝ)) h.le h
     have hA : 0 < 3/2 * pcfXi t := by positivity
     have hr : 0 < Real.sqrt (t^2 - 1) := Real.sqrt_pos.2 (by nlinarith)
-    have hd := ((pcfZ_hasDerivAt_xi h).const_mul (3/2)).rpow_const (p := 2/3) (Or.inl hA.ne')
+    have hd := ((CylinderTurningPoint.hasDerivAt_xi h).const_mul (3/2)).rpow_const (p := 2/3)
+        (Or.inl hA.ne')
     refine ⟨(3/2 * Real.sqrt (t^2 - 1)) * (2/3) * (3/2 * pcfXi t) ^ (2/3 - 1 : ℝ), ?_, ?_, ?_⟩
     · have := Real.rpow_pos_of_pos hA (2/3 - 1); positivity
-    · have e := pcfZ_rpow_aux hA
+    · have e := CylinderTurningPoint.rpow_identity hA
       have hs := Real.sq_sqrt (show 0 ≤ t^2 - 1 by nlinarith)
       simp only [pcfZeta, h.le, ↓reduceIte]
       linear_combination (t^2 - 1) * e +
@@ -506,60 +514,66 @@ theorem pcfInverseZeta_spec {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) :
   have hex : ∃ t : ℝ, -1 < t ∧ pcfZeta t = ζ := by
     obtain ⟨T, hT1, hT⟩ : ∃ T : ℝ, 1 ≤ T ∧ ζ ≤ pcfZeta T := by
       rcases le_or_gt ζ 0 with h | h
-      · exact ⟨1, le_refl _, by simp [pcfZeta, pcfZ_xi_one]; exact h⟩
+      · exact ⟨1, le_refl _, by simp [pcfZeta, CylinderTurningPoint.xi_one]; exact h⟩
       · set c := ζ ^ (3/2:ℝ)
         have hc : 0 ≤ c := by positivity
         refine ⟨2 + 2*c, by linarith, ?_⟩
-        have h2 := pcfZ_xi_ge (show (1:ℝ) ≤ 2 + 2*c by linarith)
+        have h2 := CylinderTurningPoint.xi_ge (show (1:ℝ) ≤ 2 + 2*c by linarith)
         simp only [pcfZeta, show (1:ℝ) ≤ 2 + 2*c by linarith, ↓reduceIte]
         have h3 : c ≤ 3/2 * pcfXi (2 + 2*c) := by nlinarith
         calc ζ = c ^ (2/3:ℝ) := by
               rw [← Real.rpow_mul h.le]; norm_num
           _ ≤ _ := Real.rpow_le_rpow hc h3 (by norm_num)
     have hIVT := intermediate_value_Icc (show (-1:ℝ) ≤ T by linarith)
-      (pcfZ_continuousOn_zeta.mono Icc_subset_Ici_self)
-    obtain ⟨t, ht, hft⟩ := hIVT ⟨by rw [pcfZ_zeta_neg_one]; exact hζ.le, hT⟩
+      (CylinderTurningPoint.continuousOn_zeta.mono Icc_subset_Ici_self)
+    obtain ⟨t, ht, hft⟩ := hIVT ⟨by rw [CylinderTurningPoint.zeta_neg_one]; exact hζ.le, hT⟩
     refine ⟨t, lt_of_le_of_ne ht.1 ?_, hft⟩
     rintro rfl
-    rw [pcfZ_zeta_neg_one] at hft
+    rw [CylinderTurningPoint.zeta_neg_one] at hft
     linarith
   have hs := Classical.epsilon_spec hex
   refine ⟨hs.1, hs.2, fun t ht htz => ?_⟩
-  exact pcfZ_zeta_strictMonoOn.injOn (le_of_lt ht) (le_of_lt hs.1) (htz.trans hs.2.symm)
+  exact CylinderTurningPoint.zeta_strictMonoOn.injOn (le_of_lt ht) (le_of_lt hs.1)
+      (htz.trans hs.2.symm)
 
 /-- `pcfInverseZeta` is a left inverse of `pcfZeta` on `(-1, ∞)`. -/
-theorem pcfZ_inverse_zeta {t : ℝ} (ht : -1 < t) : pcfInverseZeta (pcfZeta t) = t := by
+theorem CylinderTurningPoint.inverse_zeta {t : ℝ} (ht : -1 < t) : pcfInverseZeta
+    (pcfZeta t) = t := by
   have hc : -(3*π/4)^(2/3:ℝ) < pcfZeta t := by
-    rw [← pcfZ_zeta_neg_one]; exact pcfZ_zeta_strictMonoOn (le_refl (-1:ℝ)) ht.le ht
+    rw [← CylinderTurningPoint.zeta_neg_one];
+        exact CylinderTurningPoint.zeta_strictMonoOn (le_refl (-1:ℝ)) ht.le ht
   exact ((pcfInverseZeta_spec hc).2.2 t ht rfl).symm
 
 /-- `pcfInverseZeta` is strictly increasing. -/
-theorem pcfZ_inverse_strictMonoOn : StrictMonoOn pcfInverseZeta (Ioi (-(3*π/4)^(2/3:ℝ))) := by
+theorem CylinderTurningPoint.inverse_strictMonoOn : StrictMonoOn pcfInverseZeta
+    (Ioi (-(3*π/4)^(2/3:ℝ))) := by
   intro a ha b hb hab
   have sa := pcfInverseZeta_spec ha
   have sb := pcfInverseZeta_spec hb
   by_contra h
-  have := pcfZ_zeta_strictMonoOn.monotoneOn sb.1.le sa.1.le (not_lt.1 h)
+  have := CylinderTurningPoint.zeta_strictMonoOn.monotoneOn sb.1.le sa.1.le (not_lt.1 h)
   rw [sa.2.1, sb.2.1] at this
   linarith
 
 /-- Derivative of the inverse coordinate away from `ζ = 0`. -/
-theorem pcfZ_hasDerivAt_inverse {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) (hz : ζ ≠ 0) :
+theorem CylinderTurningPoint.hasDerivAt_inverse {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) (hz : ζ ≠ 0) :
     ∃ d : ℝ, 0 < d ∧ d^2 * ζ = pcfInverseZeta ζ ^ 2 - 1 ∧
       HasDerivAt pcfInverseZeta d⁻¹ ζ := by
   have hs := pcfInverseZeta_spec hζ
   have h1 : pcfInverseZeta ζ ≠ 1 := by
-    intro h; rw [h] at hs; apply hz; rw [← hs.2.1]; simp [pcfZeta, pcfZ_xi_one]
-  obtain ⟨d, hd, hdz, hder⟩ := pcfZ_hasDerivAt_zeta hs.1 h1
+    intro h; rw [h] at hs; apply hz; rw [← hs.2.1]; simp [pcfZeta, CylinderTurningPoint.xi_one]
+  obtain ⟨d, hd, hdz, hder⟩ := CylinderTurningPoint.hasDerivAt_zeta hs.1 h1
   rw [hs.2.1] at hdz
   refine ⟨d, hd, hdz, ?_⟩
   have hcont : ContinuousAt pcfInverseZeta ζ := by
-    refine continuousAt_of_monotoneOn_of_image_mem_nhds pcfZ_inverse_strictMonoOn.monotoneOn
+    refine continuousAt_of_monotoneOn_of_image_mem_nhds
+        CylinderTurningPoint.inverse_strictMonoOn.monotoneOn
       (Ioi_mem_nhds hζ) (mem_of_superset (Ioi_mem_nhds hs.1) fun t ht => ?_)
-    refine ⟨pcfZeta t, ?_, pcfZ_inverse_zeta ht⟩
+    refine ⟨pcfZeta t, ?_, CylinderTurningPoint.inverse_zeta ht⟩
     show -(3*π/4)^(2/3:ℝ) < pcfZeta t
     have ht' : (-1:ℝ) < t := ht
-    rw [← pcfZ_zeta_neg_one]; exact pcfZ_zeta_strictMonoOn (le_refl (-1:ℝ)) ht'.le ht'
+    rw [← CylinderTurningPoint.zeta_neg_one];
+        exact CylinderTurningPoint.zeta_strictMonoOn (le_refl (-1:ℝ)) ht'.le ht'
   refine hder.of_local_left_inverse hcont hd.ne' ?_
   filter_upwards [Ioi_mem_nhds hζ] with y hy
   exact (pcfInverseZeta_spec hy).2.1
@@ -577,31 +591,35 @@ theorem pcfZeta_analytic_at_one  :
     (analyticAt_id.add analyticAt_const) (by norm_num)
   refine h.congr ?_
   filter_upwards [Ioi_mem_nhds (show (-1:ℝ) < 1 by norm_num)] with t ht
-  exact (pcfZ_eq_airyCoord (le_of_lt ht)).symm
+  exact (CylinderTurningPoint.eq_airyCoord (le_of_lt ht)).symm
 
 /-- Degree-4 Taylor polynomial of `√(2+y)/√2`. -/
-noncomputable def pcfTay_T (y : ℝ) : ℝ := 1 + y/4 - y^2/32 + y^3/128 - 5*y^4/2048
+noncomputable def CylinderZetaTaylor.sqrtTaylor (y : ℝ) : ℝ := 1 + y/4 - y^2/32 +
+    y^3/128 - 5*y^4/2048
 
 /-- Truncated expansion `√(2+y) = √2 T(y) + O(y⁵)`, via `T² - (2+y) = O(y⁵)`. -/
-theorem pcfTay_sqrt : (fun y : ℝ => Real.sqrt (2+y) - Real.sqrt 2 * pcfTay_T y) =O[𝓝 0]
+theorem CylinderZetaTaylor.sqrt :
+    (fun y : ℝ => Real.sqrt (2+y) - Real.sqrt 2 * CylinderZetaTaylor.sqrtTaylor y) =O[𝓝 0]
     (fun y => y^5) := by
   have h2 : (0:ℝ) < Real.sqrt 2 := Real.sqrt_pos.2 two_pos
   refine invSer_isBigO_sub_of_pow_sub (n := 2) two_ne_zero h2.ne' ?_ ?_ ?_
   · have := ((continuous_const.add continuous_id).sqrt (f := fun y : ℝ => 2 + y)).tendsto 0
     simpa using this
-  · have : Continuous fun y => Real.sqrt 2 * pcfTay_T y := by unfold pcfTay_T; fun_prop
-    simpa [pcfTay_T] using this.tendsto 0
+  · have : Continuous fun y => Real.sqrt 2 * CylinderZetaTaylor.sqrtTaylor y := by
+        unfold CylinderZetaTaylor.sqrtTaylor; fun_prop
+    simpa [CylinderZetaTaylor.sqrtTaylor] using this.tendsto 0
   · refine invSer_isBigO_pow_of_eq_mul 5
       (q := fun y : ℝ => -25*y^3/2097152 + 5*y^2/65536 - 7*y/16384 + 7/2048) ?_ ?_
     · exact ((by fun_prop : Continuous fun y : ℝ =>
         -25*y^3/2097152 + 5*y^2/65536 - 7*y/16384 + 7/2048).tendsto 0).isBigO_one ℝ
     · filter_upwards [Ioi_mem_nhds (show (-2:ℝ) < 0 by norm_num)] with y hy
       have hy : (-2:ℝ) < y := hy
-      rw [mul_pow, Real.sq_sqrt (by linarith), Real.sq_sqrt (by norm_num), pcfTay_T]
+      rw [mul_pow, Real.sq_sqrt (by linarith), Real.sq_sqrt (by norm_num),
+          CylinderZetaTaylor.sqrtTaylor]
       ring
 
 /-- `∫₀¹ τ^{1/2} τ^k dτ = 1/(k+3/2)`. -/
-theorem pcfTay_integral_pow (k : ℕ) :
+theorem CylinderZetaTaylor.integral_pow (k : ℕ) :
     ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * τ^k = 1/(k+3/2) := by
   have h : ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * τ^k = ∫ τ in (0:ℝ)..1, τ^((1/2:ℝ) + k) := by
     refine intervalIntegral.integral_congr fun τ hτ => ?_
@@ -614,54 +632,61 @@ theorem pcfTay_integral_pow (k : ℕ) :
   ring
 
 /-- The Airy average of `p(s) = s+1` at `1+u`. -/
-noncomputable def pcfTay_K (u : ℝ) : ℝ := DoubleZeroSqrt.airyAvg (fun s => s + 1) 1 (1 + u)
+noncomputable def CylinderZetaTaylor.airyAverage (u : ℝ) : ℝ :=
+    DoubleZeroSqrt.airyAvg (fun s => s + 1) 1 (1 + u)
 
 /-- Degree-4 Taylor polynomial of `K/√2`. -/
-noncomputable def pcfTay_Kp (u : ℝ) : ℝ := 2/3 + u/10 - u^2/112 + u^3/576 - 5*u^4/11264
+noncomputable def CylinderZetaTaylor.airyAverageTaylor (u : ℝ) : ℝ := 2/3 + u/10 - u^2/112 +
+    u^3/576 - 5*u^4/11264
 
 /-- `K(1+u) = ∫₀¹ τ^{1/2} √(2+uτ) dτ`. -/
-theorem pcfTay_K_eq (u : ℝ) :
-    pcfTay_K u = ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * Real.sqrt (2 + u*τ) := by
-  unfold pcfTay_K DoubleZeroSqrt.airyAvg
+theorem CylinderZetaTaylor.airyAverage_eq (u : ℝ) :
+    CylinderZetaTaylor.airyAverage u = ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * Real.sqrt (2 + u*τ) := by
+  unfold CylinderZetaTaylor.airyAverage DoubleZeroSqrt.airyAvg
   refine intervalIntegral.integral_congr fun τ _ => ?_
   simp only
   congr 2; ring
 
 /-- Termwise integration of the truncated square root. -/
-theorem pcfTay_Kp_eq (u : ℝ) :
-    ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * (Real.sqrt 2 * pcfTay_T (u*τ)) = Real.sqrt 2 * pcfTay_Kp u := by
-  have e : ∀ τ : ℝ, τ^(1/2:ℝ) * (Real.sqrt 2 * pcfTay_T (u*τ)) =
+theorem CylinderZetaTaylor.airyAverageTaylor_eq (u : ℝ) :
+    ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * (Real.sqrt 2 * CylinderZetaTaylor.sqrtTaylor (u*τ)) = Real.sqrt 2 *
+        CylinderZetaTaylor.airyAverageTaylor u := by
+  have e : ∀ τ : ℝ, τ^(1/2:ℝ) * (Real.sqrt 2 * CylinderZetaTaylor.sqrtTaylor (u*τ)) =
       ∑ k ∈ Finset.range 5, (Real.sqrt 2 * ([1, 1/4, -1/32, 1/128, -5/2048] : List ℝ).getD k 0
         * u^k) * (τ^(1/2:ℝ) * τ^k) := by
     intro τ
-    simp [Finset.sum_range_succ, pcfTay_T]
+    simp [Finset.sum_range_succ, CylinderZetaTaylor.sqrtTaylor]
     ring
   simp_rw [e]
   rw [intervalIntegral.integral_finsetSum]
-  · simp_rw [intervalIntegral.integral_const_mul, pcfTay_integral_pow]
-    simp [Finset.sum_range_succ, pcfTay_Kp]
+  · simp_rw [intervalIntegral.integral_const_mul, CylinderZetaTaylor.integral_pow]
+    simp [Finset.sum_range_succ, CylinderZetaTaylor.airyAverageTaylor]
     ring
   · intro k _
     refine Continuous.intervalIntegrable ?_ _ _
     exact continuous_const.mul ((Real.continuous_rpow_const (by norm_num)).mul (continuous_pow k))
 
 /-- `K(1+u) = √2 Kp(u) + O(u⁵)`. -/
-theorem pcfTay_K_expansion :
-    (fun u => pcfTay_K u - Real.sqrt 2 * pcfTay_Kp u) =O[𝓝 0] (fun u => u^5) := by
-  obtain ⟨C, hC0, hC⟩ := pcfTay_sqrt.exists_pos
+theorem CylinderZetaTaylor.airyAverage_expansion :
+    (fun u => CylinderZetaTaylor.airyAverage u - Real.sqrt 2 *
+        CylinderZetaTaylor.airyAverageTaylor u) =O[𝓝 0] (fun u => u^5) := by
+  obtain ⟨C, hC0, hC⟩ := CylinderZetaTaylor.sqrt.exists_pos
   obtain ⟨δ, hδ, hb⟩ := Metric.eventually_nhds_iff.1 hC.bound
   refine IsBigO.of_bound C ?_
   filter_upwards [Metric.ball_mem_nhds (0:ℝ) hδ] with u hu
   have hu : |u| < δ := by simpa using hu
   have hint : IntervalIntegrable (fun τ : ℝ => τ^(1/2:ℝ) * Real.sqrt (2 + u*τ)) volume 0 1 :=
     Continuous.intervalIntegrable (by fun_prop) _ _
-  have hint2 : IntervalIntegrable (fun τ : ℝ => τ^(1/2:ℝ) * (Real.sqrt 2 * pcfTay_T (u*τ)))
+  have hint2 : IntervalIntegrable
+      (fun τ : ℝ => τ^(1/2:ℝ) * (Real.sqrt 2 * CylinderZetaTaylor.sqrtTaylor (u*τ)))
       volume 0 1 :=
-    Continuous.intervalIntegrable (by unfold pcfTay_T; fun_prop) _ _
-  rw [pcfTay_K_eq, ← pcfTay_Kp_eq, ← intervalIntegral.integral_sub hint hint2]
+    Continuous.intervalIntegrable (by unfold CylinderZetaTaylor.sqrtTaylor; fun_prop) _ _
+  rw [CylinderZetaTaylor.airyAverage_eq, ← CylinderZetaTaylor.airyAverageTaylor_eq,
+      ← intervalIntegral.integral_sub hint hint2]
   have := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := 1)
     (C := C * ‖u^5‖)
-    (f := fun τ : ℝ => τ^(1/2:ℝ) * Real.sqrt (2 + u*τ) - τ^(1/2:ℝ) * (Real.sqrt 2 * pcfTay_T (u*τ)))
+    (f := fun τ : ℝ => τ^(1/2:ℝ) * Real.sqrt (2 + u*τ) - τ^(1/2:ℝ) *
+        (Real.sqrt 2 * CylinderZetaTaylor.sqrtTaylor (u*τ)))
     (fun τ hτ => by
       rw [uIoc_of_le zero_le_one] at hτ
       have h1 : |u*τ| < δ := by
@@ -678,7 +703,7 @@ theorem pcfTay_K_expansion :
           rw [Real.norm_eq_abs, abs_of_nonneg (pow_nonneg hτ.1.le 5)]
           exact pow_le_one₀ hτ.1.le hτ.2
         nlinarith [norm_nonneg (u^5)]
-      calc ‖τ^(1/2:ℝ)‖ * ‖Real.sqrt (2 + u*τ) - Real.sqrt 2 * pcfTay_T (u*τ)‖
+      calc ‖τ^(1/2:ℝ)‖ * ‖Real.sqrt (2 + u*τ) - Real.sqrt 2 * CylinderZetaTaylor.sqrtTaylor (u*τ)‖
           ≤ 1 * (C * ‖u^5‖) := by
             refine mul_le_mul h3 (h2.trans (mul_le_mul_of_nonneg_left h4 hC0.le))
               (norm_nonneg _) zero_le_one
@@ -686,15 +711,16 @@ theorem pcfTay_K_expansion :
   simpa using this
 
 /-- `(2^{1/3})³ = 2`. -/
-theorem pcfTay_c_cube : ((2:ℝ)^(1/3:ℝ))^3 = 2 := by
+theorem CylinderZetaTaylor.c_cube : ((2:ℝ)^(1/3:ℝ))^3 = 2 := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
 
 /-- Degree-4 Taylor polynomial of `((3/2)K)^{2/3}/2^{1/3}`. -/
-noncomputable def pcfTay_R (u : ℝ) : ℝ :=
+noncomputable def CylinderZetaTaylor.zetaRatioTaylor (u : ℝ) : ℝ :=
   1 + u/10 - 2*u^2/175 + 37*u^3/15750 - 1849*u^4/3031875
 
 /-- `K(1+u) → (2/3)√2` as `u → 0`. -/
-theorem pcfTay_K_tendsto : Tendsto pcfTay_K (𝓝 0) (𝓝 ((2/3) * Real.sqrt 2)) := by
+theorem CylinderZetaTaylor.airyAverage_tendsto : Tendsto CylinderZetaTaylor.airyAverage (𝓝 0)
+    (𝓝 ((2/3) * Real.sqrt 2)) := by
   have hp : AnalyticAt ℝ (fun s : ℝ => s + 1) 1 := analyticAt_id.add analyticAt_const
   have h := (DoubleZeroSqrt.analyticAt_airyAvg hp (by norm_num)).continuousAt
   have h2 : Tendsto (fun u : ℝ => 1 + u) (𝓝 0) (𝓝 1) := by
@@ -705,29 +731,36 @@ theorem pcfTay_K_tendsto : Tendsto pcfTay_K (𝓝 0) (𝓝 ((2/3) * Real.sqrt 2)
   exact this
 
 /-- `((3/2)K)^{2/3} = 2^{1/3} R(u) + O(u⁵)`, via the cube relation. -/
-theorem pcfTay_Z_expansion :
-    (fun u => ((3/2) * pcfTay_K u)^(2/3:ℝ) - (2:ℝ)^(1/3:ℝ) * pcfTay_R u) =O[𝓝 0]
+theorem CylinderZetaTaylor.Z_expansion :
+    (fun u => ((3/2) * CylinderZetaTaylor.airyAverage u)^(2/3:ℝ) - (2:ℝ)^(1/3:ℝ) *
+        CylinderZetaTaylor.zetaRatioTaylor u) =O[𝓝 0]
       (fun u => u^5) := by
   have hc : (0:ℝ) < (2:ℝ)^(1/3:ℝ) := by positivity
-  have hK0 : ∀ u, 0 ≤ pcfTay_K u := fun u => DoubleZeroSqrt.airyAvg_nonneg _ _ _
+  have hK0 : ∀ u, 0 ≤ CylinderZetaTaylor.airyAverage u := fun u =>
+      DoubleZeroSqrt.airyAvg_nonneg _ _ _
   refine invSer_isBigO_sub_of_pow_sub (n := 3) three_ne_zero hc.ne' ?_ ?_ ?_
-  · have h1 := (pcfTay_K_tendsto.const_mul (3/2)).rpow_const (p := 2/3)
+  · have h1 := (CylinderZetaTaylor.airyAverage_tendsto.const_mul (3/2)).rpow_const (p := 2/3)
       (Or.inl (by positivity))
     convert h1 using 2
     rw [Real.sqrt_eq_rpow, show (3/2:ℝ) * ((2/3) * (2:ℝ)^(1/2:ℝ)) = (2:ℝ)^(1/2:ℝ) by ring,
       ← Real.rpow_mul (by norm_num)]
     norm_num
-  · have : Continuous fun u => (2:ℝ)^(1/3:ℝ) * pcfTay_R u := by unfold pcfTay_R; fun_prop
-    simpa [pcfTay_R] using this.tendsto 0
-  · have e1 : ∀ u, (((3/2) * pcfTay_K u)^(2/3:ℝ))^3 = (9/4) * pcfTay_K u ^ 2 := by
+  · have : Continuous fun u => (2:ℝ)^(1/3:ℝ) * CylinderZetaTaylor.zetaRatioTaylor u := by
+        unfold CylinderZetaTaylor.zetaRatioTaylor; fun_prop
+    simpa [CylinderZetaTaylor.zetaRatioTaylor] using this.tendsto 0
+  · have e1 : ∀ u, (((3/2) * CylinderZetaTaylor.airyAverage u)^(2/3:ℝ))^3 = (9/4) *
+        CylinderZetaTaylor.airyAverage u ^ 2 := by
       intro u
       rw [← Real.rpow_natCast, ← Real.rpow_mul (by have := hK0 u; positivity),
         show (2/3:ℝ) * ((3:ℕ):ℝ) = ((2:ℕ):ℝ) by norm_num, Real.rpow_natCast]; ring
-    have hA := (pcfTay_K_expansion.mul ((pcfTay_K_tendsto.add
-      ((by unfold pcfTay_Kp; fun_prop : Continuous fun u => Real.sqrt 2 * pcfTay_Kp u).tendsto
+    have hA := (CylinderZetaTaylor.airyAverage_expansion.mul
+        ((CylinderZetaTaylor.airyAverage_tendsto.add
+      ((by unfold CylinderZetaTaylor.airyAverageTaylor; fun_prop : Continuous fun u => Real.sqrt 2 *
+             CylinderZetaTaylor.airyAverageTaylor u).tendsto
           0)).isBigO_one ℝ)).const_mul_left (9/4)
     have hB := invSer_isBigO_pow_of_eq_mul (l := 𝓝 (0:ℝ)) (y := id) 5
-      (f := fun u => (9/2) * pcfTay_Kp u ^ 2 - 2 * pcfTay_R u ^ 3)
+      (f := fun u => (9/2) * CylinderZetaTaylor.airyAverageTaylor u ^ 2 - 2 *
+          CylinderZetaTaylor.zetaRatioTaylor u ^ 3)
       (q := fun u : ℝ => 12642726098*u^7/27869801526123046875 - 126495637*u^6/24129698291015625 +
           441062309*u^5/9651879316406250 - 29489287*u^4/66184315312500 +
           316335933107*u^3/257034387456000000 - 188911973*u^2/57953280000000 +
@@ -737,35 +770,39 @@ theorem pcfTay_Z_expansion :
               29489287*u^4/66184315312500 + 316335933107*u^3/257034387456000000 -
               188911973*u^2/57953280000000 + 111563237*u/26078976000000 +
               3059827/10348800000).tendsto 0).isBigO_one ℝ)
-      (Eventually.of_forall fun u => by simp only [pcfTay_Kp, pcfTay_R, id]; ring)
+      (Eventually.of_forall fun u => by
+          simp only [CylinderZetaTaylor.airyAverageTaylor,
+            CylinderZetaTaylor.zetaRatioTaylor, id]; ring)
     have hA' : _ =O[𝓝 (0:ℝ)] (fun u : ℝ => u^5) :=
         hA.trans (by simpa using isBigO_refl (fun u : ℝ => u^5) _)
     refine ((hA'.add hB).congr' (Eventually.of_forall fun u => ?_)
       (Eventually.of_forall fun u => by simp)).trans (isBigO_refl _ _)
-    simp only [e1, mul_pow, pcfTay_c_cube]
+    simp only [e1, mul_pow, CylinderZetaTaylor.c_cube]
     have h2 := Real.sq_sqrt (show (0:ℝ) ≤ 2 by norm_num)
-    linear_combination (-(9/4) * pcfTay_Kp u ^ 2) * h2
+    linear_combination (-(9/4) * CylinderZetaTaylor.airyAverageTaylor u ^ 2) * h2
 
 /-- `ζ(1+u) = u ((3/2)K(1+u))^{2/3}` (DLMF 12.10.39 as an Airy coordinate). -/
-theorem pcfTay_zeta_eq {u : ℝ} (hu : -2 ≤ u) :
-    pcfZeta (1 + u) = u * ((3/2) * pcfTay_K u)^(2/3:ℝ) := by
-  rw [pcfZ_eq_airyCoord (by linarith), DoubleZeroSqrt.airyCoord, pcfTay_K]
+theorem CylinderZetaTaylor.zeta_eq {u : ℝ} (hu : -2 ≤ u) :
+    pcfZeta (1 + u) = u * ((3/2) * CylinderZetaTaylor.airyAverage u)^(2/3:ℝ) := by
+  rw [CylinderTurningPoint.eq_airyCoord (by linarith), DoubleZeroSqrt.airyCoord,
+      CylinderZetaTaylor.airyAverage]
   ring_nf
 
 /-- Forward expansion `ζ(1+u) = 2^{1/3} u R(u) + O(u⁶)`. -/
-theorem pcfTay_zeta_expansion :
-    (fun u => pcfZeta (1 + u) - (2:ℝ)^(1/3:ℝ) * (u * pcfTay_R u)) =O[𝓝 0] (fun u => u^6) := by
-  have h := (isBigO_refl (fun u : ℝ => u) (𝓝 0)).mul pcfTay_Z_expansion
+theorem CylinderZetaTaylor.zeta_expansion :
+    (fun u => pcfZeta (1 + u) - (2:ℝ)^(1/3:ℝ) * (u * CylinderZetaTaylor.zetaRatioTaylor u)) =O[𝓝 0]
+        (fun u => u^6) := by
+  have h := (isBigO_refl (fun u : ℝ => u) (𝓝 0)).mul CylinderZetaTaylor.Z_expansion
   refine h.congr' ?_ (Eventually.of_forall fun u => by ring)
   filter_upwards [Ioi_mem_nhds (show (-2:ℝ) < 0 by norm_num)] with u hu
-  rw [pcfTay_zeta_eq (le_of_lt hu)]; ring
+  rw [CylinderZetaTaylor.zeta_eq (le_of_lt hu)]; ring
 
 /-- The printed inverse polynomial in `w = 2^{-1/3} ζ` minus `1`. -/
-noncomputable def pcfTay_v (w : ℝ) : ℝ :=
+noncomputable def CylinderZetaTaylor.inverseTaylor (w : ℝ) : ℝ :=
   w-w^2/10+11*w^3/350-823*w^4/63000+150653*w^5/24255000
 
 /-- The residual of the inversion, `(v R(v) - w)/w⁶`. -/
-noncomputable def pcfTay_q (w : ℝ) : ℝ :=
+noncomputable def CylinderZetaTaylor.inversionResidual (w : ℝ) : ℝ :=
   w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(
     783876931167548774559650287/13221689470271539282265625000000000000000
     - 143491386769361756420091123557*w/25451752230272713118361328125000000000000000)
@@ -783,9 +820,12 @@ noncomputable def pcfTay_q (w : ℝ) : ℝ :=
     + 41220257/122245200000) - 90737/97453125) + 20917/6930000
 
 /-- The printed inverse polynomial inverts `w ↦ w R(w)` to order `w⁵`. -/
-theorem pcfTay_inversion_identity (w : ℝ) :
-    pcfTay_v w * pcfTay_R (pcfTay_v w) - w = w^6 * pcfTay_q w := by
-  unfold pcfTay_v pcfTay_R pcfTay_q; ring
+theorem CylinderZetaTaylor.inversion_identity (w : ℝ) :
+    CylinderZetaTaylor.inverseTaylor w *
+        CylinderZetaTaylor.zetaRatioTaylor (CylinderZetaTaylor.inverseTaylor w) - w = w^6 *
+        CylinderZetaTaylor.inversionResidual w := by
+  unfold CylinderZetaTaylor.inverseTaylor CylinderZetaTaylor.zetaRatioTaylor
+      CylinderZetaTaylor.inversionResidual; ring
 
 /-- Asymptotic bound with the indicated comparison function: `(fun ζ : ℝ => let w:=2^(-1/3:ℝ)*ζ;
 pcfInverseZeta ζ-(1+w-w^2/10+11*w^3/350-823*w^4/63000+150653*w^5/24255000)) =O[𝓝 0] (fun ζ : ℝ
@@ -799,28 +839,32 @@ theorem pcfInverseZeta_taylor  :
   set c : ℝ := (2:ℝ)^(1/3:ℝ) with hc
   have hck : c * k = 1 := by
     rw [hc, hk, ← Real.rpow_add (by norm_num)]; norm_num
-  set v : ℝ → ℝ := fun ζ => pcfTay_v (k * ζ) with hv
-  have hvc : Continuous v := by simp only [hv, pcfTay_v]; fun_prop
+  set v : ℝ → ℝ := fun ζ => CylinderZetaTaylor.inverseTaylor (k * ζ) with hv
+  have hvc : Continuous v := by simp only [hv, CylinderZetaTaylor.inverseTaylor]; fun_prop
   have hv0 : Tendsto v (𝓝 0) (𝓝 0) := by
-    simpa [hv, pcfTay_v] using hvc.tendsto 0
+    simpa [hv, CylinderZetaTaylor.inverseTaylor] using hvc.tendsto 0
   have hvO : v =O[𝓝 0] (fun ζ => ζ^1) := by
     refine invSer_isBigO_pow_of_eq_mul (y := id) 1
       (q := fun ζ => k * (1 - (k*ζ)/10 + 11*(k*ζ)^2/350 - 823*(k*ζ)^3/63000
         + 150653*(k*ζ)^4/24255000)) ?_ (Eventually.of_forall fun ζ => ?_)
     · exact ((by fun_prop : Continuous fun ζ : ℝ => k * (1 - (k*ζ)/10 + 11*(k*ζ)^2/350
         - 823*(k*ζ)^3/63000 + 150653*(k*ζ)^4/24255000)).tendsto 0).isBigO_one ℝ
-    · simp only [hv, pcfTay_v, id]; ring
+    · simp only [hv, CylinderZetaTaylor.inverseTaylor, id]; ring
   -- `ζ(1 + v) - ζ = O(ζ⁶)`
   have hE : (fun ζ => pcfZeta (1 + v ζ) - ζ) =O[𝓝 0] (fun ζ => ζ^6) := by
-    have h1 : (fun ζ => pcfZeta (1 + v ζ) - c * (v ζ * pcfTay_R (v ζ))) =O[𝓝 0]
+    have h1 : (fun ζ => pcfZeta (1 + v ζ) - c *
+        (v ζ * CylinderZetaTaylor.zetaRatioTaylor (v ζ))) =O[𝓝 0]
         (fun ζ => ζ^6) := by
-      refine (pcfTay_zeta_expansion.comp_tendsto hv0).trans ?_
+      refine (CylinderZetaTaylor.zeta_expansion.comp_tendsto hv0).trans ?_
       simpa [Function.comp_def] using hvO.pow 6
-    have h2 : (fun ζ => c * (v ζ * pcfTay_R (v ζ)) - ζ) =O[𝓝 0] (fun ζ => ζ^6) := by
-      refine invSer_isBigO_pow_of_eq_mul (y := id) 6 (q := fun ζ => c * k^6 * pcfTay_q (k*ζ))
-        (((by unfold pcfTay_q; fun_prop : Continuous fun ζ : ℝ => c * k^6 * pcfTay_q (k*ζ)).tendsto
+    have h2 : (fun ζ => c * (v ζ * CylinderZetaTaylor.zetaRatioTaylor (v ζ)) - ζ) =O[𝓝 0]
+        (fun ζ => ζ^6) := by
+      refine invSer_isBigO_pow_of_eq_mul (y := id) 6
+          (q := fun ζ => c * k^6 * CylinderZetaTaylor.inversionResidual (k*ζ))
+        (((by unfold CylinderZetaTaylor.inversionResidual; fun_prop : Continuous fun ζ : ℝ => c *
+                k^6 * CylinderZetaTaylor.inversionResidual (k*ζ)).tendsto
           0).isBigO_one ℝ) (Eventually.of_forall fun ζ => ?_)
-      have := pcfTay_inversion_identity (k * ζ)
+      have := CylinderZetaTaylor.inversion_identity (k * ζ)
       simp only [hv, id]
       linear_combination c * this + ζ * hck
     exact (h1.add h2).congr (fun ζ => by ring) (fun _ => rfl)
@@ -846,17 +890,17 @@ theorem pcfInverseZeta_taylor  :
       Ioi_mem_nhds hneg] with ζ h1 h2 h3
     have h2' : (-1:ℝ) < g ζ := h2
     refine (pcfInverseZeta_spec h3).2.2 (g ζ) h2' ?_
-    rw [pcfZ_eq_airyCoord h2'.le, h1]
+    rw [CylinderTurningPoint.eq_airyCoord h2'.le, h1]
   have hfP : ∀ᶠ ζ in 𝓝 (0:ℝ), DoubleZeroSqrt.airyCoord (fun s : ℝ => s + 1) 1 (1 + v ζ) =
       pcfZeta (1 + v ζ) := by
     filter_upwards [hP.eventually (Ioi_mem_nhds (show (-1:ℝ) < 1 by norm_num))] with ζ h
-    exact (pcfZ_eq_airyCoord (le_of_lt h)).symm
+    exact (CylinderTurningPoint.eq_airyCoord (le_of_lt h)).symm
   have h3 := (hmain.congr' (hgP.mono fun ζ h =>
       show 1 + v ζ - g (id ζ) = 1 + v ζ - pcfInverseZeta ζ by simp only [id, h])
     (hfP.mono fun ζ h => show DoubleZeroSqrt.airyCoord (fun s : ℝ => s + 1) 1 (1 + v ζ) - id ζ =
       pcfZeta (1 + v ζ) - ζ by simp only [id, h])).trans hE
   refine h3.neg_left.congr (fun ζ => ?_) (fun _ => rfl)
-  simp only [hv, pcfTay_v, hk]
+  simp only [hv, CylinderZetaTaylor.inverseTaylor, hk]
   ring
 
 /-- The product-form Airy coefficient alpha used in the turning-point expansion of the cylinder
@@ -954,7 +998,7 @@ def pcfAiryChi (ζ : ℝ) : ℝ :=
 @[dlmf 12.10.E45]
 theorem pcfAiryChi_formula {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) (hz : ζ ≠ 0) :
     pcfAiryChi ζ=(1-2*pcfInverseZeta ζ*(pcfPhi ζ)^6)/(4*ζ) := by
-  obtain ⟨d, hd, hdz, hT⟩ := pcfZ_hasDerivAt_inverse hζ hz
+  obtain ⟨d, hd, hdz, hT⟩ := CylinderTurningPoint.hasDerivAt_inverse hζ hz
   set t := pcfInverseZeta ζ with ht
   set B : ℝ → ℝ := fun u => u / (pcfInverseZeta u ^ 2 - 1) with hB
   have ht1 : t ^ 2 - 1 ≠ 0 := by

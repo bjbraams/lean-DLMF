@@ -20,6 +20,7 @@ Lamé polynomials have the polynomial form, periods and parities of Table 29.12.
 * `tridiagMatrix`, `tridiagSymmetrizer`, `tridiagMatrixSymm`: a tridiagonal matrix of the
   shape of 29.15.2, its diagonal symmetrizer and the symmetrized matrix.
 * `lameBasisSqPoly`: the polynomial `Q_p` with `basis_p(s) = s^ε Q_p(s²)`.
+* `lameSqPoly`: the polynomial `P = ∑_p c_p Q_p` of the algebraic form 29.12.9.
 
 ## Main results
 
@@ -29,6 +30,8 @@ Lamé polynomials have the polynomial form, periods and parities of Table 29.12.
   spectral theorem.
 * `eval_lamePolyH_charpoly`: `H_m` is a root of the characteristic polynomial.
 * `lameRecVec_zero`, `lameRecVec_succ`: the forward recursion for the eigenvector.
+* `degree_lameSqPoly`, `sum_lamePolyCoeff_mul_basis`: `deg P = n` and the Chebyshev series is
+  `s^ε P(s²)`.
 * `lamePolyEk_polynomial_form`: each Lamé polynomial is `sn^a cn^b dn^c P(sn²)` with
   `deg P = n` (Table 29.12.1, DLMF §29.12(i)).
 * `lamePolyEk_periods`, `lamePolyEk_parities`: the periods and parities of Table 29.12.1.
@@ -655,35 +658,49 @@ theorem jacobiSnk_cnk_dnk_add_periods (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
   · rw [e4, e5, (dn _).2.1, (dn _).2.1, (neg z).2.2.2.2.2.2.2.2]; ring
 
 
+/-- The polynomial `P` of the algebraic form 29.12.9 of the Lamé polynomial of type `t`:
+`P = ∑_p c_p Q_p`, so that the Chebyshev series `∑_p c_p basis_p(s)` is `s^ε P(s²)`. -/
+def lameSqPoly (t : LamePolyType) (n m : ℕ) (k : ℝ) : ℝ[X] :=
+  ∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff t n m k p) * lameBasisSqPoly t p
+
+/-- The polynomial `lameSqPoly t n m k` has degree `n`. -/
+theorem degree_lameSqPoly (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
+    (hm : m ≤ n) : (lameSqPoly t n m k).degree = n := by
+  set c := lamePolyCoeff t n m k
+  have hcn : c n ≠ 0 := lamePolyCoeff_last_ne_zero hk0 hk1 t hm
+  rw [lameSqPoly, Finset.sum_range_succ]
+  have htop : (C (c n) * lameBasisSqPoly t n).degree = n := by
+    rw [degree_C_mul hcn, lameBasisSqPoly_degree]
+  have hlow : (∑ p ∈ Finset.range n, C (c p) * lameBasisSqPoly t p).degree < n := by
+    refine lt_of_le_of_lt (degree_sum_le _ _) ?_
+    refine (Finset.sup_lt_iff (WithBot.bot_lt_coe n)).mpr fun p hp => ?_
+    refine lt_of_le_of_lt (degree_mul_le _ _) ?_
+    rw [lameBasisSqPoly_degree]
+    refine lt_of_le_of_lt (add_le_add_left degree_C_le _) ?_
+    rw [zero_add]
+    exact WithBot.coe_lt_coe.mpr (Finset.mem_range.mp hp)
+  rw [degree_add_eq_right_of_degree_lt (by rw [htop]; exact hlow), htop]
+
+/-- The Chebyshev series of type `t` is `s^ε P(s²)` with `P = lameSqPoly t n m k`, where
+`ε = 1` for the types `sE, scE, sdE, scdE` and `ε = 0` otherwise. -/
+theorem sum_lamePolyCoeff_mul_basis (t : LamePolyType) (n m : ℕ) (k : ℝ) (s : ℂ) :
+    ∑ p ∈ Finset.range (n + 1), (lamePolyCoeff t n m k p : ℂ) * t.basis p s =
+      (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then s else 1) *
+        ((lameSqPoly t n m k).map (algebraMap ℝ ℂ)).eval (s ^ 2) := by
+  simp only [lameSqPoly, lamePolyType_basis_eq, Polynomial.map_sum, Polynomial.map_mul, map_C,
+    eval_finsetSum, eval_mul, eval_C, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun p _ => ?_
+  split_ifs <;> simp; ring
+
 /-- The polynomial form with `deg P = n` (in particular `P ≠ 0`). -/
 theorem lamePolyEk_eq_prefactor_mul_eval (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
     (hm : m ≤ n) :
     ∃ P : ℝ[X], P.degree = n ∧ ∀ z : ℂ,
       lamePolyEk t n m z k = t.prefactor z k *
         (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
-        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) := by
-  set c := lamePolyCoeff t n m k
-  have hcn : c n ≠ 0 := lamePolyCoeff_last_ne_zero hk0 hk1 t hm
-  refine ⟨∑ p ∈ Finset.range (n + 1), C (c p) * lameBasisSqPoly t p, ?_, fun z => ?_⟩
-  · rw [Finset.sum_range_succ]
-    have htop : (C (c n) * lameBasisSqPoly t n).degree = n := by
-      rw [degree_C_mul hcn, lameBasisSqPoly_degree]
-    have hlow : (∑ p ∈ Finset.range n, C (c p) * lameBasisSqPoly t p).degree < n := by
-      refine lt_of_le_of_lt (degree_sum_le _ _) ?_
-      refine (Finset.sup_lt_iff (WithBot.bot_lt_coe n)).mpr fun p hp => ?_
-      refine lt_of_le_of_lt (degree_mul_le _ _) ?_
-      rw [lameBasisSqPoly_degree]
-      refine lt_of_le_of_lt (add_le_add_left degree_C_le _) ?_
-      rw [zero_add]
-      exact WithBot.coe_lt_coe.mpr (Finset.mem_range.mp hp)
-    rw [degree_add_eq_right_of_degree_lt (by rw [htop]; exact hlow), htop]
-  · rw [lamePolyEk, mul_assoc]
-    congr 1
-    simp only [lamePolyType_basis_eq, Polynomial.map_sum, Polynomial.map_mul, map_C, eval_finsetSum,
-      eval_mul, eval_C, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun p _ => ?_
-    simp only [c]
-    split_ifs <;> simp; ring
+        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) :=
+  ⟨lameSqPoly t n m k, degree_lameSqPoly hk0 hk1 t hm, fun z => by
+    rw [lamePolyEk, mul_assoc, sum_lamePolyCoeff_mul_basis]⟩
 
 /-- Table 29.12.1, polynomial form: each Lamé polynomial of type `t` is
 `sn^a cn^b dn^c P(sn²)` with `P` a polynomial of degree `n`, where `sn`, `cn`, `dn` occur as

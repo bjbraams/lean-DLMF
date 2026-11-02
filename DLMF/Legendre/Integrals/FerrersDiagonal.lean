@@ -16,18 +16,19 @@ This file evaluates the integrals over `(-1, 1)` of products of Ferrers function
 follow from the off-diagonal ones by dominated convergence, using bounds
 `𝖯_λ, 𝖰_λ = O((1-x²)^{-1/4})` that are uniform for `λ` near `ν`; these come from the
 zero-balanced expansion DLMF 15.8.10 at `m = 0`, with Cauchy's estimate in the third parameter.
-Helper names carry the prefixes `legPIU_` and `legPI_`.
+Helper names live in the namespaces `UniformBound` and `FerrersGreen`.
 
 ## Main results
 
-* `legPIU_bound_zb`, `legPIU_bound_P`, `legPIU_bound_Q`: parameter-uniform bounds.
-* `legPIU_tendsto_PP`, `legPIU_tendsto_sq`, `legPIU_tendsto_int`: dominated convergence on
-  `(-1, 1)`.
+* `UniformBound.bound_zeroBalanced`, `UniformBound.bound_P`, `UniformBound.bound_Q`:
+  parameter-uniform bounds.
+* `UniformBound.tendsto_PP`, `UniformBound.tendsto_sq`, `UniformBound.tendsto_integral`: dominated
+  convergence on `(-1, 1)`.
 * `ferrers_product_integral_10`, `ferrers_product_integral_11`: DLMF 14.17.10, 14.17.11.
 * `ferrers_product_integral_12`, `ferrers_product_integral_13`: DLMF 14.17.12, 14.17.13.
 * `ferrers_product_integral_14`, `ferrers_product_integral_15`: DLMF 14.17.14, 14.17.15.
-* `legPI_green_mu`, `legPI_integral_green_B`: Green's identity for two solutions of the same
-  order.
+* `FerrersGreen.green_mu`, `FerrersGreen.integral_green_B`: Green's identity for two solutions of
+  the same order.
 * `ferrersPQ_nat_integral`: DLMF 14.17.16.
 * `ferrers_triple_integral`: DLMF 14.17.17.
 -/
@@ -42,14 +43,15 @@ namespace DLMF.Legendre
 
 /-! ### Parameter-uniform bounds and diagonal integrals
 
-The zero-balanced expansion `legBd_zeroBalanced_eq` (DLMF 15.8.10 at `m = 0`) holds with a
-remainder `legBdZbH` that is bounded uniformly in the parameters (Cauchy's estimate in the third
-parameter, `legPIU_bound_H`). This gives `𝖯_λ, 𝖰_λ = O((1-x²)^{-1/4})` on `(-1,1)` uniformly for
-`λ` near `ν`, and dominated convergence turns the off-diagonal integrals 14.17.10, 12, 14 into the
-diagonal ones 14.17.11, 13, 15. Helper names carry the prefix `legPIU_`. -/
+The zero-balanced expansion `BoundaryAsymptotics.zeroBalanced_eq` (DLMF 15.8.10 at `m = 0`) holds
+with a remainder `BoundaryAsymptotics.zeroBalancedAnalytic` that is bounded uniformly in the
+parameters (Cauchy's estimate in the third parameter, `UniformBound.bound_H`). This gives
+`𝖯_λ, 𝖰_λ = O((1-x²)^{-1/4})` on `(-1,1)` uniformly for `λ` near `ν`, and dominated convergence
+turns the off-diagonal integrals 14.17.10, 12, 14 into the diagonal ones 14.17.11, 13, 15. Helper
+names live in the namespace `UniformBound`. -/
 
 /-- Uniform bound for `𝐅(a,b;c;w)` on `‖a‖, ‖b‖, ‖c‖ ≤ R`, `‖w‖ ≤ 1/2`. -/
-theorem legPIU_bound_F (R : ℝ) : ∃ M : ℝ, ∀ a b c w : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ‖c‖ ≤ R →
+theorem UniformBound.bound_F (R : ℝ) : ∃ M : ℝ, ∀ a b c w : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ‖c‖ ≤ R →
     ‖w‖ ≤ 1/2 → ‖regularizedGaussHGFun a b c w‖ ≤ M := by
   set S : Set (ℂ × ℂ × ℂ × ℂ) := Metric.closedBall 0 R ×ˢ (Metric.closedBall 0 R ×ˢ
     (Metric.closedBall 0 R ×ˢ Metric.closedBall 0 (1/2)))
@@ -72,7 +74,7 @@ theorem legPIU_bound_F (R : ℝ) : ∃ M : ℝ, ∀ a b c w : ℂ, ‖a‖ ≤ R
   rwa [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by linarith)] at this
 
 /-- A continuous function is bounded on `‖a‖, ‖b‖ ≤ R`. -/
-theorem legPIU_bound_two {f : ℂ × ℂ → ℂ} (hf : Continuous f) (R : ℝ) :
+theorem UniformBound.bound_pair {f : ℂ × ℂ → ℂ} (hf : Continuous f) (R : ℝ) :
     ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ‖f (a, b)‖ ≤ M := by
   obtain ⟨M, hM⟩ := ((isCompact_closedBall (0:ℂ) R).prod (isCompact_closedBall (0:ℂ) R)
     ).exists_bound_of_continuousOn hf.continuousOn
@@ -81,20 +83,20 @@ theorem legPIU_bound_two {f : ℂ × ℂ → ℂ} (hf : Continuous f) (R : ℝ) 
 
 /-- Uniform bound for the analytic part `H(a,b;w)` of DLMF 15.8.10 on `‖a‖, ‖b‖ ≤ R`,
 `‖w‖ ≤ 1/2`, from Cauchy's estimate in the third parameter. -/
-theorem legPIU_bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R →
-    ‖w‖ ≤ 1/2 → ‖legBdZbH a b w‖ ≤ M := by
-  obtain ⟨MF, hMF⟩ := legPIU_bound_F (R+2)
-  have cK : Continuous fun p : ℂ × ℂ => legBdK p.1 p.2 := by
-    unfold legBdK
+theorem UniformBound.bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R →
+    ‖w‖ ≤ 1/2 → ‖BoundaryAsymptotics.zeroBalancedAnalytic a b w‖ ≤ M := by
+  obtain ⟨MF, hMF⟩ := UniformBound.bound_F (R+2)
+  have cK : Continuous fun p : ℂ × ℂ => BoundaryAsymptotics.zeroBalancedConst p.1 p.2 := by
+    unfold BoundaryAsymptotics.zeroBalancedConst
     exact (continuous_recip_Gamma.comp continuous_fst).mul
         (continuous_recip_Gamma.comp continuous_snd)
-  have cK' : Continuous fun p : ℂ × ℂ => legBdK' p.1 p.2 := by
-    unfold legBdK'
+  have cK' : Continuous fun p : ℂ × ℂ => BoundaryAsymptotics.zeroBalancedConstDeriv p.1 p.2 := by
+    unfold BoundaryAsymptotics.zeroBalancedConstDeriv
     have h1 := DLMF.Gamma.continuous_recipGammaDeriv 1
     exact ((h1.comp continuous_snd).mul (continuous_recip_Gamma.comp continuous_fst)).add
       ((continuous_recip_Gamma.comp continuous_snd).mul (h1.comp continuous_fst))
-  obtain ⟨MK, hMK⟩ := legPIU_bound_two cK R
-  obtain ⟨MK', hMK'⟩ := legPIU_bound_two cK' R
+  obtain ⟨MK, hMK⟩ := UniformBound.bound_pair cK R
+  obtain ⟨MK', hMK'⟩ := UniformBound.bound_pair cK' R
   refine ⟨MK * MF + MK' * MF + MK * MF, fun a b w ha hb hw => ?_⟩
   have hw1 : ‖w‖ < 1 := by linarith
   have hR0 : 0 ≤ R := le_trans (norm_nonneg _) ha
@@ -136,10 +138,12 @@ theorem legPIU_bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ ≤ R �
     simpa using this
   have hF1 : ‖regularizedGaussHGFun a b 1 w‖ ≤ MF :=
     hMF _ _ _ _ (by linarith) (by linarith) (by simp; linarith) hw
-  unfold legBdZbH
-  calc _ ≤ ‖legBdK a b * deriv (fun c => regularizedGaussHGFun a b (a+b-c+1) w) (a+b)‖ +
-        ‖legBdK' a b * regularizedGaussHGFun a b 1 w‖ +
-        ‖legBdK a b * deriv (fun c => regularizedGaussHGFun (c-a) (c-b) (c-a-b+1) w) (a+b)‖ :=
+  unfold BoundaryAsymptotics.zeroBalancedAnalytic
+  calc _ ≤ ‖BoundaryAsymptotics.zeroBalancedConst a b *
+         deriv (fun c => regularizedGaussHGFun a b (a+b-c+1) w) (a+b)‖ +
+        ‖BoundaryAsymptotics.zeroBalancedConstDeriv a b * regularizedGaussHGFun a b 1 w‖ +
+        ‖BoundaryAsymptotics.zeroBalancedConst a b *
+            deriv (fun c => regularizedGaussHGFun (c-a) (c-b) (c-a-b+1) w) (a+b)‖ :=
         norm_sub_le_of_le (norm_add_le _ _) le_rfl
     _ ≤ MK * MF + MK' * MF + MK * MF := by
       rw [norm_mul, norm_mul, norm_mul]
@@ -147,16 +151,16 @@ theorem legPIU_bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ ≤ R �
 
 /-- `𝖯_α(x) = O((1-x²)^{-1/4})` on `(-1,1)` uniformly for `‖α‖ ≤ R`: the parameter-uniform form of
 DLMF 15.8.10 at `m = 0` used for diagonal integrals. -/
-theorem legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R → ∀ x ∈ Ioo (-1:ℝ) 1,
-    ‖ferrersP α 0 x‖ ≤ M * legPIw x := by
+theorem UniformBound.bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R → ∀ x ∈ Ioo (-1:ℝ) 1,
+    ‖ferrersP α 0 x‖ ≤ M * FerrersGreen.weight x := by
   set R1 := |R| + 1
-  obtain ⟨MF, hMF⟩ := legPIU_bound_F R1
-  obtain ⟨MH, hMH⟩ := legPIU_bound_H R1
-  have cK : Continuous fun p : ℂ × ℂ => legBdK p.1 p.2 := by
-    unfold legBdK
+  obtain ⟨MF, hMF⟩ := UniformBound.bound_F R1
+  obtain ⟨MH, hMH⟩ := UniformBound.bound_H R1
+  have cK : Continuous fun p : ℂ × ℂ => BoundaryAsymptotics.zeroBalancedConst p.1 p.2 := by
+    unfold BoundaryAsymptotics.zeroBalancedConst
     exact (continuous_recip_Gamma.comp continuous_fst).mul
         (continuous_recip_Gamma.comp continuous_snd)
-  obtain ⟨MK, hMK⟩ := legPIU_bound_two cK R1
+  obtain ⟨MK, hMK⟩ := UniformBound.bound_pair cK R1
   set A := max MF 0
   set B := 4 * max MK 0 * max MF 0 + max MH 0
   refine ⟨A + B, fun α hα x hx => ?_⟩
@@ -168,9 +172,9 @@ theorem legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R →
   have hone : ‖(1:ℂ)‖ ≤ R1 := by simp only [norm_one, R1]; linarith [abs_nonneg R]
   have hA0 : 0 ≤ A := le_max_right _ _
   have hB0 : 0 ≤ B := by positivity
-  have hw1 := legPIw_one_le hx
-  have hw0 := legPIw_pos hx
-  rw [legPI_ferrersP_zero]
+  have hw1 := FerrersGreen.weight_one_le hx
+  have hw0 := FerrersGreen.weight_pos hx
+  rw [FerrersGreen.ferrersP_zero]
   by_cases hx0 : 0 ≤ x
   · have hn : ‖(1-(x:ℂ))/2‖ ≤ 1/2 := by
       rw [show (1-(x:ℂ))/2 = (((1-x)/2:ℝ):ℂ) by push_cast; ring, Complex.norm_real,
@@ -181,7 +185,7 @@ theorem legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R →
     calc _ ≤ MF := hMF _ _ _ _ ha hb hone hn
       _ ≤ A := le_max_left _ _
       _ ≤ A + B := by linarith
-      _ ≤ (A + B) * legPIw x := le_mul_of_one_le_right (by linarith) hw1
+      _ ≤ (A + B) * FerrersGreen.weight x := le_mul_of_one_le_right (by linarith) hw1
   · push Not at hx0
     set t : ℝ := (1+x)/2 with ht
     have ht0 : 0 < t := by simp only [t]; linarith [hx.1]
@@ -197,22 +201,24 @@ theorem legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R →
       show regularizedGaussHGFun (α+1) (-α) 1 (1 - (t:ℂ)) =
         regularizedGaussHGFun (α+1) (-α) ((α+1) + -α) (1 - (t:ℂ)) by
           rw [show (α+1) + -α = (1:ℂ) by ring],
-      legBd_zeroBalanced_eq _ _ hzn htn, sub_sub_cancel, ← Complex.ofReal_log ht0.le]
+      BoundaryAsymptotics.zeroBalanced_eq _ _ hzn htn, sub_sub_cancel, ← Complex.ofReal_log ht0.le]
     have htn' : ‖(t:ℂ)‖ ≤ 1/2 := by
       rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht0]; exact ht1
     have hF := hMF _ _ _ _ ha hb hone htn'
     have hH := hMH _ _ _ ha hb htn'
     have hK := hMK _ _ ha hb
-    have hlog := legPI_abs_log_le ht0 (by linarith)
-    have hp : 1 ≤ t^(-(1/4:ℝ)) := legPI_rpow_ge_one ht0 (by linarith)
-    have hwt : t^(-(1/4:ℝ)) ≤ legPIw x := by
-      rw [legPIw_eq hx]
+    have hlog := FerrersGreen.abs_log_le ht0 (by linarith)
+    have hp : 1 ≤ t^(-(1/4:ℝ)) := FerrersGreen.rpow_ge_one ht0 (by linarith)
+    have hwt : t^(-(1/4:ℝ)) ≤ FerrersGreen.weight x := by
+      rw [FerrersGreen.weight_eq hx]
       exact le_mul_of_one_le_right (Real.rpow_nonneg ht0.le _)
-        (legPI_rpow_ge_one (by linarith [hx.2]) (by linarith [hx.1]))
-    calc ‖-legBdK (α+1) (-α) * ((Real.log t : ℝ) : ℂ) * regularizedGaussHGFun (α+1) (-α) 1 (t:ℂ) +
-          legBdZbH (α+1) (-α) (t:ℂ)‖
-        ≤ ‖legBdK (α+1) (-α)‖ * |Real.log t| * ‖regularizedGaussHGFun (α+1) (-α) 1 (t:ℂ)‖ +
-          ‖legBdZbH (α+1) (-α) (t:ℂ)‖ := by
+        (FerrersGreen.rpow_ge_one (by linarith [hx.2]) (by linarith [hx.1]))
+    calc ‖-BoundaryAsymptotics.zeroBalancedConst (α+1) (-α) * ((Real.log t : ℝ) : ℂ) *
+           regularizedGaussHGFun (α+1) (-α) 1 (t:ℂ) +
+          BoundaryAsymptotics.zeroBalancedAnalytic (α+1) (-α) (t:ℂ)‖
+        ≤ ‖BoundaryAsymptotics.zeroBalancedConst (α+1) (-α)‖ * |Real.log t| *
+            ‖regularizedGaussHGFun (α+1) (-α) 1 (t:ℂ)‖ +
+          ‖BoundaryAsymptotics.zeroBalancedAnalytic (α+1) (-α) (t:ℂ)‖ := by
           refine le_trans (norm_add_le _ _) ?_
           rw [norm_mul, norm_mul, norm_neg, Complex.norm_real, Real.norm_eq_abs]
       _ ≤ max MK 0 * (4 * t^(-(1/4:ℝ))) * max MF 0 + max MH 0 := by
@@ -224,32 +230,33 @@ theorem legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R →
           simp only [B]
           nlinarith [le_max_right MK 0, le_max_right MF 0, le_max_right MH 0,
             mul_nonneg (le_max_right MK 0) (le_max_right MF 0)]
-      _ ≤ (A + B) * legPIw x := by
+      _ ≤ (A + B) * FerrersGreen.weight x := by
           have := Real.rpow_nonneg ht0.le (-(1/4:ℝ))
           nlinarith
 
 /-- `λ ↦ 𝖯_λ(x)` is entire for `x > -1`. -/
-theorem legPIU_continuous_degree {x : ℝ} (hx : -1 < x) : Continuous fun α : ℂ =>
+theorem UniformBound.continuous_degree {x : ℝ} (hx : -1 < x) : Continuous fun α : ℂ =>
     ferrersP α 0 x := by
-  simp only [legPI_ferrersP_zero]
+  simp only [FerrersGreen.ferrersP_zero]
   exact (differentiable_regularizedGaussHG_comp (A := fun α : ℂ => α+1) (B := fun α : ℂ => -α)
     (C := fun _ => 1) (by fun_prop) (by fun_prop) (by fun_prop)
-        (legInt_half_mem_cutPlane hx)).continuous
+        (OrthogonalityIntegrals.half_mem_cutPlane hx)).continuous
 
 /-- Dominated convergence: `∫₋₁¹ 𝖯_ν 𝖯_λ → ∫₋₁¹ 𝖯_ν²` as `λ → ν`. -/
-theorem legPIU_tendsto_PP (ν : ℂ) :
+theorem UniformBound.tendsto_PP (ν : ℂ) :
     Tendsto (fun lam : ℂ => ∫ x : ℝ in -1..1, ferrersP ν 0 x * ferrersP lam 0 x) (𝓝 ν)
       (𝓝 (∫ x : ℝ in -1..1, ferrersP ν 0 x * ferrersP ν 0 x)) := by
-  obtain ⟨M, hM⟩ := legPIU_bound_P (‖ν‖ + 1)
-  have hI := (legInt_intervalIntegrable_rpow (r := -1/2) (Or.inl rfl)).const_mul (M*M/4^(-1/2:ℝ))
+  obtain ⟨M, hM⟩ := UniformBound.bound_P (‖ν‖ + 1)
+  have hI := (OrthogonalityIntegrals.intervalIntegrable_rpow (r := -1/2) (Or.inl rfl)).const_mul
+      (M*M/4^(-1/2:ℝ))
   refine intervalIntegral.tendsto_integral_filter_of_dominated_convergence
     (fun x => M*M/4^(-1/2:ℝ) * (1-x^2)^(-1/2:ℝ)) ?_ ?_ hI ?_
   · refine Eventually.of_forall fun lam => ?_
     refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_uIoc
     intro x hx
     rw [Set.uIoc_of_le (by norm_num)] at hx
-    exact ((legPI_continuousAt_ferrersP ν hx.1).mul
-      (legPI_continuousAt_ferrersP lam hx.1)).continuousWithinAt
+    exact ((FerrersGreen.continuousAt_ferrersP ν hx.1).mul
+      (FerrersGreen.continuousAt_ferrersP lam hx.1)).continuousWithinAt
   · have hb : ∀ᶠ lam in 𝓝 ν, ‖lam‖ ≤ ‖ν‖ + 1 := by
       filter_upwards [Metric.ball_mem_nhds ν one_pos] with lam hl
       rw [Metric.mem_ball, dist_eq_norm] at hl
@@ -261,32 +268,35 @@ theorem legPIU_tendsto_PP (ν : ℂ) :
     rw [Set.uIoc_of_le (by norm_num)] at hx
     have hx' : x ∈ Ioo (-1:ℝ) 1 := ⟨hx.1, lt_of_le_of_ne hx.2 hx1⟩
     have h0 : 0 ≤ 1 - x^2 := by nlinarith [hx'.1, hx'.2]
-    have hw : legPIw x * legPIw x = (1-x^2)^(-1/2:ℝ) / 4^(-1/2:ℝ) := by
-      rw [legPIw, ← Real.rpow_add' (by positivity) (by norm_num), Real.div_rpow h0 (by norm_num)]
+    have hw : FerrersGreen.weight x * FerrersGreen.weight x = (1-x^2)^(-1/2:ℝ) / 4^(-1/2:ℝ) := by
+      rw [FerrersGreen.weight, ← Real.rpow_add' (by positivity) (by norm_num),
+          Real.div_rpow h0 (by norm_num)]
       norm_num
     have h1 := hM ν (by linarith) x hx'
     have h2 := hM lam hl x hx'
     rw [norm_mul]
-    calc ‖ferrersP ν 0 x‖ * ‖ferrersP lam 0 x‖ ≤ (M * legPIw x) * (M * legPIw x) :=
+    calc ‖ferrersP ν 0 x‖ * ‖ferrersP lam 0 x‖ ≤ (M * FerrersGreen.weight x) *
+           (M * FerrersGreen.weight x) :=
           mul_le_mul h1 h2 (norm_nonneg _) (le_trans (norm_nonneg _) h1)
       _ = M*M/4^(-1/2:ℝ)*(1-x^2)^(-1/2:ℝ) := by rw [mul_mul_mul_comm, hw]; ring
   · refine Eventually.of_forall fun x hx => ?_
     rw [Set.uIoc_of_le (by norm_num)] at hx
-    exact tendsto_const_nhds.mul ((legPIU_continuous_degree hx.1).tendsto ν)
+    exact tendsto_const_nhds.mul ((UniformBound.continuous_degree hx.1).tendsto ν)
 
 /-- Dominated convergence: `∫₋₁¹ 𝖯_λ² → ∫₋₁¹ 𝖯_ν²` as `λ → ν`. -/
-theorem legPIU_tendsto_sq (ν : ℂ) :
+theorem UniformBound.tendsto_sq (ν : ℂ) :
     Tendsto (fun lam : ℂ => ∫ x : ℝ in -1..1, (ferrersP lam 0 x)^2) (𝓝 ν)
       (𝓝 (∫ x : ℝ in -1..1, (ferrersP ν 0 x)^2)) := by
-  obtain ⟨M, hM⟩ := legPIU_bound_P (‖ν‖ + 1)
-  have hI := (legInt_intervalIntegrable_rpow (r := -1/2) (Or.inl rfl)).const_mul (M*M/4^(-1/2:ℝ))
+  obtain ⟨M, hM⟩ := UniformBound.bound_P (‖ν‖ + 1)
+  have hI := (OrthogonalityIntegrals.intervalIntegrable_rpow (r := -1/2) (Or.inl rfl)).const_mul
+      (M*M/4^(-1/2:ℝ))
   refine intervalIntegral.tendsto_integral_filter_of_dominated_convergence
     (fun x => M*M/4^(-1/2:ℝ) * (1-x^2)^(-1/2:ℝ)) ?_ ?_ hI ?_
   · refine Eventually.of_forall fun lam => ?_
     refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_uIoc
     intro x hx
     rw [Set.uIoc_of_le (by norm_num)] at hx
-    exact ((legPI_continuousAt_ferrersP lam hx.1).pow 2).continuousWithinAt
+    exact ((FerrersGreen.continuousAt_ferrersP lam hx.1).pow 2).continuousWithinAt
   · have hb : ∀ᶠ lam in 𝓝 ν, ‖lam‖ ≤ ‖ν‖ + 1 := by
       filter_upwards [Metric.ball_mem_nhds ν one_pos] with lam hl
       rw [Metric.mem_ball, dist_eq_norm] at hl
@@ -298,30 +308,33 @@ theorem legPIU_tendsto_sq (ν : ℂ) :
     rw [Set.uIoc_of_le (by norm_num)] at hx
     have hx' : x ∈ Ioo (-1:ℝ) 1 := ⟨hx.1, lt_of_le_of_ne hx.2 hx1⟩
     have h0 : 0 ≤ 1 - x^2 := by nlinarith [hx'.1, hx'.2]
-    have hw : legPIw x * legPIw x = (1-x^2)^(-1/2:ℝ) / 4^(-1/2:ℝ) := by
-      rw [legPIw, ← Real.rpow_add' (by positivity) (by norm_num), Real.div_rpow h0 (by norm_num)]
+    have hw : FerrersGreen.weight x * FerrersGreen.weight x = (1-x^2)^(-1/2:ℝ) / 4^(-1/2:ℝ) := by
+      rw [FerrersGreen.weight, ← Real.rpow_add' (by positivity) (by norm_num),
+          Real.div_rpow h0 (by norm_num)]
       norm_num
     have h2 := hM lam hl x hx'
     rw [norm_pow, pow_two]
-    calc ‖ferrersP lam 0 x‖ * ‖ferrersP lam 0 x‖ ≤ (M * legPIw x) * (M * legPIw x) :=
+    calc ‖ferrersP lam 0 x‖ * ‖ferrersP lam 0 x‖ ≤ (M * FerrersGreen.weight x) *
+           (M * FerrersGreen.weight x) :=
           mul_le_mul h2 h2 (norm_nonneg _) (le_trans (norm_nonneg _) h2)
       _ = M*M/4^(-1/2:ℝ)*(1-x^2)^(-1/2:ℝ) := by rw [mul_mul_mul_comm, hw]; ring
   · refine Eventually.of_forall fun x hx => ?_
     rw [Set.uIoc_of_le (by norm_num)] at hx
-    exact ((legPIU_continuous_degree hx.1).tendsto ν).pow 2
+    exact ((UniformBound.continuous_degree hx.1).tendsto ν).pow 2
 
 /-- Uniform zero-balanced bound (DLMF 15.8.10 at `m = 0`):
 `‖𝐅(a,b;a+b;1-t)‖ ≤ C t^{-1/4}` for `‖a‖, ‖b‖ ≤ R`, `0 < t ≤ 1/2`. -/
-theorem legPIU_bound_zb (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ t : ℝ, 0 < t →
+theorem UniformBound.bound_zeroBalanced (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R →
+    ∀ t : ℝ, 0 < t →
     t ≤ 1/2 → ‖regularizedGaussHGFun a b (a+b) (1 - (t:ℂ))‖ ≤ C * t^(-(1/4:ℝ)) := by
   set R1 := |R| + 1
-  obtain ⟨MF, hMF⟩ := legPIU_bound_F R1
-  obtain ⟨MH, hMH⟩ := legPIU_bound_H R1
-  have cK : Continuous fun p : ℂ × ℂ => legBdK p.1 p.2 := by
-    unfold legBdK
+  obtain ⟨MF, hMF⟩ := UniformBound.bound_F R1
+  obtain ⟨MH, hMH⟩ := UniformBound.bound_H R1
+  have cK : Continuous fun p : ℂ × ℂ => BoundaryAsymptotics.zeroBalancedConst p.1 p.2 := by
+    unfold BoundaryAsymptotics.zeroBalancedConst
     exact (continuous_recip_Gamma.comp continuous_fst).mul
         (continuous_recip_Gamma.comp continuous_snd)
-  obtain ⟨MK, hMK⟩ := legPIU_bound_two cK R1
+  obtain ⟨MK, hMK⟩ := UniformBound.bound_pair cK R1
   refine ⟨4 * max MK 0 * max MF 0 + max MH 0, by positivity, fun a b ha hb t ht0 ht1 => ?_⟩
   have hR1 : R ≤ |R| := le_abs_self R
   have ha' : ‖a‖ ≤ R1 := by simp only [R1]; linarith
@@ -333,18 +346,20 @@ theorem legPIU_bound_zb (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a
     constructor <;> linarith
   have htn : ‖(1:ℂ) - (1 - (t:ℂ))‖ < 1 := by
     rw [sub_sub_cancel, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht0]; linarith
-  rw [legBd_zeroBalanced_eq _ _ hzn htn, sub_sub_cancel, ← Complex.ofReal_log ht0.le]
+  rw [BoundaryAsymptotics.zeroBalanced_eq _ _ hzn htn, sub_sub_cancel, ← Complex.ofReal_log ht0.le]
   have htn' : ‖(t:ℂ)‖ ≤ 1/2 := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht0]; exact ht1
   have hF := hMF _ _ _ _ ha' hb' hone htn'
   have hH := hMH _ _ _ ha' hb' htn'
   have hK := hMK _ _ ha' hb'
-  have hlog := legPI_abs_log_le ht0 (by linarith)
-  have hp : 1 ≤ t^(-(1/4:ℝ)) := legPI_rpow_ge_one ht0 (by linarith)
-  calc ‖-legBdK a b * ((Real.log t : ℝ) : ℂ) * regularizedGaussHGFun a b 1 (t:ℂ) +
-         legBdZbH a b (t:ℂ)‖
-      ≤ ‖legBdK a b‖ * |Real.log t| * ‖regularizedGaussHGFun a b 1 (t:ℂ)‖ +
-          ‖legBdZbH a b (t:ℂ)‖ := by
+  have hlog := FerrersGreen.abs_log_le ht0 (by linarith)
+  have hp : 1 ≤ t^(-(1/4:ℝ)) := FerrersGreen.rpow_ge_one ht0 (by linarith)
+  calc ‖-BoundaryAsymptotics.zeroBalancedConst a b * ((Real.log t : ℝ) : ℂ) *
+         regularizedGaussHGFun a b 1 (t:ℂ) +
+         BoundaryAsymptotics.zeroBalancedAnalytic a b (t:ℂ)‖
+      ≤ ‖BoundaryAsymptotics.zeroBalancedConst a b‖ * |Real.log t| *
+          ‖regularizedGaussHGFun a b 1 (t:ℂ)‖ +
+          ‖BoundaryAsymptotics.zeroBalancedAnalytic a b (t:ℂ)‖ := by
         refine le_trans (norm_add_le _ _) ?_
         rw [norm_mul, norm_mul, norm_neg, Complex.norm_real, Real.norm_eq_abs]
     _ ≤ max MK 0 * (4 * t^(-(1/4:ℝ))) * max MF 0 + max MH 0 := by
@@ -357,13 +372,13 @@ theorem legPIU_bound_zb (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a
           mul_nonneg (le_max_right MK 0) (le_max_right MF 0)]
 
 /-- `‖𝐅(a,b;a+b;x²)‖ ≤ M (1-x²)^{-1/4}` on `(-1,1)`, uniformly for `‖a‖, ‖b‖ ≤ R`. -/
-theorem legPIU_bound_sq (R : ℝ) : ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ x ∈ Ioo (-1:ℝ) 1,
-    ‖regularizedGaussHG a b (a+b) ((x:ℂ)^2)‖ ≤ M * legPIw x := by
-  obtain ⟨C, hC0, hC⟩ := legPIU_bound_zb R
-  obtain ⟨MF, hMF⟩ := legPIU_bound_F (2*|R| + 1)
+theorem UniformBound.bound_sq (R : ℝ) : ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ x ∈ Ioo (-1:ℝ) 1,
+    ‖regularizedGaussHG a b (a+b) ((x:ℂ)^2)‖ ≤ M * FerrersGreen.weight x := by
+  obtain ⟨C, hC0, hC⟩ := UniformBound.bound_zeroBalanced R
+  obtain ⟨MF, hMF⟩ := UniformBound.bound_F (2*|R| + 1)
   refine ⟨max MF 0 + C, fun a b ha hb x hx => ?_⟩
   have hR1 : R ≤ |R| := le_abs_self R
-  have hw1 := legPIw_one_le hx
+  have hw1 := FerrersGreen.weight_one_le hx
   have hx2 : x^2 < 1 := by nlinarith [hx.1, hx.2]
   have hsq : ((x:ℂ))^2 = ((x^2:ℝ):ℂ) := by push_cast; ring
   have hn : ‖((x:ℂ))^2‖ < 1 := by
@@ -377,32 +392,33 @@ theorem legPIU_bound_sq (R : ℝ) : ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ ≤ R �
         _ ≤ 2*|R|+1 := by linarith
     calc _ ≤ MF := hMF _ _ _ _ (by linarith [abs_nonneg R]) (by linarith [abs_nonneg R]) hab hn'
       _ ≤ max MF 0 + C := by linarith [le_max_left MF 0]
-      _ ≤ (max MF 0 + C) * legPIw x :=
+      _ ≤ (max MF 0 + C) * FerrersGreen.weight x :=
           le_mul_of_one_le_right (by linarith [le_max_right MF 0]) hw1
   · push Not at hx0
     set t : ℝ := 1 - x^2
     have ht0 : 0 < t := by simp only [t]; linarith
     have ht1 : t ≤ 1/2 := by simp only [t]; linarith
     rw [show ((x:ℂ))^2 = 1 - (t:ℂ) by simp only [t]; push_cast; ring]
-    have hwt : t^(-(1/4:ℝ)) ≤ legPIw x := by
-      rw [legPIw]
+    have hwt : t^(-(1/4:ℝ)) ≤ FerrersGreen.weight x := by
+      rw [FerrersGreen.weight]
       exact Real.rpow_le_rpow_of_nonpos (by positivity) (by simp only [t]; linarith) (by norm_num)
     calc _ ≤ C * t^(-(1/4:ℝ)) := hC a b ha hb t ht0 ht1
-      _ ≤ (max MF 0 + C) * legPIw x := by
+      _ ≤ (max MF 0 + C) * FerrersGreen.weight x := by
           have := Real.rpow_nonneg ht0.le (-(1/4:ℝ))
           nlinarith [le_max_right MF 0]
 
 /-- A function continuous on a compact set is bounded there. -/
-theorem legPIU_bound_on {f : ℂ → ℂ} {K : Set ℂ} (hK : IsCompact K) (hf : ContinuousOn f K) :
+theorem UniformBound.bound_of_isCompact {f : ℂ → ℂ} {K : Set ℂ} (hK : IsCompact K)
+    (hf : ContinuousOn f K) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ y ∈ K, ‖f y‖ ≤ B := by
   obtain ⟨B, hB⟩ := hK.exists_bound_of_continuousOn hf
   exact ⟨max B 0, le_max_right _ _, fun y hy => le_trans (hB y hy) (le_max_left _ _)⟩
 
 /-- `𝖰_λ(x) = O((1-x²)^{-1/4})` on `(-1,1)` uniformly for `λ` near a regular `ν`. -/
-theorem legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0 < r ∧ ∃ M : ℝ,
+theorem UniformBound.bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0 < r ∧ ∃ M : ℝ,
     ∀ lam : ℂ, ‖lam - ν‖ ≤ r → LegendreQRegular lam 0 ∧
-      ∀ x ∈ Ioo (-1:ℝ) 1, ‖ferrersQ lam 0 x‖ ≤ M * legPIw x := by
-  have hν1 := legHyp_nu hν
+      ∀ x ∈ Ioo (-1:ℝ) 1, ‖ferrersQ lam 0 x‖ ≤ M * FerrersGreen.weight x := by
+  have hν1 := DegreeDerivative.add_one_ne_neg_nat hν
   have o : IsOpen {lam : ℂ | (Gamma (lam+0+1))⁻¹ ≠ 0} :=
     isOpen_ne_fun (continuous_recip_Gamma.comp (by fun_prop)) continuous_const
   obtain ⟨ε, hε, hball⟩ := Metric.isOpen_iff.mp o ν (by simpa using inv_ne_zero (Gamma_ne_zero hν1))
@@ -410,21 +426,28 @@ theorem legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0
   have hr : 0 < r := by positivity
   set K := Metric.closedBall ν r
   have hK : IsCompact K := isCompact_closedBall _ _
-  have hreg : ∀ lam ∈ K, LegendreQRegular lam 0 := fun lam hl => legHyp_regular_of_recip (hball (by
+  have hreg : ∀ lam ∈ K, LegendreQRegular lam 0 := fun lam hl =>
+      DegreeDerivative.regular_of_recip (hball (by
     rw [Metric.mem_ball]; have := Metric.mem_closedBall.mp hl; simp only [r] at this; linarith))
-  obtain ⟨B1, hB10, hB1⟩ := legPIU_bound_on (f := fun lam : ℂ => Gamma ((lam+0+1)/2)) hK
+  obtain ⟨B1, hB10, hB1⟩ :=
+      UniformBound.bound_of_isCompact (f := fun lam : ℂ => Gamma ((lam+0+1)/2)) hK
     (fun lam hl => (continuousAt_Gamma_ferrersQ (hreg lam hl)).1.continuousWithinAt)
-  obtain ⟨B2, hB20, hB2⟩ := legPIU_bound_on (f := fun lam : ℂ => Gamma ((lam+0+2)/2)) hK
+  obtain ⟨B2, hB20, hB2⟩ :=
+      UniformBound.bound_of_isCompact (f := fun lam : ℂ => Gamma ((lam+0+2)/2)) hK
     (fun lam hl => (continuousAt_Gamma_ferrersQ (hreg lam hl)).2.continuousWithinAt)
-  obtain ⟨B3, hB30, hB3⟩ := legPIU_bound_on (f := fun lam : ℂ => (Gamma ((lam-0+2)/2))⁻¹) hK
+  obtain ⟨B3, hB30, hB3⟩ :=
+      UniformBound.bound_of_isCompact (f := fun lam : ℂ => (Gamma ((lam-0+2)/2))⁻¹) hK
     (continuous_recip_Gamma.comp (by fun_prop)).continuousOn
-  obtain ⟨B4, hB40, hB4⟩ := legPIU_bound_on (f := fun lam : ℂ => (Gamma ((lam-0+1)/2))⁻¹) hK
+  obtain ⟨B4, hB40, hB4⟩ :=
+      UniformBound.bound_of_isCompact (f := fun lam : ℂ => (Gamma ((lam-0+1)/2))⁻¹) hK
     (continuous_recip_Gamma.comp (by fun_prop)).continuousOn
-  obtain ⟨B5, hB50, hB5⟩ := legPIU_bound_on (f := fun lam : ℂ => sin ((lam+0)*π/2)) hK
+  obtain ⟨B5, hB50, hB5⟩ :=
+      UniformBound.bound_of_isCompact (f := fun lam : ℂ => sin ((lam+0)*π/2)) hK
     (by fun_prop)
-  obtain ⟨B6, hB60, hB6⟩ := legPIU_bound_on (f := fun lam : ℂ => cos ((lam+0)*π/2)) hK
+  obtain ⟨B6, hB60, hB6⟩ :=
+      UniformBound.bound_of_isCompact (f := fun lam : ℂ => cos ((lam+0)*π/2)) hK
     (by fun_prop)
-  obtain ⟨MS, hMS⟩ := legPIU_bound_sq (‖ν‖ + r + 2)
+  obtain ⟨MS, hMS⟩ := UniformBound.bound_sq (‖ν‖ + r + 2)
   set MS' := max MS 0
   refine ⟨r, hr, (π/2) * (B5*B1*B3*MS' + B6*B2*B4*MS'), fun lam hl => ?_⟩
   have hlK : lam ∈ K := Metric.mem_closedBall.mpr (by rw [dist_eq_norm]; exact hl)
@@ -433,11 +456,11 @@ theorem legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0
     calc ‖lam‖ = ‖ν + (lam - ν)‖ := by ring_nf
       _ ≤ ‖ν‖ + ‖lam - ν‖ := norm_add_le _ _
       _ ≤ _ := by linarith
-  have hw0 := legPIw_pos hx
+  have hw0 := FerrersGreen.weight_pos hx
   have hxa : ‖(x:ℂ)‖ ≤ 1 := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_le]; constructor <;> linarith [hx.1, hx.2]
   -- the two hypergeometric factors
-  have hE : ‖ferrersEven lam 0 x‖ ≤ MS' * legPIw x := by
+  have hE : ‖ferrersEven lam 0 x‖ ≤ MS' * FerrersGreen.weight x := by
     unfold ferrersEven
     rw [show -(lam+0)/2 = -lam/2 by ring, show (lam-0+1)/2 = (lam+1)/2 by ring, neg_zero, zero_div,
       cpow_zero, one_mul, show (1/2:ℂ) = -lam/2 + (lam+1)/2 by ring]
@@ -447,14 +470,15 @@ theorem legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0
     · calc ‖(lam+1)/2‖ ≤ ‖lam+1‖ := by rw [norm_div]; exact div_le_self (norm_nonneg _) (by simp)
         _ ≤ ‖lam‖ + 1 := by simpa using norm_add_le lam 1
         _ ≤ _ := by linarith
-  have hO : ‖ferrersOdd lam 0 x‖ ≤ MS' * legPIw x := by
+  have hO : ‖ferrersOdd lam 0 x‖ ≤ MS' * FerrersGreen.weight x := by
     unfold ferrersOdd
     rw [show (1-lam-0)/2 = (1-lam)/2 by ring, show (lam-0+2)/2 = (lam+2)/2 by ring,
                                                                                 neg_zero, zero_div,
       cpow_zero, one_mul, show (3/2:ℂ) = (1-lam)/2 + (lam+2)/2 by ring, norm_mul]
     have h := hMS ((1-lam)/2) ((lam+2)/2) ?_ ?_ x hx
-    · calc ‖(x:ℂ)‖ * _ ≤ 1 * (MS * legPIw x) := mul_le_mul hxa h (norm_nonneg _) zero_le_one
-        _ ≤ MS' * legPIw x := by rw [one_mul];
+    · calc ‖(x:ℂ)‖ * _ ≤ 1 * (MS * FerrersGreen.weight x) :=
+             mul_le_mul hxa h (norm_nonneg _) zero_le_one
+        _ ≤ MS' * FerrersGreen.weight x := by rw [one_mul];
                                  exact mul_le_mul_of_nonneg_right (le_max_left _ _) hw0.le
     · calc ‖(1-lam)/2‖ ≤ ‖1-lam‖ := by rw [norm_div]; exact div_le_self (norm_nonneg _) (by simp)
         _ ≤ 1 + ‖lam‖ := by simpa using norm_sub_le (1:ℂ) lam
@@ -471,7 +495,8 @@ theorem legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0
   have hMS0 : 0 ≤ MS' := le_max_right _ _
   calc π/2 * ‖-sin ((lam+0)*π/2)*Gamma ((lam+0+1)/2)*(Gamma ((lam-0+2)/2))⁻¹*ferrersEven lam 0 x +
         cos ((lam+0)*π/2)*Gamma ((lam+0+2)/2)*(Gamma ((lam-0+1)/2))⁻¹*ferrersOdd lam 0 x‖
-      ≤ π/2 * (B5*B1*B3*(MS' * legPIw x) + B6*B2*B4*(MS' * legPIw x)) := by
+      ≤ π/2 * (B5*B1*B3*(MS' * FerrersGreen.weight x) +
+          B6*B2*B4*(MS' * FerrersGreen.weight x)) := by
         gcongr
         refine le_trans (norm_add_le _ _) ?_
         rw [norm_mul, norm_mul, norm_mul, norm_neg, norm_mul, norm_mul, norm_mul]
@@ -479,14 +504,15 @@ theorem legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0
     _ = _ := by ring
 
 /-- Dominated convergence on `(-1,1)` with the weight `(1-x²)^{-1/4}`. -/
-theorem legPIU_tendsto_int {F : ℂ → ℝ → ℂ} {f : ℝ → ℂ} {ν : ℂ} {M N : ℝ}
-    (hf : ContinuousOn f (Ioo (-1) 1)) (hfN : ∀ x ∈ Ioo (-1:ℝ) 1, ‖f x‖ ≤ N * legPIw x)
+theorem UniformBound.tendsto_integral {F : ℂ → ℝ → ℂ} {f : ℝ → ℂ} {ν : ℂ} {M N : ℝ}
+    (hf : ContinuousOn f (Ioo (-1) 1)) (hfN : ∀ x ∈ Ioo (-1:ℝ) 1, ‖f x‖ ≤ N * FerrersGreen.weight x)
     (hFc : ∀ lam, ContinuousOn (F lam) (Ioo (-1) 1))
-    (hFM : ∀ᶠ lam in 𝓝 ν, ∀ x ∈ Ioo (-1:ℝ) 1, ‖F lam x‖ ≤ M * legPIw x)
+    (hFM : ∀ᶠ lam in 𝓝 ν, ∀ x ∈ Ioo (-1:ℝ) 1, ‖F lam x‖ ≤ M * FerrersGreen.weight x)
     (hlim : ∀ x ∈ Ioo (-1:ℝ) 1, ContinuousAt (fun lam => F lam x) ν) :
     Tendsto (fun lam => ∫ x in (-1:ℝ)..1, f x * F lam x) (𝓝 ν)
       (𝓝 (∫ x in (-1:ℝ)..1, f x * F ν x)) := by
-  have hI := (legInt_intervalIntegrable_rpow (r := -1/2) (Or.inl rfl)).const_mul (N*M/4^(-1/2:ℝ))
+  have hI := (OrthogonalityIntegrals.intervalIntegrable_rpow (r := -1/2) (Or.inl rfl)).const_mul
+      (N*M/4^(-1/2:ℝ))
   refine intervalIntegral.tendsto_integral_filter_of_dominated_convergence
     (fun x => N*M/4^(-1/2:ℝ) * (1-x^2)^(-1/2:ℝ)) ?_ ?_ hI ?_
   · refine Eventually.of_forall fun lam => ?_
@@ -497,13 +523,14 @@ theorem legPIU_tendsto_int {F : ℂ → ℝ → ℂ} {f : ℝ → ℂ} {ν : ℂ
     rw [Set.uIoc_of_le (by norm_num)] at hx
     have hx' : x ∈ Ioo (-1:ℝ) 1 := ⟨hx.1, lt_of_le_of_ne hx.2 hx1⟩
     have h0 : 0 ≤ 1 - x^2 := by nlinarith [hx'.1, hx'.2]
-    have hw : legPIw x * legPIw x = (1-x^2)^(-1/2:ℝ) / 4^(-1/2:ℝ) := by
-      rw [legPIw, ← Real.rpow_add' (by positivity) (by norm_num), Real.div_rpow h0 (by norm_num)]
+    have hw : FerrersGreen.weight x * FerrersGreen.weight x = (1-x^2)^(-1/2:ℝ) / 4^(-1/2:ℝ) := by
+      rw [FerrersGreen.weight, ← Real.rpow_add' (by positivity) (by norm_num),
+          Real.div_rpow h0 (by norm_num)]
       norm_num
     have h1 := hfN x hx'
     have h2 := hl x hx'
     rw [norm_mul]
-    calc ‖f x‖ * ‖F lam x‖ ≤ (N * legPIw x) * (M * legPIw x) :=
+    calc ‖f x‖ * ‖F lam x‖ ≤ (N * FerrersGreen.weight x) * (M * FerrersGreen.weight x) :=
           mul_le_mul h1 h2 (norm_nonneg _) (le_trans (norm_nonneg _) h1)
       _ = N*M/4^(-1/2:ℝ)*(1-x^2)^(-1/2:ℝ) := by rw [mul_mul_mul_comm, hw]; ring
   · filter_upwards [Measure.ae_ne volume (1:ℝ)] with x hx1 hx
@@ -523,9 +550,12 @@ theorem ferrers_product_integral_10 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1
     rw [show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(lam+ν+1)) by ring]
     exact neg_ne_zero.mpr (mul_ne_zero hd1 hd2)
   have hpi : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hB := legPI_boundary_const hν hlam
-  rw [legPI_integral_PP ν lam hc, show 2*sin (ν*π)*sin (lam*π)*(digamma (ν+1)-digamma (lam+1))+
-    π*sin ((lam-ν)*π) = (π:ℂ)^2 * (legPIK ν * legPIC lam - legPIK lam * legPIC ν) by
+  have hB := FerrersGreen.boundary_const hν hlam
+  rw [FerrersGreen.integral_PP ν lam hc,
+      show 2*sin (ν*π)*sin (lam*π)*(digamma (ν+1)-digamma (lam+1))+
+    π*sin ((lam-ν)*π) = (π:ℂ)^2 *
+        (FerrersGreen.logCoeff ν * FerrersGreen.constTerm lam - FerrersGreen.logCoeff lam *
+        FerrersGreen.constTerm ν) by
     rw [hB]; ring]
   field_simp
   ring
@@ -538,7 +568,7 @@ theorem ferrers_product_integral_11 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
         (ν+1))/(π^2*(ν+1/2)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have h2ν : 2*ν+1 ≠ 0 := fun h => hν (by linear_combination h/2)
-  have hν1 := legHyp_nu hr
+  have hν1 := DegreeDerivative.add_one_ne_neg_nat hr
   -- the off-diagonal formula near `ν`
   set N : ℂ → ℂ := fun lam =>
       2*sin (ν*π)*sin (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*sin ((lam-ν)*π)
@@ -570,7 +600,7 @@ theorem ferrers_product_integral_11 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
     have o : IsOpen {lam : ℂ | (Gamma (lam+0+1))⁻¹ ≠ 0} :=
       isOpen_ne_fun (continuous_recip_Gamma.comp (by fun_prop)) continuous_const
     filter_upwards [o.mem_nhds (by simpa using inv_ne_zero (Gamma_ne_zero hν1))] with lam h
-    exact legHyp_regular_of_recip h
+    exact DegreeDerivative.regular_of_recip h
   have hne : ∀ᶠ lam in 𝓝 ν, lam ≠ -ν-1 :=
     continuousAt_id.eventually_ne (show ν ≠ -ν-1 from fun h => h2ν (by linear_combination h))
   have heq : (fun lam : ℂ => ∫ x : ℝ in -1..1, ferrersP ν 0 x * ferrersP lam 0 x) =ᶠ[𝓝[≠] ν]
@@ -583,7 +613,7 @@ theorem ferrers_product_integral_11 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
     simp only [N]
     field_simp
   have hu := tendsto_nhds_unique
-      (((legPIU_tendsto_PP ν).mono_left nhdsWithin_le_nhds).congr' heq) hR
+      (((UniformBound.tendsto_PP ν).mono_left nhdsWithin_le_nhds).congr' heq) hR
   simp only [pow_two]
   rw [hu]
   have h3 : ν + 1/2 ≠ 0 := fun h => h2ν (by linear_combination 2*h)
@@ -605,9 +635,10 @@ theorem ferrers_product_integral_12 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1
   have hc : ν*(ν+1) - lam*(lam+1) ≠ 0 := by
     rw [show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(lam+ν+1)) by ring]
     exact neg_ne_zero.mpr (mul_ne_zero hd1 hd2)
-  rw [legPI_integral_QQ hν hlam hc, show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(lam+ν+1)) by ring,
+  rw [FerrersGreen.integral_QQ hν hlam hc, show ν*(ν+1) - lam*(lam+1) =
+      -((lam-ν)*(lam+ν+1)) by ring,
     show (lam-ν)*π = lam*π - ν*π by ring, sin_sub]
-  unfold legPIcneg legPIcpos
+  unfold FerrersGreen.constNeg FerrersGreen.constPos
   field_simp
   ring
 
@@ -619,15 +650,16 @@ theorem ferrers_product_integral_13 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
         (ν+1))/(2*(2*ν+1)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have h2ν : 2*ν+1 ≠ 0 := fun h => hν (by linear_combination h/2)
-  have hν1 := legHyp_nu hr
-  obtain ⟨r, hr0, M, hM⟩ := legPIU_bound_Q hr
+  have hν1 := DegreeDerivative.add_one_ne_neg_nat hr
+  obtain ⟨r, hr0, M, hM⟩ := UniformBound.bound_Q hr
   have hnear : ∀ᶠ lam in 𝓝 ν, ‖lam - ν‖ ≤ r := by
     filter_upwards [Metric.closedBall_mem_nhds ν hr0] with lam hl
     rwa [Metric.mem_closedBall, dist_eq_norm] at hl
-  have hlimI := legPIU_tendsto_int (F := fun lam x => ferrersQ lam 0 x) (f := ferrersQ ν 0)
-    (legPI_continuousOn_of_solution (legPI_ferrersQ_isFerrersSolution ν))
+  have hlimI := UniformBound.tendsto_integral (F := fun lam x => ferrersQ lam 0 x)
+      (f := ferrersQ ν 0)
+    (FerrersGreen.continuousOn_of_solution (FerrersGreen.ferrersQ_isFerrersSolution ν))
     ((hM ν (by simp; linarith)).2)
-    (fun lam => legPI_continuousOn_of_solution (legPI_ferrersQ_isFerrersSolution lam))
+    (fun lam => FerrersGreen.continuousOn_of_solution (FerrersGreen.ferrersQ_isFerrersSolution lam))
     (by filter_upwards [hnear] with lam hl using (hM lam hl).2)
     (fun x hx => continuousAt_ferrersQ_degree hr hx)
   set N : ℂ → ℂ := fun lam =>
@@ -680,8 +712,8 @@ theorem ferrers_product_integral_14 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (hl
     (hne : lam ≠ ν) :
     (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersQ lam 0 x)=(2*sin (ν*π)*cos
         (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*cos ((lam-ν)*π)-π)/(π*(lam-ν)*(lam+ν+1)) := by
-  have hrν := legPI_regular_of_re_pos hν
-  have hrl := legPI_regular_of_re_pos hlam
+  have hrν := FerrersGreen.regular_of_re_pos hν
+  have hrl := FerrersGreen.regular_of_re_pos hlam
   have hd1 : lam - ν ≠ 0 := sub_ne_zero.mpr hne
   have hd2 : lam + ν + 1 ≠ 0 := fun h => by
     have := congrArg Complex.re h; simp at this; linarith
@@ -689,12 +721,13 @@ theorem ferrers_product_integral_14 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (hl
     rw [show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(lam+ν+1)) by ring]
     exact neg_ne_zero.mpr (mul_ne_zero hd1 hd2)
   have hpi : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hK : legBdK (ν+1) (-ν) = -sin (ν*π)/π := by
-    rw [eq_div_iff hpi, mul_comm, legPI_K_eq ν, mul_comm]
-  rw [legPI_integral_PQ hrl hc, show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(lam+ν+1)) by ring,
+  have hK : BoundaryAsymptotics.zeroBalancedConst (ν+1) (-ν) = -sin (ν*π)/π := by
+    rw [eq_div_iff hpi, mul_comm, FerrersGreen.logCoeff_eq ν, mul_comm]
+  rw [FerrersGreen.integral_PQ hrl hc, show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(lam+ν+1)) by ring,
     show (lam-ν)*π = lam*π - ν*π by ring, cos_sub]
-  unfold legPIcneg legPIcpos legPIC legPIK
-  rw [legPI_K'_eq (legHyp_nu hrν), hK, show (π:ℂ)*ν = ν*π by ring]
+  unfold FerrersGreen.constNeg FerrersGreen.constPos FerrersGreen.constTerm FerrersGreen.logCoeff
+  rw [FerrersGreen.logCoeffDeriv_eq (DegreeDerivative.add_one_ne_neg_nat hrν), hK,
+      show (π:ℂ)*ν = ν*π by ring]
   field_simp
   ring
 
@@ -704,18 +737,19 @@ theorem ferrers_product_integral_15 (ν : ℂ) (hν : 0 < ν.re) :
     (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersQ ν 0 x)=-sin (2*ν*π)*deriv digamma
         (ν+1)/(π*(2*ν+1)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hr := legPI_regular_of_re_pos hν
+  have hr := FerrersGreen.regular_of_re_pos hν
   have h2ν : 2*ν+1 ≠ 0 := fun h => by
     have := congrArg Complex.re h; simp at this; linarith
-  have hν1 := legHyp_nu hr
-  obtain ⟨r, hr0, M, hM⟩ := legPIU_bound_Q hr
-  obtain ⟨MP, hMP⟩ := legPIU_bound_P ‖ν‖
+  have hν1 := DegreeDerivative.add_one_ne_neg_nat hr
+  obtain ⟨r, hr0, M, hM⟩ := UniformBound.bound_Q hr
+  obtain ⟨MP, hMP⟩ := UniformBound.bound_P ‖ν‖
   have hnear : ∀ᶠ lam in 𝓝 ν, ‖lam - ν‖ ≤ r := by
     filter_upwards [Metric.closedBall_mem_nhds ν hr0] with lam hl
     rwa [Metric.mem_closedBall, dist_eq_norm] at hl
-  have hlimI := legPIU_tendsto_int (F := fun lam x => ferrersQ lam 0 x) (f := ferrersP ν 0)
-    (legPI_continuousOn_ferrersP ν) (hMP ν le_rfl)
-    (fun lam => legPI_continuousOn_of_solution (legPI_ferrersQ_isFerrersSolution lam))
+  have hlimI := UniformBound.tendsto_integral (F := fun lam x => ferrersQ lam 0 x)
+      (f := ferrersP ν 0)
+    (FerrersGreen.continuousOn_ferrersP ν) (hMP ν le_rfl)
+    (fun lam => FerrersGreen.continuousOn_of_solution (FerrersGreen.ferrersQ_isFerrersSolution lam))
     (by filter_upwards [hnear] with lam hl using (hM lam hl).2)
     (fun x hx => continuousAt_ferrersQ_degree hr hx)
   set N : ℂ → ℂ := fun lam =>
@@ -760,7 +794,7 @@ theorem ferrers_product_integral_15 (ν : ℂ) (hν : 0 < ν.re) :
   ring
 
 /-- Green's identity for two Legendre solutions of the same order `μ`. -/
-theorem legPI_green_mu {ν lam μ : ℂ} {f g : ℝ → ℂ} (hf : IsFerrersSolution ν μ f)
+theorem FerrersGreen.green_mu {ν lam μ : ℂ} {f g : ℝ → ℂ} (hf : IsFerrersSolution ν μ f)
     (hg : IsFerrersSolution lam μ g) {y : ℝ} (hy : y ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun y : ℝ => (1-(y:ℂ)^2)*(f y*deriv g y-g y*deriv f y))
       ((ν*(ν+1) - lam*(lam+1)) * (f y * g y)) y := by
@@ -775,7 +809,7 @@ theorem legPI_green_mu {ν lam μ : ℂ} {f g : ℝ → ℂ} (hf : IsFerrersSolu
 
 /-- Green's identity on `[-1,1]` for two solutions of the same order, in terms of the limits of a
 function `B` equal to the boundary form `(1-x²)(f g' - g f')` on `(-1,1)`. -/
-theorem legPI_integral_green_B {f g B : ℝ → ℂ} {ν lam μ Bm Bp : ℂ}
+theorem FerrersGreen.integral_green_B {f g B : ℝ → ℂ} {ν lam μ Bm Bp : ℂ}
     (hf : IsFerrersSolution ν μ f) (hg : IsFerrersSolution lam μ g)
     (hB : ∀ x ∈ Ioo (-1:ℝ) 1, (1-(x:ℂ)^2)*(f x*deriv g x - g x*deriv f x) = B x)
     (hint : IntervalIntegrable (fun x => f x * g x) volume (-1) 1)
@@ -784,7 +818,7 @@ theorem legPI_integral_green_B {f g B : ℝ → ℂ} {ν lam μ Bm Bp : ℂ}
     (∫ x : ℝ in -1..1, f x * g x) = (Bp - Bm) / (ν*(ν+1) - lam*(lam+1)) := by
   set F : ℝ → ℂ := fun y => (1-(y:ℂ)^2)*(f y*deriv g y - g y*deriv f y) with hF
   have hd : ∀ y ∈ Ioo (-1:ℝ) 1, HasDerivAt F ((ν*(ν+1) - lam*(lam+1)) * (f y * g y)) y :=
-    fun y hy => legPI_green_mu hf hg hy
+    fun y hy => FerrersGreen.green_mu hf hg hy
   have hint' := hint.const_mul (ν*(ν+1) - lam*(lam+1))
   have ha := hm.congr' (by
     filter_upwards [Ioo_mem_nhdsGT (show (-1:ℝ) < 1 by norm_num)] with y hy using (hB y hy).symm)
@@ -795,12 +829,13 @@ theorem legPI_integral_green_B {f g B : ℝ → ℂ} {ν lam μ Bm Bp : ℂ}
   rw [eq_div_iff hc, ← hI]; ring
 
 /-- A solution of the associated Legendre equation is continuous on `(-1,1)`. -/
-theorem legPI_continuousOn_of_solution' {α μ : ℂ} {f : ℝ → ℂ} (hf : IsFerrersSolution α μ f) :
+theorem FerrersGreen.continuousOn_of_solution' {α μ : ℂ} {f : ℝ → ℂ}
+    (hf : IsFerrersSolution α μ f) :
     ContinuousOn f (Ioo (-1) 1) :=
   fun y hy => (hf y hy).1.continuousAt.continuousWithinAt
 
 /-- `(k+1)_j · k! = (k+j)!`. -/
-theorem legPI_poch_nat (k j : ℕ) : poch ((k:ℂ)+1) j * (k.factorial : ℂ) =
+theorem FerrersGreen.poch_nat (k j : ℕ) : poch ((k:ℂ)+1) j * (k.factorial : ℂ) =
     ((k+j).factorial : ℂ) := by
   induction j with
   | zero => simp [poch_zero]
@@ -809,11 +844,11 @@ theorem legPI_poch_nat (k j : ℕ) : poch ((k:ℂ)+1) j * (k.factorial : ℂ) =
     push_cast; ring
 
 /-- `𝖯^m_k 𝖰^m_j → (k+m)!/((k-m)! 2m)` as `x → 1⁻`, for `1 ≤ m ≤ k`. -/
-theorem legPI_tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
+theorem FerrersGreen.tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
     Tendsto (fun x : ℝ => ferrersP k m x * ferrersQ j m x) (𝓝[<] (1:ℝ))
       (𝓝 (((k+m).factorial : ℂ) / ((k-m).factorial * (2*m)))) := by
   have hp : poch ((k:ℂ)-m+1) (2*m) ≠ 0 := by
-    have := legPI_poch_nat (k-m) (2*m)
+    have := FerrersGreen.poch_nat (k-m) (2*m)
     rw [show ((k-m:ℕ):ℂ) = (k:ℂ) - m by push_cast [hk]; ring] at this
     intro h; rw [h, zero_mul] at this
     exact (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)) this.symm
@@ -848,7 +883,7 @@ theorem legPI_tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
   have h5 := (h3.congr_right h4).symm.tendsto_nhds (tendsto_const_nhds (x := c))
   convert h5 using 2
   obtain ⟨m', rfl⟩ : ∃ m' : ℕ, m = m' + 1 := ⟨m - 1, by omega⟩
-  have hpn := legPI_poch_nat (k-(m'+1)) (2*(m'+1))
+  have hpn := FerrersGreen.poch_nat (k-(m'+1)) (2*(m'+1))
   rw [show ((k-(m'+1):ℕ):ℂ) = (k:ℂ) - ((m'+1:ℕ):ℂ) by push_cast [hk]; ring,
     show k-(m'+1)+2*(m'+1) = k+(m'+1) by omega] at hpn
   have hcos : cos (((m'+1:ℕ):ℂ)*π) = (-1)^(m'+1) := by
@@ -867,10 +902,11 @@ theorem legPI_tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
   linear_combination (-poch ((k:ℂ)-((m':ℂ)+1)+1) (2*(m'+1))) * hsq
 
 /-- `𝖯^m_k 𝖰^m_j → (-1)^{k+j+1} (k+m)!/((k-m)! 2m)` as `x → -1⁺`, for `1 ≤ m ≤ k`. -/
-theorem legPI_tendsto_PQ_neg_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
+theorem FerrersGreen.tendsto_PQ_neg_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
     Tendsto (fun x : ℝ => ferrersP k m x * ferrersQ j m x) (𝓝[>] (-1:ℝ))
       (𝓝 ((-1)^(k+j+1) * (((k+m).factorial : ℂ) / ((k-m).factorial * (2*m))))) := by
-  have h := ((legPI_tendsto_PQ_one (j := j) hm hk).comp legPI_tendsto_neg_left).const_mul
+  have h := ((FerrersGreen.tendsto_PQ_one (j := j) hm hk).comp
+      FerrersGreen.tendsto_neg_left).const_mul
     ((-1:ℂ)^(k+j+1))
   refine h.congr' ?_
   filter_upwards [Ioo_mem_nhdsGT (show (-1:ℝ) < 1 by norm_num)] with x hx
@@ -887,18 +923,20 @@ theorem legPI_tendsto_PQ_neg_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
   linear_combination -(ferrersP (k:ℂ) (m:ℂ) (-x) * ferrersQ (j:ℂ) (m:ℂ) (-x)) * this
 
 /-- A function continuous on `(-1,1)` with finite limits at both ends is integrable on `[-1,1]`. -/
-theorem legPI_intervalIntegrable_of_tendsto {h : ℝ → ℂ} (hc : ContinuousOn h (Ioo (-1) 1)) {a b : ℂ}
+theorem FerrersGreen.intervalIntegrable_of_tendsto {h : ℝ → ℂ}
+    (hc : ContinuousOn h (Ioo (-1) 1)) {a b : ℂ}
     (ha : Tendsto h (𝓝[>] (-1:ℝ)) (𝓝 a)) (hb : Tendsto h (𝓝[<] (1:ℝ)) (𝓝 b)) :
     IntervalIntegrable h volume (-1) 1 := by
-  obtain ⟨M, hM⟩ := legPI_bound hc ((ha.isBigO_one ℝ).trans legPI_one_isBigO_left)
-    ((hb.isBigO_one ℝ).trans legPI_one_isBigO_right)
-  have h1 : ∀ x ∈ Ioo (-1:ℝ) 1, ‖(fun _ : ℝ => (1:ℂ)) x‖ ≤ 1 * legPIw x := fun x hx => by
-    simp only [norm_one, one_mul]; exact legPIw_one_le hx
-  have := legPI_intervalIntegrable_mul hc continuousOn_const hM h1
+  obtain ⟨M, hM⟩ := FerrersGreen.bound hc ((ha.isBigO_one ℝ).trans FerrersGreen.one_isBigO_left)
+    ((hb.isBigO_one ℝ).trans FerrersGreen.one_isBigO_right)
+  have h1 : ∀ x ∈ Ioo (-1:ℝ) 1, ‖(fun _ : ℝ => (1:ℂ)) x‖ ≤ 1 *
+      FerrersGreen.weight x := fun x hx => by
+    simp only [norm_one, one_mul]; exact FerrersGreen.weight_one_le hx
+  have := FerrersGreen.intervalIntegrable_mul hc continuousOn_const hM h1
   simpa using this
 
 /-- DLMF 14.17.16 for positive order. -/
-theorem legPI_PQ_nat_pos (l m n : ℕ) (hm : 0 < m) (h : l ≠ n) (hl : m ≤ l) :
+theorem FerrersGreen.PQ_nat_pos (l m n : ℕ) (hm : 0 < m) (h : l ≠ n) (hl : m ≤ l) :
     (∫ x : ℝ in -1..1, ferrersP l m x*ferrersQ n m x) =
       (1-(-1)^(l+n))*((l+m).factorial:ℂ)/(((l:ℂ)-n)*(l+n+1:ℂ)*(l-m).factorial) := by
   have hreg : ∀ j : ℕ, LegendreQRegular (j:ℂ) (m:ℂ) := fun j n hn => by
@@ -925,12 +963,12 @@ theorem legPI_PQ_nat_pos (l m n : ℕ) (hm : 0 < m) (h : l ≠ n) (hl : m ≤ l)
     have := (continuous_ofReal.tendsto (-1:ℝ)).mono_left (nhdsWithin_le_nhds (s := Ioi (-1:ℝ)))
     simpa using this
   have hl1 : m ≤ l+1 := by omega
-  have p1 := legPI_tendsto_PQ_one (j := n+1) hm hl
-  have p2 := legPI_tendsto_PQ_one (j := n) hm hl
-  have p3 := legPI_tendsto_PQ_one (j := n) hm hl1
-  have q1 := legPI_tendsto_PQ_neg_one (j := n+1) hm hl
-  have q2 := legPI_tendsto_PQ_neg_one (j := n) hm hl
-  have q3 := legPI_tendsto_PQ_neg_one (j := n) hm hl1
+  have p1 := FerrersGreen.tendsto_PQ_one (j := n+1) hm hl
+  have p2 := FerrersGreen.tendsto_PQ_one (j := n) hm hl
+  have p3 := FerrersGreen.tendsto_PQ_one (j := n) hm hl1
+  have q1 := FerrersGreen.tendsto_PQ_neg_one (j := n+1) hm hl
+  have q2 := FerrersGreen.tendsto_PQ_neg_one (j := n) hm hl
+  have q3 := FerrersGreen.tendsto_PQ_neg_one (j := n) hm hl1
   have hp := ((((tendsto_const_nhds (x := (m-n-1:ℂ))).mul p1).add
     (((tendsto_const_nhds (x := (n+1:ℂ))).mul hx1).mul p2)).sub
     ((tendsto_const_nhds (x := (m-l-1:ℂ))).mul p3)).sub
@@ -940,14 +978,14 @@ theorem legPI_PQ_nat_pos (l m n : ℕ) (hm : 0 < m) (h : l ≠ n) (hl : m ≤ l)
     ((tendsto_const_nhds (x := (m-l-1:ℂ))).mul q3)).sub
     (((tendsto_const_nhds (x := (l+1:ℂ))).mul hxm).mul q2)
   have hcont : ContinuousOn (fun x => ferrersP l m x * ferrersQ n m x) (Ioo (-1) 1) :=
-    (legPI_continuousOn_of_solution' (ferrersP_isFerrersSolution _ _)).mul
-      (legPI_continuousOn_of_solution' (ferrersQ_isFerrersSolution _ _))
-  have hint := legPI_intervalIntegrable_of_tendsto hcont q2 p2
+    (FerrersGreen.continuousOn_of_solution' (ferrersP_isFerrersSolution _ _)).mul
+      (FerrersGreen.continuousOn_of_solution' (ferrersQ_isFerrersSolution _ _))
+  have hint := FerrersGreen.intervalIntegrable_of_tendsto hcont q2 p2
   have hc : (l:ℂ)*(l+1) - n*(n+1) ≠ 0 := by
     rw [show (l:ℂ)*(l+1) - n*(n+1) = ((l:ℂ)-n)*(l+n+1) by ring]
     refine mul_ne_zero (sub_ne_zero.mpr (by exact_mod_cast h)) ?_
     exact_mod_cast (Nat.succ_ne_zero (l+n))
-  rw [legPI_integral_green_B (ferrersP_isFerrersSolution _ _)
+  rw [FerrersGreen.integral_green_B (ferrersP_isFerrersSolution _ _)
     (ferrersQ_isFerrersSolution _ _) hBeq hint hq hp hc]
   have e1 : ((-1:ℂ))^(l+(n+1)+1) = (-1)^(l+n) := by
     rw [show l+(n+1)+1 = (l+n)+2 by ring, pow_add]; norm_num
@@ -987,16 +1025,18 @@ theorem ferrersPQ_nat_integral (l m n : ℕ) (h : l ≠ n) (hl : m ≤ l) :
       rw [show (l:ℂ)*(l+1) - n*(n+1) = (l-n)*(l+n+1) by ring]; exact mul_ne_zero hd2 hd3
     have hG : (Gamma (-(l:ℂ)))⁻¹ = 0 := by
       rw [inv_eq_zero]; exact Complex.Gamma_neg_nat_eq_zero l
-    have hK : legPIK (l:ℂ) = 0 := by unfold legPIK legBdK; rw [hG, mul_zero]
-    have hC : legPIC (l:ℂ) = (-1)^l := by
-      unfold legPIC; rw [legPI_K'_eq_all, hG]; unfold legBdK; rw [hG]
+    have hK : FerrersGreen.logCoeff (l:ℂ) = 0 := by
+        unfold FerrersGreen.logCoeff BoundaryAsymptotics.zeroBalancedConst; rw [hG, mul_zero]
+    have hC : FerrersGreen.constTerm (l:ℂ) = (-1)^l := by
+      unfold FerrersGreen.constTerm; rw [FerrersGreen.logCoeffDeriv_eq_all, hG];
+          unfold BoundaryAsymptotics.zeroBalancedConst; rw [hG]
       simp only [mul_zero, add_zero, sub_zero]
       rw [mul_comm, show ((l:ℂ)*π) = ((l*π : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
         Real.cos_nat_mul_pi]; push_cast; ring
     have hcos : cos ((n:ℂ)*π) = (-1)^n := by
       rw [show ((n:ℂ)*π) = ((n*π : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
         Real.cos_nat_mul_pi]; push_cast; ring
-    have e := legPI_integral_PQ (ν := (l:ℂ)) hreg hc
+    have e := FerrersGreen.integral_PQ (ν := (l:ℂ)) hreg hc
     simp only [Nat.cast_zero] at e ⊢
     rw [e, hK, hC, hcos]
     simp only [add_zero, Nat.sub_zero]
@@ -1004,7 +1044,7 @@ theorem ferrersPQ_nat_integral (l m n : ℕ) (h : l ≠ n) (hl : m ≤ l) :
     rw [pow_add]
     field_simp
     ring
-  · exact legPI_PQ_nat_pos l m n hm h hl
+  · exact FerrersGreen.PQ_nat_pos l m n hm h hl
 
 /-- DLMF 14.17.17: for positive integers `l, m, n` such that either `|m-n| < l < m+n` or `l+m+n` is
 even, `∫₀^π 𝖰_l(cos θ) 𝖯_m(cos θ) 𝖯_n(cos θ) sin θ dθ = 0`. -/

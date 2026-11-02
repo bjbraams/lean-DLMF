@@ -148,7 +148,7 @@ theorem exists_solution_of_comparison {a : ℝ} {𝒲 : 𝕜} {Q ψ y₁ y₁' y
             rw [norm_div, RCLike.norm_ofReal, abs_of_pos (hΦ t ht'), div_le_one (hΦ t ht')]
             exact hy₁Φ t ht'
         _ ≤ Real.exp (R c) := by
-            have := Real.exp_le_exp.2 (lg_tail_anti hρ0 hρi hc (le_of_lt ht))
+            have := Real.exp_le_exp.2 (tail_anti hρ0 hρi hc (le_of_lt ht))
             linarith
   have hJhm : AEStronglyMeasurable (fun t => y₁ t / (Φ t : 𝕜) + h t) (volume.restrict (Ioi a)) :=
     (hJc.aestronglyMeasurable measurableSet_Ioi).add hhm
@@ -186,13 +186,13 @@ theorem exists_solution_of_comparison {a : ℝ} {𝒲 : 𝕜} {Q ψ y₁ y₁' y
     field_simp
     ring
   have hηc : ContinuousOn η (Ioi a) :=
-    (continuousOn_const.mul ((hy₁c.mul (lg_continuousOn_integral_Ioi hI₁i)).sub
-      (hy₂c.mul (lg_continuousOn_integral_Ioi hI₂i)))).congr fun x hx => hrep x hx
+    (continuousOn_const.mul ((hy₁c.mul (continuousOn_integral_Ioi hI₁i)).sub
+      (hy₂c.mul (continuousOn_integral_Ioi hI₂i)))).congr fun x hx => hrep x hx
   have hI₁d : ∀ x, a < x → HasDerivAt I₁ (-(y₂ x * ψ x * (y₁ x + η x))) x := fun x hx =>
-    lg_hasDerivAt_integral_Ioi hI₁i hx ((hy₂c.mul hψc).mul (hy₁c.add hηc) |>.continuousAt
+    hasDerivAt_integral_Ioi hI₁i hx ((hy₂c.mul hψc).mul (hy₁c.add hηc) |>.continuousAt
       (Ioi_mem_nhds hx))
   have hI₂d : ∀ x, a < x → HasDerivAt I₂ (-(y₁ x * ψ x * (y₁ x + η x))) x := fun x hx =>
-    lg_hasDerivAt_integral_Ioi hI₂i hx ((hy₁c.mul hψc).mul (hy₁c.add hηc) |>.continuousAt
+    hasDerivAt_integral_Ioi hI₂i hx ((hy₁c.mul hψc).mul (hy₁c.add hηc) |>.continuousAt
       (Ioi_mem_nhds hx))
   obtain ⟨η', hη'def⟩ : ∃ η' : ℝ → 𝕜, η' = fun x => 𝒲⁻¹ * (y₁' x * I₁ x - y₂' x * I₂ x) :=
     ⟨_, rfl⟩
@@ -219,7 +219,7 @@ theorem exists_solution_of_comparison {a : ℝ} {𝒲 : 𝕜} {Q ψ y₁ y₁' y
       (ψ x * (y₁ x + 𝒲⁻¹ * (y₁ x * I₁ x - y₂ x * I₂ x))) * hinv
   · simp only [hηdef, norm_mul, RCLike.norm_ofReal, abs_of_pos (hΦ x hx)]
     exact mul_le_mul_of_nonneg_left (hhb x hx) (hΦ x hx).le
-  · have hexpt := lg_integral_Ioi_mul_exp_tail hρc hρ0 hρi hx
+  · have hexpt := integral_Ioi_mul_exp_tail hρc hρ0 hρi hx
     have hη'x : η' x = ∫ t in Ioi x, 𝒲⁻¹ * ((y₁' x * y₂ t - y₂' x * y₁ t) * ψ t *
         (y₁ t + η t)) := by
       rw [hη'def, integral_const_mul]

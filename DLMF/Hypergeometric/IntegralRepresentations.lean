@@ -142,7 +142,7 @@ theorem barnes_integral {a b c : ℂ} {x σ : ℝ} (hx : -1 < x) (hx0 : x < 0)
   barnes_integral_all hx hx0 ha hb hσ
 
 /-- `Γ(x+n) = (x)ₙ Γ(x)` for real `x > 0`. -/
-theorem hypSV_real_Gamma_add_nat {x : ℝ} (hx : 0 < x) (n : ℕ) :
+theorem ProductIntegral.real_Gamma_add_nat {x : ℝ} (hx : 0 < x) (n : ℕ) :
     Real.Gamma (n + x) = (ascPochhammer ℝ n).eval x * Real.Gamma x := by
   induction n with
   | zero => simp
@@ -224,7 +224,7 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
       push_cast; ring
     refine (h'.mul_left (Real.Gamma τ)).congr fun n => ?_
     simp only [he]
-    rw [hypSV_real_Gamma_add_nat hτ0]
+    rw [ProductIntegral.real_Gamma_add_nat hτ0]
     ring
   set g : ℝ → ℝ := fun y => ‖Gamma (a' + I * y) * Gamma (c' - I * y)‖ with hg
   have hg_int : Integrable g :=
@@ -233,10 +233,11 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
   have hbd (n : ℕ) (y : ℝ) : ‖F n y‖ ≤ bound n y := by
     simp only [hF, hbound, he, hg, norm_mul, norm_div, norm_pow, Complex.norm_natCast]
     have h1 : ‖Gamma (b' + I * y)‖ ≤ Real.Gamma b'.re := by
-      have := DLMF.Gamma.RamanujanAux.norm_Gamma_le_Gamma_re (z := b' + I * y) (by simpa using hb'0)
+      have := DLMF.Gamma.RamanujanIntegral.norm_Gamma_le_Gamma_re (z := b' + I * y)
+          (by simpa using hb'0)
       simpa using this
     have h2 : ‖Gamma (((n - σ : ℝ) : ℂ) - I * y)‖ ≤ Real.Gamma (n + τ) := by
-      have := DLMF.Gamma.RamanujanAux.norm_Gamma_le_Gamma_re (z := ((n - σ : ℝ) : ℂ) - I * y)
+      have := DLMF.Gamma.RamanujanIntegral.norm_Gamma_le_Gamma_re (z := ((n - σ : ℝ) : ℂ) - I * y)
         (by simpa using hτn n)
       simpa [hτ, sub_eq_add_neg] using this
     have h0 : 0 ≤ ‖z‖ ^ n / (n ! : ℝ) := by positivity
@@ -397,13 +398,13 @@ theorem fractional_integral {a b c d z : ℂ} (hd : 0 < d.re) (hcd : 0 < (c - d)
       ring
     · ring
 
-section hypSVProduct
+section ProductIntegral
 
 open Finset
 open scoped Nat
 
 /-- A summable double series is the sum of its antidiagonal sums. -/
-theorem hypSV_hasSum_antidiag {g : ℕ × ℕ → ℂ} (h : Summable g) :
+theorem ProductIntegral.hasSum_antidiagonal {g : ℕ × ℕ → ℂ} (h : Summable g) :
     HasSum (fun N => ∑ p ∈ antidiagonal N, g p) (∑' p, g p) := by
   set e := Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd (A := ℕ)
   have h' : HasSum (g ∘ e) (∑' p, g p) := by
@@ -414,7 +415,7 @@ theorem hypSV_hasSum_antidiag {g : ℕ × ℕ → ℂ} (h : Summable g) :
   exact this
 
 /-- A nonnegative double series with summable antidiagonal sums is summable. -/
-theorem hypSV_summable_of_antidiag {G : ℕ × ℕ → ℝ} (h0 : ∀ p, 0 ≤ G p)
+theorem ProductIntegral.summable_of_antidiagonal {G : ℕ × ℕ → ℝ} (h0 : ∀ p, 0 ≤ G p)
     (h : Summable fun N => ∑ p ∈ antidiagonal N, G p) : Summable G := by
   set e := Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd (A := ℕ)
   rw [← e.summable_iff]
@@ -424,7 +425,7 @@ theorem hypSV_summable_of_antidiag {G : ℕ × ℕ → ℝ} (h0 : ∀ p, 0 ≤ G
   exact (Finset.sum_coe_sort (antidiagonal N) G).symm
 
 /-- Real Chu–Vandermonde in factorial form. -/
-theorem hypSV_real_vandermonde (u v : ℝ) (N : ℕ) :
+theorem ProductIntegral.real_vandermonde (u v : ℝ) (N : ℕ) :
     ∑ p ∈ antidiagonal N, (ascPochhammer ℝ p.1).eval u / p.1 ! *
       ((ascPochhammer ℝ p.2).eval v / p.2 !) = (ascPochhammer ℝ N).eval (u + v) / N ! := by
   have h := poch_add_eq_sum (u : ℂ) v N
@@ -445,7 +446,7 @@ theorem hypSV_real_vandermonde (u v : ℝ) (N : ℕ) :
   field_simp
 
 /-- `Re c` controls the Pochhammer symbol from below. -/
-theorem hypSV_norm_poch_ge {c : ℂ} (hc : 0 < c.re) (n : ℕ) :
+theorem ProductIntegral.norm_poch_ge {c : ℂ} (hc : 0 < c.re) (n : ℕ) :
     (ascPochhammer ℝ n).eval c.re ≤ ‖poch c n‖ := by
   induction n with
   | zero => simp [poch_zero]
@@ -457,7 +458,7 @@ theorem hypSV_norm_poch_ge {c : ℂ} (hc : 0 < c.re) (n : ℕ) :
     exact mul_le_mul ih h1 (by positivity) (norm_nonneg _)
 
 /-- `‖Γ(c+N)‖⁻¹ ≤ (‖Γ(Re c)‖/‖Γ c‖) ‖Γ(Re c + N)‖⁻¹` for `Re c > 0`. -/
-theorem hypSV_norm_recip_Gamma_le {c : ℂ} (hc : 0 < c.re) (N : ℕ) :
+theorem ProductIntegral.norm_inv_Gamma_le {c : ℂ} (hc : 0 < c.re) (N : ℕ) :
     ‖Gamma (c + N)‖⁻¹ ≤ ‖Gamma (c.re : ℂ)‖ / ‖Gamma c‖ * ‖Gamma ((c.re : ℂ) + N)‖⁻¹ := by
   have hcn : ∀ k : ℕ, c ≠ -k := not_neg_nat_of_re_pos hc
   have hCn : ∀ k : ℕ, (c.re : ℂ) ≠ -k := not_neg_nat_of_re_pos (by simpa using hc)
@@ -472,7 +473,7 @@ theorem hypSV_norm_recip_Gamma_le {c : ℂ} (hc : 0 < c.re) (N : ℕ) :
     have := ascPochhammer_pos N c.re hc
     exact this
   rw [abs_of_pos hP]
-  have hle := hypSV_norm_poch_ge hc N
+  have hle := ProductIntegral.norm_poch_ge hc N
   have hn1 : 0 < ‖Gamma c‖ := norm_pos_iff.mpr hg1
   have hn2 : 0 < ‖Gamma (c.re : ℂ)‖ := norm_pos_iff.mpr hg2
   have hpc : 0 < ‖(ascPochhammer ℂ N).eval c‖ := hP.trans_le hle
@@ -482,7 +483,8 @@ theorem hypSV_norm_recip_Gamma_le {c : ℂ} (hc : 0 < c.re) (N : ℕ) :
   exact inv_anti₀ (by positivity) (mul_le_mul_of_nonneg_left hle hn1.le)
 
 /-- Rearranging `∑ₘ (p)ₘ(q)ₘ/m! xᵐ 𝐅(s+m, r; c+m; x)` by total degree. -/
-theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ} (hx : ‖x‖ < 1)
+theorem ProductIntegral.hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re)
+    {x : ℂ} (hx : ‖x‖ < 1)
     (hK : ∀ N, ∑ m ∈ range (N + 1), poch p m * poch q m / m ! *
       (poch (s + m) (N - m) * poch r (N - m) / (N - m)!) = poch A N * poch B N / N !) :
     HasSum (fun m : ℕ => poch p m * poch q m / m ! * x ^ m *
@@ -534,7 +536,7 @@ theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ
       calc ‖s + m‖ ≤ ‖s‖ + ‖(m : ℂ)‖ := norm_add_le _ _
         _ ≤ M + m := by
           rw [Complex.norm_natCast, hM]; linarith [norm_nonneg p, norm_nonneg q, norm_nonneg r]
-    have e5 := hypSV_norm_recip_Gamma_le hc (m + k)
+    have e5 := ProductIntegral.norm_inv_Gamma_le hc (m + k)
     rw [← hC] at e5
     rw [show c + (m : ℂ) + (k : ℂ) = c + ((m + k : ℕ) : ℂ) by push_cast; ring]
     have q0 := hP0 M hM0 m
@@ -554,7 +556,7 @@ theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ
             (‖x‖ ^ m * ‖x‖ ^ k / ((m ! : ℝ) * k !)) := mul_le_mul_of_nonneg_right A2 hX
       _ = _ := by rw [← hPadd, pow_add]; ring
   have hHs : Summable H := by
-    refine hypSV_summable_of_antidiag hH0 ?_
+    refine ProductIntegral.summable_of_antidiagonal hH0 ?_
     have hT := summable_norm_regularizedGaussHGFun_term ((2 * M : ℝ) : ℂ) (M : ℂ) (C : ℂ)
       (z := ((‖x‖ : ℝ) : ℂ)) (by simpa using hx)
     refine (hT.mul_left K).congr fun N => ?_
@@ -565,7 +567,7 @@ theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ
       refine Finset.sum_congr rfl fun mk hmk => ?_
       rw [Finset.mem_antidiagonal] at hmk
       simp only [hH, hmk]
-    rw [hfib, hypSV_real_vandermonde]
+    rw [hfib, ProductIntegral.real_vandermonde]
     simp only [norm_mul, norm_div, norm_pow, norm_inv, Complex.norm_natCast, Complex.norm_real,
       Real.norm_eq_abs, ascPochhammer_eval_ofReal, abs_norm, hP]
     rw [abs_of_nonneg (hP0 _ (by positivity) N), abs_of_nonneg (hP0 _ hM0 N),
@@ -573,7 +575,7 @@ theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ
     ring
   have hgs : Summable g := Summable.of_norm_bounded hHs hbound
   have h1 := hgs.hasSum.prod_fiberwise hrow
-  have h2 := hypSV_hasSum_antidiag hgs
+  have h2 := ProductIntegral.hasSum_antidiagonal hgs
   have h3 : (fun N => ∑ mk ∈ antidiagonal N, g mk) =
       fun N => poch A N * poch B N / (N ! * Gamma (c + N)) * x ^ N := by
     funext N
@@ -594,7 +596,7 @@ theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ
   exact h1
 
 /-- The Vandermonde coefficient identity behind the inner sum of 15.6.9. -/
-theorem hypSV_coeff_inner (α u v : ℂ) (N : ℕ) :
+theorem ProductIntegral.coeff_inner (α u v : ℂ) (N : ℕ) :
     ∑ n ∈ range (N + 1), poch α n * poch u n / n ! *
       (poch (α + n) (N - n) * poch v (N - n) / (N - n)!) = poch α N * poch (u + v) N / N ! := by
   rw [poch_add_eq_sum u v N, Finset.mul_sum, Finset.sum_div]
@@ -611,7 +613,7 @@ theorem hypSV_coeff_inner (α u v : ℂ) (N : ℕ) :
   field_simp
 
 /-- The Pfaff–Saalschütz coefficient identity behind the outer sum of 15.6.9, for all `l`. -/
-theorem hypSV_coeff_outer (a b l : ℂ) (N : ℕ) :
+theorem ProductIntegral.coeff_outer (a b l : ℂ) (N : ℕ) :
     ∑ m ∈ range (N + 1), poch (l - a) m * poch (l - b) m / m ! *
       (poch (l + m) (N - m) * poch (a + b - l) (N - m) / (N - m)!) =
       poch a N * poch b N / N ! := by
@@ -657,7 +659,7 @@ theorem hypSV_coeff_outer (a b l : ℂ) (N : ℕ) :
 
 /-- Termwise integration of `w u ∑ cₙ vⁿ` over `[0,1]` for integrable `w`, continuous `u, v`
 and `‖v‖ ≤ ρ` with `∑ ‖cₙ‖ ρⁿ < ∞`. -/
-theorem hypSV_hasSum_integral {w u v S : ℝ → ℂ} {c : ℕ → ℂ} {ρ : ℝ}
+theorem ProductIntegral.hasSum_integral {w u v S : ℝ → ℂ} {c : ℕ → ℂ} {ρ : ℝ}
     (hw : IntervalIntegrable w MeasureTheory.volume 0 1)
     (hu : ContinuousOn u (Set.Icc 0 1)) (hv : ContinuousOn v (Set.Icc 0 1))
     (hvρ : ∀ t ∈ Set.Icc (0 : ℝ) 1, ‖v t‖ ≤ ρ) (hc : Summable fun n => ‖c n‖ * ρ ^ n)
@@ -695,7 +697,7 @@ theorem hypSV_hasSum_integral {w u v S : ℝ → ℂ} {c : ℕ → ℂ} {ρ : �
     exact ((hS t ⟨ht.1.le, ht.2⟩).mul_left (u t)).mul_left (w t)
 
 /-- The inner Euler integral of 15.6.9 after expanding both series. -/
-theorem hypSV_product_inner_term {α c d K : ℂ} {x : ℝ} (m n : ℕ) (hd : 0 < d.re)
+theorem ProductIntegral.product_inner_term {α c d K : ℂ} {x : ℝ} (m n : ℕ) (hd : 0 < d.re)
     (hcd : 0 < (c - d).re) (hx0 : 0 ≤ x) (hx1 : x < 1) :
     ∫ t in (0 : ℝ)..1, (t : ℂ) ^ (d + m - 1) * (1 - (t : ℂ)) ^ (c - d - 1) *
         (((1 - (x : ℂ) * t) ^ α)⁻¹ * (K * ((1 - (t : ℂ)) * x / (1 - (x : ℂ) * t)) ^ n)) =
@@ -800,7 +802,8 @@ theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
   set cB : ℕ → ℂ := fun n => poch α n * poch (l - d) n / (n ! * Gamma (c - d + n)) with hcB
   have hw0 := betaIntegral_convergent hd hcd
   -- Step 1: expand the first factor.
-  have hS1 := hypSV_hasSum_integral (u := fun t => h t * F2 (W t)) (v := fun t => (x : ℂ) * t)
+  have hS1 := ProductIntegral.hasSum_integral (u := fun t => h t * F2 (W t))
+      (v := fun t => (x : ℂ) * t)
     (c := cA) (ρ := x) (S := fun t => regularizedGaussHGFun (l - a) (l - b) d ((x : ℂ) * t))
     hw0 (hhc.mul hF2c) (by fun_prop)
     (fun t ht => by
@@ -842,14 +845,15 @@ theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
       rw [show d + m - 1 = (d - 1) + m by ring, cpow_add _ _ ht0, cpow_natCast, mul_pow]
       ring
     have hwm := betaIntegral_convergent hdm hcd
-    have hS2 := hypSV_hasSum_integral (u := h) (v := W) (c := cB) (ρ := x)
+    have hS2 := ProductIntegral.hasSum_integral (u := h) (v := W) (c := cB) (ρ := x)
       (S := fun t => F2 (W t)) hwm hhc hWc hWle (hsumm α (l - d) (c - d))
       (fun t ht => hasSum_regularizedGaussHGFun_coeff α (l - d) (c - d) (hWn t ht))
     have hcm : 0 < (c + m).re := by
       have : (c + m).re = c.re + m := by simp
       rw [this]; linarith
-    have hGL := (hypSV_hasSum_shift_series α (l - d) (d + m) α (c + m) α ((l - d) + (d + m))
-      hcm hxn (hypSV_coeff_inner α (l - d) (d + m))).mul_left (Gamma (d + m))
+    have hGL := (ProductIntegral.hasSum_shift_series α (l - d) (d + m) α (c + m) α
+        ((l - d) + (d + m))
+      hcm hxn (ProductIntegral.coeff_inner α (l - d) (d + m))).mul_left (Gamma (d + m))
     have hS2' : HasSum (fun n : ℕ => Gamma (d + m) * (poch α n * poch (l - d) n / n ! *
         (x : ℂ) ^ n * regularizedGaussHGFun (α + n) (d + m) (c + m + n) (x : ℂ)))
         (∫ t in (0 : ℝ)..1, (t : ℂ) ^ (d + m - 1) * (1 - (t : ℂ)) ^ (c - d - 1) *
@@ -860,7 +864,7 @@ theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
         have : (c - d + n).re = (c - d).re + n := by simp
         rw [this]; linarith)
       have hn! : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-      have := hypSV_product_inner_term (α := α) (K := cB n) m n hd hcd hx0 hx1
+      have := ProductIntegral.product_inner_term (α := α) (K := cB n) m n hd hcd hx0 hx1
       rw [this]
       simp only [hcB]
       field_simp
@@ -868,11 +872,11 @@ theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
       regularizedGaussHGFun_symm α (l + m)]
     simp only [hcA]
     field_simp
-  have hOut := hypSV_hasSum_shift_series (l - a) (l - b) α l c a b hc0 hxn
-    (hypSV_coeff_outer a b l)
+  have hOut := ProductIntegral.hasSum_shift_series (l - a) (l - b) α l c a b hc0 hxn
+    (ProductIntegral.coeff_outer a b l)
   rw [funext hterm] at hS1
   exact (hS1.unique hOut).symm
 
-end hypSVProduct
+end ProductIntegral
 
 end DLMF.Hypergeometric

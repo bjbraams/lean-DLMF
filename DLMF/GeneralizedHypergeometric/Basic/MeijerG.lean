@@ -103,9 +103,9 @@ def MeijerGContour.closingIntegral (L : MeijerGContour) (f : ℂ→ℂ) (R : ℝ
   | .vertical =>
       let A : ℂ := R+I*(L.path R).im
       let B : ℂ := R+I*(L.path (-R)).im
-      DLMF.segmentIntegral f (L.path R) A+DLMF.segmentIntegral f A B+
-        DLMF.segmentIntegral f B (L.path (-R))
-  | _ => DLMF.segmentIntegral f (L.path R) (L.path (-R))
+      DLMF.Core.segmentIntegral f (L.path R) A+DLMF.Core.segmentIntegral f A B+
+        DLMF.Core.segmentIntegral f B (L.path (-R))
+  | _ => DLMF.Core.segmentIntegral f (L.path R) (L.path (-R))
 
 /-- The winding number of a closed truncation, expressed as a contour integral. -/
 def MeijerGContour.winding (L : MeijerGContour) (c : ℂ) (R : ℝ) : ℂ :=

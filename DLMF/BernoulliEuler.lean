@@ -10,6 +10,7 @@ public import DLMF.BernoulliEuler.GeneratingFunctions
 public import DLMF.BernoulliEuler.Properties
 public import DLMF.BernoulliEuler.Recurrences
 public import DLMF.BernoulliEuler.Explicit
+public import DLMF.BernoulliEuler.IntegralKernels
 public import DLMF.BernoulliEuler.Integrals
 public import DLMF.BernoulliEuler.Series
 public import DLMF.BernoulliEuler.Inequalities

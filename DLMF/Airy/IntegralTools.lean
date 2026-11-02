@@ -15,24 +15,28 @@ DLMF §9.10.
 
 ## Main results
 
-* `airyInt_primitive_ofReal`: the entire primitive on the real axis is an interval integral.
-* `airyInt_norm_scorerHi_le`, `airyInt_norm_scorerHiDeriv_le`: bounds for `Hi` and `Hi'` in
-  the left half-plane, from the Laplace integral 9.12.20.
-* `airyInt_norm_scorerGi_le`, `airyInt_norm_scorerGiDeriv_le`: bounds for `Gi`, `Gi'` on the
-  positive axis, from the rotation formula 9.12.12.
-* `airyInt_scorerGi_sub_isBigO`: `πGi(x) = 1/x + O(x^{-4})`.
-* `airyInt_poincare_real`, `airyInt_poincare0_real`: real-axis Poincaré bounds.
-* `airyInt_hasIntegralAtBot_of_cross`, `airyInt_cross_expansion`: improper integrals at `-∞`
-  and their asymptotics, via the Scorer identities 9.10.2–9.10.3.
+* `IntegralRepresentation.primitive_ofReal`: the entire primitive on the real axis is an interval
+  integral.
+* `IntegralRepresentation.norm_scorerHi_le`, `IntegralRepresentation.norm_scorerHiDeriv_le`: bounds
+  for `Hi` and `Hi'` in the left half-plane, from the Laplace integral 9.12.20.
+* `IntegralRepresentation.norm_scorerGi_le`, `IntegralRepresentation.norm_scorerGiDeriv_le`: bounds
+  for `Gi`, `Gi'` on the positive axis, from the rotation formula 9.12.12.
+* `IntegralRepresentation.scorerGi_sub_isBigO`: `πGi(x) = 1/x + O(x^{-4})`.
+* `IntegralRepresentation.poincare_real`, `IntegralRepresentation.poincare0_real`: real-axis
+  Poincaré bounds.
+* `IntegralRepresentation.hasIntegralAtBot_of_cross`, `IntegralRepresentation.cross_expansion`:
+  improper integrals at `-∞` and their asymptotics, via the Scorer identities 9.10.2–9.10.3.
 -/
 
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF.Confluent
 open scoped Real Topology
+open DLMF.Core
+
 namespace DLMF.Airy
 
 /-- For an entire integrand, the primitive at a real point is the interval integral. -/
-theorem airyInt_primitive_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) (x : ℝ) :
+theorem IntegralRepresentation.primitive_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) (x : ℝ) :
     primitive f x = ∫ t in (0 : ℝ)..x, f t := by
   obtain ⟨g, hg⟩ := hf.isExactOn_univ
   have hg' (w : ℂ) : HasDerivAt g (f w) w := hg w (mem_univ w)
@@ -51,7 +55,7 @@ theorem airyInt_primitive_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) (
   simp
 
 /-- `∫₀^∞ t^m e^{-st} dt = m!/s^{m+1}`. -/
-theorem airyInt_integral_pow_mul_exp_neg (m : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem IntegralRepresentation.integral_pow_mul_exp_neg (m : ℕ) {s : ℝ} (hs : 0 < s) :
     IntegrableOn (fun t : ℝ => t ^ m * Real.exp (-(s * t))) (Ioi 0) ∧
       ∫ t in Ioi (0 : ℝ), t ^ m * Real.exp (-(s * t)) = (Nat.factorial m : ℝ) / s ^ (m + 1) := by
   have he : (fun t : ℝ => t ^ m * Real.exp (-(s * t))) =ᵐ[volume.restrict (Ioi 0)]
@@ -70,10 +74,11 @@ theorem airyInt_integral_pow_mul_exp_neg (m : ℕ) {s : ℝ} (hs : 0 < s) :
     ring
 
 /-- The Laplace integrand of Hi is dominated by `t^m e^{-st}` when `Re w ≤ -s`. -/
-theorem airyInt_norm_integral_cubic_le (m : ℕ) {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
+theorem IntegralRepresentation.norm_integral_cubic_le (m : ℕ) {w : ℂ} {s : ℝ} (hs : 0 < s)
+    (hw : w.re ≤ -s) :
     ‖∫ t : ℝ in Ioi 0, (t : ℂ) ^ m * exp (-(t : ℂ) ^ 3 / 3 + w * t)‖ ≤
       (Nat.factorial m : ℝ) / s ^ (m + 1) := by
-  obtain ⟨hi, hv⟩ := airyInt_integral_pow_mul_exp_neg m hs
+  obtain ⟨hi, hv⟩ := IntegralRepresentation.integral_pow_mul_exp_neg m hs
   rw [← hv]
   refine norm_integral_le_of_norm_le hi ?_
   filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
@@ -85,31 +90,31 @@ theorem airyInt_norm_integral_cubic_le (m : ℕ) {w : ℂ} {s : ℝ} (hs : 0 < s
   nlinarith [pow_pos ht 3]
 
 /-- `‖Hi(w)‖ ≤ 1/(πs)` when `Re w ≤ -s < 0`. -/
-theorem airyInt_norm_scorerHi_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
+theorem IntegralRepresentation.norm_scorerHi_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
     ‖scorerHi w‖ ≤ 1 / (π * s) := by
   rw [(scorerHi_exp_integral w).2, norm_div, norm_real, Real.norm_of_nonneg Real.pi_pos.le]
-  have h := airyInt_norm_integral_cubic_le 0 hs hw
+  have h := IntegralRepresentation.norm_integral_cubic_le 0 hs hw
   simp only [pow_zero, one_mul, Nat.factorial_zero, Nat.cast_one, zero_add, pow_one] at h
   rw [div_le_iff₀ Real.pi_pos]
   calc _ ≤ 1 / s := h
     _ = 1 / (π * s) * π := by field_simp
 
 /-- `‖Hi'(w)‖ ≤ 1/(πs²)` when `Re w ≤ -s < 0`. -/
-theorem airyInt_norm_scorerHiDeriv_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
+theorem IntegralRepresentation.norm_scorerHiDeriv_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
     ‖scorerHiDeriv w‖ ≤ 1 / (π * s ^ 2) := by
   rw [scorerHiDeriv_exp_integral w, norm_div, norm_real, Real.norm_of_nonneg Real.pi_pos.le]
-  have h := airyInt_norm_integral_cubic_le 1 hs hw
+  have h := IntegralRepresentation.norm_integral_cubic_le 1 hs hw
   simp only [pow_one, Nat.factorial_one, Nat.cast_one] at h
   rw [div_le_iff₀ Real.pi_pos]
   calc _ ≤ 1 / s ^ 2 := h
     _ = 1 / (π * s ^ 2) * π := by field_simp
 
 /-- `Hi(-s) = 1/(πs) + O(s^{-4})`, with the explicit bound `2/(πs⁴)`. -/
-theorem airyInt_norm_scorerHi_neg_sub_le {s : ℝ} (hs : 0 < s) :
+theorem IntegralRepresentation.norm_scorerHi_neg_sub_le {s : ℝ} (hs : 0 < s) :
     ‖scorerHi (-(s : ℂ)) - 1 / (π * s)‖ ≤ 2 / (π * s ^ 4) := by
   have hpi := Real.pi_pos
-  obtain ⟨h0i, h0v⟩ := airyInt_integral_pow_mul_exp_neg 0 hs
-  obtain ⟨h3i, h3v⟩ := airyInt_integral_pow_mul_exp_neg 3 hs
+  obtain ⟨h0i, h0v⟩ := IntegralRepresentation.integral_pow_mul_exp_neg 0 hs
+  obtain ⟨h3i, h3v⟩ := IntegralRepresentation.integral_pow_mul_exp_neg 3 hs
   have hJ := integral_pow_mul_exp_cubic_ofReal 0 (-s)
   simp only [pow_zero, one_mul] at hJ h0i h0v
   have hJi : IntegrableOn (fun t : ℝ => Real.exp (-(t ^ 3 / 3) + -s * t)) (Ioi 0) := by
@@ -148,37 +153,37 @@ theorem airyInt_norm_scorerHi_neg_sub_le {s : ℝ} (hs : 0 < s) :
     _ = _ := by rw [div_div, mul_comm]
 
 /-- `Hi(-s) = O(s^{-1})` as `s → ∞`. -/
-theorem airyInt_scorerHi_neg_isBigO :
+theorem IntegralRepresentation.scorerHi_neg_isBigO :
     (fun s : ℝ => scorerHi (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-1 : ℝ)) := by
   refine IsBigO.of_bound (1 / π) ?_
   filter_upwards [eventually_gt_atTop 0] with s hs
   rw [Real.norm_of_nonneg (by positivity), Real.rpow_neg_one]
-  calc _ ≤ 1 / (π * s) := airyInt_norm_scorerHi_le hs (by simp)
+  calc _ ≤ 1 / (π * s) := IntegralRepresentation.norm_scorerHi_le hs (by simp)
     _ = _ := by field_simp
 
 /-- `Hi'(-s) = O(s^{-2})` as `s → ∞`. -/
-theorem airyInt_scorerHiDeriv_neg_isBigO :
+theorem IntegralRepresentation.scorerHiDeriv_neg_isBigO :
     (fun s : ℝ => scorerHiDeriv (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-2 : ℝ)) := by
   refine IsBigO.of_bound (1 / π) ?_
   filter_upwards [eventually_gt_atTop 0] with s hs
   rw [Real.norm_of_nonneg (by positivity), Real.rpow_neg hs.le,
     show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
-  calc _ ≤ 1 / (π * s ^ 2) := airyInt_norm_scorerHiDeriv_le hs (by simp)
+  calc _ ≤ 1 / (π * s ^ 2) := IntegralRepresentation.norm_scorerHiDeriv_le hs (by simp)
     _ = _ := by field_simp
 
 /-- The Scorer cross combination `f Hi' - f' Hi` tends to zero at `-∞` whenever
 `f(-s) = O(s^{-1/4})` and `f'(-s) = O(s^{1/4})`. -/
-theorem airyInt_tendsto_cross_atBot {f f' : ℂ → ℂ}
+theorem IntegralRepresentation.tendsto_cross_atBot {f f' : ℂ → ℂ}
     (hf : (fun s : ℝ => f (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-(1 / 4) : ℝ)))
     (hf' : (fun s : ℝ => f' (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (1 / 4 : ℝ))) :
     Tendsto (fun x : ℝ => f x * scorerHiDeriv x - f' x * scorerHi x) atBot (𝓝 0) := by
   have h1 : Tendsto (fun s : ℝ => f (-(s : ℂ)) * scorerHiDeriv (-(s : ℂ))) atTop (𝓝 0) := by
-    refine (hf.mul airyInt_scorerHiDeriv_neg_isBigO).trans_tendsto ?_
+    refine (hf.mul IntegralRepresentation.scorerHiDeriv_neg_isBigO).trans_tendsto ?_
     have := (tendsto_rpow_neg_atTop (y := 1 / 4) (by norm_num)).mul
       (tendsto_rpow_neg_atTop (y := 2) (by norm_num))
     simpa using this
   have h2 : Tendsto (fun s : ℝ => f' (-(s : ℂ)) * scorerHi (-(s : ℂ))) atTop (𝓝 0) := by
-    refine (hf'.mul airyInt_scorerHi_neg_isBigO).trans_tendsto ?_
+    refine (hf'.mul IntegralRepresentation.scorerHi_neg_isBigO).trans_tendsto ?_
     refine (tendsto_rpow_neg_atTop (y := 3 / 4) (by norm_num)).congr' ?_
     filter_upwards [eventually_gt_atTop 0] with s hs
     rw [← Real.rpow_add hs]; norm_num
@@ -189,7 +194,8 @@ theorem airyInt_tendsto_cross_atBot {f f' : ℂ → ℂ}
 
 /-- An improper integral at `-∞` obtained from a Scorer-type identity
 `c + ∫₀ˣ f = π g(x)` with `g → 0` at `-∞`. -/
-theorem airyInt_hasIntegralAtBot_of_cross {f g : ℂ → ℂ} (hfd : Differentiable ℂ f) {c : ℂ}
+theorem IntegralRepresentation.hasIntegralAtBot_of_cross {f g : ℂ → ℂ}
+    (hfd : Differentiable ℂ f) {c : ℂ}
     (hid : ∀ x : ℝ, c + primitive f x = π * g x)
     (hg : Tendsto (fun x : ℝ => g x) atBot (𝓝 0)) (x : ℝ) :
     HasIntegralAtBot (fun t => f t) x (c + primitive f x) := by
@@ -197,7 +203,8 @@ theorem airyInt_hasIntegralAtBot_of_cross {f g : ℂ → ℂ} (hfd : Differentia
   have he : ∀ R : ℝ, ∫ t in R..x, f t = primitive f x - (π * g R - c) := by
     intro R
     rw [← intervalIntegral.integral_interval_sub_left (a := 0) (hc.intervalIntegrable _ _)
-      (hc.intervalIntegrable _ _), ← airyInt_primitive_ofReal hfd, ← airyInt_primitive_ofReal hfd,
+      (hc.intervalIntegrable _ _), ← IntegralRepresentation.primitive_ofReal hfd,
+          ← IntegralRepresentation.primitive_ofReal hfd,
       ← hid R]
     ring
   unfold HasIntegralAtBot
@@ -206,7 +213,7 @@ theorem airyInt_hasIntegralAtBot_of_cross {f g : ℂ → ℂ} (hfd : Differentia
   simpa [add_comm] using this
 
 /-- If `g - c s^{1/4} φ = O(s^{-5/4})` with `|φ| ≤ 1`, then `g = O(s^{1/4})`. -/
-theorem airyInt_isBigO_rpow_of_sub {g : ℝ → ℂ} {φ : ℝ → ℝ} (hg : (fun s : ℝ => g s -
+theorem IntegralRepresentation.isBigO_rpow_of_sub {g : ℝ → ℂ} {φ : ℝ → ℝ} (hg : (fun s : ℝ => g s -
       ((s ^ (1 / 4 : ℝ) / Real.sqrt π * φ s : ℝ) : ℂ)) =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)))
     (hφ : ∀ s, |φ s| ≤ 1) : g =O[atTop] (fun s : ℝ => s ^ (1 / 4 : ℝ)) := by
   have h1 : (fun s : ℝ => ((s ^ (1 / 4 : ℝ) / Real.sqrt π * φ s : ℝ) : ℂ)) =O[atTop]
@@ -228,7 +235,7 @@ theorem airyInt_isBigO_rpow_of_sub {g : ℝ → ℂ} {φ : ℝ → ℝ} (hg : (f
   exact ((hg.trans h2).add h1).congr_left fun s => by ring
 
 /-- The Scorer cross combination with its leading oscillatory term removed. -/
-theorem airyInt_cross_expansion {f f' : ℂ → ℂ} {φ : ℝ → ℝ} (hφ : ∀ s, |φ s| ≤ 1)
+theorem IntegralRepresentation.cross_expansion {f f' : ℂ → ℂ} {φ : ℝ → ℝ} (hφ : ∀ s, |φ s| ≤ 1)
     (hf : (fun s : ℝ => f (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-(1 / 4) : ℝ)))
     (hf' : (fun s : ℝ => f' (-(s : ℂ)) - ((s ^ (1 / 4 : ℝ) / Real.sqrt π * φ s : ℝ) : ℂ))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ))) :
@@ -242,14 +249,14 @@ theorem airyInt_cross_expansion {f f' : ℂ → ℂ} {φ : ℝ → ℝ} (hφ : �
   have hE : E =O[atTop] (fun s : ℝ => s ^ (-4 : ℝ)) := by
     refine IsBigO.of_bound 2 ?_
     filter_upwards [eventually_gt_atTop 0] with s hs
-    have h := airyInt_norm_scorerHi_neg_sub_le hs
+    have h := IntegralRepresentation.norm_scorerHi_neg_sub_le hs
     have e : E s = π * (scorerHi (-(s : ℂ)) - 1 / (π * s)) := by
       simp only [E]; field_simp
     rw [e, norm_mul, norm_real, Real.norm_of_nonneg hπ.le, Real.norm_of_nonneg (by positivity),
       Real.rpow_neg hs.le, show (4 : ℝ) = ((4 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
     calc π * ‖scorerHi (-(s : ℂ)) - 1 / (π * s)‖ ≤ π * (2 / (π * s ^ 4)) := by gcongr
       _ = 2 * (s ^ 4)⁻¹ := by field_simp
-  have hf'0 := airyInt_isBigO_rpow_of_sub hf' hφ
+  have hf'0 := IntegralRepresentation.isBigO_rpow_of_sub hf' hφ
   -- decomposition
   have key : ∀ s : ℝ, 0 < s → π * (f (-(s : ℂ)) * scorerHiDeriv (-(s : ℂ)) -
       f' (-(s : ℂ)) * scorerHi (-(s : ℂ))) +
@@ -265,7 +272,8 @@ theorem airyInt_cross_expansion {f f' : ℂ → ℂ} {φ : ℝ → ℝ} (hφ : �
     ring
   have t1 : (fun s : ℝ => π * (f (-(s : ℂ)) * scorerHiDeriv (-(s : ℂ)))) =O[atTop]
       (fun s : ℝ => s ^ (-(9 / 4) : ℝ)) := by
-    refine ((hf.mul airyInt_scorerHiDeriv_neg_isBigO).const_mul_left (π : ℂ)).congr' ?_ ?_
+    refine ((hf.mul IntegralRepresentation.scorerHiDeriv_neg_isBigO).const_mul_left
+        (π : ℂ)).congr' ?_ ?_
     · exact Eventually.of_forall fun s => by simp
     · filter_upwards [eventually_gt_atTop 0] with s hs
       rw [← Real.rpow_add hs]; norm_num
@@ -291,35 +299,37 @@ theorem airyInt_cross_expansion {f f' : ℂ → ℂ} {φ : ℝ → ℝ} (hφ : �
   exact (key s hs).symm
 
 /-- `‖e^{cπi}‖ = 1` for real `c`. -/
-theorem airyInt_norm_exp_pi_I_mul (c : ℝ) : ‖exp ((c : ℂ) * π * I)‖ = 1 := by
+theorem IntegralRepresentation.norm_exp_pi_I_mul (c : ℝ) : ‖exp ((c : ℂ) * π * I)‖ = 1 := by
   rw [show (c : ℂ) * π * I = ((c * π : ℝ) : ℂ) * I by push_cast; ring, norm_exp_ofReal_mul_I]
 
 /-- Real parts of `x e^{∓2πi/3}`. -/
-theorem airyInt_re_mul_omega {x : ℝ} :
+theorem IntegralRepresentation.re_mul_omega {x : ℝ} :
     ((x : ℂ) * exp (-2 * π * I / 3)).re = -(x / 2) ∧
       ((x : ℂ) * exp (2 * π * I / 3)).re = -(x / 2) := by
   rw [exp_neg_two_pi_I_div_three', exp_two_pi_I_div_three]
   constructor <;> simp <;> ring
 
 /-- Norms of the rotation factors in the Scorer connection formulas. -/
-theorem airyInt_norm_rot :
+theorem IntegralRepresentation.norm_rotation :
     ‖exp (π * I / 3) / 2‖ = 1 / 2 ∧ ‖exp (-π * I / 3) / 2‖ = 1 / 2 ∧
       ‖exp (-2 * π * I / 3)‖ = 1 ∧ ‖exp (2 * π * I / 3)‖ = 1 := by
   have e1 : π * I / 3 = ((1 / 3 : ℝ) : ℂ) * π * I := by push_cast; ring
   have e2 : -π * I / 3 = ((-1 / 3 : ℝ) : ℂ) * π * I := by push_cast; ring
   have e3 : -2 * π * I / 3 = ((-2 / 3 : ℝ) : ℂ) * π * I := by push_cast; ring
   have e4 : 2 * π * I / 3 = ((2 / 3 : ℝ) : ℂ) * π * I := by push_cast; ring
-  rw [e1, e2, e3, e4, norm_div, norm_div, airyInt_norm_exp_pi_I_mul, airyInt_norm_exp_pi_I_mul,
-    airyInt_norm_exp_pi_I_mul, airyInt_norm_exp_pi_I_mul]
+  rw [e1, e2, e3, e4, norm_div, norm_div, IntegralRepresentation.norm_exp_pi_I_mul,
+      IntegralRepresentation.norm_exp_pi_I_mul,
+    IntegralRepresentation.norm_exp_pi_I_mul, IntegralRepresentation.norm_exp_pi_I_mul]
   norm_num
 
 /-- `|Gi(x)| ≤ 2/(πx)` for `x > 0`. -/
-theorem airyInt_norm_scorerGi_le {x : ℝ} (hx : 0 < x) : ‖scorerGi x‖ ≤ 2 / (π * x) := by
+theorem IntegralRepresentation.norm_scorerGi_le {x : ℝ} (hx : 0 < x) : ‖scorerGi x‖ ≤
+    2 / (π * x) := by
   have hx2 : 0 < x / 2 := by linarith
-  obtain ⟨n1, n2, -, -⟩ := airyInt_norm_rot
-  obtain ⟨r1, r2⟩ := airyInt_re_mul_omega (x := x)
-  have b1 := airyInt_norm_scorerHi_le hx2 r1.le
-  have b2 := airyInt_norm_scorerHi_le hx2 r2.le
+  obtain ⟨n1, n2, -, -⟩ := IntegralRepresentation.norm_rotation
+  obtain ⟨r1, r2⟩ := IntegralRepresentation.re_mul_omega (x := x)
+  have b1 := IntegralRepresentation.norm_scorerHi_le hx2 r1.le
+  have b2 := IntegralRepresentation.norm_scorerHi_le hx2 r2.le
   rw [scorerGi_rotations]
   calc _ ≤ ‖exp (π * I / 3) / 2 * scorerHi (x * exp (-2 * π * I / 3))‖ +
         ‖exp (-π * I / 3) / 2 * scorerHi (x * exp (2 * π * I / 3))‖ := norm_add_le _ _
@@ -328,14 +338,14 @@ theorem airyInt_norm_scorerGi_le {x : ℝ} (hx : 0 < x) : ‖scorerGi x‖ ≤ 2
     _ = _ := by field_simp; ring
 
 /-- `|Gi'(x)| ≤ 4/(πx²)` for `x > 0`. -/
-theorem airyInt_norm_scorerGiDeriv_le {x : ℝ} (hx : 0 < x) : ‖scorerGiDeriv x‖ ≤ 4 /
+theorem IntegralRepresentation.norm_scorerGiDeriv_le {x : ℝ} (hx : 0 < x) : ‖scorerGiDeriv x‖ ≤ 4 /
     (π * x ^ 2) := by
   have hx2 : 0 < x / 2 := by linarith
-  obtain ⟨n1, n2, n3, n4⟩ := airyInt_norm_rot
-  obtain ⟨r1, r2⟩ := airyInt_re_mul_omega (x := x)
-  have b1 := airyInt_norm_scorerHiDeriv_le hx2 r1.le
-  have b2 := airyInt_norm_scorerHiDeriv_le hx2 r2.le
-  rw [scorerAsym_scorerGiDeriv_rotations]
+  obtain ⟨n1, n2, n3, n4⟩ := IntegralRepresentation.norm_rotation
+  obtain ⟨r1, r2⟩ := IntegralRepresentation.re_mul_omega (x := x)
+  have b1 := IntegralRepresentation.norm_scorerHiDeriv_le hx2 r1.le
+  have b2 := IntegralRepresentation.norm_scorerHiDeriv_le hx2 r2.le
+  rw [ScorerExpansions.scorerGiDeriv_rotations]
   calc _ ≤ ‖exp (π * I / 3) / 2 * (scorerHiDeriv (x * exp (-2 * π * I / 3)) *
         exp (-2 * π * I / 3))‖ + ‖exp (-π * I / 3) / 2 * (scorerHiDeriv (x * exp (2 * π * I / 3)) *
         exp (2 * π * I / 3))‖ := norm_add_le _ _
@@ -344,15 +354,16 @@ theorem airyInt_norm_scorerGiDeriv_le {x : ℝ} (hx : 0 < x) : ‖scorerGiDeriv 
     _ = _ := by field_simp; ring
 
 /-- `|Ai(x)| ≤ 1` for `x ≥ 1`. -/
-theorem airyInt_norm_airyAi_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAi x‖ ≤ 1 := by
+theorem IntegralRepresentation.norm_airyAi_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAi x‖ ≤ 1 := by
   have hx0 : 0 < x := by linarith
-  have h := (airy_ai_real_error hx0 (N := 0)).1
+  have h := (airyAi_real_error hx0 (N := 0)).1
   simp only [airyRemainder, airyExponentialSum, Finset.range_zero, Finset.sum_empty, sub_zero,
-    airyExpansionCoeff, pow_zero, div_one, one_mul, airyReal_airyU_zero, ofReal_one, norm_one,
+    airyExpansionCoeff, pow_zero, div_one, one_mul, RealRemainders.airyU_zero, ofReal_one, norm_one,
     airyFunction] at h
-  have hp : airyPrefactor .ai x ≠ 0 := airyRot_prefactor_ne_zero .ai (ofReal_ne_zero.mpr hx0.ne')
+  have hp : airyPrefactor .ai x ≠ 0 :=
+      RotatedExpansions.prefactor_ne_zero .ai (ofReal_ne_zero.mpr hx0.ne')
   have hpn : ‖airyPrefactor .ai x‖ ≤ 1 := by
-    rw [airyReal_norm_prefactor_ai hx0]
+    rw [RealRemainders.norm_prefactor_ai hx0]
     have h1 : Real.exp (-airyZeta x) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith [airyZeta_pos hx0])
     have h2 : 1 ≤ 2 * Real.sqrt π * x ^ (1 / 4 : ℝ) := by
       have := Real.one_le_rpow hx (by norm_num : (0 : ℝ) ≤ 1 / 4)
@@ -367,12 +378,12 @@ theorem airyInt_norm_airyAi_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAi x‖ ≤ 1 :
     _ = 1 := by ring
 
 /-- `|Ai'(x)| ≤ 2 x^{1/4}` for `x ≥ 1`. -/
-theorem airyInt_norm_airyAiDeriv_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAiDeriv x‖ ≤ 2 *
+theorem IntegralRepresentation.norm_airyAiDeriv_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAiDeriv x‖ ≤ 2 *
     x ^ (1 / 4 : ℝ) := by
   have hx0 : 0 < x := by linarith
-  have h := airy_aiDeriv_bound hx0
+  have h := airyAiDeriv_bound hx0
   rw [airyAiDeriv_ofReal_eq, norm_real, Real.norm_eq_abs]
-  have hz := airyInt_two_thirds_le_airyZeta hx
+  have hz := IntegralRepresentation.two_thirds_le_airyZeta hx
   have h1 : Real.exp (-airyZeta x) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
   have hs : 1 ≤ Real.sqrt π := by
     rw [show (1 : ℝ) = Real.sqrt 1 by simp]
@@ -384,30 +395,30 @@ theorem airyInt_norm_airyAiDeriv_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAiDeriv x�
     _ ≤ 2 * x ^ (1 / 4 : ℝ) := by linarith
 
 /-- `Ai Gi' - Ai' Gi → 0` at `+∞`. -/
-theorem airyInt_tendsto_cross_gi_atTop :
+theorem IntegralRepresentation.tendsto_cross_gi_atTop :
     Tendsto (fun x : ℝ => airyAi x * scorerGiDeriv x - airyAiDeriv x * scorerGi x) atTop (𝓝 0) := by
   have hπ := Real.pi_pos
   have hA : (fun x : ℝ => airyAi x) =O[atTop] (fun _ : ℝ => (1 : ℝ)) := by
     refine IsBigO.of_bound 1 ?_
     filter_upwards [eventually_ge_atTop 1] with x hx
-    simpa using airyInt_norm_airyAi_le hx
+    simpa using IntegralRepresentation.norm_airyAi_le hx
   have hA' : (fun x : ℝ => airyAiDeriv x) =O[atTop] (fun x : ℝ => x ^ (1 / 4 : ℝ)) := by
     refine IsBigO.of_bound 2 ?_
     filter_upwards [eventually_ge_atTop 1] with x hx
     rw [Real.norm_of_nonneg (by positivity)]
-    exact airyInt_norm_airyAiDeriv_le hx
+    exact IntegralRepresentation.norm_airyAiDeriv_le hx
   have hG : (fun x : ℝ => scorerGi x) =O[atTop] (fun x : ℝ => x ^ (-1 : ℝ)) := by
     refine IsBigO.of_bound (2 / π) ?_
     filter_upwards [eventually_gt_atTop 0] with x hx
     rw [Real.norm_of_nonneg (by positivity), Real.rpow_neg_one]
-    calc _ ≤ 2 / (π * x) := airyInt_norm_scorerGi_le hx
+    calc _ ≤ 2 / (π * x) := IntegralRepresentation.norm_scorerGi_le hx
       _ = _ := by field_simp
   have hG' : (fun x : ℝ => scorerGiDeriv x) =O[atTop] (fun x : ℝ => x ^ (-2 : ℝ)) := by
     refine IsBigO.of_bound (4 / π) ?_
     filter_upwards [eventually_gt_atTop 0] with x hx
     rw [Real.norm_of_nonneg (by positivity), Real.rpow_neg hx.le,
       show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
-    calc _ ≤ 4 / (π * x ^ 2) := airyInt_norm_scorerGiDeriv_le hx
+    calc _ ≤ 4 / (π * x ^ 2) := IntegralRepresentation.norm_scorerGiDeriv_le hx
       _ = _ := by field_simp
   have h1 : Tendsto (fun x : ℝ => airyAi x * scorerGiDeriv x) atTop (𝓝 0) := by
     refine (hA.mul hG').trans_tendsto ?_
@@ -420,7 +431,7 @@ theorem airyInt_tendsto_cross_gi_atTop :
   simpa using h1.sub h2
 
 /-- `u - v = O(|v| x^{-c})` with `c > 0` gives `u ~ v`. -/
-theorem airyInt_isEquivalent_of_isBigO {u v : ℝ → ℂ} {c : ℝ} (hc : 0 < c)
+theorem IntegralRepresentation.isEquivalent_of_isBigO {u v : ℝ → ℂ} {c : ℝ} (hc : 0 < c)
     (h : (fun x => u x - v x) =O[atTop] (fun x => ‖v x‖ * x ^ (-c))) : u ~[atTop] v := by
   have h1 : (fun x : ℝ => x ^ (-c)) =o[atTop] (fun _ : ℝ => (1 : ℝ)) :=
     isLittleO_one_iff ℝ |>.2 (tendsto_rpow_neg_atTop hc)
@@ -431,12 +442,13 @@ theorem airyInt_isEquivalent_of_isBigO {u v : ℝ → ℂ} {c : ℝ} (hc : 0 < c
   exact h.trans_isLittleO h3
 
 /-- On the real axis, `πGi(x) = 1/x + O(x^{-4})`. -/
-theorem airyInt_scorerGi_sub_isBigO :
+theorem IntegralRepresentation.scorerGi_sub_isBigO :
     (fun x : ℝ => scorerGi x - 1 / (π * x)) =O[atTop] (fun x : ℝ => x ^ (-4 : ℝ)) := by
   have hπ := Real.pi_pos
   have h := (scorerGi_asymptotic (δ := π / 6) (by positivity) (by linarith) 1)
   rw [comap_id'] at h
-  have h' := h.comp_tendsto (airyInt_tendsto_ofReal_sector (α := π / 3 - π / 6) (by linarith))
+  have h' := h.comp_tendsto
+      (IntegralRepresentation.tendsto_ofReal_sector (α := π / 3 - π / 6) (by linarith))
   refine (h'.congr' (Eventually.of_forall fun x => ?_) EventuallyEq.rfl).trans ?_
   · simp
   · refine IsBigO.of_bound 1 ?_
@@ -447,59 +459,60 @@ theorem airyInt_scorerGi_sub_isBigO :
       Real.norm_of_nonneg (by positivity)]
 
 /-- Real-axis Poincaré bounds with one term: `w(x) = pref(x) + O(pref(x)/ζ)`. -/
-theorem airyInt_poincare_real (kind : AiryKind) :
+theorem IntegralRepresentation.poincare_real (kind : AiryKind) :
     (fun x : ℝ => airyFunction kind x - airyPrefactor kind x) =O[atTop]
       (fun x : ℝ => airyPrefactor kind x / airyZetaComplex x) := by
   have hπ := Real.pi_pos
-  have hT := airyInt_tendsto_ofReal_sector (α := π / 3 - π / 6) (by linarith)
+  have hT := IntegralRepresentation.tendsto_ofReal_sector (α := π / 3 - π / 6) (by linarith)
   have hT' : Tendsto (fun s : ℝ => (s : ℂ)) atTop (airySector (π - π / 6)) :=
-    airyInt_tendsto_ofReal_sector (by linarith)
+    IntegralRepresentation.tendsto_ofReal_sector (by linarith)
   have hs : ∀ z : ℂ, airyExponentialSum kind 1 z = 1 := fun z => by
-    cases kind <;> simp [airyExponentialSum, airyExpansionCoeff, airyReal_airyU_zero,
-      airyReal_airyV_zero]
+    cases kind <;> simp [airyExponentialSum, airyExpansionCoeff, RealRemainders.airyU_zero,
+      RealRemainders.airyV_zero]
   cases kind
-  · have := (airy_ai_poincare (δ := π / 6) (by positivity) (by linarith) 1).comp_tendsto hT'
+  · have := (airyAi_poincare (δ := π / 6) (by positivity) (by linarith) 1).comp_tendsto hT'
     simpa [hs, Function.comp_def] using this
-  · have := (airy_aiDeriv_poincare (δ := π / 6) (by positivity) (by linarith) 1).comp_tendsto hT'
+  · have := (airyAiDeriv_poincare (δ := π / 6) (by positivity) (by linarith) 1).comp_tendsto hT'
     simpa [hs, Function.comp_def] using this
-  · have := (airy_bi_poincare (δ := π / 6) (by positivity) (by linarith) 1).comp_tendsto hT
+  · have := (airyBi_poincare (δ := π / 6) (by positivity) (by linarith) 1).comp_tendsto hT
     simpa [hs, Function.comp_def] using this
-  · have := (airy_biDeriv_poincare (δ := π / 6) (by positivity) (by linarith) 1).comp_tendsto hT
+  · have := (airyBiDeriv_poincare (δ := π / 6) (by positivity) (by linarith) 1).comp_tendsto hT
     simpa [hs, Function.comp_def] using this
 
 /-- `Gi(x) = O(x^{-1})` as `x → +∞`. -/
-theorem airyInt_scorerGi_isBigO :
+theorem IntegralRepresentation.scorerGi_isBigO :
     (fun x : ℝ => scorerGi x) =O[atTop] (fun x : ℝ => x ^ (-1 : ℝ)) := by
   have hπ := Real.pi_pos
   refine IsBigO.of_bound (2 / π) ?_
   filter_upwards [eventually_gt_atTop 0] with x hx
   rw [Real.norm_of_nonneg (by positivity), Real.rpow_neg_one]
-  calc _ ≤ 2 / (π * x) := airyInt_norm_scorerGi_le hx
+  calc _ ≤ 2 / (π * x) := IntegralRepresentation.norm_scorerGi_le hx
     _ = _ := by field_simp
 
 /-- `Gi'(x) = O(x^{-2})` as `x → +∞`. -/
-theorem airyInt_scorerGiDeriv_isBigO :
+theorem IntegralRepresentation.scorerGiDeriv_isBigO :
     (fun x : ℝ => scorerGiDeriv x) =O[atTop] (fun x : ℝ => x ^ (-2 : ℝ)) := by
   have hπ := Real.pi_pos
   refine IsBigO.of_bound (4 / π) ?_
   filter_upwards [eventually_gt_atTop 0] with x hx
   rw [Real.norm_of_nonneg (by positivity), Real.rpow_neg hx.le,
     show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
-  calc _ ≤ 4 / (π * x ^ 2) := airyInt_norm_scorerGiDeriv_le hx
+  calc _ ≤ 4 / (π * x ^ 2) := IntegralRepresentation.norm_scorerGiDeriv_le hx
     _ = _ := by field_simp
 
 /-- The Scorer cross combination `π(A Gi' - A' Gi)` at `+∞`: if `A = O(x^{1/2}|v|)` and
 `A' = -x v + O(x^{-1/2}|v|)`, then it is asymptotic to `v`. -/
-theorem airyInt_cross_equiv_atTop {A A' v : ℝ → ℂ}
+theorem IntegralRepresentation.cross_equiv_atTop {A A' v : ℝ → ℂ}
     (hA : A =O[atTop] (fun x => x ^ (1 / 2 : ℝ) * ‖v x‖))
     (hA' : (fun x => A' x + x * v x) =O[atTop] (fun x => x ^ (-(1 / 2) : ℝ) * ‖v x‖)) :
     (fun x : ℝ => π * (A x * scorerGiDeriv x - A' x * scorerGi x)) ~[atTop] v := by
   have hπ := Real.pi_pos
-  refine airyInt_isEquivalent_of_isBigO (c := 3 / 2) (by norm_num) ?_
-  have t1 := (hA.mul airyInt_scorerGiDeriv_isBigO).const_mul_left (π : ℂ)
-  have t2 := (hA'.mul airyInt_scorerGi_isBigO).const_mul_left (π : ℂ)
+  refine IntegralRepresentation.isEquivalent_of_isBigO (c := 3 / 2) (by norm_num) ?_
+  have t1 := (hA.mul IntegralRepresentation.scorerGiDeriv_isBigO).const_mul_left (π : ℂ)
+  have t2 := (hA'.mul IntegralRepresentation.scorerGi_isBigO).const_mul_left (π : ℂ)
   have hE : (fun x : ℝ => (π : ℂ) * scorerGi x - 1 / x) =O[atTop] (fun x : ℝ => x ^ (-4 : ℝ)) := by
-    refine (airyInt_scorerGi_sub_isBigO.const_mul_left (π : ℂ)).congr' ?_ EventuallyEq.rfl
+    refine (IntegralRepresentation.scorerGi_sub_isBigO.const_mul_left (π : ℂ)).congr' ?_
+        EventuallyEq.rfl
     filter_upwards [eventually_gt_atTop 0] with x hx
     have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
     have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -542,32 +555,32 @@ theorem airyInt_cross_equiv_atTop {A A' v : ℝ → ℂ}
   ring
 
 /-- Real-axis Poincaré bound with no terms: `w(x) = O(pref(x))`. -/
-theorem airyInt_poincare0_real (kind : AiryKind) :
+theorem IntegralRepresentation.poincare0_real (kind : AiryKind) :
     (fun x : ℝ => airyFunction kind x) =O[atTop] (fun x : ℝ => airyPrefactor kind x) := by
   have hπ := Real.pi_pos
-  have hT := airyInt_tendsto_ofReal_sector (α := π / 3 - π / 6) (by linarith)
+  have hT := IntegralRepresentation.tendsto_ofReal_sector (α := π / 3 - π / 6) (by linarith)
   have hT' : Tendsto (fun s : ℝ => (s : ℂ)) atTop (airySector (π - π / 6)) :=
-    airyInt_tendsto_ofReal_sector (by linarith)
+    IntegralRepresentation.tendsto_ofReal_sector (by linarith)
   cases kind
-  · have := (airy_ai_poincare (δ := π / 6) (by positivity) (by linarith) 0).comp_tendsto hT'
+  · have := (airyAi_poincare (δ := π / 6) (by positivity) (by linarith) 0).comp_tendsto hT'
     simpa [airyExponentialSum, Function.comp_def] using this
-  · have := (airy_aiDeriv_poincare (δ := π / 6) (by positivity) (by linarith) 0).comp_tendsto hT'
+  · have := (airyAiDeriv_poincare (δ := π / 6) (by positivity) (by linarith) 0).comp_tendsto hT'
     simpa [airyExponentialSum, Function.comp_def] using this
-  · have := (airy_bi_poincare (δ := π / 6) (by positivity) (by linarith) 0).comp_tendsto hT
+  · have := (airyBi_poincare (δ := π / 6) (by positivity) (by linarith) 0).comp_tendsto hT
     simpa [airyExponentialSum, Function.comp_def] using this
-  · have := (airy_biDeriv_poincare (δ := π / 6) (by positivity) (by linarith) 0).comp_tendsto hT
+  · have := (airyBiDeriv_poincare (δ := π / 6) (by positivity) (by linarith) 0).comp_tendsto hT
     simpa [airyExponentialSum, Function.comp_def] using this
 
 /-- `‖pref/ζ‖ = (3/2) x^{-3/2} ‖pref‖` on the positive axis. -/
-theorem airyInt_norm_div_zeta (kind : AiryKind) {x : ℝ} (hx : 0 < x) :
+theorem IntegralRepresentation.norm_div_zeta (kind : AiryKind) {x : ℝ} (hx : 0 < x) :
     ‖airyPrefactor kind x / airyZetaComplex x‖ =
       3 / 2 * x ^ (-(3 / 2) : ℝ) * ‖airyPrefactor kind x‖ := by
-  rw [norm_div, airyReal_zeta_ofReal hx, norm_real, Real.norm_of_nonneg (airyZeta_pos hx).le,
-    div_eq_mul_inv, airyInt_airyZeta_recip hx]
+  rw [norm_div, RealRemainders.zeta_ofReal hx, norm_real, Real.norm_of_nonneg (airyZeta_pos hx).le,
+    div_eq_mul_inv, IntegralRepresentation.airyZeta_inv hx]
   ring
 
 /-- Elementary identities for the powers `x^{1/4}, x^{1/2}, x^{3/4}`. -/
-theorem airyInt_quarter_rpow {x : ℝ} (hx : 0 < x) :
+theorem IntegralRepresentation.quarter_rpow {x : ℝ} (hx : 0 < x) :
     x ^ (1 / 4 : ℝ) * x ^ (3 / 4 : ℝ) = x ∧ x ^ (1 / 4 : ℝ) * x ^ (1 / 2 : ℝ) = x ^ (3 / 4 : ℝ) ∧
       x ^ (1 / 4 : ℝ) * x ^ (-(3 / 2) : ℝ) * x ^ (3 / 4 : ℝ) = x ^ (-(1 / 2) : ℝ) := by
   refine ⟨?_, ?_, ?_⟩
@@ -576,10 +589,11 @@ theorem airyInt_quarter_rpow {x : ℝ} (hx : 0 < x) :
   · rw [← Real.rpow_add hx, ← Real.rpow_add hx]; norm_num
 
 /-- Norm of the prefactor of `Bi'(x)` on the positive axis. -/
-theorem airyInt_norm_prefactor_biDeriv {x : ℝ} (hx : 0 < x) :
+theorem IntegralRepresentation.norm_prefactor_biDeriv {x : ℝ} (hx : 0 < x) :
     ‖airyPrefactor .biDeriv x‖ = x ^ (1 / 4 : ℝ) * Real.exp (airyZeta x) / Real.sqrt π := by
-  rw [airyPrefactor, norm_div, norm_mul, airyInt_norm_cpow_quarter hx, Complex.norm_exp,
-    airyReal_zeta_ofReal hx, ofReal_re, Complex.norm_real,
+  rw [airyPrefactor, norm_div, norm_mul, IntegralRepresentation.norm_cpow_quarter hx,
+      Complex.norm_exp,
+    RealRemainders.zeta_ofReal hx, ofReal_re, Complex.norm_real,
     Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
 end DLMF.Airy

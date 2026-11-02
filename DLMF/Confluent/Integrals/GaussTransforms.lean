@@ -16,10 +16,10 @@ This file proves the Gaussian-weighted Laplace transform of the regularized Kumm
 ## Main results
 
 * `gauss_regularizedHGFun`: the Gaussian transform of `𝐌`, for `0 < Re z` (DLMF 13.10.6).
-* `confLP_subordination`: `∫₀^∞ e^{-t²u - ζ²/(4u)} u^{-3/2} du = (2√π/ζ) e^{-ζt}` for
+* `KummerGaussTransform.subordination`: `∫₀^∞ e^{-t²u - ζ²/(4u)} u^{-3/2} du = (2√π/ζ) e^{-ζt}` for
   `ζ, t > 0`.
-* `confLP_gauss_real`: DLMF 13.10.6 for real positive `z`.
-* `confLP_gauss_differentiableOn`: holomorphy of the transform in `z`.
+* `KummerGaussTransform.gauss_real`: DLMF 13.10.6 for real positive `z`.
+* `KummerGaussTransform.gauss_differentiableOn`: holomorphy of the transform in `z`.
 
 ## Implementation notes
 
@@ -48,7 +48,7 @@ open Set
 open scoped Nat
 
 /-- Subordination: `∫₀^∞ e^{-t²u - ζ²/(4u)} u^{-3/2} du = (2√π/ζ) e^{-ζt}` for `ζ, t > 0`. -/
-theorem confLP_subordination {ζ t : ℝ} (hζ : 0 < ζ) (ht : 0 < t) :
+theorem KummerGaussTransform.subordination {ζ t : ℝ} (hζ : 0 < ζ) (ht : 0 < t) :
     ∫ u : ℝ in Ioi 0, exp (-((t : ℂ) ^ 2 * u) - (ζ : ℂ) ^ 2 / (4 * u)) * (u : ℂ) ^ (-(3 / 2 : ℂ)) =
       2 * (Real.sqrt π : ℂ) / ζ * exp (-((ζ : ℂ) * t)) := by
   set y := ζ * t with hy
@@ -114,7 +114,7 @@ theorem confLP_subordination {ζ t : ℝ} (hζ : 0 < ζ) (ht : 0 < t) :
   field_simp
 
 /-- `(1+x)^m ≤ 2^m (1 + x^m)` for `x, m ≥ 0`. -/
-theorem confLP_one_add_rpow_le {x m : ℝ} (hx : 0 ≤ x) (hm : 0 ≤ m) :
+theorem KummerGaussTransform.one_add_rpow_le {x m : ℝ} (hx : 0 ≤ x) (hm : 0 ≤ m) :
     (1 + x) ^ m ≤ 2 ^ m * (1 + x ^ m) := by
   rcases le_total x 1 with h | h
   · calc (1 + x) ^ m ≤ 2 ^ m := Real.rpow_le_rpow (by linarith) (by linarith) hm
@@ -125,7 +125,7 @@ theorem confLP_one_add_rpow_le {x m : ℝ} (hx : 0 ≤ x) (hm : 0 ≤ m) :
       _ ≤ 2 ^ m * (1 + x ^ m) := by gcongr; linarith
 
 /-- A polynomial bound for the Gaussian-transform integrand. -/
-theorem confLP_gauss_bound (a b : ℂ) : ∃ C m : ℝ, 0 ≤ m ∧ ∀ t : ℝ, 0 < t →
+theorem KummerGaussTransform.gauss_bound (a b : ℂ) : ∃ C m : ℝ, 0 ≤ m ∧ ∀ t : ℝ, 0 < t →
     ‖exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) * regularizedHGFun {a} {b} ((t : ℂ) ^ 2)‖ ≤
       C * (t ^ (2 * b.re - 2) + t ^ (2 * b.re - 2 + m)) := by
   obtain ⟨C, hC⟩ := exists_norm_regularizedHGFun_neg_le (b - a) b
@@ -145,7 +145,7 @@ theorem confLP_gauss_bound (a b : ℂ) : ∃ C m : ℝ, 0 ≤ m ∧ ∀ t : ℝ,
   have h2 : (1 + t ^ 2) ^ (-γ) ≤ 2 ^ |γ| * (1 + t ^ (2 * |γ|)) := by
     calc (1 + t ^ 2) ^ (-γ) ≤ (1 + t ^ 2) ^ |γ| :=
           Real.rpow_le_rpow_of_exponent_le (by linarith) (neg_le_abs γ)
-      _ ≤ 2 ^ |γ| * (1 + (t ^ 2) ^ |γ|) := confLP_one_add_rpow_le hs (abs_nonneg γ)
+      _ ≤ 2 ^ |γ| * (1 + (t ^ 2) ^ |γ|) := KummerGaussTransform.one_add_rpow_le hs (abs_nonneg γ)
       _ = 2 ^ |γ| * (1 + t ^ (2 * |γ|)) := by
           rw [← Real.rpow_natCast, ← Real.rpow_mul ht.le]; norm_num
   have htp : 0 < t ^ (2 * b.re - 2) := Real.rpow_pos_of_pos ht _
@@ -159,12 +159,13 @@ theorem confLP_gauss_bound (a b : ℂ) : ∃ C m : ℝ, 0 ≤ m ∧ ∀ t : ℝ,
         rw [Real.rpow_add ht]; ring
 
 /-- Integrability of the 13.10.6 integrand for `0 < re z`. -/
-theorem confLP_gauss_integrableOn {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0 < z.re) :
+theorem KummerGaussTransform.gauss_integrableOn {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re)
+    (hz : 0 < z.re) :
     IntegrableOn (fun t : ℝ => exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
       regularizedHGFun {a} {b} ((t : ℂ) ^ 2)) (Ioi 0) := by
-  obtain ⟨C, m, hm, hC⟩ := confLP_gauss_bound a b
-  have hI1 := cfInt_integrableOn_rpow_exp (r := 2 * b.re - 2) (by linarith) hz
-  have hI2 := cfInt_integrableOn_rpow_exp (r := 2 * b.re - 2 + m) (by linarith) hz
+  obtain ⟨C, m, hm, hC⟩ := KummerGaussTransform.gauss_bound a b
+  have hI1 := KummerIntegrals.integrableOn_rpow_exp (r := 2 * b.re - 2) (by linarith) hz
+  have hI2 := KummerIntegrals.integrableOn_rpow_exp (r := 2 * b.re - 2 + m) (by linarith) hz
   refine ((hI1.add hI2).const_mul C).mono' ?_ ?_
   · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
     refine ContinuousOn.mul (ContinuousOn.mul (by fun_prop) ?_) ?_
@@ -188,13 +189,13 @@ theorem confLP_gauss_integrableOn {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz 
       _ = _ := by simp only [Pi.add_apply]; ring
 
 /-- `((x²:ℝ):ℂ)^w = x^{2w}` for `x > 0`. -/
-theorem confLP_sq_cpow {x : ℝ} (hx : 0 < x) (w : ℂ) :
+theorem KummerGaussTransform.sq_cpow {x : ℝ} (hx : 0 < x) (w : ℂ) :
     (((x ^ 2 : ℝ)) : ℂ) ^ w = (x : ℂ) ^ (2 * w) := by
   have hxc : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   rw [sq, ofReal_mul, mul_cpow_ofReal_nonneg hx.le hx.le, ← cpow_add _ _ hxc]; ring_nf
 
 /-- The inner `t`-integral of 13.10.6: a Kummer Laplace transform after `s = t²`. -/
-theorem confLP_gauss_inner {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {u : ℝ} (hu : 0 < u) :
+theorem KummerGaussTransform.gauss_inner {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {u : ℝ} (hu : 0 < u) :
     ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2) * exp (-((t : ℂ) ^ 2 * u)) =
       1 / 2 * (Gamma (b - 1 / 2) * (((1 + u : ℝ)) : ℂ) ^ (-(b - 1 / 2)) *
@@ -210,7 +211,8 @@ theorem confLP_gauss_inner {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {u : ℝ} (hu
   have ht0 : (0:ℝ) < t := ht
   have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht0.ne'
   simp only [hg, real_smul]
-  rw [show t ^ (2:ℝ) = t ^ 2 by norm_cast, confLP_sq_cpow ht0, show (2:ℝ) - 1 = 1 by norm_num,
+  rw [show t ^ (2:ℝ) = t ^ 2 by norm_cast, KummerGaussTransform.sq_cpow ht0, show (2:ℝ) -
+                                  1 = 1 by norm_num,
     Real.rpow_one, abs_two]
   have hp : (t : ℂ) * (t : ℂ) ^ (2 * (b - 1 / 2 - 1)) = (t : ℂ) ^ (2 * b - 2) := by
     conv_lhs => arg 1; rw [← cpow_one (t : ℂ)]
@@ -225,7 +227,7 @@ theorem confLP_gauss_inner {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {u : ℝ} (hu
   ring
 
 /-- Pfaff's transformation in the form used for 13.10.6. -/
-theorem confLP_gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
+theorem KummerGaussTransform.gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
     (((1 + u : ℝ)) : ℂ) ^ (-(b - 1 / 2)) *
         DLMF.Hypergeometric.regularizedGaussHG a (b - 1 / 2) b (1 / ((1 + u : ℝ) : ℂ)) =
       (u : ℂ) ^ (-(b - 1 / 2)) *
@@ -258,7 +260,7 @@ theorem confLP_gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
 
 /-- The outer `u`-integral of 13.10.6: after `u = 1/v` it is Tricomi's Gauss-type integral 13.4.8.
 -/
-theorem confLP_gauss_outer {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
+theorem KummerGaussTransform.gauss_outer {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
     ∫ u : ℝ in Ioi 0, exp (-(ζ : ℂ) ^ 2 / (4 * u)) * (u : ℂ) ^ (-(3 / 2 : ℂ)) *
         ((u : ℂ) ^ (-(b - 1 / 2)) *
           DLMF.Hypergeometric.regularizedGaussHG (b - 1 / 2) (b - a) b (-(1 / (u : ℂ)))) =
@@ -304,12 +306,13 @@ theorem confLP_gauss_outer {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (h
   ring
 
 /-- `π^{-1/2} = 1/√π` as complex numbers. -/
-theorem confLP_pi_cpow_neg_half : (π : ℂ) ^ (-(1 / 2 : ℂ)) = ((Real.sqrt π)⁻¹ : ℝ) := by
+theorem KummerGaussTransform.pi_cpow_neg_half : (π : ℂ) ^ (-(1 / 2 : ℂ)) =
+    ((Real.sqrt π)⁻¹ : ℝ) := by
   rw [Real.sqrt_eq_rpow, ← Real.rpow_neg Real.pi_pos.le, ofReal_cpow Real.pi_pos.le]
   push_cast; ring_nf
 
 /-- 13.10.6 for real positive `z`, by subordination and Fubini. -/
-theorem confLP_gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
+theorem KummerGaussTransform.gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
     ∫ t : ℝ in Ioi 0, exp (-(ζ : ℂ) * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2) =
       (1 / 2) * (π : ℂ) ^ (-(1 / 2 : ℂ)) * Gamma (b - 1 / 2) *
@@ -322,7 +325,8 @@ theorem confLP_gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (h�
   have hsπ : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hζc : (ζ : ℂ) ≠ 0 := ofReal_ne_zero.mpr hζ.ne'
   have hS : ∀ t : ℝ, 0 < t → ∫ u : ℝ in Ioi 0, k t u =
-      2 * (Real.sqrt π : ℂ) / ζ * exp (-((ζ : ℂ) * t)) := fun t ht => confLP_subordination hζ ht
+      2 * (Real.sqrt π : ℂ) / ζ * exp (-((ζ : ℂ) * t)) := fun t ht =>
+          KummerGaussTransform.subordination hζ ht
   have hpt : ∀ t ∈ Ioi (0:ℝ), exp (-(ζ : ℂ) * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
       regularizedHGFun {a} {b} ((t : ℂ) ^ 2) =
       (ζ / (2 * Real.sqrt π) : ℂ) * ∫ u : ℝ in Ioi 0, G t u := by
@@ -357,13 +361,15 @@ theorem confLP_gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (h�
       have hne : ∫ u : ℝ in Ioi 0, k t u ≠ 0 := by
         rw [hS t ht]
         exact mul_ne_zero (div_ne_zero (mul_ne_zero two_ne_zero hsπ) hζc) (exp_ne_zero _)
-      exact (confLP_integrableOn_of_ne_zero hne).const_mul (c t)
-    · have hI := (confLP_gauss_integrableOn (a := a) (z := (ζ : ℂ)) hb (by simpa using hζ)).norm
+      exact (KummerHankelTransforms.integrableOn_of_ne_zero hne).const_mul (c t)
+    · have hI := (KummerGaussTransform.gauss_integrableOn (a := a) (z := (ζ : ℂ)) hb
+          (by simpa using hζ)).norm
       refine IntegrableOn.congr_fun (hI.const_mul (2 * Real.sqrt π / ζ)) (fun t ht => ?_)
         measurableSet_Ioi
       have ht0 : (0:ℝ) < t := ht
       simp only [Function.uncurry_apply_pair, hG, norm_mul]
-      rw [integral_const_mul, confLP_setIntegral_norm_of_ofReal measurableSet_Ioi (hkR t)
+      rw [integral_const_mul,
+          KummerHankelTransforms.setIntegral_norm_of_ofReal measurableSet_Ioi (hkR t)
         (fun u hu => mul_nonneg (Real.exp_pos _).le (Real.rpow_nonneg (le_of_lt hu) _)), hS t ht0]
       rw [sub_eq_add_neg, Complex.exp_add, show -(ζ : ℂ) * t = -((ζ : ℂ) * t) by ring]
       simp only [hc, norm_mul, norm_div, Complex.norm_real, Complex.norm_ofNat]
@@ -375,8 +381,8 @@ theorem confLP_gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (h�
           DLMF.Hypergeometric.regularizedGaussHG (b - 1 / 2) (b - a) b (-(1 / (u : ℂ))))) := by
     intro u hu
     have hu0 : (0:ℝ) < u := hu
-    have h := confLP_gauss_inner (a := a) hb hu0
-    rw [mul_assoc (Gamma _), confLP_gauss_pfaff a b hu0] at h
+    have h := KummerGaussTransform.gauss_inner (a := a) hb hu0
+    rw [mul_assoc (Gamma _), KummerGaussTransform.gauss_pfaff a b hu0] at h
     have e : ∀ t : ℝ, G t u = (exp (-(ζ : ℂ) ^ 2 / (4 * u)) * (u : ℂ) ^ (-(3 / 2 : ℂ))) *
         (exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) * regularizedHGFun {a} {b} ((t : ℂ) ^ 2) *
           exp (-((t : ℂ) ^ 2 * u))) := by
@@ -397,21 +403,21 @@ theorem confLP_gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (h�
     _ = (ζ / (2 * Real.sqrt π) : ℂ) * (1 / 2 * Gamma (b - 1 / 2) *
           (2 / ζ * kummerU (b - 1 / 2) (a + 1 / 2) ((ζ : ℂ) ^ 2 / 4))) := by
         rw [setIntegral_congr_fun measurableSet_Ioi hinner, integral_const_mul,
-          confLP_gauss_outer hb hζ]
+          KummerGaussTransform.gauss_outer hb hζ]
     _ = _ := by
-        rw [confLP_pi_cpow_neg_half]
+        rw [KummerGaussTransform.pi_cpow_neg_half]
         push_cast
         field_simp
 
 /-- The integrand of 13.10.6 factors as `e^{-z t}` times a `z`-independent part. -/
-theorem confLP_gauss_factor (a b z : ℂ) (t : ℝ) :
+theorem KummerGaussTransform.gauss_factor (a b z : ℂ) (t : ℝ) :
     exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) * regularizedHGFun {a} {b} ((t : ℂ) ^ 2) =
       exp (-z * t) * (exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2)) := by
   rw [sub_eq_add_neg, Complex.exp_add]; ring
 
 /-- Holomorphic dependence of the Gaussian transform of `𝐌` on `z`. -/
-theorem confLP_gauss_differentiableOn {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) :
+theorem KummerGaussTransform.gauss_differentiableOn {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) :
     DifferentiableOn ℂ (fun z : ℂ => ∫ t : ℝ in Ioi 0,
       exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2)) {z : ℂ | 0 < z.re} := by
@@ -425,7 +431,7 @@ theorem confLP_gauss_differentiableOn {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) :
     simp only [sub_re] at hh
     dsimp [δ] at *
     linarith
-  obtain ⟨C, m, hm, hC⟩ := confLP_gauss_bound a b
+  obtain ⟨C, m, hm, hC⟩ := KummerGaussTransform.gauss_bound a b
   let Q (t : ℝ) : ℂ := exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
     regularizedHGFun {a} {b} ((t : ℂ) ^ 2)
   let F (z : ℂ) (t : ℝ) : ℂ := exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
@@ -434,13 +440,15 @@ theorem confLP_gauss_differentiableOn {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) :
   let bd (t : ℝ) : ℝ := C * (t ^ (r + 1) * Real.exp (-(δ * t)) +
     t ^ (r + 1 + m) * Real.exp (-(δ * t)))
   have hbd : IntegrableOn bd (Ioi 0) := by
-    have h1 := cfInt_integrableOn_rpow_exp (r := r + 1) (by dsimp [r]; linarith) hδ
-    have h2 := cfInt_integrableOn_rpow_exp (r := r + 1 + m) (by dsimp [r]; linarith) hδ
+    have h1 := KummerIntegrals.integrableOn_rpow_exp (r := r + 1) (by dsimp [r]; linarith) hδ
+    have h2 := KummerIntegrals.integrableOn_rpow_exp (r := r + 1 + m) (by dsimp [r]; linarith) hδ
     exact (h1.add h2).const_mul C
   have hmeas : ∀ᶠ z in 𝓝 z₀, AEStronglyMeasurable (F z) (volume.restrict (Ioi 0)) := by
     filter_upwards [Metric.ball_mem_nhds _ hδ] with z hz
-    exact (confLP_gauss_integrableOn (a := a) hb (hδ.trans (hre z hz))).aestronglyMeasurable
-  have hF0 : Integrable (F z₀) (volume.restrict (Ioi 0)) := confLP_gauss_integrableOn hb hz₀
+    exact (KummerGaussTransform.gauss_integrableOn (a := a) hb
+        (hδ.trans (hre z hz))).aestronglyMeasurable
+  have hF0 : Integrable (F z₀) (volume.restrict (Ioi 0)) :=
+      KummerGaussTransform.gauss_integrableOn hb hz₀
   have hd := hasDerivAt_integral_of_dominated_loc_of_deriv_le
     (μ := volume.restrict (Ioi 0)) (F := F) (F' := fun z t => -(t : ℂ) * F z t)
     (bound := bd) (Metric.ball_mem_nhds _ hδ) hmeas hF0
@@ -458,7 +466,7 @@ theorem confLP_gauss_differentiableOn {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) :
     have hp2 : t * t ^ (r + m) = t ^ (r + 1 + m) := by
       rw [show r + 1 + m = (r + m) + 1 by ring, Real.rpow_add_one ht.ne']; ring
     dsimp only [F]
-    rw [confLP_gauss_factor, norm_mul, norm_mul, norm_neg, Complex.norm_real,
+    rw [KummerGaussTransform.gauss_factor, norm_mul, norm_mul, norm_neg, Complex.norm_real,
       Real.norm_of_nonneg ht.le, Complex.norm_exp]
     simp only [neg_mul, neg_re, mul_re, ofReal_re, ofReal_im, mul_zero, sub_zero]
     calc t * (Real.exp (-(z.re * t)) * ‖Q t‖)
@@ -491,7 +499,7 @@ theorem gauss_regularizedHGFun {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0
   have hJ : AnalyticOnNhd ℂ (fun z : ℂ => ∫ t : ℝ in Ioi 0,
       exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2)) V :=
-    (confLP_gauss_differentiableOn hb).analyticOnNhd hVo
+    (KummerGaussTransform.gauss_differentiableOn hb).analyticOnNhd hVo
   have hU : AnalyticOnNhd ℂ (fun z : ℂ => (1 / 2) * (π : ℂ) ^ (-(1 / 2 : ℂ)) *
       Gamma (b - 1 / 2) * kummerU (b - 1 / 2) (a + 1 / 2) (z ^ 2 / 4)) V := by
     apply DifferentiableOn.analyticOnNhd _ hVo
@@ -524,7 +532,7 @@ theorem gauss_regularizedHGFun {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0
     apply ht.frequently
     apply Eventually.frequently
     filter_upwards [nhdsWithin_le_nhds (Ioi_mem_nhds (zero_lt_one' ℝ))] with r hr
-    exact confLP_gauss_real hb hr
+    exact KummerGaussTransform.gauss_real hb hr
   exact hJ.eqOn_of_preconnected_of_frequently_eq hU (convex_halfSpace_re_gt 0).isPreconnected
     (by change 0 < ((1:ℝ) : ℂ).re; simp) hfreq hz
 

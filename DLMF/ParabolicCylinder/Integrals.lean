@@ -48,6 +48,8 @@ is shared with the Airy product proofs.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => z*exp (-z^2/4)/Gamma
@@ -57,22 +59,25 @@ theorem pcfU_integral_2 {a z : ℂ} (ha : -1/2 < a.re) (hz : 0 < z.re) :
     HasIntegralAtTop (fun t : ℝ => z*exp (-z^2/4)/Gamma
         (a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (pcfU a z) := by
   have hα : 0 < (a/2+1/4).re := by simp; linarith
-  have hv : pcfU a z = z * exp (-z^2/4) / Gamma (a/2+1/4) * pcfInt_F (a/2+1/4) (-a/2-3/4) (z^2) :=
+  have hv : pcfU a z = z * exp (-z^2/4) / Gamma (a/2+1/4) *
+      CylinderIntegrals.laplaceIntegral (a/2+1/4) (-a/2-3/4) (z^2) :=
       by
-    refine pcfInt_eq_of_real (f := pcfU a)
-      (g := fun z => z * exp (-z^2/4) / Gamma (a/2+1/4) * pcfInt_F (a/2+1/4) (-a/2-3/4) (z^2))
-      (pcfU_entire a).differentiableOn ?_ (fun x hx => pcfInt_U_real_2 ha hx) hz
+    refine CylinderIntegrals.eq_of_real (f := pcfU a)
+      (g := fun z => z * exp (-z^2/4) / Gamma (a/2+1/4) *
+          CylinderIntegrals.laplaceIntegral (a/2+1/4) (-a/2-3/4) (z^2))
+      (pcfU_entire a).differentiableOn ?_ (fun x hx => CylinderIntegrals.U_real_2 ha hx) hz
     exact ((differentiableOn_id.mul
         (differentiableOn_id.pow 2 |>.neg.div_const 4 |>.cexp)).div_const _).mul
-      (pcfInt_differentiableOn_comp hα _)
-  have hI := pcfInt_integrableOn hα (-a/2-3/4) (pcfInt_sq_mem_slitPlane hz)
+      (CylinderIntegrals.differentiableOn_comp hα _)
+  have hI := CylinderIntegrals.integrableOn_laplaceIntegrand hα (-a/2-3/4)
+      (CylinderIntegrals.sq_mem_slitPlane hz)
   rw [show a/2+1/4-1 = a/2-3/4 by ring] at hI
   have T := intervalIntegral_tendsto_integral_Ioi 0 (hI.const_mul (z*exp (-z^2/4)/Gamma (a/2+1/4)))
       tendsto_id
   rw [integral_const_mul] at T
   unfold HasIntegralAtTop
   rw [hv]
-  unfold pcfInt_F
+  unfold CylinderIntegrals.laplaceIntegral
   rw [show a/2+1/4-1 = a/2-3/4 by ring]
   exact T
 
@@ -83,20 +88,23 @@ theorem pcfU_integral_3 {a z : ℂ} (ha : -3/2 < a.re) (hz : 0 < z.re) :
     HasIntegralAtTop (fun t : ℝ => exp (-z^2/4)/Gamma
         (a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (pcfU a z) := by
   have hα : 0 < (a/2+3/4).re := by simp; linarith
-  have hv : pcfU a z = exp (-z^2/4) / Gamma (a/2+3/4) * pcfInt_F (a/2+3/4) (-a/2-1/4) (z^2) := by
-    refine pcfInt_eq_of_real (f := pcfU a)
-      (g := fun z => exp (-z^2/4) / Gamma (a/2+3/4) * pcfInt_F (a/2+3/4) (-a/2-1/4) (z^2))
-      (pcfU_entire a).differentiableOn ?_ (fun x hx => pcfInt_U_real_3 ha hx) hz
+  have hv : pcfU a z = exp (-z^2/4) / Gamma (a/2+3/4) *
+      CylinderIntegrals.laplaceIntegral (a/2+3/4) (-a/2-1/4) (z^2) := by
+    refine CylinderIntegrals.eq_of_real (f := pcfU a)
+      (g := fun z => exp (-z^2/4) / Gamma (a/2+3/4) *
+          CylinderIntegrals.laplaceIntegral (a/2+3/4) (-a/2-1/4) (z^2))
+      (pcfU_entire a).differentiableOn ?_ (fun x hx => CylinderIntegrals.U_real_3 ha hx) hz
     exact ((differentiableOn_id.pow 2 |>.neg.div_const 4 |>.cexp).div_const _).mul
-      (pcfInt_differentiableOn_comp hα _)
-  have hI := pcfInt_integrableOn hα (-a/2-1/4) (pcfInt_sq_mem_slitPlane hz)
+      (CylinderIntegrals.differentiableOn_comp hα _)
+  have hI := CylinderIntegrals.integrableOn_laplaceIntegrand hα (-a/2-1/4)
+      (CylinderIntegrals.sq_mem_slitPlane hz)
   rw [show a/2+3/4-1 = a/2-1/4 by ring] at hI
   have T := intervalIntegral_tendsto_integral_Ioi 0 (hI.const_mul (exp (-z^2/4)/Gamma (a/2+3/4)))
       tendsto_id
   rw [integral_const_mul] at T
   unfold HasIntegralAtTop
   rw [hv]
-  unfold pcfInt_F
+  unfold CylinderIntegrals.laplaceIntegral
   rw [show a/2+3/4-1 = a/2-1/4 by ring]
   exact T
 
@@ -178,11 +186,12 @@ theorem pcfU_vertical_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
       (-z*t+t^2/2)*t^(-a-1/2)) =
       fun y : ℝ => K * (exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(-a-1/2)) := by
     funext y; simp only [K]; ring
-  have h := pcfInt_hasIntegralWholeLine ((pcfCt_vert_integrable z (-a-1/2) hc).const_mul K)
+  have h := CylinderIntegrals.hasIntegralWholeLine
+      ((CylinderContour.vertical_integrable z (-a-1/2) hc).const_mul K)
   have hs : (Real.sqrt (2*π) : ℂ) ≠ 0 :=
     ofReal_ne_zero.mpr (Real.sqrt_ne_zero'.mpr (by positivity))
   have he : exp (z^2/4) * exp (-z^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
-  rw [integral_const_mul, pcfCt_vertical a z hc] at h
+  rw [integral_const_mul, CylinderContour.vertical a z hc] at h
   rw [hfun]
   convert h using 1
   rw [show K * ((Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * pcfU a z) =
@@ -202,16 +211,16 @@ theorem pcfV_horizontal_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
         (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) v ∧ u+v=pcfV
         a z := by
   set K : ℂ := exp (-z^2/4)/(2*π)
-  obtain ⟨hiu, hvu⟩ := pcfCt_horizontal_upper a z hc
-  obtain ⟨hil, hvl⟩ := pcfCt_horizontal_lower a z hc
+  obtain ⟨hiu, hvu⟩ := CylinderContour.horizontal_upper a z hc
+  obtain ⟨hil, hvl⟩ := CylinderContour.horizontal_lower a z hc
   have fl : (fun x : ℝ => let t : ℂ := x-c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) =
       fun x : ℝ => K * (exp (z*((x:ℂ)-c*I) - ((x:ℂ)-c*I)^2/2) * ((x:ℂ)-c*I)^(a-1/2)) := by
     funext x; simp only [K]; ring
   have fu : (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) =
       fun x : ℝ => K * (exp (z*((x:ℂ)+c*I) - ((x:ℂ)+c*I)^2/2) * ((x:ℂ)+c*I)^(a-1/2)) := by
     funext x; simp only [K]; ring
-  refine ⟨_, _, fl ▸ pcfInt_hasIntegralWholeLine (hil.const_mul K),
-    fu ▸ pcfInt_hasIntegralWholeLine (hiu.const_mul K), ?_⟩
+  refine ⟨_, _, fl ▸ CylinderIntegrals.hasIntegralWholeLine (hil.const_mul K),
+    fu ▸ CylinderIntegrals.hasIntegralWholeLine (hiu.const_mul K), ?_⟩
   rw [fl, fu, integral_const_mul, integral_const_mul, hvl, hvu]
   have hV1 := pcfV_eq_mul_I a z
   have hV2 := pcfV_eq_mul_neg_I a z
@@ -248,13 +257,16 @@ theorem pcfU_hankel_integral {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ)
     Tendsto (fun R => Gamma (1/2-a)/(2*π*I)*exp (-z^2/4)*pcfNegativeLoop a z r R) atTop
         (𝓝 (pcfU a z)) := by
   have hΓ : Gamma (1/2 - a) ≠ 0 := Complex.Gamma_ne_zero fun n h => ha n (by linear_combination -h)
-  have hT := ((intervalIntegral_tendsto_integral_Ioi r (pcfCt_g_integrableOn a z hr)
-    tendsto_id).const_mul (pcfCt_kappa a)).add_const (pcfCt_C a z r)
-  rw [pcfCt_loop_value a z hr] at hT
-  have hev : (fun R => pcfCt_kappa a * (∫ t in r..id R, pcfCt_g a z t) + pcfCt_C a z r) =ᶠ[atTop]
+  have hT := ((intervalIntegral_tendsto_integral_Ioi r
+      (CylinderContour.laplaceIntegrand_integrableOn a z hr)
+    tendsto_id).const_mul (CylinderContour.jump a)).add_const (CylinderContour.circleIntegral a z r)
+  rw [CylinderContour.loop_value a z hr] at hT
+  have hev : (fun R => CylinderContour.jump a *
+      (∫ t in r..id R, CylinderContour.laplaceIntegrand a z t) +
+      CylinderContour.circleIntegral a z r) =ᶠ[atTop]
       (fun R => pcfNegativeLoop a z r R) := by
     filter_upwards [eventually_gt_atTop 0] with R hR
-    exact (pcfCt_loop_eq a z hr hR).symm
+    exact (CylinderContour.loop_eq a z hr hR).symm
   have hT' := (hT.congr' hev).const_mul (Gamma (1/2-a)/(2*π*I)*exp (-z^2/4))
   have hv : Gamma (1/2-a)/(2*π*I)*exp (-z^2/4) *
       (2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹) =
@@ -281,9 +293,10 @@ theorem pcfU_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4
       (2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z) := by
   have hca' : 2*c < 1/2 + a.re := by simpa using hca
   have hfun : (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1) =
-      pcfInt_B a z c := rfl
-  rw [hfun, ← pcfInt_B_integral a hz0 hz hc hca']
-  exact pcfInt_hasIntegralWholeLine (pcfInt_B_integrable a hz0 hz hc hca')
+      CylinderIntegrals.barnesIntegrand a z c := rfl
+  rw [hfun, ← CylinderIntegrals.barnesIntegrand_integral a hz0 hz hc hca']
+  exact CylinderIntegrals.hasIntegralWholeLine
+      (CylinderIntegrals.barnesIntegrand_integrable a hz0 hz hc hca')
 
 /-- Straight separating Barnes contour; exceptional-parameter deformations need residue
 corrections. -/
@@ -296,7 +309,7 @@ theorem pcfU_barnes_integral {a z : ℂ} (_ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz
   pcfU_barnes_integral' hz0 hz hc hca
 
 /-- `arg (±i z) = arg z ± π/2` for `|arg z| < π/2`. -/
-theorem pcfInt_arg_I_mul {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) :
+theorem CylinderIntegrals.arg_I_mul {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) :
     arg (I*z) = arg z + π/2 ∧ arg (-I*z) = arg z - π/2 := by
   obtain ⟨h1, h2⟩ := abs_lt.mp hz
   constructor
@@ -305,9 +318,9 @@ theorem pcfInt_arg_I_mul {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) :
       arg_neg_I]; ring
 
 /-- `(±i z)^w = z^w e^{±iπw/2}` for `|arg z| < π/2`. -/
-theorem pcfInt_I_mul_cpow {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (w : ℂ) :
+theorem CylinderIntegrals.I_mul_cpow {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (w : ℂ) :
     (I*z)^w = z^w * exp (π/2*I*w) ∧ (-I*z)^w = z^w * exp (-(π/2)*I*w) := by
-  obtain ⟨ha1, ha2⟩ := pcfInt_arg_I_mul hz0 hz
+  obtain ⟨ha1, ha2⟩ := CylinderIntegrals.arg_I_mul hz0 hz
   have hl1 : log (I*z) = log z + π/2*I := by
     apply Complex.ext
     · simp [log_re]
@@ -333,7 +346,7 @@ theorem pcfV_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) 
       (2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z) := by
   have hca' : 2*c < 1/2 + (-a).re := by simpa using hca
   have hz2 : |arg z| < π/2 := by linarith [Real.pi_pos]
-  obtain ⟨ha1, ha2⟩ := pcfInt_arg_I_mul hz0 hz2
+  obtain ⟨ha1, ha2⟩ := CylinderIntegrals.arg_I_mul hz0 hz2
   have hp0 : I*z ≠ 0 := mul_ne_zero I_ne_zero hz0
   have hm0 : -I*z ≠ 0 := mul_ne_zero (neg_ne_zero.mpr I_ne_zero) hz0
   have hpa : |arg (I*z)| < 3*π/4 := by
@@ -342,25 +355,28 @@ theorem pcfV_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) 
     rw [ha2]; obtain ⟨h1, h2⟩ := abs_lt.mp hz; rw [abs_lt]; constructor <;> linarith
   have hfun : (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t))
       =
-      fun y => (pcfInt_B (-a) (I*z) c y + pcfInt_B (-a) (-I*z) c y)/2 := by
+      fun y => (CylinderIntegrals.barnesIntegrand (-a) (I*z) c y +
+          CylinderIntegrals.barnesIntegrand (-a) (-I*z) c y)/2 := by
     funext y
-    simp only [pcfInt_B]
-    obtain ⟨e1, e2⟩ := pcfInt_I_mul_cpow hz0 hz2 (2*((c:ℂ)+y*I))
+    simp only [CylinderIntegrals.barnesIntegrand]
+    obtain ⟨e1, e2⟩ := CylinderIntegrals.I_mul_cpow hz0 hz2 (2*((c:ℂ)+y*I))
     rw [e1, e2, show (1/2:ℂ)+1*(-a) = 1/2+-1*a by ring, Complex.cos]
     have q1 : exp (π/2*I*(2*((c:ℂ)+y*I))) = exp (π*((c:ℂ)+y*I)*I) := by congr 1; ring
     have q2 : exp (-(π/2)*I*(2*((c:ℂ)+y*I))) = exp (-(π*((c:ℂ)+y*I))*I) := by congr 1; ring
     rw [q1, q2]; ring
-  have i1 := pcfInt_B_integrable (-a) hp0 hpa hc hca'
-  have i2 := pcfInt_B_integrable (-a) hm0 hma hc hca'
+  have i1 := CylinderIntegrals.barnesIntegrand_integrable (-a) hp0 hpa hc hca'
+  have i2 := CylinderIntegrals.barnesIntegrand_integrable (-a) hm0 hma hc hca'
   rw [hfun]
-  suffices hI : ∫ y, (pcfInt_B (-a) (I*z) c y + pcfInt_B (-a) (-I*z) c y)/2 =
+  suffices hI : ∫ y, (CylinderIntegrals.barnesIntegrand (-a) (I*z) c y +
+      CylinderIntegrals.barnesIntegrand (-a) (-I*z) c y)/2 =
       2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z by
-    rw [← hI]; exact pcfInt_hasIntegralWholeLine ((i1.add i2).div_const 2)
-  rw [integral_div, integral_add i1 i2, pcfInt_B_integral (-a) hp0 hpa hc hca',
-    pcfInt_B_integral (-a) hm0 hma hc hca']
+    rw [← hI]; exact CylinderIntegrals.hasIntegralWholeLine ((i1.add i2).div_const 2)
+  rw [integral_div, integral_add i1 i2,
+      CylinderIntegrals.barnesIntegrand_integral (-a) hp0 hpa hc hca',
+    CylinderIntegrals.barnesIntegrand_integral (-a) hm0 hma hc hca']
   have hV1 := pcfV_eq_mul_I a z
   have hV2 := pcfV_eq_mul_neg_I a z
-  obtain ⟨f1, f2⟩ := pcfInt_I_mul_cpow hz0 hz2 (-a+1/2)
+  obtain ⟨f1, f2⟩ := CylinderIntegrals.I_mul_cpow hz0 hz2 (-a+1/2)
   rw [f1, f2, show (I*z)^2 = -z^2 by rw [mul_pow, I_sq]; ring,
     show (-I*z)^2 = -z^2 by rw [mul_pow, neg_sq, I_sq]; ring, show (1/2:ℂ)+1*(-a) = 1/2+-1*a by
                               ring]
@@ -395,16 +411,16 @@ theorem pcf_integral_1 {μ : ℂ} (hμ : 0 < μ.re) (a : ℂ) :
         (Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma ((μ+a+3/2)/2)) := by
   obtain ⟨hI, hV⟩ := laplace_kummerU_gauss (a := a/2+1/4) (b := μ/2) (c := 1/2) (z := 1)
     (by simp; linarith) (by simp; linarith) (by simp)
-  obtain ⟨hI2, hV2⟩ := pcfInt_sq_half_subst hI
+  obtain ⟨hI2, hV2⟩ := CylinderIntegrals.sq_half_subst hI
   set C : ℂ := (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1)
   have heq : EqOn (fun t : ℝ => C * ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 1 (t^2/2)))
       (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(μ-1)*pcfU a t) (Ioi 0) :=
-    fun t ht => (pcfInt_integrand_1 μ a ht).symm
+    fun t ht => (CylinderIntegrals.integrand_1 μ a ht).symm
   have H := IntegrableOn.congr_fun (hI2.const_mul C) heq measurableSet_Ioi
   unfold HasIntegralAtTop
   have T := intervalIntegral_tendsto_integral_Ioi 0 H tendsto_id
   rw [← setIntegral_congr_fun measurableSet_Ioi heq, integral_const_mul, hV2, hV, sub_self,
-    pcfInt_regularizedGaussHG_zero] at T
+    CylinderIntegrals.regularizedGaussHG_zero] at T
   have hd := Complex.Gamma_mul_Gamma_add_half (μ/2)
   rw [show 2*(μ/2) = μ by ring] at hd
   have h2 : C * (2:ℂ)^(1-μ) = (2:ℂ)^(-(μ+a+1/2)/2) := by
@@ -431,17 +447,17 @@ theorem pcf_integral_2 {a : ℂ} (ha : a.re < -1/2) :
   have hab : a/2+1/4 = -(μ/2) := by rw [hμ]; ring
   have hI := (laplace_kummerU_gauss (a := a/2+1/4) (b := μ/2) (c := 1/2) (z := 2) hb
     (by simp [hμ]; linarith) (by simp)).1
-  obtain ⟨hI2, hV2⟩ := pcfInt_sq_half_subst hI
+  obtain ⟨hI2, hV2⟩ := CylinderIntegrals.sq_half_subst hI
   set C : ℂ := (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1)
   have heq : EqOn (fun t : ℝ => C * ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 2 (t^2/2)))
       (fun t : ℝ => exp (-3*t^2/4)*(t:ℂ)^(-a-3/2)*pcfU a t) (Ioi 0) := fun t ht => by
     rw [show -a-3/2 = μ - 1 by rw [hμ]; ring]
-    exact (pcfInt_integrand_2 μ a ht).symm
+    exact (CylinderIntegrals.integrand_2 μ a ht).symm
   have H := IntegrableOn.congr_fun (hI2.const_mul C) heq measurableSet_Ioi
   unfold HasIntegralAtTop
   have T := intervalIntegral_tendsto_integral_Ioi 0 H tendsto_id
   rw [← setIntegral_congr_fun measurableSet_Ioi heq, integral_const_mul, hV2, hab,
-    pcfInt_laplace_two hb] at T
+    CylinderIntegrals.laplace_two hb] at T
   have hd := Complex.Gamma_mul_Gamma_add_half (μ/2)
   rw [show 2*(μ/2) = μ by ring] at hd
   have h2 : C * (2:ℂ)^(1-μ) * (2:ℂ)^(-(μ/2)) = (2:ℂ)^(1/4+a/2) := by
@@ -463,7 +479,7 @@ theorem pcf_integral_2 {a : ℂ} (ha : a.re < -1/2) :
   exact T
 
 /-- `‖cos w‖ ≤ e^{|Im w|}`. -/
-theorem pcfCt_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
+theorem CylinderContour.norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
   rw [Complex.cos]
   have h1 : ‖exp (w*I)‖ ≤ Real.exp |w.im| := by
     rw [Complex.norm_exp]; apply Real.exp_le_exp.mpr; simp; linarith [neg_abs_le w.im]
@@ -475,7 +491,7 @@ theorem pcfCt_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
 
 /-- DLMF 12.5.4 as a Lebesgue integral: `e^{-t²/4} U(a,t) = √(2/π) ∫₀^∞ s^{-a-1/2} e^{-s²/2}
 cos(ts + (a/2+1/4)π) ds` for `re a < 1/2`, real `t`. -/
-theorem pcfCt_U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
+theorem CylinderContour.U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
     IntegrableOn (fun s : ℝ => (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos (t*s + (a/2+1/4)*π)) (Ioi 0)
         ∧
     exp (-(t:ℂ)^2/4) * pcfU a t =
@@ -494,7 +510,8 @@ theorem pcfCt_U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
       have e : (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2 - 0*s) = (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) := by
         simp
       rw [e, norm_mul]
-      refine mul_le_mul_of_nonneg_left ((pcfCt_norm_cos_le _).trans (le_of_eq ?_)) (norm_nonneg _)
+      refine mul_le_mul_of_nonneg_left ((CylinderContour.norm_cos_le _).trans (le_of_eq ?_))
+          (norm_nonneg _)
       congr 2; simp
   refine ⟨hI, ?_⟩
   have h4 := pcfU_integral_4 ha (t:ℂ)
@@ -510,8 +527,9 @@ theorem pcfCt_U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
     cos (t*s + (a/2+1/4)*π)) * he
 
 /-- DLMF 12.12.3 on the strip `-1/2 < re a < 1/2`, as a Lebesgue integral (Fubini against
-12.5.4 and the kernel `pcfCt_kernel`). -/
-theorem pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
+12.5.4 and the kernel `CylinderContour.kernel`). -/
+theorem CylinderContour.integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2)
+    {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) (Ioi 0) ∧
     ∫ t in Ioi (0:ℝ), exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
       (Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x := by
@@ -525,10 +543,11 @@ theorem pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) 
   set G1 : ℝ → ℂ := fun t => (t:ℂ)^(-a-1/2) / ((x:ℂ)^2 + (t:ℂ)^2)
   set G2 : ℝ → ℂ := fun s => (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2)
   have hG1 : IntegrableOn G1 (Ioi 0) := by
-    have h := (integrable_comp_exp (pcfCt_gs μ x 0)).mp
-      ((funext (pcfCt_Phi_real μ x 0)) ▸ pcfCt_Phi_real_integrable hm0 hm2 hx 0)
+    have h := (integrable_comp_exp (CylinderContour.stieltjesIntegrand μ x 0)).mp
+      ((funext (CylinderContour.stieltjesKernel_real μ x 0)) ▸
+          CylinderContour.stieltjesKernel_real_integrable hm0 hm2 hx 0)
     refine h.congr_fun (fun t _ => ?_) measurableSet_Ioi
-    simp [pcfCt_gs, G1, hμ1]
+    simp [CylinderContour.stieltjesIntegrand, G1, hμ1]
   have hc : -1 < (-a-1/2).re := by simp; linarith
   have hG2 : IntegrableOn G2 (Ioi 0) := by
     refine (integrableOn_pcfIntegrand hc 0).congr_fun (fun s _ => ?_) measurableSet_Ioi
@@ -542,14 +561,14 @@ theorem pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) 
     · refine Eventually.of_forall fun q => ?_
       simp only [hF, norm_mul]
       have hcos : ‖cos ((q.1:ℂ)*q.2 + θ)‖ ≤ Real.exp |θ.im| :=
-        (pcfCt_norm_cos_le _).trans (le_of_eq (by simp))
+        (CylinderContour.norm_cos_le _).trans (le_of_eq (by simp))
       calc ‖G1 q.1‖ * (‖G2 q.2‖ * ‖cos ((q.1:ℂ)*q.2 + θ)‖)
           ≤ ‖G1 q.1‖ * (‖G2 q.2‖ * Real.exp |θ.im|) := by gcongr
         _ = _ := by ring
   have hfeq : ∀ t : ℝ, exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
       (Real.sqrt (2/π):ℂ) * ∫ s in Ioi (0:ℝ), F (t, s) := by
     intro t
-    have h := (pcfCt_U_cos ha2 t).2
+    have h := (CylinderContour.U_cos ha2 t).2
     rw [show exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
       G1 t * (exp (-(t:ℂ)^2/4) * pcfU a t) by simp only [G1]; ring, h, ← integral_const_mul,
       ← integral_const_mul, ← integral_const_mul]
@@ -566,7 +585,7 @@ theorem pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) 
   have hin : ∀ s ∈ Ioi (0:ℝ), ∫ t in Ioi (0:ℝ), F (t, s) =
       π/2 * (x:ℂ)^(-a-3/2) * ((s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2 - x*s)) := by
     intro s hs
-    have hk := (pcfCt_kernel hm0 hm2 hx (le_of_lt hs)).2
+    have hk := (CylinderContour.kernel hm0 hm2 hx (le_of_lt hs)).2
     rw [hμ1, ← hθμ, show μ - 2 = -a-3/2 by rw [hμ]; ring] at hk
     rw [show (fun t : ℝ => F (t, s)) = fun t : ℝ => G2 s * ((t:ℂ)^(-a-1/2) * cos (t*s + θ) /
       ((x:ℂ)^2 + (t:ℂ)^2)) from funext fun t => by simp only [hF, G1]; ring, integral_const_mul, hk]
@@ -592,7 +611,7 @@ theorem pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) 
   linear_combination (-K) * he + (-K * exp ((x:ℂ)^2/4) * exp (-(x:ℂ)^2/4)) * hG'
 
 /-- Elementary: `t^r ≤ t^{q₁} + t^{q₂}` for `t > 0` and `q₁ ≤ r ≤ q₂`. -/
-theorem pcfCt_rpow_le_add {t q1 q2 r : ℝ} (ht : 0 < t) (h1 : q1 ≤ r) (h2 : r ≤ q2) :
+theorem CylinderContour.rpow_le_add {t q1 q2 r : ℝ} (ht : 0 < t) (h1 : q1 ≤ r) (h2 : r ≤ q2) :
     t ^ r ≤ t ^ q1 + t ^ q2 := by
   rcases le_total t 1 with h | h
   · have := Real.rpow_le_rpow_of_exponent_ge ht h h1
@@ -603,12 +622,12 @@ theorem pcfCt_rpow_le_add {t q1 q2 r : ℝ} (ht : 0 < t) (h1 : q1 ≤ r) (h2 : r
     linarith
 
 /-- Local domination for the integrand of 12.12.3 in the parameter `a`. -/
-theorem pcfCt_integral_3_dom {a0 : ℂ} (ha0 : a0.re < 1/2) {x : ℝ} (hx : 0 < x) :
+theorem CylinderContour.integral_3_gaussMajorant {a0 : ℂ} (ha0 : a0.re < 1/2) {x : ℝ} (hx : 0 < x) :
     ∃ V ∈ 𝓝 a0, ∃ g : ℝ → ℝ, IntegrableOn g (Ioi 0) ∧ ∀ t ∈ Ioi (0:ℝ), ∀ a ∈ V,
       ‖exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t‖ ≤ g t := by
   set δ := (1/2 - a0.re)/2 with hδ
   have hδ0 : 0 < δ := by rw [hδ]; linarith
-  obtain ⟨M, hM⟩ := pcfCt_U_decay (‖a0‖ + δ + 1/2)
+  obtain ⟨M, hM⟩ := CylinderContour.U_decay (‖a0‖ + δ + 1/2)
   set q1 := -a0.re - 1/2 - δ
   set q2 := -a0.re - 1/2 + δ
   refine ⟨Metric.ball a0 δ, Metric.ball_mem_nhds _ hδ0,
@@ -634,7 +653,7 @@ theorem pcfCt_integral_3_dom {a0 : ℂ} (ha0 : a0.re < 1/2) {x : ℝ} (hx : 0 < 
       rw [show ((x:ℂ)^2+(t:ℂ)^2) = ((x^2+t^2 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
         Real.norm_eq_abs, abs_of_pos (by positivity)]
       nlinarith
-    have hrp := pcfCt_rpow_le_add (r := -a.re - 1/2) ht (q1 := q1) (q2 := q2)
+    have hrp := CylinderContour.rpow_le_add (r := -a.re - 1/2) ht (q1 := q1) (q2 := q2)
       (by simp only [q1]; linarith [(abs_lt.mp hre).2])
           (by simp only [q2]; linarith [(abs_lt.mp hre).1])
     have hx2 : 0 < x^2 := by positivity
@@ -648,7 +667,7 @@ theorem pcfCt_integral_3_dom {a0 : ℂ} (ha0 : a0.re < 1/2) {x : ℝ} (hx : 0 < 
           exact div_le_div₀ (by positivity) hrp hx2 hden
       _ = _ := by ring
 /-- DLMF 12.12.3 as a Lebesgue integral on `(0,∞)`, for all `Re a < 1/2`. -/
-theorem pcfCt_integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
+theorem CylinderContour.integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) (Ioi 0) ∧
     ∫ t in Ioi (0:ℝ), exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
       (Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x := by
@@ -657,7 +676,7 @@ theorem pcfCt_integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) 
   have hint : ∀ b ∈ Ω, IntegrableOn
       (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-b-1/2)/(x^2+t^2:ℂ)*pcfU b t) (Ioi 0) := by
     intro b hb
-    obtain ⟨V, hV, g, hg, hle⟩ := pcfCt_integral_3_dom (a0 := b) hb hx
+    obtain ⟨V, hV, g, hg, hle⟩ := CylinderContour.integral_3_gaussMajorant (a0 := b) hb hx
     refine Integrable.mono' hg ?_ ?_
     · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
       intro t ht
@@ -691,7 +710,7 @@ theorem pcfCt_integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) 
         ((by fun_prop : Differentiable ℂ fun b : ℂ => -b-1/2).const_cpow (Or.inl htc))).div_const
         _).mul (pcfU_entire_order (t:ℂ))
     · intro b hb
-      obtain ⟨V, hV, g, hg, hle⟩ := pcfCt_integral_3_dom (a0 := b) hb hx
+      obtain ⟨V, hV, g, hg, hle⟩ := CylinderContour.integral_3_gaussMajorant (a0 := b) hb hx
       exact ⟨V, hV, g, hg, (ae_restrict_iff' measurableSet_Ioi).mpr
         (Eventually.of_forall fun t ht c hc => hle t ht c hc)⟩
   have hxc : (x:ℂ) ≠ 0 := by exact_mod_cast hx.ne'
@@ -715,7 +734,8 @@ theorem pcfCt_integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) 
     filter_upwards [Metric.ball_mem_nhds (0:ℂ) (by norm_num : (0:ℝ) < 1/2)] with b hb
     have hb' : ‖b‖ < 1/2 := by simpa using hb
     have := abs_re_le_norm b
-    exact (pcfCt_integral_3_strip (by linarith [neg_abs_le b.re]) (by linarith [le_abs_self b.re])
+    exact (CylinderContour.integral_3_strip (by linarith [neg_abs_le b.re])
+        (by linarith [le_abs_self b.re])
       hx).2
   exact (hΛ.analyticOnNhd hΩo).eqOn_of_preconnected_of_eventuallyEq (hR.analyticOnNhd hΩo)
     (convex_halfSpace_re_lt (1/2)).isPreconnected h0 hev ha
@@ -727,13 +747,13 @@ theorem pcfCt_integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) 
 theorem pcf_integral_3 {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
     HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) 0
         ((Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x) := by
-  obtain ⟨hI, hv⟩ := pcfCt_integral_3_all ha hx
+  obtain ⟨hI, hv⟩ := CylinderContour.integral_3_all ha hx
   unfold HasIntegralAtTop
   rw [← hv]
   exact intervalIntegral_tendsto_integral_Ioi 0 hI tendsto_id
 
 /-- Exponential lower bound for the hyperbolic sine away from its zero. -/
-lemma pcfIntegral4_sqrt_sinh_lower {t : ℝ} (ht : 1 ≤ t) :
+lemma CylinderSquareIntegral.sqrt_sinh_lower {t : ℝ} (ht : 1 ≤ t) :
     Real.exp t / 2 ≤ Real.sqrt (Real.sinh (2*t)) := by
   have he1 : 1 ≤ Real.exp (2*t) := Real.one_le_exp_iff.mpr (by linarith)
   have he2 : Real.exp (-2*t) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
@@ -747,7 +767,7 @@ lemma pcfIntegral4_sqrt_sinh_lower {t : ℝ} (ht : 1 ≤ t) :
 
 /-- The hyperbolic weight in the cylinder square integral is integrable
 precisely on the needed exponential side of the parameter bound. -/
-lemma pcfIntegral4_weight_integrable {b : ℝ} (hb : b < 1) :
+lemma CylinderSquareIntegral.weight_integrable {b : ℝ} (hb : b < 1) :
     IntegrableOn (fun t : ℝ => Real.exp (b*t) / Real.sqrt (Real.sinh (2*t))) (Ioi 0) := by
   have hc : ContinuousOn (fun t : ℝ => Real.exp (b*t) / Real.sqrt (Real.sinh (2*t))) (Ioi 0) := by
     refine (by fun_prop : Continuous (fun t : ℝ => Real.exp (b*t))).continuousOn.div
@@ -784,7 +804,7 @@ lemma pcfIntegral4_weight_integrable {b : ℝ} (hb : b < 1) :
     rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
     calc Real.exp (b*t) / Real.sqrt (Real.sinh (2*t)) ≤ Real.exp (b*t) / (Real.exp t/2) :=
         div_le_div_of_nonneg_left (by positivity) (by positivity)
-            (pcfIntegral4_sqrt_sinh_lower ht.le)
+            (CylinderSquareIntegral.sqrt_sinh_lower ht.le)
       _ = 2 * Real.exp ((b-1)*t) := by
         rw [div_div_eq_mul_div, mul_comm (Real.exp (b*t)), mul_div_assoc, ← Real.exp_sub]
         congr 2
@@ -804,7 +824,7 @@ lemma pcfIntegral4_weight_integrable {b : ℝ} (hb : b < 1) :
   exact hnear.union hfar
 
 /-- Uniform-in-`z` majorant for the cylinder square-integral kernel. -/
-lemma pcfIntegral4_kernel_norm_le (a z : ℂ) {t : ℝ} :
+lemma CylinderSquareIntegral.kernel_norm_le (a z : ℂ) {t : ℝ} :
     ‖exp (2*a*t + z^2/2*Real.tanh t) / (Real.sqrt (Real.sinh (2*t)) : ℂ)‖ ≤
       Real.exp (‖z‖^2/2) * (Real.exp (2*a.re*t) / Real.sqrt (Real.sinh (2*t))) := by
   have harg : (z^2/2*(Real.tanh t : ℂ)).re ≤ ‖z‖^2/2 := by
@@ -826,7 +846,7 @@ lemma pcfIntegral4_kernel_norm_le (a z : ℂ) {t : ℝ} :
     _ = _ := by rw [Real.exp_add]; ring
 
 /-- Continuity in the integration variable away from the integrable endpoint. -/
-lemma pcfIntegral4_kernel_continuousOn (a z : ℂ) :
+lemma CylinderSquareIntegral.kernel_continuousOn (a z : ℂ) :
     ContinuousOn (fun t : ℝ =>
       exp (2*a*t + z^2/2*Real.tanh t) / (Real.sqrt (Real.sinh (2*t)) : ℂ)) (Ioi 0) := by
   have htan : Continuous (fun t : ℝ => Real.tanh t) := by
@@ -839,21 +859,21 @@ lemma pcfIntegral4_kernel_continuousOn (a z : ℂ) :
     (Real.sinh_pos_iff.mpr (mul_pos (by norm_num) ht))))
 
 /-- Absolute convergence of the cylinder square-integral kernel. -/
-lemma pcfIntegral4_kernel_integrable {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
+lemma CylinderSquareIntegral.kernel_integrable {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
     IntegrableOn (fun t : ℝ =>
       exp (2*a*t + z^2/2*Real.tanh t) / (Real.sqrt (Real.sinh (2*t)) : ℂ)) (Ioi 0) := by
-  refine ((pcfIntegral4_weight_integrable (b := 2*a.re) (by linarith)).const_mul
+  refine ((CylinderSquareIntegral.weight_integrable (b := 2*a.re) (by linarith)).const_mul
     (Real.exp (‖z‖^2/2))).mono'
-    ((pcfIntegral4_kernel_continuousOn a z).aestronglyMeasurable measurableSet_Ioi) ?_
+    ((CylinderSquareIntegral.kernel_continuousOn a z).aestronglyMeasurable measurableSet_Ioi) ?_
   filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
-  exact pcfIntegral4_kernel_norm_le a z
+  exact CylinderSquareIntegral.kernel_norm_le a z
 
 /-- Absolute convergence, including the original normalization, of DLMF 12.12.4. -/
 theorem pcf_integral_4_integrable {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
     IntegrableOn (fun t : ℝ => 2^(3/2:ℂ)/π*Gamma (1/2-a)*
       exp (2*a*t+z^2/2*Real.tanh t)/(Real.sqrt (Real.sinh (2*t)):ℂ)) (Ioi 0) := by
   simpa only [mul_div_assoc, IntegrableOn] using
-    (pcfIntegral4_kernel_integrable ha z).const_mul ((2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-a))
+    (CylinderSquareIntegral.kernel_integrable ha z).const_mul ((2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-a))
 
 /-- Products of Weber solutions obey the common symmetric-square equation.
 This is the ODE needed to identify the convergent integral in DLMF 12.12.4. -/
@@ -877,29 +897,29 @@ def pcfIntegral4Moment (a : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
   ∫ t : ℝ in Ioi 0, (Real.tanh t : ℂ)^n * pcfIntegral4Kernel a z t
 
 /-- Continuity of the hyperbolic factor in the moment kernels. -/
-lemma pcfIntegral4_tanh_continuous : Continuous (fun t : ℝ => (Real.tanh t : ℂ)) := by
+lemma CylinderSquareIntegral.tanh_continuous : Continuous (fun t : ℝ => (Real.tanh t : ℂ)) := by
   have htan : Continuous (fun t : ℝ => Real.tanh t) := by
     simp only [Real.tanh_eq_sinh_div_cosh]
     exact Real.continuous_sinh.div Real.continuous_cosh fun t => ne_of_gt (Real.cosh_pos t)
   exact Complex.continuous_ofReal.comp htan
 
 /-- Hyperbolic moments have the same integrable majorant as the base kernel. -/
-lemma pcfIntegral4_moment_norm_le (a z : ℂ) (n : ℕ) (t : ℝ) :
+lemma CylinderSquareIntegral.moment_norm_le (a z : ℂ) (n : ℕ) (t : ℝ) :
     ‖(Real.tanh t : ℂ)^n * pcfIntegral4Kernel a z t‖ ≤ ‖pcfIntegral4Kernel a z t‖ := by
   rw [norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs]
   exact mul_le_of_le_one_left (norm_nonneg _)
       (pow_le_one₀ (abs_nonneg _) (Real.abs_tanh_lt_one t).le)
 
 /-- Every nonnegative hyperbolic moment is absolutely integrable. -/
-lemma pcfIntegral4_moment_integrable {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : ℂ) :
+lemma CylinderSquareIntegral.moment_integrable {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : ℂ) :
     IntegrableOn (fun t : ℝ => (Real.tanh t : ℂ)^n * pcfIntegral4Kernel a z t) (Ioi 0) := by
-  refine (pcfIntegral4_kernel_integrable ha z).norm.mono'
-    (((pcfIntegral4_tanh_continuous.pow n).continuousOn.mul
-      (pcfIntegral4_kernel_continuousOn a z)).aestronglyMeasurable measurableSet_Ioi) ?_
-  exact Eventually.of_forall (pcfIntegral4_moment_norm_le a z n)
+  refine (CylinderSquareIntegral.kernel_integrable ha z).norm.mono'
+    (((CylinderSquareIntegral.tanh_continuous.pow n).continuousOn.mul
+      (CylinderSquareIntegral.kernel_continuousOn a z)).aestronglyMeasurable measurableSet_Ioi) ?_
+  exact Eventually.of_forall (CylinderSquareIntegral.moment_norm_le a z n)
 
 /-- Differentiating the argument raises the hyperbolic moment index. -/
-lemma pcfIntegral4_hasDerivAt_kernel_arg (a z : ℂ) (n : ℕ) (t : ℝ) :
+lemma CylinderSquareIntegral.hasDerivAt_kernel_arg (a z : ℂ) (n : ℕ) (t : ℝ) :
     HasDerivAt (fun w => (Real.tanh t : ℂ)^n * pcfIntegral4Kernel a w t)
       (z * ((Real.tanh t : ℂ)^(n+1) * pcfIntegral4Kernel a z t)) z := by
   unfold pcfIntegral4Kernel
@@ -910,13 +930,13 @@ lemma pcfIntegral4_hasDerivAt_kernel_arg (a z : ℂ) (n : ℕ) (t : ℝ) :
   ring
 
 /-- Differentiation under the absolutely convergent moment integral. -/
-lemma pcfIntegral4_hasDerivAt_moment {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : ℂ) :
+lemma CylinderSquareIntegral.hasDerivAt_moment {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : ℂ) :
     HasDerivAt (pcfIntegral4Moment a n) (z * pcfIntegral4Moment a (n+1) z) z := by
   have hm (w : ℂ) (k : ℕ) : AEStronglyMeasurable
       (fun t : ℝ => (Real.tanh t : ℂ)^k * pcfIntegral4Kernel a w t)
       (volume.restrict (Ioi 0)) :=
-    (((pcfIntegral4_tanh_continuous.pow k).continuousOn.mul
-      (pcfIntegral4_kernel_continuousOn a w)).aestronglyMeasurable measurableSet_Ioi)
+    (((CylinderSquareIntegral.tanh_continuous.pow k).continuousOn.mul
+      (CylinderSquareIntegral.kernel_continuousOn a w)).aestronglyMeasurable measurableSet_Ioi)
   have he := hasDerivAt_integral_of_dominated_loc_of_deriv_le
     (μ := volume.restrict (Ioi 0))
     (F := fun w t => (Real.tanh t : ℂ)^n * pcfIntegral4Kernel a w t)
@@ -925,11 +945,11 @@ lemma pcfIntegral4_hasDerivAt_moment {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : 
       (Real.exp (2*a.re*t) / Real.sqrt (Real.sinh (2*t)))))
     (Metric.ball_mem_nhds z zero_lt_one)
     (Eventually.of_forall fun w => hm w n)
-    (pcfIntegral4_moment_integrable ha n z)
+    (CylinderSquareIntegral.moment_integrable ha n z)
     ((hm z (n+1)).const_mul z) ?_
-    (((pcfIntegral4_weight_integrable (b := 2*a.re) (by linarith)).const_mul
+    (((CylinderSquareIntegral.weight_integrable (b := 2*a.re) (by linarith)).const_mul
       (Real.exp ((‖z‖+1)^2/2))).const_mul (‖z‖+1))
-    (Eventually.of_forall fun t w _ => pcfIntegral4_hasDerivAt_kernel_arg a w n t)
+    (Eventually.of_forall fun t w _ => CylinderSquareIntegral.hasDerivAt_kernel_arg a w n t)
   · convert he.2 using 1 <;> first | rfl | simp [pcfIntegral4Moment, integral_const_mul]
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     intro w hw
@@ -941,15 +961,15 @@ lemma pcfIntegral4_hasDerivAt_moment {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : 
     rw [norm_mul]
     calc ‖w‖ * ‖(Real.tanh t : ℂ)^(n+1) * pcfIntegral4Kernel a w t‖ ≤
         (‖z‖+1) * ‖pcfIntegral4Kernel a w t‖ :=
-          mul_le_mul hw' (pcfIntegral4_moment_norm_le a w (n+1) t)
+          mul_le_mul hw' (CylinderSquareIntegral.moment_norm_le a w (n+1) t)
             (norm_nonneg _) (by positivity)
       _ ≤ _ := by
         apply mul_le_mul_of_nonneg_left _ (by positivity)
-        refine (pcfIntegral4_kernel_norm_le a w).trans ?_
+        refine (CylinderSquareIntegral.kernel_norm_le a w).trans ?_
         gcongr
 
 /-- The hyperbolic derivative in the cylinder kernel. -/
-lemma pcfIntegral4_tanh_hasDerivAt (t : ℝ) :
+lemma CylinderSquareIntegral.tanh_hasDerivAt (t : ℝ) :
     HasDerivAt Real.tanh (1 - Real.tanh t ^ 2) t := by
   have hc : Real.cosh t ≠ 0 := (Real.cosh_pos t).ne'
   convert ((Real.hasDerivAt_sinh t).div (Real.hasDerivAt_cosh t) hc) using 1
@@ -958,7 +978,7 @@ lemma pcfIntegral4_tanh_hasDerivAt (t : ℝ) :
     field_simp
 
 /-- Time derivative of the cylinder square-integral kernel. -/
-lemma pcfIntegral4_hasDerivAt_kernel_time (a z : ℂ) {t : ℝ} (ht : 0 < t) :
+lemma CylinderSquareIntegral.hasDerivAt_kernel_time (a z : ℂ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (pcfIntegral4Kernel a z)
       ((2*a + z^2/2*(1-(Real.tanh t : ℂ)^2) -
         (Real.cosh (2*t) : ℂ)/(Real.sinh (2*t) : ℂ)) * pcfIntegral4Kernel a z t) t := by
@@ -969,7 +989,7 @@ lemma pcfIntegral4_hasDerivAt_kernel_time (a z : ℂ) {t : ℝ} (ht : 0 < t) :
     exact_mod_cast (Real.sq_sqrt hs.le).symm
   have hr : HasDerivAt (fun u : ℝ => (Real.tanh u : ℂ))
       (1-(Real.tanh t : ℂ)^2) t := by
-    convert (pcfIntegral4_tanh_hasDerivAt t).ofReal_comp using 1 <;> push_cast <;> rfl
+    convert (CylinderSquareIntegral.tanh_hasDerivAt t).ofReal_comp using 1 <;> push_cast <;> rfl
   have hnum := (((hasDerivAt_id t).ofReal_comp.const_mul (2*a)).add
     (hr.const_mul (z^2/2))).cexp
   have hden := (((Real.hasDerivAt_sinh (2*t)).comp t
@@ -982,13 +1002,13 @@ lemma pcfIntegral4_hasDerivAt_kernel_time (a z : ℂ) {t : ℝ} (ht : 0 < t) :
   field_simp
 
 /-- The integrable total derivative that yields the moment recurrence. -/
-lemma pcfIntegral4_hasDerivAt_tanh_kernel (a z : ℂ) {t : ℝ} (ht : 0 < t) :
+lemma CylinderSquareIntegral.hasDerivAt_tanh_kernel (a z : ℂ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun u => (Real.tanh u : ℂ) * pcfIntegral4Kernel a z u)
       ((1/2 + 2*a*(Real.tanh t : ℂ) - 3/2*(Real.tanh t : ℂ)^2 +
         z^2/2*((Real.tanh t : ℂ) - (Real.tanh t : ℂ)^3)) * pcfIntegral4Kernel a z t) t := by
   have hr : HasDerivAt (fun u : ℝ => (Real.tanh u : ℂ))
       (1-(Real.tanh t : ℂ)^2) t := by
-    convert (pcfIntegral4_tanh_hasDerivAt t).ofReal_comp using 1 <;> push_cast <;> rfl
+    convert (CylinderSquareIntegral.tanh_hasDerivAt t).ofReal_comp using 1 <;> push_cast <;> rfl
   have hc : (Real.cosh t : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (Real.cosh_pos t).ne'
   have hs : (Real.sinh t : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr
     (Real.sinh_pos_iff.mpr ht).ne'
@@ -998,11 +1018,11 @@ lemma pcfIntegral4_hasDerivAt_tanh_kernel (a z : ℂ) {t : ℝ} (ht : 0 < t) :
       Complex.ofReal_div, Complex.ofReal_mul, Complex.ofReal_add, Complex.ofReal_pow,
       Complex.ofReal_ofNat]
     field_simp
-  refine (hr.mul (pcfIntegral4_hasDerivAt_kernel_time a z ht)).congr_deriv ?_
+  refine (hr.mul (CylinderSquareIntegral.hasDerivAt_kernel_time a z ht)).congr_deriv ?_
   linear_combination -pcfIntegral4Kernel a z t * hrat
 
 /-- The moment kernels vanish at the infinite endpoint. -/
-lemma pcfIntegral4_moment_tendsto_zero {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : ℂ) :
+lemma CylinderSquareIntegral.moment_tendsto_zero {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : ℂ) :
     Tendsto (fun t : ℝ => (Real.tanh t : ℂ)^n * pcfIntegral4Kernel a z t) atTop (𝓝 0) := by
   have hl : Tendsto (fun t : ℝ => 2*Real.exp (‖z‖^2/2) * Real.exp ((2*a.re-1)*t))
       atTop (𝓝 0) := by
@@ -1011,19 +1031,19 @@ lemma pcfIntegral4_moment_tendsto_zero {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z 
         (2*Real.exp (‖z‖^2/2))
   refine squeeze_zero_norm' ?_ hl
   filter_upwards [eventually_ge_atTop (1:ℝ)] with t ht
-  refine (pcfIntegral4_moment_norm_le a z n t).trans ?_
-  refine (pcfIntegral4_kernel_norm_le a z).trans ?_
+  refine (CylinderSquareIntegral.moment_norm_le a z n t).trans ?_
+  refine (CylinderSquareIntegral.kernel_norm_le a z).trans ?_
   calc Real.exp (‖z‖^2/2) * (Real.exp (2*a.re*t) / Real.sqrt (Real.sinh (2*t))) ≤
       Real.exp (‖z‖^2/2) * (Real.exp (2*a.re*t) / (Real.exp t/2)) := by
         gcongr
-        exact pcfIntegral4_sqrt_sinh_lower ht
+        exact CylinderSquareIntegral.sqrt_sinh_lower ht
     _ = _ := by
       rw [div_div_eq_mul_div, mul_comm (Real.exp (2*a.re*t)), mul_div_assoc, ← Real.exp_sub]
       rw [show 2*a.re*t-t=(2*a.re-1)*t by ring]
       ring
 
 /-- The hyperbolic factor removes the square-root singularity at zero. -/
-lemma pcfIntegral4_tanh_kernel_continuous_zero (a z : ℂ) :
+lemma CylinderSquareIntegral.tanh_kernel_continuous_zero (a z : ℂ) :
     ContinuousWithinAt (fun t => (Real.tanh t : ℂ) * pcfIntegral4Kernel a z t) (Ici 0) 0 := by
   have heq (t : ℝ) (ht : 0 ≤ t) :
       (Real.tanh t : ℂ) * pcfIntegral4Kernel a z t =
@@ -1044,19 +1064,19 @@ lemma pcfIntegral4_tanh_kernel_continuous_zero (a z : ℂ) :
     linear_combination -hsq
   have hc : Continuous (fun t : ℝ => exp (2*a*t+z^2/2*Real.tanh t) *
       (Real.sqrt (Real.sinh (2*t)) : ℂ)/(2*(Real.cosh t : ℂ)^2)) := by
-    have := pcfIntegral4_tanh_continuous
+    have := CylinderSquareIntegral.tanh_continuous
     apply Continuous.div (by fun_prop) (by fun_prop)
     intro t
     exact mul_ne_zero two_ne_zero (pow_ne_zero _ (Complex.ofReal_ne_zero.mpr (Real.cosh_pos t).ne'))
   exact hc.continuousWithinAt.congr (fun t ht => heq t ht) (heq 0 le_rfl)
 
 /-- Integration by parts gives the four-moment relation. -/
-lemma pcfIntegral4_moment_relation {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
+lemma CylinderSquareIntegral.moment_relation {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
     pcfIntegral4Moment a 0 z + 4*a*pcfIntegral4Moment a 1 z -
       3*pcfIntegral4Moment a 2 z + z^2*(pcfIntegral4Moment a 1 z - pcfIntegral4Moment a 3 z) = 0 :=
           by
   let T (n : ℕ) (t : ℝ) : ℂ := (Real.tanh t : ℂ)^n * pcfIntegral4Kernel a z t
-  have hT (n : ℕ) : IntegrableOn (T n) (Ioi 0) := pcfIntegral4_moment_integrable ha n z
+  have hT (n : ℕ) : IntegrableOn (T n) (Ioi 0) := CylinderSquareIntegral.moment_integrable ha n z
   let R' (t : ℝ) := (1/2:ℂ)*T 0 t + 2*a*T 1 t - (3/2:ℂ)*T 2 t +
     z^2/2*(T 1 t - T 3 t)
   have hA := (hT 0).const_mul (1/2:ℂ)
@@ -1066,12 +1086,12 @@ lemma pcfIntegral4_moment_relation {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
   have hR : IntegrableOn R' (Ioi 0) := ((hA.add hB).sub hC).add hD
   have hd (t : ℝ) (ht : t ∈ Ioi 0) :
       HasDerivAt (fun u => (Real.tanh u : ℂ)*pcfIntegral4Kernel a z u) (R' t) t := by
-    refine (pcfIntegral4_hasDerivAt_tanh_kernel a z ht).congr_deriv ?_
+    refine (CylinderSquareIntegral.hasDerivAt_tanh_kernel a z ht).congr_deriv ?_
     dsimp [R', T]
     ring
   have hv := integral_Ioi_of_hasDerivAt_of_tendsto
-    (pcfIntegral4_tanh_kernel_continuous_zero a z) hd hR
-    (by simpa only [pow_one] using pcfIntegral4_moment_tendsto_zero ha 1 z)
+    (CylinderSquareIntegral.tanh_kernel_continuous_zero a z) hd hR
+    (by simpa only [pow_one] using CylinderSquareIntegral.moment_tendsto_zero ha 1 z)
   have he : (∫ t : ℝ in Ioi 0, R' t) =
       (1/2:ℂ)*pcfIntegral4Moment a 0 z + 2*a*pcfIntegral4Moment a 1 z -
         (3/2:ℂ)*pcfIntegral4Moment a 2 z +
@@ -1090,28 +1110,28 @@ lemma pcfIntegral4_moment_relation {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
   linear_combination 2*hv - 2*he
 
 /-- The cylinder square integral solves the symmetric-square Weber equation. -/
-lemma pcfIntegral4_isThirdOrderSolution {a : ℂ} (ha : a.re < 1/2) :
+lemma CylinderSquareIntegral.isThirdOrderSolution {a : ℂ} (ha : a.re < 1/2) :
     ODE.IsThirdOrderSolution (fun z : ℂ => z^2+4*a) (fun z => z)
       (pcfIntegral4Moment a 0) (fun z => z*pcfIntegral4Moment a 1 z)
       (fun z => pcfIntegral4Moment a 1 z + z^2*pcfIntegral4Moment a 2 z) := by
   intro z
-  refine ⟨pcfIntegral4_hasDerivAt_moment ha 0 z, ?_, ?_⟩
-  · refine ((hasDerivAt_id z).mul (pcfIntegral4_hasDerivAt_moment ha 1 z)).congr_deriv ?_
+  refine ⟨CylinderSquareIntegral.hasDerivAt_moment ha 0 z, ?_, ?_⟩
+  · refine ((hasDerivAt_id z).mul (CylinderSquareIntegral.hasDerivAt_moment ha 1 z)).congr_deriv ?_
     simp only [id_eq]
     ring
-  · have hd := (pcfIntegral4_hasDerivAt_moment ha 1 z).add
-      (((hasDerivAt_id z).pow 2).mul (pcfIntegral4_hasDerivAt_moment ha 2 z))
+  · have hd := (CylinderSquareIntegral.hasDerivAt_moment ha 1 z).add
+      (((hasDerivAt_id z).pow 2).mul (CylinderSquareIntegral.hasDerivAt_moment ha 2 z))
     refine hd.congr_deriv ?_
     simp only [Pi.pow_apply, id_eq, Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one]
-    linear_combination -z * pcfIntegral4_moment_relation ha z
+    linear_combination -z * CylinderSquareIntegral.moment_relation ha z
 
 /-- The convergent integral in DLMF 12.12.4 is entire in the argument.
 This is the zeroth case of the common moment derivative theorem. -/
-lemma pcfIntegral4_kernel_differentiable {a : ℂ} (ha : a.re < 1/2) :
+lemma CylinderSquareIntegral.kernel_differentiable {a : ℂ} (ha : a.re < 1/2) :
     Differentiable ℂ (fun z : ℂ => ∫ t : ℝ in Ioi 0,
       exp (2*a*t + z^2/2*Real.tanh t) / (Real.sqrt (Real.sinh (2*t)) : ℂ)) := by
   intro z
-  convert (pcfIntegral4_hasDerivAt_moment ha 0 z).differentiableAt using 1
+  convert (CylinderSquareIntegral.hasDerivAt_moment ha 0 z).differentiableAt using 1
   funext w
   simp only [pcfIntegral4Moment, pcfIntegral4Kernel, pow_zero, one_mul]
 
@@ -1190,7 +1210,7 @@ theorem pcfProduct_zero_beta_v {v : ℂ} (hv : 0 < v.re) :
   linear_combination -F^2*Gamma v^2*π*hsc
 
 /-- The normalized zeroth hyperbolic moment matches the cylinder-square initial value. -/
-lemma pcfIntegral4_initial_value {a : ℂ} (ha : a.re < 1/2) :
+lemma CylinderSquareIntegral.initial_value {a : ℂ} (ha : a.re < 1/2) :
     (2 : ℂ)^(3/2 : ℂ)/π*Gamma (1/2-a) *
       (∫ t : ℝ in Ioi 0, exp (2*a*t)/(Real.sqrt (Real.sinh (2*t)) : ℂ)) =
       (pcfU a 0)^2+(pcfUBar a 0)^2 := by
@@ -1198,7 +1218,7 @@ lemma pcfIntegral4_initial_value {a : ℂ} (ha : a.re < 1/2) :
   have h := pcfProduct_zero_beta_v hv
   rw [show (2 : ℂ)*(1/4-a/2)=1/2-a by ring,
     show (1/2 : ℂ)-(1/2-a)=a by ring] at h
-  rw [pcfIntegral4_base_beta]
+  rw [CylinderSquareIntegral.base_beta]
   have h2 : (2 : ℂ)^(3/2 : ℂ)=2*(Real.sqrt 2 : ℂ) := by
     rw [show (3/2 : ℂ)=1+1/2 by norm_num, cpow_add _ _ (by norm_num : (2 : ℂ) ≠ 0), cpow_one,
       show (1/2 : ℂ)=((1/2 : ℝ) : ℂ) by norm_num,
@@ -1209,7 +1229,7 @@ lemma pcfIntegral4_initial_value {a : ℂ} (ha : a.re < 1/2) :
   field_simp
 
 /-- The normalized squared cylinder combination solves the symmetric-square equation. -/
-lemma pcfIntegral4_product_isThirdOrderSolution (a : ℂ) :
+lemma CylinderSquareIntegral.product_isThirdOrderSolution (a : ℂ) :
     ODE.IsThirdOrderSolution (fun z : ℂ => z^2+4*a) (fun z => z)
       (fun z => (pcfU a z)^2+(pcfUBar a z)^2)
       (fun z => 2*(pcfU a z*pcfUDeriv a z+pcfUBar a z*pcfUBarDeriv a z))
@@ -1230,7 +1250,7 @@ lemma pcfIntegral4_product_isThirdOrderSolution (a : ℂ) :
 
 /-- Lowering the parameter identifies both initial derivatives, including
 negative half-integral parameters of the barred solution. -/
-lemma pcfIntegral4_deriv_zero_shift {a : ℂ} (ha : a.re < 1/2) :
+lemma CylinderSquareIntegral.deriv_zero_shift {a : ℂ} (ha : a.re < 1/2) :
     pcfUDeriv a 0 = -pcfU (a-1) 0 ∧ pcfUBarDeriv a 0 = -pcfUBar (a-1) 0 := by
   constructor
   · have h := pcfU_recurrence_sub a 0
@@ -1271,7 +1291,7 @@ theorem pcfProduct_eq_of_initial {a : ℂ} {y y1 y2 z z1 z2 : ℂ → ℂ}
     pcfOddDeriv_zero]
 
 /-- The squared cylinder combination has zero first derivative at the origin. -/
-lemma pcfIntegral4_initial_deriv {a : ℂ} (ha : a.re < 1/2) :
+lemma CylinderSquareIntegral.initial_deriv {a : ℂ} (ha : a.re < 1/2) :
     pcfU a 0 * pcfUDeriv a 0 + pcfUBar a 0 * pcfUBarDeriv a 0 = 0 := by
   let v : ℂ := 1/4-a/2
   have hv : 0 < v.re := by dsimp [v]; simp; linarith
@@ -1282,12 +1302,13 @@ lemma pcfIntegral4_initial_deriv {a : ℂ} (ha : a.re < 1/2) :
     show (π:ℂ)*(v+1/2)=π*v+π/2 by ring, sin_add_pi_div_two] at hU'
   rw [show (1/2:ℂ)-2*(v+1/2)=a-1 by dsimp [v]; ring,
     show (π:ℂ)*(v+1/2)=π*v+π/2 by ring, cos_add_pi_div_two] at hB'
-  rw [(pcfIntegral4_deriv_zero_shift ha).1, (pcfIntegral4_deriv_zero_shift ha).2,
+  rw [(CylinderSquareIntegral.deriv_zero_shift ha).1,
+      (CylinderSquareIntegral.deriv_zero_shift ha).2,
     hU, hB, hU', hB']
   ring
 
 /-- An exponential factor converts the singular kernel into the continuous tanh-weighted kernel. -/
-lemma pcfIntegral4_exp_tanh (t : ℝ) :
+lemma CylinderSquareIntegral.exp_tanh (t : ℝ) :
     (1+exp (-2*(t : ℂ)))*(Real.tanh t : ℂ)=1-exp (-2*(t : ℂ)) := by
   have hr : (1+Real.exp (-2*t))*Real.tanh t=1-Real.exp (-2*t) := by
     have hc := (Real.cosh_pos t).ne'
@@ -1304,7 +1325,7 @@ lemma pcfIntegral4_exp_tanh (t : ℝ) :
   simpa using hc
 
 /-- The hyperbolic identity used when differentiating the first-moment primitive. -/
-lemma pcfIntegral4_exp_coth {t : ℝ} (ht : 0 < t) :
+lemma CylinderSquareIntegral.exp_coth {t : ℝ} (ht : 0 < t) :
     (1-exp (-2*(t : ℂ)))*(Real.cosh (2*t) : ℂ)/(Real.sinh (2*t) : ℂ)=
       (Real.tanh t : ℂ)+exp (-2*(t : ℂ)) := by
   have hr : (1-Real.exp (-2*t))*Real.cosh (2*t)/Real.sinh (2*t)=
@@ -1324,7 +1345,7 @@ lemma pcfIntegral4_exp_coth {t : ℝ} (ht : 0 < t) :
   simpa using hc
 
 /-- Multiplying the kernel by exp(-2t) decreases its parameter by one. -/
-lemma pcfIntegral4_exp_shift (a : ℂ) (t : ℝ) :
+lemma CylinderSquareIntegral.exp_shift (a : ℂ) (t : ℝ) :
     exp (-2*(t : ℂ))*pcfIntegral4Kernel a 0 t=pcfIntegral4Kernel (a-1) 0 t := by
   simp only [pcfIntegral4Kernel, zero_pow two_ne_zero, zero_div, zero_mul, add_zero]
   rw [← mul_div_assoc, ← exp_add]
@@ -1332,7 +1353,7 @@ lemma pcfIntegral4_exp_shift (a : ℂ) (t : ℝ) :
   ring
 
 /-- Integration by parts expresses the first hyperbolic moment through two zeroth moments. -/
-lemma pcfIntegral4_first_moment {a : ℂ} (ha : a.re < 1/2) :
+lemma CylinderSquareIntegral.first_moment {a : ℂ} (ha : a.re < 1/2) :
     pcfIntegral4Moment a 1 0 =
       2*a*pcfIntegral4Moment a 0 0+(1-2*a)*pcfIntegral4Moment (a-1) 0 0 := by
   let F (t : ℝ) := (1-exp (-2*(t : ℂ)))*pcfIntegral4Kernel a 0 t
@@ -1341,30 +1362,30 @@ lemma pcfIntegral4_first_moment {a : ℂ} (ha : a.re < 1/2) :
   have hF : F = fun t : ℝ => (1+exp (-2*(t : ℂ)))*((Real.tanh t : ℂ)*pcfIntegral4Kernel a 0 t) := by
     funext t
     dsimp only [F]
-    rw [← mul_assoc, pcfIntegral4_exp_tanh]
+    rw [← mul_assoc, CylinderSquareIntegral.exp_tanh]
   have hcont : ContinuousWithinAt F (Ici 0) 0 := by
     rw [hF]
     exact (by fun_prop : Continuous fun t : ℝ => 1+exp (-2*(t : ℂ))).continuousWithinAt.mul
-      (pcfIntegral4_tanh_kernel_continuous_zero a 0)
+      (CylinderSquareIntegral.tanh_kernel_continuous_zero a 0)
   have hd (t : ℝ) (ht : t ∈ Ioi 0) : HasDerivAt F (g t) t := by
     have hExp : HasDerivAt (fun u : ℝ => exp (-2*(u : ℂ)))
         (-2*exp (-2*(t : ℂ))) t := by
       convert (((hasDerivAt_id t).ofReal_comp.const_mul (-2 : ℂ)).cexp) using 1 <;> simp <;> ring
     have h := ((hasDerivAt_const t (1 : ℂ)).sub hExp).mul
-      (pcfIntegral4_hasDerivAt_kernel_time a 0 ht)
+      (CylinderSquareIntegral.hasDerivAt_kernel_time a 0 ht)
     refine h.congr_deriv ?_
     simp only [zero_pow two_ne_zero, zero_div, zero_mul, add_zero, zero_sub, Pi.sub_apply]
     dsimp only [g]
-    have hrat := pcfIntegral4_exp_coth ht
-    have hshift := pcfIntegral4_exp_shift a t
+    have hrat := CylinderSquareIntegral.exp_coth ht
+    have hshift := CylinderSquareIntegral.exp_shift a t
     linear_combination -(pcfIntegral4Kernel a 0 t)*hrat + (1-2*a)*hshift
   have ha' : (a-1).re < 1/2 := by simp; linarith
   have hi0 : IntegrableOn (pcfIntegral4Kernel a 0) (Ioi 0) := by
-    simpa using pcfIntegral4_moment_integrable ha 0 0
+    simpa using CylinderSquareIntegral.moment_integrable ha 0 0
   have hi1 : IntegrableOn (pcfIntegral4Kernel (a-1) 0) (Ioi 0) := by
-    simpa using pcfIntegral4_moment_integrable ha' 0 0
+    simpa using CylinderSquareIntegral.moment_integrable ha' 0 0
   have hit : IntegrableOn (fun t => (Real.tanh t : ℂ)*pcfIntegral4Kernel a 0 t) (Ioi 0) := by
-    simpa using pcfIntegral4_moment_integrable ha 1 0
+    simpa using CylinderSquareIntegral.moment_integrable ha 1 0
   have hig : IntegrableOn g (Ioi 0) := ((hi0.const_mul (2*a)).add (hi1.const_mul (1-2*a))).sub hit
   have ht : Tendsto F atTop (𝓝 0) := by
     have he : Tendsto (fun t : ℝ => exp (-2*(t : ℂ))) atTop (𝓝 0) := by
@@ -1378,7 +1399,7 @@ lemma pcfIntegral4_first_moment {a : ℂ} (ha : a.re < 1/2) :
       push_cast
       ring
     have hk : Tendsto (pcfIntegral4Kernel a 0) atTop (𝓝 0) := by
-      simpa using pcfIntegral4_moment_tendsto_zero ha 0 0
+      simpa using CylinderSquareIntegral.moment_tendsto_zero ha 0 0
     simpa [F] using (tendsto_const_nhds.sub he).mul hk
   have hI := integral_Ioi_of_hasDerivAt_of_tendsto hcont hd hig ht
   simp only [F, ofReal_zero, mul_zero, exp_zero, sub_self, zero_mul, sub_zero] at hI
@@ -1390,7 +1411,7 @@ lemma pcfIntegral4_first_moment {a : ℂ} (ha : a.re < 1/2) :
   simpa [pcfIntegral4Moment] using (sub_eq_zero.mp hI).symm
 
 /-- The second initial value of the normalized cylinder square integral. -/
-lemma pcfIntegral4_initial_second {a : ℂ} (ha : a.re < 1/2) :
+lemma CylinderSquareIntegral.initial_second {a : ℂ} (ha : a.re < 1/2) :
     (2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-a)*pcfIntegral4Moment a 1 0 =
       2*a*((pcfU a 0)^2+(pcfUBar a 0)^2)+
         2*((pcfUDeriv a 0)^2+(pcfUBarDeriv a 0)^2) := by
@@ -1399,7 +1420,7 @@ lemma pcfIntegral4_initial_second {a : ℂ} (ha : a.re < 1/2) :
       C b * pcfIntegral4Moment b 0 0 = (pcfU b 0)^2+(pcfUBar b 0)^2 := by
     simpa only [C, pcfIntegral4Moment, pcfIntegral4Kernel, pow_zero, one_mul,
       zero_pow (by norm_num : 2 ≠ 0), zero_div, zero_mul, add_zero]
-      using pcfIntegral4_initial_value hb
+      using CylinderSquareIntegral.initial_value hb
   have hg : (1/2:ℂ)-a ≠ 0 := by
     intro he
     have := congrArg Complex.re he
@@ -1409,8 +1430,9 @@ lemma pcfIntegral4_initial_second {a : ℂ} (ha : a.re < 1/2) :
     dsimp [C]
     rw [show (1/2:ℂ)-(a-1)=(1/2-a)+1 by ring, Gamma_add_one _ hg]
     ring
-  have hrec := congrArg (fun w => C a*w) (pcfIntegral4_first_moment ha)
-  rw [(pcfIntegral4_deriv_zero_shift ha).1, (pcfIntegral4_deriv_zero_shift ha).2,
+  have hrec := congrArg (fun w => C a*w) (CylinderSquareIntegral.first_moment ha)
+  rw [(CylinderSquareIntegral.deriv_zero_shift ha).1,
+      (CylinderSquareIntegral.deriv_zero_shift ha).2,
     neg_sq, neg_sq]
   linear_combination hrec + 2*a*hM a ha +
     2*hM (a-1) (by simp; linarith) + pcfIntegral4Moment (a-1) 0 0*hC
@@ -1423,14 +1445,14 @@ theorem pcf_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
         ((pcfU a z)^2+(pcfUBar a z)^2) := by
   let C : ℂ := (2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-a)
   have he := pcfProduct_eq_of_initial
-    ((pcfIntegral4_isThirdOrderSolution ha).const_mul C)
-    (pcfIntegral4_product_isThirdOrderSolution a)
+    ((CylinderSquareIntegral.isThirdOrderSolution ha).const_mul C)
+    (CylinderSquareIntegral.product_isThirdOrderSolution a)
     (by simpa only [C, pcfIntegral4Moment, pcfIntegral4Kernel, pow_zero, one_mul,
         zero_pow (by norm_num : 2 ≠ 0), zero_div, zero_mul, add_zero]
-      using pcfIntegral4_initial_value ha)
-    (by simp only [zero_mul, pcfIntegral4_initial_deriv ha, mul_zero])
+      using CylinderSquareIntegral.initial_value ha)
+    (by simp only [zero_mul, CylinderSquareIntegral.initial_deriv ha, mul_zero])
     (by simpa only [C, zero_pow (by norm_num : 2 ≠ 0), zero_mul, add_zero, zero_div, zero_add]
-      using pcfIntegral4_initial_second ha)
+      using CylinderSquareIntegral.initial_second ha)
   have hv : (∫ t : ℝ in Ioi 0, (2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-a)*
       exp (2*a*t+z^2/2*Real.tanh t)/(Real.sqrt (Real.sinh (2*t)):ℂ)) =
         (pcfU a z)^2+(pcfUBar a z)^2 := by

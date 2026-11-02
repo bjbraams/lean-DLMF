@@ -43,6 +43,8 @@ The integral representations DLMF 7.2.2–7.2.4, 7.2.6 and 7.2.12 and the bounds
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- `erf 0 = 0`. -/

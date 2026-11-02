@@ -21,7 +21,8 @@ public import Mathlib.Tactic.ENatToNat
 
 This file fixes the conventions shared by the special-function areas: improper integrals,
 principal values, straight-segment primitives, sector filters, finite continued fractions,
-spherical Bessel functions, ordered zeros and successively extracted asymptotic coefficients.
+ordered zeros and successively extracted asymptotic coefficients. The declarations live in the
+namespace `DLMF.Core`; files that use them `open DLMF.Core`.
 
 ## Main definitions
 
@@ -36,8 +37,6 @@ spherical Bessel functions, ordered zeros and successively extracted asymptotic 
 * `cfContinuants`, `cfTail`, `HasContinuedFraction`: finite continued fractions and their
   convergence.
 * `oddProduct`: the odd product `1·3···(2n+1)`.
-* `sphericalJ`, `sphericalI`: spherical Bessel functions `j_n` and `i_n`, with their removable
-  values at zero.
 * `orderedZero`: a zero selected by the number of strictly closer zeros.
 * `asymptoticCoeff`: coefficients extracted successively by limits at positive infinity.
 
@@ -62,7 +61,7 @@ limits defining `asymptoticCoeff`, must be established by separate theorems.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory
 open scoped Real Topology
-namespace DLMF
+namespace DLMF.Core
 
 /-- Improper integral on a right half-line, including convergence. -/
 def HasIntegralAtTop (f : ℝ → ℂ) (a : ℝ) (v : ℂ) : Prop :=
@@ -208,14 +207,6 @@ def HasContinuedFraction (a b : ℕ → ℂ) (v : ℂ) : Prop :=
   Tendsto (cfTail a b 0) atTop (𝓝 v)
 /-- The odd product 1·3···(2n+1). -/
 def oddProduct (n : ℕ) : ℂ := ∏ j ∈ Finset.range (n+1), (2*j+1 : ℂ)
-/-- Spherical j_n, with the removable value at zero supplied explicitly. -/
-def sphericalJ (n : ℕ) (z : ℂ) : ℂ :=
-  Real.sqrt π * z ^ n / (2 : ℂ) ^ (n+1) *
-    regularizedHGFun ∅ {(n : ℂ)+3/2} (-z^2/4)
-/-- Modified spherical i_n, including its removable value at zero. -/
-def sphericalI (n : ℕ) (z : ℂ) : ℂ :=
-  Real.sqrt π * z ^ n / (2 : ℂ) ^ (n+1) *
-    regularizedHGFun ∅ {(n : ℂ)+3/2} (z^2/4)
 /-- A zero chosen by the count of strictly closer zeros; existence is a theorem. -/
 def orderedZero (f : ℂ → ℂ) (S : Set ℂ) (k : ℕ) : ℂ :=
   Classical.epsilon (fun z => z ∈ S ∧ f z = 0 ∧
@@ -229,4 +220,4 @@ def asymptoticCoeff (f : ℝ → ℂ) : ℕ → ℂ
       (f t-∑ j ∈ Finset.range (n+1), asymptoticCoeff f (n-j)*(t : ℂ)^(-((n-j : ℕ) : ℤ))))
 termination_by n => n
 
-end DLMF
+end DLMF.Core

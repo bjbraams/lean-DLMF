@@ -119,7 +119,7 @@ theorem exists_solution_of_kernel_bound {a κ : ℝ} {k : 𝕜} {A A' A'' E g : 
   have hum : AEStronglyMeasurable (fun t => 1 + h t) (volume.restrict (Ioi a)) :=
     aestronglyMeasurable_const.add hhm
   have hub' : ∀ x, a < x → ∀ t ∈ Ioi x, ‖1 + h t‖ ≤ Real.exp (R x) := fun x hx t ht =>
-    (hub t (hx.trans ht)).trans (Real.exp_le_exp.2 (lg_tail_anti hρ0 hρi hx (le_of_lt ht)))
+    (hub t (hx.trans ht)).trans (Real.exp_le_exp.2 (tail_anti hρ0 hρi hx (le_of_lt ht)))
   have hmulb : ∀ {q : ℝ → 𝕜}, (∀ c, a < c → IntegrableOn (fun t => q t * F' t) (Ioi c)) →
       ∀ c, a < c → IntegrableOn (fun t => q t * F' t * (1 + h t)) (Ioi c) := by
     intro q hq c hc
@@ -132,13 +132,13 @@ theorem exists_solution_of_kernel_bound {a κ : ℝ} {k : 𝕜} {A A' A'' E g : 
   have hheq' : ∀ x, a < x → h x = -(2 * k)⁻¹ * I₁ x + (2 * k)⁻¹ * (E x ^ 2)⁻¹ * I₂ x :=
     fun x hx => hheq x hx
   have hhc : ContinuousOn h (Ioi a) :=
-    ((continuousOn_const.mul (lg_continuousOn_integral_Ioi hI₁i)).add
-      (hp₂c.mul (lg_continuousOn_integral_Ioi hI₂i))).congr fun x hx => hheq' x hx
+    ((continuousOn_const.mul (continuousOn_integral_Ioi hI₁i)).add
+      (hp₂c.mul (continuousOn_integral_Ioi hI₂i))).congr fun x hx => hheq' x hx
   have hI₁d : ∀ x, a < x → HasDerivAt I₁ (-(1 * F' x * (1 + h x))) x := fun x hx =>
-    lg_hasDerivAt_integral_Ioi hI₁i hx ((continuousOn_const.mul hF'c).mul
+    hasDerivAt_integral_Ioi hI₁i hx ((continuousOn_const.mul hF'c).mul
       (continuousOn_const.add hhc) |>.continuousAt (Ioi_mem_nhds hx))
   have hI₂d : ∀ x, a < x → HasDerivAt I₂ (-(E x ^ 2 * F' x * (1 + h x))) x := fun x hx =>
-    lg_hasDerivAt_integral_Ioi hI₂i hx (((hEc.pow 2).mul hF'c).mul
+    hasDerivAt_integral_Ioi hI₂i hx (((hEc.pow 2).mul hF'c).mul
       (continuousOn_const.add hhc) |>.continuousAt (Ioi_mem_nhds hx))
   have hEinv : ∀ x, a < x → HasDerivAt (fun y => (E y ^ 2)⁻¹)
       (-((2 : ℕ) * E x ^ (2 - 1) * -(k * (A x ^ 2)⁻¹ * E x)) / (E x ^ 2) ^ 2) x :=
@@ -191,7 +191,7 @@ theorem exists_solution_of_kernel_bound {a κ : ℝ} {k : 𝕜} {A A' A'' E g : 
       rw [integral_const_mul, hε'def]
       field_simp
       rfl
-    have hexpt := lg_integral_Ioi_mul_exp_tail hρc hρ0 hρi hx
+    have hexpt := integral_Ioi_mul_exp_tail hρc hρ0 hρi hx
     have hEx : 0 < ‖E x‖ ^ 2 := by have := hE0 x hx; positivity
     calc ‖A x ^ 2 * ε' x‖
         = ‖∫ t in Ioi x, (E x ^ 2)⁻¹ * (E t ^ 2 * F' t * (1 + h t))‖ := by rw [hεx]

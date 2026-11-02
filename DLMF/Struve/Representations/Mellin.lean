@@ -16,17 +16,17 @@ Poisson-weighted integrals.
 
 ## Main definitions
 
-* `struveMel_value`: the value of the Struve Mellin transform, DLMF 11.7.10–11.7.11, with
+* `MellinTransform.value`: the value of the Struve Mellin transform, DLMF 11.7.10–11.7.11, with
   the removable case `μ = 0`.
 
 ## Main results
 
-* `struveMel_tendsto_sin`: the Mellin transform of the sine, including Dirichlet's integral.
-* `struveMel_besselY_isBigO`, `struveMel_struveK_isBigO`, `struveMel_struveH_isBigO`:
-  growth estimates at infinity.
-* `struveMel_integral_by_parts`: integration by parts in the Struve Mellin integral.
-* `struveMel_value_succ`: the recurrence for the Mellin value, for all parameters.
-* `struveMel_tendsto`: the Struve Mellin transform as an improper integral.
+* `MellinTransform.tendsto_sin`: the Mellin transform of the sine, including Dirichlet's integral.
+* `MellinTransform.besselY_isBigO`, `MellinTransform.struveK_isBigO`,
+  `MellinTransform.struveH_isBigO`: growth estimates at infinity.
+* `MellinTransform.integral_by_parts`: integration by parts in the Struve Mellin integral.
+* `MellinTransform.value_succ`: the recurrence for the Mellin value, for all parameters.
+* `MellinTransform.tendsto`: the Struve Mellin transform as an improper integral.
 * `struveH_integral_plain`: DLMF 11.7.9.
 * `struveH_integral_mellin_zero`, `struveH_integral_mellin`: DLMF 11.7.10–11.7.11.
 * `struveH_integral_product`: DLMF 11.7.12.
@@ -44,6 +44,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Struve
 
 open DLMF.Bessel
@@ -59,14 +61,14 @@ vanish by `H_ν = Y_ν + K_ν`, Hankel's expansion of `Y_ν` and the Laplace rep
 -/
 
 /-- `u^{μ-1} sin u = u^μ sinc u` for `u ≠ 0`. -/
-theorem struveMel_cpow_mul_sin_eq (μ : ℂ) {u : ℝ} (hu : u ≠ 0) :
+theorem MellinTransform.cpow_mul_sin_eq (μ : ℂ) {u : ℝ} (hu : u ≠ 0) :
     (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ) = (u : ℂ) ^ μ * (Real.sinc u : ℂ) := by
   rw [Real.sinc_of_ne_zero hu, cpow_sub _ _ (ofReal_ne_zero.mpr hu), cpow_one]
   push_cast
   field_simp
 
 /-- The Mellin sine integrand is interval integrable for `re μ > -1`. -/
-theorem struveMel_intervalIntegrable {μ : ℂ} (h0 : -1 < μ.re) (a b : ℝ) :
+theorem MellinTransform.intervalIntegrable {μ : ℂ} (h0 : -1 < μ.re) (a b : ℝ) :
     IntervalIntegrable (fun u : ℝ => (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ)) volume a b := by
   have h := (intervalIntegral.intervalIntegrable_cpow' h0 (a := a) (b := b)).mul_continuousOn
     (continuous_ofReal.comp Real.continuous_sinc).continuousOn
@@ -75,11 +77,11 @@ theorem struveMel_intervalIntegrable {μ : ℂ} (h0 : -1 < μ.re) (a b : ℝ) :
     rw [ae_iff]; simp [measure_singleton]
   refine ae_restrict_of_ae ?_
   filter_upwards [hn] with u hu
-  exact (struveMel_cpow_mul_sin_eq μ hu).symm
+  exact (MellinTransform.cpow_mul_sin_eq μ hu).symm
 
 /-- **Mellin transform of the sine** including Dirichlet's integral at `μ = 0`:
 `∫₀^X u^{μ-1} sin u du → Γ(μ) sin(πμ/2)` (`π/2` at `μ = 0`) for `-1 < re μ < 1`. -/
-theorem struveMel_tendsto_sin {μ : ℂ} (h0 : -1 < μ.re) (h1 : μ.re < 1) :
+theorem MellinTransform.tendsto_sin {μ : ℂ} (h0 : -1 < μ.re) (h1 : μ.re < 1) :
     Tendsto (fun X : ℝ => ∫ u in (0 : ℝ)..X, (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ)) atTop
       (𝓝 (if μ = 0 then (π / 2 : ℂ) else Gamma μ * sin (π * μ / 2))) := by
   split_ifs with hμ
@@ -91,21 +93,21 @@ theorem struveMel_tendsto_sin {μ : ℂ} (h0 : -1 < μ.re) (h1 : μ.re < 1) :
     have hn : ∀ᵐ u : ℝ ∂volume, u ≠ 0 := by
       rw [ae_iff]; simp [measure_singleton]
     filter_upwards [hn] with u hu _
-    rw [struveMel_cpow_mul_sin_eq 0 hu, cpow_zero, one_mul]
+    rw [MellinTransform.cpow_mul_sin_eq 0 hu, cpow_zero, one_mul]
   · exact Complex.tendsto_integral_cpow_mul_sin h0 h1 hμ
 
 /-- The partial Mellin sine integrals are bounded on `[0, ∞)`. -/
-theorem struveMel_exists_bound {μ : ℂ} (h0 : -1 < μ.re) (h1 : μ.re < 1) :
+theorem MellinTransform.exists_bound {μ : ℂ} (h0 : -1 < μ.re) (h1 : μ.re < 1) :
     ∃ C, ∀ X : ℝ, 0 ≤ X →
       ‖∫ u in (0 : ℝ)..X, (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ)‖ ≤ C := by
   have hc : Continuous (fun X : ℝ => ∫ u in (0 : ℝ)..X, (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ)) :=
-    intervalIntegral.continuous_primitive (struveMel_intervalIntegrable h0) 0
+    intervalIntegral.continuous_primitive (MellinTransform.intervalIntegrable h0) 0
   obtain ⟨C, hC⟩ := MeasureTheory.exists_norm_le_of_continuousOn_of_tendsto hc.continuousOn
-    (struveMel_tendsto_sin h0 h1)
+    (MellinTransform.tendsto_sin h0 h1)
   exact ⟨C, fun X hX => hC X hX⟩
 
 /-- Scaling: `∫₀^R t^{μ-1} sin(ct) dt = c^{-μ} ∫₀^{Rc} u^{μ-1} sin u du` for `c > 0`. -/
-theorem struveMel_integral_scale (μ : ℂ) {c : ℝ} (hc : 0 < c) {R : ℝ} (hR : 0 ≤ R) :
+theorem MellinTransform.integral_scale (μ : ℂ) {c : ℝ} (hc : 0 < c) {R : ℝ} (hR : 0 ≤ R) :
     ∫ t in (0 : ℝ)..R, (t : ℂ) ^ (μ - 1) * (Real.sin (t * c) : ℂ) =
       (c : ℂ) ^ (-μ) * ∫ u in (0 : ℝ)..R * c, (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ) := by
   have h := intervalIntegral.integral_comp_mul_right
@@ -127,18 +129,18 @@ theorem struveMel_integral_scale (μ : ℂ) {c : ℝ} (hc : 0 < c) {R : ℝ} (hR
   field_simp
 
 /-- `sin^{2a-1} θ cos^{2b-1} θ` is integrable on `(0, π/2]` with the Beta value. -/
-theorem struveMel_trigBeta {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
+theorem MellinTransform.trigBeta {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
     IntegrableOn (fun θ : ℝ => (Real.sin θ : ℂ) ^ (2 * a - 1) * (Real.cos θ : ℂ) ^ (2 * b - 1))
       (Ioc 0 (π / 2)) ∧
     ∫ θ in Ioc 0 (π / 2), (Real.sin θ : ℂ) ^ (2 * a - 1) * (Real.cos θ : ℂ) ^ (2 * b - 1) =
       Gamma a * Gamma b / (2 * Gamma (a + b)) := by
-  obtain ⟨h1, h2⟩ := trig_beta_integral ha hb
+  obtain ⟨h1, h2⟩ := intervalIntegrable_and_integral_sin_cpow_mul_cos_cpow ha hb
   refine ⟨(intervalIntegrable_iff_integrableOn_Ioc_of_le (by positivity)).mp h1, ?_⟩
   rw [← intervalIntegral.integral_of_le (by positivity), h2]
 
 /-- The direct region of the Struve Mellin transform: for `re ν > -1/2` and `|re μ| < 1`,
 `∫₀^R t^{μ-ν-1} H_ν(t) dt` converges to the Poisson–Beta value. -/
-theorem struveMel_tendsto_direct {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1)
+theorem MellinTransform.tendsto_direct {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1)
     (hν : -1 / 2 < ν.re) :
     Tendsto (fun R : ℝ => ∫ t in (0 : ℝ)..R, (t : ℂ) ^ (μ - ν - 1) * struveH ν t) atTop
       (𝓝 (2 * (1 / 2 : ℂ) ^ ν / (Real.sqrt π * Gamma (ν + 1 / 2)) *
@@ -153,13 +155,13 @@ theorem struveMel_tendsto_direct {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re
   have hb : 0 < ((1 - μ) / 2).re := by simp; linarith
   have hb' : 0 < (1 / 2 : ℂ).re := by norm_num
   -- the weight `sin^{2ν}` and the Beta weight
-  have hW := struveMel_trigBeta ha hb'
-  have hB := struveMel_trigBeta ha hb
+  have hW := MellinTransform.trigBeta ha hb'
+  have hB := MellinTransform.trigBeta ha hb
   have e1 : 2 * (ν + 1 / 2) - 1 = 2 * ν := by ring
   have e2 : 2 * (1 / 2 : ℂ) - 1 = 0 := by norm_num
   have e3 : 2 * ((1 - μ) / 2) - 1 = -μ := by ring
   simp only [e1, e2, e3, cpow_zero, mul_one] at hW hB
-  obtain ⟨C, hC⟩ := struveMel_exists_bound hμ0 hμ1
+  obtain ⟨C, hC⟩ := MellinTransform.exists_bound hμ0 hμ1
   have hθ : ∀ᵐ θ ∂m, θ ∈ Ioo 0 (π / 2) := by
     have hn : ∀ᵐ θ : ℝ ∂volume, θ ≠ π / 2 := by
       rw [ae_iff]; simp [measure_singleton]
@@ -172,7 +174,7 @@ theorem struveMel_tendsto_direct {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re
         ∫ u in (0 : ℝ)..R * Real.cos θ, (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ) := by
     intro θ hθ R hR
     simp only [K]
-    rw [intervalIntegral.integral_mul_const, struveMel_integral_scale μ (hcos θ hθ) hR]
+    rw [intervalIntegral.integral_mul_const, MellinTransform.integral_scale μ (hcos θ hθ) hR]
     ring
   have hsinpos : ∀ θ ∈ Ioc 0 (π / 2), 0 < Real.sin θ := fun θ h =>
     Real.sin_pos_of_pos_of_lt_pi h.1 (by linarith [h.2, Real.pi_pos])
@@ -221,7 +223,7 @@ theorem struveMel_tendsto_direct {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re
       rw [hinner θ hθ' R hR, norm_mul, mul_comm C]
       exact mul_le_mul_of_nonneg_left (hC _ (mul_nonneg hR (hcos θ hθ').le)) (norm_nonneg _)
     · filter_upwards [hθ] with θ hθ'
-      have h := ((struveMel_tendsto_sin hμ0 hμ1).comp
+      have h := ((MellinTransform.tendsto_sin hμ0 hμ1).comp
         (tendsto_id.atTop_mul_const (hcos θ hθ'))).const_mul
         ((Real.sin θ : ℂ) ^ (2 * ν) * (Real.cos θ : ℂ) ^ (-μ))
       refine h.congr' ?_
@@ -254,12 +256,12 @@ theorem struveMel_tendsto_direct {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re
   exact (hpt t ht.1).symm
 
 /-- `(1/2)^ν = 2^{-ν}`. -/
-theorem struveMel_half_cpow (ν : ℂ) : (1 / 2 : ℂ) ^ ν = (2 : ℂ) ^ (-ν) := by
+theorem MellinTransform.half_cpow (ν : ℂ) : (1 / 2 : ℂ) ^ ν = (2 : ℂ) ^ (-ν) := by
   have h : (2 : ℂ).arg = 0 := by simp
   rw [one_div, inv_cpow _ _ (by rw [h]; exact Real.pi_ne_zero.symm), cpow_neg]
 
 /-- `z / Γ(z+1) = 1/Γ(z)` for every complex `z` (with Mathlib's conventions at the poles). -/
-theorem struveMel_div_Gamma_add_one (z : ℂ) : z / Gamma (z + 1) = (Gamma z)⁻¹ := by
+theorem MellinTransform.div_Gamma_add_one (z : ℂ) : z / Gamma (z + 1) = (Gamma z)⁻¹ := by
   rcases eq_or_ne z 0 with rfl | hz
   · simp
   · rw [Complex.Gamma_add_one z hz]
@@ -268,7 +270,7 @@ theorem struveMel_div_Gamma_add_one (z : ℂ) : z / Gamma (z + 1) = (Gamma z)⁻
     · field_simp
 
 /-- The Struve Mellin value `V(μ, ν)` of DLMF 11.7.10–11.7.11. -/
-theorem struveMel_value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) (hν : -1 / 2 < ν.re) :
+theorem MellinTransform.value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) (hν : -1 / 2 < ν.re) :
     2 * (1 / 2 : ℂ) ^ ν / (Real.sqrt π * Gamma (ν + 1 / 2)) *
         ((if μ = 0 then (π / 2 : ℂ) else Gamma μ * sin (π * μ / 2)) *
           (Gamma (ν + 1 / 2) * Gamma ((1 - μ) / 2) / (2 * Gamma (ν + 1 / 2 + (1 - μ) / 2)))) =
@@ -282,7 +284,7 @@ theorem struveMel_value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) 
     rw [← ofReal_mul, Real.mul_self_sqrt Real.pi_pos.le]
   have h2 : (2 : ℂ) ^ (-ν) * (2 : ℂ) ^ ν = 1 := by
     rw [← cpow_add _ _ two_ne_zero]; simp
-  rw [struveMel_half_cpow]
+  rw [MellinTransform.half_cpow]
   split_ifs with hμ
   · subst hμ
     have hG : Gamma (ν + 1 / 2 + (1 - 0) / 2) = Gamma (ν + 1) := by ring_nf
@@ -336,7 +338,7 @@ theorem struveMel_value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) 
     field_simp
 
 /-- `x^a = O(x^b)` at infinity when `a ≤ b`. -/
-theorem struveMel_rpow_isBigO_rpow {a b : ℝ} (h : a ≤ b) :
+theorem MellinTransform.rpow_isBigO_rpow {a b : ℝ} (h : a ≤ b) :
     (fun x : ℝ => x ^ a) =O[atTop] (fun x : ℝ => x ^ b) := by
   refine IsBigO.of_bound 1 ?_
   filter_upwards [eventually_ge_atTop 1] with x hx
@@ -345,7 +347,7 @@ theorem struveMel_rpow_isBigO_rpow {a b : ℝ} (h : a ≤ b) :
   exact Real.rpow_le_rpow_of_exponent_le hx h
 
 /-- `Y_ν(x) = O(x^{-1/2})` as `x → +∞`, for every complex order. -/
-theorem struveMel_besselY_isBigO (ν : ℂ) :
+theorem MellinTransform.besselY_isBigO (ν : ℂ) :
     (fun x : ℝ => besselY ν x) =O[atTop] (fun x : ℝ => x ^ (-(1 / 2) : ℝ)) := by
   -- the Hankel function
   have hH : (fun x : ℝ => hankelH1 ν x) =O[atTop] (fun x : ℝ => x ^ (-(1 / 2) : ℝ)) := by
@@ -380,7 +382,7 @@ theorem struveMel_besselY_isBigO (ν : ℂ) :
     simp
   -- the Bessel function `J`
   have hJ : (fun x : ℝ => besselJ ν x) =O[atTop] (fun x : ℝ => x ^ (-(1 / 2) : ℝ)) := by
-    have h1 := (besselJ_sub_cos_isBigO ν).trans (struveMel_rpow_isBigO_rpow
+    have h1 := (besselJ_sub_cos_isBigO ν).trans (MellinTransform.rpow_isBigO_rpow
       (show (-(3 / 2) : ℝ) ≤ -(1 / 2) by norm_num))
     set c : ℂ := ν * π / 2 + π / 4
     have hc : (fun x : ℝ => (Real.sqrt (2 / (π * x)) : ℂ) * cos (x - ν * π / 2 - π / 4)) =O[atTop]
@@ -421,7 +423,7 @@ theorem struveMel_besselY_isBigO (ν : ℂ) :
 
 /-- `K_ν(x) = O(x^{re ν - 1})` as `x → +∞` when `re ν ≤ 1/2`, from the Laplace representation
 DLMF 11.5.2. -/
-theorem struveMel_struveK_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
+theorem MellinTransform.struveK_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
     (fun x : ℝ => struveK ν x) =O[atTop] (fun x : ℝ => x ^ (ν.re - 1)) := by
   set A : ℝ := ‖2 / ((Real.sqrt π : ℂ) * Gamma (ν + 1 / 2))‖
   refine IsBigO.of_bound (A * 2 ^ (-ν.re)) ?_
@@ -462,10 +464,10 @@ theorem struveMel_struveK_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
         rw [Real.rpow_sub_one hx.ne']; ring
 
 /-- `H_ν(x) = O(x^{-1/2} + x^{re ν - 1})` as `x → +∞` when `re ν ≤ 1/2`. -/
-theorem struveMel_struveH_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
+theorem MellinTransform.struveH_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
     (fun x : ℝ => struveH ν x) =O[atTop] (fun x : ℝ => x ^ (-(1 / 2) : ℝ) + x ^ (ν.re - 1)) := by
-  have hY := struveMel_besselY_isBigO ν
-  have hK := struveMel_struveK_isBigO hν
+  have hY := MellinTransform.besselY_isBigO ν
+  have hK := MellinTransform.struveK_isBigO hν
   have hpos : ∀ᶠ x : ℝ in atTop, 0 < x := eventually_gt_atTop 0
   have h1 : (fun x : ℝ => x ^ (-(1 / 2) : ℝ)) =O[atTop]
       (fun x : ℝ => x ^ (-(1 / 2) : ℝ) + x ^ (ν.re - 1)) := by
@@ -489,7 +491,7 @@ theorem struveMel_struveH_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
 
 /-- The integration-by-parts boundary term `R^{μ-ν} H_ν(R)` tends to zero when `re ν ≤ 1/2`,
 `re μ < 1` and `re μ < re ν + 1/2`. -/
-theorem struveMel_tendsto_boundary {μ ν : ℂ} (hν : ν.re ≤ 1 / 2) (h1 : μ.re < 1)
+theorem MellinTransform.tendsto_boundary {μ ν : ℂ} (hν : ν.re ≤ 1 / 2) (h1 : μ.re < 1)
     (h2 : μ.re < ν.re + 1 / 2) :
     Tendsto (fun R : ℝ => (R : ℂ) ^ (μ - ν) * struveH ν R) atTop (𝓝 0) := by
   have hp : (fun R : ℝ => (R : ℂ) ^ (μ - ν)) =O[atTop] (fun R : ℝ => R ^ (μ.re - ν.re)) := by
@@ -498,7 +500,7 @@ theorem struveMel_tendsto_boundary {μ ν : ℂ} (hν : ν.re ≤ 1 / 2) (h1 : �
     rw [norm_cpow_eq_rpow_re_of_pos hR, Real.norm_eq_abs,
       abs_of_pos (Real.rpow_pos_of_pos hR _), one_mul]
     simp
-  have hb := hp.mul (struveMel_struveH_isBigO hν)
+  have hb := hp.mul (MellinTransform.struveH_isBigO hν)
   refine hb.trans_tendsto ?_
   have t1 := tendsto_rpow_neg_atTop (y := -(μ.re - ν.re - 1 / 2)) (by linarith)
   have t2 := tendsto_rpow_neg_atTop (y := -(μ.re - 1)) (by linarith)
@@ -509,7 +511,7 @@ theorem struveMel_tendsto_boundary {μ ν : ℂ} (hν : ν.re ≤ 1 / 2) (h1 : �
   congr 1; ring_nf
 
 /-- For `t > 0`, `t^a H_ν(t) = t^{a+ν+1} (1/2)^{ν+1} H̃_ν(t)` with the entire core `H̃_ν`. -/
-theorem struveMel_cpow_mul_struveH (a ν : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem MellinTransform.cpow_mul_struveH (a ν : ℂ) {t : ℝ} (ht : 0 < t) :
     (t : ℂ) ^ a * struveH ν t = (t : ℂ) ^ (a + ν + 1) *
         ((1 / 2 : ℂ) ^ (ν + 1) * struveHCore ν t) := by
   have ht0 : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
@@ -521,7 +523,7 @@ theorem struveMel_cpow_mul_struveH (a ν : ℂ) {t : ℝ} (ht : 0 < t) :
 
 /-- The Struve Mellin integrand `t^{μ-ν-1} H_ν(t)` is interval integrable on `[0, R]`
 when `re μ > -1`. -/
-theorem struveMel_intervalIntegrable_struveH {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ)
+theorem MellinTransform.intervalIntegrable_struveH {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ)
     {R : ℝ} (hR : 0 ≤ R) :
     IntervalIntegrable (fun t : ℝ => (t : ℂ) ^ (μ - ν - 1) * struveH ν t) volume 0 R := by
   have h := (intervalIntegral.intervalIntegrable_cpow' hμ0 (a := 0) (b := R)).mul_continuousOn
@@ -529,19 +531,19 @@ theorem struveMel_intervalIntegrable_struveH {μ : ℂ} (hμ0 : -1 < μ.re) (ν 
     (continuous_const.mul ((entire_struveHCore ν).continuous.comp continuous_ofReal)).continuousOn
   refine h.congr (fun t ht => ?_)
   rw [uIoc_of_le hR] at ht
-  rw [struveMel_cpow_mul_struveH _ _ ht.1]
+  rw [MellinTransform.cpow_mul_struveH _ _ ht.1]
   ring_nf
 
 /-- **Integration by parts** in the Struve Mellin integral, from `d/dt (t^{ν+1} H_{ν+1}) =
 t^{ν+1} H_ν` (DLMF 11.4.27). -/
-theorem struveMel_integral_by_parts {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ) {R : ℝ} (hR : 0 < R) :
+theorem MellinTransform.integral_by_parts {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ) {R : ℝ} (hR : 0 < R) :
     ∫ t in (0 : ℝ)..R, (t : ℂ) ^ (μ - ν - 1) * struveH ν t =
       (R : ℂ) ^ (μ - (ν + 1)) * struveH (ν + 1) R -
         (μ - 2 * ν - 2) * ∫ t in (0 : ℝ)..R, (t : ℂ) ^ (μ - (ν + 1) - 1) * struveH (ν + 1) t := by
   set F : ℝ → ℂ := fun t => (t : ℂ) ^ (μ + 1) * ((1 / 2 : ℂ) ^ (ν + 1 + 1) * struveHCore (ν + 1) t)
   have hF : ∀ t : ℝ, 0 < t → F t = (t : ℂ) ^ (μ - (ν + 1)) * struveH (ν + 1) t := by
     intro t ht
-    rw [struveMel_cpow_mul_struveH _ _ ht]
+    rw [MellinTransform.cpow_mul_struveH _ _ ht]
     simp only [F]; ring_nf
   have hFc : ContinuousOn F (Icc 0 R) := by
     refine Continuous.continuousOn ?_
@@ -581,8 +583,8 @@ theorem struveMel_integral_by_parts {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ) {R
         (t : ℂ) ^ (μ - ν - 1) * struveH ν t := by
       rw [← mul_assoc, ← cpow_add _ _ htc]; ring_nf
     linear_combination (μ - 2 * ν - 2) * e1 + e2
-  have hint1 := struveMel_intervalIntegrable_struveH hμ0 ν hR.le
-  have hint2 := struveMel_intervalIntegrable_struveH hμ0 (ν + 1) hR.le
+  have hint1 := MellinTransform.intervalIntegrable_struveH hμ0 ν hR.le
+  have hint2 := MellinTransform.intervalIntegrable_struveH hμ0 (ν + 1) hR.le
   have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hR.le hFc hderiv
     (hint1.add (hint2.const_mul _))
   rw [hF0, sub_zero, hF R hR] at hftc
@@ -592,18 +594,18 @@ theorem struveMel_integral_by_parts {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ) {R
   linear_combination hftc
 
 /-- The value of the Struve Mellin transform, DLMF 11.7.10–11.7.11 (removable case `μ = 0`). -/
-noncomputable def struveMel_value (μ ν : ℂ) : ℂ :=
+noncomputable def MellinTransform.value (μ ν : ℂ) : ℂ :=
   if μ = 0 then π / (2 ^ (ν + 1) * Gamma (ν + 1))
   else Gamma (μ / 2) * 2 ^ (μ - ν - 1) * sin (π * μ / 2) / (cos (π * μ / 2) * Gamma (ν - μ / 2 + 1))
 
 /-- The recurrence `V(μ, ν) = 2 (ν + 1 - μ/2) V(μ, ν + 1)`, valid for all parameters. -/
-theorem struveMel_value_succ (μ ν : ℂ) :
-    struveMel_value μ ν = -(μ - 2 * ν - 2) * struveMel_value μ (ν + 1) := by
+theorem MellinTransform.value_succ (μ ν : ℂ) :
+    MellinTransform.value μ ν = -(μ - 2 * ν - 2) * MellinTransform.value μ (ν + 1) := by
   have h2 : ∀ w : ℂ, (2 : ℂ) ^ (w + 1) = 2 * 2 ^ w := fun w => by
     rw [cpow_add _ _ two_ne_zero, cpow_one]; ring
-  unfold struveMel_value
+  unfold MellinTransform.value
   split_ifs with hμ
-  · have h := struveMel_div_Gamma_add_one (ν + 1)
+  · have h := MellinTransform.div_Gamma_add_one (ν + 1)
     rw [show ν + 1 + 1 = (ν + 1) + 1 by ring, h2 (ν + 1)]
     rw [show -(μ - 2 * ν - 2) = 2 * (ν + 1) by rw [hμ]; ring]
     calc π / (2 ^ (ν + 1) * Gamma (ν + 1)) = π / 2 ^ (ν + 1) * (Gamma (ν + 1))⁻¹ := by
@@ -612,7 +614,7 @@ theorem struveMel_value_succ (μ ν : ℂ) :
       _ = _ := by
           have h0 : (2 : ℂ) ^ (ν + 1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
           field_simp
-  · have h := struveMel_div_Gamma_add_one (ν - μ / 2 + 1)
+  · have h := MellinTransform.div_Gamma_add_one (ν - μ / 2 + 1)
     rw [show ν + 1 - μ / 2 + 1 = (ν - μ / 2 + 1) + 1 by ring,
       show μ - ν - 1 = (μ - (ν + 1) - 1) + 1 by ring, h2 (μ - (ν + 1) - 1),
       show -(μ - 2 * ν - 2) = 2 * (ν - μ / 2 + 1) by ring]
@@ -629,49 +631,49 @@ theorem struveMel_value_succ (μ ν : ℂ) :
 
 /-- **The Struve Mellin transform** as an improper integral: for `|re μ| < 1` and
 `re μ - 3/2 < re ν`, `∫₀^R t^{μ-ν-1} H_ν(t) dt → V(μ, ν)`. -/
-theorem struveMel_tendsto {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1)
+theorem MellinTransform.tendsto {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1)
     (hν : μ.re - 3 / 2 < ν.re) :
     Tendsto (fun R : ℝ => ∫ t in (0 : ℝ)..R, (t : ℂ) ^ (μ - ν - 1) * struveH ν t) atTop
-      (𝓝 (struveMel_value μ ν)) := by
+      (𝓝 (MellinTransform.value μ ν)) := by
   suffices h : ∀ n : ℕ, ∀ ν : ℂ, -1 / 2 < ν.re + n → μ.re - 3 / 2 < ν.re →
       Tendsto (fun R : ℝ => ∫ t in (0 : ℝ)..R, (t : ℂ) ^ (μ - ν - 1) * struveH ν t) atTop
-        (𝓝 (struveMel_value μ ν)) from h 2 ν (by push_cast; linarith) hν
+        (𝓝 (MellinTransform.value μ ν)) from h 2 ν (by push_cast; linarith) hν
   intro n
   induction n with
   | zero =>
     intro ν hν1 _
     simp only [Nat.cast_zero, add_zero] at hν1
-    have h := struveMel_tendsto_direct hμ0 hμ1 hν1
-    rwa [struveMel_value_eq hμ0 hμ1 hν1] at h
+    have h := MellinTransform.tendsto_direct hμ0 hμ1 hν1
+    rwa [MellinTransform.value_eq hμ0 hμ1 hν1] at h
   | succ n ih =>
     intro ν hν1 hν2
     by_cases hd : -1 / 2 < ν.re
-    · have h := struveMel_tendsto_direct hμ0 hμ1 hd
-      rwa [struveMel_value_eq hμ0 hμ1 hd] at h
+    · have h := MellinTransform.tendsto_direct hμ0 hμ1 hd
+      rwa [MellinTransform.value_eq hμ0 hμ1 hd] at h
     push Not at hd
     have hnext := ih (ν + 1) (by simp; push_cast at hν1; linarith) (by simp; linarith)
-    have hb := struveMel_tendsto_boundary (μ := μ) (ν := ν + 1) (by simp; linarith) hμ1
+    have hb := MellinTransform.tendsto_boundary (μ := μ) (ν := ν + 1) (by simp; linarith) hμ1
       (by simp; linarith)
-    rw [struveMel_value_succ μ ν]
+    rw [MellinTransform.value_succ μ ν]
     have hlim := hb.sub (hnext.const_mul (μ - 2 * ν - 2))
     rw [zero_sub, ← neg_mul] at hlim
     refine hlim.congr' ?_
     filter_upwards [eventually_gt_atTop 0] with R hR
-    rw [struveMel_integral_by_parts hμ0 ν hR]
+    rw [MellinTransform.integral_by_parts hμ0 ν hR]
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => struveH ν t) 0 (-cos
 (π*ν/2)/sin (π*ν/2))`. -/
 @[dlmf 11.7.E9]
 theorem struveH_integral_plain {ν : ℂ} (h0 : -2 < ν.re) (h1 : ν.re < 0) :
     HasIntegralAtTop (fun t : ℝ => struveH ν t) 0 (-cos (π*ν/2)/sin (π*ν/2)) := by
-  have h := struveMel_tendsto (μ := ν + 1) (ν := ν) (by simp; linarith) (by simp; linarith)
+  have h := MellinTransform.tendsto (μ := ν + 1) (ν := ν) (by simp; linarith) (by simp; linarith)
     (by simp; linarith)
   have he : ∀ t : ℝ, (t : ℂ) ^ (ν + 1 - ν - 1) * struveH ν t = struveH ν t := fun t => by
     rw [show ν + 1 - ν - 1 = 0 by ring, cpow_zero, one_mul]
   simp only [he] at h
   unfold HasIntegralAtTop
   convert h using 2
-  unfold struveMel_value
+  unfold MellinTransform.value
   have hs : sin (π * (ν + 1) / 2) = cos (π * ν / 2) := by
     rw [show (π : ℂ) * (ν + 1) / 2 = π * ν / 2 + π / 2 by ring, Complex.sin_add_pi_div_two]
   have hc : cos (π * (ν + 1) / 2) = -sin (π * ν / 2) := by
@@ -701,8 +703,9 @@ t) 0 (π/(2^(ν+1)*Gamma (ν+1)))`. -/
 @[dlmf 11.7.E10]
 theorem struveH_integral_mellin_zero {ν : ℂ} (hν : -3/2 < ν.re) :
     HasIntegralAtTop (fun t : ℝ => (t:ℂ)^(-ν-1)*struveH ν t) 0 (π/(2^(ν+1)*Gamma (ν+1))) := by
-  have h := struveMel_tendsto (μ := 0) (ν := ν) (by norm_num) (by norm_num) (by simp; linarith)
-  simp only [struveMel_value, zero_sub] at h
+  have h := MellinTransform.tendsto (μ := 0) (ν := ν) (by norm_num) (by norm_num)
+      (by simp; linarith)
+  simp only [MellinTransform.value, zero_sub] at h
   exact h
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (t:ℂ)^(μ-ν-1)*struveH
@@ -714,7 +717,7 @@ theorem struveH_integral_mellin {μ ν : ℂ} (hμ : |μ.re| < 1) (hν : μ.re-3
         (if μ=0 then π/(2^(ν+1)*Gamma (ν+1)) else
         Gamma (μ/2)*2^(μ-ν-1)*sin (π*μ/2)/(cos (π*μ/2)*Gamma (ν-μ/2+1))) := by
   obtain ⟨h0, h1⟩ := abs_lt.mp hμ
-  exact struveMel_tendsto h0 h1 hν
+  exact MellinTransform.tendsto h0 h1 hν
 
 /-- struveH integral product. DLMF 11.7.12 states only `Re(μ+ν) > 0`; the integral then
 diverges, e.g. at `μ = 3`, `ν = -2` the integrand grows like `t^(1/2) cos(...)`. The cross terms

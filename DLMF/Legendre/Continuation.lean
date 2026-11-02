@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Legendre.Continuation.LogarithmicBranches
+public import DLMF.Legendre.Continuation.SquareHypergeometric
 public import DLMF.Legendre.Continuation.Monodromy
 public import DLMF.Legendre.Continuation.ContinuityAndConnections
 

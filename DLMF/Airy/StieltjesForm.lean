@@ -29,14 +29,15 @@ Special Functions*, Ch. 7 §§3–4; Nemes 2017b).
 
 ## Main results
 
-* `airySt_binom`: the Stieltjes–Euler form of `(1+t)^{-a}`.
-* `airySt_binom_rem`: the exact remainder of the binomial expansion.
-* `airySt_factor_bound`: the ray bound of the remainder factor.
-* `airySt_rem_le_M`, `airySt_rem_le_chi`: the remainder of the ray Laplace integral
-  `∫₀^∞ e^{-Wr} t^{b-1}(1+t)^{-a} dr`, `t = r e^{iθ}`, after `N` terms is at most `M_θ` and at
-  most `χ(N+b) + 1` times the first neglected term (Olver Ch. 7 §§3–4; Boyd's method for χ).
+* `StieltjesBounds.binom`: the Stieltjes–Euler form of `(1+t)^{-a}`.
+* `StieltjesBounds.binom_remainder`: the exact remainder of the binomial expansion.
+* `StieltjesBounds.factor_bound`: the ray bound of the remainder factor.
+* `StieltjesBounds.remainder_le_M`, `StieltjesBounds.remainder_le_chi`: the remainder of the ray
+  Laplace integral `∫₀^∞ e^{-Wr} t^{b-1}(1+t)^{-a} dr`, `t = r e^{iθ}`, after `N` terms is at most
+  `M_θ` and at most `χ(N+b) + 1` times the first neglected term (Olver Ch. 7 §§3–4; Boyd's method
+  for χ).
 
-Helper names carry the prefix `airySt_`.
+Helpers live in the namespace `DLMF.Airy.StieltjesBounds`.
 -/
 
 @[expose] public noncomputable section
@@ -47,42 +48,44 @@ open scoped Real Topology
 namespace DLMF.Airy
 
 /-- The Euler weight `τ^{a-1} (1-τ)^{-a}`. -/
-def airySt_w (a τ : ℝ) : ℝ := τ ^ (a - 1) * (1 - τ) ^ (-a)
+def StieltjesBounds.w (a τ : ℝ) : ℝ := τ ^ (a - 1) * (1 - τ) ^ (-a)
 
 /-- The Euler weight `τ^{a-1}(1-τ)^{-a}` is nonnegative on `(0,1)`. -/
-theorem airySt_w_nonneg (a : ℝ) {τ : ℝ} (hτ : τ ∈ Ioo (0 : ℝ) 1) : 0 ≤ airySt_w a τ := by
+theorem StieltjesBounds.w_nonneg (a : ℝ) {τ : ℝ} (hτ : τ ∈ Ioo (0 : ℝ) 1) : 0 ≤
+    StieltjesBounds.w a τ := by
   have := hτ.1; have : 0 < 1 - τ := by linarith [hτ.2]
-  unfold airySt_w; positivity
+  unfold StieltjesBounds.w; positivity
 
 /-- `τ^k` times the Euler weight is the Beta integrand `τ^{(a+k)-1}(1-τ)^{(1-a)-1}`. -/
-theorem airySt_w_pow {a : ℝ} (k : ℕ) {τ : ℝ} (hτ : τ ∈ Ioo (0 : ℝ) 1) :
-    τ ^ k * airySt_w a τ = τ ^ ((a + k) - 1) * (1 - τ) ^ ((1 - a) - 1) := by
-  unfold airySt_w
+theorem StieltjesBounds.w_pow {a : ℝ} (k : ℕ) {τ : ℝ} (hτ : τ ∈ Ioo (0 : ℝ) 1) :
+    τ ^ k * StieltjesBounds.w a τ = τ ^ ((a + k) - 1) * (1 - τ) ^ ((1 - a) - 1) := by
+  unfold StieltjesBounds.w
   rw [show (a + k) - 1 = (a - 1) + k by ring, Real.rpow_add hτ.1, Real.rpow_natCast,
     show (1 - a) - 1 = -a by ring]
   ring
 
 /-- For `0 < a < 1`, `τ^k τ^{a-1}(1-τ)^{-a}` is integrable on `(0,1)`. -/
-theorem airySt_integrableOn_w {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
-    IntegrableOn (fun τ : ℝ => τ ^ k * airySt_w a τ) (Ioo 0 1) := by
+theorem StieltjesBounds.integrableOn_w {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
+    IntegrableOn (fun τ : ℝ => τ ^ k * StieltjesBounds.w a τ) (Ioo 0 1) := by
   have h := (TauCeti.intervalIntegrable_rpow_mul_one_sub_rpow (a := a + k) (b := 1 - a)
     (by positivity) (by linarith) (u := 0) (v := 1) (by simp) (by simp))
   rw [intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one] at h
-  exact h.congr_fun (fun τ hτ => (airySt_w_pow k hτ).symm) measurableSet_Ioo
+  exact h.congr_fun (fun τ hτ => (StieltjesBounds.w_pow k hτ).symm) measurableSet_Ioo
 
 /-- The moments of the Euler weight: `∫₀¹ τ^k w = Γ(a+k)Γ(1-a)/Γ(k+1)`. -/
-theorem airySt_moment {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
-    ∫ τ in Ioo (0 : ℝ) 1, τ ^ k * airySt_w a τ =
+theorem StieltjesBounds.moment {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
+    ∫ τ in Ioo (0 : ℝ) 1, τ ^ k * StieltjesBounds.w a τ =
       Real.Gamma (a + k) * Real.Gamma (1 - a) / Real.Gamma (k + 1) := by
   have h := TauCeti.integral_rpow_mul_one_sub_rpow (a := a + k) (b := 1 - a) (by positivity)
     (by linarith)
   rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo] at h
-  rw [setIntegral_congr_fun measurableSet_Ioo (fun τ hτ => airySt_w_pow k hτ), h,
+  rw [setIntegral_congr_fun measurableSet_Ioo (fun τ hτ => StieltjesBounds.w_pow k hτ), h,
     ProbabilityTheory.beta]
   congr 2; ring
 
 /-- `1 + tτ ≠ 0` for `τ ∈ [0,1]` when `1 + t ∈ slitPlane`. -/
-theorem airySt_one_add_mul_mem {t : ℂ} (ht : 1 + t ∈ slitPlane) {τ : ℝ} (hτ : τ ∈ Icc (0 : ℝ) 1) :
+theorem StieltjesBounds.one_add_mul_mem {t : ℂ} (ht : 1 + t ∈ slitPlane) {τ : ℝ}
+    (hτ : τ ∈ Icc (0 : ℝ) 1) :
     1 + t * τ ∈ slitPlane := by
   have h := (starConvex_ofReal_slitPlane (x := 1) one_pos) ht (a := 1 - τ) (b := τ)
     (by linarith [hτ.2]) hτ.1 (by ring)
@@ -90,9 +93,9 @@ theorem airySt_one_add_mul_mem {t : ℂ} (ht : 1 + t ∈ slitPlane) {τ : ℝ} (
   simp only [real_smul]; push_cast; ring
 
 /-- The Euler form of the binomial on the unit disc. -/
-theorem airySt_binom_disc {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : ‖t‖ < 1) :
+theorem StieltjesBounds.binom_disc {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : ‖t‖ < 1) :
     (1 + t) ^ (-(a : ℂ)) = (1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) *
-      ∫ τ in Ioo (0 : ℝ) 1, (airySt_w a τ : ℂ) * (1 + t * τ)⁻¹ := by
+      ∫ τ in Ioo (0 : ℝ) 1, (StieltjesBounds.w a τ : ℂ) * (1 + t * τ)⁻¹ := by
   have h1 := ordinaryHypergeometric_eq_one_sub_neg_cpow (a := (a : ℂ)) (c := 1) (z := -t)
     (fun k hk => by have := congrArg Complex.re hk; simp at this;
                     linarith [(k.cast_nonneg : (0:ℝ) ≤ k)])
@@ -108,7 +111,7 @@ theorem airySt_binom_disc {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 
   · refine setIntegral_congr_fun measurableSet_Ioo fun τ hτ => ?_
     have h0 : (0 : ℝ) ≤ τ := hτ.1.le
     have h1 : (0 : ℝ) ≤ 1 - τ := by linarith [hτ.2]
-    simp only [airySt_w]
+    simp only [StieltjesBounds.w]
     push_cast
     rw [ofReal_cpow h0, ofReal_cpow h1, cpow_neg_one]
     push_cast
@@ -116,14 +119,14 @@ theorem airySt_binom_disc {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 
 
 /-- The Stieltjes integral `∫₀¹ τ^{a-1}(1-τ)^{-a} (1 + uτ)⁻¹ dτ` is holomorphic in `u` on the
 set where `1 + u` lies in the slit plane. -/
-private lemma airySt_stieltjes_analyticOnNhd {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) :
-    AnalyticOnNhd ℂ (fun u : ℂ => ∫ τ in Ioo (0 : ℝ) 1, (airySt_w a τ : ℂ) * (1 + u * τ)⁻¹)
+private lemma StieltjesBounds.stieltjes_analyticOnNhd {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) :
+    AnalyticOnNhd ℂ (fun u : ℂ => ∫ τ in Ioo (0 : ℝ) 1, (StieltjesBounds.w a τ : ℂ) * (1 + u * τ)⁻¹)
       {t : ℂ | 1 + t ∈ slitPlane} := by
   have hUo : IsOpen {t : ℂ | 1 + t ∈ slitPlane} := isOpen_slitPlane.preimage (by fun_prop)
   have hne : ∀ u ∈ {t : ℂ | 1 + t ∈ slitPlane}, ∀ τ ∈ Icc (0 : ℝ) 1, 1 + u * τ ≠ 0 :=
-    fun u hu τ hτ => slitPlane_ne_zero (airySt_one_add_mul_mem hu hτ)
-  have hwi : IntegrableOn (fun τ : ℝ => airySt_w a τ) (Ioo 0 1) := by
-    simpa using airySt_integrableOn_w ha0 ha1 0
+    fun u hu τ hτ => slitPlane_ne_zero (StieltjesBounds.one_add_mul_mem hu hτ)
+  have hwi : IntegrableOn (fun τ : ℝ => StieltjesBounds.w a τ) (Ioo 0 1) := by
+    simpa using StieltjesBounds.integrableOn_w ha0 ha1 0
   refine DifferentiableOn.analyticOnNhd ?_ hUo
   refine Complex.differentiableOn_integral_of_locally_dominated hUo (fun u _ => ?_) ?_ ?_
   · exact ((Complex.continuous_ofReal.comp_aestronglyMeasurable hwi.aestronglyMeasurable).mul
@@ -139,7 +142,7 @@ private lemma airySt_stieltjes_analyticOnNhd {a : ℝ} (ha0 : 0 < a) (ha1 : a < 
     set δ := ‖1 + u₀ * τ₀‖ with hδ
     have hδ0 : 0 < δ := norm_pos_iff.mpr (hne u₀ hu₀ τ₀ hτ₀)
     refine ⟨Metric.ball u₀ (δ / 2), Metric.ball_mem_nhds _ (by positivity),
-      fun τ => airySt_w a τ * (2 / δ), hwi.mul_const _, ?_⟩
+      fun τ => StieltjesBounds.w a τ * (2 / δ), hwi.mul_const _, ?_⟩
     refine (ae_restrict_iff' measurableSet_Ioo).mpr (Filter.Eventually.of_forall fun τ hτ => ?_)
     intro u hu
     have hτI : τ ∈ Icc (0 : ℝ) 1 := Ioo_subset_Icc_self hτ
@@ -153,17 +156,17 @@ private lemma airySt_stieltjes_analyticOnNhd {a : ℝ} (ha0 : 0 < a) (ha1 : a < 
         rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg hτI.1]
         exact mul_le_of_le_one_right (norm_nonneg _) hτI.2
       linarith
-    rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (airySt_w_nonneg a hτ), norm_inv]
-    refine mul_le_mul_of_nonneg_left ?_ (airySt_w_nonneg a hτ)
+    rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (StieltjesBounds.w_nonneg a hτ), norm_inv]
+    refine mul_le_mul_of_nonneg_left ?_ (StieltjesBounds.w_nonneg a hτ)
     rw [inv_le_comm₀ (by linarith) (by positivity)]
     calc (2 / δ)⁻¹ = δ / 2 := by field_simp
       _ ≤ _ := hlow
 
 /-- **The binomial as a Stieltjes (Euler) integral**: for `0 < a < 1` and `1 + t` in the slit
 plane, `(1+t)^{-a} = (Γ(a)Γ(1-a))⁻¹ ∫₀¹ τ^{a-1}(1-τ)^{-a} (1 + tτ)⁻¹ dτ`. -/
-theorem airySt_binom {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 + t ∈ slitPlane) :
+theorem StieltjesBounds.binom {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 + t ∈ slitPlane) :
     (1 + t) ^ (-(a : ℂ)) = (1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) *
-      ∫ τ in Ioo (0 : ℝ) 1, (airySt_w a τ : ℂ) * (1 + t * τ)⁻¹ := by
+      ∫ τ in Ioo (0 : ℝ) 1, (StieltjesBounds.w a τ : ℂ) * (1 + t * τ)⁻¹ := by
   set U : Set ℂ := {t : ℂ | 1 + t ∈ slitPlane} with hU
   have hUo : IsOpen U := isOpen_slitPlane.preimage (by fun_prop)
   have hUc : IsPreconnected U := by
@@ -181,33 +184,35 @@ theorem airySt_binom {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 + t
     exact ((differentiableAt_const _).add differentiableAt_id).cpow (differentiableAt_const _)
       hu |>.differentiableWithinAt
   have hg : AnalyticOnNhd ℂ (fun u : ℂ => ((1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) : ℂ) *
-      ∫ τ in Ioo (0 : ℝ) 1, (airySt_w a τ : ℂ) * (1 + u * τ)⁻¹) U := fun u hu =>
-    analyticAt_const.mul (airySt_stieltjes_analyticOnNhd ha0 ha1 u hu)
+      ∫ τ in Ioo (0 : ℝ) 1, (StieltjesBounds.w a τ : ℂ) * (1 + u * τ)⁻¹) U := fun u hu =>
+    analyticAt_const.mul (StieltjesBounds.stieltjes_analyticOnNhd ha0 ha1 u hu)
   have h0U : (0 : ℂ) ∈ U := by simp [hU]
   have hev : (fun u : ℂ => (1 + u) ^ (-(a : ℂ))) =ᶠ[𝓝 0] fun u : ℂ =>
       ((1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) : ℂ) *
-        ∫ τ in Ioo (0 : ℝ) 1, (airySt_w a τ : ℂ) * (1 + u * τ)⁻¹ := by
+        ∫ τ in Ioo (0 : ℝ) 1, (StieltjesBounds.w a τ : ℂ) * (1 + u * τ)⁻¹ := by
     filter_upwards [Metric.ball_mem_nhds (0 : ℂ) one_pos] with u hu
-    exact airySt_binom_disc ha0 ha1 (by simpa using hu)
+    exact StieltjesBounds.binom_disc ha0 ha1 (by simpa using hu)
   exact hf.eqOn_of_preconnected_of_eventuallyEq hg hUc h0U hev ht
 
 /-- The binomial coefficient of `(1+t)^{-a}`: `(-1)^k Γ(a+k)/(Γ(a) k!)`. -/
-def airySt_coef (a : ℝ) (k : ℕ) : ℝ :=
+def StieltjesBounds.coeff (a : ℝ) (k : ℕ) : ℝ :=
   (-1) ^ k * Real.Gamma (a + k) / (Real.Gamma a * Real.Gamma (k + 1))
 
 /-- **Exact remainder of the binomial expansion** in Stieltjes–Euler form. -/
-theorem airySt_binom_rem {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 + t ∈ slitPlane)
+theorem StieltjesBounds.binom_remainder {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ}
+    (ht : 1 + t ∈ slitPlane)
     (N : ℕ) :
-    (1 + t) ^ (-(a : ℂ)) - ∑ k ∈ range N, (airySt_coef a k : ℂ) * t ^ k =
+    (1 + t) ^ (-(a : ℂ)) - ∑ k ∈ range N, (StieltjesBounds.coeff a k : ℂ) * t ^ k =
       (-t) ^ N * (((1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) : ℂ) *
-        ∫ τ in Ioo (0 : ℝ) 1, ((τ ^ N * airySt_w a τ : ℝ) : ℂ) * (1 + t * τ)⁻¹) := by
+        ∫ τ in Ioo (0 : ℝ) 1, ((τ ^ N * StieltjesBounds.w a τ : ℝ) : ℂ) * (1 + t * τ)⁻¹) := by
   have hne : ∀ τ ∈ Ioo (0 : ℝ) 1, 1 + t * τ ≠ 0 := fun τ hτ =>
-    slitPlane_ne_zero (airySt_one_add_mul_mem ht (Ioo_subset_Icc_self hτ))
-  have hint : ∀ k : ℕ, IntegrableOn (fun τ : ℝ => ((τ ^ k * airySt_w a τ : ℝ) : ℂ)) (Ioo 0 1) :=
-    fun k => (airySt_integrableOn_w ha0 ha1 k).ofReal
-  have hpt : ∀ τ ∈ Ioo (0 : ℝ) 1, (airySt_w a τ : ℂ) * (1 + t * τ)⁻¹ =
-      ∑ k ∈ range N, ((τ ^ k * airySt_w a τ : ℝ) : ℂ) * (-t) ^ k +
-        (-t) ^ N * (((τ ^ N * airySt_w a τ : ℝ) : ℂ) * (1 + t * τ)⁻¹) := by
+    slitPlane_ne_zero (StieltjesBounds.one_add_mul_mem ht (Ioo_subset_Icc_self hτ))
+  have hint : ∀ k : ℕ,
+      IntegrableOn (fun τ : ℝ => ((τ ^ k * StieltjesBounds.w a τ : ℝ) : ℂ)) (Ioo 0 1) :=
+    fun k => (StieltjesBounds.integrableOn_w ha0 ha1 k).ofReal
+  have hpt : ∀ τ ∈ Ioo (0 : ℝ) 1, (StieltjesBounds.w a τ : ℂ) * (1 + t * τ)⁻¹ =
+      ∑ k ∈ range N, ((τ ^ k * StieltjesBounds.w a τ : ℝ) : ℂ) * (-t) ^ k +
+        (-t) ^ N * (((τ ^ N * StieltjesBounds.w a τ : ℝ) : ℂ) * (1 + t * τ)⁻¹) := by
     intro τ hτ
     have hg := StieltjesRemainder.geom (t * τ) (hne τ hτ) N
     conv_lhs => rw [← one_div, hg]
@@ -217,19 +222,21 @@ theorem airySt_binom_rem {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1
       push_cast; ring
     · push_cast; ring
   have hcont : ContinuousOn (fun τ : ℝ => (1 + t * τ)⁻¹) (Icc 0 1) :=
-    ContinuousOn.inv₀ (by fun_prop) fun τ hτ => slitPlane_ne_zero (airySt_one_add_mul_mem ht hτ)
-  have hrem : IntegrableOn (fun τ : ℝ => ((τ ^ N * airySt_w a τ : ℝ) : ℂ) * (1 + t * τ)⁻¹)
+    ContinuousOn.inv₀ (by fun_prop) fun τ hτ =>
+        slitPlane_ne_zero (StieltjesBounds.one_add_mul_mem ht hτ)
+  have hrem : IntegrableOn (fun τ : ℝ => ((τ ^ N * StieltjesBounds.w a τ : ℝ) : ℂ) * (1 + t * τ)⁻¹)
       (Ioo 0 1) :=
     (hint N).mul_continuousOn_of_subset hcont measurableSet_Ioo isCompact_Icc Ioo_subset_Icc_self
-  rw [airySt_binom ha0 ha1 ht, setIntegral_congr_fun measurableSet_Ioo hpt,
+  rw [StieltjesBounds.binom ha0 ha1 ht, setIntegral_congr_fun measurableSet_Ioo hpt,
     integral_add (integrable_finsetSum _ fun k _ => (hint k).mul_const _)
       (hrem.const_mul _),
     integral_finsetSum _ fun k _ => (hint k).mul_const _, integral_const_mul]
   have hk : ∀ k ∈ range N, (((1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) : ℂ) *
-      ∫ τ in Ioo (0 : ℝ) 1, ((τ ^ k * airySt_w a τ : ℝ) : ℂ) * (-t) ^ k) =
-        (airySt_coef a k : ℂ) * t ^ k := by
+      ∫ τ in Ioo (0 : ℝ) 1, ((τ ^ k * StieltjesBounds.w a τ : ℝ) : ℂ) * (-t) ^ k) =
+        (StieltjesBounds.coeff a k : ℂ) * t ^ k := by
     intro k _
-    rw [integral_mul_const, integral_complex_ofReal, airySt_moment ha0 ha1 k, airySt_coef]
+    rw [integral_mul_const, integral_complex_ofReal, StieltjesBounds.moment ha0 ha1 k,
+        StieltjesBounds.coeff]
     have h1 : Real.Gamma (1 - a) ≠ 0 := (Real.Gamma_pos_of_pos (by linarith)).ne'
     have h2 : Real.Gamma a ≠ 0 := (Real.Gamma_pos_of_pos ha0).ne'
     have h3 : Real.Gamma (k + 1) ≠ 0 := (Real.Gamma_pos_of_pos (by positivity)).ne'
@@ -243,11 +250,11 @@ theorem airySt_binom_rem {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1
   ring
 
 /-- The ray multiplier: `1` if `cos θ ≥ 0`, else `|csc θ|`. -/
-def airySt_M (θ : ℝ) : ℝ := if 0 ≤ Real.cos θ then 1 else |Real.sin θ|⁻¹
+def StieltjesBounds.M (θ : ℝ) : ℝ := if 0 ≤ Real.cos θ then 1 else |Real.sin θ|⁻¹
 
 /-- The ray multiplier `M_θ` (`1` if `cos θ ≥ 0`, else `|csc θ|`) is positive for `|θ| < π`. -/
-theorem airySt_M_pos {θ : ℝ} (hθ : |θ| < π) : 0 < airySt_M θ := by
-  unfold airySt_M
+theorem StieltjesBounds.M_pos {θ : ℝ} (hθ : |θ| < π) : 0 < StieltjesBounds.M θ := by
+  unfold StieltjesBounds.M
   split_ifs with h
   · exact one_pos
   · refine inv_pos.mpr (abs_pos.mpr fun hs => h ?_)
@@ -256,45 +263,49 @@ theorem airySt_M_pos {θ : ℝ} (hθ : |θ| < π) : 0 < airySt_M θ := by
     simp
 
 /-- For `s ≥ 0` and `|θ| < π`, `|(1 + s e^{iθ})⁻¹| ≤ M_θ`. -/
-theorem airySt_norm_recip_le {θ : ℝ} (hθ : |θ| < π) {s : ℝ} (hs : 0 ≤ s) :
-    ‖(1 + (s : ℂ) * exp (θ * I))⁻¹‖ ≤ airySt_M θ := by
+theorem StieltjesBounds.norm_inv_le {θ : ℝ} (hθ : |θ| < π) {s : ℝ} (hs : 0 ≤ s) :
+    ‖(1 + (s : ℂ) * exp (θ * I))⁻¹‖ ≤ StieltjesBounds.M θ := by
   rw [norm_inv]
-  unfold airySt_M
+  unfold StieltjesBounds.M
   split_ifs with h
   · exact inv_le_one_of_one_le₀ (Complex.one_le_norm_one_add_ofReal_mul_exp hs h)
-  · have hM := airySt_M_pos hθ
-    unfold airySt_M at hM; simp only [h, ↓reduceIte] at hM
+  · have hM := StieltjesBounds.M_pos hθ
+    unfold StieltjesBounds.M at hM; simp only [h, ↓reduceIte] at hM
     exact inv_anti₀ (inv_pos.mp hM) (Complex.abs_sin_le_norm_one_add_ofReal_mul_exp s θ)
 
 /-- The Stieltjes factor of the binomial remainder is bounded by `M_θ` times its value at `0`. -/
-theorem airySt_factor_bound {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {θ : ℝ} (hθ : |θ| < π) {r : ℝ}
+theorem StieltjesBounds.factor_bound {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {θ : ℝ}
+    (hθ : |θ| < π) {r : ℝ}
     (hr : 0 ≤ r) (N : ℕ) :
     ‖((1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) : ℂ) *
-        ∫ τ in Ioo (0 : ℝ) 1, ((τ ^ N * airySt_w a τ : ℝ) : ℂ) * (1 + (r * exp (θ * I)) * τ)⁻¹‖ ≤
-      airySt_M θ * (Real.Gamma (a + N) / (Real.Gamma a * Real.Gamma (N + 1))) := by
+        ∫ τ in Ioo (0 : ℝ) 1, ((τ ^ N * StieltjesBounds.w a τ : ℝ) : ℂ) *
+            (1 + (r * exp (θ * I)) * τ)⁻¹‖ ≤
+      StieltjesBounds.M θ * (Real.Gamma (a + N) / (Real.Gamma a * Real.Gamma (N + 1))) := by
   have hG : 0 < Real.Gamma a * Real.Gamma (1 - a) :=
     mul_pos (Real.Gamma_pos_of_pos ha0) (Real.Gamma_pos_of_pos (by linarith))
   rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (by positivity)]
-  have hI : ‖∫ τ in Ioo (0 : ℝ) 1, ((τ ^ N * airySt_w a τ : ℝ) : ℂ) *
-      (1 + (r * exp (θ * I)) * τ)⁻¹‖ ≤ ∫ τ in Ioo (0 : ℝ) 1, τ ^ N * airySt_w a τ * airySt_M θ := by
-    refine norm_integral_le_of_norm_le ((airySt_integrableOn_w ha0 ha1 N).mul_const _) ?_
+  have hI : ‖∫ τ in Ioo (0 : ℝ) 1, ((τ ^ N * StieltjesBounds.w a τ : ℝ) : ℂ) *
+      (1 + (r * exp (θ * I)) * τ)⁻¹‖ ≤ ∫ τ in Ioo (0 : ℝ) 1, τ ^ N * StieltjesBounds.w a τ *
+          StieltjesBounds.M θ := by
+    refine norm_integral_le_of_norm_le ((StieltjesBounds.integrableOn_w ha0 ha1 N).mul_const _) ?_
     refine (ae_restrict_iff' measurableSet_Ioo).mpr (Filter.Eventually.of_forall fun τ hτ => ?_)
-    have h0 : 0 ≤ τ ^ N * airySt_w a τ := mul_nonneg (pow_nonneg hτ.1.le _) (airySt_w_nonneg a hτ)
+    have h0 : 0 ≤ τ ^ N * StieltjesBounds.w a τ :=
+        mul_nonneg (pow_nonneg hτ.1.le _) (StieltjesBounds.w_nonneg a hτ)
     rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg h0]
     refine mul_le_mul_of_nonneg_left ?_ h0
-    have := airySt_norm_recip_le hθ (s := r * τ) (mul_nonneg hr hτ.1.le)
+    have := StieltjesBounds.norm_inv_le hθ (s := r * τ) (mul_nonneg hr hτ.1.le)
     convert this using 3; push_cast; ring
-  rw [integral_mul_const, airySt_moment ha0 ha1] at hI
+  rw [integral_mul_const, StieltjesBounds.moment ha0 ha1] at hI
   have h1 : Real.Gamma (1 - a) ≠ 0 := (Real.Gamma_pos_of_pos (by linarith)).ne'
   calc 1 / (Real.Gamma a * Real.Gamma (1 - a)) * ‖∫ τ in Ioo (0 : ℝ) 1,
-        ((τ ^ N * airySt_w a τ : ℝ) : ℂ) * (1 + (r * exp (θ * I)) * τ)⁻¹‖
+        ((τ ^ N * StieltjesBounds.w a τ : ℝ) : ℂ) * (1 + (r * exp (θ * I)) * τ)⁻¹‖
       ≤ 1 / (Real.Gamma a * Real.Gamma (1 - a)) *
-          (Real.Gamma (a + N) * Real.Gamma (1 - a) / Real.Gamma (N + 1) * airySt_M θ) :=
+          (Real.Gamma (a + N) * Real.Gamma (1 - a) / Real.Gamma (N + 1) * StieltjesBounds.M θ) :=
         mul_le_mul_of_nonneg_left hI (by positivity)
     _ = _ := by field_simp
 
 /-- `(r e^{iθ})^s = r^s e^{iθ s}` for `r > 0`, `|θ| < π`. -/
-theorem airySt_ray_cpow {r : ℝ} (hr : 0 < r) {θ : ℝ} (hθ : |θ| < π) (s : ℂ) :
+theorem StieltjesBounds.ray_cpow {r : ℝ} (hr : 0 < r) {θ : ℝ} (hθ : |θ| < π) (s : ℂ) :
     ((r : ℂ) * exp (θ * I)) ^ s = (r : ℂ) ^ s * exp (θ * I * s) := by
   have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
   have him : (θ * I : ℂ).im = θ := by simp
@@ -304,7 +315,7 @@ theorem airySt_ray_cpow {r : ℝ} (hr : 0 < r) {θ : ℝ} (hθ : |θ| < π) (s :
   congr 1; ring
 
 /-- `1 + r e^{iθ}` lies in the slit plane for `r ≥ 0`, `|θ| < π`. -/
-theorem airySt_one_add_mem {r : ℝ} (hr : 0 ≤ r) {θ : ℝ} (hθ : |θ| < π) :
+theorem StieltjesBounds.one_add_mem {r : ℝ} (hr : 0 ≤ r) {θ : ℝ} (hθ : |θ| < π) :
     1 + (r : ℂ) * exp (θ * I) ∈ slitPlane := by
   rcases eq_or_lt_of_le hr with h | h
   · subst h; simp
@@ -321,15 +332,15 @@ theorem airySt_one_add_mem {r : ℝ} (hr : 0 ≤ r) {θ : ℝ} (hθ : |θ| < π)
     exact ⟨h.ne', hs⟩
 
 /-- The `k`-th term of the ray expansion: `c_k e^{iθ(b-1+k)} Γ(b+k) W^{-(b+k)}`. -/
-def airySt_T (b a θ W : ℝ) (k : ℕ) : ℂ :=
-  (airySt_coef a k : ℂ) * exp (θ * I * ((b : ℂ) - 1 + k)) *
+def StieltjesBounds.T (b a θ W : ℝ) (k : ℕ) : ℂ :=
+  (StieltjesBounds.coeff a k : ℂ) * exp (θ * I * ((b : ℂ) - 1 + k)) *
     (Gamma ((b : ℂ) + k) * (W : ℂ) ^ (-((b : ℂ) + k)))
 
 /-- The absolute value of the binomial coefficient `binom(-a, k)` is `Γ(a+k)/(Γ(a) k!)` for `a > 0`.
 -/
-theorem airySt_abs_coef {a : ℝ} (ha : 0 < a) (k : ℕ) :
-    |airySt_coef a k| = Real.Gamma (a + k) / (Real.Gamma a * Real.Gamma (k + 1)) := by
-  unfold airySt_coef
+theorem StieltjesBounds.abs_coeff {a : ℝ} (ha : 0 < a) (k : ℕ) :
+    |StieltjesBounds.coeff a k| = Real.Gamma (a + k) / (Real.Gamma a * Real.Gamma (k + 1)) := by
+  unfold StieltjesBounds.coeff
   have h1 := Real.Gamma_pos_of_pos (show 0 < a + k by positivity)
   have h2 := Real.Gamma_pos_of_pos ha
   have h3 := Real.Gamma_pos_of_pos (show (0 : ℝ) < k + 1 by positivity)
@@ -338,50 +349,52 @@ theorem airySt_abs_coef {a : ℝ} (ha : 0 < a) (k : ℕ) :
 
 /-- The modulus of the `k`-th term of the ray Laplace expansion is `Γ(a+k)/(Γ(a) k!) · Γ(b+k)
 W^{-(b+k)}`. -/
-theorem airySt_norm_T {b a θ W : ℝ} (hb : 0 < b) (ha : 0 < a) (hW : 0 < W) (k : ℕ) :
-    ‖airySt_T b a θ W k‖ =
+theorem StieltjesBounds.norm_T {b a θ W : ℝ} (hb : 0 < b) (ha : 0 < a) (hW : 0 < W) (k : ℕ) :
+    ‖StieltjesBounds.T b a θ W k‖ =
       Real.Gamma (a + k) / (Real.Gamma a * Real.Gamma (k + 1)) * Real.Gamma (b + k) *
         W ^ (-(b + k)) := by
-  unfold airySt_T
+  unfold StieltjesBounds.T
   have he : θ * I * ((b : ℂ) - 1 + k) = ((θ * (b - 1 + k) : ℝ) : ℂ) * I := by push_cast; ring
   have hg : Gamma ((b : ℂ) + k) = ((Real.Gamma (b + k) : ℝ) : ℂ) := by
     rw [← Complex.Gamma_ofReal]; push_cast; rfl
   have hw : (W : ℂ) ^ (-((b : ℂ) + k)) = ((W ^ (-(b + k)) : ℝ) : ℂ) := by
     rw [ofReal_cpow hW.le]; push_cast; rfl
   rw [he, hg, hw, norm_mul, norm_mul, norm_mul, norm_exp_ofReal_mul_I, Complex.norm_real,
-    Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, airySt_abs_coef ha,
+    Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, StieltjesBounds.abs_coeff ha,
     Real.norm_of_nonneg (Real.Gamma_pos_of_pos (by positivity)).le,
     Real.norm_of_nonneg (Real.rpow_nonneg hW.le _)]
   ring
 
 /-- The ray monomial integrand on `(0,∞)`. -/
-theorem airySt_term_eq {b W θ : ℝ} (hθ : |θ| < π) (k : ℕ) {r : ℝ} (hr : 0 < r) :
+theorem StieltjesBounds.term_eq {b W θ : ℝ} (hθ : |θ| < π) (k : ℕ) {r : ℝ} (hr : 0 < r) :
     Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
       ((r : ℂ) * exp (θ * I)) ^ k) =
       exp (θ * I * ((b : ℂ) - 1 + k)) * (((r ^ ((b + k) - 1) * Real.exp (-(W * r)) : ℝ) : ℂ)) := by
   have ht : (r : ℂ) * exp (θ * I) ≠ 0 := mul_ne_zero (ofReal_ne_zero.mpr hr.ne') (exp_ne_zero _)
-  rw [← cpow_natCast, ← cpow_add _ _ ht, airySt_ray_cpow hr hθ]
+  rw [← cpow_natCast, ← cpow_add _ _ ht, StieltjesBounds.ray_cpow hr hθ]
   push_cast
   rw [ofReal_cpow hr.le]
   push_cast
   ring_nf
 
 /-- The ray Laplace integrand `e^{-Wr} t^{b-1} t^k`, `t = r e^{iθ}`, is integrable on `(0,∞)`. -/
-theorem airySt_term_integrableOn {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| < π) (k : ℕ) :
+theorem StieltjesBounds.term_integrableOn {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W)
+    (hθ : |θ| < π) (k : ℕ) :
     IntegrableOn (fun r : ℝ => Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
       ((r : ℂ) * exp (θ * I)) ^ k)) (Ioi 0) := by
   have h := ((StieltjesRemainder.integrableOn_rpow_exp (m := (b + k) - 1)
       (by have := k.cast_nonneg (α := ℝ); linarith) hW).ofReal
     (𝕜 := ℂ)).const_mul (exp (θ * I * ((b : ℂ) - 1 + k)))
-  exact IntegrableOn.congr_fun h (fun r hr => (airySt_term_eq hθ k hr).symm) measurableSet_Ioi
+  exact IntegrableOn.congr_fun h (fun r hr => (StieltjesBounds.term_eq hθ k hr).symm)
+      measurableSet_Ioi
 
 /-- The ray Laplace integral of `t^{b-1} t^k`, `t = r e^{iθ}`, equals `e^{iθ(b-1+k)} Γ(b+k)
 W^{-(b+k)}`. -/
-theorem airySt_term_integral {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| < π) (k : ℕ) :
+theorem StieltjesBounds.term_integral {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| < π) (k : ℕ) :
     ∫ r in Ioi (0 : ℝ), Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
       ((r : ℂ) * exp (θ * I)) ^ k) =
       exp (θ * I * ((b : ℂ) - 1 + k)) * (Gamma ((b : ℂ) + k) * (W : ℂ) ^ (-((b : ℂ) + k))) := by
-  rw [setIntegral_congr_fun measurableSet_Ioi (fun r hr => airySt_term_eq hθ k hr),
+  rw [setIntegral_congr_fun measurableSet_Ioi (fun r hr => StieltjesBounds.term_eq hθ k hr),
     integral_const_mul]
   congr 1
   have h := integral_cpow_mul_cexp_neg_mul_Ioi_of_real (s := (b : ℂ) + k) (by simp; positivity) hW
@@ -394,57 +407,61 @@ theorem airySt_term_integral {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ
   ring_nf
 
 /-- The Stieltjes factor of the binomial remainder. -/
-def airySt_Q (a : ℝ) (N : ℕ) (t : ℂ) : ℂ :=
+def StieltjesBounds.Q (a : ℝ) (N : ℕ) (t : ℂ) : ℂ :=
   ((1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) : ℂ) *
-    ∫ τ in Ioo (0 : ℝ) 1, ((τ ^ N * airySt_w a τ : ℝ) : ℂ) * (1 + t * τ)⁻¹
+    ∫ τ in Ioo (0 : ℝ) 1, ((τ ^ N * StieltjesBounds.w a τ : ℝ) : ℂ) * (1 + t * τ)⁻¹
 
 /-- The ray Laplace integral of `t^{b-1}(1+t)^{-a}`, with real damping `W`. -/
-def airySt_L (b a θ W : ℝ) : ℂ :=
+def StieltjesBounds.L (b a θ W : ℝ) : ℂ :=
   ∫ r in Ioi (0 : ℝ), Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
     (1 + (r : ℂ) * exp (θ * I)) ^ (-(a : ℂ)))
 
 /-- **Exact remainder of the ray expansion.** -/
-theorem airySt_rem_repr {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b) (hW : 0 < W)
+theorem StieltjesBounds.remainder_representation {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1)
+    (hb : 0 < b) (hW : 0 < W)
     (hθ : |θ| < π) (N : ℕ)
     (hint : IntegrableOn (fun r : ℝ => Complex.exp (-(W * r)) *
       (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) * (1 + (r : ℂ) * exp (θ * I)) ^ (-(a : ℂ))))
       (Ioi 0)) :
-    airySt_L b a θ W - ∑ k ∈ range N, airySt_T b a θ W k =
+    StieltjesBounds.L b a θ W - ∑ k ∈ range N, StieltjesBounds.T b a θ W k =
       ∫ r in Ioi (0 : ℝ), Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
-        ((-((r : ℂ) * exp (θ * I))) ^ N * airySt_Q a N ((r : ℂ) * exp (θ * I)))) := by
-  have hT : ∀ k, airySt_T b a θ W k = ∫ r in Ioi (0 : ℝ), (airySt_coef a k : ℂ) *
+        ((-((r : ℂ) * exp (θ * I))) ^ N * StieltjesBounds.Q a N ((r : ℂ) * exp (θ * I)))) := by
+  have hT : ∀ k, StieltjesBounds.T b a θ W k = ∫ r in Ioi (0 : ℝ), (StieltjesBounds.coeff a k : ℂ) *
       (Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
         ((r : ℂ) * exp (θ * I)) ^ k)) := by
     intro k
-    rw [integral_const_mul, airySt_term_integral hb hW hθ k, airySt_T]
+    rw [integral_const_mul, StieltjesBounds.term_integral hb hW hθ k, StieltjesBounds.T]
     ring
   simp_rw [hT]
-  rw [← integral_finsetSum _ (fun k _ => (airySt_term_integrableOn hb hW hθ k).const_mul _),
-    airySt_L, ← integral_sub hint (integrable_finsetSum _ fun k _ =>
-      (airySt_term_integrableOn hb hW hθ k).const_mul _)]
+  rw [← integral_finsetSum _
+      (fun k _ => (StieltjesBounds.term_integrableOn hb hW hθ k).const_mul _),
+    StieltjesBounds.L, ← integral_sub hint (integrable_finsetSum _ fun k _ =>
+      (StieltjesBounds.term_integrableOn hb hW hθ k).const_mul _)]
   refine setIntegral_congr_fun measurableSet_Ioi (fun r hr => ?_)
   have hr : (0 : ℝ) ≤ r := le_of_lt hr
-  have h := airySt_binom_rem ha0 ha1 (airySt_one_add_mem hr hθ) N
-  simp only [airySt_Q]
+  have h := StieltjesBounds.binom_remainder ha0 ha1 (StieltjesBounds.one_add_mem hr hθ) N
+  simp only [StieltjesBounds.Q]
   rw [← h, mul_sub, mul_sub, Finset.mul_sum, Finset.mul_sum]
   congr 1
   refine Finset.sum_congr rfl fun k _ => ?_
   ring
 
 /-- Euler's integral `∫₀^∞ r^{m-1} e^{-Wr} dr = Γ(m) W^{-m}` for `m, W > 0`. -/
-theorem airySt_gamma_int {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
+theorem StieltjesBounds.gamma_integral {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
     ∫ r in Ioi (0 : ℝ), r ^ (m - 1) * Real.exp (-(W * r)) = Real.Gamma m * W ^ (-m) := by
   have h := integral_rpow_mul_exp_neg_mul_rpow (p := 1) (q := m - 1) one_pos (by linarith) hW
   simp only [Real.rpow_one, div_one, sub_add_cancel, mul_one, neg_mul] at h
   rw [h, mul_comm]
 
 /-- The norm of the ray remainder integrand. -/
-theorem airySt_norm_integrand {a b W θ : ℝ} (hθ : |θ| < π) (N : ℕ) {r : ℝ} (hr : 0 < r) :
+theorem StieltjesBounds.norm_integrand {a b W θ : ℝ} (hθ : |θ| < π) (N : ℕ) {r : ℝ} (hr : 0 < r) :
     ‖Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
-        ((-((r : ℂ) * exp (θ * I))) ^ N * airySt_Q a N ((r : ℂ) * exp (θ * I))))‖ =
-      r ^ ((b + N) - 1) * Real.exp (-(W * r)) * ‖airySt_Q a N ((r : ℂ) * exp (θ * I))‖ := by
+        ((-((r : ℂ) * exp (θ * I))) ^ N * StieltjesBounds.Q a N ((r : ℂ) * exp (θ * I))))‖ =
+      r ^ ((b + N) - 1) * Real.exp (-(W * r)) *
+          ‖StieltjesBounds.Q a N ((r : ℂ) * exp (θ * I))‖ := by
   have he : θ * I * ((b : ℂ) - 1) = ((θ * (b - 1) : ℝ) : ℂ) * I := by push_cast; ring
-  rw [airySt_ray_cpow hr hθ, he, norm_mul, norm_mul, norm_mul, norm_mul, norm_pow, norm_neg,
+  rw [StieltjesBounds.ray_cpow hr hθ, he, norm_mul, norm_mul, norm_mul, norm_mul,
+      norm_pow, norm_neg,
     Complex.norm_ofReal_mul_exp_ofReal_mul_I hr.le, norm_exp_ofReal_mul_I,
         norm_cpow_eq_rpow_re_of_pos hr,
     show (-(W * r : ℂ)) = ((-(W * r) : ℝ) : ℂ) by push_cast; ring, norm_exp,
@@ -454,32 +471,37 @@ theorem airySt_norm_integrand {a b W θ : ℝ} (hθ : |θ| < π) (N : ℕ) {r : 
   field_simp
 
 /-- **The ray remainder bound with Olver's multiplier `M_θ`.** -/
-theorem airySt_rem_le_M {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b) (hW : 0 < W)
+theorem StieltjesBounds.remainder_le_M {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1)
+    (hb : 0 < b) (hW : 0 < W)
     (hθ : |θ| < π) (N : ℕ)
     (hint : IntegrableOn (fun r : ℝ => Complex.exp (-(W * r)) *
       (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) * (1 + (r : ℂ) * exp (θ * I)) ^ (-(a : ℂ))))
       (Ioi 0)) :
-    ‖airySt_L b a θ W - ∑ k ∈ range N, airySt_T b a θ W k‖ ≤
-      airySt_M θ * ‖airySt_T b a θ W N‖ := by
-  rw [airySt_rem_repr ha0 ha1 hb hW hθ N hint, airySt_norm_T hb ha0 hW]
+    ‖StieltjesBounds.L b a θ W - ∑ k ∈ range N, StieltjesBounds.T b a θ W k‖ ≤
+      StieltjesBounds.M θ * ‖StieltjesBounds.T b a θ W N‖ := by
+  rw [StieltjesBounds.remainder_representation ha0 ha1 hb hW hθ N hint,
+      StieltjesBounds.norm_T hb ha0 hW]
   set C := Real.Gamma (a + N) / (Real.Gamma a * Real.Gamma (N + 1))
   have hb' : 0 < b + N := by positivity
-  calc _ ≤ ∫ r in Ioi (0 : ℝ), r ^ ((b + N) - 1) * Real.exp (-(W * r)) * (airySt_M θ * C) := by
+  calc _ ≤ ∫ r in Ioi (0 : ℝ), r ^ ((b + N) - 1) * Real.exp (-(W * r)) *
+         (StieltjesBounds.M θ * C) := by
         refine norm_integral_le_of_norm_le
           ((StieltjesRemainder.integrableOn_rpow_exp (by linarith) hW).mul_const _) ?_
         refine (ae_restrict_iff' measurableSet_Ioi).mpr (Filter.Eventually.of_forall fun r hr => ?_)
         have hr : (0 : ℝ) < r := hr
-        rw [airySt_norm_integrand hθ N hr]
-        exact mul_le_mul_of_nonneg_left (airySt_factor_bound ha0 ha1 hθ hr.le N) (by positivity)
-    _ = _ := by rw [integral_mul_const, airySt_gamma_int hb' hW]; ring
+        rw [StieltjesBounds.norm_integrand hθ N hr]
+        exact mul_le_mul_of_nonneg_left (StieltjesBounds.factor_bound ha0 ha1 hθ hr.le N)
+            (by positivity)
+    _ = _ := by rw [integral_mul_const, StieltjesBounds.gamma_integral hb' hW]; ring
 
 /-- Olver's Gamma ratio `χ(m) = √π Γ(m/2+1)/Γ(m/2+1/2)` (DLMF 9.7.3). -/
-def airySt_chi (m : ℝ) : ℝ := Real.sqrt π * Real.Gamma (m / 2 + 1) / Real.Gamma (m / 2 + 1 / 2)
+def StieltjesBounds.chi (m : ℝ) : ℝ := Real.sqrt π * Real.Gamma (m / 2 + 1) /
+    Real.Gamma (m / 2 + 1 / 2)
 
 /-- `Γ(m+1) ∫₀^∞ (W²+ρ²)^{-(m+1)/2} dρ = Γ(m) χ(m) W^{-m}`. -/
-theorem airySt_chi_integral {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
+theorem StieltjesBounds.chi_integral {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
     Real.Gamma (m + 1) * ∫ ρ in Ioi (0 : ℝ), (W ^ 2 + ρ ^ 2) ^ (-(m + 1) / 2) =
-      Real.Gamma m * airySt_chi m * W ^ (-m) := by
+      Real.Gamma m * StieltjesBounds.chi m * W ^ (-m) := by
   set s := (m + 1) / 2 with hs
   have hneg : -(m + 1) / 2 = -s := by rw [hs]; ring
   rw [hneg]
@@ -500,7 +522,7 @@ theorem airySt_chi_integral {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
     field_simp
     calc _ = W * (W⁻¹ * ∫ x in Ioi (0 : ℝ), (W ^ 2 + x ^ 2) ^ (-s)) := by field_simp
       _ = _ := by rw [← h3]; ring
-  rw [hJ, ProbabilityTheory.beta, airySt_chi, Real.Gamma_one_half_eq,
+  rw [hJ, ProbabilityTheory.beta, StieltjesBounds.chi, Real.Gamma_one_half_eq,
     show s - 1 / 2 = m / 2 by rw [hs]; ring, show (1 / 2 : ℝ) + m / 2 = m / 2 + 1 / 2 by ring,
     Real.Gamma_add_one hm.ne', Real.Gamma_add_one (by positivity : m / 2 ≠ 0)]
   have hWm : W * W ^ (-(m + 1)) = W ^ (-m) := by
@@ -511,7 +533,7 @@ theorem airySt_chi_integral {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
   field_simp
 
 /-- For `sin θ ≠ 0` there is a rotation `β` with `cos β > 0` and `cos (θ + β) = 0`. -/
-private lemma airySt_exists_rotation {θ : ℝ} (hsin : Real.sin θ ≠ 0) :
+private lemma StieltjesBounds.exists_rotation {θ : ℝ} (hsin : Real.sin θ ≠ 0) :
     ∃ β : ℝ, 0 < Real.cos β ∧ Real.cos (θ + β) = 0 := by
   rcases lt_or_gt_of_ne hsin with h | h
   · refine ⟨-(π / 2) - θ, ?_, ?_⟩
@@ -523,37 +545,40 @@ private lemma airySt_exists_rotation {θ : ℝ} (hsin : Real.sin θ ≠ 0) :
     · rw [show θ + (π / 2 - θ) = π / 2 by ring, Real.cos_pi_div_two]
 
 /-- The `(N+1)`-st remainder as a Stieltjes mixture, for the χ bound. -/
-theorem airySt_rem_succ_le {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b) (hW : 0 < W)
+theorem StieltjesBounds.remainder_succ_le {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1)
+    (hb : 0 < b) (hW : 0 < W)
     (hθ : |θ| < π) (hsin : Real.sin θ ≠ 0) (N : ℕ) :
     ‖∫ r in Ioi (0 : ℝ), Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
-        ((-((r : ℂ) * exp (θ * I))) ^ (N + 1) * airySt_Q a (N + 1) ((r : ℂ) * exp (θ * I))))‖ ≤
-      airySt_chi (b + N) * ‖airySt_T b a θ W N‖ := by
+        ((-((r : ℂ) * exp (θ * I))) ^ (N + 1) *
+            StieltjesBounds.Q a (N + 1) ((r : ℂ) * exp (θ * I))))‖ ≤
+      StieltjesBounds.chi (b + N) * ‖StieltjesBounds.T b a θ W N‖ := by
   set m := b + N with hmdef
   have hm : 0 < m := by positivity
   set C : ℝ := 1 / (Real.Gamma a * Real.Gamma (1 - a)) with hC
   have hCpos : 0 < C := by
     have := Real.Gamma_pos_of_pos ha0; have := Real.Gamma_pos_of_pos (by linarith : 0 < 1 - a)
     positivity
-  set g : ℝ → ℝ := fun τ => τ ^ (N + 1) * airySt_w a τ with hg
+  set g : ℝ → ℝ := fun τ => τ ^ (N + 1) * StieltjesBounds.w a τ with hg
   have hpt : ∀ r ∈ Ioi (0 : ℝ), Complex.exp (-(W * r)) *
       (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
-        ((-((r : ℂ) * exp (θ * I))) ^ (N + 1) * airySt_Q a (N + 1) ((r : ℂ) * exp (θ * I)))) =
+        ((-((r : ℂ) * exp (θ * I))) ^ (N + 1) *
+            StieltjesBounds.Q a (N + 1) ((r : ℂ) * exp (θ * I)))) =
       ((-1) ^ (N + 1) * exp (θ * I * m) * C) * ((r : ℂ) ^ (m : ℂ) * Complex.exp (-(W * r)) *
         ∫ τ in Ioo (0 : ℝ) 1, (g τ : ℂ) / (1 + τ * (r * exp (θ * I)))) := by
     intro r hr
     have hr : (0 : ℝ) < r := hr
     have ht : (r : ℂ) * exp (θ * I) ≠ 0 :=
       mul_ne_zero (ofReal_ne_zero.mpr hr.ne') (exp_ne_zero _)
-    have hQ : airySt_Q a (N + 1) ((r : ℂ) * exp (θ * I)) = (C : ℂ) *
+    have hQ : StieltjesBounds.Q a (N + 1) ((r : ℂ) * exp (θ * I)) = (C : ℂ) *
         ∫ τ in Ioo (0 : ℝ) 1, (g τ : ℂ) / (1 + τ * (r * exp (θ * I))) := by
-      simp only [airySt_Q, hC, hg]
+      simp only [StieltjesBounds.Q, hC, hg]
       congr 1
       refine integral_congr_ae (Eventually.of_forall fun τ => ?_)
       simp only [div_eq_mul_inv]; ring_nf
     have hpow : ((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) * (-((r : ℂ) * exp (θ * I))) ^ (N + 1) =
         (-1) ^ (N + 1) * (exp (θ * I * m) * (r : ℂ) ^ (m : ℂ)) := by
       rw [neg_eq_neg_one_mul, mul_pow, ← cpow_natCast ((r : ℂ) * exp (θ * I)),
-        mul_left_comm, ← cpow_add _ _ ht, airySt_ray_cpow hr hθ, hmdef]
+        mul_left_comm, ← cpow_add _ _ ht, StieltjesBounds.ray_cpow hr hθ, hmdef]
       push_cast
       ring_nf
     rw [hQ, ← mul_assoc (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1)), hpow]
@@ -564,22 +589,23 @@ theorem airySt_rem_succ_le {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 
       show θ * I * (m : ℂ) = ((θ * m : ℝ) : ℂ) * I by push_cast; ring, norm_exp_ofReal_mul_I,
       one_mul, Complex.norm_real, Real.norm_of_nonneg hCpos.le]
   rw [hnc]
-  obtain ⟨β, hβ, hσ⟩ := airySt_exists_rotation hsin
+  obtain ⟨β, hβ, hσ⟩ := StieltjesBounds.exists_rotation hsin
   have hg0 : ∀ τ ∈ Ioo (0 : ℝ) 1, 0 ≤ g τ := fun τ hτ =>
-    mul_nonneg (pow_nonneg hτ.1.le _) (airySt_w_nonneg a hτ)
-  have hgτ : ∀ τ ∈ Ioo (0 : ℝ) 1, g τ / τ = τ ^ N * airySt_w a τ := by
+    mul_nonneg (pow_nonneg hτ.1.le _) (StieltjesBounds.w_nonneg a hτ)
+  have hgτ : ∀ τ ∈ Ioo (0 : ℝ) 1, g τ / τ = τ ^ N * StieltjesBounds.w a τ := by
     intro τ hτ
     simp only [hg, pow_succ]
     field_simp [hτ.1.ne']
   have hgi : IntegrableOn (fun τ => g τ / τ) (Ioo 0 1) :=
-    (airySt_integrableOn_w ha0 ha1 N).congr_fun (fun τ hτ => (hgτ τ hτ).symm) measurableSet_Ioo
+    (StieltjesBounds.integrableOn_w ha0 ha1 N).congr_fun (fun τ hτ => (hgτ τ hτ).symm)
+        measurableSet_Ioo
   have hmix := StieltjesRemainder.mix_chi hm hW hβ hσ hsin hg0
-      (airySt_integrableOn_w ha0 ha1 (N + 1)) hgi
-  rw [setIntegral_congr_fun measurableSet_Ioo hgτ, airySt_moment ha0 ha1,
-    airySt_chi_integral hm hW] at hmix
-  rw [airySt_norm_T hb ha0 hW]
+      (StieltjesBounds.integrableOn_w ha0 ha1 (N + 1)) hgi
+  rw [setIntegral_congr_fun measurableSet_Ioo hgτ, StieltjesBounds.moment ha0 ha1,
+    StieltjesBounds.chi_integral hm hW] at hmix
+  rw [StieltjesBounds.norm_T hb ha0 hW]
   have h1 := Real.Gamma_pos_of_pos (by linarith : 0 < 1 - a)
-  calc C * ‖_‖ ≤ C * (Real.Gamma m * airySt_chi m * W ^ (-m) *
+  calc C * ‖_‖ ≤ C * (Real.Gamma m * StieltjesBounds.chi m * W ^ (-m) *
         (Real.Gamma (a + N) * Real.Gamma (1 - a) / Real.Gamma (N + 1))) :=
       mul_le_mul_of_nonneg_left (by linarith [hmix]) hCpos.le
     _ = _ := by
@@ -587,19 +613,23 @@ theorem airySt_rem_succ_le {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 
       field_simp
 
 /-- **The ray remainder bound with multiplier `χ(N+b) + 1`**, for `sin θ ≠ 0`. -/
-theorem airySt_rem_le_chi {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b) (hW : 0 < W)
+theorem StieltjesBounds.remainder_le_chi {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1)
+    (hb : 0 < b) (hW : 0 < W)
     (hθ : |θ| < π) (hsin : Real.sin θ ≠ 0) (N : ℕ)
     (hint : IntegrableOn (fun r : ℝ => Complex.exp (-(W * r)) *
       (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) * (1 + (r : ℂ) * exp (θ * I)) ^ (-(a : ℂ))))
       (Ioi 0)) :
-    ‖airySt_L b a θ W - ∑ k ∈ range N, airySt_T b a θ W k‖ ≤
-      (airySt_chi (b + N) + 1) * ‖airySt_T b a θ W N‖ := by
-  have hsplit : airySt_L b a θ W - ∑ k ∈ range N, airySt_T b a θ W k =
-      airySt_T b a θ W N + (airySt_L b a θ W - ∑ k ∈ range (N + 1), airySt_T b a θ W k) := by
+    ‖StieltjesBounds.L b a θ W - ∑ k ∈ range N, StieltjesBounds.T b a θ W k‖ ≤
+      (StieltjesBounds.chi (b + N) + 1) * ‖StieltjesBounds.T b a θ W N‖ := by
+  have hsplit : StieltjesBounds.L b a θ W - ∑ k ∈ range N, StieltjesBounds.T b a θ W k =
+      StieltjesBounds.T b a θ W N +
+          (StieltjesBounds.L b a θ W - ∑ k ∈ range (N + 1), StieltjesBounds.T b a θ W k) := by
     rw [sum_range_succ]; ring
-  rw [hsplit, airySt_rem_repr ha0 ha1 hb hW hθ (N + 1) hint]
-  calc _ ≤ ‖airySt_T b a θ W N‖ + airySt_chi (b + N) * ‖airySt_T b a θ W N‖ :=
-        (norm_add_le _ _).trans (by gcongr; exact airySt_rem_succ_le ha0 ha1 hb hW hθ hsin N)
+  rw [hsplit, StieltjesBounds.remainder_representation ha0 ha1 hb hW hθ (N + 1) hint]
+  calc _ ≤ ‖StieltjesBounds.T b a θ W N‖ + StieltjesBounds.chi (b + N) *
+         ‖StieltjesBounds.T b a θ W N‖ :=
+        (norm_add_le _ _).trans
+            (by gcongr; exact StieltjesBounds.remainder_succ_le ha0 ha1 hb hW hθ hsin N)
     _ = _ := by ring
 
 /-- The chi estimate for a single positive exponential density. -/
@@ -607,10 +637,10 @@ theorem laplaceChi_kernel {m W X θ : ℝ} (hm : 0 < m) (hW : 0 < W)
     (hX : 0 < X) (hsin : Real.sin θ ≠ 0) :
     ‖∫ r in Ioi (0 : ℝ), (r : ℂ) ^ (m : ℂ) * Complex.exp (-(W * r)) /
       (X + r * exp (θ * I))‖ ≤
-      airySt_chi m * ∫ r in Ioi (0 : ℝ), r ^ (m - 1) * Real.exp (-(W * r)) := by
-  obtain ⟨β, hβ, hσ⟩ := airySt_exists_rotation hsin
+      StieltjesBounds.chi m * ∫ r in Ioi (0 : ℝ), r ^ (m - 1) * Real.exp (-(W * r)) := by
+  obtain ⟨β, hβ, hσ⟩ := StieltjesBounds.exists_rotation hsin
   have h := StieltjesRemainder.chi_ray hm hW hX hβ hσ
-  rw [airySt_chi_integral hm hW] at h
+  rw [StieltjesBounds.chi_integral hm hW] at h
   rw [Real.integral_rpow_mul_exp_neg_mul_Ioi hm hW]
   convert h using 1
   rw [Real.rpow_neg hW.le, one_div, Real.inv_rpow hW.le]
@@ -648,7 +678,7 @@ theorem laplaceChi_mixture {m X θ : ℝ} (hm : 0 < m) (hX : 0 < X)
     ‖∫ r in Ioi (0 : ℝ), (r : ℂ) ^ (m : ℂ) *
       (∫ v in Ioi (0 : ℝ), (Real.exp (-((1 + v) * r)) * g v : ℝ)) /
         (X + r * exp (θ * I))‖ ≤
-      airySt_chi m * ∫ r in Ioi (0 : ℝ), r ^ (m - 1) *
+      StieltjesBounds.chi m * ∫ r in Ioi (0 : ℝ), r ^ (m - 1) *
         ∫ v in Ioi (0 : ℝ), Real.exp (-((1 + v) * r)) * g v := by
   let f : ℝ → ℝ → ℝ := fun r v => r ^ (m - 1) * Real.exp (-((1 + v) * r)) * g v
   let H : ℝ → ℝ → ℂ := fun r v => (r : ℂ) ^ (m : ℂ) *
@@ -701,7 +731,7 @@ theorem laplaceChi_mixture {m X θ : ℝ} (hm : 0 < m) (hX : 0 < X)
     ring
   rw [setIntegral_congr_fun measurableSet_Ioi (fun r _ => hpt r), integral_integral_swap hHi]
   have hbound (v : ℝ) (hv : v ∈ Ioi (0 : ℝ)) :
-      ‖∫ r in Ioi (0 : ℝ), H r v‖ ≤ airySt_chi m * ∫ r in Ioi (0 : ℝ), f r v := by
+      ‖∫ r in Ioi (0 : ℝ), H r v‖ ≤ StieltjesBounds.chi m * ∫ r in Ioi (0 : ℝ), f r v := by
     have hv0 : 0 < 1 + v := by have : 0 < v := hv; linarith
     have he : (∫ r in Ioi (0 : ℝ), H r v) =
       (∫ r in Ioi (0 : ℝ), (r : ℂ) ^ (m : ℂ) * Complex.exp (-((1 + v) * r)) /
@@ -714,10 +744,10 @@ theorem laplaceChi_mixture {m X θ : ℝ} (hm : 0 < m) (hX : 0 < X)
     rw [integral_mul_const]
     simpa only [ofReal_add, ofReal_one, mul_assoc] using hb
   calc ‖∫ v in Ioi (0 : ℝ), ∫ r in Ioi (0 : ℝ), H r v‖
-      ≤ ∫ v in Ioi (0 : ℝ), airySt_chi m * ∫ r in Ioi (0 : ℝ), f r v :=
+      ≤ ∫ v in Ioi (0 : ℝ), StieltjesBounds.chi m * ∫ r in Ioi (0 : ℝ), f r v :=
         norm_integral_le_of_norm_le (hprod.integral_prod_right.const_mul _)
           ((ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall hbound))
-    _ = airySt_chi m * ∫ r in Ioi (0 : ℝ), r ^ (m - 1) *
+    _ = StieltjesBounds.chi m * ∫ r in Ioi (0 : ℝ), r ^ (m - 1) *
         ∫ v in Ioi (0 : ℝ), Real.exp (-((1 + v) * r)) * g v := by
       have hswap : Integrable (Function.uncurry fun v r => f r v)
           ((volume.restrict (Ioi (0 : ℝ))).prod (volume.restrict (Ioi (0 : ℝ)))) := hprod.swap

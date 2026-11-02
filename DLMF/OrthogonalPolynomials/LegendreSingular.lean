@@ -37,6 +37,8 @@ open scoped Nat Topology
 open DLMF.Hypergeometric
 noncomputable section
 
+open DLMF.Core
+
 namespace DLMF.OrthogonalPolynomials.LegendreSingular
 /-- The signed kernel of the split singular integral. -/
 def signKernel (x t : ℝ) : ℂ := (x-t : ℝ) / (|x-t| : ℝ)

@@ -6,7 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Weierstrass.Relations
+public import DLMF.Weierstrass.RealPaths
 public import DLMF.Elliptic.SpecialValues
+public import DLMF.Gamma.BetaFunction.ParameterIntegrals
 
 /-!
 # Real-valued Weierstrass functions and special lattices
@@ -174,7 +176,7 @@ theorem weierstrassP_real_iff (L : PeriodPair) :
 
 
 /-- A lattice invariant under conjugation has `℘(z̄) = conj ℘(z)`. -/
-private lemma weierstrassP_conj_of_conj_mem (L : PeriodPair)
+theorem weierstrassP_conj_of_conj_mem (L : PeriodPair)
     (hinv : ∀ z, z ∈ L.lattice → conj z ∈ L.lattice) (z : ℂ) :
     ℘[L] (conj z) = conj (℘[L] z) := by
   have hl : (conjPeriodPair L).lattice = L.lattice := by
@@ -187,6 +189,22 @@ private lemma weierstrassP_conj_of_conj_mem (L : PeriodPair)
 
 end Conjugation
 namespace HalfPeriods
+
+open scoped ComplexConjugate in
+/-- `℘(z)` is real when `z̄ ≡ ±z` modulo a conjugation-invariant lattice. -/
+theorem weierstrassP_im_eq_zero_of_conj {H : HalfPeriods}
+    (hinv : ∀ z, z ∈ H.periodPair.lattice → conj z ∈ H.periodPair.lattice) {z l : ℂ}
+    (hl : l ∈ H.lattice) (h : conj z = z + l ∨ conj z = -z + l) :
+    (H.weierstrassP z).im = 0 := by
+  have hc := weierstrassP_conj_of_conj_mem H.periodPair hinv z
+  have heq : H.weierstrassP (conj z) = H.weierstrassP z := by
+    rcases h with h | h
+    · rw [h]; exact H.periodPair.weierstrassP_add_coe z ⟨l, hl⟩
+    · rw [h]
+      exact (H.periodPair.weierstrassP_add_coe (-z) ⟨l, hl⟩).trans
+        (H.periodPair.weierstrassP_neg z)
+  rw [← Complex.conj_eq_iff_im]
+  exact hc.symm.trans heq
 
 variable (H : HalfPeriods)
 
@@ -662,19 +680,411 @@ theorem IsEquianharmonic.eta {H : HalfPeriods} (h : H.IsEquianharmonic) :
   field_simp at hd ⊢
   linear_combination hd
 
+section EquianharmonicValues
+
+open MeasureTheory Set Filter Topology
+
+/-- `Γ(1/2)Γ(1/6)/Γ(2/3) = 3·2^{2/3}Γ(1/3)³/(4π)`. -/
+private lemma gamma_half_sixth_div :
+    Real.Gamma (1 / 2) * Real.Gamma (1 / 6) / Real.Gamma (2 / 3) =
+      3 * (2 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (1 / 3) ^ 3 / (4 * π) := by
+  have hdup := Real.Gamma_mul_Gamma_add_half (1 / 6)
+  have hrefl := Real.Gamma_mul_Gamma_one_sub (1 / 3)
+  rw [show (1 : ℝ) / 6 + 1 / 2 = 2 / 3 by norm_num, show (2 : ℝ) * (1 / 6) = 1 / 3 by norm_num,
+    show (1 : ℝ) - 1 / 3 = 2 / 3 by norm_num] at hdup
+  rw [show (1 : ℝ) - 1 / 3 = 2 / 3 by norm_num, show π * (1 / 3) = π / 3 by ring,
+    Real.sin_pi_div_three] at hrefl
+  have hsq3 : Real.sqrt 3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have hsqπ : Real.sqrt π ^ 2 = π := Real.sq_sqrt Real.pi_pos.le
+  have hg23 : 0 < Real.Gamma (2 / 3) := Real.Gamma_pos_of_pos (by norm_num)
+  have hg13 : 0 < Real.Gamma (1 / 3) := Real.Gamma_pos_of_pos (by norm_num)
+  rw [Real.Gamma_one_half_eq, div_eq_div_iff hg23.ne' (by positivity)]
+  have hπ := Real.pi_pos
+  have hs3 : 0 < Real.sqrt 3 := by positivity
+  -- Γ(2/3) = 2π/(√3 Γ(1/3))
+  have hG : Real.Gamma (2 / 3) * (Real.sqrt 3 * Real.Gamma (1 / 3)) = 2 * π := by
+    field_simp at hrefl
+    linear_combination hrefl
+  -- Γ(1/6) = Γ(1/3) 2^{2/3} √π / Γ(2/3)
+  have h6 : Real.Gamma (1 / 6) * Real.Gamma (2 / 3) =
+      Real.Gamma (1 / 3) * 2 ^ (2 / 3 : ℝ) * Real.sqrt π := hdup
+  apply mul_right_cancel₀ hg23.ne'
+  linear_combination 4 * π * Real.sqrt π * h6 +
+    4 * π * Real.Gamma (1 / 3) * (2 : ℝ) ^ (2 / 3 : ℝ) * hsqπ -
+    (2 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (1 / 3) *
+      (Real.Gamma (2 / 3) * (Real.sqrt 3 * Real.Gamma (1 / 3)) + 2 * π) * hG +
+    (2 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (1 / 3) ^ 3 * Real.Gamma (2 / 3) ^ 2 * hsq3
+
+
+/-- `∫₀^∞ y^{-1/2}(1+y)^{-2/3} dy = B(1/2, 1/6)`. -/
+private lemma integral_Ioi_rpow_mul_one_add_rpow :
+    ∫ y in Ioi (0 : ℝ), y ^ (-(1 / 2) : ℝ) * (1 + y) ^ (-(2 / 3) : ℝ) =
+      Real.Gamma (1 / 2) * Real.Gamma (1 / 6) / Real.Gamma (2 / 3) := by
+  have h := DLMF.Gamma.beta_on_Ioi (a := 1 / 2) (b := 1 / 6)
+  have hB := Complex.Gamma_mul_Gamma_eq_betaIntegral (s := 1 / 2) (t := 1 / 6) (by norm_num)
+    (by norm_num)
+  have hcongr :
+      ∫ t : ℝ in Ioi 0, (t : ℂ) ^ ((1 / 2 : ℂ) - 1) / (1 + (t : ℂ)) ^ ((1 / 2 : ℂ) + 1 / 6)
+      = ∫ t : ℝ in Ioi 0, ((t ^ (-(1 / 2) : ℝ) * (1 + t) ^ (-(2 / 3) : ℝ) : ℝ) : ℂ) := by
+    refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
+    have ht' : (0 : ℝ) ≤ t := le_of_lt ht
+    have h1 : (0 : ℝ) ≤ 1 + t := by linarith
+    rw [show (1 / 2 : ℂ) - 1 = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
+      show (1 / 2 : ℂ) + 1 / 6 = ((2 / 3 : ℝ) : ℂ) by push_cast; ring,
+      ← ofReal_cpow ht', show (1 : ℂ) + t = ((1 + t : ℝ) : ℂ) by push_cast; ring,
+      ← ofReal_cpow h1, Real.rpow_neg h1, ← div_eq_mul_inv]
+    push_cast; ring
+  rw [hcongr, integral_complex_ofReal] at h
+  have hG : betaIntegral (1 / 2) (1 / 6) =
+      ((Real.Gamma (1 / 2) * Real.Gamma (1 / 6) / Real.Gamma (2 / 3) : ℝ) : ℂ) := by
+    have hg : Complex.Gamma (1 / 2 + 1 / 6) ≠ 0 := by
+      rw [show (1 / 2 + 1 / 6 : ℂ) = ((2 / 3 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
+      exact_mod_cast (Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 2 / 3)).ne'
+    have hB' : betaIntegral (1 / 2) (1 / 6) =
+        Complex.Gamma (1 / 2) * Complex.Gamma (1 / 6) / Complex.Gamma (1 / 2 + 1 / 6) := by
+      rw [eq_div_iff hg, mul_comm]; exact hB.symm
+    rw [hB']
+    rw [show (1 / 2 + 1 / 6 : ℂ) = ((2 / 3 : ℝ) : ℂ) by push_cast; ring,
+      show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
+      show (1 / 6 : ℂ) = ((1 / 6 : ℝ) : ℂ) by push_cast; ring]
+    simp only [Complex.Gamma_ofReal]
+    push_cast; ring
+  rw [hG] at h
+  exact_mod_cast h
+
+/-- `∫_c^∞ du/√(u³ - c³) = B(1/2, 1/6)/(3√c)` for `c > 0`. -/
+private lemma integral_Ioi_one_div_sqrt_cube_sub {c : ℝ} (hc : 0 < c) :
+    ∫ u in Ioi c, 1 / Real.sqrt (u ^ 3 - c ^ 3) =
+      1 / (3 * Real.sqrt c) * (Real.Gamma (1 / 2) * Real.Gamma (1 / 6) / Real.Gamma (2 / 3)) := by
+  set φ : ℝ → ℝ := fun y => c * (1 + y) ^ ((3 : ℝ)⁻¹) with hφ
+  set φ' : ℝ → ℝ := fun y => c * (1 * (3 : ℝ)⁻¹ * (1 + y) ^ ((3 : ℝ)⁻¹ - 1)) with hφ'
+  have hcube : ∀ y : ℝ, 0 ≤ 1 + y → ((1 + y) ^ ((3 : ℝ)⁻¹)) ^ 3 = 1 + y := fun y hy => by
+    simpa using Real.rpow_inv_natCast_pow hy (n := 3) (by norm_num)
+  have hderiv : ∀ y ∈ Ioi (0 : ℝ), HasDerivWithinAt φ (φ' y) (Ioi 0) y := by
+    intro y hy
+    have hy' : (0 : ℝ) < 1 + y := by have := mem_Ioi.mp hy; linarith
+    exact ((((hasDerivAt_id y).const_add 1).rpow_const (Or.inl hy'.ne')).const_mul c)
+      |>.hasDerivWithinAt
+  have hinj : InjOn φ (Ioi 0) := by
+    intro x hx y hy hxy
+    have h1 := congrArg (fun w => (w / c) ^ 3) hxy
+    simp only [hφ, mul_div_cancel_left₀ _ hc.ne'] at h1
+    rw [hcube x (by have := mem_Ioi.mp hx; linarith),
+      hcube y (by have := mem_Ioi.mp hy; linarith)] at h1
+    linarith
+  have himg : φ '' Ioi 0 = Ioi c := by
+    ext u
+    constructor
+    · rintro ⟨y, hy, rfl⟩
+      have : 1 < (1 + y) ^ ((3 : ℝ)⁻¹) :=
+        Real.one_lt_rpow (by have := mem_Ioi.mp hy; linarith) (by norm_num)
+      show c < c * (1 + y) ^ ((3 : ℝ)⁻¹)
+      nlinarith
+    · intro hu
+      have hu' : c < u := hu
+      refine ⟨(u / c) ^ 3 - 1, ?_, ?_⟩
+      · have : 1 < u / c := (one_lt_div hc).mpr hu'
+        show 0 < (u / c) ^ 3 - 1
+        nlinarith [one_lt_pow₀ this (by norm_num : (3 : ℕ) ≠ 0)]
+      · show c * (1 + ((u / c) ^ 3 - 1)) ^ ((3 : ℝ)⁻¹) = u
+        rw [show 1 + ((u / c) ^ 3 - 1) = (u / c) ^ 3 by ring]
+        have := Real.pow_rpow_inv_natCast (x := u / c) (n := 3) (div_pos (hc.trans hu') hc).le
+          (by norm_num)
+        simp only [Nat.cast_ofNat] at this
+        rw [this]; field_simp
+  rw [← himg, integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi hderiv hinj]
+  rw [← integral_Ioi_rpow_mul_one_add_rpow, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioi fun y hy => ?_
+  have hy0 : (0 : ℝ) < y := hy
+  have hy1 : (0 : ℝ) < 1 + y := by linarith
+  have h3 : φ y ^ 3 - c ^ 3 = c ^ 3 * y := by
+    simp only [hφ]; rw [mul_pow, hcube y hy1.le]; ring
+  simp only [smul_eq_mul]
+  rw [h3, Real.sqrt_mul (by positivity), show c ^ 3 = c ^ 2 * c by ring,
+    Real.sqrt_mul (by positivity), Real.sqrt_sq hc.le]
+  simp only [hφ']
+  rw [show (3 : ℝ)⁻¹ - 1 = -(2 / 3) by norm_num, Real.rpow_neg hy1.le,
+    abs_of_pos (by positivity), Real.rpow_neg hy0.le, ← Real.sqrt_eq_rpow]
+  have := Real.sqrt_pos.mpr hc
+  have := Real.sqrt_pos.mpr hy0
+  field_simp
+
+
+/-- `∫_c^∞ du/√(u³ - c³) = 2^{2/3}Γ(1/3)³/(4π√c)` for `c > 0`. -/
+private lemma integral_Ioi_one_div_sqrt_cube_sub_eq {c : ℝ} (hc : 0 < c) :
+    ∫ u in Ioi c, 1 / Real.sqrt (u ^ 3 - c ^ 3) =
+      (2 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (1 / 3) ^ 3 / (4 * π * Real.sqrt c) := by
+  rw [integral_Ioi_one_div_sqrt_cube_sub hc, gamma_half_sixth_div]
+  have := Real.sqrt_pos.mpr hc
+  field_simp
+
+/-- No integer multiple of `c > 0` lies strictly between `0` and `c`. -/
+private lemma false_of_eq_int_mul_of_lt {c t : ℝ} (hc : 0 < c) {m : ℤ} (h : t = m * c)
+    (h0 : 0 < t) (h1 : t < c) : False := by
+  subst h
+  have hm0 : (0 : ℝ) < m := by
+    by_contra hh; rw [not_lt] at hh; nlinarith
+  have hm1 : (m : ℝ) < 1 := by
+    by_contra hh; rw [not_lt] at hh; nlinarith
+  have : (0 : ℤ) < m := by exact_mod_cast hm0
+  have : m < 1 := by exact_mod_cast hm1
+  omega
+
+/-- An equianharmonic lattice is invariant under multiplication by `e^{πi/3}`. -/
+private lemma mem_lattice_iff_div_rho {H : HalfPeriods} (h3 : H.ω₃ = cexp (π * I / 3) * H.ω₁) :
+    ∀ z, z ∈ H.lattice ↔ z / cexp (π * I / 3) ∈ H.lattice := by
+  set ρ := cexp (π * I / 3) with hρ
+  have hs : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
+    rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
+  have hρ2 : ρ ^ 2 = ρ - 1 := by
+    rw [hρ, exp_pi_I_div_three_eq]; ring_nf; rw [I_sq, hs]; ring
+  have hρ0 : ρ ≠ 0 := Complex.exp_ne_zero _
+  have hρi : ρ⁻¹ = 1 - ρ := by
+    apply inv_eq_of_mul_eq_one_right; linear_combination -hρ2
+  intro z
+  simp only [H.mem_lattice_iff, h3]
+  constructor
+  · rintro ⟨m, n, rfl⟩
+    refine ⟨m + n, -m, ?_⟩
+    rw [div_eq_mul_inv, hρi]; push_cast; linear_combination (-2 * n * H.ω₁) * hρ2
+  · rintro ⟨m, n, hmn⟩
+    refine ⟨-n, m + n, ?_⟩
+    have : z = ρ * (2 * m * H.ω₁ + 2 * n * (ρ * H.ω₁)) := by rw [← hmn]; field_simp
+    rw [this]; push_cast; linear_combination (2 * n * H.ω₁) * hρ2
+
+/-- For an equianharmonic lattice, `e₃ = -ρe₁` and `e₂ = (ρ - 1)e₁` with `ρ = e^{πi/3}`. -/
+private lemma equianharmonic_e {H : HalfPeriods} (h3 : H.ω₃ = cexp (π * I / 3) * H.ω₁) :
+    H.e 3 = -cexp (π * I / 3) * H.e 1 ∧ H.e 2 = (cexp (π * I / 3) - 1) * H.e 1 := by
+  set ρ := cexp (π * I / 3) with hρ
+  have hs : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
+    rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
+  have hρ2 : ρ ^ 2 = ρ - 1 := by
+    rw [hρ, exp_pi_I_div_three_eq]; ring_nf; rw [I_sq, hs]; ring
+  have hρ0 : ρ ≠ 0 := Complex.exp_ne_zero _
+  have hρi : ρ⁻¹ = 1 - ρ := by
+    apply inv_eq_of_mul_eq_one_right; linear_combination -hρ2
+  have hp := H.weierstrassP_mul_of_lattice_invariant ρ hρ0 (mem_lattice_iff_div_rho h3)
+  have e3 : H.e 3 = ρ⁻¹ ^ 2 * H.e 1 := by
+    rw [HalfPeriods.e, HalfPeriods.e, HalfPeriods.halfPeriod_three, HalfPeriods.halfPeriod_one,
+      h3, hp]
+  have e2 : H.e 2 = ρ⁻¹ ^ 2 * H.e 3 := by
+    have h1 := hp (ρ * H.ω₁)
+    have hper : H.weierstrassP (ρ * (ρ * H.ω₁)) = H.weierstrassP H.ω₂ := by
+      have hz : ρ * (ρ * H.ω₁) = -H.ω₂ - 2 * H.halfPeriod 1 := by
+        rw [HalfPeriods.halfPeriod_one, HalfPeriods.ω₂, h3]; linear_combination H.ω₁ * hρ2
+      have := H.weierstrassP_add_two_mul_halfPeriod (-H.ω₂ - 2 * H.halfPeriod 1) (j := 1)
+        (by simp)
+      rw [hz, ← this, show -H.ω₂ - 2 * H.halfPeriod 1 + 2 * H.halfPeriod 1 = -H.ω₂ by ring]
+      exact H.periodPair.weierstrassP_neg H.ω₂
+    have : H.e 3 = H.weierstrassP (ρ * H.ω₁) := by
+      rw [HalfPeriods.e, HalfPeriods.halfPeriod_three, h3]
+    rw [this, ← h1, hper]; rfl
+  have hsq : ρ⁻¹ ^ 2 = -ρ := by rw [hρi]; linear_combination hρ2
+  rw [hsq] at e2 e3
+  refine ⟨e3, ?_⟩
+  rw [e2, e3]; linear_combination (H.e 1) * hρ2
+
 /-- DLMF 23.5.7: for an equianharmonic lattice
 `e₁ = e^{2πi/3}e₃ = e^{-2πi/3}e₂ = Γ(1/3)⁶/(2^{14/3}π²ω₁²)`. -/
 @[dlmf 23.5.E7]
 theorem IsEquianharmonic.roots {H : HalfPeriods} (h : H.IsEquianharmonic) :
     H.e 1 = cexp (2 * π * I / 3) * H.e 3 ∧ H.e 1 = cexp (-(2 * π * I / 3)) * H.e 2 ∧
       H.e 1 = (Real.Gamma (1 / 3) : ℂ) ^ 6 / ((2 : ℂ) ^ (14 / 3 : ℂ) * π ^ 2 * H.ω₁ ^ 2) := by
-  sorry
+  obtain ⟨h1im, h1re, h3⟩ := h
+  obtain ⟨e3, e2⟩ := equianharmonic_e h3
+  set ρ := cexp (π * I / 3) with hρ
+  have hs : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
+    rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
+  have hρ2 : ρ ^ 2 = ρ - 1 := by
+    rw [hρ, exp_pi_I_div_three_eq]; ring_nf; rw [I_sq, hs]; ring
+  have hρ0 : ρ ≠ 0 := Complex.exp_ne_zero _
+  have hA : cexp (2 * π * I / 3) = ρ ^ 2 := by
+    rw [hρ, ← Complex.exp_nat_mul]; push_cast; ring_nf
+  have hB : cexp (-(2 * π * I / 3)) = -ρ := by
+    have h1 : cexp (-(2 * π * I / 3)) * ρ ^ 2 = 1 := by
+      rw [← hA, ← Complex.exp_add]; simp
+    have h2 : ρ ^ 2 * (-ρ) = 1 := by linear_combination (-(ρ + 1)) * hρ2
+    exact mul_right_cancel₀ (pow_ne_zero 2 hρ0) (by rw [h1]; linear_combination -h2)
+  refine ⟨by rw [hA, e3]; linear_combination (H.e 1 * (ρ + 1)) * hρ2,
+    by rw [hB, e2]; linear_combination (H.e 1) * hρ2, ?_⟩
+  -- the real half-period `a`
+  set a := H.ω₁.re with ha_def
+  have ha : 0 < a := h1re
+  have hω₁ : H.ω₁ = (a : ℂ) := Complex.ext rfl (by simp [h1im])
+  have hρv : ρ = (1 + Real.sqrt 3 * I) / 2 := by rw [hρ]; exact exp_pi_I_div_three_eq
+  have hs3 : 0 < Real.sqrt 3 := by positivity
+  -- lattice coordinates
+  have hcoord : ∀ z ∈ H.lattice, ∃ n : ℤ, z.im = n * (a * Real.sqrt 3) ∧
+      (z.im = 0 → ∃ m : ℤ, z.re = m * (2 * a)) := by
+    intro z hz
+    obtain ⟨m, n, rfl⟩ := H.mem_lattice_iff.mp hz
+    rw [h3, hω₁, hρv]
+    refine ⟨n, by simp; ring, fun h0 => ⟨m, ?_⟩⟩
+    have hn0 : (n : ℝ) = 0 := by
+      simp at h0
+      rcases h0 with h | h
+      · simp [h]
+      · exact absurd h ha.ne'
+    simp [hn0]; ring
+  have hinv : ∀ z, z ∈ H.periodPair.lattice → (starRingEnd ℂ) z ∈ H.periodPair.lattice := by
+    intro z hz
+    obtain ⟨m, n, rfl⟩ := H.mem_lattice_iff.mp hz
+    refine H.mem_lattice_iff.mpr ⟨m + n, -n, ?_⟩
+    have hcρ : (starRingEnd ℂ) ρ = 1 - ρ := by
+      rw [hρv, map_div₀, map_add, map_one, map_mul, conj_ofReal, conj_I, map_ofNat]; ring
+    rw [h3, hω₁]
+    simp only [map_add, map_mul, conj_ofReal, map_intCast, map_ofNat, hcρ]
+    push_cast; ring
+  have hR : ∀ t : ℝ, (H.weierstrassP (t : ℂ)).im = 0 := fun t =>
+    weierstrassP_im_eq_zero_of_conj hinv (zero_mem _) (Or.inl (by simp))
+  have hnotR : ∀ t : ℝ, 0 < t → t < 2 * a → (t : ℂ) ∉ H.lattice := by
+    intro t ht0 ht1 hm
+    obtain ⟨-, -, hm⟩ := hcoord _ hm
+    obtain ⟨m, hm⟩ := hm (by simp)
+    have hm' : t = m * (2 * a) := by simpa using hm
+    exact false_of_eq_int_mul_of_lt (by linarith) hm' ht0 ht1
+  set f : ℝ → ℝ := fun s => (H.weierstrassP (s : ℂ)).re with hf
+  have hL : ∀ t ∈ Ioo 0 a, (t : ℂ) ∉ H.lattice ∧ 2 * (t : ℂ) ∉ H.lattice := fun t ht =>
+    ⟨hnotR t ht.1 (by linarith [ht.2]), by
+      have := hnotR (2 * t) (by linarith [ht.1]) (by linarith [ht.2])
+      push_cast at this; exact this⟩
+  have hγ : ∀ t : ℝ, HasDerivAt (fun s : ℝ => (s : ℂ)) 1 t := fun t => by
+    simpa using (hasDerivAt_id t).ofReal_comp
+  have hPF : ∀ t ∈ Ioo 0 a, HasDerivAt f (H.derivWeierstrassP (t : ℂ) * 1).re t ∧
+      (H.derivWeierstrassP (t : ℂ) * 1).re ≠ 0 ∧
+      |(H.derivWeierstrassP (t : ℂ) * 1).re| = 2 * Real.sqrt
+        ‖(H.weierstrassP (t : ℂ) - H.e 1) * (H.weierstrassP (t : ℂ) - H.e 2) *
+          (H.weierstrassP (t : ℂ) - H.e 3)‖ :=
+    fun t ht => H.hasDerivAt_re_weierstrassP_comp (by simp) hγ hL (fun t _ => hR t) ht
+  have hcont : ∀ t ∈ Ioc 0 a, ContinuousAt f t := fun t ht =>
+    H.continuousAt_re_weierstrassP_comp hγ (hnotR t ht.1 (by linarith [ht.2]))
+  obtain ⟨hSA, himg⟩ := strictAntiOn_Ioc_of_tendsto_atTop (c := a) hcont
+    (fun t ht => (hPF t ht).1) (fun t ht => (hPF t ht).2.1)
+    (tendsto_re_weierstrassP_ofReal_nhdsGT_zero H.periodPair)
+  set c := (H.e 1).re with hc_def
+  have he1 : H.e 1 = (c : ℂ) := by
+    refine Complex.ext rfl ?_
+    have := hR a
+    simpa [HalfPeriods.e, hω₁] using this
+  have hfa : f a = c := by simp [hf, hc_def, HalfPeriods.e, hω₁]
+  have hc0 : c ≠ 0 := by
+    intro h0
+    obtain ⟨-, -, d13⟩ := H.e_distinct
+    apply d13; rw [e3, he1, h0]; simp
+  have himρ : ∀ t : ℝ, (ρ * (t : ℂ)).im = Real.sqrt 3 / 2 * t := fun t => by
+    rw [hρv]; simp
+  have hcpos : 0 < c := by
+    by_contra hneg
+    have hneg' : c < 0 := lt_of_le_of_ne (not_lt.mp hneg) hc0
+    have h0 : (0 : ℝ) ∈ f '' Ioo 0 a := by rw [himg a ⟨ha, le_rfl⟩, hfa]; exact hneg'
+    obtain ⟨t0, ht0, hft0⟩ := h0
+    have hP0 : H.weierstrassP (t0 : ℂ) = 0 := Complex.ext hft0 (hR t0)
+    have hnt0 : (t0 : ℂ) ∉ H.lattice := (hL t0 ht0).1
+    -- a lattice point with imaginary part `±(√3/2) t0` is impossible
+    have himpos : ∀ z ∈ H.lattice, z.im = Real.sqrt 3 / 2 * t0 ∨
+        z.im = -(Real.sqrt 3 / 2 * t0) → False := by
+      intro z hz hzim
+      obtain ⟨n, hn, -⟩ := hcoord z hz
+      rcases hzim with h | h
+      · have : Real.sqrt 3 * t0 = Real.sqrt 3 * (n * (2 * a)) := by linarith
+        exact false_of_eq_int_mul_of_lt (by linarith) (mul_left_cancel₀ hs3.ne' this) ht0.1
+          (by linarith [ht0.2])
+      · have : Real.sqrt 3 * t0 = Real.sqrt 3 * (((-n : ℤ) : ℝ) * (2 * a)) := by
+          push_cast; linarith
+        exact false_of_eq_int_mul_of_lt (by linarith) (mul_left_cancel₀ hs3.ne' this) ht0.1
+          (by linarith [ht0.2])
+    have hnρ : ρ * (t0 : ℂ) ∉ H.lattice := fun hm => himpos _ hm (Or.inl (himρ t0))
+    have hp := H.weierstrassP_mul_of_lattice_invariant ρ hρ0 (mem_lattice_iff_div_rho h3) t0
+    rw [hP0, mul_zero] at hp
+    have hσ := weierstrassSigma_add_mul_sub H.periodPair hnt0 hnρ
+    have hσ0 : DLMF.Weierstrass.weierstrassSigma H.periodPair (t0 + ρ * t0) *
+        DLMF.Weierstrass.weierstrassSigma H.periodPair (t0 - ρ * t0) = 0 := by
+      have hd : DLMF.Weierstrass.weierstrassSigma H.periodPair t0 ^ 2 *
+          DLMF.Weierstrass.weierstrassSigma H.periodPair (ρ * t0) ^ 2 ≠ 0 := by
+        have h1 := (DLMF.Weierstrass.weierstrassSigma_eq_zero_iff H.periodPair).not.mpr hnt0
+        have h2 := (DLMF.Weierstrass.weierstrassSigma_eq_zero_iff H.periodPair).not.mpr hnρ
+        exact mul_ne_zero (pow_ne_zero 2 h1) (pow_ne_zero 2 h2)
+      have : ℘[H.periodPair] (ρ * t0) - ℘[H.periodPair] t0 = 0 := by
+        change H.weierstrassP (ρ * t0) - H.weierstrassP t0 = 0
+        rw [hp, hP0, sub_zero]
+      rw [this, div_eq_zero_iff] at hσ
+      exact hσ.resolve_right hd
+    rcases mul_eq_zero.mp hσ0 with h | h
+    · refine himpos _ ((DLMF.Weierstrass.weierstrassSigma_eq_zero_iff H.periodPair).mp h)
+        (Or.inl ?_)
+      rw [add_im, himρ]; simp
+    · refine himpos _ ((DLMF.Weierstrass.weierstrassSigma_eq_zero_iff H.periodPair).mp h)
+        (Or.inr ?_)
+      rw [sub_im, himρ]; simp
+  have hlt : ∀ t ∈ Ioo 0 a, c < f t := fun t ht => by
+    have := hSA ⟨ht.1, ht.2.le⟩ ⟨ha, le_rfl⟩ ht.2
+    rwa [hfa] at this
+  have key := integral_image_one_div_sqrt (s := Ioo 0 a) measurableSet_Ioo (f := f)
+    (f' := fun t => (H.derivWeierstrassP (t : ℂ) * 1).re) (Q := fun u => u ^ 3 - c ^ 3)
+    (fun t (ht : t ∈ Ioo 0 a) => (hPF t ht).1.hasDerivWithinAt)
+    (hSA.injOn.mono Ioo_subset_Ioc_self)
+    (fun t (ht : t ∈ Ioo 0 a) =>
+      sub_pos.mpr (pow_lt_pow_left₀ (hlt t ht) hcpos.le (by norm_num)))
+    (fun t (ht : t ∈ Ioo 0 a) => by
+      rw [(hPF t ht).2.2]
+      have hPr : H.weierstrassP (t : ℂ) = (f t : ℂ) := Complex.ext rfl (by simp [hR t])
+      rw [hPr, e2, e3, he1,
+        show ((f t : ℂ) - c) * (f t - (ρ - 1) * c) * (f t - -ρ * c) = ((f t ^ 3 - c ^ 3 : ℝ) : ℂ) by
+          push_cast; linear_combination (-((f t : ℂ) - c) * (c : ℂ) ^ 2) * hρ2,
+        Complex.norm_real, Real.norm_eq_abs,
+        abs_of_pos (sub_pos.mpr (pow_lt_pow_left₀ (hlt t ht) hcpos.le (by norm_num)))])
+  rw [himg a ⟨ha, le_rfl⟩, hfa, Real.volume_real_Ioo_of_le ha.le,
+    integral_Ioi_one_div_sqrt_cube_sub_eq hcpos] at key
+  -- algebra
+  set p : ℝ := (2 : ℝ) ^ (2 / 3 : ℝ) with hp
+  have hp3 : p ^ 3 = 4 := by
+    rw [hp, ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
+  have hppos : 0 < p := by positivity
+  have h214 : (2 : ℂ) ^ (14 / 3 : ℂ) = ((16 * p : ℝ) : ℂ) := by
+    rw [show (14 / 3 : ℂ) = ((14 / 3 : ℝ) : ℂ) by push_cast; ring,
+      show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num, ← ofReal_cpow (by norm_num : (0 : ℝ) ≤ 2),
+      show (14 / 3 : ℝ) = 4 + 2 / 3 by norm_num,
+      Real.rpow_add (by norm_num), hp]
+    norm_num
+  rw [he1, hω₁, h214]
+  have hsc := Real.sq_sqrt hcpos.le
+  have hsc0 := Real.sqrt_pos.mpr hcpos
+  have hG := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 1 / 3)
+  have hreal : c = Real.Gamma (1 / 3) ^ 6 / (16 * p * π ^ 2 * a ^ 2) := by
+    rw [eq_div_iff (by positivity)]
+    have k2 : p * Real.Gamma (1 / 3) ^ 3 = 8 * π * a * Real.sqrt c := by
+      field_simp at key; linarith
+    apply mul_left_cancel₀ (pow_ne_zero 2 hppos.ne')
+    linear_combination (16 * π ^ 2 * a ^ 2 * c) * hp3 - (64 * π ^ 2 * a ^ 2) * hsc -
+      (p * Real.Gamma (1 / 3) ^ 3 + 8 * π * a * Real.sqrt c) * k2
+  rw [hreal]
+  push_cast
+  ring
 
 /-- DLMF 23.5.8: for an equianharmonic lattice `g₂ = 0` and `g₃ = Γ(1/3)¹⁸/(4πω₁)⁶`. -/
 @[dlmf 23.5.E8]
 theorem IsEquianharmonic.invariants {H : HalfPeriods} (h : H.IsEquianharmonic) :
     H.g₂ = 0 ∧ H.g₃ = (Real.Gamma (1 / 3) : ℂ) ^ 18 / (4 * π * H.ω₁) ^ 6 := by
-  sorry
+  obtain ⟨-, -, hv⟩ := h.roots
+  obtain ⟨e3, e2⟩ := equianharmonic_e h.2.2
+  set ρ := cexp (π * I / 3) with hρ
+  have hs : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
+    rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
+  have hρ2 : ρ ^ 2 = ρ - 1 := by
+    rw [hρ, exp_pi_I_div_three_eq]; ring_nf; rw [I_sq, hs]; ring
+  refine ⟨by rw [H.g₂_eq_e.2, e2, e3]; linear_combination (4 * H.e 1 ^ 2) * hρ2, ?_⟩
+  have h2 : ((2 : ℂ) ^ (14 / 3 : ℂ)) ^ 3 = 2 ^ 14 := by
+    rw [← Complex.cpow_nat_mul, show ((3 : ℕ) : ℂ) * (14 / 3) = ((14 : ℕ) : ℂ) by push_cast; ring,
+      Complex.cpow_natCast]
+  have h4 : 4 * H.e 1 * ((ρ - 1) * H.e 1) * (-ρ * H.e 1) = 4 * H.e 1 ^ 3 := by
+    linear_combination (-4 * H.e 1 ^ 3) * hρ2
+  have hω := H.ω₁_ne_zero
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  rw [H.g₃_eq_e.1, e2, e3, h4, hv, div_pow, mul_pow, mul_pow, h2]
+  field_simp
+  ring
+
+end EquianharmonicValues
 
 /-- DLMF §23.5(v): for an equianharmonic lattice `τ = e^{iπ/3}`. -/
 @[dlmf 23.5.v]

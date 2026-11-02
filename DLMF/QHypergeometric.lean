@@ -18,6 +18,7 @@ public import DLMF.QHypergeometric.HigherSummations
 public import DLMF.QHypergeometric.Integrals
 public import DLMF.QHypergeometric.MathlibCoverage
 public import DLMF.QHypergeometric.Transformations
+public import DLMF.QHypergeometric.VeryWellPoisedSums
 
 /-!
 # Basic hypergeometric and related functions (DLMF Chapter 17)

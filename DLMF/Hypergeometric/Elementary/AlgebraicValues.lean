@@ -912,7 +912,7 @@ theorem value_neg_one_third {a : ℂ} (hc : ∀ k : ℕ, 3 / 2 - 2 * a ≠ -(k :
     rw [l1, l2, l3, l4, hA]
     push_cast
     ring
-  rw [hE, hG, hypSV_cubic_psi_neg_one_third hcA, gauss_summation hcA hre, hdup, hΓ43, hΓ32,
+  rw [hE, hG, SpecialValues.cubic_psi_neg_one_third hcA, gauss_summation hcA hre, hdup, hΓ43, hΓ32,
     show 2 * A + 5 / 6 - A - (A + 1 / 2) = 1 / 3 by ring,
     show 2 * A + 5 / 6 = 3 / 2 - 2 * a by rw [hA]; ring, ← mul_assoc, hpow]
   have h2 : (2 : ℂ) ^ (1 - 2 * (2 / 3 - a)) ≠ 0 := by
@@ -990,7 +990,7 @@ theorem value_one_ninth {a : ℂ} (hc : ∀ k : ℕ, 5 / 6 + 2 * a / 3 ≠ -(k :
     filter_upwards [Ioo_mem_nhdsGT (show (-1 / 8 : ℝ) < 0 by norm_num)] with x hx
     obtain ⟨h0, h1⟩ := hs1 x hx.1 hx.2.le
     rw [hsc x]
-    refine hypSV_cubic_two hcA ?_ ?_ ?_
+    refine SpecialValues.cubic_two hcA ?_ ?_ ?_
     · simp; linarith [hx.1]
     · simp; linarith [hx.2]
     · rw [← hsc x, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg h0]; exact h1

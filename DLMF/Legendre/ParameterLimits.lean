@@ -170,11 +170,12 @@ theorem ferrersPP_integral_all_degrees (ν lam : ℂ) (h0 : lam ≠ ν) (h1 : la
     rw [show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(lam+ν+1)) by ring]
     exact neg_ne_zero.mpr (mul_ne_zero hd1 hd2)
   have hpi : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hB := legPI_boundary_const_all ν lam
-  rw [legPI_integral_PP ν lam hc, legendreSinDigamma_eq, legendreSinDigamma_eq,
+  have hB := FerrersGreen.boundary_const_all ν lam
+  rw [FerrersGreen.integral_PP ν lam hc, legendreSinDigamma_eq, legendreSinDigamma_eq,
     show 2*(sin (π*lam)*(π * DLMF.Gamma.recipGammaDeriv 1 (ν+1) * (Gamma (-ν))⁻¹) -
       sin (π*ν)*(π * DLMF.Gamma.recipGammaDeriv 1 (lam+1) * (Gamma (-lam))⁻¹)) + π*sin ((lam-ν)*π) =
-      (π:ℂ)^2 * (legPIK ν * legPIC lam - legPIK lam * legPIC ν) by rw [hB]; ring]
+      (π:ℂ)^2 * (FerrersGreen.logCoeff ν * FerrersGreen.constTerm lam - FerrersGreen.logCoeff lam *
+          FerrersGreen.constTerm ν) by rw [hB]; ring]
   field_simp
   ring
 
@@ -197,7 +198,8 @@ theorem ferrersP_sq_integral_all_degrees {ν : ℂ} (hν : ν ≠ -1/2) :
     refine (tendsto_const_nhds.sub (tendsto_const_nhds.mul (legendreSinSqTrigamma_limit ν))).div
       ((tendsto_const_nhds.mul ((continuousAt_id.add continuousAt_const).tendsto)).mono_left
         nhdsWithin_le_nhds) (mul_ne_zero (pow_ne_zero 2 hπ) h3)
-  exact tendsto_nhds_unique (((legPIU_tendsto_sq ν).mono_left nhdsWithin_le_nhds).congr' heq) hR
+  exact tendsto_nhds_unique
+      (((UniformBound.tendsto_sq ν).mono_left nhdsWithin_le_nhds).congr' heq) hR
 
 /-- DLMF 14.9.3 (limit form): for natural `m` and `-1 < x < 1`, `(-1)^m Γ(v-m+1)/Γ(v+m+1) 𝖯^m_v(x) →
 𝖯^{-m}_ν(x)` as `v → ν`, `v ≠ ν`; this covers the degrees where the Gamma quotient is singular. -/

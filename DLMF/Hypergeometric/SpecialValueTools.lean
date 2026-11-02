@@ -15,13 +15,14 @@ segments, for the special-argument evaluations 15.4.31 and 15.4.32.
 
 ## Main results
 
-* `hypSV_cubic_psi`: `F(3a, 3a+1/2; 2a+5/6; z) = (1-9z)^{-2a} F(a, a+1/2; 2a+5/6; ψ(z))`,
+* `SpecialValues.cubic_psi`: `F(3a, 3a+1/2; 2a+5/6; z) = (1-9z)^{-2a} F(a, a+1/2; 2a+5/6; ψ(z))`,
   `ψ(z) = -27z(1-z)²/(1-9z)²`, with `1 - ψ(z) = (1+3z)³/(1-9z)²`.
-* `hypSV_cubic_two`: `F(3a, 1/3-a; 2a+5/6; u) = (1-4u)^{-3a} F(a, a+1/3; 2a+5/6; s(u))`,
+* `SpecialValues.cubic_two`: `F(3a, 1/3-a; 2a+5/6; u) = (1-4u)^{-3a} F(a, a+1/3; 2a+5/6; s(u))`,
   `s(u) = 27u/(4u-1)³`, with `1 - s(u) = (1+8u)²(1-u)/(1-4u)³`.
-* `hypSV_cubic_psi_neg_one_third`, `hypSV_cubic_psi_deriv_neg_one_third`: the value and the
-  derivative at `-1/3` of the `ψ`-cubic family.
-* `hypSV_tendsto_ray`: Abel's theorem for `₂F₁` along a radius to a point of the unit circle.
+* `SpecialValues.cubic_psi_neg_one_third`, `SpecialValues.cubic_psi_deriv_neg_one_third`: the value
+  and the derivative at `-1/3` of the `ψ`-cubic family.
+* `SpecialValues.tendsto_ray`: Abel's theorem for `₂F₁` along a radius to a point of the unit
+  circle.
 
 ## Implementation notes
 
@@ -29,7 +30,7 @@ The proofs follow `cubic_transformation` (15.8.31): both sides solve the same Ga
 near the origin, and the identity is continued through the cut-plane continuation
 `regularizedGaussHG`. The image of the domain lies in the cut plane because `1 - ψ(z)`
 (resp. `1 - s(u)`) has positive real part there; this is checked with elementary tangent bounds
-for products (`hypSV_tan_mul`, `hypSV_tan_recip`).
+for products (`SpecialValues.tan_mul`, `SpecialValues.tan_inv`).
 -/
 
 @[expose] public section
@@ -43,7 +44,7 @@ namespace DLMF.Hypergeometric
 
 /-- Tangent bound for a product: if `|Im wᵢ| ≤ tᵢ Re wᵢ` with `Re wᵢ > 0` and `t₁t₂ < 1`, then
 `w₁w₂` has positive real part and `|Im(w₁w₂)| ≤ T Re(w₁w₂)` whenever `t₁ + t₂ ≤ T(1 - t₁t₂)`. -/
-theorem hypSV_tan_mul {w₁ w₂ : ℂ} {t₁ t₂ T : ℝ} (h₁ : 0 < w₁.re) (h₂ : 0 < w₂.re)
+theorem SpecialValues.tan_mul {w₁ w₂ : ℂ} {t₁ t₂ T : ℝ} (h₁ : 0 < w₁.re) (h₂ : 0 < w₂.re)
     (ht₁ : |w₁.im| ≤ t₁ * w₁.re) (ht₂ : |w₂.im| ≤ t₂ * w₂.re) (hlt : t₁ * t₂ < 1)
     (hT : t₁ + t₂ ≤ T * (1 - t₁ * t₂)) :
     0 < (w₁ * w₂).re ∧ |(w₁ * w₂).im| ≤ T * (w₁ * w₂).re := by
@@ -76,7 +77,7 @@ theorem hypSV_tan_mul {w₁ w₂ : ℂ} {t₁ t₂ T : ℝ} (h₁ : 0 < w₁.re)
     _ ≤ _ := mul_le_mul_of_nonneg_left hre hT0
 
 /-- Tangent bound for a reciprocal. -/
-theorem hypSV_tan_recip {w : ℂ} {t : ℝ} (h : 0 < w.re) (ht : |w.im| ≤ t * w.re) :
+theorem SpecialValues.tan_inv {w : ℂ} {t : ℝ} (h : 0 < w.re) (ht : |w.im| ≤ t * w.re) :
     0 < (w⁻¹).re ∧ |(w⁻¹).im| ≤ t * (w⁻¹).re := by
   have hn : 0 < normSq w := normSq_pos.mpr (by rintro rfl; simp at h)
   rw [inv_re, inv_im]
@@ -86,7 +87,7 @@ theorem hypSV_tan_recip {w : ℂ} {t : ℝ} (h : 0 < w.re) (ht : |w.im| ≤ t * 
 
 /-- On the cone domain of the cubic map `ψ(z) = -27z(1-z)²/(1-9z)²`, `1 - ψ z` has positive
 real part. -/
-theorem hypSV_psi_one_sub_re_pos {w : ℂ} (h₁ : 30 * |w.im| < 1 + 3 * w.re)
+theorem SpecialValues.psi_one_sub_re_pos {w : ℂ} (h₁ : 30 * |w.im| < 1 + 3 * w.re)
     (h₂ : 30 * |w.im| < 1 - 9 * w.re) :
     0 < (1 - (-27 * w * (1 - w) ^ 2 / (1 - 9 * w) ^ 2)).re := by
   have hq0 : 1 - 9 * w ≠ 0 := by
@@ -107,17 +108,19 @@ theorem hypSV_psi_one_sub_re_pos {w : ℂ} (h₁ : 30 * |w.im| < 1 + 3 * w.re)
   have hqre : 0 < (1 - 9 * w).re := by simp; linarith [abs_nonneg w.im]
   have hqim : |(1 - 9 * w).im| ≤ 3 / 10 * (1 - 9 * w).re := by
     simp [abs_mul]; linarith
-  obtain ⟨hq1, hq2⟩ := hypSV_tan_recip hqre hqim
+  obtain ⟨hq1, hq2⟩ := SpecialValues.tan_inv hqre hqim
   obtain ⟨hp2r, hp2i⟩ :=
-      hypSV_tan_mul (T := 21 / 100) hpre hpre hpim hpim (by norm_num) (by norm_num)
-  obtain ⟨hp3r, hp3i⟩ := hypSV_tan_mul (T := 8 / 25) hp2r hpre hp2i hpim (by norm_num) (by norm_num)
-  obtain ⟨hq2r, hq2i⟩ := hypSV_tan_mul (T := 2 / 3) hq1 hq1 hq2 hq2 (by norm_num) (by norm_num)
-  exact (hypSV_tan_mul (T := 2) hp3r hq2r hp3i hq2i (by norm_num) (by norm_num)).1
+      SpecialValues.tan_mul (T := 21 / 100) hpre hpre hpim hpim (by norm_num) (by norm_num)
+  obtain ⟨hp3r, hp3i⟩ :=
+      SpecialValues.tan_mul (T := 8 / 25) hp2r hpre hp2i hpim (by norm_num) (by norm_num)
+  obtain ⟨hq2r, hq2i⟩ :=
+      SpecialValues.tan_mul (T := 2 / 3) hq1 hq1 hq2 hq2 (by norm_num) (by norm_num)
+  exact (SpecialValues.tan_mul (T := 2) hp3r hq2r hp3i hq2i (by norm_num) (by norm_num)).1
 
 /-- A cubic transformation (Goursat), the `z ↦ 1 - z` image of DLMF 15.8.31:
 `F(3a, 3a+1/2; 2a+5/6; z) = (1-9z)^{-2a} F(a, a+1/2; 2a+5/6; -27z(1-z)²/(1-9z)²)` on the cone
 domain around `(-1/3, 1/9)` (where the image stays in the unit disk). -/
-theorem hypSV_cubic_psi {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : ℂ))
+theorem SpecialValues.cubic_psi {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : ℂ))
     (h₁ : 30 * |z.im| < 1 + 3 * z.re) (h₂ : 30 * |z.im| < 1 - 9 * z.re)
     (hw : ‖-27 * z * (1 - z) ^ 2 / (1 - 9 * z) ^ 2‖ < 1) :
     ₂F₁ (3 * a) (3 * a + 1 / 2) (2 * a + 5 / 6) z =
@@ -276,7 +279,7 @@ theorem hypSV_cubic_psi {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : �
   have hcut : ∀ w ∈ D, φ w ∈ cutPlane := by
     intro w hw
     rw [mem_cutPlane]
-    exact mem_slitPlane_iff.mpr (Or.inl (hypSV_psi_one_sub_re_pos hw.1 hw.2))
+    exact mem_slitPlane_iff.mpr (Or.inl (SpecialValues.psi_one_sub_re_pos hw.1 hw.2))
   have hRan : AnalyticOnNhd ℂ R D := fun w hw =>
     (hPa w hw).mul (analyticAt_const.mul ((analyticAt_regularizedGaussHG _ _ _
       (hcut w hw)).comp (f := φ) (hφa w hw)))
@@ -291,7 +294,7 @@ theorem hypSV_cubic_psi {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : �
   rw [show (1 : ℂ) - 9 * z = 1 + -9 * z by ring]
 
 /-- On the cone domain of the cubic map `s(u) = 27u/(4u-1)³`, `1 - s u` has positive real part. -/
-theorem hypSV_cubicTwo_one_sub_re_pos {w : ℂ} (h₁ : 80 * |w.im| < 1 + 8 * w.re)
+theorem SpecialValues.cubicTwo_one_sub_re_pos {w : ℂ} (h₁ : 80 * |w.im| < 1 + 8 * w.re)
     (h₂ : 80 * |w.im| < 1 - 16 * w.re) :
     0 < (1 - 27 * w / (4 * w - 1) ^ 3).re := by
   have hq0 : 4 * w - 1 ≠ 0 := by
@@ -319,18 +322,21 @@ theorem hypSV_cubicTwo_one_sub_re_pos {w : ℂ} (h₁ : 80 * |w.im| < 1 + 8 * w.
   have hqre : 0 < (1 - 4 * w).re := by simp; linarith
   have hqim : |(1 - 4 * w).im| ≤ 1 / 10 * (1 - 4 * w).re := by
     simp [abs_mul]; linarith
-  obtain ⟨hq1, hq2⟩ := hypSV_tan_recip hqre hqim
+  obtain ⟨hq1, hq2⟩ := SpecialValues.tan_inv hqre hqim
   obtain ⟨hp2r, hp2i⟩ :=
-      hypSV_tan_mul (T := 21 / 100) hpre hpre hpim hpim (by norm_num) (by norm_num)
-  obtain ⟨hprr, hpri⟩ := hypSV_tan_mul (T := 6 / 25) hp2r hrre hp2i hrim (by norm_num) (by norm_num)
-  obtain ⟨hq2r, hq2i⟩ := hypSV_tan_mul (T := 21 / 100) hq1 hq1 hq2 hq2 (by norm_num) (by norm_num)
-  obtain ⟨hq3r, hq3i⟩ := hypSV_tan_mul (T := 8 / 25) hq2r hq1 hq2i hq2 (by norm_num) (by norm_num)
-  exact (hypSV_tan_mul (T := 1) hprr hq3r hpri hq3i (by norm_num) (by norm_num)).1
+      SpecialValues.tan_mul (T := 21 / 100) hpre hpre hpim hpim (by norm_num) (by norm_num)
+  obtain ⟨hprr, hpri⟩ :=
+      SpecialValues.tan_mul (T := 6 / 25) hp2r hrre hp2i hrim (by norm_num) (by norm_num)
+  obtain ⟨hq2r, hq2i⟩ :=
+      SpecialValues.tan_mul (T := 21 / 100) hq1 hq1 hq2 hq2 (by norm_num) (by norm_num)
+  obtain ⟨hq3r, hq3i⟩ :=
+      SpecialValues.tan_mul (T := 8 / 25) hq2r hq1 hq2i hq2 (by norm_num) (by norm_num)
+  exact (SpecialValues.tan_mul (T := 1) hprr hq3r hpri hq3i (by norm_num) (by norm_num)).1
 
 /-- A cubic transformation (Goursat; Erdélyi, Higher Transcendental Functions, 2.11(39)):
 `F(3a, 1/3-a; 2a+5/6; u) = (1-4u)^{-3a} F(a, a+1/3; 2a+5/6; 27u/(4u-1)³)` on the cone domain
 around `(-1/8, 1/16)` (where the image stays in the unit disk). -/
-theorem hypSV_cubic_two {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : ℂ))
+theorem SpecialValues.cubic_two {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : ℂ))
     (h₁ : 80 * |z.im| < 1 + 8 * z.re) (h₂ : 80 * |z.im| < 1 - 16 * z.re)
     (hw : ‖27 * z / (4 * z - 1) ^ 3‖ < 1) :
     ₂F₁ (3 * a) (1 / 3 - a) (2 * a + 5 / 6) z =
@@ -478,7 +484,7 @@ theorem hypSV_cubic_two {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : �
   have hcut : ∀ w ∈ D, φ w ∈ cutPlane := by
     intro w hw
     rw [mem_cutPlane]
-    exact mem_slitPlane_iff.mpr (Or.inl (hypSV_cubicTwo_one_sub_re_pos hw.1 hw.2))
+    exact mem_slitPlane_iff.mpr (Or.inl (SpecialValues.cubicTwo_one_sub_re_pos hw.1 hw.2))
   have hRan : AnalyticOnNhd ℂ R D := fun w hw =>
     (hPa w hw).mul (analyticAt_const.mul ((analyticAt_regularizedGaussHG _ _ _
       (hcut w hw)).comp (f := φ) (hφa w hw)))
@@ -492,10 +498,10 @@ theorem hypSV_cubic_two {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : �
   simp only [hP, hφdef, hH]
   rw [show (1 : ℂ) - 4 * z = 1 + -4 * z by ring]
 
-/-- The value at `-1/3` of the `ψ`-cubic family, through `hypSV_cubic_psi` and Abel's theorem:
-`F(3a, 3a+1/2; 2a+5/6; -1/3) = 4^{-2a} F(a, a+1/2; 2a+5/6; 1)` (the last series converges since
-`Re(c - a - b) = 1/3`). -/
-theorem hypSV_cubic_psi_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 ≠ -(k : ℂ)) :
+/-- The value at `-1/3` of the `ψ`-cubic family, through `SpecialValues.cubic_psi` and Abel's
+theorem: `F(3a, 3a+1/2; 2a+5/6; -1/3) = 4^{-2a} F(a, a+1/2; 2a+5/6; 1)` (the last series converges
+since `Re(c - a - b) = 1/3`). -/
+theorem SpecialValues.cubic_psi_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 ≠ -(k : ℂ)) :
     ₂F₁ (3 * A) (3 * A + 1 / 2) (2 * A + 5 / 6) (-1 / 3) =
       (4 : ℂ) ^ (-2 * A) * ₂F₁ A (A + 1 / 2) (2 * A + 5 / 6) 1 := by
   have hre : 0 < (2 * A + 5 / 6 - A - (A + 1 / 2)).re := by
@@ -545,7 +551,7 @@ theorem hypSV_cubic_psi_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 
     filter_upwards [Ioo_mem_nhdsGT (show (-1 / 3 : ℝ) < 0 by norm_num)] with x hx
     obtain ⟨h0, h1⟩ := hψ1 x hx.1 hx.2.le
     rw [hψc x]
-    refine hypSV_cubic_psi hcA ?_ ?_ ?_
+    refine SpecialValues.cubic_psi hcA ?_ ?_ ?_
     · simp; linarith [hx.1]
     · simp; linarith [hx.2]
     · rw [← hψc x, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg h0]; exact h1
@@ -556,9 +562,9 @@ theorem hypSV_cubic_psi_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 
   exact hlim
 
 /-- `₂F₁` as the tsum of its Gauss coefficients, at every argument (the tsum is totalized). -/
-theorem hypSV_ordinaryHypergeometric_eq_tsum (a b c z : ℂ) :
+theorem SpecialValues.ordinaryHypergeometric_eq_tsum (a b c z : ℂ) :
     ₂F₁ a b c z = ∑' n, gaussHGCoeff a b c n * z ^ n := by
-  rw [ordinaryHypergeometric_eq_tsum]
+  rw [_root_.ordinaryHypergeometric_eq_tsum]
   simp only [smul_eq_mul]
   congr 1
   funext n
@@ -566,20 +572,20 @@ theorem hypSV_ordinaryHypergeometric_eq_tsum (a b c z : ℂ) :
 
 /-- Abel's theorem for `₂F₁` along a radius to a point `ω` of the unit circle, when
 `Re(c - a - b) > 0`. -/
-theorem hypSV_tendsto_ray {a b c ω : ℂ} (hω : ‖ω‖ = 1) (h : 0 < (c - a - b).re) :
+theorem SpecialValues.tendsto_ray {a b c ω : ℂ} (hω : ‖ω‖ = 1) (h : 0 < (c - a - b).re) :
     Tendsto (fun r : ℝ => ₂F₁ a b c ((r : ℂ) * ω)) (𝓝[<] 1) (𝓝 (₂F₁ a b c ω)) := by
   have hs := ordinaryHypergeometric_summable_of_mem_sphere (a := a) (b := b) (c := c) hω h
   have habel := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt hs.hasSum.tendsto_sum_nat
-  rw [← hypSV_ordinaryHypergeometric_eq_tsum] at habel
+  rw [← SpecialValues.ordinaryHypergeometric_eq_tsum] at habel
   refine habel.congr fun x => ?_
-  rw [hypSV_ordinaryHypergeometric_eq_tsum]
+  rw [SpecialValues.ordinaryHypergeometric_eq_tsum]
   dsimp only
   congr 1
   funext n
   rw [mul_pow]; ring
 
 /-- `(p³/q²)^{1/3} = p q^{-2/3}` for positive reals. -/
-theorem hypSV_rpow_third {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+theorem SpecialValues.rpow_third {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
     (p ^ 3 / q ^ 2) ^ (1 / 3 : ℝ) = p * q ^ (-(2 / 3) : ℝ) := by
   rw [Real.div_rpow (by positivity) (by positivity), ← Real.rpow_natCast, ← Real.rpow_natCast,
     ← Real.rpow_mul hp.le, ← Real.rpow_mul hq.le, Real.rpow_neg hq.le]
@@ -587,7 +593,7 @@ theorem hypSV_rpow_third {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
   rw [div_eq_mul_inv]
 
 /-- Near `z = -1/3` the `ψ`-cubic family is given by the connection formula at `ψ = 1`. -/
-theorem hypSV_cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 ≠ -(k : ℂ)) :
+theorem SpecialValues.cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 ≠ -(k : ℂ)) :
     ₂F₁ (3 * A) (3 * A + 1 / 2) (2 * A + 5 / 6) =ᶠ[𝓝 (-1 / 3)] fun z =>
       Gamma (2 * A + 5 / 6) * (Real.pi / sin (Real.pi * (1 / 3))) *
         ((1 + (-9) * z) ^ (-2 * A) *
@@ -658,7 +664,8 @@ theorem hypSV_cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 �
       constructor <;> linarith
     have h1ψn : ‖1 - ψ‖ < 1 := by
       rw [h1ψ, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hur]; exact hur1
-    have hcub := hypSV_cubic_psi (a := A) (z := (x : ℂ)) hcA (by simp; linarith) (by simp; linarith)
+    have hcub := SpecialValues.cubic_psi (a := A) (z := (x : ℂ)) hcA (by simp; linarith)
+        (by simp; linarith)
       (by rw [← hψ]; exact hψ1)
     rw [← hψ] at hcub
     have hcon := regularized_connection_one_sub A (A + 1 / 2) c hψ1 h1ψn
@@ -675,7 +682,7 @@ theorem hypSV_cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 �
     have hthird : (1 - ψ) ^ (1 / 3 : ℂ) = (1 + 3 * (x : ℂ)) *
         (1 + (-9) * (x : ℂ)) ^ (-(2 / 3) : ℂ) := by
       rw [h1ψ, show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hur.le,
-        hypSV_rpow_third hp hq, ofReal_mul, ofReal_cpow hq.le]
+        SpecialValues.rpow_third hp hq, ofReal_mul, ofReal_cpow hq.le]
       push_cast; ring_nf
     have hu' : u x = 1 - ψ := by rw [h1ψ, hu]; push_cast; ring
     rw [hcub]
@@ -711,14 +718,15 @@ theorem hypSV_cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 �
   exact (hGa.frequently_eq_iff_eventually_eq hΦa).mp (hT.frequently hev.frequently)
 
 /-- The derivative at `-1/3` of the `ψ`-cubic family, from the connection formula at `ψ = 1`. -/
-theorem hypSV_cubic_psi_deriv_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 6 ≠ -(k : ℂ)) :
+theorem SpecialValues.cubic_psi_deriv_neg_one_third {A : ℂ}
+    (hcA : ∀ k : ℕ, 2 * A + 5 / 6 ≠ -(k : ℂ)) :
     deriv (₂F₁ (3 * A) (3 * A + 1 / 2) (2 * A + 5 / 6)) (-1 / 3) =
       Gamma (2 * A + 5 / 6) * (Real.pi / sin (Real.pi * (1 / 3))) *
         (18 * A * (4 : ℂ) ^ (-2 * A) / 4 *
             (Gamma (2 / 3) * (Gamma (A + 5 / 6) * Gamma (A + 1 / 3)))⁻¹ -
           (4 : ℂ) ^ (-2 * A) * (3 * (4 : ℂ) ^ (-(2 / 3) : ℂ)) *
             (Gamma (4 / 3) * (Gamma A * Gamma (A + 1 / 2)))⁻¹) := by
-  rw [(hypSV_cubic_psi_eventually hcA).deriv_eq]
+  rw [(SpecialValues.cubic_psi_eventually hcA).deriv_eq]
   set u : ℂ → ℂ := fun z => (1 + 3 * z) ^ 3 / (1 - 9 * z) ^ 2 with hu
   have hu0 : u (-1 / 3) = 0 := by simp only [hu]; norm_num
   have hud : HasDerivAt u 0 (-1 / 3) := by

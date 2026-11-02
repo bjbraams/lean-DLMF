@@ -32,6 +32,8 @@ derivatives with respect to the finite endpoint and the recovery of the complete
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF.Confluent
 open scoped Real Topology
+open DLMF.Core
+
 namespace DLMF.Airy
 
 /-- The incomplete contour integral, replacing the upper endpoint of 9.5.4 by a.

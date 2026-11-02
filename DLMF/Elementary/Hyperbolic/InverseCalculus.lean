@@ -219,7 +219,7 @@ theorem arccoth_values_inv {z : ℂ} (hz : z≠0) : arccothValues z=arctanhValue
     exact inv_ne_zero hz hh
 
 /-- Compatible inverse-sinh/cosh branches are characterized by their two shared roots. -/
-lemma hyper_mixed_inverse_fiber (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1) :
+lemma Hyperbolic.mixed_inverse_fiber (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1) :
     Set.image2 (fun a b : ℂ=>a+σ*b) (arcsinhValues u) (arccoshValues v)=
       {w | ∃ r s : ℂ,r^2=1+u^2 ∧ s^2=v^2-1 ∧
         Complex.sinh w=u*v+σ*(r*s) ∧ Complex.cosh w=v*r+σ*(u*s)} := by
@@ -236,7 +236,7 @@ lemma hyper_mixed_inverse_fiber (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1) :
     · rcases hσ with rfl|rfl <;>
         simp [Complex.cosh_add,Complex.sinh_neg,Complex.cosh_neg,ha,hb] <;> ring
   · rintro ⟨r,s,hr,hs,hw,hc⟩
-    have ha:=hyper_sinh_cosh_log_lift u r hr
+    have ha:=Hyperbolic.sinh_cosh_log_lift u r hr
     let a:=Complex.log (r+u)
     refine ⟨a,ha.1,σ*(w-a),?_,?_⟩
     · change Complex.cosh (σ*(w-a))=v

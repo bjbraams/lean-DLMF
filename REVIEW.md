@@ -815,7 +815,7 @@ location and axiom dependencies, together with the 12 new helper declarations.
 
 `liouvilleGreen_interval_isEquivalent` has a false uniqueness assertion under its
 current finite-endpoint hypotheses. Take `(a₁, a₂) = (0, 1)`, `f = 1`, `f' = f'' = g = 0`,
-and `ξ(x) = x`. These satisfy `IsLGData`, and the error density is identically zero.
+and `ξ(x) = x`. These satisfy `IsLiouvilleGreenData`, and the error density is identically zero.
 Both `w(x) = exp x` and `v(x) = exp x + sinh x` solve `w'' = w`; both are asymptotic
 to the stated approximant `exp x` as `x → 0+`, but they differ on `(0, 1)`.
 Thus the asserted uniqueness cannot hold for any choice of the claimed solution.
@@ -2398,7 +2398,7 @@ proofs use periodicity:
   is 1-periodic and correct at `c = −j` (the terminating case). Carlson and the
   recurrence give the result.
 
-The helpers (`CarlsonAux`, `DougallAux`, `DixonAux`, about 1600 lines) include a periodic
+The helpers (`CarlsonTheorem`, `DougallSeries`, `DixonWZ`, about 1600 lines) include a periodic
 form of Carlson's theorem and Γ-ratio and reciprocal-Γ bounds on strips. These are
 ToMathlib candidates. `whipple_7F6` remains admitted.
 
@@ -6609,7 +6609,7 @@ Main results proved:
 
 `airyErrorMultiplier` (`DLMF/Airy/Asymptotics.lean`) wrote DLMF's min(|csc(ph ζ)|, χ(n+σ)+1)
 as `min |(sin (3 arg z/2))⁻¹| (χ+1)`. On the ray |arg z| = 2π/3, sin(ph ζ) = 0 and Lean's
-`0⁻¹ = 0` made the multiplier 0, so `airy_ai_complex_error` and `airy_aiDeriv_complex_error`
+`0⁻¹ = 0` made the multiplier 0, so `airyAi_complex_error` and `airyAiDeriv_complex_error`
 asserted ‖R_N(z)‖ ≤ 0 (refuted in Lean at z = e^{2πi/3}, and numerically). Transcription defect,
 not a DLMF erratum. The case sin = 0 now gives χ(n+σ)+1. The endpoint |arg z| = π, where
 cos(ph ζ) = 0, is excluded by the existing hypothesis `z ∈ slitPlane`, as in DLMF (|ph z| < π).
@@ -6724,8 +6724,8 @@ New modules:
 
 Main results proved:
 
-- Airy: 9.7.17 for Ai in all four sectors (`airy_ai_complex_error`, with a sharp Gamma inequality
-  (N/(2e))^N ≤ √(2π(N+1/6))·u_N), and 9.7.16 for Bi (`airy_bi_real_error`, `airy_bi_bound`);
+- Airy: 9.7.17 for Ai in all four sectors (`airyAi_complex_error`, with a sharp Gamma inequality
+  (N/(2e))^N ≤ √(2π(N+1/6))·u_N), and 9.7.16 for Bi (`airyBi_real_error`, `airyBi_bound`);
   9.10.17 (`airyAi_mellin`).
 - Legendre: the 14.16 zero counts `ferrersP_nonpositive_order_zero_count`,
   `ferrersP_nat_degree_zero_count`, `ferrersP_positive_integer_order_zero_count`; 14.15.21–22
@@ -7427,8 +7427,8 @@ mathematical review estimates, not newly Lean-checked proof implementations.
 **Airy derivative remainder bounds.** Prioritize a derivative counterpart to the
 proved Ai Stieltjes remainder machinery in
   [Asymptotics.lean](DLMF/Airy/Asymptotics.lean). Its immediate targets are
-`airy_aiDeriv_complex_error`, `airy_biDeriv_real_error`, and
-`airy_biDeriv_bound` (three admissions). Prove the Ai′ remainder estimate with
+`airyAiDeriv_complex_error`, `airyBiDeriv_real_error`, and
+`airyBiDeriv_bound` (three admissions). Prove the Ai′ remainder estimate with
 the required zero shift in the error multiplier, transfer it to Bi′ by the
 proved rotations, then specialize the truncation to obtain the real bound.
 Sharp constants and the sector boundary prevent obtaining these merely by
@@ -7573,7 +7573,7 @@ nonstandard axiom occurs, and the completed statements retain their hypotheses.
 - `hasSum_invErf` identifies the analytic inverse's coefficients with the
   existing recurrence and establishes convergence on the full interval
   `|x| < 1` using positivity of derivative polynomials and Taylor bounds.
-- `airy_biDeriv_bound` is proved independently of the still-admitted derivative
+- `airyBiDeriv_bound` is proved independently of the still-admitted derivative
   remainder estimates, using the Airy energy, the initial value, and an explicit
   polynomial envelope.
 - `gammaUniformInverseLog_spec` now covers the full disk `|η| < 2 sqrt π`.
@@ -8636,7 +8636,7 @@ New general files (DLMFMathlib, Mathlib-only imports):
 - `Analysis/ODE/P1oLinearGlobal`: global solutions on ℝ of linear systems with continuous
   coefficients.
 - `Analysis/ODE/P1oParamHolomorphic`: solutions depend holomorphically on a linear parameter.
-- `Analysis/Fourier/P1a2EntirePeriodic`: an entire 2π-periodic function is the sum of its Fourier
+- `Analysis/Fourier/EntirePeriodic`: an entire 2π-periodic function is the sum of its Fourier
   series on ℂ; cosine/sine series and Parseval.
 
 Highlights: `exists_isMathieuSolution` (so w_I, w_II and everything built on them are now free of
@@ -9045,7 +9045,7 @@ moves, so the moves do not preserve several copies of the same foundation.
   `HasIntegralAtTop`, `HasIntegralAtBot`, `HasIntegralWholeLine`, `improperAtTop`,
   `lineIntegral` and `primitive`, already represented in
   [Core/Framework](DLMF/Core/Basic.lean), lines 33–54. Lean accepts `rfl` for all six
-  comparisons, including `Airy.lineIntegral = DLMF.segmentIntegral`. Use one implementation
+  comparisons, including `Airy.lineIntegral = DLMF.Core.segmentIntegral`. Use one implementation
   in the common layer and update users; a compatibility abbreviation can retain an old name.
   The Airy and core principal-value predicates have different arguments and assumptions and
   must remain distinct unless an explicit equivalence with those assumptions is proved.
@@ -10241,3 +10241,126 @@ After the round `DLMF/AlgebraicAnalytic/Complex/Functions.lean` exceeded the 1,5
 §1.10(ix)–(xi) (infinite products, partial fractions, generating functions) moved unchanged to the
 new `DLMF/AlgebraicAnalytic/Complex/InfiniteProducts.lean`. The two Lagrange inversion files do not duplicate
 each other; their `lagB_` prefix is not Mathlib style.
+
+## Namespaces, spelled-out predicate names and round identifiers (2026-11-02)
+
+User decisions after the status reviews: ParabolicCylinder, IncompleteGamma, ErrorFunctions and
+ExpIntegrals stay in `DLMF.Confluent`, GeneralizedHypergeometric stays in `DLMF.Hypergeometric`;
+no declarations directly in `DLMF`; no `…Aux` namespaces; no round identifiers; predicate names
+spelled out; `multivariateGamma_ofReal` in the foundational layer. `AGENTS.md` records the rules.
+All renames are in `reports/RenameMap20261101.tsv`; statements and proofs are unchanged.
+
+- `DLMF/Core/` (`Core.Basic`, `ZeroCounting`, `Upstream`) is in `DLMF.Core`; the 88 files that use
+  the shared conventions `open DLMF.Core`. The `zcnt_` prefix was dropped (`DLMF.Core.…`).
+- `sphericalJ`, `sphericalI` moved from `DLMF.Core.Basic` to `DLMF.Bessel` in
+  `DLMF/Bessel/Basic.lean` (DLMF §10.47).
+- `sphSeries_*`, `sphProd_*` and `erfZ_*` became `DLMF.Bessel.SphericalSeries`,
+  `DLMF.Bessel.SphericalProduct` and `DLMF.Confluent.ErfZeros`.
+- `RamanujanAux`, `CarlsonAux`, `DixonAux`, `DougallAux` became `RamanujanIntegral`,
+  `CarlsonTheorem`, `DixonWZ`, `DougallSeries`.
+- Predicates: `KumDecBnd` → `KummerDecayBound`, `KumZQ` → `HasSignedZeroPattern`,
+  `PcfLGGood` → `HasParityDegreeSupport`, `PcfLG2HasExp` → `HasInversePowerExpansion`,
+  `StruveLOGood` → `LargeOrderFactorNonvanishing`, `StaircaseGood` → `DominatesStaircase`,
+  `LegendrePathOK` → `LegendrePathInSlitPlane`, `EllRedHyp` → `SymmetricReductionConditions`,
+  `EllRedPerm` → `IsReductionIndexPermutation`, `LztIsSol` → `IsLegendreTypeSolution`,
+  `KztIsSol` → `IsSturmTypeSolutionIoi`, `IsLinODE2SolOn` → `IsLinearODE2SolutionOn`,
+  `IsLGSolOn`/`IsLGData` → `IsLiouvilleGreenSolutionOn`/`IsLiouvilleGreenData`,
+  `AirySqIsProdSol` → `IsAiryProductSolution`, `IsDescendingPP`/`DescendingPPIn` →
+  `IsDescendingPlanePartition`/`DescendingPlanePartitionIn`, `MBSeriesData` →
+  `MellinBarnesSeriesData`, with the theorem names built on them.
+- Round identifiers: `p3lyR`, `p3lyR'` → `frobeniusSolutionReal`, `frobeniusSolutionRealDeriv`;
+  module `DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic` → `…Fourier.EntirePeriodic`.
+- `multivariateGamma_ofReal` and `multivariateGamma_one` moved unchanged to
+  `DLMF/MatrixArgument/Basic.lean`.
+- `DLMF.Mathieu.SpectralExistence` moved unchanged to `DLMF.Mathieu.Basic.SpectralExistence`: the
+  existence of the characteristic values (`mathieuSpecA_exists`, `mathieuA_spec`, …) is the basic
+  API of the definitions by choice `mathieuA`, `mathieuB`. It imports only Mathieu Basic files
+  and DLMFMathlib ODE files.
+- Further renames, all recorded in the rename map: `extendedInversion`, `extendedInversion'`,
+  `extendedInversion_comp'` → `lagrange_inversion_extended`, `lagrange_inversion_extended'`,
+  `lagrange_burmann_extended'`; the Airy asymptotics `airy_ai_…`, `airy_aiDeriv_…`, `airy_bi_…`,
+  `airy_biDeriv_…`, `airy_R_hyper_…`, `airy_S_hyper_…` → `airyAi_…`, `airyAiDeriv_…`, `airyBi_…`,
+  `airyBiDeriv_…`, `airyHyperR_…`, `airyHyperS_…`; the `airySq_*` helpers → namespace
+  `DLMF.Airy.AiSquare` (`scale`, `tailIntegral`, `wronskian3`, `mellinKernel`, `realKernel`,
+  `ExpDecay`, …); `regularizedGaussHGAux` → `regularizedGaussHGByShifts`.
+  `DoubleZeroSqrt.signedSqrt` is now a definition, `(x - x₀) √(2 Q(x))`, and the former theorem
+  is split into `analyticAt_signedSqrt`, `hasDerivAt_signedSqrt`, `eventually_eq_sq_signedSqrt`
+  and `eventually_signedSqrt_eq_sign_mul_sqrt`. Lines lengthened by the renames were rewrapped.
+- The `igAsy_*` helpers of the incomplete gamma asymptotics (97 names in
+  `IncompleteGamma/Asymptotics/{LargeArgument,PartialSums}.lean`) are now in
+  `DLMF.Confluent.IncompleteGammaAsymptotics`; single-letter names that clashed with local variables
+  were spelled out (`igAsy_phi` → `phi`, `igAsy_Q` → `phiQuotient`, `igAsy_W` → `ibpPrimitive`,
+  `igAsy_F` → `laplaceIntegrand`, …; see the rename map).
+
+## Fourth project-wide proof round (2026-11-02)
+
+Ten agents with disjoint directories. Source admissions: 1,275 → 1,212. No statement was changed;
+all new theorems use only the standard axioms.
+
+- AlgebraicAnalytic 142 → 126: Fourier inversion 1.14.3–4 and 1.14.11–12 (with stronger forms),
+  Laplace inversion 1.14.20 and Lerch's uniqueness theorem, the Dirac-delta kernels 1.17.9 and
+  1.17.12, the principal-value Mellin transform 1.14.34, 1.18.59 and rows of Tables 1.14.2–3, with
+  the new `DLMFMathlib/Analysis/Fourier/DirichletJordan.lean`.
+- Weierstrass 21 → 12: the rectangular-lattice integrals 23.6.30–35 (moved unchanged to the new
+  `Weierstrass/RectangularIntegrals.lean`, on the new `Weierstrass/RealPaths.lean`), the
+  equianharmonic roots and invariants 23.5.7–8 and the special values η(i), η(e^{πi/3}) of 23.17.3.
+- Mathieu 137 → 132: the continued fractions 28.6.16–19 by a Pincherle argument (new
+  `Mathieu/ContinuedFractionTails.lean` and `Mathieu/SmallQContinuedFractions.lean`). Spheroidal
+  31 → 29: primed forms of 30.6.1 and 30.6.3 (new `Spheroidal/CutPlaneSolutions.lean`).
+- GeneralizedHypergeometric 80 → 73: the Fields–Wimp expansion 16.10.1 and the Euler integral
+  16.5.2 (both with primed forms), 16.15.3 and the conditional convergence of `ₚFₚ₋₁` at unit
+  argument (new `GeneralizedHypergeometric/Appell/TriangleDirichlet.lean`).
+- EllipticIntegrals 125 → 120: 19.5.4, 19.6.15, 19.9.1 (with `tendsto_compEllIntKk_sub_log`),
+  19.24.1 and 19.11.6.
+- QHypergeometric 66 → 61: 17.6.10, the very-well-poised sums 17.7.15 and 17.7.7, the bilateral
+  `₃ψ₃` sum 17.8.5 and its continuation (new `QHypergeometric/VeryWellPoisedSums.lean`).
+- BernoulliEuler 21 → 17: the integral representations 24.7.7–10 on the strip `0 < Re x < 1` (new
+  `BernoulliEuler/IntegralKernels.lean`). Zeta 41 → 40: 25.11.23.
+- Lamé 40 → 36: 29.12.11–13 and 29.3.7–8 (new `Lame/Polynomials/Comodulus.lean`).
+- AsymptoticApproximations 74 → 71: the Mellin inversion shift 2.5.6–7, a primed form of 2.5.42 and
+  2.6.57, with the new `DLMFMathlib/Analysis/Complex/VerticalLineShift.lean`.
+- Legendre 31 → 30: 14.3.17 (new `Legendre/Continuation/SquareHypergeometric.lean`). Airy 34 → 33:
+  9.7.17 for `Ai′` in all sectors.
+
+Unchanged: Coulomb, JacobiElliptic, Theta, RiemannTheta, MatrixArgument (zonal polynomials are
+missing), Combinatorics, NumberTheory, Elementary, Polylog, Painlevé, Heun, CoalescingSaddles and
+Wigner.
+
+New area imports: Spheroidal → AlgebraicAnalytic and Weierstrass → Gamma. The import survey reports
+no new two-way pair; Elementary ↔ IncompleteGamma still awaits acceptance into the baseline. The
+abbreviated helper names of `DLMF.Mathieu.ContinuedFractionTail` (`Good`, `mat`, `num`, `den`) were
+spelled out at integration (`DenominatorsNonzero`, `coefficients`, `numerator`, `denominator`).
+
+Suspected statement defects, reported and left unchanged:
+- 2.4.9 `haar_isLittleO_pow`: the boundary terms seem to prevent the stated little-o bound.
+- 2.5.43 `laplace_expansion_residues`: hypotheses are missing (integrability on `Re z = l − δ`,
+  continuity of the second integral, holomorphy and decay in the strip).
+- 28.15.2 `mathieuLambda_contFrac`: needs `c₀ ≠ 0`. 28.12.7: the statement is speculative.
+
+Leads for the next round: `heun_kernel_typeI_angles` is numerically true and should follow like
+`typeII_uvw'`; 34.2.6 and 34.4.3 are numerically true and need Sheppard's `₃F₂` transformation and
+the balanced `₄F₃` 16.4.14; 26.8.27 and 26.8.33 are numerically true; 25.11.21 should yield to the
+odd-part technique of 25.11.23; the lower bound of 19.9.8. General real-analysis helpers in
+`Weierstrass/RealPaths.lean` (`injOn_Icc_of_hasDerivAt_ne_zero` and others) and
+`BernoulliEuler.eqOn_strip_of_eq_ofReal` are candidates for `DLMFMathlib`.
+
+## Hypotheses added to 2.5.43 and 28.15.2 (2026-11-02)
+
+Approved by the user after the fourth proof round.
+
+- 2.5.43 `laplace_expansion_residues` now assumes `VerticalIntegrable` of `Γ(1 - z)𝓜h(z)` on the
+  line `ℜz = l - δ`. Without it, `mellinInv` (a Bochner integral) is `0` on a non-integrable line
+  and the last term of 2.5.43 loses its meaning; DLMF assumes the convergence implicitly.
+  Integrability on the starting line `ℜz = p` is automatic (a bounded Mellin transform times the
+  exponentially decaying `Γ(1 - z)`) and was not added. The theorem remains admitted.
+- 28.15.2 `mathieuLambda_contFrac` now assumes `mathieuMeCoeff ν q 0 ≠ 0`. The forward continued
+  fraction equals `q c^ν_2/c^ν_0`; normality along the segment only makes `c^ν_0` continuous with
+  value `1` at `q = 0`, so at a normal `q` with `c^ν_0(q) = 0` the approximants diverge. With the
+  hypothesis the theorem is proved, from Pincherle's theorem
+  `tendsto_mathieuCFTail_of_tendsto_zero` applied to `(c^ν_{2k})_{k ≥ 0}` and `(c^ν_{-2k})_{k ≥ 0}`
+  and the recurrence 28.14.4 at `m = 0`.
+- 2.4.9 `haar_isLittleO_pow` and 28.12.7 `integral_mathieuMe_orthogonal` were reviewed and are
+  believed true as stated. For 2.4.9 the boundary terms of the integration by parts vanish because
+  uniform convergence bounds `Q - F` on the line and averaging in `t` kills the limit. For 28.12.7
+  the bilinear form `∑ c^{(m)}_j c^{(n)}_j` vanishes where the eigenvalues differ and extends by
+  continuity along the path.

@@ -146,7 +146,7 @@ theorem associatedQ_zero_order (ν : ℂ) {z : ℂ} :
   ring
 
 /-- At order zero and natural degree, `𝑸_n = Q_n/n!`. -/
-theorem legInt_olverQ_nat_zero_order (n : ℕ) {z : ℂ} :
+theorem olverQ_nat_zero_order (n : ℕ) {z : ℂ} :
     olverQ n 0 z = legendreQ n z / n.factorial := by
   have hreg : LegendreQRegular (n:ℂ) 0 := fun k hk => by
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]

@@ -31,12 +31,15 @@ power series, entireness, symmetries, segment integrals and derivatives are in
 * `Real.logIntLi_principalValue`: the logarithmic integral as a principal value (DLMF 6.2.8).
 * `sinIntTail_horizontal_integral`, `cosInt_horizontal_integral`, `cosInt_tendsto_atTop`: the
   sine and cosine integrals (DLMF 6.2.10, 6.2.11, 6.2.14).
-* `sinInt_eq_E1`, `cosInt_eq_E1`, `expIntAux_eq_E1`: relations to `E₁` (DLMF 6.5.5–6.5.7).
+* `sinInt_eq_E1`, `cosInt_eq_E1`, `ExpIntegralAuxiliary.eq_E1`: relations to `E₁` (DLMF
+  6.5.5–6.5.7).
 -/
 
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Identity under the stated parameter and domain assumptions: `genExpIntE 1 z = exp (-z) * ∫ t :
@@ -270,7 +273,7 @@ theorem Real.expIntEi_Ein {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1 ∨ ε =
   ring
 
 /-- `|Ei(-u)| ≤ e^{-u}/u` for `u > 0`. -/
-theorem liPV_abs_expIntEi_neg_le {u : ℝ} (hu : 0 < u) :
+theorem LogIntegralPrincipalValue.abs_expIntEi_neg_le {u : ℝ} (hu : 0 < u) :
     |Real.expIntEi (-u)| ≤ Real.exp (-u) / u := by
   have h := Real.expIntEi_negative hu
   rw [genExpIntE_one_eq_integral hu] at h
@@ -292,7 +295,7 @@ theorem liPV_abs_expIntEi_neg_le {u : ℝ} (hu : 0 < u) :
   exact hle
 
 /-- `li(δ) → 0` as `δ → 0⁺`. -/
-theorem liPV_tendsto_logIntLi_zero :
+theorem LogIntegralPrincipalValue.tendsto_logIntLi_zero :
     Tendsto Real.logIntLi (𝓝[>] (0 : ℝ)) (𝓝 0) := by
   have hlog : Tendsto (fun δ : ℝ => -Real.log δ) (𝓝[>] 0) atTop :=
     tendsto_neg_atBot_atTop.comp Real.tendsto_log_nhdsGT_zero
@@ -302,17 +305,17 @@ theorem liPV_tendsto_logIntLi_zero :
   refine squeeze_zero_norm' ?_ (hb.comp hlog)
   filter_upwards [hlog.eventually_gt_atTop 0, self_mem_nhdsWithin] with δ hδ hδ0
   rw [Real.norm_eq_abs, Real.logIntLi, show Real.log δ = -(-Real.log δ) by ring]
-  exact liPV_abs_expIntEi_neg_le hδ
+  exact LogIntegralPrincipalValue.abs_expIntEi_neg_le hδ
 
 /-- `li(t) = γ + log|log t| - Ein(-log t)`. -/
-theorem liPV_logIntLi_eq (t : ℝ) : Real.logIntLi t =
+theorem LogIntegralPrincipalValue.logIntLi_eq (t : ℝ) : Real.logIntLi t =
     Real.eulerMascheroniConstant + Real.log (Real.log t) - Real.expIntEin (-Real.log t) := by
   rw [Real.logIntLi, Real.expIntEi, Real.log_abs,
     show -((Real.log t : ℝ) : ℂ) = ((-Real.log t : ℝ) : ℂ) by push_cast; ring,
     expIntEin_ofReal, ofReal_re]
 
 /-- The real `Ein` differentiates to `(1 - e^{-t})/t` off the origin. -/
-theorem liPV_hasDerivAt_ein {t : ℝ} (ht : t ≠ 0) :
+theorem LogIntegralPrincipalValue.hasDerivAt_ein {t : ℝ} (ht : t ≠ 0) :
     HasDerivAt Real.expIntEin ((1 - Real.exp (-t)) / t) t := by
   have h := (hasDerivAt_expIntEin_complex (z := (t : ℂ)) (by exact_mod_cast ht)).real_of_complex
   have hf : (fun y : ℝ => (expIntEin (y : ℂ)).re) = Real.expIntEin := by
@@ -322,13 +325,14 @@ theorem liPV_hasDerivAt_ein {t : ℝ} (ht : t ≠ 0) :
   rw [← ofReal_neg, ← ofReal_exp, ← ofReal_one, ← ofReal_sub, ← ofReal_div, ofReal_re]
 
 /-- `li' = 1/log` on `(0, ∞) \ {1}`. -/
-theorem liPV_hasDerivAt {t : ℝ} (ht : 0 < t) (ht1 : t ≠ 1) :
+theorem LogIntegralPrincipalValue.hasDerivAt_logIntLi {t : ℝ} (ht : 0 < t) (ht1 : t ≠ 1) :
     HasDerivAt Real.logIntLi (1 / Real.log t) t := by
   have hl : Real.log t ≠ 0 := by
     intro h; rcases Real.log_eq_zero.mp h with h | h | h <;> [linarith; exact ht1 h; linarith]
-  rw [funext liPV_logIntLi_eq]
+  rw [funext LogIntegralPrincipalValue.logIntLi_eq]
   have h1 := ((Real.hasDerivAt_log ht.ne').log hl).const_add Real.eulerMascheroniConstant
-  have h2 := (liPV_hasDerivAt_ein (neg_ne_zero.mpr hl)).comp t (Real.hasDerivAt_log ht.ne').neg
+  have h2 := (LogIntegralPrincipalValue.hasDerivAt_ein (neg_ne_zero.mpr hl)).comp t
+      (Real.hasDerivAt_log ht.ne').neg
   refine (h1.sub h2).congr_deriv ?_
   rw [neg_neg, Real.exp_log ht]
   field_simp
@@ -341,7 +345,8 @@ theorem Real.logIntLi_eq_logIntLi_two_add_logIntegral {x : ℝ} (hx : 1 < x) :
   have hsub : ∀ t ∈ Set.uIcc 2 x, 1 < t := fun t ht => by
     rcases Set.mem_uIcc.mp ht with h | h <;> linarith [h.1, h.2]
   have hderiv : ∀ t ∈ Set.uIcc 2 x, HasDerivAt Real.logIntLi (Real.log t)⁻¹ t := fun t ht => by
-    simpa [one_div] using liPV_hasDerivAt (by linarith [hsub t ht]) (hsub t ht).ne'
+    simpa [one_div] using LogIntegralPrincipalValue.hasDerivAt_logIntLi (by linarith [hsub t ht])
+        (hsub t ht).ne'
   have hint : IntervalIntegrable (fun t => (Real.log t)⁻¹) MeasureTheory.volume 2 x := by
     refine ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ ?_ fun t ht => ?_)
     · exact Real.continuousOn_log.mono fun t ht => (by linarith [hsub t ht] : (0 : ℝ) < t).ne'
@@ -350,7 +355,7 @@ theorem Real.logIntLi_eq_logIntLi_two_add_logIntegral {x : ℝ} (hx : 1 < x) :
   ring
 
 /-- The integrand `1/log t` is continuous on `[0, b]` for `b < 1` (with `1/log 0 = 0`). -/
-theorem liPV_continuousOn_left {b : ℝ} (hb : b < 1) :
+theorem LogIntegralPrincipalValue.continuousOn_left {b : ℝ} (hb : b < 1) :
     ContinuousOn (fun t : ℝ => 1 / Real.log t) (Icc 0 b) := by
   intro t ht
   rcases eq_or_lt_of_le ht.1 with h | h
@@ -364,7 +369,7 @@ theorem liPV_continuousOn_left {b : ℝ} (hb : b < 1) :
     exact (Real.log_neg h (by linarith [ht.2])).ne
 
 /-- `li(1-ε) - li(1+ε) → 0`. -/
-theorem liPV_tendsto_sub :
+theorem LogIntegralPrincipalValue.tendsto_sub :
     Tendsto (fun ε : ℝ => Real.logIntLi (1 - ε) - Real.logIntLi (1 + ε)) (𝓝[>] 0) (𝓝 0) := by
   have hs := (Real.hasDerivAt_log one_ne_zero).tendsto_slope_zero
   simp only [Real.log_one, sub_zero, inv_one, smul_eq_mul] at hs
@@ -407,7 +412,8 @@ theorem liPV_tendsto_sub :
     have h1 : Real.log (1 - ε) ≠ 0 := (Real.log_neg (by linarith [hε.2]) (by linarith [hε.1])).ne
     have h2 : Real.log (1 + ε) ≠ 0 := (Real.log_pos (by linarith [hε.1])).ne'
     have hε0 : ε ≠ 0 := hε.1.ne'
-    rw [liPV_logIntLi_eq, liPV_logIntLi_eq, abs_mul, abs_mul, ← sub_eq_add_neg, abs_inv, abs_inv,
+    rw [LogIntegralPrincipalValue.logIntLi_eq, LogIntegralPrincipalValue.logIntLi_eq, abs_mul,
+        abs_mul, ← sub_eq_add_neg, abs_inv, abs_inv,
       abs_neg, mul_div_mul_left _ _ (inv_ne_zero (abs_ne_zero.mpr hε0)),
       Real.log_div (abs_ne_zero.mpr h1) (abs_ne_zero.mpr h2), Real.log_abs, Real.log_abs]
     ring
@@ -434,16 +440,18 @@ theorem Real.logIntLi_principalValue {x : ℝ} (hx : 1 < x) :
         have h0 : ContinuousWithinAt G (Ioi 0) 0 := by
           have : G 0 = 0 := by simp [G]
           rw [ContinuousWithinAt, this]
-          refine liPV_tendsto_logIntLi_zero.congr' ?_
+          refine LogIntegralPrincipalValue.tendsto_logIntLi_zero.congr' ?_
           filter_upwards [self_mem_nhdsWithin] with s hs
           simp [G, ne_of_gt (show (0:ℝ) < s from hs)]
         exact (continuousWithinAt_Ioi_iff_Ici.mp h0).mono Icc_subset_Ici_self
-      · have hd := liPV_hasDerivAt h (by linarith [ht.2])
+      · have hd := LogIntegralPrincipalValue.hasDerivAt_logIntLi h (by linarith [ht.2])
         exact (hd.continuousAt.congr (hGe t h.ne').symm).continuousWithinAt
     have hGd : ∀ t ∈ Ioo 0 (1 - ε), HasDerivAt G (1 / Real.log t) t := fun t ht =>
-      (liPV_hasDerivAt ht.1 (by linarith [ht.2])).congr_of_eventuallyEq (hGe t ht.1.ne')
+      (LogIntegralPrincipalValue.hasDerivAt_logIntLi ht.1
+          (by linarith [ht.2])).congr_of_eventuallyEq (hGe t ht.1.ne')
     rw [intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le (by linarith) hGc hGd
-      ((liPV_continuousOn_left (by linarith)).intervalIntegrable_of_Icc (by linarith))]
+      ((LogIntegralPrincipalValue.continuousOn_left (by linarith)).intervalIntegrable_of_Icc
+          (by linarith))]
     simp [G, show (1 : ℝ) - ε ≠ 0 by linarith]
   have hright : ∀ ε : ℝ, 0 < ε → 1 + ε < x →
       (∫ t in (1+ε)..x, 1/Real.log t) = Real.logIntLi x - Real.logIntLi (1 + ε) := by
@@ -451,7 +459,8 @@ theorem Real.logIntLi_principalValue {x : ℝ} (hx : 1 < x) :
     have hpos : ∀ t ∈ uIcc (1 + ε) x, 1 < t := fun t ht => by
       rw [uIcc_of_le hεx.le] at ht; linarith [ht.1]
     refine intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t ht =>
-      liPV_hasDerivAt (by linarith [hpos t ht]) (ne_of_gt (hpos t ht))) ?_
+      LogIntegralPrincipalValue.hasDerivAt_logIntLi (by linarith [hpos t ht])
+          (ne_of_gt (hpos t ht))) ?_
     refine ContinuousOn.intervalIntegrable fun t ht => ?_
     have h1 := hpos t ht
     exact (continuousAt_const.div (Real.continuousAt_log (by linarith))
@@ -465,7 +474,7 @@ theorem Real.logIntLi_principalValue {x : ℝ} (hx : 1 < x) :
     rw [hleft ε hε.1 h1, hright ε hε.1 (by linarith)]
     ring
   refine Tendsto.congr' (EventuallyEq.symm hev) ?_
-  simpa using (tendsto_const_nhds (x := Real.logIntLi x)).add liPV_tendsto_sub
+  simpa using (tendsto_const_nhds (x := Real.logIntLi x)).add LogIntegralPrincipalValue.tendsto_sub
 
 /-- The principal logarithms of the two quarter-turns in the right half-plane. -/
 theorem log_quarter_turn {z : ℂ} (hz : 0 < z.re) :
@@ -512,7 +521,7 @@ theorem cosInt_eq_E1 {z : ℂ} (hz : 0 < z.re) :
 /-- Identity under the stated parameter and domain assumptions: `expIntAuxG z + ε*I*expIntAuxF z =
 genExpIntE 1 (-ε*I*z)*exp (-ε*I*z)`. -/
 @[dlmf 6.5.E7]
-theorem expIntAux_eq_E1 {z : ℂ} (hz : 0 < z.re) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
+theorem ExpIntegralAuxiliary.eq_E1 {z : ℂ} (hz : 0 < z.re) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     expIntAuxG z + ε*I*expIntAuxF z = genExpIntE 1 (-ε*I*z)*exp (-ε*I*z) := by
   have hs := sinInt_eq_E1 hz
   have hc := cosInt_eq_E1 hz
@@ -549,7 +558,7 @@ theorem hasIntegralAtTop_of_hasDerivAt_of_tendsto {f F : ℝ → ℂ} {a : ℝ} 
     ((hc.mono Icc_subset_Ici_self).intervalIntegrable_of_Icc hR)]
 
 /-- Improper integrals add when both integrands are integrable on bounded intervals. -/
-theorem _root_.DLMF.HasIntegralAtTop.add {f g : ℝ → ℂ} {a : ℝ} {u v : ℂ}
+theorem _root_.DLMF.Core.HasIntegralAtTop.add {f g : ℝ → ℂ} {a : ℝ} {u v : ℂ}
     (hf : HasIntegralAtTop f a u)
     (hg : HasIntegralAtTop g a v) (hfi : ∀ R, a ≤ R → IntervalIntegrable f volume a R)
     (hgi : ∀ R, a ≤ R → IntervalIntegrable g volume a R) :
@@ -560,7 +569,7 @@ theorem _root_.DLMF.HasIntegralAtTop.add {f g : ℝ → ℂ} {a : ℝ} {u v : �
   rw [intervalIntegral.integral_add (hfi R hR) (hgi R hR)]
 
 /-- Improper integrals scale by constants. -/
-theorem _root_.DLMF.HasIntegralAtTop.const_mul {f : ℝ → ℂ} {a : ℝ} {u : ℂ}
+theorem _root_.DLMF.Core.HasIntegralAtTop.const_mul {f : ℝ → ℂ} {a : ℝ} {u : ℂ}
     (hf : HasIntegralAtTop f a u)
     (c : ℂ) : HasIntegralAtTop (fun t => c*f t) a (c*u) := by
   unfold HasIntegralAtTop at *
@@ -568,7 +577,7 @@ theorem _root_.DLMF.HasIntegralAtTop.const_mul {f : ℝ → ℂ} {a : ℝ} {u : 
   exact (intervalIntegral.integral_const_mul c f).symm
 
 /-- Changing the integrand off the half-line does not change the improper integral. -/
-theorem _root_.DLMF.HasIntegralAtTop.congr {f g : ℝ → ℂ} {a : ℝ} {u : ℂ}
+theorem _root_.DLMF.Core.HasIntegralAtTop.congr {f g : ℝ → ℂ} {a : ℝ} {u : ℂ}
     (hf : HasIntegralAtTop f a u)
     (h : ∀ t, a ≤ t → f t = g t) : HasIntegralAtTop g a u := by
   unfold HasIntegralAtTop at *

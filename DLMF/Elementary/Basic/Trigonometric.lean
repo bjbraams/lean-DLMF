@@ -32,7 +32,7 @@ Pythagorean identities.
 * `hasDerivAt_csc`, `hasDerivAt_sec`, `hasDerivAt_cot`: derivatives (DLMF 4.20.4–4.20.6).
 * `sec_sq_eq`, `csc_sq_eq`: DLMF 4.21.13–4.21.14.
 * `csc_neg`, `sec_neg`, `csc_zero`, `sec_zero`: parity and values at `0`.
-* `trig_sqrt_sq`: the square of the principal square root.
+* `Trigonometric.complexSqrt_sq`: the square of the principal square root.
 
 ## Implementation notes
 
@@ -187,7 +187,7 @@ theorem csc_sq_eq {z : ℂ} (hz : Complex.sin z≠0) : (csc z)^2=1+(Complex.cot 
   linear_combination -(Complex.sin_sq_add_cos_sq z)
 
 /-- Squaring the principal complex square root returns its argument, including zero. -/
-theorem trig_sqrt_sq (z : ℂ) : (Complex.sqrt z)^2=z := by
+theorem Trigonometric.complexSqrt_sq (z : ℂ) : (Complex.sqrt z)^2=z := by
   rw [Complex.sqrt,← Complex.cpow_mul_nat]
   norm_num
 

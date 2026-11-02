@@ -8,8 +8,8 @@ module
 public import DLMF.Elementary.Trigonometric
 public import DLMF.Mathieu.Basic.Properties
 public import DLMF.Mathieu.SturmBridge
-public import DLMF.Mathieu.SpectralExistence
-public import DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic
+public import DLMF.Mathieu.Basic.SpectralExistence
+public import DLMFMathlib.Analysis.Fourier.EntirePeriodic
 public import DLMFMathlib.Analysis.ODE.Singularities
 public import Mathlib.Analysis.Convex.Contractible
 public import SeveralComplexVariables.SeparateAnalytic

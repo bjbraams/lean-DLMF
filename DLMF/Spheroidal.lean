@@ -16,6 +16,7 @@ public import DLMF.Spheroidal.FerrersTools
 public import DLMF.Spheroidal.Existence
 public import DLMF.Spheroidal.Parity
 public import DLMF.Spheroidal.Spectrum
+public import DLMF.Spheroidal.CutPlaneSolutions
 
 /-!
 # Spheroidal wave functions (DLMF Chapter 30)

@@ -35,6 +35,8 @@ derivatives, entireness, power series and real restrictions are in
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Factorial convergence supplies the uniform bounds used in the Fresnel primitives. -/

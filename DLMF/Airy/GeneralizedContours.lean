@@ -676,7 +676,7 @@ theorem reidAiryA_zero_initial :
     rw [reidContour_neg_nat_eq hα hβ, reidRay_zero_neg_nat hα, reidRay_zero_neg_nat hβ]
     ring
   have hs : Real.sqrt 3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
-  have hG := airyMod_gamma_third_reflection
+  have hG := ModulusPhase.gamma_third_reflection
   have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have I_sq : I ^ 2 = -1 := I_sq
   constructor

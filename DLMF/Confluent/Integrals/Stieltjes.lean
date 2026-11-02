@@ -35,7 +35,7 @@ The Gauss representation is proved for `Re a > 0` from the Laplace integrals, th
 first parameter by Tricomi's contiguous relation in `a` and the matching regularized Gauss
 recurrence. The Stieltjes representations are proved in the right half-plane by Fubini against
 `1/(t+z) = ∫ e^{-(t+z)s} ds` and extended to the slit plane by holomorphy; the general `n`
-case of 13.4.6 follows by the recurrence `cfInt_kummerU_rel`.
+case of 13.4.6 follows by the recurrence `KummerIntegrals.kummerU_rel`.
 -/
 
 @[expose] public section
@@ -457,7 +457,7 @@ theorem kummerU_stieltjes {a b z : ℂ} (hz : z ∈ slitPlane)
     one_mem_slitPlane heq hz
 
 /-- `1/(t+z)` is `O((1+t)^{-1})` on the positive half-line, for `z` in the slit plane. -/
-theorem cfInt_norm_recip_add_le {z : ℂ} (hz : z ∈ slitPlane) :
+theorem KummerIntegrals.norm_recip_add_le {z : ℂ} (hz : z ∈ slitPlane) :
     ∃ K, ∀ t : ℝ, 0 < t → ‖((t : ℂ) + z)⁻¹‖ ≤ K * (1 + t) ^ (-1 : ℝ) := by
   obtain ⟨δ, hδ, hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz
   refine ⟨1 / δ + 1 + ‖z‖ / δ, fun t ht => ?_⟩
@@ -481,11 +481,11 @@ theorem cfInt_norm_recip_add_le {z : ℂ} (hz : z ∈ slitPlane) :
 
 /-- For `-Re b < n < 1 + Re(a-b)` and `z` in the slit plane, `M̃(a,b,-t) t^{b+n-1}/(t+z)` is
 integrable on `(0, ∞)`. -/
-theorem cfInt_integrableOn_stieltjes {a b z : ℂ} {n : ℕ} (hz : z ∈ slitPlane)
+theorem KummerIntegrals.integrableOn_stieltjes {a b z : ℂ} {n : ℕ} (hz : z ∈ slitPlane)
     (h0 : -b.re < n) (h1 : (n : ℝ) < 1 + (a - b).re) :
     IntegrableOn (fun t : ℝ => regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b + n - 1) /
       ((t : ℂ) + z)) (Ioi 0) := by
-  obtain ⟨K, hK⟩ := cfInt_norm_recip_add_le hz
+  obtain ⟨K, hK⟩ := KummerIntegrals.norm_recip_add_le hz
   have hne : ∀ t : ℝ, 0 < t → (t : ℂ) + z ≠ 0 := fun t ht h => by
     obtain ⟨δ, hδ, hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz
     have := hδb t ht.le z (Metric.mem_ball_self hδ)
@@ -499,15 +499,15 @@ theorem cfInt_integrableOn_stieltjes {a b z : ℂ} {n : ℕ} (hz : z ∈ slitPla
   ring
 
 /-- `∫₀^∞ e^{-ws} ds = 1/w` for `Re w > 0`. -/
-theorem cfInt_integral_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
+theorem KummerIntegrals.integral_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
     ∫ s : ℝ in Ioi 0, exp (-w * s) = w⁻¹ := by
   rw [integral_exp_mul_complex_Ioi (by simpa using hw) 0]
   simp [div_neg, neg_div]
 
 /-- `∫₀^∞ |e^{-ws}| ds = 1/Re w` for `Re w > 0`. -/
-theorem cfInt_integral_norm_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
+theorem KummerIntegrals.integral_norm_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
     ∫ s : ℝ in Ioi 0, ‖exp (-w * s)‖ = (w.re)⁻¹ := by
-  have h := cfInt_integral_exp_Ioi (w := (w.re : ℂ)) (by simpa using hw)
+  have h := KummerIntegrals.integral_exp_Ioi (w := (w.re : ℂ)) (by simpa using hw)
   have he : ∀ s : ℝ, ‖exp (-w * s)‖ = Real.exp (-w.re * s) := fun s => by
     rw [Complex.norm_exp]; simp
   simp_rw [he]
@@ -521,7 +521,7 @@ theorem cfInt_integral_norm_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
 /-- The base case `n = 0` of 13.4.6 in the right half-plane, by Fubini against
 `1/(t+z) = ∫ e^{-(t+z)s} ds`, the Kummer Laplace transform 13.10.3 and Tricomi's Laplace
 integral 13.4.4. -/
-theorem cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b.re)
+theorem KummerIntegrals.stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b.re)
     (hab : b.re < 1 + a.re) :
     ∫ t : ℝ in Ioi 0, regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b - 1) / ((t : ℂ) + z) =
       z ^ (b - 1) * Gamma (1 + a - b) * kummerU a b z := by
@@ -529,10 +529,12 @@ theorem cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b
   set g : ℝ → ℂ := fun t => regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b - 1) with hg
   set G : ℝ → ℝ → ℂ := fun t s => g t * exp (-((t : ℂ) + z) * s) with hG
   have hgc : ContinuousOn g (Ioi 0) :=
-    (kumDec_continuous_neg a b).continuousOn.mul (ContinuousOn.cpow continuous_ofReal.continuousOn
+    (KummerDecayBounds.continuous_neg a b).continuousOn.mul
+        (ContinuousOn.cpow continuous_ofReal.continuousOn
       continuousOn_const fun t ht => ofReal_mem_slitPlane.mpr ht)
   have hxz : ((z.re : ℝ) : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr hz
-  have hS := cfInt_integrableOn_stieltjes (a := a) (b := b) (n := 0) hxz (by simpa using hb)
+  have hS := KummerIntegrals.integrableOn_stieltjes (a := a) (b := b) (n := 0) hxz
+      (by simpa using hb)
     (by simp; linarith)
   simp only [CharP.cast_eq_zero, add_zero] at hS
   have hGi : Integrable (Function.uncurry G)
@@ -550,7 +552,7 @@ theorem cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b
       filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
       have ht0 : (0 : ℝ) < t := ht
       simp only [Function.uncurry_apply_pair, hG, norm_mul]
-      rw [integral_const_mul, cfInt_integral_norm_exp_Ioi (by simp; linarith), norm_div,
+      rw [integral_const_mul, KummerIntegrals.integral_norm_exp_Ioi (by simp; linarith), norm_div,
         div_eq_mul_inv]
       congr 2
       rw [show ((t : ℂ) + ((z.re : ℝ) : ℂ)) = ((t + z.re : ℝ) : ℂ) by push_cast; ring, norm_real,
@@ -560,7 +562,7 @@ theorem cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b
     intro t ht
     have ht0 : (0 : ℝ) < t := ht
     simp only [hG]
-    rw [integral_const_mul, cfInt_integral_exp_Ioi (by simp; linarith), div_eq_mul_inv]
+    rw [integral_const_mul, KummerIntegrals.integral_exp_Ioi (by simp; linarith), div_eq_mul_inv]
   have htinner : ∀ s ∈ Ioi (0 : ℝ), ∫ t : ℝ in Ioi 0, G t s =
       exp (-z * s) * ((s : ℂ) ^ (a - b) * (1 + (s : ℂ)) ^ (-a)) := by
     intro s hs
@@ -613,14 +615,15 @@ theorem cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b
         linear_combination (-(Gamma (a - b + 1) * kummerU (a - b + 1) (2 - b) z)) * hzz
 
 /-- For `z` in the slit plane and real `t ≥ 0`, `t + z ≠ 0`. -/
-theorem cfInt_add_ne_zero {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 0 ≤ t) : (t : ℂ) + z ≠ 0 := by
+theorem KummerIntegrals.add_ne_zero {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 0 ≤ t) :
+    (t : ℂ) + z ≠ 0 := by
   obtain ⟨δ, hδ, hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz
   intro h
   have := hδb t ht z (Metric.mem_ball_self hδ)
   rw [h, norm_zero] at this; linarith
 
 /-- A Stieltjes transform is holomorphic on the slit plane as soon as `g(t)/(t+1)` is integrable. -/
-theorem cfInt_differentiableOn_stieltjes {g : ℝ → ℂ}
+theorem KummerIntegrals.differentiableOn_stieltjes {g : ℝ → ℂ}
     (hg : IntegrableOn (fun t : ℝ => g t / ((t : ℂ) + 1)) (Ioi 0)) :
     DifferentiableOn ℂ (fun z => ∫ t : ℝ in Ioi 0, g t / ((t : ℂ) + z)) slitPlane := by
   set h : ℝ → ℂ := fun t => g t / ((t : ℂ) + 1) with hh
@@ -639,21 +642,21 @@ theorem cfInt_differentiableOn_stieltjes {g : ℝ → ℂ}
     exact hδb t (le_of_lt ht) z (Metric.mem_ball_self hδ)
   rw [← integral_const_mul, ← integral_add hg (hint.const_mul _)]
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
-  have h1 : (t : ℂ) + 1 ≠ 0 := cfInt_add_ne_zero one_mem_slitPlane (le_of_lt ht)
-  have h2 : (t : ℂ) + z ≠ 0 := cfInt_add_ne_zero hz (le_of_lt ht)
+  have h1 : (t : ℂ) + 1 ≠ 0 := KummerIntegrals.add_ne_zero one_mem_slitPlane (le_of_lt ht)
+  have h2 : (t : ℂ) + z ≠ 0 := KummerIntegrals.add_ne_zero hz (le_of_lt ht)
   simp only [hh]
   field_simp
   ring
 
 /-- The case `n = 0` of 13.4.6 on the slit plane. -/
-theorem cfInt_stieltjes_zero {a b z : ℂ} (hz : z ∈ slitPlane) (hb : 0 < b.re)
+theorem KummerIntegrals.stieltjes_zero {a b z : ℂ} (hz : z ∈ slitPlane) (hb : 0 < b.re)
     (hab : b.re < 1 + a.re) :
     ∫ t : ℝ in Ioi 0, regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b - 1) / ((t : ℂ) + z) =
       z ^ (b - 1) * Gamma (1 + a - b) * kummerU a b z := by
-  have hS := cfInt_integrableOn_stieltjes (a := a) (b := b) (n := 0) one_mem_slitPlane
+  have hS := KummerIntegrals.integrableOn_stieltjes (a := a) (b := b) (n := 0) one_mem_slitPlane
     (by simpa using hb) (by simp; linarith)
   simp only [CharP.cast_eq_zero, add_zero] at hS
-  have hL := cfInt_differentiableOn_stieltjes hS
+  have hL := KummerIntegrals.differentiableOn_stieltjes hS
   have hLa : AnalyticOnNhd ℂ (fun z => ∫ t : ℝ in Ioi 0,
       regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b - 1) / ((t : ℂ) + z)) slitPlane :=
     hL.analyticOnNhd isOpen_slitPlane
@@ -669,14 +672,14 @@ theorem cfInt_stieltjes_zero {a b z : ℂ} (hz : z ∈ slitPlane) (hb : 0 < b.re
     have hnh : {w : ℂ | 0 < w.re} ∈ 𝓝 (1 : ℂ) :=
       (isOpen_lt continuous_const continuous_re).mem_nhds (by simp)
     filter_upwards [hnh] with w hw
-    exact cfInt_stieltjes_zero_of_re_pos hw hb hab
+    exact KummerIntegrals.stieltjes_zero_of_re_pos hw hb hab
   exact hLa.eqOn_of_preconnected_of_eventuallyEq hRa
     ((starConvex_one_slitPlane.isPathConnected one_mem_slitPlane).isConnected.isPreconnected)
     one_mem_slitPlane heq hz
 
 /-- `b U(a,b+1,z) - a z U(a+1,b+2,z) = (b-a) U(a,b,z)`, from the contiguous relations 13.3.9
 and 13.3.10; it is the Tricomi counterpart of 13.3.20 with `n = 1`. -/
-theorem cfInt_kummerU_rel (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem KummerIntegrals.kummerU_rel (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     b * kummerU a (b + 1) z - a * z * kummerU (a + 1) (b + 2) z = (b - a) * kummerU a b z := by
   have h1 := kummerU_contiguous_shift_a (a + 1) (b + 1) z hz
   have h2 := kummerU_contiguous_a_b a (b + 1) z hz
@@ -685,7 +688,7 @@ theorem cfInt_kummerU_rel (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
   linear_combination a * h1 + (b - a) * h2
 
 /-- 13.4.6 in the form `∫ 𝐌(a,b,-t) t^{b+n-1}/(t+z) dt = (-1)^n z^{b+n-1} Γ(1+a-b) U(a,b,z)`. -/
-theorem cfInt_stieltjes_nat : ∀ n : ℕ, ∀ a b z : ℂ, z ∈ slitPlane → -b.re < n →
+theorem KummerIntegrals.stieltjes_nat : ∀ n : ℕ, ∀ a b z : ℂ, z ∈ slitPlane → -b.re < n →
     (n : ℝ) < 1 + (a - b).re →
     ∫ t : ℝ in Ioi 0, regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b + n - 1) /
         ((t : ℂ) + z) =
@@ -695,7 +698,7 @@ theorem cfInt_stieltjes_nat : ∀ n : ℕ, ∀ a b z : ℂ, z ∈ slitPlane → 
   | zero =>
     intro a b z hz h0 h1
     simp only [CharP.cast_eq_zero, add_zero, pow_zero, one_mul] at h0 h1 ⊢
-    exact cfInt_stieltjes_zero hz (by linarith) (by simp at h1; linarith)
+    exact KummerIntegrals.stieltjes_zero hz (by linarith) (by simp at h1; linarith)
   | succ n ih =>
     intro a b z hz h0 h1
     have hz0 : z ≠ 0 := slitPlane_ne_zero hz
@@ -703,9 +706,9 @@ theorem cfInt_stieltjes_nat : ∀ n : ℕ, ∀ a b z : ℂ, z ∈ slitPlane → 
     have hab : (n : ℝ) < (a - b).re := by linarith
     have i1 := ih a (b + 1) z hz (by simp; linarith) (by simp at hab ⊢; linarith)
     have i2 := ih (a + 1) (b + 2) z hz (by simp; linarith) (by simp at hab ⊢; linarith)
-    have I1 := cfInt_integrableOn_stieltjes (a := a) (b := b + 1) (n := n) hz
+    have I1 := KummerIntegrals.integrableOn_stieltjes (a := a) (b := b + 1) (n := n) hz
       (by simp; linarith) (by simp at hab ⊢; linarith)
-    have I2 := cfInt_integrableOn_stieltjes (a := a + 1) (b := b + 2) (n := n) hz
+    have I2 := KummerIntegrals.integrableOn_stieltjes (a := a + 1) (b := b + 2) (n := n) hz
       (by simp; linarith) (by simp at hab ⊢; linarith)
     have hpt : ∀ t ∈ Ioi (0 : ℝ), regularizedHGFun {a} {b} (-(t : ℂ)) *
         (t : ℂ) ^ (b + ((n + 1 : ℕ) : ℂ) - 1) / ((t : ℂ) + z) =
@@ -720,12 +723,12 @@ theorem cfInt_stieltjes_nat : ∀ n : ℕ, ∀ a b z : ℂ, z ∈ slitPlane → 
       have hp : (t : ℂ) ^ (b + 2 + n - 1) = (t : ℂ) * (t : ℂ) ^ (b + 1 + n - 1) := by
         rw [show b + 2 + n - 1 = 1 + (b + 1 + n - 1) by ring, cpow_add _ _ ht0, cpow_one]
       rw [hp, show b + ((n + 1 : ℕ) : ℂ) - 1 = b + 1 + n - 1 by push_cast; ring]
-      have h2 : (t : ℂ) + z ≠ 0 := cfInt_add_ne_zero hz (le_of_lt ht)
+      have h2 : (t : ℂ) + z ≠ 0 := KummerIntegrals.add_ne_zero hz (le_of_lt ht)
       field_simp
       linear_combination (-(t : ℂ) ^ (b + 1 + n - 1)) * hrel
     rw [setIntegral_congr_fun measurableSet_Ioi hpt, integral_sub (I1.const_mul _)
       (I2.const_mul _), integral_const_mul, integral_const_mul, i1, i2]
-    have hrel := cfInt_kummerU_rel a b hz0
+    have hrel := KummerIntegrals.kummerU_rel a b hz0
     have hG : Gamma (1 + a - b) = (a - b) * Gamma (a - b) := by
       rw [show 1 + a - b = (a - b) + 1 by ring, Gamma_add_one]
       intro h; rw [h] at hab; simp at hab; linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
@@ -740,7 +743,7 @@ Fubini against `1/(t+z) = ∫ e^{-(t+z)s} ds`, the Kummer Laplace transform 13.1
 Tricomi's Laplace integral 13.4.4, continued from the right half-plane; the decay
 `𝐌(a,b,-t) = O(t^{-Re a})` (`DLMF.Confluent.KummerDecay`) gives convergence. The step
 `n ↦ n + 1` combines the contiguous relation 13.3.20 (`n = 1`) of `𝐌` with its Tricomi
-counterpart `cfInt_kummerU_rel`. (Moved unchanged from `IntegralRepresentations`, which
+counterpart `KummerIntegrals.kummerU_rel`. (Moved unchanged from `IntegralRepresentations`, which
 precedes the Laplace transforms in the import order.) -/
 @[dlmf 13.4.E6]
 theorem kummerU_stieltjes_regularized {a b z : ℂ} (n : ℕ) (hz : z ∈ slitPlane)
@@ -751,7 +754,7 @@ theorem kummerU_stieltjes_regularized {a b z : ℂ} (n : ℕ) (hz : z ∈ slitPl
           regularizedHGFun {b - a} {b} t * exp (-(t : ℂ)) * (t : ℂ) ^ (b + n - 1) /
             ((t : ℂ) + z) := by
   have hz0 := slitPlane_ne_zero hz
-  have h := cfInt_stieltjes_nat n a b z hz hn0 hn1
+  have h := KummerIntegrals.stieltjes_nat n a b z hz hn0 hn1
   have hG : Gamma (1 + a - b) ≠ 0 := Gamma_ne_zero_of_re_pos (by
     simp only [sub_re, add_re, one_re] at hn1 ⊢; linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)])
   have hcongr : ∀ t ∈ Ioi (0 : ℝ), regularizedHGFun {b - a} {b} t * exp (-(t : ℂ)) *

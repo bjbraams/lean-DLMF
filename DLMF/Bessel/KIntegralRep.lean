@@ -27,7 +27,7 @@ The file also gives uniform and exponential-decay bounds for `K_ν` in the right
 * `besselKKernel`: the kernel `exp(-z cosh t + νt)`.
 * `besselKMoment`: the moments `Ψ_j(ν, z) = ∫_ℝ cosh^j t · e^{-z cosh t + νt} dt`.
 * `besselKMomentWronskian`: the combination `z (Φ g' - Φ' g)` with `Φ = Ψ₀`.
-* `kIntQuarterSector`: the open sector `|ph z| < π/4`, written as `|Im z| < Re z`.
+* `BesselKIntegral.quarterSector`: the open sector `|ph z| < π/4`, written as `|Im z| < Re z`.
 
 ## Main results
 
@@ -80,25 +80,25 @@ theorem continuous_besselKKernel (ν z : ℂ) : Continuous (besselKKernel ν z) 
   unfold besselKKernel; fun_prop
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.cosh t ≤ Real.exp |t|`. -/
-theorem kInt_cosh_le_exp_abs (t : ℝ) : Real.cosh t ≤ Real.exp |t| := by
+theorem BesselKIntegral.cosh_le_exp_abs (t : ℝ) : Real.cosh t ≤ Real.exp |t| := by
   rw [← Real.cosh_abs, Real.cosh_eq]
   have : Real.exp (-|t|) ≤ Real.exp |t| := Real.exp_le_exp.mpr (by linarith [abs_nonneg t])
   linarith
 
 /-- Estimate under the stated parameter and domain assumptions: `t ^ 2 / 4 ≤ Real.cosh t`. -/
-theorem kInt_sq_div_four_le_cosh (t : ℝ) : t ^ 2 / 4 ≤ Real.cosh t := by
+theorem BesselKIntegral.sq_div_four_le_cosh (t : ℝ) : t ^ 2 / 4 ≤ Real.cosh t := by
   have h := Real.quadratic_le_exp_of_nonneg (abs_nonneg t)
   have := Real.exp_abs_div_two_le_cosh t
   have h2 : |t| ^ 2 = t ^ 2 := sq_abs t
   nlinarith [abs_nonneg t]
 
 /-- The Gaussian majorant of the kernel. -/
-theorem kInt_exp_neg_mul_cosh_add_le {c M : ℝ} (hc : 0 < c) (t : ℝ) :
+theorem BesselKIntegral.exp_neg_mul_cosh_add_le {c M : ℝ} (hc : 0 < c) (t : ℝ) :
     Real.exp (-(c * Real.cosh t) + M * |t|) ≤
       Real.exp (2 * M ^ 2 / c) * Real.exp (-(c / 8) * t ^ 2) := by
   rw [← Real.exp_add]
   refine Real.exp_le_exp.mpr ?_
-  have h1 := kInt_sq_div_four_le_cosh t
+  have h1 := BesselKIntegral.sq_div_four_le_cosh t
   have h2 : M * |t| ≤ c / 8 * t ^ 2 + 2 * M ^ 2 / c := by
     have h3 : 0 ≤ (c / 8) * (|t| - 4 * M / c) ^ 2 := by positivity
     have h4 : |t| ^ 2 = t ^ 2 := sq_abs t
@@ -110,12 +110,12 @@ theorem kInt_exp_neg_mul_cosh_add_le {c M : ℝ} (hc : 0 < c) (t : ℝ) :
   nlinarith
 
 /-- The kernel `(fun t : ℝ => Real.exp (-(c * Real.cosh t) + M * |t|))` is integrable. -/
-theorem kInt_integrable_exp_neg_mul_cosh_add {c M : ℝ} (hc : 0 < c) :
+theorem BesselKIntegral.integrable_exp_neg_mul_cosh_add {c M : ℝ} (hc : 0 < c) :
     Integrable (fun t : ℝ => Real.exp (-(c * Real.cosh t) + M * |t|)) := by
   refine ((integrable_exp_neg_mul_sq (by positivity : 0 < c / 8)).const_mul
     (Real.exp (2 * M ^ 2 / c))).mono' (by fun_prop) (Eventually.of_forall fun t => ?_)
   rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
-  simpa [neg_mul] using kInt_exp_neg_mul_cosh_add_le (M := M) hc t
+  simpa [neg_mul] using BesselKIntegral.exp_neg_mul_cosh_add_le (M := M) hc t
 
 /-- Uniform bound for `cosh^j t · e^{-z cosh t + νt}`. -/
 theorem norm_cosh_pow_mul_besselKKernel_le {ν z : ℂ} {c M : ℝ} (hz : c ≤ z.re)
@@ -126,7 +126,7 @@ theorem norm_cosh_pow_mul_besselKKernel_le {ν z : ℂ} {c M : ℝ} (hz : c ≤ 
     abs_of_pos (Real.cosh_pos t)]
   have hc1 : Real.cosh t ^ j ≤ Real.exp (j * |t|) := by
     rw [Real.exp_nat_mul]
-    exact pow_le_pow_left₀ (Real.cosh_pos t).le (kInt_cosh_le_exp_abs t) j
+    exact pow_le_pow_left₀ (Real.cosh_pos t).le (BesselKIntegral.cosh_le_exp_abs t) j
   have hc2 : Real.exp (-(z.re * Real.cosh t) + ν.re * t) ≤
       Real.exp (-(c * Real.cosh t) + M * |t|) := by
     refine Real.exp_le_exp.mpr ?_
@@ -148,7 +148,7 @@ def besselKMoment (j : ℕ) (ν z : ℂ) : ℂ := ∫ t : ℝ, (Real.cosh t : �
 /-- The kernel `(fun t : ℝ => (Real.cosh t : ℂ) ^ j * besselKKernel ν z t)` is integrable. -/
 theorem integrable_cosh_pow_mul_besselKKernel {ν z : ℂ} (hz : 0 < z.re) (j : ℕ) :
     Integrable (fun t : ℝ => (Real.cosh t : ℂ) ^ j * besselKKernel ν z t) :=
-  (kInt_integrable_exp_neg_mul_cosh_add (M := |ν.re| + j) hz).mono'
+  (BesselKIntegral.integrable_exp_neg_mul_cosh_add (M := |ν.re| + j) hz).mono'
     (by unfold besselKKernel; fun_prop)
     (Eventually.of_forall fun t => norm_cosh_pow_mul_besselKKernel_le le_rfl le_rfl j t)
 
@@ -179,7 +179,7 @@ theorem hasDerivAt_besselKMoment (j : ℕ) (ν : ℂ) {z : ℂ} (hz : 0 < z.re) 
     (Eventually.of_forall fun t w hw => by
       rw [norm_neg]
       exact norm_cosh_pow_mul_besselKKernel_le (hball w hw) le_rfl (j + 1) t)
-    (kInt_integrable_exp_neg_mul_cosh_add hε)
+    (BesselKIntegral.integrable_exp_neg_mul_cosh_add hε)
     (Eventually.of_forall fun t w _ => by
       have h1 : HasDerivAt (fun w : ℂ => -(w * (Real.cosh t : ℂ)) + ν * t)
           (-(Real.cosh t : ℂ)) w := by
@@ -202,7 +202,7 @@ theorem differentiable_besselKMoment_order (j : ℕ) {z : ℂ} (hz : 0 < z.re) :
     exact (Differentiable.const_mul (by fun_prop) _).differentiableOn
   · refine ⟨Metric.ball ν 1, Metric.ball_mem_nhds ν one_pos,
       fun t => Real.exp (-(z.re * Real.cosh t) + (|ν.re| + 1 + j) * |t|),
-      kInt_integrable_exp_neg_mul_cosh_add hz, Eventually.of_forall fun t y hy => ?_⟩
+      BesselKIntegral.integrable_exp_neg_mul_cosh_add hz, Eventually.of_forall fun t y hy => ?_⟩
     refine norm_cosh_pow_mul_besselKKernel_le le_rfl ?_ j t
     have h1 : |y.re - ν.re| ≤ ‖y - ν‖ := by simpa using Complex.abs_re_le_norm (y - ν)
     have h2 : ‖y - ν‖ < 1 := by simpa [dist_eq_norm] using hy
@@ -211,7 +211,7 @@ theorem differentiable_besselKMoment_order (j : ℕ) {z : ℂ} (hz : 0 < z.re) :
 
 /-- Limit formula in the specified filter: `Tendsto (fun t : ℝ => Real.exp (-b * t ^ 2)) atTop (𝓝
 0) ∧ Tendsto (fun t : ℝ => Real.exp (-b * t ^ 2)) atBot (𝓝 0)`. -/
-theorem kInt_tendsto_exp_neg_mul_sq {b : ℝ} (hb : 0 < b) :
+theorem BesselKIntegral.tendsto_exp_neg_mul_sq {b : ℝ} (hb : 0 < b) :
     Tendsto (fun t : ℝ => Real.exp (-b * t ^ 2)) atTop (𝓝 0) ∧
       Tendsto (fun t : ℝ => Real.exp (-b * t ^ 2)) atBot (𝓝 0) := by
   have h1 : Tendsto (fun t : ℝ => t ^ 2) atTop atTop := tendsto_pow_atTop two_ne_zero
@@ -239,8 +239,8 @@ theorem tendsto_of_norm_le_cosh_mul_besselKKernel {ν z : ℂ} (hz : 0 < z.re) {
       nlinarith
     refine (hf t).trans (mul_le_mul_of_nonneg_left ?_ hC)
     exact (norm_cosh_pow_mul_besselKKernel_le le_rfl le_rfl 1 t).trans
-      (kInt_exp_neg_mul_cosh_add_le hz t)
-  obtain ⟨h1, h2⟩ := kInt_tendsto_exp_neg_mul_sq (by positivity : 0 < z.re / 8)
+      (BesselKIntegral.exp_neg_mul_cosh_add_le hz t)
+  obtain ⟨h1, h2⟩ := BesselKIntegral.tendsto_exp_neg_mul_sq (by positivity : 0 < z.re / 8)
   constructor
   · refine squeeze_zero_norm hb ?_
     simpa using (h1.const_mul _).const_mul C
@@ -476,7 +476,7 @@ theorem tendsto_cpow_mul_besselKMoment {ν : ℂ} (hν : 0 < ν.re) :
 
 /-- The map `(fun x : ℝ => regularizedHGFun (∅ : Multiset ℂ) {c} ((x : ℂ) ^ 2 / 4))` tends to `(𝓝
 (1 / Gamma c))` along `(𝓝[>] 0)`. -/
-theorem kInt_tendsto_regularized0F1_sq_div_four (c : ℂ) :
+theorem BesselKIntegral.tendsto_regularized0F1_sq_div_four (c : ℂ) :
     Tendsto (fun x : ℝ => regularizedHGFun (∅ : Multiset ℂ) {c} ((x : ℂ) ^ 2 / 4)) (𝓝[>] 0)
       (𝓝 (1 / Gamma c)) := by
   have hc := continuous_regularized0F1.comp
@@ -490,26 +490,28 @@ theorem kInt_tendsto_regularized0F1_sq_div_four (c : ℂ) :
   rwa [h0] at this
 
 /-- Nonvanishing under the stated hypotheses: `((x : ℂ) / 2) ^ ν ≠ 0`. -/
-theorem kInt_cpow_ofReal_div_two_ne_zero {x : ℝ} (hx : 0 < x) (ν : ℂ) : ((x : ℂ) / 2) ^ ν ≠ 0 :=
+theorem BesselKIntegral.cpow_ofReal_div_two_ne_zero {x : ℝ} (hx : 0 < x) (ν : ℂ) :
+    ((x : ℂ) / 2) ^ ν ≠ 0 :=
   cpow_ne_zero_iff.mpr (Or.inl (div_ne_zero (by exact_mod_cast hx.ne') two_ne_zero))
 
 /-- `(x/2)^ν I_{-ν}(x) → 1/Γ(1-ν)` as `x → 0⁺`. -/
 theorem tendsto_cpow_mul_besselI_neg (ν : ℂ) :
     Tendsto (fun x : ℝ => ((x : ℂ) / 2) ^ ν * besselI (-ν) x) (𝓝[>] 0)
       (𝓝 (1 / Gamma (1 - ν))) := by
-  have h := kInt_tendsto_regularized0F1_sq_div_four (-ν + 1)
+  have h := BesselKIntegral.tendsto_regularized0F1_sq_div_four (-ν + 1)
   rw [show -ν + 1 = 1 - ν by ring] at h
   refine h.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with x hx
   have hx' : (0 : ℝ) < x := hx
   unfold besselI
-  rw [cpow_neg, ← mul_assoc, mul_inv_cancel₀ (kInt_cpow_ofReal_div_two_ne_zero hx' ν), one_mul,
+  rw [cpow_neg, ← mul_assoc,
+      mul_inv_cancel₀ (BesselKIntegral.cpow_ofReal_div_two_ne_zero hx' ν), one_mul,
     show -ν + 1 = 1 - ν by ring]
 
 /-- `(x/2)^ν I_ν(x) → 0` as `x → 0⁺` when `Re ν > 0`. -/
 theorem tendsto_cpow_mul_besselI {ν : ℂ} (hν : 0 < ν.re) :
     Tendsto (fun x : ℝ => ((x : ℂ) / 2) ^ ν * besselI ν x) (𝓝[>] 0) (𝓝 0) := by
-  have h := kInt_tendsto_regularized0F1_sq_div_four (ν + 1)
+  have h := BesselKIntegral.tendsto_regularized0F1_sq_div_four (ν + 1)
   have hp : Tendsto (fun x : ℝ => ((x : ℂ) / 2) ^ (2 * ν)) (𝓝[>] 0) (𝓝 0) := by
     rw [tendsto_zero_iff_norm_tendsto_zero]
     have hr : Tendsto (fun x : ℝ => (x / 2) ^ (2 * ν.re)) (𝓝[>] 0) (𝓝 0) := by
@@ -577,7 +579,8 @@ theorem differentiable_besselKMomentWronskian_besselI :
   fun_prop
 
 /-- Nonvanishing under the stated hypotheses: `∀ k : ℤ, ν ≠ k`. -/
-theorem kInt_not_int_of_mem_ball_half {ν : ℂ} (hν : ν ∈ Metric.ball (1 / 2 : ℂ) (1 / 2)) :
+theorem BesselKIntegral.not_int_of_mem_ball_half {ν : ℂ}
+    (hν : ν ∈ Metric.ball (1 / 2 : ℂ) (1 / 2)) :
     ∀ k : ℤ, ν ≠ k := by
   intro k hk
   subst hk
@@ -637,7 +640,8 @@ theorem besselKMomentWronskian_besselI_eq_two (ν : ℂ) :
   have hev : (fun ν => besselKMomentWronskian ν (besselI ν) 1) =ᶠ[𝓝 (1 / 2 : ℂ)]
       fun _ => (2 : ℂ) := by
     filter_upwards [Metric.ball_mem_nhds (1 / 2 : ℂ) (by norm_num : (0 : ℝ) < 1 / 2)] with μ hμ
-    refine besselKMomentWronskian_besselI_eq_two_of_re_pos ?_ (kInt_not_int_of_mem_ball_half hμ)
+    refine besselKMomentWronskian_besselI_eq_two_of_re_pos ?_
+        (BesselKIntegral.not_int_of_mem_ball_half hμ)
     have h1 : |(μ - 1 / 2).re| ≤ ‖μ - 1 / 2‖ := Complex.abs_re_le_norm _
     have h2 : ‖μ - 1 / 2‖ < 1 / 2 := by simpa [dist_eq_norm] using hμ
     have h3 : (μ - 1 / 2).re = μ.re - 1 / 2 := by simp
@@ -732,7 +736,7 @@ theorem besselK_ofReal_eq_integral_schlafli {x : ℝ} (hx : 0 < x) (ν : ℂ) :
   have : (∫ t : ℝ, exp (-((x : ℂ) * (Real.cosh t : ℂ)) + ν * t)) = besselKMoment 0 ν x := by
     simp [besselKMoment, besselKKernel]
   rw [this]
-  field_simp [kInt_cpow_ofReal_div_two_ne_zero hx ν]
+  field_simp [BesselKIntegral.cpow_ofReal_div_two_ne_zero hx ν]
 
 /-- Pointwise majorant of the Schläfli integrand. -/
 theorem norm_kSchlafli_integrand_le {v : ℝ} (hv : 0 < v) {w ν : ℂ} (hw : 0 ≤ (w ^ 2).re) :
@@ -798,7 +802,7 @@ theorem besselK_ofReal_eq_integral_schlafli' {x : ℝ} (hx : 0 < x) (ν : ℂ) :
   have : (∫ t : ℝ, exp (-((x : ℂ) * (Real.cosh t : ℂ)) + ν * t)) = besselKMoment 0 ν x := by
     simp [besselKMoment, besselKKernel]
   rw [this]
-  field_simp [kInt_cpow_ofReal_div_two_ne_zero hx ν]
+  field_simp [BesselKIntegral.cpow_ofReal_div_two_ne_zero hx ν]
 
 /-- `∫ ‖e^{-w cosh t + νt}‖ dt ≤ 2 Γ(s) (Re w / 2)^{-s}` for `Re w > 0`, `s > 0`, `|Re ν| ≤ s`. -/
 theorem integral_norm_besselKKernel_le {ν w : ℂ} (hw : 0 < w.re) {s : ℝ} (hs : 0 < s)
@@ -884,14 +888,15 @@ theorem norm_besselK_le_exp {ν w : ℂ} (hw : 0 < w.re) {s : ℝ} (hs : 0 < s)
   linarith
 
 /-- The open sector `|ph z| < π/4`, written as `|Im z| < Re z`. -/
-def kIntQuarterSector : Set ℂ := {z : ℂ | |z.im| < z.re}
+def BesselKIntegral.quarterSector : Set ℂ := {z : ℂ | |z.im| < z.re}
 
-/-- The indicated domain is open: `IsOpen kIntQuarterSector`. -/
-theorem isOpen_kIntQuarterSector : IsOpen kIntQuarterSector :=
+/-- The indicated domain is open: `IsOpen BesselKIntegral.quarterSector`. -/
+theorem isOpen_kIntQuarterSector : IsOpen BesselKIntegral.quarterSector :=
   isOpen_lt (continuous_abs.comp continuous_im) continuous_re
 
-/-- The stated relation follows from the given hypotheses: `Convex ℝ kIntQuarterSector`. -/
-theorem convex_kIntQuarterSector : Convex ℝ kIntQuarterSector := by
+/-- The stated relation follows from the given hypotheses: `Convex ℝ BesselKIntegral.quarterSector`.
+-/
+theorem convex_kIntQuarterSector : Convex ℝ BesselKIntegral.quarterSector := by
   have h1 : Convex ℝ {z : ℂ | z.im - z.re < 0} :=
     convex_halfSpace_lt (f := fun z : ℂ => z.im - z.re)
       ⟨fun a b => by simp; ring, fun c a => by simp; ring⟩ 0
@@ -900,15 +905,16 @@ theorem convex_kIntQuarterSector : Convex ℝ kIntQuarterSector := by
       ⟨fun a b => by simp; ring, fun c a => by simp; ring⟩ 0
   convert h1.inter h2 using 1
   ext z
-  simp only [kIntQuarterSector, mem_ofPred_eq, mem_inter_iff, abs_lt]
+  simp only [BesselKIntegral.quarterSector, mem_ofPred_eq, mem_inter_iff, abs_lt]
   constructor <;> intro h <;> constructor <;> linarith [h.1, h.2]
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < z.re`. -/
-theorem re_pos_of_mem_kIntQuarterSector {z : ℂ} (hz : z ∈ kIntQuarterSector) : 0 < z.re :=
+theorem re_pos_of_mem_kIntQuarterSector {z : ℂ}
+    (hz : z ∈ BesselKIntegral.quarterSector) : 0 < z.re :=
   (abs_nonneg _).trans_lt hz
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < (z ^ 2).re`. -/
-theorem re_sq_pos_of_mem_kIntQuarterSector {z : ℂ} (hz : z ∈ kIntQuarterSector) : 0 <
+theorem re_sq_pos_of_mem_kIntQuarterSector {z : ℂ} (hz : z ∈ BesselKIntegral.quarterSector) : 0 <
     (z ^ 2).re := by
   have h : |z.im| < z.re := hz
   have h0 := (abs_nonneg z.im).trans_lt h
@@ -973,12 +979,13 @@ as `|Im z| < Re z`: `K_ν(z) = ½ (z/2)^ν ∫₀^∞ e^{-t - z²/(4t)} t^{-ν-1
 theorem besselK_eq_integral_schlafli (ν : ℂ) {z : ℂ} (hz : |z.im| < z.re) :
     besselK ν z = 1 / 2 * (z / 2) ^ ν *
       ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) - z ^ 2 / (4 * t)) * (t : ℂ) ^ (-ν - 1) := by
-  have hS : kIntQuarterSector ⊆ slitPlane := fun w hw => Or.inl (re_pos_of_mem_kIntQuarterSector hw)
-  have hf : AnalyticOnNhd ℂ (besselK ν) kIntQuarterSector :=
+  have hS : BesselKIntegral.quarterSector ⊆ slitPlane := fun w hw =>
+      Or.inl (re_pos_of_mem_kIntQuarterSector hw)
+  have hf : AnalyticOnNhd ℂ (besselK ν) BesselKIntegral.quarterSector :=
     ((differentiableOn_besselK_slitPlane ν).mono hS).analyticOnNhd isOpen_kIntQuarterSector
   have hg : AnalyticOnNhd ℂ (fun w : ℂ => 1 / 2 * (w / 2) ^ ν *
       ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) - w ^ 2 / (4 * t)) * (t : ℂ) ^ (-ν - 1))
-      kIntQuarterSector := by
+      BesselKIntegral.quarterSector := by
     refine DifferentiableOn.analyticOnNhd ?_ isOpen_kIntQuarterSector
     refine DifferentiableOn.mul ?_ ((differentiableOn_kSchlafli_integral ν).mono
       fun w hw => re_sq_pos_of_mem_kIntQuarterSector hw)
@@ -986,7 +993,7 @@ theorem besselK_eq_integral_schlafli (ν : ℂ) {z : ℂ} (hz : |z.im| < z.re) :
     have hw2 : w / 2 ∈ slitPlane := Or.inl (by
       have := re_pos_of_mem_kIntQuarterSector hw; simp; linarith)
     exact ((differentiableAt_id.div_const 2).cpow_const hw2).differentiableWithinAt
-  have h1 : (1 : ℂ) ∈ kIntQuarterSector := by simp [kIntQuarterSector]
+  have h1 : (1 : ℂ) ∈ BesselKIntegral.quarterSector := by simp [BesselKIntegral.quarterSector]
   have hfreq : ∃ᶠ w in 𝓝[≠] (1 : ℂ), besselK ν w = 1 / 2 * (w / 2) ^ ν *
       ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) - w ^ 2 / (4 * t)) * (t : ℂ) ^ (-ν - 1) := by
     have ht : Tendsto (fun r : ℝ => (r : ℂ)) (𝓝[≠] 1) (𝓝[≠] (1 : ℂ)) := by
@@ -1002,7 +1009,7 @@ theorem besselK_eq_integral_schlafli (ν : ℂ) {z : ℂ} (hz : |z.im| < z.re) :
     hfreq hz
 
 /-- Estimate under the stated parameter and domain assumptions: `|z.im| < z.re`. -/
-theorem kInt_abs_im_lt_re_of_abs_arg_lt {z : ℂ} (hz0 : z ≠ 0) (hz : |z.arg| < π / 4) :
+theorem BesselKIntegral.abs_im_lt_re_of_abs_arg_lt {z : ℂ} (hz0 : z ≠ 0) (hz : |z.arg| < π / 4) :
     |z.im| < z.re := by
   set θ := z.arg
   have hn : 0 < ‖z‖ := norm_pos_iff.mpr hz0
@@ -1030,6 +1037,6 @@ theorem besselK_eq_integral_schlafli_of_abs_arg_lt (ν : ℂ) {z : ℂ} (hz0 : z
     (hz : |z.arg| < π / 4) :
     besselK ν z = 1 / 2 * (z / 2) ^ ν *
       ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) - z ^ 2 / (4 * t)) * (t : ℂ) ^ (-ν - 1) :=
-  besselK_eq_integral_schlafli ν (kInt_abs_im_lt_re_of_abs_arg_lt hz0 hz)
+  besselK_eq_integral_schlafli ν (BesselKIntegral.abs_im_lt_re_of_abs_arg_lt hz0 hz)
 
 end DLMF.Bessel

@@ -75,7 +75,7 @@ theorem value_sixth_root
     refine mem_slitPlane_iff.mpr (Or.inl ?_)
     rw [hω]; simp; norm_num
   -- radial limit and the quadratic transformation
-  have hL := hypSV_tendsto_ray (a := 3 * a) (b := 1 / 3 + a) (c := 2 / 3 + 2 * a) hωn hre
+  have hL := SpecialValues.tendsto_ray (a := 3 * a) (b := 1 / 3 + a) (c := 2 / 3 + 2 * a) hωn hre
   have hcontR : ContinuousAt (fun r : ℝ => (1 - (r : ℂ) * ω / 2) ^ (-(3 * a)) *
       G (((r : ℂ) * ω / (2 - (r : ℂ) * ω)) ^ 2)) 1 := by
     have h1 : ContinuousAt (fun r : ℝ => (1 - (r : ℂ) * ω / 2) ^ (-(3 * a))) 1 := by
@@ -105,7 +105,7 @@ theorem value_sixth_root
   have hlim := tendsto_nhds_unique hL (hR.congr' (by
     filter_upwards [heq] with r hr
     rw [hr]))
-  rw [hlim, hG, hypSV_cubic_psi_neg_one_third hcA, gauss_summation hcA (by
+  rw [hlim, hG, SpecialValues.cubic_psi_neg_one_third hcA, gauss_summation hcA (by
     rw [show 2 * A + 5 / 6 - A - (A + 1 / 2) = 1 / 3 by ring]; norm_num)]
   have hsqπ : ((Real.sqrt Real.pi : ℝ) : ℂ) ^ 2 = (Real.pi : ℂ) := by
     exact_mod_cast Real.sq_sqrt Real.pi_pos.le
@@ -183,7 +183,7 @@ theorem value_sixth_root
   · field_simp
 
 /-- Coefficient form of `z F'(a,b;c+1;z) = c (F(a,b;c;z) - F(a,b;c+1;z))`. -/
-theorem hypSV_gaussHGCoeff_shift_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem SpecialValues.gaussHGCoeff_shift_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     (n : ℂ) * gaussHGCoeff a b (c + 1) n =
       c * (gaussHGCoeff a b c n - gaussHGCoeff a b (c + 1) n) := by
   have hc1 : ∀ k : ℕ, c + 1 ≠ -k := fun k h => hc (k + 1) (by push_cast; linear_combination h)
@@ -196,7 +196,7 @@ theorem hypSV_gaussHGCoeff_shift_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n
   linear_combination (-(poch a n * poch b n)) * hpoch
 
 /-- `z F'(a,b;c+1;z) = c (F(a,b;c;z) - F(a,b;c+1;z))` (DLMF 15.5.4 with `n = 1`). -/
-theorem hypSV_mul_deriv_shift_c {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
+theorem SpecialValues.mul_deriv_shift_c {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
     z * deriv (₂F₁ a b (c + 1)) z = c * (₂F₁ a b c z - ₂F₁ a b (c + 1) z) := by
   have hz' := mem_eball_one_of_norm_lt_one hz
   have hf := hasFPowerSeriesOnBall_ordinaryHypergeometric a b (c + 1)
@@ -207,7 +207,7 @@ theorem hypSV_mul_deriv_shift_c {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz
   have hfun : (fun n : ℕ => (n : ℂ) * gaussHGCoeff a b (c + 1) n * z ^ n) =
       fun n => c * (gaussHGCoeff a b c n * z ^ n - gaussHGCoeff a b (c + 1) n * z ^ n) := by
     funext n
-    have hcoeff := hypSV_gaussHGCoeff_shift_c (a := a) (b := b) hc n
+    have hcoeff := SpecialValues.gaussHGCoeff_shift_c (a := a) (b := b) hc n
     linear_combination hcoeff * z ^ n
   rw [hfun] at hL
   exact hL.unique (by simpa [mul_sub] using hR)
@@ -309,7 +309,7 @@ theorem value_sixth_root_contiguous
     refine mem_slitPlane_iff.mpr (Or.inl ?_)
     rw [hω]; simp; norm_num
   -- radial limit and the quadratic transformation
-  have hL := hypSV_tendsto_ray (a := 3 * a) (b := a) (c := 2 * a) hωn hre
+  have hL := SpecialValues.tendsto_ray (a := 3 * a) (b := a) (c := 2 * a) hωn hre
   have hcontR : ContinuousAt (fun r : ℝ => (1 - (r : ℂ) * ω / 2) ^ (-(3 * a)) *
       G (((r : ℂ) * ω / (2 - (r : ℂ) * ω)) ^ 2)) 1 := by
     have h1 : ContinuousAt (fun r : ℝ => (1 - (r : ℂ) * ω / 2) ^ (-(3 * a))) 1 := by
@@ -352,7 +352,7 @@ theorem value_sixth_root_contiguous
   have hc0 : a + 1 / 2 ≠ 0 := by simpa using hb' 0
   have hSK : ₂F₁ (-a / 2) (-a / 2 + 1 / 2) (a + 1 / 2) (-1 / 3) =
       K (-1 / 3) + (-1 / 3) * deriv K (-1 / 3) / (a + 1 / 2) := by
-    have h := hypSV_mul_deriv_shift_c (a := -a / 2) (b := -a / 2 + 1 / 2) hb'
+    have h := SpecialValues.mul_deriv_shift_c (a := -a / 2) (b := -a / 2 + 1 / 2) hb'
       (show ‖(-1 / 3 : ℂ)‖ < 1 by norm_num)
     rw [hK, h, mul_div_cancel_left₀ _ hc0]
     ring
@@ -387,7 +387,8 @@ theorem value_sixth_root_contiguous
     simp only [id, h43]
     rw [show 2 * a + 1 - 1 = 2 * a by ring]
     ring
-  rw [hK0, hK1, hFG, hypSV_cubic_psi_neg_one_third hcA, hypSV_cubic_psi_deriv_neg_one_third hcA,
+  rw [hK0, hK1, hFG, SpecialValues.cubic_psi_neg_one_third hcA,
+      SpecialValues.cubic_psi_deriv_neg_one_third hcA,
     gauss_summation hcA (by rw [show 2 * A + 5 / 6 - A - (A + 1 / 2) = 1 / 3 by ring]; norm_num)]
   have hsqπ : ((Real.sqrt Real.pi : ℝ) : ℂ) ^ 2 = (Real.pi : ℂ) := by
     exact_mod_cast Real.sq_sqrt Real.pi_pos.le

@@ -34,53 +34,57 @@ open DLMF.Bessel DLMF.Confluent
 theorem legendreDegreeY_spec {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 0 ≤ x) :
     LegendreYRelation α x (legendreDegreeY α x) ∧ ∀ y : ℝ, LegendreYRelation α x y →
         y=legendreDegreeY α x := by
-  obtain ⟨hex, huniq⟩ := legY_existsUnique hα hα1 hx
+  obtain ⟨hex, huniq⟩ := DegreeCoordinate.existsUnique hα hα1 hx
   have hs := Classical.epsilon_spec hex
   exact ⟨hs, fun y hy => huniq y _ hy hs⟩
 
 /-- The degree coordinate `Y = legendreDegreeY α` of DLMF 14.15(iv) is strictly decreasing on
 `[0, ∞)`, for `0 ≤ α < 1`. -/
-private lemma legY_strictAntiOn {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
+private lemma DegreeCoordinate.strictAntiOn {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
     StrictAntiOn (legendreDegreeY α) (Ici 0) := by
   set a := α
   set Y := legendreDegreeY a with hYdef
-  have hc0 := legY_x0_pos hα1 hα
-  have hc1 := legY_x0_le_one a
+  have hc0 := DegreeCoordinate.turningPoint_pos hα1 hα
+  have hc1 := DegreeCoordinate.turningPoint_le_one a
   have hrel : ∀ x, 0 ≤ x → LegendreYRelation a x (Y x) := fun x hx =>
     (legendreDegreeY_spec hα hα1 hx).1
-  have hY1 : Y 1 = 0 := (legY_rel_one a _).1 (hrel 1 zero_le_one)
+  have hY1 : Y 1 = 0 := (DegreeCoordinate.relation_one a _).1 (hrel 1 zero_le_one)
   -- region 1
   have r1 : ∀ x, 0 ≤ x → x ≠ 1 → x ≤ Real.sqrt (1 - a^2) →
-      a^2 ≤ Y x ∧ legY_L1 a (Real.sqrt (Y x - a^2)) = legY_R1 a x := fun x hx h1 h0 =>
-    (legY_rel_left h1 h0).1 (hrel x hx)
+      a^2 ≤ Y x ∧ DegreeCoordinate.lhsLeft a (Real.sqrt (Y x - a^2)) =
+          DegreeCoordinate.rhsLeft a x := fun x hx h1 h0 =>
+    (DegreeCoordinate.relation_left h1 h0).1 (hrel x hx)
   have r1' : ∀ x, 0 ≤ x → x < Real.sqrt (1 - a^2) → a^2 < Y x := by
     intro x hx h0
     have h1 : x ≠ 1 := by intro h; linarith
     obtain ⟨hy, he⟩ := r1 x hx h1 h0.le
-    have hR : 0 < legY_R1 a x := by
-      rw [← legY_R1_x0 hα hα1]
-      exact legY_R1_strictAntiOn hα hα1 ⟨hx, h0.le⟩ ⟨hc0.le, le_rfl⟩ h0
+    have hR : 0 < DegreeCoordinate.rhsLeft a x := by
+      rw [← DegreeCoordinate.rhsLeft_turningPoint hα hα1]
+      exact DegreeCoordinate.rhsLeft_strictAntiOn hα hα1 ⟨hx, h0.le⟩ ⟨hc0.le, le_rfl⟩ h0
     rcases hy.lt_or_eq with h | h
     · exact h
-    · rw [← h, sub_self, Real.sqrt_zero, legY_L1_zero] at he; linarith
+    · rw [← h, sub_self, Real.sqrt_zero, DegreeCoordinate.lhsLeft_zero] at he; linarith
   -- region 2
   have r2 : ∀ x, Real.sqrt (1 - a^2) < x → x < 1 →
-      0 < Y x ∧ Y x < a^2 ∧ legY_L2 a (Real.sqrt (a^2 - Y x)) = legY_R2 a x := by
+      0 < Y x ∧ Y x < a^2 ∧ DegreeCoordinate.lhsRight a (Real.sqrt (a^2 - Y x)) =
+          DegreeCoordinate.rhsRight a x := by
     intro x h0 h1
     have hx : 0 ≤ x := hc0.le.trans h0.le
-    obtain ⟨hy, hp, -, he⟩ := (legY_rel_right h1.ne (not_le.2 h0)).1 (hrel x hx)
+    obtain ⟨hy, hp, -, he⟩ := (DegreeCoordinate.relation_right h1.ne (not_le.2 h0)).1 (hrel x hx)
     have ha0 : 0 < a := by
       rcases hα.eq_or_lt with h | h
       · exfalso; rw [← h] at h0; simp at h0; linarith
       · exact h
     refine ⟨hp h1, lt_of_le_of_ne hy fun h => ?_, he⟩
-    rw [h, sub_self, Real.sqrt_zero, legY_L2_zero] at he
-    linarith [legY_R2_neg ha0 hα1 h0 h1]
+    rw [h, sub_self, Real.sqrt_zero, DegreeCoordinate.lhsRight_zero] at he
+    linarith [DegreeCoordinate.rhsRight_neg ha0 hα1 h0 h1]
   -- region 3
-  have r3 : ∀ x, 1 < x → Y x < 0 ∧ legY_L2 a (Real.sqrt (a^2 - Y x)) = legY_R2 a x := by
+  have r3 : ∀ x, 1 < x → Y x < 0 ∧ DegreeCoordinate.lhsRight a (Real.sqrt (a^2 - Y x)) =
+      DegreeCoordinate.rhsRight a x := by
     intro x h1
     have h0 : ¬ x ≤ Real.sqrt (1 - a^2) := fun h => by linarith
-    obtain ⟨-, -, hn, he⟩ := (legY_rel_right (ne_of_gt h1) h0).1 (hrel x (by linarith))
+    obtain ⟨-, -, hn, he⟩ :=
+        (DegreeCoordinate.relation_right (ne_of_gt h1) h0).1 (hrel x (by linarith))
     exact ⟨hn h1, he⟩
   have hsr : ∀ y, y < 0 → Real.sqrt (a^2 - y) ∈ Ioi a := by
     intro y hy
@@ -104,9 +108,10 @@ private lemma legY_strictAntiOn {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
     have hB1 : x₁ ≠ 1 := by intro h; linarith
     obtain ⟨hy₁, he₁⟩ := r1 x₁ hx₁ hB1 hB0
     obtain ⟨hy₂, he₂⟩ := r1 x₂ hx₂ hA1 hA0
-    have hR := legY_R1_strictAntiOn hα hα1 ⟨hx₁, hB0⟩ ⟨hx₂, hA0⟩ h12
+    have hR := DegreeCoordinate.rhsLeft_strictAntiOn hα hα1 ⟨hx₁, hB0⟩ ⟨hx₂, hA0⟩ h12
     rw [← he₁, ← he₂] at hR
-    have := (legY_L1_strictMonoOn hα).lt_iff_lt (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+    have := (DegreeCoordinate.lhsLeft_strictMonoOn hα).lt_iff_lt (Real.sqrt_nonneg _)
+        (Real.sqrt_nonneg _)
       |>.1 hR
     rw [Real.sqrt_lt_sqrt_iff (by linarith)] at this
     linarith
@@ -121,14 +126,14 @@ private lemma legY_strictAntiOn {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
         rcases hα.eq_or_lt with h | h
         · exfalso; rw [← h] at h20; simp at h20; linarith
         · exact h
-      have hR := legY_R2_strictAntiOn ha0 hα1 ⟨(not_le.1 h10).le, by linarith⟩
+      have hR := DegreeCoordinate.rhsRight_strictAntiOn ha0 hα1 ⟨(not_le.1 h10).le, by linarith⟩
         ⟨h20.le, h2⟩ h12
       rw [← he₁, ← he₂] at hR
       have hI : ∀ y, 0 < y → y < a^2 → Real.sqrt (a^2 - y) ∈ Ico 0 a := by
         intro y hy hya
         refine ⟨Real.sqrt_nonneg _, ?_⟩
         rw [Real.sqrt_lt' ha0]; linarith
-      have := (legY_L2_strictAntiOn ha0).lt_iff_gt (hI _ (r2 x₂ h20 h2).1 hy₂)
+      have := (DegreeCoordinate.lhsRight_strictAntiOn ha0).lt_iff_gt (hI _ (r2 x₂ h20 h2).1 hy₂)
         (hI _ hp₁ hy₁) |>.1 hR
       rw [Real.sqrt_lt_sqrt_iff (by linarith)] at this
       linarith
@@ -147,9 +152,9 @@ private lemma legY_strictAntiOn {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
     rcases le_or_gt x₁ 1 with h1 | h1
     · exact lt_of_lt_of_le hn₂ (hnn x₁ hx₁ h1)
     · obtain ⟨hn₁, he₁⟩ := r3 x₁ h1
-      have hR := legY_R2_strictMonoOn hα hα1 h1 h2 h12
+      have hR := DegreeCoordinate.rhsRight_strictMonoOn hα hα1 h1 h2 h12
       rw [← he₁, ← he₂] at hR
-      have := (legY_L2_strictMonoOn hα).lt_iff_lt (hsr _ hn₁) (hsr _ hn₂) |>.1 hR
+      have := (DegreeCoordinate.lhsRight_strictMonoOn hα).lt_iff_lt (hsr _ hn₁) (hsr _ hn₂) |>.1 hR
       rw [Real.sqrt_lt_sqrt_iff (by linarith [sq_nonneg a])] at this
       linarith
 
@@ -159,35 +164,39 @@ theorem legendreDegreeY_monotone {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
         legendreDegreeY α 1=0 ∧ Tendsto (legendreDegreeY α) atTop atBot := by
   set a := α
   set Y := legendreDegreeY a with hYdef
-  have hc0 := legY_x0_pos hα1 hα
-  have hc1 := legY_x0_le_one a
+  have hc0 := DegreeCoordinate.turningPoint_pos hα1 hα
+  have hc1 := DegreeCoordinate.turningPoint_le_one a
   have hrel : ∀ x, 0 ≤ x → LegendreYRelation a x (Y x) := fun x hx =>
     (legendreDegreeY_spec hα hα1 hx).1
-  have hY1 : Y 1 = 0 := (legY_rel_one a _).1 (hrel 1 zero_le_one)
+  have hY1 : Y 1 = 0 := (DegreeCoordinate.relation_one a _).1 (hrel 1 zero_le_one)
   -- region 1
   have r1 : ∀ x, 0 ≤ x → x ≠ 1 → x ≤ Real.sqrt (1 - a^2) →
-      a^2 ≤ Y x ∧ legY_L1 a (Real.sqrt (Y x - a^2)) = legY_R1 a x := fun x hx h1 h0 =>
-    (legY_rel_left h1 h0).1 (hrel x hx)
+      a^2 ≤ Y x ∧ DegreeCoordinate.lhsLeft a (Real.sqrt (Y x - a^2)) =
+          DegreeCoordinate.rhsLeft a x := fun x hx h1 h0 =>
+    (DegreeCoordinate.relation_left h1 h0).1 (hrel x hx)
   -- region 3
-  have r3 : ∀ x, 1 < x → Y x < 0 ∧ legY_L2 a (Real.sqrt (a^2 - Y x)) = legY_R2 a x := by
+  have r3 : ∀ x, 1 < x → Y x < 0 ∧ DegreeCoordinate.lhsRight a (Real.sqrt (a^2 - Y x)) =
+      DegreeCoordinate.rhsRight a x := by
     intro x h1
     have h0 : ¬ x ≤ Real.sqrt (1 - a^2) := fun h => by linarith
-    obtain ⟨-, -, hn, he⟩ := (legY_rel_right (ne_of_gt h1) h0).1 (hrel x (by linarith))
+    obtain ⟨-, -, hn, he⟩ :=
+        (DegreeCoordinate.relation_right (ne_of_gt h1) h0).1 (hrel x (by linarith))
     exact ⟨hn h1, he⟩
   have hsr : ∀ y, y < 0 → Real.sqrt (a^2 - y) ∈ Ioi a := by
     intro y hy
     show a < Real.sqrt (a^2 - y)
     calc a = Real.sqrt (a^2) := (Real.sqrt_sq hα).symm
       _ < _ := Real.sqrt_lt_sqrt (by positivity) (by linarith)
-  refine ⟨legY_strictAntiOn hα hα1, ?_, hY1, ?_⟩
+  refine ⟨DegreeCoordinate.strictAntiOn hα hα1, ?_, hY1, ?_⟩
   · rcases hα.eq_or_lt with h | ha0
     · have : Real.sqrt (1 - a^2) = 1 := by rw [← h]; simp
       rw [this, hY1, ← h]; ring
     · have hlt : Real.sqrt (1 - a^2) < 1 := by
         rw [Real.sqrt_lt' one_pos]; nlinarith
       obtain ⟨hy, he⟩ := r1 _ hc0.le hlt.ne le_rfl
-      rw [legY_R1_x0 hα hα1, ← legY_L1_zero a] at he
-      have := (legY_L1_strictMonoOn hα).injOn (Real.sqrt_nonneg _) (le_refl (0:ℝ)) he
+      rw [DegreeCoordinate.rhsLeft_turningPoint hα hα1, ← DegreeCoordinate.lhsLeft_zero a] at he
+      have := (DegreeCoordinate.lhsLeft_strictMonoOn hα).injOn (Real.sqrt_nonneg _)
+          (le_refl (0:ℝ)) he
       rw [Real.sqrt_eq_zero'] at this
       linarith
   · rw [tendsto_atBot]
@@ -199,13 +208,14 @@ theorem legendreDegreeY_monotone {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
       have h2 := le_abs_self (a^2 - M)
       have h3 : Real.sqrt |a^2 - M| ≤ T := by linarith
       nlinarith [Real.sqrt_nonneg |a^2 - M|]
-    filter_upwards [(legY_R2_tendsto_atTop hα hα1).eventually (eventually_gt_atTop (legY_L2 a T)),
+    filter_upwards [(DegreeCoordinate.rhsRight_tendsto_atTop hα hα1).eventually
+        (eventually_gt_atTop (DegreeCoordinate.lhsRight a T)),
       eventually_gt_atTop (1:ℝ)] with x hx h1
     obtain ⟨hn, he⟩ := r3 x h1
     rw [← he] at hx
     have hs : T < Real.sqrt (a^2 - Y x) := by
       by_contra hle
-      have := (legY_L2_strictMonoOn hα).monotoneOn (hsr _ hn) hT0 (not_lt.1 hle)
+      have := (DegreeCoordinate.lhsRight_strictMonoOn hα).monotoneOn (hsr _ hn) hT0 (not_lt.1 hle)
       linarith
     have h5 := Real.sq_sqrt (show 0 ≤ a^2 - Y x by nlinarith)
     have h6 : T^2 < Real.sqrt (a^2 - Y x) ^ 2 := by
@@ -268,12 +278,13 @@ def legendreCylinderZeta (ν μ x : ℝ) : ℝ :=
   Classical.epsilon (LegendreCylinderRelation ν μ x)
 
 /-- Left side of DLMF 14.15.31 (hyperbolic case). -/
-noncomputable def legC_P (α ζ : ℝ) : ℝ :=
+noncomputable def CylinderCoordinate.lhsHyperbolic (α ζ : ℝ) : ℝ :=
   ζ*Real.sqrt (ζ^2+α^2)/2+α^2/2*Real.arsinh (ζ/α)
 
-/-- Helper `legC_P_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_P_hasDerivAt {α : ℝ} (hα : 0 < α) (ζ : ℝ) :
-    HasDerivAt (legC_P α) (Real.sqrt (ζ^2+α^2)) ζ := by
+/-- Helper `CylinderCoordinate.lhsHyperbolic_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsHyperbolic_hasDerivAt {α : ℝ} (hα : 0 < α) (ζ : ℝ) :
+    HasDerivAt (CylinderCoordinate.lhsHyperbolic α) (Real.sqrt (ζ^2+α^2)) ζ := by
   have hp : 0 < ζ^2+α^2 := by positivity
   set s := Real.sqrt (ζ^2+α^2) with hs
   have hs0 : 0 < s := Real.sqrt_pos.2 hp
@@ -285,51 +296,64 @@ theorem legC_P_hasDerivAt {α : ℝ} (hα : 0 < α) (ζ : ℝ) :
   have ha := (Real.hasDerivAt_arsinh (ζ/α)).comp ζ ((hasDerivAt_id ζ).div_const α)
   have h := (((hasDerivAt_id ζ).mul hsd).div_const 2).add (ha.const_mul (α^2/2))
   convert h using 1
-  · funext y; simp [legC_P, Function.comp]
+  · funext y; simp [CylinderCoordinate.lhsHyperbolic, Function.comp]
   · simp only [id, one_mul]
     have h1 : 1 + (ζ/α)^2 = s^2/α^2 := by rw [hs2]; field_simp; ring
     rw [h1, Real.sqrt_div' _ (sq_nonneg α), Real.sqrt_sq hs0.le, Real.sqrt_sq hα.le]
     field_simp
     linear_combination hs2
 
-/-- Helper `legC_P_strictMono` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_P_strictMono {α : ℝ} (hα : 0 < α) : StrictMono (legC_P α) :=
+/-- Helper `CylinderCoordinate.lhsHyperbolic_strictMono` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsHyperbolic_strictMono {α : ℝ} (hα : 0 < α) : StrictMono
+    (CylinderCoordinate.lhsHyperbolic α) :=
   strictMono_of_deriv_pos fun ζ => by
-    rw [(legC_P_hasDerivAt hα ζ).deriv]; exact Real.sqrt_pos.2 (by positivity)
+    rw [(CylinderCoordinate.lhsHyperbolic_hasDerivAt hα ζ).deriv];
+        exact Real.sqrt_pos.2 (by positivity)
 
-/-- Helper `legC_P_neg` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_P_neg (α ζ : ℝ) : legC_P α (-ζ) = -legC_P α ζ := by
-  simp only [legC_P, neg_sq, neg_div, Real.arsinh_neg]; ring
+/-- Helper `CylinderCoordinate.lhsHyperbolic_neg` for DLMF 14.15(v) (Legendre–cylinder coordinate).
+-/
+theorem CylinderCoordinate.lhsHyperbolic_neg (α ζ : ℝ) : CylinderCoordinate.lhsHyperbolic α (-ζ) =
+    -CylinderCoordinate.lhsHyperbolic α ζ := by
+  simp only [CylinderCoordinate.lhsHyperbolic, neg_sq, neg_div, Real.arsinh_neg]; ring
 
-/-- Helper `legC_P_ge` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_P_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 0 ≤ ζ) : ζ^2/2 ≤ legC_P α ζ := by
+/-- Helper `CylinderCoordinate.lhsHyperbolic_ge` for DLMF 14.15(v) (Legendre–cylinder coordinate).
+-/
+theorem CylinderCoordinate.lhsHyperbolic_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 0 ≤ ζ) : ζ^2/2 ≤
+    CylinderCoordinate.lhsHyperbolic α ζ := by
   have h1 : ζ ≤ Real.sqrt (ζ^2+α^2) := Real.le_sqrt_of_sq_le (by nlinarith)
   have h2 : 0 ≤ Real.arsinh (ζ/α) := Real.arsinh_nonneg_iff.2 (by positivity)
-  simp only [legC_P]
+  simp only [CylinderCoordinate.lhsHyperbolic]
   nlinarith [mul_nonneg (sq_nonneg α) h2]
 
-/-- Helper `legC_P_surj` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_P_surj {α : ℝ} (hα : 0 < α) (c : ℝ) : ∃ ζ, legC_P α ζ = c := by
-  have hc : Continuous (legC_P α) := continuous_iff_continuousAt.2 fun ζ =>
-    (legC_P_hasDerivAt hα ζ).continuousAt
+/-- Helper `CylinderCoordinate.lhsHyperbolic_surj` for DLMF 14.15(v) (Legendre–cylinder coordinate).
+-/
+theorem CylinderCoordinate.lhsHyperbolic_surj {α : ℝ} (hα : 0 < α) (c : ℝ) : ∃ ζ,
+    CylinderCoordinate.lhsHyperbolic α ζ = c := by
+  have hc : Continuous (CylinderCoordinate.lhsHyperbolic α) :=
+      continuous_iff_continuousAt.2 fun ζ =>
+    (CylinderCoordinate.lhsHyperbolic_hasDerivAt hα ζ).continuousAt
   set T := |c| + 2
-  have hT : |c| < legC_P α T := by
-    have := legC_P_ge hα (show 0 ≤ T by positivity)
+  have hT : |c| < CylinderCoordinate.lhsHyperbolic α T := by
+    have := CylinderCoordinate.lhsHyperbolic_ge hα (show 0 ≤ T by positivity)
     nlinarith [abs_nonneg c]
-  have hT' : legC_P α (-T) < -|c| := by rw [legC_P_neg]; linarith
+  have hT' : CylinderCoordinate.lhsHyperbolic α (-T) < -|c| := by
+      rw [CylinderCoordinate.lhsHyperbolic_neg]; linarith
   have hT0 : 0 ≤ T := by positivity
   obtain ⟨ζ, -, h⟩ := intermediate_value_Icc (show -T ≤ T by linarith) hc.continuousOn
-    (show c ∈ Icc (legC_P α (-T)) (legC_P α T) from
+    (show c ∈ Icc (CylinderCoordinate.lhsHyperbolic α (-T))
+        (CylinderCoordinate.lhsHyperbolic α T) from
       ⟨by linarith [neg_abs_le c], by linarith [le_abs_self c]⟩)
   exact ⟨ζ, h⟩
 
 /-- Left side of DLMF 14.15.27 (oscillatory-free side `ζ ≥ α`). -/
-noncomputable def legC_F (α ζ : ℝ) : ℝ :=
+noncomputable def CylinderCoordinate.lhsOuter (α ζ : ℝ) : ℝ :=
   ζ*Real.sqrt (ζ^2-α^2)/2-α^2/2*Real.arcosh (ζ/α)
 
-/-- Helper `legC_F_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_F_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : α < ζ) :
-    HasDerivAt (legC_F α) (Real.sqrt (ζ^2-α^2)) ζ := by
+/-- Helper `CylinderCoordinate.lhsOuter_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsOuter_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : α < ζ) :
+    HasDerivAt (CylinderCoordinate.lhsOuter α) (Real.sqrt (ζ^2-α^2)) ζ := by
   have hp : 0 < ζ^2-α^2 := by nlinarith
   set s := Real.sqrt (ζ^2-α^2) with hs
   have hs0 : 0 < s := Real.sqrt_pos.2 hp
@@ -342,36 +366,43 @@ theorem legC_F_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : α < ζ) :
   have ha := (Real.hasDerivAt_arcosh h1).comp ζ ((hasDerivAt_id ζ).div_const α)
   have h := (((hasDerivAt_id ζ).mul hsd).div_const 2).sub (ha.const_mul (α^2/2))
   convert h using 1
-  · funext y; simp [legC_F, Function.comp]
+  · funext y; simp [CylinderCoordinate.lhsOuter, Function.comp]
   · simp only [id, one_mul]
     have h2 : (ζ/α)^2 - 1 = s^2/α^2 := by rw [hs2]; field_simp
     rw [h2, Real.sqrt_div' _ (sq_nonneg α), Real.sqrt_sq hs0.le, Real.sqrt_sq hα.le]
     field_simp
     linear_combination hs2
 
-/-- Helper `legC_F_continuousOn` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_F_continuousOn {α : ℝ} (hα : 0 < α) : ContinuousOn (legC_F α) (Ici α) := by
+/-- Helper `CylinderCoordinate.lhsOuter_continuousOn` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsOuter_continuousOn {α : ℝ} (hα : 0 < α) : ContinuousOn
+    (CylinderCoordinate.lhsOuter α) (Ici α) := by
   have h1 : ContinuousOn (fun ζ : ℝ => Real.arcosh (ζ/α)) (Ici α) :=
     Real.continuousOn_arcosh.comp (continuous_id.div_const α).continuousOn fun ζ hζ => by
       show 1 ≤ ζ/α; rw [le_div_iff₀ hα]; simpa using hζ
-  unfold legC_F
+  unfold CylinderCoordinate.lhsOuter
   exact ((continuous_id.mul (by fun_prop : Continuous fun ζ : ℝ => Real.sqrt (ζ^2-α^2))).div_const
     2).continuousOn.sub (h1.const_smul (α^2/2))
 
-/-- Helper `legC_F_strictMonoOn` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_F_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn (legC_F α) (Ici α) := by
-  refine strictMonoOn_of_deriv_pos (convex_Ici α) (legC_F_continuousOn hα) fun ζ hζ => ?_
+/-- Helper `CylinderCoordinate.lhsOuter_strictMonoOn` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsOuter_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn
+    (CylinderCoordinate.lhsOuter α) (Ici α) := by
+  refine strictMonoOn_of_deriv_pos (convex_Ici α)
+      (CylinderCoordinate.lhsOuter_continuousOn hα) fun ζ hζ => ?_
   rw [interior_Ici] at hζ
   have hζ : α < ζ := hζ
-  rw [(legC_F_hasDerivAt hα hζ).deriv]
+  rw [(CylinderCoordinate.lhsOuter_hasDerivAt hα hζ).deriv]
   exact Real.sqrt_pos.2 (by nlinarith)
 
-/-- Helper `legC_F_self` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_F_self {α : ℝ} (hα : 0 < α) : legC_F α α = 0 := by
-  simp [legC_F, hα.ne', Real.arcosh_zero]
+/-- Helper `CylinderCoordinate.lhsOuter_self` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
+theorem CylinderCoordinate.lhsOuter_self {α : ℝ} (hα : 0 < α) :
+    CylinderCoordinate.lhsOuter α α = 0 := by
+  simp [CylinderCoordinate.lhsOuter, hα.ne', Real.arcosh_zero]
 
-/-- Helper `legC_F_ge` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_F_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 2*α ≤ ζ) : ζ^2/4 - α*ζ ≤ legC_F α ζ := by
+/-- Helper `CylinderCoordinate.lhsOuter_ge` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
+theorem CylinderCoordinate.lhsOuter_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 2*α ≤ ζ) : ζ^2/4 - α*ζ ≤
+    CylinderCoordinate.lhsOuter α ζ := by
   have hζ0 : 0 < ζ := by linarith
   have h1 : ζ/2 ≤ Real.sqrt (ζ^2-α^2) := Real.le_sqrt_of_sq_le (by nlinarith)
   have hy : 1 ≤ ζ/α := by rw [le_div_iff₀ hα]; linarith
@@ -385,26 +416,29 @@ theorem legC_F_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 2*α ≤ ζ) : ζ^2/4 - α
   have h3 : α^2/2*Real.arcosh (ζ/α) ≤ α*ζ := by
     have : α^2/2*(2*(ζ/α)) = α*ζ := by field_simp
     nlinarith [mul_le_mul_of_nonneg_left h2 (show 0 ≤ α^2/2 by positivity)]
-  simp only [legC_F]
+  simp only [CylinderCoordinate.lhsOuter]
   nlinarith
 
-/-- Helper `legC_F_surj` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_F_surj {α c : ℝ} (hα : 0 < α) (hc : 0 ≤ c) : ∃ ζ, α ≤ ζ ∧ legC_F α ζ = c := by
+/-- Helper `CylinderCoordinate.lhsOuter_surj` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
+theorem CylinderCoordinate.lhsOuter_surj {α c : ℝ} (hα : 0 < α) (hc : 0 ≤ c) : ∃ ζ, α ≤ ζ ∧
+    CylinderCoordinate.lhsOuter α ζ = c := by
   set T := 2*α + 2*Real.sqrt c + 4*α + 1 with hT
   have hsc := Real.sq_sqrt hc
   have hsc0 := Real.sqrt_nonneg c
   have hT2 : 2*α ≤ T := by rw [hT]; linarith
-  have h1 := legC_F_ge hα hT2
-  have hcT : c ≤ legC_F α T := by
+  have h1 := CylinderCoordinate.lhsOuter_ge hα hT2
+  have hcT : c ≤ CylinderCoordinate.lhsOuter α T := by
     have : c ≤ T^2/4 - α*T := by rw [hT]; nlinarith
     linarith
   obtain ⟨ζ, hζ, h⟩ := intermediate_value_Icc (show α ≤ T by linarith)
-    ((legC_F_continuousOn hα).mono Icc_subset_Ici_self)
-    (show c ∈ Icc (legC_F α α) (legC_F α T) from ⟨by rw [legC_F_self hα]; exact hc, hcT⟩)
+    ((CylinderCoordinate.lhsOuter_continuousOn hα).mono Icc_subset_Ici_self)
+    (show c ∈ Icc (CylinderCoordinate.lhsOuter α α) (CylinderCoordinate.lhsOuter α T)
+        from ⟨by rw [CylinderCoordinate.lhsOuter_self hα]; exact hc, hcT⟩)
   exact ⟨ζ, hζ.1, h⟩
 
-/-- Helper `legC_hasDerivAt_artanh` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_hasDerivAt_artanh {v : ℝ} (hv : v ∈ Ioo (-1:ℝ) 1) :
+/-- Helper `CylinderCoordinate.hasDerivAt_artanh` for DLMF 14.15(v) (Legendre–cylinder coordinate).
+-/
+theorem CylinderCoordinate.hasDerivAt_artanh {v : ℝ} (hv : v ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt Real.artanh (1/(1-v^2)) v := by
   have h1 : 0 < 1 + v := by linarith [hv.1]
   have h2 : 0 < 1 - v := by linarith [hv.2]
@@ -420,17 +454,20 @@ theorem legC_hasDerivAt_artanh {v : ℝ} (hv : v ∈ Ioo (-1:ℝ) 1) :
   ring
 
 /-- Right side of DLMF 14.15.27 as a function of `x ∈ [a, 1)`. -/
-noncomputable def legC_G (a x : ℝ) : ℝ :=
+noncomputable def CylinderCoordinate.rhsOuter (a x : ℝ) : ℝ :=
   Real.sqrt (1-a^2)*Real.artanh (Real.sqrt ((x^2-a^2)/(1-a^2))/x)-Real.arcosh (x/a)
 
-/-- Helper `legC_G_v` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_G_v {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) :
+/-- Helper `CylinderCoordinate.rhsOuter_sqrt_div` for DLMF 14.15(v) (Legendre–cylinder coordinate).
+-/
+theorem CylinderCoordinate.rhsOuter_sqrt_div {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) :
     Real.sqrt ((x^2-a^2)/(1-a^2))/x = Real.sqrt (x^2-a^2)/(Real.sqrt (1-a^2)*x) := by
   rw [Real.sqrt_div' _ (by nlinarith), div_div]
 
-/-- Helper `legC_G_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_G_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo a 1) :
-    HasDerivAt (legC_G a) (Real.sqrt (x^2-a^2)/(1-x^2)) x := by
+/-- Helper `CylinderCoordinate.rhsOuter_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.rhsOuter_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1)
+    (hx : x ∈ Ioo a 1) :
+    HasDerivAt (CylinderCoordinate.rhsOuter a) (Real.sqrt (x^2-a^2)/(1-x^2)) x := by
   have hx0 : 0 < x := ha.trans hx.1
   have hw2p : 0 < x^2-a^2 := by nlinarith [hx.1]
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.2]
@@ -441,8 +478,10 @@ theorem legC_G_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo
   have hc0 : 0 < c := Real.sqrt_pos.2 hc2p
   have hw2 : w^2 = x^2-a^2 := Real.sq_sqrt hw2p.le
   have hc2 : c^2 = 1-a^2 := Real.sq_sqrt hc2p.le
-  have hG : legC_G a = fun y => c*Real.artanh (Real.sqrt (y^2-a^2)/(c*y)) - Real.arcosh (y/a) := by
-    funext y; simp only [legC_G]; rw [legC_G_v ha ha1]
+  have hG : CylinderCoordinate.rhsOuter a = fun y => c*Real.artanh (Real.sqrt (y^2-a^2)/(c*y)) -
+      Real.arcosh (y/a) := by
+    funext y; simp only [CylinderCoordinate.rhsOuter];
+        rw [CylinderCoordinate.rhsOuter_sqrt_div ha ha1]
   have hwd : HasDerivAt (fun y => Real.sqrt (y^2-a^2)) (2*x/(2*w)) x := by
     have : HasDerivAt (fun y : ℝ => y^2-a^2) (2*x) x := by
       simpa using (hasDerivAt_pow 2 x).sub_const (a^2)
@@ -456,7 +495,7 @@ theorem legC_G_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo
     rw [div_lt_one (by positivity)]
     have : w^2 < (c*x)^2 := by rw [mul_pow, hw2, hc2]; nlinarith [mul_pos (pow_pos ha 2) hx2]
     nlinarith [mul_pos hc0 hx0]
-  have hat := (legC_hasDerivAt_artanh hv).comp x hvd
+  have hat := (CylinderCoordinate.hasDerivAt_artanh hv).comp x hvd
   have h1 : (1:ℝ) < x/a := by rw [lt_div_iff₀ ha]; linarith [hx.1]
   have hac := (Real.hasDerivAt_arcosh h1).comp x ((hasDerivAt_id x).div_const a)
   have h := (hat.const_mul c).sub hac
@@ -471,15 +510,18 @@ theorem legC_G_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo
     field_simp
     rw [hw2, hc2]; ring
 
-/-- Helper `legC_G_nonneg` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_G_nonneg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ico a 1) : 0 ≤ legC_G a x := by
+/-- Helper `CylinderCoordinate.rhsOuter_nonneg` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
+theorem CylinderCoordinate.rhsOuter_nonneg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ico a 1) :
+    0 ≤ CylinderCoordinate.rhsOuter a x := by
   have hc2p : 0 < 1 - a^2 := by nlinarith
   set c := Real.sqrt (1-a^2) with hc
   have hc0 : 0 < c := Real.sqrt_pos.2 hc2p
   have hc2 : c^2 = 1-a^2 := Real.sq_sqrt hc2p.le
-  have hG : legC_G a = fun y => c*Real.artanh (Real.sqrt (y^2-a^2)/(c*y)) - Real.arcosh (y/a) := by
-    funext y; simp only [legC_G]; rw [legC_G_v ha ha1]
-  have hcont : ContinuousOn (legC_G a) (Ico a 1) := by
+  have hG : CylinderCoordinate.rhsOuter a = fun y => c*Real.artanh (Real.sqrt (y^2-a^2)/(c*y)) -
+      Real.arcosh (y/a) := by
+    funext y; simp only [CylinderCoordinate.rhsOuter];
+        rw [CylinderCoordinate.rhsOuter_sqrt_div ha ha1]
+  have hcont : ContinuousOn (CylinderCoordinate.rhsOuter a) (Ico a 1) := by
     rw [hG]
     intro y hy
     have hy0 : 0 < y := ha.trans_le hy.1
@@ -504,28 +546,30 @@ theorem legC_G_nonneg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ico a 1
     have h3 : ContinuousAt (fun y => Real.artanh (Real.sqrt (y^2-a^2)/(c*y))) y :=
       ContinuousAt.comp (g := Real.artanh) (Real.continuousAt_artanh hv) h1
     exact ((continuousAt_const.mul h3).continuousWithinAt).sub h2
-  have hmono : MonotoneOn (legC_G a) (Ico a 1) := by
+  have hmono : MonotoneOn (CylinderCoordinate.rhsOuter a) (Ico a 1) := by
     refine monotoneOn_of_deriv_nonneg (convex_Ico a 1) hcont ?_ ?_
     · intro y hy
       rw [interior_Ico] at hy
-      exact (legC_G_hasDerivAt ha ha1 hy).differentiableAt.differentiableWithinAt
+      exact (CylinderCoordinate.rhsOuter_hasDerivAt ha ha1
+          hy).differentiableAt.differentiableWithinAt
     · intro y hy
       rw [interior_Ico] at hy
-      rw [(legC_G_hasDerivAt ha ha1 hy).deriv]
+      rw [(CylinderCoordinate.rhsOuter_hasDerivAt ha ha1 hy).deriv]
       have : 0 < 1 - y^2 := by nlinarith [hy.2, ha.trans hy.1]
       positivity
-  have h0 : legC_G a a = 0 := by
-    simp [legC_G, ha.ne', Real.artanh_zero, Real.arcosh_zero]
+  have h0 : CylinderCoordinate.rhsOuter a a = 0 := by
+    simp [CylinderCoordinate.rhsOuter, ha.ne', Real.artanh_zero, Real.arcosh_zero]
   rw [← h0]
   exact hmono ⟨le_refl a, ha1⟩ hx hx.1
 
 /-- Left side of DLMF 14.15.28 (oscillatory side `|ζ| ≤ α`). -/
-noncomputable def legC_H (α ζ : ℝ) : ℝ :=
+noncomputable def CylinderCoordinate.lhsOscillatory (α ζ : ℝ) : ℝ :=
   α^2/2*Real.arcsin (ζ/α)+ζ/2*Real.sqrt (α^2-ζ^2)
 
-/-- Helper `legC_H_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_H_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : ζ ∈ Ioo (-α) α) :
-    HasDerivAt (legC_H α) (Real.sqrt (α^2-ζ^2)) ζ := by
+/-- Helper `CylinderCoordinate.lhsOscillatory_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsOscillatory_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : ζ ∈ Ioo (-α) α) :
+    HasDerivAt (CylinderCoordinate.lhsOscillatory α) (Real.sqrt (α^2-ζ^2)) ζ := by
   have hp : 0 < α^2-ζ^2 := by nlinarith [hζ.1, hζ.2]
   set s := Real.sqrt (α^2-ζ^2) with hs
   have hs0 : 0 < s := Real.sqrt_pos.2 hp
@@ -539,44 +583,58 @@ theorem legC_H_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : ζ ∈ Ioo (-α) �
   have ha := (Real.hasDerivAt_arcsin h1.ne' h2.ne).comp ζ ((hasDerivAt_id ζ).div_const α)
   have h := (ha.const_mul (α^2/2)).add (((hasDerivAt_id ζ).div_const 2).mul hsd)
   convert h using 1
-  · funext y; simp [legC_H, Function.comp]
+  · funext y; simp [CylinderCoordinate.lhsOscillatory, Function.comp]
   · simp only [id]
     have h3 : 1 - (ζ/α)^2 = s^2/α^2 := by rw [hs2]; field_simp
     rw [h3, Real.sqrt_div' _ (sq_nonneg α), Real.sqrt_sq hs0.le, Real.sqrt_sq hα.le]
     field_simp
     linear_combination hs2
 
-/-- Helper `legC_H_continuous` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_H_continuous (α : ℝ) : Continuous (legC_H α) := by
-  unfold legC_H; fun_prop
+/-- Helper `CylinderCoordinate.lhsOscillatory_continuous` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsOscillatory_continuous (α : ℝ) : Continuous
+    (CylinderCoordinate.lhsOscillatory α) := by
+  unfold CylinderCoordinate.lhsOscillatory; fun_prop
 
-/-- Helper `legC_H_strictMonoOn` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_H_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn (legC_H α) (Icc (-α) α) := by
-  refine strictMonoOn_of_deriv_pos (convex_Icc _ _) (legC_H_continuous α).continuousOn
+/-- Helper `CylinderCoordinate.lhsOscillatory_strictMonoOn` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsOscillatory_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn
+    (CylinderCoordinate.lhsOscillatory α) (Icc (-α) α) := by
+  refine strictMonoOn_of_deriv_pos (convex_Icc _ _)
+      (CylinderCoordinate.lhsOscillatory_continuous α).continuousOn
     fun ζ hζ => ?_
   rw [interior_Icc] at hζ
-  rw [(legC_H_hasDerivAt hα hζ).deriv]
+  rw [(CylinderCoordinate.lhsOscillatory_hasDerivAt hα hζ).deriv]
   exact Real.sqrt_pos.2 (by nlinarith [hζ.1, hζ.2])
 
-/-- Helper `legC_H_right` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_H_right {α : ℝ} (hα : 0 < α) : legC_H α α = π*α^2/4 := by
-  simp [legC_H, hα.ne', Real.arcsin_one]; ring
+/-- Helper `CylinderCoordinate.lhsOscillatory_right` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsOscillatory_right {α : ℝ} (hα : 0 < α) :
+    CylinderCoordinate.lhsOscillatory α α = π*α^2/4 := by
+  simp [CylinderCoordinate.lhsOscillatory, hα.ne', Real.arcsin_one]; ring
 
-/-- Helper `legC_H_left` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_H_left {α : ℝ} (hα : 0 < α) : legC_H α (-α) = -(π*α^2/4) := by
-  simp [legC_H, hα.ne', Real.arcsin_neg, Real.arcsin_one]; ring
+/-- Helper `CylinderCoordinate.lhsOscillatory_left` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.lhsOscillatory_left {α : ℝ} (hα : 0 < α) :
+    CylinderCoordinate.lhsOscillatory α (-α) = -(π*α^2/4) := by
+  simp [CylinderCoordinate.lhsOscillatory, hα.ne', Real.arcsin_neg, Real.arcsin_one]; ring
 
 /-- Right side of DLMF 14.15.28 as a function of `x ∈ (-a, a)`. -/
-noncomputable def legC_K (a x : ℝ) : ℝ :=
+noncomputable def CylinderCoordinate.rhsOscillatory (a x : ℝ) : ℝ :=
   Real.arcsin (x/a)-Real.sqrt (1-a^2)*Real.arctan (x*Real.sqrt ((1-a^2)/(a^2-x^2)))
 
-/-- Helper `legC_K_neg` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_K_neg (a x : ℝ) : legC_K a (-x) = -legC_K a x := by
-  simp only [legC_K, neg_div, Real.arcsin_neg, neg_sq, neg_mul, Real.arctan_neg]; ring
+/-- Helper `CylinderCoordinate.rhsOscillatory_neg` for DLMF 14.15(v) (Legendre–cylinder coordinate).
+-/
+theorem CylinderCoordinate.rhsOscillatory_neg (a x : ℝ) : CylinderCoordinate.rhsOscillatory a (-x) =
+    -CylinderCoordinate.rhsOscillatory a x := by
+  simp only [CylinderCoordinate.rhsOscillatory, neg_div, Real.arcsin_neg, neg_sq, neg_mul,
+      Real.arctan_neg]; ring
 
-/-- Helper `legC_K_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_K_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo (-a) a) :
-    HasDerivAt (legC_K a) (Real.sqrt (a^2-x^2)/(1-x^2)) x := by
+/-- Helper `CylinderCoordinate.rhsOscillatory_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.rhsOscillatory_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1)
+    (hx : x ∈ Ioo (-a) a) :
+    HasDerivAt (CylinderCoordinate.rhsOscillatory a) (Real.sqrt (a^2-x^2)/(1-x^2)) x := by
   have hm2p : 0 < a^2-x^2 := by nlinarith [hx.1, hx.2]
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hc2p : 0 < 1 - a^2 := by nlinarith
@@ -590,9 +648,10 @@ theorem legC_K_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo
     have : HasDerivAt (fun y : ℝ => a^2-y^2) (-(2*x)) x := by
       simpa using (hasDerivAt_pow 2 x).const_sub (a^2)
     exact this.sqrt hm2p.ne'
-  have hK : legC_K a = fun y => Real.arcsin (y/a) - c*Real.arctan (c*y/Real.sqrt (a^2-y^2)) := by
+  have hK : CylinderCoordinate.rhsOscillatory a = fun y => Real.arcsin (y/a) -
+      c*Real.arctan (c*y/Real.sqrt (a^2-y^2)) := by
     funext y
-    simp only [legC_K]
+    simp only [CylinderCoordinate.rhsOscillatory]
     rw [Real.sqrt_div hc2p.le, ← hc]
     ring_nf
   have hu1 : -1 < x/a := by rw [lt_div_iff₀ ha]; linarith [hx.1]
@@ -613,9 +672,10 @@ theorem legC_K_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo
     field_simp
     rw [hm2, hc2]; ring
 
-/-- Helper `legC_K_tendsto` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_K_tendsto {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
-    Tendsto (legC_K a) (𝓝[<] a) (𝓝 (π/2 - Real.sqrt (1-a^2)*(π/2))) := by
+/-- Helper `CylinderCoordinate.rhsOscillatory_tendsto` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.rhsOscillatory_tendsto {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
+    Tendsto (CylinderCoordinate.rhsOscillatory a) (𝓝[<] a) (𝓝 (π/2 - Real.sqrt (1-a^2)*(π/2))) := by
   have hc2p : 0 < 1 - a^2 := by nlinarith
   have h1 : Tendsto (fun x : ℝ => Real.arcsin (x/a)) (𝓝[<] a) (𝓝 (π/2)) := by
     have h := ((Real.continuous_arcsin.comp (continuous_id.div_const a)).tendsto a)
@@ -640,28 +700,32 @@ theorem legC_K_tendsto {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
   have h2 := (Real.tendsto_arctan_atTop.mono_right nhdsWithin_le_nhds).comp harg
   exact h1.sub (h2.const_mul _)
 
-/-- Helper `legC_K_bound` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_K_bound {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo (-a) a) :
-    legC_K a x < π/2 - Real.sqrt (1-a^2)*(π/2) := by
-  have hmono : StrictMonoOn (legC_K a) (Ioo (-a) a) := by
+/-- Helper `CylinderCoordinate.rhsOscillatory_bound` for DLMF 14.15(v) (Legendre–cylinder
+coordinate). -/
+theorem CylinderCoordinate.rhsOscillatory_bound {a x : ℝ} (ha : 0 < a) (ha1 : a < 1)
+    (hx : x ∈ Ioo (-a) a) :
+    CylinderCoordinate.rhsOscillatory a x < π/2 - Real.sqrt (1-a^2)*(π/2) := by
+  have hmono : StrictMonoOn (CylinderCoordinate.rhsOscillatory a) (Ioo (-a) a) := by
     refine strictMonoOn_of_deriv_pos (convex_Ioo _ _)
-      (fun y hy => (legC_K_hasDerivAt ha ha1 hy).continuousAt.continuousWithinAt) fun y hy => ?_
+      (fun y hy => (CylinderCoordinate.rhsOscillatory_hasDerivAt ha ha1
+          hy).continuousAt.continuousWithinAt) fun y hy => ?_
     rw [interior_Ioo] at hy
-    rw [(legC_K_hasDerivAt ha ha1 hy).deriv]
+    rw [(CylinderCoordinate.rhsOscillatory_hasDerivAt ha ha1 hy).deriv]
     have h1 : 0 < 1 - y^2 := by nlinarith [hy.1, hy.2]
     have h2 : 0 < Real.sqrt (a^2-y^2) := Real.sqrt_pos.2 (by nlinarith [hy.1, hy.2])
     positivity
   set y := (x + a)/2 with hydef
   have hy : y ∈ Ioo (-a) a := ⟨by linarith [hx.1, hx.2], by linarith [hx.2]⟩
-  have hxy : legC_K a x < legC_K a y := hmono hx hy (by linarith [hx.2])
-  have hle : legC_K a y ≤ π/2 - Real.sqrt (1-a^2)*(π/2) := by
-    refine ge_of_tendsto (legC_K_tendsto ha ha1) ?_
+  have hxy : CylinderCoordinate.rhsOscillatory a x < CylinderCoordinate.rhsOscillatory a y :=
+      hmono hx hy (by linarith [hx.2])
+  have hle : CylinderCoordinate.rhsOscillatory a y ≤ π/2 - Real.sqrt (1-a^2)*(π/2) := by
+    refine ge_of_tendsto (CylinderCoordinate.rhsOscillatory_tendsto ha ha1) ?_
     filter_upwards [Ioo_mem_nhdsLT hy.2] with z hz
     exact (hmono hy ⟨by linarith [hy.1, hz.1], hz.2⟩ hz.1).le
   linarith
 
-/-- Helper `legC_params_lt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_params_lt {ν μ : ℝ} (hν : -1/2 < ν) (hμ : 0 < μ) (hlt : μ < ν+1/2) :
+/-- Helper `CylinderCoordinate.parameters_lt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
+theorem CylinderCoordinate.parameters_lt {ν μ : ℝ} (hν : -1/2 < ν) (hμ : 0 < μ) (hlt : μ < ν+1/2) :
     0 < legendreCylinderA ν μ ∧ legendreCylinderA ν μ < 1 ∧ 0 < legendreCylinderAlpha ν μ ∧
       π/2 - Real.sqrt (1-legendreCylinderA ν μ^2)*(π/2) = π*legendreCylinderAlpha ν μ^2/4 := by
   have hp : 0 < ν+1/2 := by linarith
@@ -689,15 +753,15 @@ theorem legC_params_lt {ν μ : ℝ} (hν : -1/2 < ν) (hμ : 0 < μ) (hlt : μ 
     field_simp
     ring
 
-/-- Helper `legC_alpha_pos_of_gt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_alpha_pos_of_gt {ν μ : ℝ} (hν : -1/2 < ν) (hgt : ν+1/2 < μ) :
+/-- Helper `CylinderCoordinate.alpha_pos_of_gt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
+theorem CylinderCoordinate.alpha_pos_of_gt {ν μ : ℝ} (hν : -1/2 < ν) (hgt : ν+1/2 < μ) :
     0 < legendreCylinderAlpha ν μ := by
   have hp : 0 < ν+1/2 := by linarith
   have habs : |ν-μ+1/2| = μ-(ν+1/2) := by rw [abs_of_neg (by linarith)]; ring
   exact Real.sqrt_pos.2 (div_pos (by rw [habs]; linarith) hp)
 
-/-- Helper `legC_A_eq_zero` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_A_eq_zero {ν μ : ℝ} (h : μ = ν+1/2) :
+/-- Helper `CylinderCoordinate.A_eq_zero` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
+theorem CylinderCoordinate.A_eq_zero {ν μ : ℝ} (h : μ = ν+1/2) :
     legendreCylinderA ν μ = 0 := by
   rw [legendreCylinderA, show ν-μ+1/2 = 0 by linarith]; simp
 
@@ -740,8 +804,8 @@ theorem legendreCylinderZeta_spec {ν μ x : ℝ} (hν : -1/2 < ν) (hμ : 0 < �
         · nlinarith
   · simp only [ha0, ↓reduceIte]
     by_cases hle : μ ≤ ν+1/2
-    · have hlt : μ < ν+1/2 := lt_of_le_of_ne hle fun h => ha0 (legC_A_eq_zero h)
-      obtain ⟨hA0, hA1, hα0, hid⟩ := legC_params_lt hν hμ hlt
+    · have hlt : μ < ν+1/2 := lt_of_le_of_ne hle fun h => ha0 (CylinderCoordinate.A_eq_zero h)
+      obtain ⟨hA0, hA1, hα0, hid⟩ := CylinderCoordinate.parameters_lt hν hμ hlt
       simp only [hle, ↓reduceIte]
       by_cases hxa : x = -a
       · simp only [hxa, ↓reduceIte]
@@ -749,28 +813,37 @@ theorem legendreCylinderZeta_spec {ν μ x : ℝ} (hν : -1/2 < ν) (hμ : 0 < �
       · simp only [hxa, ↓reduceIte]
         by_cases hax : a ≤ x
         · simp only [hax, ↓reduceIte]
-          obtain ⟨ζ, hζ, h⟩ := legC_F_surj hα0 (legC_G_nonneg hA0 hA1 ⟨hax, hx.2⟩)
+          obtain ⟨ζ, hζ, h⟩ :=
+              CylinderCoordinate.lhsOuter_surj hα0
+              (CylinderCoordinate.rhsOuter_nonneg hA0 hA1 ⟨hax, hx.2⟩)
           refine ⟨⟨ζ, hζ, h⟩, fun ζ₁ ζ₂ h1 h2 => ?_⟩
-          exact (legC_F_strictMonoOn hα0).injOn h1.1 h2.1 (h1.2.trans h2.2.symm)
+          exact (CylinderCoordinate.lhsOuter_strictMonoOn hα0).injOn h1.1 h2.1
+              (h1.2.trans h2.2.symm)
         · simp only [hax, ↓reduceIte]
           have hxI : x ∈ Ioo (-a) a :=
             ⟨lt_of_le_of_ne (hdom hle) (Ne.symm hxa), not_le.1 hax⟩
-          have hu := legC_K_bound hA0 hA1 hxI
-          have hl := legC_K_bound hA0 hA1 (x := -x) ⟨by linarith [hxI.2], by linarith [hxI.1]⟩
-          rw [legC_K_neg] at hl
+          have hu := CylinderCoordinate.rhsOscillatory_bound hA0 hA1 hxI
+          have hl := CylinderCoordinate.rhsOscillatory_bound hA0 hA1 (x := -x)
+              ⟨by linarith [hxI.2], by linarith [hxI.1]⟩
+          rw [CylinderCoordinate.rhsOscillatory_neg] at hl
           rw [hid] at hu hl
           obtain ⟨ζ, hζ, h⟩ := intermediate_value_Icc (show -α ≤ α by linarith)
-            (legC_H_continuous α).continuousOn
-            (show legC_K a x ∈ Icc (legC_H α (-α)) (legC_H α α) from by
-              rw [legC_H_left hα0, legC_H_right hα0]; constructor <;> linarith)
+            (CylinderCoordinate.lhsOscillatory_continuous α).continuousOn
+            (show CylinderCoordinate.rhsOscillatory a x ∈
+                Icc (CylinderCoordinate.lhsOscillatory α (-α))
+                (CylinderCoordinate.lhsOscillatory α α) from by
+              rw [CylinderCoordinate.lhsOscillatory_left hα0,
+                  CylinderCoordinate.lhsOscillatory_right hα0]; constructor <;> linarith)
           refine ⟨⟨ζ, abs_le.2 hζ, h⟩, fun ζ₁ ζ₂ h1 h2 => ?_⟩
-          exact (legC_H_strictMonoOn hα0).injOn (abs_le.1 h1.1) (abs_le.1 h2.1)
+          exact (CylinderCoordinate.lhsOscillatory_strictMonoOn hα0).injOn (abs_le.1 h1.1)
+              (abs_le.1 h2.1)
               (h1.2.trans h2.2.symm)
     · simp only [hle, ↓reduceIte]
-      have hα0 := legC_alpha_pos_of_gt hν (not_le.1 hle)
-      obtain ⟨ζ, h⟩ := legC_P_surj hα0
+      have hα0 := CylinderCoordinate.alpha_pos_of_gt hν (not_le.1 hle)
+      obtain ⟨ζ, h⟩ := CylinderCoordinate.lhsHyperbolic_surj hα0
           (Real.sqrt (1+a^2)*Real.artanh (x*Real.sqrt ((1+a^2)/(x^2+a^2)))-Real.arsinh (x/a))
-      exact ⟨⟨ζ, h⟩, fun ζ₁ ζ₂ h1 h2 => (legC_P_strictMono hα0).injective (h1.trans h2.symm)⟩
+      exact ⟨⟨ζ, h⟩, fun ζ₁ ζ₂ h1 h2 =>
+          (CylinderCoordinate.lhsHyperbolic_strictMono hα0).injective (h1.trans h2.symm)⟩
 
 /-- The amplitude `((ζ²−α²)/(x²−a²))^{1/4}` (for `μ ≤ ν+1/2`) or `((ζ²+α²)/(x²+a²))^{1/4}` (for `μ >
 ν+1/2`) in DLMF 14.15.24, 14.15.25 and 14.15.30, defined as a punctured limit so that the removable
@@ -785,7 +858,7 @@ def legendreUniformFilter (S : Set (ℝ × ℝ × ℝ)) : Filter (ℝ × ℝ × 
   comap Prod.fst atTop ⊓ 𝓟 S
 
 /-- For real order and positive argument, `Y_ν(x)` is real. -/
-theorem legBes_besselY_im (ν x : ℝ) (hx : 0 < x) : (besselY ν x).im = 0 := by
+theorem BesselSum.besselY_im (ν x : ℝ) (hx : 0 < x) : (besselY ν x).im = 0 := by
   have hs : (x : ℂ) ∈ slitPlane := Or.inl (by simpa using hx)
   have hnot : ∀ μ : ℝ, (∀ k : ℤ, (μ : ℂ) ≠ k) → (besselY μ x).im = 0 := by
     intro μ hμ
@@ -819,12 +892,12 @@ theorem legBes_besselY_im (ν x : ℝ) (hx : 0 < x) : (besselY ν x).im = 0 := b
     (tendsto_const_nhds.congr' (hev.mono fun μ h => h.symm))
 
 /-- For real order and positive argument, `Y_ν(x)` is real. -/
-theorem legBes_besselY_ofReal_eq_re (ν x : ℝ) (hx : 0 < x) :
+theorem BesselSum.besselY_ofReal_eq_re (ν x : ℝ) (hx : 0 < x) :
     besselY ν x = ((besselY ν x).re : ℂ) :=
-  Complex.ext (by simp) (by simp [legBes_besselY_im ν x hx])
+  Complex.ext (by simp) (by simp [BesselSum.besselY_im ν x hx])
 
 /-- `x ↦ J_ν(x) + Y_ν(x)` is real-continuous on `(0, ∞)`. -/
-theorem legBes_continuousOn (ν : ℝ) :
+theorem BesselSum.continuousOn (ν : ℝ) :
     ContinuousOn (fun x : ℝ => (besselJ ν x + besselY ν x).re) (Ioi 0) := by
   intro x hx
   have hs : (x : ℂ) ∈ slitPlane := Or.inl (by simpa using hx)
@@ -836,14 +909,14 @@ theorem legBes_continuousOn (ν : ℝ) :
   exact ((continuousOn_re_besselJ ν) x hx).add hY.continuousWithinAt
 
 /-- On the positive axis `J_ν + Y_ν` vanishes iff its real part does. -/
-theorem legBes_eq_zero_iff {ν x : ℝ} (hx : 0 < x) :
+theorem BesselSum.eq_zero_iff {ν x : ℝ} (hx : 0 < x) :
     besselJ ν x + besselY ν x = 0 ↔ (besselJ ν x + besselY ν x).re = 0 := by
-  rw [besselJ_ofReal_eq_re ν x hx, legBes_besselY_ofReal_eq_re ν x hx, ← ofReal_add, ofReal_re,
+  rw [besselJ_ofReal_eq_re ν x hx, BesselSum.besselY_ofReal_eq_re ν x hx, ← ofReal_add, ofReal_re,
     ofReal_eq_zero]
 
 /-- Large-argument positivity: `J_ν + Y_ν > 0` at points `x ≡ νπ/2 + π/4 (mod 2π)` beyond any
 bound. -/
-theorem legBes_large (ν : ℝ) (X : ℝ) :
+theorem BesselSum.exists_pos_large (ν : ℝ) (X : ℝ) :
     ∃ x, X ≤ x ∧ 0 < x ∧ 0 < (besselJ ν x + besselY ν x).re := by
   obtain ⟨C, hC⟩ := ((besselJ_sub_cos_isBigO (ν : ℂ)).add (besselY_sub_sin_isBigO (ν : ℂ))).bound
   obtain ⟨X0, hX0⟩ := eventually_atTop.mp hC
@@ -897,7 +970,7 @@ theorem legBes_large (ν : ℝ) (X : ℝ) :
   linarith
 
 /-- Near `0`, `J_ν` is positive and bounded (`ν ≥ 0`). -/
-theorem legBes_besselJ_small {ν : ℝ} (hν : 0 ≤ ν) :
+theorem BesselSum.besselJ_small {ν : ℝ} (hν : 0 ≤ ν) :
     ∃ δ M : ℝ, 0 < δ ∧ 0 < M ∧ ∀ t : ℝ, 0 < t → t ≤ δ →
       0 < (besselJ ν t).re ∧ (besselJ ν t).re ≤ M := by
   set G : ℝ → ℂ := fun x => regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} (-((x : ℂ) ^ 2 / 4))
@@ -933,9 +1006,9 @@ theorem legBes_besselJ_small {ν : ℝ} (hν : 0 ≤ ν) :
 
 /-- Small-argument behaviour: `J_ν + Y_ν < 0` on some interval `(0, ε)` (`ν ≥ 0`), from
 `(Y_ν/J_ν)' = 2/(π x J_ν²)` (Wronskian, DLMF 10.5.2) and the boundedness of `J_ν`. -/
-theorem legBes_small {ν : ℝ} (hν : 0 ≤ ν) :
+theorem BesselSum.neg_small {ν : ℝ} (hν : 0 ≤ ν) :
     ∃ ε : ℝ, 0 < ε ∧ ∀ x : ℝ, 0 < x → x < ε → (besselJ ν x + besselY ν x).re < 0 := by
-  obtain ⟨δ, M, hδ, hM, hJ⟩ := legBes_besselJ_small hν
+  obtain ⟨δ, M, hδ, hM, hJ⟩ := BesselSum.besselJ_small hν
   set j : ℝ → ℝ := fun t => (besselJ ν t).re with hj
   set y : ℝ → ℝ := fun t => (besselY ν t).re with hy
   set dj : ℝ → ℝ := fun t => (deriv (besselJ ν) t).re
@@ -948,7 +1021,7 @@ theorem legBes_small {ν : ℝ} (hν : 0 ≤ ν) :
   have hW : ∀ t : ℝ, 0 < t → j t * dy t - dj t * y t = 2 / (π * t) := by
     intro t ht
     have h := congrArg Complex.re (wronskian_besselJ_besselY (ν : ℂ) (hs t ht))
-    rw [besselJ_ofReal_eq_re ν t ht, legBes_besselY_ofReal_eq_re ν t ht] at h
+    rw [besselJ_ofReal_eq_re ν t ht, BesselSum.besselY_ofReal_eq_re ν t ht] at h
     rw [show (2 : ℂ) / (π * t) = ((2 / (π * t) : ℝ) : ℂ) by push_cast; ring, ofReal_re] at h
     simpa [sub_re, re_ofReal_mul, re_mul_ofReal] using h
   set k := 2 / (π * M^2) with hk
@@ -1000,35 +1073,35 @@ theorem besselEnvelopeCross_spec {ν : ℝ} (hν : 0 ≤ ν) :
           (AsymptoticApproximations.besselEnvCrit ν)=0 ∧
       ∀ x : ℝ, 0 < x → x < AsymptoticApproximations.besselEnvCrit ν →
           besselJ ν x+DLMF.Bessel.besselY ν x ≠ 0 := by
-  obtain ⟨ε, hε, hsmall⟩ := legBes_small hν
+  obtain ⟨ε, hε, hsmall⟩ := BesselSum.neg_small hν
   set f : ℝ → ℝ := fun x => (besselJ ν x + besselY ν x).re with hf
   set Z := {x : ℝ | 0 < x ∧ besselJ ν x + besselY ν x = 0} with hZ
   have hlow : ∀ z ∈ Z, ε ≤ z := by
     intro z hz
     by_contra h
     have := hsmall z hz.1 (not_le.1 h)
-    rw [(legBes_eq_zero_iff hz.1).1 hz.2] at this
+    rw [(BesselSum.eq_zero_iff hz.1).1 hz.2] at this
     exact lt_irrefl _ this
   have hne : Z.Nonempty := by
-    obtain ⟨X, hX, hX0, hXpos⟩ := legBes_large ν ε
+    obtain ⟨X, hX, hX0, hXpos⟩ := BesselSum.exists_pos_large ν ε
     have hneg := hsmall (ε/2) (by positivity) (by linarith)
     obtain ⟨z, hz, hfz⟩ := intermediate_value_Icc (show ε/2 ≤ X by linarith)
-      ((legBes_continuousOn ν).mono fun t ht => show (0:ℝ) < t by linarith [ht.1])
+      ((BesselSum.continuousOn ν).mono fun t ht => show (0:ℝ) < t by linarith [ht.1])
       ⟨hneg.le, hXpos.le⟩
     have hz0 : 0 < z := by linarith [hz.1]
-    exact ⟨z, hz0, (legBes_eq_zero_iff hz0).2 hfz⟩
+    exact ⟨z, hz0, (BesselSum.eq_zero_iff hz0).2 hfz⟩
   have hbdd : BddBelow Z := ⟨ε, hlow⟩
   have hZc : Z = Ici ε ∩ f ⁻¹' {0} := by
     ext z
     simp only [hZ, mem_ofPred_eq, mem_inter_iff, mem_Ici, mem_preimage, mem_singleton_iff, hf]
     constructor
-    · intro h; exact ⟨hlow z h, (legBes_eq_zero_iff h.1).1 h.2⟩
+    · intro h; exact ⟨hlow z h, (BesselSum.eq_zero_iff h.1).1 h.2⟩
     · intro h
       have hz0 : 0 < z := lt_of_lt_of_le hε h.1
-      exact ⟨hz0, (legBes_eq_zero_iff hz0).2 h.2⟩
+      exact ⟨hz0, (BesselSum.eq_zero_iff hz0).2 h.2⟩
   have hclosed : IsClosed Z := by
     rw [hZc]
-    exact ((legBes_continuousOn ν).mono (show Ici ε ⊆ Ioi 0 from fun t (ht : ε ≤ t) =>
+    exact ((BesselSum.continuousOn ν).mono (show Ici ε ⊆ Ioi 0 from fun t (ht : ε ≤ t) =>
       show (0:ℝ) < t by linarith)).preimage_isClosed_of_isClosed isClosed_Ici isClosed_singleton
   have hmem : sInf Z ∈ Z := hclosed.csInf_mem hne hbdd
   refine ⟨hmem.1, hmem.2, fun x hx hxs h => ?_⟩

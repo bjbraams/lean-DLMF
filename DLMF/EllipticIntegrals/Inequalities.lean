@@ -10,6 +10,7 @@ public import DLMF.Elementary.Trigonometric
 public import Carlson.Elliptic.Standard
 public import Carlson.Elliptic.CapacityBound
 public import Carlson.Mean.Bounds
+public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 
 /-!
 # Inequalities for Legendre's elliptic integrals (DLMF §19.9)
@@ -29,6 +30,8 @@ are the complex DLMF integrals of `DLMF.EllipticIntegrals` (`incEllIntFk`, `incE
 
 * `log_four_le_compEllIntKk_add_log`, `one_le_compEllIntEk_le`, `one_le_compEllIntPik_le`:
   the three lines of DLMF 19.9.1.
+* `tendsto_compEllIntKk_sub_log`: the sharp limit `K(k) - ln(4/k') → 0` as `k → 1-`, which
+  gives the lower bound in the first line of DLMF 19.9.1.
 * `compEllIntKk_div_log_bounds`, `eight_add_sq_mul_compEllIntKk_div_log_bounds`: bounds for
   `K(k)/ln(4/k')` (DLMF 19.9.2, 19.9.3).
 * `compEllIntEk_bounds`, `pi_mul_cCompEllIntKk_div_bounds`: DLMF 19.9.4, 19.9.5.
@@ -148,12 +151,342 @@ private lemma compEllIntPik_eq_incEllIntPik (α2 k : ℂ) :
 
 /-! ### §19.9(i) Complete integrals -/
 
+/-! ### The sharp limit of `K(k) - ln(4/k')` -/
+
+/-- `sin² φ + a cos² φ > 0` for `a > 0`. -/
+private lemma sin_sq_add_mul_cos_sq_pos {a : ℝ} (ha : 0 < a) (φ : ℝ) :
+    0 < Real.sin φ ^ 2 + a * Real.cos φ ^ 2 := by
+  rcases eq_or_ne (Real.cos φ) 0 with h | h
+  · have := Real.sin_sq_add_cos_sq φ
+    rw [h] at this ⊢; nlinarith
+  · have := pow_pos (abs_pos.mpr h) 2
+    rw [sq_abs] at this
+    positivity
+
+/-- `(1 - cos φ)/sin φ = tan(φ/2)` written with half angles. -/
+private lemma one_sub_cos_mul_inv_sin (φ : ℝ) :
+    (1 - Real.cos φ) * (Real.sin φ)⁻¹ = Real.sin (φ / 2) / Real.cos (φ / 2) := by
+  have h1 : Real.cos φ = 1 - 2 * Real.sin (φ / 2) ^ 2 := by
+    rw [show φ = 2 * (φ / 2) by ring, Real.cos_two_mul, ← Real.sin_sq_add_cos_sq (φ / 2)]
+    ring_nf
+  have h2 : Real.sin φ = 2 * Real.sin (φ / 2) * Real.cos (φ / 2) := by
+    rw [show φ = 2 * (φ / 2) by ring, Real.sin_two_mul]; ring_nf
+  rw [h1, h2]
+  rcases eq_or_ne (Real.sin (φ / 2)) 0 with hs | hs
+  · simp [hs]
+  rcases eq_or_ne (Real.cos (φ / 2)) 0 with hc | hc
+  · simp [hc]
+  field_simp
+  ring
+
+/-- `∫₀^{π/2} (1 - cos φ)/sin φ dφ = ln 2`. -/
+private lemma integral_one_sub_cos_div_sin :
+    ∫ φ in (0 : ℝ)..(π / 2), (1 - Real.cos φ) * (Real.sin φ)⁻¹ = Real.log 2 := by
+  simp_rw [one_sub_cos_mul_inv_sin]
+  have hd : ∀ φ ∈ uIcc (0 : ℝ) (π / 2),
+      HasDerivAt (fun u => -2 * Real.log (Real.cos (u / 2)))
+        (Real.sin (φ / 2) / Real.cos (φ / 2)) φ := by
+    intro φ hφ
+    rw [uIcc_of_le (by positivity)] at hφ
+    have hc : 0 < Real.cos (φ / 2) :=
+      Real.cos_pos_of_mem_Ioo ⟨by linarith [hφ.1, Real.pi_pos], by linarith [hφ.2, Real.pi_pos]⟩
+    have h0 : HasDerivAt (fun u : ℝ => Real.cos (u / 2)) (-Real.sin (φ / 2) * (1 / 2)) φ := by
+      have := (Real.hasDerivAt_cos (φ / 2)).comp φ ((hasDerivAt_id φ).div_const 2)
+      simpa [Function.comp_def] using this
+    have h := h0.log hc.ne'
+    convert h.const_mul (-2) using 1
+    field_simp
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd]
+  · rw [show π / 2 / 2 = π / 4 by ring, Real.cos_pi_div_four, zero_div, Real.cos_zero,
+      Real.log_one, Real.log_div (by positivity) (by norm_num), Real.log_sqrt (by norm_num)]
+    ring
+  · refine ContinuousOn.intervalIntegrable fun φ hφ => ?_
+    rw [uIcc_of_le (by positivity)] at hφ
+    have hc : 0 < Real.cos (φ / 2) :=
+      Real.cos_pos_of_mem_Ioo ⟨by linarith [hφ.1, Real.pi_pos], by linarith [hφ.2, Real.pi_pos]⟩
+    exact ((Real.continuous_sin.comp (continuous_id.div_const 2)).continuousAt.div
+      (Real.continuous_cos.comp (continuous_id.div_const 2)).continuousAt hc.ne').continuousWithinAt
+
+
+/-- As `a → 0+`, `∫₀^{π/2} (1 - cos φ)(sin² φ + a cos² φ)^{-1/2} dφ → ln 2`. -/
+private lemma tendsto_integral_one_sub_cos_mul_rpow :
+    Tendsto (fun a : ℝ => ∫ φ in (0 : ℝ)..(π / 2),
+      (1 - Real.cos φ) * (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ))
+      (𝓝[>] 0) (𝓝 (Real.log 2)) := by
+  rw [← integral_one_sub_cos_div_sin]
+  have hIoc : ∀ φ ∈ uIoc (0 : ℝ) (π / 2), 0 < Real.sin φ ∧ 0 ≤ Real.cos φ := by
+    intro φ hφ
+    rw [uIoc_of_le (by positivity)] at hφ
+    exact ⟨Real.sin_pos_of_pos_of_lt_pi hφ.1 (by linarith [hφ.2, Real.pi_pos]),
+      Real.cos_nonneg_of_mem_Icc ⟨by linarith [hφ.1, Real.pi_pos], hφ.2⟩⟩
+  refine intervalIntegral.tendsto_integral_filter_of_dominated_convergence (fun _ => 1) ?_ ?_
+    intervalIntegrable_const ?_
+  · filter_upwards [self_mem_nhdsWithin] with a (ha : 0 < a)
+    refine Continuous.aestronglyMeasurable ?_
+    exact (continuous_const.sub Real.continuous_cos).mul
+      ((by fun_prop : Continuous fun φ => Real.sin φ ^ 2 + a * Real.cos φ ^ 2).rpow_const
+        fun φ => Or.inl (sin_sq_add_mul_cos_sq_pos ha φ).ne')
+  · filter_upwards [self_mem_nhdsWithin] with a (ha : 0 < a)
+    refine Eventually.of_forall fun φ hφ => ?_
+    obtain ⟨hs, hc⟩ := hIoc φ hφ
+    have hpos := sin_sq_add_mul_cos_sq_pos ha φ
+    have h1 : 0 ≤ 1 - Real.cos φ := by linarith [Real.cos_le_one φ]
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg h1 (Real.rpow_nonneg hpos.le _))]
+    have hle : (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ) ≤ (Real.sin φ)⁻¹ := by
+      rw [rpow_neg_half_eq_inv_sqrt hpos.le]
+      apply inv_anti₀ hs
+      have h2 := Real.sqrt_le_sqrt (show Real.sin φ ^ 2 ≤ Real.sin φ ^ 2 + a * Real.cos φ ^ 2 by
+        nlinarith)
+      rwa [Real.sqrt_sq hs.le] at h2
+    have hsc : 1 - Real.cos φ ≤ Real.sin φ := by
+      nlinarith [Real.sin_sq_add_cos_sq φ]
+    calc (1 - Real.cos φ) * (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ)
+        ≤ (1 - Real.cos φ) * (Real.sin φ)⁻¹ := mul_le_mul_of_nonneg_left hle h1
+      _ ≤ Real.sin φ * (Real.sin φ)⁻¹ := mul_le_mul_of_nonneg_right hsc (inv_nonneg.mpr hs.le)
+      _ = 1 := mul_inv_cancel₀ hs.ne'
+  · refine Eventually.of_forall fun φ hφ => ?_
+    obtain ⟨hs, hc⟩ := hIoc φ hφ
+    have hs2 : 0 < Real.sin φ ^ 2 := by positivity
+    have hcont : ContinuousAt (fun a : ℝ => (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ))
+        0 := by
+      refine ContinuousAt.rpow_const (by fun_prop) (Or.inl ?_)
+      simp only [zero_mul, add_zero]; exact hs2.ne'
+    have h := (hcont.tendsto.mono_left (nhdsWithin_le_nhds (s := Ioi 0))).const_mul
+      (1 - Real.cos φ)
+    simp only [zero_mul, add_zero] at h
+    rwa [rpow_neg_half_eq_inv_sqrt hs2.le, Real.sqrt_sq hs.le] at h
+
+/-- `∫₀^{π/2} cos φ (sin² φ + a cos² φ)^{-1/2} dφ = ln((1 + √(1 - a))/√a)/√(1 - a)` for
+`0 < a < 1`. -/
+private lemma integral_cos_mul_rpow {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
+    ∫ φ in (0 : ℝ)..(π / 2), Real.cos φ * (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ) =
+      Real.log ((1 + Real.sqrt (1 - a)) / Real.sqrt a) / Real.sqrt (1 - a) := by
+  set b := Real.sqrt (1 - a) with hb
+  set c := Real.sqrt a with hc
+  have hb0 : 0 < b := Real.sqrt_pos.mpr (by linarith)
+  have hc0 : 0 < c := Real.sqrt_pos.mpr ha
+  have hb2 : b ^ 2 = 1 - a := Real.sq_sqrt (by linarith)
+  have hc2 : c ^ 2 = a := Real.sq_sqrt ha.le
+  have hd : ∀ φ ∈ uIcc (0 : ℝ) (π / 2),
+      HasDerivAt (fun u => Real.arsinh (b / c * Real.sin u) / b)
+        (Real.cos φ * (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ)) φ := by
+    intro φ _
+    have h := (((Real.hasDerivAt_sin φ).const_mul (b / c)).arsinh).div_const b
+    convert h using 1
+    have hpos := sin_sq_add_mul_cos_sq_pos ha φ
+    rw [rpow_neg_half_eq_inv_sqrt hpos.le]
+    have he : 1 + (b / c * Real.sin φ) ^ 2 = (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) / c ^ 2 := by
+      rw [mul_pow, div_pow, hb2, hc2]; field_simp; nlinarith [Real.sin_sq_add_cos_sq φ]
+    rw [he, Real.sqrt_div' _ (by positivity), Real.sqrt_sq hc0.le]
+    have hs := Real.sqrt_pos.mpr hpos
+    rw [smul_eq_mul]
+    field_simp
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd]
+  · rw [Real.sin_pi_div_two, Real.sin_zero, mul_one, mul_zero, Real.arsinh_zero, zero_div, sub_zero,
+      Real.arsinh]
+    congr 1
+    congr 1
+    have he : 1 + (b / c) ^ 2 = (1 / c) ^ 2 := by
+      rw [div_pow, div_pow, hb2, hc2]; field_simp; ring
+    rw [he, Real.sqrt_sq (by positivity)]
+    field_simp
+    ring
+  · refine (Continuous.intervalIntegrable ?_ _ _)
+    exact Real.continuous_cos.mul
+      ((by fun_prop : Continuous fun φ => Real.sin φ ^ 2 + a * Real.cos φ ^ 2).rpow_const
+        fun φ => Or.inl (sin_sq_add_mul_cos_sq_pos ha φ).ne')
+
+
+/-- `K(m) = ∫₀^{π/2} (sin² φ + (1 - m) cos² φ)^{-1/2} dφ`. -/
+private lemma compEllIntKm_eq_integral_sin_sq_add (m : ℝ) :
+    DLMF.Elliptic.Real.compEllIntKm m = ∫ φ in (0 : ℝ)..(π / 2),
+      (Real.sin φ ^ 2 + (1 - m) * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ) := by
+  rw [DLMF.Elliptic.Real.compEllIntKm]
+  have h := intervalIntegral.integral_comp_sub_left
+    (fun θ : ℝ => (1 - m * Real.sin θ ^ 2) ^ (-(1 / 2) : ℝ)) (π / 2) (a := 0) (b := π / 2)
+  simp only [sub_self, sub_zero, Real.sin_pi_div_two_sub] at h
+  rw [← h]
+  refine intervalIntegral.integral_congr fun φ _ => ?_
+  congr 1
+  nlinarith [Real.sin_sq_add_cos_sq φ]
+
+/-- The sharp limit `K(m) + ½ ln(1 - m) → ln 4` as `m → 1-`, i.e. `K(k) - ln(4/k') → 0` as
+`k → 1-`. -/
+theorem tendsto_compEllIntKm_add_log :
+    Tendsto (fun m : ℝ => DLMF.Elliptic.Real.compEllIntKm m + 1 / 2 * Real.log (1 - m))
+      (𝓝[<] 1) (𝓝 (Real.log 4)) := by
+  -- the explicit part `P(a) + ½ ln a`
+  set h : ℝ → ℝ := fun a => Real.log (1 + Real.sqrt (1 - a)) / Real.sqrt (1 - a) -
+    a * Real.log a / (2 * Real.sqrt (1 - a) * (1 + Real.sqrt (1 - a))) with hh
+  have hcont : ContinuousAt h 0 := by
+    have hs : ContinuousAt (fun a : ℝ => Real.sqrt (1 - a)) 0 := by fun_prop
+    have hs0 : Real.sqrt (1 - 0) = 1 := by simp
+    refine ContinuousAt.sub ?_ ?_
+    · refine ContinuousAt.div ?_ hs (by norm_num)
+      exact (continuousAt_const.add hs).log (by norm_num)
+    · refine ContinuousAt.div Real.continuous_mul_log.continuousAt ?_ (by norm_num)
+      exact (continuousAt_const.mul hs).mul (continuousAt_const.add hs)
+  have h0 : h 0 = Real.log 2 := by simp [hh]; norm_num
+  have hP : Tendsto h (𝓝[>] 0) (𝓝 (Real.log 2)) := h0 ▸ hcont.tendsto.mono_left nhdsWithin_le_nhds
+  have hG : Tendsto (fun a : ℝ => (∫ φ in (0 : ℝ)..(π / 2),
+      (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ)) + 1 / 2 * Real.log a)
+      (𝓝[>] 0) (𝓝 (Real.log 4)) := by
+    rw [show Real.log 4 = Real.log 2 + Real.log 2 by
+      rw [← Real.log_mul (by norm_num) (by norm_num)]; norm_num]
+    refine (hP.add tendsto_integral_one_sub_cos_mul_rpow).congr' ?_
+    filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with a ha
+    have hcI : Continuous fun φ : ℝ => (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ) :=
+      (by fun_prop : Continuous fun φ => Real.sin φ ^ 2 + a * Real.cos φ ^ 2).rpow_const
+        fun φ => Or.inl (sin_sq_add_mul_cos_sq_pos ha.1 φ).ne'
+    have hsplit : (∫ φ in (0 : ℝ)..(π / 2),
+        (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ)) =
+        (∫ φ in (0 : ℝ)..(π / 2), Real.cos φ *
+          (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ)) +
+        ∫ φ in (0 : ℝ)..(π / 2), (1 - Real.cos φ) *
+          (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ) := by
+      rw [← intervalIntegral.integral_add
+        (f := fun φ => Real.cos φ * (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ))
+        (g := fun φ => (1 - Real.cos φ) * (Real.sin φ ^ 2 + a * Real.cos φ ^ 2) ^ (-(1 / 2) : ℝ))
+        ((Real.continuous_cos.mul hcI).intervalIntegrable _ _)
+        (((continuous_const.sub Real.continuous_cos).mul hcI).intervalIntegrable _ _)]
+      congr 1; funext φ; ring
+    rw [hsplit, integral_cos_mul_rpow ha.1 ha.2]
+    simp only [hh]
+    set b := Real.sqrt (1 - a) with hb
+    have hb0 : 0 < b := Real.sqrt_pos.mpr (by linarith [ha.2])
+    have hb2 : b ^ 2 = 1 - a := Real.sq_sqrt (by linarith [ha.2])
+    have hc : Real.log (Real.sqrt a) = 1 / 2 * Real.log a := by
+      rw [Real.log_sqrt ha.1.le]; ring
+    rw [Real.log_div (by positivity) (Real.sqrt_pos.mpr ha.1).ne', hc]
+    have key : (Real.log (1 + b) - 1 / 2 * Real.log a) / b + 1 / 2 * Real.log a =
+        Real.log (1 + b) / b - a * Real.log a / (2 * b * (1 + b)) := by
+      field_simp
+      linear_combination (Real.log a) * hb2
+    linear_combination -key
+  have hm : Tendsto (fun m : ℝ => 1 - m) (𝓝[<] 1) (𝓝[>] 0) := by
+    refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
+    · have h1 := (continuous_sub_left (1 : ℝ)).tendsto 1
+      simpa using h1.mono_left (nhdsWithin_le_nhds (s := Iio 1))
+    · filter_upwards [self_mem_nhdsWithin] with m (hm : m < 1) using sub_pos.mpr hm
+  refine (hG.comp hm).congr' (Eventually.of_forall fun m => ?_)
+  simp only [Function.comp_def, compEllIntKm_eq_integral_sin_sq_add]
+
+
+/-- `E(m) - (1 - m) K(m) ≤ m` for `0 ≤ m < 1`. -/
+private lemma compEllIntEm_sub_mul_compEllIntKm_le {m : ℝ} (hm0 : 0 ≤ m) (hm1 : m < 1) :
+    DLMF.Elliptic.Real.compEllIntEm m - (1 - m) * DLMF.Elliptic.Real.compEllIntKm m ≤ m := by
+  have hpos : ∀ θ, 0 < 1 - m * Real.sin θ ^ 2 := fun θ => by
+    nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ)]
+  have hc : ∀ p : ℝ, Continuous fun θ : ℝ => (1 - m * Real.sin θ ^ 2) ^ p := fun p =>
+    (by fun_prop : Continuous fun θ : ℝ => 1 - m * Real.sin θ ^ 2).rpow_const
+      fun θ => Or.inl (hpos θ).ne'
+  rw [DLMF.Elliptic.Real.compEllIntEm, DLMF.Elliptic.Real.compEllIntKm,
+    ← intervalIntegral.integral_const_mul,
+    ← intervalIntegral.integral_sub (f := fun θ => (1 - m * Real.sin θ ^ 2) ^ (1 / 2 : ℝ))
+      (g := fun θ => (1 - m) * (1 - m * Real.sin θ ^ 2) ^ (-(1 / 2) : ℝ))
+      ((hc _).intervalIntegrable _ _) ((continuous_const.mul (hc _)).intervalIntegrable _ _)]
+  calc _ ≤ ∫ θ in (0 : ℝ)..(π / 2), m * Real.cos θ := by
+        refine intervalIntegral.integral_mono_on (by positivity)
+          (((hc _).sub (continuous_const.mul (hc _))).intervalIntegrable _ _)
+          ((continuous_const.mul Real.continuous_cos).intervalIntegrable _ _) fun θ hθ => ?_
+        have hcos : 0 ≤ Real.cos θ :=
+          Real.cos_nonneg_of_mem_Icc ⟨by linarith [hθ.1, Real.pi_pos], hθ.2⟩
+        set u := (1 - m * Real.sin θ ^ 2) ^ (1 / 2 : ℝ) with hu
+        have hu0 : 0 < u := Real.rpow_pos_of_pos (hpos θ) _
+        have hu2 : u ^ 2 = 1 - m * Real.sin θ ^ 2 := by
+          rw [hu, ← Real.rpow_natCast, ← Real.rpow_mul (hpos θ).le]; norm_num
+        have hinv : (1 - m * Real.sin θ ^ 2) ^ (-(1 / 2) : ℝ) = u⁻¹ := by
+          rw [hu, Real.rpow_neg (hpos θ).le]
+        rw [hinv]
+        have hcu : Real.cos θ ≤ u := by
+          have h2 : Real.cos θ ^ 2 ≤ u ^ 2 := by
+            rw [hu2]; nlinarith [Real.sin_sq_add_cos_sq θ, sq_nonneg (Real.sin θ)]
+          nlinarith
+        have key : u - (1 - m) * u⁻¹ = m * Real.cos θ ^ 2 / u := by
+          field_simp
+          nlinarith [Real.sin_sq_add_cos_sq θ]
+        rw [key, div_le_iff₀ hu0]
+        nlinarith [mul_le_mul_of_nonneg_left hcu (mul_nonneg hm0 hcos)]
+    _ = m := by
+        rw [intervalIntegral.integral_const_mul, integral_cos, Real.sin_pi_div_two, Real.sin_zero]
+        ring
+
+
+/-- `ln 4 ≤ K(m) + ½ ln(1 - m) ≤ π/2` for `0 ≤ m < 1` (DLMF 19.9.1 in the parameter `m`):
+the middle term decreases from `π/2` at `m = 0` to its limit `ln 4` at `m = 1`. -/
+private lemma compEllIntKm_add_log_bounds {m : ℝ} (hm0 : 0 ≤ m) (hm1 : m < 1) :
+    Real.log 4 ≤ DLMF.Elliptic.Real.compEllIntKm m + 1 / 2 * Real.log (1 - m) ∧
+      DLMF.Elliptic.Real.compEllIntKm m + 1 / 2 * Real.log (1 - m) ≤ π / 2 := by
+  set f : ℝ → ℝ := fun m => DLMF.Elliptic.Real.compEllIntKm m + 1 / 2 * Real.log (1 - m)
+    with hf
+  have hderiv : ∀ x ∈ Ioo (0 : ℝ) 1, HasDerivAt f
+      ((DLMF.Elliptic.Real.compEllIntEm x - (1 - x) * DLMF.Elliptic.Real.compEllIntKm x) /
+        (2 * x * (1 - x)) + 1 / 2 * (-1 / (1 - x))) x := by
+    intro x hx
+    have h1 : (1 : ℝ) - x ≠ 0 := by linarith [hx.2]
+    have hl := ((hasDerivAt_id x).const_sub 1).log h1
+    simp only [id] at hl
+    exact (DLMF.Elliptic.Real.hasDerivAt_compEllIntKm hx.2 hx.1.ne').add (hl.const_mul (1 / 2))
+  have hanti : AntitoneOn f (Ico 0 1) := by
+    refine antitoneOn_of_deriv_nonpos (convex_Ico 0 1) (fun x hx => ?_) ?_ ?_
+    · have h1 : (1 : ℝ) - x ≠ 0 := by linarith [hx.2]
+      exact ((DLMF.Elliptic.Real.continuousAt_compEllIntKm hx.2).add
+        (((continuousAt_const.sub continuousAt_id).log h1).const_mul _)).continuousWithinAt
+    · rw [interior_Ico]
+      exact fun x hx => (hderiv x hx).differentiableAt.differentiableWithinAt
+    · rw [interior_Ico]
+      intro x hx
+      rw [(hderiv x hx).deriv]
+      have h1 : 0 < 1 - x := by linarith [hx.2]
+      have h2 : 0 < 2 * x * (1 - x) := by have := hx.1; positivity
+      have hle := compEllIntEm_sub_mul_compEllIntKm_le hx.1.le hx.2
+      rw [div_add' _ _ _ h2.ne', div_nonpos_iff]
+      right
+      refine ⟨?_, h2.le⟩
+      have : 1 / 2 * (-1 / (1 - x)) * (2 * x * (1 - x)) = -x := by field_simp
+      linarith
+  have hmem : m ∈ Ico (0 : ℝ) 1 := ⟨hm0, hm1⟩
+  refine ⟨?_, ?_⟩
+  · refine le_of_tendsto tendsto_compEllIntKm_add_log ?_
+    filter_upwards [Ioo_mem_nhdsLT hm1] with x hx
+    exact hanti hmem ⟨hm0.trans hx.1.le, hx.2⟩ hx.1.le
+  · have h := hanti ⟨le_rfl, one_pos⟩ hmem hm0
+    simp only [hf, DLMF.Elliptic.Real.compEllIntKm_zero, sub_zero, Real.log_one, mul_zero,
+      add_zero] at h
+    exact h
+
+/-- The sharp limit `K(k) - ln(4/k') → 0` as `k → 1-` (real `k`, `k' = √(1 - k²)`). -/
+theorem tendsto_compEllIntKk_sub_log :
+    Tendsto (fun k : ℝ => (compEllIntKk k).re - Real.log (4 / Real.sqrt (1 - k ^ 2)))
+      (𝓝[<] 1) (𝓝 0) := by
+  have hsq : Tendsto (fun k : ℝ => k ^ 2) (𝓝[<] 1) (𝓝[<] 1) := by
+    refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
+    · simpa using ((continuous_pow 2).tendsto (1 : ℝ)).mono_left
+        (nhdsWithin_le_nhds (s := Iio 1))
+    · filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with k hk
+      exact (sq_lt_one_iff₀ hk.1.le).mpr hk.2
+  have h := (tendsto_compEllIntKm_add_log.comp hsq).sub_const (Real.log 4)
+  rw [sub_self] at h
+  refine h.congr' ?_
+  filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with k hk
+  have hk2 : k ^ 2 < 1 := (sq_lt_one_iff₀ hk.1.le).mpr hk.2
+  have h1 : 0 < 1 - k ^ 2 := by linarith
+  rw [Function.comp_apply, compEllIntKk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk2.le,
+    ofReal_re, Real.log_div (by norm_num) (Real.sqrt_pos.mpr h1).ne', Real.log_sqrt h1.le]
+  ring
+
+/-! ### Bounds -/
+
 /-- DLMF 19.9.1, first line: `ln 4 ≤ K(k) + ln k' ≤ π/2` for `0 < k < 1`. -/
 @[dlmf 19.9.E1]
 theorem log_four_le_compEllIntKk_add_log {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
     Real.log 4 ≤ (compEllIntKk k).re + Real.log (Real.sqrt (1 - k ^ 2)) ∧
       (compEllIntKk k).re + Real.log (Real.sqrt (1 - k ^ 2)) ≤ π / 2 := by
-  sorry
+  have hk2 : k ^ 2 < 1 := (sq_lt_one_iff₀ hk0.le).mpr hk1
+  rw [compEllIntKk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk2.le, ofReal_re,
+    Real.log_sqrt (by linarith)]
+  have h := compEllIntKm_add_log_bounds (sq_nonneg k) hk2
+  constructor <;> linarith [h.1, h.2]
 
 /-- DLMF 19.9.2: `1 + k'²/8 < K(k)/ln(4/k') < 1 + k'²/4` for `0 < k < 1`. -/
 @[dlmf 19.9.E2]

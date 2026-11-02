@@ -56,28 +56,28 @@ variable {K : Type*} [Field K] (a b : ℕ → K)
 @[simp] theorem contFrac_h : (contFrac a b).h = b 0 := rfl
 
 /-- `A₀ = b₀`. -/
-theorem contFrac_nums_zero : (contFrac a b).nums 0 = b 0 := cfConv_nums_zero _ _ _
+theorem contFrac_nums_zero : (contFrac a b).nums 0 = b 0 := ofFun_nums_zero _ _ _
 
 /-- `B₀ = 1`. -/
-theorem contFrac_dens_zero : (contFrac a b).dens 0 = 1 := cfConv_dens_zero _ _ _
+theorem contFrac_dens_zero : (contFrac a b).dens 0 = 1 := ofFun_dens_zero _ _ _
 
 /-- `A₁ = b₁ b₀ + a₁`. -/
-theorem contFrac_nums_one : (contFrac a b).nums 1 = b 1 * b 0 + a 1 := cfConv_nums_one _ _ _
+theorem contFrac_nums_one : (contFrac a b).nums 1 = b 1 * b 0 + a 1 := ofFun_nums_one _ _ _
 
 /-- `B₁ = b₁`. -/
-theorem contFrac_dens_one : (contFrac a b).dens 1 = b 1 := cfConv_dens_one _ _ _
+theorem contFrac_dens_one : (contFrac a b).dens 1 = b 1 := ofFun_dens_one _ _ _
 
 /-- `A_{n+2} = b_{n+2} A_{n+1} + a_{n+2} A_n`. -/
 theorem contFrac_nums_step (n : ℕ) :
     (contFrac a b).nums (n + 2) =
       b (n + 2) * (contFrac a b).nums (n + 1) + a (n + 2) * (contFrac a b).nums n :=
-  cfConv_nums_step _ _ _ n
+  ofFun_nums_add_two _ _ _ n
 
 /-- `B_{n+2} = b_{n+2} B_{n+1} + a_{n+2} B_n`. -/
 theorem contFrac_dens_step (n : ℕ) :
     (contFrac a b).dens (n + 2) =
       b (n + 2) * (contFrac a b).dens (n + 1) + a (n + 2) * (contFrac a b).dens n :=
-  cfConv_dens_step _ _ _ n
+  ofFun_dens_add_two _ _ _ n
 
 /-- `C_0 = b₀`. -/
 theorem contFrac_convs_zero : (contFrac a b).convs 0 = b 0 := zeroth_conv_eq_h
@@ -191,11 +191,11 @@ theorem contFrac_det (n : ℕ) :
   · simp [zeroth_contAux_eq_one_zero]
 
   · rw [contFrac_contsAux_succ, contFrac_contsAux_succ]
-    have h := cfConv_det (b 0) (fun k => a (k + 1)) (fun k => b (k + 1)) m
+    have h := ofFun_determinant (b 0) (fun k => a (k + 1)) (fun k => b (k + 1)) m
     simp only [] at h ⊢
     change (contFrac a b).nums (m + 1) * (contFrac a b).dens m -
       (contFrac a b).dens (m + 1) * (contFrac a b).nums m = _
-    rw [show (contFrac a b) = cfConv_ofFun (b 0) (fun k => a (k + 1)) (fun k => b (k + 1)) from
+    rw [show (contFrac a b) = ofFun (b 0) (fun k => a (k + 1)) (fun k => b (k + 1)) from
       rfl, h, pow_succ, pow_succ]
     ring
 
@@ -204,7 +204,7 @@ theorem contFrac_det' (m : ℕ) :
     (contFrac a b).nums (m + 1) * (contFrac a b).dens m -
         (contFrac a b).dens (m + 1) * (contFrac a b).nums m =
       (-1) ^ m * ∏ k ∈ range (m + 1), a (k + 1) :=
-  cfConv_det (b 0) (fun k => a (k + 1)) (fun k => b (k + 1)) m
+  ofFun_determinant (b 0) (fun k => a (k + 1)) (fun k => b (k + 1)) m
 
 /-- DLMF 1.12.8: `C_n - C_{n-1} = (-1)^{n-1} ∏_{k=1}^n a_k / (B_{n-1} B_n)` (`n = m + 1`). -/
 @[dlmf 1.12.E8]
@@ -343,7 +343,7 @@ theorem contFracEquiv_of_scale (d : ℕ → K) (hd0 : d 0 = 1) (hd : ∀ n, d n 
   have h0 : b' 0 = b 0 := by rw [hb', hd0, one_mul]
   unfold contFrac
   rw [h0, hA, hB]
-  exact (cfConv_equiv_convs (h := b 0) (a := fun k => a (k + 1)) (b := fun k => b (k + 1))
+  exact (ofFun_convs_equiv (h := b 0) (a := fun k => a (k + 1)) (b := fun k => b (k + 1))
     (fun k => d (k + 1)) (fun k => hd _) n).symm
 
 /-- DLMF 1.12.17, first form: when `b_n ≠ 0` (`n ≥ 1`),

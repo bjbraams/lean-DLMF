@@ -41,6 +41,8 @@ derivatives from DLMF §§8.7–8.8.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 open DLMF.Statistical

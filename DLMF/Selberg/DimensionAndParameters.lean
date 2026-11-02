@@ -284,7 +284,8 @@ theorem differentiableAt_ofReal_cpow_sub_one {x : ℝ} (hx : 0 < x) (a : ℂ) :
 theorem differentiableOn_selbergInt_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 0 ≤ c.re) :
     DifferentiableOn ℂ (fun a => selbergInt N a b c) {a | 0 < a.re} := by
   unfold selbergInt
-  refine DLMF.Gamma.vb_differentiableOn_integral (isOpen_lt continuous_const Complex.continuous_re)
+  refine DLMF.Gamma.VerticalBeta.differentiableOn_integral
+      (isOpen_lt continuous_const Complex.continuous_re)
     (fun a _ => (measurable_selbergIntegrand N a b c).aestronglyMeasurable) ?_ ?_
   · filter_upwards [ae_restrict_mem (measurableSet_cube N),
       (ae_restrict_iff' (measurableSet_cube N)).2 (ae_cube_coords_Ioo N)] with t ht ht'
@@ -383,11 +384,12 @@ theorem exists_norm_recip_selbergRHS_le (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (h
       (d + (b + ((N + j - 1 : ℕ) : ℂ) * c)).re ≤ 2 + (b + ((N + j - 1 : ℕ) : ℂ) * c).re →
       ‖Gamma (d + (b + ((N + j - 1 : ℕ) : ℂ) * c))‖ ≤
         C * (1 + |d.im|) ^ K * Real.exp (-(π * |d.im|) / 2) :=
-    fun j => DLMF.Hypergeometric.CarlsonAux.exists_norm_Gamma_add_le_strip _ (by linarith [hp j])
+    fun j => DLMF.Hypergeometric.CarlsonTheorem.exists_norm_Gamma_add_le_strip _
+        (by linarith [hp j])
   have h2 : ∀ j : Fin N, ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ d : ℂ,
       |(d + ((j : ℕ) : ℂ) * c).re| ≤ 2 + |(((j : ℕ) : ℂ) * c).re| →
       ‖(Gamma (d + ((j : ℕ) : ℂ) * c))⁻¹‖ ≤ C * (1 + |d.im|) ^ K * Real.exp (π * |d.im| / 2) :=
-    fun j => DLMF.Hypergeometric.CarlsonAux.exists_norm_recip_Gamma_add_le_strip _ _
+    fun j => DLMF.Hypergeometric.CarlsonTheorem.exists_norm_recip_Gamma_add_le_strip _ _
   choose C1 K1 hC1 hb1 using h1
   choose C2 K2 hC2 hb2 using h2
   set D : Fin N → ℝ := fun j => C1 j * C2 j * ‖Gamma (1 + c)‖ * ‖(Gamma (b + (j : ℕ) * c))⁻¹‖ *
@@ -464,7 +466,7 @@ theorem selbergRatio_eq_one_left {N : ℕ} {b c : ℂ} (hb : 0 < b.re) (hc : 1 /
   set B := ∫ t in cube N, ‖∏ i, weight 1 b (t i)‖ with hB
   have hB0 : 0 ≤ B := setIntegral_nonneg (measurableSet_cube N) fun _ _ => norm_nonneg _
   have hfz : ∀ w : ℂ, 0 ≤ w.re → f w = 0 := by
-    refine DLMF.Hypergeometric.CarlsonAux.eq_zero_of_periodic_of_bound (δ := 1 / 2)
+    refine DLMF.Hypergeometric.CarlsonTheorem.eq_zero_of_periodic_of_bound (δ := 1 / 2)
       (by norm_num) ?_ ?_ (C := B * max C 0 + ‖F 1‖) (σ := 0) (K := K) Real.pi_pos ?_ ?_
     · intro w hw
       refine DifferentiableWithinAt.sub ?_ (differentiableWithinAt_const _)
@@ -588,7 +590,8 @@ theorem differentiableAt_selbergIntegrand_c {N : ℕ} (a b : ℂ) {t : Fin N →
 theorem differentiableOn_selbergInt_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
     DifferentiableOn ℂ (fun c => selbergInt N a b c) {c | 0 < c.re} := by
   unfold selbergInt
-  refine DLMF.Gamma.vb_differentiableOn_integral (isOpen_lt continuous_const Complex.continuous_re)
+  refine DLMF.Gamma.VerticalBeta.differentiableOn_integral
+      (isOpen_lt continuous_const Complex.continuous_re)
     (fun c _ => (measurable_selbergIntegrand N a b c).aestronglyMeasurable) ?_ ?_
   · filter_upwards [ae_restrict_of_ae (ae_coords_ne N)] with t ht
     exact fun c _ => (differentiableAt_selbergIntegrand_c a b ht c).differentiableWithinAt

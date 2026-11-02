@@ -499,7 +499,7 @@ private lemma derivWeierstrassP_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.l
   linear_combination h - (℘'[L] u - ℘'[L] v) / (℘[L] u - ℘[L] v) * ha
 
 /-- `℘'(z) ≠ 0` for `z, 2z ∉ 𝕃`. -/
-private lemma derivWeierstrassP_ne_zero_of_two_mul_not_mem (L : PeriodPair) {z : ℂ}
+theorem derivWeierstrassP_ne_zero_of_two_mul_not_mem (L : PeriodPair) {z : ℂ}
     (hz : z ∉ L.lattice)
     (h2z : 2 * z ∉ L.lattice) : ℘'[L] z ≠ 0 := by
   set H := halfPeriodsOf L

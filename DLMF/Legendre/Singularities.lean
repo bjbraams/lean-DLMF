@@ -113,7 +113,8 @@ equivalence). -/
 theorem legendre_singular_1 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
     (fun x : ℝ => ferrersP ν μ x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => 1/Gamma (1-μ)*(2/(1-x):ℂ)^(μ/2)) := by
   have hΓ : Gamma (1-μ) ≠ 0 := Gamma_ne_zero fun n hn => hμ n (by linear_combination -hn)
-  refine legBd_isEquivalent_of_eventuallyEq_mul ?_ (tendsto_legendre_singular_factor (ν+1) (-ν)
+  refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_
+      (tendsto_legendre_singular_factor (ν+1) (-ν)
       (1-μ)
     (μ/2) (Gamma (1-μ)) (by rw [regularizedGaussHG_zero_of_regular fun n hn => hμ n
       (by linear_combination -hn)]; field_simp) _ nhdsWithin_le_nhds)
@@ -136,7 +137,8 @@ theorem legendre_singular_2 (ν : ℂ) (m : ℕ) (hν : poch (ν-m+1) (2*m) ≠ 
   have hf : (m.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hc : ∀ n : ℕ, (m:ℂ)+1 ≠ -n := fun n hn => by
     have := congrArg re hn; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
-  refine legBd_isEquivalent_of_eventuallyEq_mul ?_ (tendsto_legendre_singular_factor (ν+m+1) (m-ν)
+  refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_
+      (tendsto_legendre_singular_factor (ν+m+1) (m-ν)
       (m+1)
     ((m:ℂ)/2) (m.factorial) (by rw [regularizedGaussHG_zero_of_regular hc,
       show (m:ℂ)+1 = ((m:ℕ):ℂ)+1 by rfl, Gamma_nat_eq_factorial]; field_simp) _ nhdsWithin_le_nhds)
@@ -155,17 +157,18 @@ theorem legendre_singular_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) (hμ : 0 
     (hh : ∀ n : ℕ, μ ≠ n+1/2) :
     (fun x : ℝ => ferrersQ ν μ x) ~[𝓝[<] (1:ℝ)]
         (fun x : ℝ => 1/2*cos (μ*π)*Gamma μ*(2/(1-x):ℂ)^(μ/2)) := by
-  have hcos := legBd_cos_ne_zero hμ hh
+  have hcos := BoundaryAsymptotics.cos_ne_zero hμ hh
   have hΓ : Gamma μ ≠ 0 := Gamma_ne_zero_of_re_pos hμ
   have hK : (2:ℂ)^(μ-1) * Gamma μ * cos (μ*π) ≠ 0 :=
     mul_ne_zero (mul_ne_zero (by simp) hΓ) hcos
-  have := legBd_isEquivalent_of_tendsto (legBd_ferrersQ_tendsto h hμ) (legBd_tendsto_weight_left μ)
+  have := BoundaryAsymptotics.isEquivalent_of_tendsto (BoundaryAsymptotics.ferrersQ_tendsto h hμ)
+      (BoundaryAsymptotics.tendsto_weight_left μ)
     hK (by simp)
   refine this.congr_right (Eventually.of_forall fun x => ?_)
   simp only
   rw [show (2:ℂ)^(μ-1) * Gamma μ * cos (μ*π) / 2^μ = (2:ℂ)^(μ-1) / 2^μ * Gamma μ *
       cos (μ*π) by ring,
-    legBd_two_cpow_sub_one_div μ]
+    BoundaryAsymptotics.two_cpow_sub_one_div μ]
   ring
 
 /-- DLMF 14.8.5: for `n ∈ ℕ` and `ν ± (n+1/2) ∉ {−1, −2, …}`, `𝖰^{n+1/2}_ν(x) ~ (−1)^{n+1} π
@@ -227,13 +230,14 @@ theorem legendre_singular_6 (ν μ : ℂ) (hμ : 0 < μ.re) (hp : LegendreQRegul
   have hG2 : Gamma (ν+μ+1) ≠ 0 := Gamma_ne_zero fun n hn => hp n (by linear_combination hn)
   have hK : (2:ℂ)^(μ-1) * Gamma μ * Gamma (ν-μ+1) / Gamma (ν+μ+1) ≠ 0 :=
     div_ne_zero (mul_ne_zero (mul_ne_zero (by simp) hΓ) hG1) hG2
-  have := legBd_isEquivalent_of_tendsto (legBd_ferrersQ_neg_tendsto hp hm hμ)
-    (legBd_tendsto_weight_left μ) hK (by simp)
+  have := BoundaryAsymptotics.isEquivalent_of_tendsto
+      (BoundaryAsymptotics.ferrersQ_neg_tendsto hp hm hμ)
+    (BoundaryAsymptotics.tendsto_weight_left μ) hK (by simp)
   refine this.congr_right (Eventually.of_forall fun x => ?_)
   simp only
   rw [show (2:ℂ)^(μ-1) * Gamma μ * Gamma (ν-μ+1) / Gamma (ν+μ+1) / 2^μ =
     (2:ℂ)^(μ-1) / 2^μ * (Gamma μ * Gamma (ν-μ+1) / Gamma (ν+μ+1)) by ring,
-    legBd_two_cpow_sub_one_div μ]
+    BoundaryAsymptotics.two_cpow_sub_one_div μ]
   field_simp
 
 /-- DLMF 14.8.7: for `μ ∉ {1, 2, 3, …}`, `P^μ_ν(x) ~ (2/(x−1))^{μ/2}/Γ(1−μ)` as `x → 1⁺`. -/
@@ -242,7 +246,8 @@ theorem legendre_singular_7 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
     (fun x : ℝ => associatedP ν μ x) ~[𝓝[>] (1:ℝ)]
         (fun x : ℝ => 1/Gamma (1-μ)*(2/(x-1):ℂ)^(μ/2)) := by
   have hΓ : Gamma (1-μ) ≠ 0 := Gamma_ne_zero fun n hn => hμ n (by linear_combination -hn)
-  refine legBd_isEquivalent_of_eventuallyEq_mul ?_ (tendsto_legendre_singular_factor (ν+1) (-ν)
+  refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_
+      (tendsto_legendre_singular_factor (ν+1) (-ν)
       (1-μ)
     (μ/2) (Gamma (1-μ)) (by rw [regularizedGaussHG_zero_of_regular fun n hn => hμ n
       (by linear_combination -hn)]; field_simp) _ nhdsWithin_le_nhds)
@@ -282,7 +287,8 @@ theorem legendre_singular_8 (ν : ℂ) (m : ℕ) (hn : LegendreQRegular ν (-m))
     rw [show ν-m+1+((2*m:ℕ):ℂ) = ν+m+1 by push_cast; ring] at h3
     rw [h3]
   have hG : Gamma (ν-m+1) ≠ 0 := Gamma_ne_zero hreg
-  refine legBd_isEquivalent_of_eventuallyEq_mul ?_ (tendsto_legendre_singular_factor (ν+m+1) (m-ν)
+  refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_
+      (tendsto_legendre_singular_factor (ν+m+1) (m-ν)
       (m+1)
     ((m:ℂ)/2) (m.factorial) (by rw [regularizedGaussHG_zero_of_regular hc,
       show (m:ℂ)+1 = ((m:ℕ):ℂ)+1 by rfl, Gamma_nat_eq_factorial]; field_simp) _ nhdsWithin_le_nhds)
@@ -304,11 +310,12 @@ theorem legendre_singular_11 (ν μ : ℂ) (hμ : 0 < μ.re) (hp : LegendreQRegu
   have hG2 : Gamma (ν+μ+1) ≠ 0 := Gamma_ne_zero fun n hn => hp n (by linear_combination hn)
   have hK : (2:ℂ)^(μ-1) * Gamma μ * (Gamma (ν+μ+1))⁻¹ ≠ 0 :=
     mul_ne_zero (mul_ne_zero (by simp) hΓ) (inv_ne_zero hG2)
-  have := legBd_isEquivalent_of_tendsto (legBd_olverQ_tendsto ν hμ) (legBd_tendsto_weight_right μ)
+  have := BoundaryAsymptotics.isEquivalent_of_tendsto (BoundaryAsymptotics.olverQ_tendsto ν hμ)
+      (BoundaryAsymptotics.tendsto_weight_right μ)
     hK (by simp)
   refine this.congr_right (Eventually.of_forall fun x => ?_)
   simp only
-  have e := legBd_two_cpow_sub_one_div μ
+  have e := BoundaryAsymptotics.two_cpow_sub_one_div μ
   rw [show (2:ℂ)^(μ-1) * Gamma μ * (Gamma (ν+μ+1))⁻¹ / 2^μ =
     (2:ℂ)^(μ-1) / 2^μ * (Gamma μ * (Gamma (ν+μ+1))⁻¹) by ring, e]
   field_simp
@@ -332,7 +339,8 @@ theorem legendre_singular_12 (ν μ : ℂ) (hν : -1/2 < ν.re) (hμ : ∀ n : �
     rw [e, cpow_neg]
     have : (x:ℂ)^ν ≠ 0 := by simp [hx.ne']
     field_simp
-  have := legBd_isEquivalent_of_tendsto (legBd_associatedP_tendsto_atTop hν μ) hM hK (by simp)
+  have := BoundaryAsymptotics.isEquivalent_of_tendsto
+      (BoundaryAsymptotics.associatedP_tendsto_atTop hν μ) hM hK (by simp)
   refine this.congr_right (Eventually.of_forall fun x => ?_)
   simp only
   have : (2:ℂ)^ν ≠ 0 := by simp
@@ -377,11 +385,12 @@ theorem legendre_singular_14 (μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2) :
     rw [e, show (2/(π*x):ℂ) = ((2/(π*x) : ℝ) : ℂ) by push_cast; rfl]
     field_simp
   have hM0 : ((2/π:ℝ):ℂ)^(1/2:ℂ) ≠ 0 := by
-    rw [← legBd_sqrt_two_div_sqrt_pi]; exact div_ne_zero (by simp) hsq
-  have := legBd_isEquivalent_of_tendsto (legBd_associatedP_half_tendsto_atTop μ) hM hK hM0
+    rw [← BoundaryAsymptotics.sqrt_two_div_sqrt_pi]; exact div_ne_zero (by simp) hsq
+  have := BoundaryAsymptotics.isEquivalent_of_tendsto
+      (BoundaryAsymptotics.associatedP_half_tendsto_atTop μ) hM hK hM0
   refine this.congr_right (Eventually.of_forall fun x => ?_)
   simp only
-  rw [← legBd_sqrt_two_div_sqrt_pi]
+  rw [← BoundaryAsymptotics.sqrt_two_div_sqrt_pi]
   have : (2:ℂ)^(1/2:ℂ) ≠ 0 := by simp
   field_simp
 
@@ -411,7 +420,7 @@ theorem legendre_singular_15 (ν μ : ℂ) (hν : ∀ n : ℕ, ν ≠ -n-3/2) :
         rw [regularizedGaussHG_zero_of_regular hc, mul_one_div_cancel hΓ]
   have hg := hcont.tendsto.comp tendsto_one_div_sq_atTop
   rw [h1] at hg
-  refine legBd_isEquivalent_of_eventuallyEq_mul ?_ hg
+  refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_ hg
   filter_upwards [eventually_gt_atTop 1] with x hx
   have h0 : (0:ℝ) < x := by linarith
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr h0.ne'
@@ -424,7 +433,7 @@ theorem legendre_singular_15 (ν μ : ℂ) (hν : ∀ n : ℕ, ν ≠ -n-3/2) :
   have hxn : (x:ℂ)^(ν+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hx0)
   have h2n : (2:ℂ)^(ν+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
   simp only [olverQ, Function.comp_apply]
-  rw [legBd_branchPower_eq μ hx, hp, h2x]
+  rw [BoundaryAsymptotics.branchPower_eq μ hx, hp, h2x]
   simp only [G]
   generalize regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/(x:ℂ)^2) = R
   generalize (1-1/(x:ℂ)^2)^(μ/2) = P
@@ -463,7 +472,7 @@ theorem legendre_singular_16 (μ : ℂ) (n : ℕ) (hn : 0 < n) (hμ : ∀ k : �
       Gamma_nat_eq_factorial, mul_one_div_cancel hf]
   have hg := hcont.tendsto.comp tendsto_one_div_sq_atTop
   rw [h1] at hg
-  refine legBd_isEquivalent_of_eventuallyEq_mul ?_ hg
+  refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_ hg
   filter_upwards [eventually_gt_atTop 1] with x hx
   have h0 : (0:ℝ) < x := by linarith
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr h0.ne'
@@ -487,7 +496,8 @@ theorem legendre_singular_16 (μ : ℂ) (n : ℕ) (hn : 0 < n) (hμ : ∀ k : �
   have hc' : -((k+1:ℕ):ℂ)-1/2+3/2 = -(k:ℂ) := by push_cast; ring
   have hν1 : -((k+1:ℕ):ℂ)-1/2+1 = s := by simp only [s]; ring
   simp only [olverQ, Function.comp_apply]
-  rw [hc', regularizedGaussHG_neg_nat _ _ _ hw, legBd_branchPower_eq μ hx, hp, hν1, h2x,
+  rw [hc', regularizedGaussHG_neg_nat _ _ _ hw,
+      BoundaryAsymptotics.branchPower_eq μ hx, hp, hν1, h2x,
     h2q, hq, hP]
   simp only [G]
   generalize regularizedGaussHG ((-((k+1:ℕ):ℂ)-1/2+μ+2)/2+k+1) ((-((k+1:ℕ):ℂ)-1/2+μ+1)/2+k+1)
@@ -502,7 +512,7 @@ theorem legendre_singular_16 (μ : ℂ) (n : ℕ) (hn : 0 < n) (hμ : ∀ k : �
 theorem ferrersQ_log_singular {ν : ℂ} (hν : LegendreQRegular ν 0) :
     (fun x : ℝ => ferrersQ ν 0 x-1/2*log (2/(1-x):ℂ)+Real.eulerMascheroniConstant+digamma (ν+1))
         =O[𝓝[<] (1:ℝ)] (fun x : ℝ => (1-x)*Real.log (1-x)) :=
-  legBd_ferrersQ_log_isBigO hν
+  BoundaryAsymptotics.ferrersQ_log_isBigO hν
 
 /-- DLMF 14.8.9 with `ψ(ν+1)/Γ(ν+1)` written as `-(1/Γ)'(ν+1)`. Stronger than DLMF: valid for
 all `ν`, including `ν = -1, -2, …`. -/
@@ -512,7 +522,7 @@ theorem olverQ_log_singular_recipGamma (ν : ℂ) :
         (x-1:ℂ)/(2*Gamma (ν+1))-(log 2/2-Real.eulerMascheroniConstant)/Gamma
         (ν+1)-DLMF.Gamma.recipGammaDeriv 1 (ν+1)) =O[𝓝[>] (1:ℝ)]
         (fun x : ℝ => (x-1)*Real.log (x-1)) :=
-  legBd_olverQ_log_isBigO ν
+  BoundaryAsymptotics.olverQ_log_isBigO ν
 
 /-- DLMF 14.8.9: for `ν ∉ {−1, −2, …}`, `𝑸_ν(x) = −ln(x−1)/(2Γ(ν+1)) + (½ ln 2 − γ − ψ(ν+1))/Γ(ν+1)
 + O((x−1) ln(x−1))` as `x → 1⁺`. -/

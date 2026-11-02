@@ -40,9 +40,11 @@ namespace DLMF.CoalescingSaddles
 /-- The fold ray integral along `arg t = π/6` equals `i w(x)`, with `w` the Airy ray integral. -/
 private lemma integral_airyInt_osc_ray_pi_div_six (x : ℝ) :
     ∫ r in Ioi (0 : ℝ), exp (((π / 6 : ℝ) : ℂ) * I) *
-      DLMF.Airy.airyInt_osc x (r * exp (((π / 6 : ℝ) : ℂ) * I)) = I * DLMF.Airy.airyInt_w x := by
-  rw [DLMF.Airy.airyInt_w, DLMF.Airy.rayIntegral, ← integral_const_mul]
-  exact setIntegral_congr_fun measurableSet_Ioi fun r _ => DLMF.Airy.airyInt_osc_rotate x r
+      DLMF.Airy.IntegralRepresentation.oscillatory x (r * exp (((π / 6 : ℝ) : ℂ) * I)) = I *
+          DLMF.Airy.IntegralRepresentation.w x := by
+  rw [DLMF.Airy.IntegralRepresentation.w, DLMF.Airy.rayIntegral, ← integral_const_mul]
+  exact setIntegral_congr_fun measurableSet_Ioi fun r _ =>
+      DLMF.Airy.IntegralRepresentation.oscillatory_rotate x r
 
 /-- For `K = 1` the sign flip `x_m ↦ (-1)^m x_m` is the identity. -/
 private lemma alternating_sign_vecCons_one (x : ℝ) :
@@ -84,20 +86,23 @@ theorem cuspoidIntegral_one (x : ℝ) :
   have hint := integrable_cuspoidIntegral_integrand 1 ![x]
   set f := fun r : ℝ =>
     cuspoidContourDir 1 r * exp (I * cuspoidPotential 1 (cuspoidContour 1 r) ![x]) with hf
-  have hR : ∫ r in Ioi (0 : ℝ), f r = (a⁻¹ : ℝ) * (I * DLMF.Airy.airyInt_w (x / a)) := by
+  have hR : ∫ r in Ioi (0 : ℝ), f r = (a⁻¹ : ℝ) *
+      (I * DLMF.Airy.IntegralRepresentation.w (x / a)) := by
     have h1 : ∀ r ∈ Ioi (0 : ℝ),
-        f r = (fun ρ : ℝ => u * DLMF.Airy.airyInt_osc (x / a) (ρ * u)) (a * r) := by
+        f r = (fun ρ : ℝ => u *
+            DLMF.Airy.IntegralRepresentation.oscillatory (x / a) (ρ * u)) (a * r) := by
       intro r hr
       simp only [hf, cuspoidContour, cuspoidContourDir_of_nonneg 1 (le_of_lt hr), hθ,
           cuspoidPotential,
-        DLMF.Airy.airyInt_osc, Fin.sum_univ_one]
+        DLMF.Airy.IntegralRepresentation.oscillatory, Fin.sum_univ_one]
       congr 2
       simp only [Matrix.cons_val_fin_one, Fin.val_zero, zero_add, pow_one]
       rw [ofReal_div x a, ofReal_mul, ← hu]
       field_simp
       linear_combination (-(r : ℂ) ^ 3 * u ^ 3) * ha3
     rw [setIntegral_congr_fun measurableSet_Ioi h1]
-    rw [integral_comp_mul_left_Ioi (fun ρ : ℝ => u * DLMF.Airy.airyInt_osc (x / a) (ρ * u)) 0 ha,
+    rw [integral_comp_mul_left_Ioi
+        (fun ρ : ℝ => u * DLMF.Airy.IntegralRepresentation.oscillatory (x / a) (ρ * u)) 0 ha,
       mul_zero, integral_airyInt_osc_ray_pi_div_six, Complex.real_smul]
   have hL : ∫ r in Iic (0 : ℝ), f r = conj (∫ r in Ioi (0 : ℝ), f r) := by
     have := integral_comp_neg_Ioi 0 f
@@ -110,9 +115,9 @@ theorem cuspoidIntegral_one (x : ℝ) :
   unfold cuspoidIntegral
   rw [← intervalIntegral.integral_Iic_add_Ioi hint.integrableOn hint.integrableOn (b := 0),
     ← hf, hL, hR]
-  have hpi := DLMF.Airy.airyInt_pi_airyAi (x / a)
+  have hpi := DLMF.Airy.IntegralRepresentation.pi_airyAi (x / a)
   have hAi : DLMF.Airy.airyAi ((x / a : ℝ) : ℂ) =
-      (((-(DLMF.Airy.airyInt_w (x / a)).im : ℝ) : ℂ)) / π := by
+      (((-(DLMF.Airy.IntegralRepresentation.w (x / a)).im : ℝ) : ℂ)) / π := by
     rw [← hpi]; field_simp
   rw [hAi]
   apply Complex.ext <;> simp [map_mul, conj_ofReal]

@@ -174,9 +174,10 @@ is not yet available from foundational imports).
 of them were made \texttt{private}; 53 files were renamed. The map is in
 \dlmf{reports/RenameMap20261101.tsv}. The round-prefix heuristic now matches 21 public
 names, all of them mathematical (\lean{hyp2F1_euler}, \lean{reg0F1_zero},
-\lean{vec3_mem_carlsonRSlitDomain}). One file name still carries a round identifier:
-\file{DLMFMathlib/Analysis/Fourier/P1a2EntirePeriodic.lean} (Fourier series of entire
-periodic functions), which is missing from the rename map.
+\lean{vec3_mem_carlsonRSlitDomain}). The last file name with a round identifier,
+\file{P1a2EntirePeriodic.lean}, and the real Frobenius solutions \lean{p3lyR}, \lean{p3lyR'}
+of the Spheroidal area were renamed later on 2026-11-02 (\file{EntirePeriodic.lean},
+\lean{frobeniusSolutionReal}, \lean{frobeniusSolutionRealDeriv}); both are in the rename map.
 
 \paragraph{Namespace policy (new audit).}
 \file{AGENTS.md} now requires every declaration under \file{DLMF/} to live in
@@ -189,23 +190,26 @@ accordingly. A source scan that tracks \texttt{namespace} blocks finds:
     \lean{DifferentiableOn.regularizedGaussHG} and
     \lean{HasFPowerSeriesOnBall.hasSum_gaussOperator} in the Hypergeometric area, and
     \lean{DirichletCharacter.isDirichletCharacterFn} in NumberTheory.
-  \item 67 public declarations outside \file{DLMF/Core} sit directly in \lean{DLMF} rather
-    than in an area: the \lean{sphSeries_*} helpers of
-    \file{Bessel/SphericalSeriesTools.lean} and \file{SphericalProductTools.lean} (57), the
-    \lean{erfZ_*} zero-counting lemmas of \file{ErrorFunctions/ZeroTools.lean} (6) and four
-    declarations in \file{ExpIntegrals}. The 35 declarations of \file{DLMF/Core} in
-    \lean{DLMF} are the shared conventions and are fine.
+  \item 67 public declarations outside \file{DLMF/Core} sat directly in \lean{DLMF}: the
+    \lean{sphSeries_*} and \lean{sphProd_*} helpers of \file{Bessel/SphericalSeriesTools.lean}
+    and \file{SphericalProductTools.lean} (57), the \lean{erfZ_*} zero-counting lemmas of
+    \file{ErrorFunctions/ZeroTools.lean} (6) and the spherical Bessel functions.
+    \emph{Resolved later on 2026-11-02:} the helpers are in \lean{DLMF.Bessel.SphericalSeries},
+    \lean{DLMF.Bessel.SphericalProduct} and \lean{DLMF.Confluent.ErfZeros};
+    \lean{sphericalJ} and \lean{sphericalI} moved to \lean{DLMF.Bessel} in
+    \module{DLMF.Bessel.Basic}; the shared conventions and infrastructure of \file{DLMF/Core}
+    moved to \lean{DLMF.Core}. Nothing is declared directly in \lean{DLMF} any more.
   \item Four areas use the namespace of another area: \file{ParabolicCylinder} (909 public
     declarations), \file{IncompleteGamma} (781), \file{ErrorFunctions} (453) and
     \file{ExpIntegrals} (414) are in \lean{DLMF.Confluent}, and \file{GeneralizedHypergeometric}
     (416) is in \lean{DLMF.Hypergeometric}; 91 declarations of \file{IncompleteGamma} are in
-    \lean{DLMF.Statistical}. This is the AAR arrangement, and \file{AGENTS.md} itself cites
-    \lean{DLMF.Confluent.erf_ofReal}. The policy should either say that ``area'' means the
-    namespace, not the directory, or these areas should move to their own namespaces before
-    the foundational layer is offered upstream.
-  \item 106 public declarations remain in auxiliary namespaces that would not pass Mathlib
-    review: \lean{RamanujanAux} (49), \lean{DixonAux} (24), \lean{CarlsonAux} (19) and
-    \lean{DougallAux} (14).
+    \lean{DLMF.Statistical}. This is the AAR arrangement. \emph{Decided later on 2026-11-02:}
+    the user keeps these areas in \lean{DLMF.Confluent} and \lean{DLMF.Hypergeometric};
+    \file{AGENTS.md} now says that an area namespace may span several directories.
+  \item 106 public declarations were in the auxiliary namespaces \lean{RamanujanAux} (49),
+    \lean{DixonAux} (24), \lean{CarlsonAux} (19) and \lean{DougallAux} (14).
+    \emph{Resolved later on 2026-11-02:} they are now \lean{RamanujanIntegral},
+    \lean{DixonWZ}, \lean{CarlsonTheorem} and \lean{DougallSeries}.
   \item In \file{DLMFMathlib/}, the root-level \lean{stRem_*}, \lean{dblZero_*},
     \lean{r27_*} and \lean{q26b_*} families of 2026-11-01 are resolved: they became the
     namespaces \lean{StieltjesRemainder} and \lean{DoubleZeroSqrt} or were renamed.
@@ -219,9 +223,13 @@ The 2026-11-01 list was renamed to snake case (\lean{mittag_leffler}, \lean{resi
 \lean{general_bailey_transform}, \lean{IsPainleveVIOn.elliptic_form}, \ldots). Of the 26
 lowerCamelCase theorem names without an underscore that remain, 22 correctly name a predicate
 in the conclusion (\lean{IsPIIOn.hasDerivAt}, \lean{IsHamiltonianSystemOn.isPainleveIOn}).
-Still to rename: \lean{RamanujanAux.gammaShiftBound}, \lean{extendedInversion} and
-\lean{extendedInversion'}, and the theorem \lean{DoubleZeroSqrt.signedSqrt}, whose name
-reads as a definition.
+Remaining at the time of the review: \lean{RamanujanIntegral.gammaShiftBound} (which correctly
+names the predicate \lean{GammaShiftBound} in its conclusion), \lean{extendedInversion} and
+\lean{extendedInversion'}, and the theorem \lean{DoubleZeroSqrt.signedSqrt}, whose name read as a
+definition. \emph{Resolved later on 2026-11-02:} \lean{lagrange_inversion_extended},
+\lean{lagrange_inversion_extended'} and \lean{lagrange_burmann_extended'}; \lean{signedSqrt} is
+now a definition with the lemmas \lean{analyticAt_signedSqrt}, \lean{hasDerivAt_signedSqrt},
+\lean{eventually_eq_sq_signedSqrt} and \lean{eventually_signedSqrt_eq_sign_mul_sqrt}.
 
 \paragraph{Uppercase and abbreviated definitions (mostly resolved).}
 The single-letter helper definitions of 2026-11-01 received descriptive names; of the 18,
@@ -229,11 +237,19 @@ only \lean{SphericalHarmonics.SU2} (an \lean{abbrev} for the special unitary gro
 which is acceptable. Among the predicate definitions, which rightly use UpperCamelCase, some
 abbreviated names would not pass review: \lean{KumDecBnd}, \lean{KumZQ}, \lean{PcfLGGood},
 \lean{PcfLG2HasExp}, \lean{StruveLOGood}, \lean{StaircaseGood}, \lean{LegendrePathOK},
-\lean{EllRedHyp}, \lean{EllRedPerm}, \lean{LztIsSol} and \lean{KztIsSol}.
+\lean{EllRedHyp}, \lean{EllRedPerm}, \lean{LztIsSol} and \lean{KztIsSol}. \emph{Resolved later on
+2026-11-02:} these and \lean{IsLinODE2SolOn}, \lean{IsLGSolOn}, \lean{IsLGData},
+\lean{AirySqIsProdSol}, \lean{IsDescendingPP}, \lean{DescendingPPIn} and \lean{MBSeriesData}
+were spelled out (\lean{KummerDecayBound}, \lean{HasParityDegreeSupport},
+\lean{IsLinearODE2SolutionOn}, \lean{IsDescendingPlanePartition}, \ldots; see the rename map).
 
 \paragraph{Remaining area vocabulary.}
 The Airy remainder family still uses \lean{airy_ai_…}/\lean{airy_bi_…} in ten theorems (20
-on 2026-11-01) instead of the \lean{airyAi}/\lean{airyBi} vocabulary.
+on 2026-11-01) instead of the \lean{airyAi}/\lean{airyBi} vocabulary. \emph{Resolved later on
+2026-11-02:} they are \lean{airyAi_…}, \lean{airyAiDeriv_…}, \lean{airyBi_…},
+\lean{airyBiDeriv_…}, \lean{airyHyperR_…} and \lean{airyHyperS_…}; the \lean{airySq_*} helpers are
+in \lean{DLMF.Airy.AiSquare}, and \lean{regularizedGaussHGAux} is
+\lean{regularizedGaussHGByShifts}.
 
 \section{Documentation}
 
@@ -378,16 +394,10 @@ lexicographic order; this count was measured afresh and is not directly comparab
     \lean{vdmSq}/\lean{siegelDiscriminant}, and a bridge from \lean{periodicBernoulli} to
     \lean{periodizedBernoulli}. Search for further postfix-\lean{⁻¹} parsing errors of the
     \lean{xPlusDistrib} kind.
-  \item \textbf{Complete the namespace policy:} move the 67 declarations in bare \lean{DLMF}
-    into their areas; replace the four \lean{…Aux} namespaces by descriptive ones or make the
-    helpers private; decide whether ParabolicCylinder, IncompleteGamma, ErrorFunctions,
-    ExpIntegrals and GeneralizedHypergeometric keep the Confluent and Hypergeometric
-    namespaces, and record the decision in \file{AGENTS.md}; resolve the new
-    Elementary $\leftrightarrow$ IncompleteGamma pair.
-  \item \textbf{Finish the naming details:} the file \file{P1a2EntirePeriodic.lean}, the four
-    theorem names of \S\ref{sec:names}, the abbreviated predicate names, the ten
-    \lean{airy_ai_…}/\lean{airy_bi_…} theorems; and decide the policy for primed stronger
-    forms and their duplicated tags.
+  \item \textbf{Complete the namespace policy:} done later on 2026-11-02 except for the new
+    Elementary $\leftrightarrow$ IncompleteGamma pair, which awaits acceptance.
+  \item \textbf{Finish the naming details:} done later on 2026-11-02, except the policy for
+    primed stronger forms and their duplicated tags.
   \item \textbf{Finish the declaration docstrings:} the 42 dated notes, the citation
     mismatches, the admitted statements whose docstrings do not say so, and the two short
     module headers.

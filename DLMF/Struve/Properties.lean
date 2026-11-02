@@ -50,6 +50,8 @@ the Bessel derivative ladders and elementary values.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Struve
 
 open DLMF.Bessel

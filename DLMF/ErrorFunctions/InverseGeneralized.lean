@@ -289,7 +289,7 @@ theorem invErfTaylorCoeff_nonneg (n : ℕ) : 0 ≤ invErfTaylorCoeff n :=
   div_nonneg (iteratedDeriv_invErf_nonneg n (by norm_num) (by norm_num)) (by positivity)
 
 /-- Every Taylor partial sum on the positive half-interval is below inverse erf. -/
-theorem invErfTaylor_sum_le {y : ℝ} (hy0 : 0 < y) (hy1 : y < 1) (n : ℕ) :
+theorem InverseErfTaylor.sum_le {y : ℝ} (hy0 : 0 < y) (hy1 : y < 1) (n : ℕ) :
     ∑ k ∈ Finset.range (n + 1), invErfTaylorCoeff k * y^k ≤ Real.invErf y := by
   have hcont : ContDiffOn ℝ (n + 1) Real.invErf (uIcc (0 : ℝ) y) := by
     intro z hz
@@ -312,13 +312,13 @@ theorem invErfTaylor_sum_le {y : ℝ} (hy0 : 0 < y) (hy1 : y < 1) (n : ℕ) :
   linarith
 
 /-- A positive-axis value bounds each nonnegative Taylor term individually. -/
-theorem invErfTaylor_term_le {y : ℝ} (hy0 : 0 < y) (hy1 : y < 1) (n : ℕ) :
+theorem InverseErfTaylor.term_le {y : ℝ} (hy0 : 0 < y) (hy1 : y < 1) (n : ℕ) :
     invErfTaylorCoeff n * y^n ≤ Real.invErf y := by
   have ht : invErfTaylorCoeff n*y^n ≤ ∑ k ∈ Finset.range (n+1), invErfTaylorCoeff k*y^k :=
     Finset.single_le_sum (f := fun k : ℕ => invErfTaylorCoeff k*y^k)
       (fun k _ => mul_nonneg (invErfTaylorCoeff_nonneg k) (pow_nonneg hy0.le k))
       (Finset.mem_range.mpr (Nat.lt_succ_self n))
-  exact ht.trans (invErfTaylor_sum_le hy0 hy1 n)
+  exact ht.trans (InverseErfTaylor.sum_le hy0 hy1 n)
 
 /-- The Taylor series of inverse erf converges absolutely throughout `(-1,1)`. -/
 theorem summable_invErfTaylor {x : ℝ} (hx : |x| < 1) :
@@ -339,7 +339,7 @@ theorem summable_invErfTaylor {x : ℝ} (hx : |x| < 1) :
           rw [div_pow |x| y n]
           field_simp [hy0.ne']
     _ ≤ Real.invErf y*(|x|/y)^n :=
-      mul_le_mul_of_nonneg_right (invErfTaylor_term_le hy0 hy1 n) (pow_nonneg hq0 _)
+      mul_le_mul_of_nonneg_right (InverseErfTaylor.term_le hy0 hy1 n) (pow_nonneg hq0 _)
 
 /-- The actual Taylor series represents inverse erf throughout its full interval. -/
 theorem hasSum_invErfTaylor {x : ℝ} (hx : |x| < 1) :
@@ -367,22 +367,24 @@ theorem hasSum_invErfTaylor {x : ℝ} (hx : |x| < 1) :
     invErfTaylorCoeff, mul_comm] using hp.hasSum hx'
 
 /-- Scalar Taylor coefficients at zero, used for the convolution calculation. -/
-private def erfInvTC (f : ℝ → ℝ) (n : ℕ) : ℝ := iteratedDeriv n f 0 / (n.factorial : ℝ)
+private def InverseErfTaylor.taylorCoeff (f : ℝ → ℝ) (n : ℕ) : ℝ := iteratedDeriv n f 0 /
+    (n.factorial : ℝ)
 
 /-- Differentiation shifts scalar Taylor coefficients. -/
-private lemma erfInvTC_deriv (f : ℝ → ℝ) (n : ℕ) :
-    erfInvTC (deriv f) n = (n+1) * erfInvTC f (n+1) := by
-  unfold erfInvTC
+private lemma InverseErfTaylor.taylorCoeff_deriv (f : ℝ → ℝ) (n : ℕ) :
+    InverseErfTaylor.taylorCoeff (deriv f) n = (n+1) * InverseErfTaylor.taylorCoeff f (n+1) := by
+  unfold InverseErfTaylor.taylorCoeff
   rw [← iteratedDeriv_succ', Nat.factorial_succ]
   push_cast
   field_simp
 
 /-- The Leibniz rule gives convolution of scalar Taylor coefficients. -/
-private lemma erfInvTC_mul {f g : ℝ → ℝ} (hf : ContDiffAt ℝ ∞ f 0)
+private lemma InverseErfTaylor.taylorCoeff_mul {f g : ℝ → ℝ} (hf : ContDiffAt ℝ ∞ f 0)
     (hg : ContDiffAt ℝ ∞ g 0) (n : ℕ) :
-    erfInvTC (fun x => f x*g x) n =
-      ∑ k ∈ Finset.range (n+1), erfInvTC f k * erfInvTC g (n-k) := by
-  unfold erfInvTC
+    InverseErfTaylor.taylorCoeff (fun x => f x*g x) n =
+      ∑ k ∈ Finset.range (n+1), InverseErfTaylor.taylorCoeff f k *
+          InverseErfTaylor.taylorCoeff g (n-k) := by
+  unfold InverseErfTaylor.taylorCoeff
   rw [iteratedDeriv_fun_mul (hf.of_le (by exact_mod_cast le_top))
     (hg.of_le (by exact_mod_cast le_top)), Finset.sum_div]
   refine Finset.sum_congr rfl fun k hk => ?_
@@ -415,11 +417,11 @@ private lemma erfInv_sum_pairs (f : ℕ → ℝ) (m : ℕ) :
     ring
 
 /-- The auxiliary primitive obtained from the inverse Gaussian differential equation. -/
-private def erfInvAuxH (x : ℝ) : ℝ := 1-Real.exp (-(Real.invErf x)^2)
+private def InverseErfTaylor.primitive (x : ℝ) : ℝ := 1-Real.exp (-(Real.invErf x)^2)
 
 /-- Its derivative is a constant multiple of inverse erf. -/
-private lemma erfInvAuxH_hasDerivAt {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
-    HasDerivAt erfInvAuxH (2*(Real.sqrt π/2)*Real.invErf x) x := by
+private lemma InverseErfTaylor.hasDerivAt_primitive {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+    HasDerivAt InverseErfTaylor.primitive (2*(Real.sqrt π/2)*Real.invErf x) x := by
   change HasDerivAt (fun y : ℝ => 1-Real.exp (-(Real.invErf y)^2)) _ x
   have h := (((hasDerivAt_invErf hx).pow 2).neg.exp).const_sub 1
   apply h.congr_deriv
@@ -430,63 +432,73 @@ private lemma erfInvAuxH_hasDerivAt {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
 
 /-- The primitive normalizes the first derivative multiplicatively. -/
 private lemma deriv_invErf_eq_add_mul_H {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
-    deriv Real.invErf x = Real.sqrt π/2 + deriv Real.invErf x*erfInvAuxH x := by
-  rw [(hasDerivAt_invErf hx).deriv, erfInvAuxH]
+    deriv Real.invErf x = Real.sqrt π/2 + deriv Real.invErf x*InverseErfTaylor.primitive x := by
+  rw [(hasDerivAt_invErf hx).deriv, InverseErfTaylor.primitive]
   have hE : Real.exp ((Real.invErf x)^2)*Real.exp (-(Real.invErf x)^2)=1 := by
     rw [← Real.exp_add]; simp
   linear_combination (Real.sqrt π/2)*hE
 
 /-- Coefficients of the auxiliary primitive in terms of the inverse-erf coefficients. -/
-private lemma erfInvTC_H (n : ℕ) :
-    erfInvTC erfInvAuxH (n+1) = 2*(Real.sqrt π/2)*invErfTaylorCoeff n/(n+1) := by
-  have he : deriv erfInvAuxH =ᶠ[𝓝 (0 : ℝ)] fun x => 2*(Real.sqrt π/2)*Real.invErf x := by
+private lemma InverseErfTaylor.taylorCoeff_primitive (n : ℕ) :
+    InverseErfTaylor.taylorCoeff InverseErfTaylor.primitive (n+1) =
+        2*(Real.sqrt π/2)*invErfTaylorCoeff n/(n+1) := by
+  have he : deriv InverseErfTaylor.primitive =ᶠ[𝓝 (0 : ℝ)] fun x =>
+      2*(Real.sqrt π/2)*Real.invErf x := by
     filter_upwards [Ioo_mem_nhds (by norm_num : (-1 : ℝ)<0) (by norm_num : (0 : ℝ)<1)] with x hx
-    exact (erfInvAuxH_hasDerivAt hx).deriv
+    exact (InverseErfTaylor.hasDerivAt_primitive hx).deriv
   have h := he.iteratedDeriv_eq n
   have hc := congrArg (fun z : ℝ => z/(n.factorial : ℝ)) h
   rw [iteratedDeriv_const_mul_field] at hc
-  have hc' : erfInvTC (deriv erfInvAuxH) n = 2*(Real.sqrt π/2)*invErfTaylorCoeff n := by
-    simpa only [erfInvTC, invErfTaylorCoeff, mul_div_assoc] using hc
-  rw [erfInvTC_deriv] at hc'
+  have hc' : InverseErfTaylor.taylorCoeff (deriv InverseErfTaylor.primitive) n =
+      2*(Real.sqrt π/2)*invErfTaylorCoeff n := by
+    simpa only [InverseErfTaylor.taylorCoeff, invErfTaylorCoeff, mul_div_assoc] using hc
+  rw [InverseErfTaylor.taylorCoeff_deriv] at hc'
   apply (eq_div_iff (by positivity : (n : ℝ)+1 ≠ 0)).mpr
   linear_combination hc'
 
 /-- Taylor's convolution identity for the inverse differential equation. -/
-private lemma invErfTaylor_recurrence {n : ℕ} (hn : 0 < n) :
+private lemma InverseErfTaylor.recurrence {n : ℕ} (hn : 0 < n) :
     (n+1)*invErfTaylorCoeff (n+1) =
-      ∑ k ∈ Finset.range (n+1), (k+1)*invErfTaylorCoeff (k+1)*erfInvTC erfInvAuxH (n-k) := by
+      ∑ k ∈ Finset.range (n+1),
+          (k+1)*invErfTaylorCoeff (k+1)*InverseErfTaylor.taylorCoeff
+          InverseErfTaylor.primitive (n-k) := by
   have he : deriv Real.invErf =ᶠ[𝓝 (0 : ℝ)]
-      fun x => Real.sqrt π/2 + deriv Real.invErf x*erfInvAuxH x := by
+      fun x => Real.sqrt π/2 + deriv Real.invErf x*InverseErfTaylor.primitive x := by
     filter_upwards [Ioo_mem_nhds (by norm_num : (-1 : ℝ)<0) (by norm_num : (0 : ℝ)<1)] with x hx
     exact deriv_invErf_eq_add_mul_H hx
   have h := he.iteratedDeriv_eq n
   rw [iteratedDeriv_const_add hn] at h
   have hc := congrArg (fun z : ℝ => z/(n.factorial : ℝ)) h
-  change erfInvTC (deriv Real.invErf) n =
-      erfInvTC (fun x => deriv Real.invErf x*erfInvAuxH x) n at hc
+  change InverseErfTaylor.taylorCoeff (deriv Real.invErf) n =
+      InverseErfTaylor.taylorCoeff
+          (fun x => deriv Real.invErf x*InverseErfTaylor.primitive x) n at hc
   have ha := invErf_analyticAt (x := 0) (by norm_num)
-  have hH : AnalyticAt ℝ erfInvAuxH 0 := analyticAt_const.sub (ha.pow 2).neg.rexp'
-  rw [erfInvTC_deriv, erfInvTC_mul ha.deriv.contDiffAt hH.contDiffAt] at hc
-  simp_rw [erfInvTC_deriv] at hc
+  have hH : AnalyticAt ℝ InverseErfTaylor.primitive 0 := analyticAt_const.sub (ha.pow 2).neg.rexp'
+  rw [InverseErfTaylor.taylorCoeff_deriv,
+      InverseErfTaylor.taylorCoeff_mul ha.deriv.contDiffAt hH.contDiffAt] at hc
+  simp_rw [InverseErfTaylor.taylorCoeff_deriv] at hc
   exact hc
 
 /-- The constant coefficient of the auxiliary primitive vanishes. -/
-private lemma erfInvTC_H_zero : erfInvTC erfInvAuxH 0 = 0 := by
-  simp only [erfInvTC, iteratedDeriv_zero, erfInvAuxH, Real.invErf,
+private lemma InverseErfTaylor.taylorCoeff_primitive_zero : InverseErfTaylor.taylorCoeff
+    InverseErfTaylor.primitive 0 = 0 := by
+  simp only [InverseErfTaylor.taylorCoeff, iteratedDeriv_zero,
+      InverseErfTaylor.primitive, Real.invErf,
     _root_.Real.erfInv_zero, zero_pow (by norm_num : 2 ≠ 0), neg_zero, Real.exp_zero,
     sub_self, zero_div]
 
 /-- Pairing parity in the Taylor equation yields the odd-coefficient recurrence. -/
-private lemma invErfTaylor_odd_recurrence (m : ℕ) :
+private lemma InverseErfTaylor.odd_recurrence (m : ℕ) :
     (2*(m : ℝ)+3)*invErfTaylorCoeff (2*(m+1)+1) =
       (Real.sqrt π/2)* ∑ j ∈ Finset.range (m+1),
         (2*(j : ℝ)+1)/(m-j+1 : ℕ)*invErfTaylorCoeff (2*j+1)*
           invErfTaylorCoeff (2*(m-j)+1) := by
-  have h := invErfTaylor_recurrence (n := 2*m+2) (by omega)
+  have h := InverseErfTaylor.recurrence (n := 2*m+2) (by omega)
   rw [Finset.sum_range_succ] at h
-  simp only [Nat.sub_self, erfInvTC_H_zero, mul_zero, add_zero] at h
+  simp only [Nat.sub_self, InverseErfTaylor.taylorCoeff_primitive_zero, mul_zero, add_zero] at h
   have hpair : (∑ k ∈ Finset.range (2*m+2),
-      (k+1)*invErfTaylorCoeff (k+1)*erfInvTC erfInvAuxH (2*m+2-k)) =
+      (k+1)*invErfTaylorCoeff (k+1)*InverseErfTaylor.taylorCoeff
+          InverseErfTaylor.primitive (2*m+2-k)) =
       ∑ j ∈ Finset.range (m+1), (Real.sqrt π/2)*
         ((2*(j : ℝ)+1)/(m-j+1 : ℕ)*invErfTaylorCoeff (2*j+1)*
           invErfTaylorCoeff (2*(m-j)+1)) := by
@@ -497,7 +509,7 @@ private lemma invErfTaylor_odd_recurrence (m : ℕ) :
       convert invErfTaylorCoeff_even (j+1) using 1
     rw [heven, mul_zero, zero_mul, add_zero]
     have hdiff : 2*(m+1)-2*j = (2*(m-j)+1)+1 := by omega
-    rw [hdiff, erfInvTC_H]
+    rw [hdiff, InverseErfTaylor.taylorCoeff_primitive]
     push_cast
     field_simp
     ring
@@ -519,7 +531,7 @@ theorem invErfTaylorCoeff_odd (m : ℕ) :
         _root_.Real.erfInv_zero, zero_pow (by norm_num : 2 ≠ 0), Real.exp_zero,
         mul_one, Nat.factorial_one, Nat.cast_one, div_one, invErfSeriesCoeff, pow_one]
     | succ m =>
-      have h := invErfTaylor_odd_recurrence m
+      have h := InverseErfTaylor.odd_recurrence m
       have hsum : (∑ j ∈ Finset.range (m+1),
           (2*(j : ℝ)+1)/(m-j+1 : ℕ)*invErfTaylorCoeff (2*j+1)*
             invErfTaylorCoeff (2*(m-j)+1)) =

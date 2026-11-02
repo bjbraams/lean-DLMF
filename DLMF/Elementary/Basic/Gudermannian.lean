@@ -57,7 +57,7 @@ def gudermannian (x : ℝ) : ℝ := ∫ t in (0:ℝ)..x,(Real.cosh t)⁻¹
 def inverseGudermannian (x : ℝ) : ℝ := ∫ t in (0:ℝ)..x,(Real.cos t)⁻¹
 
 /-- Identity under the stated parameter and domain assumptions: `gudermannian x=f x`. -/
-private lemma trig_gd_integral {f:ℝ→ℝ}
+private lemma Trigonometric.gudermannian_integral {f:ℝ→ℝ}
     (hf:∀x,HasDerivAt f (Real.cosh x)⁻¹ x) (h0:f 0=0) (x:ℝ) : gudermannian x=f x := by
   have hc:Continuous (fun t:ℝ=>(Real.cosh t)⁻¹) :=
     Real.continuous_cosh.inv₀ (fun t=>(Real.cosh_pos t).ne')
@@ -66,7 +66,7 @@ private lemma trig_gd_integral {f:ℝ→ℝ}
 
 /-- Identity under the stated parameter and domain assumptions: `Real.sqrt (1-(Real.tanh
 x)^2)=(Real.cosh x)⁻¹`. -/
-private lemma trig_sqrt_one_sub_tanh (x:ℝ) :
+private lemma Trigonometric.sqrt_one_sub_tanh (x:ℝ) :
     Real.sqrt (1-(Real.tanh x)^2)=(Real.cosh x)⁻¹ := by
   have hc:0<Real.cosh x := Real.cosh_pos x
   apply (sq_eq_sq₀ (Real.sqrt_nonneg _) (inv_nonneg.mpr hc.le)).mp
@@ -76,13 +76,13 @@ private lemma trig_sqrt_one_sub_tanh (x:ℝ) :
 
 /-- Identity under the stated parameter and domain assumptions: `Real.sqrt (1+(Real.tan
 x)^2)=(Real.cos x)⁻¹`. -/
-private lemma trig_sqrt_one_add_tan {x:ℝ} (hx:|x|<π/2) :
+private lemma Trigonometric.sqrt_one_add_tan {x:ℝ} (hx:|x|<π/2) :
     Real.sqrt (1+(Real.tan x)^2)=(Real.cos x)⁻¹ := by
   simpa only [inv_inv] using congrArg Inv.inv
     (Real.inv_sqrt_one_add_tan_sq (Real.cos_pos_of_mem_Ioo (abs_lt.mp hx)))
 
 /-- Identity under the stated parameter and domain assumptions: `inverseGudermannian x=f x`. -/
-private lemma trig_inverse_gd_integral {f:ℝ→ℝ}
+private lemma Trigonometric.inverse_gudermannian_integral {f:ℝ→ℝ}
     (hf:∀t,|t|<π/2→HasDerivAt f (Real.cos t)⁻¹ t) (h0:f 0=0)
     {x:ℝ} (hx:|x|<π/2) : inverseGudermannian x=f x := by
   have hmem:∀t∈uIcc (0:ℝ) x,|t|<π/2 := by
@@ -102,14 +102,14 @@ private lemma trig_inverse_gd_integral {f:ℝ→ℝ}
 
 /-- Identity under the stated parameter and domain assumptions: `inverseGudermannian x=Real.arsinh
 (Real.tan x)`. -/
-private lemma trig_inverse_gd_arsinh {x:ℝ} (hx:|x|<π/2) :
+private lemma Trigonometric.inverse_gudermannian_arsinh {x:ℝ} (hx:|x|<π/2) :
     inverseGudermannian x=Real.arsinh (Real.tan x) := by
-  refine trig_inverse_gd_integral (f:=fun t=>Real.arsinh (Real.tan t)) ?_ ?_ hx
+  refine Trigonometric.inverse_gudermannian_integral (f:=fun t=>Real.arsinh (Real.tan t)) ?_ ?_ hx
   · intro t ht
     have hc:Real.cos t≠0 := (Real.cos_pos_of_mem_Ioo (abs_lt.mp ht)).ne'
     have hd:=(Real.hasDerivAt_tan hc).arsinh
     convert hd using 1
-    rw [smul_eq_mul,trig_sqrt_one_add_tan ht]
+    rw [smul_eq_mul,Trigonometric.sqrt_one_add_tan ht]
     field_simp
   · simp
 
@@ -120,7 +120,7 @@ theorem gudermannian_elementary (x : ℝ) :
     gudermannian x=Real.arcsin (Real.tanh x) ∧
     gudermannian x=Real.arctan (Real.sinh x) := by
   have he: gudermannian x=2*Real.arctan (Real.exp x)-π/2 := by
-    apply trig_gd_integral
+    apply Trigonometric.gudermannian_integral
     · intro t
       have hd:=((Real.hasDerivAt_exp t).arctan.const_mul 2).sub_const (π/2)
       convert hd using 1
@@ -130,7 +130,7 @@ theorem gudermannian_elementary (x : ℝ) :
     · norm_num
       ring
   have hs: gudermannian x=Real.arctan (Real.sinh x) := by
-    apply trig_gd_integral
+    apply Trigonometric.gudermannian_integral
     · intro t
       have hd:=(Real.hasDerivAt_sinh t).arctan
       convert hd using 1
@@ -140,7 +140,8 @@ theorem gudermannian_elementary (x : ℝ) :
       linear_combination -Real.cosh_sq_sub_sinh_sq t
     · simp
   refine ⟨he,?_,hs⟩
-  rw [Real.arcsin_eq_arctan ⟨Real.neg_one_lt_tanh x,Real.tanh_lt_one x⟩,trig_sqrt_one_sub_tanh]
+  rw [Real.arcsin_eq_arctan ⟨Real.neg_one_lt_tanh x, Real.tanh_lt_one x⟩,
+      Trigonometric.sqrt_one_sub_tanh]
   convert hs using 2
   rw [Real.tanh_eq_sinh_div_cosh]
   field_simp
@@ -172,7 +173,7 @@ theorem inverse_gudermannian_elementary {x : ℝ} (hx : |x|<π/2) :
     inverseGudermannian x=Real.log ((Real.cos x)⁻¹+Real.tan x) ∧
     inverseGudermannian x=Real.arsinh (Real.tan x) ∧
     inverseGudermannian x=Real.artanh (Real.sin x) := by
-  have ha:=trig_inverse_gd_arsinh hx
+  have ha:=Trigonometric.inverse_gudermannian_arsinh hx
   have hc:0<Real.cos x := Real.cos_pos_of_mem_Ioo (abs_lt.mp hx)
   have hinv:gudermannian (inverseGudermannian x)=x := by
     rw [(gudermannian_elementary _).2.2,ha,Real.sinh_arsinh]
@@ -183,7 +184,7 @@ theorem inverse_gudermannian_elementary {x : ℝ} (hx : |x|<π/2) :
     linarith [(gudermannian_elementary (inverseGudermannian x)).1]
   refine ⟨?_,?_,ha,?_⟩
   · rw [← he,Real.log_exp]
-  · rw [ha,Real.arsinh,trig_sqrt_one_add_tan hx]
+  · rw [ha,Real.arsinh,Trigonometric.sqrt_one_add_tan hx]
     congr 1
     ring
   · have hs:Real.sin x∈Ioo (-1:ℝ) 1 := by
@@ -217,7 +218,7 @@ theorem inverse_gudermannian_nonneg_cosh {x : ℝ} (hx : 0≤x) (hπ : x<π/2) :
     rw [Real.tan_eq_sin_div_cos]
     exact div_nonneg (Real.sin_nonneg_of_nonneg_of_le_pi hx (by linarith [Real.pi_pos])) hc.le
   have hcosh:Real.cosh (Real.arsinh (Real.tan x))=(Real.cos x)⁻¹ := by
-    rw [Real.cosh_arsinh,trig_sqrt_one_add_tan hbound]
+    rw [Real.cosh_arsinh,Trigonometric.sqrt_one_add_tan hbound]
   rw [← hcosh,Real.arcosh_cosh (Real.arsinh_nonneg_iff.mpr ht)]
   exact (inverse_gudermannian_elementary hbound).2.2.1
 

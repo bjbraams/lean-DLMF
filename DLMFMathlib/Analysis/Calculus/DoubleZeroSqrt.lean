@@ -38,8 +38,10 @@ expansions, as real analysis on `ℝ`.
   `ζ'(x₀) = p(x₀)^{1/3} = f'(x₀)^{1/3}` (`hasDerivAt_airyCoord`), and with an analytic
   inverse (`exists_analytic_inverse_airyCoord`); it is continuous on `ℝ` when `p` is
   (`continuous_airyCoord`).
-* `eq_sq_mul_dslope`, `signedSqrt`: at a double zero `g = (x - x₀)² Q` and the
-  signed square root `sign(x - x₀) √(2 g)` is the analytic function `(x - x₀) √(2 Q)`.
+* `eq_sq_mul_dslope`: a double zero factors as `g = (x - x₀)² Q`.
+* `signedSqrt`, `analyticAt_signedSqrt`, `hasDerivAt_signedSqrt`, `eventually_eq_sq_signedSqrt`,
+  `eventually_signedSqrt_eq_sign_mul_sqrt`: the signed square root `sign(x - x₀) √(2 g)` is the
+  analytic function `(x - x₀) √(2 Q)`.
 * `strictMonoOn_signedSqrt`: the global monotone version on an interval;
   `exists_eq_of_tendsto`: range of a continuous map of `(0, ∞)` with infinite limits.
 * `exists_analytic_inverse`: analytic local inverse with its first Taylor coefficient
@@ -310,10 +312,11 @@ theorem eq_sq_mul_dslope {g : ℝ → ℝ} {x₀ : ℝ} (hg0 : g x₀ = 0) (hg1 
   rw [hg0, sub_zero, smul_eq_mul] at h1
   rw [← h1, ← h2]; ring
 
-/-- Signed square root at a double zero: if `g = (x - x₀)² Q` with `Q` analytic and positive at
-`x₀`, then `h(x) = (x - x₀) √(2 Q(x))` is analytic at `x₀`, `h' (x₀) = √(2 Q(x₀))`, and near `x₀`
-`g = h²/2` and `h = sign(x - x₀) √(2 g)`. -/
-theorem signedSqrt {g Q : ℝ → ℝ} {x₀ : ℝ} (hQ : AnalyticAt ℝ Q x₀) (hQ0 : 0 < Q x₀)
+/-- The signed square root `x ↦ (x - x₀) √(2 Q(x))`: where `g = (x - x₀)² Q`, it is a square
+root of `2 g` with the sign of `x - x₀`. -/
+def signedSqrt (Q : ℝ → ℝ) (x₀ x : ℝ) : ℝ := (x - x₀) * Real.sqrt (2 * Q x)
+
+private theorem signedSqrt_spec {g Q : ℝ → ℝ} {x₀ : ℝ} (hQ : AnalyticAt ℝ Q x₀) (hQ0 : 0 < Q x₀)
     (hg : ∀ᶠ x in 𝓝 x₀, g x = (x - x₀) ^ 2 * Q x) :
     AnalyticAt ℝ (fun x => (x - x₀) * Real.sqrt (2 * Q x)) x₀ ∧
       HasDerivAt (fun x => (x - x₀) * Real.sqrt (2 * Q x)) (Real.sqrt (2 * Q x₀)) x₀ ∧
@@ -337,6 +340,31 @@ theorem signedSqrt {g Q : ℝ → ℝ} {x₀ : ℝ} (hQ : AnalyticAt ℝ Q x₀)
       split_ifs with h
       · rw [abs_of_neg (sub_neg.2 h)]; ring
       · rw [abs_of_nonneg (sub_nonneg.2 (not_lt.1 h))]; ring
+
+/-- If `Q` is analytic and positive at `x₀`, the signed square root is analytic at `x₀`. -/
+theorem analyticAt_signedSqrt {Q : ℝ → ℝ} {x₀ : ℝ} (hQ : AnalyticAt ℝ Q x₀) (hQ0 : 0 < Q x₀) :
+    AnalyticAt ℝ (signedSqrt Q x₀) x₀ :=
+  (signedSqrt_spec (g := fun x => (x - x₀) ^ 2 * Q x) hQ hQ0 (.of_forall fun _ => rfl)).1
+
+/-- If `Q` is analytic and positive at `x₀`, the signed square root has derivative
+`√(2 Q(x₀))` at `x₀`. -/
+theorem hasDerivAt_signedSqrt {Q : ℝ → ℝ} {x₀ : ℝ} (hQ : AnalyticAt ℝ Q x₀) (hQ0 : 0 < Q x₀) :
+    HasDerivAt (signedSqrt Q x₀) (Real.sqrt (2 * Q x₀)) x₀ :=
+  (signedSqrt_spec (g := fun x => (x - x₀) ^ 2 * Q x) hQ hQ0 (.of_forall fun _ => rfl)).2.1
+
+/-- If `g = (x - x₀)² Q` near `x₀` with `Q` analytic and positive at `x₀`, then `g = h²/2` near
+`x₀` for the signed square root `h`. -/
+theorem eventually_eq_sq_signedSqrt {g Q : ℝ → ℝ} {x₀ : ℝ} (hQ : AnalyticAt ℝ Q x₀)
+    (hQ0 : 0 < Q x₀) (hg : ∀ᶠ x in 𝓝 x₀, g x = (x - x₀) ^ 2 * Q x) :
+    ∀ᶠ x in 𝓝 x₀, g x = signedSqrt Q x₀ x ^ 2 / 2 :=
+  (signedSqrt_spec hQ hQ0 hg).2.2.mono fun _ hx => hx.1
+
+/-- If `g = (x - x₀)² Q` near `x₀` with `Q` analytic and positive at `x₀`, then near `x₀` the
+signed square root is `sign(x - x₀) √(2 g)`. -/
+theorem eventually_signedSqrt_eq_sign_mul_sqrt {g Q : ℝ → ℝ} {x₀ : ℝ} (hQ : AnalyticAt ℝ Q x₀)
+    (hQ0 : 0 < Q x₀) (hg : ∀ᶠ x in 𝓝 x₀, g x = (x - x₀) ^ 2 * Q x) :
+    ∀ᶠ x in 𝓝 x₀, signedSqrt Q x₀ x = (if x < x₀ then -1 else 1) * Real.sqrt (2 * g x) :=
+  (signedSqrt_spec hQ hQ0 hg).2.2.mono fun _ hx => hx.2
 
 /-- Global monotonicity of the signed square root: if `g` vanishes at `x₀ ∈ I`, decreases strictly
 on `I ∩ (-∞, x₀]` and increases strictly on `I ∩ [x₀, ∞)`, then

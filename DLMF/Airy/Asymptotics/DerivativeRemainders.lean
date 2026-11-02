@@ -16,17 +16,19 @@ multiplier `χ` this controls the error kernel of the expansions of `Ai'` and `B
 
 ## Main definitions
 
-* `airyDer_normalizedU`: the normalized Kummer form of the Airy derivative.
-* `airyDer_density`: the real density of its Stieltjes transform.
+* `DerivativeRemainders.normalizedU`: the normalized Kummer form of the Airy derivative.
+* `DerivativeRemainders.density`: the real density of its Stieltjes transform.
 
 ## Main results
 
 * `airyChi_zero`, `airyChi_one`, `airyChi_add_two`, `airyChi_two_mul`,
   `airyChi_two_mul_add_one`: exact values and the two-step recurrence of `χ`.
-* `airyDer_stieltjes`: the normalized Kummer function has a positive Stieltjes remainder.
-* `airyDer_density_nonneg`, `airyDer_density_moment`: positivity and moments of the density.
-* `airyDer_normalizedU_eq`: the normalized Airy derivative is the positive Stieltjes function on
-  its principal sector.
+* `DerivativeRemainders.stieltjes`: the normalized Kummer function has a positive Stieltjes
+  remainder.
+* `DerivativeRemainders.density_nonneg`, `DerivativeRemainders.density_moment`: positivity and
+  moments of the density.
+* `DerivativeRemainders.normalizedU_eq`: the normalized Airy derivative is the positive Stieltjes
+  function on its principal sector.
 -/
 
 @[expose] public noncomputable section
@@ -92,10 +94,10 @@ The final error estimates still require the Laplace-mixture and branch-continuat
 -/
 
 /-- The normalized Kummer form of the Airy derivative. -/
-def airyDer_normalizedU (z : ℂ) : ℂ := z^(-(1/6):ℂ)*kummerU (-(1/6)) (-(1/3)) z
+def DerivativeRemainders.normalizedU (z : ℂ) : ℂ := z^(-(1/6):ℂ)*kummerU (-(1/6)) (-(1/3)) z
 
 /-- Integrable Cauchy transforms of the kernels used below. -/
-theorem airyDer_integrable_cauchy {f : ℝ → ℂ} (hf : IntegrableOn f (Ioi 0)) {z : ℂ}
+theorem DerivativeRemainders.integrable_cauchy {f : ℝ → ℂ} (hf : IntegrableOn f (Ioi 0)) {z : ℂ}
     (hz : z ∈ slitPlane) : IntegrableOn (fun t : ℝ => f t/((t:ℂ)+z)) (Ioi 0) := by
   obtain ⟨δ, hδ, hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz
   have hm : AEStronglyMeasurable (fun t : ℝ => f t/((t:ℂ)+z)) (volume.restrict (Ioi 0)) :=
@@ -109,7 +111,7 @@ theorem airyDer_integrable_cauchy {f : ℝ → ℂ} (hf : IntegrableOn f (Ioi 0)
     _ = _ := by ring
 
 /-- A contiguous relation lowering the first parameter from its positive domain. -/
-theorem airyDer_U_lower {z : ℂ} (hz : z ≠ 0) :
+theorem DerivativeRemainders.U_lower {z : ℂ} (hz : z ≠ 0) :
     kummerU (-(1/6)) (-(1/3)) z = z*kummerU (5/6) (2/3) z+(7/6:ℂ)*kummerU (5/6) (-(1/3)) z := by
   have h1 := kummerU_contiguous_mixed (-(1/6)) (-(1/3)) z hz
   have h2 := kummerU_contiguous_a_b (-(1/6)) (2/3) z hz
@@ -117,7 +119,7 @@ theorem airyDer_U_lower {z : ℂ} (hz : z ≠ 0) :
   linear_combination -6*h1-6*z*h2
 
 /-- The kernel relation used to combine the two positive-parameter transforms. -/
-theorem airyDer_U_kernel {t : ℂ} (ht : t ≠ 0) :
+theorem DerivativeRemainders.U_kernel {t : ℂ} (ht : t ≠ 0) :
     kummerU (-(7/6)) (-(1/3)) t =
         t*kummerU (-(1/6)) (2/3) t+(1/6:ℂ)*kummerU (-(1/6)) (-(1/3)) t := by
   have h := kummerU_contiguous_shift_a (-(1/6)) (-(1/3)) t ht
@@ -125,7 +127,7 @@ theorem airyDer_U_kernel {t : ℂ} (ht : t ≠ 0) :
   linear_combination h
 
 /-- The exactly evaluated constant term in the continued Stieltjes formula. -/
-theorem airyDer_constant_moment :
+theorem DerivativeRemainders.constant_moment :
     (∫ t : ℝ in Ioi 0, exp (-(t:ℂ))*(t:ℂ)^(-(1/6):ℂ)*kummerU (-(1/6)) (2/3) t) =
       Gamma (5/6)*Gamma (7/6) := by
   have h := laplace_kummerU (a := (-(1/6):ℂ)) (b := 5/6) (c := 2/3) (z := 1)
@@ -141,7 +143,8 @@ theorem airyDer_constant_moment :
   simpa using h
 
 /-- `6 Γ(5/6) Γ(7/6) = 2π`, from the reflection formula at `1/6`. -/
-private lemma airyDer_six_gamma_mul : 6 * Gamma (5 / 6 : ℂ) * Gamma (7 / 6) = 2 * π := by
+private lemma DerivativeRemainders.six_gamma_mul : 6 * Gamma (5 / 6 : ℂ) *
+    Gamma (7 / 6) = 2 * π := by
   have h := Gamma_mul_Gamma_one_sub (1 / 6 : ℂ)
   have hg := Gamma_add_one (1 / 6 : ℂ) (by norm_num)
   rw [show π * (1 / 6 : ℂ) = ((Real.pi / 6 : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
@@ -150,9 +153,9 @@ private lemma airyDer_six_gamma_mul : 6 * Gamma (5 / 6 : ℂ) * Gamma (7 / 6) = 
   linear_combination h + (6 * Gamma (5 / 6 : ℂ)) * hg
 
 /-- The Airy derivative's normalized Kummer function has a positive Stieltjes remainder. -/
-theorem airyDer_stieltjes {z : ℂ} (hz : z ∈ slitPlane) :
-    airyDer_normalizedU z = 1 + 1/(2*π:ℂ)*
-      ∫ t : ℝ in Ioi 0, exp (-(t:ℂ))*airyDer_normalizedU t/((t:ℂ)+z) := by
+theorem DerivativeRemainders.stieltjes {z : ℂ} (hz : z ∈ slitPlane) :
+    DerivativeRemainders.normalizedU z = 1 + 1/(2*π:ℂ)*
+      ∫ t : ℝ in Ioi 0, exp (-(t:ℂ))*DerivativeRemainders.normalizedU t/((t:ℂ)+z) := by
   have hz0 := slitPlane_ne_zero hz
   have h1 := kummerU_stieltjes (a := (5/6:ℂ)) (b := 2/3) hz (by norm_num) (by norm_num)
   have h2 := kummerU_stieltjes (a := (5/6:ℂ)) (b := -(1/3)) hz (by norm_num) (by norm_num)
@@ -163,7 +166,7 @@ theorem airyDer_stieltjes {z : ℂ} (hz : z ∈ slitPlane) :
   have hG2 : Gamma (7/6:ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   let f : ℝ → ℂ := fun t => exp (-(t:ℂ))*(t:ℂ)^(-(1/6):ℂ)*kummerU (-(1/6)) (2/3) t
   let g : ℝ → ℂ := fun t => exp (-(t:ℂ))*(t:ℂ)^(-(1/6):ℂ)*kummerU (-(7/6)) (-(1/3)) t
-  let p : ℝ → ℂ := fun t => exp (-(t:ℂ))*airyDer_normalizedU t
+  let p : ℝ → ℂ := fun t => exp (-(t:ℂ))*DerivativeRemainders.normalizedU t
   have hf : IntegrableOn f (Ioi 0) := by
     have h := (laplace_kummerU_gauss (a := (-(1/6):ℂ)) (b := 5/6) (c := 2/3) (z := 1)
       (by norm_num) (by norm_num) (by norm_num)).1
@@ -183,7 +186,7 @@ theorem airyDer_stieltjes {z : ℂ} (hz : z ∈ slitPlane) :
       (by norm_num) (by norm_num) (by norm_num)).1
     convert h using 1
     funext t
-    simp only [tricomiLaplaceKernel, p, airyDer_normalizedU]
+    simp only [tricomiLaplaceKernel, p, DerivativeRemainders.normalizedU]
     norm_num
     ring
   have hpt : ∀ t ∈ Ioi (0:ℝ),
@@ -193,20 +196,22 @@ theorem airyDer_stieltjes {z : ℂ} (hz : z ∈ slitPlane) :
     have hd : (t:ℂ)+z ≠ 0 := by
       obtain ⟨δ,hδ,hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz
       exact norm_pos_iff.mp (hδ.trans_le (hδb t (le_of_lt ht) z (Metric.mem_ball_self hδ)))
-    dsimp only [f,g,p,airyDer_normalizedU]
-    rw [airyDer_U_kernel ht0]
+    dsimp only [f,g,p,DerivativeRemainders.normalizedU]
+    rw [DerivativeRemainders.U_kernel ht0]
     field_simp
     ring
   have hint : z*(∫ t in Ioi (0:ℝ), f t/((t:ℂ)+z))+
       (∫ t in Ioi (0:ℝ), g t/((t:ℂ)+z)) =
       Gamma (5/6)*Gamma (7/6)+(1/6:ℂ)*(∫ t in Ioi (0:ℝ), p t/((t:ℂ)+z)) := by
     rw [← integral_const_mul,
-        ← integral_add ((airyDer_integrable_cauchy hf hz).const_mul _)
-        (airyDer_integrable_cauchy hg hz),
+        ← integral_add ((DerivativeRemainders.integrable_cauchy hf hz).const_mul _)
+        (DerivativeRemainders.integrable_cauchy hg hz),
       setIntegral_congr_fun measurableSet_Ioi hpt,
-          integral_add hf ((airyDer_integrable_cauchy hp hz).const_mul _), integral_const_mul]
-    rw [show (∫ t in Ioi (0:ℝ), f t)=Gamma (5/6)*Gamma (7/6) from airyDer_constant_moment]
-  have hu := airyDer_U_lower hz0
+          integral_add hf ((DerivativeRemainders.integrable_cauchy hp hz).const_mul _),
+              integral_const_mul]
+    rw [show (∫ t in Ioi (0:ℝ), f t)=Gamma (5/6)*Gamma (7/6)
+        from DerivativeRemainders.constant_moment]
+  have hu := DerivativeRemainders.U_lower hz0
   rw [h1,h2,hG] at hu
   have hI1 : (∫ t in Ioi (0:ℝ), kummerU (-(1/6)) (2/3) t*exp (-(t:ℂ))*(t:ℂ)^(-(1/6):ℂ)/((t:ℂ)+z)) =
       ∫ t in Ioi (0:ℝ), f t/((t:ℂ)+z) := by
@@ -217,7 +222,7 @@ theorem airyDer_stieltjes {z : ℂ} (hz : z ∈ slitPlane) :
     apply setIntegral_congr_fun measurableSet_Ioi; intro t ht; dsimp only [g]; ring
   rw [hI1,hI2] at hu
   have hpow : z^(-(1/6):ℂ)*z^(1/6:ℂ)=1 := by rw [← cpow_add _ _ hz0]; norm_num
-  have hgamma := airyDer_six_gamma_mul
+  have hgamma := DerivativeRemainders.six_gamma_mul
   have hu' : kummerU (-(1/6)) (-(1/3)) z =
       z^(1/6:ℂ)/(Gamma (5/6)*Gamma (7/6)) *
         (z*(∫ t in Ioi (0:ℝ), f t/((t:ℂ)+z))+
@@ -236,8 +241,8 @@ theorem airyDer_stieltjes {z : ℂ} (hz : z ∈ slitPlane) :
     _ = _ := by rw [hgamma]
 
 /-- Positive real Laplace representation of the normalized derivative kernel. -/
-theorem airyDer_normalizedU_real {t : ℝ} (ht : 0 < t) :
-    airyDer_normalizedU t = ((t^(7/6:ℝ)/Real.Gamma (7/6) *
+theorem DerivativeRemainders.normalizedU_real {t : ℝ} (ht : 0 < t) :
+    DerivativeRemainders.normalizedU t = ((t^(7/6:ℝ)/Real.Gamma (7/6) *
       ∫ u : ℝ in Ioi 0, Real.exp (-t*u)*u^(1/6:ℝ)*(1+u)^(1/6:ℝ) : ℝ):ℂ) := by
   have ht0 : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
   have h := kummerU_kummer_transform_all (-(1/6):ℂ) (-(1/3)) ht0
@@ -245,7 +250,8 @@ theorem airyDer_normalizedU_real {t : ℝ} (ht : 0 < t) :
   have hp : (t:ℂ)^(-(1/6):ℂ)*(t:ℂ)^(4/3:ℂ)=(t:ℂ)^(7/6:ℂ) := by
     rw [← cpow_add _ _ ht0]
     norm_num
-  rw [airyDer_normalizedU, h, ← mul_assoc, hp, kummerU_laplace (by norm_num) (by simpa using ht)]
+  rw [DerivativeRemainders.normalizedU, h, ← mul_assoc, hp,
+      kummerU_laplace (by norm_num) (by simpa using ht)]
   rw [show (7/6:ℂ)-1=1/6 by norm_num, show (7/3:ℂ)-7/6-1=1/6 by norm_num]
   have hI : (∫ u : ℝ in Ioi 0, exp (-(t:ℂ)*u)*(u:ℂ)^(1/6:ℂ)*(1+(u:ℂ))^(1/6:ℂ)) =
       ((∫ u : ℝ in Ioi 0, Real.exp (-t*u)*u^(1/6:ℝ)*(1+u)^(1/6:ℝ) : ℝ):ℂ) := by
@@ -268,9 +274,9 @@ theorem airyDer_normalizedU_real {t : ℝ} (ht : 0 < t) :
   ring
 
 /-- The derivative Stieltjes kernel is real and nonnegative on the positive axis. -/
-theorem airyDer_normalizedU_nonneg {t : ℝ} (ht : 0 < t) :
-    0 ≤ (airyDer_normalizedU t).re ∧ (airyDer_normalizedU t).im=0 := by
-  rw [airyDer_normalizedU_real ht]
+theorem DerivativeRemainders.normalizedU_nonneg {t : ℝ} (ht : 0 < t) :
+    0 ≤ (DerivativeRemainders.normalizedU t).re ∧ (DerivativeRemainders.normalizedU t).im=0 := by
+  rw [DerivativeRemainders.normalizedU_real ht]
   simp only [ofReal_re, ofReal_im, and_true]
   have hi : 0 ≤ ∫ u : ℝ in Ioi 0, Real.exp (-t*u)*u^(1/6:ℝ)*(1+u)^(1/6:ℝ) := by
     apply setIntegral_nonneg measurableSet_Ioi
@@ -282,22 +288,24 @@ theorem airyDer_normalizedU_nonneg {t : ℝ} (ht : 0 < t) :
       (Real.Gamma_pos_of_pos (by norm_num)).le) hi
 
 /-- The real density of the Airy derivative Stieltjes transform. -/
-def airyDer_density (t : ℝ) : ℝ := Real.exp (-t)*(airyDer_normalizedU t).re
+def DerivativeRemainders.density (t : ℝ) : ℝ :=
+    Real.exp (-t)*(DerivativeRemainders.normalizedU t).re
 
 /-- Complex and real forms of the derivative Stieltjes density agree. -/
-theorem airyDer_density_coe {t : ℝ} (ht : 0 < t) :
-    (airyDer_density t:ℂ)=exp (-(t:ℂ))*airyDer_normalizedU t := by
-  rw [airyDer_density, ofReal_mul, ofReal_exp]
+theorem DerivativeRemainders.density_coe {t : ℝ} (ht : 0 < t) :
+    (DerivativeRemainders.density t:ℂ)=exp (-(t:ℂ))*DerivativeRemainders.normalizedU t := by
+  rw [DerivativeRemainders.density, ofReal_mul, ofReal_exp]
   push_cast
   congr 1
-  apply Complex.ext <;> simp [(airyDer_normalizedU_nonneg ht).2]
+  apply Complex.ext <;> simp [(DerivativeRemainders.normalizedU_nonneg ht).2]
 
 /-- The Airy derivative Stieltjes density is nonnegative. -/
-theorem airyDer_density_nonneg {t : ℝ} (ht : 0 < t) : 0 ≤ airyDer_density t :=
-  mul_nonneg (Real.exp_pos _).le (airyDer_normalizedU_nonneg ht).1
+theorem DerivativeRemainders.density_nonneg {t : ℝ} (ht : 0 < t) : 0 ≤
+    DerivativeRemainders.density t :=
+  mul_nonneg (Real.exp_pos _).le (DerivativeRemainders.normalizedU_nonneg ht).1
 
 /-- The regularized Gauss function at zero, on its positive parameter half-plane. -/
-theorem airyDer_regularizedGaussHG_zero (a b c : ℂ) (hc : 0 < c.re) :
+theorem DerivativeRemainders.regularizedGaussHG_zero (a b c : ℂ) (hc : 0 < c.re) :
     regularizedGaussHG a b c 0 = 1/Gamma c := by
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by norm_num),
     regularizedGaussHGFun_eq_div_Gamma (fun k => by
@@ -307,17 +315,17 @@ theorem airyDer_regularizedGaussHG_zero (a b c : ℂ) (hc : 0 < c.re) :
       linarith [Nat.cast_nonneg (α := ℝ) k]), ordinaryHypergeometric_zero]
 
 /-- The moments of the complex derivative Stieltjes density. -/
-theorem airyDer_density_moment_complex (k : ℕ) :
-    IntegrableOn (fun t : ℝ => (t:ℂ)^k*exp (-(t:ℂ))*airyDer_normalizedU t) (Ioi 0) ∧
-    (∫ t : ℝ in Ioi 0, (t:ℂ)^k*exp (-(t:ℂ))*airyDer_normalizedU t) =
+theorem DerivativeRemainders.density_moment_complex (k : ℕ) :
+    IntegrableOn (fun t : ℝ => (t:ℂ)^k*exp (-(t:ℂ))*DerivativeRemainders.normalizedU t) (Ioi 0) ∧
+    (∫ t : ℝ in Ioi 0, (t:ℂ)^k*exp (-(t:ℂ))*DerivativeRemainders.normalizedU t) =
       Gamma ((k:ℂ)+5/6)*Gamma ((k:ℂ)+13/6)/Gamma ((k:ℂ)+2) := by
   have h := laplace_kummerU_gauss (a := (-(1/6):ℂ)) (b := (k:ℂ)+5/6) (c := -(1/3)) (z := 1)
     (by norm_num; linarith [Nat.cast_nonneg (α := ℝ) k])
     (by norm_num; linarith [Nat.cast_nonneg (α := ℝ) k]) (by norm_num)
   have hpt (t : ℝ) (ht : t ∈ Ioi (0:ℝ)) :
-      (t:ℂ)^k*exp (-(t:ℂ))*airyDer_normalizedU t =
+      (t:ℂ)^k*exp (-(t:ℂ))*DerivativeRemainders.normalizedU t =
         tricomiLaplaceKernel (-(1/6)) ((k:ℂ)+5/6) (-(1/3)) 1 t := by
-    dsimp only [airyDer_normalizedU, tricomiLaplaceKernel]
+    dsimp only [DerivativeRemainders.normalizedU, tricomiLaplaceKernel]
     have ht0 : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
     rw [show (k:ℂ)+5/6-1=(k:ℂ)+(-(1/6)) by ring, cpow_add _ _ ht0, cpow_natCast]
     ring
@@ -327,21 +335,22 @@ theorem airyDer_density_moment_complex (k : ℕ) :
     norm_num
     rw [show (k:ℂ)+5/6+1/3+1=(k:ℂ)+13/6 by ring,
       show -(1/6:ℂ)+((k:ℂ)+5/6)+1/3+1=(k:ℂ)+2 by ring,
-      airyDer_regularizedGaussHG_zero _ _ _ (by simp; positivity)]
+      DerivativeRemainders.regularizedGaussHG_zero _ _ _ (by simp; positivity)]
     ring
 
 /-- The real moments of the positive derivative Stieltjes density. -/
-theorem airyDer_density_moment (k : ℕ) :
-    IntegrableOn (fun t : ℝ => t^k*airyDer_density t) (Ioi 0) ∧
-    (∫ t : ℝ in Ioi 0, t^k*airyDer_density t) =
+theorem DerivativeRemainders.density_moment (k : ℕ) :
+    IntegrableOn (fun t : ℝ => t^k*DerivativeRemainders.density t) (Ioi 0) ∧
+    (∫ t : ℝ in Ioi 0, t^k*DerivativeRemainders.density t) =
       Real.Gamma ((k:ℝ)+5/6)*Real.Gamma ((k:ℝ)+13/6)/Real.Gamma ((k:ℝ)+2) := by
   have heq (t : ℝ) (ht : t ∈ Ioi (0:ℝ)) :
-      ((t^k*airyDer_density t:ℝ):ℂ)=(t:ℂ)^k*exp (-(t:ℂ))*airyDer_normalizedU t := by
+      ((t^k*DerivativeRemainders.density t:ℝ):ℂ)=(t:ℂ)^k*exp
+          (-(t:ℂ))*DerivativeRemainders.normalizedU t := by
     push_cast
-    rw [airyDer_density_coe ht]
+    rw [DerivativeRemainders.density_coe ht]
     ring
-  have h := airyDer_density_moment_complex k
-  have hc : IntegrableOn (fun t : ℝ => ((t^k*airyDer_density t:ℝ):ℂ)) (Ioi 0) :=
+  have h := DerivativeRemainders.density_moment_complex k
+  have hc : IntegrableOn (fun t : ℝ => ((t^k*DerivativeRemainders.density t:ℝ):ℂ)) (Ioi 0) :=
     h.1.congr_fun (fun t ht => (heq t ht).symm) measurableSet_Ioi
   constructor
   · simpa only [RCLike.re_to_complex, ofReal_re] using hc.re
@@ -354,23 +363,24 @@ theorem airyDer_density_moment (k : ℕ) :
     rfl
 
 /-- Kummer's positive-parameter form of the normalized derivative. -/
-theorem airyDer_normalizedU_positive {z : ℂ} (hz : z ≠ 0) :
-    airyDer_normalizedU z=z^(7/6:ℂ)*kummerU (7/6) (7/3) z := by
+theorem DerivativeRemainders.normalizedU_positive {z : ℂ} (hz : z ≠ 0) :
+    DerivativeRemainders.normalizedU z=z^(7/6:ℂ)*kummerU (7/6) (7/3) z := by
   have h := kummerU_kummer_transform_all (-(1/6):ℂ) (-(1/3)) hz
   norm_num at h
-  rw [airyDer_normalizedU,h,← mul_assoc,← cpow_add _ _ hz]
+  rw [DerivativeRemainders.normalizedU,h,← mul_assoc,← cpow_add _ _ hz]
   norm_num
 
 /-- The normalized Airy derivative is the positive Stieltjes function on its principal sector. -/
-theorem airyDer_normalizedU_eq {z : ℂ} (hz : z ≠ 0) (harg : |arg z|<2*π/3) :
-    airyAiDeriv z/airyPrefactor .aiDeriv z = airyDer_normalizedU (2*airyZetaComplex z) := by
-  have hW : 2*airyZetaComplex z ≠ 0 := mul_ne_zero two_ne_zero (airySt_zeta_ne_zero hz)
-  rw [airyDer_normalizedU_positive hW, airySt_two_zeta_cpow hz harg,
+theorem DerivativeRemainders.normalizedU_eq {z : ℂ} (hz : z ≠ 0) (harg : |arg z|<2*π/3) :
+    airyAiDeriv z/airyPrefactor .aiDeriv z =
+        DerivativeRemainders.normalizedU (2*airyZetaComplex z) := by
+  have hW : 2*airyZetaComplex z ≠ 0 := mul_ne_zero two_ne_zero (StieltjesBounds.zeta_ne_zero hz)
+  rw [DerivativeRemainders.normalizedU_positive hW, StieltjesBounds.two_zeta_cpow hz harg,
     airyAiDeriv_eq_kummerU hz harg, airyPrefactor]
   have hπ : (Real.sqrt π:ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hq : z^(1/4:ℂ) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hz)
   rw [exp_sub]
-  have hN := airyDer_norm_const hz
+  have hN := DerivativeRemainders.norm_const hz
   have hE : exp (-airyZetaComplex z) ≠ 0 := exp_ne_zero _
   field_simp
   have hEE : exp (airyZetaComplex z)*exp (-airyZetaComplex z)=1 := by

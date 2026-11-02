@@ -42,12 +42,14 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Struve
 
 open DLMF.Bessel DLMF.Airy
 
 /-- `‖sin w‖ ≤ e^{|Im w|}`. -/
-theorem struveAs_norm_sin_le (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
+theorem AngerAsymptotics.norm_sin_le (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
   have e1 : ‖exp (-w * I)‖ ≤ Real.exp |w.im| := by
     rw [norm_exp]; exact Real.exp_le_exp.2 (by simp [le_abs_self])
   have e2 : ‖exp (w * I)‖ ≤ Real.exp |w.im| := by
@@ -57,7 +59,7 @@ theorem struveAs_norm_sin_le (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
   linarith
 
 /-- `‖cos w‖ ≤ e^{|Im w|}`. -/
-theorem struveAs_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
+theorem AngerAsymptotics.norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
   have e1 : ‖exp (-w * I)‖ ≤ Real.exp |w.im| := by
     rw [norm_exp]; exact Real.exp_le_exp.2 (by simp [le_abs_self])
   have e2 : ‖exp (w * I)‖ ≤ Real.exp |w.im| := by
@@ -69,7 +71,7 @@ theorem struveAs_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
 /-- The two tail bounds behind DLMF 11.11.5 and 11.11.6: for `|ν| ≥ 4` at distance `≥ ε`
 from the integers, the normalized series `πν/(2 sin(πν/2)) 𝐒₁` and `π/cos(πν/2) 𝐒₂` agree
 with their leading terms up to `K/|ν/2|²`. -/
-theorem struveAs_S_tail_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
+theorem AngerAsymptotics.S_tail_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
     ∃ K, ∀ ν : ℂ, (∀ n : ℤ, ε ≤ ‖ν - n‖) → 2 ≤ ‖ν / 2‖ →
       ‖π * (ν / 2) / sin (π * (ν / 2)) * angerS1 ν z - 1‖ ≤ K / ‖ν / 2‖ ^ 2 ∧
       ‖ν / 2 * (π / cos (π * (ν / 2)) * angerS2 ν z - (z / 2) ^ (0 + 1) /
@@ -83,20 +85,22 @@ theorem struveAs_S_tail_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
     have := hν n; rw [h, sub_self, norm_zero] at this; linarith
   have hx0 : 0 < ‖ν / 2‖ := by linarith
   have hε0 : ε ≠ 0 := hε.ne'
-  have h1 := struveAs_hasSum_S1 hν' z
-  have h2 := struveAs_hasSum_S2 hν' z
+  have h1 := AngerAsymptotics.hasSum_S1 hν' z
+  have h2 := AngerAsymptotics.hasSum_S2 hν' z
   rw [← hasSum_nat_add_iff' 1] at h1 h2
-  have e1 : struveAs_P1 ν 0 = 1 := by simp [struveAs_P1]
-  have e2 : struveAs_P2 ν 0 = (1 / 2 : ℂ) ^ 2 - (ν / 2) ^ 2 := by simp [struveAs_P2]
+  have e1 : AngerAsymptotics.integerProduct ν 0 = 1 := by simp [AngerAsymptotics.integerProduct]
+  have e2 : AngerAsymptotics.halfIntegerProduct ν 0 = (1 / 2 : ℂ) ^ 2 - (ν / 2) ^ 2 := by
+      simp [AngerAsymptotics.halfIntegerProduct]
   simp only [Finset.range_one, Finset.sum_singleton, e1, e2, pow_zero, mul_zero, div_one,
     one_mul] at h1 h2
-  have hb1 : ∀ k : ℕ, ‖(-1) ^ (k + 1) * (z / 2) ^ (2 * (k + 1)) / struveAs_P1 ν (k + 1)‖ ≤
+  have hb1 : ∀ k : ℕ, ‖(-1) ^ (k + 1) * (z / 2) ^ (2 * (k + 1)) /
+      AngerAsymptotics.integerProduct ν (k + 1)‖ ≤
       4 * ‖z / 2‖ ^ 2 / ‖ν / 2‖ ^ 2 * (c ^ k / k !) := by
     intro k
-    have hP := struveAs_P1_tail_ge hε hν hx k
+    have hP := AngerAsymptotics.integerProduct_tail_ge hε hν hx k
     have hpos : 0 < ‖ν / 2‖ ^ 2 / 4 * ((ε / 2) ^ k * k !) := by positivity
     rw [norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul, norm_pow]
-    calc ‖z / 2‖ ^ (2 * (k + 1)) / ‖struveAs_P1 ν (k + 1)‖
+    calc ‖z / 2‖ ^ (2 * (k + 1)) / ‖AngerAsymptotics.integerProduct ν (k + 1)‖
         ≤ ‖z / 2‖ ^ (2 * (k + 1)) / (‖ν / 2‖ ^ 2 / 4 * ((ε / 2) ^ k * k !)) :=
           div_le_div_of_nonneg_left (by positivity) hpos hP
       _ = _ := by
@@ -105,13 +109,14 @@ theorem struveAs_S_tail_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
           field_simp
           ring
   have hb2 : ∀ k : ℕ, ‖ν / 2 * ((-1) ^ (k + 1) * (z / 2) ^ (2 * (k + 1) + 1) /
-      struveAs_P2 ν (k + 1))‖ ≤ 16 * ‖z / 2‖ ^ 3 / ‖ν / 2‖ ^ 2 * (c ^ k / k !) := by
+      AngerAsymptotics.halfIntegerProduct ν (k + 1))‖ ≤ 16 * ‖z / 2‖ ^ 3 / ‖ν / 2‖ ^ 2 *
+          (c ^ k / k !) := by
     intro k
-    have hP := struveAs_P2_tail_ge hε hν hx k
+    have hP := AngerAsymptotics.halfIntegerProduct_tail_ge hε hν hx k
     have hpos : 0 < (‖ν / 2‖ ^ 2 / 4) ^ 2 * ((ε / 2) ^ k * k !) := by positivity
     rw [norm_mul (ν / 2), norm_div ((-1 : ℂ) ^ (k + 1) * (z / 2) ^ (2 * (k + 1) + 1)),
       norm_mul ((-1 : ℂ) ^ (k + 1)), norm_pow, norm_neg, norm_one, one_pow, one_mul, norm_pow]
-    calc ‖ν / 2‖ * (‖z / 2‖ ^ (2 * (k + 1) + 1) / ‖struveAs_P2 ν (k + 1)‖)
+    calc ‖ν / 2‖ * (‖z / 2‖ ^ (2 * (k + 1) + 1) / ‖AngerAsymptotics.halfIntegerProduct ν (k + 1)‖)
         ≤ ‖ν / 2‖ * (‖z / 2‖ ^ (2 * (k + 1) + 1) /
             ((‖ν / 2‖ ^ 2 / 4) ^ 2 * ((ε / 2) ^ k * k !))) := by
           gcongr
@@ -151,7 +156,7 @@ form on the real axis. -/
 theorem weberE_large_order (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
     (fun ν : ℂ => π*ν/2*weberE ν z-(sin (π*ν/2))^2-ν*z/(ν^2-1)*(cos (π*ν/2))^2)
         =O[nonintegerOrderSector ε] (fun ν : ℂ => (Real.exp (π*|ν.im|) : ℂ)*ν^(-2:ℤ)) := by
-  obtain ⟨K, hK⟩ := struveAs_S_tail_bound z hε
+  obtain ⟨K, hK⟩ := AngerAsymptotics.S_tail_bound z hε
   have hev : ∀ᶠ ν : ℂ in nonintegerOrderSector ε, 4 ≤ ‖ν‖ ∧ ∀ n : ℤ, ε ≤ ‖ν - n‖ := by
     rw [nonintegerOrderSector, sector, eventually_inf_principal, eventually_inf_principal]
     exact (tendsto_comap.eventually (eventually_ge_atTop 4)).mono fun ν h4 _ hn => ⟨h4, hn⟩
@@ -169,8 +174,8 @@ theorem weberE_large_order (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
   have hc2 : cos (π * (ν / 2)) ≠ 0 := fun h => hs (by rw [h2, h]; ring)
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
   have hP20 : ((1 / 2 : ℂ)) ^ 2 - (ν / 2) ^ 2 ≠ 0 := by
-    have := struveAs_P2_ne_zero hν' 0
-    simpa [struveAs_P2] using this
+    have := AngerAsymptotics.halfIntegerProduct_ne_zero hν' 0
+    simpa [AngerAsymptotics.halfIntegerProduct] using this
   have hν2 : ν ^ 2 - 1 ≠ 0 := fun h => hP20 (by linear_combination (-1 / 4 : ℂ) * h)
   have hν0' : ν ≠ 0 := fun h => by rw [h] at hν0; simp at hν0
   set s := sin (π * (ν / 2)) with hsd
@@ -188,14 +193,14 @@ theorem weberE_large_order (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
     ring
   rw [hid]
   have hsn : ‖s‖ ^ 2 ≤ Real.exp (π * |ν.im|) := by
-    have := struveAs_norm_sin_le (π * (ν / 2))
+    have := AngerAsymptotics.norm_sin_le (π * (ν / 2))
     have him : |(π * (ν / 2) : ℂ).im| = π * |ν.im| / 2 := by
       simp [abs_mul, abs_of_pos Real.pi_pos, abs_div]; ring
     rw [him] at this
     calc ‖s‖ ^ 2 ≤ Real.exp (π * |ν.im| / 2) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) this 2
       _ = _ := by rw [← Real.exp_nat_mul]; ring_nf
   have hcn : ‖c‖ ^ 2 ≤ Real.exp (π * |ν.im|) := by
-    have := struveAs_norm_cos_le (π * (ν / 2))
+    have := AngerAsymptotics.norm_cos_le (π * (ν / 2))
     have him : |(π * (ν / 2) : ℂ).im| = π * |ν.im| / 2 := by
       simp [abs_mul, abs_of_pos Real.pi_pos, abs_div]; ring
     rw [him] at this

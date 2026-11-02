@@ -22,8 +22,8 @@ count `pp(n)`, the symmetry classes, and strict shifted and descending plane par
   box, and `pp(n)`.
 * `IsSymmetricPP`, `IsCyclicallySymmetricPP`, `IsTotallySymmetricPP`: the symmetry classes.
 * `planeComplement`, `planeTranspose`: the complement `π^c` in a box and the transpose.
-* `IsStrictShiftedPP`, `IsDescendingPP`, `DescendingPPIn`: strict shifted and descending plane
-  partitions, as lists of rows, row `i` indented by `i` places.
+* `IsStrictShiftedPP`, `IsDescendingPlanePartition`, `DescendingPlanePartitionIn`: strict shifted
+  and descending plane partitions, as lists of rows, row `i` indented by `i` places.
 
 ## Main results
 
@@ -149,14 +149,14 @@ def IsStrictShiftedPP (d : List (List ℕ)) : Prop :=
 number of parts of each row is strictly less than the largest part of that row and at least the
 largest part of the next row. -/
 @[dlmf 26.12.i]
-def IsDescendingPP (d : List (List ℕ)) : Prop :=
+def IsDescendingPlanePartition (d : List (List ℕ)) : Prop :=
   IsStrictShiftedPP d ∧
     ∀ i (hi : i < d.length), (d[i]).length < (d[i]).headD 0 ∧
       ∀ hi' : i + 1 < d.length, (d[i + 1]).headD 0 ≤ (d[i]).length
 
 /-- The descending plane partitions with all parts at most `r` ("in `B(r, r, r)`"). -/
-def DescendingPPIn (r : ℕ) : Type :=
-  {d : List (List ℕ) // IsDescendingPP d ∧ ∀ row ∈ d, ∀ a ∈ row, a ≤ r}
+def DescendingPlanePartitionIn (r : ℕ) : Type :=
+  {d : List (List ℕ) // IsDescendingPlanePartition d ∧ ∀ row ∈ d, ∀ a ∈ row, a ≤ r}
 
 end DLMF.Combinatorics
 

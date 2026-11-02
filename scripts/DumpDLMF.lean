@@ -18,8 +18,8 @@ proof status. It also writes the checked pointers recorded with `dlmf_upstream`
 (`DLMF/Core/Upstream.lean`) from DLMF items to untagged declarations of Mathlib or TauCeti:
 these entries have `"source": "pointer"` and name the module that recorded them in
 `recordedIn`; tagged entries have `"source": "tag"`. A pointer that duplicates a tag of the
-same declaration is omitted. The status comes from the axiom audit (`Lean.collectAxioms`), not from the
-source text: `proved` means only `propext`, `Classical.choice` and `Quot.sound` are used,
+same declaration is omitted. The status comes from the axiom audit (`Lean.collectAxioms`), not from
+the source text: `proved` means only `propext`, `Classical.choice` and `Quot.sound` are used,
 `admitted` means `sorryAx` occurs in the transitive dependencies, and `nonstandard` means some
 other axiom (for example `Lean.ofReduceBool` from `native_decide`) occurs. For admitted
 theorems, `sorryDirect` records whether `sorryAx` occurs in the declaration's own proof
@@ -113,8 +113,9 @@ def entry (info : Json) (n : Name) (tag comment source : String) (recordedIn : O
   let srcUrl := match proj.getObjValD "url", proj.getObjValD "rev", line with
     | .str u, .str r, some l => Json.str s!"{repoBase u}/blob/{r}/{modulePath mod}#L{l}"
     | _, _, _ => Json.null
+  let docPage := (modulePath mod).dropEnd 5
   let docUrl := if project == "Mathlib" then
-      Json.str s!"https://leanprover-community.github.io/mathlib4_docs/{(modulePath mod).dropEnd 5}.html#{n}"
+      Json.str s!"https://leanprover-community.github.io/mathlib4_docs/{docPage}.html#{n}"
     else Json.null
   return Json.mkObj <| [
     ("dlmf", Json.str tag),
@@ -143,8 +144,8 @@ def dlmfTags (env : Environment) : Array Tag :=
       (a.declName == b.declName && a.tag < b.tag)
 
 /-- All `dlmf_upstream` pointers with the module that recorded them. -/
-def upstreamPointers (env : Environment) : Array (DLMF.UpstreamPointer × Name) :=
-  let st := PersistentEnvExtension.getState DLMF.upstreamExt env
+def upstreamPointers (env : Environment) : Array (DLMF.Core.UpstreamPointer × Name) :=
+  let st := PersistentEnvExtension.getState DLMF.Core.upstreamExt env
   let imported := st.2.mapIdx fun i ps =>
     ps.map fun p => (p, env.header.moduleNames[i]!)
   imported.flatten ++ (st.1.toArray.map fun p => (p, env.mainModule))

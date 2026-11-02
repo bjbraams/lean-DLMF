@@ -162,7 +162,7 @@ private lemma rod_ode (n k : ℕ) (z : ℂ) :
     (z^2-1) * iteratedDeriv (n+k+2) (fun z : ℂ => (z^2-1)^n) z +
       2*(k+1)*z*iteratedDeriv (n+k+1) (fun z : ℂ => (z^2-1)^n) z =
       ((n:ℂ)-k)*(n+k+1) * iteratedDeriv (n+k) (fun z : ℂ => (z^2-1)^n) z := by
-  have h := legInt_ode n k z
+  have h := OrthogonalityIntegrals.ode n k z
   simp only [LegendreAddition.jet, iteratedDeriv_legendrePolyP_rodrigues] at h
   have hc : (2^n*(n.factorial:ℂ))⁻¹ ≠ 0 := by
     apply inv_ne_zero; exact mul_ne_zero (pow_ne_zero _ two_ne_zero)
@@ -731,9 +731,10 @@ private lemma herg_Ek (n k : ℕ) (z : ℂ) :
           LegendreAddition.jet (n+1) (k+1) z) := by
   induction k generalizing z with
   | zero =>
-    have hd := ((((hasDerivAt_pow 2 z).const_sub 1).mul (legInt_hasDerivAt_D n 1 z)).sub
-      ((((hasDerivAt_id' z).mul (legInt_hasDerivAt_D n 0 z)).sub
-          (legInt_hasDerivAt_D (n+1) 0 z)).const_mul ((n:ℂ)+1)))
+    have hd := ((((hasDerivAt_pow 2 z).const_sub 1).mul
+        (OrthogonalityIntegrals.hasDerivAt_jet n 1 z)).sub
+      ((((hasDerivAt_id' z).mul (OrthogonalityIntegrals.hasDerivAt_jet n 0 z)).sub
+          (OrthogonalityIntegrals.hasDerivAt_jet (n+1) 0 z)).const_mul ((n:ℂ)+1)))
     have h0 : HasDerivAt (fun z => (1 - z^2) * LegendreAddition.jet n 1 z -
         ((n:ℂ)+1) * (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z)) 0 z := by
       rw [show (fun z => (1 - z^2) * LegendreAddition.jet n 1 z - ((n:ℂ)+1) *
@@ -744,12 +745,14 @@ private lemma herg_Ek (n k : ℕ) (z : ℂ) :
     push_cast
     linear_combination hu
   | succ k ih =>
-    have hd := (((((hasDerivAt_pow 2 z).const_sub 1).mul (legInt_hasDerivAt_D n (k+2) z)).sub
-      (((hasDerivAt_id' z).const_mul (2*((k:ℂ)+1))).mul (legInt_hasDerivAt_D n (k+1) z))).sub
-      ((legInt_hasDerivAt_D n k z).const_mul (((k:ℂ)+1)*k))).sub
-      (((((hasDerivAt_id' z).mul (legInt_hasDerivAt_D n (k+1) z)).add
-        ((legInt_hasDerivAt_D n k z).const_mul ((k:ℂ)+1))).sub
-            (legInt_hasDerivAt_D (n+1) (k+1) z)).const_mul ((n:ℂ)+1))
+    have hd := (((((hasDerivAt_pow 2 z).const_sub 1).mul
+        (OrthogonalityIntegrals.hasDerivAt_jet n (k+2) z)).sub
+      (((hasDerivAt_id' z).const_mul (2*((k:ℂ)+1))).mul
+          (OrthogonalityIntegrals.hasDerivAt_jet n (k+1) z))).sub
+      ((OrthogonalityIntegrals.hasDerivAt_jet n k z).const_mul (((k:ℂ)+1)*k))).sub
+      (((((hasDerivAt_id' z).mul (OrthogonalityIntegrals.hasDerivAt_jet n (k+1) z)).add
+        ((OrthogonalityIntegrals.hasDerivAt_jet n k z).const_mul ((k:ℂ)+1))).sub
+            (OrthogonalityIntegrals.hasDerivAt_jet (n+1) (k+1) z)).const_mul ((n:ℂ)+1))
     have h0 : HasDerivAt
         (fun z => (1 - z^2) * LegendreAddition.jet n (k+2) z -
         2*((k:ℂ)+1)*z*LegendreAddition.jet n (k+1) z
@@ -774,7 +777,7 @@ private lemma herg_core (n k : ℕ) (z : ℂ) :
         (LegendreAddition.jet n k z / ((n+k).factorial : ℂ) - (1 - z^2) *
             LegendreAddition.jet n (k+2) z / ((n+k+2).factorial : ℂ)) / 2 := by
   have hE := herg_Ek n k z
-  have hO := legInt_ode n k z
+  have hO := OrthogonalityIntegrals.ode n k z
   have f1 : ((n+k+2).factorial : ℂ) = (n+k+2) * (n+k+1) * (n+k).factorial := by
     rw [show n+k+2 = (n+k+1)+1 by ring, Nat.factorial_succ, Nat.factorial_succ]; push_cast; ring
   have f2 : ((n+k+1).factorial : ℂ) = (n+k+1) * (n+k).factorial := by
@@ -1028,7 +1031,7 @@ open scoped ComplexConjugate in
 theorem scaledOblate_real (n m : ℕ) {x : ℝ} (hx : 0 < x) :
     (scaledOblateR n m x).im=0 ∧ (scaledOblateT n m x).im=0 := by
   have hz : I*(x:ℂ) - 1 ∈ slitPlane := Or.inr (by simp [hx.ne'])
-  have hB := addTools_legendreBranchPower_I_mul m x hx
+  have hB := legendreBranchPower_I_mul m x hx
   set rr : ℝ := Real.exp (m/2 * Real.log (1+x^2))
   have hc : conj (I*(x:ℂ)) = -(I*x) := by simp
   have hs : ∀ k : ℕ, ((-1:ℂ))^k * (-1)^k = 1 := fun k => by rw [← mul_pow]; norm_num
@@ -1041,9 +1044,9 @@ theorem scaledOblate_real (n m : ℕ) {x : ℝ} (hx : 0 < x) :
       funext w; simp [P]
     have hw : conj (iteratedDeriv (m+n) (fun z : ℂ => (z^2-1)^n) (I*x)) =
         (-1)^(m+n) * iteratedDeriv (m+n) (fun z : ℂ => (z^2-1)^n) (I*x) := by
-      rw [← addTools_iteratedDeriv_even_neg (fun z => by ring) _ _, ← hc, hf,
+      rw [← iteratedDeriv_even_neg (fun z => by ring) _ _, ← hc, hf,
         iteratedDeriv_eval_polynomial, Polynomial.iterate_derivative_map,
-        addTools_conj_eval_map_ofReal]
+        conj_eval_map_ofReal]
     set w := iteratedDeriv (m+n) (fun z : ℂ => (z^2-1)^n) (I*x)
     rw [hE]
     simp only [map_mul, map_div₀, map_pow, map_neg, conj_I, conj_ofReal, hw, map_natCast, map_ofNat]
@@ -1073,7 +1076,7 @@ theorem scaledOblate_real (n m : ℕ) {x : ℝ} (hx : 0 < x) :
         simp only [sub_re, one_re, ofReal_re]
         have : 0 < 1/x^2 := by positivity
         rw [show -1/x^2 = -(1/x^2) by ring]; linarith
-      rw [addTools_conj_regularizedGaussHG _ _ _ hcut]
+      rw [conj_regularizedGaussHG _ _ _ hcut]
       simp [map_div₀, conj_ofReal, map_ofNat]
     have hx0 : (x:ℂ) ≠ 0 := by exact_mod_cast hx.ne'
     have hT : I * exp (I*π*n/2) * (exp ((m:ℂ)*π*I) * Gamma ((n:ℂ)+(m:ℂ)+1) *

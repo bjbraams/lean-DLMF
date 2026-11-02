@@ -59,6 +59,8 @@ integrability on both sides, including the square-root singularity at the endpoi
 open Complex Set Filter MeasureTheory intervalIntegral
 open scoped Real Topology
 
+open DLMF.Core
+
 namespace DLMF.EllipticIntegrals
 
 open DLMF.JacobiElliptic

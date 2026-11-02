@@ -16,7 +16,7 @@ public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 
 ## Main definitions
 
-* `IsLinODE2SolOn f g r w D` (1.13.1, 1.13.8): `w'' + f w' + g w = r` on `D`, with genuine
+* `IsLinearODE2SolutionOn f g r w D` (1.13.1, 1.13.8): `w'' + f w' + g w = r` on `D`, with genuine
   differentiability of `w` and of `w'` at every point of `D` (so the totalized `deriv` cannot
   make a nonsolution satisfy the equation); `r = 0` is the homogeneous equation 1.13.1.
 * `IsFundamentalPair f g w₁ w₂ D` (1.13.2).
@@ -40,7 +40,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 /-- DLMF 1.13.1 and 1.13.8: `w` solves `w'' + f(z) w' + g(z) w = r(z)` on `D`: at every point of
 `D`, `w` is differentiable and `w'` has derivative `r - f w' - g w`. Intended for open `D`. -/
 @[dlmf 1.13.E1, dlmf 1.13.E8]
-def IsLinODE2SolOn (f g r : 𝕜 → 𝕜) (w : 𝕜 → 𝕜) (D : Set 𝕜) : Prop :=
+def IsLinearODE2SolutionOn (f g r : 𝕜 → 𝕜) (w : 𝕜 → 𝕜) (D : Set 𝕜) : Prop :=
   ∀ z ∈ D, DifferentiableAt 𝕜 w z ∧
     HasDerivAt (deriv w) (r z - f z * deriv w z - g z * w z) z
 
@@ -48,8 +48,8 @@ def IsLinODE2SolOn (f g r : 𝕜 → 𝕜) (w : 𝕜 → 𝕜) (D : Set 𝕜) : 
 `D`: both are solutions and every solution is `A w₁ + B w₂` on `D` for constants `A`, `B`. -/
 @[dlmf 1.13.E2]
 def IsFundamentalPair (f g : 𝕜 → 𝕜) (w₁ w₂ : 𝕜 → 𝕜) (D : Set 𝕜) : Prop :=
-  IsLinODE2SolOn f g 0 w₁ D ∧ IsLinODE2SolOn f g 0 w₂ D ∧
-    ∀ w, IsLinODE2SolOn f g 0 w D → ∃ A B : 𝕜, ∀ z ∈ D, w z = A * w₁ z + B * w₂ z
+  IsLinearODE2SolutionOn f g 0 w₁ D ∧ IsLinearODE2SolutionOn f g 0 w₂ D ∧
+    ∀ w, IsLinearODE2SolutionOn f g 0 w D → ∃ A B : 𝕜, ∀ z ∈ D, w z = A * w₁ z + B * w₂ z
 
 /-- DLMF §1.13(i): the `n`-argument Wronskian `𝒲{w₁, …, w_n} = det[w_k^{(j-1)}]`, with rows
 indexed by the order of the derivative and columns by the function. -/

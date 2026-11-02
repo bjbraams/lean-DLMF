@@ -31,10 +31,10 @@ integrability at `a` is required: all estimates are pointwise in `x > a`.
 
 ## Main results
 
-* `LiouvilleGreen.lg_continuousOn_integral_Ioi`, `LiouvilleGreen.lg_hasDerivAt_integral_Ioi`:
+* `LiouvilleGreen.continuousOn_integral_Ioi`, `LiouvilleGreen.hasDerivAt_integral_Ioi`:
   continuity and differentiation of tail integrals `x ↦ ∫_{(x,∞)} f`.
-* `LiouvilleGreen.lg_tendsto_exp_integral_Ioi_sub_one`: the error bounds tend to `0`.
-* `LiouvilleGreen.lg_integral_Ioi_mul_comp_tail`: `∫_{(x,∞)} ρ φ(R) = Φ(R x) - Φ 0` for the
+* `LiouvilleGreen.tendsto_exp_integral_Ioi_sub_one`: the error bounds tend to `0`.
+* `LiouvilleGreen.integral_Ioi_mul_comp_tail`: `∫_{(x,∞)} ρ φ(R) = Φ(R x) - Φ 0` for the
   tail `R` of `ρ` and `Φ' = φ`, with the power and exponential cases.
 * `LiouvilleGreen.volterraOp`: the rank-two Volterra operator.
 * `LiouvilleGreen.exists_volterra_solution_add`: existence of a solution of the inhomogeneous
@@ -51,7 +51,7 @@ namespace LiouvilleGreen
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 /-- Splitting a tail integral: `∫_{(c,∞)} f = ∫_c^y f + ∫_{(y,∞)} f` for `c ≤ y`. -/
-theorem lg_integral_Ioi_eq_sub {f : ℝ → E} {c y : ℝ} (hf : IntegrableOn f (Ioi c))
+theorem integral_Ioi_eq_sub {f : ℝ → E} {c y : ℝ} (hf : IntegrableOn f (Ioi c))
     (hcy : c ≤ y) :
     ∫ t in Ioi y, f t = (∫ t in Ioi c, f t) - ∫ t in c..y, f t := by
   rw [intervalIntegral.integral_of_le hcy, ← Ioc_union_Ioi_eq_Ioi hcy,
@@ -61,7 +61,7 @@ theorem lg_integral_Ioi_eq_sub {f : ℝ → E} {c y : ℝ} (hf : IntegrableOn f 
 
 /-- Tail integrals `x ↦ ∫_{(x,∞)} f` are continuous on `(a,∞)` when `f` is integrable on every
 `(c,∞)`, `c > a`. -/
-theorem lg_continuousOn_integral_Ioi {f : ℝ → E} {a : ℝ}
+theorem continuousOn_integral_Ioi {f : ℝ → E} {a : ℝ}
     (hf : ∀ c, a < c → IntegrableOn f (Ioi c)) :
     ContinuousOn (fun x => ∫ t in Ioi x, f t) (Ioi a) := by
   intro x hx
@@ -78,10 +78,10 @@ theorem lg_continuousOn_integral_Ioi {f : ℝ → E} {a : ℝ}
     continuousAt_const.sub (hprim.continuousAt (by rwa [uIcc_of_le (by linarith)]))
   refine (hca.congr ?_).continuousWithinAt
   filter_upwards [Ioi_mem_nhds hcx] with y hy
-  exact (lg_integral_Ioi_eq_sub hfc hy.le).symm
+  exact (integral_Ioi_eq_sub hfc hy.le).symm
 
 /-- The derivative of a tail integral: `d/dx ∫_{(x,∞)} f = -f x` at a point of continuity. -/
-theorem lg_hasDerivAt_integral_Ioi [CompleteSpace E] {f : ℝ → E} {a x : ℝ}
+theorem hasDerivAt_integral_Ioi [CompleteSpace E] {f : ℝ → E} {a x : ℝ}
     (hf : ∀ c, a < c → IntegrableOn f (Ioi c)) (hx : a < x) (hfx : ContinuousAt f x) :
     HasDerivAt (fun y => ∫ t in Ioi y, f t) (-f x) x := by
   set c := (a + x) / 2 with hc
@@ -96,22 +96,22 @@ theorem lg_hasDerivAt_integral_Ioi [CompleteSpace E] {f : ℝ → E} {a x : ℝ}
         (Ioi_mem_nhds hcx)) hfx
   refine (h1.const_sub (∫ t in Ioi c, f t)).congr_of_eventuallyEq ?_
   filter_upwards [Ioi_mem_nhds hcx] with y hy
-  exact lg_integral_Ioi_eq_sub hfc hy.le
+  exact integral_Ioi_eq_sub hfc hy.le
 
 /-- Tail integrals tend to `0` at infinity. -/
-theorem lg_tendsto_integral_Ioi {f : ℝ → E} {c : ℝ} (hf : IntegrableOn f (Ioi c)) :
+theorem tendsto_integral_Ioi {f : ℝ → E} {c : ℝ} (hf : IntegrableOn f (Ioi c)) :
     Tendsto (fun y => ∫ t in Ioi y, f t) atTop (𝓝 0) := by
   have h := (intervalIntegral_tendsto_integral_Ioi c hf tendsto_id).const_sub
     (∫ t in Ioi c, f t)
   rw [sub_self] at h
   refine h.congr' ?_
   filter_upwards [Ici_mem_atTop c] with y hy
-  exact (lg_integral_Ioi_eq_sub hf hy).symm
+  exact (integral_Ioi_eq_sub hf hy).symm
 
 /-- The Liouville–Green error bounds `exp (κ ∫_{(x,∞)} ρ) - 1` tend to `0` at infinity. -/
-theorem lg_tendsto_exp_integral_Ioi_sub_one {ρ : ℝ → ℝ} {c : ℝ} (hρ : IntegrableOn ρ (Ioi c))
+theorem tendsto_exp_integral_Ioi_sub_one {ρ : ℝ → ℝ} {c : ℝ} (hρ : IntegrableOn ρ (Ioi c))
     (κ : ℝ) : Tendsto (fun x => Real.exp (κ * ∫ t in Ioi x, ρ t) - 1) atTop (𝓝 0) := by
-  have h0 := (lg_tendsto_integral_Ioi hρ).const_mul κ
+  have h0 := (tendsto_integral_Ioi hρ).const_mul κ
   rw [mul_zero] at h0
   have h := ((Real.continuous_exp.tendsto 0).comp h0).sub_const 1
   simpa using h
@@ -123,12 +123,12 @@ section Tail
 variable {ρ : ℝ → ℝ} {a : ℝ}
 
 /-- The tail `∫_{(x,∞)} ρ` of a nonnegative function is nonnegative. -/
-theorem lg_tail_nonneg (hρ0 : ∀ t, a < t → 0 ≤ ρ t) {x : ℝ} (hx : a ≤ x) :
+theorem tail_nonneg (hρ0 : ∀ t, a < t → 0 ≤ ρ t) {x : ℝ} (hx : a ≤ x) :
     0 ≤ ∫ t in Ioi x, ρ t :=
   setIntegral_nonneg measurableSet_Ioi fun t ht => hρ0 t (lt_of_le_of_lt hx ht)
 
 /-- The tail `∫_{(x,∞)} ρ` of a nonnegative function is antitone in `x`. -/
-theorem lg_tail_anti (hρ0 : ∀ t, a < t → 0 ≤ ρ t) (hρi : ∀ c, a < c → IntegrableOn ρ (Ioi c))
+theorem tail_anti (hρ0 : ∀ t, a < t → 0 ≤ ρ t) (hρi : ∀ c, a < c → IntegrableOn ρ (Ioi c))
     {x y : ℝ} (hx : a < x) (hxy : x ≤ y) :
     ∫ t in Ioi y, ρ t ≤ ∫ t in Ioi x, ρ t :=
   setIntegral_mono_set (hρi x hx)
@@ -137,19 +137,19 @@ theorem lg_tail_anti (hρ0 : ∀ t, a < t → 0 ≤ ρ t) (hρi : ∀ c, a < c �
 
 /-- Integration against the tail: if `Φ' = φ` and `R x = ∫_{(x,∞)} ρ`, then
 `∫_{(x,∞)} ρ φ(R) = Φ(R x) - Φ 0`. -/
-theorem lg_integral_Ioi_mul_comp_tail (hρc : ContinuousOn ρ (Ioi a))
+theorem integral_Ioi_mul_comp_tail (hρc : ContinuousOn ρ (Ioi a))
     (hρ0 : ∀ t, a < t → 0 ≤ ρ t) (hρi : ∀ c, a < c → IntegrableOn ρ (Ioi c))
     {Φ φ : ℝ → ℝ} (hΦ : ∀ s, HasDerivAt Φ (φ s) s) (hφ : Continuous φ) {x : ℝ} (hx : a < x) :
     IntegrableOn (fun t => ρ t * φ (∫ s in Ioi t, ρ s)) (Ioi x) ∧
       ∫ t in Ioi x, ρ t * φ (∫ s in Ioi t, ρ s) = Φ (∫ s in Ioi x, ρ s) - Φ 0 := by
   set R : ℝ → ℝ := fun t => ∫ s in Ioi t, ρ s with hR
-  have hRc : ContinuousOn R (Ioi a) := lg_continuousOn_integral_Ioi hρi
+  have hRc : ContinuousOn R (Ioi a) := continuousOn_integral_Ioi hρi
   have hRd : ∀ t, a < t → HasDerivAt R (-ρ t) t := fun t ht =>
-    lg_hasDerivAt_integral_Ioi hρi ht (hρc.continuousAt (Ioi_mem_nhds ht))
+    hasDerivAt_integral_Ioi hρi ht (hρc.continuousAt (Ioi_mem_nhds ht))
   obtain ⟨C, hC⟩ := (isCompact_Icc (a := 0) (b := R x)).exists_bound_of_continuousOn
     hφ.continuousOn
   have hmem : ∀ t ∈ Ioi x, R t ∈ Icc 0 (R x) := fun t ht =>
-    ⟨lg_tail_nonneg hρ0 (hx.trans ht).le, lg_tail_anti hρ0 hρi hx (le_of_lt ht)⟩
+    ⟨tail_nonneg hρ0 (hx.trans ht).le, tail_anti hρ0 hρi hx (le_of_lt ht)⟩
   have hint : IntegrableOn (fun t => ρ t * φ (R t)) (Ioi x) :=
     (hρi x hx).mul_bdd
       ((hφ.comp_continuousOn (hRc.mono (Ioi_subset_Ioi hx.le))).aestronglyMeasurable
@@ -161,18 +161,18 @@ theorem lg_integral_Ioi_mul_comp_tail (hρc : ContinuousOn ρ (Ioi a))
     ((hΦ (R x)).continuousAt.comp (hRd x hx).continuousAt).neg.continuousWithinAt
     (fun t ht => by
       exact ((hΦ (R t)).comp t (hRd t (hx.trans ht))).neg.congr_deriv (by ring))
-    hint ((hΦ 0).continuousAt.tendsto.comp (lg_tendsto_integral_Ioi (hρi x hx))).neg
+    hint ((hΦ 0).continuousAt.tendsto.comp (tendsto_integral_Ioi (hρi x hx))).neg
   rw [hft]
   ring
 
 /-- `∫_{(x,∞)} ρ R^n / n! = R(x)^{n+1} / (n+1)!` for the tail `R` of `ρ`. -/
-theorem lg_integral_Ioi_mul_tail_pow (hρc : ContinuousOn ρ (Ioi a))
+theorem integral_Ioi_mul_tail_pow (hρc : ContinuousOn ρ (Ioi a))
     (hρ0 : ∀ t, a < t → 0 ≤ ρ t) (hρi : ∀ c, a < c → IntegrableOn ρ (Ioi c)) (n : ℕ)
     {x : ℝ} (hx : a < x) :
     IntegrableOn (fun t => ρ t * ((∫ s in Ioi t, ρ s) ^ n / n.factorial)) (Ioi x) ∧
       ∫ t in Ioi x, ρ t * ((∫ s in Ioi t, ρ s) ^ n / n.factorial) =
         (∫ s in Ioi x, ρ s) ^ (n + 1) / (n + 1).factorial := by
-  have h := lg_integral_Ioi_mul_comp_tail hρc hρ0 hρi
+  have h := integral_Ioi_mul_comp_tail hρc hρ0 hρi
     (Φ := fun s => s ^ (n + 1) / (n + 1).factorial) (φ := fun s => s ^ n / n.factorial)
     (fun s => by
       convert (hasDerivAt_pow (n + 1) s).div_const ((n + 1).factorial : ℝ) using 1
@@ -183,13 +183,13 @@ theorem lg_integral_Ioi_mul_tail_pow (hρc : ContinuousOn ρ (Ioi a))
   simpa using h
 
 /-- `∫_{(x,∞)} ρ exp(R) = exp(R x) - 1` for the tail `R` of `ρ`. -/
-theorem lg_integral_Ioi_mul_exp_tail (hρc : ContinuousOn ρ (Ioi a))
+theorem integral_Ioi_mul_exp_tail (hρc : ContinuousOn ρ (Ioi a))
     (hρ0 : ∀ t, a < t → 0 ≤ ρ t) (hρi : ∀ c, a < c → IntegrableOn ρ (Ioi c))
     {x : ℝ} (hx : a < x) :
     IntegrableOn (fun t => ρ t * Real.exp (∫ s in Ioi t, ρ s)) (Ioi x) ∧
       ∫ t in Ioi x, ρ t * Real.exp (∫ s in Ioi t, ρ s) =
         Real.exp (∫ s in Ioi x, ρ s) - 1 := by
-  have h := lg_integral_Ioi_mul_comp_tail hρc hρ0 hρi (Φ := Real.exp) (φ := Real.exp)
+  have h := integral_Ioi_mul_comp_tail hρc hρ0 hρi (Φ := Real.exp) (φ := Real.exp)
     (fun s => Real.hasDerivAt_exp s) Real.continuous_exp hx
   simpa using h
 
@@ -211,7 +211,7 @@ variable {p₁ p₂ q₁ q₂ ψ : ℝ → 𝕜} {ρ : ℝ → ℝ} {a : ℝ}
 /-- One Picard step: if `‖φ t‖ ≤ B t R(t)ⁿ / n!` with `R` the tail of `ρ` and `B ≥ 0`
 nonincreasing, then the integrands of `volterraOp` are integrable, `volterraOp φ` is measurable
 and `‖volterraOp φ x‖ ≤ B x R(x)ⁿ⁺¹ / (n + 1)!`. -/
-theorem lg_volterraOp_step
+theorem volterraOp_step
     (hp₁ : AEStronglyMeasurable p₁ (volume.restrict (Ioi a)))
     (hp₂ : AEStronglyMeasurable p₂ (volume.restrict (Ioi a)))
     (hq₁ : ∀ c, a < c → IntegrableOn (fun t => q₁ t * ψ t) (Ioi c))
@@ -231,12 +231,12 @@ theorem lg_volterraOp_step
   have hRle : ∀ x, a < x → ∀ t ∈ Ioi x,
       (∫ s in Ioi t, ρ s) ^ n / n.factorial ≤ (∫ s in Ioi x, ρ s) ^ n / n.factorial :=
     fun x hx t ht => div_le_div_of_nonneg_right
-      (pow_le_pow_left₀ (lg_tail_nonneg hρ0 (hx.trans ht).le)
-        (lg_tail_anti hρ0 hρi hx (le_of_lt ht)) n) (Nat.cast_nonneg _)
+      (pow_le_pow_left₀ (tail_nonneg hρ0 (hx.trans ht).le)
+        (tail_anti hρ0 hρi hx (le_of_lt ht)) n) (Nat.cast_nonneg _)
   have hφx : ∀ x, a < x → ∀ t ∈ Ioi x,
       ‖φ t‖ ≤ B x * ((∫ s in Ioi x, ρ s) ^ n / n.factorial) :=
     fun x hx t ht => (hφ t (hx.trans ht)).trans (mul_le_mul (hBa x t hx (le_of_lt ht))
-      (hRle x hx t ht) (by have := lg_tail_nonneg hρ0 (hx.trans ht).le; positivity)
+      (hRle x hx t ht) (by have := tail_nonneg hρ0 (hx.trans ht).le; positivity)
       (hB0 x hx))
   have hint : ∀ {q : ℝ → 𝕜}, (∀ c, a < c → IntegrableOn (fun t => q t * ψ t) (Ioi c)) →
       ∀ x, a < x → IntegrableOn (fun t => q t * ψ t * φ t) (Ioi x) := by
@@ -246,8 +246,8 @@ theorem lg_volterraOp_step
   have hi₁ := hint hq₁
   have hi₂ := hint hq₂
   refine ⟨hi₁, hi₂, ?_, ?_⟩
-  · exact (hp₁.mul ((lg_continuousOn_integral_Ioi hi₁).aestronglyMeasurable measurableSet_Ioi)).add
-      (hp₂.mul ((lg_continuousOn_integral_Ioi hi₂).aestronglyMeasurable measurableSet_Ioi))
+  · exact (hp₁.mul ((continuousOn_integral_Ioi hi₁).aestronglyMeasurable measurableSet_Ioi)).add
+      (hp₂.mul ((continuousOn_integral_Ioi hi₂).aestronglyMeasurable measurableSet_Ioi))
   · intro x hx
     have heq : volterraOp p₁ p₂ q₁ q₂ ψ φ x =
         ∫ t in Ioi x, (p₁ x * q₁ t + p₂ x * q₂ t) * ψ t * φ t := by
@@ -256,12 +256,12 @@ theorem lg_volterraOp_step
       congr 1
       ext t
       ring
-    have hb := lg_integral_Ioi_mul_tail_pow hρc hρ0 hρi n hx
+    have hb := integral_Ioi_mul_tail_pow hρc hρ0 hρi n hx
     rw [heq, ← hb.2, ← integral_const_mul]
     refine norm_integral_le_of_norm_le (hb.1.const_mul (B x))
       (ae_restrict_of_forall_mem measurableSet_Ioi fun t ht => ?_)
     rw [norm_mul]
-    have hR0 := lg_tail_nonneg hρ0 (hx.trans ht).le
+    have hR0 := tail_nonneg hρ0 (hx.trans ht).le
     calc ‖(p₁ x * q₁ t + p₂ x * q₂ t) * ψ t‖ * ‖φ t‖
         ≤ ρ t * (B t * ((∫ s in Ioi t, ρ s) ^ n / n.factorial)) :=
           mul_le_mul (hK x t hx ht) (hφ t (hx.trans ht)) (norm_nonneg _) (hρ0 t (hx.trans ht))
@@ -300,11 +300,11 @@ theorem exists_volterra_solution_add
     induction n with
     | zero => exact ⟨hσm, fun t ht => by simpa [φ] using hσ t ht⟩
     | succ n ih =>
-      have hs := lg_volterraOp_step hp₁ hp₂ hq₁ hq₂ hρc hρi hK hB0 hBa ih.1 n ih.2
+      have hs := volterraOp_step hp₁ hp₂ hq₁ hq₂ hρc hρi hK hB0 hBa ih.1 n ih.2
       have hφs : φ (n + 1) = L (φ n) := Function.iterate_succ_apply' L n σ
       rw [hφs]
       exact ⟨hs.2.2.1, hs.2.2.2⟩
-  have hstep : ∀ n, _ := fun n => lg_volterraOp_step hp₁ hp₂ hq₁ hq₂ hρc hρi hK hB0 hBa
+  have hstep : ∀ n, _ := fun n => volterraOp_step hp₁ hp₂ hq₁ hq₂ hρc hρi hK hB0 hBa
     (hφ n).1 n (hφ n).2
   have hρ0 : ∀ t, a < t → 0 ≤ ρ t := fun t ht =>
     (norm_nonneg _).trans (hK ((a + t) / 2) t (by linarith) (by linarith))
@@ -351,10 +351,10 @@ theorem exists_volterra_solution_add
           fun t ht => ?_
         rw [norm_mul]
         gcongr
-        have hR0 := lg_tail_nonneg hρ0 (hx.trans ht).le
+        have hR0 := tail_nonneg hρ0 (hx.trans ht).le
         refine ((hφ n).2 t (hx.trans ht)).trans (mul_le_mul (hBa x t hx (le_of_lt ht))
           (div_le_div_of_nonneg_right (pow_le_pow_left₀ hR0
-            (lg_tail_anti hρ0 hρi hx (le_of_lt ht)) n) (Nat.cast_nonneg _))
+            (tail_anti hρ0 hρi hx (le_of_lt ht)) n) (Nat.cast_nonneg _))
           (by positivity) (hB0 x hx))
       have hsI : Summable fun n => ∫ t in Ioi x, ‖q t * ψ t * φ n t‖ :=
         Summable.of_nonneg_of_le (fun n => integral_nonneg fun _ => norm_nonneg _) hnorm

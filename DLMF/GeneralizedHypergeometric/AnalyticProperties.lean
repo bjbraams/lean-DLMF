@@ -279,13 +279,6 @@ theorem genHG_unit_absolute_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
   simp only [norm_mul, norm_pow, hz, one_pow, mul_one]
   exact summable_norm_genCoeff_iff h hb ha
 
-/-- Every nonunit point of the unit circle converges in natural order when the excess exceeds minus
-one. -/
-theorem genHG_unit_conditional {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (hb : GenDenRegular b) {z : ℂ} (hz : ‖z‖ = 1) (hne : z ≠ 1)
-    (hγ : -1 < (genExcess a b).re) : GenSeriesConvergesTo a b z (genHG a b z) := by
-  sorry
-
 /-- Terminating upper parameters give a finitely supported sequence of coefficients,
 independently of lower-parameter regularity. -/
 lemma genCoeff_summable_of_terminates {a b : Multiset ℂ} (ha : GenTerminates a) :
@@ -743,6 +736,163 @@ private lemma gen_one_compare {c m : ℕ → ℂ} {v D0 C2 γ : ℂ} {K2 : ℝ} 
   have hx : ∀ x, c x - (c x - D0 * m x) = D0 * m x := fun x => by ring
   simp only [hx, ← Finset.mul_sum]
   field_simp
+
+/-- Dirichlet's test with coefficients of bounded variation. -/
+private lemma cauchySeq_series_mul_of_summable_sub {c z : ℕ → ℂ} {B : ℝ}
+    (hc : Tendsto c atTop (𝓝 0)) (hv : Summable fun n => ‖c (n + 1) - c n‖)
+    (hz : ∀ n, ‖∑ i ∈ range n, z i‖ ≤ B) :
+    CauchySeq fun n => ∑ i ∈ range n, c i * z i := by
+  rw [← cauchySeq_shift 1]
+  have hbp : ∀ n, ∑ i ∈ range (n + 1), c i * z i =
+      c n * ∑ i ∈ range (n + 1), z i +
+        -∑ i ∈ range n, (c (i + 1) - c i) * ∑ j ∈ range (i + 1), z j := by
+    intro n
+    have := Finset.sum_range_by_parts c z (n + 1)
+    simp only [smul_eq_mul, Nat.add_sub_cancel] at this
+    rw [this, ← sub_eq_add_neg]
+  simp_rw [hbp]
+  refine CauchySeq.add ?_ (CauchySeq.neg ?_)
+  · refine Tendsto.cauchySeq (x := 0) ?_
+    rw [tendsto_zero_iff_norm_tendsto_zero]
+    refine squeeze_zero (fun n => norm_nonneg _) (fun n => ?_)
+      ((hc.norm.mul_const B).trans (by rw [norm_zero, zero_mul]))
+    rw [norm_mul]
+    exact mul_le_mul_of_nonneg_left (hz _) (norm_nonneg _)
+  · refine cauchySeq_range_of_norm_bounded (hv.mul_right B).hasSum.tendsto_sum_nat.cauchySeq
+      fun i => ?_
+    rw [norm_mul]
+    exact mul_le_mul_of_nonneg_left (hz _) (norm_nonneg _)
+
+/-- Variation bound for the balanced coefficients: `Σ ‖c_{n+1} - c_n‖ < ∞` when `Re γ > -1`. -/
+private lemma summable_norm_genCoeff_succ_sub {a b : Multiset ℂ} (h : a.card = b.card + 1)
+    (hb : GenDenRegular b) (hγ : -1 < (genExcess a b).re) :
+    Summable fun n => ‖genCoeff a b (n + 1) - genCoeff a b n‖ := by
+  by_cases ha : GenTerminates a
+  · obtain ⟨x, hx, m, rfl⟩ := ha
+    refine summable_of_ne_finset_zero (s := range (m + 1)) fun n hn => ?_
+    have hn : m < n := by simpa using hn
+    have hz : ∀ k, m < k → genCoeff a b k = 0 := fun k hk => by
+      unfold genCoeff genPoch
+      rw [Multiset.prod_eq_zero (Multiset.mem_map.mpr ⟨_, hx, poch_neg_nat_eq_zero hk⟩),
+        zero_div]
+    rw [hz n hn, hz (n + 1) (by omega), sub_zero, norm_zero]
+  obtain ⟨L, hL, hlim⟩ := exists_tendsto_norm_genCoeff_mul_rpow h
+    (ne_neg_nat_of_not_genTerminates ha) hb
+  set e := (genExcess a b).re + 1 with he
+  set s : ℂ := a.sum - 1 - b.sum with hs
+  obtain ⟨K, hK⟩ := exists_norm_prod_add_sub_prod_add_le a ((1 + s) ::ₘ b)
+    (by simp [h]) (by simp [hs]; ring)
+  obtain ⟨R, hR⟩ : ∃ R : ℝ, ∀ y ∈ b, 2 * ‖y‖ ≤ R := by
+    refine ⟨2 * (b.map norm).sum, fun y hy => ?_⟩
+    have := Multiset.single_le_sum (fun x hx => by
+      obtain ⟨w, -, rfl⟩ := Multiset.mem_map.mp hx; exact norm_nonneg w) _
+      (Multiset.mem_map_of_mem norm hy)
+    linarith
+  set M : ℝ := ‖K‖ * 2 ^ b.card + ‖s‖ + 1 with hM
+  have hev : ∀ᶠ n : ℕ in atTop, ‖genCoeff a b (n + 1) - genCoeff a b n‖ ≤
+      (2 * L * M) * (n : ℝ) ^ (-(e + 1)) := by
+    filter_upwards [eventually_ge_atTop (max 1 ⌈R⌉₊),
+      (hlim.eventually (gt_mem_nhds (by linarith : L < 2 * L)))] with n hn hcL
+    have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast le_of_max_le_left hn
+    have hnR : R ≤ n := (Nat.le_ceil R).trans (by exact_mod_cast le_of_max_le_right hn)
+    have hn0 : (0 : ℝ) < n := by linarith
+    set Bn := (b.map (· + (n : ℂ))).prod with hBn
+    set An := (a.map (· + (n : ℂ))).prod with hAn
+    set c := genCoeff a b n
+    have hB : (n / 2) ^ b.card ≤ ‖Bn‖ :=
+      pow_le_norm_prod_map_add b hn0.le fun y hy => (hR y hy).trans hnR
+    have hBpos : 0 < ‖Bn‖ := lt_of_lt_of_le (by positivity) hB
+    have hB0 : Bn ≠ 0 := norm_pos_iff.mp hBpos
+    have hn1c : ((n : ℂ) + 1) ≠ 0 := by exact_mod_cast n.succ_ne_zero
+    have hrel := genCoeff_succ_mul (a := a) hb n
+    have hD := hK n hn1
+    rw [Multiset.map_cons, Multiset.prod_cons, h] at hD
+    set D := An - (1 + s + n) * Bn with hDdef
+    have hdiff : genCoeff a b (n + 1) - c = c * (D + s * Bn) / (Bn * (n + 1)) := by
+      rw [eq_div_iff (mul_ne_zero hB0 hn1c), sub_mul, hrel, hDdef]
+      ring
+    have hDle : ‖D‖ ≤ K * (n : ℝ) ^ (b.card - 1) := by
+      rw [hDdef, show b.card - 1 = b.card + 1 - 2 by omega]; convert hD using 3
+    have hM0 : 0 < M := by rw [hM]; positivity
+    have hcle : ‖c‖ ≤ 2 * L * (n : ℝ) ^ (-e) := by
+      rw [Real.rpow_neg hn0.le, ← div_eq_mul_inv, le_div_iff₀ (by positivity)]
+      exact hcL.le
+    have h1 : K * (n : ℝ) ^ (b.card - 1) ≤ ‖K‖ * 2 ^ b.card * ‖Bn‖ := by
+      calc K * (n : ℝ) ^ (b.card - 1) ≤ ‖K‖ * (n : ℝ) ^ (b.card - 1) :=
+            mul_le_mul_of_nonneg_right (Real.le_norm_self K) (by positivity)
+        _ ≤ ‖K‖ * (n : ℝ) ^ b.card :=
+            mul_le_mul_of_nonneg_left (pow_le_pow_right₀ hn1 (Nat.sub_le _ _)) (norm_nonneg _)
+        _ = ‖K‖ * 2 ^ b.card * (n / 2) ^ b.card := by
+            rw [div_pow]; field_simp
+        _ ≤ ‖K‖ * 2 ^ b.card * ‖Bn‖ := mul_le_mul_of_nonneg_left hB (by positivity)
+    have hnum : ‖D + s * Bn‖ ≤ M * ‖Bn‖ := by
+      calc ‖D + s * Bn‖ ≤ ‖D‖ + ‖s‖ * ‖Bn‖ := (norm_add_le _ _).trans (by rw [norm_mul])
+        _ ≤ ‖K‖ * 2 ^ b.card * ‖Bn‖ + ‖s‖ * ‖Bn‖ := by linarith
+        _ ≤ M * ‖Bn‖ := by rw [hM]; nlinarith [norm_nonneg Bn]
+    have hn1n : ‖(n : ℂ) + 1‖ = n + 1 := by
+      rw [show ((n : ℂ) + 1) = ((n + 1 : ℕ) : ℂ) by push_cast; rfl, Complex.norm_natCast]
+      push_cast; rfl
+    rw [hdiff, norm_div, norm_mul, norm_mul, hn1n, div_le_iff₀ (by positivity)]
+    have hpow : (n : ℝ) ^ (-(e + 1)) * n = (n : ℝ) ^ (-e) := by
+      rw [neg_add, Real.rpow_add hn0, Real.rpow_neg_one, mul_assoc, inv_mul_cancel₀ hn0.ne',
+        mul_one]
+    have hp0 : 0 ≤ 2 * L * M * (n : ℝ) ^ (-(e + 1)) * ‖Bn‖ := by positivity
+    calc ‖c‖ * ‖D + s * Bn‖ ≤ (2 * L * (n : ℝ) ^ (-e)) * (M * ‖Bn‖) :=
+          mul_le_mul hcle hnum (norm_nonneg _) (by positivity)
+      _ = 2 * L * M * (n : ℝ) ^ (-(e + 1)) * ‖Bn‖ * n := by rw [← hpow]; ring
+      _ ≤ 2 * L * M * (n : ℝ) ^ (-(e + 1)) * (‖Bn‖ * (n + 1)) := by nlinarith
+  refine Summable.of_norm_bounded_eventually
+    (((Real.summable_nat_rpow (p := -(e + 1))).mpr (by rw [he]; linarith)).mul_left
+      (2 * L * M)) ?_
+  rw [Nat.cofinite_eq_atTop]
+  filter_upwards [hev] with n hn
+  rwa [norm_norm]
+
+/-- Every nonunit point of the unit circle converges in natural order when the excess exceeds minus
+one. -/
+theorem genHG_unit_conditional {a b : Multiset ℂ} (h : a.card = b.card + 1)
+    (hb : GenDenRegular b) {z : ℂ} (hz : ‖z‖ = 1) (hne : z ≠ 1)
+    (hγ : -1 < (genExcess a b).re) : GenSeriesConvergesTo a b z (genHG a b z) := by
+  have hcut : z ∈ cutPlane := by
+    rw [mem_cutPlane, Complex.mem_slitPlane_iff]
+    by_contra hc
+    push Not at hc
+    obtain ⟨h1, h2⟩ := hc
+    have e1 : (1 - z).re = 1 - z.re := by simp
+    have e2 : (1 - z).im = -z.im := by simp
+    have hre : z.re ≤ 1 := (Complex.re_le_norm z).trans hz.le
+    exact hne (Complex.ext (by simp only [Complex.one_re]; linarith)
+      (by simp only [Complex.one_im]; linarith))
+  have hB : ∀ n, ‖∑ i ∈ range n, z ^ i‖ ≤ 2 / ‖z - 1‖ := fun n => by
+    rw [geom_sum_eq hne, norm_div,
+      div_le_div_iff_of_pos_right (norm_pos_iff.mpr (sub_ne_zero.mpr hne))]
+    calc ‖z ^ n - 1‖ ≤ ‖z ^ n‖ + ‖(1 : ℂ)‖ := norm_sub_le _ _
+      _ = 2 := by rw [norm_pow, hz, one_pow, norm_one]; norm_num
+  obtain ⟨l, hl⟩ := cauchySeq_tendsto_of_complete <| cauchySeq_series_mul_of_summable_sub
+    (genCoeff_tendsto_zero h hb (Or.inl hγ)) (summable_norm_genCoeff_succ_sub h hb hγ) hB
+  have habel := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt hl
+  rw [tendsto_map'_iff] at habel
+  have hc : ContinuousAt (fun w : ℂ => genHG a b (w * z)) 1 := by
+    have := ((genHG_principal_analytic h) z hcut).continuousAt
+    exact ContinuousAt.comp_of_eq (g := genHG a b) (f := fun w : ℂ => w * z) this
+      (continuousAt_id.mul continuousAt_const) (one_mul z)
+  have hcont : Tendsto (fun r : ℝ => genHG a b ((r : ℂ) * z)) (𝓝[<] 1)
+      (𝓝 (genHG a b z)) := by
+    have := hc.tendsto.comp
+      ((Complex.continuous_ofReal.tendsto' 1 1 (by simp)).mono_left
+        (nhdsWithin_le_nhds (s := Set.Iio 1)))
+    rw [one_mul] at this
+    exact this
+  have heq : ((fun w => ∑' n, genCoeff a b n * z ^ n * w ^ n) ∘ ofReal) =ᶠ[𝓝[<] 1]
+      fun r : ℝ => genHG a b ((r : ℂ) * z) := by
+    filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with r hr
+    have hrz : ‖(r : ℂ) * z‖ < 1 := by
+      rw [norm_mul, hz, mul_one, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr.1]
+      exact hr.2
+    rw [Function.comp_apply, ← (genHG_hasSum_disk h.le hb hrz).tsum_eq]
+    congr 1; ext n; rw [mul_pow]; ring
+  have := tendsto_nhds_unique (habel.congr' heq) hcont
+  exact this ▸ hl
 
 /-- At one, natural-order convergence requires strictly positive real excess unless the series
 terminates. -/

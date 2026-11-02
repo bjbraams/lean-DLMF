@@ -15,7 +15,8 @@ Tricomi's function against the Bessel kernel `t^{ν/2} J_ν(2√(xt))` (DLMF §1
 
 ## Main definitions
 
-* `confLP_Psi`, `confLP_R`: the two sides of DLMF 13.10.13 in `₀F₁` form.
+* `KummerHankelTransforms.hankelIntegral`, `KummerHankelTransforms.hankelRhs`: the two sides of DLMF
+  13.10.13 in `₀F₁` form.
 
 ## Main results
 
@@ -23,17 +24,19 @@ Tricomi's function against the Bessel kernel `t^{ν/2} J_ν(2√(xt))` (DLMF §1
 * `bessel_regularizedHGFun_U`: a Hankel-type transform of `𝐌` in terms of `U`
   (DLMF 13.10.14).
 * `bessel_kummerU`: a Hankel-type transform of `U` (DLMF 13.10.15).
-* `confLP_Psi_eq_R`: DLMF 13.10.13 in `₀F₁` form for all admissible parameters.
-* `confLP_contiguous_b`, `confLP_contiguous_down`: contiguous relations of `𝐌` for all
-  parameters.
+* `KummerHankelTransforms.hankelIntegral_eq_hankelRhs`: DLMF 13.10.13 in `₀F₁` form for all
+  admissible parameters.
+* `KummerHankelTransforms.contiguous_b`, `KummerHankelTransforms.contiguous_down`: contiguous
+  relations of `𝐌` for all parameters.
 
 ## Implementation notes
 
 The transforms are stated for real `x > 0`. For non-real `x` the Bessel kernel grows like
 `exp (c √t)`, and the parameter bounds make the integrand absolutely integrable, as Lean's
 integral requires. DLMF 13.10.13 is proved first in the Euler region by Fubini, continued
-analytically in `a` to a strip, and extended by the order recurrence `confLP_Psi_rec`, which
-the right sides also satisfy (`confLP_R_rec`).
+analytically in `a` to a strip, and extended by the order recurrence
+`KummerHankelTransforms.hankelIntegral_rec`, which the right sides also satisfy
+(`KummerHankelTransforms.hankelRhs_rec`).
 -/
 
 @[expose] public section
@@ -54,7 +57,7 @@ section LargeParamBessel
 
 /-! ### The Hankel transform 13.10.13
 
-Helpers with prefix `confLP_`. The integral, written with `t^{-ν/2} J_ν(2√(xt)) = x^{ν/2}
+Helpers live in `KummerHankelTransforms`. The integral, written with `t^{-ν/2} J_ν(2√(xt)) = x^{ν/2}
 𝐅(;ν+1;-xt)`, is evaluated in the Euler region `0 < re a < re b < re ν + 1` by the Euler integral
 of `𝐌(b-a,b,-t)`, the Laplace transform of `t^{b-1} 𝐅(;ν+1;-xt)`, the Euler integral of
 `𝐌(b,ν+1,-x/s)` and two applications of Fubini's theorem. It is continued analytically in `a`,
@@ -65,7 +68,7 @@ open Set
 open scoped Nat
 
 /-- Laplace transform of `t^{β-1} 𝐅(;c;-xt)`. -/
-theorem confLP_laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < s) :
+theorem KummerHankelTransforms.laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < s) :
     ∫ t : ℝ in Ioi 0, exp (-(s * t : ℂ)) * ((t : ℂ) ^ (β - 1) *
         regularizedHGFun (∅ : Multiset ℂ) {c} (-x * t)) =
       Gamma β * (s : ℂ) ^ (-β) * regularizedHGFun {β} {c} (-x / s) := by
@@ -80,7 +83,7 @@ theorem confLP_laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < 
     simpa using this
   have hIk : ∀ k : ℕ, IntegrableOn (fun t : ℝ => (t : ℂ) ^ (β + k - 1) *
       exp (-(s * t : ℂ))) (Ioi 0) := fun k => by
-    have h := cfInt_integrableOn_rpow_exp (r := (β + k).re - 1) (by linarith [hβk k]) hs
+    have h := KummerIntegrals.integrableOn_rpow_exp (r := (β + k).re - 1) (by linarith [hβk k]) hs
     refine h.mono' ?_ ?_
     · exact (ContinuousOn.mul (ContinuousOn.cpow continuous_ofReal.continuousOn
         continuousOn_const fun t ht => ofReal_mem_slitPlane.mpr ht)
@@ -110,7 +113,8 @@ theorem confLP_laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < 
         have : (-(↑s * ↑t : ℂ)).re = -(s * t) := by simp
         rw [this]; simp [hβ0]
       rw [setIntegral_congr_fun measurableSet_Ioi this, integral_const_mul,
-        cfInt_integral_rpow_exp (by linarith [hβk k, show (β + k).re = β0 + k by simp [hβ0]]) hs]
+        KummerIntegrals.integral_rpow_exp
+            (by linarith [hβk k, show (β + k).re = β0 + k by simp [hβ0]]) hs]
       ring_nf
     rw [hint, hd, DLMF.Bessel.regularizedHGFunCoeff_empty]
     have hGR : Real.Gamma (β0 + k) = ‖Gamma (β0 : ℂ)‖ * ‖poch (β0 : ℂ) k‖ := by
@@ -172,27 +176,27 @@ theorem confLP_laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < 
     ring
 
 /-- The inner integral `∫₀¹ s^{c-1}(1-s)^{a-1} s^{-(c+a)} e^{-y/s} ds = e^{-y} Γ(a) y^{-a}`. -/
-theorem confLP_inner_integral {a c y : ℂ} (hy : 0 < y.re) (ha : 0 < a.re) :
+theorem KummerHankelTransforms.inner_integral {a c y : ℂ} (hy : 0 < y.re) (ha : 0 < a.re) :
     ∫ s in Ioo (0 : ℝ) 1, (s : ℂ) ^ (c - 1) * (1 - (s : ℂ)) ^ (a - 1) *
         ((s : ℂ) ^ (-(c + a)) * exp (-y / s)) =
       exp (-y) * (Gamma a * y ^ (-a)) := by
-  have h := cfInt_euler_subst_U (a := a) (c := c) (ν := c + a - 1) (x := y) hy ha
+  have h := KummerIntegrals.euler_subst_U (a := a) (c := c) (ν := c + a - 1) (x := y) hy ha
   rw [show c + a - 1 + 1 = c + a by ring, show c + a - 1 + 2 - c = a + 1 by ring] at h
   have hy0 : y ≠ 0 := fun h0 => by simp [h0] at hy
   rw [h, kummerU_kummer_transform_all a _ hy0, show a - (a + 1) + 1 = 0 by ring, kummerU_zero,
     show (1 : ℂ) - (a + 1) = -a by ring, mul_one]
 
 /-- `‖𝐅(;ν+1;-rt)‖ ≤ K (1+t)^{-(re ν/2 + 1/4)}` on `(0,∞)`. -/
-theorem confLP_exists_norm_0F1_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem KummerHankelTransforms.exists_norm_0F1_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
     ∃ K, ∀ t : ℝ, 0 < t → ‖regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t)‖ ≤
       K * (1 + t) ^ (-(ν.re / 2 + 1 / 4)) := by
-  obtain ⟨C, hC⟩ := cfInt_exists_norm_kernel_le ν hr
+  obtain ⟨C, hC⟩ := KummerIntegrals.exists_norm_kernel_le ν hr
   have hx0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
   have hn : 0 < ‖(r : ℂ) ^ (ν / 2)‖ := norm_pos_iff.mpr (by
     rw [cpow_def_of_ne_zero hx0]; exact exp_ne_zero _)
   refine ⟨C / ‖(r : ℂ) ^ (ν / 2)‖, fun t ht => ?_⟩
   have h := hC t ht
-  rw [cfInt_kernel_eq ν hx0 ht, norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht] at h
+  rw [KummerIntegrals.kernel_eq ν hx0 ht, norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht] at h
   have htσ : 0 < t ^ ν.re := Real.rpow_pos_of_pos ht _
   rw [div_mul_eq_mul_div, le_div_iff₀ hn]
   have : ‖(r : ℂ) ^ (ν / 2)‖ * (t ^ ν.re *
@@ -201,21 +205,21 @@ theorem confLP_exists_norm_0F1_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
   nlinarith [norm_nonneg (regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t))]
 
 /-- Continuity of `t ↦ 𝐅(;ν+1;-rt)`. -/
-theorem confLP_continuous_0F1 (ν : ℂ) (r : ℝ) :
+theorem KummerHankelTransforms.continuous_0F1 (ν : ℂ) (r : ℝ) :
     Continuous fun t : ℝ => regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) := by
   have h := continuous_regularized0F1.comp
     (show Continuous fun t : ℝ => ((ν + 1 : ℂ), -(r : ℂ) * t) by fun_prop)
   exact h
 
 /-- Integrability of the 13.10.13 integrand in the `₀F₁` form. -/
-theorem confLP_integrableOn {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
+theorem KummerHankelTransforms.integrableOn {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
     (hν : 2 * a.re < ν.re + 1 / 2) :
     IntegrableOn (fun t : ℝ => exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {b} t *
       regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t)) (Ioi 0) := by
-  obtain ⟨K, hK⟩ := confLP_exists_norm_0F1_le ν hr
+  obtain ⟨K, hK⟩ := KummerHankelTransforms.exists_norm_0F1_le ν hr
   have h := integrableOn_cpow_mul_regularizedHGFun_neg_mul (a := b - a) (b := b) (c := b)
     (h := fun t : ℝ => regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t)) (K := K)
-    (r := ν.re / 2 + 1 / 4) (confLP_continuous_0F1 ν r).continuousOn hK hb
+    (r := ν.re / 2 + 1 / 4) (KummerHankelTransforms.continuous_0F1 ν r).continuousOn hK hb
     (by simp only [sub_re]; linarith)
   refine h.congr_fun (fun t _ => ?_) measurableSet_Ioi
   rw [regularizedConfluent_kummer_transform a b (t : ℂ)]
@@ -225,7 +229,7 @@ theorem confLP_integrableOn {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re
     regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t))) * he
 
 /-- Norm-integral of a function that is real and nonnegative on `S`. -/
-theorem confLP_setIntegral_norm_of_ofReal {S : Set ℝ} {f : ℝ → ℂ} {g : ℝ → ℝ}
+theorem KummerHankelTransforms.setIntegral_norm_of_ofReal {S : Set ℝ} {f : ℝ → ℂ} {g : ℝ → ℝ}
     (hS : MeasurableSet S) (hfg : ∀ s ∈ S, f s = (g s : ℂ)) (hg : ∀ s ∈ S, 0 ≤ g s) :
     ∫ s in S, ‖f s‖ = ‖∫ s in S, f s‖ := by
   rw [setIntegral_congr_fun hS (fun s hs => by
@@ -234,40 +238,44 @@ theorem confLP_setIntegral_norm_of_ofReal {S : Set ℝ} {f : ℝ → ℂ} {g : �
     Real.norm_of_nonneg (setIntegral_nonneg hS hg)]
 
 /-- A set integral that is nonzero comes from an integrable function. -/
-theorem confLP_integrableOn_of_ne_zero {S : Set ℝ} {f : ℝ → ℂ} (h : ∫ s in S, f s ≠ 0) :
+theorem KummerHankelTransforms.integrableOn_of_ne_zero {S : Set ℝ} {f : ℝ → ℂ}
+    (h : ∫ s in S, f s ≠ 0) :
     IntegrableOn f S := by
   by_contra hf
   exact h (integral_undef hf)
 
 /-- The Euler kernel with real parameters is real and nonnegative. -/
-theorem confLP_eulerKernel_ofReal (γ β : ℝ) (t : ℝ) {s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
-    kumDec_eulerKernel (γ : ℂ) (β : ℂ) t s =
+theorem KummerHankelTransforms.eulerKernel_ofReal (γ β : ℝ) (t : ℝ) {s : ℝ}
+    (hs : s ∈ Ioo (0 : ℝ) 1) :
+    KummerDecayBounds.eulerKernel (γ : ℂ) (β : ℂ) t s =
       ((Real.exp (-(t * s)) * s ^ (γ - 1) * (1 - s) ^ (β - γ - 1) : ℝ) : ℂ) := by
-  simp only [kumDec_eulerKernel]
+  simp only [KummerDecayBounds.eulerKernel]
   rw [Complex.ofReal_mul, Complex.ofReal_mul, Complex.ofReal_exp,
     ofReal_cpow hs.1.le, ofReal_cpow (by linarith [hs.2] : (0:ℝ) ≤ 1 - s)]
   push_cast
   ring_nf
 
 /-- The double-integral kernel of the second Fubini step. -/
-def confLP_Q (c a b μ : ℂ) (r s ρ : ℝ) : ℂ :=
+def KummerHankelTransforms.fubiniKernel (c a b μ : ℂ) (r s ρ : ℝ) : ℂ :=
   (s : ℂ) ^ (c - 1) * (1 - (s : ℂ)) ^ (a - 1) * (s : ℂ) ^ (-b) *
     (exp (-(r : ℂ) / s * ρ) * (ρ : ℂ) ^ (b - 1) * (1 - (ρ : ℂ)) ^ (μ - b))
 
-/-- Measurability of the kernel `confLP_Q`. -/
-theorem confLP_measurable_Q (c a b μ : ℂ) (r : ℝ) :
-    Measurable (Function.uncurry (confLP_Q c a b μ r)) := by
-  unfold confLP_Q
+/-- Measurability of the kernel `KummerHankelTransforms.fubiniKernel`. -/
+theorem KummerHankelTransforms.measurable_fubiniKernel (c a b μ : ℂ) (r : ℝ) :
+    Measurable (Function.uncurry (KummerHankelTransforms.fubiniKernel c a b μ r)) := by
+  unfold KummerHankelTransforms.fubiniKernel
   fun_prop
 
-/-- The modulus of the kernel `confLP_Q` on the open unit square. -/
-theorem confLP_norm_Q (c a b μ : ℂ) (r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0:ℝ) 1)
+/-- The modulus of the kernel `KummerHankelTransforms.fubiniKernel` on the open unit square. -/
+theorem KummerHankelTransforms.norm_fubiniKernel (c a b μ : ℂ) (r : ℝ) {s ρ : ℝ}
+    (hs : s ∈ Ioo (0:ℝ) 1)
     (hρ : ρ ∈ Ioo (0:ℝ) 1) :
-    ‖confLP_Q c a b μ r s ρ‖ = s ^ (c.re - 1) * (1 - s) ^ (a.re - 1) * s ^ (-b.re) *
+    ‖KummerHankelTransforms.fubiniKernel c a b μ r s ρ‖ = s ^ (c.re - 1) *
+        (1 - s) ^ (a.re - 1) * s ^ (-b.re) *
       (Real.exp (-(r / s * ρ)) * ρ ^ (b.re - 1) * (1 - ρ) ^ (μ.re - b.re)) := by
   have h1 : (1 : ℂ) - s = ((1 - s : ℝ) : ℂ) := by push_cast; ring
   have h2 : (1 : ℂ) - ρ = ((1 - ρ : ℝ) : ℂ) := by push_cast; ring
-  simp only [confLP_Q, norm_mul, Complex.norm_exp]
+  simp only [KummerHankelTransforms.fubiniKernel, norm_mul, Complex.norm_exp]
   rw [h1, h2, norm_cpow_eq_rpow_re_of_pos hs.1, norm_cpow_eq_rpow_re_of_pos hs.1,
     norm_cpow_eq_rpow_re_of_pos (by linarith [hs.2]), norm_cpow_eq_rpow_re_of_pos hρ.1,
     norm_cpow_eq_rpow_re_of_pos (by linarith [hρ.2])]
@@ -276,67 +284,72 @@ theorem confLP_norm_Q (c a b μ : ℂ) (r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0
   rw [this]
   simp
 
-/-- With real parameters the kernel `confLP_Q` is real. -/
-theorem confLP_Q_ofReal (γ α β μ r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0:ℝ) 1)
+/-- With real parameters the kernel `KummerHankelTransforms.fubiniKernel` is real. -/
+theorem KummerHankelTransforms.fubiniKernel_ofReal (γ α β μ r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0:ℝ) 1)
     (hρ : ρ ∈ Ioo (0:ℝ) 1) :
-    confLP_Q (γ : ℂ) (α : ℂ) (β : ℂ) (μ : ℂ) r s ρ =
+    KummerHankelTransforms.fubiniKernel (γ : ℂ) (α : ℂ) (β : ℂ) (μ : ℂ) r s ρ =
       ((s ^ (γ - 1) * (1 - s) ^ (α - 1) * s ^ (-β) *
         (Real.exp (-(r / s * ρ)) * ρ ^ (β - 1) * (1 - ρ) ^ (μ - β)) : ℝ) : ℂ) := by
-  simp only [confLP_Q]
+  simp only [KummerHankelTransforms.fubiniKernel]
   push_cast
   rw [ofReal_cpow hs.1.le, ofReal_cpow (by linarith [hs.2] : (0:ℝ) ≤ 1 - s),
     ofReal_cpow hs.1.le, ofReal_cpow hρ.1.le, ofReal_cpow (by linarith [hρ.2] : (0:ℝ) ≤ 1 - ρ)]
   push_cast
   ring_nf
 
-/-- The inner integral of `confLP_Q` over `s`. -/
-theorem confLP_integral_Q {c a b μ : ℂ} {r : ℝ} (hr : 0 < r) (hcab : c + a = b) (ha : 0 < a.re)
+/-- The inner integral of `KummerHankelTransforms.fubiniKernel` over `s`. -/
+theorem KummerHankelTransforms.integral_fubiniKernel {c a b μ : ℂ} {r : ℝ} (hr : 0 < r)
+    (hcab : c + a = b) (ha : 0 < a.re)
     {ρ : ℝ} (hρ : ρ ∈ Ioo (0:ℝ) 1) :
-    ∫ s in Ioo (0:ℝ) 1, confLP_Q c a b μ r s ρ =
+    ∫ s in Ioo (0:ℝ) 1, KummerHankelTransforms.fubiniKernel c a b μ r s ρ =
       (ρ : ℂ) ^ (b - 1) * (1 - (ρ : ℂ)) ^ (μ - b) *
         (exp (-((r : ℂ) * ρ)) * (Gamma a * ((r : ℂ) * ρ) ^ (-a))) := by
   have hy : 0 < ((r : ℂ) * ρ).re := by
     rw [show (r : ℂ) * ρ = ((r * ρ : ℝ) : ℂ) by push_cast; ring, ofReal_re]
     exact mul_pos hr hρ.1
-  have h := confLP_inner_integral (a := a) (c := c) (y := (r : ℂ) * ρ) hy ha
+  have h := KummerHankelTransforms.inner_integral (a := a) (c := c) (y := (r : ℂ) * ρ) hy ha
   rw [hcab] at h
   rw [← h, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun s hs => ?_
-  simp only [confLP_Q]
+  simp only [KummerHankelTransforms.fubiniKernel]
   rw [show -(r : ℂ) / s * ρ = -((r : ℂ) * ρ) / s by ring]
   ring
 
-/-- The Fubini integrand `confLP_Q` of the base case of 13.10.13 is integrable on the unit
-square, for `Re a, Re c > 0`, `c + a = b` and `Re(ν + 1 - b) > 0`. -/
-private lemma confLP_integrable_Q {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re)
+/-- The Fubini integrand `KummerHankelTransforms.fubiniKernel` of the base case of 13.10.13 is
+integrable on the unit square, for `Re a, Re c > 0`, `c + a = b` and `Re(ν + 1 - b) > 0`. -/
+private lemma KummerHankelTransforms.integrable_fubiniKernel {a b c ν : ℂ} {r : ℝ} (hr : 0 < r)
+    (ha : 0 < a.re)
     (hc0 : 0 < c.re) (hνb : 0 < (ν + 1 - b).re) (hcab : c + a = b) :
-    Integrable (Function.uncurry (confLP_Q c a b ν r))
+    Integrable (Function.uncurry (KummerHankelTransforms.fubiniKernel c a b ν r))
       ((volume.restrict (Ioo (0:ℝ) 1)).prod (volume.restrict (Ioo (0:ℝ) 1))) := by
   set γ := c.re with hγ
   set α := a.re with hα
   set β := b.re with hβ
   have hβγα : β = γ + α := by simp [hβ, hγ, hα, ← hcab]
-  have hQm := confLP_measurable_Q c a b ν r
-  set Q := confLP_Q c a b ν r with hQ
+  have hQm := KummerHankelTransforms.measurable_fubiniKernel c a b ν r
+  set Q := KummerHankelTransforms.fubiniKernel c a b ν r with hQ
   set ν' := ν.re with hν'
   have hcpow : ∀ {z : ℂ} (w : ℂ), z ≠ 0 → z ^ w ≠ 0 := fun w hz => by
     rw [cpow_def_of_ne_zero hz]; exact exp_ne_zero _
   have hnQ : ∀ ρ ∈ Ioo (0:ℝ) 1, ∀ s ∈ Ioo (0:ℝ) 1,
-      ‖Q s ρ‖ = ‖confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ‖ := by
+      ‖Q s ρ‖ = ‖KummerHankelTransforms.fubiniKernel (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ‖ := by
     intro ρ hρ s hs
-    rw [hQ, confLP_norm_Q _ _ _ _ _ hs hρ, confLP_norm_Q _ _ _ _ _ hs hρ]
+    rw [hQ, KummerHankelTransforms.norm_fubiniKernel _ _ _ _ _ hs hρ,
+        KummerHankelTransforms.norm_fubiniKernel _ _ _ _ _ hs hρ]
     simp only [ofReal_re]
     rfl
-  have hRint : ∀ ρ ∈ Ioo (0:ℝ) 1, ∫ s in Ioo (0:ℝ) 1, confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ =
+  have hRint : ∀ ρ ∈ Ioo (0:ℝ) 1, ∫ s in Ioo (0:ℝ) 1,
+      KummerHankelTransforms.fubiniKernel (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ =
       (ρ : ℂ) ^ ((β:ℂ) - 1) * (1 - (ρ : ℂ)) ^ ((ν':ℂ) - β) *
         (exp (-((r : ℂ) * ρ)) * (Gamma (α:ℂ) * ((r : ℂ) * ρ) ^ (-(α:ℂ)))) := fun ρ hρ =>
-    confLP_integral_Q hr (by rw [hβγα]; push_cast; ring) (by simpa using ha) hρ
+    KummerHankelTransforms.integral_fubiniKernel hr (by rw [hβγα]; push_cast; ring)
+        (by simpa using ha) hρ
   have hRnorm : ∀ ρ ∈ Ioo (0:ℝ) 1, ∫ s in Ioo (0:ℝ) 1, ‖Q s ρ‖ =
-      ‖∫ s in Ioo (0:ℝ) 1, confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ‖ := by
+      ‖∫ s in Ioo (0:ℝ) 1, KummerHankelTransforms.fubiniKernel (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ‖ := by
     intro ρ hρ
     rw [setIntegral_congr_fun measurableSet_Ioo (hnQ ρ hρ)]
-    refine confLP_setIntegral_norm_of_ofReal measurableSet_Ioo
-      (fun s hs => confLP_Q_ofReal γ α β ν' r hs hρ) (fun s hs => ?_)
+    refine KummerHankelTransforms.setIntegral_norm_of_ofReal measurableSet_Ioo
+      (fun s hs => KummerHankelTransforms.fubiniKernel_ofReal γ α β ν' r hs hρ) (fun s hs => ?_)
     have := hs.1; have := hs.2; have := hρ.1; have := hρ.2
     positivity
   refine (integrable_prod_iff' hQm.aestronglyMeasurable).mpr ⟨?_, ?_⟩
@@ -345,11 +358,12 @@ private lemma confLP_integrable_Q {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 
     have h1ρ : (1 - (ρ:ℂ)) ≠ 0 := by
       rw [sub_ne_zero]; intro h; have := congrArg re h; simp at this; linarith [hρ.2]
     have hrρ : (r:ℂ) * ρ ≠ 0 := mul_ne_zero (ofReal_ne_zero.mpr hr.ne') hρc
-    have hne : ∫ s in Ioo (0:ℝ) 1, confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ ≠ 0 := by
+    have hne : ∫ s in Ioo (0:ℝ) 1,
+        KummerHankelTransforms.fubiniKernel (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ ≠ 0 := by
       rw [hRint ρ hρ]
       exact mul_ne_zero (mul_ne_zero (hcpow _ hρc) (hcpow _ h1ρ)) (mul_ne_zero (exp_ne_zero _)
         (mul_ne_zero (Gamma_ne_zero_of_re_pos (by simpa using ha)) (hcpow _ hrρ)))
-    have hint := confLP_integrableOn_of_ne_zero hne
+    have hint := KummerHankelTransforms.integrableOn_of_ne_zero hne
     refine hint.norm.mono'
         ((hQm.comp (measurable_id.prodMk measurable_const)).aestronglyMeasurable) ?_
     filter_upwards [ae_restrict_mem measurableSet_Ioo] with s hs
@@ -390,25 +404,26 @@ private lemma confLP_integrable_Q {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 
 /-- The Fubini integrand `t^{b-1} ₀F̃₁(;ν+1;-rt) e^{-ts} s^{c-1} (1-s)^{a-1}` of the base case
 of 13.10.13 is integrable on `(0, ∞) × (0, 1)`, for `Re a, Re c > 0`, `c + a = b` and
 `2 Re a < Re ν + 1/2`. -/
-private lemma confLP_integrable_G {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re)
+private lemma KummerHankelTransforms.integrable_baseIntegrand {a b c ν : ℂ} {r : ℝ} (hr : 0 < r)
+    (ha : 0 < a.re)
     (hc0 : 0 < c.re) (hcab : c + a = b) (hν : 2 * a.re < ν.re + 1 / 2) :
     Integrable (Function.uncurry fun (t s : ℝ) =>
         (t : ℂ) ^ (b - 1) * regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) *
-          kumDec_eulerKernel c b t s)
+          KummerDecayBounds.eulerKernel c b t s)
       ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioo (0:ℝ) 1))) := by
   have hbc : b - c = a := by rw [← hcab]; ring
   have hb0 : 0 < b.re := by rw [← hcab, add_re]; linarith
   set p := ν.re / 2 + 1 / 4 with hp
   have hap : a.re < p := by rw [hp]; linarith
   set F : ℝ → ℂ := fun t => regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) with hF
-  have hFc : Continuous F := confLP_continuous_0F1 ν r
-  obtain ⟨KF, hKF⟩ := confLP_exists_norm_0F1_le ν hr
+  have hFc : Continuous F := KummerHankelTransforms.continuous_0F1 ν r
+  obtain ⟨KF, hKF⟩ := KummerHankelTransforms.exists_norm_0F1_le ν hr
   set P : ℝ → ℂ := fun t => (t : ℂ) ^ (b - 1) * F t with hP
-  set E : ℝ → ℝ → ℂ := fun t s => kumDec_eulerKernel c b t s with hE
+  set E : ℝ → ℝ → ℂ := fun t s => KummerDecayBounds.eulerKernel c b t s with hE
   set G : ℝ → ℝ → ℂ := fun t s => P t * E t s with hG
   show Integrable (Function.uncurry G) _
   have hEm : Measurable (Function.uncurry E) := by
-    simp only [hE, kumDec_eulerKernel]
+    simp only [hE, KummerDecayBounds.eulerKernel]
     fun_prop
   have hPm : Measurable P := by
     simp only [hP]
@@ -421,7 +436,7 @@ private lemma confLP_integrable_G {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 
   set β := b.re with hβ
   have hβγα : β = γ + α := by simp [hβ, hγ, hα, ← hcab]
   refine (integrable_prod_iff hm1).mpr ⟨Eventually.of_forall fun t => ?_, ?_⟩
-  · have h := kumDec_intervalIntegrable_eulerKernel (a := c) (b := b) hc0
+  · have h := KummerDecayBounds.intervalIntegrable_eulerKernel (a := c) (b := b) hc0
       (by rw [hbc]; exact ha) t
     exact ((intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one).mp h).const_mul (P t)
   · have hI := integrableOn_cpow_mul_regularizedHGFun_neg_mul (a := (γ : ℂ)) (b := (β : ℂ))
@@ -432,25 +447,28 @@ private lemma confLP_integrable_G {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 
       measurableSet_Ioi
     have ht0 : (0:ℝ) < t := ht
     simp only [Function.uncurry_apply_pair]
-    have hn : ∀ s ∈ Ioo (0:ℝ) 1, ‖G t s‖ = ‖P t‖ * ‖kumDec_eulerKernel (γ : ℂ) (β : ℂ) t s‖ := by
+    have hn : ∀ s ∈ Ioo (0:ℝ) 1, ‖G t s‖ = ‖P t‖ *
+        ‖KummerDecayBounds.eulerKernel (γ : ℂ) (β : ℂ) t s‖ := by
       intro s hs
       simp only [hG, hE, norm_mul]
-      rw [kumDec_norm_eulerKernel c b hs, kumDec_norm_eulerKernel (γ : ℂ) (β : ℂ) hs, hbc]
+      rw [KummerDecayBounds.norm_eulerKernel c b hs,
+          KummerDecayBounds.norm_eulerKernel (γ : ℂ) (β : ℂ) hs, hbc]
       simp only [sub_re, ofReal_re]
       rw [show β - γ = α by rw [hβγα]; ring]
     rw [setIntegral_congr_fun measurableSet_Ioo hn, integral_const_mul,
-      confLP_setIntegral_norm_of_ofReal measurableSet_Ioo
-        (fun s hs => confLP_eulerKernel_ofReal γ β t hs) (fun s hs => by
+      KummerHankelTransforms.setIntegral_norm_of_ofReal measurableSet_Ioo
+        (fun s hs => KummerHankelTransforms.eulerKernel_ofReal γ β t hs) (fun s hs => by
           have := hs.1; have := hs.2
           exact mul_nonneg (mul_nonneg (Real.exp_pos _).le (Real.rpow_nonneg (by linarith) _))
             (Real.rpow_nonneg (by linarith) _))]
-    have hR := kumDec_regularizedHGFun_neg_eq (a := (γ : ℂ)) (b := (β : ℂ)) (by simpa using hc0)
+    have hR := KummerDecayBounds.regularizedHGFun_neg_eq (a := (γ : ℂ)) (b := (β : ℂ))
+        (by simpa using hc0)
       (by simp only [sub_re, ofReal_re]; linarith) t
     rw [show (β : ℂ) - γ = (α : ℂ) by rw [hβγα]; push_cast; ring] at hR
     have hGγ : Gamma (γ : ℂ) * Gamma (α : ℂ) ≠ 0 :=
       mul_ne_zero (Gamma_ne_zero_of_re_pos (by simpa using hc0))
         (Gamma_ne_zero_of_re_pos (by simpa using ha))
-    have hint : ∫ s in Ioo (0:ℝ) 1, kumDec_eulerKernel (γ : ℂ) (β : ℂ) t s =
+    have hint : ∫ s in Ioo (0:ℝ) 1, KummerDecayBounds.eulerKernel (γ : ℂ) (β : ℂ) t s =
         Gamma (γ : ℂ) * Gamma (α : ℂ) * regularizedHGFun {(γ : ℂ)} {(β : ℂ)} (-(t : ℂ)) := by
       rw [hR, intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo,
         ← mul_assoc, mul_one_div_cancel hGγ, one_mul]
@@ -461,7 +479,8 @@ private lemma confLP_integrable_G {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 
     ring
 
 /-- Base case of 13.10.13 (in `₀F₁` form) in the Euler region. -/
-theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba : 0 < (b - a).re)
+theorem KummerHankelTransforms.base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re)
+    (hba : 0 < (b - a).re)
     (hνb : 0 < (ν + 1 - b).re) (hν : 2 * a.re < ν.re + 1 / 2) :
     ∫ t : ℝ in Ioi 0, exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {b} t *
         regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) =
@@ -474,7 +493,7 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
     linarith
   set F : ℝ → ℂ := fun t => regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) with hF
   set P : ℝ → ℂ := fun t => (t : ℂ) ^ (b - 1) * F t with hP
-  set E : ℝ → ℝ → ℂ := fun t s => kumDec_eulerKernel c b t s with hE
+  set E : ℝ → ℝ → ℂ := fun t s => KummerDecayBounds.eulerKernel c b t s with hE
   set G : ℝ → ℝ → ℂ := fun t s => P t * E t s with hG
   have hstep1 : ∀ t : ℝ, exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {b} t *
       F t = P t * regularizedHGFun {c} {b} (-(t : ℂ)) := by
@@ -491,7 +510,8 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
   have hts : ∀ t : ℝ, ∫ s in Ioo 0 1, G t s =
       P t * (Gamma c * Gamma a * regularizedHGFun {c} {b} (-(t : ℂ))) := by
     intro t
-    have h := kumDec_regularizedHGFun_neg_eq (a := c) (b := b) hc0 (by rw [hbc]; exact ha) t
+    have h := KummerDecayBounds.regularizedHGFun_neg_eq (a := c) (b := b) hc0
+        (by rw [hbc]; exact ha) t
     rw [hbc] at h
     simp only [hG]
     rw [integral_const_mul, h, intervalIntegral.integral_of_le zero_le_one,
@@ -500,18 +520,18 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
     rfl
   have hGi : Integrable (Function.uncurry G)
       ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioo (0:ℝ) 1))) :=
-    confLP_integrable_G hr ha hc0 (sub_add_cancel b a) hν
+    KummerHankelTransforms.integrable_baseIntegrand hr ha hc0 (sub_add_cancel b a) hν
   have hst : ∀ s ∈ Ioo (0:ℝ) 1, ∫ t in Ioi 0, G t s =
       (s : ℂ) ^ (c - 1) * (1 - (s : ℂ)) ^ (a - 1) *
         (Gamma b * (s : ℂ) ^ (-b) * regularizedHGFun {b} {ν + 1} (-(r : ℂ) / s)) := by
     intro s hs
-    have h := confLP_laplace_0F1 (β := b) (c := ν + 1) (x := (r : ℂ)) hb0 hs.1
+    have h := KummerHankelTransforms.laplace_0F1 (β := b) (c := ν + 1) (x := (r : ℂ)) hb0 hs.1
     rw [← h, ← integral_const_mul]
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
-    simp only [hG, hE, kumDec_eulerKernel]
+    simp only [hG, hE, KummerDecayBounds.eulerKernel]
     rw [hbc, show -(t : ℂ) * s = -(s * t : ℂ) by ring]
     ring
-  set Q := confLP_Q c a b ν r with hQ
+  set Q := KummerHankelTransforms.fubiniKernel c a b ν r with hQ
   have hsQ : ∀ s : ℝ, (s : ℂ) ^ (c - 1) * (1 - (s : ℂ)) ^ (a - 1) *
       (Gamma b * (s : ℂ) ^ (-b) * regularizedHGFun {b} {ν + 1} (-(r : ℂ) / s)) =
       (Gamma (ν + 1 - b))⁻¹ * ∫ ρ in Ioo (0:ℝ) 1, Q s ρ := by
@@ -521,12 +541,12 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
       ← integral_const_mul, ← integral_const_mul]
     congr 1
     funext ρ
-    simp only [hQ, confLP_Q]
+    simp only [hQ, KummerHankelTransforms.fubiniKernel]
     rw [show ν + 1 - b - 1 = ν - b by ring]
     field_simp
   have hQi : Integrable (Function.uncurry Q)
       ((volume.restrict (Ioo (0:ℝ) 1)).prod (volume.restrict (Ioo (0:ℝ) 1))) :=
-    confLP_integrable_Q hr ha hc0 hνb (sub_add_cancel b a)
+    KummerHankelTransforms.integrable_fubiniKernel hr ha hc0 hνb (sub_add_cancel b a)
   have hcab : c + a = b := by rw [hc]; ring
   have hνac : 0 < (ν + 1 - a - c).re := by
     rw [show ν + 1 - a - c = ν + 1 - b by rw [hc]; ring]; exact hνb
@@ -567,7 +587,8 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
             regularizedHGFun {c} {ν + 1 - a} (-(r : ℂ))))) := by
         rw [← hV]
         congr 2
-        exact setIntegral_congr_fun measurableSet_Ioo fun ρ hρ => confLP_integral_Q hr hcab ha hρ
+        exact setIntegral_congr_fun measurableSet_Ioo fun ρ hρ =>
+            KummerHankelTransforms.integral_fubiniKernel hr hcab ha hρ
     _ = _ := by
         rw [regularizedConfluent_kummer_transform c (ν + 1 - a) (-(r : ℂ)), neg_neg,
           show ν + 1 - a - c = ν - b + 1 by rw [hc]; ring, show ν + 1 - a = ν - a + 1 by ring]
@@ -575,15 +596,15 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
 
 /-- 13.10.13 (in `₀F₁` form) for `0 < re b < re ν + 1`, `re ν > -1/2`, by analytic continuation
 in `a` from the Euler region. -/
-theorem confLP_of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
+theorem KummerHankelTransforms.of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
     (hbν : 0 < (ν + 1 - b).re) (hν0 : -1 / 2 < ν.re) (hν : 2 * a.re < ν.re + 1 / 2) :
     ∫ t : ℝ in Ioi 0, exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {b} t *
         regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) =
       (r : ℂ) ^ (-a) * exp (-(r : ℂ)) * regularizedHGFun {ν - b + 1} {ν - a + 1} r := by
   set p := ν.re / 2 + 1 / 4 with hp
   set F : ℝ → ℂ := fun t => regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) with hF
-  have hFc : Continuous F := confLP_continuous_0F1 ν r
-  obtain ⟨KF, hKF⟩ := confLP_exists_norm_0F1_le ν hr
+  have hFc : Continuous F := KummerHankelTransforms.continuous_0F1 ν r
+  obtain ⟨KF, hKF⟩ := KummerHankelTransforms.exists_norm_0F1_le ν hr
   have hKF0 : 0 ≤ KF := by
     have h := (norm_nonneg _).trans (hKF 1 one_pos)
     exact (mul_nonneg_iff_of_pos_right (by positivity)).mp h
@@ -607,7 +628,7 @@ theorem confLP_of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
       refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
       exact ((ContinuousOn.cpow continuous_ofReal.continuousOn continuousOn_const
         fun t ht => ofReal_mem_slitPlane.mpr ht).mul
-        (kumDec_continuous_neg (b - w) b).continuousOn).mul hFc.continuousOn
+        (KummerDecayBounds.continuous_neg (b - w) b).continuousOn).mul hFc.continuousOn
     · refine Eventually.of_forall fun t => ?_
       exact (((differentiable_regularizedConfluent_comp (A := fun w => b - w) (B := fun _ => b)
         (differentiable_const b |>.sub differentiable_id) (differentiable_const b)
@@ -665,7 +686,7 @@ theorem confLP_of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
     filter_upwards [hopen.mem_nhds (show (m : ℂ) ∈ _ by
       simp only [Set.mem_ofPred_eq, ofReal_re]; exact ⟨hm0, hmb, hmp⟩)] with w hw
     rw [← hΨ w]
-    exact confLP_base hr hw.1 (by simp only [sub_re]; linarith [hw.2.1]) hbν
+    exact KummerHankelTransforms.base hr hw.1 (by simp only [sub_re]; linarith [hw.2.1]) hbν
       (by rw [hp] at hw; linarith [hw.2.2])
   have hfin := heq (show a ∈ U by show a.re < p; rw [hp]; linarith)
   rw [hΨ a]
@@ -673,7 +694,7 @@ theorem confLP_of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
 
 /-- The contiguous relation `𝐌(a,b,z) = (b-a) 𝐌(a,b+1,z) + a 𝐌(a+1,b+1,z)`, for all
 parameters. -/
-theorem confLP_contiguous_b (a b z : ℂ) :
+theorem KummerHankelTransforms.contiguous_b (a b z : ℂ) :
     regularizedHGFun {a} {b} z =
       (b - a) * regularizedHGFun {a} {b + 1} z + a * regularizedHGFun {a + 1} {b + 1} z := by
   rw [regularizedConfluent_eq_tsum, regularizedConfluent_eq_tsum, regularizedConfluent_eq_tsum,
@@ -688,7 +709,7 @@ theorem confLP_contiguous_b (a b z : ℂ) :
 
 /-- The contiguous relation `𝐌(A-1,B-1,x) = (B-1) 𝐌(A,B,x) - (B-A) x 𝐌(A,B+1,x)`, for all
 parameters. -/
-theorem confLP_contiguous_down (A B x : ℂ) :
+theorem KummerHankelTransforms.contiguous_down (A B x : ℂ) :
     regularizedHGFun {A - 1} {B - 1} x =
       (B - 1) * regularizedHGFun {A} {B} x - (B - A) * x * regularizedHGFun {A} {B + 1} x := by
   set T : ℂ → ℂ → ℕ → ℂ := fun a b n => poch a n * x ^ n / n.factorial * (Gamma (b + n))⁻¹
@@ -727,27 +748,31 @@ theorem confLP_contiguous_down (A B x : ℂ) :
   linear_combination this
 
 /-- The integral of 13.10.13 in `₀F₁` form. -/
-def confLP_Psi (a b ν : ℂ) (r : ℝ) : ℂ :=
+def KummerHankelTransforms.hankelIntegral (a b ν : ℂ) (r : ℝ) : ℂ :=
   ∫ t : ℝ in Ioi 0, exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {b} t *
     regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t)
 
 /-- The right side of 13.10.13 in `₀F₁` form. -/
-def confLP_R (a b ν : ℂ) (r : ℝ) : ℂ :=
+def KummerHankelTransforms.hankelRhs (a b ν : ℂ) (r : ℝ) : ℂ :=
   (r : ℂ) ^ (-a) * exp (-(r : ℂ)) * regularizedHGFun {ν - b + 1} {ν - a + 1} r
 
 /-- The order recurrence of the 13.10.13 integrals, from the `₀F₁` and Kummer contiguous
 relations. -/
-theorem confLP_Psi_rec {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
+theorem KummerHankelTransforms.hankelIntegral_rec {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
     (hν : 2 * a.re < ν.re + 1 / 2) :
-    confLP_Psi a b ν r = (ν + 1) * confLP_Psi a b (ν + 1) r -
-      r * (b - a) * confLP_Psi a (b + 1) (ν + 2) r - r * a *
-          confLP_Psi (a + 1) (b + 1) (ν + 2) r := by
-  have h1 := confLP_integrableOn (a := a) (b := b) (ν := ν + 1) hr hb (by simp; linarith)
-  have h2 := confLP_integrableOn (a := a) (b := b + 1) (ν := ν + 2) hr (by simp; linarith)
+    KummerHankelTransforms.hankelIntegral a b ν r = (ν + 1) *
+        KummerHankelTransforms.hankelIntegral a b (ν + 1) r -
+      r * (b - a) * KummerHankelTransforms.hankelIntegral a (b + 1) (ν + 2) r - r * a *
+          KummerHankelTransforms.hankelIntegral (a + 1) (b + 1) (ν + 2) r := by
+  have h1 := KummerHankelTransforms.integrableOn (a := a) (b := b) (ν := ν + 1) hr hb
+      (by simp; linarith)
+  have h2 := KummerHankelTransforms.integrableOn (a := a) (b := b + 1) (ν := ν + 2) hr
+      (by simp; linarith)
     (by simp; linarith)
-  have h3 := confLP_integrableOn (a := a + 1) (b := b + 1) (ν := ν + 2) hr (by simp; linarith)
+  have h3 := KummerHankelTransforms.integrableOn (a := a + 1) (b := b + 1) (ν := ν + 2) hr
+      (by simp; linarith)
     (by simp; linarith)
-  simp only [confLP_Psi]
+  simp only [KummerHankelTransforms.hankelIntegral]
   set f1 := fun t : ℝ => exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {b} t *
     regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + 1} (-(r : ℂ) * t) with hf1
   set f2 := fun t : ℝ => exp (-(t : ℂ)) * (t : ℂ) ^ (b + 1 - 1) * regularizedHGFun {a} {b + 1} t *
@@ -769,7 +794,7 @@ theorem confLP_Psi_rec {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
   have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht0.ne'
   simp only [hf1, hf2, hf3]
   have hF := regularized0F1_contiguous (ν + 1) (-(r : ℂ) * t)
-  have hM := confLP_contiguous_b a b (t : ℂ)
+  have hM := KummerHankelTransforms.contiguous_b a b (t : ℂ)
   have hp : (t : ℂ) ^ (b + 1 - 1) = (t : ℂ) * (t : ℂ) ^ (b - 1) := by
     rw [show b + 1 - 1 = (b - 1) + 1 by ring, cpow_add _ _ htc, cpow_one]; ring
   rw [hp]
@@ -778,12 +803,14 @@ theorem confLP_Psi_rec {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
   ring
 
 /-- The right sides satisfy the same recurrence. -/
-theorem confLP_R_rec (a b ν : ℂ) {r : ℝ} (hr : 0 < r) :
-    confLP_R a b ν r = (ν + 1) * confLP_R a b (ν + 1) r -
-      r * (b - a) * confLP_R a (b + 1) (ν + 2) r - r * a * confLP_R (a + 1) (b + 1) (ν + 2) r := by
+theorem KummerHankelTransforms.hankelRhs_rec (a b ν : ℂ) {r : ℝ} (hr : 0 < r) :
+    KummerHankelTransforms.hankelRhs a b ν r = (ν + 1) *
+        KummerHankelTransforms.hankelRhs a b (ν + 1) r -
+      r * (b - a) * KummerHankelTransforms.hankelRhs a (b + 1) (ν + 2) r - r * a *
+          KummerHankelTransforms.hankelRhs (a + 1) (b + 1) (ν + 2) r := by
   have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
-  simp only [confLP_R]
-  have h := confLP_contiguous_down (ν + 1 - b + 1) (ν + 1 - a + 1) (r : ℂ)
+  simp only [KummerHankelTransforms.hankelRhs]
+  have h := KummerHankelTransforms.contiguous_down (ν + 1 - b + 1) (ν + 1 - a + 1) (r : ℂ)
   rw [show ν + 1 - b + 1 - 1 = ν - b + 1 by ring, show ν + 1 - a + 1 - 1 = ν - a + 1 by ring,
     show ν + 1 - a + 1 + 1 = ν + 2 - a + 1 by ring] at h
   rw [show ν + 2 - (b + 1) + 1 = ν + 1 - b + 1 by ring, show ν + 2 - (a + 1) + 1 = ν +
@@ -796,19 +823,21 @@ theorem confLP_R_rec (a b ν : ℂ) {r : ℝ} (hr : 0 < r) :
       regularizedHGFun {ν + 1 - b + 1} {ν + 1 - a + 1} r) * hpow
 
 /-- 13.10.13 in `₀F₁` form for all admissible parameters. -/
-theorem confLP_Psi_eq_R : ∀ n : ℕ, ∀ a b ν : ℂ, ∀ {r : ℝ}, 0 < r → 0 < b.re →
+theorem KummerHankelTransforms.hankelIntegral_eq_hankelRhs : ∀ n : ℕ, ∀ a b ν : ℂ, ∀ {r : ℝ},
+    0 < r → 0 < b.re →
     -1 / 2 < ν.re + n → b.re < ν.re + 1 + n → 2 * a.re < ν.re + 1 / 2 →
-    confLP_Psi a b ν r = confLP_R a b ν r := by
+    KummerHankelTransforms.hankelIntegral a b ν r = KummerHankelTransforms.hankelRhs a b ν r := by
   intro n
   induction n with
   | zero =>
     intro a b ν r hr hb h1 h2 hν
     simp only [CharP.cast_eq_zero, add_zero] at h1 h2
-    exact confLP_of_strip hr hb (by simp; linarith) h1 hν
+    exact KummerHankelTransforms.of_strip hr hb (by simp; linarith) h1 hν
   | succ n ih =>
     intro a b ν r hr hb h1 h2 hν
     push_cast at h1 h2
-    rw [confLP_Psi_rec hr hb hν, confLP_R_rec a b ν hr,
+    rw [KummerHankelTransforms.hankelIntegral_rec hr hb hν,
+        KummerHankelTransforms.hankelRhs_rec a b ν hr,
       ih a b (ν + 1) hr hb (by simp; linarith) (by simp; linarith) (by simp; linarith),
       ih a (b + 1) (ν + 2) hr (by simp; linarith) (by simp; linarith) (by simp; linarith)
         (by simp; linarith),
@@ -833,8 +862,9 @@ theorem bessel_regularizedHGFun {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0
   obtain ⟨n, hn⟩ := exists_nat_gt (max (-1 / 2 - ν.re) (b.re - ν.re - 1))
   have hm1 := le_max_left (-1 / 2 - ν.re) (b.re - ν.re - 1)
   have hm2 := le_max_right (-1 / 2 - ν.re) (b.re - ν.re - 1)
-  have hP := confLP_Psi_eq_R n a b ν hx hb (by linarith) (by linarith) hν
-  simp only [confLP_Psi, confLP_R] at hP
+  have hP := KummerHankelTransforms.hankelIntegral_eq_hankelRhs n a b ν hx hb (by linarith)
+      (by linarith) hν
+  simp only [KummerHankelTransforms.hankelIntegral, KummerHankelTransforms.hankelRhs] at hP
   rw [← hxr] at hP
   have hpt : ∀ t ∈ Set.Ioi (0:ℝ), exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1 - ν / 2) *
       regularizedHGFun {a} {b} t * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)) =
@@ -843,7 +873,7 @@ theorem bessel_regularizedHGFun {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0
     intro t ht
     have ht0 : (0:ℝ) < t := ht
     have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht0.ne'
-    have hk := cfInt_kernel_eq ν hx0 ht0
+    have hk := KummerIntegrals.kernel_eq ν hx0 ht0
     have hne : (t : ℂ) ^ (ν / 2) ≠ 0 := by
       rw [cpow_def_of_ne_zero htc]; exact exp_ne_zero _
     have e1 : (t : ℂ) ^ (b - 1 - ν / 2) * (t : ℂ) ^ (ν / 2) = (t : ℂ) ^ (b - 1) := by
@@ -893,12 +923,12 @@ theorem bessel_regularizedHGFun_U {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im =
   set H : ℂ → ℂ := fun w => x ^ (ν / 2) * exp (-x) / Gamma c * kummerU w (ν + 2 - c) x with hH
   have hFH : ∀ w : ℂ, 0 < w.re → F w = H w := by
     intro w hw
-    have h := cfInt_bessel_M_euler (a := w) (b := w + c) hx hxi hw hν0
+    have h := KummerIntegrals.bessel_M_euler (a := w) (b := w + c) hx hxi hw hν0
       (by rw [show w + c - w = c by ring]; exact hν1)
     rw [show w + c - w = c by ring, show w - (w + c) + ν + 2 = ν + 2 - c by ring] at h
     exact h
-  have hKc : ContinuousOn K (Ioi 0) := cfInt_continuousOn_kernel ν hx0
-  obtain ⟨CK, hCK⟩ := cfInt_exists_norm_kernel_le ν hx
+  have hKc : ContinuousOn K (Ioi 0) := KummerIntegrals.continuousOn_kernel ν hx0
+  obtain ⟨CK, hCK⟩ := KummerIntegrals.exists_norm_kernel_le ν hx
   have hKb : ∀ t : ℝ, 0 < t → ‖K t‖ ≤ CK * (t ^ σ * (1 + t) ^ (-p)) := by
     intro t ht
     have := hCK t ht
@@ -914,7 +944,7 @@ theorem bessel_regularizedHGFun_U {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im =
       (Φ := fun w t => K t * regularizedHGFun {c} {w + c} (-(t : ℂ))) isOpen_univ 0 ?_ ?_ ?_)
     · intro w _
       exact (hKc.aestronglyMeasurable measurableSet_Ioi).mul
-        (kumDec_continuous_neg c (w + c)).aestronglyMeasurable
+        (KummerDecayBounds.continuous_neg c (w + c)).aestronglyMeasurable
     · refine Eventually.of_forall fun t => ?_
       exact ((differentiable_regularizedConfluent_comp (A := fun _ => c) (B := fun w => w + c)
         (differentiable_const c) (differentiable_id.add_const c) (-(t : ℂ))).const_mul
@@ -940,7 +970,7 @@ theorem bessel_regularizedHGFun_U {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im =
         rw [norm_mul]
         exact mul_le_mul (hKb t ht0) (hy t ht0.le) (norm_nonneg _) (by positivity)
   have hHd : Differentiable ℂ H :=
-    (cfInt_differentiable_kummerU_fst (ν + 2 - c) hx0).const_mul _
+    (KummerIntegrals.differentiable_kummerU_fst (ν + 2 - c) hx0).const_mul _
   have heq : F = H := by
     refine AnalyticOnNhd.eq_of_eventuallyEq (fun z _ => hFd.analyticAt z)
       (fun z _ => hHd.analyticAt z) (z₀ := 1) ?_
@@ -973,7 +1003,7 @@ theorem bessel_kummerU {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
   set K : ℝ → ℂ := fun t => (t : ℂ) ^ (ν / 2) * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)) with hK
   set f : ℝ → ℂ := fun s => (s : ℂ) ^ (a - 1) * (1 + (s : ℂ)) ^ (b - a - 1) with hf
   set G : ℝ → ℝ → ℂ := fun t s => K t * (exp (-(s * t : ℂ)) * f s) with hG
-  have hKc : ContinuousOn K (Ioi 0) := cfInt_continuousOn_kernel ν hx0
+  have hKc : ContinuousOn K (Ioi 0) := KummerIntegrals.continuousOn_kernel ν hx0
   have hfc : ContinuousOn f (Ioi 0) := by
     refine ContinuousOn.mul ?_ ?_
     · exact ContinuousOn.cpow continuous_ofReal.continuousOn continuousOn_const
@@ -981,9 +1011,9 @@ theorem bessel_kummerU {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
     · refine ContinuousOn.cpow (by fun_prop) continuousOn_const fun t ht => ?_
       rw [show (1 : ℂ) + t = ((1 + t : ℝ) : ℂ) by push_cast; ring]
       exact ofReal_mem_slitPlane.mpr (by linarith [show (0 : ℝ) < t from ht])
-  obtain ⟨CK, hCK⟩ := cfInt_exists_norm_kernel_le ν hx
+  obtain ⟨CK, hCK⟩ := KummerIntegrals.exists_norm_kernel_le ν hx
   set p := σ / 2 + 1 / 4 with hp
-  obtain ⟨CL, hCL⟩ := cfInt_laplace_rpow_le (r := σ) (p := p) hν1 (by rw [hp]; linarith)
+  obtain ⟨CL, hCL⟩ := KummerIntegrals.laplace_rpow_le (r := σ) (p := p) hν1 (by rw [hp]; linarith)
   have hnf : ∀ s : ℝ, 0 < s → ‖f s‖ = s ^ (α - 1) * (1 + s) ^ (β - α - 1) := by
     intro s hs
     rw [hf, norm_mul, norm_cpow_eq_rpow_re_of_pos hs,
@@ -1068,7 +1098,7 @@ theorem bessel_kummerU {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
         (x ^ (ν / 2) * ((s : ℂ) ^ (-(ν + 1)) * exp (-x / s))) := by
     intro s hs
     have hs0 : (0:ℝ) < s := hs
-    have h := cfInt_laplace_kernel hν1 hx0 hs0
+    have h := KummerIntegrals.laplace_kernel hν1 hx0 hs0
     simp only [hG]
     rw [← h, ← integral_const_mul]
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
@@ -1087,7 +1117,7 @@ theorem bessel_kummerU {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
         refine setIntegral_congr_fun measurableSet_Ioi fun s _ => ?_
         ring
     _ = _ := by
-        rw [cfInt_recip_subst_U hx (by simp; linarith)]
+        rw [KummerIntegrals.recip_subst_U hx (by simp; linarith)]
         field_simp
 
 end DLMF.Confluent

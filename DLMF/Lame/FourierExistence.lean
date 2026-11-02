@@ -33,8 +33,8 @@ Fourier expansions of DLMF §29.6.
 
 ## Implementation notes
 
-The real series come from the exponential series of `DLMF.Legendre.legAdd_hasSum_cos` and the
-coefficient decay `DLMF.Legendre.legAdd_coeff_bound` (Mathlib's
+The real series come from the exponential series of `DLMF.Legendre.AdditionTheorem.hasSum_cos` and
+the coefficient decay `DLMF.Legendre.AdditionTheorem.coeff_bound` (Mathlib's
 `has_pointwise_sum_fourier_series_of_summable`).
 -/
 
@@ -52,14 +52,16 @@ open DLMF.Legendre DLMF.Elliptic DLMF.JacobiElliptic
 /-- The paired exponential Fourier series of a `2π`-periodic `C²` function. -/
 private lemma hasSum_fourier_exp_pair {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f)
     (hper : Function.Periodic f (2 * π)) (u : ℝ) :
-    HasSum (fun n : ℕ => legAdd_coeff f n * exp (n * u * I) +
-      legAdd_coeff f (-(n : ℤ)) * exp (-(n * u * I))) (f u + legAdd_coeff f 0) := by
+    HasSum (fun n : ℕ => AdditionTheorem.coeff f n * exp (n * u * I) +
+      AdditionTheorem.coeff f (-(n : ℤ)) *
+          exp (-(n * u * I))) (f u + AdditionTheorem.coeff f 0) := by
   have : Fact (0 < 2 * π) := ⟨Real.two_pi_pos⟩
   let g : C(AddCircle (2 * π), ℂ) := ⟨hper.lift, continuous_coinduced_dom.mpr hf.continuous⟩
   have hgx : ∀ x : ℝ, g (x : AddCircle (2 * π)) = f x := fun x => rfl
-  have hgc : ∀ n : ℤ, fourierCoeff g n = legAdd_coeff f n := by
+  have hgc : ∀ n : ℤ, fourierCoeff g n = AdditionTheorem.coeff f n := by
     intro n
-    rw [fourierCoeff_eq_intervalIntegral _ n (-π), show -π + 2 * π = π by ring, legAdd_coeff,
+    rw [fourierCoeff_eq_intervalIntegral _ n (-π), show -π + 2 * π = π by ring,
+                                                                            AdditionTheorem.coeff,
       Complex.real_smul]
     congr 1
     · push_cast; ring
@@ -68,7 +70,7 @@ private lemma hasSum_fourier_exp_pair {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f)
       congr 2
       push_cast
       field_simp
-  obtain ⟨M, hM0, hM⟩ := legAdd_coeff_bound hf hper
+  obtain ⟨M, hM0, hM⟩ := AdditionTheorem.coeff_bound hf hper
   have hsum : Summable (fourierCoeff g) := by
     refine Summable.of_norm_bounded_eventually (g := fun n : ℤ => M * (1 / (n : ℝ) ^ 2))
       ((Real.summable_one_div_int_pow.mpr (by norm_num)).mul_left M) ?_
@@ -100,12 +102,12 @@ private lemma integral_neg_pi_pi_eq {g : ℝ → ℂ} (hg : Continuous g) :
     (hg.intervalIntegrable _ _)).symm
 
 /-- The coefficients of an even real function. -/
-private lemma legAdd_coeff_of_even {F : ℝ → ℝ} (hF : Continuous F)
+private lemma RealFourierCoefficients.coeff_of_even {F : ℝ → ℝ} (hF : Continuous F)
     (hev : ∀ t, F (-t) = F t) (n : ℤ) :
-    legAdd_coeff (fun t => (F t : ℂ)) n =
+    AdditionTheorem.coeff (fun t => (F t : ℂ)) n =
       ((1 / π * ∫ t in (0 : ℝ)..π, F t * Real.cos (n * t) : ℝ) : ℂ) := by
   have hc : Continuous fun t : ℝ => exp (-(n * (t : ℂ) * I)) * (F t : ℂ) := by fun_prop
-  rw [legAdd_coeff, integral_neg_pi_pi_eq hc]
+  rw [AdditionTheorem.coeff, integral_neg_pi_pi_eq hc]
   have key : ∀ t : ℝ, exp (-(n * ((-t : ℝ) : ℂ) * I)) * ((F (-t) : ℝ) : ℂ) +
       exp (-(n * (t : ℂ) * I)) * (F t : ℂ) = 2 * ((F t * Real.cos (n * t) : ℝ) : ℂ) := by
     intro t
@@ -117,12 +119,12 @@ private lemma legAdd_coeff_of_even {F : ℝ → ℝ} (hF : Continuous F)
   field_simp
 
 /-- The coefficients of an odd real function. -/
-private lemma legAdd_coeff_of_odd {F : ℝ → ℝ} (hF : Continuous F)
+private lemma RealFourierCoefficients.coeff_of_odd {F : ℝ → ℝ} (hF : Continuous F)
     (hodd : ∀ t, F (-t) = -F t) (n : ℤ) :
-    legAdd_coeff (fun t => (F t : ℂ)) n =
+    AdditionTheorem.coeff (fun t => (F t : ℂ)) n =
       -I * ((1 / π * ∫ t in (0 : ℝ)..π, F t * Real.sin (n * t) : ℝ) : ℂ) := by
   have hc : Continuous fun t : ℝ => exp (-(n * (t : ℂ) * I)) * (F t : ℂ) := by fun_prop
-  rw [legAdd_coeff, integral_neg_pi_pi_eq hc]
+  rw [AdditionTheorem.coeff, integral_neg_pi_pi_eq hc]
   have key : ∀ t : ℝ, exp (-(n * ((-t : ℝ) : ℂ) * I)) * ((F (-t) : ℝ) : ℂ) +
       exp (-(n * (t : ℂ) * I)) * (F t : ℂ) = (-2 * I) * ((F t * Real.sin (n * t) : ℝ) : ℂ) := by
     intro t
@@ -144,14 +146,14 @@ theorem hasSum_cos_series_of_even {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F)
       (2 / π * ∫ t in (0 : ℝ)..π, F t * Real.cos (n * t)) * Real.cos (n * u)) (F u) := by
   have hf : ContDiff ℝ 2 (fun t => (F t : ℂ)) := ofRealCLM.contDiff.comp hF
   have hp := hasSum_fourier_exp_pair hf (fun t => by simp [hper t]) u
-  have h0 := hasSum_ite_eq (0 : ℕ) (legAdd_coeff (fun t => (F t : ℂ)) 0)
+  have h0 := hasSum_ite_eq (0 : ℕ) (AdditionTheorem.coeff (fun t => (F t : ℂ)) 0)
   have hd := hp.sub h0
   rw [add_sub_cancel_right] at hd
   rw [← hasSum_ofReal]
   convert hd using 1
   funext n
-  have e1 := legAdd_coeff_of_even hF.continuous hev n
-  have e2 := legAdd_coeff_of_even hF.continuous hev (-(n : ℤ))
+  have e1 := RealFourierCoefficients.coeff_of_even hF.continuous hev n
+  have e2 := RealFourierCoefficients.coeff_of_even hF.continuous hev (-(n : ℤ))
   simp only [Int.cast_neg, Int.cast_natCast, neg_mul, Real.cos_neg] at e1 e2
   split_ifs with hn
   · subst hn
@@ -176,14 +178,14 @@ private lemma hasSum_sin_series_of_odd {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F)
       (2 / π * ∫ t in (0 : ℝ)..π, F t * Real.sin (n * t)) * Real.sin (n * u)) (F u) := by
   have hf : ContDiff ℝ 2 (fun t => (F t : ℂ)) := ofRealCLM.contDiff.comp hF
   have hp := hasSum_fourier_exp_pair hf (fun t => by simp [hper t]) u
-  rw [legAdd_coeff_of_odd hF.continuous hodd 0] at hp
+  rw [RealFourierCoefficients.coeff_of_odd hF.continuous hodd 0] at hp
   simp only [Int.cast_zero, zero_mul, Real.sin_zero, mul_zero, intervalIntegral.integral_zero,
     ofReal_zero, add_zero] at hp
   rw [← hasSum_ofReal]
   convert hp using 1
   funext n
-  have e1 := legAdd_coeff_of_odd hF.continuous hodd n
-  have e2 := legAdd_coeff_of_odd hF.continuous hodd (-(n : ℤ))
+  have e1 := RealFourierCoefficients.coeff_of_odd hF.continuous hodd n
+  have e2 := RealFourierCoefficients.coeff_of_odd hF.continuous hodd (-(n : ℤ))
   simp only [Int.cast_neg, Int.cast_natCast, neg_mul, Real.sin_neg, mul_neg,
     intervalIntegral.integral_neg] at e1 e2
   rw [e1, e2]
@@ -457,12 +459,13 @@ private lemma summable_abs_cos_coeff_of_even {F : ℝ → ℝ} (hF : ContDiff �
     (hper : Function.Periodic F (2 * π)) (hev : ∀ t, F (-t) = F t) :
     Summable fun n : ℕ => |2 / π * ∫ t in (0 : ℝ)..π, F t * Real.cos (n * t)| := by
   have hf : ContDiff ℝ 2 (fun t => (F t : ℂ)) := ofRealCLM.contDiff.comp hF
-  obtain ⟨M, hM0, hM⟩ := legAdd_coeff_bound hf (fun t => by simp [hper t])
+  obtain ⟨M, hM0, hM⟩ := AdditionTheorem.coeff_bound hf (fun t => by simp [hper t])
   refine Summable.of_norm_bounded_eventually_nat (g := fun n : ℕ => 2 * M * (1 / (n : ℝ) ^ 2))
     ((Real.summable_one_div_nat_pow.mpr (by norm_num)).mul_left _) ?_
   filter_upwards [eventually_ne_atTop 0] with n hn
   have h := hM n (by exact_mod_cast hn)
-  rw [legAdd_coeff_of_even hF.continuous hev, Complex.norm_real, Real.norm_eq_abs] at h
+  rw [RealFourierCoefficients.coeff_of_even hF.continuous hev, Complex.norm_real,
+      Real.norm_eq_abs] at h
   simp only [Int.cast_natCast] at h
   rw [Real.norm_eq_abs, abs_abs, show 2 / π * ∫ t in (0 : ℝ)..π, F t * Real.cos (n * t) =
     2 * (1 / π * ∫ t in (0 : ℝ)..π, F t * Real.cos (n * t)) by ring, abs_mul, abs_two]
@@ -475,12 +478,13 @@ private lemma summable_abs_sin_coeff_of_odd {F : ℝ → ℝ} (hF : ContDiff ℝ
     (hper : Function.Periodic F (2 * π)) (hodd : ∀ t, F (-t) = -F t) :
     Summable fun n : ℕ => |2 / π * ∫ t in (0 : ℝ)..π, F t * Real.sin (n * t)| := by
   have hf : ContDiff ℝ 2 (fun t => (F t : ℂ)) := ofRealCLM.contDiff.comp hF
-  obtain ⟨M, hM0, hM⟩ := legAdd_coeff_bound hf (fun t => by simp [hper t])
+  obtain ⟨M, hM0, hM⟩ := AdditionTheorem.coeff_bound hf (fun t => by simp [hper t])
   refine Summable.of_norm_bounded_eventually_nat (g := fun n : ℕ => 2 * M * (1 / (n : ℝ) ^ 2))
     ((Real.summable_one_div_nat_pow.mpr (by norm_num)).mul_left _) ?_
   filter_upwards [eventually_ne_atTop 0] with n hn
   have h := hM n (by exact_mod_cast hn)
-  rw [legAdd_coeff_of_odd hF.continuous hodd, norm_mul, norm_neg, Complex.norm_I, one_mul,
+  rw [RealFourierCoefficients.coeff_of_odd hF.continuous hodd, norm_mul, norm_neg,
+      Complex.norm_I, one_mul,
     Complex.norm_real, Real.norm_eq_abs] at h
   simp only [Int.cast_natCast] at h
   rw [Real.norm_eq_abs, abs_abs, show 2 / π * ∫ t in (0 : ℝ)..π, F t * Real.sin (n * t) =

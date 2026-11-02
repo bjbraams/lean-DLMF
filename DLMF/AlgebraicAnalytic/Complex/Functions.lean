@@ -58,8 +58,9 @@ lemma on discs, removable singularities, Rouché's theorem on discs, …) are re
   `differentiableOn_one_sub_cpow_mul_one_add_cpow`: branches in cut planes (§1.10(vi)).
 * `residueAt_div_sub_pow`, `eventually_hasSum_residueAt_lagrange`: residues of
   `H(z)/(z - z₀)ⁿ⁺¹` and the Lagrange–Bürmann expansion in terms of residues.
-* `lagrange_inversion`, `lagrange_burmann`, `extendedInversion`, `extendedInversion_comp`:
-  inversion theorems (DLMF 1.10.12–1.10.17), from `Complex.hasSum_lagrangeInversion`.
+* `lagrange_inversion`, `lagrange_burmann`, `lagrange_inversion_extended`,
+  `lagrange_burmann_extended`: inversion theorems (DLMF 1.10.12–1.10.17), from
+  `Complex.hasSum_lagrangeInversion`.
 * `differentiableOn_intervalIntegral_param`, `differentiableOn_improperIntegral_param`,
   `tendstoUniformlyOn_integral_of_norm_le`: analyticity of integrals (DLMF 1.10.18–1.10.19,
   §1.10(viii)).
@@ -799,7 +800,7 @@ theorem lagrange_burmann {f g F : ℂ → ℂ} {z₀ : ℂ} (hf : AnalyticAt ℂ
 (any `m : ℕ`), then for every `ζ` near `0`, `z = z₀ + ∑_{n ≥ 1} Fₙ ζⁿ` solves
 `f(z) = f(z₀) + ζ^m`, where `n Fₙ` is the residue of `1/φ(z)ⁿ` at `z₀`. -/
 @[dlmf 1.10.E15, dlmf 1.10.E16]
-theorem extendedInversion' {f φ : ℂ → ℂ} {z₀ : ℂ} {m : ℕ}
+theorem lagrange_inversion_extended' {f φ : ℂ → ℂ} {z₀ : ℂ} {m : ℕ}
     (hφ : AnalyticAt ℂ φ z₀) (hφ₀ : φ z₀ = 0) (hφd : deriv φ z₀ ≠ 0)
     (hroot : ∀ᶠ z in 𝓝 z₀, φ z ^ m = f z - f z₀) :
     ∀ᶠ ζ in 𝓝 (0 : ℂ), ∃ z : ℂ,
@@ -826,20 +827,21 @@ where `n Fₙ` is the residue of `1/φ(z)ⁿ = 1/(f(z) - f(z₀))^{n/m}` at `z�
 give the different solutions. DLMF allows real `μ > 0` with a series in `(z - z₀)^{μ + n}`; only
 integer `μ` is formalized. -/
 @[dlmf 1.10.E15, dlmf 1.10.E16]
-theorem extendedInversion {f φ : ℂ → ℂ} {z₀ : ℂ} {m : ℕ} (_hm : 1 ≤ m) (_hf : AnalyticAt ℂ f z₀)
+theorem lagrange_inversion_extended {f φ : ℂ → ℂ} {z₀ : ℂ} {m : ℕ} (_hm : 1 ≤ m)
+    (_hf : AnalyticAt ℂ f z₀)
     (hφ : AnalyticAt ℂ φ z₀) (hφ₀ : φ z₀ = 0) (hφd : deriv φ z₀ ≠ 0)
     (hroot : ∀ᶠ z in 𝓝 z₀, φ z ^ m = f z - f z₀) :
     ∀ᶠ ζ in 𝓝 (0 : ℂ), ∃ z : ℂ,
       HasSum (fun n : ℕ => residueAt (fun z => (φ z ^ (n + 1))⁻¹) z₀ / (n + 1) * ζ ^ (n + 1))
         (z - z₀) ∧ f z = f z₀ + ζ ^ m :=
-  extendedInversion' hφ hφ₀ hφd hroot
+  lagrange_inversion_extended' hφ hφ₀ hφd hroot
 
 /-- DLMF 1.10.17, stronger than DLMF, which assumes `μ = m ≥ 1`, `f` analytic at `z₀` and
 `φ(z)^m = f(z) - f(z₀)`: only `φ` (analytic at `z₀` with a simple zero there) and `g` matter.
 For `ζ` near `0` and `z = z₀ + ∑ Fₙ ζⁿ`, `g(z) = g(z₀) + ∑_{n ≥ 1} Gₙ ζⁿ`, where `n Gₙ` is the
 residue of `g'(z)/φ(z)ⁿ` at `z₀`. -/
 @[dlmf 1.10.E17]
-theorem extendedInversion_comp' {φ g : ℂ → ℂ} {z₀ : ℂ}
+theorem lagrange_burmann_extended' {φ g : ℂ → ℂ} {z₀ : ℂ}
     (hφ : AnalyticAt ℂ φ z₀) (hφ₀ : φ z₀ = 0) (hφd : deriv φ z₀ ≠ 0) (hg : AnalyticAt ℂ g z₀) :
     ∀ᶠ ζ in 𝓝 (0 : ℂ), ∀ z : ℂ,
       HasSum (fun n : ℕ => residueAt (fun z => (φ z ^ (n + 1))⁻¹) z₀ / (n + 1) * ζ ^ (n + 1))
@@ -864,7 +866,7 @@ and `z = z₀ + ∑ Fₙ ζⁿ` the solution belonging to `ζ`,
 `g(z) = g(z₀) + ∑_{n ≥ 1} Gₙ ζⁿ`, where `n Gₙ` is the residue of
 `g'(z)/(f(z) - f(z₀))^{n/m} = g'(z)/φ(z)ⁿ` at `z₀`. -/
 @[dlmf 1.10.E17]
-theorem extendedInversion_comp {f φ g : ℂ → ℂ} {z₀ : ℂ} {m : ℕ} (_hm : 1 ≤ m)
+theorem lagrange_burmann_extended {f φ g : ℂ → ℂ} {z₀ : ℂ} {m : ℕ} (_hm : 1 ≤ m)
     (_hf : AnalyticAt ℂ f z₀) (hφ : AnalyticAt ℂ φ z₀) (hφ₀ : φ z₀ = 0) (hφd : deriv φ z₀ ≠ 0)
     (_hroot : ∀ᶠ z in 𝓝 z₀, φ z ^ m = f z - f z₀) (hg : AnalyticAt ℂ g z₀) :
     ∀ᶠ ζ in 𝓝 (0 : ℂ), ∀ z : ℂ,
@@ -872,7 +874,7 @@ theorem extendedInversion_comp {f φ g : ℂ → ℂ} {z₀ : ℂ} {m : ℕ} (_h
         (z - z₀) →
       HasSum (fun n : ℕ => residueAt (fun z => deriv g z / φ z ^ (n + 1)) z₀ / (n + 1) *
         ζ ^ (n + 1)) (g z - g z₀) :=
-  extendedInversion_comp' hφ hφ₀ hφd hg
+  lagrange_burmann_extended' hφ hφ₀ hφd hg
 
 /-! ## §1.10(viii) Functions defined by contour integrals -/
 

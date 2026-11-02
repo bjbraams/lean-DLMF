@@ -11,27 +11,27 @@ public import DLMF.Legendre.ZeroTools
 # Zero counts of real solutions of the Ferrers equation
 
 Tools for the zero counts of DLMF §14.16(ii) beyond `𝖯^{-m}_ν`
-(`lzt_ferrersP_neg_order_zero_count`). A real solution `f` of the Ferrers equation on `(-1, 1)`
-is compared with `u = 𝖯^{-μ}_ν(x)`, recessive at `1`, and `v = 𝖯^{-μ}_ν(-x)`, recessive at `-1`
-(`μ ≥ 0`).
+(`LegendreSturm.ferrersP_neg_order_zero_count`). A real solution `f` of the Ferrers equation on
+`(-1, 1)` is compared with `u = 𝖯^{-μ}_ν(x)`, recessive at `1`, and `v = 𝖯^{-μ}_ν(-x)`, recessive at
+`-1` (`μ ≥ 0`).
 
 ## Main results
 
-* `lzc_exists_zero_between`: Sturm separation between zeros of a solution.
-* `lzc_count_bounds`, `lzc_ferrers_count_bounds`: a solution with a nonzero constant Wronskian
-  against `u` has between `N` and `N + 1` zeros, where `N = max(⌈ν - μ⌉, 0)` is the number of
-  zeros of `u`.
-* `lzc_parity`, `lzc_parity_ends`, `lzc_ferrers_parity`: the signs of the Wronskians
-  `c₁ = W{u, f}` and `c₂ = W{v, f}` (times `1-x²`) fix the signs of `f` near `±1` and hence the
-  parity of the number `n` of zeros: `-(c₁ c₂)(-1)^n > 0`.
-* `lzc_wronskian_reflect_P`, `lzc_wronskian_reflect_Q`: the Wronskians
+* `ZeroCount.exists_zero_between`: Sturm separation between zeros of a solution.
+* `ZeroCount.count_bounds`, `ZeroCount.ferrers_count_bounds`: a solution with a nonzero constant
+  Wronskian against `u` has between `N` and `N + 1` zeros, where `N = max(⌈ν - μ⌉, 0)` is the number
+  of zeros of `u`.
+* `ZeroCount.parity`, `ZeroCount.parity_ends`, `ZeroCount.ferrers_parity`: the signs of the
+  Wronskians `c₁ = W{u, f}` and `c₂ = W{v, f}` (times `1-x²`) fix the signs of `f` near `±1` and
+  hence the parity of the number `n` of zeros: `-(c₁ c₂)(-1)^n > 0`.
+* `ZeroCount.wronskian_reflect_P`, `ZeroCount.wronskian_reflect_Q`: the Wronskians
   `W{𝖯^{-μ}_ν(-x), 𝖯^μ_ν(x)} = 2 sin(νπ)/(π(1-x²))` and
   `W{𝖯^{-μ}_ν(-x), 𝖰^μ_ν(x)} = cos(νπ)/(1-x²)`, companions of DLMF 14.2.6–14.2.7.
 
 ## Implementation notes
 
 In the count bounds, the zero after the last zero of `u` comes from the divergence of `f/u` at
-`1` (`lzc_zero_right`). All helper names carry the prefix `lzc_`.
+`1` (`ZeroCount.zero_right`). Helper names live in the namespace `ZeroCount`.
 -/
 
 @[expose] public noncomputable section
@@ -42,7 +42,7 @@ namespace DLMF.Legendre
 
 /-- **Sturm separation.** If `p q' - q p'` has no zeros on `[a, b]` and `q a = q b = 0`, then `p`
 vanishes somewhere in `(a, b)` (Rolle's theorem for `q / p`). -/
-theorem lzc_exists_zero_between {p p' q q' : ℝ → ℝ} {a b : ℝ} (hab : a < b)
+theorem ZeroCount.exists_zero_between {p p' q q' : ℝ → ℝ} {a b : ℝ} (hab : a < b)
     (hp : ∀ x ∈ Icc a b, HasDerivAt p (p' x) x) (hq : ∀ x ∈ Icc a b, HasDerivAt q (q' x) x)
     (hw : ∀ x ∈ Icc a b, p x * q' x - q x * p' x ≠ 0) (ha : q a = 0) (hb : q b = 0) :
     ∃ c ∈ Ioo a b, p c = 0 := by
@@ -67,7 +67,7 @@ theorem lzc_exists_zero_between {p p' q q' : ℝ → ℝ} {a b : ℝ} (hab : a <
 
 /-- If any two points of `T` are separated by a point of the finite set `S`, then `T` is finite
 with at most `|S| + 1` points. -/
-theorem lzc_ncard_le_succ {S T : Set ℝ} (hS : S.Finite)
+theorem ZeroCount.ncard_le_succ {S T : Set ℝ} (hS : S.Finite)
     (hsep : ∀ a ∈ T, ∀ b ∈ T, a < b → ∃ s ∈ S, a < s ∧ s < b) :
     T.Finite ∧ T.ncard ≤ S.ncard + 1 := by
   classical
@@ -108,7 +108,7 @@ theorem lzc_ncard_le_succ {S T : Set ℝ} (hS : S.Finite)
 
 /-- If every point of `S` is followed by a point of the finite set `T` before the next point of
 `S`, then `|S| ≤ |T|`. -/
-theorem lzc_ncard_le {S T : Set ℝ} (hT : T.Finite)
+theorem ZeroCount.ncard_le {S T : Set ℝ} (hT : T.Finite)
     (h : ∀ s ∈ S, ∃ t ∈ T, s < t ∧ ∀ s' ∈ S, s < s' → t < s') : S.ncard ≤ T.ncard := by
   classical
   choose! g hgT hgs hgn using h
@@ -124,7 +124,7 @@ theorem lzc_ncard_le {S T : Set ℝ} (hT : T.Finite)
     rw [heq] at h2; linarith
 
 /-- Just left of a zero with positive derivative, the function is negative. -/
-theorem lzc_neg_left_of_deriv_pos {f : ℝ → ℝ} {d z : ℝ} (hd : HasDerivAt f d z) (h0 : f z = 0)
+theorem ZeroCount.neg_left_of_deriv_pos {f : ℝ → ℝ} {d z : ℝ} (hd : HasDerivAt f d z) (h0 : f z = 0)
     (hpos : 0 < d) : ∃ t < z, ∀ x ∈ Ioo t z, f x < 0 := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsLT_le_nhdsNE z)
   have hev : ∀ᶠ x in 𝓝[<] z, 0 < slope f z x := hs.eventually (lt_mem_nhds hpos)
@@ -140,7 +140,7 @@ theorem lzc_neg_left_of_deriv_pos {f : ℝ → ℝ} {d z : ℝ} (hd : HasDerivAt
 
 /-- **Parity of a zero count.** If `f` has finitely many zeros in `(a, b)`, all simple, `f > 0`
 near `a` and `σ f > 0` near `b`, then `σ (-1)^n > 0`, `n` the number of zeros. -/
-theorem lzc_parity {f f' : ℝ → ℝ} {a : ℝ} (n : ℕ) : ∀ (b σ : ℝ), a < b →
+theorem ZeroCount.parity {f f' : ℝ → ℝ} {a : ℝ} (n : ℕ) : ∀ (b σ : ℝ), a < b →
     (∀ x ∈ Ioo a b, HasDerivAt f (f' x) x) → (∀ x ∈ Ioo a b, f x = 0 → f' x ≠ 0) →
     {x | x ∈ Ioo a b ∧ f x = 0}.Finite → {x | x ∈ Ioo a b ∧ f x = 0}.ncard = n →
     (∃ s, a < s ∧ ∀ x ∈ Ioo a s, 0 < f x) → (∃ t < b, ∀ x ∈ Ioo t b, 0 < σ * f x) →
@@ -163,7 +163,7 @@ theorem lzc_parity {f f' : ℝ → ℝ} {a : ℝ} (n : ℕ) : ∀ (b σ : ℝ), 
     have hx1s : (a + min s b) / 2 ∈ Ioo a s := ⟨by linarith, by linarith⟩
     have hx2 : (max t a + b) / 2 ∈ Ioo a b := ⟨by linarith, by linarith⟩
     have hx2t : (max t a + b) / 2 ∈ Ioo t b := ⟨by linarith, by linarith⟩
-    rcases lzt_sign ordConnected_Ioo hc hne with hp | hn'
+    rcases LegendreSturm.sign ordConnected_Ioo hc hne with hp | hn'
     · have h1 := htr _ hx2t
       have h2 := hp _ hx2
       have : 0 < σ := pos_of_mul_pos_left h1 h2.le
@@ -189,7 +189,7 @@ theorem lzc_parity {f f' : ℝ → ℝ} {a : ℝ} (n : ℕ) : ∀ (b σ : ℝ), 
     have hx2t : x2 ∈ Ioo t b := ⟨by linarith, by linarith⟩
     have hσf : ∀ x ∈ Ioo z b, 0 < σ * f x := by
       have h1 := htr x2 hx2t
-      rcases lzt_sign ordConnected_Ioo hc hnz with hp | hm
+      rcases LegendreSturm.sign ordConnected_Ioo hc hnz with hp | hm
       · have hσ : 0 < σ := pos_of_mul_pos_left h1 (hp x2 hx2).le
         exact fun x hx => mul_pos hσ (hp x hx)
       · have hσ : σ < 0 := by
@@ -199,11 +199,11 @@ theorem lzc_parity {f f' : ℝ → ℝ} {a : ℝ} (n : ℕ) : ∀ (b σ : ℝ), 
     have hdz := hd z hzZ.1
     have hd' : HasDerivAt (fun x => σ * f x) (σ * f' z) z := hdz.const_mul σ
     have h0 : σ * f z = 0 := by rw [hzZ.2, mul_zero]
-    have hnn := lzt_deriv_nonneg_right hd' h0 hzZ.1.2 hσf
+    have hnn := LegendreSturm.deriv_nonneg_right hd' h0 hzZ.1.2 hσf
     have hσ0 : σ ≠ 0 := fun h => by have := hσf x2 hx2; rw [h, zero_mul] at this; linarith
     have hpos : 0 < σ * f' z := lt_of_le_of_ne hnn
       (Ne.symm (mul_ne_zero hσ0 (hsimp z hzZ.1 hzZ.2)))
-    obtain ⟨t', ht', ht'l⟩ := lzc_neg_left_of_deriv_pos hd' h0 hpos
+    obtain ⟨t', ht', ht'l⟩ := ZeroCount.neg_left_of_deriv_pos hd' h0 hpos
     have hsub : {x | x ∈ Ioo a z ∧ f x = 0} = Z \ {z} := by
       ext x
       simp only [hZ, mem_ofPred_eq, Set.mem_sdiff, mem_singleton_iff, mem_Ioo]
@@ -222,7 +222,7 @@ theorem lzc_parity {f f' : ℝ → ℝ} {a : ℝ} (n : ℕ) : ∀ (b σ : ℝ), 
 
 /-- If `u > 0`, `(1-x²)u² = O(1-x)` and `(1-x²)(u f' - f u') = c > 0` near `1`, then `f > 0`
 near `1` (`f/u` increases to `+∞`). -/
-theorem lzc_pos_near_one {f f' u u' : ℝ → ℝ} {s K c : ℝ} (hs : -1 < s) (hs1 : s < 1)
+theorem ZeroCount.pos_near_one {f f' u u' : ℝ → ℝ} {s K c : ℝ} (hs : -1 < s) (hs1 : s < 1)
     (hK : 0 < K) (hc : 0 < c)
     (hfd : ∀ x ∈ Ico s 1, HasDerivAt f (f' x) x) (hud : ∀ x ∈ Ico s 1, HasDerivAt u (u' x) x)
     (hu : ∀ x ∈ Ico s 1, 0 < u x)
@@ -230,8 +230,8 @@ theorem lzc_pos_near_one {f f' u u' : ℝ → ℝ} {s K c : ℝ} (hs : -1 < s) (
     (hW : ∀ x ∈ Ico s 1, (1 - x ^ 2) * (u x * f' x - f x * u' x) = c) :
     ∃ t ∈ Ioo s 1, ∀ x ∈ Ioo t 1, 0 < f x := by
   have hp : ∀ x ∈ Ico s 1, 0 < 1 - x ^ 2 := fun x hx => by nlinarith [hx.1, hx.2]
-  obtain ⟨x0, hx0, h0⟩ := lzt_ratio_right hs1 hK hc hfd hud hu hp hb (fun x hx => by
-    simp only [lzt_W]
+  obtain ⟨x0, hx0, h0⟩ := LegendreSturm.ratio_right hs1 hK hc hfd hud hu hp hb (fun x hx => by
+    simp only [LegendreSturm.weightedWronskian]
     have e : (1 - x ^ 2) * (u' x * f x - u x * f' x) =
         -((1 - x ^ 2) * (u x * f' x - f x * u' x)) := by ring
     rw [e, hW x hx]) 0
@@ -253,7 +253,7 @@ theorem lzc_pos_near_one {f f' u u' : ℝ → ℝ} {s K c : ℝ} (hs : -1 < s) (
 
 /-- If `u > 0`, `(1-x²)u² = O(1+x)` and `(1-x²)(u f' - f u') = c > 0` near `-1`, then `f < 0`
 near `-1`. -/
-theorem lzc_neg_near_neg_one {f f' u u' : ℝ → ℝ} {s K c : ℝ} (hs : -1 < s) (hs1 : s < 1)
+theorem ZeroCount.neg_near_neg_one {f f' u u' : ℝ → ℝ} {s K c : ℝ} (hs : -1 < s) (hs1 : s < 1)
     (hK : 0 < K) (hc : 0 < c)
     (hfd : ∀ x ∈ Ioc (-1) s, HasDerivAt f (f' x) x) (hud : ∀ x ∈ Ioc (-1) s, HasDerivAt u (u' x) x)
     (hu : ∀ x ∈ Ioc (-1) s, 0 < u x)
@@ -261,8 +261,8 @@ theorem lzc_neg_near_neg_one {f f' u u' : ℝ → ℝ} {s K c : ℝ} (hs : -1 < 
     (hW : ∀ x ∈ Ioc (-1) s, (1 - x ^ 2) * (u x * f' x - f x * u' x) = c) :
     ∃ t ∈ Ioo (-1) s, ∀ x ∈ Ioo (-1) t, f x < 0 := by
   have hp : ∀ x ∈ Ioc (-1) s, 0 < 1 - x ^ 2 := fun x hx => by nlinarith [hx.1, hx.2]
-  obtain ⟨x0, hx0, h0⟩ := lzt_ratio_left hs hK hc hfd hud hu hp hb (fun x hx => by
-    simp only [lzt_W]
+  obtain ⟨x0, hx0, h0⟩ := LegendreSturm.ratio_left hs hK hc hfd hud hu hp hb (fun x hx => by
+    simp only [LegendreSturm.weightedWronskian]
     have e : (1 - x ^ 2) * (u' x * f x - u x * f' x) =
         -((1 - x ^ 2) * (u x * f' x - f x * u' x)) := by ring
     rw [e, hW x hx])
@@ -285,7 +285,7 @@ theorem lzc_neg_near_neg_one {f f' u u' : ℝ → ℝ} {s K c : ℝ} (hs : -1 < 
 
 /-- A solution has a zero between the last zero `s₀` of the recessive solution `u` and `1`
 (normalized signs). -/
-lemma lzc_zero_right_aux {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
+lemma ZeroCount.zero_right_of_wronskian {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
     (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x)
         (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
     (hc : 0 < c) (hW : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * (u x * y' x - y x * u' x) = c)
@@ -299,7 +299,7 @@ lemma lzc_zero_right_aux {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
   have a3 : s1 < 1 := max_lt hs.2 (by linarith [hs0.2])
   have hsub : Ico s1 1 ⊆ Ioo (-1:ℝ) 1 := fun x hx => ⟨by linarith [hx.1, hs.1], hx.2⟩
   have hsub' : Ico s1 1 ⊆ Ioo s0 1 := fun x hx => ⟨by linarith [hx.1, hs0.2], hx.2⟩
-  obtain ⟨t, ht, htp⟩ := lzc_pos_near_one (f := y) (u := u) (by linarith [hs.1]) a3 hK hc
+  obtain ⟨t, ht, htp⟩ := ZeroCount.pos_near_one (f := y) (u := u) (by linarith [hs.1]) a3 hK hc
     (fun x hx => hyd x (hsub hx)) (fun x hx => hud x (hsub hx)) (fun x hx => hpos x (hsub' hx))
     (fun x hx => hb x ⟨by linarith [hx.1], hx.2⟩) (fun x hx => hW x (hsub hx))
   have hsub2 : Ico s0 1 ⊆ Ioo (-1:ℝ) 1 := fun x hx => ⟨by linarith [hx.1, hs0.1], hx.2⟩
@@ -316,7 +316,7 @@ lemma lzc_zero_right_aux {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
 
 /-- A solution independent of `u` has a zero between the last zero `s₀` of `u` and `1`, when `u`
 is recessive at `1`. -/
-theorem lzc_zero_right {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
+theorem ZeroCount.zero_right {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
     (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x)
         (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
     (hc : c ≠ 0) (hW : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * (u x * y' x - y x * u' x) = c)
@@ -334,12 +334,13 @@ theorem lzc_zero_right {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
       ∃ t ∈ Ioo s0 1, y t = 0 := by
     intro U U' C hU hC hWU hU0 hUp hbU
     rcases lt_or_gt_of_ne hC with hn | hp
-    · obtain ⟨t, ht, h0⟩ := lzc_zero_right_aux (y := fun x => -y x) (y' := fun x => -y' x)
+    · obtain ⟨t, ht, h0⟩ :=
+          ZeroCount.zero_right_of_wronskian (y := fun x => -y x) (y' := fun x => -y' x)
         (c := -C) hU (fun x hx => (hyd x hx).neg) (by linarith)
         (fun x hx => by have := hWU x hx; linarith [this]) hs0 hU0 hUp hs hK hbU
       exact ⟨t, ht, neg_eq_zero.mp h0⟩
-    · exact lzc_zero_right_aux hU hyd hp hWU hs0 hU0 hUp hs hK hbU
-  rcases lzt_sign ordConnected_Ioo hcont hne with hp | hn
+    · exact ZeroCount.zero_right_of_wronskian hU hyd hp hWU hs0 hU0 hUp hs hK hbU
+  rcases LegendreSturm.sign ordConnected_Ioo hcont hne with hp | hn
   · exact hy hud hc hW hu0 hp hb
   · refine hy (U := fun x => -u x) (U' := fun x => -u' x) (C := -c) (fun x hx => (hud x hx).neg)
       (neg_ne_zero.mpr hc) (fun x hx => by have := hW x hx; linarith [this]) (by simp [hu0])
@@ -348,7 +349,7 @@ theorem lzc_zero_right {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
 /-- **Zero count of an independent solution.** If `u` is recessive at `1`, has exactly `N`
 zeros in `(-1, 1)`, and `(1-x²)(u y' - y u') = c ≠ 0`, then `y` has between `N` and `N + 1`
 zeros there. -/
-theorem lzc_count_bounds {u u' y y' : ℝ → ℝ} {c K s : ℝ} {N : ℕ}
+theorem ZeroCount.count_bounds {u u' y y' : ℝ → ℝ} {c K s : ℝ} {N : ℕ}
     (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x)
         (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
     (hc : c ≠ 0) (hW : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * (u x * y' x - y x * u' x) = c)
@@ -364,34 +365,34 @@ theorem lzc_count_bounds {u u' y y' : ℝ → ℝ} {c K s : ℝ} {N : ℕ}
     have := hW x hx; rw [h0, mul_zero] at this; exact hc this.symm
   have hsubI : ∀ {a b : ℝ}, a ∈ Ioo (-1:ℝ) 1 → b ∈ Ioo (-1:ℝ) 1 → Icc a b ⊆ Ioo (-1:ℝ) 1 :=
     fun ha hb => Icc_subset_Ioo ha.1 hb.2
-  obtain ⟨hyfin, hup⟩ := lzc_ncard_le_succ huf (S := Zu) (T := Zy) fun a ha b hb hab => by
-    obtain ⟨e, he, he0⟩ := lzc_exists_zero_between (p := u) (q := y) hab
+  obtain ⟨hyfin, hup⟩ := ZeroCount.ncard_le_succ huf (S := Zu) (T := Zy) fun a ha b hb hab => by
+    obtain ⟨e, he, he0⟩ := ZeroCount.exists_zero_between (p := u) (q := y) hab
       (fun x hx => hud x (hsubI ha.1 hb.1 hx)) (fun x hx => hyd x (hsubI ha.1 hb.1 hx))
       (fun x hx => hw x (hsubI ha.1 hb.1 hx)) ha.2 hb.2
     exact ⟨e, ⟨hsubI ha.1 hb.1 (Ioo_subset_Icc_self he), he0⟩, he.1, he.2⟩
   refine ⟨hyfin, ?_, by rw [← hun]; exact hup⟩
   rw [← hun]
-  refine lzc_ncard_le hyfin fun s0 hs0 => ?_
+  refine ZeroCount.ncard_le hyfin fun s0 hs0 => ?_
   by_cases hnext : (Zu ∩ Ioi s0).Nonempty
   · have hfin : (Zu ∩ Ioi s0).Finite := huf.subset inter_subset_left
     set n := sInf (Zu ∩ Ioi s0)
     have hn := hnext.csInf_mem hfin
     have hn' : ∀ s' ∈ Zu, s0 < s' → n ≤ s' := fun s' hs' h => csInf_le hfin.bddBelow ⟨hs', h⟩
-    obtain ⟨e, he, he0⟩ := lzc_exists_zero_between (p := y) (q := u) (a := s0) (b := n) hn.2
+    obtain ⟨e, he, he0⟩ := ZeroCount.exists_zero_between (p := y) (q := u) (a := s0) (b := n) hn.2
       (fun x hx => hyd x (hsubI hs0.1 hn.1.1 hx)) (fun x hx => hud x (hsubI hs0.1 hn.1.1 hx))
       (fun x hx h0 => hw x (hsubI hs0.1 hn.1.1 hx) (by linarith)) hs0.2 hn.1.2
     exact ⟨e, ⟨hsubI hs0.1 hn.1.1 (Ioo_subset_Icc_self he), he0⟩, he.1,
       fun s' hs' h => he.2.trans_le (hn' s' hs' h)⟩
   · have hne : ∀ x ∈ Ioo s0 1, u x ≠ 0 := fun x hx h0 =>
       hnext ⟨x, ⟨⟨hs0.1.1.trans hx.1, hx.2⟩, h0⟩, hx.1⟩
-    obtain ⟨t, ht, h0⟩ := lzc_zero_right hud hyd hc hW hs0.1 hs0.2 hne hs hK hb
+    obtain ⟨t, ht, h0⟩ := ZeroCount.zero_right hud hyd hc hW hs0.1 hs0.2 hne hs hK hb
     exact ⟨t, ⟨⟨hs0.1.1.trans ht.1, ht.2⟩, h0⟩, ht.1,
       fun s' hs' h => absurd ⟨s', hs', h⟩ hnext⟩
 
 /-- **Parity from the ends.** If `u > 0` is recessive at `1`, `v > 0` is recessive at `-1`, and
 `f` has finitely many simple zeros with Wronskians `c₁ ≠ 0` against `u` and `c₂ ≠ 0` against
 `v`, then `-(c₁ c₂)(-1)^n > 0`, `n` the number of zeros. -/
-theorem lzc_parity_ends {f f' u u' v v' : ℝ → ℝ} {c₁ c₂ K s s' : ℝ}
+theorem ZeroCount.parity_ends {f f' u u' v v' : ℝ → ℝ} {c₁ c₂ K s s' : ℝ}
     (hfd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt f (f' x) x)
     (hsimp : ∀ x ∈ Ioo (-1:ℝ) 1, f x = 0 → f' x ≠ 0)
     (hfin : {x | x ∈ Ioo (-1:ℝ) 1 ∧ f x = 0}.Finite)
@@ -408,21 +409,21 @@ theorem lzc_parity_ends {f f' u u' v v' : ℝ → ℝ} {c₁ c₂ K s s' : ℝ}
   -- the sign near `1`: `c₁ f > 0`
   have hright : ∃ t < 1, ∀ x ∈ Ioo t 1, 0 < c₁ * f x := by
     rcases lt_or_gt_of_ne hc₁ with hn | hp
-    · obtain ⟨t, ht, h⟩ := lzc_pos_near_one (f := fun x => -f x) (f' := fun x => -f' x)
+    · obtain ⟨t, ht, h⟩ := ZeroCount.pos_near_one (f := fun x => -f x) (f' := fun x => -f' x)
         (c := -c₁) hs.1 hs.2 hK (by linarith) (fun x hx => (hfd x (hsI hx)).neg) hud hu hbu
         (fun x hx => by have := hW₁ x hx; linarith [this])
       exact ⟨t, ht.2, fun x hx => by have := h x hx; nlinarith⟩
-    · obtain ⟨t, ht, h⟩ := lzc_pos_near_one (f := f) (c := c₁) hs.1 hs.2 hK hp
+    · obtain ⟨t, ht, h⟩ := ZeroCount.pos_near_one (f := f) (c := c₁) hs.1 hs.2 hK hp
         (fun x hx => hfd x (hsI hx)) hud hu hbu hW₁
       exact ⟨t, ht.2, fun x hx => mul_pos hp (h x hx)⟩
   -- the sign near `-1`: `c₂ f < 0`
   have hleft : ∃ t, -1 < t ∧ ∀ x ∈ Ioo (-1) t, 0 < -c₂ * f x := by
     rcases lt_or_gt_of_ne hc₂ with hn | hp
-    · obtain ⟨t, ht, h⟩ := lzc_neg_near_neg_one (f := fun x => -f x) (f' := fun x => -f' x)
+    · obtain ⟨t, ht, h⟩ := ZeroCount.neg_near_neg_one (f := fun x => -f x) (f' := fun x => -f' x)
         (c := -c₂) hs'.1 hs'.2 hK (by linarith) (fun x hx => (hfd x (hsI' hx)).neg) hvd hv hbv
         (fun x hx => by have := hW₂ x hx; linarith [this])
       exact ⟨t, ht.1, fun x hx => by have := h x hx; nlinarith⟩
-    · obtain ⟨t, ht, h⟩ := lzc_neg_near_neg_one (f := f) (c := c₂) hs'.1 hs'.2 hK hp
+    · obtain ⟨t, ht, h⟩ := ZeroCount.neg_near_neg_one (f := f) (c := c₂) hs'.1 hs'.2 hK hp
         (fun x hx => hfd x (hsI' hx)) hvd hv hbv hW₂
       exact ⟨t, ht.1, fun x hx => by have := h x hx; nlinarith⟩
   obtain ⟨t₁, ht₁, h₁⟩ := hright
@@ -431,7 +432,7 @@ theorem lzc_parity_ends {f f' u u' v v' : ℝ → ℝ} {c₁ c₂ K s s' : ℝ}
   have hc₂' : -c₂ ≠ 0 := neg_ne_zero.mpr hc₂
   have hset : {x | x ∈ Ioo (-1:ℝ) 1 ∧ f x = 0} = {x | x ∈ Ioo (-1:ℝ) 1 ∧ -c₂ * f x = 0} := by
     ext x; simp [hc₂]
-  have := lzc_parity (f := fun x => -c₂ * f x) (f' := fun x => -c₂ * f' x) (a := -1)
+  have := ZeroCount.parity (f := fun x => -c₂ * f x) (f' := fun x => -c₂ * f' x) (a := -1)
     {x | x ∈ Ioo (-1:ℝ) 1 ∧ f x = 0}.ncard 1 (c₁ / -c₂) (by norm_num)
     (fun x hx => (hfd x hx).const_mul _)
     (fun x hx h0 => mul_ne_zero hc₂' (hsimp x hx ((mul_eq_zero.mp h0).resolve_left hc₂')))
@@ -445,10 +446,10 @@ theorem lzc_parity_ends {f f' u u' v v' : ℝ → ℝ} {c₁ c₂ K s s' : ℝ}
   exact mul_pos this hsq
 
 /-- Near `1`, `𝖯^{-μ}_ν` (`μ ≥ 0`) has no zeros and `(1-x²)(𝖯^{-μ}_ν)² = O(1-x)`. -/
-theorem lzc_near_one (ν : ℝ) {μ : ℝ} (hμ : 0 ≤ μ) :
+theorem ZeroCount.near_one (ν : ℝ) {μ : ℝ} (hμ : 0 ≤ μ) :
     ∃ s ∈ Ioo (-1:ℝ) 1, ∃ K > 0, ∀ x ∈ Ico s 1, (ferrersP ν (-μ : ℝ) x).re ≠ 0 ∧
       (1 - x ^ 2) * (ferrersP ν (-μ : ℝ) x).re ^ 2 ≤ K * (1 - x) := by
-  obtain ⟨s₀, hs₀, M, hM⟩ := lzt_ferrersP_near_one ν hμ
+  obtain ⟨s₀, hs₀, M, hM⟩ := LegendreSturm.ferrersP_near_one ν hμ
   have a1 := le_max_left s₀ 0
   have a2 := le_max_right s₀ 0
   have a3 : max s₀ 0 < 1 := max_lt hs₀ one_pos
@@ -478,22 +479,23 @@ theorem lzc_near_one (ν : ℝ) {μ : ℝ} (hμ : 0 ≤ μ) :
 
 /-- A real solution `f` of the Ferrers equation with nonzero Wronskian against `𝖯^{-μ}_ν`
 (`μ ≥ 0`, `ν ≥ -1/2`) has between `N` and `N + 1` zeros, `N = max(⌈ν - μ⌉, 0)`. -/
-theorem lzc_ferrers_count_bounds {ν μ : ℝ} (hμ : 0 ≤ μ) (hν : -1/2 ≤ ν) {f f' : ℝ → ℝ}
+theorem ZeroCount.ferrers_count_bounds {ν μ : ℝ} (hμ : 0 ≤ μ) (hν : -1/2 ≤ ν) {f f' : ℝ → ℝ}
     (hfd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt f (f' x) x) {c : ℝ} (hc : c ≠ 0)
     (hW : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * ((ferrersP ν (-μ:ℝ) x).re * f' x -
       f x * (deriv (ferrersP ν (-μ:ℝ)) x).re) = c) :
     {x | x ∈ Ioo (-1:ℝ) 1 ∧ f x = 0}.Finite ∧
       (max ⌈ν - μ⌉ 0).toNat ≤ {x | x ∈ Ioo (-1:ℝ) 1 ∧ f x = 0}.ncard ∧
       {x | x ∈ Ioo (-1:ℝ) 1 ∧ f x = 0}.ncard ≤ (max ⌈ν - μ⌉ 0).toNat + 1 := by
-  obtain ⟨s, hs, K, hK, hnear⟩ := lzc_near_one ν hμ
-  obtain ⟨hfin, hcard⟩ := lzt_ferrersP_neg_order_zero_count hμ hν
-  exact lzc_count_bounds (fun x hx => (lzt_ferrersP_sol ν (-μ) hx).1) hfd hc hW hfin hcard hs hK
+  obtain ⟨s, hs, K, hK, hnear⟩ := ZeroCount.near_one ν hμ
+  obtain ⟨hfin, hcard⟩ := LegendreSturm.ferrersP_neg_order_zero_count hμ hν
+  exact ZeroCount.count_bounds (fun x hx => (LegendreSturm.ferrersP_solution ν (-μ) hx).1) hfd hc hW
+      hfin hcard hs hK
     (fun x hx => (hnear x hx).2)
 
 /-- **Parity from the end Wronskians.** For a real solution `f` with simple zeros and constant
 Wronskians `c₁` against `𝖯^{-μ}_ν(x)` and `c₂` against `𝖯^{-μ}_ν(-x)` (`μ ≥ 0`), the number
 `n` of zeros satisfies `-(c₁ c₂)(-1)^n > 0`. -/
-theorem lzc_ferrers_parity {ν μ : ℝ} (hμ : 0 ≤ μ) {f f' : ℝ → ℝ}
+theorem ZeroCount.ferrers_parity {ν μ : ℝ} (hμ : 0 ≤ μ) {f f' : ℝ → ℝ}
     (hfd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt f (f' x) x)
     (hsimp : ∀ x ∈ Ioo (-1:ℝ) 1, f x = 0 → f' x ≠ 0)
     (hfin : {x | x ∈ Ioo (-1:ℝ) 1 ∧ f x = 0}.Finite) {c₁ c₂ : ℝ} (hc₁ : c₁ ≠ 0) (hc₂ : c₂ ≠ 0)
@@ -502,7 +504,7 @@ theorem lzc_ferrers_parity {ν μ : ℝ} (hμ : 0 ≤ μ) {f f' : ℝ → ℝ}
     (hW₂ : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * ((ferrersP ν (-μ:ℝ) (-x)).re * f' x -
       f x * -(deriv (ferrersP ν (-μ:ℝ)) (-x)).re) = c₂) :
     0 < -(c₁ * c₂) * (-1) ^ {x | x ∈ Ioo (-1:ℝ) 1 ∧ f x = 0}.ncard := by
-  obtain ⟨s, hs, K, hK, hnear⟩ := lzc_near_one ν hμ
+  obtain ⟨s, hs, K, hK, hnear⟩ := ZeroCount.near_one ν hμ
   set u : ℝ → ℝ := fun x => (ferrersP ν (-μ:ℝ) x).re with hu
   set u' : ℝ → ℝ := fun x => (deriv (ferrersP ν (-μ:ℝ)) x).re with hu'
   have hsI : Ico s 1 ⊆ Ioo (-1:ℝ) 1 := fun x hx => ⟨hs.1.trans_le hx.1, hx.2⟩
@@ -511,7 +513,7 @@ theorem lzc_ferrers_parity {ν μ : ℝ} (hμ : 0 ≤ μ) {f f' : ℝ → ℝ}
   have hIoc : ∀ x ∈ Ioc (-1) (-s), -x ∈ Ico s 1 := fun x hx =>
     ⟨by linarith [hx.2], by linarith [hx.1]⟩
   have hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x := fun x hx =>
-    (lzt_ferrersP_sol ν (-μ) hx).1
+    (LegendreSturm.ferrersP_solution ν (-μ) hx).1
   have hvd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt (fun t => u (-t)) (-u' (-x)) x := fun x hx => by
     have hx' : -x ∈ Ioo (-1:ℝ) 1 := ⟨by linarith [hx.2], by linarith [hx.1]⟩
     have := (hud (-x) hx').comp x (hasDerivAt_neg x)
@@ -521,12 +523,12 @@ theorem lzc_ferrers_parity {ν μ : ℝ} (hμ : 0 ≤ μ) {f f' : ℝ → ℝ}
     rwa [neg_sq, sub_neg_eq_add] at this
   have hcont : ContinuousOn u (Ico s 1) := fun x hx =>
     (hud x (hsI hx)).continuousAt.continuousWithinAt
-  rcases lzt_sign ordConnected_Ico hcont (fun x hx => (hnear x hx).1) with hp | hn
-  · exact lzc_parity_ends (u := u) (u' := u') (v := fun t => u (-t)) (v' := fun t => -u' (-t))
+  rcases LegendreSturm.sign ordConnected_Ico hcont (fun x hx => (hnear x hx).1) with hp | hn
+  · exact ZeroCount.parity_ends (u := u) (u' := u') (v := fun t => u (-t)) (v' := fun t => -u' (-t))
       hfd hsimp hfin hs hs' hK (fun x hx => hud x (hsI hx)) hp (fun x hx => (hnear x hx).2)
       (fun x hx => hvd x (hsI' hx)) (fun x hx => hp _ (hIoc x hx)) hbv
       hc₁ (fun x hx => hW₁ x (hsI hx)) hc₂ (fun x hx => hW₂ x (hsI' hx))
-  · have := lzc_parity_ends (u := fun t => -u t) (u' := fun t => -u' t)
+  · have := ZeroCount.parity_ends (u := fun t => -u t) (u' := fun t => -u' t)
       (v := fun t => -u (-t)) (v' := fun t => u' (-t)) (c₁ := -c₁) (c₂ := -c₂)
       hfd hsimp hfin hs hs' hK (fun x hx => (hud x (hsI hx)).neg)
       (fun x hx => neg_pos.mpr (hn x hx)) (fun x hx => by rw [neg_sq]; exact (hnear x hx).2)
@@ -543,7 +545,7 @@ open scoped Real
 
 /-- The Wronskian of `𝖯^{-μ}_ν(-x)` and `𝖯^μ_ν(x)` is `2 sin(νπ)/(π(1-x²))` (from the even and odd
 solutions, as in DLMF 14.2.7). -/
-theorem lzc_wronskian_reflect_P (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ZeroCount.wronskian_reflect_P (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ODE.wronskian (fun x => ferrersP ν (-μ) (-x)) (ferrersP ν μ) x =
       2*sin (ν*π)/(π*(1-x^2:ℂ)) := by
   rw [ferrersWronskian_of_even_odd (ferrersP_neg_reflect_eqOn_even_odd ν μ)
@@ -571,7 +573,7 @@ theorem lzc_wronskian_reflect_P (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ)
   linear_combination (sb*ca+cb*sa)*kT + T*Ti*(-(P*A2*r1)*o1 + sb*e2 - (P*B2*r2)*e1 - cb*o2)
 
 /-- The Wronskian of `𝖯^{-μ}_ν(-x)` and `𝖰^μ_ν(x)` is `cos(νπ)/(1-x²)` (compare DLMF 14.2.6). -/
-theorem lzc_wronskian_reflect_Q (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
+theorem ZeroCount.wronskian_reflect_Q (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
     (hx : x ∈ Ioo (-1:ℝ) 1) :
     ODE.wronskian (fun x => ferrersP ν (-μ) (-x)) (ferrersQ ν μ) x = cos (ν*π)/(1-x^2:ℂ) := by
   have hne : 1-(x:ℂ)^2≠0 := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hx)

@@ -81,7 +81,7 @@ theorem hasAsymptoticPowerSeries_iff {P : 𝕜⟦X⟧} {f : α → 𝕜} :
   simp only [this]
 
 /-- A polynomial whose coefficients below `N` vanish is `O(w^N)` at `w → 0`. -/
-theorem asymInv_isBigO_eval_of_coeff_eq_zero (hw : Tendsto w l (𝓝 0)) {p : Polynomial 𝕜}
+theorem AsymptoticInversion.isBigO_eval_of_coeff_eq_zero (hw : Tendsto w l (𝓝 0)) {p : Polynomial 𝕜}
     {N : ℕ} (hp : ∀ n < N, p.coeff n = 0) :
     (fun x => p.eval (w x)) =O[l] fun x => w x ^ N := by
   obtain ⟨q, rfl⟩ := Polynomial.X_pow_dvd_iff.mpr hp
@@ -90,7 +90,7 @@ theorem asymInv_isBigO_eval_of_coeff_eq_zero (hw : Tendsto w l (𝓝 0)) {p : Po
   simpa using (isBigO_refl (fun x => w x ^ N) l).mul hq
 
 /-- The value of a polynomial at `w → 0` is bounded. -/
-theorem asymInv_isBigO_eval_one (hw : Tendsto w l (𝓝 0)) (p : Polynomial 𝕜) :
+theorem AsymptoticInversion.isBigO_eval_one (hw : Tendsto w l (𝓝 0)) (p : Polynomial 𝕜) :
     (fun x => p.eval (w x)) =O[l] fun _ => (1 : 𝕜) :=
   ((p.continuous.tendsto 0).comp hw).isBigO_one 𝕜
 
@@ -142,7 +142,7 @@ theorem _root_.Asymptotics.hasAsymptoticPowerSeries_eval (hw : Tendsto w l (𝓝
     HasAsymptoticPowerSeries l w (p : 𝕜⟦X⟧) (fun x => p.eval (w x)) := by
   refine of_remainder fun N => ?_
   simp_rw [← Polynomial.eval_sub]
-  refine asymInv_isBigO_eval_of_coeff_eq_zero hw fun n hn => ?_
+  refine AsymptoticInversion.isBigO_eval_of_coeff_eq_zero hw fun n hn => ?_
   simp [coeff_trunc, hn]
 
 /-- Constants. -/
@@ -179,10 +179,10 @@ theorem mul (hw : Tendsto w l (𝓝 0)) (hf : HasAsymptoticPowerSeries l w P f)
     simpa using (hf.remainder N).mul hg.isBigO_one
   have h2 : (fun x => (trunc N P).eval (w x) * (g x - (trunc N Q).eval (w x))) =O[l]
       fun x => w x ^ N := by
-    simpa using (asymInv_isBigO_eval_one hw (trunc N P)).mul (hg.remainder N)
+    simpa using (AsymptoticInversion.isBigO_eval_one hw (trunc N P)).mul (hg.remainder N)
   have h3 : (fun x => (trunc N P * trunc N Q - trunc N (P * Q)).eval (w x)) =O[l]
       fun x => w x ^ N := by
-    refine asymInv_isBigO_eval_of_coeff_eq_zero hw fun n hn => ?_
+    refine AsymptoticInversion.isBigO_eval_of_coeff_eq_zero hw fun n hn => ?_
     rw [Polynomial.coeff_sub, coeff_trunc, ← Polynomial.coeff_coe,
       Polynomial.coe_mul, ← coeff_mul_eq_coeff_trunc_mul_trunc _ _ hn]
     simp [hn]
@@ -220,7 +220,7 @@ theorem aeval (hw : Tendsto w l (𝓝 0)) (hf : HasAsymptoticPowerSeries l w P f
 end HasAsymptoticPowerSeries
 
 /-- Truncations of a substitution only see the truncation of the outer series. -/
-theorem asymInv_trunc_subst {P Q : 𝕜⟦X⟧} (hQ : constantCoeff Q = 0) (N : ℕ) :
+theorem AsymptoticInversion.trunc_subst {P Q : 𝕜⟦X⟧} (hQ : constantCoeff Q = 0) (N : ℕ) :
     trunc N (P.subst Q) = trunc N (Polynomial.aeval Q (trunc N P)) := by
   have hs : HasSubst Q := HasSubst.of_constantCoeff_zero' hQ
   obtain ⟨R, hR⟩ := X_dvd_iff.mpr hQ
@@ -244,7 +244,7 @@ theorem comp {m : Filter β} {σ H : β → 𝕜} (hH : HasAsymptoticPowerSeries
     ((hH.remainder N).comp_tendsto hy).trans
       ((hs.isBigO_of_constantCoeff_eq_zero hQ).pow N)
   have h2 := (hs.aeval hw (trunc N P)).remainder N
-  rw [← asymInv_trunc_subst hQ] at h2
+  rw [← AsymptoticInversion.trunc_subst hQ] at h2
   exact (h1.add h2).congr_left fun x => by ring
 
 /-- **Asymptotic inversion.** Let `H ~ P(σ)` along `m`, where `σ → 0`, `P` has no constant
@@ -281,7 +281,8 @@ theorem inversion {m : Filter β} {σ H : β → 𝕜} (hσ : Tendsto σ m (𝓝
     · simpa using hs0.isBigO_one 𝕜
     · simpa [trunc_one_left] using hsw
   · have h := (hW.aeval hs0 (trunc N (P.substInvOfIsUnit hP1.isUnit))).remainder N
-    rw [← asymInv_trunc_subst hP0, subst_substInvOfIsUnit_left _ hP0, trunc_X_of hN] at h
+    rw [← AsymptoticInversion.trunc_subst hP0, subst_substInvOfIsUnit_left _ hP0,
+        trunc_X_of hN] at h
     have h' := (h.trans (hsw.pow N)).neg_left
     exact h'.congr_left fun x => by simp
 
@@ -346,17 +347,17 @@ end HasAsymptoticPowerSeries
 
 /-- The phase series `X (1 + X C)⁻¹`: if `G(x) ~ C(1/x)`, then `1/(x + G(x)) ~ P(1/x)` for
 this `P`. -/
-def asymInv_mcMahonPhase (C : 𝕜⟦X⟧) : 𝕜⟦X⟧ := X * (1 + X * C)⁻¹
+def AsymptoticInversion.mcMahonPhase (C : 𝕜⟦X⟧) : 𝕜⟦X⟧ := X * (1 + X * C)⁻¹
 
 /-- The phase series has no constant term. -/
-theorem asymInv_constantCoeff_mcMahonPhase (C : 𝕜⟦X⟧) :
-    constantCoeff (asymInv_mcMahonPhase C) = 0 := by
-  simp [asymInv_mcMahonPhase]
+theorem AsymptoticInversion.constantCoeff_mcMahonPhase (C : 𝕜⟦X⟧) :
+    constantCoeff (AsymptoticInversion.mcMahonPhase C) = 0 := by
+  simp [AsymptoticInversion.mcMahonPhase]
 
 /-- The phase series has linear coefficient `1`. -/
-theorem asymInv_coeff_one_mcMahonPhase (C : 𝕜⟦X⟧) :
-    coeff 1 (asymInv_mcMahonPhase C) = 1 := by
-  rw [asymInv_mcMahonPhase, show (1 : ℕ) = 0 + 1 from rfl, coeff_succ_X_mul,
+theorem AsymptoticInversion.coeff_one_mcMahonPhase (C : 𝕜⟦X⟧) :
+    coeff 1 (AsymptoticInversion.mcMahonPhase C) = 1 := by
+  rw [AsymptoticInversion.mcMahonPhase, show (1 : ℕ) = 0 + 1 from rfl, coeff_succ_X_mul,
     coeff_zero_eq_constantCoeff_apply, constantCoeff_inv]
   simp
 
@@ -365,8 +366,9 @@ theorem asymInv_coeff_one_mcMahonPhase (C : 𝕜⟦X⟧) :
 It is built from the compositional inverse `Q` of `X (1 + X C)⁻¹` (the expansion of `1/x` in
 powers of `1/T`) as the shifted coefficients of `(Q/X)⁻¹`. -/
 def mcMahonSeries (C : 𝕜⟦X⟧) : 𝕜⟦X⟧ :=
-  mk fun n => coeff (n + 1) (mk fun k => coeff (k + 1) ((asymInv_mcMahonPhase C).substInvOfIsUnit
-    (by rw [asymInv_coeff_one_mcMahonPhase]; exact isUnit_one)))⁻¹
+  mk fun n => coeff (n + 1)
+      (mk fun k => coeff (k + 1) ((AsymptoticInversion.mcMahonPhase C).substInvOfIsUnit
+    (by rw [AsymptoticInversion.coeff_one_mcMahonPhase]; exact isUnit_one)))⁻¹
 
 namespace HasAsymptoticPowerSeries
 
@@ -382,9 +384,9 @@ theorem mcMahon_inversion {m : Filter β} {ξ G : β → 𝕜} {C : 𝕜⟦X⟧}
     HasAsymptoticPowerSeries l (fun a => (T a)⁻¹) (mcMahonSeries C)
       (fun a => ξ (y a) - T a) := by
   set σ : β → 𝕜 := fun b => (ξ b)⁻¹
-  set P := asymInv_mcMahonPhase C with hP_def
-  have hP0 : constantCoeff P = 0 := asymInv_constantCoeff_mcMahonPhase C
-  have hP1 : coeff 1 P = 1 := asymInv_coeff_one_mcMahonPhase C
+  set P := AsymptoticInversion.mcMahonPhase C with hP_def
+  have hP0 : constantCoeff P = 0 := AsymptoticInversion.constantCoeff_mcMahonPhase C
+  have hP1 : coeff 1 P = 1 := AsymptoticInversion.coeff_one_mcMahonPhase C
   have hP1' : coeff 1 P ≠ 0 := by rw [hP1]; exact one_ne_zero
   -- `1/(ξ + G) ~ P(1/ξ)`
   have hH : HasAsymptoticPowerSeries m σ P (fun b => (ξ b + G b)⁻¹) := by
@@ -434,32 +436,33 @@ end HasAsymptoticPowerSeries
 `D = mcMahonSeries C`, one has `Q = X (1 + X D)⁻¹` and `D = -C(Q)`. Thus
 `D = -C(X (1 + X D)⁻¹)`, the formal form of `x - T = -G(x)` with `1/x = (1/T)/(1 + (x-T)/T)`. -/
 theorem mcMahonSeries_spec (C : 𝕜⟦X⟧) :
-    (asymInv_mcMahonPhase C).substInvOfIsUnit
-        (by rw [asymInv_coeff_one_mcMahonPhase]; exact isUnit_one) =
+    (AsymptoticInversion.mcMahonPhase C).substInvOfIsUnit
+        (by rw [AsymptoticInversion.coeff_one_mcMahonPhase]; exact isUnit_one) =
       X * (1 + X * mcMahonSeries C)⁻¹ ∧
     mcMahonSeries C = -(C.subst (X * (1 + X * mcMahonSeries C)⁻¹ : 𝕜⟦X⟧)) := by
-  set hu : IsUnit (coeff 1 (asymInv_mcMahonPhase C)) :=
-    (by rw [asymInv_coeff_one_mcMahonPhase]; exact isUnit_one)
-  set Q := (asymInv_mcMahonPhase C).substInvOfIsUnit hu with hQ_def
+  set hu : IsUnit (coeff 1 (AsymptoticInversion.mcMahonPhase C)) :=
+    (by rw [AsymptoticInversion.coeff_one_mcMahonPhase]; exact isUnit_one)
+  set Q := (AsymptoticInversion.mcMahonPhase C).substInvOfIsUnit hu with hQ_def
   have hQ0 : constantCoeff Q = 0 := constantCoeff_substInvOfIsUnit _ _
   have hQs : HasSubst Q := HasSubst.of_constantCoeff_zero' hQ0
   have hQ1 : coeff 1 Q = 1 := by
     rw [hQ_def, coeff_one_substInvOfIsUnit]
-    have : hu.unit = 1 := Units.ext (by rw [IsUnit.unit_spec, asymInv_coeff_one_mcMahonPhase]; rfl)
+    have : hu.unit = 1 :=
+        Units.ext (by rw [IsUnit.unit_spec, AsymptoticInversion.coeff_one_mcMahonPhase]; rfl)
     rw [this]; rfl
   set U : 𝕜⟦X⟧ := 1 + X * C
   have hU : constantCoeff U ≠ 0 := by simp [U]
   -- `Q = X (1 + Q C(Q))`
   have hA : Q = X * (1 + Q * C.subst Q) := by
-    have h1 : (asymInv_mcMahonPhase C).subst Q = X :=
-      subst_substInvOfIsUnit_right _ (asymInv_constantCoeff_mcMahonPhase C) hu
+    have h1 : (AsymptoticInversion.mcMahonPhase C).subst Q = X :=
+      subst_substInvOfIsUnit_right _ (AsymptoticInversion.constantCoeff_mcMahonPhase C) hu
     have h2 : U⁻¹.subst Q * U.subst Q = 1 := by
       rw [← subst_mul hQs, PowerSeries.inv_mul_cancel _ hU, ← Polynomial.coe_one,
         subst_coe hQs, map_one, Polynomial.coe_one]
     have h3 : U.subst Q = 1 + Q * C.subst Q := by
       rw [subst_add hQs, subst_mul hQs, subst_X hQs, ← Polynomial.coe_one, subst_coe hQs,
         map_one, Polynomial.coe_one]
-    rw [asymInv_mcMahonPhase, subst_mul hQs, subst_X hQs] at h1
+    rw [AsymptoticInversion.mcMahonPhase, subst_mul hQs, subst_X hQs] at h1
     rw [← h3, ← h1, mul_assoc, h2, mul_one]
   set Q' : 𝕜⟦X⟧ := mk fun k => coeff (k + 1) Q
   have hQQ' : Q = X * Q' := by
@@ -519,7 +522,8 @@ theorem mcMahonSeries_coeff_le_two (G : 𝕜⟦X⟧) :
       coeff n (PowerSeries.C (coeff 0 G) + PowerSeries.C (coeff 1 G) * Q +
         PowerSeries.C (coeff 2 G) * Q ^ 2) := by
     intro n hn
-    have h := congrArg (fun p => Polynomial.coeff p n) (asymInv_trunc_subst (P := G) hQ0 3)
+    have h := congrArg (fun p => Polynomial.coeff p n)
+        (AsymptoticInversion.trunc_subst (P := G) hQ0 3)
     simp only [coeff_trunc, hn, ite_true] at h
     rw [h]
     simp [trunc_succ, Polynomial.aeval_monomial]

@@ -23,6 +23,8 @@ polynomial `P` of 29.12.10 has `n` simple zeros, `m` in `(0, 1)` and `n - m` in 
 
 * `ncard_zeros_lamePolyEk_real`: exactly `m` zeros in `(0, K)`.
 * `ncard_zeros_lamePolyEk_vertical`: exactly `n - m` zeros on the vertical side.
+* `lamePolyEk_vertical_spectrum`: the vertical side as a Sturm–Liouville eigenproblem.
+* `roots_of_lamePolyEk_eq`: the zeros of any `P` in the polynomial form.
 * `exists_poly_roots_lamePolyEk`: DLMF 29.12.9–29.12.10, the zeros of `P`.
 
 ## Implementation notes
@@ -454,6 +456,32 @@ theorem ncard_zeros_lamePolyEk_vertical (hk0 : 0 < k) (hk1 : k < 1) (t : LamePol
   rw [(key m hm).2]
   exact eq_sub_of_strictAnti hlt hle m hm
 
+/-- **The vertical Sturm–Liouville problem.** Along `y ↦ K + iy` the Lamé polynomial
+`lamePolyEk t n j` is an eigenfunction of `g'' = (V(y) - μ) g` (`V = verticalPotential`) on
+`[0, K']` with the boundary types `lamePolyOddK t`, `lamePolyOddKiK t`, for
+`μ = -½(H_j + ν(ν+1)k²)`, and exactly `n - j` points of that spectrum lie below `μ`. -/
+theorem lamePolyEk_vertical_spectrum (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n j : ℕ} (hj : j ≤ n) :
+    -((lamePolyH t n j k + (t.order n : ℝ) * ((t.order n : ℝ) + 1) * k ^ 2) / 2) ∈
+        ODE.separatedSpectrum (verticalPotential (t.order n : ℝ) k)
+          (Real.compEllIntKm (1 - k ^ 2)) (lamePolyOddK t) (lamePolyOddKiK t) ∧
+      (ODE.separatedSpectrum (verticalPotential (t.order n : ℝ) k)
+          (Real.compEllIntKm (1 - k ^ 2)) (lamePolyOddK t) (lamePolyOddKiK t) ∩
+        Iio (-((lamePolyH t n j k + (t.order n : ℝ) * ((t.order n : ℝ) + 1) * k ^ 2) / 2))).ncard =
+        n - j := by
+  have hL : 0 < Real.compEllIntKm (1 - k ^ 2) := Real.compEllIntKm_pos (by nlinarith)
+  have hV := continuous_verticalPotential hk0 (t.order n : ℝ)
+  have hB := abs_verticalPotential_le hk0 hk1 (t.order n : ℝ)
+  obtain ⟨hd, -, hode⟩ := lamePolyEk_vertical_ode hk0 hk1 t hj
+  obtain ⟨b0, bL⟩ := lamePolyEk_vertical_boundary hk0 hk1 t hj
+  obtain ⟨hZf, -, hne⟩ := lamePolyEk_vertical_zeros hk0 hk1 t hj
+  obtain ⟨hmem, henc⟩ := encard_zeros_of_complex_solution hV hB hL _ _ hd hode b0 bL hne
+  refine ⟨by simpa using hmem, ?_⟩
+  rw [← ncard_zeros_lamePolyEk_vertical hk0 hk1 t hj]
+  rw [← Set.Finite.cast_ncard_eq hZf, ← Set.Finite.cast_ncard_eq
+    (ODE.separatedSpectrum_inter_Iio_finite hV hB hL _ _ _)] at henc
+  simpa using (ENat.natCast_inj.1 henc).symm
+
 /-- **Zeros on `(0, K)`** (§29.12(i)): `lamePolyEk t n m` has exactly `m` zeros in `(0, K)`. -/
 theorem ncard_zeros_lamePolyEk_real (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
     {n m : ℕ} (hm : m ≤ n) :
@@ -499,19 +527,18 @@ private lemma card_filter_eq_card_filter_toFinset {s : Multiset ℝ} (hs : s.Nod
     (s.filter q).card = (s.toFinset.filter q).card := by
   rw [← Multiset.toFinset_filter, Multiset.toFinset_card_of_nodup (hs.filter q)]
 
-/-- **29.12.9–29.12.10**: in `E = pre · sn^ρ · P(sn²)` the polynomial `P` of degree `n` has `n`
+/-- In `E = pre · sn^ρ · P(sn²)`, any polynomial `P` of degree `n` has `n`
 simple zeros, `m` of them in `(0, 1)` and `n - m` in `(1, k⁻²)`. The zeros of `E` on `(0, K)`
 and on `K + i(0, K')` (`ncard_zeros_lamePolyEk_real`, `ncard_zeros_lamePolyEk_vertical`) give `m`
 and `n - m` distinct roots `sn²(x) ∈ (0, 1)` and `1/dn²(y, k') ∈ (1, k⁻²)`. -/
-theorem exists_poly_roots_lamePolyEk (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
-    {n m : ℕ} (hm : m ≤ n) :
-    ∃ P : ℝ[X], P.natDegree = n ∧ P.roots.Nodup ∧ P.roots.card = n ∧
-      (P.roots.filter (· ∈ Ioo (0 : ℝ) 1)).card = m ∧
-      (P.roots.filter (· ∈ Ioo (1 : ℝ) (k ^ 2)⁻¹)).card = n - m ∧
-      ∀ z : ℂ, lamePolyEk t n m z k = t.prefactor z k *
+theorem roots_of_lamePolyEk_eq (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n m : ℕ} (hm : m ≤ n) {P : ℝ[X]} (hP : P.degree = n)
+    (hE : ∀ z : ℂ, lamePolyEk t n m z k = t.prefactor z k *
         (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
-        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) := by
-  obtain ⟨P, hP, hE⟩ := lamePolyEk_eq_prefactor_mul_eval hk0 hk1 t hm
+        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2)) :
+    P.natDegree = n ∧ P.roots.Nodup ∧ P.roots.card = n ∧
+      (P.roots.filter (· ∈ Ioo (0 : ℝ) 1)).card = m ∧
+      (P.roots.filter (· ∈ Ioo (1 : ℝ) (k ^ 2)⁻¹)).card = n - m := by
   have hP0 : P ≠ 0 := fun h0 => by simp [h0] at hP
   have hPd : P.natDegree = n := natDegree_eq_of_degree_eq_some hP
   have hk2 : k ^ 2 < 1 := by nlinarith
@@ -605,8 +632,23 @@ theorem exists_poly_roots_lamePolyEk (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyTy
   have hnd : P.roots.Nodup := Multiset.toFinset_card_eq_card_iff_nodup.1 hRc
   have hAc : A.card = m := by omega
   have hBc : B.card = n - m := by omega
-  refine ⟨P, hPd, hnd, hcard, ?_, ?_, hE⟩
+  refine ⟨hPd, hnd, hcard, ?_, ?_⟩
   · rw [card_filter_eq_card_filter_toFinset hnd]; exact hAc
   · rw [card_filter_eq_card_filter_toFinset hnd]; exact hBc
+
+/-- **29.12.9–29.12.10**: in `E = pre · sn^ρ · P(sn²)` the polynomial `P` of degree `n` has `n`
+simple zeros, `m` of them in `(0, 1)` and `n - m` in `(1, k⁻²)`
+(`roots_of_lamePolyEk_eq`). -/
+theorem exists_poly_roots_lamePolyEk (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+    {n m : ℕ} (hm : m ≤ n) :
+    ∃ P : ℝ[X], P.natDegree = n ∧ P.roots.Nodup ∧ P.roots.card = n ∧
+      (P.roots.filter (· ∈ Ioo (0 : ℝ) 1)).card = m ∧
+      (P.roots.filter (· ∈ Ioo (1 : ℝ) (k ^ 2)⁻¹)).card = n - m ∧
+      ∀ z : ℂ, lamePolyEk t n m z k = t.prefactor z k *
+        (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
+        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) := by
+  obtain ⟨P, hP, hE⟩ := lamePolyEk_eq_prefactor_mul_eval hk0 hk1 t hm
+  obtain ⟨h1, h2, h3, h4, h5⟩ := roots_of_lamePolyEk_eq hk0 hk1 t hm hP hE
+  exact ⟨P, h1, h2, h3, h4, h5, hE⟩
 
 end DLMF.Lame

@@ -19,13 +19,17 @@ regular parameters on a straight vertical line `Re t = c`, adding the residues o
 
 * `pcfBarnesResidue`, `pcfBarnesResidueSum`: the residues of the right pole family and their
   finite sum over the poles crossed by the line `Re t = c`.
-* `pcfBC_F`: the Barnes integrand `Γ(t) Γ(A - 2t) 2^t z^{2t}` with `A = a + 1/2`.
-* `pcfBC_J`: the line integral minus the crossed residues, which is independent of the line.
+* `CylinderBarnesContinuation.integrand`: the Barnes integrand `Γ(t) Γ(A - 2t) 2^t z^{2t}` with
+  `A = a + 1/2`.
+* `CylinderBarnesContinuation.correctedIntegral`: the line integral minus the crossed residues,
+  which is independent of the line.
 
 ## Main results
 
-* `pcfBC_shift`: moving the line from `c₁` to `c₂` picks up the residues of the crossed poles.
-* `pcfBC_U_integral`: DLMF 12.5.8 for all regular parameters, in terms of `pcfBC_F`.
+* `CylinderBarnesContinuation.shift`: moving the line from `c₁` to `c₂` picks up the residues of the
+  crossed poles.
+* `CylinderBarnesContinuation.U_integral`: DLMF 12.5.8 for all regular parameters, in terms of
+  `CylinderBarnesContinuation.integrand`.
 * `pcfU_barnes_continued`, `pcfV_barnes_continued`: DLMF 12.5.8–12.5.9 with crossed-residue
   corrections.
 
@@ -33,7 +37,7 @@ regular parameters on a straight vertical line `Re t = c`, adding the residues o
 
 For `Re A > 0` (`A = 1/2 ± a`) one starts from the straight-line integrals 12.5.8–12.5.9 on a
 line `0 < 2c < Re A` and shifts the line to the right across the poles `t = (A + n)/2` of
-`Γ(A - 2t)` with `Complex.barnesRes_vertical_shift` (removable form
+`Γ(A - 2t)` with `Complex.BarnesResidue.vertical_shift` (removable form
 `Γ(A - 2t + n + 1)/∏_{j<n}(A - 2t + j)`). The general case follows by analytic continuation in
 `a`, since the line integral minus the crossed residues is independent of the line and
 holomorphic in `a` off the poles of `Γ(A)`. The 12.5.9 case follows from 12.5.8 at
@@ -43,6 +47,8 @@ holomorphic in `a` off the poles of `Γ(A)`. The 12.5.9 case follows from 12.5.8
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Residue at the right-pole family t=(A+n)/2; the minus one half Jacobian is retained. -/
@@ -58,7 +64,7 @@ def pcfBarnesResidueSum (second : Bool) (a z : ℂ) (c : ℝ) : ℂ :=
 
 /-- Uniform vertical bounds for `Γ` on a strip `|Re w| ≤ X`: with the factor `|sin(π Re w)|`
 for all heights, and without it for `|Im w| ≥ 1`. -/
-theorem pcfBC_Gamma_bound (X : ℝ) :
+theorem CylinderBarnesContinuation.Gamma_bound (X : ℝ) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ x ∈ Icc (-X) X, ∀ y : ℝ,
       ‖Gamma (x + I*y)‖ * |Real.sin (π*x)| ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2) ∧
       (1 ≤ |y| → ‖Gamma (x + I*y)‖ ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2)) := by
@@ -76,7 +82,7 @@ theorem pcfBC_Gamma_bound (X : ℝ) :
     refine this.trans ?_
     gcongr
     exact le_max_left _ _
-  have h2 := (Complex.barnesRes_norm_Gamma_mul_sin_le (x + I*y)).trans
+  have h2 := (Complex.BarnesResidue.norm_Gamma_mul_sin_le (x + I*y)).trans
       (mul_le_mul_of_nonneg_left h1 Real.pi_pos.le)
   have hw : (π:ℂ)*(x + I*y) = ((π*x:ℝ):ℂ) + ((π*y:ℝ):ℂ)*I := by push_cast; ring
   rw [hw] at h2
@@ -85,7 +91,7 @@ theorem pcfBC_Gamma_bound (X : ℝ) :
     have := Real.exp_pos (-(π*|y|)); linarith
   have hG0 := norm_nonneg (Gamma (x + I*y))
   constructor
-  · have hs := Complex.barnesRes_abs_sin_mul_cosh_le_norm_sin (π*x) (π*y)
+  · have hs := Complex.BarnesResidue.abs_sin_mul_cosh_le_norm_sin (π*x) (π*y)
     have h3 : ‖Gamma (x + I*y)‖ * |Real.sin (π*x)| * (E*E/2) ≤ π * (C0 * (1+|y|)^K * E) := by
       refine le_trans ?_ h2
       rw [mul_assoc]
@@ -98,7 +104,7 @@ theorem pcfBC_Gamma_bound (X : ℝ) :
     have : 0 ≤ π*C0*(1+|y|)^K*E⁻¹ := by positivity
     rw [e]; linarith
   · intro hy
-    have hs := Complex.barnesRes_abs_sinh_le_norm_sin (π*x) (π*y)
+    have hs := Complex.BarnesResidue.abs_sinh_le_norm_sin (π*x) (π*y)
     have hsinh : E*E/4 ≤ |Real.sinh (π*y)| := by
       rw [Real.abs_sinh, abs_mul, abs_of_pos Real.pi_pos, Real.sinh_eq, ← hE2]
       have hu : π ≤ π*|y| := by nlinarith [Real.pi_pos]
@@ -115,16 +121,16 @@ theorem pcfBC_Gamma_bound (X : ℝ) :
     field_simp
 
 /-- Vertical bound for `Γ` on a line `Re w = x` missing the poles. -/
-theorem pcfBC_Gamma_bound_pt {x : ℝ} (hx : ∀ n : ℕ, x ≠ -n) :
+theorem CylinderBarnesContinuation.Gamma_bound_point {x : ℝ} (hx : ∀ n : ℕ, x ≠ -n) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ y : ℝ,
       ‖Gamma (x + I*y)‖ ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2) := by
   by_cases hx0 : 0 < x
   · obtain ⟨C, K, h⟩ := DLMF.Gamma.exists_norm_Gamma_le hx0
     exact ⟨C, K, (norm_nonneg _).trans (by simpa using h 0), h⟩
   · push Not at hx0
-    have hs := Complex.barnesRes_real_sin_ne_zero hx0 hx
+    have hs := Complex.BarnesResidue.real_sin_ne_zero hx0 hx
     have hs0 : 0 < |Real.sin (π*x)| := abs_pos.mpr hs
-    obtain ⟨C, K, hC0, h⟩ := pcfBC_Gamma_bound |x|
+    obtain ⟨C, K, hC0, h⟩ := CylinderBarnesContinuation.Gamma_bound |x|
     refine ⟨C / |Real.sin (π*x)|, K, by positivity, fun y => ?_⟩
     have := (h x ⟨neg_abs_le x, le_abs_self x⟩ y).1
     rw [← le_div_iff₀ hs0] at this
@@ -132,7 +138,8 @@ theorem pcfBC_Gamma_bound_pt {x : ℝ} (hx : ∀ n : ℕ, x ≠ -n) :
     field_simp
 
 /-- `|Γ(x+iy)| ≤ Γ(x)/Γ(x') |Γ(x'+iy)|` for `0 < x ≤ x'`. -/
-theorem pcfBC_norm_Gamma_le_ratio {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ) :
+theorem CylinderBarnesContinuation.norm_Gamma_le_ratio {x x' : ℝ} (hx : 0 < x)
+    (hxx : x ≤ x') (y : ℝ) :
     ‖Gamma (x + I*y)‖ ≤ Real.Gamma x / Real.Gamma x' * ‖Gamma (x' + I*y)‖ := by
   have hx' : 0 < x' := hx.trans_le hxx
   have h1 := DLMF.Gamma.norm_Gamma_sq_eq hx y
@@ -148,7 +155,7 @@ theorem pcfBC_norm_Gamma_le_ratio {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y 
     _ = _ := by field_simp
 
 /-- Uniform vertical bound for `Γ` on a strip `0 < c₁ ≤ Re w ≤ c₂`. -/
-theorem pcfBC_Gamma_bound_strip {c₁ c₂ : ℝ} (hc : 0 < c₁) :
+theorem CylinderBarnesContinuation.Gamma_bound_strip {c₁ c₂ : ℝ} (hc : 0 < c₁) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ x ∈ Icc c₁ c₂, ∀ y : ℝ,
       ‖Gamma (x + I*y)‖ ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2) := by
   by_cases h12 : c₁ ≤ c₂
@@ -161,7 +168,7 @@ theorem pcfBC_Gamma_bound_strip {c₁ c₂ : ℝ} (hc : 0 < c₁) :
     have hC0 : 0 ≤ C := (norm_nonneg _).trans (by simpa using hC 0)
     have hG2 := Real.Gamma_pos_of_pos hc2
     refine ⟨|G| / Real.Gamma c₂ * C, K, by positivity, fun x hx y => ?_⟩
-    refine (pcfBC_norm_Gamma_le_ratio (hc.trans_le hx.1) hx.2 y).trans ?_
+    refine (CylinderBarnesContinuation.norm_Gamma_le_ratio (hc.trans_le hx.1) hx.2 y).trans ?_
     have hGx : Real.Gamma x ≤ |G| := by
       have := hG x hx; rw [Real.norm_eq_abs] at this
       exact (le_abs_self _).trans (this.trans (le_abs_self G))
@@ -173,20 +180,26 @@ theorem pcfBC_Gamma_bound_strip {c₁ c₂ : ℝ} (hc : 0 < c₁) :
   · exact ⟨0, 0, le_rfl, fun x hx => absurd (hx.1.trans hx.2) h12⟩
 
 /-- The Barnes integrand `Γ(t) Γ(A-2t) 2^t z^{2t}` of DLMF 12.5.8 with `A = a + 1/2`. -/
-def pcfBC_F (A z t : ℂ) : ℂ := Gamma t * Gamma (A - 2*t) * 2^t * z^(2*t)
+def CylinderBarnesContinuation.integrand (A z t : ℂ) : ℂ := Gamma t *
+    Gamma (A - 2*t) * 2^t * z^(2*t)
 
-/-- Identity under the stated parameter and domain assumptions: `pcfBC_F (1/2+1*a) z (c + y*I) =
-pcfInt_B a z c y`. -/
-theorem pcfBC_F_eq_B (a z : ℂ) (c y : ℝ) : pcfBC_F (1/2+1*a) z (c + y*I) = pcfInt_B a z c y := by
-  unfold pcfBC_F pcfInt_B; ring_nf
+/-- Identity under the stated parameter and domain assumptions:
+`CylinderBarnesContinuation.integrand (1/2+1*a) z (c + y*I) = CylinderIntegrals.barnesIntegrand a z
+c y`. -/
+theorem CylinderBarnesContinuation.integrand_eq_barnesIntegrand (a z : ℂ) (c y : ℝ) :
+    CylinderBarnesContinuation.integrand (1/2+1*a) z (c + y*I) =
+    CylinderIntegrals.barnesIntegrand a z c y := by
+  unfold CylinderBarnesContinuation.integrand CylinderIntegrals.barnesIntegrand; ring_nf
 
 /-- Pointwise bound for the Barnes integrand from vertical bounds of the two Gamma factors. -/
-theorem pcfBC_norm_F_le {A z : ℂ} (hz : z ≠ 0) (x y : ℝ) {C1 C2 : ℝ} {K1 K2 : ℕ}
+theorem CylinderBarnesContinuation.norm_integrand_le {A z : ℂ} (hz : z ≠ 0) (x y : ℝ)
+    {C1 C2 : ℝ} {K1 K2 : ℕ}
     (hC1 : 0 ≤ C1) (hC2 : 0 ≤ C2)
     (g1 : ‖Gamma (x + I*y)‖ ≤ C1 * (1+|y|)^K1 * Real.exp (-(π*|y|)/2))
     (g2 : ‖Gamma ((A.re - 2*x : ℝ) + I*(A.im - 2*y : ℝ))‖ ≤
       C2 * (1+|A.im - 2*y|)^K2 * Real.exp (-(π*|A.im - 2*y|)/2)) :
-    ‖pcfBC_F A z (x + y*I)‖ ≤ C1 * C2 * (2*(1+|A.im|))^K2 * Real.exp (π*|A.im|/2) *
+    ‖CylinderBarnesContinuation.integrand A z (x + y*I)‖ ≤ C1 * C2 * (2*(1+|A.im|))^K2 *
+        Real.exp (π*|A.im|/2) *
       (2:ℝ)^x * ‖z‖^(2*x) * ((1+|y|)^(K1+K2) * Real.exp (-((3*π/2 - 2*|arg z|)*|y|))) := by
   have e1 : (x:ℂ)+y*I = x + I*y := by ring
   have e2 : A-2*((x:ℂ)+y*I) = ((A.re - 2*x : ℝ) : ℂ) + I*((A.im - 2*y : ℝ) : ℂ) := by
@@ -202,8 +215,8 @@ theorem pcfBC_norm_F_le {A z : ℂ} (hz : z ≠ 0) (x y : ℝ) {C1 C2 : ℝ} {K1
     nlinarith [Real.pi_pos]
   have h2t : ‖(2:ℂ)^((x:ℂ)+y*I)‖ = (2:ℝ)^x := by
     rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_cast, norm_cpow_eq_rpow_re_of_pos (by norm_num)]; simp
-  have hz2 := pcfInt_norm_cpow_two_mul_le hz x y
-  unfold pcfBC_F
+  have hz2 := CylinderIntegrals.norm_cpow_two_mul_le hz x y
+  unfold CylinderBarnesContinuation.integrand
   rw [norm_mul, norm_mul, norm_mul, h2t, e2]
   rw [e1] at hz2 ⊢
   rw [← e1] at g1 hz2 ⊢
@@ -220,48 +233,60 @@ theorem pcfBC_norm_F_le {A z : ℂ} (hz : z ≠ 0) (x y : ℝ) {C1 C2 : ℝ} {K1
     _ = _ := by
         rw [← Real.exp_add, ← Real.exp_add]; ring_nf
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ (pcfBC_F A z) t`. -/
-theorem pcfBC_F_differentiableAt {A z t : ℂ} (hz : z ≠ 0) (ht : 0 < t.re)
-    (hA : ∀ m : ℕ, A - 2*t ≠ -m) : DifferentiableAt ℂ (pcfBC_F A z) t := by
+/-- Differentiability at the specified argument:
+`DifferentiableAt ℂ (CylinderBarnesContinuation.integrand A z) t`. -/
+theorem CylinderBarnesContinuation.integrand_differentiableAt {A z t : ℂ} (hz : z ≠ 0)
+    (ht : 0 < t.re)
+    (hA : ∀ m : ℕ, A - 2*t ≠ -m) : DifferentiableAt ℂ
+        (CylinderBarnesContinuation.integrand A z) t := by
   have ht' : ∀ m : ℕ, t ≠ -m := fun m h => by
     rw [h] at ht; simp at ht; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)]
-  unfold pcfBC_F
+  unfold CylinderBarnesContinuation.integrand
   refine (((differentiableAt_Gamma t ht').mul ((differentiableAt_Gamma _ hA).comp t
     (by fun_prop))).mul (differentiableAt_id.const_cpow (Or.inl two_ne_zero))).mul
     ((differentiableAt_id.const_mul 2).const_cpow (Or.inl hz))
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun A => pcfBC_F A z t) A`. -/
-theorem pcfBC_F_differentiableAt_param {A z t : ℂ} (hA : ∀ m : ℕ, A - 2*t ≠ -m) :
-    DifferentiableAt ℂ (fun A => pcfBC_F A z t) A := by
-  unfold pcfBC_F
+/-- Differentiability at the specified argument:
+`DifferentiableAt ℂ (fun A => CylinderBarnesContinuation.integrand A z t) A`. -/
+theorem CylinderBarnesContinuation.integrand_differentiableAt_param {A z t : ℂ}
+    (hA : ∀ m : ℕ, A - 2*t ≠ -m) :
+    DifferentiableAt ℂ (fun A => CylinderBarnesContinuation.integrand A z t) A := by
+  unfold CylinderBarnesContinuation.integrand
   exact (((differentiableAt_const _).mul ((differentiableAt_Gamma _ hA).comp A
     (by fun_prop))).mul (differentiableAt_const _)).mul (differentiableAt_const _)
 
 /-- Nonvanishing under the stated hypotheses: `∀ m : ℕ, A - 2*((x:ℂ)+y*I) ≠ -m`. -/
-theorem pcfBC_ne_pole {A : ℂ} {x : ℝ} (hav : ∀ n : ℕ, 2*x ≠ A.re + n) (y : ℝ) :
+theorem CylinderBarnesContinuation.ne_pole {A : ℂ} {x : ℝ} (hav : ∀ n : ℕ, 2*x ≠ A.re + n) (y : ℝ) :
     ∀ m : ℕ, A - 2*((x:ℂ)+y*I) ≠ -m := fun m h => by
   have := congrArg re h; simp at this; exact hav m (by linarith)
 
-/-- Continuity of the indicated function: `Continuous fun y : ℝ => pcfBC_F A z (c + y*I)`. -/
-theorem pcfBC_F_continuous {A z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
-    (hav : ∀ n : ℕ, 2*c ≠ A.re + n) : Continuous fun y : ℝ => pcfBC_F A z (c + y*I) :=
+/-- Continuity of the indicated function:
+`Continuous fun y : ℝ => CylinderBarnesContinuation.integrand A z (c + y*I)`. -/
+theorem CylinderBarnesContinuation.integrand_continuous {A z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
+    (hav : ∀ n : ℕ, 2*c ≠ A.re + n) : Continuous fun y : ℝ =>
+        CylinderBarnesContinuation.integrand A z (c + y*I) :=
   continuous_iff_continuousAt.mpr fun y => by
-    have h := (pcfBC_F_differentiableAt hz (by simp [hc]) (pcfBC_ne_pole hav y)).continuousAt
+    have h := (CylinderBarnesContinuation.integrand_differentiableAt hz (by simp [hc])
+        (CylinderBarnesContinuation.ne_pole hav y)).continuousAt
     exact h.comp (f := fun y : ℝ => (c:ℂ) + y*I) (by fun_prop)
 
 /-- The Barnes integrand is integrable on every line `Re t = c > 0` missing the poles. -/
-theorem pcfBC_F_integrable {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c)
-    (hav : ∀ n : ℕ, 2*c ≠ A.re + n) : Integrable fun y : ℝ => pcfBC_F A z (c + y*I) := by
+theorem CylinderBarnesContinuation.integrand_integrable {A z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c)
+    (hav : ∀ n : ℕ, 2*c ≠ A.re + n) : Integrable fun y : ℝ =>
+        CylinderBarnesContinuation.integrand A z (c + y*I) := by
   obtain ⟨C1, K1, h1⟩ := DLMF.Gamma.exists_norm_Gamma_le hc
   have hC1 : 0 ≤ C1 := (norm_nonneg _).trans (by simpa using h1 0)
-  obtain ⟨C2, K2, hC2, h2⟩ := pcfBC_Gamma_bound_pt (x := A.re - 2*c)
+  obtain ⟨C2, K2, hC2, h2⟩ := CylinderBarnesContinuation.Gamma_bound_point (x := A.re - 2*c)
     (fun n h => hav n (by linarith))
   refine ((DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (c := 3*π/2 - 2*|arg z|)
-    (by linarith) (K1+K2)).const_mul _).mono' (pcfBC_F_continuous hz0 hc hav).aestronglyMeasurable
-    (Eventually.of_forall fun y => pcfBC_norm_F_le hz0 c y hC1 hC2 (h1 y) (h2 _))
+    (by linarith) (K1+K2)).const_mul _).mono'
+        (CylinderBarnesContinuation.integrand_continuous hz0 hc hav).aestronglyMeasurable
+    (Eventually.of_forall fun y =>
+        CylinderBarnesContinuation.norm_integrand_le hz0 c y hC1 hC2 (h1 y) (h2 _))
 
 /-- `‖z‖^{2x} ≤ ‖z‖^{2c₁} + ‖z‖^{2c₂}` on `[c₁, c₂]`. -/
-theorem pcfBC_rpow_le {r : ℝ} (hr : 0 < r) {c₁ c₂ x : ℝ} (hx : x ∈ Icc c₁ c₂) :
+theorem CylinderBarnesContinuation.rpow_le {r : ℝ} (hr : 0 < r) {c₁ c₂ x : ℝ} (hx : x ∈ Icc c₁ c₂) :
     r^(2*x) ≤ r^(2*c₁) + r^(2*c₂) := by
   rcases le_total 1 r with h1 | h1
   · have := Real.rpow_le_rpow_of_exponent_le h1 (show 2*x ≤ 2*c₂ by linarith [hx.2])
@@ -271,22 +296,26 @@ theorem pcfBC_rpow_le {r : ℝ} (hr : 0 < r) {c₁ c₂ x : ℝ} (hx : x ∈ Icc
 
 open scoped Interval in
 /-- Horizontal cross-sections of the Barnes integrand vanish at `±i∞`. -/
-theorem pcfBC_F_horizontal {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem CylinderBarnesContinuation.integrand_horizontal {A z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc : 0 < c₁) (h12 : c₁ ≤ c₂) :
-    Tendsto (fun T : ℝ => ∫ x in c₁..c₂, pcfBC_F A z (x + T*I)) atTop (𝓝 0) ∧
-    Tendsto (fun T : ℝ => ∫ x in c₁..c₂, pcfBC_F A z (x + T*I)) atBot (𝓝 0) := by
-  obtain ⟨C1, K1, hC1, h1⟩ := pcfBC_Gamma_bound_strip (c₂ := c₂) hc
-  obtain ⟨C2, K2, hC2, h2⟩ := pcfBC_Gamma_bound (|A.re| + 2*c₂)
+    Tendsto (fun T : ℝ => ∫ x in c₁..c₂,
+        CylinderBarnesContinuation.integrand A z (x + T*I)) atTop (𝓝 0) ∧
+    Tendsto (fun T : ℝ => ∫ x in c₁..c₂, CylinderBarnesContinuation.integrand A z (x + T*I))
+        atBot (𝓝 0) := by
+  obtain ⟨C1, K1, hC1, h1⟩ := CylinderBarnesContinuation.Gamma_bound_strip (c₂ := c₂) hc
+  obtain ⟨C2, K2, hC2, h2⟩ := CylinderBarnesContinuation.Gamma_bound (|A.re| + 2*c₂)
   set b : ℝ := 3*π/2 - 2*|arg z|
   have hb : 0 < b := by simp only [b]; linarith
   have hzn : 0 < ‖z‖ := norm_pos_iff.mpr hz0
   set M : ℝ := C1 * C2 * (2*(1+|A.im|))^K2 * Real.exp (π*|A.im|/2) * (2:ℝ)^c₂ *
     (‖z‖^(2*c₁) + ‖z‖^(2*c₂))
   have hM : 0 ≤ M := by positivity
-  have key : ∀ T : ℝ, 1 ≤ |A.im - 2*T| → ‖∫ x in c₁..c₂, pcfBC_F A z (x + T*I)‖ ≤
+  have key : ∀ T : ℝ, 1 ≤ |A.im - 2*T| → ‖∫ x in c₁..c₂,
+      CylinderBarnesContinuation.integrand A z (x + T*I)‖ ≤
       (c₂ - c₁) * (M * ((1 + |T|) ^ (K1+K2) * Real.exp (-(b * |T|)))) := by
     intro T hT
-    have hpt : ∀ x ∈ Ι c₁ c₂, ‖pcfBC_F A z (x + T*I)‖ ≤
+    have hpt : ∀ x ∈ Ι c₁ c₂, ‖CylinderBarnesContinuation.integrand A z (x + T*I)‖ ≤
         M * ((1 + |T|) ^ (K1+K2) * Real.exp (-(b * |T|))) := by
       intro x hx
       rw [uIoc_of_le h12] at hx
@@ -294,15 +323,16 @@ theorem pcfBC_F_horizontal {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {
       have hX : A.re - 2*x ∈ Icc (-(|A.re| + 2*c₂)) (|A.re| + 2*c₂) := by
         constructor <;> linarith [abs_le.mp (le_refl |A.re|), le_abs_self A.re, neg_abs_le A.re,
           hxI.1, hxI.2]
-      refine (pcfBC_norm_F_le hz0 x T hC1 hC2 (h1 x hxI T) ((h2 _ hX _).2 hT)).trans ?_
+      refine (CylinderBarnesContinuation.norm_integrand_le hz0 x T hC1 hC2 (h1 x hxI T)
+          ((h2 _ hX _).2 hT)).trans ?_
       have h2x : (2:ℝ)^x ≤ (2:ℝ)^c₂ := Real.rpow_le_rpow_of_exponent_le (by norm_num) hxI.2
-      have hzx := pcfBC_rpow_le hzn hxI
+      have hzx := CylinderBarnesContinuation.rpow_le hzn hxI
       simp only [M, b]
       gcongr
     have := intervalIntegral.norm_integral_le_of_norm_le_const hpt
     rw [abs_of_nonneg (sub_nonneg.mpr h12)] at this
     linarith
-  have hlim := Complex.barnesRes_tendsto_poly_exp hb (K1+K2)
+  have hlim := Complex.BarnesResidue.tendsto_one_add_pow_mul_exp_neg hb (K1+K2)
   have l1 := ((hlim.comp tendsto_abs_atTop_atTop).const_mul M).const_mul (c₂ - c₁)
   have l2 := ((hlim.comp tendsto_abs_atBot_atTop).const_mul M).const_mul (c₂ - c₁)
   simp only [mul_zero] at l1 l2
@@ -319,36 +349,43 @@ theorem pcfBC_F_horizontal {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {
       linarith [neg_abs_le A.im, abs_nonneg A.im])
 
 /-- Shifting the Barnes line when no pole `t = (A+n)/2` lies in the closed strip. -/
-theorem pcfBC_shift_none {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem CylinderBarnesContinuation.shift_none {A z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc : 0 < c₁) (h12 : c₁ < c₂) (hno : ∀ n : ℕ, (A.re + n)/2 ∉ Icc c₁ c₂) :
-    (∫ y : ℝ, pcfBC_F A z (c₂ + y*I)) = ∫ y : ℝ, pcfBC_F A z (c₁ + y*I) := by
+    (∫ y : ℝ, CylinderBarnesContinuation.integrand A z (c₂ + y*I)) = ∫ y : ℝ,
+        CylinderBarnesContinuation.integrand A z (c₁ + y*I) := by
   have hav : ∀ c ∈ Icc c₁ c₂, ∀ n : ℕ, 2*c ≠ A.re + n := fun c hcI n h =>
     hno n (by rw [show (A.re + n)/2 = c by linarith]; exact hcI)
-  obtain ⟨ht, hb⟩ := pcfBC_F_horizontal (A := A) hz0 hz hc h12.le
-  refine Complex.barnesRes_vertical_shift_of_differentiableOn h12 (fun t htS => ?_)
-    (pcfBC_F_integrable hz0 hz hc (hav c₁ ⟨le_rfl, h12.le⟩))
-    (pcfBC_F_integrable hz0 hz (hc.trans h12) (hav c₂ ⟨h12.le, le_rfl⟩)) ht hb
+  obtain ⟨ht, hb⟩ := CylinderBarnesContinuation.integrand_horizontal (A := A) hz0 hz hc h12.le
+  refine Complex.BarnesResidue.vertical_shift_of_differentiableOn h12 (fun t htS => ?_)
+    (CylinderBarnesContinuation.integrand_integrable hz0 hz hc (hav c₁ ⟨le_rfl, h12.le⟩))
+    (CylinderBarnesContinuation.integrand_integrable hz0 hz (hc.trans h12)
+        (hav c₂ ⟨h12.le, le_rfl⟩)) ht hb
   have htS' : t.re ∈ Icc c₁ c₂ := htS
-  refine (pcfBC_F_differentiableAt hz0 (hc.trans_le htS'.1) fun m h => ?_).differentiableWithinAt
+  refine (CylinderBarnesContinuation.integrand_differentiableAt hz0 (hc.trans_le htS'.1) fun m h =>
+      ?_).differentiableWithinAt
   have := congrArg re h; simp at this
   exact hno m (by rw [show (A.re + m)/2 = t.re by linarith]; exact htS')
 
 /-- The residue of the Barnes integrand at `t = (A+n)/2` (with the `-1/2` Jacobian). -/
-def pcfBC_res (A z : ℂ) (n : ℕ) : ℂ :=
+def CylinderBarnesContinuation.residue (A z : ℂ) (n : ℕ) : ℂ :=
   (-1)^(n+1)/(2*(n.factorial:ℂ)) * Gamma ((A+n)/2) * 2^((A+n)/2) * z^(A+n)
 
 /-- The removable-singularity form `(t - (A+n)/2) F(t)`. -/
-def pcfBC_phi (A z : ℂ) (n : ℕ) (t : ℂ) : ℂ :=
+def CylinderBarnesContinuation.removableIntegrand (A z : ℂ) (n : ℕ) (t : ℂ) : ℂ :=
   -(1/2) * Gamma t * Gamma (A - 2*t + n + 1) / (∏ j ∈ Finset.range n, (A - 2*t + j)) *
     2^t * z^(2*t)
 
-/-- Identity under the stated parameter and domain assumptions: `pcfBC_phi A z n ((A+n)/2) =
-pcfBC_res A z n`. -/
-theorem pcfBC_phi_pole (A z : ℂ) (n : ℕ) : pcfBC_phi A z n ((A+n)/2) = pcfBC_res A z n := by
-  unfold pcfBC_phi pcfBC_res
+/-- Identity under the stated parameter and domain assumptions:
+`CylinderBarnesContinuation.removableIntegrand A z n ((A+n)/2) = CylinderBarnesContinuation.residue
+A z n`. -/
+theorem CylinderBarnesContinuation.removableIntegrand_pole (A z : ℂ) (n : ℕ) :
+    CylinderBarnesContinuation.removableIntegrand A z n ((A+n)/2) =
+    CylinderBarnesContinuation.residue A z n := by
+  unfold CylinderBarnesContinuation.removableIntegrand CylinderBarnesContinuation.residue
   have h1 : A - 2*((A+n)/2) + n + 1 = 1 := by ring
   have h2 : ∏ j ∈ Finset.range n, (A - 2*((A+n)/2) + j) = (-1)^n * n.factorial := by
-    rw [← Complex.barnesRes_prod_sub_nat]; exact Finset.prod_congr rfl fun j _ => by ring
+    rw [← Complex.BarnesResidue.prod_sub_nat]; exact Finset.prod_congr rfl fun j _ => by ring
   have h3 : (2:ℂ)*((A+n)/2) = A + n := by ring
   rw [h1, h2, h3, Gamma_one]
   have hinv : ((-1:ℂ)^n)⁻¹ = (-1)^n := by rw [← inv_pow, inv_neg, inv_one]
@@ -358,33 +395,36 @@ theorem pcfBC_phi_pole (A z : ℂ) (n : ℕ) : pcfBC_phi A z n ((A+n)/2) = pcfBC
   ring
 
 /-- `φ(t)/(t - p) = F(t)` away from the pole `p = (A+n)/2` and from the poles of index `< n`. -/
-theorem pcfBC_phi_div {A z t : ℂ} {n : ℕ} (ht : t ≠ (A+n)/2)
+theorem CylinderBarnesContinuation.removableIntegrand_div {A z t : ℂ} {n : ℕ} (ht : t ≠ (A+n)/2)
     (hj : ∀ j : ℕ, j < n → A - 2*t + j ≠ 0) :
-    pcfBC_phi A z n t / (t - (A+n)/2) = pcfBC_F A z t := by
+    CylinderBarnesContinuation.removableIntegrand A z n t / (t - (A+n)/2) =
+        CylinderBarnesContinuation.integrand A z t := by
   have hn : A - 2*t + n ≠ 0 := fun h => ht (by linear_combination -h/2)
   have hall : ∀ j : ℕ, j ≤ n → A - 2*t + j ≠ 0 := fun j hjn => by
     rcases lt_or_eq_of_le hjn with h | rfl
     · exact hj j h
     · exact hn
-  have hG := Complex.barnesRes_Gamma_add_nat_succ (A - 2*t) n hall
+  have hG := Complex.BarnesResidue.Gamma_add_nat_succ (A - 2*t) n hall
   rw [Finset.prod_range_succ] at hG
   have hP : ∏ j ∈ Finset.range n, (A - 2*t + j) ≠ 0 :=
     Finset.prod_ne_zero_iff.mpr fun j hj' => hj j (Finset.mem_range.mp hj')
   have hd : t - (A+n)/2 ≠ 0 := sub_ne_zero.mpr ht
-  unfold pcfBC_phi pcfBC_F
+  unfold CylinderBarnesContinuation.removableIntegrand CylinderBarnesContinuation.integrand
   rw [hG, show A - 2*t + (n:ℂ) = -2*(t - (A+n)/2) by ring]
   have hd' : 2*t - (A+n) ≠ 0 := fun h => hd (by linear_combination h/2)
   field_simp
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ (pcfBC_phi A z n) t`. -/
-theorem pcfBC_phi_differentiableAt {A z t : ℂ} {n : ℕ} (hz : z ≠ 0) (ht : 0 < t.re)
+/-- Differentiability at the specified argument:
+`DifferentiableAt ℂ (CylinderBarnesContinuation.removableIntegrand A z n) t`. -/
+theorem CylinderBarnesContinuation.removableIntegrand_differentiableAt {A z t : ℂ} {n : ℕ}
+    (hz : z ≠ 0) (ht : 0 < t.re)
     (hA : ∀ m : ℕ, A - 2*t + n + 1 ≠ -m) (hj : ∀ j : ℕ, j < n → A - 2*t + j ≠ 0) :
-    DifferentiableAt ℂ (pcfBC_phi A z n) t := by
+    DifferentiableAt ℂ (CylinderBarnesContinuation.removableIntegrand A z n) t := by
   have ht' : ∀ m : ℕ, t ≠ -m := fun m h => by
     rw [h] at ht; simp at ht; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)]
   have hP : ∏ j ∈ Finset.range n, (A - 2*t + j) ≠ 0 :=
     Finset.prod_ne_zero_iff.mpr fun j hj' => hj j (Finset.mem_range.mp hj')
-  unfold pcfBC_phi
+  unfold CylinderBarnesContinuation.removableIntegrand
   refine ((((((differentiableAt_const _).mul (differentiableAt_Gamma t ht')).mul
     ((differentiableAt_Gamma _ hA).comp t (by fun_prop))).div
     (by fun_prop) hP)).mul
@@ -392,11 +432,13 @@ theorem pcfBC_phi_differentiableAt {A z t : ℂ} {n : ℕ} (hz : z ≠ 0) (ht : 
     ((differentiableAt_id.const_mul 2).const_cpow (Or.inl hz))
 
 /-- Shifting the Barnes line across exactly one pole `t = (A+n)/2`. -/
-theorem pcfBC_shift_one {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem CylinderBarnesContinuation.shift_one {A z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc : 0 < c₁) {n : ℕ} (hn₁ : c₁ < (A.re + n)/2) (hn₂ : (A.re + n)/2 < c₂)
     (hno : ∀ m : ℕ, m ≠ n → (A.re + m)/2 ∉ Icc c₁ c₂) :
-    (∫ y : ℝ, pcfBC_F A z (c₂ + y*I)) - (∫ y : ℝ, pcfBC_F A z (c₁ + y*I)) =
-      2*π*pcfBC_res A z n := by
+    (∫ y : ℝ, CylinderBarnesContinuation.integrand A z (c₂ + y*I)) -
+        (∫ y : ℝ, CylinderBarnesContinuation.integrand A z (c₁ + y*I)) =
+      2*π*CylinderBarnesContinuation.residue A z n := by
   have h12 : c₁ < c₂ := hn₁.trans hn₂
   set p : ℂ := (A+n)/2 with hp
   have hpre : p.re = (A.re + n)/2 := by simp [hp]
@@ -406,16 +448,18 @@ theorem pcfBC_shift_one {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c�
     intro t htS j hjn h
     have := congrArg re h; simp at this
     exact hno j hjn.ne (by rw [show (A.re + j)/2 = t.re by linarith]; exact htS)
-  have hdiv : ∀ t : ℂ, t.re ∈ Icc c₁ c₂ → t ≠ p → pcfBC_phi A z n t / (t - p) = pcfBC_F A z t :=
-    fun t htS htp => pcfBC_phi_div htp (hj t htS)
+  have hdiv : ∀ t : ℂ, t.re ∈ Icc c₁ c₂ → t ≠ p →
+      CylinderBarnesContinuation.removableIntegrand A z n t / (t - p) =
+      CylinderBarnesContinuation.integrand A z t :=
+    fun t htS htp => CylinderBarnesContinuation.removableIntegrand_div htp (hj t htS)
   have hav : ∀ c ∈ Icc c₁ c₂, c ≠ (A.re + n)/2 → ∀ m : ℕ, 2*c ≠ A.re + m := by
     intro c hcI hcn m h
     by_cases hm : m = n
     · subst hm; exact hcn (by linarith)
     · exact hno m hm (by rw [show (A.re + m)/2 = c by linarith]; exact hcI)
   have hline : ∀ c ∈ Icc c₁ c₂, c ≠ (A.re + n)/2 →
-      (fun y : ℝ => pcfBC_phi A z n (c + y*I) / (c + y*I - p)) =
-        fun y : ℝ => pcfBC_F A z (c + y*I) := by
+      (fun y : ℝ => CylinderBarnesContinuation.removableIntegrand A z n (c + y*I) / (c + y*I - p)) =
+        fun y : ℝ => CylinderBarnesContinuation.integrand A z (c + y*I) := by
     intro c hcI hcn
     funext y
     exact hdiv _ (by simpa using hcI) (fun h => hcn (by
@@ -424,99 +468,119 @@ theorem pcfBC_shift_one {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c�
   have h2I : c₂ ∈ Icc c₁ c₂ := ⟨h12.le, le_rfl⟩
   have hn1 : c₁ ≠ (A.re + n)/2 := hn₁.ne
   have hn2 : c₂ ≠ (A.re + n)/2 := hn₂.ne'
-  obtain ⟨ht, hb⟩ := pcfBC_F_horizontal (A := A) hz0 hz hc h12.le
-  have hH : ∀ T : ℝ, T ≠ A.im/2 → (∫ x in c₁..c₂, pcfBC_phi A z n (x + T*I) / (x + T*I - p)) =
-      ∫ x in c₁..c₂, pcfBC_F A z (x + T*I) := by
+  obtain ⟨ht, hb⟩ := CylinderBarnesContinuation.integrand_horizontal (A := A) hz0 hz hc h12.le
+  have hH : ∀ T : ℝ, T ≠ A.im/2 →
+      (∫ x in c₁..c₂, CylinderBarnesContinuation.removableIntegrand A z n (x + T*I) /
+      (x + T*I - p)) =
+      ∫ x in c₁..c₂, CylinderBarnesContinuation.integrand A z (x + T*I) := by
     intro T hT
     refine intervalIntegral.integral_congr fun x hx => ?_
     rw [uIcc_of_le h12.le] at hx
     exact hdiv _ (by simpa using hx) (fun h => hT (by
       have := congrArg im h; simp at this; rw [this, hpim]))
-  have hΦ : DifferentiableOn ℂ (pcfBC_phi A z n) (re ⁻¹' Icc c₁ c₂) := by
+  have hΦ : DifferentiableOn ℂ (CylinderBarnesContinuation.removableIntegrand A z n)
+      (re ⁻¹' Icc c₁ c₂) := by
     intro t htS
     have htS' : t.re ∈ Icc c₁ c₂ := htS
-    refine (pcfBC_phi_differentiableAt hz0 (hc.trans_le htS'.1) (fun m h => ?_)
+    refine (CylinderBarnesContinuation.removableIntegrand_differentiableAt hz0 (hc.trans_le htS'.1)
+        (fun m h => ?_)
       (hj t htS')).differentiableWithinAt
     have := congrArg re h; simp at this
     exact hno (n+1+m) (by omega) (by
       rw [show (A.re + ((n+1+m : ℕ) : ℝ))/2 = t.re by push_cast; linarith]; exact htS')
-  have key := Complex.barnesRes_vertical_shift (p := p)
+  have key := Complex.BarnesResidue.vertical_shift (p := p)
     (by rw [hpre]; exact hn₁) (by rw [hpre]; exact hn₂) hΦ
-    (by rw [hline c₁ h1I hn1]; exact pcfBC_F_integrable hz0 hz hc (hav c₁ h1I hn1))
-    (by rw [hline c₂ h2I hn2]; exact pcfBC_F_integrable hz0 hz (hc.trans h12) (hav c₂ h2I hn2))
+    (by rw [hline c₁ h1I hn1];
+        exact CylinderBarnesContinuation.integrand_integrable hz0 hz hc (hav c₁ h1I hn1))
+    (by rw [hline c₂ h2I hn2];
+        exact CylinderBarnesContinuation.integrand_integrable hz0 hz (hc.trans h12)
+          (hav c₂ h2I hn2))
     (ht.congr' (by
       filter_upwards [eventually_gt_atTop (A.im/2)] with T hT
       exact (hH T hT.ne').symm))
     (hb.congr' (by
       filter_upwards [eventually_lt_atBot (A.im/2)] with T hT
       exact (hH T hT.ne).symm))
-  rw [hline c₁ h1I hn1, hline c₂ h2I hn2, hp, pcfBC_phi_pole] at key
+  rw [hline c₁ h1I hn1, hline c₂ h2I hn2, hp,
+      CylinderBarnesContinuation.removableIntegrand_pole] at key
   exact key
 
 /-- The number of poles `t = (A+n)/2` to the left of the line `Re t = c`. -/
-def pcfBC_N (A : ℂ) (c : ℝ) : ℕ := (⌈2*c - A.re⌉).toNat
+def CylinderBarnesContinuation.poleCount (A : ℂ) (c : ℝ) : ℕ := (⌈2*c - A.re⌉).toNat
 
-/-- Estimate under the stated parameter and domain assumptions: `n < pcfBC_N A c ↔ (A.re + n)/2 <
-c`. -/
-theorem pcfBC_lt_N {A : ℂ} {c : ℝ} {n : ℕ} : n < pcfBC_N A c ↔ (A.re + n)/2 < c := by
-  unfold pcfBC_N
+/-- Estimate under the stated parameter and domain assumptions:
+`n < CylinderBarnesContinuation.poleCount A c ↔ (A.re + n)/2 < c`. -/
+theorem CylinderBarnesContinuation.lt_poleCount {A : ℂ} {c : ℝ} {n : ℕ} : n <
+    CylinderBarnesContinuation.poleCount A c ↔ (A.re + n)/2 < c := by
+  unfold CylinderBarnesContinuation.poleCount
   rw [Int.lt_toNat, Int.lt_ceil]
   push_cast
   constructor <;> intro h <;> linarith
 
-/-- Estimate under the stated parameter and domain assumptions: `pcfBC_N A c₁ ≤ pcfBC_N A c₂`. -/
-theorem pcfBC_N_mono {A : ℂ} {c₁ c₂ : ℝ} (h : c₁ ≤ c₂) : pcfBC_N A c₁ ≤ pcfBC_N A c₂ := by
-  unfold pcfBC_N
+/-- Estimate under the stated parameter and domain assumptions:
+`CylinderBarnesContinuation.poleCount A c₁ ≤ CylinderBarnesContinuation.poleCount A c₂`. -/
+theorem CylinderBarnesContinuation.poleCount_mono {A : ℂ} {c₁ c₂ : ℝ} (h : c₁ ≤ c₂) :
+    CylinderBarnesContinuation.poleCount A c₁ ≤ CylinderBarnesContinuation.poleCount A c₂ := by
+  unfold CylinderBarnesContinuation.poleCount
   exact Int.toNat_le_toNat (Int.ceil_mono (by linarith))
 
 /-- Moving the Barnes line from `c₁` to `c₂` picks up the residues of the crossed poles. -/
-theorem pcfBC_shift {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem CylinderBarnesContinuation.shift {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc : 0 < c₁) (h12 : c₁ ≤ c₂) (hav₁ : ∀ n : ℕ, 2*c₁ ≠ A.re + n)
     (hav₂ : ∀ n : ℕ, 2*c₂ ≠ A.re + n) :
-    (∫ y : ℝ, pcfBC_F A z (c₂ + y*I)) - 2*π*∑ n ∈ Finset.range (pcfBC_N A c₂), pcfBC_res A z n =
-      (∫ y : ℝ, pcfBC_F A z (c₁ + y*I)) -
-        2*π*∑ n ∈ Finset.range (pcfBC_N A c₁), pcfBC_res A z n := by
-  obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le (pcfBC_N_mono (A := A) h12)
+    (∫ y : ℝ, CylinderBarnesContinuation.integrand A z (c₂ + y*I)) - 2*π*∑ n ∈
+        Finset.range (CylinderBarnesContinuation.poleCount A c₂),
+        CylinderBarnesContinuation.residue A z n =
+      (∫ y : ℝ, CylinderBarnesContinuation.integrand A z (c₁ + y*I)) -
+        2*π*∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount A c₁),
+            CylinderBarnesContinuation.residue A z n := by
+  obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le (CylinderBarnesContinuation.poleCount_mono (A := A) h12)
   induction k generalizing c₁ with
   | zero =>
     rcases eq_or_lt_of_le h12 with h | h
     · subst h; rfl
     rw [add_zero] at hk
-    rw [hk, pcfBC_shift_none hz0 hz hc h (fun n hn => ?_)]
+    rw [hk, CylinderBarnesContinuation.shift_none hz0 hz hc h (fun n hn => ?_)]
     have h1 : (A.re + n)/2 ≠ c₁ := fun h' => hav₁ n (by linarith)
     have h2 : (A.re + n)/2 ≠ c₂ := fun h' => hav₂ n (by linarith)
-    have hlt2 : n < pcfBC_N A c₂ := pcfBC_lt_N.mpr (lt_of_le_of_ne hn.2 h2)
-    have hlt1 : ¬ n < pcfBC_N A c₁ := fun h' => by
-      have := pcfBC_lt_N.mp h'; linarith [hn.1]
+    have hlt2 : n < CylinderBarnesContinuation.poleCount A c₂ :=
+        CylinderBarnesContinuation.lt_poleCount.mpr (lt_of_le_of_ne hn.2 h2)
+    have hlt1 : ¬ n < CylinderBarnesContinuation.poleCount A c₁ := fun h' => by
+      have := CylinderBarnesContinuation.lt_poleCount.mp h'; linarith [hn.1]
     rw [hk] at hlt2; exact hlt1 hlt2
   | succ k ih =>
-    set n₀ := pcfBC_N A c₁ with hn₀
+    set n₀ := CylinderBarnesContinuation.poleCount A c₁ with hn₀
     have hp1 : c₁ < (A.re + n₀)/2 := by
-      have h1 : ¬ n₀ < pcfBC_N A c₁ := lt_irrefl _
-      rw [pcfBC_lt_N] at h1
+      have h1 : ¬ n₀ < CylinderBarnesContinuation.poleCount A c₁ := lt_irrefl _
+      rw [CylinderBarnesContinuation.lt_poleCount] at h1
       exact lt_of_le_of_ne (not_lt.mp h1) (fun h' => hav₁ n₀ (by linarith))
-    have hp2 : (A.re + n₀)/2 < c₂ := pcfBC_lt_N.mp (by omega)
+    have hp2 : (A.re + n₀)/2 < c₂ := CylinderBarnesContinuation.lt_poleCount.mp (by omega)
     -- poles of index `< n₀` are left of `c₁`
-    have hleft : ∀ m : ℕ, m < n₀ → (A.re + m)/2 < c₁ := fun m hm => pcfBC_lt_N.mp hm
+    have hleft : ∀ m : ℕ, m < n₀ → (A.re + m)/2 < c₁ := fun m hm =>
+        CylinderBarnesContinuation.lt_poleCount.mp hm
     by_cases hk0 : k = 0
     · subst hk0
-      have hsh := pcfBC_shift_one hz0 hz hc hp1 hp2 (n := n₀) (fun m hm hmI => by
+      have hsh := CylinderBarnesContinuation.shift_one hz0 hz hc hp1 hp2 (n := n₀)
+          (fun m hm hmI => by
         have h1 : (A.re + m)/2 ≠ c₂ := fun h' => hav₂ m (by linarith)
-        have hlt2 : m < pcfBC_N A c₂ := pcfBC_lt_N.mpr (lt_of_le_of_ne hmI.2 h1)
+        have hlt2 : m < CylinderBarnesContinuation.poleCount A c₂ :=
+            CylinderBarnesContinuation.lt_poleCount.mpr (lt_of_le_of_ne hmI.2 h1)
         rcases lt_or_gt_of_ne hm with h' | h'
         · linarith [hleft m h', hmI.1]
         · omega)
       rw [hk, Finset.sum_range_succ]
       linear_combination hsh
     · set c' : ℝ := (A.re + n₀)/2 + 1/4 with hc'
-      have hNc' : pcfBC_N A c' = n₀ + 1 := by
+      have hNc' : CylinderBarnesContinuation.poleCount A c' = n₀ + 1 := by
         apply le_antisymm
         · by_contra h'
-          have := pcfBC_lt_N.mp (show n₀ + 1 < pcfBC_N A c' by omega)
+          have := CylinderBarnesContinuation.lt_poleCount.mp
+              (show n₀ + 1 < CylinderBarnesContinuation.poleCount A c' by omega)
           push_cast at this; linarith
-        · exact pcfBC_lt_N.mpr (by linarith)
+        · exact CylinderBarnesContinuation.lt_poleCount.mpr (by linarith)
       have hc'2 : c' ≤ c₂ := by
-        have := pcfBC_lt_N.mp (show n₀ + 1 < pcfBC_N A c₂ by omega)
+        have := CylinderBarnesContinuation.lt_poleCount.mp
+            (show n₀ + 1 < CylinderBarnesContinuation.poleCount A c₂ by omega)
         push_cast at this; linarith
       have hav' : ∀ n : ℕ, 2*c' ≠ A.re + n := by
         intro n h'
@@ -526,7 +590,8 @@ theorem pcfBC_shift {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c�
           · left; exact_mod_cast h4
           · right; exact_mod_cast h4
         rcases h3 with h3 | h3 <;> linarith
-      have hsh := pcfBC_shift_one hz0 hz hc hp1 (show (A.re + n₀)/2 < c' by linarith)
+      have hsh := CylinderBarnesContinuation.shift_one hz0 hz hc hp1
+          (show (A.re + n₀)/2 < c' by linarith)
         (n := n₀) (fun m hm hmI => by
           rcases lt_or_gt_of_ne hm with h' | h'
           · linarith [hleft m h', hmI.1]
@@ -537,11 +602,13 @@ theorem pcfBC_shift {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c�
       linear_combination hsh
 
 /-- DLMF 12.5.8 with crossed residues, in the regime `Re A > 0` (shift from a small line). -/
-theorem pcfBC_U_pos {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c)
+theorem CylinderBarnesContinuation.U_pos {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4)
+    {c : ℝ} (hc : 0 < c)
     (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) (hA : 0 < (1/2+1*a).re) :
-    (∫ y : ℝ, pcfBC_F (1/2+1*a) z (c + y*I)) =
+    (∫ y : ℝ, CylinderBarnesContinuation.integrand (1/2+1*a) z (c + y*I)) =
       2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z +
-        ∑ n ∈ Finset.range (pcfBC_N (1/2+1*a) c), pcfBC_res (1/2+1*a) z n) := by
+        ∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount (1/2+1*a) c),
+            CylinderBarnesContinuation.residue (1/2+1*a) z n) := by
   set A : ℂ := 1/2+1*a with hAdef
   set c₀ : ℝ := min c (A.re/2) / 2 with hc₀
   have hm1 := min_le_left c (A.re/2)
@@ -552,45 +619,57 @@ theorem pcfBC_U_pos {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ
   have hc₀A : 2*c₀ < A.re := by simp only [hc₀]; linarith
   have hav₀ : ∀ n : ℕ, 2*c₀ ≠ A.re + n := fun n h => by
     linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
-  have hN₀ : pcfBC_N A c₀ = 0 := by
+  have hN₀ : CylinderBarnesContinuation.poleCount A c₀ = 0 := by
     by_contra h
-    have := pcfBC_lt_N.mp (show 0 < pcfBC_N A c₀ by omega)
+    have := CylinderBarnesContinuation.lt_poleCount.mp
+        (show 0 < CylinderBarnesContinuation.poleCount A c₀ by omega)
     push_cast at this; linarith
-  have hsh := pcfBC_shift hz0 hz hc₀0 hc₀c hav₀ hav
+  have hsh := CylinderBarnesContinuation.shift hz0 hz hc₀0 hc₀c hav₀ hav
   rw [hN₀, Finset.range_zero, Finset.sum_empty, mul_zero, sub_zero] at hsh
-  have hB : (∫ y : ℝ, pcfBC_F A z (c₀ + y*I)) = ∫ y, pcfInt_B a z c₀ y := by
-    simp only [hAdef, pcfBC_F_eq_B]
+  have hB : (∫ y : ℝ, CylinderBarnesContinuation.integrand A z (c₀ + y*I)) = ∫ y,
+      CylinderIntegrals.barnesIntegrand a z c₀ y := by
+    simp only [hAdef, CylinderBarnesContinuation.integrand_eq_barnesIntegrand]
   have hca : 2*c₀ < 1/2 + a.re := by simpa [hAdef] using hc₀A
-  rw [hB, pcfInt_B_integral a hz0 hz hc₀0 hca] at hsh
+  rw [hB, CylinderIntegrals.barnesIntegrand_integral a hz0 hz hc₀0 hca] at hsh
   linear_combination hsh
 
 /-- The line integral minus the crossed residues; independent of the line. -/
-def pcfBC_J (A z : ℂ) (c : ℝ) : ℂ :=
-  (∫ y : ℝ, pcfBC_F A z (c + y*I)) - 2*π*∑ n ∈ Finset.range (pcfBC_N A c), pcfBC_res A z n
+def CylinderBarnesContinuation.correctedIntegral (A z : ℂ) (c : ℝ) : ℂ :=
+  (∫ y : ℝ, CylinderBarnesContinuation.integrand A z (c + y*I)) - 2*π*∑ n ∈
+      Finset.range (CylinderBarnesContinuation.poleCount A c),
+      CylinderBarnesContinuation.residue A z n
 
-/-- Identity under the stated parameter and domain assumptions: `pcfBC_J A z c₁ = pcfBC_J A z c₂`.
+/-- Identity under the stated parameter and domain assumptions:
+`CylinderBarnesContinuation.correctedIntegral A z c₁ = CylinderBarnesContinuation.correctedIntegral
+A z c₂`.
 -/
-theorem pcfBC_J_eq {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem CylinderBarnesContinuation.correctedIntegral_eq {A z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) (hav₁ : ∀ n : ℕ, 2*c₁ ≠ A.re + n)
-    (hav₂ : ∀ n : ℕ, 2*c₂ ≠ A.re + n) : pcfBC_J A z c₁ = pcfBC_J A z c₂ := by
+    (hav₂ : ∀ n : ℕ, 2*c₂ ≠ A.re + n) : CylinderBarnesContinuation.correctedIntegral A z c₁ =
+        CylinderBarnesContinuation.correctedIntegral A z c₂ := by
   rcases le_total c₁ c₂ with h | h
-  · exact (pcfBC_shift hz0 hz hc₁ h hav₁ hav₂).symm
-  · exact pcfBC_shift hz0 hz hc₂ h hav₂ hav₁
+  · exact (CylinderBarnesContinuation.shift hz0 hz hc₁ h hav₁ hav₂).symm
+  · exact CylinderBarnesContinuation.shift hz0 hz hc₂ h hav₂ hav₁
 
 /-- A canonical admissible line, at distance `1/4` from the poles (in `2 Re t`). -/
-def pcfBC_cg (A : ℂ) : ℝ := (Int.fract A.re + 1/2)/2
+def CylinderBarnesContinuation.canonicalLine (A : ℂ) : ℝ := (Int.fract A.re + 1/2)/2
 
-/-- Estimate under the stated parameter and domain assumptions: `0 < pcfBC_cg A`. -/
-theorem pcfBC_cg_pos (A : ℂ) : 0 < pcfBC_cg A := by
-  unfold pcfBC_cg; linarith [Int.fract_nonneg A.re]
+/-- Estimate under the stated parameter and domain assumptions:
+`0 < CylinderBarnesContinuation.canonicalLine A`. -/
+theorem CylinderBarnesContinuation.canonicalLine_pos (A : ℂ) : 0 <
+    CylinderBarnesContinuation.canonicalLine A := by
+  unfold CylinderBarnesContinuation.canonicalLine; linarith [Int.fract_nonneg A.re]
 
-/-- Identity under the stated parameter and domain assumptions: `2*pcfBC_cg A - A.re = 1/2 -
-⌊A.re⌋`. -/
-theorem pcfBC_two_cg (A : ℂ) : 2*pcfBC_cg A - A.re = 1/2 - ⌊A.re⌋ := by
-  unfold pcfBC_cg; rw [← Int.self_sub_floor]; ring
+/-- Identity under the stated parameter and domain assumptions:
+`2*CylinderBarnesContinuation.canonicalLine A - A.re = 1/2 - ⌊A.re⌋`. -/
+theorem CylinderBarnesContinuation.two_canonicalLine (A : ℂ) :
+    2*CylinderBarnesContinuation.canonicalLine A - A.re = 1/2 - ⌊A.re⌋ := by
+  unfold CylinderBarnesContinuation.canonicalLine; rw [← Int.self_sub_floor]; ring
 
 /-- No integer lies within `1/4` of `1/2 - m`. -/
-theorem pcfBC_not_int {m : ℤ} {h : ℝ} (h1 : 1/4 - (m:ℝ) < h) (h2 : h < 3/4 - m) (n : ℤ) :
+theorem CylinderBarnesContinuation.not_int {m : ℤ} {h : ℝ} (h1 : 1/4 - (m:ℝ) < h)
+    (h2 : h < 3/4 - m) (n : ℤ) :
     h ≠ n := by
   intro he
   rw [he] at h1 h2
@@ -600,30 +679,34 @@ theorem pcfBC_not_int {m : ℤ} {h : ℝ} (h1 : 1/4 - (m:ℝ) < h) (h2 : h < 3/4
   · have : (1:ℝ) ≤ ((n + m : ℤ) : ℝ) := by exact_mod_cast h3
     push_cast at this; linarith
 
-/-- Nonvanishing under the stated hypotheses: `2*pcfBC_cg A₀ ≠ A.re + n`. -/
-theorem pcfBC_avoid_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) (n : ℕ) :
-    2*pcfBC_cg A₀ ≠ A.re + n := by
-  have h0 := pcfBC_two_cg A₀
+/-- Nonvanishing under the stated hypotheses:
+`2*CylinderBarnesContinuation.canonicalLine A₀ ≠ A.re + n`. -/
+theorem CylinderBarnesContinuation.avoid_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) (n : ℕ) :
+    2*CylinderBarnesContinuation.canonicalLine A₀ ≠ A.re + n := by
+  have h0 := CylinderBarnesContinuation.two_canonicalLine A₀
   have habs := abs_lt.mp hA
   intro h
-  exact pcfBC_not_int (m := ⌊A₀.re⌋) (h := 2*pcfBC_cg A₀ - A.re) (by linarith) (by linarith) n
+  exact CylinderBarnesContinuation.not_int (m := ⌊A₀.re⌋)
+      (h := 2*CylinderBarnesContinuation.canonicalLine A₀ - A.re) (by linarith) (by linarith) n
     (by push_cast; linarith)
 
-/-- Identity under the stated parameter and domain assumptions: `pcfBC_N A (pcfBC_cg A₀) = pcfBC_N
-A₀ (pcfBC_cg A₀)`. -/
-theorem pcfBC_N_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) :
-    pcfBC_N A (pcfBC_cg A₀) = pcfBC_N A₀ (pcfBC_cg A₀) := by
-  have h0 := pcfBC_two_cg A₀
+/-- Identity under the stated parameter and domain assumptions:
+`CylinderBarnesContinuation.poleCount A (CylinderBarnesContinuation.canonicalLine A₀) =
+CylinderBarnesContinuation.poleCount A₀ (CylinderBarnesContinuation.canonicalLine A₀)`. -/
+theorem CylinderBarnesContinuation.poleCount_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) :
+    CylinderBarnesContinuation.poleCount A (CylinderBarnesContinuation.canonicalLine A₀) =
+        CylinderBarnesContinuation.poleCount A₀ (CylinderBarnesContinuation.canonicalLine A₀) := by
+  have h0 := CylinderBarnesContinuation.two_canonicalLine A₀
   have habs := abs_lt.mp hA
-  unfold pcfBC_N
-  have e1 : ⌈2*pcfBC_cg A₀ - A.re⌉ = 1 - ⌊A₀.re⌋ := by
+  unfold CylinderBarnesContinuation.poleCount
+  have e1 : ⌈2*CylinderBarnesContinuation.canonicalLine A₀ - A.re⌉ = 1 - ⌊A₀.re⌋ := by
     rw [Int.ceil_eq_iff]; push_cast; constructor <;> linarith
-  have e2 : ⌈2*pcfBC_cg A₀ - A₀.re⌉ = 1 - ⌊A₀.re⌋ := by
+  have e2 : ⌈2*CylinderBarnesContinuation.canonicalLine A₀ - A₀.re⌉ = 1 - ⌊A₀.re⌋ := by
     rw [Int.ceil_eq_iff]; push_cast; constructor <;> linarith
   rw [e1, e2]
 
 /-- A uniform lower bound for `|sin(π x)|` within `1/4` of a half-integer. -/
-theorem pcfBC_sin_lower (m : ℤ) : ∃ δ : ℝ, 0 < δ ∧
+theorem CylinderBarnesContinuation.sin_lower (m : ℤ) : ∃ δ : ℝ, 0 < δ ∧
     ∀ x ∈ Icc ((m:ℝ) - 3/4) (m - 1/4), δ ≤ |Real.sin (π*x)| := by
   obtain ⟨x₁, hx₁, hmin⟩ := (isCompact_Icc (a := (m:ℝ) - 3/4) (b := m - 1/4)).exists_isMinOn
     (nonempty_Icc.mpr (by linarith)) ((Real.continuous_sin.comp (continuous_const.mul
@@ -642,12 +725,15 @@ theorem pcfBC_sin_lower (m : ℤ) : ∃ δ : ℝ, 0 < δ ∧
     push_cast at this; linarith [hx₁.2]
 
 /-- On a fixed admissible line the Barnes integral is holomorphic in `A` near `A₀`. -/
-theorem pcfBC_integral_differentiableOn {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) (A₀ : ℂ) :
-    DifferentiableOn ℂ (fun A => ∫ y : ℝ, pcfBC_F A z (pcfBC_cg A₀ + y*I))
+theorem CylinderBarnesContinuation.integral_differentiableOn {z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) (A₀ : ℂ) :
+    DifferentiableOn ℂ (fun A => ∫ y : ℝ,
+        CylinderBarnesContinuation.integrand A z
+        (CylinderBarnesContinuation.canonicalLine A₀ + y*I))
       (Metric.ball A₀ (1/4)) := by
-  set c₀ := pcfBC_cg A₀ with hc₀
-  have hc0 : 0 < c₀ := pcfBC_cg_pos A₀
-  have h0 := pcfBC_two_cg A₀
+  set c₀ := CylinderBarnesContinuation.canonicalLine A₀ with hc₀
+  have hc0 : 0 < c₀ := CylinderBarnesContinuation.canonicalLine_pos A₀
+  have h0 := CylinderBarnesContinuation.two_canonicalLine A₀
   set m : ℤ := ⌊A₀.re⌋
   have hre : ∀ A ∈ Metric.ball A₀ (1/4), |A.re - A₀.re| < 1/4 := fun A hA => by
     have := abs_re_le_norm (A - A₀)
@@ -659,17 +745,18 @@ theorem pcfBC_integral_differentiableOn {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| 
     simp only [sub_im] at this
     have := abs_sub_abs_le_abs_sub A.im A₀.im; linarith
   have hav : ∀ A ∈ Metric.ball A₀ (1/4), ∀ n : ℕ, 2*c₀ ≠ A.re + n := fun A hA =>
-    pcfBC_avoid_near (hre A hA)
+    CylinderBarnesContinuation.avoid_near (hre A hA)
   obtain ⟨C1, K1, g1⟩ := DLMF.Gamma.exists_norm_Gamma_le hc0
   have hC1 : 0 ≤ C1 := (norm_nonneg _).trans (by simpa using g1 0)
-  obtain ⟨C2, K2, hC2, g2⟩ := pcfBC_Gamma_bound (|(m:ℝ)| + 1)
-  obtain ⟨δ, hδ, hδx⟩ := pcfBC_sin_lower m
+  obtain ⟨C2, K2, hC2, g2⟩ := CylinderBarnesContinuation.Gamma_bound (|(m:ℝ)| + 1)
+  obtain ⟨δ, hδ, hδx⟩ := CylinderBarnesContinuation.sin_lower m
   set M : ℝ := |A₀.im| + 1/4
   set b : ℝ := 3*π/2 - 2*|arg z|
   have hb : 0 < b := by simp only [b]; linarith
   set K0 : ℝ := C1 * (C2/δ) * (2*(1+M))^K2 * Real.exp (π*M/2) * (2:ℝ)^c₀ * ‖z‖^(2*c₀)
   have hbound : ∀ A ∈ Metric.ball A₀ (1/4), ∀ y : ℝ,
-      ‖pcfBC_F A z (c₀ + y*I)‖ ≤ K0 * ((1+|y|)^(K1+K2) * Real.exp (-(b*|y|))) := by
+      ‖CylinderBarnesContinuation.integrand A z (c₀ + y*I)‖ ≤ K0 *
+          ((1+|y|)^(K1+K2) * Real.exp (-(b*|y|))) := by
     intro A hA y
     have hr := abs_lt.mp (hre A hA)
     have hxI : A.re - 2*c₀ ∈ Icc ((m:ℝ) - 3/4) (m - 1/4) := by
@@ -686,49 +773,64 @@ theorem pcfBC_integral_differentiableOn {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| 
         le_trans (mul_le_mul_of_nonneg_left hs (norm_nonneg _)) h
       rw [← le_div_iff₀ hδ] at h'
       exact h'.trans (le_of_eq (by ring))
-    refine (pcfBC_norm_F_le hz0 c₀ y hC1 (by positivity) (g1 y) hG2).trans ?_
+    refine (CylinderBarnesContinuation.norm_integrand_le hz0 c₀ y hC1 (by positivity)
+        (g1 y) hG2).trans ?_
     have hAim := him A hA
     simp only [K0, b]
     gcongr
-  have hdiff : ∀ y : ℝ, DifferentiableOn ℂ (fun A => pcfBC_F A z (c₀ + y*I))
+  have hdiff : ∀ y : ℝ,
+      DifferentiableOn ℂ (fun A => CylinderBarnesContinuation.integrand A z (c₀ + y*I))
       (Metric.ball A₀ (1/4)) := fun y A hA =>
-    (pcfBC_F_differentiableAt_param (pcfBC_ne_pole (hav A hA) y)).differentiableWithinAt
+    (CylinderBarnesContinuation.integrand_differentiableAt_param
+        (CylinderBarnesContinuation.ne_pole (hav A hA) y)).differentiableWithinAt
   refine Complex.differentiableOn_integral_of_locally_dominated Metric.isOpen_ball
-    (fun A hA => (pcfBC_F_continuous hz0 hc0 (hav A hA)).aestronglyMeasurable)
+    (fun A hA => (CylinderBarnesContinuation.integrand_continuous hz0 hc0
+        (hav A hA)).aestronglyMeasurable)
     (Eventually.of_forall hdiff) (fun A hA => ⟨_, Metric.isOpen_ball.mem_nhds hA,
       fun y => K0 * ((1+|y|)^(K1+K2) * Real.exp (-(b*|y|))),
       (DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg hb _).const_mul _,
       Eventually.of_forall fun y A' hA' => hbound A' hA' y⟩)
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun a => pcfBC_res (1/2+1*a)
-z n) a₀`. -/
-theorem pcfBC_res_differentiableAt {z : ℂ} (hz0 : z ≠ 0) {a₀ : ℂ}
+/-- Differentiability at the specified argument:
+`DifferentiableAt ℂ (fun a => CylinderBarnesContinuation.residue (1/2+1*a) z n) a₀`. -/
+theorem CylinderBarnesContinuation.residue_differentiableAt {z : ℂ} (hz0 : z ≠ 0) {a₀ : ℂ}
     (ha : ∀ n : ℕ, a₀ ≠ -1/2 - n) (n : ℕ) :
-    DifferentiableAt ℂ (fun a => pcfBC_res (1/2+1*a) z n) a₀ := by
+    DifferentiableAt ℂ (fun a => CylinderBarnesContinuation.residue (1/2+1*a) z n) a₀ := by
   have hG : ∀ m : ℕ, (1/2+1*a₀+n)/2 ≠ -m := fun m h =>
     ha (n + 2*m) (by push_cast; linear_combination 2*h)
-  unfold pcfBC_res
+  unfold CylinderBarnesContinuation.residue
   refine (((differentiableAt_const _).mul ((differentiableAt_Gamma _ hG).comp a₀
     (by fun_prop))).mul ?_).mul ?_
   · exact (DifferentiableAt.const_cpow (by fun_prop) (Or.inl two_ne_zero))
   · exact (DifferentiableAt.const_cpow (by fun_prop) (Or.inl hz0))
 
 /-- The canonical-line value `G(a)` of the residue-corrected Barnes integral. -/
-def pcfBC_G (z a : ℂ) : ℂ := pcfBC_J (1/2+1*a) z (pcfBC_cg (1/2+1*a))
+def CylinderBarnesContinuation.canonicalValue (z a : ℂ) : ℂ :=
+    CylinderBarnesContinuation.correctedIntegral (1/2+1*a) z
+    (CylinderBarnesContinuation.canonicalLine (1/2+1*a))
 
-/-- Identity under the stated parameter and domain assumptions: `pcfBC_J (1/2+1*a) z c = pcfBC_G z
-a`. -/
-theorem pcfBC_G_eq_J {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) (a : ℂ) {c : ℝ} (hc : 0 < c)
-    (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) : pcfBC_J (1/2+1*a) z c = pcfBC_G z a :=
-  pcfBC_J_eq hz0 hz hc (pcfBC_cg_pos _) hav (pcfBC_avoid_near (by simp))
+/-- Identity under the stated parameter and domain assumptions:
+`CylinderBarnesContinuation.correctedIntegral (1/2+1*a) z c =
+CylinderBarnesContinuation.canonicalValue z a`. -/
+theorem CylinderBarnesContinuation.canonicalValue_eq_correctedIntegral {z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) (a : ℂ) {c : ℝ} (hc : 0 < c)
+    (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) : CylinderBarnesContinuation.correctedIntegral (1/2+1*a)
+        z c = CylinderBarnesContinuation.canonicalValue z a :=
+  CylinderBarnesContinuation.correctedIntegral_eq hz0 hz hc
+      (CylinderBarnesContinuation.canonicalLine_pos _) hav
+      (CylinderBarnesContinuation.avoid_near (by simp))
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ (pcfBC_G z) a₀`. -/
-theorem pcfBC_G_differentiableAt {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {a₀ : ℂ}
-    (ha : ∀ n : ℕ, a₀ ≠ -1/2 - n) : DifferentiableAt ℂ (pcfBC_G z) a₀ := by
+/-- Differentiability at the specified argument:
+`DifferentiableAt ℂ (CylinderBarnesContinuation.canonicalValue z) a₀`. -/
+theorem CylinderBarnesContinuation.canonicalValue_differentiableAt {z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {a₀ : ℂ}
+    (ha : ∀ n : ℕ, a₀ ≠ -1/2 - n) : DifferentiableAt ℂ
+        (CylinderBarnesContinuation.canonicalValue z) a₀ := by
   set A₀ : ℂ := 1/2+1*a₀
-  set c₀ := pcfBC_cg A₀
-  set H : ℂ → ℂ := fun a => (∫ y : ℝ, pcfBC_F (1/2+1*a) z (c₀ + y*I)) -
-    2*π*∑ n ∈ Finset.range (pcfBC_N A₀ c₀), pcfBC_res (1/2+1*a) z n
+  set c₀ := CylinderBarnesContinuation.canonicalLine A₀
+  set H : ℂ → ℂ := fun a => (∫ y : ℝ, CylinderBarnesContinuation.integrand (1/2+1*a) z (c₀ + y*I)) -
+    2*π*∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount A₀ c₀),
+        CylinderBarnesContinuation.residue (1/2+1*a) z n
   have hball : ∀ a ∈ Metric.ball a₀ (1/4), (1/2+1*a) ∈ Metric.ball A₀ (1/4) := fun a ha' => by
     rw [Metric.mem_ball, dist_eq_norm] at ha' ⊢
     simpa [A₀, show 1/2+1*a-(1/2+1*a₀) = a - a₀ by ring] using ha'
@@ -737,29 +839,35 @@ theorem pcfBC_G_differentiableAt {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/
     rw [Metric.mem_ball, dist_eq_norm] at h
     have := abs_re_le_norm ((1/2+1*a) - A₀)
     simp only [sub_re] at this; linarith
-  have heq : pcfBC_G z =ᶠ[𝓝 a₀] H := by
+  have heq : CylinderBarnesContinuation.canonicalValue z =ᶠ[𝓝 a₀] H := by
     filter_upwards [Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self (by norm_num : (0:ℝ) < 1/4))]
       with a ha'
-    rw [← pcfBC_G_eq_J hz0 hz a (pcfBC_cg_pos A₀) (pcfBC_avoid_near (hre a ha'))]
-    simp only [pcfBC_J, H, c₀, pcfBC_N_near (hre a ha')]
+    rw [← CylinderBarnesContinuation.canonicalValue_eq_correctedIntegral hz0 hz a
+        (CylinderBarnesContinuation.canonicalLine_pos A₀)
+        (CylinderBarnesContinuation.avoid_near (hre a ha'))]
+    simp only [CylinderBarnesContinuation.correctedIntegral, H, c₀,
+        CylinderBarnesContinuation.poleCount_near (hre a ha')]
   refine DifferentiableAt.congr_of_eventuallyEq ?_ heq
   refine DifferentiableAt.sub ?_ ((DifferentiableAt.fun_sum fun n _ =>
-    pcfBC_res_differentiableAt hz0 ha n).const_mul _)
-  have hI := (pcfBC_integral_differentiableOn hz0 hz A₀).differentiableAt
+    CylinderBarnesContinuation.residue_differentiableAt hz0 ha n).const_mul _)
+  have hI := (CylinderBarnesContinuation.integral_differentiableOn hz0 hz A₀).differentiableAt
     (Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self (by norm_num)))
   exact hI.comp (f := fun a : ℂ => 1/2+1*a) a₀ (by fun_prop)
 
 /-- **DLMF 12.5.8 for all regular parameters**: line integral = 2π (value + crossed residues). -/
-theorem pcfBC_U_integral {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -1/2 - n) (hz0 : z ≠ 0)
+theorem CylinderBarnesContinuation.U_integral {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -1/2 - n) (hz0 : z ≠ 0)
     (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c) (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) :
-    (∫ y : ℝ, pcfBC_F (1/2+1*a) z (c + y*I)) =
+    (∫ y : ℝ, CylinderBarnesContinuation.integrand (1/2+1*a) z (c + y*I)) =
       2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z +
-        ∑ n ∈ Finset.range (pcfBC_N (1/2+1*a) c), pcfBC_res (1/2+1*a) z n) := by
+        ∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount (1/2+1*a) c),
+            CylinderBarnesContinuation.residue (1/2+1*a) z n) := by
   set D : Set ℂ := {a : ℂ | ∀ n : ℕ, a ≠ -1/2 - n}
-  have hD : IsOpen D := Complex.barnesRes_isOpen_ne_sub_nat (-1/2)
+  have hD : IsOpen D := Complex.BarnesResidue.isOpen_ne_sub_nat (-1/2)
   set W : ℂ → ℂ := fun a => 2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z)
-  have hGa : AnalyticOnNhd ℂ (pcfBC_G z) D := DifferentiableOn.analyticOnNhd
-    (fun a ha' => (pcfBC_G_differentiableAt hz0 hz ha').differentiableWithinAt) hD
+  have hGa : AnalyticOnNhd ℂ (CylinderBarnesContinuation.canonicalValue z) D :=
+      DifferentiableOn.analyticOnNhd
+    (fun a ha' => (CylinderBarnesContinuation.canonicalValue_differentiableAt hz0 hz
+        ha').differentiableWithinAt) hD
   have hWa : AnalyticOnNhd ℂ W D := by
     refine DifferentiableOn.analyticOnNhd (fun a ha' => ?_) hD
     have hG : ∀ m : ℕ, 1/2+1*a ≠ -m := fun m h => ha' m (by linear_combination h)
@@ -767,49 +875,58 @@ theorem pcfBC_U_integral {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -1/2 - n) (hz0 : z
     exact (differentiableAt_const _).mul ((((differentiableAt_Gamma _ hG).comp a
       (by fun_prop)).mul ((differentiableAt_const _).mul (DifferentiableAt.const_cpow
         (by fun_prop) (Or.inl hz0)))).mul (pcfU_entire_order z a))
-  have hpos : ∀ a : ℂ, 0 < (1/2+1*a).re → pcfBC_G z a = W a := by
+  have hpos : ∀ a : ℂ, 0 < (1/2+1*a).re → CylinderBarnesContinuation.canonicalValue z a = W a := by
     intro a hA
-    have := pcfBC_U_pos (a := a) hz0 hz (pcfBC_cg_pos _)
-      (pcfBC_avoid_near (A₀ := 1/2+1*a) (by simp)) hA
-    simp only [pcfBC_G, pcfBC_J, W]
+    have := CylinderBarnesContinuation.U_pos (a := a) hz0 hz
+        (CylinderBarnesContinuation.canonicalLine_pos _)
+      (CylinderBarnesContinuation.avoid_near (A₀ := 1/2+1*a) (by simp)) hA
+    simp only [CylinderBarnesContinuation.canonicalValue,
+        CylinderBarnesContinuation.correctedIntegral, W]
     rw [this]; ring
   have hhalf : (1/2 : ℂ) ∈ D := fun n h => by
     have := congrArg re h; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
-  have hev : pcfBC_G z =ᶠ[𝓝 (1/2)] W := by
+  have hev : CylinderBarnesContinuation.canonicalValue z =ᶠ[𝓝 (1/2)] W := by
     have ho : IsOpen {a : ℂ | 0 < (1/2+1*a).re} :=
       isOpen_lt continuous_const (by fun_prop)
     filter_upwards [ho.mem_nhds (by norm_num)] with a ha'
     exact hpos a ha'
   have hEq := hGa.eqOn_of_preconnected_of_eventuallyEq hWa
-    (Complex.barnesRes_isPreconnected_ne_sub_nat (-1/2)) hhalf hev ha
-  have hJ := pcfBC_G_eq_J hz0 hz a hc hav
-  simp only [pcfBC_J] at hJ
+    (Complex.BarnesResidue.isPreconnected_ne_sub_nat (-1/2)) hhalf hev ha
+  have hJ := CylinderBarnesContinuation.canonicalValue_eq_correctedIntegral hz0 hz a hc hav
+  simp only [CylinderBarnesContinuation.correctedIntegral] at hJ
   rw [hEq] at hJ
   simp only [W] at hJ
   linear_combination hJ
 
 /-- Formula under the stated hypotheses: `pcfBarnesResidueSum false a z c = ∑ n ∈ Finset.range
-(pcfBC_N (1/2+1*a) c), pcfBC_res (1/2+1*a) z n`. -/
-theorem pcfBC_sum_false (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum false a z c =
-    ∑ n ∈ Finset.range (pcfBC_N (1/2+1*a) c), pcfBC_res (1/2+1*a) z n := by
-  simp only [pcfBarnesResidueSum, pcfBarnesResidue, pcfBC_N, pcfBC_res, Bool.false_eq_true,
+(CylinderBarnesContinuation.poleCount (1/2+1*a) c), CylinderBarnesContinuation.residue (1/2+1*a) z
+n`. -/
+theorem CylinderBarnesContinuation.sum_false (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum false a z c =
+    ∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount (1/2+1*a) c),
+        CylinderBarnesContinuation.residue (1/2+1*a) z n := by
+  simp only [pcfBarnesResidueSum, pcfBarnesResidue, CylinderBarnesContinuation.poleCount,
+      CylinderBarnesContinuation.residue, Bool.false_eq_true,
     ite_false, mul_one]
   rw [show (1/2:ℂ)+1*a = a+1/2 by ring]
 
 /-- Formula under the stated hypotheses: `pcfBarnesResidueSum true a z c = ∑ n ∈ Finset.range
-(pcfBC_N (1/2+1*(-a)) c), pcfBarnesResidue true a z n`. -/
-theorem pcfBC_sum_true (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum true a z c =
-    ∑ n ∈ Finset.range (pcfBC_N (1/2+1*(-a)) c), pcfBarnesResidue true a z n := by
-  simp only [pcfBarnesResidueSum, pcfBC_N, ite_true]
+(CylinderBarnesContinuation.poleCount (1/2+1*(-a)) c), pcfBarnesResidue true a z n`. -/
+theorem CylinderBarnesContinuation.sum_true (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum true a z c =
+    ∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount (1/2+1*(-a)) c),
+        pcfBarnesResidue true a z n := by
+  simp only [pcfBarnesResidueSum, CylinderBarnesContinuation.poleCount, ite_true]
   rw [show (1/2:ℂ)+1*(-a) = 1/2-a by ring]
 
-/-- Identity under the stated parameter and domain assumptions: `pcfBC_res (1/2+1*(-a)) (I*z) n +
-pcfBC_res (1/2+1*(-a)) (-I*z) n = 2 * pcfBarnesResidue true a z n`. -/
-theorem pcfBC_res_true {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (n : ℕ) :
-    pcfBC_res (1/2+1*(-a)) (I*z) n + pcfBC_res (1/2+1*(-a)) (-I*z) n =
+/-- Identity under the stated parameter and domain assumptions:
+`CylinderBarnesContinuation.residue (1/2+1*(-a)) (I*z) n + CylinderBarnesContinuation.residue
+(1/2+1*(-a)) (-I*z) n = 2 * pcfBarnesResidue true a z n`. -/
+theorem CylinderBarnesContinuation.residue_true {a z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < π/2) (n : ℕ) :
+    CylinderBarnesContinuation.residue (1/2+1*(-a)) (I*z) n +
+        CylinderBarnesContinuation.residue (1/2+1*(-a)) (-I*z) n =
       2 * pcfBarnesResidue true a z n := by
-  obtain ⟨e1, e2⟩ := pcfInt_I_mul_cpow hz0 hz ((1/2+1*(-a)) + n)
-  simp only [pcfBC_res, pcfBarnesResidue, ite_true]
+  obtain ⟨e1, e2⟩ := CylinderIntegrals.I_mul_cpow hz0 hz ((1/2+1*(-a)) + n)
+  simp only [CylinderBarnesContinuation.residue, pcfBarnesResidue, ite_true]
   rw [e1, e2, show (1/2:ℂ)+1*(-a) = 1/2-a by ring, Complex.cos]
   have q1 : exp (π/2*I*((1/2-a)+n)) = exp (π*((1/2-a+n)/2)*I) := by congr 1; ring
   have q2 : exp (-(π/2)*I*((1/2-a)+n)) = exp (-(π*((1/2-a+n)/2))*I) := by congr 1; ring
@@ -827,10 +944,12 @@ theorem pcfU_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz
   have ha' : ∀ n : ℕ, a ≠ -1/2 - n := fun n h => ha n (by rw [h]; ring)
   have hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n := fun n h => havoid n (by simp at h ⊢; linarith)
   have hfun : (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1) =
-      fun y : ℝ => pcfBC_F (1/2+1*a) z (c + y*I) := by
-    funext y; simp only [pcfBC_F, mul_one]
-  rw [hfun, pcfBC_sum_false, ← pcfBC_U_integral ha' hz0 hz hc hav]
-  exact pcfInt_hasIntegralWholeLine (pcfBC_F_integrable hz0 hz hc hav)
+      fun y : ℝ => CylinderBarnesContinuation.integrand (1/2+1*a) z (c + y*I) := by
+    funext y; simp only [CylinderBarnesContinuation.integrand, mul_one]
+  rw [hfun, CylinderBarnesContinuation.sum_false,
+      ← CylinderBarnesContinuation.U_integral ha' hz0 hz hc hav]
+  exact CylinderIntegrals.hasIntegralWholeLine
+      (CylinderBarnesContinuation.integrand_integrable hz0 hz hc hav)
 
 /-- All regular parameters: crossed residues encode the deformed separating contour instead of
 strengthening the real-part hypothesis. -/
@@ -844,7 +963,7 @@ theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (h
   have ha' : ∀ n : ℕ, -a ≠ -1/2 - n := fun n h => ha n (by rw [neg_one_mul, h]; ring)
   have hav : ∀ n : ℕ, 2*c ≠ (1/2+1*(-a)).re + n := fun n h => havoid n (by simp at h ⊢; linarith)
   have hz2 : |arg z| < π/2 := by linarith [Real.pi_pos]
-  obtain ⟨ha1, ha2⟩ := pcfInt_arg_I_mul hz0 hz2
+  obtain ⟨ha1, ha2⟩ := CylinderIntegrals.arg_I_mul hz0 hz2
   have hp0 : I*z ≠ 0 := mul_ne_zero I_ne_zero hz0
   have hm0 : -I*z ≠ 0 := mul_ne_zero (neg_ne_zero.mpr I_ne_zero) hz0
   have hpa : |arg (I*z)| < 3*π/4 := by
@@ -853,37 +972,42 @@ theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (h
     rw [ha2]; obtain ⟨h1, h2⟩ := abs_lt.mp hz; rw [abs_lt]; constructor <;> linarith
   have hfun : (fun y : ℝ => let t : ℂ := c+y*I;
       Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t)) =
-      fun y : ℝ => (pcfBC_F (1/2+1*(-a)) (I*z) (c + y*I) +
-          pcfBC_F (1/2+1*(-a)) (-I*z) (c + y*I))/2 := by
+      fun y : ℝ => (CylinderBarnesContinuation.integrand (1/2+1*(-a)) (I*z) (c + y*I) +
+          CylinderBarnesContinuation.integrand (1/2+1*(-a)) (-I*z) (c + y*I))/2 := by
     funext y
-    rw [pcfBC_F_eq_B, pcfBC_F_eq_B]
-    simp only [pcfInt_B]
-    obtain ⟨e1, e2⟩ := pcfInt_I_mul_cpow hz0 hz2 (2*((c:ℂ)+y*I))
+    rw [CylinderBarnesContinuation.integrand_eq_barnesIntegrand,
+        CylinderBarnesContinuation.integrand_eq_barnesIntegrand]
+    simp only [CylinderIntegrals.barnesIntegrand]
+    obtain ⟨e1, e2⟩ := CylinderIntegrals.I_mul_cpow hz0 hz2 (2*((c:ℂ)+y*I))
     rw [e1, e2, show (1/2:ℂ)+1*(-a) = 1/2+-1*a by ring, Complex.cos]
     have q1 : exp (π/2*I*(2*((c:ℂ)+y*I))) = exp (π*((c:ℂ)+y*I)*I) := by congr 1; ring
     have q2 : exp (-(π/2)*I*(2*((c:ℂ)+y*I))) = exp (-(π*((c:ℂ)+y*I))*I) := by congr 1; ring
     rw [q1, q2]; ring
-  have i1 := pcfBC_F_integrable hp0 hpa hc hav
-  have i2 := pcfBC_F_integrable hm0 hma hc hav
+  have i1 := CylinderBarnesContinuation.integrand_integrable hp0 hpa hc hav
+  have i2 := CylinderBarnesContinuation.integrand_integrable hm0 hma hc hav
   rw [hfun]
   suffices hI : ∫ y : ℝ,
-      (pcfBC_F (1/2+1*(-a)) (I*z) (c + y*I) + pcfBC_F (1/2+1*(-a)) (-I*z) (c + y*I))/2 =
+      (CylinderBarnesContinuation.integrand (1/2+1*(-a)) (I*z) (c + y*I) +
+          CylinderBarnesContinuation.integrand (1/2+1*(-a)) (-I*z) (c + y*I))/2 =
       2*π*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a
           z+pcfBarnesResidueSum true a z c) by
-    rw [← hI]; exact pcfInt_hasIntegralWholeLine ((i1.add i2).div_const 2)
-  rw [integral_div, integral_add i1 i2, pcfBC_U_integral ha' hp0 hpa hc hav,
-    pcfBC_U_integral ha' hm0 hma hc hav, pcfBC_sum_true]
-  have hR : ∑ n ∈ Finset.range (pcfBC_N (1/2+1*(-a)) c), pcfBC_res (1/2+1*(-a)) (I*z) n +
-      ∑ n ∈ Finset.range (pcfBC_N (1/2+1*(-a)) c), pcfBC_res (1/2+1*(-a)) (-I*z) n =
-      2 * ∑ n ∈ Finset.range (pcfBC_N (1/2+1*(-a)) c), pcfBarnesResidue true a z n := by
+    rw [← hI]; exact CylinderIntegrals.hasIntegralWholeLine ((i1.add i2).div_const 2)
+  rw [integral_div, integral_add i1 i2, CylinderBarnesContinuation.U_integral ha' hp0 hpa hc hav,
+    CylinderBarnesContinuation.U_integral ha' hm0 hma hc hav, CylinderBarnesContinuation.sum_true]
+  have hR : ∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount (1/2+1*(-a)) c),
+      CylinderBarnesContinuation.residue (1/2+1*(-a)) (I*z) n +
+      ∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount (1/2+1*(-a)) c),
+          CylinderBarnesContinuation.residue (1/2+1*(-a)) (-I*z) n =
+      2 * ∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount (1/2+1*(-a)) c),
+          pcfBarnesResidue true a z n := by
     rw [← Finset.sum_add_distrib, Finset.mul_sum]
-    exact Finset.sum_congr rfl fun n _ => pcfBC_res_true hz0 hz2 n
+    exact Finset.sum_congr rfl fun n _ => CylinderBarnesContinuation.residue_true hz0 hz2 n
   have hM : Gamma (1/2+1*(-a))*(exp ((I*z)^2/4)*(I*z)^(-a+1/2))*pcfU (-a) (I*z) +
       Gamma (1/2+1*(-a))*(exp ((-I*z)^2/4)*(-I*z)^(-a+1/2))*pcfU (-a) (-I*z) =
       2*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z) := by
     have hV1 := pcfV_eq_mul_I a z
     have hV2 := pcfV_eq_mul_neg_I a z
-    obtain ⟨f1, f2⟩ := pcfInt_I_mul_cpow hz0 hz2 (-a+1/2)
+    obtain ⟨f1, f2⟩ := CylinderIntegrals.I_mul_cpow hz0 hz2 (-a+1/2)
     rw [f1, f2, show (I*z)^2 = -z^2 by rw [mul_pow, I_sq]; ring,
       show (-I*z)^2 = -z^2 by rw [mul_pow, neg_sq, I_sq]; ring,
       show (1/2:ℂ)+1*(-a) = 1/2+-1*a by ring]

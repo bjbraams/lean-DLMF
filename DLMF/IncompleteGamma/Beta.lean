@@ -48,6 +48,8 @@ Mathlib are referenced, not reproved.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Statistical
 
 /-- Identity under the stated parameter and domain assumptions: `incBeta a b x=Real.incBeta a b

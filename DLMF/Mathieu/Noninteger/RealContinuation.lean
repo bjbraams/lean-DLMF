@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.SpectralExistence
+public import DLMF.Mathieu.Basic.SpectralExistence
 public import DLMF.Mathieu.Basic
 public import DLMF.Mathieu.Noninteger.Basic
 public import DLMF.Mathieu.Properties.BasicSolutions
@@ -25,9 +25,9 @@ solutions with parameters `a` and `a'` gives the difference formula
 `w_II(π) w_I'(π) = w_I(π)² - 1 < 0` makes `g(a, a, Q) = -w_II(π) ∫ w_I² + w_I'(π) ∫ w_II²`
 definite, so all roots are simple. The roots are bounded below (there are none for
 `a < -(2|Q| + 1)`) and unbounded above, so for each `t` they can be enumerated increasingly;
-the zero-count deformation theorem (`ODE.sturmDef_eventually_ncard_eq`) shows that the `k`-th
-root depends continuously on `t`, and the local one-zero theorem (`ODE.sturmDef_local`) gives
-uniqueness of continuous root paths.
+the zero-count deformation theorem (`ODE.SturmDeformation.eventually_ncard_eq`) shows that the
+`k`-th root depends continuously on `t`, and the local one-zero theorem
+(`ODE.SturmDeformation.local`) gives uniqueness of continuous root paths.
 
 ## Main results
 
@@ -460,7 +460,8 @@ private lemma continuous_branch {q c₀ : ℝ} (hc : |c₀| < 1) (k : ℕ) :
   have hz1 : A + 1 ≤ z := by
     by_contra h
     exact hlow.self_of_nhds z (by linarith) hz
-  obtain ⟨δ₀, hδ₀, hloc⟩ := ODE.sturmDef_local isOpen_univ isOpen_univ (continuousOn_Yf q c₀)
+  obtain ⟨δ₀, hδ₀, hloc⟩ :=
+      ODE.SturmDeformation.local isOpen_univ isOpen_univ (continuousOn_Yf q c₀)
     (continuousOn_Yd q) (hasDerivAt_Yf q c₀) (mem_univ t₀) (mem_univ z) hz
     (Yd_ne_zero hc t₀ (mem_univ _) z (mem_univ _) hz)
   have hwin : ∀ x ∈ Ioo (z - δ₀) (z + δ₀), Yf q c₀ t₀ x = 0 → x = z := by
@@ -479,7 +480,7 @@ private lemma continuous_branch {q c₀ : ℝ} (hc : |c₀| < 1) (k : ℕ) :
     intro h
     have := hwin (z - δ) ⟨by linarith, by linarith⟩ h
     linarith
-  have hcount := ODE.sturmDef_eventually_ncard_eq isOpen_univ isOpen_univ (subset_univ _)
+  have hcount := ODE.SturmDeformation.eventually_ncard_eq isOpen_univ isOpen_univ (subset_univ _)
     (continuousOn_Yf q c₀) (continuousOn_Yd q) (hasDerivAt_Yf q c₀) (Yd_ne_zero hc)
     (mem_univ t₀) hA0 hb0
   have hset0 : {x | x ∈ Icc A (z - δ) ∧ Yf q c₀ t₀ x = 0} = {a | Yf q c₀ t₀ a = 0} ∩ Iio z := by
@@ -501,7 +502,7 @@ private lemma continuous_branch {q c₀ : ℝ} (hc : |c₀| < 1) (k : ℕ) :
   filter_upwards [hcount, hloc δ hδp hδ₀'.le, hlow] with t hct hut hlt
   obtain ⟨x, ⟨hxw, hx0⟩, hxu⟩ := hut
   have hfin : ({y | y ∈ Icc A (z - δ) ∧ Yf q c₀ t y = 0}).Finite :=
-    ODE.sturmDef_finite (fun y _ => hasDerivAt_Yf q c₀ t (mem_univ _) y (mem_univ _))
+    ODE.SturmDeformation.finite (fun y _ => hasDerivAt_Yf q c₀ t (mem_univ _) y (mem_univ _))
       fun y _ => Yd_ne_zero hc t (mem_univ _) y (mem_univ _)
   have hsetx : {a | Yf q c₀ t a = 0} ∩ Iio x = {y | y ∈ Icc A (z - δ) ∧ Yf q c₀ t y = 0} := by
     ext y
@@ -536,7 +537,8 @@ private lemma eqOn_of_Yf {q c₀ : ℝ} (hc : |c₀| < 1) {Λ₁ Λ₂ : ℝ →
   obtain ⟨hxe, hx01⟩ := hx
   have hxI : x ∈ Icc (0 : ℝ) 1 := Ico_subset_Icc_self hx01
   set z := Λ₁ x
-  obtain ⟨δ₀, hδ₀, hloc⟩ := ODE.sturmDef_local isOpen_univ isOpen_univ (continuousOn_Yf q c₀)
+  obtain ⟨δ₀, hδ₀, hloc⟩ :=
+      ODE.SturmDeformation.local isOpen_univ isOpen_univ (continuousOn_Yf q c₀)
     (continuousOn_Yd q) (hasDerivAt_Yf q c₀) (mem_univ x) (mem_univ z) (hr₁ x hxI)
     (Yd_ne_zero hc x (mem_univ _) z (mem_univ _) (hr₁ x hxI))
   have hIcc : Icc (0 : ℝ) 1 ∈ 𝓝[>] x :=
@@ -562,7 +564,7 @@ theorem exists_continuous_re_mathieuWI_pi_eq {q c₀ a₀ : ℝ} (hc : |c₀| < 
       ∀ t : ℝ, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = c₀ := by
   have hroot : Yf q c₀ 0 a₀ = 0 := by simp [Yf, r1, h₀]
   have hfin : ({a | Yf q c₀ 0 a = 0} ∩ Iio a₀).Finite := by
-    refine (ODE.sturmDef_finite (a := -(2 * |0 * q| + 1) - 1) (b := a₀)
+    refine (ODE.SturmDeformation.finite (a := -(2 * |0 * q| + 1) - 1) (b := a₀)
       (fun y _ => hasDerivAt_Yf q c₀ 0 (mem_univ _) y (mem_univ _))
       fun y _ => Yd_ne_zero hc 0 (mem_univ _) y (mem_univ _)).subset ?_
     rintro y ⟨hy0, hya⟩

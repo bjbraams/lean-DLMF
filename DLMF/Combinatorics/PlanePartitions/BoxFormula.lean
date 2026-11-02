@@ -44,13 +44,14 @@ and transpose, and the strict shifted and descending plane partitions) are in
   DLMF 26.12.12–26.12.15.
 * `card_cyclicallySymmetric_selfComplementary`, `card_totallySymmetric_selfComplementary`:
   DLMF 26.12.16, 26.12.17.
-* `isDescendingPP_example`, `card_descendingPPIn`: descending plane partitions
-  (DLMF 26.12.18, 26.12.19).
+* `isDescendingPlanePartition_example`, `card_descendingPlanePartitionIn`: descending plane
+  partitions (DLMF 26.12.18, 26.12.19).
 
 ## Implementation notes
 
 * Counts in boxes are stated as rational numbers (`ℚ`), as DLMF's products are. A descending
-  plane partition "in `B(r, r, r)`" is one with all parts at most `r` (`DescendingPPIn`).
+  plane partition "in `B(r, r, r)`" is one with all parts at most `r`
+  (`DescendingPlanePartitionIn`).
 * §26.12(i), transpose complement: DLMF says "equal to the reflection through the `(x, y)`-plane
   of its complement". The count (26.12.12) is that of plane partitions whose complement is their
   transpose `(h, j, k) ↦ (j, h, k)` (reflection in the plane `x = y`); with the literal
@@ -1072,7 +1073,8 @@ theorem card_totallySymmetric_selfComplementary (r : ℕ) :
 /-- (26.12.18): the example `6 6 6 4 3 / 3 3 / 2` is a strict shifted (indeed descending) plane
 partition. -/
 @[dlmf 26.12.E18]
-theorem isDescendingPP_example : IsDescendingPP [[6, 6, 6, 4, 3], [3, 3], [2]] := by
+theorem isDescendingPlanePartition_example : IsDescendingPlanePartition
+    [[6, 6, 6, 4, 3], [3, 3], [2]] := by
   refine ⟨⟨?_, ?_⟩, ?_⟩
   · intro row hrow
     simp only [List.mem_cons, List.not_mem_nil, or_false] at hrow
@@ -1093,7 +1095,8 @@ theorem isDescendingPP_example : IsDescendingPP [[6, 6, 6, 4, 3], [3, 3], [2]] :
 /-- (26.12.19): the number of descending plane partitions in `B(r, r, r)` is
 `∏_{h=0}^{r-1} (3h+1)!/(r+h)!`. -/
 @[dlmf 26.12.E19]
-theorem card_descendingPPIn (r : ℕ) : (Nat.card (DescendingPPIn r) : ℚ) = asmProduct r := by
+theorem card_descendingPlanePartitionIn (r : ℕ) : (Nat.card (DescendingPlanePartitionIn r) : ℚ) =
+    asmProduct r := by
   sorry
 
 end DLMF.Combinatorics

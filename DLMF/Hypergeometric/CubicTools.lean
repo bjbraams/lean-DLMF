@@ -16,16 +16,16 @@ The proof of `cubic_connection` (DLMF 15.8.32) works in the variable `u = 1/ζ`.
 
 ## Main results
 
-* `hcub_cubic`: Goursat's cubic transformation near `u = 0`,
+* `CubicTransformation.cubic_near_zero`: Goursat's cubic transformation near `u = 0`,
   `F(a+1/3, 3a; 2a+2/3; u) = (1+ω²u)^{-3a} F(a, a+1/3; 2a+2/3; 3t u(u-1)/(1+ω²u)³)`, proved by
   the uniqueness of the analytic solution of the Gauss equation at the origin.
-* `hcub_conn`: the bracket of 15.8.32 written through `w₁, w₂` at `0` equals
+* `CubicTransformation.connection`: the bracket of 15.8.32 written through `w₁, w₂` at `0` equals
   `√3 Γ(a+1/3)/(2π Γ(2a+2/3)) F(a, a+1/3; 2a+2/3; 1-w)`, from 15.10.17 for generic `a` and
   holomorphy in `a` (all `a` with `2a+2/3, a+1/3 ∉ -ℕ`).
-* `hcub_main`: the two combined near `u = 0` (where `w = Z³` with `Z = ω²(1+ωu)/(u+ω)` and the
-  principal cube root of `w` is `ω² Z`) and continued by the identity theorem to the convex set
-  `{Im u > 0, |u| < 1}`, where `|Z| < 1`.
-* `hcub_cpow`: the bookkeeping of principal powers on the image `u = 1/2 + iY`,
+* `CubicTransformation.cubic_upper_half`: the two combined near `u = 0` (where `w = Z³` with
+  `Z = ω²(1+ωu)/(u+ω)` and the principal cube root of `w` is `ω² Z`) and continued by the identity
+  theorem to the convex set `{Im u > 0, |u| < 1}`, where `|Z| < 1`.
+* `CubicTransformation.cpow`: the bookkeeping of principal powers on the image `u = 1/2 + iY`,
   `0 < Y < √3/2`, of the ray `x < -1`, by comparing logarithms whose imaginary parts differ by
   less than `2π`.
 -/
@@ -41,7 +41,7 @@ namespace DLMF.Hypergeometric
 
 
 /-- Powers of `t` with `t² = -3`. -/
-theorem hcub_tpow {t : ℂ} (ht : t ^ 2 = -3) :
+theorem CubicTransformation.pow_of_sq_eq_neg_three {t : ℂ} (ht : t ^ 2 = -3) :
     t ^ 3 = -3 * t ∧ t ^ 4 = 9 ∧ t ^ 5 = 9 * t ∧ t ^ 6 = -27 ∧ t ^ 7 = -27 * t ∧ t ^ 8 = 81 ∧
       t ^ 9 = 81 * t ∧ t ^ 10 = -243 ∧ t ^ 11 = -243 * t ∧ t ^ 12 = 729 := by
   have h3 : t ^ 3 = -3 * t := by rw [pow_succ, ht]
@@ -59,7 +59,7 @@ theorem hcub_tpow {t : ℂ} (ht : t ^ 2 = -3) :
 set_option maxRecDepth 10000 in
 /-- The Gauss-equation algebra of the cubic transformation: the operator of
 `(1+ω²u)^{-3a} F(φ(u))` is a multiple of the Gauss operator of `F` at `φ(u)`. -/
-theorem hcub_ode_alg {t a u P h0 h1 h2 : ℂ} (ht : t ^ 2 = -3)
+theorem CubicTransformation.ode_algebra {t a u P h0 h1 h2 : ℂ} (ht : t ^ 2 = -3)
     (hq : 1 + (-1 - t) / 2 * u ≠ 0) (hr : 1 + (-1 + t) / 2 * u ≠ 0)
     (hode : 3 * t * u * (u - 1) / (1 + (-1 - t) / 2 * u) ^ 3 *
         (1 - 3 * t * u * (u - 1) / (1 + (-1 - t) / 2 * u) ^ 3) * h2 +
@@ -82,7 +82,8 @@ theorem hcub_ode_alg {t a u P h0 h1 h2 : ℂ} (ht : t ^ 2 = -3)
               ((-1 - t) / 2) * u * (u - 1)) /
             (1 + (-1 - t) / 2 * u) ^ 4))) -
       (a + 1 / 3) * (3 * a) * (P * h0) = 0 := by
-  obtain ⟨h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩ := hcub_tpow ht
+  obtain ⟨h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩ :=
+      CubicTransformation.pow_of_sq_eq_neg_three ht
   linear_combination (norm := skip)
     (-P * (3 * t) * ((2 * u - 1) * (1 + (-1 - t) / 2 * u) - 3 * ((-1 - t) / 2) * u * (u - 1)) ^ 2 /
       ((1 + (-1 - t) / 2 * u) ^ 2 * (1 + (-1 + t) / 2 * u) ^ 3)) * hode
@@ -95,7 +96,7 @@ theorem hcub_ode_alg {t a u P h0 h1 h2 : ℂ} (ht : t ^ 2 = -3)
   ring_nf
 
 /-- The cubic map `φ(u) = K u (u - 1) / (1 + m u)³` and its derivatives. -/
-theorem hcub_phi_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
+theorem CubicTransformation.phi_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
     HasDerivAt (fun v => K * v * (v - 1) / (1 + m * v) ^ 3)
       (K * ((2 * u - 1) * (1 + m * u) - 3 * m * u * (u - 1)) / (1 + m * u) ^ 4) u := by
   have h : HasDerivAt (fun v => K * v * (v - 1) / (1 + m * v) ^ 3) _ u :=
@@ -107,7 +108,7 @@ theorem hcub_phi_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
   ring
 
 /-- Second derivative of the cubic map. -/
-theorem hcub_phi_deriv_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
+theorem CubicTransformation.phi_deriv_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
     HasDerivAt (fun v => K * ((2 * v - 1) * (1 + m * v) - 3 * m * v * (v - 1)) / (1 + m * v) ^ 4)
       (K * ((2 * (1 + m * u) - 2 * m * (2 * u - 1)) * (1 + m * u) -
         4 * m * ((2 * u - 1) * (1 + m * u) - 3 * m * u * (u - 1))) / (1 + m * u) ^ 5) u := by
@@ -129,15 +130,15 @@ theorem hcub_phi_deriv_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
 
 
 /-- `t = √3 i` satisfies `t² = -3`. -/
-theorem hcub_t_sq : ((Real.sqrt 3 : ℂ) * I) ^ 2 = -3 := by
+theorem CubicTransformation.sqrt_three_mul_I_sq : ((Real.sqrt 3 : ℂ) * I) ^ 2 = -3 := by
   rw [mul_pow, I_sq, ← ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
 
 /-- `‖√3 i‖ = √3`. -/
-theorem hcub_norm_t : ‖(Real.sqrt 3 : ℂ) * I‖ = Real.sqrt 3 := by
+theorem CubicTransformation.norm_sqrt_three_mul_I : ‖(Real.sqrt 3 : ℂ) * I‖ = Real.sqrt 3 := by
   rw [norm_mul, norm_I, mul_one, norm_real, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- `|ω| = |ω²| = 1`. -/
-theorem hcub_norm_m (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
+theorem CubicTransformation.norm_primitive_cube_root (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
     ‖(-1 + ε * ((Real.sqrt 3 : ℂ) * I)) / 2‖ = 1 := by
   have h3 := Real.sq_sqrt (show (0 : ℝ) ≤ 3 by norm_num)
   have hε2 : ε ^ 2 = 1 := by rcases hε with rfl | rfl <;> norm_num
@@ -148,56 +149,63 @@ theorem hcub_norm_m (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
   nlinarith
 
 /-- A crude bound `√3 < 7/4`. -/
-theorem hcub_sqrt3_lt : Real.sqrt 3 < 7 / 4 := by
+theorem CubicTransformation.sqrt_three_lt : Real.sqrt 3 < 7 / 4 := by
   rw [Real.sqrt_lt' (by norm_num)]; norm_num
 
 /-- `Re(1 + m u) > 0` when `|m| = 1` and `|u| < 1`. -/
-theorem hcub_one_add_mul_re_pos {m u : ℂ} (hm : ‖m‖ = 1) (hu : ‖u‖ < 1) : 0 < (1 + m * u).re := by
+theorem CubicTransformation.one_add_mul_re_pos {m u : ℂ} (hm : ‖m‖ = 1) (hu : ‖u‖ < 1) : 0 <
+    (1 + m * u).re := by
   have h := abs_re_le_norm (m * u)
   rw [norm_mul, hm, one_mul] at h
   rw [add_re, one_re]
   linarith [neg_abs_le (m * u).re]
 
 /-- `|1 + m u| ≥ 1 - |u|` when `|m| = 1`. -/
-theorem hcub_one_add_mul_norm_ge {m u : ℂ} (hm : ‖m‖ = 1) : 1 - ‖u‖ ≤ ‖1 + m * u‖ := by
+theorem CubicTransformation.one_add_mul_norm_ge {m u : ℂ} (hm : ‖m‖ = 1) : 1 - ‖u‖ ≤
+    ‖1 + m * u‖ := by
   have := norm_sub_norm_le (1 : ℂ) (-(m * u))
   rw [norm_one, norm_neg, norm_mul, hm, one_mul, sub_neg_eq_add] at this
   exact this
 
 /-- Goursat's cubic transformation near the origin:
 `F(a+1/3, 3a; 2a+2/3; u) = (1+ω²u)^{-3a} F(a, a+1/3; 2a+2/3; 3√3 i u(u-1)/(1+ω²u)³)`. -/
-theorem hcub_cubic {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ)) {u : ℂ} (hu : ‖u‖ < 1 / 10) :
+theorem CubicTransformation.cubic_near_zero {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ)) {u : ℂ}
+    (hu : ‖u‖ < 1 / 10) :
     ₂F₁ (a + 1 / 3) (3 * a) (2 * a + 2 / 3) u =
       (1 + (-1 - (Real.sqrt 3 : ℂ) * I) / 2 * u) ^ (-3 * a) *
         ₂F₁ a (a + 1 / 3) (2 * a + 2 / 3) (3 * ((Real.sqrt 3 : ℂ) * I) * u * (u - 1) /
           (1 + (-1 - (Real.sqrt 3 : ℂ) * I) / 2 * u) ^ 3) := by
   set t : ℂ := (Real.sqrt 3 : ℂ) * I with htdef
-  have ht : t ^ 2 = -3 := hcub_t_sq
+  have ht : t ^ 2 = -3 := CubicTransformation.sqrt_three_mul_I_sq
   have hm : ‖(-1 - t) / 2‖ = 1 := by
-    have := hcub_norm_m (-1) (Or.inr rfl); rw [← htdef] at this; convert this using 2;
+    have := CubicTransformation.norm_primitive_cube_root (-1) (Or.inr rfl); rw [← htdef] at this;
+        convert this using 2;
         push_cast; ring
   have hω : ‖(-1 + t) / 2‖ = 1 := by
-    have := hcub_norm_m 1 (Or.inl rfl); rw [← htdef] at this; convert this using 2; push_cast; ring
+    have := CubicTransformation.norm_primitive_cube_root 1 (Or.inl rfl); rw [← htdef] at this;
+        convert this using 2; push_cast; ring
   set m : ℂ := (-1 - t) / 2 with hmdef
   set H : ℂ → ℂ := ₂F₁ a (a + 1 / 3) (2 * a + 2 / 3) with hH
   set P : ℂ → ℂ := fun w => (1 + m * w) ^ (-3 * a) with hP
   set φ : ℂ → ℂ := fun v => (3 * t) * v * (v - 1) / (1 + m * v) ^ 3 with hφdef
   have hsmall : ∀ w ∈ Metric.ball (0 : ℂ) (1 / 10), ‖w‖ < 1 / 10 := fun w hw => by simpa using hw
   have hq0 : ∀ w : ℂ, ‖w‖ < 1 / 10 → 1 + m * w ≠ 0 := fun w hw h => by
-    have := hcub_one_add_mul_re_pos hm (show ‖w‖ < 1 by linarith)
+    have := CubicTransformation.one_add_mul_re_pos hm (show ‖w‖ < 1 by linarith)
     rw [h, zero_re] at this; exact lt_irrefl _ this
   have hr0 : ∀ w : ℂ, ‖w‖ < 1 / 10 → 1 + (-1 + t) / 2 * w ≠ 0 := fun w hw h => by
-    have := hcub_one_add_mul_re_pos hω (show ‖w‖ < 1 by linarith)
+    have := CubicTransformation.one_add_mul_re_pos hω (show ‖w‖ < 1 by linarith)
     rw [h, zero_re] at this; exact lt_irrefl _ this
   have hslit : ∀ w : ℂ, ‖w‖ < 1 / 10 → 1 + m * w ∈ slitPlane := fun w hw =>
-    mem_slitPlane_iff.mpr (Or.inl (hcub_one_add_mul_re_pos hm (by linarith)))
+    mem_slitPlane_iff.mpr (Or.inl (CubicTransformation.one_add_mul_re_pos hm (by linarith)))
   have hφn : ∀ w : ℂ, ‖w‖ < 1 / 10 → ‖φ w‖ < 1 := by
     intro w hw
-    have h1 : 9 / 10 ≤ ‖1 + m * w‖ := by linarith [hcub_one_add_mul_norm_ge (u := w) hm]
+    have h1 : 9 / 10 ≤ ‖1 + m * w‖ := by
+        linarith [CubicTransformation.one_add_mul_norm_ge (u := w) hm]
     have h2 : ‖w - 1‖ ≤ 11 / 10 := by
       have := norm_sub_le w 1; rw [norm_one] at this; linarith
     have h3 : ‖(3 : ℂ)‖ * ‖t‖ ≤ 21 / 4 := by
-      rw [htdef, hcub_norm_t]; norm_num; linarith [hcub_sqrt3_lt]
+      rw [htdef, CubicTransformation.norm_sqrt_three_mul_I]; norm_num;
+          linarith [CubicTransformation.sqrt_three_lt]
     simp only [hφdef, norm_div, norm_mul, norm_pow]
     rw [div_lt_one (by positivity)]
     have hw0 := norm_nonneg w
@@ -219,9 +227,9 @@ theorem hcub_cubic {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ)) {u
     have hev : deriv φ =ᶠ[𝓝 w] fun v =>
         3 * t * ((2 * v - 1) * (1 + m * v) - 3 * m * v * (v - 1)) / (1 + m * v) ^ 4 := by
       filter_upwards [hballo.mem_nhds hw] with v hv
-      exact (hcub_phi_hasDerivAt (hq0 v hv)).deriv
+      exact (CubicTransformation.phi_hasDerivAt (hq0 v hv)).deriv
     rw [hev.deriv_eq]
-    exact (hcub_phi_deriv_hasDerivAt (hq0 w hw)).deriv
+    exact (CubicTransformation.phi_deriv_hasDerivAt (hq0 w hw)).deriv
   have hG : ∀ w ∈ Metric.ball (0 : ℂ) (1 / 10), (fun v => P v * H (φ v)) w =
       ₂F₁ (a + 1 / 3) (3 * a) (2 * a + 2 / 3) w := by
     refine eq_ordinaryHypergeometric_of_gaussOperator hc (by norm_num) (by norm_num) ?_ ?_ ?_
@@ -235,7 +243,7 @@ theorem hcub_cubic {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ)) {u
       rw [gaussOperator_mul_comp (hPa w hw1) (hφa w hw1) hHa,
         show deriv P w = _ from deriv_affine_cpow (hslit w hw1),
         show deriv (deriv P) w = _ from deriv_deriv_affine_cpow (hslit w hw1),
-        (hcub_phi_hasDerivAt (hq0 w hw1)).deriv, hφdd w hw1]
+        (CubicTransformation.phi_hasDerivAt (hq0 w hw1)).deriv, hφdd w hw1]
       have hode := gaussOperator_ordinaryHypergeometric (a := a) (b := a + 1 / 3) hc (hφn w hw1)
       simp only [gaussOperator] at hode
       simp only [hP, hφdef, hH] at hode ⊢
@@ -246,7 +254,7 @@ theorem hcub_cubic {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ)) {u
       generalize iteratedDeriv 2 (₂F₁ a (a + 1 / 3) (2 * a + 2 / 3))
         (3 * t * w * (w - 1) / (1 + m * w) ^ 3) = h2 at hode ⊢
       generalize (1 + m * w) ^ (-3 * a) = pw
-      have := hcub_ode_alg (P := pw) ht (hq0 w hw1) (hr0 w hw1) hode
+      have := CubicTransformation.ode_algebra (P := pw) ht (hq0 w hw1) (hr0 w hw1) hode
       linear_combination this
     · simp [hP, hφdef, hH, ordinaryHypergeometric_zero]
   exact (hG u (by simpa using hu)).symm
@@ -254,7 +262,8 @@ theorem hcub_cubic {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ)) {u
 
 
 /-- A number with real part in `(0, 1)` is not an integer. -/
-theorem hcub_not_int {s : ℂ} (h0 : 0 < s.re) (h1 : s.re < 1) : ∀ k : ℤ, s ≠ (k : ℂ) := by
+theorem CubicTransformation.ne_intCast_of_re_mem_Ioo {s : ℂ} (h0 : 0 < s.re) (h1 : s.re < 1) : ∀ k :
+    ℤ, s ≠ (k : ℂ) := by
   intro k hk
   have hr : s.re = (k : ℝ) := by rw [hk]; simp
   have a0 : (0 : ℝ) < k := hr ▸ h0
@@ -264,7 +273,8 @@ theorem hcub_not_int {s : ℂ} (h0 : 0 < s.re) (h1 : s.re < 1) : ∀ k : ℤ, s 
   omega
 
 /-- `Γ(1/3) Γ(2/3) = 2π/√3`. -/
-theorem hcub_gamma_third_mul : Gamma (1 / 3) * Gamma (2 / 3) = 2 * π / Real.sqrt 3 := by
+theorem CubicTransformation.Gamma_third_mul_Gamma_two_thirds : Gamma (1 / 3) * Gamma (2 / 3) = 2 *
+    π / Real.sqrt 3 := by
   have h := Complex.Gamma_mul_Gamma_one_sub (1 / 3)
   rw [show (1 : ℂ) - 1 / 3 = 2 / 3 by norm_num] at h
   rw [h, show (π : ℂ) * (1 / 3) = ((π / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
@@ -275,7 +285,7 @@ theorem hcub_gamma_third_mul : Gamma (1 / 3) * Gamma (2 / 3) = 2 * π / Real.sqr
   field_simp
 
 /-- The connection of the bracket of DLMF 15.8.32 with the solution at `1`, for all `a`. -/
-theorem hcub_conn {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
+theorem CubicTransformation.connection {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
     (ha : ∀ k : ℕ, a + 1 / 3 ≠ -(k : ℂ)) (hw : ‖w‖ < 1) (hw1 : ‖1 - w‖ < 1) :
     ₂F₁ a (a + 1 / 3) (2 / 3) w / (Gamma (a + 2 / 3) * Gamma (2 / 3)) -
         w ^ (1 / 3 : ℂ) * ₂F₁ (a + 1 / 3) (a + 2 / 3) (4 / 3) w / (Gamma a * Gamma (4 / 3)) =
@@ -319,7 +329,8 @@ theorem hcub_conn {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
       ((differentiable_id.const_mul _).add_const _) hwc'
     exact analyticOnNhd_const.mul h3
   have hGne : ∀ s : ℂ, 0 < s.re → Gamma s ≠ 0 := fun s hs => Complex.Gamma_ne_zero_of_re_pos hs
-  have hc23 : ∀ k : ℤ, (2 / 3 : ℂ) ≠ (k : ℂ) := hcub_not_int (by norm_num) (by norm_num)
+  have hc23 : ∀ k : ℤ, (2 / 3 : ℂ) ≠ (k : ℂ) :=
+      CubicTransformation.ne_intCast_of_re_mem_Ioo (by norm_num) (by norm_num)
   have e1 : ∀ b : ℂ, ₂F₁ b (b + 1 / 3) (2 / 3) w = Gamma (2 / 3) * F₁ b := fun b => by
     simp only [hF₁]
     rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
@@ -359,7 +370,8 @@ theorem hcub_conn {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
       have := congrArg re hk; simp at this
       have : (0 : ℝ) ≤ k := Nat.cast_nonneg k
       linarith
-    have he : ∀ k : ℤ, 2 / 3 - b - (b + 1 / 3) ≠ (k : ℂ) := hcub_not_int
+    have he : ∀ k : ℤ, 2 / 3 - b - (b + 1 / 3) ≠ (k : ℂ) :=
+        CubicTransformation.ne_intCast_of_re_mem_Ioo
       (by simp; linarith) (by simp; linarith)
     have hconn := one_first_connection_zero (a := b) (b := b + 1 / 3) hc23 he hw hw1
     simp only [oneFirst, zeroSecond] at hconn
@@ -378,7 +390,7 @@ theorem hcub_conn {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
       rw [hconn]
       ring
     simp only [hf, hg]
-    rw [hF3, hcub_gamma_third_mul]
+    rw [hF3, CubicTransformation.Gamma_third_mul_Gamma_two_thirds]
     have h3 : (Real.sqrt 3 : ℂ) ≠ 0 := by
       exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 3)).ne'
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
@@ -410,57 +422,61 @@ theorem hcub_conn {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
 
 
 /-- `√3 > 0`. -/
-theorem hcub_sqrt3_pos : 0 < Real.sqrt 3 := Real.sqrt_pos.mpr (by norm_num)
+theorem CubicTransformation.sqrt_three_pos : 0 < Real.sqrt 3 := Real.sqrt_pos.mpr (by norm_num)
 
 /-- `(√3)² = 3`. -/
-theorem hcub_sqrt3_sq : Real.sqrt 3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+theorem CubicTransformation.sqrt_three_sq : Real.sqrt 3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
 
 /-- `|u + ω|² - |1 + ωu|² = 2√3 Im u` for `ω = e^{2πi/3}`. -/
-theorem hcub_normSq_diff (u : ℂ) :
+theorem CubicTransformation.normSq_sub_normSq (u : ℂ) :
     normSq (u + (-1 + (Real.sqrt 3 : ℂ) * I) / 2) =
       normSq (1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u) + 2 * Real.sqrt 3 * u.im := by
   simp only [normSq_apply, add_re, add_im, mul_re, mul_im, div_re, div_im, ofReal_re, ofReal_im,
     I_re, I_im, one_re, one_im, neg_re, neg_im]
   norm_num
   ring_nf
-  rw [hcub_sqrt3_sq]
+  rw [CubicTransformation.sqrt_three_sq]
   ring
 
 /-- Comparison of norms through `normSq`. -/
-theorem hcub_norm_lt_of_normSq {z w : ℂ} (h : normSq z < normSq w) : ‖z‖ < ‖w‖ := by
+theorem CubicTransformation.norm_lt_of_normSq {z w : ℂ} (h : normSq z < normSq w) : ‖z‖ < ‖w‖ := by
   rw [normSq_eq_norm_sq, normSq_eq_norm_sq] at h
   exact lt_of_pow_lt_pow_left₀ 2 (norm_nonneg _) h
 
 /-- For `Im u > 0`, `|1 + ωu| < |u + ω|`. -/
-theorem hcub_norm_lt_of_im_pos {u : ℂ} (hu : 0 < u.im) :
+theorem CubicTransformation.norm_lt_of_im_pos {u : ℂ} (hu : 0 < u.im) :
     ‖1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u‖ < ‖u + (-1 + (Real.sqrt 3 : ℂ) * I) / 2‖ := by
-  apply hcub_norm_lt_of_normSq
-  rw [hcub_normSq_diff]
-  have := hcub_sqrt3_pos
+  apply CubicTransformation.norm_lt_of_normSq
+  rw [CubicTransformation.normSq_sub_normSq]
+  have := CubicTransformation.sqrt_three_pos
   nlinarith
 
 /-- Three-way exponentials: `e^{iπ/3}`, `e^{2πi/3}`, `e^{4πi/3}` through `t = √3 i`. -/
-theorem hcub_exp_third : exp (Real.pi * I / 3) = (1 + (Real.sqrt 3 : ℂ) * I) / 2 := by
+theorem CubicTransformation.exp_pi_I_div_three : exp (Real.pi * I / 3) =
+    (1 + (Real.sqrt 3 : ℂ) * I) / 2 := by
   rw [show (Real.pi : ℂ) * I / 3 = ((π / 3 : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_three, Real.sin_pi_div_three]
   push_cast; ring
 
 /-- `exp(2πi/3) = (-1 + i√3)/2`. -/
-theorem hcub_exp_two_third : exp (2 * Real.pi * I / 3) = (-1 + (Real.sqrt 3 : ℂ) * I) / 2 := by
+theorem CubicTransformation.exp_two_pi_I_div_three : exp (2 * Real.pi * I / 3) =
+    (-1 + (Real.sqrt 3 : ℂ) * I) / 2 := by
   rw [show 2 * (Real.pi : ℂ) * I / 3 = ((π - π / 3 : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_pi_sub, Real.sin_pi_sub, Real.cos_pi_div_three,
     Real.sin_pi_div_three]
   push_cast; ring
 
 /-- `exp(4πi/3) = (-1 - i√3)/2`. -/
-theorem hcub_exp_four_third : exp (4 * Real.pi * I / 3) = (-1 - (Real.sqrt 3 : ℂ) * I) / 2 := by
+theorem CubicTransformation.exp_four_pi_I_div_three : exp (4 * Real.pi * I / 3) =
+    (-1 - (Real.sqrt 3 : ℂ) * I) / 2 := by
   rw [show 4 * (Real.pi : ℂ) * I / 3 = ((π / 3 + π : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_add_pi, Real.sin_add_pi, Real.cos_pi_div_three,
     Real.sin_pi_div_three]
   push_cast; ring
 
 /-- Principal cube root near `1`: if `‖y - 1‖ < 1/5` then `(y³)^{1/3} = y`. -/
-theorem hcub_cube_root {y : ℂ} (hy : ‖y - 1‖ < 1 / 5) : (y ^ 3) ^ (1 / 3 : ℂ) = y := by
+theorem CubicTransformation.cube_root {y : ℂ} (hy : ‖y - 1‖ < 1 / 5) : (y ^ 3) ^
+    (1 / 3 : ℂ) = y := by
   have him : |y.im| < 1 / 5 := by
     have := abs_im_le_norm (y - 1); simp at this; linarith
   have hre : 4 / 5 < y.re := by
@@ -482,17 +498,19 @@ theorem hcub_cube_root {y : ℂ} (hy : ‖y - 1‖ < 1 / 5) : (y ^ 3) ^ (1 / 3 :
   simpa using this
 
 /-- The cubic map sends the disk `|u| < 1/10` into the unit disk. -/
-theorem hcub_phi_norm {u : ℂ} (hu : ‖u‖ < 1 / 10) :
+theorem CubicTransformation.norm_phi_le {u : ℂ} (hu : ‖u‖ < 1 / 10) :
     ‖3 * ((Real.sqrt 3 : ℂ) * I) * u * (u - 1) / (1 + (-1 - (Real.sqrt 3 : ℂ) * I) / 2 * u) ^ 3‖
       < 1 := by
   have hm : ‖(-1 - (Real.sqrt 3 : ℂ) * I) / 2‖ = 1 := by
-    have := hcub_norm_m (-1) (Or.inr rfl); convert this using 2; push_cast; ring
+    have := CubicTransformation.norm_primitive_cube_root (-1) (Or.inr rfl); convert this using 2;
+        push_cast; ring
   have h1 : 9 / 10 ≤ ‖1 + (-1 - (Real.sqrt 3 : ℂ) * I) / 2 * u‖ := by
-    linarith [hcub_one_add_mul_norm_ge (u := u) hm]
+    linarith [CubicTransformation.one_add_mul_norm_ge (u := u) hm]
   have h2 : ‖u - 1‖ ≤ 11 / 10 := by
     have := norm_sub_le u 1; rw [norm_one] at this; linarith
   have h3 : ‖(3 : ℂ)‖ * ‖(Real.sqrt 3 : ℂ) * I‖ ≤ 21 / 4 := by
-    rw [hcub_norm_t]; norm_num; linarith [hcub_sqrt3_lt]
+    rw [CubicTransformation.norm_sqrt_three_mul_I]; norm_num;
+        linarith [CubicTransformation.sqrt_three_lt]
   simp only [norm_div, norm_mul, norm_pow] at h3 ⊢
   rw [div_lt_one (by positivity)]
   have hu0 := norm_nonneg u
@@ -502,14 +520,15 @@ theorem hcub_phi_norm {u : ℂ} (hu : ‖u‖ < 1 / 10) :
     _ ≤ _ := by gcongr
 
 /-- The algebraic identities behind the cubic change of variables (`t² = -3`). -/
-theorem hcub_alg {t u : ℂ} (ht : t ^ 2 = -3) (hq : 1 + (-1 - t) / 2 * u ≠ 0) :
+theorem CubicTransformation.algebra {t u : ℂ} (ht : t ^ 2 = -3) (hq : 1 + (-1 - t) / 2 * u ≠ 0) :
     ((-1 - t) / 2 * ((-1 - t) / 2 * (1 + (-1 + t) / 2 * u) / (u + (-1 + t) / 2))) ^ 3 =
         ((-1 - t) / 2 * (1 + (-1 + t) / 2 * u) / (u + (-1 + t) / 2)) ^ 3 ∧
       (-1 - t) / 2 * ((-1 - t) / 2 * (1 + (-1 + t) / 2 * u) / (u + (-1 + t) / 2)) - 1 =
         u * ((-1 - t) / 2 - 1) / (u + (-1 + t) / 2) ∧
       1 - ((-1 - t) / 2 * (1 + (-1 + t) / 2 * u) / (u + (-1 + t) / 2)) ^ 3 =
         3 * t * u * (u - 1) / (1 + (-1 - t) / 2 * u) ^ 3 := by
-  obtain ⟨h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩ := hcub_tpow ht
+  obtain ⟨h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩ :=
+      CubicTransformation.pow_of_sq_eq_neg_three ht
   have hω : u + (-1 + t) / 2 = (-1 + t) / 2 * (1 + (-1 - t) / 2 * u) := by
     linear_combination (u / 4) * ht
   have hω1 : (-1 + t) / 2 ≠ 0 := by
@@ -539,7 +558,7 @@ theorem hcub_alg {t u : ℂ} (ht : t ^ 2 = -3) (hq : 1 + (-1 - t) / 2 * u ≠ 0)
 `ω = e^{2πi/3}` and `Z = ω²(1+ωu)/(u+ω)` (so that `Z³` lies in the unit disk), the bracket of
 DLMF 15.8.32 at `z = 1/Z` equals `√3 Γ(a+1/3)/(2π Γ(2a+2/3)) (1+ω²u)^{3a} F(a+1/3, 3a; 2a+2/3; u)`.
 -/
-theorem hcub_main {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
+theorem CubicTransformation.cubic_upper_half {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
     (ha : ∀ k : ℕ, a + 1 / 3 ≠ -(k : ℂ)) {u : ℂ} (hu0 : 0 < u.im) (hu1 : ‖u‖ < 1) :
     ₂F₁ a (a + 1 / 3) (2 / 3) (((-1 - (Real.sqrt 3 : ℂ) * I) / 2 *
           (1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u) /
@@ -555,12 +574,14 @@ theorem hcub_main {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
         (1 + (-1 - (Real.sqrt 3 : ℂ) * I) / 2 * u) ^ (3 * a) *
         ₂F₁ (a + 1 / 3) (3 * a) (2 * a + 2 / 3) u := by
   set t : ℂ := (Real.sqrt 3 : ℂ) * I with htdef
-  have ht : t ^ 2 = -3 := hcub_t_sq
+  have ht : t ^ 2 = -3 := CubicTransformation.sqrt_three_mul_I_sq
   have hm : ‖(-1 - t) / 2‖ = 1 := by
-    have := hcub_norm_m (-1) (Or.inr rfl); rw [← htdef] at this; convert this using 2;
+    have := CubicTransformation.norm_primitive_cube_root (-1) (Or.inr rfl); rw [← htdef] at this;
+        convert this using 2;
         push_cast; ring
   have hωn : ‖(-1 + t) / 2‖ = 1 := by
-    have := hcub_norm_m 1 (Or.inl rfl); rw [← htdef] at this; convert this using 2; push_cast; ring
+    have := CubicTransformation.norm_primitive_cube_root 1 (Or.inl rfl); rw [← htdef] at this;
+        convert this using 2; push_cast; ring
   set ω : ℂ := (-1 + t) / 2 with hωdef
   set m : ℂ := (-1 - t) / 2 with hmdef
   set Zf : ℂ → ℂ := fun v => m * (1 + ω * v) / (v + ω) with hZf
@@ -576,7 +597,8 @@ theorem hcub_main {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
   have hΩc : IsPreconnected Ω :=
       (Convex.inter (convex_halfSpace_im_gt (r := 0)) (convex_ball (0 : ℂ) 1)).isPreconnected
   have hmem : ∀ v ∈ Ω, 0 < v.im ∧ ‖v‖ < 1 := fun v hv => ⟨hv.1, by simpa using hv.2⟩
-  have hlt : ∀ v ∈ Ω, ‖1 + ω * v‖ < ‖v + ω‖ := fun v hv => hcub_norm_lt_of_im_pos (hmem v hv).1
+  have hlt : ∀ v ∈ Ω, ‖1 + ω * v‖ < ‖v + ω‖ := fun v hv =>
+      CubicTransformation.norm_lt_of_im_pos (hmem v hv).1
   have hden : ∀ v ∈ Ω, v + ω ≠ 0 := fun v hv h => by
     have := hlt v hv; rw [h, norm_zero] at this; exact absurd this (not_lt.mpr (norm_nonneg _))
   have hZn : ∀ v ∈ Ω, ‖Zf v ^ 3‖ < 1 := by
@@ -598,7 +620,7 @@ theorem hcub_main {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
       (hZn v hv)).comp (f := fun w => Zf w ^ 3) hZ3
     exact (hF1.div_const).add (((analyticAt_const.mul (hZa v hv)).div_const).mul hF2)
   have hslit : ∀ v : ℂ, ‖v‖ < 1 → 1 + m * v ∈ slitPlane := fun v hv =>
-    mem_slitPlane_iff.mpr (Or.inl (hcub_one_add_mul_re_pos hm hv))
+    mem_slitPlane_iff.mpr (Or.inl (CubicTransformation.one_add_mul_re_pos hm hv))
   have hRa : AnalyticOnNhd ℂ Rf Ω := by
     intro v hv
     have hP : AnalyticAt ℂ (fun v => (1 + m * v) ^ (3 * a)) v :=
@@ -610,7 +632,7 @@ theorem hcub_main {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
     intro v hv0 hv1
     have hvΩ : v ∈ Ω := ⟨hv0, by simpa using (show ‖v‖ < 1 by linarith)⟩
     have hq : 1 + m * v ≠ 0 := slitPlane_ne_zero (hslit v (by linarith))
-    obtain ⟨A1, A2, A3⟩ := hcub_alg (u := v) ht hq
+    obtain ⟨A1, A2, A3⟩ := CubicTransformation.algebra (u := v) ht hq
     have hy : ‖m * Zf v - 1‖ < 1 / 5 := by
       simp only [hZf]
       rw [A2, norm_div, norm_mul]
@@ -620,23 +642,24 @@ theorem hcub_main {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
         rw [Complex.norm_eq_sqrt_sq_add_sq]
         congr 1
         simp only
-        nlinarith [hcub_sqrt3_sq]
+        nlinarith [CubicTransformation.sqrt_three_sq]
       have hω9 : 9 / 10 ≤ ‖v + ω‖ := by
         have := norm_sub_norm_le ω (-v)
         rw [norm_neg, hωn, sub_neg_eq_add, add_comm] at this; linarith
       rw [hm1, div_lt_iff₀ (by linarith)]
-      have := hcub_sqrt3_lt
+      have := CubicTransformation.sqrt_three_lt
       calc ‖v‖ * Real.sqrt 3 ≤ 1 / 10 * (7 / 4) := by gcongr
         _ < 1 / 5 * (9 / 10) := by norm_num
         _ ≤ _ := by gcongr
     have hroot : (Zf v ^ 3) ^ (1 / 3 : ℂ) = m * Zf v := by
-      rw [← hcub_cube_root hy]; congr 1; exact A1.symm
-    have hexp : exp (Real.pi * I / 3) = -m := by rw [hcub_exp_third, hmdef, htdef]; ring
+      rw [← CubicTransformation.cube_root hy]; congr 1; exact A1.symm
+    have hexp : exp (Real.pi * I / 3) = -m := by
+        rw [CubicTransformation.exp_pi_I_div_three, hmdef, htdef]; ring
     have hw1 : ‖1 - Zf v ^ 3‖ < 1 := by
-      simp only [hZf]; rw [A3]; exact hcub_phi_norm hv1
-    have hconn := hcub_conn (w := Zf v ^ 3) hc ha (hZn v hvΩ) hw1
+      simp only [hZf]; rw [A3]; exact CubicTransformation.norm_phi_le hv1
+    have hconn := CubicTransformation.connection (w := Zf v ^ 3) hc ha (hZn v hvΩ) hw1
     rw [hroot] at hconn
-    have hcub := hcub_cubic hc (u := v) hv1
+    have hcub := CubicTransformation.cubic_near_zero hc (u := v) hv1
     rw [← htdef, ← hmdef] at hcub
     simp only [hZf] at hconn
     rw [A3, ← hβ] at hconn
@@ -660,7 +683,8 @@ theorem hcub_main {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
   simpa only [hBf, hRf, hZf, hβ] using this
 
 /-- The point `u = 1/ζ` of DLMF 15.8.32 for real `z = X`, in terms of `t² = -3`. -/
-theorem hcub_seg_u {t X : ℂ} (ht : t ^ 2 = -3) (hω : -1 + t ≠ 0) (h1 : 1 - X ≠ 0)
+theorem CubicTransformation.segment_inv {t X : ℂ} (ht : t ^ 2 = -3) (hω : -1 + t ≠ 0)
+    (h1 : 1 - X ≠ 0)
     (hxm : 2 * X + 1 + t ≠ 0) :
     1 / ((-1 + t) / 2 * (1 - X) / (X - (-1 - t) / 2)) = 1 / 2 - t / 2 * (X + 1) / (1 - X) := by
   have hxm' : X - (-1 - t) / 2 ≠ 0 := by
@@ -670,7 +694,8 @@ theorem hcub_seg_u {t X : ℂ} (ht : t ^ 2 = -3) (hω : -1 + t ≠ 0) (h1 : 1 - 
   linear_combination (X + 1) * ht
 
 /-- At `u = 1/ζ`, the point `ω²(1+ωu)/(u+ω)` is `1/X`. -/
-theorem hcub_seg_Z {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X ≠ 0) :
+theorem CubicTransformation.segment_variable {t X : ℂ} (ht : t ^ 2 = -3)
+    (h1 : 1 - X ≠ 0) (hX : X ≠ 0) :
     (-1 - t) / 2 * (1 + (-1 + t) / 2 * (1 / 2 - t / 2 * (X + 1) / (1 - X))) /
       ((1 / 2 - t / 2 * (X + 1) / (1 - X)) + (-1 + t) / 2) = X⁻¹ := by
   have hden : (1 / 2 - t / 2 * (X + 1) / (1 - X)) + (-1 + t) / 2 = -t * X / (1 - X) := by
@@ -685,12 +710,13 @@ theorem hcub_seg_Z {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X ≠ 
   ring_nf
 
 /-- The algebraic form of the power identity on the segment. -/
-theorem hcub_seg_rel {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X ≠ 0)
+theorem CubicTransformation.segment_relation {t X : ℂ} (ht : t ^ 2 = -3)
+    (h1 : 1 - X ≠ 0) (hX : X ≠ 0)
     (hu : 1 / 2 - t / 2 * (X + 1) / (1 - X) ≠ 0) :
     (1 - X ^ 3) * (1 + (-1 - t) / 2 * (1 / 2 - t / 2 * (X + 1) / (1 - X))) ^ 3 / (-X) ^ 3 =
       3 * t * (1 - 1 / (1 / 2 - t / 2 * (X + 1) / (1 - X))) *
         (1 / 2 - t / 2 * (X + 1) / (1 - X)) ^ 2 := by
-  obtain ⟨h3, h4, h5, h6, -⟩ := hcub_tpow ht
+  obtain ⟨h3, h4, h5, h6, -⟩ := CubicTransformation.pow_of_sq_eq_neg_three ht
   have hu' : (1 - X) - t * (X + 1) ≠ 0 := by
     intro h; apply hu; field_simp; linear_combination h
   have hrw : 1 / 2 - t / 2 * (X + 1) / (1 - X) = ((1 - X) - t * (X + 1)) / (2 * (1 - X)) := by
@@ -702,7 +728,8 @@ theorem hcub_seg_rel {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X �
   ring_nf
 
 /-- The power bookkeeping of DLMF 15.8.32 on the segment `u = 1/2 + iY`. -/
-theorem hcub_cpow {a : ℂ} {x : ℝ} (hx : x < -1) {u : ℂ} (hre : u.re = 1 / 2) (him : 0 < u.im)
+theorem CubicTransformation.cpow {a : ℂ} {x : ℝ} (hx : x < -1) {u : ℂ} (hre : u.re = 1 / 2)
+    (him : 0 < u.im)
     (hn : ‖u‖ < 1)
     (hrel : (1 - (x : ℂ) ^ 3) * (1 + (-1 - (Real.sqrt 3 : ℂ) * I) / 2 * u) ^ 3 / (-(x : ℂ)) ^ 3 =
       3 * ((Real.sqrt 3 : ℂ) * I) * (1 - 1 / u) * u ^ 2) :
@@ -712,7 +739,8 @@ theorem hcub_cpow {a : ℂ} {x : ℝ} (hx : x < -1) {u : ℂ} (hre : u.re = 1 / 
         (-(1 / u)) ^ (2 * a) := by
   set m : ℂ := (-1 - (Real.sqrt 3 : ℂ) * I) / 2 with hmdef
   have hm : ‖m‖ = 1 := by
-    have := hcub_norm_m (-1) (Or.inr rfl); convert this using 2; push_cast; ring
+    have := CubicTransformation.norm_primitive_cube_root (-1) (Or.inr rfl); convert this using 2;
+        push_cast; ring
   set X : ℂ := (x : ℂ) with hX
   have hu0 : u ≠ 0 := by rintro rfl; simp at him
   have hpos1 : (1 - X ^ 3) = ((1 - x ^ 3 : ℝ) : ℂ) := by push_cast; rfl
@@ -722,10 +750,10 @@ theorem hcub_cpow {a : ℂ} {x : ℝ} (hx : x < -1) {u : ℂ} (hre : u.re = 1 / 
     have := mul_pos hr2 (pow_pos hr2 2); nlinarith
   have hA : 1 - X ^ 3 ≠ 0 := by rw [hpos1]; exact_mod_cast hr1.ne'
   have hB : -X ≠ 0 := by rw [hpos2]; exact_mod_cast hr2.ne'
-  have hCre : 0 < (1 + m * u).re := hcub_one_add_mul_re_pos hm hn
+  have hCre : 0 < (1 + m * u).re := CubicTransformation.one_add_mul_re_pos hm hn
   have hC : 1 + m * u ≠ 0 := fun h => by rw [h, zero_re] at hCre; exact lt_irrefl _ hCre
   have hCim : (1 + m * u).im < 0 := by
-    simp [hmdef, hre]; nlinarith [hcub_sqrt3_pos]
+    simp [hmdef, hre]; nlinarith [CubicTransformation.sqrt_three_pos]
   have hns : 0 < normSq u := normSq_pos.mpr hu0
   have hζre : 0 < (1 / u).re := by rw [one_div, inv_re, hre]; positivity
   have hζim : (1 / u).im < 0 := by

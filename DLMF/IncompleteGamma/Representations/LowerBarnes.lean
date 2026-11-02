@@ -20,7 +20,8 @@ vertical-contour estimates, and the Mellin–Barnes representations DLMF 8.6.10 
 * `upperGammaIndentPV`: the symmetric principal value underlying the indented contour of
   DLMF 8.6.9.
 * `upperIncGammaMBIntegrand`: the Mellin–Barnes integrand `Γ(s+a) z^{-s}/s` of DLMF 8.6.11.
-* `incRep_L`: the Mellin–Barnes integrand `Γ(s) z^{a-s}/(a-s)` of DLMF 8.6.10.
+* `IncompleteGammaBarnes.lowerIntegrand`: the Mellin–Barnes integrand `Γ(s) z^{a-s}/(a-s)` of DLMF
+  8.6.10.
 
 ## Main results
 
@@ -41,6 +42,8 @@ vertical-contour estimates, and the Mellin–Barnes representations DLMF 8.6.10 
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
+
+open DLMF.Core
 
 namespace DLMF.Confluent
 
@@ -706,11 +709,12 @@ theorem upperIncGamma_mellinBarnes (a : ℂ) {z : ℂ} (hz : 0 < z.re) {c : ℝ}
 /-! ### Tools for DLMF 8.6.10 -/
 
 /-- The Mellin–Barnes integrand `Γ(s) z^{a-s}/(a-s)`, `s = c+iy`, of DLMF 8.6.10. -/
-noncomputable def incRep_L (a z : ℂ) (c y : ℝ) : ℂ :=
+noncomputable def IncompleteGammaBarnes.lowerIntegrand (a z : ℂ) (c y : ℝ) : ℂ :=
   Gamma (c+y*I)/(a-(c+y*I))*z^(a-(c+y*I))
 
 /-- A whole-line improper integral of an integrable function is its Lebesgue integral. -/
-theorem incRep_integral_eq {f : ℝ → ℂ} {v : ℂ} (hf : Integrable f) (h : HasIntegralWholeLine f v) :
+theorem IncompleteGammaBarnes.integral_eq {f : ℝ → ℂ} {v : ℂ} (hf : Integrable f)
+    (h : HasIntegralWholeLine f v) :
     ∫ y, f y = v := by
   obtain ⟨u, w, hu, hw, huw⟩ := h
   have hu' := tendsto_nhds_unique hu
@@ -720,40 +724,45 @@ theorem incRep_integral_eq {f : ℝ → ℂ} {v : ℂ} (hf : Integrable f) (h : 
   rw [← huw, hu', hw', intervalIntegral.integral_Iic_add_Ioi hf.integrableOn hf.integrableOn]
 
 /-- An integrable function has its Lebesgue integral as whole-line improper integral. -/
-theorem incRep_hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
+theorem IncompleteGammaBarnes.hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
     HasIntegralWholeLine f (∫ y, f y) :=
   ⟨_, _, intervalIntegral_tendsto_integral_Iic 0 hf.integrableOn tendsto_id,
     intervalIntegral_tendsto_integral_Ioi 0 hf.integrableOn tendsto_id,
     intervalIntegral.integral_Iic_add_Ioi hf.integrableOn hf.integrableOn⟩
 
 /-- The 8.6.10 integrand is the negative of a shifted 8.6.11 integrand. -/
-theorem incRep_L_eq_upper (a z : ℂ) (c y : ℝ) :
-    incRep_L a z c y = -upperIncGammaMBIntegrand a z (c - a.re) (y - a.im) := by
-  unfold incRep_L upperIncGammaMBIntegrand
+theorem IncompleteGammaBarnes.lowerIntegrand_eq_upper (a z : ℂ) (c y : ℝ) :
+    IncompleteGammaBarnes.lowerIntegrand a z c y =
+        -upperIncGammaMBIntegrand a z (c - a.re) (y - a.im) := by
+  unfold IncompleteGammaBarnes.lowerIntegrand upperIncGammaMBIntegrand
   rw [show ((c - a.re : ℝ) : ℂ) + ((y - a.im : ℝ) : ℂ) * I = (c + y*I) - a by
     apply Complex.ext <;> simp, sub_add_cancel, neg_sub, ← neg_sub (c + y*I : ℂ) a, div_neg]
   ring
 
 /-- DLMF 8.6.10 to the right of the pole: the line integral is `-2π Γ(a,z)`. -/
-theorem incRep_integral_right {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hca : a.re < c) :
-    Integrable (incRep_L a z c) ∧ ∫ y, incRep_L a z c y = -(2*π*upperIncGamma a z) := by
+theorem IncompleteGammaBarnes.integral_right {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
+    (hca : a.re < c) :
+    Integrable (IncompleteGammaBarnes.lowerIntegrand a z c) ∧ ∫ y,
+        IncompleteGammaBarnes.lowerIntegrand a z c y = -(2*π*upperIncGamma a z) := by
   have hc0 : 0 < c - a.re := by linarith
   have hca' : 0 < (c - a.re) + a.re := by linarith
   have hint := integrable_upperIncGammaMBIntegrand a hz hc0 hca'
-  have hfun : incRep_L a z c = fun y => -upperIncGammaMBIntegrand a z (c - a.re) (y - a.im) :=
-    funext fun y => incRep_L_eq_upper a z c y
+  have hfun : IncompleteGammaBarnes.lowerIntegrand a z c = fun y =>
+      -upperIncGammaMBIntegrand a z (c - a.re) (y - a.im) :=
+    funext fun y => IncompleteGammaBarnes.lowerIntegrand_eq_upper a z c y
   have hv := upperIncGamma_mellinBarnes a hz hc0 hca'
   have hv' : ∫ y, upperIncGammaMBIntegrand a z (c - a.re) y = 2*π*upperIncGamma a z :=
-    incRep_integral_eq hint hv
+    IncompleteGammaBarnes.integral_eq hint hv
   refine ⟨hfun ▸ (hint.comp_sub_right a.im).neg, ?_⟩
   rw [hfun, integral_neg,
       integral_sub_right_eq_self (fun y => upperIncGammaMBIntegrand a z (c - a.re) y) a.im, hv']
 
 /-- Pointwise bound for the 8.6.10 integrand. -/
-theorem incRep_norm_L_le (a : ℂ) {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
-    ‖incRep_L a z c y‖ ≤ ‖Gamma (c+y*I)‖ * (‖z‖^(a.re - c) * Real.exp (|arg z| * |a.im|) *
+theorem IncompleteGammaBarnes.norm_lowerIntegrand_le (a : ℂ) {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
+    ‖IncompleteGammaBarnes.lowerIntegrand a z c y‖ ≤ ‖Gamma (c+y*I)‖ *
+        (‖z‖^(a.re - c) * Real.exp (|arg z| * |a.im|) *
       Real.exp (|arg z| * |y|)) / ‖a - (c+y*I)‖ := by
-  unfold incRep_L
+  unfold IncompleteGammaBarnes.lowerIntegrand
   have hre : (a - (c+y*I)).re = a.re - c := by simp
   have him : (a - (c+y*I)).im = a.im - y := by simp
   have hexp : (Real.exp (arg z * (a.im - y)))⁻¹ ≤
@@ -771,7 +780,7 @@ theorem incRep_norm_L_le (a : ℂ) {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
     _ = _ := by ring
 
 /-- `|Γ(x+iy)| ≤ Γ(x)/Γ(x') |Γ(x'+iy)|` for `0 < x ≤ x'`. -/
-theorem incRep_norm_Gamma_le {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ) :
+theorem IncompleteGammaBarnes.norm_Gamma_le {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ) :
     ‖Gamma (x + I*y)‖ ≤ Real.Gamma x / Real.Gamma x' * ‖Gamma (x' + I*y)‖ := by
   have hx' : 0 < x' := hx.trans_le hxx
   have h1 := DLMF.Gamma.norm_Gamma_sq_eq hx y
@@ -787,7 +796,7 @@ theorem incRep_norm_Gamma_le {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ
     _ = _ := by field_simp
 
 /-- `(1+u)^K e^{-bu} → 0`. -/
-theorem incRep_tendsto_poly_exp {b : ℝ} (hb : 0 < b) (K : ℕ) :
+theorem IncompleteGammaBarnes.tendsto_poly_exp {b : ℝ} (hb : 0 < b) (K : ℕ) :
     Tendsto (fun u : ℝ => (1 + u) ^ K * Real.exp (-(b * u))) atTop (𝓝 0) := by
   have h := ((Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero K).comp
     ((tendsto_id.const_mul_atTop hb).comp (tendsto_atTop_add_const_left _ 1 tendsto_id))).const_mul
@@ -800,8 +809,9 @@ theorem incRep_tendsto_poly_exp {b : ℝ} (hb : 0 < b) (K : ℕ) :
   field_simp
 
 /-- The 8.6.10 integrand is integrable on every line `Re s = c > 0` missing the pole. -/
-theorem incRep_integrable {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hca : c ≠ a.re) :
-    Integrable (incRep_L a z c) := by
+theorem IncompleteGammaBarnes.integrable {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
+    (hca : c ≠ a.re) :
+    Integrable (IncompleteGammaBarnes.lowerIntegrand a z c) := by
   have hz0 : z ≠ 0 := fun h => by rw [h] at hz; simp at hz
   have hθ : |arg z| < π/2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz)
   obtain ⟨C, K, hC⟩ := DLMF.Gamma.exists_norm_Gamma_shift_le hc 0
@@ -810,9 +820,9 @@ theorem incRep_integrable {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hc
   have hd0 : 0 < d := abs_pos.mpr (sub_ne_zero.mpr (Ne.symm hca))
   have hne : ∀ y : ℝ, d ≤ ‖a - (c + y*I)‖ := fun y => by
     have := Complex.abs_re_le_norm (a - (c + y*I)); simpa [hd] using this
-  have hcont : Continuous (incRep_L a z c) := by
+  have hcont : Continuous (IncompleteGammaBarnes.lowerIntegrand a z c) := by
     refine continuous_iff_continuousAt.mpr fun y => ?_
-    unfold incRep_L
+    unfold IncompleteGammaBarnes.lowerIntegrand
     refine ContinuousAt.mul (ContinuousAt.div ?_ (by fun_prop) ?_) ?_
     · exact (DLMF.Gamma.continuousAt_Gamma_of_re_pos (by simp [hc])).comp (by fun_prop)
     · intro h; have := hne y; rw [h, norm_zero] at this; linarith
@@ -823,7 +833,7 @@ theorem incRep_integrable {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hc
     K).const_mul M).mono' hcont.aestronglyMeasurable (Eventually.of_forall fun y => ?_)
   have h1 := hC y
   rw [show ((c:ℝ):ℂ) + I * (((0:ℝ):ℂ) + (y:ℂ)) = c + y*I by push_cast; ring] at h1
-  refine (incRep_norm_L_le a hz0 c y).trans ?_
+  refine (IncompleteGammaBarnes.norm_lowerIntegrand_le a hz0 c y).trans ?_
   have hA : 0 ≤ ‖z‖^(a.re - c) * Real.exp (|arg z| * |a.im|) := by positivity
   calc ‖Gamma (c+y*I)‖ * (‖z‖^(a.re - c) * Real.exp (|arg z| * |a.im|) *
         Real.exp (|arg z| * |y|)) / ‖a - (c+y*I)‖
@@ -837,13 +847,15 @@ theorem incRep_integrable {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hc
         simp only [M]; rw [← this]; field_simp
 
 /-- The 8.6.10 integrand in the residue-shift form `φ(s)/(s-a)`. -/
-theorem incRep_L_eq_div (a z : ℂ) (x T : ℝ) :
-    (-(Gamma ((x:ℂ)+T*I) * z^(a-((x:ℂ)+T*I)))) / ((x:ℂ)+T*I - a) = incRep_L a z x T := by
-  unfold incRep_L; rw [neg_div, ← div_neg, neg_sub]; ring
+theorem IncompleteGammaBarnes.lowerIntegrand_eq_div (a z : ℂ) (x T : ℝ) :
+    (-(Gamma ((x:ℂ)+T*I) * z^(a-((x:ℂ)+T*I)))) / ((x:ℂ)+T*I - a) =
+        IncompleteGammaBarnes.lowerIntegrand a z x T := by
+  unfold IncompleteGammaBarnes.lowerIntegrand; rw [neg_div, ← div_neg, neg_sub]; ring
 
 open scoped Interval in
 /-- Horizontal cross-sections of the 8.6.10 integrand vanish at `±i∞`. -/
-theorem incRep_horizontal {a z : ℂ} (hz : 0 < z.re) {c c' : ℝ} (hc : 0 < c) (hcc : c ≤ c') :
+theorem IncompleteGammaBarnes.horizontal {a z : ℂ} (hz : 0 < z.re) {c c' : ℝ} (hc : 0 < c)
+    (hcc : c ≤ c') :
     Tendsto (fun T : ℝ => ∫ x in c..c', (-(Gamma ((x:ℂ)+T*I) * z^(a-((x:ℂ)+T*I)))) /
       ((x:ℂ)+T*I - a)) atTop (𝓝 0) ∧
     Tendsto (fun T : ℝ => ∫ x in c..c', (-(Gamma ((x:ℂ)+T*I) * z^(a-((x:ℂ)+T*I)))) /
@@ -881,12 +893,12 @@ theorem incRep_horizontal {a z : ℂ} (hz : 0 < z.re) {c c' : ℝ} (hc : 0 < c) 
       rw [uIoc_of_le hcc] at hx
       have hxI : x ∈ Icc c c' := ⟨hx.1.le, hx.2⟩
       have hx0 : 0 < x := hc.trans hx.1
-      rw [incRep_L_eq_div]
-      refine (incRep_norm_L_le a hz0 x T).trans ?_
+      rw [IncompleteGammaBarnes.lowerIntegrand_eq_div]
+      refine (IncompleteGammaBarnes.norm_lowerIntegrand_le a hz0 x T).trans ?_
       have hg1 : ‖Gamma ((x:ℂ)+T*I)‖ ≤ |G| / Real.Gamma c' * (C * (1 + |T|) ^ K *
           Real.exp (-(π * |T|) / 2)) := by
         rw [show (x:ℂ)+T*I = x + I*T by ring]
-        refine (incRep_norm_Gamma_le hx0 hxI.2 T).trans ?_
+        refine (IncompleteGammaBarnes.norm_Gamma_le hx0 hxI.2 T).trans ?_
         have hGx : Real.Gamma x ≤ |G| := by
           have := hG x hxI; rw [Real.norm_eq_abs] at this
           exact (le_abs_self _).trans (this.trans (le_abs_self G))
@@ -909,7 +921,7 @@ theorem incRep_horizontal {a z : ℂ} (hz : 0 < z.re) {c c' : ℝ} (hc : 0 < c) 
     rw [abs_of_nonneg (sub_nonneg.mpr hcc)] at this
     calc _ ≤ _ := this
       _ = K0 * ((1 + |T|) ^ K * Real.exp (-(b * |T|))) := by simp only [K0]; ring
-  have hlim := incRep_tendsto_poly_exp hb K
+  have hlim := IncompleteGammaBarnes.tendsto_poly_exp hb K
   constructor
   · refine squeeze_zero_norm' ?_ (by simpa using (hlim.comp tendsto_abs_atTop_atTop).const_mul K0)
     filter_upwards [eventually_ge_atTop (a.im + 1)] with T hT
@@ -919,23 +931,27 @@ theorem incRep_horizontal {a z : ℂ} (hz : 0 < z.re) {c c' : ℝ} (hc : 0 < c) 
     exact key T (by rw [abs_of_nonneg (by linarith)]; linarith)
 
 /-- The value of the 8.6.10 line integral. -/
-theorem incRep_integral_value {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
+theorem IncompleteGammaBarnes.integral_value {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 < z.re)
+    {c : ℝ} (hc : 0 < c)
     (hca : c ≠ a.re) :
-    ∫ y, incRep_L a z c y = 2*π*(lowerIncGamma a z-(if a.re < c then Gamma a else 0)) := by
+    ∫ y, IncompleteGammaBarnes.lowerIntegrand a z c y =
+        2*π*(lowerIncGamma a z-(if a.re < c then Gamma a else 0)) := by
   have hz0 : z ≠ 0 := fun h => by rw [h] at hz; simp at hz
   have hsum := lowerIncGamma_add_upperIncGamma ha hz0
   by_cases h : a.re < c
   · simp only [h, ↓reduceIte]
-    have hR := (incRep_integral_right hz hc h).2
+    have hR := (IncompleteGammaBarnes.integral_right hz hc h).2
     linear_combination hR - 2*π*hsum
   · simp only [h, ↓reduceIte, sub_zero]
     have hlt : c < a.re := lt_of_le_of_ne (not_lt.mp h) hca
     set c' : ℝ := a.re + 1
     have hc' : 0 < c' := by simp only [c']; linarith
-    have hR := incRep_integral_right hz hc' (show a.re < c' by simp only [c']; linarith)
+    have hR := IncompleteGammaBarnes.integral_right hz hc'
+        (show a.re < c' by simp only [c']; linarith)
     set Φ : ℂ → ℂ := fun s => -(Gamma s * z^(a-s)) with hΦdef
-    have e : ∀ c0 : ℝ, (fun y : ℝ => Φ ((c0:ℂ) + y*I) / ((c0:ℂ)+y*I - a)) = incRep_L a z c0 :=
-      fun c0 => funext fun y => incRep_L_eq_div a z c0 y
+    have e : ∀ c0 : ℝ, (fun y : ℝ => Φ ((c0:ℂ) + y*I) / ((c0:ℂ)+y*I - a)) =
+        IncompleteGammaBarnes.lowerIntegrand a z c0 :=
+      fun c0 => funext fun y => IncompleteGammaBarnes.lowerIntegrand_eq_div a z c0 y
     have hΦ : DifferentiableOn ℂ Φ (re ⁻¹' Icc c c') := by
       intro s hs
       have hs0 : 0 < s.re := hc.trans_le hs.1
@@ -943,12 +959,16 @@ theorem incRep_integral_value {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 <
       refine ((Complex.differentiableAt_Gamma s fun m hm => ?_).mul
         ((differentiableAt_const a).sub differentiableAt_id |>.const_cpow (Or.inl hz0))).neg
       have := congrArg re hm; simp at this; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)]
-    have hH := incRep_horizontal (a := a) hz hc (show c ≤ c' by simp only [c']; linarith)
-    have hshift := Complex.barnesRes_vertical_shift (p := a) hlt
+    have hH := IncompleteGammaBarnes.horizontal (a := a) hz hc
+        (show c ≤ c' by simp only [c']; linarith)
+    have hshift := Complex.BarnesResidue.vertical_shift (p := a) hlt
       (show a.re < c' by simp only [c']; linarith) hΦ
-      (by rw [e c]; exact incRep_integrable hz hc hca) (by rw [e c']; exact hR.1) hH.1 hH.2
-    rw [show (fun y : ℝ => Φ ((c':ℂ) + y*I) / ((c':ℂ)+y*I - a)) = incRep_L a z c' from e c',
-      show (fun y : ℝ => Φ ((c:ℂ) + y*I) / ((c:ℂ)+y*I - a)) = incRep_L a z c from e c,
+      (by rw [e c]; exact IncompleteGammaBarnes.integrable hz hc hca)
+          (by rw [e c']; exact hR.1) hH.1 hH.2
+    rw [show (fun y : ℝ => Φ ((c':ℂ) + y*I) / ((c':ℂ)+y*I - a)) =
+        IncompleteGammaBarnes.lowerIntegrand a z c' from e c',
+      show (fun y : ℝ => Φ ((c:ℂ) + y*I) / ((c:ℂ)+y*I - a)) =
+          IncompleteGammaBarnes.lowerIntegrand a z c from e c,
           hR.2] at hshift
     simp only [hΦdef, sub_self, cpow_zero, mul_one] at hshift
     linear_combination -hshift - 2*π*hsum
@@ -959,9 +979,10 @@ theorem lowerIncGamma_mellinBarnes {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz 
     (hc : 0 < c) (hca : c ≠ a.re) :
     HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma s/(a-s)*z^(a-s))
         (2*π*(lowerIncGamma a z-(if a.re < c then Gamma a else 0))) := by
-  have hfun : (fun y : ℝ => let s : ℂ := c+y*I; Gamma s/(a-s)*z^(a-s)) = incRep_L a z c := rfl
-  rw [hfun, ← incRep_integral_value ha hz hc hca]
-  exact incRep_hasIntegralWholeLine (incRep_integrable hz hc hca)
+  have hfun : (fun y : ℝ => let s : ℂ := c+y*I; Gamma s/(a-s)*z^(a-s)) =
+      IncompleteGammaBarnes.lowerIntegrand a z c := rfl
+  rw [hfun, ← IncompleteGammaBarnes.integral_value ha hz hc hca]
+  exact IncompleteGammaBarnes.hasIntegralWholeLine (IncompleteGammaBarnes.integrable hz hc hca)
 
 end DLMF.Confluent
 end

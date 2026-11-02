@@ -43,6 +43,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 open DLMF.Statistical
@@ -84,11 +86,11 @@ theorem incGammaAsymptoticRemainder_real_bound {a x : ℝ} (hx : 0 < x) {N : ℕ
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   set θ : ℝ := x^((N:ℝ)+1-a)*Real.exp x*(upperIncGamma ((a-N:ℝ):ℂ) x).re
   have hθ0 : 0 < θ := by
-    have := incG_upperIncGamma_re_pos (a := a-N) hx
-        (incG_integrableOn_rpow_exp_of_le_one (by linarith) hx)
+    have := IncompleteGammaRealIntegrals.upperIncGamma_re_pos (a := a-N) hx
+        (IncompleteGammaRealIntegrals.integrableOn_rpow_exp_of_le_one (by linarith) hx)
     positivity
   have hθ1 : θ ≤ 1 := by
-    have hle := incG_upperIncGamma_re_le (a := a-N) (by linarith) hx
+    have hle := IncompleteGammaRealIntegrals.upperIncGamma_re_le (a := a-N) (by linarith) hx
     calc θ ≤ x^((N:ℝ)+1-a)*Real.exp x*(x^(a-N-1)*Real.exp (-x)) := by
           simp only [θ]; gcongr
       _ = 1 := by
@@ -107,10 +109,10 @@ theorem incGammaAsymptoticRemainder_real_bound {a x : ℝ} (hx : 0 < x) {N : ℕ
         mul_comm (log X)]
     have hk : ∀ k : ℕ, exp (-(k:ℂ)*(Real.log x : ℂ)) = X^(-(k:ℂ)) := by
       intro k; rw [ofReal_log hx.le, cpow_def_of_ne_zero hx0, mul_comm]
-    have hU := incG_upperIncGamma_expansion (a:ℂ) hx0 N
+    have hU := IncompleteGammaRealIntegrals.upperIncGamma_expansion (a:ℂ) hx0 N
     have hθc : ((θ:ℝ):ℂ) = X^((N:ℂ)+1-a)*exp X*upperIncGamma ((a-N:ℝ):ℂ) x := by
       simp only [θ]
-      conv_rhs => rw [incG_upperIncGamma_ofReal_re (a-N) hx]
+      conv_rhs => rw [IncompleteGammaRealIntegrals.upperIncGamma_ofReal_re (a-N) hx]
       push_cast
       rw [ofReal_cpow hx.le]; push_cast; simp only [X]
     have hsum : ∀ k ∈ Finset.range N,
@@ -252,8 +254,10 @@ theorem lowerIncGamma_large_parameter_asymptotic {z : ℂ} (hz : z ≠ 0) {δ : 
   rw [hsum]
   linarith
 
+namespace IncompleteGammaAsymptotics
+
 /-- On the logarithmic sector, `exp` maps into the principal sector. -/
-theorem igAsy_tendsto_exp_logSector {α : ℝ} (hα : α < π) :
+theorem tendsto_exp_logSector {α : ℝ} (hα : α < π) :
     Tendsto exp (logSector α) (sector α) := by
   refine tendsto_inf.mpr ⟨?_, ?_⟩
   · rw [tendsto_comap_iff]
@@ -271,7 +275,7 @@ theorem igAsy_tendsto_exp_logSector {α : ℝ} (hα : α < π) :
     exact hw'
 
 /-- Points of a sector of half-angle `π - δ` are not nonpositive integers. -/
-theorem igAsy_ne_neg_nat {δ : ℝ} (hδ : 0 < δ) {a : ℂ} (ha0 : a ≠ 0) (harg : |arg a| ≤ π-δ) (n : ℕ) :
+theorem ne_neg_nat {δ : ℝ} (hδ : 0 < δ) {a : ℂ} (ha0 : a ≠ 0) (harg : |arg a| ≤ π-δ) (n : ℕ) :
     a ≠ -n := by
   intro hn
   rcases Nat.eq_zero_or_pos n with h | h
@@ -284,7 +288,7 @@ theorem igAsy_ne_neg_nat {δ : ℝ} (hδ : 0 < δ) {a : ℂ} (ha0 : a ≠ 0) (ha
     linarith
 
 /-- First half of 8.11.5 on the principal sector. -/
-theorem igAsy_normIncGammaP_equiv_sector {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
+theorem normIncGammaP_equiv_sector {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
     IsEquivalent (sector (π-δ)) (fun a => normIncGammaPContinued a z)
       (fun a => z^a*exp (-z)/Gamma (1+a)) := by
   have H := lowerIncGamma_large_parameter_asymptotic hz hδ hδ1 1
@@ -313,21 +317,21 @@ theorem igAsy_normIncGammaP_equiv_sector {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (h�
   have H2 := H.mul (isBigO_refl (fun a => (Gamma a)⁻¹) (sector (π-δ)))
   refine (H2.congr' ?_ ?_)
   · filter_upwards [hev] with a ⟨ha0, harg⟩
-    have hnp := igAsy_ne_neg_nat hδ ha0 harg
+    have hnp := ne_neg_nat hδ ha0 harg
     simp only [Pi.sub_apply]
     rw [normIncGammaPContinued_eq hnp, normIncGammaP, add_comm 1 a,
       Complex.Gamma_add_one a ha0]
     simp [poch_one]
     field_simp
   · filter_upwards [hev] with a ⟨ha0, harg⟩
-    have hnp := igAsy_ne_neg_nat hδ ha0 harg
+    have hnp := ne_neg_nat hδ ha0 harg
     have ha1 : a + 1 ≠ 0 := by simpa [add_eq_zero_iff_eq_neg] using hnp 1
     rw [add_comm 1 a, Complex.Gamma_add_one a ha0, show (1:ℕ)+1 = 2 by rfl]
     simp [poch_succ, poch_zero]
     field_simp
 
 /-- Stirling's formula in the form used for 8.11.5. -/
-theorem igAsy_stirling_logSector {z : ℂ} (hz : z ≠ 0) {w : ℂ} (hw1 : -π < w.im) (hw2 : w.im < π) :
+theorem stirling_logSector {z : ℂ} (hz : z ≠ 0) {w : ℂ} (hw1 : -π < w.im) (hw2 : w.im < π) :
     z^(exp w)*exp (-z)/Gamma (1+exp w) =
       exp (exp w-z+exp w*(log z-w)-w/2)/Real.sqrt (2*π) * exp (-DLMF.Gamma.binetMu (exp w)) := by
   set a := exp w with ha
@@ -351,7 +355,7 @@ theorem igAsy_stirling_logSector {z : ℂ} (hz : z ≠ 0) {w : ℂ} (hw1 : -π <
   ring
 
 /-- The Binet remainder tends to zero on the logarithmic sector. -/
-theorem igAsy_tendsto_binetMu_logSector {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
+theorem tendsto_binetMu_logSector {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
     Tendsto (fun w => DLMF.Gamma.binetMu (exp w)) (logSector (π-δ)) (𝓝 0) := by
   have hc : 0 < 1 - Real.cos δ := by
     have := Real.cos_lt_cos_of_nonneg_of_le_pi (le_refl 0) hδ1.le hδ
@@ -387,6 +391,10 @@ theorem igAsy_tendsto_binetMu_logSector {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < �
   gcongr
   linarith
 
+end IncompleteGammaAsymptotics
+
+open IncompleteGammaAsymptotics
+
 /-- Identity under the stated parameter and domain assumptions: `IsEquivalent (logSector (π-δ))
 (fun w => normIncGammaPContinued (exp w) z) (fun w => z^(exp w)*exp (-z)/Gamma (1+exp w)) ∧
 IsEquivalent (logSector (π-δ)) (fun w => normIncGammaPContinued (exp w) z) (fun w => exp (exp
@@ -398,10 +406,10 @@ theorem normIncGammaP_large_parameter_equivalent {z : ℂ} (hz : z ≠ 0) {δ : 
         (fun w => z^(exp w)*exp (-z)/Gamma (1+exp w)) ∧
         IsEquivalent (logSector (π-δ)) (fun w => normIncGammaPContinued (exp w) z)
         (fun w => exp (exp w-z+exp w*(log z-w)-w/2)/Real.sqrt (2*π)) := by
-  have h1 := (igAsy_normIncGammaP_equiv_sector hz hδ hδ1).comp_tendsto
-    (igAsy_tendsto_exp_logSector (by linarith : π-δ < π))
+  have h1 := (normIncGammaP_equiv_sector hz hδ hδ1).comp_tendsto
+    (tendsto_exp_logSector (by linarith : π-δ < π))
   refine ⟨h1, h1.trans ?_⟩
-  have hmu := igAsy_tendsto_binetMu_logSector hδ hδ1
+  have hmu := tendsto_binetMu_logSector hδ hδ1
   have hexp : Tendsto (fun w => exp (-DLMF.Gamma.binetMu (exp w))) (logSector (π-δ)) (𝓝 1) := by
     have := (Complex.continuous_exp.tendsto (-0)).comp hmu.neg
     simpa [Function.comp_def] using this
@@ -409,7 +417,7 @@ theorem normIncGammaP_large_parameter_equivalent {z : ℂ} (hz : z ≠ 0) {δ : 
   filter_upwards [mem_inf_of_right (mem_principal_self _)] with w hw
   have hw' : |w.im| ≤ π-δ := hw
   simp only [Function.comp, Pi.mul_apply]
-  rw [igAsy_stirling_logSector hz (by linarith [neg_abs_le w.im]) (by linarith [le_abs_self w.im])]
+  rw [stirling_logSector hz (by linarith [neg_abs_le w.im]) (by linarith [le_abs_self w.im])]
   ring
 
 /-- Polynomials b_k(lam), defined by the differential recurrence 8.11.9. -/
@@ -430,58 +438,61 @@ theorem incGammaLambdaPolynomial_initial  :
       Polynomial.C_ofNat]
   ring
 
+namespace IncompleteGammaAsymptotics
+
 /-- `1 - x s > 0` for `x < 1` and `s ∈ [0,1]`. -/
-theorem igAsy_one_sub_mul_pos {x s : ℝ} (hx : x < 1) (hs : s ∈ Icc (0:ℝ) 1) : 0 < 1 - x*s := by
+theorem one_sub_mul_pos {x s : ℝ} (hx : x < 1) (hs : s ∈ Icc (0:ℝ) 1) : 0 < 1 - x*s := by
   rcases le_or_gt x 0 with h | h
   · nlinarith [mul_nonpos_of_nonpos_of_nonneg h hs.1]
   · nlinarith [mul_le_mul_of_nonneg_left hs.2 h.le]
 
 /-- Real version of the polynomials `b_k` of 8.11.9. -/
-noncomputable def igAsy_b : ℕ → Polynomial ℝ
+noncomputable def coeffPoly : ℕ → Polynomial ℝ
   | 0 => 1
-  | k+1 => Polynomial.X*(1-Polynomial.X)*(igAsy_b k).derivative +
-      Polynomial.C (2*(k:ℝ)+1)*Polynomial.X*igAsy_b k
+  | k+1 => Polynomial.X*(1-Polynomial.X)*(coeffPoly k).derivative +
+      Polynomial.C (2*(k:ℝ)+1)*Polynomial.X*coeffPoly k
 
-/-- `igAsy_b` complexifies to `incGammaLambdaPolynomial`. -/
-theorem igAsy_b_map (k : ℕ) : (igAsy_b k).map (algebraMap ℝ ℂ) = incGammaLambdaPolynomial k := by
+/-- `coeffPoly` complexifies to `incGammaLambdaPolynomial`. -/
+theorem coeffPoly_map (k : ℕ) : (coeffPoly k).map (algebraMap ℝ ℂ) =
+    incGammaLambdaPolynomial k := by
   induction k with
-  | zero => simp [igAsy_b, incGammaLambdaPolynomial]
+  | zero => simp [coeffPoly, incGammaLambdaPolynomial]
   | succ k ih =>
-    rw [igAsy_b, incGammaLambdaPolynomial, ← ih]
+    rw [coeffPoly, incGammaLambdaPolynomial, ← ih]
     simp only [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_sub, Polynomial.map_one,
       Polynomial.map_X, Polynomial.map_C, Polynomial.derivative_map]
     simp
 
 /-- `b_k(x)` at a real point. -/
-theorem igAsy_b_eval (k : ℕ) (x : ℝ) :
-    (incGammaLambdaPolynomial k).eval (x : ℂ) = (((igAsy_b k).eval x : ℝ) : ℂ) := by
-  rw [← igAsy_b_map, Polynomial.eval_map, show (x:ℂ) = algebraMap ℝ ℂ x from rfl,
+theorem coeffPoly_eval (k : ℕ) (x : ℝ) :
+    (incGammaLambdaPolynomial k).eval (x : ℂ) = (((coeffPoly k).eval x : ℝ) : ℂ) := by
+  rw [← coeffPoly_map, Polynomial.eval_map, show (x:ℂ) = algebraMap ℝ ℂ x from rfl,
     Polynomial.eval₂_at_apply]
   rfl
 
 /-- `v_k(y) = b_k(y)/(1-y)^{2k}`. -/
-noncomputable def igAsy_v (k : ℕ) (y : ℝ) : ℝ := (igAsy_b k).eval y / (1-y)^(2*k)
+noncomputable def coeffRational (k : ℕ) (y : ℝ) : ℝ := (coeffPoly k).eval y / (1-y)^(2*k)
 
 /-- `v_0 = 1`. -/
-theorem igAsy_v_zero (y : ℝ) : igAsy_v 0 y = 1 := by simp [igAsy_v, igAsy_b]
+theorem coeffRational_zero (y : ℝ) : coeffRational 0 y = 1 := by simp [coeffRational, coeffPoly]
 
 /-- The primitive `W_k(t) = b_k(λt)/(1-λt)^{2k+1}`. -/
-noncomputable def igAsy_W (k : ℕ) (l t : ℝ) : ℝ := (igAsy_b k).eval (l*t) / (1-l*t)^(2*k+1)
+noncomputable def ibpPrimitive (k : ℕ) (l t : ℝ) : ℝ := (coeffPoly k).eval (l*t) / (1-l*t)^(2*k+1)
 
 /-- The derivative of `W_k`. -/
-noncomputable def igAsy_W' (k : ℕ) (l t : ℝ) : ℝ :=
-  l*((igAsy_b k).derivative.eval (l*t)*(1-l*t) + (2*k+1)*(igAsy_b k).eval (l*t))/(1-l*t)^(2*k+2)
+noncomputable def derivIbpPrimitive (k : ℕ) (l t : ℝ) : ℝ :=
+  l*((coeffPoly k).derivative.eval (l*t)*(1-l*t) + (2*k+1)*(coeffPoly k).eval (l*t))/(1-l*t)^(2*k+2)
 
 /-- `W_k` has derivative `W_k'` where `1 - λt ≠ 0`. -/
-theorem igAsy_hasDerivAt_W (k : ℕ) {l t : ℝ} (h : 1 - l*t ≠ 0) :
-    HasDerivAt (igAsy_W k l) (igAsy_W' k l t) t := by
-  have hP := ((igAsy_b k).hasDerivAt (l*t)).comp t ((hasDerivAt_id t).const_mul l)
+theorem hasDerivAt_ibpPrimitive (k : ℕ) {l t : ℝ} (h : 1 - l*t ≠ 0) :
+    HasDerivAt (ibpPrimitive k l) (derivIbpPrimitive k l t) t := by
+  have hP := ((coeffPoly k).hasDerivAt (l*t)).comp t ((hasDerivAt_id t).const_mul l)
   have hD := (((hasDerivAt_id t).const_mul l).const_sub 1).pow (2*k+1)
   have hq := hP.div hD (pow_ne_zero _ h)
-  unfold igAsy_W
+  unfold ibpPrimitive
   convert hq using 1
   · funext s; simp [Function.comp_def]
-  unfold igAsy_W'
+  unfold derivIbpPrimitive
   simp only [id, mul_one, Function.comp_apply, Pi.pow_apply]
   rw [show 2*k+1-1 = 2*k by omega]
   field_simp
@@ -489,139 +500,144 @@ theorem igAsy_hasDerivAt_W (k : ℕ) {l t : ℝ} (h : 1 - l*t ≠ 0) :
   ring
 
 /-- `t W_k'(t) = v_{k+1}(λt)`. -/
-theorem igAsy_mul_W' (k : ℕ) (l t : ℝ) :
-    t * igAsy_W' k l t = igAsy_v (k+1) (l*t) := by
-  unfold igAsy_W' igAsy_v
-  simp only [igAsy_b, Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_X,
+theorem mul_W' (k : ℕ) (l t : ℝ) :
+    t * derivIbpPrimitive k l t = coeffRational (k+1) (l*t) := by
+  unfold derivIbpPrimitive coeffRational
+  simp only [coeffPoly, Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_X,
     Polynomial.eval_sub, Polynomial.eval_one, Polynomial.eval_C]
   rw [show 2*(k+1) = 2*k+2 by ring]
   field_simp
 
 /-- The integrand `g(t) = t^{a-1} e^{λa(1-t)}` of `e^{λa} γ*`-type integrals. -/
-noncomputable def igAsy_g (l : ℝ) (a : ℂ) (t : ℝ) : ℂ := (t:ℂ)^(a-1) * exp (l*a*(1-t))
+noncomputable def powMulExpIntegrand (l : ℝ) (a : ℂ) (t : ℝ) : ℂ := (t:ℂ)^(a-1) * exp (l*a*(1-t))
 
 /-- `H(t) = t^a e^{λa(1-t)}`. -/
-noncomputable def igAsy_H (l : ℝ) (a : ℂ) (t : ℝ) : ℂ := (t:ℂ)^a * exp (l*a*(1-t))
+noncomputable def powMulExp (l : ℝ) (a : ℂ) (t : ℝ) : ℂ := (t:ℂ)^a * exp (l*a*(1-t))
 
 /-- `H' = a(1-λt) g` for `t > 0`. -/
-theorem igAsy_hasDerivAt_H (l : ℝ) (a : ℂ) {t : ℝ} (ht : 0 < t) :
-    HasDerivAt (igAsy_H l a) (a*(1-l*t)*igAsy_g l a t) t := by
+theorem hasDerivAt_powMulExp (l : ℝ) (a : ℂ) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (powMulExp l a) (a*(1-l*t)*powMulExpIntegrand l a t) t := by
   have hslit : (t:ℂ) ∈ slitPlane := by simpa using ofReal_mem_slitPlane.mpr ht
   have h1 := (Complex.hasStrictDerivAt_cpow_const (c := a) hslit).hasDerivAt.comp_ofReal
   have h2 : HasDerivAt (fun s : ℝ => exp (l*a*(1-(s:ℂ)))) (exp (l*a*(1-t)) * (-(l*a))) t := by
     have := ((((hasDerivAt_id' (t:ℂ)).const_sub 1).const_mul ((l:ℂ)*a)).cexp).comp_ofReal
     convert this using 1; ring
   have h := h1.mul h2
-  unfold igAsy_H
+  unfold powMulExp
   convert h using 1
-  unfold igAsy_g
+  unfold powMulExpIntegrand
   have ht0 : (t:ℂ) ≠ 0 := by exact_mod_cast ht.ne'
   rw [show (t:ℂ)^a = (t:ℂ)^(a-1) * t by
         have := cpow_add (a-1) 1 ht0; rwa [sub_add_cancel, cpow_one] at this]
   ring
 
 /-- `W_k` is continuous on `[0,1]` for `λ < 1`. -/
-theorem igAsy_continuousOn_W (k : ℕ) {l : ℝ} (hl : l < 1) :
-    ContinuousOn (igAsy_W k l) (uIcc 0 1) := by
-  unfold igAsy_W
+theorem continuousOn_ibpPrimitive (k : ℕ) {l : ℝ} (hl : l < 1) :
+    ContinuousOn (ibpPrimitive k l) (uIcc 0 1) := by
+  unfold ibpPrimitive
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => ?_
   rw [uIcc_of_le zero_le_one] at hs
-  exact pow_ne_zero _ (igAsy_one_sub_mul_pos hl hs).ne'
+  exact pow_ne_zero _ (one_sub_mul_pos hl hs).ne'
 
 /-- `t ↦ v_k(λt)` is continuous on `[0,1]` for `λ < 1`. -/
-theorem igAsy_continuousOn_v (k : ℕ) {l : ℝ} (hl : l < 1) :
-    ContinuousOn (fun s => igAsy_v k (l*s)) (uIcc 0 1) := by
-  unfold igAsy_v
+theorem continuousOn_coeffRational (k : ℕ) {l : ℝ} (hl : l < 1) :
+    ContinuousOn (fun s => coeffRational k (l*s)) (uIcc 0 1) := by
+  unfold coeffRational
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => ?_
   rw [uIcc_of_le zero_le_one] at hs
-  exact pow_ne_zero _ (igAsy_one_sub_mul_pos hl hs).ne'
+  exact pow_ne_zero _ (one_sub_mul_pos hl hs).ne'
 
 /-- `W_k'` is continuous on `[0,1]` for `λ < 1`. -/
-theorem igAsy_continuousOn_W' (k : ℕ) {l : ℝ} (hl : l < 1) :
-    ContinuousOn (igAsy_W' k l) (uIcc 0 1) := by
-  unfold igAsy_W'
+theorem continuousOn_W' (k : ℕ) {l : ℝ} (hl : l < 1) :
+    ContinuousOn (derivIbpPrimitive k l) (uIcc 0 1) := by
+  unfold derivIbpPrimitive
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => ?_
   rw [uIcc_of_le zero_le_one] at hs
-  exact pow_ne_zero _ (igAsy_one_sub_mul_pos hl hs).ne'
+  exact pow_ne_zero _ (one_sub_mul_pos hl hs).ne'
 
 /-- `g` is continuous for `Re a > 1`. -/
-theorem igAsy_continuous_g (l : ℝ) {a : ℂ} (ha : 1 < a.re) : Continuous (igAsy_g l a) := by
-  unfold igAsy_g
+theorem continuous_powMulExpIntegrand (l : ℝ) {a : ℂ} (ha : 1 < a.re) : Continuous
+    (powMulExpIntegrand l a) := by
+  unfold powMulExpIntegrand
   refine Continuous.mul ?_ (by fun_prop)
   exact continuous_iff_continuousAt.mpr fun t =>
     (Complex.continuousAt_ofReal_cpow_const t (a-1) (Or.inl (by simp; linarith)))
 
 /-- One complex integration by parts. -/
-theorem igAsy_ibpC (k : ℕ) {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) :
-    ∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v k (l*t) =
-      igAsy_W k l 1/a - 1/a * ∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v (k+1) (l*t) := by
+theorem ibp_complex (k : ℕ) {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) :
+    ∫ t in (0:ℝ)..1, powMulExpIntegrand l a t * coeffRational k (l*t) =
+      ibpPrimitive k l 1/a - 1/a * ∫ t in (0:ℝ)..1, powMulExpIntegrand l a t *
+          coeffRational (k+1) (l*t) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha; linarith
-  have hgc := igAsy_continuous_g l ha
-  have hHc : ContinuousOn (igAsy_H l a) (uIcc 0 1) := by
-    unfold igAsy_H
+  have hgc := continuous_powMulExpIntegrand l ha
+  have hHc : ContinuousOn (powMulExp l a) (uIcc 0 1) := by
+    unfold powMulExp
     refine ContinuousOn.mul ?_ (by fun_prop)
     exact (continuous_iff_continuousAt.mpr fun t =>
       (Complex.continuousAt_ofReal_cpow_const t a (Or.inl (by linarith)))).continuousOn
-  have hv : ContinuousOn (fun s : ℝ => ((igAsy_W k l s : ℝ) : ℂ)/a) (uIcc 0 1) :=
-    ((continuous_ofReal.comp_continuousOn (igAsy_continuousOn_W k hl))).div_const _
-  have hu' : ∀ t ∈ Ioo (min (0:ℝ) 1) (max 0 1), HasDerivAt (igAsy_H l a)
-      (a*(1-l*t)*igAsy_g l a t) t := fun t ht => igAsy_hasDerivAt_H l a (by simpa using ht.1)
+  have hv : ContinuousOn (fun s : ℝ => ((ibpPrimitive k l s : ℝ) : ℂ)/a) (uIcc 0 1) :=
+    ((continuous_ofReal.comp_continuousOn (continuousOn_ibpPrimitive k hl))).div_const _
+  have hu' : ∀ t ∈ Ioo (min (0:ℝ) 1) (max 0 1), HasDerivAt (powMulExp l a)
+      (a*(1-l*t)*powMulExpIntegrand l a t) t := fun t ht =>
+          hasDerivAt_powMulExp l a (by simpa using ht.1)
   have hv' : ∀ t ∈ Ioo (min (0:ℝ) 1) (max 0 1),
-      HasDerivAt (fun s : ℝ => ((igAsy_W k l s : ℝ) : ℂ)/a)
-      (((igAsy_W' k l t : ℝ) : ℂ)/a) t := by
+      HasDerivAt (fun s : ℝ => ((ibpPrimitive k l s : ℝ) : ℂ)/a)
+      (((derivIbpPrimitive k l t : ℝ) : ℂ)/a) t := by
     intro t ht
     simp only [min_eq_left zero_le_one, max_eq_right zero_le_one] at ht
-    exact ((igAsy_hasDerivAt_W k
-        (igAsy_one_sub_mul_pos hl ⟨ht.1.le, ht.2.le⟩).ne').ofReal_comp).div_const _
-  have hi1 : IntervalIntegrable (fun t : ℝ => a*(1-l*t)*igAsy_g l a t) volume 0 1 :=
-    (by fun_prop : Continuous fun t : ℝ => a*(1-l*t)*igAsy_g l a t).intervalIntegrable _ _
-  have hi2 : IntervalIntegrable (fun t : ℝ => ((igAsy_W' k l t : ℝ) : ℂ)/a) volume 0 1 :=
-    ((continuous_ofReal.comp_continuousOn (igAsy_continuousOn_W' k hl)).div_const
+    exact ((hasDerivAt_ibpPrimitive k
+        (one_sub_mul_pos hl ⟨ht.1.le, ht.2.le⟩).ne').ofReal_comp).div_const _
+  have hi1 : IntervalIntegrable (fun t : ℝ => a*(1-l*t)*powMulExpIntegrand l a t) volume 0 1 :=
+    (by fun_prop : Continuous fun t : ℝ =>
+          a*(1-l*t)*powMulExpIntegrand l a t).intervalIntegrable _ _
+  have hi2 : IntervalIntegrable (fun t : ℝ => ((derivIbpPrimitive k l t : ℝ) : ℂ)/a) volume 0 1 :=
+    ((continuous_ofReal.comp_continuousOn (continuousOn_W' k hl)).div_const
         _).intervalIntegrable
   have H := intervalIntegral.integral_mul_deriv_eq_deriv_mul_of_hasDerivAt hHc hv hu' hv' hi1 hi2
-  have hc1 : ∫ t in (0:ℝ)..1, igAsy_H l a t * (((igAsy_W' k l t : ℝ) : ℂ)/a) =
-      (∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v (k+1) (l*t))/a := by
+  have hc1 : ∫ t in (0:ℝ)..1, powMulExp l a t * (((derivIbpPrimitive k l t : ℝ) : ℂ)/a) =
+      (∫ t in (0:ℝ)..1, powMulExpIntegrand l a t * coeffRational (k+1) (l*t))/a := by
     rw [← intervalIntegral.integral_div]
     refine intervalIntegral.integral_congr fun t ht => ?_
-    rw [← igAsy_mul_W']
-    unfold igAsy_H igAsy_g
+    rw [← mul_W']
+    unfold powMulExp powMulExpIntegrand
     rcases eq_or_ne t 0 with h0 | h0
     · subst h0; simp [zero_cpow ha0]
     · have ht0 : (t:ℂ) ≠ 0 := by exact_mod_cast h0
       rw [show (t:ℂ)^a = (t:ℂ)^(a-1) * t by
         have := cpow_add (a-1) 1 ht0; rwa [sub_add_cancel, cpow_one] at this]
       push_cast; ring
-  have hc2 : ∫ t in (0:ℝ)..1, a*(1-l*t)*igAsy_g l a t * (((igAsy_W k l t : ℝ) : ℂ)/a) =
-      ∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v k (l*t) := by
+  have hc2 : ∫ t in (0:ℝ)..1, a*(1-l*t)*powMulExpIntegrand l a t *
+      (((ibpPrimitive k l t : ℝ) : ℂ)/a) =
+      ∫ t in (0:ℝ)..1, powMulExpIntegrand l a t * coeffRational k (l*t) := by
     refine intervalIntegral.integral_congr fun t ht => ?_
     rw [uIcc_of_le zero_le_one] at ht
-    have h1 := (igAsy_one_sub_mul_pos hl ht).ne'
+    have h1 := (one_sub_mul_pos hl ht).ne'
     have h1' : (1:ℂ) - l*t ≠ 0 := by exact_mod_cast h1
-    simp only [igAsy_W, igAsy_v]
+    simp only [ibpPrimitive, coeffRational]
     push_cast
     field_simp
     ring
   rw [hc1, hc2] at H
-  have hH1 : igAsy_H l a 1 = 1 := by simp [igAsy_H]
-  have hH0 : igAsy_H l a 0 = 0 := by simp [igAsy_H, zero_cpow ha0]
+  have hH1 : powMulExp l a 1 = 1 := by simp [powMulExp]
+  have hH0 : powMulExp l a 0 = 0 := by simp [powMulExp, zero_cpow ha0]
   rw [hH1, hH0] at H
   field_simp at H ⊢
   linear_combination H
 
 /-- Iterated complex integration by parts. -/
-theorem igAsy_iterC {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) (N : ℕ) :
-    ∫ t in (0:ℝ)..1, igAsy_g l a t =
-      ∑ k ∈ Finset.range N, (-1)^k/a^(k+1) * (igAsy_W k l 1 : ℂ) +
-        (-1)^N/a^N * ∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v N (l*t) := by
+theorem ibp_iterate_complex {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) (N : ℕ) :
+    ∫ t in (0:ℝ)..1, powMulExpIntegrand l a t =
+      ∑ k ∈ Finset.range N, (-1)^k/a^(k+1) * (ibpPrimitive k l 1 : ℂ) +
+        (-1)^N/a^N * ∫ t in (0:ℝ)..1, powMulExpIntegrand l a t * coeffRational N (l*t) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha; linarith
   induction N with
-  | zero => simp [igAsy_v_zero]
+  | zero => simp [coeffRational_zero]
   | succ N ih =>
-    rw [ih, igAsy_ibpC N hl ha, Finset.sum_range_succ]
+    rw [ih, ibp_complex N hl ha, Finset.sum_range_succ]
     ring
 
 /-- `∫₀¹ e^{-c(1-t)} dt ≤ 1/c`. -/
-theorem igAsy_integral_exp_le {c : ℝ} (hc0 : 0 < c) :
+theorem integral_exp_le {c : ℝ} (hc0 : 0 < c) :
     ∫ t in (0:ℝ)..1, Real.exp (-c*(1-t)) ≤ 1/c := by
   have hd : ∀ s ∈ uIcc (0:ℝ) 1, HasDerivAt (fun s : ℝ => Real.exp (-c*(1-s))/c)
       (Real.exp (-c*(1-s))) s := by
@@ -638,9 +654,10 @@ theorem igAsy_integral_exp_le {c : ℝ} (hc0 : 0 < c) :
   linarith [Real.exp_pos (-c*(1-0))]
 
 /-- Pointwise bound `‖t^{a-1} e^{λa(1-t)}‖ ≤ e^{-(Re a(1-λ)-1)(1-t)}`. -/
-theorem igAsy_norm_g_le {l : ℝ} {a : ℂ} (ha : 1 < a.re) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
-    ‖igAsy_g l a t‖ ≤ Real.exp (-(a.re*(1-l)-1)*(1-t)) := by
-  unfold igAsy_g
+theorem norm_powMulExpIntegrand_le {l : ℝ} {a : ℂ} (ha : 1 < a.re) {t : ℝ} (ht0 : 0 ≤ t)
+    (ht1 : t ≤ 1) :
+    ‖powMulExpIntegrand l a t‖ ≤ Real.exp (-(a.re*(1-l)-1)*(1-t)) := by
+  unfold powMulExpIntegrand
   rcases ht0.eq_or_lt with h | h
   · subst h
     have : a - 1 ≠ 0 := fun h' => by
@@ -657,30 +674,34 @@ theorem igAsy_norm_g_le {l : ℝ} {a : ℂ} (ha : 1 < a.re) {t : ℝ} (ht0 : 0 �
     _ = Real.exp (-(a.re*(1-l)-1)*(1-t)) := by rw [← Real.exp_add]; ring_nf
 
 /-- Remainder bound for the complex integral. -/
-theorem igAsy_norm_integral_le {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) (ha2 : 2 ≤ a.re*(1-l))
-    {N : ℕ} {K : ℝ} (hK : ∀ t ∈ Icc (0:ℝ) 1, |igAsy_v N (l*t)| ≤ K) :
-    ‖∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v N (l*t)‖ ≤ K * (2/(a.re*(1-l))) := by
+theorem norm_integral_le {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) (ha2 : 2 ≤ a.re*(1-l))
+    {N : ℕ} {K : ℝ} (hK : ∀ t ∈ Icc (0:ℝ) 1, |coeffRational N (l*t)| ≤ K) :
+    ‖∫ t in (0:ℝ)..1, powMulExpIntegrand l a t * coeffRational N (l*t)‖ ≤ K * (2/(a.re*(1-l))) := by
   have hK0 : 0 ≤ K := le_trans (abs_nonneg _) (hK 0 ⟨le_rfl, zero_le_one⟩)
   set c := (a.re*(1-l))/2 with hc_def
   have hc : 0 < c := by linarith
-  have hcont : ContinuousOn (fun t : ℝ => igAsy_g l a t * igAsy_v N (l*t)) (uIcc 0 1) :=
-    (igAsy_continuous_g l ha).continuousOn.mul
-      (continuous_ofReal.comp_continuousOn (igAsy_continuousOn_v N hl))
+  have hcont : ContinuousOn
+      (fun t : ℝ => powMulExpIntegrand l a t * coeffRational N (l*t)) (uIcc 0 1) :=
+    (continuous_powMulExpIntegrand l ha).continuousOn.mul
+      (continuous_ofReal.comp_continuousOn (continuousOn_coeffRational N hl))
   refine (intervalIntegral.norm_integral_le_integral_norm zero_le_one).trans ?_
-  calc ∫ t in (0:ℝ)..1, ‖igAsy_g l a t * igAsy_v N (l*t)‖
+  calc ∫ t in (0:ℝ)..1, ‖powMulExpIntegrand l a t * coeffRational N (l*t)‖
       ≤ ∫ t in (0:ℝ)..1, K * Real.exp (-c*(1-t)) := by
         refine intervalIntegral.integral_mono_on zero_le_one hcont.norm.intervalIntegrable
           ((by fun_prop : Continuous fun t : ℝ => K *
                  Real.exp (-c*(1-t))).intervalIntegrable _ _) ?_
         intro t ht
         rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, mul_comm]
-        refine mul_le_mul (hK t ht) ((igAsy_norm_g_le ha ht.1 ht.2).trans ?_) (norm_nonneg _) hK0
+        refine mul_le_mul (hK t ht) ((norm_powMulExpIntegrand_le ha ht.1 ht.2).trans ?_)
+            (norm_nonneg _) hK0
         rw [Real.exp_le_exp]
         have : 0 ≤ 1 - t := by linarith [ht.2]
         nlinarith
     _ = K * ∫ t in (0:ℝ)..1, Real.exp (-c*(1-t)) := intervalIntegral.integral_const_mul _ _
-    _ ≤ K * (1/c) := mul_le_mul_of_nonneg_left (igAsy_integral_exp_le hc) hK0
+    _ ≤ K * (1/c) := mul_le_mul_of_nonneg_left (integral_exp_le hc) hK0
     _ = K * (2/(a.re*(1-l))) := by rw [hc_def]; field_simp
+
+end IncompleteGammaAsymptotics
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
 (π/2-δ)) (fun k w => exp (exp w*(w+Real.log lam)-lam*exp w-(k+1 : ℂ)*w)/(lam-1 : ℂ)^(2*k+1))
@@ -694,9 +715,9 @@ theorem lowerIncGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 0 < lam) (hlam1
         (fun k => -(-1 : ℂ)^k*(incGammaLambdaPolynomial k).eval (lam : ℂ))
         (fun w => lowerIncGammaOnLog (exp w) (w+Real.log lam)) := by
   intro N
-  obtain ⟨K, hK⟩ : ∃ K, ∀ t ∈ Icc (0:ℝ) 1, |igAsy_v N (lam*t)| ≤ K := by
+  obtain ⟨K, hK⟩ : ∃ K, ∀ t ∈ Icc (0:ℝ) 1, |coeffRational N (lam*t)| ≤ K := by
     obtain ⟨K, hK⟩ := isCompact_Icc.exists_bound_of_continuousOn
-      (by simpa [uIcc_of_le zero_le_one] using igAsy_continuousOn_v N hlam1)
+      (by simpa [uIcc_of_le zero_le_one] using continuousOn_coeffRational N hlam1)
     exact ⟨K, fun t ht => by simpa [Real.norm_eq_abs] using hK t ht⟩
   have hK0 : 0 ≤ K := le_trans (abs_nonneg _) (hK 0 ⟨le_rfl, zero_le_one⟩)
   set c := Real.sin δ with hc_def
@@ -728,7 +749,8 @@ theorem lowerIncGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 0 < lam) (hlam1
   set E := exp (a*(w+Real.log lam) - lam*a) with hE
   have hw' : exp (w + (Real.log lam : ℂ)) = a * lam := by
     rw [Complex.exp_add, ← ofReal_exp, Real.exp_log hlam]
-  have hf : lowerIncGammaOnLog a (w+Real.log lam) = E * ∫ t in (0:ℝ)..1, igAsy_g lam a t := by
+  have hf : lowerIncGammaOnLog a (w+Real.log lam) = E * ∫ t in (0:ℝ)..1,
+      powMulExpIntegrand lam a t := by
     unfold lowerIncGammaOnLog
     rw [hw', scIncGamma_integral (by linarith)]
     have hG := Complex.Gamma_ne_zero_of_re_pos (by linarith : 0 < a.re)
@@ -737,20 +759,20 @@ theorem lowerIncGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 0 < lam) (hlam1
         (t:ℂ)^(a-1) * exp (-(a*lam)*t) by field_simp]
     rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr fun t _ => ?_
-    simp only [igAsy_g, hE]
+    simp only [powMulExpIntegrand, hE]
     rw [mul_left_comm, ← Complex.exp_add, mul_left_comm (exp _), ← Complex.exp_add]
     congr 2
     ring
   have hφ : ∀ k : ℕ, (exp (a*(w+Real.log lam)-lam*a-(k+1 : ℂ)*w)/(lam-1 : ℂ)^(2*k+1)) •
       (-(-1 : ℂ)^k*(incGammaLambdaPolynomial k).eval (lam : ℂ)) =
-      E * ((-1)^k/a^(k+1) * (igAsy_W k lam 1 : ℂ)) := by
+      E * ((-1)^k/a^(k+1) * (ibpPrimitive k lam 1 : ℂ)) := by
     intro k
     have hak : exp (-(k+1 : ℂ)*w) = (a^(k+1))⁻¹ := by
       rw [ha_def, ← Complex.exp_nat_mul, ← Complex.exp_neg]; push_cast; ring_nf
     have hl' : (1:ℂ) - lam ≠ 0 := by rw [sub_ne_zero]; exact_mod_cast hlam1.ne'
     rw [smul_eq_mul, show a*(w+Real.log lam)-lam*a-(k+1 : ℂ)*w = (a*(w+Real.log lam)-lam*a) +
-      (-(k+1 : ℂ)*w) by ring, Complex.exp_add, ← hE, hak, igAsy_b_eval]
-    simp only [igAsy_W, mul_one]
+      (-(k+1 : ℂ)*w) by ring, Complex.exp_add, ← hE, hak, coeffPoly_eval]
+    simp only [ibpPrimitive, mul_one]
     push_cast
     rw [show ((lam:ℂ)-1)^(2*k+1) = -((1-lam)^(2*k+1)) by
       rw [show (lam:ℂ)-1 = -(1-lam) by ring, Odd.neg_pow ⟨k, rfl⟩]]
@@ -763,15 +785,15 @@ theorem lowerIncGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 0 < lam) (hlam1
       (-(N+1 : ℂ)*w) by ring, Complex.exp_add, ← hE, hak]
     field_simp
   simp only [hf, hφ, hφN]
-  rw [← Finset.mul_sum, ← mul_sub, igAsy_iterC hlam1 ha1 N, add_sub_cancel_left]
-  have hI := igAsy_norm_integral_le hlam1 ha1 ha2 hK
+  rw [← Finset.mul_sum, ← mul_sub, ibp_iterate_complex hlam1 ha1 N, add_sub_cancel_left]
+  have hI := norm_integral_le hlam1 ha1 ha2 hK
   have hapos : 0 < ‖a‖ := norm_pos_iff.mpr ha0
   simp only [norm_pow, norm_mul, norm_div, norm_neg, norm_one, one_pow]
   have hb : K * (2/(a.re*(1-lam))) ≤ K * (2/(c*(1-lam)))/‖a‖ := by
     have : 2/(a.re*(1-lam)) ≤ 2/(c*(1-lam))/‖a‖ := by
       rw [div_div, div_le_div_iff₀ (by positivity) (by positivity)]; nlinarith
     rw [mul_div_assoc]; exact mul_le_mul_of_nonneg_left this hK0
-  calc ‖E‖ * (1/‖a‖^N * ‖∫ t in (0:ℝ)..1, igAsy_g lam a t * igAsy_v N (lam*t)‖)
+  calc ‖E‖ * (1/‖a‖^N * ‖∫ t in (0:ℝ)..1, powMulExpIntegrand lam a t * coeffRational N (lam*t)‖)
       ≤ ‖E‖ * (1/‖a‖^N * (K * (2/(c*(1-lam)))/‖a‖)) := by gcongr; exact hI.trans hb
     _ = K*(2/(c*(1-lam)))*‖(lam:ℂ)-1‖^(2*N+1) * (‖E‖/(‖a‖^(N+1)*‖(lam:ℂ)-1‖^(2*N+1))) := by
         have : ‖(lam:ℂ)-1‖^(2*N+1) ≠ 0 := by rw [← norm_pow]; exact norm_ne_zero_iff.mpr hlc
@@ -815,31 +837,33 @@ theorem upperIncGamma_diagonal_asymptotic  :
         (fun w => upperIncGammaOnLog (exp w) w) := by
   sorry
 
+namespace IncompleteGammaAsymptotics
+
 /-- Real polynomials `p_k` with `b_k = X p_k` for `k ≥ 1` (helper for 8.11.18). -/
-noncomputable def igAsy_poly : ℕ → Polynomial ℝ
+noncomputable def ibpPoly : ℕ → Polynomial ℝ
   | 0 => 1
-  | k+1 => (1 - Polynomial.X) * (igAsy_poly k + Polynomial.X * (igAsy_poly k).derivative) +
-      Polynomial.C (2*(k:ℝ)+1) * Polynomial.X * igAsy_poly k
+  | k+1 => (1 - Polynomial.X) * (ibpPoly k + Polynomial.X * (ibpPoly k).derivative) +
+      Polynomial.C (2*(k:ℝ)+1) * Polynomial.X * ibpPoly k
 
 /-- The rational functions `h_k(y) = p_k(y)/(1-y)^{2k}` of the integration by parts. -/
-noncomputable def igAsy_h (k : ℕ) (y : ℝ) : ℝ := (igAsy_poly k).eval y / (1-y)^(2*k)
+noncomputable def ibpRational (k : ℕ) (y : ℝ) : ℝ := (ibpPoly k).eval y / (1-y)^(2*k)
 
-/-- The recursion of `igAsy_poly`, evaluated. -/
-theorem igAsy_poly_eval_succ (k : ℕ) (y : ℝ) :
-    (igAsy_poly (k+1)).eval y = (1-y)*((igAsy_poly k).eval y + y*(igAsy_poly k).derivative.eval y) +
-      (2*k+1)*y*(igAsy_poly k).eval y := by
-  simp [igAsy_poly]
+/-- The recursion of `ibpPoly`, evaluated. -/
+theorem ibpPoly_eval_succ (k : ℕ) (y : ℝ) :
+    (ibpPoly (k+1)).eval y = (1-y)*((ibpPoly k).eval y + y*(ibpPoly k).derivative.eval y) +
+      (2*k+1)*y*(ibpPoly k).eval y := by
+  simp [ibpPoly]
 
 /-- The derivative step of the integration by parts. -/
-theorem igAsy_hasDerivAt_V (k : ℕ) {x s : ℝ} (hs : 1 - x*s ≠ 0) :
-    HasDerivAt (fun t : ℝ => t*(igAsy_poly k).eval (x*t)/(1-x*t)^(2*k+1))
-        (igAsy_h (k+1) (x*s)) s := by
-  have hP := ((igAsy_poly k).hasDerivAt (x*s)).comp s ((hasDerivAt_id s).const_mul x)
+theorem hasDerivAt_V (k : ℕ) {x s : ℝ} (hs : 1 - x*s ≠ 0) :
+    HasDerivAt (fun t : ℝ => t*(ibpPoly k).eval (x*t)/(1-x*t)^(2*k+1))
+        (ibpRational (k+1) (x*s)) s := by
+  have hP := ((ibpPoly k).hasDerivAt (x*s)).comp s ((hasDerivAt_id s).const_mul x)
   have hD := (((hasDerivAt_id s).const_mul x).const_sub 1).pow (2*k+1)
   have h := ((hasDerivAt_id s).mul hP).div hD (pow_ne_zero _ hs)
   convert h using 1
   · funext t; simp [Function.comp_def]
-  rw [igAsy_h, igAsy_poly_eval_succ]
+  rw [ibpRational, ibpPoly_eval_succ]
   simp only [id, mul_one, Function.comp_apply, Pi.pow_apply, Pi.mul_apply]
   rw [show 2*k+1-1 = 2*k by omega, show 2*(k+1) = 2*k+2 by ring]
   field_simp
@@ -847,19 +871,19 @@ theorem igAsy_hasDerivAt_V (k : ℕ) {x s : ℝ} (hs : 1 - x*s ≠ 0) :
   ring
 
 /-- `h_0 = 1`. -/
-theorem igAsy_h_zero (y : ℝ) : igAsy_h 0 y = 1 := by simp [igAsy_h, igAsy_poly]
+theorem ibpRational_zero (y : ℝ) : ibpRational 0 y = 1 := by simp [ibpRational, ibpPoly]
 
 /-- The Laplace-type integrand `s^n e^{n x (1-s)}` with `n = m+1`. -/
-noncomputable def igAsy_F (m : ℕ) (x s : ℝ) : ℝ := s^(m+1) * Real.exp ((m+1)*x*(1-s))
+noncomputable def laplaceIntegrand (m : ℕ) (x s : ℝ) : ℝ := s^(m+1) * Real.exp ((m+1)*x*(1-s))
 
-/-- Derivative of the integrand `igAsy_F`. -/
-theorem igAsy_hasDerivAt_F (m : ℕ) (x s : ℝ) :
-    HasDerivAt (igAsy_F m x) ((m+1)*(1-x*s)*s^m*Real.exp ((m+1)*x*(1-s))) s := by
+/-- Derivative of the integrand `laplaceIntegrand`. -/
+theorem hasDerivAt_laplaceIntegrand (m : ℕ) (x s : ℝ) :
+    HasDerivAt (laplaceIntegrand m x) ((m+1)*(1-x*s)*s^m*Real.exp ((m+1)*x*(1-s))) s := by
   have h1 := hasDerivAt_pow (m+1) s
   have h2 := (Real.hasDerivAt_exp ((m+1)*x*(1-s))).comp s
     (((hasDerivAt_id s).const_sub 1).const_mul ((m+1)*x))
   have h := h1.mul h2
-  unfold igAsy_F
+  unfold laplaceIntegrand
   convert h using 1
   · funext t; simp [Function.comp_def]
   push_cast
@@ -867,48 +891,49 @@ theorem igAsy_hasDerivAt_F (m : ℕ) (x s : ℝ) :
   ring
 
 /-- `s ↦ h_k(x s)` is continuous on `[0,1]` for `x < 1`. -/
-theorem igAsy_continuousOn_h (k : ℕ) {x : ℝ} (hx : x < 1) :
-    ContinuousOn (fun s : ℝ => igAsy_h k (x*s)) (uIcc 0 1) := by
-  unfold igAsy_h
+theorem continuousOn_ibpRational (k : ℕ) {x : ℝ} (hx : x < 1) :
+    ContinuousOn (fun s : ℝ => ibpRational k (x*s)) (uIcc 0 1) := by
+  unfold ibpRational
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => ?_
   rw [uIcc_of_le zero_le_one] at hs
-  exact pow_ne_zero _ (igAsy_one_sub_mul_pos hx hs).ne'
+  exact pow_ne_zero _ (one_sub_mul_pos hx hs).ne'
 
 /-- One integration by parts. -/
-theorem igAsy_ibp (m k : ℕ) {x : ℝ} (hx : x < 1) :
-    ∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h k (x*s) =
-      igAsy_h k x/((m+1)*(1-x)) - 1/(m+1) * ∫ s in (0:ℝ)..1, igAsy_F m x s *
-          igAsy_h (k+1) (x*s) := by
+theorem ibp (m k : ℕ) {x : ℝ} (hx : x < 1) :
+    ∫ s in (0:ℝ)..1, laplaceIntegrand m x s * ibpRational k (x*s) =
+      ibpRational k x/((m+1)*(1-x)) - 1/(m+1) * ∫ s in (0:ℝ)..1, laplaceIntegrand m x s *
+          ibpRational (k+1) (x*s) := by
   have hm : (m:ℝ)+1 ≠ 0 := by positivity
   have hx1 : 1 - x ≠ 0 := by linarith
-  have hu : ∀ s ∈ uIcc (0:ℝ) 1, HasDerivAt (igAsy_F m x)
-      ((m+1)*(1-x*s)*s^m*Real.exp ((m+1)*x*(1-s))) s := fun s _ => igAsy_hasDerivAt_F m x s
+  have hu : ∀ s ∈ uIcc (0:ℝ) 1, HasDerivAt (laplaceIntegrand m x)
+      ((m+1)*(1-x*s)*s^m*Real.exp ((m+1)*x*(1-s))) s := fun s _ => hasDerivAt_laplaceIntegrand m x s
   have hv : ∀ s ∈ uIcc (0:ℝ) 1, HasDerivAt
-      (fun t : ℝ => t*(igAsy_poly k).eval (x*t)/(1-x*t)^(2*k+1)/(m+1))
-      (igAsy_h (k+1) (x*s)/(m+1)) s := by
+      (fun t : ℝ => t*(ibpPoly k).eval (x*t)/(1-x*t)^(2*k+1)/(m+1))
+      (ibpRational (k+1) (x*s)/(m+1)) s := by
     intro s hs
     rw [uIcc_of_le zero_le_one] at hs
-    exact (igAsy_hasDerivAt_V k (igAsy_one_sub_mul_pos hx hs).ne').div_const _
+    exact (hasDerivAt_V k (one_sub_mul_pos hx hs).ne').div_const _
   have hu' : IntervalIntegrable (fun s : ℝ => (m+1)*(1-x*s)*s^m*Real.exp ((m+1)*x*(1-s)))
       volume 0 1 := (by fun_prop : Continuous _).intervalIntegrable _ _
-  have hv' : IntervalIntegrable (fun s : ℝ => igAsy_h (k+1) (x*s)/(m+1)) volume 0 1 :=
-    ((igAsy_continuousOn_h (k+1) hx).div_const _).intervalIntegrable
+  have hv' : IntervalIntegrable (fun s : ℝ => ibpRational (k+1) (x*s)/(m+1)) volume 0 1 :=
+    ((continuousOn_ibpRational (k+1) hx).div_const _).intervalIntegrable
   have H := intervalIntegral.integral_mul_deriv_eq_deriv_mul hu hv hu' hv'
   have hcongr : ∫ s in (0:ℝ)..1, (m+1)*(1-x*s)*s^m*Real.exp ((m+1)*x*(1-s)) *
-      ((s*(igAsy_poly k).eval (x*s)/(1-x*s)^(2*k+1))/(m+1)) =
-      ∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h k (x*s) := by
+      ((s*(ibpPoly k).eval (x*s)/(1-x*s)^(2*k+1))/(m+1)) =
+      ∫ s in (0:ℝ)..1, laplaceIntegrand m x s * ibpRational k (x*s) := by
     refine intervalIntegral.integral_congr fun s hs => ?_
     rw [uIcc_of_le zero_le_one] at hs
-    have h1 := (igAsy_one_sub_mul_pos hx hs).ne'
-    simp only [igAsy_F, igAsy_h]
+    have h1 := (one_sub_mul_pos hx hs).ne'
+    simp only [laplaceIntegrand, ibpRational]
     field_simp
     ring
   rw [hcongr] at H
-  have hdiv : ∫ s in (0:ℝ)..1, igAsy_F m x s * (igAsy_h (k+1) (x*s)/(m+1)) =
-      (∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h (k+1) (x*s))/(m+1) := by
+  have hdiv : ∫ s in (0:ℝ)..1, laplaceIntegrand m x s * (ibpRational (k+1) (x*s)/(m+1)) =
+      (∫ s in (0:ℝ)..1, laplaceIntegrand m x s * ibpRational (k+1) (x*s))/(m+1) := by
     rw [← intervalIntegral.integral_div]; congr 1; funext s; ring
   rw [hdiv] at H
-  simp only [igAsy_F, igAsy_h, one_pow, one_mul, sub_self, mul_zero, Real.exp_zero, zero_mul,
+  simp only [laplaceIntegrand, ibpRational, one_pow, one_mul, sub_self, mul_zero,
+      Real.exp_zero, zero_mul,
     mul_one, ne_eq, Nat.add_eq_zero_iff, one_ne_zero, and_false, not_false_eq_true, zero_pow,
     zero_div, sub_zero] at H ⊢
   rw [pow_succ] at H
@@ -916,27 +941,28 @@ theorem igAsy_ibp (m k : ℕ) {x : ℝ} (hx : x < 1) :
   linear_combination H
 
 /-- Iterated integration by parts. -/
-theorem igAsy_iter (m : ℕ) {x : ℝ} (hx : x < 1) (N : ℕ) :
-    ∫ s in (0:ℝ)..1, igAsy_F m x s =
-      ∑ k ∈ Finset.range N, (-1)^k/((m:ℝ)+1)^(k+1) * (igAsy_h k x/(1-x)) +
-        (-1)^N/((m:ℝ)+1)^N * ∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h N (x*s) := by
+theorem ibp_iterate (m : ℕ) {x : ℝ} (hx : x < 1) (N : ℕ) :
+    ∫ s in (0:ℝ)..1, laplaceIntegrand m x s =
+      ∑ k ∈ Finset.range N, (-1)^k/((m:ℝ)+1)^(k+1) * (ibpRational k x/(1-x)) +
+        (-1)^N/((m:ℝ)+1)^N * ∫ s in (0:ℝ)..1, laplaceIntegrand m x s * ibpRational N (x*s) := by
   induction N with
-  | zero => simp [igAsy_h_zero]
+  | zero => simp [ibpRational_zero]
   | succ N ih =>
-    rw [ih, igAsy_ibp m N hx, Finset.sum_range_succ]
+    rw [ih, ibp m N hx, Finset.sum_range_succ]
     have hm : (m:ℝ)+1 ≠ 0 := by positivity
     have hx1 : 1 - x ≠ 0 := by linarith
     field_simp
     ring_nf
 
 /-- The integrand is nonnegative on `[0, ∞)`. -/
-theorem igAsy_F_nonneg (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) : 0 ≤ igAsy_F m x s := by
-  unfold igAsy_F; positivity
+theorem laplaceIntegrand_nonneg (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) : 0 ≤
+    laplaceIntegrand m x s := by
+  unfold laplaceIntegrand; positivity
 
 /-- Exponential majorant `s^n e^{n x(1-s)} ≤ e^{-n(1-x)(1-s)}`. -/
-theorem igAsy_F_le (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) :
-    igAsy_F m x s ≤ Real.exp (-((m+1)*(1-x))*(1-s)) := by
-  unfold igAsy_F
+theorem laplaceIntegrand_le (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) :
+    laplaceIntegrand m x s ≤ Real.exp (-((m+1)*(1-x))*(1-s)) := by
+  unfold laplaceIntegrand
   have h1 : s ≤ Real.exp (s-1) := by linarith [Real.add_one_le_exp (s-1)]
   have h2 : s^(m+1) ≤ Real.exp ((m+1)*(s-1)) := by
     calc s^(m+1) ≤ (Real.exp (s-1))^(m+1) := pow_le_pow_left₀ hs h1 _
@@ -946,17 +972,18 @@ theorem igAsy_F_le (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) :
     _ = Real.exp (-((m+1)*(1-x))*(1-s)) := by rw [← Real.exp_add]; ring_nf
 
 /-- `∫₀¹ s^n e^{n x (1-s)} ds ≤ 1/(n(1-x))` for `x < 1`. -/
-theorem igAsy_integral_F_le (m : ℕ) {x : ℝ} (hx : x < 1) :
-    ∫ s in (0:ℝ)..1, igAsy_F m x s ≤ 1/((m+1)*(1-x)) := by
+theorem integral_laplaceIntegrand_le (m : ℕ) {x : ℝ} (hx : x < 1) :
+    ∫ s in (0:ℝ)..1, laplaceIntegrand m x s ≤ 1/((m+1)*(1-x)) := by
   set c : ℝ := (m+1)*(1-x) with hc
   have hc0 : 0 < c := by rw [hc]; have : 0 < 1-x := by linarith
                          positivity
-  have hle : ∫ s in (0:ℝ)..1, igAsy_F m x s ≤ ∫ s in (0:ℝ)..1, Real.exp (-c*(1-s)) := by
+  have hle : ∫ s in (0:ℝ)..1, laplaceIntegrand m x s ≤ ∫ s in (0:ℝ)..1, Real.exp (-c*(1-s)) := by
     refine intervalIntegral.integral_mono_on zero_le_one
-      ((by unfold igAsy_F; fun_prop : Continuous (igAsy_F m x)).intervalIntegrable _ _)
+      ((by unfold laplaceIntegrand;
+           fun_prop : Continuous (laplaceIntegrand m x)).intervalIntegrable _ _)
       ((by fun_prop : Continuous fun s : ℝ => Real.exp (-c*(1-s))).intervalIntegrable _ _) ?_
     intro s hs
-    exact igAsy_F_le m x hs.1
+    exact laplaceIntegrand_le m x hs.1
   have hval : ∫ s in (0:ℝ)..1, Real.exp (-c*(1-s)) = (1 - Real.exp (-c))/c := by
     have hd : ∀ s ∈ uIcc (0:ℝ) 1, HasDerivAt (fun s : ℝ => Real.exp (-c*(1-s))/c)
         (Real.exp (-c*(1-s))) s := by
@@ -976,7 +1003,7 @@ theorem igAsy_integral_F_le (m : ℕ) {x : ℝ} (hx : x < 1) :
   linarith [Real.exp_pos (-c)]
 
 /-- The absolute value of a real polynomial is bounded by `A (1+|y|)^{deg}`. -/
-theorem igAsy_abs_eval_le (p : Polynomial ℝ) (y : ℝ) :
+theorem abs_eval_le (p : Polynomial ℝ) (y : ℝ) :
     |p.eval y| ≤ (∑ i ∈ Finset.range (p.natDegree+1), |p.coeff i|) * (1+|y|)^p.natDegree := by
   rw [Polynomial.eval_eq_sum_range, Finset.sum_mul]
   refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun i hi => ?_)
@@ -987,15 +1014,15 @@ theorem igAsy_abs_eval_le (p : Polynomial ℝ) (y : ℝ) :
     _ ≤ (1+|y|)^p.natDegree := pow_le_pow_right₀ (by linarith [abs_nonneg y]) hi'
 
 /-- `deg p_k ≤ 2k`. -/
-theorem igAsy_poly_natDegree_le (k : ℕ) : (igAsy_poly k).natDegree ≤ 2*k := by
+theorem ibpPoly_natDegree_le (k : ℕ) : (ibpPoly k).natDegree ≤ 2*k := by
   induction k with
-  | zero => simp [igAsy_poly]
+  | zero => simp [ibpPoly]
   | succ k ih =>
-    rw [igAsy_poly]
-    have hd := (igAsy_poly k).natDegree_derivative_le
+    rw [ibpPoly]
+    have hd := (ibpPoly k).natDegree_derivative_le
     have h1 : (1 - Polynomial.X : Polynomial ℝ).natDegree ≤ 1 := by
       refine (Polynomial.natDegree_sub_le _ _).trans ?_; simp
-    have h2 : (igAsy_poly k + Polynomial.X * (igAsy_poly k).derivative).natDegree ≤ 2*k+1 := by
+    have h2 : (ibpPoly k + Polynomial.X * (ibpPoly k).derivative).natDegree ≤ 2*k+1 := by
       refine (Polynomial.natDegree_add_le _ _).trans (max_le (by omega) ?_)
       refine Polynomial.natDegree_mul_le.trans ?_
       have := Polynomial.natDegree_X_le (R := ℝ)
@@ -1010,11 +1037,11 @@ theorem igAsy_poly_natDegree_le (k : ℕ) : (igAsy_poly k).natDegree ≤ 2*k := 
       omega
 
 /-- A uniform bound on `h_N` on `(-∞, max 0 (1-δ)]`. -/
-theorem igAsy_h_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
-    ∃ K, 0 ≤ K ∧ ∀ y : ℝ, y ≤ max 0 (1-δ) → |igAsy_h N y| ≤ K := by
+theorem ibpRational_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
+    ∃ K, 0 ≤ K ∧ ∀ y : ℝ, y ≤ max 0 (1-δ) → |ibpRational N y| ≤ K := by
   set c : ℝ := min 1 δ / 2 with hc
   have hc0 : 0 < c := by rw [hc]; positivity
-  set A := ∑ i ∈ Finset.range ((igAsy_poly N).natDegree+1), |(igAsy_poly N).coeff i|
+  set A := ∑ i ∈ Finset.range ((ibpPoly N).natDegree+1), |(ibpPoly N).coeff i|
   have hA : 0 ≤ A := Finset.sum_nonneg fun i _ => abs_nonneg _
   refine ⟨A/c^(2*N), by positivity, fun y hy => ?_⟩
   have hsep : c*(1+|y|) ≤ 1-y := by
@@ -1031,11 +1058,11 @@ theorem igAsy_h_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
       nlinarith
   have hy1 : 0 < 1+|y| := by positivity
   have hpos : 0 < 1-y := lt_of_lt_of_le (by positivity) hsep
-  unfold igAsy_h
+  unfold ibpRational
   rw [abs_div, abs_pow, abs_of_pos hpos, div_le_div_iff₀ (by positivity) (by positivity)]
-  have hp := igAsy_abs_eval_le (igAsy_poly N) y
-  have hd := igAsy_poly_natDegree_le N
-  calc |(igAsy_poly N).eval y| * c^(2*N) ≤ A*(1+|y|)^(igAsy_poly N).natDegree * c^(2*N) := by
+  have hp := abs_eval_le (ibpPoly N) y
+  have hd := ibpPoly_natDegree_le N
+  calc |(ibpPoly N).eval y| * c^(2*N) ≤ A*(1+|y|)^(ibpPoly N).natDegree * c^(2*N) := by
         gcongr
     _ ≤ A*(1+|y|)^(2*N) * c^(2*N) := by
         gcongr
@@ -1044,9 +1071,9 @@ theorem igAsy_h_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
     _ ≤ A * (1-y)^(2*N) := by gcongr
 
 /-- `γ(n+1, nx)/((nx)^n e^{-nx}) = n x ∫₀¹ s^n e^{n x (1-s)} ds` with `n = m+1`. -/
-theorem igAsy_lowerIncGamma_ratio_eq (m : ℕ) (x : ℝ) :
+theorem lowerIncGamma_ratio_eq (m : ℕ) (x : ℝ) :
     lowerIncGamma (((m+1:ℕ):ℂ)+1) (((m+1:ℕ):ℂ)*x)/((((m+1:ℕ):ℂ)*x)^(m+1)*exp (-((m+1:ℕ):ℂ)*x)) =
-      (((m+1)*x * ∫ s in (0:ℝ)..1, igAsy_F m x s : ℝ) : ℂ) := by
+      (((m+1)*x * ∫ s in (0:ℝ)..1, laplaceIntegrand m x s : ℝ) : ℂ) := by
   push_cast
   by_cases hx : x = 0
   · subst hx; simp
@@ -1068,10 +1095,10 @@ theorem igAsy_lowerIncGamma_ratio_eq (m : ℕ) (x : ℝ) :
     field_simp
   rw [show (-((m:ℂ)+1)*x) = -z by rw [hz]; ring, hL]
   have hI : (∫ t in (0:ℝ)..1, (t:ℂ)^(m+1) * exp (-z*t)) * exp z =
-      ((∫ s in (0:ℝ)..1, igAsy_F m x s : ℝ) : ℂ) := by
+      ((∫ s in (0:ℝ)..1, laplaceIntegrand m x s : ℝ) : ℂ) := by
     rw [← intervalIntegral.integral_mul_const, ← intervalIntegral.integral_ofReal]
     refine intervalIntegral.integral_congr fun t _ => ?_
-    simp only [igAsy_F, hz]
+    simp only [laplaceIntegrand, hz]
     push_cast
     rw [mul_assoc, ← Complex.exp_add]
     congr 2
@@ -1079,6 +1106,8 @@ theorem igAsy_lowerIncGamma_ratio_eq (m : ℕ) (x : ℝ) :
   rw [← hI, Complex.exp_neg]
   field_simp
   ring
+
+end IncompleteGammaAsymptotics
 
 end DLMF.Confluent
 end

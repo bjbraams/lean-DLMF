@@ -120,7 +120,7 @@ theorem existsUnique_isSpheroidalPsFactor {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ
     have P₂ := isFactorSolution_data_of_parity hmem d₂ s₂
     refine factorSolution_unique d₁ s₁ d₂ s₂ H₁.real H₂.real ?_
         (H₁.normalized.trans H₂.normalized.symm) ?_
-    · by_cases hq : p3lyR' m γ2 lam 0 = 0
+    · by_cases hq : frobeniusSolutionRealDeriv m γ2 lam 0 = 0
       · rw [P₁.1 hq, P₂.1 hq]; ring
       · rw [P₁.2 hq, P₂.2 hq]; ring
     · by_cases he : Even (n - m)
@@ -145,7 +145,7 @@ theorem existsUnique_isSpheroidalPsFactor {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ
   have hs2 : s ^ 2 = 1 := by simp only [s]; split_ifs <;> exact t2 _
   obtain ⟨g₁, hd₁, hs₁, hr₁, hev, hod⟩ := exists_real_factorSolution_unit_data hmem
   have hnd : (g₁ 0).re ≠ 0 ∨ (deriv g₁ 0).re ≠ 0 := by
-    by_cases hq : p3lyR' m γ2 lam 0 = 0
+    by_cases hq : frobeniusSolutionRealDeriv m γ2 lam 0 = 0
     · left; rw [(hev hq).1]; simp
     · right; rw [(hod hq).2]; simp
   set I := ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (g₁ x).re ^ 2
@@ -175,7 +175,7 @@ theorem existsUnique_isSpheroidalPsFactor {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ
       rw [e]; exact hsqp
     · intro ho
       have hne : ¬Even (n - m) := Nat.not_even_iff_odd.2 ho
-      have hq : p3lyR' m γ2 lam 0 ≠ 0 := fun h => hne (hpar.1 h)
+      have hq : frobeniusSolutionRealDeriv m γ2 lam 0 ≠ 0 := fun h => hne (hpar.1 h)
       rw [hgd0, (hod hq).2]
       simp only [κ, s, hne, ↓reduceIte, Complex.one_re, mul_one]
       have e : (-1 : ℝ) ^ ((n + m - 1) / 2) * ((-1) ^ ((n + m - 1) / 2) * Real.sqrt (N / I)) =

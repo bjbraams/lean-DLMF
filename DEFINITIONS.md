@@ -619,7 +619,7 @@ These logarithmic formulas must be used with their parameter hypotheses.
 
 - **Spherical jₙ and modified i¹ₙ**, [10.47.3](https://dlmf.nist.gov/10.47.E3),
   [10.47.7](https://dlmf.nist.gov/10.47.E7):
-  `DLMF.sphericalJ`, `DLMF.sphericalI` in
+  `DLMF.Bessel.sphericalJ`, `DLMF.Bessel.sphericalI` in
   [Framework](DLMF/Core/Basic.lean#L179), defined by regularized series
   that include their removable values at zero. These avoid interpreting a
   totalized square-root quotient as the value at zero.
@@ -1587,8 +1587,8 @@ the definitions; displayed examples do not introduce new families.
   these operations and the preceding predicates, without new named predicates.
 - **Strict shifted and descending plane partitions**,
   [prose around 26.12.18–19](https://dlmf.nist.gov/26.12.E18):
-  `DLMF.Combinatorics.IsStrictShiftedPP`, `IsDescendingPP`, and
-  `DescendingPPIn` in
+  `DLMF.Combinatorics.IsStrictShiftedPP`, `IsDescendingPlanePartition`, and
+  `DescendingPlanePartitionIn` in
   [PlanePartitions](DLMF/Combinatorics/Basic/PlanePartitions.lean#L142),
   using finite lists of rows rather than the unshifted triple-set representation.
 

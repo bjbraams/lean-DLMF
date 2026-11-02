@@ -44,6 +44,8 @@ are in `DLMF.ExpIntegrals.AnalyticProperties`.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- The series with terms `(fun k : ℕ => (-1 : ℂ)^k*z^(k+1)/((k+1).factorial*(k+1 : ℂ)))`

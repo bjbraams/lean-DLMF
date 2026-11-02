@@ -16,12 +16,12 @@ Auxiliary summation results for DLMF §§18.27–18.28.
 
 ## Main results
 
-* `qOrth_saalschutz`: the balanced `q`-Pfaff–Saalschütz sum in the standard form
+* `QOrthogonality.saalschutz`: the balanced `q`-Pfaff–Saalschütz sum in the standard form
   `₃φ₂(q^{-n}, r, s; c, e; q, q)` with `c e = q^{1-n} r s`, obtained termwise from the
   polynomial form `DLMF.QSeries.sum_qBinom_saalschutz`.
-* `qOrth_littleQJacobi_moment`: moments of the little `q`-Jacobi weight, by the `q`-binomial
-  theorem.
-* `qOrth_littleQJacobi_sum_zero`: vanishing of the moment sums behind little `q`-Jacobi
+* `QOrthogonality.littleQJacobi_moment`: moments of the little `q`-Jacobi weight, by the
+  `q`-binomial theorem.
+* `QOrthogonality.littleQJacobi_sum_zero`: vanishing of the moment sums behind little `q`-Jacobi
   orthogonality.
 -/
 
@@ -34,7 +34,7 @@ noncomputable section
 namespace DLMF.OrthogonalPolynomials
 
 /-- The ratio rule `[n, m+1]_q (1 - q^{m+1}) = [n, m]_q (1 - q^{n-m})`. -/
-theorem qOrth_qBinom_succ_ratio {q : ℂ} (hq : ‖q‖ < 1) (m d : ℕ) :
+theorem QOrthogonality.qBinom_succ_ratio {q : ℂ} (hq : ‖q‖ < 1) (m d : ℕ) :
     qBinom q (m + 1 + d) (m + 1) * (1 - q * q ^ m) =
       qBinom q (m + 1 + d) m * (1 - q * q ^ d) := by
   have h1 := qBinom_mul_qPochhammer q (m + 1) d
@@ -48,7 +48,7 @@ theorem qOrth_qBinom_succ_ratio {q : ℂ} (hq : ‖q‖ < 1) (m d : ℕ) :
   linear_combination h1 - h2
 
 /-- Term conversion between the reversed polynomial form and the `q^{-n}` form. -/
-theorem qOrth_term {q x c : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hx : x ≠ 0) {n : ℕ}
+theorem QOrthogonality.term {q x c : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hx : x ≠ 0) {n : ℕ}
     (hc : c * x * q ^ n = q) {m : ℕ} (hm : m ≤ n) :
     qBinom q n m * qPochhammer x q (n - m) * x ^ m * qPochhammer c q m * qPochhammer q q m =
       qPochhammer x q n * qPochhammer (q⁻¹ ^ n) q m * q ^ m := by
@@ -61,7 +61,7 @@ theorem qOrth_term {q x c : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hx : x ≠ 
     have e2 : m + 1 + d - (m + 1) = d := by omega
     rw [e1, qPochhammer_succ x q d] at ih
     rw [e2]
-    have hR := qOrth_qBinom_succ_ratio hq m d
+    have hR := QOrthogonality.qBinom_succ_ratio hq m d
     have hX : x * (1 - c * q ^ m) = -(q⁻¹ ^ d) * (1 - x * q ^ d) := by
       have hc' : c = q / (x * q ^ (m + 1 + d)) := by
         field_simp; linear_combination hc
@@ -86,7 +86,8 @@ theorem qOrth_term {q x c : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hx : x ≠ 
 /-- The balanced `q`-Pfaff–Saalschütz sum in the standard `q^{-n}` form: with
 `c x qⁿ = q` and `x r s = e`,
 `(x;q)_n (e;q)_n ₃φ₂(q^{-n}, r, s; c, e; q, q) = (xr;q)_n (xs;q)_n`. -/
-theorem qOrth_saalschutz {q x c r s e : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hx : x ≠ 0) {n : ℕ}
+theorem QOrthogonality.saalschutz {q x c r s e : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0)
+    (hx : x ≠ 0) {n : ℕ}
     (hc : c * x * q ^ n = q) (he : x * r * s = e)
     (hcn : ∀ m ≤ n, qPochhammer c q m ≠ 0) (hen : qPochhammer e q n ≠ 0) :
     qPochhammer x q n * qPochhammer e q n *
@@ -97,7 +98,7 @@ theorem qOrth_saalschutz {q x c r s e : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) 
   rw [← sum_qBinom_saalschutz, mul_sum]
   refine sum_congr rfl fun m hm => ?_
   have hmn : m ≤ n := by simpa [Nat.lt_succ_iff] using hm
-  have hT := qOrth_term hq hq0 hx hc hmn
+  have hT := QOrthogonality.term hq hq0 hx hc hmn
   have hS := qPochhammer_add e q m (n - m)
   rw [Nat.add_sub_cancel' hmn] at hS
   have hqm := qPochhammer_self_ne_zero hq m
@@ -111,7 +112,7 @@ theorem qOrth_saalschutz {q x c r s e : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) 
     qPochhammer (x * r * s * q ^ m) q (n - m)) * hT
 
 /-- Moments of the little `q`-Jacobi weight, by the `q`-binomial theorem. -/
-theorem qOrth_littleQJacobi_moment {a b q : ℂ} (hq : ‖q‖ < 1) (haq : ‖a * q‖ < 1) (t : ℕ) :
+theorem QOrthogonality.littleQJacobi_moment {a b q : ℂ} (hq : ‖q‖ < 1) (haq : ‖a * q‖ < 1) (t : ℕ) :
     HasSum (fun y : ℕ => (q ^ t) ^ y *
       (qPochhammer (b * q) q y * (a * q) ^ y / qPochhammer q q y))
       (qPochhammerInf (a * b * q ^ (t + 2)) q / qPochhammerInf (a * q ^ (t + 1)) q) := by
@@ -128,20 +129,20 @@ theorem qOrth_littleQJacobi_moment {a b q : ℂ} (hq : ‖q‖ < 1) (haq : ‖a 
   · congr 2; ring
 
 /-- `(w;q)_n = 0` as soon as one factor `1 - w q^k`, `k < n`, vanishes. -/
-theorem qOrth_qPochhammer_eq_zero {w q : ℂ} {n k : ℕ} (hk : k < n) (h : w * q ^ k = 1) :
+theorem QOrthogonality.qPochhammer_eq_zero {w q : ℂ} {n k : ℕ} (hk : k < n) (h : w * q ^ k = 1) :
     qPochhammer w q n = 0 := by
   rw [qPochhammer_eq_prod]
   exact prod_eq_zero (mem_range.mpr hk) (by rw [h, sub_self])
 
 /-- `(w;q)_n ≠ 0` when no factor vanishes. -/
-theorem qOrth_qPochhammer_ne_zero {w q : ℂ} {n : ℕ} (h : ∀ k < n, w * q ^ k ≠ 1) :
+theorem QOrthogonality.qPochhammer_ne_zero {w q : ℂ} {n : ℕ} (h : ∀ k < n, w * q ^ k ≠ 1) :
     qPochhammer w q n ≠ 0 := by
   rw [qPochhammer_eq_prod]
   exact prod_ne_zero_iff.mpr fun k hk => sub_ne_zero.mpr (h k (mem_range.mp hk)).symm
 
 /-- The moment sum behind the orthogonality of little `q`-Jacobi polynomials vanishes:
 a balanced `₃φ₂` with a factor `(q^{i+1-n};q)_n = 0`. -/
-theorem qOrth_littleQJacobi_sum_zero {a b q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (ha0 : a ≠ 0)
+theorem QOrthogonality.littleQJacobi_sum_zero {a b q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (ha0 : a ≠ 0)
     (haq : ‖a * q‖ < 1) (hab : ∀ p : ℕ, a * b * q ^ (p + 2) ≠ 1)
     (ha1 : ∀ p : ℕ, a * q ^ (p + 1) ≠ 1) {i n : ℕ} (hin : i < n) :
     ∑ j ∈ range (n + 1), qPochhammer (q⁻¹ ^ n) q j * qPochhammer (a * b * q ^ (n + 1)) q j /
@@ -159,16 +160,18 @@ theorem qOrth_littleQJacobi_sum_zero {a b q : ℂ} (hq : ‖q‖ < 1) (hq0 : q �
   have hQ := qPochhammerInf_ne_zero hq hrn
   have hcn : ∀ m : ℕ, qPochhammer (a * q) q m ≠ 0 :=
     qPochhammer_ne_zero_of_factors hq (one_sub_mul_pow_ne_zero_of_norm haq hq)
-  have hS := qOrth_saalschutz (q := q) (x := x) (c := a * q) (r := r) (s := a * b * q ^ (n + 1))
+  have hS := QOrthogonality.saalschutz (q := q) (x := x) (c := a * q) (r := r)
+      (s := a * b * q ^ (n + 1))
     (e := e) hq hq0 hx (n := n) (by simp only [x]; field_simp)
     (by simp only [x, r, e]; field_simp; ring) (fun m _ => hcn m)
     (qPochhammer_ne_zero_of_factors hq hen n)
   have hxr : qPochhammer (x * r) q n = 0 :=
-    qOrth_qPochhammer_eq_zero (k := n - 1 - i) (by omega) (by
+    QOrthogonality.qPochhammer_eq_zero (k := n - 1 - i) (by omega) (by
       simp only [x, r]
       rw [mul_assoc, mul_assoc a, ← pow_add, show i + 1 + (n - 1 - i) = n by omega]
       field_simp)
-  have hxn : qPochhammer x q n ≠ 0 := qOrth_qPochhammer_ne_zero fun k hk h => ha1 (n - 1 - k) (by
+  have hxn : qPochhammer x q n ≠ 0 := QOrthogonality.qPochhammer_ne_zero fun k hk h =>
+      ha1 (n - 1 - k) (by
     simp only [x] at h
     have : q ^ k * q ^ (n - 1 - k + 1) = q ^ n := by rw [← pow_add]; congr 1; omega
     field_simp at h

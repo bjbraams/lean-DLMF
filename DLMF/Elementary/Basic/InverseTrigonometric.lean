@@ -24,7 +24,8 @@ inverse functions on `[-1, 1]`, and the symmetry and complement relations of DLM
 
 ## Main results
 
-* `trig_hasDerivAt_arcsin`, `trig_hasDerivAt_arctan`: derivatives on the cut planes.
+* `Trigonometric.hasDerivAt_arcsin`, `Trigonometric.hasDerivAt_arctan`: derivatives on the cut
+  planes.
 * `analytic_arcsin_principal`, `analytic_arccos_principal`, `analytic_arctan_principal`,
   `analytic_arccsc_principal`, `analytic_arcsec_principal`, `analytic_arccot_principal`:
   analyticity (DLMF §4.23(ii)).
@@ -84,7 +85,7 @@ def arccscCutPlane : Set ℂ := {z | z≠0 ∧ z⁻¹∈arcsinCutPlane}
 def arccotCutPlane : Set ℂ := {z | z≠0 ∧ z⁻¹∈arctanCutPlane}
 
 /-- Formula under the stated hypotheses: `(1+z*I)/(1-z*I)∈Complex.slitPlane`. -/
-lemma trig_arctan_quotient_slit {z:ℂ} (hz:z∈arctanCutPlane) :
+lemma Trigonometric.arctan_quotient_slit {z:ℂ} (hz:z∈arctanCutPlane) :
     (1+z*I)/(1-z*I)∈Complex.slitPlane := by
   have hre : ((1+z*I)/(1-z*I)).re=(1-z.im^2-z.re^2)/((1+z.im)^2+z.re^2) := by
     simp [Complex.div_re,Complex.normSq]
@@ -108,7 +109,7 @@ lemma trig_arctan_quotient_slit {z:ℂ} (hz:z∈arctanCutPlane) :
     · positivity
 
 /-- Nonvanishing under the stated hypotheses: `1+z*I≠0 ∧ 1-z*I≠0`. -/
-private lemma trig_arctan_linear_ne {z:ℂ} (hz:z∈arctanCutPlane) :
+private lemma Trigonometric.arctan_linear_ne {z:ℂ} (hz:z∈arctanCutPlane) :
     1+z*I≠0 ∧ 1-z*I≠0 := by
   have hgood: ¬(z.re=0 ∧ (z.im=1 ∨ z.im= -1)) := by
     rintro ⟨hr,hi⟩
@@ -127,12 +128,12 @@ private lemma trig_arctan_linear_ne {z:ℂ} (hz:z∈arctanCutPlane) :
     exact hgood ⟨by linarith,Or.inr (by linarith)⟩
 
 /-- At `z`, the function `Complex.arctan` has derivative `((1+z^2)⁻¹)`. -/
-lemma trig_hasDerivAt_arctan {z:ℂ} (hz:z∈arctanCutPlane) :
+lemma Trigonometric.hasDerivAt_arctan {z:ℂ} (hz:z∈arctanCutPlane) :
     HasDerivAt Complex.arctan ((1+z^2)⁻¹) z := by
-  obtain ⟨hp,hm⟩:=trig_arctan_linear_ne hz
+  obtain ⟨hp,hm⟩:=Trigonometric.arctan_linear_ne hz
   have hd0 := (((hasDerivAt_id z).mul_const I).const_add 1).div
     (((hasDerivAt_id z).mul_const I).const_sub 1) hm
-  have hd1 := (Complex.hasDerivAt_log (trig_arctan_quotient_slit hz)).comp z hd0
+  have hd1 := (Complex.hasDerivAt_log (Trigonometric.arctan_quotient_slit hz)).comp z hd0
   have hd:=hd1.const_mul (-I/2)
   convert hd using 1
   · rfl
@@ -144,7 +145,7 @@ lemma trig_hasDerivAt_arctan {z:ℂ} (hz:z∈arctanCutPlane) :
     linear_combination 2*Complex.I_sq
 
 /-- Formula under the stated hypotheses: `1+z^2∈Complex.slitPlane`. -/
-lemma trig_one_add_sq_slit {z:ℂ} (hz:z∈arctanCutPlane) :
+lemma Trigonometric.one_add_sq_slit {z:ℂ} (hz:z∈arctanCutPlane) :
     1+z^2∈Complex.slitPlane := by
   rw [Complex.mem_slitPlane_iff]
   by_cases hr:z.re=0
@@ -162,19 +163,19 @@ lemma trig_one_add_sq_slit {z:ℂ} (hz:z∈arctanCutPlane) :
 
 /-- Identity under the stated parameter and domain assumptions: `(Complex.sqrt
 (1-z^2)+I*z)*(Complex.sqrt (1-z^2)-I*z)=1`. -/
-lemma trig_arcsin_product (z:ℂ) :
+lemma Trigonometric.arcsin_product (z:ℂ) :
     (Complex.sqrt (1-z^2)+I*z)*(Complex.sqrt (1-z^2)-I*z)=1 := by
-  linear_combination trig_sqrt_sq (1-z^2) - z^2*Complex.I_sq
+  linear_combination Trigonometric.complexSqrt_sq (1-z^2) - z^2*Complex.I_sq
 
 /-- Nonvanishing under the stated hypotheses: `Complex.sqrt (1-z^2)+I*z≠0`. -/
-lemma trig_arcsin_log_arg_ne (z:ℂ) : Complex.sqrt (1-z^2)+I*z≠0 := by
+lemma Trigonometric.arcsin_log_arg_ne (z:ℂ) : Complex.sqrt (1-z^2)+I*z≠0 := by
   intro h
-  have hp:=trig_arcsin_product z
+  have hp:=Trigonometric.arcsin_product z
   rw [h,zero_mul] at hp
   exact zero_ne_one hp
 
 /-- Formula under the stated hypotheses: `Complex.sqrt (1-z^2)+I*z∈Complex.slitPlane`. -/
-private lemma trig_arcsin_log_slit (z:ℂ) : Complex.sqrt (1-z^2)+I*z∈Complex.slitPlane := by
+private lemma Trigonometric.arcsin_log_slit (z:ℂ) : Complex.sqrt (1-z^2)+I*z∈Complex.slitPlane := by
   let r:=Complex.sqrt (1-z^2)
   change r+I*z∈Complex.slitPlane
   rw [Complex.mem_slitPlane_iff]
@@ -189,7 +190,7 @@ private lemma trig_arcsin_log_slit (z:ℂ) : Complex.sqrt (1-z^2)+I*z∈Complex.
     have him:r.im= -z.re := by
       simp only [Complex.add_im,Complex.I_mul_im] at hi0
       linarith
-    have hp:=congrArg Complex.re (trig_arcsin_product z)
+    have hp:=congrArg Complex.re (Trigonometric.arcsin_product z)
     change ((r+I*z)*(r-I*z)).re=1 at hp
     simp only [Complex.mul_re,Complex.add_re,Complex.sub_re,Complex.add_im,Complex.sub_im,
       Complex.I_mul_re,Complex.I_mul_im,him] at hp
@@ -198,7 +199,7 @@ private lemma trig_arcsin_log_slit (z:ℂ) : Complex.sqrt (1-z^2)+I*z∈Complex.
     nlinarith
 
 /-- Formula under the stated hypotheses: `1-z^2∈Complex.slitPlane`. -/
-lemma trig_one_sub_sq_slit {z:ℂ} (hz:z∈arcsinCutPlane) : 1-z^2∈Complex.slitPlane := by
+lemma Trigonometric.one_sub_sq_slit {z:ℂ} (hz:z∈arcsinCutPlane) : 1-z^2∈Complex.slitPlane := by
   rw [Complex.mem_slitPlane_iff]
   by_cases hi:z.im=0
   · left
@@ -214,30 +215,30 @@ lemma trig_one_sub_sq_slit {z:ℂ} (hz:z∈arcsinCutPlane) : 1-z^2∈Complex.sli
       convert neg_ne_zero.mpr (mul_ne_zero (mul_ne_zero two_ne_zero hr) hi) using 1 <;> ring
 
 /-- At `q`, the function `Complex.sqrt` has derivative `((Complex.sqrt q)⁻¹/2)`. -/
-lemma trig_hasDerivAt_sqrt {q:ℂ} (hq:q∈Complex.slitPlane) :
+lemma Trigonometric.hasDerivAt_complexSqrt {q:ℂ} (hq:q∈Complex.slitPlane) :
     HasDerivAt Complex.sqrt ((Complex.sqrt q)⁻¹/2) q := by
   simpa only [Complex.sqrt,show (-1/2:ℂ)= -(2⁻¹:ℂ) by norm_num,Complex.cpow_neg] using
     Complex.hasDerivAt_sqrt hq
 
 /-- At `z`, the function `arcsinPrincipal` has derivative `(Complex.sqrt (1-z^2))⁻¹`. -/
-lemma trig_hasDerivAt_arcsin {z:ℂ} (hz:z∈arcsinCutPlane) :
+lemma Trigonometric.hasDerivAt_arcsin {z:ℂ} (hz:z∈arcsinCutPlane) :
     HasDerivAt arcsinPrincipal (Complex.sqrt (1-z^2))⁻¹ z := by
-  have hq:=trig_one_sub_sq_slit hz
+  have hq:=Trigonometric.one_sub_sq_slit hz
   have hr:Complex.sqrt (1-z^2)≠0 := by
     intro h
-    have hs:=trig_sqrt_sq (1-z^2)
+    have hs:=Trigonometric.complexSqrt_sq (1-z^2)
     rw [h,zero_pow two_ne_zero] at hs
     exact (Complex.mem_slitPlane_iff_arg.mp hq).2 hs.symm
-  have hd0:=(trig_hasDerivAt_sqrt hq).comp z (((hasDerivAt_id z).pow 2).const_sub 1)
+  have hd0:=(Trigonometric.hasDerivAt_complexSqrt hq).comp z (((hasDerivAt_id z).pow 2).const_sub 1)
   have hd1:=hd0.add ((hasDerivAt_id z).const_mul I)
-  have hd2:=(Complex.hasDerivAt_log (trig_arcsin_log_slit z)).comp z hd1
+  have hd2:=(Complex.hasDerivAt_log (Trigonometric.arcsin_log_slit z)).comp z hd1
   have hd:=hd2.const_mul (-I)
   convert hd using 1
   · rfl
   · dsimp only [id,Pi.pow_apply,Pi.add_apply]
     norm_num only [Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one,one_mul]
     generalize heq : Complex.sqrt (1-z^2)=r at hr ⊢
-    have hw:r+I*z≠0 := by rw [← heq]; exact trig_arcsin_log_arg_ne z
+    have hw:r+I*z≠0 := by rw [← heq]; exact Trigonometric.arcsin_log_arg_ne z
     field_simp [hr,hw]
     linear_combination r*Complex.I_sq
 
@@ -249,7 +250,7 @@ theorem analytic_arcsin_principal : AnalyticOnNhd ℂ arcsinPrincipal arcsinCutP
     exact (isOpen_ne.preimage Complex.continuous_im).union
       (isOpen_lt (continuous_abs.comp Complex.continuous_re) continuous_const)
   exact (show DifferentiableOn ℂ arcsinPrincipal arcsinCutPlane from fun z hz=>
-    (trig_hasDerivAt_arcsin hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
+    (Trigonometric.hasDerivAt_arcsin hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
 
 /-- The principal arcsine is continuous at every point of its closed unit disk,
 including the two branch points. -/
@@ -266,7 +267,7 @@ lemma continuousAt_arcsin_principal_of_norm_le_one {z : ℂ} (hz : ‖z‖≤1) 
     hroot.comp (f := fun w : ℂ => 1-w^2) hpoly
   have hs : ContinuousAt (fun w : ℂ => Complex.sqrt (1-w^2)+I*w) z :=
     hsqrt.add (by fun_prop)
-  exact (continuousAt_clog (trig_arcsin_log_slit z)).comp
+  exact (continuousAt_clog (Trigonometric.arcsin_log_slit z)).comp
     (f := fun w : ℂ => Complex.sqrt (1-w^2)+I*w) hs |>.const_mul (-I)
 
 /-- DLMF 4.23.ii: analytic arccos principal. -/
@@ -284,7 +285,7 @@ theorem analytic_arctan_principal : AnalyticOnNhd ℂ Complex.arctan arctanCutPl
     exact (isOpen_ne.preimage Complex.continuous_re).union
       (isOpen_lt (continuous_abs.comp Complex.continuous_im) continuous_const)
   exact (show DifferentiableOn ℂ Complex.arctan arctanCutPlane from fun z hz=>
-    (trig_hasDerivAt_arctan hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
+    (Trigonometric.hasDerivAt_arctan hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
 
 /-- DLMF 4.23.ii: analytic arccsc principal. -/
 @[dlmf 4.23.ii]
@@ -331,11 +332,11 @@ theorem inverse_principal_real {x : ℝ} (hx : x∈Icc (-1) 1) :
 @[dlmf 4.23.E10]
 theorem arcsin_principal_neg {z : ℂ} : arcsinPrincipal (-z)= -arcsinPrincipal z := by
   have hn:Complex.sqrt (1-(-z)^2)+I*(-z)=(Complex.sqrt (1-z^2)+I*z)⁻¹ := by
-    apply (mul_left_cancel₀ (trig_arcsin_log_arg_ne z))
-    rw [mul_inv_cancel₀ (trig_arcsin_log_arg_ne z)]
-    convert trig_arcsin_product z using 1 <;> ring
+    apply (mul_left_cancel₀ (Trigonometric.arcsin_log_arg_ne z))
+    rw [mul_inv_cancel₀ (Trigonometric.arcsin_log_arg_ne z)]
+    convert Trigonometric.arcsin_product z using 1 <;> ring
   unfold arcsinPrincipal
-  rw [hn,Complex.log_inv _ (Complex.mem_slitPlane_iff_arg.mp (trig_arcsin_log_slit z)).1]
+  rw [hn,Complex.log_inv _ (Complex.mem_slitPlane_iff_arg.mp (Trigonometric.arcsin_log_slit z)).1]
   ring
 
 /-- DLMF 4.23.E11: arccos principal neg. -/
@@ -352,7 +353,7 @@ theorem arctan_principal_neg {z : ℂ} (hz : z∈arctanCutPlane) :
   have hq: (1+(-z)*I)/(1-(-z)*I)=((1+z*I)/(1-z*I))⁻¹ := by
     simp only [neg_mul,sub_neg_eq_add,sub_eq_add_neg,inv_div,neg_neg]
   rw [Complex.arctan,Complex.arctan,hq,Complex.log_inv _
-    (Complex.mem_slitPlane_iff_arg.mp (trig_arctan_quotient_slit hz)).1]
+    (Complex.mem_slitPlane_iff_arg.mp (Trigonometric.arctan_quotient_slit hz)).1]
   ring
 
 /-- DLMF 4.23.E13: arccsc principal neg. -/

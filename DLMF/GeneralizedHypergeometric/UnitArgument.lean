@@ -195,41 +195,41 @@ private lemma gaussHGCoeff_neg_two_mul_eq_zero (k : ℕ) (b c : ℂ) {n : ℕ} (
 
 /-- The normalized Dixon series with `a = -2k` is a finite sum. -/
 private lemma normalizedSeries_neg_two_mul (k : ℕ) (b c : ℂ) :
-    DixonAux.normalizedSeries (-(2 * k : ℂ)) b c =
-      ∑ n ∈ range (2 * k + 1), DixonAux.s (-(2 * k : ℂ)) b c n := by
-  unfold DixonAux.normalizedSeries
+    DixonWZ.normalizedSeries (-(2 * k : ℂ)) b c =
+      ∑ n ∈ range (2 * k + 1), DixonWZ.s (-(2 * k : ℂ)) b c n := by
+  unfold DixonWZ.normalizedSeries
   refine tsum_eq_sum fun n hn => ?_
   have : 2 * k < n := by simpa using hn
-  simp [DixonAux.s, gaussHGCoeff_neg_two_mul_eq_zero k b _ this]
+  simp [DixonWZ.s, gaussHGCoeff_neg_two_mul_eq_zero k b _ this]
 
 /-- The WZ recurrence in `c` for the degenerate Dixon series `a = -2k`, valid for every `c`. -/
 private lemma normalizedSeries_neg_two_mul_recurrence (k : ℕ) (b : ℂ)
     (hb : ∀ n : ℕ, 1 - 2 * k - b ≠ -n) (c : ℂ) :
-    (1 - k - b - c) * DixonAux.normalizedSeries (-(2 * k : ℂ)) b c =
-      (1 - k - c) * (1 - 2 * k - b - c) * DixonAux.normalizedSeries (-(2 * k : ℂ)) b (c - 1) := by
-  have hsum : ∀ c', Summable (DixonAux.s (-(2 * k : ℂ)) b c') := fun c' =>
+    (1 - k - b - c) * DixonWZ.normalizedSeries (-(2 * k : ℂ)) b c =
+      (1 - k - c) * (1 - 2 * k - b - c) * DixonWZ.normalizedSeries (-(2 * k : ℂ)) b (c - 1) := by
+  have hsum : ∀ c', Summable (DixonWZ.s (-(2 * k : ℂ)) b c') := fun c' =>
     summable_of_ne_finset_zero (s := range (2 * k + 1)) fun n hn => by
       have : 2 * k < n := by simpa using hn
-      simp [DixonAux.s, gaussHGCoeff_neg_two_mul_eq_zero k b _ this]
-  have hH : Tendsto (DixonAux.wzCertificate (-(2 * k : ℂ)) b c) atTop (𝓝 0) := by
+      simp [DixonWZ.s, gaussHGCoeff_neg_two_mul_eq_zero k b _ this]
+  have hH : Tendsto (DixonWZ.wzCertificate (-(2 * k : ℂ)) b c) atTop (𝓝 0) := by
     refine tendsto_const_nhds.congr' ?_
     filter_upwards [eventually_gt_atTop (2 * k)] with n hn
-    simp [DixonAux.wzCertificate, gaussHGCoeff_neg_two_mul_eq_zero k b _ hn]
+    simp [DixonWZ.wzCertificate, gaussHGCoeff_neg_two_mul_eq_zero k b _ hn]
   have hb' : ∀ n : ℕ, 1 + -(2 * k : ℂ) - b ≠ -n := fun n h => hb n (by linear_combination h)
-  have h := DixonAux.recurrence hb' (hsum c) (hsum (c - 1)) hH
+  have h := DixonWZ.recurrence hb' (hsum c) (hsum (c - 1)) hH
   convert h using 2 <;> ring
 
 /-- At `c = -m` the polynomial side is `m!` times the normalized series. -/
 private lemma dixonEvenT_neg_nat (k : ℕ) (b : ℂ) (m : ℕ) :
     dixonEvenT k b (-(m : ℂ)) = m.factorial *
-      DixonAux.normalizedSeries (-(2 * k : ℂ)) b (-(m : ℂ)) := by
+      DixonWZ.normalizedSeries (-(2 * k : ℂ)) b (-(m : ℂ)) := by
   rw [normalizedSeries_neg_two_mul, mul_sum]
   refine sum_congr rfl fun n hn => ?_
   have hn' : n ≤ 2 * k := Nat.lt_succ_iff.mp (mem_range.mp hn)
   have hr := recip_Gamma_eq_poch_mul_recip (1 + -(2 * k : ℂ) - -(m : ℂ) + n) (2 * k - n)
   rw [show 1 + -(2 * k : ℂ) - -(m : ℂ) + n + ((2 * k - n : ℕ) : ℂ) = (m : ℂ) + 1 by
     push_cast [hn']; ring, Complex.Gamma_nat_eq_factorial] at hr
-  simp only [DixonAux.s]
+  simp only [DixonWZ.s]
   rw [show (1 : ℂ) - 2 * k - b = 1 + -(2 * k : ℂ) - b by ring, hr,
     show (1 : ℂ) - 2 * k + n - -(m : ℂ) = 1 + -(2 * k : ℂ) - -(m : ℂ) + n by ring]
   have hf : (m.factorial : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero

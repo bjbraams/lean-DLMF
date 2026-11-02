@@ -16,30 +16,35 @@ and 12.5.8 of `U(a,z)` and the integrals DLMF 12.12.1–12.12.2.
 
 ## Main definitions
 
-* `pcfInt_F`: the integral `∫₀^∞ t^{c-1} e^{-t} (w + 2t)^p dt` behind DLMF 12.5.2–12.5.3.
-* `pcfInt_B`: the Barnes integrand `Γ(t) Γ(1/2 + a - 2t) 2^t z^{2t}`, `t = c + iy`, of
-  DLMF 12.5.8.
-* `pcfInt_sector`: the sector `|arg z| < 3π/4` of DLMF 12.5.8.
+* `CylinderIntegrals.laplaceIntegral`: the integral `∫₀^∞ t^{c-1} e^{-t} (w + 2t)^p dt` behind DLMF
+  12.5.2–12.5.3.
+* `CylinderIntegrals.barnesIntegrand`: the Barnes integrand `Γ(t) Γ(1/2 + a - 2t) 2^t z^{2t}`,
+  `t = c + iy`, of DLMF 12.5.8.
+* `CylinderIntegrals.sector`: the sector `|arg z| < 3π/4` of DLMF 12.5.8.
 
 ## Main results
 
-* `pcfInt_differentiableOn`: `pcfInt_F c p` is holomorphic on the slit plane.
-* `pcfInt_U_real_2`, `pcfInt_U_real_3`: DLMF 12.5.2–12.5.3 for real positive argument.
-* `pcfInt_eq_of_real`: the identity theorem on the right half-plane.
-* `pcfInt_integrand_1`, `pcfInt_integrand_2`, `pcfInt_laplace_two`: the integrands of
-  DLMF 12.12.1–12.12.2 as Laplace kernels of Kummer's `U`, and the value at `z = 2`.
-* `pcfInt_B_real`: DLMF 12.5.8 for real positive argument.
-* `pcfInt_norm_B_le`, `pcfInt_B_differentiableOn`: a uniform bound for the Barnes integrand
-  and holomorphy of the integral on the sector.
-* `pcfInt_B_integral`: DLMF 12.5.8, value and integrability.
+* `CylinderIntegrals.differentiableOn_laplaceIntegral`: `CylinderIntegrals.laplaceIntegral c p` is
+  holomorphic on the slit plane.
+* `CylinderIntegrals.U_real_2`, `CylinderIntegrals.U_real_3`: DLMF 12.5.2–12.5.3 for real positive
+  argument.
+* `CylinderIntegrals.eq_of_real`: the identity theorem on the right half-plane.
+* `CylinderIntegrals.integrand_1`, `CylinderIntegrals.integrand_2`, `CylinderIntegrals.laplace_two`:
+  the integrands of DLMF 12.12.1–12.12.2 as Laplace kernels of Kummer's `U`, and the value at
+  `z = 2`.
+* `CylinderIntegrals.barnesIntegrand_real`: DLMF 12.5.8 for real positive argument.
+* `CylinderIntegrals.norm_barnesIntegrand_le`, `CylinderIntegrals.barnesIntegrand_differentiableOn`:
+  a uniform bound for the Barnes integrand and holomorphy of the integral on the sector.
+* `CylinderIntegrals.barnesIntegrand_integral`: DLMF 12.5.8, value and integrability.
 
 ## Implementation notes
 
-`pcfInt_F` is holomorphic by locally uniform domination. For real `x > 0` the Laplace
-integral of Kummer's `U` (`kummerU_laplace`) rescales to it (`pcfInt_laplace_scale`), and the
-identity theorem extends DLMF 12.5.2–12.5.3 to the right half-plane.
+`CylinderIntegrals.laplaceIntegral` is holomorphic by locally uniform domination. For real `x > 0`
+the Laplace integral of Kummer's `U` (`kummerU_laplace`) rescales to it
+(`CylinderIntegrals.laplace_scale`), and the identity theorem extends DLMF 12.5.2–12.5.3 to the
+right half-plane.
 
-For DLMF 12.12.1–12.12.2 the substitution `x = t²/2` (`pcfInt_sq_half_subst`) turns the
+For DLMF 12.12.1–12.12.2 the substitution `x = t²/2` (`CylinderIntegrals.sq_half_subst`) turns the
 integrands into the Laplace kernel of `U(a/2 + 1/4, 1/2, x)`, whose transform is DLMF 13.10.7
 (`laplace_kummerU_gauss`); at `z = 2` the resulting `₂F₁(-b, b; 1/2; 1/2)` is evaluated by
 DLMF 15.4.12.
@@ -54,14 +59,16 @@ the identity theorem the general case.
 open Complex Filter Set MeasureTheory Metric DLMF DLMF.Hypergeometric
 open scoped Real Topology
 
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- The Laplace-type integral `∫₀^∞ t^{c-1} e^{-t} (w+2t)^p dt` behind DLMF 12.5.2–3. -/
-noncomputable def pcfInt_F (c p w : ℂ) : ℂ :=
+noncomputable def CylinderIntegrals.laplaceIntegral (c p w : ℂ) : ℂ :=
   ∫ t in Ioi (0:ℝ), (t:ℂ)^(c-1) * exp (-t) * (w + 2*t)^p
 
 /-- Adding a nonnegative real multiple of `2` keeps a point in the slit plane. -/
-theorem pcfInt_add_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) {t : ℝ} (ht : 0 ≤ t) :
+theorem CylinderIntegrals.add_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) {t : ℝ} (ht : 0 ≤ t) :
     w + 2*t ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hw ⊢
   simp only [add_re, add_im, mul_re, mul_im, ofReal_re, ofReal_im, re_ofNat, im_ofNat]
@@ -70,7 +77,7 @@ theorem pcfInt_add_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) {t : ℝ} (ht 
   · right; simpa using h
 
 /-- The square of a point of the right half-plane lies in the slit plane. -/
-theorem pcfInt_sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z^2 ∈ slitPlane := by
+theorem CylinderIntegrals.sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z^2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases h : z.im = 0
   · left; simp [sq, h]; nlinarith
@@ -79,7 +86,7 @@ theorem pcfInt_sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z^2 ∈ slitPlane :=
     intro h'; apply this; linarith
 
 /-- Near a point of the slit plane, `w + 2t` (`t ≥ 0`) stays uniformly away from `0`. -/
-theorem pcfInt_norm_add_ge {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
+theorem CylinderIntegrals.norm_add_ge {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
     ∃ ε > 0, ∀ w ∈ ball w₀ ε, ∀ t : ℝ, 0 ≤ t → ε ≤ ‖w + 2*t‖ := by
   obtain ⟨δ, hδ, hsub⟩ := isOpen_iff.mp isOpen_slitPlane w₀ hw₀
   refine ⟨δ/2, half_pos hδ, fun w hw t ht => ?_⟩
@@ -96,7 +103,7 @@ theorem pcfInt_norm_add_ge {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
   linarith
 
 /-- An elementary bound `u^q ≤ K e^{t/2}` for `ε ≤ u ≤ R + 2t`. -/
-theorem pcfInt_rpow_bound (q : ℝ) {ε R : ℝ} (hε : 0 < ε) (hR : 0 ≤ R) :
+theorem CylinderIntegrals.rpow_bound (q : ℝ) {ε R : ℝ} (hε : 0 < ε) (hR : 0 ≤ R) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ u t : ℝ, 0 ≤ t → ε ≤ u → u ≤ R + 2*t → u^q ≤ K * Real.exp (t/2) := by
   set m : ℝ := |q| + 1 with hm
   have hm0 : 0 < m := by positivity
@@ -131,7 +138,7 @@ theorem pcfInt_rpow_bound (q : ℝ) {ε R : ℝ} (hε : 0 < ε) (hR : 0 ≤ R) :
       _ ≤ _ := by nlinarith [Real.rpow_nonneg hε.le q, Real.exp_pos (t/2)]
 
 /-- `‖u^p‖ ≤ ‖u‖^{Re p} e^{π |Im p|}`. -/
-theorem pcfInt_norm_cpow_le (u p : ℂ) : ‖u^p‖ ≤ ‖u‖^p.re * Real.exp (π * |p.im|) := by
+theorem CylinderIntegrals.norm_cpow_le (u p : ℂ) : ‖u^p‖ ≤ ‖u‖^p.re * Real.exp (π * |p.im|) := by
   refine (norm_cpow_le u p).trans ?_
   rw [div_eq_mul_inv, ← Real.exp_neg]
   apply mul_le_mul_of_nonneg_left _ (by positivity)
@@ -141,12 +148,13 @@ theorem pcfInt_norm_cpow_le (u p : ℂ) : ‖u^p‖ ≤ ‖u‖^p.re * Real.exp 
     rw [abs_mul]; exact mul_le_mul_of_nonneg_right h1 (abs_nonneg _)
   linarith [neg_abs_le (arg u * p.im)]
 
-/-- Local domination of the integrand of `pcfInt_F`. -/
-theorem pcfInt_dom {c : ℂ} (p : ℂ) {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
+/-- Local domination of the integrand of `CylinderIntegrals.laplaceIntegral`. -/
+theorem CylinderIntegrals.laplaceIntegrand_domination {c : ℂ} (p : ℂ) {w₀ : ℂ}
+    (hw₀ : w₀ ∈ slitPlane) :
     ∃ ε > 0, ∃ M : ℝ, 0 ≤ M ∧ ∀ w ∈ ball w₀ ε, ∀ t : ℝ, 0 < t →
       ‖(t:ℂ)^(c-1) * exp (-t) * (w + 2*t)^p‖ ≤ M * (t^(c.re-1) * Real.exp (-(1/2) * t^(1:ℝ))) := by
-  obtain ⟨ε, hε, hε'⟩ := pcfInt_norm_add_ge hw₀
-  obtain ⟨K, hK, hK'⟩ := pcfInt_rpow_bound p.re hε (R := ‖w₀‖ + ε) (by positivity)
+  obtain ⟨ε, hε, hε'⟩ := CylinderIntegrals.norm_add_ge hw₀
+  obtain ⟨K, hK, hK'⟩ := CylinderIntegrals.rpow_bound p.re hε (R := ‖w₀‖ + ε) (by positivity)
   refine ⟨ε, hε, K * Real.exp (π * |p.im|), by positivity, fun w hw t ht => ?_⟩
   have hup : ‖w + 2*t‖ ≤ ‖w₀‖ + ε + 2*t := by
     have : ‖w‖ ≤ ‖w₀‖ + ε := by
@@ -161,7 +169,7 @@ theorem pcfInt_dom {c : ℂ} (p : ℂ) {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane)
   rw [norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht, show ((-(t:ℂ))) =
       ((-t:ℝ):ℂ) by push_cast; rfl,
     Complex.norm_exp_ofReal, Real.rpow_one]
-  have hc := pcfInt_norm_cpow_le (w + 2*t) p
+  have hc := CylinderIntegrals.norm_cpow_le (w + 2*t) p
   have e : Real.exp (-t) = Real.exp (-(1/2)*t) * Real.exp (-(t/2)) := by
     rw [← Real.exp_add]; ring_nf
   have hx : ‖w + 2*t‖^p.re * Real.exp (-t) ≤ K * Real.exp (-(1/2)*t) := by
@@ -180,8 +188,8 @@ theorem pcfInt_dom {c : ℂ} (p : ℂ) {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane)
         mul_le_mul_of_nonneg_left hx (by positivity)
     _ = _ := by ring
 
-/-- Continuity of the integrand of `pcfInt_F` on `(0,∞)`. -/
-theorem pcfInt_continuousOn (c p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
+/-- Continuity of the integrand of `CylinderIntegrals.laplaceIntegral` on `(0,∞)`. -/
+theorem CylinderIntegrals.continuousOn_laplaceIntegrand (c p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
     ContinuousOn (fun t : ℝ => (t:ℂ)^(c-1) * exp (-t) * (w + 2*t)^p) (Ioi 0) := by
   intro t ht
   apply ContinuousAt.continuousWithinAt
@@ -191,44 +199,48 @@ theorem pcfInt_continuousOn (c p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
   have h3 : ContinuousAt (fun t : ℝ => (w + 2*(t:ℂ))^p) t :=
     (continuousAt_const.add (continuousAt_const.mul continuous_ofReal.continuousAt)).cpow
         continuousAt_const
-      (pcfInt_add_mem_slitPlane hw (le_of_lt ht))
+      (CylinderIntegrals.add_mem_slitPlane hw (le_of_lt ht))
   exact (h1.mul (continuous_ofReal.continuousAt.neg.cexp)).mul h3
 
 /-- Integrability of the majorant `M t^{Re c - 1} e^{-t/2}`. -/
-theorem pcfInt_integrable_majorant {c : ℂ} (hc : 0 < c.re) (M : ℝ) :
+theorem CylinderIntegrals.integrable_majorant {c : ℂ} (hc : 0 < c.re) (M : ℝ) :
     IntegrableOn (fun t : ℝ => M * (t^(c.re-1) * Real.exp (-(1/2) * t^(1:ℝ)))) (Ioi 0) :=
   (integrableOn_rpow_mul_exp_neg_mul_rpow (by linarith) one_pos (by norm_num)).const_mul M
 
-/-- The integrand of `pcfInt_F` is integrable for `w` in the slit plane. -/
-theorem pcfInt_integrableOn {c : ℂ} (hc : 0 < c.re) (p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
+/-- The integrand of `CylinderIntegrals.laplaceIntegral` is integrable for `w` in the slit plane. -/
+theorem CylinderIntegrals.integrableOn_laplaceIntegrand {c : ℂ} (hc : 0 < c.re) (p : ℂ) {w : ℂ}
+    (hw : w ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (t:ℂ)^(c-1) * exp (-t) * (w + 2*t)^p) (Ioi 0) := by
-  obtain ⟨ε, hε, M, -, hM⟩ := pcfInt_dom (c := c) p hw
-  refine (pcfInt_integrable_majorant hc M).mono' ((pcfInt_continuousOn c p hw).aestronglyMeasurable
+  obtain ⟨ε, hε, M, -, hM⟩ := CylinderIntegrals.laplaceIntegrand_domination (c := c) p hw
+  refine (CylinderIntegrals.integrable_majorant hc M).mono'
+      ((CylinderIntegrals.continuousOn_laplaceIntegrand c p hw).aestronglyMeasurable
     measurableSet_Ioi) ?_
   filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
   exact hM w (mem_ball_self hε) t ht
 
-/-- `pcfInt_F c p` is holomorphic on the slit plane. -/
-theorem pcfInt_differentiableOn {c : ℂ} (hc : 0 < c.re) (p : ℂ) :
-    DifferentiableOn ℂ (pcfInt_F c p) slitPlane := by
-  unfold pcfInt_F
+/-- `CylinderIntegrals.laplaceIntegral c p` is holomorphic on the slit plane. -/
+theorem CylinderIntegrals.differentiableOn_laplaceIntegral {c : ℂ} (hc : 0 < c.re) (p : ℂ) :
+    DifferentiableOn ℂ (CylinderIntegrals.laplaceIntegral c p) slitPlane := by
+  unfold CylinderIntegrals.laplaceIntegral
   refine differentiableOn_integral_Ioi_of_locally_dominated isOpen_slitPlane 0
-    (fun w hw => (pcfInt_continuousOn c p hw).aestronglyMeasurable measurableSet_Ioi) ?_ ?_
+    (fun w hw => (CylinderIntegrals.continuousOn_laplaceIntegrand c p hw).aestronglyMeasurable
+        measurableSet_Ioi) ?_ ?_
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     intro w hw
     apply DifferentiableAt.differentiableWithinAt
     apply DifferentiableAt.const_mul
-    exact (differentiableAt_id.add_const _).cpow_const (pcfInt_add_mem_slitPlane hw (le_of_lt ht))
+    exact (differentiableAt_id.add_const _).cpow_const
+        (CylinderIntegrals.add_mem_slitPlane hw (le_of_lt ht))
   · intro w hw
-    obtain ⟨ε, hε, M, -, hM⟩ := pcfInt_dom (c := c) p hw
-    refine ⟨ball w ε, ball_mem_nhds w hε, _, pcfInt_integrable_majorant hc M, ?_⟩
+    obtain ⟨ε, hε, M, -, hM⟩ := CylinderIntegrals.laplaceIntegrand_domination (c := c) p hw
+    refine ⟨ball w ε, ball_mem_nhds w hε, _, CylinderIntegrals.integrable_majorant hc M, ?_⟩
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     exact fun y hy => hM y hy t ht
 
 /-- Rescaling the Laplace integral of Kummer's `U` (real positive scale). -/
-theorem pcfInt_laplace_scale (c p : ℂ) {b : ℝ} (hb : 0 < b) :
+theorem CylinderIntegrals.laplace_scale (c p : ℂ) {b : ℝ} (hb : 0 < b) :
     ∫ s in Ioi (0:ℝ), exp (-(b:ℂ) * s) * (s:ℂ)^(c-1) * (1 + (s:ℂ))^p =
-      (b:ℂ)^(-c) * ((2*b:ℝ):ℂ)^(-p) * pcfInt_F c p ((2*b:ℝ):ℂ) := by
+      (b:ℂ)^(-c) * ((2*b:ℝ):ℂ)^(-p) * CylinderIntegrals.laplaceIntegral c p ((2*b:ℝ):ℂ) := by
   set g : ℝ → ℂ := fun t => (t:ℂ)^(c-1) * exp (-t) * (((2*b:ℝ):ℂ) + 2*t)^p with hg
   have h := integral_comp_mul_left_Ioi g 0 hb
   rw [mul_zero] at h
@@ -246,7 +258,7 @@ theorem pcfInt_laplace_scale (c p : ℂ) {b : ℝ} (hb : 0 < b) :
   have h2b : ((2*b:ℝ):ℂ) ≠ 0 := ofReal_ne_zero.mpr (by positivity)
   have hK0 : K ≠ 0 := mul_ne_zero (by rw [Ne, cpow_eq_zero_iff]; tauto)
     (by rw [Ne, cpow_eq_zero_iff]; tauto)
-  have hF : pcfInt_F c p ((2*b:ℝ):ℂ) = ∫ t in Ioi (0:ℝ), g t := rfl
+  have hF : CylinderIntegrals.laplaceIntegral c p ((2*b:ℝ):ℂ) = ∫ t in Ioi (0:ℝ), g t := rfl
   rw [hF, real_smul, ofReal_inv] at *
   rw [eq_inv_mul_iff_mul_eq₀ hb0] at h
   have hbc : (b:ℂ)^c ≠ 0 := by rw [Ne, cpow_eq_zero_iff]; tauto
@@ -255,7 +267,7 @@ theorem pcfInt_laplace_scale (c p : ℂ) {b : ℝ} (hb : 0 < b) :
   field_simp
 
 /-- Power bookkeeping for positive reals: `(x²/2)^{-e} (x²)^{-d} = 2^e (x²)^{-e-d}`. -/
-lemma pcfInt_const_aux {x : ℝ} (hx : 0 < x) (e d : ℂ) :
+lemma CylinderIntegrals.cpow_sq_half_mul_cpow_sq {x : ℝ} (hx : 0 < x) (e d : ℂ) :
     ((x^2/2:ℝ):ℂ)^(-e) * ((x^2:ℝ):ℂ)^(-d) = (2:ℂ)^e * ((x^2:ℝ):ℂ)^(-e-d) := by
   have hx2 : ((x^2:ℝ):ℂ) ≠ 0 := ofReal_ne_zero.mpr (by positivity)
   rw [show ((x^2/2:ℝ):ℂ) = ((x^2:ℝ):ℂ) * ((1/2:ℝ):ℂ) by push_cast; ring,
@@ -270,17 +282,19 @@ lemma pcfInt_const_aux {x : ℝ} (hx : 0 < x) (e d : ℂ) :
   ring
 
 /-- `(x²)^{1/2} = x` for `x > 0`. -/
-theorem pcfInt_sq_cpow_half {x : ℝ} (hx : 0 < x) : ((x^2:ℝ):ℂ)^(1/2:ℂ) = x := by
+theorem CylinderIntegrals.sq_cpow_half {x : ℝ} (hx : 0 < x) : ((x^2:ℝ):ℂ)^(1/2:ℂ) = x := by
   rw [show (1/2:ℂ) = ((1/2:ℝ):ℂ) by push_cast; ring, ← ofReal_cpow (by positivity),
     ← Real.sqrt_eq_rpow, Real.sqrt_sq hx.le]
 
 /-- `(x²)^{-1/2} = x⁻¹` for `x > 0`. -/
-theorem pcfInt_sq_cpow_neg_half {x : ℝ} (hx : 0 < x) : ((x^2:ℝ):ℂ)^(-1/2:ℂ) = (x:ℂ)⁻¹ := by
-  rw [show (-1/2:ℂ) = -(1/2) by ring, cpow_neg, pcfInt_sq_cpow_half hx]
+theorem CylinderIntegrals.sq_cpow_neg_half {x : ℝ} (hx : 0 < x) : ((x^2:ℝ):ℂ)^(-1/2:ℂ)
+    = (x:ℂ)⁻¹ := by
+  rw [show (-1/2:ℂ) = -(1/2) by ring, cpow_neg, CylinderIntegrals.sq_cpow_half hx]
 
 /-- DLMF 12.5.2 for real positive argument. -/
-theorem pcfInt_U_real_2 {a : ℂ} (ha : -1/2 < a.re) {x : ℝ} (hx : 0 < x) :
-    pcfU a x = x * exp (-(x:ℂ)^2/4) / Gamma (a/2+1/4) * pcfInt_F (a/2+1/4) (-a/2-3/4) (x^2) := by
+theorem CylinderIntegrals.U_real_2 {a : ℂ} (ha : -1/2 < a.re) {x : ℝ} (hx : 0 < x) :
+    pcfU a x = x * exp (-(x:ℂ)^2/4) / Gamma (a/2+1/4) *
+        CylinderIntegrals.laplaceIntegral (a/2+1/4) (-a/2-3/4) (x^2) := by
   have hα : 0 < (a/2+1/4).re := by simp; linarith
   have hre : 0 < (x:ℂ).re := by simpa using hx
   have hb : (0:ℝ) < x^2/2 := by positivity
@@ -288,20 +302,21 @@ theorem pcfInt_U_real_2 {a : ℂ} (ha : -1/2 < a.re) {x : ℝ} (hx : 0 < x) :
     rw [show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by push_cast; ring, ofReal_re]; exact hb
   rw [pcfU_eq_kummerU a hre, kummerU_laplace hα hw,
     show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by push_cast; ring,
-    show (1/2:ℂ) - (a/2+1/4) - 1 = -a/2-3/4 by ring, pcfInt_laplace_scale _ _ hb,
+    show (1/2:ℂ) - (a/2+1/4) - 1 = -a/2-3/4 by ring, CylinderIntegrals.laplace_scale _ _ hb,
     show 2*(x^2/2) = x^2 by ring]
-  have key := pcfInt_const_aux hx (a/2+1/4) (-a/2-3/4)
-  rw [show -(a/2+1/4) - (-a/2-3/4) = 1/2 by ring, pcfInt_sq_cpow_half hx] at key
+  have key := CylinderIntegrals.cpow_sq_half_mul_cpow_sq hx (a/2+1/4) (-a/2-3/4)
+  rw [show -(a/2+1/4) - (-a/2-3/4) = 1/2 by ring, CylinderIntegrals.sq_cpow_half hx] at key
   have h2 : (2:ℂ)^(-(1/4:ℂ)-a/2) * (2:ℂ)^(a/2+1/4) = 1 := by
     rw [← cpow_add _ _ two_ne_zero, show -(1/4:ℂ)-a/2 + (a/2+1/4) = 0 by ring, cpow_zero]
   push_cast at key ⊢
   linear_combination (exp (-(x:ℂ)^2/4) * (1 / Gamma (a/2+1/4)) *
-      pcfInt_F (a/2+1/4) (-a/2-3/4) ((x:ℂ)^2)) *
+      CylinderIntegrals.laplaceIntegral (a/2+1/4) (-a/2-3/4) ((x:ℂ)^2)) *
     ((2:ℂ)^(-(1/4:ℂ)-a/2) * key + x * h2)
 
 /-- DLMF 12.5.3 for real positive argument. -/
-theorem pcfInt_U_real_3 {a : ℂ} (ha : -3/2 < a.re) {x : ℝ} (hx : 0 < x) :
-    pcfU a x = exp (-(x:ℂ)^2/4) / Gamma (a/2+3/4) * pcfInt_F (a/2+3/4) (-a/2-1/4) (x^2) := by
+theorem CylinderIntegrals.U_real_3 {a : ℂ} (ha : -3/2 < a.re) {x : ℝ} (hx : 0 < x) :
+    pcfU a x = exp (-(x:ℂ)^2/4) / Gamma (a/2+3/4) *
+        CylinderIntegrals.laplaceIntegral (a/2+3/4) (-a/2-1/4) (x^2) := by
   have hα : 0 < (a/2+3/4).re := by simp; linarith
   have hre : 0 < (x:ℂ).re := by simpa using hx
   have hb : (0:ℝ) < x^2/2 := by positivity
@@ -309,21 +324,21 @@ theorem pcfInt_U_real_3 {a : ℂ} (ha : -3/2 < a.re) {x : ℝ} (hx : 0 < x) :
     rw [show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by push_cast; ring, ofReal_re]; exact hb
   rw [pcfU_kummerU_odd a hre, kummerU_laplace hα hw,
     show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by push_cast; ring,
-    show (3/2:ℂ) - (a/2+3/4) - 1 = -a/2-1/4 by ring, pcfInt_laplace_scale _ _ hb,
+    show (3/2:ℂ) - (a/2+3/4) - 1 = -a/2-1/4 by ring, CylinderIntegrals.laplace_scale _ _ hb,
     show 2*(x^2/2) = x^2 by ring]
-  have key := pcfInt_const_aux hx (a/2+3/4) (-a/2-1/4)
-  rw [show -(a/2+3/4) - (-a/2-1/4) = -1/2 by ring, pcfInt_sq_cpow_neg_half hx] at key
+  have key := CylinderIntegrals.cpow_sq_half_mul_cpow_sq hx (a/2+3/4) (-a/2-1/4)
+  rw [show -(a/2+3/4) - (-a/2-1/4) = -1/2 by ring, CylinderIntegrals.sq_cpow_neg_half hx] at key
   have h2 : (2:ℂ)^(-3/4-a/2) * (2:ℂ)^(a/2+3/4) = 1 := by
     rw [← cpow_add _ _ two_ne_zero, show (-3/4:ℂ)-a/2 + (a/2+3/4) = 0 by ring, cpow_zero]
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   push_cast at key ⊢
   have hk : (x:ℂ) * ((x:ℂ)⁻¹) = 1 := mul_inv_cancel₀ hx0
   linear_combination (exp (-(x:ℂ)^2/4) * (1 / Gamma (a/2+3/4)) *
-      pcfInt_F (a/2+3/4) (-a/2-1/4) ((x:ℂ)^2)) *
+      CylinderIntegrals.laplaceIntegral (a/2+3/4) (-a/2-1/4) ((x:ℂ)^2)) *
     ((2:ℂ)^(-3/4-a/2) * x * key + (2:ℂ)^(-3/4-a/2) * (2:ℂ)^(a/2+3/4) * hk + h2)
 
 /-- Identity theorem on the right half-plane from agreement on the positive reals. -/
-theorem pcfInt_eq_of_real {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f {z | 0 < z.re})
+theorem CylinderIntegrals.eq_of_real {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f {z | 0 < z.re})
     (hg : DifferentiableOn ℂ g {z | 0 < z.re}) (h : ∀ x : ℝ, 0 < x → f x = g x)
     {z : ℂ} (hz : 0 < z.re) : f z = g z := by
   have hU : IsOpen {z : ℂ | 0 < z.re} := isOpen_lt continuous_const continuous_re
@@ -342,21 +357,22 @@ theorem pcfInt_eq_of_real {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f {z | 
   exact (hf.analyticOnNhd hU).eqOn_of_preconnected_of_frequently_eq (hg.analyticOnNhd hU)
     (convex_halfSpace_re_gt 0).isPreconnected (by simp) hfreq hz
 
-/-- `z ↦ pcfInt_F c p (z²)` is holomorphic on the right half-plane. -/
-theorem pcfInt_differentiableOn_comp {c : ℂ} (hc : 0 < c.re) (p : ℂ) :
-    DifferentiableOn ℂ (fun z : ℂ => pcfInt_F c p (z^2)) {z | 0 < z.re} :=
-  (pcfInt_differentiableOn hc p).comp (differentiableOn_id.pow 2)
-    (fun _ hz => pcfInt_sq_mem_slitPlane hz)
+/-- `z ↦ CylinderIntegrals.laplaceIntegral c p (z²)` is holomorphic on the right half-plane. -/
+theorem CylinderIntegrals.differentiableOn_comp {c : ℂ} (hc : 0 < c.re) (p : ℂ) :
+    DifferentiableOn ℂ (fun z : ℂ => CylinderIntegrals.laplaceIntegral c p (z^2)) {z | 0 < z.re} :=
+  (CylinderIntegrals.differentiableOn_laplaceIntegral hc p).comp (differentiableOn_id.pow 2)
+    (fun _ hz => CylinderIntegrals.sq_mem_slitPlane hz)
 
 
 /-- `𝐅(a,b;c;0) = 1/Γ(c)` for every `c` (both sides vanish at the poles of `Γ`). -/
-theorem pcfInt_regularizedGaussHG_zero (a b c : ℂ) : regularizedGaussHG a b c 0 = (Gamma c)⁻¹ := by
+theorem CylinderIntegrals.regularizedGaussHG_zero (a b c : ℂ) : regularizedGaussHG a b c 0 =
+    (Gamma c)⁻¹ := by
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by simp), regularizedGaussHGFun_eq_tsum,
     tsum_eq_single 0 (fun n hn => by simp [zero_pow hn])]
   simp
 
 /-- The substitution `x = t²/2` on the half-line. -/
-theorem pcfInt_sq_half_subst {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
+theorem CylinderIntegrals.sq_half_subst {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
     IntegrableOn (fun t : ℝ => (t:ℂ) * g (t^2/2)) (Ioi 0) ∧
       ∫ t in Ioi (0:ℝ), (t:ℂ) * g (t^2/2) = ∫ x in Ioi (0:ℝ), g x := by
   set h : ℝ → ℂ := fun y => (1/2:ℂ) * g ((1/2) * y) with hh
@@ -378,14 +394,14 @@ theorem pcfInt_sq_half_subst {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
   push_cast; ring
 
 /-- `(t²)^s = t^{2s}` for `t > 0`. -/
-theorem pcfInt_sq_cpow {t : ℝ} (ht : 0 < t) (s : ℂ) : ((t^2:ℝ):ℂ)^s = (t:ℂ)^(2*s) := by
+theorem CylinderIntegrals.sq_cpow {t : ℝ} (ht : 0 < t) (s : ℂ) : ((t^2:ℝ):ℂ)^s = (t:ℂ)^(2*s) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr (by positivity)),
     cpow_def_of_ne_zero (ofReal_ne_zero.mpr ht.ne'), ← ofReal_log (by positivity), Real.log_pow,
     ← ofReal_log ht.le]
   push_cast; ring_nf
 
 /-- The integrand of DLMF 12.12.1 in terms of the Laplace kernel of Kummer's `U`. -/
-theorem pcfInt_integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem CylinderIntegrals.integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
     exp (-t^2/4) * (t:ℂ)^(μ-1) * pcfU a t =
       (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1) *
         ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 1 (t^2/2)) := by
@@ -393,8 +409,8 @@ theorem pcfInt_integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
   have ht0 : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
   rw [pcfU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 =
       ((t^2/2:ℝ):ℂ) by push_cast; ring]
-  have key := pcfInt_const_aux ht (1-μ/2) 0
-  rw [neg_zero, cpow_zero, mul_one, sub_zero, neg_sub, pcfInt_sq_cpow ht] at key
+  have key := CylinderIntegrals.cpow_sq_half_mul_cpow_sq ht (1-μ/2) 0
+  rw [neg_zero, cpow_zero, mul_one, sub_zero, neg_sub, CylinderIntegrals.sq_cpow ht] at key
   rw [key]
   have e1 : (t:ℂ)^(μ-1) = (t:ℂ) * (t:ℂ)^(2*(μ/2-1)) := by
     rw [show μ - 1 = 1 + 2*(μ/2-1) by ring, cpow_add _ _ ht0, cpow_one]
@@ -407,7 +423,7 @@ theorem pcfInt_integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
     (t:ℂ)^(2*(μ/2-1)) * kummerU (a/2+1/4) (1/2) ((t^2/2:ℝ):ℂ)) * e3
 
 /-- The integrand of DLMF 12.12.2 in terms of the Laplace kernel of Kummer's `U` at `z = 2`. -/
-theorem pcfInt_integrand_2 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem CylinderIntegrals.integrand_2 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
     exp (-3*t^2/4) * (t:ℂ)^(μ-1) * pcfU a t =
       (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1) *
         ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 2 (t^2/2)) := by
@@ -415,8 +431,8 @@ theorem pcfInt_integrand_2 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
   have ht0 : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
   rw [pcfU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 =
       ((t^2/2:ℝ):ℂ) by push_cast; ring]
-  have key := pcfInt_const_aux ht (1-μ/2) 0
-  rw [neg_zero, cpow_zero, mul_one, sub_zero, neg_sub, pcfInt_sq_cpow ht] at key
+  have key := CylinderIntegrals.cpow_sq_half_mul_cpow_sq ht (1-μ/2) 0
+  rw [neg_zero, cpow_zero, mul_one, sub_zero, neg_sub, CylinderIntegrals.sq_cpow ht] at key
   rw [key]
   have e1 : (t:ℂ)^(μ-1) = (t:ℂ) * (t:ℂ)^(2*(μ/2-1)) := by
     rw [show μ - 1 = 1 + 2*(μ/2-1) by ring, cpow_add _ _ ht0, cpow_one]
@@ -431,7 +447,7 @@ theorem pcfInt_integrand_2 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
 /-- The value of the `U` Laplace integral at `z = 2`, `c = 1/2`, `a = -b` (via DLMF 13.10.7
 and DLMF 15.4.12). The 13.10.7 step repeats the proof of `laplace_kummerU`
 (`DLMF/Confluent/Integrals.lean`). -/
-theorem pcfInt_laplace_two {b : ℂ} (hb : 0 < b.re) :
+theorem CylinderIntegrals.laplace_two {b : ℂ} (hb : 0 < b.re) :
     ∫ t in Ioi (0:ℝ), tricomiLaplaceKernel (-b) b (1/2) 2 t =
       Gamma b * Gamma (b + 1/2) * (2:ℂ)^(-b) * cos (b*π/2) / Real.sqrt π := by
   have hm := (laplace_kummerU_gauss (a := -b) (b := b) (c := 1/2) (z := 2) hb
@@ -464,7 +480,7 @@ theorem pcfInt_laplace_two {b : ℂ} (hb : 0 < b.re) :
 
 
 /-- An integrable function has its Lebesgue integral as whole-line improper integral. -/
-theorem pcfInt_hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
+theorem CylinderIntegrals.hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
     HasIntegralWholeLine f (∫ y, f y) :=
   ⟨_, _, intervalIntegral_tendsto_integral_Iic 0 hf.integrableOn tendsto_id,
     intervalIntegral_tendsto_integral_Ioi 0 hf.integrableOn tendsto_id,
@@ -472,11 +488,11 @@ theorem pcfInt_hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
 
 
 /-- The Barnes integrand `Γ(t) Γ(1/2+a-2t) 2^t z^{2t}`, `t = c+iy`, of DLMF 12.5.8. -/
-noncomputable def pcfInt_B (a z : ℂ) (c y : ℝ) : ℂ :=
+noncomputable def CylinderIntegrals.barnesIntegrand (a z : ℂ) (c y : ℝ) : ℂ :=
   Gamma (c+y*I)*Gamma (1/2+1*a-2*(c+y*I))*2^((c:ℂ)+y*I)*z^(2*((c:ℂ)+y*I))*1
 
 /-- `‖z^{2t}‖ ≤ ‖z‖^{2c} e^{2|arg z||y|}` for `t = c+iy`. -/
-theorem pcfInt_norm_cpow_two_mul_le {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
+theorem CylinderIntegrals.norm_cpow_two_mul_le {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
     ‖z^(2*((c:ℂ)+y*I))‖ ≤ ‖z‖^(2*c) * Real.exp (2*|arg z| *|y|) := by
   rw [norm_cpow_of_ne_zero hz]
   have hre : (2*((c:ℂ)+y*I)).re = 2*c := by simp
@@ -488,9 +504,11 @@ theorem pcfInt_norm_cpow_two_mul_le {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
   linarith
 
 /-- The uniform bound `C ‖z‖^{2c} (1+|y|)^K e^{-(3π/2 - 2|arg z|)|y|}` for the 12.5.8 integrand. -/
-theorem pcfInt_norm_B_le (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) :
+theorem CylinderIntegrals.norm_barnesIntegrand_le (a : ℂ) {c : ℝ} (hc : 0 < c)
+    (hca : 2*c < 1/2 + a.re) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ z : ℂ, z ≠ 0 → ∀ y : ℝ,
-      ‖pcfInt_B a z c y‖ ≤ C * ‖z‖^(2*c) * ((1+|y|)^K * Real.exp (-((3*π/2 - 2*|arg z|)*|y|))) := by
+      ‖CylinderIntegrals.barnesIntegrand a z c y‖ ≤ C * ‖z‖^(2*c) *
+          ((1+|y|)^K * Real.exp (-((3*π/2 - 2*|arg z|)*|y|))) := by
   have hx0 : 0 < 1/2 + a.re - 2*c := by linarith
   obtain ⟨C1, K1, h1⟩ := DLMF.Gamma.exists_norm_Gamma_le hc
   obtain ⟨C2, K2, h2⟩ := DLMF.Gamma.exists_norm_Gamma_le hx0
@@ -514,8 +532,8 @@ theorem pcfInt_norm_B_le (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.r
     nlinarith [Real.pi_pos]
   have h2t : ‖(2:ℂ)^((c:ℂ)+y*I)‖ = (2:ℝ)^c := by
     rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_cast, norm_cpow_eq_rpow_re_of_pos (by norm_num)]; simp
-  have hz2 := pcfInt_norm_cpow_two_mul_le hz c y
-  unfold pcfInt_B
+  have hz2 := CylinderIntegrals.norm_cpow_two_mul_le hz c y
+  unfold CylinderIntegrals.barnesIntegrand
   rw [mul_one, norm_mul, norm_mul, norm_mul, h2t]
   calc ‖Gamma (c+y*I)‖ * ‖Gamma (1/2+1*a-2*((c:ℂ)+y*I))‖ * (2:ℝ)^c * ‖z^(2*((c:ℂ)+y*I))‖
       ≤ (C1 * (1 + |y|)^K1 * Real.exp (-(π*|y|)/2)) *
@@ -530,10 +548,10 @@ theorem pcfInt_norm_B_le (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.r
         rw [← Real.exp_add, ← Real.exp_add]; ring_nf
 
 /-- Pointwise form of the 12.5.8 integrand from Kummer's Barnes integrand (duplication formula). -/
-theorem pcfInt_B_real_pt (a : ℂ) {x : ℝ} (hx : 0 < x) (c y : ℝ) :
+theorem CylinderIntegrals.barnesIntegrand_real_point (a : ℂ) {x : ℝ} (hx : 0 < x) (c y : ℝ) :
     Gamma (a/2+1/4 - ((c:ℂ)+y*I)) * Gamma (a/2+1/4+1/2 - ((c:ℂ)+y*I)) * Gamma ((c:ℂ)+y*I) *
       ((x^2/2:ℝ):ℂ)^((c:ℂ)+y*I) =
-    (Real.sqrt π : ℂ) * (2:ℂ)^(1/2-a) * pcfInt_B a x c y := by
+    (Real.sqrt π : ℂ) * (2:ℂ)^(1/2-a) * CylinderIntegrals.barnesIntegrand a x c y := by
   set t : ℂ := (c:ℂ)+y*I
   have hd := Complex.Gamma_mul_Gamma_add_half (a/2+1/4 - t)
   rw [show a/2+1/4 - t + 1/2 = a/2+1/4+1/2 - t by ring,
@@ -541,19 +559,21 @@ theorem pcfInt_B_real_pt (a : ℂ) {x : ℝ} (hx : 0 < x) (c y : ℝ) :
   rw [hd]
   have hX : ((x^2/2:ℝ):ℂ)^t = (x:ℂ)^(2*t) * (2:ℂ)^(-t) := by
     rw [show ((x^2/2:ℝ):ℂ) = ((x^2:ℝ):ℂ) * ((1/2:ℝ):ℂ) by push_cast; ring,
-      mul_cpow_ofReal_nonneg (by positivity) (by norm_num), pcfInt_sq_cpow hx,
+      mul_cpow_ofReal_nonneg (by positivity) (by norm_num), CylinderIntegrals.sq_cpow hx,
       show ((1/2:ℝ):ℂ) = (2:ℂ)⁻¹ by push_cast; ring,
       inv_cpow _ _ (by rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_cast, arg_ofReal_of_nonneg (by norm_num)];
                        exact Real.pi_ne_zero.symm), cpow_neg]
   have h2 : (2:ℂ)^(1 - (1/2+1*a-2*t)) * (2:ℂ)^(-t) = (2:ℂ)^(1/2-a) * (2:ℂ)^t := by
     rw [← cpow_add _ _ two_ne_zero, ← cpow_add _ _ two_ne_zero]; ring_nf
   rw [hX]
-  unfold pcfInt_B
+  unfold CylinderIntegrals.barnesIntegrand
   linear_combination (Gamma (1/2+1*a-2*t) * Real.sqrt π * Gamma t * (x:ℂ)^(2*t)) * h2
 
 /-- DLMF 12.5.8 for real positive argument, from Kummer's Barnes integral (DLMF 13.4.17). -/
-theorem pcfInt_B_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) {x : ℝ} (hx : 0 < x) :
-    ∫ y, pcfInt_B a x c y = 2*π*Gamma (1/2+1*a)*(exp ((x:ℂ)^2/4)*(x:ℂ)^(a+1/2))*pcfU a x := by
+theorem CylinderIntegrals.barnesIntegrand_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re)
+    {x : ℝ} (hx : 0 < x) :
+    ∫ y, CylinderIntegrals.barnesIntegrand a x c y =
+        2*π*Gamma (1/2+1*a)*(exp ((x:ℂ)^2/4)*(x:ℂ)^(a+1/2))*pcfU a x := by
   set α : ℂ := a/2+1/4 with hα
   have hX : (0:ℝ) < x^2/2 := by positivity
   have hb := kummerU_barnes (a := α) (b := 1/2) (σ := -c) hX (by simp [hα]; linarith)
@@ -562,7 +582,8 @@ theorem pcfInt_B_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) 
   have hpt : ∀ y : ℝ, Gamma (α + ((-c:ℝ):ℂ) + I * ((-y:ℝ):ℂ)) *
       Gamma (1 + α - 1/2 + ((-c:ℝ):ℂ) + I * ((-y:ℝ):ℂ)) *
       Gamma (-(((-c:ℝ):ℂ) + I * ((-y:ℝ):ℂ))) / (Gamma α * Gamma (1 + α - 1/2)) *
-      ((x^2/2:ℝ):ℂ) ^ (-(((-c:ℝ):ℂ) + I * ((-y:ℝ):ℂ))) * I = Kc * pcfInt_B a x c y := by
+      ((x^2/2:ℝ):ℂ) ^ (-(((-c:ℝ):ℂ) + I * ((-y:ℝ):ℂ))) * I = Kc *
+          CylinderIntegrals.barnesIntegrand a x c y := by
     intro y
     have e1 : α + ((-c:ℝ):ℂ) + I * ((-y:ℝ):ℂ) = a/2+1/4 - ((c:ℂ)+y*I) := by
       rw [hα]; push_cast; ring
@@ -570,7 +591,7 @@ theorem pcfInt_B_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) 
       rw [hα]; push_cast; ring
     have e3 : -(((-c:ℝ):ℂ) + I * ((-y:ℝ):ℂ)) = (c:ℂ)+y*I := by push_cast; ring
     rw [e1, e2, e3]
-    have := pcfInt_B_real_pt a hx c y
+    have := CylinderIntegrals.barnesIntegrand_real_point a hx c y
     simp only [Kc]
     linear_combination (I / (Gamma α * Gamma (1 + α - 1/2))) * this
   rw [← integral_neg_eq_self] at hb
@@ -579,8 +600,8 @@ theorem pcfInt_B_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) 
   have hre : 0 < (x:ℂ).re := by simpa using hx
   have hd := Complex.Gamma_mul_Gamma_add_half α
   rw [show 2*α = 1/2+1*a by rw [hα]; ring, show 1 - (1/2+1*a) = 1/2 - a by ring] at hd
-  have hXa := pcfInt_const_aux hx α 0
-  rw [neg_zero, cpow_zero, mul_one, sub_zero, pcfInt_sq_cpow hx] at hXa
+  have hXa := CylinderIntegrals.cpow_sq_half_mul_cpow_sq hx α 0
+  rw [neg_zero, cpow_zero, mul_one, sub_zero, CylinderIntegrals.sq_cpow hx] at hXa
   have hG : Gamma (1/2+1*a) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
   have hW : (2:ℂ)^(1/2-a) ≠ 0 := by rw [Ne, cpow_eq_zero_iff]; simp
   have hs : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_ne_zero'.mpr Real.pi_pos)
@@ -602,30 +623,32 @@ theorem pcfInt_B_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) 
   field_simp
 
 /-- The sector `|arg z| < 3π/4` (origin excluded) of DLMF 12.5.8. -/
-noncomputable def pcfInt_sector : Set ℂ := slitPlane ∩ (fun z : ℂ => |arg z|) ⁻¹' Iio (3*π/4)
+noncomputable def CylinderIntegrals.sector : Set ℂ :=
+    slitPlane ∩ (fun z : ℂ => |arg z|) ⁻¹' Iio (3*π/4)
 
 /-- The sector is open. -/
-theorem pcfInt_isOpen_sector : IsOpen pcfInt_sector :=
+theorem CylinderIntegrals.isOpen_sector : IsOpen CylinderIntegrals.sector :=
   ContinuousOn.isOpen_inter_preimage (fun _ hz => (continuousAt_arg hz).abs.continuousWithinAt)
     isOpen_slitPlane isOpen_Iio
 
 /-- Membership in the sector. -/
-theorem pcfInt_mem_sector {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) : z ∈ pcfInt_sector := by
+theorem CylinderIntegrals.mem_sector {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) : z ∈
+    CylinderIntegrals.sector := by
   refine ⟨mem_slitPlane_iff_arg.mpr ⟨fun h => ?_, hz0⟩, hz⟩
   rw [h, abs_of_pos Real.pi_pos] at hz; linarith [Real.pi_pos]
 
 /-- The sector is preconnected (the image of a strip under `exp`). -/
-theorem pcfInt_isPreconnected_sector : IsPreconnected pcfInt_sector := by
+theorem CylinderIntegrals.isPreconnected_sector : IsPreconnected CylinderIntegrals.sector := by
   have hS : IsPreconnected (im ⁻¹' Ioo (-(3*π/4)) (3*π/4)) :=
     ((convex_Ioo _ _).linear_preimage imLm).isPreconnected
-  have himg : exp '' (im ⁻¹' Ioo (-(3*π/4)) (3*π/4)) = pcfInt_sector := by
+  have himg : exp '' (im ⁻¹' Ioo (-(3*π/4)) (3*π/4)) = CylinderIntegrals.sector := by
     ext z
     constructor
     · rintro ⟨w, hw, rfl⟩
       have hw' : -(3*π/4) < w.im ∧ w.im < 3*π/4 := hw
       have hlog : log (exp w) = w := log_exp (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])
       have harg : arg (exp w) = w.im := by rw [← log_im, hlog]
-      exact pcfInt_mem_sector (exp_ne_zero w) (by rw [harg, abs_lt]; exact hw')
+      exact CylinderIntegrals.mem_sector (exp_ne_zero w) (by rw [harg, abs_lt]; exact hw')
     · rintro ⟨hz, hz'⟩
       have hz0 : z ≠ 0 := slitPlane_ne_zero hz
       refine ⟨log z, ?_, exp_log hz0⟩
@@ -635,10 +658,11 @@ theorem pcfInt_isPreconnected_sector : IsPreconnected pcfInt_sector := by
   exact hS.image _ continuous_exp.continuousOn
 
 /-- The 12.5.8 integrand is continuous in `y`. -/
-theorem pcfInt_B_continuous (a : ℂ) {z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
-    (hca : 2*c < 1/2 + a.re) : Continuous (pcfInt_B a z c) := by
+theorem CylinderIntegrals.barnesIntegrand_continuous (a : ℂ) {z : ℂ} (hz : z ≠ 0)
+    {c : ℝ} (hc : 0 < c)
+    (hca : 2*c < 1/2 + a.re) : Continuous (CylinderIntegrals.barnesIntegrand a z c) := by
   refine continuous_iff_continuousAt.mpr fun y => ?_
-  unfold pcfInt_B
+  unfold CylinderIntegrals.barnesIntegrand
   refine ContinuousAt.mul (ContinuousAt.mul (ContinuousAt.mul (ContinuousAt.mul ?_ ?_) ?_) ?_)
     continuousAt_const
   · exact (DLMF.Gamma.continuousAt_Gamma_of_re_pos (by simp [hc])).comp (by fun_prop)
@@ -649,23 +673,28 @@ theorem pcfInt_B_continuous (a : ℂ) {z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0
       (Or.inl hz)).continuousAt
 
 /-- The 12.5.8 integrand is integrable for `|arg z| < 3π/4`. -/
-theorem pcfInt_B_integrable (a : ℂ) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ}
-    (hc : 0 < c) (hca : 2*c < 1/2 + a.re) : Integrable (pcfInt_B a z c) := by
-  obtain ⟨C, K, -, hCK⟩ := pcfInt_norm_B_le a hc hca
+theorem CylinderIntegrals.barnesIntegrand_integrable (a : ℂ) {z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {c : ℝ}
+    (hc : 0 < c) (hca : 2*c < 1/2 + a.re) : Integrable
+        (CylinderIntegrals.barnesIntegrand a z c) := by
+  obtain ⟨C, K, -, hCK⟩ := CylinderIntegrals.norm_barnesIntegrand_le a hc hca
   exact ((DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (c := 3*π/2 - 2*|arg z|)
     (by linarith) K).const_mul (C * ‖z‖^(2*c))).mono'
-    (pcfInt_B_continuous a hz0 hc hca).aestronglyMeasurable
+    (CylinderIntegrals.barnesIntegrand_continuous a hz0 hc hca).aestronglyMeasurable
     (Eventually.of_forall fun y => (hCK z hz0 y).trans (le_of_eq (by ring)))
 
 /-- The 12.5.8 integral is holomorphic in `z` on the sector. -/
-theorem pcfInt_B_differentiableOn (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) :
-    DifferentiableOn ℂ (fun z => ∫ y, pcfInt_B a z c y) pcfInt_sector := by
-  obtain ⟨C, K, hC0, hCK⟩ := pcfInt_norm_B_le a hc hca
-  refine Complex.differentiableOn_integral_of_locally_dominated pcfInt_isOpen_sector
-    (fun z hz => (pcfInt_B_continuous a (slitPlane_ne_zero hz.1) hc hca).aestronglyMeasurable)
+theorem CylinderIntegrals.barnesIntegrand_differentiableOn (a : ℂ) {c : ℝ} (hc : 0 < c)
+    (hca : 2*c < 1/2 + a.re) :
+    DifferentiableOn ℂ (fun z => ∫ y, CylinderIntegrals.barnesIntegrand a z c y)
+        CylinderIntegrals.sector := by
+  obtain ⟨C, K, hC0, hCK⟩ := CylinderIntegrals.norm_barnesIntegrand_le a hc hca
+  refine Complex.differentiableOn_integral_of_locally_dominated CylinderIntegrals.isOpen_sector
+    (fun z hz => (CylinderIntegrals.barnesIntegrand_continuous a (slitPlane_ne_zero hz.1) hc
+        hca).aestronglyMeasurable)
     ?_ ?_
   · refine Eventually.of_forall fun y z hz => ?_
-    unfold pcfInt_B
+    unfold CylinderIntegrals.barnesIntegrand
     refine DifferentiableAt.differentiableWithinAt ?_
     exact (((differentiableAt_const _).mul (differentiableAt_id.cpow_const hz.1)).mul
       (differentiableAt_const _))
@@ -677,7 +706,7 @@ theorem pcfInt_B_differentiableOn (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 
       ((continuousAt_arg hz0.1).abs).eventually_lt continuousAt_const (by simp only [θ]; linarith)
     have hnorm : ∀ᶠ z in 𝓝 z0, ‖z‖ < R :=
       continuous_norm.continuousAt.eventually_lt continuousAt_const (by simp only [R]; linarith)
-    refine ⟨_, (harg.and hnorm).and (pcfInt_isOpen_sector.mem_nhds hz0),
+    refine ⟨_, (harg.and hnorm).and (CylinderIntegrals.isOpen_sector.mem_nhds hz0),
       fun y => C * R^(2*c) * ((1+|y|)^K * Real.exp (-((3*π/2 - 2*θ)*|y|))), ?_,
       Eventually.of_forall fun y z hz => ?_⟩
     · exact (DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (by simp only [θ]; linarith)
@@ -692,29 +721,33 @@ theorem pcfInt_B_differentiableOn (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 
       gcongr
 
 /-- DLMF 12.5.8, value and integrability. -/
-theorem pcfInt_B_integral (a : ℂ) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ}
+theorem CylinderIntegrals.barnesIntegrand_integral (a : ℂ) {z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < 3*π/4) {c : ℝ}
     (hc : 0 < c) (hca : 2*c < 1/2 + a.re) :
-    ∫ y, pcfInt_B a z c y = 2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z := by
-  have hF := (pcfInt_B_differentiableOn a hc hca).analyticOnNhd pcfInt_isOpen_sector
+    ∫ y, CylinderIntegrals.barnesIntegrand a z c y =
+        2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z := by
+  have hF := (CylinderIntegrals.barnesIntegrand_differentiableOn a hc hca).analyticOnNhd
+      CylinderIntegrals.isOpen_sector
   have hG : AnalyticOnNhd ℂ (fun z => 2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z)
-      pcfInt_sector := by
-    refine DifferentiableOn.analyticOnNhd (fun z hz => ?_) pcfInt_isOpen_sector
+      CylinderIntegrals.sector := by
+    refine DifferentiableOn.analyticOnNhd (fun z hz => ?_) CylinderIntegrals.isOpen_sector
     refine DifferentiableAt.differentiableWithinAt ?_
     exact ((differentiableAt_const _).mul ((((differentiableAt_id.pow 2).div_const 4).cexp).mul
       (differentiableAt_id.cpow_const hz.1))).mul ((pcfU_entire a) z)
-  have h1 : (1:ℂ) ∈ pcfInt_sector := pcfInt_mem_sector one_ne_zero (by simp; positivity)
-  have hfreq : ∃ᶠ w in 𝓝[≠] (1:ℂ), (∫ y, pcfInt_B a w c y) =
+  have h1 : (1:ℂ) ∈ CylinderIntegrals.sector :=
+      CylinderIntegrals.mem_sector one_ne_zero (by simp; positivity)
+  have hfreq : ∃ᶠ w in 𝓝[≠] (1:ℂ), (∫ y, CylinderIntegrals.barnesIntegrand a w c y) =
       2*π*Gamma (1/2+1*a)*(exp (w^2/4)*w^(a+1/2))*pcfU a w := by
     have hmap : Tendsto (fun x : ℝ => (x:ℂ)) (𝓝[≠] (1:ℝ)) (𝓝[≠] (1:ℂ)) := by
       have := continuous_ofReal.continuousWithinAt.tendsto_nhdsWithin (s := {(1:ℝ)}ᶜ)
         (t := {(1:ℂ)}ᶜ) (x := 1) (fun x hx h => hx (by simp at h ⊢; exact_mod_cast h))
       simpa using this
-    have hev : ∀ᶠ x : ℝ in 𝓝[≠] (1:ℝ), (∫ y, pcfInt_B a (x:ℂ) c y) =
+    have hev : ∀ᶠ x : ℝ in 𝓝[≠] (1:ℝ), (∫ y, CylinderIntegrals.barnesIntegrand a (x:ℂ) c y) =
         2*π*Gamma (1/2+1*a)*(exp ((x:ℂ)^2/4)*(x:ℂ)^(a+1/2))*pcfU a x := by
       filter_upwards [nhdsWithin_le_nhds (lt_mem_nhds (show (0:ℝ) < 1 by norm_num))] with x hx
-      exact pcfInt_B_real a hc hca hx
+      exact CylinderIntegrals.barnesIntegrand_real a hc hca hx
     exact hmap.frequently hev.frequently
-  exact hF.eqOn_of_preconnected_of_frequently_eq hG pcfInt_isPreconnected_sector h1 hfreq
-    (pcfInt_mem_sector hz0 hz)
+  exact hF.eqOn_of_preconnected_of_frequently_eq hG CylinderIntegrals.isPreconnected_sector h1 hfreq
+    (CylinderIntegrals.mem_sector hz0 hz)
 
 end DLMF.Confluent

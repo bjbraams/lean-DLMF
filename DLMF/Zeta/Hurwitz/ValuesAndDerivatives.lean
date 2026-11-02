@@ -7,6 +7,7 @@ module
 
 public import DLMF.Zeta.Hurwitz.SeriesAndContinuation
 public import DLMFMathlib.Analysis.Complex.NonInteger
+public import DLMF.Gamma.PolygammaHurwitz
 
 /-!
 # Hurwitz zeta values and derivatives
@@ -842,6 +843,96 @@ theorem deriv_hurwitzZeta_one_sub_two_mul_half {n : ℕ} (hn : 1 ≤ n) :
   field_simp
   ring
 
+/-- `sinZeta (1/3) s = 3^{-s} (√3/2) (ζ(s, 1/3) - ζ(s, 2/3))` for `Re s > 1`. -/
+private lemma sinZeta_third {s : ℂ} (hs : 1 < s.re) :
+    sinZeta ((1 / 3 : ℝ) : UnitAddCircle) s = (3 : ℂ) ^ (-s) * (Real.sqrt 3 / 2) *
+      (hurwitzZeta ((1 / 3 : ℝ) : UnitAddCircle) s -
+        hurwitzZeta ((2 / 3 : ℝ) : UnitAddCircle) s) := by
+  set Φ : ZMod 3 → ℂ := fun j => (Real.sin (2 * π * (1 / 3) * j.val) : ℂ)
+  have hL := ZMod.LFunction_eq_LSeries Φ hs
+  have hS := (LSeriesHasSum_sin (1 / 3) hs).LSeries_eq
+  have hΦ : ∀ k : ℕ, Φ k = (Real.sin (2 * π * (1 / 3) * k) : ℂ) := by
+    intro k
+    simp only [Φ, ZMod.val_natCast]
+    congr 1
+    conv_rhs => rw [← Nat.mod_add_div k 3]
+    push_cast
+    rw [show 2 * π * (1 / 3) * ((k % 3 : ℕ) + 3 * (k / 3 : ℕ) : ℝ) =
+      2 * π * (1 / 3) * (k % 3 : ℕ) + (k / 3 : ℕ) * (2 * π) by ring, Real.sin_add_nat_mul_two_pi]
+  rw [← hS, ← LSeries_congr (fun {k} _ => hΦ k) s, ← hL, ZMod.LFunction]
+  have h3 : ∀ f : ZMod 3 → ℂ, ∑ j, f j = f 0 + f 1 + f 2 := fun f => Fin.sum_univ_three f
+  rw [h3]
+  simp only [Φ, ZMod.toAddCircle_apply]
+  have v1 : (1 : ZMod 3).val = 1 := rfl
+  have v2 : (2 : ZMod 3).val = 2 := rfl
+  have v0 : (0 : ZMod 3).val = 0 := rfl
+  rw [v0, v1, v2]
+  have e1 : Real.sin (2 * π * (1 / 3) * ((1 : ℕ) : ℝ)) = Real.sqrt 3 / 2 := by
+    rw [show 2 * π * (1 / 3) * ((1 : ℕ) : ℝ) = π - π / 3 by push_cast; ring, Real.sin_pi_sub,
+      Real.sin_pi_div_three]
+  have e2 : Real.sin (2 * π * (1 / 3) * ((2 : ℕ) : ℝ)) = -(Real.sqrt 3 / 2) := by
+    rw [show 2 * π * (1 / 3) * ((2 : ℕ) : ℝ) = π / 3 + π by push_cast; ring, Real.sin_add_pi,
+      Real.sin_pi_div_three]
+  rw [e1, e2]
+  push_cast
+  norm_num
+  ring
+
+
+/-- The derivative of the odd Hurwitz zeta function at a negative odd integer, from its
+functional equation (the trivial zero of  at ). -/
+private lemma deriv_hurwitzZetaOdd_one_sub_two_mul (a : UnitAddCircle) {n : ℕ} (hn : 1 ≤ n) :
+    deriv (hurwitzZetaOdd a) (1 - 2 * n) =
+      -(2 * (2 * π) ^ (-(2 * n : ℂ)) * Gamma (2 * n) * sinZeta a (2 * n) * (π / 2) * (-1) ^ n) := by
+  set s₀ : ℂ := 2 * n
+  have hs₀ : ∀ m : ℕ, s₀ ≠ -m := by
+    intro m h
+    have := congrArg Complex.re h
+    simp [s₀] at this
+    have : (0 : ℝ) < n := by exact_mod_cast hn
+    linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]
+  set F : ℂ → ℂ := fun s => 2 * (2 * π) ^ (-s) * Gamma s * sinZeta a s
+  set Sn : ℂ → ℂ := fun s => Complex.sin (π * s / 2)
+  have hev : (fun s => hurwitzZetaOdd a (1 - s)) =ᶠ[𝓝 s₀] fun s => F s * Sn s := by
+    have hU : {s : ℂ | 0 < s.re} ∈ 𝓝 s₀ :=
+      (isOpen_lt continuous_const continuous_re).mem_nhds (by
+        simp only [mem_ofPred_eq, s₀]; simp; positivity)
+    filter_upwards [hU] with s hs
+    have hs' : ∀ m : ℕ, s ≠ -m := by
+      intro m h; rw [h] at hs; simp at hs; linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]
+    rw [hurwitzZetaOdd_one_sub a hs']
+    simp only [F, Sn]; ring
+  have h2π : (2 * π : ℂ) ≠ 0 := by
+    have : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+    exact mul_ne_zero two_ne_zero this
+  have hF : DifferentiableAt ℂ F s₀ := by
+    refine ((DifferentiableAt.mul ?_ (Complex.differentiableAt_Gamma _ hs₀)).mul
+      ((differentiableAt_sinZeta a) s₀))
+    exact (differentiableAt_const _).mul
+      ((differentiableAt_id.neg).const_cpow (Or.inl h2π))
+  have hS : HasDerivAt Sn (Complex.cos (π * s₀ / 2) * (π / 2)) s₀ := by
+    have := ((hasDerivAt_id s₀).const_mul (π : ℂ)).div_const 2
+    simpa [Sn, mul_comm] using this.csin
+  have hS0 : Sn s₀ = 0 := by
+    simp only [Sn, s₀]
+    rw [show (π : ℂ) * (2 * n) / 2 = n * π by ring, Complex.sin_nat_mul_pi]
+  have hC : Complex.cos (π * s₀ / 2) = (-1) ^ n := by
+    simp only [s₀]
+    rw [show (π : ℂ) * (2 * n) / 2 = ((n * π : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_cos,
+      Real.cos_nat_mul_pi]
+    push_cast; ring
+  have hD : HasDerivAt (fun s => F s * Sn s) _ s₀ := hF.hasDerivAt.mul hS
+  have hd := hD.deriv
+  rw [hS0, hC, mul_zero, zero_add] at hd
+  have hcomp : deriv (fun s => hurwitzZetaOdd a (1 - s)) s₀ = -deriv (hurwitzZetaOdd a) (1 - s₀) :=
+    deriv_comp_const_sub _ _ _
+  rw [hev.deriv_eq, hd] at hcomp
+  rw [show (1 : ℂ) - 2 * n = 1 - s₀ from rfl]
+  rw [← neg_neg (deriv (hurwitzZetaOdd a) (1 - s₀)), ← hcomp]
+  simp only [F, s₀]
+  ring
+
+
 /-- **`ζ'(1-2n, 1/3)`** (DLMF 25.11.23, **corrected**), `n ≥ 1`:
 `ζ'(1-2n, 1/3) = -π(9ⁿ-1)B_{2n}/(8n√3·3^{2n-1}) - B_{2n} ln 3/(4n·3^{2n-1})
  - (-1)ⁿ ψ^{(2n-1)}(1/3)/(2√3(6π)^{2n-1}) - (3^{2n-1}-1) ζ'(1-2n)/(2·3^{2n-1})`.
@@ -856,7 +947,109 @@ theorem deriv_hurwitzZeta_one_sub_two_mul_third {n : ℕ} (hn : 1 ≤ n) :
         (-1) ^ n * DLMF.Gamma.polygamma (2 * n - 1) (1 / 3) /
           (2 * Real.sqrt 3 * (6 * π) ^ (2 * n - 1)) -
         (3 ^ (2 * n - 1) - 1) * deriv riemannZeta (1 - 2 * n) / (2 * 3 ^ (2 * n - 1)) := by
-  sorry
+  have hb : ((2 / 3 : ℝ) : UnitAddCircle) = -((1 / 3 : ℝ) : UnitAddCircle) := by
+    rw [show (2 / 3 : ℝ) = -(1 / 3) + 1 by norm_num, AddCircle.coe_add_period, AddCircle.coe_neg]
+  have hs₀ : (1 - 2 * n : ℂ) ≠ 1 := by
+    intro h
+    have : (2 : ℂ) * n = 0 := by linear_combination -h
+    have : (n : ℂ) = 0 := by simpa using this
+    have : n = 0 := by exact_mod_cast this
+    omega
+  have hEa := differentiableAt_hurwitzZetaEven ((1 / 3 : ℝ) : UnitAddCircle) hs₀
+  have hOa := differentiable_hurwitzZetaOdd ((1 / 3 : ℝ) : UnitAddCircle) (1 - 2 * n)
+  have hDa : deriv (hurwitzZeta ((1 / 3 : ℝ) : UnitAddCircle)) (1 - 2 * n) =
+      deriv (hurwitzZetaEven ((1 / 3 : ℝ) : UnitAddCircle)) (1 - 2 * n) +
+      deriv (hurwitzZetaOdd ((1 / 3 : ℝ) : UnitAddCircle)) (1 - 2 * n) := by
+    rw [show hurwitzZeta ((1 / 3 : ℝ) : UnitAddCircle) = fun s =>
+      hurwitzZetaEven ((1 / 3 : ℝ) : UnitAddCircle) s +
+        hurwitzZetaOdd ((1 / 3 : ℝ) : UnitAddCircle) s from rfl]
+    exact deriv_add hEa hOa
+  have hDb : deriv (hurwitzZeta ((2 / 3 : ℝ) : UnitAddCircle)) (1 - 2 * n) =
+      deriv (hurwitzZetaEven ((1 / 3 : ℝ) : UnitAddCircle)) (1 - 2 * n) -
+      deriv (hurwitzZetaOdd ((1 / 3 : ℝ) : UnitAddCircle)) (1 - 2 * n) := by
+    rw [hb, show hurwitzZeta (-((1 / 3 : ℝ) : UnitAddCircle)) = fun s =>
+      hurwitzZetaEven ((1 / 3 : ℝ) : UnitAddCircle) s -
+        hurwitzZetaOdd ((1 / 3 : ℝ) : UnitAddCircle) s by
+      funext s; rw [hurwitzZeta, hurwitzZetaEven_neg, hurwitzZetaOdd_neg]; ring]
+    exact deriv_sub hEa hOa
+  have hsum := sum_deriv_hurwitzZeta_div_eq hs₀ (k := 3) (by norm_num)
+  simp only [show Finset.Ico 1 3 = {1, 2} by rfl,
+    Finset.sum_insert (by decide : 1 ∉ ({2} : Finset ℕ)), Finset.sum_singleton, Nat.cast_one,
+    Nat.cast_ofNat] at hsum
+  have hodd := deriv_hurwitzZetaOdd_one_sub_two_mul ((1 / 3 : ℝ) : UnitAddCircle) hn
+  have hre : 1 < ((2 * n : ℂ)).re := by
+    simp; have : (1 : ℝ) ≤ n := by exact_mod_cast hn
+    linarith
+  have hsin := sinZeta_third hre
+  have h2n : (2 * n : ℂ) ≠ 1 := fun h => by
+    have := congrArg Complex.re h; simp at this; have : (1:ℝ) ≤ n := by exact_mod_cast hn
+    linarith
+  have h2 := sum_hurwitzZeta_div_eq (k := 3) (by norm_num) h2n
+  simp only [show Finset.Ico 1 3 = {1, 2} by rfl,
+    Finset.sum_insert (by decide : 1 ∉ ({2} : Finset ℕ)), Finset.sum_singleton, Nat.cast_one,
+    Nat.cast_ofNat] at h2
+  rw [hDa, hodd, hsin]
+  have hE : deriv (hurwitzZetaEven ((1 / 3 : ℝ) : UnitAddCircle)) (1 - 2 * n) =
+      ((3 ^ (1 - 2 * (n : ℂ)) - 1) * deriv riemannZeta (1 - 2 * n) +
+        3 ^ (1 - 2 * (n : ℂ)) * riemannZeta (1 - 2 * n) * Real.log 3) / 2 := by
+    rw [← hsum, hDa, hDb]; ring
+  rw [hE, show hurwitzZeta ((2 / 3 : ℝ) : UnitAddCircle) (2 * n) =
+    (3 ^ (2 * (n : ℂ)) - 1) * riemannZeta (2 * n) -
+      hurwitzZeta ((1 / 3 : ℝ) : UnitAddCircle) (2 * n)
+    by linear_combination h2]
+  obtain ⟨j, rfl⟩ : ∃ j, n = j + 1 := ⟨n - 1, by omega⟩
+  have hpsi := DLMF.Gamma.polygamma_eq_hurwitzZeta (n := 2 * j + 1) (by omega) (a := 1 / 3)
+    (by norm_num) (by norm_num)
+  have hz := riemannZeta_two_mul_nat (k := j + 1) (by omega)
+  have hzn := riemannZeta_neg_nat_eq_bernoulli (2 * j + 1)
+  have hΓ := Complex.Gamma_nat_eq_factorial (2 * j + 1)
+  have c1 : (2 * ((j + 1 : ℕ) : ℂ)) = ((2 * j + 2 : ℕ) : ℂ) := by push_cast; ring
+  have c2 : (1 - ((2 * j + 2 : ℕ) : ℂ)) = -((2 * j + 1 : ℕ) : ℂ) := by push_cast; ring
+  have c3 : ((2 * j + 1 : ℕ) : ℂ) + 1 = ((2 * j + 2 : ℕ) : ℂ) := by push_cast; ring
+  rw [c3] at hpsi hΓ
+  rw [c1] at hz ⊢
+  rw [c2]
+  simp only [cpow_neg, cpow_natCast]
+  rw [hzn, hΓ, hz]
+  rw [show ((1 / 3 : ℝ) : ℂ) = 1 / 3 by push_cast; ring] at hpsi
+  rw [show hurwitzZeta ((1 / 3 : ℝ) : UnitAddCircle) ((2 * j + 2 : ℕ) : ℂ) =
+    DLMF.Gamma.polygamma (2 * j + 1) (1 / 3) / (2 * j + 1)! by
+      have hF : ((2 * j + 1)! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+      rw [hpsi, show 2 * j + 1 + 1 = 2 * (j + 1) by ring, pow_mul]; field_simp; simp]
+  rw [show 2 * (j + 1) - 1 = 2 * j + 1 by omega, show 2 * (j + 1) = 2 * j + 2 by ring]
+  have hr : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
+    rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num
+  rw [show (3 : ℂ) ^ (2 * j + 2) = ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 * 3 ^ (2 * j + 1) by rw [hr]; ring,
+    show (9 : ℂ) ^ (j + 1) = ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 * 3 ^ (2 * j + 1) by
+      rw [hr, show (9 : ℂ) = 3 ^ 2 by norm_num, ← pow_mul]; ring,
+    show (6 * (π : ℂ)) ^ (2 * j + 1) = 2 ^ (2 * j + 1) * 3 ^ (2 * j + 1) * π ^ (2 * j + 1) by
+      rw [show (6 : ℂ) = 2 * 3 by norm_num, mul_pow, mul_pow],
+    show (2 * (π : ℂ)) ^ (2 * j + 2) = 2 * 2 ^ (2 * j + 1) * π * π ^ (2 * j + 1) by ring,
+    show (π : ℂ) ^ (2 * j + 2) = π * π ^ (2 * j + 1) by ring,
+    show (2 * j + 2)! = (2 * j + 2) * (2 * j + 1)! from Nat.factorial_succ _,
+    show 2 * j + 1 + 1 = 2 * j + 2 by ring, pow_succ (-1 : ℂ) (j + 1),
+    show (-1 : ℂ) ^ (2 * j + 1) = -1 by rw [pow_succ, pow_mul]; simp]
+  have hF : ((2 * j + 1)! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  have hr0 : ((Real.sqrt 3 : ℝ) : ℂ) ≠ 0 := by
+    intro h; rw [h] at hr; norm_num at hr
+  push_cast
+  generalize ((Real.sqrt 3 : ℝ) : ℂ) = r at *
+  generalize ((2 * j + 1)! : ℂ) = F at *
+  generalize DLMF.Gamma.polygamma (2 * j + 1) (1 / 3) = P
+  generalize deriv riemannZeta (-(2 * (j : ℂ) + 1)) = Z
+  have hT : (3 : ℂ) ^ (2 * j + 1) ≠ 0 := pow_ne_zero _ (by norm_num)
+  have hW : (2 : ℂ) ^ (2 * j + 1) ≠ 0 := pow_ne_zero _ (by norm_num)
+  have hQ : (π : ℂ) ^ (2 * j + 1) ≠ 0 := pow_ne_zero _ hπ
+  generalize (3 : ℂ) ^ (2 * j + 1) = T at *
+  generalize (2 : ℂ) ^ (2 * j + 1) = W at *
+  generalize (π : ℂ) ^ (2 * j + 1) = Q at *
+  have hj : (j : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero j
+  have hj2 : 2 * (j : ℂ) + 2 ≠ 0 := by
+    rw [show 2 * (j : ℂ) + 2 = 2 * (j + 1) by ring]; exact mul_ne_zero two_ne_zero hj
+  have hj3 : 2 * (j : ℂ) + 1 + 1 ≠ 0 := by rw [add_assoc]; norm_num; exact hj2
+  have hj4 : 2 + (j : ℂ) * 2 ≠ 0 := by rw [show 2 + (j : ℂ) * 2 = 2 * j + 2 by ring]; exact hj2
+  rcases neg_one_pow_eq_or ℂ (j + 1) with h | h <;> rw [h] <;> field_simp <;> ring
 
 /-- **Sum of derivatives over a period** (DLMF 25.11.24): for `s ≠ 1`, `k = 1, 2, 3, …`,
 `∑_{r=1}^{k-1} ζ'(s, r/k) = (k^s - 1) ζ'(s) + k^s ζ(s) ln k`. -/

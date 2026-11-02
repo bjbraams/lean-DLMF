@@ -13,7 +13,7 @@ public import Mathlib.Analysis.Convex.Contractible
 # Zero enumerations by modulus and one-zero-per-disc criteria
 
 DLMF lists the complex zeros of a special function in a sector "arranged in order of increasing
-absolute value". The project encodes this by `DLMF.orderedZero f S k`, an `epsilon`-choice of a
+absolute value". The project encodes this by `DLMF.Core.orderedZero f S k`, an `epsilon`-choice of a
 zero `z ∈ S` of `f` with exactly `k - 1` zeros of `f` in `S` of smaller modulus. This file gives
 the combinatorics behind that encoding and the bridge to it from Rouché's theorem
 (`TauCeti.rouche`).
@@ -23,16 +23,16 @@ for an entire function that is not identically zero.
 
 ## Main results
 
-* `zcnt_finite_zeros_closedBall`, `zcnt_finite_zeros_lt`: the zeros of a nonzero entire
+* `finite_zeros_closedBall`, `finite_zeros_lt`: the zeros of a nonzero entire
   function in a bounded region form a finite set.
-* `zcnt_orderedZero_spec_iff`: the enumeration is well defined for every `k ≥ 1` if and only if
+* `orderedZero_spec_iff`: the enumeration is well defined for every `k ≥ 1` if and only if
   the zeros in `S` have pairwise distinct moduli and there are infinitely many of them.
-* `zcnt_orderedZero_strictMonoOn`: the enumeration is then strictly increasing in modulus.
-* `zcnt_eq_orderedZero`: every zero in `S` is enumerated.
-* `zcnt_injOn_infinite_of_discs`: exactly one zero in each disc `D_k`, with the discs in
+* `orderedZero_strictMonoOn`: the enumeration is then strictly increasing in modulus.
+* `eq_orderedZero`: every zero in `S` is enumerated.
+* `injOn_infinite_of_discs`: exactly one zero in each disc `D_k`, with the discs in
   disjoint annuli of increasing radius and every zero in some `D_k`, gives distinct moduli and
   infinitely many zeros.
-* `zcnt_existsUnique_of_count_eq_one`, `zcnt_existsUnique_zero_of_rouche`: a zero count `1`
+* `existsUnique_of_count_eq_one`, `existsUnique_zero_of_rouche`: a zero count `1`
   (with multiplicity) on a disc, for instance transferred by Rouché's theorem from a model,
   gives exactly one zero in the disc.
 -/
@@ -42,11 +42,11 @@ for an entire function that is not identically zero.
 open Complex Metric Set Filter
 open scoped Topology
 
-namespace DLMF
+namespace DLMF.Core
 
 /-- The zeros of an entire function that is not identically zero form a finite set in every
 closed disc about the origin. -/
-theorem zcnt_finite_zeros_closedBall {f : ℂ → ℂ} (hf : Differentiable ℂ f) {x : ℂ}
+theorem finite_zeros_closedBall {f : ℂ → ℂ} (hf : Differentiable ℂ f) {x : ℂ}
     (hx : f x ≠ 0) (R : ℝ) : {z : ℂ | f z = 0 ∧ ‖z‖ ≤ R}.Finite := by
   have han : AnalyticOnNhd ℂ f univ := fun z _ => hf.analyticAt z
   have hcod := (han.preimage_zero_mem_codiscrete hx)
@@ -58,9 +58,9 @@ theorem zcnt_finite_zeros_closedBall {f : ℂ → ℂ} (hf : Differentiable ℂ 
 
 /-- The zeros in `S` of modulus `< R` of an entire function that is not identically zero form a
 finite set. -/
-theorem zcnt_finite_zeros_lt {f : ℂ → ℂ} (hf : Differentiable ℂ f) {x : ℂ} (hx : f x ≠ 0)
+theorem finite_zeros_lt {f : ℂ → ℂ} (hf : Differentiable ℂ f) {x : ℂ} (hx : f x ≠ 0)
     (S : Set ℂ) (R : ℝ) : {z : ℂ | z ∈ S ∧ f z = 0 ∧ ‖z‖ < R}.Finite :=
-  (zcnt_finite_zeros_closedBall hf hx R).subset fun _ hz => ⟨hz.2.1, hz.2.2.le⟩
+  (finite_zeros_closedBall hf hx R).subset fun _ hz => ⟨hz.2.1, hz.2.2.le⟩
 
 section Enumeration
 
@@ -166,7 +166,7 @@ private lemma exists_count (hfin : ∀ r : ℝ, (B f S r).Finite)
 /-- **The modulus enumeration is well defined** exactly when the zeros of `f` in `S` have
 pairwise distinct moduli and are infinitely many, given that bounded parts of the zero set are
 finite. -/
-theorem zcnt_orderedZero_spec_iff
+theorem orderedZero_spec_iff
     (hfin : ∀ r : ℝ, {w : ℂ | w ∈ S ∧ f w = 0 ∧ ‖w‖ < r}.Finite) :
     (∀ k : ℕ, 1 ≤ k → orderedZero f S k ∈ S ∧ f (orderedZero f S k) = 0 ∧
         ({w : ℂ | w ∈ S ∧ f w = 0 ∧ ‖w‖ < ‖orderedZero f S k‖} : Set ℂ).ncard = k - 1) ↔
@@ -190,7 +190,7 @@ theorem zcnt_orderedZero_spec_iff
       ({w : ℂ | w ∈ S ∧ f w = 0 ∧ ‖w‖ < ‖z‖} : Set ℂ).ncard = k - 1) ⟨z, hzS, hz0, hzn⟩
 
 /-- **The modulus enumeration is strictly increasing**, once it is well defined. -/
-theorem zcnt_orderedZero_strictMonoOn
+theorem orderedZero_strictMonoOn
     (hfin : ∀ r : ℝ, {w : ℂ | w ∈ S ∧ f w = 0 ∧ ‖w‖ < r}.Finite)
     (hspec : ∀ k : ℕ, 1 ≤ k → orderedZero f S k ∈ S ∧ f (orderedZero f S k) = 0 ∧
         ({w : ℂ | w ∈ S ∧ f w = 0 ∧ ‖w‖ < ‖orderedZero f S k‖} : Set ℂ).ncard = k - 1) :
@@ -206,7 +206,7 @@ theorem zcnt_orderedZero_strictMonoOn
 
 /-- **Every zero in `S` is enumerated**: the zero `z` is the `(n+1)`-st, `n` being the number of
 zeros in `S` of smaller modulus. -/
-theorem zcnt_eq_orderedZero
+theorem eq_orderedZero
     (hfin : ∀ r : ℝ, {w : ℂ | w ∈ S ∧ f w = 0 ∧ ‖w‖ < r}.Finite)
     (hspec : ∀ k : ℕ, 1 ≤ k → orderedZero f S k ∈ S ∧ f (orderedZero f S k) = 0 ∧
         ({w : ℂ | w ∈ S ∧ f w = 0 ∧ ‖w‖ < ‖orderedZero f S k‖} : Set ℂ).ncard = k - 1)
@@ -230,7 +230,7 @@ end Enumeration
 in `S`, the discs lie in annuli of increasing radius (`‖c k‖ + r k ≤ ‖c (k+1)‖ - r (k+1)`), and
 every zero of `f` in `S` lies in one of the discs, then the zeros of `f` in `S` have pairwise
 distinct moduli and are infinitely many. -/
-theorem zcnt_injOn_infinite_of_discs {f : ℂ → ℂ} {S : Set ℂ} {c : ℕ → ℂ} {r : ℕ → ℝ}
+theorem injOn_infinite_of_discs {f : ℂ → ℂ} {S : Set ℂ} {c : ℕ → ℂ} {r : ℕ → ℝ}
     (hone : ∀ k, ∃! z, z ∈ S ∧ f z = 0 ∧ z ∈ ball (c k) (r k))
     (hsep : ∀ k, ‖c k‖ + r k ≤ ‖c (k + 1)‖ - r (k + 1))
     (hcover : ∀ z, z ∈ S → f z = 0 → ∃ k, z ∈ ball (c k) (r k)) :
@@ -316,7 +316,7 @@ private lemma existsUnique_ne_zero_of_finsum_mem_eq_one {α : Type*} {s : Set α
 
 /-- **Zero count one means exactly one zero.** If `f` is analytic on `closedBall c R` and its
 zero count in the open disc (with multiplicity) is `1`, then `f` has exactly one zero there. -/
-theorem zcnt_existsUnique_of_count_eq_one {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
+theorem existsUnique_of_count_eq_one {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
     (hf : AnalyticOnNhd ℂ f (closedBall c R))
     (hcount : (∑ᶠ z ∈ ball c R, analyticOrderNatAt f z) = 1) :
     ∃! z, z ∈ ball c R ∧ f z = 0 := by
@@ -343,12 +343,12 @@ theorem zcnt_existsUnique_of_count_eq_one {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
 /-- **Rouché transfer of a single zero.** If `f` and `g` are analytic on `closedBall c R`,
 `‖f z - g z‖ < ‖g z‖` on the bounding circle, and `g` has zero count `1` in the open disc, then
 `f` has exactly one zero in the open disc. -/
-theorem zcnt_existsUnique_zero_of_rouche {f g : ℂ → ℂ} {c : ℂ} {R : ℝ} (hR : 0 < R)
+theorem existsUnique_zero_of_rouche {f g : ℂ → ℂ} {c : ℂ} {R : ℝ} (hR : 0 < R)
     (hf : AnalyticOnNhd ℂ f (closedBall c R)) (hg : AnalyticOnNhd ℂ g (closedBall c R))
     (hs : ∀ z ∈ sphere c R, ‖f z - g z‖ < ‖g z‖)
     (hcount : (∑ᶠ z ∈ ball c R, analyticOrderNatAt g z) = 1) :
     ∃! z, z ∈ ball c R ∧ f z = 0 := by
-  refine zcnt_existsUnique_of_count_eq_one hf ?_
+  refine existsUnique_of_count_eq_one hf ?_
   rw [← TauCeti.rouche hR hg hf (fun z hz => by rw [norm_sub_rev]; exact hs z hz), hcount]
 
-end DLMF
+end DLMF.Core

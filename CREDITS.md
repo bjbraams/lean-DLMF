@@ -882,7 +882,7 @@ work:
 
 - The Rouché theorem, argument principle and zero-count tools of TauCeti
   (`TauCeti.Analysis.Complex.Conformal`, `TauCeti.Analysis.Complex.ZeroCount`) are used in
-  `DLMF/ErrorFunctions/ZeroTools.lean`; the helper `erfZ_count_eq_single` there is adapted from a
+  `DLMF/ErrorFunctions/ZeroTools.lean`; the helper `DLMF.Confluent.ErfZeros.count_eq_single` there is adapted from a
   private TauCeti lemma (`count_eq_single`), as credited in the module header.
 - The primitive argument in `DLMFMathlib/Analysis/Complex/BarnesResidue.lean` follows the approach
   of TauCeti's Perron formula development (`TauCeti/.../Perron/Basic`), as noted in its docstring.
@@ -1808,3 +1808,14 @@ rest on Mathlib's level-one Eisenstein series: the modular transformation
 `θ₃⁴` (`DLMF/NumberTheory/ThetaFourthPowerLambert.lean`, the analytic input for the
 four-square formula of §27.13(iv)) uses Mathlib's divisor-sum rearrangement
 `Mathlib.NumberTheory.TsumDivisorsAntidiagonal`.
+
+## Proof round 4 of 2026-11-02
+
+The integrals over the triangle in
+`DLMF/GeneralizedHypergeometric/Appell/TriangleDirichlet.lean` rest on the complex Dirichlet
+beta integral of lean-codes (`Dirichlet.Beta.Complex.Integral`). The integral representations
+24.7.7–24.7.10 (`DLMF/BernoulliEuler/IntegralKernels.lean`) use Mathlib's Fourier series
+`hasSum_one_div_nat_pow_mul_cos` and `hasSum_one_div_nat_pow_mul_sin`. The derivative formula
+25.11.23 (`DLMF/Zeta/Hurwitz/ValuesAndDerivatives.lean`) uses Mathlib's `hurwitzZetaOdd_one_sub`
+and `ZMod.LFunction` API together with the project's `DLMF.Gamma.polygamma_eq_hurwitzZeta`. No
+external proof body was copied.

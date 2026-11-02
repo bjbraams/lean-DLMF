@@ -64,17 +64,17 @@ theorem normSq_cuspoidIntegral_one_eq_integral (x : ℝ) :
   have ha : 0 < a := by positivity
   have ha3 : a ^ 3 = 3 := by
     rw [ha_def, ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
-  set c : ℝ := DLMF.Airy.airySq_c with hc_def
+  set c : ℝ := DLMF.Airy.AiSquare.scale with hc_def
   have hc : c = (2 : ℝ) ^ (2 / 3 : ℝ) := rfl
   have hc53 : (2 : ℝ) ^ (5 / 3 : ℝ) = 2 * c := by
     rw [hc, show (5 / 3 : ℝ) = 1 + 2 / 3 by norm_num, Real.rpow_add (by norm_num),
       Real.rpow_one]
   set g : ℝ → ℝ := fun t => DLMF.Airy.airyAiReal (c * (x / a + t ^ 2)) with hg
   have hgi : Integrable g :=
-    DLMF.Airy.airySq_integrable DLMF.Airy.airySq_decay_ai DLMF.Airy.airySq_cont_ai
-      DLMF.Airy.airySq_c_pos (x / a)
-  have hrep := DLMF.Airy.airySq_rep (x / a)
-  have hF : DLMF.Airy.airySq_F (x / a) = ∫ t in Ioi 0, g t := rfl
+    DLMF.Airy.AiSquare.integrable DLMF.Airy.AiSquare.decay_ai DLMF.Airy.AiSquare.continuous_ai
+      DLMF.Airy.AiSquare.scale_pos (x / a)
+  have hrep := DLMF.Airy.AiSquare.scale_mul_tailIntegral (x / a)
+  have hF : DLMF.Airy.AiSquare.tailIntegral (x / a) = ∫ t in Ioi 0, g t := rfl
   have hfun : (fun u : ℝ => cuspoidIntegral 1 ![(2 : ℝ) ^ (2 / 3 : ℝ) * (3 * u ^ 2 + x)]) =
       fun u : ℝ => (((2 * π / a) * g (a * u) : ℝ) : ℂ) := by
     funext u
@@ -95,8 +95,9 @@ theorem normSq_cuspoidIntegral_one_eq_integral (x : ℝ) :
     rw [show (2 * π / (a : ℂ)) = ((2 * π / a : ℝ) : ℂ) by push_cast; ring, norm_real,
       Real.norm_eq_abs, abs_of_pos (by positivity)]
   rw [this, smul_eq_mul]
-  have hc0 : 0 < c := DLMF.Airy.airySq_c_pos
-  have hF' : DLMF.Airy.airySq_F (x / a) = π * DLMF.Airy.airyAiReal (x / a) ^ 2 / c := by
+  have hc0 : 0 < c := DLMF.Airy.AiSquare.scale_pos
+  have hF' : DLMF.Airy.AiSquare.tailIntegral (x / a) = π *
+      DLMF.Airy.airyAiReal (x / a) ^ 2 / c := by
     field_simp; linarith
   rw [hF']
   have hcC : (c : ℂ) ≠ 0 := ofReal_ne_zero.mpr hc0.ne'

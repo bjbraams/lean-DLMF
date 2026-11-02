@@ -101,6 +101,8 @@ functions of `DLMF.JacobiElliptic.Inverse`; Weierstrass functions are those of
 open Complex Set MeasureTheory
 open scoped Real
 
+open DLMF.Core
+
 namespace DLMF.EllipticIntegrals
 
 open DLMF.JacobiElliptic
@@ -260,7 +262,8 @@ private lemma symEllIntRD_csc_sq_swap_eq_integral {φ : ℝ} {k : ℂ} (hφ : 0 
     push_cast; field_simp [hsC]; ring
   rw [hden]
   have hslit : 1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 ∈ slitPlane := by
-    have h := legendrePathOK_ofReal_of_endpoint hφ hφ' hk (θ / φ) ⟨div_nonneg hθ.1.le hφ.le,
+    have h := legendrePathInSlitPlane_ofReal_of_endpoint hφ hφ' hk (θ / φ)
+        ⟨div_nonneg hθ.1.le hφ.le,
       (div_le_one hφ).mpr hθ.2.le⟩
     simpa only [div_mul_cancel₀ _ hφ.ne', ← ofReal_mul, ← ofReal_sin] using h
   have hw0 := slitPlane_ne_zero hslit
@@ -285,7 +288,7 @@ theorem hasDerivAt_incEllIntFk_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (
     HasDerivAt (fun κ : ℂ => incEllIntFk φ κ)
       ((1 / 3) * k * symEllIntRD (c - 1) c (c - k ^ 2)) k := by
   dsimp only
-  have hpath := legendrePathOK_ofReal_of_endpoint hφ hφ' hk
+  have hpath := legendrePathInSlitPlane_ofReal_of_endpoint hφ hφ' hk
   have h := hasDerivAt_integral_unit_mul_cpow
       (by fun_prop : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2)
     continuousOn_const (-(1 / 2) : ℂ) (w := fun _ => (φ : ℂ)) hpath
@@ -414,7 +417,7 @@ theorem hasDerivAt_incEllIntEk_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (
     let c : ℂ := ((1 / Real.sin φ ^ 2 : ℝ) : ℂ)
     HasDerivAt (fun κ : ℂ => incEllIntEk φ κ)
       (-(1 / 3) * k * symEllIntRD (c - 1) (c - k ^ 2) c) k := by
-  have hpath := legendrePathOK_ofReal_of_endpoint hφ hφ' hk
+  have hpath := legendrePathInSlitPlane_ofReal_of_endpoint hφ hφ' hk
   have h := hasDerivAt_integral_unit_mul_cpow
       (by fun_prop : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2)
     continuousOn_const (1 / 2 : ℂ) (w := fun _ => (φ : ℂ)) hpath

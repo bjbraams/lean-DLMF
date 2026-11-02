@@ -218,7 +218,7 @@ private lemma qHahn_weight_balance {a b q : ℂ} (ha : a ≠ 0) (hq : q ≠ 0) (
 /-- The terminating denominator has no zero factors up to the lattice size. -/
 private lemma qHahn_denominator_ne_zero {q : ℝ} (hq : 0 < q) (hq1 : q < 1) {N k : ℕ} (hk : k ≤ N) :
     qPochhammer ((q : ℂ)⁻¹ ^ N) q k ≠ 0 := by
-  apply qOrth_qPochhammer_ne_zero
+  apply QOrthogonality.qPochhammer_ne_zero
   intro j hj h
   have hr : (q⁻¹ ^ N) * q ^ j = 1 := by exact_mod_cast h
   have hp := congrArg (fun z : ℝ => q ^ N * z) hr
@@ -345,8 +345,8 @@ theorem littleQJacobi_moment_hasSum {a b q : ℂ} (hq : ‖q‖ < 1) (hq0 : q �
     qPochhammer (a * b * q ^ (n + 1)) q j /
       (qPochhammer (a * q) q j * qPochhammer q q j) * q ^ j
   have hs := hasSum_sum (s := Finset.range (n + 1)) (fun j _ =>
-    (qOrth_littleQJacobi_moment (b := b) hq haq (i + j)).mul_left (c j))
-  have hz := qOrth_littleQJacobi_sum_zero hq hq0 ha0 haq hab ha1 hin
+    (QOrthogonality.littleQJacobi_moment (b := b) hq haq (i + j)).mul_left (c j))
+  have hz := QOrthogonality.littleQJacobi_sum_zero hq hq0 ha0 haq hab ha1 hin
   change ∑ j ∈ Finset.range (n + 1), c j * _ = 0 at hz
   rw [hz] at hs
   convert hs using 1
@@ -833,7 +833,7 @@ theorem stieltjesWigert_moment_sum {q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0)
     have h3 := twice_choose_two_add (i + k + 1)
     nlinarith
   have hz : qPochhammer (q⁻¹ ^ i) q n = 0 :=
-    qOrth_qPochhammer_eq_zero hin (by simp [inv_pow, hq0])
+    QOrthogonality.qPochhammer_eq_zero hin (by simp [inv_pow, hq0])
   rw [← zero_div (qPochhammer q q n * q ^ (i + 1).choose 2), ← hz,
     qPochhammer_eq_sum_qBinom, Finset.sum_div]
   apply Finset.sum_congr rfl

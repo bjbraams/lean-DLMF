@@ -37,7 +37,7 @@ public meta section
 
 open Lean Elab Command Mathlib.CrossRef
 
-namespace DLMF
+namespace DLMF.Core
 
 /-- A pointer from a DLMF item to a declaration made elsewhere. -/
 structure UpstreamPointer where
@@ -74,4 +74,4 @@ elab_rules : command
     modifyEnv (upstreamExt.addEntry · {
       dlmf := idStr, declName := n, comment := (comment.map (·.getString)).getD "" })
 
-end DLMF
+end DLMF.Core

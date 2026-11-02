@@ -175,7 +175,7 @@ private lemma jet_three_term_recurrence (m ν : ℕ) (hν : m ≤ ν) {x : ℝ} 
         OrthogonalPolynomials.LegendreAddition.jet (ν - 1) m x else 0) := by
     split_ifs with h
     · rw [show (ν : ℂ) - 1 = ((ν - 1 : ℕ) : ℂ) by push_cast [Nat.cast_sub (by omega : 1 ≤ ν)]; ring,
-        legInt_ferrersP_nat_nat _ _ hx]
+        OrthogonalityIntegrals.ferrersP_nat_nat _ _ hx]
       rw [Nat.cast_sub (by omega : 1 ≤ ν)]; push_cast; ring
     · have hνm : ν = m := by omega
       subst hνm
@@ -184,7 +184,8 @@ private lemma jet_three_term_recurrence (m ν : ℕ) (hν : m ≤ ν) {x : ℝ} 
       · rw [show (ν : ℂ) - 1 = ((ν - 1 : ℕ) : ℂ) by push_cast [Nat.cast_sub h0]; ring,
           ferrersP_order_gt_degree _ _ (by omega) hx]
         simp
-  rw [hlow, legInt_ferrersP_nat_nat _ _ hx, legInt_ferrersP_nat_nat _ _ hx] at R
+  rw [hlow, OrthogonalityIntegrals.ferrersP_nat_nat _ _ hx,
+      OrthogonalityIntegrals.ferrersP_nat_nat _ _ hx] at R
   have hsq : ((-1 : ℂ) ^ m) * (-1) ^ m = 1 := by rw [← mul_pow]; norm_num
   have hsc : (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hs.ne'
   have R' : ((ν : ℂ) - m + 1) * OrthogonalPolynomials.LegendreAddition.jet (ν + 1) m x -
@@ -274,7 +275,7 @@ private lemma weighted_moments_eq_zero_of_jet_moments {H : ℝ → ℝ}
       (OrthogonalPolynomials.LegendreAddition.jet ν m x).re) (Icc (-1) 1) := fun i ν =>
     (((by fun_prop : Continuous fun x : ℝ => (1 - x ^ 2) ^ m).continuousOn.mul hH).mul
       (continuous_pow i).continuousOn).mul
-      (Complex.continuous_re.comp (legInt_cont_D ν m)).continuousOn
+      (Complex.continuous_re.comp (OrthogonalityIntegrals.continuous_jet ν m)).continuousOn
   have hi : ∀ (i ν : ℕ), IntervalIntegrable (fun x : ℝ => (1 - x ^ 2) ^ m * H x * x ^ i *
       (OrthogonalPolynomials.LegendreAddition.jet ν m x).re) volume (-1) 1 := fun i ν =>
     (hc i ν).intervalIntegrable_of_Icc (by norm_num)
@@ -368,21 +369,21 @@ theorem integral_weight_mul_jet_mul_jet {m ν : ℕ} (hν : m ≤ ν) (μ : ℕ)
     ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re *
         (OrthogonalPolynomials.LegendreAddition.jet μ m x).re =
       if ν = μ then 2 * ((ν + m).factorial : ℝ) / ((2 * ν + 1) * (ν - m).factorial) else 0 := by
-  have e : legInt_I m ν μ = ((∫ x in (-1 : ℝ)..1,
+  have e : OrthogonalityIntegrals.weightedMoment m ν μ = ((∫ x in (-1 : ℝ)..1,
       (1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re *
           (OrthogonalPolynomials.LegendreAddition.jet μ m x).re : ℝ) : ℂ) := by
-    rw [legInt_I, ← intervalIntegral.integral_ofReal]
+    rw [OrthogonalityIntegrals.weightedMoment, ← intervalIntegral.integral_ofReal]
     refine intervalIntegral.integral_congr fun x _ => ?_
     rw [jet_ofReal_eq_re ν m x, jet_ofReal_eq_re μ m x]
     push_cast
     simp [OrthogonalPolynomials.LegendreAddition.jet]
-  have h := legInt_I_eq m ν μ
+  have h := OrthogonalityIntegrals.weightedMoment_eq m ν μ
   rw [e] at h
   apply Complex.ofReal_injective
   rw [h]
   split_ifs with hνμ
   · subst hνμ
-    have hp := legInt_prod_factorial hν
+    have hp := OrthogonalityIntegrals.prod_factorial hν
     have hf : ((ν - m).factorial : ℂ) ≠ 0 := by exact_mod_cast (ν - m).factorial_ne_zero
     have h2 : (2 * (ν : ℂ) + 1) ≠ 0 := by
       have : (0 : ℝ) < 2 * ν + 1 := by positivity
@@ -485,7 +486,7 @@ theorem exists_abs_jet_le (m : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ ν : ℕ, m �
   have hcl : closure (Ioo (-1 : ℝ) 1) ⊆
       {x : ℝ | |(OrthogonalPolynomials.LegendreAddition.jet ν m x).re| ≤ |c| * L ^ (ν - m)} := by
     refine (isClosed_le ?_ continuous_const).closure_subset_iff.mpr ?_
-    · exact (Complex.continuous_re.comp (legInt_cont_D ν m)).abs
+    · exact (Complex.continuous_re.comp (OrthogonalityIntegrals.continuous_jet ν m)).abs
     · intro y hy
       have := key (ν - m) (ν - m) le_rfl y hy
       rwa [show m + (ν - m) = ν by omega] at this
@@ -523,7 +524,7 @@ theorem hasSum_jet_expansion {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)
       (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re with hf
   have hD : ∀ μ : ℕ, Continuous fun x : ℝ =>
       (OrthogonalPolynomials.LegendreAddition.jet μ m x).re := fun μ =>
-    Complex.continuous_re.comp (legInt_cont_D μ m)
+    Complex.continuous_re.comp (OrthogonalityIntegrals.continuous_jet μ m)
   have hw : Continuous fun x : ℝ => (1 - x ^ 2) ^ m := by fun_prop
   have hsum : ∀ x ∈ Icc (-1 : ℝ) 1, Summable fun j => f j x := fun x hx =>
     Summable.of_norm_bounded hu fun j => by rw [Real.norm_eq_abs]; exact hb j x hx

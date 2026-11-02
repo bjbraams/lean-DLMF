@@ -561,7 +561,7 @@ theorem airyModulus_bessel {x : ℝ} (hx : x < 0) :
 
 /-- If `M > 0`, `M cos(ψ - α) = cJ` and `M sin(ψ - α) = cY` with `c, J ≠ 0`, then
 `ψ = α + arctan(Y/J)` modulo `π`. -/
-private lemma airyMod_eq_add_arctan {M ψ α c J Y : ℝ} (hM : 0 < M) (hc0 : c ≠ 0) (hJ : J ≠ 0)
+private lemma ModulusPhase.eq_add_arctan {M ψ α c J Y : ℝ} (hM : 0 < M) (hc0 : c ≠ 0) (hJ : J ≠ 0)
     (hc : M * Real.cos (ψ - α) = c * J) (hs : M * Real.sin (ψ - α) = c * Y) :
     ∃ k : ℤ, ψ = α + Real.arctan (Y / J) + k * π := by
   have hcos : Real.cos (ψ - α) ≠ 0 := by
@@ -635,7 +635,7 @@ theorem airyPhase_bessel_atan {x : ℝ} (hx : x < 0)
     field_simp
     linear_combination ((J - K) * (Real.sqrt 3 ^ 2 + 3) - (J + K)) * h33
   have hsy : 0 < Real.sqrt y := Real.sqrt_pos.mpr hy0
-  exact airyMod_eq_add_arctan (c := Real.sqrt y / Real.sqrt 3) hM (div_ne_zero hsy.ne' hs3) hJ
+  exact ModulusPhase.eq_add_arctan (c := Real.sqrt y / Real.sqrt 3) hM (div_ne_zero hsy.ne' hs3) hJ
     (by rw [hc]; ring) (by rw [hs]; ring)
 
 /-- On the positive real axis the log-plane `J` is the principal `J` at `ζ = (2/3)x^{3/2}`. -/
@@ -778,7 +778,7 @@ theorem airyDerivPhase_bessel_atan {x : ℝ} (hx : x < 0)
       ← mul_assoc, ← airyBiDerivReal_eq_modulus_cos, ← airyAiDerivReal_eq_modulus_sin, hAr, hBr]
     field_simp
     linear_combination (-2 * J - 4 * K) * h33
-  exact airyMod_eq_add_arctan (c := y / Real.sqrt 3) hM (div_ne_zero hy0.ne' hs3) hJ
+  exact ModulusPhase.eq_add_arctan (c := y / Real.sqrt 3) hM (div_ne_zero hy0.ne' hs3) hJ
     (by rw [hc]; ring) (by rw [hs]; ring)
 
 /-- Wronskian in modulus–phase form: `M N sin(θ - φ) = 1/π` (DLMF 9.8.13). -/

@@ -34,6 +34,8 @@ open Complex Set Filter MeasureTheory
 
 open scoped Real Topology
 
+open DLMF.Core
+
 namespace DLMF.EllipticIntegrals
 
 open DLMF.JacobiElliptic

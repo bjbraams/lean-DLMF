@@ -274,13 +274,102 @@ theorem isDeltaSequence_gaussian_fourier :
   rw [this]
   simp [gaussianDeltaSeq]
 
+/-- `(2/π) ∫₀^R cos(xt) cos(at) dt` as a sum of two Dirichlet kernels, `x ≠ ±a`. -/
+private lemma two_div_pi_integral_cos_mul_cos {x a : ℝ} (h1 : x - a ≠ 0) (h2 : x + a ≠ 0)
+    (R : ℝ) :
+    2 / Real.pi * ∫ t in (0 : ℝ)..R, Real.cos (x * t) * Real.cos (a * t) =
+      Real.sin (R * (a - x)) / (Real.pi * (a - x)) +
+        Real.sin (R * (-a - x)) / (Real.pi * (-a - x)) := by
+  have hd : ∀ t ∈ uIcc (0 : ℝ) R, HasDerivAt (fun t => Real.sin ((x - a) * t) / (2 * (x - a)) +
+      Real.sin ((x + a) * t) / (2 * (x + a))) (Real.cos (x * t) * Real.cos (a * t)) t := by
+    intro t _
+    have e1 := ((hasDerivAt_id t).const_mul (x - a)).sin.div_const (2 * (x - a))
+    have e2 := ((hasDerivAt_id t).const_mul (x + a)).sin.div_const (2 * (x + a))
+    convert e1.add e2 using 1
+    · rfl
+    simp only [id]
+    rw [sub_mul, add_mul, Real.cos_sub, Real.cos_add]
+    field_simp
+    ring
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd (by
+    exact (by fun_prop : Continuous fun t => Real.cos (x * t) *
+      Real.cos (a * t)).intervalIntegrable _ _)]
+  have : Real.pi ≠ 0 := Real.pi_ne_zero
+  have h3 : a - x ≠ 0 := fun h => h1 (by linarith)
+  have h4 : -a - x ≠ 0 := fun h => h2 (by linarith)
+  rw [show Real.sin (R * (a - x)) = -Real.sin ((x - a) * R) by rw [← Real.sin_neg]; ring_nf,
+    show Real.sin (R * (-a - x)) = -Real.sin ((x + a) * R) by rw [← Real.sin_neg]; ring_nf]
+  simp only [mul_zero, Real.sin_zero, zero_div, add_zero, sub_zero]
+  field_simp
+  ring
+
+/-- `(2/π) ∫₀^R sin(xt) sin(at) dt` as a difference of two Dirichlet kernels, `x ≠ ±a`. -/
+private lemma two_div_pi_integral_sin_mul_sin {x a : ℝ} (h1 : x - a ≠ 0) (h2 : x + a ≠ 0)
+    (R : ℝ) :
+    2 / Real.pi * ∫ t in (0 : ℝ)..R, Real.sin (x * t) * Real.sin (a * t) =
+      Real.sin (R * (a - x)) / (Real.pi * (a - x)) -
+        Real.sin (R * (-a - x)) / (Real.pi * (-a - x)) := by
+  have hd : ∀ t ∈ uIcc (0 : ℝ) R, HasDerivAt (fun t => Real.sin ((x - a) * t) / (2 * (x - a)) -
+      Real.sin ((x + a) * t) / (2 * (x + a))) (Real.sin (x * t) * Real.sin (a * t)) t := by
+    intro t _
+    have e1 := ((hasDerivAt_id t).const_mul (x - a)).sin.div_const (2 * (x - a))
+    have e2 := ((hasDerivAt_id t).const_mul (x + a)).sin.div_const (2 * (x + a))
+    convert e1.sub e2 using 1
+    · rfl
+    simp only [id]
+    rw [sub_mul, add_mul, Real.cos_sub, Real.cos_add]
+    field_simp
+    ring
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd (by
+    exact (by fun_prop : Continuous fun t => Real.sin (x * t) *
+      Real.sin (a * t)).intervalIntegrable _ _)]
+  have : Real.pi ≠ 0 := Real.pi_ne_zero
+  have h3 : a - x ≠ 0 := fun h => h1 (by linarith)
+  have h4 : -a - x ≠ 0 := fun h => h2 (by linarith)
+  rw [show Real.sin (R * (a - x)) = -Real.sin ((x - a) * R) by rw [← Real.sin_neg]; ring_nf,
+    show Real.sin (R * (-a - x)) = -Real.sin ((x + a) * R) by rw [← Real.sin_neg]; ring_nf]
+  simp only [mul_zero, Real.sin_zero, zero_div, sub_zero]
+  field_simp
+  ring
+
+/-- Integrability of a test function against the Dirichlet kernel. -/
+private lemma integrable_mul_dirichlet {φ : ℝ → ℂ} (hi : Integrable φ) (R b : ℝ) :
+    Integrable fun x => φ x * ((Real.sin (R * (b - x)) / (Real.pi * (b - x)) : ℝ) : ℂ) := by
+  refine hi.mul_bdd (c := |R| / Real.pi) (by fun_prop : Measurable fun x : ℝ =>
+    ((Real.sin (R * (b - x)) / (Real.pi * (b - x)) : ℝ) : ℂ)).aestronglyMeasurable
+    (Eventually.of_forall fun x => ?_)
+  rw [Complex.norm_real, Real.norm_eq_abs, abs_div, abs_mul, abs_of_pos Real.pi_pos]
+  rcases eq_or_ne (b - x) 0 with h | h
+  · rw [h]; simp only [abs_zero, mul_zero, div_zero]; positivity
+  rw [div_le_div_iff₀ (by positivity) Real.pi_pos]
+  have := Real.abs_sin_le_abs (x := R * (b - x))
+  rw [abs_mul] at this
+  nlinarith [Real.pi_pos, abs_nonneg (b - x), abs_nonneg R]
+
 /-- DLMF 1.17.9 and 1.17.12: `δ(x - a) = (2π)⁻¹ ∫ e^{i(x-a)t} dt`, in the sense
 `lim_{R→∞} ∫ ((2π)⁻¹ ∫_{-R}^{R} e^{i(x-a)t} dt) φ(x) dx = φ(a)` for test functions `φ`. -/
 @[dlmf 1.17.E9, dlmf 1.17.E12]
 theorem tendsto_fourier_kernel {φ : ℝ → ℂ} (hφ : IsTestFunctionOn univ φ) (a : ℝ) :
     Tendsto (fun R : ℝ => ∫ x : ℝ, ((1 / (2 * Real.pi) : ℂ) *
       ∫ t in -R..R, exp (I * (x - a) * t)) * φ x) atTop (𝓝 (φ a)) := by
-  sorry
+  have hi : Integrable φ := hφ.1.continuous.integrable_of_hasCompactSupport hφ.2.1
+  refine (Real.tendsto_integral_mul_sin_div_of_differentiableAt hi
+    ((hφ.1.differentiable (by simp)) a)).congr fun R => ?_
+  refine integral_congr_ae ?_
+  filter_upwards [Measure.ae_ne volume a] with x hx
+  have hxa : x - a ≠ 0 := sub_ne_zero.2 hx
+  have h := intervalIntegral_cexp_mul_I_symm hxa R
+  rw [show (fun t : ℝ => cexp (((x - a : ℝ) : ℂ) * I * t)) =
+    fun t : ℝ => cexp (I * (x - a) * t) from funext fun t => by push_cast; ring_nf] at h
+  rw [h]
+  have : Real.pi ≠ 0 := Real.pi_ne_zero
+  have h1 : (a : ℂ) - x ≠ 0 := by exact_mod_cast sub_ne_zero.2 (Ne.symm hx)
+  have h2 : (x : ℂ) - a ≠ 0 := by exact_mod_cast hxa
+  rw [show Real.sin (R * (a - x)) = -Real.sin (R * (x - a)) by
+    rw [← Real.sin_neg]; ring_nf]
+  push_cast
+  field_simp
+  ring
 
 /-- DLMF 1.17.12_1: `δ(x - a) = (2/π) ∫_0^∞ cos(xt) cos(at) dt` for `x, a > 0`. -/
 @[dlmf 1.17.E12_1]
@@ -288,7 +377,22 @@ theorem tendsto_cos_kernel {φ : ℝ → ℂ} (hφ : IsTestFunctionOn (Ioi 0) φ
     (ha : 0 < a) :
     Tendsto (fun R : ℝ => ∫ x in Ioi (0 : ℝ), ((2 / Real.pi : ℝ) *
       ∫ t in (0 : ℝ)..R, Real.cos (x * t) * Real.cos (a * t) : ℝ) * φ x) atTop (𝓝 (φ a)) := by
-  sorry
+  have hi : Integrable φ := hφ.1.continuous.integrable_of_hasCompactSupport hφ.2.1
+  have hd : Differentiable ℝ φ := hφ.1.differentiable (by simp)
+  have hφa : φ (-a) = 0 := image_eq_zero_of_notMem_tsupport fun h => by
+    have := hφ.2.2 h; simp only [mem_Ioi] at this; linarith
+  have h := (Real.tendsto_integral_mul_sin_div_of_differentiableAt hi (hd a)).add
+    (Real.tendsto_integral_mul_sin_div_of_differentiableAt hi (hd (-a)))
+  rw [hφa, add_zero] at h
+  refine h.congr fun R => ?_
+  rw [← integral_add (integrable_mul_dirichlet hi R a) (integrable_mul_dirichlet hi R (-a)),
+    setIntegral_eq_integral_of_forall_compl_eq_zero fun x hx => by
+      rw [image_eq_zero_of_notMem_tsupport (fun h => hx (hφ.2.2 h)), mul_zero]]
+  refine integral_congr_ae ?_
+  filter_upwards [Measure.ae_ne volume a, Measure.ae_ne volume (-a)] with x hx1 hx2
+  rw [two_div_pi_integral_cos_mul_cos (sub_ne_zero.2 hx1) (fun h => hx2 (by linarith)) R]
+  push_cast
+  ring
 
 /-- DLMF 1.17.12_2: `δ(x - a) = (2/π) ∫_0^∞ sin(xt) sin(at) dt` for `x, a > 0`. -/
 @[dlmf 1.17.E12_2]
@@ -296,7 +400,22 @@ theorem tendsto_sin_kernel {φ : ℝ → ℂ} (hφ : IsTestFunctionOn (Ioi 0) φ
     (ha : 0 < a) :
     Tendsto (fun R : ℝ => ∫ x in Ioi (0 : ℝ), ((2 / Real.pi : ℝ) *
       ∫ t in (0 : ℝ)..R, Real.sin (x * t) * Real.sin (a * t) : ℝ) * φ x) atTop (𝓝 (φ a)) := by
-  sorry
+  have hi : Integrable φ := hφ.1.continuous.integrable_of_hasCompactSupport hφ.2.1
+  have hd : Differentiable ℝ φ := hφ.1.differentiable (by simp)
+  have hφa : φ (-a) = 0 := image_eq_zero_of_notMem_tsupport fun h => by
+    have := hφ.2.2 h; simp only [mem_Ioi] at this; linarith
+  have h := (Real.tendsto_integral_mul_sin_div_of_differentiableAt hi (hd a)).sub
+    (Real.tendsto_integral_mul_sin_div_of_differentiableAt hi (hd (-a)))
+  rw [hφa, sub_zero] at h
+  refine h.congr fun R => ?_
+  rw [← integral_sub (integrable_mul_dirichlet hi R a) (integrable_mul_dirichlet hi R (-a)),
+    setIntegral_eq_integral_of_forall_compl_eq_zero fun x hx => by
+      rw [image_eq_zero_of_notMem_tsupport (fun h => hx (hφ.2.2 h)), mul_zero]]
+  refine integral_congr_ae ?_
+  filter_upwards [Measure.ae_ne volume a, Measure.ae_ne volume (-a)] with x hx1 hx2
+  rw [two_div_pi_integral_sin_mul_sin (sub_ne_zero.2 hx1) (fun h => hx2 (by linarith)) R]
+  push_cast
+  ring
 
 /-- DLMF 1.17.13: `δ(x - a) = x ∫_0^∞ t J_ν(xt) J_ν(at) dt` for `ℜν > -1`, `x, a > 0`
 (Hankel inversion), with Mathlib's `Complex.besselJ`. -/
@@ -314,7 +433,7 @@ spherical Bessel function `sphericalJ` of `DLMF.Core.Basic`. -/
 theorem tendsto_sphericalBessel_kernel (ℓ : ℕ) {φ : ℝ → ℂ} (hφ : IsTestFunctionOn (Ioi 0) φ)
     {a : ℝ} (ha : 0 < a) :
     Tendsto (fun R : ℝ => ∫ x in Ioi (0 : ℝ), ((2 * x * a / Real.pi : ℝ) *
-      ∫ t in (0 : ℝ)..R, (t : ℂ) ^ 2 * sphericalJ ℓ (x * t) * sphericalJ ℓ (a * t)) *
+      ∫ t in (0 : ℝ)..R, (t : ℂ) ^ 2 * Bessel.sphericalJ ℓ (x * t) * Bessel.sphericalJ ℓ (a * t)) *
         φ x) atTop (𝓝 (φ a)) := by
   sorry
 

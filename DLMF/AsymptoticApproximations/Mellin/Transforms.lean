@@ -12,6 +12,7 @@ public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 public import Mathlib.Analysis.MellinInversion
 public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
+public import DLMFMathlib.Analysis.Complex.VerticalLineShift
 
 /-!
 # Mellin transform methods (DLMF §2.5(i)–(ii))
@@ -138,6 +139,79 @@ theorem mellin_convolution_eq_mellinInv {f h : ℝ → ℂ} {c x : ℝ} (hx : 0 
   unfold mellinInv
   simp only [hline]
 
+/-- Near an isolated singularity the Laurent coefficient `a_{-1}` on small circles is the
+residue. -/
+private lemma eventually_laurentCoeff_eq_residueAt {f : ℂ → ℂ} {p : ℂ} {ε : ℝ} (hε : 0 < ε)
+    (hf : ∀ z : ℂ, z ≠ p → ‖z - p‖ < ε → DifferentiableAt ℂ f z) :
+    ∀ᶠ r in 𝓝[>] (0 : ℝ), DLMF.AlgebraicAnalytic.laurentCoeff f p r (-1) =
+      DLMF.AlgebraicAnalytic.residueAt f p := by
+  have hconst : ∀ r ∈ Ioo 0 ε, DLMF.AlgebraicAnalytic.laurentCoeff f p r (-1) =
+      DLMF.AlgebraicAnalytic.laurentCoeff f p (ε / 2) (-1) := by
+    have key : ∀ r₁ r₂ : ℝ, 0 < r₁ → r₁ ≤ r₂ → r₂ < ε →
+        DLMF.AlgebraicAnalytic.laurentCoeff f p r₂ (-1) =
+          DLMF.AlgebraicAnalytic.laurentCoeff f p r₁ (-1) := by
+      intro r₁ r₂ h0 h12 h2
+      unfold DLMF.AlgebraicAnalytic.laurentCoeff
+      congr 1
+      refine circleIntegral_eq_of_differentiable_on_annulus_off_countable h0 h12
+        countable_empty (fun z hz => ?_) (fun z hz => ?_)
+      · have h1 : ‖z - p‖ ≤ r₂ := by simpa [dist_eq_norm] using hz.1
+        have h2' : r₁ ≤ ‖z - p‖ := by simpa [dist_eq_norm] using hz.2
+        refine ((hf z (fun h => ?_) (by linarith)).continuousAt.mul
+          (continuousAt_const)).continuousWithinAt
+        rw [h, sub_self, norm_zero] at h2'; linarith
+      · have h1 : ‖z - p‖ < r₂ := by simpa [dist_eq_norm] using hz.1.1
+        have h2' : r₁ < ‖z - p‖ := by simpa [dist_eq_norm] using hz.1.2
+        refine (hf z (fun h => ?_) (by linarith)).mul (differentiableAt_const _)
+        rw [h, sub_self, norm_zero] at h2'; linarith
+    intro r hr
+    rcases le_total r (ε / 2) with h | h
+    · exact (key r (ε / 2) hr.1 h (by linarith)).symm
+    · exact key (ε / 2) r (by linarith) h hr.2
+  have hev : ∀ᶠ r in 𝓝[>] (0 : ℝ), DLMF.AlgebraicAnalytic.laurentCoeff f p r (-1) =
+      DLMF.AlgebraicAnalytic.laurentCoeff f p (ε / 2) (-1) := by
+    filter_upwards [Ioo_mem_nhdsGT hε] with r hr using hconst r hr
+  have hres : DLMF.AlgebraicAnalytic.residueAt f p =
+      DLMF.AlgebraicAnalytic.laurentCoeff f p (ε / 2) (-1) :=
+    Tendsto.limUnder_eq (tendsto_nhds_of_eventually_eq hev)
+  rw [hres]
+  exact hev
+
+/-- A function holomorphic on a closed strip minus a finite set `P` of interior points is
+holomorphic in a punctured disc around each point of `P`. -/
+theorem exists_punctured_differentiableAt {F : ℂ → ℂ} {c d : ℝ} {P : Finset ℂ}
+    (hP : ∀ p ∈ P, d < p.re ∧ p.re < c)
+    (hF : DifferentiableOn ℂ F (re ⁻¹' Icc d c \ (P : Set ℂ))) {q : ℂ} (hq : q ∈ P) :
+    ∃ ε > 0, ∀ z : ℂ, z ≠ q → ‖z - q‖ < ε → DifferentiableAt ℂ F z := by
+  classical
+  have hU : IsOpen (re ⁻¹' Ioo d c ∩ ((P.erase q : Finset ℂ) : Set ℂ)ᶜ) :=
+    ((isOpen_Ioo).preimage continuous_re).inter
+      (P.erase q).finite_toSet.isClosed.isOpen_compl
+  obtain ⟨ε, hε, hball⟩ := Metric.isOpen_iff.mp hU q ⟨hP q hq, by simp⟩
+  refine ⟨ε, hε, fun z hzq hz => ?_⟩
+  have hzU := hball (by rwa [Metric.mem_ball, dist_eq_norm])
+  have hzP : z ∉ P := fun hzP => hzU.2 (by simp [hzq, hzP])
+  refine hF.differentiableAt (Filter.mem_of_superset ((((isOpen_Ioo (a := d) (b := c)).preimage
+    continuous_re).inter P.finite_toSet.isClosed.isOpen_compl).mem_nhds ⟨hzU.1, hzP⟩) ?_)
+  rintro v ⟨hv, hvP⟩
+  exact ⟨Ioo_subset_Icc_self hv, hvP⟩
+
+/-- At an isolated singularity, `Res_{z=p}[-f(z)] = -Res_{z=p} f(z)`. -/
+theorem residueAt_neg_of_differentiableAt {f : ℂ → ℂ} {p : ℂ} {ε : ℝ} (hε : 0 < ε)
+    (hf : ∀ z : ℂ, z ≠ p → ‖z - p‖ < ε → DifferentiableAt ℂ f z) :
+    DLMF.AlgebraicAnalytic.residueAt (fun z => -f z) p =
+      -DLMF.AlgebraicAnalytic.residueAt f p := by
+  have hev := eventually_laurentCoeff_eq_residueAt hε hf
+  have hneg : ∀ r : ℝ, DLMF.AlgebraicAnalytic.laurentCoeff (fun z => -f z) p r (-1) =
+      -DLMF.AlgebraicAnalytic.laurentCoeff f p r (-1) := fun r => by
+    unfold DLMF.AlgebraicAnalytic.laurentCoeff circleIntegral
+    simp only [neg_mul, smul_neg, intervalIntegral.integral_neg, mul_neg]
+  unfold DLMF.AlgebraicAnalytic.residueAt
+  simp only [hneg]
+  refine Tendsto.limUnder_eq (tendsto_nhds_of_eventually_eq ?_)
+  filter_upwards [hev] with r hr
+  rw [hr, DLMF.AlgebraicAnalytic.residueAt]
+
 /-- DLMF 2.5.6–2.5.7 and 2.5.34–2.5.35 (shifting the line of integration): let `d < c`, let `G`
 be differentiable on the closed strip `d ≤ ℜz ≤ c` except at the points of a finite set `P` of
 poles in the open strip `d < ℜz < c`, let `G(σ + iy) → 0` as `y → ±∞` uniformly for
@@ -153,7 +227,92 @@ theorem mellinInv_shift {G : ℂ → ℂ} {c d x : ℝ} (hdc : d < c) (hx : 0 < 
     (hc : VerticalIntegrable G c) (hd : VerticalIntegrable G d) :
     mellinInv c G x = ∑ p ∈ P, DLMF.AlgebraicAnalytic.residueAt
       (fun z => (x : ℂ) ^ (-z) * G z) p + mellinInv d G x := by
-  sorry
+  classical
+  set f : ℂ → ℂ := fun z => (x : ℂ) ^ (-z) * G z with hfdef
+  have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
+  have hpow : ∀ z : ℂ, DifferentiableAt ℂ (fun z : ℂ => (x : ℂ) ^ (-z)) z := fun z =>
+    differentiableAt_id.neg.const_cpow (Or.inl hx0)
+  have hnormpow : ∀ z : ℂ, ‖(x : ℂ) ^ (-z)‖ = x ^ (-z.re) := fun z => by
+    rw [norm_cpow_eq_rpow_re_of_pos hx, neg_re]
+  have hf : DifferentiableOn ℂ f (re ⁻¹' Icc d c \ P) := fun z hz =>
+    ((hpow z).differentiableWithinAt).mul (hG z hz)
+  have hline : ∀ σ : ℝ, VerticalIntegrable G σ → Integrable fun y : ℝ => f (σ + y * I) := by
+    intro σ hσ
+    refine (hσ.norm.const_mul (x ^ (-σ))).mono' ?_ (Eventually.of_forall fun y => ?_)
+    · have hcp : Continuous fun y : ℝ => (x : ℂ) ^ (-((σ : ℂ) + y * I)) :=
+        continuous_iff_continuousAt.2 fun y => (hpow _).continuousAt.comp
+          (f := fun y : ℝ => (σ : ℂ) + y * I) (by fun_prop)
+      exact hcp.aestronglyMeasurable.mul hσ.aestronglyMeasurable
+    · rw [norm_mul, hnormpow]; simp
+  -- horizontal cross-sections
+  set X : ℝ := max (x ^ (-d)) (x ^ (-c)) with hX
+  have hXσ : ∀ σ ∈ Icc d c, x ^ (-σ) ≤ X := by
+    intro σ hσ
+    rcases le_total 1 x with h1 | h1
+    · exact (Real.rpow_le_rpow_of_exponent_le h1 (by linarith [hσ.1])).trans (le_max_left _ _)
+    · exact (Real.rpow_le_rpow_of_exponent_ge hx h1 (by linarith [hσ.2])).trans
+        (le_max_right _ _)
+  have hhor : ∀ l : Filter ℝ, l ≤ cocompact ℝ →
+      Tendsto (fun T : ℝ => ∫ σ in d..c, f (σ + T * I)) l (𝓝 0) := by
+    intro l hl
+    have hlim : Tendsto (fun T : ℝ => X * (⨆ σ : Icc d c, ‖G (σ + T * I)‖) * |c - d|) l
+        (𝓝 0) := by
+      simpa using ((hdecay.mono_left hl).const_mul X).mul_const |c - d|
+    refine squeeze_zero_norm' ?_ hlim
+    have hev : ∀ᶠ T : ℝ in l, ∀ p ∈ P, T ≠ p.im :=
+      hl ((Filter.eventually_all_finset P).mpr fun p _ =>
+        (isCompact_singleton : IsCompact ({p.im} : Set ℝ)).compl_mem_cocompact)
+    filter_upwards [hev] with T hT
+    refine intervalIntegral.norm_integral_le_of_norm_le_const fun σ hσ => ?_
+    rw [uIoc_of_le hdc.le] at hσ
+    have hσ' : σ ∈ Icc d c := Ioc_subset_Icc_self hσ
+    have hseg : ∀ τ ∈ Icc d c, ((τ : ℂ) + T * I) ∈ re ⁻¹' Icc d c \ (P : Set ℂ) := by
+      intro τ hτ
+      refine ⟨by simpa using hτ, fun hP' => hT _ hP' ?_⟩
+      simp
+    have hcont : ContinuousOn (fun τ : ℝ => ‖G (τ + T * I)‖) (Icc d c) :=
+      (hG.continuousOn.comp (Continuous.continuousOn (by fun_prop)) hseg).norm
+    have hbdd : BddAbove (Set.range fun τ : Icc d c => ‖G (τ + T * I)‖) := by
+      have := (isCompact_Icc.image_of_continuousOn hcont).bddAbove
+      rwa [Set.image_eq_range] at this
+    have hle : ‖G (σ + T * I)‖ ≤ ⨆ τ : Icc d c, ‖G (τ + T * I)‖ :=
+      le_ciSup (f := fun τ : Icc d c => ‖G (τ + T * I)‖) hbdd ⟨σ, hσ'⟩
+    simp only [hfdef]
+    have hre : ((σ : ℂ) + T * I).re = σ := by simp
+    rw [norm_mul, hnormpow, hre]
+    exact mul_le_mul (hXσ σ hσ') hle (norm_nonneg _) ((Real.rpow_nonneg hx.le _).trans
+      (hXσ σ hσ'))
+  obtain ⟨ρ, hρ, hmain⟩ := Complex.integral_vertical_sub_eq_sum_circleIntegral hdc P hP hf
+    (hline d hd) (hline c hc) (hhor atTop atTop_le_cocompact) (hhor atBot atBot_le_cocompact)
+  -- residues as Laurent coefficients on a common small circle
+  have hres : ∀ p ∈ P, ∀ᶠ r in 𝓝[>] (0 : ℝ),
+      DLMF.AlgebraicAnalytic.laurentCoeff f p r (-1) =
+        DLMF.AlgebraicAnalytic.residueAt f p := by
+    intro p hp
+    obtain ⟨ε, hε, hball⟩ := exists_punctured_differentiableAt hP hf hp
+    exact eventually_laurentCoeff_eq_residueAt hε hball
+  obtain ⟨r, hr, hr0⟩ := (((Filter.eventually_all_finset P).mpr hres).and
+    (Ioo_mem_nhdsGT hρ)).exists
+  have hsum := hmain r hr0.1 hr0.2
+  have hres' : ∑ p ∈ P, DLMF.AlgebraicAnalytic.residueAt f p =
+      (2 * π * I)⁻¹ * ∑ p ∈ P, ∮ z in C(p, r), f z := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun p hp => ?_
+    rw [← hr p hp, DLMF.AlgebraicAnalytic.laurentCoeff]
+    simp
+  change mellinInv c G x = ∑ p ∈ P, DLMF.AlgebraicAnalytic.residueAt f p + mellinInv d G x
+  rw [hres', ← hsum]
+  unfold mellinInv
+  simp only [smul_eq_mul]
+  change (1 / (2 * π) : ℝ) • (∫ y : ℝ, f (c + y * I)) = _ +
+    (1 / (2 * π) : ℝ) • ∫ y : ℝ, f (d + y * I)
+  rw [real_smul, real_smul]
+  generalize (∫ y : ℝ, f (c + y * I)) = A
+  generalize (∫ y : ℝ, f (d + y * I)) = B
+  have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+  push_cast
+  field_simp
+  ring
 
 /-- Helper for `mellinInv_isLittleO`: the integrand of `mellinInv q G x` as a Fourier
 integrand. -/

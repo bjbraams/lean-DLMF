@@ -32,17 +32,19 @@ kernel in TauCeti, `TauCeti.NumberTheory.ArithmeticDirichletSeries.Perron.Basic`
 
 ## Main results
 
-* `Complex.barnesRes_integral_recip`: `∫_{-T}^{T} (c + it)⁻¹ dt = 2 arctan (T / c)`.
-* `Complex.barnesRes_vertical_shift`: the residue formula for moving a vertical line past a pole.
-* `Complex.barnesRes_vertical_shift_of_differentiableOn`: the pole-free version.
+* `Complex.BarnesResidue.integral_inv`: `∫_{-T}^{T} (c + it)⁻¹ dt = 2 arctan (T / c)`.
+* `Complex.BarnesResidue.vertical_shift`: the residue formula for moving a vertical line past a
+  pole.
+* `Complex.BarnesResidue.vertical_shift_of_differentiableOn`: the pole-free version.
 * `Complex.norm_sin_add_mul_I_sq` and the lower bounds `|sinh y| ≤ ‖sin (x + iy)‖`,
   `|sin x| cosh y ≤ ‖sin (x + iy)‖`, used to bound `Γ` through the reflection formula.
-* `Complex.barnesRes_norm_Gamma_mul_sin_le`: `‖Γ(w)‖ ‖sin πw‖ ≤ π ‖Γ(1-w)⁻¹‖`, with the lower
-  bounds `barnesRes_sin_lower_line`, `barnesRes_sin_lower_far` for `‖sin(π(x+iy))‖`.
-* `Complex.barnesRes_prod_sub_nat`: `∏_{j<n} (j - n) = (-1)^n n!` (residues of `Γ`).
-* `Complex.barnesRes_Gamma_add_nat_succ`: `Γ(w + n + 1) = Γ(w) ∏_{j ≤ n} (w + j)`, the
+* `Complex.BarnesResidue.norm_Gamma_mul_sin_le`: `‖Γ(w)‖ ‖sin πw‖ ≤ π ‖Γ(1-w)⁻¹‖`, with the lower
+  bounds `BarnesResidue.abs_sin_mul_exp_le_norm_sin`, `BarnesResidue.exp_div_four_le_norm_sin` for
+  `‖sin(π(x+iy))‖`.
+* `Complex.BarnesResidue.prod_sub_nat`: `∏_{j<n} (j - n) = (-1)^n n!` (residues of `Γ`).
+* `Complex.BarnesResidue.Gamma_add_nat_succ`: `Γ(w + n + 1) = Γ(w) ∏_{j ≤ n} (w + j)`, the
   removable-singularity form of `(s - p) Γ(·)` at a Gamma pole.
-* `Complex.barnesRes_isOpen_ne_sub_nat`, `Complex.barnesRes_isPreconnected_ne_sub_nat`: the
+* `Complex.BarnesResidue.isOpen_ne_sub_nat`, `Complex.BarnesResidue.isPreconnected_ne_sub_nat`: the
   complement of a half-lattice `b - ℕ` is a domain (for analytic continuation in parameters).
 -/
 
@@ -57,7 +59,7 @@ open scoped Topology Interval
 namespace Complex
 
 /-- A primitive of `t ↦ (c + it)⁻¹` on `ℝ` for `c ≠ 0`. -/
-theorem barnesRes_hasDerivAt_primitive {c : ℝ} (hc : c ≠ 0) (t : ℝ) :
+theorem BarnesResidue.hasDerivAt_primitive {c : ℝ} (hc : c ≠ 0) (t : ℝ) :
     HasDerivAt
       (fun u : ℝ => (Real.arctan (u / c) : ℂ) - I / 2 * (Real.log (c ^ 2 + u ^ 2) : ℂ))
       (((c : ℂ) + t * I)⁻¹) t := by
@@ -83,23 +85,23 @@ theorem barnesRes_hasDerivAt_primitive {c : ℝ} (hc : c ≠ 0) (t : ℝ) :
   ring
 
 /-- `t ↦ (c + it)⁻¹` is continuous for `c ≠ 0`. -/
-theorem barnesRes_continuous_recip {c : ℝ} (hc : c ≠ 0) :
+theorem BarnesResidue.continuous_inv {c : ℝ} (hc : c ≠ 0) :
     Continuous fun t : ℝ => ((c : ℂ) + t * I)⁻¹ :=
   Continuous.inv₀ (by fun_prop) fun t h => hc (by simpa using congrArg re h)
 
 /-- `∫_{-T}^{T} (c + it)⁻¹ dt = 2 arctan (T / c)` for `c ≠ 0`. -/
-theorem barnesRes_integral_recip {c : ℝ} (hc : c ≠ 0) (T : ℝ) :
+theorem BarnesResidue.integral_inv {c : ℝ} (hc : c ≠ 0) (T : ℝ) :
     ∫ t in -T..T, ((c : ℂ) + t * I)⁻¹ = 2 * (Real.arctan (T / c) : ℂ) := by
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt
-    (fun u _ => barnesRes_hasDerivAt_primitive hc u)
-    ((barnesRes_continuous_recip hc).intervalIntegrable _ _), neg_div, Real.arctan_neg, neg_sq]
+    (fun u _ => BarnesResidue.hasDerivAt_primitive hc u)
+    ((BarnesResidue.continuous_inv hc).intervalIntegrable _ _), neg_div, Real.arctan_neg, neg_sq]
   push_cast; ring
 
 /-- `∫_{-T}^{T} (c + it)⁻¹ dt → π sign c` as `T → ∞`. -/
-theorem barnesRes_tendsto_integral_recip {c : ℝ} (hc : c ≠ 0) :
+theorem BarnesResidue.tendsto_integral_inv {c : ℝ} (hc : c ≠ 0) :
     Tendsto (fun T : ℝ => ∫ t in -T..T, ((c : ℂ) + t * I)⁻¹) atTop
       (𝓝 (if 0 < c then (π : ℂ) else -π)) := by
-  simp_rw [barnesRes_integral_recip hc]
+  simp_rw [BarnesResidue.integral_inv hc]
   have key : Tendsto (fun T : ℝ => Real.arctan (T / c)) atTop
       (𝓝 (if 0 < c then π / 2 else -(π / 2))) := by
     split_ifs with h
@@ -116,7 +118,7 @@ theorem barnesRes_tendsto_integral_recip {c : ℝ} (hc : c ≠ 0) :
   exact this
 
 /-- The bound `‖∫_{c₁}^{c₂} (x + iy - p)⁻¹ dx‖ ≤ (c₂ - c₁) / |y - Im p|`. -/
-theorem barnesRes_norm_horizontal_recip_le {c₁ c₂ : ℝ} (h : c₁ ≤ c₂) (p : ℂ) {y : ℝ}
+theorem BarnesResidue.norm_integral_horizontal_inv_le {c₁ c₂ : ℝ} (h : c₁ ≤ c₂) (p : ℂ) {y : ℝ}
     (hy : y ≠ p.im) :
     ‖∫ x in c₁..c₂, ((x : ℂ) + y * I - p)⁻¹‖ ≤ (c₂ - c₁) * |y - p.im|⁻¹ := by
   have hb : ∀ x : ℝ, ‖((x : ℂ) + y * I - p)⁻¹‖ ≤ |y - p.im|⁻¹ := by
@@ -135,7 +137,7 @@ theorem barnesRes_norm_horizontal_recip_le {c₁ c₂ : ℝ} (h : c₁ ≤ c₂)
 closed strip `c₁ ≤ Re s ≤ c₂`, `c₁ < Re p < c₂`, and `f s = φ s / (s - p)`. If `f` is integrable
 on both boundary lines and its integrals over horizontal cross-sections tend to `0` at `±i∞`, then
 `∫ f(c₂+iy) dy - ∫ f(c₁+iy) dy = 2π φ(p)`. -/
-theorem barnesRes_vertical_shift {φ : ℂ → ℂ} {c₁ c₂ : ℝ} {p : ℂ} (h₁ : c₁ < p.re)
+theorem BarnesResidue.vertical_shift {φ : ℂ → ℂ} {c₁ c₂ : ℝ} {p : ℂ} (h₁ : c₁ < p.re)
     (h₂ : p.re < c₂) (hφ : DifferentiableOn ℂ φ (re ⁻¹' Icc c₁ c₂))
     (hi₁ : Integrable fun y : ℝ => φ (c₁ + y * I) / (c₁ + y * I - p))
     (hi₂ : Integrable fun y : ℝ => φ (c₂ + y * I) / (c₂ + y * I - p))
@@ -238,8 +240,8 @@ theorem barnesRes_vertical_shift {φ : ℂ → ℂ} {c₁ c₂ : ℝ} {p : ℂ} 
     refine intervalIntegral.integral_congr fun t _ => ?_
     congr 1
     apply Complex.ext <;> simp [hβ]
-  have hinv2 := barnesRes_tendsto_integral_recip (c := c₂ - p.re) (by linarith)
-  have hinv1 := barnesRes_tendsto_integral_recip (c := c₁ - p.re) (by linarith)
+  have hinv2 := BarnesResidue.tendsto_integral_inv (c := c₂ - p.re) (by linarith)
+  have hinv1 := BarnesResidue.tendsto_integral_inv (c := c₁ - p.re) (by linarith)
   simp only [show (0:ℝ) < c₂ - p.re by linarith, ↓reduceIte] at hinv2
   simp only [show ¬ (0:ℝ) < c₁ - p.re by linarith, ↓reduceIte] at hinv1
   have hhinv : ∀ (s : ℝ → ℝ), Tendsto s atTop (atBot ⊔ atTop) → (∀ᶠ T in atTop, s T ≠ β) →
@@ -248,7 +250,7 @@ theorem barnesRes_vertical_shift {φ : ℂ → ℂ} {c₁ c₂ : ℝ} {p : ℂ} 
     intro s _ hs hlim
     refine squeeze_zero_norm' ?_ (by simpa using hlim.const_mul (c₂ - c₁))
     filter_upwards [hs] with T hT
-    exact barnesRes_norm_horizontal_recip_le hc p hT
+    exact BarnesResidue.norm_integral_horizontal_inv_le hc p hT
   have hb1 : Tendsto (fun T : ℝ => ∫ x in c₁..c₂, ((x : ℂ) + (β - T : ℝ) * I - p)⁻¹) atTop
       (𝓝 0) := by
     refine hhinv (fun T => β - T) (hTt.mono_right le_sup_left) ?_ ?_
@@ -278,7 +280,7 @@ theorem barnesRes_vertical_shift {φ : ℂ → ℂ} {c₁ c₂ : ℝ} {p : ℂ} 
   exact mul_left_cancel₀ hI this
 
 /-- **Shifting a vertical line of integration with no pole in between.** -/
-theorem barnesRes_vertical_shift_of_differentiableOn {f : ℂ → ℂ} {c₁ c₂ : ℝ} (h : c₁ < c₂)
+theorem BarnesResidue.vertical_shift_of_differentiableOn {f : ℂ → ℂ} {c₁ c₂ : ℝ} (h : c₁ < c₂)
     (hf : DifferentiableOn ℂ f (re ⁻¹' Icc c₁ c₂))
     (hi₁ : Integrable fun y : ℝ => f (c₁ + y * I))
     (hi₂ : Integrable fun y : ℝ => f (c₂ + y * I))
@@ -299,7 +301,7 @@ theorem barnesRes_vertical_shift_of_differentiableOn {f : ℂ → ℂ} {c₁ c�
   have hH : ∀ T : ℝ, T ≠ 0 → (∫ x in c₁..c₂, Φ (x + T * I) / (x + T * I - p)) =
       ∫ x in c₁..c₂, f (x + T * I) := fun T hT => intervalIntegral.integral_congr fun x _ =>
     hdiv _ (fun he => hT (by have := congrArg im he; simpa [hpim] using this))
-  have key := barnesRes_vertical_shift (φ := Φ) (p := p) (by rw [hpre]; linarith)
+  have key := BarnesResidue.vertical_shift (φ := Φ) (p := p) (by rw [hpre]; linarith)
     (by rw [hpre]; linarith) ((differentiableOn_id.sub_const p).mul hf)
     (by rw [hv c₁ hne1]; exact hi₁) (by rw [hv c₂ hne2]; exact hi₂)
     (htop.congr' (by filter_upwards [eventually_gt_atTop 0] with T hT; exact (hH T hT.ne').symm))
@@ -309,12 +311,13 @@ theorem barnesRes_vertical_shift_of_differentiableOn {f : ℂ → ℂ} {c₁ c�
   exact sub_eq_zero.mp key
 
 /-- `|sinh y| ≤ ‖sin (x + iy)‖`. -/
-theorem barnesRes_abs_sinh_le_norm_sin (x y : ℝ) : |Real.sinh y| ≤ ‖Complex.sin (x + y * I)‖ := by
+theorem BarnesResidue.abs_sinh_le_norm_sin (x y : ℝ) : |Real.sinh y| ≤
+    ‖Complex.sin (x + y * I)‖ := by
   rw [← sq_le_sq₀ (abs_nonneg _) (norm_nonneg _), sq_abs, Complex.norm_sin_add_mul_I_sq]
   nlinarith [sq_nonneg (Real.sin x)]
 
 /-- `|sin x| cosh y ≤ ‖sin (x + iy)‖`. -/
-theorem barnesRes_abs_sin_mul_cosh_le_norm_sin (x y : ℝ) :
+theorem BarnesResidue.abs_sin_mul_cosh_le_norm_sin (x y : ℝ) :
     |Real.sin x| * Real.cosh y ≤ ‖Complex.sin (x + y * I)‖ := by
   rw [← sq_le_sq₀ (by positivity) (norm_nonneg _), mul_pow, sq_abs, Complex.norm_sin_add_mul_I_sq,
     Real.cosh_sq]
@@ -322,7 +325,7 @@ theorem barnesRes_abs_sin_mul_cosh_le_norm_sin (x y : ℝ) :
   nlinarith [sq_nonneg (Real.sinh y), sq_nonneg (Real.sin x)]
 
 /-- `Γ(w + n + 1) = Γ(w) ∏_{j ≤ n} (w + j)` when `w + j ≠ 0` for `j ≤ n`. -/
-theorem barnesRes_Gamma_add_nat_succ (w : ℂ) (n : ℕ) (h : ∀ j : ℕ, j ≤ n → w + j ≠ 0) :
+theorem BarnesResidue.Gamma_add_nat_succ (w : ℂ) (n : ℕ) (h : ∀ j : ℕ, j ≤ n → w + j ≠ 0) :
     Gamma (w + n + 1) = Gamma w * ∏ j ∈ Finset.range (n + 1), (w + j) := by
   induction n with
   | zero =>
@@ -338,7 +341,7 @@ theorem barnesRes_Gamma_add_nat_succ (w : ℂ) (n : ℕ) (h : ∀ j : ℕ, j ≤
     ring
 
 /-- The set `{a | a ≠ b - n for all n : ℕ}` is open. -/
-theorem barnesRes_isOpen_ne_sub_nat (b : ℂ) : IsOpen {a : ℂ | ∀ n : ℕ, a ≠ b - n} := by
+theorem BarnesResidue.isOpen_ne_sub_nat (b : ℂ) : IsOpen {a : ℂ | ∀ n : ℕ, a ≠ b - n} := by
   have hc : IsClosed (range (fun n : ℕ => b - n)) := by
     have h1 : IsClosed (range ((↑) : ℕ → ℝ)) := Nat.isClosedEmbedding_coe_real.isClosed_range
     have h2 : IsClosed (((↑) : ℝ → ℂ) '' range ((↑) : ℕ → ℝ)) :=
@@ -355,7 +358,7 @@ theorem barnesRes_isOpen_ne_sub_nat (b : ℂ) : IsOpen {a : ℂ | ∀ n : ℕ, a
   ext a; simp [eq_comm]
 
 /-- The set `{a | a ≠ b - n for all n : ℕ}` is preconnected. -/
-theorem barnesRes_isPreconnected_ne_sub_nat (b : ℂ) :
+theorem BarnesResidue.isPreconnected_ne_sub_nat (b : ℂ) :
     IsPreconnected {a : ℂ | ∀ n : ℕ, a ≠ b - n} := by
   have hs : (range (fun n : ℕ => b - n)).Countable := countable_range _
   have := (hs.isPathConnected_compl_of_one_lt_rank (by
@@ -364,7 +367,7 @@ theorem barnesRes_isPreconnected_ne_sub_nat (b : ℂ) :
   ext a; simp [eq_comm]
 
 /-- `‖Γ(w)‖ ‖sin(πw)‖ ≤ π ‖Γ(1-w)⁻¹‖` (reflection formula, all `w`). -/
-theorem barnesRes_norm_Gamma_mul_sin_le (w : ℂ) :
+theorem BarnesResidue.norm_Gamma_mul_sin_le (w : ℂ) :
     ‖Gamma w‖ * ‖Complex.sin (π*w)‖ ≤ π * ‖(Gamma (1-w))⁻¹‖ := by
   have hr := Complex.Gamma_mul_Gamma_one_sub w
   by_cases hs : Complex.sin (π*w) = 0
@@ -379,11 +382,11 @@ theorem barnesRes_norm_Gamma_mul_sin_le (w : ℂ) :
   rw [← norm_mul, this, norm_mul, norm_real, Real.norm_eq_abs, abs_of_pos Real.pi_pos]
 
 /-- `‖sin(π(x+iy))‖ ≥ (|sin πx|/2) e^{π|y|}`. -/
-theorem barnesRes_sin_lower_line (x y : ℝ) :
+theorem BarnesResidue.abs_sin_mul_exp_le_norm_sin (x y : ℝ) :
     |Real.sin (π*x)|/2 * Real.exp (π*|y|) ≤ ‖Complex.sin (π*((x:ℂ) + y*I))‖ := by
   have hw : (π:ℂ)*((x:ℂ) + y*I) = ((π*x:ℝ):ℂ) + ((π*y:ℝ):ℂ)*I := by push_cast; ring
   rw [hw]
-  refine le_trans ?_ (barnesRes_abs_sin_mul_cosh_le_norm_sin (π*x) (π*y))
+  refine le_trans ?_ (BarnesResidue.abs_sin_mul_cosh_le_norm_sin (π*x) (π*y))
   have hcosh : Real.exp (π*|y|)/2 ≤ Real.cosh (π*y) := by
     rw [← Real.cosh_abs, abs_mul, abs_of_pos Real.pi_pos, Real.cosh_eq]
     have := Real.exp_pos (-(π*|y|)); linarith
@@ -391,27 +394,27 @@ theorem barnesRes_sin_lower_line (x y : ℝ) :
   nlinarith
 
 /-- `‖sin(π(x+iy))‖ ≥ e^{π|y|}/4` for `|y| ≥ 1`. -/
-theorem barnesRes_sin_lower_far (x : ℝ) {y : ℝ} (hy : 1 ≤ |y|) :
+theorem BarnesResidue.exp_div_four_le_norm_sin (x : ℝ) {y : ℝ} (hy : 1 ≤ |y|) :
     1/4 * Real.exp (π*|y|) ≤ ‖Complex.sin (π*((x:ℂ) + y*I))‖ := by
   have hw : (π:ℂ)*((x:ℂ) + y*I) = ((π*x:ℝ):ℂ) + ((π*y:ℝ):ℂ)*I := by push_cast; ring
   rw [hw]
-  refine le_trans ?_ (barnesRes_abs_sinh_le_norm_sin (π*x) (π*y))
+  refine le_trans ?_ (BarnesResidue.abs_sinh_le_norm_sin (π*x) (π*y))
   rw [Real.abs_sinh, abs_mul, abs_of_pos Real.pi_pos, Real.sinh_eq]
   have h4 := Real.add_one_le_exp (π*|y|)
   have h5 : Real.exp (-(π*|y|)) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith [Real.pi_pos])
   nlinarith [Real.two_le_pi]
 
 /-- `sin(πs) ≠ 0` when `sin(π Re s) ≠ 0`. -/
-theorem barnesRes_sin_ne_zero_of_re {s : ℂ} (h : Real.sin (π*s.re) ≠ 0) :
+theorem BarnesResidue.sin_ne_zero_of_re {s : ℂ} (h : Real.sin (π*s.re) ≠ 0) :
     Complex.sin (π*s) ≠ 0 := by
   intro h0
-  have := barnesRes_sin_lower_line s.re s.im
+  have := BarnesResidue.abs_sin_mul_exp_le_norm_sin s.re s.im
   rw [show ((s.re:ℂ) + s.im*I) = s from re_add_im s, h0, norm_zero] at this
   have h1 : 0 < |Real.sin (π*s.re)|/2 * Real.exp (π*|s.im|) := by positivity
   linarith
 
 /-- `sin(πx) ≠ 0` for real `x ≤ 0` that is not a non-positive integer. -/
-theorem barnesRes_real_sin_ne_zero {x : ℝ} (hx0 : x ≤ 0) (hx : ∀ n : ℕ, x ≠ -n) :
+theorem BarnesResidue.real_sin_ne_zero {x : ℝ} (hx0 : x ≤ 0) (hx : ∀ n : ℕ, x ≠ -n) :
     Real.sin (π*x) ≠ 0 := by
   intro h
   obtain ⟨n, hn⟩ := Real.sin_eq_zero_iff.mp h
@@ -432,7 +435,7 @@ theorem barnesRes_real_sin_ne_zero {x : ℝ} (hx0 : x ≤ 0) (hx : ∀ n : ℕ, 
   rw [h4]; ring
 
 /-- `∏_{j<n} (n - j) = n!`. -/
-theorem barnesRes_prod_nat_sub (n : ℕ) : ∏ j ∈ Finset.range n, ((n:ℂ) - j) = n.factorial := by
+theorem BarnesResidue.prod_nat_sub (n : ℕ) : ∏ j ∈ Finset.range n, ((n:ℂ) - j) = n.factorial := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -443,16 +446,16 @@ theorem barnesRes_prod_nat_sub (n : ℕ) : ∏ j ∈ Finset.range n, ((n:ℂ) - 
     rw [this, ih]; push_cast; ring
 
 /-- `∏_{j<n} (j - n) = (-1)^n n!`, the residue factor of `Γ` at `-n`. -/
-theorem barnesRes_prod_sub_nat (n : ℕ) :
+theorem BarnesResidue.prod_sub_nat (n : ℕ) :
     ∏ j ∈ Finset.range n, ((j:ℂ) - n) = (-1)^n * n.factorial := by
   calc ∏ j ∈ Finset.range n, ((j:ℂ) - n) = ∏ j ∈ Finset.range n, ((-1) * ((n:ℂ) - j)) :=
         Finset.prod_congr rfl fun j _ => by ring
     _ = (-1)^n * ∏ j ∈ Finset.range n, ((n:ℂ) - j) := by
         rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_range]
-    _ = _ := by rw [barnesRes_prod_nat_sub]
+    _ = _ := by rw [BarnesResidue.prod_nat_sub]
 
 /-- `(1+u)^K e^{-bu} → 0` as `u → ∞`. -/
-theorem barnesRes_tendsto_poly_exp {b : ℝ} (hb : 0 < b) (K : ℕ) :
+theorem BarnesResidue.tendsto_one_add_pow_mul_exp_neg {b : ℝ} (hb : 0 < b) (K : ℕ) :
     Tendsto (fun u : ℝ => (1 + u) ^ K * Real.exp (-(b * u))) atTop (𝓝 0) := by
   have h := ((Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero K).comp
     ((tendsto_id.const_mul_atTop hb).comp (tendsto_atTop_add_const_left _ 1 tendsto_id))).const_mul

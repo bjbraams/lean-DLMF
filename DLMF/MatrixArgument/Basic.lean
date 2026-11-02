@@ -12,6 +12,7 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
 public import Mathlib.LinearAlgebra.Matrix.PosDef
 public import Mathlib.Topology.Algebra.Star.Real
+public import TauCeti.Analysis.SpecialFunctions.MultivariateGamma.Basic
 
 /-!
 # Functions of matrix argument: definitions
@@ -40,6 +41,11 @@ hypergeometric functions of matrix argument (§§35.5–35.8).
   `hyp0F1`, `hyp1F1` (35.6.1), `hyp2F1` (35.7.1) and `hyp3F2`.
 * `kummerPsi`, `laguerreL`, `jacobiP`: DLMF 35.6.2, 35.6.3, 35.7.2.
 * `gaussPDEOperator`: the system of partial differential equations 35.7.9 for `₂F₁`.
+
+## Main results
+
+* `multivariateGamma_ofReal`, `multivariateGamma_one`: the bridge to Tau Ceti's real `Γ_m` and
+  the case `m = 1` (35.3.4).
 
 ## Implementation notes
 
@@ -349,5 +355,23 @@ def gaussPDEOperator {m : ℕ} (a b c : ℂ) (F : (Fin m → ℝ) → ℂ) (j : 
       (1 / 2 : ℂ) * ∑ k ∈ Finset.univ.erase j, ((t j * (1 - t j) / (t j - t k) : ℝ) : ℂ)) *
       coordDeriv F j t -
     a * b * F t
+
+/-- DLMF 35.3.4: on real arguments `Γ_m` is Tau Ceti's real multivariate gamma function. -/
+@[dlmf 35.3.E4]
+theorem multivariateGamma_ofReal (m : ℕ) (x : ℝ) :
+    ((TauCeti.multivariateGamma m x : ℝ) : ℂ) = multivariateGamma m x := by
+  rw [TauCeti.multivariateGamma_def, multivariateGamma, Complex.ofReal_mul,
+    Complex.ofReal_cpow Real.pi_pos.le, Complex.ofReal_prod]
+  push_cast
+  congr 1
+  refine Finset.prod_congr rfl fun j _ => ?_
+  rw [← Complex.Gamma_ofReal]
+  push_cast
+  rfl
+
+/-- DLMF 35.3.4 for `m = 1`: `Γ₁(a) = Γ(a)`. -/
+@[dlmf 35.3.E4]
+theorem multivariateGamma_one (a : ℂ) : multivariateGamma 1 a = Complex.Gamma a := by
+  simp [multivariateGamma]
 
 end DLMF.MatrixArgument

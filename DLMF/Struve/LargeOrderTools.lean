@@ -22,25 +22,26 @@ of `𝐊_ν(λν)` and `𝐌_ν(λν)`.
 
 ## Main definitions
 
-* `struveLO_I`: the circle integral `I_m(λ)`.
-* `StruveLOGood`: on a small circle, `t + λ sinh t = t(1 + λσ(t))`, `σ = dslope sinh 0`, has no
-  zero other than `t = 0` for all `λ` in a closed disc around `λ₀ ≠ -1`.
-* `struveLO_b`: the binomial coefficient `a(a-1)⋯(a-j+1)/j!` for complex `a`.
-* `struveLO_R`: the binomial remainder `R_N(a, u) = (1+u)^a - ∑_{j<N} (a choose j) u^j`.
+* `LargeOrder.lagrangeIntegral`: the circle integral `I_m(λ)`.
+* `LargeOrderFactorNonvanishing`: on a small circle, `t + λ sinh t = t(1 + λσ(t))`,
+  `σ = dslope sinh 0`, has no zero other than `t = 0` for all `λ` in a closed disc around `λ₀ ≠ -1`.
+* `LargeOrder.binomialCoeff`: the binomial coefficient `a(a-1)⋯(a-j+1)/j!` for complex `a`.
+* `LargeOrder.binomialRemainder`: the binomial remainder
+  `R_N(a, u) = (1+u)^a - ∑_{j<N} (a choose j) u^j`.
 
 ## Main results
 
-* `struveLO_good_exists`: such circles exist.
-* `struveLO_hasDerivAt_I`: the integrals are holomorphic in `λ`, by differentiation under the
-  integral sign (`struveLO_hasDerivAt_circleIntegral`).
-* `struveLO_I_one`: `I_1 = 2πi/(1+λ)`, by Cauchy's formula.
-* `struveLO_hasDerivAt_exact`, `struveLO_recurrence`: the exact derivative
+* `LargeOrder.exists_factorNonvanishing`: such circles exist.
+* `LargeOrder.hasDerivAt_lagrangeIntegral`: the integrals are holomorphic in `λ`, by differentiation
+  under the integral sign (`LargeOrder.hasDerivAt_circleIntegral`).
+* `LargeOrder.lagrangeIntegral_one`: `I_1 = 2πi/(1+λ)`, by Cauchy's formula.
+* `LargeOrder.hasDerivAt_exact`, `LargeOrder.recurrence`: the exact derivative
   `λ² n(n+1) sinh² t u^{-n-2} - λ n sinh t u^{-n-1} - (1-λ²) n(n+1) u^{-n-2}
   = d/dt [-n (λ cosh t - 1) u^{-n-1}]`, and hence `θ² I_n = (1-λ²) n(n+1) I_{n+2}`,
   `θ = λ d/dλ`.
-* `struveLO_norm_R_le`: `|R_N(a,u)| ≤ ∏_{i<N} |a-i| |u|^N (1 + max u 0)^{re a - N}` for
-  `N ≤ re a` and real `u > -1`.
-* `struveLO_K_integral_bound`, `struveLO_M_integral_bound`: explicit error bounds for
+* `LargeOrder.norm_binomialRemainder_le`:
+  `|R_N(a,u)| ≤ ∏_{i<N} |a-i| |u|^N (1 + max u 0)^{re a - N}` for `N ≤ re a` and real `u > -1`.
+* `LargeOrder.K_integral_bound`, `LargeOrder.M_integral_bound`: explicit error bounds for
   `∫₀^∞ e^{-zt} (1+t²)^a dt` (`re a < re z`) and `∫₀¹ e^{-zt} (1-t²)^a dt` (`re z > 0`), uniform
   in complex `a`, `z`.
 
@@ -48,8 +49,8 @@ of `𝐊_ν(λν)` and `𝐌_ν(λν)`.
 
 The recurrence for `A_k = (2πi)⁻¹ I_{2k+1}` is the recurrence of DLMF §11.11(iii); it shows
 that the singularity of the recurrence at `λ = 1` is removable (`angerScaledA_removable` in
-`DLMF.Struve.Asymptotics.ScaledExpansions`). The remainder bound `struveLO_norm_R_le` is proved
-by induction with the mean value inequality.
+`DLMF.Struve.Asymptotics.ScaledExpansions`). The remainder bound
+`LargeOrder.norm_binomialRemainder_le` is proved by induction with the mean value inequality.
 -/
 
 @[expose] public noncomputable section
@@ -60,7 +61,7 @@ open scoped Real Topology Interval
 namespace DLMF.Struve
 
 /-- Differentiation under a circle integral in a parameter. -/
-theorem struveLO_hasDerivAt_circleIntegral {F F' : ℂ → ℂ → ℂ} {s : Set ℂ} (hs : IsCompact s)
+theorem LargeOrder.hasDerivAt_circleIntegral {F F' : ℂ → ℂ → ℂ} {s : Set ℂ} (hs : IsCompact s)
     {z₀ : ℂ} (hz : s ∈ 𝓝 z₀) {r : ℝ}
     (hF : ContinuousOn (fun p : ℂ × ℝ => F p.1 (circleMap 0 r p.2)) (s ×ˢ univ))
     (hF' : ContinuousOn (fun p : ℂ × ℝ => F' p.1 (circleMap 0 r p.2)) (s ×ˢ univ))
@@ -94,45 +95,45 @@ theorem struveLO_hasDerivAt_circleIntegral {F F' : ℂ → ℂ → ℂ} {s : Set
     exact (hd z hzs θ).const_smul (circleMap 0 r θ * I)
 
 /-- The circle integral `∮_{|t|=r} g(t) (t + λ sinh t)^{-m} dt`. -/
-def struveLO_I (r : ℝ) (g : ℂ → ℂ) (m : ℕ) (lam : ℂ) : ℂ :=
+def LargeOrder.lagrangeIntegral (r : ℝ) (g : ℂ → ℂ) (m : ℕ) (lam : ℂ) : ℂ :=
   ∮ t in C(0, r), g t * ((t + lam * sinh t) ^ m)⁻¹
 
 /-- `sinh t = t · σ(t)` with the entire slope `σ = dslope sinh 0`. -/
-theorem struveLO_sinh_eq (t : ℂ) : sinh t = t * dslope sinh 0 t := by
+theorem LargeOrder.sinh_eq (t : ℂ) : sinh t = t * dslope sinh 0 t := by
   have h := sub_smul_dslope sinh 0 t
   simp only [sub_zero, smul_eq_mul, sinh_zero] at h
   exact h.symm
 
 /-- The slope `σ = dslope sinh 0` is entire. -/
-theorem struveLO_differentiable_dslope : Differentiable ℂ (dslope sinh 0) := by
+theorem LargeOrder.differentiable_dslope : Differentiable ℂ (dslope sinh 0) := by
   intro t
   exact ((differentiableOn_dslope (s := univ) univ_mem).2
     differentiable_sinh.differentiableOn t (mem_univ _)).differentiableAt univ_mem
 
 /-- `σ(0) = 1`. -/
-theorem struveLO_dslope_zero : dslope sinh 0 0 = 1 := by
+theorem LargeOrder.dslope_zero : dslope sinh 0 0 = 1 := by
   rw [dslope_same, Complex.deriv_sinh, cosh_zero]
 
 /-- The good-set condition: on the closed disc `|λ - λ₀| ≤ ε` and `|t| ≤ r` the factor
 `1 + λ σ(t)` of `t + λ sinh t = t (1 + λ σ(t))` does not vanish. -/
-def StruveLOGood (r ε : ℝ) (lam₀ : ℂ) : Prop :=
+def LargeOrderFactorNonvanishing (r ε : ℝ) (lam₀ : ℂ) : Prop :=
   ∀ lam ∈ closedBall lam₀ ε, ∀ t ∈ closedBall (0 : ℂ) r, 1 + lam * dslope sinh 0 t ≠ 0
 
 /-- For `1 + λ₀ ≠ 0` a good disc pair exists. -/
-theorem struveLO_good_exists {lam₀ : ℂ} (h : 1 + lam₀ ≠ 0) :
-    ∃ r > 0, ∃ ε > 0, StruveLOGood r ε lam₀ := by
+theorem LargeOrder.exists_factorNonvanishing {lam₀ : ℂ} (h : 1 + lam₀ ≠ 0) :
+    ∃ r > 0, ∃ ε > 0, LargeOrderFactorNonvanishing r ε lam₀ := by
   set m := ‖1 + lam₀‖ with hm
   have hm0 : 0 < m := norm_pos_iff.2 h
   set L := ‖lam₀‖ + m / 4 + 1 with hL
   have hL0 : 0 < L := by positivity
   have hcont : ContinuousAt (dslope sinh 0) 0 :=
-      struveLO_differentiable_dslope.continuous.continuousAt
+      LargeOrder.differentiable_dslope.continuous.continuousAt
   obtain ⟨ρ, hρ, hρ'⟩ := Metric.continuousAt_iff.1 hcont (m / (2 * L)) (by positivity)
   refine ⟨ρ / 2, by positivity, m / 4, by positivity, fun lam hlam t ht => ?_⟩
   have ht' : dist t 0 < ρ := by
     have := mem_closedBall.1 ht; linarith
   have hσ := hρ' ht'
-  rw [struveLO_dslope_zero, dist_eq_norm] at hσ
+  rw [LargeOrder.dslope_zero, dist_eq_norm] at hσ
   rw [mem_closedBall, dist_eq_norm] at hlam
   have hlamL : ‖lam‖ ≤ L := by
     have := norm_le_norm_add_norm_sub' lam lam₀
@@ -150,20 +151,20 @@ theorem struveLO_good_exists {lam₀ : ℂ} (h : 1 + lam₀ ≠ 0) :
   linarith
 
 /-- On a good disc pair the denominator `t + λ sinh t` does not vanish for `0 < |t| ≤ r`. -/
-theorem struveLO_u_ne {r ε : ℝ} {lam₀ : ℂ} (hG : StruveLOGood r ε lam₀) {lam : ℂ}
+theorem LargeOrder.u_ne {r ε : ℝ} {lam₀ : ℂ} (hG : LargeOrderFactorNonvanishing r ε lam₀) {lam : ℂ}
     (hlam : lam ∈ closedBall lam₀ ε) {t : ℂ} (ht : t ∈ closedBall (0 : ℂ) r) (ht0 : t ≠ 0) :
     t + lam * sinh t ≠ 0 := by
-  rw [struveLO_sinh_eq, show t + lam * (t * dslope sinh 0 t) = t * (1 + lam * dslope sinh 0 t) by
+  rw [LargeOrder.sinh_eq, show t + lam * (t * dslope sinh 0 t) = t * (1 + lam * dslope sinh 0 t) by
     ring]
   exact mul_ne_zero ht0 (hG lam hlam t ht)
 
 /-- Points of the circle `|t| = r`, `r > 0`, as values of `circleMap`. -/
-theorem struveLO_circleMap_mem {r : ℝ} (hr : 0 < r) (θ : ℝ) :
+theorem LargeOrder.circleMap_mem {r : ℝ} (hr : 0 < r) (θ : ℝ) :
     circleMap 0 r θ ∈ closedBall (0 : ℂ) r ∧ circleMap 0 r θ ≠ 0 :=
   ⟨sphere_subset_closedBall (circleMap_mem_sphere 0 hr.le θ), circleMap_ne_center hr.ne'⟩
 
 /-- Derivative of `c (a + w b)^{-m}` in `w`. -/
-theorem struveLO_hasDerivAt_recip_pow (a b c : ℂ) (m : ℕ) {w : ℂ} (h : a + w * b ≠ 0) :
+theorem LargeOrder.hasDerivAt_recip_pow (a b c : ℂ) (m : ℕ) {w : ℂ} (h : a + w * b ≠ 0) :
     HasDerivAt (fun w => c * ((a + w * b) ^ m)⁻¹)
       (-(m : ℂ) * (c * b * ((a + w * b) ^ (m + 1))⁻¹)) w := by
   have hu : HasDerivAt (fun w => a + w * b) b w := by
@@ -178,7 +179,8 @@ theorem struveLO_hasDerivAt_recip_pow (a b c : ℂ) (m : ℕ) {w : ℂ} (h : a +
     ring
 
 /-- Continuity of the circle integrands on a good disc. -/
-theorem struveLO_continuousOn {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
+theorem LargeOrder.continuousOn {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r)
+    (hG : LargeOrderFactorNonvanishing r ε lam₀)
     {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) :
     ContinuousOn (fun p : ℂ × ℝ => g (circleMap 0 r p.2) *
       ((circleMap 0 r p.2 + p.1 * sinh (circleMap 0 r p.2)) ^ m)⁻¹)
@@ -187,31 +189,32 @@ theorem struveLO_continuousOn {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : Str
     (continuous_circleMap 0 r).comp continuous_snd
   refine (hg.comp hc).continuousOn.mul (ContinuousOn.inv₀ (Continuous.continuousOn (by fun_prop))
     fun p hp => pow_ne_zero _ ?_)
-  obtain ⟨h1, h2⟩ := struveLO_circleMap_mem hr p.2
-  exact struveLO_u_ne hG hp.1 h1 h2
+  obtain ⟨h1, h2⟩ := LargeOrder.circleMap_mem hr p.2
+  exact LargeOrder.u_ne hG hp.1 h1 h2
 
 /-- `λ ↦ ∮ g (t + λ sinh t)^{-m}` is differentiable on a good disc, with derivative
 `-m ∮ g sinh (t + λ sinh t)^{-(m+1)}`. -/
-theorem struveLO_hasDerivAt_I {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
+theorem LargeOrder.hasDerivAt_lagrangeIntegral {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r)
+    (hG : LargeOrderFactorNonvanishing r ε lam₀)
     {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {lam : ℂ} (hlam : lam ∈ ball lam₀ ε) :
-    HasDerivAt (struveLO_I r g m)
-      (-(m : ℂ) * struveLO_I r (fun t => g t * sinh t) (m + 1) lam) lam := by
-  have h := struveLO_hasDerivAt_circleIntegral (isCompact_closedBall lam₀ ε)
+    HasDerivAt (LargeOrder.lagrangeIntegral r g m)
+      (-(m : ℂ) * LargeOrder.lagrangeIntegral r (fun t => g t * sinh t) (m + 1) lam) lam := by
+  have h := LargeOrder.hasDerivAt_circleIntegral (isCompact_closedBall lam₀ ε)
     (closedBall_mem_nhds_of_mem hlam) (r := r)
     (F := fun w t => g t * ((t + w * sinh t) ^ m)⁻¹)
     (F' := fun w t => -(m : ℂ) * (g t * sinh t * ((t + w * sinh t) ^ (m + 1))⁻¹))
-    (struveLO_continuousOn hr hG hg m)
-    (continuousOn_const.mul (struveLO_continuousOn hr hG (hg.mul continuous_sinh) (m + 1)))
+    (LargeOrder.continuousOn hr hG hg m)
+    (continuousOn_const.mul (LargeOrder.continuousOn hr hG (hg.mul continuous_sinh) (m + 1)))
     (fun z hz θ => by
-      obtain ⟨h1, h2⟩ := struveLO_circleMap_mem hr θ
-      exact struveLO_hasDerivAt_recip_pow _ _ _ m (struveLO_u_ne hG hz h1 h2))
+      obtain ⟨h1, h2⟩ := LargeOrder.circleMap_mem hr θ
+      exact LargeOrder.hasDerivAt_recip_pow _ _ _ m (LargeOrder.u_ne hG hz h1 h2))
   rw [circleIntegral.integral_const_mul] at h
   exact h
 
 /-- The exact-derivative identity behind the recurrence: with `u = t + λ sinh t`,
 `λ² n(n+1) sinh² t u^{-n-2} - λ n sinh t u^{-n-1} - (1-λ²) n(n+1) u^{-n-2}` is the
 `t`-derivative of `-n (λ cosh t - 1) u^{-n-1}`. -/
-theorem struveLO_hasDerivAt_exact (lam : ℂ) (n : ℕ) {t : ℂ} (h : t + lam * sinh t ≠ 0) :
+theorem LargeOrder.hasDerivAt_exact (lam : ℂ) (n : ℕ) {t : ℂ} (h : t + lam * sinh t ≠ 0) :
     HasDerivAt (fun t => -(n : ℂ) * (lam * cosh t - 1) * ((t + lam * sinh t) ^ (n + 1))⁻¹)
       (lam ^ 2 * (n * (n + 1)) * (1 * sinh t * sinh t * ((t + lam * sinh t) ^ (n + 1 + 1))⁻¹) -
         lam * n * (1 * sinh t * ((t + lam * sinh t) ^ (n + 1))⁻¹) -
@@ -228,66 +231,73 @@ theorem struveLO_hasDerivAt_exact (lam : ℂ) (n : ℕ) {t : ℂ} (h : t + lam *
   linear_combination (-(n : ℂ) * (n + 1) * (t + lam * sinh t)⁻¹ ^ (n + 2) * lam ^ 2) * cosh_sq t
 
 /-- Circle integrability of the integrands on a good disc. -/
-theorem struveLO_circleIntegrable {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
+theorem LargeOrder.circleIntegrable {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r)
+    (hG : LargeOrderFactorNonvanishing r ε lam₀)
     {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {lam : ℂ} (hlam : lam ∈ closedBall lam₀ ε) (c : ℂ) :
     CircleIntegrable (fun t => c * (g t * ((t + lam * sinh t) ^ m)⁻¹)) 0 r := by
   refine ContinuousOn.circleIntegrable hr.le (continuousOn_const.mul (hg.continuousOn.mul
     (ContinuousOn.inv₀ (Continuous.continuousOn (by fun_prop)) fun t ht => pow_ne_zero _ ?_)))
-  exact struveLO_u_ne hG hlam (sphere_subset_closedBall ht) (ne_of_mem_sphere ht hr.ne')
+  exact LargeOrder.u_ne hG hlam (sphere_subset_closedBall ht) (ne_of_mem_sphere ht hr.ne')
 
 /-- The recurrence identity for the circle integrals:
 `λ² n(n+1) I(sinh², n+2) - λ n I(sinh, n+1) = (1-λ²) n(n+1) I(1, n+2)`. -/
-theorem struveLO_recurrence {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
+theorem LargeOrder.recurrence {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r)
+    (hG : LargeOrderFactorNonvanishing r ε lam₀)
     (n : ℕ) {lam : ℂ} (hlam : lam ∈ closedBall lam₀ ε) :
-    lam ^ 2 * (n * (n + 1)) * struveLO_I r (fun t => 1 * sinh t * sinh t) (n + 1 + 1) lam -
-      lam * n * struveLO_I r (fun t => 1 * sinh t) (n + 1) lam =
-      (1 - lam ^ 2) * (n * (n + 1)) * struveLO_I r (fun _ => 1) (n + 2) lam := by
+    lam ^ 2 * (n * (n + 1)) *
+        LargeOrder.lagrangeIntegral r (fun t => 1 * sinh t * sinh t) (n + 1 + 1) lam -
+      lam * n * LargeOrder.lagrangeIntegral r (fun t => 1 * sinh t) (n + 1) lam =
+      (1 - lam ^ 2) * (n * (n + 1)) * LargeOrder.lagrangeIntegral r (fun _ => 1) (n + 2) lam := by
   have h0 := circleIntegral.integral_eq_zero_of_hasDerivWithinAt hr.le (c := 0)
-    (fun z hz => (struveLO_hasDerivAt_exact lam n (struveLO_u_ne hG hlam
+    (fun z hz => (LargeOrder.hasDerivAt_exact lam n (LargeOrder.u_ne hG hlam
       (sphere_subset_closedBall hz) (ne_of_mem_sphere hz hr.ne'))).hasDerivWithinAt)
-  have i1 := struveLO_circleIntegrable hr hG (g := fun t => 1 * sinh t * sinh t) (by fun_prop)
+  have i1 := LargeOrder.circleIntegrable hr hG (g := fun t => 1 * sinh t * sinh t) (by fun_prop)
     (n + 1 + 1) hlam (lam ^ 2 * (n * (n + 1)))
-  have i2 := struveLO_circleIntegrable hr hG (g := fun t => 1 * sinh t) (by fun_prop) (n + 1) hlam
+  have i2 := LargeOrder.circleIntegrable hr hG (g := fun t => 1 * sinh t) (by fun_prop) (n + 1) hlam
     (lam * n)
-  have i3 := struveLO_circleIntegrable hr hG (g := fun _ => 1) continuous_const (n + 2) hlam
+  have i3 := LargeOrder.circleIntegrable hr hG (g := fun _ => 1) continuous_const (n + 2) hlam
     ((1 - lam ^ 2) * (n * (n + 1)))
   have e1 := circleIntegral.integral_sub (i1.sub i2) i3
   simp only [Pi.sub_apply] at e1
   rw [e1, circleIntegral.integral_sub i1 i2,
     circleIntegral.integral_const_mul, circleIntegral.integral_const_mul,
     circleIntegral.integral_const_mul] at h0
-  simp only [struveLO_I]
+  simp only [LargeOrder.lagrangeIntegral]
   linear_combination h0
 
 /-- Base case: `∮ (t + λ sinh t)^{-1} dt = 2πi/(1+λ)` on a good disc. -/
-theorem struveLO_I_one {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
+theorem LargeOrder.lagrangeIntegral_one {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r)
+    (hG : LargeOrderFactorNonvanishing r ε lam₀)
     {lam : ℂ} (hlam : lam ∈ closedBall lam₀ ε) :
-    struveLO_I r (fun _ => 1) 1 lam = 2 * π * I / (1 + lam) := by
+    LargeOrder.lagrangeIntegral r (fun _ => 1) 1 lam = 2 * π * I / (1 + lam) := by
   have hd : DifferentiableOn ℂ (fun t => (1 + lam * dslope sinh 0 t)⁻¹) (closedBall 0 r) :=
     ((differentiableOn_const _).add ((differentiableOn_const _).mul
-      struveLO_differentiable_dslope.differentiableOn)).inv fun t ht => hG lam hlam t ht
+      LargeOrder.differentiable_dslope.differentiableOn)).inv fun t ht => hG lam hlam t ht
   have h := hd.circleIntegral_sub_inv_smul (mem_ball_self hr)
-  rw [struveLO_dslope_zero, mul_one] at h
-  rw [struveLO_I, circleIntegral.integral_congr hr.le (g := fun t =>
+  rw [LargeOrder.dslope_zero, mul_one] at h
+  rw [LargeOrder.lagrangeIntegral, circleIntegral.integral_congr hr.le (g := fun t =>
     (t - 0)⁻¹ • (1 + lam * dslope sinh 0 t)⁻¹), h, smul_eq_mul, div_eq_mul_inv]
   intro t ht
   simp only [one_mul, pow_one, sub_zero, smul_eq_mul]
-  rw [struveLO_sinh_eq t, show t + lam * (t * dslope sinh 0 t) = t * (1 + lam * dslope sinh 0 t) by
+  rw [LargeOrder.sinh_eq t, show t + lam * (t * dslope sinh 0 t) = t *
+      (1 + lam * dslope sinh 0 t) by
     ring, mul_inv]
 
 /-! ### Complex binomial remainders -/
 
 /-- Binomial coefficient `a(a-1)⋯(a-j+1)/j!` for complex `a`. -/
-def struveLO_b (a : ℂ) (j : ℕ) : ℂ := (∏ r ∈ Finset.range j, (a - r)) / (j.factorial : ℂ)
+def LargeOrder.binomialCoeff (a : ℂ) (j : ℕ) : ℂ := (∏ r ∈ Finset.range j, (a - r)) /
+    (j.factorial : ℂ)
 
 /-- Complex binomial remainder `(1+u)^a - ∑_{j<N} (a choose j) u^j` for real `u`. -/
-def struveLO_R (a : ℂ) (N : ℕ) (u : ℝ) : ℂ :=
-  (1 + (u : ℂ)) ^ a - ∑ j ∈ Finset.range N, struveLO_b a j * (u : ℂ) ^ j
+def LargeOrder.binomialRemainder (a : ℂ) (N : ℕ) (u : ℝ) : ℂ :=
+  (1 + (u : ℂ)) ^ a - ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * (u : ℂ) ^ j
 
 /-- `(j+1) (a choose j+1) = a (a-1 choose j)`. -/
-theorem struveLO_succ_mul_b (a : ℂ) (j : ℕ) :
-    ((j + 1 : ℕ) : ℂ) * struveLO_b a (j + 1) = a * struveLO_b (a - 1) j := by
-  unfold struveLO_b
+theorem LargeOrder.succ_mul_binomialCoeff (a : ℂ) (j : ℕ) :
+    ((j + 1 : ℕ) : ℂ) * LargeOrder.binomialCoeff a (j + 1) = a *
+        LargeOrder.binomialCoeff (a - 1) j := by
+  unfold LargeOrder.binomialCoeff
   rw [Finset.prod_range_succ', Nat.factorial_succ]
   push_cast
   have : ∏ r ∈ Finset.range j, (a - ((r : ℂ) + 1)) = ∏ r ∈ Finset.range j, (a - 1 - r) :=
@@ -298,47 +308,51 @@ theorem struveLO_succ_mul_b (a : ℂ) (j : ℕ) :
   ring
 
 /-- Derivative of the binomial remainder in `u`. -/
-theorem struveLO_hasDerivAt_R (a : ℂ) (N : ℕ) {u : ℝ} (hu : -1 < u) :
-    HasDerivAt (struveLO_R a (N + 1)) (a * struveLO_R (a - 1) N u) u := by
+theorem LargeOrder.hasDerivAt_binomialRemainder (a : ℂ) (N : ℕ) {u : ℝ} (hu : -1 < u) :
+    HasDerivAt (LargeOrder.binomialRemainder a (N + 1))
+        (a * LargeOrder.binomialRemainder (a - 1) N u) u := by
   have hpos : (0 : ℝ) < 1 + u := by linarith
   have h1 : HasDerivAt (fun x : ℝ => (1 + (x : ℂ)) ^ a) (a * (1 + (u : ℂ)) ^ (a - 1)) u := by
     have hz : (1 + (u : ℂ)) ∈ slitPlane := by
       rw [← ofReal_one, ← ofReal_add]; exact ofReal_mem_slitPlane.2 hpos
     have hc := ((hasDerivAt_id (u : ℂ)).const_add 1).cpow_const (c := a) hz
     simpa using hc.comp_ofReal
-  have h2 : HasDerivAt (fun x : ℝ => ∑ j ∈ Finset.range (N + 1), struveLO_b a j * (x : ℂ) ^ j)
-      (∑ j ∈ Finset.range N, a * struveLO_b (a - 1) j * (u : ℂ) ^ j) u := by
+  have h2 : HasDerivAt
+      (fun x : ℝ => ∑ j ∈ Finset.range (N + 1), LargeOrder.binomialCoeff a j * (x : ℂ) ^ j)
+      (∑ j ∈ Finset.range N, a * LargeOrder.binomialCoeff (a - 1) j * (u : ℂ) ^ j) u := by
     have hs := HasDerivAt.fun_sum (u := Finset.range (N + 1)) (fun j _ =>
-      ((((hasDerivAt_id u).ofReal_comp).pow j).const_mul (struveLO_b a j)))
+      ((((hasDerivAt_id u).ofReal_comp).pow j).const_mul (LargeOrder.binomialCoeff a j)))
     convert hs using 1
     · funext x; simp
     rw [Finset.sum_range_succ']
     simp only [Nat.cast_zero, mul_zero, zero_mul, add_zero, id]
     refine Finset.sum_congr rfl fun j _ => ?_
-    rw [← struveLO_succ_mul_b]
+    rw [← LargeOrder.succ_mul_binomialCoeff]
     simp only [Nat.add_sub_cancel, ofReal_one, mul_one]
     ring
   have := h1.sub h2
   convert this using 1
-  · funext x; simp [struveLO_R]
-  simp only [struveLO_R, mul_sub, Finset.mul_sum]
+  · funext x; simp [LargeOrder.binomialRemainder]
+  simp only [LargeOrder.binomialRemainder, mul_sub, Finset.mul_sum]
   congr 1
   exact Finset.sum_congr rfl fun j _ => by ring
 
 /-- The remainder after at least one term vanishes at `0`. -/
-theorem struveLO_R_succ_zero (a : ℂ) (N : ℕ) : struveLO_R a (N + 1) 0 = 0 := by
-  simp [struveLO_R, Finset.sum_range_succ', struveLO_b]
+theorem LargeOrder.binomialRemainder_succ_zero (a : ℂ) (N : ℕ) : LargeOrder.binomialRemainder a
+    (N + 1) 0 = 0 := by
+  simp [LargeOrder.binomialRemainder, Finset.sum_range_succ', LargeOrder.binomialCoeff]
 
 /-- Bound for the binomial remainder: for `N ≤ re a` and `u > -1`,
 `|R_N(a, u)| ≤ ∏_{i<N} |a - i| · |u|^N · (1 + max u 0)^{re a - N}`. -/
-theorem struveLO_norm_R_le : ∀ (N : ℕ) (a : ℂ), (N : ℝ) ≤ a.re → ∀ u : ℝ, -1 < u →
-    ‖struveLO_R a N u‖ ≤ (∏ i ∈ Finset.range N, ‖a - i‖) * |u| ^ N *
+theorem LargeOrder.norm_binomialRemainder_le : ∀ (N : ℕ) (a : ℂ), (N : ℝ) ≤ a.re → ∀ u : ℝ, -1 < u →
+    ‖LargeOrder.binomialRemainder a N u‖ ≤ (∏ i ∈ Finset.range N, ‖a - i‖) * |u| ^ N *
       (1 + max u 0) ^ (a.re - N) := by
   intro N
   induction N with
   | zero =>
     intro a ha u hu
-    simp only [struveLO_R, Finset.range_zero, Finset.sum_empty, sub_zero, Finset.prod_empty,
+    simp only [LargeOrder.binomialRemainder, Finset.range_zero, Finset.sum_empty, sub_zero,
+        Finset.prod_empty,
       pow_zero, one_mul, Nat.cast_zero]
     have hpos : (0 : ℝ) < 1 + u := by linarith
     rw [← ofReal_one, ← ofReal_add, norm_cpow_eq_rpow_re_of_pos hpos]
@@ -359,10 +373,10 @@ theorem struveLO_norm_R_le : ∀ (N : ℕ) (a : ℂ), (N : ℝ) ≤ a.re → ∀
         refine ⟨by linarith [hv.1], by rw [abs_of_nonpos hv.2, abs_of_nonpos h];
                                        linarith [hv.1], ?_⟩
         rw [max_eq_right hv.2, max_eq_right h]
-    have hd : ∀ v ∈ uIcc 0 u, HasDerivWithinAt (struveLO_R a (N + 1))
-        (a * struveLO_R (a - 1) N v) (uIcc 0 u) v :=
-      fun v hv => (struveLO_hasDerivAt_R a N (hmem v hv).1).hasDerivWithinAt
-    have hb : ∀ v ∈ uIcc 0 u, ‖a * struveLO_R (a - 1) N v‖ ≤ C := by
+    have hd : ∀ v ∈ uIcc 0 u, HasDerivWithinAt (LargeOrder.binomialRemainder a (N + 1))
+        (a * LargeOrder.binomialRemainder (a - 1) N v) (uIcc 0 u) v :=
+      fun v hv => (LargeOrder.hasDerivAt_binomialRemainder a N (hmem v hv).1).hasDerivWithinAt
+    have hb : ∀ v ∈ uIcc 0 u, ‖a * LargeOrder.binomialRemainder (a - 1) N v‖ ≤ C := by
       intro v hv
       obtain ⟨hv1, hv2, hv3⟩ := hmem v hv
       have hre : (N : ℝ) ≤ (a - 1).re := by
@@ -372,7 +386,7 @@ theorem struveLO_norm_R_le : ∀ (N : ℕ) (a : ℂ), (N : ℝ) ≤ a.re → ∀
       have hexp : (a - 1).re - N = a.re - (N + 1 : ℕ) := by simp; ring
       rw [hexp] at this
       have he : 0 ≤ a.re - (N + 1 : ℕ) := by linarith
-      calc ‖a‖ * ‖struveLO_R (a - 1) N v‖
+      calc ‖a‖ * ‖LargeOrder.binomialRemainder (a - 1) N v‖
           ≤ ‖a‖ * ((∏ i ∈ Finset.range N, ‖a - 1 - i‖) * |v| ^ N *
               (1 + max v 0) ^ (a.re - (N + 1 : ℕ))) := by gcongr
         _ ≤ ‖a‖ * ((∏ i ∈ Finset.range N, ‖a - 1 - i‖) * |u| ^ N *
@@ -386,21 +400,21 @@ theorem struveLO_norm_R_le : ∀ (N : ℕ) (a : ℂ), (N : ℝ) ≤ a.re → ∀
             rw [this]; simp; ring
     have key := hs.norm_image_sub_le_of_norm_hasDerivWithin_le hd hb (left_mem_uIcc)
         (right_mem_uIcc)
-    rw [struveLO_R_succ_zero, sub_zero, Real.norm_eq_abs, sub_zero] at key
-    calc ‖struveLO_R a (N + 1) u‖ ≤ C * |u| := key
+    rw [LargeOrder.binomialRemainder_succ_zero, sub_zero, Real.norm_eq_abs, sub_zero] at key
+    calc ‖LargeOrder.binomialRemainder a (N + 1) u‖ ≤ C * |u| := key
       _ = _ := by rw [hC, pow_succ]; ring
 
 /-! ### The Laplace integral of `𝐊_ν` with a binomial expansion -/
 
 /-- `1 + t² ≤ e^t` for `t ≥ 0`. -/
-theorem struveLO_one_add_sq_le_exp {t : ℝ} (ht : 0 ≤ t) : 1 + t ^ 2 ≤ Real.exp t := by
+theorem LargeOrder.one_add_sq_le_exp {t : ℝ} (ht : 0 ≤ t) : 1 + t ^ 2 ≤ Real.exp t := by
   have h := Real.sum_le_exp_of_nonneg ht 4
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, Nat.factorial] at h
   norm_num at h
   nlinarith [sq_nonneg (t - 3 / 2), sq_nonneg t, mul_nonneg ht (sq_nonneg (t - 3/2))]
 
 /-- Laplace transform of an even power: `∫₀^∞ e^{-zt} t^{n} dt = n!/z^{n+1}` for `re z > 0`. -/
-theorem struveLO_integral_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
+theorem LargeOrder.integral_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     ∫ t in Ioi (0 : ℝ), exp (-z * t) * (t : ℂ) ^ n = (n.factorial : ℂ) / z ^ (n + 1) := by
   have h := integral_cpow_mul_cexp_neg_mul_Ioi (s := (n : ℂ) + 1) (by simp; positivity) hz
   have hG : Gamma ((n : ℂ) + 1) = n.factorial := Complex.Gamma_nat_eq_factorial n
@@ -411,7 +425,7 @@ theorem struveLO_integral_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
   ring_nf
 
 /-- Integrability of `e^{-zt} t^n` on `(0, ∞)` for `re z > 0`. -/
-theorem struveLO_integrableOn_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
+theorem LargeOrder.integrableOn_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     IntegrableOn (fun t : ℝ => exp (-z * t) * (t : ℂ) ^ n) (Ioi 0) := by
   have hb := integrableOn_exp_neg_mul_mul_rpow_sub_one (s := (n : ℝ) + 1) (by positivity) hz
   refine hb.mono' (by fun_prop) ((ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
@@ -424,9 +438,10 @@ theorem struveLO_integrableOn_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
 /-- The `𝐊_ν` Laplace integral with its binomial expansion: for `N ≤ re a < re z`,
 `∫₀^∞ e^{-zt} (1+t²)^a dt = ∑_{j<N} (a choose j) (2j)!/z^{2j+1} + E` with
 `|E| ≤ ∏_{i<N} |a-i| · (2N)!/(re z - re a)^{2N+1}`. -/
-theorem struveLO_K_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re) (hza : a.re < z.re) :
+theorem LargeOrder.K_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re) (hza : a.re < z.re) :
     ‖(∫ t in Ioi (0 : ℝ), exp (-z * t) * (1 + (t : ℂ) ^ 2) ^ a) -
-        ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1)‖ ≤
+        ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * ((2 * j).factorial : ℂ) /
+            z ^ (2 * j + 1)‖ ≤
       (∏ i ∈ Finset.range N, ‖a - i‖) * (2 * N).factorial / (z.re - a.re) ^ (2 * N + 1) := by
   set c := z.re - a.re with hc
   have hc0 : 0 < c := by linarith
@@ -434,36 +449,36 @@ theorem struveLO_K_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
   set P := ∏ i ∈ Finset.range N, ‖a - i‖ with hP
   have hP0 : 0 ≤ P := Finset.prod_nonneg fun _ _ => norm_nonneg _
   have hpt : ∀ t : ℝ, exp (-z * t) * (1 + (t : ℂ) ^ 2) ^ a =
-      ∑ j ∈ Finset.range N, struveLO_b a j * (exp (-z * t) * (t : ℂ) ^ (2 * j)) +
-        exp (-z * t) * struveLO_R a N (t ^ 2) := by
+      ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * (exp (-z * t) * (t : ℂ) ^ (2 * j)) +
+        exp (-z * t) * LargeOrder.binomialRemainder a N (t ^ 2) := by
     intro t
-    simp only [struveLO_R, ofReal_pow, mul_sub, Finset.mul_sum]
-    have : ∑ j ∈ Finset.range N, struveLO_b a j * (exp (-z * t) * (t : ℂ) ^ (2 * j)) =
-        ∑ i ∈ Finset.range N, exp (-z * t) * (struveLO_b a i * ((t : ℂ) ^ 2) ^ i) :=
+    simp only [LargeOrder.binomialRemainder, ofReal_pow, mul_sub, Finset.mul_sum]
+    have : ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * (exp (-z * t) * (t : ℂ) ^ (2 * j)) =
+        ∑ i ∈ Finset.range N, exp (-z * t) * (LargeOrder.binomialCoeff a i * ((t : ℂ) ^ 2) ^ i) :=
       Finset.sum_congr rfl fun j _ => by rw [← pow_mul]; ring
     rw [this]; ring
-  have hRc : Continuous fun t : ℝ => exp (-z * t) * struveLO_R a N (t ^ 2) := by
-    unfold struveLO_R
+  have hRc : Continuous fun t : ℝ => exp (-z * t) * LargeOrder.binomialRemainder a N (t ^ 2) := by
+    unfold LargeOrder.binomialRemainder
     refine (by fun_prop : Continuous fun t : ℝ => exp (-z * t)).mul
         (Continuous.sub ?_ (by fun_prop))
     refine Continuous.cpow (by fun_prop) continuous_const fun t => ?_
     rw [← ofReal_one, ← ofReal_add]; exact ofReal_mem_slitPlane.2 (by positivity)
-  have hbd : ∀ t ∈ Ioi (0 : ℝ), ‖exp (-z * t) * struveLO_R a N (t ^ 2)‖ ≤
+  have hbd : ∀ t ∈ Ioi (0 : ℝ), ‖exp (-z * t) * LargeOrder.binomialRemainder a N (t ^ 2)‖ ≤
       P * (Real.exp (-c * t) * t ^ (((2 * N : ℕ) : ℝ) + 1 - 1)) := by
     intro t ht
     have ht : (0 : ℝ) < t := ht
-    have hR := struveLO_norm_R_le N a ha (t ^ 2) (by nlinarith)
+    have hR := LargeOrder.norm_binomialRemainder_le N a ha (t ^ 2) (by nlinarith)
     rw [abs_of_nonneg (by positivity), max_eq_left (by positivity)] at hR
     have he : 0 ≤ a.re - N := by linarith
     have h1 : (1 + t ^ 2) ^ (a.re - N) ≤ Real.exp (a.re * t) := by
       calc (1 + t ^ 2) ^ (a.re - N) ≤ (Real.exp t) ^ (a.re - N) :=
-            Real.rpow_le_rpow (by positivity) (struveLO_one_add_sq_le_exp ht.le) he
+            Real.rpow_le_rpow (by positivity) (LargeOrder.one_add_sq_le_exp ht.le) he
         _ = Real.exp ((a.re - N) * t) := by rw [← Real.exp_mul]; ring_nf
         _ ≤ Real.exp (a.re * t) := Real.exp_le_exp.2 (by nlinarith [Nat.cast_nonneg (α := ℝ) N])
     rw [norm_mul, Complex.norm_exp, add_sub_cancel_right, Real.rpow_natCast]
     have hre : (-z * t).re = -z.re * t := by simp
     rw [hre]
-    calc Real.exp (-z.re * t) * ‖struveLO_R a N (t ^ 2)‖
+    calc Real.exp (-z.re * t) * ‖LargeOrder.binomialRemainder a N (t ^ 2)‖
         ≤ Real.exp (-z.re * t) * (P * (t ^ 2) ^ N * Real.exp (a.re * t)) := by
           gcongr
           exact hR.trans (mul_le_mul_of_nonneg_left h1 (by positivity))
@@ -474,22 +489,24 @@ theorem struveLO_K_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
           linear_combination (P * t ^ (2 * N)) * this
   have hgint : IntegrableOn (fun t : ℝ => P * (Real.exp (-c * t) * t ^ (((2 * N : ℕ) : ℝ) + 1 - 1)))
       (Ioi 0) := (integrableOn_exp_neg_mul_mul_rpow_sub_one (by positivity) hc0).const_mul P
-  have hRint : IntegrableOn (fun t : ℝ => exp (-z * t) * struveLO_R a N (t ^ 2)) (Ioi 0) :=
+  have hRint : IntegrableOn
+      (fun t : ℝ => exp (-z * t) * LargeOrder.binomialRemainder a N (t ^ 2)) (Ioi 0) :=
     hgint.mono' hRc.aestronglyMeasurable
       ((ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall hbd))
   have hjint : ∀ j ∈ Finset.range N, IntegrableOn
-      (fun t : ℝ => struveLO_b a j * (exp (-z * t) * (t : ℂ) ^ (2 * j))) (Ioi 0) :=
-    fun j _ => (struveLO_integrableOn_exp_mul_pow (2 * j) hz).const_mul _
+      (fun t : ℝ => LargeOrder.binomialCoeff a j * (exp (-z * t) * (t : ℂ) ^ (2 * j))) (Ioi 0) :=
+    fun j _ => (LargeOrder.integrableOn_exp_mul_pow (2 * j) hz).const_mul _
   have hsplit : (∫ t in Ioi (0 : ℝ), exp (-z * t) * (1 + (t : ℂ) ^ 2) ^ a) =
-      ∑ j ∈ Finset.range N, struveLO_b a j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) +
-        ∫ t in Ioi (0 : ℝ), exp (-z * t) * struveLO_R a N (t ^ 2) := by
+      ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * ((2 * j).factorial : ℂ) /
+          z ^ (2 * j + 1) +
+        ∫ t in Ioi (0 : ℝ), exp (-z * t) * LargeOrder.binomialRemainder a N (t ^ 2) := by
     simp_rw [hpt]
     rw [integral_add (integrable_finsetSum _ hjint) hRint, integral_finsetSum _ hjint]
     congr 1
     refine Finset.sum_congr rfl fun j _ => ?_
-    rw [integral_const_mul, struveLO_integral_exp_mul_pow _ hz, mul_div_assoc]
+    rw [integral_const_mul, LargeOrder.integral_exp_mul_pow _ hz, mul_div_assoc]
   rw [hsplit, add_sub_cancel_left]
-  calc ‖∫ t in Ioi (0 : ℝ), exp (-z * t) * struveLO_R a N (t ^ 2)‖
+  calc ‖∫ t in Ioi (0 : ℝ), exp (-z * t) * LargeOrder.binomialRemainder a N (t ^ 2)‖
       ≤ ∫ t in Ioi (0 : ℝ), P * (Real.exp (-c * t) * t ^ (((2 * N : ℕ) : ℝ) + 1 - 1)) :=
         norm_integral_le_of_norm_le hgint
           ((ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall hbd))
@@ -503,14 +520,14 @@ theorem struveLO_K_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
 /-! ### The integral of `𝐌_ν` with a binomial expansion -/
 
 /-- `e^{-y} ≤ m!/y^m` for `y > 0`. -/
-theorem struveLO_exp_neg_le {y : ℝ} (hy : 0 < y) (m : ℕ) :
+theorem LargeOrder.exp_neg_le {y : ℝ} (hy : 0 < y) (m : ℕ) :
     Real.exp (-y) ≤ m.factorial / y ^ m := by
   have h := Real.pow_div_factorial_le_exp _ hy.le m
   rw [Real.exp_neg, inv_le_comm₀ (Real.exp_pos _) (by positivity), inv_div]
   exact h
 
 /-- Tail bound: `|∫₁^∞ e^{-zt} tⁿ dt| ≤ e^{-c/2} n! (2/c)^{n+1}` for `c = re z > 0`. -/
-theorem struveLO_norm_integral_Ioi_one_le (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
+theorem LargeOrder.norm_integral_Ioi_one_le (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     ‖∫ t in Ioi (1 : ℝ), exp (-z * t) * (t : ℂ) ^ n‖ ≤
       Real.exp (-(z.re / 2)) * (n.factorial * (2 / z.re) ^ (n + 1)) := by
   set c := z.re
@@ -548,53 +565,60 @@ theorem struveLO_norm_integral_Ioi_one_le (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
 /-- The `𝐌_ν` integral with its binomial expansion: for `N ≤ re a` and `re z > 0`,
 `∫₀¹ e^{-zt} (1-t²)^a dt = ∑_{j<N} (a choose j) (-1)^j (2j)!/z^{2j+1} + E`, where `E` is bounded by
 `∏_{i<N} |a-i| (2N)!/(re z)^{2N+1}` plus exponentially small tails. -/
-theorem struveLO_M_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re) (hz : 0 < z.re) :
+theorem LargeOrder.M_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re) (hz : 0 < z.re) :
     ‖(∫ t in (0 : ℝ)..1, exp (-z * t) * (1 - (t : ℂ) ^ 2) ^ a) -
-        ∑ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) /
+        ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * (-1) ^ j * ((2 * j).factorial : ℂ) /
             z ^ (2 * j + 1)‖ ≤
       (∏ i ∈ Finset.range N, ‖a - i‖) * (2 * N).factorial / z.re ^ (2 * N + 1) +
-        ∑ j ∈ Finset.range N, ‖struveLO_b a j‖ *
+        ∑ j ∈ Finset.range N, ‖LargeOrder.binomialCoeff a j‖ *
           (Real.exp (-(z.re / 2)) * ((2 * j).factorial * (2 / z.re) ^ (2 * j + 1))) := by
   set c := z.re with hc
   set P := ∏ i ∈ Finset.range N, ‖a - i‖ with hP
   have hP0 : 0 ≤ P := Finset.prod_nonneg fun _ _ => norm_nonneg _
   rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo]
   have hpt : ∀ t : ℝ, exp (-z * t) * (1 - (t : ℂ) ^ 2) ^ a =
-      ∑ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j * (exp (-z * t) * (t : ℂ) ^ (2 * j)) +
-        exp (-z * t) * struveLO_R a N (-t ^ 2) := by
+      ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * (-1) ^ j *
+          (exp (-z * t) * (t : ℂ) ^ (2 * j)) +
+        exp (-z * t) * LargeOrder.binomialRemainder a N (-t ^ 2) := by
     intro t
-    simp only [struveLO_R, ofReal_neg, ofReal_pow, mul_sub, Finset.mul_sum, ← sub_eq_add_neg]
-    have : ∑ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j * (exp (-z * t) * (t : ℂ) ^ (2 * j)) =
-        ∑ i ∈ Finset.range N, exp (-z * t) * (struveLO_b a i * (-(t : ℂ) ^ 2) ^ i) :=
+    simp only [LargeOrder.binomialRemainder, ofReal_neg, ofReal_pow, mul_sub, Finset.mul_sum,
+        ← sub_eq_add_neg]
+    have : ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * (-1) ^ j *
+        (exp (-z * t) * (t : ℂ) ^ (2 * j)) =
+        ∑ i ∈ Finset.range N, exp (-z * t) * (LargeOrder.binomialCoeff a i * (-(t : ℂ) ^ 2) ^ i) :=
       Finset.sum_congr rfl fun j _ => by rw [neg_pow ((t : ℂ) ^ 2), ← pow_mul]; ring
     rw [this]; ring
-  have hbd : ∀ t ∈ Ioo (0 : ℝ) 1, ‖exp (-z * t) * struveLO_R a N (-t ^ 2)‖ ≤
+  have hbd : ∀ t ∈ Ioo (0 : ℝ) 1, ‖exp (-z * t) * LargeOrder.binomialRemainder a N (-t ^ 2)‖ ≤
       P * (Real.exp (-c * t) * t ^ (((2 * N : ℕ) : ℝ) + 1 - 1)) := by
     intro t ht
-    have hR := struveLO_norm_R_le N a ha (-t ^ 2) (by nlinarith [ht.1, ht.2])
+    have hR := LargeOrder.norm_binomialRemainder_le N a ha (-t ^ 2) (by nlinarith [ht.1, ht.2])
     rw [abs_neg, abs_of_nonneg (by positivity), max_eq_right (by nlinarith), add_zero,
       Real.one_rpow, mul_one, ← pow_mul] at hR
     rw [norm_mul, Complex.norm_exp, add_sub_cancel_right, Real.rpow_natCast]
     have hre : (-z * t).re = -c * t := by simp [hc]
     rw [hre]
-    calc Real.exp (-c * t) * ‖struveLO_R a N (-t ^ 2)‖ ≤ Real.exp (-c * t) * (P * t ^ (2 * N)) := by
+    calc Real.exp (-c * t) * ‖LargeOrder.binomialRemainder a N (-t ^ 2)‖ ≤ Real.exp (-c * t) *
+           (P * t ^ (2 * N)) := by
           gcongr
       _ = _ := by ring
   have hgint : IntegrableOn (fun t : ℝ => P * (Real.exp (-c * t) * t ^ (((2 * N : ℕ) : ℝ) + 1 - 1)))
       (Ioi 0) := (integrableOn_exp_neg_mul_mul_rpow_sub_one (by positivity) hz).const_mul P
-  have hRc : ContinuousOn (fun t : ℝ => exp (-z * t) * struveLO_R a N (-t ^ 2)) (Ioo 0 1) := by
-    unfold struveLO_R
+  have hRc : ContinuousOn (fun t : ℝ => exp (-z * t) * LargeOrder.binomialRemainder a N (-t ^ 2))
+      (Ioo 0 1) := by
+    unfold LargeOrder.binomialRemainder
     refine ((by fun_prop : Continuous fun t : ℝ => exp (-z * t)).continuousOn).mul
       (ContinuousOn.sub ?_ (by fun_prop))
     refine ContinuousOn.cpow (by fun_prop) continuousOn_const fun t ht => ?_
     rw [← ofReal_one, ← ofReal_add]; exact ofReal_mem_slitPlane.2 (by nlinarith [ht.1, ht.2])
-  have hRint : IntegrableOn (fun t : ℝ => exp (-z * t) * struveLO_R a N (-t ^ 2)) (Ioo 0 1) :=
+  have hRint : IntegrableOn
+      (fun t : ℝ => exp (-z * t) * LargeOrder.binomialRemainder a N (-t ^ 2)) (Ioo 0 1) :=
     (hgint.mono_set Ioo_subset_Ioi_self).mono' (hRc.aestronglyMeasurable measurableSet_Ioo)
       ((ae_restrict_iff' measurableSet_Ioo).2 (Eventually.of_forall hbd))
   have hjI : ∀ j : ℕ, IntegrableOn (fun t : ℝ => exp (-z * t) * (t : ℂ) ^ (2 * j)) (Ioi 0) :=
-    fun j => struveLO_integrableOn_exp_mul_pow (2 * j) hz
+    fun j => LargeOrder.integrableOn_exp_mul_pow (2 * j) hz
   have hjint : ∀ j ∈ Finset.range N, IntegrableOn
-      (fun t : ℝ => struveLO_b a j * (-1) ^ j * (exp (-z * t) * (t : ℂ) ^ (2 * j))) (Ioo 0 1) :=
+      (fun t : ℝ => LargeOrder.binomialCoeff a j * (-1) ^ j *
+          (exp (-z * t) * (t : ℂ) ^ (2 * j))) (Ioo 0 1) :=
     fun j _ => ((hjI j).mono_set Ioo_subset_Ioi_self).const_mul _
   have hpiece : ∀ j : ℕ, ∫ t in Ioo (0 : ℝ) 1, exp (-z * t) * (t : ℂ) ^ (2 * j) =
       ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) - ∫ t in Ioi (1 : ℝ), exp (-z * t) *
@@ -605,20 +629,21 @@ theorem struveLO_M_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
       (Set.disjoint_left.2 fun x hx hx' => by simp only [mem_Ioo, mem_Ici] at hx hx'; linarith)
       measurableSet_Ici ((hjI j).mono_set Ioo_subset_Ioi_self)
       ((hjI j).mono_set (Ici_subset_Ioi.2 zero_lt_one))
-    rw [Ioo_union_Ici_eq_Ioi zero_lt_one, struveLO_integral_exp_mul_pow _ hz,
+    rw [Ioo_union_Ici_eq_Ioi zero_lt_one, LargeOrder.integral_exp_mul_pow _ hz,
       integral_Ici_eq_integral_Ioi] at hu
     rw [hu]; ring
   have hsplit : (∫ t in Ioo (0 : ℝ) 1, exp (-z * t) * (1 - (t : ℂ) ^ 2) ^ a) -
-      ∑ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) =
-      -(∑ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j *
+      ∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * (-1) ^ j * ((2 * j).factorial : ℂ) /
+          z ^ (2 * j + 1) =
+      -(∑ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * (-1) ^ j *
           ∫ t in Ioi (1 : ℝ), exp (-z * t) * (t : ℂ) ^ (2 * j)) +
-        ∫ t in Ioo (0 : ℝ) 1, exp (-z * t) * struveLO_R a N (-t ^ 2) := by
+        ∫ t in Ioo (0 : ℝ) 1, exp (-z * t) * LargeOrder.binomialRemainder a N (-t ^ 2) := by
     simp_rw [hpt]
     rw [integral_add (integrable_finsetSum _ hjint) hRint, integral_finsetSum _ hjint]
     simp_rw [integral_const_mul, hpiece, mul_sub, Finset.sum_sub_distrib]
-    have : ∀ j ∈ Finset.range N, struveLO_b a j * (-1) ^ j *
+    have : ∀ j ∈ Finset.range N, LargeOrder.binomialCoeff a j * (-1) ^ j *
         (((2 * j).factorial : ℂ) / z ^ (2 * j + 1)) =
-        struveLO_b a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) :=
+        LargeOrder.binomialCoeff a j * (-1) ^ j * ((2 * j).factorial : ℂ) / z ^ (2 * j + 1) :=
       fun j _ => by ring
     rw [Finset.sum_congr rfl this]
     ring
@@ -626,7 +651,7 @@ theorem struveLO_M_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
   refine (norm_add_le _ _).trans ?_
   rw [add_comm]
   gcongr
-  · calc ‖∫ t in Ioo (0 : ℝ) 1, exp (-z * t) * struveLO_R a N (-t ^ 2)‖
+  · calc ‖∫ t in Ioo (0 : ℝ) 1, exp (-z * t) * LargeOrder.binomialRemainder a N (-t ^ 2)‖
         ≤ ∫ t in Ioo (0 : ℝ) 1, P * (Real.exp (-c * t) * t ^ (((2 * N : ℕ) : ℝ) + 1 - 1)) :=
           norm_integral_le_of_norm_le (hgint.mono_set Ioo_subset_Ioi_self)
             ((ae_restrict_iff' measurableSet_Ioo).2 (Eventually.of_forall hbd))
@@ -645,6 +670,6 @@ theorem struveLO_M_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
     refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun j _ => ?_)
     rw [norm_mul, norm_mul, norm_pow, norm_neg, norm_one, one_pow, mul_one]
     gcongr
-    exact struveLO_norm_integral_Ioi_one_le (2 * j) hz
+    exact LargeOrder.norm_integral_Ioi_one_le (2 * j) hz
 
 end DLMF.Struve

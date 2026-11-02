@@ -7,18 +7,19 @@ module
 
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.Mathieu.Basic.ContinuedFractions
+public import DLMF.Mathieu.SmallQContinuedFractions
 public import DLMF.Mathieu.SmallQCeSe
 public import DLMF.Mathieu.SmallQCeSeGeneral
-public import DLMF.Mathieu.SpectralExistence
+public import DLMF.Mathieu.Basic.SpectralExistence
 
 /-!
 # Expansions for small `q`
 
 This file states and proves the small-`q` expansions of DLMF §28.6: the power series
-28.6.1–28.6.14 of the eigenvalues `a_n(q)`, `b_n(q)`, the continued-fraction equations
-28.6.16–28.6.19, and the expansions 28.6.21–28.6.26 of `ce_n`, `se_n`. The series converge for
-small `|q|` and DLMF gives their leading terms; they are stated as `Asymptotics.IsBigO`
-statements as `q → 0` (real `q`), with the remainder of the order of the first omitted power.
+28.6.1–28.6.14 of the eigenvalues `a_n(q)`, `b_n(q)` and the expansions 28.6.21–28.6.26 of
+`ce_n`, `se_n`. The series converge for small `|q|` and DLMF gives their leading terms; they are
+stated as `Asymptotics.IsBigO` statements as `q → 0` (real `q`), with the remainder of the order
+of the first omitted power.
 
 ## Main results
 
@@ -26,8 +27,8 @@ statements as `q → 0` (real `q`), with the remainder of the order of the first
   `mathieuA_six_small_q`, `mathieuB_six_small_q`: DLMF 28.6.1–28.6.13.
 * `mathieuA_small_q`, `mathieuB_small_q`: the general expansion 28.6.14 for `m ≥ 7`.
 * `mathieuA_sub_mathieuB_small_q`: `a_m(q) - b_m(q)` (DLMF 28.6.15).
-* `mathieuA_even_contFrac`, `mathieuA_zero_contFrac`, `mathieuA_odd_contFrac`,
-  `mathieuB_odd_contFrac`, `mathieuB_even_contFrac`: the continued fractions 28.6.16–28.6.19.
+* The continued fractions 28.6.16–28.6.19 (`mathieuA_even_contFrac` and its companions) are in
+  `DLMF.Mathieu.SmallQContinuedFractions`.
 * `mathieu_radius_liminf`: the radii of convergence (DLMF 28.6.20).
 * `mathieuCe_zero_small_q`, `mathieuCe_one_small_q`, `mathieuSe_one_small_q`,
   `mathieuCe_two_small_q`, `mathieuSe_two_small_q`: DLMF 28.6.21–28.6.25.
@@ -56,10 +57,6 @@ grouping `9293 59872 00000`). Numerically
 `(a₆(q) - 36 - q²/70 - 187q⁴/43904000)/q⁶ → 7.2562…·10⁻⁸`; with these values
 `a₆ - b₆ = q⁶/7372800 + O(q⁸)`, which is 28.6.15 for `m = 6`, while `(a₆ + b₆)/2` matches
 the general formula 28.6.14 at `m = 6`.
-
-**Remark (28.6.16, `n = 0`).** For `n = 0` the left side of 28.6.16 reduces to `a`, and the
-relation needs a factor 2: `a₀ = -2q²/(4 - a₀ - q²/(16 - a₀ - ⋯))`; it is stated separately as
-`mathieuA_zero_contFrac`.
 
 The radii of convergence of Table 28.6.1 are numerical and out of scope; the conjecture that
 they grow like `n²` is not stated, and 28.6.20 is stated in terms of analytic continuation to
@@ -1150,65 +1147,6 @@ theorem mathieuA_sub_mathieuB_small_q {m : ℕ} (hm : 1 ≤ m) :
     ∃ ε : ℝ → ℝ, ε =O[𝓝 0] (fun q => q ^ 2) ∧ ∀ q : ℝ,
       mathieuA m q - mathieuB m q =
         2 * q ^ m / (2 ^ (m - 1) * ((m - 1).factorial : ℝ)) ^ 2 * (1 + ε q) := by
-  sorry
-
-/-- **DLMF 28.6.16** (`n ≥ 1`): for `a = a_{2n}(q)`,
-`a - (2n)² - q²/(a - (2n-2)² - ⋯ q²/(a - 2² - 2q²/a)) = -q²/((2n+2)² - a - q²/((2n+4)² - a - ⋯))`;
-the right side is the limit of the truncations `mathieuCFTail`. The left-side partial
-denominators are assumed nonzero. -/
-@[dlmf 28.6.E16]
-theorem mathieuA_even_contFrac {n : ℕ} (hn : 1 ≤ n) {q : ℝ}
-    (hE : ∀ k < n, mathieuCFHead q (mathieuA (2 * n) q) (mathieuA (2 * n) q)
-      (fun k => if k = 0 then 2 else 1) (fun k => (2 * k + 2) ^ 2) k ≠ 0) :
-    Tendsto (fun N => -mathieuCFTail q (mathieuA (2 * n) q) (fun k => (2 * n + 2 * k + 2) ^ 2) N)
-      atTop (𝓝 (mathieuCFHead q (mathieuA (2 * n) q) (mathieuA (2 * n) q)
-        (fun k => if k = 0 then 2 else 1) (fun k => (2 * k + 2) ^ 2) n)) := by
-  sorry
-
-/-- **DLMF 28.6.16, case `n = 0`**: `a₀(q) = -2q²/(4 - a₀ - q²/(16 - a₀ - ⋯))` (the printed
-pattern degenerates at `n = 0`; the factor 2 comes from 28.4.5). -/
-@[dlmf 28.6.E16]
-theorem mathieuA_zero_contFrac (q : ℝ) :
-    Tendsto (fun N => -2 * mathieuCFTail q (mathieuA 0 q) (fun k => (2 * k + 2) ^ 2) N)
-      atTop (𝓝 (mathieuA 0 q : ℂ)) := by
-  sorry
-
-/-- **DLMF 28.6.17**: for `a = a_{2n+1}(q)`,
-`a - (2n+1)² - q²/(a - (2n-1)² - ⋯ q²/(a - 3² - q²/(a - 1² - q)))
-= -q²/((2n+3)² - a - q²/((2n+5)² - a - ⋯))`. -/
-@[dlmf 28.6.E17]
-theorem mathieuA_odd_contFrac (n : ℕ) {q : ℝ}
-    (hE : ∀ k < n, mathieuCFHead q (mathieuA (2 * n + 1) q) (mathieuA (2 * n + 1) q - 1 - q)
-      (fun _ => 1) (fun k => (2 * k + 3) ^ 2) k ≠ 0) :
-    Tendsto (fun N => -mathieuCFTail q (mathieuA (2 * n + 1) q)
-        (fun k => (2 * n + 2 * k + 3) ^ 2) N)
-      atTop (𝓝 (mathieuCFHead q (mathieuA (2 * n + 1) q) (mathieuA (2 * n + 1) q - 1 - q)
-        (fun _ => 1) (fun k => (2 * k + 3) ^ 2) n)) := by
-  sorry
-
-/-- **DLMF 28.6.18**: for `a = b_{2n+1}(q)`,
-`a - (2n+1)² - q²/(a - (2n-1)² - ⋯ q²/(a - 3² - q²/(a - 1² + q)))
-= -q²/((2n+3)² - a - q²/((2n+5)² - a - ⋯))`. -/
-@[dlmf 28.6.E18]
-theorem mathieuB_odd_contFrac (n : ℕ) {q : ℝ}
-    (hE : ∀ k < n, mathieuCFHead q (mathieuB (2 * n + 1) q) (mathieuB (2 * n + 1) q - 1 + q)
-      (fun _ => 1) (fun k => (2 * k + 3) ^ 2) k ≠ 0) :
-    Tendsto (fun N => -mathieuCFTail q (mathieuB (2 * n + 1) q)
-        (fun k => (2 * n + 2 * k + 3) ^ 2) N)
-      atTop (𝓝 (mathieuCFHead q (mathieuB (2 * n + 1) q) (mathieuB (2 * n + 1) q - 1 + q)
-        (fun _ => 1) (fun k => (2 * k + 3) ^ 2) n)) := by
-  sorry
-
-/-- **DLMF 28.6.19**: for `a = b_{2n+2}(q)`,
-`a - (2n+2)² - q²/(a - (2n)² - ⋯ q²/(a - 2²)) = -q²/((2n+4)² - a - q²/((2n+6)² - a - ⋯))`. -/
-@[dlmf 28.6.E19]
-theorem mathieuB_even_contFrac (n : ℕ) {q : ℝ}
-    (hE : ∀ k < n, mathieuCFHead q (mathieuB (2 * n + 2) q) (mathieuB (2 * n + 2) q - 4)
-      (fun _ => 1) (fun k => (2 * k + 4) ^ 2) k ≠ 0) :
-    Tendsto (fun N => -mathieuCFTail q (mathieuB (2 * n + 2) q)
-        (fun k => (2 * n + 2 * k + 4) ^ 2) N)
-      atTop (𝓝 (mathieuCFHead q (mathieuB (2 * n + 2) q) (mathieuB (2 * n + 2) q - 4)
-        (fun _ => 1) (fun k => (2 * k + 4) ^ 2) n)) := by
   sorry
 
 /-- **DLMF 28.6.20**: the radii of convergence `ρ_n^{(j)}` of the power series of `a_{2n}`

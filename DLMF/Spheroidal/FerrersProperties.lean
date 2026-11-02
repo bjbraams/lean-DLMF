@@ -8,6 +8,7 @@ module
 public import DLMF.Spheroidal.Basic.Equation
 public import DLMF.Spheroidal.Basic.Ferrers
 public import DLMF.Spheroidal.Existence
+public import DLMF.Spheroidal.CutPlaneSolutions
 public import Mathlib.Analysis.SpecialFunctions.Artanh
 
 /-!
@@ -25,7 +26,8 @@ of this file, which retain their original domains and coefficient conventions.
 * `isSpheroidalSolutionReal_spheroidalPs`, `spheroidalPs_neg`, `spheroidalPs_zero_sign`,
   `spheroidalPs_deriv_zero_sign`: the equation, parity 30.4.3 and sign conventions of `𝖯s`.
 * `existsUnique_isSpheroidalQsC`, `spheroidalQsC_spec`: existence and uniqueness of `𝑄s^m_n` and
-  its defining property (DLMF 30.6.1).
+  its defining property (DLMF 30.6.1), with the stronger primed forms without the hypothesis on
+  the forward recursion.
 -/
 
 @[expose] public noncomputable section
@@ -341,31 +343,64 @@ theorem exists_isSpheroidalQs {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     ∃ f, IsSpheroidalQs n m γ2 f :=
   exists_isSpheroidalQs_of_le hmn γ2
 
-/-- **Existence and uniqueness of `𝑄s^m_n`** (DLMF §30.6), under the hypotheses of
-`exists_isSpheroidalQs`. Flagged existence theorem (admitted). -/
-@[dlmf 30.6.E1]
-theorem existsUnique_isSpheroidalQsC {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
-    (hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) :
-    ∃! F, IsSpheroidalQsC n m γ2 F := by
-  sorry
-
-/-- The defining property of `𝖰s^m_n` (DLMF 30.5.1), from `exists_isSpheroidalQs`. -/
-theorem spheroidalQs_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
-    (hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) :
+/-- The defining property of `𝖰s^m_n` (DLMF 30.5.1), from `exists_isSpheroidalQs_of_le`.
+Stronger than `spheroidalQs_spec`, which assumes that the forward recursion does not vanish. -/
+theorem spheroidalQs_spec' {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     IsSpheroidalQs n m γ2 (fun x => spheroidalQs n m x γ2) := by
-  have h := exists_isSpheroidalQs hmn γ2 hf
+  have h := exists_isSpheroidalQs_of_le hmn γ2
   have he : (fun x => spheroidalQs n m x γ2) = h.choose := by
     funext x; simp only [spheroidalQs, dite_eq_of_pos h]
   rw [he]; exact h.choose_spec
 
-/-- The defining property of `𝑄s^m_n` (DLMF 30.6.1), from `existsUnique_isSpheroidalQsC`. -/
-theorem spheroidalQsC_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
-    (hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) :
+/-- The defining property of `𝖰s^m_n` (DLMF 30.5.1), from `exists_isSpheroidalQs`. -/
+theorem spheroidalQs_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
+    (_hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) :
+    IsSpheroidalQs n m γ2 (fun x => spheroidalQs n m x γ2) :=
+  spheroidalQs_spec' hmn γ2
+
+/-- **Existence and uniqueness of `𝑄s^m_n`** (DLMF §30.6). Stronger than DLMF, which assumes that
+the forward recursion of §30.8(ii) does not vanish at `k = -R`. A solution on the cut plane with
+the boundary values 30.6.5 from above exists by
+`exists_isSpheroidalSolutionOn_cutPlane_boundary` and is unique by
+`eq_of_isSpheroidalSolutionOn_cutPlane_boundary`. -/
+@[dlmf 30.6.E1]
+theorem existsUnique_isSpheroidalQsC' {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+    ∃! F, IsSpheroidalQsC n m γ2 F := by
+  have hP := isSpheroidalSolutionReal_spheroidalPs hmn γ2
+  have hQ := (spheroidalQs_spec' hmn γ2).ode
+  obtain ⟨F, hFs, hFo, hFb⟩ := exists_isSpheroidalSolutionOn_cutPlane_boundary hQ hP
+    ((-I) ^ m) (-((-I) ^ m * (I * π / 2)))
+  have hFs' : IsSpheroidalSolutionOn (spheroidalEigenvalue n m γ2) γ2 m spheroidalCutPlane F := by
+    simpa using hFs
+  have hb : ∀ x ∈ Ioo (-1 : ℝ) 1, Tendsto (fun ε : ℝ => F (x + ε * I)) (𝓝[>] 0)
+      (𝓝 ((-I) ^ m * (spheroidalQs n m x γ2 - I * π / 2 * spheroidalPs n m x γ2))) :=
+    fun x hx => by convert hFb x hx using 2; ring
+  refine ⟨F, ⟨hFs', hb, hFo⟩, fun G hG => ?_⟩
+  exact eq_of_isSpheroidalSolutionOn_cutPlane_boundary hG.ode hFs' hG.outside hFo hG.boundary hb
+
+/-- **Existence and uniqueness of `𝑄s^m_n`** (DLMF §30.6), under the hypotheses of
+`exists_isSpheroidalQs`; proved by `existsUnique_isSpheroidalQsC'`, which does not need the
+hypothesis. -/
+@[dlmf 30.6.E1]
+theorem existsUnique_isSpheroidalQsC {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
+    (_hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) :
+    ∃! F, IsSpheroidalQsC n m γ2 F :=
+  existsUnique_isSpheroidalQsC' hmn γ2
+
+/-- The defining property of `𝑄s^m_n` (DLMF 30.6.1), from `existsUnique_isSpheroidalQsC'`.
+Stronger than `spheroidalQsC_spec`, which assumes that the forward recursion does not vanish. -/
+theorem spheroidalQsC_spec' {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     IsSpheroidalQsC n m γ2 (fun z => spheroidalQsC n m z γ2) := by
-  have h := (existsUnique_isSpheroidalQsC hmn γ2 hf).exists
+  have h := (existsUnique_isSpheroidalQsC' hmn γ2).exists
   have he : (fun z => spheroidalQsC n m z γ2) = h.choose := by
     funext z; simp only [spheroidalQsC, dite_eq_of_pos h]
   rw [he]; exact h.choose_spec
+
+/-- The defining property of `𝑄s^m_n` (DLMF 30.6.1), from `existsUnique_isSpheroidalQsC`. -/
+theorem spheroidalQsC_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
+    (_hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) :
+    IsSpheroidalQsC n m γ2 (fun z => spheroidalQsC n m z γ2) :=
+  spheroidalQsC_spec' hmn γ2
 
 /-- The defining property of `a'^m_{n,k}` (DLMF §30.8(ii)), from
 `exists_isSpheroidalCoeffPrime`. -/

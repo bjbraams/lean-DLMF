@@ -7,7 +7,7 @@ module
 
 public import DLMF.Elliptic.Jacobi
 public import DLMF.Lame.Basic
-public import DLMF.Mathieu.SpectralExistence
+public import DLMF.Mathieu.Basic.SpectralExistence
 public import Mathlib.Tactic.Basify
 public import Mathlib.Tactic.ENatToNat
 

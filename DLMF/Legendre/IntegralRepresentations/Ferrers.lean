@@ -17,7 +17,8 @@ Ferrers and associated Legendre functions, integrals over `(0, π)` and `(0, ∞
 
 ## Main definitions
 
-* `legInt_md`: the substitution `u = (1 - cos s)/(1 - cos θ)` used for DLMF 14.12.1.
+* `MehlerDirichlet.substitution`: the substitution `u = (1 - cos s)/(1 - cos θ)` used for DLMF
+  14.12.1.
 * `legendreUCoordinate`: the limit `u = ½ ln((x+1)/(x-1))` of DLMF 14.12.10.
 
 ## Main results
@@ -42,30 +43,35 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 
 open scoped Real Topology Nat
 
+open DLMF.Core
+
 namespace DLMF.Legendre
 
 /-! ### Helpers for DLMF 14.12.1 -/
 
 /-- The substitution `u = (1 - cos s)/(1 - cos θ)` of DLMF 14.12.1. -/
-noncomputable def legInt_md (θ s : ℝ) : ℝ := (1 - Real.cos s) / (1 - Real.cos θ)
+noncomputable def MehlerDirichlet.substitution (θ s : ℝ) : ℝ := (1 - Real.cos s) / (1 - Real.cos θ)
 
 /-- Change of variables `u = (1 - cos s)/(1 - cos θ)` from `(0, 1)` to `(0, θ)`. -/
-theorem legInt_md_cov {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (g : ℝ → ℂ) :
-    ∫ s in Ioo 0 θ, |Real.sin s / (1 - Real.cos θ)| • g (legInt_md θ s) = ∫ u in Ioo 0 1, g u := by
+theorem MehlerDirichlet.substitution_changeOfVariables {θ : ℝ} (h0 : 0 < θ)
+    (hπ : θ < π) (g : ℝ → ℂ) :
+    ∫ s in Ioo 0 θ, |Real.sin s / (1 - Real.cos θ)| • g (MehlerDirichlet.substitution θ s) =
+        ∫ u in Ioo 0 1, g u := by
   have hD : 0 < 1 - Real.cos θ := by
     have := Real.cos_lt_cos_of_nonneg_of_le_pi le_rfl hπ.le h0; rw [Real.cos_zero] at this; linarith
-  have hd : ∀ s ∈ Ioo (0:ℝ) θ, HasDerivWithinAt (legInt_md θ) (Real.sin s / (1 - Real.cos θ))
+  have hd : ∀ s ∈ Ioo (0:ℝ) θ,
+      HasDerivWithinAt (MehlerDirichlet.substitution θ) (Real.sin s / (1 - Real.cos θ))
       (Ioo 0 θ) s := by
     intro s _
     have h := ((Real.hasDerivAt_cos s).const_sub 1).div_const (1 - Real.cos θ)
-    unfold legInt_md
+    unfold MehlerDirichlet.substitution
     convert h.hasDerivWithinAt using 1; ring
-  have hinj : InjOn (legInt_md θ) (Ioo 0 θ) := by
+  have hinj : InjOn (MehlerDirichlet.substitution θ) (Ioo 0 θ) := by
     intro a ha b hb he
-    simp only [legInt_md] at he
+    simp only [MehlerDirichlet.substitution] at he
     rw [div_left_inj' hD.ne'] at he
     exact Real.injOn_cos ⟨ha.1.le, by linarith [ha.2]⟩ ⟨hb.1.le, by linarith [hb.2]⟩ (by linarith)
-  have him : legInt_md θ '' Ioo 0 θ = Ioo 0 1 := by
+  have him : MehlerDirichlet.substitution θ '' Ioo 0 θ = Ioo 0 1 := by
     ext u; constructor
     · rintro ⟨s, hs, rfl⟩
       have h1 := Real.cos_lt_cos_of_nonneg_of_le_pi le_rfl (by linarith [hs.2]) hs.1
@@ -80,23 +86,25 @@ theorem legInt_md_cov {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (g : ℝ → ℂ)
       refine ⟨Real.arccos y, ⟨Real.arccos_pos.mpr hy1, ?_⟩, ?_⟩
       · have := Real.arccos_lt_arccos hc1 hy2 hy1.le
         rwa [Real.arccos_cos h0.le hπ.le] at this
-      · rw [legInt_md, Real.cos_arccos (by linarith) hy1.le]
+      · rw [MehlerDirichlet.substitution, Real.cos_arccos (by linarith) hy1.le]
         simp only [y]; field_simp; ring
   have hcov := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioo hd hinj g
   rw [him] at hcov
   exact hcov.symm
 
 /-- `√r = e^{(log r)/2}` for `r > 0`, as complex numbers. -/
-theorem legInt_sqrt_eq_exp {r : ℝ} (hr : 0 < r) : ((Real.sqrt r : ℝ) : ℂ) =
+theorem MehlerDirichlet.sqrt_eq_exp {r : ℝ} (hr : 0 < r) : ((Real.sqrt r : ℝ) : ℂ) =
     exp (Real.log r / 2) := by
   rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos hr, ofReal_exp]; push_cast; ring_nf
 
 /-- The integrand of 15.6.8 after the substitution `u = (1 - cos s)/(1 - cos θ)`, by DLMF 15.4.14.
 -/
-theorem legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ) (hπ : θ < π) :
+theorem MehlerDirichlet.substitution_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s)
+    (hsθ : s < θ) (hπ : θ < π) :
     |Real.sin s / (1 - Real.cos θ)| • (regularizedGaussHGFun (ν+1) (-ν) (1/2)
-      ((1 - (Real.cos θ:ℂ))/2 * (legInt_md θ s : ℂ)) * (legInt_md θ s : ℂ)^((1/2:ℂ)-1) *
-      (1 - (legInt_md θ s : ℂ))^((1-μ)-1/2-1)) =
+      ((1 - (Real.cos θ:ℂ))/2 * (MehlerDirichlet.substitution θ s : ℂ)) *
+          (MehlerDirichlet.substitution θ s : ℂ)^((1/2:ℂ)-1) *
+      (1 - (MehlerDirichlet.substitution θ s : ℂ))^((1-μ)-1/2-1)) =
     (Real.sqrt 2 * exp (Real.log (1 - Real.cos θ) * μ) / Real.sqrt π) *
       (cos ((ν+1/2)*s) / (Real.cos s - Real.cos θ : ℂ)^(μ+1/2)) := by
   have h0 : 0 < θ := by linarith
@@ -115,11 +123,13 @@ theorem legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ)
   have hA : 1 - Real.cos s = 2*s2^2 := by
     have h1 := Real.cos_sq (s/2); have h2 := Real.sin_sq_add_cos_sq (s/2)
     rw [show 2*(s/2) = s by ring] at h1; rw [hs2]; linarith
-  have hmd : legInt_md θ s = 2*s2^2/D := by rw [legInt_md, hA, hDdef]
-  have hmd1 : 1 - legInt_md θ s = B/D := by
-    rw [legInt_md, hBdef, ← hDdef]; field_simp; rw [hDdef]; ring
+  have hmd : MehlerDirichlet.substitution θ s = 2*s2^2/D := by
+      rw [MehlerDirichlet.substitution, hA, hDdef]
+  have hmd1 : 1 - MehlerDirichlet.substitution θ s = B/D := by
+    rw [MehlerDirichlet.substitution, hBdef, ← hDdef]; field_simp; rw [hDdef]; ring
   have hD0 : (D:ℂ) ≠ 0 := by exact_mod_cast hD.ne'
-  have hz : (1 - (Real.cos θ:ℂ))/2 * (legInt_md θ s : ℂ) = ((Real.sin (s/2):ℝ):ℂ)^2 := by
+  have hz : (1 - (Real.cos θ:ℂ))/2 * (MehlerDirichlet.substitution θ s : ℂ) =
+      ((Real.sin (s/2):ℝ):ℂ)^2 := by
     rw [hmd, ← hs2, show (1:ℂ) - (Real.cos θ:ℂ) = (D:ℂ) by rw [hDdef, ofReal_sub, ofReal_one]]
     simp only [ofReal_div, ofReal_mul, ofReal_pow, ofReal_ofNat]
     field_simp
@@ -128,19 +138,19 @@ theorem legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ)
   have hF := sin_sq_cos_quotient (ν+1) (x := s/2) (by rw [abs_of_pos (by linarith)]; linarith)
   rw [show (1:ℂ) - (ν+1) = -ν by ring, ← hc2] at hF
   rw [hz, regularizedGaussHGFun_eq_div_Gamma hc12, hF, legendre_Gamma_one_half,
-    show (1 - (legInt_md θ s : ℂ)) =
-        ((1 - legInt_md θ s : ℝ):ℂ) by rw [ofReal_sub, ofReal_one], hmd1,
+    show (1 - (MehlerDirichlet.substitution θ s : ℂ)) =
+        ((1 - MehlerDirichlet.substitution θ s : ℝ):ℂ) by rw [ofReal_sub, ofReal_one], hmd1,
     Complex.ofReal_cpow_eq_exp (div_pos hB hD),
     show ((1/2:ℂ)-1) = (((-1/2:ℝ)):ℂ) by push_cast; ring,
     ← ofReal_cpow (by rw [hmd]; positivity),
     show (Real.cos s - Real.cos θ : ℂ) = (B:ℂ) by rw [hBdef, ofReal_sub],
     Complex.ofReal_cpow_eq_exp hB, Real.log_div hB.ne' hD.ne', ← hDdef]
-  have ht : legInt_md θ s ^ (-1/2:ℝ) = Real.sqrt D / (Real.sqrt 2 * s2) := by
+  have ht : MehlerDirichlet.substitution θ s ^ (-1/2:ℝ) = Real.sqrt D / (Real.sqrt 2 * s2) := by
     rw [hmd, show (-1/2:ℝ) = -(1/2) by ring, Real.rpow_neg (by positivity), ← Real.sqrt_eq_rpow,
       Real.sqrt_div' _ hD.le, Real.sqrt_mul (by norm_num), Real.sqrt_sq hs2p.le, inv_div]
   have hE : exp (((Real.log B - Real.log D : ℝ) : ℂ) * ((1-μ)-1/2-1)) =
       exp (Real.log D * μ) * ((Real.sqrt D:ℝ):ℂ) / exp (Real.log B * (μ+1/2)) := by
-    rw [legInt_sqrt_eq_exp hD, eq_div_iff (exp_ne_zero _), ← exp_add, ← exp_add]
+    rw [MehlerDirichlet.sqrt_eq_exp hD, eq_div_iff (exp_ne_zero _), ← exp_add, ← exp_add]
     congr 1; push_cast; ring
   rw [ht, hE, abs_of_pos (div_pos (by rw [hsin]; positivity) hD), hsin,
     show (2:ℂ)*(ν+1)-1 = 2*(ν+1/2) by ring, show 2*(ν+1/2)*((s/2:ℝ):ℂ) =
@@ -180,8 +190,8 @@ theorem ferrersP_mehler_dirichlet {μ : ℂ} (hμ : μ.re < 1/2) (ν : ℂ) {θ 
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
     fractional_integral (d := 1/2) (by norm_num) hcd hz,
     intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo,
-    ← legInt_md_cov h0 hπ, setIntegral_congr_fun measurableSet_Ioo
-      (fun s hs => legInt_md_point ν μ hs.1 hs.2 hπ), integral_const_mul,
+    ← MehlerDirichlet.substitution_changeOfVariables h0 hπ, setIntegral_congr_fun measurableSet_Ioo
+      (fun s hs => MehlerDirichlet.substitution_point ν μ hs.1 hs.2 hπ), integral_const_mul,
     intervalIntegral.integral_of_le h0.le, integral_Ioc_eq_integral_Ioo]
   have hlog : Real.log (Real.sin θ) =
       (Real.log (1 - Real.cos θ) + Real.log (1 + Real.cos θ))/2 := by
@@ -303,7 +313,7 @@ theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) 
       rw [cpow_add _ _ (ofReal_ne_zero.2 hc), cpow_one]; ring
     rw [hμ1]; push_cast; ring
   have hG : Gamma μ ≠ 0 := Gamma_ne_zero_of_re_pos hμ
-  rw [hsub, ← legInt_fractional_cutPlane _ _ hμ hzc]
+  rw [hsub, ← LaplaceIntegrals.fractional_cutPlane _ _ hμ hzc]
   have hpow : exp (-μ/2*(log ((x:ℂ)+1)-log ((x:ℂ)-1))) = ((x:ℂ)^2-1)^(-μ/2) * ((x-1:ℝ):ℂ)^μ := by
     rw [show ((x:ℂ)^2-1) = (((x+1)*(x-1):ℝ):ℂ) by push_cast; ring,
       Complex.ofReal_cpow_eq_exp (mul_pos h2 h1), Complex.ofReal_cpow_eq_exp h1, ← exp_add,
@@ -325,7 +335,7 @@ theorem associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1
     HasIntegralAtTop (fun t : ℝ =>
         Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh
         ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) 0 (associatedP ν (-μ) x) :=
-  legInt_associatedP_cosh_integral h hconv hx
+  ExteriorIntegral.associatedP_cosh_integral h hconv hx
 
 /-- DLMF 14.12.6: for `−1/2 < Re μ < Re ν + 1` and `x > 1`, `𝑸^μ_ν(x) = π^{1/2} (x²−1)^{μ/2}/(2^μ
 Γ(μ+1/2) Γ(ν−μ+1)) ∫_0^∞ sinh^{2μ} t/(x + (x²−1)^{1/2} cosh t)^{ν+μ+1} dt`, as an improper integral
@@ -336,13 +346,13 @@ theorem olverQ_real_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν
     HasIntegralAtTop (fun t : ℝ =>
         Real.sqrt π*(x^2-1:ℂ)^(μ/2)/(2^μ*Gamma (μ+1/2)*Gamma (ν-μ+1))*(Real.sinh
         t:ℂ)^(2*μ)/(x+Real.sqrt (x^2-1)*Real.cosh t:ℂ)^(ν+μ+1)) 0 (olverQ ν μ x) := by
-  have h := olverQ_complex_integral h0 h1 (legInt_one_lt_mem hx)
+  have h := olverQ_complex_integral h0 h1 (LaplaceIntegrals.one_lt_mem hx)
   have hr : exp ((log ((x:ℂ)-1)+log ((x:ℂ)+1))/2) = (Real.sqrt (x^2-1) : ℂ) := by
-    have := legInt_zeta_real hx
-    rw [legInt_zeta, legInt_root] at this
+    have := ExteriorIntegral.invJoukowski_real hx
+    rw [ExteriorIntegral.invJoukowski, ExteriorIntegral.sqrtSqSubOne] at this
     push_cast at this
     linear_combination -this
-  rw [hr, legInt_legendreBranchPower_real μ hx] at h
+  rw [hr, OrthogonalityIntegrals.legendreBranchPower_real μ hx] at h
   convert h using 3 with t
   ring
 
@@ -352,37 +362,42 @@ cos(mθ) dθ`. -/
 theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x) :
     associatedP ν m x=poch (ν+1) m/π*∫ θ : ℝ in 0..π,
         (x+Real.sqrt (x^2-1)*Real.cos θ:ℂ)^ν*Real.cos (m*θ) := by
-  have hx1 : ((x:ℂ)-1) ∈ slitPlane := legInt_one_lt_mem hx
+  have hx1 : ((x:ℂ)-1) ∈ slitPlane := LaplaceIntegrals.one_lt_mem hx
   set s := Real.sqrt (x^2-1) with hs_def
   have hs : (s:ℂ) ≠ 0 := ofReal_ne_zero.2 (Real.sqrt_pos.2 (by nlinarith)).ne'
   have hb1 : legendreBranchPower 1 x = s := by
-    rw [legInt_legendreBranchPower_real _ hx, show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by push_cast; ring,
+    rw [OrthogonalityIntegrals.legendreBranchPower_real _ hx, show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by
+        push_cast; ring,
       hs_def, Real.sqrt_eq_rpow, ofReal_cpow (by nlinarith)]
     push_cast; ring_nf
   have hbm : legendreBranchPower (-1) x * s = 1 := by
     rw [← hb1, legendreBranchPower_mul, neg_add_cancel]; simp [legendreBranchPower]
   have hπ : (π:ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
-  have h0 : ∀ μ : ℂ, associatedP μ 0 x = 1/π * legInt_L μ x 0 := fun μ => by
-    rw [associatedP_zero_order _ hx1, legendreP_laplace _ hx.le, legInt_L]
+  have h0 : ∀ μ : ℂ, associatedP μ 0 x = 1/π * LaplaceIntegrals.fourierMoment μ x 0 := fun μ => by
+    rw [associatedP_zero_order _ hx1, legendreP_laplace _ hx.le, LaplaceIntegrals.fourierMoment]
     simp
-  have key : ∀ k : ℕ, associatedP ν k x = poch (ν+1) k/π * legInt_L ν x k ∧
-      associatedP ν (k+1:ℕ) x = poch (ν+1) (k+1)/π * legInt_L ν x (k+1) := by
+  have key : ∀ k : ℕ, associatedP ν k x = poch (ν+1) k/π * LaplaceIntegrals.fourierMoment ν x k ∧
+      associatedP ν (k+1:ℕ) x = poch (ν+1) (k+1)/π * LaplaceIntegrals.fourierMoment ν x (k+1) := by
     intro k
     induction k with
     | zero =>
       refine ⟨by rw [Nat.cast_zero, h0 ν]; simp [poch], ?_⟩
       have h7 := associatedP_recurrence_7 ν 0 hx1
-      have hL : legInt_L (ν+1) x 0 = x * legInt_L ν x 0 + s * legInt_L ν x 1 := by
-        simp only [legInt_L, CharP.cast_eq_zero, zero_mul, Real.cos_zero, ofReal_one, mul_one,
+      have hL : LaplaceIntegrals.fourierMoment (ν+1) x 0 = x *
+          LaplaceIntegrals.fourierMoment ν x 0 + s * LaplaceIntegrals.fourierMoment ν x 1 := by
+        simp only [LaplaceIntegrals.fourierMoment, CharP.cast_eq_zero, zero_mul, Real.cos_zero,
+            ofReal_one, mul_one,
           Nat.cast_one, one_mul]
         rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul,
           ← intervalIntegral.integral_add]
         · refine intervalIntegral.integral_congr fun θ _ => ?_
-          have hw := legInt_laplace_pos hx θ
+          have hw := LaplaceIntegrals.laplace_pos hx θ
           rw [cpow_add _ _ (ofReal_ne_zero.2 hw.ne'), cpow_one]; push_cast; ring
-        · exact ((by simpa using legInt_cont_L ν hx 0 : Continuous fun θ : ℝ =>
+        · exact ((by simpa using LaplaceIntegrals.continuous_fourierMoment ν hx 0 :
+                       Continuous fun θ : ℝ =>
             (((x + Real.sqrt (x^2-1) * Real.cos θ : ℝ)) : ℂ)^ν).intervalIntegrable _ _).const_mul _
-        · exact ((by simpa using legInt_cont_L ν hx 1 : Continuous fun θ : ℝ =>
+        · exact ((by simpa using LaplaceIntegrals.continuous_fourierMoment ν hx 1 :
+                       Continuous fun θ : ℝ =>
             (((x + Real.sqrt (x^2-1) * Real.cos θ : ℝ)) : ℂ)^ν * Real.cos θ).intervalIntegrable
               _ _).const_mul _
       rw [h0 ν, h0 (ν+1), hb1, hL, zero_add] at h7
@@ -392,7 +407,7 @@ theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x)
     | succ k ih =>
       refine ⟨ih.2, ?_⟩
       have h6 := associatedP_recurrence_6 ν (k:ℂ) hx1
-      have hr := legInt_L_rec ν hx k
+      have hr := LaplaceIntegrals.fourierMoment_recurrence ν hx k
       rw [show (k:ℂ)+1 = ((k+1:ℕ):ℂ) by push_cast; ring, ih.2,
         show (k:ℂ)+2 = ((k+1+1:ℕ):ℂ) by push_cast; ring, ih.1] at h6
       apply mul_left_cancel₀ hs
@@ -400,9 +415,9 @@ theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x)
       simp only [show k+1+1 = k+2 by ring] at h6 hr ⊢
       push_cast at h6 hr ⊢
       linear_combination (s:ℂ) * h6 -
-          2*((k:ℂ)+1)*x*(poch (ν+1) k*(ν+1+k)/π*legInt_L ν x (k+1)) * hbm
+          2*((k:ℂ)+1)*x*(poch (ν+1) k*(ν+1+k)/π*LaplaceIntegrals.fourierMoment ν x (k+1)) * hbm
         - poch (ν+1) k*(ν+1+k)/π * hr
-  rw [(key m).1, legInt_L]; push_cast; rfl
+  rw [(key m).1, LaplaceIntegrals.fourierMoment]; push_cast; rfl
 
 /-- DLMF 14.12.8: for integers `0 ≤ m ≤ n` and `x > 1`, `P^m_n(x) = 2^m m! (n+m)!
 (x²−1)^{m/2}/((2m)! (n−m)! π) ∫_0^π (x + (x²−1)^{1/2} cos θ)^{n−m} sin^{2m} θ dθ`. -/
@@ -420,11 +435,12 @@ theorem associatedP_nat_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx : 1 <
     rw [Real.sqrt_eq_rpow, ← Real.rpow_mul_natCast (by nlinarith)]
     ring_nf
   have hI : (∫ θ : ℝ in 0..π, (x+Real.sqrt (x^2-1)*Real.cos θ:ℂ)^(m+p-m)*(Real.sin θ:ℂ)^(2*m)) =
-      legInt_Ks x p m := by
-    rw [legInt_Ks, ← intervalIntegral.integral_ofReal, Nat.add_sub_cancel_left]
+      LaplaceIntegrals.sineMoment x p m := by
+    rw [LaplaceIntegrals.sineMoment, ← intervalIntegral.integral_ofReal, Nat.add_sub_cancel_left]
     refine intervalIntegral.integral_congr fun θ _ => ?_
-    simp only [legInt_w]; push_cast; ring
-  rw [hI, hpow, legInt_associatedP_Ks hx, legInt_cK, Nat.add_sub_cancel_left,
+    simp only [LaplaceIntegrals.laplaceKernel]; push_cast; ring
+  rw [hI, hpow, LaplaceIntegrals.associatedP_sineMoment hx, LaplaceIntegrals.sineMomentConst,
+      Nat.add_sub_cancel_left,
     show m+p+m = 2*m+p by ring]
   ring
 
@@ -440,55 +456,58 @@ cosh(mt) dt`, where `u = ½ ln((x+1)/(x−1))` (`legendreUCoordinate`). -/
 theorem olverQ_nat_finite_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
     olverQ n m x=1/(n.factorial:ℂ)*∫ t : ℝ in 0..legendreUCoordinate x,
         (x-Real.sqrt (x^2-1)*Real.cosh t:ℂ)^n*Real.cosh (m*t) := by
-  rw [show legendreUCoordinate x = legInt_u x from rfl]
-  have hx1 : (x:ℂ)-1 ∈ slitPlane := legInt_one_lt_mem hx
+  rw [show legendreUCoordinate x = LaplaceIntegrals.arcothEndpoint x from rfl]
+  have hx1 : (x:ℂ)-1 ∈ slitPlane := LaplaceIntegrals.one_lt_mem hx
   set s := Real.sqrt (x^2-1) with hs_def
   have hs : (s:ℂ) ≠ 0 := ofReal_ne_zero.2 (Real.sqrt_pos.2 (by nlinarith)).ne'
   have hb1 : legendreBranchPower 1 x = s := by
-    rw [legInt_legendreBranchPower_real _ hx, show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by push_cast; ring,
+    rw [OrthogonalityIntegrals.legendreBranchPower_real _ hx, show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by
+        push_cast; ring,
       hs_def, Real.sqrt_eq_rpow, ofReal_cpow (by nlinarith)]
     push_cast; ring_nf
   have hbm : legendreBranchPower (-1) x * s = 1 := by
     rw [← hb1, legendreBranchPower_mul, neg_add_cancel]; simp [legendreBranchPower]
   have hf : (n.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero n)
-  have hI : (∫ t : ℝ in 0..legInt_u x, (x-Real.sqrt (x^2-1)*Real.cosh t:ℂ)^n*Real.cosh (m*t)) =
-      legInt_M x n m := by
-    rw [legInt_M, ← intervalIntegral.integral_ofReal]
+  have hI : (∫ t : ℝ in 0..LaplaceIntegrals.arcothEndpoint x,
+      (x-Real.sqrt (x^2-1)*Real.cosh t:ℂ)^n*Real.cosh (m*t)) =
+      LaplaceIntegrals.finiteMoment x n m := by
+    rw [LaplaceIntegrals.finiteMoment, ← intervalIntegral.integral_ofReal]
     refine intervalIntegral.integral_congr fun t _ => ?_
-    simp only [legInt_f, legInt_V]; push_cast; ring
+    simp only [LaplaceIntegrals.finiteIntegrand, LaplaceIntegrals.finiteKernel]; push_cast; ring
   rw [hI]
-  have h0 : ∀ k : ℕ, olverQ k 0 x = legInt_M x k 0 / k.factorial := fun k => by
-    rw [legInt_olverQ_nat_zero_order _, legInt_legendreQ_M hx]
-  have key : ∀ m : ℕ, olverQ n m x = legInt_M x n m / n.factorial ∧
-      olverQ n (m+1:ℕ) x = legInt_M x n (m+1) / n.factorial := by
+  have h0 : ∀ k : ℕ, olverQ k 0 x = LaplaceIntegrals.finiteMoment x k 0 / k.factorial := fun k => by
+    rw [olverQ_nat_zero_order _, LaplaceIntegrals.legendreQ_finiteMoment hx]
+  have key : ∀ m : ℕ, olverQ n m x = LaplaceIntegrals.finiteMoment x n m / n.factorial ∧
+      olverQ n (m+1:ℕ) x = LaplaceIntegrals.finiteMoment x n (m+1) / n.factorial := by
     intro m
     induction m with
     | zero =>
       refine ⟨by simpa using h0 n, ?_⟩
       have h7 := olverQ_recurrence_7 (n:ℂ) 0 hx1
-      have h1 := legInt_M_one x n
+      have h1 := LaplaceIntegrals.finiteMoment_one x n
       rw [hb1, zero_add, h0 n, show (n:ℂ)+1 = ((n+1:ℕ):ℂ) by push_cast; ring, h0 (n+1)] at h7
       apply mul_left_cancel₀ hs
       simp only [zero_add, Nat.cast_one]
       apply_fun ((↑) : ℝ → ℂ) at h1
       rw [Nat.factorial_succ] at h7
       push_cast at h1 h7
-      have e : ((n:ℂ)+1)*((legInt_M x (n+1) 0:ℂ)/(((n:ℂ)+1)*n.factorial)) =
-          (legInt_M x (n+1) 0:ℂ)/n.factorial := by
+      have e : ((n:ℂ)+1)*((LaplaceIntegrals.finiteMoment x (n+1) 0:ℂ)/(((n:ℂ)+1)*n.factorial)) =
+          (LaplaceIntegrals.finiteMoment x (n+1) 0:ℂ)/n.factorial := by
         have : (n:ℂ)+1 ≠ 0 := by norm_cast
         field_simp
       linear_combination -h7 - e - h1/(n.factorial:ℂ)
     | succ k ih =>
       refine ⟨ih.2, ?_⟩
       have h6 := olverQ_recurrence_6 (n:ℂ) (k:ℂ) hx1
-      have hr := legInt_M_ord hx n k
+      have hr := LaplaceIntegrals.finiteMoment_order hx n k
       rw [show (k:ℂ)+1 = ((k+1:ℕ):ℂ) by push_cast; ring, ih.2,
         show (k:ℂ)+2 = ((k+1+1:ℕ):ℂ) by push_cast; ring, ih.1] at h6
       have hnk : ((n:ℂ)+((k+1+1:ℕ):ℂ)) ≠ 0 := by norm_cast
       apply mul_left_cancel₀ (mul_ne_zero hnk hs)
       apply_fun ((↑) : ℝ → ℂ) at hr
       push_cast at hr h6 ⊢
-      linear_combination (s:ℂ) * h6 + 2*((k:ℂ)+1)*x*((legInt_M x n (k+1):ℂ)/n.factorial)*hbm -
+      linear_combination (s:ℂ) * h6 +
+          2*((k:ℂ)+1)*x*((LaplaceIntegrals.finiteMoment x n (k+1):ℂ)/n.factorial)*hbm -
         hr/(n.factorial:ℂ)
   rw [(key m).1]; ring
 
@@ -498,13 +517,14 @@ theorem olverQ_nat_finite_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
 theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
     olverQ n m x=(x^2-1:ℂ)^((m:ℂ)/2)/(2^(n+1)*(n.factorial:ℂ))*∫ t : ℝ in -1..1,
         (1-t^2:ℂ)^n/(x-t:ℂ)^(n+m+1) := by
-  have hx1 : (x:ℂ)-1 ∈ slitPlane := legInt_one_lt_mem hx
+  have hx1 : (x:ℂ)-1 ∈ slitPlane := LaplaceIntegrals.one_lt_mem hx
   set s := Real.sqrt (x^2-1) with hs_def
   have hs : (s:ℂ) ≠ 0 := ofReal_ne_zero.2 (Real.sqrt_pos.2 (by nlinarith)).ne'
   have hss : (s:ℂ)^2 = (x:ℂ)^2-1 := by
     rw [← ofReal_pow, hs_def, Real.sq_sqrt (by nlinarith)]; push_cast; ring
   have hb1 : legendreBranchPower 1 x = s := by
-    rw [legInt_legendreBranchPower_real _ hx, show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by push_cast; ring,
+    rw [OrthogonalityIntegrals.legendreBranchPower_real _ hx, show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by
+        push_cast; ring,
       hs_def, Real.sqrt_eq_rpow, ofReal_cpow (by nlinarith)]
     push_cast; ring_nf
   have hbm : legendreBranchPower (-1) x * s = 1 := by
@@ -516,22 +536,24 @@ theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
     congr 1
     rw [hs_def, Real.sqrt_eq_rpow, ← Real.rpow_mul_natCast (by nlinarith)]
     ring_nf
-  have hI : (∫ t : ℝ in -1..1, (1-t^2:ℂ)^n/(x-t:ℂ)^(n+m+1)) = legInt_A x n (n+m+1) := by
-    rw [legInt_A, ← intervalIntegral.integral_ofReal]
+  have hI : (∫ t : ℝ in -1..1, (1-t^2:ℂ)^n/(x-t:ℂ)^(n+m+1)) =
+      LaplaceIntegrals.intervalMoment x n (n+m+1) := by
+    rw [LaplaceIntegrals.intervalMoment, ← intervalIntegral.integral_ofReal]
     refine intervalIntegral.integral_congr fun t _ => ?_
     push_cast; ring
   rw [hI, hpow]
   set C : ℂ := 1/(2^(n+1)*(n.factorial:ℂ)) with hC
-  have h0 : ∀ k : ℕ, olverQ k 0 x = legInt_A x k (k+1) / (2^(k+1)*k.factorial) := fun k => by
-    rw [legInt_olverQ_nat_zero_order _, legInt_legendreQ_A hx, div_div]
-  have key : ∀ m : ℕ, olverQ n m x = C * s^m * legInt_A x n (n+m+1) ∧
-      olverQ n (m+1:ℕ) x = C * s^(m+1) * legInt_A x n (n+(m+1)+1) := by
+  have h0 : ∀ k : ℕ, olverQ k 0 x = LaplaceIntegrals.intervalMoment x k (k+1) /
+      (2^(k+1)*k.factorial) := fun k => by
+    rw [olverQ_nat_zero_order _, LaplaceIntegrals.legendreQ_intervalMoment hx, div_div]
+  have key : ∀ m : ℕ, olverQ n m x = C * s^m * LaplaceIntegrals.intervalMoment x n (n+m+1) ∧
+      olverQ n (m+1:ℕ) x = C * s^(m+1) * LaplaceIntegrals.intervalMoment x n (n+(m+1)+1) := by
     intro m
     induction m with
     | zero =>
       refine ⟨by rw [Nat.cast_zero, h0 n, hC]; simp; ring, ?_⟩
       have h7 := olverQ_recurrence_7 (n:ℂ) 0 hx1
-      have hb := legInt_A_b hx n
+      have hb := LaplaceIntegrals.intervalMoment_diagonal hx n
       rw [hb1, zero_add, h0 n, show (n:ℂ)+1 = ((n+1:ℕ):ℂ) by push_cast; ring, h0 (n+1)] at h7
       apply mul_left_cancel₀ hs
       simp only [zero_add, Nat.cast_one]
@@ -540,18 +562,20 @@ theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
       push_cast at hb h7
       have hn1 : (n:ℂ)+1 ≠ 0 := by norm_cast
       have hf : (n.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero n)
-      have e : ((n:ℂ)+1)*((legInt_A x (n+1) (n+1+1):ℂ)/(2^(n+1+1)*(((n:ℂ)+1)*n.factorial))) =
-          C * (legInt_A x (n+1) (n+2):ℂ)/2 := by
+      have e : ((n:ℂ)+1)*((LaplaceIntegrals.intervalMoment x (n+1)
+          (n+1+1):ℂ)/(2^(n+1+1)*(((n:ℂ)+1)*n.factorial))) =
+          C * (LaplaceIntegrals.intervalMoment x (n+1) (n+2):ℂ)/2 := by
         rw [hC]; field_simp; ring
       rw [show n+1+1 = n+2 by ring] at e h7 ⊢
-      have e2 : (legInt_A x n (n+1):ℂ)/(2^(n+1)*n.factorial) = C * legInt_A x n (n+1) := by
+      have e2 : (LaplaceIntegrals.intervalMoment x n (n+1):ℂ)/(2^(n+1)*n.factorial) = C *
+          LaplaceIntegrals.intervalMoment x n (n+1) := by
         rw [hC]; ring
       rw [e2] at h7
-      linear_combination -h7 - e - C/2*hb - C*(legInt_A x n (n+2):ℂ)*hss
+      linear_combination -h7 - e - C/2*hb - C*(LaplaceIntegrals.intervalMoment x n (n+2):ℂ)*hss
     | succ k ih =>
       refine ⟨ih.2, ?_⟩
       have h6 := olverQ_recurrence_6 (n:ℂ) (k:ℂ) hx1
-      have hord := legInt_A_ord hx n (n+k+1)
+      have hord := LaplaceIntegrals.intervalMoment_order hx n (n+k+1)
       rw [show (k:ℂ)+1 = ((k+1:ℕ):ℂ) by push_cast; ring, ih.2,
         show (k:ℂ)+2 = ((k+1+1:ℕ):ℂ) by push_cast; ring, ih.1] at h6
       have hnk : ((n:ℂ)+((k+1+1:ℕ):ℂ)) ≠ 0 := by norm_cast
@@ -559,8 +583,10 @@ theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
       apply_fun ((↑) : ℝ → ℂ) at hord
       simp only [show n+(k+1)+1 = n+k+1+1 by ring, show n+(k+1+1)+1 = n+k+1+2 by ring] at h6 ⊢
       push_cast at hord h6 ⊢
-      linear_combination (s:ℂ) * h6 + 2*((k:ℂ)+1)*x*C*(s:ℂ)^(k+1)*(legInt_A x n (n+k+1+1):ℂ)*hbm
-        + C*(s:ℂ)^(k+1)*hord - ((n:ℂ)+k+2)*C*(s:ℂ)^(k+1)*(legInt_A x n (n+k+1+2):ℂ)*hss
+      linear_combination (s:ℂ) * h6 +
+          2*((k:ℂ)+1)*x*C*(s:ℂ)^(k+1)*(LaplaceIntegrals.intervalMoment x n (n+k+1+1):ℂ)*hbm
+        + C*(s:ℂ)^(k+1)*hord -
+            ((n:ℂ)+k+2)*C*(s:ℂ)^(k+1)*(LaplaceIntegrals.intervalMoment x n (n+k+1+2):ℂ)*hss
   rw [(key m).1, hC]; ring
 
 /-! ### Helpers for DLMF 14.12.12 (prefix `legIR_`) -/
@@ -611,7 +637,7 @@ theorem legIR_norm_associatedP_ge (n m : ℕ) (hmn : m ≤ n) : ∃ C > 0, ∀ t
     have := congrArg re h; simp at this; linarith
   have hΓ : Gamma ((m:ℂ)+1) ≠ 0 := Gamma_ne_zero (fun k h => hc k h)
   refine ⟨‖K‖ / ‖Gamma ((m:ℂ)+1)‖, by positivity, fun t ht => ?_⟩
-  have hs := legInt_one_lt_mem ht
+  have hs := LaplaceIntegrals.one_lt_mem ht
   rw [associatedP_integer_hypergeometric_8 _ m hs]
   have h1z : 1 - (1-(t:ℂ))/2 = (((1+t)/2 : ℝ) : ℂ) := by push_cast; ring
   have hz : (1-(t:ℂ))/2 ∈ cutPlane := by
@@ -683,7 +709,7 @@ theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx 
   have hderiv : ∀ t : ℝ, 1 < t → HasDerivAt F
       (associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2)) t := by
     intro t ht
-    have hs := legInt_one_lt_mem ht
+    have hs := LaplaceIntegrals.one_lt_mem ht
     have hQd := ((olverQ_analytic n m) _ hs).differentiableAt.hasDerivAt
     have hPd := ((associatedP_analytic n m) _ hs).differentiableAt.hasDerivAt
     have h := ((hQd.div hPd (hPne t ht)).comp_ofReal).const_mul (-associatedP n m x)
@@ -701,7 +727,7 @@ theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx 
       ContinuousAt (fun t : ℝ =>
       associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2)) t := by
     intro t ht
-    have hs := legInt_one_lt_mem ht
+    have hs := LaplaceIntegrals.one_lt_mem ht
     have hPc : ContinuousAt (fun s : ℝ => associatedP n m s) t :=
       ((associatedP_analytic n m) _ hs).continuousAt.comp continuous_ofReal.continuousAt
     have ht2 : (t:ℂ)^2-1 ≠ 0 := by
@@ -766,11 +792,11 @@ theorem olverQ_nat_neumann (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 theorem olverQ_nat_heine (n : ℕ) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => 1/((n.factorial:ℂ)*(x+Real.sqrt (x^2-1)*Real.cosh t:ℂ)^(n+1))) 0
         (olverQ n 0 x) := by
-  rw [legInt_olverQ_nat_zero_order _]
-  refine ((legInt_heine x hx n).div_const (n.factorial:ℂ)).congr fun R => ?_
+  rw [olverQ_nat_zero_order _]
+  refine ((LaplaceIntegrals.heine x hx n).div_const (n.factorial:ℂ)).congr fun R => ?_
   rw [← intervalIntegral.integral_ofReal, ← intervalIntegral.integral_div]
   refine intervalIntegral.integral_congr fun t _ => ?_
-  simp only [legInt_W]; push_cast
+  simp only [LaplaceIntegrals.heineKernel]; push_cast
   field_simp
 
 /-- DLMF 14.6.6: for `m ≥ 1` and `-1 < x < 1`, `𝖯^{−m}_ν(x) = (1−x²)^{−m/2} ∫_x^1 ⋯ ∫_x^1 𝖯_ν(x)
@@ -779,7 +805,8 @@ theorem olverQ_nat_heine (n : ℕ) {x : ℝ} (hx : 1 < x) :
 theorem ferrersP_negative_order_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν (-m) x=(1-x^2:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in x..1, f t)^[m])
         (ferrersP ν 0) x := by
-  rw [legInt_iterate_ferrers ν m ⟨hx.1, hx.2.le⟩, legInt_H, ferrersP]
+  rw [OrthogonalityIntegrals.iterate_ferrers ν m ⟨hx.1, hx.2.le⟩,
+      OrthogonalityIntegrals.ferrersPrimitive, ferrersP]
   have h1 : (0:ℝ) < 1 + x := by linarith [hx.1]
   have h2 : (0:ℝ) < 1 - x := by linarith [hx.2]
   have hreal : ((1+x)/(1-x)) ^ (-(m:ℝ)/2) = (1-x^2) ^ (-(m:ℝ)/2) * (1-x)^m := by
@@ -801,8 +828,9 @@ theorem associatedP_negative_order_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx :
     associatedP ν (-m) x=(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in 1..x, f t)^[m])
         (fun x : ℝ => associatedP ν 0 x) x := by
   have hz : (x:ℂ)-1 ∈ slitPlane := Or.inl (by simp; linarith)
-  rw [legInt_iterate_associated ν m hx.le, legInt_associatedP_neg_nat ν m hz,
-    legInt_legendreBranchPower_real _ hx]
+  rw [OrthogonalityIntegrals.iterate_associated ν m hx.le,
+      OrthogonalityIntegrals.associatedP_neg_nat ν m hz,
+    OrthogonalityIntegrals.legendreBranchPower_real _ hx]
 
 /-- DLMF 14.6.8: for `m ≥ 1`, `Re ν > m − 1` and `x > 1`, `Q^{−m}_ν(x) = (−1)^m (x²−1)^{−m/2} ∫_x^∞
 ⋯ ∫_x^∞ Q_ν(x) (dx)^m`, the `m`-fold iterated improper integral over `(x, ∞)`. -/
@@ -811,7 +839,8 @@ theorem associatedQ_negative_order_integral (ν : ℂ) (m : ℕ) (hν : (m:ℝ)-
     {x : ℝ} (hx : 1 < x) :
     associatedQ ν (-m) x=(-1)^m*(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x =>
         improperAtTop f x)^[m]) (fun x : ℝ => associatedQ ν 0 x) x := by
-  rw [legInt_iterate_Q ν m hν hx, legInt_g, legInt_legendreBranchPower_real _ hx]
+  rw [LaplaceIntegrals.iterate_Q ν m hν hx, LaplaceIntegrals.primitive,
+      OrthogonalityIntegrals.legendreBranchPower_real _ hx]
   have hne : ((x:ℂ)^2-1) ≠ 0 := by
     rw [show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by push_cast; ring]
     exact_mod_cast (by nlinarith : (x^2-1:ℝ) ≠ 0)
@@ -826,7 +855,8 @@ theorem associatedP_negative_order_integral_complex (ν : ℂ) (m : ℕ)
     {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (-m) z=legendreBranchPower (-m) z*
       ((fun f : ℂ → ℂ => fun z => segmentIntegral f 1 z)^[m]) (associatedP ν 0) z := by
-  rw [legInt_iterate_segment ν m (Or.inr hz), legInt_associatedP_neg_nat ν m hz]
+  rw [OrthogonalityIntegrals.iterate_segment ν m (Or.inr hz),
+      OrthogonalityIntegrals.associatedP_neg_nat ν m hz]
 
 /-- DLMF 14.6.8: a tail joined to the positive real axis, with actual convergence. -/
 @[dlmf 14.6.E8]
@@ -835,7 +865,7 @@ theorem associatedQ_negative_order_integral_complex (ν : ℂ) (m : ℕ)
     associatedQ ν (-m) z=(-1)^m*legendreBranchPower (-m) z*
       ((fun f : ℂ → ℂ => fun z => segmentIntegral f z 2+improperAtTop (fun t : ℝ => f t) 2)^[m])
         (associatedQ ν 0) z := by
-  rw [legInt_iterate_Qc ν m hν hz, legInt_g]
+  rw [LaplaceIntegrals.iterate_Q_segment ν m hν hz, LaplaceIntegrals.primitive]
   have hc : legendreBranchPower (-m) z * legendreBranchPower m z = 1 := by
     rw [legendreBranchPower_mul, neg_add_cancel]; simp [legendreBranchPower]
   have hsq : (-1:ℂ)^m*(-1)^m = 1 := by rw [← mul_pow]; norm_num

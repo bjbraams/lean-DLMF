@@ -44,6 +44,8 @@ including the poles of `Γ(a)`, by continuity in `a`.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 open DLMF.Statistical
@@ -343,12 +345,13 @@ theorem serRec_sqrt_cpow {x : ℝ} (hx : 0 < x) (s : ℂ) :
   ring_nf
 
 /-- Nonvanishing under the stated hypotheses: `a + k ≠ 0`. -/
-theorem scSph_add_ne {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (k : ℕ) : a + k ≠ 0 := fun h =>
+theorem IncompleteGammaSphericalSeries.add_ne {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (k : ℕ) : a +
+    k ≠ 0 := fun h =>
   ha k (by linear_combination h)
 
 /-- Euler image of `w ↦ γ*(a, 2w)`. -/
 
-theorem scSph_euler_F {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
+theorem IncompleteGammaSphericalSeries.eulerImage {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
     Differentiable ℂ (fun w => scIncGamma a (2*w)) ∧ ∀ w,
       w * deriv (fun w => scIncGamma a (2*w)) w + a * scIncGamma a (2*w) =
         exp (-(2*w)) / Gamma a := by
@@ -363,7 +366,7 @@ theorem scSph_euler_F {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
     intro R
     refine ⟨fun k => (2*|R|)^k * ‖(Gamma (a+k+1))⁻¹‖, ?_, fun k w hw => ?_⟩
     · refine summable_of_ratio_norm_eventually_le (r := 1/2) (by norm_num) ?_
-      have hev := sphSeries_eventually_norm_add_le (16*|R|) (a+1)
+      have hev := Bessel.SphericalSeries.eventually_norm_add_le (16*|R|) (a+1)
       filter_upwards [hev] with k hk
       have hG : Gamma (a+((k+1:ℕ):ℂ)+1) = (a+k+1) * Gamma (a+k+1) := by
         rw [show a+((k+1:ℕ):ℂ)+1 = (a+k+1)+1 by push_cast; ring, Gamma_add_one _ (hne k)]
@@ -393,7 +396,7 @@ theorem scSph_euler_F {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
       simp only [hh, norm_mul, norm_pow, norm_inv]
       gcongr
       simp
-  obtain ⟨hD, hS⟩ := sphSeries_euler_hasSum a hf hb
+  obtain ⟨hD, hS⟩ := Bessel.SphericalSeries.euler_hasSum a hf hb
   have hH : ∀ w, scIncGamma a (2*w) = exp (-(2*w)) * ∑' k, h k w := by
     intro w
     rw [← tsum_mul_left]
@@ -415,7 +418,7 @@ theorem scSph_euler_F {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
       · rw [one_div]; ring
     refine key.congr_fun fun k => ?_
     simp only [hh]
-    have hak := scSph_add_ne ha k
+    have hak := IncompleteGammaSphericalSeries.add_ne ha k
     rw [Gamma_add_one _ hak, mul_inv]
     rcases k with _ | k
     · simp only [Nat.cast_zero, zero_mul, mul_zero, zero_add, pow_zero, one_mul, add_zero] at hak ⊢
@@ -440,15 +443,16 @@ theorem scSph_euler_F {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
   linear_combination (exp (-(2*w))) * hEu w
 
 /-- The series with terms `(fun n : ℕ => exp (-w) * (poch (1-a) n/Gamma (n+a+1)*(2*n+1) *
-sphericalI n w))` converges to `(scIncGamma a (2*w))`. -/
-theorem scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
-    HasSum (fun n : ℕ => exp (-w) * (poch (1-a) n/Gamma (n+a+1)*(2*n+1) * sphericalI n w))
+Bessel.sphericalI n w))` converges to `(scIncGamma a (2*w))`. -/
+theorem IncompleteGammaSphericalSeries.hasSum_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
+    HasSum (fun n : ℕ => exp (-w) * (poch (1-a) n/Gamma (n+a+1)*(2*n+1) * Bessel.sphericalI n w))
       (scIncGamma a (2*w)) := by
   have hΓ : ∀ k : ℕ, Gamma (k+a) ≠ 0 := fun k => Gamma_ne_zero (fun m e => ha (m+k)
     (by push_cast; linear_combination e))
   have hΓ1 : ∀ k : ℕ, Gamma (k+a+1) = (k+a) * Gamma (k+a) := fun k =>
-    Gamma_add_one _ (by rw [add_comm]; exact scSph_add_ne ha k)
-  have hka : ∀ k : ℕ, (k+a : ℂ) ≠ 0 := fun k => by rw [add_comm]; exact scSph_add_ne ha k
+    Gamma_add_one _ (by rw [add_comm]; exact IncompleteGammaSphericalSeries.add_ne ha k)
+  have hka : ∀ k : ℕ, (k+a : ℂ) ≠ 0 := fun k => by rw [add_comm];
+                                                   exact IncompleteGammaSphericalSeries.add_ne ha k
   set c : ℕ → ℂ := fun n => poch (1-a) n/Gamma (n+a+1) with hc
   set e : ℕ → ℂ := fun n => poch (1-a) n/Gamma (n+a) with he
   have hce : ∀ n : ℕ, e n = (n+a) * c n := by
@@ -460,25 +464,26 @@ theorem scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
     intro n; rw [← hec n, hce (n+1)]; push_cast; ring
   clear_value c e
   set C : ℕ → ℂ := fun n => c n * (2*n+1) with hC
-  have hdi : ∀ n w, HasDerivAt (sphericalI n) (deriv (sphericalI n) w) w := by
+  have hdi : ∀ n w, HasDerivAt (Bessel.sphericalI n) (deriv (Bessel.sphericalI n) w) w := by
     intro n w
     rcases n with _ | n
-    · exact (sphSeries_hasDerivAt_sphericalI_zero w).differentiableAt.hasDerivAt
-    · exact (sphSeries_hasDerivAt_sphericalI_succ n w).differentiableAt.hasDerivAt
+    · exact (Bessel.SphericalSeries.hasDerivAt_sphericalI_zero w).differentiableAt.hasDerivAt
+    · exact (Bessel.SphericalSeries.hasDerivAt_sphericalI_succ n w).differentiableAt.hasDerivAt
   have hexp : ∀ w : ℂ, HasDerivAt (fun w : ℂ => exp (-w)) (exp (-w) * (-1)) w := fun w => by
     have := (hasDerivAt_id w).neg.cexp
     exact this.congr_deriv (by simp)
-  set f' : ℕ → ℂ → ℂ := fun n w => exp (-w) * (-1) * (C n * sphericalI n w) +
-    exp (-w) * (C n * deriv (sphericalI n) w) with hf'
-  have hf : ∀ n w, HasDerivAt (fun w => exp (-w) * (C n * sphericalI n w)) (f' n w) w :=
+  set f' : ℕ → ℂ → ℂ := fun n w => exp (-w) * (-1) * (C n * Bessel.sphericalI n w) +
+    exp (-w) * (C n * deriv (Bessel.sphericalI n) w) with hf'
+  have hf : ∀ n w, HasDerivAt (fun w => exp (-w) * (C n * Bessel.sphericalI n w)) (f' n w) w :=
     fun n w => (hexp w).mul ((hdi n w).const_mul (C n))
   set g : ℕ → ℂ → ℂ := fun n w => if n = 0 then exp (-(2*w)) / Gamma a else
-    exp (-w) * (w * (e n * (sphericalI (n-1) w - sphericalI n w))) with hg
-  have hL : ∀ n w, w * f' n w + a * (exp (-w) * (C n * sphericalI n w)) = g n w - g (n+1) w := by
+    exp (-w) * (w * (e n * (Bessel.sphericalI (n-1) w - Bessel.sphericalI n w))) with hg
+  have hL : ∀ n w, w * f' n w + a * (exp (-w) * (C n * Bessel.sphericalI n w)) = g n w -
+      g (n+1) w := by
     intro n w
     simp only [hf', hg, hC]
     rcases n with _ | n
-    · rw [(sphSeries_hasDerivAt_sphericalI_zero w).deriv]
+    · rw [(Bessel.SphericalSeries.hasDerivAt_sphericalI_zero w).deriv]
       simp only [ite_true, one_ne_zero, ite_false, show (0+1-1 : ℕ) = 0 by rfl, Nat.cast_zero,
         mul_zero, zero_add]
       have h1 := hec 0
@@ -487,28 +492,29 @@ theorem scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
         rw [mul_comm, ← this]; simp [he, poch_zero]
       have hE : exp (-(2*w)) = exp (-w) * (cosh w - sinh w) := by
         rw [cosh_sub_sinh, ← Complex.exp_add]; ring_nf
-      rw [hE, ← sphSeries_mul_sphericalI_zero, ← sphSeries_sphericalI_zero_add]
+      rw [hE, ← Bessel.SphericalSeries.mul_sphericalI_zero,
+          ← Bessel.SphericalSeries.sphericalI_zero_add]
       simp only [Nat.cast_zero, add_zero] at h1
       rw [h1, div_eq_mul_inv, ← one_div, ← hc0]
       ring
     · simp only [Nat.add_eq_zero_iff, one_ne_zero, and_false, ite_false,
         show n+1-1 = n by omega, show n+1+1-1 = n+1 by omega]
-      have hd := (sphSeries_hasDerivAt_sphericalI_succ n w).deriv
+      have hd := (Bessel.SphericalSeries.hasDerivAt_sphericalI_succ n w).deriv
       have h3 : (2*(n:ℂ)+3) ≠ 0 := by
         have : (0:ℝ) < 2*n+3 := by positivity
         exact_mod_cast this.ne'
-      have hd' : (2*(n:ℂ)+3) * deriv (sphericalI (n+1)) w =
-          (n+1) * sphericalI n w + (n+2) * sphericalI (n+2) w := by
+      have hd' : (2*(n:ℂ)+3) * deriv (Bessel.sphericalI (n+1)) w =
+          (n+1) * Bessel.sphericalI n w + (n+2) * Bessel.sphericalI (n+2) w := by
         rw [hd]; field_simp
-      have hr := sphSeries_sphericalI_recurrence n w
+      have hr := Bessel.SphericalSeries.sphericalI_recurrence n w
       have he1 := hce (n+1)
       have he2 := hec (n+1)
       push_cast at he1 he2 ⊢
       linear_combination (w * exp (-w) * c (n+1)) * hd' + (-(exp (-w) * c (n+1) * a)) * hr
-        + (-(exp (-w) * w * (sphericalI n w - sphericalI (n+1) w))) * he1
-        + (exp (-w) * w * (sphericalI (n+1) w - sphericalI (n+2) w)) * he2
+        + (-(exp (-w) * w * (Bessel.sphericalI n w - Bessel.sphericalI (n+1) w))) * he1
+        + (exp (-w) * w * (Bessel.sphericalI (n+1) w - Bessel.sphericalI (n+2) w)) * he2
   have hratio_e : ∀ᶠ k in atTop, ‖e (k+1+1)‖ ≤ 2 * ‖e (k+1)‖ := by
-    filter_upwards [sphSeries_eventually_norm_add_le (1-a+1) (a+1)] with k hk
+    filter_upwards [Bessel.SphericalSeries.eventually_norm_add_le (1-a+1) (a+1)] with k hk
     rw [hec (k+1), hce (k+1), norm_mul, norm_mul]
     have h' : ‖1 - a + ((k+1:ℕ):ℂ)‖ ≤ 2*‖((k+1:ℕ):ℂ)+a‖ := by
       push_cast
@@ -518,8 +524,8 @@ theorem scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
   have hgt : ∀ w, Tendsto (fun n => g n w) atTop (𝓝 0) := by
     intro w
     rw [← tendsto_add_atTop_iff_nat 1]
-    have t0 := sphSeries_tendsto_coeff_mul_sphericalI (fun k => e (k+1)) hratio_e 0 w
-    have t1 := sphSeries_tendsto_coeff_mul_sphericalI (fun k => e (k+1)) hratio_e 1 w
+    have t0 := Bessel.SphericalSeries.tendsto_coeff_mul_sphericalI (fun k => e (k+1)) hratio_e 0 w
+    have t1 := Bessel.SphericalSeries.tendsto_coeff_mul_sphericalI (fun k => e (k+1)) hratio_e 1 w
     have := (t0.sub t1).const_mul (exp (-w) * w)
     rw [sub_zero, mul_zero] at this
     refine this.congr fun k => ?_
@@ -527,7 +533,7 @@ theorem scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
       add_zero]
     ring
   have hratio_C : ∀ᶠ k in atTop, ‖C (k+1)‖ ≤ 6 * ‖C k‖ := by
-    filter_upwards [sphSeries_eventually_norm_add_le (1-a) (a+1)] with k hk
+    filter_upwards [Bessel.SphericalSeries.eventually_norm_add_le (1-a) (a+1)] with k hk
     have hq : 0 < ‖(k:ℂ)+1+a‖ := norm_pos_iff.mpr (by
       have := hka (k+1); push_cast at this; exact this)
     have h1 : ‖c (k+1)‖ ≤ 2 * ‖c k‖ := by
@@ -547,9 +553,9 @@ theorem scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
     calc ‖c (k+1)‖ * ‖(2*((k+1:ℕ):ℂ)+1)‖ ≤ (2 * ‖c k‖) * (3 * ‖(2*(k:ℂ)+1)‖) := by gcongr
       _ = 6 * (‖c k‖ * ‖(2*(k:ℂ)+1)‖) := by ring
   have hb : ∀ R : ℝ, ∃ u : ℕ → ℝ, Summable u ∧ ∀ n w, ‖w‖ < R →
-      ‖exp (-w) * (C n * sphericalI n w)‖ ≤ u n := by
+      ‖exp (-w) * (C n * Bessel.sphericalI n w)‖ ≤ u n := by
     intro R
-    obtain ⟨u, hu, hle⟩ := sphSeries_bound_coeff_mul_sphericalI C hratio_C 0 R
+    obtain ⟨u, hu, hle⟩ := Bessel.SphericalSeries.bound_coeff_mul_sphericalI C hratio_C 0 R
     refine ⟨fun k => Real.exp |R| * u k, hu.mul_left _, fun k w hw => ?_⟩
     rw [norm_mul]
     have hw' : ‖w‖ ≤ |R| := hw.le.trans (le_abs_self R)
@@ -557,10 +563,11 @@ theorem scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
       rw [Complex.norm_exp]
       refine Real.exp_le_exp.mpr ((Complex.re_le_norm (-w)).trans ?_)
       rw [norm_neg]; exact hw'
-    have h2 : ‖C k * sphericalI k w‖ ≤ u k := by simpa using hle k w hw
+    have h2 : ‖C k * Bessel.sphericalI k w‖ ≤ u k := by simpa using hle k w hw
     exact mul_le_mul h1 h2 (norm_nonneg _) (Real.exp_pos _).le
-  obtain ⟨hFd, hFL⟩ := scSph_euler_F ha
-  have key := sphSeries_hasSum_of_euler (f := fun n w => exp (-w) * (C n * sphericalI n w))
+  obtain ⟨hFd, hFL⟩ := IncompleteGammaSphericalSeries.eulerImage ha
+  have key := Bessel.SphericalSeries.hasSum_of_euler
+      (f := fun n w => exp (-w) * (C n * Bessel.sphericalI n w))
     (f' := f') (g := g) (F := fun w => scIncGamma a (2*w)) a hf hL hgt hb hFd
     (fun w => by rw [hFL w]; simp [hg])
     (fun m hm => absurd (by linear_combination hm : a = -m) (ha m)) w
@@ -570,7 +577,7 @@ theorem scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
 /-- The coefficient recursion `c_{n+1}(n+1+a) = (1-a+n) c_n` holds for every `a`,
 the poles of `Γ` included. -/
 
-theorem scSph_coeff_succ (a : ℂ) (n : ℕ) :
+theorem IncompleteGammaSphericalSeries.coeff_succ (a : ℂ) (n : ℕ) :
     poch (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1) * (n+1+a) = (1-a+n) * (poch (1-a) n/Gamma (n+a+1)) := by
   rw [poch_succ, show ((n+1:ℕ):ℂ)+a+1 = (n+a+1)+1 by push_cast; ring]
   by_cases h0 : (n:ℂ)+a+1 = 0
@@ -584,7 +591,8 @@ theorem scSph_coeff_succ (a : ℂ) (n : ℕ) :
 
 /-- Locally uniform geometric bound for the coefficients `(1-a)_n/Γ(n+a+1)`. -/
 
-theorem scSph_coeff_bound (a₀ : ℂ) : ∃ K : ℝ, ∀ n : ℕ, ∀ a ∈ Metric.closedBall a₀ (1/2),
+theorem IncompleteGammaSphericalSeries.coeff_bound (a₀ : ℂ) : ∃ K : ℝ, ∀ n : ℕ, ∀ a ∈
+    Metric.closedBall a₀ (1/2),
     ‖poch (1-a) n/Gamma (n+a+1)‖ ≤ K * 2^n := by
   set s := Metric.closedBall a₀ (1/2) with hs
   set A : ℝ := ‖a₀‖ + 1/2 with hA
@@ -630,7 +638,7 @@ theorem scSph_coeff_bound (a₀ : ℂ) : ∃ K : ℝ, ∀ n : ℕ, ∀ a ∈ Met
         have := norm_sub_le (1:ℂ) a
         simp only [norm_one, Complex.norm_natCast] at this ⊢; linarith
       have hpos : 0 < (n:ℝ) + 1 - A := by linarith
-      have e := congrArg norm (scSph_coeff_succ a n)
+      have e := congrArg norm (IncompleteGammaSphericalSeries.coeff_succ a n)
       rw [norm_mul, norm_mul] at e
       have h2 : ‖poch (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1)‖ * ((n:ℝ)+1-A) ≤
           2 * ((n:ℝ)+1-A) * ‖poch (1-a) n/Gamma (n+a+1)‖ := by
@@ -646,14 +654,14 @@ theorem scSph_coeff_bound (a₀ : ℂ) : ∃ K : ℝ, ∀ n : ℕ, ∀ a ∈ Met
 
 /-- DLMF 8.7.5 for every `a`: the generic case by the Euler operator, the poles of `Γ(a)`
 by continuity in `a`. -/
-theorem scSph_series (a z : ℂ) :
-    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2))
+theorem IncompleteGammaSphericalSeries.hasSum_series (a z : ℂ) :
+    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))
         (scIncGamma a z) := by
   have hgen : ∀ a : ℂ, (∀ n : ℕ, a ≠ -n) →
-      HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2))
+      HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))
       (scIncGamma a z) := by
     intro a ha
-    have h := scSph_generic ha (z/2)
+    have h := IncompleteGammaSphericalSeries.hasSum_generic ha (z/2)
     rw [show 2*(z/2) = z by ring] at h
     refine h.congr_fun fun n => ?_
     rw [neg_div]; ring
@@ -663,9 +671,10 @@ theorem scSph_series (a z : ℂ) :
   obtain ⟨m, rfl⟩ := ha
   set a₀ : ℂ := -(m:ℂ) with ha₀
   set s := Metric.closedBall a₀ (1/2) with hs
-  set T : ℂ → ℕ → ℂ := fun a n => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2)
+  set T : ℂ → ℕ → ℂ := fun a n =>
+      exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2)
     with hT
-  obtain ⟨K, hK⟩ := scSph_coeff_bound a₀
+  obtain ⟨K, hK⟩ := IncompleteGammaSphericalSeries.coeff_bound a₀
   have hr6 : ∀ᶠ k in atTop, ‖((2:ℂ)^(k+1)*(2*((k+1:ℕ):ℂ)+1))‖ ≤ 6 * ‖((2:ℂ)^k*(2*(k:ℂ)+1))‖ := by
     refine Eventually.of_forall fun k => ?_
     rw [show ((2:ℂ)^(k+1)*(2*((k+1:ℕ):ℂ)+1)) = (((2:ℝ)^(k+1)*(2*k+3) : ℝ) : ℂ) by push_cast; ring,
@@ -673,26 +682,27 @@ theorem scSph_series (a z : ℂ) :
       Complex.norm_real, Complex.norm_real, Real.norm_of_nonneg (by positivity),
       Real.norm_of_nonneg (by positivity), pow_succ]
     nlinarith [pow_pos (two_pos : (0:ℝ) < 2) k, (k.cast_nonneg : (0:ℝ) ≤ k)]
-  obtain ⟨u, hu, hle⟩ := sphSeries_bound_coeff_mul_sphericalI (fun k => (2:ℂ)^k*(2*(k:ℂ)+1)) hr6 0
+  obtain ⟨u, hu, hle⟩ :=
+      Bessel.SphericalSeries.bound_coeff_mul_sphericalI (fun k => (2:ℂ)^k*(2*(k:ℂ)+1)) hr6 0
     (‖z/2‖+1)
   have hbound : ∀ n, ∀ a ∈ s, ‖T a n‖ ≤ ‖exp (-z/2)‖ * K * u n := by
     intro n a ha
     have h1 := hK n a ha
-    have h2 : ‖(2:ℂ)^n*(2*(n:ℂ)+1) * sphericalI n (z/2)‖ ≤ u n := by
+    have h2 : ‖(2:ℂ)^n*(2*(n:ℂ)+1) * Bessel.sphericalI n (z/2)‖ ≤ u n := by
       simpa using hle n (z/2) (by linarith)
     have hK0 : 0 ≤ K := by
       have := (norm_nonneg _).trans (hK 0 a ha); simpa using this
     simp only [hT]
-    rw [show exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2) =
-      exp (-z/2) * (poch (1-a) n/Gamma (n+a+1)) * ((2*n+1)*sphericalI n (z/2)) by ring,
+    rw [show exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2) =
+      exp (-z/2) * (poch (1-a) n/Gamma (n+a+1)) * ((2*n+1)*Bessel.sphericalI n (z/2)) by ring,
       norm_mul, norm_mul]
-    have h3 : ‖((2:ℂ)*n+1)*sphericalI n (z/2)‖ * 2^n ≤ u n := by
+    have h3 : ‖((2:ℂ)*n+1)*Bessel.sphericalI n (z/2)‖ * 2^n ≤ u n := by
       have h22 : ‖(2:ℂ)‖ = 2 := by simp
       rw [norm_mul, norm_mul, norm_pow, h22] at h2
       rw [norm_mul]; linarith
-    calc ‖exp (-z/2)‖ * ‖poch (1-a) n/Gamma (n+a+1)‖ * ‖((2:ℂ)*n+1)*sphericalI n (z/2)‖
-        ≤ ‖exp (-z/2)‖ * (K * 2^n) * ‖((2:ℂ)*n+1)*sphericalI n (z/2)‖ := by gcongr
-      _ = ‖exp (-z/2)‖ * K * (‖((2:ℂ)*n+1)*sphericalI n (z/2)‖ * 2^n) := by ring
+    calc ‖exp (-z/2)‖ * ‖poch (1-a) n/Gamma (n+a+1)‖ * ‖((2:ℂ)*n+1)*Bessel.sphericalI n (z/2)‖
+        ≤ ‖exp (-z/2)‖ * (K * 2^n) * ‖((2:ℂ)*n+1)*Bessel.sphericalI n (z/2)‖ := by gcongr
+      _ = ‖exp (-z/2)‖ * K * (‖((2:ℂ)*n+1)*Bessel.sphericalI n (z/2)‖ * 2^n) := by ring
       _ ≤ ‖exp (-z/2)‖ * K * u n := by gcongr
   have hsum : Summable fun n => ‖exp (-z/2)‖ * K * u n := hu.mul_left _
   have hTc : ∀ n, ContinuousOn (fun a => T a n) s := by
@@ -811,13 +821,14 @@ theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x :
   rw [hxn, show ((n:ℂ) + a) = a + (n:ℕ) by ring]
   ring
 
-/-- The series with terms `(fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI
-n (z/2))` converges to `(scIncGamma a z)`. -/
+/-- The series with terms
+`(fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))` converges
+to `(scIncGamma a z)`. -/
 @[dlmf 8.7.E5]
 theorem scIncGamma_sphericalI_series (a z : ℂ) :
-    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*sphericalI n (z/2))
+    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))
         (scIncGamma a z) := by
-  exact scSph_series a z
+  exact IncompleteGammaSphericalSeries.hasSum_series a z
 
 /-- The series with terms `(fun n : ℕ => (x : ℂ)^a*exp (-x :
 ℂ)*DLMF.OrthogonalPolynomials.laguerrePolyL a n x/(n+1))` converges to `(upperIncGamma a x)`. -/

@@ -42,6 +42,8 @@ open scoped Real Nat Topology ENNReal Interval
 open DLMF.Hypergeometric
 open MeasureTheory
 
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- Faddeeva complex probability function. -/

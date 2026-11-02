@@ -16,7 +16,7 @@ transforms of the Fresnel integrals, obtained by integration by parts.
 
 ## Main definitions
 
-* `erfInt_G`: the antiderivative (in `x = √t`) used for DLMF 7.14.4.
+* `ErrorFunctionIntegrals.laplaceAntideriv`: the antiderivative (in `x = √t`) used for DLMF 7.14.4.
 
 ## Main results
 
@@ -24,8 +24,8 @@ transforms of the Fresnel integrals, obtained by integration by parts.
   (DLMF 7.14.4).
 * `erfc_sqrt_reciprocal_laplace_negative`: the unnumbered companion transform following
   DLMF 7.14.4.
-* `erfInt_laplace_plus`, `erfInt_laplace_minus`: the two transforms for `Re a > 0`, `Re b > 0`,
-  `Re c ≥ 0`, by continuity from `Re c > 0`.
+* `ErrorFunctionIntegrals.laplace_plus`, `ErrorFunctionIntegrals.laplace_minus`: the two transforms
+  for `Re a > 0`, `Re b > 0`, `Re c ≥ 0`, by continuity from `Re c > 0`.
 * `fresnelCosInt_laplace`, `fresnelSinInt_laplace`: Laplace transforms of `C(t)` and `S(t)`
   (DLMF 7.14.5, 7.14.6).
 * `fresnelCosInt_sqrt_laplace`, `fresnelSinInt_sqrt_laplace`: Laplace transforms of
@@ -45,15 +45,17 @@ namespace DLMF.Confluent
 /-! ### Tools for DLMF 7.14.4 and its companion -/
 
 /-- The antiderivative (in `x = √t`) for the Laplace transforms of DLMF 7.14.4. -/
-noncomputable def erfInt_G (p α β γ : ℂ) (x : ℝ) : ℂ :=
+noncomputable def ErrorFunctionIntegrals.laplaceAntideriv (p α β γ : ℂ) (x : ℝ) : ℂ :=
   1/p*exp (p*(x:ℂ)^2)*erfc (α*x+γ/x) - exp (-2*α*γ)/p*((1+α/β)/2*exp (2*β*γ)*erfc (β*x+γ/x) +
     (α/β-1)/2*exp (-2*β*γ)*erfc (β*x+(-γ)/x))
 
-/-- At `x`, the function `(erfInt_G p α β γ)` has derivative `(2*x*exp (p*(x:ℂ)^2)*erfc
-(α*x+γ/x))`. -/
-theorem erfInt_hasDerivAt_G {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0) (hβ : β ≠ 0)
+/-- At `x`, the function `(ErrorFunctionIntegrals.laplaceAntideriv p α β γ)` has derivative
+`(2*x*exp (p*(x:ℂ)^2)*erfc (α*x+γ/x))`. -/
+theorem ErrorFunctionIntegrals.hasDerivAt_laplaceAntideriv {p α β γ : ℂ} (hp : p = α^2-β^2)
+    (hp0 : p ≠ 0) (hβ : β ≠ 0)
     {x : ℝ} (hx : x ≠ 0) :
-    HasDerivAt (erfInt_G p α β γ) (2*x*exp (p*(x:ℂ)^2)*erfc (α*x+γ/x)) x := by
+    HasDerivAt (ErrorFunctionIntegrals.laplaceAntideriv p α β γ)
+        (2*x*exp (p*(x:ℂ)^2)*erfc (α*x+γ/x)) x := by
   have hx' : (x:ℂ) ≠ 0 := by exact_mod_cast hx
   have hsq : HasDerivAt (fun x : ℝ => exp (p*(x:ℂ)^2)) (exp (p*(x:ℂ)^2)*(p*(2*x))) x := by
     have h : HasDerivAt (fun w : ℂ => p*w^2) (p*(2*(x:ℂ))) (x:ℂ) := by
@@ -66,7 +68,8 @@ theorem erfInt_hasDerivAt_G {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠
     ((1+α/β)/2*exp (2*β*γ))).add (h3.const_mul ((α/β-1)/2*exp (-2*β*γ)))).const_mul
     (exp (-2*α*γ)/p))))
   convert h using 1
-  · funext y; simp only [erfInt_G, Pi.mul_apply, Pi.sub_apply, Pi.add_apply]
+  · funext y; simp only
+        [ErrorFunctionIntegrals.laplaceAntideriv, Pi.mul_apply, Pi.sub_apply, Pi.add_apply]
   · have e1 : exp (-(α*x+γ/x)^2) = exp (-2*α*γ)*exp (-(β^2*x^2+γ^2/x^2))*exp (-(p*(x:ℂ)^2)) := by
       rw [← Complex.exp_add, ← Complex.exp_add]; congr 1; rw [hp]; field_simp; ring
     have e2 : exp (-(β*x+γ/x)^2) = exp (-(β^2*x^2+γ^2/x^2))*exp (-2*β*γ) := by
@@ -88,12 +91,13 @@ theorem erfInt_hasDerivAt_G {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠
       (2*β*cexp (-(2*α*γ))*Q*((x:ℂ)^2*α-γ)/P) * hB
 
 /-- The derivative of `G(√t)`. -/
-theorem erfInt_hasDerivAt_G_sqrt {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0) (hβ : β ≠ 0)
+theorem ErrorFunctionIntegrals.hasDerivAt_laplaceAntideriv_sqrt {p α β γ : ℂ} (hp : p = α^2-β^2)
+    (hp0 : p ≠ 0) (hβ : β ≠ 0)
     {t : ℝ} (ht : 0 < t) :
-    HasDerivAt (fun t : ℝ => erfInt_G p α β γ (Real.sqrt t))
+    HasDerivAt (fun t : ℝ => ErrorFunctionIntegrals.laplaceAntideriv p α β γ (Real.sqrt t))
       (exp (p*t)*erfc (α*Real.sqrt t+γ/Real.sqrt t)) t := by
   have hs : 0 < Real.sqrt t := Real.sqrt_pos.2 ht
-  have h := (erfInt_hasDerivAt_G (γ := γ) hp hp0 hβ hs.ne').scomp t
+  have h := (ErrorFunctionIntegrals.hasDerivAt_laplaceAntideriv (γ := γ) hp hp0 hβ hs.ne').scomp t
     (Real.hasDerivAt_sqrt ht.ne')
   have hs' : (Real.sqrt t : ℂ) ≠ 0 := by exact_mod_cast hs.ne'
   have hsq : (Real.sqrt t : ℂ)^2 = t := by exact_mod_cast Real.sq_sqrt ht.le
@@ -101,7 +105,8 @@ theorem erfInt_hasDerivAt_G_sqrt {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : 
   rw [hsq, real_smul]; push_cast; field_simp
 
 /-- `erfc (βx + δ/x) → 0` as `x → ∞` when `Re β > 0` and `Re β² > 0`. -/
-theorem erfInt_tendsto_erfc_atTop {β : ℂ} (hβ : 0 < β.re) (hβ2 : 0 < (β^2).re) (δ : ℂ) :
+theorem ErrorFunctionIntegrals.tendsto_erfc_atTop {β : ℂ} (hβ : 0 < β.re)
+    (hβ2 : 0 < (β^2).re) (δ : ℂ) :
     Tendsto (fun x : ℝ => erfc (β*x+δ/x)) atTop (𝓝 0) := by
   have hinv : Tendsto (fun x : ℝ => x⁻¹) atTop (𝓝 0) := tendsto_inv_atTop_zero
   refine tendsto_erfc_zero_of_re ?_ ?_
@@ -128,7 +133,8 @@ theorem erfInt_tendsto_erfc_atTop {β : ℂ} (hβ : 0 < β.re) (hβ2 : 0 < (β^2
 /-- **Core of DLMF 7.14.4**: with `p = α² - β²`, the Laplace-type integral
 `∫₀^∞ e^{pt} erfc(α√t + γ/√t) dt` equals `e^{-2αγ-2βγ}/(β(α+β))`, given integrability and the
 decay of `e^{px²} erfc(αx+γ/x)` at infinity. -/
-theorem erfInt_laplace_core {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0) (hβ : 0 < β.re)
+theorem ErrorFunctionIntegrals.laplace_core {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0)
+    (hβ : 0 < β.re)
     (hβ2 : 0 < (β^2).re) (hγ : 0 < γ.re) (hγ2 : 0 < (γ^2).re) (hαβ : α + β ≠ 0)
     (hint : IntegrableOn (fun t : ℝ => exp (p*t)*erfc (α*Real.sqrt t+γ/Real.sqrt t)) (Ioi 0))
     (hlim : Tendsto (fun x : ℝ => exp (p*(x:ℂ)^2)*erfc (α*x+γ/x)) atTop (𝓝 0)) :
@@ -137,7 +143,7 @@ theorem erfInt_laplace_core {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠
   have hβ0 : β ≠ 0 := fun h => by simp [h] at hβ
   set L0 : ℂ := -(exp (-2*α*γ)/p*((α/β-1)*exp (-2*β*γ))) with hL0
   -- limit of `G` at `0⁺`
-  have hG0 : Tendsto (erfInt_G p α β γ) (𝓝[>] 0) (𝓝 L0) := by
+  have hG0 : Tendsto (ErrorFunctionIntegrals.laplaceAntideriv p α β γ) (𝓝[>] 0) (𝓝 L0) := by
     have hx0 : Tendsto (fun x : ℝ => (x:ℂ)) (𝓝[>] 0) (𝓝 0) := by
       have := (Complex.continuous_ofReal.tendsto 0).mono_left (nhdsWithin_le_nhds (s := Ioi 0))
       simpa using this
@@ -156,17 +162,18 @@ theorem erfInt_laplace_core {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠
         (α/β-1)/2*exp (-2*β*γ)*(2-0)) := by rw [hL0]; ring
     rw [hv]
     refine this.congr fun x => ?_
-    rw [erfInt_G]
+    rw [ErrorFunctionIntegrals.laplaceAntideriv]
   -- limit of `G` at `∞`
-  have hGi : Tendsto (erfInt_G p α β γ) atTop (𝓝 0) := by
-    have h2 := erfInt_tendsto_erfc_atTop hβ hβ2 γ
-    have h3 := erfInt_tendsto_erfc_atTop hβ hβ2 (-γ)
+  have hGi : Tendsto (ErrorFunctionIntegrals.laplaceAntideriv p α β γ) atTop (𝓝 0) := by
+    have h2 := ErrorFunctionIntegrals.tendsto_erfc_atTop hβ hβ2 γ
+    have h3 := ErrorFunctionIntegrals.tendsto_erfc_atTop hβ hβ2 (-γ)
     have := (hlim.const_mul (1/p)).sub ((((h2.const_mul ((1+α/β)/2*exp (2*β*γ))).add
       (h3.const_mul ((α/β-1)/2*exp (-2*β*γ))))).const_mul (exp (-2*α*γ)/p))
     simp only [mul_zero, add_zero, sub_zero] at this
     refine this.congr fun x => ?_
-    rw [erfInt_G]; ring
-  set f : ℝ → ℂ := Function.update (fun t : ℝ => erfInt_G p α β γ (Real.sqrt t)) 0 L0 with hf
+    rw [ErrorFunctionIntegrals.laplaceAntideriv]; ring
+  set f : ℝ → ℂ := Function.update
+      (fun t : ℝ => ErrorFunctionIntegrals.laplaceAntideriv p α β γ (Real.sqrt t)) 0 L0 with hf
   have hsq0 : Tendsto Real.sqrt (𝓝[>] 0) (𝓝[>] 0) := by
     refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
     · have := (Real.continuous_sqrt.tendsto 0).mono_left (nhdsWithin_le_nhds (s := Ioi 0))
@@ -183,7 +190,8 @@ theorem erfInt_laplace_core {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠
       (exp (p*t)*erfc (α*Real.sqrt t+γ/Real.sqrt t)) t := by
     intro t ht
     have ht : (0:ℝ) < t := ht
-    refine (erfInt_hasDerivAt_G_sqrt hp hp0 hβ0 ht).congr_of_eventuallyEq ?_
+    refine (ErrorFunctionIntegrals.hasDerivAt_laplaceAntideriv_sqrt hp hp0 hβ0
+        ht).congr_of_eventuallyEq ?_
     filter_upwards [lt_mem_nhds ht] with s hs
     simp [hf, Function.update_of_ne (ne_of_gt hs)]
   have hfi : Tendsto f atTop (𝓝 0) := by
@@ -200,7 +208,7 @@ theorem erfInt_laplace_core {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠
   ring
 
 /-- If `Re a > 0` and `Re c ≥ 0`, then `ac` is not a negative real number. -/
-theorem erfInt_re_mul_nonneg_or {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) :
+theorem ErrorFunctionIntegrals.re_mul_nonneg_or {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) :
     0 ≤ (a*c).re ∨ (a*c).im ≠ 0 := by
   by_cases h : (a*c).im = 0
   · left
@@ -214,7 +222,7 @@ theorem erfInt_re_mul_nonneg_or {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) :
   · exact Or.inr h
 
 /-- `(a t)^{1/2} = a^{1/2} √t` for `Re a > 0`, `t > 0`. -/
-theorem erfInt_cpow_half_mul_ofReal {a : ℂ} (ha : 0 < a.re) {t : ℝ} (ht : 0 < t) :
+theorem ErrorFunctionIntegrals.cpow_half_mul_ofReal {a : ℂ} (ha : 0 < a.re) {t : ℝ} (ht : 0 < t) :
     (a*t)^(1/2 : ℂ) = a^(1/2 : ℂ)*Real.sqrt t := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
   have hr : 0 < (a^(1/2 : ℂ)*(Real.sqrt t:ℂ)).re := by
@@ -224,7 +232,7 @@ theorem erfInt_cpow_half_mul_ofReal {a : ℂ} (ha : 0 < a.re) {t : ℝ} (ht : 0 
   rw [← hsq, sq_cpow_half hr]
 
 /-- `(c/t)^{1/2} = c^{1/2}/√t` for `Re c > 0`, `t > 0`. -/
-theorem erfInt_cpow_half_div_ofReal {c : ℂ} (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
+theorem ErrorFunctionIntegrals.cpow_half_div_ofReal {c : ℂ} (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
     (c/t)^(1/2 : ℂ) = c^(1/2 : ℂ)/Real.sqrt t := by
   have hc0 : c ≠ 0 := fun h => by simp [h] at hc
   have hs : 0 < Real.sqrt t := Real.sqrt_pos.2 ht
@@ -235,7 +243,7 @@ theorem erfInt_cpow_half_div_ofReal {c : ℂ} (hc : 0 < c.re) {t : ℝ} (ht : 0 
   rw [← hsq, sq_cpow_half hr]
 
 /-- `(ac)^{1/2} = a^{1/2} c^{1/2}` for `Re a > 0`, `Re c > 0`. -/
-theorem erfInt_cpow_half_mul {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) :
+theorem ErrorFunctionIntegrals.cpow_half_mul {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) :
     (a*c)^(1/2 : ℂ) = a^(1/2 : ℂ)*c^(1/2 : ℂ) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
   have hc0 : c ≠ 0 := fun h => by simp [h] at hc
@@ -249,7 +257,8 @@ theorem erfInt_cpow_half_mul {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) :
 
 /-- The sharp bound for the integrand of DLMF 7.14.4: for `Re a > 0`, `Re c > 0`, `t > 0`,
 `z = (at)^{1/2} + (c/t)^{1/2}` has `Re z > 0` and `Re z² ≥ Re a · t`. -/
-theorem erfInt_re_sq_ge {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
+theorem ErrorFunctionIntegrals.re_sq_ge {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re)
+    {t : ℝ} (ht : 0 < t) :
     0 < ((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ)).re ∧
       a.re*t ≤ (((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))^2).re := by
   have hat : 0 < (a*(t:ℂ)).re := by rw [re_mul_ofReal]; positivity
@@ -275,11 +284,12 @@ theorem erfInt_re_sq_ge {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (h
 
 /-- Bound for the integrand of DLMF 7.14.4: `‖erfc((at)^{1/2} + (c/t)^{1/2})‖ ≤ 1` and
 `≤ e^{-Re a t}/√(π Re a t)`. -/
-theorem erfInt_norm_erfc_plus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
+theorem ErrorFunctionIntegrals.norm_erfc_plus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re)
+    {t : ℝ} (ht : 0 < t) :
     ‖erfc ((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))‖ ≤ 1 ∧
       ‖erfc ((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))‖ ≤
         Real.exp (-(a.re*t))/Real.sqrt (π*(a.re*t)) := by
-  obtain ⟨h1, h2⟩ := erfInt_re_sq_ge ha hc ht
+  obtain ⟨h1, h2⟩ := ErrorFunctionIntegrals.re_sq_ge ha hc ht
   have hat : 0 < a.re*t := by positivity
   have h2' : 0 < (((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))^2).re := lt_of_lt_of_le hat h2
   refine ⟨norm_erfc_le_one h1 h2', (norm_erfc_le h1 h2').trans ?_⟩
@@ -287,10 +297,11 @@ theorem erfInt_norm_erfc_plus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t 
   gcongr
 
 /-- A uniform exponential majorant for the integrand of DLMF 7.14.4. -/
-theorem erfInt_norm_plus_le {a b c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
+theorem ErrorFunctionIntegrals.norm_plus_le {a b c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re)
+    {t : ℝ} (ht : 0 < t) :
     ‖exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))‖ ≤
       (Real.exp (|(a-b).re| + |b.re|) + 1/Real.sqrt (π*a.re)) * Real.exp (-(b.re*t)) := by
-  obtain ⟨h1, h2⟩ := erfInt_norm_erfc_plus_le ha hc ht
+  obtain ⟨h1, h2⟩ := ErrorFunctionIntegrals.norm_erfc_plus_le ha hc ht
   have hre : ((a-b)*(t:ℂ)).re = (a.re - b.re)*t := by simp [sub_re]
   rw [norm_mul, Complex.norm_exp, hre]
   have hK : 0 ≤ 1/Real.sqrt (π*a.re) := by positivity
@@ -330,7 +341,8 @@ theorem erfInt_norm_plus_le {a b c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : �
           linarith [Real.exp_pos (|(a-b).re| + |b.re|)]
 
 /-- Continuity of the integrand of DLMF 7.14.4 on `(0, ∞)`. -/
-theorem erfInt_continuousOn_plus (s : ℂ) {a c : ℂ} (ha : 0 ≤ a.re) (hc : 0 ≤ c.re) (σ : ℂ) :
+theorem ErrorFunctionIntegrals.continuousOn_plus (s : ℂ) {a c : ℂ} (ha : 0 ≤ a.re)
+    (hc : 0 ≤ c.re) (σ : ℂ) :
     ContinuousOn (fun t : ℝ => exp (s*t)*erfc (σ*(a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))) (Ioi 0) := by
   intro t ht
   have ht : (0:ℝ) < t := ht
@@ -350,7 +362,8 @@ theorem erfInt_continuousOn_plus (s : ℂ) {a c : ℂ} (ha : 0 ≤ a.re) (hc : 0
     (hE.continuousAt.comp ((continuousAt_const.mul h1).add h2))
 
 /-- **DLMF 7.14.4 for `Re c > 0`, `a ≠ b`.** -/
-theorem erfInt_laplace_plus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re)
+theorem ErrorFunctionIntegrals.laplace_plus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+    (hc : 0 < c.re)
     (hab : a ≠ b) :
     (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ))) =
       exp (-2*((a*c)^(1/2 : ℂ)+(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(a^(1/2 : ℂ)+b^(1/2 : ℂ))) := by
@@ -374,7 +387,8 @@ theorem erfInt_laplace_plus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.
   have hform : ∀ t : ℝ, 0 < t → exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)) =
       exp ((a-b)*t)*erfc (α*Real.sqrt t+γ/Real.sqrt t) := by
     intro t ht
-    rw [erfInt_cpow_half_mul_ofReal ha ht, erfInt_cpow_half_div_ofReal hc ht]
+    rw [ErrorFunctionIntegrals.cpow_half_mul_ofReal ha ht,
+        ErrorFunctionIntegrals.cpow_half_div_ofReal hc ht]
   have hint0 : IntegrableOn (fun t : ℝ => exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)))
       (Ioi 0) := by
     have hg : IntegrableOn (fun t : ℝ => (Real.exp (|(a-b).re| + |b.re|) +
@@ -384,8 +398,8 @@ theorem erfInt_laplace_plus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.
         (exp_neg_integrableOn_Ioi 0 hb).const_mul _
       refine this.congr_fun (fun t _ => by ring_nf) measurableSet_Ioi
     refine hg.mono' ?_ ((ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
-      fun t ht => erfInt_norm_plus_le ha hc ht))
-    have := erfInt_continuousOn_plus (a-b) ha.le hc.le 1
+      fun t ht => ErrorFunctionIntegrals.norm_plus_le ha hc ht))
+    have := ErrorFunctionIntegrals.continuousOn_plus (a-b) ha.le hc.le 1
     simp only [one_mul] at this
     exact this.aestronglyMeasurable measurableSet_Ioi
   have hint : IntegrableOn (fun t : ℝ => exp ((a-b)*t)*erfc (α*Real.sqrt t+γ/Real.sqrt t))
@@ -400,28 +414,30 @@ theorem erfInt_laplace_plus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.
     refine squeeze_zero_norm' ?_ hd
     filter_upwards [eventually_gt_atTop 0] with x hx
     have hx2 : (0:ℝ) < x^2 := by positivity
-    have := erfInt_norm_plus_le (b := b) ha hc hx2
+    have := ErrorFunctionIntegrals.norm_plus_le (b := b) ha hc hx2
     rw [hform _ hx2, Real.sqrt_sq hx.le] at this
     push_cast at this
     exact this
-  have hcore := erfInt_laplace_core hp hp0 hβr (by rw [hβ2]; exact hb) hγr (by rw [hγ2]; exact hc)
+  have hcore := ErrorFunctionIntegrals.laplace_core hp hp0 hβr (by rw [hβ2]; exact hb) hγr
+      (by rw [hγ2]; exact hc)
     hαβ hint hlim
   rw [setIntegral_congr_fun measurableSet_Ioi (fun t ht => hform t ht), hcore,
-    erfInt_cpow_half_mul ha hc, erfInt_cpow_half_mul hb hc]
+    ErrorFunctionIntegrals.cpow_half_mul ha hc, ErrorFunctionIntegrals.cpow_half_mul hb hc]
   simp only [hα, hβ, hγ]
   congr 1
   ring_nf
 
 /-- Continuity of `w ↦ w^{1/2}` at points with `Re w ≥ 0`. -/
-theorem erfInt_continuousAt_cpow_half {w : ℂ} (hw : 0 ≤ w.re ∨ w.im ≠ 0) :
+theorem ErrorFunctionIntegrals.continuousAt_cpow_half {w : ℂ} (hw : 0 ≤ w.re ∨ w.im ≠ 0) :
     ContinuousAt (fun z : ℂ => z^(1/2 : ℂ)) w :=
   continuousAt_cpow_const_of_re_pos hw (by norm_num)
 
 /-- `ε ↦ (c+ε)/t` and the half power: continuity at `ε = 0` for `Re c ≥ 0`, `t > 0`. -/
-theorem erfInt_tendsto_cpow_half_shift {c : ℂ} (hc : 0 ≤ c.re) {t : ℝ} (ht : 0 < t) :
+theorem ErrorFunctionIntegrals.tendsto_cpow_half_shift {c : ℂ} (hc : 0 ≤ c.re)
+    {t : ℝ} (ht : 0 < t) :
     Tendsto (fun ε : ℝ => ((c+ε)/t)^(1/2 : ℂ)) (𝓝[>] 0) (𝓝 ((c/t)^(1/2 : ℂ))) := by
   have hg : ContinuousAt (fun z : ℂ => z^(1/2:ℂ)) ((c + ((0:ℝ):ℂ))/(t:ℂ)) :=
-    erfInt_continuousAt_cpow_half (Or.inl (by
+    ErrorFunctionIntegrals.continuousAt_cpow_half (Or.inl (by
       simp only [ofReal_zero, add_zero, div_ofReal_re]; positivity))
   have hf : ContinuousAt (fun ε : ℝ => (c+(ε:ℂ))/(t:ℂ)) 0 := by fun_prop
   have h : ContinuousAt (fun ε : ℝ => ((c+ε)/t)^(1/2 : ℂ)) 0 :=
@@ -430,8 +446,9 @@ theorem erfInt_tendsto_cpow_half_shift {c : ℂ} (hc : 0 ≤ c.re) {t : ℝ} (ht
   simpa using this
 
 /-- **DLMF 7.14.4** in full: `Re a > 0`, `Re b > 0`, `Re c ≥ 0`. From
-`erfInt_laplace_plus_of_re_pos` by continuity in `(b, c) ↦ (b+ε, c+ε)`, `ε → 0⁺`. -/
-theorem erfInt_laplace_plus {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re) :
+`ErrorFunctionIntegrals.laplace_plus_of_re_pos` by continuity in `(b, c) ↦ (b+ε, c+ε)`, `ε → 0⁺`. -/
+theorem ErrorFunctionIntegrals.laplace_plus {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+    (hc : 0 ≤ c.re) :
     (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ))) =
       exp (-2*((a*c)^(1/2 : ℂ)+(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(a^(1/2 : ℂ)+b^(1/2 : ℂ))) := by
   set F : ℝ → ℝ → ℂ := fun ε t => exp ((a-(b+ε))*t)*erfc ((a*t)^(1/2 : ℂ)+((c+ε)/t)^(1/2 : ℂ))
@@ -446,13 +463,14 @@ theorem erfInt_laplace_plus {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 
     refine tendsto_integral_filter_of_dominated_convergence (fun t => K * Real.exp (-b.re*t))
       ?_ ?_ ((exp_neg_integrableOn_Ioi 0 hb).const_mul K) ?_
     · filter_upwards [self_mem_nhdsWithin] with ε hε
-      have := erfInt_continuousOn_plus (a-(b+ε)) (a := a) (c := c+ε) ha.le (hre1 ε hε).2.le 1
+      have := ErrorFunctionIntegrals.continuousOn_plus (a-(b+ε)) (a := a) (c := c+ε) ha.le
+          (hre1 ε hε).2.le 1
       simp only [one_mul] at this
       exact this.aestronglyMeasurable measurableSet_Ioi
     · filter_upwards [Ioo_mem_nhdsGT (show (0:ℝ) < 1 by norm_num)] with ε hε
       refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht => ?_)
       have ht : (0:ℝ) < t := ht
-      have h := erfInt_norm_plus_le (b := b+ε) ha (hre1 ε hε.1).2 ht
+      have h := ErrorFunctionIntegrals.norm_plus_le (b := b+ε) ha (hre1 ε hε.1).2 ht
       refine h.trans ?_
       have e1 : |(a-(b+ε)).re| ≤ |(a-b).re| + 1 := by
         have : (a-(b+ε)).re = (a-b).re - ε := by simp [sub_re]; ring
@@ -475,7 +493,8 @@ theorem erfInt_laplace_plus {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 
       have h1 : Tendsto (fun ε : ℝ => exp ((a-(b+ε))*t)) (𝓝[>] 0) (𝓝 (exp ((a-(b+((0:ℝ):ℂ)))*t))) :=
         ((by fun_prop : Continuous fun ε : ℝ => exp ((a-(b+ε))*t)).tendsto 0).mono_left
           nhdsWithin_le_nhds
-      have h2 := ((hE.tendsto _).comp ((erfInt_tendsto_cpow_half_shift hc ht).const_add
+      have h2 := ((hE.tendsto _).comp
+          ((ErrorFunctionIntegrals.tendsto_cpow_half_shift hc ht).const_add
         ((a*t)^(1/2 : ℂ))))
       have := h1.mul h2
       simp only [ofReal_zero, add_zero] at this
@@ -484,14 +503,17 @@ theorem erfInt_laplace_plus {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 
   have hRc : Tendsto R (𝓝[>] 0) (𝓝 (R 0)) := by
     have hbc : ContinuousAt (fun ε : ℝ => (b+ε)^(1/2 : ℂ)) 0 :=
       ContinuousAt.comp (g := fun z : ℂ => z^(1/2:ℂ)) (f := fun ε : ℝ => b+(ε:ℂ))
-        (erfInt_continuousAt_cpow_half (Or.inl (by simp; exact hb.le))) (by fun_prop)
+        (ErrorFunctionIntegrals.continuousAt_cpow_half
+            (Or.inl (by simp; exact hb.le))) (by fun_prop)
     have hac : ContinuousAt (fun ε : ℝ => (a*(c+ε))^(1/2 : ℂ)) 0 :=
       ContinuousAt.comp (g := fun z : ℂ => z^(1/2:ℂ)) (f := fun ε : ℝ => a*(c+(ε:ℂ)))
-        (erfInt_continuousAt_cpow_half (by simpa using erfInt_re_mul_nonneg_or ha hc))
+        (ErrorFunctionIntegrals.continuousAt_cpow_half
+            (by simpa using ErrorFunctionIntegrals.re_mul_nonneg_or ha hc))
         (by fun_prop)
     have hbc' : ContinuousAt (fun ε : ℝ => ((b+ε)*(c+ε))^(1/2 : ℂ)) 0 :=
       ContinuousAt.comp (g := fun z : ℂ => z^(1/2:ℂ)) (f := fun ε : ℝ => (b+(ε:ℂ))*(c+(ε:ℂ)))
-        (erfInt_continuousAt_cpow_half (by simpa using erfInt_re_mul_nonneg_or hb hc))
+        (ErrorFunctionIntegrals.continuousAt_cpow_half
+            (by simpa using ErrorFunctionIntegrals.re_mul_nonneg_or hb hc))
         (by fun_prop)
     have hden : ((b+((0:ℝ):ℂ))^(1/2 : ℂ)*(a^(1/2 : ℂ)+(b+((0:ℝ):ℂ))^(1/2 : ℂ))) ≠ 0 := by
       simp only [ofReal_zero, add_zero]
@@ -520,12 +542,12 @@ theorem erfInt_laplace_plus {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 
   have heq : (fun ε => ∫ t in Ioi (0:ℝ), F ε t) =ᶠ[𝓝[>] 0] R := by
     filter_upwards [self_mem_nhdsWithin, hne] with ε hε hab
     obtain ⟨h1, h2⟩ := hre1 ε hε
-    exact erfInt_laplace_plus_of_re_pos ha h1 h2 hab
+    exact ErrorFunctionIntegrals.laplace_plus_of_re_pos ha h1 h2 hab
   have := tendsto_nhds_unique (hI.congr' heq) hRc
   simpa [hF, hR] using this
 
 /-- A crude global bound: `‖erf w‖ ≤ (2/√π) ‖w‖ e^{max(0, -Re w²)}`. -/
-theorem erfInt_norm_erf_le (w : ℂ) :
+theorem ErrorFunctionIntegrals.norm_erf_le (w : ℂ) :
     ‖erf w‖ ≤ 2/Real.sqrt π * Real.exp (max 0 (-(w^2).re)) * ‖w‖ := by
   have hs : Convex ℝ (segment ℝ (0:ℂ) w) := convex_segment _ _
   have h := hs.norm_image_sub_le_of_norm_hasDerivWithin_le (f := erf)
@@ -555,7 +577,7 @@ theorem erfInt_norm_erf_le (w : ℂ) :
 
 /-- Bound for the integrand of the companion of DLMF 7.14.4: for `Re a > 0`, `Re c > 0`,
 `‖c‖ ≤ M`, `t > 0`. -/
-theorem erfInt_norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {M : ℝ}
+theorem ErrorFunctionIntegrals.norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {M : ℝ}
     (hM : ‖c‖ ≤ M) {t : ℝ} (ht : 0 < t) :
     ‖erfc (-(a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))‖ ≤ 1 + 2/Real.sqrt π *
       Real.exp (2*Real.sqrt (‖a‖*M)) *
@@ -600,7 +622,7 @@ theorem erfInt_norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {M
         _ = Real.sqrt (‖a‖*M) := by
             rw [Real.sqrt_mul (norm_nonneg _)]; field_simp
     refine max_le (by positivity) (by linarith)
-  have herf := erfInt_norm_erf_le (-u+v)
+  have herf := ErrorFunctionIntegrals.norm_erf_le (-u+v)
   have : erfc (-u+v) = 1 - erf (-u+v) := rfl
   rw [this]
   refine (norm_sub_le _ _).trans ?_
@@ -611,7 +633,7 @@ theorem erfInt_norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {M
         (Real.sqrt ‖a‖ * Real.sqrt t + Real.sqrt M / Real.sqrt t) := by gcongr
 
 /-- Integrability of `(A + B√t + C/√t) e^{-λt}` on `(0, ∞)`. -/
-theorem erfInt_integrableOn_majorant {l : ℝ} (hl : 0 < l) (A B C : ℝ) :
+theorem ErrorFunctionIntegrals.integrableOn_majorant {l : ℝ} (hl : 0 < l) (A B C : ℝ) :
     IntegrableOn (fun t : ℝ => (A + B*Real.sqrt t + C/Real.sqrt t) *
         Real.exp (-(l*t))) (Ioi 0) := by
   have h0 : IntegrableOn (fun t : ℝ => t^(0:ℝ) * Real.exp (-l * t^(1:ℝ))) (Ioi 0) :=
@@ -628,7 +650,8 @@ theorem erfInt_integrableOn_majorant {l : ℝ} (hl : 0 < l) (A B C : ℝ) :
   ring_nf
 
 /-- **Companion of DLMF 7.14.4 for `Re c > 0`.** -/
-theorem erfInt_laplace_minus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re)
+theorem ErrorFunctionIntegrals.laplace_minus_of_re_pos {a b c : ℂ} (ha : 0 < a.re)
+    (hba : 0 < (b-a).re)
     (hc : 0 < c.re) :
     (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc (-(a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ))) =
       exp (2*((a*c)^(1/2 : ℂ)-(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(b^(1/2 : ℂ)-a^(1/2 : ℂ))) := by
@@ -653,13 +676,14 @@ theorem erfInt_laplace_minus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < 
   have hform : ∀ t : ℝ, 0 < t → exp ((a-b)*t)*erfc (-(a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)) =
       exp ((a-b)*t)*erfc (α*Real.sqrt t+γ/Real.sqrt t) := by
     intro t ht
-    rw [erfInt_cpow_half_mul_ofReal ha ht, erfInt_cpow_half_div_ofReal hc ht, hα, neg_mul]
+    rw [ErrorFunctionIntegrals.cpow_half_mul_ofReal ha ht,
+        ErrorFunctionIntegrals.cpow_half_div_ofReal hc ht, hα, neg_mul]
   set l := (b-a).re with hl
   set Cst := 2/Real.sqrt π * Real.exp (2*Real.sqrt (‖a‖*‖c‖)) with hCst
   have hbnd : ∀ t : ℝ, 0 < t → ‖exp ((a-b)*t)*erfc (-(a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ))‖ ≤
       (1 + Cst*Real.sqrt ‖a‖*Real.sqrt t + Cst*Real.sqrt ‖c‖/Real.sqrt t) * Real.exp (-(l*t)) := by
     intro t ht
-    have h := erfInt_norm_erfc_minus_le ha hc le_rfl ht
+    have h := ErrorFunctionIntegrals.norm_erfc_minus_le ha hc le_rfl ht
     have hre : ((a-b)*(t:ℂ)).re = -(l*t) := by simp [hl, sub_re]; ring
     rw [norm_mul, Complex.norm_exp, hre, mul_comm]
     gcongr
@@ -667,9 +691,10 @@ theorem erfInt_laplace_minus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < 
     simp only [hCst]; ring
   have hint0 : IntegrableOn (fun t : ℝ => exp ((a-b)*t)*erfc (-(a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)))
       (Ioi 0) := by
-    refine (erfInt_integrableOn_majorant hba _ _ _).mono' ?_ ((ae_restrict_iff' measurableSet_Ioi).2
+    refine (ErrorFunctionIntegrals.integrableOn_majorant hba _ _ _).mono' ?_
+        ((ae_restrict_iff' measurableSet_Ioi).2
       (Eventually.of_forall fun t ht => hbnd t ht))
-    have := erfInt_continuousOn_plus (a-b) ha.le hc.le (-1)
+    have := ErrorFunctionIntegrals.continuousOn_plus (a-b) ha.le hc.le (-1)
     simp only [neg_one_mul] at this
     exact this.aestronglyMeasurable measurableSet_Ioi
   have hint : IntegrableOn (fun t : ℝ => exp ((a-b)*t)*erfc (α*Real.sqrt t+γ/Real.sqrt t))
@@ -677,7 +702,7 @@ theorem erfInt_laplace_minus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < 
   have hlim : Tendsto (fun x : ℝ => exp ((a-b)*(x:ℂ)^2)*erfc (α*x+γ/x)) atTop (𝓝 0) := by
     have h2 : Tendsto (fun x : ℝ => erfc (α*x+γ/x)) atTop (𝓝 (2 - 0)) := by
       have ha2 : 0 < ((a^(1/2 : ℂ))^2).re := by rw [cpow_half_sq ha0]; exact ha
-      have := (erfInt_tendsto_erfc_atTop (re_cpow_half_pos ha) ha2 (-γ)).const_sub 2
+      have := (ErrorFunctionIntegrals.tendsto_erfc_atTop (re_cpow_half_pos ha) ha2 (-γ)).const_sub 2
       refine this.congr fun x => ?_
       rw [← erfc_negative]; congr 1; rw [hα]; ring
     have h1 : Tendsto (fun x : ℝ => exp ((a-b)*(x:ℂ)^2)) atTop (𝓝 0) := by
@@ -689,17 +714,19 @@ theorem erfInt_laplace_minus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < 
         rw [← ofReal_pow, re_mul_ofReal, hl]; simp [sub_re]; ring
       simp only [Function.comp_apply]; rw [Complex.norm_exp, hre]
     simpa using h1.mul h2
-  have hcore := erfInt_laplace_core hp hp0 hβr (by rw [hβ2]; exact hb) hγr (by rw [hγ2]; exact hc)
+  have hcore := ErrorFunctionIntegrals.laplace_core hp hp0 hβr (by rw [hβ2]; exact hb) hγr
+      (by rw [hγ2]; exact hc)
     hαβ hint hlim
   rw [setIntegral_congr_fun measurableSet_Ioi (fun t ht => hform t ht), hcore,
-    erfInt_cpow_half_mul ha hc, erfInt_cpow_half_mul hb hc]
+    ErrorFunctionIntegrals.cpow_half_mul ha hc, ErrorFunctionIntegrals.cpow_half_mul hb hc]
   simp only [hα, hβ, hγ]
   congr 1
   · congr 1; ring
   · ring
 
 /-- **Companion of DLMF 7.14.4** in full (`Re c ≥ 0`), by continuity in `c ↦ c + ε`. -/
-theorem erfInt_laplace_minus {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re) (hc : 0 ≤ c.re) :
+theorem ErrorFunctionIntegrals.laplace_minus {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re)
+    (hc : 0 ≤ c.re) :
     (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc (-(a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ))) =
       exp (2*((a*c)^(1/2 : ℂ)-(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(b^(1/2 : ℂ)-a^(1/2 : ℂ))) := by
   have hb : 0 < b.re := by have : (b-a).re = b.re - a.re := sub_re b a; linarith
@@ -715,9 +742,10 @@ theorem erfInt_laplace_minus {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re) 
   have hI : Tendsto (fun ε => ∫ t in Ioi (0:ℝ), F ε t) (𝓝[>] 0) (𝓝 (∫ t in Ioi (0:ℝ), F 0 t)) := by
     refine tendsto_integral_filter_of_dominated_convergence
       (fun t => (1 + Cst*Real.sqrt ‖a‖*Real.sqrt t + Cst*Real.sqrt M/Real.sqrt t) *
-        Real.exp (-(l*t))) ?_ ?_ (erfInt_integrableOn_majorant hba _ _ _) ?_
+        Real.exp (-(l*t))) ?_ ?_ (ErrorFunctionIntegrals.integrableOn_majorant hba _ _ _) ?_
     · filter_upwards [self_mem_nhdsWithin] with ε hε
-      have := erfInt_continuousOn_plus (a-b) (a := a) (c := c+ε) ha.le (hre1 ε hε).le (-1)
+      have := ErrorFunctionIntegrals.continuousOn_plus (a-b) (a := a) (c := c+ε) ha.le
+          (hre1 ε hε).le (-1)
       simp only [neg_one_mul] at this
       exact this.aestronglyMeasurable measurableSet_Ioi
     · filter_upwards [Ioo_mem_nhdsGT (show (0:ℝ) < 1 by norm_num)] with ε hε
@@ -726,7 +754,7 @@ theorem erfInt_laplace_minus {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re) 
       have hcM : ‖c+ε‖ ≤ M := by
         refine (norm_add_le _ _).trans ?_
         rw [Complex.norm_real, Real.norm_of_nonneg hε.1.le]; linarith [hε.2]
-      have h := erfInt_norm_erfc_minus_le ha (hre1 ε hε.1) hcM ht
+      have h := ErrorFunctionIntegrals.norm_erfc_minus_le ha (hre1 ε hε.1) hcM ht
       have hre : ((a-b)*(t:ℂ)).re = -(l*t) := by simp [hl, sub_re]; ring
       simp only [hF]
       rw [norm_mul, Complex.norm_exp, hre, mul_comm]
@@ -737,18 +765,21 @@ theorem erfInt_laplace_minus {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re) 
       have ht : (0:ℝ) < t := ht
       have hE : Continuous erfc := by
         unfold erfc; have := differentiable_erf_complex.continuous; fun_prop
-      have h2 := ((hE.tendsto _).comp ((erfInt_tendsto_cpow_half_shift hc ht).const_add
+      have h2 := ((hE.tendsto _).comp
+          ((ErrorFunctionIntegrals.tendsto_cpow_half_shift hc ht).const_add
         (-(a*t)^(1/2 : ℂ))))
       have := h2.const_mul (exp ((a-b)*t))
       simpa [hF] using this
   have hRc : Tendsto R (𝓝[>] 0) (𝓝 (R 0)) := by
     have hac : ContinuousAt (fun ε : ℝ => (a*(c+ε))^(1/2 : ℂ)) 0 :=
       ContinuousAt.comp (g := fun z : ℂ => z^(1/2:ℂ)) (f := fun ε : ℝ => a*(c+(ε:ℂ)))
-        (erfInt_continuousAt_cpow_half (by simpa using erfInt_re_mul_nonneg_or ha hc))
+        (ErrorFunctionIntegrals.continuousAt_cpow_half
+            (by simpa using ErrorFunctionIntegrals.re_mul_nonneg_or ha hc))
         (by fun_prop)
     have hbc : ContinuousAt (fun ε : ℝ => (b*(c+ε))^(1/2 : ℂ)) 0 :=
       ContinuousAt.comp (g := fun z : ℂ => z^(1/2:ℂ)) (f := fun ε : ℝ => b*(c+(ε:ℂ)))
-        (erfInt_continuousAt_cpow_half (by simpa using erfInt_re_mul_nonneg_or hb hc))
+        (ErrorFunctionIntegrals.continuousAt_cpow_half
+            (by simpa using ErrorFunctionIntegrals.re_mul_nonneg_or hb hc))
         (by fun_prop)
     have hcont : ContinuousAt R 0 := by
       simp only [hR]
@@ -756,7 +787,7 @@ theorem erfInt_laplace_minus {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re) 
     exact hcont.tendsto.mono_left nhdsWithin_le_nhds
   have heq : (fun ε => ∫ t in Ioi (0:ℝ), F ε t) =ᶠ[𝓝[>] 0] R := by
     filter_upwards [self_mem_nhdsWithin] with ε hε
-    exact erfInt_laplace_minus_of_re_pos ha hba (hre1 ε hε)
+    exact ErrorFunctionIntegrals.laplace_minus_of_re_pos ha hba (hre1 ε hε)
   have := tendsto_nhds_unique (hI.congr' heq) hRc
   simpa [hF, hR] using this
 
@@ -767,14 +798,14 @@ theorem erfInt_laplace_minus {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re) 
 theorem erfc_sqrt_reciprocal_laplace {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re) :
     (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)))=exp
         (-2*((a*c)^(1/2 : ℂ)+(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(a^(1/2 : ℂ)+b^(1/2 : ℂ))) :=
-  erfInt_laplace_plus ha hb hc
+  ErrorFunctionIntegrals.laplace_plus ha hb hc
 
 /-- Unnumbered transform following DLMF 7.14.4. -/
 theorem erfc_sqrt_reciprocal_laplace_negative {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < (b-a).re)
     (hc : 0 ≤ c.re) :
     (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc (-(a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ)))=exp
         (2*((a*c)^(1/2 : ℂ)-(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(b^(1/2 : ℂ)-a^(1/2 : ℂ))) :=
-  erfInt_laplace_minus ha hb hc
+  ErrorFunctionIntegrals.laplace_minus ha hb hc
 
 /-- A continuous function with a limit at `+∞` is bounded on `[0, ∞)`. -/
 theorem exists_bound_Ici_of_tendsto {g : ℝ → ℂ} {L : ℂ} (hg : Continuous g)

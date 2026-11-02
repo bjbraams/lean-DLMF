@@ -48,6 +48,8 @@ the Gamma area.
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
+open DLMF.Core
+
 namespace DLMF.Confluent
 
 /-- The unique real zero of Ei. -/
@@ -72,17 +74,17 @@ function `f(x) = Ci(x) sin x - si(x) cos x` (DLMF 6.7.13); between consecutive c
 functions are strictly monotone, which separates the zeros. -/
 
 /-- The real auxiliary function `f(x) = Ci(x) sin x - si(x) cos x`. -/
-theorem ezero_auxF_ofReal {x : ℝ} (hx : 0 < x) :
+theorem ExpIntegralZeros.auxF_ofReal {x : ℝ} (hx : 0 < x) :
     expIntAuxF x = ((Real.cosInt x * Real.sin x - (Real.sinInt x - π / 2) *
         Real.cos x : ℝ) : ℂ) := by
   rw [expIntAuxF, cosInt_ofReal hx, sinIntTail, sinInt_ofReal, ← ofReal_sin, ← ofReal_cos]
   push_cast; ring
 
 /-- `f(x) > 0` for `x > 0`, from the Laplace representation (DLMF 6.7.13). -/
-theorem ezero_auxF_pos {x : ℝ} (hx : 0 < x) :
+theorem ExpIntegralZeros.auxF_pos {x : ℝ} (hx : 0 < x) :
     0 < Real.cosInt x * Real.sin x - (Real.sinInt x - π / 2) * Real.cos x := by
   have h := expIntAuxF_laplace_integral (z := (x : ℂ)) (by simp; linarith)
-  rw [ezero_auxF_ofReal hx] at h
+  rw [ExpIntegralZeros.auxF_ofReal hx] at h
   have h' := (Complex.continuous_re.tendsto _).comp h
   simp only [Function.comp_def, ofReal_re] at h'
   set g : ℝ → ℝ := fun t => Real.exp (-x * t) / (t ^ 2 + 1) with hg
@@ -117,19 +119,19 @@ theorem ezero_auxF_pos {x : ℝ} (hx : 0 < x) :
   linarith [Real.exp_pos (-x)]
 
 /-- At the points `nπ`, `(-1)^n si(nπ) = -f(nπ)`. -/
-theorem ezero_si_nat_mul_pi {n : ℕ} (hn : 1 ≤ n) :
+theorem ExpIntegralZeros.si_nat_mul_pi {n : ℕ} (hn : 1 ≤ n) :
     (-1) ^ n * (Real.sinInt (n * π) - π / 2) < 0 := by
   have hx : 0 < (n : ℝ) * π := by have : (1 : ℝ) ≤ n := by exact_mod_cast hn
                                   positivity
-  have h := ezero_auxF_pos hx
+  have h := ExpIntegralZeros.auxF_pos hx
   rw [Real.sin_nat_mul_pi, Real.cos_nat_mul_pi] at h
   linarith
 
 /-- At the points `(m + 1/2)π`, `Ci = (-1)^m f`. -/
-theorem ezero_ci_half {m : ℕ} :
+theorem ExpIntegralZeros.ci_half {m : ℕ} :
     0 < (-1) ^ m * Real.cosInt ((m + 1 / 2) * π) := by
   have hx : 0 < ((m : ℝ) + 1 / 2) * π := by positivity
-  have h := ezero_auxF_pos hx
+  have h := ExpIntegralZeros.auxF_pos hx
   have hs : Real.sin ((m + 1 / 2) * π) = (-1) ^ m := by
     rw [show ((m : ℝ) + 1 / 2) * π = π / 2 + m * π by ring, Real.sin_add_nat_mul_pi,
                                                         Real.sin_pi_div_two,
@@ -143,11 +145,11 @@ theorem ezero_ci_half {m : ℕ} :
   nlinarith
 
 /-- Identity under the stated parameter and domain assumptions: `Real.sinInt 0 = 0`. -/
-theorem ezero_sinInt_zero : Real.sinInt 0 = 0 := by simp [Real.sinInt]
+theorem ExpIntegralZeros.sinInt_zero : Real.sinInt 0 = 0 := by simp [Real.sinInt]
 
 /-- Identity under the stated parameter and domain assumptions: `StrictMonoOn (fun x => (-1) ^ n *
 (Real.sinInt x - π / 2)) (Icc (n * π) ((n + 1) * π))`. -/
-theorem ezero_si_mono (n : ℕ) :
+theorem ExpIntegralZeros.si_mono (n : ℕ) :
     StrictMonoOn (fun x => (-1) ^ n * (Real.sinInt x - π / 2)) (Icc (n * π) ((n + 1) * π)) := by
   have hπ := Real.pi_pos
   refine strictMonoOn_of_deriv_pos (convex_Icc _ _) ?_ fun x hx => ?_
@@ -167,17 +169,17 @@ theorem ezero_si_mono (n : ℕ) :
 
 /-- Formula under the stated hypotheses: `∃! x, x ∈ Ioo ((n : ℝ) * π) ((n + 1 : ℕ) * π) ∧
 Real.sinInt x - π / 2 = 0`. -/
-theorem ezero_si_unique (n : ℕ) :
+theorem ExpIntegralZeros.si_unique (n : ℕ) :
     ∃! x, x ∈ Ioo ((n : ℝ) * π) ((n + 1 : ℕ) * π) ∧ Real.sinInt x - π / 2 = 0 := by
   have hπ := Real.pi_pos
   have hne : ((-1 : ℝ) ^ n) ≠ 0 := pow_ne_zero _ (by norm_num)
-  have hm := ezero_si_mono n
+  have hm := ExpIntegralZeros.si_mono n
   have hlo : (-1) ^ n * (Real.sinInt (n * π) - π / 2) < 0 := by
     rcases Nat.eq_zero_or_pos n with rfl | hn
-    · simp [ezero_sinInt_zero]; linarith
-    · exact ezero_si_nat_mul_pi hn
+    · simp [ExpIntegralZeros.sinInt_zero]; linarith
+    · exact ExpIntegralZeros.si_nat_mul_pi hn
   have hhi : 0 < (-1) ^ n * (Real.sinInt ((n + 1) * π) - π / 2) := by
-    have := ezero_si_nat_mul_pi (n := n + 1) (by omega)
+    have := ExpIntegralZeros.si_nat_mul_pi (n := n + 1) (by omega)
     push_cast at this
     rw [pow_succ] at this; linarith
   have hc : ContinuousOn (fun x => (-1) ^ n * (Real.sinInt x - π / 2))
@@ -190,7 +192,7 @@ theorem ezero_si_unique (n : ℕ) :
   simpa [hne] using hx0
 
 /-- The positive zeros of `si`, separated by the points `nπ`. -/
-theorem ezero_si_enum :
+theorem ExpIntegralZeros.si_enumeration :
     ∃ z : ℕ → ℝ, StrictMono z ∧ (∀ n : ℕ, z n ∈ Ioo ((n : ℝ) * π) (((n + 1 : ℕ) : ℝ) * π)) ∧
       (∀ x, 0 < x → (Real.sinInt x - π / 2 = 0 ↔ ∃ k, z k = x)) ∧
       (∀ k, 0 < z k ∧ Real.sinInt (z k) - π / 2 = 0 ∧
@@ -200,35 +202,37 @@ theorem ezero_si_enum :
   have hπ := Real.pi_pos
   refine zcount_enum (P := fun x => Real.sinInt x - π / 2 = 0) (t := fun n => n * π) (by simp)
     (fun m n h => by simp only; gcongr) (fun x => ⟨⌈x / π⌉₊, ?_⟩)
-    ezero_si_unique (fun n h => ?_)
+    ExpIntegralZeros.si_unique (fun n h => ?_)
   · have := Nat.le_ceil (x / π)
     rwa [div_le_iff₀ hπ] at this
-  · obtain ⟨x, ⟨hx, -⟩, -⟩ := ezero_si_unique n
-    have := ezero_si_nat_mul_pi (n := n + 1) (by omega)
+  · obtain ⟨x, ⟨hx, -⟩, -⟩ := ExpIntegralZeros.si_unique n
+    have := ExpIntegralZeros.si_nat_mul_pi (n := n + 1) (by omega)
     rw [h, mul_zero] at this
     exact lt_irrefl _ this
 
 /-- Estimate under the stated parameter and domain assumptions: `0 ≤ Real.cosIntCin x`. -/
-theorem ezero_cosIntCin_nonneg {x : ℝ} (hx : 0 ≤ x) : 0 ≤ Real.cosIntCin x :=
+theorem ExpIntegralZeros.cosIntCin_nonneg {x : ℝ} (hx : 0 ≤ x) : 0 ≤ Real.cosIntCin x :=
   intervalIntegral.integral_nonneg hx fun t ht =>
     div_nonneg (sub_nonneg.mpr (Real.cos_le_one t)) ht.1
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.cosInt (Real.exp (-1)) < 0`.
 -/
-theorem ezero_ci_neg : Real.cosInt (Real.exp (-1)) < 0 := by
+theorem ExpIntegralZeros.ci_neg : Real.cosInt (Real.exp (-1)) < 0 := by
   rw [Real.cosInt, Real.log_exp]
-  have := ezero_cosIntCin_nonneg (Real.exp_pos (-1)).le
+  have := ExpIntegralZeros.cosIntCin_nonneg (Real.exp_pos (-1)).le
   have := Real.eulerMascheroniConstant_lt_two_thirds
   linarith
 
 /-- The function `Real.cosInt` is continuous on `s`. -/
-theorem ezero_ci_contOn {s : Set ℝ} (hs : ∀ x ∈ s, 0 < x) : ContinuousOn Real.cosInt s :=
+theorem ExpIntegralZeros.ci_continuousOn {s : Set ℝ} (hs : ∀ x ∈ s, 0 < x) : ContinuousOn
+    Real.cosInt s :=
   fun x hx => (Real.hasDerivAt_cosInt (hs x hx)).continuousAt.continuousWithinAt
 
 /-- The stated relation follows from the given hypotheses: `StrictMonoOn Real.cosInt (Ioc 0 (π /
 2))`. -/
-theorem ezero_ci_mono_first : StrictMonoOn Real.cosInt (Ioc 0 (π / 2)) := by
-  refine strictMonoOn_of_deriv_pos (convex_Ioc _ _) (ezero_ci_contOn fun x hx => hx.1)
+theorem ExpIntegralZeros.ci_mono_first : StrictMonoOn Real.cosInt (Ioc 0 (π / 2)) := by
+  refine strictMonoOn_of_deriv_pos (convex_Ioc _ _)
+      (ExpIntegralZeros.ci_continuousOn fun x hx => hx.1)
     fun x hx => ?_
   rw [interior_Ioc] at hx
   rw [(Real.hasDerivAt_cosInt hx.1).deriv]
@@ -236,7 +240,7 @@ theorem ezero_ci_mono_first : StrictMonoOn Real.cosInt (Ioc 0 (π / 2)) := by
 
 /-- Identity under the stated parameter and domain assumptions: `StrictMonoOn (fun x => (-1) ^ (m
 + 1) * Real.cosInt x) (Icc ((m + 1 / 2) * π) ((m + 1 + 1 / 2) * π))`. -/
-theorem ezero_ci_mono (m : ℕ) :
+theorem ExpIntegralZeros.ci_mono (m : ℕ) :
     StrictMonoOn (fun x => (-1) ^ (m + 1) * Real.cosInt x)
       (Icc ((m + 1 / 2) * π) ((m + 1 + 1 / 2) * π)) := by
   have hπ := Real.pi_pos
@@ -258,85 +262,94 @@ theorem ezero_ci_mono (m : ℕ) :
   exact div_pos hc hx0
 
 /-- The separating points for the zeros of `Ci`. -/
-noncomputable def ezero_ct (n : ℕ) : ℝ := if n = 0 then 0 else (n - 1 / 2) * π
+noncomputable def ExpIntegralZeros.cosIntSeparator (n : ℕ) : ℝ := if n = 0 then 0 else
+    (n - 1 / 2) * π
 
-/-- Identity under the stated parameter and domain assumptions: `ezero_ct (n + 1) = (n + 1 / 2) *
-π`. -/
-theorem ezero_ct_succ (n : ℕ) : ezero_ct (n + 1) = (n + 1 / 2) * π := by
-  simp [ezero_ct]; ring
+/-- Identity under the stated parameter and domain assumptions:
+`ExpIntegralZeros.cosIntSeparator (n + 1) = (n + 1 / 2) * π`. -/
+theorem ExpIntegralZeros.cosIntSeparator_succ (n : ℕ) : ExpIntegralZeros.cosIntSeparator (n + 1) =
+    (n + 1 / 2) * π := by
+  simp [ExpIntegralZeros.cosIntSeparator]; ring
 
-/-- Formula under the stated hypotheses: `∃! x, x ∈ Ioo (ezero_ct n) (ezero_ct (n + 1)) ∧
+/-- Formula under the stated hypotheses:
+`∃! x, x ∈ Ioo (ExpIntegralZeros.cosIntSeparator n) (ExpIntegralZeros.cosIntSeparator (n + 1)) ∧
 Real.cosInt x = 0`. -/
-theorem ezero_ci_unique (n : ℕ) :
-    ∃! x, x ∈ Ioo (ezero_ct n) (ezero_ct (n + 1)) ∧ Real.cosInt x = 0 := by
+theorem ExpIntegralZeros.ci_unique (n : ℕ) :
+    ∃! x, x ∈ Ioo (ExpIntegralZeros.cosIntSeparator n) (ExpIntegralZeros.cosIntSeparator (n + 1)) ∧
+        Real.cosInt x = 0 := by
   have hπ := Real.pi_pos
   rcases n with _ | m
-  · rw [ezero_ct_succ, show ezero_ct 0 = 0 by simp [ezero_ct]]
+  · rw [ExpIntegralZeros.cosIntSeparator_succ, show ExpIntegralZeros.cosIntSeparator 0 = 0 by
+        simp [ExpIntegralZeros.cosIntSeparator]]
     simp only [CharP.cast_eq_zero, zero_add, one_div]
     have he1 : Real.exp (-1) < π / 2 := by
       have := Real.exp_lt_one_iff.mpr (show (-1 : ℝ) < 0 by norm_num)
       linarith [Real.pi_gt_three]
     have hhi : 0 < Real.cosInt (π / 2) := by
-      have := ezero_ci_half (m := 0); simpa [div_eq_inv_mul] using this
+      have := ExpIntegralZeros.ci_half (m := 0); simpa [div_eq_inv_mul] using this
     obtain ⟨x, ⟨hx, hx0⟩, -⟩ := zcount_existsUnique_zero he1.le
-      (ezero_ci_contOn fun x hx => (Real.exp_pos _).trans_le hx.1)
-      (ezero_ci_mono_first.mono fun x hx => ⟨(Real.exp_pos _).trans_le hx.1, hx.2⟩)
-      ezero_ci_neg hhi
+      (ExpIntegralZeros.ci_continuousOn fun x hx => (Real.exp_pos _).trans_le hx.1)
+      (ExpIntegralZeros.ci_mono_first.mono fun x hx => ⟨(Real.exp_pos _).trans_le hx.1, hx.2⟩)
+      ExpIntegralZeros.ci_neg hhi
     refine ⟨x, ⟨⟨(Real.exp_pos _).trans hx.1, by rw [← div_eq_inv_mul]; exact hx.2⟩, hx0⟩,
-      fun y ⟨hy, hy0⟩ => ezero_ci_mono_first.injOn ⟨hy.1, ?_⟩ ⟨(Real.exp_pos _).trans hx.1,
+      fun y ⟨hy, hy0⟩ => ExpIntegralZeros.ci_mono_first.injOn ⟨hy.1, ?_⟩
+          ⟨(Real.exp_pos _).trans hx.1,
         hx.2.le⟩ (hy0.trans hx0.symm)⟩
     rw [← div_eq_inv_mul] at hy; exact hy.2.le
-  · rw [ezero_ct_succ, ezero_ct_succ]
+  · rw [ExpIntegralZeros.cosIntSeparator_succ, ExpIntegralZeros.cosIntSeparator_succ]
     have hne : ((-1 : ℝ) ^ (m + 1)) ≠ 0 := pow_ne_zero _ (by norm_num)
     have hlo : (-1) ^ (m + 1) * Real.cosInt ((m + 1 / 2) * π) < 0 := by
-      have := ezero_ci_half (m := m); rw [pow_succ]; linarith
+      have := ExpIntegralZeros.ci_half (m := m); rw [pow_succ]; linarith
     have hhi : 0 < (-1) ^ (m + 1) * Real.cosInt ((m + 1 + 1 / 2) * π) := by
-      have := ezero_ci_half (m := m + 1); push_cast at this; exact this
+      have := ExpIntegralZeros.ci_half (m := m + 1); push_cast at this; exact this
     have hπ' : ((m : ℝ) + 1 / 2) * π ≤ (m + 1 + 1 / 2) * π := by nlinarith
     obtain ⟨x, ⟨hx, hx0⟩, hxu⟩ := zcount_existsUnique_zero hπ'
       (fun x hx => (((Real.hasDerivAt_cosInt (lt_of_lt_of_le (by positivity) hx.1)).const_mul
-        ((-1 : ℝ) ^ (m + 1))).continuousAt).continuousWithinAt) (ezero_ci_mono m) hlo hhi
+        ((-1 : ℝ) ^ (m + 1))).continuousAt).continuousWithinAt) (ExpIntegralZeros.ci_mono m) hlo hhi
     push_cast
     refine ⟨x, ⟨hx, by simpa [hne] using hx0⟩, fun y ⟨hy, hy0⟩ => hxu y ⟨hy, by simp [hy0]⟩⟩
 
 /-- Estimate under the stated parameter and domain assumptions: `∃ z : ℕ → ℝ, StrictMono z ∧ (∀ n
-: ℕ, z n ∈ Ioo (ezero_ct n) (ezero_ct (n + 1))) ∧ (∀ x, 0 < x → (Real.cosInt x = 0 ↔ ∃ k, z k
-= x)) ∧ (∀ k, 0 < z k ∧ Real.cosInt (z k) = 0 ∧ {y : ℝ | 0 < y ∧ y < z k ∧ Real.cosInt y =
-0}.ncard = k) ∧ ∀ k, Classical.epsilon (fun x : ℝ => 0 < x ∧ Real.cosInt x = 0 ∧ {y : ℝ | 0 <
-y ∧ y < x ∧ Real.cosInt y = 0}.ncard = k) = z k`. -/
-theorem ezero_ci_enum :
-    ∃ z : ℕ → ℝ, StrictMono z ∧ (∀ n : ℕ, z n ∈ Ioo (ezero_ct n) (ezero_ct (n + 1))) ∧
+: ℕ, z n ∈ Ioo (ExpIntegralZeros.cosIntSeparator n) (ExpIntegralZeros.cosIntSeparator (n + 1))) ∧ (∀
+x, 0 < x → (Real.cosInt x = 0 ↔ ∃ k, z k = x)) ∧ (∀ k, 0 < z k ∧ Real.cosInt (z k) = 0 ∧ {y : ℝ | 0
+< y ∧ y < z k ∧ Real.cosInt y = 0}.ncard = k) ∧ ∀ k, Classical.epsilon (fun x : ℝ => 0 < x ∧
+Real.cosInt x = 0 ∧ {y : ℝ | 0 < y ∧ y < x ∧ Real.cosInt y = 0}.ncard = k) = z k`. -/
+theorem ExpIntegralZeros.ci_enumeration :
+    ∃ z : ℕ → ℝ, StrictMono z ∧
+        (∀ n : ℕ, z n ∈ Ioo (ExpIntegralZeros.cosIntSeparator n)
+        (ExpIntegralZeros.cosIntSeparator (n + 1))) ∧
       (∀ x, 0 < x → (Real.cosInt x = 0 ↔ ∃ k, z k = x)) ∧
       (∀ k, 0 < z k ∧ Real.cosInt (z k) = 0 ∧
         {y : ℝ | 0 < y ∧ y < z k ∧ Real.cosInt y = 0}.ncard = k) ∧
       ∀ k, Classical.epsilon (fun x : ℝ => 0 < x ∧ Real.cosInt x = 0 ∧
         {y : ℝ | 0 < y ∧ y < x ∧ Real.cosInt y = 0}.ncard = k) = z k := by
   have hπ := Real.pi_pos
-  refine zcount_enum (P := fun x => Real.cosInt x = 0) (t := ezero_ct) (by simp [ezero_ct])
+  refine zcount_enum (P := fun x => Real.cosInt x = 0) (t := ExpIntegralZeros.cosIntSeparator)
+      (by simp [ExpIntegralZeros.cosIntSeparator])
     (strictMono_nat_of_lt_succ fun n => ?_) (fun x => ⟨⌈x / π⌉₊ + 1, ?_⟩)
-    ezero_ci_unique (fun n h => ?_)
-  · rw [ezero_ct_succ]
+    ExpIntegralZeros.ci_unique (fun n h => ?_)
+  · rw [ExpIntegralZeros.cosIntSeparator_succ]
     rcases n with _ | m
-    · simp [ezero_ct]; positivity
-    · rw [ezero_ct_succ]; push_cast; nlinarith
-  · rw [ezero_ct_succ]
+    · simp [ExpIntegralZeros.cosIntSeparator]; positivity
+    · rw [ExpIntegralZeros.cosIntSeparator_succ]; push_cast; nlinarith
+  · rw [ExpIntegralZeros.cosIntSeparator_succ]
     have := Nat.le_ceil (x / π)
     rw [div_le_iff₀ hπ] at this
     nlinarith
-  · have := ezero_ci_half (m := n)
-    rw [ezero_ct_succ] at h
+  · have := ExpIntegralZeros.ci_half (m := n)
+    rw [ExpIntegralZeros.cosIntSeparator_succ] at h
     rw [h, mul_zero] at this
     exact lt_irrefl _ this
 
 /-- Identity under the stated parameter and domain assumptions: `Real.expIntEi x =
 Real.eulerMascheroniConstant + Real.log x - Real.expIntEin (-x)`. -/
-theorem ezero_ei_eq {x : ℝ} (hx : 0 < x) :
+theorem ExpIntegralZeros.ei_eq {x : ℝ} (hx : 0 < x) :
     Real.expIntEi x = Real.eulerMascheroniConstant + Real.log x - Real.expIntEin (-x) := by
   rw [Real.expIntEi, abs_of_pos hx, show -(x : ℂ) = ((-x : ℝ) : ℂ) by push_cast; ring,
     expIntEin_ofReal, ofReal_re]
 
 /-- At `t`, the function `Real.expIntEin` has derivative `((1 - Real.exp (-t)) / t)`. -/
-theorem ezero_hasDerivAt_ein {t : ℝ} (ht : t ≠ 0) :
+theorem ExpIntegralZeros.hasDerivAt_ein {t : ℝ} (ht : t ≠ 0) :
     HasDerivAt Real.expIntEin ((1 - Real.exp (-t)) / t) t := by
   have h := (hasDerivAt_expIntEin_complex (z := (t : ℂ)) (by exact_mod_cast ht)).real_of_complex
   have hf : (fun y : ℝ => (expIntEin (y : ℂ)).re) = Real.expIntEin := by
@@ -346,7 +359,7 @@ theorem ezero_hasDerivAt_ein {t : ℝ} (ht : t ≠ 0) :
   rw [← ofReal_neg, ← ofReal_exp, ← ofReal_one, ← ofReal_sub, ← ofReal_div, ofReal_re]
 
 /-- The negative part of the real axis: `Ei(-y) = -E₁(y) < 0`. -/
-theorem ezero_ei_neg {y : ℝ} (hy : 0 < y) : Real.expIntEi (-y) < 0 := by
+theorem ExpIntegralZeros.ei_neg {y : ℝ} (hy : 0 < y) : Real.expIntEi (-y) < 0 := by
   have h := Real.expIntEi_negative hy
   rw [genExpIntE_one_eq_integral hy, ← ofReal_neg, ofReal_inj] at h
   rw [h, neg_lt_zero]
@@ -362,13 +375,13 @@ theorem ezero_ei_neg {y : ℝ} (hy : 0 < y) : Real.expIntEi (-y) < 0 := by
 
 /-- Identity under the stated parameter and domain assumptions: `StrictMonoOn (fun x =>
 Real.eulerMascheroniConstant + Real.log x - Real.expIntEin (-x)) (Ioi 0)`. -/
-theorem ezero_ei_mono : StrictMonoOn
+theorem ExpIntegralZeros.ei_mono : StrictMonoOn
     (fun x => Real.eulerMascheroniConstant + Real.log x - Real.expIntEin (-x)) (Ioi 0) := by
   have hd : ∀ x : ℝ, 0 < x → HasDerivAt
       (fun x => Real.eulerMascheroniConstant + Real.log x - Real.expIntEin (-x))
       (Real.exp x / x) x := by
     intro x hx
-    have h1 := ((ezero_hasDerivAt_ein (t := -x) (by linarith)).comp x (hasDerivAt_neg x))
+    have h1 := ((ExpIntegralZeros.hasDerivAt_ein (t := -x) (by linarith)).comp x (hasDerivAt_neg x))
     have h2 := ((hasDerivAt_const x Real.eulerMascheroniConstant).add
         (Real.hasDerivAt_log hx.ne')).sub h1
     refine h2.congr_deriv ?_
@@ -381,7 +394,7 @@ theorem ezero_ei_mono : StrictMonoOn
 
 /-- The series with terms `(fun k : ℕ => x ^ (k + 1) / ((k + 1) * (k + 1)!))` converges to
 `(-Real.expIntEin (-x))`. -/
-theorem ezero_ein_neg_series (x : ℝ) :
+theorem ExpIntegralZeros.ein_neg_series (x : ℝ) :
     HasSum (fun k : ℕ => x ^ (k + 1) / ((k + 1) * (k + 1)!)) (-Real.expIntEin (-x)) := by
   refine (Real.hasSum_expIntEin (-x)).neg.congr_fun fun k => ?_
   have h1 : (-x) ^ (k + 1) = (-1) ^ (k + 1) * x ^ (k + 1) := neg_pow x (k + 1)
@@ -392,15 +405,15 @@ theorem ezero_ein_neg_series (x : ℝ) :
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < Real.eulerMascheroniConstant
 + Real.log 1 - Real.expIntEin (-1)`. -/
-theorem ezero_ei_one_pos :
+theorem ExpIntegralZeros.ei_one_pos :
     0 < Real.eulerMascheroniConstant + Real.log 1 - Real.expIntEin (-1) := by
-  have h := (ezero_ein_neg_series 1).nonneg fun k => by positivity
+  have h := (ExpIntegralZeros.ein_neg_series 1).nonneg fun k => by positivity
   have := Real.one_half_lt_eulerMascheroniConstant
   rw [Real.log_one]; linarith
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.eulerMascheroniConstant +
 Real.log (Real.exp (-2)) - Real.expIntEin (-Real.exp (-2)) < 0`. -/
-theorem ezero_ei_small_neg :
+theorem ExpIntegralZeros.ei_small_neg :
     Real.eulerMascheroniConstant + Real.log (Real.exp (-2)) -
         Real.expIntEin (-Real.exp (-2)) < 0 := by
   set x := Real.exp (-2)
@@ -409,7 +422,8 @@ theorem ezero_ei_small_neg :
     have := Real.add_one_le_exp (2 : ℝ)
     have h : x * Real.exp 2 = 1 := by rw [← Real.exp_add]; norm_num
     nlinarith [Real.exp_pos 2]
-  have hle := hasSum_le (fun k => ?_) (ezero_ein_neg_series x) (hasSum_geometric_two.mul_left x)
+  have hle := hasSum_le (fun k => ?_) (ExpIntegralZeros.ein_neg_series x)
+      (hasSum_geometric_two.mul_left x)
   · have := Real.eulerMascheroniConstant_lt_two_thirds
     rw [Real.log_exp]; linarith
   · have hk : (1 : ℝ) ≤ (k + 1) * (k + 1)! := by
@@ -424,31 +438,33 @@ theorem ezero_ei_small_neg :
     nlinarith
 
 /-- **The unique real zero of `Ei`** (DLMF 6.13). -/
-theorem ezero_ei_existsUnique : ∃! x : ℝ, x ≠ 0 ∧ Real.expIntEi x = 0 := by
+theorem ExpIntegralZeros.ei_existsUnique : ∃! x : ℝ, x ≠ 0 ∧ Real.expIntEi x = 0 := by
   set E := fun x => Real.eulerMascheroniConstant + Real.log x - Real.expIntEin (-x)
   have hlt : Real.exp (-2) < 1 := Real.exp_lt_one_iff.mpr (by norm_num)
   have hc : ContinuousOn E (Icc (Real.exp (-2)) 1) := by
     refine ContinuousOn.sub (continuousOn_const.add (Real.continuousOn_log.mono fun t ht =>
       ((Real.exp_pos _).trans_le ht.1).ne')) fun t ht => ?_
-    exact ((ezero_hasDerivAt_ein (t := -t) (by linarith [(Real.exp_pos (-2)).trans_le ht.1])).comp t
+    exact ((ExpIntegralZeros.hasDerivAt_ein (t := -t)
+        (by linarith [(Real.exp_pos (-2)).trans_le ht.1])).comp t
       (hasDerivAt_neg t)).continuousAt.continuousWithinAt
   obtain ⟨x, ⟨hx, hx0⟩, -⟩ := zcount_existsUnique_zero hlt.le hc
-    (ezero_ei_mono.mono fun t ht => (Real.exp_pos _).trans_le ht.1) ezero_ei_small_neg
-    ezero_ei_one_pos
+    (ExpIntegralZeros.ei_mono.mono fun t ht => (Real.exp_pos _).trans_le ht.1)
+        ExpIntegralZeros.ei_small_neg
+    ExpIntegralZeros.ei_one_pos
   have hxpos : 0 < x := (Real.exp_pos _).trans hx.1
-  refine ⟨x, ⟨hxpos.ne', by rw [ezero_ei_eq hxpos]; exact hx0⟩, fun y ⟨hy0, hy⟩ => ?_⟩
+  refine ⟨x, ⟨hxpos.ne', by rw [ExpIntegralZeros.ei_eq hxpos]; exact hx0⟩, fun y ⟨hy0, hy⟩ => ?_⟩
   rcases lt_or_gt_of_ne hy0 with hneg | hpos
-  · have := ezero_ei_neg (y := -y) (by linarith)
+  · have := ExpIntegralZeros.ei_neg (y := -y) (by linarith)
     rw [neg_neg, hy] at this; exact absurd this (lt_irrefl _)
-  · rw [ezero_ei_eq hpos] at hy
-    exact ezero_ei_mono.injOn hpos hxpos (hy.trans hx0.symm)
+  · rw [ExpIntegralZeros.ei_eq hpos] at hy
+    exact ExpIntegralZeros.ei_mono.injOn hpos hxpos (hy.trans hx0.symm)
 
 /-- Identity under the stated parameter and domain assumptions: `Real.expIntEiZero ≠ 0 ∧
 Real.expIntEi Real.expIntEiZero=0 ∧ ∀ x : ℝ, x ≠ 0 → Real.expIntEi x=0 → x=Real.expIntEiZero`. -/
 theorem Real.expIntEi_unique_zero  :
     Real.expIntEiZero ≠ 0 ∧ Real.expIntEi Real.expIntEiZero=0 ∧ ∀ x : ℝ, x ≠ 0 → Real.expIntEi x=0 →
         x=Real.expIntEiZero := by
-  obtain ⟨x, hx, hu⟩ := ezero_ei_existsUnique
+  obtain ⟨x, hx, hu⟩ := ExpIntegralZeros.ei_existsUnique
   have hs := Classical.epsilon_spec (p := fun x : ℝ => x ≠ 0 ∧ Real.expIntEi x = 0) ⟨x, hx⟩
   have he : Real.expIntEiZero = x := hu _ hs
   rw [he]
@@ -460,7 +476,7 @@ y=0} : Set ℝ).ncard=k`. -/
 theorem Real.cosIntZero_spec (k : ℕ) :
     0 < Real.cosIntZero k ∧ (Real.cosInt) (Real.cosIntZero k)=0 ∧
         ({y : ℝ | 0 < y ∧ y < Real.cosIntZero k ∧ (Real.cosInt) y=0} : Set ℝ).ncard=k := by
-  obtain ⟨z, -, -, -, hs, he⟩ := ezero_ci_enum
+  obtain ⟨z, -, -, -, hs, he⟩ := ExpIntegralZeros.ci_enumeration
   have hZ : Real.cosIntZero = z := funext he
   rw [hZ]; exact hs k
 
@@ -469,7 +485,7 @@ theorem Real.cosIntZero_spec (k : ℕ) :
 theorem Real.cosIntZero_enumeration  :
     StrictMono Real.cosIntZero ∧ ∀ x : ℝ, 0 < x →
         ((Real.cosInt) x=0 ↔ ∃ k, Real.cosIntZero k=x) := by
-  obtain ⟨z, hm, -, hi, -, he⟩ := ezero_ci_enum
+  obtain ⟨z, hm, -, hi, -, he⟩ := ExpIntegralZeros.ci_enumeration
   have hZ : Real.cosIntZero = z := funext he
   rw [hZ]; exact ⟨hm, hi⟩
 
@@ -480,7 +496,7 @@ theorem Real.sinIntTailZero_spec (k : ℕ) :
     0 < Real.sinIntTailZero k ∧ (fun x => Real.sinInt x-π/2) (Real.sinIntTailZero k)=0 ∧
         ({y : ℝ | 0 < y ∧ y < Real.sinIntTailZero k ∧ (fun x => Real.sinInt x-π/2) y=0} : Set
         ℝ).ncard=k := by
-  obtain ⟨z, -, -, -, hs, he⟩ := ezero_si_enum
+  obtain ⟨z, -, -, -, hs, he⟩ := ExpIntegralZeros.si_enumeration
   have hZ : Real.sinIntTailZero = z := funext he
   rw [hZ]; exact hs k
 
@@ -489,7 +505,7 @@ theorem Real.sinIntTailZero_spec (k : ℕ) :
 theorem Real.sinIntTailZero_enumeration  :
     StrictMono Real.sinIntTailZero ∧ ∀ x : ℝ, 0 < x →
         ((fun x => Real.sinInt x-π/2) x=0 ↔ ∃ k, Real.sinIntTailZero k=x) := by
-  obtain ⟨z, hm, -, hi, -, he⟩ := ezero_si_enum
+  obtain ⟨z, hm, -, hi, -, he⟩ := ExpIntegralZeros.si_enumeration
   have hZ : Real.sinIntTailZero = z := funext he
   rw [hZ]; exact ⟨hm, hi⟩
 
@@ -510,7 +526,7 @@ theorem Real.trigonometric_integral_zero_asymptotics  :
 @[dlmf 6.14.E1]
 theorem expIntE1_laplace {a : ℂ} (ha : -1 < a.re) :
     (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE 1 t) = if a=0 then 1 else log (1+a)/a :=
-  (eiTr_laplace_E1 ha).2
+  (ExpIntegralTransforms.laplace_E1 ha).2
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi 0, exp
 (-a*t)*cosInt t) = -log (1+a^2)/(2*a)`. -/
@@ -518,23 +534,24 @@ theorem expIntE1_laplace {a : ℂ} (ha : -1 < a.re) :
 theorem cosInt_laplace {a : ℂ} (ha : 0 < a.re) :
     (∫ t : ℝ in Ioi 0, exp (-a*t)*cosInt t) = -log (1+a^2)/(2*a) := by
   have ha0 : a ≠ 0 := fun h => by rw [h] at ha; simp at ha
-  obtain ⟨hE, hEv⟩ := eiTr_laplace_E1 (a := a) (by linarith)
+  obtain ⟨hE, hEv⟩ := ExpIntegralTransforms.laplace_E1 (a := a) (by linarith)
   rw [ite_eq_right_iff.2 (fun h => absurd h ha0)] at hEv
   set F : ℝ → ℝ → ℂ := fun t u => (((Real.cos (t * u) - Real.exp (-(t * u))) / u : ℝ) : ℂ)
   have hFm : Measurable (Function.uncurry F) := by
     simp only [F]; unfold Function.uncurry; fun_prop
   have hFb : ∀ t u : ℝ, 0 < t → u ∈ Ioc (0:ℝ) 1 → ‖F t u‖ ≤ 1 * (1 + t ^ 2) :=
-    fun t u ht hu => eiTr_ein_cin_bound ht hu
+    fun t u ht hu => ExpIntegralTransforms.ein_cin_bound ht hu
   have hrep : ∀ t ∈ Ioi (0:ℝ), exp (-a*t)*cosInt t =
       (cexp (-a * t) * ∫ u in (0:ℝ)..1, F t u) - cexp (-a * t) * genExpIntE 1 t := by
     intro t ht
     have ht0 : (0:ℝ) < t := ht
     simp only [F]
     rw [cosInt_ofReal ht0, genExpIntE_one_eq_Ein ht0, intervalIntegral.integral_ofReal,
-      ← eiTr_ein_sub_cin_eq ht0.le, Real.cosInt]
+      ← ExpIntegralTransforms.ein_sub_cin_eq ht0.le, Real.cosInt]
     push_cast; ring
-  rw [setIntegral_congr_fun measurableSet_Ioi hrep, integral_sub (eiTr_integrable01 ha hFm hFb) hE,
-    hEv, eiTr_swap01 ha hFm hFb]
+  rw [setIntegral_congr_fun measurableSet_Ioi hrep,
+      integral_sub (ExpIntegralTransforms.integrable_unitInterval ha hFm hFb) hE,
+    hEv, ExpIntegralTransforms.integral_swap_unitInterval ha hFm hFb]
   have hin : ∫ u in (0:ℝ)..1, ∫ t in Ioi (0:ℝ), cexp (-a * t) * F t u =
       ∫ u in (0:ℝ)..1, (a / (a ^ 2 + (u:ℂ) ^ 2) - 1 / (a + u)) / u := by
     refine intervalIntegral.integral_congr_ae (Eventually.of_forall fun u hu => ?_)
@@ -551,14 +568,15 @@ theorem cosInt_laplace {a : ℂ} (ha : 0 < a.re) :
     simp_rw [he]
     have hcos : IntegrableOn
         (fun t : ℝ => cexp (-a * t) * ((Real.cos (t * u) : ℝ) : ℂ)) (Ioi 0) := by
-      refine (eiTr_integrableOn_exp_neg ha).norm.mono' (by fun_prop)
+      refine (ExpIntegralTransforms.integrableOn_exp_neg ha).norm.mono' (by fun_prop)
           (Eventually.of_forall fun t => ?_)
       rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
       exact mul_le_of_le_one_right (norm_nonneg _) (Real.abs_cos_le_one _)
-    rw [integral_mul_const, integral_sub hcos (eiTr_integrableOn_exp_neg hc), eiTr_laplace_cos ha,
-      eiTr_integral_exp_neg hc]
+    rw [integral_mul_const, integral_sub hcos (ExpIntegralTransforms.integrableOn_exp_neg hc),
+        ExpIntegralTransforms.laplace_cos ha,
+      ExpIntegralTransforms.integral_exp_neg hc]
     field_simp
-  rw [hin, eiTr_integral_ci_kernel ha]
+  rw [hin, ExpIntegralTransforms.integral_ci_kernel ha]
   field_simp
   ring
 
@@ -567,13 +585,14 @@ theorem cosInt_laplace {a : ℂ} (ha : 0 < a.re) :
 @[dlmf 6.14.E3]
 theorem sinIntTail_laplace {a : ℂ} (ha : 0 < a.re) :
     (∫ t : ℝ in Ioi 0, exp (-a*t)*sinIntTail t) = -arctan a/a := by
-  obtain ⟨hi, hv⟩ := eiTr_laplace_sinInt ha
+  obtain ⟨hi, hv⟩ := ExpIntegralTransforms.laplace_sinInt ha
   have he : ∀ t : ℝ, exp (-a*t)*sinIntTail t =
       cexp (-a * t) * (Real.sinInt t : ℂ) - (π / 2 : ℂ) * cexp (-a * t) := fun t => by
     rw [sinIntTail, sinInt_ofReal]; ring
   simp_rw [he]
-  rw [integral_sub hi ((eiTr_integrableOn_exp_neg ha).const_mul _), integral_const_mul, hv,
-    eiTr_integral_exp_neg ha]
+  rw [integral_sub hi ((ExpIntegralTransforms.integrableOn_exp_neg ha).const_mul _),
+      integral_const_mul, hv,
+    ExpIntegralTransforms.integral_exp_neg ha]
   have : a ≠ 0 := fun h => by rw [h] at ha; simp at ha
   field_simp
   ring
@@ -583,9 +602,10 @@ t^2) = 2*Real.log 2`. -/
 @[dlmf 6.14.E4]
 theorem expIntE1_squared_integral  :
     (∫ t : ℝ in Ioi 0, genExpIntE 1 t^2) = 2*Real.log 2 := by
-  rw [setIntegral_congr_fun measurableSet_Ioi (g := fun t : ℝ => ((eiTr_e t ^ 2 : ℝ) : ℂ))
-    (fun t ht => by rw [eiTr_E1_ofReal (show (0:ℝ) < t from ht)]; push_cast; rfl),
-    integral_complex_ofReal, eiTr_integral_e_sq]
+  rw [setIntegral_congr_fun measurableSet_Ioi
+      (g := fun t : ℝ => ((ExpIntegralTransforms.realE1 t ^ 2 : ℝ) : ℂ))
+    (fun t ht => by rw [ExpIntegralTransforms.E1_ofReal (show (0:ℝ) < t from ht)]; push_cast; rfl),
+    integral_complex_ofReal, ExpIntegralTransforms.integral_realE1_sq]
   push_cast; ring
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => cos t*cosInt t) 0
@@ -595,7 +615,8 @@ theorem cosInt_fourier_integral  :
     HasIntegralAtTop (fun t : ℝ => cos t*cosInt t) 0 (-π/4) ∧
         HasIntegralAtTop (fun t : ℝ => sin t*sinIntTail t) 0 (-π/4) := by
   constructor
-  · have h := (continuous_ofReal.tendsto _).comp eiTr_tendsto_integral_cos_mul_cosInt
+  · have h := (continuous_ofReal.tendsto _).comp
+        ExpIntegralTransforms.tendsto_integral_cos_mul_cosInt
     unfold HasIntegralAtTop
     rw [show (-π/4 : ℂ) = ((-(π/4) : ℝ) : ℂ) by push_cast; ring]
     refine h.congr' ?_
@@ -604,7 +625,8 @@ theorem cosInt_fourier_integral  :
     refine intervalIntegral.integral_congr_ae (Eventually.of_forall fun t ht => ?_)
     rw [uIoc_of_le hR] at ht
     rw [cosInt_ofReal ht.1]; push_cast; ring
-  · have h := (continuous_ofReal.tendsto _).comp eiTr_tendsto_integral_sin_mul_sinIntTail
+  · have h := (continuous_ofReal.tendsto _).comp
+        ExpIntegralTransforms.tendsto_integral_sin_mul_sinIntTail
     unfold HasIntegralAtTop
     rw [show (-π/4 : ℂ) = ((-(π/4) : ℝ) : ℂ) by push_cast; ring]
     refine h.congr' (Eventually.of_forall fun R => ?_)
@@ -620,12 +642,12 @@ theorem trigIntegral_squared_integrals  :
   constructor
   · rw [setIntegral_congr_fun measurableSet_Ioi (g := fun t : ℝ => ((Real.cosInt t ^ 2 : ℝ) : ℂ))
       (fun t ht => by simp only [cosInt_ofReal (show (0:ℝ) < t from ht)]; push_cast; rfl),
-      integral_complex_ofReal, eiTr_integral_cosInt_sq]
+      integral_complex_ofReal, ExpIntegralTransforms.integral_cosInt_sq]
     push_cast; ring
   · rw [setIntegral_congr_fun measurableSet_Ioi
       (g := fun t : ℝ => (((Real.sinInt t - π / 2) ^ 2 : ℝ) : ℂ))
       (fun t _ => by simp only [sinIntTail, sinInt_ofReal]; push_cast; ring),
-      integral_complex_ofReal, eiTr_integral_sinIntTail_sq]
+      integral_complex_ofReal, ExpIntegralTransforms.integral_sinIntTail_sq]
     push_cast; ring
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi 0, cosInt
@@ -638,16 +660,17 @@ theorem trigIntegral_product_integral  :
       (fun t ht => by
         simp only [cosInt_ofReal (show (0:ℝ) < t from ht), sinIntTail, sinInt_ofReal];
             push_cast; ring),
-      integral_complex_ofReal, eiTr_integral_cosInt_mul_sinIntTail]
+      integral_complex_ofReal, ExpIntegralTransforms.integral_cosInt_mul_sinIntTail]
 
 /-- The series with terms `(fun n : ℕ => cosInt (π*(n+1 : ℂ)))` converges to `((Real.log
 2-Real.eulerMascheroniConstant)/2)`. -/
 @[dlmf 6.15.E1]
 theorem trigIntegral_hasSum_1  :
     HasSum (fun n : ℕ => cosInt (π*(n+1 : ℂ))) ((Real.log 2-Real.eulerMascheroniConstant)/2) := by
-  have h := eiTr_hasSum_g Real.pi_pos
-  rw [eiTr_integral_fermi Real.pi_pos, eiTr_K_eq Real.pi_pos one_pos,
-    eiTr_K_eq (by positivity : 0 < 2 * π) one_pos,
+  have h := ExpIntegralTransforms.hasSum_realAuxG Real.pi_pos
+  rw [ExpIntegralTransforms.integral_fermi Real.pi_pos,
+      ExpIntegralTransforms.binetKernel_eq Real.pi_pos one_pos,
+    ExpIntegralTransforms.binetKernel_eq (by positivity : 0 < 2 * π) one_pos,
     show 1 * π / (2 * π) = 1 / 2 by field_simp, show 1 * (2 * π) / (2 * π) = 1 by field_simp,
     Gamma.Real.digamma_one_div_two, Gamma.Real.digamma_one, Real.log_one,
     show Real.log (1 / 2) = -Real.log 2 by rw [one_div, Real.log_inv]] at h
@@ -656,7 +679,7 @@ theorem trigIntegral_hasSum_1  :
   · funext n
     have hx : 0 < π * ((n:ℝ) + 1) := by positivity
     rw [show (π : ℂ) * ((n:ℂ) + 1) = ((π * ((n:ℝ) + 1) : ℝ) : ℂ) by push_cast; ring,
-      cosInt_ofReal hx, eiTr_cosInt_of_sin_eq_zero hx (by
+      cosInt_ofReal hx, ExpIntegralTransforms.cosInt_of_sin_eq_zero hx (by
         rw [mul_comm, show ((n:ℝ) + 1) = ((n + 1 : ℕ) : ℝ) by push_cast; ring]
         exact Real.sin_nat_mul_pi _),
       mul_comm π, show ((n:ℝ) + 1) = ((n + 1 : ℕ) : ℝ) by push_cast; ring, Real.cos_nat_mul_pi]
@@ -668,9 +691,10 @@ theorem trigIntegral_hasSum_1  :
 @[dlmf 6.15.E2]
 theorem trigIntegral_hasSum_2  :
     HasSum (fun n : ℕ => sinIntTail (π*(n+1 : ℂ))/(n+1 : ℂ)) (π/2*(Real.log π-1)) := by
-  have h := eiTr_hasSum_f Real.pi_pos
-  rw [eiTr_integral_log_eq' Real.pi_pos, eiTr_arctanK_eq Real.pi_pos,
-    eiTr_arctanK_eq (by positivity : 0 < 2 * π),
+  have h := ExpIntegralTransforms.hasSum_realAuxF Real.pi_pos
+  rw [ExpIntegralTransforms.integral_log_eq' Real.pi_pos,
+      ExpIntegralTransforms.arctanKernel_eq Real.pi_pos,
+    ExpIntegralTransforms.arctanKernel_eq (by positivity : 0 < 2 * π),
     show π / (2 * π) = 1 / 2 by field_simp, show 2 * π / (2 * π) = 1 by field_simp,
     Real.Gamma_one_half_eq, Real.Gamma_one, Real.log_one, Real.log_sqrt Real.pi_pos.le,
     show Real.log (1 / 2) = -Real.log 2 by rw [one_div, Real.log_inv],
@@ -684,7 +708,7 @@ theorem trigIntegral_hasSum_2  :
       sinIntTail, sinInt_ofReal,
       show ((Real.sinInt (π * ((n:ℝ) + 1)) : ℂ) - π / 2) =
         ((Real.sinInt (π * ((n:ℝ) + 1)) - π / 2 : ℝ) : ℂ) by push_cast; ring,
-      eiTr_sinIntTail_of_sin_eq_zero hx (by rw [hn]; exact Real.sin_nat_mul_pi _),
+      ExpIntegralTransforms.sinIntTail_of_sin_eq_zero hx (by rw [hn]; exact Real.sin_nat_mul_pi _),
       hn, Real.cos_nat_mul_pi]
     push_cast; ring
   · field_simp
@@ -697,19 +721,20 @@ theorem trigIntegral_hasSum_3  :
     HasSum (fun n : ℕ => (-1 : ℂ)^(n+1)*cosInt (2*π*(n+1 : ℂ)))
         (1-Real.log 2-Real.eulerMascheroniConstant/2) := by
   have hc : 0 < 2 * π := by positivity
-  have h := eiTr_hasSum_g hc
-  rw [eiTr_integral_fermi hc, eiTr_K_eq hc one_pos,
-    eiTr_K_eq (by positivity : 0 < 2 * (2 * π)) one_pos,
+  have h := ExpIntegralTransforms.hasSum_realAuxG hc
+  rw [ExpIntegralTransforms.integral_fermi hc, ExpIntegralTransforms.binetKernel_eq hc one_pos,
+    ExpIntegralTransforms.binetKernel_eq (by positivity : 0 < 2 * (2 * π)) one_pos,
     show 1 * (2 * π) / (2 * π) = 1 by field_simp, show 1 * (2 * (2 * π)) / (2 * π) =
                                         2 by field_simp,
-    eiTr_digamma_two, Gamma.Real.digamma_one, Real.log_one] at h
+    ExpIntegralTransforms.digamma_two, Gamma.Real.digamma_one, Real.log_one] at h
   have h' := Complex.hasSum_ofReal.2 h
   convert h' using 1
   · funext n
     have hx : 0 < 2 * π * ((n:ℝ) + 1) := by positivity
     have hn : 2 * π * ((n:ℝ) + 1) = ((2 * (n + 1) : ℕ) : ℝ) * π := by push_cast; ring
     rw [show (2 : ℂ) * π * ((n:ℂ) + 1) = ((2 * π * ((n:ℝ) + 1) : ℝ) : ℂ) by push_cast; ring,
-      cosInt_ofReal hx, eiTr_cosInt_of_sin_eq_zero hx (by rw [hn]; exact Real.sin_nat_mul_pi _),
+      cosInt_ofReal hx, ExpIntegralTransforms.cosInt_of_sin_eq_zero hx
+          (by rw [hn]; exact Real.sin_nat_mul_pi _),
       hn, Real.cos_nat_mul_pi, pow_mul]
     push_cast; ring
   · push_cast; ring
@@ -721,9 +746,9 @@ theorem trigIntegral_hasSum_4  :
     HasSum (fun n : ℕ => (-1 : ℂ)^(n+1)*sinIntTail (2*π*(n+1 : ℂ))/(n+1 : ℂ))
         (π*(3/2*Real.log 2-1)) := by
   have hc : 0 < 2 * π := by positivity
-  have h := eiTr_hasSum_f hc
-  rw [eiTr_integral_log_eq' hc, eiTr_arctanK_eq hc,
-    eiTr_arctanK_eq (by positivity : 0 < 2 * (2 * π)),
+  have h := ExpIntegralTransforms.hasSum_realAuxF hc
+  rw [ExpIntegralTransforms.integral_log_eq' hc, ExpIntegralTransforms.arctanKernel_eq hc,
+    ExpIntegralTransforms.arctanKernel_eq (by positivity : 0 < 2 * (2 * π)),
     show 2 * π / (2 * π) = 1 by field_simp, show 2 * (2 * π) / (2 * π) = 2 by field_simp,
     Real.Gamma_two, Real.Gamma_one, Real.log_one] at h
   have h' := Complex.hasSum_ofReal.2 h
@@ -735,7 +760,7 @@ theorem trigIntegral_hasSum_4  :
       sinIntTail, sinInt_ofReal,
       show ((Real.sinInt (2 * π * ((n:ℝ) + 1)) : ℂ) - π / 2) =
         ((Real.sinInt (2 * π * ((n:ℝ) + 1)) - π / 2 : ℝ) : ℂ) by push_cast; ring,
-      eiTr_sinIntTail_of_sin_eq_zero hx (by rw [hn]; exact Real.sin_nat_mul_pi _),
+      ExpIntegralTransforms.sinIntTail_of_sin_eq_zero hx (by rw [hn]; exact Real.sin_nat_mul_pi _),
       hn, Real.cos_nat_mul_pi, pow_mul]
     push_cast; ring
   · field_simp
@@ -759,7 +784,7 @@ def expIntActonC (n : ℕ) (z : ℂ) : ℂ :=
 /-- Initial normalization in DLMF §6.18(ii). -/
 theorem expIntActon_initial {z : ℂ} (hz : 0 < z.re) :
     expIntActonB 0 z=expIntAuxF z ∧ expIntActonA 0 z=expIntAuxG z ∧ expIntActonC 0 z=1/z := by
-  obtain ⟨hf, hg⟩ := expIntAux_laplace_Ioi hz
+  obtain ⟨hf, hg⟩ := ExpIntegralAuxiliary.laplace_Ioi hz
   refine ⟨?_, ?_, ?_⟩
   · rw [expIntActonB, hf]; simp
   · rw [expIntActonA, hg]; simp only [pow_zero, mul_one, pow_one]

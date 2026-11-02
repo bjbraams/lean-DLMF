@@ -36,13 +36,15 @@ of the coordinate maps.
 * `legendreOrderEta_spec`, `legendreOrderEta_bijective`: for `0 ≤ α < 1` and `x > 1`, `η` is the
   unique positive solution of DLMF 14.15.10, and `x ↦ η` is a strictly decreasing bijection of
   `(1,∞)` onto `(0,∞)` (DLMF §14.15(ii)).
-* `legY_existsUnique`: existence and uniqueness of the solution `y` of DLMF 14.15.21–14.15.22.
+* `DegreeCoordinate.existsUnique`: existence and uniqueness of the solution `y` of DLMF
+  14.15.21–14.15.22.
 
 ## Implementation notes
 
 Since DLMF defines `η`, `y` only implicitly, `legendreOrderEta` and `legendreDegreeY` are chosen
 solutions; `legendreOrderEta_spec` and `legendreDegreeY_spec` (in `InverseCoordinates`) give
-the defining relations and uniqueness. Helper names carry the prefixes `legO_` and `legY_`.
+the defining relations and uniqueness. Helper names live in the namespaces `OrderEta` and
+`DegreeCoordinate`.
 -/
 
 @[expose] public noncomputable section
@@ -89,12 +91,12 @@ def legendreOrderEta (α x : ℝ) : ℝ :=
   Classical.epsilon (fun η : ℝ => 0 < η ∧ LegendreEtaRelation α x η)
 
 /-- The left side of DLMF 14.15.10 as a function of `η`. -/
-noncomputable def legO_L (α η : ℝ) : ℝ :=
+noncomputable def OrderEta.lhs (α η : ℝ) : ℝ :=
   α*Real.log (Real.sqrt (α^2+η^2)+α)-α*Real.log η-Real.sqrt (α^2+η^2)
 
 /-- `L'(η) = -√(α²+η²)/η`. -/
-theorem legO_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
-    HasDerivAt (legO_L α) (-(Real.sqrt (α^2+η^2)/η)) η := by
+theorem OrderEta.lhs_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
+    HasDerivAt (OrderEta.lhs α) (-(Real.sqrt (α^2+η^2)/η)) η := by
   have hp : 0 < α^2+η^2 := by positivity
   set s := Real.sqrt (α^2+η^2) with hs
   have hs0 : 0 < s := Real.sqrt_pos.2 hp
@@ -107,23 +109,24 @@ theorem legO_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
   have h := ((((hsd.add_const α).log hsa.ne').const_mul α).sub
     ((Real.hasDerivAt_log hη.ne').const_mul α)).sub hsd
   convert h using 1
-  · funext y; simp only [legO_L, Pi.sub_apply]
+  · funext y; simp only [OrderEta.lhs, Pi.sub_apply]
   · rw [← hs]
     field_simp
     linear_combination (-s) * hs2
 
 /-- `L` decreases strictly on `(0, ∞)`. -/
-theorem legO_strictAntiOn {α : ℝ} (hα : 0 ≤ α) : StrictAntiOn (legO_L α) (Ioi 0) := by
+theorem OrderEta.lhs_strictAntiOn {α : ℝ} (hα : 0 ≤ α) : StrictAntiOn (OrderEta.lhs α) (Ioi 0) := by
   refine strictAntiOn_of_deriv_neg (convex_Ioi 0)
-    (fun η hη => (legO_hasDerivAt hα hη).continuousAt.continuousWithinAt) fun η hη => ?_
+    (fun η hη => (OrderEta.lhs_hasDerivAt hα hη).continuousAt.continuousWithinAt) fun η hη => ?_
   rw [interior_Ioi] at hη
   have hη : (0:ℝ) < η := hη
-  rw [(legO_hasDerivAt hα hη).deriv, neg_lt_zero]
+  rw [(OrderEta.lhs_hasDerivAt hα hη).deriv, neg_lt_zero]
   have : 0 < Real.sqrt (α^2+η^2) := Real.sqrt_pos.2 (by positivity)
   positivity
 
 /-- `L → ∞` as `η → 0⁺` when `α > 0`. -/
-theorem legO_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (legO_L α) (𝓝[>] 0) atTop := by
+theorem OrderEta.lhs_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (OrderEta.lhs α)
+    (𝓝[>] 0) atTop := by
   have hg : ContinuousAt
       (fun η : ℝ => α*Real.log (Real.sqrt (α^2+η^2)+α) - Real.sqrt (α^2+η^2)) 0 := by
     have h : Real.sqrt (α^2+0^2)+α ≠ 0 := by positivity
@@ -131,11 +134,11 @@ theorem legO_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (legO_L α) (𝓝[
   have := (Real.tendsto_log_nhdsGT_zero.const_mul_atBot_of_neg (show -α < 0 by linarith)).atTop_add
     (hg.tendsto.mono_left nhdsWithin_le_nhds)
   refine this.congr fun η => ?_
-  simp only [legO_L]; ring
+  simp only [OrderEta.lhs]; ring
 
 /-- `L → -∞` as `η → ∞`. -/
-theorem legO_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (legO_L α) atTop atBot := by
-  have hb : ∀ᶠ η in atTop, legO_L α η ≤ α*Real.log 3 - η := by
+theorem OrderEta.lhs_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (OrderEta.lhs α) atTop atBot := by
+  have hb : ∀ᶠ η in atTop, OrderEta.lhs α η ≤ α*Real.log 3 - η := by
     filter_upwards [eventually_ge_atTop (α+1)] with η hη
     have hη0 : 0 < η := by linarith
     have hp : 0 < α^2+η^2 := by positivity
@@ -148,13 +151,13 @@ theorem legO_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (legO_L α) atT
     have hl : Real.log (s+α) - Real.log η ≤ Real.log 3 := by
       rw [← Real.log_div hsa.ne' hη0.ne']
       exact Real.log_le_log (by positivity) (by rw [div_le_iff₀ hη0]; linarith)
-    simp only [legO_L]
+    simp only [OrderEta.lhs]
     rw [← hs]
     nlinarith
   exact tendsto_atBot_mono' _ hb (tendsto_atBot_add_const_left _ _ tendsto_neg_atTop_atBot)
 
 /-- The right side of DLMF 14.15.10 as a function of `x`. -/
-noncomputable def legO_R (α x : ℝ) : ℝ :=
+noncomputable def OrderEta.rhs (α x : ℝ) : ℝ :=
   Real.log (((1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1))/((x^2-1)*(1-α^2)))/2+α/2*Real.log
       ((α^2*(2*x^2-1)+1+2*α*x*Real.sqrt (α^2*x^2-α^2+1))/(1-α^2))
 
@@ -164,13 +167,14 @@ noncomputable def legO_R (α x : ℝ) : ℝ :=
 theorem legendreOrderEta_spec {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
     0 < legendreOrderEta α x ∧ LegendreEtaRelation α x (legendreOrderEta α x) ∧ ∀ η : ℝ, 0 < η →
         LegendreEtaRelation α x η → η=legendreOrderEta α x := by
-  have hrel : ∀ η, LegendreEtaRelation α x η ↔ legO_L α η = legO_R α x := fun η => Iff.rfl
+  have hrel : ∀ η, LegendreEtaRelation α x η ↔ OrderEta.lhs α η = OrderEta.rhs α x :=
+      fun η => Iff.rfl
   have hex : ∃ η : ℝ, 0 < η ∧ LegendreEtaRelation α x η := by
     rcases hα.lt_or_eq with hα | hα
-    · obtain ⟨η, hη, h⟩ := DoubleZeroSqrt.exists_eq_of_tendsto (f := fun η => -legO_L α η)
-        (fun η hη => (legO_hasDerivAt hα.le hη).continuousAt.neg.continuousWithinAt)
-        (tendsto_neg_atTop_atBot.comp (legO_tendsto_zero hα))
-        (tendsto_neg_atBot_atTop.comp (legO_tendsto_atTop hα.le)) (-legO_R α x)
+    · obtain ⟨η, hη, h⟩ := DoubleZeroSqrt.exists_eq_of_tendsto (f := fun η => -OrderEta.lhs α η)
+        (fun η hη => (OrderEta.lhs_hasDerivAt hα.le hη).continuousAt.neg.continuousWithinAt)
+        (tendsto_neg_atTop_atBot.comp (OrderEta.lhs_tendsto_zero hα))
+        (tendsto_neg_atBot_atTop.comp (OrderEta.lhs_tendsto_atTop hα.le)) (-OrderEta.rhs α x)
       exact ⟨η, hη, (hrel η).2 (by simpa using h)⟩
     · subst hα
       have h1 : 0 < x - 1 := by linarith
@@ -191,10 +195,10 @@ theorem legendreOrderEta_spec {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx 
       ring
   have hs := Classical.epsilon_spec hex
   refine ⟨hs.1, hs.2, fun η hη h => ?_⟩
-  exact (legO_strictAntiOn hα).injOn hη hs.1 (((hrel η).1 h).trans ((hrel _).1 hs.2).symm)
+  exact (OrderEta.lhs_strictAntiOn hα).injOn hη hs.1 (((hrel η).1 h).trans ((hrel _).1 hs.2).symm)
 
 /-- The first logarithm argument in DLMF 14.15.10 is positive for `x > 1`. -/
-theorem legO_N_pos {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
+theorem OrderEta.logArg_pos {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
     0 < (1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1) := by
   have hB : 0 < 1 - α^2 := by nlinarith
   have hW : Real.sqrt (α^2*x^2-α^2+1) ^ 2 = α^2*x^2-α^2+1 :=
@@ -213,15 +217,15 @@ theorem legO_N_pos {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
   nlinarith
 
 /-- `R'(x) = √(α²x²-α²+1)/(x²-1)`. -/
-theorem legO_R_hasDerivAt {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
-    HasDerivAt (legO_R α) (Real.sqrt (α^2*x^2-α^2+1)/(x^2-1)) x := by
+theorem OrderEta.rhs_hasDerivAt {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
+    HasDerivAt (OrderEta.rhs α) (Real.sqrt (α^2*x^2-α^2+1)/(x^2-1)) x := by
   have hB : 0 < 1 - α^2 := by nlinarith
   have hx2 : 0 < x^2 - 1 := by nlinarith
   have hWp : 0 < α^2*x^2-α^2+1 := by nlinarith [mul_nonneg (sq_nonneg α) hx2.le]
   set W := Real.sqrt (α^2*x^2-α^2+1) with hWdef
   have hW0 : 0 < W := Real.sqrt_pos.2 hWp
   have hW : W^2 = α^2*x^2-α^2+1 := Real.sq_sqrt hWp.le
-  have hN := legO_N_pos hα hα1 hx
+  have hN := OrderEta.logArg_pos hα hα1 hx
   have hP : 0 < α^2*(2*x^2-1)+1+2*α*x*W := by
     have : 0 ≤ α*x*W := by positivity
     nlinarith [mul_nonneg (sq_nonneg α) hx2.le]
@@ -251,7 +255,7 @@ theorem legO_R_hasDerivAt {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 
   have hL2 := ((hPd.div_const (1-α^2)).log (div_pos hP hB).ne').const_mul (α/2)
   have := hL1.add hL2
   convert this using 1
-  · funext y; simp [legO_R]
+  · funext y; simp [OrderEta.rhs]
   · simp only [Pi.div_apply]
     rw [← hWdef]
     have hN2 : x^2*(1+α^2)+1-α^2-W*x*2 ≠ 0 := by
@@ -263,7 +267,7 @@ theorem legO_R_hasDerivAt {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 
       - α^4*x^2 - α^2*x^4 + α^2*x^2) * hW
 
 /-- Rationalized form of the first logarithm argument. -/
-theorem legO_ratio {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
+theorem OrderEta.logArg_ratio {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
     ((1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1))/((x^2-1)*(1-α^2))
       = (1-α^2)*(x^2-1)/((1+α^2)*x^2+1-α^2+2*x*Real.sqrt (α^2*x^2-α^2+1)) := by
   have hB : 0 < 1 - α^2 := by nlinarith
@@ -277,8 +281,8 @@ theorem legO_ratio {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
   linear_combination (-4*x^2) * hW
 
 /-- `R → -∞` as `x → 1⁺`. -/
-theorem legO_R_tendsto_one {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
-    Tendsto (legO_R α) (𝓝[>] (1:ℝ)) atBot := by
+theorem OrderEta.rhs_tendsto_one {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
+    Tendsto (OrderEta.rhs α) (𝓝[>] (1:ℝ)) atBot := by
   have hB : 0 < 1 - α^2 := by nlinarith
   set T : ℝ → ℝ := fun x => (1+α^2)*x^2+1-α^2+2*x*Real.sqrt (α^2*x^2-α^2+1) with hTdef
   have hT1 : Tendsto T (𝓝 1) (𝓝 4) := by
@@ -315,14 +319,14 @@ theorem legO_R_tendsto_one {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
     fun_prop (disch := assumption)
   refine (hl.atBot_add (h2.tendsto.mono_left nhdsWithin_le_nhds)).congr' ?_
   filter_upwards [self_mem_nhdsWithin] with x hx
-  simp only [Function.comp, legO_R]
-  rw [legO_ratio hα hα1 hx]
+  simp only [Function.comp, OrderEta.rhs]
+  rw [OrderEta.logArg_ratio hα hα1 hx]
 
 /-- `R → ∞` as `x → ∞` when `α > 0`. -/
-theorem legO_R_tendsto_atTop {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
-    Tendsto (legO_R α) atTop atTop := by
+theorem OrderEta.rhs_tendsto_atTop {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
+    Tendsto (OrderEta.rhs α) atTop atTop := by
   have hB : 0 < 1 - α^2 := by nlinarith
-  have hb : ∀ᶠ x in atTop, Real.log ((1-α^2)/8)/2 + α/2*Real.log (α^2*x^2) ≤ legO_R α x := by
+  have hb : ∀ᶠ x in atTop, Real.log ((1-α^2)/8)/2 + α/2*Real.log (α^2*x^2) ≤ OrderEta.rhs α x := by
     filter_upwards [eventually_ge_atTop 2] with x hx
     have hx1 : (1:ℝ) < x := by linarith
     have hx2 : 0 < x^2 - 1 := by nlinarith
@@ -349,32 +353,33 @@ theorem legO_R_tendsto_atTop {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
       nlinarith [mul_nonneg (sq_nonneg α) (sq_nonneg x),
           mul_nonneg (mul_nonneg (sq_nonneg α) (sq_nonneg x)) (sq_nonneg α),
           mul_nonneg (sq_nonneg α) hx2.le]
-    simp only [legO_R]
-    rw [legO_ratio hα.le hα1 hx1, ← hWdef]
+    simp only [OrderEta.rhs]
+    rw [OrderEta.logArg_ratio hα.le hα1 hx1, ← hWdef]
     nlinarith
   refine tendsto_atTop_mono' _ hb (tendsto_atTop_add_const_left _ _ ?_)
   refine (Real.tendsto_log_atTop.comp ?_).const_mul_atTop (by positivity)
   exact (tendsto_pow_atTop (two_ne_zero)).const_mul_atTop (by positivity)
 
 /-- `L` at `α = 0`. -/
-theorem legO_L_zero (b : ℝ) (hb : 0 < b) : legO_L 0 b = -b := by
-  simp [legO_L, Real.sqrt_sq hb.le]
+theorem OrderEta.lhs_zero (b : ℝ) (hb : 0 < b) : OrderEta.lhs 0 b = -b := by
+  simp [OrderEta.lhs, Real.sqrt_sq hb.le]
 
 /-- `R` at `α = 0`. -/
-theorem legO_R_zero {x : ℝ} (hx : 1 < x) : legO_R 0 x = Real.log ((x-1)/(x+1))/2 := by
+theorem OrderEta.rhs_zero {x : ℝ} (hx : 1 < x) : OrderEta.rhs 0 x = Real.log ((x-1)/(x+1))/2 := by
   have h2 : 0 < x + 1 := by linarith
-  simp only [legO_R, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, zero_mul, sub_zero,
+  simp only [OrderEta.rhs, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow,
+      zero_mul, sub_zero,
     zero_add, Real.sqrt_one, add_zero, mul_one, zero_div, one_mul]
   rw [show (x^2+1-2*x)/(x^2-1) = (x-1)/(x+1) by
     rw [div_eq_div_iff (by nlinarith) h2.ne']; ring]
 
 /-- Eventually `R(x) > L(b)` for every `b > 0`. -/
-theorem legO_R_eventually_gt {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) {b : ℝ} (hb : 0 < b) :
-    ∀ᶠ x in atTop, legO_L α b < legO_R α x := by
+theorem OrderEta.rhs_eventually_gt {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) {b : ℝ} (hb : 0 < b) :
+    ∀ᶠ x in atTop, OrderEta.lhs α b < OrderEta.rhs α x := by
   rcases hα.lt_or_eq with hα | hα
-  · exact (legO_R_tendsto_atTop hα hα1).eventually (eventually_gt_atTop _)
+  · exact (OrderEta.rhs_tendsto_atTop hα hα1).eventually (eventually_gt_atTop _)
   · subst hα
-    rw [legO_L_zero b hb]
+    rw [OrderEta.lhs_zero b hb]
     have hq : Tendsto (fun x : ℝ => 1 - 2/(x+1)) atTop (𝓝 (1 - 0)) :=
       tendsto_const_nhds.sub ((tendsto_const_nhds (x := (2:ℝ))).div_atTop
         (tendsto_atTop_add_const_right _ 1 tendsto_id))
@@ -383,7 +388,7 @@ theorem legO_R_eventually_gt {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) {b : �
     rw [Real.log_one, zero_div] at hl
     filter_upwards [hl.eventually (lt_mem_nhds (show -b < 0 by linarith)), eventually_gt_atTop 1]
       with x hx hx1
-    rw [legO_R_zero hx1]
+    rw [OrderEta.rhs_zero hx1]
     simp only [Function.comp] at hx
     rwa [show (x-1)/(x+1) = 1 - 2/(x+1) by field_simp; ring]
 
@@ -392,16 +397,16 @@ theorem legendreOrderEta_bijective {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
     Set.BijOn (legendreOrderEta α) (Ioi 1) (Ioi 0) ∧ StrictAntiOn (legendreOrderEta α) (Ioi 1) ∧
         Tendsto (legendreOrderEta α) (𝓝[>] 1) atTop ∧ Tendsto (legendreOrderEta α) atTop (𝓝 0) := by
   have hE : ∀ x ∈ Ioi (1:ℝ), 0 < legendreOrderEta α x ∧
-      legO_L α (legendreOrderEta α x) = legO_R α x :=
+      OrderEta.lhs α (legendreOrderEta α x) = OrderEta.rhs α x :=
     fun x hx => ⟨(legendreOrderEta_spec hα hα1 hx).1, (legendreOrderEta_spec hα hα1 hx).2.1⟩
-  have hL := legO_strictAntiOn hα
-  have hRc : ContinuousOn (legO_R α) (Ioi 1) :=
-    fun x hx => (legO_R_hasDerivAt hα hα1 hx).continuousAt.continuousWithinAt
-  have hR : StrictMonoOn (legO_R α) (Ioi 1) := by
+  have hL := OrderEta.lhs_strictAntiOn hα
+  have hRc : ContinuousOn (OrderEta.rhs α) (Ioi 1) :=
+    fun x hx => (OrderEta.rhs_hasDerivAt hα hα1 hx).continuousAt.continuousWithinAt
+  have hR : StrictMonoOn (OrderEta.rhs α) (Ioi 1) := by
     refine strictMonoOn_of_deriv_pos (convex_Ioi _) hRc fun x hx => ?_
     rw [interior_Ioi] at hx
     have hx : (1:ℝ) < x := hx
-    rw [(legO_R_hasDerivAt hα hα1 hx).deriv]
+    rw [(OrderEta.rhs_hasDerivAt hα hα1 hx).deriv]
     have hx2 : 0 < x^2 - 1 := by nlinarith
     have : 0 < Real.sqrt (α^2*x^2-α^2+1) :=
       Real.sqrt_pos.2 (by nlinarith [mul_nonneg (sq_nonneg α) hx2.le])
@@ -414,22 +419,23 @@ theorem legendreOrderEta_bijective {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
   have hI : ∀ᶠ x in 𝓝[>] (1:ℝ), x ∈ Ioi (1:ℝ) := self_mem_nhdsWithin
   refine ⟨⟨fun x hx => (hE x hx).1, hanti.injOn, fun e he => ?_⟩, hanti, ?_, ?_⟩
   · have he : (0:ℝ) < e := he
-    obtain ⟨a, ha, haI⟩ := (((legO_R_tendsto_one hα hα1).eventually
-      (eventually_lt_atBot (legO_L α e))).and hI).exists
-    obtain ⟨b, hb, hab⟩ := ((legO_R_eventually_gt hα hα1 he).and (eventually_ge_atTop a)).exists
+    obtain ⟨a, ha, haI⟩ := (((OrderEta.rhs_tendsto_one hα hα1).eventually
+      (eventually_lt_atBot (OrderEta.lhs α e))).and hI).exists
+    obtain ⟨b, hb, hab⟩ :=
+        ((OrderEta.rhs_eventually_gt hα hα1 he).and (eventually_ge_atTop a)).exists
     have hsub : Icc a b ⊆ Ioi (1:ℝ) := fun x hx => lt_of_lt_of_le haI hx.1
     obtain ⟨c, hc, hcy⟩ := intermediate_value_Icc hab (hRc.mono hsub) ⟨ha.le, hb.le⟩
     exact ⟨c, hsub hc, ((legendreOrderEta_spec hα hα1 (hsub hc)).2.2 e he hcy.symm).symm⟩
   · refine tendsto_atTop.2 fun M => ?_
     have hM : (0:ℝ) < max M 1 := lt_max_of_lt_right one_pos
-    filter_upwards [(legO_R_tendsto_one hα hα1).eventually
-      (eventually_lt_atBot (legO_L α (max M 1))), hI] with x hx hxI
+    filter_upwards [(OrderEta.rhs_tendsto_one hα hα1).eventually
+      (eventually_lt_atBot (OrderEta.lhs α (max M 1))), hI] with x hx hxI
     rw [← (hE x hxI).2] at hx
     exact (le_max_left _ _).trans ((hL.lt_iff_gt (hE x hxI).1 hM).1 hx).le
   · refine tendsto_order.2 ⟨fun a ha => ?_, fun b hb => ?_⟩
     · filter_upwards [eventually_gt_atTop 1] with x hx
       exact ha.trans (hE x hx).1
-    · filter_upwards [legO_R_eventually_gt hα hα1 hb, eventually_gt_atTop 1] with x hx hxI
+    · filter_upwards [OrderEta.rhs_eventually_gt hα hα1 hb, eventually_gt_atTop 1] with x hx hxI
       rw [← (hE x hxI).2] at hx
       exact (hL.lt_iff_gt hb (hE x hxI).1).1 hx
 
@@ -465,29 +471,33 @@ def legendreDegreeY (α x : ℝ) : ℝ :=
   Classical.epsilon (LegendreYRelation α x)
 
 /-- Left side of 14.15.21 in the variable `s = √(y - α²)`. -/
-noncomputable def legY_L1 (a s : ℝ) : ℝ := s - a * Real.arctan (s / a)
+noncomputable def DegreeCoordinate.lhsLeft (a s : ℝ) : ℝ := s - a * Real.arctan (s / a)
 
 /-- Left side of 14.15.22 in the variable `s = √(α² - y)`. -/
-noncomputable def legY_L2 (a s : ℝ) : ℝ := s + a/2 * Real.log (a^2 - s^2) - a * Real.log (s + a)
+noncomputable def DegreeCoordinate.lhsRight (a s : ℝ) : ℝ := s + a/2 * Real.log (a^2 - s^2) - a *
+    Real.log (s + a)
 
 /-- `L₁` is continuous. -/
-theorem legY_L1_continuous (a : ℝ) : Continuous (legY_L1 a) := by
-  unfold legY_L1
+theorem DegreeCoordinate.lhsLeft_continuous (a : ℝ) : Continuous (DegreeCoordinate.lhsLeft a) := by
+  unfold DegreeCoordinate.lhsLeft
   exact continuous_id.sub (continuous_const.mul (Real.continuous_arctan.comp
     (continuous_id.div_const a)))
 
 /-- `L₁(0) = 0`. -/
-theorem legY_L1_zero (a : ℝ) : legY_L1 a 0 = 0 := by simp [legY_L1]
+theorem DegreeCoordinate.lhsLeft_zero (a : ℝ) : DegreeCoordinate.lhsLeft a 0 = 0 := by
+    simp [DegreeCoordinate.lhsLeft]
 
 /-- `L₁` increases strictly on `[0, ∞)`. -/
-theorem legY_L1_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn (legY_L1 a) (Ici 0) := by
+theorem DegreeCoordinate.lhsLeft_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn
+    (DegreeCoordinate.lhsLeft a) (Ici 0) := by
   rcases ha.eq_or_lt with rfl | ha
-  · intro s _ t _ h; simpa [legY_L1] using h
-  refine strictMonoOn_of_deriv_pos (convex_Ici 0) (legY_L1_continuous a).continuousOn ?_
+  · intro s _ t _ h; simpa [DegreeCoordinate.lhsLeft] using h
+  refine strictMonoOn_of_deriv_pos (convex_Ici 0)
+      (DegreeCoordinate.lhsLeft_continuous a).continuousOn ?_
   intro s hs
   rw [interior_Ici] at hs
   have hs : (0:ℝ) < s := hs
-  have hd : HasDerivAt (legY_L1 a) (1 - a * (1 / (1 + (s/a)^2) * (1/a))) s := by
+  have hd : HasDerivAt (DegreeCoordinate.lhsLeft a) (1 - a * (1 / (1 + (s/a)^2) * (1/a))) s := by
     have := (hasDerivAt_id' s).fun_sub ((((hasDerivAt_id' s).div_const a).arctan).const_mul a)
     exact this
   rw [hd.deriv]
@@ -497,26 +507,29 @@ theorem legY_L1_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn (legY_L1 a)
   nlinarith
 
 /-- A linear lower bound for `L₁`. -/
-theorem legY_L1_ge {a : ℝ} (ha : 0 ≤ a) (s : ℝ) : s - a * (π/2) ≤ legY_L1 a s := by
-  unfold legY_L1
+theorem DegreeCoordinate.lhsLeft_ge {a : ℝ} (ha : 0 ≤ a) (s : ℝ) : s - a * (π/2) ≤
+    DegreeCoordinate.lhsLeft a s := by
+  unfold DegreeCoordinate.lhsLeft
   nlinarith [Real.arctan_lt_pi_div_two (s/a)]
 
 /-- `L₁` maps `[0, ∞)` onto `[0, ∞)`. -/
-theorem legY_L1_surj {a : ℝ} (ha : 0 ≤ a) {v : ℝ} (hv : 0 ≤ v) :
-    ∃ s, 0 ≤ s ∧ legY_L1 a s = v := by
+theorem DegreeCoordinate.lhsLeft_surj {a : ℝ} (ha : 0 ≤ a) {v : ℝ} (hv : 0 ≤ v) :
+    ∃ s, 0 ≤ s ∧ DegreeCoordinate.lhsLeft a s = v := by
   have h0 : (0:ℝ) ≤ v + a * (π/2) := by positivity
-  obtain ⟨s, hs, hsv⟩ := intermediate_value_Icc h0 (legY_L1_continuous a).continuousOn
-    (show v ∈ Icc (legY_L1 a 0) (legY_L1 a (v + a * (π/2))) from ⟨by rw [legY_L1_zero]; exact hv, by
-      have := legY_L1_ge ha (v + a * (π/2)); linarith⟩)
+  obtain ⟨s, hs, hsv⟩ :=
+      intermediate_value_Icc h0 (DegreeCoordinate.lhsLeft_continuous a).continuousOn
+    (show v ∈ Icc (DegreeCoordinate.lhsLeft a 0) (DegreeCoordinate.lhsLeft a (v + a * (π/2)))
+        from ⟨by rw [DegreeCoordinate.lhsLeft_zero]; exact hv, by
+      have := DegreeCoordinate.lhsLeft_ge ha (v + a * (π/2)); linarith⟩)
   exact ⟨s, hs.1, hsv⟩
 
 /-- `L₂(0) = 0`. -/
-theorem legY_L2_zero (a : ℝ) : legY_L2 a 0 = 0 := by
-  simp [legY_L2, Real.log_pow]; ring
+theorem DegreeCoordinate.lhsRight_zero (a : ℝ) : DegreeCoordinate.lhsRight a 0 = 0 := by
+  simp [DegreeCoordinate.lhsRight, Real.log_pow]; ring
 
 /-- `L₂` is continuous away from `s = α` and `s = -α`. -/
-theorem legY_L2_continuousOn (a : ℝ) :
-    ContinuousOn (legY_L2 a) {s | 0 ≤ s ∧ s ≠ a ∧ 0 < s + a} := by
+theorem DegreeCoordinate.lhsRight_continuousOn (a : ℝ) :
+    ContinuousOn (DegreeCoordinate.lhsRight a) {s | 0 ≤ s ∧ s ≠ a ∧ 0 < s + a} := by
   intro s ⟨hs, hsa, hsa'⟩
   have h1 : a^2 - s^2 ≠ 0 := by
     intro h
@@ -525,14 +538,14 @@ theorem legY_L2_continuousOn (a : ℝ) :
     · exact hsa (by linarith)
     · linarith
   refine ContinuousAt.continuousWithinAt ?_
-  unfold legY_L2
+  unfold DegreeCoordinate.lhsRight
   exact (continuousAt_id.add (continuousAt_const.mul
     ((continuous_const.sub (continuous_pow 2)).continuousAt.log h1))).sub
     (continuousAt_const.mul ((continuous_id.add continuous_const).continuousAt.log hsa'.ne'))
 
 /-- `L₂'(s) = -s²/(α² - s²)`. -/
-theorem legY_L2_hasDerivAt {a s : ℝ} (hsa : a^2 - s^2 ≠ 0) (hsa' : s + a ≠ 0) :
-    HasDerivAt (legY_L2 a) (-s^2/(a^2 - s^2)) s := by
+theorem DegreeCoordinate.lhsRight_hasDerivAt {a s : ℝ} (hsa : a^2 - s^2 ≠ 0) (hsa' : s + a ≠ 0) :
+    HasDerivAt (DegreeCoordinate.lhsRight a) (-s^2/(a^2 - s^2)) s := by
   have h1 : HasDerivAt (fun s : ℝ => a^2 - s^2) (-(2*s)) s := by
     simpa using (hasDerivAt_pow 2 s).const_sub (a^2)
   have h2 : HasDerivAt (fun s : ℝ => s + a) 1 s := (hasDerivAt_id s).add_const a
@@ -545,31 +558,36 @@ theorem legY_L2_hasDerivAt {a s : ℝ} (hsa : a^2 - s^2 ≠ 0) (hsa' : s + a ≠
   ring
 
 /-- `L₂` decreases strictly on `[0, α)`. -/
-theorem legY_L2_strictAntiOn {a : ℝ} (ha : 0 < a) : StrictAntiOn (legY_L2 a) (Ico 0 a) := by
+theorem DegreeCoordinate.lhsRight_strictAntiOn {a : ℝ} (ha : 0 < a) : StrictAntiOn
+    (DegreeCoordinate.lhsRight a) (Ico 0 a) := by
   refine strictAntiOn_of_deriv_neg (convex_Ico 0 a)
-    ((legY_L2_continuousOn a).mono fun s hs => ⟨hs.1, hs.2.ne, by linarith [hs.1]⟩) ?_
+    ((DegreeCoordinate.lhsRight_continuousOn a).mono fun s hs =>
+        ⟨hs.1, hs.2.ne, by linarith [hs.1]⟩) ?_
   intro s hs
   rw [interior_Ico] at hs
   have hp : 0 < a^2 - s^2 := by nlinarith [hs.1, hs.2]
-  rw [(legY_L2_hasDerivAt hp.ne' (by linarith [hs.1])).deriv]
+  rw [(DegreeCoordinate.lhsRight_hasDerivAt hp.ne' (by linarith [hs.1])).deriv]
   have : 0 < s^2 := by nlinarith [hs.1]
   exact div_neg_of_neg_of_pos (by linarith) hp
 
 /-- `L₂` increases strictly on `(α, ∞)`. -/
-theorem legY_L2_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn (legY_L2 a) (Ioi a) := by
+theorem DegreeCoordinate.lhsRight_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn
+    (DegreeCoordinate.lhsRight a) (Ioi a) := by
   refine strictMonoOn_of_deriv_pos (convex_Ioi a)
-    ((legY_L2_continuousOn a).mono fun s hs => ⟨by have : a < s := hs; linarith, (ne_of_gt hs),
+    ((DegreeCoordinate.lhsRight_continuousOn a).mono fun s hs =>
+        ⟨by have : a < s := hs; linarith, (ne_of_gt hs),
       by have : a < s := hs; linarith⟩) ?_
   intro s hs
   rw [interior_Ioi] at hs
   have hs : a < s := hs
   have hp : a^2 - s^2 < 0 := by nlinarith
-  rw [(legY_L2_hasDerivAt hp.ne (by linarith)).deriv]
+  rw [(DegreeCoordinate.lhsRight_hasDerivAt hp.ne (by linarith)).deriv]
   have : 0 < s^2 := by nlinarith
   exact div_pos_of_neg_of_neg (by linarith) hp
 
 /-- `L₂ → -∞` at `s = α`. -/
-theorem legY_L2_tendsto_nhdsNE {a : ℝ} (ha : 0 < a) : Tendsto (legY_L2 a) (𝓝[≠] a) atBot := by
+theorem DegreeCoordinate.lhsRight_tendsto_nhdsNE {a : ℝ} (ha : 0 < a) : Tendsto
+    (DegreeCoordinate.lhsRight a) (𝓝[≠] a) atBot := by
   have h1 : Tendsto (fun s : ℝ => a^2 - s^2) (𝓝[≠] a) (𝓝[≠] 0) := by
     refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
     · have := ((continuous_const.sub (continuous_pow 2)).tendsto a (f := fun s : ℝ => a^2 - s^2))
@@ -591,11 +609,11 @@ theorem legY_L2_tendsto_nhdsNE {a : ℝ} (ha : 0 < a) : Tendsto (legY_L2 a) (�
     exact continuousAt_id.sub (continuousAt_const.mul
       ((continuous_id.add continuous_const).continuousAt.log (by simp; linarith)))
   refine (h2.atBot_add h3).congr fun s => ?_
-  simp only [Function.comp, legY_L2]; ring
+  simp only [Function.comp, DegreeCoordinate.lhsRight]; ring
 
 /-- A linear lower bound for `L₂` for large `s`. -/
-theorem legY_L2_ge {a s : ℝ} (ha : 0 ≤ a) (hs : 3*a + 1 ≤ s) :
-    s - a/2 * Real.log 2 ≤ legY_L2 a s := by
+theorem DegreeCoordinate.lhsRight_ge {a s : ℝ} (ha : 0 ≤ a) (hs : 3*a + 1 ≤ s) :
+    s - a/2 * Real.log 2 ≤ DegreeCoordinate.lhsRight a s := by
   have h1 : 0 < s - a := by linarith
   have h2 : 0 < s + a := by linarith
   have e : Real.log (a^2 - s^2) = Real.log (s - a) + Real.log (s + a) := by
@@ -603,39 +621,43 @@ theorem legY_L2_ge {a s : ℝ} (ha : 0 ≤ a) (hs : 3*a + 1 ≤ s) :
   have h3 : Real.log (s + a) - Real.log 2 ≤ Real.log (s - a) := by
     rw [← Real.log_div h2.ne' two_ne_zero]
     exact Real.log_le_log (by positivity) (by linarith)
-  unfold legY_L2
+  unfold DegreeCoordinate.lhsRight
   rw [e]
   nlinarith [mul_le_mul_of_nonneg_left h3 ha]
 
 /-- `L₂ → ∞` at `∞`. -/
-theorem legY_L2_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) : Tendsto (legY_L2 a) atTop atTop := by
+theorem DegreeCoordinate.lhsRight_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) : Tendsto
+    (DegreeCoordinate.lhsRight a) atTop atTop := by
   refine tendsto_atTop_mono' _ ?_ (tendsto_atTop_add_const_right _ (-(a/2 * Real.log 2)) tendsto_id)
   filter_upwards [eventually_ge_atTop (3*a+1)] with s hs
-  have := legY_L2_ge ha hs
+  have := DegreeCoordinate.lhsRight_ge ha hs
   simp only [id]; linarith
 
 /-- Right side of 14.15.21. -/
-noncomputable def legY_R1 (a x : ℝ) : ℝ :=
+noncomputable def DegreeCoordinate.rhsLeft (a x : ℝ) : ℝ :=
   Real.arccos (x/Real.sqrt (1-a^2))-a/2*Real.arccos (((1+a^2)*x^2-1+a^2)/((1-a^2)*(1-x^2)))
 
 /-- Right side of 14.15.22. -/
-noncomputable def legY_R2 (a x : ℝ) : ℝ :=
+noncomputable def DegreeCoordinate.rhsRight (a x : ℝ) : ℝ :=
   Real.log ((x+Real.sqrt (x^2-1+a^2))/Real.sqrt (1-a^2))+a/2*Real.log
       ((1-a^2)*|1-x^2|/((1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2)))
 
 /-- `√(1-α²) > 0`. -/
-theorem legY_x0_pos {a : ℝ} (ha1 : a < 1) (ha : 0 ≤ a) : 0 < Real.sqrt (1 - a^2) :=
+theorem DegreeCoordinate.turningPoint_pos {a : ℝ} (ha1 : a < 1) (ha : 0 ≤ a) : 0 <
+    Real.sqrt (1 - a^2) :=
   Real.sqrt_pos.2 (by nlinarith)
 
 /-- `√(1-α²)² = 1-α²`. -/
-theorem legY_x0_sq {a : ℝ} (ha1 : a < 1) (ha : 0 ≤ a) : Real.sqrt (1 - a^2) ^ 2 = 1 - a^2 :=
+theorem DegreeCoordinate.turningPoint_sq {a : ℝ} (ha1 : a < 1) (ha : 0 ≤ a) : Real.sqrt (1 - a^2)
+    ^ 2 = 1 - a^2 :=
   Real.sq_sqrt (by nlinarith)
 
 /-- The right side of 14.15.21 vanishes at `x = √(1-α²)`. -/
-theorem legY_R1_x0 {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) : legY_R1 a (Real.sqrt (1 - a^2)) = 0 := by
-  have h0 := legY_x0_pos ha1 ha
-  have h2 := legY_x0_sq ha1 ha
-  unfold legY_R1
+theorem DegreeCoordinate.rhsLeft_turningPoint {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
+    DegreeCoordinate.rhsLeft a (Real.sqrt (1 - a^2)) = 0 := by
+  have h0 := DegreeCoordinate.turningPoint_pos ha1 ha
+  have h2 := DegreeCoordinate.turningPoint_sq ha1 ha
+  unfold DegreeCoordinate.rhsLeft
   rw [div_self h0.ne', Real.arccos_one]
   rcases ha.eq_or_lt with rfl | ha
   · simp
@@ -647,16 +669,17 @@ theorem legY_R1_x0 {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) : legY_R1 a (Real.sqrt
   rw [this, Real.arccos_one]; ring
 
 /-- At `α = 0` the right side of 14.15.21 is `arccos x`. -/
-theorem legY_R1_zero_alpha (x : ℝ) : legY_R1 0 x = Real.arccos x := by
-  simp [legY_R1]
+theorem DegreeCoordinate.rhsLeft_zero_alpha (x : ℝ) : DegreeCoordinate.rhsLeft 0 x =
+    Real.arccos x := by
+  simp [DegreeCoordinate.rhsLeft]
 
 /-- Derivative of the right side of 14.15.21: `-√(1-α²-x²)/(1-x²)`. -/
-theorem legY_R1_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 0 < x)
+theorem DegreeCoordinate.rhsLeft_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 0 < x)
     (hx1 : x < Real.sqrt (1 - a^2)) :
-    HasDerivAt (legY_R1 a) (-Real.sqrt (1 - a^2 - x^2) / (1 - x^2)) x := by
+    HasDerivAt (DegreeCoordinate.rhsLeft a) (-Real.sqrt (1 - a^2 - x^2) / (1 - x^2)) x := by
   set c := Real.sqrt (1 - a^2) with hc
-  have hc0 : 0 < c := legY_x0_pos ha1 ha.le
-  have hc2 : c^2 = 1 - a^2 := legY_x0_sq ha1 ha.le
+  have hc0 : 0 < c := DegreeCoordinate.turningPoint_pos ha1 ha.le
+  have hc2 : c^2 = 1 - a^2 := DegreeCoordinate.turningPoint_sq ha1 ha.le
   have hxc : x^2 < 1 - a^2 := by nlinarith
   set V := Real.sqrt (1 - a^2 - x^2) with hV
   have hV0 : 0 < V := Real.sqrt_pos.2 (by linarith)
@@ -702,62 +725,63 @@ theorem legY_R1_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 0 < x)
   linear_combination (2 * ((1 - a^2) * (1 - x^2))) * hV2
 
 /-- The right side of 14.15.21 decreases strictly on `[0, √(1-α²)]`. -/
-theorem legY_R1_strictAntiOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
-    StrictAntiOn (legY_R1 a) (Icc 0 (Real.sqrt (1 - a^2))) := by
+theorem DegreeCoordinate.rhsLeft_strictAntiOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
+    StrictAntiOn (DegreeCoordinate.rhsLeft a) (Icc 0 (Real.sqrt (1 - a^2))) := by
   rcases ha.eq_or_lt with rfl | ha
   · intro x hx y hy hxy
-    simp only [legY_R1_zero_alpha]
+    simp only [DegreeCoordinate.rhsLeft_zero_alpha]
     refine Real.strictAntiOn_arccos ⟨by linarith [hx.1], ?_⟩ ⟨by linarith [hy.1], ?_⟩ hxy
     · simpa using hx.2
     · simpa using hy.2
-  have hc0 := legY_x0_pos ha1 ha.le
-  have hc2 := legY_x0_sq ha1 ha.le
+  have hc0 := DegreeCoordinate.turningPoint_pos ha1 ha.le
+  have hc2 := DegreeCoordinate.turningPoint_sq ha1 ha.le
   refine strictAntiOn_of_deriv_neg (convex_Icc _ _) ?_ ?_
   · intro x hx
     have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
     have ha2 : 0 < 1 - a^2 := by nlinarith
     have hD : (1 - a^2) * (1 - x^2) ≠ 0 := by positivity
     refine ContinuousAt.continuousWithinAt ?_
-    unfold legY_R1
+    unfold DegreeCoordinate.rhsLeft
     exact (Real.continuous_arccos.continuousAt.comp (continuousAt_id.div_const _)).sub
       (continuousAt_const.mul (Real.continuous_arccos.continuousAt.comp
         ((by fun_prop : Continuous fun x : ℝ => (1+a^2)*x^2-1+a^2).continuousAt.div
           (by fun_prop : Continuous fun x : ℝ => (1-a^2)*(1-x^2)).continuousAt hD)))
   · intro x hx
     rw [interior_Icc] at hx
-    rw [(legY_R1_hasDerivAt ha ha1 hx.1 hx.2).deriv]
+    rw [(DegreeCoordinate.rhsLeft_hasDerivAt ha ha1 hx.1 hx.2).deriv]
     have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
     have : 0 < Real.sqrt (1 - a^2 - x^2) := Real.sqrt_pos.2 (by nlinarith [hx.1, hx.2])
     exact div_neg_of_neg_of_pos (by linarith) hx2
 
 /-- The right side of 14.15.21 is nonnegative on `[0, √(1-α²)]`. -/
-theorem legY_R1_nonneg {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
-    (hx1 : x ≤ Real.sqrt (1 - a^2)) : 0 ≤ legY_R1 a x := by
+theorem DegreeCoordinate.rhsLeft_nonneg {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
+    (hx1 : x ≤ Real.sqrt (1 - a^2)) : 0 ≤ DegreeCoordinate.rhsLeft a x := by
   rcases hx1.lt_or_eq with h | h
-  · rw [← legY_R1_x0 ha ha1]
-    exact (legY_R1_strictAntiOn ha ha1 ⟨hx, hx1⟩ ⟨(legY_x0_pos ha1 ha).le, le_rfl⟩ h).le
-  · rw [h, legY_R1_x0 ha ha1]
+  · rw [← DegreeCoordinate.rhsLeft_turningPoint ha ha1]
+    exact (DegreeCoordinate.rhsLeft_strictAntiOn ha ha1 ⟨hx, hx1⟩
+        ⟨(DegreeCoordinate.turningPoint_pos ha1 ha).le, le_rfl⟩ h).le
+  · rw [h, DegreeCoordinate.rhsLeft_turningPoint ha ha1]
 
 /-- The right side of 14.15.22 without the absolute value (the logarithm is even). -/
-theorem legY_R2_eq (a x : ℝ) : legY_R2 a x =
+theorem DegreeCoordinate.rhsRight_eq (a x : ℝ) : DegreeCoordinate.rhsRight a x =
     Real.log ((x+Real.sqrt (x^2-1+a^2))/Real.sqrt (1-a^2)) +
         a/2*Real.log ((1-a^2)*(1-x^2)/((1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2))) := by
-  unfold legY_R2
+  unfold DegreeCoordinate.rhsRight
   congr 2
   rcases abs_choice (1 - x^2) with h | h
   · rw [h]
   · rw [h, ← Real.log_neg_eq_log]; congr 1; ring
 
 /-- `√(1-α²) ≤ x ↔ x² - 1 + α² ≥ 0` for `x ≥ 0`. -/
-theorem legY_x0_le_iff {a x : ℝ} (hx : 0 ≤ x) :
+theorem DegreeCoordinate.turningPoint_le_iff {a x : ℝ} (hx : 0 ≤ x) :
     Real.sqrt (1 - a^2) ≤ x ↔ 0 ≤ x^2 - 1 + a^2 := by
   rw [Real.sqrt_le_left hx]; constructor <;> intro h <;> linarith
 
 /-- `√(1-α²) < x ↔ x² - 1 + α² > 0` for `x ≥ 0`. -/
-theorem legY_x0_lt_iff {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
+theorem DegreeCoordinate.turningPoint_lt_iff {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
     Real.sqrt (1 - a^2) < x ↔ 0 < x^2 - 1 + a^2 := by
-  have h0 := legY_x0_pos ha1 ha
-  have h2 := legY_x0_sq ha1 ha
+  have h0 := DegreeCoordinate.turningPoint_pos ha1 ha
+  have h2 := DegreeCoordinate.turningPoint_sq ha1 ha
   constructor
   · intro h
     have := pow_lt_pow_left₀ h h0.le two_ne_zero
@@ -767,13 +791,13 @@ theorem legY_x0_lt_iff {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
     rwa [Real.sqrt_sq hx] at this
 
 /-- Derivative of the right side of 14.15.22: `√(x²-1+α²)/(x²-1)`. -/
-theorem legY_R2_hasDerivAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
+theorem DegreeCoordinate.rhsRight_hasDerivAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
     (hx0 : Real.sqrt (1 - a^2) < x) (hx1 : x ≠ 1) :
-    HasDerivAt (legY_R2 a) (Real.sqrt (x^2 - 1 + a^2) / (x^2 - 1)) x := by
-  have hW0' := (legY_x0_lt_iff ha ha1 hx).1 hx0
-  have hxpos : 0 < x := lt_of_le_of_lt (legY_x0_pos ha1 ha).le hx0
+    HasDerivAt (DegreeCoordinate.rhsRight a) (Real.sqrt (x^2 - 1 + a^2) / (x^2 - 1)) x := by
+  have hW0' := (DegreeCoordinate.turningPoint_lt_iff ha ha1 hx).1 hx0
+  have hxpos : 0 < x := lt_of_le_of_lt (DegreeCoordinate.turningPoint_pos ha1 ha).le hx0
   set c := Real.sqrt (1 - a^2) with hc
-  have hc0 : 0 < c := legY_x0_pos ha1 ha
+  have hc0 : 0 < c := DegreeCoordinate.turningPoint_pos ha1 ha
   set W := Real.sqrt (x^2 - 1 + a^2) with hW
   have hW0 : 0 < W := Real.sqrt_pos.2 hW0'
   have hW2 : W^2 = x^2 - 1 + a^2 := Real.sq_sqrt hW0'.le
@@ -808,7 +832,7 @@ theorem legY_R2_hasDerivAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ 
     refine div_ne_zero (mul_ne_zero ha2.ne' ?_) hGne
     intro h; exact hx2 (by linarith)
   have := (h1.log hf1).add ((h2.log hf2).const_mul (a/2))
-  rw [show legY_R2 a = _ from funext (legY_R2_eq a)]
+  rw [show DegreeCoordinate.rhsRight a = _ from funext (DegreeCoordinate.rhsRight_eq a)]
   refine this.congr_deriv ?_
   simp only [Pi.div_apply, ← hW]
   rw [hG]
@@ -817,12 +841,13 @@ theorem legY_R2_hasDerivAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ 
   linear_combination (W^3*(x^2 - 1) + W^2*(a*x^3 - a*x + x^3 - x) + W*(a*x^4 - a*x^2)) * hW2
 
 /-- The right side of 14.15.22 vanishes at `x = √(1-α²)`. -/
-theorem legY_R2_x0 {a : ℝ} (ha : 0 < a) (ha1 : a < 1) : legY_R2 a (Real.sqrt (1 - a^2)) = 0 := by
-  have h0 := legY_x0_pos ha1 ha.le
-  have h2 := legY_x0_sq ha1 ha.le
+theorem DegreeCoordinate.rhsRight_turningPoint {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
+    DegreeCoordinate.rhsRight a (Real.sqrt (1 - a^2)) = 0 := by
+  have h0 := DegreeCoordinate.turningPoint_pos ha1 ha.le
+  have h2 := DegreeCoordinate.turningPoint_sq ha1 ha.le
   have hW : Real.sqrt (Real.sqrt (1 - a^2) ^ 2 - 1 + a^2) = 0 := by
     rw [h2]; simp
-  unfold legY_R2
+  unfold DegreeCoordinate.rhsRight
   rw [hW, add_zero, div_self h0.ne', Real.log_one, zero_add, h2,
     show 1 - (1 - a^2) = a^2 by ring, abs_of_pos (by positivity)]
   have : (1 - a^2) * a^2 / ((1 + a^2) * (1 - a^2) - 1 + a^2 + 2 * a * Real.sqrt (1 - a^2) * 0)
@@ -833,10 +858,11 @@ theorem legY_R2_x0 {a : ℝ} (ha : 0 < a) (ha1 : a < 1) : legY_R2 a (Real.sqrt (
   rw [this, Real.log_one, mul_zero]
 
 /-- Continuity of the right side of 14.15.22. -/
-theorem legY_R2_continuousAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx1 : x ≠ 1) (hx1' : x ≠ -1)
+theorem DegreeCoordinate.rhsRight_continuousAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx1 : x ≠ 1)
+    (hx1' : x ≠ -1)
     (hpos : 0 < x + Real.sqrt (x^2-1+a^2))
     (hG : (1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2) ≠ 0) :
-    ContinuousAt (legY_R2 a) x := by
+    ContinuousAt (DegreeCoordinate.rhsRight a) x := by
   have ha2 : 0 < Real.sqrt (1 - a^2) := Real.sqrt_pos.2 (by nlinarith)
   have hab : |1 - x^2| ≠ 0 := by
     rw [abs_ne_zero]; intro h
@@ -845,7 +871,7 @@ theorem legY_R2_continuousAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx1 : x �
     · exact hx1 (by linarith)
     · exact hx1' (by linarith)
   have ha3 : 1 - a^2 ≠ 0 := by nlinarith
-  unfold legY_R2
+  unfold DegreeCoordinate.rhsRight
   refine ContinuousAt.add ?_ (continuousAt_const.mul ?_)
   · exact ((by fun_prop : Continuous fun x : ℝ => (x + Real.sqrt (x^2-1+a^2)) /
       Real.sqrt (1-a^2)).continuousAt).log (by positivity)
@@ -855,51 +881,53 @@ theorem legY_R2_continuousAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx1 : x �
         (1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2)).continuousAt) hG
 
 /-- For `x ≥ √(1-α²)` the denominator in 14.15.22 is the square `(W + αx)²`. -/
-theorem legY_G_eq {a x : ℝ} (hW : 0 ≤ x^2 - 1 + a^2) :
+theorem DegreeCoordinate.denominator_eq_sq {a x : ℝ} (hW : 0 ≤ x^2 - 1 + a^2) :
     (1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2) = (Real.sqrt (x^2-1+a^2) + a*x)^2 := by
   have := Real.sq_sqrt hW
   linear_combination (-1) * this
 
 /-- The right side of 14.15.22 decreases strictly on `[√(1-α²), 1)`. -/
-theorem legY_R2_strictAntiOn {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
-    StrictAntiOn (legY_R2 a) (Ico (Real.sqrt (1 - a^2)) 1) := by
-  have h0 := legY_x0_pos ha1 ha.le
+theorem DegreeCoordinate.rhsRight_strictAntiOn {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
+    StrictAntiOn (DegreeCoordinate.rhsRight a) (Ico (Real.sqrt (1 - a^2)) 1) := by
+  have h0 := DegreeCoordinate.turningPoint_pos ha1 ha.le
   refine strictAntiOn_of_deriv_neg (convex_Ico _ _) ?_ ?_
   · intro x hx
     have hx0 : 0 ≤ x := h0.le.trans hx.1
-    have hW := (legY_x0_le_iff hx0).1 hx.1
-    refine (legY_R2_continuousAt ha.le ha1 hx.2.ne (by linarith) ?_ ?_).continuousWithinAt
+    have hW := (DegreeCoordinate.turningPoint_le_iff hx0).1 hx.1
+    refine (DegreeCoordinate.rhsRight_continuousAt ha.le ha1 hx.2.ne (by linarith) ?_
+        ?_).continuousWithinAt
     · have := Real.sqrt_nonneg (x^2-1+a^2); linarith [lt_of_lt_of_le h0 hx.1]
-    · rw [legY_G_eq hW]
+    · rw [DegreeCoordinate.denominator_eq_sq hW]
       have : 0 < a * x := mul_pos ha (lt_of_lt_of_le h0 hx.1)
       have := Real.sqrt_nonneg (x^2-1+a^2)
       positivity
   · intro x hx
     rw [interior_Ico] at hx
     have hx0 : 0 ≤ x := h0.le.trans hx.1.le
-    rw [(legY_R2_hasDerivAt ha.le ha1 hx0 hx.1 hx.2.ne).deriv]
-    have hW := (legY_x0_lt_iff ha.le ha1 hx0).1 hx.1
+    rw [(DegreeCoordinate.rhsRight_hasDerivAt ha.le ha1 hx0 hx.1 hx.2.ne).deriv]
+    have hW := (DegreeCoordinate.turningPoint_lt_iff ha.le ha1 hx0).1 hx.1
     exact div_neg_of_pos_of_neg (Real.sqrt_pos.2 hW) (by nlinarith [hx.2])
 
 /-- The right side of 14.15.22 is negative on `(√(1-α²), 1)`. -/
-theorem legY_R2_neg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx0 : Real.sqrt (1 - a^2) < x)
-    (hx1 : x < 1) : legY_R2 a x < 0 := by
-  rw [← legY_R2_x0 ha ha1]
-  exact legY_R2_strictAntiOn ha ha1 ⟨le_rfl, by
-    have := legY_x0_sq ha1 ha.le
-    nlinarith [legY_x0_pos ha1 ha.le]⟩ ⟨hx0.le, hx1⟩ hx0
+theorem DegreeCoordinate.rhsRight_neg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1)
+    (hx0 : Real.sqrt (1 - a^2) < x)
+    (hx1 : x < 1) : DegreeCoordinate.rhsRight a x < 0 := by
+  rw [← DegreeCoordinate.rhsRight_turningPoint ha ha1]
+  exact DegreeCoordinate.rhsRight_strictAntiOn ha ha1 ⟨le_rfl, by
+    have := DegreeCoordinate.turningPoint_sq ha1 ha.le
+    nlinarith [DegreeCoordinate.turningPoint_pos ha1 ha.le]⟩ ⟨hx0.le, hx1⟩ hx0
 
 /-- `√(1-α²) ≤ 1`. -/
-theorem legY_x0_le_one (a : ℝ) : Real.sqrt (1 - a^2) ≤ 1 := by
+theorem DegreeCoordinate.turningPoint_le_one (a : ℝ) : Real.sqrt (1 - a^2) ≤ 1 := by
   rw [Real.sqrt_le_one]; nlinarith
 
 /-- The right side of 14.15.22 increases strictly on `(1, ∞)`. -/
-theorem legY_R2_strictMonoOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
-    StrictMonoOn (legY_R2 a) (Ioi 1) := by
-  have hd : ∀ x ∈ Ioi (1:ℝ), HasDerivAt (legY_R2 a)
+theorem DegreeCoordinate.rhsRight_strictMonoOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
+    StrictMonoOn (DegreeCoordinate.rhsRight a) (Ioi 1) := by
+  have hd : ∀ x ∈ Ioi (1:ℝ), HasDerivAt (DegreeCoordinate.rhsRight a)
       (Real.sqrt (x^2 - 1 + a^2) / (x^2 - 1)) x := fun x hx =>
-    legY_R2_hasDerivAt ha ha1 (by linarith [show (1:ℝ) < x from hx])
-      (lt_of_le_of_lt (legY_x0_le_one a) hx) (ne_of_gt hx)
+    DegreeCoordinate.rhsRight_hasDerivAt ha ha1 (by linarith [show (1:ℝ) < x from hx])
+      (lt_of_le_of_lt (DegreeCoordinate.turningPoint_le_one a) hx) (ne_of_gt hx)
   refine strictMonoOn_of_deriv_pos (convex_Ioi 1)
     (fun x hx => (hd x hx).continuousAt.continuousWithinAt) ?_
   intro x hx
@@ -909,10 +937,10 @@ theorem legY_R2_strictMonoOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
   exact div_pos (Real.sqrt_pos.2 (by nlinarith)) (by nlinarith)
 
 /-- The right side of 14.15.22 tends to `∞`. -/
-theorem legY_R2_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
-    Tendsto (legY_R2 a) atTop atTop := by
+theorem DegreeCoordinate.rhsRight_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
+    Tendsto (DegreeCoordinate.rhsRight a) atTop atTop := by
   set c := Real.sqrt (1 - a^2)
-  have hc0 : 0 < c := legY_x0_pos ha1 ha
+  have hc0 : 0 < c := DegreeCoordinate.turningPoint_pos ha1 ha
   have ha2 : 0 < 1 - a^2 := by nlinarith
   set k := 3 * (1 - a^2) / 16
   have hk : 0 < k := by positivity
@@ -927,7 +955,7 @@ theorem legY_R2_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
   have h1 : Real.log x - Real.log c ≤ Real.log ((x + W) / c) := by
     rw [← Real.log_div (by linarith) hc0.ne']
     exact Real.log_le_log (by positivity) (by gcongr; linarith)
-  have hG : (1+a^2)*x^2-1+a^2+2*a*x*W = (W + a*x)^2 := legY_G_eq hW0
+  have hG : (1+a^2)*x^2-1+a^2+2*a*x*W = (W + a*x)^2 := DegreeCoordinate.denominator_eq_sq hW0
   have hGpos : 0 < (W + a*x)^2 := by
     have : 0 < W + a*x := by
       rcases ha.eq_or_lt with rfl | ha'
@@ -945,95 +973,101 @@ theorem legY_R2_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
     nlinarith [mul_le_mul_of_nonneg_left this ha2.le]
   have h3 : a/2 * Real.log k ≤ a/2 * Real.log ((1-a^2)*|1-x^2|/((1+a^2)*x^2-1+a^2+2*a*x*W)) :=
     mul_le_mul_of_nonneg_left (Real.log_le_log hk h2) (by positivity)
-  show Real.log x + (-Real.log c + a/2 * Real.log k) ≤ legY_R2 a x
-  unfold legY_R2
+  show Real.log x + (-Real.log c + a/2 * Real.log k) ≤ DegreeCoordinate.rhsRight a x
+  unfold DegreeCoordinate.rhsRight
   linarith
 
 /-- At `α = 0` the right side of 14.15.22 is positive for `x > 1`. -/
-theorem legY_R2_pos_zero {x : ℝ} (hx : 1 < x) : 0 < legY_R2 0 x := by
-  simp only [legY_R2]
+theorem DegreeCoordinate.rhsRight_pos_zero {x : ℝ} (hx : 1 < x) : 0 <
+    DegreeCoordinate.rhsRight 0 x := by
+  simp only [DegreeCoordinate.rhsRight]
   norm_num
   apply Real.log_pos
   have : 0 < Real.sqrt (x^2 - 1) := Real.sqrt_pos.2 (by nlinarith)
   linarith
 
 /-- The relation at `x = 1`. -/
-theorem legY_rel_one (a y : ℝ) : LegendreYRelation a 1 y ↔ y = 0 := by
+theorem DegreeCoordinate.relation_one (a y : ℝ) : LegendreYRelation a 1 y ↔ y = 0 := by
   simp [LegendreYRelation]
 
 /-- The relation for `x ≤ √(1-α²)`, `x ≠ 1`, through `L₁`. -/
-theorem legY_rel_left {a x y : ℝ} (hx1 : x ≠ 1) (hx0 : x ≤ Real.sqrt (1 - a^2)) :
-    LegendreYRelation a x y ↔ a^2 ≤ y ∧ legY_L1 a (Real.sqrt (y - a^2)) = legY_R1 a x := by
+theorem DegreeCoordinate.relation_left {a x y : ℝ} (hx1 : x ≠ 1) (hx0 : x ≤ Real.sqrt (1 - a^2)) :
+    LegendreYRelation a x y ↔ a^2 ≤ y ∧ DegreeCoordinate.lhsLeft a (Real.sqrt (y - a^2)) =
+        DegreeCoordinate.rhsLeft a x := by
   simp only [LegendreYRelation, hx1, hx0, ↓reduceIte]; rfl
 
 /-- The left side of 14.15.22 through `L₂`. -/
-theorem legY_L2_sqrt {a y : ℝ} (hy : y ≤ a^2) :
+theorem DegreeCoordinate.lhsRight_sqrt {a y : ℝ} (hy : y ≤ a^2) :
     Real.sqrt (a^2-y)+a/2*Real.log |y|-a*Real.log (Real.sqrt (a^2-y)+a)
-      = legY_L2 a (Real.sqrt (a^2-y)) := by
-  unfold legY_L2
+      = DegreeCoordinate.lhsRight a (Real.sqrt (a^2-y)) := by
+  unfold DegreeCoordinate.lhsRight
   rw [Real.sq_sqrt (by linarith), Real.log_abs, show a^2 - (a^2 - y) = y by ring]
 
 /-- The relation for `x > √(1-α²)`, `x ≠ 1`, through `L₂`. -/
-theorem legY_rel_right {a x y : ℝ} (hx1 : x ≠ 1) (hx0 : ¬ x ≤ Real.sqrt (1 - a^2)) :
+theorem DegreeCoordinate.relation_right {a x y : ℝ} (hx1 : x ≠ 1)
+    (hx0 : ¬ x ≤ Real.sqrt (1 - a^2)) :
     LegendreYRelation a x y ↔ y ≤ a^2 ∧ (x < 1 → 0 < y) ∧ (1 < x → y < 0) ∧
-      legY_L2 a (Real.sqrt (a^2-y)) = legY_R2 a x := by
+      DegreeCoordinate.lhsRight a (Real.sqrt (a^2-y)) = DegreeCoordinate.rhsRight a x := by
   simp only [LegendreYRelation, hx1, hx0, ↓reduceIte]
   constructor
   · rintro ⟨h1, h2, h3, h4⟩
-    exact ⟨h1, h2, h3, by rw [← legY_L2_sqrt h1]; exact h4⟩
+    exact ⟨h1, h2, h3, by rw [← DegreeCoordinate.lhsRight_sqrt h1]; exact h4⟩
   · rintro ⟨h1, h2, h3, h4⟩
-    exact ⟨h1, h2, h3, by rw [legY_L2_sqrt h1]; exact h4⟩
+    exact ⟨h1, h2, h3, by rw [DegreeCoordinate.lhsRight_sqrt h1]; exact h4⟩
 
 /-- Existence and uniqueness of the solution of 14.15.21–22. -/
-theorem legY_existsUnique {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
+theorem DegreeCoordinate.existsUnique {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
     (∃ y, LegendreYRelation a x y) ∧
       ∀ y₁ y₂, LegendreYRelation a x y₁ → LegendreYRelation a x y₂ → y₁ = y₂ := by
-  have hc0 := legY_x0_pos ha1 ha
-  have hc1 := legY_x0_le_one a
+  have hc0 := DegreeCoordinate.turningPoint_pos ha1 ha
+  have hc1 := DegreeCoordinate.turningPoint_le_one a
   by_cases h1 : x = 1
   · subst h1
-    simp only [legY_rel_one]
+    simp only [DegreeCoordinate.relation_one]
     exact ⟨⟨0, rfl⟩, fun y₁ y₂ h₁ h₂ => h₁.trans h₂.symm⟩
   by_cases h0 : x ≤ Real.sqrt (1 - a^2)
-  · simp only [legY_rel_left h1 h0]
+  · simp only [DegreeCoordinate.relation_left h1 h0]
     refine ⟨?_, fun y₁ y₂ h₁ h₂ => ?_⟩
-    · obtain ⟨s, hs, hsv⟩ := legY_L1_surj ha (legY_R1_nonneg ha ha1 hx h0)
+    · obtain ⟨s, hs, hsv⟩ :=
+          DegreeCoordinate.lhsLeft_surj ha (DegreeCoordinate.rhsLeft_nonneg ha ha1 hx h0)
       refine ⟨a^2 + s^2, by nlinarith, ?_⟩
       rw [show a^2 + s^2 - a^2 = s^2 by ring, Real.sqrt_sq hs, hsv]
-    · have := (legY_L1_strictMonoOn ha).injOn (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+    · have := (DegreeCoordinate.lhsLeft_strictMonoOn ha).injOn (Real.sqrt_nonneg _)
+          (Real.sqrt_nonneg _)
         (h₁.2.trans h₂.2.symm)
       have := (Real.sqrt_inj (by linarith [h₁.1]) (by linarith [h₂.1])).1 this
       linarith
-  simp only [legY_rel_right h1 h0]
+  simp only [DegreeCoordinate.relation_right h1 h0]
   rcases lt_or_gt_of_ne h1 with hlt | hgt
   · -- `√(1-α²) < x < 1`, so `α > 0`
     have ha0 : 0 < a := by
       rcases ha.eq_or_lt with rfl | h
       · exfalso; apply h0; simp; linarith
       · exact h
-    have hv := legY_R2_neg ha0 ha1 (not_le.1 h0) hlt
+    have hv := DegreeCoordinate.rhsRight_neg ha0 ha1 (not_le.1 h0) hlt
     have hsl : ∀ y, 0 < y → y ≤ a^2 → Real.sqrt (a^2 - y) ∈ Ico 0 a := by
       intro y hy hya
       refine ⟨Real.sqrt_nonneg _, ?_⟩
       rw [Real.sqrt_lt' ha0]; linarith
     refine ⟨?_, fun y₁ y₂ h₁ h₂ => ?_⟩
-    · obtain ⟨s₁, hs₁, hs₁a⟩ := (((legY_L2_tendsto_nhdsNE ha0).mono_left
+    · obtain ⟨s₁, hs₁, hs₁a⟩ := (((DegreeCoordinate.lhsRight_tendsto_nhdsNE ha0).mono_left
         (nhdsWithin_mono _ (show Iio a ⊆ ({a}ᶜ : Set ℝ) from fun s (hs : s < a) =>
             ne_of_lt hs))).eventually
-        (eventually_lt_atBot (legY_R2 a x)) |>.and (Ioo_mem_nhdsLT ha0)).exists
-      have hcont : ContinuousOn (legY_L2 a) (Icc 0 s₁) :=
-        (legY_L2_continuousOn a).mono fun s hs =>
+        (eventually_lt_atBot (DegreeCoordinate.rhsRight a x)) |>.and (Ioo_mem_nhdsLT ha0)).exists
+      have hcont : ContinuousOn (DegreeCoordinate.lhsRight a) (Icc 0 s₁) :=
+        (DegreeCoordinate.lhsRight_continuousOn a).mono fun s hs =>
           ⟨hs.1, ne_of_lt (lt_of_le_of_lt hs.2 hs₁a.2), by linarith [hs.1]⟩
       obtain ⟨s, hs, hsv⟩ := intermediate_value_Icc' hs₁a.1.le hcont
-        (show legY_R2 a x ∈ Icc (legY_L2 a s₁) (legY_L2 a 0) from
-          ⟨hs₁.le, by rw [legY_L2_zero]; exact hv.le⟩)
+        (show DegreeCoordinate.rhsRight a x ∈
+            Icc (DegreeCoordinate.lhsRight a s₁) (DegreeCoordinate.lhsRight a 0) from
+          ⟨hs₁.le, by rw [DegreeCoordinate.lhsRight_zero]; exact hv.le⟩)
       have hsa : s < a := lt_of_le_of_lt hs.2 hs₁a.2
       refine ⟨a^2 - s^2, by nlinarith [hs.1], fun _ => by nlinarith [hs.1], fun h => absurd h
         (by linarith), ?_⟩
       rw [show a^2 - (a^2 - s^2) = s^2 by ring, Real.sqrt_sq hs.1, hsv]
     · have e₁ := h₁.2.1 hlt
       have e₂ := h₂.2.1 hlt
-      have := (legY_L2_strictAntiOn ha0).injOn (hsl _ e₁ h₁.1) (hsl _ e₂ h₂.1)
+      have := (DegreeCoordinate.lhsRight_strictAntiOn ha0).injOn (hsl _ e₁ h₁.1) (hsl _ e₂ h₂.1)
         (h₁.2.2.2.trans h₂.2.2.2.symm)
       have := (Real.sqrt_inj (by linarith [h₁.1]) (by linarith [h₂.1])).1 this
       linarith
@@ -1044,22 +1078,23 @@ theorem legY_existsUnique {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x
       calc a = Real.sqrt (a^2) := (Real.sqrt_sq ha).symm
         _ < _ := Real.sqrt_lt_sqrt (by positivity) (by linarith)
     refine ⟨?_, fun y₁ y₂ h₁ h₂ => ?_⟩
-    · set v := legY_R2 a x
-      obtain ⟨s₁, hs₁a, hs₁⟩ : ∃ s₁, a < s₁ ∧ legY_L2 a s₁ < v := by
+    · set v := DegreeCoordinate.rhsRight a x
+      obtain ⟨s₁, hs₁a, hs₁⟩ : ∃ s₁, a < s₁ ∧ DegreeCoordinate.lhsRight a s₁ < v := by
         rcases ha.eq_or_lt with ha0 | ha0
         · subst ha0
-          have hv := legY_R2_pos_zero hgt
+          have hv := DegreeCoordinate.rhsRight_pos_zero hgt
           refine ⟨v/2, by positivity, ?_⟩
-          simp only [legY_L2]; simp; linarith
-        · obtain ⟨s₁, hs₁, hs₁a⟩ := (((legY_L2_tendsto_nhdsNE ha0).mono_left
+          simp only [DegreeCoordinate.lhsRight]; simp; linarith
+        · obtain ⟨s₁, hs₁, hs₁a⟩ := (((DegreeCoordinate.lhsRight_tendsto_nhdsNE ha0).mono_left
             (nhdsWithin_mono _ (show Ioi a ⊆ ({a}ᶜ : Set ℝ) from fun s (hs : a < s) =>
                 ne_of_gt hs))).eventually
             (eventually_lt_atBot v) |>.and self_mem_nhdsWithin).exists
           exact ⟨s₁, hs₁a, hs₁⟩
-      obtain ⟨s₂, hs₂, hs₂a⟩ := ((legY_L2_tendsto_atTop ha).eventually (eventually_gt_atTop v)
+      obtain ⟨s₂, hs₂, hs₂a⟩ :=
+          ((DegreeCoordinate.lhsRight_tendsto_atTop ha).eventually (eventually_gt_atTop v)
         |>.and (eventually_ge_atTop s₁)).exists
-      have hcont : ContinuousOn (legY_L2 a) (Icc s₁ s₂) :=
-        (legY_L2_continuousOn a).mono fun s hs =>
+      have hcont : ContinuousOn (DegreeCoordinate.lhsRight a) (Icc s₁ s₂) :=
+        (DegreeCoordinate.lhsRight_continuousOn a).mono fun s hs =>
           ⟨by linarith [hs.1], ne_of_gt (lt_of_lt_of_le hs₁a hs.1), by linarith [hs.1]⟩
       obtain ⟨s, hs, hsv⟩ := intermediate_value_Icc hs₂a hcont ⟨hs₁.le, hs₂.le⟩
       have hsa : a < s := lt_of_lt_of_le hs₁a hs.1
@@ -1067,7 +1102,7 @@ theorem legY_existsUnique {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x
       rw [show a^2 - (a^2 - s^2) = s^2 by ring, Real.sqrt_sq (by linarith), hsv]
     · have e₁ := h₁.2.2.1 hgt
       have e₂ := h₂.2.2.1 hgt
-      have := (legY_L2_strictMonoOn ha).injOn (hsr _ e₁) (hsr _ e₂)
+      have := (DegreeCoordinate.lhsRight_strictMonoOn ha).injOn (hsr _ e₁) (hsr _ e₂)
         (h₁.2.2.2.trans h₂.2.2.2.symm)
       have := (Real.sqrt_inj (by linarith [h₁.1]) (by linarith [h₂.1])).1 this
       linarith

@@ -444,7 +444,7 @@ one more Cauchy integral. The parameters are continued one at a time to complex 
 integral is holomorphic in each parameter on `re(a+b+c+d) > 3`, by locally uniform tail bounds
 from log-convexity of `Γ` and the reflection formula. -/
 
-namespace RamanujanAux
+namespace RamanujanIntegral
 
 /-- `|Γ(x+iy)| ≤ Γ(x)` for `x > 0`. -/
 theorem norm_Gamma_le_Gamma_re {z : ℂ} (hz : 0 < z.re) : ‖Complex.Gamma z‖ ≤ Real.Gamma z.re := by
@@ -1241,7 +1241,7 @@ theorem integrable_recip_Gamma_mul_recip_Gamma {b d : ℂ} (h : 2 < (b + d).re) 
           have e1 : Eb / π * (K2 * u ^ e) = K2 * Eb / π * u ^ e := by ring
           rw [add_mul]; linarith
 
-end RamanujanAux
+end RamanujanIntegral
 end Ramanujan
 end DLMF.Gamma
 end

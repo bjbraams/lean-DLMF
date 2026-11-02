@@ -1433,8 +1433,9 @@ theorem cubic_connection {a : ℂ} {x : ℝ} (hx : x < -1)
             ₂F₁ (a + 1 / 3) (3 * a) (2 * a + 2 / 3) (1
           / ζ) := by
   intro z ζ
-  simp only [ζ, z, hcub_exp_two_third, hcub_exp_four_third]
-  have ht : ((Real.sqrt 3 : ℂ) * I) ^ 2 = -3 := hcub_t_sq
+  simp only [ζ, z, CubicTransformation.exp_two_pi_I_div_three,
+      CubicTransformation.exp_four_pi_I_div_three]
+  have ht : ((Real.sqrt 3 : ℂ) * I) ^ 2 = -3 := CubicTransformation.sqrt_three_mul_I_sq
   set t : ℂ := (Real.sqrt 3 : ℂ) * I with htdef
   set X : ℂ := (x : ℂ) with hXdef
   have him_t : t.im = Real.sqrt 3 := by simp [htdef]
@@ -1449,31 +1450,31 @@ theorem cubic_connection {a : ℂ} {x : ℝ} (hx : x < -1)
   -- the point `u = 1/ζ`
   set Y : ℝ := -(Real.sqrt 3 / 2) * (x + 1) / (1 - x) with hY
   have hu : 1 / ((-1 + t) / 2 * (1 - X) / (X - (-1 - t) / 2)) = 1 / 2 - t / 2 * (X + 1) / (1 - X) :=
-    hcub_seg_u ht hω h1 hxm
+    CubicTransformation.segment_inv ht hω h1 hxm
   set u : ℂ := 1 / 2 - t / 2 * (X + 1) / (1 - X) with hudef
   have huY : u = 1 / 2 + (Y : ℂ) * I := by
     rw [hudef, hY, htdef, hXdef]; push_cast; ring
   have hY0 : 0 < Y := by
     rw [hY]; apply div_pos _ (by linarith)
-    nlinarith [hcub_sqrt3_pos]
+    nlinarith [CubicTransformation.sqrt_three_pos]
   have hY1 : Y < Real.sqrt 3 / 2 := by
-    rw [hY, div_lt_iff₀ (by linarith)]; nlinarith [hcub_sqrt3_pos]
+    rw [hY, div_lt_iff₀ (by linarith)]; nlinarith [CubicTransformation.sqrt_three_pos]
   have hure : u.re = 1 / 2 := by rw [huY]; simp
   have huim : 0 < u.im := by rw [huY]; simpa using hY0
   have hun : ‖u‖ < 1 := by
     have hns : normSq u < 1 := by
       rw [huY, normSq_apply]; simp
-      nlinarith [hcub_sqrt3_sq, hcub_sqrt3_pos]
+      nlinarith [CubicTransformation.sqrt_three_sq, CubicTransformation.sqrt_three_pos]
     rw [normSq_eq_norm_sq] at hns
     nlinarith [norm_nonneg u]
   have hu0 : u ≠ 0 := by rintro h; rw [h] at huim; simp at huim
   have hζ : (-1 + t) / 2 * (1 - X) / (X - (-1 - t) / 2) = 1 / u := by
     rw [← hu, one_div_one_div]
   rw [hu, hζ]
-  have hmain := hcub_main hc ha huim hun
-  rw [← htdef, hcub_seg_Z ht h1 hX0] at hmain
-  have hrel := hcub_seg_rel ht h1 hX0 hu0
-  have hcp := hcub_cpow (a := a) hx hure huim hun (by rw [← htdef]; exact hrel)
+  have hmain := CubicTransformation.cubic_upper_half hc ha huim hun
+  rw [← htdef, CubicTransformation.segment_variable ht h1 hX0] at hmain
+  have hrel := CubicTransformation.segment_relation ht h1 hX0 hu0
+  have hcp := CubicTransformation.cpow (a := a) hx hure huim hun (by rw [← htdef]; exact hrel)
   rw [← htdef] at hcp
   have hB : ₂F₁ a (a + 1 / 3) (2 / 3) (X⁻¹ ^ 3) / (Gamma (a + 2 / 3) * Gamma (2 / 3)) +
       exp (Real.pi * I / 3) / (X * Gamma a * Gamma (4 / 3)) *

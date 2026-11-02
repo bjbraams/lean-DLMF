@@ -544,7 +544,7 @@ domain of convergence. -/
 theorem differentiableOn_selbergInt_cDomain (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
     DifferentiableOn ℂ (fun c => selbergInt N a b c) (cDomain N a b) := by
   unfold selbergInt
-  refine DLMF.Gamma.vb_differentiableOn_integral (isOpen_cDomain N a b)
+  refine DLMF.Gamma.VerticalBeta.differentiableOn_integral (isOpen_cDomain N a b)
     (fun c _ => (measurable_selbergIntegrand N a b c).aestronglyMeasurable) ?_ ?_
   · filter_upwards [ae_restrict_of_ae (ae_coords_ne N)] with t ht
     exact fun c _ => (differentiableAt_selbergIntegrand_c a b ht c).differentiableWithinAt
@@ -594,7 +594,8 @@ theorem differentiableOn_integral_mul_selbergIntegrand_c (N : ℕ) {a b : ℂ} (
     (hh1 : ∀ t ∈ cube N, ‖h t‖ ≤ 1) :
     DifferentiableOn ℂ (fun c => ∫ t in cube N, h t * selbergIntegrand N a b c t)
       {c | 0 < c.re} := by
-  refine DLMF.Gamma.vb_differentiableOn_integral (isOpen_lt continuous_const Complex.continuous_re)
+  refine DLMF.Gamma.VerticalBeta.differentiableOn_integral
+      (isOpen_lt continuous_const Complex.continuous_re)
     (fun c _ => (hh.mul (measurable_selbergIntegrand N a b c)).aestronglyMeasurable) ?_ ?_
   · filter_upwards [ae_restrict_of_ae (ae_coords_ne N)] with t ht
     exact fun c _ => ((differentiableAt_selbergIntegrand_c a b ht c).const_mul (h t))

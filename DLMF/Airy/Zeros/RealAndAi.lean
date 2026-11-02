@@ -31,7 +31,7 @@ negative; an energy identity excludes nonreal zeros of `Ai` and `Ai'` (DLMF §9.
   `Bi'` follow the same pattern (e.g. `airyBiDerivZero_enumeration`).
 * `airyAi_complex_zeros_real`, `airyAiDeriv_complex_zeros_real`: all zeros of `Ai` and `Ai'`
   are real.
-* `airyZeroC_real_neg`: the energy identity argument.
+* `NonrealZeros.real_neg`: the energy identity argument.
 -/
 
 @[expose] public noncomputable section
@@ -491,16 +491,17 @@ forces `z₀ < 0`.
 -/
 
 /-- `re (2ζ(w)) = (4/3)|w|^{3/2} cos(3/2 arg w)`. -/
-theorem airyZeroC_re_two_zeta {w : ℂ} (hw : w ≠ 0) :
+theorem NonrealZeros.re_two_zeta {w : ℂ} (hw : w ≠ 0) :
     (2 * airyZetaComplex w).re = 4 / 3 * ‖w‖ ^ (3 / 2 : ℝ) * Real.cos (3 / 2 * arg w) := by
-  have h := airyRot_re_W w 0
-  rw [← airyRot_two_zeta_mul_exp hw 0, ofReal_zero, zero_mul, exp_zero, mul_one, add_zero] at h
-  rw [h, ← airyRot_norm_two_zeta w]
+  have h := RotatedExpansions.re_W w 0
+  rw [← RotatedExpansions.two_zeta_mul_exp hw 0, ofReal_zero, zero_mul, exp_zero,
+      mul_one, add_zero] at h
+  rw [h, ← RotatedExpansions.norm_two_zeta w]
   congr 1
   rw [← Complex.norm_exp, exp_log_two_add_airyLogZeta hw]
 
 /-- Along a horizontal ray `z₀ + T`, `arg → 0`. -/
-theorem airyZeroC_tendsto_arg (z0 : ℂ) :
+theorem NonrealZeros.tendsto_arg (z0 : ℂ) :
     Tendsto (fun T : ℝ => arg (z0 + T)) atTop (𝓝 0) := by
   have h1 : Tendsto (fun T : ℝ => z0 / T + 1) atTop (𝓝 (0 + 1)) := by
     refine Tendsto.add_const 1 ?_
@@ -520,7 +521,7 @@ theorem airyZeroC_tendsto_arg (z0 : ℂ) :
   field_simp
 
 /-- `‖z₀ + T‖ → ∞` as `T → +∞`. -/
-theorem airyZeroC_tendsto_norm (z0 : ℂ) :
+theorem NonrealZeros.tendsto_norm (z0 : ℂ) :
     Tendsto (fun T : ℝ => ‖z0 + T‖) atTop atTop := by
   refine tendsto_atTop_mono (fun T => ?_) (tendsto_atTop_add_const_left _ (-‖z0‖) tendsto_id)
   have := norm_sub_norm_le (T : ℂ) (-z0)
@@ -533,40 +534,40 @@ theorem airyZeroC_tendsto_norm (z0 : ℂ) :
 
 /-- The horizontal ray `z₀ + T`, `T → +∞`, eventually lies in the sector `|arg z| ≤ π/2`
 and tends to infinity there. -/
-theorem airyZeroC_tendsto_sector (z0 : ℂ) :
+theorem NonrealZeros.tendsto_sector (z0 : ℂ) :
     Tendsto (fun T : ℝ => z0 + T) atTop (airySector (π / 2)) := by
-  refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr (airyZeroC_tendsto_norm z0), ?_⟩
+  refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr (NonrealZeros.tendsto_norm z0), ?_⟩
   refine tendsto_principal.mpr ?_
   filter_upwards [eventually_gt_atTop (-z0.re)] with T hT
   have hre : 0 < (z0 + T).re := by simp; linarith
   refine ⟨fun h => by simp [h] at hre, abs_arg_le_pi_div_two_iff.mpr hre.le⟩
 
 /-- `re (2ζ(z₀ + T)) → ∞`. -/
-theorem airyZeroC_tendsto_re_zeta (z0 : ℂ) :
+theorem NonrealZeros.tendsto_re_zeta (z0 : ℂ) :
     Tendsto (fun T : ℝ => (2 * airyZetaComplex (z0 + T)).re) atTop atTop := by
   have hc : Tendsto (fun T : ℝ => Real.cos (3 / 2 * arg (z0 + T))) atTop (𝓝 1) := by
-    have h0 := (airyZeroC_tendsto_arg z0).const_mul (3 / 2)
+    have h0 := (NonrealZeros.tendsto_arg z0).const_mul (3 / 2)
     rw [mul_zero] at h0
     have := (Real.continuous_cos.tendsto 0).comp h0
     simpa [Function.comp_def] using this
   have hn : Tendsto (fun T : ℝ => 4 / 3 * ‖z0 + T‖ ^ (3 / 2 : ℝ)) atTop atTop :=
-    ((tendsto_rpow_atTop (by norm_num)).comp (airyZeroC_tendsto_norm z0)).const_mul_atTop
+    ((tendsto_rpow_atTop (by norm_num)).comp (NonrealZeros.tendsto_norm z0)).const_mul_atTop
       (by norm_num)
   refine (hn.atTop_mul_pos one_pos hc).congr' ?_
   filter_upwards [eventually_gt_atTop (-z0.re)] with T hT
   have hre : 0 < (z0 + T).re := by simp; linarith
   have hw : z0 + T ≠ 0 := fun h => by simp [h] at hre
-  rw [airyZeroC_re_two_zeta hw]
+  rw [NonrealZeros.re_two_zeta hw]
 
 /-- The Wronskian-type boundary term `conj(Ai) Ai'` decays along horizontal rays. -/
-theorem airyZeroC_tendsto_boundary (z0 : ℂ) :
+theorem NonrealZeros.tendsto_boundary (z0 : ℂ) :
     Tendsto (fun T : ℝ => (starRingEnd ℂ) (airyAi (z0 + T)) * airyAiDeriv (z0 + T)) atTop
       (𝓝 0) := by
-  have hT := airyZeroC_tendsto_sector z0
-  have hA := (airy_ai_poincare (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
+  have hT := NonrealZeros.tendsto_sector z0
+  have hA := (airyAi_poincare (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
       0).comp_tendsto
     (by rw [show π - π / 2 = π / 2 by ring]; exact hT)
-  have hD := (airy_aiDeriv_poincare (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
+  have hD := (airyAiDeriv_poincare (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
       0).comp_tendsto
     (by rw [show π - π / 2 = π / 2 by ring]; exact hT)
   simp only [airyFunction, airyExponentialSum, Finset.range_zero, Finset.sum_empty, mul_zero,
@@ -581,7 +582,7 @@ theorem airyZeroC_tendsto_boundary (z0 : ℂ) :
   rw [tendsto_zero_iff_norm_tendsto_zero]
   have he : Tendsto (fun T : ℝ => Real.exp (-(2 * airyZetaComplex (z0 + T)).re) / (4 * π)) atTop
       (𝓝 (0 / (4 * π))) :=
-    (Real.tendsto_exp_neg_atTop_nhds_zero.comp (airyZeroC_tendsto_re_zeta z0)).div_const _
+    (Real.tendsto_exp_neg_atTop_nhds_zero.comp (NonrealZeros.tendsto_re_zeta z0)).div_const _
   rw [zero_div] at he
   refine he.congr' ?_
   filter_upwards [eventually_gt_atTop (-z0.re)] with T hT
@@ -603,14 +604,14 @@ theorem airyZeroC_tendsto_boundary (z0 : ℂ) :
   simp [abs_of_pos Real.pi_pos]
 
 /-- `t ↦ Ai(z₀ + t)` has derivative `Ai'(z₀ + t)` along the real line. -/
-theorem airyZeroC_hasDerivAt_u (z0 : ℂ) (t : ℝ) :
+theorem NonrealZeros.hasDerivAt_u (z0 : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => airyAi (z0 + t)) (airyAiDeriv (z0 + t)) t := by
   have h := ((hasDerivAt_airyAi (z0 + t)).comp (t : ℂ) ((hasDerivAt_id (t : ℂ)).const_add z0))
   simp only [mul_one] at h
   exact h.comp_ofReal
 
 /-- `t ↦ Ai'(z₀ + t)` has derivative `(z₀ + t) Ai(z₀ + t)` along the real line. -/
-theorem airyZeroC_hasDerivAt_v (z0 : ℂ) (t : ℝ) :
+theorem NonrealZeros.hasDerivAt_v (z0 : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => airyAiDeriv (z0 + t)) ((z0 + t) * airyAi (z0 + t)) t := by
   have h := ((hasDerivAt_airyAiDeriv (z0 + t)).comp (t : ℂ) ((hasDerivAt_id (t : ℂ)).const_add z0))
   simp only [mul_one] at h
@@ -618,7 +619,7 @@ theorem airyZeroC_hasDerivAt_v (z0 : ℂ) (t : ℝ) :
 
 /-- A function with nonnegative derivative on `[0, ∞)`, vanishing at `0` and at infinity,
 vanishes identically there, and so does its derivative on `(0, ∞)`. -/
-theorem airyZeroC_deriv_eq_zero {φ ψ : ℝ → ℝ} (hφ : ∀ t, HasDerivAt φ (ψ t) t) (h0 : φ 0 = 0)
+theorem NonrealZeros.deriv_eq_zero {φ ψ : ℝ → ℝ} (hφ : ∀ t, HasDerivAt φ (ψ t) t) (h0 : φ 0 = 0)
     (hlim : Tendsto φ atTop (𝓝 0)) (hψ : ∀ t, 0 ≤ t → 0 ≤ ψ t) {t : ℝ} (ht : 0 < t) :
     ψ t = 0 := by
   have hmono : MonotoneOn φ (Ici 0) := by
@@ -638,7 +639,7 @@ theorem airyZeroC_deriv_eq_zero {φ ψ : ℝ → ℝ} (hφ : ∀ t, HasDerivAt �
   exact (hφ t).unique ((hasDerivAt_const t (0 : ℝ)).congr_of_eventuallyEq hev)
 
 /-- `Ai` does not vanish on a whole horizontal ray. -/
-theorem airyZeroC_not_forall (z0 : ℂ) : ¬ ∀ t : ℝ, 0 < t → airyAi (z0 + t) = 0 := by
+theorem NonrealZeros.not_forall (z0 : ℂ) : ¬ ∀ t : ℝ, 0 < t → airyAi (z0 + t) = 0 := by
   intro h
   have hf : AnalyticOnNhd ℂ airyAi univ := fun z _ => differentiable_airyAi.analyticAt z
   have hT : Tendsto (fun t : ℝ => z0 + t) (𝓝[>] 1) (𝓝[≠] (z0 + 1)) := by
@@ -662,20 +663,20 @@ theorem airyZeroC_not_forall (z0 : ℂ) : ¬ ∀ t : ℝ, 0 < t → airyAi (z0 +
   exact lt_irrefl _ hp
 
 /-- **Energy identity argument.** If `conj(Ai(z₀)) Ai'(z₀) = 0`, then `z₀` is real and negative. -/
-theorem airyZeroC_real_neg {z0 : ℂ}
+theorem NonrealZeros.real_neg {z0 : ℂ}
     (h0 : (starRingEnd ℂ) (airyAi z0) * airyAiDeriv z0 = 0) : z0.im = 0 ∧ z0.re < 0 := by
   set g : ℝ → ℂ := fun t => (starRingEnd ℂ) (airyAi (z0 + t)) * airyAiDeriv (z0 + t) with hgdef
   have hg : ∀ t : ℝ, HasDerivAt g ((starRingEnd ℂ) (airyAiDeriv (z0 + t)) * airyAiDeriv (z0 + t) +
       (starRingEnd ℂ) (airyAi (z0 + t)) * ((z0 + t) * airyAi (z0 + t))) t := fun t =>
-    ((airyZeroC_hasDerivAt_u z0 t).star.mul (airyZeroC_hasDerivAt_v z0 t))
+    ((NonrealZeros.hasDerivAt_u z0 t).star.mul (NonrealZeros.hasDerivAt_v z0 t))
   have hg0 : g 0 = 0 := by simp [hgdef, h0]
-  have hlim : Tendsto g atTop (𝓝 0) := airyZeroC_tendsto_boundary z0
-  have hnv := airyZeroC_not_forall z0
+  have hlim : Tendsto g atTop (𝓝 0) := NonrealZeros.tendsto_boundary z0
+  have hnv := NonrealZeros.not_forall z0
   have him : z0.im = 0 := by
     by_contra hne
     apply hnv
     intro t ht
-    have hψ := airyZeroC_deriv_eq_zero (φ := fun t => (g t).im / z0.im)
+    have hψ := NonrealZeros.deriv_eq_zero (φ := fun t => (g t).im / z0.im)
       (ψ := fun t => normSq (airyAi (z0 + t)))
       (fun t => by
         refine (((imCLM.hasFDerivAt).comp_hasDerivAt t (hg t)).div_const z0.im).congr_deriv ?_
@@ -692,7 +693,7 @@ theorem airyZeroC_real_neg {z0 : ℂ}
   push Not at hre
   apply hnv
   intro t ht
-  have hψ := airyZeroC_deriv_eq_zero (φ := fun t => (g t).re)
+  have hψ := NonrealZeros.deriv_eq_zero (φ := fun t => (g t).re)
     (ψ := fun t => normSq (airyAiDeriv (z0 + t)) + (z0.re + t) * normSq (airyAi (z0 + t)))
     (fun t => by
       refine ((reCLM.hasFDerivAt).comp_hasDerivAt t (hg t)).congr_deriv ?_
@@ -714,12 +715,12 @@ theorem airyZeroC_real_neg {z0 : ℂ}
 /-- Ai and Ai' have no nonreal zeros, DLMF §9.9(i). -/
 theorem airyAi_complex_zeros_real {z : ℂ} (hz : airyAi z = 0) :
     z.im = 0 ∧ z.re < 0 :=
-  airyZeroC_real_neg (by rw [hz, map_zero, zero_mul])
+  NonrealZeros.real_neg (by rw [hz, map_zero, zero_mul])
 
 /-- Ai and Ai' have no nonreal zeros, DLMF §9.9(i). -/
 theorem airyAiDeriv_complex_zeros_real {z : ℂ} (hz : airyAiDeriv z = 0) :
     z.im = 0 ∧ z.re < 0 :=
-  airyZeroC_real_neg (by rw [hz, mul_zero])
+  NonrealZeros.real_neg (by rw [hz, mul_zero])
 
 end DLMF.Airy
 end

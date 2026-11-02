@@ -148,7 +148,40 @@ theorem symEllIntR_mul_neg_gt {ι : Type*} [Fintype ι] {a : ℝ} (ha : a ≠ 0)
 theorem symEllIntRF_zero_log_bounds {y z : ℝ} (hy : 0 < y) (hyz : y ≤ z) :
     Real.log 4 ≤ √z * (symEllIntRF 0 y z).re + Real.log √(y / z) ∧
       √z * (symEllIntRF 0 y z).re + Real.log √(y / z) ≤ π / 2 := by
-  sorry
+  have hz : 0 < z := hy.trans_le hyz
+  have hsz : 0 < √z := Real.sqrt_pos.mpr hz
+  rcases hyz.lt_or_eq with hyz' | rfl
+  · set k := √(1 - y / z) with hk
+    have hb : 0 < 1 - y / z := sub_pos.mpr ((div_lt_one hz).mpr hyz')
+    have hk0 : 0 < k := Real.sqrt_pos.mpr hb
+    have hk2' : k ^ 2 = 1 - y / z := Real.sq_sqrt hb.le
+    have hk1 : k < 1 := by
+      rw [hk, Real.sqrt_lt' zero_lt_one]; linarith [div_pos hy hz]
+    have hRF : symEllIntRF 0 y z = ((√z)⁻¹ : ℝ) * compEllIntKk k := by
+      rw [symEllIntRF_zero_eq_carlsonRK (ofReal_mem_slitPlane.mpr hy)
+        (ofReal_mem_slitPlane.mpr hz), Carlson.carlsonRK_eq_compEllIntKk hy hyz, ← hk,
+        compEllIntKk_ofReal_carlson (by nlinarith)]
+      have := Real.pi_pos
+      push_cast
+      field_simp
+    have he : √z * (symEllIntRF 0 y z).re = (compEllIntKk k).re := by
+      rw [hRF, re_ofReal_mul]; field_simp
+    have hyz2 : y / z = 1 - k ^ 2 := by rw [hk2']; ring
+    rw [he, hyz2]
+    exact log_four_le_compEllIntKk_add_log hk0 hk1
+  · have hys : (y : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr hy
+    rw [symEllIntRF_zero_self hys, div_self hy.ne', Real.sqrt_one, Real.log_one, add_zero,
+      show (-1 / 2 : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hy.le,
+      Real.rpow_neg hy.le, ← Real.sqrt_eq_rpow]
+    have he : √y * (((π / 2 : ℂ) * (((√y)⁻¹ : ℝ) : ℂ))).re = π / 2 := by
+      rw [show (π / 2 : ℂ) = ((π / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_mul, ofReal_re]
+      field_simp
+    rw [he]
+    refine ⟨?_, le_rfl⟩
+    have h4 : Real.log 4 = 2 * Real.log 2 := by
+      rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]; push_cast; ring
+    rw [h4]
+    linarith [Real.log_two_lt_d9, Real.pi_gt_three]
 
 /-- DLMF 19.24.2: `1/2 ≤ z^{-1/2} R_G(0, y, z) ≤ π/4` for `0 ≤ y ≤ z`, `z > 0`. -/
 @[dlmf 19.24.E2]

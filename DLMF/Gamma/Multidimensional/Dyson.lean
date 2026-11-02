@@ -632,7 +632,7 @@ theorem differentiableOn_circInt {n : ℕ} {s0 : ℝ}
     DifferentiableOn ℂ (circInt n) {b | s0 < b.re} := by
   have h : DifferentiableOn ℂ (fun b => ∫ θ in circBox n, circIntegrand n b θ)
       {b | s0 < b.re} := by
-    refine DLMF.Gamma.vb_differentiableOn_integral
+    refine DLMF.Gamma.VerticalBeta.differentiableOn_integral
       (isOpen_lt continuous_const Complex.continuous_re)
       (fun b _ => (measurable_circIntegrand n b).aestronglyMeasurable) ?_ ?_
     · filter_upwards [ae_circBox_good n] with θ hθ

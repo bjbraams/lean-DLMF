@@ -31,13 +31,15 @@ formulas and bibasic sums, together with counterexamples to two printed formulas
 
 * `q_pfaff_saalschutz`, `nonterminating_saalschutz`: DLMF 17.7.4–17.7.5.
 * `q_dixon_terminating`: the terminating `q`-Dixon sum (DLMF 17.7.6).
-* `four_phi_three_sum`, `eight_phi_seven_quadratic_sum`, `four_phi_three_parity`,
-  `eight_phi_seven_even_sum`, `four_phi_three_infinite_product`: DLMF 17.7.7–17.7.11.
+* `eight_phi_seven_quadratic_sum`, `four_phi_three_parity`, `eight_phi_seven_even_sum`,
+  `four_phi_three_infinite_product`: DLMF 17.7.8–17.7.11 (the `₄φ₃` sum 17.7.7 is
+  `four_phi_three_sum` in `DLMF.QHypergeometric.VeryWellPoisedSums`).
 * `four_phi_three_base_square_first`, `four_phi_three_base_square_second`:
   DLMF 17.7.12–17.7.13.
 * `jackson_eight_phi_seven`: Jackson's `₈φ₇` summation (DLMF 17.7.14).
-* `six_phi_five_sum`, `six_phi_five_terminating`, `nonterminating_eight_phi_seven`:
-  DLMF 17.7.15–17.7.17.
+* `six_phi_five_terminating`, `nonterminating_eight_phi_seven`: DLMF 17.7.16–17.7.17; the
+  nonterminating `₆φ₅` sum 17.7.15 is `six_phi_five_sum` in
+  `DLMF.QHypergeometric.VeryWellPoisedSums`.
 * `q_karlsson_minton`, `q_karlsson_minton_zero_corrected`: DLMF 17.7.18 and the corrected
   17.7.19.
 * `bibasic_gosper`, `bibasic_gasper`, `bibasic_bilateral_finite`: DLMF 17.7.20–17.7.22.
@@ -311,14 +313,6 @@ theorem q_dixon_terminating {b c q : ℂ} (hb : b≠0) (hc : c≠0) (hq0 : q≠0
         (qPochhammerList [q,b*c] q n*qPochhammerList [b,c] q (2*n)) := by
   sorry
 
-/-- The very-well-poised `4φ3` summation at argument `q√a/(bc)` (DLMF 17.7.E7). -/
-@[dlmf 17.7.E7]
-theorem four_phi_three_sum {a b c q : ℂ} (hq : ‖q‖<1) (hz : ‖q*Complex.sqrt a‖<‖b*c‖)
-    (hd : QDenominatorRegular [-Complex.sqrt a,a*q/b,a*q/c] q) :
-    qPhi [a,-q*Complex.sqrt a,b,c] [-Complex.sqrt a,a*q/b,a*q/c] q
-      (q*Complex.sqrt a/(b*c))=qFourPhiThreeValue a b c q := by
-  sorry
-
 /-- A quadratic very-well-poised `8φ7` summation with `ℓ = -c√(ab/q)` (DLMF 17.7.E8). -/
 @[dlmf 17.7.E8]
 theorem eight_phi_seven_quadratic_sum {a b c q ell : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc : c≠0)
@@ -382,7 +376,7 @@ theorem four_phi_three_base_square_second {a b q : ℂ} (hq0 : q≠0) (hq : ‖q
   sorry
 
 /-- The very-well-poised factor of an `₈φ₇` term as the unit-Bailey numerator. -/
-private lemma veryWellPoised_factor_eq_unitD {a q : ℂ} (k : ℕ) (hk : k = 0 ∨ (a ≠ 1 ∧
+theorem veryWellPoised_factor_eq_unitD {a q : ℂ} (k : ℕ) (hk : k = 0 ∨ (a ≠ 1 ∧
     qPochhammer (Complex.sqrt a) q k * qPochhammer (-Complex.sqrt a) q k ≠ 0)) :
     qPochhammer a q k * qPochhammer (q*Complex.sqrt a) q k * qPochhammer (-q*Complex.sqrt a) q k /
       (qPochhammer (Complex.sqrt a) q k * qPochhammer (-Complex.sqrt a) q k) =
@@ -677,16 +671,6 @@ theorem jackson_eight_phi_seven {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<
         fun_prop (disch := first | exact hb | exact hbcd')
   have h1 : Tendsto g (𝓝[≠] b) (𝓝 (g b)) := hg.tendsto.mono_left nhdsWithin_le_nhds
   exact tendsto_nhds_unique h1 (tendsto_const_nhds.congr' hev.symm)
-
-/-- The nonterminating very-well-poised `6φ5` summation (DLMF 17.7.E15). -/
-@[dlmf 17.7.E15]
-theorem six_phi_five_sum {a b c d q : ℂ} (hq : ‖q‖<1) (hz : ‖a*q‖<‖b*c*d‖)
-    (hd : QDenominatorRegular [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q) :
-    qPhi [a,q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d]
-      [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q (a*q/(b*c*d))=
-      qPochhammerListInf [a*q,a*q/(b*c),a*q/(b*d),a*q/(c*d)] q/
-        qPochhammerListInf [a*q/b,a*q/c,a*q/d,a*q/(b*c*d)] q := by
-  sorry
 
 /-- The rational terms of the terminating very-well-poised `₆φ₅` sum. -/
 def sixTerm (a b c q : ℂ) (n k : ℕ) : ℂ :=

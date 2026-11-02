@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.SpectralExistence
+public import DLMF.Mathieu.Basic.SpectralExistence
 public import DLMF.Mathieu.Properties
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 
@@ -42,7 +42,7 @@ expansions, recurrences, normalizations, sign convention, values at `q = 0`, cha
 ## Implementation notes
 
 The expansions come from the Fourier series of entire periodic functions
-(`DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic`) and the parity and periodicity of `ce_n`,
+(`DLMFMathlib.Analysis.Fourier.EntirePeriodic`) and the parity and periodicity of `ce_n`,
 `se_n`; the recurrences from integration by parts against `cos mx`, `sin mx`; the
 normalizations from Parseval's identity together with DLMF 28.2.30; the values at `q = 0` from
 DLMF 28.2.29; the change of sign of `q` from DLMF 28.2.34–28.2.37; and the convergence from
@@ -487,6 +487,28 @@ theorem exists_norm_mathieuFourierB_le_exp {n : ℕ} (hn : n ≠ 0) (q : ℝ) (R
   calc _ ≤ 1 * (C * Real.exp (-(R * m))) :=
         mul_le_mul hp (hC m) (norm_nonneg _) zero_le_one
     _ = _ := one_mul _
+
+/-- `A^n_{g(k)}(q) → 0` along any sequence of indices `g(k) → ∞`. -/
+theorem tendsto_mathieuFourierA_comp_atTop (n : ℕ) (q : ℝ) {g : ℕ → ℕ}
+    (hg : Tendsto g atTop atTop) : Tendsto (fun k => mathieuFourierA n (g k) q) atTop (𝓝 0) := by
+  obtain ⟨C, -, hC⟩ := exists_norm_mathieuFourierA_le_exp n q 1
+  refine squeeze_zero_norm (fun k => hC (g k)) ?_
+  have : Tendsto (fun k => Real.exp (-(1 * (g k : ℝ)))) atTop (𝓝 0) := by
+    have h := Real.tendsto_exp_neg_atTop_nhds_zero.comp (tendsto_natCast_atTop_atTop.comp hg)
+    refine h.congr fun k => ?_
+    simp [Function.comp]
+  simpa using this.const_mul C
+
+/-- `B^n_{g(k)}(q) → 0` along any sequence of indices `g(k) → ∞`, `n ≥ 1`. -/
+theorem tendsto_mathieuFourierB_comp_atTop {n : ℕ} (hn : n ≠ 0) (q : ℝ) {g : ℕ → ℕ}
+    (hg : Tendsto g atTop atTop) : Tendsto (fun k => mathieuFourierB n (g k) q) atTop (𝓝 0) := by
+  obtain ⟨C, -, hC⟩ := exists_norm_mathieuFourierB_le_exp hn q 1
+  refine squeeze_zero_norm (fun k => hC (g k)) ?_
+  have : Tendsto (fun k => Real.exp (-(1 * (g k : ℝ)))) atTop (𝓝 0) := by
+    have h := Real.tendsto_exp_neg_atTop_nhds_zero.comp (tendsto_natCast_atTop_atTop.comp hg)
+    refine h.congr fun k => ?_
+    simp [Function.comp]
+  simpa using this.const_mul C
 
 /-- **Absolute and locally uniform convergence** (DLMF §28.4(i)): the Fourier series
 `∑ₘ A^n_m(q) cos mz` and `∑ₘ B^n_m(q) sin mz` converge absolutely and uniformly on compact

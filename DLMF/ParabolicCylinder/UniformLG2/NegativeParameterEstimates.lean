@@ -15,23 +15,25 @@ applies it to Temme's form DLMF 12.10.31 of the uniform expansion of `U(-μ²/2,
 
 ## Main definitions
 
-* `pcfLG2_ser`: a truncated series `∑_{s<N} a_s(t)/u^s`.
-* `pcfLG2_p`: `p(t) = (t² - 1)^{-1/2}`.
-* `pcfLG2_Ta`, `pcfLG2_Tad`, `pcfLG2_Tad2`: Temme's coefficients `φ_s(τ(t))` and their first
-  and second derivatives.
+* `CylinderUniformExpansion.truncSeries`: a truncated series `∑_{s<N} a_s(t)/u^s`.
+* `CylinderUniformExpansion.recipSqrt`: `p(t) = (t² - 1)^{-1/2}`.
+* `CylinderUniformExpansion.temmeCoeff`, `CylinderUniformExpansion.temmeCoeffDeriv`,
+  `CylinderUniformExpansion.temmeCoeffDeriv2`: Temme's coefficients `φ_s(τ(t))` and their first and
+  second derivatives.
 
 ## Main results
 
-* `pcfLG2_core`: the general recessive Liouville–Green core.
-* `pcfLG2_temme_rec`: Temme's coefficients satisfy the Liouville–Green recursion.
+* `CylinderUniformExpansion.core`: the general recessive Liouville–Green core.
+* `CylinderUniformExpansion.temme_recursion`: Temme's coefficients satisfy the Liouville–Green
+  recursion.
 * `pcfU_temme_uniform`: Temme's form of the uniform expansion (DLMF 12.10.31).
 
 ## Implementation notes
 
-`pcfLG2_core` applies to any amplitude `A` with `ξ' = A⁻²` on `(b, ∞)`, any coefficient family
-satisfying the Liouville–Green recursion with uniform bounds and limits at `+∞`, and any
-solution `U` of `U'' = μ⁴A⁻⁴U` normalized at `+∞`; the expansions of `U` and of `U'` then hold
-with explicit constants. Temme's coefficients satisfy the recursion by the polynomial
+`CylinderUniformExpansion.core` applies to any amplitude `A` with `ξ' = A⁻²` on `(b, ∞)`, any
+coefficient family satisfying the Liouville–Green recursion with uniform bounds and limits at `+∞`,
+and any solution `U` of `U'' = μ⁴A⁻⁴U` normalized at `+∞`; the expansions of `U` and of `U'` then
+hold with explicit constants. Temme's coefficients satisfy the recursion by the polynomial
 recursion DLMF 12.10.33 and tend to `0` at `t = ∞` for `s ≥ 1`, so that the normalizer is
 exactly `h(μ)`.
 -/
@@ -47,29 +49,33 @@ namespace DLMF.Confluent
 open Polynomial
 
 /-- A truncated series `∑_{s<N} a_s(t)/u^s`. -/
-noncomputable def pcfLG2_ser (a : ℕ → ℝ → ℝ) (N : ℕ) (u t : ℝ) : ℝ := ∑ s ∈
+noncomputable def CylinderUniformExpansion.truncSeries (a : ℕ → ℝ → ℝ) (N : ℕ)
+    (u t : ℝ) : ℝ := ∑ s ∈
     Finset.range N, a s t / u^s
 
-/-- The Liouville–Green series with coefficients `(-1)^s a_s` is `pcfLG2_ser`. -/
-lemma pcfLG2_lgSeries_eq (a : ℕ → ℝ → ℝ) (N : ℕ) (u t : ℝ) :
-    LiouvilleGreen.lgSeries u (fun s t => (-1)^s * a s t) N t = pcfLG2_ser a N u t := by
-  unfold LiouvilleGreen.lgSeries pcfLG2_ser
+/-- The Liouville–Green series with coefficients `(-1)^s a_s` is
+`CylinderUniformExpansion.truncSeries`. -/
+lemma CylinderUniformExpansion.lgSeries_eq (a : ℕ → ℝ → ℝ) (N : ℕ) (u t : ℝ) :
+    LiouvilleGreen.lgSeries u (fun s t => (-1)^s * a s t) N t =
+        CylinderUniformExpansion.truncSeries a N u t := by
+  unfold LiouvilleGreen.lgSeries CylinderUniformExpansion.truncSeries
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [← mul_assoc, ← mul_pow]; norm_num
 
-/-- The Liouville–Green series with parameter `-u` is `pcfLG2_ser`. -/
-lemma pcfLG2_lgSeries_neg_eq (a : ℕ → ℝ → ℝ) (N : ℕ) (u t : ℝ) :
-    LiouvilleGreen.lgSeries (-u) a N t = pcfLG2_ser a N u t := by
-  unfold LiouvilleGreen.lgSeries pcfLG2_ser
+/-- The Liouville–Green series with parameter `-u` is `CylinderUniformExpansion.truncSeries`. -/
+lemma CylinderUniformExpansion.lgSeries_neg_eq (a : ℕ → ℝ → ℝ) (N : ℕ) (u t : ℝ) :
+    LiouvilleGreen.lgSeries (-u) a N t = CylinderUniformExpansion.truncSeries a N u t := by
+  unfold LiouvilleGreen.lgSeries CylinderUniformExpansion.truncSeries
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [neg_pow u s, mul_comm ((-1:ℝ)^s) (u^s), ← div_div, mul_div_assoc, mul_div_assoc,
     ← mul_div_assoc, mul_div_cancel_left₀ _ (pow_ne_zero s (by norm_num : (-1:ℝ) ≠ 0))]
 
 /-- A truncated series with leading term `1` and bounded coefficients is within `K/u` of `1`. -/
-lemma pcfLG2_abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : ℕ → ℝ} (hf0 : f 0 = 1) {K : ℕ → ℝ}
+lemma CylinderUniformExpansion.abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : ℕ → ℝ}
+    (hf0 : f 0 = 1) {K : ℕ → ℝ}
     (hK : ∀ s < N, |f s| ≤ K s) {u : ℝ} (hu : 1 ≤ u) :
     |∑ s ∈ Finset.range N, f s / u^s - 1| ≤ (∑ s ∈ Finset.range N, K s) / u := by
-  have h := pcfLG_abs_sum_sub_one_le hN (f := fun s => if s < N then f s else 0)
+  have h := CylinderLiouvilleGreen.abs_sum_sub_one_le hN (f := fun s => if s < N then f s else 0)
     (K := fun s => if s < N then K s else 0) (by simp [hf0, show 0 < N by omega])
     (fun s => by split_ifs with hs; exacts [hK s hs, by simp]) hu
   have e1 : ∑ s ∈ Finset.range N, (if s < N then f s else 0) / u^s =
@@ -80,10 +86,11 @@ lemma pcfLG2_abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : ℕ → ℝ} (hf0 
   rwa [e1, e2] at h
 
 /-- Termwise derivative of a truncated series. -/
-lemma pcfLG2_hasDerivAt_ser {b : ℝ} {a ad : ℕ → ℝ → ℝ} {N : ℕ}
+lemma CylinderUniformExpansion.hasDerivAt_truncSeries {b : ℝ} {a ad : ℕ → ℝ → ℝ} {N : ℕ}
     (ha : ∀ s < N, ∀ t, b < t → HasDerivAt (a s) (ad s t) t) (u : ℝ) {t : ℝ} (ht : b < t) :
-    HasDerivAt (fun t => pcfLG2_ser a N u t) (pcfLG2_ser ad N u t) t := by
-  unfold pcfLG2_ser
+    HasDerivAt (fun t => CylinderUniformExpansion.truncSeries a N u t)
+        (CylinderUniformExpansion.truncSeries ad N u t) t := by
+  unfold CylinderUniformExpansion.truncSeries
   exact HasDerivAt.fun_sum fun s hs => (ha s (Finset.mem_range.1 hs) t ht).div_const _
 
 /-- **General recessive core.** Let `A > 0` on `(b, ∞)` with `ξ' = A⁻²`, `A → 0`, and let
@@ -93,7 +100,7 @@ coefficients `a_s` satisfy the Liouville–Green recursion
 (explicitly), with `u = μ²`, `U = (H/L) A e^{-uξ} (∑_{s<N} a_s/u^s + ε)`, `L = ∑_{s<N} l_s/u^s`,
 where `|ε| ≤ C u^{-N}` and `|A² ε'| ≤ 2 C u^{1-N}`, together with the corresponding formula for
 `U'`. -/
-lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
+lemma CylinderUniformExpansion.core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
     (hA : ∀ t, b < t → 0 < A t) (hA1 : ∀ t, b < t → HasDerivAt A (A1 t) t)
     (hA2 : ∀ t, b < t → HasDerivAt A1 (A2 t) t) (hA2c : ContinuousOn A2 (Ioi b))
     (hξ : ∀ t, b < t → HasDerivAt ξ ((A t ^ 2)⁻¹) t)
@@ -120,14 +127,16 @@ lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
     {C μ₀ : ℝ} (hC : I * Real.exp (V0/2) ≤ C) (hμ₀ : 1 ≤ μ₀)
     (hμ₀C : 2 * ((∑ s ∈ Finset.range N, K s) + C) ≤ μ₀^2) :
     ∀ μ, μ₀ ≤ μ →
-      |pcfLG2_ser (fun s _ => l s) N (μ^2) 0 - 1| ≤ 1/2 ∧
+      |CylinderUniformExpansion.truncSeries (fun s _ => l s) N (μ^2) 0 - 1| ≤ 1/2 ∧
       ∃ ε ε' : ℝ → ℝ, ∀ t, b < t →
         |ε t| ≤ C / (μ^2)^N ∧ |A t ^ 2 * ε' t| ≤ 2 * C / (μ^2)^(N-1) ∧
-        U μ t = H μ / (pcfLG2_ser (fun s _ => l s) N (μ^2) 0 : ℂ) *
-          ((A t * Real.exp (-(μ^2 * ξ t)) * (pcfLG2_ser a N (μ^2) t + ε t) : ℝ) : ℂ) ∧
-        U' μ t = H μ / (pcfLG2_ser (fun s _ => l s) N (μ^2) 0 : ℂ) *
-          ((Real.exp (-(μ^2 * ξ t)) * ((A1 t - μ^2 * (A t)⁻¹) * (pcfLG2_ser a N (μ^2) t + ε t) +
-            A t * (pcfLG2_ser ad N (μ^2) t + ε' t)) : ℝ) : ℂ) := by
+        U μ t = H μ / (CylinderUniformExpansion.truncSeries (fun s _ => l s) N (μ^2) 0 : ℂ) *
+          ((A t * Real.exp (-(μ^2 * ξ t)) *
+              (CylinderUniformExpansion.truncSeries a N (μ^2) t + ε t) : ℝ) : ℂ) ∧
+        U' μ t = H μ / (CylinderUniformExpansion.truncSeries (fun s _ => l s) N (μ^2) 0 : ℂ) *
+          ((Real.exp (-(μ^2 * ξ t)) *
+              ((A1 t - μ^2 * (A t)⁻¹) * (CylinderUniformExpansion.truncSeries a N (μ^2) t + ε t) +
+            A t * (CylinderUniformExpansion.truncSeries ad N (μ^2) t + ε' t)) : ℝ) : ℂ) := by
   intro μ hμ
   have hμ1 : 1 ≤ μ := hμ₀.trans hμ
   have hμ0 : 0 < μ := by linarith
@@ -147,16 +156,16 @@ lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
   have huK : 2*(KS+C) ≤ u := hμ₀C.trans hμμ
   have hsmall : (KS + C)/u ≤ 1/2 := by rw [div_le_iff₀ hu0]; linarith
   have hKSu : KS/u ≤ 1/2 := le_trans (div_le_div_of_nonneg_right (by linarith) hu0.le) hsmall
-  have hser : ∀ t, b < t → |pcfLG2_ser a N u t - 1| ≤ KS/u := fun t ht =>
-    pcfLG2_abs_sum_sub_one_le hN (ha0 t) (fun s hs => hK s hs t ht) hu1
+  have hser : ∀ t, b < t → |CylinderUniformExpansion.truncSeries a N u t - 1| ≤ KS/u := fun t ht =>
+    CylinderUniformExpansion.abs_sum_sub_one_le hN (ha0 t) (fun s hs => hK s hs t ht) hu1
   have hlK : ∀ s < N, |l s| ≤ K s := fun s hs =>
     le_of_tendsto ((hl s hs).abs) ((eventually_gt_atTop b).mono fun t ht => hK s hs t ht)
   have hl0 : l 0 = 1 := by
     have h := hl 0 hN
     rw [show a 0 = fun _ => 1 from funext ha0] at h
     exact tendsto_nhds_unique h tendsto_const_nhds
-  set L := pcfLG2_ser (fun s _ => l s) N u 0 with hLdef
-  have hS : |L - 1| ≤ KS/u := pcfLG2_abs_sum_sub_one_le hN hl0 hlK hu1
+  set L := CylinderUniformExpansion.truncSeries (fun s _ => l s) N u 0 with hLdef
+  have hS : |L - 1| ≤ KS/u := CylinderUniformExpansion.abs_sum_sub_one_le hN hl0 hlK hu1
   have hL0 : L ≠ 0 := by
     have := abs_le.1 (hS.trans hKSu); intro h; rw [h] at this; linarith [this.1]
   have hL0' : (L : ℂ) ≠ 0 := by exact_mod_cast hL0
@@ -176,7 +185,7 @@ lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
       rw [pow_succ]
       linear_combination (-1:ℝ)^s * this)
     (fun c' hc' => by simpa [abs_mul] using hNi c' hc')
-  simp only [pcfLG2_lgSeries_eq] at HLG
+  simp only [CylinderUniformExpansion.lgSeries_eq] at HLG
   -- error bounds
   have hεb : ∀ t, b < t → |ε t| ≤ (∫ x in Ioi t, |ad N x|) * Real.exp (V0/2) / u^N ∧
       |A t ^ 2 * ε' t| ≤ 2 * u * ((∫ x in Ioi t, |ad N x|) * Real.exp (V0/2) / u^N) := by
@@ -219,23 +228,27 @@ lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
     refine (hεC t ht).1.trans (div_le_div_of_nonneg_left hC0 hu0 ?_)
     calc u = u^1 := (pow_one u).symm
       _ ≤ u^N := pow_le_pow_right₀ hu1 hN
-  have hsum : ∀ t, b < t → |pcfLG2_ser a N u t + ε t - 1| ≤ 1/2 := by
+  have hsum : ∀ t, b < t → |CylinderUniformExpansion.truncSeries a N u t + ε t - 1| ≤ 1/2 := by
     intro t ht
     have := hser t ht; have := hεC1 t ht
-    have : |pcfLG2_ser a N u t + ε t - 1| ≤ |pcfLG2_ser a N u t - 1| + |ε t| := by
-      rw [show pcfLG2_ser a N u t + ε t - 1 = (pcfLG2_ser a N u t - 1) + ε t by ring]
+    have : |CylinderUniformExpansion.truncSeries a N u t + ε t -
+        1| ≤ |CylinderUniformExpansion.truncSeries a N u t - 1| + |ε t| := by
+      rw [show CylinderUniformExpansion.truncSeries a N u t + ε t - 1 =
+          (CylinderUniformExpansion.truncSeries a N u t - 1) + ε t by ring]
       exact abs_add_le _ _
     have : KS/u + C/u ≤ 1/2 := by rw [← add_div]; exact hsmall
     linarith
-  have hpos : ∀ t, b < t → 1/2 ≤ pcfLG2_ser a N u t + ε t := fun t ht => by
+  have hpos : ∀ t, b < t → 1/2 ≤ CylinderUniformExpansion.truncSeries a N u t +
+      ε t := fun t ht => by
     have := abs_le.1 (hsum t ht); linarith [this.1]
-  set W : ℝ → ℝ := fun t => A t * Real.exp (-(u * ξ t)) * (pcfLG2_ser a N u t + ε t)
+  set W : ℝ → ℝ := fun t => A t * Real.exp (-(u * ξ t)) *
+      (CylinderUniformExpansion.truncSeries a N u t + ε t)
     with hWdef
   set q : ℝ → ℝ := fun t => u^2 * (A t ^ 4)⁻¹ + (fun _ => (0:ℝ)) t with hq
   have hAe : ∀ t, b < t → 0 < A t * Real.exp (-(u * ξ t)) := fun t ht =>
     mul_pos (hA t ht) (Real.exp_pos _)
   have hξm : ∀ x t, b < x → x ≤ t → ξ x ≤ ξ t := fun x t hx hxt =>
-    LiouvilleGreen.lg_le_of_hasDerivAt_nonneg hξ (fun y _ => inv_nonneg.2 (sq_nonneg _)) hx hxt
+    LiouvilleGreen.le_of_hasDerivAt_nonneg hξ (fun y _ => inv_nonneg.2 (sq_nonneg _)) hx hxt
   -- `W → 0`
   have hWl : Tendsto W atTop (𝓝 0) := by
     have hb : Tendsto (fun t => (3/2 * Real.exp (-(u * ξ (b+1)))) * A t) atTop (𝓝 0) := by
@@ -247,11 +260,11 @@ lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
       have htb : b < t := by linarith
       have h1 : Real.exp (-(u * ξ t)) ≤ Real.exp (-(u * ξ (b+1))) :=
         Real.exp_le_exp.2 (by nlinarith [hξm (b+1) t hb1 ht])
-      have h2 : pcfLG2_ser a N u t + ε t ≤ 3/2 := by
+      have h2 : CylinderUniformExpansion.truncSeries a N u t + ε t ≤ 3/2 := by
         have := abs_le.1 (hsum t htb); linarith [this.2]
       have hA' := (hA t htb).le
       simp only [hWdef]
-      calc A t * Real.exp (-(u * ξ t)) * (pcfLG2_ser a N u t + ε t)
+      calc A t * Real.exp (-(u * ξ t)) * (CylinderUniformExpansion.truncSeries a N u t + ε t)
           ≤ A t * Real.exp (-(u * ξ (b+1))) * (3/2) := by
             gcongr
             linarith [hpos t htb]
@@ -259,14 +272,15 @@ lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
   -- `ε → 0` and the limit of the series
   have hεl : Tendsto ε atTop (𝓝 0) := by
     have hb : Tendsto (fun t => (∫ x in Ioi t, |ad N x|) * Real.exp (V0/2) / u^N) atTop (𝓝 0) := by
-      simpa using ((LiouvilleGreen.lg_tendsto_integral_Ioi (hNi (b+1) hb1)).mul_const
+      simpa using ((LiouvilleGreen.tendsto_integral_Ioi (hNi (b+1) hb1)).mul_const
         (Real.exp (V0/2))).div_const (u^N)
     refine squeeze_zero_norm' ?_ hb
     filter_upwards [eventually_gt_atTop b] with t ht
     rw [Real.norm_eq_abs]; exact (hεb t ht).1
-  have hserl : Tendsto (fun t => pcfLG2_ser a N u t) atTop (𝓝 L) :=
+  have hserl : Tendsto (fun t => CylinderUniformExpansion.truncSeries a N u t) atTop (𝓝 L) :=
     tendsto_finsetSum _ fun s hs => (hl s (Finset.mem_range.1 hs)).div_const _
-  have hsl : Tendsto (fun t => ((pcfLG2_ser a N u t + ε t : ℝ) : ℂ)) atTop (𝓝 (L : ℂ)) := by
+  have hsl : Tendsto (fun t => ((CylinderUniformExpansion.truncSeries a N u t + ε t : ℝ) : ℂ)) atTop
+      (𝓝 (L : ℂ)) := by
     have := (hserl.add hεl); rw [add_zero] at this
     exact (Complex.continuous_ofReal.tendsto _).comp this
   have hUl' : Tendsto (fun t => U μ t / ((A t * Real.exp (-(u * ξ t)) : ℝ) : ℂ)) atTop
@@ -278,7 +292,8 @@ lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
     push_cast
     rw [div_div]
   -- identification with `U`
-  obtain ⟨κ, hκ⟩ := pcfLG_eq_mul_of_tendsto (b := b) (q := q) (U := U μ) (U' := U' μ)
+  obtain ⟨κ, hκ⟩ := CylinderLiouvilleGreen.eq_mul_of_tendsto (b := b) (q := q)
+      (U := U μ) (U' := U' μ)
     (W := W) (W' := w') (fun t ht => hU μ t ht)
     (fun t ht => (hU' μ t ht).congr_deriv (by simp only [hq, hu]; push_cast; ring))
     (fun t ht => (HLG t ht).2.1) (fun t ht => (HLG t ht).2.2.1)
@@ -298,9 +313,10 @@ lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
   · rw [hκ t ht, hκ']
   · -- the derivative
     have hWd : HasDerivAt W (Real.exp (-(u * ξ t)) * ((A1 t - u * (A t)⁻¹) *
-        (pcfLG2_ser a N u t + ε t) + A t * (pcfLG2_ser ad N u t + ε' t))) t := by
+        (CylinderUniformExpansion.truncSeries a N u t + ε t) + A t *
+            (CylinderUniformExpansion.truncSeries ad N u t + ε' t))) t := by
       have he := ((hξ t ht).const_mul u).neg.exp
-      have hs := (pcfLG2_hasDerivAt_ser ha u ht).add (HLG t ht).1
+      have hs := (CylinderUniformExpansion.hasDerivAt_truncSeries ha u ht).add (HLG t ht).1
       have := ((hA1 t ht).mul he).mul hs
       convert this using 1
       have hA0 : A t ≠ 0 := (hA t ht).ne'
@@ -317,95 +333,112 @@ lemma pcfLG2_core {b : ℝ} {A A1 A2 ξ : ℝ → ℝ}
 /-! ### Temme's form of the expansion (DLMF 12.10.31) -/
 
 /-- `p(t) = (t²-1)^{-1/2}`. -/
-noncomputable def pcfLG2_p (t : ℝ) : ℝ := (t^2-1) ^ (-(1/2):ℝ)
+noncomputable def CylinderUniformExpansion.recipSqrt (t : ℝ) : ℝ := (t^2-1) ^ (-(1/2):ℝ)
 
 /-- `p(t) > 0` for `t > 1`. -/
-lemma pcfLG2_p_pos {t : ℝ} (ht : 1 < t) : 0 < pcfLG2_p t :=
+lemma CylinderUniformExpansion.recipSqrt_pos {t : ℝ} (ht : 1 < t) : 0 <
+    CylinderUniformExpansion.recipSqrt t :=
   Real.rpow_pos_of_pos (by nlinarith) _
 
 /-- Powers of `p` as real powers of `t²-1`. -/
-lemma pcfLG2_p_pow (n : ℕ) {t : ℝ} (ht : 1 < t) : pcfLG2_p t ^ n = (t^2-1) ^ (-(n/2:ℝ)) := by
+lemma CylinderUniformExpansion.recipSqrt_pow (n : ℕ) {t : ℝ} (ht : 1 < t) :
+    CylinderUniformExpansion.recipSqrt t ^ n = (t^2-1) ^ (-(n/2:ℝ)) := by
   have hy : 0 < t^2-1 := by nlinarith
-  rw [pcfLG2_p, ← Real.rpow_natCast, ← Real.rpow_mul hy.le]; ring_nf
+  rw [CylinderUniformExpansion.recipSqrt, ← Real.rpow_natCast, ← Real.rpow_mul hy.le]; ring_nf
 
 /-- `p² (t²-1) = 1`. -/
-lemma pcfLG2_p_sq_mul {t : ℝ} (ht : 1 < t) : pcfLG2_p t ^ 2 * (t^2-1) = 1 := by
+lemma CylinderUniformExpansion.recipSqrt_sq_mul {t : ℝ} (ht : 1 < t) :
+    CylinderUniformExpansion.recipSqrt t ^ 2 * (t^2-1) = 1 := by
   have hy : 0 < t^2-1 := by nlinarith
-  rw [pcfLG2_p_pow 2 ht, show -((2:ℕ)/2:ℝ) = -1 by norm_num, Real.rpow_neg_one]
+  rw [CylinderUniformExpansion.recipSqrt_pow 2 ht, show -((2:ℕ)/2:ℝ) = -1 by norm_num,
+                                                                               Real.rpow_neg_one]
   field_simp
 
 /-- `τ(t) = (t p(t) - 1)/2` (DLMF 12.10.32). -/
-lemma pcfLG2_tau_eq {t : ℝ} (ht : 1 < t) : pcfTau t = (t * pcfLG2_p t - 1)/2 := by
+lemma CylinderUniformExpansion.tau_eq {t : ℝ} (ht : 1 < t) : pcfTau t =
+    (t * CylinderUniformExpansion.recipSqrt t - 1)/2 := by
   have hy : 0 < t^2-1 := by nlinarith
-  rw [pcfTau, pcfLG2_p, Real.rpow_neg hy.le, ← Real.sqrt_eq_rpow]; ring
+  rw [pcfTau, CylinderUniformExpansion.recipSqrt, Real.rpow_neg hy.le, ← Real.sqrt_eq_rpow]; ring
 
 /-- `p' = -t p³`. -/
-lemma pcfLG2_hasDerivAt_p {t : ℝ} (ht : 1 < t) :
-    HasDerivAt pcfLG2_p (-t * pcfLG2_p t ^ 3) t := by
+lemma CylinderUniformExpansion.hasDerivAt_recipSqrt {t : ℝ} (ht : 1 < t) :
+    HasDerivAt CylinderUniformExpansion.recipSqrt
+        (-t * CylinderUniformExpansion.recipSqrt t ^ 3) t := by
   have hy : 0 < t^2-1 := by nlinarith
   have h1 : HasDerivAt (fun t : ℝ => t^2-1) (2*t) t := by
     simpa using (hasDerivAt_pow 2 t).sub_const 1
   have := h1.rpow_const (p := -(1/2)) (Or.inl hy.ne')
-  rw [pcfLG2_p_pow 3 ht]
+  rw [CylinderUniformExpansion.recipSqrt_pow 3 ht]
   refine this.congr_deriv ?_
   rw [show (-(1/2):ℝ) - 1 = -((3:ℕ)/2:ℝ) by norm_num]; ring
 
 /-- `τ' = -p³/2`. -/
-lemma pcfLG2_hasDerivAt_tau {t : ℝ} (ht : 1 < t) :
-    HasDerivAt pcfTau (-(pcfLG2_p t ^ 3)/2) t := by
-  have h := (((hasDerivAt_id' t).mul (pcfLG2_hasDerivAt_p ht)).sub_const 1).div_const 2
-  have hev : pcfTau =ᶠ[𝓝 t] fun x => (x * pcfLG2_p x - 1)/2 := by
-    filter_upwards [Ioi_mem_nhds ht] with x hx; exact pcfLG2_tau_eq hx
+lemma CylinderUniformExpansion.hasDerivAt_tau {t : ℝ} (ht : 1 < t) :
+    HasDerivAt pcfTau (-(CylinderUniformExpansion.recipSqrt t ^ 3)/2) t := by
+  have h := (((hasDerivAt_id' t).mul
+      (CylinderUniformExpansion.hasDerivAt_recipSqrt ht)).sub_const 1).div_const 2
+  have hev : pcfTau =ᶠ[𝓝 t] fun x => (x * CylinderUniformExpansion.recipSqrt x - 1)/2 := by
+    filter_upwards [Ioi_mem_nhds ht] with x hx; exact CylinderUniformExpansion.tau_eq hx
   refine (h.congr_of_eventuallyEq hev).congr_deriv ?_
-  have hr := pcfLG2_p_sq_mul ht
-  linear_combination (-(pcfLG2_p t)/2) * hr
+  have hr := CylinderUniformExpansion.recipSqrt_sq_mul ht
+  linear_combination (-(CylinderUniformExpansion.recipSqrt t)/2) * hr
 
 /-- `A² = p` for `A = (t²-1)^{-1/4}`. -/
-lemma pcfLG2_A_sq {t : ℝ} (ht : 1 < t) : pcfLG_A t ^ 2 = pcfLG2_p t := by
+lemma CylinderUniformExpansion.amplitude_sq {t : ℝ} (ht : 1 < t) : CylinderLiouvilleGreen.amplitude
+    t ^ 2 = CylinderUniformExpansion.recipSqrt t := by
   have hy : 0 < t^2-1 := by nlinarith
-  rw [pcfLG_A, pcfLG2_p, ← Real.rpow_natCast, ← Real.rpow_mul hy.le]; norm_num
+  rw [CylinderLiouvilleGreen.amplitude, CylinderUniformExpansion.recipSqrt, ← Real.rpow_natCast,
+      ← Real.rpow_mul hy.le]; norm_num
 
 /-- `A A' = -(t/2) p³`. -/
-lemma pcfLG2_A_mul_A1 {t : ℝ} (ht : 1 < t) :
-    pcfLG_A t * pcfLG_A1 t = -(t/2) * pcfLG2_p t ^ 3 := by
+lemma CylinderUniformExpansion.amplitude_mul_amplitudeDeriv {t : ℝ} (ht : 1 < t) :
+    CylinderLiouvilleGreen.amplitude t * CylinderLiouvilleGreen.amplitudeDeriv t = -(t/2) *
+        CylinderUniformExpansion.recipSqrt t ^ 3 := by
   have hy : 0 < t^2-1 := by nlinarith
-  rw [pcfLG2_p_pow 3 ht, pcfLG_A, pcfLG_A1, mul_left_comm,
-    pcfLG_rpow_mul hy (c := -((3:ℕ)/2:ℝ)) (by norm_num)]
+  rw [CylinderUniformExpansion.recipSqrt_pow 3 ht, CylinderLiouvilleGreen.amplitude,
+      CylinderLiouvilleGreen.amplitudeDeriv, mul_left_comm,
+    CylinderLiouvilleGreen.rpow_mul hy (c := -((3:ℕ)/2:ℝ)) (by norm_num)]
 
 /-- `A A'' = (3t²+2)/4 · p⁵`. -/
-lemma pcfLG2_A_mul_A2 {t : ℝ} (ht : 1 < t) :
-    pcfLG_A t * pcfLG_A2 t = (3*t^2+2)/4 * pcfLG2_p t ^ 5 := by
+lemma CylinderUniformExpansion.amplitude_mul_amplitudeDeriv2 {t : ℝ} (ht : 1 < t) :
+    CylinderLiouvilleGreen.amplitude t * CylinderLiouvilleGreen.amplitudeDeriv2 t = (3*t^2+2)/4 *
+        CylinderUniformExpansion.recipSqrt t ^ 5 := by
   have hy : 0 < t^2-1 := by nlinarith
-  rw [pcfLG2_p_pow 5 ht, pcfLG_A, pcfLG_A2, mul_left_comm,
-    pcfLG_rpow_mul hy (c := -((5:ℕ)/2:ℝ)) (by norm_num)]
+  rw [CylinderUniformExpansion.recipSqrt_pow 5 ht, CylinderLiouvilleGreen.amplitude,
+      CylinderLiouvilleGreen.amplitudeDeriv2, mul_left_comm,
+    CylinderLiouvilleGreen.rpow_mul hy (c := -((5:ℕ)/2:ℝ)) (by norm_num)]
 
 /-- `τ(τ+1) = p²/4`. -/
-lemma pcfLG2_tau_mul {t : ℝ} (ht : 1 < t) :
-    pcfTau t * (pcfTau t + 1) = pcfLG2_p t ^ 2 / 4 := by
-  rw [pcfLG2_tau_eq ht]; linear_combination (pcfLG2_p_sq_mul ht)/4
+lemma CylinderUniformExpansion.tau_mul {t : ℝ} (ht : 1 < t) :
+    pcfTau t * (pcfTau t + 1) = CylinderUniformExpansion.recipSqrt t ^ 2 / 4 := by
+  rw [CylinderUniformExpansion.tau_eq ht];
+      linear_combination (CylinderUniformExpansion.recipSqrt_sq_mul ht)/4
 
 /-- `τ(t) ≥ 0` for `t > 1`. -/
-lemma pcfLG2_tau_nonneg {t : ℝ} (ht : 1 < t) : 0 ≤ pcfTau t := by
-  have hr := pcfLG2_p_sq_mul ht
-  have hp := pcfLG2_p_pos ht
-  rw [pcfLG2_tau_eq ht]
-  have h1 : 1 ≤ (t * pcfLG2_p t)^2 := by nlinarith
-  have h2 : 0 < t * pcfLG2_p t := by positivity
+lemma CylinderUniformExpansion.tau_nonneg {t : ℝ} (ht : 1 < t) : 0 ≤ pcfTau t := by
+  have hr := CylinderUniformExpansion.recipSqrt_sq_mul ht
+  have hp := CylinderUniformExpansion.recipSqrt_pos ht
+  rw [CylinderUniformExpansion.tau_eq ht]
+  have h1 : 1 ≤ (t * CylinderUniformExpansion.recipSqrt t)^2 := by nlinarith
+  have h2 : 0 < t * CylinderUniformExpansion.recipSqrt t := by positivity
   nlinarith
 
 /-- `τ(t) ≤ p(t)/2` for `t > 1`. -/
-lemma pcfLG2_tau_le {t : ℝ} (ht : 1 < t) : pcfTau t ≤ pcfLG2_p t / 2 := by
-  have h1 := pcfLG2_tau_mul ht
-  have h2 := pcfLG2_tau_nonneg ht
-  have h3 := pcfLG2_p_pos ht
+lemma CylinderUniformExpansion.tau_le {t : ℝ} (ht : 1 < t) : pcfTau t ≤
+    CylinderUniformExpansion.recipSqrt t / 2 := by
+  have h1 := CylinderUniformExpansion.tau_mul ht
+  have h2 := CylinderUniformExpansion.tau_nonneg ht
+  have h3 := CylinderUniformExpansion.recipSqrt_pos ht
   nlinarith
 
 /-- `p` is antitone on `(1, ∞)`. -/
-lemma pcfLG2_p_anti {c t : ℝ} (hc : 1 < c) (ht : c ≤ t) : pcfLG2_p t ≤ pcfLG2_p c :=
+lemma CylinderUniformExpansion.recipSqrt_anti {c t : ℝ} (hc : 1 < c) (ht : c ≤ t) :
+    CylinderUniformExpansion.recipSqrt t ≤ CylinderUniformExpansion.recipSqrt c :=
   Real.rpow_le_rpow_of_nonpos (by nlinarith) (by nlinarith) (by norm_num)
 
 /-- `p(t) → 0` as `t → ∞`. -/
-lemma pcfLG2_tendsto_p : Tendsto pcfLG2_p atTop (𝓝 0) := by
+lemma CylinderUniformExpansion.tendsto_recipSqrt : Tendsto CylinderUniformExpansion.recipSqrt
+    atTop (𝓝 0) := by
   have hy : Tendsto (fun t : ℝ => t^2-1) atTop atTop := by
     have := (tendsto_pow_atTop (two_ne_zero (α := ℕ))).atTop_add
       (tendsto_const_nhds (x := (-1:ℝ)))
@@ -413,26 +446,27 @@ lemma pcfLG2_tendsto_p : Tendsto pcfLG2_p atTop (𝓝 0) := by
   exact (tendsto_rpow_neg_atTop (by norm_num : (0:ℝ) < 1/2)).comp hy
 
 /-- `τ(t) → 0` as `t → ∞`. -/
-lemma pcfLG2_tendsto_tau : Tendsto pcfTau atTop (𝓝 0) := by
-  have hb : Tendsto (fun t => pcfLG2_p t / 2) atTop (𝓝 0) := by
-    simpa using pcfLG2_tendsto_p.div_const 2
+lemma CylinderUniformExpansion.tendsto_tau : Tendsto pcfTau atTop (𝓝 0) := by
+  have hb : Tendsto (fun t => CylinderUniformExpansion.recipSqrt t / 2) atTop (𝓝 0) := by
+    simpa using CylinderUniformExpansion.tendsto_recipSqrt.div_const 2
   refine squeeze_zero' ?_ ?_ hb
-  · filter_upwards [eventually_gt_atTop 1] with t ht using pcfLG2_tau_nonneg ht
-  · filter_upwards [eventually_gt_atTop 1] with t ht using pcfLG2_tau_le ht
+  · filter_upwards [eventually_gt_atTop 1] with t ht using CylinderUniformExpansion.tau_nonneg ht
+  · filter_upwards [eventually_gt_atTop 1] with t ht using CylinderUniformExpansion.tau_le ht
 
 /-- A polynomial is bounded on `[0, M]`. -/
-lemma pcfLG2_poly_bound (P : Polynomial ℝ) (M : ℝ) :
+lemma CylinderUniformExpansion.poly_bound (P : Polynomial ℝ) (M : ℝ) :
     ∃ K, 0 ≤ K ∧ ∀ x ∈ Icc 0 M, |P.eval x| ≤ K := by
   obtain ⟨K, hK⟩ := (isCompact_Icc (a := (0:ℝ)) (b := M)).exists_bound_of_continuousOn
     P.continuous.continuousOn
   exact ⟨max K 0, le_max_right _ _, fun x hx => (hK x hx).trans (le_max_left _ _)⟩
 
 /-- `φ_s(0) = 0` for `s ≥ 1`. -/
-lemma pcfLG2_temme_eval_zero (s : ℕ) : (pcfTemmePoly (s+1)).eval 0 = 0 := by
+lemma CylinderUniformExpansion.temme_eval_zero (s : ℕ) : (pcfTemmePoly (s+1)).eval 0 = 0 := by
   rw [pcfTemmePoly]; simp [eval_zero_pcfPolyPrimitive]
 
 /-- The differentiated Temme recursion (from DLMF 12.10.33). -/
-lemma pcfLG2_temme_deriv_succ (s : ℕ) (x : ℝ) : (derivative (pcfTemmePoly (s+1))).eval x =
+lemma CylinderUniformExpansion.temme_deriv_succ (s : ℕ) (x : ℝ) :
+    (derivative (pcfTemmePoly (s+1))).eval x =
     -4*x^2*(x+1)^2*(derivative (derivative (pcfTemmePoly s))).eval x -
       8*x*(x+1)*(2*x+1)*(derivative (pcfTemmePoly s)).eval x -
       1/4*(20*x^2+20*x+3)*(pcfTemmePoly s).eval x := by
@@ -443,36 +477,42 @@ lemma pcfLG2_temme_deriv_succ (s : ℕ) (x : ℝ) : (derivative (pcfTemmePoly (s
   ring
 
 /-- Temme's coefficient `φ_s(τ(t))`. -/
-noncomputable def pcfLG2_Ta (s : ℕ) (t : ℝ) : ℝ := (pcfTemmePoly s).eval (pcfTau t)
+noncomputable def CylinderUniformExpansion.temmeCoeff (s : ℕ) (t : ℝ) : ℝ :=
+    (pcfTemmePoly s).eval (pcfTau t)
 /-- Its derivative. -/
-noncomputable def pcfLG2_Tad (s : ℕ) (t : ℝ) : ℝ :=
-  (derivative (pcfTemmePoly s)).eval (pcfTau t) * (-(pcfLG2_p t ^ 3)/2)
+noncomputable def CylinderUniformExpansion.temmeCoeffDeriv (s : ℕ) (t : ℝ) : ℝ :=
+  (derivative (pcfTemmePoly s)).eval (pcfTau t) * (-(CylinderUniformExpansion.recipSqrt t ^ 3)/2)
 /-- Its second derivative. -/
-noncomputable def pcfLG2_Tad2 (s : ℕ) (t : ℝ) : ℝ :=
-  (derivative (derivative (pcfTemmePoly s))).eval (pcfTau t) * (pcfLG2_p t ^ 6/4) +
-    (derivative (pcfTemmePoly s)).eval (pcfTau t) * (3/2 * t * pcfLG2_p t ^ 5)
+noncomputable def CylinderUniformExpansion.temmeCoeffDeriv2 (s : ℕ) (t : ℝ) : ℝ :=
+  (derivative (derivative (pcfTemmePoly s))).eval (pcfTau t) *
+      (CylinderUniformExpansion.recipSqrt t ^ 6/4) +
+    (derivative (pcfTemmePoly s)).eval (pcfTau t) *
+        (3/2 * t * CylinderUniformExpansion.recipSqrt t ^ 5)
 
 /-- Derivative of `φ_s(τ(t))`. -/
-lemma pcfLG2_hasDerivAt_Ta (s : ℕ) {t : ℝ} (ht : 1 < t) :
-    HasDerivAt (pcfLG2_Ta s) (pcfLG2_Tad s t) t :=
-  ((pcfTemmePoly s).hasDerivAt (pcfTau t)).comp t (pcfLG2_hasDerivAt_tau ht)
+lemma CylinderUniformExpansion.hasDerivAt_temmeCoeff (s : ℕ) {t : ℝ} (ht : 1 < t) :
+    HasDerivAt (CylinderUniformExpansion.temmeCoeff s)
+        (CylinderUniformExpansion.temmeCoeffDeriv s t) t :=
+  ((pcfTemmePoly s).hasDerivAt (pcfTau t)).comp t (CylinderUniformExpansion.hasDerivAt_tau ht)
 
 /-- Second derivative of `φ_s(τ(t))`. -/
-lemma pcfLG2_hasDerivAt_Tad (s : ℕ) {t : ℝ} (ht : 1 < t) :
-    HasDerivAt (pcfLG2_Tad s) (pcfLG2_Tad2 s t) t := by
+lemma CylinderUniformExpansion.hasDerivAt_temmeCoeffDeriv (s : ℕ) {t : ℝ} (ht : 1 < t) :
+    HasDerivAt (CylinderUniformExpansion.temmeCoeffDeriv s)
+        (CylinderUniformExpansion.temmeCoeffDeriv2 s t) t := by
   have h1 := ((derivative (pcfTemmePoly s)).hasDerivAt (pcfTau t)).comp t
-    (pcfLG2_hasDerivAt_tau ht)
-  have h2 := (((pcfLG2_hasDerivAt_p ht).pow 3).neg).div_const 2
+    (CylinderUniformExpansion.hasDerivAt_tau ht)
+  have h2 := (((CylinderUniformExpansion.hasDerivAt_recipSqrt ht).pow 3).neg).div_const 2
   refine (h1.mul h2).congr_deriv ?_
-  simp only [pcfLG2_Tad2, Function.comp]
+  simp only [CylinderUniformExpansion.temmeCoeffDeriv2, Function.comp]
   norm_num
   ring
 
 /-- Continuity of the second derivative of `φ_s(τ(t))`. -/
-lemma pcfLG2_continuousOn_Tad2 (s : ℕ) : ContinuousOn (pcfLG2_Tad2 s) (Ioi 1) := by
+lemma CylinderUniformExpansion.continuousOn_temmeCoeffDeriv2 (s : ℕ) : ContinuousOn
+    (CylinderUniformExpansion.temmeCoeffDeriv2 s) (Ioi 1) := by
   intro t ht
-  have hp := (pcfLG2_hasDerivAt_p ht).continuousAt
-  have hτ := (pcfLG2_hasDerivAt_tau ht).continuousAt
+  have hp := (CylinderUniformExpansion.hasDerivAt_recipSqrt ht).continuousAt
+  have hτ := (CylinderUniformExpansion.hasDerivAt_tau ht).continuousAt
   have hP : ∀ Q : Polynomial ℝ, ContinuousAt (fun x => Q.eval (pcfTau x)) t := fun Q =>
     Q.continuous.continuousAt.comp hτ
   have hl : ContinuousAt (fun x : ℝ => 3/2 * x) t := continuousAt_const.mul continuousAt_id
@@ -481,17 +521,22 @@ lemma pcfLG2_continuousOn_Tad2 (s : ℕ) : ContinuousOn (pcfLG2_Tad2 s) (Ioi 1) 
 
 /-- **The Liouville–Green recursion for Temme's coefficients** `φ_s(τ(t))`, with
 `A = (t²-1)^{-1/4}`. -/
-lemma pcfLG2_temme_rec (s : ℕ) {t : ℝ} (ht : 1 < t) :
-    pcfLG_A t ^ 2 * pcfLG2_Tad2 s t + 2 * pcfLG_A t * pcfLG_A1 t * pcfLG2_Tad s t +
-      pcfLG_A t * pcfLG_A2 t * pcfLG2_Ta s t = 2 * pcfLG2_Tad (s+1) t := by
-  have e1 := pcfLG2_A_sq ht
-  have e2 := pcfLG2_A_mul_A1 ht
-  have e3 := pcfLG2_A_mul_A2 ht
-  have hr := pcfLG2_p_sq_mul ht
-  have hpoly := pcfLG2_temme_deriv_succ s (pcfTau t)
-  simp only [pcfLG2_Ta, pcfLG2_Tad, pcfLG2_Tad2] at *
-  rw [pcfLG2_tau_eq ht] at hpoly ⊢
-  set p := pcfLG2_p t
+lemma CylinderUniformExpansion.temme_recursion (s : ℕ) {t : ℝ} (ht : 1 < t) :
+    CylinderLiouvilleGreen.amplitude t ^ 2 * CylinderUniformExpansion.temmeCoeffDeriv2 s t + 2 *
+        CylinderLiouvilleGreen.amplitude t * CylinderLiouvilleGreen.amplitudeDeriv t *
+        CylinderUniformExpansion.temmeCoeffDeriv s t +
+      CylinderLiouvilleGreen.amplitude t * CylinderLiouvilleGreen.amplitudeDeriv2 t *
+          CylinderUniformExpansion.temmeCoeff s t = 2 *
+          CylinderUniformExpansion.temmeCoeffDeriv (s+1) t := by
+  have e1 := CylinderUniformExpansion.amplitude_sq ht
+  have e2 := CylinderUniformExpansion.amplitude_mul_amplitudeDeriv ht
+  have e3 := CylinderUniformExpansion.amplitude_mul_amplitudeDeriv2 ht
+  have hr := CylinderUniformExpansion.recipSqrt_sq_mul ht
+  have hpoly := CylinderUniformExpansion.temme_deriv_succ s (pcfTau t)
+  simp only [CylinderUniformExpansion.temmeCoeff, CylinderUniformExpansion.temmeCoeffDeriv,
+      CylinderUniformExpansion.temmeCoeffDeriv2] at *
+  rw [CylinderUniformExpansion.tau_eq ht] at hpoly ⊢
+  set p := CylinderUniformExpansion.recipSqrt t
   set F0 := (pcfTemmePoly s).eval ((t * p - 1)/2)
   set F1 := (derivative (pcfTemmePoly s)).eval ((t * p - 1)/2)
   set F2 := (derivative (derivative (pcfTemmePoly s))).eval ((t * p - 1)/2)
@@ -500,29 +545,31 @@ lemma pcfLG2_temme_rec (s : ℕ) {t : ℝ} (ht : 1 < t) :
     (-p^3*(2*F0 + 8*F1*p*t + F2*p^2*t^2 + F2*p^2 - F2)/4) * hr
 
 /-- The Temme series tends to `1` at `t = ∞`: `∑_{s<N} φ_s(0) u^{-s} = 1`. -/
-lemma pcfLG2_temme_L {N : ℕ} (hN : 1 ≤ N) (u : ℝ) :
-    pcfLG2_ser (fun s _ => (pcfTemmePoly s).eval 0) N u 0 = 1 := by
+lemma CylinderUniformExpansion.sum_temme_atTop {N : ℕ} (hN : 1 ≤ N) (u : ℝ) :
+    CylinderUniformExpansion.truncSeries (fun s _ => (pcfTemmePoly s).eval 0) N u 0 = 1 := by
   obtain ⟨M, rfl⟩ : ∃ M, N = M + 1 := ⟨N - 1, by omega⟩
-  unfold pcfLG2_ser
+  unfold CylinderUniformExpansion.truncSeries
   rw [Finset.sum_range_succ']
-  simp only [pcfLG2_temme_eval_zero, zero_div, Finset.sum_const_zero, zero_add,
+  simp only [CylinderUniformExpansion.temme_eval_zero, zero_div, Finset.sum_const_zero, zero_add,
     show pcfTemmePoly 0 = 1 from rfl, eval_one, pow_zero, div_one]
 
-/-- The complex Temme series is the real series `pcfLG2_ser`. -/
-lemma pcfLG2_sum_temme_eq (N : ℕ) (μ t : ℝ) :
+/-- The complex Temme series is the real series `CylinderUniformExpansion.truncSeries`. -/
+lemma CylinderUniformExpansion.sum_temme_eq (N : ℕ) (μ t : ℝ) :
     ∑ s ∈ Finset.range N, (((pcfTemmePoly s).eval (pcfTau t) : ℝ) : ℂ) / (μ:ℂ)^(2*s) =
-      (pcfLG2_ser pcfLG2_Ta N (μ^2) t : ℂ) := by
-  rw [pcfLG2_ser]; push_cast
+      (CylinderUniformExpansion.truncSeries CylinderUniformExpansion.temmeCoeff N (μ^2) t : ℂ) := by
+  rw [CylinderUniformExpansion.truncSeries]; push_cast
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [pow_mul]; rfl
 
 /-- Bound `|d/dt φ_N(τ(t))| ≤ K'/2 · (t²-1)^{-3/2}`. -/
-lemma pcfLG2_abs_Tad_le {N : ℕ} {M K' : ℝ}
+lemma CylinderUniformExpansion.abs_temmeCoeffDeriv_le {N : ℕ} {M K' : ℝ}
     (hK' : ∀ x ∈ Icc 0 M, |(derivative (pcfTemmePoly N)).eval x| ≤ K') {t : ℝ} (ht : 1 < t)
     (hτ : pcfTau t ∈ Icc 0 M) :
-    |pcfLG2_Tad N t| ≤ K'/2 * |(1 : Polynomial ℝ).eval t * (t^2-1) ^ (-(3/2:ℝ))| := by
+    |CylinderUniformExpansion.temmeCoeffDeriv N t| ≤ K'/2 * |(1 : Polynomial ℝ).eval t *
+        (t^2-1) ^ (-(3/2:ℝ))| := by
   have hy : 0 < t^2-1 := by nlinarith
-  rw [pcfLG2_Tad, eval_one, one_mul, abs_mul, pcfLG2_p_pow 3 ht,
+  rw [CylinderUniformExpansion.temmeCoeffDeriv, eval_one, one_mul, abs_mul,
+      CylinderUniformExpansion.recipSqrt_pow 3 ht,
     abs_div, abs_neg, abs_two, abs_of_pos (Real.rpow_pos_of_pos hy _),
     abs_of_pos (Real.rpow_pos_of_pos hy _)]
   have := hK' _ hτ
@@ -544,37 +591,42 @@ theorem pcfU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
       ∑ s ∈ Finset.range N, (((pcfTemmePoly s).eval (pcfTau p.2):ℝ):ℂ) / (p.1:ℂ)^(2*s))
       =O[pcfUniformFilter (Ici (1+δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) := by
     intro N hN
-    set M := pcfLG2_p b / 2
+    set M := CylinderUniformExpansion.recipSqrt b / 2
     have hτb : ∀ t, b < t → pcfTau t ∈ Icc 0 M := fun t ht => by
       have ht1 : 1 < t := hb.trans ht
-      exact ⟨pcfLG2_tau_nonneg ht1, (pcfLG2_tau_le ht1).trans
-        (div_le_div_of_nonneg_right (pcfLG2_p_anti hb ht.le) (by norm_num))⟩
-    choose K hK0 hK using fun s => pcfLG2_poly_bound (pcfTemmePoly s) M
-    obtain ⟨K', hK'0, hK'⟩ := pcfLG2_poly_bound (derivative (pcfTemmePoly N)) M
+      exact ⟨CylinderUniformExpansion.tau_nonneg ht1, (CylinderUniformExpansion.tau_le ht1).trans
+        (div_le_div_of_nonneg_right (CylinderUniformExpansion.recipSqrt_anti hb ht.le)
+            (by norm_num))⟩
+    choose K hK0 hK using fun s => CylinderUniformExpansion.poly_bound (pcfTemmePoly s) M
+    obtain ⟨K', hK'0, hK'⟩ := CylinderUniformExpansion.poly_bound (derivative (pcfTemmePoly N)) M
     have hP1 : (1 : Polynomial ℝ).natDegree ≤ 0 := by simp
-    have hint1 := fun c (hc : 1 < c) => pcfLG_integrableOn_poly_rpow 1 hP1 (e := 3/2)
+    have hint1 := fun c (hc : 1 < c) =>
+        CylinderLiouvilleGreen.integrableOn_poly_rpow 1 hP1 (e := 3/2)
       (by norm_num) (by norm_num) hc
-    obtain ⟨J, hJ0, hJ⟩ := pcfLG_tail_poly_rpow 1 hP1 (e := 3/2) (by norm_num) (by norm_num) hb
-    have hNi : ∀ c, b < c → IntegrableOn (fun t => |pcfLG2_Tad N t|) (Ioi c) := by
+    obtain ⟨J, hJ0, hJ⟩ :=
+        CylinderLiouvilleGreen.tail_poly_rpow 1 hP1 (e := 3/2) (by norm_num) (by norm_num) hb
+    have hNi : ∀ c, b < c →
+        IntegrableOn (fun t => |CylinderUniformExpansion.temmeCoeffDeriv N t|) (Ioi c) := by
       intro c hc
       refine Integrable.mono' ((hint1 c (hb.trans hc)).const_mul (K'/2)) ?_
         (ae_restrict_of_forall_mem measurableSet_Ioi fun t ht => ?_)
       · refine ContinuousOn.aestronglyMeasurable (fun t ht => ?_) measurableSet_Ioi
         have ht1 : 1 < t := hb.trans (hc.trans ht)
-        exact (pcfLG2_hasDerivAt_Ta N ht1 |> fun _ =>
-          (pcfLG2_hasDerivAt_Tad N ht1).continuousAt.abs).continuousWithinAt
+        exact (CylinderUniformExpansion.hasDerivAt_temmeCoeff N ht1 |> fun _ =>
+          (CylinderUniformExpansion.hasDerivAt_temmeCoeffDeriv N
+              ht1).continuousAt.abs).continuousWithinAt
       · rw [Real.norm_eq_abs, abs_abs]
         have ht' : b < t := hc.trans ht
-        exact pcfLG2_abs_Tad_le hK' (hb.trans ht') (hτb t ht')
+        exact CylinderUniformExpansion.abs_temmeCoeffDeriv_le hK' (hb.trans ht') (hτb t ht')
     set I := K'/2 * J
-    have hI : ∀ t, b < t → ∫ x in Ioi t, |pcfLG2_Tad N x| ≤ I := by
+    have hI : ∀ t, b < t → ∫ x in Ioi t, |CylinderUniformExpansion.temmeCoeffDeriv N x| ≤ I := by
       intro t ht
-      calc ∫ x in Ioi t, |pcfLG2_Tad N x|
+      calc ∫ x in Ioi t, |CylinderUniformExpansion.temmeCoeffDeriv N x|
           ≤ ∫ x in Ioi t, K'/2 * |(1 : Polynomial ℝ).eval x * (x^2-1) ^ (-(3/2:ℝ))| := by
             refine setIntegral_mono_on (hNi t ht) ((hint1 t (hb.trans ht)).const_mul _)
               measurableSet_Ioi fun x hx => ?_
             have hx' : b < x := ht.trans hx
-            exact pcfLG2_abs_Tad_le hK' (hb.trans hx') (hτb x hx')
+            exact CylinderUniformExpansion.abs_temmeCoeffDeriv_le hK' (hb.trans hx') (hτb x hx')
         _ = K'/2 * ∫ x in Ioi t, |(1 : Polynomial ℝ).eval x * (x^2-1) ^ (-(3/2:ℝ))| :=
             integral_const_mul _ _
         _ ≤ K'/2 * (J * t ^ (((0:ℕ):ℝ) - 2*(3/2) + 1)) := by
@@ -584,7 +636,7 @@ theorem pcfU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
               Real.rpow_le_one_of_one_le_of_nonpos (by linarith) (by norm_num)
             have : J * t ^ (((0:ℕ):ℝ) - 2*(3/2) + 1) ≤ J := by nlinarith
             simp only [I]; gcongr
-    obtain ⟨V0, hV00, hV⟩ := pcfLG_tail_V hb
+    obtain ⟨V0, hV00, hV⟩ := CylinderLiouvilleGreen.tail_V hb
     set C := I * Real.exp (V0/2) with hCdef
     set KS := ∑ s ∈ Finset.range N, K s
     have hKS : 0 ≤ KS := Finset.sum_nonneg fun s _ => hK0 s
@@ -593,47 +645,59 @@ theorem pcfU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
     have hμ₀ : 1 ≤ μ₀ := le_max_left _ _
     have hμ₀C : 2*((∑ s ∈ Finset.range N, K s) + C) ≤ μ₀^2 := by
       have := le_max_right 1 (2*(KS+C)+1); nlinarith
-    have hcore := pcfLG2_core (b := b) (A := pcfLG_A) (A1 := pcfLG_A1) (A2 := pcfLG_A2)
-      (ξ := pcfXi) (fun t ht => pcfLG_A_pos (hb.trans ht))
-      (fun t ht => pcfLG_hasDerivAt_A (hb.trans ht))
-      (fun t ht => pcfLG_hasDerivAt_A1 (hb.trans ht))
-      (pcfLG_continuousOn_A2.mono (Ioi_subset_Ioi hb.le))
-      (fun t ht => by rw [pcfLG_A_sq_recip (hb.trans ht)]; exact pcfLG_hasDerivAt_xi (hb.trans ht))
-      (fun c hc => pcfLG_integrableOn_V (hb.trans hc)) (fun t ht => hV t ht.le)
-      pcfLG_tendsto_A hN (a := pcfLG2_Ta) (ad := pcfLG2_Tad) (ad2 := pcfLG2_Tad2)
+    have hcore := CylinderUniformExpansion.core (b := b) (A := CylinderLiouvilleGreen.amplitude)
+        (A1 := CylinderLiouvilleGreen.amplitudeDeriv) (A2 := CylinderLiouvilleGreen.amplitudeDeriv2)
+      (ξ := pcfXi) (fun t ht => CylinderLiouvilleGreen.amplitude_pos (hb.trans ht))
+      (fun t ht => CylinderLiouvilleGreen.hasDerivAt_amplitude (hb.trans ht))
+      (fun t ht => CylinderLiouvilleGreen.hasDerivAt_amplitudeDeriv (hb.trans ht))
+      (CylinderLiouvilleGreen.continuousOn_amplitudeDeriv2.mono (Ioi_subset_Ioi hb.le))
+      (fun t ht => by rw [CylinderLiouvilleGreen.amplitude_sq_recip (hb.trans ht)];
+                      exact CylinderLiouvilleGreen.hasDerivAt_xi (hb.trans ht))
+      (fun c hc => CylinderLiouvilleGreen.integrableOn_V (hb.trans hc)) (fun t ht => hV t ht.le)
+      CylinderLiouvilleGreen.tendsto_amplitude hN (a := CylinderUniformExpansion.temmeCoeff)
+          (ad := CylinderUniformExpansion.temmeCoeffDeriv)
+          (ad2 := CylinderUniformExpansion.temmeCoeffDeriv2)
       (l := fun s => (pcfTemmePoly s).eval 0)
-      (fun s _ t ht => pcfLG2_hasDerivAt_Ta s (hb.trans ht))
-      (fun s _ t ht => pcfLG2_hasDerivAt_Tad s (hb.trans ht))
-      (fun s _ => (pcfLG2_continuousOn_Tad2 s).mono (Ioi_subset_Ioi hb.le))
-      (fun t => by simp [pcfLG2_Ta, pcfTemmePoly])
-      (fun t _ => by simp [pcfLG2_Tad, pcfTemmePoly])
-      (fun s _ t ht => pcfLG2_temme_rec s (hb.trans ht)) hNi hI (K := K)
+      (fun s _ t ht => CylinderUniformExpansion.hasDerivAt_temmeCoeff s (hb.trans ht))
+      (fun s _ t ht => CylinderUniformExpansion.hasDerivAt_temmeCoeffDeriv s (hb.trans ht))
+      (fun s _ => (CylinderUniformExpansion.continuousOn_temmeCoeffDeriv2 s).mono
+          (Ioi_subset_Ioi hb.le))
+      (fun t => by simp [CylinderUniformExpansion.temmeCoeff, pcfTemmePoly])
+      (fun t _ => by simp [CylinderUniformExpansion.temmeCoeffDeriv, pcfTemmePoly])
+      (fun s _ t ht => CylinderUniformExpansion.temme_recursion s (hb.trans ht)) hNi hI (K := K)
       (fun s _ t ht => hK s _ (hτb t ht))
-      (fun s _ => ((pcfTemmePoly s).continuous.tendsto 0).comp pcfLG2_tendsto_tau)
+      (fun s _ => ((pcfTemmePoly s).continuous.tendsto 0).comp CylinderUniformExpansion.tendsto_tau)
       (U := fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2))
       (U' := fun μ t => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
-      (H := fun μ => pcfH μ) (fun μ t _ => pcfLG_hasDerivAt_U μ t)
-      (fun μ t ht => (pcfLG_hasDerivAt_U' μ t).congr_deriv (by
-        rw [pcfLG_A_pow_four_recip (hb.trans ht)]))
-      (fun μ hμ => pcfLG_tendsto_U_div (by linarith)) le_rfl hμ₀ hμ₀C
-    refine IsBigO.of_bound C (pcfLG_eventually_uniform μ₀ fun μ hμ t ht => ?_)
+      (H := fun μ => pcfH μ) (fun μ t _ => CylinderLiouvilleGreen.hasDerivAt_U μ t)
+      (fun μ t ht => (CylinderLiouvilleGreen.hasDerivAt_U' μ t).congr_deriv (by
+        rw [CylinderLiouvilleGreen.amplitude_pow_four_recip (hb.trans ht)]))
+      (fun μ hμ => CylinderLiouvilleGreen.tendsto_U_div (by linarith)) le_rfl hμ₀ hμ₀C
+    refine IsBigO.of_bound C (CylinderLiouvilleGreen.eventually_uniform μ₀ fun μ hμ t ht => ?_)
     have hμ0 : 0 < μ := by linarith
     have ht1 : 1 < t := by have : 1 + δ ≤ t := ht; linarith
     have htb : b < t := by have : 1 + δ ≤ t := ht; linarith
     obtain ⟨-, ε, ε', hε⟩ := hcore μ hμ
     obtain ⟨hεb, -, hU, -⟩ := hε t htb
-    rw [pcfLG2_temme_L hN] at hU
-    have hh0 : pcfH μ ≠ 0 := by rw [pcfLG_pcfH_eq hμ0]; exact_mod_cast (pcfLG_h_pos hμ0).ne'
-    have hAe : ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
-      exact_mod_cast (mul_pos (pcfLG_A_pos ht1) (Real.exp_pos _)).ne'
+    rw [CylinderUniformExpansion.sum_temme_atTop hN] at hU
+    have hh0 : pcfH μ ≠ 0 := by rw [CylinderLiouvilleGreen.pcfH_eq hμ0];
+                                exact_mod_cast (CylinderLiouvilleGreen.normalizer_pos hμ0).ne'
+    have hAe : ((CylinderLiouvilleGreen.amplitude t *
+        Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
+      exact_mod_cast (mul_pos (CylinderLiouvilleGreen.amplitude_pos ht1) (Real.exp_pos _)).ne'
     simp only
-    rw [pcfLG_denom_eq ht1, pcfLG2_sum_temme_eq, pcfLG_norm_zpow hμ0, hU]
-    have heq : pcfH μ / ((1:ℝ):ℂ) * ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) *
-        (pcfLG2_ser pcfLG2_Ta N (μ^2) t + ε t) : ℝ) : ℂ) /
-        (pcfH μ * ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) -
-        (pcfLG2_ser pcfLG2_Ta N (μ^2) t : ℂ) = (ε t : ℂ) := by
+    rw [CylinderLiouvilleGreen.denominator_eq ht1, CylinderUniformExpansion.sum_temme_eq,
+        CylinderLiouvilleGreen.norm_zpow hμ0, hU]
+    have heq : pcfH μ / ((1:ℝ):ℂ) *
+        ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) *
+        (CylinderUniformExpansion.truncSeries CylinderUniformExpansion.temmeCoeff N (μ^2) t +
+            ε t) : ℝ) : ℂ) /
+        (pcfH μ * ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) -
+        (CylinderUniformExpansion.truncSeries CylinderUniformExpansion.temmeCoeff N (μ^2) t : ℂ) =
+            (ε t : ℂ) := by
       push_cast
-      have hA0 : (pcfLG_A t : ℂ) ≠ 0 := by exact_mod_cast (pcfLG_A_pos ht1).ne'
+      have hA0 : (CylinderLiouvilleGreen.amplitude t : ℂ) ≠ 0 := by
+          exact_mod_cast (CylinderLiouvilleGreen.amplitude_pos ht1).ne'
       field_simp
       ring
     rw [heq, Complex.norm_real, Real.norm_eq_abs, ← div_eq_mul_inv]
@@ -643,8 +707,9 @@ theorem pcfU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
   · have h1 := key 1 le_rfl
     have hb : (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(1:ℕ):ℤ))) =O[pcfUniformFilter (Ici (1+δ))]
         (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(0:ℕ):ℤ))) := by
-      refine IsBigO.of_bound 1 (pcfLG_eventually_uniform 1 fun μ hμ t _ => ?_)
-      rw [pcfLG_norm_zpow (by linarith), pcfLG_norm_zpow (by linarith)]
+      refine IsBigO.of_bound 1 (CylinderLiouvilleGreen.eventually_uniform 1 fun μ hμ t _ => ?_)
+      rw [CylinderLiouvilleGreen.norm_zpow (by linarith),
+          CylinderLiouvilleGreen.norm_zpow (by linarith)]
       simp only [pow_zero, inv_one, one_mul, pow_one]
       exact inv_le_one_of_one_le₀ (by nlinarith)
     have hc : (fun _ : ℝ × ℝ => (1:ℂ)) =O[pcfUniformFilter (Ici (1+δ))]

@@ -15,21 +15,22 @@ This file proves the main Laplace estimates behind the expansions DLMF 11.11.15 
 
 ## Main definitions
 
-* `struveSc_phiR`: the real phase `φ(s) = λs - arsinh s` of `𝐀_{-ν}(λν)` on the positive axis.
-* `struveSc_s0`: the saddle point `s₀ = √(1-λ²)/λ` of the real phase.
-* `struveSc_Q0`, `struveSc_Qf`: half the second derivative of the phase at the saddle and the
-  quadratic phase coefficient.
+* `ScaledAnger.realPhase`: the real phase `φ(s) = λs - arsinh s` of `𝐀_{-ν}(λν)` on the positive
+  axis.
+* `ScaledAnger.saddle`: the saddle point `s₀ = √(1-λ²)/λ` of the real phase.
+* `ScaledAnger.halfSecondDeriv`, `ScaledAnger.quadraticCoeff`: half the second derivative of the
+  phase at the saddle and the quadratic phase coefficient.
 
 ## Main results
 
-* `struveSc_turning_est`: the main estimate behind DLMF 11.11.16.
-* `struveSc_const_turn`, `struveSc_turning_rhs`: the constant
+* `ScaledAnger.turning_estimate`: the main estimate behind DLMF 11.11.16.
+* `ScaledAnger.const_turning`, `ScaledAnger.turning_rhs`: the constant
   `π⁻¹ Γ(4/3) 6^{1/3} = 2^{4/3}/(3^{7/6} Γ(2/3))` and the right-hand side of DLMF 11.11.16 as the
   Gamma-integral leading term.
-* `struveSc_angerA_real`: DLMF 11.10.4 on the real contour, written with the real phase.
-* `struveSc_phiR_taylor`, `struveSc_phiR_gap`: the quadratic Taylor bound at the saddle and the
-  phase gap away from it.
-* `struveSc_inner_est`: the main Laplace estimate behind DLMF 11.11.15, uniform in `ph ν`.
+* `ScaledAnger.angerA_real`: DLMF 11.10.4 on the real contour, written with the real phase.
+* `ScaledAnger.realPhase_taylor`, `ScaledAnger.realPhase_gap`: the quadratic Taylor bound at the
+  saddle and the phase gap away from it.
+* `ScaledAnger.inner_estimate`: the main Laplace estimate behind DLMF 11.11.15, uniform in `ph ν`.
 -/
 
 @[expose] public noncomputable section
@@ -48,14 +49,15 @@ open scoped Interval
 
 set_option maxHeartbeats 400000 in
 /-- **The main estimate** behind DLMF 11.11.16. -/
-theorem struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0 ≤ K) (hc0 : 0 < c0)
+theorem ScaledAnger.turning_estimate {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ}
+    (hK0 : 0 ≤ K) (hc0 : 0 < c0)
     (hc0a : c0 ≤ Real.cos a)
     (hK : ∀ s : ℝ, 0 ≤ s →
       ‖(1 + ((s : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))‖ ≤ K ∧
       ‖1 - (1 + ((s : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))‖ ≤ K * s)
     {ρ : ℝ} (hρ : 1 ≤ ρ) :
     ‖(∫ r in Ioi (0 : ℝ), exp (-((ρ : ℂ) * exp ((2 * a : ℝ) * I) *
-          struveSc_phase 1 ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)))) *
+          ScaledAnger.phase 1 ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)))) *
           (1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))) -
       ∫ r in Ioi (0 : ℝ), exp (-(((ρ : ℂ) * exp ((2 * a : ℝ) * I) *
           exp (((-a : ℝ) : ℂ) * I) ^ 3 / 6) * (r : ℂ) ^ 3))‖ ≤
@@ -71,9 +73,9 @@ theorem struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0
   have hK₅0 : 0 ≤ K₅ := by positivity
   set β : ℝ := κ * ρ with hβ
   have hβ0 : 0 < β := mul_pos hκ0 hρ0
-  have hc := struveSc_cos_pos ha
+  have hc := ScaledAnger.cos_pos ha
   set q : ℝ → ℂ := fun s => (1 + ((s : ℂ) * E) ^ 2) ^ (-(1 / 2 : ℂ)) with hq
-  set Ψ : ℝ → ℂ := fun s => struveSc_phase 1 ((s : ℂ) * E) with hΨ
+  set Ψ : ℝ → ℂ := fun s => ScaledAnger.phase 1 ((s : ℂ) * E) with hΨ
   set F : ℝ → ℂ := fun r => exp (-(ν * Ψ r)) * q r with hF
   set C : ℂ := ν * E ^ 3 / 6 with hC
   have hνE3 : ν * E ^ 3 = ((ρ : ℝ) : ℂ) * exp (((-a : ℝ) : ℂ) * I) := by
@@ -85,7 +87,7 @@ theorem struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0
     ring
   have hCpos : 0 < C.re := by rw [hCre]; positivity
   set G : ℝ → ℂ := fun r => exp (-(C * (r : ℂ) ^ 3)) with hG
-  have hGi : IntegrableOn G (Ioi 0) := struveSc_integrableOn_exp_cube hCpos
+  have hGi : IntegrableOn G (Ioi 0) := ScaledAnger.integrableOn_exp_cube hCpos
   set H : ℝ → ℝ := fun r => (Real.exp (-(β * r ^ 3)) + Real.exp (-(β * r))) *
     (K * r + ρ * K₅ * r ^ 5) with hH
   -- pointwise bound
@@ -93,7 +95,7 @@ theorem struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0
     intro r hr
     set X : ℝ := Real.exp (-(c0 * ρ * (r ^ 3 / (12 * (1 + r ^ 2))))) with hX
     have hhr : 0 ≤ r ^ 3 / (12 * (1 + r ^ 2)) := by positivity
-    have hre := struveSc_re_phase_one_ge ha hρ0.le hr.le
+    have hre := ScaledAnger.re_phase_one_ge ha hρ0.le hr.le
     rw [← hν] at hre
     have hA : (-(ν * Ψ r)).re ≤ -(c0 * ρ * (r ^ 3 / (12 * (1 + r ^ 2)))) := by
       rw [neg_re]; simp only [hΨ, hE]
@@ -113,16 +115,16 @@ theorem struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0
     have h1 : ‖exp (-(ν * Ψ r))‖ ≤ X := by
       rw [norm_exp]; exact Real.exp_le_exp.2 hA
     have h2 : ‖q r - 1‖ ≤ K * r := by rw [norm_sub_rev]; exact (hK r hr.le).2
-    have hcube := struveSc_phase_one_sub_cube ha (fun s hs => (hK s hs).1) hr.le
+    have hcube := ScaledAnger.phase_one_sub_cube ha (fun s hs => (hK s hs).1) hr.le
     have h3 : ‖-(ν * Ψ r) - -(C * (r : ℂ) ^ 3)‖ ≤ ρ * (K₅ * r ^ 5) := by
-      have : -(ν * Ψ r) - -(C * (r : ℂ) ^ 3) = -(ν * (struveSc_phase 1 ((r : ℂ) * E) -
+      have : -(ν * Ψ r) - -(C * (r : ℂ) ^ 3) = -(ν * (ScaledAnger.phase 1 ((r : ℂ) * E) -
           ((r : ℂ) * E) ^ 3 / 6)) := by
         simp only [hΨ, hC]; ring
       rw [this, norm_neg, norm_mul, hν, norm_mul, norm_exp_ofReal_mul_I, mul_one, norm_real,
         Real.norm_of_nonneg hρ0.le]
       exact mul_le_mul_of_nonneg_left hcube hρ0.le
-    have h4 := struveSc_norm_exp_sub_exp_le hA hB
-    have hXs := struveSc_exp_split hc0.le hρ0.le hr.le
+    have h4 := ScaledAnger.norm_exp_sub_exp_le hA hB
+    have hXs := ScaledAnger.exp_split hc0.le hρ0.le hr.le
     rw [hsplit]
     calc ‖exp (-(ν * Ψ r)) * (q r - 1) + (exp (-(ν * Ψ r)) - exp (-(C * (r : ℂ) ^ 3)))‖
         ≤ ‖exp (-(ν * Ψ r))‖ * ‖q r - 1‖ + ‖-(ν * Ψ r) - -(C * (r : ℂ) ^ 3)‖ * X := by
@@ -135,10 +137,10 @@ theorem struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0
           refine mul_le_mul_of_nonneg_right ?_ (by positivity)
           simpa [hX, hβ, hκ, mul_assoc] using hXs
   -- integrability of the majorant
-  obtain ⟨i31, e31⟩ := struveSc_integral_pow_exp_cube 1 hβ0
-  obtain ⟨i35, e35⟩ := struveSc_integral_pow_exp_cube 5 hβ0
-  obtain ⟨i11, e11⟩ := struveSc_integral_pow_exp 1 hβ0
-  obtain ⟨i15, e15⟩ := struveSc_integral_pow_exp 5 hβ0
+  obtain ⟨i31, e31⟩ := ScaledAnger.integral_pow_exp_cube 1 hβ0
+  obtain ⟨i35, e35⟩ := ScaledAnger.integral_pow_exp_cube 5 hβ0
+  obtain ⟨i11, e11⟩ := ScaledAnger.integral_pow_exp 1 hβ0
+  obtain ⟨i15, e15⟩ := ScaledAnger.integral_pow_exp 5 hβ0
   have hsplitH : ∀ r : ℝ, H r = (K * (Real.exp (-(β * r ^ 3)) * r ^ 1) +
       ρ * K₅ * (Real.exp (-(β * r ^ 3)) * r ^ 5)) +
       (K * (Real.exp (-(β * r)) * r ^ 1) + ρ * K₅ * (Real.exp (-(β * r)) * r ^ 5)) := by
@@ -171,10 +173,10 @@ theorem struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0
   have hFc : ContinuousOn F (Ioi 0) := by
     intro r hr
     have hr0 : (0 : ℝ) ≤ r := le_of_lt hr
-    have hΨc : ContinuousAt Ψ r := (struveSc_hasDerivAt_phase_ray 1 ha hr0).continuousAt
+    have hΨc : ContinuousAt Ψ r := (ScaledAnger.hasDerivAt_phase_ray 1 ha hr0).continuousAt
     have hqc : ContinuousAt q r :=
       ((by fun_prop : Continuous fun s : ℝ => 1 + ((s : ℂ) * E) ^ 2).continuousAt).cpow
-        continuousAt_const (struveSc_mem_slitPlane ha)
+        continuousAt_const (ScaledAnger.mem_slitPlane ha)
     exact ((continuous_exp.continuousAt.comp (hΨc.const_mul ν).neg).mul hqc).continuousWithinAt
   have hdm : AEStronglyMeasurable (fun r => F r - G r) (volume.restrict (Ioi 0)) :=
     (hFc.sub (by fun_prop : Continuous G).continuousOn).aestronglyMeasurable measurableSet_Ioi
@@ -228,10 +230,10 @@ theorem struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0
   nlinarith [a1, a2, a3]
 
 /-- `π⁻¹ Γ(4/3) 6^{1/3} = 2^{4/3}/(3^{7/6} Γ(2/3))`. -/
-theorem struveSc_const_turn :
+theorem ScaledAnger.const_turning :
     1 / π * Real.Gamma (4 / 3) * (1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) =
       2 ^ (4 / 3 : ℝ) / (3 ^ (7 / 6 : ℝ) * Real.Gamma (2 / 3)) := by
-  have h := struveTP_const_E
+  have h := TurningPoint.const_E
   rw [Real.sin_pi_div_six] at h
   have h2 : (2 : ℝ) ^ (4 / 3 : ℝ) = 2 * 2 ^ (1 / 3 : ℝ) := by
     rw [show (4 / 3 : ℝ) = 1 + 1 / 3 by norm_num, Real.rpow_add (by norm_num), Real.rpow_one]
@@ -239,7 +241,7 @@ theorem struveSc_const_turn :
   ring
 
 /-- The DLMF 11.11.16 right-hand side as the Gamma-integral leading term. -/
-theorem struveSc_turning_rhs {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ} (hρ : 0 < ρ) :
+theorem ScaledAnger.turning_rhs {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ} (hρ : 0 < ρ) :
     (2 : ℂ) ^ (4 / 3 : ℂ) / ((3 : ℂ) ^ (7 / 6 : ℂ) * Gamma (2 / 3) *
         ((ρ : ℂ) * exp ((2 * a : ℝ) * I)) ^ (1 / 3 : ℂ)) =
       1 / π * (exp (((-a : ℝ) : ℂ) * I) * (Gamma (4 / 3) *
@@ -274,7 +276,7 @@ theorem struveSc_turning_rhs {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ} (hρ : 0 <
   have hρ6 : (ρ / 6) ^ (-(1 / 3 : ℝ)) * ρ ^ (1 / 3 : ℝ) = (1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) := by
     rw [show ρ / 6 = 1 / 6 * ρ by ring, Real.mul_rpow (by norm_num) hρ.le, mul_assoc,
       ← Real.rpow_add hρ, show -(1 / 3 : ℝ) + 1 / 3 = 0 by ring, Real.rpow_zero, mul_one]
-  have hk := struveSc_const_turn
+  have hk := ScaledAnger.const_turning
   have hexp : exp (((-a : ℝ) : ℂ) * I) * exp (((a / 3 : ℝ) : ℂ) * I) *
       exp (((2 * a / 3 : ℝ) : ℂ) * I) = 1 := by
     rw [← exp_add, ← exp_add]; push_cast; ring_nf; exact exp_zero
@@ -300,7 +302,7 @@ theorem struveSc_turning_rhs {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ} (hρ : 0 <
       (((3 ^ (7 / 6 : ℝ) : ℝ) : ℂ) * ((Real.Gamma (2 / 3) : ℝ) : ℂ))) * hexp
 
 /-- The norm of the DLMF 11.11.16 right-hand side. -/
-theorem struveSc_norm_turning_rhs (ν : ℂ) :
+theorem ScaledAnger.norm_turning_rhs (ν : ℂ) :
     ‖(2 : ℂ) ^ (4 / 3 : ℂ) / ((3 : ℂ) ^ (7 / 6 : ℂ) * Gamma (2 / 3) * ν ^ (1 / 3 : ℂ))‖ =
       2 ^ (4 / 3 : ℝ) / (3 ^ (7 / 6 : ℝ) * Real.Gamma (2 / 3)) / ‖ν‖ ^ (1 / 3 : ℝ) := by
   have e5 : Gamma (2 / 3 : ℂ) = ((Real.Gamma (2 / 3) : ℝ) : ℂ) := by
@@ -315,61 +317,62 @@ theorem struveSc_norm_turning_rhs (ν : ℂ) :
   ring
 
 /-- The real phase `φ(s) = λ s - arsinh s` of `𝐀_{-ν}(λν)` on the positive axis. -/
-noncomputable def struveSc_phiR (lam s : ℝ) : ℝ := lam * s - Real.arsinh s
+noncomputable def ScaledAnger.realPhase (lam s : ℝ) : ℝ := lam * s - Real.arsinh s
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < Real.sqrt (1 + s ^ 2)`. -/
-theorem struveSc_sqrt_pos (s : ℝ) : 0 < Real.sqrt (1 + s ^ 2) := Real.sqrt_pos.2 (by positivity)
+theorem ScaledAnger.sqrt_pos (s : ℝ) : 0 < Real.sqrt (1 + s ^ 2) := Real.sqrt_pos.2 (by positivity)
 
 /-- Identity under the stated parameter and domain assumptions: `Real.sqrt (1 + s ^ 2) ^ 2 = 1 + s
 ^ 2`. -/
-theorem struveSc_sqrt_sq (s : ℝ) : Real.sqrt (1 + s ^ 2) ^ 2 = 1 + s ^ 2 :=
+theorem ScaledAnger.sqrt_sq (s : ℝ) : Real.sqrt (1 + s ^ 2) ^ 2 = 1 + s ^ 2 :=
   Real.sq_sqrt (by positivity)
 
 /-- Estimate under the stated parameter and domain assumptions: `1 ≤ Real.sqrt (1 + s ^ 2)`. -/
-theorem struveSc_one_le_sqrt (s : ℝ) : 1 ≤ Real.sqrt (1 + s ^ 2) := by
+theorem ScaledAnger.one_le_sqrt (s : ℝ) : 1 ≤ Real.sqrt (1 + s ^ 2) := by
   have := Real.sqrt_le_sqrt (show (1 : ℝ) ≤ 1 + s ^ 2 by nlinarith)
   rwa [Real.sqrt_one] at this
 
 /-- Estimate under the stated parameter and domain assumptions: `|s| ≤ Real.sqrt (1 + s ^ 2)`. -/
-theorem struveSc_abs_le_sqrt (s : ℝ) : |s| ≤ Real.sqrt (1 + s ^ 2) := by
+theorem ScaledAnger.abs_le_sqrt (s : ℝ) : |s| ≤ Real.sqrt (1 + s ^ 2) := by
   rw [← Real.sqrt_sq_eq_abs]; exact Real.sqrt_le_sqrt (by linarith)
 
 /-- At `s`, the function `(fun s : ℝ => Real.sqrt (1 + s ^ 2))` has derivative `(s / Real.sqrt (1
 + s ^ 2))`. -/
-theorem struveSc_hasDerivAt_sqrt (s : ℝ) :
+theorem ScaledAnger.hasDerivAt_sqrt (s : ℝ) :
     HasDerivAt (fun s : ℝ => Real.sqrt (1 + s ^ 2)) (s / Real.sqrt (1 + s ^ 2)) s := by
   have h := ((hasDerivAt_pow 2 s).const_add 1).sqrt (by positivity)
   convert h using 1
-  have := struveSc_sqrt_pos s
+  have := ScaledAnger.sqrt_pos s
   field_simp
   push_cast; ring
 
-/-- At `s`, the function `(struveSc_phiR lam)` has derivative `(lam - (Real.sqrt (1 + s ^ 2))⁻¹)`.
+/-- At `s`, the function `(ScaledAnger.realPhase lam)` has derivative
+`(lam - (Real.sqrt (1 + s ^ 2))⁻¹)`.
 -/
-theorem struveSc_hasDerivAt_phiR (lam s : ℝ) :
-    HasDerivAt (struveSc_phiR lam) (lam - (Real.sqrt (1 + s ^ 2))⁻¹) s := by
+theorem ScaledAnger.hasDerivAt_realPhase (lam s : ℝ) :
+    HasDerivAt (ScaledAnger.realPhase lam) (lam - (Real.sqrt (1 + s ^ 2))⁻¹) s := by
   have h := ((hasDerivAt_id s).const_mul lam).sub (Real.hasDerivAt_arsinh s)
   exact h.congr_deriv (by simp)
 
 /-- At `s`, the function `(fun s : ℝ => lam - (Real.sqrt (1 + s ^ 2))⁻¹)` has derivative `(s /
 Real.sqrt (1 + s ^ 2) ^ 3)`. -/
-theorem struveSc_hasDerivAt_phiR' (lam s : ℝ) :
+theorem ScaledAnger.hasDerivAt_realPhase' (lam s : ℝ) :
     HasDerivAt (fun s : ℝ => lam - (Real.sqrt (1 + s ^ 2))⁻¹)
       (s / Real.sqrt (1 + s ^ 2) ^ 3) s := by
-  have hS := struveSc_sqrt_pos s
-  have h := ((struveSc_hasDerivAt_sqrt s).inv hS.ne').const_sub lam
+  have hS := ScaledAnger.sqrt_pos s
+  have h := ((ScaledAnger.hasDerivAt_sqrt s).inv hS.ne').const_sub lam
   convert h using 1
   field_simp
 
 /-- At `s`, the function `(fun s : ℝ => s / Real.sqrt (1 + s ^ 2) ^ 3)` has derivative `((1 - 2 *
 s ^ 2) / Real.sqrt (1 + s ^ 2) ^ 5)`. -/
-theorem struveSc_hasDerivAt_phiR'' (s : ℝ) :
+theorem ScaledAnger.hasDerivAt_realPhase'' (s : ℝ) :
     HasDerivAt (fun s : ℝ => s / Real.sqrt (1 + s ^ 2) ^ 3)
       ((1 - 2 * s ^ 2) / Real.sqrt (1 + s ^ 2) ^ 5) s := by
-  have hS := struveSc_sqrt_pos s
-  have h := (hasDerivAt_id s).div ((struveSc_hasDerivAt_sqrt s).pow 3) (pow_pos hS 3).ne'
+  have hS := ScaledAnger.sqrt_pos s
+  have h := (hasDerivAt_id s).div ((ScaledAnger.hasDerivAt_sqrt s).pow 3) (pow_pos hS 3).ne'
   refine h.congr_deriv ?_
-  have h2 := struveSc_sqrt_sq s
+  have h2 := ScaledAnger.sqrt_sq s
   simp only [id, Pi.pow_apply]
   field_simp
   norm_num
@@ -378,10 +381,11 @@ theorem struveSc_hasDerivAt_phiR'' (s : ℝ) :
 
 /-- Estimate under the stated parameter and domain assumptions: `|(1 - 2 * s ^ 2) / Real.sqrt (1 +
 s ^ 2) ^ 5| ≤ 1`. -/
-theorem struveSc_abs_phiR''' (s : ℝ) : |(1 - 2 * s ^ 2) / Real.sqrt (1 + s ^ 2) ^ 5| ≤ 1 := by
-  have hS := struveSc_sqrt_pos s
-  have h1 := struveSc_one_le_sqrt s
-  have h2 := struveSc_sqrt_sq s
+theorem ScaledAnger.abs_realPhase''' (s : ℝ) : |(1 - 2 * s ^ 2) /
+    Real.sqrt (1 + s ^ 2) ^ 5| ≤ 1 := by
+  have hS := ScaledAnger.sqrt_pos s
+  have h1 := ScaledAnger.one_le_sqrt s
+  have h2 := ScaledAnger.sqrt_sq s
   rw [abs_div, abs_of_pos (pow_pos hS 5), div_le_one (pow_pos hS 5)]
   have h4 : Real.sqrt (1 + s ^ 2) ^ 4 ≤ Real.sqrt (1 + s ^ 2) ^ 5 :=
     pow_le_pow_right₀ h1 (by norm_num)
@@ -390,19 +394,20 @@ theorem struveSc_abs_phiR''' (s : ℝ) : |(1 - 2 * s ^ 2) / Real.sqrt (1 + s ^ 2
   rw [abs_le]; constructor <;> nlinarith [sq_nonneg s, pow_nonneg (sq_nonneg s) 2]
 
 /-- `φ''` is `1`-Lipschitz. -/
-theorem struveSc_phiR''_lip (u v : ℝ) :
+theorem ScaledAnger.realPhase''_lipschitz (u v : ℝ) :
     |u / Real.sqrt (1 + u ^ 2) ^ 3 - v / Real.sqrt (1 + v ^ 2) ^ 3| ≤ |u - v| := by
   have := (convex_univ : Convex ℝ (univ : Set ℝ)).norm_image_sub_le_of_norm_hasDerivWithin_le
     (f := fun s : ℝ => s / Real.sqrt (1 + s ^ 2) ^ 3)
     (f' := fun s => (1 - 2 * s ^ 2) / Real.sqrt (1 + s ^ 2) ^ 5) (C := 1)
-    (fun x _ => (struveSc_hasDerivAt_phiR'' x).hasDerivWithinAt)
-    (fun x _ => by rw [Real.norm_eq_abs]; exact struveSc_abs_phiR''' x)
+    (fun x _ => (ScaledAnger.hasDerivAt_realPhase'' x).hasDerivWithinAt)
+    (fun x _ => by rw [Real.norm_eq_abs]; exact ScaledAnger.abs_realPhase''' x)
     (mem_univ v) (mem_univ u)
   simpa [Real.norm_eq_abs] using this
 
 /-- Quadratic Taylor bound for `φ` at a critical point. -/
-theorem struveSc_phiR_taylor {lam s₀ : ℝ} (hcrit : lam = (Real.sqrt (1 + s₀ ^ 2))⁻¹) (t : ℝ) :
-    |struveSc_phiR lam (s₀ + t) - struveSc_phiR lam s₀ -
+theorem ScaledAnger.realPhase_taylor {lam s₀ : ℝ}
+    (hcrit : lam = (Real.sqrt (1 + s₀ ^ 2))⁻¹) (t : ℝ) :
+    |ScaledAnger.realPhase lam (s₀ + t) - ScaledAnger.realPhase lam s₀ -
       s₀ / Real.sqrt (1 + s₀ ^ 2) ^ 3 / 2 * t ^ 2| ≤ |t| ^ 3 := by
   set c₂ := s₀ / Real.sqrt (1 + s₀ ^ 2) ^ 3 with hc₂
   -- first derivative bound
@@ -412,12 +417,13 @@ theorem struveSc_phiR_taylor {lam s₀ : ℝ} (hcrit : lam = (Real.sqrt (1 + s�
       (f := fun y : ℝ => lam - (Real.sqrt (1 + (s₀ + y) ^ 2))⁻¹ - c₂ * y)
       (f' := fun y => (s₀ + y) / Real.sqrt (1 + (s₀ + y) ^ 2) ^ 3 - c₂) (C := |x|)
       (fun y _ => by
-        have h := (struveSc_hasDerivAt_phiR' lam (s₀ + y)).comp y ((hasDerivAt_id y).const_add s₀)
+        have h := (ScaledAnger.hasDerivAt_realPhase' lam (s₀ + y)).comp y
+            ((hasDerivAt_id y).const_add s₀)
         have h2 := h.sub ((hasDerivAt_id y).const_mul c₂)
         exact (h2.congr_deriv (by simp)).hasDerivWithinAt)
       (fun y hy => by
         rw [Real.norm_eq_abs]
-        have := struveSc_phiR''_lip (s₀ + y) s₀
+        have := ScaledAnger.realPhase''_lipschitz (s₀ + y) s₀
         rw [show s₀ + y - s₀ = y by ring] at this
         have hy' := abs_sub_left_of_mem_uIcc hy
         simp only [sub_zero] at hy'
@@ -428,11 +434,14 @@ theorem struveSc_phiR_taylor {lam s₀ : ℝ} (hcrit : lam = (Real.sqrt (1 + s�
     calc _ ≤ |x| * |x| := this
       _ = x ^ 2 := by rw [← abs_mul, ← sq, abs_of_nonneg (sq_nonneg x)]
   have := (convex_uIcc (0 : ℝ) t).norm_image_sub_le_of_norm_hasDerivWithin_le
-    (f := fun y : ℝ => struveSc_phiR lam (s₀ + y) - struveSc_phiR lam s₀ - c₂ / 2 * y ^ 2)
+    (f := fun y : ℝ => ScaledAnger.realPhase lam (s₀ + y) - ScaledAnger.realPhase lam s₀ -
+        c₂ / 2 * y ^ 2)
     (f' := fun y => lam - (Real.sqrt (1 + (s₀ + y) ^ 2))⁻¹ - c₂ * y) (C := t ^ 2)
     (fun y _ => by
-      have h := (struveSc_hasDerivAt_phiR lam (s₀ + y)).comp y ((hasDerivAt_id y).const_add s₀)
-      have h2 := (h.sub_const (struveSc_phiR lam s₀)).sub ((hasDerivAt_pow 2 y).const_mul (c₂ / 2))
+      have h := (ScaledAnger.hasDerivAt_realPhase lam (s₀ + y)).comp y
+          ((hasDerivAt_id y).const_add s₀)
+      have h2 := (h.sub_const (ScaledAnger.realPhase lam s₀)).sub
+          ((hasDerivAt_pow 2 y).const_mul (c₂ / 2))
       exact (h2.congr_deriv (by simp; ring)).hasDerivWithinAt)
     (fun y hy => by
       rw [Real.norm_eq_abs]
@@ -448,21 +457,23 @@ theorem struveSc_phiR_taylor {lam s₀ : ℝ} (hcrit : lam = (Real.sqrt (1 + s�
     _ = |t| ^ 3 := by rw [← sq_abs t]; ring
 
 /-- The saddle `s₀ = √(1-λ²)/λ` satisfies `√(1+s₀²) = 1/λ`. -/
-theorem struveSc_sqrt_saddle {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
+theorem ScaledAnger.sqrt_saddle {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
     Real.sqrt (1 + (Real.sqrt (1 - lam ^ 2) / lam) ^ 2) = lam⁻¹ := by
   have hs : Real.sqrt (1 - lam ^ 2) ^ 2 = 1 - lam ^ 2 := Real.sq_sqrt (by nlinarith)
   rw [div_pow, hs, show 1 + (1 - lam ^ 2) / lam ^ 2 = lam⁻¹ ^ 2 by field_simp; ring,
     Real.sqrt_sq (inv_pos.2 h0).le]
 
 /-- Monotonicity of `φ` on both sides of the critical point. -/
-theorem struveSc_phiR_mono {lam s₀ : ℝ} (hs₀ : 0 ≤ s₀) (hcrit : lam = (Real.sqrt (1 + s₀ ^ 2))⁻¹) :
-    MonotoneOn (struveSc_phiR lam) (Ici s₀) ∧ AntitoneOn (struveSc_phiR lam) (Icc 0 s₀) := by
-  have hS : ∀ s, 0 < Real.sqrt (1 + s ^ 2) := struveSc_sqrt_pos
+theorem ScaledAnger.realPhase_monotone {lam s₀ : ℝ} (hs₀ : 0 ≤ s₀)
+    (hcrit : lam = (Real.sqrt (1 + s₀ ^ 2))⁻¹) :
+    MonotoneOn (ScaledAnger.realPhase lam) (Ici s₀) ∧
+        AntitoneOn (ScaledAnger.realPhase lam) (Icc 0 s₀) := by
+  have hS : ∀ s, 0 < Real.sqrt (1 + s ^ 2) := ScaledAnger.sqrt_pos
   constructor
   · refine monotoneOn_of_hasDerivWithinAt_nonneg (convex_Ici s₀)
       (f' := fun s => lam - (Real.sqrt (1 + s ^ 2))⁻¹)
-      (fun s _ => (struveSc_hasDerivAt_phiR lam s).continuousAt.continuousWithinAt)
-      (fun s _ => (struveSc_hasDerivAt_phiR lam s).hasDerivWithinAt) ?_
+      (fun s _ => (ScaledAnger.hasDerivAt_realPhase lam s).continuousAt.continuousWithinAt)
+      (fun s _ => (ScaledAnger.hasDerivAt_realPhase lam s).hasDerivWithinAt) ?_
     intro s hs
     rw [interior_Ici] at hs
     have hss : s₀ ≤ s := le_of_lt hs
@@ -472,8 +483,8 @@ theorem struveSc_phiR_mono {lam s₀ : ℝ} (hs₀ : 0 ≤ s₀) (hcrit : lam = 
     exact inv_anti₀ (hS s₀) this
   · refine antitoneOn_of_hasDerivWithinAt_nonpos (convex_Icc 0 s₀)
       (f' := fun s => lam - (Real.sqrt (1 + s ^ 2))⁻¹)
-      (fun s _ => (struveSc_hasDerivAt_phiR lam s).continuousAt.continuousWithinAt)
-      (fun s _ => (struveSc_hasDerivAt_phiR lam s).hasDerivWithinAt) ?_
+      (fun s _ => (ScaledAnger.hasDerivAt_realPhase lam s).continuousAt.continuousWithinAt)
+      (fun s _ => (ScaledAnger.hasDerivAt_realPhase lam s).hasDerivWithinAt) ?_
     intro s hs
     rw [interior_Icc] at hs
     have : Real.sqrt (1 + s ^ 2) ≤ Real.sqrt (1 + s₀ ^ 2) :=
@@ -483,7 +494,7 @@ theorem struveSc_phiR_mono {lam s₀ : ℝ} (hs₀ : 0 ≤ s₀) (hcrit : lam = 
 
 /-- Identity under the stated parameter and domain assumptions: `(1 + (s : ℂ) ^ 2) ^ (1 / 2 : ℂ) =
 ((Real.sqrt (1 + s ^ 2) : ℝ) : ℂ)`. -/
-theorem struveSc_cpow_half_ofReal (s : ℝ) :
+theorem ScaledAnger.cpow_half_ofReal (s : ℝ) :
     (1 + (s : ℂ) ^ 2) ^ (1 / 2 : ℂ) = ((Real.sqrt (1 + s ^ 2) : ℝ) : ℂ) := by
   rw [show 1 + (s : ℂ) ^ 2 = ((1 + s ^ 2 : ℝ) : ℂ) by push_cast; ring,
     show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; rfl, ← ofReal_cpow (by positivity),
@@ -491,137 +502,149 @@ theorem struveSc_cpow_half_ofReal (s : ℝ) :
 
 /-- Identity under the stated parameter and domain assumptions: `(1 + (s : ℂ) ^ 2) ^ (-(1 / 2 :
 ℂ)) = (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ)`. -/
-theorem struveSc_q_ofReal (s : ℝ) :
+theorem ScaledAnger.q_ofReal (s : ℝ) :
     (1 + (s : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) = (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) := by
-  rw [cpow_neg, struveSc_cpow_half_ofReal, ofReal_inv]
+  rw [cpow_neg, ScaledAnger.cpow_half_ofReal, ofReal_inv]
 
-/-- Identity under the stated parameter and domain assumptions: `struveSc_phase lam (s : ℂ) =
-((struveSc_phiR lam s : ℝ) : ℂ)`. -/
-theorem struveSc_phase_ofReal (lam s : ℝ) :
-    struveSc_phase lam (s : ℂ) = ((struveSc_phiR lam s : ℝ) : ℂ) := by
+/-- Identity under the stated parameter and domain assumptions: `ScaledAnger.phase lam (s : ℂ) =
+((ScaledAnger.realPhase lam s : ℝ) : ℂ)`. -/
+theorem ScaledAnger.phase_ofReal (lam s : ℝ) :
+    ScaledAnger.phase lam (s : ℂ) = ((ScaledAnger.realPhase lam s : ℝ) : ℂ) := by
   have hpos : 0 < s + Real.sqrt (1 + s ^ 2) := by
-    have := struveSc_abs_le_sqrt s
+    have := ScaledAnger.abs_le_sqrt s
     have h2 : Real.sqrt (1 + s ^ 2) ≠ |s| := by
       intro h
-      have := struveSc_sqrt_sq s
+      have := ScaledAnger.sqrt_sq s
       rw [h, sq_abs] at this; linarith
     have := lt_of_le_of_ne this h2.symm
     linarith [neg_abs_le s]
-  rw [struveSc_phase, struveSc_cpow_half_ofReal, ← ofReal_add, ← ofReal_log hpos.le,
-    struveSc_phiR, Real.arsinh]
+  rw [ScaledAnger.phase, ScaledAnger.cpow_half_ofReal, ← ofReal_add, ← ofReal_log hpos.le,
+    ScaledAnger.realPhase, Real.arsinh]
   push_cast; ring
 
 /-- DLMF 11.10.4 on the real contour, written with the real phase. -/
-theorem struveSc_angerA_real {lam : ℝ} (hlam : 0 < lam) {ν : ℂ} (hν : 0 < ν.re) :
+theorem ScaledAnger.angerA_real {lam : ℝ} (hlam : 0 < lam) {ν : ℂ} (hν : 0 < ν.re) :
     angerA (-ν) (lam * ν) = 1 / π * ∫ s in Ioi (0 : ℝ),
-      exp (-(ν * ((struveSc_phiR lam s : ℝ) : ℂ))) * (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) := by
+      exp (-(ν * ((ScaledAnger.realPhase lam s : ℝ) : ℂ))) *
+          (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) := by
   have ha : |(0 : ℝ)| < π / 2 := by rw [abs_zero]; positivity
   have hθ : |(-(0 : ℝ))| < π / 2 := by rw [neg_zero, abs_zero]; positivity
   have hz : 0 < ((lam : ℂ) * ν * exp (((-(0 : ℝ) : ℝ) : ℂ) * I)).re := by
     simp only [neg_zero, ofReal_zero, zero_mul, exp_zero, mul_one]
     rw [re_ofReal_mul]; exact mul_pos hlam hν
-  rw [struveAs_angerA_eq_rot (-ν) hθ hz, struveAs_rotInt]
+  rw [AngerAsymptotics.angerA_eq_rotated (-ν) hθ hz, AngerAsymptotics.rotatedIntegral]
   have hint : (∫ r in Ioi (0 : ℝ), exp (-((lam : ℂ) * ν * exp (((-(0 : ℝ) : ℝ) : ℂ) * I) * r)) *
-      struveAs_kernel (-ν) ((r : ℂ) * exp (((-(0 : ℝ) : ℝ) : ℂ) * I))) =
-      ∫ s in Ioi (0 : ℝ), exp (-(ν * ((struveSc_phiR lam s : ℝ) : ℂ))) *
+      AngerAsymptotics.kernel (-ν) ((r : ℂ) * exp (((-(0 : ℝ) : ℝ) : ℂ) * I))) =
+      ∫ s in Ioi (0 : ℝ), exp (-(ν * ((ScaledAnger.realPhase lam s : ℝ) : ℂ))) *
         (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) := by
     refine setIntegral_congr_fun measurableSet_Ioi fun r hr => ?_
-    rw [struveSc_integrand_eq lam ha ν (le_of_lt hr)]
+    rw [ScaledAnger.integrand_eq lam ha ν (le_of_lt hr)]
     simp only [neg_zero, ofReal_zero, zero_mul, exp_zero, mul_one]
-    rw [struveSc_phase_ofReal, struveSc_q_ofReal]
+    rw [ScaledAnger.phase_ofReal, ScaledAnger.q_ofReal]
   rw [hint]
   simp only [neg_zero, ofReal_zero, zero_mul, exp_zero, one_mul]
 
 /-- The saddle point `s₀ = √(1-λ²)/λ` of the real phase. -/
-noncomputable def struveSc_s0 (lam : ℝ) : ℝ := Real.sqrt (1 - lam ^ 2) / lam
+noncomputable def ScaledAnger.saddle (lam : ℝ) : ℝ := Real.sqrt (1 - lam ^ 2) / lam
 
 /-- Half the second derivative of the phase at the saddle, `φ''(s₀)/2 = s₀ λ³/2`. -/
-noncomputable def struveSc_Q0 (lam : ℝ) : ℝ := struveSc_s0 lam * lam ^ 3 / 2
+noncomputable def ScaledAnger.halfSecondDeriv (lam : ℝ) : ℝ := ScaledAnger.saddle lam * lam ^ 3 / 2
 
 /-- The quadratic phase coefficient `(φ(s₀+t) - φ(s₀))/t²`, extended by `Q₀` at `0`. -/
-noncomputable def struveSc_Qf (lam t : ℝ) : ℝ :=
-  if t = 0 then struveSc_Q0 lam else
-    (struveSc_phiR lam (struveSc_s0 lam + t) - struveSc_phiR lam (struveSc_s0 lam)) / t ^ 2
+noncomputable def ScaledAnger.quadraticCoeff (lam t : ℝ) : ℝ :=
+  if t = 0 then ScaledAnger.halfSecondDeriv lam else
+    (ScaledAnger.realPhase lam (ScaledAnger.saddle lam + t) -
+        ScaledAnger.realPhase lam (ScaledAnger.saddle lam)) / t ^ 2
 
-/-- Estimate under the stated parameter and domain assumptions: `0 < struveSc_s0 lam`. -/
-theorem struveSc_s0_pos {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) : 0 < struveSc_s0 lam :=
+/-- Estimate under the stated parameter and domain assumptions: `0 < ScaledAnger.saddle lam`. -/
+theorem ScaledAnger.saddle_pos {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) : 0 <
+    ScaledAnger.saddle lam :=
   div_pos (Real.sqrt_pos.2 (by nlinarith)) h0
 
-/-- Identity under the stated parameter and domain assumptions: `lam = (Real.sqrt (1 + struveSc_s0
-lam ^ 2))⁻¹`. -/
-theorem struveSc_crit {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
-    lam = (Real.sqrt (1 + struveSc_s0 lam ^ 2))⁻¹ := by
-  rw [struveSc_s0, struveSc_sqrt_saddle h0 h1, inv_inv]
+/-- Identity under the stated parameter and domain assumptions:
+`lam = (Real.sqrt (1 + ScaledAnger.saddle lam ^ 2))⁻¹`. -/
+theorem ScaledAnger.critical {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
+    lam = (Real.sqrt (1 + ScaledAnger.saddle lam ^ 2))⁻¹ := by
+  rw [ScaledAnger.saddle, ScaledAnger.sqrt_saddle h0 h1, inv_inv]
 
-/-- Identity under the stated parameter and domain assumptions: `struveSc_s0 lam / Real.sqrt (1 +
-struveSc_s0 lam ^ 2) ^ 3 / 2 = struveSc_Q0 lam`. -/
-theorem struveSc_c2 {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
-    struveSc_s0 lam / Real.sqrt (1 + struveSc_s0 lam ^ 2) ^ 3 / 2 = struveSc_Q0 lam := by
-  rw [struveSc_Q0, struveSc_s0, struveSc_sqrt_saddle h0 h1]
+/-- Identity under the stated parameter and domain assumptions:
+`ScaledAnger.saddle lam / Real.sqrt (1 + ScaledAnger.saddle lam ^ 2) ^ 3 / 2 =
+ScaledAnger.halfSecondDeriv lam`. -/
+theorem ScaledAnger.c2 {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
+    ScaledAnger.saddle lam / Real.sqrt (1 + ScaledAnger.saddle lam ^ 2) ^ 3 / 2 =
+        ScaledAnger.halfSecondDeriv lam := by
+  rw [ScaledAnger.halfSecondDeriv, ScaledAnger.saddle, ScaledAnger.sqrt_saddle h0 h1]
   field_simp
 
-/-- Estimate under the stated parameter and domain assumptions: `0 < struveSc_Q0 lam`. -/
-theorem struveSc_Q0_pos {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) : 0 < struveSc_Q0 lam := by
-  have := struveSc_s0_pos h0 h1
-  rw [struveSc_Q0]; positivity
+/-- Estimate under the stated parameter and domain assumptions:
+`0 < ScaledAnger.halfSecondDeriv lam`. -/
+theorem ScaledAnger.halfSecondDeriv_pos {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) : 0 <
+    ScaledAnger.halfSecondDeriv lam := by
+  have := ScaledAnger.saddle_pos h0 h1
+  rw [ScaledAnger.halfSecondDeriv]; positivity
 
-/-- Estimate under the stated parameter and domain assumptions: `struveSc_Q0 lam < struveSc_s0
-lam`. -/
-theorem struveSc_Q0_lt {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
-    struveSc_Q0 lam < struveSc_s0 lam := by
-  have := struveSc_s0_pos h0 h1
+/-- Estimate under the stated parameter and domain assumptions:
+`ScaledAnger.halfSecondDeriv lam < ScaledAnger.saddle lam`. -/
+theorem ScaledAnger.halfSecondDeriv_lt {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
+    ScaledAnger.halfSecondDeriv lam < ScaledAnger.saddle lam := by
+  have := ScaledAnger.saddle_pos h0 h1
   have h3 : lam ^ 3 < 1 := pow_lt_one₀ h0.le h1 (by norm_num)
-  rw [struveSc_Q0]; nlinarith
+  rw [ScaledAnger.halfSecondDeriv]; nlinarith
 
-/-- Identity under the stated parameter and domain assumptions: `struveSc_phiR lam (struveSc_s0
-lam + t) - struveSc_phiR lam (struveSc_s0 lam) = t ^ 2 * struveSc_Qf lam t`. -/
-theorem struveSc_D_eq {lam : ℝ} (t : ℝ) :
-    struveSc_phiR lam (struveSc_s0 lam + t) - struveSc_phiR lam (struveSc_s0 lam) =
-      t ^ 2 * struveSc_Qf lam t := by
+/-- Identity under the stated parameter and domain assumptions:
+`ScaledAnger.realPhase lam (ScaledAnger.saddle lam + t) - ScaledAnger.realPhase lam
+(ScaledAnger.saddle lam) = t ^ 2 * ScaledAnger.quadraticCoeff lam t`. -/
+theorem ScaledAnger.D_eq {lam : ℝ} (t : ℝ) :
+    ScaledAnger.realPhase lam (ScaledAnger.saddle lam + t) -
+        ScaledAnger.realPhase lam (ScaledAnger.saddle lam) =
+      t ^ 2 * ScaledAnger.quadraticCoeff lam t := by
   rcases eq_or_ne t 0 with rfl | ht
   · simp
-  · simp only [struveSc_Qf, ht, ↓reduceIte]; field_simp
+  · simp only [ScaledAnger.quadraticCoeff, ht, ↓reduceIte]; field_simp
 
-/-- Estimate under the stated parameter and domain assumptions: `|struveSc_phiR lam (struveSc_s0
-lam + t) - struveSc_phiR lam (struveSc_s0 lam) - struveSc_Q0 lam * t ^ 2| ≤ |t| ^ 3`. -/
-theorem struveSc_D_taylor {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
-    |struveSc_phiR lam (struveSc_s0 lam + t) - struveSc_phiR lam (struveSc_s0 lam) -
-      struveSc_Q0 lam * t ^ 2| ≤ |t| ^ 3 := by
-  have := struveSc_phiR_taylor (struveSc_crit h0 h1) t
-  rwa [struveSc_c2 h0 h1] at this
+/-- Estimate under the stated parameter and domain assumptions:
+`|ScaledAnger.realPhase lam (ScaledAnger.saddle lam + t) - ScaledAnger.realPhase lam
+(ScaledAnger.saddle lam) - ScaledAnger.halfSecondDeriv lam * t ^ 2| ≤ |t| ^ 3`. -/
+theorem ScaledAnger.D_taylor {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
+    |ScaledAnger.realPhase lam (ScaledAnger.saddle lam + t) -
+        ScaledAnger.realPhase lam (ScaledAnger.saddle lam) -
+      ScaledAnger.halfSecondDeriv lam * t ^ 2| ≤ |t| ^ 3 := by
+  have := ScaledAnger.realPhase_taylor (ScaledAnger.critical h0 h1) t
+  rwa [ScaledAnger.c2 h0 h1] at this
 
-/-- Estimate under the stated parameter and domain assumptions: `|struveSc_Qf lam t - struveSc_Q0
-lam| ≤ |t|`. -/
-theorem struveSc_Qf_lip {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
-    |struveSc_Qf lam t - struveSc_Q0 lam| ≤ |t| := by
+/-- Estimate under the stated parameter and domain assumptions:
+`|ScaledAnger.quadraticCoeff lam t - ScaledAnger.halfSecondDeriv lam| ≤ |t|`. -/
+theorem ScaledAnger.quadraticCoeff_lipschitz {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
+    |ScaledAnger.quadraticCoeff lam t - ScaledAnger.halfSecondDeriv lam| ≤ |t| := by
   rcases eq_or_ne t 0 with rfl | ht
-  · simp [struveSc_Qf]
-  · have h := struveSc_D_taylor h0 h1 t
-    rw [struveSc_D_eq] at h
+  · simp [ScaledAnger.quadraticCoeff]
+  · have h := ScaledAnger.D_taylor h0 h1 t
+    rw [ScaledAnger.D_eq] at h
     have ht2 : 0 < t ^ 2 := by positivity
-    rw [show t ^ 2 * struveSc_Qf lam t - struveSc_Q0 lam * t ^ 2 =
-      t ^ 2 * (struveSc_Qf lam t - struveSc_Q0 lam) by ring, abs_mul,
+    rw [show t ^ 2 * ScaledAnger.quadraticCoeff lam t - ScaledAnger.halfSecondDeriv lam * t ^ 2 =
+      t ^ 2 * (ScaledAnger.quadraticCoeff lam t - ScaledAnger.halfSecondDeriv lam) by ring, abs_mul,
       abs_of_pos ht2, show |t| ^ 3 = t ^ 2 * |t| by rw [← sq_abs t]; ring] at h
     exact le_of_mul_le_mul_left h ht2
 
-/-- Estimate under the stated parameter and domain assumptions: `|(Real.sqrt (1 + (struveSc_s0 lam
-+ t) ^ 2))⁻¹ - lam| ≤ |t|`. -/
-theorem struveSc_amp_lip {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
-    |(Real.sqrt (1 + (struveSc_s0 lam + t) ^ 2))⁻¹ - lam| ≤ |t| := by
-  have hcrit := struveSc_crit h0 h1
+/-- Estimate under the stated parameter and domain assumptions:
+`|(Real.sqrt (1 + (ScaledAnger.saddle lam + t) ^ 2))⁻¹ - lam| ≤ |t|`. -/
+theorem ScaledAnger.amplitude_lipschitz {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
+    |(Real.sqrt (1 + (ScaledAnger.saddle lam + t) ^ 2))⁻¹ - lam| ≤ |t| := by
+  have hcrit := ScaledAnger.critical h0 h1
   have := (convex_uIcc (0 : ℝ) t).norm_image_sub_le_of_norm_hasDerivWithin_le
-    (f := fun y : ℝ => lam - (Real.sqrt (1 + (struveSc_s0 lam + y) ^ 2))⁻¹)
-    (f' := fun y => (struveSc_s0 lam + y) / Real.sqrt (1 + (struveSc_s0 lam + y) ^ 2) ^ 3)
+    (f := fun y : ℝ => lam - (Real.sqrt (1 + (ScaledAnger.saddle lam + y) ^ 2))⁻¹)
+    (f' := fun y => (ScaledAnger.saddle lam + y) /
+        Real.sqrt (1 + (ScaledAnger.saddle lam + y) ^ 2) ^ 3)
     (C := 1)
     (fun y _ => by
-      have h := (struveSc_hasDerivAt_phiR' lam (struveSc_s0 lam + y)).comp y
-        ((hasDerivAt_id y).const_add (struveSc_s0 lam))
+      have h := (ScaledAnger.hasDerivAt_realPhase' lam (ScaledAnger.saddle lam + y)).comp y
+        ((hasDerivAt_id y).const_add (ScaledAnger.saddle lam))
       exact (h.congr_deriv (by simp)).hasDerivWithinAt)
     (fun y _ => by
-      set u := struveSc_s0 lam + y
-      have hS := struveSc_sqrt_pos u
-      have hle := struveSc_abs_le_sqrt u
-      have h1' := struveSc_one_le_sqrt u
+      set u := ScaledAnger.saddle lam + y
+      have hS := ScaledAnger.sqrt_pos u
+      have hle := ScaledAnger.abs_le_sqrt u
+      have h1' := ScaledAnger.one_le_sqrt u
       rw [Real.norm_eq_abs, abs_div, abs_of_pos (pow_pos hS 3), div_le_one (pow_pos hS 3)]
       calc |u| ≤ Real.sqrt (1 + u ^ 2) := hle
         _ ≤ Real.sqrt (1 + u ^ 2) ^ 3 := by
@@ -632,32 +655,33 @@ theorem struveSc_amp_lip {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
   rw [← hcrit, sub_self, sub_zero, abs_sub_comm] at this
   simpa [abs_sub_comm] using this
 
-/-- Estimate under the stated parameter and domain assumptions: `struveSc_phiR lam (struveSc_s0
-lam) ≤ struveSc_phiR lam s`. -/
-theorem struveSc_phiR_ge {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs : 0 ≤ s) :
-    struveSc_phiR lam (struveSc_s0 lam) ≤ struveSc_phiR lam s := by
-  have hs0 := struveSc_s0_pos h0 h1
-  obtain ⟨hm, ha⟩ := struveSc_phiR_mono hs0.le (struveSc_crit h0 h1)
-  rcases le_total s (struveSc_s0 lam) with h | h
+/-- Estimate under the stated parameter and domain assumptions:
+`ScaledAnger.realPhase lam (ScaledAnger.saddle lam) ≤ ScaledAnger.realPhase lam s`. -/
+theorem ScaledAnger.realPhase_ge {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs : 0 ≤ s) :
+    ScaledAnger.realPhase lam (ScaledAnger.saddle lam) ≤ ScaledAnger.realPhase lam s := by
+  have hs0 := ScaledAnger.saddle_pos h0 h1
+  obtain ⟨hm, ha⟩ := ScaledAnger.realPhase_monotone hs0.le (ScaledAnger.critical h0 h1)
+  rcases le_total s (ScaledAnger.saddle lam) with h | h
   · exact ha ⟨hs, h⟩ ⟨hs0.le, le_rfl⟩ h
   · exact hm (mem_Ici.2 le_rfl) (mem_Ici.2 h) h
 
 /-- The phase gap away from the saddle. -/
-theorem struveSc_phiR_gap {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs : 0 ≤ s)
-    (hout : s ∉ Icc (struveSc_s0 lam - struveSc_Q0 lam / 2)
-        (struveSc_s0 lam + struveSc_Q0 lam / 2)) :
-    struveSc_phiR lam (struveSc_s0 lam) + struveSc_Q0 lam * (struveSc_Q0 lam / 2) ^ 2 / 2 ≤
-      struveSc_phiR lam s := by
-  set s₀ := struveSc_s0 lam with hs₀
-  set Q0 := struveSc_Q0 lam with hQ0
-  have hs0 := struveSc_s0_pos h0 h1
-  have hQ := struveSc_Q0_pos h0 h1
-  have hQs := struveSc_Q0_lt h0 h1
-  obtain ⟨hm, ha⟩ := struveSc_phiR_mono hs0.le (struveSc_crit h0 h1)
-  have key : ∀ t : ℝ, |t| = Q0 / 2 → struveSc_phiR lam s₀ + Q0 * (Q0 / 2) ^ 2 / 2 ≤
-      struveSc_phiR lam (s₀ + t) := by
+theorem ScaledAnger.realPhase_gap {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs : 0 ≤ s)
+    (hout : s ∉ Icc (ScaledAnger.saddle lam - ScaledAnger.halfSecondDeriv lam / 2)
+        (ScaledAnger.saddle lam + ScaledAnger.halfSecondDeriv lam / 2)) :
+    ScaledAnger.realPhase lam (ScaledAnger.saddle lam) + ScaledAnger.halfSecondDeriv lam *
+        (ScaledAnger.halfSecondDeriv lam / 2) ^ 2 / 2 ≤
+      ScaledAnger.realPhase lam s := by
+  set s₀ := ScaledAnger.saddle lam with hs₀
+  set Q0 := ScaledAnger.halfSecondDeriv lam with hQ0
+  have hs0 := ScaledAnger.saddle_pos h0 h1
+  have hQ := ScaledAnger.halfSecondDeriv_pos h0 h1
+  have hQs := ScaledAnger.halfSecondDeriv_lt h0 h1
+  obtain ⟨hm, ha⟩ := ScaledAnger.realPhase_monotone hs0.le (ScaledAnger.critical h0 h1)
+  have key : ∀ t : ℝ, |t| = Q0 / 2 → ScaledAnger.realPhase lam s₀ + Q0 * (Q0 / 2) ^ 2 / 2 ≤
+      ScaledAnger.realPhase lam (s₀ + t) := by
     intro t ht
-    have h := struveSc_D_taylor h0 h1 t
+    have h := ScaledAnger.D_taylor h0 h1 t
     rw [← hs₀, ← hQ0, ht] at h
     have ht2 : t ^ 2 = (Q0 / 2) ^ 2 := by rw [← sq_abs, ht]
     rw [ht2] at h
@@ -674,16 +698,16 @@ theorem struveSc_phiR_gap {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (h
     linarith
 
 /-- An integrable majorant for `e^{-(φ - φ₀)} (1+s²)^{-1/2}`. -/
-theorem struveSc_W_le {lam : ℝ} {s : ℝ} (hs : 0 ≤ s) (c : ℝ) :
-    Real.exp (-(struveSc_phiR lam s - c)) * (Real.sqrt (1 + s ^ 2))⁻¹ ≤
+theorem ScaledAnger.W_le {lam : ℝ} {s : ℝ} (hs : 0 ≤ s) (c : ℝ) :
+    Real.exp (-(ScaledAnger.realPhase lam s - c)) * (Real.sqrt (1 + s ^ 2))⁻¹ ≤
       Real.exp c * (Real.exp (-(lam * s)) * (1 + 2 * s)) := by
-  have hS := struveSc_sqrt_pos s
-  have h1 := struveSc_one_le_sqrt s
+  have hS := ScaledAnger.sqrt_pos s
+  have h1 := ScaledAnger.one_le_sqrt s
   have hS1 : Real.sqrt (1 + s ^ 2) ≤ 1 + s := by
     rw [Real.sqrt_le_left (by linarith)]; nlinarith
-  have he : Real.exp (-(struveSc_phiR lam s - c)) =
+  have he : Real.exp (-(ScaledAnger.realPhase lam s - c)) =
       Real.exp c * (Real.exp (-(lam * s)) * (s + Real.sqrt (1 + s ^ 2))) := by
-    rw [struveSc_phiR, ← Real.exp_arsinh, ← Real.exp_add, ← Real.exp_add]; congr 1; ring
+    rw [ScaledAnger.realPhase, ← Real.exp_arsinh, ← Real.exp_add, ← Real.exp_add]; congr 1; ring
   have hk : (s + Real.sqrt (1 + s ^ 2)) * (Real.sqrt (1 + s ^ 2))⁻¹ ≤ 1 + 2 * s := by
     calc (s + Real.sqrt (1 + s ^ 2)) * (Real.sqrt (1 + s ^ 2))⁻¹ ≤
           (s + Real.sqrt (1 + s ^ 2)) * 1 := by
@@ -697,43 +721,45 @@ theorem struveSc_W_le {lam : ℝ} {s : ℝ} (hs : 0 ≤ s) (c : ℝ) :
 
 /-- The kernel `(fun s : ℝ => Real.exp c * (Real.exp (-(lam * s)) * (1 + 2 * s)))` is integrable
 on `(Ioi 0)`. -/
-theorem struveSc_integrableOn_maj {lam : ℝ} (h0 : 0 < lam) (c : ℝ) :
+theorem ScaledAnger.integrableOn_majorant {lam : ℝ} (h0 : 0 < lam) (c : ℝ) :
     IntegrableOn (fun s : ℝ => Real.exp c * (Real.exp (-(lam * s)) * (1 + 2 * s))) (Ioi 0) := by
-  obtain ⟨i0, -⟩ := struveSc_integral_pow_exp 0 h0
-  obtain ⟨i1, -⟩ := struveSc_integral_pow_exp 1 h0
+  obtain ⟨i0, -⟩ := ScaledAnger.integral_pow_exp 0 h0
+  obtain ⟨i1, -⟩ := ScaledAnger.integral_pow_exp 1 h0
   refine IntegrableOn.congr_fun ((i0.add (i1.const_mul 2)).const_mul (Real.exp c))
     (fun s _ => ?_) measurableSet_Ioi
   simp only [Pi.add_apply, pow_zero, pow_one]; ring
 
-/-- The function `(struveSc_phiR lam)` is continuous. -/
-theorem struveSc_continuous_phiR (lam : ℝ) : Continuous (struveSc_phiR lam) :=
+/-- The function `(ScaledAnger.realPhase lam)` is continuous. -/
+theorem ScaledAnger.continuous_realPhase (lam : ℝ) : Continuous (ScaledAnger.realPhase lam) :=
   (continuous_const.mul continuous_id).sub Real.continuous_arsinh
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.exp (-y) ≤ 1 / y`. -/
-theorem struveSc_exp_neg_le_recip {y : ℝ} (hy : 0 < y) : Real.exp (-y) ≤ 1 / y := by
+theorem ScaledAnger.exp_neg_le_recip {y : ℝ} (hy : 0 < y) : Real.exp (-y) ≤ 1 / y := by
   rw [Real.exp_neg, inv_eq_one_div]
   exact one_div_le_one_div_of_le hy (by linarith [Real.add_one_le_exp y])
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.sin δ ≤ Real.cos θ`. -/
-theorem struveSc_cos_ge {δ θ : ℝ} (hδ : 0 ≤ δ) (hδπ : δ < π / 2) (hθ : |θ| ≤ π / 2 - δ) :
+theorem ScaledAnger.cos_ge {δ θ : ℝ} (hδ : 0 ≤ δ) (hδπ : δ < π / 2) (hθ : |θ| ≤ π / 2 - δ) :
     Real.sin δ ≤ Real.cos θ := by
   rw [← Real.cos_abs, ← Real.cos_pi_div_two_sub]
   exact Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg θ) (by linarith [Real.pi_pos]) hθ
 
 /-- **The main Laplace estimate** behind DLMF 11.11.15, uniform in `ph ν`. -/
-theorem struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (hδ : 0 < δ)
+theorem ScaledAnger.inner_estimate {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (hδ : 0 < δ)
     (hδπ : δ < π / 2) : ∃ C n₀ : ℝ, 0 < n₀ ∧ ∀ n θ : ℝ, n₀ ≤ n → |θ| ≤ π / 2 - δ →
       ‖(Real.sqrt n : ℂ) * (∫ s in Ioi (0 : ℝ), exp (-((n : ℂ) * exp ((θ : ℂ) * I) *
-          ((struveSc_phiR lam s - struveSc_phiR lam (struveSc_s0 lam) : ℝ) : ℂ))) *
+          ((ScaledAnger.realPhase lam s -
+              ScaledAnger.realPhase lam (ScaledAnger.saddle lam) : ℝ) : ℂ))) *
           (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ)) -
-        (lam : ℂ) * ((π : ℂ) / (exp ((θ : ℂ) * I) * (struveSc_Q0 lam : ℂ))) ^ (1 / 2 : ℂ)‖ ≤
+        (lam : ℂ) * ((π : ℂ) / (exp ((θ : ℂ) * I) * (ScaledAnger.halfSecondDeriv lam : ℂ)))
+            ^ (1 / 2 : ℂ)‖ ≤
         C / Real.sqrt n := by
-  set s₀ := struveSc_s0 lam with hs₀
-  set φ₀ := struveSc_phiR lam s₀ with hφ₀
-  set Q0 := struveSc_Q0 lam with hQ0
-  have hs0 := struveSc_s0_pos h0 h1
-  have hQ := struveSc_Q0_pos h0 h1
-  have hQs := struveSc_Q0_lt h0 h1
+  set s₀ := ScaledAnger.saddle lam with hs₀
+  set φ₀ := ScaledAnger.realPhase lam s₀ with hφ₀
+  set Q0 := ScaledAnger.halfSecondDeriv lam with hQ0
+  have hs0 := ScaledAnger.saddle_pos h0 h1
+  have hQ := ScaledAnger.halfSecondDeriv_pos h0 h1
+  have hQs := ScaledAnger.halfSecondDeriv_lt h0 h1
   set δ' := Q0 / 2 with hδ'
   have hδ'0 : 0 < δ' := by positivity
   set η := Q0 * δ' ^ 2 / 2 with hη
@@ -742,14 +768,14 @@ theorem struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} 
   set c := Real.sin δ * Q0 / 2 with hc
   have hc0 : 0 < c := by positivity
   set maj : ℝ → ℝ := fun s => Real.exp φ₀ * (Real.exp (-(lam * s)) * (1 + 2 * s)) with hmaj
-  have hmi : IntegrableOn maj (Ioi 0) := struveSc_integrableOn_maj h0 φ₀
+  have hmi : IntegrableOn maj (Ioi 0) := ScaledAnger.integrableOn_majorant h0 φ₀
   set T0 := ∫ s in Ioi (0 : ℝ), maj s with hT0
   have hmaj0 : ∀ s : ℝ, 0 ≤ s → 0 ≤ maj s := fun s hs => by simp only [hmaj]; positivity
   have hT00 : 0 ≤ T0 := setIntegral_nonneg measurableSet_Ioi fun s hs => hmaj0 s (le_of_lt hs)
   refine ⟨((1 + 1 / δ') / c + 1 * 1 / c ^ 2) + 2 * T0 / (Real.sin δ * η), 2 / Real.sin δ,
     by positivity, fun n θ hn hθ => ?_⟩
   have hn0 : 0 < n := lt_of_lt_of_le (by positivity) hn
-  have hcos := struveSc_cos_ge hδ.le hδπ hθ
+  have hcos := ScaledAnger.cos_ge hδ.le hδπ hθ
   set x := n * Real.cos θ with hx
   have hx2 : 2 ≤ x := by
     have : 2 ≤ n * Real.sin δ := by rwa [div_le_iff₀ hsδ] at hn
@@ -761,48 +787,48 @@ theorem struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} 
     rw [hν, neg_re, show (n : ℂ) * exp ((θ : ℂ) * I) * (d : ℂ) = ((n * d : ℝ) : ℂ) *
       exp ((θ : ℂ) * I) by push_cast; ring, re_ofReal_mul, exp_ofReal_mul_I_re, hx]
     ring
-  set f : ℝ → ℂ := fun s => exp (-(ν * ((struveSc_phiR lam s - φ₀ : ℝ) : ℂ))) *
+  set f : ℝ → ℂ := fun s => exp (-(ν * ((ScaledAnger.realPhase lam s - φ₀ : ℝ) : ℂ))) *
     (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) with hf
-  have hfn : ∀ s : ℝ, ‖f s‖ = Real.exp (-(x * (struveSc_phiR lam s - φ₀))) *
+  have hfn : ∀ s : ℝ, ‖f s‖ = Real.exp (-(x * (ScaledAnger.realPhase lam s - φ₀))) *
       (Real.sqrt (1 + s ^ 2))⁻¹ := by
     intro s
     rw [hf, norm_mul, norm_exp, hνre, norm_real, Real.norm_of_nonneg
-      (inv_nonneg.2 (struveSc_sqrt_pos s).le)]
+      (inv_nonneg.2 (ScaledAnger.sqrt_pos s).le)]
   have hSc : Continuous fun s : ℝ => (Real.sqrt (1 + s ^ 2))⁻¹ :=
     ((Real.continuous_sqrt.comp (by fun_prop : Continuous fun s : ℝ => 1 + s ^ 2)).inv₀
-      fun s => (struveSc_sqrt_pos s).ne')
+      fun s => (ScaledAnger.sqrt_pos s).ne')
   have hfc : Continuous f := by
-    have := struveSc_continuous_phiR lam
+    have := ScaledAnger.continuous_realPhase lam
     simp only [hf]
     exact (continuous_exp.comp ((continuous_const.mul (continuous_ofReal.comp
       (this.sub continuous_const))).neg)).mul (continuous_ofReal.comp hSc)
   -- global bound
   have hb1 : ∀ s : ℝ, 0 ≤ s → ‖f s‖ ≤ maj s := by
     intro s hs
-    have hd := struveSc_phiR_ge h0 h1 hs
+    have hd := ScaledAnger.realPhase_ge h0 h1 hs
     rw [hfn]
-    refine le_trans ?_ (struveSc_W_le hs φ₀)
+    refine le_trans ?_ (ScaledAnger.W_le hs φ₀)
     gcongr
     nlinarith
   -- tail bound
   have hb2 : ∀ s : ℝ, 0 ≤ s → s ∉ Icc (s₀ - δ') (s₀ + δ') →
       ‖f s‖ ≤ Real.exp (-((x - 1) * η)) * maj s := by
     intro s hs hout
-    have hd := struveSc_phiR_gap h0 h1 hs hout
+    have hd := ScaledAnger.realPhase_gap h0 h1 hs hout
     rw [← hs₀, ← hQ0, ← hφ₀] at hd
-    have hd' : η ≤ struveSc_phiR lam s - φ₀ := by rw [hη, hδ']; linarith
+    have hd' : η ≤ ScaledAnger.realPhase lam s - φ₀ := by rw [hη, hδ']; linarith
     rw [hfn]
-    have : Real.exp (-(x * (struveSc_phiR lam s - φ₀))) ≤
-        Real.exp (-((x - 1) * η)) * Real.exp (-(struveSc_phiR lam s - φ₀)) := by
+    have : Real.exp (-(x * (ScaledAnger.realPhase lam s - φ₀))) ≤
+        Real.exp (-((x - 1) * η)) * Real.exp (-(ScaledAnger.realPhase lam s - φ₀)) := by
       rw [← Real.exp_add]; gcongr
       nlinarith [mul_nonneg (show (0 : ℝ) ≤ x - 1 by linarith) (sub_nonneg.2 hd')]
-    calc Real.exp (-(x * (struveSc_phiR lam s - φ₀))) * (Real.sqrt (1 + s ^ 2))⁻¹
-        ≤ Real.exp (-((x - 1) * η)) * Real.exp (-(struveSc_phiR lam s - φ₀)) *
+    calc Real.exp (-(x * (ScaledAnger.realPhase lam s - φ₀))) * (Real.sqrt (1 + s ^ 2))⁻¹
+        ≤ Real.exp (-((x - 1) * η)) * Real.exp (-(ScaledAnger.realPhase lam s - φ₀)) *
           (Real.sqrt (1 + s ^ 2))⁻¹ := by
           gcongr
-      _ = Real.exp (-((x - 1) * η)) * (Real.exp (-(struveSc_phiR lam s - φ₀)) *
+      _ = Real.exp (-((x - 1) * η)) * (Real.exp (-(ScaledAnger.realPhase lam s - φ₀)) *
           (Real.sqrt (1 + s ^ 2))⁻¹) := by ring
-      _ ≤ _ := by gcongr; exact struveSc_W_le hs φ₀
+      _ ≤ _ := by gcongr; exact ScaledAnger.W_le hs φ₀
   have hfi : IntegrableOn f (Ioi 0) :=
     Integrable.mono' hmi hfc.aestronglyMeasurable ((ae_restrict_iff' measurableSet_Ioi).mpr
       (Eventually.of_forall fun s hs => hb1 s (le_of_lt hs)))
@@ -815,7 +841,7 @@ theorem struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} 
   rw [hinter] at hsplit
   -- core via the Laplace estimate
   set A : ℝ → ℂ := fun t => (((Real.sqrt (1 + (s₀ + t) ^ 2))⁻¹ : ℝ) : ℂ) with hA
-  set q : ℝ → ℂ := fun t => exp ((θ : ℂ) * I) * ((struveSc_Qf lam t : ℝ) : ℂ) with hq
+  set q : ℝ → ℂ := fun t => exp ((θ : ℂ) * I) * ((ScaledAnger.quadraticCoeff lam t : ℝ) : ℂ) with hq
   have hcore : ∫ s in Icc (s₀ - δ') (s₀ + δ'), f s =
       ∫ t in Icc (-δ') δ', A t * exp (-(n : ℂ) * (t : ℂ) ^ 2 * q t) := by
     have hpre := (measurePreserving_add_right volume s₀).setIntegral_preimage_emb
@@ -824,7 +850,7 @@ theorem struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} 
       show s₀ + δ' - s₀ = δ' by ring] at hpre
     rw [← hpre]
     refine setIntegral_congr_fun measurableSet_Icc fun t _ => ?_
-    have hD := struveSc_D_eq (lam := lam) t
+    have hD := ScaledAnger.D_eq (lam := lam) t
     rw [← hs₀, ← hφ₀] at hD
     simp only [hf, hA, hq]
     rw [add_comm t s₀, hD, mul_comm]
@@ -832,50 +858,50 @@ theorem struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} 
     rw [hν]; push_cast; ring
   have hAc : Measurable A := by
     simp only [hA]; fun_prop
-  have hQm : Measurable (struveSc_Qf lam) := by
-    have hDc : Continuous fun t : ℝ => struveSc_phiR lam (struveSc_s0 lam + t) -
-        struveSc_phiR lam (struveSc_s0 lam) :=
-      ((struveSc_continuous_phiR lam).comp (continuous_const.add continuous_id)).sub
+  have hQm : Measurable (ScaledAnger.quadraticCoeff lam) := by
+    have hDc : Continuous fun t : ℝ => ScaledAnger.realPhase lam (ScaledAnger.saddle lam + t) -
+        ScaledAnger.realPhase lam (ScaledAnger.saddle lam) :=
+      ((ScaledAnger.continuous_realPhase lam).comp (continuous_const.add continuous_id)).sub
         continuous_const
-    unfold struveSc_Qf
+    unfold ScaledAnger.quadraticCoeff
     exact Measurable.ite measurableSet_eq measurable_const
       (hDc.measurable.div (continuous_pow 2).measurable)
   have hqc : Measurable q := by
     simp only [hq]
     exact measurable_const.mul (Complex.measurable_ofReal.comp hQm)
-  have hQ0f : struveSc_Qf lam 0 = Q0 := by simp [struveSc_Qf, hQ0]
+  have hQ0f : ScaledAnger.quadraticCoeff lam 0 = Q0 := by simp [ScaledAnger.quadraticCoeff, hQ0]
   have hqre : ∀ t ∈ Icc (-δ') δ', c ≤ (q t).re := by
     intro t ht
-    have hl := struveSc_Qf_lip h0 h1 t
+    have hl := ScaledAnger.quadraticCoeff_lipschitz h0 h1 t
     rw [← hQ0] at hl
     have hta : |t| ≤ δ' := abs_le.2 ⟨ht.1, ht.2⟩
-    have hQt : Q0 / 2 ≤ struveSc_Qf lam t := by
+    have hQt : Q0 / 2 ≤ ScaledAnger.quadraticCoeff lam t := by
       have := (abs_le.1 hl).1; linarith
     simp only [hq]
     rw [mul_comm, re_ofReal_mul, exp_ofReal_mul_I_re, hc]
     calc Real.sin δ * Q0 / 2 = Real.sin δ * (Q0 / 2) := by ring
-      _ ≤ Real.cos θ * struveSc_Qf lam t := by
+      _ ≤ Real.cos θ * ScaledAnger.quadraticCoeff lam t := by
         have : 0 ≤ Real.cos θ := by linarith
         gcongr
-      _ = struveSc_Qf lam t * Real.cos θ := by ring
+      _ = ScaledAnger.quadraticCoeff lam t * Real.cos θ := by ring
   have hA0 : ‖A 0‖ ≤ 1 := by
     simp only [hA, add_zero]
-    rw [← struveSc_crit h0 h1, norm_real, Real.norm_of_nonneg h0.le]; exact h1.le
+    rw [← ScaledAnger.critical h0 h1, norm_real, Real.norm_of_nonneg h0.le]; exact h1.le
   have hAl : ∀ t ∈ Icc (-δ') δ', ‖A t - A 0‖ ≤ 1 * |t| := by
     intro t _
     simp only [hA, add_zero]
-    rw [← struveSc_crit h0 h1, ← ofReal_sub, norm_real, Real.norm_eq_abs, one_mul]
-    exact struveSc_amp_lip h0 h1 t
+    rw [← ScaledAnger.critical h0 h1, ← ofReal_sub, norm_real, Real.norm_eq_abs, one_mul]
+    exact ScaledAnger.amplitude_lipschitz h0 h1 t
   have hql : ∀ t ∈ Icc (-δ') δ', ‖q t - q 0‖ ≤ 1 * |t| := by
     intro t _
     simp only [hq]
     rw [← mul_sub, norm_mul, norm_exp_ofReal_mul_I, one_mul, one_mul, ← ofReal_sub, norm_real,
       Real.norm_eq_abs, hQ0f]
-    exact struveSc_Qf_lip h0 h1 t
+    exact ScaledAnger.quadraticCoeff_lipschitz h0 h1 t
   have hlap := Complex.norm_sqrt_mul_integral_laplace_Icc_sub_le hc0 hδ'0 hn0 hAc hqc hqre hA0
     hAl hql
   have hA0' : A 0 = (lam : ℂ) := by
-    simp only [hA, add_zero]; rw [← struveSc_crit h0 h1]
+    simp only [hA, add_zero]; rw [← ScaledAnger.critical h0 h1]
   have hq0' : q 0 = exp ((θ : ℂ) * I) * (Q0 : ℂ) := by simp only [hq]; rw [hQ0f]
   rw [hA0', hq0', ← hcore] at hlap
   -- tail
@@ -896,7 +922,7 @@ theorem struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} 
   have hsq : 0 < Real.sqrt n := Real.sqrt_pos.2 hn0
   have htail' : Real.sqrt n * ‖Tl‖ ≤ 2 * T0 / (Real.sin δ * η) / Real.sqrt n := by
     have hy : 0 < (x - 1) * η := mul_pos (by linarith) hη0
-    have he := struveSc_exp_neg_le_recip hy
+    have he := ScaledAnger.exp_neg_le_recip hy
     have hxs : n * Real.sin δ ≤ x := by rw [hx]; gcongr
     have hx1 : x ≤ 2 * (x - 1) := by linarith
     have hsn : Real.sqrt n * Real.sqrt n = n := Real.mul_self_sqrt hn0.le

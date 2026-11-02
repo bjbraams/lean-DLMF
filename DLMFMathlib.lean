@@ -36,6 +36,7 @@ public import DLMFMathlib.Analysis.Complex.MellinBarnesSeries
 public import DLMFMathlib.Analysis.Complex.ParameterContinuity
 public import DLMFMathlib.Analysis.Complex.RoucheFilledHull
 public import DLMFMathlib.Analysis.Complex.LaurentAnnulus
+public import DLMFMathlib.Analysis.Complex.VerticalLineShift
 public import DLMFMathlib.Analysis.Complex.ParameterLimits
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
@@ -53,10 +54,11 @@ public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
 public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
+public import DLMFMathlib.Analysis.Fourier.DirichletJordan
 public import DLMFMathlib.Analysis.Fourier.GaussianSeries
 public import DLMFMathlib.Analysis.Fourier.L1Inversion
 public import DLMFMathlib.Analysis.Fourier.L2Compatibility
-public import DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic
+public import DLMFMathlib.Analysis.Fourier.EntirePeriodic
 public import DLMFMathlib.Analysis.Fourier.Pairing
 public import DLMFMathlib.Analysis.InnerProductSpace.CauchySchwarz
 public import DLMFMathlib.Analysis.Integral.Frullani
@@ -93,6 +95,7 @@ public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.OneSubCosInteg
 public import DLMFMathlib.Analysis.SpecificLimits.Oscillation
 public import DLMFMathlib.Analysis.SpecificLimits.PowMulPowChoose
 public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
+public import DLMFMathlib.MeasureTheory.Function.JacobianSqrt
 public import DLMFMathlib.MeasureTheory.Function.L2Space
 public import DLMFMathlib.MeasureTheory.Integral.HalfLine
 public import DLMFMathlib.MeasureTheory.Integral.PathParametric
@@ -113,7 +116,9 @@ public import DLMFMathlib.Algebra.Polynomial.OfReal
 public import DLMFMathlib.Analysis.Analytic.OfScalarsDeriv
 public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
 public import DLMFMathlib.Analysis.Calculus.Deriv.CompCurve
+public import DLMFMathlib.Analysis.Calculus.Deriv.InjOn
 public import DLMFMathlib.Analysis.Calculus.Deriv.Sign
+public import DLMFMathlib.Analysis.Complex.IdentityTheoremStrip
 public import DLMFMathlib.Analysis.Complex.NonInteger
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
 public import DLMFMathlib.Analysis.ODE.SturmLiouville
@@ -189,7 +194,7 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.ODE.EntireLinear`, `LinearGlobal`, `ParamHolomorphic`: entire
   solutions of linear second-order ODEs with entire coefficients, global solutions on ℝ for
   continuous coefficients, and holomorphic dependence on a linear parameter.
-* `DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic`: an entire 2π-periodic function is the sum of
+* `DLMFMathlib.Analysis.Fourier.EntirePeriodic`: an entire 2π-periodic function is the sum of
   its Fourier series on all of ℂ; cosine and sine series and Parseval for even and odd functions.
 * `DLMFMathlib.Analysis.ODE.SturmSpectrum`, `SturmGrowth`, `SturmOscillation`: spectra of real
   Sturm–Liouville problems through entire boundary functions, energy estimates, and infinitely
@@ -238,6 +243,8 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
   compact set.
 * `DLMFMathlib.Analysis.Complex.LaurentAnnulus`: the Cauchy formula on an annulus and the
   expansion of the inner integral (Laurent's theorem).
+* `DLMFMathlib.Analysis.Complex.VerticalLineShift`: shifting a vertical-line integral across
+  finitely many isolated singularities, the difference being a sum of small circle integrals.
 * `DLMFMathlib.Analysis.Analytic.OfScalarsDeriv`: derivatives of scalar power series and ODEs
   from coefficient recurrences.
 * `DLMFMathlib.Analysis.Complex.ParameterContinuity`: continuity and analyticity in parameters of
@@ -256,8 +263,16 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
   the free oscillator.
 * `DLMFMathlib.Analysis.Fourier.DirichletKernel`: Dirichlet's pointwise theorem for the sine
   kernel `sin(η(t-u))/(π(t-u))`.
+* `DLMFMathlib.Analysis.Fourier.DirichletJordan`: the Dirichlet–Jordan theorem for the Fourier
+  integral of a function of bounded variation.
 * `DLMFMathlib.Analysis.Calculus.Deriv.CompCurve`: derivatives of compositions with curves and
   of functions of three complex variables along a curve.
 * `DLMFMathlib.MeasureTheory.Integral.PathParametric`: differentiation under interval integrals
   along parametrized paths and swapping iterated integrals over `[0, 1]²`.
+* `DLMFMathlib.Analysis.Calculus.Deriv.InjOn`: injectivity of real functions with nonvanishing
+  derivative (Rolle) and images of open intervals under continuous strictly monotone functions.
+* `DLMFMathlib.MeasureTheory.Function.JacobianSqrt`: the change of variables
+  `∫_{f(s)} du/√Q(u) = 2 · vol(s)` when `|f'| = 2√(Q ∘ f)`.
+* `DLMFMathlib.Analysis.Complex.IdentityTheoremStrip`: the identity theorem on the strip
+  `0 < Re z < 1` from agreement on `(0, 1)`.
 -/

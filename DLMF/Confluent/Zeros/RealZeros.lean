@@ -19,7 +19,7 @@ zeros.
 ## Main definitions
 
 * `kummerMPosZeros`, `kummerUPosZeros`: the positive real zeros of `M(a,b,·)` and `U(a,b,·)`.
-* `KumZQ`: sign-pattern data for counting positive zeros.
+* `HasSignedZeroPattern`: sign-pattern data for counting positive zeros.
 
 ## Main results
 
@@ -133,13 +133,13 @@ theorem kummerM_ofReal_hasSum {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (
 
 The counts are proved by induction along `(a,b) ↦ (a+1,b+1)` using `M' = (a/b) M(a+1,b+1,·)`
 and Kummer's equation, which at a zero `x` of `M(a+1,b+1,·)` gives
-`M(a,b,x) = (x/b) M'(a+1,b+1,x)`. The invariant `KumZQ` records the zeros together with the
-sign pattern between them and the eventual growth. -/
+`M(a,b,x) = (x/b) M'(a+1,b+1,x)`. The invariant `HasSignedZeroPattern` records the zeros together
+with the sign pattern between them and the eventual growth. -/
 
 /-- Sign-pattern data for counting positive zeros: `f` has exactly `m` positive zeros
 `y 1 < ⋯ < y m`, at which `(-1)^j f'` is positive, with `(-1)^j f > 0` between consecutive zeros,
 `(-1)^m f > 0` beyond the last one, and eventually `(-1)^m f ≥ 1`. -/
-def KumZQ (f f' : ℝ → ℝ) (m : ℕ) : Prop :=
+def HasSignedZeroPattern (f f' : ℝ → ℝ) (m : ℕ) : Prop :=
   ∃ y : ℕ → ℝ, y 0 = 0 ∧ (∀ j < m, y j < y (j + 1)) ∧
     (∀ j, 1 ≤ j → j ≤ m → f (y j) = 0 ∧ 0 < (-1) ^ j * f' (y j)) ∧
     (∀ j < m, ∀ x ∈ Ioo (y j) (y (j + 1)), 0 < (-1) ^ j * f x) ∧
@@ -147,15 +147,17 @@ def KumZQ (f f' : ℝ → ℝ) (m : ℕ) : Prop :=
     (∃ X, ∀ x, X ≤ x → 1 ≤ (-1) ^ m * f x)
 
 /-- The base case: a function bounded below by `1` on `[0, ∞)` has no positive zeros. -/
-theorem kumZ_Q_zero {f f' : ℝ → ℝ} (h1 : ∀ x, 0 ≤ x → 1 ≤ f x) : KumZQ f f' 0 := by
+theorem KummerZeros.signedZeroPattern_zero {f f' : ℝ → ℝ} (h1 : ∀ x, 0 ≤ x → 1 ≤ f x) :
+    HasSignedZeroPattern f f' 0 := by
   refine ⟨fun j => j, by simp, fun j hj => absurd hj (Nat.not_lt_zero _),
     fun j hj1 hj => by omega, fun j hj => absurd hj (Nat.not_lt_zero _), fun x hx => ?_,
     ⟨0, fun x hx => by simpa using h1 x hx⟩⟩
   have := h1 x (by simp at hx; linarith)
   simp only [pow_zero, one_mul]; linarith
 
-/-- Under `KumZQ`, the positive zeros are exactly `y 1, …, y m`. -/
-theorem kumZ_Q_encard {f f' : ℝ → ℝ} {m : ℕ} (hQ : KumZQ f f' m) :
+/-- Under `HasSignedZeroPattern`, the positive zeros are exactly `y 1, …, y m`. -/
+theorem KummerZeros.signedZeroPattern_encard {f f' : ℝ → ℝ} {m : ℕ}
+    (hQ : HasSignedZeroPattern f f' m) :
     {x : ℝ | 0 < x ∧ f x = 0}.encard = m := by
   obtain ⟨y, hy0, hymono, hyz, hysign, hylast, -⟩ := hQ
   have hmono : StrictMonoOn y (Iic m) := strictMonoOn_Iic_of_lt_succ fun j hj => hymono j hj
@@ -200,7 +202,7 @@ theorem kumZ_Q_encard {f f' : ℝ → ℝ} {m : ℕ} (hQ : KumZQ f f' m) :
 
 /-- A strictly increasing continuous function on an order-connected set, negative at its least
 point and positive somewhere, has exactly one zero there, with the expected signs. -/
-theorem kumZ_unique_zero {h : ℝ → ℝ} {S : Set ℝ} {p : ℝ} (hS : S.OrdConnected) (hp : p ∈ S)
+theorem KummerZeros.unique_zero {h : ℝ → ℝ} {S : Set ℝ} {p : ℝ} (hS : S.OrdConnected) (hp : p ∈ S)
     (hc : ContinuousOn h S) (hm : StrictMonoOn h S) (hhp : h p < 0)
     (ht : ∃ t ∈ S, 0 < h t) :
     ∃ z ∈ S, p < z ∧ h z = 0 ∧ (∀ x ∈ S, x < z → h x < 0) ∧ (∀ x ∈ S, z < x → 0 < h x) := by
@@ -220,10 +222,10 @@ theorem kumZ_unique_zero {h : ℝ → ℝ} {S : Set ℝ} {p : ℝ} (hS : S.OrdCo
 /-- The inductive step of the zero count: if `f' = (a/b) g` with `a < 0 < b`, `f 0 = 1`, and at
 the positive zeros of `g` the value `f = (x/b) g'` (from the differential equation), then the
 sign-pattern data for `g` with `k` zeros yields the data for `f` with `k + 1` zeros. -/
-theorem kumZ_step {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : a / b < 0) (hb : k = 0 ∨ 0 < b)
+theorem KummerZeros.step {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : a / b < 0) (hb : k = 0 ∨ 0 < b)
     (hf0 : f 0 = 1) (hfd : ∀ x, HasDerivAt f (a / b * g x) x)
     (hode : ∀ x, 0 < x → g x = 0 → f x = x / b * g' x)
-    (hQ : KumZQ g g' k) : KumZQ f (fun x => a / b * g x) (k + 1) := by
+    (hQ : HasSignedZeroPattern g g' k) : HasSignedZeroPattern f (fun x => a / b * g x) (k + 1) := by
   obtain ⟨y, hy0, hymono, hyz, hysign, hylast, X, hX⟩ := hQ
   set c : ℝ := -(a / b) with hcdef
   have hc : 0 < c := by rw [hcdef]; exact neg_pos.mpr hab
@@ -290,7 +292,7 @@ theorem kumZ_step {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : a / b < 0)
           rw [interior_Icc] at hx
           rw [(hdh j x).deriv]
           exact mul_pos hc (hysign j hlt x hx)
-      obtain ⟨z, hzS, hyz', hz0, hlo, hhi⟩ := kumZ_unique_zero (S := Icc (y j) (y (j + 1)))
+      obtain ⟨z, hzS, hyz', hz0, hlo, hhi⟩ := KummerZeros.unique_zero (S := Icc (y j) (y (j + 1)))
         ordConnected_Icc (left_mem_Icc.mpr (hymono j hlt).le) (by fun_prop) hm
         (hneg_at j hjk) ⟨y (j + 1), right_mem_Icc.mpr (hymono j hlt).le, hfy (j + 1) hlt⟩
       have hfz : f z = 0 := (mul_eq_zero.mp hz0).resolve_left hne
@@ -316,7 +318,7 @@ theorem kumZ_step {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : a / b < 0)
         have : 0 ≤ |hk X1| / c + 1 / c := by positivity
         have : y j ≤ X1 := le_max_right _ _
         linarith
-      obtain ⟨z, hzS, hyz', hz0, hlo, hhi⟩ := kumZ_unique_zero (S := Ici (y j))
+      obtain ⟨z, hzS, hyz', hz0, hlo, hhi⟩ := KummerZeros.unique_zero (S := Ici (y j))
         ordConnected_Ici (mem_Ici.mpr le_rfl) (by fun_prop) hm (hneg_at j le_rfl)
         ⟨T, hTy, by have := hgrow T le_rfl; simp only [hhk] at this; linarith⟩
       have hfz : f z = 0 := (mul_eq_zero.mp hz0).resolve_left hne
@@ -363,7 +365,7 @@ theorem kumZ_step {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : a / b < 0)
   · exact ⟨_, fun x hx => hgrow x hx⟩
 
 /-- Linear growth: if `h' ≥ c > 0` beyond `X`, then eventually `h ≥ 1`. -/
-theorem kumZ_growth {h h' : ℝ → ℝ} (hd : ∀ x, HasDerivAt h (h' x) x) {c X : ℝ} (hc : 0 < c)
+theorem KummerZeros.growth {h h' : ℝ → ℝ} (hd : ∀ x, HasDerivAt h (h' x) x) {c X : ℝ} (hc : 0 < c)
     (hX : ∀ x, X ≤ x → c ≤ h' x) : ∃ T, ∀ x, T ≤ x → 1 ≤ h x := by
   have hcont : Continuous h := continuous_iff_continuousAt.2 fun x => (hd x).continuousAt
   refine ⟨X + |h X| / c + 1 / c, fun x hx => ?_⟩
@@ -385,10 +387,10 @@ theorem kumZ_growth {h h' : ℝ → ℝ} (hd : ∀ x, HasDerivAt h (h' x) x) {c 
 
 /-- The step `k = 1 ↦ 0` for `a / b < 0` and `b < 0`: the critical point of `f` is a positive
 minimum. -/
-theorem kumZ_step_down {f g g' : ℝ → ℝ} {a b : ℝ} (hab : a / b < 0) (hb : b < 0)
+theorem KummerZeros.step_down {f g g' : ℝ → ℝ} {a b : ℝ} (hab : a / b < 0) (hb : b < 0)
     (hfd : ∀ x, HasDerivAt f (a / b * g x) x)
     (hode : ∀ x, 0 < x → g x = 0 → f x = x / b * g' x)
-    (hQ : KumZQ g g' 1) : KumZQ f (fun x => a / b * g x) 0 := by
+    (hQ : HasSignedZeroPattern g g' 1) : HasSignedZeroPattern f (fun x => a / b * g x) 0 := by
   obtain ⟨y, hy0, hymono, hyz, hysign, hylast, X, hX⟩ := hQ
   have hfc : Continuous f := continuous_iff_continuousAt.2 fun x => (hfd x).continuousAt
   have hy1 : 0 < y 1 := by have := hymono 0 (by norm_num); rwa [hy0] at this
@@ -421,17 +423,17 @@ theorem kumZ_step_down {f g g' : ℝ → ℝ} {a b : ℝ} (hab : a / b < 0) (hb 
       · exact hfy1.trans (hanti ⟨hx.le, h.le⟩ ⟨hy1.le, le_rfl⟩ h)
       · rw [h]; exact hfy1
     · exact hfy1.trans (hmono (mem_Ici.mpr le_rfl) (mem_Ici.mpr h.le) h)
-  · obtain ⟨T, hT⟩ := kumZ_growth hfd (c := -(a / b)) (X := X) (by linarith) fun x hx => by
+  · obtain ⟨T, hT⟩ := KummerZeros.growth hfd (c := -(a / b)) (X := X) (by linarith) fun x hx => by
       have := hX x hx
       simp only [pow_one, neg_one_mul] at this
       nlinarith
     exact ⟨T, fun x hx => by simpa using hT x hx⟩
 
 /-- The step `k ↦ k` for `a / b > 0` and `b < 0`. -/
-theorem kumZ_step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a / b) (hb : b < 0)
+theorem KummerZeros.step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a / b) (hb : b < 0)
     (hf0 : f 0 = 1) (hfd : ∀ x, HasDerivAt f (a / b * g x) x)
     (hode : ∀ x, 0 < x → g x = 0 → f x = x / b * g' x)
-    (hQ : KumZQ g g' k) : KumZQ f (fun x => a / b * g x) k := by
+    (hQ : HasSignedZeroPattern g g' k) : HasSignedZeroPattern f (fun x => a / b * g x) k := by
   obtain ⟨y, hy0, hymono, hyz, hysign, hylast, X, hX⟩ := hQ
   set c : ℝ := a / b with hcdef
   have hfc : Continuous f := continuous_iff_continuousAt.2 fun x => (hfd x).continuousAt
@@ -449,7 +451,7 @@ theorem kumZ_step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a
         have := hylast x (by rwa [hy0])
         simp only [pow_zero, one_mul] at this
         exact mul_pos hab this
-    refine kumZ_Q_zero fun x hx => ?_
+    refine KummerZeros.signedZeroPattern_zero fun x hx => ?_
     rcases hx.lt_or_eq with h | h
     · rw [← hf0]; exact (hmono (mem_Ici.mpr le_rfl) (mem_Ici.mpr hx) h).le
     · rw [← h, hf0]
@@ -499,7 +501,7 @@ theorem kumZ_step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a
       have hright : 0 < (-1 : ℝ) ^ j * f (y (j + 1)) := by
         have := hfy (j + 1) (by omega) hlt
         rw [pow_succ] at this; linarith
-      obtain ⟨z, hzS, hyz', hz0, hlo, hhi⟩ := kumZ_unique_zero (S := Icc (y j) (y (j + 1)))
+      obtain ⟨z, hzS, hyz', hz0, hlo, hhi⟩ := KummerZeros.unique_zero (S := Icc (y j) (y (j + 1)))
         ordConnected_Icc (left_mem_Icc.mpr (hymono j hlt).le) (by fun_prop) hm
         (hfy j hj1 hjk) ⟨y (j + 1), right_mem_Icc.mpr (hymono j hlt).le, hright⟩
       have hfz : f z = 0 := (mul_eq_zero.mp hz0).resolve_left hne
@@ -518,10 +520,10 @@ theorem kumZ_step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a
           rw [interior_Ici] at hx
           rw [(hdh j x).deriv]
           exact mul_pos hab (hylast x hx)
-      obtain ⟨T, hT⟩ := kumZ_growth (hdh j) (c := c) (X := X) hab fun x hx => by
+      obtain ⟨T, hT⟩ := KummerZeros.growth (hdh j) (c := c) (X := X) hab fun x hx => by
         have := hX x hx
         nlinarith
-      obtain ⟨z, hzS, hyz', hz0, hlo, hhi⟩ := kumZ_unique_zero (S := Ici (y j))
+      obtain ⟨z, hzS, hyz', hz0, hlo, hhi⟩ := KummerZeros.unique_zero (S := Ici (y j))
         ordConnected_Ici (mem_Ici.mpr le_rfl) (by fun_prop) hm (hfy j hj1 le_rfl)
         ⟨max T (y j), mem_Ici.mpr (le_max_right _ _),
           by have := hT (max T (y j)) (le_max_left _ _); linarith⟩
@@ -559,22 +561,22 @@ theorem kumZ_step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a
   · intro t ht
     simp only [hk.ne', ↓reduceIte] at ht
     exact (hw k hk le_rfl).2.2.2.2.2 t ht (fun h => absurd h (lt_irrefl _))
-  · exact kumZ_growth (hdh k) (c := c) (X := X) hab fun x hx => by
+  · exact KummerZeros.growth (hdh k) (c := c) (X := X) hab fun x hx => by
       have := hX x hx
       nlinarith
 
 /-- `x ↦ M(a,b,x)` on the real line, as a real function. -/
-noncomputable def kumZ_F (a b : ℝ) : ℝ → ℝ := fun x => (kummerM a b x).re
+noncomputable def KummerZeros.realM (a b : ℝ) : ℝ → ℝ := fun x => (kummerM a b x).re
 
 /-- Positive `b` is not a nonpositive integer. -/
-theorem kumZ_not_neg_nat {b : ℝ} (hb : 0 < b) : ∀ k : ℕ, (b : ℂ) ≠ -k := by
+theorem KummerZeros.not_neg_nat {b : ℝ} (hb : 0 < b) : ∀ k : ℕ, (b : ℂ) ≠ -k := by
   intro k hk
   have h := congrArg re hk
   simp only [ofReal_re, neg_re, natCast_re] at h
   linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
 /-- `b ∉ -ℕ` implies `b + 1 ∉ -ℕ`. -/
-theorem kumZ_succ_not_neg_nat {b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
+theorem KummerZeros.succ_not_neg_nat {b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
     ∀ k : ℕ, ((b + 1 : ℝ) : ℂ) ≠ -k := by
   intro k hk
   apply hb (k + 1)
@@ -582,29 +584,31 @@ theorem kumZ_succ_not_neg_nat {b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
   linear_combination hk
 
 /-- `M(a,b,x)` is real for real parameters and argument. -/
-theorem kumZ_F_real {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
-    kummerM a b x = (kumZ_F a b x : ℂ) :=
+theorem KummerZeros.realM_real {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
+    kummerM a b x = (KummerZeros.realM a b x : ℂ) :=
   (kummerM_ofReal_hasSum hb x).2
 
 /-- `M(a,b,0) = 1`. -/
-theorem kumZ_F_zero (a b : ℝ) : kumZ_F a b 0 = 1 := by simp [kumZ_F, kummerM_zero]
+theorem KummerZeros.realM_zero (a b : ℝ) : KummerZeros.realM a b 0 = 1 := by
+    simp [KummerZeros.realM, kummerM_zero]
 
 /-- `d/dx M(a,b,x) = (a/b) M(a+1,b+1,x)` on the real line. -/
-theorem kumZ_F_hasDerivAt {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
-    HasDerivAt (kumZ_F a b) (a / b * kumZ_F (a + 1) (b + 1) x) x := by
+theorem KummerZeros.realM_hasDerivAt {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
+    HasDerivAt (KummerZeros.realM a b) (a / b * KummerZeros.realM (a + 1) (b + 1) x) x := by
   have h := (hasDerivAt_kummerM_shift (a := (a : ℂ)) hb (x : ℂ)).real_of_complex
   refine h.congr_deriv ?_
   rw [show ((a : ℂ) / b) = ((a / b : ℝ) : ℂ) by push_cast; ring, re_ofReal_mul]
-  simp [kumZ_F]
+  simp [KummerZeros.realM]
 
 /-- At a positive zero `x` of `M(a+1,b+1,·)`, Kummer's equation gives
 `M(a,b,x) = (x/b) M'(a+1,b+1,x)`. -/
-theorem kumZ_F_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 0) {x : ℝ}
-    (hg : kumZ_F (a + 1) (b + 1) x = 0) :
-    kumZ_F a b x = x / b * ((a + 1) / (b + 1) * kumZ_F (a + 1 + 1) (b + 1 + 1) x) := by
+theorem KummerZeros.realM_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 0) {x : ℝ}
+    (hg : KummerZeros.realM (a + 1) (b + 1) x = 0) :
+    KummerZeros.realM a b x = x / b *
+        ((a + 1) / (b + 1) * KummerZeros.realM (a + 1 + 1) (b + 1 + 1) x) := by
   have hb' := hb
-  have hb1' := kumZ_succ_not_neg_nat hb
-  have hb2' := kumZ_succ_not_neg_nat hb1'
+  have hb1' := KummerZeros.succ_not_neg_nat hb
+  have hb2' := KummerZeros.succ_not_neg_nat hb1'
   have hb1 : ∀ k : ℕ, ((b : ℂ) + 1) ≠ -k := by push_cast at hb1'; exact hb1'
   have hb0 : (b : ℂ) ≠ 0 := by simpa using hb' 0
   have hode := kummerM_ode (a := (a : ℂ)) hb' (z := (x : ℂ))
@@ -616,7 +620,7 @@ theorem kumZ_F_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 
     exact (((hasDerivAt_kummerM_shift (a := (a : ℂ) + 1) hb1 (x : ℂ)).const_mul
       ((a : ℂ) / b))).deriv
   have hG : kummerM ((a : ℂ) + 1) ((b : ℂ) + 1) x = 0 := by
-    have := kumZ_F_real (a := a + 1) (b := b + 1) hb1' x
+    have := KummerZeros.realM_real (a := a + 1) (b := b + 1) hb1' x
     push_cast at this
     rw [this, hg, ofReal_zero]
   rw [hd2, hd1] at hode
@@ -627,44 +631,50 @@ theorem kumZ_F_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 
     apply mul_left_cancel₀ ha'
     linear_combination -hode
   have := congrArg re hM
-  rw [kumZ_F_real hb x, ofReal_re] at this
+  rw [KummerZeros.realM_real hb x, ofReal_re] at this
   rw [this]
-  have hr := kumZ_F_real (a := a + 1 + 1) (b := b + 1 + 1) hb2' x
+  have hr := KummerZeros.realM_real (a := a + 1 + 1) (b := b + 1 + 1) hb2' x
   push_cast at hr
-  rw [hr, show (x : ℂ) / b * (((a : ℂ) + 1) / (b + 1) * (kumZ_F (a + 1 + 1) (b + 1 + 1) x : ℂ)) =
-    ((x / b * ((a + 1) / (b + 1) * kumZ_F (a + 1 + 1) (b + 1 + 1) x) : ℝ) : ℂ) by push_cast; ring,
+  rw [hr, show (x : ℂ) / b *
+      (((a : ℂ) + 1) / (b + 1) * (KummerZeros.realM (a + 1 + 1) (b + 1 + 1) x : ℂ)) =
+    ((x / b * ((a + 1) / (b + 1) * KummerZeros.realM (a + 1 + 1) (b + 1 + 1) x) : ℝ) : ℂ) by
+        push_cast; ring,
     ofReal_re]
 
 /-- For `a ≥ 0 < b`, `M(a,b,x) ≥ 1` on `[0, ∞)`. -/
-theorem kumZ_F_one_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 < b) {x : ℝ} (hx : 0 ≤ x) :
-    1 ≤ kumZ_F a b x := by
-  obtain ⟨hr, -⟩ := kummerM_ofReal_hasSum (a := a) (kumZ_not_neg_nat hb) x
+theorem KummerZeros.realM_one_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 < b) {x : ℝ} (hx : 0 ≤ x) :
+    1 ≤ KummerZeros.realM a b x := by
+  obtain ⟨hr, -⟩ := kummerM_ofReal_hasSum (a := a) (KummerZeros.not_neg_nat hb) x
   have hnonneg : ∀ n : ℕ, 0 ≤ (ascPochhammer ℝ n).eval a /
       ((ascPochhammer ℝ n).eval b * n.factorial) * x ^ n := fun n => mul_nonneg
     (div_nonneg (poch_eval_nonneg ha n)
       (mul_nonneg (poch_eval_nonneg hb.le n) (Nat.cast_nonneg _))) (pow_nonneg hx n)
   have hle := hr.summable.sum_le_tsum ({0} : Finset ℕ) (fun n _ => hnonneg n)
   rw [Finset.sum_singleton, hr.tsum_eq] at hle
-  simpa [kumZ_F] using hle
+  simpa [KummerZeros.realM] using hle
 
 /-- The sign-pattern data for `M(a,b,·)` with `⌈-a⌉ = n` zeros. -/
-theorem kumZ_F_Q (n : ℕ) : ∀ a b : ℝ, 0 < b → -(n : ℝ) ≤ a → a < -(n : ℝ) + 1 →
-    KumZQ (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x) n := by
+theorem KummerZeros.realM_signedZeroPattern (n : ℕ) : ∀ a b : ℝ, 0 < b → -(n : ℝ) ≤ a →
+    a < -(n : ℝ) + 1 →
+    HasSignedZeroPattern (KummerZeros.realM a b)
+        (fun x => a / b * KummerZeros.realM (a + 1) (b + 1) x) n := by
   induction n with
   | zero =>
     intro a b hb ha _
-    exact kumZ_Q_zero fun x hx => kumZ_F_one_le (by simpa using ha) hb hx
+    exact KummerZeros.signedZeroPattern_zero fun x hx =>
+        KummerZeros.realM_one_le (by simpa using ha) hb hx
   | succ n ih =>
     intro a b hb ha1 ha2
     push_cast at ha1 ha2
     have ha : a < 0 := by linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
-    exact kumZ_step (div_neg_of_neg_of_pos ha hb) (Or.inr hb) (kumZ_F_zero a b)
-      (kumZ_F_hasDerivAt (kumZ_not_neg_nat hb))
-      (fun x hx hg => kumZ_F_ode (kumZ_not_neg_nat hb) ha.ne hg)
+    exact KummerZeros.step (div_neg_of_neg_of_pos ha hb) (Or.inr hb) (KummerZeros.realM_zero a b)
+      (KummerZeros.realM_hasDerivAt (KummerZeros.not_neg_nat hb))
+      (fun x hx hg => KummerZeros.realM_ode (KummerZeros.not_neg_nat hb) ha.ne hg)
       (ih (a + 1) (b + 1) (by linarith) (by linarith) (by linarith))
 
 /-- A real number strictly between consecutive nonpositive integers is not in `-ℕ`. -/
-theorem kumZ_not_neg_nat_of_Ioo {b : ℝ} {n : ℕ} (h1 : -((n : ℝ) + 1) < b) (h2 : b < -(n : ℝ)) :
+theorem KummerZeros.not_neg_nat_of_Ioo {b : ℝ} {n : ℕ} (h1 : -((n : ℝ) + 1) < b)
+    (h2 : b < -(n : ℝ)) :
     ∀ k : ℕ, (b : ℂ) ≠ -k := by
   intro k hk
   have hb : b = -(k : ℝ) := by
@@ -678,37 +688,42 @@ theorem kumZ_not_neg_nat_of_Ioo {b : ℝ} {n : ℕ} (h1 : -((n : ℝ) + 1) < b) 
 
 /-- Sign-pattern data for `a > 0` and `b ∈ (-(n+1), -n)`: one zero when `n` is even, none when
 `n` is odd. -/
-theorem kumZ_F_Q_negb (n : ℕ) : ∀ a b : ℝ, 0 < a → -((n : ℝ) + 1) < b → b < -(n : ℝ) →
-    KumZQ (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x) ((n + 1) % 2) := by
+theorem KummerZeros.realM_signedZeroPattern_neg_b (n : ℕ) : ∀ a b : ℝ, 0 < a → -((n : ℝ) + 1) <
+    b → b < -(n : ℝ) →
+    HasSignedZeroPattern (KummerZeros.realM a b)
+        (fun x => a / b * KummerZeros.realM (a + 1) (b + 1) x)
+        ((n + 1) % 2) := by
   induction n with
   | zero =>
     intro a b ha hb1 hb2
     simp only [CharP.cast_eq_zero, zero_add, neg_zero] at hb1 hb2
-    have hbn := kumZ_not_neg_nat_of_Ioo (n := 0) (by simpa using hb1) (by simpa using hb2)
-    have hg : KumZQ (kumZ_F (a + 1) (b + 1))
-        (fun x => (a + 1) / (b + 1) * kumZ_F (a + 1 + 1) (b + 1 + 1) x) 0 :=
-      kumZ_Q_zero fun x hx => kumZ_F_one_le (by linarith) (by linarith) hx
-    exact kumZ_step (div_neg_of_pos_of_neg ha hb2) (Or.inl rfl) (kumZ_F_zero a b)
-      (kumZ_F_hasDerivAt hbn) (fun x hx hg0 => kumZ_F_ode hbn ha.ne' hg0) hg
+    have hbn := KummerZeros.not_neg_nat_of_Ioo (n := 0) (by simpa using hb1) (by simpa using hb2)
+    have hg : HasSignedZeroPattern (KummerZeros.realM (a + 1) (b + 1))
+        (fun x => (a + 1) / (b + 1) * KummerZeros.realM (a + 1 + 1) (b + 1 + 1) x) 0 :=
+      KummerZeros.signedZeroPattern_zero fun x hx =>
+          KummerZeros.realM_one_le (by linarith) (by linarith) hx
+    exact KummerZeros.step (div_neg_of_pos_of_neg ha hb2) (Or.inl rfl) (KummerZeros.realM_zero a b)
+      (KummerZeros.realM_hasDerivAt hbn) (fun x hx hg0 => KummerZeros.realM_ode hbn ha.ne' hg0) hg
   | succ n ih =>
     intro a b ha hb1 hb2
     push_cast at hb1 hb2
-    have hbn := kumZ_not_neg_nat_of_Ioo (n := n + 1) (by push_cast; linarith)
+    have hbn := KummerZeros.not_neg_nat_of_Ioo (n := n + 1) (by push_cast; linarith)
       (by push_cast; linarith)
     have hab : a / b < 0 := div_neg_of_pos_of_neg ha (by linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
     have hg := ih (a + 1) (b + 1) (by linarith) (by linarith) (by linarith)
     rcases Nat.mod_two_eq_zero_or_one (n + 1) with h | h
     · rw [h] at hg
-      have := kumZ_step hab (Or.inl rfl) (kumZ_F_zero a b) (kumZ_F_hasDerivAt hbn)
-        (fun x hx hg0 => kumZ_F_ode hbn ha.ne' hg0) hg
+      have := KummerZeros.step hab (Or.inl rfl) (KummerZeros.realM_zero a b)
+          (KummerZeros.realM_hasDerivAt hbn)
+        (fun x hx hg0 => KummerZeros.realM_ode hbn ha.ne' hg0) hg
       rwa [show (n + 1 + 1) % 2 = 0 + 1 by omega]
     · rw [h] at hg
-      have := kumZ_step_down hab (by linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
-        (kumZ_F_hasDerivAt hbn) (fun x hx hg0 => kumZ_F_ode hbn ha.ne' hg0) hg
+      have := KummerZeros.step_down hab (by linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
+        (KummerZeros.realM_hasDerivAt hbn) (fun x hx hg0 => KummerZeros.realM_ode hbn ha.ne' hg0) hg
       rwa [show (n + 1 + 1) % 2 = 0 by omega]
 
 /-- For noninteger `b < 0`, `b` lies strictly between `-⌈-b⌉` and `-⌈-b⌉ + 1`. -/
-theorem kumZ_ceil_bounds {b : ℝ} (hb : b < 0) (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
+theorem KummerZeros.ceil_bounds {b : ℝ} (hb : b < 0) (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
     1 ≤ ⌈-b⌉ ∧ -((⌈-b⌉.toNat : ℕ) : ℝ) < b ∧ b < -((⌈-b⌉.toNat : ℕ) : ℝ) + 1 := by
   have hc1 : 1 ≤ ⌈-b⌉ := by
     rw [Int.one_le_ceil_iff]; linarith
@@ -724,38 +739,42 @@ theorem kumZ_ceil_bounds {b : ℝ} (hb : b < 0) (hbi : ∀ k : ℕ, b ≠ -(k : 
       rw [← Int.cast_natCast, Int.toNat_of_nonneg (by omega), ← h]; ring
   · rw [hn]; linarith [Int.ceil_lt_add_one (-b)]
 
-/-- Positive zeros of `M(a,b,·)` are the positive zeros of the real function `kumZ_F a b`. -/
-theorem kumZ_posZeros_eq {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
-    kummerMPosZeros a b = {x : ℝ | 0 < x ∧ kumZ_F a b x = 0} := by
+/-- Positive zeros of `M(a,b,·)` are the positive zeros of the real function
+`KummerZeros.realM a b`. -/
+theorem KummerZeros.posZeros_eq {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
+    kummerMPosZeros a b = {x : ℝ | 0 < x ∧ KummerZeros.realM a b x = 0} := by
   ext x
-  simp only [kummerMPosZeros, mem_ofPred_eq, kumZ_F_real hb x, ofReal_eq_zero]
+  simp only [kummerMPosZeros, mem_ofPred_eq, KummerZeros.realM_real hb x, ofReal_eq_zero]
 
 /-- Real-to-complex transfer of `b ∉ -ℕ`. -/
-theorem kumZ_not_neg_nat_real {b : ℝ} (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) : ∀ k : ℕ, (b : ℂ) ≠ -k :=
+theorem KummerZeros.not_neg_nat_real {b : ℝ} (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) : ∀ k : ℕ,
+    (b : ℂ) ≠ -k :=
   fun k hk => hbi k (by exact_mod_cast hk)
 
 /-- Sign-pattern data for `a < -m` and `b ∈ (-(m+1), -m)`: `⌈-a⌉ - (m+1)` zeros. -/
-theorem kumZ_F_Q_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b < -(m : ℝ) → a < -(m : ℝ) →
-    KumZQ (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x)
+theorem KummerZeros.realM_signedZeroPattern_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b <
+    -(m : ℝ) → a < -(m : ℝ) →
+    HasSignedZeroPattern (KummerZeros.realM a b)
+        (fun x => a / b * KummerZeros.realM (a + 1) (b + 1) x)
       (⌈-a⌉.toNat - (m + 1)) := by
   induction m with
   | zero =>
     intro a b hb1 hb2 ha
     simp only [CharP.cast_eq_zero, zero_add, neg_zero] at hb1 hb2 ha
-    have hbn := kumZ_not_neg_nat_of_Ioo (n := 0) (by simpa using hb1) (by simpa using hb2)
+    have hbn := KummerZeros.not_neg_nat_of_Ioo (n := 0) (by simpa using hb1) (by simpa using hb2)
     have hc : 1 ≤ ⌈-a⌉ := by rw [Int.one_le_ceil_iff]; linarith
     have hn : (((⌈-a⌉.toNat - 1 : ℕ) : ℤ) : ℝ) = (⌈-a⌉ : ℝ) - 1 := by
       rw [Nat.cast_sub (by omega), Int.toNat_of_nonneg (by omega)]; push_cast; ring
     rw [Int.cast_natCast] at hn
-    have hg := kumZ_F_Q (⌈-a⌉.toNat - 1) (a + 1) (b + 1) (by linarith)
+    have hg := KummerZeros.realM_signedZeroPattern (⌈-a⌉.toNat - 1) (a + 1) (b + 1) (by linarith)
       (by rw [hn]; linarith [Int.le_ceil (-a)]) (by rw [hn]; linarith [Int.ceil_lt_add_one (-a)])
-    exact kumZ_step_same (div_pos_of_neg_of_neg ha hb2) hb2 (kumZ_F_zero a b)
-      (kumZ_F_hasDerivAt hbn) (fun x hx hg0 => kumZ_F_ode hbn ha.ne hg0) hg
+    exact KummerZeros.step_same (div_pos_of_neg_of_neg ha hb2) hb2 (KummerZeros.realM_zero a b)
+      (KummerZeros.realM_hasDerivAt hbn) (fun x hx hg0 => KummerZeros.realM_ode hbn ha.ne hg0) hg
   | succ m ih =>
     intro a b hb1 hb2 ha
     push_cast at hb1 hb2 ha
     have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
-    have hbn := kumZ_not_neg_nat_of_Ioo (b := b) (n := m + 1) (by push_cast; linarith)
+    have hbn := KummerZeros.not_neg_nat_of_Ioo (b := b) (n := m + 1) (by push_cast; linarith)
       (by push_cast; linarith)
     have ha0 : a < 0 := by linarith
     have hb0 : b < 0 := by linarith
@@ -763,15 +782,17 @@ theorem kumZ_F_Q_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b < -(
     have hceil : ⌈-(a + 1)⌉ = ⌈-a⌉ - 1 := by
       rw [show -(a + 1) = -a - 1 by ring, Int.ceil_sub_one]
     rw [hceil, show (⌈-a⌉ - 1).toNat - (m + 1) = ⌈-a⌉.toNat - (m + 1 + 1) by omega] at hg
-    exact kumZ_step_same (div_pos_of_neg_of_neg ha0 hb0) hb0
-      (kumZ_F_zero a b) (kumZ_F_hasDerivAt hbn)
-      (fun x hx hg0 => kumZ_F_ode hbn ha0.ne hg0) hg
+    exact KummerZeros.step_same (div_pos_of_neg_of_neg ha0 hb0) hb0
+      (KummerZeros.realM_zero a b) (KummerZeros.realM_hasDerivAt hbn)
+      (fun x hx hg0 => KummerZeros.realM_ode hbn ha0.ne hg0) hg
 
 /-- Sign-pattern data for noninteger `a ∈ (-(p+1), -p)` and noninteger `b` with
 `⌈-b⌉ > p + 1`: `(⌈-b⌉ - (p+1)) mod 2` zeros. -/
-theorem kumZ_F_Q_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) < a → a < -(p : ℝ) →
+theorem KummerZeros.realM_signedZeroPattern_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) <
+    a → a < -(p : ℝ) →
     (∀ k : ℕ, b ≠ -(k : ℝ)) → (p : ℤ) + 1 < ⌈-b⌉ →
-    KumZQ (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x)
+    HasSignedZeroPattern (KummerZeros.realM a b)
+        (fun x => a / b * KummerZeros.realM (a + 1) (b + 1) x)
       ((⌈-b⌉ - (p + 1)) % 2).toNat := by
   induction p with
   | zero =>
@@ -780,17 +801,18 @@ theorem kumZ_F_Q_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) < a → a < -(
     have hb : b < -1 := by
       have := Int.lt_ceil.mp hcb
       push_cast at this; linarith
-    obtain ⟨-, hl, hr⟩ := kumZ_ceil_bounds (by linarith) hbi
+    obtain ⟨-, hl, hr⟩ := KummerZeros.ceil_bounds (by linarith) hbi
     obtain ⟨n, hn⟩ : ∃ n, ⌈-b⌉.toNat = n + 1 + 1 := ⟨⌈-b⌉.toNat - 2, by omega⟩
     rw [hn] at hl hr
     push_cast at hl hr
-    have hbn := kumZ_not_neg_nat_real hbi
-    have hg := kumZ_F_Q_negb n (a + 1) (b + 1) (by linarith) (by linarith) (by linarith)
+    have hbn := KummerZeros.not_neg_nat_real hbi
+    have hg := KummerZeros.realM_signedZeroPattern_neg_b n (a + 1) (b + 1) (by linarith)
+        (by linarith) (by linarith)
     have hcount : (n + 1) % 2 = ((⌈-b⌉ - (0 + 1)) % 2).toNat := by omega
     rw [hcount] at hg
-    exact kumZ_step_same (div_pos_of_neg_of_neg ha2 (by linarith)) (by linarith)
-      (kumZ_F_zero a b) (kumZ_F_hasDerivAt hbn)
-      (fun x hx hg0 => kumZ_F_ode hbn ha2.ne hg0) hg
+    exact KummerZeros.step_same (div_pos_of_neg_of_neg ha2 (by linarith)) (by linarith)
+      (KummerZeros.realM_zero a b) (KummerZeros.realM_hasDerivAt hbn)
+      (fun x hx hg0 => KummerZeros.realM_ode hbn ha2.ne hg0) hg
   | succ p ih =>
     intro a b ha1 ha2 hbi hcb
     push_cast at ha1 ha2 hcb
@@ -798,7 +820,7 @@ theorem kumZ_F_Q_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) < a → a < -(
     have hb : b < 0 := by
       have := Int.lt_ceil.mp (show (0 : ℤ) < ⌈-b⌉ by omega)
       push_cast at this; linarith
-    have hbn := kumZ_not_neg_nat_real hbi
+    have hbn := KummerZeros.not_neg_nat_real hbi
     have hbi1 : ∀ k : ℕ, b + 1 ≠ -(k : ℝ) := by
       intro k hk; apply hbi (k + 1); push_cast; linarith
     have hceil : ⌈-(b + 1)⌉ = ⌈-b⌉ - 1 := by
@@ -806,9 +828,9 @@ theorem kumZ_F_Q_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) < a → a < -(
     have hg := ih (a + 1) (b + 1) (by linarith) (by linarith) hbi1 (by rw [hceil]; omega)
     rw [hceil, show ⌈-b⌉ - 1 - ((p : ℤ) + 1) = ⌈-b⌉ - ((p : ℤ) + 1 + 1) by ring] at hg
     have ha0 : a < 0 := by linarith
-    exact kumZ_step_same (div_pos_of_neg_of_neg ha0 hb) hb
-      (kumZ_F_zero a b) (kumZ_F_hasDerivAt hbn)
-      (fun x hx hg0 => kumZ_F_ode hbn ha0.ne hg0) hg
+    exact KummerZeros.step_same (div_pos_of_neg_of_neg ha0 hb) hb
+      (KummerZeros.realM_zero a b) (KummerZeros.realM_hasDerivAt hbn)
+      (fun x hx hg0 => KummerZeros.realM_ode hbn ha0.ne hg0) hg
 
 /- The old 13.9.3–4 statements were false at `a = 0`; 13.9.5 omitted `a,b < 0`. -/
 /-- DLMF 13.9.1: `⌈-a⌉` positive zeros for `a < 0 < b`. -/
@@ -818,13 +840,14 @@ theorem kummerM_posZeros_neg_a {a b : ℝ} (ha : a < 0) (hb : 0 < b) :
   have hc : 0 ≤ ⌈-a⌉ := Int.ceil_nonneg (by linarith)
   have hn : ((Int.toNat ⌈-a⌉ : ℕ) : ℝ) = (⌈-a⌉ : ℝ) := by
     rw [← Int.cast_natCast, Int.toNat_of_nonneg hc]
-  have hQ := kumZ_F_Q (Int.toNat ⌈-a⌉) a b hb
+  have hQ := KummerZeros.realM_signedZeroPattern (Int.toNat ⌈-a⌉) a b hb
     (by rw [hn]; linarith [Int.le_ceil (-a)])
     (by rw [hn]; linarith [Int.ceil_lt_add_one (-a)])
-  have hset : kummerMPosZeros a b = {x : ℝ | 0 < x ∧ kumZ_F a b x = 0} := by
+  have hset : kummerMPosZeros a b = {x : ℝ | 0 < x ∧ KummerZeros.realM a b x = 0} := by
     ext x
-    simp only [kummerMPosZeros, mem_ofPred_eq, kumZ_F_real (kumZ_not_neg_nat hb) x, ofReal_eq_zero]
-  rw [hset, kumZ_Q_encard hQ]
+    simp only [kummerMPosZeros, mem_ofPred_eq,
+        KummerZeros.realM_real (KummerZeros.not_neg_nat hb) x, ofReal_eq_zero]
+  rw [hset, KummerZeros.signedZeroPattern_encard hQ]
 
 /-- Identity under the stated parameter and domain assumptions: `(kummerMPosZeros a b).encard =
 1`. -/
@@ -908,17 +931,17 @@ theorem kummerM_posZeros_b_le_neg_one {a b : ℝ} (ha : 0 < a) (hb : b ≤ -1)
     (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
     (kummerMPosZeros a b).encard =
       Int.toNat (⌊-(b / 2)⌋ - ⌊-((b + 1) / 2)⌋) := by
-  obtain ⟨hc1, hl, hr⟩ := kumZ_ceil_bounds (by linarith) hbi
+  obtain ⟨hc1, hl, hr⟩ := KummerZeros.ceil_bounds (by linarith) hbi
   set N := ⌈-b⌉.toNat with hN
   obtain ⟨n, hn⟩ : ∃ n, N = n + 1 := ⟨N - 1, by omega⟩
   rw [hn] at hl hr
   push_cast at hl hr
-  have hbn := kumZ_not_neg_nat_of_Ioo (n := n) (by linarith) (by linarith)
-  have hQ := kumZ_F_Q_negb n a b ha (by linarith) (by linarith)
-  have hset : kummerMPosZeros a b = {x : ℝ | 0 < x ∧ kumZ_F a b x = 0} := by
+  have hbn := KummerZeros.not_neg_nat_of_Ioo (n := n) (by linarith) (by linarith)
+  have hQ := KummerZeros.realM_signedZeroPattern_neg_b n a b ha (by linarith) (by linarith)
+  have hset : kummerMPosZeros a b = {x : ℝ | 0 < x ∧ KummerZeros.realM a b x = 0} := by
     ext x
-    simp only [kummerMPosZeros, mem_ofPred_eq, kumZ_F_real hbn x, ofReal_eq_zero]
-  rw [hset, kumZ_Q_encard hQ]
+    simp only [kummerMPosZeros, mem_ofPred_eq, KummerZeros.realM_real hbn x, ofReal_eq_zero]
+  rw [hset, KummerZeros.signedZeroPattern_encard hQ]
   -- the floor formula is the parity of `n + 1`
   obtain ⟨q, hq | hq⟩ := Nat.even_or_odd' n
   · rw [hq] at hl hr; push_cast at hl hr
@@ -943,7 +966,7 @@ theorem kummerM_posZeros_b_le_neg_one {a b : ℝ} (ha : 0 < a) (hb : b ≤ -1)
 theorem kummerM_posZeros_ceil {a b : ℝ} (hb : b < 0) (h : ⌈-a⌉ ≥ ⌈-b⌉)
     (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
     (kummerMPosZeros a b).encard = Int.toNat (⌈-a⌉ - ⌈-b⌉) := by
-  obtain ⟨hc1, hl, hr⟩ := kumZ_ceil_bounds hb hbi
+  obtain ⟨hc1, hl, hr⟩ := KummerZeros.ceil_bounds hb hbi
   obtain ⟨m, hm⟩ : ∃ m, ⌈-b⌉.toNat = m + 1 := ⟨⌈-b⌉.toNat - 1, by omega⟩
   rw [hm] at hl hr
   push_cast at hl hr
@@ -953,8 +976,9 @@ theorem kummerM_posZeros_ceil {a b : ℝ} (hb : b < 0) (h : ⌈-a⌉ ≥ ⌈-b�
       have := Int.lt_ceil.mp (show (m : ℤ) < ⌈-a⌉ by omega)
       exact_mod_cast this
     linarith
-  have hQ := kumZ_F_Q_both m a b (by linarith) (by linarith) ham
-  rw [kumZ_posZeros_eq (kumZ_not_neg_nat_real hbi), kumZ_Q_encard hQ]
+  have hQ := KummerZeros.realM_signedZeroPattern_both m a b (by linarith) (by linarith) ham
+  rw [KummerZeros.posZeros_eq (KummerZeros.not_neg_nat_real hbi),
+      KummerZeros.signedZeroPattern_encard hQ]
   congr 1
   omega
 
@@ -971,12 +995,14 @@ theorem kummerM_posZeros_ceil_swap {a b : ℝ} (h : ⌈-b⌉ > ⌈-a⌉) (ha : 0
     (kummerMPosZeros a b).encard = Int.toNat ((⌈-b⌉ - ⌈-a⌉) % 2) := by
   have ha0 : a < 0 := by
     have := Int.lt_ceil.mp ha; push_cast at this; linarith
-  obtain ⟨-, hl, hr⟩ := kumZ_ceil_bounds ha0 hai
+  obtain ⟨-, hl, hr⟩ := KummerZeros.ceil_bounds ha0 hai
   obtain ⟨p, hp⟩ : ∃ p, ⌈-a⌉.toNat = p + 1 := ⟨⌈-a⌉.toNat - 1, by omega⟩
   rw [hp] at hl hr
   push_cast at hl hr
-  have hQ := kumZ_F_Q_swap p a b (by linarith) (by linarith) hbi (by omega)
-  rw [kumZ_posZeros_eq (kumZ_not_neg_nat_real hbi), kumZ_Q_encard hQ]
+  have hQ := KummerZeros.realM_signedZeroPattern_swap p a b (by linarith)
+      (by linarith) hbi (by omega)
+  rw [KummerZeros.posZeros_eq (KummerZeros.not_neg_nat_real hbi),
+      KummerZeros.signedZeroPattern_encard hQ]
   congr 2
   omega
 
@@ -990,17 +1016,17 @@ theorem kummerM_posZeros_ceil_swap_ne :
     have h2 : (2 * k : ℝ) = 3 := by linarith
     have h3 : 2 * k = 3 := by exact_mod_cast h2
     omega
-  have hbn := kumZ_not_neg_nat_real hbi
-  have hg : KumZQ (kumZ_F ((-1 : ℝ) + 1) ((-3 / 2 : ℝ) + 1))
+  have hbn := KummerZeros.not_neg_nat_real hbi
+  have hg : HasSignedZeroPattern (KummerZeros.realM ((-1 : ℝ) + 1) ((-3 / 2 : ℝ) + 1))
       (fun x => ((-1 : ℝ) + 1) / ((-3 / 2 : ℝ) + 1) *
-          kumZ_F ((-1 : ℝ) + 1 + 1) ((-3 / 2 : ℝ) + 1 + 1) x)
+          KummerZeros.realM ((-1 : ℝ) + 1 + 1) ((-3 / 2 : ℝ) + 1 + 1) x)
       0 :=
-    kumZ_Q_zero fun x _ => by
-      norm_num [kumZ_F, kummerM_of_zero_param]
-  have hQ := kumZ_step_same (a := -1) (b := -3 / 2) (by norm_num) (by norm_num)
-    (kumZ_F_zero _ _) (kumZ_F_hasDerivAt hbn)
-    (fun x hx hg0 => kumZ_F_ode hbn (by norm_num) hg0) hg
-  rw [kumZ_posZeros_eq hbn, kumZ_Q_encard hQ]
+    KummerZeros.signedZeroPattern_zero fun x _ => by
+      norm_num [KummerZeros.realM, kummerM_of_zero_param]
+  have hQ := KummerZeros.step_same (a := -1) (b := -3 / 2) (by norm_num) (by norm_num)
+    (KummerZeros.realM_zero _ _) (KummerZeros.realM_hasDerivAt hbn)
+    (fun x hx hg0 => KummerZeros.realM_ode hbn (by norm_num) hg0) hg
+  rw [KummerZeros.posZeros_eq hbn, KummerZeros.signedZeroPattern_encard hQ]
   have h1 : ⌈-(-3 / 2 : ℝ)⌉ = 2 := by rw [Int.ceil_eq_iff]; norm_num
   have h2 : ⌈-(-1 : ℝ)⌉ = 1 := by rw [Int.ceil_eq_iff]; norm_num
   rw [h1, h2]
