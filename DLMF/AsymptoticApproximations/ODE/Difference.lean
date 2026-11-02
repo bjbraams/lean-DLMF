@@ -36,7 +36,7 @@ Expansions are `Asymptotics.HasAsymptoticExpansion atTop` in the scales
 
 @[expose] public noncomputable section
 
-open Filter Asymptotics
+open Filter Asymptotics Finset
 open scoped Topology
 
 namespace DLMF.AsymptoticApproximations
@@ -73,6 +73,62 @@ theorem difference_distinct_roots_solution {f g : ℕ → ℂ} {fs gs : ℕ → 
         (differenceCoeff fs gs ρ) w := by
   sorry
 
+/-- `(n+1)^α / n^α → 1`. -/
+private lemma tendsto_natCast_add_one_cpow_div (α : ℂ) :
+    Tendsto (fun n : ℕ => ((n : ℂ) + 1) ^ α / (n : ℂ) ^ α) atTop (𝓝 1) := by
+  have h0 : Tendsto (fun n : ℕ => Real.log (1 + (n : ℝ)⁻¹)) atTop (𝓝 0) := by
+    have h := (tendsto_inv_atTop_nhds_zero_nat (𝕜 := ℝ)).const_add (1 : ℝ)
+    rw [add_zero] at h
+    have h' := (Real.continuousAt_log one_ne_zero).tendsto.comp h
+    rwa [Real.log_one] at h'
+  have h1 : Tendsto (fun n : ℕ => Complex.exp (α * (Real.log (1 + (n : ℝ)⁻¹) : ℂ)))
+      atTop (𝓝 1) := by
+    have hc : Continuous fun y : ℝ => Complex.exp (α * (y : ℂ)) := by fun_prop
+    have := (hc.tendsto 0).comp h0
+    simpa [Function.comp_def] using this
+  refine h1.congr' ?_
+  filter_upwards [eventually_ge_atTop 1] with n hn
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast (by omega : 0 < n)
+  have hn1 : ((n : ℂ) + 1) = ((n + 1 : ℝ) : ℂ) := by push_cast; ring
+  rw [hn1, Complex.cpow_def_of_ne_zero (by exact_mod_cast (by linarith : (n : ℝ) + 1 ≠ 0)),
+    Complex.cpow_def_of_ne_zero (by exact_mod_cast hn0.ne'), ← Complex.exp_sub,
+    ← Complex.ofReal_natCast, ← Complex.ofReal_log hn0.le, ← Complex.ofReal_log (by linarith)]
+  congr 1
+  rw [show (1 : ℝ) + (n : ℝ)⁻¹ = (n + 1) / n by field_simp, Real.log_div (by linarith) hn0.ne']
+  push_cast
+  ring
+
+/-- Leading-order form of an expansion in `geomCpowScale`. -/
+private lemma tendsto_div_geomCpowScale {ρ α : ℂ} (hρ : ρ ≠ 0) {a : ℕ → ℂ} (ha : a 0 = 1)
+    {w : ℕ → ℂ}
+    (hw : HasAsymptoticExpansion atTop (geomCpowScale ρ α) a w) :
+    Tendsto (fun n => w n / geomCpowScale ρ α 0 n) atTop (𝓝 1) := by
+  have h1 := hw 1
+  simp only [range_one, sum_singleton, ha, smul_eq_mul, mul_one] at h1
+  have hev : ∀ᶠ n : ℕ in atTop, geomCpowScale ρ α 0 n ≠ 0 := by
+    filter_upwards [eventually_ge_atTop 1] with n hn
+    have : (n : ℂ) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)
+    simp only [geomCpowScale]
+    exact mul_ne_zero (pow_ne_zero _ hρ) (by rw [Ne, Complex.cpow_eq_zero_iff]; tauto)
+  have h2 : (fun n => (w n - geomCpowScale ρ α 0 n) / geomCpowScale ρ α 0 n) =O[atTop]
+      fun n : ℕ => ((n : ℂ))⁻¹ := by
+    refine (h1.mul (isBigO_refl (fun n => (geomCpowScale ρ α 0 n)⁻¹) atTop)).congr' ?_ ?_
+    · exact Eventually.of_forall fun n => by simp [div_eq_mul_inv]
+    · filter_upwards [eventually_ge_atTop 1] with n hn
+      have : (n : ℂ) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)
+      simp only [geomCpowScale, Nat.cast_one, Nat.cast_zero, sub_zero]
+      rw [Complex.cpow_sub _ _ this, Complex.cpow_one]
+      have h3 : (n : ℂ) ^ α ≠ 0 := by rw [Ne, Complex.cpow_eq_zero_iff]; tauto
+      field_simp
+  have h3 : Tendsto (fun n : ℕ => ((n : ℂ))⁻¹) atTop (𝓝 0) := by
+    simpa using (tendsto_inv_atTop_zero.comp tendsto_natCast_atTop_atTop).ofReal
+  have h4 := (h2.trans_tendsto h3).add_const 1
+  rw [zero_add] at h4
+  refine h4.congr' ?_
+  filter_upwards [hev] with n hn
+  field_simp
+  ring
+
 /-- DLMF §2.9(i) (independence of the two solutions of 2.9.8): solutions with the expansions
 2.9.8 for the two distinct roots `ρ₁ ≠ ρ₂` of 2.9.5 are linearly independent; their
 Casoratian `w₁(n) w₂(n+1) - w₁(n+1) w₂(n)` is eventually nonzero. -/
@@ -87,7 +143,42 @@ theorem difference_distinct_roots_independent {f g : ℕ → ℂ} {fs gs : ℕ �
     (hw₂ : HasAsymptoticExpansion atTop (geomCpowScale ρ₂ (differenceExponent fs gs ρ₂))
       (differenceCoeff fs gs ρ₂) w₂) :
     ∀ᶠ n in atTop, w₁ n * w₂ (n + 1) - w₁ (n + 1) * w₂ n ≠ 0 := by
-  sorry
+  -- only the leading terms of the two expansions are needed
+  have _ := hf
+  have _ := hg
+  have hρne : ∀ ρ : ℂ, ρ ^ 2 + fs 0 * ρ + gs 0 = 0 → ρ ≠ 0 := fun ρ h h0 =>
+    hg0 (by subst h0; simpa using h)
+  set α₁ := differenceExponent fs gs ρ₁
+  set α₂ := differenceExponent fs gs ρ₂
+  have hu₁ := tendsto_div_geomCpowScale (hρne _ hρ₁) (by simp [differenceCoeff]) hw₁
+  have hu₂ := tendsto_div_geomCpowScale (hρne _ hρ₂) (by simp [differenceCoeff]) hw₂
+  have hu₁' := hu₁.comp (tendsto_add_atTop_nat 1)
+  have hu₂' := hu₂.comp (tendsto_add_atTop_nat 1)
+  have hr₁ := tendsto_natCast_add_one_cpow_div α₁
+  have hr₂ := tendsto_natCast_add_one_cpow_div α₂
+  have hE := ((((tendsto_const_nhds (x := ρ₂)).mul hr₂).mul hu₁).mul hu₂').sub
+    ((((tendsto_const_nhds (x := ρ₁)).mul hr₁).mul hu₁').mul hu₂)
+  simp only [mul_one] at hE
+  filter_upwards [hE.eventually_ne (sub_ne_zero.mpr h12.symm), eventually_ge_atTop 1]
+    with n hEn hn hC
+  apply hEn
+  have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)
+  have hn1 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast (by omega : n + 1 ≠ 0)
+  have hp : ∀ α : ℂ, (n : ℂ) ^ α ≠ 0 := fun α => by
+    rw [Ne, Complex.cpow_eq_zero_iff]; tauto
+  have hp1 : ∀ α : ℂ, ((n : ℂ) + 1) ^ α ≠ 0 := fun α => by
+    rw [Ne, Complex.cpow_eq_zero_iff]; tauto
+  have h1 := hρne _ hρ₁
+  have h2 := hρne _ hρ₂
+  simp only [Function.comp, geomCpowScale, Nat.cast_zero, sub_zero, Nat.cast_add, Nat.cast_one]
+  have hz : w₁ n * w₂ (n + 1) = w₁ (n + 1) * w₂ n := sub_eq_zero.mp hC
+  have hp' := hp α₁
+  have hp'' := hp α₂
+  have hq' := hp1 α₁
+  have hq'' := hp1 α₂
+  field_simp
+  rw [pow_succ, pow_succ]
+  linear_combination (ρ₁ * ρ₂ * ρ₁ ^ n * ρ₂ ^ n) * hz
 
 /-- DLMF §2.9(i) (recessive and dominant solutions): in the situation of
 `difference_distinct_roots_solution`, if `|ρ₂| > |ρ₁|`, or `|ρ₂| = |ρ₁|` and

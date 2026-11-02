@@ -7,6 +7,7 @@ module
 
 public import DLMF.Airy.Basic.Properties
 public import DLMF.Hypergeometric.Basic.Pochhammer
+public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values
 
 /-!
 # Maclaurin series of the Airy functions (DLMF §9.4)
@@ -26,32 +27,6 @@ open Complex DLMF.Hypergeometric
 open scoped Real Nat
 
 namespace DLMF.Airy
-
-/-- `Γ(α + k) = (α)ₖ Γ(α)` for `Re α > 0`. -/
-private theorem airyBasic_Gamma_add_nat_eq_poch_mul_Gamma {α : ℂ} (hα : 0 < α.re) (k : ℕ) :
-    Gamma (α + k) = poch α k * Gamma α := by
-  induction k with
-  | zero => simp [poch_zero]
-  | succ k ih =>
-    have hne : α + k ≠ 0 := by
-      intro h
-      have := congrArg re h
-      simp at this
-      linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-    rw [Nat.cast_succ, ← add_assoc, Gamma_add_one _ hne, ih, poch_succ]
-    ring
-
-/-- Pochhammer symbols at points of positive real part do not vanish. -/
-private theorem airyBasic_poch_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) (k : ℕ) :
-    poch z k ≠ 0 :=
-  poch_ne_zero_of_not_neg_nat (fun j h => by
-    have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]) k
-
-/-- The series `₀F̃₁(;c;w) = ∑ wᵏ / (k! Γ(c + k))`. -/
-private theorem airyBasic_hasSum_reg0F1 (c w : ℂ) :
-    HasSum (fun k : ℕ => w ^ k / (k ! * Gamma (c + k))) (regularizedHGFun ∅ {c} w) :=
-  (DLMF.Bessel.hasSum_regularized0F1 c w).congr_fun fun k => by
-    rw [DLMF.Bessel.regularizedHGFunCoeff_empty]; ring
 
 /-- `Γ(4/3) = Γ(1/3)/3`. -/
 theorem Gamma_four_thirds : Gamma (4 / 3) = 1 / 3 * Gamma (1 / 3) := by
@@ -107,10 +82,10 @@ theorem factorial_three_mul_add_two (k : ℕ) :
 theorem hasSum_airyF_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * poch (1 / 3) k / (3 * k)! *
       z ^ (3 * k)) (airyF z) := by
-  refine (airyBasic_hasSum_reg0F1 (2 / 3) (z ^ 3 / 9)).congr_fun fun k => ?_
-  rw [factorial_three_mul, airyBasic_Gamma_add_nat_eq_poch_mul_Gamma (by norm_num)]
-  have h1 := airyBasic_poch_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
-  have h2 := airyBasic_poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
+  refine (Complex.hasSum_regularizedHGFun_empty_singleton (2 / 3) (z ^ 3 / 9)).congr_fun fun k => ?_
+  rw [factorial_three_mul, Gamma_add_nat_eq_poch_mul_Gamma (by norm_num)]
+  have h1 := poch_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
+  have h2 := poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
   have h3 : Gamma (2 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -120,11 +95,11 @@ theorem hasSum_airyF_maclaurin (z : ℂ) :
 theorem hasSum_airyG_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k + 1)! *
       z ^ (3 * k + 1)) (airyG z) := by
-  refine ((airyBasic_hasSum_reg0F1 (4 / 3) (z ^ 3 / 9)).mul_left
+  refine ((Complex.hasSum_regularizedHGFun_empty_singleton (4 / 3) (z ^ 3 / 9)).mul_left
       z).congr_fun fun k => ?_
-  rw [factorial_three_mul_add_one, airyBasic_Gamma_add_nat_eq_poch_mul_Gamma (by norm_num)]
-  have h1 := airyBasic_poch_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
-  have h2 := airyBasic_poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
+  rw [factorial_three_mul_add_one, Gamma_add_nat_eq_poch_mul_Gamma (by norm_num)]
+  have h1 := poch_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
+  have h2 := poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
   have h3 : Gamma (4 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_succ, pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -134,12 +109,12 @@ theorem hasSum_airyG_maclaurin (z : ℂ) :
 theorem hasSum_airyFDeriv_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * poch (4 / 3) k / (3 * k + 2)! *
       z ^ (3 * k + 2)) (airyFDeriv z) := by
-  refine ((airyBasic_hasSum_reg0F1 (5 / 3) (z ^ 3 / 9)).mul_left (z ^ 2 /
+  refine ((Complex.hasSum_regularizedHGFun_empty_singleton (5 / 3) (z ^ 3 / 9)).mul_left (z ^ 2 /
       3)).congr_fun fun k => ?_
-  rw [factorial_three_mul_add_two, airyBasic_Gamma_add_nat_eq_poch_mul_Gamma (by norm_num),
+  rw [factorial_three_mul_add_two, Gamma_add_nat_eq_poch_mul_Gamma (by norm_num),
     Gamma_five_thirds]
-  have h1 := airyBasic_poch_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
-  have h2 := airyBasic_poch_ne_zero_of_re_pos (z := 5 / 3) (by norm_num) k
+  have h1 := poch_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
+  have h2 := poch_ne_zero_of_re_pos (z := 5 / 3) (by norm_num) k
   have h3 : Gamma (2 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_add, pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -157,12 +132,12 @@ theorem hasSum_airyGDeriv_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k)! *
       z ^ (3 * k)) (airyGDeriv z) := by
   rw [airyGDeriv_eq]
-  refine ((airyBasic_hasSum_reg0F1 (1 / 3) (z ^ 3 / 9)).mul_left
+  refine ((Complex.hasSum_regularizedHGFun_empty_singleton (1 / 3) (z ^ 3 / 9)).mul_left
       3).congr_fun fun k => ?_
-  rw [factorial_three_mul, airyBasic_Gamma_add_nat_eq_poch_mul_Gamma (by norm_num),
+  rw [factorial_three_mul, Gamma_add_nat_eq_poch_mul_Gamma (by norm_num),
     Gamma_four_thirds]
-  have h1 := airyBasic_poch_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
-  have h2 := airyBasic_poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
+  have h1 := poch_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
+  have h2 := poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
   have h3 : Gamma (1 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]

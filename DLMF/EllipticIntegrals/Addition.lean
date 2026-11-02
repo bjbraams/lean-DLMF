@@ -8,6 +8,7 @@ module
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Inequalities
+public import DLMF.JacobiElliptic.Related
 
 /-!
 # Addition theorems for Legendre's integrals
@@ -176,6 +177,41 @@ theorem addition_tan_half {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hs : Real.sin ψ 
   · rw [div_eq_div_iff h0 hθφ]
     linear_combination (Q * a * c ^ 2) * hP + (P * a ^ 2 * c) * hQ + (P * c) * hab + (Q * a) * hcd
 
+open DLMF.Elliptic in
+/-- For `θ, φ ∈ [0, π/2]` and `ψ ∈ [0, π]` with `cos ψ` given by (19.11.4),
+`am(F(θ) + F(φ)) = ψ`: the cosine addition formula for `cn` (DLMF 22.8.2). -/
+private lemma jacobiAmm_add_eq_of_additionCos {k θ φ ψ : ℝ} (hk : k ^ 2 < 1)
+    (hθ : θ ∈ Icc 0 (π / 2)) (hφ : φ ∈ Icc 0 (π / 2)) (hψ : ψ ∈ Icc 0 π)
+    (hc : Real.cos ψ = additionCos k θ φ) :
+    Real.jacobiAmm (Real.incEllIntFm θ (k ^ 2) + Real.incEllIntFm φ (k ^ 2)) (k ^ 2) = ψ := by
+  set m := k ^ 2 with hmdef
+  have hm : m < 1 := hk
+  have hF := Real.strictMono_incEllIntFm hm
+  set u := Real.incEllIntFm θ m
+  set v := Real.incEllIntFm φ m
+  have hF0 : Real.incEllIntFm 0 m = 0 := by simp [Real.incEllIntFm]
+  have hu0 : 0 ≤ u := hF0 ▸ hF.monotone hθ.1
+  have hv0 : 0 ≤ v := hF0 ▸ hF.monotone hφ.1
+  have huK : u ≤ Real.compEllIntKm m := Real.incEllIntFm_pi_div_two m ▸ hF.monotone hθ.2
+  have hvK : v ≤ Real.compEllIntKm m := Real.incEllIntFm_pi_div_two m ▸ hF.monotone hφ.2
+  have hamle : ∀ a b : ℝ, a ≤ b → Real.jacobiAmm a m ≤ Real.jacobiAmm b m := by
+    intro a b hab
+    rw [← hF.le_iff_le, Real.incEllIntFm_jacobiAmm hm, Real.incEllIntFm_jacobiAmm hm]
+    exact hab
+  have h1 : 0 ≤ Real.jacobiAmm (u + v) m := by
+    have := hamle 0 (u + v) (by linarith)
+    rwa [Real.jacobiAmm_zero hm] at this
+  have h2 : Real.jacobiAmm (u + v) m ≤ π := by
+    have := hamle (u + v) (0 + 2 * Real.compEllIntKm m) (by linarith)
+    rwa [Real.jacobiAmm_add_two_compEllIntKm hm, Real.jacobiAmm_zero hm, zero_add] at this
+  have hamu : Real.jacobiAmm u m = θ := Real.jacobiAmm_incEllIntFm hm θ
+  have hamv : Real.jacobiAmm v m = φ := Real.jacobiAmm_incEllIntFm hm φ
+  have hcos : Real.cos (Real.jacobiAmm (u + v) m) = additionCos k θ φ := by
+    have := Real.jacobiCnm_add hm u v
+    simp only [Real.jacobiCnm, Real.jacobiSnm, Real.jacobiDnm, hamu, hamv] at this
+    rw [this, additionCos, ellDeltaReal, ellDeltaReal, Real.sqrt_eq_rpow, Real.sqrt_eq_rpow]
+  exact Real.injOn_cos ⟨h1, h2⟩ hψ (hcos.trans hc.symm)
+
 /-- DLMF 19.11.1: `F(θ, k) + F(φ, k) = F(ψ, k)` for real `k² < 1`, `θ, φ ∈ [0, π/2]`, with
 `ψ ∈ [0, π]` given by (19.11.3) and (19.11.4). -/
 @[dlmf 19.11.E1, dlmf 19.11.E3]
@@ -183,7 +219,11 @@ theorem incEllIntFk_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 
     (hφ : φ ∈ Icc 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = additionSin k θ φ)
     (hc : Real.cos ψ = additionCos k θ φ) :
     incEllIntFk θ k + incEllIntFk φ k = incEllIntFk ψ k := by
-  sorry
+  have hk' : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; rfl
+  rw [incEllIntFk_eq_ofReal hk' hk.le, incEllIntFk_eq_ofReal hk' hk.le,
+    incEllIntFk_eq_ofReal hk' hk.le, ← jacobiAmm_add_eq_of_additionCos hk hθ hφ hψ hc,
+    DLMF.Elliptic.Real.incEllIntFm_jacobiAmm hk]
+  push_cast; rfl
 
 /-- DLMF 19.11.2: `E(θ, k) + E(φ, k) = E(ψ, k) + k² sin θ sin φ sin ψ`, hypotheses as in
 (19.11.1). -/
@@ -193,7 +233,19 @@ theorem incEllIntEk_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 
     (hc : Real.cos ψ = additionCos k θ φ) :
     incEllIntEk θ k + incEllIntEk φ k =
       incEllIntEk ψ k + k ^ 2 * Real.sin θ * Real.sin φ * Real.sin ψ := by
-  sorry
+  have hk' : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; rfl
+  have hA := jacobiAmm_add_eq_of_additionCos hk hθ hφ hψ hc
+  have hm : k ^ 2 < 1 := hk
+  have H := DLMF.JacobiElliptic.Real.jacobiEpsilonk_add hm
+    (DLMF.Elliptic.Real.incEllIntFm θ (k ^ 2)) (DLMF.Elliptic.Real.incEllIntFm φ (k ^ 2))
+  rw [← DLMF.JacobiElliptic.Real.incEllIntEm_jacobiAmm hm,
+    ← DLMF.JacobiElliptic.Real.incEllIntEm_jacobiAmm hm,
+    ← DLMF.JacobiElliptic.Real.incEllIntEm_jacobiAmm hm, hA,
+    DLMF.Elliptic.Real.jacobiAmm_incEllIntFm hm, DLMF.Elliptic.Real.jacobiAmm_incEllIntFm hm] at H
+  simp only [DLMF.Elliptic.Real.jacobiSnm, hA, DLMF.Elliptic.Real.jacobiAmm_incEllIntFm hm] at H
+  rw [incEllIntEk_eq_ofReal hk' hk.le, incEllIntEk_eq_ofReal hk' hk.le,
+    incEllIntEk_eq_ofReal hk' hk.le, H]
+  push_cast; ring
 
 /-- DLMF 19.11.5–19.11.6: `Π(θ, α², k) + Π(φ, α², k) = Π(ψ, α², k) - α² R_C(γ - δ, γ)` with
 `γ = (csc²θ - α²)(csc²φ - α²)(csc²ψ - α²)`, `δ = α²(1 - α²)(α² - k²)`; real `k² < 1`,

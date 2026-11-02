@@ -11,6 +11,7 @@ public import DLMF.AsymptoticApproximations.Integrals.Basic
 public import DLMFMathlib.Analysis.Asymptotics.WatsonKernel
 public import DLMFMathlib.Analysis.Asymptotics.WatsonLog
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
+public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import Mathlib.Analysis.MellinTransform
 
 /-!
@@ -289,7 +290,50 @@ theorem watson_lemma_rotate {q : ℂ → V} {a : ℕ → V} {lam : ℂ} {mu c δ
       (fun s => Complex.Gamma (((s : ℂ) + lam) / mu) • a s)
       (fun z => Complex.exp (θ * I) • ∫ r in Ioi (0 : ℝ),
         Complex.exp (-(z * Complex.exp (θ * I) * r)) • q (r * Complex.exp (θ * I))) := by
-  sorry
+  have hθ1 : -π < θ := by linarith [neg_abs_le θ, Real.pi_pos]
+  have hθ2 : θ ≤ π := by linarith [le_abs_self θ, Real.pi_pos]
+  set x : ℕ → ℂ := fun s => ((s : ℂ) + lam - mu) / mu with hx
+  -- the expansion of `G(r) = e^{iθ} q(r e^{iθ})` in powers of `r`
+  have hG := (hq.smul_scale (κ := fun s => exp (θ * I * x s))
+    (ψ := fun (s : ℕ) (r : ℝ) => (r : ℂ) ^ x s) fun s => by
+      filter_upwards [self_mem_nhdsWithin] with r (hr : 0 < r)
+      rw [Complex.ofReal_mul_exp_cpow hr hθ1 hθ2]; ring).const_smul (exp (θ * I))
+  have hintG : IntegrableOn (fun r : ℝ => Real.exp (-c * r) •
+      (exp (θ * I) • q (r * Complex.exp (θ * I)))) (Ioi 0) := by
+    refine IntegrableOn.congr_fun (hint.smul (exp (θ * I))) (fun r _ => ?_) measurableSet_Ioi
+    simp only [Pi.smul_apply]
+    rw [smul_comm]
+  have hW := (watson_lemma_sector hlam hmu hδ hintG hG).comp_tendsto
+    (tendsto_comap : Tendsto (fun z : ℂ => z * exp (θ * I))
+      (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ)) (sectorAtTop δ))
+  have hev : ∀ᶠ z in comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ),
+      z ≠ 0 ∧ |arg z + θ| < Real.pi / 2 := by
+    have h := (tendsto_comap : Tendsto (fun z : ℂ => z * exp (θ * I))
+      (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ)) (sectorAtTop δ)).eventually
+      (eventually_sectorAtTop (R := 1) (p := fun w : ℂ => 0 < w.re) fun w hw hws => by
+        nlinarith)
+    filter_upwards [h] with z hz
+    refine ⟨fun h0 => by simp [h0] at hz, Complex.abs_arg_add_lt_of_re_mul_exp_pos hθ hz⟩
+  refine (((hW.smul_scale (κ := fun s => exp (θ * I * (-(((s : ℂ) + lam) / mu))))
+    (ψ := fun (s : ℕ) (z : ℂ) => z ^ (-(((s : ℂ) + lam) / mu))) fun s => ?_)).congr_coeff
+      ?_).congr' ?_
+  · filter_upwards [hev] with z hz
+    rw [Complex.cpow_mul_exp_ofReal_mul_I hz.1 (by linarith [(abs_lt.mp hz.2).1, Real.pi_pos])
+      (by linarith [(abs_lt.mp hz.2).2, Real.pi_pos])]
+    ring
+  · funext s
+    have hmu' : (mu : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hmu.ne'
+    simp only [Pi.smul_apply, smul_smul, hx]
+    congr 1
+    rw [mul_left_comm, ← Complex.exp_add, ← Complex.exp_add]
+    rw [show (θ : ℂ) * I * -(((s : ℂ) + lam) / mu) +
+        (θ * I + θ * I * (((s : ℂ) + lam - mu) / mu)) = 0 by field_simp; ring, Complex.exp_zero,
+      mul_one]
+  · refine Eventually.of_forall fun z => ?_
+    simp only [Function.comp]
+    rw [← integral_smul]
+    refine setIntegral_congr_fun measurableSet_Ioi fun r _ => ?_
+    rw [smul_comm]
 
 end Sector
 

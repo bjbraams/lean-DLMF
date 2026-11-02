@@ -54,6 +54,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-- The letter permutation `s ↔ c`, `d ↔ n` induced by `z ↦ z + K`. -/
 def JacobiLetter.swapK : JacobiLetter → JacobiLetter
   | .s => .c

@@ -7,6 +7,10 @@ module
 
 public import DLMF.AlgebraicAnalytic.ODE.Basic
 public import DLMFMathlib.Analysis.ODE.EntireLinear
+public import DLMFMathlib.Analysis.ODE.BallLinear
+public import TauCeti.Analysis.Complex.Conformal.RiemannMapping.Normalization
+public import Mathlib.Analysis.Complex.HasPrimitives
+public import TauCeti.Analysis.Complex.Conformal.Inverse.Function
 public import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
 
 /-!
@@ -33,6 +37,11 @@ coefficients (`IsLinODE2SolOn f g r w D`).
   inhomogeneous equation, its general solution 1.13.9 and variation of parameters 1.13.10.
 
 ## Implementation notes
+
+Existence on a simply connected proper domain transports the equation to the unit disc by a
+normalized Riemann map (Tau Ceti's `TauCeti.riemannMapping_normalized`) and solves it there by
+`ODE.exists_ball_solution_linear_ode`; the same transport gives primitives, which feed
+variation of parameters for the inhomogeneous equation.
 
 Abel's identity is stated given a primitive `F` of `f`, so that `e^{-∫ f} = e^{-F}`; variation
 of parameters is stated given primitives of `w₁ r/𝒲` and `w₂ r/𝒲`.
@@ -94,15 +103,6 @@ private lemma deriv_const_mul_add_const_mul_of_isLinODE2SolOn {w v : ℂ → ℂ
 
 /-! ## Existence and uniqueness (§1.13(i)) -/
 
-/-- DLMF §1.13(i): on a simply connected domain `D`, with `f`, `g` analytic in `D`, the equation
-1.13.1 has a solution with prescribed `w(z₀)` and `w'(z₀)` at any `z₀ ∈ D` (so infinitely many
-analytic solutions). -/
-@[dlmf 1.13.i]
-theorem exists_isLinODE2SolOn (hD : IsOpen D) (hsc : IsSimplyConnected D)
-    (hf : DifferentiableOn ℂ f D) (hg : DifferentiableOn ℂ g D) {z₀ : ℂ} (hz₀ : z₀ ∈ D)
-    (w₀ w₁ : ℂ) : ∃ w, IsLinODE2SolOn f g 0 w D ∧ w z₀ = w₀ ∧ deriv w z₀ = w₁ := by
-  sorry
-
 /-- DLMF §1.13(i) for entire coefficients: `w'' + f w' + g w = 0` has an entire solution with
 prescribed `w(z₀)`, `w'(z₀)`. -/
 @[dlmf 1.13.i]
@@ -113,6 +113,99 @@ theorem exists_isLinODE2SolOn_univ (hf : Differentiable ℂ f) (hg : Differentia
   refine ⟨w, fun z _ => ⟨hw z, (hode z).congr_deriv ?_⟩, h0, h1⟩
   simp only [Pi.zero_apply]
   ring
+
+/-- A Riemann map of a simply connected proper domain `D` onto the unit disc, normalized by
+`φ(z₀) = 0`, together with its holomorphic inverse `ψ` and the chain rule `ψ'(φ z) φ'(z) = 1`. -/
+private lemma exists_riemannMap_data (hD : IsOpen D) (hsc : IsSimplyConnected D) (hne : D ≠ univ)
+    {z₀ : ℂ} (hz₀ : z₀ ∈ D) :
+    ∃ φ ψ : ℂ → ℂ, φ z₀ = 0 ∧ AnalyticOnNhd ℂ φ D ∧ DifferentiableOn ℂ ψ (Metric.ball 0 1) ∧
+      MapsTo φ D (Metric.ball 0 1) ∧ MapsTo ψ (Metric.ball 0 1) D ∧ LeftInvOn ψ φ D ∧
+      ∀ z ∈ D, deriv ψ (φ z) * deriv φ z = 1 := by
+  obtain ⟨φ, hφ, -⟩ := TauCeti.riemannMapping_normalized hD hsc hne hz₀
+  set ψ := Function.invFunOn φ D
+  have hbij := hφ.bijOn
+  have hψd : DifferentiableOn ℂ ψ (Metric.ball 0 1) := by
+    have := _root_.DifferentiableOn.invFunOn hφ.differentiableOn hD hbij.injOn
+    rwa [hbij.image_eq] at this
+  have hleft : LeftInvOn ψ φ D := hbij.injOn.leftInvOn_invFunOn
+  have hψD : MapsTo ψ (Metric.ball 0 1) D := fun ζ hζ => Function.invFunOn_mem (hbij.surjOn hζ)
+  have hφa : AnalyticOnNhd ℂ φ D := hφ.differentiableOn.analyticOnNhd hD
+  refine ⟨φ, ψ, hφ.map_base, hφa, hψd, hbij.mapsTo, hψD, hleft, fun z hz => ?_⟩
+  have hev : ψ ∘ φ =ᶠ[𝓝 z] id := by
+    filter_upwards [hD.mem_nhds hz] with y hy using hleft hy
+  have h1 : HasDerivAt (ψ ∘ φ) (deriv ψ (φ z) * deriv φ z) z :=
+    ((hψd.differentiableAt (Metric.isOpen_ball.mem_nhds (hbij.mapsTo hz))).hasDerivAt).comp z
+      (hφa z hz).differentiableAt.hasDerivAt
+  exact h1.unique ((hasDerivAt_id z).congr_of_eventuallyEq hev)
+
+/-- A holomorphic function on a simply connected open set has a primitive vanishing at a given
+point (via the Riemann mapping theorem and Morera's theorem on the disc). -/
+private lemma exists_primitive_of_isSimplyConnected (hD : IsOpen D) (hsc : IsSimplyConnected D)
+    {F : ℂ → ℂ} (hF : DifferentiableOn ℂ F D) {z₀ : ℂ} (hz₀ : z₀ ∈ D) :
+    ∃ G : ℂ → ℂ, (∀ z ∈ D, HasDerivAt G (F z) z) ∧ G z₀ = 0 := by
+  suffices h : ∃ G : ℂ → ℂ, ∀ z ∈ D, HasDerivAt G (F z) z by
+    obtain ⟨G, hG⟩ := h
+    exact ⟨fun z => G z - G z₀, fun z hz => (hG z hz).sub_const _, sub_self _⟩
+  by_cases hne : D = univ
+  · subst hne
+    exact (differentiableOn_univ.mp hF).isExactOn_univ
+  obtain ⟨φ, ψ, -, hφa, hψd, hφD, hψD, hleft, hchain⟩ := exists_riemannMap_data hD hsc hne hz₀
+  have hψa : AnalyticOnNhd ℂ ψ (Metric.ball 0 1) := hψd.analyticOnNhd Metric.isOpen_ball
+  obtain ⟨H, hH⟩ := ((hF.comp hψd hψD).mul hψa.deriv.differentiableOn).isExactOn_ball
+  refine ⟨H ∘ φ, fun z hz => ?_⟩
+  have h := (hH (φ z) (hφD hz)).comp z (hφa z hz).differentiableAt.hasDerivAt
+  convert h using 1
+  change F z = F (ψ (φ z)) * deriv ψ (φ z) * deriv φ z
+  rw [hleft hz, mul_assoc, hchain z hz, mul_one]
+
+/-- DLMF §1.13(i): on a simply connected domain `D`, with `f`, `g` analytic in `D`, the equation
+1.13.1 has a solution with prescribed `w(z₀)` and `w'(z₀)` at any `z₀ ∈ D` (so infinitely many
+analytic solutions). -/
+@[dlmf 1.13.i]
+theorem exists_isLinODE2SolOn (hD : IsOpen D) (hsc : IsSimplyConnected D)
+    (hf : DifferentiableOn ℂ f D) (hg : DifferentiableOn ℂ g D) {z₀ : ℂ} (hz₀ : z₀ ∈ D)
+    (w₀ w₁ : ℂ) : ∃ w, IsLinODE2SolOn f g 0 w D ∧ w z₀ = w₀ ∧ deriv w z₀ = w₁ := by
+  by_cases hne : D = univ
+  · subst hne
+    obtain ⟨w, hw, h0, h1⟩ := exists_isLinODE2SolOn_univ (differentiableOn_univ.mp hf)
+      (differentiableOn_univ.mp hg) z₀ w₀ w₁
+    exact ⟨w, hw, h0, h1⟩
+  obtain ⟨φ, ψ, hφ0, hφa, hψd, hφD, hψD, hleft, hchain⟩ := exists_riemannMap_data hD hsc hne hz₀
+  have hφ'ne : ∀ z ∈ D, deriv φ z ≠ 0 := fun z hz h => by simpa [h] using hchain z hz
+  have hd1 : DifferentiableOn ℂ (deriv φ) D := hφa.deriv.differentiableOn
+  have hd2 : DifferentiableOn ℂ (deriv (deriv φ)) D := hφa.deriv.deriv.differentiableOn
+  set P : ℂ → ℂ := fun ζ =>
+    -((deriv (deriv φ) (ψ ζ) + f (ψ ζ) * deriv φ (ψ ζ)) / deriv φ (ψ ζ) ^ 2)
+  set Q : ℂ → ℂ := fun ζ => -(g (ψ ζ) / deriv φ (ψ ζ) ^ 2)
+  have hne2 : ∀ ζ ∈ Metric.ball (0 : ℂ) 1, deriv φ (ψ ζ) ^ 2 ≠ 0 := fun ζ hζ =>
+    pow_ne_zero _ (hφ'ne _ (hψD hζ))
+  have hPd : DifferentiableOn ℂ P (Metric.ball 0 1) :=
+    (((hd2.comp hψd hψD).add ((hf.comp hψd hψD).mul (hd1.comp hψd hψD))).div
+      ((hd1.comp hψd hψD).pow 2) hne2).neg
+  have hQd : DifferentiableOn ℂ Q (Metric.ball 0 1) :=
+    ((hg.comp hψd hψD).div ((hd1.comp hψd hψD).pow 2) hne2).neg
+  obtain ⟨v, hvd, hvode, hv0, hv1⟩ :=
+    ODE.exists_ball_solution_linear_ode hPd hQd w₀ (w₁ / deriv φ z₀)
+  have hvda : ∀ z ∈ D, HasDerivAt v (deriv v (φ z)) (φ z) := fun z hz =>
+    (hvd.differentiableAt (Metric.isOpen_ball.mem_nhds (hφD hz))).hasDerivAt
+  have hderiv : ∀ z ∈ D, HasDerivAt (v ∘ φ) (deriv v (φ z) * deriv φ z) z := fun z hz =>
+    (hvda z hz).comp z (hφa z hz).differentiableAt.hasDerivAt
+  refine ⟨v ∘ φ, fun z hz => ⟨(hderiv z hz).differentiableAt, ?_⟩, ?_, ?_⟩
+  · have hev : deriv (v ∘ φ) =ᶠ[𝓝 z] fun y => deriv v (φ y) * deriv φ y := by
+      filter_upwards [hD.mem_nhds hz] with y hy using (hderiv y hy).deriv
+    have h2 := ((hvode (φ z) (hφD hz)).comp z
+      (hφa z hz).differentiableAt.hasDerivAt).mul
+      (hd1.differentiableAt (hD.mem_nhds hz)).hasDerivAt
+    refine (h2.congr_of_eventuallyEq hev).congr_deriv ?_
+    rw [(hderiv z hz).deriv]
+    have hψφ : ψ (φ z) = z := hleft hz
+    have hnz := hφ'ne z hz
+    simp only [P, Q, hψφ, Function.comp_apply, Pi.zero_apply]
+    field_simp
+    ring
+  · simp [hφ0, hv0]
+  · rw [(hderiv z₀ hz₀).deriv, hφ0, hv1]
+    field_simp [hφ'ne z₀ hz₀]
 
 /-- DLMF §1.13(i): a solution of 1.13.1 on a connected open set `D` (with `f`, `g` analytic in
 `D`) is uniquely determined by `w(z₀)` and `w'(z₀)`. -/
@@ -320,16 +413,6 @@ theorem isLinODE2SolOn_param_analytic {U : Set ℂ} (hU : IsOpen U) (hD : IsOpen
 
 /-! ## Inhomogeneous equations (§1.13(iii)) -/
 
-/-- DLMF §1.13(iii): on a simply connected domain `D`, with `f`, `g`, `r` analytic in `D`, the
-inhomogeneous equation 1.13.8 has a solution with prescribed `w(z₀)`, `w'(z₀)` (so infinitely
-many analytic solutions). -/
-@[dlmf 1.13.E8, dlmf 1.13.iii]
-theorem exists_isLinODE2SolOn_inhom (hD : IsOpen D) (hsc : IsSimplyConnected D)
-    (hf : DifferentiableOn ℂ f D) (hg : DifferentiableOn ℂ g D) (hr : DifferentiableOn ℂ r D)
-    {z₀ : ℂ} (hz₀ : z₀ ∈ D) (w₀ w₁ : ℂ) :
-    ∃ w, IsLinODE2SolOn f g r w D ∧ w z₀ = w₀ ∧ deriv w z₀ = w₁ := by
-  sorry
-
 /-- DLMF 1.13.9: if `w₀` solves the inhomogeneous equation 1.13.8 and `w₁`, `w₂` are a
 fundamental pair of 1.13.1 in the open set `D`, every solution of 1.13.8 is
 `w₀ + A w₁ + B w₂`. -/
@@ -378,5 +461,44 @@ theorem isLinODE2SolOn_varParam (hD : IsOpen D) {w₁ w₂ P Q : ℂ → ℂ}
     ring
   simp only [Pi.zero_apply]
   linear_combination key
+
+/-- DLMF §1.13(iii): on a simply connected domain `D`, with `f`, `g`, `r` analytic in `D`, the
+inhomogeneous equation 1.13.8 has a solution with prescribed `w(z₀)`, `w'(z₀)` (so infinitely
+many analytic solutions). -/
+@[dlmf 1.13.E8, dlmf 1.13.iii]
+theorem exists_isLinODE2SolOn_inhom (hD : IsOpen D) (hsc : IsSimplyConnected D)
+    (hf : DifferentiableOn ℂ f D) (hg : DifferentiableOn ℂ g D) (hr : DifferentiableOn ℂ r D)
+    {z₀ : ℂ} (hz₀ : z₀ ∈ D) (w₀ w₁ : ℂ) :
+    ∃ w, IsLinODE2SolOn f g r w D ∧ w z₀ = w₀ ∧ deriv w z₀ = w₁ := by
+  obtain ⟨u₁, h₁, h10, h11⟩ := exists_isLinODE2SolOn hD hsc hf hg hz₀ 1 0
+  obtain ⟨u₂, h₂, h20, h21⟩ := exists_isLinODE2SolOn hD hsc hf hg hz₀ 0 1
+  have hDc : IsPreconnected D := hsc.isPathConnected.isConnected.isPreconnected
+  obtain ⟨F, hF, -⟩ := exists_primitive_of_isSimplyConnected hD hsc hf hz₀
+  obtain ⟨c, hc⟩ := wronskian_eq_mul_exp hD hDc hF h₁ h₂
+  have hc0 : c ≠ 0 := by
+    intro h
+    have := hc z₀ hz₀
+    simp [h, ODE.wronskian, h10, h11, h20, h21] at this
+  have hW : ∀ z ∈ D, ODE.wronskian u₁ u₂ z ≠ 0 := fun z hz => by
+    rw [hc z hz]; exact mul_ne_zero hc0 (Complex.exp_ne_zero _)
+  have ha₁ := h₁.analyticOnNhd hD
+  have ha₂ := h₂.analyticOnNhd hD
+  have hWd : DifferentiableOn ℂ (ODE.wronskian u₁ u₂) D := by
+    unfold ODE.wronskian
+    exact (ha₁.differentiableOn.mul ha₂.deriv.differentiableOn).sub
+      (ha₂.differentiableOn.mul ha₁.deriv.differentiableOn)
+  obtain ⟨P, hP, hP0⟩ := exists_primitive_of_isSimplyConnected hD hsc
+    ((ha₁.differentiableOn.mul hr).div hWd hW) hz₀
+  obtain ⟨Q, hQ, hQ0⟩ := exists_primitive_of_isSimplyConnected hD hsc
+    ((ha₂.differentiableOn.mul hr).div hWd hW) hz₀
+  have hp := isLinODE2SolOn_varParam hD h₁ h₂ hW hP hQ
+  have hhom := h₁.linear_combination hD h₂ w₀ w₁ (r := 0) (fun z _ => by simp)
+  have htot := hp.linear_combination hD hhom 1 1 (r := r) (fun z _ => by simp)
+  refine ⟨_, htot, by simp [hP0, hQ0, h10, h20], ?_⟩
+  rw [deriv_const_mul_add_const_mul_of_isLinODE2SolOn hp hhom 1 1 hz₀,
+    deriv_const_mul_add_const_mul_of_isLinODE2SolOn h₁ h₂ w₀ w₁ hz₀,
+    (hasDerivAt_variationOfParameters (h₁ z₀ hz₀).1 (h₂ z₀ hz₀).1 (hP z₀ hz₀)
+      (hQ z₀ hz₀)).deriv, hP0, hQ0, h11, h21]
+  ring
 
 end DLMF.AlgebraicAnalytic

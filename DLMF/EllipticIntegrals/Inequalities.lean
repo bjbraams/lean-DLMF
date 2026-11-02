@@ -17,7 +17,7 @@ public import Carlson.Mean.Bounds
 DLMF §19.9 states inequalities for real modulus `0 < k < 1`, `k' = √(1 - k²)`, and, in
 §19.9(ii), real amplitude `0 ≤ φ ≤ π/2` with `Δ = √(1 - k² sin²φ) > 0`. The Legendre integrals
 are the complex DLMF integrals of `DLMF.EllipticIntegrals` (`incEllIntFk`, `incEllIntEk`,
-`incEllIntPik`, `compEllIntEk`, `compEllIntPik`, and `DLMF.JacobiElliptic.compEllIntKk`,
+`incEllIntPik`, `compEllIntEk`, `compEllIntPik`, and `DLMF.EllipticIntegrals.compEllIntKk`,
 `cCompEllIntKk`), evaluated at real arguments; there they are real
 (`incEllIntFk_eq_ofReal` etc.), and the inequalities are stated for their real parts.
 

@@ -38,6 +38,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-! ### Theta toolkit: nonvanishing of the theta constants and half-period shifts -/
 
 open DLMF.QSeries DLMF.QSeries.TripleProduct in

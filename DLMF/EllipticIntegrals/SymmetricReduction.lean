@@ -717,71 +717,19 @@ theorem ellRed_quad_first {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 ≤ y) (hxy : 
     (hint : IntegrableOn (fun t => 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))) (Ioo y x)) :
     ((∫ t in Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
       symEllIntRF (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
-        (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) := by
-  sorry
-
-/-- The algebra behind the positivity of the arguments in (19.29.19): with
-`(x² - y²) U = x P₁(y) P₂(y) + y P₁(x) P₂(x)` and `(x² - y²) W = x P₁(x) P₂(y) + y P₁(y) P₂(x)`,
-`P_j(t)² = a_j + b_j t²`, one has `W² - U² = a₂ b₁` (`U_{12}² - U_{14}² = d_{13} d_{24}`, 19.29.5). -/
-private lemma quadratic_product_sq_identity {a₁ b₁ a₂ b₂ x y p₁ q₁ p₂ q₂ : ℝ} (hxy : x ^ 2 - y ^ 2 ≠ 0)
-    (h₁ : p₁ ^ 2 = a₁ + b₁ * x ^ 2) (h₂ : p₂ ^ 2 = a₂ + b₂ * x ^ 2)
-    (k₁ : q₁ ^ 2 = a₁ + b₁ * y ^ 2) (k₂ : q₂ ^ 2 = a₂ + b₂ * y ^ 2) :
-    ((x * p₁ * q₂ + y * q₁ * p₂) / (x ^ 2 - y ^ 2)) ^ 2 =
-      ((x * (q₁ * q₂) + y * (p₁ * p₂)) / (x ^ 2 - y ^ 2)) ^ 2 + a₂ * b₁ := by
-  rw [div_pow, div_pow, div_add' _ _ _ (pow_ne_zero 2 hxy), div_left_inj' (pow_ne_zero 2 hxy)]
-  linear_combination (x ^ 2 * q₂ ^ 2 - y ^ 2 * p₂ ^ 2) * h₁ - (x ^ 2 * q₂ ^ 2 - y ^ 2 * p₂ ^ 2) * k₁ +
-    (-(b₁ * (x ^ 2 - y ^ 2)) * y ^ 2) * h₂ + (b₁ * (x ^ 2 - y ^ 2) * x ^ 2) * k₂
+        (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) :=
+  integral_quadratic_product_eq_symEllIntRF hy hxy hQ
 
 /-- DLMF 19.29.19 for `0 < y` and both `Q_j` positive on `[y, x]` (proved): Carlson's
 Exercise 9.8-3, `Carlson.integral_quadratic_mul_quadratic` of `lean-codes`, in DLMF's notation;
-the arguments of `R_F` are positive (`quadratic_product_sq_identity`). -/
+the arguments of `R_F` are positive (`ellRedQuadU_args_pos`). -/
 @[dlmf 19.29.E19]
 theorem ellRed_quad_first_of_pos {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 < y) (hxy : y < x)
     (hQ : ∀ t ∈ Icc y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2) :
     ((∫ t in Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
       symEllIntRF (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
-        (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) := by
-  have H := Carlson.integral_quadratic_mul_quadratic (a := b₁) (c := a₁) (α := b₂) (γ := a₂)
-    hy hxy (fun t ht => by obtain ⟨h1, h2⟩ := hQ t ht; exact ⟨by linarith, by linarith⟩)
-  have e1 : ∀ t : ℝ, (b₁ * t ^ 2 + a₁) * (b₂ * t ^ 2 + a₂) = (a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2) :=
-    fun t => by ring
-  simp only [e1] at H
-  have hx0 : 0 < x := hy.trans hxy
-  have hd : 0 < x ^ 2 - y ^ 2 := by nlinarith
-  obtain ⟨px1, px2⟩ := hQ x ⟨hxy.le, le_rfl⟩
-  obtain ⟨py1, py2⟩ := hQ y ⟨le_rfl, hxy.le⟩
-  have hU : 0 < ellRedQuadU a₁ b₁ a₂ b₂ x y := by
-    unfold ellRedQuadU
-    have : 0 < √((a₁ + b₁ * y ^ 2) * (a₂ + b₂ * y ^ 2)) := Real.sqrt_pos.mpr (by positivity)
-    positivity
-  -- the two other arguments are squares of positive numbers
-  have hsq : ∀ {c₁ d₁ c₂ d₂ : ℝ}, 0 < c₁ + d₁ * x ^ 2 → 0 < c₂ + d₂ * x ^ 2 →
-      0 < c₁ + d₁ * y ^ 2 → 0 < c₂ + d₂ * y ^ 2 →
-      0 < ellRedQuadU c₁ d₁ c₂ d₂ x y ^ 2 + c₂ * d₁ := by
-    intro c₁ d₁ c₂ d₂ g1 g2 g3 g4
-    unfold ellRedQuadU
-    rw [Real.sqrt_mul g3.le, Real.sqrt_mul g1.le, ← quadratic_product_sq_identity hd.ne'
-      (Real.sq_sqrt g1.le) (Real.sq_sqrt g2.le) (Real.sq_sqrt g3.le) (Real.sq_sqrt g4.le)]
-    have := Real.sqrt_pos.mpr g1; have := Real.sqrt_pos.mpr g4
-    positivity
-  have hB : 0 < ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ := hsq px1 px2 py1 py2
-  have hA : 0 < ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ := by
-    have := hsq (c₁ := a₂) (d₁ := b₂) (c₂ := a₁) (d₂ := b₁) px2 px1 py2 py1
-    have e : ellRedQuadU a₂ b₂ a₁ b₁ x y = ellRedQuadU a₁ b₁ a₂ b₂ x y := by
-      unfold ellRedQuadU; rw [mul_comm (a₂ + _), mul_comm (a₂ + b₂ * x ^ 2)]
-    rwa [e] at this
-  have hint : ∀ t ∈ Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) =
-      ((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) ^ (-1 / 2 : ℝ) := by
-    intro t ht
-    obtain ⟨q1, q2⟩ := hQ t (Ioo_subset_Icc_self ht)
-    rw [Real.sqrt_eq_rpow, show (-1 / 2 : ℝ) = -(1 / 2) by norm_num,
-      Real.rpow_neg (by positivity), one_div]
-  rw [setIntegral_congr_fun measurableSet_Ioo hint, H]
-  rw [symEllIntRF_comm_left, symEllIntRF_comm_right, symEllIntRF_comm_left,
-    symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr (by positivity))
-      (ofReal_mem_slitPlane.mpr hB) (ofReal_mem_slitPlane.mpr hA)]
-  unfold ellRedQuadU
-  rw [mul_comm a₂ b₁]
+        (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) :=
+  integral_quadratic_product_eq_symEllIntRF_of_pos hy hxy hQ
 
 /-- DLMF 19.29.20: with the hypotheses of (19.29.19) and `U ≠ 0`,
 `∫_y^x t² dt / √(Q₁(t) Q₂(t)) = (1/3) a₁ a₂ R_D(U² + a₁b₂, U² + a₂b₁, U²) + xy/U`. -/
@@ -835,7 +783,15 @@ theorem ellRed_quad_degenerate {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 < y) (hxy
 theorem ellRed_quad_infinite {a b y : ℝ} (hb : 0 ≤ b) (hby : b ≤ y) (hy : 0 < y) :
     ((∫ t in Ioi y, 1 / √((t ^ 2 + a ^ 2) * (t ^ 2 - b ^ 2)) : ℝ) : ℂ) =
       symEllIntRF (y ^ 2 + a ^ 2 : ℝ) (y ^ 2 - b ^ 2 : ℝ) (y ^ 2 : ℝ) := by
-  sorry
+  have h := integral_Ioi_quadratic_product_eq_symEllIntRF (a₁ := a ^ 2) (b₁ := 1)
+    (a₂ := -b ^ 2) (b₂ := 1) hy.le
+    (fun t (ht : y < t) => ⟨by nlinarith [sq_nonneg a], by nlinarith⟩)
+    (by norm_num)
+  have e : (fun t : ℝ => 1 / √((t ^ 2 + a ^ 2) * (t ^ 2 - b ^ 2))) =
+      fun t => 1 / √((a ^ 2 + 1 * t ^ 2) * (-b ^ 2 + 1 * t ^ 2)) := by
+    funext t; ring_nf
+  rw [e, h]
+  congr 2 <;> ring
 
 /-- DLMF 19.29.25: `S_j = (√Q_j(x) + √Q_j(y))² - h_j (x - y)²` for
 `Q_j(t) = f_j + g_j t + h_j t²`. -/

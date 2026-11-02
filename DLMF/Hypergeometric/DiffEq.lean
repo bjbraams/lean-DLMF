@@ -8,6 +8,7 @@ module
 public import DLMF.Hypergeometric.Contiguous
 public import DLMF.Hypergeometric.Basic.GaussEquation
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
+public import DLMFMathlib.Analysis.Complex.NonInteger
 
 /-!
 # The arcsine evaluation (AAR §2.3)
@@ -36,13 +37,6 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Helper lemma for `arcsin_eq_ordinaryHypergeometric`. -/
-theorem three_halves_not_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := by
-  intro k h
-  have hre : (3 : ℝ) / 2 = -k := by simpa using congrArg Complex.re h
-  have : (0 : ℝ) ≤ k := Nat.cast_nonneg k
-  linarith
-
-/-- Helper lemma for `arcsin_eq_ordinaryHypergeometric`. -/
 theorem one_sub_sq_cpow_neg_half {t : ℝ} (ht : |t| < 1) :
     ((1 : ℂ) - (t : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) = (1 / Real.sqrt (1 - t ^ 2) : ℝ) := by
   have hnn : 0 < 1 - t ^ 2 := by nlinarith [abs_lt.mp ht]
@@ -68,7 +62,7 @@ theorem ordinaryHypergeometric_arcsin_ident {z : ℂ} (hz : ‖z‖ < 1) :
     ₂F₁ (1 / 2 : ℂ) (1 / 2) (3 / 2) z +
         z / 3 * ₂F₁ (3 / 2 : ℂ) (3 / 2) (5 / 2) z =
       (1 - z) ^ (-(1 / 2 : ℂ)) := by
-  have hc := three_halves_not_neg_nat
+  have hc := Complex.three_div_two_ne_neg_natCast
   have hshift := contiguous_shift_b (a := (1 / 2 : ℂ)) (b := (1 / 2 : ℂ))
     (c := (3 / 2 : ℂ)) hc hz
   simp only [half_add_one_eq_three_halves, three_halves_add_one_eq_five_halves] at hshift
@@ -108,7 +102,7 @@ theorem hasDerivAt_mul_ordinaryHypergeometric_arcsin {t : ℝ} (ht : |t| < 1) :
   have ht2 : ‖(t : ℂ) * (t : ℂ)‖ < 1 := by
     rw [norm_mul]
     nlinarith [ht1, norm_nonneg (t : ℂ)]
-  have hc := three_halves_not_neg_nat
+  have hc := Complex.three_div_two_ne_neg_natCast
   have hF0 := hasDerivAt_ordinaryHypergeometric (a := (1 / 2 : ℂ)) (b := (1 / 2 : ℂ))
     (c := (3 / 2 : ℂ)) hc ht2
   have hF : HasDerivAt (₂F₁ (1 / 2 : ℂ) (1 / 2) (3 / 2))

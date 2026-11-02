@@ -286,7 +286,7 @@ theorem struveMel_value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) 
   split_ifs with hμ
   · subst hμ
     have hG : Gamma (ν + 1 / 2 + (1 - 0) / 2) = Gamma (ν + 1) := by ring_nf
-    rw [hG, show (1 - (0 : ℂ)) / 2 = 1 / 2 by ring, DLMF.Confluent.Gamma_one_half_eq_sqrt,
+    rw [hG, show (1 - (0 : ℂ)) / 2 = 1 / 2 by ring, Complex.Gamma_one_half_eq_sqrt,
       cpow_add _ _ two_ne_zero, cpow_one]
     generalize Gamma (ν + 1 / 2) = G at hG1 ⊢
     rcases eq_or_ne (Gamma (ν + 1)) 0 with h | h

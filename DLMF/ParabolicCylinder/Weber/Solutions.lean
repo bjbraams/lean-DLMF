@@ -343,7 +343,7 @@ theorem pcfGammaPhase_spec (a : ℝ) :
   have hconst := is_const_of_deriv_eq_zero hdiff (fun x => (hhd x).deriv) a 0
   have h0 : h 0 = Real.sqrt π := by
     simp [hh, hPh, hTh]
-    rw [← one_div, Gamma_one_half_eq_sqrt]
+    rw [← one_div, Complex.Gamma_one_half_eq_sqrt]
   rw [h0] at hconst
   simp only [hh] at hconst
   have e1 : exp (I*Ph a)*exp (-I*Ph a) = 1 := by rw [← Complex.exp_add]; simp

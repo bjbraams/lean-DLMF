@@ -6,6 +6,10 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Combinatorics.Permutations.CyclesAndExcedances
+public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
+public import DLMFMathlib.RingTheory.PowerSeriesEvaluation
+public import Mathlib.Analysis.Complex.CauchyIntegral
+public import Mathlib.Analysis.Complex.LocallyUniformLimit
 
 /-!
 # Eulerian numbers (DLMF §26.14)
@@ -332,12 +336,6 @@ theorem sum_pow_inversionNumber {q : ℂ} (hq : q ≠ 1) (n : ℕ) :
           eq_div_iff hq', mul_comm, mul_neg_geom_sum]
         ring
 
-/-- (26.14.4): `∑_{n,k} ⟨n k⟩ x^k tⁿ/n! = (1 - x)/(exp((x - 1)t) - x)` for `|x| < 1`, `|t| < 1`. -/
-@[dlmf 26.14.E4]
-theorem hasSum_eulerianNumber {x t : ℂ} (hx : ‖x‖ < 1) (ht : ‖t‖ < 1) :
-    HasSum (fun nk : ℕ × ℕ => (eulerianNumber nk.1 nk.2 : ℂ) * x ^ nk.2 * t ^ nk.1 / nk.1.factorial)
-      ((1 - x) / (Complex.exp ((x - 1) * t) - x)) := by
-  sorry
 
 /-- (26.14.5), Worpitzky's identity: `∑_{k=0}^{n-1} ⟨n k⟩ C(x + k, n) = xⁿ` for `n ≥ 1` and
 every `x ∈ ℂ`, with `C(y, n) = y(y-1)⋯(y-n+1)/n!`. -/
@@ -621,6 +619,309 @@ theorem eulerianNumber_two_right {n : ℕ} (hn : 1 ≤ n) :
     simp only [Nat.cast_add, Nat.cast_one] at h1 h2 ⊢
     rw [h1]
     linear_combination h2
+
+/-! ### The exponential generating function (26.14.4)
+
+Carlitz's identity `A_n(x) = (1 - x)^{n+1} ∑_j (j+1)ⁿ xʲ` (from 26.14.6) gives the generating
+function for small `t` by expanding `1/(1 - x e^{(1-x)t})`; it extends to `|t| < 1` by the
+identity theorem, since `e^{(x-1)t} ≠ x` there. -/
+
+section GeneratingFunction
+
+open Complex Filter Topology
+
+
+/-- `‖e^z - 1‖ ≤ ‖z‖` for `Re z ≤ 0`. -/
+private lemma norm_exp_sub_one_le_of_re_nonpos {z : ℂ} (hz : z.re ≤ 0) : ‖cexp z - 1‖ ≤ ‖z‖ := by
+  have h := (convex_halfSpace_re_le 0).norm_image_sub_le_of_norm_deriv_le (𝕜 := ℂ) (f := cexp)
+    (C := 1) (x := 0) (y := z) (fun w _ => differentiableAt_exp)
+    (fun w hw => by
+      rw [Complex.deriv_exp, norm_exp]
+      exact Real.exp_le_one_iff.mpr hw) (by simp) hz
+  simpa using h
+
+/-- For `|x| < 1` and `|t| < 1`, `e^{(x-1)t} ≠ x`. -/
+private lemma exp_mul_ne {x t : ℂ} (hx : ‖x‖ < 1) (ht : ‖t‖ < 1) : cexp ((x - 1) * t) ≠ x := by
+  intro h
+  rcases eq_or_ne x 0 with rfl | hx0
+  · exact exp_ne_zero _ h
+  have hre : ((x - 1) * t).re ≤ 0 := by
+    have := congrArg norm h
+    rw [norm_exp] at this
+    have hl : Real.exp ((x - 1) * t).re < 1 := this ▸ hx
+    by_contra hc
+    push Not at hc
+    linarith [Real.one_le_exp hc.le]
+  have h1 := norm_exp_sub_one_le_of_re_nonpos hre
+  rw [h, norm_mul] at h1
+  have hx1 : 0 < ‖x - 1‖ := norm_pos_iff.mpr (sub_ne_zero.mpr (by rintro rfl; simp at hx))
+  have : ‖x - 1‖ * ‖t‖ < ‖x - 1‖ := by nlinarith
+  linarith
+
+
+private lemma summable_succ_pow_mul_pow {x : ℂ} (hx : ‖x‖ < 1) (n : ℕ) :
+    Summable (fun j : ℕ => ((j : ℂ) + 1) ^ n * x ^ j) := by
+  have e : ∀ j : ℕ, ((j : ℂ) + 1) ^ n * x ^ j =
+      ∑ m ∈ range (n + 1), (n.choose m : ℂ) * ((j : ℂ) ^ m * x ^ j) := by
+    intro j
+    rw [add_pow, sum_mul]
+    refine sum_congr rfl fun m _ => ?_
+    simp only [one_pow, mul_one]; ring
+  simp_rw [e]
+  exact summable_sum fun m _ => (summable_pow_mul_geometric_of_norm_lt_one m hx).mul_left _
+
+private lemma eulerianNumber_eq_zero_of_lt {n k : ℕ} (hk : n < k) : eulerianNumber n k = 0 := by
+  rcases n with _ | n
+  · rw [eulerianNumber_zero_left]; simp; omega
+  · obtain ⟨k, rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
+    exact eulerianNumber_succ_eq_zero_of_le (by omega) (by omega)
+
+/-- Carlitz's identity `A_n(x) = (1 - x)^{n+1} ∑_j (j+1)ⁿ xʲ` for the Eulerian polynomial. -/
+private lemma eulerianPoly_eq {x : ℂ} (hx : ‖x‖ < 1) (n : ℕ) :
+    ∑ k ∈ range (n + 1), (eulerianNumber n k : ℂ) * x ^ k =
+      (1 - x) ^ (n + 1) * ∑' j : ℕ, ((j : ℂ) + 1) ^ n * x ^ j := by
+  have hx1 : (1 : ℂ) - x ≠ 0 := sub_ne_zero.mpr (by rintro rfl; simp at hx)
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp [eulerianNumber_zero_left, tsum_geometric_of_norm_lt_one hx, hx1]
+  set Pa : PowerSeries ℤ := PowerSeries.mk fun i => (-1) ^ i * ((n + 1).choose i : ℤ)
+  set Pb : PowerSeries ℤ := PowerSeries.mk fun j => ((j : ℤ) + 1) ^ n
+  have hPa : PowerSeries.HasSumAt Pa x ((1 - x) ^ (n + 1)) := by
+    rw [PowerSeries.hasSumAt_int_iff]
+    have h : HasSum (fun i : ℕ => (((PowerSeries.coeff i Pa : ℤ) : ℂ)) * x ^ i)
+        (∑ i ∈ range (n + 2), (((PowerSeries.coeff i Pa : ℤ) : ℂ)) * x ^ i) :=
+      hasSum_sum_of_ne_finset_zero (fun i hi => by
+        have : n + 1 < i := by simp at hi; omega
+        simp [Pa, Nat.choose_eq_zero_of_lt this])
+    convert h using 1
+    rw [show (1 : ℂ) - x = -x + 1 by ring, add_pow]
+    refine sum_congr rfl fun i _ => ?_
+    simp only [Pa, PowerSeries.coeff_mk, one_pow, mul_one]
+    rw [neg_pow]
+    push_cast
+    ring
+  have hPb : PowerSeries.HasSumAt Pb x (∑' j : ℕ, ((j : ℂ) + 1) ^ n * x ^ j) := by
+    rw [PowerSeries.hasSumAt_int_iff]
+    convert (summable_succ_pow_mul_pow hx n).hasSum using 1
+    funext j; simp [Pb]
+  have hcoeff : ∀ k, PowerSeries.coeff k (Pa * Pb) = (eulerianNumber n k : ℤ) := by
+    intro k
+    rw [eulerianNumber_eq_sum hn, PowerSeries.coeff_mul,
+      Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk]
+    refine sum_congr rfl fun j hj => ?_
+    have hjk : j ≤ k := Nat.lt_succ_iff.mp (mem_range.mp hj)
+    simp only [Pa, Pb, PowerSeries.coeff_mk]
+    push_cast [Nat.cast_sub hjk]
+    ring
+  have h1 := hPa.mul hPb
+  have h2 : PowerSeries.HasSumAt (Pa * Pb) x
+      (∑ k ∈ range (n + 1), (eulerianNumber n k : ℂ) * x ^ k) := by
+    rw [PowerSeries.hasSumAt_int_iff]
+    have h : HasSum (fun k : ℕ => (((PowerSeries.coeff k (Pa * Pb) : ℤ) : ℂ)) * x ^ k)
+        (∑ k ∈ range (n + 1), (((PowerSeries.coeff k (Pa * Pb) : ℤ) : ℂ)) * x ^ k) :=
+      hasSum_sum_of_ne_finset_zero (fun k hk => by
+        have : n < k := by simpa using hk
+        simp [hcoeff, eulerianNumber_eq_zero_of_lt this])
+    convert h using 1
+    refine sum_congr rfl fun k _ => ?_
+    simp [hcoeff]
+  exact h2.unique h1
+
+
+/-- The Eulerian generating function for small `t`, by expanding `1/(1 - x e^{(1-x)t})`. -/
+private lemma hasSum_eulerianPoly_of_small {x t : ℂ} (hx : ‖x‖ < 1)
+    (hs : ‖x‖ * Real.exp ‖(1 - x) * t‖ < 1) :
+    HasSum (fun n : ℕ => (∑ k ∈ range (n + 1), (eulerianNumber n k : ℂ) * x ^ k) * t ^ n /
+      n.factorial) ((1 - x) / (cexp ((x - 1) * t) - x)) := by
+  have hx1 : (1 : ℂ) - x ≠ 0 := sub_ne_zero.mpr (by rintro rfl; simp at hx)
+  set s : ℂ := (1 - x) * t with hsdef
+  set F : ℕ × ℕ → ℂ := fun p => (1 - x) * x ^ p.1 * (((p.1 : ℂ) + 1) * s) ^ p.2 / p.2.factorial
+    with hF
+  have hnorm : ∀ p : ℕ × ℕ, ‖F p‖ = ‖1 - x‖ * ‖x‖ ^ p.1 *
+      (((p.1 : ℝ) + 1) * ‖s‖) ^ p.2 / p.2.factorial := by
+    intro p
+    simp only [hF, norm_div, norm_mul, norm_pow, Complex.norm_natCast]
+    congr 3
+    rw [show ((p.1 : ℂ) + 1) = ((p.1 + 1 : ℕ) : ℂ) by push_cast; ring, Complex.norm_natCast]
+    push_cast; ring
+  have hrow : ∀ j : ℕ, HasSum (fun n => ‖F (j, n)‖)
+      (‖1 - x‖ * ‖x‖ ^ j * Real.exp (((j : ℝ) + 1) * ‖s‖)) := by
+    intro j
+    simp only [hnorm]
+    have := (Real.hasSum_pow_div_factorial (((j : ℝ) + 1) * ‖s‖)).mul_left (‖1 - x‖ * ‖x‖ ^ j)
+    simpa [mul_div_assoc] using this
+  have hgeo : Summable fun j : ℕ => ‖1 - x‖ * ‖x‖ ^ j * Real.exp (((j : ℝ) + 1) * ‖s‖) := by
+    have e : ∀ j : ℕ, ‖1 - x‖ * ‖x‖ ^ j * Real.exp (((j : ℝ) + 1) * ‖s‖) =
+        ‖1 - x‖ * Real.exp ‖s‖ * (‖x‖ * Real.exp ‖s‖) ^ j := by
+      intro j
+      rw [mul_pow, ← Real.exp_nat_mul, add_mul, one_mul, Real.exp_add]; ring
+    simp_rw [e]
+    exact (summable_geometric_of_lt_one (by positivity) hs).mul_left _
+  have hsumF : Summable F := by
+    refine Summable.of_norm ?_
+    refine (summable_prod_of_nonneg (fun p => norm_nonneg _)).mpr ⟨fun j => (hrow j).summable, ?_⟩
+    simpa [(hrow _).tsum_eq] using hgeo
+  have hes : ‖x * cexp s‖ < 1 := by
+    rw [norm_mul, norm_exp]
+    calc ‖x‖ * Real.exp s.re ≤ ‖x‖ * Real.exp ‖s‖ := by
+          gcongr; exact re_le_norm s
+      _ < 1 := hs
+  -- sum over `n` first
+  have hfib1 : ∀ j : ℕ, HasSum (fun n => F (j, n)) ((1 - x) * cexp s * (x * cexp s) ^ j) := by
+    intro j
+    have := (hasSum_pow_div_factorial (((j : ℂ) + 1) * s)).mul_left ((1 - x) * x ^ j)
+    convert this using 1
+    · funext n; simp only [hF]; ring
+    · rw [mul_pow, ← exp_nat_mul, show ((j : ℂ) + 1) * s = s + j * s by ring, exp_add]
+      ring
+  have hval : HasSum F ((1 - x) * cexp s / (1 - x * cexp s)) := by
+    have h1 := hsumF.hasSum.prod_fiberwise hfib1
+    have h2 := (hasSum_geometric_of_norm_lt_one hes).mul_left ((1 - x) * cexp s)
+    have e : ∑' p, F p = (1 - x) * cexp s * (1 - x * cexp s)⁻¹ := h1.unique h2
+    rw [div_eq_mul_inv, ← e]
+    exact hsumF.hasSum
+  -- sum over `j` first
+  have hfib2 : ∀ n : ℕ, HasSum (fun j => F (j, n))
+      ((∑ k ∈ range (n + 1), (eulerianNumber n k : ℂ) * x ^ k) * t ^ n / n.factorial) := by
+    intro n
+    have hS := (summable_succ_pow_mul_pow hx n).hasSum.mul_left ((1 - x) * s ^ n / n.factorial)
+    convert hS using 1
+    · funext j; simp only [hF, mul_pow]; ring
+    · rw [eulerianPoly_eq hx n, hsdef, mul_pow]
+      field_simp
+      ring
+  have hswap : HasSum (fun p : ℕ × ℕ => F p.swap) ((1 - x) * cexp s / (1 - x * cexp s)) :=
+    (Equiv.prodComm ℕ ℕ).hasSum_iff.mpr hval
+  have h3 := hswap.prod_fiberwise (fun n => hfib2 n)
+  convert h3 using 1
+  have hne : (1 : ℂ) - x * cexp s ≠ 0 := by
+    intro h; rw [sub_eq_zero] at h; rw [← h] at hes; simp at hes
+  have hne' : cexp ((x - 1) * t) - x ≠ 0 := by
+    have : cexp ((x - 1) * t) = (cexp s)⁻¹ := by
+      rw [← exp_neg]; congr 1; rw [hsdef]; ring
+    rw [this]
+    intro h
+    apply hne
+    have h' : (cexp s)⁻¹ = x := sub_eq_zero.mp h
+    rw [← h', inv_mul_cancel₀ (exp_ne_zero s), sub_self]
+  rw [div_eq_div_iff hne' hne]
+  have : cexp ((x - 1) * t) * cexp s = 1 := by
+    rw [← exp_add, hsdef, show (x - 1) * t + (1 - x) * t = 0 by ring, exp_zero]
+  linear_combination (x - 1) * this
+
+
+private lemma sum_range_succ_eulerianNumber (n : ℕ) :
+    ∑ k ∈ range (n + 1), eulerianNumber n k = n.factorial := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp [eulerianNumber_zero_left]
+  · obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+    rw [sum_range_succ, sum_eulerianNumber hn,
+      eulerianNumber_succ_eq_zero_of_le (n := m + 1) (k := m) le_rfl hn, add_zero]
+
+private lemma norm_eulerianPoly_le {x : ℂ} (hx : ‖x‖ < 1) (n : ℕ) :
+    ‖∑ k ∈ range (n + 1), (eulerianNumber n k : ℂ) * x ^ k‖ ≤ n.factorial := by
+  calc ‖∑ k ∈ range (n + 1), (eulerianNumber n k : ℂ) * x ^ k‖
+      ≤ ∑ k ∈ range (n + 1), ‖(eulerianNumber n k : ℂ) * x ^ k‖ := norm_sum_le _ _
+    _ ≤ ∑ k ∈ range (n + 1), (eulerianNumber n k : ℝ) := by
+        refine sum_le_sum fun k _ => ?_
+        rw [norm_mul, norm_pow, Complex.norm_natCast]
+        exact mul_le_of_le_one_right (by positivity) (pow_le_one₀ (norm_nonneg _) hx.le)
+    _ = n.factorial := by exact_mod_cast sum_range_succ_eulerianNumber n
+
+private lemma norm_eulerianTerm_le {x t : ℂ} (hx : ‖x‖ < 1) (n : ℕ) :
+    ‖(∑ k ∈ range (n + 1), (eulerianNumber n k : ℂ) * x ^ k) * t ^ n / n.factorial‖ ≤
+      ‖t‖ ^ n := by
+  rw [norm_div, norm_mul, norm_pow, Complex.norm_natCast]
+  have hf : (0 : ℝ) < n.factorial := by exact_mod_cast Nat.factorial_pos n
+  rw [div_le_iff₀ hf]
+  have := norm_eulerianPoly_le hx n
+  nlinarith [pow_nonneg (norm_nonneg t) n]
+
+/-- (26.14.4): `∑_{n,k} ⟨n k⟩ x^k tⁿ/n! = (1 - x)/(exp((x - 1)t) - x)` for `|x| < 1`, `|t| < 1`. -/
+@[dlmf 26.14.E4]
+theorem hasSum_eulerianNumber {x t : ℂ} (hx : ‖x‖ < 1) (ht : ‖t‖ < 1) :
+    HasSum (fun nk : ℕ × ℕ => (eulerianNumber nk.1 nk.2 : ℂ) * x ^ nk.2 * t ^ nk.1 / nk.1.factorial)
+      ((1 - x) / (Complex.exp ((x - 1) * t) - x)) := by
+  set P : ℕ → ℂ := fun n => ∑ k ∈ range (n + 1), (eulerianNumber n k : ℂ) * x ^ k with hP
+  set L : ℂ → ℂ := fun w => ∑' n : ℕ, P n * w ^ n / n.factorial with hL
+  set R : ℂ → ℂ := fun w => (1 - x) / (cexp ((x - 1) * w) - x) with hR
+  have hLsum : ∀ w : ℂ, ‖w‖ < 1 → HasSum (fun n : ℕ => P n * w ^ n / n.factorial) (L w) := by
+    intro w hw
+    refine (Summable.of_norm_bounded (summable_geometric_of_lt_one (norm_nonneg w) hw)
+      fun n => norm_eulerianTerm_le hx n).hasSum
+  have hLdiff : DifferentiableOn ℂ L (Metric.ball 0 1) := by
+    intro w hw
+    rw [Metric.mem_ball, dist_zero_right] at hw
+    set r : ℝ := (‖w‖ + 1) / 2 with hr
+    have hr1 : r < 1 := by rw [hr]; linarith
+    have hwr : ‖w‖ < r := by rw [hr]; linarith
+    have hr0 : 0 ≤ r := by rw [hr]; positivity
+    have hd : DifferentiableOn ℂ L (Metric.ball 0 r) := by
+      refine differentiableOn_tsum_of_summable_norm (u := fun n : ℕ => r ^ n)
+        (summable_geometric_of_lt_one hr0 hr1) (fun n => by fun_prop) Metric.isOpen_ball ?_
+      intro n v hv
+      rw [Metric.mem_ball, dist_zero_right] at hv
+      refine (norm_eulerianTerm_le hx n).trans ?_
+      exact pow_le_pow_left₀ (norm_nonneg v) hv.le n
+    exact (hd.differentiableAt (Metric.isOpen_ball.mem_nhds (by simpa using hwr)))
+      |>.differentiableWithinAt
+  have hRdiff : DifferentiableOn ℂ R (Metric.ball 0 1) := by
+    intro w hw
+    rw [Metric.mem_ball, dist_zero_right] at hw
+    refine DifferentiableAt.differentiableWithinAt ?_
+    refine (differentiableAt_const _).div (by fun_prop) ?_
+    exact sub_ne_zero.mpr (exp_mul_ne hx hw)
+  have hnear : ∀ᶠ w in 𝓝 (0 : ℂ), L w = R w := by
+    have hc : ContinuousAt (fun w : ℂ => ‖x‖ * Real.exp ‖(1 - x) * w‖) 0 := by fun_prop
+    have h1 := hc.eventually_lt continuousAt_const (by simpa using hx)
+    have h2 : ∀ᶠ w in 𝓝 (0 : ℂ), ‖w‖ < 1 :=
+      (continuous_norm.tendsto 0).eventually (gt_mem_nhds (by simp))
+    filter_upwards [h1, h2] with w hw1 hw2
+    exact (hLsum w hw2).unique (hasSum_eulerianPoly_of_small hx hw1)
+  have heq := hLdiff.analyticOnNhd Metric.isOpen_ball |>.eqOn_of_preconnected_of_eventuallyEq
+    (hRdiff.analyticOnNhd Metric.isOpen_ball) (convex_ball 0 1).isPreconnected
+    (Metric.mem_ball_self one_pos) hnear
+  have hLR : L t = R t := heq (by simpa using ht)
+  set G : ℕ × ℕ → ℂ := fun nk => (eulerianNumber nk.1 nk.2 : ℂ) * x ^ nk.2 * t ^ nk.1 /
+    nk.1.factorial with hG
+  have hfib : ∀ n : ℕ, HasSum (fun k => G (n, k)) (P n * t ^ n / n.factorial) := by
+    intro n
+    have h : HasSum (fun k : ℕ => G (n, k)) (∑ k ∈ range (n + 1), G (n, k)) :=
+      hasSum_sum_of_ne_finset_zero (fun k hk => by
+        have : n < k := by simpa using hk
+        simp [hG, eulerianNumber_eq_zero_of_lt this])
+    convert h using 1
+    simp only [hP, hG, sum_mul, sum_div]
+  have hnfib : ∀ n : ℕ, HasSum (fun k => ‖G (n, k)‖) (∑ k ∈ range (n + 1), ‖G (n, k)‖) :=
+    fun n => hasSum_sum_of_ne_finset_zero (fun k hk => by
+      have : n < k := by simpa using hk
+      simp [hG, eulerianNumber_eq_zero_of_lt this])
+  have hbound : ∀ n : ℕ, ∑ k ∈ range (n + 1), ‖G (n, k)‖ ≤ ‖t‖ ^ n := by
+    intro n
+    have hf : (0 : ℝ) < n.factorial := by exact_mod_cast Nat.factorial_pos n
+    calc ∑ k ∈ range (n + 1), ‖G (n, k)‖
+        ≤ ∑ k ∈ range (n + 1), (eulerianNumber n k : ℝ) * ‖t‖ ^ n / n.factorial := by
+          refine sum_le_sum fun k _ => ?_
+          simp only [hG, norm_div, norm_mul, norm_pow, Complex.norm_natCast]
+          gcongr
+          exact mul_le_of_le_one_right (by positivity) (pow_le_one₀ (norm_nonneg _) hx.le)
+      _ = ‖t‖ ^ n := by
+          rw [← sum_div, ← sum_mul]
+          have : ∑ k ∈ range (n + 1), (eulerianNumber n k : ℝ) = n.factorial := by
+            exact_mod_cast sum_range_succ_eulerianNumber n
+          rw [this]; field_simp
+  have hsumG : Summable G := by
+    refine Summable.of_norm ((summable_prod_of_nonneg (fun p => norm_nonneg _)).mpr
+      ⟨fun n => (hnfib n).summable, ?_⟩)
+    refine Summable.of_nonneg_of_le (fun n => tsum_nonneg fun k => norm_nonneg _)
+      (fun n => ?_) (summable_geometric_of_lt_one (norm_nonneg t) ht)
+    rw [(hnfib n).tsum_eq]
+    exact hbound n
+  have h := hsumG.hasSum.prod_fiberwise hfib
+  have e : ∑' p, G p = R t := by rw [← hLR]; exact h.unique (hLsum t ht)
+  rw [show (1 - x) / (cexp ((x - 1) * t) - x) = R t from rfl, ← e]
+  exact hsumG.hasSum
+
+end GeneratingFunction
 
 end DLMF.Combinatorics
 end

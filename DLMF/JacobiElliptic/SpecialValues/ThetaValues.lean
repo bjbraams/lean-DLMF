@@ -40,6 +40,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-- The normalized theta functions at `ζ = 0`: `θ_s(0) = 0`, `θ_c(0) = θ_d(0) = θ_n(0) = 1`. -/
 theorem jacobiLetterTheta_zero {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) :
     jacobiLetterTheta p 0 τ = if p = .s then 0 else 1 := by

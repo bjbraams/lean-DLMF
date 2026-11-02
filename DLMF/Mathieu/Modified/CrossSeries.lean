@@ -173,14 +173,14 @@ theorem besselYExp_sub_one_add_add_one (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : 
     besselYExp (μ - 1) h z + besselYExp (μ + 1) h z =
       2 * μ / (h * Complex.exp z) * besselYExp μ h z := by
   have hc := continuousAt_besselYExp_order hh z
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => besselYExp (μ - 1) h z + besselYExp (μ + 1) h z)
     (g := fun μ => 2 * μ / (h * Complex.exp z) * besselYExp μ h z)
     (((hc _).comp (by fun_prop : ContinuousAt (fun μ : ℂ => μ - 1) μ)).add
       ((hc _).comp (by fun_prop : ContinuousAt (fun μ : ℂ => μ + 1) μ)))
     ((by fun_prop : ContinuousAt (fun μ : ℂ => 2 * μ / (h * Complex.exp z)) μ).mul (hc μ))
     (fun c hc' => ?_)
-  have hk := DLMF.Confluent.forall_of_mem_integerComplement hc'
+  have hk := Complex.forall_of_mem_integerComplement hc'
   have hk1 : ∀ k : ℤ, c - 1 ≠ k := DLMF.Bessel.not_int_sub_one hk
   have hk2 : ∀ k : ℤ, c + 1 ≠ k := DLMF.Bessel.not_int_add_one hk
   rw [besselYExp_eq_besselYExpNumerator_div hk, besselYExp_eq_besselYExpNumerator_div hk1,

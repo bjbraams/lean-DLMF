@@ -76,10 +76,6 @@ section Amplitude
 
 variable {m : ℝ}
 
-/-- `dn` is continuous for `m < 1` (helper). -/
-private lemma continuous_jacobiDnm (hm : m < 1) : Continuous fun u => Real.jacobiDnm u m :=
-  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiDnm hm u).continuousAt
-
 /-- `-π/2 ≤ am x ≤ π/2` for `-K ≤ x ≤ K` (helper). -/
 private lemma jacobiAmm_mem_Icc (hm : m < 1) {x : ℝ} (hx0 : -Real.compEllIntKm m ≤ x)
     (hx1 : x ≤ Real.compEllIntKm m) :
@@ -126,7 +122,7 @@ theorem Real.jacobiAmm_eq_integral_jacobiDnm (hm : m < 1) (x : ℝ) :
     Real.jacobiAmm x m = ∫ t in (0 : ℝ)..x, Real.jacobiDnm t m := by
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (f := fun t => Real.jacobiAmm t m)
     (f' := fun t => Real.jacobiDnm t m) (fun t _ => Real.hasDerivAt_jacobiAmm hm t)
-    ((continuous_jacobiDnm hm).intervalIntegrable 0 x)
+    ((Real.continuous_jacobiDnm hm).intervalIntegrable 0 x)
   rw [h, Real.jacobiAmm_zero hm, sub_zero]
 
 /-- DLMF 22.16.5: `am(x, 1) = gd(x)`, as the limit `k → 1⁻` (the existing real amplitude is
@@ -311,7 +307,7 @@ variable {k : ℝ}
 /-- `dn²` is interval integrable (helper). -/
 private lemma intervalIntegrable_jacobiDnm_sq (hm : k ^ 2 < 1) (a b : ℝ) :
     IntervalIntegrable (fun t => Real.jacobiDnm t (k ^ 2) ^ 2) MeasureTheory.volume a b :=
-  ((continuous_jacobiDnm hm).pow 2).intervalIntegrable a b
+  ((Real.continuous_jacobiDnm hm).pow 2).intervalIntegrable a b
 
 /-- `sn²` is interval integrable (helper). -/
 private lemma intervalIntegrable_jacobiSnm_sq (hm : k ^ 2 < 1) (a b : ℝ) :
@@ -430,25 +426,13 @@ theorem Real.jacobiEpsilonk_add_two_compEllIntKm (hm : k ^ 2 < 1) (x : ℝ) :
 ^ 2) ^ 2)`. -/
 private lemma hasDerivAt_jacobiEpsilonk {k : ℝ} (hm : k ^ 2 < 1) (x : ℝ) :
     HasDerivAt (fun x => Real.jacobiEpsilonk x k) (Real.jacobiDnm x (k ^ 2) ^ 2) x :=
-  (((continuous_jacobiDnm hm).pow 2).integral_hasStrictDerivAt 0 x).hasDerivAt
-
-/-- Continuity of the indicated function: `Continuous fun u => Real.jacobiSnm u m`. -/
-private lemma continuous_jacobiSnm {m : ℝ} (hm : m < 1) : Continuous fun u => Real.jacobiSnm u m :=
-  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiSnm hm u).continuousAt
-
-/-- Continuity of the indicated function: `Continuous fun u => Real.jacobiCnm u m`. -/
-private lemma continuous_jacobiCnm {m : ℝ} (hm : m < 1) : Continuous fun u => Real.jacobiCnm u m :=
-  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiCnm hm u).continuousAt
+  (((Real.continuous_jacobiDnm hm).pow 2).integral_hasStrictDerivAt 0 x).hasDerivAt
 
 /-- Identity under the stated parameter and domain assumptions: `∫ t in (0 : ℝ)..x, f t = F x - F
 0`. -/
 private lemma integral_eq_sub_of_hasDerivAt_of_continuous {F f : ℝ → ℝ} (hF : ∀ t, HasDerivAt F (f t) t) (hf : Continuous f) (x : ℝ) :
     ∫ t in (0 : ℝ)..x, f t = F x - F 0 :=
   intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hF t) (hf.intervalIntegrable _ _)
-
-/-- Identity under the stated parameter and domain assumptions: `Real.jacobiSnm 0 m = 0`. -/
-private lemma jacobiSnm_zero {m : ℝ} (hm : m < 1) : Real.jacobiSnm 0 m = 0 := by
-  simp [Real.jacobiSnm, Real.jacobiAmm_zero hm]
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < Real.jacobiCnm t m`. -/
 private lemma jacobiCnm_pos_of_mem_Ioo {m : ℝ} (hm : m < 1) {t : ℝ} (h0 : -Real.compEllIntKm m < t)
@@ -474,9 +458,9 @@ theorem Real.jacobiEpsilonk_eq_integral_cd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : �
           (Real.jacobiCnm x (k ^ 2) / Real.jacobiDnm x (k ^ 2)) := by
   have hm : k ^ 2 < 1 := by nlinarith
   have hdn := fun t => (Real.jacobiDnm_pos hm t).ne'
-  have cdn := continuous_jacobiDnm hm
-  have csn := continuous_jacobiSnm hm
-  have ccn := continuous_jacobiCnm hm
+  have cdn := Real.continuous_jacobiDnm hm
+  have csn := Real.continuous_jacobiSnm hm
+  have ccn := Real.continuous_jacobiCnm hm
   have cg : Continuous fun t => (Real.jacobiCnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2 := by
     first
     | exact (ccn.div cdn hdn).pow 2
@@ -502,7 +486,7 @@ theorem Real.jacobiEpsilonk_eq_integral_cd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : �
   have key := integral_eq_sub_of_hasDerivAt_of_continuous hF (cd2.sub cg2) x
   rw [intervalIntegral.integral_sub (cd2.intervalIntegrable _ _)
     (cg2.intervalIntegrable _ _), intervalIntegral.integral_const_mul,
-    jacobiSnm_zero hm] at key
+    Real.jacobiSnm_zero hm] at key
   rw [Real.jacobiEpsilonk]
   simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
   linarith
@@ -517,9 +501,9 @@ theorem Real.jacobiEpsilonk_eq_integral_sd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : �
           (Real.jacobiCnm x (k ^ 2) / Real.jacobiDnm x (k ^ 2)) := by
   have hm : k ^ 2 < 1 := by nlinarith
   have hdn := fun t => (Real.jacobiDnm_pos hm t).ne'
-  have cdn := continuous_jacobiDnm hm
-  have csn := continuous_jacobiSnm hm
-  have ccn := continuous_jacobiCnm hm
+  have cdn := Real.continuous_jacobiDnm hm
+  have csn := Real.continuous_jacobiSnm hm
+  have ccn := Real.continuous_jacobiCnm hm
   have cg : Continuous fun t => (Real.jacobiSnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2 := by
     first
     | exact (ccn.div cdn hdn).pow 2
@@ -546,7 +530,7 @@ theorem Real.jacobiEpsilonk_eq_integral_sd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : �
   have key := integral_eq_sub_of_hasDerivAt_of_continuous hF (cd2.sub cg2) x
   rw [intervalIntegral.integral_sub (cd2.intervalIntegrable _ _)
     (cg2.intervalIntegrable _ _), intervalIntegral.integral_const_mul,
-    jacobiSnm_zero hm] at key
+    Real.jacobiSnm_zero hm] at key
   rw [Real.jacobiEpsilonk]
   simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
   linarith
@@ -560,9 +544,9 @@ theorem Real.jacobiEpsilonk_eq_integral_nd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : �
             by
   have hm : k ^ 2 < 1 := by nlinarith
   have hdn := fun t => (Real.jacobiDnm_pos hm t).ne'
-  have cdn := continuous_jacobiDnm hm
-  have csn := continuous_jacobiSnm hm
-  have ccn := continuous_jacobiCnm hm
+  have cdn := Real.continuous_jacobiDnm hm
+  have csn := Real.continuous_jacobiSnm hm
+  have ccn := Real.continuous_jacobiCnm hm
   have cg : Continuous fun t => (1 / Real.jacobiDnm t (k ^ 2)) ^ 2 := by
     first
     | exact (ccn.div cdn hdn).pow 2
@@ -589,7 +573,7 @@ theorem Real.jacobiEpsilonk_eq_integral_nd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : �
   have key := integral_eq_sub_of_hasDerivAt_of_continuous hF (cd2.sub cg2) x
   rw [intervalIntegral.integral_sub (cd2.intervalIntegrable _ _)
     (cg2.intervalIntegrable _ _), intervalIntegral.integral_const_mul,
-    jacobiSnm_zero hm] at key
+    Real.jacobiSnm_zero hm] at key
   rw [Real.jacobiEpsilonk]
   simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
   linarith
@@ -613,9 +597,9 @@ theorem Real.jacobiEpsilonk_eq_integral_dc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
     · cases le_total 0 x with
       | inl h => rw [Set.uIcc_of_le h] at ht; linarith [ht.2]
       | inr h => rw [Set.uIcc_of_ge h] at ht; linarith [ht.2]
-  have cdn := continuous_jacobiDnm hm
-  have csn := continuous_jacobiSnm hm
-  have ccn := continuous_jacobiCnm hm
+  have cdn := Real.continuous_jacobiDnm hm
+  have csn := Real.continuous_jacobiSnm hm
+  have ccn := Real.continuous_jacobiCnm hm
   have cg : ContinuousOn (fun t => (Real.jacobiDnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := by
     first
     | exact (cdn.continuousOn.div ccn.continuousOn hcn).pow 2
@@ -641,7 +625,7 @@ theorem Real.jacobiEpsilonk_eq_integral_dc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
   have cg2 : ContinuousOn (fun t => (-1) * (Real.jacobiDnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := continuousOn_const.mul cg
   have key := integral_eq_sub_of_hasDerivAt_of_continuousOn hF (cd2.sub cg2)
   rw [intervalIntegral.integral_sub cd2.intervalIntegrable cg2.intervalIntegrable,
-    intervalIntegral.integral_const_mul, jacobiSnm_zero hm] at key
+    intervalIntegral.integral_const_mul, Real.jacobiSnm_zero hm] at key
   rw [Real.jacobiEpsilonk]
   simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
   linarith
@@ -665,9 +649,9 @@ theorem Real.jacobiEpsilonk_eq_integral_nc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
     · cases le_total 0 x with
       | inl h => rw [Set.uIcc_of_le h] at ht; linarith [ht.2]
       | inr h => rw [Set.uIcc_of_ge h] at ht; linarith [ht.2]
-  have cdn := continuous_jacobiDnm hm
-  have csn := continuous_jacobiSnm hm
-  have ccn := continuous_jacobiCnm hm
+  have cdn := Real.continuous_jacobiDnm hm
+  have csn := Real.continuous_jacobiSnm hm
+  have ccn := Real.continuous_jacobiCnm hm
   have cg : ContinuousOn (fun t => (1 / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := by
     first
     | exact (cdn.continuousOn.div ccn.continuousOn hcn).pow 2
@@ -693,7 +677,7 @@ theorem Real.jacobiEpsilonk_eq_integral_nc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
   have cg2 : ContinuousOn (fun t => (-(1 - k ^ 2)) * (1 / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := continuousOn_const.mul cg
   have key := integral_eq_sub_of_hasDerivAt_of_continuousOn hF (cd2.sub cg2)
   rw [intervalIntegral.integral_sub cd2.intervalIntegrable cg2.intervalIntegrable,
-    intervalIntegral.integral_const_mul, jacobiSnm_zero hm] at key
+    intervalIntegral.integral_const_mul, Real.jacobiSnm_zero hm] at key
   rw [Real.jacobiEpsilonk]
   simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
   linarith
@@ -718,9 +702,9 @@ theorem Real.jacobiEpsilonk_eq_integral_sc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
     · cases le_total 0 x with
       | inl h => rw [Set.uIcc_of_le h] at ht; linarith [ht.2]
       | inr h => rw [Set.uIcc_of_ge h] at ht; linarith [ht.2]
-  have cdn := continuous_jacobiDnm hm
-  have csn := continuous_jacobiSnm hm
-  have ccn := continuous_jacobiCnm hm
+  have cdn := Real.continuous_jacobiDnm hm
+  have csn := Real.continuous_jacobiSnm hm
+  have ccn := Real.continuous_jacobiCnm hm
   have cg : ContinuousOn (fun t => (Real.jacobiSnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := by
     first
     | exact (cdn.continuousOn.div ccn.continuousOn hcn).pow 2
@@ -746,7 +730,7 @@ theorem Real.jacobiEpsilonk_eq_integral_sc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
   have cg2 : ContinuousOn (fun t => (-(1 - k ^ 2)) * (Real.jacobiSnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := continuousOn_const.mul cg
   have key := integral_eq_sub_of_hasDerivAt_of_continuousOn hF (cd2.sub cg2)
   rw [intervalIntegral.integral_sub cd2.intervalIntegrable cg2.intervalIntegrable,
-    intervalIntegral.integral_const_mul, jacobiSnm_zero hm] at key
+    intervalIntegral.integral_const_mul, Real.jacobiSnm_zero hm] at key
   rw [Real.jacobiEpsilonk]
   simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
   linarith
@@ -896,7 +880,7 @@ private lemma jacobiEpsilonk_ns_integral_aux {k x : ℝ} (hk0 : 0 < k) (hk1 : k 
   have hGc : ContinuousOn G (uIcc 0 x) := fun t ht => (hFG t (hseg ht)).2.1.continuousWithinAt
   have hGi : IntervalIntegrable G volume 0 x := hGc.intervalIntegrable
   have hdi : IntervalIntegrable (fun t => Real.jacobiDnm t (k ^ 2) ^ 2) volume 0 x :=
-    ((continuous_jacobiDnm hm).pow 2).intervalIntegrable _ _
+    ((Real.continuous_jacobiDnm hm).pow 2).intervalIntegrable _ _
   have he : (fun t => G t - Real.jacobiDnm t (k ^ 2) ^ 2) =ᵐ[volume.restrict (uIoc 0 x)]
       (fun t => (1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2) := by
     filter_upwards [ae_restrict_mem measurableSet_uIoc, (volume.restrict (uIoc 0 x)).ae_ne 0] with t ht ht0

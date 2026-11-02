@@ -24,6 +24,9 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Tactic.CrossRefAttribute
 public import TauCeti.Analysis.Contour.Residue.Basic
+public import TauCeti.Analysis.Contour.Residue.Theorem
+public import DLMFMathlib.Analysis.Complex.RoucheFilledHull
+public import DLMFMathlib.Analysis.Complex.LaurentAnnulus
 public import TauCeti.Analysis.InnerProductSpace.Harmonic.Subharmonic
 public import TauCeti.Analysis.InnerProductSpace.Laplacian.StrongMaximumPrinciple
 
@@ -92,6 +95,78 @@ theorem hasSum_exp_series (z : ℂ) :
 
 /-! ## §1.10(iii) Laurent series -/
 
+/-- The open annulus `r₁ < ‖z - z₀‖ < r₂` is open. -/
+private lemma isOpen_annulus (z₀ : ℂ) (r₁ r₂ : ℝ) :
+    IsOpen {z : ℂ | r₁ < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂} :=
+  (isOpen_lt continuous_const (continuous_id.sub continuous_const).norm).inter
+    (isOpen_lt (continuous_id.sub continuous_const).norm continuous_const)
+
+/-- The closed annulus `ρ ≤ ‖z - z₀‖ ≤ ρ'` lies in the open annulus `r₁ < ‖z - z₀‖ < r₂`. -/
+private lemma closedAnnulus_subset {z₀ : ℂ} {r₁ r₂ ρ ρ' : ℝ} (hρ : r₁ < ρ) (hρ' : ρ' < r₂) :
+    closedBall z₀ ρ' \ ball z₀ ρ ⊆ {z : ℂ | r₁ < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂} := by
+  intro z hz
+  simp only [Set.mem_sdiff, mem_closedBall, mem_ball, dist_eq_norm, not_lt] at hz
+  exact ⟨by linarith [hz.2], by linarith [hz.1]⟩
+
+/-- Radius independence of Laurent coefficients, for radii `ρ ≤ ρ'`. -/
+private lemma laurentCoeff_eq_of_le {f : ℂ → ℂ} {z₀ : ℂ} {r₁ r₂ ρ ρ' : ℝ} (hr₁ : 0 ≤ r₁)
+    (hf : DifferentiableOn ℂ f {z | r₁ < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂}) (hρ : ρ ∈ Ioo r₁ r₂)
+    (hρ' : ρ' ∈ Ioo r₁ r₂) (hle : ρ ≤ ρ') (n : ℤ) :
+    laurentCoeff f z₀ ρ' n = laurentCoeff f z₀ ρ n := by
+  unfold laurentCoeff
+  congr 1
+  have hsub := closedAnnulus_subset (z₀ := z₀) hρ.1 hρ'.2
+  have hA := isOpen_annulus z₀ r₁ r₂
+  have hdiff : ∀ z ∈ closedBall z₀ ρ' \ ball z₀ ρ,
+      DifferentiableAt ℂ (fun z => f z * (z - z₀) ^ (-n - 1)) z := by
+    intro z hz
+    have hzA := hsub hz
+    have hz0 : z - z₀ ≠ 0 := by
+      intro h
+      have h1 : r₁ < ‖z - z₀‖ := hzA.1
+      rw [h, norm_zero] at h1; linarith
+    exact (hf.differentiableAt (hA.mem_nhds hzA)).mul
+      ((differentiableAt_id.sub_const z₀).zpow (Or.inl hz0))
+  refine circleIntegral_eq_of_differentiable_on_annulus_off_countable (hr₁.trans_lt hρ.1) hle
+    countable_empty (fun z hz => (hdiff z hz).continuousAt.continuousWithinAt)
+    (fun z hz => hdiff z ⟨ball_subset_closedBall hz.1.1, fun h => hz.1.2
+      (ball_subset_closedBall h)⟩)
+
+/-- Laurent coefficients do not depend on the radius within the annulus of holomorphy. -/
+private lemma laurentCoeff_eq_of_mem {f : ℂ → ℂ} {z₀ : ℂ} {r₁ r₂ ρ ρ' : ℝ} (hr₁ : 0 ≤ r₁)
+    (hf : DifferentiableOn ℂ f {z | r₁ < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂}) (hρ : ρ ∈ Ioo r₁ r₂)
+    (hρ' : ρ' ∈ Ioo r₁ r₂) (n : ℤ) :
+    laurentCoeff f z₀ ρ' n = laurentCoeff f z₀ ρ n := by
+  rcases le_total ρ ρ' with h | h
+  · exact laurentCoeff_eq_of_le hr₁ hf hρ hρ' h n
+  · exact (laurentCoeff_eq_of_le hr₁ hf hρ' hρ h n).symm
+
+/-- The nonnegative part of the Laurent series sums to the outer Cauchy integral. -/
+private lemma hasSum_laurent_outer {f : ℂ → ℂ} {z₀ : ℂ} {r₁ r₂ r ρ : ℝ} (hr₁ : 0 ≤ r₁)
+    (hf : DifferentiableOn ℂ f {z | r₁ < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂}) (hr : r ∈ Ioo r₁ r₂)
+    (hρ : ρ ∈ Ioo r₁ r₂) {z : ℂ} (hzρ : ‖z - z₀‖ < ρ) :
+    HasSum (fun n : ℕ => laurentCoeff f z₀ r (n : ℤ) * (z - z₀) ^ (n : ℤ))
+      ((2 * Real.pi * I)⁻¹ * ∮ w in C(z₀, ρ), (w - z)⁻¹ * f w) := by
+  have hρ0 : 0 < ρ := hr₁.trans_lt hρ.1
+  have hsph : sphere z₀ ρ ⊆ {z : ℂ | r₁ < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂} := fun w hw => by
+    rw [mem_sphere, dist_eq_norm] at hw
+    change r₁ < ‖w - z₀‖ ∧ ‖w - z₀‖ < r₂
+    rw [hw]; exact hρ
+  have hint : CircleIntegrable f z₀ ρ := (hf.continuousOn.mono hsph).circleIntegrable hρ0.le
+  have hout := hasSum_two_pi_I_cauchyPowerSeries_integral (f := f) (w := z - z₀) hint hzρ
+  have := hout.mul_left (2 * Real.pi * I)⁻¹
+  simp only [add_sub_cancel, smul_eq_mul] at this
+  refine this.congr_fun fun n => ?_
+  rw [laurentCoeff_eq_of_mem hr₁ hf hρ hr, laurentCoeff, zpow_natCast, mul_assoc]
+  congr 1
+  rw [mul_comm _ ((z - z₀) ^ n), ← circleIntegral.integral_const_mul]
+  refine circleIntegral.integral_congr hρ0.le fun w hw => ?_
+  have hw0 : w - z₀ ≠ 0 := by
+    intro h; rw [mem_sphere, dist_eq_norm, h, norm_zero] at hw; linarith
+  rw [show -(n : ℤ) - 1 = -((n + 1 : ℕ) : ℤ) by push_cast; ring, zpow_neg, zpow_natCast,
+    div_pow, pow_succ]
+  field_simp
+
 /-- DLMF 1.10.6–1.10.7 (Laurent's theorem): if `f` is analytic in the annulus
 `r₁ < |z - z₀| < r₂` (`0 ≤ r₁ < r₂ ≤ ∞`; here `r₂` finite or the statement is applied for every
 finite `r₂`) and `r₁ < r < r₂`, then `f(z) = ∑_{n ∈ ℤ} aₙ (z - z₀)ⁿ` in the annulus, with
@@ -102,7 +177,127 @@ theorem hasSum_laurentSeries {f : ℂ → ℂ} {z₀ : ℂ} {r₁ r₂ r : ℝ} 
     (hf : DifferentiableOn ℂ f {z | r₁ < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂}) (hr : r ∈ Ioo r₁ r₂)
     {z : ℂ} (hz : r₁ < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂) :
     HasSum (fun n : ℤ => laurentCoeff f z₀ r n * (z - z₀) ^ n) (f z) := by
-  sorry
+  set d := ‖z - z₀‖
+  set ρ₁ := (r₁ + d) / 2
+  set ρ₂ := (d + r₂) / 2
+  have hρ₁ : ρ₁ ∈ Ioo r₁ r₂ := ⟨by simp only [ρ₁]; linarith, by simp only [ρ₁]; linarith⟩
+  have hρ₂ : ρ₂ ∈ Ioo r₁ r₂ := ⟨by simp only [ρ₂]; linarith, by simp only [ρ₂]; linarith⟩
+  have hρ₁0 : 0 < ρ₁ := hr₁.trans_lt hρ₁.1
+  have hρ₁d : ρ₁ < d := by simp only [ρ₁]; linarith
+  have hdρ₂ : d < ρ₂ := by simp only [ρ₂]; linarith
+  have hA := isOpen_annulus z₀ r₁ r₂
+  have hsub := closedAnnulus_subset (z₀ := z₀) hρ₁.1 hρ₂.2
+  have hcont : ContinuousOn f (closedBall z₀ ρ₂ \ ball z₀ ρ₁) :=
+    hf.continuousOn.mono hsub
+  have hsph : ∀ ρ ∈ Ioo r₁ r₂, sphere z₀ ρ ⊆ {z : ℂ | r₁ < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂} :=
+    fun ρ hρ w hw => by
+      rw [mem_sphere, dist_eq_norm] at hw
+      change r₁ < ‖w - z₀‖ ∧ ‖w - z₀‖ < r₂
+      rw [hw]; exact hρ
+  have hint : ∀ ρ ∈ Ioo r₁ r₂, CircleIntegrable f z₀ ρ := fun ρ hρ =>
+    (hf.continuousOn.mono (hsph ρ hρ)).circleIntegrable (hr₁.trans hρ.1.le)
+  have hcauchy := Complex.circleIntegral_sub_inv_mul_annulus hρ₁0 hρ₁d hdρ₂ hcont
+    (fun w hw => hf.differentiableAt (hA.mem_nhds (hsub ⟨ball_subset_closedBall hw.1,
+      fun h => hw.2 (ball_subset_closedBall h)⟩)))
+  have hin := Complex.hasSum_circleIntegral_inner (w := z - z₀) hρ₁0 (hint ρ₁ hρ₁) hρ₁d
+  have hz0 : z - z₀ ≠ 0 := fun h => by
+    have : d = 0 := by simp only [d, h, norm_zero]
+    linarith
+  have hpi : (2 * Real.pi * I : ℂ) ≠ 0 := by simp [Real.pi_ne_zero, I_ne_zero]
+  have hA' := hasSum_laurent_outer hr₁ hf hr hρ₂ hdρ₂
+  have hB' : HasSum (fun n : ℕ => laurentCoeff f z₀ r (-((n : ℤ) + 1)) *
+      (z - z₀) ^ (-((n : ℤ) + 1)))
+      (-((2 * Real.pi * I)⁻¹ * ∮ w in C(z₀, ρ₁), (w - z)⁻¹ * f w)) := by
+    have := hin.mul_left (2 * Real.pi * I)⁻¹
+    rw [show (∮ w in C(z₀, ρ₁), -((w - (z₀ + (z - z₀)))⁻¹ * f w)) =
+        ∮ w in C(z₀, ρ₁), (-1) * ((w - z)⁻¹ * f w) by
+          simp only [add_sub_cancel, neg_one_mul],
+      circleIntegral.integral_const_mul] at this
+    convert this using 1
+    · funext n
+      rw [laurentCoeff_eq_of_mem hr₁ hf hρ₁ hr, laurentCoeff,
+        show -(-((n : ℤ) + 1)) - 1 = (n : ℤ) by ring, mul_assoc]
+      congr 1
+      rw [mul_comm, ← circleIntegral.integral_const_mul]
+      refine circleIntegral.integral_congr hρ₁0.le fun w _ => ?_
+      rw [zpow_neg, zpow_natCast, show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) by push_cast; ring,
+        zpow_natCast, div_pow, pow_succ]
+      field_simp
+    · ring
+  have key := HasSum.of_nat_of_neg_add_one (f := fun n : ℤ => laurentCoeff f z₀ r n * (z - z₀) ^ n)
+    hA' hB'
+  rw [← sub_eq_add_neg, ← mul_sub, hcauchy, ← mul_assoc, inv_mul_cancel₀ hpi, one_mul] at key
+  exact key
+
+/-- If all negative Laurent coefficients vanish, `f` agrees off `z₀` with the Cauchy integral
+over `C(z₀, r)`, which is analytic at `z₀` with value `a₀` there. -/
+private lemma exists_analyticAt_of_laurentCoeff_neg {f : ℂ → ℂ} {z₀ : ℂ} {r₂ r : ℝ}
+    (hf : DifferentiableOn ℂ f {z | 0 < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂}) (hr : r ∈ Ioo 0 r₂)
+    (h : ∀ n : ℤ, n < 0 → laurentCoeff f z₀ r n = 0) :
+    ∃ G : ℂ → ℂ, AnalyticAt ℂ G z₀ ∧ G z₀ = laurentCoeff f z₀ r 0 ∧ f =ᶠ[𝓝[≠] z₀] G := by
+  have hsph : sphere z₀ r ⊆ {z : ℂ | 0 < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂} := fun w hw => by
+    rw [mem_sphere, dist_eq_norm] at hw
+    change 0 < ‖w - z₀‖ ∧ ‖w - z₀‖ < r₂
+    rw [hw]; exact hr
+  have hint : CircleIntegrable f z₀ r := (hf.continuousOn.mono hsph).circleIntegrable hr.1.le
+  refine ⟨fun z => (2 * Real.pi * I)⁻¹ * ∮ w in C(z₀, r), (w - z)⁻¹ * f w, ?_, ?_, ?_⟩
+  · have := (hasFPowerSeriesOn_cauchy_integral (R := ⟨r, hr.1.le⟩) hint
+      (by exact_mod_cast hr.1)).analyticAt
+    refine this.congr (Eventually.of_forall fun z => ?_)
+    simp only [smul_eq_mul]
+    rfl
+  · beta_reduce
+    rw [laurentCoeff]
+    congr 1
+    refine circleIntegral.integral_congr hr.1.le fun w _ => ?_
+    simp only [neg_zero, zero_sub, zpow_neg_one, mul_comm]
+  · filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds (ball_mem_nhds z₀ hr.1)] with z hz hb
+    rw [mem_ball, dist_eq_norm] at hb
+    have hz' : 0 < ‖z - z₀‖ := norm_pos_iff.mpr (sub_ne_zero.mpr hz)
+    have hL := hasSum_laurentSeries le_rfl hf hr ⟨hz', hb.trans hr.2⟩
+    have hA := hasSum_laurent_outer le_rfl hf hr hr hb
+    have hB : HasSum (fun n : ℕ => laurentCoeff f z₀ r (-((n : ℤ) + 1)) *
+        (z - z₀) ^ (-((n : ℤ) + 1))) 0 := by
+      have : (fun n : ℕ => laurentCoeff f z₀ r (-((n : ℤ) + 1)) *
+          (z - z₀) ^ (-((n : ℤ) + 1))) = fun _ => 0 := by
+        funext n; rw [h _ (by omega), zero_mul]
+      rw [this]; exact hasSum_zero
+    have := HasSum.of_nat_of_neg_add_one
+      (f := fun n : ℤ => laurentCoeff f z₀ r n * (z - z₀) ^ n) hA hB
+    rw [add_zero] at this
+    exact hL.unique this
+
+/-- Laurent coefficients of an analytic germ at negative indices vanish. -/
+private lemma laurentCoeff_neg_eq_zero_of_analyticAt {f g : ℂ → ℂ} {z₀ : ℂ} {r₂ r : ℝ}
+    (hf : DifferentiableOn ℂ f {z | 0 < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂}) (hr : r ∈ Ioo 0 r₂)
+    (hg : AnalyticAt ℂ g z₀) (hfg : f =ᶠ[𝓝[≠] z₀] g) {n : ℤ} (hn : n < 0) :
+    laurentCoeff f z₀ r n = 0 := by
+  obtain ⟨ε₁, hε₁, hg'⟩ := hg.exists_ball_analyticOnNhd
+  obtain ⟨ε₂, hε₂, hfg'⟩ := Metric.mem_nhdsWithin_iff.mp hfg
+  set ρ := min (min (ε₁ / 2) (ε₂ / 2)) (r / 2)
+  have hρ0 : 0 < ρ := lt_min (lt_min (by linarith) (by linarith)) (by linarith [hr.1])
+  have hρ1 : ρ < ε₁ := by
+    have := min_le_left (min (ε₁ / 2) (ε₂ / 2)) (r / 2)
+    have := min_le_left (ε₁ / 2) (ε₂ / 2); linarith
+  have hρ2 : ρ < ε₂ := by
+    have := min_le_left (min (ε₁ / 2) (ε₂ / 2)) (r / 2)
+    have := min_le_right (ε₁ / 2) (ε₂ / 2); linarith
+  have hρr : ρ < r := by have := min_le_right (min (ε₁ / 2) (ε₂ / 2)) (r / 2); linarith
+  rw [laurentCoeff_eq_of_mem le_rfl hf ⟨hρ0, hρr.trans hr.2⟩ hr, laurentCoeff]
+  obtain ⟨k, hk⟩ := Int.eq_ofNat_of_zero_le (show 0 ≤ -n - 1 by omega)
+  have hgd : DifferentiableOn ℂ (fun w => g w * (w - z₀) ^ k) (closedBall z₀ ρ) := fun w hw =>
+    ((hg' w (closedBall_subset_ball hρ1 hw)).differentiableAt.mul
+      ((differentiableAt_id.sub_const z₀).pow k)).differentiableWithinAt
+  rw [circleIntegral.integral_congr hρ0.le (g := fun w => g w * (w - z₀) ^ k),
+    circleIntegral_eq_zero_of_differentiable_on_off_countable hρ0.le countable_empty
+      hgd.continuousOn (fun w hw => hgd.differentiableAt (closedBall_mem_nhds_of_mem hw.1)),
+    mul_zero]
+  intro w hw
+  have hw0 : w ≠ z₀ := by
+    intro h; rw [h, mem_sphere, dist_self] at hw; linarith
+  beta_reduce
+  rw [hk, zpow_natCast, hfg' ⟨sphere_subset_closedBall.trans
+    (closedBall_subset_ball hρ2) hw, hw0⟩]
 
 /-- DLMF §1.10(iii) (removable singularities): if `f` is analytic in the punctured disc
 `0 < |z - z₀| < r₂`, then `z₀` is removable (`f` agrees near `z₀`, off `z₀`, with a function
@@ -113,7 +308,12 @@ theorem removable_iff_laurentCoeff_neg_eq_zero {f : ℂ → ℂ} {z₀ : ℂ} {r
     (hf : DifferentiableOn ℂ f {z | 0 < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂}) (hr : r ∈ Ioo 0 r₂) :
     (∃ g : ℂ → ℂ, AnalyticAt ℂ g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g) ↔
       ∀ n : ℤ, n < 0 → laurentCoeff f z₀ r n = 0 := by
-  sorry
+  constructor
+  · rintro ⟨g, hg, hfg⟩ n hn
+    exact laurentCoeff_neg_eq_zero_of_analyticAt hf hr hg hfg hn
+  · intro h
+    obtain ⟨G, hG, -, hfG⟩ := exists_analyticAt_of_laurentCoeff_neg hf hr h
+    exact ⟨G, hG, hfG⟩
 
 /-- DLMF §1.10(iii) (poles): for `f` analytic in a punctured disc, `z₀` is a pole of order
 `m ≥ 1` (`f` is meromorphic at `z₀` of order `-m`) iff `a_{-m} ≠ 0` and `aₙ = 0` for `n < -m`.
@@ -124,7 +324,58 @@ theorem meromorphicOrderAt_eq_neg_iff_laurentCoeff {f : ℂ → ℂ} {z₀ : ℂ
     {m : ℕ} (hm : 1 ≤ m) :
     (MeromorphicAt f z₀ ∧ meromorphicOrderAt f z₀ = (-(m : ℤ) : ℤ)) ↔
       laurentCoeff f z₀ r (-(m : ℤ)) ≠ 0 ∧ ∀ n : ℤ, n < -(m : ℤ) → laurentCoeff f z₀ r n = 0 := by
-  sorry
+  set h : ℂ → ℂ := fun z => (z - z₀) ^ m * f z with hh
+  have hhd : DifferentiableOn ℂ h {z | 0 < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂} :=
+    ((differentiableOn_id.sub_const z₀).pow m).mul hf
+  have hcoeff : ∀ k : ℤ, laurentCoeff h z₀ r k = laurentCoeff f z₀ r (k - m) := by
+    intro k
+    rw [laurentCoeff, laurentCoeff]
+    congr 1
+    refine circleIntegral.integral_congr hr.1.le fun w hw => ?_
+    have hw0 : w - z₀ ≠ 0 := by
+      intro h0; rw [mem_sphere, dist_eq_norm, h0, norm_zero] at hw; linarith [hr.1]
+    rw [show -(k - (m : ℤ)) - 1 = (m : ℤ) + (-k - 1) by ring, zpow_add₀ hw0, zpow_natCast, hh]
+    ring
+  have hfe : ∀ G : ℂ → ℂ, h =ᶠ[𝓝[≠] z₀] G →
+      ∀ᶠ z in 𝓝[≠] z₀, f z = (z - z₀) ^ (-(m : ℤ)) • G z := by
+    intro G hG
+    filter_upwards [hG, self_mem_nhdsWithin] with z hz hz0
+    have hz0' : z - z₀ ≠ 0 := sub_ne_zero.mpr hz0
+    rw [← hz, hh, smul_eq_mul, zpow_neg, zpow_natCast, ← mul_assoc,
+      inv_mul_cancel₀ (pow_ne_zero _ hz0'), one_mul]
+  constructor
+  · rintro ⟨hM, hord⟩
+    obtain ⟨g, hg, hg0, hfg⟩ := (meromorphicOrderAt_eq_int_iff hM).mp hord
+    have hhg : h =ᶠ[𝓝[≠] z₀] g := by
+      filter_upwards [hfg, self_mem_nhdsWithin] with z hz hz0
+      have hz0' : z - z₀ ≠ 0 := sub_ne_zero.mpr hz0
+      rw [hh]; simp only
+      rw [hz, smul_eq_mul, zpow_neg, zpow_natCast, ← mul_assoc,
+        mul_inv_cancel₀ (pow_ne_zero _ hz0'), one_mul]
+    have hneg : ∀ k : ℤ, k < 0 → laurentCoeff h z₀ r k = 0 := fun k hk =>
+      laurentCoeff_neg_eq_zero_of_analyticAt hhd hr hg hhg hk
+    obtain ⟨G, hG, hG0, hhG⟩ := exists_analyticAt_of_laurentCoeff_neg hhd hr hneg
+    have hGg : G z₀ = g z₀ := by
+      have h1 : Tendsto G (𝓝[≠] z₀) (𝓝 (G z₀)) :=
+        hG.continuousAt.tendsto.mono_left nhdsWithin_le_nhds
+      have h2 : Tendsto G (𝓝[≠] z₀) (𝓝 (g z₀)) :=
+        (hg.continuousAt.tendsto.mono_left nhdsWithin_le_nhds).congr' (hhG.symm.trans hhg).symm
+      exact tendsto_nhds_unique h1 h2
+    refine ⟨?_, fun n hn => ?_⟩
+    · rw [show -(m : ℤ) = 0 - m by ring, ← hcoeff 0, ← hG0, hGg]
+      exact hg0
+    · have := hneg (n + m) (by omega)
+      rwa [hcoeff, add_sub_cancel_right] at this
+  · rintro ⟨hne, hzero⟩
+    have hneg : ∀ k : ℤ, k < 0 → laurentCoeff h z₀ r k = 0 := fun k hk => by
+      rw [hcoeff]; exact hzero _ (by omega)
+    obtain ⟨G, hG, hG0, hhG⟩ := exists_analyticAt_of_laurentCoeff_neg hhd hr hneg
+    have hG0' : G z₀ ≠ 0 := by rwa [hG0, hcoeff, zero_sub]
+    have hfe' := hfe G hhG
+    have hM : MeromorphicAt f z₀ := by
+      have : MeromorphicAt (fun z => (z - z₀) ^ (-(m : ℤ)) • G z) z₀ := by fun_prop
+      exact this.congr (hfe'.mono fun z hz => hz.symm)
+    exact ⟨hM, (meromorphicOrderAt_eq_int_iff hM).mpr ⟨G, hG, hG0', hfe'⟩⟩
 
 /-- DLMF §1.10(iii) (residue): at a pole, the Laurent residue `residueAt f z₀` (the coefficient
 `a_{-1}`) is Tau Ceti's `TauCeti.Contour.residue f z₀`. -/
@@ -132,7 +383,27 @@ theorem meromorphicOrderAt_eq_neg_iff_laurentCoeff {f : ℂ → ℂ} {z₀ : ℂ
 theorem residueAt_eq_residue {f : ℂ → ℂ} {z₀ : ℂ} {r₂ : ℝ}
     (hf : DifferentiableOn ℂ f {z | 0 < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂}) (hm : MeromorphicAt f z₀) :
     residueAt f z₀ = TauCeti.Contour.residue f z₀ := by
-  sorry
+  obtain ⟨ε, hε, hεs⟩ := Metric.mem_nhdsWithin_iff.mp hm.eventually_analyticAt
+  have key : ∀ r ∈ Ioo 0 ε, laurentCoeff f z₀ r (-1) = TauCeti.Contour.residue f z₀ := by
+    intro r hr
+    have han : ∀ z ∈ closedBall z₀ r, z ≠ z₀ → AnalyticAt ℂ f z := fun z hz hzz =>
+      hεs ⟨closedBall_subset_ball hr.2 hz, hzz⟩
+    have hmo : MeromorphicOn f (closedBall z₀ r) := fun z hz => by
+      by_cases h : z = z₀
+      · exact h ▸ hm
+      · exact (han z hz h).meromorphicAt
+    have hres := TauCeti.Contour.classicalResidueTheorem_circle_of_meromorphicOrderAt_neg hr.1
+      {z₀} hmo (by simp [hr.1]) fun z hz hneg => by
+        by_contra h
+        rw [Finset.mem_singleton] at h
+        exact (not_le.mpr hneg) (han z hz h).meromorphicOrderAt_nonneg
+    rw [laurentCoeff, show -(-1 : ℤ) - 1 = 0 by norm_num]
+    simp only [zpow_zero, mul_one]
+    rw [hres, Finset.sum_singleton]
+    field_simp
+  unfold residueAt
+  exact Tendsto.limUnder_eq (tendsto_nhds_of_eventually_eq (by
+    filter_upwards [Ioo_mem_nhdsGT hε] with r hr using key r hr))
 
 /-- DLMF §1.10(iii) (Picard's theorem): in any neighbourhood of an isolated essential
 singularity (`f` analytic in a punctured disc of positive radius and not meromorphic at `z₀`),
@@ -205,7 +476,14 @@ theorem IsSimpleClosedContour.rouche {γ : ℝ → ℂ} {a b : ℝ} {f g : ℂ �
     (hlt : ∀ z ∈ γ '' Icc a b, ‖g z‖ < ‖f z‖) :
     (∑ᶠ z ∈ contourInterior γ a b, analyticOrderNatAt f z) =
       ∑ᶠ z ∈ contourInterior γ a b, analyticOrderNatAt (fun w => f w + g w) z := by
-  sorry
+  have hC : IsCompact (γ '' Icc a b) := by
+    refine isCompact_Icc.image_of_continuousOn ?_
+    have := hγ.2.1.continuousOn
+    rwa [uIcc_of_le hγ.1.le] at this
+  have hK : contourInterior γ a b ∪ γ '' Icc a b = TauCeti.filledHull (γ '' Icc a b) :=
+    sdiff_union_of_subset TauCeti.subset_filledHull
+  rw [hK] at hf hg
+  exact Complex.rouche_filledHull hC hf hg hlt
 
 /-! ## §1.10(v) Maximum-modulus principle -/
 
@@ -552,7 +830,88 @@ theorem tendstoUniformlyOn_integral_of_norm_le {f : ℂ → ℝ → ℂ} {S : Se
 theorem prodConvergesDLMF_iff_log {a : ℕ → ℂ} (ha : ∀ n ≥ 1, a n ≠ -1) :
     ProdConvergesDLMF a ↔
       ∃ s, Tendsto (fun N => ∑ n ∈ Finset.Icc 1 N, log (1 + a n)) atTop (𝓝 s) := by
-  sorry
+  have hne : ∀ n ≥ 1, 1 + a n ≠ 0 := fun n hn h => ha n hn (by linear_combination h)
+  set S : ℕ → ℂ := fun N => ∑ n ∈ Finset.Icc 1 N, log (1 + a n)
+  set P : ℕ → ℂ := fun N => ∏ n ∈ Finset.Icc 1 N, (1 + a n)
+  have hSP : ∀ N, exp (S N) = P N := fun N => by
+    simp only [S, P, Complex.exp_sum]
+    refine Finset.prod_congr rfl fun n hn => exp_log (hne n (Finset.mem_Icc.mp hn).1)
+  have hP0 : ∀ N, P N ≠ 0 := fun N => by rw [← hSP]; exact exp_ne_zero _
+  constructor
+  · rintro ⟨k, hk, p, hp, hlim⟩
+    -- the full partial products converge to a nonzero limit
+    set C := ∏ n ∈ Finset.Ico 1 k, (1 + a n)
+    have hC : C ≠ 0 := Finset.prod_ne_zero_iff.mpr fun n hn =>
+      hne n (Finset.mem_Ico.mp hn).1
+    have hPl : Tendsto P atTop (𝓝 (C * p)) := by
+      refine (hlim.const_mul C).congr' ?_
+      filter_upwards [eventually_ge_atTop k] with m hm
+      simp only [P, C]
+      rw [← Finset.Ico_add_one_right_eq_Icc, ← Finset.Ico_add_one_right_eq_Icc,
+        Finset.prod_Ico_consecutive _ hk (by omega)]
+    set L := C * p
+    have hL : L ≠ 0 := mul_ne_zero hC hp
+    have hint : ∀ N, ∃ k : ℤ, S N - log (P N / L) - log L = k * (2 * Real.pi * I) := by
+      intro N
+      rw [← Complex.exp_eq_one_iff, exp_sub, exp_sub, hSP, exp_log (div_ne_zero (hP0 N) hL),
+        exp_log hL]
+      field_simp [hP0 N]
+    choose kk hkk using hint
+    have hlog : Tendsto (fun N => log (P N / L)) atTop (𝓝 0) := by
+      have h1 : Tendsto (fun N => P N / L) atTop (𝓝 1) := by
+        simpa [div_self hL] using hPl.div_const L
+      have h2 := (continuousAt_clog (by simp : (1 : ℂ) ∈ slitPlane)).tendsto.comp h1
+      rw [log_one] at h2
+      exact h2
+    have hstep : Tendsto (fun N => S (N + 1) - S N) atTop (𝓝 0) := by
+      have h1 : Tendsto (fun N => P (N + 1) / P N) atTop (𝓝 1) := by
+        have := ((tendsto_add_atTop_iff_nat 1).mpr hPl).div hPl hL
+        rw [div_self hL] at this
+        exact this
+      have h2 := (continuousAt_clog (by simp : (1 : ℂ) ∈ slitPlane)).tendsto.comp h1
+      rw [log_one] at h2
+      refine h2.congr fun N => ?_
+      simp only [Function.comp_apply, S, P]
+      rw [Finset.sum_Icc_succ_top (by omega), Finset.prod_Icc_succ_top (by omega),
+        mul_div_cancel_left₀ _ (hP0 N)]
+      ring
+    have hd : Tendsto (fun N => (((kk (N + 1) - kk N : ℤ) : ℂ))) atTop (𝓝 0) := by
+      have h := (hstep.sub (((tendsto_add_atTop_iff_nat 1).mpr hlog).sub hlog)).div_const
+        (2 * Real.pi * I)
+      simp only [sub_zero, zero_div] at h
+      refine h.congr fun N => ?_
+      have e1 := hkk (N + 1)
+      have e2 := hkk N
+      have hpi : (2 * Real.pi * I : ℂ) ≠ 0 := by simp [Real.pi_ne_zero, I_ne_zero]
+      rw [div_eq_iff hpi]
+      push_cast
+      linear_combination e1 - e2
+    have hev : ∀ᶠ N in atTop, kk (N + 1) = kk N := by
+      have hd' := hd.norm
+      rw [norm_zero] at hd'
+      filter_upwards [hd'.eventually (gt_mem_nhds (by norm_num : (0 : ℝ) < 1))] with N hN
+      rw [Complex.norm_intCast] at hN
+      have : kk (N + 1) - kk N = 0 := by
+        have h' : |((kk (N + 1) - kk N : ℤ) : ℝ)| < 1 := by exact_mod_cast hN
+        exact_mod_cast Int.abs_lt_one_iff.mp (by exact_mod_cast h')
+      omega
+    obtain ⟨M, hM⟩ := eventually_atTop.mp hev
+    have hconst : ∀ N ≥ M, kk N = kk M := by
+      intro N hN
+      induction N, hN using Nat.le_induction with
+      | base => rfl
+      | succ N hN ih => rw [hM N hN, ih]
+    refine ⟨kk M * (2 * Real.pi * I) + log L, ?_⟩
+    have h := (hlog.const_add (kk M * (2 * Real.pi * I) + log L))
+    rw [add_zero] at h
+    refine h.congr' ?_
+    filter_upwards [eventually_ge_atTop M] with N hN
+    have := hkk N
+    rw [hconst N hN] at this
+    linear_combination -this
+  · rintro ⟨s, hs⟩
+    refine ⟨1, le_rfl, exp s, exp_ne_zero s, ?_⟩
+    exact ((continuous_exp.tendsto s).comp hs).congr fun N => hSP N
 
 /-- DLMF §1.10(ix): the product `∏_{n ≥ 1} (1 + aₙ)` converges absolutely (that is,
 `∏ (1 + |aₙ|)` converges) iff `∑_{n ≥ 1} |aₙ|` converges. -/

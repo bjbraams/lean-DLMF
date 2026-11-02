@@ -303,7 +303,8 @@ def laguerreL {m : ℕ} (γ ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
 
 /-- DLMF 35.7.2: the Jacobi form
 `P_ν^{(γ,δ)}(T) = Γ_m(γ + ν + (m+1)/2) / Γ_m(γ + (m+1)/2)
-  ₂F₁(-ν, γ + δ + ν + (m+1)/2; γ + (m+1)/2; T)` (DLMF: `0 < T < I`, `ℜγ > -1`). -/
+  ₂F₁(-ν, γ + δ + ν + (m+1)/2; γ + (m+1)/2; T)` (DLMF: `0 < T < I`, `ℜγ > -1`). The classical
+Jacobi polynomial is `DLMF.OrthogonalPolynomials.jacobiPolyP`. -/
 @[dlmf 35.7.E2]
 def jacobiP {m : ℕ} (γ δ ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
   multivariateGamma m (γ + ν + ((m : ℂ) + 1) / 2) / multivariateGamma m (γ + ((m : ℂ) + 1) / 2) *

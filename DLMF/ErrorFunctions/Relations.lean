@@ -499,8 +499,8 @@ theorem erfc_upperIncGamma {z : ℂ} (hz : 0 < z.re) :
 theorem erf_lowerIncGamma {z : ℂ} (hz : 0 < z.re) :
     erf z=lowerIncGamma (1/2) (z^2)/Real.sqrt π := by
   have hz0 : z≠0 := ne_zero_of_re_pos hz
-  have h := lowerIncGamma_add_upperIncGamma (a:=1/2) half_ne_neg_nat (pow_ne_zero 2 hz0)
-  rw [Gamma_one_half_eq_sqrt] at h
+  have h := lowerIncGamma_add_upperIncGamma (a:=1/2) Complex.one_div_two_ne_neg_natCast (pow_ne_zero 2 hz0)
+  rw [Complex.Gamma_one_half_eq_sqrt] at h
   have hu := erfc_upperIncGamma hz
   unfold erfc at hu
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -525,7 +525,7 @@ theorem erf_kummerM_pair (z : ℂ) :
   constructor
   · unfold erf
     ring
-  · rw [erf, kummerM_kummer_transform three_half_ne_neg_nat]
+  · rw [erf, kummerM_kummer_transform Complex.three_div_two_ne_neg_natCast]
     norm_num
     ring
 
@@ -552,7 +552,7 @@ theorem fresnel_kummerM_pair (z : ℂ) :
     ring
   rw [(erf_kummerM_pair _).1,hzeta,←mul_assoc,hcoef] at h
   refine ⟨h,?_⟩
-  rw [h,kummerM_kummer_transform three_half_ne_neg_nat]
+  rw [h,kummerM_kummer_transform Complex.three_div_two_ne_neg_natCast]
   norm_num
   ring
 

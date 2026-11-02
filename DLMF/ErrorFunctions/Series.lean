@@ -70,7 +70,7 @@ n)` converges to `(erf z)`. -/
 @[dlmf 7.6.E2]
 theorem hasSum_erf_scaled (z : ℂ) :
     HasSum (fun n : ℕ => 2/Real.sqrt π*exp (-z^2)*(2 : ℂ)^n*z^(2*n+1)/oddProduct n) (erf z) := by
-  have h := (hasSum_kummerM (a:=1) three_half_ne_neg_nat (z^2)).mul_left
+  have h := (hasSum_kummerM (a:=1) Complex.three_div_two_ne_neg_natCast (z^2)).mul_left
     (2*z/Real.sqrt π*exp (-z^2))
   rw [← (erf_kummerM_pair z).2] at h
   refine h.congr_fun fun n => ?_
@@ -95,7 +95,7 @@ theorem Gamma_nat_add_three_half_mul_two_pow (m : ℕ) :
   induction m with
   | zero =>
     have h := Complex.Gamma_add_one (1/2:ℂ) (by norm_num)
-    rw [Gamma_one_half_eq_sqrt] at h
+    rw [Complex.Gamma_one_half_eq_sqrt] at h
     norm_num [oddProduct] at h ⊢
     rw [h]; ring
   | succ m ih =>

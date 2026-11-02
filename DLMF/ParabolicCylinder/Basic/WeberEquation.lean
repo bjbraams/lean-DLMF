@@ -67,7 +67,7 @@ theorem hasDerivAt_exp_neg_sq_div_four (z : ℂ) :
 /-- The even Weber solution `pcfEven a` has derivative `pcfEvenDeriv a`. -/
 theorem hasDerivAt_pcfEven (a z : ℂ) : HasDerivAt (pcfEven a) (pcfEvenDeriv a z) z := by
   have h := (hasDerivAt_exp_neg_sq_div_four z).mul
-    (hasDerivAt_kummerM_half_sq (α := a / 2 + 1 / 4) half_ne_neg_nat z)
+    (hasDerivAt_kummerM_half_sq (α := a / 2 + 1 / 4) Complex.one_div_two_ne_neg_natCast z)
   exact h.congr_deriv (by unfold pcfEvenDeriv; ring)
 
 /-- `(pcfEvenDeriv a)' = (z²/4 + a) pcfEven a`, i.e. `pcfEven a` solves Weber's equation `w'' =
@@ -75,12 +75,12 @@ theorem hasDerivAt_pcfEven (a z : ℂ) : HasDerivAt (pcfEven a) (pcfEvenDeriv a 
 theorem hasDerivAt_pcfEvenDeriv (a z : ℂ) :
     HasDerivAt (pcfEvenDeriv a) ((z ^ 2 / 4 + a) * pcfEven a z) z := by
   have hb1 : ∀ k : ℕ, (1 / 2 + 1 : ℂ) ≠ -k := by
-    norm_num; exact three_half_ne_neg_nat
-  have h0 := hasDerivAt_kummerM_half_sq (α := a / 2 + 1 / 4) half_ne_neg_nat z
+    norm_num; exact Complex.three_div_two_ne_neg_natCast
+  have h0 := hasDerivAt_kummerM_half_sq (α := a / 2 + 1 / 4) Complex.one_div_two_ne_neg_natCast z
   have h1 := hasDerivAt_kummerM_half_sq (α := a / 2 + 1 / 4 + 1) hb1 z
   have h := (((hasDerivAt_id z).mul (hasDerivAt_exp_neg_sq_div_four z)).mul
     ((h0.const_mul (-(1 / 2))).add (h1.const_mul (a + 1 / 2))))
-  have hc := kummerM_ode_contiguous (a := a / 2 + 1 / 4) (b := 1 / 2) half_ne_neg_nat
+  have hc := kummerM_ode_contiguous (a := a / 2 + 1 / 4) (b := 1 / 2) Complex.one_div_two_ne_neg_natCast
     (z := z ^ 2 / 2)
   refine h.congr_deriv ?_
   unfold pcfEven
@@ -92,7 +92,7 @@ theorem hasDerivAt_pcfEvenDeriv (a z : ℂ) :
 /-- The odd Weber solution `pcfOdd a` has derivative `pcfOddDeriv a`. -/
 theorem hasDerivAt_pcfOdd (a z : ℂ) : HasDerivAt (pcfOdd a) (pcfOddDeriv a z) z := by
   have h := ((hasDerivAt_id z).mul (hasDerivAt_exp_neg_sq_div_four z)).mul
-    (hasDerivAt_kummerM_half_sq (α := a / 2 + 3 / 4) three_half_ne_neg_nat z)
+    (hasDerivAt_kummerM_half_sq (α := a / 2 + 3 / 4) Complex.three_div_two_ne_neg_natCast z)
   exact h.congr_deriv (by unfold pcfOddDeriv; simp only [id, Pi.mul_apply]; ring)
 
 /-- `(pcfOddDeriv a)' = (z²/4 + a) pcfOdd a`, i.e. `pcfOdd a` solves Weber's equation. -/
@@ -100,13 +100,13 @@ theorem hasDerivAt_pcfOddDeriv (a z : ℂ) :
     HasDerivAt (pcfOddDeriv a) ((z ^ 2 / 4 + a) * pcfOdd a z) z := by
   have hb1 : ∀ k : ℕ, (3 / 2 + 1 : ℂ) ≠ -k := by
     norm_num; exact five_halves_ne_neg_nat
-  have h0 := hasDerivAt_kummerM_half_sq (α := a / 2 + 3 / 4) three_half_ne_neg_nat z
+  have h0 := hasDerivAt_kummerM_half_sq (α := a / 2 + 3 / 4) Complex.three_div_two_ne_neg_natCast z
   have h1 := hasDerivAt_kummerM_half_sq (α := a / 2 + 3 / 4 + 1) hb1 z
   have h := (hasDerivAt_exp_neg_sq_div_four z).mul
     ((((hasDerivAt_const z (1 : ℂ)).sub ((hasDerivAt_pow 2 z).div_const 2)).mul h0).add
       (((hasDerivAt_pow 2 z).const_mul ((a + 3 / 2) / 3)).mul h1))
   have hc := kummerM_ode_contiguous (a := a / 2 + 3 / 4) (b := 3 / 2)
-    three_half_ne_neg_nat (z := z ^ 2 / 2)
+    Complex.three_div_two_ne_neg_natCast (z := z ^ 2 / 2)
   refine h.congr_deriv ?_
   unfold pcfOdd
   rw [show a / 2 + 3 / 4 + 1 + 1 = a / 2 + 3 / 4 + 2 by ring]

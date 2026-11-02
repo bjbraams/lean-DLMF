@@ -31,6 +31,8 @@ derivatives, periodicity and special values, and defines the inverse function `a
 * `Real.jacobiSnm_sq_add_jacobiCnm_sq`, `Real.mul_jacobiSnm_sq_add_jacobiDnm_sq`: DLMF 22.6.1.
 * `Real.hasDerivAt_jacobiSnm`, `Real.hasDerivAt_jacobiCnm`, `Real.hasDerivAt_jacobiDnm`:
   derivatives (DLMF Table 22.13.1).
+* `Real.continuous_jacobiSnm`, `Real.continuous_jacobiCnm`, `Real.continuous_jacobiDnm`:
+  continuity for `m < 1`.
 * `Real.jacobi_add_two_compEllIntKm`, `Real.jacobiSnm_add_four_compEllIntKm`: half-period shifts
   and periods (DLMF Tables 22.4.1, 22.4.3).
 * `Real.jacobi_compEllIntKm`, `jacobi_zero`: values at `u = K` and `u = 0` (DLMF Table 22.5.1).
@@ -161,6 +163,25 @@ theorem Real.hasDerivAt_jacobiDnm {m : ℝ} (hm : m < 1) (u : ℝ) :
   rw [hr]
   field_simp
   ring
+
+/-- `sn(·|m)` is continuous for `m < 1`. -/
+theorem Real.continuous_jacobiSnm {m : ℝ} (hm : m < 1) :
+    Continuous fun u => Real.jacobiSnm u m :=
+  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiSnm hm u).continuousAt
+
+/-- `cn(·|m)` is continuous for `m < 1`. -/
+theorem Real.continuous_jacobiCnm {m : ℝ} (hm : m < 1) :
+    Continuous fun u => Real.jacobiCnm u m :=
+  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiCnm hm u).continuousAt
+
+/-- `dn(·|m)` is continuous for `m < 1`. -/
+theorem Real.continuous_jacobiDnm {m : ℝ} (hm : m < 1) :
+    Continuous fun u => Real.jacobiDnm u m :=
+  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiDnm hm u).continuousAt
+
+/-- `sn(0|m) = 0` for `m < 1`. -/
+theorem Real.jacobiSnm_zero {m : ℝ} (hm : m < 1) : Real.jacobiSnm 0 m = 0 := by
+  simp [Real.jacobiSnm, Real.jacobiAmm_zero hm]
 
 /-- `sn(u + 2K) = -sn u`, `cn(u + 2K) = -cn u`, `dn(u + 2K) = dn u` (DLMF Table 22.4.3). -/
 @[dlmf 22.4.T3 "real parameter m < 1 and real argument: the 2K column for sn, cn, dn"]

@@ -63,7 +63,7 @@ open DLMF.Confluent
 
 open DLMF.Bessel
 
-open DLMF.Gamma (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
 
 noncomputable section
 

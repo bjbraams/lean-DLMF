@@ -661,12 +661,12 @@ theorem struveAs_angerA_eq_rot (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) {z : 
     (hz : 0 < (z * exp (θ * I)).re) :
     angerA ν z = 1 / π * (exp (θ * I) * struveAs_rotInt ν θ z) := by
   have hzs := struveAs_halfPlane_subset hθ hz
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement (f := fun μ => angerA μ z)
+  refine Complex.eq_of_continuousAt_of_integerComplement (f := fun μ => angerA μ z)
     (g := fun μ => 1 / π * (exp (θ * I) * struveAs_rotInt μ θ z))
     (continuousAt_angerA_order ν hzs)
     (continuousAt_const.mul (continuousAt_const.mul
       (struveAs_continuousAt_rotInt_order hθ hz ν))) fun c hc => ?_
-  exact struveAs_angerA_eq_rot_of_not_int (DLMF.Confluent.forall_of_mem_integerComplement hc) hθ hz
+  exact struveAs_angerA_eq_rot_of_not_int (Complex.forall_of_mem_integerComplement hc) hθ hz
 
 /-- Taylor remainder of the kernel along a ray, in the form required by Watson's lemma. -/
 theorem struveAs_kernel_ray_isBigO (ν : ℂ) (θ : ℝ) (N : ℕ) :

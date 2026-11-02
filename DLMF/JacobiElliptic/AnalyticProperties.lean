@@ -34,6 +34,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-! ### §22.2: theta-quotient forms and Neville form -/
 
 /-- The theta-quotient forms of DLMF 22.2.4–22.2.9 with `τ = iK'/K`, `ζ = πz/(2K)`: e.g.

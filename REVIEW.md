@@ -9981,3 +9981,38 @@ These follow the overlap list above; the renames and removals are rows of
   `Zeta.polylog_two_ofReal_eq_dilog` (made public, renamed from the private
   `polylog_two_ofReal`), and
   `Zeta.polylog_natCast_eq_polylogSeries` identifies `Li_n` with the series on the closed disk.
+
+## Remaining overlaps and shared helpers (2026-11-01)
+
+These are rows of `reports/RenameMap20261101.tsv` as well.
+
+- `compEllIntKk` and `compEllIntKpk` (complete integrals as functions of the modulus `k`) moved
+  from `DLMF.JacobiElliptic` to the new foundational file `DLMF.EllipticIntegrals.Basic.Complete`
+  in namespace `DLMF.EllipticIntegrals`. `EllipticIntegrals.Basic.Legendre` still uses
+  `jacobiComodulusk`, so EllipticIntegrals ↔ JacobiElliptic is a new two-way area pair.
+- Not duplicates, now cross-referenced in docstrings: `MatrixArgument.jacobiP` and
+  `OrthogonalPolynomials.jacobiPolyP`; the spherical harmonics of `SphericalHarmonics.Basic`
+  and `Legendre.sphericalHarmonic`. `arcsinhDomain = arctanCutPlane` is the new theorem
+  `arcsinhDomain_eq_arctanCutPlane` (`rfl`).
+- General helpers moved to `DLMFMathlib`: power-series lemmas
+  (`HasFPowerSeriesOnBall.deriv_ofScalars` and four others) to
+  `Analysis.Analytic.OfScalarsDeriv`; the noninteger-complement lemmas to
+  `Analysis.Complex.NonInteger` (namespace `Complex`, with the new
+  `three_div_two_ne_neg_natCast`); parameter continuity of `dslope` and of dominated `tsum`s to
+  `Analysis.Complex.ParameterContinuity`; the `1/Γ(a + n)` bounds to
+  `Analysis.SpecialFunctions.Gamma.Bounds`. The private `besselBasic_*` and `airyBasic_*`
+  copies in the Bessel and Airy Basic files are removed, and `Bessel.Basic.SecondKind` no longer
+  imports a Hypergeometric file.
+- `DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values` no longer imports
+  `DLMFMathlib.Analysis.Complex.BarnesResidue`, which depends on lean-codes; `analyticAt_Gamma`
+  proves its open-set step directly. Basic files may now import `Values`.
+- `Gamma_add_nat_eq_poch_mul_Gamma` (from `DLMF.Gamma`) and `poch_ne_zero_of_re_pos` (from
+  `DLMF.OrthogonalPolynomials`) moved to `DLMF.Hypergeometric.Basic.Pochhammer`.
+- Removed duplicates: `Gamma.poch_succ_left`, `Gamma.poch_succ_left'`, the `half_ne_neg_nat`
+  family (four copies), `Confluent.Gamma_one_half_eq_sqrt`, `airyRot_neg_connection_ai/bi`,
+  `airyDer_ai/biDeriv_ofReal_im`, the private copy of `jacobiThetaOneTau_zero` in
+  `Theta.Identities` (the public one moved to `Elliptic.Basic.ThetaPeriodicity`), the
+  `Lame`/`JacobiElliptic` continuity lemmas for real `sn`, `cn`, `dn` (now
+  `Real.continuous_jacobiSnm`, `…Cnm`, `…Dnm` and `Real.jacobiSnm_zero` in
+  `Elliptic.Basic.Jacobi`), and the wrapper `OrthogonalPolynomials.deriv_kummerM_regular` of
+  `Confluent.deriv_kummerM` (DLMF 13.3.15).

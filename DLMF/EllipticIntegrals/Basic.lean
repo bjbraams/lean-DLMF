@@ -7,6 +7,7 @@ module
 
 public import DLMF.EllipticIntegrals.Basic.Symmetric
 public import DLMF.EllipticIntegrals.Basic.SymmetricProperties
+public import DLMF.EllipticIntegrals.Basic.Complete
 public import DLMF.EllipticIntegrals.Basic.Legendre
 
 /-!

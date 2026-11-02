@@ -104,7 +104,7 @@ theorem struveK_zero_laplace {z : ℂ} (hz : 0 < z.re) :
   set c : ℂ := 2*(z/2)^(0:ℂ)/(Real.sqrt π*Gamma (0+1/2))
   have hc : c = (2/π : ℂ) := by
     simp only [c]
-    rw [cpow_zero, zero_add, DLMF.Confluent.Gamma_one_half_eq_sqrt, ← ofReal_mul,
+    rw [cpow_zero, zero_add, Complex.Gamma_one_half_eq_sqrt, ← ofReal_mul,
       Real.mul_self_sqrt Real.pi_pos.le]; ring
   have h := intervalIntegral_tendsto_integral_Ioi 0
     ((integrableOn_yLaplaceKernel 0 hz).const_mul c) tendsto_real_sinh_atTop
@@ -304,7 +304,7 @@ theorem struveFour_mem_slitPlane_neg_I {x : ℝ} (hx : 0 < x) : -I * (x : ℂ) �
 theorem struveFour_Y {x : ℝ} (hx : 0 < x) (ν : ℂ) :
     exp (I * ν * π / 2) * besselY ν (-I * x) - exp (-(I * ν * π / 2)) * besselY ν (I * x) =
       -2 * I * besselI (-ν) x := by
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => exp (I * μ * π / 2) * besselY μ (-I * x) -
       exp (-(I * μ * π / 2)) * besselY μ (I * x))
     (g := fun μ => -2 * I * besselI (-μ) x) ?_ ?_ (fun c hc => ?_)
@@ -315,7 +315,7 @@ theorem struveFour_Y {x : ℝ} (hx : 0 < x) (ν : ℂ) :
       (continuousAt_besselY_order (fun μ => μ) continuous_id ν (struveFour_mem_slitPlane_I hx)))
   · exact continuousAt_const.mul (continuousAt_besselI_order (fun μ => -μ) continuous_neg ν
       (by simpa using ofReal_mem_slitPlane.mpr hx))
-  · have hc' := DLMF.Confluent.forall_of_mem_integerComplement hc
+  · have hc' := Complex.forall_of_mem_integerComplement hc
     have hs : sin (c * π) ≠ 0 := by
       rw [Ne, Complex.sin_eq_zero_iff]
       rintro ⟨k, hk⟩

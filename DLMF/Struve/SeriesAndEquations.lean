@@ -415,7 +415,7 @@ theorem struveQuadratic_recurrence (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane
     struveQuadratic (ν-1) σ z-σ*struveQuadratic (ν+1) σ z =
       2*ν/z*struveQuadratic ν σ z+(z/2)^ν/(Real.sqrt π*Gamma (ν+3/2)) := by
   have hc := regularized1F2_one_shift (3/2) (ν+3/2) (σ*z^2/4)
-  rw [show (3/2:ℂ)-1=1/2 by norm_num,DLMF.Confluent.Gamma_one_half_eq_sqrt] at hc
+  rw [show (3/2:ℂ)-1=1/2 by norm_num,Complex.Gamma_one_half_eq_sqrt] at hc
   have hp : (z/2)^(ν+1)=(z/2)^ν*(z/2) := by
     rw [cpow_add _ _ (div_ne_zero (slitPlane_ne_zero hz) (by norm_num)),cpow_one]
   have hp' : (z/2)^(ν+1+1)=(z/2)^ν*z^2/4 := by
@@ -493,7 +493,7 @@ theorem struve_series_ode (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     show (ν+1+ν)/2+1=ν+3/2 by ring,
     show (ν+1-ν)/2=(1/2:ℂ) by ring,
     show (ν+1+ν)/2=ν+1/2 by ring,
-    DLMF.Confluent.Gamma_one_half_eq_sqrt] at h
+    Complex.Gamma_one_half_eq_sqrt] at h
   have hp : (z/2)^(ν+1)=(z/2)^(ν-1)*z^2/4 := by
     rw [show ν+1=ν-1+(2:ℕ) by norm_num; ring, cpow_add _ _
       (div_ne_zero (slitPlane_ne_zero hz) (by norm_num)), cpow_natCast, div_pow]

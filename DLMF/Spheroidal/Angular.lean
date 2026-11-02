@@ -24,11 +24,10 @@ the second kind `𝖰s^m_n(x, γ²)` (§30.5), and the functions of complex argu
 
 ## Main results
 
-* `spheroidalPs_zero_sign`, `spheroidalPs_deriv_zero_sign`, `integral_spheroidalPs_sq`: the
-  sign conventions of §30.4(i) and the normalization DLMF 30.4.1.
+* `integral_spheroidalPs_sq`: the normalization DLMF 30.4.1 (the sign conventions of §30.4(i),
+  the parity 30.4.3 and the equation for `𝖯s` are in `DLMF.Spheroidal.FerrersProperties`).
 * `spheroidalPs_gamma_zero`, `spheroidalEigenvalue_gamma_zero`: the Legendre limit 30.4.2 and
   `λ^m_n(0) = n(n+1)` (DLMF 30.3.3).
-* `spheroidalPs_neg`: the parity DLMF 30.4.3.
 * `ncard_zeros_spheroidalPs`: `𝖯s^m_n` has exactly `n - m` zeros in `(-1, 1)` (§30.4(ii)).
 * `hasSum_spheroidalPs`, `spheroidalPs_coeff_recurrence`: the power series 30.4.4 and its
   recurrence 30.4.5.
@@ -149,52 +148,6 @@ private lemma isSpheroidalFactor_iteratedDeriv_recurrence {m : ℕ} {γ2 lam : �
     try simp only [Pi.sub_def, Pi.add_def]
     fun_prop
 
-/-- The reflected factor `(-1)^{n-m} g(-z)` is again the normalized factor. -/
-theorem isSpheroidalPsFactor_reflect {n m : ℕ} {γ2 : ℝ} {g : ℂ → ℂ}
-    (hg : IsSpheroidalPsFactor n m γ2 g) :
-    IsSpheroidalPsFactor n m γ2 (fun z => (-1 : ℂ) ^ (n - m) * g (-z)) := by
-  have hd := hg.factor.differentiable
-  have hd1 : Differentiable ℂ (deriv g) :=
-    fun z => ((hd.analyticAt z).deriv).differentiableAt
-  have h1 : ∀ z, HasDerivAt (fun z => (-1 : ℂ) ^ (n - m) * g (-z))
-      (-((-1 : ℂ) ^ (n - m) * deriv g (-z))) z := fun z => by
-    have := ((hd (-z)).hasDerivAt.comp z (hasDerivAt_neg z)).const_mul ((-1 : ℂ) ^ (n - m))
-    simpa using this
-  have e1 : deriv (fun z => (-1 : ℂ) ^ (n - m) * g (-z)) =
-      fun z => -((-1 : ℂ) ^ (n - m) * deriv g (-z)) := funext fun z => (h1 z).deriv
-  have h2 : ∀ z, HasDerivAt (fun z => -((-1 : ℂ) ^ (n - m) * deriv g (-z)))
-      ((-1 : ℂ) ^ (n - m) * deriv (deriv g) (-z)) z := fun z => by
-    refine ((((hd1 (-z)).hasDerivAt.comp z (hasDerivAt_neg z)).const_mul
-      ((-1 : ℂ) ^ (n - m))).neg).congr_deriv ?_
-    ring
-  have e2 : deriv (deriv (fun z => (-1 : ℂ) ^ (n - m) * g (-z))) =
-      fun z => (-1 : ℂ) ^ (n - m) * deriv (deriv g) (-z) := by
-    rw [e1]; exact funext fun z => (h2 z).deriv
-  have hk : ((-1 : ℂ) ^ (n - m)) = (((-1 : ℝ) ^ (n - m) : ℝ) : ℂ) := by push_cast; rfl
-  refine ⟨⟨fun z => (h1 z).differentiableAt,
-    fun z => ?_⟩, fun x => ?_, ?_, fun he => ?_, fun ho => ?_⟩
-  · rw [e2, e1]
-    have h := hg.factor.ode (-z)
-    linear_combination (-1 : ℂ) ^ (n - m) * h
-  · rw [hk, ← Complex.ofReal_neg, Complex.im_ofReal_mul, hg.real, mul_zero]
-  · rw [← hg.normalized]
-    have : ∀ x : ℝ, (1 - x ^ 2) ^ m * (((-1 : ℂ) ^ (n - m) * g (-(x : ℂ))).re) ^ 2 =
-        (fun x : ℝ => (1 - x ^ 2) ^ m * (g x).re ^ 2) (-x) := by
-      intro x
-      rw [hk, ← Complex.ofReal_neg, Complex.re_ofReal_mul, mul_pow, ← pow_mul,
-        mul_comm (n - m) 2, pow_mul]
-      simp
-    simp_rw [this]
-    rw [intervalIntegral.integral_comp_neg (fun x : ℝ => (1 - x ^ 2) ^ m * (g x).re ^ 2)]
-    norm_num
-  · rw [neg_zero, hk, Complex.re_ofReal_mul, he.neg_one_pow, one_mul]
-    exact hg.sign_even he
-  · rw [e1]
-    simp only [neg_zero]
-    rw [show -((-1 : ℂ) ^ (n - m) * deriv g 0) = (((-((-1 : ℝ) ^ (n - m))) : ℝ) : ℂ) * deriv g 0
-      by push_cast; ring, Complex.re_ofReal_mul, ho.neg_one_pow, neg_neg, one_mul]
-    exact hg.sign_odd ho
-
 /-- Iterated derivatives of an entire function real on `ℝ` are real on `ℝ`. -/
 private lemma im_iteratedDeriv_ofReal_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
     (hreal : ∀ x : ℝ, (g x).im = 0) (j : ℕ) :
@@ -214,43 +167,6 @@ private lemma im_iteratedDeriv_ofReal_eq_zero {g : ℂ → ℂ} (hg : Differenti
 
 /-! ### Elementary properties of `𝖯s` (§30.4(i), (ii)) -/
 
-/-- `𝖯s^m_n(0, γ²) = g(0)` for the entire factor `g`. -/
-theorem spheroidalPs_zero (n m : ℕ) (γ2 : ℝ) :
-    spheroidalPs n m 0 γ2 = (spheroidalPsFactor n m γ2 0).re := by
-  simp [spheroidalPs]
-
-/-- `d𝖯s^m_n(x, γ²)/dx` at `x = 0` is `g'(0)` for the entire factor `g` (`(1-x²)^{m/2}` is
-stationary at `0`). Proved. -/
-theorem hasDerivAt_spheroidalPs_zero {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
-    HasDerivAt (fun x => spheroidalPs n m x γ2) (deriv (spheroidalPsFactor n m γ2) 0).re 0 := by
-  have hG := (spheroidalPsFactor_spec hmn γ2).factor.differentiable
-  have h2 : HasDerivAt (fun x : ℝ => (spheroidalPsFactor n m γ2 x).re)
-      (deriv (spheroidalPsFactor n m γ2) 0).re 0 := by
-    have := (hG ((0 : ℝ) : ℂ)).hasDerivAt
-    exact this.real_of_complex
-  have hb : HasDerivAt (fun x : ℝ => 1 - x ^ 2) (-(2 * (0 : ℝ))) 0 := by
-    simpa using ((hasDerivAt_id (0 : ℝ)).pow 2).const_sub 1
-  have h1 := hb.rpow_const (p := (m : ℝ) / 2) (Or.inl (by norm_num))
-  have := h1.mul h2
-  convert this using 1
-  · funext x; rfl
-  · simp
-
-/-- **Sign convention for `n - m` even** (DLMF §30.4(i)): the sign of `𝖯s^m_n(0, γ²)` is
-`(-1)^{(n+m)/2}`. Proved from `existsUnique_isSpheroidalPsFactor`. -/
-@[dlmf 30.4.i]
-theorem spheroidalPs_zero_sign {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (h : Even (n - m)) :
-    0 < (-1 : ℝ) ^ ((n + m) / 2) * spheroidalPs n m 0 γ2 := by
-  rw [spheroidalPs_zero]; exact (spheroidalPsFactor_spec hmn γ2).sign_even h
-
-/-- **Sign convention for `n - m` odd** (DLMF §30.4(i)): the sign of `d𝖯s^m_n(x, γ²)/dx|_{x=0}` is
-`(-1)^{(n+m-1)/2}`. Proved from `existsUnique_isSpheroidalPsFactor`. -/
-@[dlmf 30.4.i]
-theorem spheroidalPs_deriv_zero_sign {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (h : Odd (n - m)) :
-    0 < (-1 : ℝ) ^ ((n + m - 1) / 2) * deriv (fun x => spheroidalPs n m x γ2) 0 := by
-  rw [(hasDerivAt_spheroidalPs_zero hmn γ2).deriv]
-  exact (spheroidalPsFactor_spec hmn γ2).sign_odd h
-
 /-- **Normalization** (DLMF 30.4.1): `∫_{-1}^1 (𝖯s^m_n(x, γ²))² dx = 2(n+m)!/((2n+1)(n-m)!)`.
 Proved from `existsUnique_isSpheroidalPsFactor`. -/
 @[dlmf 30.4.E1]
@@ -266,16 +182,6 @@ theorem integral_spheroidalPs_sq {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
   rw [← Real.rpow_mul_natCast h0, ← Real.rpow_natCast (1 - x ^ 2) m]
   congr 1
   push_cast; ring
-
-/-- `𝖯s^m_n(x, γ²)` solves 30.2.1 on `(-1, 1)` with `μ = m`, `λ = λ^m_n(γ²)` (DLMF §30.4(i)).
-Proved from the admitted 30.3(i) equivalence and the existence theorem. -/
-@[dlmf 30.4.i]
-theorem isSpheroidalSolutionReal_spheroidalPs {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
-    IsSpheroidalSolutionReal (spheroidalEigenvalue n m γ2) γ2 m
-      (fun x => spheroidalPs n m x γ2) := by
-  have h := spheroidalPsFactor_spec hmn γ2
-  exact (isSpheroidalSolutionReal_iff_isSpheroidalFactor h.factor.differentiable h.real).mpr
-    h.factor
 
 /-! ### The Legendre case `γ = 0` (helpers, proof round P1, agent S30) -/
 
@@ -629,19 +535,6 @@ theorem spheroidalPs_gamma_zero {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x �
   push_cast
   congr 1
   exact Complex.ext (by simp) (by simp [hre])
-
-/-- **Parity** (DLMF 30.4.3): `𝖯s^m_n(-x, γ²) = (-1)^{n-m} 𝖯s^m_n(x, γ²)`. -/
-@[dlmf 30.4.E3]
-theorem spheroidalPs_neg {n m : ℕ} (hmn : m ≤ n) (x γ2 : ℝ) :
-    spheroidalPs n m (-x) γ2 = (-1) ^ (n - m) * spheroidalPs n m x γ2 := by
-  have hg := spheroidalPsFactor_spec hmn γ2
-  have hu := (existsUnique_isSpheroidalPsFactor hmn γ2).unique
-    (isSpheroidalPsFactor_reflect hg) hg
-  have hx := congrFun hu (-(x : ℂ))
-  simp only [neg_neg] at hx
-  have hk : ((-1 : ℂ) ^ (n - m)) = (((-1 : ℝ) ^ (n - m) : ℝ) : ℂ) := by push_cast; rfl
-  simp only [spheroidalPs, neg_sq, Complex.ofReal_neg, ← hx, hk, Complex.re_ofReal_mul]
-  ring
 
 /-- **Zeros** (DLMF §30.4(ii)): `𝖯s^m_n(x, γ²)` has exactly `n - m` zeros in `-1 < x < 1`. -/
 @[dlmf 30.4.ii]

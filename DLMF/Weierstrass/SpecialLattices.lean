@@ -40,7 +40,7 @@ modulus.
 Real numbers are complex numbers with vanishing imaginary part, and order statements are made
 for real parts. The complete elliptic integral of 23.5.5 is the project's real
 `DLMF.Elliptic.Real.compEllIntKm` with parameter `m = k² = 1/2`; the complex values in 23.5.9
-use the principal complex integral `DLMF.JacobiElliptic.compEllIntKk` (modulus form) and the
+use the principal complex integral `DLMF.EllipticIntegrals.compEllIntKk` (modulus form) and the
 modulus `k = e^{iπ/6}` with `k² = e^{iπ/3}`.
 -/
 
@@ -52,6 +52,8 @@ open scoped Real
 noncomputable section
 
 namespace DLMF.Weierstrass
+
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
 
 section Conjugation
 open Filter Topology
@@ -280,14 +282,6 @@ theorem IsRectangular.roots {H : HalfPeriods} (h : H.IsRectangular) :
   have hC4 : 0 < C ^ 4 := by positivity
   refine ⟨by nlinarith, by nlinarith, by positivity, by nlinarith⟩
 
-/-- DLMF §23.5(ii): for a rectangular lattice `e₂` and `g₃` have opposite signs unless
-`ω₃ = iω₁`, in which case both vanish. -/
-@[dlmf 23.5.ii]
-theorem IsRectangular.e_two_g₃ {H : HalfPeriods} (h : H.IsRectangular) :
-    H.g₃.im = 0 ∧ (H.ω₃ = I * H.ω₁ → H.e 2 = 0 ∧ H.g₃ = 0) ∧
-      (H.ω₃ ≠ I * H.ω₁ → (H.e 2).re * H.g₃.re < 0) := by
-  sorry
-
 /-- Rectangular half-periods `ω₁ = a`, `ω₃ = ib` with `a, b > 0`. -/
 def rectangular (a b : ℝ) (ha : 0 < a) (hb : 0 < b) : HalfPeriods :=
   ⟨a, b * I, by exact_mod_cast ha.ne', by
@@ -462,6 +456,76 @@ theorem IsLemniscatic.modulus_sq {H : HalfPeriods} (h : H.IsLemniscatic) :
   rw [h2, h3]
   field_simp
   ring
+
+/-- For a rectangular lattice, `e₂ = 0` forces `ω₃ = iω₁` (then `k² = 1/2`, so `K' = K`). -/
+private lemma IsRectangular.eq_I_mul_of_e_two_eq_zero {H : HalfPeriods} (h : H.IsRectangular)
+    (he : H.e 2 = 0) : H.ω₃ = I * H.ω₁ := by
+  obtain ⟨h1i, h1r, h3r, h3i⟩ := h
+  set a := H.ω₁.re
+  set t := H.ω₃.im / a
+  have ht : 0 < t := div_pos h3i h1r
+  have hω1 : H.ω₁ = a := Complex.ext rfl (by simp [h1i])
+  have hω3 : H.ω₃ = I * H.ω₃.im := Complex.ext (by simp [h3r]) (by simp)
+  have hτ : H.tau = I * t := by
+    rw [HalfPeriods.tau, hω1, hω3]; simp only [t]; push_cast
+    have : (a : ℂ) ≠ 0 := ofReal_ne_zero.mpr h1r.ne'
+    field_simp
+  obtain ⟨d3, d2⟩ := H.e_one_sub_e_three_and_e_one_sub_e_two
+  have hs := H.e_sum
+  rw [hτ, jacobiThetaThreeTau_zero_I_mul_eq_imag] at d3
+  rw [hτ, jacobiThetaFourTau_zero_I_mul_eq_imag] at d2
+  have hc : (π / (2 * H.ω₁)) ^ 2 ≠ 0 := by
+    have := H.ω₁_ne_zero; have : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+    exact pow_ne_zero _ (div_ne_zero this (mul_ne_zero two_ne_zero H.ω₁_ne_zero))
+  have hBC : (jacobiThetaThreeImag t : ℂ) ^ 4 = 2 * (jacobiThetaFourImag t : ℂ) ^ 4 := by
+    apply mul_left_cancel₀ hc
+    linear_combination -d3 + 2 * d2 - hs + 3 * he
+  have hBC' : jacobiThetaThreeImag t ^ 4 = 2 * jacobiThetaFourImag t ^ 4 := by
+    exact_mod_cast hBC
+  obtain ⟨-, -, -, -, -, -, hK1, hK2⟩ := jacobiModulusImag_spec ht
+  have hB := one_le_jacobiThetaThreeImag ht
+  have hJ := jacobiThetaThreeImag_pow_four ht
+  have hk : jacobiModulusImag t ^ 2 = 1 / 2 := by
+    rw [jacobiModulusImag]
+    field_simp
+    nlinarith
+  rw [hk] at hK1
+  rw [hk, show (1 : ℝ) - 1 / 2 = 1 / 2 by norm_num, hK1] at hK2
+  have hB2 : 0 < π / 2 * jacobiThetaThreeImag t ^ 2 := by positivity
+  have ht1 : t = 1 := by nlinarith
+  have : H.ω₃.im = a := by
+    have := ht1; simp only [t] at this; field_simp at this; linarith
+  rw [hω3, this, hω1]
+
+/-- DLMF §23.5(ii): for a rectangular lattice `e₂` and `g₃` have opposite signs unless
+`ω₃ = iω₁`, in which case both vanish. -/
+@[dlmf 23.5.ii]
+theorem IsRectangular.e_two_g₃ {H : HalfPeriods} (h : H.IsRectangular) :
+    H.g₃.im = 0 ∧ (H.ω₃ = I * H.ω₁ → H.e 2 = 0 ∧ H.g₃ = 0) ∧
+      (H.ω₃ ≠ I * H.ω₁ → (H.e 2).re * H.g₃.re < 0) := by
+  have hg := H.g₃_eq_e.1
+  obtain ⟨a, c, A, B, C, ha, hω1, -, hc, hA, hB, hC, hJ, e1, e2, e3, -⟩ :=
+    exists_real_data_of_isRectangular h
+  set x := c * (B ^ 4 + C ^ 4) / 3
+  set y := c * (B ^ 4 + C ^ 4) / 3 - c * C ^ 4
+  set z := c * (B ^ 4 + C ^ 4) / 3 - c * B ^ 4
+  have hg' : H.g₃ = ((4 * x * y * z : ℝ) : ℂ) := by
+    rw [hg, e1, e2, e3]; push_cast; ring
+  refine ⟨by rw [hg']; exact ofReal_im _, fun hl => ?_, fun hne => ?_⟩
+  · have hL : H.IsLemniscatic := ⟨h.1, h.2.1, hl⟩
+    exact ⟨hL.roots.2.2, hL.invariants.2⟩
+  · rw [hg', e2]
+    simp only [ofReal_re]
+    have hy : y ≠ 0 := by
+      intro h0; apply hne
+      exact IsRectangular.eq_I_mul_of_e_two_eq_zero h (by rw [e2, h0, ofReal_zero])
+    have hA4 : 0 < A ^ 4 := by positivity
+    have hC4 : 0 < C ^ 4 := by positivity
+    have hsq : 0 < y ^ 2 := by positivity
+    have hx : 0 < x := by positivity
+    have hz : z < 0 := by simp only [z]; nlinarith
+    have : 4 * x * z < 0 := by nlinarith
+    nlinarith
 
 /-- DLMF 23.5.5: `K(k) = K'(k) = Γ(1/4)²/(4√π)` for `k² = 1/2` (parameter form; this is the
 project's `DLMF.Elliptic.Real.compEllIntKm_one_half`, and `K' = K(1 - k²) = K(1/2)`). -/
@@ -672,9 +736,9 @@ theorem IsEquianharmonic.modulus_sq {H : HalfPeriods} (h : H.IsEquianharmonic) :
 complete elliptic integrals. -/
 @[dlmf 23.5.E9]
 theorem compEllIntKk_equianharmonic :
-    JacobiElliptic.compEllIntKk (cexp (π * I / 6)) =
-        cexp (π * I / 6) * JacobiElliptic.compEllIntKpk (cexp (π * I / 6)) ∧
-      JacobiElliptic.compEllIntKk (cexp (π * I / 6)) =
+    EllipticIntegrals.compEllIntKk (cexp (π * I / 6)) =
+        cexp (π * I / 6) * EllipticIntegrals.compEllIntKpk (cexp (π * I / 6)) ∧
+      EllipticIntegrals.compEllIntKk (cexp (π * I / 6)) =
         cexp (π * I / 12) * (3 : ℂ) ^ (1 / 4 : ℂ) * (Real.Gamma (1 / 3) : ℂ) ^ 3 /
           ((2 : ℂ) ^ (7 / 3 : ℂ) * π) := by
   sorry

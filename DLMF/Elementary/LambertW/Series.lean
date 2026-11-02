@@ -955,7 +955,80 @@ theorem lambertW_one_lower_puiseux_hasSum {z : ℂ}
 theorem lambertW_other_logarithmic_growth (k : ℤ) (hk : k ≠ 0) :
     Tendsto (fun z : ℂ => ‖lambertW k z‖ / |Real.log ‖z‖|)
       (𝓝[Complex.slitPlane] 0) (𝓝 1) := by
-  sorry
+  set C : ℝ := Real.pi + 2 * Real.pi * |(k : ℝ)|
+  have hC : 0 ≤ C := by positivity
+  set l := 𝓝[Complex.slitPlane] (0 : ℂ)
+  have hL : Tendsto (fun z : ℂ => |Real.log ‖z‖|) l atTop := by
+    have h0 : Tendsto (fun z : ℂ => ‖z‖) l (𝓝[>] 0) := by
+      apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
+      · have := (continuous_norm.tendsto (0 : ℂ)).mono_left (nhdsWithin_le_nhds (s :=
+          Complex.slitPlane))
+        simpa using this
+      · filter_upwards [self_mem_nhdsWithin] with z hz
+        exact norm_pos_iff.mpr (Complex.slitPlane_ne_zero hz)
+    exact tendsto_abs_atBot_atTop.comp (Real.tendsto_log_nhdsGT_zero.comp h0)
+  -- the estimate
+  have key : ∀ z ∈ Complex.slitPlane, 1 ≤ |Real.log ‖z‖| →
+      abs (‖lambertW k z‖ - |Real.log ‖z‖|) ≤ 8 * Real.sqrt (|Real.log ‖z‖| + C) + Real.pi + C := by
+    intro z hz hL1
+    set ξ := Complex.log z + 2 * Real.pi * I * k
+    have hΩ := log_add_mem_lambertOmegaDomain k hz
+    have hW : lambertW k z = lambertLogMapInv ξ := by
+      rw [lambertW_eq_lambertBranchValue, lambertBranchValue_of_mem_slitPlane k hz]
+    obtain ⟨hS, hg⟩ := lambertLogMapInv_spec hΩ
+    have him : |ξ.im| ≤ C := by
+      rw [im_log_add_two_pi_mul_I_mul]
+      refine (abs_add_le _ _).trans ?_
+      rw [abs_mul, abs_of_pos (by positivity : (0 : ℝ) < 2 * Real.pi)]
+      simp only [C]; linarith [abs_arg_le_pi z]
+    have him2 : Real.pi ≤ |ξ.im| := by
+      rw [im_log_add_two_pi_mul_I_mul]
+      have hk' : (1 : ℝ) ≤ |(k : ℝ)| := by
+        rw [← Int.cast_abs]; exact_mod_cast Int.one_le_abs hk
+      have := abs_arg_le_pi z
+      have h2 : 2 * Real.pi * |(k : ℝ)| ≤ |arg z + 2 * Real.pi * k| + |arg z| := by
+        have := abs_sub (arg z + 2 * Real.pi * k) (arg z)
+        rwa [add_sub_cancel_left, abs_mul, abs_of_pos (by positivity : (0 : ℝ) < 2 * Real.pi)]
+          at this
+      nlinarith [Real.pi_pos]
+    have hW1 : 1 ≤ ‖lambertLogMapInv ξ‖ :=
+      one_le_norm_of_pi_le_abs_lambertLogMap_im hS (by rw [hg]; exact him2)
+    have hre : ξ.re = Real.log ‖z‖ := re_log_add_two_pi_mul_I_mul k z
+    have hξ1 : |Real.log ‖z‖| ≤ ‖ξ‖ := by rw [← hre]; exact Complex.abs_re_le_norm ξ
+    have hξ2 : ‖ξ‖ ≤ |Real.log ‖z‖| + C := by
+      refine (Complex.norm_le_abs_re_add_abs_im ξ).trans ?_; rw [hre]; linarith
+    have hd := norm_lambertLogMapInv_sub_le hΩ hW1 (by linarith)
+    have hsq : Real.sqrt ‖ξ‖ ≤ Real.sqrt (|Real.log ‖z‖| + C) := Real.sqrt_le_sqrt hξ2
+    rw [hW, abs_le]
+    have t1 := norm_sub_norm_le (lambertLogMapInv ξ) ξ
+    have t2 := norm_sub_norm_le ξ (lambertLogMapInv ξ)
+    rw [norm_sub_rev] at t2
+    constructor <;> nlinarith [Real.pi_pos]
+  have hB : Tendsto (fun t : ℝ => (8 * Real.sqrt (t + C) + Real.pi + C) / t) atTop (𝓝 0) := by
+    have h1 : Tendsto (fun t : ℝ => 8 * (Real.sqrt t)⁻¹ +
+        (8 * Real.sqrt C + Real.pi + C) * t⁻¹) atTop (𝓝 0) := by
+      have a := (tendsto_inv_atTop_zero.comp Real.tendsto_sqrt_atTop).const_mul 8
+      have b := (tendsto_inv_atTop_zero (𝕜 := ℝ)).const_mul (8 * Real.sqrt C + Real.pi + C)
+      simpa using a.add b
+    refine squeeze_zero' ?_ ?_ h1
+    · filter_upwards [eventually_gt_atTop 0] with t ht; positivity
+    · filter_upwards [eventually_gt_atTop 0] with t ht
+      have hs : Real.sqrt (t + C) ≤ Real.sqrt t + Real.sqrt C := by
+        rw [Real.sqrt_le_left (by positivity)]
+        nlinarith [Real.sq_sqrt ht.le, Real.sq_sqrt hC, Real.sqrt_nonneg t, Real.sqrt_nonneg C]
+      have hst : 0 < Real.sqrt t := Real.sqrt_pos.mpr ht
+      rw [div_le_iff₀ ht]
+      have e : (8 * (Real.sqrt t)⁻¹ + (8 * Real.sqrt C + Real.pi + C) * t⁻¹) * t =
+          8 * Real.sqrt t + (8 * Real.sqrt C + Real.pi + C) := by
+        field_simp; linear_combination (-8) * Real.sq_sqrt ht.le
+      rw [e]; linarith
+  rw [tendsto_iff_norm_sub_tendsto_zero]
+  refine squeeze_zero' (Eventually.of_forall fun _ => norm_nonneg _) ?_ (hB.comp hL)
+  filter_upwards [self_mem_nhdsWithin, hL.eventually (eventually_ge_atTop 1)] with z hz hL1
+  have hpos : 0 < |Real.log ‖z‖| := by linarith
+  simp only [Function.comp, Real.norm_eq_abs]
+  rw [div_sub_one hpos.ne', abs_div, abs_of_pos hpos]
+  exact div_le_div_of_nonneg_right (key z hz hL1) hpos.le
 
 /-- Differential of the inverse substitution `z=w exp w` used in Lambert integrals. -/
 theorem lambert_forward_hasDerivAt (w : ℂ) :

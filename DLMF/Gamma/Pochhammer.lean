@@ -19,7 +19,6 @@ and `poch_succ` in `DLMF.Hypergeometric.Basic.Pochhammer`. The Gamma quotient
 
 * `poch_neg_eq`: `(-a)_n = (-1)^n (a - n + 1)_n`, DLMF 5.2.6.
 * `poch_neg_nat_eq`: `(-m)_n = (-1)^n m!/(m - n)!` for `n ≤ m` and `0` otherwise, DLMF 5.2.7.
-* `poch_succ_left`: `(a)_{n+1} = a (a + 1)_n`.
 -/
 
 @[expose] public section
@@ -30,10 +29,6 @@ open DLMF.Hypergeometric
 noncomputable section
 
 namespace DLMF.Gamma
-
-/-- `(a)_{n+1} = a (a + 1)_n`. -/
-theorem poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n :=
-  DLMF.Hypergeometric.poch_succ_left a n
 
 /-- DLMF 5.2.6: `(-a)_n = (-1)^n (a - n + 1)_n`. -/
 @[dlmf 5.2.E6]

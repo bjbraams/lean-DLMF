@@ -7,6 +7,7 @@ module
 
 public import DLMF.Confluent.BasicProperties.IntegerParametersAndLimits
 public import Carlson.TwoVariable.R.ElementaryValues
+public import DLMFMathlib.Analysis.Complex.ParameterContinuity
 
 /-!
 # Wronskians and connection formulas for Kummer and Tricomi functions
@@ -149,28 +150,6 @@ theorem wronskian_kummer_pair (a b : ℂ) {z : ℂ} (hb : ∀ n : ℤ, b ≠ n) 
       (1 - b) * z ^ (-b) * exp z :=
   wronskian_kummer_pair_of_nonpole a b (fun k h => hb (-k) (by push_cast; exact h))
     (fun k h => hb (2 + k) (by push_cast; linear_combination -h)) hz
-
-/-- Joint continuity at `(b, x)` gives uniform convergence near `x` as the parameter tends
-to `b`. -/
-theorem tendstoUniformlyOnFilter_of_continuousAt {F : ℂ → ℂ → ℂ} {b x : ℂ}
-    (h : ContinuousAt (fun p : ℂ × ℂ => F p.1 p.2) (b, x)) {l : Filter ℂ} (hl : l ≤ 𝓝 b) :
-    TendstoUniformlyOnFilter F (F b) l (𝓝 x) := by
-  rw [Metric.tendstoUniformlyOnFilter_iff]
-  intro ε hε
-  have h1 : ∀ᶠ p : ℂ × ℂ in 𝓝 (b, x), dist (F p.1 p.2) (F b x) < ε / 2 :=
-    Metric.tendsto_nhds.mp h (ε / 2) (by positivity)
-  have h2 : ∀ᶠ w in 𝓝 x, dist (F b w) (F b x) < ε / 2 := by
-    have hc : ContinuousAt (fun w => F b w) x :=
-      ContinuousAt.comp (f := fun w => (b, w)) h (by fun_prop)
-    exact Metric.tendsto_nhds.mp hc (ε / 2) (by positivity)
-  have h1' : ∀ᶠ p : ℂ × ℂ in l ×ˢ 𝓝 x, dist (F p.1 p.2) (F b x) < ε / 2 := by
-    rw [nhds_prod_eq] at h1
-    exact Filter.Eventually.filter_mono (Filter.prod_mono hl le_rfl) h1
-  filter_upwards [h1', h2.prod_inr l] with p hp1 hp2
-  calc dist (F b p.2) (F p.1 p.2) ≤ dist (F b p.2) (F b x) + dist (F p.1 p.2) (F b x) :=
-        dist_triangle_right _ _ _
-    _ < ε / 2 + ε / 2 := add_lt_add hp2 hp1
-    _ = ε := by ring
 
 /-- At noninteger `c`, `U(a,c,·)` is differentiable on the slit plane. -/
 theorem differentiableOn_kummerU_of_mem (a : ℂ) {c : ℂ} (hc : c ∈ integerComplement) :

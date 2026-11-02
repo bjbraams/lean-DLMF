@@ -1214,7 +1214,7 @@ Traversal: all §§5.1–5.24 checked; the matching section is §5.2.
   Mathlib `ascPochhammer` evaluated at the base, from
   [Polynomial/Pochhammer](.lake/packages/mathlib/Mathlib/RingTheory/Polynomial/Pochhammer.lean);
   `DLMF.Hypergeometric.poch`
-  is an abbreviation for this in [Hypergeometric/Basic](DLMF/Hypergeometric/Basic/Pochhammer.lean#L25).
+  is an abbreviation for this in [Hypergeometric/Basic](DLMF/Hypergeometric/Basic/Pochhammer.lean#L38).
   The gamma quotient is an identity away from poles, not its definition.
 
 <!-- retained entry 42 -->
@@ -1931,7 +1931,7 @@ Integral formulas are bridge theorems, not alternative public Ai/Bi definitions.
 
   [DLMF 9.12.E17](https://dlmf.nist.gov/9.12.E17):
   The entire Scorer function Hi, specified by its Maclaurin series.
-  `DLMF.Airy.scorerHi` ([definition](DLMF/Airy/Basic/Scorer.lean#L50)).
+  `DLMF.Airy.scorerHi` ([definition](DLMF/Airy/Basic/Scorer.lean#L51)).
 
 ### §9.13 Generalized Airy Functions
 
@@ -4330,7 +4330,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.1 Special Notation
 
 - **Modulus, complementary modulus and parameter**, [DLMF 19.1](https://dlmf.nist.gov/19.1):
-  The parameter is m=k²; the complementary modulus satisfies k′²=1−k². The principal complex choice is `DLMF.JacobiElliptic.jacobiComodulusk` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L156)). A consistent other square-root choice must be tracked separately. The complementary integrals in §19.2 have their own continuation conventions, as recorded at §19.2.
+  The parameter is m=k²; the complementary modulus satisfies k′²=1−k². The principal complex choice is `DLMF.JacobiElliptic.jacobiComodulusk` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L146)). A consistent other square-root choice must be tracked separately. The complementary integrals in §19.2 have their own continuation conventions, as recorded at §19.2.
 
 ### §19.2 Definitions
 
@@ -4356,8 +4356,8 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 
 <!-- retained entry 140 -->
 - **Complete K, E, D and Π**, [19.2.8](https://dlmf.nist.gov/19.2.E8):
-  `DLMF.JacobiElliptic.compEllIntKk` in
-  [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L93) is a complex
+  `DLMF.EllipticIntegrals.compEllIntKk` in
+  [Complete](DLMF/EllipticIntegrals/Basic/Complete.lean#L46) is a complex
   t-integral; `DLMF.EllipticIntegrals.compEllIntEk`, `compEllIntDk`,
   `compEllIntPik` in [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L204)
   specialize the amplitude to π/2. Real parameter-m K/E are
@@ -4369,7 +4369,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 
 <!-- retained entry 141 -->
 - **Complementary K-prime and E-prime**, [19.2.8_1–9](https://dlmf.nist.gov/19.2.E8_1):
-  `DLMF.JacobiElliptic.compEllIntKpk` is the literal complementary-modulus
+  `DLMF.EllipticIntegrals.compEllIntKpk` is the literal complementary-modulus
   integral; `DLMF.EllipticIntegrals.cCompEllIntKk`, `cCompEllIntEk` in
   [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L215) include the extra
   continuation terms on the left half-plane. These are materially different
@@ -4396,7 +4396,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
   [`DLMF.Hypergeometric.compEllIntKkSeries`](DLMF/Hypergeometric/Identities/Whipple.lean#L386).
 
 - **Nome and small-modulus auxiliary parameters**, [DLMF 19.5.E5](https://dlmf.nist.gov/19.5.E5):
-  q=exp(−πK′/K) is `DLMF.JacobiElliptic.jacobiNomek` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L164)); the τ-parametrized version uses exp(iπτ). The r=k²/16 and λ=(1−√k′)/(2(1+√k′)) of 19.5.6–7 are local expressions in the expansion statements, without separately named constructions. The complete hypergeometric-series representative is also `DLMF.Hypergeometric.compEllIntKkSeries` ([source](DLMF/Hypergeometric/Identities/Whipple.lean#L396)); convergence and its bridge to the integral require their stated domain.
+  q=exp(−πK′/K) is `DLMF.JacobiElliptic.jacobiNomek` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L154)); the τ-parametrized version uses exp(iπτ). The r=k²/16 and λ=(1−√k′)/(2(1+√k′)) of 19.5.6–7 are local expressions in the expansion statements, without separately named constructions. The complete hypergeometric-series representative is also `DLMF.Hypergeometric.compEllIntKkSeries` ([source](DLMF/Hypergeometric/Identities/Whipple.lean#L396)); convergence and its bridge to the integral require their stated domain.
 
 - **Descending Landen modulus sequence**, [DLMF 19.5.E11](https://dlmf.nist.gov/19.5.E11): The descending Landen sequence of moduli of DLMF 19.5.11: `k₀ = k`, `k_{m+1} = (1 - √(1 - k_m²))/(1 + √(1 - k_m²))` (principal square roots).
   [`DLMF.EllipticIntegrals.landenModulusSeq`](DLMF/EllipticIntegrals/Expansions.lean#L253).
@@ -4650,7 +4650,7 @@ Traversal: all §§20.1–20.16 checked; the matching section is §20.2.
 ### §20.1 Special Notation
 
 - **Nome, nome powers and alternate theta normalizations**, [DLMF 20.1](https://dlmf.nist.gov/20.1):
-  q=exp(iπτ), with τ known, and q^α means exp(iαπτ), not an independently chosen principal power of q. The explicit τ-based theta constructions ([source](DLMF/Elliptic/Basic/Theta.lean)) retain this information; no separate nome wrapper is needed. Jacobi's Θ,Θ₁,H,H₁ are the four classical theta functions with u=z/θ₃(0|τ)²; McKean–Moll's ϑⱼ is θⱼ(πz|τ), without independent local wrappers. Neville's θ_s,θ_c,θ_d,θ_n are the four normalized/rescaled formulas in §20.1; `DLMF.JacobiElliptic.jacobiLetterTheta` and `DLMF.JacobiElliptic.jacobiGlaisher` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L109)) supply the letter/quotient construction. A quotient cancels some normalizing factors, so these ratio constructions are not separately normalized Neville functions.
+  q=exp(iπτ), with τ known, and q^α means exp(iαπτ), not an independently chosen principal power of q. The explicit τ-based theta constructions ([source](DLMF/Elliptic/Basic/Theta.lean)) retain this information; no separate nome wrapper is needed. Jacobi's Θ,Θ₁,H,H₁ are the four classical theta functions with u=z/θ₃(0|τ)²; McKean–Moll's ϑⱼ is θⱼ(πz|τ), without independent local wrappers. Neville's θ_s,θ_c,θ_d,θ_n are the four normalized/rescaled formulas in §20.1; `DLMF.JacobiElliptic.jacobiLetterTheta` and `DLMF.JacobiElliptic.jacobiGlaisher` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L112)) supply the letter/quotient construction. A quotient cancels some normalizing factors, so these ratio constructions are not separately normalized Neville functions.
 
 ### §20.2 Definitions and Periodic Properties
 
@@ -4711,7 +4711,7 @@ Traversal: all §§20.1–20.16 checked; the matching section is §20.2.
 ### §20.7 Identities
 
 - **Landen normalizing factors**, [DLMF 20.7.E15](https://dlmf.nist.gov/20.7.E15):
-  A(τ)=1/θ₄(0|2τ) and B(τ)=1/(θ₃(0|τ)θ₄(0|τ)θ₃(π/4|τ)) are `DLMF.Theta.thetaLandenA`, `DLMF.Theta.thetaLandenB` ([source](DLMF/Theta/Identities.lean#L671)). The transformed τ′=−1/τ in 20.7.30–33 is a formula substitution, using principal square roots.
+  A(τ)=1/θ₄(0|2τ) and B(τ)=1/(θ₃(0|τ)θ₄(0|τ)θ₃(π/4|τ)) are `DLMF.Theta.thetaLandenA`, `DLMF.Theta.thetaLandenB` ([source](DLMF/Theta/Identities.lean#L667)). The transformed τ′=−1/τ in 20.7.30–33 is a formula substitution, using principal square roots.
 
   [DLMF 20.7.E15](https://dlmf.nist.gov/20.7.E15): DLMF 20.7.15: `A(τ) = 1/θ₄(0|2τ)`.
   [`DLMF.Theta.thetaLandenA`](DLMF/Theta/Identities.lean#L607).
@@ -4722,7 +4722,7 @@ Traversal: all §§20.1–20.16 checked; the matching section is §20.2.
 ### §20.9 Relations to Other Functions
 
 - **Theta modulus and elliptic modular function**, [DLMF 20.9.E1](https://dlmf.nist.gov/20.9.E1):
-  k=θ₂²/θ₃² is both `DLMF.Theta.thetaModulusK` ([source](DLMF/Theta/Relations.lean#L74)) and `DLMF.JacobiElliptic.jacobiModulusTau` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L125)); its square is the modular function `DLMF.Weierstrass.modularLambda`. The quarter-period constructions `DLMF.JacobiElliptic.compEllIntKTau`, `DLMF.JacobiElliptic.compEllIntKpTau` give the theta-side K,K′. Their equalities with integral constructions are bridge theorems, and the nome does not determine τ uniquely.
+  k=θ₂²/θ₃² is both `DLMF.Theta.thetaModulusK` ([source](DLMF/Theta/Relations.lean#L74)) and `DLMF.JacobiElliptic.jacobiModulusTau` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L128)); its square is the modular function `DLMF.Weierstrass.modularLambda`. The quarter-period constructions `DLMF.JacobiElliptic.compEllIntKTau`, `DLMF.JacobiElliptic.compEllIntKpTau` give the theta-side K,K′. Their equalities with integral constructions are bridge theorems, and the nome does not determine τ uniquely.
 
   [DLMF 20.9.E1](https://dlmf.nist.gov/20.9.E1): DLMF 20.9.1: the modulus `k = θ₂²(0|τ)/θ₃²(0|τ)`.
   [`DLMF.Theta.thetaModulusK`](DLMF/Theta/Relations.lean#L53).
@@ -4862,17 +4862,19 @@ Traversal: all §§22.1–22.22 checked; matching headings are §22.2,
 - **Nome, modulus, complementary modulus, K and scaled argument ζ**,
   [22.2.1–3](https://dlmf.nist.gov/22.2.E1):
   `DLMF.JacobiElliptic.jacobiNomek`, `jacobiTauk`, `jacobiComodulusk`,
-  `jacobiZetak`, `compEllIntKk`, `compEllIntKpk`, and the τ-based
+  `jacobiZetak`, and the τ-based
   `jacobiModulusTau`, `jacobiComodulusTau`, `compEllIntKTau`,
   `compEllIntKpTau`, `jacobiZetaTau` in
-  [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L65).
+  [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L120);
+  `DLMF.EllipticIntegrals.compEllIntKk`, `compEllIntKpk` in
+  [Complete](DLMF/EllipticIntegrals/Basic/Complete.lean#L46).
   Here “Zeta” denotes the scaled argument πz/(2K), not Jacobi's zeta function.
 
 <!-- retained entry 154 -->
 - **All twelve Jacobi functions and Glaisher quotients**,
   [22.2.4–12](https://dlmf.nist.gov/22.2.E4):
   `DLMF.JacobiElliptic.jacobiGlaisher`, `jacobiPQTau`, `jacobiPQk`, with
-  `JacobiLetter`, in [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L58).
+  `JacobiLetter`, in [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L84).
   The explicit modulus-k wrappers are `jacobiSnk`, `jacobiCnk`, `jacobiDnk`,
   `jacobiSdk`, `jacobiCdk`, `jacobiSck`, `jacobiNsk`, `jacobiNck`,
   `jacobiNdk`, `jacobiDsk`, `jacobiDck`, `jacobiCsk`; each has a corresponding
@@ -4886,7 +4888,7 @@ Traversal: all §§22.1–22.22 checked; matching headings are §22.2,
 ### §22.4 Periods, Poles, and Zeros
 
 - **Jacobian congruence classes and letter vertices**, [DLMF 22.4.i](https://dlmf.nist.gov/22.4.i):
-  The congruent set of a is {a+2mK+2niK′}. It is `DLMF.JacobiElliptic.jacobiCongruentk`; the vertices s=0,c=K,d=K+iK′,n=iK′ are `DLMF.JacobiElliptic.jacobiLetterPointk` ([source](DLMF/JacobiElliptic/PeriodsPolesZeros.lean#L758)). Copolar means having the same pole column and coperiodic the same period row in Tables22.4.1–2; no independent local predicates were found. The geometric lattice generated by K,iK′ differs from each function's actual period lattice.
+  The congruent set of a is {a+2mK+2niK′}. It is `DLMF.JacobiElliptic.jacobiCongruentk`; the vertices s=0,c=K,d=K+iK′,n=iK′ are `DLMF.JacobiElliptic.jacobiLetterPointk` ([source](DLMF/JacobiElliptic/PeriodsPolesZeros.lean#L760)). Copolar means having the same pole column and coperiodic the same period row in Tables22.4.1–2; no independent local predicates were found. The geometric lattice generated by K,iK′ differs from each function's actual period lattice.
 
 ### §22.7 Landen Transformations
 
@@ -4902,7 +4904,7 @@ Traversal: all §§22.1–22.22 checked; matching headings are §22.2,
 ### §22.9 Cyclic Identities
 
 - **Cyclic sample values and identity rank**, [DLMF 22.9.E1](https://dlmf.nist.gov/22.9.E1):
-  The functions s,c,d sampled at z+N(m−1)K/p, N=2 or4, are `DLMF.JacobiElliptic.jacobiCyclicArg`, `DLMF.JacobiElliptic.jacobiCyclicS`, `DLMF.JacobiElliptic.jacobiCyclicC`, `DLMF.JacobiElliptic.jacobiCyclicD` ([source](DLMF/JacobiElliptic/Cyclic/QuarterPeriodAndThreePoint.lean#L56)). κ=dn(2K/3,k) is `DLMF.JacobiElliptic.jacobiCyclicKappa`. The rank of a cyclic identity is the largest number of elliptic-function factors in a term; no separate local syntactic rank object is defined.
+  The functions s,c,d sampled at z+N(m−1)K/p, N=2 or4, are `DLMF.JacobiElliptic.jacobiCyclicArg`, `DLMF.JacobiElliptic.jacobiCyclicS`, `DLMF.JacobiElliptic.jacobiCyclicC`, `DLMF.JacobiElliptic.jacobiCyclicD` ([source](DLMF/JacobiElliptic/Cyclic/QuarterPeriodAndThreePoint.lean#L58)). κ=dn(2K/3,k) is `DLMF.JacobiElliptic.jacobiCyclicKappa`. The rank of a cyclic identity is the largest number of elliptic-function factors in a term; no separate local syntactic rank object is defined.
 
   [DLMF 22.9.E1](https://dlmf.nist.gov/22.9.E1): The cyclic argument `z + N p⁻¹ (m - 1) K(k)` of DLMF 22.9.1–22.9.6 (`N = 2` or `4`).
   [`DLMF.JacobiElliptic.jacobiCyclicArg`](DLMF/JacobiElliptic/Cyclic/QuarterPeriodAndThreePoint.lean#L31).
@@ -4954,7 +4956,7 @@ Traversal: all §§22.1–22.22 checked; matching headings are §22.2,
 ### §22.17 Moduli Outside the Interval [0,1]
 
 - **Imaginary-modulus transformation**, [DLMF 22.17.E5](https://dlmf.nist.gov/22.17.E5):
-  k₁=k/√(1+k²) is `DLMF.JacobiElliptic.jacobiImagModulusk` ([source](DLMF/JacobiElliptic/OutsideModuli.lean#L134)); Lean selects the principal square root, whereas DLMF permits either consistent choice. Reciprocal and negative moduli are substitutions in the same functions, not new function families.
+  k₁=k/√(1+k²) is `DLMF.JacobiElliptic.jacobiImagModulusk` ([source](DLMF/JacobiElliptic/OutsideModuli.lean#L136)); Lean selects the principal square root, whereas DLMF permits either consistent choice. Reciprocal and negative moduli are substitutions in the same functions, not new function families.
 
   [DLMF 22.17.E5](https://dlmf.nist.gov/22.17.E5): The modulus `k₁ = k/√(1 + k²)` of DLMF 22.17.5 for complex `k` (principal square root; DLMF 22.17(i): either value of the square root can be chosen).
   [`DLMF.JacobiElliptic.jacobiImagModulusk`](DLMF/JacobiElliptic/OutsideModuli.lean#L116).
@@ -5028,12 +5030,12 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
 ### §23.5 Special Lattices
 
 - **Special lattice classes**, [DLMF 23.5](https://dlmf.nist.gov/23.5):
-  `DLMF.Weierstrass.HalfPeriods.IsRectangular`, `DLMF.Weierstrass.HalfPeriods.IsLemniscatic`, `DLMF.Weierstrass.HalfPeriods.IsRhombic`, `DLMF.Weierstrass.HalfPeriods.IsEquianharmonic` ([source](DLMF/Weierstrass/SpecialLattices.lean#L205)) express the four half-period geometries; `DLMF.Weierstrass.HalfPeriods.rectangular` and `DLMF.Weierstrass.HalfPeriods.rhombic` construct examples from positive real parameters. DLMF also names the pseudo-lemniscatic rhombic case2ω₃=(1+i)ω₁; no separate local predicate was found. Conjugation-invariant lattices are expressed directly as equality with the conjugate lattice, with real invariants as an equivalent property.
+  `DLMF.Weierstrass.HalfPeriods.IsRectangular`, `DLMF.Weierstrass.HalfPeriods.IsLemniscatic`, `DLMF.Weierstrass.HalfPeriods.IsRhombic`, `DLMF.Weierstrass.HalfPeriods.IsEquianharmonic` ([source](DLMF/Weierstrass/SpecialLattices.lean#L207)) express the four half-period geometries; `DLMF.Weierstrass.HalfPeriods.rectangular` and `DLMF.Weierstrass.HalfPeriods.rhombic` construct examples from positive real parameters. DLMF also names the pseudo-lemniscatic rhombic case2ω₃=(1+i)ω₁; no separate local predicate was found. Conjugation-invariant lattices are expressed directly as equality with the conjugate lattice, with real invariants as an equivalent property.
 
 ### §23.6 Relations to Other Functions
 
 - **Weierstrass/Jacobi moduli and alternate lattices**, [DLMF 23.6.E16](https://dlmf.nist.gov/23.6.E16):
-  k²=(e₂−e₃)/(e₁−e₃), k′²=(e₁−e₂)/(e₁−e₃); the actual theta-based abbreviations are `DLMF.Weierstrass.HalfPeriods.modulus`, `DLMF.Weierstrass.HalfPeriods.comodulus`, `DLMF.Weierstrass.HalfPeriods.quarterK` ([source](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L186)). Their bridge theorems fix branches via τ rather than choosing an arbitrary root of the displayed ratio. The three lattices L₁,L₂,L₃ in 23.6.27–29 use explicit `PeriodPair` constructions in the relation statements. The inverse elliptic-integral variable w in 23.6.36 depends on its path and square-root determination; no single path-independent local inverse function is defined.
+  k²=(e₂−e₃)/(e₁−e₃), k′²=(e₁−e₂)/(e₁−e₃); the actual theta-based abbreviations are `DLMF.Weierstrass.HalfPeriods.modulus`, `DLMF.Weierstrass.HalfPeriods.comodulus`, `DLMF.Weierstrass.HalfPeriods.quarterK` ([source](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L188)). Their bridge theorems fix branches via τ rather than choosing an arbitrary root of the displayed ratio. The three lattices L₁,L₂,L₃ in 23.6.27–29 use explicit `PeriodPair` constructions in the relation statements. The inverse elliptic-integral variable w in 23.6.36 depends on its path and square-root determination; no single path-independent local inverse function is defined.
 
 ### §23.9 Laurent and Other Power Series
 
@@ -5100,7 +5102,7 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
 ### §23.18 Modular Transformations
 
 - **Eta multiplier and Dedekind sum**, [DLMF 23.18.E6](https://dlmf.nist.gov/23.18.E6):
-  ε(A) and s(d,c), c>0, are `DLMF.Weierstrass.etaMultiplier`, `DLMF.Weierstrass.dedekindSum` ([source](DLMF/Weierstrass/Basic/Modular.lean#L124)). The sum uses every r=1,…,c−1, not just residues coprime to c. The six anharmonic λ transforms of 23.18.1–2 also have existing exact helpers `DLMF.Weierstrass.anharmonicMap`, `DLMF.Weierstrass.anharmonicMapSL` ([source](DLMF/Weierstrass/ModularFunctions.lean#L567)); the arguments encode the matrix parity class.
+  ε(A) and s(d,c), c>0, are `DLMF.Weierstrass.etaMultiplier`, `DLMF.Weierstrass.dedekindSum` ([source](DLMF/Weierstrass/Basic/Modular.lean#L124)). The sum uses every r=1,…,c−1, not just residues coprime to c. The six anharmonic λ transforms of 23.18.1–2 also have existing exact helpers `DLMF.Weierstrass.anharmonicMap`, `DLMF.Weierstrass.anharmonicMapSL` ([source](DLMF/Weierstrass/ModularFunctions.lean#L569)); the arguments encode the matrix parity class.
 
   [DLMF 23.18.E6](https://dlmf.nist.gov/23.18.E6): The eta multiplier `ε(𝒜) = exp(πi((a + d)/(12c) + s(-d, c)))` (DLMF 23.18.6), `c > 0`.
   [`DLMF.Weierstrass.etaMultiplier`](DLMF/Weierstrass/ModularFunctions.lean#L758).
@@ -6121,7 +6123,7 @@ Names in this chapter are in `DLMF.Mathieu`.
 
 - **Finite continued-fraction approximants**, [28.6.16–19](https://dlmf.nist.gov/28.6.E16) and [28.15.2](https://dlmf.nist.gov/28.15.E2): `DLMF.Mathieu.mathieuCFHead` and `DLMF.Mathieu.mathieuCFTail` in [ContFracDefs](DLMF/Mathieu/Basic/ContinuedFractions.lean#L30) encode the finite head and tail fractions used for integer characteristic values. `DLMF.Mathieu.mathieuContFrac` in [Noninteger/Defs](DLMF/Mathieu/Noninteger/Basic.lean#L196) encodes the finite truncation with denominators `a-(ν+2k)²`. These are finite totalized rational expressions; an infinite continued fraction is represented separately by a convergence statement about the truncations.
 
-- **Radii of convergence ρₙ⁽ʲ⁾ and the elliptic comparison constant**, [28.6.20](https://dlmf.nist.gov/28.6.E20): `ρₙ⁽ʲ⁾` are the radii for the indicated small-`q` characteristic-value series. The exact constant is `k k′ K(k)²`, where `0<k<1`, `2E(k)=K(k)` and `k′=√(1-k²)`. Existing objects are `DLMF.EllipticIntegrals.compEllIntEk` and `DLMF.JacobiElliptic.compEllIntKk`; there is no separate public radius sequence or selected root `k`. The local theorem `DLMF.Mathieu.mathieu_radius_liminf` expresses the result through existence of analytic extensions to growing discs, rather than defining `ρₙ⁽ʲ⁾`. The decimal constant and Table 28.6.1 are excluded: numerical.
+- **Radii of convergence ρₙ⁽ʲ⁾ and the elliptic comparison constant**, [28.6.20](https://dlmf.nist.gov/28.6.E20): `ρₙ⁽ʲ⁾` are the radii for the indicated small-`q` characteristic-value series. The exact constant is `k k′ K(k)²`, where `0<k<1`, `2E(k)=K(k)` and `k′=√(1-k²)`. Existing objects are `DLMF.EllipticIntegrals.compEllIntEk` and `DLMF.EllipticIntegrals.compEllIntKk`; there is no separate public radius sequence or selected root `k`. The local theorem `DLMF.Mathieu.mathieu_radius_liminf` expresses the result through existence of analytic extensions to growing discs, rather than defining `ρₙ⁽ʲ⁾`. The decimal constant and Table 28.6.1 are excluded: numerical.
 
 ### §28.8 Asymptotic Expansions for Large q
 
@@ -6699,13 +6701,13 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 - **Complementary-modulus transformation and imaginary-period functions**, [DLMF 29.10.E1–4](https://dlmf.nist.gov/29.10.E1):
   h′=ν(ν+1)−h and z′=i(z−K−iK′) are expressions in the change-of-equation
   theorem `DLMF.Lame.isLameSolutionOn_imaginary`
-  ([source](DLMF/Lame/DifferentialEquations.lean#L525)). DLMF's Ec/Es(z′,k′²)
+  ([source](DLMF/Lame/DifferentialEquations.lean#L527)). DLMF's Ec/Es(z′,k′²)
   require complex continuation of these functions. The current real-variable
   constructions give the restriction z=K+is, z′=K′−s; the corresponding
   solution/period statements are `DLMF.Lame.Real.lameEck_imaginary_solution`,
   `DLMF.Lame.Real.lameEsk_imaginary_solution` and
   `DLMF.Lame.Real.lame_imaginary_periods`
-  ([source](DLMF/Lame/DifferentialEquations.lean#L682)). They do not construct
+  ([source](DLMF/Lame/DifferentialEquations.lean#L684)). They do not construct
   the full normalized complex Ec/Es family.
 
 ### §29.11 Lamé Wave Equation
@@ -8298,7 +8300,7 @@ and normalization are recorded in
   Gamma-ratio/₂F₁ construction; DLMF requires 0<T<I and Re γ>−1.
 
 - **Eigenvalue-coordinate derivatives and hypergeometric PDE**, [DLMF 35.7.E9](https://dlmf.nist.gov/35.7.E9):
-  `DLMF.MatrixArgument.coordDeriv` ([source](DLMF/MatrixArgument/Basic.lean#L333)), `DLMF.MatrixArgument.gaussPDEOperator` ([source](DLMF/MatrixArgument/Basic.lean#L342)) construct coordinate derivatives and the differential operator minus abF. The raw operator is used at pairwise distinct eigenvalues; its totalized denominators do not describe a removable extension at coincident eigenvalues by themselves. Orthogonal invariance, analyticity near zero and value one normalize the characterized function; no independent PDE-selected ₂F₁ is defined.
+  `DLMF.MatrixArgument.coordDeriv` ([source](DLMF/MatrixArgument/Basic.lean#L334)), `DLMF.MatrixArgument.gaussPDEOperator` ([source](DLMF/MatrixArgument/Basic.lean#L343)) construct coordinate derivatives and the differential operator minus abF. The raw operator is used at pairwise distinct eigenvalues; its totalized denominators do not describe a removable extension at coincident eigenvalues by themselves. Orthogonal invariance, analyticity near zero and value one normalize the characterized function; no independent PDE-selected ₂F₁ is defined.
 
   [DLMF 35.7.E9](https://dlmf.nist.gov/35.7.E9):
   DLMF 35.7.9: the `j`th partial differential operator of the system for `₂F₁` of matrix
@@ -8306,7 +8308,7 @@ and normalization are recorded in
   `t_j(1-t_j) ∂²F/∂t_j² - ½ ∑_{k≠j} t_k(1-t_k)/(t_j-t_k) ∂F/∂t_k
     + (c - ½(m-1) - (a+b-½(m-3)) t_j + ½ ∑_{k≠j} t_j(1-t_j)/(t_j-t_k)) ∂F/∂t_j - abF`.
   It is used at points with pairwise distinct `t_k`, where no denominator vanishes.
-  `DLMF.MatrixArgument.gaussPDEOperator` ([definition](DLMF/MatrixArgument/Basic.lean#L342)).
+  `DLMF.MatrixArgument.gaussPDEOperator` ([definition](DLMF/MatrixArgument/Basic.lean#L343)).
 
 ### §35.8 Generalized Hypergeometric Functions of Matrix Argument
 

@@ -9,6 +9,7 @@ public import DLMF.Legendre.Basic.Associated
 public import DLMF.Hypergeometric.Basic.CutPlane
 public import DLMF.Legendre.Ferrers
 public import DLMF.Legendre.Integer
+public import DLMFMathlib.Analysis.Complex.NonInteger
 
 /-!
 # Quadratic bases for associated Legendre and Ferrers functions
@@ -52,10 +53,6 @@ namespace DLMF.Legendre
 theorem legendre_Gamma_one_half : Gamma (1 / 2 : ℂ) = (Real.sqrt π : ℂ) := by
   rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, Complex.ofReal_cpow Real.pi_pos.le]
   norm_num
-
-/-- `1/2` is not a pole of `Γ`. -/
-theorem half_ne_neg_nat : ∀ k : ℕ, (1/2:ℂ) ≠ -(k:ℂ) := fun k h => by
-  have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
 
 /-- `Γ(3/2) = √π/2`. -/
 theorem legendre_Gamma_three_halves : Gamma (3 / 2 : ℂ) = (Real.sqrt π : ℂ)/2 := by

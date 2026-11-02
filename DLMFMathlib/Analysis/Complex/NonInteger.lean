@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.Basic
+public import Mathlib.Analysis.Complex.IntegerCompl
 public import Mathlib.Topology.Algebra.Module.Cardinality
 public import Mathlib.Tactic.LinearCombination
 
@@ -23,10 +24,20 @@ all of `ℂ`.
 * `Complex.ne_neg_natCast_of_ne_intCast`, `Complex.add_one_ne_intCast_of_ne_intCast`:
   bookkeeping for non-integer parameters.
 * `Complex.add_natCast_ne_zero_of_ne_neg_natCast`, `Complex.add_natCast_ne_zero_of_re_pos`,
-  `Complex.one_div_two_ne_neg_natCast`: parameters off the poles of `Γ`.
+  `Complex.one_div_two_ne_neg_natCast`, `Complex.three_div_two_ne_neg_natCast`: parameters off
+  the poles of `Γ`.
+* `Complex.forall_of_mem_integerComplement`, `Complex.mem_integerComplement_of_forall`,
+  `Complex.not_neg_nat_of_mem_integerComplement`: membership in `ℂ \ ℤ` (Mathlib's
+  `Complex.integerComplement`).
+* `Complex.integerComplement_nhdsWithin_neBot`, `Complex.eq_of_continuousAt_of_integerComplement`:
+  every point is a limit of nonintegers, so two functions continuous at `b` that agree off the
+  integers agree at `b`.
 -/
 
 @[expose] public section
+
+open Filter
+open scoped Topology
 
 namespace Complex
 
@@ -60,5 +71,37 @@ theorem add_natCast_ne_zero_of_re_pos {a : ℂ} (ha : 0 < a.re) (k : ℕ) : a + 
 /-- `1/2` is not a nonpositive integer. -/
 theorem one_div_two_ne_neg_natCast : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -(k : ℂ) := fun k h => by
   have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0 : ℝ) ≤ k)]
+
+/-- `3/2` is not a nonpositive integer. -/
+theorem three_div_two_ne_neg_natCast : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) := fun k h => by
+  have := congrArg re h
+  simp at this
+  linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
+
+/-- A noninteger complex number is not a nonpositive integer. -/
+theorem not_neg_nat_of_mem_integerComplement {c : ℂ} (hc : c ∈ integerComplement) :
+    ∀ k : ℕ, c ≠ -(k : ℂ) := fun k h => hc ⟨-k, by rw [h]; push_cast; ring⟩
+
+/-- A complex number different from every integer lies in `ℂ \ ℤ`. -/
+theorem mem_integerComplement_of_forall {c : ℂ} (hc : ∀ k : ℤ, c ≠ k) : c ∈ integerComplement :=
+  fun ⟨k, hk⟩ => hc k hk.symm
+
+/-- A point of `ℂ \ ℤ` differs from every integer. -/
+theorem forall_of_mem_integerComplement {c : ℂ} (hc : c ∈ integerComplement) : ∀ k : ℤ, c ≠ k :=
+  fun k hk => hc ⟨k, hk.symm⟩
+
+/-- Every complex `b` is an accumulation point of `ℂ \ ℤ`. -/
+theorem integerComplement_nhdsWithin_neBot (b : ℂ) : (𝓝[integerComplement] b).NeBot := by
+  have hd : Dense integerComplement :=
+    (Set.countable_range (fun k : ℤ => (k : ℂ))).dense_compl ℂ
+  exact mem_closure_iff_nhdsWithin_neBot.mp (hd b)
+
+/-- Two functions continuous at `b` that agree at all noninteger points agree at `b`. -/
+theorem eq_of_continuousAt_of_integerComplement {f g : ℂ → ℂ} {b : ℂ} (hf : ContinuousAt f b)
+    (hg : ContinuousAt g b) (h : ∀ c ∈ integerComplement, f c = g c) : f b = g b := by
+  have := integerComplement_nhdsWithin_neBot b
+  exact tendsto_nhds_unique (hf.tendsto.mono_left nhdsWithin_le_nhds)
+    ((hg.tendsto.mono_left nhdsWithin_le_nhds).congr'
+      (eventually_nhdsWithin_of_forall fun c hc => (h c hc).symm))
 
 end Complex

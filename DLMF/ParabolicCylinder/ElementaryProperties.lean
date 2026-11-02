@@ -96,14 +96,14 @@ theorem pcfU_entire (a : ℂ) :
 theorem differentiable_pcfEven_order (z : ℂ) :
     Differentiable ℂ (fun a => pcfEven a z) := by
   unfold pcfEven
-  simp_rw [kummerM_eq_mul_regularizedHGFun half_ne_neg_nat]
+  simp_rw [kummerM_eq_mul_regularizedHGFun Complex.one_div_two_ne_neg_natCast]
   fun_prop
 
 /-- The odd Kummer basis is entire in the cylinder parameter. -/
 theorem differentiable_pcfOdd_order (z : ℂ) :
     Differentiable ℂ (fun a => pcfOdd a z) := by
   unfold pcfOdd
-  simp_rw [kummerM_eq_mul_regularizedHGFun three_half_ne_neg_nat]
+  simp_rw [kummerM_eq_mul_regularizedHGFun Complex.three_div_two_ne_neg_natCast]
   fun_prop
 
 /-- Entire dependence on the parameter. -/
@@ -403,8 +403,8 @@ theorem factorial_two_mul_add_one_eq_poch (k : ℕ) :
 theorem pcfEven_series_3 (a z : ℂ) :
     HasSum (fun k : ℕ => exp (-1*z^2/4)*(∏ r ∈ Finset.range k, (a+1/2+2*r))*z^(2*k)/((2*k).factorial:ℂ)) (pcfEven a z) := by
   rw [pcfEven]
-  convert (hasSum_kummerM half_ne_neg_nat (z^2/2)).mul_left (exp (-z^2/4)) using 2 with k
-  have hp := poch_ne_zero_of_not_neg_nat half_ne_neg_nat k
+  convert (hasSum_kummerM Complex.one_div_two_ne_neg_natCast (z^2/2)).mul_left (exp (-z^2/4)) using 2 with k
+  have hp := poch_ne_zero_of_not_neg_nat Complex.one_div_two_ne_neg_natCast k
   have hf : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [show (fun r : ℕ => a+1/2+2*(r:ℂ)) = fun r : ℕ => 2 * ((a/2+1/4) + r) by funext r; ring,
     prod_range_mul_add_eq_poch, factorial_two_mul_eq_poch, kummerMCoeff, pow_mul, div_pow,
@@ -417,8 +417,8 @@ theorem pcfEven_series_3 (a z : ℂ) :
 theorem pcfEven_series_5 (a z : ℂ) :
     HasSum (fun k : ℕ => exp (1*z^2/4)*(∏ r ∈ Finset.range k, (a-1/2-2*r))*z^(2*k)/((2*k).factorial:ℂ)) (pcfEven a z) := by
   rw [pcfEven_kummer_alternative]
-  convert (hasSum_kummerM half_ne_neg_nat (-z^2/2)).mul_left (exp (z^2/4)) using 2 with k
-  have hp := poch_ne_zero_of_not_neg_nat half_ne_neg_nat k
+  convert (hasSum_kummerM Complex.one_div_two_ne_neg_natCast (-z^2/2)).mul_left (exp (z^2/4)) using 2 with k
+  have hp := poch_ne_zero_of_not_neg_nat Complex.one_div_two_ne_neg_natCast k
   have hf : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [show (fun r : ℕ => a-1/2-2*(r:ℂ)) = fun r : ℕ => (-2) * ((-a/2+1/4) + r) by funext r; ring,
     prod_range_mul_add_eq_poch, factorial_two_mul_eq_poch, kummerMCoeff, pow_mul, div_pow, neg_pow (z^2),
@@ -431,8 +431,8 @@ theorem pcfEven_series_5 (a z : ℂ) :
 theorem pcfOdd_series_4 (a z : ℂ) :
     HasSum (fun k : ℕ => exp (-1*z^2/4)*(∏ r ∈ Finset.range k, (a+3/2+2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ)) (pcfOdd a z) := by
   rw [pcfOdd]
-  convert (hasSum_kummerM three_half_ne_neg_nat (z^2/2)).mul_left (z * exp (-z^2/4)) using 2 with k
-  have hp := poch_ne_zero_of_not_neg_nat three_half_ne_neg_nat k
+  convert (hasSum_kummerM Complex.three_div_two_ne_neg_natCast (z^2/2)).mul_left (z * exp (-z^2/4)) using 2 with k
+  have hp := poch_ne_zero_of_not_neg_nat Complex.three_div_two_ne_neg_natCast k
   have hf : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [show (fun r : ℕ => a+3/2+2*(r:ℂ)) = fun r : ℕ => 2 * ((a/2+3/4) + r) by funext r; ring,
     prod_range_mul_add_eq_poch, factorial_two_mul_add_one_eq_poch, kummerMCoeff, show z^(2*k+1) = z * (z^2)^k by rw [pow_succ, pow_mul]; ring, div_pow,
@@ -445,8 +445,8 @@ theorem pcfOdd_series_4 (a z : ℂ) :
 theorem pcfOdd_series_6 (a z : ℂ) :
     HasSum (fun k : ℕ => exp (1*z^2/4)*(∏ r ∈ Finset.range k, (a-3/2-2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ)) (pcfOdd a z) := by
   rw [pcfOdd_kummer_alternative]
-  convert (hasSum_kummerM three_half_ne_neg_nat (-z^2/2)).mul_left (z * exp (z^2/4)) using 2 with k
-  have hp := poch_ne_zero_of_not_neg_nat three_half_ne_neg_nat k
+  convert (hasSum_kummerM Complex.three_div_two_ne_neg_natCast (-z^2/2)).mul_left (z * exp (z^2/4)) using 2 with k
+  have hp := poch_ne_zero_of_not_neg_nat Complex.three_div_two_ne_neg_natCast k
   have hf : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [show (fun r : ℕ => a-3/2-2*(r:ℂ)) = fun r : ℕ => (-2) * ((-a/2+3/4) + r) by funext r; ring,
     prod_range_mul_add_eq_poch, factorial_two_mul_add_one_eq_poch, kummerMCoeff, show z^(2*k+1) = z * (z^2)^k by rw [pow_succ, pow_mul]; ring, div_pow, neg_pow (z^2),
@@ -467,7 +467,7 @@ theorem pcfU_half (z : ℂ) :
   have hE : pcfEven (1/2) z=exp (z^2/4) := by
     rw [pcfEven]
     norm_num
-    rw [kummerM_self half_ne_neg_nat, ← Complex.exp_add]
+    rw [kummerM_self Complex.one_div_two_ne_neg_natCast, ← Complex.exp_add]
     congr 1
     ring
   have hO : pcfOdd (1/2) z=z*exp (z^2/4)*kummerM (1/2) (3/2) (-(z/Real.sqrt 2)^2) := by
@@ -477,7 +477,7 @@ theorem pcfU_half (z : ℂ) :
     simp [hz2]
   unfold pcfU
   norm_num
-  rw [hE, hO, Gamma_one_half_eq_sqrt]
+  rw [hE, hO, Complex.Gamma_one_half_eq_sqrt]
   have hp : (2:ℂ)^(-(1/2:ℂ))=(Real.sqrt 2:ℂ)⁻¹ := by
     rw [Complex.cpow_neg, two_cpow_half]
   rw [hp,erfc,erf]

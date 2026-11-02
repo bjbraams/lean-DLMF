@@ -51,6 +51,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-- DLMF 22.17.1: `pq(z, -k) = pq(z, k)` for all twelve Glaisher functions (all letters
 `p, q`), all complex `z` and `k`. -/
 @[dlmf 22.17.E1 "stronger than DLMF: all complex z and k"]

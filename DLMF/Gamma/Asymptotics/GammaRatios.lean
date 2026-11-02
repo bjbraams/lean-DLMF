@@ -65,14 +65,10 @@ def recipFacRem (β : ℂ) (n : ℕ) (s : ℝ) : ℂ :=
 /-- The zeroth binomial coefficient `C(β, 0) = 1`. -/
 theorem recipFacBinom_zero (β : ℂ) : recipFacBinom β 0 = 1 := by simp [recipFacBinom, poch_zero]
 
-/-- `(a)_{n+1} = a (a + 1)_n`. -/
-theorem poch_succ_left' (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n := by
-  simp [poch, ascPochhammer_succ_left, Polynomial.eval_comp, add_comm]
-
 /-- `C(β, k + 1)(k + 1) = β C(β - 1, k)`. -/
 theorem recipFacBinom_succ (β : ℂ) (k : ℕ) :
     recipFacBinom β (k + 1) * (k + 1) = β * recipFacBinom (β - 1) k := by
-  simp only [recipFacBinom, poch_succ_left', Nat.factorial_succ]
+  simp only [recipFacBinom, poch_succ_left, Nat.factorial_succ]
   rw [show -β + 1 = -(β - 1) by ring]
   push_cast
   have hk : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
@@ -192,20 +188,6 @@ theorem integrableOn_cpow_mul_one_add_cpow {p A : ℂ} (hp : 0 < p.re) (hpA : p.
   have hs0 : (0 : ℝ) < s := hs
   rw [norm_mul, norm_cpow_eq_rpow_re_of_pos hs0, norm_cpow_eq_rpow_re_of_pos (by linarith)]
   simp
-
-/-- `Γ(α + k) = (α)ₖ Γ(α)` for `Re α > 0`. -/
-theorem Gamma_add_nat_eq_poch_mul_Gamma {α : ℂ} (hα : 0 < α.re) (k : ℕ) :
-    Complex.Gamma (α + k) = poch α k * Complex.Gamma α := by
-  induction k with
-  | zero => simp [poch_zero]
-  | succ k ih =>
-    have hne : α + k ≠ 0 := by
-      intro h
-      have := congrArg Complex.re h
-      simp at this
-      linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-    rw [Nat.cast_succ, ← add_assoc, Complex.Gamma_add_one _ hne, ih, poch_succ]
-    ring
 
 /-- The Beta-integral representation of the remainder of the reciprocal-factorial expansion. -/
 theorem ratioThree_rem_eq {a b c : ℂ} (n : ℕ) (hα : 0 < (c - a).re) {t : ℝ}
@@ -353,7 +335,7 @@ theorem ratioThreeSum_shift (a b c : ℂ) (t : ℝ) (n : ℕ)
         Finset.sum_empty, zero_add, Nat.cast_zero] at hY ⊢
       rw [hY]; ring
     · simp only [ratioThreeShiftCoeff]
-      rw [poch_succ_left' (c - a) j, poch_succ (c - a + 1) j,
+      rw [poch_succ_left (c - a) j, poch_succ (c - a + 1) j,
         poch_succ (c - b) (j + 1), Nat.factorial_succ]
       rw [hY]
       have hj : (j.factorial : ℂ) ≠ 0 := by exact_mod_cast j.factorial_ne_zero

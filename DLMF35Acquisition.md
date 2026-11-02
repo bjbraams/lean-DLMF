@@ -149,9 +149,9 @@ All were checked before acquisition; `m = 2` checks use the zonal polynomials co
 ## [§35.2 Laplace Transform](https://dlmf.nist.gov/35.2)
 
 - [35.2](https://dlmf.nist.gov/35.2): [`DLMF.MatrixArgument.laplaceTransform_integrableOn_analyticOnNhd`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L120) (proved). Paragraph 35.2.Px1.p2 (absolute convergence for ℜ𝐙 > X₀ and holomorphy in the entries `z_{j,k}`); measurability of `f` added.
-- [35.2.E1](https://dlmf.nist.gov/35.2.E1): [`DLMF.MatrixArgument.laplaceTransform`](DLMF/MatrixArgument/Basic.lean#L314) (definition)
+- [35.2.E1](https://dlmf.nist.gov/35.2.E1): [`DLMF.MatrixArgument.laplaceTransform`](DLMF/MatrixArgument/Basic.lean#L315) (definition)
 - [35.2.E2](https://dlmf.nist.gov/35.2.E2): [`DLMF.MatrixArgument.laplaceTransform_inversion`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L181) (admitted). **Corrected**: DLMF omits the factor `2^{m(m-1)/2}` (Fourier inversion on `𝓢` with `tr(VX)` doubling the off-diagonal frequencies; checked with a Gaussian). Continuity of `f` added; DLMF's limit hypothesis as `U → ∞` dropped (not needed).
-- [35.2.E3](https://dlmf.nist.gov/35.2.E3): [`DLMF.MatrixArgument.matrixConvolution`](DLMF/MatrixArgument/Basic.lean#L323) (definition); [`DLMF.MatrixArgument.laplaceTransform_matrixConvolution`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L212) (proved). The convolution theorem of 35.2.Px3.p1.
+- [35.2.E3](https://dlmf.nist.gov/35.2.E3): [`DLMF.MatrixArgument.matrixConvolution`](DLMF/MatrixArgument/Basic.lean#L324) (definition); [`DLMF.MatrixArgument.laplaceTransform_matrixConvolution`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L212) (proved). The convolution theorem of 35.2.Px3.p1.
 
 ## [§35.3 Multivariate Gamma and Beta Functions](https://dlmf.nist.gov/35.3)
 
@@ -214,7 +214,7 @@ All were checked before acquisition; `m = 2` checks use the zonal polynomials co
 - [35.7.E6](https://dlmf.nist.gov/35.7.E6): [`DLMF.MatrixArgument.hyp2F1_euler`](DLMF/MatrixArgument/Gaussian.lean#L95) (admitted); [`DLMF.MatrixArgument.hyp2F1_pfaff`](DLMF/MatrixArgument/Gaussian.lean#L103) (admitted). First equality on `0 < T < I`; the two Pfaff forms on `0 < T < I/2`, where `‖T(I-T)⁻¹‖ < 1`.
 - [35.7.E7](https://dlmf.nist.gov/35.7.E7): [`DLMF.MatrixArgument.hyp2F1_one`](DLMF/MatrixArgument/Gaussian.lean#L114) (admitted)
 - [35.7.E8](https://dlmf.nist.gov/35.7.E8): [`DLMF.MatrixArgument.hyp2F1_reflection`](DLMF/MatrixArgument/Gaussian.lean#L124) (admitted). **Corrected**: the condition `½(j+1) - a ∈ ℕ` for some `j` must be `a ∈ {0, -1, -2, …}` (`j = 1`); fails for `m = 2`, `a = ±1/2`.
-- [35.7.E9](https://dlmf.nist.gov/35.7.E9): [`DLMF.MatrixArgument.gaussPDEOperator`](DLMF/MatrixArgument/Basic.lean#L336) (definition); [`DLMF.MatrixArgument.hyp2F1_gaussPDE`](DLMF/MatrixArgument/Gaussian.lean#L139) (admitted). `gaussPDEOperator` is the operator minus `abF`; the theorem gives real analyticity on `|t_k| < 1` and the equations at distinct `t_k`.
+- [35.7.E9](https://dlmf.nist.gov/35.7.E9): [`DLMF.MatrixArgument.gaussPDEOperator`](DLMF/MatrixArgument/Basic.lean#L337) (definition); [`DLMF.MatrixArgument.hyp2F1_gaussPDE`](DLMF/MatrixArgument/Gaussian.lean#L139) (admitted). `gaussPDEOperator` is the operator minus `abF`; the theorem gives real analyticity on `|t_k| < 1` and the equations at distinct `t_k`.
 - [35.7.E10](https://dlmf.nist.gov/35.7.E10): Not formalized: the display names the functions whose uniform asymptotics (Butler and Wood 2002) DLMF cites but does not state.
 - [35.7.E11](https://dlmf.nist.gov/35.7.E11): Not formalized: as 35.7.E10.
 - [35.7.iii](https://dlmf.nist.gov/35.7.iii): [`DLMF.MatrixArgument.eq_hyp2F1_of_gaussPDE`](DLMF/MatrixArgument/Gaussian.lean#L151) (admitted). The uniqueness statement of 35.7.iii.p1 (conditions (a)–(c)); 35.7.iii.p2 (systems for `₀F₁`, `₁F₁` by confluence) is a remark without a separate statement.

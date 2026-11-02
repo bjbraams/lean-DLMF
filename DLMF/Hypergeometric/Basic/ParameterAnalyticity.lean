@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Basic.GaussSeries
+public import DLMFMathlib.Analysis.Complex.ParameterContinuity
+public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Bounds
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
@@ -190,28 +192,6 @@ theorem eq_of_analyticOnNhd_univ_of_eqOn {f g : ℂ → ℂ}
   obtain ⟨z₀, hz₀⟩ := hne
   exact AnalyticOnNhd.eq_of_eventuallyEq hf hg (eventuallyEq_of_mem (hU.mem_nhds hz₀) h)
 
-/-- A series of entire functions whose terms are, near every point, eventually dominated by a
-summable sequence defines an entire function. -/
-theorem analyticOnNhd_tsum_of_eventually_dominated {F : ℕ → ℂ → ℂ}
-    (hF : ∀ n, Differentiable ℂ (F n)) (hsum : ∀ w, Summable fun n => F n w)
-    (hdom : ∀ w₀ : ℂ, ∃ U : Set ℂ, IsOpen U ∧ w₀ ∈ U ∧ ∃ N : ℕ, ∃ u : ℕ → ℝ, Summable u ∧
-      ∀ n, N ≤ n → ∀ w ∈ U, ‖F n w‖ ≤ u n) :
-    AnalyticOnNhd ℂ (fun w => ∑' n, F n w) univ := by
-  intro w₀ _
-  obtain ⟨U, hU, hw₀, N, u, hu, hle⟩ := hdom w₀
-  have hsplit : ∀ w ∈ U,
-      (∑' n, F n w) = ∑ n ∈ Finset.range N, F n w + ∑' k, F (k + N) w :=
-    fun w _ => ((hsum w).sum_add_tsum_nat_add N).symm
-  have htail : DifferentiableOn ℂ (fun w => ∑' k, F (k + N) w) U :=
-    differentiableOn_tsum_of_summable_norm (u := fun k => u (k + N))
-      (hu.comp_injective (add_left_injective N)) (fun k => (hF (k + N)).differentiableOn) hU
-      (fun k w hw => hle (k + N) (by omega) w hw)
-  have hfin : DifferentiableOn ℂ (fun w => ∑ n ∈ Finset.range N, F n w) U :=
-    DifferentiableOn.fun_sum fun n _ => (hF n).differentiableOn
-  have hdiff : DifferentiableOn ℂ (fun w => ∑' n, F n w) U :=
-    (hfin.add htail).congr fun w hw => hsplit w hw
-  exact hdiff.analyticAt (hU.mem_nhds hw₀)
-
 /-- Pochhammer symbols with nonnegative real argument are nonnegative. -/
 theorem ascPochhammer_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
     0 ≤ (ascPochhammer ℝ n).eval x := by
@@ -235,45 +215,6 @@ theorem norm_ascPochhammer_eval_le {a : ℂ} {r : ℝ} (hr : ‖a‖ ≤ r) (n :
   rw [ascPochhammer_eval_ofReal, Complex.norm_real, Real.norm_eq_abs]
   exact (norm_poch_le a n).trans
     ((poch_eval_mono (norm_nonneg a) hr n).trans (le_abs_self _))
-
-/-- Lower bound for the Pochhammer symbol when `1 ≤ Re w`. -/
-theorem factorial_le_norm_ascPochhammer_eval {w : ℂ} (hw : 1 ≤ w.re) (k : ℕ) :
-    (k.factorial : ℝ) ≤ ‖(ascPochhammer ℂ k).eval w‖ := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-    rw [ascPochhammer_succ_eval, norm_mul, Nat.factorial_succ, Nat.cast_mul]
-    have h1 : ((k + 1 : ℕ) : ℝ) ≤ ‖w + k‖ := by
-      calc ((k + 1 : ℕ) : ℝ) = 1 + k := by push_cast; ring
-        _ ≤ (w + k).re := by simp only [Complex.add_re, Complex.natCast_re]; linarith
-        _ ≤ ‖w + k‖ := re_le_norm _
-    calc ((k + 1 : ℕ) : ℝ) * k.factorial ≤ ‖w + k‖ * ‖(ascPochhammer ℂ k).eval w‖ :=
-          mul_le_mul h1 ih (by positivity) (norm_nonneg _)
-      _ = _ := by ring
-
-/-- `‖1/Γ(c+n)‖ ≤ 1/((n-N)! m)` for `n ≥ N`, when `1 ≤ Re (c+N)` and `m ≤ ‖Γ(c+N)‖`. -/
-theorem norm_recip_Gamma_add_nat_le {c : ℂ} {N : ℕ} (hre : 1 ≤ (c + N).re) {m : ℝ} (hm : 0 < m)
-    (hΓ : m ≤ ‖Gamma (c + N)‖) {n : ℕ} (hn : N ≤ n) :
-    ‖(Gamma (c + n))⁻¹‖ ≤ ((n - N).factorial : ℝ)⁻¹ * m⁻¹ := by
-  have hpole : ∀ k : ℕ, c + N ≠ -k := fun k h => by
-    have := congrArg Complex.re h
-    simp only [Complex.neg_re, Complex.natCast_re] at this
-    linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hΓ0 : Gamma (c + N) ≠ 0 := by
-    intro h
-    rw [h, norm_zero] at hΓ
-    linarith
-  have heq : c + n = c + N + ((n - N : ℕ) : ℂ) := by
-    push_cast [Nat.cast_sub hn]
-    ring
-  have hG : Gamma (c + N + ((n - N : ℕ) : ℂ)) =
-      (ascPochhammer ℂ (n - N)).eval (c + N) * Gamma (c + N) := by
-    rw [← Gamma_add_nat_div_Gamma_eq (n := n - N) (c + N) hpole]
-    field_simp
-  rw [heq, hG, mul_inv, norm_mul, norm_inv, norm_inv]
-  have hp := factorial_le_norm_ascPochhammer_eval hre (n - N)
-  have hfpos : (0 : ℝ) < (n - N).factorial := by positivity
-  gcongr
 
 /-- The complement of the nonpositive integers is open in `ℂ`. -/
 theorem isOpen_not_neg_nat : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -(m : ℂ)} := by
@@ -397,22 +338,6 @@ theorem norm_term_le_majorant {a b c : ℂ} {z : ℂ} {α β : ℝ}
       ≤ ‖(ascPochhammer ℂ n).eval (α : ℂ)‖ * ‖(ascPochhammer ℂ n).eval (β : ℂ)‖ * ‖z‖ ^ n /
           n.factorial * (((n - N).factorial : ℝ)⁻¹ * m⁻¹) := by gcongr
     _ = _ := by field_simp
-
-/-- The nonvanishing of `Γ` near a point with real part at least two. -/
-theorem exists_open_norm_Gamma_add_nat_gt {c₀ : ℂ} {N : ℕ} (hre : 2 ≤ (c₀ + N).re) :
-    ∃ V : Set ℂ, IsOpen V ∧ c₀ ∈ V ∧
-      ∀ c ∈ V, ‖Gamma (c₀ + N)‖ / 2 < ‖Gamma (c + N)‖ := by
-  have hpole : ∀ k : ℕ, c₀ + N ≠ -k := fun k h => by
-    have := congrArg Complex.re h
-    simp only [Complex.neg_re, Complex.natCast_re] at this
-    linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hΓ0 : Gamma (c₀ + N) ≠ 0 := Gamma_ne_zero hpole
-  have hcont : ContinuousAt (fun c : ℂ => ‖Gamma (c + N)‖) c₀ :=
-    ((differentiableAt_Gamma _ hpole).comp c₀ (differentiableAt_id.add_const _)).continuousAt.norm
-  have hev : ∀ᶠ c in 𝓝 c₀, ‖Gamma (c₀ + N)‖ / 2 < ‖Gamma (c + N)‖ :=
-    hcont.eventually (lt_mem_nhds (half_lt_self (norm_pos_iff.mpr hΓ0)))
-  obtain ⟨V, hV, hVopen, hc₀V⟩ := eventually_nhds_iff.mp hev
-  exact ⟨V, hVopen, hc₀V, hV⟩
 
 /-- The regularized Gauss function is entire along any entire curve in the parameter space
 (DLMF §15.2(ii)): for entire `A B C`, `w ↦ 𝐅(A w, B w; C w; z)` is entire when `‖z‖ < 1`. -/

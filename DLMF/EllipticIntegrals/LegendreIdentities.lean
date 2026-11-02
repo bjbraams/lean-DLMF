@@ -766,12 +766,12 @@ private lemma tendsto_integral_rcNeg_kernel_truncated {x y : ℝ} (hx : 0 ≤ x)
   dsimp [a]
   rw [show -y - ε + y = -ε by ring, show -y + ε + y = ε by ring, Real.log_neg_eq_log]
   ring_nf
-/-- The negative-real RC principal value equals its real logarithmic expression. -/
-private lemma symEllIntRC_of_neg_log {x y : ℝ} (hx : 0 ≤ x) (hy : y < 0) :
-    symEllIntRC x y = ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt (-y)) /
-      Real.sqrt (x - y) : ℝ) : ℂ) := by
-  have ha : 0 < Real.sqrt (x - y) := Real.sqrt_pos.mpr (by linarith)
-  have hb : 0 < Real.sqrt (-y) := Real.sqrt_pos.mpr (by linarith)
+/-- The complex symmetric truncations of the RC kernel converge to the real logarithmic value. -/
+private lemma tendsto_integral_rcNeg_kernel_truncated_complex {x y : ℝ} (hx : 0 ≤ x) (hy : y < 0) :
+    Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε),
+      (((t : ℂ) + (x : ℂ)) ^ (1 / 2 : ℂ) * ((t : ℂ) + (y : ℂ)))⁻¹) (𝓝[>] 0)
+      (𝓝 ((-(Real.log y - 2 * Real.log (Real.sqrt x + Real.sqrt (x - y))) /
+        Real.sqrt (x - y) : ℝ) : ℂ)) := by
   have hcast (ε : ℝ) :
       (∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε),
         (((t : ℂ) + (x : ℂ)) ^ (1 / 2 : ℂ) * ((t : ℂ) + (y : ℂ)))⁻¹) =
@@ -789,10 +789,27 @@ private lemma symEllIntRC_of_neg_log {x y : ℝ} (hx : 0 ≤ x) (hy : y < 0) :
     push_cast
     rfl
   have hl := Complex.continuous_ofReal.tendsto _ |>.comp (tendsto_integral_rcNeg_kernel_truncated hx hy)
-  have hl' : Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε),
+  simpa only [Function.comp_def, hcast] using hl
+
+/-- For real `x ≥ 0 > y`, the symmetric truncations of `∫₀^∞ dt/(√(t+x)(t+y))` about `t = -y`
+converge to `2 R_C(x, y)`: the Cauchy principal value defining `R_C` exists. -/
+theorem tendsto_integral_symEllIntRC_truncated {x y : ℝ} (hx : 0 ≤ x) (hy : y < 0) :
+    Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε),
       (((t : ℂ) + (x : ℂ)) ^ (1 / 2 : ℂ) * ((t : ℂ) + (y : ℂ)))⁻¹) (𝓝[>] 0)
-      (𝓝 ((-(Real.log y - 2 * Real.log (Real.sqrt x + Real.sqrt (x - y))) / Real.sqrt (x - y) : ℝ) : ℂ)) := by
-    simpa only [Function.comp_def, hcast] using hl
+      (𝓝 (2 * symEllIntRC x y)) := by
+  have hl' := tendsto_integral_rcNeg_kernel_truncated_complex hx hy
+  convert hl' using 2
+  rw [symEllIntRC_eq_cauchyPV (show IsNegReal (y : ℂ) by exact ⟨by simp, by simpa using hy⟩),
+    cauchyPVIoi, ofReal_re, hl'.limUnder_eq]
+  ring
+
+/-- The negative-real RC principal value equals its real logarithmic expression. -/
+private lemma symEllIntRC_of_neg_log {x y : ℝ} (hx : 0 ≤ x) (hy : y < 0) :
+    symEllIntRC x y = ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt (-y)) /
+      Real.sqrt (x - y) : ℝ) : ℂ) := by
+  have ha : 0 < Real.sqrt (x - y) := Real.sqrt_pos.mpr (by linarith)
+  have hb : 0 < Real.sqrt (-y) := Real.sqrt_pos.mpr (by linarith)
+  have hl' := tendsto_integral_rcNeg_kernel_truncated_complex hx hy
   rw [symEllIntRC_eq_cauchyPV (show IsNegReal (y : ℂ) by exact ⟨by simp, by simpa using hy⟩),
     cauchyPVIoi, ofReal_re, hl'.limUnder_eq]
   rw [Real.log_div (by positivity) hb.ne', Real.log_sqrt (by linarith : 0 ≤ -y),

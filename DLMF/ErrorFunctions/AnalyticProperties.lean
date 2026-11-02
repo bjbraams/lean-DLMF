@@ -56,7 +56,7 @@ theorem summable_fresnel_coeff (ε : ℕ) (R : ℝ) :
 /-- The entire Dawson integral is the same Kummer specialization on the full complex plane. -/
 theorem dawsonF_eq_kummerM (z : ℂ) : dawsonF z=z*kummerM 1 (3/2) (-z^2) := by
   have hM : Differentiable ℂ (kummerM 1 (3/2)) := fun w =>
-    ((hasFPowerSeriesOnBall_kummerM (a:=1) three_half_ne_neg_nat).analyticAt_of_mem (by simp)).differentiableAt
+    ((hasFPowerSeriesOnBall_kummerM (a:=1) Complex.three_div_two_ne_neg_natCast).analyticAt_of_mem (by simp)).differentiableAt
   have he := Complex.eq_of_differentiable_of_eqOn_pos_reals dawsonF_entire
     (show Differentiable ℂ (fun w => w*kummerM 1 (3/2) (-w^2)) by fun_prop)
     (fun x hx => by rw [dawsonF_ofReal, Real.dawsonF_eq_kummerM])
@@ -178,7 +178,7 @@ theorem erfc_eq_laplace {z : ℂ} (hz : 0 < z.re) (hz2 : 0 < (z^2).re) :
   have hu := kummerU_erfc (Or.inl hz) hz
   have hl := kummerU_laplace (a := 1/2) (b := 1/2) (z := z^2) (by norm_num) hz2
   rw [show (1/2:ℂ)-1 = -1/2 by norm_num, show (1/2:ℂ)-1/2-1 = -1 by norm_num,
-    Gamma_one_half_eq_sqrt] at hl
+    Complex.Gamma_one_half_eq_sqrt] at hl
   set J := ∫ t : ℝ in Ioi 0, exp (-z^2*t) * (t:ℂ)^(-1/2:ℂ) * (1+(t:ℂ))^(-1:ℂ)
   have hp0 : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpp : (Real.sqrt π:ℂ)*Real.sqrt π = π := by exact_mod_cast Real.mul_self_sqrt Real.pi_pos.le

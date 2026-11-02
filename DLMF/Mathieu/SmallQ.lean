@@ -1127,8 +1127,8 @@ theorem mathieuB_even_contFrac (n : ℕ) {q : ℝ}
 eigenvalues extends analytically from the real interval `(-cn², cn²)` to the disc `|q| < cn²`. -/
 @[dlmf 28.6.E20]
 theorem mathieu_radius_liminf {k : ℝ} (hk : k ∈ Ioo (0 : ℝ) 1)
-    (hEK : 2 * DLMF.EllipticIntegrals.compEllIntEk k = DLMF.JacobiElliptic.compEllIntKk k)
-    {c : ℝ} (hc : c < k * Real.sqrt (1 - k ^ 2) * (DLMF.JacobiElliptic.compEllIntKk k).re ^ 2) :
+    (hEK : 2 * DLMF.EllipticIntegrals.compEllIntEk k = DLMF.EllipticIntegrals.compEllIntKk k)
+    {c : ℝ} (hc : c < k * Real.sqrt (1 - k ^ 2) * (DLMF.EllipticIntegrals.compEllIntKk k).re ^ 2) :
     ∀ᶠ n : ℕ in atTop, ∀ e : ℕ → ℝ → ℝ, e ∈ ({fun n => mathieuA (2 * n),
         fun n => mathieuB (2 * n + 2), fun n => mathieuA (2 * n + 1),
         fun n => mathieuB (2 * n + 1)} : Set (ℕ → ℝ → ℝ)) →

@@ -179,7 +179,7 @@ theorem integral_exp_sq_eq_kummerM (x : ℝ) :
 theorem Real.dawsonF_eq_kummerM (x : ℝ) :
     (Real.dawsonF x : ℂ) = x * kummerM 1 (3 / 2) (-(x : ℂ) ^ 2) := by
   rw [Real.dawsonF, Complex.ofReal_mul, integral_exp_sq_eq_kummerM,
-    kummerM_kummer_transform three_half_ne_neg_nat]
+    kummerM_kummer_transform Complex.three_div_two_ne_neg_natCast]
   push_cast
   rw [show (3 / 2 : ℂ) - 1 / 2 = 1 by norm_num, show -(x : ℂ) ^ 2 = -((x : ℂ) ^ 2) by ring]
   have he : exp (-(x : ℂ) ^ 2) * exp ((x : ℂ) ^ 2) = 1 := by rw [← Complex.exp_add]; simp
@@ -200,7 +200,7 @@ theorem Real.hasAsymptoticExpansion_dawsonF :
   · filter_upwards with x
     simp only [Pi.smul_apply, Function.comp_apply, smul_eq_mul]
     rw [Real.dawsonF, Complex.ofReal_mul, integral_exp_sq_eq_kummerM,
-      kummerM_eq_mul_regularizedHGFun three_half_ne_neg_nat]
+      kummerM_eq_mul_regularizedHGFun Complex.three_div_two_ne_neg_natCast]
     push_cast
     ring
   · filter_upwards [eventually_gt_atTop 0] with x hx
@@ -218,8 +218,8 @@ theorem Real.hasAsymptoticExpansion_dawsonF :
   · funext k
     simp only [Pi.smul_apply, smul_eq_mul, kummerCoeff]
     rw [show (1 : ℂ) - 1 / 2 = 1 / 2 by norm_num, show (3 / 2 : ℂ) - 1 / 2 = 1 by norm_num,
-      poch_nat_one, Gamma_one_half_eq_sqrt, show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num,
-      Complex.Gamma_add_one _ (by norm_num), Gamma_one_half_eq_sqrt]
+      poch_nat_one, Complex.Gamma_one_half_eq_sqrt, show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num,
+      Complex.Gamma_add_one _ (by norm_num), Complex.Gamma_one_half_eq_sqrt]
     have hf : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
     field_simp
 

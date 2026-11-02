@@ -657,7 +657,7 @@ private lemma jacobi_eq_Gamma_mul_scaled_series {α : ℝ} (hα : -1 < α) (β :
     poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos ha) k
   have hGn : Gamma ((n : ℂ) + α + 1) = poch ((α : ℂ) + 1) n * Gamma ((α : ℂ) + 1) := by
     rw [show (n : ℂ) + α + 1 = ((α : ℂ) + 1) + n by ring]
-    exact DLMF.Gamma.Gamma_add_nat_eq_poch_mul_Gamma ha n
+    exact DLMF.Hypergeometric.Gamma_add_nat_eq_poch_mul_Gamma ha n
   rw [tsum_eq_sum (s := Finset.range (n + 1)) (fun k hk => by
     rw [poch_neg_nat_eq_zero (by simp only [Finset.mem_range, not_lt] at hk; omega)]
     simp), jacobiPolyP, ordinaryHypergeometric_eq_sum_neg_nat,
@@ -665,7 +665,7 @@ private lemma jacobi_eq_Gamma_mul_scaled_series {α : ℝ} (hα : -1 < α) (β :
   apply Finset.sum_congr rfl
   intro k hk
   rw [regularizedHGFunCoeff_empty, gaussHGCoeff, hGn,
-    DLMF.Gamma.Gamma_add_nat_eq_poch_mul_Gamma ha k,
+    DLMF.Hypergeometric.Gamma_add_nat_eq_poch_mul_Gamma ha k,
     show (1 - (1 - 2 * w / (n : ℂ) ^ 2)) / 2 = w / (n : ℂ) ^ 2 by ring,
     show (n : ℂ) + α + β + 1 = n + (α + β + 1) by ring,
     div_pow, show ((n : ℂ) ^ 2) ^ k = ((n : ℂ) ^ k) ^ 2 by ring]

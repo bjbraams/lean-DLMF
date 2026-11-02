@@ -42,7 +42,7 @@ theorem continuous_regularized1F2_one :
     simp only [div_eq_mul_inv,mul_inv_rev]
     ring
   rw [heq]
-  apply DLMF.Confluent.continuous_tsum_of_eventually_dominated
+  apply continuous_tsum_of_eventually_dominated
   · intro n
     exact ((by fun_prop : Continuous fun p : ℂ × ℂ × ℂ => p.2.2^n).mul
       (differentiable_one_div_Gamma.continuous.comp (by fun_prop))).mul

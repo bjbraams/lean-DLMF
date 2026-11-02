@@ -56,11 +56,6 @@ set_option autoImplicit false
 
 namespace DLMF.OrthogonalPolynomials
 
-/-- Pochhammer symbols at points of positive real part do not vanish. -/
-theorem poch_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) (k : ℕ) : poch z k ≠ 0 :=
-  poch_ne_zero_of_not_neg_nat (fun j h => by
-    have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]) k
-
 /-- The forward difference of a Pochhammer symbol in a shifted argument. -/
 theorem poch_half_sub (w : ℂ) (k : ℕ) :
     poch (w - 1 / 2) (k + 1) - poch (w + 1 / 2) (k + 1) = -(k + 1) * poch (w + 1 / 2) k := by

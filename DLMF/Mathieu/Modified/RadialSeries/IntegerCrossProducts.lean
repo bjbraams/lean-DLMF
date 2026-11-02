@@ -54,7 +54,7 @@ private lemma besselYExp_neg (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
       Complex.sin (μ * π) * besselJExp μ h z := by
   have hc := continuousAt_besselYExp_order hh z
   have hJ := differentiable_besselJExp_order hh z
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => besselYExp (-μ) h z)
     (g := fun μ => Complex.cos (μ * π) * besselYExp μ h z +
       Complex.sin (μ * π) * besselJExp μ h z)
@@ -62,7 +62,7 @@ private lemma besselYExp_neg (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     (((by fun_prop : ContinuousAt (fun μ : ℂ => Complex.cos (μ * π)) μ).mul (hc μ)).add
       ((by fun_prop : ContinuousAt (fun μ : ℂ => Complex.sin (μ * π)) μ).mul
         (hJ μ).continuousAt)) (fun c hc' => ?_)
-  have hk := DLMF.Confluent.forall_of_mem_integerComplement hc'
+  have hk := Complex.forall_of_mem_integerComplement hc'
   have hk' : ∀ k : ℤ, -c ≠ k := fun k h' => hk (-k) (by push_cast; linear_combination -h')
   have hs := DLMF.Bessel.sin_mul_pi_ne_zero hk
   rw [besselYExp_eq_besselYExpNumerator_div hk', besselYExp_eq_besselYExpNumerator_div hk]

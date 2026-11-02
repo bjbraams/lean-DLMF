@@ -8,6 +8,8 @@ module
 public import DLMF.Confluent.LogSeries
 public import DLMFMathlib.Analysis.ODE.Wronskian
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
+public import DLMFMathlib.Analysis.Complex.NonInteger
+public import DLMFMathlib.Analysis.Complex.ParameterContinuity
 
 /-!
 # Existence and continuity of Tricomi's function
@@ -117,18 +119,6 @@ def tricomiD (a c z : ℂ) : ℂ :=
   regularizedHGFun {a} {c} z * (Gamma (a - c + 1))⁻¹ -
     z ^ (1 - c) * regularizedHGFun {a - c + 1} {2 - c} z * (Gamma a)⁻¹
 
-/-- A noninteger complex number is not a nonpositive integer. -/
-theorem not_neg_nat_of_mem_integerComplement {c : ℂ} (hc : c ∈ integerComplement) :
-    ∀ k : ℕ, c ≠ -(k : ℂ) := fun k h => hc ⟨-k, by rw [h]; push_cast; ring⟩
-
-/-- A complex number different from every integer lies in `ℂ \ ℤ`. -/
-theorem mem_integerComplement_of_forall {c : ℂ} (hc : ∀ k : ℤ, c ≠ k) : c ∈ integerComplement :=
-  fun ⟨k, hk⟩ => hc k hk.symm
-
-/-- A point of `ℂ \ ℤ` differs from every integer. -/
-theorem forall_of_mem_integerComplement {c : ℂ} (hc : c ∈ integerComplement) : ∀ k : ℤ, c ≠ k :=
-  fun k hk => hc ⟨k, hk.symm⟩
-
 /-- For noninteger `c`, the connection formula equals `π / sin(πc)` times the regularized
 combination `tricomiD a c z` (DLMF 13.2.42 with the reflection formula). -/
 theorem kummerUConnection_eq_tricomiD {a c z : ℂ} (hc : c ∈ integerComplement) :
@@ -211,12 +201,6 @@ theorem differentiable_tricomiD (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
   have h4 : Differentiable ℂ (fun c : ℂ => z ^ (1 - c)) := fun c =>
     ((differentiableAt_const (1 : ℂ)).sub differentiableAt_id).const_cpow (Or.inl hz)
   exact (h1.mul h3).sub ((h4.mul h2).mul_const _)
-
-/-- Every complex `b` is an accumulation point of `ℂ \ ℤ`. -/
-theorem integerComplement_nhdsWithin_neBot (b : ℂ) : (𝓝[integerComplement] b).NeBot := by
-  have hd : Dense integerComplement :=
-    (Set.countable_range (fun k : ℤ => (k : ℂ))).dense_compl ℂ
-  exact mem_closure_iff_nhdsWithin_neBot.mp (hd b)
 
 /-- **Existence of Tricomi's function at every second parameter**: for `z ≠ 0`, the
 connection formula converges along noninteger parameters to `U(a,b,z)`. -/
@@ -310,77 +294,6 @@ theorem tendsto_kummerU (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
 section TricomiContinuity
 
 open Set Metric
-
-/-- Cauchy's formula for the difference quotient of an entire function. -/
-theorem dslope_eq_circleIntegral {f : ℂ → ℂ} (hf : Differentiable ℂ f) (n : ℂ) {R : ℝ}
-    {c : ℂ} (hc : c ∈ ball n R) :
-    dslope f n c = (2 * π * I : ℂ)⁻¹ • ∫ θ : ℝ in 0..2 * π,
-      circleMap 0 R θ * I * ((circleMap n R θ - c)⁻¹ *
-        ((f (circleMap n R θ) - f n) / (circleMap n R θ - n))) := by
-  have hR : 0 < R := pos_of_mem_ball hc
-  have hd : Differentiable ℂ (dslope f n) := by
-    rw [← differentiableOn_univ, differentiableOn_dslope univ_mem]
-    exact hf.differentiableOn
-  rw [← (hd.diffContOnCl (s := ball n R)).two_pi_i_inv_smul_circleIntegral_sub_inv_smul hc]
-  congr 1
-  unfold circleIntegral
-  refine intervalIntegral.integral_congr fun θ _ => ?_
-  have hne : circleMap n R θ ≠ n := by
-    intro h
-    have := circleMap_sub_center n R θ
-    rw [h, sub_self] at this
-    exact (circleMap_ne_center hR.ne') h
-  simp only [smul_eq_mul]
-  rw [deriv_circleMap, dslope_of_ne _ hne, slope_def_field]
-
-/-- The difference quotient of a family of entire functions depends continuously on the
-parameter and the point. -/
-theorem continuousOn_dslope_param {X : Type*} [TopologicalSpace X] {f : X → ℂ → ℂ} {s : Set X}
-    (hs : IsOpen s) (hf : ContinuousOn (fun p : X × ℂ => f p.1 p.2) (s ×ˢ univ))
-    (hd : ∀ x ∈ s, Differentiable ℂ (f x)) (n : ℂ) :
-    ContinuousOn (fun p : X × ℂ => dslope (f p.1) n p.2) (s ×ˢ univ) := by
-  rintro ⟨x₀, c₀⟩ ⟨hx₀, -⟩
-  set R : ℝ := ‖c₀ - n‖ + 1 with hRdef
-  have hR : 0 < R := by positivity
-  set T : Set (X × ℂ) := s ×ˢ ball c₀ (1 / 2) with hT
-  have hTo : IsOpen T := hs.prod isOpen_ball
-  have hmem : (x₀, c₀) ∈ T := ⟨hx₀, mem_ball_self (by norm_num)⟩
-  have hcball : ∀ p ∈ T, p.2 ∈ ball n R := by
-    intro p hp
-    have h1 := mem_ball.mp hp.2
-    rw [mem_ball, dist_eq_norm] at *
-    calc ‖p.2 - n‖ ≤ ‖p.2 - c₀‖ + ‖c₀ - n‖ := norm_sub_le_norm_sub_add_norm_sub _ _ _
-      _ < R := by linarith
-  set F : X × ℂ → ℝ → ℂ := fun p θ => circleMap 0 R θ * I * ((circleMap n R θ - p.2)⁻¹ *
-      ((f p.1 (circleMap n R θ) - f p.1 n) / (circleMap n R θ - n))) with hF
-  have heq : EqOn (fun p : X × ℂ => dslope (f p.1) n p.2)
-      (fun p => (2 * π * I : ℂ)⁻¹ • ∫ θ : ℝ in 0..2 * π, F p θ) T := fun p hp =>
-    dslope_eq_circleIntegral (hd p.1 hp.1) n (hcball p hp)
-  have hcont : ContinuousOn (fun p => (2 * π * I : ℂ)⁻¹ • ∫ θ : ℝ in 0..2 * π, F p θ) T := by
-    rw [continuousOn_iff_continuous_domRestrict]
-    change Continuous fun q : T => (2 * π * I : ℂ)⁻¹ • ∫ θ : ℝ in 0..2 * π, F q.1 θ
-    refine Continuous.smul (continuous_const (y := (2 * π * I : ℂ)⁻¹)) ?_
-    refine intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' ?_ _ _
-    have hfc : Continuous fun r : T × ℝ => f r.1.1.1 (circleMap n R r.2) := by
-      refine hf.comp_continuous (f := fun r : T × ℝ => (r.1.1.1, circleMap n R r.2))
-        (by fun_prop) fun r => ⟨r.1.2.1, mem_univ _⟩
-    have hfn : Continuous fun r : T × ℝ => f r.1.1.1 n := by
-      refine hf.comp_continuous (f := fun r : T × ℝ => (r.1.1.1, n))
-        (by fun_prop) fun r => ⟨r.1.2.1, mem_univ _⟩
-    have hne1 : ∀ r : T × ℝ, circleMap n R r.2 - r.1.1.2 ≠ 0 := by
-      intro r h
-      have h1 := hcball r.1.1 r.1.2
-      rw [sub_eq_zero] at h
-      rw [← h, mem_ball, dist_eq_norm, circleMap_sub_center, norm_circleMap_zero,
-        abs_of_pos hR] at h1
-      exact lt_irrefl _ h1
-    have hne2 : ∀ r : T × ℝ, circleMap n R r.2 - n ≠ 0 := fun r =>
-      sub_ne_zero.mpr (circleMap_ne_center hR.ne')
-    simp only [hF]
-    refine Continuous.mul (by fun_prop) (Continuous.mul ?_ ?_)
-    · exact Continuous.inv₀ (by fun_prop) hne1
-    · exact Continuous.div (hfc.sub hfn) (by fun_prop) hne2
-  exact ((hcont.congr heq).continuousAt (hTo.mem_nhds hmem)).continuousWithinAt
 
 /-- The regularized connection combination `tricomiD a c z` is jointly continuous in `(a, c, z)` for
 `z` in the slit plane. -/
@@ -647,14 +560,6 @@ theorem kummerU_kummer_transform (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (hb : ∀ k : ℤ, b ≠ k) :
     kummerU a b z = z ^ (1 - b) * kummerU (a - b + 1) (2 - b) z :=
   kummerU_kummer_transform_of_ne_zero a b (slitPlane_ne_zero hz) hb
-
-/-- Two functions continuous at `b` that agree at all noninteger points agree at `b`. -/
-theorem eq_of_continuousAt_of_integerComplement {f g : ℂ → ℂ} {b : ℂ} (hf : ContinuousAt f b)
-    (hg : ContinuousAt g b) (h : ∀ c ∈ integerComplement, f c = g c) : f b = g b := by
-  have := integerComplement_nhdsWithin_neBot b
-  exact tendsto_nhds_unique (hf.tendsto.mono_left nhdsWithin_le_nhds)
-    ((hg.tendsto.mono_left nhdsWithin_le_nhds).congr'
-      (eventually_nhdsWithin_of_forall fun c hc => (h c hc).symm))
 
 /-- `U` is continuous along any continuous curve in the parameters, at fixed `z ≠ 0`. -/
 theorem continuousAt_kummerU_comp {A B : ℂ → ℂ} {b : ℂ} (hA : ContinuousAt A b)

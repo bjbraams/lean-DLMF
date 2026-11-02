@@ -1098,12 +1098,12 @@ private lemma lommelCapital_parameter_locallyUniform (μ ν : ℂ) :
     intro p hp
     exact ((lommelNumerator_joint_continuous ν (μ:=p.2) hp.1).comp
       (f:=Prod.swap) (x:=p) continuous_swap.continuousAt).continuousWithinAt
-  have hD₁c := DLMF.Confluent.continuousOn_dslope_param isOpen_slitPlane hHc hHd μ
+  have hD₁c := continuousOn_dslope_param isOpen_slitPlane hHc hHd μ
   have hD₁d : ∀ z ∈ slitPlane, Differentiable ℂ (fun t => D₁ t z) := by
     intro z hz
     rw [← differentiableOn_univ,Complex.differentiableOn_dslope Filter.univ_mem]
     exact (hHd z hz).differentiableOn
-  have hD₂c := DLMF.Confluent.continuousOn_dslope_param isOpen_slitPlane hD₁c hD₁d μ
+  have hD₂c := continuousOn_dslope_param isOpen_slitPlane hD₁c hD₁d μ
   have hDcont : ∀ z ∈ slitPlane, ContinuousAt (fun p : ℂ × ℂ => D₁ p.1 p.2) (μ,z) ∧
       ContinuousAt (fun p : ℂ × ℂ => D₂ p.1 p.2) (μ,z) := by
     intro z hz

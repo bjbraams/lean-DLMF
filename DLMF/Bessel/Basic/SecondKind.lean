@@ -11,6 +11,9 @@ public import Mathlib.Topology.Algebra.Module.Cardinality
 public import Mathlib.Analysis.Complex.CauchyIntegral
 public import Mathlib.Analysis.Calculus.UniformLimitsDeriv
 public import Mathlib.Analysis.Complex.IntegerCompl
+public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Bounds
+public import DLMFMathlib.Analysis.Complex.NonInteger
+public import DLMFMathlib.Analysis.Complex.ParameterContinuity
 
 /-!
 # Bessel functions of the second kind and Hankel functions: basic properties
@@ -62,226 +65,6 @@ noncomputable section
 
 namespace DLMF.Bessel
 
-/-! ### Auxiliary facts on continuity in a parameter -/
-
-section Auxiliary
-
-open Metric
-
-/-- A series of continuous functions whose terms are, near every point, eventually dominated
-by a summable sequence has a continuous sum. -/
-private theorem besselBasic_continuous_tsum_of_eventually_dominated {X : Type*} [TopologicalSpace X]
-    {F : ℕ → X → ℂ} (hF : ∀ n, Continuous (F n)) (hsum : ∀ x, Summable fun n => F n x)
-    (hdom : ∀ x₀ : X, ∃ U : Set X, IsOpen U ∧ x₀ ∈ U ∧ ∃ N : ℕ, ∃ u : ℕ → ℝ, Summable u ∧
-      ∀ n, N ≤ n → ∀ x ∈ U, ‖F n x‖ ≤ u n) :
-    Continuous (fun x => ∑' n, F n x) := by
-  refine continuous_iff_continuousAt.mpr fun x₀ => ?_
-  obtain ⟨U, hU, hx₀, N, u, hu, hle⟩ := hdom x₀
-  have htail : ContinuousOn (fun x => ∑' k, F (k + N) x) U :=
-    continuousOn_tsum (u := fun k => u (k + N)) (fun k => (hF (k + N)).continuousOn)
-      (hu.comp_injective (add_left_injective N)) (fun k x hx => hle (k + N) (by omega) x hx)
-  have hfin : ContinuousOn (fun x => ∑ n ∈ Finset.range N, F n x) U :=
-    continuousOn_finsetSum _ fun n _ => (hF n).continuousOn
-  exact ((hfin.add htail).congr fun x _ => ((hsum x).sum_add_tsum_nat_add N).symm).continuousAt
-    (hU.mem_nhds hx₀)
-
-/-- A point of `ℂ \ ℤ` differs from every integer. -/
-private theorem besselBasic_forall_of_mem_integerComplement {c : ℂ} (hc : c ∈ integerComplement) :
-    ∀ k : ℤ, c ≠ k :=
-  fun k hk => hc ⟨k, hk.symm⟩
-
-/-- Every complex `b` is an accumulation point of `ℂ \ ℤ`. -/
-private theorem besselBasic_integerComplement_nhdsWithin_neBot (b : ℂ) :
-    (𝓝[integerComplement] b).NeBot := by
-  have hd : Dense integerComplement :=
-    (Set.countable_range (fun k : ℤ => (k : ℂ))).dense_compl ℂ
-  exact mem_closure_iff_nhdsWithin_neBot.mp (hd b)
-
-/-- Two functions continuous at `b` that agree at all noninteger points agree at `b`. -/
-private theorem besselBasic_eq_of_continuousAt_of_integerComplement {f g : ℂ → ℂ} {b : ℂ}
-    (hf : ContinuousAt f b)
-    (hg : ContinuousAt g b) (h : ∀ c ∈ integerComplement, f c = g c) : f b = g b := by
-  have := besselBasic_integerComplement_nhdsWithin_neBot b
-  exact tendsto_nhds_unique (hf.tendsto.mono_left nhdsWithin_le_nhds)
-    ((hg.tendsto.mono_left nhdsWithin_le_nhds).congr'
-      (eventually_nhdsWithin_of_forall fun c hc => (h c hc).symm))
-
-/-- Cauchy's formula for the difference quotient of an entire function. -/
-private theorem besselBasic_dslope_eq_circleIntegral {f : ℂ → ℂ} (hf : Differentiable ℂ f) (n : ℂ)
-    {R : ℝ}
-    {c : ℂ} (hc : c ∈ ball n R) :
-    dslope f n c = (2 * π * I : ℂ)⁻¹ • ∫ θ : ℝ in 0..2 * π,
-      circleMap 0 R θ * I * ((circleMap n R θ - c)⁻¹ *
-        ((f (circleMap n R θ) - f n) / (circleMap n R θ - n))) := by
-  have hR : 0 < R := pos_of_mem_ball hc
-  have hd : Differentiable ℂ (dslope f n) := by
-    rw [← differentiableOn_univ, differentiableOn_dslope univ_mem]
-    exact hf.differentiableOn
-  rw [← (hd.diffContOnCl (s := ball n R)).two_pi_i_inv_smul_circleIntegral_sub_inv_smul hc]
-  congr 1
-  unfold circleIntegral
-  refine intervalIntegral.integral_congr fun θ _ => ?_
-  have hne : circleMap n R θ ≠ n := by
-    intro h
-    have := circleMap_sub_center n R θ
-    rw [h, sub_self] at this
-    exact (circleMap_ne_center hR.ne') h
-  simp only [smul_eq_mul]
-  rw [deriv_circleMap, dslope_of_ne _ hne, slope_def_field]
-
-/-- The difference quotient of a family of entire functions depends continuously on the
-parameter and the point. -/
-private theorem besselBasic_continuousOn_dslope_param {X : Type*} [TopologicalSpace X]
-    {f : X → ℂ → ℂ} {s : Set X}
-    (hs : IsOpen s) (hf : ContinuousOn (fun p : X × ℂ => f p.1 p.2) (s ×ˢ univ))
-    (hd : ∀ x ∈ s, Differentiable ℂ (f x)) (n : ℂ) :
-    ContinuousOn (fun p : X × ℂ => dslope (f p.1) n p.2) (s ×ˢ univ) := by
-  rintro ⟨x₀, c₀⟩ ⟨hx₀, -⟩
-  set R : ℝ := ‖c₀ - n‖ + 1 with hRdef
-  have hR : 0 < R := by positivity
-  set T : Set (X × ℂ) := s ×ˢ ball c₀ (1 / 2) with hT
-  have hTo : IsOpen T := hs.prod isOpen_ball
-  have hmem : (x₀, c₀) ∈ T := ⟨hx₀, mem_ball_self (by norm_num)⟩
-  have hcball : ∀ p ∈ T, p.2 ∈ ball n R := by
-    intro p hp
-    have h1 := mem_ball.mp hp.2
-    rw [mem_ball, dist_eq_norm] at *
-    calc ‖p.2 - n‖ ≤ ‖p.2 - c₀‖ + ‖c₀ - n‖ := norm_sub_le_norm_sub_add_norm_sub _ _ _
-      _ < R := by linarith
-  set F : X × ℂ → ℝ → ℂ := fun p θ => circleMap 0 R θ * I * ((circleMap n R θ - p.2)⁻¹ *
-      ((f p.1 (circleMap n R θ) - f p.1 n) / (circleMap n R θ - n))) with hF
-  have heq : EqOn (fun p : X × ℂ => dslope (f p.1) n p.2)
-      (fun p => (2 * π * I : ℂ)⁻¹ • ∫ θ : ℝ in 0..2 * π, F p θ) T := fun p hp =>
-    besselBasic_dslope_eq_circleIntegral (hd p.1 hp.1) n (hcball p hp)
-  have hcont : ContinuousOn (fun p => (2 * π * I : ℂ)⁻¹ • ∫ θ : ℝ in 0..2 * π, F p θ) T := by
-    rw [continuousOn_iff_continuous_domRestrict]
-    change Continuous fun q : T => (2 * π * I : ℂ)⁻¹ • ∫ θ : ℝ in 0..2 * π, F q.1 θ
-    refine Continuous.smul (continuous_const (y := (2 * π * I : ℂ)⁻¹)) ?_
-    refine intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' ?_ _ _
-    have hfc : Continuous fun r : T × ℝ => f r.1.1.1 (circleMap n R r.2) := by
-      refine hf.comp_continuous (f := fun r : T × ℝ => (r.1.1.1, circleMap n R r.2))
-        (by fun_prop) fun r => ⟨r.1.2.1, mem_univ _⟩
-    have hfn : Continuous fun r : T × ℝ => f r.1.1.1 n := by
-      refine hf.comp_continuous (f := fun r : T × ℝ => (r.1.1.1, n))
-        (by fun_prop) fun r => ⟨r.1.2.1, mem_univ _⟩
-    have hne1 : ∀ r : T × ℝ, circleMap n R r.2 - r.1.1.2 ≠ 0 := by
-      intro r h
-      have h1 := hcball r.1.1 r.1.2
-      rw [sub_eq_zero] at h
-      rw [← h, mem_ball, dist_eq_norm, circleMap_sub_center, norm_circleMap_zero,
-        abs_of_pos hR] at h1
-      exact lt_irrefl _ h1
-    have hne2 : ∀ r : T × ℝ, circleMap n R r.2 - n ≠ 0 := fun r =>
-      sub_ne_zero.mpr (circleMap_ne_center hR.ne')
-    simp only [hF]
-    refine Continuous.mul (by fun_prop) (Continuous.mul ?_ ?_)
-    · exact Continuous.inv₀ (by fun_prop) hne1
-    · exact Continuous.div (hfc.sub hfn) (by fun_prop) hne2
-  exact ((hcont.congr heq).continuousAt (hTo.mem_nhds hmem)).continuousWithinAt
-
-/-- Joint continuity at `(b, x)` gives uniform convergence near `x` as the parameter tends
-to `b`. -/
-private theorem besselBasic_tendstoUniformlyOnFilter_of_continuousAt {F : ℂ → ℂ → ℂ} {b x : ℂ}
-    (h : ContinuousAt (fun p : ℂ × ℂ => F p.1 p.2) (b, x)) {l : Filter ℂ} (hl : l ≤ 𝓝 b) :
-    TendstoUniformlyOnFilter F (F b) l (𝓝 x) := by
-  rw [Metric.tendstoUniformlyOnFilter_iff]
-  intro ε hε
-  have h1 : ∀ᶠ p : ℂ × ℂ in 𝓝 (b, x), dist (F p.1 p.2) (F b x) < ε / 2 :=
-    Metric.tendsto_nhds.mp h (ε / 2) (by positivity)
-  have h2 : ∀ᶠ w in 𝓝 x, dist (F b w) (F b x) < ε / 2 := by
-    have hc : ContinuousAt (fun w => F b w) x :=
-      ContinuousAt.comp (f := fun w => (b, w)) h (by fun_prop)
-    exact Metric.tendsto_nhds.mp hc (ε / 2) (by positivity)
-  have h1' : ∀ᶠ p : ℂ × ℂ in l ×ˢ 𝓝 x, dist (F p.1 p.2) (F b x) < ε / 2 := by
-    rw [nhds_prod_eq] at h1
-    exact Filter.Eventually.filter_mono (Filter.prod_mono hl le_rfl) h1
-  filter_upwards [h1', h2.prod_inr l] with p hp1 hp2
-  calc dist (F b p.2) (F p.1 p.2) ≤ dist (F b p.2) (F b x) + dist (F p.1 p.2) (F b x) :=
-        dist_triangle_right _ _ _
-    _ < ε / 2 + ε / 2 := add_lt_add hp2 hp1
-    _ = ε := by ring
-
-/-- A series of entire functions whose terms are, near every point, eventually dominated by a
-summable sequence defines an entire function. -/
-private theorem besselBasic_analyticOnNhd_tsum_of_eventually_dominated {F : ℕ → ℂ → ℂ}
-    (hF : ∀ n, Differentiable ℂ (F n)) (hsum : ∀ w, Summable fun n => F n w)
-    (hdom : ∀ w₀ : ℂ, ∃ U : Set ℂ, IsOpen U ∧ w₀ ∈ U ∧ ∃ N : ℕ, ∃ u : ℕ → ℝ, Summable u ∧
-      ∀ n, N ≤ n → ∀ w ∈ U, ‖F n w‖ ≤ u n) :
-    AnalyticOnNhd ℂ (fun w => ∑' n, F n w) univ := by
-  intro w₀ _
-  obtain ⟨U, hU, hw₀, N, u, hu, hle⟩ := hdom w₀
-  have hsplit : ∀ w ∈ U,
-      (∑' n, F n w) = ∑ n ∈ Finset.range N, F n w + ∑' k, F (k + N) w :=
-    fun w _ => ((hsum w).sum_add_tsum_nat_add N).symm
-  have htail : DifferentiableOn ℂ (fun w => ∑' k, F (k + N) w) U :=
-    differentiableOn_tsum_of_summable_norm (u := fun k => u (k + N))
-      (hu.comp_injective (add_left_injective N)) (fun k => (hF (k + N)).differentiableOn) hU
-      (fun k w hw => hle (k + N) (by omega) w hw)
-  have hfin : DifferentiableOn ℂ (fun w => ∑ n ∈ Finset.range N, F n w) U :=
-    DifferentiableOn.fun_sum fun n _ => (hF n).differentiableOn
-  have hdiff : DifferentiableOn ℂ (fun w => ∑' n, F n w) U :=
-    (hfin.add htail).congr fun w hw => hsplit w hw
-  exact hdiff.analyticAt (hU.mem_nhds hw₀)
-
-/-- Lower bound for the Pochhammer symbol when `1 ≤ Re w`. -/
-private theorem besselBasic_factorial_le_norm_ascPochhammer_eval {w : ℂ} (hw : 1 ≤ w.re) (k : ℕ) :
-    (k.factorial : ℝ) ≤ ‖(ascPochhammer ℂ k).eval w‖ := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-    rw [ascPochhammer_succ_eval, norm_mul, Nat.factorial_succ, Nat.cast_mul]
-    have h1 : ((k + 1 : ℕ) : ℝ) ≤ ‖w + k‖ := by
-      calc ((k + 1 : ℕ) : ℝ) = 1 + k := by push_cast; ring
-        _ ≤ (w + k).re := by simp only [Complex.add_re, Complex.natCast_re]; linarith
-        _ ≤ ‖w + k‖ := re_le_norm _
-    calc ((k + 1 : ℕ) : ℝ) * k.factorial ≤ ‖w + k‖ * ‖(ascPochhammer ℂ k).eval w‖ :=
-          mul_le_mul h1 ih (by positivity) (norm_nonneg _)
-      _ = _ := by ring
-
-/-- `‖1/Γ(c+n)‖ ≤ 1/((n-N)! m)` for `n ≥ N`, when `1 ≤ Re (c+N)` and `m ≤ ‖Γ(c+N)‖`. -/
-private theorem besselBasic_norm_recip_Gamma_add_nat_le {c : ℂ} {N : ℕ} (hre : 1 ≤ (c + N).re)
-    {m : ℝ} (hm : 0 < m)
-    (hΓ : m ≤ ‖Gamma (c + N)‖) {n : ℕ} (hn : N ≤ n) :
-    ‖(Gamma (c + n))⁻¹‖ ≤ ((n - N).factorial : ℝ)⁻¹ * m⁻¹ := by
-  have hpole : ∀ k : ℕ, c + N ≠ -k := fun k h => by
-    have := congrArg Complex.re h
-    simp only [Complex.neg_re, Complex.natCast_re] at this
-    linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hΓ0 : Gamma (c + N) ≠ 0 := by
-    intro h
-    rw [h, norm_zero] at hΓ
-    linarith
-  have heq : c + n = c + N + ((n - N : ℕ) : ℂ) := by
-    push_cast [Nat.cast_sub hn]
-    ring
-  have hG : Gamma (c + N + ((n - N : ℕ) : ℂ)) =
-      (ascPochhammer ℂ (n - N)).eval (c + N) * Gamma (c + N) := by
-    rw [← Gamma_add_nat_div_Gamma_eq (n := n - N) (c + N) hpole]
-    field_simp
-  rw [heq, hG, mul_inv, norm_mul, norm_inv, norm_inv]
-  have hp := besselBasic_factorial_le_norm_ascPochhammer_eval hre (n - N)
-  have hfpos : (0 : ℝ) < (n - N).factorial := by positivity
-  gcongr
-
-/-- The nonvanishing of `Γ` near a point with real part at least two. -/
-private theorem besselBasic_exists_open_norm_Gamma_add_nat_gt {c₀ : ℂ} {N : ℕ}
-    (hre : 2 ≤ (c₀ + N).re) :
-    ∃ V : Set ℂ, IsOpen V ∧ c₀ ∈ V ∧
-      ∀ c ∈ V, ‖Gamma (c₀ + N)‖ / 2 < ‖Gamma (c + N)‖ := by
-  have hpole : ∀ k : ℕ, c₀ + N ≠ -k := fun k h => by
-    have := congrArg Complex.re h
-    simp only [Complex.neg_re, Complex.natCast_re] at this
-    linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hΓ0 : Gamma (c₀ + N) ≠ 0 := Gamma_ne_zero hpole
-  have hcont : ContinuousAt (fun c : ℂ => ‖Gamma (c + N)‖) c₀ :=
-    ((differentiableAt_Gamma _ hpole).comp c₀ (differentiableAt_id.add_const _)).continuousAt.norm
-  have hev : ∀ᶠ c in 𝓝 c₀, ‖Gamma (c₀ + N)‖ / 2 < ‖Gamma (c + N)‖ :=
-    hcont.eventually (lt_mem_nhds (half_lt_self (norm_pos_iff.mpr hΓ0)))
-  obtain ⟨V, hV, hVopen, hc₀V⟩ := _root_.eventually_nhds_iff.mp hev
-  exact ⟨V, hVopen, hc₀V, hV⟩
-
-end Auxiliary
-
 /-! ### The `₀F₁` series in the parameter -/
 
 /-- Local domination of the `₀F₁` terms, uniformly for `c` near `c₀` and `|w| < R`. -/
@@ -290,7 +73,7 @@ theorem exists_regularized0F1_dominated (c₀ : ℂ) (R : ℝ) :
       ∀ n, N ≤ n → ∀ c ∈ V, ∀ w : ℂ, ‖w‖ ≤ R → ‖w ^ n / n ! * (Gamma (c + n))⁻¹‖ ≤ u n := by
   obtain ⟨N, hN⟩ : ∃ N : ℕ, 3 - c₀.re ≤ N := exists_nat_ge _
   have hre0 : 2 ≤ (c₀ + N).re := by simp only [add_re, natCast_re]; linarith
-  obtain ⟨V, hVopen, hc₀V, hV⟩ := besselBasic_exists_open_norm_Gamma_add_nat_gt hre0
+  obtain ⟨V, hVopen, hc₀V, hV⟩ := Complex.exists_open_norm_Gamma_add_nat_gt hre0
   have hm : 0 < ‖Gamma (c₀ + N)‖ / 2 := by
     have hpole : ∀ k : ℕ, c₀ + N ≠ -k := fun k h => by
       have := congrArg re h
@@ -306,7 +89,7 @@ theorem exists_regularized0F1_dominated (c₀ : ℂ) (R : ℝ) :
       simp only [add_re, natCast_re] at hre0 ⊢
       change c₀.re - 1 < c.re at hcre
       linarith
-    have hG := besselBasic_norm_recip_Gamma_add_nat_le hre hm (hV c hcV).le hn
+    have hG := Complex.norm_recip_Gamma_add_nat_le hre hm (hV c hcV).le hn
     have hf : (1 : ℝ) ≤ ((n - N) ! : ℝ) := by exact_mod_cast Nat.factorial_pos _
     have hG' : ‖(Gamma (c + n))⁻¹‖ ≤ (‖Gamma (c₀ + N)‖ / 2)⁻¹ := by
       refine hG.trans ?_
@@ -324,7 +107,7 @@ theorem exists_regularized0F1_dominated (c₀ : ℂ) (R : ℝ) :
 theorem continuous_regularized0F1 :
     Continuous fun p : ℂ × ℂ => regularizedHGFun (∅ : Multiset ℂ) {p.1} p.2 := by
   simp_rw [regularized0F1_eq_tsum]
-  refine besselBasic_continuous_tsum_of_eventually_dominated (fun n => ?_)
+  refine continuous_tsum_of_eventually_dominated (fun n => ?_)
     (fun p => summable_regularized0F1_term _ _) fun p₀ => ?_
   · exact ((by fun_prop : Continuous fun p : ℂ × ℂ => p.2 ^ n / n !)).mul
       (differentiable_one_div_Gamma.continuous.comp (by fun_prop))
@@ -336,7 +119,7 @@ theorem continuous_regularized0F1 :
 theorem differentiable_regularized0F1_param (w : ℂ) :
     Differentiable ℂ fun c : ℂ => regularizedHGFun (∅ : Multiset ℂ) {c} w := by
   simp_rw [regularized0F1_eq_tsum]
-  have h := besselBasic_analyticOnNhd_tsum_of_eventually_dominated
+  have h := analyticOnNhd_tsum_of_eventually_dominated
     (F := fun n c => w ^ n / n ! * (Gamma (c + n))⁻¹)
     (fun n => (differentiable_const _).mul (differentiable_one_div_Gamma.comp (by fun_prop)))
     (fun c => summable_regularized0F1_term c w) fun c₀ => by
@@ -478,7 +261,7 @@ theorem continuousAt_besselY (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   have hD := continuousOn_besselD
   by_cases hν : ∃ k : ℤ, ν = k
   · obtain ⟨n, rfl⟩ := hν
-    have hds := besselBasic_continuousOn_dslope_param (X := ℂ) (f := fun w ν => besselD ν w)
+    have hds := continuousOn_dslope_param (X := ℂ) (f := fun w ν => besselD ν w)
       isOpen_slitPlane hD (fun w hw => differentiable_besselD (slitPlane_ne_zero hw)) n
     have h1 : ContinuousAt (fun p : ℂ × ℂ => dslope (fun ν => besselD ν p.2) n p.1) (n, z) :=
       ContinuousAt.comp (g := fun q : ℂ × ℂ => dslope (fun ν => besselD ν q.1) n q.2)
@@ -551,14 +334,14 @@ theorem continuousAt_besselY_order (f : ℂ → ℂ) (hf : Continuous f) (ν : �
 theorem besselY_add_sub (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     (2 * ν / z) * besselY ν z = besselY (ν - 1) z + besselY (ν + 1) z := by
   have hz0 := slitPlane_ne_zero hz
-  refine besselBasic_eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun ν => (2 * ν / z) * besselY ν z)
     (g := fun ν => besselY (ν - 1) z + besselY (ν + 1) z)
     ((by fun_prop : Continuous fun ν : ℂ => 2 * ν / z).continuousAt.mul
       (continuousAt_besselY_order id continuous_id ν hz))
     ((continuousAt_besselY_order (· - 1) (by fun_prop) ν hz).add
       (continuousAt_besselY_order (· + 1) (by fun_prop) ν hz)) fun c hc => ?_
-  have hcz := besselBasic_forall_of_mem_integerComplement hc
+  have hcz := Complex.forall_of_mem_integerComplement hc
   have hs := sin_mul_pi_ne_zero hcz
   rw [besselY_eq_of_not_int hcz, besselY_eq_of_not_int (not_int_sub_one hcz),
     besselY_eq_of_not_int (not_int_add_one hcz), sin_sub_one_mul_pi, sin_add_one_mul_pi]
@@ -594,7 +377,7 @@ theorem hasDerivAt_besselY_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) {
 /-- **The derivative of `Y_ν`** (DLMF 10.6.2), for every order: `Y_ν' = (ν/z) Y_ν - Y_{ν+1}`. -/
 theorem hasDerivAt_besselY (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselY ν) ((ν / z) * besselY ν z - besselY (ν + 1) z) z := by
-  have := besselBasic_integerComplement_nhdsWithin_neBot ν
+  have := Complex.integerComplement_nhdsWithin_neBot ν
   refine hasDerivAt_of_tendstoUniformlyOnFilter (l := 𝓝[integerComplement] ν)
     (f := fun c => besselY c) (f' := fun c w => (c / w) * besselY c w - besselY (c + 1) w)
     (g' := fun w => (ν / w) * besselY ν w - besselY (ν + 1) w) ?_ ?_ ?_
@@ -605,13 +388,13 @@ theorem hasDerivAt_besselY (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
         ContinuousAt.comp (g := fun p : ℂ × ℂ => besselY p.1 p.2)
           (f := fun p : ℂ × ℂ => (p.1 + 1, p.2)) (continuousAt_besselY (ν + 1) hz) (by fun_prop)
       exact ((continuousAt_fst.div continuousAt_snd (slitPlane_ne_zero hz)).mul h1).sub h2
-    exact besselBasic_tendstoUniformlyOnFilter_of_continuousAt
+    exact tendstoUniformlyOnFilter_of_continuousAt
       (F := fun c w => (c / w) * besselY c w - besselY (c + 1) w) hc nhdsWithin_le_nhds
   · have hm : integerComplement ×ˢ slitPlane ∈
         𝓝[integerComplement] ν ×ˢ 𝓝 z :=
       prod_mem_prod self_mem_nhdsWithin (isOpen_slitPlane.mem_nhds hz)
     filter_upwards [hm] with p hp
-    exact hasDerivAt_besselY_of_not_int (besselBasic_forall_of_mem_integerComplement hp.1) hp.2
+    exact hasDerivAt_besselY_of_not_int (Complex.forall_of_mem_integerComplement hp.1) hp.2
   · filter_upwards [isOpen_slitPlane.mem_nhds hz] with y hy
     exact ((continuousAt_besselY_order id continuous_id ν hy).tendsto).mono_left
       nhdsWithin_le_nhds
@@ -719,14 +502,14 @@ theorem continuousAt_besselJ_order (f : ℂ → ℂ) (hf : Continuous f) (ν : �
 theorem besselJ_succ_mul_besselY_sub (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselJ (ν + 1) z * besselY ν z - besselJ ν z * besselY (ν + 1) z = 2 / (π * z) := by
   have hz0 := slitPlane_ne_zero hz
-  refine besselBasic_eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun ν => besselJ (ν + 1) z * besselY ν z - besselJ ν z * besselY (ν + 1) z)
     (g := fun _ => 2 / (π * z))
     (((continuousAt_besselJ_order (· + 1) (by fun_prop) ν hz).mul
       (continuousAt_besselY_order id continuous_id ν hz)).sub
       ((continuousAt_besselJ_order id continuous_id ν hz).mul
       (continuousAt_besselY_order (· + 1) (by fun_prop) ν hz))) continuousAt_const fun c hc => ?_
-  have hcz := besselBasic_forall_of_mem_integerComplement hc
+  have hcz := Complex.forall_of_mem_integerComplement hc
   have hs := sin_mul_pi_ne_zero hcz
   have hW := wronskian_besselJ_neg c hz
   rw [(hasDerivAt_besselJ' (ν := -c) hz).deriv, (hasDerivAt_besselJ (ν := c) hz).deriv] at hW
@@ -928,7 +711,7 @@ theorem continuousAt_besselK (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   have hE := continuousOn_besselE
   by_cases hν : ∃ k : ℤ, ν = k
   · obtain ⟨n, rfl⟩ := hν
-    have hds := besselBasic_continuousOn_dslope_param (X := ℂ) (f := fun w ν => besselE ν w)
+    have hds := continuousOn_dslope_param (X := ℂ) (f := fun w ν => besselE ν w)
       isOpen_slitPlane hE (fun w hw => differentiable_besselE (slitPlane_ne_zero hw)) n
     have h1 : ContinuousAt (fun p : ℂ × ℂ => dslope (fun ν => besselE ν p.2) n p.1) (n, z) :=
       ContinuousAt.comp (g := fun q : ℂ × ℂ => dslope (fun ν => besselE ν q.1) n q.2)
@@ -975,14 +758,14 @@ theorem continuousAt_besselI_order (f : ℂ → ℂ) (hf : Continuous f) (ν : �
 theorem besselK_add_sub (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     (2 * ν / z) * besselK ν z = besselK (ν + 1) z - besselK (ν - 1) z := by
   have hz0 := slitPlane_ne_zero hz
-  refine besselBasic_eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun ν => (2 * ν / z) * besselK ν z)
     (g := fun ν => besselK (ν + 1) z - besselK (ν - 1) z)
     ((by fun_prop : Continuous fun ν : ℂ => 2 * ν / z).continuousAt.mul
       (continuousAt_besselK_order id continuous_id ν hz))
     ((continuousAt_besselK_order (· + 1) (by fun_prop) ν hz).sub
       (continuousAt_besselK_order (· - 1) (by fun_prop) ν hz)) fun c hc => ?_
-  have hcz := besselBasic_forall_of_mem_integerComplement hc
+  have hcz := Complex.forall_of_mem_integerComplement hc
   have hs := sin_mul_pi_ne_zero hcz
   rw [besselK_eq_of_not_int hcz, besselK_eq_of_not_int (not_int_sub_one hcz),
     besselK_eq_of_not_int (not_int_add_one hcz), sin_sub_one_mul_pi, sin_add_one_mul_pi]
@@ -1019,7 +802,7 @@ theorem hasDerivAt_besselK_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) {
 @[dlmf 10.29.E2]
 theorem hasDerivAt_besselK (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselK ν) ((ν / z) * besselK ν z - besselK (ν + 1) z) z := by
-  have := besselBasic_integerComplement_nhdsWithin_neBot ν
+  have := Complex.integerComplement_nhdsWithin_neBot ν
   refine hasDerivAt_of_tendstoUniformlyOnFilter (l := 𝓝[integerComplement] ν)
     (f := fun c => besselK c) (f' := fun c w => (c / w) * besselK c w - besselK (c + 1) w)
     (g' := fun w => (ν / w) * besselK ν w - besselK (ν + 1) w) ?_ ?_ ?_
@@ -1030,12 +813,12 @@ theorem hasDerivAt_besselK (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
         ContinuousAt.comp (g := fun p : ℂ × ℂ => besselK p.1 p.2)
           (f := fun p : ℂ × ℂ => (p.1 + 1, p.2)) (continuousAt_besselK (ν + 1) hz) (by fun_prop)
       exact ((continuousAt_fst.div continuousAt_snd (slitPlane_ne_zero hz)).mul h1).sub h2
-    exact besselBasic_tendstoUniformlyOnFilter_of_continuousAt
+    exact tendstoUniformlyOnFilter_of_continuousAt
       (F := fun c w => (c / w) * besselK c w - besselK (c + 1) w) hc nhdsWithin_le_nhds
   · have hm : integerComplement ×ˢ slitPlane ∈ 𝓝[integerComplement] ν ×ˢ 𝓝 z :=
       prod_mem_prod self_mem_nhdsWithin (isOpen_slitPlane.mem_nhds hz)
     filter_upwards [hm] with p hp
-    exact hasDerivAt_besselK_of_not_int (besselBasic_forall_of_mem_integerComplement hp.1) hp.2
+    exact hasDerivAt_besselK_of_not_int (Complex.forall_of_mem_integerComplement hp.1) hp.2
   · filter_upwards [isOpen_slitPlane.mem_nhds hz] with y hy
     exact ((continuousAt_besselK_order id continuous_id ν hy).tendsto).mono_left
       nhdsWithin_le_nhds
@@ -1100,14 +883,14 @@ besselK (ν + 1) z * besselI ν z = 1 / z`. -/
 theorem besselK_mul_besselI_succ_add (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselK ν z * besselI (ν + 1) z + besselK (ν + 1) z * besselI ν z = 1 / z := by
   have hz0 := slitPlane_ne_zero hz
-  refine besselBasic_eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun ν => besselK ν z * besselI (ν + 1) z + besselK (ν + 1) z * besselI ν z)
     (g := fun _ => 1 / z)
     (((continuousAt_besselK_order id continuous_id ν hz).mul
       (continuousAt_besselI_order (· + 1) (by fun_prop) ν hz)).add
       ((continuousAt_besselK_order (· + 1) (by fun_prop) ν hz).mul
       (continuousAt_besselI_order id continuous_id ν hz))) continuousAt_const fun c hc => ?_
-  have hcz := besselBasic_forall_of_mem_integerComplement hc
+  have hcz := Complex.forall_of_mem_integerComplement hc
   have hs := sin_mul_pi_ne_zero hcz
   have hW := wronskian_besselI_neg c hz
   rw [(hasDerivAt_besselI' (ν := -c) hz).deriv, (hasDerivAt_besselI (ν := c) hz).deriv] at hW
@@ -1128,11 +911,11 @@ theorem wronskian_besselK_besselI (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 /-- `K_{-ν} = K_ν` (DLMF 10.27.3). -/
 @[dlmf 10.27.E3]
 theorem besselK_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) : besselK (-ν) z = besselK ν z := by
-  refine besselBasic_eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => besselK (-μ) z) (g := fun μ => besselK μ z)
     (continuousAt_besselK_order (fun μ => -μ) continuous_neg ν hz)
     (continuousAt_besselK_order (fun μ => μ) continuous_id ν hz) (fun c hc => ?_)
-  have hc' := besselBasic_forall_of_mem_integerComplement hc
+  have hc' := Complex.forall_of_mem_integerComplement hc
   have hcn : ∀ k : ℤ, -c ≠ k := fun k h => hc' (-k) (by push_cast; linear_combination -h)
   have hs := sin_mul_pi_ne_zero hc'
   rw [besselK_eq_of_not_int hcn, besselK_eq_of_not_int hc', besselE, besselE, neg_neg, neg_mul,
@@ -1145,7 +928,7 @@ theorem besselK_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) : besselK (-ν) 
 /-- `J_{-ν} = cos(νπ) J_ν - sin(νπ) Y_ν` for every order. -/
 theorem besselJ_neg_eq (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselJ (-ν) z = cos (ν * π) * besselJ ν z - sin (ν * π) * besselY ν z := by
-  refine besselBasic_eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => besselJ (-μ) z)
     (g := fun μ => cos (μ * π) * besselJ μ z - sin (μ * π) * besselY μ z)
     (continuousAt_besselJ_order (fun μ => -μ) continuous_neg ν hz)
@@ -1154,7 +937,7 @@ theorem besselJ_neg_eq (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       ((by fun_prop : Continuous fun μ : ℂ => sin (μ * π)).continuousAt.mul
       (continuousAt_besselY_order (fun μ => μ) continuous_id ν hz)))
     (fun c hc => ?_)
-  have hc' := besselBasic_forall_of_mem_integerComplement hc
+  have hc' := Complex.forall_of_mem_integerComplement hc
   have hs := sin_mul_pi_ne_zero hc'
   rw [besselY_eq_of_not_int hc', besselD]
   field_simp
@@ -1163,7 +946,7 @@ theorem besselJ_neg_eq (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 /-- `Y_{-ν} = sin(νπ) J_ν + cos(νπ) Y_ν` for every order (DLMF §10.4). -/
 theorem besselY_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselY (-ν) z = sin (ν * π) * besselJ ν z + cos (ν * π) * besselY ν z := by
-  refine besselBasic_eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => besselY (-μ) z)
     (g := fun μ => sin (μ * π) * besselJ μ z + cos (μ * π) * besselY μ z)
     (continuousAt_besselY_order (fun μ => -μ) continuous_neg ν hz)
@@ -1172,7 +955,7 @@ theorem besselY_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       ((by fun_prop : Continuous fun μ : ℂ => cos (μ * π)).continuousAt.mul
       (continuousAt_besselY_order (fun μ => μ) continuous_id ν hz)))
     (fun c hc => ?_)
-  have hc' := besselBasic_forall_of_mem_integerComplement hc
+  have hc' := Complex.forall_of_mem_integerComplement hc
   have hcn : ∀ k : ℤ, -c ≠ k := fun k h => hc' (-k) (by push_cast; linear_combination -h)
   have hs := sin_mul_pi_ne_zero hc'
   rw [besselY_eq_of_not_int hcn, besselY_eq_of_not_int hc', besselD, besselD, neg_neg,

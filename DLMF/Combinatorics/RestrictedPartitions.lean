@@ -975,11 +975,165 @@ theorem partitionCountAtMostParts_recurrence (k n : ℕ) :
         ∑ j ∈ t.divisors with j ≤ k, j :=
   mul_partitionCountAtMostParts_eq_sum_divisors k n
 
+/-! ### The asymptotic form (26.9.10) -/
+
+private lemma pow_succ_sub_pow_succ_bounds {a b : ℝ} (hb : 0 ≤ b) (hab : b ≤ a) (k : ℕ) :
+    (a - b) * (k + 1) * b ^ k ≤ a ^ (k + 1) - b ^ (k + 1) ∧
+      a ^ (k + 1) - b ^ (k + 1) ≤ (a - b) * (k + 1) * a ^ k := by
+  have ha : 0 ≤ a := hb.trans hab
+  rw [← geom_sum₂_mul]
+  have hlo : ∀ i ∈ range (k + 1), b ^ k ≤ a ^ i * b ^ (k + 1 - 1 - i) := by
+    intro i hi
+    have hi' : i ≤ k := Nat.lt_succ_iff.mp (mem_range.mp hi)
+    calc b ^ k = b ^ i * b ^ (k + 1 - 1 - i) := by rw [← pow_add]; congr 1; omega
+      _ ≤ a ^ i * b ^ (k + 1 - 1 - i) := by gcongr
+  have hhi : ∀ i ∈ range (k + 1), a ^ i * b ^ (k + 1 - 1 - i) ≤ a ^ k := by
+    intro i hi
+    have hi' : i ≤ k := Nat.lt_succ_iff.mp (mem_range.mp hi)
+    calc a ^ i * b ^ (k + 1 - 1 - i) ≤ a ^ i * a ^ (k + 1 - 1 - i) := by gcongr
+      _ = a ^ k := by rw [← pow_add]; congr 1; omega
+  have h1 := sum_le_sum hlo
+  have h2 := sum_le_sum hhi
+  simp only [sum_const, card_range, nsmul_eq_mul] at h1 h2
+  push_cast at h1 h2
+  have hab' : 0 ≤ a - b := sub_nonneg.mpr hab
+  simp only [Nat.add_sub_cancel]
+  constructor
+  · have := mul_le_mul_of_nonneg_left h1 hab'; linarith
+  · have := mul_le_mul_of_nonneg_left h2 hab'; linarith
+
+/-- Two-sided polynomial bounds `n^j/((j+1)! j!) ≤ p_{j+1}(n) ≤ (n + C)^j/((j+1)! j!)`. -/
+private lemma partitionCountAtMostParts_bounds (j : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ n : ℕ,
+    (n : ℝ) ^ j / ((j + 1).factorial * j.factorial) ≤ partitionCountAtMostParts (j + 1) n ∧
+      (partitionCountAtMostParts (j + 1) n : ℝ) ≤
+        ((n : ℝ) + C) ^ j / ((j + 1).factorial * j.factorial) := by
+  induction j with
+  | zero => exact ⟨0, le_rfl, fun n => by simp [partitionCountAtMostParts_one]⟩
+  | succ j ih =>
+    obtain ⟨C, hC, hb⟩ := ih
+    set a : ℝ := 1 / ((j + 1).factorial * j.factorial) with ha
+    set A : ℝ := 1 / ((j + 1 + 1).factorial * (j + 1).factorial) with hA
+    set M : ℝ := (j + 2) * (j + 1) with hM
+    have hAa : A * M = a := by
+      rw [hA, ha, hM, Nat.factorial_succ (j + 1), Nat.factorial_succ j]
+      push_cast
+      field_simp
+      ring
+    have hA0 : 0 < A := by positivity
+    have hM0 : 0 < M := by positivity
+    have hrec : ∀ n, (partitionCountAtMostParts (j + 2) n : ℝ) =
+        (if j + 2 ≤ n then (partitionCountAtMostParts (j + 2) (n - (j + 2)) : ℝ) else 0) +
+          partitionCountAtMostParts (j + 1) n := by
+      intro n
+      rw [partitionCountAtMostParts_succ (j + 1) n]
+      split_ifs <;> simp
+    have hbj : ∀ n : ℕ, a * (n : ℝ) ^ j ≤ partitionCountAtMostParts (j + 1) n ∧
+        (partitionCountAtMostParts (j + 1) n : ℝ) ≤ a * ((n : ℝ) + C) ^ j := by
+      intro n
+      obtain ⟨h1, h2⟩ := hb n
+      refine ⟨le_of_eq_of_le ?_ h1, h2.trans_eq ?_⟩ <;> rw [ha] <;> ring
+    set C' : ℝ := C + M with hC'
+    refine ⟨C', by positivity, fun n => ?_⟩
+    have hdivA : ∀ y : ℝ, y / ((j + 1 + 1).factorial * (j + 1).factorial) = A * y := by
+      intro y; rw [hA]; ring
+    rw [hdivA, hdivA]
+    constructor
+    · induction n using Nat.strong_induction_on with
+      | _ n ihn =>
+        rw [hrec n]
+        split_ifs with hn
+        · have h1 := ihn (n - (j + 2)) (by omega)
+          have h2 := (hbj n).1
+          have hsub : ((n - (j + 2) : ℕ) : ℝ) = n - (j + 2) := by push_cast [Nat.cast_sub hn]; ring
+          rw [hsub] at h1
+          have hnm : (0 : ℝ) ≤ n - (j + 2) := by rw [← hsub]; positivity
+          have key := (pow_succ_sub_pow_succ_bounds hnm (by linarith : (n : ℝ) - (j + 2) ≤ n) j).2
+          have e : ((n : ℝ) - (n - (j + 2))) * ((j : ℝ) + 1) = M := by rw [hM]; ring
+          rw [e] at key
+          have : A * (n : ℝ) ^ (j + 1) ≤ A * ((n : ℝ) - (j + 2)) ^ (j + 1) + a * (n : ℝ) ^ j := by
+            rw [← hAa]
+            have := mul_le_mul_of_nonneg_left key hA0.le
+            nlinarith
+          linarith
+        · push Not at hn
+          have h2 := (hbj n).1
+          have hn' : (n : ℝ) ≤ M := by
+            have : (n : ℝ) < j + 2 := by exact_mod_cast hn
+            rw [hM]; nlinarith
+          have : A * (n : ℝ) ^ (j + 1) ≤ a * (n : ℝ) ^ j := by
+            rw [← hAa, pow_succ]
+            have hpos : 0 ≤ A * (n : ℝ) ^ j := by positivity
+            have := mul_le_mul_of_nonneg_left hn' hpos
+            nlinarith
+          linarith
+    · induction n using Nat.strong_induction_on with
+      | _ n ihn =>
+        rw [hrec n]
+        split_ifs with hn
+        · have h1 := ihn (n - (j + 2)) (by omega)
+          have h2 := (hbj n).2
+          have hsub : ((n - (j + 2) : ℕ) : ℝ) = n - (j + 2) := by push_cast [Nat.cast_sub hn]; ring
+          rw [hsub] at h1
+          have hnm : (0 : ℝ) ≤ n - (j + 2) := by rw [← hsub]; positivity
+          have hb0 : (0 : ℝ) ≤ n - (j + 2) + C' := by rw [hC']; positivity
+          have key := (pow_succ_sub_pow_succ_bounds hb0
+            (by linarith : (n : ℝ) - (j + 2) + C' ≤ n + C') j).1
+          have e : ((n : ℝ) + C' - (n - (j + 2) + C')) * ((j : ℝ) + 1) = M := by rw [hM]; ring
+          rw [e] at key
+          have hCle : (n : ℝ) + C ≤ n - (j + 2) + C' := by
+            rw [hC', hM]; nlinarith [(j.cast_nonneg : (0 : ℝ) ≤ j)]
+          have hmono : ((n : ℝ) + C) ^ j ≤ ((n : ℝ) - (j + 2) + C') ^ j :=
+            pow_le_pow_left₀ (by positivity) hCle j
+          have : A * ((n : ℝ) - (j + 2) + C') ^ (j + 1) + a * ((n : ℝ) + C) ^ j ≤
+              A * ((n : ℝ) + C') ^ (j + 1) := by
+            rw [← hAa]
+            have := mul_le_mul_of_nonneg_left key hA0.le
+            have h3 := mul_le_mul_of_nonneg_left hmono (mul_pos hA0 hM0).le
+            nlinarith
+          linarith
+        · push Not at hn
+          have h2 := (hbj n).2
+          have hle : ((n : ℝ) + C) ^ j ≤ ((n : ℝ) + C') ^ j :=
+            pow_le_pow_left₀ (by positivity) (by rw [hC']; linarith) j
+          have hle2 : M ≤ (n : ℝ) + C' := by rw [hC']; linarith [(n.cast_nonneg : (0 : ℝ) ≤ n)]
+          have hpos : 0 ≤ A * ((n : ℝ) + C') ^ j := by positivity
+          have : a * ((n : ℝ) + C) ^ j ≤ A * ((n : ℝ) + C') ^ (j + 1) := by
+            rw [← hAa, pow_succ]
+            have h3 := mul_le_mul_of_nonneg_left hle (mul_pos hA0 hM0).le
+            have h4 := mul_le_mul_of_nonneg_left hle2 hpos
+            nlinarith
+          linarith
+
+
 /-- (26.9.10): `p_k(n) ∼ n^{k-1}/(k! (k-1)!)` as `n → ∞` with `k ≥ 1` fixed. -/
 @[dlmf 26.9.E10]
 theorem partitionCountAtMostParts_isEquivalent {k : ℕ} (hk : 1 ≤ k) :
     (fun n : ℕ => (partitionCountAtMostParts k n : ℝ)) ~[atTop]
       fun n : ℕ => (n : ℝ) ^ (k - 1) / ((k.factorial : ℝ) * ((k - 1).factorial : ℝ)) := by
-  sorry
+  obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 := ⟨k - 1, by omega⟩
+  simp only [Nat.add_sub_cancel]
+  obtain ⟨C, hC, hb⟩ := partitionCountAtMostParts_bounds j
+  refine isEquivalent_of_tendsto_one ?_
+  have hup : Tendsto (fun n : ℕ => (1 + C / n) ^ j) atTop (nhds 1) := by
+    simpa using ((tendsto_const_nhds (x := (1 : ℝ))).add
+      (tendsto_const_div_atTop_nhds_zero_nat C)).pow j
+  refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hup ?_ ?_
+  · filter_upwards [eventually_ge_atTop 1] with n hn
+    have hn' : (0 : ℝ) < n := by exact_mod_cast hn
+    have hv : 0 < (n : ℝ) ^ j / ((j + 1).factorial * j.factorial) := by positivity
+    rw [Pi.div_apply, le_div_iff₀ hv, one_mul]
+    exact (hb n).1
+  · filter_upwards [eventually_ge_atTop 1] with n hn
+    have hn' : (0 : ℝ) < n := by exact_mod_cast hn
+    have hv : 0 < (n : ℝ) ^ j / ((j + 1).factorial * j.factorial) := by positivity
+    rw [Pi.div_apply, div_le_iff₀ hv]
+    have : (1 + C / n) ^ j * ((n : ℝ) ^ j / ((j + 1).factorial * j.factorial)) =
+        ((n : ℝ) + C) ^ j / ((j + 1).factorial * j.factorial) := by
+      rw [← mul_div_assoc, ← mul_pow]
+      congr 2
+      field_simp
+    rw [this]
+    exact (hb n).2
+
 
 end DLMF.Combinatorics

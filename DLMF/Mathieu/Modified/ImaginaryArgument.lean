@@ -100,7 +100,7 @@ private lemma mathieuCylExp_three_I_mul_ofReal (μ : ℂ) {h : ℝ} (hh : 0 < h)
   have hs := ofReal_mul_exp_mem_slitPlane_of_abs_im_lt hh hz
   have hIh : I * (h : ℂ) ≠ 0 := mul_ne_zero I_ne_zero (by exact_mod_cast hh.ne')
   have h1 := abs_lt.mp hz
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => mathieuCylExp 3 μ (I * h) z)
     (g := fun μ => 2 / (π * I) * Complex.exp (-(I * μ * π / 2)) * besselK μ (h * Complex.exp z))
     ?_ ?_ ?_
@@ -110,7 +110,7 @@ private lemma mathieuCylExp_three_I_mul_ofReal (μ : ℂ) {h : ℝ} (hh : 0 < h)
   · exact (continuousAt_const.mul (by fun_prop)).mul
       (continuousAt_besselK_order (fun μ => μ) continuous_id μ hs)
   · intro c hc
-    have hc' := DLMF.Confluent.forall_of_mem_integerComplement hc
+    have hc' := Complex.forall_of_mem_integerComplement hc
     have hsin := DLMF.Bessel.sin_mul_pi_ne_zero hc'
     simp only [mathieuCylExp]
     rw [besselYExp_of_not_exists_int (fun ⟨k, hk⟩ => hc' k hk), besselJExp_I_mul_ofReal c hh h1.1 h1.2.le,

@@ -13,6 +13,7 @@ public import DLMF.OrthogonalPolynomials.Basic.Definitions
 public import ComplexAnalysis.HalfPlane
 public import DLMF.Confluent.Continuation
 public import DLMF.OrthogonalPolynomials.Hahn
+public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values
 
 /-!
 # Relations of confluent hypergeometric functions to other functions
@@ -94,11 +95,6 @@ theorem ofReal_mul_cpow_of_pos {r : ℝ} (hr : 0 < r) {x : ℂ} (hx : x ≠ 0) (
   rw [cpow_def_of_ne_zero (mul_ne_zero hr' hx), log_ofReal_mul hr hx, cpow_def_of_ne_zero hr',
     cpow_def_of_ne_zero hx, ← exp_add, ofReal_log hr.le]
   ring_nf
-
-/-- `Γ(1/2) = √π`. -/
-theorem Gamma_one_half_eq_sqrt : Gamma (1 / 2 : ℂ) = (Real.sqrt π : ℂ) := by
-  rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, Complex.ofReal_cpow Real.pi_pos.le]
-  norm_num
 
 /-- Identity under the stated parameter and domain assumptions: `kummerM 1 2 (2 * z) = exp z *
 sinh z / z`. -/
@@ -196,10 +192,10 @@ theorem kummerU_erfc {z : ℂ} (hz : z ∈ slitPlane) (hre : 0 < z.re) :
     show (1 / 2 : ℂ) - 1 = -1 / 2 by ring, show (2 : ℂ) - 1 / 2 = 3 / 2 by ring,
     kummerM_self h12, Complex.Gamma_one, sq_cpow_of_re_pos hre,
     show (2 : ℂ) * (1 / 2) = 1 by ring, cpow_one, kummerM_kummer_transform h32,
-    show (3 / 2 : ℂ) - 1 = 1 / 2 by ring, kummerM_erf hz0, Gamma_one_half_eq_sqrt]
+    show (3 / 2 : ℂ) - 1 = 1 / 2 by ring, kummerM_erf hz0, Complex.Gamma_one_half_eq_sqrt]
   have hGm : Gamma (-1 / 2 : ℂ) = -2 * (Real.sqrt π : ℂ) := by
     have h := Gamma_add_one (-1 / 2 : ℂ) (by norm_num)
-    rw [show (-1 / 2 : ℂ) + 1 = 1 / 2 by ring, Gamma_one_half_eq_sqrt] at h
+    rw [show (-1 / 2 : ℂ) + 1 = 1 / 2 by ring, Complex.Gamma_one_half_eq_sqrt] at h
     linear_combination 2 * h
   have hπ : (Real.sqrt π : ℂ) ≠ 0 :=
     ofReal_ne_zero.mpr (ne_of_gt (Real.sqrt_pos.2 Real.pi_pos))
@@ -678,7 +674,7 @@ theorem hermitePolyHEval_even_mul (n : ℕ) (z : ℂ) :
     ring
   | more n ih0 ih1 =>
     have K := kummerM_contiguous_a (a := -((n : ℂ) + 1)) (b := 1 / 2) (z := z ^ 2)
-      half_ne_neg_nat
+      Complex.one_div_two_ne_neg_natCast
     rw [show -((n : ℂ) + 1) - 1 = -((n : ℂ) + 2) by ring,
       show -((n : ℂ) + 1) + 1 = -(n : ℂ) by ring] at K
     have hrec := hermitePolyHEval_two_step (2 * n) z
@@ -723,7 +719,7 @@ theorem hermitePolyHEval_odd_mul (n : ℕ) (z : ℂ) :
     ring
   | more n ih0 ih1 =>
     have K := kummerM_contiguous_a (a := -((n : ℂ) + 1)) (b := 3 / 2) (z := z ^ 2)
-      three_half_ne_neg_nat
+      Complex.three_div_two_ne_neg_natCast
     rw [show -((n : ℂ) + 1) - 1 = -((n : ℂ) + 2) by ring,
       show -((n : ℂ) + 1) + 1 = -(n : ℂ) by ring] at K
     have hrec := hermitePolyHEval_two_step (2 * n + 1) z

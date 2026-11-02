@@ -502,27 +502,6 @@ theorem airyDer_comp_false {x : ℝ} (hx : 0 < x) :
     linear_combination (airyOscPrefactor .ai (x : ℂ) *
       airyRot_odd (fun w => airyAi w / airyPrefactor .ai w) x) * hcs
 
-/-- `Ai'` is real on the real axis (as in `DLMF.Airy.ModulusPhase`, which this file does not
-import). -/
-theorem airyDer_aiDeriv_ofReal_im (x : ℝ) : (airyAiDeriv x).im = 0 := by
-  have h := ((hasDerivAt_airyAi x).comp_ofReal).hasFDerivAt.restrictScalars ℝ
-  have h1 : HasDerivAt (fun t : ℝ => (airyAi t).im) (airyAiDeriv x).im x := by
-    have := (Complex.imCLM.hasFDerivAt.comp x h).hasDerivAt
-    simpa [Function.comp_def] using this
-  have h0 : (fun t : ℝ => (airyAi t).im) = fun _ => 0 := funext airyAi_ofReal_im
-  rw [h0] at h1
-  exact (h1.unique (hasDerivAt_const x 0))
-
-/-- `Bi'` is real on the real axis. -/
-theorem airyDer_biDeriv_ofReal_im (x : ℝ) : (airyBiDeriv x).im = 0 := by
-  have h := ((hasDerivAt_airyBi x).comp_ofReal).hasFDerivAt.restrictScalars ℝ
-  have h1 : HasDerivAt (fun t : ℝ => (airyBi t).im) (airyBiDeriv x).im x := by
-    have := (Complex.imCLM.hasFDerivAt.comp x h).hasDerivAt
-    simpa [Function.comp_def] using this
-  have h0 : (fun t : ℝ => (airyBi t).im) = fun _ => 0 := funext airyBi_ofReal_im
-  rw [h0] at h1
-  exact (h1.unique (hasDerivAt_const x 0))
-
 /-- A complex number with zero imaginary part is the cast of its real part. -/
 theorem airyDer_eq_ofReal {w : ℂ} (h : w.im = 0) : w = (w.re : ℂ) :=
   Complex.ext (by simp) (by simp [h])
@@ -534,9 +513,9 @@ theorem airyDer_comp_im (derivative : Bool) (parity : Fin 2) {x : ℝ} (hx : 0 <
   have hA := airyDer_eq_ofReal (w := airyAi (-(x : ℂ))) (by rw [hneg]; exact airyAi_ofReal_im _)
   have hB := airyDer_eq_ofReal (w := airyBi (-(x : ℂ))) (by rw [hneg]; exact airyBi_ofReal_im _)
   have hA' := airyDer_eq_ofReal (w := airyAiDeriv (-(x : ℂ)))
-    (by rw [hneg]; exact airyDer_aiDeriv_ofReal_im _)
+    (by rw [hneg]; exact airyAiDeriv_ofReal_im _)
   have hB' := airyDer_eq_ofReal (w := airyBiDeriv (-(x : ℂ)))
-    (by rw [hneg]; exact airyDer_biDeriv_ofReal_im _)
+    (by rw [hneg]; exact airyBiDeriv_ofReal_im _)
   have hq : (x : ℂ) ^ (1 / 4 : ℂ) = ((x ^ (1 / 4 : ℝ) : ℝ) : ℂ) := by
     rw [ofReal_cpow hx.le]; push_cast; rfl
   have hc : cos (((airyZeta x : ℝ) : ℂ) - π / 4) = ((Real.cos (airyZeta x - π / 4) : ℝ) : ℂ) := by

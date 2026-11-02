@@ -47,6 +47,8 @@ noncomputable section
 
 namespace DLMF.Heun
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 variable {a q α β γ δ ε : ℂ}
 
 /-- Pointwise equal coefficients give the same second-order equation. -/

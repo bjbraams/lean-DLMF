@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Combinatorics.PartitionIdentities.RestrictedProducts
+public import DLMF.Combinatorics.PartitionIdentities.GaussIdentity
 
 /-!
 # Staircase and pentagonal partition identities (DLMF §26.10(ii), §26.10(v))
@@ -35,6 +36,9 @@ set, the recurrences of DLMF §26.10(v) and the pentagonal-number identities (26
   `m` distinct parts, `q_m(n) = q_m(n - m) + q_{m-1}(n - m)`); this corrected form is stated.
 * (26.10.7), (26.10.8): the printed sums over `k ≥ 0` with both signs `±` (the `k = 0` term once)
   are sums over `k ∈ ℤ` of the pentagonal numbers `k(3k-1)/2` (Mathlib's `pentagonal`).
+* (26.10.8) follows from `(q;q)_∞ (-q;q)_∞ = (q²;q²)_∞` and Gauss's identity
+  `(q²;q²)_∞² = (∑ q^{r(r+1)/2}) (q;q)_∞` (`expand_pentagonalSeries_sq`), cancelling `(q;q)_∞` in
+  `ℤ⟦X⟧`.
 
 ## References
 
@@ -433,6 +437,7 @@ theorem sum_neg_one_pow_partitionCountDistinct_pentagonal (n : ℕ) :
       ∑ r ∈ Icc (-(n : ℤ)) n, if (n : ℤ) = r * (3 * r - 1) then (-1 : ℤ) ^ r.natAbs else 0 :=
   sum_neg_one_pow_partitionCountDistinct_sub_pentagonal n
 
+open PowerSeries in
 /-- (26.10.8): `∑_{k ∈ ℤ} (-1)^k p(𝒟, n - k(3k-1)) = 1` if `n = r(r ± 1)/2` (a triangular
 number) and `0` otherwise (same reading of the `±` sum as in (26.10.7)); the right side is a sum
 over the (at most one) `r ≥ 0` with `n = r(r+1)/2`. -/
@@ -441,7 +446,76 @@ theorem sum_neg_one_pow_partitionCountDistinct_two_pentagonal (n : ℕ) :
     ∑ k ∈ Icc (-(n : ℤ)) n with 2 * pentagonal k ≤ n,
         (-1 : ℤ) ^ k.natAbs * partitionCountDistinct (n - 2 * pentagonal k) =
       ∑ r ∈ range (n + 1), if n = r * (r + 1) / 2 then (1 : ℤ) else 0 := by
-  sorry
+  set E := pentagonalSeries ℤ
+  set E2 := expand 2 two_ne_zero E
+  set D : ℤ⟦X⟧ := PowerSeries.mk fun n => (partitionCountDistinct n : ℤ)
+  have hED : E * D = E2 := by
+    ext m
+    rw [coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk, coeff_expand]
+    simpa [D] using sum_coeff_pentagonalSeries_mul_partitionCountDistinct m
+  have hE0 : E ≠ 0 := by
+    intro h
+    have := congrArg (coeff 0) h
+    rw [show (0 : ℕ) = pentagonal 0 by simp [pentagonal_def],
+      coeff_pentagonalSeries_pentagonal] at this
+    simp at this
+  have hT : E2 * D = triangularSeries := by
+    refine mul_left_cancel₀ hE0 ?_
+    rw [← mul_assoc, mul_comm E E2, mul_assoc, hED, ← sq, expand_pentagonalSeries_sq, mul_comm]
+  have hc := congrArg (coeff n) hT
+  rw [coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk] at hc
+  set K := (Icc (-(n : ℤ)) n).filter (fun k => 2 * pentagonal k ≤ n)
+  have hinj : Function.Injective (fun k : ℤ => 2 * pentagonal k) :=
+    fun a b h => pentagonal_injective (by simpa using h)
+  have hL : ∑ k ∈ K, (-1 : ℤ) ^ k.natAbs * partitionCountDistinct (n - 2 * pentagonal k) =
+      ∑ i ∈ range (n + 1), coeff i E2 * coeff (n - i) D := by
+    rw [← sum_subset (s₁ := K.image fun k => 2 * pentagonal k)]
+    · rw [sum_image (fun x _ y _ h => hinj h)]
+      refine sum_congr rfl fun k _ => ?_
+      simp only [E2, D, coeff_expand_mul, coeff_mk, E, coeff_pentagonalSeries_pentagonal,
+        coe_negOnePow_eq_pow_natAbs, Int.cast_id]
+    · intro i hi
+      obtain ⟨k, hk, rfl⟩ := mem_image.mp hi
+      simp only [K, mem_filter] at hk
+      exact mem_range.mpr (Nat.lt_succ_of_le hk.2)
+    · intro i hi hiK
+      have hin : i ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hi)
+      rw [coeff_expand]
+      split_ifs with h2
+      · obtain ⟨j, rfl⟩ := h2
+        rw [Nat.mul_div_cancel_left _ two_pos]
+        by_cases hr : ∃ k, pentagonal k = j
+        · obtain ⟨k, rfl⟩ := hr
+          exfalso; apply hiK
+          refine mem_image_of_mem _ ?_
+          have h1 := natAbs_le_pentagonal' k
+          simp only [K, mem_filter, mem_Icc]
+          refine ⟨⟨?_, ?_⟩, hin⟩ <;> omega
+        · rw [coeff_pentagonalSeries_eq_zero _ (by simpa using hr), zero_mul]
+      · rw [zero_mul]
+  rw [hL, hc]
+  by_cases hex : ∃ r, r * (r + 1) / 2 = n
+  · obtain ⟨r, hr⟩ := hex
+    rw [← hr, coeff_triangularSeries_tri, hr]
+    have hrn : r ≤ n := by
+      have : r * 2 ≤ r * (r + 1) := by rcases r with _ | r <;> [simp; nlinarith]
+      rw [← hr]; exact (Nat.le_div_iff_mul_le two_pos).mpr this
+    rw [sum_eq_single r]
+    · simp [hr]
+    · intro b _ hb
+      refine ite_eq_right_iff.mpr fun h => absurd ?_ hb
+      have hm : StrictMono (fun n : ℕ => n * (n + 1) / 2) := by
+        refine strictMono_nat_of_lt_succ fun m => ?_
+        have h1 : 2 * (m * (m + 1) / 2) = m * (m + 1) :=
+          Nat.mul_div_cancel' (Nat.even_mul_succ_self m).two_dvd
+        have h2 : 2 * ((m + 1) * (m + 1 + 1) / 2) = (m + 1) * (m + 1 + 1) :=
+          Nat.mul_div_cancel' (Nat.even_mul_succ_self (m + 1)).two_dvd
+        nlinarith
+      exact hm.injective (show b * (b + 1) / 2 = r * (r + 1) / 2 by omega)
+    · intro h; exact absurd (mem_range.mpr (Nat.lt_succ_of_le hrn)) h
+  · push Not at hex
+    rw [coeff_triangularSeries_eq_zero hex]
+    exact (sum_eq_zero fun r _ => ite_eq_right_iff.mpr fun h => absurd h.symm (hex r)).symm
 
 /-- Helper for (26.10.9) (agent p26a). -/
 private lemma sum_map_add_one (s : Multiset ℕ) : (s.map (· + 1)).sum = s.sum + Multiset.card s := by

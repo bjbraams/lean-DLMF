@@ -21,7 +21,6 @@ the Jacobian elliptic functions, and the nome `q = e^{iπτ}` of the modulus `k`
 
 ## Main results
 
-* `jacobiThetaOneTau_zero`: `θ₁(0|τ) = 0`.
 * `jacobiThetaOneTau_add_pi_div_two`, …, `jacobiThetaFourTau_add_pi_div_two`: the shift
   `ζ ↦ ζ + π/2`.
 * `jacobiThetaOneTau_add_pi_mul_div_two`, …, `jacobiThetaFourTau_add_pi_mul_div_two`: the shift
@@ -38,12 +37,6 @@ open scoped Real
 noncomputable section
 
 namespace DLMF.JacobiElliptic
-
-/-- `θ₁(0|τ) = 0`. -/
-theorem jacobiThetaOneTau_zero (τ : ℂ) : jacobiThetaOneTau 0 τ = 0 := by
-  have h := jacobiThetaOneTau_neg 0 τ
-  rw [neg_zero] at h
-  exact CharZero.eq_neg_self_iff.mp h
 
 /-- `θ₁(ζ + π/2) = θ₂(ζ)`. -/
 theorem jacobiThetaOneTau_add_pi_div_two (ζ τ : ℂ) :

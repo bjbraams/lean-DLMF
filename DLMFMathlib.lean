@@ -30,6 +30,7 @@ public import DLMFMathlib.Analysis.Complex.FactorialSeries
 public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
 public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
 public import DLMFMathlib.Analysis.Complex.MellinBarnesSeries
+public import DLMFMathlib.Analysis.Complex.ParameterContinuity
 public import DLMFMathlib.Analysis.Complex.ParameterLimits
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
@@ -97,6 +98,7 @@ public import DLMFMathlib.Analysis.ODE.Singularities
 
 public import DLMFMathlib.Algebra.BigOperators
 public import DLMFMathlib.Algebra.Polynomial.OfReal
+public import DLMFMathlib.Analysis.Analytic.OfScalarsDeriv
 public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
 public import DLMFMathlib.Analysis.Calculus.Deriv.Sign
 public import DLMFMathlib.Analysis.Complex.NonInteger
@@ -107,6 +109,7 @@ public import DLMFMathlib.Analysis.ODE.Oscillation
 public import DLMFMathlib.Analysis.ODE.SturmOscillation
 public import DLMFMathlib.Analysis.ODE.SturmSpectrum
 public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog
+public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Bounds
 public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values
 public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
 public import DLMFMathlib.Analysis.SpecialFunctions.Pow.ComplexReal

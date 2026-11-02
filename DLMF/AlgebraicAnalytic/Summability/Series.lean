@@ -88,7 +88,94 @@ theorem hasCesaroSumOfOrder_of_tendsto {α : ℝ} (hα : 0 ≤ α) {a : ℕ → 
 @[dlmf 1.15.ii]
 theorem hasBorelSum_of_tendsto {a : ℕ → ℂ} {s : ℂ}
     (h : Tendsto (seriesPartialSum a) atTop (𝓝 s)) : HasBorelSum a s := by
-  sorry
+  set c := seriesPartialSum a
+  have hexpR : ∀ t : ℝ, HasSum (fun n : ℕ => t ^ n / (n.factorial : ℝ)) (Real.exp t) := fun t => by
+    have := NormedSpace.expSeries_div_hasSum_exp (𝔸 := ℝ) t
+    rwa [← Real.exp_eq_exp_ℝ] at this
+  have hexpC : ∀ t : ℝ, HasSum (fun n : ℕ => (t : ℂ) ^ n / (n.factorial : ℂ)) (Real.exp t : ℂ) :=
+    fun t => by
+      have := (hexpR t).mapL Complex.ofRealCLM
+      simpa using this
+  obtain ⟨C, hC⟩ := h.norm.bddAbove_range
+  -- summability for every `t`, with a geometric-type majorant
+  have hsumm : ∀ (b : ℕ → ℂ) (B : ℝ), (∀ n, ‖b n‖ ≤ B) → ∀ t : ℝ, 0 ≤ t →
+      Summable fun n => b n * (t : ℂ) ^ n / (n.factorial : ℂ) := by
+    intro b B hB t ht
+    refine Summable.of_norm_bounded ((hexpR t).summable.mul_left B) fun n => ?_
+    rw [mul_div_assoc, norm_mul, norm_div, norm_pow, Complex.norm_real, Complex.norm_natCast,
+      Real.norm_of_nonneg ht]
+    exact mul_le_mul_of_nonneg_right (hB n) (by positivity)
+  refine ⟨fun t ht => hsumm c C (fun n => hC ⟨n, rfl⟩) t ht, ?_⟩
+  set b : ℕ → ℂ := fun n => c n - s
+  have hb : Tendsto b atTop (𝓝 0) := by simpa [b] using h.sub_const s
+  obtain ⟨B, hB⟩ := hb.norm.bddAbove_range
+  have hB' : ∀ n, ‖b n‖ ≤ B := fun n => hB ⟨n, rfl⟩
+  -- the main estimate
+  have hmain : Tendsto (fun t : ℝ =>
+      (Real.exp (-t) : ℂ) * ∑' n, b n * (t : ℂ) ^ n / (n.factorial : ℂ))
+      atTop (𝓝 0) := by
+    rw [Metric.tendsto_nhds]
+    intro ε hε
+    obtain ⟨N, hN⟩ := (Metric.tendsto_atTop.mp hb) (ε / 2) (by positivity)
+    have hpoly : Tendsto (fun t : ℝ => Real.exp (-t) *
+        ∑ n ∈ range N, ‖b n‖ * (t ^ n / (n.factorial : ℝ))) atTop (𝓝 0) := by
+      have : Tendsto (fun t : ℝ => ∑ n ∈ range N, ‖b n‖ / (n.factorial : ℝ) *
+          (t ^ n * Real.exp (-t))) atTop (𝓝 (∑ n ∈ range N, ‖b n‖ / (n.factorial : ℝ) * 0)) :=
+        tendsto_finsetSum _ fun n _ =>
+          (Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero n).const_mul _
+      simp only [mul_zero, sum_const_zero] at this
+      refine this.congr fun t => ?_
+      rw [mul_sum]
+      refine sum_congr rfl fun n _ => ?_
+      ring
+    filter_upwards [hpoly.eventually (gt_mem_nhds (half_pos hε)), eventually_ge_atTop 0]
+      with t ht ht0
+    rw [dist_zero_right]
+    set g : ℕ → ℝ := fun n => (if n < N then ‖b n‖ else 0) * (t ^ n / (n.factorial : ℝ)) +
+      ε / 2 * (t ^ n / (n.factorial : ℝ))
+    have hgle : ∀ n, ‖b n * (t : ℂ) ^ n / (n.factorial : ℂ)‖ ≤ g n := by
+      intro n
+      rw [mul_div_assoc, norm_mul, norm_div, norm_pow, Complex.norm_real, Complex.norm_natCast,
+        Real.norm_of_nonneg ht0]
+      have hw : 0 ≤ t ^ n / (n.factorial : ℝ) := by positivity
+      by_cases hn : n < N
+      · simp only [g, ite_eq_left_of_eq_true _ _ (eq_true hn)]; nlinarith
+      · simp only [g, ite_eq_right_of_eq_false _ _ (eq_false hn), zero_mul, zero_add]
+        have := hN n (not_lt.mp hn)
+        rw [dist_zero_right] at this
+        exact mul_le_mul_of_nonneg_right this.le hw
+    have hgs : HasSum g
+        (∑ n ∈ range N, ‖b n‖ * (t ^ n / (n.factorial : ℝ)) + ε / 2 * Real.exp t) := by
+      refine HasSum.add ?_ ((hexpR t).mul_left _)
+      have : HasSum (fun n => (if n < N then ‖b n‖ else 0) * (t ^ n / (n.factorial : ℝ)))
+          (∑ n ∈ range N, (if n < N then ‖b n‖ else 0) * (t ^ n / (n.factorial : ℝ))) :=
+        hasSum_sum_of_ne_finset_zero (s := range N)
+        (f := fun n => (if n < N then ‖b n‖ else 0) * (t ^ n / (n.factorial : ℝ)))
+        (fun n hn => by simp only [Finset.mem_range] at hn; simp [hn])
+      convert this using 1
+      refine sum_congr rfl fun n hn => ?_
+      simp [Finset.mem_range.mp hn]
+    have hsb := hsumm b B hB' t ht0
+    calc ‖(Real.exp (-t) : ℂ) * ∑' n, b n * (t : ℂ) ^ n / (n.factorial : ℂ)‖
+        = Real.exp (-t) * ‖∑' n, b n * (t : ℂ) ^ n / (n.factorial : ℂ)‖ := by
+          rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (Real.exp_pos _).le]
+      _ ≤ Real.exp (-t) * (∑ n ∈ range N, ‖b n‖ * (t ^ n / (n.factorial : ℝ)) +
+            ε / 2 * Real.exp t) := by
+          gcongr
+          exact tsum_of_norm_bounded hgs hgle
+      _ = Real.exp (-t) * ∑ n ∈ range N, ‖b n‖ * (t ^ n / (n.factorial : ℝ)) + ε / 2 := by
+          rw [mul_add, mul_left_comm, ← Real.exp_add, neg_add_cancel, Real.exp_zero, mul_one]
+      _ < ε := by linarith
+  refine (hmain.add_const s).congr' ?_ |>.trans (by rw [zero_add])
+  filter_upwards [eventually_ge_atTop 0] with t ht
+  have hs1 := (hsumm b B hB' t ht).hasSum
+  have hs2 := (hexpC t).mul_left s
+  have hsum : ∑' n, c n * (t : ℂ) ^ n / (n.factorial : ℂ) =
+      ∑' n, b n * (t : ℂ) ^ n / (n.factorial : ℂ) + s * (Real.exp t : ℂ) := by
+    refine (((hs1.add hs2).congr_fun fun n => ?_).tsum_eq).symm.symm
+    simp only [b]; ring
+  rw [hsum, mul_add, ← mul_assoc, mul_comm _ s, mul_assoc, ← Complex.ofReal_mul,
+    ← Real.exp_add, neg_add_cancel, Real.exp_zero, Complex.ofReal_one, mul_one]
 
 /-- DLMF 1.15.54–1.15.55 (Littlewood's Tauberian theorem): if `∑ a_n = s (A)` for real `a_n`
 and `a_n > -K/n` for `n > 0` with a constant `K > 0`, then `∑ a_n = s`. -/

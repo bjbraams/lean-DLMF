@@ -58,6 +58,7 @@ DLMF 18.17.5 and the vanishing of the integrals of `C_j^{λ-1/2}(cos ψ)`, `j �
 open Complex Matrix MeasureTheory intervalIntegral Metric Set Filter InnerProductSpace
 open scoped Real Topology
 open DLMF.OrthogonalPolynomials
+open DLMF.Hypergeometric (poch_ne_zero_of_re_pos)
 
 noncomputable section
 

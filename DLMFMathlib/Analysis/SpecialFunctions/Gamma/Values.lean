@@ -7,7 +7,6 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
 public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
-public import DLMFMathlib.Analysis.Complex.BarnesResidue
 
 /-!
 # Values and basic identities of the complex Gamma function
@@ -64,7 +63,18 @@ theorem pi_mul_inv_Gamma_mul_inv_Gamma_one_sub (s : ℂ) :
 /-- `Γ` is complex analytic at every point that is not a nonpositive integer. -/
 theorem analyticAt_Gamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) : AnalyticAt ℂ Gamma s := by
   have hU : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -m} := by
-    simpa using barnesRes_isOpen_ne_sub_nat (0 : ℂ)
+    have hc : IsClosed (Set.range fun m : ℕ => -(m : ℂ)) := by
+      have h1 : IsClosed (Set.range ((↑) : ℕ → ℝ)) := Nat.isClosedEmbedding_coe_real.isClosed_range
+      have h2 : IsClosed (((↑) : ℝ → ℂ) '' Set.range ((↑) : ℕ → ℝ)) :=
+        Complex.isometry_ofReal.isClosedEmbedding.isClosedMap _ h1
+      convert h2.preimage (continuous_neg (G := ℂ)) using 1
+      ext a
+      simp only [Set.mem_range, Set.mem_preimage, Set.mem_image, exists_exists_eq_and]
+      exact ⟨fun ⟨m, hm⟩ => ⟨m, by rw [← hm]; push_cast; ring⟩,
+        fun ⟨m, hm⟩ => ⟨m, by push_cast at hm; linear_combination -hm⟩⟩
+    convert hc.isOpen_compl using 1
+    ext a
+    simp [eq_comm]
   exact DifferentiableOn.analyticAt
     (fun w hw => (differentiableAt_Gamma w hw).differentiableWithinAt) (hU.mem_nhds hs)
 

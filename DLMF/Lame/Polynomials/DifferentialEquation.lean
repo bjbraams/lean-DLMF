@@ -55,6 +55,8 @@ noncomputable section
 
 namespace DLMF.Lame
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-- The value at `s` of the operator `(1-s²)(1-k²s²)G'' - s M G' + (N + h - λk²s²) G`. -/
 def lameSnOperator (k h lam M N : ℂ) (G : ℂ[X]) (s : ℂ) : ℂ :=
   (1 - s ^ 2) * (1 - k ^ 2 * s ^ 2) * (derivative (derivative G)).eval s -

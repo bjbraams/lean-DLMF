@@ -83,7 +83,39 @@ is (C,1) summable to `L`. -/
 @[dlmf 1.15.iv]
 theorem hasCesaroIntegral_of_integrable {f : ℝ → ℂ} (hf : Integrable f) :
     HasCesaroIntegral f (∫ t, f t) := by
-  sorry
+  set G : ℝ → ℝ → ℂ := fun R t =>
+    (Ioc (-R) R).indicator (fun t => ((1 - |t| / R : ℝ) : ℂ) * f t) t
+  have hEq : ∀ᶠ R in atTop, ∫ t in -R..R, ((1 - |t| / R : ℝ) : ℂ) * f t = ∫ t, G R t := by
+    filter_upwards [eventually_gt_atTop 0] with R hR
+    rw [intervalIntegral.integral_of_le (by linarith), integral_indicator measurableSet_Ioc]
+  have hmeas : ∀ R, AEStronglyMeasurable (G R) := fun R =>
+    (((by fun_prop : Continuous fun t : ℝ => ((1 - |t| / R : ℝ) : ℂ)).aestronglyMeasurable.mul
+      hf.aestronglyMeasurable)).indicator measurableSet_Ioc
+  have hbound : ∀ᶠ R in atTop, ∀ᵐ t, ‖G R t‖ ≤ ‖f t‖ := by
+    filter_upwards [eventually_gt_atTop 0] with R hR
+    refine Eventually.of_forall fun t => ?_
+    simp only [G, indicator]
+    split_ifs with ht
+    · rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+      have h1 : |t| ≤ R := abs_le.mpr ⟨ht.1.le, ht.2⟩
+      have h2 : 0 ≤ |t| / R := div_nonneg (abs_nonneg t) hR.le
+      have h3 : |t| / R ≤ 1 := (div_le_one hR).mpr h1
+      rw [abs_of_nonneg (by linarith)]
+      exact mul_le_of_le_one_left (norm_nonneg _) (by linarith)
+    · simp
+  have hlim : ∀ᵐ t, Tendsto (fun R => G R t) atTop (𝓝 (f t)) := by
+    refine Eventually.of_forall fun t => ?_
+    have h1 : Tendsto (fun R : ℝ => ((1 - |t| / R : ℝ) : ℂ) * f t) atTop
+        (𝓝 (((1 - 0 : ℝ) : ℂ) * f t)) := by
+      refine (Complex.continuous_ofReal.tendsto _ |>.comp ?_).mul_const _
+      exact tendsto_const_nhds.sub (tendsto_const_nhds.div_atTop tendsto_id)
+    simp only [sub_zero, ofReal_one, one_mul] at h1
+    refine h1.congr' ?_
+    filter_upwards [eventually_gt_atTop |t|] with R hR
+    have : t ∈ Ioc (-R) R := ⟨by linarith [neg_abs_le t], by linarith [le_abs_self t]⟩
+    simp only [G, indicator_of_mem this]
+  exact (tendsto_integral_filter_of_dominated_convergence (fun t => ‖f t‖)
+    (Eventually.of_forall hmeas) hbound hf.norm hlim).congr' (hEq.mono fun R h => h.symm)
 
 /-- DLMF §1.15(iv), improper case: if `f` is locally integrable and the improper integral
 `lim_{a→-∞, b→∞} ∫_a^b f` equals `L`, then `∫ f = L (C,1)`. -/

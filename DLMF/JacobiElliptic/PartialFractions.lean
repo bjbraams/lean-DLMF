@@ -57,6 +57,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 variable {k : ℂ}
 
 /-- DLMF 22.12.1: `τ = iK'(k)/K(k)`; this is the definition of `jacobiTauk`. -/

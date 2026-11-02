@@ -110,7 +110,8 @@ two Beta integrals. Dividing by the `r = 0` term gives the nearly poised series.
 namespace NearlyPoised
 
 open MeasureTheory Set
-open DLMF.Gamma (Gamma_add_nat_eq_poch_mul_Gamma poch_neg_eq)
+open DLMF.Gamma (poch_neg_eq)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
 
 /-- The binomial theorem with Pochhammer coefficients. -/
 theorem sub_pow_eq_sum_poch (x y : ℂ) (n : ℕ) :

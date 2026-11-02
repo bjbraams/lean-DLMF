@@ -27,8 +27,6 @@ conditions, ratio limits and Parseval sums for `Ec^{2m+1}_ν`, `Es^{2m+1}_ν` an
 * `Real.lameEsk_even_hasSum_fourierB`, `Real.lameEsk_even_hasSum_fourierD` and companions such
   as `Real.lameEsk_even_fourierD_normalization`, and `Real.lameEsk_even_fourier_parseval`:
   DLMF 29.6.46–29.6.60.
-* `Real.lameEck_even_fourierA_eq_zero`: for `ν = 2n` and `m ≤ n` the coefficients `A_{2p}`
-  vanish for `p > n` (the terminating case of DLMF §29.6(i)).
 
 ## Implementation notes
 
@@ -151,7 +149,7 @@ theorem Real.lameEck_odd_fourierA_normalization
   have hk := modulus_sq_lt_one hk0 hk1
   have h := hasSum_lameEck_cos_integral (ν := ν) hk0 hk1 (2 * m + 1) true
     (g := fun x => Real.lameEck ν (2 * m + 1) x k * Real.jacobiDnm x (k ^ 2))
-    ((continuous_lameEck hk0 hk1 _).mul (continuous_jacobiDnm hk))
+    ((continuous_lameEck hk0 hk1 _).mul (Real.continuous_jacobiDnm hk))
   simp only [↓reduceIte, div_one, integral_cos_lamePhi_mul_dn] at h
   rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEck ν (2 * m + 1) t k *
       (Real.lameEck ν (2 * m + 1) t k * Real.jacobiDnm t (k ^ 2))) =
@@ -272,7 +270,7 @@ theorem Real.lameEck_odd_fourierC_normalization
   have hE := continuous_lameEck (ν := ν) hk0 hk1 (2 * m + 1)
   have h := hasSum_lameEck_cos_integral (ν := ν) hk0 hk1 (2 * m + 1) false
     (g := fun x => Real.lameEck ν (2 * m + 1) x k * Real.jacobiDnm x (k ^ 2) ^ 2)
-    (hE.mul ((continuous_jacobiDnm hk).pow 2))
+    (hE.mul ((Real.continuous_jacobiDnm hk).pow 2))
   simp only [Bool.false_eq_true, ↓reduceIte, integral_cos_lamePhi_mul_dn_sq hk hE] at h
   rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEck ν (2 * m + 1) t k /
       Real.jacobiDnm t (k ^ 2) * (Real.lameEck ν (2 * m + 1) t k * Real.jacobiDnm t (k ^ 2) ^ 2)) =
@@ -438,7 +436,7 @@ theorem Real.lameEsk_odd_fourierB_normalization
   have hk := modulus_sq_lt_one hk0 hk1
   have h := hasSum_lameEsk_sin_integral (ν := ν) hk0 hk1 (2 * m + 1) true
     (g := fun x => Real.lameEsk ν (2 * m + 1) x k * Real.jacobiDnm x (k ^ 2))
-    ((continuous_lameEsk hk0 hk1 _).mul (continuous_jacobiDnm hk))
+    ((continuous_lameEsk hk0 hk1 _).mul (Real.continuous_jacobiDnm hk))
   simp only [↓reduceIte, div_one, integral_sin_lamePhi_mul_dn] at h
   rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEsk ν (2 * m + 1) t k *
       (Real.lameEsk ν (2 * m + 1) t k * Real.jacobiDnm t (k ^ 2))) =
@@ -573,7 +571,7 @@ theorem Real.lameEsk_odd_fourierD_normalization
   have hE := continuous_lameEsk (ν := ν) hk0 hk1 (2 * m + 1)
   have h := hasSum_lameEsk_sin_integral (ν := ν) hk0 hk1 (2 * m + 1) false
     (g := fun x => Real.lameEsk ν (2 * m + 1) x k * Real.jacobiDnm x (k ^ 2) ^ 2)
-    (hE.mul ((continuous_jacobiDnm hk).pow 2))
+    (hE.mul ((Real.continuous_jacobiDnm hk).pow 2))
   simp only [Bool.false_eq_true, ↓reduceIte, integral_sin_lamePhi_mul_dn_sq hk hE] at h
   rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEsk ν (2 * m + 1) t k /
       Real.jacobiDnm t (k ^ 2) * (Real.lameEsk ν (2 * m + 1) t k * Real.jacobiDnm t (k ^ 2) ^ 2)) =
@@ -750,7 +748,7 @@ theorem Real.lameEsk_even_fourierB_normalization
   have hk := modulus_sq_lt_one hk0 hk1
   have h := hasSum_lameEsk_sin_integral (ν := ν) hk0 hk1 (2 * m + 2) true
     (g := fun x => Real.lameEsk ν (2 * m + 2) x k * Real.jacobiDnm x (k ^ 2))
-    ((continuous_lameEsk hk0 hk1 _).mul (continuous_jacobiDnm hk))
+    ((continuous_lameEsk hk0 hk1 _).mul (Real.continuous_jacobiDnm hk))
   simp only [↓reduceIte, div_one, integral_sin_lamePhi_mul_dn] at h
   rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEsk ν (2 * m + 2) t k *
       (Real.lameEsk ν (2 * m + 2) t k * Real.jacobiDnm t (k ^ 2))) =
@@ -896,7 +894,7 @@ theorem Real.lameEsk_even_fourierD_normalization
   have hE := continuous_lameEsk (ν := ν) hk0 hk1 (2 * m + 2)
   have h := hasSum_lameEsk_sin_integral (ν := ν) hk0 hk1 (2 * m + 2) false
     (g := fun x => Real.lameEsk ν (2 * m + 2) x k * Real.jacobiDnm x (k ^ 2) ^ 2)
-    (hE.mul ((continuous_jacobiDnm hk).pow 2))
+    (hE.mul ((Real.continuous_jacobiDnm hk).pow 2))
   simp only [Bool.false_eq_true, ↓reduceIte, integral_sin_lamePhi_mul_dn_sq hk hE] at h
   rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEsk ν (2 * m + 2) t k /
       Real.jacobiDnm t (k ^ 2) * (Real.lameEsk ν (2 * m + 2) t k * Real.jacobiDnm t (k ^ 2) ^ 2)) =
@@ -1004,15 +1002,6 @@ theorem Real.lameEsk_even_fourier_parseval
       congr 1; funext t; ring
   · have := (neg_one_pow_eq_iff_mod_two j).2.2 (by omega)
     simp [pow_succ, pow_mul, this]
-
-/-- §29.6(i): for `ν = 2n` and `m = 0, 1, …, n` the Fourier coefficients `A_{2p}` of
-`Ec^{2m}_{2n}` vanish for `p > n`, so `Ec^{2m}_{2n}` reduces to a Lamé polynomial (compare
-§§29.12(i), 29.15(i)). Admitted. -/
-@[dlmf 29.6.i]
-theorem Real.lameEck_even_fourierA_eq_zero (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n)
-    {p : ℕ} (hp : n < p) :
-    Real.lameCosCoeff (fun x => Real.lameEck (2 * n : ℕ) (2 * m) x k) k true (2 * p) = 0 := by
-  sorry
 
 end DLMF.Lame
 

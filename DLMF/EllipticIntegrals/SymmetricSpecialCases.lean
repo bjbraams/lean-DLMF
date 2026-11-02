@@ -547,12 +547,148 @@ theorem symEllIntRJ_zero_self_self {y : ℂ} (hy : y ∈ slitPlane) {p : ℝ} (h
     field_simp
     ring
 
+/-- Symmetric excision of a shrinking interval about `c` does not change the limit of a set
+integral of an integrable function. -/
+theorem tendsto_setIntegral_diff_Icc_nhdsGT {g : ℝ → ℂ} {s : Set ℝ}
+    (hg : IntegrableOn g s) (c : ℝ) :
+    Tendsto (fun ε : ℝ => ∫ t in s \ Icc (c - ε) (c + ε), g t) (𝓝[>] 0)
+      (𝓝 (∫ t in s, g t)) := by
+  have he : ∀ ε : ℝ, ∫ t in s \ Icc (c - ε) (c + ε), g t =
+      ∫ t in s, (Icc (c - ε) (c + ε))ᶜ.indicator g t := by
+    intro ε
+    rw [setIntegral_indicator measurableSet_Icc.compl, sdiff_eq]
+  simp only [he]
+  refine tendsto_integral_filter_of_dominated_convergence (fun t => ‖g t‖) ?_ ?_ hg.norm ?_
+  · exact Eventually.of_forall fun ε =>
+      (hg.aestronglyMeasurable.indicator measurableSet_Icc.compl)
+  · refine Eventually.of_forall fun ε => Eventually.of_forall fun t => ?_
+    by_cases ht : t ∈ (Icc (c - ε) (c + ε))ᶜ
+    · simp [indicator_of_mem ht]
+    · simp [indicator_of_notMem ht]
+  · have hae : ∀ᵐ t ∂(volume.restrict s), t ≠ c :=
+      ae_restrict_of_ae (by
+        rw [ae_iff]; simp only [ne_eq, not_not, ofPred_eq_eq_singleton]; exact measure_singleton c)
+    filter_upwards [hae] with t htc
+    have hpos : 0 < |t - c| := abs_pos.mpr (sub_ne_zero.mpr htc)
+    refine tendsto_const_nhds.congr' ?_
+    filter_upwards [Ioo_mem_nhdsGT hpos] with ε hε
+    have hmem : t ∈ (Icc (c - ε) (c + ε))ᶜ := by
+      intro h
+      have : |t - c| ≤ ε := abs_le.mpr ⟨by linarith [h.1], by linarith [h.2]⟩
+      linarith [hε.2]
+    rw [indicator_of_mem hmem]
+
+/-- DLMF 19.20.8 (third), principal-value case, by partial fractions in the truncated
+integrals. -/
+private lemma symEllIntRJ_self_right_of_neg_aux {x y p : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hp : p < 0) :
+    symEllIntRJ x y y p = 3 / ((p : ℂ) - y) * (symEllIntRC x y - symEllIntRC x p) := by
+  set A : ℝ → Set ℝ := fun ε => Ioi (0 : ℝ) \ Icc (-p - ε) (-p + ε) with hA
+  set F : ℝ → ℂ := fun t => (symEllIntS x y y t)⁻¹ with hF
+  set g : ℝ → ℂ := fun t => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹ with hg
+  set h : ℝ → ℂ := fun t => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + p))⁻¹ with hh
+  set f : ℝ → ℂ := fun t => (symEllIntS x y y t * ((t : ℂ) + p))⁻¹ with hf
+  have hxa : (x : ℂ) ∈ slitPlane ∨ (x : ℂ) = 0 := by
+    rcases hx.eq_or_lt with h0 | h0
+    · right; simp [← h0]
+    · left; exact ofReal_mem_slitPlane.mpr h0
+  have hys : (y : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr hy
+  have hFi : IntegrableOn F (Ioi 0) := by
+    simpa [F, symEllIntS] using integrableOn_symEllIntRF_integrand hxa hys hys
+  have hgF : ∀ t ∈ Ioi (0 : ℝ), g t = F t := by
+    intro t _
+    simp only [g, F, symEllIntS, mul_assoc, cpow_half_mul_cpow_half]
+  have hgi : IntegrableOn g (Ioi 0) :=
+    hFi.congr_fun (fun t ht => (hgF t ht).symm) measurableSet_Ioi
+  have hAm : ∀ ε, MeasurableSet (A ε) := fun ε => measurableSet_Ioi.diff measurableSet_Icc
+  have hmemA : ∀ ε, ∀ t ∈ A ε, 0 < t ∧ ε < |t + p| := by
+    intro ε t ht
+    refine ⟨ht.1, ?_⟩
+    by_contra hc
+    push Not at hc
+    exact ht.2 ⟨by linarith [(abs_le.mp hc).1], by linarith [(abs_le.mp hc).2]⟩
+  have hpy : (p : ℂ) - y ≠ 0 := by
+    rw [← ofReal_sub]; exact ofReal_ne_zero.mpr (by linarith)
+  have hfid : ∀ t, 0 < t → t ≠ -p → f t = ((p : ℂ) - y)⁻¹ * (g t - h t) := by
+    intro t ht htp
+    have h1 : ((t : ℂ) + x) ^ (1 / 2 : ℂ) ≠ 0 := ofReal_pos_add_cpow_half_ne_zero ht hxa
+    have h2 : (t : ℂ) + y ≠ 0 := slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht (Or.inl hys))
+    have h3 : (t : ℂ) + p ≠ 0 := by
+      rw [← ofReal_add]; exact ofReal_ne_zero.mpr (fun e => htp (by linarith))
+    simp only [f, g, h, symEllIntS, mul_assoc, cpow_half_mul_cpow_half]
+    field_simp
+    ring
+  have hhi : ∀ ε, 0 < ε → IntegrableOn h (A ε) := by
+    intro ε hε
+    have hmeas : AEStronglyMeasurable h (volume.restrict (A ε)) :=
+      (by fun_prop : Measurable h).aestronglyMeasurable
+    refine Integrable.mono' ((hgi.mono_set sdiff_subset).norm.mul_const (1 + (y - p) / ε)) hmeas ?_
+    refine (ae_restrict_mem (hAm ε)).mono fun t ht => ?_
+    obtain ⟨ht0, htp⟩ := hmemA ε t ht
+    have h3 : (t : ℂ) + p ≠ 0 := by
+      rw [← ofReal_add]; exact ofReal_ne_zero.mpr (fun e => by simp [e] at htp; linarith)
+    have hht : h t = g t * (((t : ℂ) + y) / ((t : ℂ) + p)) := by
+      have h1 : ((t : ℂ) + x) ^ (1 / 2 : ℂ) ≠ 0 := ofReal_pos_add_cpow_half_ne_zero ht0 hxa
+      have h2 : (t : ℂ) + y ≠ 0 :=
+        slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht0 (Or.inl hys))
+      simp only [g, h]; field_simp
+    rw [hht, norm_mul]
+    gcongr
+    rw [← ofReal_add, ← ofReal_add, ← ofReal_div, norm_real, Real.norm_eq_abs,
+      abs_div, abs_of_pos (by linarith : 0 < t + y)]
+    have hap : 0 < |t + p| := lt_trans hε htp
+    rw [div_le_iff₀ hap]
+    have : t + y ≤ |t + p| + (y - p) := by linarith [le_abs_self (t + p)]
+    have h2 : (y - p) / ε * |t + p| ≥ (y - p) := by
+      rw [ge_iff_le, div_mul_eq_mul_div, le_div_iff₀ hε]
+      nlinarith
+    nlinarith
+  have hkey : ∀ ε, 0 < ε → ∫ t in A ε, f t =
+      ((p : ℂ) - y)⁻¹ * ((∫ t in A ε, g t) - ∫ t in A ε, h t) := by
+    intro ε hε
+    rw [setIntegral_congr_fun (hAm ε) (fun t ht => hfid t (hmemA ε t ht).1 (fun e => by
+      have := (hmemA ε t ht).2; rw [e, neg_add_cancel, abs_zero] at this; linarith)),
+      integral_const_mul, integral_sub (hgi.mono_set sdiff_subset) (hhi ε hε)]
+  have hlg := tendsto_setIntegral_diff_Icc_nhdsGT hgi (-p)
+  have hlh := tendsto_integral_symEllIntRC_truncated hx hp
+  have hgv : ∫ t in Ioi (0 : ℝ), g t = 2 * symEllIntRC x y := by
+    rw [symEllIntRC_eq_integral
+      (fun hn => by have := hn.2; simp at this; linarith : ¬ IsNegReal (y : ℂ))]
+    ring
+  have hlim : Tendsto (fun ε => ∫ t in A ε, f t) (𝓝[>] 0)
+      (𝓝 (((p : ℂ) - y)⁻¹ * (2 * symEllIntRC x y - 2 * symEllIntRC x p))) := by
+    rw [← hgv]
+    refine ((hlg.sub hlh).const_mul _).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with ε hε
+    exact (hkey ε hε).symm
+  have hneg : IsNegReal (p : ℂ) := ⟨by simp, by simpa using hp⟩
+  simp only [symEllIntRJ, hneg, ↓reduceIte, cauchyPVIoi, ofReal_re]
+  rw [hlim.limUnder_eq]
+  field_simp
+
+
 /-- DLMF 19.20.8 (second): `R_J(0, y, y, -q) = -3π / (2√y (y + q))`, `q > 0` (Cauchy principal
 value), `y > 0`. -/
 @[dlmf 19.20.E8]
 theorem symEllIntRJ_zero_self_self_neg {y q : ℝ} (hy : 0 < y) (hq : 0 < q) :
     symEllIntRJ 0 y y (-q : ℝ) = -3 * π / (2 * (y : ℂ) ^ (1 / 2 : ℂ) * (y + q)) := by
-  sorry
+  have H := symEllIntRJ_self_right_of_neg_aux le_rfl hy (by linarith : -q < 0)
+  have hys : (y : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr hy
+  have hRC : symEllIntRC 0 (y : ℂ) = (π / 2) * ((y : ℂ) ^ (1 / 2 : ℂ))⁻¹ := by
+    rw [← symEllIntRF_self_right 0 (not_isNegReal_of_mem_slitPlane hys),
+      symEllIntRF_zero_self hys, show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
+  have hRC0 : symEllIntRC ((0 : ℝ) : ℂ) ((-q : ℝ) : ℂ) = 0 := by
+    rw [(symEllIntRC_of_neg (by linarith : -q < 0) le_rfl).2.2]
+    simp
+  rw [ofReal_zero] at H hRC0
+  rw [H, hRC, hRC0]
+  have hY0 := cpow_half_ne_zero_of_mem_slitPlane hys
+  have h1 : ((y : ℂ) + q) ≠ 0 := by rw [← ofReal_add]; exact ofReal_ne_zero.mpr (by linarith)
+  have h2 : ((-q : ℝ) : ℂ) - y ≠ 0 := by
+    rw [← ofReal_sub]; exact ofReal_ne_zero.mpr (by linarith)
+  push_cast at h2 ⊢
+  field_simp
+  ring
+
 
 /-- DLMF 19.20.8 (third): `R_J(x, y, y, p) = 3/(p - y) (R_C(x, y) - R_C(x, p))`, `p ≠ y`,
 for `x` admissible, `y, p ∈ ℂ \ (-∞, 0]`. -/
@@ -565,8 +701,8 @@ theorem symEllIntRJ_self_right_eq {x y p : ℂ} (hx : SymEllIntArg x) (hy : y �
 /-- DLMF 19.20.8 (third), principal-value case: real `x ≥ 0`, `y > 0`, `p < 0`. -/
 @[dlmf 19.20.E8]
 theorem symEllIntRJ_self_right_eq_of_neg {x y p : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hp : p < 0) :
-    symEllIntRJ x y y p = 3 / ((p : ℂ) - y) * (symEllIntRC x y - symEllIntRC x p) := by
-  sorry
+    symEllIntRJ x y y p = 3 / ((p : ℂ) - y) * (symEllIntRC x y - symEllIntRC x p) :=
+  symEllIntRJ_self_right_of_neg_aux hx hy hp
 
 /-- DLMF 19.20.9: `R_J(0, y, z, ±√(yz)) = ±3/(2√(yz)) R_F(0, y, z)`, `y, z > 0` (the lower sign
 is a Cauchy principal value). -/

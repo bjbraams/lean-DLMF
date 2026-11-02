@@ -8,6 +8,7 @@ module
 public import DLMF.OrthogonalPolynomials.Basic.Definitions
 public import DLMF.Hypergeometric.Basic.GaussEquation
 public import DLMF.Confluent.Basic.KummerProperties
+public import DLMFMathlib.Analysis.Complex.NonInteger
 
 /-!
 # Basic properties of the classical orthogonal polynomials
@@ -54,13 +55,6 @@ open DLMF.Confluent
 noncomputable section
 
 namespace DLMF.OrthogonalPolynomials
-
-/-- `3/2` is not a nonpositive integer. -/
-private lemma classicalBasic_three_halves_not_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := by
-  intro k h
-  have hre : (3 : ℝ) / 2 = -k := by simpa using congrArg Complex.re h
-  have : (0 : ℝ) ≤ k := Nat.cast_nonneg k
-  linarith
 
 /-- A point of positive real part is not a nonpositive integer. -/
 private lemma classicalBasic_not_neg_nat_of_re_pos {w : ℂ} (hw : 0 < w.re) :
@@ -413,7 +407,7 @@ theorem iterate_derivative_U_eq_gaussHGCoeff (n k : ℕ) :
     have hU := Polynomial.Chebyshev.iterate_derivative_U_eval_one_recurrence
       (R := ℂ) (n : ℤ) k
     have hF := gaussHGCoeff_recurrence (a := -(n : ℂ)) (b := (n : ℂ) + 2)
-      classicalBasic_three_halves_not_neg_nat k
+      Complex.three_div_two_ne_neg_natCast k
     have hne : (2 * k + 3 : ℂ) ≠ 0 := by
       have hpos : (0 : ℝ) < 2 * k + 3 := by positivity
       exact_mod_cast ne_of_gt hpos

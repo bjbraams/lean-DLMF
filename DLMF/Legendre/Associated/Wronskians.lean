@@ -188,7 +188,7 @@ theorem ferrers_even_odd_wronskian (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:�
   have hw := (ferrersEven_isFerrersSolution ν μ).wronskian_const (ferrersOdd_isFerrersSolution ν μ) hx
   have hE0 : ferrersEven ν μ 0 = 1/(Real.sqrt π:ℂ) := by
     unfold ferrersEven
-    rw [ofReal_zero, show (0:ℂ)^2 = 0 by norm_num, regularizedGaussHG_zero_of_regular half_ne_neg_nat,
+    rw [ofReal_zero, show (0:ℂ)^2 = 0 by norm_num, regularizedGaussHG_zero_of_regular Complex.one_div_two_ne_neg_natCast,
       legendre_Gamma_one_half]
     simp
   have hO0 : ferrersOdd ν μ 0 = 0 := by simp [ferrersOdd]
@@ -196,7 +196,7 @@ theorem ferrers_even_odd_wronskian (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:�
     have h := (hasDerivAt_quadratic_odd ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) μ).comp_ofReal (z := 0)
     rw [show ferrersOdd ν μ = fun y:ℝ => (y:ℂ)*((1-(y:ℂ)^2)^(-μ/2)*
       regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((y:ℂ)^2)) from rfl, h.deriv,
-      regularizedGaussHG_zero_of_regular DLMF.Hypergeometric.three_halves_not_neg_nat,
+      regularizedGaussHG_zero_of_regular Complex.three_div_two_ne_neg_natCast,
           legendre_Gamma_three_halves]
     field_simp
   rw [hE0, hO0, hO1] at hw

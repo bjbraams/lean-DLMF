@@ -74,8 +74,8 @@ theorem scIncGamma_half_negative_square {z : ℂ} (hz : z ≠ 0) :
     scIncGamma (1/2) (-z^2)=2*exp (z^2)/(z*Real.sqrt π)*dawsonF z := by
   rw [scIncGamma, dawsonF_eq_kummerM,
     show (1/2:ℂ)+1=3/2 by norm_num,
-    kummerM_eq_mul_regularizedHGFun three_half_ne_neg_nat]
-  rw [DLMF.Bessel.Gamma_three_halves,Gamma_one_half_eq_sqrt]
+    kummerM_eq_mul_regularizedHGFun Complex.three_div_two_ne_neg_natCast]
+  rw [DLMF.Bessel.Gamma_three_halves,Complex.Gamma_one_half_eq_sqrt]
   field_simp [hz]
 
 /-- Identity under the stated parameter and domain assumptions: `upperIncGamma 0 z=genExpIntE 1
@@ -150,14 +150,14 @@ theorem normIncGammaQ_half_nat (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have he := normIncGammaQContinued_shift_up n (1/2) (pow_ne_zero 2 hz0)
   rw [show (1/2:ℂ)+n=n+1/2 by ring,
-    normIncGammaQContinued_eq half_ne_neg_nat (pow_ne_zero 2 hz0),normIncGammaQ,
-    upperIncGamma_half_square hz,Gamma_one_half_eq_sqrt,
+    normIncGammaQContinued_eq Complex.one_div_two_ne_neg_natCast (pow_ne_zero 2 hz0),normIncGammaQ,
+    upperIncGamma_half_square hz,Complex.Gamma_one_half_eq_sqrt,
     sq_cpow_of_re_pos hz,show (2:ℂ)*(1/2)=1 by norm_num,cpow_one] at he
   rw [he]
   have hc (k : ℕ) : Gamma ((1/2:ℂ)+k+1)=(Real.sqrt π:ℂ)*poch (1/2) (k+1) := by
-    have h := Gamma_add_nat_div_Gamma_eq (n:=k+1) (1/2:ℂ) half_ne_neg_nat
-    rw [← poch,div_eq_iff (Gamma_ne_zero half_ne_neg_nat)] at h
-    rw [Gamma_one_half_eq_sqrt] at h
+    have h := Gamma_add_nat_div_Gamma_eq (n:=k+1) (1/2:ℂ) Complex.one_div_two_ne_neg_natCast
+    rw [← poch,div_eq_iff (Gamma_ne_zero Complex.one_div_two_ne_neg_natCast)] at h
+    rw [Complex.Gamma_one_half_eq_sqrt] at h
     convert h using 1 <;> push_cast <;> ring
   simp_rw [hc]
   rw [show (Real.sqrt π:ℂ)*erfc z/(Real.sqrt π:ℂ)=erfc z by field_simp]
@@ -322,11 +322,11 @@ theorem lowerIncGammaOnLog_half (w : ℂ) :
   have hs : exp (w/2)^2=exp w := by rw [← Complex.exp_nat_mul]; congr 1; ring
   have he := kummerM_erf hu
   rw [hs] at he
-  rw [kummerM_eq_mul_regularizedHGFun three_half_ne_neg_nat] at he
+  rw [kummerM_eq_mul_regularizedHGFun Complex.three_div_two_ne_neg_natCast] at he
   rw [lowerIncGammaOnLog,(scIncGamma_regularized_pair _ _).2,
-    show (1:ℂ)+1/2=3/2 by ring,Gamma_one_half_eq_sqrt,
+    show (1:ℂ)+1/2=3/2 by ring,Complex.Gamma_one_half_eq_sqrt,
     show (1/2:ℂ)*w=w/2 by ring]
-  rw [DLMF.Bessel.Gamma_three_halves,Gamma_one_half_eq_sqrt] at he
+  rw [DLMF.Bessel.Gamma_three_halves,Complex.Gamma_one_half_eq_sqrt] at he
   field_simp [hu] at he
   linear_combination (Real.sqrt π:ℂ)*he
 
@@ -348,12 +348,12 @@ theorem upperIncGammaOnLog_half (w : ℂ) :
     rw [lowerIncGammaOnLog,Complex.exp_log (Complex.exp_ne_zero _)]
     rw [show exp ((1/2:ℂ)*log (exp w))=(exp w)^(1/2:ℂ) by
       rw [cpow_def_of_ne_zero (Complex.exp_ne_zero _)]; congr 1; ring]
-    rw [mul_assoc,← normIncGammaPContinued,normIncGammaPContinued_eq half_ne_neg_nat,normIncGammaP]
-    rw [Gamma_one_half_eq_sqrt]
+    rw [mul_assoc,← normIncGammaPContinued,normIncGammaPContinued_eq Complex.one_div_two_ne_neg_natCast,normIncGammaP]
+    rw [Complex.Gamma_one_half_eq_sqrt]
     field_simp
   rw [lowerIncGammaOnLog_half] at hl
-  have hc := lowerIncGamma_add_upperIncGamma half_ne_neg_nat (Complex.exp_ne_zero w)
-  rw [Gamma_one_half_eq_sqrt] at hc
+  have hc := lowerIncGamma_add_upperIncGamma Complex.one_div_two_ne_neg_natCast (Complex.exp_ne_zero w)
+  rw [Complex.Gamma_one_half_eq_sqrt] at hc
   rw [upperIncGammaOnLog,hi]
   simp only [erfc]
   linear_combination hc+hl
@@ -384,7 +384,7 @@ theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hGm : Gamma (-(1/2):ℂ)= -2*(Real.sqrt π:ℂ) := by
     have h := Gamma_add_one (-(1/2):ℂ) (by norm_num)
-    rw [show (-(1/2):ℂ)+1=1/2 by ring,Gamma_one_half_eq_sqrt] at h
+    rw [show (-(1/2):ℂ)+1=1/2 by ring,Complex.Gamma_one_half_eq_sqrt] at h
     linear_combination 2*h
   have he : exp (2*log z)=z^2 := by
     rw [show (2:ℂ)*log z=((2:ℕ):ℂ)*log z by norm_num,Complex.exp_nat_mul,Complex.exp_log hz]
@@ -395,8 +395,8 @@ theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
       (Real.sqrt π:ℂ)*exp (z^2)*erfc z := by
     unfold kummerUOnLog
     norm_num only
-    rw [he,hp,kummerM_self half_ne_neg_nat,Gamma_one,hGm,Gamma_one_half_eq_sqrt,
-      kummerM_kummer_transform three_half_ne_neg_nat]
+    rw [he,hp,kummerM_self Complex.one_div_two_ne_neg_natCast,Gamma_one,hGm,Complex.Gamma_one_half_eq_sqrt,
+      kummerM_kummer_transform Complex.three_div_two_ne_neg_natCast]
     norm_num only
     rw [kummerM_erf hz]
     simp only [erfc]
@@ -406,7 +406,7 @@ theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
       kummerUOnLog (1/2) (1/2) (2*log z)/z := by
     unfold kummerUOnLog
     norm_num only
-    rw [he,hp,hm,Gamma_one,hGm,Gamma_one_half_eq_sqrt,kummerM_self half_ne_neg_nat]
+    rw [he,hp,hm,Gamma_one,hGm,Complex.Gamma_one_half_eq_sqrt,kummerM_self Complex.one_div_two_ne_neg_natCast]
     field_simp
     ring
   have hexp : exp (-z^2)*exp (z^2)=1 := by rw [← Complex.exp_add]; simp

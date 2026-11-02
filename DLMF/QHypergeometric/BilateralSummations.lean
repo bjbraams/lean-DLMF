@@ -80,7 +80,14 @@ def qQuintupleExponent (n : ℤ) : ℤ := n*(3*n-1)/2
 theorem ramanujan_one_psi_one {a b q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
     (hab : QBilateralRegular [a] [b] q) (hz : ‖b/a‖<‖z‖ ∧ ‖z‖<1) :
     qPsi [a] [b] q z=qRamanujanValue a b q z := by
-  sorry
+  have h := ramanujan_1psi1_of_regular hq0 hq ha (fun n => hab.2 a (by simp) n)
+    (fun n => hab.1 b (by simp) n) hz
+  unfold qPsi qRamanujanValue
+  simp only [qPsiTerm, qPochhammerListInt, qPsiExponent, qPochhammerListInf, List.map_cons,
+    List.map_nil, List.prod_cons, List.prod_nil, mul_one, List.length_singleton, sub_self,
+    zpow_zero]
+  rw [h]
+  ring
 
 /-- The quintuple product identity (DLMF 17.8.E3). -/
 @[dlmf 17.8.E3]
@@ -139,7 +146,39 @@ theorem ramanujan_continues {a b q z₀ : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (h
     AnalyticOnNhd ℂ (qRamanujanValue a b q) U ∧
     (qPsi [a] [b] q=ᶠ[𝓝 z₀] qRamanujanValue a b q) ∧
     TauCeti.ContinuesInside (qPsi [a] [b] q) U z₀ := by
-  sorry
+  intro U
+  have hP := qPochhammerInf_analytic hq
+  have hAz : ∀ {f : ℂ → ℂ} {z : ℂ}, AnalyticAt ℂ f z →
+      AnalyticAt ℂ (fun w => qPochhammerInf (f w) q) z :=
+    fun hf => (hP _ (mem_univ _)).comp hf
+  have hden : ∀ z : ℂ, z ≠ 0 →
+      AnalyticAt ℂ (fun w => qPochhammerListInf [b,q/a,w,b/(a*w)] q) z := by
+    intro z hz0
+    simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
+      mul_one]
+    exact analyticAt_const.mul (analyticAt_const.mul ((hAz analyticAt_id).mul
+      (hAz (analyticAt_const.div (analyticAt_const.mul analyticAt_id) (mul_ne_zero ha hz0)))))
+  have hnum : ∀ z : ℂ, z ≠ 0 →
+      AnalyticAt ℂ (fun w => qPochhammerListInf [q,b/a,a*w,q/(a*w)] q) z := by
+    intro z hz0
+    simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
+      mul_one]
+    exact analyticAt_const.mul (analyticAt_const.mul
+      ((hAz (analyticAt_const.mul analyticAt_id)).mul (hAz (analyticAt_const.div
+        (analyticAt_const.mul analyticAt_id) (mul_ne_zero ha hz0)))))
+  have hF : AnalyticOnNhd ℂ (qRamanujanValue a b q) U := fun z hz =>
+    (hnum z hz.1).div (hden z hz.1) hz.2
+  have hUo : IsOpen U := by
+    have hc : ContinuousOn (fun w => qPochhammerListInf [b,q/a,w,b/(a*w)] q) {z | z ≠ 0} :=
+      fun z hz => (hden z hz).continuousAt.continuousWithinAt
+    exact hc.isOpen_inter_preimage isOpen_ne isOpen_ne
+  have heq : qPsi [a] [b] q=ᶠ[𝓝 z₀] qRamanujanValue a b q := by
+    have hopen : IsOpen {z : ℂ | ‖b/a‖<‖z‖ ∧ ‖z‖<1} :=
+      (isOpen_lt continuous_const continuous_norm).inter
+        (isOpen_lt continuous_norm continuous_const)
+    filter_upwards [hopen.mem_nhds hz] with z hz'
+    exact ramanujan_one_psi_one hq0 hq ha hreg hz'
+  exact ⟨hF, heq, qPsi_continuesInside_of_eq hUo hF heq⟩
 
 /-- The product side of the `2ψ2` sum, as a function of `a`, analytically continues the bilateral
 series. -/

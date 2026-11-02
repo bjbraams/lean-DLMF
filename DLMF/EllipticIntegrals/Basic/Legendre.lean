@@ -25,7 +25,7 @@ integrals and Bulirsch's integrals, and bridges them to the real integrals.
   and `Π(φ, α², k)` (DLMF 19.2.4–19.2.7), with the Cauchy principal value in `Π` when
   `1 - α² sin²θ` vanishes at an interior point of the path.
 * `compEllIntEk`, `compEllIntDk`, `compEllIntPik`: the complete integrals `E(k)`, `D(k)`,
-  `Π(α², k)` (DLMF 19.2.8); `K(k) = F(π/2, k)` is `DLMF.JacobiElliptic.compEllIntKk`.
+  `Π(α², k)` (DLMF 19.2.8); `K(k) = F(π/2, k)` is `DLMF.EllipticIntegrals.compEllIntKk`.
 * `cCompEllIntKk`, `cCompEllIntEk`: Legendre's complementary integrals `K'`, `E'`
   (DLMF 19.2.8_1, 19.2.8_2, 19.2.9), with branch point at `k = 0` and principal branch
   `|ph k| ≤ π`.
@@ -190,7 +190,7 @@ def incEllIntPik (φ α2 k : ℂ) : ℂ :=
 
 /-- Legendre's complete integral of the second kind (DLMF 19.2.8), `E(k) = E(π/2, k)`, principal
 branch `|ph(1 - k²)| ≤ π` (cuts `(-∞, -1] ∪ [1, ∞)` in `k`). The first kind is the existing
-`DLMF.JacobiElliptic.compEllIntKk`. -/
+`DLMF.EllipticIntegrals.compEllIntKk`. -/
 @[dlmf 19.2.E8, dlmf 19.1.E1]
 def compEllIntEk (k : ℂ) : ℂ := incEllIntEk (π / 2) k
 
@@ -289,7 +289,7 @@ theorem incEllIntDk_ofReal_eq_integral (φ : ℝ) (k : ℂ) :
   simp only [← Complex.ofReal_sin]
 
 /-- DLMF 19.2.8: `K(k) = F(π/2, k)`, bridging the Chapter 22 definition
-`DLMF.JacobiElliptic.compEllIntKk` (all complex `k`). -/
+`DLMF.EllipticIntegrals.compEllIntKk` (all complex `k`). -/
 @[dlmf 19.2.E8]
 theorem compEllIntKk_eq_incEllIntFk (k : ℂ) : compEllIntKk k = incEllIntFk (π / 2) k := by
   rw [show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring, incEllIntFk_ofReal_eq_integral,

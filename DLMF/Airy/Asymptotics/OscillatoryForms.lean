@@ -24,7 +24,7 @@ of `Ai`, `Bi` and their derivatives on the negative axis, in `|arg z| ≤ 2π/3 
   normalized `Bi` and `Bi'` (DLMF 9.7.7, 9.7.8).
 * `airyRot_even_expansion`, `airyRot_odd_expansion`: the even and odd subseries.
 * `airyRot_osc_bound`: the oscillatory error envelope.
-* `airyRot_neg_connection_ai`, `airyRot_neg_connection_bi`: the connection formulas
+* `airyAi_neg_connection`, `airyBi_neg_connection`: the connection formulas
   DLMF 9.2.14 and 9.2.15, shared with `DLMF.Airy.Equation`.
 * `airy_ai_oscillatory_expansion`, `airy_aiDeriv_oscillatory_expansion`,
   `airy_bi_oscillatory_expansion`, `airy_biDeriv_oscillatory_expansion`: the oscillatory
@@ -476,49 +476,18 @@ theorem airyRot_third_data {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 2 * π / 3)
   · rw [Complex.cpow_mul_exp_ofReal_mul_I hz0 a1 a2]; congr 2; push_cast; ring
   · rw [Complex.cpow_mul_exp_ofReal_mul_I hz0 b1 b2, ← exp_neg]; congr 2; push_cast; ring
 
-/-- DLMF 9.2.14, shared with `DLMF.Airy.Equation` from this earlier module.
-The equation module uses the asymptotics here for its numerically satisfactory pairs. -/
-theorem airyRot_neg_connection_ai (z : ℂ) :
-    airyAi (-z) = exp (π * I / 3) * airyAi (z * exp (π * I / 3)) +
-      exp (-π * I / 3) * airyAi (z * exp (-π * I / 3)) := by
-  have h := airyAi_add_omega (-z)
-  have e1 : -exp (-(2 * π * I / 3)) = exp (π * I / 3) := by
-    rw [exp_neg_two_pi_I_div_three, exp_pi_I_div_three]
-    push_cast; ring
-  have e2 : -exp (2 * π * I / 3) = exp (-π * I / 3) := by
-    rw [show -π * I / 3 = -(π * I / 3) by ring, exp_two_pi_I_div_three, exp_neg_pi_I_div_three]
-    push_cast; ring
-  rw [show -z * exp (-(2 * π * I / 3)) = z * exp (π * I / 3) by rw [← e1]; ring,
-    show -z * exp (2 * π * I / 3) = z * exp (-π * I / 3) by rw [← e2]; ring] at h
-  linear_combination h + airyAi (z * exp (π * I / 3)) * e1 +
-    airyAi (z * exp (-π * I / 3)) * e2
-
-/-- DLMF 9.2.15, shared with the equation module for the same reason. -/
-theorem airyRot_neg_connection_bi (z : ℂ) :
-    airyBi (-z) = exp (-π * I / 6) * airyAi (z * exp (π * I / 3)) +
-      exp (π * I / 6) * airyAi (z * exp (-π * I / 3)) := by
-  have h := airyBi_eq_airyAi_omega (-z)
-  have e1 : -exp (-(2 * π * I / 3)) = exp (π * I / 3) := by
-    rw [exp_neg_two_pi_I_div_three, exp_pi_I_div_three]
-    push_cast; ring
-  have e2 : -exp (2 * π * I / 3) = exp (-π * I / 3) := by
-    rw [show -π * I / 3 = -(π * I / 3) by ring, exp_two_pi_I_div_three, exp_neg_pi_I_div_three]
-    push_cast; ring
-  simpa only [neg_mul, neg_div, show -z * exp (-(2 * π * I / 3)) = z * exp (π * I / 3) by
-    rw [← e1]; ring, show -z * exp (2 * π * I / 3) = z * exp (-π * I / 3) by rw [← e2]; ring] using h
-
 /-- The connection formula for `Ai(-z)` with the rotations written as `e^{iα}`. -/
 theorem airyRot_airyAi_neg (z : ℂ) :
     airyAi (-z) = exp (π * I / 3) * airyAi (z * exp ((π / 3 : ℝ) * I)) +
       exp (-π * I / 3) * airyAi (z * exp ((-(π / 3) : ℝ) * I)) := by
-  rw [airyRot_neg_connection_ai z]
+  rw [airyAi_neg_connection z]
   congr 4 <;> push_cast <;> ring_nf
 
 /-- `Bi(-z)` with the rotations written as `e^{iα}`. -/
 theorem airyRot_airyBi_neg (z : ℂ) :
     airyBi (-z) = exp (-π * I / 6) * airyAi (z * exp ((π / 3 : ℝ) * I)) +
       exp (π * I / 6) * airyAi (z * exp ((-(π / 3) : ℝ) * I)) := by
-  rw [airyRot_neg_connection_bi z]
+  rw [airyBi_neg_connection z]
   congr 4 <;> push_cast <;> ring_nf
 
 /-- The twelfth root of `-1`, `u = e^{iπ/12}`, and the exponentials used below. -/

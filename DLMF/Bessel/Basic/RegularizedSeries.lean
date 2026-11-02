@@ -9,6 +9,7 @@ public import Mathlib.Analysis.SpecialFunctions.Bessel
 public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 public import Mathlib.Analysis.Calculus.FDeriv.Analytic
 public import Mathlib.Tactic.CrossRefAttribute
+public import DLMFMathlib.Analysis.Analytic.OfScalarsDeriv
 
 /-!
 # The regularized series `₀F̃₁`
@@ -42,39 +43,6 @@ open scoped Real Nat Topology ENNReal ComplexConjugate
 noncomputable section
 
 namespace DLMF.Bessel
-
-/-! ### Scalar power series -/
-
-/-- Termwise differentiation of a scalar power series. -/
-private theorem besselBasic_deriv_ofScalars {f : ℂ → ℂ} {c : ℕ → ℂ} {r : ℝ≥0∞}
-    (h : HasFPowerSeriesOnBall f (ofScalars ℂ c) 0 r) :
-    HasFPowerSeriesOnBall (deriv f) (ofScalars ℂ (fun n => (n + 1) * c (n + 1))) 0 r := by
-  have hd := (ContinuousLinearMap.apply ℂ ℂ (1 : ℂ)).comp_hasFPowerSeriesOnBall h.fderiv
-  have heq : (ContinuousLinearMap.apply ℂ ℂ (1 : ℂ)).compFormalMultilinearSeries
-      (ofScalars ℂ c).derivSeries = ofScalars ℂ (fun n => (n + 1) * c (n + 1)) := by
-    ext n
-    simp only [ContinuousLinearMap.compFormalMultilinearSeries_apply,
-      ContinuousLinearMap.compContinuousMultilinearMap_coe, Function.comp_apply]
-    rw [apply_eq_prod_smul_coeff]
-    simp [derivSeries_coeff_one, coeff_ofScalars, ofScalars, mul_comm]
-  simpa only [heq, Function.comp_def, ContinuousLinearMap.apply_apply,
-    fderiv_eq_deriv_mul, mul_one] using hd
-
-/-- Scalar coefficients give the usual series sum on the ball. -/
-private theorem besselBasic_hasSum_mul_pow {f : ℂ → ℂ} {c : ℕ → ℂ} {r : ℝ≥0∞}
-    (h : HasFPowerSeriesOnBall f (ofScalars ℂ c) 0 r) {z : ℂ}
-    (hz : z ∈ Metric.eball (0 : ℂ) r) : HasSum (fun n => c n * z ^ n) (f z) := by
-  simpa only [ofScalars_apply_eq, smul_eq_mul, zero_add] using h.hasSum hz
-
-/-- Multiplying the differentiated series by `z` restores its original indexing. -/
-private theorem besselBasic_hasSum_z_mul_deriv {f : ℂ → ℂ} {c : ℕ → ℂ} {r : ℝ≥0∞}
-    (h : HasFPowerSeriesOnBall f (ofScalars ℂ c) 0 r) {z : ℂ}
-    (hz : z ∈ Metric.eball (0 : ℂ) r) :
-    HasSum (fun n : ℕ => (n : ℂ) * c n * z ^ n) (z * deriv f z) := by
-  have hs := besselBasic_hasSum_mul_pow (besselBasic_deriv_ofScalars h) hz
-  rw [← hasSum_nat_add_iff' 1]
-  simpa [Finset.sum_range_one, pow_succ, mul_comm, mul_left_comm, mul_assoc] using
-    hs.mul_left z
 
 /-! ### The regularized series -/
 
@@ -112,7 +80,7 @@ theorem analyticAt_regularized0F1 (c z : ℂ) :
 theorem hasSum_regularized0F1 (c w : ℂ) :
     HasSum (fun n => regularizedHGFunCoeff (∅ : Multiset ℂ) {c} n * w ^ n)
       (regularizedHGFun (∅ : Multiset ℂ) {c} w) :=
-  besselBasic_hasSum_mul_pow (hasFPowerSeriesOnBall_regularized0F1 c) (by simp)
+  HasFPowerSeriesOnBall.hasSum_mul_pow (hasFPowerSeriesOnBall_regularized0F1 c) (by simp)
 
 /-- The reciprocal Gamma recurrence avoids restrictions on the parameter. -/
 theorem regularized0F1_coeff_recurrence (c : ℂ) (n : ℕ) :
@@ -127,8 +95,8 @@ theorem regularized0F1_coeff_recurrence (c : ℂ) (n : ℕ) :
 /-- Differentiating regularized `₀F₁` raises its parameter by one. -/
 theorem deriv_regularized0F1 (c w : ℂ) :
     deriv (regularizedHGFun (∅ : Multiset ℂ) {c}) w = regularizedHGFun ∅ {c + 1} w := by
-  have hd := besselBasic_hasSum_mul_pow
-    (besselBasic_deriv_ofScalars (hasFPowerSeriesOnBall_regularized0F1 c)) (z := w) (by simp)
+  have hd := (hasFPowerSeriesOnBall_regularized0F1 c).deriv_ofScalars.hasSum_mul_pow
+    (z := w) (by simp)
   have he (n : ℕ) : (n + 1 : ℂ) * regularizedHGFunCoeff ∅ {c} (n + 1) =
       regularizedHGFunCoeff ∅ {c + 1} n := by
     simp only [regularizedHGFunCoeff_empty, Nat.factorial_succ, Nat.cast_mul,
@@ -150,8 +118,8 @@ theorem regularized0F1_contiguous (c w : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {c} w =
       c * regularizedHGFun ∅ {c + 1} w + w * regularizedHGFun ∅ {c + 1 + 1} w := by
   have hf := hasFPowerSeriesOnBall_regularized0F1 (c + 1)
-  have hs := ((besselBasic_hasSum_mul_pow hf (z := w) (by simp)).mul_left c).add
-    (besselBasic_hasSum_z_mul_deriv hf (z := w) (by simp))
+  have hs := ((hf.hasSum_mul_pow (z := w) (by simp)).mul_left c).add
+    (hf.hasSum_z_mul_deriv (z := w) (by simp))
   have he (n : ℕ) : regularizedHGFunCoeff ∅ {c} n =
       (c + n) * regularizedHGFunCoeff ∅ {c + 1} n := by
     simp only [regularizedHGFunCoeff_empty, one_div, mul_inv_rev]

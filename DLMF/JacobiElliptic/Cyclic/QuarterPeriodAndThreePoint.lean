@@ -39,6 +39,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-- The cyclic argument `z + N p⁻¹ (m - 1) K(k)` of DLMF 22.9.1–22.9.6 (`N = 2` or `4`). -/
 @[dlmf 22.9.E1, dlmf 22.9.E4]
 def jacobiCyclicArg (N m p : ℕ) (z k : ℂ) : ℂ := z + N * ((m : ℂ) - 1) / p * compEllIntKk k

@@ -61,7 +61,7 @@ or error function. Project definitions `erf`, `lowerIncGamma`,
 | 13.2.E2 | `kummerM` |
 | 13.2.E4 | `kummerM_eq_mul_regularizedHGFun` |
 | 13.2.E39 | `kummerM_kummer_transform` |
-| 13.3.E15 | `deriv_kummerM_regular` in `OrthogonalPolynomials/Differential.lean`; restated in `Recurrence.lean` |
+| 13.3.E15 | `DLMF.Confluent.deriv_kummerM` in `Confluent/Basic/KummerContiguous.lean` |
 | 13.4.E1 | `kummerM_eq_euler_integral` (the `M` form); regularized form in `IntegralRepresentations.lean` |
 | 13.6.E1 | `kummerM_self` |
 | 13.6.E3 | `kummerM_of_zero_param`; `U` form in `Relations.lean` |

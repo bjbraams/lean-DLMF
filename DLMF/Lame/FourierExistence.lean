@@ -257,7 +257,8 @@ theorem contDiff_two_of_isLameSolution {h ν : ℝ} {w : ℝ → ℝ} (hk : k ^ 
   rw [contDiff_one_iff_deriv]
   refine ⟨fun x => (hw.hasDerivAt_deriv x).differentiableAt, ?_⟩
   rw [hdd]
-  exact ((continuous_const.sub (continuous_const.mul ((continuous_jacobiSnm hk).pow 2))).neg).mul
+  exact ((continuous_const.sub
+    (continuous_const.mul ((Real.continuous_jacobiSnm hk).pow 2))).neg).mul
     hw.differentiable.continuous
 
 variable {w : ℝ → ℝ} {weighted : Bool}

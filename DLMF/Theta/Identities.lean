@@ -69,6 +69,8 @@ noncomputable section
 
 namespace DLMF.Theta
 
+open DLMF.JacobiElliptic (jacobiThetaOneTau_zero)
+
 open DLMF.Elliptic
 
 /-! ### Helpers: Watson's product formula -/
@@ -200,12 +202,6 @@ private lemma jacobiThetaOneTau_mul_jacobiThetaOneTau (z w τ : ℂ) (hτ : 0 < 
     (jacobiThetaTwoTau_half_periods (w - π / 2) τ).1, show z + π / 2 + π / 2 = z + π by ring,
     show w - π / 2 + π / 2 = w by ring, jacobiThetaOneTau_add_pi] at h
   linear_combination -h
-
-/-- `θ₁(0|τ) = 0` (helper). -/
-private lemma jacobiThetaOneTau_zero (τ : ℂ) : jacobiThetaOneTau 0 τ = 0 := by
-  have := jacobiThetaOneTau_neg 0 τ
-  rw [neg_zero] at this
-  exact CharZero.eq_neg_self_iff.mp this
 
 /-- `θ₁(x + π/2|τ) = θ₂(x|τ)` (helper). -/
 private lemma jacobiThetaOneTau_add_half_pi (x τ : ℂ) : jacobiThetaOneTau (x + π / 2) τ = jacobiThetaTwoTau x τ :=

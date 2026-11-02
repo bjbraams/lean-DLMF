@@ -156,12 +156,12 @@ parameters; scripts in the agent's scratch directory, not part of the project):
 - [31.2.E4](https://dlmf.nist.gov/31.2.E4): [`DLMF.Heun.heunNormalA`](DLMF/Heun/Basic.lean#L108) (definition); [`DLMF.Heun.heunNormalB`](DLMF/Heun/Basic.lean#L112) (definition); [`DLMF.Heun.heunNormalC`](DLMF/Heun/Basic.lean#L117) (definition); [`DLMF.Heun.heunNormalD`](DLMF/Heun/Basic.lean#L122) (definition); [`DLMF.Heun.heunNormal_A_add_B_add_C`](DLMF/Heun/Basic/Equation.lean#L479) (proved)
 - [31.2.E5](https://dlmf.nist.gov/31.2.E5): [`DLMF.Heun.heun_trigonometricForm`](DLMF/Heun/Basic/Equation.lean#L561) (proved)
 - [31.2.E6](https://dlmf.nist.gov/31.2.E6): [`DLMF.Heun.heun_trigonometricForm`](DLMF/Heun/Basic/Equation.lean#L561) (proved)
-- [31.2.E7](https://dlmf.nist.gov/31.2.E7): [`DLMF.Heun.heun_jacobiForm`](DLMF/Heun/DoublyPeriodic.lean#L68) (proved)
-- [31.2.E8](https://dlmf.nist.gov/31.2.E8): [`DLMF.Heun.heun_jacobiForm`](DLMF/Heun/DoublyPeriodic.lean#L68) (proved)
-- [31.2.E9](https://dlmf.nist.gov/31.2.E9): [`DLMF.Heun.jacobiSnk_sq_eq_weierstrassP`](DLMF/Heun/DoublyPeriodic.lean#L189) (proved); [`DLMF.Heun.heun_weierstrassForm`](DLMF/Heun/DoublyPeriodic.lean#L285) (proved)
-- [31.2.E10](https://dlmf.nist.gov/31.2.E10): [`DLMF.Heun.heun_weierstrassForm`](DLMF/Heun/DoublyPeriodic.lean#L285) (proved)
-- [31.2.E11](https://dlmf.nist.gov/31.2.E11): [`DLMF.Heun.heun_weierstrassForm`](DLMF/Heun/DoublyPeriodic.lean#L285) (proved)
-- [31.2.E12](https://dlmf.nist.gov/31.2.E12): [`DLMF.Heun.heun_weierstrassForm`](DLMF/Heun/DoublyPeriodic.lean#L285) (proved)
+- [31.2.E7](https://dlmf.nist.gov/31.2.E7): [`DLMF.Heun.heun_jacobiForm`](DLMF/Heun/DoublyPeriodic.lean#L70) (proved)
+- [31.2.E8](https://dlmf.nist.gov/31.2.E8): [`DLMF.Heun.heun_jacobiForm`](DLMF/Heun/DoublyPeriodic.lean#L70) (proved)
+- [31.2.E9](https://dlmf.nist.gov/31.2.E9): [`DLMF.Heun.jacobiSnk_sq_eq_weierstrassP`](DLMF/Heun/DoublyPeriodic.lean#L191) (proved); [`DLMF.Heun.heun_weierstrassForm`](DLMF/Heun/DoublyPeriodic.lean#L287) (proved)
+- [31.2.E10](https://dlmf.nist.gov/31.2.E10): [`DLMF.Heun.heun_weierstrassForm`](DLMF/Heun/DoublyPeriodic.lean#L287) (proved)
+- [31.2.E11](https://dlmf.nist.gov/31.2.E11): [`DLMF.Heun.heun_weierstrassForm`](DLMF/Heun/DoublyPeriodic.lean#L287) (proved)
+- [31.2.E12](https://dlmf.nist.gov/31.2.E12): [`DLMF.Heun.heun_weierstrassForm`](DLMF/Heun/DoublyPeriodic.lean#L287) (proved)
 
 ## [§31.3 Basic Solutions](https://dlmf.nist.gov/31.3)
 
@@ -199,12 +199,12 @@ parameters; scripts in the agent's scratch directory, not part of the project):
 
 ## [§31.7 Relations to Other Functions](https://dlmf.nist.gov/31.7)
 
-- [31.7.ii](https://dlmf.nist.gov/31.7.ii): [`DLMF.Heun.heun_lame`](DLMF/Heun/DoublyPeriodic.lean#L397) (proved); [`DLMF.Heun.heunLocal_lame_even_odd`](DLMF/Heun/DoublyPeriodic.lean#L445) (proved)
+- [31.7.ii](https://dlmf.nist.gov/31.7.ii): [`DLMF.Heun.heun_lame`](DLMF/Heun/DoublyPeriodic.lean#L399) (proved); [`DLMF.Heun.heunLocal_lame_even_odd`](DLMF/Heun/DoublyPeriodic.lean#L447) (proved)
 - [31.7.E1](https://dlmf.nist.gov/31.7.E1): [`DLMF.Heun.heunLocal_one_eq_hypergeometric`](DLMF/Heun/Hypergeometric.lean#L130) (proved); [`DLMF.Heun.heunLocal_eps_zero_eq_hypergeometric`](DLMF/Heun/Hypergeometric.lean#L140) (proved); [`DLMF.Heun.tendsto_heunLocal_zero_eq_hypergeometric`](DLMF/Heun/Hypergeometric.lean#L152) (proved); [`DLMF.Heun.hypergeometric_isHeunSolOn_zero`](DLMF/Heun/Hypergeometric.lean#L162) (proved)
 - [31.7.E2](https://dlmf.nist.gov/31.7.E2): [`DLMF.Heun.heunLocal_two_eq_hypergeometric`](DLMF/Heun/Hypergeometric.lean#L246) (proved)
 - [31.7.E3](https://dlmf.nist.gov/31.7.E3): [`DLMF.Heun.heunLocal_four_eq_hypergeometric`](DLMF/Heun/Hypergeometric.lean#L345) (proved)
 - [31.7.E4](https://dlmf.nist.gov/31.7.E4): [`DLMF.Heun.heunLocal_cubic_eq_hypergeometric`](DLMF/Heun/Hypergeometric.lean#L447) (admitted)
-- [31.7.E5](https://dlmf.nist.gov/31.7.E5): [`DLMF.Heun.heun_lame`](DLMF/Heun/DoublyPeriodic.lean#L397) (proved)
+- [31.7.E5](https://dlmf.nist.gov/31.7.E5): [`DLMF.Heun.heun_lame`](DLMF/Heun/DoublyPeriodic.lean#L399) (proved)
 
 ## [§31.8 Solutions via Quadratures](https://dlmf.nist.gov/31.8)
 

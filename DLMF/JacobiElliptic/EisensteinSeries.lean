@@ -50,6 +50,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-- Lower bound `‖sin w‖ ≥ (e^{|Im w|} - e^{-|Im w|})/2`. -/
 private lemma sinh_abs_im_le_norm_sin (w : ℂ) :
     (Real.exp |w.im| - Real.exp (-|w.im|)) / 2 ≤ ‖sin w‖ := by
@@ -638,7 +640,7 @@ theorem HasPoleDichotomy.analyticAt_of_not_neg {f : ℂ → ℂ} (hf : HasPoleDi
   (hf z).resolve_right fun h' => h h'.1
 
 /-- `p s` (with `p ≠ s`) is analytic off the points congruent to `0`. -/
-private lemma analyticAt_jacobiPQk_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter}
+lemma analyticAt_jacobiPQk_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter}
     (hp : p ≠ .s) {z : ℂ} (hz : z ∉ jacobiCongruentk 0 k) :
     AnalyticAt ℂ (fun w => jacobiPQk p .s w k) z := by
   have h := jacobiPQk_zeros_poles hk hp z
@@ -648,7 +650,7 @@ private lemma analyticAt_jacobiPQk_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
   · exact (h.2.2 hzp hz).1
 
 /-- A letter function is analytic at a point where its denominator letter is nonzero. -/
-private lemma analyticAt_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
+lemma analyticAt_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
     (hpq : p ≠ q) {z : ℂ} (hz : jacobiLetterTheta q (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
     AnalyticAt ℂ (fun w => jacobiPQk p q w k) z :=
   Complex.analyticAt_iff_eventually_differentiableAt.mpr
@@ -754,6 +756,43 @@ lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDoma
     rw [← h1, h2]; ring
   have := eq_eisensteinSinSeries_of_quasiPeriodic hε hτ hdich hf1 hfτ hfodd hfan hf0 t ht
   exact this
+
+/-- `ps(z) - 1/z` has a removable singularity at `0` for `p ≠ s` (the simple pole of `ps` at `0`
+has residue `1`). -/
+lemma exists_analyticAt_jacobiPQk_s_sub_one_div {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    {p : JacobiLetter} (hp : p ≠ .s) :
+    ∃ A : ℂ → ℂ, AnalyticAt ℂ A 0 ∧
+      (fun z => jacobiPQk p .s z k - 1 / z) =ᶠ[𝓝[≠] 0] A := by
+  have hreg := jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (q := .n) (by decide)
+  set N₁ : ℂ → ℂ := fun z => jacobiPQk p .n z k
+  have hN₁ : AnalyticAt ℂ N₁ 0 := by
+    by_cases hpn : p = .n
+    · subst hpn; simp only [N₁, jacobiPQk_self]; exact analyticAt_const
+    · exact analyticAt_jacobiPQk hk hpn (by simpa using hreg)
+  have hS₁ : AnalyticAt ℂ (fun z => jacobiSnk z k) 0 :=
+    analyticAt_jacobiPQk hk (p := .s) (q := .n) (by decide) (by simpa using hreg)
+  have hn₁ : N₁ 0 = 1 := by
+    simp only [N₁]
+    rcases p with _ | _ | _ | _
+    · exact absurd rfl hp
+    · exact jacobiCnk_zero hk
+    · exact jacobiDnk_zero hk
+    · exact jacobiPQk_self _ _ _
+  have hd₁ : HasDerivAt (fun z => jacobiSnk z k) 1 0 := by
+    have h := hasDerivAt_jacobiSnk hk (z := 0) (by simpa using hreg)
+    simpa only [jacobiCnk_zero hk, jacobiDnk_zero hk, mul_one] using h
+  obtain ⟨A, hA, hev⟩ := exists_analyticAt_eq_div_sub_div_of_residue_eq (a := 1) (b := 1)
+    (N₂ := fun _ => 1) (S₂ := fun z => z) hN₁ analyticAt_const hS₁ analyticAt_id
+    (jacobiSnk_zero hk) rfl hn₁ rfl hd₁ (hasDerivAt_id 0) one_ne_zero one_ne_zero (by ring)
+  refine ⟨A, hA, ?_⟩
+  have hfe : ∀ᶠ z in 𝓝 (0 : ℂ), jacobiPQk p .s z k = N₁ z / jacobiSnk z k := by
+    filter_upwards [eventually_jacobiLetterTheta_ne_zero hk hreg] with z hzn
+    simp only [N₁, jacobiSnk]
+    by_cases hpn : p = .n
+    · subst hpn; rw [jacobiPQk_eq_one_div, jacobiPQk_self]
+    · rw [jacobiPQk_eq_div (r := .n) hp hpn (by decide) hzn]
+  filter_upwards [hev, nhdsWithin_le_nhds hfe] with z h1 h2
+  rw [← h1, h2]; ring
 
 /-- A point avoiding all `m + nτ` is off the lattice. -/
 theorem not_mem_eisensteinSinLattice {τ t : ℂ} (h : ∀ m n : ℤ, t - m - n * τ ≠ 0) : t ∉ eisensteinSinLattice τ := by

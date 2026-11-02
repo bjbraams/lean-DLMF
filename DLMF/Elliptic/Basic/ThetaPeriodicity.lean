@@ -24,6 +24,7 @@ convention (`q = e^{iπτ}`, period `π` in `z`), derived from Mathlib's results
   `θ₃(z ± πτ|τ) = q⁻¹ e^{∓2iz} θ₃(z|τ)`.
 * `jacobiThetaOneTau_neg`, `jacobiThetaTwoTau_neg`, `jacobiThetaThreeTau_neg`,
   `jacobiThetaFourTau_neg`: `θ₁` is odd and `θ₂, θ₃, θ₄` are even (DLMF §20.2(ii)).
+* `DLMF.JacobiElliptic.jacobiThetaOneTau_zero`: `θ₁(0|τ) = 0`.
 -/
 
 @[expose] public section
@@ -124,3 +125,15 @@ theorem jacobiThetaOneTau_neg (z τ : ℂ) : jacobiThetaOneTau (-z) τ = -jacobi
     jacobiThetaTwoTau_add_pi, neg_neg]
 
 end DLMF.Elliptic
+
+namespace DLMF.JacobiElliptic
+
+open DLMF.Elliptic
+
+/-- `θ₁(0|τ) = 0`. -/
+theorem jacobiThetaOneTau_zero (τ : ℂ) : jacobiThetaOneTau 0 τ = 0 := by
+  have h := jacobiThetaOneTau_neg 0 τ
+  rw [neg_zero] at h
+  exact CharZero.eq_neg_self_iff.mp h
+
+end DLMF.JacobiElliptic

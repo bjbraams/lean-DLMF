@@ -320,7 +320,7 @@ Traversal: all §§5.1–5.24 checked; the matching section is §5.2.
   Mathlib `ascPochhammer` evaluated at the base, from
   [Polynomial/Pochhammer](.lake/packages/mathlib/Mathlib/RingTheory/Polynomial/Pochhammer.lean);
   `DLMF.Hypergeometric.poch`
-  is an abbreviation for this in [Hypergeometric/Basic](DLMF/Hypergeometric/Basic/Pochhammer.lean#L25).
+  is an abbreviation for this in [Hypergeometric/Basic](DLMF/Hypergeometric/Basic/Pochhammer.lean#L38).
   The gamma quotient is an identity away from poles, not its definition.
 - **Falling factorial and Lah numbers**, [prose and 5.2.9](https://dlmf.nist.gov/5.2.E9):
   Mathlib `descPochhammer` in
@@ -1124,8 +1124,8 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
   [Carlson/Elliptic/Standard](../lean-codes/Carlson/Elliptic/Standard.lean#L78).
   The ordinary real Π interval integrals do not implement principal values.
 - **Complete K, E, D and Π**, [19.2.8](https://dlmf.nist.gov/19.2.E8):
-  `DLMF.JacobiElliptic.compEllIntKk` in
-  [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L93) is a complex
+  `DLMF.EllipticIntegrals.compEllIntKk` in
+  [Complete](DLMF/EllipticIntegrals/Basic/Complete.lean#L46) is a complex
   t-integral; `DLMF.EllipticIntegrals.compEllIntEk`, `compEllIntDk`,
   `compEllIntPik` in [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L204)
   specialize the amplitude to π/2. Real parameter-m K/E are
@@ -1135,7 +1135,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
   lean-codes has independent real modulus-k `Carlson.Real.compEllIntKk`,
   `compEllIntEk` in [Standard](../lean-codes/Carlson/Elliptic/Standard.lean#L93).
 - **Complementary K-prime and E-prime**, [19.2.8_1–9](https://dlmf.nist.gov/19.2.E8_1):
-  `DLMF.JacobiElliptic.compEllIntKpk` is the literal complementary-modulus
+  `DLMF.EllipticIntegrals.compEllIntKpk` is the literal complementary-modulus
   integral; `DLMF.EllipticIntegrals.cCompEllIntKk`, `cCompEllIntEk` in
   [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L215) include the extra
   continuation terms on the left half-plane. These are materially different
@@ -1248,15 +1248,17 @@ Traversal: all §§22.1–22.22 checked; matching headings are §22.2,
 - **Nome, modulus, complementary modulus, K and scaled argument ζ**,
   [22.2.1–3](https://dlmf.nist.gov/22.2.E1):
   `DLMF.JacobiElliptic.jacobiNomek`, `jacobiTauk`, `jacobiComodulusk`,
-  `jacobiZetak`, `compEllIntKk`, `compEllIntKpk`, and the τ-based
+  `jacobiZetak`, and the τ-based
   `jacobiModulusTau`, `jacobiComodulusTau`, `compEllIntKTau`,
   `compEllIntKpTau`, `jacobiZetaTau` in
-  [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L65).
+  [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L120);
+  `DLMF.EllipticIntegrals.compEllIntKk`, `compEllIntKpk` in
+  [Complete](DLMF/EllipticIntegrals/Basic/Complete.lean#L46).
   Here “Zeta” denotes the scaled argument πz/(2K), not Jacobi's zeta function.
 - **All twelve Jacobi functions and Glaisher quotients**,
   [22.2.4–12](https://dlmf.nist.gov/22.2.E4):
   `DLMF.JacobiElliptic.jacobiGlaisher`, `jacobiPQTau`, `jacobiPQk`, with
-  `JacobiLetter`, in [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L58).
+  `JacobiLetter`, in [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L84).
   The explicit modulus-k wrappers are `jacobiSnk`, `jacobiCnk`, `jacobiDnk`,
   `jacobiSdk`, `jacobiCdk`, `jacobiSck`, `jacobiNsk`, `jacobiNck`,
   `jacobiNdk`, `jacobiDsk`, `jacobiDck`, `jacobiCsk`; each has a corresponding

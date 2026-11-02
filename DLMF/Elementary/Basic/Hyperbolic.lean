@@ -63,7 +63,8 @@ def sech (z : ℂ) : ℂ := (Complex.cosh z)⁻¹
 @[dlmf 4.28.E7]
 def coth (z : ℂ) : ℂ := Complex.cosh z/Complex.sinh z
 
-/-- The open principal domain of arcsinh (the imaginary rays beyond ±i are cut). -/
+/-- The open principal domain of arcsinh (the imaginary rays beyond ±i are cut); it equals
+`arctanCutPlane` (`arcsinhDomain_eq_arctanCutPlane`). -/
 def arcsinhDomain : Set ℂ := {z | z.re ≠ 0 ∨ |z.im| < 1}
 
 /-- The open principal domain of arccosh, with the real ray up to 1 removed. -/

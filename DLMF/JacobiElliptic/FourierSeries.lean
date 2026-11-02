@@ -55,6 +55,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 variable {k : ℂ}
 
 /-- DLMF 22.11.1: `sn(z,k) = (2π/(Kk)) ∑_{n≥0} q^{n+1/2} sin((2n+1)ζ)/(1 - q^{2n+1})`, for `k ∈

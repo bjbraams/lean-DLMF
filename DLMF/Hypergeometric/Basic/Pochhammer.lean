@@ -73,6 +73,25 @@ theorem poch_ne_zero_of_not_neg_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (n : 
   obtain ⟨k, hk, hk'⟩ := (ascPochhammer_eval_eq_zero_iff (R := ℂ) n a).1 h
   exact ha k (neg_eq_iff_eq_neg.mp hk'.symm)
 
+/-- Pochhammer symbols at points of positive real part do not vanish. -/
+theorem poch_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) (k : ℕ) : poch z k ≠ 0 :=
+  poch_ne_zero_of_not_neg_nat (fun j h => by
+    have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]) k
+
+/-- `Γ(α + k) = (α)ₖ Γ(α)` for `Re α > 0`. -/
+theorem Gamma_add_nat_eq_poch_mul_Gamma {α : ℂ} (hα : 0 < α.re) (k : ℕ) :
+    Complex.Gamma (α + k) = poch α k * Complex.Gamma α := by
+  induction k with
+  | zero => simp [poch_zero]
+  | succ k ih =>
+    have hne : α + k ≠ 0 := by
+      intro h
+      have := congrArg Complex.re h
+      simp at this
+      linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
+    rw [Nat.cast_succ, ← add_assoc, Complex.Gamma_add_one _ hne, ih, poch_succ]
+    ring
+
 /-- Concatenation of Pochhammer symbols: `(a)_{n+m} = (a)_n (a+n)_m`. -/
 theorem poch_add (a : ℂ) (n m : ℕ) : poch a (n + m) = poch a n * poch (a + n) m := by
   induction m with

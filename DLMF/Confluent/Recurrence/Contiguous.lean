@@ -33,8 +33,7 @@ relation (DLMF 13.3.13) and `M' = (a/b) M(a+1,b+1)` (DLMF 13.3.15) are in
 
 Denominator parameters of `kummerM` stay off the nonpositive integers. The operator
 `(z d/dz z)` is `mulDerivMul`. The relations for `U` are proved first at noninteger second
-parameter and extended to integers by continuity in the parameter. DLMF 13.3.15 is also
-`deriv_kummerM_regular` in `DLMF.OrthogonalPolynomials.Differential.ChebyshevAndShifts`.
+parameter and extended to integers by continuity in the parameter.
 -/
 
 @[expose] public section

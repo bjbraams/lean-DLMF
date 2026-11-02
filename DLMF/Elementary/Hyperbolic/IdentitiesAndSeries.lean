@@ -1007,6 +1007,54 @@ theorem hyperbolic_linear_ode {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U)
     rw [hev'.deriv_eq, h2.deriv, hAB z hz]
     ring
 
+/-- Reduction of the squared first-order equation `f'² - a² f² = σ`: either `f` is locally
+constant or `f = A cosh (a z) + B sinh (a z)` with `a² (B² - A²) = σ`. -/
+private lemma squared_ode_reduce {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U) {a : ℂ}
+    (ha : a ≠ 0) {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) {σ : ℂ}
+    (h : ∀ z ∈ U, (deriv f z) ^ 2 - a ^ 2 * (f z) ^ 2 = σ) :
+    (∀ z ∈ U, deriv f z = 0) ∨
+      ∃ A B : ℂ, (∀ z ∈ U, f z = A * Complex.cosh (a * z) + B * Complex.sinh (a * z)) ∧
+        a ^ 2 * (B ^ 2 - A ^ 2) = σ := by
+  have hfa : AnalyticOnNhd ℂ f U := hf.analyticOnNhd hU
+  have hf1 := hfa.deriv
+  have hf2 := hf1.deriv
+  have hprod : ∀ z ∈ U, deriv f z * (deriv (deriv f) z - a ^ 2 * f z) = 0 := by
+    intro z hz
+    have hd : HasDerivAt (fun w => (deriv f w) ^ 2 - a ^ 2 * (f w) ^ 2)
+        (2 * deriv f z * deriv (deriv f) z - a ^ 2 * (2 * f z * deriv f z)) z := by
+      have h1 := (hf1 z hz).differentiableAt.hasDerivAt.pow 2
+      have h2 := ((hfa z hz).differentiableAt.hasDerivAt.pow 2).const_mul (a ^ 2)
+      convert h1.sub h2 using 1; push_cast; ring
+    have hc0 : HasDerivAt (fun w => (deriv f w) ^ 2 - a ^ 2 * (f w) ^ 2) 0 z := by
+      apply (hasDerivAt_const z σ).congr_of_eventuallyEq
+      filter_upwards [hU.mem_nhds hz] with w hw
+      exact h w hw
+    have := hd.unique hc0
+    linear_combination this / 2
+  rcases hf1.eq_zero_or_eq_zero_of_mul_eq_zero (hf2.sub (analyticOnNhd_const.mul hfa)) hprod
+    hc.isPreconnected with h0 | h1
+  · exact Or.inl h0
+  · right
+    obtain ⟨A, B, hAB⟩ := (hyperbolic_linear_ode hU hc ha hf hf1.differentiableOn).mp
+      (fun z hz => by simpa using h1 z hz)
+    refine ⟨A, B, hAB, ?_⟩
+    obtain ⟨z0, hz0⟩ := hc.nonempty
+    have hF : HasDerivAt (fun w => A * Complex.cosh (a * w) + B * Complex.sinh (a * w))
+        (a * (A * Complex.sinh (a * z0) + B * Complex.cosh (a * z0))) z0 := by
+      have h1 := ((Complex.hasDerivAt_cosh (a * z0)).comp z0
+        ((hasDerivAt_id z0).const_mul a)).const_mul A
+      have h2 := ((Complex.hasDerivAt_sinh (a * z0)).comp z0
+        ((hasDerivAt_id z0).const_mul a)).const_mul B
+      exact (h1.add h2).congr_deriv (by simp; ring)
+    have hev : f =ᶠ[𝓝 z0] fun w => A * Complex.cosh (a * w) + B * Complex.sinh (a * w) := by
+      filter_upwards [hU.mem_nhds hz0] with w hw
+      exact hAB w hw
+    have hd := h z0 hz0
+    rw [hev.deriv_eq, hF.deriv, hAB z0 hz0] at hd
+    have hcs := Complex.cosh_sq_sub_sinh_sq (a * z0)
+    rw [← hd]
+    linear_combination (-(a ^ 2) * (B ^ 2 - A ^ 2)) * hcs
+
 /-- General squared first-order equation, including the equilibrium solutions omitted in the source shorthand. -/
 @[dlmf 4.34.E8, dlmf 4.34.E12]
 theorem hyperbolic_squared_ode_plus {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U) {a : ℂ} (ha : a≠0)
@@ -1014,7 +1062,47 @@ theorem hyperbolic_squared_ode_plus {U : Set ℂ} (hU : IsOpen U) (hc : IsConnec
     (∀ z ∈ U, (deriv f z)^2-a^2*(f z)^2=1) ↔
       (∃ c : ℂ, ∀ z ∈ U, f z=a⁻¹*Complex.sinh (a*z+c)) ∨
       (∃ w : ℂ, -a^2*w^2=1 ∧ ∀ z ∈ U, f z=w) := by
-  sorry
+  constructor
+  · intro h
+    rcases squared_ode_reduce hU hc ha hf h with h0 | ⟨A, B, hAB, hid⟩
+    · right
+      obtain ⟨w, hw⟩ := hU.exists_is_const_of_deriv_eq_zero hc.isPreconnected hf h0
+      obtain ⟨z0, hz0⟩ := hc.nonempty
+      refine ⟨w, ?_, hw⟩
+      have := h z0 hz0
+      rw [h0 z0 hz0, hw z0 hz0] at this
+      linear_combination this
+    · left
+      set p := a * B + a * A
+      have hp : p * (a * B - a * A) = 1 := by simp only [p]; linear_combination hid
+      have hp0 : p ≠ 0 := left_ne_zero_of_mul_eq_one hp
+      refine ⟨Complex.log p, fun z hz => ?_⟩
+      have hinv : Complex.exp (-Complex.log p) = a * B - a * A := by
+        rw [Complex.exp_neg, Complex.exp_log hp0]; exact (eq_inv_of_mul_eq_one_right hp).symm
+      have hch : Complex.cosh (Complex.log p) = a * B := by
+        rw [Complex.cosh, Complex.exp_log hp0, hinv]; simp only [p]; ring
+      have hsh : Complex.sinh (Complex.log p) = a * A := by
+        rw [Complex.sinh, Complex.exp_log hp0, hinv]; simp only [p]; ring
+      rw [hAB z hz, Complex.sinh_add, hch, hsh]
+      field_simp
+      ring
+  · rintro (⟨c, hc'⟩ | ⟨w, hw, hfw⟩) z hz
+    · have hev : f =ᶠ[𝓝 z] fun u => a⁻¹ * Complex.sinh (a * u + c) := by
+        filter_upwards [hU.mem_nhds hz] with u hu
+        exact hc' u hu
+      have hd : HasDerivAt (fun u => a⁻¹ * Complex.sinh (a * u + c))
+          (a⁻¹ * (Complex.cosh (a * z + c) * a)) z :=
+        ((Complex.hasDerivAt_sinh _).comp z (((hasDerivAt_id z).const_mul a).add_const c)
+          |>.congr_deriv (by simp)).const_mul a⁻¹
+      rw [hev.deriv_eq, hd.deriv, hc' z hz]
+      have := Complex.cosh_sq_sub_sinh_sq (a * z + c)
+      field_simp
+      linear_combination this
+    · have hev : f =ᶠ[𝓝 z] fun _ => w := by
+        filter_upwards [hU.mem_nhds hz] with u hu
+        exact hfw u hu
+      rw [hev.deriv_eq, deriv_const, hfw z hz]
+      linear_combination hw
 
 /-- General squared first-order equation, including the equilibrium solutions omitted in the source shorthand. -/
 @[dlmf 4.34.E9, dlmf 4.34.E13]
@@ -1023,7 +1111,46 @@ theorem hyperbolic_squared_ode_minus {U : Set ℂ} (hU : IsOpen U) (hc : IsConne
     (∀ z ∈ U, (deriv f z)^2-a^2*(f z)^2=-1) ↔
       (∃ c : ℂ, ∀ z ∈ U, f z=a⁻¹*Complex.cosh (a*z+c)) ∨
       (∃ w : ℂ, -a^2*w^2=-1 ∧ ∀ z ∈ U, f z=w) := by
-  sorry
+  constructor
+  · intro h
+    rcases squared_ode_reduce hU hc ha hf h with h0 | ⟨A, B, hAB, hid⟩
+    · right
+      obtain ⟨w, hw⟩ := hU.exists_is_const_of_deriv_eq_zero hc.isPreconnected hf h0
+      obtain ⟨z0, hz0⟩ := hc.nonempty
+      refine ⟨w, ?_, hw⟩
+      have := h z0 hz0
+      rw [h0 z0 hz0, hw z0 hz0] at this
+      linear_combination this
+    · left
+      set p := a * A + a * B
+      have hp : p * (a * A - a * B) = 1 := by simp only [p]; linear_combination -hid
+      have hp0 : p ≠ 0 := left_ne_zero_of_mul_eq_one hp
+      refine ⟨Complex.log p, fun z hz => ?_⟩
+      have hinv : Complex.exp (-Complex.log p) = a * A - a * B := by
+        rw [Complex.exp_neg, Complex.exp_log hp0]; exact (eq_inv_of_mul_eq_one_right hp).symm
+      have hch : Complex.cosh (Complex.log p) = a * A := by
+        rw [Complex.cosh, Complex.exp_log hp0, hinv]; simp only [p]; ring
+      have hsh : Complex.sinh (Complex.log p) = a * B := by
+        rw [Complex.sinh, Complex.exp_log hp0, hinv]; simp only [p]; ring
+      rw [hAB z hz, Complex.cosh_add, hch, hsh]
+      field_simp
+  · rintro (⟨c, hc'⟩ | ⟨w, hw, hfw⟩) z hz
+    · have hev : f =ᶠ[𝓝 z] fun u => a⁻¹ * Complex.cosh (a * u + c) := by
+        filter_upwards [hU.mem_nhds hz] with u hu
+        exact hc' u hu
+      have hd : HasDerivAt (fun u => a⁻¹ * Complex.cosh (a * u + c))
+          (a⁻¹ * (Complex.sinh (a * z + c) * a)) z :=
+        ((Complex.hasDerivAt_cosh _).comp z (((hasDerivAt_id z).const_mul a).add_const c)
+          |>.congr_deriv (by simp)).const_mul a⁻¹
+      rw [hev.deriv_eq, hd.deriv, hc' z hz]
+      have := Complex.cosh_sq_sub_sinh_sq (a * z + c)
+      field_simp
+      linear_combination -this
+    · have hev : f =ᶠ[𝓝 z] fun _ => w := by
+        filter_upwards [hU.mem_nhds hz] with u hu
+        exact hfw u hu
+      rw [hev.deriv_eq, deriv_const, hfw z hz]
+      linear_combination hw
 
 /-- The Riccati general solution, with both constant equilibria and all pole exclusions. -/
 @[dlmf 4.34.E10, dlmf 4.34.E14]
@@ -1032,7 +1159,143 @@ theorem hyperbolic_riccati_ode {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U
     (∀ z ∈ U, deriv f z+a^2*(f z)^2=1) ↔
       (∃ c : ℂ, (∀ z ∈ U, Complex.sinh (a*z+c)≠0) ∧ ∀ z ∈ U, f z=a⁻¹*coth (a*z+c)) ∨
       (∀ z ∈ U, f z=a⁻¹) ∨ (∀ z ∈ U, f z= -a⁻¹) := by
-  sorry
+  have hfa : AnalyticOnNhd ℂ f U := hf.analyticOnNhd hU
+  constructor
+  · intro h
+    set P : ℂ → ℂ := fun z => (1 + a * f z) * Complex.exp (-(a * z))
+    set Q : ℂ → ℂ := fun z => (1 - a * f z) * Complex.exp (a * z)
+    have hPa : AnalyticOnNhd ℂ P U := fun z hz =>
+      ((analyticAt_const.add (analyticAt_const.mul (hfa z hz))).mul
+        (analyticAt_const.mul analyticAt_id).neg.cexp)
+    have hQa : AnalyticOnNhd ℂ Q U := fun z hz =>
+      ((analyticAt_const.sub (analyticAt_const.mul (hfa z hz))).mul
+        (analyticAt_const.mul analyticAt_id).cexp)
+    have hdf : ∀ z ∈ U, HasDerivAt f (1 - a ^ 2 * (f z) ^ 2) z := fun z hz => by
+      have := (hfa z hz).differentiableAt.hasDerivAt
+      rwa [show deriv f z = 1 - a ^ 2 * (f z) ^ 2 by linear_combination h z hz] at this
+    have hdP : ∀ z ∈ U, HasDerivAt P (-(a ^ 2) * f z * P z) z := by
+      intro z hz
+      have he : HasDerivAt (fun w => Complex.exp (-(a * w))) (Complex.exp (-(a * z)) * (-a)) z := by
+        simpa using ((hasDerivAt_id z).const_mul a).neg.cexp
+      have := (((hdf z hz).const_mul a).const_add 1).mul he
+      convert this using 1; simp only [P]; ring
+    have hdQ : ∀ z ∈ U, HasDerivAt Q (-(a ^ 2) * f z * Q z) z := by
+      intro z hz
+      have he : HasDerivAt (fun w => Complex.exp (a * w)) (Complex.exp (a * z) * a) z := by
+        simpa using ((hasDerivAt_id z).const_mul a).cexp
+      have := (((hdf z hz).const_mul a).const_sub 1).mul he
+      convert this using 1; simp only [Q]; ring
+    by_cases hQ0 : ∀ z ∈ U, Q z = 0
+    · right; left
+      intro z hz
+      have := hQ0 z hz
+      simp only [Q, mul_eq_zero, Complex.exp_ne_zero, or_false] at this
+      field_simp; linear_combination -this
+    by_cases hP0 : ∀ z ∈ U, P z = 0
+    · right; right
+      intro z hz
+      have := hP0 z hz
+      simp only [P, mul_eq_zero, Complex.exp_ne_zero, or_false] at this
+      field_simp; linear_combination this
+    left
+    simp only [not_forall] at hQ0
+    obtain ⟨z0, hz0, hQz0⟩ := hQ0
+    -- `P = K Q` near `z0`
+    have hV : IsOpen (U ∩ {z | Q z ≠ 0}) :=
+      hQa.continuousOn.isOpen_inter_preimage hU isOpen_ne
+    obtain ⟨r, hr, hball⟩ := Metric.isOpen_iff.mp hV z0 ⟨hz0, hQz0⟩
+    have hR : DifferentiableOn ℂ (fun z => P z / Q z) (Metric.ball z0 r) := fun z hz =>
+      ((hPa z (hball hz).1).differentiableAt.div (hQa z (hball hz).1).differentiableAt
+        (hball hz).2).differentiableWithinAt
+    have hR0 : (Metric.ball z0 r).EqOn (deriv fun z => P z / Q z) 0 := by
+      intro z hz
+      have hzU := (hball hz).1
+      have hd : HasDerivAt (fun z => P z / Q z) ((-(a ^ 2) * f z * P z * Q z -
+          P z * (-(a ^ 2) * f z * Q z)) / Q z ^ 2) z := (hdP z hzU).div (hdQ z hzU) (hball hz).2
+      rw [hd.deriv]
+      simp only [Pi.zero_apply]
+      ring
+    obtain ⟨K, hK⟩ := Metric.isOpen_ball.exists_is_const_of_deriv_eq_zero
+      (convex_ball z0 r).isPreconnected hR hR0
+    have hPK : EqOn P (fun z => K * Q z) U := by
+      refine hPa.eqOn_of_preconnected_of_frequently_eq (fun z hz => analyticAt_const.mul
+        (hQa z hz)) hc.isPreconnected hz0 ?_
+      refine (eventually_nhdsWithin_of_eventually_nhds ?_).frequently
+      filter_upwards [Metric.ball_mem_nhds z0 hr] with z hz
+      have := hK z hz
+      have hq := (hball hz).2
+      rwa [div_eq_iff hq] at this
+    have hK0 : K ≠ 0 := by
+      rintro rfl; apply hP0; intro z hz; simpa using hPK hz
+    set c := Complex.log (-K) / 2
+    refine ⟨c, ?_⟩
+    have key : ∀ z ∈ U, Complex.exp (a * z + c) ^ 2 = -K * Complex.exp (a * z) ^ 2 ∧
+        (1 + a * f z) = -(Complex.exp (a * z + c) ^ 2) * (1 - a * f z) := by
+      intro z hz
+      have e1 : Complex.exp (a * z + c) ^ 2 = -K * Complex.exp (a * z) ^ 2 := by
+        rw [← Complex.exp_nat_mul, ← Complex.exp_nat_mul, show ((2 : ℕ) : ℂ) * (a * z + c) =
+          2 * (a * z) + Complex.log (-K) by simp only [c]; push_cast; ring, Complex.exp_add,
+          Complex.exp_log (neg_ne_zero.mpr hK0)]
+        push_cast; ring
+      refine ⟨e1, ?_⟩
+      have := hPK hz
+      simp only [P, Q] at this
+      rw [e1]
+      have hE := Complex.exp_ne_zero (a * z)
+      rw [Complex.exp_neg] at this
+      field_simp at this
+      linear_combination this
+    have hsinh : ∀ z ∈ U, Complex.sinh (a * z + c) ≠ 0 := by
+      intro z hz hs
+      obtain ⟨-, h2⟩ := key z hz
+      have hY := Complex.exp_ne_zero (a * z + c)
+      have : Complex.exp (a * z + c) ^ 2 = 1 := by
+        rw [Complex.sinh, Complex.exp_neg] at hs
+        field_simp at hs; linear_combination hs
+      rw [this] at h2
+      have : (2 : ℂ) = 0 := by linear_combination h2
+      norm_num at this
+    refine ⟨hsinh, fun z hz => ?_⟩
+    obtain ⟨-, h2⟩ := key z hz
+    have hs := hsinh z hz
+    have hY := Complex.exp_ne_zero (a * z + c)
+    set Y := Complex.exp (a * z + c)
+    have hY1 : Y ^ 2 - 1 ≠ 0 := by
+      intro h0; apply hs; rw [Complex.sinh, Complex.exp_neg]; field_simp
+      linear_combination h0
+    have haf : a * f z = (Y ^ 2 + 1) / (Y ^ 2 - 1) := by
+      rw [eq_div_iff hY1]; linear_combination -h2
+    have hcoth : coth (a * z + c) = (Y ^ 2 + 1) / (Y ^ 2 - 1) := by
+      rw [coth, Complex.cosh, Complex.sinh, Complex.exp_neg,
+        show Complex.exp (a * z + c) = Y from rfl]
+      have hY2 : Y ^ 2 - 1 ≠ 0 := hY1
+      field_simp
+    rw [hcoth, ← haf]; field_simp
+  · rintro (⟨c, hs, hc'⟩ | h1 | h1) z hz
+    · have hev : f =ᶠ[𝓝 z] fun u => a⁻¹ * coth (a * u + c) := by
+        filter_upwards [hU.mem_nhds hz] with u hu
+        exact hc' u hu
+      have hsz := hs z hz
+      have hd : HasDerivAt (fun u => a⁻¹ * coth (a * u + c))
+          (a⁻¹ * ((Complex.sinh (a * z + c) * Complex.sinh (a * z + c) -
+            Complex.cosh (a * z + c) * Complex.cosh (a * z + c)) /
+              Complex.sinh (a * z + c) ^ 2 * a)) z := by
+        have hin : HasDerivAt (fun u => a * u + c) a z := by
+          simpa using ((hasDerivAt_id z).const_mul a).add_const c
+        have hco := ((Complex.hasDerivAt_cosh _).div (Complex.hasDerivAt_sinh _) hsz).comp z hin
+        exact hco.const_mul a⁻¹
+      rw [hev.deriv_eq, hd.deriv, hc' z hz, coth]
+      have := Complex.cosh_sq_sub_sinh_sq (a * z + c)
+      field_simp
+      ring
+    · have hev : f =ᶠ[𝓝 z] fun _ => a⁻¹ := by
+        filter_upwards [hU.mem_nhds hz] with u hu
+        exact h1 u hu
+      rw [hev.deriv_eq, deriv_const, h1 z hz]; field_simp; ring
+    · have hev : f =ᶠ[𝓝 z] fun _ => -a⁻¹ := by
+        filter_upwards [hU.mem_nhds hz] with u hu
+        exact h1 u hu
+      rw [hev.deriv_eq, deriv_const, h1 z hz]; field_simp; ring
 
 end DLMF.Elementary
 end

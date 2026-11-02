@@ -78,7 +78,7 @@ theorem eventually_nhdsNE_not_int (ν : ℂ) : ∀ᶠ μ : ℂ in 𝓝[≠] ν, 
 
 /-- `sin(πν) ≠ 0` at nonintegral `ν`. -/
 theorem sin_pi_mul_ne_zero_of_not_int {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : sin (π*ν) ≠ 0 :=
-  _root_.sin_pi_mul_ne_zero (DLMF.Confluent.mem_integerComplement_of_forall hν)
+  _root_.sin_pi_mul_ne_zero (Complex.mem_integerComplement_of_forall hν)
 
 /-- Associated Anger–Weber function at nonintegral order. -/
 def angerARegular (ν z : ℂ) : ℂ :=
@@ -697,7 +697,7 @@ theorem anger_bessel (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 @[dlmf 11.10.E16]
 theorem weber_bessel (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     weberE ν z = -besselY ν z-cos (π*ν)*angerA ν z-angerA (-ν) z := by
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => weberE μ z)
     (g := fun μ => -besselY μ z-cos (π*μ)*angerA μ z-angerA (-μ) z)
     ((weberE_entire_order z) ν).continuousAt ?_ ?_
@@ -706,7 +706,7 @@ theorem weber_bessel (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
         (continuousAt_angerA_order ν hz))).sub ?_
     exact (continuousAt_angerA_order (-ν) hz).comp (f := fun μ : ℂ => -μ) continuousAt_id.neg
   · intro c hc
-    have hc' := DLMF.Confluent.forall_of_mem_integerComplement hc
+    have hc' := Complex.forall_of_mem_integerComplement hc
     have hcn : ∀ k : ℤ, -c ≠ k := fun k hk => hc' (-k) (by rw [Int.cast_neg, ← hk, neg_neg])
     have hs := sin_pi_mul_ne_zero_of_not_int hc'
     have hw := weber_anger c z

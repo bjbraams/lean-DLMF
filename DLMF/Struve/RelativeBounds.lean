@@ -151,7 +151,7 @@ theorem struveH_relative_bound {ν z : ℂ} (hz : z ≠ 0) (d : ℝ) (hd : 0 < d
   refine ⟨θ, ?_, ?_⟩
   · have hΓ : Gamma (3 / 2 : ℂ) = (Real.sqrt π : ℂ) / 2 := by
       rw [show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num, Gamma_add_one _ (by norm_num),
-        DLMF.Confluent.Gamma_one_half_eq_sqrt]
+        Complex.Gamma_one_half_eq_sqrt]
       ring
     have hΓv : Gamma (ν + 3 / 2) ≠ 0 := Gamma_ne_zero hν
     have hsqrt : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'

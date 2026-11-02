@@ -47,6 +47,8 @@ open scoped Topology Real
 
 namespace DLMF.Lame
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-- The real part of a differentiable curve in `ℂ`. -/
 private lemma hasDerivAt_re_comp {G : ℝ → ℂ} {G' : ℂ} {x : ℝ} (h : HasDerivAt G G' x) :
     HasDerivAt (fun x => (G x).re) G'.re x := by

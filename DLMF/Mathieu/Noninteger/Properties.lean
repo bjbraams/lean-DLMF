@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Noninteger.Basic
+public import DLMF.Mathieu.Noninteger.ExpSeries
+public import DLMF.Mathieu.Noninteger.RealContinuation
 public import DLMF.Mathieu.Properties
 public import Mathlib.Topology.Separation.CompletelyRegular
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
@@ -21,7 +23,9 @@ countable set `{(ν + 2m)²}` is constant, and the sign of `c_0` is fixed by con
 symmetries are obtained by transporting continuation paths along the involutions
 `c_m ↦ c_{-m}` (`ν ↦ -ν`), `c_m ↦ (-1)^m c_m` (`q ↦ -q`) and complex conjugation. The key
 analytic step is that an absolutely summable solution of the recurrence 28.14.4 decays faster
-than every exponential, so `∑ c_m e^{i(ν+2m)z}` is entire and can be differentiated termwise.
+than every exponential, so `∑ c_m e^{i(ν+2m)z}` is entire and can be differentiated termwise
+(`DLMF.Mathieu.Noninteger.ExpSeries`). Normality of real parameters follows the root of
+`cos πν = w_I(π; a, tq)` along `t ∈ [0, 1]` (`DLMF.Mathieu.Noninteger.RealContinuation`).
 
 ## Main results
 
@@ -258,13 +262,6 @@ theorem isMathieuCharExp_iff_exists_mathieuLambda {ν q a : ℂ} (hν : ∀ m : 
     IsMathieuCharExp a q ν ↔ ∃ n : ℤ, a = mathieuLambda (ν + 2 * n) q := by
   sorry
 
-/-- **Real parameters are normal** (DLMF §28.12(i)): for real `ν ∉ ℤ` and real `q` all the
-`λ_ν(q)` are real and `q` is normal (along the whole segment `[0, q]`). -/
-@[dlmf 28.12.i]
-theorem mathieuNormalSegment_real {ν q : ℝ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
-    MathieuNormalSegment ν q ∧ (mathieuLambda ν q).im = 0 := by
-  sorry
-
 /-- **Discontinuity in `ν`** (DLMF §28.12(i)): for fixed real `q ≠ 0`, `λ_ν(q)` is
 discontinuous (as a function of real `ν`) at `ν = ±1, ±2, …`. -/
 @[dlmf 28.12.i]
@@ -371,331 +368,6 @@ theorem mathieuLambda_intCast_eq (m : ℤ) (q : ℝ) :
     mathieuLambda m q = if 0 ≤ m then (mathieuA m.toNat q : ℂ) else mathieuB m.natAbs q := by
   rw [mathieuLambda_intCast, mathieuLambdaInt]
   split_ifs <;> rfl
-
-/-! ### Absolutely convergent solutions of the recurrence 28.14.4 -/
-
-/-- An absolutely summable solution of the recurrence 28.14.4 decays faster than every
-exponential: `∑ |c_m| e^{K|m|} < ∞` for every real `K`. -/
-private lemma summable_norm_mul_exp_of_rec {ν q a : ℂ} {c : ℤ → ℂ}
-    (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
-    (hs : Summable (fun m => ‖c m‖)) (K : ℝ) :
-    Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|)) := by
-  set ρ : ℝ := Real.exp (-K) / 2 with hρdef
-  have hρ : 0 < ρ := by positivity
-  have hρK : ρ * Real.exp K = 1 / 2 := by
-    rw [hρdef, div_mul_eq_mul_div, ← Real.exp_add, neg_add_cancel, Real.exp_zero]
-  set B : ℝ := ∑' m, ‖c m‖
-  have hB : ∀ m, ‖c m‖ ≤ B := fun m => hs.le_tsum m (fun j _ => norm_nonneg _)
-  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB 0)
-  obtain ⟨N, hN⟩ := exists_nat_ge (‖ν‖ + ‖a‖ + 2 * ‖q‖ / ρ + 1)
-  have hqρ : 0 ≤ 2 * ‖q‖ / ρ := by positivity
-  have hD : ∀ k : ℤ, N ≤ k.natAbs → 2 * ‖q‖ / ρ + 1 ≤ ‖a - (ν + 2 * k) ^ 2‖ := by
-    intro k hk
-    have hk' : (N : ℝ) ≤ |(k : ℝ)| := by
-      rw [← Int.cast_abs, ← Int.natCast_natAbs]; exact_mod_cast hk
-    have h2k : ‖(2 : ℂ) * k‖ = 2 * |(k : ℝ)| := by
-      rw [norm_mul, Complex.norm_intCast]; norm_num
-    have h1 : 2 * |(k : ℝ)| - ‖ν‖ ≤ ‖ν + 2 * k‖ := by
-      have := norm_sub_norm_le ((2 : ℂ) * k) (-ν)
-      rw [h2k, norm_neg, sub_neg_eq_add, add_comm] at this
-      exact this
-    have h3 : ‖a‖ + (2 * ‖q‖ / ρ + 1) ≤ ‖ν + 2 * k‖ := by
-      have := norm_nonneg ν; have := norm_nonneg a; linarith
-    have h4 : ‖ν + 2 * k‖ ≤ ‖(ν + 2 * k) ^ 2‖ := by
-      have : 1 ≤ ‖ν + 2 * k‖ := by linarith [norm_nonneg a]
-      rw [norm_pow]; nlinarith
-    have h5 := norm_sub_norm_le ((ν + 2 * k) ^ 2) a
-    rw [norm_sub_rev] at h5
-    linarith
-  have hind : ∀ n : ℕ, ∀ k : ℤ, N + n ≤ k.natAbs → ‖c k‖ ≤ B * ρ ^ n := by
-    intro n
-    induction n with
-    | zero => intro k _; simpa using hB k
-    | succ n ih =>
-      intro k hk
-      have hp := ih (k + 1) (by omega)
-      have hm := ih (k - 1) (by omega)
-      have hDk := hD k (by omega)
-      have hDpos : 0 < ‖a - (ν + 2 * k) ^ 2‖ := by linarith
-      have he : (a - (ν + 2 * k) ^ 2) * c k = q * (c (k + 1) + c (k - 1)) := by
-        linear_combination -(hrec k)
-      have hn : ‖a - (ν + 2 * k) ^ 2‖ * ‖c k‖ ≤ ‖q‖ * (2 * (B * ρ ^ n)) := by
-        rw [← norm_mul, he, norm_mul]
-        gcongr
-        exact (norm_add_le _ _).trans (by linarith)
-      have hDρ : 2 * ‖q‖ ≤ ‖a - (ν + 2 * k) ^ 2‖ * ρ := by
-        have : (2 * ‖q‖ / ρ + 1) * ρ ≤ ‖a - (ν + 2 * k) ^ 2‖ * ρ :=
-          mul_le_mul_of_nonneg_right hDk hρ.le
-        rw [add_mul, div_mul_cancel₀ _ hρ.ne', one_mul] at this
-        linarith
-      have hBρ : 0 ≤ B * ρ ^ n := by positivity
-      refine le_of_mul_le_mul_left ?_ hDpos
-      calc ‖a - (ν + 2 * k) ^ 2‖ * ‖c k‖ ≤ ‖q‖ * (2 * (B * ρ ^ n)) := hn
-        _ = (2 * ‖q‖) * (B * ρ ^ n) := by ring
-        _ ≤ (‖a - (ν + 2 * k) ^ 2‖ * ρ) * (B * ρ ^ n) := mul_le_mul_of_nonneg_right hDρ hBρ
-        _ = ‖a - (ν + 2 * k) ^ 2‖ * (B * ρ ^ (n + 1)) := by ring
-  set C : ℝ := B * (ρ ^ N)⁻¹
-  have hg : Summable (fun k : ℤ => C * (1 / 2 : ℝ) ^ k.natAbs) := by
-    have hgeo : Summable (fun n : ℕ => C * (1 / 2 : ℝ) ^ n) :=
-      (summable_geometric_of_lt_one (by norm_num) (by norm_num)).mul_left C
-    refine Summable.of_nat_of_neg ?_ ?_
-    · simpa using hgeo
-    · simpa using hgeo
-  refine Summable.of_norm_bounded_eventually hg ?_
-  rw [Int.cofinite_eq, Filter.eventually_sup]
-  have key : ∀ k : ℤ, N ≤ k.natAbs →
-      ‖‖c k‖ * Real.exp (K * |(k : ℝ)|)‖ ≤ C * (1 / 2 : ℝ) ^ k.natAbs := by
-    intro k hk
-    have hc := hind (k.natAbs - N) k (by omega)
-    have habs : |(k : ℝ)| = (k.natAbs : ℝ) := by
-      rw [← Int.cast_abs, ← Int.natCast_natAbs]; rfl
-    rw [Real.norm_of_nonneg (by positivity), habs, mul_comm K, Real.exp_nat_mul]
-    have hpow : ρ ^ (k.natAbs - N) = (ρ ^ N)⁻¹ * ρ ^ k.natAbs := by
-      rw [pow_sub₀ _ hρ.ne' hk]; ring
-    calc ‖c k‖ * Real.exp K ^ k.natAbs ≤ B * ρ ^ (k.natAbs - N) * Real.exp K ^ k.natAbs := by
-          gcongr
-      _ = C * (ρ * Real.exp K) ^ k.natAbs := by rw [hpow, mul_pow]; ring
-      _ = C * (1 / 2 : ℝ) ^ k.natAbs := by rw [hρK]
-  constructor
-  · exact eventually_atBot.2 ⟨-(N : ℤ), fun k hk => key k (by omega)⟩
-  · exact eventually_atTop.2 ⟨(N : ℤ), fun k hk => key k (by omega)⟩
-
-/-- Bound on `(i(ν+2m))^j e^{i(ν+2m)z}` for `‖z‖ ≤ R`. -/
-theorem norm_pow_mul_exp_le (ν z : ℂ) (m : ℤ) {R : ℝ} (hz : ‖z‖ ≤ R) (j : ℕ) :
-    ‖(I * (ν + 2 * m)) ^ j * Complex.exp (I * (ν + 2 * m) * z)‖ ≤
-      Real.exp (‖ν‖ * (R + j)) * Real.exp (2 * (R + j) * |(m : ℝ)|) := by
-  have hR : 0 ≤ R := (norm_nonneg z).trans hz
-  set y : ℝ := ‖ν‖ + 2 * |(m : ℝ)|
-  have hx : ‖ν + 2 * m‖ ≤ y := by
-    refine (norm_add_le _ _).trans ?_
-    rw [norm_mul, Complex.norm_intCast]; norm_num [y]
-  have hy : 0 ≤ y := by positivity
-  have h1 : ‖(I * (ν + 2 * m)) ^ j‖ ≤ Real.exp (j * y) := by
-    rw [norm_pow, norm_mul, Complex.norm_I, one_mul, Real.exp_nat_mul]
-    refine pow_le_pow_left₀ (norm_nonneg _) (hx.trans ?_) j
-    linarith [Real.add_one_le_exp y]
-  have h2 : ‖Complex.exp (I * (ν + 2 * m) * z)‖ ≤ Real.exp (y * R) := by
-    refine (Complex.norm_exp_le_exp_norm _).trans (Real.exp_le_exp.mpr ?_)
-    rw [norm_mul, norm_mul, Complex.norm_I, one_mul]
-    exact mul_le_mul hx hz (norm_nonneg _) hy
-  calc _ ≤ Real.exp (j * y) * Real.exp (y * R) := by
-        rw [norm_mul]; exact mul_le_mul h1 h2 (norm_nonneg _) (Real.exp_pos _).le
-    _ = _ := by rw [← Real.exp_add, ← Real.exp_add]; congr 1; simp only [y]; ring
-
-/-- The summable majorant (from faster-than-exponential decay) of the termwise
-differentiated series. -/
-private lemma summable_majorant_of_summable_exp {ν : ℂ} {c : ℤ → ℂ}
-    (hb : ∀ K : ℝ, Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|))) (R : ℝ) (j : ℕ) :
-    Summable (fun m : ℤ => ‖c m‖ *
-      (Real.exp (‖ν‖ * (R + j)) * Real.exp (2 * (R + j) * |(m : ℝ)|))) :=
-  ((hb (2 * (R + j))).mul_left (Real.exp (‖ν‖ * (R + j)))).congr
-    fun m => by ring
-
-/-- Termwise differentiation of `∑ c_m (i(ν+2m))^j e^{i(ν+2m)z}`. -/
-theorem hasDerivAt_tsum_exp_series_of_summable_exp {ν : ℂ} {c : ℤ → ℂ}
-    (hb : ∀ K : ℝ, Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|))) (j : ℕ) (z : ℂ) :
-    HasDerivAt (fun w => ∑' m : ℤ, c m * ((I * (ν + 2 * m)) ^ j *
-        Complex.exp (I * (ν + 2 * m) * w)))
-      (∑' m : ℤ, c m * ((I * (ν + 2 * m)) ^ (j + 1) * Complex.exp (I * (ν + 2 * m) * z))) z := by
-  set R : ℝ := ‖z‖ + 1
-  refine hasDerivAt_tsum_of_isPreconnected
-    (g := fun m w => c m * ((I * (ν + 2 * m)) ^ j * Complex.exp (I * (ν + 2 * m) * w)))
-    (g' := fun m w => c m * ((I * (ν + 2 * m)) ^ (j + 1) * Complex.exp (I * (ν + 2 * m) * w)))
-    (summable_majorant_of_summable_exp (ν := ν) hb R (j + 1))
-    Metric.isOpen_ball (convex_ball (0 : ℂ) R).isPreconnected (fun m w _ => ?_)
-    (fun m w hw => ?_) (Metric.mem_ball_self (by positivity : (0 : ℝ) < R)) ?_
-    (by rw [Metric.mem_ball, dist_zero_right]; simp [R])
-  rotate_left
-  · rw [norm_mul]
-    gcongr
-    have := norm_pow_mul_exp_le ν w m (R := R)
-      (by rw [Metric.mem_ball, dist_zero_right] at hw; exact hw.le) (j + 1)
-    simpa using this
-  · refine .of_norm_bounded (summable_majorant_of_summable_exp (ν := ν) hb R j) fun m => ?_
-    rw [norm_mul]
-    gcongr
-    have := norm_pow_mul_exp_le ν (0 : ℂ) m (R := R) (by simp [R]; positivity) j
-    simpa using this
-  · have h := ((hasDerivAt_id w).const_mul (I * (ν + 2 * m))).cexp
-    have := (h.const_mul ((I * (ν + 2 * m)) ^ j)).const_mul (c m)
-    convert this using 1
-    · funext w; simp [mul_assoc]
-    · simp only [id]; ring
-
-/-- Absolute convergence of `∑ c_m (i(ν+2m))^j e^{i(ν+2m)z}` for every complex `z`. -/
-theorem summable_exp_series_of_summable_exp {ν : ℂ} {c : ℤ → ℂ}
-    (hb : ∀ K : ℝ, Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|))) (j : ℕ) (z : ℂ) :
-    Summable (fun m : ℤ => ‖c m * ((I * (ν + 2 * m)) ^ j * Complex.exp (I * (ν + 2 * m) * z))‖) :=
-  .of_nonneg_of_le (fun _ => norm_nonneg _) (fun m => by
-    rw [norm_mul]; gcongr; exact norm_pow_mul_exp_le ν z m le_rfl j)
-    (summable_majorant_of_summable_exp (ν := ν) hb ‖z‖ j)
-
-/-- The summable majorant of the termwise differentiated series. -/
-theorem summable_majorant_of_rec {ν q a : ℂ} {c : ℤ → ℂ}
-    (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
-    (hs : Summable (fun m => ‖c m‖)) (R : ℝ) (j : ℕ) :
-    Summable (fun m : ℤ => ‖c m‖ *
-      (Real.exp (‖ν‖ * (R + j)) * Real.exp (2 * (R + j) * |(m : ℝ)|))) :=
-  summable_majorant_of_summable_exp (summable_norm_mul_exp_of_rec hrec hs) R j
-
-/-- Termwise differentiation of `∑ c_m (i(ν+2m))^j e^{i(ν+2m)z}`. -/
-private lemma hasDerivAt_tsum_exp_series_of_rec {ν q a : ℂ} {c : ℤ → ℂ}
-    (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
-    (hs : Summable (fun m => ‖c m‖)) (j : ℕ) (z : ℂ) :
-    HasDerivAt (fun w => ∑' m : ℤ, c m * ((I * (ν + 2 * m)) ^ j *
-        Complex.exp (I * (ν + 2 * m) * w)))
-      (∑' m : ℤ, c m * ((I * (ν + 2 * m)) ^ (j + 1) * Complex.exp (I * (ν + 2 * m) * z))) z :=
-  hasDerivAt_tsum_exp_series_of_summable_exp (summable_norm_mul_exp_of_rec hrec hs) j z
-
-/-- Absolute convergence of `∑ c_m (i(ν+2m))^j e^{i(ν+2m)z}` for every complex `z`. -/
-theorem summable_exp_series_of_rec {ν q a : ℂ} {c : ℤ → ℂ}
-    (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
-    (hs : Summable (fun m => ‖c m‖)) (j : ℕ) (z : ℂ) :
-    Summable (fun m : ℤ => ‖c m * ((I * (ν + 2 * m)) ^ j * Complex.exp (I * (ν + 2 * m) * z))‖) :=
-  summable_exp_series_of_summable_exp (summable_norm_mul_exp_of_rec hrec hs) j z
-
-/-- An absolutely summable solution of 28.14.4 gives an entire solution
-`∑ c_m e^{i(ν+2m)z}` of Mathieu's equation. -/
-private lemma isMathieuSolution_tsum_exp_series {ν q a : ℂ} {c : ℤ → ℂ}
-    (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
-    (hs : Summable (fun m => ‖c m‖)) :
-    IsMathieuSolution a q (fun z => ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * z)) := by
-  set S : ℕ → ℂ → ℂ := fun j z => ∑' m : ℤ, c m * ((I * (ν + 2 * m)) ^ j *
-    Complex.exp (I * (ν + 2 * m) * z)) with hS
-  have h0 : (fun z => ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * z)) = S 0 := by
-    funext z; simp [hS]
-  have hd : ∀ j z, HasDerivAt (S j) (S (j + 1) z) z := fun j z =>
-    hasDerivAt_tsum_exp_series_of_rec hrec hs j z
-  have hderiv : deriv (S 0) = S 1 := funext fun z => (hd 0 z).deriv
-  rw [h0]
-  refine ⟨fun z => (hd 0 z).differentiableAt, fun z => ?_⟩
-  rw [hderiv]
-  convert hd 1 z using 1
-  -- the coefficient identity
-  set e : ℤ → ℂ := fun m => Complex.exp (I * (ν + 2 * m) * z) with he
-  set E : ℂ := Complex.exp (2 * I * z)
-  set E' : ℂ := Complex.exp (-(2 * I * z))
-  have hs0 : HasSum (fun m => c m * e m) (S 0 z) := by
-    have := (summable_exp_series_of_rec hrec hs 0 z).of_norm.hasSum
-    simpa [hS] using this
-  have hs2 : HasSum (fun m => c m * ((I * (ν + 2 * m)) ^ 2 * e m)) (S 2 z) :=
-    (summable_exp_series_of_rec hrec hs 2 z).of_norm.hasSum
-  have hE : ∀ m : ℤ, e (m + 1) = E * e m := fun m => by
-    simp only [he, E, ← Complex.exp_add]; congr 1; push_cast; ring
-  have hE' : ∀ m : ℤ, e (m - 1) = E' * e m := fun m => by
-    simp only [he, E', ← Complex.exp_add]; congr 1; push_cast; ring
-  have H1 : HasSum (fun m => q * c (m - 1) * e m) (q * E * S 0 z) := by
-    rw [← (Equiv.addRight (1 : ℤ)).hasSum_iff]
-    refine (hs0.mul_left (q * E)).congr_fun fun m => ?_
-    simp only [Function.comp, Equiv.coe_addRight, add_sub_cancel_right, hE]; ring
-  have H2 : HasSum (fun m => q * c (m + 1) * e m) (q * E' * S 0 z) := by
-    rw [← (Equiv.subRight (1 : ℤ)).hasSum_iff]
-    refine (hs0.mul_left (q * E')).congr_fun fun m => ?_
-    simp only [Function.comp, Equiv.subRight_apply, sub_add_cancel, hE']; ring
-  have H := (H1.add H2).sub (hs0.mul_left a)
-  have hcos : 2 * Complex.cos (2 * z) = E + E' := by
-    rw [Complex.cos]; simp only [E, E']; ring_nf
-  have key := H.unique (hs2.congr_fun fun m => ?_)
-  · rw [show 1 + 1 = 2 from rfl, ← key]; linear_combination (q * S 0 z) * hcos
-  · have := hrec m
-    rw [mul_pow, Complex.I_sq]
-    linear_combination (e m) * this
-
-/-- `|e^{i(ν+2m)x}| = e^{-ℑν x}` for real `x`. -/
-theorem norm_exp_I_mul_add_two_mul_ofReal (ν : ℂ) (m : ℤ) (x : ℝ) :
-    ‖Complex.exp (I * (ν + 2 * m) * x)‖ = Real.exp (-(ν.im * x)) := by
-  rw [Complex.norm_exp]; congr 1; simp [Complex.mul_re, Complex.mul_im]
-
-/-- `∫₀^π e^{2ikx} dx = π δ_{k0}`. -/
-private lemma integral_exp_two_mul_I_intCast_mul (k : ℤ) :
-    ∫ x in (0 : ℝ)..π, Complex.exp (2 * I * k * x) = if k = 0 then (π : ℂ) else 0 := by
-  split_ifs with hk
-  · subst hk; simp
-  · have hc : (2 * I * k : ℂ) ≠ 0 := by
-      simp [hk, Complex.I_ne_zero]
-    rw [integral_exp_mul_complex hc]
-    have : Complex.exp (2 * I * k * π) = 1 := by
-      rw [show (2 * I * k * π : ℂ) = k * (2 * π * I) by ring, Complex.exp_int_mul_two_pi_mul_I]
-    simp [this]
-
-/-- Fourier coefficients of an absolutely convergent series `∑ c_m e^{i(ν+2m)x}` on `[0, π]`. -/
-theorem integral_tsum_exp_series_mul_exp {ν : ℂ} {c : ℤ → ℂ} (hs : Summable (fun m => ‖c m‖))
-    (n : ℤ) :
-    ∫ x in (0 : ℝ)..π, (∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * x)) *
-      Complex.exp (-(I * (ν + 2 * n) * x)) = π * c n := by
-  have hF : ∀ m : ℤ, ∀ x : ℝ, c m * Complex.exp (I * (ν + 2 * m) * x) *
-      Complex.exp (-(I * (ν + 2 * n) * x)) = c m * Complex.exp (2 * I * (m - n : ℤ) * x) := by
-    intro m x
-    rw [mul_assoc, ← Complex.exp_add]; congr 2; push_cast; ring
-  have hnorm : ∀ m : ℤ, ∀ x : ℝ, ‖c m * Complex.exp (2 * I * (m - n : ℤ) * x)‖ = ‖c m‖ := by
-    intro m x
-    rw [norm_mul, Complex.norm_exp]
-    simp [Complex.mul_re]
-  have hsum := intervalIntegral.hasSum_integral_of_dominated_convergence
-    (μ := volume) (a := 0) (b := π)
-    (F := fun m x => c m * Complex.exp (2 * I * (m - n : ℤ) * x))
-    (f := fun x => (∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * x)) *
-      Complex.exp (-(I * (ν + 2 * n) * x)))
-    (fun m _ => ‖c m‖) (fun m => by fun_prop)
-    (fun m => ae_of_all _ fun x _ => (hnorm m x).le) (ae_of_all _ fun _ _ => hs)
-    intervalIntegrable_const (ae_of_all _ fun x _ => ?_)
-  · have hval : ∀ m : ℤ, ∫ x in (0 : ℝ)..π, c m * Complex.exp (2 * I * (m - n : ℤ) * x) =
-        if m = n then (π : ℂ) * c n else 0 := by
-      intro m
-      rw [intervalIntegral.integral_const_mul, integral_exp_two_mul_I_intCast_mul]
-      by_cases h : m = n
-      · subst h; simp; ring
-      · simp [sub_eq_zero, h]
-    simp only [hval] at hsum
-    exact hsum.unique (hasSum_ite_eq n _)
-  · have hs' : Summable (fun m : ℤ => c m * Complex.exp (I * (ν + 2 * m) * x)) := by
-      refine Summable.of_norm ?_
-      simp only [norm_mul, norm_exp_I_mul_add_two_mul_ofReal]
-      exact hs.mul_right _
-    exact (hs'.hasSum.mul_right _).congr_fun fun m => (hF m x).symm
-
-
-/-- `∫₀^π f(x) f(-x) dx = π ∑ c_m²` for `f(x) = ∑ c_m e^{i(ν+2m)x}` (absolutely convergent). -/
-private lemma integral_tsum_exp_series_mul_neg {ν : ℂ} {c : ℤ → ℂ} (hs : Summable (fun m => ‖c m‖))
-    (hf : Continuous (fun x : ℝ => ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * x)))
-    {s : ℂ} (hsq : HasSum (fun m => c m ^ 2) s) :
-    ∫ x in (0 : ℝ)..π, (∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * x)) *
-      (∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * -(x : ℂ))) = π * s := by
-  set f : ℝ → ℂ := fun x => ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * x)
-  have hneg : ∀ (m : ℤ) (x : ℝ), Complex.exp (I * (ν + 2 * m) * -(x : ℂ)) =
-      Complex.exp (-(I * (ν + 2 * m) * x)) := fun m x => by congr 1; ring
-  have hnorm : ∀ (m : ℤ) (x : ℝ),
-      ‖Complex.exp (I * (ν + 2 * m) * -(x : ℂ))‖ = Real.exp (ν.im * x) := by
-    intro m x
-    rw [show -(x : ℂ) = ((-x : ℝ) : ℂ) by push_cast; ring, norm_exp_I_mul_add_two_mul_ofReal]
-    congr 1; ring
-  have hsum := intervalIntegral.hasSum_integral_of_dominated_convergence
-    (μ := volume) (a := 0) (b := π)
-    (F := fun m x => f x * (c m * Complex.exp (I * (ν + 2 * m) * -(x : ℂ))))
-    (f := fun x => f x * (∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * -(x : ℂ))))
-    (fun m t => ‖f t‖ * (‖c m‖ * Real.exp (ν.im * t)))
-    (fun m => (hf.mul (by fun_prop)).aestronglyMeasurable)
-    (fun m => ae_of_all _ fun x _ => by rw [norm_mul, norm_mul, hnorm])
-    (ae_of_all _ fun t _ => (hs.mul_right _).mul_left _) ?_ (ae_of_all _ fun x _ => ?_)
-  · have hval : ∀ m : ℤ, ∫ x in (0 : ℝ)..π, f x * (c m * Complex.exp (I * (ν + 2 * m) *
-        -(x : ℂ))) = π * c m ^ 2 := by
-      intro m
-      have : (fun x : ℝ => f x * (c m * Complex.exp (I * (ν + 2 * m) * -(x : ℂ)))) =
-          fun x : ℝ => c m * (f x * Complex.exp (-(I * (ν + 2 * m) * x))) := by
-        funext x; rw [hneg]; ring
-      rw [this, intervalIntegral.integral_const_mul, integral_tsum_exp_series_mul_exp hs]; ring
-    simp only [hval] at hsum
-    exact hsum.unique (hsq.mul_left _)
-  · have : (fun t : ℝ => ∑' m : ℤ, ‖f t‖ * (‖c m‖ * Real.exp (ν.im * t))) =
-        fun t => ‖f t‖ * ((∑' m : ℤ, ‖c m‖) * Real.exp (ν.im * t)) := by
-      funext t; rw [tsum_mul_left, tsum_mul_right]
-    rw [this]
-    exact (hf.norm.mul (continuous_const.mul (by fun_prop))).intervalIntegrable _ _
-  · have hs' : Summable (fun m : ℤ => c m * Complex.exp (I * (ν + 2 * m) * -(x : ℂ))) := by
-      refine Summable.of_norm ?_
-      simp only [norm_mul, hnorm]
-      exact hs.mul_right _
-    exact hs'.hasSum.mul_left _
 
 /-! ### §28.12(ii) The functions `me_ν` -/
 
@@ -1094,5 +766,424 @@ theorem mathieuSeNu_neg {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (z q : 
     mathieuSeNu ν z q = -mathieuSeNu ν (-z) q ∧ mathieuSeNu ν z q = -mathieuSeNu (-ν) z q := by
   refine ⟨by simp only [mathieuSeNu, neg_neg]; ring, ?_⟩
   simp only [mathieuSeNu, mathieuMe_neg_nu hν, neg_neg]; ring
+
+/-! ### Normality of real parameters (DLMF §28.12(i)) -/
+
+/-- At `q = 0` and `a = ν²` an admissible coefficient sequence is `c₀ δ₀` with `c₀² = 1`. -/
+private lemma isMeCoeffSeq_zero_q {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {c : ℤ → ℂ}
+    (h : IsMeCoeffSeq ν 0 (ν ^ 2) c) : c = Pi.single 0 (c 0) ∧ c 0 ^ 2 = 1 := by
+  have hcm : ∀ m : ℤ, m ≠ 0 → c m = 0 := by
+    intro m hm
+    have := h.1 m
+    simp only [zero_mul, zero_sub, add_zero, neg_eq_zero] at this
+    exact (mul_eq_zero.mp this).resolve_left (sq_sub_add_two_mul_sq_ne_zero hν hm)
+  refine ⟨funext fun m => ?_, ?_⟩
+  · by_cases hm : m = 0
+    · subst hm; simp
+    · simp [hm, hcm m hm]
+  · have h2 := hasSum_single (f := fun m : ℤ => c m ^ 2) (0 : ℤ) fun m hm => by simp [hcm m hm]
+    exact h2.unique h.2.2
+
+/-- The coefficients of an absolutely convergent series `∑ c_m e^{i(ν+2m)x}` are determined by
+its values on `ℝ`. -/
+private lemma eq_of_tsum_exp_series_eq {ν : ℂ} {c d : ℤ → ℂ} (hc : Summable fun m => ‖c m‖)
+    (hd : Summable fun m => ‖d m‖)
+    (h : ∀ x : ℝ, ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * x) =
+      ∑' m : ℤ, d m * Complex.exp (I * (ν + 2 * m) * x)) : c = d := by
+  funext n
+  have h1 := integral_tsum_exp_series_mul_exp (ν := ν) hc n
+  have h2 := integral_tsum_exp_series_mul_exp (ν := ν) hd n
+  simp only [h] at h1
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  exact mul_left_cancel₀ hπ (h1.symm.trans h2)
+
+/-- The series of an admissible coefficient sequence is a Floquet solution. -/
+private lemma isFloquetSolution_tsum_of_isMeCoeffSeq {ν q a : ℂ} {c : ℤ → ℂ}
+    (h : IsMeCoeffSeq ν q a c) :
+    IsFloquetSolution a q ν (fun z => ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * z)) := by
+  refine ⟨isMathieuSolution_tsum_exp_series h.1 h.2.1, fun h0 => ?_, fun z => ?_⟩
+  · have hc : c = 0 := by
+      refine eq_of_tsum_exp_series_eq (ν := ν) h.2.1 (by simp) fun x => ?_
+      simpa using congrFun h0 (x : ℂ)
+    have : HasSum (fun m => c m ^ 2) 0 := by simp [hc]
+    exact one_ne_zero (this.unique h.2.2).symm
+  · beta_reduce
+    rw [← tsum_mul_left]
+    congr 1; funext m
+    have e : Complex.exp (I * (ν + 2 * m) * (z + π)) =
+        Complex.exp (π * I * ν) * Complex.exp (I * (ν + 2 * m) * z) *
+          Complex.exp (m * (2 * π * I)) := by
+      rw [← Complex.exp_add, ← Complex.exp_add]; congr 1; ring
+    rw [e, Complex.exp_int_mul_two_pi_mul_I]; ring
+
+/-- The explicit Floquet solution along a real root path `Λ`. -/
+private def realW (ν q : ℝ) (Λ : ℝ → ℝ) (t : ℝ) (z : ℂ) : ℂ :=
+  mathieuWII (Λ t) ((t * q : ℝ) : ℂ) π * mathieuWI (Λ t) ((t * q : ℝ) : ℂ) z +
+    (Complex.exp (π * I * ν) - mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π) *
+      mathieuWII (Λ t) ((t * q : ℝ) : ℂ) z
+
+/-- Its Fourier coefficients. -/
+private def realCoeff (ν q : ℝ) (Λ : ℝ → ℝ) (t : ℝ) (n : ℤ) : ℂ :=
+  (π : ℂ)⁻¹ * ∫ x in (0 : ℝ)..π, realW ν q Λ t x * Complex.exp (-(I * (ν + 2 * n) * x))
+
+section RealPath
+
+variable {ν q : ℝ} {Λ : ℝ → ℝ}
+
+private lemma realW_charExp (hΛ : ∀ t, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν))
+    (t : ℝ) : IsMathieuCharExp (Λ t) ((t * q : ℝ) : ℂ) ν := by
+  have hr := Complex.conj_eq_iff_re.mp (conj_mathieuWI_ofReal (Λ t) (t * q) π)
+  unfold IsMathieuCharExp
+  rw [← hr, hΛ t, Complex.ofReal_cos]
+  push_cast; ring_nf
+
+private lemma realW_floquet (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+    (hΛ : ∀ t, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν)) (t : ℝ) :
+    IsFloquetSolution (Λ t) ((t * q : ℝ) : ℂ) ν (realW ν q Λ t) :=
+  isFloquetSolution_mathieuWII_pi_mul_add (exp_pi_mul_I_mul_ne_inv hν) (realW_charExp hΛ t)
+
+private lemma realCoeff_fourier (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+    (hΛ : ∀ t, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν)) (t : ℝ) :
+    Summable (fun n => ‖realCoeff ν q Λ t n‖) ∧
+      (∀ z, HasSum (fun n => realCoeff ν q Λ t n * Complex.exp (I * (ν + 2 * n) * z))
+        (realW ν q Λ t z)) ∧
+      ∀ n : ℤ, ((t * q : ℝ) : ℂ) * realCoeff ν q Λ t (n + 1) -
+        ((Λ t : ℂ) - (ν + 2 * n) ^ 2) * realCoeff ν q Λ t n +
+          ((t * q : ℝ) : ℂ) * realCoeff ν q Λ t (n - 1) = 0 := by
+  obtain ⟨c, hsum, hhas, hrec⟩ := (realW_floquet hν hΛ t).exists_fourier
+  have hs0 : Summable (fun n => ‖c n‖) := by simpa using hsum 0
+  have hc : c = realCoeff ν q Λ t := by
+    funext n
+    have h := integral_tsum_exp_series_mul_exp (ν := ν) hs0 n
+    simp only [fun x : ℝ => (hhas x).tsum_eq] at h
+    unfold realCoeff
+    rw [h]
+    field_simp [show (π : ℂ) ≠ 0 by exact_mod_cast Real.pi_ne_zero]
+  subst hc
+  exact ⟨hs0, hhas, hrec⟩
+
+private lemma realW_neg (hΛ : ∀ t, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν))
+    (t x : ℝ) : realW ν q Λ t (-(x : ℂ)) = conj (realW ν q Λ t x) := by
+  have hc := realW_charExp hΛ t
+  unfold IsMathieuCharExp at hc
+  unfold realW
+  rw [mathieuWI_neg, mathieuWII_neg]
+  simp only [map_add, map_mul, map_sub, conj_mathieuWI_ofReal, conj_mathieuWII_ofReal,
+    ← Complex.exp_conj]
+  simp only [Complex.conj_ofReal, Complex.conj_I]
+  have hcos : 2 * mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π =
+      Complex.exp (π * I * ν) + Complex.exp (π * -I * ν) := by
+    rw [← hc, Complex.cos]
+    rw [show (π : ℂ) * ν * I = π * I * ν by ring, show -((π : ℂ) * ν) * I = π * -I * ν by ring]
+    ring
+  linear_combination (mathieuWII (Λ t) ((t * q : ℝ) : ℂ) x) * hcos
+
+private lemma conj_realCoeff (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+    (hΛ : ∀ t, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν)) (t : ℝ) (n : ℤ) :
+    conj (realCoeff ν q Λ t n) = realCoeff ν q Λ t n := by
+  obtain ⟨hs, hhas, -⟩ := realCoeff_fourier hν hΛ t
+  have hd : Summable (fun m => ‖conj (realCoeff ν q Λ t m)‖) := by simp [hs]
+  have key := eq_of_tsum_exp_series_eq (ν := ν) hd hs fun x => ?_
+  · exact congrFun key n
+  · have e : ∀ m : ℤ, conj (realCoeff ν q Λ t m) * Complex.exp (I * (ν + 2 * m) * x) =
+        conj (realCoeff ν q Λ t m * Complex.exp (I * (ν + 2 * m) * -(x : ℂ))) := by
+      intro m
+      rw [map_mul, ← Complex.exp_conj]
+      congr 2
+      simp only [map_mul, map_add, map_neg, Complex.conj_I, Complex.conj_ofReal, map_intCast,
+        map_ofNat]
+      ring
+    simp only [e]
+    rw [← Complex.conj_tsum, (hhas _).tsum_eq, (hhas _).tsum_eq, realW_neg hΛ, Complex.conj_conj]
+
+
+/-- The sum of squares of the coefficients, as an integral. -/
+private def realNorm (ν q : ℝ) (Λ : ℝ → ℝ) (t : ℝ) : ℂ :=
+  (π : ℂ)⁻¹ * ∫ x in (0 : ℝ)..π, realW ν q Λ t x * realW ν q Λ t (-(x : ℂ))
+
+private lemma summable_sq_of_summable_norm {c : ℤ → ℂ} (hs : Summable (fun n => ‖c n‖)) :
+    Summable (fun n => ‖c n‖ ^ 2) := by
+  have hB : ∀ m, ‖c m‖ ≤ ∑' m, ‖c m‖ := fun m => hs.le_tsum m (fun j _ => norm_nonneg _)
+  exact Summable.of_nonneg_of_le (fun m => by positivity)
+    (fun m => by rw [sq]; exact mul_le_mul_of_nonneg_right (hB m) (norm_nonneg _))
+    (hs.mul_left _)
+
+private lemma hasSum_realCoeff_sq (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+    (hΛ : ∀ t, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν)) (t : ℝ) :
+    HasSum (fun n => realCoeff ν q Λ t n ^ 2) (realNorm ν q Λ t) := by
+  obtain ⟨hs, hhas, -⟩ := realCoeff_fourier hν hΛ t
+  have hs2 : Summable (fun n => realCoeff ν q Λ t n ^ 2) :=
+    Summable.of_norm (by simpa [norm_pow] using summable_sq_of_summable_norm hs)
+  have hW := (realW_floquet hν hΛ t).1
+  have hcont : Continuous (fun x : ℝ =>
+      ∑' m : ℤ, realCoeff ν q Λ t m * Complex.exp (I * (ν + 2 * m) * x)) := by
+    simp only [fun x : ℝ => (hhas x).tsum_eq]
+    exact hW.differentiable.continuous.comp Complex.continuous_ofReal
+  have h := integral_tsum_exp_series_mul_neg hs hcont hs2.hasSum
+  simp only [fun x : ℝ => (hhas x).tsum_eq, fun x : ℝ => (hhas (-(x : ℂ))).tsum_eq] at h
+  unfold realNorm
+  rw [h, ← mul_assoc, inv_mul_cancel₀ (by exact_mod_cast Real.pi_ne_zero), one_mul]
+  exact hs2.hasSum
+
+/-- The real sum of squares. -/
+private def realNormRe (ν q : ℝ) (Λ : ℝ → ℝ) (t : ℝ) : ℝ := (realNorm ν q Λ t).re
+
+private lemma realNorm_eq (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+    (hΛ : ∀ t, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν)) (t : ℝ) :
+    realNorm ν q Λ t = (realNormRe ν q Λ t : ℂ) ∧ 0 < realNormRe ν q Λ t := by
+  obtain ⟨hs, hhas, -⟩ := realCoeff_fourier hν hΛ t
+  have hre : ∀ n, realCoeff ν q Λ t n = ((realCoeff ν q Λ t n).re : ℂ) := fun n =>
+    (Complex.conj_eq_iff_re.mp (conj_realCoeff hν hΛ t n)).symm
+  have hs2 : Summable (fun n => (realCoeff ν q Λ t n).re ^ 2) := by
+    refine Summable.of_nonneg_of_le (fun n => sq_nonneg _) (fun n => ?_)
+      (summable_sq_of_summable_norm hs)
+    rw [← sq_abs]
+    exact pow_le_pow_left₀ (abs_nonneg _) (Complex.abs_re_le_norm _) 2
+  have hh : HasSum (fun n => realCoeff ν q Λ t n ^ 2)
+      ((∑' n, (realCoeff ν q Λ t n).re ^ 2 : ℝ) : ℂ) := by
+    have := (Complex.hasSum_ofReal.mpr hs2.hasSum)
+    refine this.congr_fun fun n => ?_
+    rw [hre n]; push_cast; simp
+  have he := (hasSum_realCoeff_sq hν hΛ t).unique hh
+  have hval : realNorm ν q Λ t = (realNormRe ν q Λ t : ℂ) := by
+    unfold realNormRe; rw [he]; simp
+  refine ⟨hval, ?_⟩
+  have hne : ∃ n, realCoeff ν q Λ t n ≠ 0 := by
+    by_contra h
+    push Not at h
+    apply (realW_floquet hν hΛ t).2.1
+    funext z
+    have := (hhas z).tsum_eq
+    simp only [h, zero_mul, tsum_zero] at this
+    exact this.symm
+  obtain ⟨n, hn⟩ := hne
+  have hn' : (realCoeff ν q Λ t n).re ≠ 0 := by
+    intro h0; apply hn; rw [hre n, h0]; simp
+  unfold realNormRe
+  rw [he, Complex.ofReal_re]
+  exact hs2.tsum_pos (fun _ => sq_nonneg _) n (by positivity)
+
+private lemma continuous_realW (hΛc : Continuous Λ) :
+    Continuous (fun p : ℝ × ℂ => realW ν q Λ p.1 p.2) := by
+  have h1 := differentiable_mathieuWI_mathieuWII.1.continuous
+  have h2 := differentiable_mathieuWI_mathieuWII.2.continuous
+  have hp : Continuous (fun p : ℝ × ℂ => (p.2, ((Λ p.1 : ℝ) : ℂ), ((p.1 * q : ℝ) : ℂ))) := by
+    fun_prop
+  have hπ : Continuous (fun p : ℝ × ℂ => ((π : ℂ), ((Λ p.1 : ℝ) : ℂ), ((p.1 * q : ℝ) : ℂ))) := by
+    fun_prop
+  unfold realW
+  exact ((h2.comp hπ).mul (h1.comp hp)).add
+    ((continuous_const.sub (h1.comp hπ)).mul (h2.comp hp))
+
+private lemma continuous_realCoeff (hΛc : Continuous Λ) (n : ℤ) :
+    Continuous (fun t => realCoeff ν q Λ t n) := by
+  unfold realCoeff
+  refine continuous_const.mul ?_
+  apply intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
+  exact ((continuous_realW hΛc).comp (by fun_prop :
+    Continuous (fun p : ℝ × ℝ => (p.1, (p.2 : ℂ))))).mul (by fun_prop)
+
+private lemma continuous_realNormRe (hΛc : Continuous Λ) :
+    Continuous (realNormRe ν q Λ) := by
+  unfold realNormRe realNorm
+  refine Complex.continuous_re.comp (continuous_const.mul ?_)
+  apply intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
+  exact ((continuous_realW hΛc).comp (by fun_prop :
+    Continuous (fun p : ℝ × ℝ => (p.1, (p.2 : ℂ))))).mul
+    ((continuous_realW hΛc).comp (by fun_prop :
+    Continuous (fun p : ℝ × ℝ => (p.1, -(p.2 : ℂ)))))
+
+/-- The normalized coefficients. -/
+private def realNormCoeff (ν q : ℝ) (Λ : ℝ → ℝ) (t : ℝ) (n : ℤ) : ℂ :=
+  realCoeff ν q Λ t n / (Real.sqrt (realNormRe ν q Λ t) : ℂ)
+
+private lemma isMeCoeffSeq_realNormCoeff (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+    (hΛ : ∀ t, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν)) (t : ℝ) :
+    IsMeCoeffSeq ν ((t * q : ℝ) : ℂ) (Λ t) (realNormCoeff ν q Λ t) := by
+  obtain ⟨hs, -, hrec⟩ := realCoeff_fourier hν hΛ t
+  obtain ⟨hN, hpos⟩ := realNorm_eq hν hΛ t
+  have hsq : (Real.sqrt (realNormRe ν q Λ t) : ℂ) ≠ 0 := by
+    exact_mod_cast (Real.sqrt_pos.mpr hpos).ne'
+  refine ⟨fun m => ?_, ?_, ?_⟩
+  · unfold realNormCoeff
+    field_simp
+    linear_combination hrec m
+  · unfold realNormCoeff
+    simpa [norm_div] using hs.div_const ‖(Real.sqrt (realNormRe ν q Λ t) : ℂ)‖
+  · have h := (hasSum_realCoeff_sq hν hΛ t).div_const (realNormRe ν q Λ t : ℂ)
+    rw [hN, div_self (by exact_mod_cast hpos.ne')] at h
+    refine h.congr_fun fun n => ?_
+    unfold realNormCoeff
+    rw [div_pow, ← Complex.ofReal_pow, Real.sq_sqrt hpos.le]
+
+private lemma continuous_realNormCoeff (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+    (hΛ : ∀ t, (mathieuWI (Λ t) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν))
+    (hΛc : Continuous Λ) (n : ℤ) : Continuous (fun t => realNormCoeff ν q Λ t n) := by
+  unfold realNormCoeff
+  refine (continuous_realCoeff hΛc n).div
+    (Complex.continuous_ofReal.comp (continuous_realNormRe hΛc).sqrt) fun t => ?_
+  exact_mod_cast (Real.sqrt_pos.mpr (realNorm_eq hν hΛ t).2).ne'
+
+end RealPath
+
+/-- **Real parameters are normal** (DLMF §28.12(i)): for real `ν ∉ ℤ` and real `q` all the
+`λ_ν(q)` are real and `q` is normal (along the whole segment `[0, q]`). The root
+`λ_ν(tq)` of `cos πν = w_I(π; a, tq)` is continued along `t ∈ [0, 1]`
+(`exists_continuous_re_mathieuWI_pi_eq`), the coefficients are the normalized Fourier
+coefficients of the explicit Floquet solution `isFloquetSolution_mathieuWII_pi_mul_add`, and
+uniqueness follows from the reality of the eigenvalues (`im_eq_zero_of_isMeCoeffSeq`), the
+uniqueness of root paths (`eqOn_of_re_mathieuWI_pi_eq`), Ince's theorem
+(`IsFloquetSolution.unique`) and the connectedness of `[0, 1]`. -/
+@[dlmf 28.12.i]
+theorem mathieuNormalSegment_real {ν q : ℝ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
+    MathieuNormalSegment ν q ∧ (mathieuLambda ν q).im = 0 := by
+  by_cases hq : q = 0
+  · subst hq
+    simp only [Complex.ofReal_zero]
+    refine ⟨mathieuNormalSegment_zero hν, ?_⟩
+    rw [mathieuLambda_zero hν, ← Complex.ofReal_pow, Complex.ofReal_im]
+  have hc := abs_cos_pi_mul_lt_one hν
+  have h0 : (mathieuWI ((ν ^ 2 : ℝ) : ℂ) 0 π).re = Real.cos (π * ν) := by
+    have hF := (isFloquetSolution_mathieuMe hν (mathieuNormalSegment_zero hν)).1
+    rw [mathieuLambda_zero hν] at hF
+    have hch := (exists_isFloquetSolution_iff_charExp _ _ _).mp ⟨_, hF⟩
+    unfold IsMathieuCharExp at hch
+    rw [Complex.ofReal_pow, ← hch, ← Complex.ofReal_mul, ← Complex.ofReal_cos, Complex.ofReal_re]
+  obtain ⟨Λ, hΛc, hΛ0, hΛ⟩ := exists_continuous_re_mathieuWI_pi_eq (q := q) hc h0
+  set nc := realNormCoeff ν q Λ with hncdef
+  have hnc := isMeCoeffSeq_realNormCoeff hν hΛ
+  have hnc0 : IsMeCoeffSeq ν 0 ((ν : ℂ) ^ 2) (nc 0) := by
+    have := hnc 0
+    rwa [zero_mul, Complex.ofReal_zero, hΛ0, Complex.ofReal_pow] at this
+  obtain ⟨-, hε2⟩ := isMeCoeffSeq_zero_q hν hnc0
+  set ε := nc 0 0 with hεdef
+  set cp : ℝ → ℤ → ℂ := fun t n => ε * nc t n with hcpdef
+  have hcp : ∀ t, IsMeCoeffSeq ν ((t * q : ℝ) : ℂ) (Λ t) (cp t) := by
+    intro t
+    obtain ⟨hr, hs, hsq⟩ := hnc t
+    refine ⟨fun m => by simp only [cp]; linear_combination ε * hr m, ?_, ?_⟩
+    · simpa [cp, norm_mul] using hs.mul_left ‖ε‖
+    · have := hsq.mul_left (ε ^ 2)
+      rw [show ε ^ 2 * 1 = 1 by rw [hε2, one_mul]] at this
+      refine this.congr_fun fun n => ?_
+      simp only [cp]; ring
+  have hcpc : ∀ m, Continuous (fun t => cp t m) := fun m =>
+    continuous_const.mul (continuous_realNormCoeff hν hΛ hΛc m)
+  have hcp00 : cp 0 0 = 1 := by simp only [cp]; rw [← sq]; exact hε2
+  have hpath : IsMathieuLambdaPath ν q (fun t => (Λ t : ℂ)) cp := by
+    refine ⟨(Complex.continuous_ofReal.comp hΛc).continuousOn, fun m => (hcpc m).continuousOn,
+      ?_, hcp00, fun t _ => ?_⟩
+    · simp [hΛ0]
+    · have := hcp t; push_cast at this; exact this
+  have huniq : ∀ p' : ℂ × (ℤ → ℂ), (∃ Λ' c', IsMathieuLambdaPath ν q Λ' c' ∧ Λ' 1 = p'.1 ∧
+      c' 1 = p'.2) → p' = ((Λ 1 : ℂ), cp 1) := by
+    rintro ⟨a', c''⟩ ⟨Λ', c', hp, rfl, rfl⟩
+    have hseq : ∀ t ∈ Icc (0 : ℝ) 1, IsMeCoeffSeq ν ((t * q : ℝ) : ℂ) (Λ' t) (c' t) := by
+      intro t ht; have := hp.isMeCoeffSeq t ht; push_cast; exact this
+    have hreal : ∀ t ∈ Icc (0 : ℝ) 1, Λ' t = ((Λ' t).re : ℂ) := fun t ht =>
+      Complex.ext (by simp) (by simp [im_eq_zero_of_isMeCoeffSeq (hseq t ht)])
+    have hroot : ∀ t ∈ Icc (0 : ℝ) 1,
+        (mathieuWI ((Λ' t).re : ℂ) ((t * q : ℝ) : ℂ) π).re = Real.cos (π * ν) := by
+      intro t ht
+      have hch := (exists_isFloquetSolution_iff_charExp _ _ _).mp
+        ⟨_, isFloquetSolution_tsum_of_isMeCoeffSeq (hseq t ht)⟩
+      unfold IsMathieuCharExp at hch
+      rw [← hreal t ht, ← hch, ← Complex.ofReal_mul, ← Complex.ofReal_cos, Complex.ofReal_re]
+    have heq := eqOn_of_re_mathieuWI_pi_eq hc (Λ₁ := fun t => (Λ' t).re) (Λ₂ := Λ)
+      (Complex.continuous_re.comp_continuousOn hp.continuousOn_lambda) hΛc.continuousOn
+      (by
+        show (Λ' 0).re = Λ 0
+        rw [hp.lambda_zero, hΛ0, ← Complex.ofReal_pow, Complex.ofReal_re]) hroot
+      (fun t _ => hΛ t)
+    have hΛeq : ∀ t ∈ Icc (0 : ℝ) 1, Λ' t = (Λ t : ℂ) := fun t ht => by
+      rw [hreal t ht]; exact congrArg _ (heq ht)
+    have hzero : c' 0 = cp 0 := by
+      have h1 : IsMeCoeffSeq ν 0 ((ν : ℂ) ^ 2) (c' 0) := by
+        have := hseq 0 ⟨le_rfl, zero_le_one⟩
+        rwa [zero_mul, Complex.ofReal_zero, hp.lambda_zero] at this
+      have h2 : IsMeCoeffSeq ν 0 ((ν : ℂ) ^ 2) (cp 0) := by
+        have := hcp 0
+        rwa [zero_mul, Complex.ofReal_zero, hΛ0, Complex.ofReal_pow] at this
+      rw [(isMeCoeffSeq_zero_q hν h1).1, (isMeCoeffSeq_zero_q hν h2).1, hp.coeff_zero, hcp00]
+    have hsign : ∀ t ∈ Icc (0 : ℝ) 1, c' t = cp t ∨ c' t = -cp t := by
+      intro t ht
+      rcases eq_or_ne t 0 with rfl | ht0
+      · exact Or.inl hzero
+      have hQ : ((t * q : ℝ) : ℂ) ≠ 0 := by exact_mod_cast mul_ne_zero ht0 hq
+      have hw := isFloquetSolution_tsum_of_isMeCoeffSeq (hcp t)
+      have hw' := isFloquetSolution_tsum_of_isMeCoeffSeq (hseq t ht)
+      rw [hΛeq t ht] at hw'
+      obtain ⟨κ, hκ⟩ := IsFloquetSolution.unique hQ hw hw'
+      have hcκ : c' t = fun m => κ * cp t m := by
+        refine eq_of_tsum_exp_series_eq (ν := ν) (hseq t ht).2.1
+          (by simpa [norm_mul] using (hcp t).2.1.mul_left ‖κ‖) fun x => ?_
+        have := congrFun hκ x
+        rw [this, ← tsum_mul_left]
+        congr 1; funext m; ring
+      have hκ2 : κ * κ = 1 := by
+        have h1 := (hseq t ht).2.2
+        have h2 := (hcp t).2.2.mul_left (κ ^ 2)
+        rw [mul_one] at h2
+        rw [hcκ] at h1
+        have := h1.unique (h2.congr_fun fun m => by ring)
+        rw [← sq]; exact this.symm
+      rcases mul_self_eq_one_iff.mp hκ2 with h | h
+      · left; rw [hcκ, h]; funext m; simp
+      · right; rw [hcκ, h]; funext m; simp
+    -- connectedness of `[0, 1]`
+    set u : Set ℝ := ⋂ m : ℤ, Icc 0 1 ∩ (fun t => c' t m - cp t m) ⁻¹' {0} with hu
+    set v : Set ℝ := ⋂ m : ℤ, Icc 0 1 ∩ (fun t => c' t m + cp t m) ⁻¹' {0} with hv
+    have huc : IsClosed u := isClosed_iInter fun m =>
+      ((hp.continuousOn_coeff m).sub (hcpc m).continuousOn).preimage_isClosed_of_isClosed
+        isClosed_Icc isClosed_singleton
+    have hvc : IsClosed v := isClosed_iInter fun m =>
+      ((hp.continuousOn_coeff m).add (hcpc m).continuousOn).preimage_isClosed_of_isClosed
+        isClosed_Icc isClosed_singleton
+    have hmem_u : ∀ t, t ∈ u ↔ t ∈ Icc (0 : ℝ) 1 ∧ c' t = cp t := by
+      intro t
+      simp only [u, mem_iInter, mem_inter_iff, mem_preimage, mem_singleton_iff, sub_eq_zero]
+      exact ⟨fun h => ⟨(h 0).1, funext fun m => (h m).2⟩,
+        fun h m => ⟨h.1, congrFun h.2 m⟩⟩
+    have hmem_v : ∀ t, t ∈ v ↔ t ∈ Icc (0 : ℝ) 1 ∧ c' t = -cp t := by
+      intro t
+      simp only [v, mem_iInter, mem_inter_iff, mem_preimage, mem_singleton_iff,
+        add_eq_zero_iff_eq_neg]
+      exact ⟨fun h => ⟨(h 0).1, funext fun m => (h m).2⟩,
+        fun h m => ⟨h.1, congrFun h.2 m⟩⟩
+    have hcover : Icc (0 : ℝ) 1 ⊆ u ∪ v := by
+      intro t ht
+      rcases hsign t ht with h | h
+      · exact Or.inl ((hmem_u t).2 ⟨ht, h⟩)
+      · exact Or.inr ((hmem_v t).2 ⟨ht, h⟩)
+    have hdisj : Icc (0 : ℝ) 1 ∩ (u ∩ v) = ∅ := by
+      ext t
+      simp only [mem_inter_iff, mem_empty_iff_false, iff_false, not_and]
+      intro ht htu htv
+      have e1 := ((hmem_u t).1 htu).2
+      have e2 := ((hmem_v t).1 htv).2
+      have hz : cp t = 0 := by
+        funext m
+        have := congrFun (e1.symm.trans e2) m
+        simp only [Pi.neg_apply, Pi.zero_apply] at this ⊢
+        linear_combination this / 2
+      have := (hcp t).2.2
+      rw [hz] at this
+      simp only [Pi.zero_apply, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow] at this
+      exact one_ne_zero (hasSum_zero.unique this).symm
+    rcases (isPreconnected_iff_subset_of_disjoint_closed.mp isPreconnected_Icc) u v huc hvc
+      hcover hdisj with h | h
+    · have h1 := ((hmem_u 1).1 (h ⟨zero_le_one, le_rfl⟩)).2
+      rw [hΛeq 1 ⟨zero_le_one, le_rfl⟩, h1]
+    · exfalso
+      have h1 := ((hmem_v 0).1 (h ⟨le_rfl, zero_le_one⟩)).2
+      rw [hzero] at h1
+      have := congrFun h1 0
+      simp only [Pi.neg_apply, hcp00] at this
+      norm_num at this
+  have hex : ∃ Λ' c', IsMathieuLambdaPath ν q Λ' c' ∧ Λ' 1 = ((Λ 1 : ℂ), cp 1).1 ∧
+      c' 1 = ((Λ 1 : ℂ), cp 1).2 := ⟨fun t => (Λ t : ℂ), cp, hpath, rfl, rfl⟩
+  refine ⟨⟨_, hex, huniq⟩, ?_⟩
+  rw [mathieuLambda_of_not_int hν, mathieuLambdaData_eq_of_unique hex huniq]
+  simp
 
 end DLMF.Mathieu

@@ -434,8 +434,8 @@ theorem pcfPZ_recipGamma_comp {f : ℂ × ℂ → ℂ} (hf : Continuous f) :
 
 /-- `U(a,z)` is jointly continuous in `(a,z)`. -/
 theorem pcfPZ_pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) := by
-  have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := half_ne_neg_nat
-  have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := three_half_ne_neg_nat
+  have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := Complex.one_div_two_ne_neg_natCast
+  have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := Complex.three_div_two_ne_neg_natCast
   unfold pcfU pcfEven pcfOdd
   have k1 := pcfPZ_kummerM_comp hb1 (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4)
     (g := fun p => p.2 ^ 2 / 2) (by fun_prop) (by fun_prop)
@@ -451,9 +451,9 @@ theorem pcfPZ_pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) 
 
 /-- `U'(a,z)` is jointly continuous in `(a,z)`. -/
 theorem pcfPZ_pcfUDeriv_continuous : Continuous (fun p : ℂ × ℂ => pcfUDeriv p.1 p.2) := by
-  have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := half_ne_neg_nat
-  have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := three_half_ne_neg_nat
-  have hb3' : ∀ k : ℕ, (1 / 2 + 1 : ℂ) ≠ -k := by norm_num; exact three_half_ne_neg_nat
+  have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := Complex.one_div_two_ne_neg_natCast
+  have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := Complex.three_div_two_ne_neg_natCast
+  have hb3' : ∀ k : ℕ, (1 / 2 + 1 : ℂ) ≠ -k := by norm_num; exact Complex.three_div_two_ne_neg_natCast
   have hb5 : ∀ k : ℕ, (3 / 2 + 1 : ℂ) ≠ -k := by norm_num; exact five_halves_ne_neg_nat
   unfold pcfUDeriv pcfEvenDeriv pcfOddDeriv
   have k1 := pcfPZ_kummerM_comp hb1 (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4)

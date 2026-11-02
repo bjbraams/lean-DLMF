@@ -41,6 +41,8 @@ open scoped Topology Real
 
 namespace DLMF.Lame
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 variable {k : ℝ}
 
 /-- `sn²` has the periods `2K` and `2iK'` (all integer combinations). -/

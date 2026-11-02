@@ -7,6 +7,9 @@ module
 
 public import DLMF.AsymptoticApproximations.Distributional.Basic
 public import TauCeti.Analysis.SpecialFunctions.Beta
+public import DLMF.Gamma.IntegralRepresentations.FrullaniAndMoments
+public import DLMF.Gamma.Polygamma
+public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 
 /-!
 # Fractional integrals and regularization (DLMF §2.6(iii)–(iv))
@@ -149,13 +152,178 @@ theorem kPlusPairing_powKernel_conv_rpow {μ α : ℝ} (hμ : 0 < μ) (hμn : �
         tPowPairing (μ - s - α) φ := by
   sorry
 
+/-- `0 ≤ 1 - v^μ ≤ max 1 μ · (1 - v)` for `0 ≤ v ≤ 1`, `μ > 0`. -/
+private lemma one_sub_rpow_le {μ v : ℝ} (hμ : 0 < μ) (hv0 : 0 ≤ v) (hv1 : v ≤ 1) :
+    0 ≤ 1 - v ^ μ ∧ 1 - v ^ μ ≤ max 1 μ * (1 - v) := by
+  refine ⟨by linarith [Real.rpow_le_one hv0 hv1 hμ.le], ?_⟩
+  rcases le_total μ 1 with h | h
+  · have : v ^ (1 : ℝ) ≤ v ^ μ := Real.rpow_le_rpow_of_exponent_ge' hv0 hv1 hμ.le h
+    rw [Real.rpow_one] at this
+    nlinarith [le_max_left 1 μ]
+  · have hb := one_add_mul_self_le_rpow_one_add (s := v - 1) (by linarith) h
+    rw [show 1 + (v - 1) = v by ring] at hb
+    nlinarith [le_max_right 1 μ]
+
+/-- `(1 - v^μ)/(1 - v)` is integrable on `(0, 1)`. -/
+private lemma integrableOn_one_sub_rpow_div {μ : ℝ} (hμ : 0 < μ) :
+    IntegrableOn (fun v : ℝ => (1 - v ^ μ) / (1 - v)) (Ioo 0 1) := by
+  have hmeas : AEStronglyMeasurable (fun v : ℝ => (1 - v ^ μ) / (1 - v))
+      (volume.restrict (Ioo (0 : ℝ) 1)) := by
+    refine ContinuousOn.aestronglyMeasurable (fun v hv => ?_) measurableSet_Ioo
+    have h1 : 1 - v ≠ 0 := by linarith [hv.2]
+    exact ((continuousAt_const.sub (Real.continuousAt_rpow_const _ _ (Or.inr hμ.le))).div
+      (continuousAt_const.sub continuousAt_id) h1).continuousWithinAt
+  have hbd : ∀ᵐ v ∂(volume.restrict (Ioo (0 : ℝ) 1)), ‖(1 - v ^ μ) / (1 - v)‖ ≤ max 1 μ := by
+    refine (ae_restrict_iff' measurableSet_Ioo).mpr (Eventually.of_forall fun v hv => ?_)
+    obtain ⟨h0, h1⟩ := one_sub_rpow_le hμ hv.1.le hv.2.le
+    have hp : 0 < 1 - v := by linarith [hv.2]
+    rw [Real.norm_eq_abs, abs_of_nonneg (div_nonneg h0 hp.le), div_le_iff₀ hp]
+    exact h1
+  exact (integrableOn_const (C := max 1 μ) measure_Ioo_lt_top.ne).mono' hmeas hbd
+
+/-- `v^{μ-1} ln(1 - v)` is integrable on `(0, 1)` for `μ > 0`. -/
+private lemma integrableOn_rpow_mul_log_one_sub {μ : ℝ} (hμ : 0 < μ) :
+    IntegrableOn (fun v : ℝ => v ^ (μ - 1) * Real.log (1 - v)) (Ioo 0 1) := by
+  have hB : IntegrableOn (fun v : ℝ => v ^ (μ - 1) * (1 - v) ^ ((1 / 2 : ℝ) - 1)) (Ioo 0 1) :=
+    TauCeti.integrableOn_rpow_mul_one_sub_rpow_iff.mpr ⟨hμ, by norm_num⟩
+  have hmeas : AEStronglyMeasurable (fun v : ℝ => v ^ (μ - 1) * Real.log (1 - v))
+      (volume.restrict (Ioo (0 : ℝ) 1)) := by
+    refine ContinuousOn.aestronglyMeasurable (fun v hv => ?_) measurableSet_Ioo
+    have h1 : 1 - v ≠ 0 := by linarith [hv.2]
+    exact ((Real.continuousAt_rpow_const _ _ (Or.inl hv.1.ne')).mul
+      ((continuousAt_const.sub continuousAt_id).log h1)).continuousWithinAt
+  refine (hB.const_mul 2).mono' hmeas ((ae_restrict_iff' measurableSet_Ioo).mpr
+    (Eventually.of_forall fun v hv => ?_))
+  · have hp : 0 < 1 - v := by linarith [hv.2]
+    have hlog : Real.log (1 - v) ≤ 0 := Real.log_nonpos hp.le (by linarith [hv.1])
+    have hy := Real.log_le_sub_one_of_pos (Real.rpow_pos_of_pos hp (-(1 / 2 : ℝ)))
+    rw [Real.log_rpow hp] at hy
+    have hv' : 0 < v ^ (μ - 1) := Real.rpow_pos_of_pos hv.1 _
+    rw [Real.norm_eq_abs, abs_mul, abs_of_pos hv', abs_of_nonpos hlog]
+    rw [show (1 / 2 : ℝ) - 1 = -(1 / 2) by norm_num]
+    have : -Real.log (1 - v) ≤ 2 * (1 - v) ^ (-(1 / 2 : ℝ)) := by nlinarith
+    nlinarith
+
+/-- `∫₀¹ v^{μ-1} ln(1 - v) dv = -(ψ(μ+1) + γ)/μ`, by parts and DLMF 5.9.16. -/
+private lemma integral_rpow_mul_log_one_sub {μ : ℝ} (hμ : 0 < μ) :
+    ∫ v in (0 : ℝ)..1, v ^ (μ - 1) * Real.log (1 - v) =
+      -(Real.digamma (μ + 1) + Real.eulerMascheroniConstant) / μ := by
+  set P : ℝ → ℝ := fun v => (v ^ μ - 1) * Real.log (1 - v) with hP
+  set P' : ℝ → ℝ := fun v => μ * (v ^ (μ - 1) * Real.log (1 - v)) + (1 - v ^ μ) / (1 - v)
+    with hP'
+  have hI1 := integrableOn_rpow_mul_log_one_sub hμ
+  have hI2 := integrableOn_one_sub_rpow_div hμ
+  have hint : IntervalIntegrable P' volume 0 1 := by
+    rw [intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one]
+    exact (hI1.const_mul μ).add hI2
+  have hcont : ContinuousOn P (Icc 0 1) := by
+    intro v hv
+    rcases lt_or_eq_of_le hv.2 with h1 | h1
+    · have h1' : 1 - v ≠ 0 := by linarith
+      exact (((Real.continuousAt_rpow_const _ _ (Or.inr hμ.le)).sub continuousAt_const).mul
+        ((continuousAt_const.sub continuousAt_id).log h1')).continuousWithinAt
+    · subst h1
+      have hP1 : P 1 = 0 := by simp [hP]
+      rw [ContinuousWithinAt, hP1]
+      have hlim : Tendsto (fun v : ℝ => max 1 μ * |(1 - v) * Real.log (1 - v)|)
+          (𝓝[Icc 0 1] 1) (𝓝 0) := by
+        have hc : Continuous fun v : ℝ => max 1 μ * |(1 - v) * Real.log (1 - v)| :=
+          continuous_const.mul ((Real.continuous_mul_log.comp
+            (continuous_const.sub continuous_id)).abs)
+        have := hc.tendsto 1
+        simp only [sub_self, Real.log_zero, mul_zero, abs_zero] at this
+        exact this.mono_left nhdsWithin_le_nhds
+      refine squeeze_zero_norm' ?_ hlim
+      filter_upwards [self_mem_nhdsWithin] with v hv
+      obtain ⟨h0, hle⟩ := one_sub_rpow_le hμ hv.1 hv.2
+      have hlog : Real.log (1 - v) ≤ 0 := Real.log_nonpos (by linarith [hv.2]) (by linarith [hv.1])
+      simp only [hP, Real.norm_eq_abs, abs_mul]
+      rw [abs_of_nonneg (by linarith [hv.2] : 0 ≤ 1 - v),
+        abs_of_nonpos (by linarith : v ^ μ - 1 ≤ 0),
+        abs_of_nonpos hlog]
+      nlinarith
+  have hderiv : ∀ v ∈ Ioo (0 : ℝ) 1, HasDerivAt P (P' v) v := by
+    intro v hv
+    have h1 : 1 - v ≠ 0 := by linarith [hv.2]
+    have hd := ((Real.hasDerivAt_rpow_const (p := μ) (Or.inl hv.1.ne')).sub_const 1).mul
+      (((hasDerivAt_id v).const_sub 1).log h1)
+    have hfun : P = (fun x => x ^ μ - 1) * fun y => Real.log (1 - id y) := rfl
+    rw [hfun]
+    refine hd.congr_deriv ?_
+    simp only [hP', id]
+    field_simp
+    ring
+  have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le zero_le_one hcont hderiv hint
+  have hP0 : P 0 = 0 := by simp [hP]
+  have hP1 : P 1 = 0 := by simp [hP]
+  rw [hP0, hP1, sub_zero] at hftc
+  have hsplit : ∫ v in (0 : ℝ)..1, P' v =
+      (μ * ∫ v in (0 : ℝ)..1, v ^ (μ - 1) * Real.log (1 - v)) +
+      ∫ v in (0 : ℝ)..1, (1 - v ^ μ) / (1 - v) := by
+    have h1 : IntervalIntegrable (fun v : ℝ => μ * (v ^ (μ - 1) * Real.log (1 - v)))
+        volume 0 1 := by
+      rw [intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one]; exact hI1.const_mul μ
+    have h2 : IntervalIntegrable (fun v : ℝ => (1 - v ^ μ) / (1 - v)) volume 0 1 := by
+      rw [intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one]; exact hI2
+    rw [hP', intervalIntegral.integral_add h1 h2, intervalIntegral.integral_const_mul]
+  have hdig := (DLMF.Gamma.digamma_add_euler (x := μ + 1) (by linarith)).2
+  rw [show μ + 1 - 1 = μ by ring] at hdig
+  rw [hsplit, ← hdig] at hftc
+  rw [eq_div_iff hμ.ne']
+  linear_combination hftc
+
+/-- `∫₀ˣ (x-t)^{μ-1} ln t dt = μ⁻¹ x^μ (ln x - γ - ψ(μ+1))`. -/
+private lemma integral_rpow_sub_mul_log {μ : ℝ} (hμ : 0 < μ) {x : ℝ} (hx : 0 < x) :
+    ∫ t in (0 : ℝ)..x, (x - t) ^ (μ - 1) * Real.log t =
+      μ⁻¹ * (x ^ μ * (Real.log x - Real.eulerMascheroniConstant - Real.digamma (μ + 1))) := by
+  have h1 := intervalIntegral.integral_comp_sub_left
+    (fun t => (x - t) ^ (μ - 1) * Real.log t) x (a := 0) (b := x)
+  simp only [sub_sub_cancel, sub_self, sub_zero] at h1
+  rw [← h1]
+  have h2 := intervalIntegral.integral_comp_mul_left
+    (fun s => s ^ (μ - 1) * Real.log (x - s)) hx.ne' (a := 0) (b := 1)
+  simp only [mul_zero, mul_one] at h2
+  rw [show (∫ s in (0 : ℝ)..x, s ^ (μ - 1) * Real.log (x - s)) =
+      x * ∫ v in (0 : ℝ)..1, (x * v) ^ (μ - 1) * Real.log (x - x * v) by
+    rw [h2, smul_eq_mul, mul_inv_cancel_left₀ hx.ne']]
+  have hcongr : ∫ v in (0 : ℝ)..1, (x * v) ^ (μ - 1) * Real.log (x - x * v) =
+      ∫ v in (0 : ℝ)..1, x ^ (μ - 1) * (Real.log x * v ^ (μ - 1) +
+        v ^ (μ - 1) * Real.log (1 - v)) := by
+    rw [intervalIntegral.integral_of_le zero_le_one, intervalIntegral.integral_of_le zero_le_one,
+      integral_Ioc_eq_integral_Ioo, integral_Ioc_eq_integral_Ioo]
+    refine setIntegral_congr_fun measurableSet_Ioo fun v hv => ?_
+    have hp : 0 < 1 - v := by linarith [hv.2]
+    rw [Real.mul_rpow hx.le hv.1.le, show x - x * v = x * (1 - v) by ring,
+      Real.log_mul hx.ne' hp.ne']
+    ring
+  have hr : IntervalIntegrable (fun v : ℝ => v ^ (μ - 1)) volume 0 1 :=
+    intervalIntegral.intervalIntegrable_rpow' (by linarith)
+  have hl : IntervalIntegrable (fun v : ℝ => v ^ (μ - 1) * Real.log (1 - v)) volume 0 1 := by
+    rw [intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one]
+    exact integrableOn_rpow_mul_log_one_sub hμ
+  rw [hcongr, intervalIntegral.integral_const_mul,
+    intervalIntegral.integral_add (hr.const_mul _) hl, intervalIntegral.integral_const_mul,
+    integral_rpow (Or.inl (by linarith)), integral_rpow_mul_log_one_sub hμ,
+    show μ - 1 + 1 = μ by ring, Real.zero_rpow hμ.ne', Real.one_rpow,
+    Real.rpow_sub_one hx.ne']
+  field_simp
+  ring
+
 /-- The convolution behind DLMF 2.6.40, as an identity of functions:
 `(t^{μ-1} ∗ ln t)(x) = μ⁻¹ x^μ (ln x - γ - ψ(μ+1))` for `x > 0`, `μ > 0`. -/
 @[dlmf 2.6.E40]
 theorem halfLineConvolution_powKernel_log {μ : ℝ} (hμ : 0 < μ) {x : ℝ} (hx : 0 < x) :
     halfLineConvolution (rpowKernel μ) (fun t => (Real.log t : ℂ)) x =
       (μ : ℂ)⁻¹ * logRpowKernel μ x := by
-  sorry
+  have h : halfLineConvolution (rpowKernel μ) (fun t => (Real.log t : ℂ)) x =
+      ((∫ t in (0 : ℝ)..x, (x - t) ^ (μ - 1) * Real.log t : ℝ) : ℂ) := by
+    rw [← intervalIntegral.integral_ofReal]
+    simp only [halfLineConvolution, rpowKernel, Complex.ofReal_mul]
+  have hd := DLMF.Gamma.digamma_ofReal (x := μ + 1) (by linarith)
+  push_cast at hd
+  rw [h, integral_rpow_sub_mul_log hμ hx, logRpowKernel, hd]
+  push_cast
+  ring
 
 /-- DLMF 2.6.40: for `μ > 0` and `s = 0, 1, 2, …`,
 `t^{μ-1} ∗ t^{-s-1} = (-1)^s/(μ s!) · D^{s+1}(t^μ (ln t - γ - ψ(μ+1)))`, where

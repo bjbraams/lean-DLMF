@@ -678,12 +678,12 @@ theorem besselK_eq_half_integral (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
   have hmom : ∀ μ, (∫ t : ℝ, exp (-(z * (Real.cosh t : ℂ)) + μ * t)) = besselKMoment 0 μ z := by
     intro μ; simp [besselKMoment, besselKKernel]
   simp_rw [hmom]
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => besselK μ z) (g := fun μ => 1 / 2 * besselKMoment 0 μ z)
     (continuousAt_besselK_order id continuous_id ν hzs)
     ((differentiable_besselKMoment_order 0 hz).continuous.continuousAt.const_mul _)
     (fun c hc => ?_)
-  have hc' := DLMF.Confluent.forall_of_mem_integerComplement hc
+  have hc' := Complex.forall_of_mem_integerComplement hc
   have e := besselKMoment_eq_wronskian_combination c hz
   rw [besselKMomentWronskian_besselI_eq_two, besselKMomentWronskian_besselK_eq_zero hc'] at e
   rw [e]

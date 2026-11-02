@@ -7,6 +7,7 @@ module
 
 public import DLMF.QSeries.Basic.SeriesProperties
 public import DLMF.QSeries.QBinomial
+public import DLMF.QSeries.RamanujanPsi
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
 
 /-!
@@ -322,7 +323,9 @@ theorem ramanujan_1psi1 {a b q z : ℂ}
           qPochhammerInf (q / (a * z)) q /
         (qPochhammerInf b q * qPochhammerInf (q / a) q * qPochhammerInf z q *
           qPochhammerInf (b / (a * z)) q) := by
-  sorry
+  refine ramanujan_1psi1_of_regular hq0 hq ha0 (fun n h => ha (-((n + 1 : ℕ) : ℤ)) ?_)
+    (fun n => by simpa using hb n) hz
+  rw [h, zpow_neg, zpow_natCast, mul_inv_cancel₀ (pow_ne_zero _ hq0)]
 
 /-- Heine's transformation of `₂φ₁` (AAR §10.10). -/
 @[dlmf 17.6.E6 "exact: both actual series disks, nonzero b, and all literal lower exclusions; local notation adapter proved"]

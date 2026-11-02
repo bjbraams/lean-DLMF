@@ -8,6 +8,8 @@ module
 public import DLMF.AsymptoticApproximations.Mellin.Transforms
 public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMF.ExpIntegrals.Expansions
+public import DLMF.IncompleteGamma.ExponentialIntegral
+public import DLMF.Hypergeometric.Solutions.Logarithmic
 
 /-!
 # Laplace transforms with small parameters (DLMF §2.5(iii))
@@ -276,7 +278,11 @@ theorem laplace_inv_one_add_eq {ζ : ℝ} (hζ : 0 < ζ) :
 theorem laplace_inv_one_add_eq_complex {ζ : ℂ} (hζ : 0 < ζ.re) :
     laplaceTransform (fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹) ζ =
       Complex.exp ζ * DLMF.Confluent.genExpIntE 1 ζ := by
-  sorry
+  rw [DLMF.Confluent.genExpIntE_stieltjes (by norm_num) hζ]
+  simp only [sub_self, cpow_zero, Complex.Gamma_one, div_one, one_mul, laplaceTransform]
+  rw [← mul_assoc, ← Complex.exp_add, add_neg_cancel, Complex.exp_zero, one_mul]
+  refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+  push_cast; ring
 
 /-- DLMF 2.5.48 (convergent form, stronger than DLMF): for `ζ > 0`,
 `𝓛h(ζ) = (-ln ζ) ∑ ζᵏ/k! + ∑ ψ(k + 1) ζᵏ/k!` with both series convergent, for
@@ -305,6 +311,75 @@ theorem laplace_inv_one_add_isBigO (N : ℕ) :
     (fun ζ : ℝ => laplaceTransform (fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹) ζ -
         ∑ k ∈ range N, (-(Real.log ζ : ℂ) + digamma (k + 1)) * (ζ : ℂ) ^ k / k !)
       =O[𝓝[>] 0] fun ζ => ζ ^ N * (1 + |Real.log ζ|) := by
-  sorry
+  obtain ⟨C, hC⟩ := DLMF.Hypergeometric.exists_norm_digamma_add_nat_le (x := 1)
+    (fun m h => by
+      have : ((1 : ℝ) : ℂ) = ((-(m : ℝ) : ℝ) : ℂ) := by push_cast; exact h
+      have h' := Complex.ofReal_injective this
+      linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)])
+  set D : ℝ := max C 1 with hD
+  set g : ℕ → ℝ := fun k => (N + 1) * 2 ^ k / k ! with hg
+  have hgs : Summable g := by
+    have := (Real.summable_pow_div_factorial 2).mul_left ((N : ℝ) + 1)
+    refine this.congr fun k => ?_
+    simp only [hg]; ring
+  refine IsBigO.of_bound (D * ∑' k, g k) ?_
+  filter_upwards [Ioo_mem_nhdsGT (zero_lt_one' ℝ)] with ζ hζ
+  have hζ0 : 0 < ζ := hζ.1
+  set term : ℕ → ℂ := fun k => (-(Real.log ζ : ℂ) + digamma (k + 1)) * (ζ : ℂ) ^ k / k !
+    with hterm
+  have hS : HasSum (fun k => term (k + N))
+      (laplaceTransform (fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹) ζ - ∑ k ∈ range N, term k) :=
+    (hasSum_nat_add_iff' N).mpr (hasSum_laplace_inv_one_add hζ0)
+  have hbound : ∀ k : ℕ, ‖term (k + N)‖ ≤ ζ ^ N * (1 + |Real.log ζ|) * (D * g k) := by
+    intro k
+    have hdig : ‖digamma (((k + N : ℕ) : ℂ) + 1)‖ ≤ C * ((k + N : ℕ) + 1) := by
+      rw [add_comm]; exact hC (k + N)
+    have hk1 : (1 : ℝ) ≤ ((k + N : ℕ) : ℝ) + 1 := by
+      linarith [(Nat.cast_nonneg (k + N) : (0:ℝ) ≤ _)]
+    have hkN : ((k + N : ℕ) : ℝ) + 1 ≤ (N + 1) * 2 ^ k := by
+      have h2 : (k : ℝ) + 1 ≤ 2 ^ k := by
+        have := Nat.lt_two_pow_self (n := k)
+        exact_mod_cast this
+      push_cast
+      nlinarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k), (Nat.cast_nonneg N : (0:ℝ) ≤ N)]
+    have h1 : ‖-(Real.log ζ : ℂ) + digamma (((k + N : ℕ) : ℂ) + 1)‖ ≤
+        (1 + |Real.log ζ|) * (D * (((k + N : ℕ) : ℝ) + 1)) := by
+      refine (norm_add_le _ _).trans ?_
+      rw [norm_neg, Complex.norm_real, Real.norm_eq_abs]
+      have hC' : C * (((k + N : ℕ) : ℝ) + 1) ≤ D * (((k + N : ℕ) : ℝ) + 1) :=
+        mul_le_mul_of_nonneg_right (le_max_left _ _) (by linarith)
+      have hD1 : 1 ≤ D := le_max_right _ _
+      have hDm : 1 ≤ D * (((k + N : ℕ) : ℝ) + 1) := by nlinarith
+      nlinarith [mul_le_mul_of_nonneg_left hDm (abs_nonneg (Real.log ζ))]
+    have h2 : ‖(ζ : ℂ) ^ (k + N) / ((k + N)! : ℂ)‖ ≤ ζ ^ N / k ! := by
+      rw [norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hζ0,
+        Complex.norm_natCast, pow_add]
+      have hk : (k ! : ℝ) ≤ (k + N)! := by exact_mod_cast Nat.factorial_le (by omega)
+      have hk0 : (0 : ℝ) < k ! := by positivity
+      have hζk : ζ ^ k ≤ 1 := pow_le_one₀ hζ0.le hζ.2.le
+      rw [div_le_div_iff₀ (by positivity) hk0]
+      calc ζ ^ k * ζ ^ N * k ! ≤ 1 * ζ ^ N * (k + N)! := by gcongr
+        _ = ζ ^ N * (k + N)! := by ring
+    have heq : term (k + N) = (-(Real.log ζ : ℂ) + digamma (((k + N : ℕ) : ℂ) + 1)) *
+        ((ζ : ℂ) ^ (k + N) / ((k + N)! : ℂ)) := by
+      simp only [hterm]; ring
+    rw [heq, norm_mul]
+    calc _ ≤ (1 + |Real.log ζ|) * (D * (((k + N : ℕ) : ℝ) + 1)) * (ζ ^ N / k !) := by
+          gcongr
+      _ ≤ (1 + |Real.log ζ|) * (D * ((N + 1) * 2 ^ k)) * (ζ ^ N / k !) := by
+          have hD0 : 0 ≤ D := le_trans zero_le_one (le_max_right _ _)
+          gcongr
+      _ = _ := by simp only [hg]; ring
+  have hsum := hgs.mul_left (ζ ^ N * (1 + |Real.log ζ|) * D)
+  have hle := norm_tsum_le_tsum_norm ?_ |>.trans (hS.summable.norm.tsum_le_tsum hbound ?_)
+  · rw [hS.tsum_eq] at hle
+    have hpos : 0 ≤ ζ ^ N * (1 + |Real.log ζ|) := by positivity
+    rw [Real.norm_eq_abs, abs_of_nonneg hpos]
+    calc _ ≤ _ := hle
+      _ = ζ ^ N * (1 + |Real.log ζ|) * D * ∑' k, g k := by
+          rw [← tsum_mul_left]; congr 1; funext k; ring
+      _ = _ := by ring
+  · exact hS.summable.norm
+  · exact (hgs.mul_left D).mul_left (ζ ^ N * (1 + |Real.log ζ|))
 
 end DLMF.AsymptoticApproximations

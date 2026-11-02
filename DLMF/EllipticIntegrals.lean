@@ -44,7 +44,7 @@ Mathlib has no elliptic integrals.
 
 * Legendre's integrals (§§19.1–19.14): `incEllIntFk`, `incEllIntEk`, `incEllIntDk`,
   `incEllIntPik`, the complete `compEllIntEk`, `compEllIntDk`, `compEllIntPik` (with the existing
-  `DLMF.JacobiElliptic.compEllIntKk`, `compEllIntKpk`), the complementary `cCompEllIntKk`,
+  `DLMF.EllipticIntegrals.compEllIntKk`, `compEllIntKpk`), the complementary `cCompEllIntKk`,
   `cCompEllIntEk` (19.2.9), and Bulirsch's `bulirschCel`, `bulirschEl1/2/3`, in
   `DLMF.EllipticIntegrals.Legendre`. Bridges go to the real `DLMF.Elliptic.Real.*` integrals and
   to the `lean-codes` Carlson library. Cauchy principal values are `limUnder` of excised

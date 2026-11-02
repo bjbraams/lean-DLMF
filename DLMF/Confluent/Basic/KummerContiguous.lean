@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.Basic.KummerProperties
+public import DLMFMathlib.Analysis.Complex.NonInteger
 
 /-!
 # Kummer's function: derivative, contiguous relations and conjugation
@@ -42,18 +43,6 @@ open DLMF.Hypergeometric
 noncomputable section
 
 namespace DLMF.Confluent
-
-/-- `1/2` is not a nonpositive integer. -/
-theorem half_ne_neg_nat : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
-  have := congrArg Complex.re hk
-  simp at this
-  linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-
-/-- `3/2` is not a nonpositive integer. -/
-theorem three_half_ne_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
-  have := congrArg Complex.re hk
-  simp at this
-  linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
 section KummerContiguous
 

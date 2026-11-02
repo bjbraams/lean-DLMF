@@ -43,6 +43,9 @@ The orthogonality integrates by parts against the Gaussian `exp (-‖x‖²)` wi
 line-derivative integration by parts and Euler identity, and passes to the sphere with the
 TauCeti polar-coordinate formula `TauCeti.integral_eq_integral_Ioi_integral_toSphere`; the
 homogeneous scaling lemma is adapted from TauCeti's `MvPolynomial.IsHomogeneous.eval₂_const_mul`.
+
+The spherical harmonics `Y_{l,m}(θ, φ)` of DLMF 14.30.1 as functions of the angles are
+`DLMF.Legendre.sphericalHarmonic` in `DLMF.Legendre.Basic.Harmonics`.
 -/
 
 @[expose] public section

@@ -348,7 +348,7 @@ private lemma continuousAt_besselYExp_uncurry {h : ℂ} (hh : h ≠ 0) (μ₀ z�
   have hD := continuous_besselYExpNumerator_uncurry hh
   by_cases hν : ∃ k : ℤ, μ₀ = k
   · obtain ⟨n, rfl⟩ := hν
-    have hds := DLMF.Confluent.continuousOn_dslope_param (X := ℂ)
+    have hds := continuousOn_dslope_param (X := ℂ)
       (f := fun w ν => besselYExpNumerator ν h w) (s := univ) isOpen_univ
       ((hD.comp continuous_swap).continuousOn) (fun w _ => differentiable_besselYExpNumerator hh w) n
     have h1 : ContinuousAt (fun p : ℂ × ℂ => dslope (fun ν => besselYExpNumerator ν h p.2) n p.1)
@@ -413,7 +413,7 @@ private lemma hasDerivAt_besselYExp_of_not_int {μ : ℂ} (hμ : ∀ k : ℤ, μ
 private lemma hasDerivAt_besselYExp (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     HasDerivAt (fun z => besselYExp μ h z)
       (μ * besselYExp μ h z - h * Complex.exp z * besselYExp (μ + 1) h z) z := by
-  have := DLMF.Confluent.integerComplement_nhdsWithin_neBot μ
+  have := Complex.integerComplement_nhdsWithin_neBot μ
   have hY := continuousAt_besselYExp_uncurry hh
   refine hasDerivAt_of_tendstoUniformlyOnFilter (l := 𝓝[integerComplement] μ)
     (f := fun c w => besselYExp c h w)
@@ -426,14 +426,14 @@ private lemma hasDerivAt_besselYExp (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ
           (f := fun p : ℂ × ℂ => (p.1 + 1, p.2)) (hY (μ + 1) z) (by fun_prop)
       exact (continuousAt_fst.mul (hY μ z)).sub ((by fun_prop : ContinuousAt
         (fun p : ℂ × ℂ => h * Complex.exp p.2) (μ, z)).mul h2)
-    exact DLMF.Confluent.tendstoUniformlyOnFilter_of_continuousAt
+    exact tendstoUniformlyOnFilter_of_continuousAt
       (F := fun c w => c * besselYExp c h w - h * Complex.exp w * besselYExp (c + 1) h w) hc
       nhdsWithin_le_nhds
   · have hm : integerComplement ×ˢ univ ∈ 𝓝[integerComplement] μ ×ˢ 𝓝 z :=
       prod_mem_prod self_mem_nhdsWithin univ_mem
     filter_upwards [hm] with p hp
     exact hasDerivAt_besselYExp_of_not_int
-      (DLMF.Confluent.forall_of_mem_integerComplement hp.1) hh p.2
+      (Complex.forall_of_mem_integerComplement hp.1) hh p.2
   · filter_upwards [univ_mem] with y _
     exact ((continuousAt_besselYExp_order hh y μ).tendsto).mono_left nhdsWithin_le_nhds
 

@@ -175,7 +175,7 @@ theorem lamePolyEk_re_eq_lameEigenfunction {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
 /-! ### The substitution `φ = π/2 - am(x, k)` and trigonometric orthogonality -/
 
 /-- `∫₀^K dn(x) g(φ(x)) dx = ∫₀^{π/2} g(φ) dφ` for `φ = π/2 - am(x, k)`. -/
-private lemma integral_jacobiDnm_mul_comp_lamePhi {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {g : ℝ → ℝ}
+theorem integral_jacobiDnm_mul_comp_lamePhi {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {g : ℝ → ℝ}
     (hg : Continuous g) :
     ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * g (Real.lamePhi x k) =
       ∫ t in (0 : ℝ)..π / 2, g t := by
@@ -199,7 +199,7 @@ private lemma integral_jacobiDnm_mul_comp_lamePhi {k : ℝ} (hk0 : 0 < k) (hk1 :
   rw [e, hsub, intervalIntegral.integral_symm (π / 2)]
 
 /-- `∫₀^{π/2} cos(2jφ) dφ = π/2` if `j = 0` and `0` otherwise. -/
-private lemma integral_cos_two_mul_int_pi_div_two (j : ℤ) :
+theorem integral_cos_two_mul_int_pi_div_two (j : ℤ) :
     ∫ t in (0 : ℝ)..π / 2, Real.cos (2 * j * t) = if j = 0 then π / 2 else 0 := by
   split_ifs with hj
   · simp [hj]

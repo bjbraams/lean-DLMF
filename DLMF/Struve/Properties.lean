@@ -110,7 +110,7 @@ theorem struveL_neg_nat_sub_half (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
 theorem struve_half_prefactor {z : ℂ} (hz : z∈slitPlane) :
     (z/2)^(-(1/2):ℂ)/(Real.sqrt π:ℂ)=(2/(π*z))^(1/2:ℂ) := by
   have hp : (π:ℂ)^(1/2:ℂ)=(Real.sqrt π:ℂ) :=
-    Complex.Gamma_one_half_eq.symm.trans DLMF.Confluent.Gamma_one_half_eq_sqrt
+    Complex.Gamma_one_half_eq.symm.trans Complex.Gamma_one_half_eq_sqrt
   rw [cpow_half_recip_div_two hz,cpow_half_two_div_pi_z hz,cpow_half_div_pi,hp]
   ring
 
@@ -120,7 +120,7 @@ theorem struve_positive_half_prefactor {z : ℂ} (hz : z∈slitPlane) :
       (z/2)^(1/2:ℂ)/(Real.sqrt π:ℂ)=(2/(π*z))^(1/2:ℂ)*z/2 := by
   have hz0 := slitPlane_ne_zero hz
   have hp : (π:ℂ)^(1/2:ℂ)=(Real.sqrt π:ℂ) :=
-    Complex.Gamma_one_half_eq.symm.trans DLMF.Confluent.Gamma_one_half_eq_sqrt
+    Complex.Gamma_one_half_eq.symm.trans Complex.Gamma_one_half_eq_sqrt
   constructor
   · rw [show z/(2*π)=(((π:ℝ)⁻¹:ℝ):ℂ)*(z/2) by push_cast; ring,
       DLMF.Confluent.ofReal_mul_cpow_of_pos (by positivity) (div_ne_zero hz0 (by norm_num)) (1/2:ℂ),
@@ -151,7 +151,7 @@ theorem besselI_elementary_halves {z : ℂ} (hz : z∈slitPlane) :
   constructor
   · rw [besselI,show (1/2:ℂ)+1=3/2 by ring,hs',← bessel_half_prefactor hz]
     field_simp
-  · rw [besselI,show -(1/2:ℂ)+1=1/2 by ring,hc,DLMF.Confluent.Gamma_one_half_eq_sqrt]
+  · rw [besselI,show -(1/2:ℂ)+1=1/2 by ring,hc,Complex.Gamma_one_half_eq_sqrt]
     linear_combination cosh z*(struve_half_prefactor hz)
 
 /-- Identity under the stated parameter and domain assumptions: `struveH (-1/2) z =

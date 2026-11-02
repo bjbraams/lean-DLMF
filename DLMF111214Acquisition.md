@@ -799,7 +799,7 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 ### [§14.3 Definitions and Hypergeometric Representations](https://dlmf.nist.gov/14.3)
 
 - [14.3.E1](https://dlmf.nist.gov/14.3.E1): [`ferrersP`](DLMF/Legendre/Basic/Functions.lean#L37) (defined).
-- [14.3.E2](https://dlmf.nist.gov/14.3.E2): [`DLMF.Legendre.ferrersQ_hypergeometric`](DLMF/Legendre/Associated/QuadraticFerrers.lean#L501) (proved); [`DLMF.Legendre.ferrersQ_order_limit`](DLMF/Legendre/Associated/QuadraticFerrers.lean#L602) (proved).
+- [14.3.E2](https://dlmf.nist.gov/14.3.E2): [`DLMF.Legendre.ferrersQ_hypergeometric`](DLMF/Legendre/Associated/QuadraticFerrers.lean#L498) (proved); [`DLMF.Legendre.ferrersQ_order_limit`](DLMF/Legendre/Associated/QuadraticFerrers.lean#L599) (proved).
 - [14.3.E3](https://dlmf.nist.gov/14.3.E3): [`DLMF.Legendre.legendreGaussF`](DLMF/Legendre/Hypergeometric.lean#L55) (defined); [`DLMF.Legendre.legendreGaussF_normalization`](DLMF/Legendre/Hypergeometric.lean#L61) (proved).
 - [14.3.E4](https://dlmf.nist.gov/14.3.E4): [`DLMF.Legendre.ferrersP_integer_hypergeometric_4`](DLMF/Legendre/Hypergeometric.lean#L69) (proved).
 - [14.3.E5](https://dlmf.nist.gov/14.3.E5): [`DLMF.Legendre.ferrersP_integer_hypergeometric_5`](DLMF/Legendre/Hypergeometric.lean#L85) (proved).
@@ -808,7 +808,7 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 - [14.3.E8](https://dlmf.nist.gov/14.3.E8): [`DLMF.Legendre.associatedP_integer_hypergeometric_8`](DLMF/Legendre/Hypergeometric.lean#L99) (proved).
 - [14.3.E9](https://dlmf.nist.gov/14.3.E9): [`DLMF.Legendre.associated_hypergeometric_9`](DLMF/Legendre/Hypergeometric.lean#L115) (proved).
 - [14.3.E10](https://dlmf.nist.gov/14.3.E10): [`DLMF.Legendre.olverQ`](DLMF/Legendre/Basic/Associated.lean#L52) (defined); [`DLMF.Legendre.olverQ_normalization`](DLMF/Legendre/Associated/ConjugationAndValues.lean#L119) (proved).
-- [14.3.E11](https://dlmf.nist.gov/14.3.E11): [`DLMF.Legendre.ferrersP_w1_w2`](DLMF/Legendre/Associated/QuadraticFerrers.lean#L102) (proved).
+- [14.3.E11](https://dlmf.nist.gov/14.3.E11): [`DLMF.Legendre.ferrersP_w1_w2`](DLMF/Legendre/Associated/QuadraticFerrers.lean#L99) (proved).
 - [14.3.E12](https://dlmf.nist.gov/14.3.E12): [`DLMF.Legendre.ferrersQ`](DLMF/Legendre/Basic/Associated.lean#L83) (defined).
 - [14.3.E13](https://dlmf.nist.gov/14.3.E13): [`DLMF.Legendre.ferrersW1`](DLMF/Legendre/Basic/Associated.lean#L69) (defined).
 - [14.3.E14](https://dlmf.nist.gov/14.3.E14): [`DLMF.Legendre.ferrersW2`](DLMF/Legendre/Basic/Associated.lean#L76) (defined).

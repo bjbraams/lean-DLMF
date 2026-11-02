@@ -686,7 +686,7 @@ theorem iteratedErfc_kummerUOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hg : Gamma (-1/2:ℂ)= -2*(Real.sqrt π:ℂ) := by
     have h := Gamma_add_one (-1/2:ℂ) (by norm_num)
-    rw [show (-1/2:ℂ)+1=1/2 by ring,Gamma_one_half_eq_sqrt] at h
+    rw [show (-1/2:ℂ)+1=1/2 by ring,Complex.Gamma_one_half_eq_sqrt] at h
     linear_combination 2*h
   have he : exp (2*log z)=z^2 := by simpa only [Nat.cast_ofNat,Complex.exp_log hz] using Complex.exp_nat_mul (log z) 2
   rw [iteratedErfc_kummerM,kummerUOnLog]
@@ -694,7 +694,7 @@ theorem iteratedErfc_kummerUOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     show (2:ℂ)-1/2=3/2 by ring]
   rw [show (n:ℂ)/2+1/2-1/2+1=n/2+1 by ring,
     show (1/2:ℂ)*(2*log z)=log z by ring,Complex.exp_log hz,he,
-    Gamma_one_half_eq_sqrt,show -(1/2:ℂ)= -1/2 by ring,hg,zpow_sub₀ (by norm_num : (2:ℂ)≠0),zpow_natCast,zpow_one]
+    Complex.Gamma_one_half_eq_sqrt,show -(1/2:ℂ)= -1/2 by ring,hg,zpow_sub₀ (by norm_num : (2:ℂ)≠0),zpow_natCast,zpow_one]
   field_simp [hp0]
   ring
 

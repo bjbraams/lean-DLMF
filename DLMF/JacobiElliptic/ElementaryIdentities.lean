@@ -55,6 +55,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-- `k'² = 1 - k²` for the principal `k' = (1 - k²)^{1/2}`. -/
 theorem jacobiComodulusk_sq (k : ℂ) : jacobiComodulusk k ^ 2 = 1 - k ^ 2 := by
   rw [jacobiComodulusk, one_div]

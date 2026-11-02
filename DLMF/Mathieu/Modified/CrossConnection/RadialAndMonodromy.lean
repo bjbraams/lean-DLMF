@@ -514,14 +514,14 @@ private lemma besselYExp_add_pi_mul_I (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : �
       2 * I * Complex.cos (μ * π) * besselJExp μ h z := by
   have hc := continuousAt_besselYExp_order hh
   have hJ := differentiable_besselJExp_order hh
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
+  refine Complex.eq_of_continuousAt_of_integerComplement
     (f := fun μ => besselYExp μ h (z + π * I))
     (g := fun μ => Complex.exp (-(μ * π * I)) * besselYExp μ h z +
       2 * I * Complex.cos (μ * π) * besselJExp μ h z)
     (hc _ _) (((by fun_prop : ContinuousAt (fun μ : ℂ => Complex.exp (-(μ * π * I))) μ).mul
       (hc z μ)).add ((by fun_prop : ContinuousAt (fun μ : ℂ => 2 * I * Complex.cos (μ * π)) μ).mul
         (hJ z μ).continuousAt)) (fun c hc' => ?_)
-  have hk := DLMF.Confluent.forall_of_mem_integerComplement hc'
+  have hk := Complex.forall_of_mem_integerComplement hc'
   have hs := DLMF.Bessel.sin_mul_pi_ne_zero hk
   have e : Complex.exp (2 * (π * I)) = 1 := by
     rw [Complex.exp_eq_one_iff]; exact ⟨1, by ring⟩

@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Elliptic.Basic.Theta
+public import DLMF.EllipticIntegrals.Basic.Complete
 
 /-!
 # Theta-quotient definitions of Jacobian elliptic functions
@@ -26,8 +27,8 @@ lattice form (parameter `τ`) and in DLMF's literal modulus form.
   (DLMF 22.2.2, 22.2.3, 22.2.12).
 * `jacobiPQTau`: Glaisher's function `pq(z)` for the lattice parameter `τ`, with the named
   functions `jacobiSnTau`, …, `jacobiCsTau`.
-* `compEllIntKk`, `compEllIntKpk`: the principal complex complete elliptic integrals `K(k)`,
-  `K'(k)` (DLMF 19.2.8, 19.2.9); `jacobiComodulusk`: `k' = √(1 - k²)`.
+* `jacobiComodulusk`: `k' = √(1 - k²)`; `K(k)`, `K'(k)` are
+  `DLMF.EllipticIntegrals.compEllIntKk`, `compEllIntKpk` (DLMF 19.2.8, 19.2.9).
 * `jacobiTauk`, `jacobiNomek`, `jacobiZetak`: `τ = iK'/K`, the nome and `ζ` of the modulus `k`
   (DLMF 22.2.12, 22.2.1, 22.2.3).
 * `jacobiModulusDomain`: the moduli `Re k > 0`, `k ∉ [1, ∞)`, on which DLMF's formulas hold.
@@ -75,6 +76,8 @@ open scoped Real
 noncomputable section
 
 namespace DLMF.JacobiElliptic
+
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
 
 /-- The four letters `s, c, d, n` of Glaisher's notation (DLMF 22.2.10). They label the four
 lattice points `0, K, K + iK', iK'` of the fundamental unit cell (DLMF §22.4(ii)). -/
@@ -138,19 +141,6 @@ with `k = jacobiModulusTau τ`. -/
 def jacobiPQTau (p q : JacobiLetter) (z τ : ℂ) : ℂ := jacobiGlaisher p q (jacobiZetaTau z τ) τ
 
 /-! ### The modulus (`k`) parametrization -/
-
-/-- Legendre's complete elliptic integral of the first kind for complex modulus,
-`K(k) = ∫₀^{π/2} (1 - k² sin²θ)^{-1/2} dθ` with the principal power (DLMF 19.2.8); it is the
-principal branch for `k² ∈ ℂ \ [1, ∞)`. -/
-@[dlmf 19.2.E8]
-def compEllIntKk (k : ℂ) : ℂ :=
-  ∫ θ in (0 : ℝ)..(π / 2), (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))
-
-/-- The complementary integral `K'(k) = K(k') = ∫₀^{π/2} (1 - (1 - k²) sin²θ)^{-1/2} dθ`
-(DLMF 19.2.9), principal for `k² ∈ ℂ \ (-∞, 0]`. -/
-@[dlmf 19.2.E9]
-def compEllIntKpk (k : ℂ) : ℂ :=
-  ∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))
 
 /-- The complementary modulus `k' = √(1 - k²)` (principal square root, DLMF §22.1). -/
 def jacobiComodulusk (k : ℂ) : ℂ := (1 - k ^ 2) ^ (1 / 2 : ℂ)

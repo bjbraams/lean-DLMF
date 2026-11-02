@@ -107,13 +107,64 @@ theorem coulombF_eq_coulombf (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) (ρ : ℝ) 
   have hf : (((2 * ℓ + 1)! : ℕ) : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
   field_simp
 
+/-- Away from `ε = 0` and when `κ` is not real, `h(ε,ℓ;r)` is the real part of 33.14.7. -/
+theorem coulombh_eq_re_coulombhFormula_of_im_ne {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ)
+    (him : (coulombKappa ε r).im ≠ 0) :
+    coulombh ε ℓ r = (coulombhFormula ε ℓ r).re := by
+  unfold coulombh
+  split_ifs with h
+  · exfalso
+    rcases h with h | ⟨m, hm⟩
+    · exact hε h
+    · have := congrArg Complex.im hm
+      simp at this
+      exact him (by linarith)
+  · rfl
+
+
+/-- For `η < 0`, `ρ > 0`, the real part of the bracketed form 33.14.7 at `κ = -iη`,
+`r = -ηρ` is a real multiple of `G_ℓ(η,ρ)`. -/
+private lemma re_coulombhKappa_of_neg (ℓ : ℕ) {η : ℝ} (hη : η < 0) {ρ : ℝ} (hρ : 0 < ρ) (S : ℝ) :
+    (coulombhKappa (I * (-η : ℝ)) S ℓ (-η * ρ)).re =
+      (-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) *
+        coulombG ℓ η ρ := by
+  rw [coulombhKappa_I_mul_neg_eq ℓ hη.ne hρ, sub_re, re_ofReal_mul, I_mul_re, ofReal_im,
+    neg_zero, sub_zero, coulombG]
+
+/-- For `η > 0`, `ρ > 0`, the real part of the bracketed form 33.14.7 at `κ = iη`,
+`r = -ηρ` is a real multiple of `G_ℓ(η,ρ)`. -/
+private lemma re_coulombhKappa_of_pos (ℓ : ℕ) {η : ℝ} (hη : 0 < η) {ρ : ℝ} (hρ : 0 < ρ) (S : ℝ) :
+    (coulombhKappa (I * (η : ℝ)) S ℓ (-η * ρ)).re =
+      (-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) *
+        coulombG ℓ η ρ := by
+  rw [coulombhKappa_I_mul_eq ℓ hη.ne' hρ, add_re, re_ofReal_mul, I_mul_re, ofReal_im,
+    neg_zero, add_zero, coulombHMinus_eq_conj ℓ η hρ, conj_re, coulombG]
+
 /-- **DLMF 33.16.2**: `G_ℓ(η,ρ) = π(-2η)^ℓ / ((2ℓ+1)! C_ℓ(η)) h(1/η², ℓ; -ηρ)` for `η ≠ 0`,
 `ρ > 0`. -/
 @[dlmf 33.16.E2]
 theorem coulombG_eq_coulombh (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) :
     coulombG ℓ η ρ =
       π * (-2 * η) ^ ℓ / ((2 * ℓ + 1)! * coulombC ℓ η) * coulombh (1 / η ^ 2) ℓ (-η * ρ) := by
-  sorry
+  have hε : (1 / η ^ 2 : ℝ) ≠ 0 := by positivity
+  have hκ := coulombKappa_one_div_sq hη (-η * ρ)
+  rw [coulombh_eq_re_coulombhFormula_of_im_ne hε ℓ _ (by rw [hκ]; simpa using hη),
+    coulombhFormula, hκ]
+  have hX : (-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) *
+      (π * (-2 * η) ^ ℓ / ((2 * ℓ + 1)! * coulombC ℓ η)) = 1 := by
+    have hN : ‖Gamma (ℓ + 1 + I * η)‖ ≠ 0 :=
+      norm_ne_zero_iff.mpr (Gamma_nat_add_one_add_I_mul_ne_zero ℓ η)
+    have hf : ((2 * ℓ + 1)! : ℝ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+    have hm1 : ((-1 : ℝ) ^ ℓ) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
+    rw [coulombC, show (-2 * η) ^ ℓ = (-1) ^ ℓ * 2 ^ ℓ * η ^ ℓ by rw [← mul_pow, ← mul_pow]; ring]
+    have := Real.exp_pos (-π * η / 2)
+    field_simp
+    linear_combination hm1
+  rcases hη.lt_or_gt with hneg | hpos
+  · rw [abs_of_neg hneg, re_coulombhKappa_of_neg ℓ hneg hρ]
+    linear_combination (-coulombG ℓ η ρ) * hX
+  · rw [abs_of_pos hpos, re_coulombhKappa_of_pos ℓ hpos hρ]
+    linear_combination (-coulombG ℓ η ρ) * hX
 
 /-! ### `ε > 0`: `f`, `h`, `s`, `c` in terms of `F_ℓ` and `G_ℓ` (`τ = ε^{1/2}`) -/
 
@@ -211,7 +262,38 @@ theorem coulombh_eq_coulombG_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
     coulombh ε ℓ r = Real.sqrt (2 / (π * Real.sqrt ε) * coulombAProd ε ℓ /
         (1 - Real.exp (-(2 * π / Real.sqrt ε)))) *
       coulombG ℓ (-1 / Real.sqrt ε) (Real.sqrt ε * r) := by
-  sorry
+  have hτ := Real.sqrt_pos.mpr hε
+  set τ := Real.sqrt ε with hτ_def
+  have hτ2 : τ ^ 2 = ε := Real.sq_sqrt hε.le
+  have hη : (-1 / τ) ≠ 0 := by positivity
+  rw [coulombG_eq_coulombh ℓ hη (by positivity), show -(-1 / τ) * (τ * r) = r by field_simp,
+    show 1 / (-1 / τ) ^ 2 = ε by rw [← hτ2]; field_simp]
+  have hA := coulombAProd_pos hε.le ℓ
+  have hC := coulombC_pos ℓ (-1 / τ)
+  have hK := factorial_mul_coulombC_sq ℓ hη
+  rw [show 1 / (-1 / τ) ^ 2 = ε by rw [← hτ2]; field_simp,
+    show 2 * π * (-1 / τ) = -(2 * π / τ) by ring] at hK
+  set K := (2 * ℓ + 1)! * coulombC ℓ (-1 / τ) with hK_def
+  have hKpos : 0 < K := by positivity
+  have hd : (-2 * (-1 / τ)) ^ ℓ = (2 / τ) ^ ℓ := by congr 1; ring
+  rw [hd]
+  have hE : 0 < 1 - Real.exp (-(2 * π / τ)) := by
+    have : 0 < 2 * π / τ := by positivity
+    have := Real.exp_lt_one_iff.mpr (neg_neg_of_pos this)
+    linarith
+  suffices h : Real.sqrt (2 / (π * τ) * coulombAProd ε ℓ / (1 - Real.exp (-(2 * π / τ)))) =
+      K / (π * (2 / τ) ^ ℓ) by
+    rw [h]; field_simp
+  rw [← Real.sqrt_sq (by positivity : 0 ≤ K / (π * (2 / τ) ^ ℓ)), div_pow, hK]
+  congr 1
+  have hE' : Real.exp (-(2 * π / τ)) - 1 ≠ 0 := by linarith
+  have hτ0 : τ ≠ 0 := hτ.ne'
+  rw [show ((-1 / τ) ^ 2) ^ ℓ = 1 / τ ^ (2 * ℓ) by
+      rw [div_pow, neg_one_sq, one_div_pow, ← pow_mul],
+    show (π * (2 / τ) ^ ℓ) ^ 2 = π ^ 2 * (2 ^ (2 * ℓ) / τ ^ (2 * ℓ)) by
+      rw [mul_pow, ← pow_mul, div_pow, mul_comm ℓ 2]]
+  field_simp
+  ring
 
 /-- **DLMF 33.16.6**: for `ε > 0`, `r < 0`,
 `f(ε,ℓ;r) = (-1)^{ℓ+1} ((2/(πτ)) (e^{2π/τ} - 1) / A(ε,ℓ))^{1/2} F_ℓ(1/τ, -τr)`. -/
@@ -267,7 +349,38 @@ theorem coulombh_eq_coulombG_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
     coulombh ε ℓ r = (-1) ^ ℓ * Real.sqrt (2 / (π * Real.sqrt ε) * coulombAProd ε ℓ /
         (Real.exp (2 * π / Real.sqrt ε) - 1)) *
       coulombG ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r)) := by
-  sorry
+  have hτ := Real.sqrt_pos.mpr hε
+  set τ := Real.sqrt ε with hτ_def
+  have hτ2 : τ ^ 2 = ε := Real.sq_sqrt hε.le
+  have hη : (1 / τ) ≠ 0 := by positivity
+  have hρ : 0 < -(τ * r) := by nlinarith
+  rw [coulombG_eq_coulombh ℓ hη hρ, show -(1 / τ) * -(τ * r) = r by field_simp,
+    show 1 / (1 / τ) ^ 2 = ε by rw [← hτ2]; field_simp]
+  have hA := coulombAProd_pos hε.le ℓ
+  have hC := coulombC_pos ℓ (1 / τ)
+  have hK := factorial_mul_coulombC_sq ℓ hη
+  rw [show 1 / (1 / τ) ^ 2 = ε by rw [← hτ2]; field_simp,
+    show 2 * π * (1 / τ) = 2 * π / τ by ring] at hK
+  set K := (2 * ℓ + 1)! * coulombC ℓ (1 / τ) with hK_def
+  have hKpos : 0 < K := by positivity
+  have hd : (-2 * (1 / τ)) ^ ℓ = (-1) ^ ℓ * (2 / τ) ^ ℓ := by
+    rw [← mul_pow]; congr 1; ring
+  rw [hd]
+  have hD : 0 < Real.exp (2 * π / τ) - 1 := by
+    have := Real.one_lt_exp_iff.mpr (show 0 < 2 * π / τ by positivity); linarith
+  suffices h : Real.sqrt (2 / (π * τ) * coulombAProd ε ℓ / (Real.exp (2 * π / τ) - 1)) =
+      K / (π * (2 / τ) ^ ℓ) by
+    have hm1 : ((-1 : ℝ) ^ ℓ) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
+    rw [h]; field_simp
+    linear_combination (-coulombh ε ℓ r) * hm1
+  rw [← Real.sqrt_sq (by positivity : 0 ≤ K / (π * (2 / τ) ^ ℓ)), div_pow, hK]
+  congr 1
+  have hτ0 : τ ≠ 0 := hτ.ne'
+  rw [show ((1 / τ) ^ 2) ^ ℓ = 1 / τ ^ (2 * ℓ) by
+      rw [div_pow, one_pow, one_div_pow, ← pow_mul],
+    show (π * (2 / τ) ^ ℓ) ^ 2 = π ^ 2 * (2 ^ (2 * ℓ) / τ ^ (2 * ℓ)) by
+      rw [mul_pow, ← pow_mul, div_pow, mul_comm ℓ 2]]
+  field_simp
 
 /-- **DLMF 33.16.14**: for `ε > 0`, `r > 0`, `s(ε,ℓ;r) = (πτ)^{-1/2} F_ℓ(-1/τ, τr)` and
 `c(ε,ℓ;r) = (πτ)^{-1/2} G_ℓ(-1/τ, τr)`. -/

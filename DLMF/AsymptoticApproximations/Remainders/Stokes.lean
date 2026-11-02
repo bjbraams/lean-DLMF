@@ -180,7 +180,31 @@ theorem genExpIntE_eq_sum_add_terminant {p z : ℂ} (hp : 0 < p.re) (hz : z ∈ 
     genExpIntE p z = exp (-z) / z * ∑ s ∈ Finset.range n, (-1) ^ s * poch p s / z ^ s +
       (-1) ^ n * (2 * π) / Gamma p * z ^ (p - 1) *
         (Gamma (n + p) / (2 * π) * genExpIntE (n + p) z / z ^ (n + p - 1)) := by
-  sorry
+  have hz0 : z ≠ 0 := slitPlane_ne_zero hz
+  have key : ∀ m : ℕ, genExpIntE p z = exp (-z) / z * ∑ s ∈ Finset.range m,
+      (-1) ^ s * poch p s / z ^ s + (-1) ^ m * poch p m / z ^ m * genExpIntE (m + p) z := by
+    intro m
+    induction m with
+    | zero => simp [poch_zero]
+    | succ m ih =>
+      have hr := genExpIntE_add_one ((m : ℂ) + p) hz0
+      rw [ih, Finset.sum_range_succ, poch_succ]
+      push_cast
+      rw [show (m : ℂ) + 1 + p = (m : ℂ) + p + 1 by ring]
+      field_simp
+      linear_combination (-1) ^ m * poch p m * z * z ^ m * hr
+  rw [key n]
+  congr 1
+  have hΓ : Gamma p ≠ 0 := Complex.Gamma_ne_zero_of_re_pos hp
+  have hG : Gamma ((n : ℂ) + p) = poch p n * Gamma p := by
+    rw [add_comm]; exact Gamma_add_nat_eq_poch_mul_Gamma hp n
+  have hzp : z ^ ((n : ℂ) + p - 1) = z ^ n * z ^ (p - 1) := by
+    rw [show (n : ℂ) + p - 1 = (n : ℂ) + (p - 1) by ring, Complex.cpow_add _ _ hz0,
+      Complex.cpow_natCast]
+  have hz1 : z ^ (p - 1) ≠ 0 := by rw [Ne, Complex.cpow_eq_zero_iff]; tauto
+  have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+  rw [hG, hzp]
+  field_simp
 
 /-- DLMF 2.11.11: for `ℜ(n+p) > 0` and `ℜz > 0` the two forms of the terminant agree:
 `F_{n+p}(z) = e^{-z}/(2π) ∫_0^∞ e^{-zt} t^{n+p-1}/(1+t) dt = Γ(n+p)/(2π) E_{n+p}(z)/z^{n+p-1}`.

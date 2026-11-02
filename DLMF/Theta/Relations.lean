@@ -121,7 +121,7 @@ theorem compEllIntK_eq_jacobiThetaThreeNullTau {t : ℝ} (ht : 0 < t) :
   push_cast; ring
 
 /-- DLMF 20.9.2, **corrected full-domain form** with the principal complex `K(k)`
-(`DLMF.JacobiElliptic.compEllIntKk`, `K'(k) = DLMF.JacobiElliptic.compEllIntKpk`): with
+(`DLMF.EllipticIntegrals.compEllIntKk`, `K'(k) = DLMF.EllipticIntegrals.compEllIntKpk`): with
 `k = θ₂²(0|τ)/θ₃²(0|τ)`, `K(k) = (π/2) θ₃²(0|τ)` and `K'(k) = -iτ K(k)` for `τ` in the
 fundamental region `F = {|Re τ| < 1, |τ - 1/2| > 1/2, |τ + 1/2| > 1/2}` of `Γ(2)`, and
 `K(k) = (π/2) θ₃²(0|τ)` for every translate `τ + 2n` of `F` (both sides are 2-periodic; `K'`
@@ -132,11 +132,11 @@ Checked with mpmath: no failure at 205 + 471 points of `F` and exact agreement o
 @[dlmf 20.9.E2 "corrected full-domain form: region of validity of the principal K"]
 theorem compEllIntKk_eq_jacobiThetaThreeNullTau_fundamental {τ : ℂ} (hτ : 0 < τ.im)
     (hre : |τ.re| < 1) (h₁ : 1 / 2 < ‖τ - 1 / 2‖) (h₂ : 1 / 2 < ‖τ + 1 / 2‖) :
-    DLMF.JacobiElliptic.compEllIntKk (thetaModulusK τ) =
+    DLMF.EllipticIntegrals.compEllIntKk (thetaModulusK τ) =
         π / 2 * jacobiThetaThreeNullTau τ ^ 2 ∧
-      DLMF.JacobiElliptic.compEllIntKpk (thetaModulusK τ) =
-        -I * τ * DLMF.JacobiElliptic.compEllIntKk (thetaModulusK τ) ∧
-      ∀ n : ℤ, DLMF.JacobiElliptic.compEllIntKk (thetaModulusK (τ + 2 * n)) =
+      DLMF.EllipticIntegrals.compEllIntKpk (thetaModulusK τ) =
+        -I * τ * DLMF.EllipticIntegrals.compEllIntKk (thetaModulusK τ) ∧
+      ∀ n : ℤ, DLMF.EllipticIntegrals.compEllIntKk (thetaModulusK (τ + 2 * n)) =
         π / 2 * jacobiThetaThreeNullTau (τ + 2 * n) ^ 2 := by
   sorry
 

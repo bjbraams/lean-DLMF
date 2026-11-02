@@ -78,7 +78,7 @@ theorem pcfV_neg_half (z : ℂ) :
   rw [pcfV, pcfVZero, pcfVDerivZero, pcfOdd_kummer_alternative, dawsonF_eq_kummerM, h2,
     show (1/4:ℂ) + (-1/2)/2 = 0 by norm_num, Complex.Gamma_zero, inv_zero, mul_zero, zero_mul,
     zero_add, show (1/4:ℂ) - (-1/2)/2 = 1/2 by norm_num, show (3/4:ℂ) + (-1/2)/2 = 1/2 by norm_num,
-    show -(-1/2:ℂ)/2 + 3/4 = 1 by norm_num, Gamma_one_half_eq_sqrt, div_pow, hs]
+    show -(-1/2:ℂ)/2 + 3/4 = 1 by norm_num, Complex.Gamma_one_half_eq_sqrt, div_pow, hs]
   rw [← hpp]
   field_simp
   rw [hs]; ring

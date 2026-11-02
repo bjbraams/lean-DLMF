@@ -48,6 +48,8 @@ noncomputable section
 
 namespace DLMF.Lame
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 variable {h ν k : ℝ}
 
 /-! ### Singularities (§29.2(i)) -/

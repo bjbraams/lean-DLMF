@@ -230,7 +230,35 @@ theorem tendsto_functionPairing_stieltjesTestFunction {f : ℝ → ℂ} {z : ℂ
     (hf : IntegrableOn (fun t : ℝ => f t / ((t : ℂ) + z)) (Ioi 0)) :
     Tendsto (fun ε : ℝ => functionPairing f (stieltjesTestFunction ε z)) (𝓝[>] 0)
       (𝓝 (stieltjesTransform f z)) := by
-  sorry
+  -- dominated convergence; the condition on `z` is not needed
+  have _ := hz
+  unfold functionPairing stieltjesTestFunction stieltjesTransform
+  refine tendsto_integral_filter_of_dominated_convergence (fun t => ‖f t / ((t : ℂ) + z)‖)
+    ?_ ?_ hf.norm ?_
+  · refine Eventually.of_forall fun ε => ?_
+    have hm : AEStronglyMeasurable (fun t : ℝ => Complex.exp (-(ε * t : ℂ)))
+        (volume.restrict (Ioi 0)) := by fun_prop
+    refine (hf.aestronglyMeasurable.mul hm).congr (Eventually.of_forall fun t => ?_)
+    simp only [Pi.mul_apply]
+    ring
+  · filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
+    refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t (ht : 0 < t) => ?_)
+    rw [mul_div_assoc', norm_div, norm_mul, norm_div]
+    have he : ‖Complex.exp (-(ε * t : ℂ))‖ ≤ 1 := by
+      rw [Complex.norm_exp]
+      simp only [Complex.neg_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+        mul_zero, sub_zero, Real.exp_le_one_iff, Left.neg_nonpos_iff]
+      positivity
+    have : 0 ≤ ‖f t‖ / ‖(t : ℂ) + z‖ := by positivity
+    calc ‖f t‖ * ‖Complex.exp (-(ε * t : ℂ))‖ / ‖(t : ℂ) + z‖
+        = ‖f t‖ / ‖(t : ℂ) + z‖ * ‖Complex.exp (-(ε * t : ℂ))‖ := by ring
+      _ ≤ ‖f t‖ / ‖(t : ℂ) + z‖ * 1 := by gcongr
+      _ = _ := mul_one _
+  · refine Eventually.of_forall fun t => ?_
+    have hc : Continuous fun ε : ℝ => f t * (Complex.exp (-(ε * t : ℂ)) / ((t : ℂ) + z)) := by
+      fun_prop
+    have := (hc.tendsto 0).mono_left (nhdsWithin_le_nhds (s := Ioi 0))
+    simpa [mul_div_assoc', div_eq_mul_inv] using this
 
 /-- DLMF 2.6.26 and the display following it: under the hypotheses of §2.6(ii),
 `lim_{ε → 0+} ⟨f_n, φ_ε⟩ = n! ∫₀^∞ f_{n,n}(t)/(t+z)^{n+1} dt`, and interchanging the order of

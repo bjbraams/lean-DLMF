@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Basic.Properties
+public import DLMFMathlib.Analysis.Analytic.OfScalarsDeriv
 
 /-!
 # Scorer functions (DLMF §9.12)
@@ -61,27 +62,6 @@ def scorerGiDeriv : ℂ → ℂ := deriv scorerGi
 /-- The inhomogeneous Airy equation with forcing 1/π. -/
 def IsScorerSol (w w' : ℂ → ℂ) : Prop :=
   ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (z * w z + 1 / π) z
-
-/-- Termwise differentiation of a scalar power series. -/
-private theorem airyBasic_deriv_ofScalars {f : ℂ → ℂ} {c : ℕ → ℂ} {r : ℝ≥0∞}
-    (h : HasFPowerSeriesOnBall f (ofScalars ℂ c) 0 r) :
-    HasFPowerSeriesOnBall (deriv f) (ofScalars ℂ (fun n => (n + 1) * c (n + 1))) 0 r := by
-  have hd := (ContinuousLinearMap.apply ℂ ℂ (1 : ℂ)).comp_hasFPowerSeriesOnBall h.fderiv
-  have heq : (ContinuousLinearMap.apply ℂ ℂ (1 : ℂ)).compFormalMultilinearSeries
-      (ofScalars ℂ c).derivSeries = ofScalars ℂ (fun n => (n + 1) * c (n + 1)) := by
-    ext n
-    simp only [ContinuousLinearMap.compFormalMultilinearSeries_apply,
-      ContinuousLinearMap.compContinuousMultilinearMap_coe, Function.comp_apply]
-    rw [apply_eq_prod_smul_coeff]
-    simp [derivSeries_coeff_one, coeff_ofScalars, ofScalars, mul_comm]
-  simpa only [heq, Function.comp_def, ContinuousLinearMap.apply_apply,
-    fderiv_eq_deriv_mul, mul_one] using hd
-
-/-- Scalar coefficients give the usual series sum on the ball. -/
-private theorem airyBasic_hasSum_mul_pow {f : ℂ → ℂ} {c : ℕ → ℂ} {r : ℝ≥0∞}
-    (h : HasFPowerSeriesOnBall f (ofScalars ℂ c) 0 r) {z : ℂ}
-    (hz : z ∈ Metric.eball (0 : ℂ) r) : HasSum (fun n => c n * z ^ n) (f z) := by
-  simpa only [ofScalars_apply_eq, smul_eq_mul, zero_add] using h.hasSum hz
 
 /-- The three-step recurrence `c_{k+3}(k+3)(k+2) = c_k` of the Hi coefficients. -/
 theorem scorerHiCoeff_rec (k : ℕ) :
@@ -173,12 +153,12 @@ theorem scorerHiCoeff_two : scorerHiCoeff 2 = 1 / (2 * π) := by
 /-- `Hi'' = z Hi + 1/π`. -/
 theorem hasDerivAt_scorerHiDeriv (z : ℂ) :
     HasDerivAt scorerHiDeriv (z * scorerHi z + 1 / π) z := by
-  have h1 := airyBasic_deriv_ofScalars hasFPowerSeriesOnBall_scorerHi
-  have h2 := airyBasic_deriv_ofScalars h1
+  have h1 := HasFPowerSeriesOnBall.deriv_ofScalars hasFPowerSeriesOnBall_scorerHi
+  have h2 := HasFPowerSeriesOnBall.deriv_ofScalars h1
   have hdiff : DifferentiableAt ℂ scorerHiDeriv z :=
     (h1.analyticAt_of_mem (mem_eball_top z)).differentiableAt
-  have hs := airyBasic_hasSum_mul_pow h2 (mem_eball_top z)
-  have hH := (airyBasic_hasSum_mul_pow hasFPowerSeriesOnBall_scorerHi (mem_eball_top z)).mul_left z
+  have hs := HasFPowerSeriesOnBall.hasSum_mul_pow h2 (mem_eball_top z)
+  have hH := (hasFPowerSeriesOnBall_scorerHi.hasSum_mul_pow (mem_eball_top z)).mul_left z
   have hs' : HasSum (fun n : ℕ => ((n : ℂ) + 1) * (((n + 1 : ℕ) : ℂ) + 1) *
       scorerHiCoeff (n + 2) * z ^ n) (z * scorerHi z + 1 / π) := by
     rw [← hasSum_nat_add_iff' 1]
@@ -323,7 +303,7 @@ theorem scorer_zero  :
 
 /-- `Hi'(0) = 3^{-1/3} Γ(2/3)/π`. -/
 theorem scorerHiDeriv_zero : scorerHiDeriv 0 = scorerHiCoeff 1 := by
-  have h := airyBasic_hasSum_mul_pow (airyBasic_deriv_ofScalars hasFPowerSeriesOnBall_scorerHi)
+  have h := hasFPowerSeriesOnBall_scorerHi.deriv_ofScalars.hasSum_mul_pow
     (mem_eball_top 0)
   have h' : HasSum (fun n : ℕ => ((n : ℂ) + 1) * scorerHiCoeff (n + 1) * (0 : ℂ) ^ n)
       ((((0 : ℕ) : ℂ) + 1) * scorerHiCoeff (0 + 1) * (0 : ℂ) ^ 0) :=

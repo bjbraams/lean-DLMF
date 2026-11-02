@@ -52,6 +52,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 local notation "θ₁" => jacobiThetaOneTau
 
 local notation "θ₂" => jacobiThetaTwoTau

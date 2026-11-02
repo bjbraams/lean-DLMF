@@ -33,6 +33,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-- DLMF 22.9.14: cyclic identity (three points, rank 3), at points where the
 functions are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E14]

@@ -39,7 +39,7 @@ bounds for the Gamma function.
 open Complex MeasureTheory Filter
 open scoped Real Nat
 open DLMF.Hypergeometric
-open DLMF.Gamma (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
 noncomputable section
 namespace DLMF.OrthogonalPolynomials.HahnMoments
 

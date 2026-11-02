@@ -13,6 +13,7 @@ public import Mathlib.Tactic.NormNum.Abs
 public import Mathlib.Tactic.NormNum.DivMod
 public import Mathlib.Tactic.NormNum.OfScientific
 public import Mathlib.Tactic.NormNum.Pow
+public import DLMF.NumberTheory.RamanujanCongruences
 
 /-!
 # Partitions and Ramanujan's congruences (AAR Chapter 11; DLMF §27.14)
@@ -34,7 +35,8 @@ Ramanujan's congruences (AAR §11.7, DLMF §27.14(v)).
 
 Mathlib already has `Nat.Partition`, the generating-function formalism
 `Nat.Partition.genFun`, Euler's theorem `Nat.Partition.card_odds_eq_card_distincts`,
-Glaisher's theorem and the pentagonal number theorem. MacMahon's partition analysis
+Glaisher's theorem and the pentagonal number theorem. The congruences modulo 5 and 7 are proved
+in `DLMF.NumberTheory.RamanujanCongruences` from Jacobi's identity for `∏ (1 - xᵐ)³`. MacMahon's partition analysis
 (AAR §§11.2–11.3) is an algorithm, not a theorem list, and is omitted. Graphical methods
 (AAR §11.6, Ferrers diagrams) correspond to the Mathlib TODO linking partitions to Young
 diagrams.
@@ -66,13 +68,13 @@ theorem partitionFunction_zero : partitionFunction 0 = 1 := by
 
 /-- Ramanujan's congruence `p(5n+4) ≡ 0 (mod 5)` (AAR §11.7). -/
 @[dlmf 27.14.v]
-theorem ramanujan_mod_five (n : ℕ) : 5 ∣ partitionFunction (5 * n + 4) := by
-  sorry
+theorem ramanujan_mod_five (n : ℕ) : 5 ∣ partitionFunction (5 * n + 4) :=
+  DLMF.NumberTheory.RamanujanCongruences.five_dvd_card_partition n
 
 /-- Ramanujan's congruence `p(7n+5) ≡ 0 (mod 7)`. -/
 @[dlmf 27.14.v]
-theorem ramanujan_mod_seven (n : ℕ) : 7 ∣ partitionFunction (7 * n + 5) := by
-  sorry
+theorem ramanujan_mod_seven (n : ℕ) : 7 ∣ partitionFunction (7 * n + 5) :=
+  DLMF.NumberTheory.RamanujanCongruences.seven_dvd_card_partition n
 
 /-- Ramanujan's congruence `p(11n+6) ≡ 0 (mod 11)`. -/
 @[dlmf 27.14.v]

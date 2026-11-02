@@ -7,6 +7,7 @@ module
 
 public import DLMF.Confluent.KummerProperties
 public import DLMF.Hypergeometric.Continuation
+public import DLMFMathlib.Analysis.Complex.ParameterContinuity
 
 /-!
 # The regularized Kummer function as an entire function of its parameters
@@ -210,23 +211,6 @@ theorem differentiableAt_regularizedConfluent (a b z : ℂ) :
     (by simp : z ∈ Metric.eball (0 : ℂ) ⊤)).differentiableAt
 
 /-! ### Joint continuity -/
-
-/-- A series of continuous functions whose terms are, near every point, eventually dominated
-by a summable sequence has a continuous sum. -/
-theorem continuous_tsum_of_eventually_dominated {X : Type*} [TopologicalSpace X]
-    {F : ℕ → X → ℂ} (hF : ∀ n, Continuous (F n)) (hsum : ∀ x, Summable fun n => F n x)
-    (hdom : ∀ x₀ : X, ∃ U : Set X, IsOpen U ∧ x₀ ∈ U ∧ ∃ N : ℕ, ∃ u : ℕ → ℝ, Summable u ∧
-      ∀ n, N ≤ n → ∀ x ∈ U, ‖F n x‖ ≤ u n) :
-    Continuous (fun x => ∑' n, F n x) := by
-  refine continuous_iff_continuousAt.mpr fun x₀ => ?_
-  obtain ⟨U, hU, hx₀, N, u, hu, hle⟩ := hdom x₀
-  have htail : ContinuousOn (fun x => ∑' k, F (k + N) x) U :=
-    continuousOn_tsum (u := fun k => u (k + N)) (fun k => (hF (k + N)).continuousOn)
-      (hu.comp_injective (add_left_injective N)) (fun k x hx => hle (k + N) (by omega) x hx)
-  have hfin : ContinuousOn (fun x => ∑ n ∈ Finset.range N, F n x) U :=
-    continuousOn_finsetSum _ fun n _ => (hF n).continuousOn
-  exact ((hfin.add htail).congr fun x _ => ((hsum x).sum_add_tsum_nat_add N).symm).continuousAt
-    (hU.mem_nhds hx₀)
 
 /-- `𝐌(a,b,z)` is jointly continuous in the parameters and the argument. -/
 theorem continuous_regularizedConfluent :

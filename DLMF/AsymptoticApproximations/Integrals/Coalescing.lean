@@ -9,6 +9,9 @@ public import DLMF.AsymptoticApproximations.Integrals.Basic
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.LHopital
+public import Mathlib.Analysis.Calculus.Deriv.Slope
+public import Mathlib.MeasureTheory.Function.JacobianOneDim
 
 /-!
 # Coalescing critical points (DLMF §§2.3(v), 2.4(v))
@@ -114,7 +117,55 @@ theorem bleisteinW_hasDerivAt_self {p₂ : ℝ} (hp : ContDiffAt ℝ 2 (p α) α
     (hd1 : deriv (p α) α = 0) (hd2 : deriv (deriv (p α)) α = p₂) (hp₂ : 0 < p₂)
     (hmin : ∀ s, p α α ≤ p α s) :
     HasDerivAt (bleisteinW p α) (Real.sqrt p₂) α := by
-  sorry
+  -- the positivity of `p₂` is not needed for the derivative
+  have _ := hp₂
+  set P := p α with hP
+  have hev : ∀ᶠ y in 𝓝 α, DifferentiableAt ℝ P y :=
+    (hp.eventually (by simp)).mono fun y hy => hy.differentiableAt (by norm_num)
+  have hdd : DifferentiableAt ℝ (deriv P) α := by
+    have h1 : DifferentiableAt ℝ (fderiv ℝ P) α :=
+      (hp.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)
+    have : deriv P = fun x => fderiv ℝ P x 1 := by funext x; rfl
+    rw [this]; exact h1.clm_apply (differentiableAt_const _)
+  have hP2 : HasDerivAt (deriv P) p₂ α := hd2 ▸ hdd.hasDerivAt
+  -- L'Hôpital: 2(P t - P α)/(t-α)² → p₂
+  have hlim : Tendsto (fun t => (2 * P t - 2 * P α) / (t - α) ^ 2) (𝓝[≠] α) (𝓝 p₂) := by
+    have hev' : ∀ᶠ y in 𝓝[≠] α, DifferentiableAt ℝ P y := nhdsWithin_le_nhds hev
+    refine HasDerivAt.lhopital_zero_nhdsNE (f' := fun t => 2 * deriv P t)
+      (g' := fun t => 2 * (t - α))
+      (hev'.mono fun y hy => by simpa using (hy.hasDerivAt.const_mul 2).sub_const (2 * P α))
+      (Eventually.of_forall fun y => by
+        simpa using ((hasDerivAt_id y).sub_const α).fun_pow 2)
+      (eventually_nhdsWithin_of_forall fun y hy => by
+        have : y - α ≠ 0 := sub_ne_zero.mpr hy
+        positivity) ?_ ?_ ?_
+    · have hc : ContinuousAt (fun t => 2 * P t - 2 * P α) α :=
+        (hp.continuousAt.const_mul 2).sub continuousAt_const
+      simpa using hc.tendsto.mono_left nhdsWithin_le_nhds
+    · have hc : ContinuousAt (fun t : ℝ => (t - α) ^ 2) α := by fun_prop
+      simpa using hc.tendsto.mono_left nhdsWithin_le_nhds
+    · have hs := hP2.tendsto_slope
+      refine hs.congr' (eventually_nhdsWithin_of_forall fun y hy => ?_)
+      have : y - α ≠ 0 := sub_ne_zero.mpr hy
+      simp only [slope_def_field, hd1, sub_zero]
+      field_simp
+  rw [hasDerivAt_iff_tendsto_slope]
+  refine ((Real.continuous_sqrt.tendsto p₂).comp hlim).congr'
+    (eventually_nhdsWithin_of_forall fun y hy => ?_)
+  have hne : y - α ≠ 0 := sub_ne_zero.mpr hy
+  have h0 : 0 ≤ 2 * P y - 2 * P α := by linarith [hmin y]
+  simp only [Function.comp, slope_def_field, bleisteinW_self]
+  rw [Real.sqrt_div h0, Real.sqrt_sq_eq_abs]
+  unfold bleisteinW
+  rcases lt_or_gt_of_ne hy with h | h
+  · simp only [not_le.mpr h, ↓reduceIte]
+    rw [abs_of_neg (sub_neg.mpr h)]
+    field_simp
+    ring
+  · simp only [h.le, ↓reduceIte]
+    rw [abs_of_pos (sub_pos.mpr h)]
+    field_simp
+    ring
 
 /-- DLMF 2.3.24, 2.3.29–2.3.30: for finite `k`, if `t ↦ w = W(t)` maps `[0, k]` onto `[0, κ]`
 with inverse `T` (`W(T(w)) = w`) of class `C¹`, `T(0) = 0`, `T(κ) = k`, `T' > 0`, and
@@ -131,7 +182,39 @@ theorem bleistein_transform {q : ℝ → ℝ → ℝ} {T : ℝ → ℝ} {k κ la
     ∫ t in (0 : ℝ)..k, Real.exp (-x * p α t) * q α t * t ^ (lam - 1) =
       Real.exp (-x * p α 0) * ∫ w in (0 : ℝ)..κ, Real.exp (-x * (w ^ 2 / 2 - a * w)) *
         (q α (T w) * (T w / w) ^ (lam - 1) * derivWithin T (Icc 0 κ) w) * w ^ (lam - 1) := by
-  sorry
+  -- the change of variables needs neither `λ > 0` nor the continuity of `q`
+  have _ := hlam
+  have _ := hq
+  set T' := derivWithin T (Icc 0 κ) with hT'def
+  have hdiff : DifferentiableOn ℝ T (Icc 0 κ) := hT.differentiableOn one_ne_zero
+  have hcont : ContinuousOn T (Icc 0 κ) := hdiff.continuousOn
+  have hder : ∀ w ∈ Icc 0 κ, HasDerivWithinAt T (T' w) (Icc 0 κ) w :=
+    fun w hw => (hdiff w hw).hasDerivWithinAt
+  have hmono : StrictMonoOn T (Icc 0 κ) := by
+    refine strictMonoOn_of_deriv_pos (convex_Icc 0 κ) hcont fun w hw => ?_
+    rw [interior_Icc] at hw
+    have := hT' w (Ioo_subset_Icc_self hw)
+    rwa [hT'def, derivWithin_of_mem_nhds (Icc_mem_nhds hw.1 hw.2)] at this
+  have himage : T '' Icc 0 κ = Icc 0 k := by
+    rw [hcont.image_Icc_of_monotoneOn hκ.le hmono.monotoneOn, hT0, hTκ]
+  have hchange := integral_image_eq_integral_abs_deriv_smul measurableSet_Icc hder
+    hmono.injOn (fun t => Real.exp (-x * p α t) * q α t * t ^ (lam - 1))
+  rw [himage] at hchange
+  rw [intervalIntegral.integral_of_le hk.le, ← integral_Icc_eq_integral_Ioc, hchange,
+    intervalIntegral.integral_of_le hκ.le, integral_Icc_eq_integral_Ioc, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioc fun w hw => ?_
+  have hwI : w ∈ Icc 0 κ := Ioc_subset_Icc_self hw
+  have hw0 : 0 < w := hw.1
+  have hTw : 0 ≤ T w := by
+    rw [← hT0]; exact hmono.monotoneOn (left_mem_Icc.mpr hκ.le) hwI hw0.le
+  simp only [smul_eq_mul]
+  rw [abs_of_pos (hT' w hwI), hpT w hwI, ← hb, Real.div_rpow hTw hw0.le]
+  have hwr : w ^ (lam - 1) ≠ 0 := (Real.rpow_pos_of_pos hw0 _).ne'
+  have he : Real.exp (-x * (w ^ 2 / 2 - a * w + b)) =
+      Real.exp (-x * b) * Real.exp (-x * (w ^ 2 / 2 - a * w)) := by
+    rw [← Real.exp_add]; ring_nf
+  rw [he]
+  field_simp
 
 /-- DLMF 2.3.31–2.3.33 (**Bleistein's uniform expansion**): let `λ > 0`, `κ > 0`, and for `α` in
 `[α₁, α₂]` let `a(α) ≤ a₂ < κ`. Suppose that `f(α, w)` (measurable in `w`) has the expansion

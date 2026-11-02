@@ -73,7 +73,8 @@ def arccotPrincipal (z : ℂ) : ℂ := Complex.arctan z⁻¹
 /-- The open arcsine/arccosine cut plane, excluding the two branch points. -/
 def arcsinCutPlane : Set ℂ := {z | z.im≠0 ∨ |z.re|<1}
 
-/-- The open arctangent cut plane, excluding ±i. -/
+/-- The open arctangent cut plane, excluding ±i; it equals `arcsinhDomain`
+(`arcsinhDomain_eq_arctanCutPlane`). -/
 def arctanCutPlane : Set ℂ := {z | z.re≠0 ∨ |z.im|<1}
 
 /-- The reciprocal cut plane for inverse secant and cosecant. -/

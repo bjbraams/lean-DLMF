@@ -7,6 +7,8 @@ module
 
 public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
+public import Mathlib.Analysis.Complex.Harmonic.MeanValue
+public import Mathlib.Analysis.InnerProductSpace.Harmonic.Constructions
 
 /-!
 # Summability of Fourier series (DLMF §1.15(iii))
@@ -33,7 +35,7 @@ Throughout, `0 < δ < π` as in DLMF.
 
 @[expose] public noncomputable section
 
-open MeasureTheory Complex Set Filter Topology Finset
+open MeasureTheory Complex Set Filter Topology Finset ComplexConjugate
 
 namespace DLMF.AlgebraicAnalytic
 
@@ -42,13 +44,93 @@ namespace DLMF.AlgebraicAnalytic
 theorem hasSum_abelPoissonKernel {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) (θ : ℝ) :
     HasSum (fun n : ℤ => ((r ^ n.natAbs : ℝ) : ℂ) * cexp (n * θ * I))
       (abelPoissonKernel r θ : ℂ) := by
-  sorry
+  obtain ⟨q, hqd⟩ : ∃ q : ℂ, q = r * cexp (θ * I) := ⟨_, rfl⟩
+  have hq : ‖q‖ = r := by
+    rw [hqd, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, Complex.norm_real,
+      Real.norm_of_nonneg hr0]
+  have hqc : ‖conj q‖ = r := by rw [Complex.norm_conj, hq]
+  have h1 : HasSum (fun n : ℕ => q ^ n) (1 - q)⁻¹ :=
+    hasSum_geometric_of_norm_lt_one (by rw [hq]; exact hr1)
+  have h2' : HasSum (fun n : ℕ => conj q ^ n) (1 - conj q)⁻¹ :=
+    hasSum_geometric_of_norm_lt_one (by rw [hqc]; exact hr1)
+  have h2 : HasSum (fun n : ℕ => conj q * conj q ^ n) (conj q * (1 - conj q)⁻¹) :=
+    h2'.mul_left (conj q)
+  have hconj : conj q = r * cexp (-(θ * I)) := by
+    rw [hqd, map_mul, Complex.conj_ofReal, ← Complex.exp_conj, map_mul,
+      Complex.conj_I, Complex.conj_ofReal]
+    ring_nf
+  have hA : HasSum (fun n : ℕ => ((r ^ ((n : ℤ)).natAbs : ℝ) : ℂ) *
+      cexp (((n : ℤ) : ℂ) * θ * I)) (1 - q)⁻¹ := by
+    refine h1.congr_fun fun n => ?_
+    rw [hqd, mul_pow, ← Complex.exp_nat_mul, Int.natAbs_natCast]
+    push_cast
+    ring_nf
+  have hB : HasSum (fun n : ℕ => ((r ^ (-((n : ℤ) + 1)).natAbs : ℝ) : ℂ) *
+      cexp (((-((n : ℤ) + 1) : ℤ) : ℂ) * θ * I)) (conj q * (1 - conj q)⁻¹) := by
+    refine h2.congr_fun fun n => ?_
+    have : (-((n : ℤ) + 1)).natAbs = n + 1 := by omega
+    rw [this, hconj, ← pow_succ', mul_pow, ← Complex.exp_nat_mul]
+    push_cast
+    ring_nf
+  have key := HasSum.of_nat_of_neg_add_one (f := fun n : ℤ =>
+      ((r ^ n.natAbs : ℝ) : ℂ) * cexp (n * θ * I)) hA hB
+  convert key using 1
+  have hq1 : (1 : ℂ) - q ≠ 0 := fun h => by
+    have : ‖q‖ = 1 := by rw [← sub_eq_zero.mp h, norm_one]
+    linarith
+  have hq2 : (1 : ℂ) - conj q ≠ 0 := fun h => by
+    have : ‖conj q‖ = 1 := by rw [← sub_eq_zero.mp h, norm_one]
+    linarith
+  have hsum : (1 - q)⁻¹ + conj q * (1 - conj q)⁻¹ =
+      (1 - q * conj q) / (1 - (q + conj q) + q * conj q) := by
+    rw [show 1 - (q + conj q) + q * conj q = (1 - q) * (1 - conj q) by ring]
+    field_simp
+    ring
+  have hre : q.re = r * Real.cos θ := by
+    rw [hqd, Complex.re_ofReal_mul, Complex.exp_ofReal_mul_I_re]
+  rw [hsum, Complex.add_conj, Complex.mul_conj, Complex.normSq_eq_norm_sq, hq, hre,
+    abelPoissonKernel]
+  push_cast
+  ring
 
 /-- DLMF 1.15.13: `(1/2π) ∫₀^{2π} P(r, θ) dθ = 1` for `0 ≤ r < 1`. -/
 @[dlmf 1.15.E13]
 theorem integral_abelPoissonKernel {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
     (1 / (2 * Real.pi)) * ∫ θ in (0 : ℝ)..2 * Real.pi, abelPoissonKernel r θ = 1 := by
-  sorry
+  set F : ℂ → ℂ := fun z => (1 + z) / (1 - z)
+  have hFa : ∀ z ∈ Metric.closedBall (0 : ℂ) |r|, AnalyticAt ℂ F z := by
+    intro z hz
+    have hz1 : (1 : ℂ) - z ≠ 0 := by
+      intro h
+      rw [Metric.mem_closedBall, dist_zero_right, abs_of_nonneg hr0,
+        ← sub_eq_zero.mp h, norm_one] at hz
+      linarith
+    exact (analyticAt_const.add analyticAt_id).div (analyticAt_const.sub analyticAt_id) hz1
+  have hH : InnerProductSpace.HarmonicOnNhd (fun z => (F z).re) (Metric.closedBall 0 |r|) :=
+    fun z hz => (hFa z hz).harmonicAt_re
+  have hav := hH.circleAverage_eq
+  rw [Real.circleAverage_def] at hav
+  have hpt : ∀ θ, (F (circleMap 0 r θ)).re = abelPoissonKernel r θ := by
+    intro θ
+    simp only [F, circleMap, zero_add, abelPoissonKernel]
+    rw [Complex.div_re]
+    have hc : (r * cexp (θ * I)).re = r * Real.cos θ := by
+      rw [Complex.re_ofReal_mul, Complex.exp_ofReal_mul_I_re]
+    have hs : (r * cexp (θ * I)).im = r * Real.sin θ := by
+      rw [Complex.im_ofReal_mul, Complex.exp_ofReal_mul_I_im]
+    simp only [Complex.add_re, Complex.sub_re, Complex.one_re, Complex.add_im,
+      Complex.sub_im, Complex.one_im, Complex.normSq_apply, hc, hs]
+    have h1 : Real.sin θ ^ 2 + Real.cos θ ^ 2 = 1 := Real.sin_sq_add_cos_sq θ
+    have hden : (1 - r * Real.cos θ) * (1 - r * Real.cos θ) +
+        (0 - r * Real.sin θ) * (0 - r * Real.sin θ) = 1 - 2 * r * Real.cos θ + r ^ 2 := by
+      linear_combination r ^ 2 * h1
+    rw [hden, ← add_div]
+    congr 1
+    linear_combination (-r ^ 2) * h1
+  have hF0 : (F 0).re = 1 := by simp [F]
+  simp only [hpt, smul_eq_mul, hF0] at hav
+  rw [one_div]
+  simpa using hav
 
 /-- The denominator of the Poisson kernel is bounded below away from `θ ∈ 2πℤ`. -/
 private lemma poissonKernel_denom_ge {r θ δ : ℝ} (hr : 0 ≤ r) (hθ : θ ∈ Icc δ (2 * Real.pi - δ))
@@ -98,11 +180,99 @@ theorem tendstoUniformlyOn_abelPoissonKernel {δ : ℝ} (hδ0 : 0 < δ) (hδ : �
         nlinarith [mul_pos hc (by linarith : (0 : ℝ) < 1 - r)]
     _ < ε := hrε
 
+/-- The Dirichlet kernel identity `sin(θ/2) (1 + 2 ∑_{k=1}^{m} cos kθ) = sin((2m+1)θ/2)`. -/
+private lemma sin_half_mul_dirichlet (θ : ℝ) (m : ℕ) :
+    Real.sin (θ / 2) * (1 + 2 * ∑ k ∈ range m, Real.cos ((k + 1) * θ)) =
+      Real.sin ((2 * m + 1) * θ / 2) := by
+  induction m with
+  | zero => simp
+  | succ m ih =>
+    rw [sum_range_succ]
+    have h := Real.sin_sub_sin ((2 * (m + 1 : ℕ) + 1) * θ / 2) ((2 * m + 1) * θ / 2)
+    push_cast at h ⊢
+    have e1 : ((2 * (m + 1) + 1) * θ / 2 - (2 * m + 1) * θ / 2) / 2 = θ / 2 := by ring
+    have e2 : ((2 * (m + 1) + 1) * θ / 2 + (2 * m + 1) * θ / 2) / 2 = (m + 1) * θ := by ring
+    rw [e1, e2] at h
+    linear_combination ih - h
+
+/-- `sin² a - sin² b = sin(a + b) sin(a - b)`. -/
+private lemma sin_sq_sub_sin_sq (a b : ℝ) :
+    Real.sin a ^ 2 - Real.sin b ^ 2 = Real.sin (a + b) * Real.sin (a - b) := by
+  rw [Real.sin_add, Real.sin_sub]
+  linear_combination (-(Real.sin a ^ 2)) * Real.sin_sq_add_cos_sq b +
+    (Real.sin b ^ 2) * Real.sin_sq_add_cos_sq a
+
+/-- The Fejér kernel identity `sin²(θ/2) ((n+1) + 2 ∑_{k=1}^{n} (n+1-k) cos kθ) =
+sin²((n+1)θ/2)`. -/
+private lemma sin_half_sq_mul_fejer (θ : ℝ) (n : ℕ) :
+    Real.sin (θ / 2) ^ 2 * ((n + 1) + 2 * ∑ k ∈ range n, ((n : ℝ) - k) * Real.cos ((k + 1) * θ)) =
+      Real.sin ((n + 1) * θ / 2) ^ 2 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    have hA : ((n + 1 : ℕ) : ℝ) + 1 + 2 * ∑ k ∈ range (n + 1),
+        (((n + 1 : ℕ) : ℝ) - k) * Real.cos ((k + 1) * θ) =
+        ((n + 1) + 2 * ∑ k ∈ range n, ((n : ℝ) - k) * Real.cos ((k + 1) * θ)) +
+          (1 + 2 * ∑ k ∈ range (n + 1), Real.cos ((k + 1) * θ)) := by
+      rw [sum_range_succ, sum_range_succ (fun k : ℕ => Real.cos ((k + 1) * θ))]
+      have : ∑ k ∈ range n, (((n + 1 : ℕ) : ℝ) - k) * Real.cos ((k + 1) * θ) =
+          ∑ k ∈ range n, ((n : ℝ) - k) * Real.cos ((k + 1) * θ) +
+            ∑ k ∈ range n, Real.cos ((k + 1) * θ) := by
+        rw [← sum_add_distrib]; refine sum_congr rfl fun k _ => ?_; push_cast; ring
+      rw [this]; push_cast; ring
+    rw [hA, mul_add, ih, pow_two (Real.sin (θ / 2)), mul_assoc, sin_half_mul_dirichlet]
+    have := sin_sq_sub_sin_sq (((n + 1 : ℕ) + 1) * θ / 2) ((n + 1) * θ / 2)
+    have e1 : ((n + 1 : ℕ) + 1) * θ / 2 + (n + 1) * θ / 2 = (2 * (n + 1 : ℕ) + 1) * θ / 2 := by
+      push_cast; ring
+    have e2 : ((n + 1 : ℕ) + 1) * θ / 2 - (n + 1) * θ / 2 = θ / 2 := by push_cast; ring
+    rw [e1, e2] at this
+    push_cast at this ⊢
+    linear_combination -this
+
 /-- DLMF 1.15.16: `(1/2π) ∫₀^{2π} K_n(θ) dθ = 1`. -/
 @[dlmf 1.15.E16]
 theorem integral_fejerKernel (n : ℕ) :
     (1 / (2 * Real.pi)) * ∫ θ in (0 : ℝ)..2 * Real.pi, fejerKernel n θ = 1 := by
-  sorry
+  set A : ℝ → ℝ := fun θ =>
+    (1 / (n + 1 : ℝ)) * ((n + 1) + 2 * ∑ k ∈ range n, ((n : ℝ) - k) * Real.cos ((k + 1) * θ))
+  have hEq : ∀ θ ∈ Ioo 0 (2 * Real.pi), fejerKernel n θ = A θ := by
+    intro θ hθ
+    have hs : Real.sin (θ / 2) ≠ 0 := by
+      apply (Real.sin_pos_of_pos_of_lt_pi (by linarith [hθ.1]) (by linarith [hθ.2])).ne'
+    simp only [fejerKernel, A]
+    rw [div_pow, ← sin_half_sq_mul_fejer θ n]
+    field_simp
+  have hint : ∫ θ in (0 : ℝ)..2 * Real.pi, fejerKernel n θ =
+      ∫ θ in (0 : ℝ)..2 * Real.pi, A θ := by
+    refine intervalIntegral.integral_congr_ae ?_
+    have hfin : ∀ᵐ θ ∂volume, θ ∉ ({0, 2 * Real.pi} : Set ℝ) :=
+      (Set.toFinite _).measure_zero volume |> measure_eq_zero_iff_ae_notMem.mp
+    filter_upwards [hfin] with θ hθ hθI
+    rw [uIoc_of_le (by positivity)] at hθI
+    refine hEq θ ⟨hθI.1, lt_of_le_of_ne hθI.2 fun h => hθ (by simp [h])⟩
+  have hcos : ∀ k : ℕ, ∫ θ in (0 : ℝ)..2 * Real.pi, Real.cos ((k + 1) * θ) = 0 := by
+    intro k
+    have hk : ((k : ℝ) + 1) ≠ 0 := by positivity
+    rw [intervalIntegral.integral_comp_mul_left (fun x => Real.cos x) hk, integral_cos,
+      mul_zero, Real.sin_zero]
+    have : ((k : ℝ) + 1) * (2 * Real.pi) = ((2 * (k + 1) : ℕ) : ℝ) * Real.pi := by
+      push_cast; ring
+    rw [this, Real.sin_nat_mul_pi]; simp
+  have hcont : ∀ k : ℕ, IntervalIntegrable (fun θ => ((n : ℝ) - k) * Real.cos ((k + 1) * θ))
+      volume 0 (2 * Real.pi) := fun k => (by fun_prop : Continuous _).intervalIntegrable _ _
+  rw [hint]
+  simp only [A]
+  have hsI : IntervalIntegrable (fun θ : ℝ => 2 * ∑ k ∈ range n,
+      ((n : ℝ) - k) * Real.cos ((k + 1) * θ)) volume 0 (2 * Real.pi) :=
+    (by fun_prop : Continuous _).intervalIntegrable _ _
+  rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_add intervalIntegrable_const
+    hsI,
+    intervalIntegral.integral_const_mul, intervalIntegral.integral_finsetSum
+      fun k _ => hcont k]
+  simp only [intervalIntegral.integral_const_mul, hcos, mul_zero, Finset.sum_const_zero,
+    intervalIntegral.integral_const, sub_zero, smul_eq_mul, add_zero]
+  have hpi : Real.pi ≠ 0 := Real.pi_ne_zero
+  field_simp
 
 /-- DLMF 1.15.17: `K_n(θ) → 0` as `n → ∞`, uniformly for `θ ∈ [δ, 2π - δ]`, `0 < δ < π`. -/
 @[dlmf 1.15.E17]

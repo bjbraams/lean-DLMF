@@ -1090,7 +1090,7 @@ theorem pcfProduct_zero_beta_v {v : ℂ} (hv : 0 < v.re) :
   obtain ⟨hU, hV⟩ := pcfProduct_zero_pair_v hv
   rw [hU, hV]
   have hbeta := Gamma_mul_Gamma_eq_betaIntegral hv (show 0 < (1/2 : ℂ).re by norm_num)
-  rw [Gamma_one_half_eq_sqrt] at hbeta
+  rw [Complex.Gamma_one_half_eq_sqrt] at hbeta
   have hpow : (2 : ℂ)^(1-2*v)*((2 : ℂ)^(v-1/2))^2 = 1 := by
     rw [pow_two, ← cpow_add _ _ h2, ← cpow_add _ _ h2]
     convert cpow_zero (2 : ℂ) using 1 <;> congr 1 <;> ring

@@ -71,7 +71,33 @@ theorem liouville_transformation {u : ℝ} {f g w w' Z Z' Z'' A' A'' : ℝ → �
       HasDerivAt W' ((u ^ 2 * Z' ξ ^ 2 * f (Z ξ) +
           (Z' ξ ^ 2 * g (Z ξ) + A'' ξ / Z' ξ ^ (-(1 / 2) : ℝ))) *
         (Z' ξ ^ (-(1 / 2) : ℝ) * w (Z ξ))) ξ := by
-  sorry
+  refine ⟨fun ξ => A' ξ * w (Z ξ) + Z' ξ ^ (1 / 2 : ℝ) * w' (Z ξ), fun ξ hξ => ⟨?_, ?_⟩⟩
+  · have hp := hpos ξ hξ
+    have h1 := ((hZ' ξ hξ).rpow_const (p := -(1 / 2)) (Or.inl hp.ne')).mul
+      ((hw ξ hξ).comp ξ (hZ ξ hξ))
+    refine h1.congr_deriv ?_
+    simp only [Function.comp]
+    rw [hA' ξ hξ]
+    have e1 : Z' ξ ^ (-(1 / 2 : ℝ) - 1) = Z' ξ ^ (-(3 / 2) : ℝ) := by norm_num
+    have e2 : Z' ξ ^ (-(1 / 2) : ℝ) * Z' ξ = Z' ξ ^ (1 / 2 : ℝ) := by
+      rw [← Real.rpow_add_one hp.ne']; norm_num
+    rw [e1, ← e2]
+    ring
+  · have hp := hpos ξ hξ
+    have h1 := (hA'' ξ hξ).mul ((hw ξ hξ).comp ξ (hZ ξ hξ))
+    have h2 := ((hZ' ξ hξ).rpow_const (p := 1 / 2) (Or.inl hp.ne')).mul
+      ((hw' ξ hξ).comp ξ (hZ ξ hξ))
+    refine (h1.add h2).congr_deriv ?_
+    rw [hA' ξ hξ]
+    have hm : Z' ξ ^ (-(1 / 2) : ℝ) ≠ 0 := (Real.rpow_pos_of_pos hp _).ne'
+    have e3 : Z' ξ ^ (-(3 / 2) : ℝ) * Z' ξ = Z' ξ ^ (1 / 2 - 1 : ℝ) := by
+      rw [← Real.rpow_add_one hp.ne']; norm_num
+    have e4 : Z' ξ ^ (1 / 2 : ℝ) = Z' ξ ^ (-(1 / 2) : ℝ) * Z' ξ := by
+      rw [← Real.rpow_add_one hp.ne']; norm_num
+    simp only [Function.comp]
+    rw [← e3, e4]
+    field_simp
+    ring
 
 /-- DLMF 2.8.5 (Case I): if `ξ = ∫ f^{1/2} dz`, that is, `ξ` has derivative `f^{1/2}` in `z`,
 and `ξ'(z) = d`, then `ż² f(z) = 1` with `ż = 1/d`; the transformed equation is 2.8.8 with

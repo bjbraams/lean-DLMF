@@ -34,6 +34,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 set_option maxRecDepth 10000 in
 set_option maxHeartbeats 1600000 in
 /-- DLMF 22.9.22: cyclic identity (three points, rank 4), at points where the

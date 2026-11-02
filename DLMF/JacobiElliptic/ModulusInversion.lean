@@ -43,6 +43,8 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 /-! ### DLMF 22.2.2: the inversion `k = θ₂²/θ₃²(iK'/K)`
 
 The real case `0 < k < 1` comes from Jacobi's `K = (π/2)θ₃²` for a real nome (the AGM,

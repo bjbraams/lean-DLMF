@@ -29,8 +29,6 @@ the weighted polynomials.
   `chebyshevU_weighted_derivative`, `laguerrePolyL_weighted_derivative`: derivatives of the
   weighted polynomials (DLMF 18.9.16, 18.9.20, 18.9.22, 18.9.24).
 * `hermitePolyH_weighted_derivative`, `hermite_weighted_derivative`: DLMF 18.9.26 and 18.9.28.
-* `deriv_kummerM_regular`: the derivative of Kummer's series at regular lower parameters
-  (DLMF 13.3.15).
 
 ## Implementation notes
 
@@ -633,12 +631,6 @@ theorem ultrasphPoly_derivative {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (
     show lam + 1 / 2 + 1 = (lam + 1) + 1 / 2 by ring]
   linear_combination (₂F₁ (-(n : ℂ)) (n + 2 * (lam + 1)) ((lam + 1) + 1 / 2) ((1 - x) / 2)) * hf
 
-/-- The derivative formula for Kummer's entire series at regular lower parameters. -/
-@[dlmf 13.3.E15]
-theorem deriv_kummerM_regular {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
-    deriv (kummerM a c) = fun z => a / c * kummerM (a + 1) (c + 1) z :=
-  funext fun z => DLMF.Confluent.deriv_kummerM hc (by simpa using hc 0)
-
 /-- Identity under the stated parameter and domain assumptions: `deriv (laguerrePolyL α (n + 1)) x
 = -laguerrePolyL (α + 1) n x`. -/
 @[dlmf 18.9.E23]
@@ -652,7 +644,7 @@ theorem laguerrePolyL_derivative {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : �
   have he : laguerrePolyL α (n + 1) = fun z => poch (α + 1) (n + 1) / ((n + 1).factorial : ℂ) *
       kummerM (-((n + 1 : ℕ) : ℂ)) (α + 1) z := rfl
   rw [he]
-  simp only [deriv_const_mul_field', deriv_kummerM_regular hc]
+  simp only [deriv_const_mul_field', DLMF.Confluent.deriv_kummerM hc hc0]
   rw [laguerrePolyL, poch_succ_left, Nat.factorial_succ]
   push_cast
   rw [show -((n : ℂ) + 1) + 1 = -(n : ℂ) by ring]

@@ -65,7 +65,7 @@ elliptic functions (§19.25(vi)) and the Gauss hypergeometric function (§19.25(
 
 Legendre's integrals are the complex `DLMF.EllipticIntegrals.incEllIntFk` etc. of
 `DLMF.EllipticIntegrals.Legendre` (segment path from `0` to `φ`, principal powers, a Cauchy
-principal value for `Π`), and `K(k)` is `DLMF.JacobiElliptic.compEllIntKk`. Jacobian functions
+principal value for `Π`), and `K(k)` is `DLMF.EllipticIntegrals.compEllIntKk`. Jacobian functions
 are the project's real `DLMF.Elliptic.Real.jacobiSnm` etc. (parameter `m = k²`) and the inverse
 functions of `DLMF.JacobiElliptic.Inverse`; Weierstrass functions are those of
 `DLMF.Weierstrass` on the lattice of `H : HalfPeriods`; `₂F₁` is Mathlib's
@@ -1009,14 +1009,14 @@ theorem symEllIntRF_mul_symEllIntRD_lemniscate :
   have hL2 := ofReal_cpow_half_sq (l := 2)
   have hL0 := ofReal_cpow_half_ne_zero hl
   simp only [ofReal_ofNat] at hL2 hL0
-  have hLc : ((compEllIntEk k * JacobiElliptic.compEllIntKk k + compEllIntEk k * JacobiElliptic.compEllIntKk k -
-      JacobiElliptic.compEllIntKk k * JacobiElliptic.compEllIntKk k : ℂ)) = π / 2 := by
+  have hLc : ((compEllIntEk k * EllipticIntegrals.compEllIntKk k + compEllIntEk k * EllipticIntegrals.compEllIntKk k -
+      EllipticIntegrals.compEllIntKk k * EllipticIntegrals.compEllIntKk k : ℂ)) = π / 2 := by
     rw [hK, hE]; exact_mod_cast hL
   generalize (2 : ℂ) ^ (1 / 2 : ℂ) = L at hL2 hL0 ⊢
   have hL4 : L ^ 4 = 4 := by rw [show L ^ 4 = (L ^ 2) ^ 2 by ring, hL2]; norm_num
-  rw [show L⁻¹ * JacobiElliptic.compEllIntKk k * (1 / 3 * ((L ^ 3)⁻¹ * symEllIntRD 0 1 (1 / 2))) =
-      JacobiElliptic.compEllIntKk k * symEllIntRD 0 1 (1 / 2) * (L ^ 4)⁻¹ / 3 by field_simp, hL4]
-  linear_combination (-JacobiElliptic.compEllIntKk k) * h5 + (1 / 2 : ℂ) * hLc
+  rw [show L⁻¹ * EllipticIntegrals.compEllIntKk k * (1 / 3 * ((L ^ 3)⁻¹ * symEllIntRD 0 1 (1 / 2))) =
+      EllipticIntegrals.compEllIntKk k * symEllIntRD 0 1 (1 / 2) * (L ^ 4)⁻¹ / 3 by field_simp, hL4]
+  linear_combination (-EllipticIntegrals.compEllIntKk k) * h5 + (1 / 2 : ℂ) * hLc
 
 /-- Round-1 helper: `R_F(0, 1, 2) = Γ(1/4)²/(4 √(2π))` (DLMF 19.20.2). -/
 theorem symEllIntRF_zero_one_two :

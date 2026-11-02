@@ -46,7 +46,7 @@ Gamma-shift formula come from `DLMF.OrthogonalPolynomials.HahnMoments`.
 
 open Complex Filter Set MeasureTheory
 open scoped Real Topology Nat
-open DLMF.Gamma (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
 noncomputable section
 namespace DLMF.OrthogonalPolynomials.PollaczekMoments
 /-- A rescaled Gamma pair, suited to the existing half-plane Mellin--Barnes API. -/

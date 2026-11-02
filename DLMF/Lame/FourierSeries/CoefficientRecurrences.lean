@@ -182,10 +182,6 @@ lemma continuous_lameEsk (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     Continuous fun x => Real.lameEsk ν m x k :=
   (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 m).1.differentiable.continuous
 
-/-- For `k² < 1`, `x ↦ dn(x, k)` is continuous on `ℝ`. -/
-lemma continuous_jacobiDnm (hk : k ^ 2 < 1) : Continuous fun x => Real.jacobiDnm x (k ^ 2) :=
-  continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnm hk x).continuousAt
-
 /-- The sequence identity behind the normalizations 29.6.12, 29.6.27, 29.6.42, 29.6.57. -/
 lemma lame_normalization_seq_identity {C : ℕ → ℝ} (hC : Summable fun p => |C p|) (k e a : ℝ)
     (h : HasSum (fun p => (if p = 0 then e else 1) * C p *
@@ -458,17 +454,13 @@ private lemma integral_lame_green_test {h : ℝ} {w F F1 F2 : ℝ → ℝ} (hk :
   have hcont : Continuous fun x =>
       w x * (F2 x + (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * F x) :=
     hw.differentiable.continuous.mul (hF2.add ((continuous_const.sub
-      (continuous_const.mul ((continuous_jacobiSnm hk).pow 2))).mul hFc))
+      (continuous_const.mul ((Real.continuous_jacobiSnm hk).pow 2))).mul hFc))
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hd x)
     (hcont.intervalIntegrable a b)
 
 /-- `sin φ(x) = cn(x, k)` for `φ(x) = π/2 - am(x, k)`. -/
 private lemma sin_lamePhi (x : ℝ) : Real.sin (Real.lamePhi x k) = Real.jacobiCnm x (k ^ 2) := by
   simp [Real.lamePhi, Real.sin_pi_div_two_sub, Real.jacobiCnm]
-
-/-- For `k² < 1`, `x ↦ cn(x, k)` is continuous on `ℝ`. -/
-private lemma continuous_jacobiCnm (hk : k ^ 2 < 1) : Continuous fun x => Real.jacobiCnm x (k ^ 2) :=
-  continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiCnm hk x).continuousAt
 
 /-- For `k² < 1`, `x ↦ φ(x) = π/2 - am(x, k)` is continuous. -/
 private lemma continuous_lamePhi (hk : k ^ 2 < 1) : Continuous fun x => Real.lamePhi x k :=
@@ -481,10 +473,6 @@ private lemma lamePhi_zero (hk : k ^ 2 < 1) : Real.lamePhi 0 k = π / 2 := by
 /-- `φ(K) = 0`, since `am(K, k) = π/2`. -/
 private lemma lamePhi_K_of_sq_lt_one (hk : k ^ 2 < 1) : Real.lamePhi (Real.compEllIntKm (k ^ 2)) k = 0 := by
   rw [Real.lamePhi, Real.jacobiAmm_compEllIntKm hk, sub_self]
-
-/-- `sn(0, k) = 0` for `k² < 1`. -/
-private lemma jacobiSnm_zero (hk : k ^ 2 < 1) : Real.jacobiSnm 0 (k ^ 2) = 0 := by
-  simp [Real.jacobiSnm, Real.jacobiAmm_zero hk]
 
 /-- `cn(K, k) = 0` for `k² < 1`. -/
 private lemma jacobiCnm_K (hk : k ^ 2 < 1) : Real.jacobiCnm (Real.compEllIntKm (k ^ 2)) (k ^ 2) = 0 := by
@@ -524,9 +512,9 @@ lemma integral_lame_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^ 2 < 1)
     convert h1 using 1
     · funext y; simp only [Pi.neg_apply, Pi.mul_apply, Function.comp_apply, D, φ]; ring
     · simp only [D, S, Cn, φ, Function.comp_apply]; ring
-  have hS : Continuous S := continuous_jacobiSnm hk
-  have hC : Continuous Cn := continuous_jacobiCnm hk
-  have hD : Continuous D := continuous_jacobiDnm hk
+  have hS : Continuous S := Real.continuous_jacobiSnm hk
+  have hC : Continuous Cn := Real.continuous_jacobiCnm hk
+  have hD : Continuous D := Real.continuous_jacobiDnm hk
   have hP : Continuous φ := continuous_lamePhi hk
   have hF2 : Continuous fun x =>
       j * k ^ 2 * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 2 * g (j * φ x) := by
@@ -607,9 +595,9 @@ lemma integral_lame_weighted_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^
       ((((Real.hasDerivAt_jacobiDnm hk x).pow 2).const_mul j).mul (hG1 x))
     convert h1 using 1
     simp only [D, S, Cn, Pi.mul_apply, Pi.neg_apply, Pi.pow_apply]; ring
-  have hS : Continuous S := continuous_jacobiSnm hk
-  have hC : Continuous Cn := continuous_jacobiCnm hk
-  have hD : Continuous D := continuous_jacobiDnm hk
+  have hS : Continuous S := Real.continuous_jacobiSnm hk
+  have hC : Continuous Cn := Real.continuous_jacobiCnm hk
+  have hD : Continuous D := Real.continuous_jacobiDnm hk
   have hP : Continuous φ := continuous_lamePhi hk
   have hF2 : Continuous fun x => -(k ^ 2) * D x * (Cn x ^ 2 - S x ^ 2) * g (j * φ x) +
         3 * j * k ^ 2 * D x * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 3 * g (j * φ x) := by
@@ -617,7 +605,7 @@ lemma integral_lame_weighted_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^
   have hG := integral_lame_green_test hk hw hF hF1 hF2 0 K
   have hφ0 : φ 0 = π / 2 := lamePhi_zero hk
   have hφK : φ K = 0 := lamePhi_K_of_sq_lt_one hk
-  have hS0 : S 0 = 0 := jacobiSnm_zero hk
+  have hS0 : S 0 = 0 := Real.jacobiSnm_zero hk
   have hCK : Cn K = 0 := jacobiCnm_K hk
   simp only [hφ0, hφK, mul_zero, hS0, hCK, zero_mul, mul_zero, neg_zero, zero_sub] at hG
   have hpt : ∀ x, w x * ((-(k ^ 2) * D x * (Cn x ^ 2 - S x ^ 2) * g (j * φ x) +
@@ -793,7 +781,7 @@ theorem Real.lameEck_even_fourierA_normalization
   have hk := modulus_sq_lt_one hk0 hk1
   have h := hasSum_lameEck_cos_integral (ν := ν) hk0 hk1 (2 * m) true
     (g := fun x => Real.lameEck ν (2 * m) x k * Real.jacobiDnm x (k ^ 2))
-    ((continuous_lameEck hk0 hk1 _).mul (continuous_jacobiDnm hk))
+    ((continuous_lameEck hk0 hk1 _).mul (Real.continuous_jacobiDnm hk))
   simp only [↓reduceIte, div_one, integral_cos_lamePhi_mul_dn] at h
   rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEck ν (2 * m) t k *
       (Real.lameEck ν (2 * m) t k * Real.jacobiDnm t (k ^ 2))) =
@@ -913,7 +901,7 @@ theorem Real.lameEck_even_fourierC_normalization
   have hE := continuous_lameEck (ν := ν) hk0 hk1 (2 * m)
   have h := hasSum_lameEck_cos_integral (ν := ν) hk0 hk1 (2 * m) false
     (g := fun x => Real.lameEck ν (2 * m) x k * Real.jacobiDnm x (k ^ 2) ^ 2)
-    (hE.mul ((continuous_jacobiDnm hk).pow 2))
+    (hE.mul ((Real.continuous_jacobiDnm hk).pow 2))
   simp only [Bool.false_eq_true, ↓reduceIte, integral_cos_lamePhi_mul_dn_sq hk hE] at h
   rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEck ν (2 * m) t k /
       Real.jacobiDnm t (k ^ 2) * (Real.lameEck ν (2 * m) t k * Real.jacobiDnm t (k ^ 2) ^ 2)) =

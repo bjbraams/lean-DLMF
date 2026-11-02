@@ -89,7 +89,7 @@ theorem ferrersP_zero_2 (ν μ : ℂ) :
     filter_upwards [Ioo_mem_nhds (show (-1:ℝ) < 0 by norm_num) (show (0:ℝ) < 1 by norm_num)]
       with x hx using ferrersP_eq_quadratic ν μ hx
   refine (hd.congr_of_eventuallyEq hev).congr_deriv ?_
-  rw [regularizedGaussHG_zero_of_regular DLMF.Hypergeometric.three_halves_not_neg_nat,
+  rw [regularizedGaussHG_zero_of_regular Complex.three_div_two_ne_neg_natCast,
       legendre_Gamma_three_halves,
     cpow_add _ _ (by norm_num : (2:ℂ) ≠ 0), cpow_one]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -107,7 +107,7 @@ theorem ferrersQ_zero_3 (ν μ : ℂ) :
   unfold ferrersQ ferrersW1 ferrersW2
   simp only [ofReal_zero, zero_mul, mul_zero, add_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
     zero_pow, sub_zero, one_cpow, mul_one]
-  rw [regularizedGaussHG_zero_of_regular half_ne_neg_nat, legendre_Gamma_one_half,
+  rw [regularizedGaussHG_zero_of_regular Complex.one_div_two_ne_neg_natCast, legendre_Gamma_one_half,
     cpow_sub _ _ (by norm_num : (2:ℂ) ≠ 0), cpow_one, show (ν-μ+2)/2 = (ν-μ)/2+1 by ring]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpi : (π:ℂ) = (Real.sqrt π : ℂ)^2 := by
@@ -134,7 +134,7 @@ theorem ferrersQ_zero_4 (ν μ : ℂ) :
     ring
   rw [he]
   refine hd.congr_deriv ?_
-  rw [regularizedGaussHG_zero_of_regular DLMF.Hypergeometric.three_halves_not_neg_nat,
+  rw [regularizedGaussHG_zero_of_regular Complex.three_div_two_ne_neg_natCast,
       legendre_Gamma_three_halves,
     show (ν+μ+2)/2 = (ν+μ)/2+1 by ring]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -248,7 +248,7 @@ theorem ofReal_mul_regularizedGaussHG_log_ratio {x : ℝ} (hx : x ∈ Ioo (-1:�
     rw [Complex.norm_real, Real.norm_eq_abs, abs_lt]; exact ⟨hx.1, hx.2⟩
   have hw : ‖(x:ℂ)^2‖ < 1 := by rw [norm_pow]; nlinarith [norm_nonneg (x:ℂ)]
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-    regularizedGaussHGFun_eq_div_Gamma DLMF.Hypergeometric.three_halves_not_neg_nat,
+    regularizedGaussHGFun_eq_div_Gamma Complex.three_div_two_ne_neg_natCast,
         legendre_Gamma_three_halves,
     ← log_ratio hx1]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'

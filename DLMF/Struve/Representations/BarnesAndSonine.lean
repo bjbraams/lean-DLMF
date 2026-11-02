@@ -747,7 +747,7 @@ theorem struveH_integral_zero_div  :
   have hr' : ((Real.cos θ * Real.sinc (t * Real.cos θ) : ℝ) : ℂ) * t =
       sin ((t:ℂ) * (Real.cos θ : ℂ)) := by
     rw [← ofReal_mul, hr, ofReal_sin, ofReal_mul]
-  simp only [cpow_zero, mul_zero, mul_one, zero_add, DLMF.Confluent.Gamma_one_half_eq_sqrt]
+  simp only [cpow_zero, mul_zero, mul_one, zero_add, Complex.Gamma_one_half_eq_sqrt]
   rw [mul_assoc, hr', sqrt_pi_mul_sqrt_pi_complex]
   push_cast
   ring
@@ -784,7 +784,7 @@ theorem struveH_integral_one_div_sq  :
       ← ofReal_cpow (by nlinarith [hs.1, hs.2]), Real.sqrt_eq_rpow]
   have hG : Gamma (1 + 1/2) = (Real.sqrt π : ℂ) / 2 := by
     rw [show (1:ℂ) + 1/2 = 1/2 + 1 by ring, Complex.Gamma_add_one _ (by norm_num),
-      DLMF.Confluent.Gamma_one_half_eq_sqrt]; ring
+      Complex.Gamma_one_half_eq_sqrt]; ring
   have hsin : sin ((t:ℂ) * (s:ℂ)) = ((Real.sin (t * s) : ℝ) : ℂ) := by push_cast; ring_nf
   rw [hsq, hG, cpow_one, hsin, ← hr]
   have hp : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero

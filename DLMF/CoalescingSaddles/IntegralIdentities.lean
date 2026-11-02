@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Properties
+public import DLMF.Airy.SquareTools
+public import DLMF.CoalescingSaddles.CanonicalIntegrals.ContoursAndSymmetries
 public import DLMF.CoalescingSaddles.Basic
 
 /-!
@@ -58,7 +60,49 @@ theorem normSq_cuspoidIntegral_one_eq_integral (x : ℝ) :
         (Ioi 0) ∧
       ((‖cuspoidIntegral 1 ![x]‖ ^ 2 : ℝ) : ℂ) = (((2 : ℝ) ^ (5 / 3 : ℝ) : ℝ) : ℂ) *
         ∫ u in Ioi (0 : ℝ), cuspoidIntegral 1 ![(2 : ℝ) ^ (2 / 3 : ℝ) * (3 * u ^ 2 + x)] := by
-  sorry
+  set a : ℝ := (3 : ℝ) ^ (1 / 3 : ℝ) with ha_def
+  have ha : 0 < a := by positivity
+  have ha3 : a ^ 3 = 3 := by
+    rw [ha_def, ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
+  set c : ℝ := DLMF.Airy.airySq_c with hc_def
+  have hc : c = (2 : ℝ) ^ (2 / 3 : ℝ) := rfl
+  have hc53 : (2 : ℝ) ^ (5 / 3 : ℝ) = 2 * c := by
+    rw [hc, show (5 / 3 : ℝ) = 1 + 2 / 3 by norm_num, Real.rpow_add (by norm_num),
+      Real.rpow_one]
+  set g : ℝ → ℝ := fun t => DLMF.Airy.airyAiReal (c * (x / a + t ^ 2)) with hg
+  have hgi : Integrable g :=
+    DLMF.Airy.airySq_integrable DLMF.Airy.airySq_decay_ai DLMF.Airy.airySq_cont_ai
+      DLMF.Airy.airySq_c_pos (x / a)
+  have hrep := DLMF.Airy.airySq_rep (x / a)
+  have hF : DLMF.Airy.airySq_F (x / a) = ∫ t in Ioi 0, g t := rfl
+  have hfun : (fun u : ℝ => cuspoidIntegral 1 ![(2 : ℝ) ^ (2 / 3 : ℝ) * (3 * u ^ 2 + x)]) =
+      fun u : ℝ => (((2 * π / a) * g (a * u) : ℝ) : ℂ) := by
+    funext u
+    rw [cuspoidIntegral_one, DLMF.Airy.airyAi_ofReal_eq, ← ha_def, ← hc]
+    have : c * (3 * u ^ 2 + x) / a = c * (x / a + (a * u) ^ 2) := by
+      field_simp
+      rw [← ha3]; ring
+    rw [this]; push_cast; ring
+  have hint : Integrable (fun u : ℝ => (((2 * π / a) * g (a * u) : ℝ) : ℂ)) :=
+    ((hgi.comp_mul_left' ha.ne').const_mul _).ofReal
+  refine ⟨hfun ▸ hint.integrableOn, ?_⟩
+  rw [hfun, integral_complex_ofReal, integral_const_mul,
+    integral_comp_mul_left_Ioi g 0 ha, mul_zero, ← hF, cuspoidIntegral_one,
+    DLMF.Airy.airyAi_ofReal_eq, hc53, ← ha_def]
+  rw [norm_mul, norm_real, Real.norm_eq_abs, mul_pow, sq_abs]
+  have hpi : (0 : ℝ) < π := Real.pi_pos
+  have : ‖(2 * π / (a : ℂ))‖ = 2 * π / a := by
+    rw [show (2 * π / (a : ℂ)) = ((2 * π / a : ℝ) : ℂ) by push_cast; ring, norm_real,
+      Real.norm_eq_abs, abs_of_pos (by positivity)]
+  rw [this, smul_eq_mul]
+  have hc0 : 0 < c := DLMF.Airy.airySq_c_pos
+  have hF' : DLMF.Airy.airySq_F (x / a) = π * DLMF.Airy.airyAiReal (x / a) ^ 2 / c := by
+    field_simp; linarith
+  rw [hF']
+  have hcC : (c : ℂ) ≠ 0 := ofReal_ne_zero.mpr hc0.ne'
+  have haC : (a : ℂ) ≠ 0 := ofReal_ne_zero.mpr ha.ne'
+  push_cast
+  field_simp
 
 /-- `Ai(x)² = (2^{2/3}/π) ∫_0^∞ Ai(2^{2/3}(u² + x)) du` for real `x` (DLMF 36.9.2). -/
 @[dlmf 36.9.E2]
@@ -67,7 +111,8 @@ theorem airyAi_sq_eq_integral (x : ℝ) :
         (Ioi 0) ∧
       Airy.airyAi (x : ℂ) ^ 2 = (((2 : ℝ) ^ (2 / 3 : ℝ) / π : ℝ) : ℂ) *
         ∫ u in Ioi (0 : ℝ), Airy.airyAi (((2 : ℝ) ^ (2 / 3 : ℝ) * (u ^ 2 + x) : ℝ) : ℂ) := by
-  sorry
+  simp_rw [add_comm _ x]
+  exact DLMF.Airy.airyAi_sq_eq_integral x
 
 /-- `|Ψ₁(x)|² = √(8π/3) ∫_0^∞ u^{-1/2} cos(2u(x + u²) + π/4) du` (DLMF 36.9.3), as an improper
 integral (`∫_0^R → |Ψ₁(x)|²` as `R → ∞`; the integral is not absolutely convergent). -/

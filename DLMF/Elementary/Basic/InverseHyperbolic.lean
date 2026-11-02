@@ -30,6 +30,7 @@ agreement with Mathlib's real inverse functions on the uncut real intervals, and
 * `arcsinh_branch_points`, `arccosh_branch_points`, `arctanh_branch_points`,
   `arccsch_branch_points`, `arcsech_branch_points`, `arccoth_branch_points`: the branch points.
 * `arcsinh_zero`: `arcsinh 0 = 0`.
+* `arcsinhDomain_eq_arctanCutPlane`: the arcsinh domain is the arctangent cut plane.
 * `arcsinh_ofReal`, `arccosh_ofReal`, `arctanh_ofReal`: agreement with `Real.arsinh`,
   `Real.arcosh` and `Real.artanh` on the uncut real intervals.
 * `arcsinh_neg`, `arctanh_neg`, `arccsch_neg`, `arccoth_neg`: oddness on the open cut planes
@@ -131,6 +132,10 @@ lemma hyper_arcsinh_rotation (z:ℂ) : arcsinh z=I*arcsinPrincipal (-I*z) := by
   unfold arcsinh arcsinPrincipal
   rw [hq,hi]
   linear_combination Complex.log (Complex.sqrt (z^2+1)+z)*Complex.I_sq
+
+/-- The principal domain of `arcsinh` is the arctangent cut plane: both remove the imaginary
+rays beyond `±i`. -/
+theorem arcsinhDomain_eq_arctanCutPlane : arcsinhDomain = arctanCutPlane := rfl
 
 /-- Rotation maps the inverse-sinh cut plane to the inverse-sine cut plane. -/
 private lemma hyper_asinh_coord {z:ℂ} (hz:z∈arcsinhDomain) : -I*z∈arcsinCutPlane := by

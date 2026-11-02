@@ -292,10 +292,6 @@ theorem comodulus_mem_Ioo (hk0 : 0 < k) (hk1 : k < 1) :
   refine ⟨Real.sqrt_pos.2 h1, ?_, Real.sq_sqrt h1.le⟩
   rw [Real.sqrt_lt' one_pos]; nlinarith
 
-/-- For `k² < 1`, `x ↦ sn(x, k)` is continuous on `ℝ`. -/
-theorem continuous_jacobiSnm (hk : k ^ 2 < 1) : Continuous fun x => Real.jacobiSnm x (k ^ 2) :=
-  continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiSnm hk x).continuousAt
-
 /-- `sn²` is even. -/
 private lemma jacobiSnm_neg_sq (hk : k ^ 2 < 1) (x : ℝ) :
     Real.jacobiSnm (2 * 0 - x) (k ^ 2) ^ 2 = Real.jacobiSnm x (k ^ 2) ^ 2 := by
@@ -315,7 +311,7 @@ private lemma isLameSolution_reflect {c : ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLam
     (deriv w c = 0 → ∀ x, w (2 * c - x) = w x) ∧ (w c = 0 → ∀ x, w (2 * c - x) = -w x) := by
   set q : ℝ → ℝ := fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) with hq_def
   have hq : Continuous q :=
-    (continuous_const.sub (continuous_const.mul ((continuous_jacobiSnm hk).pow 2))).neg
+    (continuous_const.sub (continuous_const.mul ((Real.continuous_jacobiSnm hk).pow 2))).neg
   have hw' : ∀ x, HasDerivAt w (deriv w x) x ∧
       HasDerivAt (deriv w) ((0 : ℝ) • deriv w x + q x • w x) x := fun x =>
     ⟨(hw.differentiable x).hasDerivAt, by simpa [q, smul_eq_mul] using hw.hasDerivAt_deriv x⟩

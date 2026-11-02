@@ -77,13 +77,13 @@ theorem besselY_eq_schlafli (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
   have hRc : Continuous R := (differentiable_schlafli_order hz).continuous
   have hSc : Continuous Sg :=
     intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' (by fun_prop) _ _
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement (f := fun μ => besselY μ z)
+  refine Complex.eq_of_continuousAt_of_integerComplement (f := fun μ => besselY μ z)
     (g := fun μ => 1 / π * Sg μ - 1 / π * (R (-μ) + cos (μ * π) * R μ))
     (continuousAt_besselY_order id continuous_id ν hzs) ?_ (fun c hc => ?_)
   · exact ((continuous_const.mul hSc).sub (continuous_const.mul
       ((hRc.comp continuous_neg).add ((by fun_prop : Continuous fun μ : ℂ => cos (μ * π)).mul
         hRc)))).continuousAt
-  · have hcz := DLMF.Confluent.forall_of_mem_integerComplement hc
+  · have hcz := Complex.forall_of_mem_integerComplement hc
     have hs := sin_mul_pi_ne_zero hcz
     have hJ := besselJ_eq_schlafli c hz
     have hJ' := besselJ_eq_schlafli (-c) hz

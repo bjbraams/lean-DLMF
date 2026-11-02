@@ -32,6 +32,8 @@ their eigenvalues, finite Fourier series, algebraic form and zeros (DLMF §§29.
 * `lamePolyEk_algebraic_form`: the algebraic form DLMF 29.12.9–29.12.10.
 * `lamePolyEk_zeros_maximize`, `lamePolyEk_zeros_equilibrium`: the maximum principle and the
   electrostatic equilibrium of the zeros, DLMF 29.12.11–29.12.13.
+* `Real.lameEck_even_fourierA_eq_zero`: for `ν = 2n` and `m ≤ n` the Fourier coefficients
+  `A_{2p}` of `Ec^{2m}_{2n}` vanish for `p > n` (§29.6(i)).
 
 ## Implementation notes
 
@@ -689,5 +691,56 @@ theorem lamePolyEk_zeros_equilibrium (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyTy
             (ξ - (k ^ 2)⁻¹) +
           ((P.roots.erase ξ).map fun η => 1 / (ξ - η)).sum = 0 := by
   sorry
+
+/-! ### The terminating Fourier series of §29.6(i) -/
+
+/-- §29.6(i): for `ν = 2n` and `m = 0, 1, …, n` the Fourier coefficients `A_{2p}` of
+`Ec^{2m}_{2n}` vanish for `p > n`, so `Ec^{2m}_{2n}` reduces to a Lamé polynomial (compare
+§§29.12(i), 29.15(i)). Proved from the finite Fourier series 29.15.1 (`Real.lameUEk_eq`,
+`Real.lameUEk_fourier`) and the orthogonality of `cos(2qφ)` on `[0, π/2]`. -/
+@[dlmf 29.6.i]
+theorem Real.lameEck_even_fourierA_eq_zero (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n)
+    {p : ℕ} (hp : n < p) :
+    Real.lameCosCoeff (fun x => Real.lameEck (2 * n : ℕ) (2 * m) x k) k true (2 * p) = 0 := by
+  set b : ℕ → ℝ := fun q => (if q = 0 then 1 / 2 else 1) * lamePolyCoeff .uE n m k q
+  have hE : ∀ x : ℝ, Real.lameEck (2 * n : ℕ) (2 * m) x k =
+      ∑ q ∈ Finset.range (n + 1), b q * Real.cos ((2 * q) * Real.lamePhi x k) := fun x => by
+    have h := (Real.lameUEk_eq hk0 hk1 hm x).symm.trans (Real.lameUEk_fourier hk0 hk1 n m x)
+    exact_mod_cast h
+  rw [Real.lameCosCoeff]
+  simp only [↓reduceIte]
+  have e : ∀ x : ℝ, Real.lameEck (2 * n : ℕ) (2 * m) x k *
+      Real.cos (((2 * p : ℕ) : ℝ) * Real.lamePhi x k) * Real.jacobiDnm x (k ^ 2) =
+      Real.jacobiDnm x (k ^ 2) * (fun t => ∑ q ∈ Finset.range (n + 1),
+        b q * (Real.cos (2 * (((q : ℤ) - p : ℤ) : ℝ) * t) / 2 +
+          Real.cos (2 * (((q : ℤ) + p : ℤ) : ℝ) * t) / 2)) (Real.lamePhi x k) := fun x => by
+    rw [hE x, Finset.sum_mul, Finset.sum_mul, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun q _ => ?_
+    push_cast
+    rw [show 2 * ((q : ℝ) - p) * Real.lamePhi x k =
+        2 * q * Real.lamePhi x k - 2 * p * Real.lamePhi x k by ring,
+      show 2 * ((q : ℝ) + p) * Real.lamePhi x k =
+        2 * q * Real.lamePhi x k + 2 * p * Real.lamePhi x k by ring, Real.cos_sub, Real.cos_add]
+    ring
+  rw [intervalIntegral.integral_congr (fun x _ => e x),
+    integral_jacobiDnm_mul_comp_lamePhi (g := fun t => ∑ q ∈ Finset.range (n + 1),
+        b q * (Real.cos (2 * (((q : ℤ) - p : ℤ) : ℝ) * t) / 2 +
+          Real.cos (2 * (((q : ℤ) + p : ℤ) : ℝ) * t) / 2)) hk0 hk1 (by fun_prop)]
+  rw [intervalIntegral.integral_finsetSum (fun q _ => by
+    exact (Continuous.intervalIntegrable (by fun_prop) _ _))]
+  rw [Finset.sum_eq_zero, mul_zero]
+  intro q hq
+  have hq' : q ≤ n := Nat.lt_succ_iff.1 (Finset.mem_range.1 hq)
+  rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_add
+    (Continuous.intervalIntegrable (by fun_prop) _ _)
+    (Continuous.intervalIntegrable (by fun_prop) _ _),
+    intervalIntegral.integral_div, intervalIntegral.integral_div]
+  have e1 := integral_cos_two_mul_int_pi_div_two ((q : ℤ) - p)
+  have e2 := integral_cos_two_mul_int_pi_div_two ((q : ℤ) + p)
+  have h1 : (q : ℤ) - p ≠ 0 := by omega
+  have h2 : (q : ℤ) + p ≠ 0 := by omega
+  simp only [h1, h2, ↓reduceIte] at e1 e2
+  rw [e1, e2]
+  simp
 
 end DLMF.Lame

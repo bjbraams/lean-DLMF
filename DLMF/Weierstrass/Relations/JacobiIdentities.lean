@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Weierstrass.Relations.ThetaIdentities
+public import DLMF.JacobiElliptic.EisensteinSeries
 
 /-!
 # Relations between Weierstrass and Jacobian elliptic functions
@@ -56,6 +57,8 @@ open Filter Topology
 noncomputable section
 
 namespace DLMF.Weierstrass
+
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
 
 namespace HalfPeriods
 
@@ -424,6 +427,232 @@ theorem weierstrassP_add_ω₃_sub_e_three_eq_sn {z : ℂ} (hz : z + H.ω₃ ∉
 
 end HalfPeriods
 
+/-- Points off a period lattice: every point has a punctured neighbourhood avoiding `𝕃`. -/
+private lemma eventually_notMem_lattice (L : PeriodPair) (a : ℂ) :
+    ∀ᶠ w in 𝓝[≠] a, w ∉ L.lattice := by
+  have hU : IsOpen ((L.lattice : Set ℂ) \ {a})ᶜ := L.isOpen_compl_lattice_sdiff
+  have ha : a ∈ ((L.lattice : Set ℂ) \ {a})ᶜ := by simp
+  filter_upwards [nhdsWithin_le_nhds (hU.mem_nhds ha), self_mem_nhdsWithin] with w hw hwa
+  intro hwL; exact hw ⟨hwL, hwa⟩
+
+/-- `ζ` is meromorphic. -/
+private lemma meromorphicAt_weierstrassZeta (L : PeriodPair) (a : ℂ) :
+    MeromorphicAt (weierstrassZeta L) a := by
+  by_cases ha : a ∈ L.lattice
+  · have h := (analyticAt_weierstrassZeta_sub L ha).meromorphicAt.add
+      ((MeromorphicAt.id a).sub (MeromorphicAt.const a a)).inv
+    convert h using 1; funext z; simp
+  · exact (analyticOnNhd_weierstrassZeta L a ha).meromorphicAt
+
+/-- Liouville identification: an odd elliptic function `f` for `𝕃` with `f(z + s) = -f(z)`
+(`2s ∈ 𝕃`, `s ∉ 𝕃`), poles only on `𝕃 ∪ (𝕃 - s)` and `f(z) - 1/z` regular at `0` equals
+`ζ(z) - ζ(z + s) + ζ(s)`. -/
+private lemma weierstrassZeta_sub_add_eq_of_antiperiodic (L : PeriodPair) {s : ℂ}
+    (hs : s ∉ L.lattice)
+    (h2s : 2 * s ∈ L.lattice) {f : ℂ → ℂ} (hfm : ∀ z, MeromorphicAt f z)
+    (hper : ∀ z, ∀ l ∈ L.lattice, f (z + l) = f z) (hanti : ∀ z, f (z + s) = -f z)
+    (hodd : ∀ z, f (-z) = -f z)
+    (han : ∀ z, z ∉ L.lattice → z + s ∉ L.lattice → AnalyticAt ℂ f z)
+    (h0 : ∃ A : ℂ → ℂ, AnalyticAt ℂ A 0 ∧ (fun z => f z - 1 / z) =ᶠ[𝓝[≠] 0] A)
+    {z : ℂ} (hz : z ∉ L.lattice) (hz' : z + s ∉ L.lattice) :
+    weierstrassZeta L z - weierstrassZeta L (z + s) + weierstrassZeta L s = f z := by
+  classical
+  set ζ := weierstrassZeta L with hζ
+  set P : ℂ → Prop := fun w => w ∈ L.lattice ∨ w + s ∈ L.lattice with hP
+  set F : ℂ → ℂ := fun w => ζ w - ζ (w + s) + ζ s with hF
+  set G : ℂ → ℂ := fun w => if P w then 0 else F w - f w with hG
+  have hmem_add : ∀ {w l : ℂ}, l ∈ L.lattice → (w + l ∈ L.lattice ↔ w ∈ L.lattice) := by
+    intro w l hl
+    exact ⟨fun h => by simpa using L.lattice.sub_mem h hl, fun h => L.lattice.add_mem h hl⟩
+  have hPl : ∀ w, ∀ l ∈ L.lattice, (P (w + l) ↔ P w) := by
+    intro w l hl
+    simp only [hP, hmem_add hl, show w + l + s = w + s + l by ring]
+  have hPs : ∀ w, (P (w + s) ↔ P w) := by
+    intro w
+    simp only [hP, show w + s + s = w + 2 * s by ring, hmem_add h2s]; tauto
+  have hPneg : ∀ w, (P (-w) ↔ P w) := by
+    intro w
+    have e1 : -w ∈ L.lattice ↔ w ∈ L.lattice := neg_mem_iff
+    have e2 : -w + s ∈ L.lattice ↔ w + s ∈ L.lattice := by
+      rw [show -w + s = -(w + s) + 2 * s by ring, hmem_add h2s, neg_mem_iff]
+    simp only [hP, e1, e2]
+  -- quasi-periodicity of `ζ`
+  have hns : -s ∉ L.lattice := fun h => hs (by simpa using L.lattice.neg_mem h)
+  have hζ2s : ∀ w, w ∉ L.lattice → ζ (w + 2 * s) = ζ w + 2 * ζ s := by
+    intro w hw
+    have := weierstrassZeta_add_sub_eq_of_mem L h2s hw hns
+    rw [show -s + 2 * s = s by ring, weierstrassZeta_neg] at this
+    simp only [hζ]; linear_combination this
+  have hFl : ∀ w, ¬ P w → ∀ l ∈ L.lattice, F (w + l) = F w := by
+    intro w hw l hl
+    simp only [hP, not_or] at hw
+    have := weierstrassZeta_add_sub_eq_of_mem L hl hw.1 hw.2
+    simp only [hF, show w + l + s = w + s + l by ring]
+    linear_combination this
+  have hFs : ∀ w, ¬ P w → F (w + s) = -F w := by
+    intro w hw
+    simp only [hP, not_or] at hw
+    simp only [hF, show w + s + s = w + 2 * s by ring, hζ2s w hw.1]; ring
+  have hFneg : ∀ w, ¬ P w → F (-w) = -F w := by
+    intro w hw
+    simp only [hP, not_or] at hw
+    have hw' : -w - s ∉ L.lattice := fun h => hw.2 (by
+      simpa [show -(-w - s) = w + s by ring] using L.lattice.neg_mem h)
+    have e1 : ζ (-w + s) = -ζ (w + s) + 2 * ζ s := by
+      rw [show -w + s = (-w - s) + 2 * s by ring, hζ2s _ hw', show -w - s = -(w + s) by ring]
+      simp only [hζ, weierstrassZeta_neg]
+    have e2 : ζ (-w) = -ζ w := by simp only [hζ, weierstrassZeta_neg]
+    simp only [hF]
+    rw [e1, e2]; ring
+  have hGl : ∀ w, ∀ l ∈ L.lattice, G (w + l) = G w := by
+    intro w l hl
+    by_cases hw : P w
+    · simp [hG, hw, (hPl w l hl).mpr hw]
+    · simp only [hG, hw, (hPl w l hl).not.mpr hw, ite_false, hFl w hw l hl, hper w l hl]
+  have hGs : ∀ w, G (w + s) = -G w := by
+    intro w
+    by_cases hw : P w
+    · simp [hG, hw, (hPs w).mpr hw]
+    · simp only [hG, hw, (hPs w).not.mpr hw, ite_false, hFs w hw, hanti]; ring
+  have hGneg : ∀ w, G (-w) = -G w := by
+    intro w
+    by_cases hw : P w
+    · simp [hG, hw, (hPneg w).mpr hw]
+    · simp only [hG, hw, (hPneg w).not.mpr hw, ite_false, hFneg w hw, hodd]; ring
+  -- local structure
+  have hPev : ∀ a, ∀ᶠ w in 𝓝[≠] a, ¬ P w := by
+    intro a
+    have h1 := eventually_notMem_lattice L a
+    have h2 : ∀ᶠ w in 𝓝[≠] a, w + s ∉ L.lattice := by
+      have ht : Tendsto (fun w => w + s) (𝓝[≠] a) (𝓝[≠] (a + s)) :=
+        tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _
+          ((continuous_id.add continuous_const).tendsto a |>.mono_left nhdsWithin_le_nhds)
+          (by filter_upwards [self_mem_nhdsWithin] with w hw
+              exact fun h => hw (add_right_cancel h))
+      exact ht.eventually (eventually_notMem_lattice L (a + s))
+    filter_upwards [h1, h2] with w hw1 hw2
+    simp only [hP, not_or]; exact ⟨hw1, hw2⟩
+  have hGev : ∀ a, G =ᶠ[𝓝[≠] a] fun w => F w - f w := by
+    intro a
+    filter_upwards [hPev a] with w hw
+    simp [hG, hw]
+  have hFm : ∀ a, MeromorphicAt F a := by
+    intro a
+    have e : F = (weierstrassZeta L - weierstrassZeta L ∘ fun w => w + s) + fun _ => ζ s := by
+      funext w; simp [hF, hζ]
+    rw [e]
+    exact ((meromorphicAt_weierstrassZeta L a).sub
+      ((meromorphicAt_weierstrassZeta L (a + s)).comp_analyticAt (g := fun w : ℂ => w + s)
+        (by fun_prop))).add (MeromorphicAt.const _ a)
+  have hGm : Meromorphic G := fun a =>
+    ((hFm a).sub (hfm a)).congr (hGev a).symm
+  have hGan : ∀ a, ¬ P a → AnalyticAt ℂ G a := by
+    intro a ha
+    simp only [hP, not_or] at ha
+    have hopen : IsOpen {w : ℂ | ¬ P w} := by
+      have h1 : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl
+      have h2 : IsOpen ((fun w => w + s) ⁻¹' (L.latticeᶜ : Set ℂ)) :=
+        h1.preimage (continuous_id.add continuous_const)
+      convert h1.inter h2 using 1
+      ext w; simp [hP]
+    have hFa : AnalyticAt ℂ F a := by
+      have h1 := analyticOnNhd_weierstrassZeta L a ha.1
+      have h2 := (analyticOnNhd_weierstrassZeta L (a + s) ha.2).comp_of_eq
+        (by fun_prop : AnalyticAt ℂ (fun w : ℂ => w + s) a) rfl
+      exact (h1.sub h2).add analyticAt_const
+    refine (hFa.sub (han a ha.1 ha.2)).congr ?_
+    filter_upwards [hopen.mem_nhds (show ¬ P a by simp [hP, ha.1, ha.2])] with w hw
+    simp [hG, hw]
+  -- orders
+  have hord0 : 0 ≤ meromorphicOrderAt G 0 := by
+    obtain ⟨A, hA, hfA⟩ := h0
+    have h1 := analyticAt_weierstrassZeta_sub L L.lattice.zero_mem
+    have h2 := (analyticOnNhd_weierstrassZeta L (0 + s) (by simpa using hs)).comp_of_eq
+        (by fun_prop : AnalyticAt ℂ (fun w : ℂ => w + s) 0) rfl
+    have hev : G =ᶠ[𝓝[≠] 0] fun w => (ζ w - 1 / (w - 0)) - ζ (w + s) + ζ s - A w := by
+      filter_upwards [hGev 0, hfA] with w hw hwA
+      rw [hw, ← hwA]; simp only [hF, sub_zero]; ring
+    rw [meromorphicOrderAt_congr hev]
+    exact (((h1.sub h2).add analyticAt_const).sub hA).meromorphicOrderAt_nonneg
+  have hord : ∀ x, 0 ≤ meromorphicOrderAt G x := by
+    intro x
+    by_cases hx : P x
+    · rcases hx with hx | hx
+      · have e : G ∘ (· + x) = G := funext fun w => hGl w x hx
+        have h1 := meromorphicOrderAt_comp_add_const_eq_meromorphicOrderAt (x := (0 : ℂ))
+          (c := x) (f := G)
+        rw [zero_add, e] at h1
+        rw [← h1]; exact hord0
+      · have e : G ∘ (· + x) = (-1 : ℂ) • G := by
+          funext w
+          have h1 := hGs (w + x)
+          rw [show w + x + s = w + (x + s) by ring, hGl w _ hx] at h1
+          simp only [Function.comp_apply, Pi.smul_apply, smul_eq_mul]
+          linear_combination h1
+        have h1 := meromorphicOrderAt_comp_add_const_eq_meromorphicOrderAt (x := (0 : ℂ))
+          (c := x) (f := G)
+        rw [zero_add, e, meromorphicOrderAt_const_smul_eq_meromorphicOrderAt
+          (by norm_num)] at h1
+        rw [← h1]; exact hord0
+    · exact (hGan x hx).meromorphicOrderAt_nonneg
+  obtain ⟨c, hc⟩ := exists_eq_const_of_periodic_of_order_nonneg L hGm hGl hord
+  have hhalf : ¬ P (s / 2) := by
+    have hh : s / 2 ∉ L.lattice := by
+      intro h
+      have := L.lattice.add_mem h h
+      rw [show s / 2 + s / 2 = s by ring] at this
+      exact hs this
+    simp only [hP, not_or]
+    refine ⟨hh, fun h => hh ?_⟩
+    have := L.lattice.sub_mem h2s h
+    rwa [show 2 * s - (s / 2 + s) = s / 2 by ring] at this
+  have hhalf' : ¬ P (-(s / 2)) := (hPneg _).not.mpr hhalf
+  have hc0 : c = 0 := by
+    have e1 := hc _ (hGan _ hhalf)
+    have e2 := hc _ (hGan _ hhalf')
+    rw [hGneg, e1] at e2
+    linear_combination -e2 / 2
+  have hzP : ¬ P z := by simp [hP, hz, hz']
+  have := hc z (hGan z hzP)
+  rw [hc0] at this
+  simp only [hG, hzP, ite_false, hF] at this
+  exact sub_eq_zero.mp this
+
+/-- Linear independence of the generators of a period lattice, with real coefficients. -/
+private lemma eq_zero_of_real_combination (L : PeriodPair) {a b : ℝ}
+    (h : (a : ℂ) * L.ω₁ + (b : ℂ) * L.ω₂ = 0) : a = 0 ∧ b = 0 := by
+  have := LinearIndependent.pair_iff.mp L.indep a b (by simpa [Complex.real_smul] using h)
+  exact this
+
+/-- A function periodic under both generators is periodic under the lattice. -/
+private lemma periodic_lattice_of_generators (L : PeriodPair) {f : ℂ → ℂ}
+    (h1 : ∀ z, f (z + L.ω₁) = f z) (h2 : ∀ z, f (z + L.ω₂) = f z) :
+    ∀ z, ∀ l ∈ L.lattice, f (z + l) = f z := by
+  intro z l hl
+  obtain ⟨m, n, rfl⟩ := PeriodPair.mem_lattice.mp hl
+  have p1 : Function.Periodic f L.ω₁ := h1
+  have p2 : Function.Periodic f L.ω₂ := h2
+  rw [← add_assoc, (p2.int_mul n) (z + m * L.ω₁), (p1.int_mul m) z]
+
+open DLMF.JacobiElliptic in
+/-- The Liouville identification specialized to `ps(z, k)`, `p ≠ s`. -/
+private lemma weierstrassZeta_sub_add_eq_jacobiPQk_s {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    {p : JacobiLetter} (hp : p ≠ .s) (L : PeriodPair) {s : ℂ} (hs : s ∉ L.lattice)
+    (h2s : 2 * s ∈ L.lattice)
+    (h1 : ∀ z, jacobiPQk p .s (z + L.ω₁) k = jacobiPQk p .s z k)
+    (h2 : ∀ z, jacobiPQk p .s (z + L.ω₂) k = jacobiPQk p .s z k)
+    (hanti : ∀ z, jacobiPQk p .s (z + s) k = -jacobiPQk p .s z k)
+    (hcong : ∀ z ∈ jacobiCongruentk 0 k, z ∈ L.lattice ∨ z + s ∈ L.lattice)
+    {z : ℂ} (hz : z ∉ L.lattice) (hz' : z + s ∉ L.lattice) :
+    weierstrassZeta L z - weierstrassZeta L (z + s) + weierstrassZeta L s =
+      jacobiPQk p .s z k :=
+  weierstrassZeta_sub_add_eq_of_antiperiodic L hs h2s (f := fun w => jacobiPQk p .s w k)
+    (fun w => (poleDichotomy_jacobiPQk hk hp).meromorphicAt w)
+    (periodic_lattice_of_generators L (f := fun w => jacobiPQk p .s w k) h1 h2) hanti
+    (fun w => by rw [jacobiPQk_neg]; simp [hp])
+    (fun w hw hw' => analyticAt_jacobiPQk_s hk hp fun h => (hcong w h).elim hw hw')
+    (exists_analyticAt_jacobiPQk_s_sub_one_div hk hp) hz hz'
+
 /-- DLMF 23.6.27: for a modulus `k` (`ℜk > 0`, `k ∉ [1, ∞)`), `K = K(k)`, `K' = K(k')` and
 `𝕃₁` the lattice with generators `4K, 2iK'`,
 `ζ(z|𝕃₁) - ζ(z + 2K|𝕃₁) + ζ(2K|𝕃₁) = ns(z, k)` for `z, z + 2K ∉ 𝕃₁`. -/
@@ -433,7 +662,28 @@ theorem weierstrassZeta_ns {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : Perio
     (hz : z ∉ L.lattice) (hz' : z + 2 * compEllIntKk k ∉ L.lattice) :
     weierstrassZeta L z - weierstrassZeta L (z + 2 * compEllIntKk k) +
       weierstrassZeta L (2 * compEllIntKk k) = jacobiNsk z k := by
-  sorry
+  refine weierstrassZeta_sub_add_eq_jacobiPQk_s hk (p := .n) (by decide) L ?_ ?_ ?_ ?_
+    (fun w => (jacobiNsk_shift hk w).2.2.2.1) ?_ hz hz'
+  · intro h
+    obtain ⟨m, n, hmn⟩ := PeriodPair.mem_lattice.mp h
+    have h0 : (((m : ℝ) - 1 / 2 : ℝ) : ℂ) * L.ω₁ + ((n : ℝ) : ℂ) * L.ω₂ = 0 := by
+      rw [h₁, h₂] at hmn ⊢; push_cast; linear_combination hmn
+    have := (eq_zero_of_real_combination L h0).1
+    have h2 : (2 * m : ℝ) = 1 := by linarith
+    have : (2 * m : ℤ) = 1 := by exact_mod_cast h2
+    omega
+  · exact PeriodPair.mem_lattice.mpr ⟨1, 0, by rw [h₁]; push_cast; ring⟩
+  · intro w
+    change jacobiNsk (w + L.ω₁) k = jacobiNsk w k
+    rw [h₁, show w + 4 * compEllIntKk k = w + 2 * compEllIntKk k + 2 * compEllIntKk k by ring,
+      (jacobiNsk_shift hk _).2.2.2.1, (jacobiNsk_shift hk w).2.2.2.1, neg_neg]
+  · intro w
+    rw [h₂, show 2 * I * compEllIntKpk k = 2 * (I * compEllIntKpk k) by ring]
+    exact (jacobiNsk_shift hk w).2.2.2.2.2
+  · rintro w ⟨m, n, rfl⟩
+    rcases Int.even_or_odd' m with ⟨a, rfl | rfl⟩
+    · left; exact PeriodPair.mem_lattice.mpr ⟨a, n, by rw [h₁, h₂]; push_cast; ring⟩
+    · right; exact PeriodPair.mem_lattice.mpr ⟨a + 1, n, by rw [h₁, h₂]; push_cast; ring⟩
 
 /-- DLMF 23.6.28: with `𝕃₂` generated by `2K - 2iK'`, `2K + 2iK'`,
 `ζ(z|𝕃₂) - ζ(z + 2K|𝕃₂) + ζ(2K|𝕃₂) = ds(z, k)` for `z, z + 2K ∉ 𝕃₂`. -/
@@ -444,7 +694,41 @@ theorem weierstrassZeta_ds {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : Perio
     (hz : z ∉ L.lattice) (hz' : z + 2 * compEllIntKk k ∉ L.lattice) :
     weierstrassZeta L z - weierstrassZeta L (z + 2 * compEllIntKk k) +
       weierstrassZeta L (2 * compEllIntKk k) = jacobiDsk z k := by
-  sorry
+  refine weierstrassZeta_sub_add_eq_jacobiPQk_s hk (p := .d) (by decide) L ?_ ?_ ?_ ?_
+    (fun w => (jacobiDsk_shift hk w).2.2.2.1) ?_ hz hz'
+  · intro h
+    obtain ⟨m, n, hmn⟩ := PeriodPair.mem_lattice.mp h
+    have h0 : (((m : ℝ) - 1 / 2 : ℝ) : ℂ) * L.ω₁ + (((n : ℝ) - 1 / 2 : ℝ) : ℂ) * L.ω₂ = 0 := by
+      rw [h₁, h₂] at hmn ⊢; push_cast; linear_combination hmn
+    have := (eq_zero_of_real_combination L h0).1
+    have h2 : (2 * m : ℝ) = 1 := by linarith
+    have : (2 * m : ℤ) = 1 := by exact_mod_cast h2
+    omega
+  · exact PeriodPair.mem_lattice.mpr ⟨1, 1, by rw [h₁, h₂]; push_cast; ring⟩
+  · intro w
+    change jacobiDsk (w + L.ω₁) k = jacobiDsk w k
+    have e := (jacobiDsk_shift hk (w - 2 * (I * compEllIntKpk k))).2.2.2.2.2
+    rw [sub_add_cancel] at e
+    rw [h₁, show w + (2 * compEllIntKk k - 2 * I * compEllIntKpk k) =
+      (w - 2 * (I * compEllIntKpk k)) + 2 * compEllIntKk k by ring,
+      (jacobiDsk_shift hk _).2.2.2.1, e]
+  · intro w
+    rw [h₂, show w + (2 * compEllIntKk k + 2 * I * compEllIntKpk k) =
+      w + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring]
+    exact (jacobiDsk_shift hk w).2.2.2.2.1
+  · rintro w ⟨m, n, rfl⟩
+    rcases Int.even_or_odd' (m + n) with ⟨c, hc | hc⟩
+    · left
+      exact PeriodPair.mem_lattice.mpr ⟨m - c, c, by
+        rw [h₁, h₂]; have : (n : ℂ) = 2 * c - m := by
+          rw [show (n : ℂ) = ((n : ℤ) : ℂ) from rfl]; push_cast [show n = 2 * c - m by omega]
+          ring
+        rw [this]; push_cast; ring⟩
+    · right
+      exact PeriodPair.mem_lattice.mpr ⟨m - c, c + 1, by
+        rw [h₁, h₂]; have : (n : ℂ) = 2 * c + 1 - m := by
+          push_cast [show n = 2 * c + 1 - m by omega]; ring
+        rw [this]; push_cast; ring⟩
 
 /-- DLMF 23.6.29, **corrected sign**: with `𝕃₃` generated by `2K`, `4iK'`,
 `ζ(z|𝕃₃) - ζ(z + 2iK'|𝕃₃) + ζ(2iK'|𝕃₃) = cs(z, k)` for `z, z + 2iK' ∉ 𝕃₃`.
@@ -456,7 +740,31 @@ theorem weierstrassZeta_cs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : Perio
     (hz : z ∉ L.lattice) (hz' : z + 2 * I * compEllIntKpk k ∉ L.lattice) :
     weierstrassZeta L z - weierstrassZeta L (z + 2 * I * compEllIntKpk k) +
       weierstrassZeta L (2 * I * compEllIntKpk k) = jacobiCsk z k := by
-  sorry
+  have hanti : ∀ w, jacobiCsk (w + 2 * I * compEllIntKpk k) k = -jacobiCsk w k := by
+    intro w
+    rw [show w + 2 * I * compEllIntKpk k = w + 2 * (I * compEllIntKpk k) by ring]
+    exact (jacobiCsk_shift hk w).2.2.2.2.2
+  refine weierstrassZeta_sub_add_eq_jacobiPQk_s hk (p := .c) (by decide) L ?_ ?_ ?_ ?_
+    hanti ?_ hz hz'
+  · intro h
+    obtain ⟨m, n, hmn⟩ := PeriodPair.mem_lattice.mp h
+    have h0 : ((m : ℝ) : ℂ) * L.ω₁ + (((n : ℝ) - 1 / 2 : ℝ) : ℂ) * L.ω₂ = 0 := by
+      rw [h₁, h₂] at hmn ⊢; push_cast; linear_combination hmn
+    have := (eq_zero_of_real_combination L h0).2
+    have h2 : (2 * n : ℝ) = 1 := by linarith
+    have : (2 * n : ℤ) = 1 := by exact_mod_cast h2
+    omega
+  · exact PeriodPair.mem_lattice.mpr ⟨0, 1, by rw [h₂]; push_cast; ring⟩
+  · intro w
+    rw [h₁]; exact (jacobiCsk_shift hk w).2.2.2.1
+  · intro w
+    change jacobiCsk (w + L.ω₂) k = jacobiCsk w k
+    rw [h₂, show w + 4 * I * compEllIntKpk k =
+      w + 2 * I * compEllIntKpk k + 2 * I * compEllIntKpk k by ring, hanti, hanti, neg_neg]
+  · rintro w ⟨m, n, rfl⟩
+    rcases Int.even_or_odd' n with ⟨a, rfl | rfl⟩
+    · left; exact PeriodPair.mem_lattice.mpr ⟨m, a, by rw [h₁, h₂]; push_cast; ring⟩
+    · right; exact PeriodPair.mem_lattice.mpr ⟨m, a + 1, by rw [h₁, h₂]; push_cast; ring⟩
 
 /-! ### Elliptic integrals (§23.6(iv)) -/
 

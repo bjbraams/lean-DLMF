@@ -69,6 +69,8 @@ noncomputable section
 
 namespace DLMF.Weierstrass
 
+open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+
 open DLMF.Elliptic DLMF.Theta DLMF.JacobiElliptic
 open ModularForm (kleinJ)
 
