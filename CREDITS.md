@@ -1798,3 +1798,13 @@ an integrable rational kernel.
 The final even-zeta summation uses the proved Bernoulli-cotangent representation of ζ(3),
 reflection and cotangent duplication for a quadratic moment, and dominated integration
 of the existing generating series. That moment is isolated in `DLMF.Zeta.CotangentMoments`.
+
+## Proof round 3 of 2026-11-02
+
+The series for the Bernoulli numbers (DLMF 24.8.6–24.8.8, `DLMF/BernoulliEuler/Series.lean`)
+rest on Mathlib's level-one Eisenstein series: the modular transformation
+`E_k(-1/τ) = τ^k E_k(τ)` and the `q`-expansion `EisensteinSeries.q_expansion_bernoulli` from
+`Mathlib.NumberTheory.ModularForms.EisensteinSeries.QExpansion`. Jacobi's Lambert series for
+`θ₃⁴` (`DLMF/NumberTheory/ThetaFourthPowerLambert.lean`, the analytic input for the
+four-square formula of §27.13(iv)) uses Mathlib's divisor-sum rearrangement
+`Mathlib.NumberTheory.TsumDivisorsAntidiagonal`.

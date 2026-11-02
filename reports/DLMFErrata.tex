@@ -189,7 +189,8 @@ Later proof-review findings carry their own dates below.
   \]
   For each finite $m\ge1$, $|P_m(z)-P(z)|$ is unbounded on $D$.
 \item[Lean] \lean{prod_mtest_log}
-  (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}) was corrected on 2026-10-30 to assert locally uniform convergence and remains admitted.
+  (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}) was corrected on 2026-10-30 to assert
+  locally uniform convergence and is proved.
   The counterexample to the former interface is analytical, not a new Lean theorem.
 \item[Found] 2026-10-28; source wording rechecked 2026-10-30.
 \end{fields}
@@ -201,7 +202,7 @@ Later proof-review findings carry their own dates below.
   poles may accumulate and $f$ is not meromorphic in $\CC$.
 \item[Evidence] $z_n=1+1/n$, $a_n=2^{-n}$: the series converges off $\{z_n\}\cup\{1\}$, and $1$ is
   a non-isolated singularity.
-\item[Lean] \lean{mittagLeffler} (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}), admitted.
+\item[Lean] \lean{mittag_leffler} (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}), proved.
 \end{fields}
 
 \entry{\dlink{1.13.viii}{\S1.13(viii)} (Liouville normal form, periodic case)}
@@ -245,8 +246,8 @@ Later proof-review findings carry their own dates below.
   rows 16--17 need $\Re s>|\Im a|$ for complex $a$, since $\cos at$ grows like
   $\eu^{|\Im a|t}$.
 \item[Lean] \lean{laplaceTransform_one_sub_cosh_div}, \lean{laplaceTransform_one_sub_cos_div},
-  \lean{laplaceTransform_sin_div} (\file{DLMF/AlgebraicAnalytic/Transforms/Tables.lean}),
-  admitted.
+  \lean{laplaceTransform_sin_div} (\file{DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean}),
+  proved.
 \end{fields}
 
 \entry{\dlink{1.15.ii}{\S1.15(ii)}, regularity for negative Ces\`aro orders}
@@ -267,7 +268,8 @@ Later proof-review findings carry their own dates below.
   The means do not converge, despite ordinary convergence. This exact argument
   resolves the earlier tentative alternating-series example without numerical evidence.
 \item[Lean] \lean{hasCesaroSumOfOrder_of_tendsto}
-  (\file{DLMF/AlgebraicAnalytic/Summability/Series.lean}) was corrected on 2026-10-30 to assume $\alpha\ge0$ and remains admitted.
+  (\file{DLMF/AlgebraicAnalytic/Summability/Series.lean}) was corrected on 2026-10-30 to assume
+  $\alpha\ge0$ and is proved.
   The counterexample to the negative-order assertion has not been formalized.
 \item[Found] Range concern on 2026-10-28; confirmed analytically 2026-10-30.
 \end{fields}
@@ -446,7 +448,8 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 \item[Correct] these ``general solutions'' omit the constant equilibria (for \deq{4.34.14}:
   $w=\pm1/a$).
 \item[Lean] \lean{hyperbolic_squared_ode_plus}, \lean{hyperbolic_squared_ode_minus},
-  \lean{hyperbolic_riccati_ode} (\file{DLMF/Elementary/Hyperbolic.lean}), admitted.
+  \lean{hyperbolic_riccati_ode} (\file{DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean}),
+  proved.
 \item[Found] 2026-10-24 (\file{DLMF4Acquisition.md}, 4.34 rows).
 \end{fields}
 
@@ -744,8 +747,8 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
   $\mu>\nu$, $\mu\notin\ZZ$, and $\sin((\mu-\nu)\pi)$ and $\sin(\mu\pi)$ have opposite signs, or
   (b) $\mu\leq\nu$, $\mu\notin\ZZ$, and $\lfloor\mu\rfloor$ is odd.
 \item[Correct] case (b) needs $\mu>0$ ($\nu=0.184$, $\mu=-0.088$: $\LegendreP>0$ on $(1,\infty)$).
-\item[Lean] \lean{associatedPOneZero}, \lean{associatedP_zero_count}
-  (\file{DLMF/Legendre/Zeros.lean}), proved.
+\item[Lean] \lean{AssociatedPOneZero}, \lean{associatedP_zero_count}
+  (\file{DLMF/Legendre/Zeros/Exterior.lean}), proved.
 \item[Found] 2026-10-22 (same section).
 \end{fields}
 
@@ -1094,7 +1097,8 @@ $\alpha,\beta$ are not fixed.
 \item[Correct] for $\alpha,\beta>0$.
 \item[Evidence] $\alpha=-2$, $\beta=3$, $\theta=1$ (all printed conditions hold): $0.895880$
 against $0.202733$.
-\item[Lean] \lean{symEllIntRC_addition_theta}, admitted.
+\item[Lean] \lean{symEllIntRC_addition_theta}
+(\file{DLMF/EllipticIntegrals/SymmetricAddition.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1115,7 +1119,7 @@ left side is a Cauchy principal value, \deq{19.2.20}, but the right side is not.
 $-\pi\iu/(2\sqrt{\theta})$); $x=-2$, $\theta=-3$: $0.41207$ against $1.40173$; no failure at
 3000 random complex points under the corrected hypotheses.
 \item[Lean] \lean{symEllIntRC_duplication_theta}
-(\file{DLMF/EllipticIntegrals/SymmetricAddition.lean}), admitted. The hypothesis
+(\file{DLMF/EllipticIntegrals/SymmetricAddition.lean}), proved. The hypothesis
 $x^{2}-\theta\in\CC\setminus(-\infty,0]$ was added on 2026-10-25: the acquired statement without
 it was false.
 \item[Found] 2026-10-25.
@@ -1445,7 +1449,8 @@ $K^{2}-\omega_{1}^{2}(e_{1}-e_{3})\approx11.0-13.7\iu$.
 +\zeta\left(2\iu K'\middle|\Lthree\right)=\cs\left(z,k\right).
 \end{equation*}
 \item[Evidence] the printed form is off by about $-0.49\iu$ at $k^{2}=0.3$.
-\item[Lean] \lean{weierstrassZeta_cs} (\file{DLMF/Weierstrass/Relations.lean}), admitted.
+\item[Lean] \lean{weierstrassZeta_cs} (\file{DLMF/Weierstrass/Relations/JacobiIdentities.lean}),
+  proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1464,7 +1469,7 @@ $\lvert\Im(z/\omega_{1})\rvert<2\Im(\omega_{3}/\omega_{1})$.
 \item[Evidence] outside the corrected region the series diverges (terms $10^{5}$, $10^{11}$,
 $10^{21}$ at $n=10$, $20$, $40$).
 \item[Lean] \lean{HalfPeriods.weierstrassP_fourier} (\file{DLMF/Weierstrass/Series.lean}),
-admitted.
+proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1480,7 +1485,7 @@ admitted.
 \item[Correct] same condition correction as \deq{23.8.1}:
 $\lvert\Im(z/\omega_{1})\rvert<2\Im(\omega_{3}/\omega_{1})$.
 \item[Lean] \lean{HalfPeriods.weierstrassZeta_fourier} (\file{DLMF/Weierstrass/Series.lean}),
-admitted.
+proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1638,7 +1643,7 @@ $y^{(n)}_{2m}$ tends to $2m-\tfrac12$, so the printed form fails for every $m\ge
 \item[Evidence] the zeros of $E_n$ in $[\tfrac12,\infty)$ for $n=21,41,61$ are about
 $0.5$, $1.50025$, $2.49975$, $3.50025$, $4.49975$, $5.50025$ (sign changes, mpmath; found by
 p24b, recomputed independently).
-\item[Lean] \lean{r24b_tendsto_eulerRealZero_odd_counterexample} (proved),
+\item[Lean] \lean{not_tendsto_eulerRealZero_odd_two} (proved),
 \lean{tendsto_eulerRealZero_odd} (corrected statement, proved)
 (\file{DLMF/BernoulliEuler/Zeros.lean}).
 \item[Found] 2026-10-25 (proof round 2).
@@ -1746,7 +1751,7 @@ verified domain $0<\Re a<1$, $0<|z|<1$, admitted.
 located symmetrically about the critical line $\Re s=\frac12$.''
 \item[Correct] for an even primitive $\chi$ the trivial zero $s=0$ lies in that strip but
 $L(1,\chi)\ne 0$. The symmetry $\rho\mapsto 1-\bar\rho$ holds for zeros $\rho\ne 0$.
-\item[Lean] \lean{q25b_LFunction_one_sub_conj_counterexample} (proved),
+\item[Lean] \lean{LFunction_zero_eq_zero_and_LFunction_one_sub_conj_zero_ne_zero} (proved),
 \lean{LFunction_one_sub_conj_eq_zero} (hypothesis $\rho\ne 0$ added in proof round 1)
 (\file{DLMF/Zeta/DirichletL.lean}), proved.
 \item[Found] 2026-10-25 (proof round 1).
@@ -1761,7 +1766,7 @@ $L(1,\chi)\ne 0$. The symmetry $\rho\mapsto 1-\bar\rho$ holds for zeros $\rho\ne
 C(n)=\sum_{k=1}^{n}N(n,k).
 \end{equation*}
 \item[Correct] at $n=0$ the sum is empty while $C(0)=1$. The identity holds for $n\ge 1$.
-\item[Lean] \lean{q26a_not_catalan_eq_sum_narayana} (proved counterexample),
+\item[Lean] \lean{not_forall_catalan_eq_sum_narayana} (proved counterexample),
 \lean{catalan_eq_sum_narayana} ($n\ge 1$, restated in proof round 1)
 (\file{DLMF/Combinatorics/LatticePaths.lean}), proved.
 \item[Found] 2026-10-25 (proof round 1).
@@ -2165,7 +2170,7 @@ u=\left(\frac{stz}{a}\right)^{1/2};\qquad\text{then}\quad u^{2}+v^{2}+w^{2}=s+t+
 \end{equation*}
 \item[Evidence] \DLMF{31.10.14} against \DLMF{31.10.18} on test polynomials (sympy): constant ratio
 only with $u^2=stz/a$.
-\item[Lean] \lean{heun_kernel_typeII_uvw} (\file{DLMF/Heun/Integral.lean}), admitted.
+\item[Lean] \lean{heun_kernel_typeII_uvw} (\file{DLMF/Heun/Integral.lean}), proved.
 \end{fields}
 
 \entry{\deq{31.10.22}--\deq{31.10.23}}
@@ -2347,7 +2352,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \item[Correct] $n=\ell+1,\ell+2,\ldots$, as in the text above \deq{33.14.14}:
   $A(-1/\ell^2,\ell)=\prod_k(1-k^2/\ell^2)=0$, so $\phi_{\ell,\ell}=0$.
 \item[Lean] \lean{hydrogenRadial_orthonormal} (\file{DLMF/Coulomb/Energy/Properties.lean}),
-  admitted.
+  proved.
 \end{fields}
 
 \entry{\deq{33.16.15}}
@@ -2360,8 +2365,8 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \item[Evidence] $\epsilon=0.7$, $\ell=1$, $r=-1.3$: $s$ true $1.72551393616$, printed $0.0403810$,
   corrected $1.72551393616$; $c$ true $-0.06407112687$, printed $2.73781$, corrected
   $-0.06407112687$.
-\item[Lean] \lean{coulombs_coulombc_eq_neg} (\file{DLMF/Coulomb/Energy/Connection.lean}), admitted;
-  the corrected form is also proved from the admitted \deq{33.16.6}--\deq{33.16.7}.
+\item[Lean] \lean{coulombs_coulombc_eq_neg} (\file{DLMF/Coulomb/Energy/Connection.lean}), proved,
+  as are \deq{33.16.6}--\deq{33.16.7}.
 \end{fields}
 
 \entry{\deq{33.16.17}}
@@ -2749,7 +2754,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   orthogonality \DLMF{28.2.33} fails, and the sine series of \S28.4(i) diverges off the real
   axis.
 \item[Fix] The hypothesis $n\ne0$ (2026-10-26).
-\item[Lean] Counterexample \lean{p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne} (proved);
+\item[Lean] Counterexample \lean{integral_mathieuCe_zero_mul_mathieuSe_zero_ne_zero} (proved);
   \lean{integral_mathieuCe_mul_mathieuSe} (\file{DLMF/Mathieu/Properties.lean}), now proved;
   second conjunct of \lean{mathieu_fourier_locallyUniform}
   (\file{DLMF/Mathieu/FourierSeries.lean}), proved.
@@ -2762,7 +2767,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   including $\gamma^2=0$. There every $A_k$ vanishes, Lean's $(\lambda-B_k)/A_k$ is $0$, and the
   expression is identically $-1$, not $O(k^{-4})$.
 \item[Fix] The hypothesis $\gamma^2\ne0$ (DLMF divides by $A_k$), 2026-10-26.
-\item[Lean] Counterexample \lean{p2y_not_spheroidalCoeff_ratio_isBigO_four_zero} (proved);
+\item[Lean] Counterexample \lean{not_spheroidalCoeff_ratio_isBigO_zero} (proved);
   \lean{spheroidalCoeff_ratio_isBigO_four} (\file{DLMF/Spheroidal/FerrersSeries.lean}), now
   proved.
 \item[Found] 2026-10-26 (proof round 2 for Chapters 28--31).
@@ -2775,7 +2780,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   integer; there Mathlib's ${}_2F_1$ takes a junk value and the Riemann equation fails
   ($\gamma=1$, $\delta=-1$, $\lambda=-1$, $\mu=0$, $j=0$, $z=2$).
 \item[Fix] The hypotheses that these parameters are not nonpositive integers, 2026-10-26.
-\item[Lean] Counterexample \lean{p2h_not_heunHypP5_P6_riemann_degenerate} (proved);
+\item[Lean] Counterexample \lean{not_heunHypP5_P6_riemann_of_degenerate} (proved);
   \lean{heunHypP5_P6_riemann} (\file{DLMF/Heun/Hypergeometric.lean}), now proved.
 \item[Found] 2026-10-26 (proof round 2 for Chapters 28--31).
 \end{fields}
@@ -2790,7 +2795,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   (star-shaped about $0$; the identity holds there to $5\cdot10^{-18}$). User decision,
   2026-10-26.
 \item[Lean] \lean{heunLocal_cubic_eq_hypergeometric} (\file{DLMF/Heun/Hypergeometric.lean}),
-  admitted.
+  proved.
 \item[Found] 2026-10-26 (proof round 2 for Chapters 28--31).
 \end{fields}
 
@@ -2800,7 +2805,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   required $\Lambda(\cdot,z)$ to be entire with the periods $2\varphi_1(z)$, $2\varphi_2(z)$, whereas
   DLMF's $\Lambda$ is elliptic with poles. The hypotheses were contradictory (an entire function
   with two $\mathbb R$-independent periods is constant, forcing $w=0$;
-  \lean{p3b_painleveVI_picard_hyp_false}), so the statement held vacuously.
+  \lean{not_painleveVI_picard_original_hyp}), so the statement held vacuously.
 \item[Fix] Restated on 2026-10-27 with
   $\Lambda(u,z)=4\wp\bigl(u+\omega_0(z);g_2(z),g_3(z)\bigr)+\tfrac13(1+z)$,
   $g_2=\tfrac1{12}(z^2-z+1)$, $g_3=-\tfrac1{432}(1+z)(2-z)(2z-1)$ and $\wp(\omega_0)=-\tfrac1{12}(1+z)$,
@@ -2825,7 +2830,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   rewritten by the reflection formula, is a candidate for a separate theorem. User decision,
   2026-11-02.
 \item[Lean] \lean{hasSum_coulombHPlus_log}, \lean{hasSum_coulombHMinus_log}
-  (\file{DLMF/Coulomb/RhoEtaSeries.lean}), admitted.
+  (\file{DLMF/Coulomb/RhoEtaSeries.lean}), proved.
 \item[Found] 2026-11-02 (proof round of 2026-11-02).
 \end{fields}
 
@@ -2879,7 +2884,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   product (\S1.9(vii), nonzero limit); for plain uniform convergence of the partial products it
   fails ($a_n=\frac12$). The Lean statement takes $F\ne0$ as part of the convergence hypothesis.
 \item[Lean] \lean{tendsto_logDeriv_prod} (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}),
-  admitted.
+  proved.
 \end{fields}
 
 \entry{\dlink{1.10.ii}{\S1.10(ii)} (analytic continuation)}
@@ -3002,8 +3007,8 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \begin{fields}
 \item[Note] Removable values ($\sin x/x$ and $\sinh x/x$ at $0$; the value $4$ at $a=0$) are
   stated explicitly.
-\item[Lean] \lean{cos_le_sinc_le_one} (proved), \lean{cosh_le_sinhc_cube} and
-  \lean{integral_exp_div_cosh_sq} (admitted).
+\item[Lean] \lean{cos_le_sinc_le_one}, \lean{cosh_le_sinhc_cube} and
+  \lean{integral_exp_div_cosh_sq}, all proved.
 \item[Source] \file{DLMF4Acquisition.md}.
 \end{fields}
 
@@ -3116,7 +3121,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \entry{\deq{17.6.28}}
 \begin{fields}
 \item[Note] Gamma poles excluded, with a parameter-limit statement.
-\item[Lean] \lean{heine_jackson_integral}, \lean{heine_jackson_parameter_limit}, admitted.
+\item[Lean] \lean{heine_jackson_integral}, \lean{heine_jackson_parameter_limit}, proved.
 \item[Source] \file{DLMF17Acquisition.md}.
 \end{fields}
 
@@ -3313,8 +3318,9 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   $\poch{s}{n}\zeta(n+s)$, whereas Lean's \lean{poch s n · ζ(1)} is $0$; at $s=0$, $a=\tfrac12$
   the Lean series sums to $-\tfrac12$ while $\zeta(0,\tfrac12)=0$. The hypothesis
   $s\ne0,-1,-2,\dots$ was added.
-\item[Lean] \lean{r25b_hasSum_hurwitzZetaComplex_taylor_counterexample} (proved),
-  \lean{hasSum_hurwitzZetaComplex_taylor} (\file{DLMF/Zeta/Hurwitz.lean}), admitted.
+\item[Lean] \lean{not_hasSum_hurwitzZetaComplex_taylor_zero} (proved),
+  \lean{hasSum_hurwitzZetaComplex_taylor} (\file{DLMF/Zeta/Hurwitz/SeriesAndContinuation.lean}),
+  proved.
 \item[Found] 2026-10-25 (proof round 2).
 \end{fields}
 
@@ -3364,7 +3370,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \item[Note] The normal form needs distinct singular points, implicit in DLMF; with coinciding
   $a_j$ the Lean junk value $1/(a_j-a_k)=0$ breaks it. The hypothesis
   \lean{Function.Injective a} was added on 2026-10-26.
-\item[Lean] Counterexample \lean{p1h_fuchsian_normalForm_counterexample} (proved);
+\item[Lean] Counterexample \lean{not_fuchsian_normalForm_of_not_injective} (proved);
   \lean{fuchsian_normalForm} (\file{DLMF/Heun/Fuchsian.lean}), proved.
 \end{fields}
 
@@ -3381,7 +3387,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \begin{fields}
 \item[Note] Proved under the extra hypothesis $\lambda_{\nu+2m}(q)\ne\lambda_{\nu+2n}(q)$ as a
   separate theorem; the statement as acquired stays admitted.
-\item[Lean] \lean{p2x_integral_mathieuMe_orthogonal_of_ne}
+\item[Lean] \lean{integral_mathieuMe_orthogonal_of_mathieuLambda_ne}
   (\file{DLMF/Mathieu/Noninteger/Properties.lean}), proved.
 \end{fields}
 
@@ -3446,7 +3452,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   \lean{coulombSigma}, which suffices for $H^\pm$, $G$ and $\eu^{\iu\sigma}$; these limits need
   DLMF's continuous branch (with the principal branch \deq{33.10.10} is off by about $38$ at
   $\eta=-20$). The continuous branch is \lean{phaseShift}, defined by the Weierstrass product;
-  its defining property \lean{phaseShift_spec} is admitted.
+  its defining property \lean{phaseShift_spec} is proved.
 \item[Lean] \file{DLMF/Coulomb/Basic/Functions.lean}, \file{DLMF/Coulomb/RhoEtaLimits.lean}.
 \end{fields}
 

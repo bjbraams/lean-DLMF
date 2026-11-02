@@ -401,42 +401,42 @@ have no Jacobian elliptic functions, so there are no upstream pointers.
 
 ## [§22.16 Related Functions](https://dlmf.nist.gov/22.16)
 
-- [22.16.E1](https://dlmf.nist.gov/22.16.E1): [`DLMF.JacobiElliptic.Real.jacobiAmm_eq_arcsin_jacobiSnm`](DLMF/JacobiElliptic/Related.lean#L89) (proved). Special case: real parameter m = k² < 1; principal branch on -K ≤ x ≤ K.
+- [22.16.E1](https://dlmf.nist.gov/22.16.E1): [`DLMF.JacobiElliptic.Real.jacobiAmm_eq_arcsin_jacobiSnm`](DLMF/JacobiElliptic/Related.lean#L90) (proved). Special case: real parameter m = k² < 1; principal branch on -K ≤ x ≤ K.
 - [22.16.E2](https://dlmf.nist.gov/22.16.E2): [`DLMF.Elliptic.Real.jacobiAmm_add_two_compEllIntKm`](DLMF/Elliptic/Basic/Jacobi.lean#L99) (proved). Pre-existing (untagged).
-- [22.16.E3](https://dlmf.nist.gov/22.16.E3): [`DLMF.JacobiElliptic.Real.jacobiAmm_eq_integral_jacobiDnm`](DLMF/JacobiElliptic/Related.lean#L120) (proved). Special case: real parameter m = k² < 1.
+- [22.16.E3](https://dlmf.nist.gov/22.16.E3): [`DLMF.JacobiElliptic.Real.jacobiAmm_eq_integral_jacobiDnm`](DLMF/JacobiElliptic/Related.lean#L121) (proved). Special case: real parameter m = k² < 1.
 - [22.16.E4](https://dlmf.nist.gov/22.16.E4): [`DLMF.Elliptic.Real.jacobiAmm_zero_param`](DLMF/Elliptic/Basic/Jacobi.lean#L112) (proved). Pre-existing (untagged).
-- [22.16.E5](https://dlmf.nist.gov/22.16.E5): [`DLMF.JacobiElliptic.Real.tendsto_jacobiAmm_one`](DLMF/JacobiElliptic/Related.lean#L129) (proved). Stated as limit k→1⁻: `Real.jacobiAmm` is totalized (am=x) at m≥1.
-- [22.16.E6](https://dlmf.nist.gov/22.16.E6): [`DLMF.JacobiElliptic.Real.jacobiAmm_isBigO_maclaurin`](DLMF/JacobiElliptic/Related.lean#L207) (proved). Special case: real x, real parameter m = k² < 1.
-- [22.16.E7](https://dlmf.nist.gov/22.16.E7): [`DLMF.JacobiElliptic.Real.jacobiAmm_isBigO_small_modulus`](DLMF/JacobiElliptic/Related.lean#L237) (admitted). Special case: real x, real k → 0.
-- [22.16.E8](https://dlmf.nist.gov/22.16.E8): [`DLMF.JacobiElliptic.Real.jacobiAmm_isBigO_small_comodulus`](DLMF/JacobiElliptic/Related.lean#L245) (admitted). Special case: real x, real k → 1⁻.
-- [22.16.E9](https://dlmf.nist.gov/22.16.E9): [`DLMF.JacobiElliptic.Real.jacobiAmm_hasSum_fourier`](DLMF/JacobiElliptic/Related.lean#L289) (proved). Special case: real x, 0 < k < 1.
-- [22.16.E10](https://dlmf.nist.gov/22.16.E10): [`DLMF.JacobiElliptic.Real.eq_incEllIntFm_iff_jacobiAmm_eq`](DLMF/JacobiElliptic/Related.lean#L355) (proved). Stronger than DLMF: all real x and φ.
+- [22.16.E5](https://dlmf.nist.gov/22.16.E5): [`DLMF.JacobiElliptic.Real.tendsto_jacobiAmm_one`](DLMF/JacobiElliptic/Related.lean#L130) (proved). Stated as limit k→1⁻: `Real.jacobiAmm` is totalized (am=x) at m≥1.
+- [22.16.E6](https://dlmf.nist.gov/22.16.E6): [`DLMF.JacobiElliptic.Real.jacobiAmm_isBigO_maclaurin`](DLMF/JacobiElliptic/Related.lean#L208) (proved). Special case: real x, real parameter m = k² < 1.
+- [22.16.E7](https://dlmf.nist.gov/22.16.E7): [`DLMF.JacobiElliptic.Real.jacobiAmm_isBigO_small_modulus`](DLMF/JacobiElliptic/Related.lean#L238) (proved). Special case: real x, real k → 0.
+- [22.16.E8](https://dlmf.nist.gov/22.16.E8): [`DLMF.JacobiElliptic.Real.jacobiAmm_isBigO_small_comodulus`](DLMF/JacobiElliptic/Related.lean#L253) (proved). Special case: real x, real k → 1⁻.
+- [22.16.E9](https://dlmf.nist.gov/22.16.E9): [`DLMF.JacobiElliptic.Real.jacobiAmm_hasSum_fourier`](DLMF/JacobiElliptic/Related.lean#L305) (proved). Special case: real x, 0 < k < 1.
+- [22.16.E10](https://dlmf.nist.gov/22.16.E10): [`DLMF.JacobiElliptic.Real.eq_incEllIntFm_iff_jacobiAmm_eq`](DLMF/JacobiElliptic/Related.lean#L371) (proved). Stronger than DLMF: all real x and φ.
 - [22.16.E11](https://dlmf.nist.gov/22.16.E11): [`DLMF.Elliptic.Real.jacobiAmm`](DLMF/Elliptic/Basic/Amplitude.lean#L168) (definition); [`DLMF.Elliptic.Real.incEllIntFm_jacobiAmm`](DLMF/Elliptic/Basic/Jacobi.lean#L59) (proved). Pre-existing definition of am as inverse of F(·,m) (untagged).
-- [22.16.E12](https://dlmf.nist.gov/22.16.E12): [`DLMF.JacobiElliptic.Real.jacobiAmm_eq_iff_jacobiSnm_eq_sin`](DLMF/JacobiElliptic/Related.lean#L364) (proved). Special case: -π/2 ≤ φ ≤ π/2 made explicit.
-- [22.16.E13](https://dlmf.nist.gov/22.16.E13): [`DLMF.JacobiElliptic.Real.jacobiAmm_eq_iff_jacobiCnm_eq_cos`](DLMF/JacobiElliptic/Related.lean#L376) (proved). Converse direction needs 0≤x and 0≤φ (cos is even).
-- [22.16.E14](https://dlmf.nist.gov/22.16.E14): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_sn`](DLMF/JacobiElliptic/Related.lean#L442) (proved). Corrected form (DLMF 2010-07-08, Karney) used.
-- [22.16.E15](https://dlmf.nist.gov/22.16.E15): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_jacobiSnm_sq`](DLMF/JacobiElliptic/Related.lean#L479) (proved). Special case: real modulus with k² < 1.
-- [22.16.E16](https://dlmf.nist.gov/22.16.E16): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_jacobiCnm_sq`](DLMF/JacobiElliptic/Related.lean#L494) (proved). Special case: real modulus with k² < 1.
+- [22.16.E12](https://dlmf.nist.gov/22.16.E12): [`DLMF.JacobiElliptic.Real.jacobiAmm_eq_iff_jacobiSnm_eq_sin`](DLMF/JacobiElliptic/Related.lean#L380) (proved). Special case: -π/2 ≤ φ ≤ π/2 made explicit.
+- [22.16.E13](https://dlmf.nist.gov/22.16.E13): [`DLMF.JacobiElliptic.Real.jacobiAmm_eq_iff_jacobiCnm_eq_cos`](DLMF/JacobiElliptic/Related.lean#L392) (proved). Converse direction needs 0≤x and 0≤φ (cos is even).
+- [22.16.E14](https://dlmf.nist.gov/22.16.E14): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_sn`](DLMF/JacobiElliptic/Related.lean#L458) (proved). Corrected form (DLMF 2010-07-08, Karney) used.
+- [22.16.E15](https://dlmf.nist.gov/22.16.E15): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_jacobiSnm_sq`](DLMF/JacobiElliptic/Related.lean#L495) (proved). Special case: real modulus with k² < 1.
+- [22.16.E16](https://dlmf.nist.gov/22.16.E16): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_jacobiCnm_sq`](DLMF/JacobiElliptic/Related.lean#L510) (proved). Special case: real modulus with k² < 1.
 - [22.16.E17](https://dlmf.nist.gov/22.16.E17): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk`](DLMF/JacobiElliptic/Basic/Epsilon.lean#L39) (definition).
-- [22.16.E18](https://dlmf.nist.gov/22.16.E18): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_cd_sq`](DLMF/JacobiElliptic/Related.lean#L547) (proved). Special case: real modulus 0 < k < 1.
-- [22.16.E19](https://dlmf.nist.gov/22.16.E19): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_sd_sq`](DLMF/JacobiElliptic/Related.lean#L593) (proved). Special case: real modulus 0 < k < 1.
-- [22.16.E20](https://dlmf.nist.gov/22.16.E20): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_nd_sq`](DLMF/JacobiElliptic/Related.lean#L641) (proved). Special case: real modulus 0 < k < 1.
-- [22.16.E21](https://dlmf.nist.gov/22.16.E21): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_dc_sq`](DLMF/JacobiElliptic/Related.lean#L687) (proved). Special case: real modulus 0 < k < 1.
-- [22.16.E22](https://dlmf.nist.gov/22.16.E22): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_nc_sq`](DLMF/JacobiElliptic/Related.lean#L746) (proved). Special case: real modulus 0 < k < 1.
-- [22.16.E23](https://dlmf.nist.gov/22.16.E23): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_sc_sq`](DLMF/JacobiElliptic/Related.lean#L802) (proved). Special case: real modulus 0 < k < 1.
-- [22.16.E24](https://dlmf.nist.gov/22.16.E24): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_ns_sq`](DLMF/JacobiElliptic/Related.lean#L1068) (proved). Special case: real modulus 0 < k < 1, x ≠ 0.
-- [22.16.E25](https://dlmf.nist.gov/22.16.E25): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_ds_sq`](DLMF/JacobiElliptic/Related.lean#L1078) (proved). Special case: real modulus 0 < k < 1, x ≠ 0.
-- [22.16.E26](https://dlmf.nist.gov/22.16.E26): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_cs_sq`](DLMF/JacobiElliptic/Related.lean#L1094) (proved). Special case: real modulus 0 < k < 1, x ≠ 0.
-- [22.16.E27](https://dlmf.nist.gov/22.16.E27): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_add`](DLMF/JacobiElliptic/Related.lean#L1108) (proved). Special case: real modulus with k² < 1.
-- [22.16.E28](https://dlmf.nist.gov/22.16.E28): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_add_compEllIntKm`](DLMF/JacobiElliptic/Related.lean#L1152) (proved). Special case: real modulus with k² < 1.
-- [22.16.E29](https://dlmf.nist.gov/22.16.E29): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_add_two_compEllIntKm`](DLMF/JacobiElliptic/Related.lean#L510) (proved). Special case: real modulus with k² < 1.
-- [22.16.E30](https://dlmf.nist.gov/22.16.E30): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_theta`](DLMF/JacobiElliptic/Related.lean#L1165) (admitted). Special case: real x, 0 < k < 1.
-- [22.16.E31](https://dlmf.nist.gov/22.16.E31): [`DLMF.JacobiElliptic.Real.incEllIntEm_jacobiAmm`](DLMF/JacobiElliptic/Related.lean#L409) (proved). Stronger than DLMF: all real x.
+- [22.16.E18](https://dlmf.nist.gov/22.16.E18): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_cd_sq`](DLMF/JacobiElliptic/Related.lean#L563) (proved). Special case: real modulus 0 < k < 1.
+- [22.16.E19](https://dlmf.nist.gov/22.16.E19): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_sd_sq`](DLMF/JacobiElliptic/Related.lean#L609) (proved). Special case: real modulus 0 < k < 1.
+- [22.16.E20](https://dlmf.nist.gov/22.16.E20): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_nd_sq`](DLMF/JacobiElliptic/Related.lean#L657) (proved). Special case: real modulus 0 < k < 1.
+- [22.16.E21](https://dlmf.nist.gov/22.16.E21): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_dc_sq`](DLMF/JacobiElliptic/Related.lean#L703) (proved). Special case: real modulus 0 < k < 1.
+- [22.16.E22](https://dlmf.nist.gov/22.16.E22): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_nc_sq`](DLMF/JacobiElliptic/Related.lean#L762) (proved). Special case: real modulus 0 < k < 1.
+- [22.16.E23](https://dlmf.nist.gov/22.16.E23): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_sc_sq`](DLMF/JacobiElliptic/Related.lean#L818) (proved). Special case: real modulus 0 < k < 1.
+- [22.16.E24](https://dlmf.nist.gov/22.16.E24): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_ns_sq`](DLMF/JacobiElliptic/Related.lean#L1084) (proved). Special case: real modulus 0 < k < 1, x ≠ 0.
+- [22.16.E25](https://dlmf.nist.gov/22.16.E25): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_ds_sq`](DLMF/JacobiElliptic/Related.lean#L1094) (proved). Special case: real modulus 0 < k < 1, x ≠ 0.
+- [22.16.E26](https://dlmf.nist.gov/22.16.E26): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_integral_cs_sq`](DLMF/JacobiElliptic/Related.lean#L1110) (proved). Special case: real modulus 0 < k < 1, x ≠ 0.
+- [22.16.E27](https://dlmf.nist.gov/22.16.E27): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_add`](DLMF/JacobiElliptic/Related.lean#L1124) (proved). Special case: real modulus with k² < 1.
+- [22.16.E28](https://dlmf.nist.gov/22.16.E28): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_add_compEllIntKm`](DLMF/JacobiElliptic/Related.lean#L1168) (proved). Special case: real modulus with k² < 1.
+- [22.16.E29](https://dlmf.nist.gov/22.16.E29): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_add_two_compEllIntKm`](DLMF/JacobiElliptic/Related.lean#L526) (proved). Special case: real modulus with k² < 1.
+- [22.16.E30](https://dlmf.nist.gov/22.16.E30): [`DLMF.JacobiElliptic.Real.jacobiEpsilonk_eq_theta`](DLMF/JacobiElliptic/Related.lean#L1181) (admitted). Special case: real x, 0 < k < 1.
+- [22.16.E31](https://dlmf.nist.gov/22.16.E31): [`DLMF.JacobiElliptic.Real.incEllIntEm_jacobiAmm`](DLMF/JacobiElliptic/Related.lean#L425) (proved). Stronger than DLMF: all real x.
 - [22.16.E32](https://dlmf.nist.gov/22.16.E32): [`DLMF.JacobiElliptic.Real.jacobiZetaFunctionk`](DLMF/JacobiElliptic/Basic/Epsilon.lean#L45) (definition). Named `jacobiZetaFunctionk` to avoid confusion with the theta argument `jacobiZetak`.
-- [22.16.E33](https://dlmf.nist.gov/22.16.E33): [`DLMF.JacobiElliptic.Real.jacobiZetaFunctionk_add_compEllIntKm`](DLMF/JacobiElliptic/Related.lean#L1197) (proved). Proof depends on admitted 22.16.E28.
-- [22.16.E34](https://dlmf.nist.gov/22.16.E34): [`DLMF.JacobiElliptic.Real.jacobiZetaFunctionk_add_two_compEllIntKm`](DLMF/JacobiElliptic/Related.lean#L1207) (proved). Special case: real modulus with k² < 1.
-- [22.16.i](https://dlmf.nist.gov/22.16#i): [`DLMF.JacobiElliptic.Real.contDiff_jacobiAmm`](DLMF/JacobiElliptic/Related.lean#L98) (proved); [`DLMF.Elliptic.Real.continuous_jacobiAmm`](DLMF/Elliptic/Basic/Jacobi.lean#L73) (proved); [`DLMF.Elliptic.Real.hasDerivAt_jacobiAmm`](DLMF/Elliptic/Basic/Jacobi.lean#L78) (proved). Smoothness ContDiff ℝ ⊤ of am in x proved; existing continuity and derivative pre-existing (untagged).
-- [22.16.iii](https://dlmf.nist.gov/22.16#iii): [`DLMF.JacobiElliptic.Real.jacobiZetaFunctionk_add`](DLMF/JacobiElliptic/Related.lean#L1186) (proved). Quasi-addition for Z; proof depends on admitted 22.16.E27.
+- [22.16.E33](https://dlmf.nist.gov/22.16.E33): [`DLMF.JacobiElliptic.Real.jacobiZetaFunctionk_add_compEllIntKm`](DLMF/JacobiElliptic/Related.lean#L1213) (proved). Proof depends on admitted 22.16.E28.
+- [22.16.E34](https://dlmf.nist.gov/22.16.E34): [`DLMF.JacobiElliptic.Real.jacobiZetaFunctionk_add_two_compEllIntKm`](DLMF/JacobiElliptic/Related.lean#L1223) (proved). Special case: real modulus with k² < 1.
+- [22.16.i](https://dlmf.nist.gov/22.16#i): [`DLMF.JacobiElliptic.Real.contDiff_jacobiAmm`](DLMF/JacobiElliptic/Related.lean#L99) (proved); [`DLMF.Elliptic.Real.continuous_jacobiAmm`](DLMF/Elliptic/Basic/Jacobi.lean#L73) (proved); [`DLMF.Elliptic.Real.hasDerivAt_jacobiAmm`](DLMF/Elliptic/Basic/Jacobi.lean#L78) (proved). Smoothness ContDiff ℝ ⊤ of am in x proved; existing continuity and derivative pre-existing (untagged).
+- [22.16.iii](https://dlmf.nist.gov/22.16#iii): [`DLMF.JacobiElliptic.Real.jacobiZetaFunctionk_add`](DLMF/JacobiElliptic/Related.lean#L1202) (proved). Quasi-addition for Z; proof depends on admitted 22.16.E27.
 
 ## [§22.17 Moduli Outside the Interval [0,1]](https://dlmf.nist.gov/22.17)
 
@@ -465,8 +465,8 @@ have no Jacobian elliptic functions, so there are no upstream pointers.
 - [22.15.i](https://dlmf.nist.gov/22.15#i) p1–p2: principal ranges of arcsn, arccn and arcdn. Covered by 22.15.E5–E7. [22.15.ii](https://dlmf.nist.gov/22.15#ii) p1–p4: normal-form remark and references. Covered by 22.15.E15–E23, otherwise bibliographic.
 - [22.16.Px1.p1](https://dlmf.nist.gov/22.16#Px1.p1): smoothness of `am`. `DLMF.JacobiElliptic.Real.contDiff_jacobiAmm` (tag 22.16.i, proved). The other 22.16 prose paragraphs restate the definitions and domains used in 22.16.E1–E34. Quasi-addition for `Z` in [22.16.iii](https://dlmf.nist.gov/22.16#iii): `DLMF.JacobiElliptic.Real.jacobiZetaFunctionk_add` (proved, depends on admitted 22.16.E27).
 - [22.16.iv](https://dlmf.nist.gov/22.16#iv): excluded: graphics (figures).
-- [22.16.i](https://dlmf.nist.gov/22.16.i): [`DLMF.Elliptic.Real.hasDerivAt_jacobiAmm`](DLMF/Elliptic/Basic/Jacobi.lean#L78) (proved); [`DLMF.JacobiElliptic.Real.contDiff_jacobiAmm`](DLMF/JacobiElliptic/Related.lean#L98) (proved).
-- [22.16.iii](https://dlmf.nist.gov/22.16.iii): [`DLMF.JacobiElliptic.Real.jacobiZetaFunctionk_add`](DLMF/JacobiElliptic/Related.lean#L1186) (proved).
+- [22.16.i](https://dlmf.nist.gov/22.16.i): [`DLMF.Elliptic.Real.hasDerivAt_jacobiAmm`](DLMF/Elliptic/Basic/Jacobi.lean#L78) (proved); [`DLMF.JacobiElliptic.Real.contDiff_jacobiAmm`](DLMF/JacobiElliptic/Related.lean#L99) (proved).
+- [22.16.iii](https://dlmf.nist.gov/22.16.iii): [`DLMF.JacobiElliptic.Real.jacobiZetaFunctionk_add`](DLMF/JacobiElliptic/Related.lean#L1202) (proved).
 - [22.17.i](https://dlmf.nist.gov/22.17#i) p1–p5: transformations to `[0, 1]`. p5 (polynomial identities, choice of square root sign) is reflected in `jacobiImagModulusk`, which uses the principal root. [22.17.ii.p1](https://dlmf.nist.gov/22.17#ii.p1): meromorphy in `k²` and validity for complex `k`. Used as the justification for the complex-domain statements of 22.17.E2–E8.
 - [22.18](https://dlmf.nist.gov/22.18) E1–E8: excluded: application. Mathematical content, briefly: arc length of the ellipse `l(u) = a ℰ(u, k)` (22.18.3); lemniscate arc length (22.18.4–6); conformal map of a rectangle by `sn` (22.18(ii)); uniformization of `y² = (1 - x²)(1 - k²x²)` (22.18.7); Jacobi–Abel / Euler addition law (22.18.8, equivalent to 22.8.1).
 - [22.19](https://dlmf.nist.gov/22.19) E1–E9: excluded: application. Mathematical content: pendulum solution `sin(θ/2) = sin(α/2) sn(t + K, sin(α/2))` (22.19.2–3), cf. existing `DLMF.Elliptic.pendulumAngle_ode` and `DLMF.Elliptic.pendulumAngle_periodic` in `DLMF/Elliptic/JacobiIdentities.lean`; cn/sn/dn solutions of the quartic (Duffing) oscillator (22.19.6–9).

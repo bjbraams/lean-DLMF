@@ -2233,7 +2233,7 @@ These logarithmic formulas must be used with their parameter hypotheses.
   denominator c²+2c cos(νπ)t^(2ν)+t^(4ν), with c>0,0<ν<1.
   No named transform definitions were found in Mathlib, TauCeti or this project.
   `DLMF.AlgebraicAnalytic.tendsto_hankel_kernel`
-  ([source](DLMF/AlgebraicAnalytic/Spectral/Theory.lean#L535)) states the
+  ([source](DLMF/AlgebraicAnalytic/Spectral/Theory.lean#L595)) states the
   corresponding symmetric-kernel completeness limit, but it is a theorem
   statement, not a transform definition. Specialized exact Bessel-transform
   integrals also occur in
@@ -3491,7 +3491,7 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
 - **Thomae expression supplies parameter continuation beyond the original unit**, [DLMF 16.4.E11](https://dlmf.nist.gov/16.4.E11):
   The Thomae expression supplies parameter continuation beyond the original unit
   series region; at Gamma poles its totalized value is not an assigned finite limit.
-  `DLMF.Hypergeometric.gen3F2UnitThomae` ([definition](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L1003)).
+  `DLMF.Hypergeometric.gen3F2UnitThomae` ([definition](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L1212)).
 
 - **Formal bilateral hypergeometric coefficients and series**, [DLMF 16.4.E16](https://dlmf.nist.gov/16.4.E16):
   Formal bilateral hypergeometric coefficient, with no factorial factor (16.4.16).
@@ -3505,11 +3505,11 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
 ### §16.8 Differential Equations
 
 - **Ordinary/regular singularities and generalized hypergeometric ODE**, [DLMF 16.8](https://dlmf.nist.gov/16.8):
-  The classification extends §2.7 to arbitrary order; the local predicates are `Complex.LinearODEOrdinaryAt`, `Complex.LinearODEAtMostRegularAt`, `Complex.LinearODERegularSingularAt`, `Complex.LinearODEIrregularAt` and their infinity counterparts ([source](DLMFMathlib/Analysis/ODE/Singularities.lean#L33)). The module path is `DLMFMathlib.Analysis.ODE.Singularities`; the declaration namespace is `Complex`. Eulerθ=zD is `DLMF.Hypergeometric.eulerTheta`, while the normalized differential form, coefficient polynomials and Frobenius solutions are `DLMF.Hypergeometric.genNormalizedODE`, `DLMF.Hypergeometric.genD`, `DLMF.Hypergeometric.genThetaA`, `DLMF.Hypergeometric.genThetaB`, `DLMF.Hypergeometric.genThetaDCoeff`, `DLMF.Hypergeometric.genODEAlpha`, `DLMF.Hypergeometric.genODEBeta`, `DLMF.Hypergeometric.genODEOrder`, `DLMF.Hypergeometric.genODECoeff`, `DLMF.Hypergeometric.GenODESolution`, `DLMF.Hypergeometric.GenFundamentalSystem`, `DLMF.Hypergeometric.genFrobeniusRoot`, `DLMF.Hypergeometric.genFrobeniusZero`, `DLMF.Hypergeometric.genHGNegativeLog`, `DLMF.Hypergeometric.genFrobeniusInfinityLog`, `DLMF.Hypergeometric.genInfinityConnectionCoeff`, `DLMF.Hypergeometric.genCenteredInfinityTerm` ([source](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L149)). Ordinary powers and full logarithmic sheets remain separate.
+  The classification extends §2.7 to arbitrary order; the local predicates are `Complex.LinearODEOrdinaryAt`, `Complex.LinearODEAtMostRegularAt`, `Complex.LinearODERegularSingularAt`, `Complex.LinearODEIrregularAt` and their infinity counterparts ([source](DLMFMathlib/Analysis/ODE/Singularities.lean#L33)). The module path is `DLMFMathlib.Analysis.ODE.Singularities`; the declaration namespace is `Complex`. Eulerθ=zD is `DLMF.Hypergeometric.eulerTheta`, while the normalized differential form, coefficient polynomials and Frobenius solutions are `DLMF.Hypergeometric.genNormalizedODE`, `DLMF.Hypergeometric.genD`, `DLMF.Hypergeometric.genThetaA`, `DLMF.Hypergeometric.genThetaB`, `DLMF.Hypergeometric.genThetaDCoeff`, `DLMF.Hypergeometric.genODEAlpha`, `DLMF.Hypergeometric.genODEBeta`, `DLMF.Hypergeometric.genODEOrder`, `DLMF.Hypergeometric.genODECoeff`, `DLMF.Hypergeometric.GenODESolution`, `DLMF.Hypergeometric.GenFundamentalSystem`, `DLMF.Hypergeometric.genFrobeniusRoot`, `DLMF.Hypergeometric.genFrobeniusZero`, `DLMF.Hypergeometric.genHGNegativeLog`, `DLMF.Hypergeometric.genFrobeniusInfinityLog`, `DLMF.Hypergeometric.genInfinityConnectionCoeff`, `DLMF.Hypergeometric.genCenteredInfinityTerm` ([source](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L151)). Ordinary powers and full logarithmic sheets remain separate.
 
   [DLMF 16.8.E1](https://dlmf.nist.gov/16.8.E1):
   Normalized scalar ODE value (16.8.1).
-  `DLMF.Hypergeometric.genNormalizedODE` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L58)).
+  `DLMF.Hypergeometric.genNormalizedODE` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L60)).
 
   [DLMF 16.8.E2](https://dlmf.nist.gov/16.8.E2):
   The Euler operator `θ f = z f'`.
@@ -3517,15 +3517,15 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
 
   [DLMF 16.8.E2](https://dlmf.nist.gov/16.8.E2):
   Differentiation operator; theta itself is the existing `eulerTheta` (16.8.2).
-  `DLMF.Hypergeometric.genD` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L63)).
+  `DLMF.Hypergeometric.genD` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L65)).
 
   [DLMF 16.8.E6](https://dlmf.nist.gov/16.8.E6):
   The nonresonant Frobenius solutions at zero (16.8.6).
-  `DLMF.Hypergeometric.genFrobeniusZero` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L112)).
+  `DLMF.Hypergeometric.genFrobeniusZero` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L114)).
 
   [DLMF 16.8.E7](https://dlmf.nist.gov/16.8.E7):
   The nonresonant infinity solutions with an explicit log(-z) sheet (16.8.7).
-  `DLMF.Hypergeometric.genFrobeniusInfinityLog` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L128)).
+  `DLMF.Hypergeometric.genFrobeniusInfinityLog` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L130)).
 
 ### §16.11 Asymptotic Expansions
 
@@ -3722,7 +3722,7 @@ Traversal: all §§17.1–17.19 checked; no heading contains “Definition” or
 ### §17.4 Basic Hypergeometric Functions
 
 - **Basic hypergeometric continuations and poised classifications**, [DLMF 17.4](https://dlmf.nist.gov/17.4):
-  The unilateral/bilateral series `DLMF.QHypergeometric.qPhi`, `DLMF.QHypergeometric.qPsi`, their finite forms/coefficient functions and `DLMF.QHypergeometric.qAppell1`, `DLMF.QHypergeometric.qAppell2`, `DLMF.QHypergeometric.qAppell3`, `DLMF.QHypergeometric.qAppell4` constructions retain the Gasper–Rahman phase factor convention; older Bailey/Slater notation differs. The five class predicates are `DLMF.QHypergeometric.QBalanced`, `DLMF.QHypergeometric.QKBalanced`, `DLMF.QHypergeometric.QWellPoised`, `DLMF.QHypergeometric.QVeryWellPoised`, `DLMF.QHypergeometric.QNearlyPoised` ([source](DLMF/QHypergeometric/Basic/Series.lean#L124)). `DLMF.QHypergeometric.qOnePhiZeroContinuation` ([source](DLMF/QHypergeometric/BasicSummations/OnePhiZero.lean#L34)), `DLMF.QHypergeometric.qHeineJacksonValue` ([source](DLMF/QHypergeometric/BasicSummations/Heine.lean#L41)), `DLMF.QHypergeometric.qHeineBarnesKernel` ([source](DLMF/QHypergeometric/BasicSummations/Heine.lean#L46)), `DLMF.QHypergeometric.qHeineBarnesLeft` ([source](DLMF/QHypergeometric/BasicSummations/Heine.lean#L50)), `DLMF.QHypergeometric.qHeineBarnesRight` ([source](DLMF/QHypergeometric/BasicSummations/Heine.lean#L53)) provide a product continuation and independent Jackson/Barnes expressions. Common-zero removal is an existential analytic-germ theorem, without another selected function. No separately named global two-phi-one continued function was found. Bibasic identities use two bases; they do not define a new q-Gamma branch.
+  The unilateral/bilateral series `DLMF.QHypergeometric.qPhi`, `DLMF.QHypergeometric.qPsi`, their finite forms/coefficient functions and `DLMF.QHypergeometric.qAppell1`, `DLMF.QHypergeometric.qAppell2`, `DLMF.QHypergeometric.qAppell3`, `DLMF.QHypergeometric.qAppell4` constructions retain the Gasper–Rahman phase factor convention; older Bailey/Slater notation differs. The five class predicates are `DLMF.QHypergeometric.QBalanced`, `DLMF.QHypergeometric.QKBalanced`, `DLMF.QHypergeometric.QWellPoised`, `DLMF.QHypergeometric.QVeryWellPoised`, `DLMF.QHypergeometric.QNearlyPoised` ([source](DLMF/QHypergeometric/Basic/Series.lean#L124)). `DLMF.QHypergeometric.qOnePhiZeroContinuation` ([source](DLMF/QHypergeometric/BasicSummations/OnePhiZero.lean#L34)), `DLMF.QHypergeometric.qHeineJacksonValue` ([source](DLMF/QHypergeometric/BasicSummations/Heine.lean#L44)), `DLMF.QHypergeometric.qHeineBarnesKernel` ([source](DLMF/QHypergeometric/BasicSummations/Heine.lean#L49)), `DLMF.QHypergeometric.qHeineBarnesLeft` ([source](DLMF/QHypergeometric/BasicSummations/Heine.lean#L53)), `DLMF.QHypergeometric.qHeineBarnesRight` ([source](DLMF/QHypergeometric/BasicSummations/Heine.lean#L56)) provide a product continuation and independent Jackson/Barnes expressions. Common-zero removal is an existential analytic-germ theorem, without another selected function. No separately named global two-phi-one continued function was found. Bibasic identities use two bases; they do not define a new q-Gamma branch.
 
 <!-- retained entry 117 -->
 - **Basic unilateral and bilateral hypergeometric series**,
@@ -4452,7 +4452,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.14 Reduction of General Elliptic Integrals
 
 - **Legendre reduction auxiliary U**, [DLMF 19.14.E6](https://dlmf.nist.gov/19.14.E6):
-  The explicit root expression is `DLMF.EllipticIntegrals.ei19b_redU`, with its admissibility package `DLMF.EllipticIntegrals.QuadraticProductReductionHyp` ([source](DLMF/EllipticIntegrals/Reduction.lean#L176)). The later `DLMF.EllipticIntegrals.ellRedQuadU` of §19.29 gives another actual formulation of this biquadratic reduction parameter.
+  The explicit root expression is `DLMF.EllipticIntegrals.ei19b_redU`, with its admissibility package `DLMF.EllipticIntegrals.QuadraticProductReductionHyp` ([source](DLMF/EllipticIntegrals/Reduction.lean#L391)). The later `DLMF.EllipticIntegrals.ellRedQuadU` of §19.29 gives another actual formulation of this biquadratic reduction parameter.
 
 ### §19.16 Definitions
 
@@ -5051,7 +5051,7 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
 ### §23.10 Addition Theorems and Other Identities
 
 - **Multiplication constants Aₙ and G**, [DLMF 23.10.E14](https://dlmf.nist.gov/23.10.E14):
-  The actual constructions are `DLMF.Weierstrass.HalfPeriods.nTupleConst`, `DLMF.Weierstrass.HalfPeriods.nTupleG` ([source](DLMF/Weierstrass/Addition.lean#L918)). The local Aₙ deliberately corrects DLMF's printed product: omit only (j,ℓ)=(0,0), rather than every diagonal pairℓ=j. This is a deliberate statement/source discrepancy, rather than an exact transcription of the printed product. G is the exact infinite product ∏(1−q^(2n)), with its convergence hypotheses supplied by theorems.
+  The actual constructions are `DLMF.Weierstrass.HalfPeriods.nTupleConst`, `DLMF.Weierstrass.HalfPeriods.nTupleG` ([source](DLMF/Weierstrass/Addition.lean#L1398)). The local Aₙ deliberately corrects DLMF's printed product: omit only (j,ℓ)=(0,0), rather than every diagonal pairℓ=j. This is a deliberate statement/source discrepancy, rather than an exact transcription of the printed product. G is the exact infinite product ∏(1−q^(2n)), with its convergence hypotheses supplied by theorems.
 
   [DLMF 23.10.E14](https://dlmf.nist.gov/23.10.E14): The constant `A_n` of 23.10.13, by the **corrected** DLMF 23.10.14: `A_n = n ∏_{(j,ℓ) ≠ (0,0)} 1/σ((2jω₁ + 2ℓω₃)/n)`, `0 ≤ j, ℓ < n`. Corrected from the printed DLMF formula: the printed index set `ℓ ≠ j` is wrong (relative error 0.71 at `n = 2`); the product runs over `(j, ℓ) ≠ (0, 0)`, excluding only the zero of `σ`.
   [`DLMF.Weierstrass.HalfPeriods.nTupleConst`](DLMF/Weierstrass/Addition.lean#L848).
@@ -5102,7 +5102,7 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
 ### §23.18 Modular Transformations
 
 - **Eta multiplier and Dedekind sum**, [DLMF 23.18.E6](https://dlmf.nist.gov/23.18.E6):
-  ε(A) and s(d,c), c>0, are `DLMF.Weierstrass.etaMultiplier`, `DLMF.Weierstrass.dedekindSum` ([source](DLMF/Weierstrass/Basic/Modular.lean#L124)). The sum uses every r=1,…,c−1, not just residues coprime to c. The six anharmonic λ transforms of 23.18.1–2 also have existing exact helpers `DLMF.Weierstrass.anharmonicMap`, `DLMF.Weierstrass.anharmonicMapSL` ([source](DLMF/Weierstrass/ModularFunctions.lean#L579)); the arguments encode the matrix parity class.
+  ε(A) and s(d,c), c>0, are `DLMF.Weierstrass.etaMultiplier`, `DLMF.Weierstrass.dedekindSum` ([source](DLMF/Weierstrass/Basic/Modular.lean#L124)). The sum uses every r=1,…,c−1, not just residues coprime to c. The six anharmonic λ transforms of 23.18.1–2 also have existing exact helpers `DLMF.Weierstrass.anharmonicMap`, `DLMF.Weierstrass.anharmonicMapSL` ([source](DLMF/Weierstrass/ModularFunctions.lean#L792)); the arguments encode the matrix parity class.
 
   [DLMF 23.18.E6](https://dlmf.nist.gov/23.18.E6): The eta multiplier `ε(𝒜) = exp(πi((a + d)/(12c) + s(-d, c)))` (DLMF 23.18.6), `c > 0`.
   [`DLMF.Weierstrass.etaMultiplier`](DLMF/Weierstrass/ModularFunctions.lean#L758).
@@ -5975,26 +5975,26 @@ Traversal: all §§27.1–27.22 checked; the matching heading is §27.2(i).
 - **Goldbach Conjecture**, [DLMF 27.13.ii](https://dlmf.nist.gov/27.13.ii):
   §27.13(ii): Goldbach's conjecture, every even integer `n > 4` is the sum of two odd primes
   (an open problem; stated as a proposition only).
-  `DLMF.NumberTheory.GoldbachConjecture` ([definition](DLMF/NumberTheory/Additive.lean#L73)).
+  `DLMF.NumberTheory.GoldbachConjecture` ([definition](DLMF/NumberTheory/Additive.lean#L74)).
 
 - **Hardy Littlewood Waring Conjecture**, [DLMF 27.13.iii](https://dlmf.nist.gov/27.13.iii):
   §27.13(iii): the Hardy–Littlewood conjectures `G(k) < 2k + 1` for `k` not a power of `2`
   and `G(k) ≤ 4k` for `k` a power of `2` (open; stated as a proposition only).
-  `DLMF.NumberTheory.HardyLittlewoodWaringConjecture` ([definition](DLMF/NumberTheory/Additive.lean#L205)).
+  `DLMF.NumberTheory.HardyLittlewoodWaringConjecture` ([definition](DLMF/NumberTheory/Additive.lean#L206)).
 
 - **Waring representations and Waring numbers**, [DLMF 27.13.E1](https://dlmf.nist.gov/27.13.E1):
   DLMF 27.13.1: every `n ≥ 1` is a sum `x₁^k + ⋯ + x_m^k` of `m` `k`th powers of
   nonnegative integers.
-  `DLMF.NumberTheory.IsWaringNumber` ([definition](DLMF/NumberTheory/Additive.lean#L96)).
+  `DLMF.NumberTheory.IsWaringNumber` ([definition](DLMF/NumberTheory/Additive.lean#L97)).
 
   [DLMF 27.13.E1](https://dlmf.nist.gov/27.13.E1):
   §27.13(iii): `g(k)`, the smallest `m` for which 27.13.1 is solvable for all `n ≥ 1`.
-  `DLMF.NumberTheory.waringSmallG` ([definition](DLMF/NumberTheory/Additive.lean#L101)).
+  `DLMF.NumberTheory.waringSmallG` ([definition](DLMF/NumberTheory/Additive.lean#L102)).
 
   [DLMF 27.13.E1](https://dlmf.nist.gov/27.13.E1):
   §27.13(iii): `G(k)`, the smallest `m` for which 27.13.1 is solvable for all sufficiently
   large `n`.
-  `DLMF.NumberTheory.waringBigG` ([definition](DLMF/NumberTheory/Additive.lean#L106)).
+  `DLMF.NumberTheory.waringBigG` ([definition](DLMF/NumberTheory/Additive.lean#L107)).
 
 ### §27.14 Unrestricted Partitions
 

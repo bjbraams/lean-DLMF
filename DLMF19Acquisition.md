@@ -112,15 +112,15 @@ Quadratic 11). Twenty-two existing real-variable declarations in `DLMF/Elliptic/
 - [19.2.E12](https://dlmf.nist.gov/19.2.E12): [`DLMF.EllipticIntegrals.bulirschEl2`](DLMF/EllipticIntegrals/Basic/Legendre.lean#L252) (definition).
 - [19.2.E13](https://dlmf.nist.gov/19.2.E13): [`DLMF.EllipticIntegrals.compEllInt_eq_bulirschCel`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L400) (proved); [`DLMF.EllipticIntegrals.incEllIntFk_eq_bulirschEl1`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L462) (proved). 19.2.E13 (k_c² = 1 − k²) is built into each Bulirsch bridge.
 - [19.2.E14](https://dlmf.nist.gov/19.2.E14): [`DLMF.EllipticIntegrals.compEllInt_eq_bulirschCel`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L400) (proved); [`DLMF.EllipticIntegrals.compEllIntEk_eq_bulirschCel`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L424) (proved); [`DLMF.EllipticIntegrals.compEllIntEk_sub_eq_bulirschCel`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L437) (proved). Real 0 < k_c, or all real k for E; D and Π in `compEllInt_eq_bulirschCel`.
-- [19.2.E15](https://dlmf.nist.gov/19.2.E15): [`DLMF.EllipticIntegrals.incEllIntFk_eq_bulirschEl1`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L462) (proved); [`DLMF.EllipticIntegrals.incEllInt_eq_bulirschEl2`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L471) (admitted). The el1 bridge is proved for every complex k and real |φ| < π/2; the el2 bridges (F, E, D; real k² < 1) are admitted.
-- [19.2.iii](https://dlmf.nist.gov/19.2.iii): [`DLMF.EllipticIntegrals.tendsto_bulirsch_atTop`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L493) (admitted). Prose of 19.2(iii): el1, el2 as x → ∞ give cel (admitted). The remark that k_c may be pure imaginary is covered by the complex `kc` argument.
-- [19.2.E16](https://dlmf.nist.gov/19.2.E16): [`DLMF.EllipticIntegrals.bulirschEl3`](DLMF/EllipticIntegrals/Basic/Legendre.lean#L261) (definition); [`DLMF.EllipticIntegrals.bulirschEl3_eq_incEllIntPik`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L482) (proved).
-- [19.2.E17](https://dlmf.nist.gov/19.2.E17): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L505) (proved); [`DLMF.EllipticIntegrals.symEllIntRC_eq_cauchyPV`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L513) (proved). R_C is ACQ19C's `symEllIntRC` (Symmetric.lean); 19.2.17 proved for the ordinary integral and for the PV (y < 0) form.
-- [19.2.E18](https://dlmf.nist.gov/19.2.E18): [`DLMF.EllipticIntegrals.symEllIntRC_of_lt`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L569) (proved).
-- [19.2.E19](https://dlmf.nist.gov/19.2.E19): [`DLMF.EllipticIntegrals.symEllIntRC_of_gt`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L599) (proved).
-- [19.2.E20](https://dlmf.nist.gov/19.2.E20): [`DLMF.EllipticIntegrals.symEllIntRC_of_neg`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L833) (proved).
-- [19.2.E21](https://dlmf.nist.gov/19.2.E21): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral_segment`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L867) (admitted).
-- [19.2.E22](https://dlmf.nist.gov/19.2.E22): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral_RC`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L875) (admitted).
+- [19.2.E15](https://dlmf.nist.gov/19.2.E15): [`DLMF.EllipticIntegrals.incEllIntFk_eq_bulirschEl1`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L462) (proved); [`DLMF.EllipticIntegrals.incEllInt_eq_bulirschEl2`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L511) (proved). The el1 bridge is proved for every complex k and real |φ| < π/2; the el2 bridges (F, E, D; real k² < 1) are admitted.
+- [19.2.iii](https://dlmf.nist.gov/19.2.iii): [`DLMF.EllipticIntegrals.tendsto_bulirsch_atTop`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L602) (proved). Prose of 19.2(iii): el1, el2 as x → ∞ give cel (admitted). The remark that k_c may be pure imaginary is covered by the complex `kc` argument.
+- [19.2.E16](https://dlmf.nist.gov/19.2.E16): [`DLMF.EllipticIntegrals.bulirschEl3`](DLMF/EllipticIntegrals/Basic/Legendre.lean#L261) (definition); [`DLMF.EllipticIntegrals.bulirschEl3_eq_incEllIntPik`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L561) (proved).
+- [19.2.E17](https://dlmf.nist.gov/19.2.E17): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L697) (proved); [`DLMF.EllipticIntegrals.symEllIntRC_eq_cauchyPV`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L705) (proved). R_C is ACQ19C's `symEllIntRC` (Symmetric.lean); 19.2.17 proved for the ordinary integral and for the PV (y < 0) form.
+- [19.2.E18](https://dlmf.nist.gov/19.2.E18): [`DLMF.EllipticIntegrals.symEllIntRC_of_lt`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L761) (proved).
+- [19.2.E19](https://dlmf.nist.gov/19.2.E19): [`DLMF.EllipticIntegrals.symEllIntRC_of_gt`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L791) (proved).
+- [19.2.E20](https://dlmf.nist.gov/19.2.E20): [`DLMF.EllipticIntegrals.symEllIntRC_of_neg`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L1025) (proved).
+- [19.2.E21](https://dlmf.nist.gov/19.2.E21): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral_segment`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L1059) (admitted).
+- [19.2.E22](https://dlmf.nist.gov/19.2.E22): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral_RC`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L1067) (admitted).
 
 ## [§19.4 Derivatives and Differential Equations](https://dlmf.nist.gov/19.4)
 
@@ -155,20 +155,20 @@ Quadratic 11). Twenty-two existing real-variable declarations in `DLMF/Elliptic/
 ## [§19.6 Special Cases](https://dlmf.nist.gov/19.6)
 
 - [19.6.E1](https://dlmf.nist.gov/19.6.E1): [`DLMF.EllipticIntegrals.compEllInt_special_pi_div_two`](DLMF/EllipticIntegrals/SpecialCases.lean#L164) (proved); [`DLMF.EllipticIntegrals.compEllInt_special_one`](DLMF/EllipticIntegrals/SpecialCases.lean#L176) (proved); [`DLMF.EllipticIntegrals.tendsto_norm_compEllIntKk_one'`](DLMF/EllipticIntegrals/SpecialCases.lean#L185) (proved); [`DLMF.EllipticIntegrals.tendsto_norm_cCompEllIntKk_zero`](DLMF/EllipticIntegrals/SpecialCases.lean#L192) (proved); [`DLMF.Elliptic.Real.compEllIntEm_one`](DLMF/Elliptic/Complete.lean#L225) (proved). Values at k = 0, k = 1 and the limits K → ∞ as k → 1, K' → ∞ as k → 0 (the limits proved from admitted JacobiElliptic lemmas).
-- [19.6.E2](https://dlmf.nist.gov/19.6.E2): [`DLMF.EllipticIntegrals.compEllIntPik_sq_self`](DLMF/EllipticIntegrals/SpecialCases.lean#L360) (proved); [`DLMF.EllipticIntegrals.compEllIntPik_neg_self`](DLMF/EllipticIntegrals/SpecialCases.lean#L402) (admitted).
-- [19.6.E3](https://dlmf.nist.gov/19.6.E3): [`DLMF.EllipticIntegrals.compEllIntPik_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L414) (proved).
-- [19.6.E4](https://dlmf.nist.gov/19.6.E4): [`DLMF.EllipticIntegrals.tendsto_compEllIntPik`](DLMF/EllipticIntegrals/SpecialCases.lean#L433) (proved).
-- [19.6.E5](https://dlmf.nist.gov/19.6.E5): [`DLMF.EllipticIntegrals.compEllIntPik_of_one_lt`](DLMF/EllipticIntegrals/SpecialCases.lean#L470) (admitted). Real `1 < α²`; Cauchy principal value.
-- [19.6.E6](https://dlmf.nist.gov/19.6.E6): [`DLMF.EllipticIntegrals.compEllIntPik_of_one_lt_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L477) (admitted).
-- [19.6.E7](https://dlmf.nist.gov/19.6.E7): [`DLMF.EllipticIntegrals.incEllIntFk_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L490) (proved); [`DLMF.EllipticIntegrals.incEllIntFk_limits`](DLMF/EllipticIntegrals/SpecialCases.lean#L548) (proved).
-- [19.6.E8](https://dlmf.nist.gov/19.6.E8): [`DLMF.EllipticIntegrals.incEllIntFk_one_eq_integral_sec`](DLMF/EllipticIntegrals/SpecialCases.lean#L497) (proved); [`DLMF.EllipticIntegrals.incEllIntFk_one`](DLMF/EllipticIntegrals/SpecialCases.lean#L516) (proved).
-- [19.6.E9](https://dlmf.nist.gov/19.6.E9): [`DLMF.EllipticIntegrals.incEllIntEk_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L572) (proved); [`DLMF.EllipticIntegrals.incEllIntEk_one`](DLMF/EllipticIntegrals/SpecialCases.lean#L578) (proved); [`DLMF.EllipticIntegrals.incEllIntEk_pi_div_two_one`](DLMF/EllipticIntegrals/SpecialCases.lean#L597) (proved); [`DLMF.EllipticIntegrals.incEllIntEk_one_complex`](DLMF/EllipticIntegrals/SpecialCases.lean#L604) (proved). E(φ, 1) = sin φ only for real |φ| ≤ π/2 (otherwise ∫₀^φ |cos θ| dθ); docstring records this. The complex form is admitted with |Re φ| < π/2.
-- [19.6.E10](https://dlmf.nist.gov/19.6.E10): [`DLMF.EllipticIntegrals.tendsto_incEllIntEk_div`](DLMF/EllipticIntegrals/SpecialCases.lean#L633) (proved).
-- [19.6.E11](https://dlmf.nist.gov/19.6.E11): [`DLMF.EllipticIntegrals.incEllIntPik_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L643) (proved); [`DLMF.EllipticIntegrals.incEllIntPik_one_zero`](DLMF/EllipticIntegrals/SpecialCases.lean#L649) (proved).
-- [19.6.E12](https://dlmf.nist.gov/19.6.E12): [`DLMF.EllipticIntegrals.incEllIntPik_special_RC`](DLMF/EllipticIntegrals/SpecialCases.lean#L697) (admitted).
-- [19.6.E13](https://dlmf.nist.gov/19.6.E13): [`DLMF.EllipticIntegrals.incEllIntPik_zero`](DLMF/EllipticIntegrals/SpecialCases.lean#L408) (proved); [`DLMF.EllipticIntegrals.incEllIntPik_special_k`](DLMF/EllipticIntegrals/SpecialCases.lean#L714) (proved).
-- [19.6.E14](https://dlmf.nist.gov/19.6.E14): [`DLMF.EllipticIntegrals.incEllIntPik_pi_div_two`](DLMF/EllipticIntegrals/SpecialCases.lean#L746) (proved); [`DLMF.EllipticIntegrals.tendsto_incEllIntPik_div`](DLMF/EllipticIntegrals/SpecialCases.lean#L750) (proved).
-- [19.6.E15](https://dlmf.nist.gov/19.6.E15): [`DLMF.EllipticIntegrals.symEllIntRC_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L781) (admitted); [`DLMF.EllipticIntegrals.tendsto_symEllIntRC_zero`](DLMF/EllipticIntegrals/SpecialCases.lean#L794) (proved).
+- [19.6.E2](https://dlmf.nist.gov/19.6.E2): [`DLMF.EllipticIntegrals.compEllIntPik_sq_self`](DLMF/EllipticIntegrals/SpecialCases.lean#L360) (proved); [`DLMF.EllipticIntegrals.compEllIntPik_neg_self`](DLMF/EllipticIntegrals/SpecialCases.lean#L477) (proved).
+- [19.6.E3](https://dlmf.nist.gov/19.6.E3): [`DLMF.EllipticIntegrals.compEllIntPik_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L521) (proved).
+- [19.6.E4](https://dlmf.nist.gov/19.6.E4): [`DLMF.EllipticIntegrals.tendsto_compEllIntPik`](DLMF/EllipticIntegrals/SpecialCases.lean#L540) (proved).
+- [19.6.E5](https://dlmf.nist.gov/19.6.E5): [`DLMF.EllipticIntegrals.compEllIntPik_of_one_lt`](DLMF/EllipticIntegrals/SpecialCases.lean#L577) (admitted). Real `1 < α²`; Cauchy principal value.
+- [19.6.E6](https://dlmf.nist.gov/19.6.E6): [`DLMF.EllipticIntegrals.compEllIntPik_of_one_lt_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L584) (admitted).
+- [19.6.E7](https://dlmf.nist.gov/19.6.E7): [`DLMF.EllipticIntegrals.incEllIntFk_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L597) (proved); [`DLMF.EllipticIntegrals.incEllIntFk_limits`](DLMF/EllipticIntegrals/SpecialCases.lean#L655) (proved).
+- [19.6.E8](https://dlmf.nist.gov/19.6.E8): [`DLMF.EllipticIntegrals.incEllIntFk_one_eq_integral_sec`](DLMF/EllipticIntegrals/SpecialCases.lean#L604) (proved); [`DLMF.EllipticIntegrals.incEllIntFk_one`](DLMF/EllipticIntegrals/SpecialCases.lean#L623) (proved).
+- [19.6.E9](https://dlmf.nist.gov/19.6.E9): [`DLMF.EllipticIntegrals.incEllIntEk_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L679) (proved); [`DLMF.EllipticIntegrals.incEllIntEk_one`](DLMF/EllipticIntegrals/SpecialCases.lean#L685) (proved); [`DLMF.EllipticIntegrals.incEllIntEk_pi_div_two_one`](DLMF/EllipticIntegrals/SpecialCases.lean#L704) (proved); [`DLMF.EllipticIntegrals.incEllIntEk_one_complex`](DLMF/EllipticIntegrals/SpecialCases.lean#L711) (proved). E(φ, 1) = sin φ only for real |φ| ≤ π/2 (otherwise ∫₀^φ |cos θ| dθ); docstring records this. The complex form is admitted with |Re φ| < π/2.
+- [19.6.E10](https://dlmf.nist.gov/19.6.E10): [`DLMF.EllipticIntegrals.tendsto_incEllIntEk_div`](DLMF/EllipticIntegrals/SpecialCases.lean#L740) (proved).
+- [19.6.E11](https://dlmf.nist.gov/19.6.E11): [`DLMF.EllipticIntegrals.incEllIntPik_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L750) (proved); [`DLMF.EllipticIntegrals.incEllIntPik_one_zero`](DLMF/EllipticIntegrals/SpecialCases.lean#L756) (proved).
+- [19.6.E12](https://dlmf.nist.gov/19.6.E12): [`DLMF.EllipticIntegrals.incEllIntPik_special_RC`](DLMF/EllipticIntegrals/SpecialCases.lean#L804) (admitted).
+- [19.6.E13](https://dlmf.nist.gov/19.6.E13): [`DLMF.EllipticIntegrals.incEllIntPik_zero`](DLMF/EllipticIntegrals/SpecialCases.lean#L515) (proved); [`DLMF.EllipticIntegrals.incEllIntPik_special_k`](DLMF/EllipticIntegrals/SpecialCases.lean#L821) (proved).
+- [19.6.E14](https://dlmf.nist.gov/19.6.E14): [`DLMF.EllipticIntegrals.incEllIntPik_pi_div_two`](DLMF/EllipticIntegrals/SpecialCases.lean#L853) (proved); [`DLMF.EllipticIntegrals.tendsto_incEllIntPik_div`](DLMF/EllipticIntegrals/SpecialCases.lean#L857) (proved).
+- [19.6.E15](https://dlmf.nist.gov/19.6.E15): [`DLMF.EllipticIntegrals.symEllIntRC_special`](DLMF/EllipticIntegrals/SpecialCases.lean#L888) (admitted); [`DLMF.EllipticIntegrals.tendsto_symEllIntRC_zero`](DLMF/EllipticIntegrals/SpecialCases.lean#L901) (proved).
 
 ## [§19.7 Connection Formulas](https://dlmf.nist.gov/19.7)
 
@@ -337,13 +337,13 @@ Analytical prose:
 
 ## [§19.12 Asymptotic Approximations](https://dlmf.nist.gov/19.12)
 
-- [19.12.E1](https://dlmf.nist.gov/19.12.E1): [`DLMF.EllipticIntegrals.compEllIntKk_hasSum_log`](DLMF/EllipticIntegrals/Asymptotics.lean#L102) (admitted).
-- [19.12.E2](https://dlmf.nist.gov/19.12.E2): [`DLMF.EllipticIntegrals.compEllIntEk_hasSum_log`](DLMF/EllipticIntegrals/Asymptotics.lean#L113) (admitted).
-- [19.12.E3](https://dlmf.nist.gov/19.12.E3): [`DLMF.EllipticIntegrals.compEllIntLogCoeff`](DLMF/EllipticIntegrals/Asymptotics.lean#L62) (definition); [`DLMF.EllipticIntegrals.compEllIntLogCoeff_zero`](DLMF/EllipticIntegrals/Asymptotics.lean#L67) (proved); [`DLMF.EllipticIntegrals.compEllIntLogCoeff_succ`](DLMF/EllipticIntegrals/Asymptotics.lean#L74) (proved).
-- [19.12.E4](https://dlmf.nist.gov/19.12.E4): [`DLMF.EllipticIntegrals.compEllIntPik_isBigO_log`](DLMF/EllipticIntegrals/Asymptotics.lean#L128) (admitted).
-- [19.12.E5](https://dlmf.nist.gov/19.12.E5): [`DLMF.EllipticIntegrals.compEllIntPik_isBigO_log_of_one_lt`](DLMF/EllipticIntegrals/Asymptotics.lean#L138) (admitted).
-- [19.12.E6](https://dlmf.nist.gov/19.12.E6): [`DLMF.EllipticIntegrals.symEllIntRC_isBigO_small`](DLMF/EllipticIntegrals/Asymptotics.lean#L232) (proved).
-- [19.12.E7](https://dlmf.nist.gov/19.12.E7): [`DLMF.EllipticIntegrals.symEllIntRC_isBigO_large`](DLMF/EllipticIntegrals/Asymptotics.lean#L274) (admitted).
+- [19.12.E1](https://dlmf.nist.gov/19.12.E1): [`DLMF.EllipticIntegrals.compEllIntKk_hasSum_log`](DLMF/EllipticIntegrals/Asymptotics.lean#L103) (admitted).
+- [19.12.E2](https://dlmf.nist.gov/19.12.E2): [`DLMF.EllipticIntegrals.compEllIntEk_hasSum_log`](DLMF/EllipticIntegrals/Asymptotics.lean#L114) (admitted).
+- [19.12.E3](https://dlmf.nist.gov/19.12.E3): [`DLMF.EllipticIntegrals.compEllIntLogCoeff`](DLMF/EllipticIntegrals/Asymptotics.lean#L63) (definition); [`DLMF.EllipticIntegrals.compEllIntLogCoeff_zero`](DLMF/EllipticIntegrals/Asymptotics.lean#L68) (proved); [`DLMF.EllipticIntegrals.compEllIntLogCoeff_succ`](DLMF/EllipticIntegrals/Asymptotics.lean#L75) (proved).
+- [19.12.E4](https://dlmf.nist.gov/19.12.E4): [`DLMF.EllipticIntegrals.compEllIntPik_isBigO_log`](DLMF/EllipticIntegrals/Asymptotics.lean#L129) (admitted).
+- [19.12.E5](https://dlmf.nist.gov/19.12.E5): [`DLMF.EllipticIntegrals.compEllIntPik_isBigO_log_of_one_lt`](DLMF/EllipticIntegrals/Asymptotics.lean#L139) (admitted).
+- [19.12.E6](https://dlmf.nist.gov/19.12.E6): [`DLMF.EllipticIntegrals.symEllIntRC_isBigO_small`](DLMF/EllipticIntegrals/Asymptotics.lean#L233) (proved).
+- [19.12.E7](https://dlmf.nist.gov/19.12.E7): [`DLMF.EllipticIntegrals.symEllIntRC_isBigO_large`](DLMF/EllipticIntegrals/Asymptotics.lean#L355) (proved).
 
 Analytical prose:
 
@@ -366,14 +366,14 @@ Analytical prose:
 
 ## [§19.14 Reduction of General Elliptic Integrals](https://dlmf.nist.gov/19.14)
 
-- [19.14.E1](https://dlmf.nist.gov/19.14.E1): [`DLMF.EllipticIntegrals.integral_inv_sqrt_cube_sub_one`](DLMF/EllipticIntegrals/Reduction.lean#L70) (admitted).
-- [19.14.E2](https://dlmf.nist.gov/19.14.E2): [`DLMF.EllipticIntegrals.integral_inv_sqrt_one_sub_cube`](DLMF/EllipticIntegrals/Reduction.lean#L80) (admitted).
-- [19.14.E3](https://dlmf.nist.gov/19.14.E3): [`DLMF.EllipticIntegrals.integral_inv_sqrt_one_add_pow_four`](DLMF/EllipticIntegrals/Reduction.lean#L127) (proved).
-- [19.14.E4](https://dlmf.nist.gov/19.14.E4): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L691) (proved).
-- [19.14.E5](https://dlmf.nist.gov/19.14.E5): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L691) (proved).
-- [19.14.E6](https://dlmf.nist.gov/19.14.E6): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L691) (proved).
+- [19.14.E1](https://dlmf.nist.gov/19.14.E1): [`DLMF.EllipticIntegrals.integral_inv_sqrt_cube_sub_one`](DLMF/EllipticIntegrals/Reduction.lean#L263) (proved).
+- [19.14.E2](https://dlmf.nist.gov/19.14.E2): [`DLMF.EllipticIntegrals.integral_inv_sqrt_one_sub_cube`](DLMF/EllipticIntegrals/Reduction.lean#L284) (proved).
+- [19.14.E3](https://dlmf.nist.gov/19.14.E3): [`DLMF.EllipticIntegrals.integral_inv_sqrt_one_add_pow_four`](DLMF/EllipticIntegrals/Reduction.lean#L342) (proved).
+- [19.14.E4](https://dlmf.nist.gov/19.14.E4): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L906) (proved).
+- [19.14.E5](https://dlmf.nist.gov/19.14.E5): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L906) (proved).
+- [19.14.E6](https://dlmf.nist.gov/19.14.E6): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L906) (proved).
 - [19.14.E7](https://dlmf.nist.gov/19.14.E7): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_zero`](DLMF/EllipticIntegrals/Reduction.lean#L191) (proved from the admitted integral_inv_sqrt_two_quadratics (19.14.4)).
-- [19.14.E8](https://dlmf.nist.gov/19.14.E8): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_infty`](DLMF/EllipticIntegrals/Reduction.lean#L781) (proved).
+- [19.14.E8](https://dlmf.nist.gov/19.14.E8): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_infty`](DLMF/EllipticIntegrals/Reduction.lean#L996) (proved).
 - [19.14.E9](https://dlmf.nist.gov/19.14.E9): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_left`](DLMF/EllipticIntegrals/Reduction.lean#L227) (proved from the admitted integral_inv_sqrt_two_quadratics (19.14.4)).
 - [19.14.E10](https://dlmf.nist.gov/19.14.E10): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_right`](DLMF/EllipticIntegrals/Reduction.lean#L253) (proved from the admitted integral_inv_sqrt_two_quadratics (19.14.4)).
 
@@ -713,18 +713,18 @@ Conventions and corrections of part D:
 - [19.25.E29](https://dlmf.nist.gov/19.25.E29): [`DLMF.EllipticIntegrals.jacobiDeltam_values`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L716) (proved). Stronger than DLMF: 0 ≤ k² is not needed.
 - [19.25.E30](https://dlmf.nist.gov/19.25.E30): [`DLMF.EllipticIntegrals.jacobiAmm_eq_symEllIntRC`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L803) (proved). Restricted to 0 < u ≤ K; see corrections; [`DLMF.EllipticIntegrals.jacobiAmm_eq_symEllIntRC'`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L773) (proved).
 - [19.25.E31](https://dlmf.nist.gov/19.25.E31): [`DLMF.EllipticIntegrals.eq_symEllIntRF_jacobi`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L815) (proved). Restricted to 0 < u ≤ K; see corrections.
-- [19.25.E32](https://dlmf.nist.gov/19.25.E32): [`DLMF.EllipticIntegrals.jacobiArcps_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L853) (admitted). Restricted to x ≥ 0; see corrections.
-- [19.25.E33](https://dlmf.nist.gov/19.25.E33): [`DLMF.EllipticIntegrals.jacobiArcsp_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L868) (admitted). Restricted to x ≥ 0; see corrections.
-- [19.25.E34](https://dlmf.nist.gov/19.25.E34): [`DLMF.EllipticIntegrals.jacobiArcpq_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L882) (admitted). Restricted to x ≥ 0, with x ≥ 1 or x ≥ k′ where the function needs it; see corrections.
-- [19.25.E35](https://dlmf.nist.gov/19.25.E35): [`DLMF.EllipticIntegrals.weierstrassP_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L917) (admitted); [`DLMF.EllipticIntegrals.weierstrassZeta_symEllIntRG`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L928) (admitted).
-- [19.25.E36](https://dlmf.nist.gov/19.25.E36): [`DLMF.EllipticIntegrals.weierstrassP_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L917) (admitted).
-- [19.25.E37](https://dlmf.nist.gov/19.25.E37): [`DLMF.EllipticIntegrals.weierstrassZeta_symEllIntRG`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L928) (admitted).
-- [19.25.E38](https://dlmf.nist.gov/19.25.E38): [`DLMF.EllipticIntegrals.halfPeriod_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L942) (admitted). The R_F arguments are assumed in the slit plane; a rectangular lattice with j = 2, 3 does not meet this hypothesis.
-- [19.25.E39](https://dlmf.nist.gov/19.25.E39): [`DLMF.EllipticIntegrals.halfPeriod_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L942) (admitted).
-- [19.25.E40](https://dlmf.nist.gov/19.25.E40): [`DLMF.EllipticIntegrals.eq_weierstrassSigma_mul_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L963) (admitted). The R_F arguments are assumed in the slit plane.
-- [19.25.E41](https://dlmf.nist.gov/19.25.E41): [`DLMF.EllipticIntegrals.weierstrassSigmaIdx`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L956) (definition).
-- [19.25.E42](https://dlmf.nist.gov/19.25.E42): [`DLMF.EllipticIntegrals.ordinaryHypergeometric_eq_symEllIntR`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L976) (proved).
-- [19.25.E43](https://dlmf.nist.gov/19.25.E43): [`DLMF.EllipticIntegrals.symEllIntR_two_eq_ordinaryHypergeometric`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L999) (proved).
+- [19.25.E32](https://dlmf.nist.gov/19.25.E32): [`DLMF.EllipticIntegrals.jacobiArcps_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricInverseJacobi.lean#L427) (proved). Restricted to x ≥ 0; see corrections; [`DLMF.EllipticIntegrals.jacobiArcps_eq_symEllIntRF'`](DLMF/EllipticIntegrals/SymmetricInverseJacobi.lean#L398) (proved).
+- [19.25.E33](https://dlmf.nist.gov/19.25.E33): [`DLMF.EllipticIntegrals.jacobiArcsp_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricInverseJacobi.lean#L473) (proved). Restricted to x ≥ 0; see corrections; [`DLMF.EllipticIntegrals.jacobiArcsp_eq_symEllIntRF'`](DLMF/EllipticIntegrals/SymmetricInverseJacobi.lean#L442) (proved).
+- [19.25.E34](https://dlmf.nist.gov/19.25.E34): [`DLMF.EllipticIntegrals.jacobiArcpq_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricInverseJacobi.lean#L487) (proved). Restricted to x ≥ 0, with x ≥ 1 or x ≥ k′ where the function needs it; see corrections.
+- [19.25.E35](https://dlmf.nist.gov/19.25.E35): [`DLMF.EllipticIntegrals.weierstrassP_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L855) (admitted); [`DLMF.EllipticIntegrals.weierstrassZeta_symEllIntRG`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L866) (admitted).
+- [19.25.E36](https://dlmf.nist.gov/19.25.E36): [`DLMF.EllipticIntegrals.weierstrassP_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L855) (admitted).
+- [19.25.E37](https://dlmf.nist.gov/19.25.E37): [`DLMF.EllipticIntegrals.weierstrassZeta_symEllIntRG`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L866) (admitted).
+- [19.25.E38](https://dlmf.nist.gov/19.25.E38): [`DLMF.EllipticIntegrals.halfPeriod_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L880) (admitted). The R_F arguments are assumed in the slit plane; a rectangular lattice with j = 2, 3 does not meet this hypothesis.
+- [19.25.E39](https://dlmf.nist.gov/19.25.E39): [`DLMF.EllipticIntegrals.halfPeriod_eq_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L880) (admitted).
+- [19.25.E40](https://dlmf.nist.gov/19.25.E40): [`DLMF.EllipticIntegrals.eq_weierstrassSigma_mul_symEllIntRF`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L901) (admitted). The R_F arguments are assumed in the slit plane.
+- [19.25.E41](https://dlmf.nist.gov/19.25.E41): [`DLMF.EllipticIntegrals.weierstrassSigmaIdx`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L894) (definition).
+- [19.25.E42](https://dlmf.nist.gov/19.25.E42): [`DLMF.EllipticIntegrals.ordinaryHypergeometric_eq_symEllIntR`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L914) (proved).
+- [19.25.E43](https://dlmf.nist.gov/19.25.E43): [`DLMF.EllipticIntegrals.symEllIntR_two_eq_ordinaryHypergeometric`](DLMF/EllipticIntegrals/SymmetricRelations.lean#L937) (proved).
 
 ## [§19.26 Addition Theorems](https://dlmf.nist.gov/19.26)
 
@@ -878,7 +878,7 @@ cases; the degenerate case of 19.29.iii.p1).
 - [19.29.E19](https://dlmf.nist.gov/19.29.E19): [`DLMF.EllipticIntegrals.ellRed_quad_first`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L842) (proved); [`DLMF.EllipticIntegrals.ellRed_quad_first_of_pos`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L853) (proved).
 - [19.29.E20](https://dlmf.nist.gov/19.29.E20): [`DLMF.EllipticIntegrals.ellRed_quad_second`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L864) (admitted).
 - [19.29.E21](https://dlmf.nist.gov/19.29.E21): [`DLMF.EllipticIntegrals.ellRed_quad_third`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L877) (admitted).
-- [19.29.E22](https://dlmf.nist.gov/19.29.E22): [`DLMF.EllipticIntegrals.ellRedQuadU`](DLMF/EllipticIntegrals/Reduction.lean#L166) (definition).
+- [19.29.E22](https://dlmf.nist.gov/19.29.E22): [`DLMF.EllipticIntegrals.ellRedQuadU`](DLMF/EllipticIntegrals/Reduction.lean#L381) (definition).
 - [19.29.E23](https://dlmf.nist.gov/19.29.E23): [`DLMF.EllipticIntegrals.ellRed_quad_infinite`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L909) (proved).
 - [19.29.E24](https://dlmf.nist.gov/19.29.E24): [`DLMF.EllipticIntegrals.ellRedQuadRF`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L936) (definition); [`DLMF.EllipticIntegrals.ellRed_two_quadratics`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L946) (admitted).
 - [19.29.E25](https://dlmf.nist.gov/19.29.E25): [`DLMF.EllipticIntegrals.ellRedQuadS`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L926) (definition); [`DLMF.EllipticIntegrals.ellRedQuadD`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L932) (definition); [`DLMF.EllipticIntegrals.ellRedQuadRF`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L936) (definition).

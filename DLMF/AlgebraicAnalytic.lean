@@ -22,6 +22,7 @@ public import DLMF.AlgebraicAnalytic.Calculus.Vectors
 public import DLMF.AlgebraicAnalytic.Complex.Calculus
 public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMF.AlgebraicAnalytic.Complex.Functions
+public import DLMF.AlgebraicAnalytic.Complex.InfiniteProducts
 public import DLMF.AlgebraicAnalytic.Complex.GeneratingFunctions
 public import DLMF.AlgebraicAnalytic.Complex.MathlibCoverage
 public import DLMF.AlgebraicAnalytic.ContinuedFractions.Convergence

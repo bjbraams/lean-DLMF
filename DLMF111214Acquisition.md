@@ -295,7 +295,7 @@ and source checks. They are acquired statements unless listed as proved above.
 - [DLMF/ParabolicCylinder/Basic.lean](DLMF/ParabolicCylinder/Basic.lean): 0 definitions, 0 statements, 0 proved, 0 admitted.
   Additional assertions: [`DLMF.Confluent.pcfU_entire`](DLMF/ParabolicCylinder/ElementaryProperties.lean#L73), [`DLMF.Confluent.pcfU_entire_order`](DLMF/ParabolicCylinder/ElementaryProperties.lean#L93), [`DLMF.Confluent.pcfU_real`](DLMF/ParabolicCylinder/ElementaryProperties.lean#L131), [`DLMF.Confluent.pcfV_entire`](DLMF/ParabolicCylinder/ElementaryProperties.lean#L136), [`DLMF.Confluent.pcfV_entire_order`](DLMF/ParabolicCylinder/ElementaryProperties.lean#L142), [`DLMF.Confluent.pcfV_real`](DLMF/ParabolicCylinder/ElementaryProperties.lean#L158), [`DLMF.Confluent.pcfUBar_recurrences`](DLMF/ParabolicCylinder/ElementaryProperties.lean#L569).
 
-- [DLMF/ParabolicCylinder/Computation.lean](DLMF/ParabolicCylinder/Computation.lean): 0 definitions, 3 statements, 2 proved, 1 admitted.
+- [DLMF/ParabolicCylinder/Computation.lean](DLMF/ParabolicCylinder/Computation.lean): 0 definitions, 7 statements, 7 proved, 0 admitted.
   Additional assertions: [`DLMF.Confluent.pcfU_chebyshev_compact`](DLMF/ParabolicCylinder/Computation.lean#L26), [`DLMF.Confluent.pcfV_chebyshev_compact`](DLMF/ParabolicCylinder/Computation.lean#L48), [`DLMF.Confluent.pcfU_chebyshev_infinite`](DLMF/ParabolicCylinder/Computation.lean#L70).
 
 - [DLMF/ParabolicCylinder/Hermite.lean](DLMF/ParabolicCylinder/Hermite.lean): 0 definitions, 4 statements, 4 proved, 0 admitted.

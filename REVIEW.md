@@ -10175,3 +10175,69 @@ converges only conditionally and Lean's unconditional `HasSum`/`Summable` fail; 
 counterexample (`not_summable_hurwitzZeta_log_gamma_one`) is in the round-3 scratch notes. Both
 hypotheses are now strict (`1 < a`, `1 < a.re`), names and tags unchanged; both remain
 admitted. The correction was approved by the user.
+
+## Third project-wide proof round (2026-11-02)
+
+Ten agents with disjoint directories. Source admissions: 1,336 → 1,275 (with the proof of 1.16.21
+after the `xPlusDistrib` correction). Apart from the two approved corrections above, no statement
+was changed; all new theorems use only the standard axioms. Unused hypotheses were removed in
+primed stronger forms (`arctan_general_integral'`, `arctanh_path_values'` and others below).
+
+- ParabolicCylinder 19 → 18: `pcfU_chebyshev_infinite` (§12.20), with the new
+  `DLMFMathlib/Analysis/SpecialFunctions/ChebyshevSeriesDecay.lean`.
+- Mathieu 139 → 137: `infinite_hillDiscriminant_eq` (§28.29(iii)) and
+  `charExp_set_infinite_discrete` (§28.2(v)), with the new
+  `DLMFMathlib.Analysis.Complex.EntireFiniteZeros` and `DLMFMathlib.Analysis.ODE.PerturbedOscillator`.
+- AlgebraicAnalytic 152 → 142: 1.10.20 (`prod_mtest_log`), regularity of Cesàro `(C, α)` means
+  (§1.15(ii)), Cesàro and Abel means of integrals (§1.15(iv)), 1.18.55, 1.16.20–21 and the Mellin
+  transforms of `arctan`, `arccot` and `log(1 + 1/x)` (Table 1.14.5).
+- Weierstrass 25 → 21: 23.10.11–13 (with primed forms) and 23.17.4. JacobiElliptic 19 → 17:
+  22.16.7–8 (new `JacobiElliptic/AmplitudeExpansions.lean`).
+- EllipticIntegrals 134 → 125: 19.25.32–34 (moved unchanged to the new
+  `EllipticIntegrals/SymmetricInverseJacobi.lean`, primed forms for 19.25.32–33), 19.2.15,
+  §19.2(iii), 19.14.1–2, 19.6.2 and 19.12.7.
+- AsymptoticApproximations 79 → 74: the Laplace inversion 2.4.2–3, 2.5.41, 2.10.4–5, §2.10(i) and
+  the Borel–Ritt theorem of §2.1(iii) (with a primed form), with the new
+  `DLMFMathlib/Analysis/Fourier/DirichletKernel.lean`.
+- GeneralizedHypergeometric 86 → 80: 16.3.2–4, the singularities of the ODE in §16.8(i) (both with
+  primed forms) and Dixon's sum 16.4.5 in the terminating even case. Wigner 34 → 33: 34.3.4 in the
+  even case, from Dixon's sum.
+- QHypergeometric 73 → 66: 17.6.4 and its companion (moved to the new
+  `QHypergeometric/BasicSummations/HeineParity.lean`), 17.6.26, 17.6.28 with its parameter limit,
+  and 17.7.3.
+- BernoulliEuler, NumberTheory, Elementary and Zeta 156 → 147: the series for `B₂ₙ` 24.8.6–8 from
+  Mathlib's level-one Eisenstein series and their `q`-expansion, Jacobi's four-square formula
+  (§27.13(iv); new `NumberTheory/ThetaFourthPowerLambert.lean`), 4.23.1–3, 4.37.1 and 4.37.3 (new
+  `Elementary/PathLifts.lean`).
+- Heun 26 → 21: 31.7.4 and the kernel equations 31.10.1–6, 31.10.12–18 and 31.10.20–21, all with
+  primed forms (new `Heun/IntegralPath.lean`,
+  `DLMFMathlib.Analysis.Calculus.Deriv.CompCurve` and
+  `DLMFMathlib.MeasureTheory.Integral.PathParametric`).
+
+Unchanged: Spheroidal, Coulomb, Theta, RiemannTheta, MatrixArgument, Painlevé and Lamé.
+
+New area imports: AlgebraicAnalytic → Bessel, AsymptoticApproximations → Gamma and → BernoulliEuler,
+Wigner → GeneralizedHypergeometric and NumberTheory → Theta. The import survey reports no new
+two-way pair apart from Elementary ↔ IncompleteGamma, which awaits acceptance into the baseline.
+The errata report was brought up to date with the dump: 20 entries listed as admitted are now
+proved, and the names removed in the 2026-11-01 renaming pass were replaced.
+
+Suspected false statements (no counterexample yet, argument only):
+- 2.4.9 `haar_isLittleO_pow`: the boundary terms seem to prevent the stated little-o bound.
+- `heun_kernel_example₁_pde`, `heun_kernel_example₂_pde`: they appear to need `γ, δ ∉ −ℕ`.
+
+Leads and blockers: 9.7.17 in the third sector; 14.3.17 (about 400 lines by the 14.3.19 template);
+8.9.2 with complex `a` needs the Scott–Wall parabola theorem; 8.17.22 needs the Gauss continued
+fraction beyond `x < 1/2`; `gammaUniformC` needs the Stirling coefficients; the Mathieu `QsC`
+construction by a conformal map; 23.17.3 needs Γ(1/3) (23.5.9) and 23.17.5 needs λ to order `q⁸`;
+23.6.30–35 are feasible but long; 22.10.4–9 need joint analyticity in `k`; Cauchy principal-value
+theory for many of 19.x, and 19.9.1 needs the sharp limit of `K − log(4/k′)`; 2.5.6–7 need a
+rectangle residue theorem (they unlock 2.5.42–43), and `DirichletKernel` may give the Fourier and
+Laplace inversion admissions of Chapter 1; 16.8.11 needs confluence domination and 16.4.6–8 Watson
+and Whipple infrastructure; the arccosh branch 4.37.2 needs smooth gluing; 29.12.13 is feasible but
+long; MatrixArgument needs zonal polynomials.
+
+After the round `DLMF/AlgebraicAnalytic/Complex/Functions.lean` exceeded the 1,500-line limit;
+§1.10(ix)–(xi) (infinite products, partial fractions, generating functions) moved unchanged to the
+new `DLMF/AlgebraicAnalytic/Complex/InfiniteProducts.lean`. The two Lagrange inversion files do not duplicate
+each other; their `lagB_` prefix is not Mathlib style.
