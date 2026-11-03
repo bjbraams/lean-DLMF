@@ -19,19 +19,19 @@ root of a quartic or cubic polynomial, written as a product of linear factors
 
 ## Main definitions
 
-* `ellRedRoot`, `ellRedDet`, `ellRedS`, `ellRedU`, `ellRedUInf`, `ellRedUNegInf`: the notation
+* `linearRoot`, `factorDet`, `quarticProduct`, `pairU`, `pairUAtTop`, `pairUAtBot`: the notation
   of DLMF 19.29.1–19.29.3, 19.29.5, 19.29.6.
-* `ellRedU5Sq`, `ellRedS5`, `ellRedQ5Sq`: the quantities of DLMF 19.29.9.
+* `pairUFiveSq`, `pairSFive`, `pairQFiveSq`: the quantities of DLMF 19.29.9.
 * `SymmetricReductionConditions`, `IsReductionIndexPermutation`: the standing hypotheses of
   §19.29(i) and permutations of the four factors.
-* `ellRedI`, `ellRedE`, `ellRedBasic`, `ellRedS3`: the integrals `I(𝐦)`, unit vectors, basic
-  integrals and the cubic `s(t)` of §19.29(ii) (DLMF 19.29.11–19.29.14, 19.29.17).
-* `ellRedQuadS`, `ellRedQuadD`, `ellRedQuadRF`, `ellRedBiquadU`: the notation of
+* `reductionIntegral`, `unitVector`, `basicIndices`, `cubicProduct`: the integrals `I(𝐦)`, unit
+  vectors, basic integrals and the cubic `s(t)` of §19.29(ii) (DLMF 19.29.11–19.29.14, 19.29.17).
+* `quadraticS`, `quadraticD`, `quadraticRF`, `biquadraticU`: the notation of
   DLMF 19.29.24, 19.29.25 and 19.29.31.
 
 ## Main results
 
-* `ellRedU_symm`, `ellRedU_sq_sub_sq`, `ellRedU5Sq_eq`, `ellRedS5_sq_sub_Q5Sq`: the algebraic
+* `pairU_symm`, `pairU_sq_sub_sq`, `pairUFiveSq_eq`, `pairSFive_sq_sub_pairQFiveSq`: the algebraic
   identities of DLMF 19.29.5 and 19.29.9, for arbitrary complex coefficients.
 * `SymmetricReduction.integral_inv_s`, `SymmetricReduction.integral_inv_s_Ioi`,
   `SymmetricReduction.integral_inv_s_Iio`, `SymmetricReduction.integral_inv_s_of_pos`:
@@ -39,14 +39,14 @@ root of a quartic or cubic polynomial, written as a product of linear factors
 * `SymmetricReduction.integral_ratio_s`, `SymmetricReduction.integral_ratio5_s`: DLMF 19.29.7,
   19.29.8.
 * `SymmetricReduction.gradshteynRyzhik_3_142`: the example DLMF 19.29.10.
-* `ellRedI_reduction`, `ellRedI_partial_fraction`, `ellRedI_cubic_recurrence`,
-  `ellRedI_recurrence`: the reduction of `I(𝐦)` to basic integrals (DLMF 19.29.ii.p3,
-  19.29.15, 19.29.16, 19.29.18).
+* `reductionIntegral_reduction`, `reductionIntegral_partial_fraction`,
+  `reductionIntegral_cubic_recurrence`, `reductionIntegral_recurrence`: the reduction of `I(𝐦)` to
+  basic integrals (DLMF 19.29.ii.p3, 19.29.15, 19.29.16, 19.29.18).
 * `SymmetricReduction.quadratic_first`, `SymmetricReduction.quadratic_first_of_pos`,
   `SymmetricReduction.quadratic_second`, `SymmetricReduction.quadratic_third`,
   `SymmetricReduction.quadratic_degenerate`, `SymmetricReduction.quadratic_infinite`: DLMF
   19.29.19–19.29.23.
-* `SymmetricReduction.two_quadratics`, `ellRedQuadS_linear_mul`,
+* `SymmetricReduction.two_quadratics`, `quadraticS_linear_mul`,
   `SymmetricReduction.linear_linear_quadratic`, `SymmetricReduction.linear_quadratic`: DLMF
   19.29.24–19.29.27.
 * `SymmetricReduction.cube_difference`, `SymmetricReduction.biquadratic`,
@@ -80,6 +80,9 @@ root of a quartic or cubic polynomial, written as a product of linear factors
   (1999).
 * B. C. Carlson, *Special Functions of Applied Mathematics*, 1977, §9.8 (formalized in
   `lean-codes`, reused here).
+
+The notation of §19.29 and the reduction helpers live in the namespace
+`DLMF.EllipticIntegrals.SymmetricReduction`, which this file opens.
 -/
 
 @[expose] public noncomputable section
@@ -89,72 +92,78 @@ open scoped Real Topology
 
 namespace DLMF.EllipticIntegrals
 
+namespace SymmetricReduction
+end SymmetricReduction
+
+open SymmetricReduction
+
 /-! ### §19.29(i) Notation -/
 
-/-- DLMF 19.29.1: `X_α = √(a_α + b_α x)` (and `Y_α = √(a_α + b_α y)` is `ellRedRoot a b y α`),
+/-- DLMF 19.29.1: `X_α = √(a_α + b_α x)` (and `Y_α = √(a_α + b_α y)` is `linearRoot a b y α`),
 principal square root. -/
 @[dlmf 19.29.E1]
-def ellRedRoot {ι : Type*} (a b : ι → ℂ) (x : ℝ) (α : ι) : ℂ := (a α + b α * x) ^ (1 / 2 : ℂ)
+def SymmetricReduction.linearRoot {ι : Type*} (a b : ι → ℂ) (x : ℝ) (α : ι) : ℂ :=
+    (a α + b α * x) ^ (1 / 2 : ℂ)
 
 /-- DLMF 19.29.2: `d_{αβ} = a_α b_β - a_β b_α`. -/
 @[dlmf 19.29.E2]
-def ellRedDet {ι : Type*} (a b : ι → ℂ) (α β : ι) : ℂ := a α * b β - a β * b α
+def SymmetricReduction.factorDet {ι : Type*} (a b : ι → ℂ) (α β : ι) : ℂ := a α * b β - a β * b α
 
 /-- DLMF 19.29.3: `s(t) = ∏_{α=1}^{4} √(a_α + b_α t)` (Lean indices `0, …, 3`). Cubic cases are
 obtained by setting one factor equal to `1` (`a = 1`, `b = 0`). -/
 @[dlmf 19.29.E3]
-def ellRedS (a b : Fin 5 → ℂ) (t : ℝ) : ℂ :=
-  ellRedRoot a b t 0 * ellRedRoot a b t 1 * ellRedRoot a b t 2 * ellRedRoot a b t 3
+def SymmetricReduction.quarticProduct (a b : Fin 5 → ℂ) (t : ℝ) : ℂ :=
+  linearRoot a b t 0 * linearRoot a b t 1 * linearRoot a b t 2 * linearRoot a b t 3
 
 /-- DLMF 19.29.5: `U_{αβ} = (X_α X_β Y_γ Y_δ + Y_α Y_β X_γ X_δ)/(x - y)`, for a permutation
 `α, β, γ, δ` of the four factors (the complementary pair `γ, δ` is given explicitly). -/
 @[dlmf 19.29.E5]
-def ellRedU (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) : ℂ :=
-  (ellRedRoot a b x α * ellRedRoot a b x β * ellRedRoot a b y γ * ellRedRoot a b y δ +
-      ellRedRoot a b y α * ellRedRoot a b y β * ellRedRoot a b x γ * ellRedRoot a b x δ) /
+def SymmetricReduction.pairU (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) : ℂ :=
+  (linearRoot a b x α * linearRoot a b x β * linearRoot a b y γ * linearRoot a b y δ +
+      linearRoot a b y α * linearRoot a b y β * linearRoot a b x γ * linearRoot a b x δ) /
     ((x : ℂ) - y)
 
 /-- DLMF 19.29.6, case `x = ∞`:
 `U_{αβ} = √b_α √b_β Y_γ Y_δ + Y_α Y_β √b_γ √b_δ`. -/
 @[dlmf 19.29.E6]
-def ellRedUInf (a b : Fin 5 → ℂ) (y : ℝ) (α β γ δ : Fin 5) : ℂ :=
-  b α ^ (1 / 2 : ℂ) * b β ^ (1 / 2 : ℂ) * ellRedRoot a b y γ * ellRedRoot a b y δ +
-    ellRedRoot a b y α * ellRedRoot a b y β * b γ ^ (1 / 2 : ℂ) * b δ ^ (1 / 2 : ℂ)
+def SymmetricReduction.pairUAtTop (a b : Fin 5 → ℂ) (y : ℝ) (α β γ δ : Fin 5) : ℂ :=
+  b α ^ (1 / 2 : ℂ) * b β ^ (1 / 2 : ℂ) * linearRoot a b y γ * linearRoot a b y δ +
+    linearRoot a b y α * linearRoot a b y β * b γ ^ (1 / 2 : ℂ) * b δ ^ (1 / 2 : ℂ)
 
 /-- DLMF 19.29.6, case `y = -∞`:
 `U_{αβ} = X_α X_β √(-b_γ) √(-b_δ) + √(-b_α) √(-b_β) X_γ X_δ`. -/
 @[dlmf 19.29.E6]
-def ellRedUNegInf (a b : Fin 5 → ℂ) (x : ℝ) (α β γ δ : Fin 5) : ℂ :=
-  ellRedRoot a b x α * ellRedRoot a b x β * (-b γ) ^ (1 / 2 : ℂ) * (-b δ) ^ (1 / 2 : ℂ) +
-    (-b α) ^ (1 / 2 : ℂ) * (-b β) ^ (1 / 2 : ℂ) * ellRedRoot a b x γ * ellRedRoot a b x δ
+def SymmetricReduction.pairUAtBot (a b : Fin 5 → ℂ) (x : ℝ) (α β γ δ : Fin 5) : ℂ :=
+  linearRoot a b x α * linearRoot a b x β * (-b γ) ^ (1 / 2 : ℂ) * (-b δ) ^ (1 / 2 : ℂ) +
+    (-b α) ^ (1 / 2 : ℂ) * (-b β) ^ (1 / 2 : ℂ) * linearRoot a b x γ * linearRoot a b x δ
 
 /-- DLMF 19.29.9: `U_{α5}² = U_{αβ}² - d_{αγ} d_{αδ} d_{β5} / d_{α5}` (Lean index `4` for DLMF's
 `5`). Only the square `U_{α5}²` enters (19.29.8). -/
 @[dlmf 19.29.E9]
-def ellRedU5Sq (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) : ℂ :=
-  ellRedU a b x y α β γ δ ^ 2 -
-    ellRedDet a b α γ * ellRedDet a b α δ * ellRedDet a b β 4 / ellRedDet a b α 4
+def SymmetricReduction.pairUFiveSq (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) : ℂ :=
+  pairU a b x y α β γ δ ^ 2 -
+    factorDet a b α γ * factorDet a b α δ * factorDet a b β 4 / factorDet a b α 4
 
 /-- DLMF 19.29.9: `S_{α5} = (X_β X_γ X_δ Y_5² / X_α + Y_β Y_γ Y_δ X_5² / Y_α)/(x - y)`. -/
 @[dlmf 19.29.E9]
-def ellRedS5 (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) : ℂ :=
-  (ellRedRoot a b x β * ellRedRoot a b x γ * ellRedRoot a b x δ / ellRedRoot a b x α *
-        ellRedRoot a b y 4 ^ 2 +
-      ellRedRoot a b y β * ellRedRoot a b y γ * ellRedRoot a b y δ / ellRedRoot a b y α *
-        ellRedRoot a b x 4 ^ 2) / ((x : ℂ) - y)
+def SymmetricReduction.pairSFive (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) : ℂ :=
+  (linearRoot a b x β * linearRoot a b x γ * linearRoot a b x δ / linearRoot a b x α *
+        linearRoot a b y 4 ^ 2 +
+      linearRoot a b y β * linearRoot a b y γ * linearRoot a b y δ / linearRoot a b y α *
+        linearRoot a b x 4 ^ 2) / ((x : ℂ) - y)
 
 /-- DLMF 19.29.9: `Q_{α5}² = (X_5 Y_5 / (X_α Y_α))² U_{α5}²` (DLMF defines
 `Q_{α5} = X_5 Y_5 U_{α5} / (X_α Y_α)`; only its square enters (19.29.8)). -/
 @[dlmf 19.29.E9]
-def ellRedQ5Sq (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) : ℂ :=
-  (ellRedRoot a b x 4 * ellRedRoot a b y 4 / (ellRedRoot a b x α * ellRedRoot a b y α)) ^ 2 *
-    ellRedU5Sq a b x y α β γ δ
+def SymmetricReduction.pairQFiveSq (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) : ℂ :=
+  (linearRoot a b x 4 * linearRoot a b y 4 / (linearRoot a b x α * linearRoot a b y α)) ^ 2 *
+    pairUFiveSq a b x y α β γ δ
 
 /-- The standing hypotheses of DLMF §19.29(i) for the four factors of `s(t)`: `y < x`,
 `d_{αβ} ≠ 0` for distinct `α, β ≤ 4` (19.29.2), and each segment `a_α + b_α [y, x]` in
 `ℂ \ (-∞, 0)`. -/
 def SymmetricReductionConditions (a b : Fin 5 → ℂ) (x y : ℝ) : Prop :=
-  y < x ∧ (∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → ellRedDet a b α β ≠ 0) ∧
+  y < x ∧ (∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → factorDet a b α β ≠ 0) ∧
     ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Icc y x, SymEllIntArg (a α + b α * t)
 
 /-- `α, β, γ, δ` is a permutation of DLMF's `1, 2, 3, 4` (Lean `0, 1, 2, 3`). -/
@@ -163,43 +172,44 @@ def IsReductionIndexPermutation (α β γ δ : Fin 5) : Prop :=
 
 /-! ### Algebraic identities (19.29.5), (19.29.9) -/
 
-/-- Identity under the stated parameter and domain assumptions: `ellRedRoot a b x α ^ 2 = a α + b
+/-- Identity under the stated parameter and domain assumptions: `linearRoot a b x α ^ 2 = a α + b
 α * x`. -/
-private lemma ellRedRoot_sq {ι : Type*} (a b : ι → ℂ) (x : ℝ) (α : ι) :
-    ellRedRoot a b x α ^ 2 = a α + b α * x := by
-  rw [sq, ellRedRoot, cpow_half_mul_cpow_half]
+private lemma SymmetricReduction.linearRoot_sq {ι : Type*} (a b : ι → ℂ) (x : ℝ) (α : ι) :
+    linearRoot a b x α ^ 2 = a α + b α * x := by
+  rw [sq, linearRoot, cpow_half_mul_cpow_half]
 
 /-- DLMF 19.29.5: `U_{αβ} = U_{βα} = U_{γδ} = U_{δγ}` (also independent of the order of the
 complementary pair). -/
 @[dlmf 19.29.E5]
-theorem ellRedU_symm (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) :
-    ellRedU a b x y β α γ δ = ellRedU a b x y α β γ δ ∧
-      ellRedU a b x y α β δ γ = ellRedU a b x y α β γ δ ∧
-      ellRedU a b x y γ δ α β = ellRedU a b x y α β γ δ ∧
-      ellRedU a b x y δ γ α β = ellRedU a b x y α β γ δ := by
-  refine ⟨?_, ?_, ?_, ?_⟩ <;> simp only [ellRedU] <;> ring
+theorem SymmetricReduction.pairU_symm (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) :
+    pairU a b x y β α γ δ = pairU a b x y α β γ δ ∧
+      pairU a b x y α β δ γ = pairU a b x y α β γ δ ∧
+      pairU a b x y γ δ α β = pairU a b x y α β γ δ ∧
+      pairU a b x y δ γ α β = pairU a b x y α β γ δ := by
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> simp only [pairU] <;> ring
 
 /-- DLMF 19.29.5: `U_{αβ}² - U_{αγ}² = d_{αδ} d_{βγ}`, for all complex coefficients and `x ≠ y`
 (stronger than DLMF: no condition on the segments or on the `d`'s). -/
 @[dlmf 19.29.E5]
-theorem ellRedU_sq_sub_sq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (α β γ δ : Fin 5) :
-    ellRedU a b x y α β γ δ ^ 2 - ellRedU a b x y α γ β δ ^ 2 =
-      ellRedDet a b α δ * ellRedDet a b β γ := by
+theorem SymmetricReduction.pairU_sq_sub_sq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y)
+    (α β γ δ : Fin 5) :
+    pairU a b x y α β γ δ ^ 2 - pairU a b x y α γ β δ ^ 2 =
+      factorDet a b α δ * factorDet a b β γ := by
   have hd : (x : ℂ) - y ≠ 0 := sub_ne_zero.mpr (by exact_mod_cast hxy)
-  have hXa := ellRedRoot_sq a b x α
-  have hXb := ellRedRoot_sq a b x β
-  have hXc := ellRedRoot_sq a b x γ
-  have hXd := ellRedRoot_sq a b x δ
-  have hYa := ellRedRoot_sq a b y α
-  have hYb := ellRedRoot_sq a b y β
-  have hYc := ellRedRoot_sq a b y γ
-  have hYd := ellRedRoot_sq a b y δ
-  simp only [ellRedU, ellRedDet, div_pow]
+  have hXa := linearRoot_sq a b x α
+  have hXb := linearRoot_sq a b x β
+  have hXc := linearRoot_sq a b x γ
+  have hXd := linearRoot_sq a b x δ
+  have hYa := linearRoot_sq a b y α
+  have hYb := linearRoot_sq a b y β
+  have hYc := linearRoot_sq a b y γ
+  have hYd := linearRoot_sq a b y δ
+  simp only [pairU, factorDet, div_pow]
   rw [← sub_div, div_eq_iff (pow_ne_zero 2 hd)]
-  set Xa := ellRedRoot a b x α; set Xb := ellRedRoot a b x β
-  set Xc := ellRedRoot a b x γ; set Xd := ellRedRoot a b x δ
-  set Ya := ellRedRoot a b y α; set Yb := ellRedRoot a b y β
-  set Yc := ellRedRoot a b y γ; set Yd := ellRedRoot a b y δ
+  set Xa := linearRoot a b x α; set Xb := linearRoot a b x β
+  set Xc := linearRoot a b x γ; set Xd := linearRoot a b x δ
+  set Ya := linearRoot a b y α; set Yb := linearRoot a b y β
+  set Yc := linearRoot a b y γ; set Yd := linearRoot a b y δ
   linear_combination (Yd ^ 2 * (Xb * Yc - Xc * Yb) * (Xb * Yc + Xc * Yb)) * hXa +
     (Yc ^ 2 * (-Xd ^ 2 * Ya ^ 2 + Yd ^ 2 * a α + Yd ^ 2 * b α * x)) * hXb +
     (-Yb ^ 2 * (-Xd ^ 2 * Ya ^ 2 + Yd ^ 2 * a α + Yd ^ 2 * b α * x)) * hXc +
@@ -215,21 +225,22 @@ theorem ellRedU_sq_sub_sq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (α 
 `U_{αβ}² - d_{αγ} d_{αδ} d_{β5}/d_{α5} = U_{βγ}² - d_{αβ} d_{αγ} d_{δ5}/d_{α5}`
 (`U_{βγ} = U_{αδ}`), for `x ≠ y` and `d_{α5} ≠ 0`. -/
 @[dlmf 19.29.E9]
-theorem ellRedU5Sq_eq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (α β γ δ : Fin 5)
-    (h5 : ellRedDet a b α 4 ≠ 0) :
-    ellRedU5Sq a b x y α β γ δ =
-      ellRedU a b x y β γ α δ ^ 2 -
-        ellRedDet a b α β * ellRedDet a b α γ * ellRedDet a b δ 4 / ellRedDet a b α 4 := by
-  have h1 := ellRedU_sq_sub_sq a b hxy α β δ γ
-  have h2 : ellRedU a b x y β γ α δ = ellRedU a b x y α δ β γ := by
-    simp only [ellRedU]; ring
-  rw [ellRedU5Sq, h2]
-  have h3 : ellRedU a b x y α β δ γ = ellRedU a b x y α β γ δ := (ellRedU_symm a b x y α β γ δ).2.1
+theorem SymmetricReduction.pairUFiveSq_eq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y)
+    (α β γ δ : Fin 5)
+    (h5 : factorDet a b α 4 ≠ 0) :
+    pairUFiveSq a b x y α β γ δ =
+      pairU a b x y β γ α δ ^ 2 -
+        factorDet a b α β * factorDet a b α γ * factorDet a b δ 4 / factorDet a b α 4 := by
+  have h1 := pairU_sq_sub_sq a b hxy α β δ γ
+  have h2 : pairU a b x y β γ α δ = pairU a b x y α δ β γ := by
+    simp only [pairU]; ring
+  rw [pairUFiveSq, h2]
+  have h3 : pairU a b x y α β δ γ = pairU a b x y α β γ δ := (pairU_symm a b x y α β γ δ).2.1
   rw [h3] at h1
-  have key : ellRedDet a b α β * ellRedDet a b α γ * ellRedDet a b δ 4 / ellRedDet a b α 4 -
-      ellRedDet a b α γ * ellRedDet a b α δ * ellRedDet a b β 4 / ellRedDet a b α 4 =
-      -(ellRedDet a b α γ * ellRedDet a b β δ) := by
-    rw [div_sub_div_same, div_eq_iff h5]; simp only [ellRedDet]; ring
+  have key : factorDet a b α β * factorDet a b α γ * factorDet a b δ 4 / factorDet a b α 4 -
+      factorDet a b α γ * factorDet a b α δ * factorDet a b β 4 / factorDet a b α 4 =
+      -(factorDet a b α γ * factorDet a b β δ) := by
+    rw [div_sub_div_same, div_eq_iff h5]; simp only [factorDet]; ring
   linear_combination h1 + key
 
 /-- Polynomial identity behind (19.29.9) (coefficients found by Gröbner reduction). -/
@@ -386,22 +397,23 @@ private lemma SymmetricReduction.five_factor_identity
 /-- DLMF 19.29.9: `S_{α5}² - Q_{α5}² = d_{β5} d_{γ5} d_{δ5} / d_{α5}`, for `x ≠ y`,
 `X_α, Y_α ≠ 0` and `d_{α5} ≠ 0`. -/
 @[dlmf 19.29.E9]
-theorem ellRedS5_sq_sub_Q5Sq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (α β γ δ : Fin 5)
-    (hX : ellRedRoot a b x α ≠ 0) (hY : ellRedRoot a b y α ≠ 0)
-    (h5 : ellRedDet a b α 4 ≠ 0) :
-    ellRedS5 a b x y α β γ δ ^ 2 - ellRedQ5Sq a b x y α β γ δ =
-      ellRedDet a b β 4 * ellRedDet a b γ 4 * ellRedDet a b δ 4 / ellRedDet a b α 4 := by
+theorem SymmetricReduction.pairSFive_sq_sub_pairQFiveSq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y)
+    (α β γ δ : Fin 5)
+    (hX : linearRoot a b x α ≠ 0) (hY : linearRoot a b y α ≠ 0)
+    (h5 : factorDet a b α 4 ≠ 0) :
+    pairSFive a b x y α β γ δ ^ 2 - pairQFiveSq a b x y α β γ δ =
+      factorDet a b β 4 * factorDet a b γ 4 * factorDet a b δ 4 / factorDet a b α 4 := by
   have hd : (x : ℂ) - y ≠ 0 := sub_ne_zero.mpr (by exact_mod_cast hxy)
-  have H := SymmetricReduction.five_factor_identity (ellRedRoot a b x α) (ellRedRoot a b x β)
-      (ellRedRoot a b x γ)
-    (ellRedRoot a b x δ) (ellRedRoot a b x 4) (ellRedRoot a b y α) (ellRedRoot a b y β)
-    (ellRedRoot a b y γ) (ellRedRoot a b y δ) (ellRedRoot a b y 4) (a α) (a β) (a γ) (a δ) (a 4)
+  have H := SymmetricReduction.five_factor_identity (linearRoot a b x α) (linearRoot a b x β)
+      (linearRoot a b x γ)
+    (linearRoot a b x δ) (linearRoot a b x 4) (linearRoot a b y α) (linearRoot a b y β)
+    (linearRoot a b y γ) (linearRoot a b y δ) (linearRoot a b y 4) (a α) (a β) (a γ) (a δ) (a 4)
     (b α) (b β) (b γ) (b δ) (b 4) x y hd hX hY h5
-    (ellRedRoot_sq a b x α) (ellRedRoot_sq a b y α) (ellRedRoot_sq a b x β)
-    (ellRedRoot_sq a b y β) (ellRedRoot_sq a b x γ) (ellRedRoot_sq a b y γ)
-    (ellRedRoot_sq a b x δ) (ellRedRoot_sq a b y δ) (ellRedRoot_sq a b x 4)
-    (ellRedRoot_sq a b y 4)
-  simp only [ellRedS5, ellRedQ5Sq, ellRedU5Sq, ellRedU, ellRedDet]
+    (linearRoot_sq a b x α) (linearRoot_sq a b y α) (linearRoot_sq a b x β)
+    (linearRoot_sq a b y β) (linearRoot_sq a b x γ) (linearRoot_sq a b y γ)
+    (linearRoot_sq a b x δ) (linearRoot_sq a b y δ) (linearRoot_sq a b x 4)
+    (linearRoot_sq a b y 4)
+  simp only [pairSFive, pairQFiveSq, pairUFiveSq, pairU, factorDet]
   exact H
 
 /-! ### Reduction theorems (19.29.4), (19.29.6)–(19.29.8) -/
@@ -412,35 +424,35 @@ of §19.29(i) (`SymmetricReductionConditions`): complex coefficients, `d_{αβ} 
 @[dlmf 19.29.E4]
 theorem SymmetricReduction.integral_inv_s {a b : Fin 5 → ℂ} {x y : ℝ}
     (h : SymmetricReductionConditions a b x y) :
-    ∫ t in Ioo y x, (ellRedS a b t)⁻¹ =
-      2 * symEllIntRF (ellRedU a b x y 0 1 2 3 ^ 2) (ellRedU a b x y 0 2 1 3 ^ 2)
-        (ellRedU a b x y 1 2 0 3 ^ 2) := by
+    ∫ t in Ioo y x, (quarticProduct a b t)⁻¹ =
+      2 * symEllIntRF (pairU a b x y 0 1 2 3 ^ 2) (pairU a b x y 0 2 1 3 ^ 2)
+        (pairU a b x y 1 2 0 3 ^ 2) := by
   sorry
 
 /-- DLMF 19.29.6 with (19.29.4), case `x = ∞`:
 `∫_y^∞ dt / s(t) = 2 R_F(U_{12}², U_{13}², U_{23}²)` with `U_{αβ}` from (19.29.6)
-(`ellRedUInf`); the `d_{αβ}` are nonzero and each ray `a_α + b_α [y, ∞)` lies in
+(`pairUAtTop`); the `d_{αβ}` are nonzero and each ray `a_α + b_α [y, ∞)` lies in
 `ℂ \ (-∞, 0)`. -/
 @[dlmf 19.29.E6]
 theorem SymmetricReduction.integral_inv_s_Ioi {a b : Fin 5 → ℂ} {y : ℝ}
-    (hd : ∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → ellRedDet a b α β ≠ 0)
+    (hd : ∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → factorDet a b α β ≠ 0)
     (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Ici y, SymEllIntArg (a α + b α * t)) :
-    ∫ t in Ioi y, (ellRedS a b t)⁻¹ =
-      2 * symEllIntRF (ellRedUInf a b y 0 1 2 3 ^ 2) (ellRedUInf a b y 0 2 1 3 ^ 2)
-        (ellRedUInf a b y 1 2 0 3 ^ 2) := by
+    ∫ t in Ioi y, (quarticProduct a b t)⁻¹ =
+      2 * symEllIntRF (pairUAtTop a b y 0 1 2 3 ^ 2) (pairUAtTop a b y 0 2 1 3 ^ 2)
+        (pairUAtTop a b y 1 2 0 3 ^ 2) := by
   sorry
 
 /-- DLMF 19.29.6 with (19.29.4), case `y = -∞`:
 `∫_{-∞}^x dt / s(t) = 2 R_F(U_{12}², U_{13}², U_{23}²)` with `U_{αβ}` from (19.29.6)
-(`ellRedUNegInf`); the `d_{αβ}` are nonzero and each ray `a_α + b_α (-∞, x]` lies in
+(`pairUAtBot`); the `d_{αβ}` are nonzero and each ray `a_α + b_α (-∞, x]` lies in
 `ℂ \ (-∞, 0)`. -/
 @[dlmf 19.29.E6]
 theorem SymmetricReduction.integral_inv_s_Iio {a b : Fin 5 → ℂ} {x : ℝ}
-    (hd : ∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → ellRedDet a b α β ≠ 0)
+    (hd : ∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → factorDet a b α β ≠ 0)
     (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Iic x, SymEllIntArg (a α + b α * t)) :
-    ∫ t in Iio x, (ellRedS a b t)⁻¹ =
-      2 * symEllIntRF (ellRedUNegInf a b x 0 1 2 3 ^ 2) (ellRedUNegInf a b x 0 2 1 3 ^ 2)
-        (ellRedUNegInf a b x 1 2 0 3 ^ 2) := by
+    ∫ t in Iio x, (quarticProduct a b t)⁻¹ =
+      2 * symEllIntRF (pairUAtBot a b x 0 1 2 3 ^ 2) (pairUAtBot a b x 0 2 1 3 ^ 2)
+        (pairUAtBot a b x 1 2 0 3 ^ 2) := by
   sorry
 
 /-- DLMF 19.29.7: for a permutation `α, β, γ, δ` of the four factors and `U_{αδ} ≠ 0`,
@@ -450,13 +462,13 @@ theorem SymmetricReduction.integral_inv_s_Iio {a b : Fin 5 → ℂ} {x : ℝ}
 theorem SymmetricReduction.integral_ratio_s {a b : Fin 5 → ℂ} {x y : ℝ}
     (h : SymmetricReductionConditions a b x y)
     {α β γ δ : Fin 5} (hp : IsReductionIndexPermutation α β γ δ)
-        (hU : ellRedU a b x y α δ β γ ≠ 0) :
-    ∫ t in Ioo y x, (a α + b α * t) / (a δ + b δ * t) * (ellRedS a b t)⁻¹ =
-      2 / 3 * ellRedDet a b α β * ellRedDet a b α γ *
-          symEllIntRD (ellRedU a b x y α β γ δ ^ 2) (ellRedU a b x y α γ β δ ^ 2)
-            (ellRedU a b x y α δ β γ ^ 2) +
-        2 * ellRedRoot a b x α * ellRedRoot a b y α /
-          (ellRedRoot a b x δ * ellRedRoot a b y δ * ellRedU a b x y α δ β γ) := by
+        (hU : pairU a b x y α δ β γ ≠ 0) :
+    ∫ t in Ioo y x, (a α + b α * t) / (a δ + b δ * t) * (quarticProduct a b t)⁻¹ =
+      2 / 3 * factorDet a b α β * factorDet a b α γ *
+          symEllIntRD (pairU a b x y α β γ δ ^ 2) (pairU a b x y α γ β δ ^ 2)
+            (pairU a b x y α δ β γ ^ 2) +
+        2 * linearRoot a b x α * linearRoot a b y α /
+          (linearRoot a b x δ * linearRoot a b y δ * pairU a b x y α δ β γ) := by
   sorry
 
 /-- DLMF 19.29.8: for a permutation `α, β, γ, δ` of the four factors, a fifth factor
@@ -472,15 +484,15 @@ the left side when `a_5 + b_5 t` vanishes inside `(y, x)` is not covered. -/
 theorem SymmetricReduction.integral_ratio5_s {a b : Fin 5 → ℂ} {x y : ℝ}
     (h : SymmetricReductionConditions a b x y)
     {α β γ δ : Fin 5} (hp : IsReductionIndexPermutation α β γ δ)
-    (hd5 : ∀ ε : Fin 5, ε ≠ 4 → ellRedDet a b ε 4 ≠ 0)
+    (hd5 : ∀ ε : Fin 5, ε ≠ 4 → factorDet a b ε 4 ≠ 0)
     (h5 : ∀ t ∈ Icc y x, a 4 + b 4 * t ≠ 0)
-    (hU5 : ellRedU5Sq a b x y α β γ δ ≠ 0) (hQ5 : ellRedQ5Sq a b x y α β γ δ ≠ 0)
-    (hS5 : SymEllIntArg (ellRedS5 a b x y α β γ δ ^ 2)) :
-    ∫ t in Ioo y x, (a α + b α * t) / (a 4 + b 4 * t) * (ellRedS a b t)⁻¹ =
-      2 / 3 * (ellRedDet a b α β * ellRedDet a b α γ * ellRedDet a b α δ / ellRedDet a b α 4) *
-          symEllIntRJ (ellRedU a b x y 0 1 2 3 ^ 2) (ellRedU a b x y 0 2 1 3 ^ 2)
-            (ellRedU a b x y 1 2 0 3 ^ 2) (ellRedU5Sq a b x y α β γ δ) +
-        2 * symEllIntRC (ellRedS5 a b x y α β γ δ ^ 2) (ellRedQ5Sq a b x y α β γ δ) := by
+    (hU5 : pairUFiveSq a b x y α β γ δ ≠ 0) (hQ5 : pairQFiveSq a b x y α β γ δ ≠ 0)
+    (hS5 : SymEllIntArg (pairSFive a b x y α β γ δ ^ 2)) :
+    ∫ t in Ioo y x, (a α + b α * t) / (a 4 + b 4 * t) * (quarticProduct a b t)⁻¹ =
+      2 / 3 * (factorDet a b α β * factorDet a b α γ * factorDet a b α δ / factorDet a b α 4) *
+          symEllIntRJ (pairU a b x y 0 1 2 3 ^ 2) (pairU a b x y 0 2 1 3 ^ 2)
+            (pairU a b x y 1 2 0 3 ^ 2) (pairUFiveSq a b x y α β γ δ) +
+        2 * symEllIntRC (pairSFive a b x y α β γ δ ^ 2) (pairQFiveSq a b x y α β γ δ) := by
   sorry
 
 /-- DLMF 19.29.10 (Gradshteyn–Ryzhik 3.142(2) as a cubic case of (19.29.7)): for real
@@ -504,10 +516,10 @@ theorem SymmetricReduction.gradshteynRyzhik_3_142 {a b u c : ℝ} (hab : b < a) 
 @[dlmf 19.29.E4]
 theorem SymmetricReduction.integral_inv_s_of_pos {a b : Fin 5 → ℝ} {x y : ℝ} (hxy : y < x)
     (hpos : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Icc y x, 0 < a α + b α * t) :
-    ∫ t in Ioo y x, (ellRedS (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) t)⁻¹ =
-      2 * symEllIntRF (ellRedU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 0 1 2 3 ^ 2)
-        (ellRedU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 0 2 1 3 ^ 2)
-        (ellRedU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 1 2 0 3 ^ 2) := by
+    ∫ t in Ioo y x, (quarticProduct (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) t)⁻¹ =
+      2 * symEllIntRF (pairU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 0 1 2 3 ^ 2)
+        (pairU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 0 2 1 3 ^ 2)
+        (pairU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 1 2 0 3 ^ 2) := by
   have hp : ∀ i : Fin 5, i ≠ 4 → ∀ t ∈ Icc y x, 0 < a i + b i * t := hpos
   have h0 := hp 0 (by decide)
   have h1 := hp 1 (by decide)
@@ -517,21 +529,21 @@ theorem SymmetricReduction.integral_inv_s_of_pos {a b : Fin 5 → ℝ} {x y : �
     (c := a 2) (γ := b 2) (d := a 3) (δ := b 3) hxy
     (fun t ht => ⟨h0 t ht, h1 t ht, h2 t ht, h3 t ht⟩)
   have hroot : ∀ (i : Fin 5) (t : ℝ), 0 ≤ a i + b i * t →
-      ellRedRoot (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) t i = ((√(a i + b i * t) : ℝ) : ℂ) := by
+      linearRoot (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) t i = ((√(a i + b i * t) : ℝ) : ℂ) := by
     intro i t ht
-    simp only [ellRedRoot]
+    simp only [linearRoot]
     rw [show (a i : ℂ) + (b i : ℂ) * (t : ℂ) = ((a i + b i * t : ℝ) : ℂ) by push_cast; ring]
     exact Carlson.ofReal_cpow_half ht
   have hx : x ∈ Icc y x := ⟨hxy.le, le_rfl⟩
   have hy : y ∈ Icc y x := ⟨le_rfl, hxy.le⟩
   -- the integrand
-  have hint : ∀ t ∈ Ioo y x, (ellRedS (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) t)⁻¹ =
+  have hint : ∀ t ∈ Ioo y x, (quarticProduct (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) t)⁻¹ =
       ((((a 0 + b 0 * t) * (a 1 + b 1 * t) * (a 2 + b 2 * t) * (a 3 + b 3 * t)) ^
         (-1 / 2 : ℝ) : ℝ) : ℂ) := by
     intro t ht
     have ht' : t ∈ Icc y x := Ioo_subset_Icc_self ht
     have q0 := h0 t ht'; have q1 := h1 t ht'; have q2 := h2 t ht'; have q3 := h3 t ht'
-    simp only [ellRedS]
+    simp only [quarticProduct]
     rw [hroot 0 t q0.le, hroot 1 t q1.le, hroot 2 t q2.le, hroot 3 t q3.le,
       show (-1 / 2 : ℝ) = -(1 / 2) by norm_num, Real.rpow_neg (by positivity),
       ← Real.sqrt_eq_rpow, Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity),
@@ -542,12 +554,12 @@ theorem SymmetricReduction.integral_inv_s_of_pos {a b : Fin 5 → ℝ} {x y : �
   have hU : ∀ (i j k l : Fin 5), 0 < a i + b i * x → 0 < a j + b j * x → 0 < a k + b k * y →
       0 < a l + b l * y → 0 < a i + b i * y → 0 < a j + b j * y → 0 < a k + b k * x →
       0 < a l + b l * x →
-      ellRedU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y i j k l =
+      pairU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y i j k l =
         (((√((a i + b i * x) * (a j + b j * x) * (a k + b k * y) * (a l + b l * y)) +
           √((a i + b i * y) * (a j + b j * y) * (a k + b k * x) * (a l + b l * x))) / (x - y) :
             ℝ) : ℂ) := by
     intro i j k l p1 p2 p3 p4 q1 q2 q3 q4
-    simp only [ellRedU]
+    simp only [pairU]
     rw [hroot i x p1.le, hroot j x p2.le, hroot k y p3.le, hroot l y p4.le, hroot i y q1.le,
       hroot j y q2.le, hroot k x q3.le, hroot l x q4.le,
       Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity), Real.sqrt_mul p1.le,
@@ -579,33 +591,36 @@ theorem SymmetricReduction.integral_inv_s_of_pos {a b : Fin 5 → ℝ} {x y : �
 /-- The integrand of (19.29.11):
 `∏_{α=1}^{h} (a_α + b_α t)^{-1/2} ∏_{j=1}^{n} (a_j + b_j t)^{m_j}` (the first `h` of the `n`
 linear factors carry the square roots; Lean indices `0, …, n-1`). -/
-def ellRedIntegrand (h : ℕ) {n : ℕ} (a b : Fin n → ℂ) (m : Fin n → ℤ) (t : ℝ) : ℂ :=
+def SymmetricReduction.reductionIntegrand (h : ℕ) {n : ℕ} (a b : Fin n → ℂ)
+    (m : Fin n → ℤ) (t : ℝ) : ℂ :=
   (∏ α ∈ Finset.univ.filter (fun α : Fin n => (α : ℕ) < h), (a α + b α * t) ^ (-1 / 2 : ℂ)) *
     ∏ j, (a j + b j * t) ^ (m j)
 
 /-- DLMF 19.29.11: `I(𝐦) = ∫_y^x ∏_{α=1}^{h} (a_α + b_α t)^{-1/2} ∏_{j=1}^{n} (a_j + b_j t)^{m_j}
 dt`, `x > y`, `h = 3` or `4`, `n ≥ h`, integer `m_j` (DLMF's rewriting of (19.2.3)). -/
 @[dlmf 19.29.E11]
-def ellRedI (h : ℕ) {n : ℕ} (a b : Fin n → ℂ) (x y : ℝ) (m : Fin n → ℤ) : ℂ :=
-  ∫ t in Ioo y x, ellRedIntegrand h a b m t
+def SymmetricReduction.reductionIntegral (h : ℕ) {n : ℕ} (a b : Fin n → ℂ) (x y : ℝ)
+    (m : Fin n → ℤ) : ℂ :=
+  ∫ t in Ioo y x, reductionIntegrand h a b m t
 
 /-- DLMF 19.29.12: the unit vector `𝐞_j` (`1` in the `j`th position, `0` elsewhere). -/
 @[dlmf 19.29.E12]
-def ellRedE {n : ℕ} (j : Fin n) : Fin n → ℤ := Pi.single j 1
+def SymmetricReduction.unitVector {n : ℕ} (j : Fin n) : Fin n → ℤ := Pi.single j 1
 
 /-- DLMF 19.29.12: `𝐦 = (m_1, …, m_n) = ∑_j m_j 𝐞_j`. -/
 @[dlmf 19.29.E12]
-theorem ellRedE_sum {n : ℕ} (m : Fin n → ℤ) : m = ∑ j, m j • ellRedE j := by
+theorem SymmetricReduction.eq_sum_smul_unitVector {n : ℕ} (m : Fin n → ℤ) : m = ∑ j, m j •
+    unitVector j := by
   funext k
-  simp [ellRedE, Finset.sum_apply, Pi.single_apply]
+  simp [unitVector, Finset.sum_apply, Pi.single_apply]
 
 /-- DLMF 19.29.13, 19.29.14: the index vectors of the basic integrals: `I(𝟎)`, `I(-𝐞_j)`
 (`1 ≤ j ≤ n`) and, in the quartic case `h = 4`, also `I(𝐞_α)` (`1 ≤ α ≤ 4`). The integrals of
 (19.29.4), (19.29.7), (19.29.8) are `I(𝟎)`, `I(𝐞_α - 𝐞_δ)`, `I(𝐞_α - 𝐞_5)` (19.29.ii.p1). -/
 @[dlmf 19.29.E13, dlmf 19.29.E14]
-def ellRedBasic (h n : ℕ) : Set (Fin n → ℤ) :=
-  {0} ∪ Set.range (fun j : Fin n => -ellRedE j) ∪
-    (if h = 4 then {m | ∃ α : Fin n, (α : ℕ) < 4 ∧ m = ellRedE α} else ∅)
+def SymmetricReduction.basicIndices (h n : ℕ) : Set (Fin n → ℤ) :=
+  {0} ∪ Set.range (fun j : Fin n => -unitVector j) ∪
+    (if h = 4 then {m | ∃ α : Fin n, (α : ℕ) < 4 ∧ m = unitVector α} else ∅)
 
 /-- DLMF 19.29.ii.p3: `I(𝐦)` is a linear combination of basic integrals (19.29.13), (19.29.14)
 and algebraic functions; the algebraic part is `[A(t)]_y^x` with `A(t) = s_h(t) P(t)/Q(t)`,
@@ -613,13 +628,14 @@ and algebraic functions; the algebraic part is `[A(t)]_y^x` with `A(t) = s_h(t) 
 Stated with all `d_{jl} ≠ 0` (19.29.2), the radicands in `ℂ \ (-∞, 0]` and all factors nonzero
 on `[y, x]` (so that every `I(𝐦)` is a proper integral). -/
 @[dlmf 19.29.ii]
-theorem ellRedI_reduction {h n : ℕ} (hh : h = 3 ∨ h = 4) (hn : h ≤ n) {a b : Fin n → ℂ}
-    {x y : ℝ} (hxy : y < x) (hd : ∀ j l : Fin n, j ≠ l → ellRedDet a b j l ≠ 0)
+theorem SymmetricReduction.reductionIntegral_reduction {h n : ℕ} (hh : h = 3 ∨ h = 4) (hn : h ≤ n)
+    {a b : Fin n → ℂ}
+    {x y : ℝ} (hxy : y < x) (hd : ∀ j l : Fin n, j ≠ l → factorDet a b j l ≠ 0)
     (hslit : ∀ α : Fin n, (α : ℕ) < h → ∀ t ∈ Icc y x, a α + b α * t ∈ slitPlane)
     (hnz : ∀ j : Fin n, ∀ t ∈ Icc y x, a j + b j * t ≠ 0) (m : Fin n → ℤ) :
     ∃ (S : Finset (Fin n → ℤ)) (c : (Fin n → ℤ) → ℂ) (P Q : Polynomial ℂ),
-      (↑S ⊆ ellRedBasic h n) ∧ (∀ t ∈ Icc y x, Q.eval (t : ℂ) ≠ 0) ∧
-      ellRedI h a b x y m = ∑ k ∈ S, c k * ellRedI h a b x y k +
+      (↑S ⊆ basicIndices h n) ∧ (∀ t ∈ Icc y x, Q.eval (t : ℂ) ≠ 0) ∧
+      reductionIntegral h a b x y m = ∑ k ∈ S, c k * reductionIntegral h a b x y k +
         ((∏ α ∈ Finset.univ.filter (fun α : Fin n => (α : ℕ) < h),
             (a α + b α * x) ^ (1 / 2 : ℂ)) * P.eval (x : ℂ) / Q.eval (x : ℂ) -
           (∏ α ∈ Finset.univ.filter (fun α : Fin n => (α : ℕ) < h),
@@ -633,44 +649,46 @@ private lemma prod_pow_single {n : ℕ} (f : Fin n → ℂ) (j : Fin n) (q : ℤ
   rw [Finset.prod_eq_single j (fun k _ hk => by simp [hk]) (by simp)]
   simp
 
-/-- Identity under the stated parameter and domain assumptions: `∏ k, f k ^ ((ellRedE l - ellRedE
-j) k) = f l * (f j)⁻¹`. -/
-private lemma prod_pow_ellRedE_sub {n : ℕ} (f : Fin n → ℂ) {l j : Fin n} (hlj : l ≠ j) :
-    ∏ k, f k ^ ((ellRedE l - ellRedE j) k) = f l * (f j)⁻¹ := by
+/-- Identity under the stated parameter and domain assumptions:
+`∏ k, f k ^ ((unitVector l - unitVector j) k) = f l * (f j)⁻¹`. -/
+private lemma prod_pow_unitVector_sub {n : ℕ} (f : Fin n → ℂ) {l j : Fin n} (hlj : l ≠ j) :
+    ∏ k, f k ^ ((unitVector l - unitVector j) k) = f l * (f j)⁻¹ := by
   rw [← Finset.prod_subset (Finset.subset_univ {l, j}) (fun k _ hk => by
     simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hk
-    simp [ellRedE, hk.1, hk.2]), Finset.prod_pair hlj]
-  simp [ellRedE, hlj, hlj.symm]
+    simp [unitVector, hk.1, hk.2]), Finset.prod_pair hlj]
+  simp [unitVector, hlj, hlj.symm]
 
 /-- DLMF 19.29.15 (Carlson 1999, (2.19)): `b_j I(𝐞_l - 𝐞_j) = d_{lj} I(-𝐞_j) + b_l I(𝟎)`
 (proved). DLMF leaves convergence implicit; here `I(-𝐞_j)` and `I(𝟎)` are assumed integrable
 and `a_j + b_j t ≠ 0` on `(y, x)` (no other hypothesis, so also for `h` and `n` arbitrary). -/
 @[dlmf 19.29.E15]
-theorem ellRedI_partial_fraction {h n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (j l : Fin n)
+theorem SymmetricReduction.reductionIntegral_partial_fraction {h n : ℕ} (a b : Fin n → ℂ)
+    {x y : ℝ} (j l : Fin n)
     (hj : ∀ t ∈ Ioo y x, a j + b j * t ≠ 0)
-    (hi1 : IntegrableOn (ellRedIntegrand h a b (-ellRedE j)) (Ioo y x))
-    (hi0 : IntegrableOn (ellRedIntegrand h a b 0) (Ioo y x)) :
-    b j * ellRedI h a b x y (ellRedE l - ellRedE j) =
-      ellRedDet a b l j * ellRedI h a b x y (-ellRedE j) + b l * ellRedI h a b x y 0 := by
-  simp only [ellRedI]
+    (hi1 : IntegrableOn (reductionIntegrand h a b (-unitVector j)) (Ioo y x))
+    (hi0 : IntegrableOn (reductionIntegrand h a b 0) (Ioo y x)) :
+    b j * reductionIntegral h a b x y (unitVector l - unitVector j) =
+      factorDet a b l j * reductionIntegral h a b x y (-unitVector j) + b l *
+          reductionIntegral h a b x y 0 := by
+  simp only [reductionIntegral]
   rw [← integral_const_mul, ← integral_const_mul, ← integral_const_mul,
     ← integral_add (hi1.const_mul _) (hi0.const_mul _)]
   refine setIntegral_congr_fun measurableSet_Ioo fun t ht => ?_
   have hf := hj t ht
-  simp only [ellRedIntegrand]
+  simp only [reductionIntegrand]
   have h0 : ∏ k, (a k + b k * t) ^ ((0 : Fin n → ℤ) k) = 1 := by simp
-  have h1 : ∏ k, (a k + b k * t) ^ ((-ellRedE j) k) = (a j + b j * t)⁻¹ := by
-    rw [show (-ellRedE j : Fin n → ℤ) = Pi.single j (-1) by
-      funext k; simp [ellRedE, Pi.single_apply]; split_ifs <;> simp]
+  have h1 : ∏ k, (a k + b k * t) ^ ((-unitVector j) k) = (a j + b j * t)⁻¹ := by
+    rw [show (-unitVector j : Fin n → ℤ) = Pi.single j (-1) by
+      funext k; simp [unitVector, Pi.single_apply]; split_ifs <;> simp]
     rw [prod_pow_single (fun k => a k + b k * t), zpow_neg_one]
   rw [h0, h1]
   by_cases hlj : l = j
   · subst hlj
-    simp [ellRedDet]
-  · rw [prod_pow_ellRedE_sub (fun k => a k + b k * t) hlj]
+    simp [factorDet]
+  · rw [prod_pow_unitVector_sub (fun k => a k + b k * t) hlj]
     set P := ∏ α ∈ Finset.univ.filter (fun α : Fin n => (α : ℕ) < h), (a α + b α * t) ^ (-1 / 2 : ℂ)
-    have key : b j * (a l + b l * t) = ellRedDet a b l j + b l * (a j + b j * t) := by
-      simp only [ellRedDet]; ring
+    have key : b j * (a l + b l * t) = factorDet a b l j + b l * (a j + b j * t) := by
+      simp only [factorDet]; ring
     have hinv : (a j + b j * t) * (a j + b j * t)⁻¹ = 1 := mul_inv_cancel₀ hf
     linear_combination (P * (a j + b j * t)⁻¹) * key + (b l * P) * hinv
 
@@ -679,22 +697,23 @@ theorem ellRedI_partial_fraction {h n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (
 (proved), assuming each `I(r 𝐞_j)`, `0 ≤ r ≤ q`, integrable (convergence is implicit in
 DLMF); no other hypothesis. -/
 @[dlmf 19.29.E18]
-theorem ellRedI_recurrence {h n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (j l : Fin n) (q : ℕ)
+theorem SymmetricReduction.reductionIntegral_recurrence {h n : ℕ} (a b : Fin n → ℂ) {x y : ℝ}
+    (j l : Fin n) (q : ℕ)
     (hi : ∀ r ∈ Finset.range (q + 1),
-      IntegrableOn (ellRedIntegrand h a b ((r : ℤ) • ellRedE j)) (Ioo y x)) :
-    b j ^ q * ellRedI h a b x y ((q : ℤ) • ellRedE l) =
-      ∑ r ∈ Finset.range (q + 1), (q.choose r : ℂ) * b l ^ r * ellRedDet a b l j ^ (q - r) *
-        ellRedI h a b x y ((r : ℤ) • ellRedE j) := by
-  simp only [ellRedI]
+      IntegrableOn (reductionIntegrand h a b ((r : ℤ) • unitVector j)) (Ioo y x)) :
+    b j ^ q * reductionIntegral h a b x y ((q : ℤ) • unitVector l) =
+      ∑ r ∈ Finset.range (q + 1), (q.choose r : ℂ) * b l ^ r * factorDet a b l j ^ (q - r) *
+        reductionIntegral h a b x y ((r : ℤ) • unitVector j) := by
+  simp only [reductionIntegral]
   rw [← integral_const_mul]
   simp_rw [← integral_const_mul]
   rw [← integral_finsetSum _ (fun r hr => (hi r hr).const_mul _)]
   refine setIntegral_congr_fun measurableSet_Ioo fun t _ => ?_
-  have hsm : ∀ (i : Fin n) (p : ℕ), ((p : ℤ) • ellRedE i : Fin n → ℤ) = Pi.single i (p : ℤ) := by
-    intro i p; funext k; simp [ellRedE, Pi.single_apply]
-  simp only [ellRedIntegrand, hsm, prod_pow_single (fun k => a k + b k * t), zpow_natCast]
-  have key : b j * (a l + b l * t) = b l * (a j + b j * t) + ellRedDet a b l j := by
-    simp only [ellRedDet]; ring
+  have hsm : ∀ (i : Fin n) (p : ℕ), ((p : ℤ) • unitVector i : Fin n → ℤ) = Pi.single i (p : ℤ) := by
+    intro i p; funext k; simp [unitVector, Pi.single_apply]
+  simp only [reductionIntegrand, hsm, prod_pow_single (fun k => a k + b k * t), zpow_natCast]
+  have key : b j * (a l + b l * t) = b l * (a j + b j * t) + factorDet a b l j := by
+    simp only [factorDet]; ring
   rw [← mul_assoc, mul_comm (b j ^ q), mul_assoc, ← mul_pow, key, add_pow, Finset.mul_sum]
   refine Finset.sum_congr rfl fun r _ => ?_
   rw [mul_pow]
@@ -702,7 +721,7 @@ theorem ellRedI_recurrence {h n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (j l : 
 
 /-- DLMF 19.29.17: `s(t) = ∏_{α=1}^{3} √(a_α + b_α t)` (cubic case). -/
 @[dlmf 19.29.E17]
-def ellRedS3 {n : ℕ} (a b : Fin n → ℂ) (t : ℝ) : ℂ :=
+def SymmetricReduction.cubicProduct {n : ℕ} (a b : Fin n → ℂ) (t : ℝ) : ℂ :=
   ∏ α ∈ Finset.univ.filter (fun α : Fin n => (α : ℕ) < 3), (a α + b α * t) ^ (1 / 2 : ℂ)
 
 /-- DLMF 19.29.16 (Carlson 1999, (3.5)), cubic case `h = 3`: for a permutation `α, β, γ` of
@@ -710,20 +729,22 @@ the three radicand indices,
 `b_β b_γ I(𝐞_α) = d_{αβ} d_{αγ} I(-𝐞_α) + 2 b_α (s(x)/(a_α + b_α x) - s(y)/(a_α + b_α y))`,
 with the three radicands in `ℂ \ (-∞, 0]` on `[y, x]`. -/
 @[dlmf 19.29.E16]
-theorem ellRedI_cubic_recurrence {n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (hxy : y < x)
+theorem SymmetricReduction.reductionIntegral_cubic_recurrence {n : ℕ} (a b : Fin n → ℂ)
+    {x y : ℝ} (hxy : y < x)
     {α β γ : Fin n} (hα : (α : ℕ) < 3) (hβ : (β : ℕ) < 3) (hγ : (γ : ℕ) < 3)
     (hαβ : α ≠ β) (hαγ : α ≠ γ) (hβγ : β ≠ γ)
     (hslit : ∀ ε : Fin n, (ε : ℕ) < 3 → ∀ t ∈ Icc y x, a ε + b ε * t ∈ slitPlane) :
-    b β * b γ * ellRedI 3 a b x y (ellRedE α) =
-      ellRedDet a b α β * ellRedDet a b α γ * ellRedI 3 a b x y (-ellRedE α) +
-        2 * b α * (ellRedS3 a b x / (a α + b α * x) - ellRedS3 a b y / (a α + b α * y)) := by
+    b β * b γ * reductionIntegral 3 a b x y (unitVector α) =
+      factorDet a b α β * factorDet a b α γ * reductionIntegral 3 a b x y (-unitVector α) +
+        2 * b α * (cubicProduct a b x / (a α + b α * x) - cubicProduct a b y /
+            (a α + b α * y)) := by
   -- the three radicands and their square roots
-  set r : Fin n → ℝ → ℂ := fun ε t => ellRedRoot a b t ε with hr_def
+  set r : Fin n → ℝ → ℂ := fun ε t => linearRoot a b t ε with hr_def
   have hf : ∀ ε : Fin n, (ε : ℕ) < 3 → ∀ t ∈ Icc y x, a ε + b ε * t ∈ slitPlane := hslit
   have hne : ∀ ε : Fin n, (ε : ℕ) < 3 → ∀ t ∈ Icc y x, r ε t ≠ 0 := by
     intro ε hε t ht h
     exact slitPlane_ne_zero (hf ε hε t ht) ((cpow_eq_zero_iff _ _).mp h).1
-  have hsq : ∀ ε : Fin n, ∀ t : ℝ, r ε t ^ 2 = a ε + b ε * t := fun ε t => ellRedRoot_sq a b t ε
+  have hsq : ∀ ε : Fin n, ∀ t : ℝ, r ε t ^ 2 = a ε + b ε * t := fun ε t => linearRoot_sq a b t ε
   have hderiv : ∀ ε : Fin n, (ε : ℕ) < 3 → ∀ t ∈ Icc y x,
       HasDerivAt (r ε) (b ε / (2 * r ε t)) t := by
     intro ε hε t ht
@@ -733,7 +754,7 @@ theorem ellRedI_cubic_recurrence {n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (hx
       t hlin
     have h0 := hne ε hε t ht
     refine h.congr_deriv ?_
-    simp only [hr_def, ellRedRoot] at h0 ⊢
+    simp only [hr_def, linearRoot] at h0 ⊢
     rw [show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num, cpow_neg]
     field_simp
   have hcont : ∀ ε : Fin n, (ε : ℕ) < 3 → ContinuousOn (r ε) (Icc y x) :=
@@ -784,21 +805,21 @@ theorem ellRedI_cubic_recurrence {n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (hx
       (fun t ht => hGd t (by rwa [uIcc_of_le hxy.le] at ht))
       ((hDc.mono (by rw [uIcc_of_le hxy.le])).intervalIntegrable)
   -- the two integrands on `(y, x)`
-  have hI1 : ∀ t ∈ Ioo y x, ellRedIntegrand 3 a b (ellRedE α) t =
+  have hI1 : ∀ t ∈ Ioo y x, reductionIntegrand 3 a b (unitVector α) t =
       r α t ^ 2 * ((r α t)⁻¹ * (r β t)⁻¹ * (r γ t)⁻¹) := by
     intro t ht
-    simp only [ellRedIntegrand, ellRedE, prod_pow_single (fun k => a k + b k * t), zpow_one]
+    simp only [reductionIntegrand, unitVector, prod_pow_single (fun k => a k + b k * t), zpow_one]
     rw [hprod, hsq α t]
-    simp only [hr_def, ellRedRoot, inv_cpow_half_eq_cpow_neg_half]
+    simp only [hr_def, linearRoot, inv_cpow_half_eq_cpow_neg_half]
     ring
-  have hI2 : ∀ t ∈ Ioo y x, ellRedIntegrand 3 a b (-ellRedE α) t =
+  have hI2 : ∀ t ∈ Ioo y x, reductionIntegrand 3 a b (-unitVector α) t =
       (r α t ^ 2)⁻¹ * ((r α t)⁻¹ * (r β t)⁻¹ * (r γ t)⁻¹) := by
     intro t ht
-    have hneg : (-ellRedE α : Fin n → ℤ) = Pi.single α (-1) := by
-      funext k; simp [ellRedE, Pi.single_apply]; split_ifs <;> simp
-    simp only [ellRedIntegrand, hneg, prod_pow_single (fun k => a k + b k * t), zpow_neg_one]
+    have hneg : (-unitVector α : Fin n → ℤ) = Pi.single α (-1) := by
+      funext k; simp [unitVector, Pi.single_apply]; split_ifs <;> simp
+    simp only [reductionIntegrand, hneg, prod_pow_single (fun k => a k + b k * t), zpow_neg_one]
     rw [hprod, hsq α t]
-    simp only [hr_def, ellRedRoot, inv_cpow_half_eq_cpow_neg_half]
+    simp only [hr_def, linearRoot, inv_cpow_half_eq_cpow_neg_half]
     ring
   have hinv : ∀ ε : Fin n, (ε : ℕ) < 3 → ContinuousOn (fun t => (r ε t)⁻¹) (Icc y x) :=
     fun ε hε => (hcont ε hε).inv₀ fun t ht => hne ε hε t ht
@@ -809,21 +830,21 @@ theorem ellRedI_cubic_recurrence {n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (hx
       (Icc y x) :=
     (((hcont α hα).pow 2).inv₀ fun t ht => pow_ne_zero 2 (hne α hα t ht)).mul
       (((hinv α hα).mul (hinv β hβ)).mul (hinv γ hγ))
-  have hint1 : IntegrableOn (ellRedIntegrand 3 a b (ellRedE α)) (Ioo y x) :=
+  have hint1 : IntegrableOn (reductionIntegrand 3 a b (unitVector α)) (Ioo y x) :=
     (hcI1.integrableOn_Icc.mono_set Ioo_subset_Icc_self).congr_fun
       (fun t ht => (hI1 t ht).symm) measurableSet_Ioo
-  have hint2 : IntegrableOn (ellRedIntegrand 3 a b (-ellRedE α)) (Ioo y x) :=
+  have hint2 : IntegrableOn (reductionIntegrand 3 a b (-unitVector α)) (Ioo y x) :=
     (hcI2.integrableOn_Icc.mono_set Ioo_subset_Icc_self).congr_fun
       (fun t ht => (hI2 t ht).symm) measurableSet_Ioo
   -- the pointwise identity
-  have hpt : ∀ t ∈ Ioo y x, b β * b γ * ellRedIntegrand 3 a b (ellRedE α) t -
-      ellRedDet a b α β * ellRedDet a b α γ * ellRedIntegrand 3 a b (-ellRedE α) t =
+  have hpt : ∀ t ∈ Ioo y x, b β * b γ * reductionIntegrand 3 a b (unitVector α) t -
+      factorDet a b α β * factorDet a b α γ * reductionIntegrand 3 a b (-unitVector α) t =
         2 * b α * D t := by
     intro t ht
     have ht' := Ioo_subset_Icc_self ht
     have h1 := hne α hα t ht'; have h2 := hne β hβ t ht'; have h3 := hne γ hγ t ht'
     rw [hI1 t ht, hI2 t ht]
-    simp only [hD, ellRedDet]
+    simp only [hD, factorDet]
     have sα := hsq α t; have sβ := hsq β t; have sγ := hsq γ t
     field_simp
     linear_combination (a α * b β * b γ + b α * b β * b γ * t - b α * b β * r γ t ^ 2 -
@@ -833,16 +854,16 @@ theorem ellRedI_cubic_recurrence {n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (hx
   -- assemble
   have hxα : a α + b α * x ≠ 0 := slitPlane_ne_zero (hf α hα x ⟨hxy.le, le_rfl⟩)
   have hyα : a α + b α * y ≠ 0 := slitPlane_ne_zero (hf α hα y ⟨le_rfl, hxy.le⟩)
-  have hGs : ∀ t ∈ Icc y x, ellRedS3 a b t / (a α + b α * t) = G t := by
+  have hGs : ∀ t ∈ Icc y x, cubicProduct a b t / (a α + b α * t) = G t := by
     intro t ht
     have h1 := hne α hα t ht
     rw [div_eq_iff (slitPlane_ne_zero (hf α hα t ht))]
     conv_rhs => rw [← hsq α t]
-    simp only [ellRedS3, hprod, hG]
-    simp only [hr_def, ellRedRoot] at h1 ⊢
+    simp only [cubicProduct, hprod, hG]
+    simp only [hr_def, linearRoot] at h1 ⊢
     field_simp
   rw [hGs x ⟨hxy.le, le_rfl⟩, hGs y ⟨le_rfl, hxy.le⟩, ← hFTC, ← integral_const_mul,
-    ← sub_eq_iff_eq_add', ellRedI, ellRedI, ← integral_const_mul,
+    ← sub_eq_iff_eq_add', reductionIntegral, reductionIntegral, ← integral_const_mul,
     ← integral_const_mul, ← integral_sub (hint1.const_mul _) (hint2.const_mul _)]
   exact setIntegral_congr_fun measurableSet_Ioo fun t ht => hpt t ht
 
@@ -855,19 +876,21 @@ theorem SymmetricReduction.quadratic_first {a₁ b₁ a₂ b₂ x y : ℝ} (hy :
     (hQ : ∀ t ∈ Ioo y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2)
     (hint : IntegrableOn (fun t => 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))) (Ioo y x)) :
     ((∫ t in Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
-      symEllIntRF (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
-        (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) :=
+      symEllIntRF (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+        (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
+            (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) :=
   integral_quadratic_product_eq_symEllIntRF hy hxy hQ
 
 /-- DLMF 19.29.19 for `0 < y` and both `Q_j` positive on `[y, x]` (proved): Carlson's
 Exercise 9.8-3, `Carlson.integral_quadratic_mul_quadratic` of `lean-codes`, in DLMF's notation;
-the arguments of `R_F` are positive (`ellRedQuadU_args_pos`). -/
+the arguments of `R_F` are positive (`quadraticPairU_args_pos`). -/
 @[dlmf 19.29.E19]
 theorem SymmetricReduction.quadratic_first_of_pos {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 < y) (hxy : y < x)
     (hQ : ∀ t ∈ Icc y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2) :
     ((∫ t in Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
-      symEllIntRF (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
-        (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) :=
+      symEllIntRF (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+        (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
+            (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) :=
   integral_quadratic_product_eq_symEllIntRF_of_pos hy hxy hQ
 
 /-- DLMF 19.29.20: with the hypotheses of (19.29.19) and `U ≠ 0`,
@@ -876,11 +899,12 @@ theorem SymmetricReduction.quadratic_first_of_pos {a₁ b₁ a₂ b₂ x y : ℝ
 theorem SymmetricReduction.quadratic_second {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 ≤ y) (hxy : y < x)
     (hQ : ∀ t ∈ Ioo y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2)
     (hint : IntegrableOn (fun t => t ^ 2 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))) (Ioo y x))
-    (hU : ellRedQuadU a₁ b₁ a₂ b₂ x y ≠ 0) :
+    (hU : quadraticPairU a₁ b₁ a₂ b₂ x y ≠ 0) :
     ((∫ t in Ioo y x, t ^ 2 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
-      1 / 3 * a₁ * a₂ * symEllIntRD (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
-          (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) +
-        ((x * y / ellRedQuadU a₁ b₁ a₂ b₂ x y : ℝ) : ℂ) := by
+      1 / 3 * a₁ * a₂ * symEllIntRD (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+          (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
+              (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) +
+        ((x * y / quadraticPairU a₁ b₁ a₂ b₂ x y : ℝ) : ℂ) := by
   sorry
 
 /-- DLMF 19.29.21: with the hypotheses of (19.29.19), `U ≠ 0` and `y > 0` (needed for
@@ -891,11 +915,12 @@ theorem SymmetricReduction.quadratic_third {a₁ b₁ a₂ b₂ x y : ℝ} (hy :
     (hQ : ∀ t ∈ Ioo y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2)
     (hint : IntegrableOn (fun t => 1 / (t ^ 2 * √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))))
       (Ioo y x))
-    (hU : ellRedQuadU a₁ b₁ a₂ b₂ x y ≠ 0) :
+    (hU : quadraticPairU a₁ b₁ a₂ b₂ x y ≠ 0) :
     ((∫ t in Ioo y x, 1 / (t ^ 2 * √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))) : ℝ) : ℂ) =
-      1 / 3 * b₁ * b₂ * symEllIntRD (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
-          (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) +
-        (((x * y * ellRedQuadU a₁ b₁ a₂ b₂ x y)⁻¹ : ℝ) : ℂ) := by
+      1 / 3 * b₁ * b₂ * symEllIntRD (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+          (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
+              (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) +
+        (((x * y * quadraticPairU a₁ b₁ a₂ b₂ x y)⁻¹ : ℝ) : ℂ) := by
   sorry
 
 /-- DLMF 19.29.iii.p1: when both square roots in (19.29.22) vanish (`U = 0`), the integrals of
@@ -935,19 +960,19 @@ theorem SymmetricReduction.quadratic_infinite {a b y : ℝ} (hb : 0 ≤ b) (hby 
 /-- DLMF 19.29.25: `S_j = (√Q_j(x) + √Q_j(y))² - h_j (x - y)²` for
 `Q_j(t) = f_j + g_j t + h_j t²`. -/
 @[dlmf 19.29.E25]
-def ellRedQuadS (f g h x y : ℝ) : ℝ :=
+def SymmetricReduction.quadraticS (f g h x y : ℝ) : ℝ :=
   (√(f + g * x + h * x ^ 2) + √(f + g * y + h * y ^ 2)) ^ 2 - h * (x - y) ^ 2
 
 /-- DLMF 19.29.25: `D_{jl} = 2 f_j h_l + 2 h_j f_l - g_j g_l`. -/
 @[dlmf 19.29.E25]
-def ellRedQuadD (f₁ g₁ h₁ f₂ g₂ h₂ : ℝ) : ℝ := 2 * f₁ * h₂ + 2 * h₁ * f₂ - g₁ * g₂
+def SymmetricReduction.quadraticD (f₁ g₁ h₁ f₂ g₂ h₂ : ℝ) : ℝ := 2 * f₁ * h₂ + 2 * h₁ * f₂ - g₁ * g₂
 
 /-- DLMF 19.29.24 with 19.29.25: the right side `4 R_F(U, U + D₁₂ + V, U + D₁₂ - V)` with
 `(x - y)² U = S₁ S₂` and `V = √(D₁₂² - D₁₁ D₂₂)` (principal complex square root: the
 variables of `R_F` are real and nonnegative unless both quadratics have real zeros and those of
 `Q₁` interlace those of `Q₂`, 19.29.iii.p2). -/
 @[dlmf 19.29.E24, dlmf 19.29.E25]
-def ellRedQuadRF (S₁ S₂ D₁₁ D₁₂ D₂₂ x y : ℝ) : ℂ :=
+def SymmetricReduction.quadraticRF (S₁ S₂ D₁₁ D₁₂ D₂₂ x y : ℝ) : ℂ :=
   4 * symEllIntRF (S₁ * S₂ / (x - y) ^ 2 : ℝ)
     ((S₁ * S₂ / (x - y) ^ 2 + D₁₂ : ℝ) + ((D₁₂ ^ 2 - D₁₁ * D₂₂ : ℝ) : ℂ) ^ (1 / 2 : ℂ))
     ((S₁ * S₂ / (x - y) ^ 2 + D₁₂ : ℝ) - ((D₁₂ ^ 2 - D₁₁ * D₂₂ : ℝ) : ℂ) ^ (1 / 2 : ℂ))
@@ -961,9 +986,9 @@ theorem SymmetricReduction.two_quadratics {f₁ g₁ h₁ f₂ g₂ h₂ x y : �
       (fun t => 1 / √((f₁ + g₁ * t + h₁ * t ^ 2) * (f₂ + g₂ * t + h₂ * t ^ 2))) (Ioo y x)) :
     ((∫ t in Ioo y x,
         1 / √((f₁ + g₁ * t + h₁ * t ^ 2) * (f₂ + g₂ * t + h₂ * t ^ 2)) : ℝ) : ℂ) =
-      ellRedQuadRF (ellRedQuadS f₁ g₁ h₁ x y) (ellRedQuadS f₂ g₂ h₂ x y)
-        (ellRedQuadD f₁ g₁ h₁ f₁ g₁ h₁) (ellRedQuadD f₁ g₁ h₁ f₂ g₂ h₂)
-        (ellRedQuadD f₂ g₂ h₂ f₂ g₂ h₂) x y := by
+      quadraticRF (quadraticS f₁ g₁ h₁ x y) (quadraticS f₂ g₂ h₂ x y)
+        (quadraticD f₁ g₁ h₁ f₁ g₁ h₁) (quadraticD f₁ g₁ h₁ f₂ g₂ h₂)
+        (quadraticD f₂ g₂ h₂ f₂ g₂ h₂) x y := by
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `0 ≤ c + d * x ∧ 0 ≤ c + d * y`. -/
@@ -981,13 +1006,13 @@ private lemma linear_endpoints_nonneg {c d x y : ℝ} (hxy : y < x)
 `(y, x)` (hence on `[y, x]` nonnegative), then `S₁ = (X₁ Y₂ + Y₁ X₂)²`; the algebraic part
 (proved): this agrees with `S₁` of (19.29.25) for `Q₁ = a₁a₂ + (a₁b₂ + a₂b₁) t + b₁b₂ t²`. -/
 @[dlmf 19.29.E26]
-theorem ellRedQuadS_linear_mul {a₁ b₁ a₂ b₂ x y : ℝ} (hx₁ : 0 ≤ a₁ + b₁ * x)
+theorem SymmetricReduction.quadraticS_linear_mul {a₁ b₁ a₂ b₂ x y : ℝ} (hx₁ : 0 ≤ a₁ + b₁ * x)
     (hx₂ : 0 ≤ a₂ + b₂ * x) (hy₁ : 0 ≤ a₁ + b₁ * y) (hy₂ : 0 ≤ a₂ + b₂ * y) :
-    ellRedQuadS (a₁ * a₂) (a₁ * b₂ + a₂ * b₁) (b₁ * b₂) x y =
+    quadraticS (a₁ * a₂) (a₁ * b₂ + a₂ * b₁) (b₁ * b₂) x y =
       (√(a₁ + b₁ * x) * √(a₂ + b₂ * y) + √(a₁ + b₁ * y) * √(a₂ + b₂ * x)) ^ 2 := by
   have e : ∀ t : ℝ, a₁ * a₂ + (a₁ * b₂ + a₂ * b₁) * t + b₁ * b₂ * t ^ 2 =
       (a₁ + b₁ * t) * (a₂ + b₂ * t) := fun t => by ring
-  simp only [ellRedQuadS, e, Real.sqrt_mul hx₁, Real.sqrt_mul hy₁]
+  simp only [quadraticS, e, Real.sqrt_mul hx₁, Real.sqrt_mul hy₁]
   have s1 := Real.sq_sqrt hx₁; have s2 := Real.sq_sqrt hx₂
   have s3 := Real.sq_sqrt hy₁; have s4 := Real.sq_sqrt hy₂
   linear_combination (√(a₂ + b₂ * x) - √(a₂ + b₂ * y)) * (√(a₂ + b₂ * x) + √(a₂ + b₂ * y)) * s1 +
@@ -1005,10 +1030,10 @@ theorem SymmetricReduction.linear_linear_quadratic {a₁ b₁ a₂ b₂ f₂ g�
       (fun t => 1 / √((a₁ + b₁ * t) * (a₂ + b₂ * t) * (f₂ + g₂ * t + h₂ * t ^ 2))) (Ioo y x)) :
     ((∫ t in Ioo y x,
         1 / √((a₁ + b₁ * t) * (a₂ + b₂ * t) * (f₂ + g₂ * t + h₂ * t ^ 2)) : ℝ) : ℂ) =
-      ellRedQuadRF ((√(a₁ + b₁ * x) * √(a₂ + b₂ * y) + √(a₁ + b₁ * y) * √(a₂ + b₂ * x)) ^ 2)
-        (ellRedQuadS f₂ g₂ h₂ x y) (-(a₁ * b₂ - a₂ * b₁) ^ 2)
+      quadraticRF ((√(a₁ + b₁ * x) * √(a₂ + b₂ * y) + √(a₁ + b₁ * y) * √(a₂ + b₂ * x)) ^ 2)
+        (quadraticS f₂ g₂ h₂ x y) (-(a₁ * b₂ - a₂ * b₁) ^ 2)
         (2 * a₁ * a₂ * h₂ + 2 * b₁ * b₂ * f₂ - (a₁ * b₂ + a₂ * b₁) * g₂)
-        (ellRedQuadD f₂ g₂ h₂ f₂ g₂ h₂) x y := by
+        (quadraticD f₂ g₂ h₂ f₂ g₂ h₂) x y := by
   have e : ∀ t : ℝ, a₁ * a₂ + (a₁ * b₂ + a₂ * b₁) * t + b₁ * b₂ * t ^ 2 =
       (a₁ + b₁ * t) * (a₂ + b₂ * t) := fun t => by ring
   obtain ⟨hx₁, hy₁⟩ := linear_endpoints_nonneg hxy fun t ht => (hQ t ht).1
@@ -1018,11 +1043,11 @@ theorem SymmetricReduction.linear_linear_quadratic {a₁ b₁ a₂ b₂ f₂ g�
     (f₂ := f₂) (g₂ := g₂) (h₂ := h₂) hxy
     (fun t ht => ⟨by rw [e]; exact mul_pos (hQ t ht).1 (hQ t ht).2.1, (hQ t ht).2.2⟩)
     (by simpa only [e] using hint)
-  rw [ellRedQuadS_linear_mul hx₁ hx₂ hy₁ hy₂] at H
-  have eD11 : ellRedQuadD (a₁ * a₂) (a₁ * b₂ + a₂ * b₁) (b₁ * b₂) (a₁ * a₂) (a₁ * b₂ + a₂ * b₁)
-      (b₁ * b₂) = -(a₁ * b₂ - a₂ * b₁) ^ 2 := by unfold ellRedQuadD; ring
-  have eD12 : ellRedQuadD (a₁ * a₂) (a₁ * b₂ + a₂ * b₁) (b₁ * b₂) f₂ g₂ h₂ =
-      2 * a₁ * a₂ * h₂ + 2 * b₁ * b₂ * f₂ - (a₁ * b₂ + a₂ * b₁) * g₂ := by unfold ellRedQuadD; ring
+  rw [quadraticS_linear_mul hx₁ hx₂ hy₁ hy₂] at H
+  have eD11 : quadraticD (a₁ * a₂) (a₁ * b₂ + a₂ * b₁) (b₁ * b₂) (a₁ * a₂) (a₁ * b₂ + a₂ * b₁)
+      (b₁ * b₂) = -(a₁ * b₂ - a₂ * b₁) ^ 2 := by unfold quadraticD; ring
+  have eD12 : quadraticD (a₁ * a₂) (a₁ * b₂ + a₂ * b₁) (b₁ * b₂) f₂ g₂ h₂ =
+      2 * a₁ * a₂ * h₂ + 2 * b₁ * b₂ * f₂ - (a₁ * b₂ + a₂ * b₁) * g₂ := by unfold quadraticD; ring
   rw [eD11, eD12] at H
   rw [← H]
   simp only [e]
@@ -1035,8 +1060,8 @@ theorem SymmetricReduction.linear_quadratic {a₁ b₁ f₂ g₂ h₂ x y : ℝ}
     (hQ : ∀ t ∈ Ioo y x, 0 < a₁ + b₁ * t ∧ 0 < f₂ + g₂ * t + h₂ * t ^ 2)
     (hint : IntegrableOn (fun t => 1 / √((a₁ + b₁ * t) * (f₂ + g₂ * t + h₂ * t ^ 2))) (Ioo y x)) :
     ((∫ t in Ioo y x, 1 / √((a₁ + b₁ * t) * (f₂ + g₂ * t + h₂ * t ^ 2)) : ℝ) : ℂ) =
-      ellRedQuadRF ((√(a₁ + b₁ * x) + √(a₁ + b₁ * y)) ^ 2) (ellRedQuadS f₂ g₂ h₂ x y) (-b₁ ^ 2)
-        (2 * a₁ * h₂ - b₁ * g₂) (ellRedQuadD f₂ g₂ h₂ f₂ g₂ h₂) x y := by
+      quadraticRF ((√(a₁ + b₁ * x) + √(a₁ + b₁ * y)) ^ 2) (quadraticS f₂ g₂ h₂ x y) (-b₁ ^ 2)
+        (2 * a₁ * h₂ - b₁ * g₂) (quadraticD f₂ g₂ h₂ f₂ g₂ h₂) x y := by
   have H := SymmetricReduction.linear_linear_quadratic (a₁ := a₁) (b₁ := b₁) (a₂ := 1) (b₂ := 0)
     (f₂ := f₂) (g₂ := g₂) (h₂ := h₂) hxy
     (fun t ht => ⟨(hQ t ht).1, by norm_num, (hQ t ht).2⟩) (by simpa using hint)
@@ -1068,7 +1093,7 @@ theorem SymmetricReduction.cube_difference {a x y : ℝ} (ha : 0 ≤ a) (hay : a
 
 /-- DLMF 19.29.31: `(x - y)² U = (√Q(x²) + √Q(y²))² - h (x² - y²)²`, `Q(s) = f + g s + h s²`. -/
 @[dlmf 19.29.E31]
-def ellRedBiquadU (f g h x y : ℝ) : ℝ :=
+def SymmetricReduction.biquadraticU (f g h x y : ℝ) : ℝ :=
   ((√(f + g * x ^ 2 + h * x ^ 4) + √(f + g * y ^ 2 + h * y ^ 4)) ^ 2 -
     h * (x ^ 2 - y ^ 2) ^ 2) / (x - y) ^ 2
 
@@ -1082,9 +1107,9 @@ theorem SymmetricReduction.biquadratic {f g h x y : ℝ} (hxy : y < x)
       AntitoneOn (fun t => f + g * t ^ 2 + h * t ^ 4) (Ioo y x))
     (hint : IntegrableOn (fun t => 1 / √(f + g * t ^ 2 + h * t ^ 4)) (Ioo y x)) :
     ((∫ t in Ioo y x, 1 / √(f + g * t ^ 2 + h * t ^ 4) : ℝ) : ℂ) =
-      2 * symEllIntRF (ellRedBiquadU f g h x y : ℝ)
-        ((ellRedBiquadU f g h x y - g : ℝ) + 2 * ((f * h : ℝ) : ℂ) ^ (1 / 2 : ℂ))
-        ((ellRedBiquadU f g h x y - g : ℝ) - 2 * ((f * h : ℝ) : ℂ) ^ (1 / 2 : ℂ)) := by
+      2 * symEllIntRF (biquadraticU f g h x y : ℝ)
+        ((biquadraticU f g h x y - g : ℝ) + 2 * ((f * h : ℝ) : ℂ) ^ (1 / 2 : ℂ))
+        ((biquadraticU f g h x y - g : ℝ) - 2 * ((f * h : ℝ) : ℂ) ^ (1 / 2 : ℂ)) := by
   sorry
 
 /-- DLMF 19.29.32 with 19.29.33: for `0 ≤ y < x` (DLMF: `0 ≤ y ≤ x`; `x = y` is excluded since
@@ -1129,7 +1154,7 @@ theorem SymmetricReduction.quartic_plus {a x y : ℝ} (hy : 0 ≤ y) (hxy : y < 
     rw [Carlson.ofReal_cpow_half (by positivity), show a ^ 4 * 1 = (a ^ 2) ^ 2 by ring,
       Real.sqrt_sq (sq_nonneg a)]
   have e' : ∀ t : ℝ, a ^ 4 + 0 * t ^ 2 + t ^ 4 = t ^ 4 + a ^ 4 := fun t => by ring
-  simp only [ellRedBiquadU, hs, one_mul, sub_zero, e'] at H
+  simp only [biquadraticU, hs, one_mul, sub_zero, e'] at H
   rw [H]
   push_cast
   ring_nf

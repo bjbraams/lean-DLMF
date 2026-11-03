@@ -919,7 +919,7 @@ theorem LaplaceIntegrals.finiteMoment_one (x : ℝ) (n : ℕ) :
 
 /-- The Legendre recurrence `(k+2) Q_{k+2} = (2k+3) x Q_{k+1} - (k+1) Q_k` on the principal sheet.
 -/
-theorem LaplaceIntegrals.legendreQ_recurrence (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem LaplaceIntegrals.legendreQ_nat_recurrence (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     ((k:ℂ)+2) * legendreQ ((k+2:ℕ):ℂ) z =
       (2*k+3)*z*legendreQ ((k+1:ℕ):ℂ) z - ((k:ℂ)+1) * legendreQ k z := by
   have hrec := olverQ_recurrence_3 (k:ℂ) 0 hz
@@ -961,7 +961,7 @@ theorem LaplaceIntegrals.legendreQ_finiteMoment {x : ℝ} (hx : 1 < x) (n : ℕ)
       simp [legendreQPoly, DLMF.OrthogonalPolynomials.legendrePolyP_one]
     | succ k ih =>
       refine ⟨ih.2, ?_⟩
-      have h := LaplaceIntegrals.legendreQ_recurrence k hx1
+      have h := LaplaceIntegrals.legendreQ_nat_recurrence k hx1
       have hM := LaplaceIntegrals.finiteMoment_degree hx k
       have hk2 : (k:ℂ)+2 ≠ 0 := by norm_cast
       rw [ih.1, ih.2] at h
@@ -1129,7 +1129,7 @@ theorem LaplaceIntegrals.legendreQ_intervalMoment {x : ℝ} (hx : 1 < x) (n : �
       field_simp
     | succ k ih =>
       refine ⟨ih.2, ?_⟩
-      have h := LaplaceIntegrals.legendreQ_recurrence k hx1
+      have h := LaplaceIntegrals.legendreQ_nat_recurrence k hx1
       have hA := LaplaceIntegrals.intervalMoment_degree hx k
       have hk2 : (k:ℂ)+2 ≠ 0 := by norm_cast
       rw [ih.1, ih.2] at h

@@ -6,6 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.Legendre
+public import DLMF.EllipticIntegrals.Expansions
+public import DLMF.EllipticIntegrals.LegendreIdentities
+public import DLMF.Hypergeometric.Basic.RealPochhammer
 public import DLMF.Elementary.Trigonometric
 public import Carlson.Elliptic.Standard
 public import Carlson.Elliptic.CapacityBound
@@ -77,11 +80,12 @@ excluded, except the analytical statement that Ramanujan's approximation is from
 @[expose] public noncomputable section
 
 open Complex Set Filter MeasureTheory
-open scoped Real Topology
+open scoped Real Topology NNReal
 
 namespace DLMF.EllipticIntegrals
 
 open DLMF.JacobiElliptic
+open DLMF.Hypergeometric (poch_ofReal hasSum_poch_div_factorial)
 
 /-! ### Real-variable helpers -/
 
@@ -521,6 +525,217 @@ theorem pi_mul_cCompEllIntKk_div_bounds {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
         Real.log (2 * (1 + Real.sqrt (1 - k ^ 2)) / k) := by
   sorry
 
+/-- The real binomial series `∑ (β)ₘ/m! xᵐ = (1 - x)^{-β}` for `0 ≤ x < 1`. -/
+private lemma hasSum_ascPochhammer_binomial (β : ℝ) {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
+    HasSum (fun m : ℕ => (ascPochhammer ℝ m).eval β / Nat.factorial m * x ^ m)
+      ((1 - x) ^ (-β)) := by
+  have hz : ‖(x : ℂ)‖ < 1 := by rwa [norm_real, Real.norm_of_nonneg hx0]
+  have h := Complex.hasSum_re (hasSum_poch_div_factorial (β := (β : ℂ)) hz)
+  rw [← ofReal_one, ← ofReal_sub, ← ofReal_neg, ← ofReal_cpow (by linarith), ofReal_re] at h
+  refine h.congr_fun fun m => ?_
+  rw [poch_ofReal, ← ofReal_natCast, ← ofReal_div, ← ofReal_pow, ← ofReal_mul, ofReal_re]
+
+/-- Coefficientwise comparison of two power series with nonnegative ratios. -/
+private lemma le_of_ratio_le {u v r s : ℕ → ℝ} (hu : ∀ m, u (m + 1) = u m * r m)
+    (hv : ∀ m, v (m + 1) = v m * s m) (h0 : u 0 = v 0) (hu0 : 0 < u 0)
+    (hr : ∀ m, 0 ≤ r m) (hrs : ∀ m, r m ≤ s m) (hr0 : 0 < r 0) (hr1 : r 1 < s 1) :
+    (∀ m, u m ≤ v m) ∧ u 2 < v 2 := by
+  have key : ∀ m, 0 ≤ u m ∧ u m ≤ v m := by
+    intro m
+    induction m with
+    | zero => exact ⟨hu0.le, h0.le⟩
+    | succ m ih =>
+      rw [hu, hv]
+      have hs : 0 ≤ s m := (hr m).trans (hrs m)
+      exact ⟨mul_nonneg ih.1 (hr m), (mul_le_mul_of_nonneg_left (hrs m) ih.1).trans
+        (mul_le_mul_of_nonneg_right ih.2 hs)⟩
+  refine ⟨fun m => (key m).2, ?_⟩
+  have hu1 : 0 < u 1 := by rw [hu]; exact mul_pos hu0 hr0
+  rw [hu, hv]
+  exact (mul_lt_mul_of_pos_left hr1 hu1).trans_le
+    (mul_le_mul_of_nonneg_right (key 1).2 ((hr 1).trans (hrs 1)))
+
+/-- Comparison of sums of power series with coefficientwise comparable coefficients. -/
+private lemma hasSum_lt_of_coeff {u v : ℕ → ℝ} {x A B : ℝ} (hx : 0 < x)
+    (hA : HasSum (fun m => u m * x ^ m) A) (hB : HasSum (fun m => v m * x ^ m) B)
+    (h : ∀ m, u m ≤ v m) (h2 : u 2 < v 2) : A < B :=
+  hasSum_lt (f := fun m => u m * x ^ m) (g := fun m => v m * x ^ m) (i := 2)
+    (fun m => mul_le_mul_of_nonneg_right (h m) (by positivity))
+    (mul_lt_mul_of_pos_right h2 (by positivity)) hA hB
+
+/-- `(3/2)ₘ = 2 (m + 1/2) (1/2)ₘ`. -/
+private lemma ascPochhammer_three_halves (m : ℕ) :
+    (ascPochhammer ℝ m).eval (3 / 2 : ℝ) = 2 * (1 / 2 + m) * (ascPochhammer ℝ m).eval (1 / 2) := by
+  induction m with
+  | zero => simp
+  | succ m ih =>
+    rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval, ih]
+    push_cast; ring
+
+/-- The ratio of consecutive coefficients of the binomial series of `(1 - cx)^{-β}`. -/
+private lemma binomial_coeff_succ (β c : ℝ) (m : ℕ) :
+    (ascPochhammer ℝ (m + 1)).eval β / (Nat.factorial (m + 1) : ℕ) * c ^ (m + 1) =
+      (ascPochhammer ℝ m).eval β / (Nat.factorial m : ℕ) * c ^ m * ((β + m) / (m + 1) * c) := by
+  rw [ascPochhammer_succ_eval, Nat.factorial_succ]
+  push_cast
+  field_simp
+  ring
+
+/-- The coefficients `(a)ₘ (1/2)ₘ/((m+1)! m!)` and their ratio. -/
+private lemma hg2_coeff_succ (a : ℝ) (m : ℕ) :
+    (ascPochhammer ℝ (m + 1)).eval a * (ascPochhammer ℝ (m + 1)).eval (1 / 2) /
+        ((Nat.factorial (m + 1 + 1) : ℕ) * (Nat.factorial (m + 1) : ℕ)) =
+      (ascPochhammer ℝ m).eval a * (ascPochhammer ℝ m).eval (1 / 2) /
+        ((Nat.factorial (m + 1) : ℕ) * (Nat.factorial m : ℕ)) *
+        ((a + m) * (1 / 2 + m) / ((m + 2) * (m + 1))) := by
+  rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval, Nat.factorial_succ (m + 1),
+    Nat.factorial_succ m]
+  push_cast
+  field_simp
+  ring
+
+/-- `(4/π) D(k) = ∑ₘ (3/2)ₘ (1/2)ₘ/((m+1)! m!) k^{2m}` for real `0 < k < 1`. -/
+private lemma hasSum_compEllIntDk_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
+    HasSum (fun m : ℕ => (ascPochhammer ℝ m).eval (3 / 2 : ℝ) *
+        (ascPochhammer ℝ m).eval (1 / 2 : ℝ) /
+        ((Nat.factorial (m + 1) : ℕ) * (Nat.factorial m : ℕ)) * (k ^ 2) ^ m)
+      (4 / (π * k ^ 2) * ((compEllIntKk k).re - (compEllIntEk k).re)) := by
+  have hk : ‖(k : ℂ)‖ < 1 := by rwa [norm_real, Real.norm_of_nonneg hk0.le]
+  have h := (Complex.hasSum_re (compEllIntDk_hasSum hk).1).mul_left (4 / π)
+  have hk2 : 1 - (k : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_one, ← ofReal_sub]
+    exact ofReal_mem_slitPlane.mpr (by nlinarith)
+  rw [compEllIntDk_eq (ofReal_ne_zero.mpr hk0.ne') hk2, ← ofReal_pow, div_ofReal_re,
+    sub_re] at h
+  convert h using 1
+  · funext m
+    rw [show (3 / 2 : ℂ) = ((3 / 2 : ℝ) : ℂ) by push_cast; ring,
+      show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, poch_ofReal, poch_ofReal,
+      pow_mul, ← ofReal_pow, ← ofReal_pow]
+    simp only [← ofReal_natCast, ← ofReal_mul, ← ofReal_div, ← ofReal_ofNat]
+    rw [ofReal_re]
+    have := Real.pi_pos
+    field_simp
+  · have := Real.pi_pos
+    field_simp
+
+/-- `(4/(πk²))(E(k) - k'² K(k)) = ∑ₘ (1/2)ₘ (1/2)ₘ/((m+1)! m!) k^{2m}` for real `0 < k < 1`. -/
+private lemma hasSum_compEllIntEk_sub_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
+    HasSum (fun m : ℕ => (ascPochhammer ℝ m).eval (1 / 2 : ℝ) *
+        (ascPochhammer ℝ m).eval (1 / 2 : ℝ) /
+        ((Nat.factorial (m + 1) : ℕ) * (Nat.factorial m : ℕ)) * (k ^ 2) ^ m)
+      (4 / (π * k ^ 2) * ((compEllIntEk k).re - (1 - k ^ 2) * (compEllIntKk k).re)) := by
+  have hk : ‖(k : ℂ)‖ < 1 := by rwa [norm_real, Real.norm_of_nonneg hk0.le]
+  have hK := (Complex.hasSum_re (compEllIntKk_hasSum hk).1).mul_left (4 / π)
+  have hD := hasSum_compEllIntDk_real hk0 hk1
+  convert hK.sub hD using 1
+  · funext m
+    rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, poch_ofReal, pow_mul,
+      ← ofReal_pow, ← ofReal_pow]
+    simp only [← ofReal_natCast, ← ofReal_mul, ← ofReal_div, ← ofReal_ofNat]
+    rw [ofReal_re, ascPochhammer_three_halves, Nat.factorial_succ]
+    have := Real.pi_pos
+    push_cast
+    field_simp
+    ring
+  · have := Real.pi_pos
+    field_simp
+    ring
+
+/-- `E(k) - k'² K(k) < k²` for real `0 < k < 1`. -/
+private lemma compEllIntEk_sub_mul_compEllIntKk_lt {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
+    (compEllIntEk k).re - (1 - k ^ 2) * (compEllIntKk k).re < k ^ 2 := by
+  have hk2 : k ^ 2 < 1 := by nlinarith
+  have hkm : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; ring
+  rw [compEllIntEk_eq_ofReal hkm hk2.le, compEllIntKk_eq_ofReal hkm hk2.le, ofReal_re, ofReal_re,
+    DLMF.Elliptic.Real.compEllIntEm, DLMF.Elliptic.Real.compEllIntKm,
+    ← intervalIntegral.integral_const_mul]
+  have hcE := DLMF.Elliptic.continuous_one_sub_mul_sin_sq_rpow hk2 (1 / 2)
+  have hcK := DLMF.Elliptic.continuous_one_sub_mul_sin_sq_rpow hk2 (-(1 / 2))
+  rw [← intervalIntegral.integral_sub (hcE.intervalIntegrable _ _)
+    ((hcK.const_mul _).intervalIntegrable _ _)]
+  have hcos : ∫ θ in (0 : ℝ)..(π / 2), k ^ 2 * Real.cos θ = k ^ 2 := by
+    rw [intervalIntegral.integral_const_mul, integral_cos]; simp
+  conv_rhs => rw [← hcos]
+  have hpt : ∀ θ, 0 ≤ Real.cos θ →
+      (1 - k ^ 2 * Real.sin θ ^ 2) ^ (1 / 2 : ℝ) -
+          (1 - k ^ 2) * (1 - k ^ 2 * Real.sin θ ^ 2) ^ (-(1 / 2) : ℝ) =
+        k ^ 2 * Real.cos θ ^ 2 / Real.sqrt (1 - k ^ 2 * Real.sin θ ^ 2) ∧
+      Real.cos θ ≤ Real.sqrt (1 - k ^ 2 * Real.sin θ ^ 2) := by
+    intro θ hc
+    have hs := Real.sin_sq_add_cos_sq θ
+    have hu : 0 < 1 - k ^ 2 * Real.sin θ ^ 2 := by nlinarith [Real.sin_sq_le_one θ]
+    have hsq := Real.sqrt_pos.mpr hu
+    refine ⟨?_, ?_⟩
+    · rw [Real.rpow_neg hu.le, ← Real.sqrt_eq_rpow]
+      have h2 := Real.sq_sqrt hu.le
+      field_simp
+      linear_combination (-(k ^ 2) * hs + h2)
+    · rw [Real.le_sqrt hc hu.le]; nlinarith [sq_nonneg (Real.sin θ)]
+  have hle : ∀ θ, 0 ≤ Real.cos θ →
+      k ^ 2 * Real.cos θ ^ 2 / Real.sqrt (1 - k ^ 2 * Real.sin θ ^ 2) ≤ k ^ 2 * Real.cos θ := by
+    intro θ hc
+    rcases hc.eq_or_lt with h | h
+    · rw [← h]; simp
+    have h2 := (hpt θ hc).2
+    rw [div_le_iff₀ (h.trans_le h2)]
+    have := mul_le_mul_of_nonneg_left h2 (mul_nonneg (sq_nonneg k) hc)
+    nlinarith
+  refine intervalIntegral.integral_lt_integral_of_continuousOn_of_le_of_exists_lt
+    (by positivity) ((hcE.sub (hcK.const_mul _)).continuousOn) (by fun_prop) ?_ ?_
+  · intro θ hθ
+    have hc : 0 ≤ Real.cos θ :=
+      Real.cos_nonneg_of_mem_Icc ⟨by linarith [hθ.1, Real.pi_pos], hθ.2⟩
+    rw [(hpt θ hc).1]; exact hle θ hc
+  · refine ⟨π / 4, ⟨by positivity, by linarith [Real.pi_pos]⟩, ?_⟩
+    have hc : 0 < Real.cos (π / 4) :=
+      Real.cos_pos_of_mem_Ioo ⟨by linarith [Real.pi_pos], by linarith [Real.pi_pos]⟩
+    have hsn : 0 < Real.sin (π / 4) := Real.sin_pos_of_pos_of_lt_pi (by positivity)
+      (by linarith [Real.pi_pos])
+    rw [(hpt _ hc.le).1]
+    have hs := Real.sin_sq_add_cos_sq (π / 4)
+    have hu : 0 < 1 - k ^ 2 * Real.sin (π / 4) ^ 2 := by
+      nlinarith [Real.sin_sq_le_one (π / 4)]
+    have hlt : Real.cos (π / 4) < Real.sqrt (1 - k ^ 2 * Real.sin (π / 4) ^ 2) := by
+      rw [Real.lt_sqrt hc.le]; nlinarith [mul_pos hsn hsn]
+    rw [div_lt_iff₀ (hc.trans hlt)]
+    have := mul_lt_mul_of_pos_left hlt (mul_pos (pow_pos hk0 2) hc)
+    nlinarith
+
+/-- The binomial series `(1 - cx)^{-β}` in powers of `x`. -/
+private lemma hasSum_binomial_mul (β c : ℝ) {x : ℝ} (hcx0 : 0 ≤ c * x) (hcx : c * x < 1) :
+    HasSum (fun m : ℕ => (ascPochhammer ℝ m).eval β / (Nat.factorial m : ℕ) * c ^ m * x ^ m)
+      ((1 - c * x) ^ (-β)) :=
+  (hasSum_ascPochhammer_binomial β hcx0 hcx).congr_fun fun m => by rw [mul_pow]; ring
+
+/-- A power series with coefficient ratios above those of `(1 - cx)^{-β}` exceeds it. -/
+private lemma binomial_lt_of_ratio {β c x A : ℝ} {w ρ : ℕ → ℝ} (hβ : 0 < β) (hc : 0 < c)
+    (hx : 0 < x) (hcx : c * x < 1) (hA : HasSum (fun m => w m * x ^ m) A)
+    (hw : ∀ m, w (m + 1) = w m * ρ m) (hw0 : w 0 = 1)
+    (hrs : ∀ m : ℕ, (β + m) / (m + 1) * c ≤ ρ m) (hr1 : (β + 1) / (1 + 1) * c < ρ 1) :
+    (1 - c * x) ^ (-β) < A := by
+  obtain ⟨h, h2⟩ := le_of_ratio_le
+    (u := fun m => (ascPochhammer ℝ m).eval β / (Nat.factorial m : ℕ) * c ^ m)
+    (v := w) (r := fun m : ℕ => (β + m) / (m + 1) * c) (s := ρ)
+    (fun m => binomial_coeff_succ β c m) hw (by simp [hw0]) (by simp)
+    (fun m => by positivity) hrs (by simp; positivity) (by simpa using hr1)
+  exact hasSum_lt_of_coeff hx (hasSum_binomial_mul β c (by positivity) hcx) hA h h2
+
+/-- A power series with coefficient ratios below those of `(1 - x)^{-β}` is below it. -/
+private lemma lt_binomial_of_ratio {β x A : ℝ} {w ρ : ℕ → ℝ} (hx : 0 < x) (hx1 : x < 1)
+    (hA : HasSum (fun m => w m * x ^ m) A)
+    (hw : ∀ m, w (m + 1) = w m * ρ m) (hw0 : w 0 = 1) (hr : ∀ m, 0 ≤ ρ m) (hr0 : 0 < ρ 0)
+    (hrs : ∀ m : ℕ, ρ m ≤ (β + m) / (m + 1) * 1) (hr1 : ρ 1 < (β + 1) / (1 + 1) * 1) :
+    A < (1 - x) ^ (-β) := by
+  obtain ⟨h, h2⟩ := le_of_ratio_le (u := w)
+    (v := fun m => (ascPochhammer ℝ m).eval β / (Nat.factorial m : ℕ) * 1 ^ m)
+    (r := ρ) (s := fun m : ℕ => (β + m) / (m + 1) * 1)
+    hw (fun m => binomial_coeff_succ β 1 m) (by simp [hw0]) (by simp [hw0])
+    hr hrs hr0 (by simpa using hr1)
+  have hB := hasSum_binomial_mul β 1 (x := x) (by linarith) (by linarith)
+  rw [one_mul] at hB
+  exact hasSum_lt_of_coeff hx hA hB h h2
+
 /-- DLMF 19.9.6: `(1 - ¾k²)^{-1/2} < (4/(πk²))(K(k) - E(k)) < k'^{-3/4}` for `0 < k < 1`. -/
 @[dlmf 19.9.E6]
 theorem compEllIntKk_sub_compEllIntEk_bounds {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
@@ -528,7 +743,24 @@ theorem compEllIntKk_sub_compEllIntEk_bounds {k : ℝ} (hk0 : 0 < k) (hk1 : k < 
         4 / (π * k ^ 2) * ((compEllIntKk k).re - (compEllIntEk k).re) ∧
       4 / (π * k ^ 2) * ((compEllIntKk k).re - (compEllIntEk k).re) <
         Real.sqrt (1 - k ^ 2) ^ (-(3 / 4) : ℝ) := by
-  sorry
+  have hx : 0 < k ^ 2 := by positivity
+  have hx1 : k ^ 2 < 1 := by nlinarith
+  have hA := hasSum_compEllIntDk_real hk0 hk1
+  have hw := hg2_coeff_succ (3 / 2)
+  constructor
+  · refine binomial_lt_of_ratio (by norm_num) (by norm_num) hx (by linarith) hA hw (by simp)
+      (fun m => ?_) (by norm_num)
+    have hm : (0 : ℝ) ≤ m := m.cast_nonneg
+    rw [div_mul_eq_mul_div, div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith [mul_nonneg (mul_nonneg hm (by linarith : (0 : ℝ) ≤ 1 / 2 + m))
+      (by linarith : (0 : ℝ) ≤ m + 1)]
+  · rw [Real.sqrt_eq_rpow, ← Real.rpow_mul (by linarith)]
+    rw [show (1 / 2 : ℝ) * -(3 / 4) = -(3 / 8) by norm_num]
+    refine lt_binomial_of_ratio hx hx1 hA hw (by simp) (fun m => by positivity)
+      (by norm_num) (fun m => ?_) (by norm_num)
+    have hm : (0 : ℝ) ≤ m := m.cast_nonneg
+    rw [mul_one, div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith
 
 /-- DLMF 19.9.7: `(1 - ¼k²)^{-1/2} < (4/(πk²))(E(k) - k'² K(k)) < min(k'^{-1/4}, 4/π)` for
 `0 < k < 1`. -/
@@ -538,14 +770,127 @@ theorem compEllIntEk_sub_mul_compEllIntKk_bounds {k : ℝ} (hk0 : 0 < k) (hk1 : 
         4 / (π * k ^ 2) * ((compEllIntEk k).re - (1 - k ^ 2) * (compEllIntKk k).re) ∧
       4 / (π * k ^ 2) * ((compEllIntEk k).re - (1 - k ^ 2) * (compEllIntKk k).re) <
         min (Real.sqrt (1 - k ^ 2) ^ (-(1 / 4) : ℝ)) (4 / π) := by
-  sorry
+  have hx : 0 < k ^ 2 := by positivity
+  have hx1 : k ^ 2 < 1 := by nlinarith
+  have hA := hasSum_compEllIntEk_sub_real hk0 hk1
+  have hw := hg2_coeff_succ (1 / 2)
+  refine ⟨?_, lt_min ?_ ?_⟩
+  · refine binomial_lt_of_ratio (by norm_num) (by norm_num) hx (by linarith) hA hw (by simp)
+      (fun m => ?_) (by norm_num)
+    have hm : (0 : ℝ) ≤ m := m.cast_nonneg
+    rw [div_mul_eq_mul_div, div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith
+  · rw [Real.sqrt_eq_rpow, ← Real.rpow_mul (by linarith)]
+    rw [show (1 / 2 : ℝ) * -(1 / 4) = -(1 / 8) by norm_num]
+    refine lt_binomial_of_ratio hx hx1 hA hw (by simp) (fun m => by positivity)
+      (by norm_num) (fun m => ?_) (by norm_num)
+    have hm : (0 : ℝ) ≤ m := m.cast_nonneg
+    rw [mul_one, div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith
+  · have h := compEllIntEk_sub_mul_compEllIntKk_lt hk0 hk1
+    have := Real.pi_pos
+    rw [div_mul_eq_mul_div, div_lt_div_iff₀ (by positivity) this]
+    nlinarith
+
+/-- Facts on the AGM sequence started at `(1, g₀)` with `0 < g₀ ≤ 1`. -/
+private lemma agmSeqG_pos_and_le_agmSeqA {g₀ : ℝ≥0} (hg : 0 < g₀) (h1 : g₀ ≤ 1) (n : ℕ) :
+    0 < (agmSeqG 1 g₀ n : ℝ) ∧ (agmSeqG 1 g₀ n : ℝ) ≤ agmSeqA 1 g₀ n := by
+  induction n with
+  | zero => exact ⟨by exact_mod_cast hg, by exact_mod_cast h1⟩
+  | succ n ih =>
+    refine ⟨?_, ?_⟩
+    · rw [(agmSeq_succ 1 g₀ n).2, Real.coe_sqrt]
+      exact Real.sqrt_pos.mpr (by push_cast; nlinarith [ih.1, ih.2])
+    · exact_mod_cast NNReal.agmSequences_fst_le_snd n n
+
+/-- `cₙ² = aₙ² - gₙ²` along the AGM sequence started at `(1, g₀)`. -/
+private lemma agmSeqC_sq_eq {g₀ : ℝ≥0} (hg : 0 < g₀) (h1 : g₀ ≤ 1) (n : ℕ) :
+    agmSeqC 1 g₀ n ^ 2 = (agmSeqA 1 g₀ n : ℝ) ^ 2 - (agmSeqG 1 g₀ n : ℝ) ^ 2 := by
+  obtain ⟨h0, hle⟩ := agmSeqG_pos_and_le_agmSeqA hg h1 n
+  rw [agmSeqC, Real.sq_sqrt (by nlinarith)]
+
+/-- `4 c_{n+1}² ≤ cₙ²` along the AGM sequence started at `(1, g₀)`. -/
+private lemma four_mul_agmSeqC_sq_succ_le {g₀ : ℝ≥0} (hg : 0 < g₀) (h1 : g₀ ≤ 1) (n : ℕ) :
+    4 * agmSeqC 1 g₀ (n + 1) ^ 2 ≤ agmSeqC 1 g₀ n ^ 2 := by
+  obtain ⟨h0, hle⟩ := agmSeqG_pos_and_le_agmSeqA hg h1 n
+  rw [(agmSeqC_succ hg h1 n).1, agmSeqC_sq_eq hg h1 n]
+  nlinarith
 
 /-- DLMF 19.9.8: `k' < E(k)/K(k) < ((1 + k')/2)²` for `0 < k < 1`. -/
 @[dlmf 19.9.E8]
 theorem compEllIntEk_div_compEllIntKk_bounds {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
     Real.sqrt (1 - k ^ 2) < (compEllIntEk k).re / (compEllIntKk k).re ∧
       (compEllIntEk k).re / (compEllIntKk k).re < ((1 + Real.sqrt (1 - k ^ 2)) / 2) ^ 2 := by
-  sorry
+  have hk2 : k ^ 2 < 1 := by nlinarith
+  have hkm : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; ring
+  obtain ⟨-, hE⟩ := compEllIntEk_eq_agm hkm hk2
+  have hK := compEllIntKk_eq_pi_div_agm hkm hk2
+  set g₀ : ℝ≥0 := NNReal.sqrt (1 - k ^ 2).toNNReal with hg₀def
+  have hg₀ : (g₀ : ℝ) = Real.sqrt (1 - k ^ 2) := by
+    simp [g₀, Real.coe_sqrt, Real.coe_toNNReal _ (by linarith : (0 : ℝ) ≤ 1 - k ^ 2)]
+  have hgpos : 0 < g₀ := by
+    rw [← NNReal.coe_pos, hg₀]; exact Real.sqrt_pos.mpr (by linarith)
+  have hg1' : (g₀ : ℝ) < 1 := by
+    rw [hg₀, Real.sqrt_lt' one_pos]; nlinarith
+  have hg1 : g₀ ≤ 1 := by rw [← NNReal.coe_le_coe]; exact_mod_cast hg1'.le
+  have hM : (0 : ℝ) < NNReal.agm 1 g₀ := by exact_mod_cast NNReal.agm_pos one_pos hgpos
+  set c := agmSeqC 1 g₀ with hc
+  set t : ℕ → ℝ := fun n => (2 : ℝ) ^ (n + 1) * c (n + 2) ^ 2 with ht
+  have ht_le : ∀ n, t n ≤ t 0 * (1 / 2) ^ n := by
+    intro n
+    induction n with
+    | zero => simp
+    | succ n ih =>
+      have h := four_mul_agmSeqC_sq_succ_le hgpos hg1 (n + 2)
+      rw [← hc] at h
+      have ih' : (2 : ℝ) ^ (n + 1) * c (n + 2) ^ 2 ≤ t 0 * (1 / 2) ^ n := ih
+      show (2 : ℝ) ^ (n + 1 + 1) * c (n + 1 + 2) ^ 2 ≤ t 0 * (1 / 2) ^ (n + 1)
+      have hp : (0 : ℝ) < 2 ^ (n + 1) := by positivity
+      rw [pow_succ, pow_succ (1 / 2 : ℝ), show n + 1 + 2 = n + 2 + 1 by ring]
+      nlinarith [mul_le_mul_of_nonneg_left h hp.le]
+  have ht0 : ∀ n, 0 ≤ t n := fun n => by positivity
+  have hsum : Summable t :=
+    Summable.of_nonneg_of_le ht0 ht_le ((summable_geometric_two).mul_left _)
+  -- the AGM members at `n = 1`
+  have hA1 : (agmSeqA 1 g₀ 1 : ℝ) = (1 + Real.sqrt (1 - k ^ 2)) / 2 := by
+    rw [(agmSeq_succ 1 g₀ 0).1]; push_cast; simp [agmSeqA, agmSeqG, hg₀]
+  have hc1 : c 1 = (1 - Real.sqrt (1 - k ^ 2)) / 2 := by
+    rw [hc, (agmSeqC_succ hgpos hg1 0).1]; simp [agmSeqA, agmSeqG, hg₀]
+  have hc1pos : 0 < c 1 := by rw [hc1]; rw [hg₀] at hg1'; linarith
+  -- `c₂ > 0` and `4c₂² < c₁²`
+  obtain ⟨hG1, hGA1⟩ := agmSeqG_pos_and_le_agmSeqA hgpos hg1 1
+  have hc2 : c 2 = c 1 ^ 2 / (4 * agmSeqA 1 g₀ 2) := (agmSeqC_succ hgpos hg1 1).2
+  have hA2 : (0 : ℝ) < agmSeqA 1 g₀ 2 := lt_of_lt_of_le (agmSeqG_pos_and_le_agmSeqA hgpos hg1 2).1
+    (agmSeqG_pos_and_le_agmSeqA hgpos hg1 2).2
+  have hc2pos : 0 < c 2 := by rw [hc2]; positivity
+  have hc2' : c 2 = ((agmSeqA 1 g₀ 1 : ℝ) - agmSeqG 1 g₀ 1) / 2 := (agmSeqC_succ hgpos hg1 1).1
+  have hc1sq : c 1 ^ 2 = _ := agmSeqC_sq_eq hgpos hg1 1
+  have h4 : 4 * c 2 ^ 2 < c 1 ^ 2 := by
+    rw [hc1sq, hc2']
+    nlinarith
+  -- bounds on the sum
+  have hSpos : 0 < ∑' n, t n := by
+    have := hsum.tsum_pos ht0 0 (by simp only [ht]; positivity)
+    exact this
+  have hSle : ∑' n, t n ≤ 2 * t 0 := by
+    have := hsum.tsum_le_tsum ht_le ((summable_geometric_two).mul_left _)
+    rw [tsum_mul_left, tsum_geometric_two] at this
+    linarith
+  have ht0' : t 0 = 2 * c 2 ^ 2 := by simp [ht]
+  -- the ratio
+  have hratio : (compEllIntEk k).re / (compEllIntKk k).re =
+      (agmSeqA 1 g₀ 1 : ℝ) ^ 2 - ∑' n, t n := by
+    have hKre : (compEllIntKk k).re = π / (2 * (NNReal.agm 1 g₀ : ℝ)) := by
+      rw [hK]; norm_cast
+    have : π / (2 * (NNReal.agm 1 g₀ : ℝ)) ≠ 0 := by positivity
+    rw [hE, re_mul_ofReal, hKre]
+    field_simp
+  rw [hratio, hA1]
+  have hs := Real.sqrt_nonneg (1 - k ^ 2)
+  rw [hc1] at h4
+  constructor
+  · nlinarith
+  · linarith
 
 /-- The perimeter `L(a, b)` of an ellipse with semiaxes `a, b` (DLMF §19.9(i)): the arc length
 `∫₀^{2π} √(a² sin²t + b² cos²t) dt` of `t ↦ (a cos t, b sin t)`. -/

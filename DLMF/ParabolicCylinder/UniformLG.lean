@@ -770,7 +770,8 @@ theorem CylinderLiouvilleGreen.bound_coeff (s : ℕ) {c : ℝ} (hc : 1 < c) : �
   exact this
 
 /-- `A_0 = 1`. -/
-theorem CylinderLiouvilleGreen.coeff_zero (t : ℝ) : CylinderLiouvilleGreen.coeff 0 t = 1 := by
+theorem CylinderLiouvilleGreen.coeff_zero_eq_one (t : ℝ) :
+    CylinderLiouvilleGreen.coeff 0 t = 1 := by
   simp [CylinderLiouvilleGreen.coeff, pcfOlverU, pcfOlverPair]
 
 /-- `c_0 = 1`. -/
@@ -887,7 +888,7 @@ theorem CylinderLiouvilleGreen.core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 
   have hsmall : (KS + Cε)/u ≤ 1/2 := by rw [div_le_iff₀ hu0]; linarith
   -- bounds on the series and on `S`
   have hser : ∀ t, c ≤ t → |CylinderLiouvilleGreen.coeffSum N u t - 1| ≤ KS/u := fun t ht =>
-    CylinderLiouvilleGreen.abs_sum_sub_one_le hN (CylinderLiouvilleGreen.coeff_zero t)
+    CylinderLiouvilleGreen.abs_sum_sub_one_le hN (CylinderLiouvilleGreen.coeff_zero_eq_one t)
         (fun s => hKA s t ht) hu1
   have hS : |CylinderLiouvilleGreen.limitCoeffSum N u - 1| ≤ KS/u :=
     CylinderLiouvilleGreen.abs_sum_sub_one_le hN CylinderLiouvilleGreen.limitCoeff_zero
@@ -1129,7 +1130,7 @@ theorem CylinderLiouvilleGreen.sum_limitCoeff_eq (N : ℕ) (μ : ℝ) :
   rw [pow_mul]
 
 /-- `‖μ^{-2N}‖ = (μ²)^{-N}` for `μ > 0`. -/
-theorem CylinderLiouvilleGreen.norm_zpow {μ : ℝ} (hμ : 0 < μ) (N : ℕ) :
+theorem CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul {μ : ℝ} (hμ : 0 < μ) (N : ℕ) :
     ‖(μ:ℂ)^(-(2*N:ℤ))‖ = ((μ^2)^N)⁻¹ := by
   rw [norm_zpow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hμ, zpow_neg,
     show (2*N:ℤ) = ((2*N:ℕ):ℤ) by push_cast; ring, zpow_natCast, pow_mul]
@@ -1196,7 +1197,8 @@ theorem pcf_negative_parameter_uniform_U :
     have hh0 : pcfH μ ≠ 0 := by rw [CylinderLiouvilleGreen.pcfH_eq hμ0];
                                 exact_mod_cast (CylinderLiouvilleGreen.normalizer_pos hμ0).ne'
     have hΦ0 : (Φ (μ^2) : ℂ) ≠ 0 := by exact_mod_cast (by linarith : (0:ℝ) < Φ (μ^2)).ne'
-    rw [CylinderLiouvilleGreen.sum_limitCoeff_eq, CylinderLiouvilleGreen.norm_zpow hμ0]
+    rw [CylinderLiouvilleGreen.sum_limitCoeff_eq,
+        CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0]
     have heq : pcfH μ / (Φ (μ^2) : ℂ) / pcfH μ *
         (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) - 1 =
         (((CylinderLiouvilleGreen.limitCoeffSum N (μ^2) - Φ (μ^2)) / Φ (μ^2) : ℝ) : ℂ) := by
@@ -1238,7 +1240,7 @@ theorem pcf_negative_parameter_uniform_U :
         exact_mod_cast (mul_pos (CylinderLiouvilleGreen.amplitude_pos ht1) (Real.exp_pos _)).ne'
       simp only
       rw [CylinderLiouvilleGreen.denominator_eq ht1, CylinderLiouvilleGreen.sum_olverA_eq N μ ht1,
-          CylinderLiouvilleGreen.norm_zpow hμ0]
+          CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0]
       set X := pcfU (-μ^2/2) (μ*t*Real.sqrt 2) *
           (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) /
         (pcfH μ * ((CylinderLiouvilleGreen.amplitude t *
@@ -1290,8 +1292,8 @@ theorem pcf_negative_parameter_uniform_U :
       have hb : (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(1:ℕ):ℤ))) =O[pcfUniformFilter (Ici (1+δ))]
           (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(0:ℕ):ℤ))) := by
         refine IsBigO.of_bound 1 (CylinderLiouvilleGreen.eventually_uniform 1 fun μ hμ t _ => ?_)
-        rw [CylinderLiouvilleGreen.norm_zpow (by linarith),
-            CylinderLiouvilleGreen.norm_zpow (by linarith)]
+        rw [CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul (by linarith),
+            CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul (by linarith)]
         simp only [pow_zero, inv_one, one_mul, pow_one]
         exact inv_le_one_of_one_le₀ (by nlinarith)
       have hc : (fun _ : ℝ × ℝ => (1:ℂ)) =O[pcfUniformFilter (Ici (1+δ))]

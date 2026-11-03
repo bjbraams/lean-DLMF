@@ -20,7 +20,7 @@ and 12.5.8 of `U(a,z)` and the integrals DLMF 12.12.1–12.12.2.
   12.5.2–12.5.3.
 * `CylinderIntegrals.barnesIntegrand`: the Barnes integrand `Γ(t) Γ(1/2 + a - 2t) 2^t z^{2t}`,
   `t = c + iy`, of DLMF 12.5.8.
-* `CylinderIntegrals.sector`: the sector `|arg z| < 3π/4` of DLMF 12.5.8.
+* `CylinderIntegrals.barnesSector`: the sector `|arg z| < 3π/4` of DLMF 12.5.8.
 
 ## Main results
 
@@ -138,7 +138,8 @@ theorem CylinderIntegrals.rpow_bound (q : ℝ) {ε R : ℝ} (hε : 0 < ε) (hR :
       _ ≤ _ := by nlinarith [Real.rpow_nonneg hε.le q, Real.exp_pos (t/2)]
 
 /-- `‖u^p‖ ≤ ‖u‖^{Re p} e^{π |Im p|}`. -/
-theorem CylinderIntegrals.norm_cpow_le (u p : ℂ) : ‖u^p‖ ≤ ‖u‖^p.re * Real.exp (π * |p.im|) := by
+theorem CylinderIntegrals.norm_cpow_le_exp_abs_im (u p : ℂ) : ‖u^p‖ ≤ ‖u‖^p.re *
+    Real.exp (π * |p.im|) := by
   refine (norm_cpow_le u p).trans ?_
   rw [div_eq_mul_inv, ← Real.exp_neg]
   apply mul_le_mul_of_nonneg_left _ (by positivity)
@@ -169,7 +170,7 @@ theorem CylinderIntegrals.laplaceIntegrand_domination {c : ℂ} (p : ℂ) {w₀ 
   rw [norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht, show ((-(t:ℂ))) =
       ((-t:ℝ):ℂ) by push_cast; rfl,
     Complex.norm_exp_ofReal, Real.rpow_one]
-  have hc := CylinderIntegrals.norm_cpow_le (w + 2*t) p
+  have hc := CylinderIntegrals.norm_cpow_le_exp_abs_im (w + 2*t) p
   have e : Real.exp (-t) = Real.exp (-(1/2)*t) * Real.exp (-(t/2)) := by
     rw [← Real.exp_add]; ring_nf
   have hx : ‖w + 2*t‖^p.re * Real.exp (-t) ≤ K * Real.exp (-(1/2)*t) := by
@@ -623,32 +624,33 @@ theorem CylinderIntegrals.barnesIntegrand_real (a : ℂ) {c : ℝ} (hc : 0 < c) 
   field_simp
 
 /-- The sector `|arg z| < 3π/4` (origin excluded) of DLMF 12.5.8. -/
-noncomputable def CylinderIntegrals.sector : Set ℂ :=
+noncomputable def CylinderIntegrals.barnesSector : Set ℂ :=
     slitPlane ∩ (fun z : ℂ => |arg z|) ⁻¹' Iio (3*π/4)
 
 /-- The sector is open. -/
-theorem CylinderIntegrals.isOpen_sector : IsOpen CylinderIntegrals.sector :=
+theorem CylinderIntegrals.isOpen_barnesSector : IsOpen CylinderIntegrals.barnesSector :=
   ContinuousOn.isOpen_inter_preimage (fun _ hz => (continuousAt_arg hz).abs.continuousWithinAt)
     isOpen_slitPlane isOpen_Iio
 
 /-- Membership in the sector. -/
-theorem CylinderIntegrals.mem_sector {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) : z ∈
-    CylinderIntegrals.sector := by
+theorem CylinderIntegrals.mem_barnesSector {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) : z ∈
+    CylinderIntegrals.barnesSector := by
   refine ⟨mem_slitPlane_iff_arg.mpr ⟨fun h => ?_, hz0⟩, hz⟩
   rw [h, abs_of_pos Real.pi_pos] at hz; linarith [Real.pi_pos]
 
 /-- The sector is preconnected (the image of a strip under `exp`). -/
-theorem CylinderIntegrals.isPreconnected_sector : IsPreconnected CylinderIntegrals.sector := by
+theorem CylinderIntegrals.isPreconnected_barnesSector : IsPreconnected
+    CylinderIntegrals.barnesSector := by
   have hS : IsPreconnected (im ⁻¹' Ioo (-(3*π/4)) (3*π/4)) :=
     ((convex_Ioo _ _).linear_preimage imLm).isPreconnected
-  have himg : exp '' (im ⁻¹' Ioo (-(3*π/4)) (3*π/4)) = CylinderIntegrals.sector := by
+  have himg : exp '' (im ⁻¹' Ioo (-(3*π/4)) (3*π/4)) = CylinderIntegrals.barnesSector := by
     ext z
     constructor
     · rintro ⟨w, hw, rfl⟩
       have hw' : -(3*π/4) < w.im ∧ w.im < 3*π/4 := hw
       have hlog : log (exp w) = w := log_exp (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])
       have harg : arg (exp w) = w.im := by rw [← log_im, hlog]
-      exact CylinderIntegrals.mem_sector (exp_ne_zero w) (by rw [harg, abs_lt]; exact hw')
+      exact CylinderIntegrals.mem_barnesSector (exp_ne_zero w) (by rw [harg, abs_lt]; exact hw')
     · rintro ⟨hz, hz'⟩
       have hz0 : z ≠ 0 := slitPlane_ne_zero hz
       refine ⟨log z, ?_, exp_log hz0⟩
@@ -687,9 +689,10 @@ theorem CylinderIntegrals.barnesIntegrand_integrable (a : ℂ) {z : ℂ} (hz0 : 
 theorem CylinderIntegrals.barnesIntegrand_differentiableOn (a : ℂ) {c : ℝ} (hc : 0 < c)
     (hca : 2*c < 1/2 + a.re) :
     DifferentiableOn ℂ (fun z => ∫ y, CylinderIntegrals.barnesIntegrand a z c y)
-        CylinderIntegrals.sector := by
+        CylinderIntegrals.barnesSector := by
   obtain ⟨C, K, hC0, hCK⟩ := CylinderIntegrals.norm_barnesIntegrand_le a hc hca
-  refine Complex.differentiableOn_integral_of_locally_dominated CylinderIntegrals.isOpen_sector
+  refine Complex.differentiableOn_integral_of_locally_dominated
+      CylinderIntegrals.isOpen_barnesSector
     (fun z hz => (CylinderIntegrals.barnesIntegrand_continuous a (slitPlane_ne_zero hz.1) hc
         hca).aestronglyMeasurable)
     ?_ ?_
@@ -706,7 +709,7 @@ theorem CylinderIntegrals.barnesIntegrand_differentiableOn (a : ℂ) {c : ℝ} (
       ((continuousAt_arg hz0.1).abs).eventually_lt continuousAt_const (by simp only [θ]; linarith)
     have hnorm : ∀ᶠ z in 𝓝 z0, ‖z‖ < R :=
       continuous_norm.continuousAt.eventually_lt continuousAt_const (by simp only [R]; linarith)
-    refine ⟨_, (harg.and hnorm).and (CylinderIntegrals.isOpen_sector.mem_nhds hz0),
+    refine ⟨_, (harg.and hnorm).and (CylinderIntegrals.isOpen_barnesSector.mem_nhds hz0),
       fun y => C * R^(2*c) * ((1+|y|)^K * Real.exp (-((3*π/2 - 2*θ)*|y|))), ?_,
       Eventually.of_forall fun y z hz => ?_⟩
     · exact (DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (by simp only [θ]; linarith)
@@ -727,15 +730,15 @@ theorem CylinderIntegrals.barnesIntegrand_integral (a : ℂ) {z : ℂ} (hz0 : z 
     ∫ y, CylinderIntegrals.barnesIntegrand a z c y =
         2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z := by
   have hF := (CylinderIntegrals.barnesIntegrand_differentiableOn a hc hca).analyticOnNhd
-      CylinderIntegrals.isOpen_sector
+      CylinderIntegrals.isOpen_barnesSector
   have hG : AnalyticOnNhd ℂ (fun z => 2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z)
-      CylinderIntegrals.sector := by
-    refine DifferentiableOn.analyticOnNhd (fun z hz => ?_) CylinderIntegrals.isOpen_sector
+      CylinderIntegrals.barnesSector := by
+    refine DifferentiableOn.analyticOnNhd (fun z hz => ?_) CylinderIntegrals.isOpen_barnesSector
     refine DifferentiableAt.differentiableWithinAt ?_
     exact ((differentiableAt_const _).mul ((((differentiableAt_id.pow 2).div_const 4).cexp).mul
       (differentiableAt_id.cpow_const hz.1))).mul ((pcfU_entire a) z)
-  have h1 : (1:ℂ) ∈ CylinderIntegrals.sector :=
-      CylinderIntegrals.mem_sector one_ne_zero (by simp; positivity)
+  have h1 : (1:ℂ) ∈ CylinderIntegrals.barnesSector :=
+      CylinderIntegrals.mem_barnesSector one_ne_zero (by simp; positivity)
   have hfreq : ∃ᶠ w in 𝓝[≠] (1:ℂ), (∫ y, CylinderIntegrals.barnesIntegrand a w c y) =
       2*π*Gamma (1/2+1*a)*(exp (w^2/4)*w^(a+1/2))*pcfU a w := by
     have hmap : Tendsto (fun x : ℝ => (x:ℂ)) (𝓝[≠] (1:ℝ)) (𝓝[≠] (1:ℂ)) := by
@@ -747,7 +750,8 @@ theorem CylinderIntegrals.barnesIntegrand_integral (a : ℂ) {z : ℂ} (hz0 : z 
       filter_upwards [nhdsWithin_le_nhds (lt_mem_nhds (show (0:ℝ) < 1 by norm_num))] with x hx
       exact CylinderIntegrals.barnesIntegrand_real a hc hca hx
     exact hmap.frequently hev.frequently
-  exact hF.eqOn_of_preconnected_of_frequently_eq hG CylinderIntegrals.isPreconnected_sector h1 hfreq
-    (CylinderIntegrals.mem_sector hz0 hz)
+  exact hF.eqOn_of_preconnected_of_frequently_eq hG
+      CylinderIntegrals.isPreconnected_barnesSector h1 hfreq
+    (CylinderIntegrals.mem_barnesSector hz0 hz)
 
 end DLMF.Confluent

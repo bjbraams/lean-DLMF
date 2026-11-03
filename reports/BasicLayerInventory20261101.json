@@ -347,7 +347,7 @@
    "agmPiEps"
   ],
   "DLMF/EllipticIntegrals/Reduction.lean": [
-   "ellRedQuadU"
+   "quadraticPairU"
   ],
   "DLMF/EllipticIntegrals/Symmetric.lean": [
    "symEllIntRConj"
@@ -364,23 +364,23 @@
    "ellAsymH"
   ],
   "DLMF/EllipticIntegrals/SymmetricReduction.lean": [
-   "ellRedRoot",
-   "ellRedDet",
-   "ellRedS",
-   "ellRedU",
-   "ellRedUInf",
-   "ellRedUNegInf",
-   "ellRedU5Sq",
-   "ellRedS5",
-   "ellRedQ5Sq",
-   "ellRedI",
-   "ellRedE",
-   "ellRedBasic",
-   "ellRedS3",
-   "ellRedQuadS",
-   "ellRedQuadD",
-   "ellRedQuadRF",
-   "ellRedBiquadU"
+   "SymmetricReduction.linearRoot",
+   "SymmetricReduction.factorDet",
+   "SymmetricReduction.quarticProduct",
+   "SymmetricReduction.pairU",
+   "SymmetricReduction.pairUAtTop",
+   "SymmetricReduction.pairUAtBot",
+   "SymmetricReduction.pairUFiveSq",
+   "SymmetricReduction.pairSFive",
+   "SymmetricReduction.pairQFiveSq",
+   "SymmetricReduction.reductionIntegral",
+   "SymmetricReduction.unitVector",
+   "SymmetricReduction.basicIndices",
+   "SymmetricReduction.cubicProduct",
+   "SymmetricReduction.quadraticS",
+   "SymmetricReduction.quadraticD",
+   "SymmetricReduction.quadraticRF",
+   "SymmetricReduction.biquadraticU"
   ],
   "DLMF/EllipticIntegrals/SymmetricRelations.lean": [
    "jacobiDeltam",

@@ -794,13 +794,153 @@ theorem not_integrableOn_symEllIntRD_zero_zero {z : ℂ} (hz : z ∈ slitPlane) 
     ¬ IntegrableOn (fun t => (symEllIntS 0 0 z t * ((t : ℂ) + z))⁻¹) (Ioi 0) :=
   not_integrableOn_symEllIntRJ_integrand_zero_zero hz hz
 
+/-- The rescaled integrand `(√(zu + x) √(zu + y) (u + 1)^{3/2})⁻¹` of `√z R_D(x, y, z)`. -/
+private noncomputable def symEllIntRDScaledIntegrand (x y z u : ℝ) : ℝ :=
+  (√(z * u + x) * √(z * u + y) * (√(u + 1) * (u + 1)))⁻¹
+
+/-- `R_D(x, y, z)` for positive real arguments as a real integral. -/
+private lemma symEllIntRD_eq_ofReal_integral {x y z : ℝ} (hx : 0 < x) (hy : 0 < y)
+    (hz : 0 < z) :
+    symEllIntRD x y z = ((3 / 2 * ∫ t in Ioi (0 : ℝ),
+      (√(t + x) * √(t + y) * √(t + z) * (t + z))⁻¹ : ℝ) : ℂ) := by
+  have hneg : ¬ IsNegReal (z : ℂ) := fun h => by simp [IsNegReal] at h; linarith
+  unfold symEllIntRD symEllIntRJ
+  simp only [hneg, ↓reduceIte]
+  rw [ofReal_mul, ← integral_complex_ofReal]
+  push_cast
+  congr 1
+  refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
+  have ht : (0 : ℝ) < t := ht
+  simp only [symEllIntS]
+  rw [show (t : ℂ) + x = ((t + x : ℝ) : ℂ) by push_cast; ring,
+    show (t : ℂ) + y = ((t + y : ℝ) : ℂ) by push_cast; ring,
+    show (t : ℂ) + z = ((t + z : ℝ) : ℂ) by push_cast; ring,
+    Carlson.ofReal_cpow_half (by linarith), Carlson.ofReal_cpow_half (by linarith),
+    Carlson.ofReal_cpow_half (by linarith)]
+
+/-- `√z ∫₀^∞ (√(t+x) √(t+y) √(t+z) (t+z))⁻¹ dt = ∫₀^∞ symEllIntRDScaledIntegrand x y z u du`. -/
+private lemma sqrt_mul_integral_eq {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
+    √z * ∫ t in Ioi (0 : ℝ), (√(t + x) * √(t + y) * √(t + z) * (t + z))⁻¹ =
+      ∫ u in Ioi (0 : ℝ), symEllIntRDScaledIntegrand x y z u := by
+  have h := integral_comp_mul_left_Ioi
+    (fun t : ℝ => (√(t + x) * √(t + y) * √(t + z) * (t + z))⁻¹) 0 hz
+  rw [mul_zero, smul_eq_mul] at h
+  rw [show (∫ t in Ioi (0 : ℝ), (√(t + x) * √(t + y) * √(t + z) * (t + z))⁻¹) =
+      z * ∫ u in Ioi (0 : ℝ), (√(z * u + x) * √(z * u + y) * √(z * u + z) * (z * u + z))⁻¹ by
+    rw [h]; field_simp, ← mul_assoc, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioi fun u hu => ?_
+  have hu : (0 : ℝ) < u := hu
+  simp only [symEllIntRDScaledIntegrand]
+  have e : z * u + z = z * (u + 1) := by ring
+  rw [e, Real.sqrt_mul hz.le]
+  have hs := Real.sqrt_pos.mpr hz
+  have h1 := Real.sqrt_pos.mpr (show 0 < u + 1 by linarith)
+  have h2 := Real.sqrt_pos.mpr (show 0 < z * u + x by positivity)
+  have h3 := Real.sqrt_pos.mpr (show 0 < z * u + y by positivity)
+  field_simp
+
+/-- `∫₀^∞ (√(u + 1)(u + 1))⁻¹ du = 2`. -/
+private lemma integral_inv_sqrt_mul_add_one :
+    ∫ u in Ioi (0 : ℝ), (√(u + 1) * (u + 1))⁻¹ = 2 := by
+  have hd : ∀ u ∈ Ioi (0 : ℝ), HasDerivAt (fun u : ℝ => -2 * (√(u + 1))⁻¹)
+      ((√(u + 1) * (u + 1))⁻¹) u := by
+    intro u hu
+    have hu : (0 : ℝ) < u := hu
+    have hp : 0 < u + 1 := by linarith
+    have hs := Real.sqrt_pos.mpr hp
+    have H := (((hasDerivAt_id u).add_const 1).sqrt hp.ne').inv hs.ne'
+    convert H.const_mul (-2) using 1
+    · rfl
+    · simp only [id]
+      rw [Real.sq_sqrt hp.le]
+      field_simp
+  have hint : IntegrableOn (fun u : ℝ => (√(u + 1) * (u + 1))⁻¹) (Ioi 0) := by
+    have := integrableOn_add_rpow_Ioi_of_lt (a := -(3 / 2)) (c := 0) (m := 1) (by norm_num)
+      (by norm_num)
+    refine this.congr_fun (fun u hu => ?_) measurableSet_Ioi
+    have hu : (0 : ℝ) < u := hu
+    have hp : 0 < u + 1 := by linarith
+    show (u + 1) ^ (-(3 / 2) : ℝ) = _
+    rw [show (-(3 / 2) : ℝ) = -(1 / 2 + 1) by norm_num, Real.rpow_neg hp.le,
+      Real.rpow_add hp, Real.rpow_one, ← Real.sqrt_eq_rpow]
+  have hlim : Tendsto (fun u : ℝ => -2 * (√(u + 1))⁻¹) atTop (𝓝 0) := by
+    have : Tendsto (fun u : ℝ => √(u + 1)) atTop atTop :=
+      Real.tendsto_sqrt_atTop.comp (tendsto_atTop_add_const_right _ 1 tendsto_id)
+    simpa using this.inv_tendsto_atTop.const_mul (-2)
+  have hc : ContinuousWithinAt (fun u : ℝ => -2 * (√(u + 1))⁻¹) (Ici 0) 0 :=
+    (((Real.continuous_sqrt.comp (continuous_id.add continuous_const)).continuousAt.inv₀
+      (by norm_num)).const_mul _).continuousWithinAt
+  rw [integral_Ioi_of_hasDerivAt_of_tendsto hc hd hint hlim]
+  simp
+
+/-- `∫₀^∞ symEllIntRDScaledIntegrand x y z u du → 2/(√x √y)` as `z → 0+`. -/
+private lemma tendsto_integral_symEllIntRDScaledIntegrand {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
+    Tendsto (fun z => ∫ u in Ioi (0 : ℝ), symEllIntRDScaledIntegrand x y z u) (𝓝[>] 0)
+      (𝓝 (2 / (√x * √y))) := by
+  have hsx := Real.sqrt_pos.mpr hx
+  have hsy := Real.sqrt_pos.mpr hy
+  have hint : IntegrableOn (fun u : ℝ => (√(u + 1) * (u + 1))⁻¹) (Ioi 0) := by
+    by_contra h
+    have := integral_inv_sqrt_mul_add_one
+    rw [integral_undef h] at this
+    norm_num at this
+  have hval : ∫ u in Ioi (0 : ℝ), (√x * √y)⁻¹ * (√(u + 1) * (u + 1))⁻¹ = 2 / (√x * √y) := by
+    rw [integral_const_mul, integral_inv_sqrt_mul_add_one]; ring
+  rw [← hval]
+  refine tendsto_integral_filter_of_dominated_convergence
+    (fun u => (√x * √y)⁻¹ * (√(u + 1) * (u + 1))⁻¹) ?_ ?_ (hint.const_mul _) ?_
+  · exact Eventually.of_forall fun z => by
+      unfold symEllIntRDScaledIntegrand; exact (by fun_prop : Measurable _).aestronglyMeasurable
+  · filter_upwards [self_mem_nhdsWithin] with z hz
+    have hz : (0 : ℝ) < z := hz
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu : (0 : ℝ) < u := hu
+    have h1 := Real.sqrt_pos.mpr (show 0 < u + 1 by linarith)
+    have hX : √x ≤ √(z * u + x) := Real.sqrt_le_sqrt (by nlinarith)
+    have hY : √y ≤ √(z * u + y) := Real.sqrt_le_sqrt (by nlinarith)
+    unfold symEllIntRDScaledIntegrand
+    rw [Real.norm_of_nonneg (by positivity), ← mul_inv]
+    gcongr
+  · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu : (0 : ℝ) < u := hu
+    have hc : Tendsto (fun z : ℝ => symEllIntRDScaledIntegrand x y z u) (𝓝 0)
+        (𝓝 (symEllIntRDScaledIntegrand x y 0 u)) := by
+      unfold symEllIntRDScaledIntegrand
+      refine ((Continuous.tendsto (by fun_prop) 0).mul tendsto_const_nhds).inv₀ ?_
+      have h1 := Real.sqrt_pos.mpr (show 0 < u + 1 by linarith)
+      simp only [zero_mul, zero_add]
+      positivity
+    have e : symEllIntRDScaledIntegrand x y 0 u = (√x * √y)⁻¹ * (√(u + 1) * (u + 1))⁻¹ := by
+      simp only [symEllIntRDScaledIntegrand, zero_mul, zero_add, mul_inv]
+    rw [← e]
+    exact hc.mono_left nhdsWithin_le_nhds
+
 /-- DLMF 19.20.19: `R_D(x, y, z) ∼ 3 x^{-1/2} y^{-1/2} z^{-1/2}` as `z/√(xy) → 0`; stated for
 fixed `x, y > 0` and `z → 0+`. -/
 @[dlmf 19.20.E19]
 theorem symEllIntRD_isEquivalent_zero {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
     (fun z : ℝ => symEllIntRD x y z) ~[𝓝[>] 0]
       fun z : ℝ => ((3 * x ^ (-1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ) * z ^ (-1 / 2 : ℝ) : ℝ) : ℂ) := by
-  sorry
+  have hsx := Real.sqrt_pos.mpr hx
+  have hsy := Real.sqrt_pos.mpr hy
+  have hneg : ∀ w : ℝ, 0 < w → w ^ (-1 / 2 : ℝ) = (√w)⁻¹ := fun w hw => by
+    rw [show (-1 / 2 : ℝ) = -(1 / 2) by ring, Real.rpow_neg hw.le, Real.sqrt_eq_rpow]
+  refine isEquivalent_of_tendsto_one ?_
+  have hT := tendsto_integral_symEllIntRDScaledIntegrand hx hy
+  have hR : Tendsto (fun z => ((∫ u in Ioi (0 : ℝ), symEllIntRDScaledIntegrand x y z u) *
+      (√x * √y) / 2 : ℝ)) (𝓝[>] 0) (𝓝 1) := by
+    have := (hT.mul_const (√x * √y)).div_const 2
+    convert this using 2
+    field_simp
+  refine (Complex.continuous_ofReal.tendsto 1 |>.comp hR).congr' ?_ |>.trans (by simp)
+  filter_upwards [self_mem_nhdsWithin] with z hz
+  have hz : (0 : ℝ) < z := hz
+  have hsz := Real.sqrt_pos.mpr hz
+  simp only [Function.comp_apply, Pi.div_apply]
+  rw [symEllIntRD_eq_ofReal_integral hx hy hz, hneg x hx, hneg y hy, hneg z hz,
+    ← sqrt_mul_integral_eq hx hy hz]
+  push_cast
+  field_simp
 
 /-- DLMF 19.20.20: `R_D(x, y, y) = 3/(2(y - x)) (R_C(x, y) - √x/y)`, `x ≠ y`, `y ≠ 0`
 (`x` admissible, `y ∈ ℂ \ (-∞, 0]`). -/

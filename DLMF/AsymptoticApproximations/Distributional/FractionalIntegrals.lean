@@ -404,6 +404,16 @@ theorem stieltjesRemainder_rpowDivOneAddExample (α : ℝ) (n : ℕ) {t : ℝ} (
     field_simp [hden]
     ring
 
+/-- `∫₀^∞ t^{s-1}/(1+t) dt = π/sin(πs)` for `0 < ℜs < 1`. -/
+private lemma integral_cpow_div_one_add {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re < 1) :
+    ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (s - 1) / (1 + (t : ℂ)) = π / Complex.sin (π * s) := by
+  have h := DLMF.Gamma.beta_on_Ioi (a := s) (b := 1 - s)
+  rw [show s + (1 - s) = 1 by ring] at h
+  simp only [Complex.cpow_one] at h
+  rw [h, ← Complex.Gamma_mul_Gamma_one_sub,
+    Complex.Gamma_mul_Gamma_eq_betaIntegral hs0 (by simp; linarith),
+    show s + (1 - s) = 1 by ring, Complex.Gamma_one, one_mul]
+
 /-- DLMF 2.6.51: the Mellin transform of `f(t) = t^{1-α}/(1+t)`, `0 < α < 1`, continues to
 `𝓜f(z) = π/sin(π(z+1-α))`, and at the integers `𝓜f(s) = (-1)^s π/sin(πα)`. -/
 @[dlmf 2.6.E51]
@@ -411,7 +421,52 @@ theorem isMellinContinuation_rpowDivOneAddExample {α : ℝ} (hα0 : 0 < α) (h�
     IsMellinContinuation (rpowDivOneAddExample α) α
         (fun z => π / Complex.sin (π * (z + 1 - α))) ∧
       ∀ s : ℕ, π / Complex.sin (π * ((s : ℂ) + 1 - α)) = (-1 : ℂ) ^ s * (π / Real.sin (π * α)) := by
-  sorry
+  have hsin : ∀ s : ℕ, Complex.sin (π * ((s : ℂ) + 1 - α)) = (-1 : ℂ) ^ s * Real.sin (π * α) := by
+    intro s
+    rw [show (π : ℂ) * ((s : ℂ) + 1 - α) = ((-(π * α) + ((s + 1 : ℕ) : ℝ) * π : ℝ) : ℂ) by
+      push_cast; ring, ← Complex.ofReal_sin, Real.sin_add_nat_mul_pi, Real.sin_neg, pow_succ]
+    push_cast; ring
+  refine ⟨⟨?_, fun z hz0 hzα => ?_⟩, fun s => ?_⟩
+  · intro z ⟨hz0, hzk⟩
+    refine DifferentiableAt.differentiableWithinAt ?_
+    refine (differentiableAt_const _).div (by fun_prop) ?_
+    intro h0
+    rw [Complex.sin_eq_zero_iff] at h0
+    obtain ⟨m, hm⟩ := h0
+    have hz : z = (m : ℂ) - 1 + α := by
+      have hpi : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 Real.pi_ne_zero
+      have := hm; field_simp at this
+      linear_combination this
+    have hre := congrArg Complex.re hz
+    simp at hre
+    have hm1 : (1 : ℤ) ≤ m := by
+      have : (0 : ℝ) < m := by linarith
+      exact_mod_cast this
+    apply hzk (m - 1).toNat
+    rw [hz]
+    have : (((m - 1).toNat : ℕ) : ℂ) = ((m - 1 : ℤ) : ℂ) := by
+      rw [← Int.cast_natCast, Int.toNat_of_nonneg (by omega)]
+    rw [this]; push_cast; ring
+  · have hs0 : 0 < (z + 1 - α).re := by simp; linarith
+    have hs1 : (z + 1 - α).re < 1 := by simp; linarith
+    show _ / _ = _
+    rw [← integral_cpow_div_one_add hs0 hs1]
+    unfold mellin rpowDivOneAddExample
+    refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
+    have ht' : (t : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 ht.ne'
+    rw [smul_eq_mul, Complex.ofReal_div, Complex.ofReal_cpow ht.le,
+      show z + 1 - α - 1 = (z - 1) + ((1 - α : ℝ) : ℂ) by push_cast; ring,
+      Complex.cpow_add _ _ ht']
+    push_cast; ring
+  · rw [hsin s]
+    have h3 : Real.sin (π * α) ≠ 0 := (Real.sin_pos_of_pos_of_lt_pi (by positivity)
+      (by nlinarith [Real.pi_pos])).ne'
+    have : ((-1 : ℂ) ^ s) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
+    have h3' : ((Real.sin (π * α) : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 h3
+    have h1 : ((-1 : ℂ) ^ s) ≠ 0 := pow_ne_zero _ (by norm_num)
+    rw [div_eq_iff (mul_ne_zero h1 h3')]
+    field_simp
+    linear_combination -this
 
 /-- DLMF 2.6.52 (with 2.6.48): for `0 < α < 1`, `μ > 0`, `n ≥ 1` and `x > 0`,
 `I^μ f(x) = ∑_{s<n} (-1)^s Γ(1-s-α)/Γ(μ+1-s-α) x^{μ-s-α}

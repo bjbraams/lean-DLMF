@@ -527,7 +527,97 @@ theorem incEllInt_landen_ascending {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
 
 /-! ### §19.8(iii) Gauss transformation -/
 
-/-- **Admitted.** DLMF 19.8.18–19.8.19 (descending Gauss transformation): for real `0 < k < 1` and
+/-- `((1/s²)^{1/2})` for `s > 0`. -/
+private lemma inv_sq_cpow_half {s : ℝ} (hs : 0 < s) :
+    (((1 / s ^ 2 : ℝ) : ℂ) ^ (1 / 2 : ℂ)) = ((1 / s : ℝ) : ℂ) := by
+  rw [Carlson.ofReal_cpow_half (by positivity), Real.sqrt_div' _ (by positivity),
+    Real.sqrt_one, Real.sqrt_sq hs.le]
+
+/-- `F(φ, k) = sin φ R_F(cos²φ, Δ², 1)` for real `0 < φ < π/2` and `k² sin²φ < 1`. -/
+private lemma incEllIntFk_eq_sin_mul_symEllIntRF {φ k : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2) :
+    incEllIntFk φ k = (Real.sin φ : ℂ) *
+      symEllIntRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1 := by
+  have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ0 (by linarith)
+  rw [incEllIntFk_eq_symEllIntRF' hφ0 hφ1.le]
+  have hsc := Real.sin_sq_add_cos_sq φ
+  have h := symEllIntRF_scale (l := 1 / Real.sin φ ^ 2) (by positivity)
+    ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1
+  rw [inv_sq_cpow_half hs] at h
+  have e1 : (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) =
+      ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) * ((Real.cos φ ^ 2 : ℝ) : ℂ) := by
+    rw [← ofReal_one, ← ofReal_sub, ← ofReal_mul]; congr 1; field_simp; linarith
+  have e2 : (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - (k : ℂ) ^ 2) =
+      ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) * ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) := by
+    rw [← ofReal_pow, ← ofReal_sub, ← ofReal_mul]; congr 1; field_simp
+  rw [mul_one] at h
+  rw [e1, e2, h, ← ofReal_inv, one_div, inv_inv]
+
+/-- `E(φ, k) = (2/sin φ) R_G(cos²φ, Δ², 1) - (cos²φ/sin φ) R_F(cos²φ, Δ², 1) - cos φ Δ/sin φ`
+for real `0 < φ < π/2` and `k² sin²φ < 1`, `Δ = √(1 - k² sin²φ)`. -/
+private lemma incEllIntEk_eq_symEllIntRG_sin {φ k : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2)
+    (hk : k ^ 2 * Real.sin φ ^ 2 < 1) :
+    incEllIntEk φ k =
+      ((2 / Real.sin φ : ℝ) : ℂ) *
+          symEllIntRG ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1 -
+        ((Real.cos φ ^ 2 / Real.sin φ : ℝ) : ℂ) *
+          symEllIntRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1 -
+        ((Real.cos φ * √(1 - k ^ 2 * Real.sin φ ^ 2) / Real.sin φ : ℝ) : ℂ) := by
+  have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ0 (by linarith)
+  have hc : 0 < Real.cos φ := Real.cos_pos_of_mem_Ioo ⟨by linarith, hφ1⟩
+  have hD : 0 < 1 - k ^ 2 * Real.sin φ ^ 2 := by linarith
+  have hsc := Real.sin_sq_add_cos_sq φ
+  have hkc : 1 - (k : ℂ) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_pow, ← ofReal_mul, ← ofReal_one, ← ofReal_sub]
+    exact ofReal_mem_slitPlane.mpr hD
+  rw [incEllIntEk_eq_symEllIntRG hφ0 hφ1.le hkc]
+  have hG := symEllIntRG_scale (l := 1 / Real.sin φ ^ 2) (by positivity)
+    ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1
+  have hF := symEllIntRF_scale (l := 1 / Real.sin φ ^ 2) (by positivity)
+    ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1
+  rw [inv_sq_cpow_half hs, mul_one] at hG hF
+  have e1 : (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) =
+      ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) * ((Real.cos φ ^ 2 : ℝ) : ℂ) := by
+    rw [← ofReal_one, ← ofReal_sub, ← ofReal_mul]; congr 1; field_simp; linarith
+  have e2 : (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - (k : ℂ) ^ 2) =
+      ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) * ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) := by
+    rw [← ofReal_pow, ← ofReal_sub, ← ofReal_mul]; congr 1; field_simp
+  have hsq : ((((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) ^ (1 / 2 : ℂ) *
+      (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - (k : ℂ) ^ 2) ^ (1 / 2 : ℂ) /
+        ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) ^ (1 / 2 : ℂ)) =
+      ((Real.cos φ * √(1 - k ^ 2 * Real.sin φ ^ 2) / Real.sin φ : ℝ) : ℂ) := by
+    rw [e1, e2, ← ofReal_mul, ← ofReal_mul, Carlson.ofReal_cpow_half (by positivity),
+      Carlson.ofReal_cpow_half (by positivity), Carlson.ofReal_cpow_half (by positivity),
+      Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity), Real.sqrt_sq hc.le]
+    have h1 : √(1 / Real.sin φ ^ 2) = 1 / Real.sin φ := by
+      rw [Real.sqrt_div' _ (by positivity), Real.sqrt_one, Real.sqrt_sq hs.le]
+    rw [h1]
+    push_cast
+    field_simp
+  rw [hsq, e1, e2, hG, hF]
+  push_cast
+  field_simp
+
+/-- Landen's transformation of `R_F` and `R_G` (Carlson, Theorem 9.5-1 and Exercise 9.5-5) for
+DLMF's integrals: for positive `x, y, z, v, w` with `v² + w² = z² + xy`, `vw = z(x + y)/2`. -/
+private lemma symEllInt_landen {x y z v w : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
+    (hv : 0 < v) (hw : 0 < w) (hv2 : v ^ 2 + w ^ 2 = z ^ 2 + x * y)
+    (hvw : v * w = z * ((x + y) / 2)) :
+    symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
+        symEllIntRF ((((x + y) / 2) ^ 2 : ℝ) : ℂ) ((v ^ 2 : ℝ) : ℂ) ((w ^ 2 : ℝ) : ℂ) ∧
+      2 * symEllIntRG ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
+        4 * symEllIntRG ((((x + y) / 2) ^ 2 : ℝ) : ℂ) ((v ^ 2 : ℝ) : ℂ) ((w ^ 2 : ℝ) : ℂ) -
+          x * y * symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) - z := by
+  have sl : ∀ {r : ℝ}, 0 < r → ((r ^ 2 : ℝ) : ℂ) ∈ slitPlane := fun hr =>
+    ofReal_mem_slitPlane.mpr (by positivity)
+  have hu : 0 < (x + y) / 2 := by positivity
+  rw [symEllIntRF_eq_carlsonRF (sl hx) (sl hy) (sl hz),
+    symEllIntRF_eq_carlsonRF (sl hu) (sl hv) (sl hw),
+    symEllIntRG_eq_carlsonRG (sl hx) (sl hy) (sl hz),
+    symEllIntRG_eq_carlsonRG (sl hu) (sl hv) (sl hw)]
+  exact ⟨Carlson.carlsonRF_landen hx hy hz hv hw hv2 hvw,
+    Carlson.carlsonRG_landen hx hy hz hv hw hv2 hvw⟩
+
+/-- DLMF 19.8.18–19.8.19 (descending Gauss transformation): for real `0 < k < 1` and
 `0 < φ < π/2`, with `k₁ = (1 - k')/(1 + k')`, `Δ = √(1 - k² sin²φ)` and
 `sin ψ₁ = (1 + k') sin φ/(1 + Δ)`:
 `F(φ, k) = (1 + k₁)F(ψ₁, k₁)` and `E(φ, k) = (1 + k')E(ψ₁, k₁) - k'F(φ, k) + (1 - Δ) cot φ`. -/
@@ -540,7 +630,141 @@ theorem incEllInt_gauss {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
     incEllIntFk φ k = (1 + k₁ : ℝ) * incEllIntFk ψ₁ k₁ ∧
       incEllIntEk φ k = (1 + kp : ℝ) * incEllIntEk ψ₁ k₁ - kp * incEllIntFk φ k +
         ((1 - Δ) * Real.cot φ : ℝ) := by
-  sorry
+  intro kp k₁ Δ ψ₁
+  set s := Real.sin φ with hsdef
+  set c := Real.cos φ with hcdef
+  have hs : 0 < s := Real.sin_pos_of_pos_of_lt_pi hφ0 (by linarith)
+  have hc : 0 < c := Real.cos_pos_of_mem_Ioo ⟨by linarith, hφ1⟩
+  have hsc : s ^ 2 + c ^ 2 = 1 := Real.sin_sq_add_cos_sq φ
+  have hs1 : s < 1 := by nlinarith
+  have hk2 : k ^ 2 < 1 := by nlinarith
+  have hkp2 : kp ^ 2 = 1 - k ^ 2 := Real.sq_sqrt (by linarith)
+  have hkp0 : 0 < kp := Real.sqrt_pos.mpr (by linarith)
+  have hkp1 : kp < 1 := by nlinarith
+  have hD0 : 0 < 1 - k ^ 2 * s ^ 2 := by nlinarith
+  have hΔ2 : Δ ^ 2 = 1 - k ^ 2 * s ^ 2 := Real.sq_sqrt hD0.le
+  have hΔ0 : 0 < Δ := Real.sqrt_pos.mpr hD0
+  have hΔkp : kp ≤ Δ := by nlinarith
+  set a := (1 + kp) * s / (1 + Δ) with hadef
+  have ha0 : 0 < a := by positivity
+  have ha1 : a < 1 := by rw [hadef, div_lt_one (by linarith)]; nlinarith
+  have hk10 : 0 ≤ k₁ := div_nonneg (by linarith) (by linarith)
+  have hk11 : k₁ < 1 := by rw [div_lt_one (by linarith)]; linarith
+  have hsinψ : Real.sin ψ₁ = a := Real.sin_arcsin (by linarith) ha1.le
+  have hcosψ : Real.cos ψ₁ ^ 2 = 1 - a ^ 2 := by
+    rw [Real.cos_arcsin, Real.sq_sqrt (by nlinarith)]
+  have hψ0 : 0 < ψ₁ := Real.arcsin_pos.mpr ha0
+  have hψ1 : ψ₁ < π / 2 := Real.arcsin_lt_pi_div_two.mpr ha1
+  set C1 := 1 - a ^ 2 with hC1def
+  set D1 := 1 - k₁ ^ 2 * a ^ 2 with hD1def
+  have hC1 : 0 < C1 := by nlinarith
+  have hD1 : 0 < D1 := by nlinarith [mul_le_mul hk11.le ha1.le ha0.le zero_le_one]
+  set u := (Δ + 1) / 2 with hudef
+  have hu : 0 < u := by positivity
+  have hua : u * a = (1 + kp) * s / 2 := by rw [hudef, hadef]; field_simp; ring
+  have hk₁ : k₁ * (1 + kp) = 1 - kp := by simp only [k₁]; field_simp
+  have huka : u * (k₁ * a) = (1 - kp) * s / 2 := by
+    rw [show u * (k₁ * a) = k₁ * (u * a) by ring, hua]; linear_combination (s / 2) * hk₁
+  -- Landen data
+  set v := u * √C1 with hvdef
+  set w := u * √D1 with hwdef
+  have hv : 0 < v := by positivity
+  have hw : 0 < w := by positivity
+  have hv2' : v ^ 2 = u ^ 2 * C1 := by rw [hvdef, mul_pow, Real.sq_sqrt hC1.le]
+  have hw2' : w ^ 2 = u ^ 2 * D1 := by rw [hwdef, mul_pow, Real.sq_sqrt hD1.le]
+  have hsum : v ^ 2 + w ^ 2 = c ^ 2 + Δ * 1 := by
+    rw [hv2', hw2', hC1def, hD1def]
+    have e1 : u ^ 2 * a ^ 2 = ((1 + kp) * s / 2) ^ 2 := by rw [← hua]; ring
+    have e2 : u ^ 2 * (k₁ ^ 2 * a ^ 2) = ((1 - kp) * s / 2) ^ 2 := by rw [← huka]; ring
+    have e3 : u ^ 2 * (1 - a ^ 2) + u ^ 2 * (1 - k₁ ^ 2 * a ^ 2) =
+        2 * u ^ 2 - u ^ 2 * a ^ 2 - u ^ 2 * (k₁ ^ 2 * a ^ 2) := by ring
+    rw [e3, e1, e2, hudef]
+    linear_combination (1 / 2 : ℝ) * hΔ2 - hsc - (s ^ 2 / 2) * hkp2
+  have hprod : C1 * D1 = (c / u) ^ 2 := by
+    have e1 : u ^ 2 * C1 = u ^ 2 - ((1 + kp) * s / 2) ^ 2 := by rw [hC1def, ← hua]; ring
+    have e2 : u ^ 2 * D1 = u ^ 2 - ((1 - kp) * s / 2) ^ 2 := by rw [hD1def, ← huka]; ring
+    have e3 : (u ^ 2 * C1) * (u ^ 2 * D1) = (u * c) ^ 2 := by
+      rw [e1, e2, hudef]
+      linear_combination (-(Δ + 1) ^ 2 / 4) * hsc +
+        ((Δ ^ 2 + 4 * Δ - kp ^ 2 * s ^ 2 + s ^ 2 + 3) / 16) * hΔ2 +
+        (-(Δ ^ 2 + 4 * Δ - kp ^ 2 * s ^ 2 + s ^ 2 + 3) / 16 * s ^ 2) * hkp2
+    have hu2 : u ^ 2 ≠ 0 := by positivity
+    have h4 := mul_left_cancel₀ hu2
+      (show u ^ 2 * (C1 * D1 * u ^ 2) = u ^ 2 * c ^ 2 by linear_combination e3)
+    rw [div_pow, eq_div_iff hu2]
+    linarith
+  have hCD : √C1 * √D1 = c / u := by
+    rw [← Real.sqrt_mul hC1.le, hprod, Real.sqrt_sq (by positivity)]
+  have hvw : v * w = c * ((Δ + 1) / 2) := by
+    rw [hvdef, hwdef, ← hudef, show u * √C1 * (u * √D1) = u * u * (√C1 * √D1) by ring, hCD]
+    field_simp
+  obtain ⟨hLF, hLG⟩ := symEllInt_landen hΔ0 one_pos hc hv hw hsum hvw
+  simp only [hv2', hw2', one_pow, ofReal_one, mul_one, ofReal_mul] at hLF hLG
+  -- scaling
+  have hFs := symEllIntRF_scale (l := u ^ 2) (by positivity) 1 (C1 : ℂ) (D1 : ℂ)
+  have hGs := symEllIntRG_scale (l := u ^ 2) (by positivity) 1 (C1 : ℂ) (D1 : ℂ)
+  rw [mul_one, Carlson.ofReal_cpow_half (by positivity), Real.sqrt_sq hu.le] at hFs hGs
+  have eF1 : symEllIntRF 1 (C1 : ℂ) (D1 : ℂ) = symEllIntRF (C1 : ℂ) (D1 : ℂ) 1 :=
+    (symEllIntRF_comm_left _ _ _).trans (symEllIntRF_comm_right _ _ _)
+  have eG1 : symEllIntRG 1 (C1 : ℂ) (D1 : ℂ) = symEllIntRG (C1 : ℂ) (D1 : ℂ) 1 :=
+    (symEllIntRG_comm_left _ _ _).trans (symEllIntRG_comm_right _ _ _)
+  rw [hFs, eF1] at hLF
+  rw [← hudef, hGs, eG1, hLF] at hLG
+  have eF0 : symEllIntRF ((c ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * s ^ 2 : ℝ) : ℂ) 1 =
+      symEllIntRF ((Δ ^ 2 : ℝ) : ℂ) 1 ((c ^ 2 : ℝ) : ℂ) := by
+    rw [hΔ2]; exact (symEllIntRF_comm_left _ _ _).trans (symEllIntRF_comm_right _ _ _)
+  have eG0 : symEllIntRG ((c ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * s ^ 2 : ℝ) : ℂ) 1 =
+      symEllIntRG ((Δ ^ 2 : ℝ) : ℂ) 1 ((c ^ 2 : ℝ) : ℂ) := by
+    rw [hΔ2]; exact (symEllIntRG_comm_left _ _ _).trans (symEllIntRG_comm_right _ _ _)
+  have hF0 := incEllIntFk_eq_sin_mul_symEllIntRF (k := k) hφ0 hφ1
+  have hE0 := incEllIntEk_eq_symEllIntRG_sin (k := k) hφ0 hφ1 (by linarith)
+  have hF1 := incEllIntFk_eq_sin_mul_symEllIntRF (k := k₁) hψ0 hψ1
+  have hE1 := incEllIntEk_eq_symEllIntRG_sin (k := k₁) hψ0 hψ1
+    (by have h := hD1; rw [hD1def] at h; rw [hsinψ]; linarith)
+  have hcosψ' : Real.cos ψ₁ = √C1 := Real.cos_arcsin _
+  rw [hsinψ, hcosψ, ← hD1def] at hF1 hE1
+  rw [hcosψ'] at hE1
+  rw [eF0, hLF] at hF0
+  rw [eF0, eG0, hLF] at hE0
+  have hΔdef : √(1 - k ^ 2 * s ^ 2) = Δ := rfl
+  rw [← hsdef] at hF0
+  rw [← hsdef, ← hcdef, hΔdef] at hE0
+  have hG0 : symEllIntRG ((Δ ^ 2 : ℝ) : ℂ) 1 ((c ^ 2 : ℝ) : ℂ) =
+      (4 * ((u : ℂ) * symEllIntRG (C1 : ℂ) (D1 : ℂ) 1) -
+        (Δ : ℂ) * ((u : ℂ)⁻¹ * symEllIntRF (C1 : ℂ) (D1 : ℂ) 1) - c) / 2 := by
+    linear_combination hLG / 2
+  rw [hG0] at hE0
+  have hkey : s * u⁻¹ = (1 + k₁) * a := by
+    field_simp
+    linear_combination (-(1 + k₁)) * hua - (s / 2) * hk₁
+  have hA : 4 * u / s = 2 * (1 + kp) / a := by
+    field_simp
+    linear_combination 4 * hua
+  have hB : (Δ + c ^ 2) / (s * u) = (1 + kp) * C1 / a + kp * s / u := by
+    rw [hC1def, hadef, hudef]
+    have h1Δ : 1 + Δ ≠ 0 := by positivity
+    field_simp
+    linear_combination (1 + Δ) * (2 * hsc - hΔ2 + s ^ 2 * hkp2)
+  have hC : (1 + kp) * (√C1 * √D1) / a = 2 * c / s := by
+    rw [hCD]
+    have := ha0.ne'
+    have := hu.ne'
+    have := hs.ne'
+    have h1Δ : 1 + Δ ≠ 0 := by positivity
+    rw [hadef, hudef]
+    field_simp
+    ring
+  have hA' : (4 * u / s : ℂ) = 2 * (1 + kp) / a := by exact_mod_cast hA
+  have hB' : ((Δ + c ^ 2) / (s * u) : ℂ) = (1 + kp) * C1 / a + kp * s / u := by
+    exact_mod_cast hB
+  have hC' : ((1 + kp) * ((√C1 : ℝ) * (√D1 : ℝ)) / a : ℂ) = 2 * c / s := by exact_mod_cast hC
+  have hF : incEllIntFk φ k = ((1 + k₁ : ℝ) : ℂ) * incEllIntFk ψ₁ k₁ := by
+    rw [hF0, hF1, ← mul_assoc, ← mul_assoc, ← ofReal_inv, ← ofReal_mul, ← ofReal_mul, hkey]
+  refine ⟨hF, ?_⟩
+  rw [hE0, hE1, hF0, Real.cot_eq_cos_div_sin, ← hsdef, ← hcdef]
+  push_cast
+  linear_combination symEllIntRG (C1 : ℂ) (D1 : ℂ) 1 * hA' -
+    symEllIntRF (C1 : ℂ) (D1 : ℂ) 1 * hB' + hC'
 
 /-- **Admitted.** DLMF 19.8.20–19.8.21: for real `0 < k < 1`, `0 < φ < π/2` and real `α² ≠ 0`
 with `α² ≠ c = csc²φ`, with `ρ = √(1 - k²/α²)` (pure imaginary if `0 < α² < k²`),

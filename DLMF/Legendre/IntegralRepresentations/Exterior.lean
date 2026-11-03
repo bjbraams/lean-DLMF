@@ -36,7 +36,7 @@ Euler's integral for `𝐅`, Pfaff's transformation and, for `𝑸^μ_ν`, the i
 * `ExteriorIntegral.olverQ_eq_zetaForm`: the `ζ`-form of `𝑸^μ_ν` on `ℂ ∖ (-∞, 1]`, from the
   quadratic transformation DLMF 15.8.15 on `(1, ∞)`.
 * `olverQ_complex_integral`: DLMF 14.25.2.
-* `ExteriorIntegral.associatedP_cosh_integral`: DLMF 14.12.4, by the substitution `v = e^{±t}/q`,
+* `associatedP_cosh_integral`: DLMF 14.12.4, by the substitution `v = e^{±t}/q`,
   Euler's half-line integral, Pfaff, the quadratic transformation 15.8.13 and DLMF 14.3.18.
 -/
 
@@ -991,10 +991,9 @@ theorem ExteriorIntegral.cosh_value (ν μ F P : ℂ) {x q : ℝ} (hq0 : 0 < q) 
         mul_div_cancel_left₀ _ (mul_ne_zero two_ne_zero hne)]
       ring
 
-/-- DLMF 14.12.4 by the substitution `v = e^{±t}/q`, Euler's half-line integral, Pfaff, the
-quadratic transformation 15.8.13 and 14.3.18. -/
-theorem ExteriorIntegral.associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re)
-    (hconv : -1 < (μ+ν).re)
+/-- associatedP cosh integral. The hypothesis `hν` is implied by `hconv` and is not used. -/
+@[dlmf 14.12.E4]
+theorem associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re)
     {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ =>
         Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh

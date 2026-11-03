@@ -180,7 +180,7 @@ recurrence 14.10.4 and evaluated at `-1` from the logarithmic behaviour of `𝖯
 (DLMF 15.8.10 at `m = 0`, `BoundaryAsymptotics.zeroBalanced_isBigO`). Helper names live in the
 namespace `FerrersGreen`. -/
 /-- `𝖯_α(x) = 𝐅(α+1,-α;1;(1-x)/2)`. -/
-theorem FerrersGreen.ferrersP_zero (α : ℂ) (x : ℝ) :
+theorem FerrersGreen.ferrersP_zero_eq_regularizedGaussHG (α : ℂ) (x : ℝ) :
     ferrersP α 0 x = regularizedGaussHG (α+1) (-α) 1 ((1-(x:ℂ))/2) := by
   simp [ferrersP]
 
@@ -189,14 +189,14 @@ theorem FerrersGreen.continuousAt_ferrersP (α : ℂ) {x : ℝ} (hx : -1 < x) :
     ContinuousAt (ferrersP α 0) x := by
   have hw := OrthogonalityIntegrals.half_mem_cutPlane hx
   have : ferrersP α 0 = fun y : ℝ => regularizedGaussHG (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
-    funext (FerrersGreen.ferrersP_zero α)
+    funext (FerrersGreen.ferrersP_zero_eq_regularizedGaussHG α)
   rw [this]
   exact ContinuousAt.comp (g := regularizedGaussHG (α+1) (-α) 1)
     (differentiableAt_regularizedGaussHG _ _ _ hw).continuousAt (by fun_prop)
 
 /-- The Ferrers function satisfies `ferrersP α 0 1 = 1` for every complex degree `α`. -/
 theorem FerrersGreen.ferrersP_one (α : ℂ) : ferrersP α 0 1 = 1 := by
-  rw [FerrersGreen.ferrersP_zero]
+  rw [FerrersGreen.ferrersP_zero_eq_regularizedGaussHG]
   have h1 : ∀ k : ℕ, (1:ℂ) ≠ -(k:ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
   simpa using regularizedGaussHG_zero_of_regular (a := α+1) (b := -α) h1
@@ -230,7 +230,7 @@ theorem FerrersGreen.ferrersP_neg_one_isBigO (α : ℂ) :
       FerrersGreen.tendsto_half
   refine h.congr_left fun x => ?_
   simp only [Function.comp_apply]
-  rw [FerrersGreen.ferrersP_zero, show α + 1 + -α = 1 by ring]
+  rw [FerrersGreen.ferrersP_zero_eq_regularizedGaussHG, show α + 1 + -α = 1 by ring]
   congr 3
   push_cast; ring
 
@@ -473,11 +473,6 @@ theorem FerrersGreen.logCoeffDeriv_eq {α : ℂ} (hα : ∀ m : ℕ, α+1 ≠ -(
 
 end Constants
 
-/-- `𝖯_α` solves the Legendre equation on `(-1,1)`. -/
-theorem FerrersGreen.ferrersP_isFerrersSolution (α : ℂ) : IsFerrersSolution α 0 (ferrersP α 0) :=
-  ((ferrersEven_isFerrersSolution α 0).add_smul (ferrersOdd_isFerrersSolution α 0) _ _).congr
-    (ferrersP_eqOn_even_odd α 0).symm
-
 /-- Green's identity for two order-zero Legendre solutions:
 `((1-x²)(f g' - g f'))' = (ν(ν+1) - λ(λ+1)) f g`. -/
 theorem FerrersGreen.green {ν lam : ℂ} {f g : ℝ → ℂ} (hf : IsFerrersSolution ν 0 f)
@@ -710,11 +705,6 @@ theorem FerrersGreen.ferrersQ_neg {ν : ℂ} (h : LegendreQRegular ν 0) {x : �
   linear_combination (π:ℂ) * (Gamma ((ν+2)/2) * (Gamma ((ν+1)/2))⁻¹) * cos (ν*π/2) *
     ferrersOdd ν 0 x * pyth
 
-/-- `𝖰_α` solves the Legendre equation on `(-1,1)`. -/
-theorem FerrersGreen.ferrersQ_isFerrersSolution (α : ℂ) : IsFerrersSolution α 0 (ferrersQ α 0) :=
-  ((ferrersEven_isFerrersSolution α 0).add_smul (ferrersOdd_isFerrersSolution α 0) _ _).congr
-    (ferrersQ_eqOn_even_odd α 0).symm
-
 /-- Any solution `f` of the Ferrers (Legendre, `μ = 0`) equation on `(-1,1)` is continuous on
 `(-1,1)`. -/
 theorem FerrersGreen.continuousOn_of_solution {α : ℂ} {f : ℝ → ℂ} (hf : IsFerrersSolution α 0 f) :
@@ -779,7 +769,7 @@ theorem FerrersGreen.ferrersP_pos_isBigO (α : ℂ) :
     (fun x : ℝ => ferrersP α 0 x + (0:ℂ) * Real.log ((1-x)/2) - 1) =O[𝓝[<] (1:ℝ)]
       (fun x => (1-x)/2 * Real.log ((1-x)/2)) := by
   have hfun : ferrersP α 0 = fun y : ℝ => regularizedGaussHG (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
-    funext (FerrersGreen.ferrersP_zero α)
+    funext (FerrersGreen.ferrersP_zero_eq_regularizedGaussHG α)
   have hw := OrthogonalityIntegrals.half_mem_cutPlane (show (-1:ℝ) < 1 by norm_num)
   have hd : DifferentiableAt ℝ (ferrersP α 0) 1 := by
     rw [hfun]
@@ -955,8 +945,8 @@ is interval integrable on `[-1,1]`. -/
 theorem FerrersGreen.intervalIntegrable_QQ {ν lam : ℂ} (hν : LegendreQRegular ν 0)
     (hlam : LegendreQRegular lam 0) :
     IntervalIntegrable (fun x => ferrersQ ν 0 x * ferrersQ lam 0 x) volume (-1) 1 := by
-  have c1 := FerrersGreen.continuousOn_of_solution (FerrersGreen.ferrersQ_isFerrersSolution ν)
-  have c2 := FerrersGreen.continuousOn_of_solution (FerrersGreen.ferrersQ_isFerrersSolution lam)
+  have c1 := FerrersGreen.continuousOn_of_solution (ferrersQ_isFerrersSolution ν 0)
+  have c2 := FerrersGreen.continuousOn_of_solution (ferrersQ_isFerrersSolution lam 0)
   obtain ⟨M, hM⟩ := FerrersGreen.bound c1 (FerrersGreen.ferrersQ_isBigO_left hν)
       (FerrersGreen.ferrersQ_isBigO_right hν)
   obtain ⟨N, hN⟩ := FerrersGreen.bound c2 (FerrersGreen.ferrersQ_isBigO_left hlam)
@@ -967,7 +957,7 @@ theorem FerrersGreen.intervalIntegrable_QQ {ν lam : ℂ} (hν : LegendreQRegula
 integrable on `[-1,1]`. -/
 theorem FerrersGreen.intervalIntegrable_PQ {lam : ℂ} (ν : ℂ) (hlam : LegendreQRegular lam 0) :
     IntervalIntegrable (fun x => ferrersP ν 0 x * ferrersQ lam 0 x) volume (-1) 1 := by
-  have c2 := FerrersGreen.continuousOn_of_solution (FerrersGreen.ferrersQ_isFerrersSolution lam)
+  have c2 := FerrersGreen.continuousOn_of_solution (ferrersQ_isFerrersSolution lam 0)
   obtain ⟨M, hM⟩ := FerrersGreen.bound (FerrersGreen.continuousOn_ferrersP ν)
       (FerrersGreen.ferrersP_isBigO_left ν)
     (FerrersGreen.ferrersP_isBigO_right ν)
@@ -984,8 +974,8 @@ theorem FerrersGreen.integral_QQ {ν lam : ℂ} (hν : LegendreQRegular ν 0)
         2*((-(1/2)*cos (ν*π))*FerrersGreen.constNeg lam -
             (-(1/2)*cos (lam*π))*FerrersGreen.constNeg ν)) /
         (ν*(ν+1) - lam*(lam+1)) := by
-  refine FerrersGreen.integral_green (FerrersGreen.ferrersQ_isFerrersSolution ν)
-    (FerrersGreen.ferrersQ_isFerrersSolution lam) (FerrersGreen.ferrersQ_recurrence hν)
+  refine FerrersGreen.integral_green (ferrersQ_isFerrersSolution ν 0)
+    (ferrersQ_isFerrersSolution lam 0) (FerrersGreen.ferrersQ_recurrence hν)
         (FerrersGreen.ferrersQ_recurrence hlam)
     (FerrersGreen.intervalIntegrable_QQ hν hlam) ?_ ?_ hc
   · refine FerrersGreen.boundary_neg FerrersGreen.tendsto_half FerrersGreen.eventually_ofReal_eq_neg
@@ -1027,8 +1017,8 @@ theorem FerrersGreen.integral_PQ {ν lam : ℂ} (hlam : LegendreQRegular lam 0)
         2*(FerrersGreen.logCoeff ν * FerrersGreen.constNeg lam - (-(1/2)*cos (lam*π)) *
             FerrersGreen.constTerm ν)) /
         (ν*(ν+1) - lam*(lam+1)) := by
-  refine FerrersGreen.integral_green (FerrersGreen.ferrersP_isFerrersSolution ν)
-    (FerrersGreen.ferrersQ_isFerrersSolution lam) (FerrersGreen.ferrersP_recurrence ν)
+  refine FerrersGreen.integral_green (ferrersP_isFerrersSolution ν 0)
+    (ferrersQ_isFerrersSolution lam 0) (FerrersGreen.ferrersP_recurrence ν)
         (FerrersGreen.ferrersQ_recurrence hlam)
     (FerrersGreen.intervalIntegrable_PQ ν hlam) ?_ ?_ hc
   · refine FerrersGreen.boundary_neg FerrersGreen.tendsto_half FerrersGreen.eventually_ofReal_eq_neg
@@ -1056,8 +1046,8 @@ theorem FerrersGreen.integral_PP (ν lam : ℂ) (h : (ν*(ν+1) - lam*(lam+1)) �
     (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersP lam 0 x) =
       -(2*(FerrersGreen.logCoeff ν * FerrersGreen.constTerm lam - FerrersGreen.logCoeff lam *
           FerrersGreen.constTerm ν)) / (ν*(ν+1) - lam*(lam+1)) := by
-  rw [FerrersGreen.integral_green (FerrersGreen.ferrersP_isFerrersSolution ν)
-    (FerrersGreen.ferrersP_isFerrersSolution lam) (FerrersGreen.ferrersP_recurrence ν)
+  rw [FerrersGreen.integral_green (ferrersP_isFerrersSolution ν 0)
+    (ferrersP_isFerrersSolution lam 0) (FerrersGreen.ferrersP_recurrence ν)
         (FerrersGreen.ferrersP_recurrence lam)
     (FerrersGreen.intervalIntegrable_PP ν lam)
     (FerrersGreen.boundary_neg FerrersGreen.tendsto_half FerrersGreen.eventually_ofReal_eq_neg

@@ -8,6 +8,8 @@ module
 public import DLMF.GeneralizedHypergeometric.DifferentialEquations
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
 public import TauCeti.Analysis.Contour.Residue.Basic
+public import Mathlib.LinearAlgebra.Lagrange
+public import Mathlib.Topology.Algebra.Monoid
 
 /-!
 # Asymptotic expansions of `ₚF_q` (DLMF §16.11)
@@ -24,7 +26,7 @@ public import TauCeti.Analysis.Contour.Residue.Basic
 ## Main results
 
 * `genAsymptoticC_recurrence`, `genAsymptoticC_limit`: the coefficient recurrence and its
-  continuation to repeated lower parameters.
+  continuation to repeated lower parameters (`genAsymptoticC_limit'` for all `p`, `q`).
 * `genH_simple_residue`, `genH_resonant_log_polynomial`: algebraic terms as Barnes residues.
 * `genH_balanced_converges`: convergence of the algebraic series for `p = q + 1`, `|z| > 1`,
   DLMF 16.11.6.
@@ -142,13 +144,6 @@ def genInfinityLogHalf (ε : ℝ) : Filter ℂ :=
 def genPartialShift {n : ℕ} (a : Fin n → ℂ) (k : ℕ) (r : ℝ) (j : Fin n) : ℂ :=
   if j.val < k then a j + r else a j
 
-/-- All repeated lower-parameter cases have the finite limiting coefficient. -/
-@[dlmf 16.11.E4, dlmf 16.11.E5]
-theorem genAsymptoticC_limit {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p < q + 1) (k : ℕ) :
-    Tendsto (fun ε : ℂ => genAsymptoticCRaw a (genAsymptoticPerturb b ε) k)
-      (𝓝[≠] 0) (𝓝 (genAsymptoticC a b k)) := by
-  sorry
-
 /-- Each augmented lower parameter varies continuously with the parameter vector. -/
 private lemma genAsymptoticAugment_continuous {q : ℕ} (j : Fin (q + 1)) :
     Continuous (fun b : Fin q → ℂ => genAsymptoticAugment b j) := by
@@ -228,6 +223,293 @@ theorem genAsymptoticC_recurrence {p q : ℕ} (a : Fin p → ℂ) (b : Fin q →
     congr 2
     exact Fin.sum_univ_eq_sum_range (fun m => genAsymptoticCRaw a b m *
       genAsymptoticEkm a b (k + 1) m) (k + 1)
+
+/-! ### Continuation of the coefficients through repeated lower parameters -/
+
+namespace DividedDifference
+
+open Polynomial
+
+/-- Products over the complement of a point as products over `succAbove`. -/
+private lemma prod_erase_eq_prod_succAbove {m : ℕ} (f : Fin (m + 1) → ℂ) (j : Fin (m + 1)) :
+    ∏ i ∈ univ.erase j, f i = ∏ i : Fin m, f (j.succAbove i) := by
+  classical
+  have h := Fin.prod_univ_succAbove (fun i => if i = j then 1 else f i) j
+  rw [← Finset.mul_prod_erase univ _ (mem_univ j)] at h
+  simp only [↓reduceIte, one_mul] at h
+  rw [show ∏ i ∈ univ.erase j, f i = ∏ i ∈ univ.erase j, (if i = j then 1 else f i) from
+    prod_congr rfl fun i hi => by simp [ne_of_mem_erase hi], h]
+  exact prod_congr rfl fun i _ => by simp [Fin.succAbove_ne j i]
+
+/-- Splitting off the node `0` from a product over the complement of `k.succ`. -/
+private lemma prod_erase_succ {m : ℕ} (f : Fin (m + 1) → ℂ) (k : Fin m) :
+    ∏ i ∈ univ.erase k.succ, f i = f 0 * ∏ i ∈ univ.erase k, f i.succ := by
+  cases m with
+  | zero => exact k.elim0
+  | succ m =>
+    rw [prod_erase_eq_prod_succAbove, prod_erase_eq_prod_succAbove, Fin.prod_univ_succ,
+      Fin.succ_succAbove_zero]
+    simp only [Fin.succ_succAbove_succ]
+
+/-- The divided-difference sum of the monomial `X ^ d` at the nodes `x`. -/
+private noncomputable def monomialSum {n : ℕ} (d : ℕ) (x : Fin n → ℂ) : ℂ :=
+  ∑ j, x j ^ d / ∏ i ∈ univ.erase j, (x j - x i)
+
+private lemma monomialSum_succ {m : ℕ} (d : ℕ) (x : Fin (m + 1) → ℂ) (hx : Function.Injective x) :
+    monomialSum (d + 1) x = monomialSum d (Fin.tail x) + x 0 * monomialSum d x := by
+  have hsplit : monomialSum (d + 1) x =
+      ∑ j, x j ^ d * (x j - x 0) / ∏ i ∈ univ.erase j, (x j - x i) + x 0 * monomialSum d x := by
+    rw [monomialSum, monomialSum, mul_sum, ← sum_add_distrib]
+    refine sum_congr rfl fun j _ => ?_
+    ring
+  rw [hsplit, Fin.sum_univ_succ, sub_self, mul_zero, zero_div, zero_add]
+  congr 1
+  rw [monomialSum]
+  refine sum_congr rfl fun k _ => ?_
+  rw [prod_erase_succ (fun i => x k.succ - x i)]
+  have hne : x k.succ - x 0 ≠ 0 := sub_ne_zero.mpr (hx.ne (Fin.succ_ne_zero k))
+  simp only [Fin.tail]
+  field_simp
+
+
+private lemma exists_continuous_monomialSum (n d : ℕ) :
+    ∃ Q : (Fin n → ℂ) → ℂ, Continuous Q ∧
+      ∀ x, Function.Injective x → monomialSum d x = Q x := by
+  induction n generalizing d with
+  | zero => exact ⟨fun _ => 0, continuous_const, fun x _ => by simp [monomialSum]⟩
+  | succ m ihm =>
+    induction d with
+    | zero =>
+      refine ⟨fun _ => (1 : Polynomial ℂ).coeff m, continuous_const, fun x hx => ?_⟩
+      have h := Lagrange.coeff_eq_sum (s := (univ : Finset (Fin (m + 1)))) (v := x)
+        hx.injOn (P := 1) (by simp; positivity)
+      simp only [card_univ, Fintype.card_fin, Nat.add_sub_cancel, Polynomial.eval_one] at h
+      rw [h, monomialSum]
+      simp
+    | succ d ihd =>
+      obtain ⟨Q₁, hQ₁, hQ₁e⟩ := ihm d
+      obtain ⟨Q₂, hQ₂, hQ₂e⟩ := ihd
+      refine ⟨fun x => Q₁ (Fin.tail x) + x 0 * Q₂ x, ?_, fun x hx => ?_⟩
+      · have ht : Continuous (fun x : Fin (m + 1) → ℂ => Fin.tail x) := by
+          unfold Fin.tail; fun_prop
+        exact (hQ₁.comp ht).add ((continuous_apply 0).mul hQ₂)
+      · rw [monomialSum_succ d x hx, hQ₁e (Fin.tail x) (hx.comp (Fin.succ_injective m)), hQ₂e x hx]
+
+/-- The divided-difference sum of a polynomial as a combination of monomial sums. -/
+private lemma sum_eval_div_eq {n N : ℕ} (P : Polynomial ℂ) (hP : P.natDegree < N) (x : Fin n → ℂ) :
+    ∑ j, P.eval (x j) / ∏ i ∈ univ.erase j, (x j - x i) =
+      ∑ d ∈ Finset.range N, P.coeff d * monomialSum d x := by
+  simp_rw [monomialSum, mul_sum, Polynomial.eval_eq_sum_range' hP, sum_div]
+  rw [sum_comm]
+  refine sum_congr rfl fun j _ => sum_congr rfl fun d _ => ?_
+  ring
+
+/-- Coefficients of a family of polynomials of bounded degree depending continuously on a
+parameter at every point are continuous in the parameter. -/
+private lemma continuous_coeff {N : ℕ} (P : ℂ → Polynomial ℂ) (hP : ∀ ε, (P ε).natDegree < N)
+    (hc : ∀ t, Continuous fun ε => (P ε).eval t) (d : ℕ) :
+    Continuous fun ε => (P ε).coeff d := by
+  have hinj : Set.InjOn (fun i : ℕ => (i : ℂ)) (Finset.range N) :=
+    fun i _ j _ h => by simpa using h
+  have he : ∀ ε, (P ε).coeff d = ∑ i ∈ Finset.range N,
+      (P ε).eval (i : ℂ) * (Lagrange.basis (Finset.range N) (fun i : ℕ => (i : ℂ)) i).coeff d := by
+    intro ε
+    have hdeg : (P ε).degree < (Finset.range N).card := by
+      rw [card_range]
+      exact lt_of_le_of_lt Polynomial.degree_le_natDegree (by exact_mod_cast hP ε)
+    conv_lhs => rw [Lagrange.eq_interpolate hinj hdeg]
+    rw [Lagrange.interpolate_apply, Polynomial.finsetSum_coeff]
+    simp only [Polynomial.coeff_C_mul]
+  simp_rw [he]
+  exact continuous_finsetSum _ fun i _ => (hc _).mul continuous_const
+
+/-- Divided-difference sums of continuously varying polynomials at continuously varying nodes
+agree, at distinct nodes, with a continuous function. -/
+private lemma exists_continuous_sum_eval_div {n N : ℕ} (P : ℂ → Polynomial ℂ)
+    (hP : ∀ ε, (P ε).natDegree < N) (hc : ∀ t, Continuous fun ε => (P ε).eval t)
+    (x : ℂ → Fin n → ℂ) (hx : Continuous x) :
+    ∃ G : ℂ → ℂ, Continuous G ∧ ∀ ε, Function.Injective (x ε) →
+      ∑ j, (P ε).eval (x ε j) / ∏ i ∈ univ.erase j, (x ε j - x ε i) = G ε := by
+  choose Q hQ hQe using fun d => exists_continuous_monomialSum n d
+  refine ⟨fun ε => ∑ d ∈ Finset.range N, (P ε).coeff d * Q d (x ε), ?_, fun ε hε => ?_⟩
+  · exact continuous_finsetSum _ fun d _ =>
+      (continuous_coeff P hP hc d).mul ((hQ d).comp hx)
+  · rw [sum_eval_div_eq (P ε) (hP ε)]
+    exact sum_congr rfl fun d _ => by rw [hQe d _ hε]
+
+end DividedDifference
+
+namespace CoefficientLimit
+
+open Polynomial DividedDifference
+
+private lemma eventually_affine_ne_zero (α β : ℂ) (hβ : β ≠ 0) :
+    ∀ᶠ ε in 𝓝[≠] (0 : ℂ), α + β * ε ≠ 0 := by
+  by_cases hα : α = 0
+  · filter_upwards [self_mem_nhdsWithin] with ε hε
+    simpa [hα] using mul_ne_zero hβ hε
+  · have ht : Tendsto (fun ε : ℂ => α + β * ε) (𝓝 0) (𝓝 α) := by
+      have hc : Continuous (fun ε : ℂ => α + β * ε) := by fun_prop
+      have h0 := hc.tendsto 0
+      rwa [mul_zero, add_zero] at h0
+    exact (ht.eventually_ne hα).filter_mono nhdsWithin_le_nhds
+
+/-- Slopes of the perturbed augmented parameters. -/
+private def augmentSlope (q : ℕ) (j : Fin (q + 1)) : ℂ := if j.val < q then (j.val + 1 : ℂ) else 0
+
+private lemma augment_perturb {q : ℕ} (b : Fin q → ℂ) (ε : ℂ) (j : Fin (q + 1)) :
+    genAsymptoticAugment (genAsymptoticPerturb b ε) j =
+      genAsymptoticAugment b j + augmentSlope q j * ε := by
+  unfold genAsymptoticAugment augmentSlope genAsymptoticPerturb
+  split_ifs <;> simp
+
+private lemma augmentSlope_injective (q : ℕ) : Function.Injective (augmentSlope q) := by
+  intro i j h
+  unfold augmentSlope at h
+  apply Fin.ext
+  split_ifs at h with hi hj hj
+  · have : ((i.val : ℕ) : ℂ) = (j.val : ℕ) := by linear_combination h
+    exact_mod_cast this
+  · exact absurd h (by norm_cast)
+  · exact absurd h.symm (by norm_cast)
+  · omega
+
+private lemma eventually_injective_augment {q : ℕ} (b : Fin q → ℂ) :
+    ∀ᶠ ε in 𝓝[≠] (0 : ℂ),
+      Function.Injective (genAsymptoticAugment (genAsymptoticPerturb b ε)) := by
+  have h : ∀ᶠ ε in 𝓝[≠] (0 : ℂ), ∀ ij : Fin (q + 1) × Fin (q + 1), ij.1 ≠ ij.2 →
+      genAsymptoticAugment (genAsymptoticPerturb b ε) ij.1 ≠
+        genAsymptoticAugment (genAsymptoticPerturb b ε) ij.2 := by
+    rw [eventually_all]
+    rintro ⟨i, j⟩
+    by_cases hij : i = j
+    · exact Eventually.of_forall fun _ h => absurd hij h
+    · filter_upwards [eventually_affine_ne_zero
+        (genAsymptoticAugment b i - genAsymptoticAugment b j)
+        (augmentSlope q i - augmentSlope q j)
+        (sub_ne_zero.mpr ((augmentSlope_injective q).ne hij))] with ε hε _
+      rw [augment_perturb, augment_perturb]
+      intro he
+      apply hε
+      linear_combination he
+  filter_upwards [h] with ε hε i j he
+  by_contra hne
+  exact hε (i, j) hne he
+
+private lemma continuous_augment_perturb {q : ℕ} (b : Fin q → ℂ) :
+    Continuous fun ε : ℂ => genAsymptoticAugment (genAsymptoticPerturb b ε) := by
+  refine continuous_pi fun j => ?_
+  simp_rw [augment_perturb]
+  fun_prop
+
+private lemma continuous_nu_perturb {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) :
+    Continuous fun ε : ℂ => genAsymptoticNu a (genAsymptoticPerturb b ε) := by
+  unfold genAsymptoticNu genAsymptoticPerturb
+  fun_prop
+
+private lemma exists_continuous_ekm {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (k m : ℕ) :
+    ∃ G : ℂ → ℂ, Continuous G ∧ ∀ ε,
+      Function.Injective (genAsymptoticAugment (genAsymptoticPerturb b ε)) →
+        genAsymptoticEkm a (genAsymptoticPerturb b ε) k m = G ε := by
+  set M := genAsymptoticKappa p q + k - m
+  set κ : ℂ := (genAsymptoticKappa p q : ℂ)
+  set ν := fun ε : ℂ => genAsymptoticNu a (genAsymptoticPerturb b ε)
+  let P : ℂ → Polynomial ℂ := fun ε => C ((-1 : ℂ) ^ q) *
+    (ascPochhammer ℂ M).comp (C (1 - ν ε + m) - C κ * X) * ∏ i, (C (a i) - X)
+  have hdeg : ∀ ε, (P ε).natDegree < M + p + 1 := by
+    intro ε
+    refine Nat.lt_succ_of_le ?_
+    refine (natDegree_mul_le).trans (add_le_add ?_ ?_)
+    · refine (natDegree_C_mul_le _ _).trans ((natDegree_comp_le).trans ?_)
+      rw [ascPochhammer_natDegree]
+      have h1 : (C (1 - ν ε + m) - C κ * X).natDegree ≤ 1 := by compute_degree
+      nlinarith
+    · refine (Polynomial.natDegree_prod_le (s := univ) (f := fun i => C (a i) - X)).trans ?_
+      have h2 : ∀ i, (C (a i) - X).natDegree ≤ 1 := fun i => by compute_degree
+      calc ∑ i, (C (a i) - X).natDegree ≤ ∑ _i : Fin p, 1 :=
+            Finset.sum_le_sum (f := fun i => (C (a i) - X).natDegree) (g := fun _ => 1)
+              fun i _ => h2 i
+        _ = p := by simp
+  have heval : ∀ ε t, (P ε).eval t =
+      (-1 : ℂ) ^ q * poch (1 - ν ε - κ * t + m) M * ∏ i, (a i - t) := by
+    intro ε t
+    simp only [P, eval_mul, eval_C, eval_comp, eval_sub, eval_X, eval_prod, poch]
+    congr 3
+    ring
+  have hc : ∀ t, Continuous fun ε => (P ε).eval t := by
+    intro t
+    simp_rw [heval]
+    have := continuous_nu_perturb a b
+    exact (continuous_const.mul ((ascPochhammer ℂ M).continuous.comp
+      (((continuous_const.sub this).sub continuous_const).add continuous_const))).mul
+        continuous_const
+  obtain ⟨G, hG, hGe⟩ := exists_continuous_sum_eval_div P hdeg hc _
+    (continuous_augment_perturb b)
+  refine ⟨G, hG, fun ε hε => ?_⟩
+  rw [← hGe ε hε, genAsymptoticEkm]
+  refine sum_congr rfl fun j _ => ?_
+  rw [heval]
+  have hprod : ∏ i ∈ univ.erase j, (genAsymptoticAugment (genAsymptoticPerturb b ε) i -
+      genAsymptoticAugment (genAsymptoticPerturb b ε) j) = (-1 : ℂ) ^ q *
+      ∏ i ∈ univ.erase j, (genAsymptoticAugment (genAsymptoticPerturb b ε) j -
+        genAsymptoticAugment (genAsymptoticPerturb b ε) i) := by
+    rw [show (-1 : ℂ) ^ q = ∏ _i ∈ univ.erase j, (-1 : ℂ) by simp, ← prod_mul_distrib]
+    exact prod_congr rfl fun i _ => by ring
+  rw [hprod]
+  have hs : ((-1 : ℂ) ^ q) ^ 2 = 1 := by rw [← pow_mul, pow_mul']; norm_num
+  have hne : ∏ i ∈ univ.erase j, (genAsymptoticAugment (genAsymptoticPerturb b ε) j -
+        genAsymptoticAugment (genAsymptoticPerturb b ε) i) ≠ 0 :=
+    prod_ne_zero_iff.mpr fun i hi => sub_ne_zero.mpr (fun he => (mem_erase.mp hi).1 (hε he).symm)
+  have h1 : ((-1 : ℂ) ^ q) ≠ 0 := pow_ne_zero _ (by norm_num)
+  field_simp
+  rw [hs, mul_one, mul_comm]
+  congr 2
+  simp only [ν, κ]
+  ring
+
+private lemma exists_continuous_cRaw {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (k : ℕ) :
+    ∃ G : ℂ → ℂ, Continuous G ∧
+      ∀ᶠ ε in 𝓝[≠] (0 : ℂ), genAsymptoticCRaw a (genAsymptoticPerturb b ε) k = G ε := by
+  induction k using Nat.strong_induction_on with
+  | h k ih =>
+    cases k with
+    | zero => exact ⟨fun _ => 1, continuous_const, Eventually.of_forall fun ε => by
+        simp [genAsymptoticCRaw]⟩
+    | succ k =>
+      choose C hC hCe using fun m : Fin (k + 1) => ih m.val (by omega)
+      choose E hE hEe using fun m : Fin (k + 1) => exists_continuous_ekm a b (k + 1) m.val
+      refine ⟨fun ε => -(∑ m : Fin (k + 1), C m ε * E m ε) /
+        ((k + 1 : ℂ) * (genAsymptoticKappa p q : ℂ) ^ genAsymptoticKappa p q), ?_, ?_⟩
+      · exact ((continuous_finsetSum _ fun m _ => (hC m).mul (hE m)).neg).div_const _
+      · have hall : ∀ᶠ ε in 𝓝[≠] (0 : ℂ), ∀ m : Fin (k + 1),
+            genAsymptoticCRaw a (genAsymptoticPerturb b ε) m.val = C m ε :=
+          eventually_all.mpr hCe
+        filter_upwards [hall, eventually_injective_augment b] with ε hε hinj
+        rw [genAsymptoticCRaw]
+        congr 2
+        exact sum_congr rfl fun m _ => by rw [hε m, hEe m ε hinj]
+
+end CoefficientLimit
+
+/-- All repeated lower-parameter cases have the finite limiting coefficient, for all `p` and `q`.
+Stronger than DLMF, which assumes `p < q + 1`. -/
+@[dlmf 16.11.E4, dlmf 16.11.E5]
+theorem genAsymptoticC_limit' {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (k : ℕ) :
+    Tendsto (fun ε : ℂ => genAsymptoticCRaw a (genAsymptoticPerturb b ε) k)
+      (𝓝[≠] 0) (𝓝 (genAsymptoticC a b k)) := by
+  obtain ⟨G, hG, hGe⟩ := CoefficientLimit.exists_continuous_cRaw a b k
+  have ht : Tendsto (fun ε : ℂ => genAsymptoticCRaw a (genAsymptoticPerturb b ε) k)
+      (𝓝[≠] 0) (𝓝 (G 0)) :=
+    ((hG.tendsto 0).mono_left nhdsWithin_le_nhds).congr' (hGe.mono fun ε h => h.symm)
+  rwa [genAsymptoticC, ht.limUnder_eq]
+
+/-- All repeated lower-parameter cases have the finite limiting coefficient. -/
+@[dlmf 16.11.E4, dlmf 16.11.E5]
+theorem genAsymptoticC_limit {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (_hpq : p < q + 1)
+    (k : ℕ) :
+    Tendsto (fun ε : ℂ => genAsymptoticCRaw a (genAsymptoticPerturb b ε) k)
+      (𝓝[≠] 0) (𝓝 (genAsymptoticC a b k)) :=
+  genAsymptoticC_limit' a b k
 
 /-- Gamma is analytic away from its poles. -/
 private lemma analyticAt_Gamma_of_ne_neg_nat {c : ℂ} (hc : ∀ m : ℕ, c ≠ -m) : AnalyticAt

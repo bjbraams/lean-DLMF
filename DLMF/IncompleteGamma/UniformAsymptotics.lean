@@ -292,7 +292,8 @@ theorem IncompleteGammaUniform.gammaUniformEta_sq {w : ℂ} (hw : |w.im| < 2*π)
 
 /-- Derivative formula at the specified argument: `HasDerivAt gammaUniformEtaOnLog 1 0 ∧
 gammaUniformEtaOnLog 0=0`. -/
-theorem IncompleteGammaUniform.gammaUniformEta_normalization :
+@[dlmf 8.12.E1]
+theorem gammaUniformEta_normalization  :
     HasDerivAt gammaUniformEtaOnLog 1 0 ∧ gammaUniformEtaOnLog 0=0 := by
   refine ⟨?_, by simp [gammaUniformEtaOnLog]⟩
   have hP := IncompleteGammaUniform.hasDerivAt_etaPrimitive IncompleteGammaUniform.zero_mem_strip
@@ -305,8 +306,8 @@ theorem IncompleteGammaUniform.gammaUniformEta_normalization :
 
 /-- At `w`, the function `gammaUniformEtaOnLog` has derivative `((exp w-1)/gammaUniformEtaOnLog
 w)`. -/
-theorem IncompleteGammaUniform.gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π)
-    (hw0 : w ≠ 0) :
+@[dlmf 8.12.E2]
+theorem gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     HasDerivAt gammaUniformEtaOnLog ((exp w-1)/gammaUniformEtaOnLog w) w := by
   have hws : w ∈ IncompleteGammaUniform.strip := hw
   have hP := IncompleteGammaUniform.hasDerivAt_etaPrimitive hws
@@ -345,20 +346,6 @@ w-1-w`. -/
 theorem gammaUniformEta_equation {w : ℂ} (hw : |w.im| < 2*π) :
     gammaUniformEtaOnLog w^2/2=exp w-1-w :=
   IncompleteGammaUniform.gammaUniformEta_sq hw
-
-/-- At `w`, the function `gammaUniformEtaOnLog` has derivative `((exp w-1)/gammaUniformEtaOnLog
-w)`. -/
-@[dlmf 8.12.E2]
-theorem gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
-    HasDerivAt gammaUniformEtaOnLog ((exp w-1)/gammaUniformEtaOnLog w) w :=
-  IncompleteGammaUniform.gammaUniformEta_derivative hw hw0
-
-/-- Derivative formula at the specified argument: `HasDerivAt gammaUniformEtaOnLog 1 0 ∧
-gammaUniformEtaOnLog 0=0`. -/
-@[dlmf 8.12.E1]
-theorem gammaUniformEta_normalization  :
-    HasDerivAt gammaUniformEtaOnLog 1 0 ∧ gammaUniformEtaOnLog 0=0 :=
-  IncompleteGammaUniform.gammaUniformEta_normalization
 
 /-- The exact S remainder, with w the logarithm of λ. -/
 @[dlmf 8.12.E4]
@@ -638,10 +625,11 @@ theorem IncompleteGammaUniform.gammaUniformEta_ne_zero {w : ℂ} (hw : |w.im| < 
 /-- Identity under the stated parameter and domain assumptions: `gammaUniformC 0 w=1/(exp
 w-1)-1/gammaUniformEtaOnLog w ∧ gammaUniformC 1 w=1/gammaUniformEtaOnLog w^3-1/(exp
 w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1))`. -/
-theorem IncompleteGammaUniform.gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
+@[dlmf 8.12.E9]
+theorem gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     gammaUniformC 0 w=1/(exp w-1)-1/gammaUniformEtaOnLog w ∧
         gammaUniformC 1 w=1/gammaUniformEtaOnLog
-        w^3-1/(exp w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1)) := by
+            w^3-1/(exp w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1)) := by
   have h0 : ∀ v : ℂ, v ≠ 0 → gammaUniformC 0 v = 1/(exp v-1)-1/gammaUniformEtaOnLog v := by
     intro v hv; simp [gammaUniformC, hv]
   refine ⟨h0 w hw0, ?_⟩
@@ -665,15 +653,6 @@ theorem IncompleteGammaUniform.gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π
   rw [hD.deriv, IncompleteGammaUniform.gammaStirlingCoeff_one]
   field_simp
   ring
-
-/-- Identity under the stated parameter and domain assumptions: `gammaUniformC 0 w=1/(exp
-w-1)-1/gammaUniformEtaOnLog w ∧ gammaUniformC 1 w=1/gammaUniformEtaOnLog w^3-1/(exp
-w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1))`. -/
-@[dlmf 8.12.E9]
-theorem gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
-    gammaUniformC 0 w=1/(exp w-1)-1/gammaUniformEtaOnLog w ∧
-        gammaUniformC 1 w=1/gammaUniformEtaOnLog w^3-1/(exp w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1)) :=
-  IncompleteGammaUniform.gammaUniformC_first hw hw0
 
 /-- The normalized η coordinate is holomorphic throughout the zero-free strip. -/
 theorem IncompleteGammaUniform.gammaUniformEta_analyticOnNhd :

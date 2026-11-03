@@ -56,6 +56,104 @@ open DLMF.Confluent DLMF.Hypergeometric
 
 /-! ### §2.11(i) Numerical use of asymptotic expansions -/
 
+/-- The derivatives `h^{(n)}` of `h(t) = 1/(t² + 1)`. -/
+private noncomputable abbrev cosRationalDeriv (n : ℕ) : ℝ → ℝ :=
+  iteratedDeriv n (fun t : ℝ => 1 / (t ^ 2 + 1))
+
+/-- `h(t) = 1/(t² + 1)` is smooth. -/
+private lemma contDiff_cosRationalKernel : ContDiff ℝ ⊤ (fun t : ℝ => 1 / (t ^ 2 + 1)) := by
+  refine contDiff_const.div (by fun_prop) fun t => ?_
+  positivity
+
+/-- `h^{(n)}` has derivative `h^{(n+1)}`. -/
+private lemma hasDerivAt_cosRationalDeriv (n : ℕ) (t : ℝ) :
+    HasDerivAt (cosRationalDeriv n) (cosRationalDeriv (n + 1) t) t := by
+  have h := (contDiff_cosRationalKernel.differentiable_iteratedDeriv n
+    (WithTop.coe_lt_top _)).differentiableAt (x := t)
+  have e : cosRationalDeriv (n + 1) t = deriv (cosRationalDeriv n) t := by
+    simp only [cosRationalDeriv, iteratedDeriv_succ]
+  rw [e]
+  exact h.hasDerivAt
+
+/-- `h^{(n)}` is continuous. -/
+private lemma continuous_cosRationalDeriv (n : ℕ) : Continuous (cosRationalDeriv n) :=
+  continuous_iff_continuousAt.2 fun t => (hasDerivAt_cosRationalDeriv n t).continuousAt
+
+/-- The odd derivatives of the even function `h` vanish at `0`. -/
+private lemma cosRationalDeriv_odd_zero (k : ℕ) : cosRationalDeriv (2 * k + 1) 0 = 0 := by
+  have h := iteratedDeriv_comp_neg (2 * k + 1) (fun t : ℝ => 1 / (t ^ 2 + 1)) 0
+  simp only [neg_sq, neg_zero, smul_eq_mul] at h
+  rw [pow_succ, pow_mul] at h
+  norm_num at h
+  unfold cosRationalDeriv
+  simp only [one_div] at h ⊢
+  linarith
+
+/-- One step of the double integration by parts. -/
+private lemma integral_cos_mul_step (m : ℕ) (hm : 1 ≤ m) (n : ℕ) :
+    (∫ t in (0 : ℝ)..π, Real.cos (m * t) * cosRationalDeriv n t) +
+        1 / (m : ℝ) ^ 2 * ∫ t in (0 : ℝ)..π, Real.cos (m * t) * cosRationalDeriv (n + 2) t =
+      ((-1) ^ m * cosRationalDeriv (n + 1) π - cosRationalDeriv (n + 1) 0) / (m : ℝ) ^ 2 := by
+  have hm0 : (m : ℝ) ≠ 0 := by positivity
+  set F : ℝ → ℝ := fun t => Real.sin (m * t) * cosRationalDeriv n t / m +
+    Real.cos (m * t) * cosRationalDeriv (n + 1) t / (m : ℝ) ^ 2
+  have hF : ∀ t, HasDerivAt F (Real.cos (m * t) * cosRationalDeriv n t +
+      1 / (m : ℝ) ^ 2 * (Real.cos (m * t) * cosRationalDeriv (n + 2) t)) t := by
+    intro t
+    have hs : HasDerivAt (fun t => Real.sin (m * t)) (Real.cos (m * t) * m) t := by
+      simpa using ((hasDerivAt_id t).const_mul (m : ℝ)).sin
+    have hc : HasDerivAt (fun t => Real.cos (m * t)) (-Real.sin (m * t) * m) t := by
+      simpa using ((hasDerivAt_id t).const_mul (m : ℝ)).cos
+    have := ((hs.mul (hasDerivAt_cosRationalDeriv n t)).div_const (m : ℝ)).add
+      ((hc.mul (hasDerivAt_cosRationalDeriv (n + 1) t)).div_const ((m : ℝ) ^ 2))
+    convert this using 1
+    field_simp
+    ring
+  have hcont : Continuous fun t => Real.cos (m * t) * cosRationalDeriv n t +
+      1 / (m : ℝ) ^ 2 * (Real.cos (m * t) * cosRationalDeriv (n + 2) t) := by
+    have := continuous_cosRationalDeriv n; have := continuous_cosRationalDeriv (n + 2)
+    fun_prop
+  have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hF t)
+    (hcont.intervalIntegrable 0 π)
+  rw [intervalIntegral.integral_add, intervalIntegral.integral_const_mul] at h
+  · rw [h]
+    simp only [F, mul_zero, Real.sin_zero, Real.cos_zero, zero_mul, zero_div, one_mul, zero_add]
+    rw [Real.sin_nat_mul_pi, Real.cos_nat_mul_pi]
+    ring
+  · have := continuous_cosRationalDeriv n
+    exact Continuous.intervalIntegrable (by fun_prop) _ _
+  · have := continuous_cosRationalDeriv (n + 2)
+    exact Continuous.intervalIntegrable (by fun_prop) _ _
+
+/-- The exact expansion of `I(m)` with remainder after `N` steps of integration by parts. -/
+private lemma cosRationalIntegral_eq_sum (m : ℕ) (hm : 1 ≤ m) (N : ℕ) :
+    cosRationalIntegral m = ∑ k ∈ Finset.range N,
+        (-1) ^ m * cosRationalCoeff (k + 1) π / (m : ℝ) ^ (2 * k + 2) +
+      (-1) ^ N * (∫ t in (0 : ℝ)..π, Real.cos (m * t) * cosRationalDeriv (2 * N) t) /
+        (m : ℝ) ^ (2 * N) := by
+  have hm0 : (m : ℝ) ≠ 0 := by positivity
+  induction N with
+  | zero =>
+    simp only [Finset.range_zero, Finset.sum_empty, pow_zero, mul_zero, one_mul, div_one,
+      zero_add, cosRationalIntegral, cosRationalDeriv, iteratedDeriv_zero]
+    refine intervalIntegral.integral_congr fun t _ => ?_
+    simp only [div_eq_mul_one_div (Real.cos _)]
+  | succ N ih =>
+    rw [ih, Finset.sum_range_succ]
+    have hstep := integral_cos_mul_step m hm (2 * N)
+    rw [cosRationalDeriv_odd_zero, show 2 * N + 2 = 2 * (N + 1) by ring] at hstep
+    have hq : cosRationalCoeff (N + 1) π = (-1) ^ N * cosRationalDeriv (2 * N + 1) π := by
+      rw [cosRationalCoeff, show 2 * (N + 1) - 1 = 2 * N + 1 by omega, pow_succ, pow_succ]
+      simp [cosRationalDeriv]
+    rw [hq]
+    set J := ∫ t in (0 : ℝ)..π, Real.cos (m * t) * cosRationalDeriv (2 * N) t
+    set J' := ∫ t in (0 : ℝ)..π, Real.cos (m * t) * cosRationalDeriv (2 * (N + 1)) t
+    have hJ : J = ((-1) ^ m * cosRationalDeriv (2 * N + 1) π) / (m : ℝ) ^ 2 -
+        1 / (m : ℝ) ^ 2 * J' := by linear_combination hstep
+    rw [hJ]
+    field_simp
+    ring
+
 /-- DLMF 2.11.1–2.11.2: as the integer `m → ∞`, `I(m) ∼ (-1)^m ∑_{s ≥ 1} q_s(π)/m^{2s}`
 (scale `(-1)^m m^{-2s}`, `s = 0, 1, …`, with zero coefficient for `s = 0`). -/
 @[dlmf 2.11.E1, dlmf 2.11.E2]
@@ -63,7 +161,59 @@ theorem cosRationalIntegral_asymptotic :
     HasAsymptoticExpansion atTop (fun (s m : ℕ) => ((-1 : ℝ) ^ m / (m : ℝ) ^ (2 * s)))
       (fun s => if s = 0 then 0 else cosRationalCoeff s π)
       (fun m : ℕ => cosRationalIntegral m) := by
-  sorry
+  intro N
+  set C : ℕ → ℝ := fun n => ∫ t in (0 : ℝ)..π, |cosRationalDeriv (2 * n) t|
+  have hJ : ∀ n (m : ℕ), |∫ t in (0 : ℝ)..π, Real.cos (m * t) * cosRationalDeriv (2 * n) t| ≤
+      C n := by
+    intro n m
+    have h := intervalIntegral.norm_integral_le_integral_norm (μ := volume)
+      (f := fun t => Real.cos (m * t) * cosRationalDeriv (2 * n) t) Real.pi_pos.le
+    refine h.trans (intervalIntegral.integral_mono_on Real.pi_pos.le ?_ ?_ fun t _ => ?_)
+    · have := continuous_cosRationalDeriv (2 * n)
+      exact Continuous.intervalIntegrable (by fun_prop) _ _
+    · have := continuous_cosRationalDeriv (2 * n)
+      exact Continuous.intervalIntegrable (by fun_prop) _ _
+    · rw [Real.norm_eq_abs, abs_mul]
+      exact mul_le_of_le_one_left (abs_nonneg _) (Real.abs_cos_le_one _)
+  cases N with
+  | zero =>
+    refine IsBigO.of_bound (C 0) ?_
+    filter_upwards [eventually_ge_atTop 1] with m hm
+    have h := cosRationalIntegral_eq_sum m hm 0
+    simp only [Finset.range_zero, Finset.sum_empty, pow_zero, mul_zero, one_mul, div_one,
+      zero_add] at h
+    simp only [Finset.range_zero, Finset.sum_empty, sub_zero, mul_zero, pow_zero, div_one,
+      Real.norm_eq_abs, abs_pow, abs_neg, abs_one, one_pow, mul_one]
+    rw [h]; exact hJ 0 m
+  | succ M =>
+    refine IsBigO.of_bound (|cosRationalCoeff (M + 1) π| + C (M + 1)) ?_
+    filter_upwards [eventually_ge_atTop 1] with m hm
+    have hm0 : (0 : ℝ) < m := by exact_mod_cast hm
+    have h := cosRationalIntegral_eq_sum m hm (M + 1)
+    have hsum : ∑ n ∈ Finset.range (M + 1), ((-1 : ℝ) ^ m / (m : ℝ) ^ (2 * n)) •
+        (if n = 0 then 0 else cosRationalCoeff n π) = ∑ k ∈ Finset.range M,
+        (-1) ^ m * cosRationalCoeff (k + 1) π / (m : ℝ) ^ (2 * k + 2) := by
+      rw [Finset.sum_range_succ']
+      simp only [Nat.succ_ne_zero, ↓reduceIte, smul_eq_mul, mul_zero, add_zero]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      rw [show 2 * (k + 1) = 2 * k + 2 by ring]; ring
+    rw [hsum, h, Finset.sum_range_succ]
+    have hp : (0 : ℝ) < (m : ℝ) ^ (2 * (M + 1)) := by positivity
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_div, abs_pow, abs_neg, abs_one, one_pow,
+      abs_of_pos hp, show 2 * M + 2 = 2 * (M + 1) by ring]
+    set J := ∫ t in (0 : ℝ)..π, Real.cos (m * t) * cosRationalDeriv (2 * (M + 1)) t
+    have e : (-1) ^ m * cosRationalCoeff (M + 1) π / (m : ℝ) ^ (2 * (M + 1)) +
+        (-1) ^ (M + 1) * J / (m : ℝ) ^ (2 * (M + 1)) =
+        ((-1) ^ m * cosRationalCoeff (M + 1) π + (-1) ^ (M + 1) * J) /
+          (m : ℝ) ^ (2 * (M + 1)) := by ring
+    rw [show ∀ S a b : ℝ, S + a + b - S = a + b from fun _ _ _ => by ring, e, abs_div,
+      abs_of_pos hp, div_le_iff₀ hp]
+    have h1 := hJ (M + 1) m
+    calc |(-1) ^ m * cosRationalCoeff (M + 1) π + (-1) ^ (M + 1) * J|
+        ≤ |(-1) ^ m * cosRationalCoeff (M + 1) π| + |(-1) ^ (M + 1) * J| := abs_add_le _ _
+      _ = |cosRationalCoeff (M + 1) π| + |J| := by simp [abs_mul]
+      _ ≤ |cosRationalCoeff (M + 1) π| + C (M + 1) := by linarith
+      _ = _ := by field_simp
 
 /-- DLMF 2.11.3: `q₁(t) = -2t/(t²+1)²`, `q₂(t) = 24(t³-t)/(t²+1)⁴`,
 `q₃(t) = -240(3t⁵-10t³+3t)/(t²+1)⁶`. -/

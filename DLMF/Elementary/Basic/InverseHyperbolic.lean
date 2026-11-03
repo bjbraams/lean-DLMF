@@ -23,8 +23,8 @@ agreement with Mathlib's real inverse functions on the uncut real intervals, and
 * `arccoth_eq_inv`: `arccoth z = arctanh z⁻¹` (DLMF 4.37.9).
 * `Hyperbolic.sinh_arcsinh`, `Hyperbolic.cosh_arccosh`: the inverse equations.
 * `Hyperbolic.arcsinh_rotation`: `arcsinh z = i arcsin(-i z)`.
-* `Hyperbolic.hasDerivAt_arcsinh`, `hasDerivAt_arccosh_of_mem`, `Hyperbolic.hasDerivAt_arctanh`:
-  derivatives on the cut domains.
+* `hasDerivAt_arcsinh`, `hasDerivAt_arccosh_of_mem`, `hasDerivAt_arctanh`:
+  derivatives on the cut domains (DLMF 4.38.9, 4.38.11).
 * `arcsinh_analytic`, `arccosh_analytic`, `arctanh_analytic`, `arccsch_analytic`,
   `arcsech_analytic`, `arccoth_analytic`: analyticity on precisely the open cut domains.
 * `arcsinh_branch_points`, `arccosh_branch_points`, `arctanh_branch_points`,
@@ -141,9 +141,10 @@ theorem arcsinhDomain_eq_arctanCutPlane : arcsinhDomain = arctanCutPlane := rfl
 private lemma Hyperbolic.asinh_coord {z:ℂ} (hz:z∈arcsinhDomain) : -I*z∈arcsinCutPlane := by
   simpa [arcsinhDomain,arcsinCutPlane,Complex.mul_re,Complex.mul_im] using hz
 
-/-- The inverse-sinh derivative follows from the proved rotated inverse-sine derivative. -/
-lemma Hyperbolic.hasDerivAt_arcsinh {z:ℂ} (hz:z∈arcsinhDomain) :
-    HasDerivAt arcsinh (Complex.sqrt (1+z^2))⁻¹ z := by
+/-- At `z`, the function `arcsinh` has derivative `((Complex.sqrt (1+z^2))⁻¹)`. -/
+@[dlmf 4.38.E9]
+theorem hasDerivAt_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) : HasDerivAt arcsinh
+    ((Complex.sqrt (1+z^2))⁻¹) z := by
   have hd:=((Trigonometric.hasDerivAt_arcsin (Hyperbolic.asinh_coord hz)).comp z
     ((hasDerivAt_id z).const_mul (-I))).const_mul I
   convert hd using 1
@@ -222,9 +223,9 @@ private lemma Hyperbolic.atanh_nonzero {z:ℂ} (hz:z∈arctanhDomain) : 1+z≠0 
     rw [he] at hz
     norm_num [arctanhDomain] at hz
 
-/-- Differentiate the principal inverse-tanh logarithm on its full cut plane. -/
-lemma Hyperbolic.hasDerivAt_arctanh {z:ℂ} (hz:z∈arctanhDomain) :
-    HasDerivAt arctanh (1/(1-z^2)) z := by
+/-- At `z`, the function `arctanh` has derivative `(1/(1-z^2))`. -/
+@[dlmf 4.38.E11]
+theorem hasDerivAt_arctanh {z : ℂ} (hz : z∈arctanhDomain) : HasDerivAt arctanh (1/(1-z^2)) z := by
   obtain ⟨hp,hm⟩:=Hyperbolic.atanh_nonzero hz
   have hd0:=((hasDerivAt_id z).const_add 1).div ((hasDerivAt_id z).const_sub 1) hm
   have hd:=((Complex.hasDerivAt_log (Hyperbolic.atanh_slit hz)).comp z hd0).div_const 2
@@ -265,7 +266,7 @@ theorem arcsinh_analytic  : AnalyticOnNhd ℂ arcsinh arcsinhDomain := by
     exact (isOpen_ne.preimage Complex.continuous_re).union
       (isOpen_lt (continuous_abs.comp Complex.continuous_im) continuous_const)
   exact (show DifferentiableOn ℂ arcsinh arcsinhDomain from fun z hz=>
-    (Hyperbolic.hasDerivAt_arcsinh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
+    (hasDerivAt_arcsinh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
 
 /-- Both linear factors of the factored inverse-cosh root lie in the principal slit plane. -/
 lemma sub_one_add_one_mem_slitPlane_of_mem_arccoshDomain {z : ℂ} (hz : z ∈ arccoshDomain) :
@@ -362,7 +363,7 @@ theorem arctanh_analytic  : AnalyticOnNhd ℂ arctanh arctanhDomain := by
     exact (isOpen_ne.preimage Complex.continuous_im).union
       (isOpen_lt (continuous_abs.comp Complex.continuous_re) continuous_const)
   exact (show DifferentiableOn ℂ arctanh arctanhDomain from fun z hz=>
-    (Hyperbolic.hasDerivAt_arctanh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
+    (hasDerivAt_arctanh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
 
 /-- Analyticity of the principal inverse on precisely its open cut domain. -/
 theorem arccsch_analytic  : AnalyticOnNhd ℂ arccsch arccschDomain := by

@@ -109,16 +109,7 @@ theorem card_latticePaths_peaks_eq_narayana {n : ℕ} (hn : 1 ≤ n) (k : ℕ) :
       narayana n k := by
   sorry
 
-/-- DLMF §26.6(i): the Schröder number `r(n)` (Mathlib `Nat.largeSchroder n`) is the number of
-paths from `(0, 0)` to `(n, n)` with steps `(1, 0)`, `(0, 1)`, `(1, 1)` that stay on or above
-`y = x`. -/
-@[dlmf 26.6.i]
-theorem card_latticePaths_above_eq_largeSchroder (n : ℕ) :
-    #{l ∈ latticePaths {(1, 0), (0, 1), (1, 1)} n n | StaysWeaklyAboveDiagonal l} =
-      Nat.largeSchroder n := by
-  sorry
-
-/-! ### Helpers (agent p26a) -/
+/-! ### Helpers -/
 
 /-- A function satisfying the Delannoy boundary values and recurrence is `delannoy`. -/
 private lemma eq_delannoy_of_rec (f : ℕ → ℕ → ℕ) (h0 : ∀ n, f 0 n = 1) (h1 : ∀ m, f m 0 = 1)
@@ -493,6 +484,168 @@ theorem largeSchroder_eq_delannoy_sub {n : ℕ} (hn : 1 ≤ n) :
     refine sum_congr rfl fun k _ => ?_
     rw [hcat]; ring
   exact_mod_cast h
+
+/-! ### Schröder paths by the reflection principle -/
+
+/-- `(0, 0)` is not a Delannoy step. -/
+private lemma zero_not_mem_delannoySteps :
+    (0, 0) ∉ ({(1, 0), (0, 1), (1, 1)} : Finset (ℕ × ℕ)) := by
+  decide
+
+/-- The number of paths with steps `(1, 0)`, `(0, 1)`, `(1, 1)` to `(m, n)` staying in
+`x ≤ y + d`. -/
+private def schroderCount (d : ℤ) (m n : ℕ) : ℕ :=
+  #{l ∈ latticePaths {(1, 0), (0, 1), (1, 1)} m n | StaysAbove d l}
+
+/-- A path stays in `x ≤ y + d` iff the origin does and the rest stays in the shifted
+half-plane. -/
+private lemma staysAbove_cons_iff (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
+    StaysAbove d (s :: l) ↔ 0 ≤ d ∧ StaysAbove (d + s.2 - s.1) l := by
+  simp only [StaysAbove, mem_range, List.length_cons]
+  constructor
+  · intro h
+    refine ⟨by simpa using h 0 (by omega), fun i hi => ?_⟩
+    have := h (i + 1) (by omega)
+    simp only [List.take_succ_cons, List.sum_cons, Prod.fst_add, Prod.snd_add] at this
+    push_cast at this
+    linarith
+  · rintro ⟨hd, h⟩ i hi
+    rcases i with _ | i
+    · simpa using hd
+    · have := h i (by omega)
+      simp only [List.take_succ_cons, List.sum_cons, Prod.fst_add, Prod.snd_add]
+      push_cast
+      linarith
+
+private lemma schroderCount_of_neg {d : ℤ} (hd : d < 0) (m n : ℕ) :
+    schroderCount d m n = 0 := by
+  rw [schroderCount, card_eq_zero, filter_eq_empty_iff]
+  intro l _ h
+  have := h 0 (by simp)
+  simp at this; omega
+
+private lemma schroderCount_zero_zero {d : ℤ} (hd : 0 ≤ d) : schroderCount d 0 0 = 1 := by
+  rw [schroderCount, latticePaths_zero_zero zero_not_mem_delannoySteps, filter_singleton]
+  have : StaysAbove d [] := by simpa [StaysAbove] using hd
+  simp [this]
+
+private lemma schroderCount_eq_sum {d : ℤ} (hd : 0 ≤ d) {m n : ℕ} (hmn : (m, n) ≠ (0, 0)) :
+    schroderCount d m n = ∑ s ∈ ({(1, 0), (0, 1), (1, 1)} : Finset (ℕ × ℕ)).filter
+      (fun s => s.1 ≤ m ∧ s.2 ≤ n), schroderCount (d + s.2 - s.1) (m - s.1) (n - s.2) := by
+  rw [schroderCount, card_filter_latticePaths zero_not_mem_delannoySteps hmn]
+  refine sum_congr rfl fun s _ => ?_
+  rw [schroderCount]
+  congr 1
+  refine filter_congr fun l _ => ?_
+  rw [staysAbove_cons_iff]
+  simp [hd]
+
+private lemma schroderCount_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :
+    schroderCount d (m + 1) (n + 1) = schroderCount (d - 1) m (n + 1) +
+      schroderCount (d + 1) (m + 1) n + schroderCount d m n := by
+  rw [schroderCount_eq_sum hd (by simp),
+    show ({(1, 0), (0, 1), (1, 1)} : Finset (ℕ × ℕ)).filter
+      (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ n + 1) = {(1, 0), (0, 1), (1, 1)} by
+    ext ⟨a, b⟩; simp only [mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]; omega]
+  rw [sum_insert (by decide), sum_pair (by decide)]
+  simp only [Nat.cast_zero, Nat.cast_one, add_zero, Nat.add_sub_cancel, Nat.sub_zero, sub_zero,
+    add_sub_cancel_right, add_assoc]
+
+private lemma schroderCount_zero_succ {d : ℤ} (hd : 0 ≤ d) (n : ℕ) :
+    schroderCount d 0 (n + 1) = schroderCount (d + 1) 0 n := by
+  rw [schroderCount_eq_sum hd (by simp),
+    show ({(1, 0), (0, 1), (1, 1)} : Finset (ℕ × ℕ)).filter
+      (fun s => s.1 ≤ 0 ∧ s.2 ≤ n + 1) = {(0, 1)} by
+    ext ⟨a, b⟩; simp only [mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]; omega]
+  simp
+
+private lemma schroderCount_succ_zero {d : ℤ} (hd : 0 ≤ d) (m : ℕ) :
+    schroderCount d (m + 1) 0 = schroderCount (d - 1) m 0 := by
+  rw [schroderCount_eq_sum hd (by simp),
+    show ({(1, 0), (0, 1), (1, 1)} : Finset (ℕ × ℕ)).filter
+      (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ 0) = {(1, 0)} by
+    ext ⟨a, b⟩; simp only [mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]; omega]
+  simp
+
+/-- The reflection count: Schröder-type paths to `(m, n)` staying in `x ≤ y + d`, `m ≤ n + d`,
+number `D(m, n) - D(m-d-1, n+d+1)`. -/
+private lemma schroderCount_eq_delannoy_sub (N : ℕ) : ∀ (d m n : ℕ), m + n = N → m ≤ n + d →
+    (schroderCount d m n : ℤ) =
+      delannoy m n - if d < m then (delannoy (m - d - 1) (n + d + 1) : ℤ) else 0 := by
+  induction N using Nat.strong_induction_on with
+  | _ N ih =>
+    intro d m n h hle
+    rcases m with _ | m
+    · rcases n with _ | n
+      · simp [schroderCount_zero_zero (Int.natCast_nonneg d)]
+      rw [schroderCount_zero_succ (Int.natCast_nonneg d),
+        show (d : ℤ) + 1 = ((d + 1 : ℕ) : ℤ) by push_cast; ring,
+        ih _ (by omega) (d + 1) 0 n rfl (by omega)]
+      simp
+    rcases n with _ | n
+    · obtain ⟨d, rfl⟩ : ∃ d', d = d' + 1 := ⟨d - 1, by omega⟩
+      rw [schroderCount_succ_zero (Int.natCast_nonneg _),
+        show ((d + 1 : ℕ) : ℤ) - 1 = (d : ℤ) by push_cast; ring,
+        ih _ (by omega) d m 0 rfl (by omega)]
+      simp [show ¬ d + 1 < m + 1 by omega, show ¬ d < m by omega]
+    rw [schroderCount_succ_succ (Int.natCast_nonneg _)]
+    push_cast
+    rcases d with _ | d
+    · rw [schroderCount_of_neg (by norm_num), show ((0 : ℕ) : ℤ) + 1 = ((1 : ℕ) : ℤ) by norm_num,
+        ih _ (by omega) 1 (m + 1) n rfl (by omega), ih _ (by omega) 0 m n rfl (by omega),
+        delannoy_succ_succ]
+      rcases m with _ | m
+      · simp
+      · simp only [show 1 < m + 1 + 1 by omega, show 0 < m + 1 + 1 by omega,
+          show 0 < m + 1 by omega, ite_true]
+        rw [show m + 1 + 1 - 0 - 1 = m + 1 by omega, show m + 1 + 1 - 1 - 1 = m by omega,
+          show m + 1 - 0 - 1 = m by omega, show n + 1 + 0 + 1 = n + 1 + 1 by omega,
+          show n + 1 + 1 = n + 2 by omega, show n + 0 + 1 = n + 1 by omega,
+          delannoy_succ_succ m (n + 1)]
+        push_cast; ring
+    · rw [show ((d + 1 : ℕ) : ℤ) - 1 = ((d : ℕ) : ℤ) by push_cast; ring,
+        show ((d + 1 : ℕ) : ℤ) + 1 = ((d + 2 : ℕ) : ℤ) by push_cast; ring,
+        ih _ (by omega) d m (n + 1) rfl (by omega),
+        ih _ (by omega) (d + 2) (m + 1) n rfl (by omega),
+        ih _ (by omega) (d + 1) m n rfl (by omega), delannoy_succ_succ]
+      by_cases hdm : d < m
+      · obtain ⟨e, rfl⟩ : ∃ e, m = d + 1 + e := ⟨m - d - 1, by omega⟩
+        simp only [hdm, show d + 1 < d + 1 + e + 1 by omega, ite_true]
+        rw [show d + 1 + e - d - 1 = e by omega, show d + 1 + e + 1 - (d + 1) - 1 = e by omega]
+        rcases e with _ | e
+        · simp only [show ¬ d + 2 < d + 1 + 0 + 1 by omega, show ¬ d + 1 < d + 1 + 0 by omega,
+            ite_false, delannoy_zero_left]
+          push_cast; ring
+        · simp only [show d + 2 < d + 1 + (e + 1) + 1 by omega,
+            show d + 1 < d + 1 + (e + 1) by omega,
+            ite_true, show d + 1 + (e + 1) + 1 - (d + 2) - 1 = e by omega,
+            show d + 1 + (e + 1) - (d + 1) - 1 = e by omega]
+          rw [show n + 1 + (d + 1) + 1 = (n + (d + 2)) + 1 by omega,
+            show n + (d + 2) + 1 = (n + (d + 2)) + 1 by omega,
+            show n + (d + 1) + 1 = n + (d + 2) by omega,
+            show n + 1 + d + 1 = n + (d + 2) by omega, delannoy_succ_succ e (n + (d + 2))]
+          push_cast; ring
+      · simp only [hdm, show ¬ d + 1 < m + 1 by omega, show ¬ d + 2 < m + 1 by omega,
+          show ¬ d + 1 < m by omega, ite_false]
+        push_cast; ring
+
+/-- DLMF §26.6(i): the Schröder number `r(n)` (Mathlib `Nat.largeSchroder n`) is the number of
+paths from `(0, 0)` to `(n, n)` with steps `(1, 0)`, `(0, 1)`, `(1, 1)` that stay on or above
+`y = x`. -/
+@[dlmf 26.6.i]
+theorem card_latticePaths_above_eq_largeSchroder (n : ℕ) :
+    #{l ∈ latticePaths {(1, 0), (0, 1), (1, 1)} n n | StaysWeaklyAboveDiagonal l} =
+      Nat.largeSchroder n := by
+  have h := schroderCount_eq_delannoy_sub (n + n) 0 n n rfl (by omega)
+  simp only [schroderCount, Nat.cast_zero, staysAbove_zero_iff] at h
+  rcases n with _ | n
+  · simpa using h
+  · have h2 := largeSchroder_eq_delannoy_sub (n := n + 1) (by omega)
+    simp only [show 0 < n + 1 by omega, ite_true, Nat.add_sub_cancel, Nat.sub_zero,
+      add_zero] at h h2
+    rw [delannoy_comm n (n + 1 + 1)] at h
+    exact_mod_cast h.trans h2.symm
+
 
 /-! ### Generating functions (§26.6(ii)) -/
 

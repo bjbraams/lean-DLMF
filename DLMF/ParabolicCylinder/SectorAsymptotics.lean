@@ -92,7 +92,7 @@ theorem CylinderSectorAsymptotics.sum_gaussCoeff (t : ℂ) (M : ℕ) :
     ring
 
 /-- Taylor remainders of `e^{-t²/2}` along a ray. -/
-theorem CylinderSectorAsymptotics.gauss_sub_sum_isBigO (θ : ℝ) (N : ℕ) :
+theorem CylinderSectorAsymptotics.cexp_neg_sq_div_two_sub_sum_isBigO (θ : ℝ) (N : ℕ) :
     (fun r : ℝ => cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 2)) - ∑ n ∈ Finset.range N,
       ((r : ℂ) * exp (θ * I)) ^ n *
           CylinderSectorAsymptotics.gaussCoeff n) =O[𝓝[>] 0] fun r => r ^ N := by
@@ -333,7 +333,8 @@ theorem CylinderSectorAsymptotics.integral_rotate {a : ℂ} (ha : -1 / 2 < a.re)
 /-! ### Watson's lemma along rotated rays -/
 
 /-- `|(r e^{iy})^w| ≤ e^{π |im w|} r^{re w}` for `r > 0`, `|y| ≤ π`. -/
-theorem CylinderSectorAsymptotics.norm_cpow_le (w : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy1 : -π < y)
+theorem CylinderSectorAsymptotics.norm_mul_exp_cpow_le (w : ℂ) {r : ℝ} (hr : 0 < r)
+    {y : ℝ} (hy1 : -π < y)
     (hy2 : y ≤ π) :
     ‖((r : ℂ) * exp (y * I)) ^ w‖ ≤ Real.exp (π * |w.im|) * r ^ w.re := by
   rw [Complex.ofReal_mul_exp_cpow hr hy1 hy2, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos hr,
@@ -362,9 +363,9 @@ theorem CylinderSectorAsymptotics.kernel_sub_sum_isBigO (μ : ℂ) {θ : ℝ} (h
     filter_upwards [self_mem_nhdsWithin] with r hr
     have hr : (0 : ℝ) < r := hr
     rw [Real.norm_of_nonneg (Real.rpow_nonneg hr.le _)]
-    have := CylinderSectorAsymptotics.norm_cpow_le (μ - 1) hr hθ1 hθ2
+    have := CylinderSectorAsymptotics.norm_mul_exp_cpow_le (μ - 1) hr hθ1 hθ2
     simpa using this
-  refine ((h1.mul (CylinderSectorAsymptotics.gauss_sub_sum_isBigO θ N)).congr' ?_ ?_)
+  refine ((h1.mul (CylinderSectorAsymptotics.cexp_neg_sq_div_two_sub_sum_isBigO θ N)).congr' ?_ ?_)
   · filter_upwards [self_mem_nhdsWithin] with r hr
     have hr : (0 : ℝ) < r := hr
     have ht : (r : ℂ) * exp (θ * I) ≠ 0 :=

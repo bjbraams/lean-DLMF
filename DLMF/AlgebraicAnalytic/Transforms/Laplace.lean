@@ -664,6 +664,23 @@ theorem laplaceTransform_deriv {f f' : ℝ → ℂ} {α : ℝ} (hf : ContinuousO
   change laplaceTransform f' s - s * laplaceTransform f s = -f 0 at he
   linear_combination he
 
+/-- Strict monotonicity of the jump points from the consecutive inequalities. -/
+private lemma jumpPoint_lt {τ : ℕ → ℝ} {n : ℕ} (hτ : ∀ k < n, τ k < τ (k + 1)) {i j : ℕ}
+    (hij : i < j) (hj : j ≤ n) : τ i < τ j := by
+  induction j with
+  | zero => omega
+  | succ j ih =>
+    rcases Nat.lt_succ_iff_lt_or_eq.1 hij with h | h
+    · exact (ih h (by omega)).trans (hτ j (by omega))
+    · subst h; exact hτ i (by omega)
+
+/-- Monotonicity of the jump points. -/
+private lemma jumpPoint_le {τ : ℕ → ℝ} {n : ℕ} (hτ : ∀ k < n, τ k < τ (k + 1)) {i j : ℕ}
+    (hij : i ≤ j) (hj : j ≤ n) : τ i ≤ τ j := by
+  rcases hij.lt_or_eq with h | h
+  · exact (jumpPoint_lt hτ h hj).le
+  · rw [h]
+
 /-- DLMF 1.14.28: if `f` has jump discontinuities at `0 = t₀ < t₁ < ⋯ < tₙ` and is differentiable
 elsewhere on `(0, ∞)` with locally integrable derivative `f'`, then
 `𝓛(f')(s) = s 𝓛(f)(s) - f(0+) - ∑_{k=1}^{n} e^{-s t_k}(f(t_k+) - f(t_k-))`. -/
@@ -677,7 +694,81 @@ theorem laplaceTransform_deriv_of_jumps {f f' : ℝ → ℂ} {α : ℝ} {n : ℕ
     (hm : ∀ k ≤ n, 0 < k → Tendsto f (𝓝[<] (τ k)) (𝓝 (fm k))) {s : ℂ} (hs : α < s.re) :
     laplaceTransform f' s = s * laplaceTransform f s - fp 0 -
       ∑ k ∈ Finset.Icc 1 n, cexp (-s * τ k) * (fp k - fm k) := by
-  sorry
+  set g : ℝ → ℂ := fun t => cexp (-s * t) * f t with hgdef
+  set G : ℝ → ℂ := fun t => cexp (-s * t) * f' t - s * (cexp (-s * t) * f t) with hGdef
+  have hfi := integrableOn_laplace_integrand hf hg hs
+  have hf'i := integrableOn_laplace_integrand hf' hg' hs
+  have hGi : IntegrableOn G (Ioi 0) := hf'i.sub (hfi.const_mul s)
+  have hGint : ∫ t in Ioi (0 : ℝ), G t = laplaceTransform f' s - s * laplaceTransform f s := by
+    rw [integral_sub hf'i (hfi.const_mul s), integral_const_mul]; rfl
+  have hd : ∀ t, 0 < t → t ∉ τ '' (Finset.range (n + 1) : Set ℕ) → HasDerivAt g (G t) t := by
+    intro t ht htn
+    convert! (((Complex.ofRealCLM.hasDerivAt (x := t)).const_mul (-s)).cexp.mul
+      (hderiv t ht htn)) using 1
+    simp [hGdef, Complex.ofRealCLM_apply]
+    ring
+  have hτnn : ∀ k ≤ n, 0 ≤ τ k := fun k hk => hτ0 ▸ jumpPoint_le hτ (Nat.zero_le k) hk
+  have hexp : ∀ a : ℝ, Tendsto (fun t : ℝ => cexp (-s * t)) (𝓝 a) (𝓝 (cexp (-s * a))) :=
+    fun a => ((by fun_prop : Continuous fun t : ℝ => cexp (-s * t)).tendsto a)
+  -- values off the jump points between consecutive jumps
+  have hoff : ∀ k < n, ∀ t ∈ Ioo (τ k) (τ (k + 1)), t ∉ τ '' (Finset.range (n + 1) : Set ℕ) := by
+    rintro k hk t ⟨h1, h2⟩ ⟨j, hj, rfl⟩
+    have hj : j ≤ n := by simpa [Nat.lt_succ_iff] using hj
+    rcases le_or_gt j k with hjk | hjk
+    · exact absurd (jumpPoint_le hτ hjk hk.le) (not_le.2 h1)
+    · exact absurd (jumpPoint_le hτ (Nat.succ_le_of_lt hjk) hj) (not_le.2 h2)
+  have hpiece : ∀ k < n, ∫ t in τ k..τ (k + 1), G t =
+      cexp (-s * τ (k + 1)) * fm (k + 1) - cexp (-s * τ k) * fp k := by
+    intro k hk
+    refine intervalIntegral.integral_eq_sub_of_hasDerivAt_of_tendsto (hτ k hk)
+      (fun t ht => hd t ((hτnn k hk.le).trans_lt ht.1) (hoff k hk t ht)) ?_ ?_ ?_
+    · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (hτ k hk).le]
+      exact hGi.mono_set fun t ht => (hτnn k hk.le).trans_lt ht.1
+    · exact ((hexp _).mono_left nhdsWithin_le_nhds).mul (hp k hk.le)
+    · exact ((hexp _).mono_left nhdsWithin_le_nhds).mul (hm (k + 1) hk (Nat.succ_pos k))
+  have htail : ∫ t in Ioi (τ n), G t = -(cexp (-s * τ n) * fp n) := by
+    have hlim : Tendsto g (𝓝[>] τ n) (𝓝 (cexp (-s * τ n) * fp n)) :=
+      ((hexp _).mono_left nhdsWithin_le_nhds).mul (hp n le_rfl)
+    have h := integral_Ioi_of_hasDerivAt_of_tendsto
+      (f := Function.update g (τ n) (cexp (-s * τ n) * fp n)) (f' := G) (a := τ n) (m := 0)
+      ?_ ?_ (hGi.mono_set (Ioi_subset_Ioi (hτnn n le_rfl))) ?_
+    · simpa using h
+    · rw [continuousWithinAt_update_same]
+      exact hlim.mono_left (nhdsWithin_mono _ fun t ht => lt_of_le_of_ne ht.1 (Ne.symm ht.2))
+    · intro t ht
+      refine (hd t ((hτnn n le_rfl).trans_lt ht) ?_).congr_of_eventuallyEq ?_
+      · rintro ⟨j, hj, rfl⟩
+        have hj : j ≤ n := by simpa [Nat.lt_succ_iff] using hj
+        exact absurd (jumpPoint_le hτ hj le_rfl) (not_le.2 ht)
+      · filter_upwards [Ioi_mem_nhds ht] with u hu
+        exact Function.update_of_ne (show τ n < u from hu).ne' _ _
+    · refine (laplace_integrand_tendsto_zero hg hs).congr' ?_
+      filter_upwards [Ioi_mem_atTop (τ n)] with u hu
+      exact (Function.update_of_ne (show τ n < u from hu).ne' (cexp (-s * τ n) * fp n) g).symm
+  have hsplit : ∫ t in Ioi (0 : ℝ), G t =
+      (∑ k ∈ Finset.range n, ∫ t in τ k..τ (k + 1), G t) + ∫ t in Ioi (τ n), G t := by
+    have hII : ∀ k < n, IntervalIntegrable G volume (τ k) (τ (k + 1)) := by
+      intro k hk
+      rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (hτ k hk).le]
+      exact hGi.mono_set fun t ht => (hτnn k hk.le).trans_lt ht.1
+    rw [intervalIntegral.sum_integral_adjacent_intervals hII, hτ0]
+    exact (intervalIntegral.integral_interval_add_Ioi hGi
+      (hGi.mono_set (Ioi_subset_Ioi (hτ0 ▸ hτnn n le_rfl)))).symm
+  have hps : ∑ k ∈ Finset.range n, ∫ t in τ k..τ (k + 1), G t = ∑ k ∈ Finset.range n,
+      (cexp (-s * τ (k + 1)) * fm (k + 1) - cexp (-s * τ k) * fp k) :=
+    Finset.sum_congr rfl fun k hk => hpiece k (Finset.mem_range.1 hk)
+  rw [hps, htail] at hsplit
+  rw [hGint] at hsplit
+  have hsum : ∀ m ≤ n, ∑ k ∈ Finset.range m,
+      (cexp (-s * τ (k + 1)) * fm (k + 1) - cexp (-s * τ k) * fp k) - cexp (-s * τ m) * fp m =
+      -fp 0 - ∑ k ∈ Finset.Icc 1 m, cexp (-s * τ k) * (fp k - fm k) := by
+    intro m _
+    induction m with
+    | zero => simp [hτ0]
+    | succ m ih =>
+      rw [Finset.sum_range_succ, Finset.sum_Icc_succ_top (by omega)]
+      linear_combination ih (by omega)
+  linear_combination hsplit + hsum n le_rfl
 
 /-- DLMF 1.14.29: if `f, f', …, f^{(n-1)}` are continuous on `[0, ∞)` and of exponential growth,
 and `f^{(n)}` is locally integrable (and of exponential growth), then

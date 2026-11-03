@@ -474,6 +474,45 @@ theorem symEllIntRF_symEllIntRG_complete_bounds {x y : ℝ} (hx : 0 < x) (hy : 0
     nlinarith [mul_lt_mul_of_pos_left h.1 (div_pos this (by norm_num : (0:ℝ)<8))]
   · nlinarith [mul_lt_mul_of_pos_left h.2 Real.pi_pos]
 
+/-- `R_G(0, y, z)/R_F(0, y, z) = (z/2) E(k)/K(k)` with `k = √(1 - y/z)`, for `0 < y < z`. -/
+private lemma symEllIntRG_div_symEllIntRF_zero {y z : ℝ} (hy : 0 < y) (hyz : y < z) :
+    (symEllIntRG 0 y z).re / (symEllIntRF 0 y z).re =
+      z / 2 * ((compEllIntEk (√(1 - y / z))).re / (compEllIntKk (√(1 - y / z))).re) := by
+  have hz : 0 < z := hy.trans hyz
+  have hsz : 0 < √z := Real.sqrt_pos.mpr hz
+  set k := √(1 - y / z) with hk
+  have hb : 0 < 1 - y / z := sub_pos.mpr ((div_lt_one hz).mpr hyz)
+  have hk0 : 0 < k := Real.sqrt_pos.mpr hb
+  have hk2' : k ^ 2 = 1 - y / z := Real.sq_sqrt hb.le
+  have hk2 : k ^ 2 < 1 := by rw [hk2']; linarith [div_pos hy hz]
+  have hRF : symEllIntRF 0 y z = ((√z)⁻¹ : ℝ) * compEllIntKk k := by
+    rw [symEllIntRF_zero_eq_carlsonRK (ofReal_mem_slitPlane.mpr hy)
+      (ofReal_mem_slitPlane.mpr hz), Carlson.carlsonRK_eq_compEllIntKk hy hyz.le, ← hk,
+      compEllIntKk_ofReal_carlson hk2.le]
+    have := Real.pi_pos
+    push_cast
+    field_simp
+  have hRE := Carlson.carlsonRE_eq_compEllIntEk hy hyz.le
+  rw [← hk, ← compEllIntEk_ofReal hk2.le] at hRE
+  have hRG : symEllIntRG 0 y z = ((√z / 2 : ℝ) : ℂ) * compEllIntEk k := by
+    rw [symEllIntRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr hy)
+      (ofReal_mem_slitPlane.mpr hz), hRE]
+    push_cast
+    field_simp
+    ring
+  have hK : 0 < (compEllIntKk k).re := by
+    have hM : (0 : ℝ) < NNReal.agm 1 (NNReal.sqrt (1 - k ^ 2).toNNReal) :=
+      NNReal.agm_pos one_pos (NNReal.sqrt_pos.mpr (Real.toNNReal_pos.mpr (by linarith)))
+    have e : compEllIntKk k =
+        ((π / (2 * (NNReal.agm 1 (NNReal.sqrt (1 - k ^ 2).toNNReal) : ℝ)) : ℝ) : ℂ) := by
+      rw [compEllIntKk_eq_pi_div_agm (m := k ^ 2) (by push_cast; ring) hk2]; push_cast; rfl
+    rw [e, ofReal_re]
+    positivity
+  rw [hRF, hRG, re_ofReal_mul, re_ofReal_mul]
+  field_simp
+  rw [Real.sq_sqrt hz.le]
+  ring
+
 /-- DLMF 19.24.9 (Neuman): with `a₁ = (a₀ + g₀)/2`, `g₁ = √(a₀ g₀)` (19.24.6) and `a₀ ≥ g₀ > 0`,
 `g₁²/2 ≤ R_G(a₀², g₀², 0)/R_F(a₀², g₀², 0) ≤ a₁²/2`, with equality (in either inequality) iff
 `a₀ = g₀`. -/
@@ -484,7 +523,58 @@ theorem symEllIntRG_div_symEllIntRF_agm_bounds {a₀ g₀ : ℝ} (hg : 0 < g₀)
     let r := (symEllIntRG ((a₀ ^ 2 : ℝ) : ℂ) ((g₀ ^ 2 : ℝ) : ℂ) 0).re /
       (symEllIntRF ((a₀ ^ 2 : ℝ) : ℂ) ((g₀ ^ 2 : ℝ) : ℂ) 0).re
     g₁ ^ 2 / 2 ≤ r ∧ r ≤ a₁ ^ 2 / 2 ∧ (g₁ ^ 2 / 2 = r ↔ a₀ = g₀) ∧ (r = a₁ ^ 2 / 2 ↔ a₀ = g₀) := by
-  sorry
+  intro a₁ g₁ r
+  have ha : 0 < a₀ := hg.trans_le hag
+  have hg1 : g₁ ^ 2 = a₀ * g₀ := Real.sq_sqrt (by positivity)
+  have hr : r = (symEllIntRG 0 ((g₀ ^ 2 : ℝ) : ℂ) ((a₀ ^ 2 : ℝ) : ℂ)).re /
+      (symEllIntRF 0 ((g₀ ^ 2 : ℝ) : ℂ) ((a₀ ^ 2 : ℝ) : ℂ)).re := by
+    simp only [r]
+    rw [← symEllIntRG_comm_right, ← symEllIntRG_comm_left, ← symEllIntRG_comm_right,
+      ← symEllIntRF_comm_right, ← symEllIntRF_comm_left, ← symEllIntRF_comm_right]
+  rcases hag.lt_or_eq with hlt | heq
+  · have hsq : g₀ ^ 2 < a₀ ^ 2 := by nlinarith
+    rw [symEllIntRG_div_symEllIntRF_zero (by positivity) hsq] at hr
+    have hk0 : 0 < √(1 - g₀ ^ 2 / a₀ ^ 2) :=
+      Real.sqrt_pos.mpr (sub_pos.mpr ((div_lt_one (by positivity)).mpr hsq))
+    have hk1 : √(1 - g₀ ^ 2 / a₀ ^ 2) < 1 := by
+      rw [Real.sqrt_lt' one_pos]; have := div_pos (pow_pos hg 2) (pow_pos ha 2); linarith
+    obtain ⟨h1, h2⟩ := compEllIntEk_div_compEllIntKk_bounds hk0 hk1
+    have hkp : √(1 - √(1 - g₀ ^ 2 / a₀ ^ 2) ^ 2) = g₀ / a₀ := by
+      have : g₀ ^ 2 / a₀ ^ 2 < 1 := (div_lt_one (by positivity)).mpr hsq
+      rw [Real.sq_sqrt (by linarith), sub_sub_cancel, Real.sqrt_div (sq_nonneg _),
+        Real.sqrt_sq hg.le, Real.sqrt_sq ha.le]
+    rw [hkp] at h1 h2
+    have hA : (0 : ℝ) < a₀ ^ 2 / 2 := by positivity
+    have l1 : g₁ ^ 2 / 2 < r := by
+      rw [hr, hg1]
+      have := mul_lt_mul_of_pos_left h1 hA
+      calc a₀ * g₀ / 2 = a₀ ^ 2 / 2 * (g₀ / a₀) := by field_simp
+        _ < _ := this
+    have l2 : r < a₁ ^ 2 / 2 := by
+      rw [hr]
+      have := mul_lt_mul_of_pos_left h2 hA
+      calc _ < a₀ ^ 2 / 2 * ((1 + g₀ / a₀) / 2) ^ 2 := this
+        _ = a₁ ^ 2 / 2 := by simp only [a₁]; field_simp
+    exact ⟨l1.le, l2.le, ⟨fun h => absurd h l1.ne, fun h => absurd h hlt.ne'⟩,
+      ⟨fun h => absurd h l2.ne, fun h => absurd h hlt.ne'⟩⟩
+  · subst heq
+    have hys : ((g₀ ^ 2 : ℝ) : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr (by positivity)
+    have hval : r = g₀ ^ 2 / 2 := by
+      rw [hr, (symEllIntRG_zero_self hys hys).1, symEllIntRF_zero_self hys]
+      rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
+        show (-1 / 2 : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
+        ← ofReal_cpow (by positivity), ← ofReal_cpow (by positivity),
+        show (π / 4 : ℂ) = ((π / 4 : ℝ) : ℂ) by push_cast; ring,
+        show (π / 2 : ℂ) = ((π / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_mul, ← ofReal_mul,
+        ofReal_re, ofReal_re, Real.rpow_neg (by positivity), ← Real.sqrt_eq_rpow,
+        Real.sqrt_sq hg.le]
+      have := Real.pi_pos
+      field_simp
+      norm_num
+    have e1 : g₁ ^ 2 / 2 = g₀ ^ 2 / 2 := by rw [hg1]; ring
+    have e2 : a₁ ^ 2 / 2 = g₀ ^ 2 / 2 := by simp only [a₁]; ring
+    rw [hval, e1, e2]
+    simp
 
 /-! ### §19.24(ii) Incomplete integrals -/
 

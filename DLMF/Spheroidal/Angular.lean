@@ -359,7 +359,7 @@ private lemma ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolyP (n m : ℕ) {x : 
       ((-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) x) := by
   rw [ferrersP_nat (n : ℂ) m hx]
   have : DLMF.Legendre.legendreP (n : ℂ) = DLMF.OrthogonalPolynomials.legendrePolyP n :=
-    funext fun z => DLMF.Legendre.GeneratingSeries.legendreP_nat n z
+    funext fun z => DLMF.Legendre.GeneratingSeries.legendreP_nat_eq_legendrePolyP n z
   rw [this]
   ring
 

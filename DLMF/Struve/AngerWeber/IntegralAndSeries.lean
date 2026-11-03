@@ -360,12 +360,6 @@ theorem sinPow_moment_one (ν : ℂ) {g g1 : ℝ → ℂ} (hg : ∀ θ, HasDeriv
   rw [hint]
   simp [Φ]
 
-/-- `a / Γ(a+1) = 1/Γ(a)` for every complex `a` (both sides vanish at the poles). -/
-theorem div_Gamma_add_one (a : ℂ) : a / Gamma (a+1) = (Gamma a)⁻¹ := by
-  by_cases h : a = 0
-  · subst h; simp [Complex.Gamma_zero]
-  · rw [Complex.Gamma_add_one a h, div_mul_cancel_left₀ h]
-
 /-- The closed form of the sine-power moments, without the trigonometric factor. -/
 noncomputable def sinPowR (ν : ℂ) (n : ℕ) : ℂ :=
   π * n ! / 2^n * ((Gamma (1+((n:ℂ)+ν)/2))⁻¹ * (Gamma (1+((n:ℂ)-ν)/2))⁻¹)
@@ -381,8 +375,8 @@ theorem sinPowR_recurrence (ν : ℂ) (m : ℕ) :
   have hB : (1+(((m+2:ℕ):ℂ)-ν)/2) = B+1 := by simp only [B]; push_cast; ring
   have hAB : ((m:ℂ)+2)^2 - ν^2 = 4*A*B := by simp only [A, B]; ring
   rw [hA, hB, hAB]
-  have e1 := div_Gamma_add_one A
-  have e2 := div_Gamma_add_one B
+  have e1 := Complex.div_Gamma_add_one A
+  have e2 := Complex.div_Gamma_add_one B
   rw [show 4*A*B*(π*((m+2)! : ℕ)/2^(m+2)*((Gamma (A+1))⁻¹*(Gamma (B+1))⁻¹)) =
     4*(π*((m+2)! : ℕ)/2^(m+2))*(A/Gamma (A+1))*(B/Gamma (B+1)) by ring, e1, e2]
   rw [Nat.factorial_succ, Nat.factorial_succ]

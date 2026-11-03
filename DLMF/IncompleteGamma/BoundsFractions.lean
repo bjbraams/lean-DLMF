@@ -122,13 +122,6 @@ theorem upperIncGamma_bound_le_one {a x : ℝ} (ha1 : a ≤ 1) (hx : 0 < x) :
   calc _ ≤ x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) := by gcongr
     _ = 1 := e
 
-/-- The stated relation follows from the given hypotheses: `(lowerIncGamma a x).re ≥
-x^(a-1)/a*(1-Real.exp (-x))`. -/
-@[dlmf 8.10.E2]
-theorem lowerIncGamma_bound_ge {a x : ℝ} (ha : 0 < a) (ha1 : a ≤ 1) (hx : 0 < x) :
-    (lowerIncGamma a x).re ≥ x^(a-1)/a*(1-Real.exp (-x)) :=
-  IncompleteGammaRealIntegrals.lowerIncGamma_bound_ge ha ha1 hx
-
 /-- Estimate under the stated parameter and domain assumptions: `1 ≤ x^(1-a)*Real.exp
 x*(upperIncGamma a x).re`. -/
 @[dlmf 8.10.E1]
@@ -141,13 +134,6 @@ theorem upperIncGamma_bound_ge_one {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
       ← Real.rpow_add hx, ← Real.exp_add]; simp
   calc (1:ℝ) = x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) := e.symm
     _ ≤ _ := by gcongr
-
-/-- Estimate under the stated parameter and domain assumptions: `(lowerIncGamma a x).re ≤
-x^(a-1)/a*(1-Real.exp (-x))`. -/
-@[dlmf 8.10.E2]
-theorem lowerIncGamma_bound_le {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
-    (lowerIncGamma a x).re ≤ x^(a-1)/a*(1-Real.exp (-x)) :=
-  IncompleteGammaRealIntegrals.lowerIncGamma_bound_le ha hx
 
 /-- The first-order real incomplete-Gamma remainder ratio. -/
 @[dlmf 8.10.E3]

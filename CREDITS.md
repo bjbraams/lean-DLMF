@@ -1819,3 +1819,11 @@ beta integral of lean-codes (`Dirichlet.Beta.Complex.Integral`). The integral re
 25.11.23 (`DLMF/Zeta/Hurwitz/ValuesAndDerivatives.lean`) uses Mathlib's `hurwitzZetaOdd_one_sub`
 and `ZMod.LFunction` API together with the project's `DLMF.Gamma.polygamma_eq_hurwitzZeta`. No
 external proof body was copied.
+
+## Proof round 5 of 2026-11-02
+
+Gauss's transformation 19.8.18–19.8.19 (`incEllInt_gauss`,
+`DLMF/EllipticIntegrals/Quadratic.lean`) rests on the Landen transformations
+`Carlson.carlsonRF_landen` and `Carlson.carlsonRG_landen` of lean-codes. The Abel means of Fourier
+integrals in `DLMF/AlgebraicAnalytic/Summability/Integrals.lean` use TauCeti's
+`TauCeti.Analysis.Fourier.ExpNegAbs`. No external proof body was copied.

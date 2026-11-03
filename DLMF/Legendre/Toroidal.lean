@@ -697,7 +697,7 @@ theorem toroidalQ_integral (n m : ℕ) (hmn : m ≤ n) {ξ : ℝ} (hξ : 0 < ξ)
     rw [one_lt_div hs]; nlinarith [Real.cosh_sq_sub_sinh_sq ξ, Real.sinh_lt_cosh ξ]
   have hW := olverQ_whipple_real ((n:ℂ)-1/2) (m:ℂ) c hc1
   rw [hpt, hbp, show -((n:ℂ)-1/2)-1/2 = -(n:ℂ) by ring] at hW
-  have hI := ExteriorIntegral.associatedP_cosh_integral (ν := -(m:ℂ)-1/2) (μ := (n:ℂ))
+  have hI := associatedP_cosh_integral (ν := -(m:ℂ)-1/2) (μ := (n:ℂ))
     (by simp; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)])
     (by simp; have : (m:ℝ) ≤ n := by exact_mod_cast hmn
         linarith) hy

@@ -546,12 +546,12 @@ theorem genTrigAuxG_oscillatory_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz
 
 /-- Identity under the stated parameter and domain assumptions: `c.re = 0 ∧ (c.im = 1 ∨ c.im =
 -1)`. -/
-theorem GeneralizedTrigAux.unit_cases {c : ℂ} (hc : c = I ∨ c = -I) : c.re = 0 ∧
+theorem GeneralizedTrigSphericalSeries.unit_cases {c : ℂ} (hc : c = I ∨ c = -I) : c.re = 0 ∧
     (c.im = 1 ∨ c.im = -1) := by
   rcases hc with rfl | rfl <;> simp
 
 /-- `(1+t)^k e^{-bt}` is integrable on `(0,∞)` for `b > 0`. -/
-theorem GeneralizedTrigAux.integrableOn_one_add_rpow_mul_exp {k b : ℝ} (hb : 0 < b) :
+theorem GeneralizedTrigSphericalSeries.integrableOn_one_add_rpow_mul_exp {k b : ℝ} (hb : 0 < b) :
     IntegrableOn (fun t : ℝ => (1+t)^k * Real.exp (-b*t)) (Ioi 0) := by
   refine integrable_of_isBigO_exp_neg (b := b/2) (by positivity) ?_ ?_
   · intro t ht
@@ -573,10 +573,11 @@ theorem GeneralizedTrigAux.integrableOn_one_add_rpow_mul_exp {k b : ℝ} (hb : 0
 
 /-- Estimate under the stated parameter and domain assumptions: `‖(1+c*t)^(a-1)‖ ≤ (1+t)^|a.re-1|
 * Real.exp (π/2*|a.im|)`. -/
-theorem GeneralizedTrigAux.norm_one_add_cpow_le {c : ℂ} (hc : c = I ∨ c = -I) (a : ℂ)
+theorem GeneralizedTrigSphericalSeries.norm_one_add_I_mul_cpow_le {c : ℂ}
+    (hc : c = I ∨ c = -I) (a : ℂ)
     {t : ℝ} (ht : 0 ≤ t) :
     ‖(1+c*t)^(a-1)‖ ≤ (1+t)^|a.re-1| * Real.exp (π/2*|a.im|) := by
-  obtain ⟨hre, him⟩ := GeneralizedTrigAux.unit_cases hc
+  obtain ⟨hre, him⟩ := GeneralizedTrigSphericalSeries.unit_cases hc
   have hu0 : (1+c*t) ≠ 0 := by
     intro h; have := congrArg Complex.re h; simp [hre] at this
   have hre1 : (1+c*(t:ℂ)).re = 1 := by simp [hre]
@@ -607,22 +608,25 @@ theorem GeneralizedTrigAux.norm_one_add_cpow_le {c : ℂ} (hc : c = I ∨ c = -I
         mul_le_mul hA hB (by positivity) (by positivity)
 
 /-- Formula under the stated hypotheses: `1 + c*t ∈ slitPlane`. -/
-theorem GeneralizedTrigAux.one_add_mul_mem_slitPlane {c : ℂ} (hc : c = I ∨ c = -I) (t : ℝ) :
+theorem GeneralizedTrigSphericalSeries.one_add_mul_mem_slitPlane {c : ℂ}
+    (hc : c = I ∨ c = -I) (t : ℝ) :
     1 + c*t ∈ slitPlane :=
-        Or.inl (by obtain ⟨hre, _⟩ := GeneralizedTrigAux.unit_cases hc; simp [hre])
+        Or.inl (by obtain ⟨hre, _⟩ := GeneralizedTrigSphericalSeries.unit_cases hc; simp [hre])
 
 /-- The kernel `(fun t : ℝ => (1+c*t)^(a-1)*exp (-z*t))` is integrable on `(Ioi 0)`. -/
-theorem GeneralizedTrigAux.integrableOn_trigLap {c : ℂ} (hc : c = I ∨ c = -I) (a : ℂ) {z : ℂ}
+theorem GeneralizedTrigSphericalSeries.integrableOn_trigLap {c : ℂ} (hc : c = I ∨ c = -I)
+    (a : ℂ) {z : ℂ}
     (hz : 0 < z.re) :
     IntegrableOn (fun t : ℝ => (1+c*t)^(a-1)*exp (-z*t)) (Ioi 0) := by
   refine Integrable.mono'
-      ((GeneralizedTrigAux.integrableOn_one_add_rpow_mul_exp (k := |a.re-1|) hz).mul_const
+      ((GeneralizedTrigSphericalSeries.integrableOn_one_add_rpow_mul_exp
+          (k := |a.re-1|) hz).mul_const
     (Real.exp (π/2*|a.im|))) ?_ ?_
   · refine ContinuousOn.aestronglyMeasurable (fun t _ => ContinuousAt.continuousWithinAt ?_)
         measurableSet_Ioi
     refine ContinuousAt.mul ?_ (by fun_prop)
     exact (continuousAt_const.add (continuousAt_const.mul continuous_ofReal.continuousAt)).cpow
-      continuousAt_const (GeneralizedTrigAux.one_add_mul_mem_slitPlane hc t)
+      continuousAt_const (GeneralizedTrigSphericalSeries.one_add_mul_mem_slitPlane hc t)
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     have ht0 : (0:ℝ) ≤ t := le_of_lt ht
     rw [norm_mul, Complex.norm_exp]
@@ -630,15 +634,16 @@ theorem GeneralizedTrigAux.integrableOn_trigLap {c : ℂ} (hc : c = I ∨ c = -I
     rw [hre]
     calc ‖(1+c*(t:ℂ))^(a-1)‖ * Real.exp (-z.re*t)
         ≤ ((1+t)^|a.re-1| * Real.exp (π/2*|a.im|)) * Real.exp (-z.re*t) :=
-          mul_le_mul_of_nonneg_right (GeneralizedTrigAux.norm_one_add_cpow_le hc a ht0)
+          mul_le_mul_of_nonneg_right
+              (GeneralizedTrigSphericalSeries.norm_one_add_I_mul_cpow_le hc a ht0)
               (Real.exp_pos _).le
       _ = (1+t)^|a.re-1| * Real.exp (-z.re*t) * Real.exp (π/2*|a.im|) := by ring
 
 /-- Formula under the stated hypotheses: `z*(t-c) ∈ slitPlane`. -/
-theorem GeneralizedTrigAux.ray_mem_slitPlane {c : ℂ} (hc : c = I ∨ c = -I) {z : ℂ}
+theorem GeneralizedTrigSphericalSeries.ray_mem_slitPlane {c : ℂ} (hc : c = I ∨ c = -I) {z : ℂ}
     (hz : 0 < z.re) {t : ℝ}
     (ht : 0 ≤ t) : z*(t-c) ∈ slitPlane := by
-  obtain ⟨hre, him⟩ := GeneralizedTrigAux.unit_cases hc
+  obtain ⟨hre, him⟩ := GeneralizedTrigSphericalSeries.unit_cases hc
   rw [mem_slitPlane_iff]
   by_cases h : (z*((t:ℂ)-c)).im = 0
   · left
@@ -650,12 +655,12 @@ theorem GeneralizedTrigAux.ray_mem_slitPlane {c : ℂ} (hc : c = I ∨ c = -I) {
   · exact Or.inr h
 
 /-- Splitting the power along the ray. -/
-theorem GeneralizedTrigAux.ray_cpow {c : ℂ} (hc : c = I ∨ c = -I) (a : ℂ) {z : ℂ}
+theorem GeneralizedTrigSphericalSeries.ray_cpow {c : ℂ} (hc : c = I ∨ c = -I) (a : ℂ) {z : ℂ}
     (hz : 0 < z.re) {t : ℝ}
     (ht : 0 ≤ t) :
     (z*(t-c))^(a-1) = z^(a-1)*((-c)^(a-1)*(1+c*t)^(a-1)) := by
   have hz0 : z ≠ 0 := by intro h; rw [h] at hz; simp at hz
-  obtain ⟨hre, him⟩ := GeneralizedTrigAux.unit_cases hc
+  obtain ⟨hre, him⟩ := GeneralizedTrigSphericalSeries.unit_cases hc
   have hc0 : c ≠ 0 := by intro h; rw [h] at him; simp at him
   have hw0 : ((t:ℂ)-c) ≠ 0 := by intro h; have := congrArg Complex.im h; simp at this;
                                  rcases him with h1 | h1 <;> linarith
@@ -686,7 +691,7 @@ theorem GeneralizedTrigAux.ray_cpow {c : ℂ} (hc : c = I ∨ c = -I) (a : ℂ) 
   congr 1; ring
 
 /-- `Γ(a, z(t-c)) → 0` along the ray. -/
-theorem GeneralizedTrigAux.tendsto_upperIncGamma_ray (c : ℂ) (a : ℂ) {z : ℂ}
+theorem GeneralizedTrigSphericalSeries.tendsto_upperIncGamma_ray (c : ℂ) (a : ℂ) {z : ℂ}
     (hz : 0 < z.re) :
     Tendsto (fun t : ℝ => upperIncGamma a (z*(t-c))) atTop (𝓝 0) := by
   have hz0 : z ≠ 0 := by intro h; rw [h] at hz; simp at hz
@@ -704,7 +709,8 @@ theorem GeneralizedTrigAux.tendsto_upperIncGamma_ray (c : ℂ) (a : ℂ) {z : �
   congr 2 <;> · simp only [u]; push_cast; field_simp; ring
 
 /-- Rotating the upper Gamma integral onto the ray `z(t - c)`, `c = ±i`. -/
-theorem GeneralizedTrigAux.upperIncGamma_rotate {c : ℂ} (hc : c = I ∨ c = -I) (a : ℂ) {z : ℂ}
+theorem GeneralizedTrigSphericalSeries.upperIncGamma_rotate {c : ℂ} (hc : c = I ∨ c = -I)
+    (a : ℂ) {z : ℂ}
     (hz : 0 < z.re) :
     upperIncGamma a (-c*z) = z^a*(-c)^(a-1)*exp (c*z) *
       ∫ t : ℝ in Ioi 0, (1+c*t)^(a-1)*exp (-z*t) := by
@@ -716,21 +722,21 @@ theorem GeneralizedTrigAux.upperIncGamma_rotate {c : ℂ} (hc : c = I ∨ c = -I
     have h1 : HasDerivAt (fun t : ℝ => z*((t:ℂ)-c)) z t := by
       simpa using ((hasDerivAt_id t).ofReal_comp.sub_const c).const_mul z
     exact (hasDerivAt_upperIncGamma_complex a
-        (GeneralizedTrigAux.ray_mem_slitPlane hc hz ht)).comp t h1
+        (GeneralizedTrigSphericalSeries.ray_mem_slitPlane hc hz ht)).comp t h1
   have hF' : ∀ t : ℝ, 0 ≤ t → F' t = -(z^a*(-c)^(a-1)*exp (c*z)) * ((1+c*t)^(a-1)*exp (-z*t)) := by
     intro t ht
     simp only [F']
-    rw [GeneralizedTrigAux.ray_cpow hc a hz ht, show -(z*((t:ℂ)-c)) = c*z + -z*t by
+    rw [GeneralizedTrigSphericalSeries.ray_cpow hc a hz ht, show -(z*((t:ℂ)-c)) = c*z + -z*t by
         ring, Complex.exp_add,
       cpow_sub _ _ hz0, cpow_one]
     field_simp
   have hint : IntegrableOn F' (Ioi 0) := by
     have h0 : IntegrableOn (fun t : ℝ => -(z^a*(-c)^(a-1)*exp (c*z)) * ((1+c*t)^(a-1)*exp (-z*t)))
-        (Ioi 0) := (GeneralizedTrigAux.integrableOn_trigLap hc a hz).const_mul _
+        (Ioi 0) := (GeneralizedTrigSphericalSeries.integrableOn_trigLap hc a hz).const_mul _
     exact h0.congr_fun (fun t ht => (hF' t (le_of_lt ht)).symm) measurableSet_Ioi
   have hcont : ContinuousWithinAt F (Ici 0) 0 := (hd 0 le_rfl).continuousAt.continuousWithinAt
   have h := integral_Ioi_of_hasDerivAt_of_tendsto hcont (fun t ht => hd t (le_of_lt ht)) hint
-    (GeneralizedTrigAux.tendsto_upperIncGamma_ray c a hz)
+    (GeneralizedTrigSphericalSeries.tendsto_upperIncGamma_ray c a hz)
   rw [setIntegral_congr_fun measurableSet_Ioi (fun t ht => hF' t (le_of_lt ht)),
     integral_const_mul] at h
   simp only [F, ofReal_zero, zero_sub] at h
@@ -738,7 +744,7 @@ theorem GeneralizedTrigAux.upperIncGamma_rotate {c : ℂ} (hc : c = I ∨ c = -I
   linear_combination h
 
 /-- The two rotated upper Gamma values in the tails, as Laplace integrals. -/
-theorem GeneralizedTrigAux.trigTail_rotate (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
+theorem GeneralizedTrigSphericalSeries.trigTail_rotate (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
     genSinIntTail a z = (exp (π*I*a/2)*upperIncGamma a (-I*z) -
         exp (-π*I*a/2)*upperIncGamma a (I*z))/(2*I) ∧
     genCosIntTail a z = (exp (π*I*a/2)*upperIncGamma a (-I*z) +
@@ -767,7 +773,7 @@ theorem GeneralizedTrigAux.trigTail_rotate (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
   · rw [genCosIntTail, genCosIntTailOnLog, h1, h2]
 
 /-- Identity under the stated parameter and domain assumptions: `(-I)^(a-1) = exp (-π*I*a/2)*I`. -/
-theorem GeneralizedTrigAux.negI_cpow (a : ℂ) : (-I)^(a-1) = exp (-π*I*a/2)*I := by
+theorem GeneralizedTrigSphericalSeries.negI_cpow (a : ℂ) : (-I)^(a-1) = exp (-π*I*a/2)*I := by
   rw [cpow_sub _ _ (neg_ne_zero.mpr I_ne_zero), cpow_one,
       cpow_def_of_ne_zero (neg_ne_zero.mpr I_ne_zero),
     log_neg_I]
@@ -776,7 +782,7 @@ theorem GeneralizedTrigAux.negI_cpow (a : ℂ) : (-I)^(a-1) = exp (-π*I*a/2)*I 
   rw [I_sq]
 
 /-- Identity under the stated parameter and domain assumptions: `I^(a-1) = -(exp (π*I*a/2)*I)`. -/
-theorem GeneralizedTrigAux.I_cpow (a : ℂ) : I^(a-1) = -(exp (π*I*a/2)*I) := by
+theorem GeneralizedTrigSphericalSeries.I_cpow (a : ℂ) : I^(a-1) = -(exp (π*I*a/2)*I) := by
   rw [cpow_sub _ _ I_ne_zero, cpow_one, cpow_def_of_ne_zero I_ne_zero, log_I]
   field_simp
   ring_nf
@@ -785,24 +791,24 @@ theorem GeneralizedTrigAux.I_cpow (a : ℂ) : I^(a-1) = -(exp (π*I*a/2)*I) := b
 /-- Identity under the stated parameter and domain assumptions: `genTrigAuxF a z=z^a/2*(∫ t : ℝ in
 Ioi 0, ((1+I*t)^(a-1)+(1-I*t)^(a-1))*exp (-z*t)) ∧ genTrigAuxG a z=z^a/(2*I)*(∫ t : ℝ in Ioi
 0, ((1-I*t)^(a-1)-(1+I*t)^(a-1))*exp (-z*t))`. -/
-lemma GeneralizedTrigAux.genTrigAux_laplace (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
+lemma GeneralizedTrigSphericalSeries.genTrigAux_laplace (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
     genTrigAuxF a z=z^a/2*(∫ t : ℝ in Ioi 0, ((1+I*t)^(a-1)+(1-I*t)^(a-1))*exp (-z*t)) ∧
     genTrigAuxG a z=z^a/(2*I)*(∫ t : ℝ in Ioi 0, ((1-I*t)^(a-1)-(1+I*t)^(a-1))*exp (-z*t)) := by
-  obtain ⟨hS, hC⟩ := GeneralizedTrigAux.trigTail_rotate a hz
-  have K1 := GeneralizedTrigAux.upperIncGamma_rotate (c := I) (Or.inl rfl) a hz
-  have K2 := GeneralizedTrigAux.upperIncGamma_rotate (c := -I) (Or.inr rfl) a hz
+  obtain ⟨hS, hC⟩ := GeneralizedTrigSphericalSeries.trigTail_rotate a hz
+  have K1 := GeneralizedTrigSphericalSeries.upperIncGamma_rotate (c := I) (Or.inl rfl) a hz
+  have K2 := GeneralizedTrigSphericalSeries.upperIncGamma_rotate (c := -I) (Or.inr rfl) a hz
   rw [neg_neg] at K2
   have hJ2 : (∫ t : ℝ in Ioi 0, (1+(-I)*t)^(a-1)*exp (-z*t)) =
       ∫ t : ℝ in Ioi 0, (1-I*t)^(a-1)*exp (-z*t) := by
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
     rw [neg_mul, ← sub_eq_add_neg]
-  rw [hJ2, GeneralizedTrigAux.I_cpow] at K2
-  rw [GeneralizedTrigAux.negI_cpow] at K1
+  rw [hJ2, GeneralizedTrigSphericalSeries.I_cpow] at K2
+  rw [GeneralizedTrigSphericalSeries.negI_cpow] at K1
   set Jp := ∫ t : ℝ in Ioi 0, (1+I*t)^(a-1)*exp (-z*t)
   set Jm := ∫ t : ℝ in Ioi 0, (1-I*t)^(a-1)*exp (-z*t)
-  have hip := GeneralizedTrigAux.integrableOn_trigLap (c := I) (Or.inl rfl) a hz
+  have hip := GeneralizedTrigSphericalSeries.integrableOn_trigLap (c := I) (Or.inl rfl) a hz
   have him : IntegrableOn (fun t : ℝ => (1-I*t)^(a-1)*exp (-z*t)) (Ioi 0) := by
-    have := GeneralizedTrigAux.integrableOn_trigLap (c := -I) (Or.inr rfl) a hz
+    have := GeneralizedTrigSphericalSeries.integrableOn_trigLap (c := -I) (Or.inr rfl) a hz
     refine this.congr_fun (fun t _ => ?_) measurableSet_Ioi
     simp only; rw [neg_mul, ← sub_eq_add_neg]
   have hsum : (∫ t : ℝ in Ioi 0, ((1+I*t)^(a-1)+(1-I*t)^(a-1))*exp (-z*t)) = Jp + Jm := by
@@ -839,14 +845,14 @@ Ioi 0, ((1+I*t)^(a-1)+(1-I*t)^(a-1))*exp (-z*t))`. -/
 @[dlmf 8.21.E24]
 theorem genTrigAuxF_laplace_integral (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
     genTrigAuxF a z=z^a/2*(∫ t : ℝ in Ioi 0, ((1+I*t)^(a-1)+(1-I*t)^(a-1))*exp (-z*t)) :=
-  (GeneralizedTrigAux.genTrigAux_laplace a hz).1
+  (GeneralizedTrigSphericalSeries.genTrigAux_laplace a hz).1
 
 /-- Identity under the stated parameter and domain assumptions: `genTrigAuxG a z=z^a/(2*I)*(∫ t :
 ℝ in Ioi 0, ((1-I*t)^(a-1)-(1+I*t)^(a-1))*exp (-z*t))`. -/
 @[dlmf 8.21.E25]
 theorem genTrigAuxG_laplace_integral (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
     genTrigAuxG a z=z^a/(2*I)*(∫ t : ℝ in Ioi 0, ((1-I*t)^(a-1)-(1+I*t)^(a-1))*exp (-z*t)) :=
-  (GeneralizedTrigAux.genTrigAux_laplace a hz).2
+  (GeneralizedTrigSphericalSeries.genTrigAux_laplace a hz).2
 
 /-- `e^{e^w} Γ(a, e^w) ~ ∑ (-1)^k (1-a)_k e^{(a-1-k) w}` on the logarithmic sector
 `|im w| ≤ 3π/2 - δ` (DLMF 8.11.2 continued to the logarithmic plane). -/

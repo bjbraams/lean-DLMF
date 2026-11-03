@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QHypergeometric.Convergence
+public import DLMF.QHypergeometric.SearsTransformation
 public import DLMF.QSeries.RamanujanPsi
 public import DLMF.QSeries.Saalschutz
 public import DLMFMathlib.Analysis.SpecificLimits.PowMulPowChoose
@@ -273,7 +274,20 @@ theorem qPhi2_terminating_to_qPhi3_1 (n : ℕ) (b c q z : ℂ)
     (hden : QDenominatorRegular [c,b*q^(1-(n:ℤ))/c] q) :
     qPhi [q^(-(n:ℤ)),b] [c] q (z) =
       qProductRatio n [c/b] [c] q * b^n * qPhi [q^(-(n:ℤ)),b,q/z] [b*q^(1-(n:ℤ))/c] q (z/c) := by
-  sorry
+  have hreg : ∀ x ∈ [c,b*q^(1-(n:ℤ))/c], qPochhammer x q n ≠ 0 :=
+    fun x hx => qPochhammer_ne_zero_of_mem_qDenominatorRegular hq hden hx n
+  have hz' : ∀ x : ℂ, x*q^(1-(n:ℤ)) = x*q*q⁻¹^n := fun x => by
+    rw [SearsTransformation.zpow_one_sub_natCast hq0]; ring
+  have hC := hreg c (by simp)
+  have h₁ := hreg (b*q^(1-(n:ℤ))/c) (by simp)
+  rw [hz'] at h₁
+  have H := phiSum_two_one_three_one n hq0 hq (hpar b (by simp)) (hpar c (by simp))
+    (hpar z (by simp)) hC h₁
+  rw [qPhi_three_one_eq_sum hq0, qPhi_two_one_eq_phiSum hq0, hz']
+  simp only [qProductRatio, qPochhammerList, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, mul_one]
+  rw [div_mul_eq_mul_div, div_mul_eq_mul_div, eq_div_iff hC]
+  linear_combination H
 
 /-- DLMF 17.9.E3: qPhi2 two qPhi3 2. -/
 @[dlmf 17.9.E3]
@@ -310,7 +324,36 @@ theorem qPhi2_terminating_reverse (n : ℕ) (b c q z : ℂ)
     qPhi [q^(-(n:ℤ)),b] [c] q (z) =
       qProductRatio n [c/b] [c] q * (b*z/q)^n *
           qPhi [q^(-(n:ℤ)), q/z, q^(1-(n:ℤ))/c] [b*q^(1-(n:ℤ))/c, 0] q (q) := by
-  sorry
+  have hreg : ∀ x ∈ [c,b*q^(1-(n:ℤ))/c,0], qPochhammer x q n ≠ 0 :=
+    fun x hx => qPochhammer_ne_zero_of_mem_qDenominatorRegular hq hden hx n
+  have hz' : ∀ x : ℂ, x*q^(1-(n:ℤ)) = x*q*q⁻¹^n := fun x => by
+    rw [SearsTransformation.zpow_one_sub_natCast hq0]; ring
+  have hz1 : q^(1-(n:ℤ)) = q*q⁻¹^n := SearsTransformation.zpow_one_sub_natCast hq0 n
+  have hb := hpar b (by simp)
+  have hc := hpar c (by simp)
+  have hz := hpar z (by simp)
+  have hQ0 : q⁻¹^n ≠ 0 := pow_ne_zero _ (inv_ne_zero hq0)
+  have hC := hreg c (by simp)
+  have h₁ := hreg (b*q^(1-(n:ℤ))/c) (by simp)
+  rw [hz'] at h₁
+  have H5 := phiSum_two_one_sears z n hq0 hq hb hc hC h₁
+  have H8 := searsSum_three_two_first (c := b*z*q⁻¹^n/c) (d := b*q*q⁻¹^n/c) (e := 0) n hq0 hq
+    hb (div_ne_zero (by simp [*]) hc)
+    (div_ne_zero (by simp [*]) hc) h₁ (by simp [qPochhammer_zero_param])
+    (by simp [qPochhammer_zero_param])
+  simp only [mul_zero, zero_div, qPochhammer_zero_param, one_mul, mul_one] at H8
+  rw [show b * q * q⁻¹ ^ n / c / b = q * q⁻¹ ^ n / c by field_simp,
+    show b * q * q⁻¹ ^ n / c / (b * z * q⁻¹ ^ n / c) = q / z by field_simp,
+    show b * (b * z * q⁻¹ ^ n / c) / (b * q * q⁻¹ ^ n / c) = b * z / q by field_simp] at H8
+  have hs : searsSum q n (q * q⁻¹ ^ n / c) (q / z) 0 (b * q * q⁻¹ ^ n / c) 0 0 =
+      searsSum q n (q / z) (q * q⁻¹ ^ n / c) 0 (b * q * q⁻¹ ^ n / c) 0 0 := by
+    unfold searsSum; exact Finset.sum_congr rfl fun k _ => by ring
+  rw [hs] at H8
+  rw [qPhi_three_two_eq_searsSum hq0, qPhi_two_one_eq_phiSum hq0, hz', hz1]
+  simp only [qProductRatio, qPochhammerList, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, mul_one]
+  rw [div_mul_eq_mul_div, div_mul_eq_mul_div, eq_div_iff hC, mul_assoc, ← H8]
+  linear_combination H5
 
 /-- DLMF 17.9.E5: qPhi2 terminating sears. -/
 @[dlmf 17.9.E5]
@@ -321,7 +364,20 @@ theorem qPhi2_terminating_sears (n : ℕ) (b c q z : ℂ)
     qPhi [q^(-(n:ℤ)),b] [c] q (z) =
       qProductRatio n [c/b] [c] q *
           qPhi [q^(-(n:ℤ)), b, b*z*q^(-(n:ℤ))/c] [b*q^(1-(n:ℤ))/c, 0] q (q) := by
-  sorry
+  have hreg : ∀ x ∈ [c,b*q^(1-(n:ℤ))/c,0], qPochhammer x q n ≠ 0 :=
+    fun x hx => qPochhammer_ne_zero_of_mem_qDenominatorRegular hq hden hx n
+  have hz' : ∀ x : ℂ, x*q^(1-(n:ℤ)) = x*q*q⁻¹^n := fun x => by
+    rw [SearsTransformation.zpow_one_sub_natCast hq0]; ring
+  have hzn : q^(-(n:ℤ)) = q⁻¹^n := by rw [zpow_neg, zpow_natCast, inv_pow]
+  have hC := hreg c (by simp)
+  have h₁ := hreg (b*q^(1-(n:ℤ))/c) (by simp)
+  rw [hz'] at h₁
+  have H := phiSum_two_one_sears z n hq0 hq (hpar b (by simp)) (hpar c (by simp)) hC h₁
+  rw [qPhi_three_two_eq_searsSum hq0, qPhi_two_one_eq_phiSum hq0, hzn, hz']
+  simp only [qProductRatio, qPochhammerList, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, mul_one]
+  rw [div_mul_eq_mul_div, eq_div_iff hC]
+  linear_combination H
 
 /-- DLMF 17.9.E6: qPhi3 sears first. -/
 @[dlmf 17.9.E6]
@@ -358,7 +414,15 @@ theorem qPhi3_terminating_first (n : ℕ) (b c d e q : ℂ)
     qPhi [q^(-(n:ℤ)),b,c] [d,e] q (q) =
       qProductRatio n [d*e/(b*c)] [e] q * (b*c/d)^n *
           qPhi [q^(-(n:ℤ)), d/b, d/c] [d, d*e/(b*c)] q (q) := by
-  sorry
+  have hreg : ∀ x ∈ [d,e,d*e/(b*c)], qPochhammer x q n ≠ 0 :=
+    fun x hx => qPochhammer_ne_zero_of_mem_qDenominatorRegular hq hden hx n
+  have hE := hreg e (by simp)
+  have H := searsSum_three_two_first n hq0 hq (hpar b (by simp)) (hpar c (by simp))
+    (hpar d (by simp)) (hreg d (by simp)) hE (hreg (d*e/(b*c)) (by simp))
+  simp only [qPhi_three_two_eq_searsSum hq0, qProductRatio, qPochhammerList, List.map_cons,
+    List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+  rw [div_mul_eq_mul_div, div_mul_eq_mul_div, eq_div_iff hE]
+  linear_combination H
 
 /-- DLMF 17.9.E9: qPhi3 terminating second. -/
 @[dlmf 17.9.E9]
@@ -369,7 +433,19 @@ theorem qPhi3_terminating_second (n : ℕ) (b c d e q : ℂ)
     qPhi [q^(-(n:ℤ)),b,c] [d,e] q (q) =
       qProductRatio n [e/c] [e] q * c^n *
           qPhi [q^(-(n:ℤ)), c, d/b] [d, c*q^(1-(n:ℤ))/e] q (b*q/e) := by
-  sorry
+  have hreg : ∀ x ∈ [d,e,c*q^(1-(n:ℤ))/e], qPochhammer x q n ≠ 0 :=
+    fun x hx => qPochhammer_ne_zero_of_mem_qDenominatorRegular hq hden hx n
+  have hz' : ∀ x : ℂ, x*q^(1-(n:ℤ)) = x*q*q⁻¹^n := fun x => by
+    rw [SearsTransformation.zpow_one_sub_natCast hq0]; ring
+  have hE := hreg e (by simp)
+  have h₁ := hreg (c*q^(1-(n:ℤ))/e) (by simp)
+  rw [hz'] at h₁
+  have H := phiSum_three_two_second n hq0 hq (hpar b (by simp)) (hpar c (by simp))
+    (hpar e (by simp)) (hreg d (by simp)) hE h₁
+  simp only [qPhi_three_two_eq_searsSum hq0, qPhi_three_two_eq_phiSum hq0, qProductRatio,
+    qPochhammerList, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, hz']
+  rw [div_mul_eq_mul_div, div_mul_eq_mul_div, eq_div_iff hE]
+  linear_combination H
 
 /-- DLMF 17.9.E10: qPhi3 terminating third. -/
 @[dlmf 17.9.E10]
@@ -379,7 +455,19 @@ theorem qPhi3_terminating_third (n : ℕ) (b c d e q : ℂ)
     (hden : QDenominatorRegular [d,e,c*q^(1-(n:ℤ))/e] q) :
     qPhi [q^(-(n:ℤ)),b,c] [d,e] q (d*e*q^n/(b*c)) =
       qProductRatio n [e/c] [e] q * qPhi [q^(-(n:ℤ)),c,d/b] [d,c*q^(1-(n:ℤ))/e] q (q) := by
-  sorry
+  have hreg : ∀ x ∈ [d,e,c*q^(1-(n:ℤ))/e], qPochhammer x q n ≠ 0 :=
+    fun x hx => qPochhammer_ne_zero_of_mem_qDenominatorRegular hq hden hx n
+  have hz' : ∀ x : ℂ, x*q^(1-(n:ℤ)) = x*q*q⁻¹^n := fun x => by
+    rw [SearsTransformation.zpow_one_sub_natCast hq0]; ring
+  have hE := hreg e (by simp)
+  have h₁ := hreg (c*q^(1-(n:ℤ))/e) (by simp)
+  rw [hz'] at h₁
+  have H := phiSum_three_two_third n hq0 hq (hpar b (by simp)) (hpar c (by simp))
+    (hpar e (by simp)) (hreg d (by simp)) hE h₁
+  simp only [qPhi_three_two_eq_searsSum hq0, qPhi_three_two_eq_phiSum hq0, qProductRatio,
+    qPochhammerList, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, hz']
+  rw [div_mul_eq_mul_div, eq_div_iff hE]
+  linear_combination H
 
 /-- DLMF 17.9.E11: qPhi3 terminating fourth. -/
 @[dlmf 17.9.E11]
@@ -390,7 +478,21 @@ theorem qPhi3_terminating_fourth (n : ℕ) (b c d e q : ℂ)
     qPhi [q^(-(n:ℤ)),b,c] [d,e] q (q) =
       qProductRatio n [e/c, d/c] [e, d] q * c^n *
           qPhi [q^(-(n:ℤ)), c, c*b*q^(1-(n:ℤ))/(d*e)] [c*q^(1-(n:ℤ))/e, c*q^(1-(n:ℤ))/d] q (q) := by
-  sorry
+  have hreg : ∀ x ∈ [d,e,c*q^(1-(n:ℤ))/e,c*q^(1-(n:ℤ))/d], qPochhammer x q n ≠ 0 :=
+    fun x hx => qPochhammer_ne_zero_of_mem_qDenominatorRegular hq hden hx n
+  have hz' : ∀ x : ℂ, x*q^(1-(n:ℤ)) = x*q*q⁻¹^n := fun x => by
+    rw [SearsTransformation.zpow_one_sub_natCast hq0]; ring
+  have hD := hreg d (by simp)
+  have hE := hreg e (by simp)
+  have h₁ := hreg (c*q^(1-(n:ℤ))/e) (by simp)
+  have h₂ := hreg (c*q^(1-(n:ℤ))/d) (by simp)
+  rw [hz'] at h₁ h₂
+  have H := searsSum_three_two_fourth (b := b) n hq0 hq (hpar c (by simp)) (hpar d (by simp))
+    (hpar e (by simp)) hD hE h₁ h₂
+  simp only [qPhi_three_two_eq_searsSum hq0, qProductRatio, qPochhammerList, List.map_cons,
+    List.map_nil, List.prod_cons, List.prod_nil, mul_one, hz']
+  rw [div_mul_eq_mul_div, div_mul_eq_mul_div, eq_div_iff (mul_ne_zero hE hD)]
+  linear_combination H
 
 /-- DLMF 17.9.E12: qPhi3 three term. -/
 @[dlmf 17.9.E12]
@@ -435,7 +537,39 @@ theorem qPhi4_balanced_transformations (n : ℕ) (a b c d e f q : ℂ)
     (qPhi [q^(-(n:ℤ)), a, b, c] [d, e, f] q (q)) =
         qProductRatio n [a, e*f/(a*b), e*f/(a*c)] [e, f, e*f/(a*b*c)] q *
         qPhi [q^(-(n:ℤ)), e/a, f/a, e*f/(a*b*c)] [e*f/(a*b), e*f/(a*c), q^(1-(n:ℤ))/a] q (q) := by
-  sorry
+  have hreg : ∀ x ∈ [d, e, f, a*q^(1-(n:ℤ))/e, a*q^(1-(n:ℤ))/f, e*f/(a*b), e*f/(a*c),
+      e*f/(a*b*c), q^(1-(n:ℤ))/a], qPochhammer x q n ≠ 0 :=
+    fun x hx => qPochhammer_ne_zero_of_mem_qDenominatorRegular hq hden hx n
+  have ha : a≠0 := hpar a (by simp)
+  have hb : b≠0 := hpar b (by simp)
+  have hc : c≠0 := hpar c (by simp)
+  have hd : d≠0 := hpar d (by simp)
+  have he : e≠0 := hpar e (by simp)
+  have hf : f≠0 := hpar f (by simp)
+  have hz : q^(1-(n:ℤ)) = q*q⁻¹^n := SearsTransformation.zpow_one_sub_natCast hq0 n
+  have hz' : ∀ x : ℂ, x*q^(1-(n:ℤ)) = x*q*q⁻¹^n := fun x => by rw [hz]; ring
+  have hbal' : d*e*f = a*b*c*q*q⁻¹^n := by rw [hbal, hz']
+  have hD := hreg d (by simp)
+  have hE := hreg e (by simp)
+  have hF := hreg f (by simp)
+  have h₁ := hreg (a*q^(1-(n:ℤ))/e) (by simp)
+  have h₂ := hreg (a*q^(1-(n:ℤ))/f) (by simp)
+  have h₃ := hreg (e*f/(a*b)) (by simp)
+  have h₄ := hreg (e*f/(a*c)) (by simp)
+  have h₅ := hreg (e*f/(a*b*c)) (by simp)
+  have h₆ := hreg (q^(1-(n:ℤ))/a) (by simp)
+  rw [hz'] at h₁ h₂
+  rw [hz] at h₆
+  simp only [qPhi_four_three_eq_searsSum hq0, qProductRatio, qPochhammerList, List.map_cons,
+    List.map_nil, List.prod_cons, List.prod_nil, mul_one, hz]
+  constructor
+  · have H := searsSum_transformation_first n hq0 hq ha hb hc hd he hf hbal' hD hE hF h₁ h₂
+    rw [div_mul_eq_mul_div, div_mul_eq_mul_div, eq_div_iff (mul_ne_zero hE hF)]
+    rw [show a*(q*q⁻¹^n) = a*q*q⁻¹^n by ring]
+    linear_combination H
+  · have H := searsSum_transformation_second n hq0 hq ha hb hc hd he hf hbal' hD hE hF h₃ h₄ h₆
+    rw [div_mul_eq_mul_div, eq_div_iff (mul_ne_zero hE (mul_ne_zero hF h₅))]
+    linear_combination H
 
 /-- DLMF 17.9.E16: nonterminating watson. -/
 @[dlmf 17.9.E16]

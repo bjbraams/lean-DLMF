@@ -9,6 +9,7 @@
   "Confluent <-> Hypergeometric",
   "Confluent <-> OrthogonalPolynomials",
   "Confluent <-> ParabolicCylinder",
+  "Elementary <-> IncompleteGamma",
   "EllipticIntegrals <-> JacobiElliptic",
   "ErrorFunctions <-> IncompleteGamma",
   "ErrorFunctions <-> ParabolicCylinder",

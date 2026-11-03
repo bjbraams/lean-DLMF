@@ -285,27 +285,27 @@ foundational layer (for example `DLMF.Confluent.erf_ofReal` to TauCeti's `Real.e
 
 ### Statistics
 
-Counts as of 2026-11-02, after the fourth proof round of that day. Theorems include private
+Counts as of 2026-11-02, after the fifth proof round of that day. Theorems include private
 helper lemmas, and a theorem counts as admitted when its proof contains `sorry`.
 
-- **Size.** 1,370 Lean files with 617,276 lines (490,313 lines of code without comments and
-  blank lines): 1,238 files under `DLMF/` and 132 under `DLMFMathlib/`. The foundational
+- **Size.** 1,383 Lean files with 629,457 lines (501,186 lines of code without comments and
+  blank lines): 1,246 files under `DLMF/` and 137 under `DLMFMathlib/`. The foundational
   layer (every `Basic.lean` and every file below a `Basic/` directory) has 236 files and
-  49,413 lines.
-- **Declarations.** 3,495 definitions, 62 structures, inductive types and classes, 19
-  instances, and 24,089 theorems.
-- **Proofs.** 22,877 theorems are fully proved and 1,212 are admitted (95.0% proved). No
+  49,415 lines.
+- **Declarations.** 3,517 definitions, 62 structures, inductive types and classes, 19
+  instances, and 24,307 theorems.
+- **Proofs.** 23,144 theorems are fully proved and 1,163 are admitted (95.2% proved). No
   definition is admitted. The foundational layer (1,559 definitions, 2,018 theorems) and
-  `DLMFMathlib/` (79 definitions, 1,008 theorems) contain no admissions. No axioms are used
+  `DLMFMathlib/` (80 definitions, 1,022 theorems) contain no admissions. No axioms are used
   beyond `propext`, `Classical.choice` and `Quot.sound`.
-- **DLMF coverage.** 10,780 index entries link DLMF items in 35 chapters (Chapter 3 is out of
-  scope) to Lean declarations: 9,730 `@[dlmf]` tags on 8,765 project declarations, 1,031
+- **DLMF coverage.** 10,789 index entries link DLMF items in 35 chapters (Chapter 3 is out of
+  scope) to Lean declarations: 9,739 `@[dlmf]` tags on 8,772 project declarations, 1,031
   checked `dlmf_upstream` pointers (987 to Mathlib, 31 to TauCeti, the rest to lean-codes and
   other packages) and 19 tags carried by Mathlib itself. Of the 7,462 distinct DLMF items,
-  6,140 (82%) are proved, defined or covered upstream, 236 have both a proved and an admitted
-  formalization, and 1,086 (15%) are only admitted.
-- **History.** The project started on 2026-09-24 as lean-AAR. The four proof rounds of
-  2026-11-02 reduced the admissions from 1,482 to 1,212.
+  6,189 (83%) are proved, defined or covered upstream, 231 have both a proved and an admitted
+  formalization, and 1,042 (14%) are only admitted.
+- **History.** The project started on 2026-09-24 as lean-AAR. The five proof rounds of
+  2026-11-02 reduced the admissions from 1,482 to 1,163.
 
 ### Reports
 

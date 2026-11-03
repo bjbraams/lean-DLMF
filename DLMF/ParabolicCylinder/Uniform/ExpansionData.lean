@@ -464,7 +464,8 @@ theorem CylinderTurningPoint.xi_ge {t : ℝ} (ht : 1 ≤ t) : (t - 1)^2/2 ≤ pc
   exact Real.le_sqrt_of_sq_le (by nlinarith [hs.1])
 
 /-- An exponent identity used for `ζ'`. -/
-lemma CylinderTurningPoint.rpow_identity {A : ℝ} (hA : 0 < A) : (A ^ (2/3 - 1 : ℝ)) ^ 2 *
+lemma CylinderTurningPoint.rpow_sub_one_sq_mul_rpow_eq_one {A : ℝ} (hA : 0 < A) :
+    (A ^ (2/3 - 1 : ℝ)) ^ 2 *
     A ^ (2/3 : ℝ) = 1 := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul hA.le, ← Real.rpow_add hA]; norm_num
 
@@ -480,7 +481,7 @@ theorem CylinderTurningPoint.hasDerivAt_zeta {t : ℝ} (ht : -1 < t) (ht1 : t �
       (p := 2/3) (Or.inl hA.ne')).neg
     refine ⟨-((3/2 * -Real.sqrt (1 - t^2)) * (2/3) * (3/2 * pcfEta t) ^ (2/3 - 1 : ℝ)), ?_, ?_, ?_⟩
     · have := Real.rpow_pos_of_pos hA (2/3 - 1); nlinarith
-    · have e := CylinderTurningPoint.rpow_identity hA
+    · have e := CylinderTurningPoint.rpow_sub_one_sq_mul_rpow_eq_one hA
       have hs := Real.sq_sqrt (show 0 ≤ 1 - t^2 by nlinarith)
       simp only [pcfZeta, show ¬ 1 ≤ t from not_le.2 h, ↓reduceIte]
       linear_combination (-(1 - t^2)) * e +
@@ -496,7 +497,7 @@ theorem CylinderTurningPoint.hasDerivAt_zeta {t : ℝ} (ht : -1 < t) (ht1 : t �
         (Or.inl hA.ne')
     refine ⟨(3/2 * Real.sqrt (t^2 - 1)) * (2/3) * (3/2 * pcfXi t) ^ (2/3 - 1 : ℝ), ?_, ?_, ?_⟩
     · have := Real.rpow_pos_of_pos hA (2/3 - 1); positivity
-    · have e := CylinderTurningPoint.rpow_identity hA
+    · have e := CylinderTurningPoint.rpow_sub_one_sq_mul_rpow_eq_one hA
       have hs := Real.sq_sqrt (show 0 ≤ t^2 - 1 by nlinarith)
       simp only [pcfZeta, h.le, ↓reduceIte]
       linear_combination (t^2 - 1) * e +

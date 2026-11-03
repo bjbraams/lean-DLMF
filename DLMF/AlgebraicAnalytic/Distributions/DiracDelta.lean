@@ -7,6 +7,7 @@ module
 
 public import DLMF.AlgebraicAnalytic.Distributions.Basic
 public import DLMF.AlgebraicAnalytic.Transforms.Fourier
+public import DLMF.AlgebraicAnalytic.Fourier.Series
 public import Mathlib.MeasureTheory.Integral.PeakFunction
 public import Mathlib.Algebra.BigOperators.Group.Finset.Interval
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
@@ -176,17 +177,163 @@ theorem tendsto_gaussian_integral_of_growth {φ : ℝ → ℂ} {a : ℝ} (n₀ :
   linear_combination (↑(Real.exp (-((n : ℝ) * (x - a) ^ 2))) *
     ↑(Real.exp (-(n₀ * (x - a) ^ 2))) * φ x) * hsc
 
+/-- A Gaussian weight `e^{-m(x-a)²}` can be replaced by a stronger one `e^{-n(x-a)²}`, `m ≤ n`. -/
+private lemma integrable_gaussian_weight_mono {h : ℝ → ℂ} {a : ℝ} {m n : ℝ} (hmn : m ≤ n)
+    (hh : Integrable fun x => (Real.exp (-(m * (x - a) ^ 2)) : ℂ) * h x) :
+    Integrable fun x => (Real.exp (-(n * (x - a) ^ 2)) : ℂ) * h x := by
+  have hb := hh.bdd_mul (c := 1)
+    (f := fun x => (Real.exp (-((n - m) * (x - a) ^ 2)) : ℂ))
+    (by fun_prop) (Eventually.of_forall fun x => by
+      rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _), Real.exp_le_one_iff]
+      have := sq_nonneg (x - a)
+      nlinarith)
+  refine hb.congr (Eventually.of_forall fun x => ?_)
+  simp only
+  rw [← mul_assoc, ← ofReal_mul, ← Real.exp_add]
+  congr 3
+  ring
+
+/-- `∫ gaussianDeltaSeq n = 1` and `∫_{x>0} gaussianDeltaSeq n = 1/2` for `n ≥ 1`. -/
+private lemma integral_gaussianDeltaSeq {n : ℕ} (hn : 1 ≤ n) :
+    ∫ y, gaussianDeltaSeq n y = 1 ∧ ∫ y in Ioi (0 : ℝ), gaussianDeltaSeq n y = 1 / 2 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
+  have hprod : Real.sqrt (n / Real.pi) * Real.sqrt (Real.pi / n) = 1 := by
+    rw [← Real.sqrt_mul (by positivity)]
+    rw [div_mul_div_comm, mul_comm (n : ℝ), div_self (by positivity), Real.sqrt_one]
+  simp only [gaussianDeltaSeq]
+  constructor
+  · rw [integral_complex_ofReal, integral_const_mul]
+    have h := integral_gaussian (n : ℝ)
+    simp only [neg_mul] at h
+    rw [h, hprod, ofReal_one]
+  · rw [integral_complex_ofReal, integral_const_mul]
+    have h := integral_gaussian_Ioi (n : ℝ)
+    simp only [neg_mul] at h
+    rw [h, mul_div_assoc', hprod]
+    push_cast; ring
+
+/-- DLMF 1.17.7, stronger than DLMF, which also assumes `φ` locally integrable (piecewise
+continuous): if the Gaussian integrals converge absolutely for large `n` and `φ` has one-sided
+limits `φ(a±)` at `a`, then `lim √(n/π) ∫ e^{-n(x-a)²} φ(x) dx = ½ φ(a-) + ½ φ(a+)`. -/
+@[dlmf 1.17.E7]
+theorem tendsto_gaussian_integral_jump' {φ : ℝ → ℂ} {a : ℝ} {φm φp : ℂ} (n₀ : ℕ)
+    (hφ : Integrable fun x => (Real.exp (-(n₀ * (x - a) ^ 2)) : ℂ) * φ x)
+    (hm : Tendsto φ (𝓝[<] a) (𝓝 φm))
+    (hp : Tendsto φ (𝓝[>] a) (𝓝 φp)) :
+    Tendsto (fun n : ℕ => ∫ x, gaussianDeltaSeq n (x - a) * φ x) atTop
+      (𝓝 ((1 / 2 : ℂ) * φm + (1 / 2 : ℂ) * φp)) := by
+  set J : ℝ → ℂ := fun x => if a < x then φp else φm with hJ
+  set ψ : ℝ → ℂ := fun x => if x = a then 0 else φ x - J x with hψ
+  have hJm : Measurable J := Measurable.ite measurableSet_Ioi measurable_const measurable_const
+  have hJb : ∀ x, ‖J x‖ ≤ ‖φm‖ + ‖φp‖ := fun x => by
+    simp only [hJ]; split_ifs <;> simp
+  have hψae : (fun x => φ x) =ᵐ[volume] fun x => ψ x + J x := by
+    filter_upwards [Measure.ae_ne volume a] with x hx
+    simp [hψ, hx]
+  have hψa : ContinuousAt ψ a := by
+    rw [continuousAt_iff_continuous_left'_right']
+    constructor
+    · have hJl : Tendsto J (𝓝[<] a) (𝓝 φm) := tendsto_const_nhds.congr' (by
+        filter_upwards [self_mem_nhdsWithin] with x (hx : x < a)
+        simp [hJ, not_lt.2 hx.le])
+      have h := hm.sub hJl
+      rw [sub_self] at h
+      simp only [ContinuousWithinAt, hψ, ↓reduceIte]
+      refine h.congr' ?_
+      filter_upwards [self_mem_nhdsWithin] with x (hx : x < a)
+      simp [hx.ne]
+    · have hJr : Tendsto J (𝓝[>] a) (𝓝 φp) := tendsto_const_nhds.congr' (by
+        filter_upwards [self_mem_nhdsWithin] with x (hx : a < x)
+        simp [hJ, hx])
+      have h := hp.sub hJr
+      rw [sub_self] at h
+      simp only [ContinuousWithinAt, hψ, ↓reduceIte]
+      refine h.congr' ?_
+      filter_upwards [self_mem_nhdsWithin] with x (hx : a < x)
+      simp [hx.ne']
+  have hGJ : ∀ n : ℕ, 1 ≤ n →
+      Integrable fun x => (Real.exp (-((n : ℝ) * (x - a) ^ 2)) : ℂ) * J x := by
+    intro n hn
+    have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
+    have hg : Integrable fun x => (Real.exp (-((n : ℝ) * (x - a) ^ 2)) : ℂ) := by
+      have := (integrable_exp_neg_mul_sq hn0).comp_sub_right a
+      simpa only [neg_mul, Complex.ofRealCLM_apply] using Complex.ofRealCLM.integrable_comp this
+    have := hg.bdd_mul (c := ‖φm‖ + ‖φp‖) hJm.aestronglyMeasurable
+      (Eventually.of_forall hJb)
+    simpa only [mul_comm] using this
+  have hn₁ : (1 : ℕ) ≤ n₀ + 1 := by omega
+  have hψint : Integrable fun x =>
+      (Real.exp (-(((n₀ + 1 : ℕ) : ℝ) * (x - a) ^ 2)) : ℂ) * ψ x := by
+    have h1 := integrable_gaussian_weight_mono (m := (n₀ : ℝ)) (n := ((n₀ + 1 : ℕ) : ℝ))
+      (by push_cast; linarith) hφ
+    refine (h1.sub (hGJ _ hn₁)).congr ?_
+    filter_upwards [hψae] with x hx
+    simp only [Pi.sub_apply]
+    rw [hx]; ring
+  have hlim := tendsto_gaussian_integral_of_growth (n₀ + 1) hψint hψa
+  simp only [hψ, ↓reduceIte] at hlim
+  rw [show (1 / 2 : ℂ) * φm + (1 / 2 : ℂ) * φp = 0 + ((1 / 2 : ℂ) * φm + (1 / 2 : ℂ) * φp)
+    by ring]
+  refine (hlim.add_const _).congr' ?_
+  filter_upwards [eventually_ge_atTop (n₀ + 1)] with n hn
+  have hn1 : 1 ≤ n := by omega
+  have hgauss : ∀ x, gaussianDeltaSeq n (x - a) =
+      (Real.sqrt (n / Real.pi) : ℂ) * (Real.exp (-((n : ℝ) * (x - a) ^ 2)) : ℂ) := fun x => by
+    simp [gaussianDeltaSeq]
+  have hiψ : Integrable fun x => gaussianDeltaSeq n (x - a) * ψ x := by
+    have := (integrable_gaussian_weight_mono (n := (n : ℝ)) (by exact_mod_cast hn)
+      hψint).const_mul (Real.sqrt (n / Real.pi) : ℂ)
+    simpa only [hgauss, mul_assoc] using this
+  have hiJ : Integrable fun x => gaussianDeltaSeq n (x - a) * J x := by
+    have := (hGJ n hn1).const_mul (Real.sqrt (n / Real.pi) : ℂ)
+    simpa only [hgauss, mul_assoc] using this
+  have hsplit : ∫ x, gaussianDeltaSeq n (x - a) * φ x =
+      (∫ x, gaussianDeltaSeq n (x - a) * ψ x) + ∫ x, gaussianDeltaSeq n (x - a) * J x := by
+    rw [← integral_add hiψ hiJ]
+    refine integral_congr_ae ?_
+    filter_upwards [hψae] with x hx
+    rw [hx]; ring
+  have hJint : ∫ x, gaussianDeltaSeq n (x - a) * J x = (1 / 2 : ℂ) * φm + (1 / 2 : ℂ) * φp := by
+    obtain ⟨h1, h2⟩ := integral_gaussianDeltaSeq hn1
+    have hgi : Integrable (gaussianDeltaSeq n) := by
+      have hn0 : (0 : ℝ) < n := by exact_mod_cast hn1
+      have := (Complex.ofRealCLM.integrable_comp (integrable_exp_neg_mul_sq hn0)).const_mul
+        (Real.sqrt (n / Real.pi) : ℂ)
+      refine this.congr (Eventually.of_forall fun y => ?_)
+      simp [gaussianDeltaSeq]
+    have ht := integral_sub_right_eq_self (μ := volume)
+      (fun y => gaussianDeltaSeq n y * J (y + a)) a
+    simp only [sub_add_cancel] at ht
+    rw [ht]
+    have hiJ' : Integrable fun y => gaussianDeltaSeq n y * J (y + a) :=
+      hgi.mul_bdd (c := ‖φm‖ + ‖φp‖) (hJm.comp (measurable_add_const a)).aestronglyMeasurable
+        (Eventually.of_forall fun y => hJb _)
+    rw [← integral_add_compl (measurableSet_Ioi (a := (0 : ℝ))) hiJ']
+    have hc := integral_add_compl (measurableSet_Ioi (a := (0 : ℝ))) hgi
+    rw [setIntegral_congr_fun measurableSet_Ioi (g := fun y => gaussianDeltaSeq n y * φp)
+        (fun y (hy : 0 < y) => by simp [hJ, hy]),
+      setIntegral_congr_fun measurableSet_Ioi.compl (g := fun y => gaussianDeltaSeq n y * φm)
+        (fun y (hy : ¬ 0 < y) => by simp [hJ, hy]),
+      integral_mul_const, integral_mul_const]
+    rw [h1, h2] at hc
+    have hc' : ∫ y in (Ioi (0 : ℝ))ᶜ, gaussianDeltaSeq n y = 1 / 2 := by
+      linear_combination hc
+    rw [h2, hc']
+    ring
+  rw [hsplit, hJint]
+
+
 /-- DLMF 1.17.7: for `φ` piecewise continuous with one-sided limits `φ(a±)` at `a`, and the
 Gaussian integrals absolutely convergent for large `n`,
 `lim √(n/π) ∫ e^{-n(x-a)²} φ(x) dx = ½ φ(a-) + ½ φ(a+)`. -/
 @[dlmf 1.17.E7]
 theorem tendsto_gaussian_integral_jump {φ : ℝ → ℂ} {a : ℝ} {φm φp : ℂ} (n₀ : ℕ)
     (hφ : Integrable fun x => (Real.exp (-(n₀ * (x - a) ^ 2)) : ℂ) * φ x)
-    (hloc : LocallyIntegrable φ) (hm : Tendsto φ (𝓝[<] a) (𝓝 φm))
+    (_hloc : LocallyIntegrable φ) (hm : Tendsto φ (𝓝[<] a) (𝓝 φm))
     (hp : Tendsto φ (𝓝[>] a) (𝓝 φp)) :
     Tendsto (fun n : ℕ => ∫ x, gaussianDeltaSeq n (x - a) * φ x) atTop
-      (𝓝 ((1 / 2 : ℂ) * φm + (1 / 2 : ℂ) * φp)) := by
-  sorry
+      (𝓝 ((1 / 2 : ℂ) * φm + (1 / 2 : ℂ) * φp)) :=
+  tendsto_gaussian_integral_jump' n₀ hφ hm hp
 
 /-! ## §1.17(ii): integral representations -/
 
@@ -458,6 +605,59 @@ theorem tendsto_airy_kernel {φ : ℝ → ℂ} (hφ : IsTestFunctionOn univ φ) 
 
 /-! ## §1.17(iii): series representations -/
 
+/-- `∑_{k=-n}^{n} e^{ikθ} = 1 + 2 ∑_{k=1}^{n} cos(kθ)`. -/
+private lemma sum_exp_Icc_eq_cos (n : ℕ) (θ : ℝ) :
+    ∑ k ∈ Finset.Icc (-(n : ℤ)) n, exp (I * k * θ) =
+      1 + 2 * ∑ k ∈ Finset.range n, (Real.cos ((k + 1 : ℕ) * θ) : ℂ) := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    have hset : Finset.Icc (-((n + 1 : ℕ) : ℤ)) ((n + 1 : ℕ) : ℤ) =
+        insert (-((n + 1 : ℕ) : ℤ)) (insert ((n + 1 : ℕ) : ℤ) (Finset.Icc (-(n : ℤ)) n)) := by
+      ext k; simp only [Finset.mem_Icc, Finset.mem_insert]; push_cast; omega
+    rw [hset, Finset.sum_insert (by simp; omega), Finset.sum_insert (by simp), ih,
+      Finset.sum_range_succ]
+    have hc : (Real.cos (((n + 1 : ℕ) : ℝ) * θ) : ℂ) =
+        (exp (I * ((n + 1 : ℕ) : ℤ) * θ) + exp (I * (-((n + 1 : ℕ) : ℤ) : ℤ) * θ)) / 2 := by
+      rw [ofReal_cos, Complex.cos]
+      push_cast
+      ring_nf
+    rw [hc]
+    ring
+
+private lemma dirichletKernel_eq_cos (n : ℕ) (θ : ℝ) :
+    dirichletKernel n θ = (1 / Real.pi : ℂ) *
+      ((1 / 2 + ∑ k ∈ Finset.range n, Real.cos ((k + 1 : ℕ) * θ) : ℝ) : ℂ) := by
+  rw [dirichletKernel, sum_exp_Icc_eq_cos, ofReal_add, ofReal_sum]
+  generalize (∑ k ∈ Finset.range n, (Real.cos ((k + 1 : ℕ) * θ) : ℂ)) = S
+  have : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
+  push_cast
+  field_simp
+
+/-- Pointwise convergence of the Dirichlet-kernel integrals for `C¹` periodic functions. -/
+private theorem tendsto_integral_dirichletKernel_mul {φ : ℝ → ℂ} (hφ : ContDiff ℝ 1 φ)
+    (hper : Function.Periodic φ (2 * Real.pi)) (a : ℝ) :
+    Tendsto (fun n : ℕ => ∫ x in -Real.pi..Real.pi, dirichletKernel n (x - a) * φ x) atTop
+      (𝓝 (φ a)) := by
+  have hd : HasDerivAt φ (deriv φ a) a := (hφ.differentiable one_ne_zero a).hasDerivAt
+  have hslope := hd.tendsto_slope_zero
+  have hL : Tendsto (fun h : ℝ => (φ (a + h) - φ a) / h) (𝓝[<] 0) (𝓝 (deriv φ a)) := by
+    refine (hslope.mono_left (nhdsWithin_mono _ fun h hh =>
+      Set.mem_compl_singleton_iff.2 (ne_of_lt (Set.mem_Iio.1 hh)))).congr fun h => ?_
+    rw [Complex.real_smul, div_eq_inv_mul, ofReal_inv]
+  have hR : Tendsto (fun h : ℝ => (φ (a + h) - φ a) / h) (𝓝[>] 0) (𝓝 (deriv φ a)) := by
+    refine (hslope.mono_left (nhdsWithin_mono _ fun h hh =>
+      Set.mem_compl_singleton_iff.2 (ne_of_gt (Set.mem_Ioi.1 hh)))).congr fun h => ?_
+    rw [Complex.real_smul, div_eq_inv_mul, ofReal_inv]
+  have h := tendsto_integral_mul_cosineKernel_of_oneSidedDeriv
+    (hφ.continuous.intervalIntegrable _ _) hper hL hR
+  rw [add_halves] at h
+  refine h.congr fun N => ?_
+  rw [← intervalIntegral.integral_const_mul]
+  refine intervalIntegral.integral_congr fun x _ => ?_
+  simp only [dirichletKernel_eq_cos]
+  ring
+
 /-- DLMF 1.17.17 (Fourier series at a point): for `φ` smooth and `2π`-periodic,
 `(2π)⁻¹ Σ_k e^{-ika} ∫_{-π}^{π} φ(x) e^{ikx} dx = φ(a)`, as the limit of the symmetric partial
 sums. -/
@@ -467,7 +667,26 @@ theorem tendsto_fourier_series {φ : ℝ → ℂ} (hφ : ContDiff ℝ (⊤ : ℕ
     Tendsto (fun n : ℕ => (1 / (2 * Real.pi) : ℂ) * ∑ k ∈ Finset.Icc (-(n : ℤ)) n,
       exp (-(I * k * a)) * ∫ x in -Real.pi..Real.pi, φ x * exp (I * k * x)) atTop
       (𝓝 (φ a)) := by
-  sorry
+  refine (tendsto_integral_dirichletKernel_mul (hφ.of_le (by exact_mod_cast le_top)) hper
+    a).congr fun n => ?_
+  have hi : ∀ k : ℤ, IntervalIntegrable (fun x : ℝ => exp (I * k * (x - a)) * φ x) volume
+      (-Real.pi) Real.pi := fun k =>
+    (Continuous.mul (by fun_prop) hφ.continuous).intervalIntegrable _ _
+  have hpt : ∀ x : ℝ, dirichletKernel n (x - a) * φ x = (1 / (2 * Real.pi) : ℂ) *
+      ∑ k ∈ Finset.Icc (-(n : ℤ)) n, exp (I * k * ((x : ℂ) - a)) * φ x := by
+    intro x
+    simp only [dirichletKernel, Finset.sum_mul, mul_assoc]
+    push_cast
+    rfl
+  simp_rw [hpt]
+  rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_finsetSum fun k _ => hi k]
+  congr 1
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [← intervalIntegral.integral_const_mul]
+  refine intervalIntegral.integral_congr fun x _ => ?_
+  rw [show I * k * ((x : ℂ) - a) = -(I * k * a) + I * k * x by ring, Complex.exp_add]
+  ring
+
 
 /-- DLMF 1.17.20 (closed form): `(2π)⁻¹ Σ_{k=-n}^{n} e^{ikθ} = sin((n+½)θ) / (2π sin(θ/2))`
 when `sin(θ/2) ≠ 0`. -/
@@ -525,8 +744,8 @@ The statement is made for continuously differentiable `φ` (any Dini-type condit
 theorem tendsto_dirichletKernel_integral {φ : ℝ → ℂ} (hφ : ContDiff ℝ 1 φ)
     (hper : Function.Periodic φ (2 * Real.pi)) (a : ℝ) :
     Tendsto (fun n : ℕ => ∫ x in -Real.pi..Real.pi, dirichletKernel n (x - a) * φ x) atTop
-      (𝓝 (φ a)) := by
-  sorry
+      (𝓝 (φ a)) :=
+  tendsto_integral_dirichletKernel_mul hφ hper a
 
 /-- DLMF 1.17.22: `δ(x - a) = Σ_k (k + ½) P_k(x) P_k(a)` on `(-1, 1)` (Legendre polynomials
 `legendrePolyP`), as the limit of the partial sums tested against test functions. -/

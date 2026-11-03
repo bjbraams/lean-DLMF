@@ -37,7 +37,8 @@ statements.
   rotation of the integration path (DLMF 2.4.1, §2.4(i)).
 * `laplace_inversion`, `inverseLaplace_of_hasAsymptoticExpansion`: Laplace inversion and the
   inverse transform of an asymptotic expansion (DLMF 2.4.2–2.4.5).
-* `haar_sub`, `haar_isLittleO`, `haar_isLittleO_pow`: Haar's method (DLMF 2.4.6–2.4.9).
+* `haar_sub`, `haar_isLittleO`, `haar_isLittleO_pow`, `haar_isLittleO_pow'`: Haar's method
+  (DLMF 2.4.6–2.4.9).
 
 ## Implementation notes
 
@@ -566,15 +567,31 @@ theorem haar_isLittleO {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {L : 
   push_cast
   ring
 
-/-- DLMF 2.4.9 (Haar's method): if `Q` and `F` are holomorphic in the right half-plane
-and their Fourier integrals along the vertical line, through derivative order `m`, converge
-uniformly for all sufficiently large `t`, then `q(t) = f(t) + o(t^{-m} e^{ct})`.
-Individual holomorphy identifies the separate derivative data with the derivatives of `Q-F`.
--/
+/-- Derivatives of a function holomorphic on `ℜz > c - 1` along the vertical line `ℜz = c`. -/
+private lemma hasDerivAt_iteratedDeriv_line {Q : ℂ → ℂ} {c : ℝ}
+    (hQ : DifferentiableOn ℂ Q {z | c - 1 < z.re}) (j : ℕ) (τ : ℝ) :
+    HasDerivAt (fun τ : ℝ => iteratedDeriv j Q (c + τ * I))
+      (iteratedDeriv (j + 1) Q (c + τ * I) * I) τ := by
+  have hU : IsOpen {z : ℂ | c - 1 < z.re} := isOpen_lt continuous_const continuous_re
+  have hA : AnalyticAt ℂ (iteratedDeriv j Q) (c + (τ : ℂ) * I) := by
+    rw [iteratedDeriv_eq_iterate]
+    exact (hQ.analyticOnNhd hU).iterated_deriv j _ (by simp)
+  have h1 : HasDerivAt (iteratedDeriv j Q) (iteratedDeriv (j + 1) Q (c + (τ : ℂ) * I))
+      (c + (τ : ℂ) * I) := by
+    rw [iteratedDeriv_succ]; exact hA.differentiableAt.hasDerivAt
+  have h2 : HasDerivAt (fun w : ℂ => (c : ℂ) + w * I) I (τ : ℂ) := by
+    simpa using ((hasDerivAt_id (τ : ℂ)).mul_const I).const_add (c : ℂ)
+  exact (h1.comp (τ : ℂ) h2).comp_ofReal
+
+
+/-- DLMF 2.4.9 (Haar's method), stronger than DLMF, which also assumes local integrability of the
+derivative data along the line (automatic here, by holomorphy): if `Q` and `F` are holomorphic in
+the half-plane `ℜz > c - 1` and their Fourier integrals along the vertical line `ℜz = c`, through
+derivative order `m`, converge uniformly for all sufficiently large `t`, then
+`q(t) = f(t) + o(t^{-m} e^{ct})`. Integration by parts gives
+`t L_j(t) + L_{j+1}(t) = 0`, the boundary term changing sign under `t ↦ t + π/η`. -/
 @[dlmf 2.4.E9]
-theorem haar_isLittleO_pow {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {m : ℕ} {L : ℕ → ℝ → ℂ}
-    (hd : ∀ j ≤ m, ∀ η : ℝ, IntervalIntegrable
-      (fun τ : ℝ => iteratedDeriv j Q (c + τ * I) - iteratedDeriv j F (c + τ * I)) volume (-η) η)
+theorem haar_isLittleO_pow' {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {m : ℕ} {L : ℕ → ℝ → ℂ}
     (hQ : DifferentiableOn ℂ Q {z | c - 1 < z.re})
     (hF : DifferentiableOn ℂ F {z | c - 1 < z.re})
     (hunif : ∀ j ≤ m, TendstoUniformlyOn (fun (η t : ℝ) => ∫ τ in -η..η,
@@ -582,6 +599,128 @@ theorem haar_isLittleO_pow {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {
       (L j) atTop (Ici T))
     (hqf : ∀ t, T ≤ t → q t - f t = (Real.exp (c * t) / (2 * π) : ℂ) * L 0 t) :
     (fun t => q t - f t) =o[atTop] fun t => (t : ℝ) ^ (-(m : ℝ)) * Real.exp (c * t) := by
-  sorry
+  set D : ℕ → ℝ → ℂ := fun j τ => iteratedDeriv j Q (c + τ * I) - iteratedDeriv j F (c + τ * I)
+    with hDdef
+  have hD : ∀ j τ, HasDerivAt (D j) (D (j + 1) τ * I) τ := fun j τ => by
+    have := (hasDerivAt_iteratedDeriv_line hQ j τ).sub (hasDerivAt_iteratedDeriv_line hF j τ)
+    convert this using 1; simp only [hDdef, sub_mul]
+  have hDc : ∀ j, Continuous (D j) := fun j =>
+    continuous_iff_continuousAt.2 fun τ => (hD j τ).continuousAt
+  set A : ℕ → ℝ → ℝ → ℂ := fun j η t => ∫ τ in -η..η, cexp (I * t * τ) * D j τ with hAdef
+  have hAc : ∀ j η, Continuous (A j η) := fun j η => by
+    refine intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' ?_ _ _
+    have := hDc j
+    fun_prop
+  have hLc : ∀ j ≤ m, ContinuousOn (L j) (Ici T) := fun j hj =>
+    (hunif j hj).continuousOn (Frequently.of_forall fun η => (hAc j η).continuousOn)
+  -- integration by parts
+  have hibp : ∀ j η t, I * t * A j η t + I * A (j + 1) η t =
+      cexp (I * t * η) * D j η - cexp (I * t * ((-η : ℝ) : ℂ)) * D j (-η) := by
+    intro j η t
+    have hφ : ∀ τ : ℝ, HasDerivAt (fun τ : ℝ => cexp (I * t * τ) * D j τ)
+        (cexp (I * t * τ) * (I * t) * D j τ + cexp (I * t * τ) * (D (j + 1) τ * I)) τ := by
+      intro τ
+      have he : HasDerivAt (fun w : ℂ => cexp (I * t * w)) (cexp (I * t * τ) * (I * t)) τ := by
+        simpa using ((hasDerivAt_id (τ : ℂ)).const_mul (I * t)).cexp
+      exact he.comp_ofReal.mul (hD j τ)
+    have hcont : Continuous fun τ : ℝ =>
+        cexp (I * t * τ) * (I * t) * D j τ + cexp (I * t * τ) * (D (j + 1) τ * I) := by
+      have := hDc j; have := hDc (j + 1); fun_prop
+    have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun τ _ => hφ τ)
+      (hcont.intervalIntegrable (-η) η)
+    rw [← h, intervalIntegral.integral_add]
+    · simp only [hAdef, ← intervalIntegral.integral_const_mul]
+      congr 1 <;> refine intervalIntegral.integral_congr fun τ _ => ?_ <;> ring
+    · have := hDc j; exact Continuous.intervalIntegrable (by fun_prop) _ _
+    · have := hDc (j + 1); exact Continuous.intervalIntegrable (by fun_prop) _ _
+  -- the boundary term changes sign under `t ↦ t + π/η`, so its limit vanishes
+  have hkey : ∀ j < m, ∀ t, T ≤ t → t * L j t + L (j + 1) t = 0 := by
+    intro j hj t ht
+    have hj' : j ≤ m := hj.le
+    have hj1 : j + 1 ≤ m := hj
+    set X : ℂ := I * t * L j t + I * L (j + 1) t
+    have h1 : Tendsto (fun η => I * t * A j η t + I * A (j + 1) η t) atTop (𝓝 X) :=
+      (((hunif j hj').tendsto_at ht).const_mul _).add (((hunif _ hj1).tendsto_at ht).const_mul _)
+    set s : ℝ → ℝ := fun η => t + π / η
+    have hs0 : Tendsto s atTop (𝓝 t) := by
+      have h0 : Tendsto (fun η : ℝ => π / η) atTop (𝓝 0) :=
+        tendsto_const_nhds.div_atTop tendsto_id
+      simpa [s] using (tendsto_const_nhds (x := t)).add h0
+    have hs : Tendsto s atTop (𝓝[Ici T] t) := by
+      refine tendsto_nhdsWithin_iff.2 ⟨hs0, ?_⟩
+      filter_upwards [eventually_gt_atTop 0] with η hη
+      show T ≤ t + π / η
+      have : 0 < π / η := by positivity
+      linarith
+    have hsr : Tendsto (fun η => (s η : ℂ)) atTop (𝓝 (t : ℂ)) :=
+      (continuous_ofReal.tendsto _).comp hs0
+    have h2 : Tendsto (fun η => I * (s η) * A j η (s η) + I * A (j + 1) η (s η)) atTop (𝓝 X) :=
+      ((hsr.const_mul I).mul ((hunif j hj').tendsto_comp
+          ((hLc j hj') t ht) hs)).add
+        (((hunif _ hj1).tendsto_comp ((hLc _ hj1) t ht) hs).const_mul _)
+    have h3 : Tendsto (fun η => -(I * t * A j η t + I * A (j + 1) η t)) atTop (𝓝 X) := by
+      refine h2.congr' ?_
+      filter_upwards [eventually_gt_atTop 0] with η hη
+      rw [hibp, hibp]
+      have hη' : (η : ℂ) ≠ 0 := ofReal_ne_zero.2 hη.ne'
+      have e1 : cexp (I * ((s η : ℝ) : ℂ) * η) = -cexp (I * t * η) := by
+        rw [show I * ((s η : ℝ) : ℂ) * η = I * t * η + π * I by
+          simp only [s]; push_cast; field_simp, Complex.exp_add, Complex.exp_pi_mul_I]
+        ring
+      have e2 : cexp (I * ((s η : ℝ) : ℂ) * ((-η : ℝ) : ℂ)) =
+          -cexp (I * t * ((-η : ℝ) : ℂ)) := by
+        rw [show I * ((s η : ℝ) : ℂ) * ((-η : ℝ) : ℂ) = I * t * ((-η : ℝ) : ℂ) + -(π * I) by
+          simp only [s]; push_cast; field_simp; ring, Complex.exp_add, Complex.exp_neg,
+          Complex.exp_pi_mul_I]
+        ring
+      rw [e1, e2]; ring
+    have hX : X = -X := tendsto_nhds_unique h3 (by simpa using h1.neg)
+    have hX0 : X = 0 := by linear_combination (1 / 2 : ℂ) * hX
+    have : I * (t * L j t + L (j + 1) t) = 0 := by rw [← hX0]; ring
+    simpa [I_ne_zero] using this
+  -- iterate: `L₀(t) = (-1/t)^j L_j(t)`
+  have hiter : ∀ j ≤ m, ∀ t, T ≤ t → 0 < t → L 0 t = (-(t : ℂ)⁻¹) ^ j * L j t := by
+    intro j
+    induction j with
+    | zero => intro _ t _ _; simp
+    | succ j ih =>
+      intro hj t hT ht
+      rw [ih (by omega) t hT ht]
+      have hk := hkey j (by omega) t hT
+      have ht' : (t : ℂ) ≠ 0 := ofReal_ne_zero.2 ht.ne'
+      rw [show L j t = -(t : ℂ)⁻¹ * L (j + 1) t by field_simp; linear_combination hk, pow_succ]
+      ring
+  -- Riemann–Lebesgue for the `m`-th derivatives
+  have hm := haar_isLittleO (q := fun t => (Real.exp (c * t) / (2 * π) : ℂ) * L m t)
+    (f := fun _ => 0) (hunif m le_rfl) (fun t _ => by simp)
+  simp only [sub_zero] at hm
+  have hB : (fun t : ℝ => (-(t : ℂ)⁻¹) ^ m) =O[atTop] fun t : ℝ => t ^ (-(m : ℝ)) := by
+    refine IsBigO.of_bound 1 ?_
+    filter_upwards [eventually_gt_atTop 0] with t ht
+    rw [norm_pow, norm_neg, norm_inv, Complex.norm_real, Real.norm_of_nonneg ht.le, one_mul,
+      Real.norm_of_nonneg (Real.rpow_nonneg ht.le _), Real.rpow_neg ht.le, Real.rpow_natCast,
+      inv_pow]
+  refine (hB.mul_isLittleO hm).congr' ?_ (Eventually.of_forall fun t => rfl)
+  filter_upwards [eventually_ge_atTop T, eventually_gt_atTop 0] with t hT ht
+  rw [hqf t hT, hiter m le_rfl t hT ht]
+  ring
+
+/-- DLMF 2.4.9 (Haar's method): if `Q` and `F` are holomorphic in the right half-plane
+and their Fourier integrals along the vertical line, through derivative order `m`, converge
+uniformly for all sufficiently large `t`, then `q(t) = f(t) + o(t^{-m} e^{ct})`.
+Individual holomorphy identifies the separate derivative data with the derivatives of `Q-F`.
+-/
+@[dlmf 2.4.E9]
+theorem haar_isLittleO_pow {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {m : ℕ} {L : ℕ → ℝ → ℂ}
+    (_hd : ∀ j ≤ m, ∀ η : ℝ, IntervalIntegrable
+      (fun τ : ℝ => iteratedDeriv j Q (c + τ * I) - iteratedDeriv j F (c + τ * I)) volume (-η) η)
+    (hQ : DifferentiableOn ℂ Q {z | c - 1 < z.re})
+    (hF : DifferentiableOn ℂ F {z | c - 1 < z.re})
+    (hunif : ∀ j ≤ m, TendstoUniformlyOn (fun (η t : ℝ) => ∫ τ in -η..η,
+      Complex.exp (I * t * τ) * (iteratedDeriv j Q (c + τ * I) - iteratedDeriv j F (c + τ * I)))
+      (L j) atTop (Ici T))
+    (hqf : ∀ t, T ≤ t → q t - f t = (Real.exp (c * t) / (2 * π) : ℂ) * L 0 t) :
+    (fun t => q t - f t) =o[atTop] fun t => (t : ℝ) ^ (-(m : ℝ)) * Real.exp (c * t) :=
+  haar_isLittleO_pow' hQ hF hunif hqf
 
 end DLMF.AsymptoticApproximations

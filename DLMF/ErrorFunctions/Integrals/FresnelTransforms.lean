@@ -23,7 +23,8 @@ transforms of error functions of DLMF 7.14.1–7.14.3.
 
 ## Main results
 
-* `FresnelMellinBarnes.mellin`: the Mellin transforms of the Fresnel auxiliary functions.
+* `FresnelMellinBarnes.mellin_auxFunction`: the Mellin transforms of the Fresnel auxiliary
+  functions.
 * `fresnelAuxFComplex_mellinBarnes`, `fresnelAuxGComplex_mellinBarnes`: the Mellin–Barnes
   integrals for `f(z)` and `g(z)` (DLMF 7.7.13, 7.7.14).
 * `laplace_exp_I_sq`: the Laplace transform of `exp(± i t²)`.
@@ -206,7 +207,7 @@ FresnelMellinBarnes.auxFunction aux x) w ∧ mellin (fun x : ℝ => FresnelMelli
 x) w = 1 / (π * Real.sqrt 2) * (((2 / π : ℝ) : ℂ) ^ (w / 2) * Gamma (w / 2) / 2 * (Gamma (((if aux
 then 1 else 0 : ℕ) : ℂ) / 2 + 1 / 4 - w / 4) * Gamma (1 - (((if aux then 1 else 0 : ℕ) : ℂ) / 2 + 1
 / 4 - w / 4)) / 2))`. -/
-theorem FresnelMellinBarnes.mellin (aux : Bool) {w : ℂ} (hw : 0 < w.re)
+theorem FresnelMellinBarnes.mellin_auxFunction (aux : Bool) {w : ℂ} (hw : 0 < w.re)
     (hw1 : w.re < 2 * ((if aux then 1 else 0 : ℕ) : ℝ) + 1) :
     MellinConvergent (fun x : ℝ => FresnelMellinBarnes.auxFunction aux x) w ∧
       mellin (fun x : ℝ => FresnelMellinBarnes.auxFunction aux x) w = 1 / (π * Real.sqrt 2) *
@@ -330,7 +331,7 @@ theorem FresnelMellinBarnes.mellin_auxMellin (aux : Bool) {s : ℂ} (hs : 0 < s.
   have hw4 : w = 4 * s := by rw [hw]; push_cast; field_simp
   have hwre : 0 < w.re := by rw [hw4]; simp; linarith
   have hwre1 : w.re < 2 * (k : ℝ) + 1 := by rw [hw4]; simp; linarith
-  obtain ⟨hconv, hval⟩ := FresnelMellinBarnes.mellin aux hwre hwre1
+  obtain ⟨hconv, hval⟩ := FresnelMellinBarnes.mellin_auxFunction aux hwre hwre1
   have hsq : (0 : ℝ) < 2 / Real.sqrt π := by positivity
   refine ⟨?_, ?_⟩
   · rw [hgF, MellinConvergent.comp_rpow (by norm_num), ← hw]

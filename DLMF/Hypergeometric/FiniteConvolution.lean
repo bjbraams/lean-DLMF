@@ -25,6 +25,8 @@ Wilson generating functions.
 * `saalschutz_binomial_convolution`: Euler's transformation as a finite binomial convolution.
 * `wilson_inner_sum`, `balanced_inner_sum`: inner Pfaff–Saalschütz sums.
 * `balanced_4F3_convolution`: Whipple's balanced terminating transformation.
+* `balanced_4F3_convolution_of_regular`: the same for lower parameters off the nonpositive
+  integers.
 -/
 
 @[expose] public section
@@ -259,5 +261,114 @@ theorem balanced_4F3_convolution (P Q N E F R : ℂ)
   apply Finset.sum_congr rfl
   intro j hj
   rw [balanced_inner_sum hE hF n j (by simpa using hj) hbal]
+
+/-- Pfaff–Saalschütz in the balanced inner sum, for lower parameters off the nonpositive
+integers. -/
+theorem balanced_inner_sum_of_regular {P Q E F : ℂ}
+    (hE : ∀ k : ℕ, E ≠ -k) (hF : ∀ k : ℕ, F ≠ -k) (n j : ℕ) (hj : j ≤ n)
+    (hbal : Q = E + F - P + n - 1) :
+    ∑ l ∈ Finset.range (n-j+1), poch (-((n-j : ℕ) : ℂ)) l * poch (P+j) l * poch Q l /
+      (poch (E+j) l * poch (F+j) l * l !) =
+    poch (E-P) (n-j) * poch (F-P) (n-j) /
+      (poch (E+j) (n-j) * poch (F+j) (n-j)) := by
+  have he := not_neg_nat_add_nat hE j
+  have hf := not_neg_nat_add_nat hF j
+  have hh : 1 + (P+j) + Q - (E+j) - (n-j : ℕ) = F+j := by
+    rw [hbal]; push_cast [Nat.cast_sub hj]; ring
+  have hs := pfaff_saalschutz (n-j) (a := P+j) (b := Q) (c := E+j) he
+    (by rw [hh]; exact poch_ne_zero_of_not_neg_nat hf _)
+  rw [hh, show E+j-(P+j) = E-P by ring,
+    show E+j-Q = 1-(F-P)-(n-j : ℕ) by rw [hbal]; push_cast [Nat.cast_sub hj]; ring,
+    show E-P-Q = 1-(F+j)-(n-j : ℕ) by rw [hbal]; push_cast [Nat.cast_sub hj]; ring,
+    poch_reflect, poch_reflect] at hs
+  rw [hs]
+  have hs : (-1 : ℂ) ^ (n-j) ≠ 0 := pow_ne_zero _ (by norm_num)
+  field_simp
+
+/-- Reindexing the double convolution arising from Euler's transformation, for lower parameters
+off the nonpositive integers. -/
+theorem balanced_4F3_double_sum_of_regular (P Q N E F R : ℂ)
+    (hE : ∀ k : ℕ, E ≠ -k) (hF : ∀ k : ℕ, F ≠ -k) (n : ℕ) :
+    (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k /
+      (poch E k * poch F k * k !) *
+      (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j /
+        poch R j * poch (Q+N-R) (k-j))) =
+    ∑ j ∈ Finset.range (n+1),
+      (poch (-(n : ℂ)) j * poch P j * poch (R-Q) j * poch (R-N) j /
+        (poch R j * poch E j * poch F j * j !)) *
+      (∑ l ∈ Finset.range (n-j+1), poch (-((n-j : ℕ) : ℂ)) l * poch (P+j) l *
+        poch (Q+N-R) l / (poch (E+j) l * poch (F+j) l * l !)) := by
+  simp_rw [Finset.mul_sum]
+  have htri := (Finset.sum_range_diag_flip (n+1) (fun j l =>
+    poch (-(n : ℂ)) (j+l) * poch P (j+l) / (poch E (j+l) * poch F (j+l) * (j+l)!) *
+      ((j+l).choose j * poch (R-Q) j * poch (R-N) j / poch R j * poch (Q+N-R) l))).symm
+  have he : (∑ k ∈ Finset.range (n+1), ∑ j ∈ Finset.range (k+1),
+      poch (-(n : ℂ)) k * poch P k / (poch E k * poch F k * k !) *
+        ((k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j / poch R j * poch (Q+N-R) (k-j))) =
+      ∑ j ∈ Finset.range (n+1), ∑ l ∈ Finset.range (n+1-j),
+        poch (-(n : ℂ)) (j+l) * poch P (j+l) / (poch E (j+l) * poch F (j+l) * (j+l)!) *
+          ((j+l).choose j * poch (R-Q) j * poch (R-N) j / poch R j * poch (Q+N-R) l) := by
+    rw [htri]
+    apply Finset.sum_congr rfl
+    intro k hk
+    apply Finset.sum_congr rfl
+    intro j hj
+    rw [Nat.add_sub_cancel' (show j ≤ k by simpa using hj)]
+  rw [he]
+  apply Finset.sum_congr rfl
+  intro j hj
+  have hj' : j ≤ n := by simpa using hj
+  rw [show n+1-j = n-j+1 by omega]
+  apply Finset.sum_congr rfl
+  intro l hl
+  have hl' : l ≤ n-j := by simpa using hl
+  have hch : ((j+l).choose j : ℂ) * j ! * l ! = (j+l)! := by
+    exact_mod_cast (by simpa using Nat.choose_mul_factorial_mul_factorial (show j ≤ j+l by omega))
+  rw [poch_add, poch_add, show -(n : ℂ)+j = -((n-j : ℕ) : ℂ) by push_cast [Nat.cast_sub hj']; ring,
+    poch_add E, poch_add F]
+  have hp (Z : ℂ) (hZ : ∀ k : ℕ, Z ≠ -k) (k : ℕ) : poch Z k ≠ 0 :=
+    poch_ne_zero_of_not_neg_nat hZ k
+  have he := not_neg_nat_add_nat hE j
+  have hf := not_neg_nat_add_nat hF j
+  have hjf : (j ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
+  have hlf : (l ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr l.factorial_ne_zero
+  have ht : ((j+l)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (j+l).factorial_ne_zero
+  field_simp [hp E hE j, hp F hF j, hp (E+j) he l, hp (F+j) hf l, hjf, hlf, ht]
+  linear_combination (poch (-(n : ℂ)) j * poch (-((n-j : ℕ) : ℂ)) l * poch P j *
+    poch (P+j) l * poch (R-Q) j * poch (R-N) j * poch (Q+N-R) l * (poch R j)⁻¹) * hch
+
+/-- Whipple's balanced terminating coefficient transformation in convolution form, for lower
+parameters off the nonpositive integers. -/
+theorem balanced_4F3_convolution_of_regular (P Q N E F R : ℂ)
+    (hE : ∀ k : ℕ, E ≠ -k) (hF : ∀ k : ℕ, F ≠ -k) (hR : ∀ k : ℕ, R ≠ -k) (n : ℕ)
+    (hbal : Q+N-R = E+F-P+n-1) :
+    (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k * poch Q k * poch N k /
+      (poch R k * poch E k * poch F k * k !)) =
+    ∑ j ∈ Finset.range (n+1),
+      (poch (-(n : ℂ)) j * poch P j * poch (R-Q) j * poch (R-N) j /
+        (poch R j * poch E j * poch F j * j !)) *
+      (poch (E-P) (n-j) * poch (F-P) (n-j) /
+        (poch (E+j) (n-j) * poch (F+j) (n-j))) := by
+  have hr := hR
+  have he (k : ℕ) : poch Q k * poch N k / poch R k =
+      ∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j /
+        poch R j * poch (Q+N-R) (k-j) := by
+    have ht := saalschutz_binomial_convolution (R-Q) (R-N) R hr k
+    simpa only [show R-(R-Q) = Q by ring, show R-(R-N) = N by ring,
+      show R-(R-Q)-(R-N) = Q+N-R by ring,
+      show Q-(R-N) = Q+N-R by ring] using ht.symm
+  have hf : (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k * poch Q k * poch N k /
+      (poch R k * poch E k * poch F k * k !)) =
+      ∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k / (poch E k * poch F k * k !) *
+        (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j /
+          poch R j * poch (Q+N-R) (k-j)) := by
+    apply Finset.sum_congr rfl
+    intro k _
+    rw [← he]
+    ring
+  rw [hf, balanced_4F3_double_sum_of_regular P Q N E F R hE hF]
+  apply Finset.sum_congr rfl
+  intro j hj
+  rw [balanced_inner_sum_of_regular hE hF n j (by simpa using hj) hbal]
 
 end DLMF.Hypergeometric

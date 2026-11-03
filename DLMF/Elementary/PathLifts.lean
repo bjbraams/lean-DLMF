@@ -10,7 +10,7 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
-# Path lifts for the inverse sine and tangent
+# Path lifts for the inverse sine, tangent and hyperbolic cosine
 
 This file supplies the analytic core of the path-integral characterizations of the general
 inverse trigonometric and hyperbolic functions (DLMF 4.23.1–4.23.3 and 4.37.1–4.37.3).
@@ -23,6 +23,8 @@ inverse trigonometric and hyperbolic functions (DLMF 4.23.1–4.23.3 and 4.37.1�
 
 * `sin_of_arcsin_lift`, `tan_of_arctan_lift`: path integrals of `γ' / √(1 - γ²)` and
   `γ' / (1 + γ²)` with a continued branch are arcsines and arctangents of the endpoint.
+* `cosh_of_arccosh_lift`: an integrable path integral of `γ' / √(γ² - 1)` starting at `1` with
+  the root vanishing there is an inverse cosh of the endpoint.
 * `arcsin_lift_exists`, `arctan_lift_exists`: every arcsine (arctangent) arises in this way,
   along the image of `pathDetour` under `sin` (`tan`).
 
@@ -393,5 +395,69 @@ theorem tan_of_arctan_lift {γ : ℝ → ℂ} {z : ℂ} (hγ : ContDiffOn ℝ 1 
   rw [Complex.tan_eq_sin_div_cos, div_eq_iff hc0, hsin, hcos]
   linear_combination (I / 2) * hk - (z * (e + f) / 2) * I_sq
 
+/-- Soundness of the inverse-cosh path integral: if `r` is a continuous square root of
+`γ² - 1` along a `C¹` path `γ` from `1` to `z` with `r 0 = 0` and `r ≠ 0` at positive times,
+and `γ' / r` is integrable, then the integral of `γ' / r` is an inverse cosh of `z`. -/
+theorem cosh_of_arccosh_lift {γ r : ℝ → ℂ} {z : ℂ} (hγ : ContDiffOn ℝ 1 γ (Icc 0 1))
+    (h0 : γ 0 = 1) (h1 : γ 1 = z) (hr : ContinuousOn r (Icc 0 1)) (hr0 : r 0 = 0)
+    (hrr : ∀ t ∈ Ioc (0 : ℝ) 1, r t ≠ 0 ∧ r t ^ 2 = γ t ^ 2 - 1)
+    (hi : IntervalIntegrable (fun t => deriv γ t / r t) volume 0 1) :
+    Complex.cosh (∫ t in (0 : ℝ)..1, deriv γ t / r t) = z := by
+  set f := fun t => deriv γ t / r t with hf
+  set W := fun s => ∫ t in (0 : ℝ)..s, f t with hW
+  have hfc : ContinuousOn f (Ioo 0 1) := by
+    refine ContinuousOn.div ?_ (hr.mono Ioo_subset_Icc_self)
+      fun t ht => (hrr t ⟨ht.1, ht.2.le⟩).1
+    exact ((continuousOn_derivWithin_Icc hγ).mono Ioo_subset_Icc_self).congr
+      (deriv_eqOn_derivWithin γ)
+  have hWc : ContinuousOn W (Icc 0 1) := by
+    have := intervalIntegral.continuousOn_primitive_interval (μ := volume) (a := 0) (b := 1)
+      (f := f) (by
+        rw [uIcc_of_le zero_le_one]
+        exact (intervalIntegrable_iff_integrableOn_Icc_of_le zero_le_one).mp hi)
+    simpa [uIcc_of_le zero_le_one] using this
+  have hWd : ∀ s ∈ Ioo (0 : ℝ) 1, HasDerivAt W (f s) s := by
+    intro s hs
+    refine intervalIntegral.integral_hasDerivAt_right (hi.mono_set ?_) ?_ ?_
+    · rw [uIcc_of_le hs.1.le, uIcc_of_le zero_le_one]
+      exact Icc_subset_Icc le_rfl hs.2.le
+    · exact hfc.stronglyMeasurableAtFilter isOpen_Ioo s hs
+    · exact hfc.continuousAt (Ioo_mem_nhds hs.1 hs.2)
+  let H := fun s => (γ s + r s) * exp (-W s)
+  have hHc : ContinuousOn H (Icc 0 1) := (hγ.continuousOn.add hr).mul hWc.neg.cexp
+  have hHd : ∀ s ∈ Ioo (0 : ℝ) 1, HasDerivAt H 0 s := by
+    intro s hs
+    have hsI : s ∈ Ioc (0 : ℝ) 1 := ⟨hs.1, hs.2.le⟩
+    have hγd := hasDerivAt_of_contDiffOn_Icc hγ hs
+    have hrd := hasDerivAt_of_sq_eq (c := -1) (σ := 1) (γ' := deriv γ s)
+      (by filter_upwards [Ioo_mem_nhds hs.1 hs.2] with x hx
+          rw [(hrr x ⟨hx.1, hx.2.le⟩).2]; ring)
+      (hr.continuousAt (Icc_mem_nhds hs.1 hs.2)) (hrr s hsI).1 hγd
+    have := (hγd.add hrd).mul (hWd s hs).neg.cexp
+    convert this using 1
+    have := (hrr s hsI).1
+    simp only [f, Pi.add_apply]
+    field_simp
+    ring
+  have hH := eq_of_hasDerivAt_zero hHc hHd
+  simp only [H, hW, h0, h1, hr0, intervalIntegral.integral_same, neg_zero, Complex.exp_zero,
+    add_zero, mul_one] at hH
+  set w := ∫ t in (0 : ℝ)..1, f t
+  have hp : z + r 1 = exp w := by
+    have := congrArg (· * exp w) hH
+    simp only [mul_assoc, ← Complex.exp_add, neg_add_cancel, Complex.exp_zero, mul_one,
+      one_mul] at this
+    exact this
+  have hsq : (z - r 1) * (z + r 1) = 1 := by
+    have := (hrr 1 ⟨zero_lt_one, le_rfl⟩).2
+    rw [h1] at this
+    linear_combination -this
+  have hm : z - r 1 = exp (-w) := by
+    rw [hp] at hsq
+    have he : exp w * exp (-w) = 1 := by rw [← Complex.exp_add]; simp
+    calc z - r 1 = (z - r 1) * (exp w * exp (-w)) := by rw [he, mul_one]
+      _ = exp (-w) := by rw [← mul_assoc, hsq, one_mul]
+  rw [Complex.cosh, ← hp, ← hm]
+  ring
 
 end DLMF.Elementary

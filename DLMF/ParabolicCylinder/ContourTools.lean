@@ -90,7 +90,7 @@ theorem CylinderContour.norm_exp_le (z : ℂ) {c : ℝ} (hc : 0 ≤ c) (y : ℝ)
   linarith
 
 /-- Growth of `t^p` on the vertical line `t = c+iy`, `c > 0`. -/
-theorem CylinderContour.norm_cpow_le (p : ℂ) {c : ℝ} (hc : 0 < c) (y : ℝ) :
+theorem CylinderContour.norm_cpow_vertical_le (p : ℂ) {c : ℝ} (hc : 0 < c) (y : ℝ) :
     ‖((c:ℂ)+y*I)^p‖ ≤ Real.exp (‖p‖*(|Real.log c| + π) + ‖p‖/c*|y|) := by
   set t : ℂ := (c:ℂ)+y*I
   have ht1 : c ≤ ‖t‖ := by
@@ -99,7 +99,7 @@ theorem CylinderContour.norm_cpow_le (p : ℂ) {c : ℝ} (hc : 0 < c) (y : ℝ) 
     refine (norm_add_le _ _).trans ?_
     simp [abs_of_pos hc]
   have htp : 0 < ‖t‖ := lt_of_lt_of_le hc ht1
-  refine (CylinderIntegrals.norm_cpow_le t p).trans ?_
+  refine (CylinderIntegrals.norm_cpow_le_exp_abs_im t p).trans ?_
   rw [Real.rpow_def_of_pos htp, ← Real.exp_add]
   apply Real.exp_le_exp.mpr
   have hl1 : Real.log c ≤ Real.log ‖t‖ := Real.log_le_log hc ht1
@@ -141,7 +141,7 @@ theorem CylinderContour.vertical_le {z p : ℂ} {Z P c : ℝ} (hc : 0 < c) (hZ :
         CylinderContour.gaussMajorant Z P c y := by
   rw [norm_mul]
   have h1 := CylinderContour.norm_exp_le z hc.le y
-  have h2 := CylinderContour.norm_cpow_le p hc y
+  have h2 := CylinderContour.norm_cpow_vertical_le p hc y
   refine (mul_le_mul h1 h2 (norm_nonneg _) (Real.exp_pos _).le).trans ?_
   rw [CylinderContour.gaussMajorant, ← Real.exp_add, ← Real.exp_add]
   apply Real.exp_le_exp.mpr
@@ -409,7 +409,7 @@ theorem CylinderContour.loopIntegrand_differentiable (a z : ℂ) : Differentiabl
   unfold CylinderContour.loopIntegrand; fun_prop
 
 /-- `(t : ℂ)^w = exp (w log t)` for `t > 0`. -/
-theorem CylinderContour.ofReal_cpow {t : ℝ} (ht : 0 < t) (w : ℂ) : (t:ℂ)^w =
+theorem CylinderContour.ofReal_cpow_eq_exp_log {t : ℝ} (ht : 0 < t) (w : ℂ) : (t:ℂ)^w =
     exp (w * Real.log t) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr ht.ne'), ← ofReal_log ht.le, mul_comm]
 
@@ -422,7 +422,7 @@ theorem CylinderContour.loopIntegrand_edge (a z : ℂ) (x : ℝ) (s : ℝ) (hs :
     · simp [exp_pi_mul_I]
     · push_cast; rw [show (-1*(π:ℂ))*I = -(π*I) by ring, Complex.exp_neg, exp_pi_mul_I]; norm_num
   unfold CylinderContour.loopIntegrand CylinderContour.laplaceIntegrand
-  rw [CylinderContour.ofReal_cpow (Real.exp_pos x), Real.log_exp, Complex.exp_add (x:ℂ),
+  rw [CylinderContour.ofReal_cpow_eq_exp_log (Real.exp_pos x), Real.log_exp, Complex.exp_add (x:ℂ),
       he, ofReal_exp]
   have h2 : (-(exp (x:ℂ)))^2 = exp (x:ℂ)^2 := by ring
   rw [mul_neg_one, h2]
@@ -499,14 +499,14 @@ theorem CylinderContour.loop_eq (a z : ℂ) {r R : ℝ} (hr : 0 < r) (hR : 0 < R
       ∫ t : ℝ in r..R, exp (-(a-1/2)*π*I) * CylinderContour.laplaceIntegrand a z t := by
     refine intervalIntegral.integral_congr fun t ht => ?_
     simp only [CylinderContour.laplaceIntegrand]
-    rw [CylinderContour.ofReal_cpow (hpos t ht), ← Complex.exp_add, ← Complex.exp_add,
+    rw [CylinderContour.ofReal_cpow_eq_exp_log (hpos t ht), ← Complex.exp_add, ← Complex.exp_add,
         ← Complex.exp_add]
     congr 1; ring
   have h3 : ∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t+π*I)) =
       ∫ t : ℝ in r..R, exp ((a-1/2)*π*I) * CylinderContour.laplaceIntegrand a z t := by
     refine intervalIntegral.integral_congr fun t ht => ?_
     simp only [CylinderContour.laplaceIntegrand]
-    rw [CylinderContour.ofReal_cpow (hpos t ht), ← Complex.exp_add, ← Complex.exp_add,
+    rw [CylinderContour.ofReal_cpow_eq_exp_log (hpos t ht), ← Complex.exp_add, ← Complex.exp_add,
         ← Complex.exp_add]
     congr 1; ring
   have h2 : (∫ θ : ℝ in -π..π, let t := r*exp (I*θ);
@@ -860,7 +860,8 @@ theorem CylinderContour.stieltjesKernel_real (μ : ℂ) (x σ u : ℝ) :
     CylinderContour.stieltjesKernel μ x σ u = Real.exp u •
         CylinderContour.stieltjesIntegrand μ x σ (Real.exp u) := by
   unfold CylinderContour.stieltjesKernel CylinderContour.stieltjesIntegrand
-  rw [CylinderContour.ofReal_cpow (Real.exp_pos u), Real.log_exp, Complex.real_smul, ofReal_exp]
+  rw [CylinderContour.ofReal_cpow_eq_exp_log (Real.exp_pos u), Real.log_exp,
+      Complex.real_smul, ofReal_exp]
   rw [show exp (μ*u) = exp (u:ℂ) * exp ((μ-1)*u) by rw [← Complex.exp_add]; ring_nf]
   ring
 
@@ -1139,7 +1140,7 @@ theorem CylinderContour.kernel {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x
     rw [← Complex.exp_add, show -(c*I) = (c*I + μ*π*I) + -(π*I) by simp only [c]; ring,
       Complex.exp_add (c*I + μ*π*I), Complex.exp_neg, exp_pi_mul_I]; ring
   have e3 : exp (μ*((Real.log x:ℂ) + π/2*I)) = (x:ℂ)^μ * exp (μ*π/2*I) := by
-    rw [CylinderContour.ofReal_cpow hx, ← Complex.exp_add]; ring_nf
+    rw [CylinderContour.ofReal_cpow_eq_exp_log hx, ← Complex.exp_add]; ring_nf
   have e4 : (x:ℂ)^(μ-2) = (x:ℂ)^μ / (x:ℂ)^2 := by
     rw [cpow_sub _ _ (ofReal_ne_zero.mpr hx.ne'), cpow_two]
   have e5 : exp (-(μ*π/2*I)) * exp (μ*π/2*I) = 1 := by rw [← Complex.exp_add]; simp

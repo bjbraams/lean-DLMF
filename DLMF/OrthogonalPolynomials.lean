@@ -41,6 +41,8 @@ public import DLMF.OrthogonalPolynomials.HahnRodrigues
 public import DLMF.OrthogonalPolynomials.Wilson
 public import DLMF.OrthogonalPolynomials.QFamilies
 public import DLMF.OrthogonalPolynomials.Associated
+public import DLMF.OrthogonalPolynomials.ExceptionalOrthogonality
+public import DLMF.OrthogonalPolynomials.QFamilies.ContinuousQHermite
 public import DLMF.OrthogonalPolynomials.UnitCircle
 public import DLMF.OrthogonalPolynomials.Multivariate
 public import DLMF.OrthogonalPolynomials.InequalityTools

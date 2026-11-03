@@ -8,6 +8,7 @@ module
 public import DLMF.Elementary.Basic.InverseHyperbolic
 public import DLMF.Elementary.Hyperbolic.Products
 public import DLMF.Elementary.PathLifts
+public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 
 /-!
 # Inverse hyperbolic functions: path integrals
@@ -114,11 +115,170 @@ theorem arcsinh_path_values {z : ℂ} (hz : z≠I ∧ z≠ -I) :
       simp only [mul_div_assoc, intervalIntegral.integral_const_mul, hint]
       linear_combination (-w) * I_sq
 
+/-- `sinh x ≠ 0` off the imaginary lattice points `kπi`. -/
+private lemma sinh_ne_zero_of {x : ℂ} (h : x.re ≠ 0 ∨ ∀ k : ℤ, x.im ≠ k * π) :
+    Complex.sinh x ≠ 0 := by
+  intro h0
+  have hs := Complex.sin_mul_I x
+  rw [h0, zero_mul] at hs
+  obtain ⟨k, hk⟩ := Complex.sin_eq_zero_iff.mp hs
+  have h1 := congrArg Complex.re hk
+  have h2 := congrArg Complex.im hk
+  simp at h1 h2
+  rcases h with h | h
+  · exact h h2
+  · exact h (-k) (by push_cast; linarith)
+
+/-- The bulge parameter of the arccosh path: it keeps the path in `Re > 0` when `Re w ≥ 0`, and
+otherwise crosses the imaginary axis once, at height `π/2`. -/
+private def arccoshBulge (w : ℂ) : ℂ :=
+  if 0 ≤ w.re then 1 else -2 * w.re + (2 * π - 2 * w.im) * I
+
+/-- The arccosh path: real on `[0, 1/8]`, `s ↦ s w + s(1-s) β` on `[1/4, 1]`. -/
+private def arccoshPath (w : ℂ) (s : ℝ) : ℂ :=
+  (1 - (Real.smoothTransition (8 * s - 1) : ℂ)) * s +
+    (Real.smoothTransition (8 * s - 1) : ℂ) * (s * w + ((s * (1 - s) : ℝ) : ℂ) * arccoshBulge w)
+
+private lemma contDiff_arccoshPath (w : ℂ) : ContDiff ℝ 1 (arccoshPath w) := by
+  have hτ : ContDiff ℝ 1 (fun s : ℝ => (Real.smoothTransition (8 * s - 1) : ℂ)) :=
+    ofRealCLM.contDiff.comp (Real.smoothTransition.contDiff.comp
+      ((contDiff_const.mul contDiff_id).sub contDiff_const))
+  have hs : ContDiff ℝ 1 (fun s : ℝ => (s : ℂ)) := ofRealCLM.contDiff
+  have hp : ContDiff ℝ 1 (fun s : ℝ => ((s * (1 - s) : ℝ) : ℂ)) :=
+    ofRealCLM.contDiff.comp (contDiff_id.mul (contDiff_const.sub contDiff_id))
+  unfold arccoshPath
+  exact ((contDiff_const.sub hτ).mul hs).add
+    (hτ.mul ((hs.mul contDiff_const).add (hp.mul contDiff_const)))
+
+private lemma arccoshPath_of_le {w : ℂ} {s : ℝ} (hs : s ≤ 1 / 8) : arccoshPath w s = s := by
+  simp [arccoshPath, Real.smoothTransition.zero_of_nonpos (by linarith : 8 * s - 1 ≤ 0)]
+
+private lemma arccoshPath_of_ge {w : ℂ} {s : ℝ} (hs : 1 / 4 ≤ s) :
+    arccoshPath w s = s * w + ((s * (1 - s) : ℝ) : ℂ) * arccoshBulge w := by
+  simp [arccoshPath, Real.smoothTransition.one_of_one_le (by linarith : 1 ≤ 8 * s - 1)]
+
+/-- The bulged segment has positive real part for `0 < s < 1/2`. -/
+private lemma re_bulged_pos (w : ℂ) {s : ℝ} (hs0 : 0 < s) (hs1 : s < 1 / 2) :
+    0 < (s * w + ((s * (1 - s) : ℝ) : ℂ) * arccoshBulge w).re := by
+  unfold arccoshBulge
+  split_ifs with h
+  · simp; nlinarith [mul_pos hs0 (by linarith : (0 : ℝ) < 1 - s)]
+  · simp
+    push Not at h
+    nlinarith [mul_pos hs0 (by linarith : (0 : ℝ) < 1 - 2 * s)]
+
+/-- The arccosh path avoids the zeros of `sinh` at positive times. -/
+private lemma sinh_arccoshPath_ne_zero {w : ℂ} (hw : Complex.sinh w ≠ 0) {s : ℝ}
+    (hs : s ∈ Ioc (0 : ℝ) 1) : Complex.sinh (arccoshPath w s) ≠ 0 := by
+  obtain ⟨hs0, hs1⟩ := hs
+  rcases le_or_gt s (1 / 4) with h4 | h4
+  · refine sinh_ne_zero_of (Or.inl (ne_of_gt ?_))
+    have hτ0 := Real.smoothTransition.nonneg (8 * s - 1)
+    have hτ1 := Real.smoothTransition.le_one (8 * s - 1)
+    have hq := re_bulged_pos w hs0 (by linarith)
+    set τ := Real.smoothTransition (8 * s - 1)
+    have : (arccoshPath w s).re = (1 - τ) * s +
+        τ * (s * w + ((s * (1 - s) : ℝ) : ℂ) * arccoshBulge w).re := by
+      simp only [arccoshPath, τ]; simp
+    rw [this]
+    rcases eq_or_lt_of_le hτ0 with h | h
+    · rw [← h]; simp; exact hs0
+    · nlinarith
+  rw [arccoshPath_of_ge h4.le]
+  rcases eq_or_lt_of_le hs1 with h1 | h1
+  · subst h1; simpa using hw
+  rcases lt_trichotomy s (1 / 2) with h2 | h2 | h2
+  · exact sinh_ne_zero_of (Or.inl (ne_of_gt (re_bulged_pos w hs0 h2)))
+  · subst h2
+    unfold arccoshBulge
+    split_ifs with h
+    · refine sinh_ne_zero_of (Or.inl (ne_of_gt ?_)); simp; nlinarith
+    · refine sinh_ne_zero_of (Or.inr fun k hk => ?_)
+      simp at hk
+      have hk' : (k : ℝ) * π = π / 2 := by linarith
+      have : (2 * k : ℝ) = 1 := by
+        have := Real.pi_pos
+        field_simp at hk'; linarith
+      have : (2 * k : ℤ) = 1 := by exact_mod_cast this
+      omega
+  · refine sinh_ne_zero_of (Or.inl ?_)
+    unfold arccoshBulge
+    split_ifs with h
+    · simp; nlinarith [mul_pos (by linarith : (0 : ℝ) < s) (by linarith : (0 : ℝ) < 1 - s)]
+    · simp
+      push Not at h
+      nlinarith [mul_pos (by linarith : (0 : ℝ) < s) (by linarith : (0 : ℝ) < 2 * s - 1)]
+
 /-- The multivalued inverse defined by all admissible continued-branch path integrals. -/
 @[dlmf 4.37.E2]
 theorem arccosh_path_values {z : ℂ} (hz : z≠1 ∧ z≠ -1) :
     {w | IsArccoshPathValue z w}=arccoshValues z := by
-  sorry
+  ext w
+  simp only [mem_ofPred_eq, arccoshValues]
+  constructor
+  · rintro ⟨γ, r, hγ, h0, h1, hr, hr0, hh, -, hi, hint⟩
+    have hrr : ∀ t ∈ Ioc (0 : ℝ) 1, r t ≠ 0 ∧ r t ^ 2 = γ t ^ 2 - 1 := by
+      intro t ht
+      obtain ⟨hp, hm, hs⟩ := hh t ht
+      refine ⟨fun h0 => ?_, hs⟩
+      rw [h0] at hs
+      have : (γ t - 1) * (γ t + 1) = 0 := by linear_combination -hs
+      rcases mul_eq_zero.mp this with h | h
+      · exact hp (sub_eq_zero.mp h)
+      · exact hm (eq_neg_of_add_eq_zero_left h)
+    rw [← hint]
+    exact cosh_of_arccosh_lift hγ h0 h1 hr hr0 hrr hi
+  · intro hw
+    have hsw : Complex.sinh w ≠ 0 := by
+      intro h
+      have := Complex.cosh_sq_sub_sinh_sq w
+      rw [h, hw] at this
+      have : (z - 1) * (z + 1) = 0 := by linear_combination this
+      rcases mul_eq_zero.mp this with h1 | h1
+      · exact hz.1 (sub_eq_zero.mp h1)
+      · exact hz.2 (eq_neg_of_add_eq_zero_left h1)
+    set D := arccoshPath w
+    have hD := contDiff_arccoshPath w
+    have hDd : ∀ t, HasDerivAt D (deriv D t) t := fun t =>
+      ((hD.differentiable one_ne_zero) t).hasDerivAt
+    have hDc : Continuous (deriv D) := hD.continuous_deriv le_rfl
+    have hD0 : D 0 = 0 := by simpa using arccoshPath_of_le (w := w) (s := 0) (by norm_num)
+    have hD1 : D 1 = w := by rw [show D 1 = _ from arccoshPath_of_ge (by norm_num)]; simp
+    have hγd : ∀ t, HasDerivAt (fun t => Complex.cosh (D t))
+        (Complex.sinh (D t) * deriv D t) t := fun t => (Complex.hasDerivAt_cosh _).comp t (hDd t)
+    have hratio : ∀ t ∈ Ioc (0 : ℝ) 1, deriv (fun t => Complex.cosh (D t)) t /
+        Complex.sinh (D t) = deriv D t := by
+      intro t ht
+      rw [(hγd t).deriv]
+      exact mul_div_cancel_left₀ _ (sinh_arccoshPath_ne_zero hsw ht)
+    have hiD : IntervalIntegrable (deriv D) volume 0 1 := hDc.intervalIntegrable 0 1
+    refine ⟨fun t => Complex.cosh (D t), fun t => Complex.sinh (D t),
+      ((Complex.contDiff_cosh.restrict_scalars ℝ).comp hD).contDiffOn,
+      by simp [hD0], by simp [hD1, hw],
+      (Complex.continuous_sinh.comp hD.continuous).continuousOn, by simp [hD0],
+      fun t ht => ?_, ⟨1 / 8, by norm_num, fun t ht => ?_⟩, ?_, ?_⟩
+    · have hs := sinh_arccoshPath_ne_zero hsw ht
+      have hc := Complex.cosh_sq_sub_sinh_sq (D t)
+      refine ⟨fun h => hs ?_, fun h => hs ?_, by linear_combination -hc⟩ <;>
+      · beta_reduce at h
+        rw [h] at hc
+        exact pow_eq_zero_iff two_ne_zero |>.mp (by linear_combination -hc)
+    · have hDt : D t = t := arccoshPath_of_le ht.2.le
+      simp only [hDt]
+      rw [← Complex.ofReal_cosh, ← Complex.ofReal_sinh]
+      refine ⟨Complex.ofReal_im _, by simpa using Real.one_lt_cosh.mpr ht.1.ne', ?_⟩
+      rw [← Complex.ofReal_pow, ← Complex.ofReal_one, ← Complex.ofReal_sub,
+        Hyperbolic.sqrt_ofReal _
+          (by nlinarith [Real.cosh_sq t, sq_nonneg (Real.sinh t)]),
+        show Real.cosh t ^ 2 - 1 = Real.sinh t ^ 2 by rw [Real.cosh_sq]; ring,
+        Real.sqrt_sq (Real.sinh_nonneg_iff.mpr ht.1.le)]
+    · refine hiD.congr_uIoo fun t ht => ?_
+      rw [uIoo_of_le zero_le_one] at ht
+      exact (hratio t ⟨ht.1, ht.2.le⟩).symm
+    · rw [intervalIntegral.integral_congr_uIoo (g := deriv D) fun t ht => by
+        rw [uIoo_of_le zero_le_one] at ht; exact hratio t ⟨ht.1, ht.2.le⟩,
+        intervalIntegral.integral_deriv_eq_sub (fun t _ => (hDd t).differentiableAt) hiD,
+        hD1, hD0, sub_zero]
 
 /-- The multivalued inverse defined by all admissible continued-branch path integrals.
 Stronger than DLMF, which assumes `z ≠ ±1`. -/

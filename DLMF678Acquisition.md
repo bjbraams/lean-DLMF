@@ -254,20 +254,20 @@ is not counted as a proved version of the incorrect universal claim.
 
 #### §6.2
 
-- [6.2.E1](https://dlmf.nist.gov/6.2.E1): [expIntE1_horizontal_integral](DLMF/ExpIntegrals/AnalyticProperties.lean#L776) (proved); [genExpIntE_one_eq_integral](DLMF/Confluent/ExpIntegral.lean#L127) (proved).
-- [6.2.E2](https://dlmf.nist.gov/6.2.E2): [expIntE1_stieltjes](DLMF/ExpIntegrals/AnalyticProperties.lean#L44) (proved).
+- [6.2.E1](https://dlmf.nist.gov/6.2.E1): [expIntE1_horizontal_integral](DLMF/ExpIntegrals/AnalyticProperties.lean#L783) (proved); [genExpIntE_one_eq_integral](DLMF/Confluent/ExpIntegral.lean#L127) (proved).
+- [6.2.E2](https://dlmf.nist.gov/6.2.E2): [expIntE1_stieltjes](DLMF/ExpIntegrals/AnalyticProperties.lean#L45) (proved).
 - [6.2.E3](https://dlmf.nist.gov/6.2.E3): [expIntEin](DLMF/ExpIntegrals/Basic/Functions.lean#L38) (definition); [expIntEin_segment_integral](DLMF/ExpIntegrals/Basic/Properties.lean#L217) (proved); [Real.expIntEin](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L45) (definition); [`DLMF.Confluent.expIntEin`](DLMF/ExpIntegrals/Basic/Functions.lean#L38) (definition).
-- [6.2.E4](https://dlmf.nist.gov/6.2.E4): [expIntE1_eq_Ein_complex](DLMF/ExpIntegrals/AnalyticProperties.lean#L129) (proved); [genExpIntE_one_eq_Ein](DLMF/Confluent/ExpIntegral.lean#L209) (proved).
-- [6.2.E5](https://dlmf.nist.gov/6.2.E5): [Real.expIntEi](DLMF/ExpIntegrals/Basic/Functions.lean#L73) (definition); [Real.expIntEi_principalValue](DLMF/ExpIntegrals/AnalyticProperties.lean#L186) (proved).
-- [6.2.E6](https://dlmf.nist.gov/6.2.E6): [Real.expIntEi_negative](DLMF/ExpIntegrals/AnalyticProperties.lean#L246) (proved).
-- [6.2.E7](https://dlmf.nist.gov/6.2.E7): [Real.expIntEi_Ein](DLMF/ExpIntegrals/AnalyticProperties.lean#L258) (proved).
-- [6.2.E8](https://dlmf.nist.gov/6.2.E8): [Real.logIntLi](DLMF/ExpIntegrals/Basic/Functions.lean#L78) (definition); [Real.logIntLi_principalValue](DLMF/ExpIntegrals/AnalyticProperties.lean#L419) (proved).
+- [6.2.E4](https://dlmf.nist.gov/6.2.E4): [expIntE1_eq_Ein_complex](DLMF/ExpIntegrals/AnalyticProperties.lean#L130) (proved); [genExpIntE_one_eq_Ein](DLMF/Confluent/ExpIntegral.lean#L209) (proved).
+- [6.2.E5](https://dlmf.nist.gov/6.2.E5): [Real.expIntEi](DLMF/ExpIntegrals/Basic/Functions.lean#L73) (definition); [Real.expIntEi_principalValue](DLMF/ExpIntegrals/AnalyticProperties.lean#L187) (proved).
+- [6.2.E6](https://dlmf.nist.gov/6.2.E6): [Real.expIntEi_negative](DLMF/ExpIntegrals/AnalyticProperties.lean#L247) (proved).
+- [6.2.E7](https://dlmf.nist.gov/6.2.E7): [Real.expIntEi_Ein](DLMF/ExpIntegrals/AnalyticProperties.lean#L259) (proved).
+- [6.2.E8](https://dlmf.nist.gov/6.2.E8): [Real.logIntLi](DLMF/ExpIntegrals/Basic/Functions.lean#L78) (definition); [Real.logIntLi_principalValue](DLMF/ExpIntegrals/AnalyticProperties.lean#L423) (proved).
 - [6.2.E9](https://dlmf.nist.gov/6.2.E9): [sinInt](DLMF/ExpIntegrals/Basic/Functions.lean#L43) (definition); [sinInt_segment_integral](DLMF/ExpIntegrals/Basic/Properties.lean#L237) (proved); [Real.sinInt](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L50) (definition); [`DLMF.Confluent.sinInt`](DLMF/ExpIntegrals/Basic/Functions.lean#L43) (definition).
-- [6.2.E10](https://dlmf.nist.gov/6.2.E10): [sinIntTail](DLMF/ExpIntegrals/Basic/Functions.lean#L58) (definition); [sinIntTail_horizontal_integral](DLMF/ExpIntegrals/AnalyticProperties.lean#L793) (proved).
-- [6.2.E11](https://dlmf.nist.gov/6.2.E11): [cosInt_horizontal_integral](DLMF/ExpIntegrals/AnalyticProperties.lean#L808) (proved).
+- [6.2.E10](https://dlmf.nist.gov/6.2.E10): [sinIntTail](DLMF/ExpIntegrals/Basic/Functions.lean#L58) (definition); [sinIntTail_horizontal_integral](DLMF/ExpIntegrals/AnalyticProperties.lean#L800) (proved).
+- [6.2.E11](https://dlmf.nist.gov/6.2.E11): [cosInt_horizontal_integral](DLMF/ExpIntegrals/AnalyticProperties.lean#L815) (proved).
 - [6.2.E12](https://dlmf.nist.gov/6.2.E12): [cosIntCin](DLMF/ExpIntegrals/Basic/Functions.lean#L48) (definition); [cosIntCin_segment_integral](DLMF/ExpIntegrals/Basic/Properties.lean#L257) (proved); [Real.cosIntCin](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L55) (definition); [`DLMF.Confluent.cosIntCin`](DLMF/ExpIntegrals/Basic/Functions.lean#L48) (definition).
 - [6.2.E13](https://dlmf.nist.gov/6.2.E13): [cosInt](DLMF/ExpIntegrals/Basic/Functions.lean#L53) (definition); [Real.cosInt](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L60) (definition); [`DLMF.Confluent.cosInt`](DLMF/ExpIntegrals/Basic/Functions.lean#L53) (definition).
-- [6.2.E14](https://dlmf.nist.gov/6.2.E14): [cosInt_tendsto_atTop](DLMF/ExpIntegrals/AnalyticProperties.lean#L823) (proved); [Real.tendsto_sinInt_atTop](DLMF/Confluent/Basic/ExponentialIntegralSeries.lean#L105) (proved).
+- [6.2.E14](https://dlmf.nist.gov/6.2.E14): [cosInt_tendsto_atTop](DLMF/ExpIntegrals/AnalyticProperties.lean#L830) (proved); [Real.tendsto_sinInt_atTop](DLMF/Confluent/Basic/ExponentialIntegralSeries.lean#L105) (proved).
 - [6.2.E15](https://dlmf.nist.gov/6.2.E15): [sinhInt](DLMF/ExpIntegrals/Basic/Functions.lean#L63) (definition); [sinhInt_segment_integral](DLMF/ExpIntegrals/Basic/Properties.lean#L277) (proved).
 - [6.2.E16](https://dlmf.nist.gov/6.2.E16): [coshInt](DLMF/ExpIntegrals/Basic/Functions.lean#L68) (definition); [coshInt_segment_integral](DLMF/ExpIntegrals/Basic/Properties.lean#L296) (proved).
 - [6.2.E17](https://dlmf.nist.gov/6.2.E17): [expIntAuxF](DLMF/ExpIntegrals/Basic/Functions.lean#L83) (definition).
@@ -292,18 +292,18 @@ is not counted as a proved version of the incorrect universal claim.
 - [6.5.E2](https://dlmf.nist.gov/6.5.E2): [expIntEi_boundary_average](DLMF/ExpIntegrals/Continuation.lean#L208) (proved).
 - [6.5.E3](https://dlmf.nist.gov/6.5.E3): [sinhInt_eq_Ei](DLMF/ExpIntegrals/Continuation.lean#L251) (proved).
 - [6.5.E4](https://dlmf.nist.gov/6.5.E4): [coshInt_eq_Ei](DLMF/ExpIntegrals/Continuation.lean#L266) (proved).
-- [6.5.E5](https://dlmf.nist.gov/6.5.E5): [sinInt_eq_E1](DLMF/ExpIntegrals/AnalyticProperties.lean#L485) (proved).
-- [6.5.E6](https://dlmf.nist.gov/6.5.E6): [cosInt_eq_E1](DLMF/ExpIntegrals/AnalyticProperties.lean#L499) (proved).
-- [6.5.E7](https://dlmf.nist.gov/6.5.E7): [expIntAux_eq_E1](DLMF/ExpIntegrals/AnalyticProperties.lean#L514) (proved).
+- [6.5.E5](https://dlmf.nist.gov/6.5.E5): [sinInt_eq_E1](DLMF/ExpIntegrals/AnalyticProperties.lean#L492) (proved).
+- [6.5.E6](https://dlmf.nist.gov/6.5.E6): [cosInt_eq_E1](DLMF/ExpIntegrals/AnalyticProperties.lean#L506) (proved).
+- [6.5.E7](https://dlmf.nist.gov/6.5.E7): [ExpIntegralAuxiliary.eq_E1](DLMF/ExpIntegrals/AnalyticProperties.lean#L521) (proved); [`DLMF.Confluent.ExpIntegralAuxiliary.eq_E1`](DLMF/ExpIntegrals/AnalyticProperties.lean#L521) (proved).
 
 #### §6.6
 
 - [6.6.E1](https://dlmf.nist.gov/6.6.E1): [Real.hasSum_expIntEi](DLMF/ExpIntegrals/Expansions.lean#L43) (proved).
-- [6.6.E2](https://dlmf.nist.gov/6.6.E2): [expIntE1_hasSum](DLMF/ExpIntegrals/Expansions.lean#L70) (proved); [genExpIntE_one_eq_tsum](DLMF/Confluent/ExpIntegral.lean#L277) (proved).
-- [6.6.E3](https://dlmf.nist.gov/6.6.E3): [expIntE1_digamma_series](DLMF/ExpIntegrals/Expansions.lean#L63) (proved).
+- [6.6.E2](https://dlmf.nist.gov/6.6.E2): [expIntE1_hasSum](DLMF/ExpIntegrals/Expansions.lean#L63) (proved); [genExpIntE_one_eq_tsum](DLMF/Confluent/ExpIntegral.lean#L277) (proved).
+- [6.6.E3](https://dlmf.nist.gov/6.6.E3): [expIntE1_digamma_series](DLMF/IncompleteGamma/ExponentialIntegral.lean#L321) (proved).
 - [6.6.E4](https://dlmf.nist.gov/6.6.E4): [hasSum_Ein_complex](DLMF/ExpIntegrals/Basic/Properties.lean#L51) (proved); [Real.hasSum_expIntEin](DLMF/Confluent/Basic/ExponentialIntegralSeries.lean#L75) (proved).
 - [6.6.E5](https://dlmf.nist.gov/6.6.E5): [hasSum_Si_complex](DLMF/ExpIntegrals/Basic/Properties.lean#L61) (proved); [Real.hasSum_sinInt](DLMF/Confluent/Basic/ExponentialIntegralSeries.lean#L110) (proved).
-- [6.6.E6](https://dlmf.nist.gov/6.6.E6): [hasSum_Ci_complex](DLMF/ExpIntegrals/Expansions.lean#L84) (proved); [Real.cosInt_eq_tsum](DLMF/Confluent/Basic/ExponentialIntegralSeries.lean#L171) (proved).
+- [6.6.E6](https://dlmf.nist.gov/6.6.E6): [hasSum_Ci_complex](DLMF/ExpIntegrals/Expansions.lean#L77) (proved); [Real.cosInt_eq_tsum](DLMF/Confluent/Basic/ExponentialIntegralSeries.lean#L171) (proved).
 
 #### §6.7
 
@@ -315,79 +315,79 @@ is not counted as a proved version of the incorrect universal claim.
 - [6.7.E6](https://dlmf.nist.gov/6.7.E6): [expIntE1_rational_laplace_1](DLMF/ExpIntegrals/Representations.lean#L322) (proved).
 - [6.7.E7](https://dlmf.nist.gov/6.7.E7): [expIntEin_real_integral_7](DLMF/ExpIntegrals/Representations.lean#L368) (proved).
 - [6.7.E8](https://dlmf.nist.gov/6.7.E8): [expIntEin_real_integral_8](DLMF/ExpIntegrals/Representations.lean#L382) (proved).
-- [6.7.E9](https://dlmf.nist.gov/6.7.E9): [sinIntTail_angular_integral](DLMF/ExpIntegrals/Representations.lean#L481) (proved).
-- [6.7.E10](https://dlmf.nist.gov/6.7.E10): [Ein_sub_Cin_angular_integral](DLMF/ExpIntegrals/Representations.lean#L501) (proved).
+- [6.7.E9](https://dlmf.nist.gov/6.7.E9): [sinIntTail_angular_integral](DLMF/ExpIntegrals/Representations.lean#L482) (proved).
+- [6.7.E10](https://dlmf.nist.gov/6.7.E10): [Ein_sub_Cin_angular_integral](DLMF/ExpIntegrals/Representations.lean#L504) (proved).
 - [6.7.E11](https://dlmf.nist.gov/6.7.E11): [expIntEin_real_integral_11](DLMF/ExpIntegrals/Representations.lean#L401) (proved).
-- [6.7.E12](https://dlmf.nist.gov/6.7.E12): [expIntAux_horizontal_integral](DLMF/ExpIntegrals/Representations.lean#L522) (proved).
-- [6.7.E13](https://dlmf.nist.gov/6.7.E13): [expIntAuxF_oscillatory_integral](DLMF/ExpIntegrals/Representations.lean#L560) (proved); [expIntAuxF_laplace_integral](DLMF/ExpIntegrals/Representations.lean#L589) (proved).
-- [6.7.E14](https://dlmf.nist.gov/6.7.E14): [expIntAuxG_oscillatory_integral](DLMF/ExpIntegrals/Representations.lean#L1002) (proved); [expIntAuxG_laplace_integral](DLMF/ExpIntegrals/Representations.lean#L1031) (proved).
-- [6.7.E15](https://dlmf.nist.gov/6.7.E15): [expIntAuxF_besselK_integral](DLMF/ExpIntegrals/Representations.lean#L993) (proved).
-- [6.7.E16](https://dlmf.nist.gov/6.7.E16): [expIntAuxG_besselK_integral](DLMF/ExpIntegrals/Representations.lean#L1038) (proved).
+- [6.7.E12](https://dlmf.nist.gov/6.7.E12): [ExpIntegralAuxiliary.horizontal_integral](DLMF/ExpIntegrals/Representations.lean#L527) (proved); [`DLMF.Confluent.ExpIntegralAuxiliary.horizontal_integral`](DLMF/ExpIntegrals/Representations.lean#L527) (proved).
+- [6.7.E13](https://dlmf.nist.gov/6.7.E13): [expIntAuxF_oscillatory_integral](DLMF/ExpIntegrals/Representations.lean#L565) (proved); [expIntAuxF_laplace_integral](DLMF/ExpIntegrals/Representations.lean#L594) (proved).
+- [6.7.E14](https://dlmf.nist.gov/6.7.E14): [expIntAuxG_oscillatory_integral](DLMF/ExpIntegrals/Representations.lean#L1007) (proved); [expIntAuxG_laplace_integral](DLMF/ExpIntegrals/Representations.lean#L1036) (proved).
+- [6.7.E15](https://dlmf.nist.gov/6.7.E15): [expIntAuxF_besselK_integral](DLMF/ExpIntegrals/Representations.lean#L998) (proved).
+- [6.7.E16](https://dlmf.nist.gov/6.7.E16): [expIntAuxG_besselK_integral](DLMF/ExpIntegrals/Representations.lean#L1043) (proved).
 
 #### §6.8
 
-- [6.8.E1](https://dlmf.nist.gov/6.8.E1): [expIntE1_inequality_1](DLMF/ExpIntegrals/Representations.lean#L1160) (proved).
-- [6.8.E2](https://dlmf.nist.gov/6.8.E2): [expIntE1_inequality_2](DLMF/ExpIntegrals/Representations.lean#L1212) (proved).
-- [6.8.E3](https://dlmf.nist.gov/6.8.E3): [expIntE1_inequality_3](DLMF/ExpIntegrals/Representations.lean#L1254) (proved).
+- [6.8.E1](https://dlmf.nist.gov/6.8.E1): [expIntE1_inequality_1](DLMF/ExpIntegrals/Representations.lean#L1169) (proved).
+- [6.8.E2](https://dlmf.nist.gov/6.8.E2): [expIntE1_inequality_2](DLMF/ExpIntegrals/Representations.lean#L1224) (proved).
+- [6.8.E3](https://dlmf.nist.gov/6.8.E3): [expIntE1_inequality_3](DLMF/ExpIntegrals/Representations.lean#L1268) (proved).
 
 #### §6.9
 
-- [6.9.E1](https://dlmf.nist.gov/6.9.E1): [expIntE1_continuedFraction](DLMF/ExpIntegrals/Representations.lean#L1308) (proved).
+- [6.9.E1](https://dlmf.nist.gov/6.9.E1): [expIntE1_continuedFraction](DLMF/ExpIntegrals/Representations.lean#L1322) (proved).
 
 #### §6.10
 
-- [6.10.E1](https://dlmf.nist.gov/6.10.E1): [expIntE1_reciprocal_factorial_series](DLMF/ExpIntegrals/Expansions.lean#L532) (proved).
-- [6.10.E2](https://dlmf.nist.gov/6.10.E2): [expIntReciprocalFactorialCoeff_initial](DLMF/ExpIntegrals/Expansions.lean#L108) (proved).
-- [6.10.E3](https://dlmf.nist.gov/6.10.E3): [expIntReciprocalFactorialCoeff](DLMF/ExpIntegrals/Expansions.lean#L101) (definition).
-- [6.10.E4](https://dlmf.nist.gov/6.10.E4): [sinInt_spherical_series](DLMF/ExpIntegrals/Expansions.lean#L571) (proved).
-- [6.10.E5](https://dlmf.nist.gov/6.10.E5): [cosIntCin_spherical_series](DLMF/ExpIntegrals/Expansions.lean#L910) (proved).
-- [6.10.E6](https://dlmf.nist.gov/6.10.E6): [expIntEi_spherical_series](DLMF/ExpIntegrals/Expansions.lean#L921) (proved).
-- [6.10.E7](https://dlmf.nist.gov/6.10.E7): [expIntSphericalCoeff](DLMF/ExpIntegrals/Expansions.lean#L566) (definition).
-- [6.10.E8](https://dlmf.nist.gov/6.10.E8): [Ein_spherical_series](DLMF/ExpIntegrals/Expansions.lean#L952) (proved).
+- [6.10.E1](https://dlmf.nist.gov/6.10.E1): [expIntE1_reciprocal_factorial_series](DLMF/ExpIntegrals/Expansions.lean#L595) (proved).
+- [6.10.E2](https://dlmf.nist.gov/6.10.E2): [expIntReciprocalFactorialCoeff_initial](DLMF/ExpIntegrals/Expansions.lean#L101) (proved).
+- [6.10.E3](https://dlmf.nist.gov/6.10.E3): [expIntReciprocalFactorialCoeff](DLMF/ExpIntegrals/Expansions.lean#L94) (definition).
+- [6.10.E4](https://dlmf.nist.gov/6.10.E4): [sinInt_spherical_series](DLMF/ExpIntegrals/Expansions.lean#L637) (proved).
+- [6.10.E5](https://dlmf.nist.gov/6.10.E5): [cosIntCin_spherical_series](DLMF/ExpIntegrals/Expansions.lean#L986) (proved).
+- [6.10.E6](https://dlmf.nist.gov/6.10.E6): [expIntEi_spherical_series](DLMF/ExpIntegrals/Expansions.lean#L997) (proved).
+- [6.10.E7](https://dlmf.nist.gov/6.10.E7): [expIntSphericalCoeff](DLMF/ExpIntegrals/Expansions.lean#L632) (definition).
+- [6.10.E8](https://dlmf.nist.gov/6.10.E8): [Ein_spherical_series](DLMF/ExpIntegrals/Expansions.lean#L1028) (proved).
 
 #### §6.11
 
-- [6.11.E1](https://dlmf.nist.gov/6.11.E1): [expIntE1_eq_upperIncGamma](DLMF/ExpIntegrals/Expansions.lean#L1053) (proved).
-- [6.11.E2](https://dlmf.nist.gov/6.11.E2): [expIntE1_eq_kummerU](DLMF/ExpIntegrals/Expansions.lean#L1060) (proved).
-- [6.11.E3](https://dlmf.nist.gov/6.11.E3): [expIntAux_eq_kummerU](DLMF/ExpIntegrals/Expansions.lean#L1067) (proved).
+- [6.11.E1](https://dlmf.nist.gov/6.11.E1): [expIntE1_eq_upperIncGamma](DLMF/ExpIntegrals/Expansions.lean#L1129) (proved).
+- [6.11.E2](https://dlmf.nist.gov/6.11.E2): [expIntE1_eq_kummerU](DLMF/ExpIntegrals/Expansions.lean#L1136) (proved).
+- [6.11.E3](https://dlmf.nist.gov/6.11.E3): [ExpIntegralAuxiliary.eq_kummerU](DLMF/ExpIntegrals/Expansions.lean#L1143) (proved); [`DLMF.Confluent.ExpIntegralAuxiliary.eq_kummerU`](DLMF/ExpIntegrals/Expansions.lean#L1143) (proved).
 
 #### §6.12
 
-- [6.12.E1](https://dlmf.nist.gov/6.12.E1): [expIntE1_logSector_asymptotic](DLMF/ExpIntegrals/Asymptotics.lean#L434) (proved).
-- [6.12.E2](https://dlmf.nist.gov/6.12.E2): [expIntEi_asymptotic](DLMF/ExpIntegrals/Asymptotics.lean#L457) (proved).
-- [6.12.E3](https://dlmf.nist.gov/6.12.E3): [expIntAuxF_sector_asymptotic](DLMF/ExpIntegrals/Asymptotics.lean#L511) (proved).
-- [6.12.E4](https://dlmf.nist.gov/6.12.E4): [expIntAuxG_sector_asymptotic](DLMF/ExpIntegrals/Asymptotics.lean#L541) (proved).
+- [6.12.E1](https://dlmf.nist.gov/6.12.E1): [expIntE1_logSector_asymptotic](DLMF/ExpIntegrals/Asymptotics.lean#L435) (proved).
+- [6.12.E2](https://dlmf.nist.gov/6.12.E2): [expIntEi_asymptotic](DLMF/ExpIntegrals/Asymptotics.lean#L458) (proved).
+- [6.12.E3](https://dlmf.nist.gov/6.12.E3): [expIntAuxF_sector_asymptotic](DLMF/ExpIntegrals/Asymptotics.lean#L512) (proved).
+- [6.12.E4](https://dlmf.nist.gov/6.12.E4): [expIntAuxG_sector_asymptotic](DLMF/ExpIntegrals/Asymptotics.lean#L543) (proved).
 - [6.12.E5](https://dlmf.nist.gov/6.12.E5): [expIntAsymptoticRemainder](DLMF/ExpIntegrals/Asymptotics.lean#L51) (definition).
 - [6.12.E6](https://dlmf.nist.gov/6.12.E6): [expIntAsymptoticRemainder](DLMF/ExpIntegrals/Asymptotics.lean#L51) (definition).
-- [6.12.E7](https://dlmf.nist.gov/6.12.E7): [expIntAuxF_remainder_integral](DLMF/ExpIntegrals/Asymptotics.lean#L533) (proved).
-- [6.12.E8](https://dlmf.nist.gov/6.12.E8): [expIntAuxG_remainder_integral](DLMF/ExpIntegrals/Asymptotics.lean#L567) (proved).
+- [6.12.E7](https://dlmf.nist.gov/6.12.E7): [expIntAuxF_remainder_integral](DLMF/ExpIntegrals/Asymptotics.lean#L535) (proved).
+- [6.12.E8](https://dlmf.nist.gov/6.12.E8): [expIntAuxG_remainder_integral](DLMF/ExpIntegrals/Asymptotics.lean#L570) (proved).
 
 #### §6.13
 
-- [6.13.E1](https://dlmf.nist.gov/6.13.E1): [Real.expIntEiZero](DLMF/ExpIntegrals/ZerosIntegrals.lean#L55) (definition); the decimal value is excluded: numerical; uniqueness of the zero is [Real.expIntEi_unique_zero](DLMF/ExpIntegrals/ZerosIntegrals.lean#L450) (proved).
-- [6.13.E2](https://dlmf.nist.gov/6.13.E2): [Real.trigonometric_integral_zero_asymptotics](DLMF/ExpIntegrals/ZerosIntegrals.lean#L498) (admitted).
+- [6.13.E1](https://dlmf.nist.gov/6.13.E1): [Real.expIntEiZero](DLMF/ExpIntegrals/ZerosIntegrals.lean#L55) (definition); the decimal value is excluded: numerical; uniqueness of the zero is [Real.expIntEi_unique_zero](DLMF/ExpIntegrals/ZerosIntegrals.lean#L464) (proved).
+- [6.13.E2](https://dlmf.nist.gov/6.13.E2): [Real.trigonometric_integral_zero_asymptotics](DLMF/ExpIntegrals/ZerosIntegrals.lean#L512) (admitted).
 
 #### §6.14
 
-- [6.14.E1](https://dlmf.nist.gov/6.14.E1): [expIntE1_laplace](DLMF/ExpIntegrals/ZerosIntegrals.lean#L510) (proved).
-- [6.14.E2](https://dlmf.nist.gov/6.14.E2): [cosInt_laplace](DLMF/ExpIntegrals/ZerosIntegrals.lean#L517) (proved).
-- [6.14.E3](https://dlmf.nist.gov/6.14.E3): [sinIntTail_laplace](DLMF/ExpIntegrals/ZerosIntegrals.lean#L567) (proved).
-- [6.14.E4](https://dlmf.nist.gov/6.14.E4): [expIntE1_squared_integral](DLMF/ExpIntegrals/ZerosIntegrals.lean#L583) (proved).
-- [6.14.E5](https://dlmf.nist.gov/6.14.E5): [cosInt_fourier_integral](DLMF/ExpIntegrals/ZerosIntegrals.lean#L593) (proved).
-- [6.14.E6](https://dlmf.nist.gov/6.14.E6): [trigIntegral_squared_integrals](DLMF/ExpIntegrals/ZerosIntegrals.lean#L617) (proved).
-- [6.14.E7](https://dlmf.nist.gov/6.14.E7): [trigIntegral_product_integral](DLMF/ExpIntegrals/ZerosIntegrals.lean#L633) (proved).
+- [6.14.E1](https://dlmf.nist.gov/6.14.E1): [expIntE1_laplace](DLMF/ExpIntegrals/ZerosIntegrals.lean#L524) (proved).
+- [6.14.E2](https://dlmf.nist.gov/6.14.E2): [cosInt_laplace](DLMF/ExpIntegrals/ZerosIntegrals.lean#L531) (proved).
+- [6.14.E3](https://dlmf.nist.gov/6.14.E3): [sinIntTail_laplace](DLMF/ExpIntegrals/ZerosIntegrals.lean#L583) (proved).
+- [6.14.E4](https://dlmf.nist.gov/6.14.E4): [expIntE1_squared_integral](DLMF/ExpIntegrals/ZerosIntegrals.lean#L600) (proved).
+- [6.14.E5](https://dlmf.nist.gov/6.14.E5): [cosInt_fourier_integral](DLMF/ExpIntegrals/ZerosIntegrals.lean#L611) (proved).
+- [6.14.E6](https://dlmf.nist.gov/6.14.E6): [trigIntegral_squared_integrals](DLMF/ExpIntegrals/ZerosIntegrals.lean#L637) (proved).
+- [6.14.E7](https://dlmf.nist.gov/6.14.E7): [trigIntegral_product_integral](DLMF/ExpIntegrals/ZerosIntegrals.lean#L653) (proved).
 
 #### §6.15
 
-- [6.15.E1](https://dlmf.nist.gov/6.15.E1): [trigIntegral_hasSum_1](DLMF/ExpIntegrals/ZerosIntegrals.lean#L645) (proved).
-- [6.15.E2](https://dlmf.nist.gov/6.15.E2): [trigIntegral_hasSum_2](DLMF/ExpIntegrals/ZerosIntegrals.lean#L668) (proved).
-- [6.15.E3](https://dlmf.nist.gov/6.15.E3): [trigIntegral_hasSum_3](DLMF/ExpIntegrals/ZerosIntegrals.lean#L695) (proved).
-- [6.15.E4](https://dlmf.nist.gov/6.15.E4): [trigIntegral_hasSum_4](DLMF/ExpIntegrals/ZerosIntegrals.lean#L719) (proved).
+- [6.15.E1](https://dlmf.nist.gov/6.15.E1): [trigIntegral_hasSum_1](DLMF/ExpIntegrals/ZerosIntegrals.lean#L665) (proved).
+- [6.15.E2](https://dlmf.nist.gov/6.15.E2): [trigIntegral_hasSum_2](DLMF/ExpIntegrals/ZerosIntegrals.lean#L689) (proved).
+- [6.15.E3](https://dlmf.nist.gov/6.15.E3): [trigIntegral_hasSum_3](DLMF/ExpIntegrals/ZerosIntegrals.lean#L717) (proved).
+- [6.15.E4](https://dlmf.nist.gov/6.15.E4): [trigIntegral_hasSum_4](DLMF/ExpIntegrals/ZerosIntegrals.lean#L742) (proved).
 
 #### §6.18
 
-- [6.18.E1](https://dlmf.nist.gov/6.18.E1): [expIntActonA](DLMF/ExpIntegrals/ZerosIntegrals.lean#L746) (definition); [expIntActonB](DLMF/ExpIntegrals/ZerosIntegrals.lean#L751) (definition); [expIntActonC](DLMF/ExpIntegrals/ZerosIntegrals.lean#L756) (definition).
-- [6.18.E2](https://dlmf.nist.gov/6.18.E2): [expIntActon_recurrence](DLMF/ExpIntegrals/ZerosIntegrals.lean#L820) (proved).
+- [6.18.E1](https://dlmf.nist.gov/6.18.E1): [expIntActonA](DLMF/ExpIntegrals/ZerosIntegrals.lean#L769) (definition); [expIntActonB](DLMF/ExpIntegrals/ZerosIntegrals.lean#L774) (definition); [expIntActonC](DLMF/ExpIntegrals/ZerosIntegrals.lean#L779) (definition).
+- [6.18.E2](https://dlmf.nist.gov/6.18.E2): [expIntActon_recurrence](DLMF/ExpIntegrals/ZerosIntegrals.lean#L843) (proved).
 
 ### Chapter 7
 
@@ -414,8 +414,8 @@ is not counted as a proved version of the incorrect universal claim.
 - [7.4.E4](https://dlmf.nist.gov/7.4.E4): [dawsonF_negative](DLMF/ErrorFunctions/Relations.lean#L75) (proved).
 - [7.4.E5](https://dlmf.nist.gov/7.4.E5): [fresnel_negative](DLMF/ErrorFunctions/Relations.lean#L81) (proved).
 - [7.4.E6](https://dlmf.nist.gov/7.4.E6): [fresnel_mul_I](DLMF/ErrorFunctions/Relations.lean#L88) (proved).
-- [7.4.E7](https://dlmf.nist.gov/7.4.E7): [fresnelAux_mul_I](DLMF/ErrorFunctions/Relations.lean#L111) (proved).
-- [7.4.E8](https://dlmf.nist.gov/7.4.E8): [fresnelAux_negative](DLMF/ErrorFunctions/Relations.lean#L146) (proved).
+- [7.4.E7](https://dlmf.nist.gov/7.4.E7): [FresnelAuxiliary.mul_I](DLMF/ErrorFunctions/Relations.lean#L111) (proved); [`DLMF.Confluent.FresnelAuxiliary.mul_I`](DLMF/ErrorFunctions/Relations.lean#L111) (proved).
+- [7.4.E8](https://dlmf.nist.gov/7.4.E8): [FresnelAuxiliary.negative](DLMF/ErrorFunctions/Relations.lean#L146) (proved); [`DLMF.Confluent.FresnelAuxiliary.negative`](DLMF/ErrorFunctions/Relations.lean#L146) (proved).
 
 #### §7.5
 
@@ -428,10 +428,10 @@ is not counted as a proved version of the incorrect universal claim.
 - [7.5.E7](https://dlmf.nist.gov/7.5.E7): [fresnelZetaComplex](DLMF/ErrorFunctions/Relations.lean#L247) (definition).
 - [7.5.E8](https://dlmf.nist.gov/7.5.E8): [fresnel_signed_erf](DLMF/ErrorFunctions/Relations.lean#L252) (proved); [Real.fresnelCosInt_add_I_mul_fresnelSinInt](DLMF/Confluent/ErrorFunctions.lean#L60) (proved).
 - [7.5.E9](https://dlmf.nist.gov/7.5.E9): [fresnel_signed_faddeeva](DLMF/ErrorFunctions/Relations.lean#L296) (proved).
-- [7.5.E10](https://dlmf.nist.gov/7.5.E10): [fresnelAux_signed_erfc](DLMF/ErrorFunctions/Relations.lean#L318) (proved); [fresnelAuxG_add_I_mul_fresnelAuxF](DLMF/Confluent/FresnelAsymptotics.lean#L49) (proved).
+- [7.5.E10](https://dlmf.nist.gov/7.5.E10): [FresnelAuxiliary.signed_erfc](DLMF/ErrorFunctions/Relations.lean#L318) (proved); [fresnelAuxG_add_I_mul_fresnelAuxF](DLMF/Confluent/FresnelAsymptotics.lean#L49) (proved); [`DLMF.Confluent.FresnelAuxiliary.signed_erfc`](DLMF/ErrorFunctions/Relations.lean#L318) (proved).
 - [7.5.E11](https://dlmf.nist.gov/7.5.E11): [fresnelTail_norm_sq_nonneg](DLMF/ErrorFunctions/Relations.lean#L351) (proved).
 - [7.5.E12](https://dlmf.nist.gov/7.5.E12): [fresnelTail_norm_sq_nonpos](DLMF/ErrorFunctions/Relations.lean#L358) (proved).
-- [7.5.E13](https://dlmf.nist.gov/7.5.E13): [goodwinStatonG_dawson](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L595) (proved).
+- [7.5.E13](https://dlmf.nist.gov/7.5.E13): [goodwinStatonG_dawson](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L596) (proved).
 
 #### §7.6
 
@@ -443,7 +443,7 @@ is not counted as a proved version of the incorrect universal claim.
 - [7.6.E6](https://dlmf.nist.gov/7.6.E6): [fresnelSinInt_hasSum](DLMF/ErrorFunctions/Basic/Properties.lean#L127) (proved).
 - [7.6.E7](https://dlmf.nist.gov/7.6.E7): [fresnelSinInt_alternate_series](DLMF/ErrorFunctions/Series.lean#L264) (proved).
 - [7.6.E8](https://dlmf.nist.gov/7.6.E8): [erf_spherical_series](DLMF/ErrorFunctions/Series.lean#L279) (proved).
-- [7.6.E9](https://dlmf.nist.gov/7.6.E9): [erf_chebyshev_spherical_series](DLMF/ErrorFunctions/Series.lean#L585) (proved); [`DLMF.Confluent.erfCheb_hasSum`](DLMF/ErrorFunctions/Series.lean#L434) (proved).
+- [7.6.E9](https://dlmf.nist.gov/7.6.E9): [erf_chebyshev_spherical_series](DLMF/ErrorFunctions/Series.lean#L585) (proved); [`DLMF.Confluent.ErfChebyshev.hasSum`](DLMF/ErrorFunctions/Series.lean#L434) (proved); [`DLMF.Confluent.ErfChebyshev.hasSum`](DLMF/ErrorFunctions/Series.lean#L434) (proved).
 - [7.6.E10](https://dlmf.nist.gov/7.6.E10): [fresnelCosInt_spherical_series](DLMF/ErrorFunctions/Series.lean#L601) (proved).
 - [7.6.E11](https://dlmf.nist.gov/7.6.E11): [fresnelSinInt_spherical_series](DLMF/ErrorFunctions/Series.lean#L636) (proved).
 
@@ -451,36 +451,36 @@ is not counted as a proved version of the incorrect universal claim.
 
 - [7.7.E1](https://dlmf.nist.gov/7.7.E1): [erfc_rational_gaussian_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L256) (proved).
 - [7.7.E2](https://dlmf.nist.gov/7.7.E2): [faddeevaW_cauchy_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L457) (proved).
-- [7.7.E3](https://dlmf.nist.gov/7.7.E3): [gaussian_fourier_halfLine](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L639) (proved).
-- [7.7.E4](https://dlmf.nist.gov/7.7.E4): [gaussian_sqrt_laplace](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L668) (proved).
-- [7.7.E5](https://dlmf.nist.gov/7.7.E5): [erf_squared_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L831) (proved).
-- [7.7.E6](https://dlmf.nist.gov/7.7.E6): [gaussian_quadratic_tail](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L911) (proved); Mathlib: [`integral_gaussian_complex_Ioi`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Gaussian/GaussianIntegral.html#integral_gaussian_complex_Ioi); Mathlib: [`integral_gaussian_complex`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Gaussian/GaussianIntegral.html#integral_gaussian_complex).
-- [7.7.E7](https://dlmf.nist.gov/7.7.E7): [gaussian_reciprocal_tail](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L919) (proved).
-- [7.7.E8](https://dlmf.nist.gov/7.7.E8): [gaussian_reciprocal_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1001) (proved).
-- [7.7.E9](https://dlmf.nist.gov/7.7.E9): [erf_primitive](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1062) (proved).
-- [7.7.E10](https://dlmf.nist.gov/7.7.E10): [fresnelAuxFComplex_laplace_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1078) (proved).
-- [7.7.E11](https://dlmf.nist.gov/7.7.E11): [fresnelAuxGComplex_laplace_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1090) (proved).
-- [7.7.E12](https://dlmf.nist.gov/7.7.E12): [fresnelAux_contour_tail](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1102) (proved).
-- [7.7.E13](https://dlmf.nist.gov/7.7.E13): [fresnelAuxFComplex_mellinBarnes](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L635) (proved).
-- [7.7.E14](https://dlmf.nist.gov/7.7.E14): [fresnelAuxGComplex_mellinBarnes](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L658) (proved).
-- [7.7.E15](https://dlmf.nist.gov/7.7.E15): [fresnelAuxFComplex_laplace_square](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L824) (proved).
-- [7.7.E16](https://dlmf.nist.gov/7.7.E16): [fresnelAuxGComplex_laplace_square](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L839) (proved).
+- [7.7.E3](https://dlmf.nist.gov/7.7.E3): [gaussian_fourier_halfLine](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L640) (proved).
+- [7.7.E4](https://dlmf.nist.gov/7.7.E4): [gaussian_sqrt_laplace](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L669) (proved).
+- [7.7.E5](https://dlmf.nist.gov/7.7.E5): [erf_squared_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L832) (proved).
+- [7.7.E6](https://dlmf.nist.gov/7.7.E6): [gaussian_quadratic_tail](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L912) (proved); Mathlib: [`integral_gaussian_complex_Ioi`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Gaussian/GaussianIntegral.html#integral_gaussian_complex_Ioi); Mathlib: [`integral_gaussian_complex`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Gaussian/GaussianIntegral.html#integral_gaussian_complex).
+- [7.7.E7](https://dlmf.nist.gov/7.7.E7): [gaussian_reciprocal_tail](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L920) (proved).
+- [7.7.E8](https://dlmf.nist.gov/7.7.E8): [gaussian_reciprocal_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1002) (proved).
+- [7.7.E9](https://dlmf.nist.gov/7.7.E9): [erf_primitive](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1063) (proved).
+- [7.7.E10](https://dlmf.nist.gov/7.7.E10): [fresnelAuxFComplex_laplace_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1079) (proved).
+- [7.7.E11](https://dlmf.nist.gov/7.7.E11): [fresnelAuxGComplex_laplace_integral](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1091) (proved).
+- [7.7.E12](https://dlmf.nist.gov/7.7.E12): [FresnelAuxiliary.contour_tail](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1103) (proved); [`DLMF.Confluent.FresnelAuxiliary.contour_tail`](DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean#L1103) (proved).
+- [7.7.E13](https://dlmf.nist.gov/7.7.E13): [fresnelAuxFComplex_mellinBarnes](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L672) (proved).
+- [7.7.E14](https://dlmf.nist.gov/7.7.E14): [fresnelAuxGComplex_mellinBarnes](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L695) (proved).
+- [7.7.E15](https://dlmf.nist.gov/7.7.E15): [fresnelAuxFComplex_laplace_square](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L861) (proved).
+- [7.7.E16](https://dlmf.nist.gov/7.7.E16): [fresnelAuxGComplex_laplace_square](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L876) (proved).
 
 #### §7.8
 
 - [7.8.E1](https://dlmf.nist.gov/7.8.E1): [Real.millsRatio](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L47) (definition); [Real.millsRatio_integral](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L52) (proved).
-- [7.8.E2](https://dlmf.nist.gov/7.8.E2): [Real.millsRatio_bound_2](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L265) (proved).
-- [7.8.E3](https://dlmf.nist.gov/7.8.E3): [Real.millsRatio_bound_3](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L350) (proved).
-- [7.8.E4](https://dlmf.nist.gov/7.8.E4): [Real.millsRatio_bound_four](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L418) (proved).
-- [7.8.E5](https://dlmf.nist.gov/7.8.E5): [Real.millsRatio_rational_bounds](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L454) (proved).
-- [7.8.E6](https://dlmf.nist.gov/7.8.E6): [Real.exp_sq_integral_bound](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L538) (proved).
-- [7.8.E7](https://dlmf.nist.gov/7.8.E7): [Real.dawsonF_integral_bounds](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L583) (proved).
-- [7.8.E8](https://dlmf.nist.gov/7.8.E8): [Real.erf_exponential_bound](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L654) (proved).
+- [7.8.E2](https://dlmf.nist.gov/7.8.E2): [Real.millsRatio_bound_2](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L270) (proved).
+- [7.8.E3](https://dlmf.nist.gov/7.8.E3): [Real.millsRatio_bound_3](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L358) (proved).
+- [7.8.E4](https://dlmf.nist.gov/7.8.E4): [Real.millsRatio_bound_four](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L426) (proved).
+- [7.8.E5](https://dlmf.nist.gov/7.8.E5): [Real.millsRatio_rational_bounds](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L462) (proved).
+- [7.8.E6](https://dlmf.nist.gov/7.8.E6): [Real.exp_sq_integral_bound](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L546) (proved).
+- [7.8.E7](https://dlmf.nist.gov/7.8.E7): [Real.dawsonF_integral_bounds](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L591) (proved).
+- [7.8.E8](https://dlmf.nist.gov/7.8.E8): [Real.erf_exponential_bound](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L663) (proved).
 
 #### §7.9
 
-- [7.9.E1](https://dlmf.nist.gov/7.9.E1): [erfc_continuedFraction_one](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L837) (proved).
-- [7.9.E2](https://dlmf.nist.gov/7.9.E2): [erfc_continuedFraction_two](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L879) (proved).
+- [7.9.E1](https://dlmf.nist.gov/7.9.E1): [erfc_continuedFraction_one](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L847) (proved).
+- [7.9.E2](https://dlmf.nist.gov/7.9.E2): [erfc_continuedFraction_two](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L890) (proved).
 - [7.9.E3](https://dlmf.nist.gov/7.9.E3): [faddeevaW_continuedFraction](DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean#L43) (proved).
 
 #### §7.10
@@ -494,7 +494,7 @@ is not counted as a proved version of the incorrect universal claim.
 
 - [7.11.E1](https://dlmf.nist.gov/7.11.E1): [erf_lowerIncGamma](DLMF/ErrorFunctions/Relations.lean#L517) (proved); [erf_lowerIncGammaOnLog_square](DLMF/IncompleteGamma/SpecialValues.lean#L373) (proved).
 - [7.11.E2](https://dlmf.nist.gov/7.11.E2): [erfc_upperIncGamma](DLMF/ErrorFunctions/Relations.lean#L508) (proved); [erfc_upperIncGammaOnLog_square](DLMF/IncompleteGamma/SpecialValues.lean#L381) (proved).
-- [7.11.E3](https://dlmf.nist.gov/7.11.E3): [erfc_genExpIntE](DLMF/ErrorFunctions/Relations.lean#L532) (proved); [erfc_genExpIntEOnLog_square](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1459) (proved).
+- [7.11.E3](https://dlmf.nist.gov/7.11.E3): [erfc_genExpIntE](DLMF/ErrorFunctions/Relations.lean#L532) (proved); [erfc_genExpIntEOnLog_square](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1457) (proved).
 - [7.11.E4](https://dlmf.nist.gov/7.11.E4): [erf_kummerM_pair](DLMF/ErrorFunctions/Relations.lean#L542) (proved).
 - [7.11.E5](https://dlmf.nist.gov/7.11.E5): [erfc_kummerU_pair](DLMF/ErrorFunctions/Relations.lean#L487) (proved); [erfc_kummerUOnLog_square](DLMF/IncompleteGamma/SpecialValues.lean#L390) (proved).
 - [7.11.E6](https://dlmf.nist.gov/7.11.E6): [fresnel_kummerM_pair](DLMF/ErrorFunctions/Relations.lean#L555) (proved).
@@ -513,33 +513,33 @@ is not counted as a proved version of the incorrect universal claim.
 
 #### §7.13
 
-- [7.13.E1](https://dlmf.nist.gov/7.13.E1): [errorFunctionZero_asymptotic](DLMF/ErrorFunctions/Zeros.lean#L344) (admitted).
-- [7.13.E2](https://dlmf.nist.gov/7.13.E2): [errorZeroLambda](DLMF/ErrorFunctions/Zeros.lean#L334) (definition); [errorZeroMu](DLMF/ErrorFunctions/Zeros.lean#L339) (definition).
-- [7.13.E3](https://dlmf.nist.gov/7.13.E3): [errorFunctionZero_asymptotic](DLMF/ErrorFunctions/Zeros.lean#L344) (admitted).
-- [7.13.E4](https://dlmf.nist.gov/7.13.E4): [errorZeroLambda](DLMF/ErrorFunctions/Zeros.lean#L334) (definition); [errorZeroMu](DLMF/ErrorFunctions/Zeros.lean#L339) (definition).
-- [7.13.E5](https://dlmf.nist.gov/7.13.E5): [fresnelFunctionZero_asymptotic](DLMF/ErrorFunctions/Zeros.lean#L371) (admitted).
-- [7.13.E6](https://dlmf.nist.gov/7.13.E6): [fresnelZeroLambda](DLMF/ErrorFunctions/Zeros.lean#L361) (definition); [fresnelZeroAlpha](DLMF/ErrorFunctions/Zeros.lean#L366) (definition).
-- [7.13.E7](https://dlmf.nist.gov/7.13.E7): [fresnelZeroLambda](DLMF/ErrorFunctions/Zeros.lean#L361) (definition); [fresnelZeroAlpha](DLMF/ErrorFunctions/Zeros.lean#L366) (definition).
+- [7.13.E1](https://dlmf.nist.gov/7.13.E1): [errorFunctionZero_asymptotic](DLMF/ErrorFunctions/Zeros.lean#L348) (admitted).
+- [7.13.E2](https://dlmf.nist.gov/7.13.E2): [errorZeroLambda](DLMF/ErrorFunctions/Zeros.lean#L338) (definition); [errorZeroMu](DLMF/ErrorFunctions/Zeros.lean#L343) (definition).
+- [7.13.E3](https://dlmf.nist.gov/7.13.E3): [errorFunctionZero_asymptotic](DLMF/ErrorFunctions/Zeros.lean#L348) (admitted).
+- [7.13.E4](https://dlmf.nist.gov/7.13.E4): [errorZeroLambda](DLMF/ErrorFunctions/Zeros.lean#L338) (definition); [errorZeroMu](DLMF/ErrorFunctions/Zeros.lean#L343) (definition).
+- [7.13.E5](https://dlmf.nist.gov/7.13.E5): [fresnelFunctionZero_asymptotic](DLMF/ErrorFunctions/Zeros.lean#L375) (admitted).
+- [7.13.E6](https://dlmf.nist.gov/7.13.E6): [fresnelZeroLambda](DLMF/ErrorFunctions/Zeros.lean#L365) (definition); [fresnelZeroAlpha](DLMF/ErrorFunctions/Zeros.lean#L370) (definition).
+- [7.13.E7](https://dlmf.nist.gov/7.13.E7): [fresnelZeroLambda](DLMF/ErrorFunctions/Zeros.lean#L365) (definition); [fresnelZeroAlpha](DLMF/ErrorFunctions/Zeros.lean#L370) (definition).
 
 #### §7.14
 
-- [7.14.E1](https://dlmf.nist.gov/7.14.E1): [erfc_fourier_halfLine](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L854) (proved).
-- [7.14.E2](https://dlmf.nist.gov/7.14.E2): [erf_laplace](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L988) (proved).
-- [7.14.E3](https://dlmf.nist.gov/7.14.E3): [erf_sqrt_laplace](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L1084) (proved).
-- [7.14.E4](https://dlmf.nist.gov/7.14.E4): [erfc_sqrt_reciprocal_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L763) (proved).
-- [7.14.E5](https://dlmf.nist.gov/7.14.E5): [fresnelCosInt_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L999) (proved).
-- [7.14.E6](https://dlmf.nist.gov/7.14.E6): [fresnelSinInt_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L1096) (proved).
-- [7.14.E7](https://dlmf.nist.gov/7.14.E7): [fresnelCosInt_sqrt_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L1025) (proved).
-- [7.14.E8](https://dlmf.nist.gov/7.14.E8): [fresnelSinInt_sqrt_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L1122) (proved).
+- [7.14.E1](https://dlmf.nist.gov/7.14.E1): [erfc_fourier_halfLine](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L891) (proved).
+- [7.14.E2](https://dlmf.nist.gov/7.14.E2): [erf_laplace](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L1025) (proved).
+- [7.14.E3](https://dlmf.nist.gov/7.14.E3): [erf_sqrt_laplace](DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean#L1121) (proved).
+- [7.14.E4](https://dlmf.nist.gov/7.14.E4): [erfc_sqrt_reciprocal_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L794) (proved).
+- [7.14.E5](https://dlmf.nist.gov/7.14.E5): [fresnelCosInt_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L1030) (proved).
+- [7.14.E6](https://dlmf.nist.gov/7.14.E6): [fresnelSinInt_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L1127) (proved).
+- [7.14.E7](https://dlmf.nist.gov/7.14.E7): [fresnelCosInt_sqrt_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L1056) (proved).
+- [7.14.E8](https://dlmf.nist.gov/7.14.E8): [fresnelSinInt_sqrt_laplace](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L1153) (proved).
 
 #### §7.17
 
 - [7.17.E1](https://dlmf.nist.gov/7.17.E1): [Real.invErf](DLMF/ErrorFunctions/Basic/Inverse.lean#L37) (definition); [Real.invErfc](DLMF/ErrorFunctions/Basic/Inverse.lean#L42) (definition).
-- [7.17.E2](https://dlmf.nist.gov/7.17.E2): [invErfSeriesCoeff_initial](DLMF/ErrorFunctions/InverseGeneralized.lean#L210) (proved); [hasSum_invErf](DLMF/ErrorFunctions/InverseGeneralized.lean#L557) (proved).
-- [7.17.E3](https://dlmf.nist.gov/7.17.E3): [invErfc_asymptotic](DLMF/ErrorFunctions/InverseGeneralized.lean#L591) (admitted).
-- [7.17.E4](https://dlmf.nist.gov/7.17.E4): [invErfc_asymptotic](DLMF/ErrorFunctions/InverseGeneralized.lean#L591) (admitted).
-- [7.17.E5](https://dlmf.nist.gov/7.17.E5): [invErfcAsymptoticU](DLMF/ErrorFunctions/InverseGeneralized.lean#L581) (definition).
-- [7.17.E6](https://dlmf.nist.gov/7.17.E6): [invErfcAsymptoticV](DLMF/ErrorFunctions/InverseGeneralized.lean#L586) (definition).
+- [7.17.E2](https://dlmf.nist.gov/7.17.E2): [invErfSeriesCoeff_initial](DLMF/ErrorFunctions/InverseGeneralized.lean#L210) (proved); [hasSum_invErf](DLMF/ErrorFunctions/InverseGeneralized.lean#L569) (proved).
+- [7.17.E3](https://dlmf.nist.gov/7.17.E3): [invErfc_asymptotic](DLMF/ErrorFunctions/InverseGeneralized.lean#L603) (admitted).
+- [7.17.E4](https://dlmf.nist.gov/7.17.E4): [invErfc_asymptotic](DLMF/ErrorFunctions/InverseGeneralized.lean#L603) (admitted).
+- [7.17.E5](https://dlmf.nist.gov/7.17.E5): [invErfcAsymptoticU](DLMF/ErrorFunctions/InverseGeneralized.lean#L593) (definition).
+- [7.17.E6](https://dlmf.nist.gov/7.17.E6): [invErfcAsymptoticV](DLMF/ErrorFunctions/InverseGeneralized.lean#L598) (definition).
 
 #### §7.18
 
@@ -556,7 +556,7 @@ is not counted as a proved version of the incorrect universal claim.
 - [7.18.E11](https://dlmf.nist.gov/7.18.E11): [iteratedErfc_pcfU](DLMF/ErrorFunctions/Repeated.lean#L732) (proved).
 - [7.18.E12](https://dlmf.nist.gov/7.18.E12): [iteratedErfc_probability](DLMF/ErrorFunctions/Repeated.lean#L741) (proved).
 - [7.18.E13](https://dlmf.nist.gov/7.18.E13): [iteratedErfc_continuedFraction](DLMF/ErrorFunctions/Repeated.lean#L752) (proved).
-- [7.18.E14](https://dlmf.nist.gov/7.18.E14): [iteratedErfc_asymptotic](DLMF/ErrorFunctions/Repeated.lean#L1067) (proved).
+- [7.18.E14](https://dlmf.nist.gov/7.18.E14): [iteratedErfc_asymptotic](DLMF/ErrorFunctions/Repeated.lean#L1071) (proved).
 
 #### §7.19
 
@@ -603,7 +603,7 @@ is not counted as a proved version of the incorrect universal claim.
 - [8.4.E8](https://dlmf.nist.gov/8.4.E8): [upperIncGamma_nat_succ_expPartialSum](DLMF/IncompleteGamma/SpecialValues.lean#L112) (proved).
 - [8.4.E9](https://dlmf.nist.gov/8.4.E9): [normIncGammaPContinued_nat_succ_expPartialSum](DLMF/IncompleteGamma/SpecialValues.lean#L123) (proved).
 - [8.4.E10](https://dlmf.nist.gov/8.4.E10): [normIncGammaQ_nat_succ](DLMF/Statistical/IncompleteGamma.lean#L88) (proved); [normIncGammaQContinued_nat_succ_expPartialSum](DLMF/IncompleteGamma/SpecialValues.lean#L131) (proved).
-- [8.4.E11](https://dlmf.nist.gov/8.4.E11): [normIncGammaP_nat_succ](DLMF/Statistical/IncompleteGamma.lean#L101) (proved); [expPartialSum](DLMF/Elementary/LogExpIntegrals.lean#L255) (definition).
+- [8.4.E11](https://dlmf.nist.gov/8.4.E11): [normIncGammaP_nat_succ](DLMF/Statistical/IncompleteGamma.lean#L101) (proved); [expPartialSum](DLMF/Elementary/LogExpIntegrals.lean#L257) (definition).
 - [8.4.E12](https://dlmf.nist.gov/8.4.E12): [scIncGamma_neg_nat](DLMF/Statistical/IncompleteGamma.lean#L209) (proved).
 - [8.4.E13](https://dlmf.nist.gov/8.4.E13): [upperIncGamma_one_minus_nat](DLMF/IncompleteGamma/SpecialValues.lean#L139) (proved).
 - [8.4.E14](https://dlmf.nist.gov/8.4.E14): [normIncGammaQ_half_nat](DLMF/IncompleteGamma/SpecialValues.lean#L147) (proved).
@@ -619,49 +619,49 @@ is not counted as a proved version of the incorrect universal claim.
 
 #### §8.6
 
-- [8.6.E1](https://dlmf.nist.gov/8.6.E1): [lowerIncGamma_trigonometric_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L101) (proved).
-- [8.6.E2](https://dlmf.nist.gov/8.6.E2): [lowerIncGamma_besselJ_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L183) (proved).
-- [8.6.E3](https://dlmf.nist.gov/8.6.E3): [lowerIncGamma_logarithmic_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L303) (proved).
-- [8.6.E4](https://dlmf.nist.gov/8.6.E4): [upperIncGamma_stieltjes_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L340) (proved).
-- [8.6.E5](https://dlmf.nist.gov/8.6.E5): [upperIncGamma_laplace_integral_complex](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L356) (proved).
-- [8.6.E6](https://dlmf.nist.gov/8.6.E6): [upperIncGamma_besselK_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L368) (proved).
-- [8.6.E7](https://dlmf.nist.gov/8.6.E7): [upperIncGamma_logarithmic_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L389) (proved).
-- [8.6.E8](https://dlmf.nist.gov/8.6.E8): [lowerIncGamma_circle_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L413) (proved).
-- [8.6.E9](https://dlmf.nist.gov/8.6.E9): [upperGammaIndentPV_converges](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L479) (proved); [upperIncGamma_indented_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L530) (admitted).
-- [8.6.E10](https://dlmf.nist.gov/8.6.E10): [lowerIncGamma_mellinBarnes](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L958) (proved).
-- [8.6.E11](https://dlmf.nist.gov/8.6.E11): [upperIncGamma_mellinBarnes](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L670) (proved).
-- [8.6.E12](https://dlmf.nist.gov/8.6.E12): [upperIncGamma_mellinBarnes_continued](DLMF/IncompleteGamma/Representations/UpperBarnes.lean#L860) (proved).
+- [8.6.E1](https://dlmf.nist.gov/8.6.E1): [lowerIncGamma_trigonometric_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L102) (proved).
+- [8.6.E2](https://dlmf.nist.gov/8.6.E2): [lowerIncGamma_besselJ_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L184) (proved).
+- [8.6.E3](https://dlmf.nist.gov/8.6.E3): [lowerIncGamma_logarithmic_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L304) (proved).
+- [8.6.E4](https://dlmf.nist.gov/8.6.E4): [upperIncGamma_stieltjes_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L341) (proved).
+- [8.6.E5](https://dlmf.nist.gov/8.6.E5): [upperIncGamma_laplace_integral_complex](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L357) (proved).
+- [8.6.E6](https://dlmf.nist.gov/8.6.E6): [upperIncGamma_besselK_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L369) (proved).
+- [8.6.E7](https://dlmf.nist.gov/8.6.E7): [upperIncGamma_logarithmic_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L390) (proved).
+- [8.6.E8](https://dlmf.nist.gov/8.6.E8): [lowerIncGamma_circle_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L414) (proved).
+- [8.6.E9](https://dlmf.nist.gov/8.6.E9): [upperGammaIndentPV_converges](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L480) (proved); [upperIncGamma_indented_integral](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L531) (admitted).
+- [8.6.E10](https://dlmf.nist.gov/8.6.E10): [lowerIncGamma_mellinBarnes](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L976) (proved).
+- [8.6.E11](https://dlmf.nist.gov/8.6.E11): [upperIncGamma_mellinBarnes](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L671) (proved).
+- [8.6.E12](https://dlmf.nist.gov/8.6.E12): [upperIncGamma_mellinBarnes_continued](DLMF/IncompleteGamma/Representations/UpperBarnes.lean#L949) (proved).
 
 #### §8.7
 
 - [8.7.E1](https://dlmf.nist.gov/8.7.E1): [lowerIncGamma_eq_tsum](DLMF/Statistical/IncompleteGamma.lean#L109) (proved); [scIncGamma_eq_tsum](DLMF/Statistical/IncompleteGamma.lean#L168) (proved); [scIncGamma_hasSum_exponential](DLMF/IncompleteGamma/ContinuedProperties.lean#L69) (proved); [scIncGamma_hasSum_alternating](DLMF/IncompleteGamma/SeriesRecurrences.lean#L53) (proved).
 - [8.7.E2](https://dlmf.nist.gov/8.7.E2): [incompleteGamma_increment_series](DLMF/IncompleteGamma/SeriesRecurrences.lean#L104) (proved).
 - [8.7.E3](https://dlmf.nist.gov/8.7.E3): [upperIncGamma_hasSum_alternating](DLMF/IncompleteGamma/SeriesRecurrences.lean#L252) (proved); [upperIncGamma_hasSum_exponential](DLMF/IncompleteGamma/SeriesRecurrences.lean#L274) (proved).
-- [8.7.E4](https://dlmf.nist.gov/8.7.E4): [lowerIncGamma_besselI_series](DLMF/IncompleteGamma/SeriesRecurrences.lean#L742) (proved).
-- [8.7.E5](https://dlmf.nist.gov/8.7.E5): [scIncGamma_sphericalI_series](DLMF/IncompleteGamma/SeriesRecurrences.lean#L821) (proved).
-- [8.7.E6](https://dlmf.nist.gov/8.7.E6): [upperIncGamma_laguerre_series](DLMF/IncompleteGamma/SeriesRecurrences.lean#L830) (admitted).
+- [8.7.E4](https://dlmf.nist.gov/8.7.E4): [lowerIncGamma_besselI_series](DLMF/IncompleteGamma/SeriesRecurrences.lean#L745) (proved).
+- [8.7.E5](https://dlmf.nist.gov/8.7.E5): [scIncGamma_sphericalI_series](DLMF/IncompleteGamma/SeriesRecurrences.lean#L824) (proved).
+- [8.7.E6](https://dlmf.nist.gov/8.7.E6): [upperIncGamma_laguerre_series](DLMF/IncompleteGamma/SeriesRecurrences.lean#L833) (admitted).
 
 #### §8.8
 
 - [8.8.E1](https://dlmf.nist.gov/8.8.E1): [lowerIncGamma_add_one](DLMF/Statistical/IncompleteGamma.lean#L54) (proved); Mathlib: [`Complex.partialGamma_add_one`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.html#Complex.partialGamma_add_one).
 - [8.8.E2](https://dlmf.nist.gov/8.8.E2): [upperIncGamma_add_one](DLMF/Confluent/IncompleteGamma.lean#L194) (proved).
-- [8.8.E3](https://dlmf.nist.gov/8.8.E3): [incompleteGamma_threeTerm](DLMF/IncompleteGamma/SeriesRecurrences.lean#L839) (proved).
+- [8.8.E3](https://dlmf.nist.gov/8.8.E3): [incompleteGamma_threeTerm](DLMF/IncompleteGamma/SeriesRecurrences.lean#L842) (proved).
 - [8.8.E4](https://dlmf.nist.gov/8.8.E4): [scIncGamma_recurrence](DLMF/IncompleteGamma/ContinuedProperties.lean#L83) (proved).
 - [8.8.E5](https://dlmf.nist.gov/8.8.E5): [normIncGammaP_add_one](DLMF/Statistical/IncompleteGamma.lean#L73) (proved).
 - [8.8.E6](https://dlmf.nist.gov/8.8.E6): [normIncGammaQ_add_one](DLMF/Statistical/IncompleteGamma.lean#L64) (proved).
-- [8.8.E7](https://dlmf.nist.gov/8.8.E7): [lowerIncGamma_shift_up](DLMF/IncompleteGamma/SeriesRecurrences.lean#L856) (proved).
-- [8.8.E8](https://dlmf.nist.gov/8.8.E8): [lowerIncGamma_shift_down](DLMF/IncompleteGamma/SeriesRecurrences.lean#L905) (proved).
-- [8.8.E9](https://dlmf.nist.gov/8.8.E9): [upperIncGamma_shift_up](DLMF/IncompleteGamma/SeriesRecurrences.lean#L919) (proved).
-- [8.8.E10](https://dlmf.nist.gov/8.8.E10): [upperIncGamma_shift_down](DLMF/IncompleteGamma/SeriesRecurrences.lean#L932) (proved).
+- [8.8.E7](https://dlmf.nist.gov/8.8.E7): [lowerIncGamma_shift_up](DLMF/IncompleteGamma/SeriesRecurrences.lean#L859) (proved).
+- [8.8.E8](https://dlmf.nist.gov/8.8.E8): [lowerIncGamma_shift_down](DLMF/IncompleteGamma/SeriesRecurrences.lean#L908) (proved).
+- [8.8.E9](https://dlmf.nist.gov/8.8.E9): [upperIncGamma_shift_up](DLMF/IncompleteGamma/SeriesRecurrences.lean#L922) (proved).
+- [8.8.E10](https://dlmf.nist.gov/8.8.E10): [upperIncGamma_shift_down](DLMF/IncompleteGamma/SeriesRecurrences.lean#L935) (proved).
 - [8.8.E11](https://dlmf.nist.gov/8.8.E11): [normIncGammaPContinued_shift_up](DLMF/IncompleteGamma/ContinuedProperties.lean#L101) (proved).
 - [8.8.E12](https://dlmf.nist.gov/8.8.E12): [normIncGammaQContinued_shift_up](DLMF/IncompleteGamma/ContinuedProperties.lean#L119) (proved).
 - [8.8.E13](https://dlmf.nist.gov/8.8.E13): [hasDerivAt_lowerIncGamma_ofReal](DLMF/Statistical/IncompleteGamma.lean#L144) (proved); [hasDerivAt_incompleteGamma](DLMF/IncompleteGamma/ContinuedProperties.lean#L615) (proved).
-- [8.8.E14](https://dlmf.nist.gov/8.8.E14): [scIncGamma_deriv_parameter_zero](DLMF/IncompleteGamma/SeriesRecurrences.lean#L946) (proved).
-- [8.8.E15](https://dlmf.nist.gov/8.8.E15): [lowerIncGamma_iteratedDeriv_scaled_power](DLMF/IncompleteGamma/SeriesRecurrences.lean#L959) (proved).
-- [8.8.E16](https://dlmf.nist.gov/8.8.E16): [upperIncGamma_iteratedDeriv_scaled_power](DLMF/IncompleteGamma/SeriesRecurrences.lean#L991) (proved).
-- [8.8.E17](https://dlmf.nist.gov/8.8.E17): [lowerIncGamma_iteratedDeriv_scaled_exp](DLMF/IncompleteGamma/SeriesRecurrences.lean#L1034) (proved).
-- [8.8.E18](https://dlmf.nist.gov/8.8.E18): [scIncGamma_iteratedDeriv_scaled](DLMF/IncompleteGamma/SeriesRecurrences.lean#L1129) (proved).
-- [8.8.E19](https://dlmf.nist.gov/8.8.E19): [upperIncGamma_iteratedDeriv_scaled_exp](DLMF/IncompleteGamma/SeriesRecurrences.lean#L1064) (proved).
+- [8.8.E14](https://dlmf.nist.gov/8.8.E14): [scIncGamma_deriv_parameter_zero](DLMF/IncompleteGamma/SeriesRecurrences.lean#L949) (proved).
+- [8.8.E15](https://dlmf.nist.gov/8.8.E15): [lowerIncGamma_iteratedDeriv_scaled_power](DLMF/IncompleteGamma/SeriesRecurrences.lean#L962) (proved).
+- [8.8.E16](https://dlmf.nist.gov/8.8.E16): [upperIncGamma_iteratedDeriv_scaled_power](DLMF/IncompleteGamma/SeriesRecurrences.lean#L994) (proved).
+- [8.8.E17](https://dlmf.nist.gov/8.8.E17): [lowerIncGamma_iteratedDeriv_scaled_exp](DLMF/IncompleteGamma/SeriesRecurrences.lean#L1037) (proved).
+- [8.8.E18](https://dlmf.nist.gov/8.8.E18): [scIncGamma_iteratedDeriv_scaled](DLMF/IncompleteGamma/SeriesRecurrences.lean#L1132) (proved).
+- [8.8.E19](https://dlmf.nist.gov/8.8.E19): [upperIncGamma_iteratedDeriv_scaled_exp](DLMF/IncompleteGamma/SeriesRecurrences.lean#L1067) (proved).
 
 #### §8.9
 
@@ -670,19 +670,19 @@ is not counted as a proved version of the incorrect universal claim.
 
 #### §8.10
 
-- [8.10.E1](https://dlmf.nist.gov/8.10.E1): [upperIncGamma_bound_le_one](DLMF/IncompleteGamma/BoundsFractions.lean#L112) (proved); [upperIncGamma_bound_ge_one](DLMF/IncompleteGamma/BoundsFractions.lean#L132) (proved).
-- [8.10.E2](https://dlmf.nist.gov/8.10.E2): [lowerIncGamma_bound_ge](DLMF/IncompleteGamma/BoundsFractions.lean#L125) (proved); [lowerIncGamma_bound_le](DLMF/IncompleteGamma/BoundsFractions.lean#L145) (proved).
-- [8.10.E3](https://dlmf.nist.gov/8.10.E3): [Real.upperGammaTheta](DLMF/IncompleteGamma/BoundsFractions.lean#L152) (definition); [Real.upperGammaTheta_identity](DLMF/IncompleteGamma/BoundsFractions.lean#L157) (proved).
-- [8.10.E4](https://dlmf.nist.gov/8.10.E4): [Real.upperGammaTheta_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L232) (proved).
-- [8.10.E5](https://dlmf.nist.gov/8.10.E5): [Real.upperGammaPade_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L277) (proved).
-- [8.10.E6](https://dlmf.nist.gov/8.10.E6): [Real.upperGammaPade_first](DLMF/IncompleteGamma/BoundsFractions.lean#L310) (proved).
-- [8.10.E7](https://dlmf.nist.gov/8.10.E7): [incompleteGamma_positive_exponential_integral](DLMF/IncompleteGamma/BoundsFractions.lean#L352) (proved).
-- [8.10.E8](https://dlmf.nist.gov/8.10.E8): [incompleteGamma_positive_exponential_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L490) (proved); [incompleteGamma_positive_exponential_limit](DLMF/IncompleteGamma/BoundsFractions.lean#L497) (proved).
-- [8.10.E9](https://dlmf.nist.gov/8.10.E9): [Real.upperGammaCa](DLMF/IncompleteGamma/BoundsFractions.lean#L522) (definition); [Real.upperGammaDa](DLMF/IncompleteGamma/BoundsFractions.lean#L527) (definition).
-- [8.10.E10](https://dlmf.nist.gov/8.10.E10): [upperIncGamma_power_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L532) (proved); [upperIncGamma_power_bounds_zero_limit](DLMF/IncompleteGamma/BoundsFractions.lean#L572) (proved).
-- [8.10.E11](https://dlmf.nist.gov/8.10.E11): [normIncGammaP_exponential_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L625) (proved); [normIncGammaP_exponential_bounds_strict](DLMF/IncompleteGamma/BoundsFractions.lean#L643) (proved).
-- [8.10.E12](https://dlmf.nist.gov/8.10.E12): [Real.gammaPAlpha](DLMF/IncompleteGamma/BoundsFractions.lean#L599) (definition); [Real.gammaPBeta](DLMF/IncompleteGamma/BoundsFractions.lean#L604) (definition).
-- [8.10.E13](https://dlmf.nist.gov/8.10.E13): [normIncGammaQ_diagonal_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L650) (proved).
+- [8.10.E1](https://dlmf.nist.gov/8.10.E1): [upperIncGamma_bound_le_one](DLMF/IncompleteGamma/BoundsFractions.lean#L112) (proved); [upperIncGamma_bound_ge_one](DLMF/IncompleteGamma/BoundsFractions.lean#L125) (proved).
+- [8.10.E2](https://dlmf.nist.gov/8.10.E2): [lowerIncGamma_bound_ge](DLMF/IncompleteGamma/RealIntegrals.lean#L169) (proved); [lowerIncGamma_bound_le](DLMF/IncompleteGamma/RealIntegrals.lean#L191) (proved).
+- [8.10.E3](https://dlmf.nist.gov/8.10.E3): [Real.upperGammaTheta](DLMF/IncompleteGamma/BoundsFractions.lean#L138) (definition); [Real.upperGammaTheta_identity](DLMF/IncompleteGamma/BoundsFractions.lean#L143) (proved).
+- [8.10.E4](https://dlmf.nist.gov/8.10.E4): [Real.upperGammaTheta_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L218) (proved).
+- [8.10.E5](https://dlmf.nist.gov/8.10.E5): [Real.upperGammaPade_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L263) (proved).
+- [8.10.E6](https://dlmf.nist.gov/8.10.E6): [Real.upperGammaPade_first](DLMF/IncompleteGamma/BoundsFractions.lean#L299) (proved).
+- [8.10.E7](https://dlmf.nist.gov/8.10.E7): [incompleteGamma_positive_exponential_integral](DLMF/IncompleteGamma/BoundsFractions.lean#L341) (proved).
+- [8.10.E8](https://dlmf.nist.gov/8.10.E8): [incompleteGamma_positive_exponential_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L482) (proved); [incompleteGamma_positive_exponential_limit](DLMF/IncompleteGamma/BoundsFractions.lean#L489) (proved).
+- [8.10.E9](https://dlmf.nist.gov/8.10.E9): [Real.upperGammaCa](DLMF/IncompleteGamma/BoundsFractions.lean#L514) (definition); [Real.upperGammaDa](DLMF/IncompleteGamma/BoundsFractions.lean#L519) (definition).
+- [8.10.E10](https://dlmf.nist.gov/8.10.E10): [upperIncGamma_power_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L524) (proved); [upperIncGamma_power_bounds_zero_limit](DLMF/IncompleteGamma/BoundsFractions.lean#L564) (proved).
+- [8.10.E11](https://dlmf.nist.gov/8.10.E11): [normIncGammaP_exponential_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L622) (proved); [normIncGammaP_exponential_bounds_strict](DLMF/IncompleteGamma/BoundsFractions.lean#L640) (proved).
+- [8.10.E12](https://dlmf.nist.gov/8.10.E12): [Real.gammaPAlpha](DLMF/IncompleteGamma/BoundsFractions.lean#L591) (definition); [Real.gammaPBeta](DLMF/IncompleteGamma/BoundsFractions.lean#L596) (definition).
+- [8.10.E13](https://dlmf.nist.gov/8.10.E13): [normIncGammaQ_diagonal_bounds](DLMF/IncompleteGamma/BoundsFractions.lean#L647) (proved).
 
 #### §8.11
 
@@ -695,8 +695,8 @@ is not counted as a proved version of the incorrect universal claim.
 - [8.11.E7](https://dlmf.nist.gov/8.11.E7): [upperIncGamma_fixed_ratio_asymptotic](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L803) (admitted); [upperIncGamma_negative_parameter_ratio_asymptotic](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L816) (admitted).
 - [8.11.E8](https://dlmf.nist.gov/8.11.E8): [incGammaLambdaPolynomial_initial](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L430) (proved).
 - [8.11.E9](https://dlmf.nist.gov/8.11.E9): [incGammaLambdaPolynomial](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L423) (definition).
-- [8.11.E10](https://dlmf.nist.gov/8.11.E10): [normIncGammaP_central_expansion](DLMF/IncompleteGamma/Asymptotics/Central.lean#L838) (proved).
-- [8.11.E11](https://dlmf.nist.gov/8.11.E11): [scIncGamma_central_expansion](DLMF/IncompleteGamma/Asymptotics/Central.lean#L899) (admitted).
+- [8.11.E10](https://dlmf.nist.gov/8.11.E10): [normIncGammaP_central_expansion](DLMF/IncompleteGamma/Asymptotics/Central.lean#L846) (proved).
+- [8.11.E11](https://dlmf.nist.gov/8.11.E11): [scIncGamma_central_expansion](DLMF/IncompleteGamma/Asymptotics/Central.lean#L908) (admitted).
 - [8.11.E12](https://dlmf.nist.gov/8.11.E12): [upperIncGamma_diagonal_asymptotic](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L826) (admitted).
 - [8.11.E13](https://dlmf.nist.gov/8.11.E13): [expPartialSum_poisson_limit](DLMF/IncompleteGamma/Asymptotics/PartialSums.lean#L395) (proved).
 - [8.11.E14](https://dlmf.nist.gov/8.11.E14): [expPartialSumRemainderS_identity](DLMF/IncompleteGamma/Asymptotics/PartialSums.lean#L426) (proved).
@@ -708,46 +708,46 @@ is not counted as a proved version of the incorrect universal claim.
 
 #### §8.12
 
-- [8.12.E1](https://dlmf.nist.gov/8.12.E1): [gammaUniformEtaOnLog](DLMF/IncompleteGamma/UniformAsymptotics.lean#L88) (definition); [gammaUniformEta_normalization](DLMF/IncompleteGamma/UniformAsymptotics.lean#L345) (proved).
-- [8.12.E2](https://dlmf.nist.gov/8.12.E2): [gammaUniformEta_equation](DLMF/IncompleteGamma/UniformAsymptotics.lean#L331) (proved); [gammaUniformEta_derivative](DLMF/IncompleteGamma/UniformAsymptotics.lean#L338) (proved).
-- [8.12.E3](https://dlmf.nist.gov/8.12.E3): [gammaUniformP_identity](DLMF/IncompleteGamma/UniformAsymptotics.lean#L362) (proved).
-- [8.12.E4](https://dlmf.nist.gov/8.12.E4): [gammaUniformS](DLMF/IncompleteGamma/UniformAsymptotics.lean#L352) (definition).
-- [8.12.E5](https://dlmf.nist.gov/8.12.E5): [gammaUniformQ_negative_identity](DLMF/IncompleteGamma/UniformAsymptotics.lean#L381) (proved).
-- [8.12.E6](https://dlmf.nist.gov/8.12.E6): [gammaUniform_scIncGamma_identity](DLMF/IncompleteGamma/UniformAsymptotics.lean#L410) (proved).
-- [8.12.E7](https://dlmf.nist.gov/8.12.E7): [gammaUniformS_uniform_expansion](DLMF/IncompleteGamma/UniformAsymptotics.lean#L708) (admitted).
-- [8.12.E8](https://dlmf.nist.gov/8.12.E8): [gammaUniformT_uniform_expansion](DLMF/IncompleteGamma/UniformAsymptotics.lean#L721) (admitted).
-- [8.12.E9](https://dlmf.nist.gov/8.12.E9): [gammaUniformC](DLMF/IncompleteGamma/UniformAsymptotics.lean#L491) (definition); [gammaUniformC_first](DLMF/IncompleteGamma/UniformAsymptotics.lean#L657) (proved).
-- [8.12.E10](https://dlmf.nist.gov/8.12.E10): [gammaUniformC](DLMF/IncompleteGamma/UniformAsymptotics.lean#L491) (definition).
-- [8.12.E11](https://dlmf.nist.gov/8.12.E11): [gammaUniformC_maclaurin](DLMF/IncompleteGamma/UniformAsymptotics.lean#L927) (admitted).
-- [8.12.E12](https://dlmf.nist.gov/8.12.E12): [gammaUniformD_recurrence](DLMF/IncompleteGamma/UniformAsymptotics.lean#L934) (admitted).
-- [8.12.E13](https://dlmf.nist.gov/8.12.E13): [gammaUniformInverseLog_spec](DLMF/IncompleteGamma/UniformAsymptotics.lean#L916) (proved); [gammaUniformAlpha_hasSum](DLMF/IncompleteGamma/UniformAsymptotics.lean#L944) (proved).
-- [8.12.E14](https://dlmf.nist.gov/8.12.E14): [gammaUniformAlpha_printed](DLMF/IncompleteGamma/UniformAsymptotics.lean#L960) (proved).
-- [8.12.E15](https://dlmf.nist.gov/8.12.E15): [normIncGammaQ_diagonal_uniform_asymptotic](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1050) (admitted).
-- [8.12.E16](https://dlmf.nist.gov/8.12.E16): [normIncGammaQ_negative_diagonal_asymptotic](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1059) (admitted).
-- [8.12.E17](https://dlmf.nist.gov/8.12.E17): [gammaUniformC_at_zero_printed](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1041) (admitted).
-- [8.12.E18](https://dlmf.nist.gov/8.12.E18): [gammaParis_uniform_expansion](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1099) (admitted).
-- [8.12.E19](https://dlmf.nist.gov/8.12.E19): [gammaParisD](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1072) (definition).
-- [8.12.E20](https://dlmf.nist.gov/8.12.E20): [gammaParis_printed](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1091) (admitted).
-- [8.12.E21](https://dlmf.nist.gov/8.12.E21): [gammaQInverse](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1116) (definition); [gammaQInverse_spec](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1158) (proved).
-- [8.12.E22](https://dlmf.nist.gov/8.12.E22): [gammaQInverse_median_asymptotic](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1184) (admitted).
+- [8.12.E1](https://dlmf.nist.gov/8.12.E1): [gammaUniformEtaOnLog](DLMF/IncompleteGamma/UniformAsymptotics.lean#L88) (definition); [gammaUniformEta_normalization](DLMF/IncompleteGamma/UniformAsymptotics.lean#L293) (proved).
+- [8.12.E2](https://dlmf.nist.gov/8.12.E2): [gammaUniformEta_equation](DLMF/IncompleteGamma/UniformAsymptotics.lean#L343) (proved); [gammaUniformEta_derivative](DLMF/IncompleteGamma/UniformAsymptotics.lean#L307) (proved).
+- [8.12.E3](https://dlmf.nist.gov/8.12.E3): [gammaUniformP_identity](DLMF/IncompleteGamma/UniformAsymptotics.lean#L360) (proved).
+- [8.12.E4](https://dlmf.nist.gov/8.12.E4): [gammaUniformS](DLMF/IncompleteGamma/UniformAsymptotics.lean#L350) (definition).
+- [8.12.E5](https://dlmf.nist.gov/8.12.E5): [gammaUniformQ_negative_identity](DLMF/IncompleteGamma/UniformAsymptotics.lean#L379) (proved).
+- [8.12.E6](https://dlmf.nist.gov/8.12.E6): [gammaUniform_scIncGamma_identity](DLMF/IncompleteGamma/UniformAsymptotics.lean#L408) (proved).
+- [8.12.E7](https://dlmf.nist.gov/8.12.E7): [gammaUniformS_uniform_expansion](DLMF/IncompleteGamma/UniformAsymptotics.lean#L703) (admitted).
+- [8.12.E8](https://dlmf.nist.gov/8.12.E8): [gammaUniformT_uniform_expansion](DLMF/IncompleteGamma/UniformAsymptotics.lean#L716) (admitted).
+- [8.12.E9](https://dlmf.nist.gov/8.12.E9): [gammaUniformC](DLMF/IncompleteGamma/UniformAsymptotics.lean#L489) (definition); [gammaUniformC_first](DLMF/IncompleteGamma/UniformAsymptotics.lean#L625) (proved).
+- [8.12.E10](https://dlmf.nist.gov/8.12.E10): [gammaUniformC](DLMF/IncompleteGamma/UniformAsymptotics.lean#L489) (definition).
+- [8.12.E11](https://dlmf.nist.gov/8.12.E11): [gammaUniformC_maclaurin](DLMF/IncompleteGamma/UniformAsymptotics.lean#L928) (admitted).
+- [8.12.E12](https://dlmf.nist.gov/8.12.E12): [gammaUniformD_recurrence](DLMF/IncompleteGamma/UniformAsymptotics.lean#L935) (admitted).
+- [8.12.E13](https://dlmf.nist.gov/8.12.E13): [gammaUniformInverseLog_spec](DLMF/IncompleteGamma/UniformAsymptotics.lean#L917) (proved); [gammaUniformAlpha_hasSum](DLMF/IncompleteGamma/UniformAsymptotics.lean#L945) (proved).
+- [8.12.E14](https://dlmf.nist.gov/8.12.E14): [gammaUniformAlpha_printed](DLMF/IncompleteGamma/UniformAsymptotics.lean#L961) (proved).
+- [8.12.E15](https://dlmf.nist.gov/8.12.E15): [normIncGammaQ_diagonal_uniform_asymptotic](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1051) (admitted).
+- [8.12.E16](https://dlmf.nist.gov/8.12.E16): [normIncGammaQ_negative_diagonal_asymptotic](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1060) (admitted).
+- [8.12.E17](https://dlmf.nist.gov/8.12.E17): [gammaUniformC_at_zero_printed](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1042) (admitted).
+- [8.12.E18](https://dlmf.nist.gov/8.12.E18): [gammaParis_uniform_expansion](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1100) (admitted).
+- [8.12.E19](https://dlmf.nist.gov/8.12.E19): [gammaParisD](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1073) (definition).
+- [8.12.E20](https://dlmf.nist.gov/8.12.E20): [gammaParis_printed](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1092) (admitted).
+- [8.12.E21](https://dlmf.nist.gov/8.12.E21): [gammaQInverse](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1117) (definition); [gammaQInverse_spec](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1162) (proved).
+- [8.12.E22](https://dlmf.nist.gov/8.12.E22): [gammaQInverse_median_asymptotic](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1188) (admitted).
 
 #### §8.13
 
-- [8.13.E1](https://dlmf.nist.gov/8.13.E1): [Real.scIncGammaNegativeZero_bounds](DLMF/IncompleteGamma/ZerosIntegrals.lean#L609) (proved).
+- [8.13.E1](https://dlmf.nist.gov/8.13.E1): [Real.scIncGammaNegativeZero_bounds](DLMF/IncompleteGamma/ZerosIntegrals.lean#L642) (proved).
 
 #### §8.14
 
-- [8.14.E1](https://dlmf.nist.gov/8.14.E1): [normIncGammaP_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L780) (proved).
-- [8.14.E2](https://dlmf.nist.gov/8.14.E2): [upperIncGamma_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L800) (proved).
-- [8.14.E3](https://dlmf.nist.gov/8.14.E3): [lowerIncGamma_mellin](DLMF/IncompleteGamma/ZerosIntegrals.lean#L871) (proved).
-- [8.14.E4](https://dlmf.nist.gov/8.14.E4): [upperIncGamma_mellin](DLMF/IncompleteGamma/ZerosIntegrals.lean#L895) (proved).
-- [8.14.E5](https://dlmf.nist.gov/8.14.E5): [lowerIncGamma_mellin_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L918) (proved).
-- [8.14.E6](https://dlmf.nist.gov/8.14.E6): [upperIncGamma_mellin_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L946) (proved).
+- [8.14.E1](https://dlmf.nist.gov/8.14.E1): [normIncGammaP_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L817) (proved).
+- [8.14.E2](https://dlmf.nist.gov/8.14.E2): [upperIncGamma_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L837) (proved).
+- [8.14.E3](https://dlmf.nist.gov/8.14.E3): [lowerIncGamma_mellin](DLMF/IncompleteGamma/ZerosIntegrals.lean#L908) (proved).
+- [8.14.E4](https://dlmf.nist.gov/8.14.E4): [upperIncGamma_mellin](DLMF/IncompleteGamma/ZerosIntegrals.lean#L932) (proved).
+- [8.14.E5](https://dlmf.nist.gov/8.14.E5): [lowerIncGamma_mellin_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L955) (proved).
+- [8.14.E6](https://dlmf.nist.gov/8.14.E6): [upperIncGamma_mellin_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L983) (proved).
 
 #### §8.15
 
-- [8.15.E1](https://dlmf.nist.gov/8.15.E1): [lowerIncGamma_multiplication_hasSum](DLMF/IncompleteGamma/ZerosIntegrals.lean#L982) (proved).
-- [8.15.E2](https://dlmf.nist.gov/8.15.E2): [incompleteGamma_hurwitz_fourier_sum](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1026) (admitted).
+- [8.15.E1](https://dlmf.nist.gov/8.15.E1): [lowerIncGamma_multiplication_hasSum](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1019) (proved).
+- [8.15.E2](https://dlmf.nist.gov/8.15.E2): [incompleteGamma_hurwitz_fourier_sum](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1063) (admitted).
 
 #### §8.17
 
@@ -780,22 +780,22 @@ is not counted as a proved version of the incorrect universal claim.
 
 - [8.18.E1](https://dlmf.nist.gov/8.18.E1): [incBeta_large_a_fixed_x](DLMF/IncompleteGamma/BetaAsymptotics.lean#L121) (proved); [incBeta_large_a_integer_b_exact](DLMF/IncompleteGamma/BetaAsymptotics.lean#L169) (proved).
 - [8.18.E2](https://dlmf.nist.gov/8.18.E2): [Real.betaXi](DLMF/IncompleteGamma/BetaAsymptotics.lean#L272) (definition).
-- [8.18.E3](https://dlmf.nist.gov/8.18.E3): [incBeta_large_a_uniform](DLMF/IncompleteGamma/BetaAsymptotics.lean#L605) (admitted).
+- [8.18.E3](https://dlmf.nist.gov/8.18.E3): [incBeta_large_a_uniform](DLMF/IncompleteGamma/BetaAsymptotics.lean#L606) (admitted).
 - [8.18.E4](https://dlmf.nist.gov/8.18.E4): [betaAuxF_recurrence](DLMF/IncompleteGamma/BetaAsymptotics.lean#L373) (proved).
 - [8.18.E5](https://dlmf.nist.gov/8.18.E5): [betaAuxF_initial](DLMF/IncompleteGamma/BetaAsymptotics.lean#L429) (proved).
-- [8.18.E6](https://dlmf.nist.gov/8.18.E6): [Real.betaGeneratingCoeff](DLMF/IncompleteGamma/BetaAsymptotics.lean#L281) (definition); [Real.betaGenerating_hasSum](DLMF/IncompleteGamma/BetaAsymptotics.lean#L475) (proved).
-- [8.18.E7](https://dlmf.nist.gov/8.18.E7): [Real.betaGeneratingCoeff_first](DLMF/IncompleteGamma/BetaAsymptotics.lean#L525) (proved); [Real.betaGeneratingCoeff_at_endpoint](DLMF/IncompleteGamma/BetaAsymptotics.lean#L590) (proved).
-- [8.18.E8](https://dlmf.nist.gov/8.18.E8): [Real.betaCenter](DLMF/IncompleteGamma/BetaAsymptotics.lean#L617) (definition).
-- [8.18.E9](https://dlmf.nist.gov/8.18.E9): [incBeta_symmetric_uniform_expansion](DLMF/IncompleteGamma/BetaAsymptotics.lean#L800) (admitted).
-- [8.18.E10](https://dlmf.nist.gov/8.18.E10): [Real.betaEta](DLMF/IncompleteGamma/BetaAsymptotics.lean#L622) (definition); [Real.betaEta_equation](DLMF/IncompleteGamma/BetaAsymptotics.lean#L631) (proved); [Real.betaEtaInverse_spec](DLMF/IncompleteGamma/BetaAsymptotics.lean#L766) (proved).
-- [8.18.E11](https://dlmf.nist.gov/8.18.E11): [betaSymmetricC_first](DLMF/IncompleteGamma/BetaAsymptotics.lean#L781) (admitted).
-- [8.18.E12](https://dlmf.nist.gov/8.18.E12): [betaSymmetricC_at_zero](DLMF/IncompleteGamma/BetaAsymptotics.lean#L788) (admitted).
+- [8.18.E6](https://dlmf.nist.gov/8.18.E6): [Real.betaGeneratingCoeff](DLMF/IncompleteGamma/BetaAsymptotics.lean#L281) (definition); [Real.betaGenerating_hasSum](DLMF/IncompleteGamma/BetaAsymptotics.lean#L476) (proved).
+- [8.18.E7](https://dlmf.nist.gov/8.18.E7): [Real.betaGeneratingCoeff_first](DLMF/IncompleteGamma/BetaAsymptotics.lean#L526) (proved); [Real.betaGeneratingCoeff_at_endpoint](DLMF/IncompleteGamma/BetaAsymptotics.lean#L591) (proved).
+- [8.18.E8](https://dlmf.nist.gov/8.18.E8): [Real.betaCenter](DLMF/IncompleteGamma/BetaAsymptotics.lean#L618) (definition).
+- [8.18.E9](https://dlmf.nist.gov/8.18.E9): [incBeta_symmetric_uniform_expansion](DLMF/IncompleteGamma/BetaAsymptotics.lean#L801) (admitted).
+- [8.18.E10](https://dlmf.nist.gov/8.18.E10): [Real.betaEta](DLMF/IncompleteGamma/BetaAsymptotics.lean#L623) (definition); [Real.betaEta_equation](DLMF/IncompleteGamma/BetaAsymptotics.lean#L632) (proved); [Real.betaEtaInverse_spec](DLMF/IncompleteGamma/BetaAsymptotics.lean#L767) (proved).
+- [8.18.E11](https://dlmf.nist.gov/8.18.E11): [betaSymmetricC_first](DLMF/IncompleteGamma/BetaAsymptotics.lean#L782) (admitted).
+- [8.18.E12](https://dlmf.nist.gov/8.18.E12): [betaSymmetricC_at_zero](DLMF/IncompleteGamma/BetaAsymptotics.lean#L789) (admitted).
 - [8.18.E13](https://dlmf.nist.gov/8.18.E13): retired slot; see [5.11.3](https://dlmf.nist.gov/5.11.E3) and `gammaScaled`.
-- [8.18.E14](https://dlmf.nist.gov/8.18.E14): [incBeta_general_uniform_expansion](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1048) (admitted).
-- [8.18.E15](https://dlmf.nist.gov/8.18.E15): [Real.betaZeta](DLMF/IncompleteGamma/BetaAsymptotics.lean#L813) (definition); [Real.betaZeta_spec](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1010) (proved).
-- [8.18.E16](https://dlmf.nist.gov/8.18.E16): [betaGeneralH_first](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1029) (admitted).
-- [8.18.E17](https://dlmf.nist.gov/8.18.E17): [betaGeneralH_at_transition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1036) (admitted).
-- [8.18.E18](https://dlmf.nist.gov/8.18.E18): [Real.incBetaInverse](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1060) (definition); [Real.incBetaInverse_spec](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1088) (proved).
+- [8.18.E14](https://dlmf.nist.gov/8.18.E14): [incBeta_general_uniform_expansion](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1051) (admitted).
+- [8.18.E15](https://dlmf.nist.gov/8.18.E15): [Real.betaZeta](DLMF/IncompleteGamma/BetaAsymptotics.lean#L814) (definition); [Real.betaZeta_spec](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1013) (proved).
+- [8.18.E16](https://dlmf.nist.gov/8.18.E16): [betaGeneralH_first](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1032) (admitted).
+- [8.18.E17](https://dlmf.nist.gov/8.18.E17): [betaGeneralH_at_transition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1039) (admitted).
+- [8.18.E18](https://dlmf.nist.gov/8.18.E18): [Real.incBetaInverse](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1063) (definition); [Real.incBetaInverse_spec](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1092) (proved).
 
 #### §8.19
 
@@ -807,25 +807,25 @@ is not counted as a proved version of the incorrect universal claim.
 - [8.19.E6](https://dlmf.nist.gov/8.19.E6): [genExpIntEExtended_zero](DLMF/IncompleteGamma/ExponentialIntegral.lean#L140) (proved).
 - [8.19.E7](https://dlmf.nist.gov/8.19.E7): [genExpIntE_nat_finite](DLMF/IncompleteGamma/ExponentialIntegral.lean#L185) (proved).
 - [8.19.E8](https://dlmf.nist.gov/8.19.E8): [genExpIntE_nat_hasSum](DLMF/IncompleteGamma/ExponentialIntegral.lean#L232) (proved).
-- [8.19.E9](https://dlmf.nist.gov/8.19.E9): [genExpIntE_nat_digamma_series](DLMF/IncompleteGamma/ExponentialIntegral.lean#L417) (proved).
-- [8.19.E10](https://dlmf.nist.gov/8.19.E10): [genExpIntE_hasSum_noninteger](DLMF/IncompleteGamma/ExponentialIntegral.lean#L430) (proved); [genExpIntE_series_integer_limits](DLMF/IncompleteGamma/ExponentialIntegral.lean#L458) (proved).
-- [8.19.E11](https://dlmf.nist.gov/8.19.E11): [genExpIntE_hasSum_exponential](DLMF/IncompleteGamma/ExponentialIntegral.lean#L443) (proved); [genExpIntE_series_integer_limits](DLMF/IncompleteGamma/ExponentialIntegral.lean#L458) (proved).
+- [8.19.E9](https://dlmf.nist.gov/8.19.E9): [genExpIntE_nat_digamma_series](DLMF/IncompleteGamma/ExponentialIntegral.lean#L402) (proved).
+- [8.19.E10](https://dlmf.nist.gov/8.19.E10): [genExpIntE_hasSum_noninteger](DLMF/IncompleteGamma/ExponentialIntegral.lean#L424) (proved); [genExpIntE_series_integer_limits](DLMF/IncompleteGamma/ExponentialIntegral.lean#L452) (proved).
+- [8.19.E11](https://dlmf.nist.gov/8.19.E11): [genExpIntE_hasSum_exponential](DLMF/IncompleteGamma/ExponentialIntegral.lean#L437) (proved); [genExpIntE_series_integer_limits](DLMF/IncompleteGamma/ExponentialIntegral.lean#L452) (proved).
 - [8.19.E12](https://dlmf.nist.gov/8.19.E12): [genExpIntE_add_one](DLMF/Confluent/ExpIntegral.lean#L77) (proved).
 - [8.19.E13](https://dlmf.nist.gov/8.19.E13): [hasDerivAt_genExpIntE](DLMF/Confluent/ExpIntegral.lean#L91) (proved).
-- [8.19.E14](https://dlmf.nist.gov/8.19.E14): [genExpIntE_scaled_derivative](DLMF/IncompleteGamma/ExponentialIntegral.lean#L486) (proved).
-- [8.19.E15](https://dlmf.nist.gov/8.19.E15): [genExpIntE_parameter_derivatives](DLMF/IncompleteGamma/ExponentialIntegral.lean#L611) (proved).
+- [8.19.E14](https://dlmf.nist.gov/8.19.E14): [genExpIntE_scaled_derivative](DLMF/IncompleteGamma/ExponentialIntegral.lean#L480) (proved).
+- [8.19.E15](https://dlmf.nist.gov/8.19.E15): [genExpIntE_parameter_derivatives](DLMF/IncompleteGamma/ExponentialIntegral.lean#L587) (proved).
 - [8.19.E16](https://dlmf.nist.gov/8.19.E16): [genExpIntE_eq_cpow_mul_kummerU](DLMF/Confluent/ExpIntegral.lean#L47) (proved).
-- [8.19.E17](https://dlmf.nist.gov/8.19.E17): [genExpIntE_continuedFraction](DLMF/IncompleteGamma/ExponentialIntegral.lean#L619) (admitted).
-- [8.19.E18](https://dlmf.nist.gov/8.19.E18): [genExpIntEOnLog_monodromy](DLMF/IncompleteGamma/ExponentialIntegral.lean#L628) (proved); [genExpIntEOnLog_nat_monodromy](DLMF/IncompleteGamma/ExponentialIntegral.lean#L664) (proved); [genExpIntEOnLog_nonpos_nat_monodromy](DLMF/IncompleteGamma/ExponentialIntegral.lean#L680) (proved).
-- [8.19.E19](https://dlmf.nist.gov/8.19.E19): [genExpIntE_nat_order_bounds](DLMF/IncompleteGamma/ExponentialIntegral.lean#L958) (proved).
-- [8.19.E20](https://dlmf.nist.gov/8.19.E20): [genExpIntE_nat_logconvex](DLMF/IncompleteGamma/ExponentialIntegral.lean#L966) (proved).
-- [8.19.E21](https://dlmf.nist.gov/8.19.E21): [genExpIntE_nat_rational_bounds](DLMF/IncompleteGamma/ExponentialIntegral.lean#L973) (proved).
-- [8.19.E22](https://dlmf.nist.gov/8.19.E22): [genExpIntE_nat_ratio_derivative](DLMF/IncompleteGamma/ExponentialIntegral.lean#L980) (proved).
-- [8.19.E23](https://dlmf.nist.gov/8.19.E23): [genExpIntE_tail_integral](DLMF/IncompleteGamma/ExponentialIntegral.lean#L987) (proved).
-- [8.19.E24](https://dlmf.nist.gov/8.19.E24): [genExpIntE_nat_laplace](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1188) (proved).
-- [8.19.E25](https://dlmf.nist.gov/8.19.E25): [genExpIntE_mellin_laplace](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1013) (proved).
-- [8.19.E26](https://dlmf.nist.gov/8.19.E26): [genExpIntE_product_integral](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1308) (proved).
-- [8.19.E27](https://dlmf.nist.gov/8.19.E27): [genExpIntL](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1196) (definition); [genExpIntL_hypergeometric](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1201) (proved).
+- [8.19.E17](https://dlmf.nist.gov/8.19.E17): [genExpIntE_continuedFraction](DLMF/IncompleteGamma/ExponentialIntegral.lean#L608) (admitted).
+- [8.19.E18](https://dlmf.nist.gov/8.19.E18): [genExpIntEOnLog_monodromy](DLMF/IncompleteGamma/ExponentialIntegral.lean#L617) (proved); [genExpIntEOnLog_nat_monodromy](DLMF/IncompleteGamma/ExponentialIntegral.lean#L653) (proved); [genExpIntEOnLog_nonpos_nat_monodromy](DLMF/IncompleteGamma/ExponentialIntegral.lean#L669) (proved).
+- [8.19.E19](https://dlmf.nist.gov/8.19.E19): [genExpIntE_nat_order_bounds](DLMF/IncompleteGamma/ExponentialIntegral.lean#L960) (proved).
+- [8.19.E20](https://dlmf.nist.gov/8.19.E20): [genExpIntE_nat_logconvex](DLMF/IncompleteGamma/ExponentialIntegral.lean#L968) (proved).
+- [8.19.E21](https://dlmf.nist.gov/8.19.E21): [genExpIntE_nat_rational_bounds](DLMF/IncompleteGamma/ExponentialIntegral.lean#L975) (proved).
+- [8.19.E22](https://dlmf.nist.gov/8.19.E22): [genExpIntE_nat_ratio_derivative](DLMF/IncompleteGamma/ExponentialIntegral.lean#L982) (proved).
+- [8.19.E23](https://dlmf.nist.gov/8.19.E23): [genExpIntE_tail_integral](DLMF/IncompleteGamma/ExponentialIntegral.lean#L989) (proved).
+- [8.19.E24](https://dlmf.nist.gov/8.19.E24): [genExpIntE_nat_laplace](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1179) (proved).
+- [8.19.E25](https://dlmf.nist.gov/8.19.E25): [genExpIntE_mellin_laplace](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1015) (proved).
+- [8.19.E26](https://dlmf.nist.gov/8.19.E26): [genExpIntE_product_integral](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1304) (proved).
+- [8.19.E27](https://dlmf.nist.gov/8.19.E27): [genExpIntL](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1192) (definition); [genExpIntL_hypergeometric](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1197) (proved).
 
 #### §8.20
 
@@ -839,20 +839,20 @@ is not counted as a proved version of the incorrect universal claim.
 #### §8.21
 
 - [8.21.E1](https://dlmf.nist.gov/8.21.E1): [genUpperTrig_gamma](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L92) (proved).
-- [8.21.E2](https://dlmf.nist.gov/8.21.E2): [genLowerTrig_gamma](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L858) (proved).
-- [8.21.E3](https://dlmf.nist.gov/8.21.E3): [gamma_rotated_oscillatory_integral](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L512) (proved).
+- [8.21.E2](https://dlmf.nist.gov/8.21.E2): [genLowerTrig_gamma](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L845) (proved).
+- [8.21.E3](https://dlmf.nist.gov/8.21.E3): [gamma_rotated_oscillatory_integral](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L497) (proved).
 - [8.21.E4](https://dlmf.nist.gov/8.21.E4): [genSinIntTail_horizontal_integral](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L520) (proved).
 - [8.21.E5](https://dlmf.nist.gov/8.21.E5): [genCosIntTail_horizontal_integral](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L539) (proved).
-- [8.21.E6](https://dlmf.nist.gov/8.21.E6): [genSinInt_segment_integral](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L985) (proved).
-- [8.21.E7](https://dlmf.nist.gov/8.21.E7): [genCosInt_segment_integral](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L1026) (proved).
-- [8.21.E8](https://dlmf.nist.gov/8.21.E8): [genSinInt_complement](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L753) (proved).
-- [8.21.E9](https://dlmf.nist.gov/8.21.E9): [genCosInt_complement](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L760) (proved).
+- [8.21.E6](https://dlmf.nist.gov/8.21.E6): [genSinInt_segment_integral](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L972) (proved).
+- [8.21.E7](https://dlmf.nist.gov/8.21.E7): [genCosInt_segment_integral](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L1013) (proved).
+- [8.21.E8](https://dlmf.nist.gov/8.21.E8): [genSinInt_complement](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L716) (proved).
+- [8.21.E9](https://dlmf.nist.gov/8.21.E9): [genCosInt_complement](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L731) (proved).
 - [8.21.E10](https://dlmf.nist.gov/8.21.E10): [genTrig_order_zero](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L773) (proved).
 - [8.21.E11](https://dlmf.nist.gov/8.21.E11): [genSinInt_order_zero](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L795) (proved).
-- [8.21.E12](https://dlmf.nist.gov/8.21.E12): [genSinInt_value_at_infinity](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L807) (proved).
-- [8.21.E13](https://dlmf.nist.gov/8.21.E13): [genCosInt_value_at_infinity](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L813) (proved).
-- [8.21.E14](https://dlmf.nist.gov/8.21.E14): [genSinInt_hasSum](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L905) (proved).
-- [8.21.E15](https://dlmf.nist.gov/8.21.E15): [genCosInt_hasSum](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L928) (proved).
+- [8.21.E12](https://dlmf.nist.gov/8.21.E12): [genSinInt_value_at_infinity](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L746) (proved).
+- [8.21.E13](https://dlmf.nist.gov/8.21.E13): [genCosInt_value_at_infinity](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L756) (proved).
+- [8.21.E14](https://dlmf.nist.gov/8.21.E14): [genSinInt_hasSum](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L892) (proved).
+- [8.21.E15](https://dlmf.nist.gov/8.21.E15): [genCosInt_hasSum](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L915) (proved).
 - [8.21.E16](https://dlmf.nist.gov/8.21.E16): [genSinInt_spherical_series](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L153) (proved).
 - [8.21.E17](https://dlmf.nist.gov/8.21.E17): [genCosInt_spherical_series](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L290) (proved).
 - [8.21.E18](https://dlmf.nist.gov/8.21.E18): [genTrigAuxF](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L459) (definition).
@@ -861,10 +861,10 @@ is not counted as a proved version of the incorrect universal claim.
 - [8.21.E21](https://dlmf.nist.gov/8.21.E21): [genCosIntTail_aux](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L478) (proved).
 - [8.21.E22](https://dlmf.nist.gov/8.21.E22): [genTrigAuxF_oscillatory_integral](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L487) (proved).
 - [8.21.E23](https://dlmf.nist.gov/8.21.E23): [genTrigAuxG_oscillatory_integral](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L517) (proved).
-- [8.21.E24](https://dlmf.nist.gov/8.21.E24): [genTrigAuxF_laplace_integral](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L826) (proved).
-- [8.21.E25](https://dlmf.nist.gov/8.21.E25): [genTrigAuxG_laplace_integral](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L833) (proved).
-- [8.21.E26](https://dlmf.nist.gov/8.21.E26): [genTrigAuxF_sector_asymptotic](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L956) (proved).
-- [8.21.E27](https://dlmf.nist.gov/8.21.E27): [genTrigAuxG_sector_asymptotic](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L995) (proved).
+- [8.21.E24](https://dlmf.nist.gov/8.21.E24): [genTrigAuxF_laplace_integral](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L843) (proved).
+- [8.21.E25](https://dlmf.nist.gov/8.21.E25): [genTrigAuxG_laplace_integral](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L850) (proved).
+- [8.21.E26](https://dlmf.nist.gov/8.21.E26): [genTrigAuxF_sector_asymptotic](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L973) (proved).
+- [8.21.E27](https://dlmf.nist.gov/8.21.E27): [genTrigAuxG_sector_asymptotic](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L1012) (proved).
 
 ## Additional unnumbered statements and definitions
 
@@ -909,14 +909,14 @@ pointers and bibliographic comments are recorded above.
 - [DLMF.Confluent.fresnelS1](DLMF/ErrorFunctions/Basic/Functions.lean#L110) (definition).
 - [DLMF.Confluent.fresnelC2](DLMF/ErrorFunctions/Basic/Functions.lean#L114) (definition).
 - [DLMF.Confluent.fresnelS2](DLMF/ErrorFunctions/Basic/Functions.lean#L118) (definition).
-- [DLMF.Confluent.Real.dawsonF_normalized_strictAnti](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L778) (proved).
+- [DLMF.Confluent.Real.dawsonF_normalized_strictAnti](DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean#L788) (proved).
 - [DLMF.Confluent.erfcAsymptoticRemainder](DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean#L402) (definition).
 - [DLMF.Confluent.erfc_remainder_bound](DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean#L588) (proved).
 - [DLMF.Confluent.erfc_remainder_sign](DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean#L810) (proved).
 - [DLMF.Confluent.fresnelAsymptoticTerm](DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean#L47) (definition).
-- [DLMF.Confluent.fresnelAux_remainder_bound](DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean#L644) (proved).
-- [DLMF.Confluent.fresnelAux_remainder_sign](DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean#L814) (proved).
-- [DLMF.Confluent.erfc_sqrt_reciprocal_laplace_negative](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L773) (proved).
+- [DLMF.Confluent.FresnelAuxiliary.remainder_bound](DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean#L644) (proved).
+- [DLMF.Confluent.FresnelAuxiliary.remainder_sign](DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean#L815) (proved).
+- [DLMF.Confluent.erfc_sqrt_reciprocal_laplace_negative](DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean#L804) (proved).
 - [DLMF.Confluent.Real.generalizedErrorIntegral](DLMF/ErrorFunctions/InverseGeneralized.lean#L56) (definition).
 - [DLMF.Confluent.Real.generalizedDawsonIntegral](DLMF/ErrorFunctions/InverseGeneralized.lean#L60) (definition).
 - [DLMF.Confluent.Real.generalizedErrorIntegral_gamma](DLMF/ErrorFunctions/InverseGeneralized.lean#L64) (proved).
@@ -933,21 +933,21 @@ pointers and bibliographic comments are recorded above.
 - [DLMF.Confluent.erf_zero_simple](DLMF/ErrorFunctions/Zeros.lean#L66) (proved).
 - [DLMF.Confluent.fresnel_zero_orders](DLMF/ErrorFunctions/Zeros.lean#L73) (proved).
 - [DLMF.Confluent.errorFunctionZero_spec](DLMF/ErrorFunctions/Zeros.lean#L99) (admitted).
-- [DLMF.Confluent.errorFunctionZero_ordered](DLMF/ErrorFunctions/Zeros.lean#L126) (proved).
-- [DLMF.Confluent.erf_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L138) (proved).
-- [DLMF.Confluent.erfc_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L188) (proved).
-- [DLMF.Confluent.faddeevaW_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L213) (proved).
-- [DLMF.Confluent.fresnelFunctionZero_spec](DLMF/ErrorFunctions/Zeros.lean#L225) (admitted).
-- [DLMF.Confluent.fresnelFunctionZero_ordered](DLMF/ErrorFunctions/Zeros.lean#L234) (proved).
-- [DLMF.Confluent.fresnel_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L272) (proved).
+- [DLMF.Confluent.errorFunctionZero_ordered](DLMF/ErrorFunctions/Zeros.lean#L128) (proved).
+- [DLMF.Confluent.erf_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L142) (proved).
+- [DLMF.Confluent.erfc_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L192) (proved).
+- [DLMF.Confluent.faddeevaW_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L217) (proved).
+- [DLMF.Confluent.fresnelFunctionZero_spec](DLMF/ErrorFunctions/Zeros.lean#L229) (admitted).
+- [DLMF.Confluent.fresnelFunctionZero_ordered](DLMF/ErrorFunctions/Zeros.lean#L238) (proved).
+- [DLMF.Confluent.fresnel_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L276) (proved).
 - Tables 7.13.1–7.13.4: excluded: numerical (removed 2026-10-21).
-- [DLMF.Confluent.fresnelTail_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L314) (proved).
+- [DLMF.Confluent.fresnelTail_zero_classification](DLMF/ErrorFunctions/Zeros.lean#L318) (proved).
 - [DLMF.Confluent.expIntAsymptoticTerm](DLMF/ExpIntegrals/Asymptotics.lean#L48) (definition).
-- [DLMF.Confluent.expIntE1_remainder_bound](DLMF/ExpIntegrals/Asymptotics.lean#L597) (proved).
-- [DLMF.Confluent.expIntE1_remainder_sign](DLMF/ExpIntegrals/Asymptotics.lean#L782) (proved).
-- [DLMF.Confluent.expIntEi_remainder_bound](DLMF/ExpIntegrals/Asymptotics.lean#L805) (admitted).
-- [DLMF.Confluent.expIntAux_remainder_bound](DLMF/ExpIntegrals/Asymptotics.lean#L812) (proved).
-- [DLMF.Confluent.expIntAux_remainder_sign](DLMF/ExpIntegrals/Asymptotics.lean#L936) (proved).
+- [DLMF.Confluent.expIntE1_remainder_bound](DLMF/ExpIntegrals/Asymptotics.lean#L600) (proved).
+- [DLMF.Confluent.expIntE1_remainder_sign](DLMF/ExpIntegrals/Asymptotics.lean#L785) (proved).
+- [DLMF.Confluent.expIntEi_remainder_bound](DLMF/ExpIntegrals/Asymptotics.lean#L808) (admitted).
+- [DLMF.Confluent.ExpIntegralAuxiliary.remainder_bound](DLMF/ExpIntegrals/Asymptotics.lean#L815) (proved).
+- [DLMF.Confluent.ExpIntegralAuxiliary.remainder_sign](DLMF/ExpIntegrals/Asymptotics.lean#L940) (proved).
 - [DLMF.Confluent.expIntEin_entire](DLMF/ExpIntegrals/Basic/Properties.lean#L72) (proved).
 - [DLMF.Confluent.sinInt_entire](DLMF/ExpIntegrals/Basic/Properties.lean#L81) (proved).
 - [DLMF.Confluent.cosIntCin_entire](DLMF/ExpIntegrals/Basic/Properties.lean#L90) (proved).
@@ -964,14 +964,14 @@ pointers and bibliographic comments are recorded above.
 - [DLMF.Confluent.expIntAuxGOnLog](DLMF/ExpIntegrals/Continuation.lean#L62) (definition).
 - [DLMF.Confluent.Real.cosIntZero](DLMF/ExpIntegrals/ZerosIntegrals.lean#L61) (definition).
 - [DLMF.Confluent.Real.sinIntTailZero](DLMF/ExpIntegrals/ZerosIntegrals.lean#L66) (definition).
-- [DLMF.Confluent.Real.expIntEi_unique_zero](DLMF/ExpIntegrals/ZerosIntegrals.lean#L450) (proved).
-- [DLMF.Confluent.Real.cosIntZero_spec](DLMF/ExpIntegrals/ZerosIntegrals.lean#L462) (proved).
-- [DLMF.Confluent.Real.cosIntZero_enumeration](DLMF/ExpIntegrals/ZerosIntegrals.lean#L471) (proved).
-- [DLMF.Confluent.Real.sinIntTailZero_spec](DLMF/ExpIntegrals/ZerosIntegrals.lean#L481) (proved).
-- [DLMF.Confluent.Real.sinIntTailZero_enumeration](DLMF/ExpIntegrals/ZerosIntegrals.lean#L491) (proved).
-- [DLMF.Confluent.expIntActon_initial](DLMF/ExpIntegrals/ZerosIntegrals.lean#L762) (proved).
+- [DLMF.Confluent.Real.expIntEi_unique_zero](DLMF/ExpIntegrals/ZerosIntegrals.lean#L464) (proved).
+- [DLMF.Confluent.Real.cosIntZero_spec](DLMF/ExpIntegrals/ZerosIntegrals.lean#L476) (proved).
+- [DLMF.Confluent.Real.cosIntZero_enumeration](DLMF/ExpIntegrals/ZerosIntegrals.lean#L485) (proved).
+- [DLMF.Confluent.Real.sinIntTailZero_spec](DLMF/ExpIntegrals/ZerosIntegrals.lean#L495) (proved).
+- [DLMF.Confluent.Real.sinIntTailZero_enumeration](DLMF/ExpIntegrals/ZerosIntegrals.lean#L505) (proved).
+- [DLMF.Confluent.expIntActon_initial](DLMF/ExpIntegrals/ZerosIntegrals.lean#L785) (proved).
 - [DLMF.Confluent.incGammaAsymptoticRemainder_real_bound](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L82) (proved).
-- [DLMF.Confluent.gammaCentralFilter](DLMF/IncompleteGamma/Asymptotics/Central.lean#L835) (definition).
+- [DLMF.Confluent.gammaCentralFilter](DLMF/IncompleteGamma/Asymptotics/Central.lean#L843) (definition).
 - [DLMF.Confluent.upperIncGammaOnLog](DLMF/IncompleteGamma/Basic.lean#L41) (definition).
 - [DLMF.Confluent.lowerIncGammaOnLog](DLMF/IncompleteGamma/Basic.lean#L45) (definition).
 - [DLMF.Confluent.normIncGammaPOnLog](DLMF/IncompleteGamma/Basic.lean#L60) (definition).
@@ -989,21 +989,21 @@ pointers and bibliographic comments are recorded above.
 - [DLMF.Statistical.incBeta_cf_third_counterexample_value](DLMF/IncompleteGamma/Beta.lean#L823) (proved).
 - [DLMF.Statistical.Real.betaGeneratingKernel](DLMF/IncompleteGamma/BetaAsymptotics.lean#L278) (definition).
 - [DLMF.Statistical.betaAuxF](DLMF/IncompleteGamma/BetaAsymptotics.lean#L287) (definition).
-- [DLMF.Statistical.Real.betaEtaInverse](DLMF/IncompleteGamma/BetaAsymptotics.lean#L628) (definition).
-- [DLMF.Statistical.betaSymmetricC](DLMF/IncompleteGamma/BetaAsymptotics.lean#L775) (definition).
-- [DLMF.Statistical.betaSymmetricC_analytic](DLMF/IncompleteGamma/BetaAsymptotics.lean#L796) (admitted).
-- [DLMF.Statistical.Real.betaGeneralX](DLMF/IncompleteGamma/BetaAsymptotics.lean#L821) (definition).
-- [DLMF.Statistical.betaGeneralH](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1023) (definition).
-- [DLMF.Statistical.betaGeneralH_analytic](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1044) (admitted).
-- [DLMF.Confluent.Real.upperGammaTheta_limit](DLMF/IncompleteGamma/BoundsFractions.lean#L173) (proved).
-- [DLMF.Confluent.Real.upperGammaPade](DLMF/IncompleteGamma/BoundsFractions.lean#L273) (definition).
+- [DLMF.Statistical.Real.betaEtaInverse](DLMF/IncompleteGamma/BetaAsymptotics.lean#L629) (definition).
+- [DLMF.Statistical.betaSymmetricC](DLMF/IncompleteGamma/BetaAsymptotics.lean#L776) (definition).
+- [DLMF.Statistical.betaSymmetricC_analytic](DLMF/IncompleteGamma/BetaAsymptotics.lean#L797) (admitted).
+- [DLMF.Statistical.Real.betaGeneralX](DLMF/IncompleteGamma/BetaAsymptotics.lean#L822) (definition).
+- [DLMF.Statistical.betaGeneralH](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1026) (definition).
+- [DLMF.Statistical.betaGeneralH_analytic](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1047) (admitted).
+- [DLMF.Confluent.Real.upperGammaTheta_limit](DLMF/IncompleteGamma/BoundsFractions.lean#L159) (proved).
+- [DLMF.Confluent.Real.upperGammaPade](DLMF/IncompleteGamma/BoundsFractions.lean#L259) (definition).
 - [DLMF.Confluent.expIntLargeOrderPolynomial_degree](DLMF/IncompleteGamma/ExpIntegralAsymptotics.lean#L587) (proved).
 - [DLMF.Confluent.genExpIntEOnLog](DLMF/IncompleteGamma/ExponentialIntegral.lean#L67) (definition).
 - [DLMF.Confluent.genExpIntEExtended](DLMF/IncompleteGamma/ExponentialIntegral.lean#L71) (definition).
-- [DLMF.Confluent.genExpIntEOnLog_parameter_entire](DLMF/IncompleteGamma/ExponentialIntegral.lean#L699) (proved).
-- [DLMF.Confluent.genExpIntEOnLog_branch_point](DLMF/IncompleteGamma/ExponentialIntegral.lean#L708) (proved).
-- [DLMF.Confluent.upperGammaIndentPV](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L442) (definition).
-- [DLMF.Confluent.gammaBarnesResidueSum](DLMF/IncompleteGamma/Representations/UpperBarnes.lean#L848) (definition).
+- [DLMF.Confluent.genExpIntEOnLog_parameter_entire](DLMF/IncompleteGamma/ExponentialIntegral.lean#L688) (proved).
+- [DLMF.Confluent.genExpIntEOnLog_branch_point](DLMF/IncompleteGamma/ExponentialIntegral.lean#L697) (proved).
+- [DLMF.Confluent.upperGammaIndentPV](DLMF/IncompleteGamma/Representations/LowerBarnes.lean#L443) (definition).
+- [DLMF.Confluent.gammaBarnesResidueSum](DLMF/IncompleteGamma/Representations/UpperBarnes.lean#L934) (definition).
 - [DLMF.Confluent.genSinIntOnLog](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L61) (definition).
 - [DLMF.Confluent.genCosIntOnLog](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L65) (definition).
 - [DLMF.Confluent.genSinIntTailOnLog](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L69) (definition).
@@ -1014,41 +1014,41 @@ pointers and bibliographic comments are recorded above.
 - [DLMF.Confluent.genCosIntTail](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L89) (definition).
 - [DLMF.Confluent.genSinIntTail_parameter_entire](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L105) (proved).
 - [DLMF.Confluent.genCosIntTail_parameter_entire](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L114) (proved).
-- [DLMF.Confluent.genSinInt_parameter_analytic](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L293) (proved).
-- [DLMF.Confluent.genCosInt_parameter_analytic](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L301) (proved).
-- [DLMF.Confluent.genSinInt_parameter_residue](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L310) (proved).
-- [DLMF.Confluent.genCosInt_parameter_residue](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L320) (proved).
+- [DLMF.Confluent.genSinInt_parameter_analytic](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L299) (proved).
+- [DLMF.Confluent.genCosInt_parameter_analytic](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L307) (proved).
+- [DLMF.Confluent.genSinInt_parameter_residue](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L316) (proved).
+- [DLMF.Confluent.genCosInt_parameter_residue](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L326) (proved).
 - [DLMF.Confluent.gammaSinHalfPiContinued](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L559) (definition).
 - [DLMF.Confluent.gammaCosHalfPiContinued](DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean#L563) (definition).
 - [DLMF.Confluent.gammaScaled](DLMF/IncompleteGamma/UniformAsymptotics.lean#L77) (definition).
 - [DLMF.Confluent.gammaStirlingCoeff](DLMF/IncompleteGamma/UniformAsymptotics.lean#L81) (definition).
 - [DLMF.Confluent.gammaEtaFactor](DLMF/IncompleteGamma/UniformAsymptotics.lean#L85) (definition).
-- [DLMF.Confluent.gammaUniformT](DLMF/IncompleteGamma/UniformAsymptotics.lean#L358) (definition).
-- [DLMF.Confluent.gammaUniformFilter](DLMF/IncompleteGamma/UniformAsymptotics.lean#L705) (definition).
-- [DLMF.Confluent.gammaUniformInverseLog](DLMF/IncompleteGamma/UniformAsymptotics.lean#L735) (definition).
-- [DLMF.Confluent.gammaUniformAlpha](DLMF/IncompleteGamma/UniformAsymptotics.lean#L740) (definition).
-- [DLMF.Confluent.gammaUniformD](DLMF/IncompleteGamma/UniformAsymptotics.lean#L744) (definition).
-- [DLMF.Confluent.gammaParisRawCoeff](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1078) (definition).
-- [DLMF.Confluent.gammaParisA](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1084) (definition).
-- [DLMF.Confluent.gammaParisB](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1088) (definition).
+- [DLMF.Confluent.gammaUniformT](DLMF/IncompleteGamma/UniformAsymptotics.lean#L356) (definition).
+- [DLMF.Confluent.gammaUniformFilter](DLMF/IncompleteGamma/UniformAsymptotics.lean#L700) (definition).
+- [DLMF.Confluent.gammaUniformInverseLog](DLMF/IncompleteGamma/UniformAsymptotics.lean#L730) (definition).
+- [DLMF.Confluent.gammaUniformAlpha](DLMF/IncompleteGamma/UniformAsymptotics.lean#L735) (definition).
+- [DLMF.Confluent.gammaUniformD](DLMF/IncompleteGamma/UniformAsymptotics.lean#L739) (definition).
+- [DLMF.Confluent.gammaParisRawCoeff](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1079) (definition).
+- [DLMF.Confluent.gammaParisA](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1085) (definition).
+- [DLMF.Confluent.gammaParisB](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1089) (definition).
 - [DLMF.Confluent.Real.scIncGammaNegativeZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L61) (definition).
 - [DLMF.Confluent.Real.scIncGammaPositiveZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L65) (definition).
 - [DLMF.Confluent.scIncGamma_nonnegative_parameter_no_real_zeros](DLMF/IncompleteGamma/ZerosIntegrals.lean#L82) (proved).
-- [DLMF.Confluent.scIncGamma_one_negative_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L463) (proved).
-- [DLMF.Confluent.scIncGamma_two_real_zeros](DLMF/IncompleteGamma/ZerosIntegrals.lean#L508) (proved).
-- [DLMF.Confluent.Real.scIncGammaNegativeZero_strictAnti](DLMF/IncompleteGamma/ZerosIntegrals.lean#L554) (proved).
-- [DLMF.Confluent.scIncGammaDoubleZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L713) (definition).
-- [DLMF.Confluent.scIncGamma_two_parameter_zeros_negative_x](DLMF/IncompleteGamma/ZerosIntegrals.lean#L719) (admitted).
-- [DLMF.Confluent.scIncGamma_two_parameter_zeros_positive_x](DLMF/IncompleteGamma/ZerosIntegrals.lean#L725) (admitted).
-- [DLMF.Confluent.scIncGamma_double_parameter_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L731) (admitted).
-- [DLMF.Confluent.scIncGamma_parameter_zeros_at_x_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L740) (proved).
-- [DLMF.Confluent.scIncGamma_conjugate_zero_trajectories](DLMF/IncompleteGamma/ZerosIntegrals.lean#L764) (admitted).
+- [DLMF.Confluent.scIncGamma_one_negative_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L488) (proved).
+- [DLMF.Confluent.scIncGamma_two_real_zeros](DLMF/IncompleteGamma/ZerosIntegrals.lean#L536) (proved).
+- [DLMF.Confluent.Real.scIncGammaNegativeZero_strictAnti](DLMF/IncompleteGamma/ZerosIntegrals.lean#L586) (proved).
+- [DLMF.Confluent.scIncGammaDoubleZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L750) (definition).
+- [DLMF.Confluent.scIncGamma_two_parameter_zeros_negative_x](DLMF/IncompleteGamma/ZerosIntegrals.lean#L756) (admitted).
+- [DLMF.Confluent.scIncGamma_two_parameter_zeros_positive_x](DLMF/IncompleteGamma/ZerosIntegrals.lean#L762) (admitted).
+- [DLMF.Confluent.scIncGamma_double_parameter_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L768) (admitted).
+- [DLMF.Confluent.scIncGamma_parameter_zeros_at_x_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L777) (proved).
+- [DLMF.Confluent.scIncGamma_conjugate_zero_trajectories](DLMF/IncompleteGamma/ZerosIntegrals.lean#L801) (admitted).
 - [DLMF.Zeta.hurwitzZetaComplex](DLMF/Zeta/Basic/Hurwitz.lean#L464) (definition).
-- [DLMF.Confluent.hurwitzZetaComplex_mathlib](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1022) (proved).
-- [DLMF.Confluent.Real.gammaDiDonatoF](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1037) (definition).
-- [DLMF.Confluent.Real.gammaDiDonatoH](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1041) (definition).
-- [DLMF.Confluent.Real.gammaDiDonato_gamma](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1045) (proved).
-- [DLMF.Confluent.Real.gammaDiDonato_approximation](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1332) (proved).
+- [DLMF.Confluent.hurwitzZetaComplex_mathlib](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1059) (proved).
+- [DLMF.Confluent.Real.gammaDiDonatoF](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1074) (definition).
+- [DLMF.Confluent.Real.gammaDiDonatoH](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1078) (definition).
+- [DLMF.Confluent.Real.gammaDiDonato_gamma](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1082) (proved).
+- [DLMF.Confluent.Real.gammaDiDonato_approximation](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1402) (proved).
 
 ## Next proof priorities
 

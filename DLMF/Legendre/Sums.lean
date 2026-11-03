@@ -73,7 +73,7 @@ theorem ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 < θ₁) (hs : 
         (Real.cos θ₁)*ferrersQ ν 0 (Real.cos θ₂)) := by
   -- Non-real `ν`: 14.18.1 at `(θ₁, θ₂)` and `(θ₁, π - θ₂)` with 14.9.10; then continuity in `ν`.
   -- The hypothesis `θ₁ < π/2` is not needed.
-  exact SecondKindAddition.ferrersQ_addition ν h1.le h12 hs hr phi
+  exact SecondKindAddition.ferrersQ_addition_of_regular ν h1.le h12 hs hr phi
 
 /-- DLMF 14.18.2: for natural `n`, `θ₁, θ₂ ≥ 0` with `θ₁ + θ₂ < π` and real `φ`, `P_n(cos θ₁ cos θ₂
 + sin θ₁ sin θ₂ cos φ) = Σ_{m=-n}^{n} (-1)^m 𝖯^{-m}_n(cos θ₁) 𝖯^m_n(cos θ₂) cos(mφ)`. -/
@@ -162,17 +162,6 @@ theorem ferrersP_nat_addition (n : ℕ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (
     linear_combination (-2 *
         DLMF.OrthogonalPolynomials.LegendreAddition.coeff n (k+1) (Complex.cos θ₁) (Complex.cos θ₂)
         (Complex.sin θ₁) (Complex.sin θ₂) * Complex.cos (((k:ℂ)+1)*phi)) * hs
-
-/-- At coincident arguments and phi zero, the order-zero P value is understood by its regular
-extension at one. -/
-@[dlmf 14.18.E4]
-theorem associatedP_addition (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (phi : ℝ) :
-    HasSum (fun j : ℕ => let m:=j+1;
-        2*(-1)^m*associatedP ν (-m) (Real.cosh ξ₁)*associatedP ν m (Real.cosh ξ₂)*Real.cos (m*phi))
-        (associatedP ν 0 (Real.cosh ξ₁*Real.cosh ξ₂-Real.sinh ξ₁*Real.sinh ξ₂*Real.cos
-        phi)-associatedP ν 0 (Real.cosh ξ₁)*associatedP ν 0 (Real.cosh ξ₂)) := by
-  -- Fourier expansion in `phi`; coefficients by Carlson's theorem from the integer case.
-  exact AdditionTheorem.associatedP_addition ν h1 h2 phi
 
 /-- DLMF 14.18.5: for `0 < ξ₁ < ξ₂`, real `φ` and `ν` not a negative integer, `Q_ν(cosh ξ₁ cosh ξ₂ -
 sinh ξ₁ sinh ξ₂ cos φ) = P_ν(cosh ξ₁) Q_ν(cosh ξ₂) + 2 Σ_{m≥1} (-1)^m P^{-m}_ν(cosh ξ₁) Q^m_ν(cosh
@@ -934,20 +923,5 @@ theorem legendre_heine_uniform {R₁ R₂ : ℝ} (hR₂ : 2 < R₂) (hR : R₂ <
           ((R₁ - R₂) / 2) := by
         gcongr
     _ = _ := by ring
-
-/-- DLMF 14.28.1: for `Re z₁, Re z₂ > 0` off the cut, real `φ`, and `Z = z₁z₂ -
-(z₁²-1)^{1/2}(z₂²-1)^{1/2} cos φ` (DLMF's condition that `Z` is off the cut is automatic), `P_ν(Z) =
-P_ν(z₁) P_ν(z₂) + 2 Σ_{m≥1} (-1)^m P^m_ν(z₁) P^m_ν(z₂)
-cos(mφ)/(ν-m+1)_{2m}`, as a convergent series. -/
-@[dlmf 14.28.E1]
-theorem associatedP_complex_addition (ν : ℂ) {z₁ z₂ : ℂ} (h1 : 0 < z₁.re) (h2 : 0 < z₂.re)
-    (hz1 : z₁-1 ∈ slitPlane) (hz2 : z₂-1 ∈ slitPlane) (phi : ℝ) :
-    HasSum (fun j : ℕ => let m:=j+1;
-        2*(-1)^m*1/poch (ν-m+1) (2*m)*associatedP ν m z₁*associatedP ν m z₂*Real.cos (m*phi))
-        (associatedP ν 0 (z₁*z₂-exp ((log (z₁-1)+log (z₁+1))/2)*exp
-        ((log (z₂-1)+log (z₂+1))/2)*Real.cos phi)-associatedP ν 0 z₁*associatedP ν 0 z₂) := by
-  -- The combined argument avoids `(-∞, -1]` for every angle, so 14.18.4 continues analytically in
-  -- `z₁` and `z₂`; the hypothesis `harg` is not needed.
-  exact SecondKindAddition.associatedP_complex_addition ν h1 h2 hz1 hz2 phi
 
 end DLMF.Legendre

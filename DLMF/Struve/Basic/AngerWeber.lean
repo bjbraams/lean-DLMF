@@ -184,7 +184,7 @@ theorem hasDerivAt_weberE_shift (ν z : ℂ) :
   ring
 
 /-- Derivative of the phase `νθ - z sin θ` in `θ`. -/
-theorem hasDerivAt_phase (ν z : ℂ) (t : ℝ) :
+theorem hasDerivAt_mul_sub_mul_sin (ν z : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => ν*(t:ℂ)-z*Real.sin t) (ν-z*Real.cos t) t := by
   have h1 : HasDerivAt (fun t : ℝ => (t:ℂ)) 1 t := (hasDerivAt_id t).ofReal_comp
   have h2 : HasDerivAt (fun t : ℝ => ((Real.sin t : ℝ):ℂ)) (Real.cos t) t :=
@@ -198,7 +198,8 @@ lemma angerJ_recurrence_aux (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
   have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt
     (f := fun t : ℝ => sin (ν*(t:ℂ)-z*Real.sin t))
     (f' := fun t : ℝ => cos (ν*(t:ℂ)-z*Real.sin t)*(ν-z*Real.cos t))
-    (a := 0) (b := π) (fun t _ => (Complex.hasDerivAt_sin _).comp t (hasDerivAt_phase ν z t))
+    (a := 0) (b := π) (fun t _ =>
+        (Complex.hasDerivAt_sin _).comp t (hasDerivAt_mul_sub_mul_sin ν z t))
         (intervalIntegrable_zero_pi _ (by fun_prop))
   have e1 : (∫ t in (0:ℝ)..π, cos (ν*(t:ℂ)-z*Real.sin t)*(ν-z*Real.cos t)) =
       ν*(∫ t in (0:ℝ)..π, cos (ν*(t:ℂ)-z*Real.sin t)) -
@@ -237,7 +238,7 @@ lemma weberE_recurrence_aux (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
     (f := fun t : ℝ => -cos (ν*(t:ℂ)-z*Real.sin t))
     (f' := fun t : ℝ => sin (ν*(t:ℂ)-z*Real.sin t)*(ν-z*Real.cos t))
     (a := 0) (b := π) (fun t _ => by
-      convert ((Complex.hasDerivAt_cos _).comp t (hasDerivAt_phase ν z t)).neg using 1
+      convert ((Complex.hasDerivAt_cos _).comp t (hasDerivAt_mul_sub_mul_sin ν z t)).neg using 1
           <;> first | rfl | ring) (intervalIntegrable_zero_pi _ (by fun_prop))
   have e1 : (∫ t in (0:ℝ)..π, sin (ν*(t:ℂ)-z*Real.sin t)*(ν-z*Real.cos t)) =
       ν*(∫ t in (0:ℝ)..π, sin (ν*(t:ℂ)-z*Real.sin t)) -

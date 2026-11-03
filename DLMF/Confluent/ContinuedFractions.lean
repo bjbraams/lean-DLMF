@@ -926,7 +926,7 @@ def whittakerWContinuedFraction (κ μ z : ℂ) : GenContFract ℂ where
   s := Stream'.Seq.ofStream fun k => ⟨whittakerWContFractCoeff κ μ k / z, 1⟩
 
 /-- `x^{s+1/2} = √x · x^s` for `x > 0`. -/
-theorem KummerContinuedFraction.cpow_add_half {x : ℝ} (hx : 0 < x) (s : ℂ) :
+theorem KummerContinuedFraction.ofReal_cpow_add_half {x : ℝ} (hx : 0 < x) (s : ℂ) :
     (x : ℂ) ^ (s + 1 / 2) = (Real.sqrt x : ℂ) * (x : ℂ) ^ s := by
   rw [cpow_add _ _ (ofReal_ne_zero.mpr hx.ne'), Real.sqrt_eq_rpow, ofReal_cpow hx.le]
   push_cast
@@ -1061,7 +1061,7 @@ theorem whittakerM_continued_fraction_limit {κ μ x : ℝ} (hμ : 0 < μ)
         kummerM (a + 1) (b + 1) x := by
     simp only [whittakerM, a, b]
     rw [show (μ : ℂ) + 1 / 2 + 1 / 2 = (μ + 1 / 2) + 1 / 2 by
-        ring, KummerContinuedFraction.cpow_add_half hx]
+        ring, KummerContinuedFraction.ofReal_cpow_add_half hx]
     rw [show (μ : ℂ) + 1 / 2 - (κ - 1 / 2) + 1 / 2 = μ - κ + 1 / 2 + 1 by ring,
       show 1 + 2 * ((μ : ℂ) + 1 / 2) = 1 + 2 * μ + 1 by ring]
     ring
@@ -1121,7 +1121,7 @@ theorem whittakerW_continued_fraction_limit {κ μ x : ℝ} (hx : 0 < x)
     rw [Ne, cpow_eq_zero_iff]; exact fun h => (ofReal_ne_zero.mpr hx.ne') h.1
   simp only [whittakerW, a, b]
   push_cast
-  rw [show (1 : ℂ) / 2 + μ = μ + 1 / 2 by ring, KummerContinuedFraction.cpow_add_half hx]
+  rw [show (1 : ℂ) / 2 + μ = μ + 1 / 2 by ring, KummerContinuedFraction.ofReal_cpow_add_half hx]
   field_simp
 
 end DLMF.Confluent

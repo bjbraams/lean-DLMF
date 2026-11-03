@@ -21,7 +21,7 @@ Chu–Vandermonde sum evaluates all polynomial moments, including the exact squa
 * `pairHalf`: a rescaled Gamma pair for the half-plane Mellin–Barnes transform.
 * `weight`, `scale`, `phase`: the tilted two-Gamma weight and the scale and phase of its
   transform.
-* `moment`: the reversed rising-factorial moment.
+* `reversedMoment`: the reversed rising-factorial moment.
 * `poly`: a terminating Pollaczek sum with its transform-adapted argument.
 
 ## Main results
@@ -293,7 +293,7 @@ def scale (θ : ℝ) : ℂ := (2*Real.cos (θ/2):ℝ)
 /-- The phase in the tilted Gamma transform. -/
 def phase (θ : ℝ) : ℂ := exp (I*θ/2)
 /-- The reversed rising-factorial moment. -/
-def moment (lam θ : ℝ) (j : ℕ) : ℂ :=
+def reversedMoment (lam θ : ℝ) (j : ℕ) : ℂ :=
   2*π*Gamma (2*(lam:ℂ)+j)*exp (-I*θ*j/2) / scale θ^(2*(lam:ℂ)+j)
 /-- The transform scale does not vanish inside the convergence strip. -/
 theorem scale_ne_zero {θ : ℝ} (hθ : |θ| < π) : scale θ ≠ 0 := by
@@ -306,7 +306,7 @@ theorem scale_ne_zero {θ : ℝ} (hθ : |θ| < π) : scale θ ≠ 0 := by
 theorem mixed_moment {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (k j : ℕ) :
     Integrable (fun x : ℝ => poch ((lam:ℂ)+I*x) k * poch ((lam:ℂ)-I*x) j * weight lam θ x) ∧
     (∫ x : ℝ, poch ((lam:ℂ)+I*x) k * poch ((lam:ℂ)-I*x) j * weight lam θ x) =
-      moment lam θ j * poch (2*(lam:ℂ)+j) k * (phase θ / scale θ)^k := by
+      reversedMoment lam θ j * poch (2*(lam:ℂ)+j) k * (phase θ / scale θ)^k := by
   have he (x : ℝ) : poch ((lam:ℂ)+I*x) k * poch ((lam:ℂ)-I*x) j * weight lam θ x =
       Gamma (((lam+k:ℝ):ℂ)+I*x)*Gamma (((lam+j:ℝ):ℂ)-I*x)*exp (θ*x) := by
     dsimp only [weight]
@@ -330,7 +330,7 @@ theorem mixed_moment {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (k j : �
     ring
   rw [hexp, show 2*cos ((θ:ℂ)/2) = scale θ by simp [scale, ofReal_cos, ofReal_div],
     cpow_add _ _ (scale_ne_zero hθ), cpow_natCast]
-  dsimp only [moment, scale]
+  dsimp only [reversedMoment, scale]
   rw [div_pow]
   ring
 /-- A terminating Pollaczek sum with its transform-adapted argument. -/
@@ -348,7 +348,7 @@ theorem integrable_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) 
 /-- Chu--Vandermonde evaluates all reversed moments of a Pollaczek polynomial. -/
 theorem integral_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n j : ℕ) :
     (∫ x : ℝ, poly lam θ n x * poch ((lam:ℂ)-I*x) j * weight lam θ x) =
-      moment lam θ j * poch (-(j:ℂ)) n / poch (2*(lam:ℂ)) n := by
+      reversedMoment lam θ j * poch (-(j:ℂ)) n / poch (2*(lam:ℂ)) n := by
   have hP (k : ℕ) : poch (2*(lam:ℂ)) k ≠ 0 :=
     poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; positivity)) k
   have hr : phase θ ≠ 0 := Complex.exp_ne_zero _
@@ -362,8 +362,8 @@ theorem integral_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n
   rw [he, integral_finsetSum _ (fun k hk => (mixed_moment hlam hθ k j).1.const_mul _)]
   simp_rw [integral_const_mul, (mixed_moment hlam hθ _ j).2]
   have ht (k : ℕ) : (((-1:ℂ)^k*n.choose k/poch (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
-      (moment lam θ j*poch (2*(lam:ℂ)+j) k*(phase θ/scale θ)^k) =
-      moment lam θ j*((-1:ℂ)^k*n.choose k*poch (2*(lam:ℂ)+j) k/poch (2*(lam:ℂ)) k) := by
+      (reversedMoment lam θ j*poch (2*(lam:ℂ)+j) k*(phase θ/scale θ)^k) =
+      reversedMoment lam θ j*((-1:ℂ)^k*n.choose k*poch (2*(lam:ℂ)+j) k/poch (2*(lam:ℂ)) k) := by
     rw [div_pow, div_pow]
     field_simp
   simp_rw [ht]
@@ -376,7 +376,7 @@ theorem poly_same_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n k :
     Integrable (fun x : ℝ => poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) ∧
     (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) =
       ∑ j ∈ Finset.range (k+1), ((-1:ℂ)^k*k.choose j*poch (-2*(lam:ℂ)-k+1) (k-j))*
-        (moment lam θ j*poch (-(j:ℂ)) n/poch (2*(lam:ℂ)) n) := by
+        (reversedMoment lam θ j*poch (-(j:ℂ)) n/poch (2*(lam:ℂ)) n) := by
   let C (j : ℕ) : ℂ := (-1:ℂ)^k*k.choose j*poch (-2*(lam:ℂ)-k+1) (k-j)
   have he : (fun x : ℝ => poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) =
       fun x : ℝ => ∑ j ∈ Finset.range (k+1),
@@ -406,7 +406,7 @@ theorem integral_poly_same_basis_zero {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ
 /-- Only the leading reversed rising factorial contributes in equal degree. -/
 theorem integral_poly_same_basis_self {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
     (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) n*weight lam θ x) =
-      (-1:ℂ)^n*(moment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n) := by
+      (-1:ℂ)^n*(reversedMoment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n) := by
   rw [(poly_same_basis hlam hθ n n).2, Finset.sum_eq_single n]
   · simp [poch_zero]
   · intro j hj hjn
@@ -447,13 +447,14 @@ theorem poly_orthogonal {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) {m n :
 /-- The exact square norm of the unnormalized terminating sum. -/
 theorem poly_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
     (∫ x : ℝ, poly lam θ n x*poly lam θ n x*weight lam θ x) =
-      (scale θ/phase θ)^n*moment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n^2 := by
+      (scale θ/phase θ)^n*reversedMoment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n^2 := by
   rw [integral_poly_mul_poly hlam hθ, Finset.sum_eq_single n]
   · rw [integral_poly_same_basis_self hlam hθ]
     simp only [Nat.choose_self, Nat.cast_one, mul_one]
     have hn : ((-1:ℂ)^n)^2 = 1 := by rw [← pow_mul, mul_comm n 2, pow_mul]; simp
     calc _ = ((-1:ℂ)^n)^2 *
-           ((scale θ/phase θ)^n*moment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n^2) := by ring
+           ((scale θ/phase θ)^n*reversedMoment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ))
+               n^2) := by ring
       _ = _ := by rw [hn, one_mul]
   · intro k hk hkn
     rw [integral_poly_same_basis_zero hlam hθ
@@ -481,7 +482,7 @@ theorem normalized_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n :
     ring
   have hn : ((-1:ℂ)^n)^2 = 1 := by rw [← pow_mul, mul_comm n 2, pow_mul]; simp
   rw [poly_square hlam hθ, mul_pow, hpow, hneg]
-  dsimp only [moment]
+  dsimp only [reversedMoment]
   rw [he, cpow_add _ _ hs, cpow_natCast, div_pow]
   field_simp [hs, hr, hP, hf]
   ring_nf at hn ⊢

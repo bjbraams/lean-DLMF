@@ -19,6 +19,7 @@ public import TauCeti.Analysis.Complex.SlitPlane
 public import Mathlib.Analysis.Calculus.IteratedDeriv.WithinZpow
 public import Mathlib.MeasureTheory.Integral.Asymptotics
 public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
+public import DLMFMathlib.Analysis.Fourier.PoissonKernel
 
 /-!
 # Mellin, Hilbert and Stieltjes transforms (DLMF §1.14(iv)–(vi))
@@ -547,17 +548,155 @@ theorem iteratedDeriv_stieltjesTransform {f : ℝ → ℂ} {s₀ : ℝ} (hs₀ :
   simp_rw [iteratedDeriv_stieltjesKernel]
   simp only [mul_assoc, mul_div_assoc, integral_const_mul]
 
-/-- DLMF 1.14.49 (Stieltjes inversion): if `f` is absolutely integrable on every `[0, R]` and the
-integral 1.14.47 converges (absolutely, at `s = 1`), then for every `σ > 0` at which the one-sided
-limits exist, `(𝒮(f)(-σ - it) - 𝒮(f)(-σ + it))/(2πi) → ½(f(σ+) + f(σ-))` as `t → 0+`. -/
+/-- `f(t)/(s + t)` is integrable on `(0, ∞)` when `ℑs ≠ 0` and `f(t)/(1 + t)` is. -/
+private lemma integrableOn_div_add_of_im_ne_zero {f : ℝ → ℂ}
+    (hconv : IntegrableOn (fun t : ℝ => f t / (1 + t)) (Ioi 0)) {s : ℂ} (hs : s.im ≠ 0) :
+    IntegrableOn (fun t : ℝ => f t / (s + t)) (Ioi 0) := by
+  have hne : ∀ t : ℝ, s + t ≠ 0 := fun t h => hs (by simpa using congrArg Complex.im h)
+  have hc : Continuous fun t : ℝ => (1 + (t : ℂ)) / (s + t) :=
+    Continuous.div (by fun_prop) (by fun_prop) hne
+  have hb := hconv.bdd_mul (c := 1 + ‖1 - s‖ / |s.im|) hc.aestronglyMeasurable
+    (Eventually.of_forall fun t => by
+      have h1 : (1 + (t : ℂ)) / (s + t) = 1 + (1 - s) / (s + t) := by
+        field_simp [hne t]; ring
+      have h2 : |s.im| ≤ ‖s + t‖ := by
+        have := Complex.abs_im_le_norm (s + t)
+        simpa using this
+      rw [h1]
+      refine (norm_add_le _ _).trans ?_
+      rw [norm_one, norm_div]
+      gcongr)
+  refine IntegrableOn.congr_fun hb (fun t ht => ?_) measurableSet_Ioi
+  have h1 : (1 + (t : ℂ)) ≠ 0 := by
+    intro h; have := congrArg Complex.re h; simp at this; linarith [ht.out]
+  field_simp [hne t, h1]
+
+/-- DLMF 1.14.49 (Stieltjes inversion), stronger than DLMF, which also assumes `f` absolutely
+integrable on every `[0, R]`: if `∫₀^∞ |f(t)|/(1 + t) dt < ∞`, then at every `σ > 0` with one-sided
+limits `f(σ±)`, `(𝒮(f)(-σ - it) - 𝒮(f)(-σ + it))/(2πi) → ½(f(σ+) + f(σ-))` as `t → 0+`. -/
 @[dlmf 1.14.E49]
-theorem tendsto_stieltjesTransform_jump {f : ℝ → ℂ} (hf : LocallyIntegrableOn f (Ici 0))
+theorem tendsto_stieltjesTransform_jump' {f : ℝ → ℂ}
     (hconv : IntegrableOn (fun t : ℝ => f t / (1 + t)) (Ioi 0)) {σ : ℝ} (hσ : 0 < σ)
     {fp fm : ℂ} (hp : Tendsto f (𝓝[>] σ) (𝓝 fp)) (hm : Tendsto f (𝓝[<] σ) (𝓝 fm)) :
     Tendsto (fun t : ℝ => (stieltjesTransform f (-σ - t * I) -
         stieltjesTransform f (-σ + t * I)) / (2 * Real.pi * I)) (𝓝[>] 0)
       (𝓝 ((fp + fm) / 2)) := by
-  sorry
+  set h : ℝ → ℂ := (Ioi 0).indicator (fun t => f t / (1 + t)) with hh
+  have hhi : Integrable h := (integrable_indicator_iff measurableSet_Ioi).2 hconv
+  have hσ1 : (1 + (σ : ℂ)) ≠ 0 := by
+    intro h; have := congrArg Complex.re h; simp at this; linarith
+  have hden : Tendsto (fun t : ℝ => 1 + (t : ℂ)) (𝓝 σ) (𝓝 (1 + σ)) :=
+    ((continuous_const.add Complex.continuous_ofReal).tendsto σ)
+  have heq : h =ᶠ[𝓝 σ] fun t => f t / (1 + t) := by
+    filter_upwards [Ioi_mem_nhds hσ] with t ht
+    simp [hh, ht]
+  have hhp : Tendsto h (𝓝[>] σ) (𝓝 (fp / (1 + σ))) :=
+    (hp.div (hden.mono_left nhdsWithin_le_nhds) hσ1).congr'
+      (heq.filter_mono nhdsWithin_le_nhds).symm
+  have hhm : Tendsto h (𝓝[<] σ) (𝓝 (fm / (1 + σ))) :=
+    (hm.div (hden.mono_left nhdsWithin_le_nhds) hσ1).congr'
+      (heq.filter_mono nhdsWithin_le_nhds).symm
+  have hP := Real.tendsto_integral_poissonKernelLine_mul hhi hhp hhm
+  -- the remainder term
+  set Q : ℝ → ℝ → ℝ := fun ε t => (t - σ) * Real.poissonKernelLine σ ε t with hQ
+  have hQb : ∀ ε, 0 < ε → ∀ t, |Q ε t| ≤ 1 / (2 * Real.pi) := by
+    intro ε hε t
+    simp only [hQ]
+    rw [abs_mul, abs_of_nonneg (Real.poissonKernelLine_nonneg σ hε t)]
+    unfold Real.poissonKernelLine
+    have := Real.pi_pos
+    rw [mul_div_assoc', div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith [sq_nonneg (|t - σ| - ε), sq_abs (t - σ), abs_nonneg (t - σ)]
+  have hQc : ∀ ε, 0 < ε → Continuous (Q ε) := fun ε hε =>
+    (continuous_id.sub continuous_const).mul (Real.continuous_poissonKernelLine σ hε)
+  have hR : Tendsto (fun ε : ℝ => ∫ t, (Q ε t : ℂ) * h t) (𝓝[>] 0) (𝓝 0) := by
+    have := tendsto_integral_filter_of_dominated_convergence (μ := volume) (l := 𝓝[>] (0 : ℝ))
+      (F := fun ε t => (Q ε t : ℂ) * h t) (f := fun _ => 0)
+      (fun t => 1 / (2 * Real.pi) * ‖h t‖) ?_ ?_ (hhi.norm.const_mul _) ?_
+    · simpa using this
+    · filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
+      exact ((Complex.continuous_ofReal.comp (hQc ε hε)).aestronglyMeasurable).mul
+        hhi.aestronglyMeasurable
+    · filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
+      refine Eventually.of_forall fun t => ?_
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+      exact mul_le_mul_of_nonneg_right (hQb ε hε t) (norm_nonneg _)
+    · filter_upwards [Measure.ae_ne volume σ] with t ht
+      have hpos : 0 < (t - σ) ^ 2 := by
+        have : t - σ ≠ 0 := sub_ne_zero.2 ht
+        positivity
+      have hc : ContinuousAt (fun ε : ℝ => ((t - σ) * (ε / (Real.pi * ((t - σ) ^ 2 + ε ^ 2))) : ℝ))
+          0 := by
+        refine (continuous_const.mul (continuous_id.div (by fun_prop) fun ε => ?_)).continuousAt
+        have := Real.pi_pos; positivity
+      have h0 := ((Complex.continuous_ofReal.tendsto _).comp hc.tendsto).mul_const (h t)
+      simp only [Function.comp_def, zero_div, mul_zero, ofReal_zero, zero_mul] at h0
+      exact h0.mono_left nhdsWithin_le_nhds
+  -- the identity
+  have hD : ∀ ε : ℝ, 0 < ε → (stieltjesTransform f (-σ - ε * I) -
+      stieltjesTransform f (-σ + ε * I)) / (2 * Real.pi * I) =
+        (1 + σ) * (∫ t, (Real.poissonKernelLine σ ε t : ℂ) * h t) + ∫ t, (Q ε t : ℂ) * h t := by
+    intro ε hε
+    have hbdd : ∀ u : ℝ → ℝ, Continuous u → (∃ C, ∀ t, ‖u t‖ ≤ C) →
+        Integrable fun t => (u t : ℂ) * h t := fun u hu ⟨C, hC⟩ =>
+      hhi.bdd_mul (c := C) (Complex.continuous_ofReal.comp hu).aestronglyMeasurable
+        (Eventually.of_forall fun t => by rw [Complex.norm_real]; exact hC t)
+    have hi1 := hbdd _ (Real.continuous_poissonKernelLine σ hε) ⟨1 / (Real.pi * ε), fun t => by
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.poissonKernelLine_nonneg σ hε t)]
+      exact Real.poissonKernelLine_le σ hε t⟩
+    have hi2 := hbdd _ (hQc ε hε) ⟨1 / (2 * Real.pi), fun t => hQb ε hε t⟩
+    rw [← integral_const_mul, ← integral_add (hi1.const_mul _) hi2]
+    have hpt : ∀ t, (1 + (σ : ℂ)) * ((Real.poissonKernelLine σ ε t : ℂ) * h t) +
+        (Q ε t : ℂ) * h t =
+        (Ioi 0).indicator (fun t => (Real.poissonKernelLine σ ε t : ℂ) * f t) t := by
+      intro t
+      by_cases ht : t ∈ Ioi (0 : ℝ)
+      · have h1 : (1 + (t : ℂ)) ≠ 0 := by
+          intro h; have := congrArg Complex.re h; simp at this; linarith [ht.out]
+        simp only [hh, indicator_of_mem ht, hQ]
+        push_cast
+        field_simp
+        ring
+      · simp [hh, ht]
+    simp_rw [hpt]
+    rw [integral_indicator measurableSet_Ioi]
+    have hne1 : (-(σ : ℂ) - ε * I).im ≠ 0 := by simp; exact hε.ne'
+    have hne2 : (-(σ : ℂ) + ε * I).im ≠ 0 := by simp; exact hε.ne'
+    unfold stieltjesTransform
+    rw [← integral_sub (integrableOn_div_add_of_im_ne_zero hconv hne1)
+      (integrableOn_div_add_of_im_ne_zero hconv hne2), ← integral_div]
+    refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+    have d1 : -(σ : ℂ) - ε * I + t ≠ 0 := fun h => hne1 (by simpa using congrArg Complex.im h)
+    have d2 : -(σ : ℂ) + ε * I + t ≠ 0 := fun h => hne2 (by simpa using congrArg Complex.im h)
+    have hprod : (-(σ : ℂ) - ε * I + t) * (-(σ : ℂ) + ε * I + t) = ((t - σ) ^ 2 + ε ^ 2 : ℝ) := by
+      push_cast; ring_nf; rw [I_sq]; ring
+    have hpos : (((t - σ) ^ 2 + ε ^ 2 : ℝ) : ℂ) ≠ 0 := by
+      rw [ofReal_ne_zero]; positivity
+    have hpi : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
+    simp only [Real.poissonKernelLine]
+    rw [div_sub_div _ _ d1 d2, hprod]
+    push_cast
+    field_simp
+    ring_nf
+  have hlim := (hP.const_mul (1 + (σ : ℂ))).add hR
+  rw [add_zero, show (1 + (σ : ℂ)) * ((fp / (1 + σ) + fm / (1 + σ)) / 2) = (fp + fm) / 2 by
+    field_simp] at hlim
+  refine hlim.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
+  exact (hD ε hε).symm
+
+
+/-- DLMF 1.14.49 (Stieltjes inversion): if `f` is absolutely integrable on every `[0, R]` and the
+integral 1.14.47 converges (absolutely, at `s = 1`), then for every `σ > 0` at which the one-sided
+limits exist, `(𝒮(f)(-σ - it) - 𝒮(f)(-σ + it))/(2πi) → ½(f(σ+) + f(σ-))` as `t → 0+`. -/
+@[dlmf 1.14.E49]
+theorem tendsto_stieltjesTransform_jump {f : ℝ → ℂ} (_hf : LocallyIntegrableOn f (Ici 0))
+    (hconv : IntegrableOn (fun t : ℝ => f t / (1 + t)) (Ioi 0)) {σ : ℝ} (hσ : 0 < σ)
+    {fp fm : ℂ} (hp : Tendsto f (𝓝[>] σ) (𝓝 fp)) (hm : Tendsto f (𝓝[<] σ) (𝓝 fm)) :
+    Tendsto (fun t : ℝ => (stieltjesTransform f (-σ - t * I) -
+        stieltjesTransform f (-σ + t * I)) / (2 * Real.pi * I)) (𝓝[>] 0)
+      (𝓝 ((fp + fm) / 2)) :=
+  tendsto_stieltjesTransform_jump' hconv hσ hp hm
 
 /-- DLMF 1.14.50: if `f` is locally integrable on `[0, ∞)` and the integral 1.14.47 converges
 (absolutely, at `s = 1`), then `𝒮(f)(s) = 𝓛(𝓛(f))(s)` for `ℜs > 0`, where the inner transform

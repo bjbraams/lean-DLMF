@@ -17,6 +17,7 @@ public import DLMF.Mathieu.Zeros
 public import DLMF.Mathieu.IntegralEquations
 public import DLMF.Mathieu.Expansions
 public import DLMF.Mathieu.Noninteger.Basic
+public import DLMF.Mathieu.Noninteger.CoefficientPaths
 public import DLMF.Mathieu.Noninteger.ExpSeries
 public import DLMF.Mathieu.Noninteger.RealContinuation
 public import DLMF.Mathieu.Noninteger.Properties
@@ -42,6 +43,7 @@ public import DLMF.Mathieu.Modified.Wronskians
 public import DLMF.Mathieu.SmallQJacobi
 public import DLMF.Mathieu.SmallQSpectrum
 public import DLMF.Mathieu.SmallQGeneral
+public import DLMF.Mathieu.SmallQFourierCoefficients
 public import DLMF.Mathieu.SmallQVector
 public import DLMF.Mathieu.SmallQCeSe
 public import DLMF.Mathieu.SmallQCeSeGeneral

@@ -602,7 +602,7 @@ theorem complex_antiderivative_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) :
   have dS := (Complex.hasDerivAt_sqrt hq).comp z hp
   have hv : (1+z^2)^(-1/2:ℂ) = (Complex.sqrt (1+z^2))⁻¹ := by
     rw [Complex.sqrt, show (-1/2:ℂ) = -(2⁻¹) by norm_num, Complex.cpow_neg]
-  have hd := ((hasDerivAt_id z).mul (Hyperbolic.hasDerivAt_arcsinh hz)).sub dS
+  have hd := ((hasDerivAt_id z).mul (hasDerivAt_arcsinh hz)).sub dS
   rw [hv] at hd
   convert hd using 1
   · funext w; simp [Function.comp_def]
@@ -652,7 +652,7 @@ theorem complex_antiderivative_arctanh {z : ℂ} (hz : z∈arctanhDomain) :
   have hq0 : 1-z^2 ≠ 0 := Complex.slitPlane_ne_zero hq
   have dL := ((Complex.hasDerivAt_log hq).comp z
       (((hasDerivAt_id z).pow 2).const_sub 1)).div_const 2
-  have hd := ((hasDerivAt_id z).mul (Hyperbolic.hasDerivAt_arctanh hz)).add dL
+  have hd := ((hasDerivAt_id z).mul (hasDerivAt_arctanh hz)).add dL
   convert hd using 1
   · funext w; simp [Function.comp_def]
   · simp only [id_eq, Pi.pow_apply]
@@ -832,7 +832,7 @@ theorem complex_antiderivatives_reciprocal_inverse {z : ℂ}
   have hzs : z ∈ arcsinhDomain := Or.inl hre.ne'
   constructor
   · have hd := ((hasDerivAt_id z).mul (hasDerivAt_arccsch_signed hs hre.ne')).add
-      (Hyperbolic.hasDerivAt_arcsinh hzs)
+      (hasDerivAt_arcsinh hzs)
     have hq : Complex.sqrt (1+z^2) ≠ 0 := by
       intro h
       have hsq := Trigonometric.complexSqrt_sq (1+z^2)

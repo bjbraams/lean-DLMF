@@ -114,7 +114,7 @@ theorem KummerGaussTransform.subordination {ζ t : ℝ} (hζ : 0 < ζ) (ht : 0 <
   field_simp
 
 /-- `(1+x)^m ≤ 2^m (1 + x^m)` for `x, m ≥ 0`. -/
-theorem KummerGaussTransform.one_add_rpow_le {x m : ℝ} (hx : 0 ≤ x) (hm : 0 ≤ m) :
+theorem KummerGaussTransform.one_add_rpow_le_two_rpow_mul {x m : ℝ} (hx : 0 ≤ x) (hm : 0 ≤ m) :
     (1 + x) ^ m ≤ 2 ^ m * (1 + x ^ m) := by
   rcases le_total x 1 with h | h
   · calc (1 + x) ^ m ≤ 2 ^ m := Real.rpow_le_rpow (by linarith) (by linarith) hm
@@ -145,7 +145,8 @@ theorem KummerGaussTransform.gauss_bound (a b : ℂ) : ∃ C m : ℝ, 0 ≤ m �
   have h2 : (1 + t ^ 2) ^ (-γ) ≤ 2 ^ |γ| * (1 + t ^ (2 * |γ|)) := by
     calc (1 + t ^ 2) ^ (-γ) ≤ (1 + t ^ 2) ^ |γ| :=
           Real.rpow_le_rpow_of_exponent_le (by linarith) (neg_le_abs γ)
-      _ ≤ 2 ^ |γ| * (1 + (t ^ 2) ^ |γ|) := KummerGaussTransform.one_add_rpow_le hs (abs_nonneg γ)
+      _ ≤ 2 ^ |γ| * (1 + (t ^ 2) ^ |γ|) :=
+          KummerGaussTransform.one_add_rpow_le_two_rpow_mul hs (abs_nonneg γ)
       _ = 2 ^ |γ| * (1 + t ^ (2 * |γ|)) := by
           rw [← Real.rpow_natCast, ← Real.rpow_mul ht.le]; norm_num
   have htp : 0 < t ^ (2 * b.re - 2) := Real.rpow_pos_of_pos ht _

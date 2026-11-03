@@ -31,8 +31,9 @@ functions of DLMF 14.7.19.
 
 ## Main results
 
-* `GeneratingSeries.legendreP_nat`: the terminating hypergeometric function `P_n(z)` equals the
-  Legendre polynomial for every `z ∈ ℂ`, including the cut `(-∞,-1]` of the continuation.
+* `GeneratingSeries.legendreP_nat_eq_legendrePolyP`: the terminating hypergeometric function
+  `P_n(z)` equals the Legendre polynomial for every `z ∈ ℂ`, including the cut `(-∞,-1]` of the
+  continuation.
 * `GeneratingSeries.generatingSeries_ode`, `GeneratingSeries.quadratic_generatingSeries_sq`:
   `(1-2zX+X²) G' = (z-X) G` and `(1-2zX+X²) G² = 1`.
 * `GeneratingSeries.product_eq`: the coefficients of `F G` are the polynomials `R_n = W_{n-1}`
@@ -143,7 +144,7 @@ theorem GeneratingSeries.poly_ext {p q : Polynomial ℂ}
   rw [Polynomial.eq_of_infinite_eval_eq p q (GeneratingSeries.infinite.mono fun w hw => h w hw)]
 
 /-- The three-term recurrence for `P_n(z)` holds for every `z ∈ ℂ`. -/
-theorem GeneratingSeries.legendreP_recurrence (n : ℕ) (z : ℂ) :
+theorem GeneratingSeries.legendreP_nat_recurrence (n : ℕ) (z : ℂ) :
     ((n:ℂ)+2) * legendreP ((n+2:ℕ):ℂ) z =
       (2*n+3) * z * legendreP ((n+1:ℕ):ℂ) z - ((n:ℂ)+1) * legendreP (n:ℂ) z := by
   obtain ⟨q0, h0⟩ := GeneratingSeries.legendreP_poly n
@@ -152,7 +153,7 @@ theorem GeneratingSeries.legendreP_recurrence (n : ℕ) (z : ℂ) :
   have key := GeneratingSeries.poly_ext (p := Polynomial.C ((n:ℂ)+2) * q2)
     (q := Polynomial.C (2*(n:ℂ)+3) * Polynomial.X * q1 - Polynomial.C ((n:ℂ)+1) * q0)
     (fun w hw => by
-      have e := legendreP_recurrence ((n:ℂ)+1) hw
+      have e := DLMF.Legendre.legendreP_recurrence ((n:ℂ)+1) hw
       simp only [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_sub, Polynomial.eval_X,
         ← h0, ← h1, ← h2]
       push_cast
@@ -166,27 +167,29 @@ theorem GeneratingSeries.legendreP_recurrence (n : ℕ) (z : ℂ) :
 theorem GeneratingSeries.legendreP_zero (z : ℂ) : legendreP ((0:ℕ):ℂ) z = 1 := by
   obtain ⟨q, h⟩ := GeneratingSeries.legendreP_poly 0
   have key := GeneratingSeries.poly_ext (p := q) (q := 1) (fun w hw => by
-    rw [← h, legendreP_nat 0 hw]; simp [DLMF.OrthogonalPolynomials.legendrePolyP_zero]) z
+    rw [← h, DLMF.Legendre.legendreP_nat 0 hw];
+        simp [DLMF.OrthogonalPolynomials.legendrePolyP_zero]) z
   rw [h, key]; simp
 
 /-- `P_1(z) = z` for every `z`. -/
-theorem GeneratingSeries.legendreP_one (z : ℂ) : legendreP ((1:ℕ):ℂ) z = z := by
+theorem GeneratingSeries.legendreP_one_left (z : ℂ) : legendreP ((1:ℕ):ℂ) z = z := by
   obtain ⟨q, h⟩ := GeneratingSeries.legendreP_poly 1
   have key := GeneratingSeries.poly_ext (p := q) (q := Polynomial.X) (fun w hw => by
-    rw [← h, legendreP_nat 1 hw]; simp [DLMF.OrthogonalPolynomials.legendrePolyP_one]) z
+    rw [← h, DLMF.Legendre.legendreP_nat 1 hw];
+        simp [DLMF.OrthogonalPolynomials.legendrePolyP_one]) z
   rw [h, key]; simp
 
 /-- `P_n(z)` equals the Legendre polynomial for every `z ∈ ℂ` (the hypergeometric
 representation terminates). -/
-theorem GeneratingSeries.legendreP_nat (n : ℕ) (z : ℂ) :
+theorem GeneratingSeries.legendreP_nat_eq_legendrePolyP (n : ℕ) (z : ℂ) :
     legendreP n z = DLMF.OrthogonalPolynomials.legendrePolyP n z := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     match n, ih with
     | 0, _ => rw [GeneratingSeries.legendreP_zero, DLMF.OrthogonalPolynomials.legendrePolyP_zero]
-    | 1, _ => rw [GeneratingSeries.legendreP_one, DLMF.OrthogonalPolynomials.legendrePolyP_one]
+    | 1, _ => rw [GeneratingSeries.legendreP_one_left, DLMF.OrthogonalPolynomials.legendrePolyP_one]
     | n+2, ih =>
-      have e1 := GeneratingSeries.legendreP_recurrence n z
+      have e1 := GeneratingSeries.legendreP_nat_recurrence n z
       have e2 := DLMF.OrthogonalPolynomials.legendrePolyP_recurrence n z
       rw [ih n (by omega), ih (n+1) (by omega)] at e1
       have hn : (n:ℂ) + 2 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (n+1)
@@ -248,12 +251,12 @@ theorem GeneratingSeries.legendreSeq_zero (z : ℂ) : GeneratingSeries.legendreS
     GeneratingSeries.legendreP_zero z
 /-- `P_1(z) = z`. -/
 theorem GeneratingSeries.legendreSeq_one (z : ℂ) : GeneratingSeries.legendreSeq z 1 = z :=
-    GeneratingSeries.legendreP_one z
+    GeneratingSeries.legendreP_one_left z
 /-- Bonnet's recurrence `(n+2) P_{n+2}(z) = (2n+3) z P_{n+1}(z) - (n+1) P_n(z)`. -/
 theorem GeneratingSeries.legendreSeq_recurrence (z : ℂ) (n : ℕ) :
     ((n:ℂ)+2) * GeneratingSeries.legendreSeq z (n+2) = (2*n+3) * z *
         GeneratingSeries.legendreSeq z (n+1) - ((n:ℂ)+1) * GeneratingSeries.legendreSeq z n :=
-  GeneratingSeries.legendreP_recurrence n z
+  GeneratingSeries.legendreP_nat_recurrence n z
 
 /-- The generating series `∑ P_n(z) Xⁿ`. -/
 noncomputable def GeneratingSeries.generatingSeries (z : ℂ) : ℂ⟦X⟧ :=

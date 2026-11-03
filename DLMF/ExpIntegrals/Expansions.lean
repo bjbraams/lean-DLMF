@@ -60,13 +60,6 @@ theorem Real.hasSum_expIntEi {x : ℝ} (hx : 0 < x) :
   rw [ht]
   ring
 
-/-- The series with terms `(fun k : ℕ => z^k/(k.factorial : ℂ)*digamma (k+1))` converges to `(exp
-z*(genExpIntE 1 z+log z))`. -/
-@[dlmf 6.6.E3]
-theorem expIntE1_digamma_series {z : ℂ} (hz : z ≠ 0) :
-    HasSum (fun k : ℕ => z^k/(k.factorial : ℂ)*digamma (k+1)) (exp z*(genExpIntE 1 z+log z)) :=
-  GeneralizedExpIntegral.expIntE1_digamma_series hz
-
 /-- The series with terms `(fun k : ℕ => (-z)^(k+1)/((k+1).factorial*(k+1 : ℂ)))` converges to
 `(-genExpIntE 1 z - Real.eulerMascheroniConstant - log z)`. -/
 @[dlmf 6.6.E2]

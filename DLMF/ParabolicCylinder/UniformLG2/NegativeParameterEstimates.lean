@@ -687,7 +687,7 @@ theorem pcfU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
       exact_mod_cast (mul_pos (CylinderLiouvilleGreen.amplitude_pos ht1) (Real.exp_pos _)).ne'
     simp only
     rw [CylinderLiouvilleGreen.denominator_eq ht1, CylinderUniformExpansion.sum_temme_eq,
-        CylinderLiouvilleGreen.norm_zpow hμ0, hU]
+        CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0, hU]
     have heq : pcfH μ / ((1:ℝ):ℂ) *
         ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) *
         (CylinderUniformExpansion.truncSeries CylinderUniformExpansion.temmeCoeff N (μ^2) t +
@@ -708,8 +708,8 @@ theorem pcfU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
     have hb : (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(1:ℕ):ℤ))) =O[pcfUniformFilter (Ici (1+δ))]
         (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(0:ℕ):ℤ))) := by
       refine IsBigO.of_bound 1 (CylinderLiouvilleGreen.eventually_uniform 1 fun μ hμ t _ => ?_)
-      rw [CylinderLiouvilleGreen.norm_zpow (by linarith),
-          CylinderLiouvilleGreen.norm_zpow (by linarith)]
+      rw [CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul (by linarith),
+          CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul (by linarith)]
       simp only [pow_zero, inv_one, one_mul, pow_one]
       exact inv_le_one_of_one_le₀ (by nlinarith)
     have hc : (fun _ : ℝ × ℝ => (1:ℂ)) =O[pcfUniformFilter (Ici (1+δ))]

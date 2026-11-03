@@ -277,8 +277,8 @@ lemma CylinderUniformExpansion.expansion_of_one_le {F : ℝ → ℝ → ℂ} {Cf
     have hb : (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(1:ℕ):ℤ))) =O[pcfUniformFilter S]
         (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*(0:ℕ):ℤ))) := by
       refine IsBigO.of_bound 1 (CylinderLiouvilleGreen.eventually_uniform 1 fun μ hμ t _ => ?_)
-      rw [CylinderLiouvilleGreen.norm_zpow (by linarith),
-          CylinderLiouvilleGreen.norm_zpow (by linarith)]
+      rw [CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul (by linarith),
+          CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul (by linarith)]
       simp only [pow_zero, inv_one, one_mul, pow_one]
       exact inv_le_one_of_one_le₀ (by nlinarith)
     have hc : (fun _ : ℝ × ℝ => (1:ℂ)) =O[pcfUniformFilter S]
@@ -366,7 +366,7 @@ theorem pcf_positive_parameter_uniform :
       obtain ⟨hΦl, -⟩ := hΦb μ ((le_max_left _ _).trans hμ)
       have hΦ0 : (Φ (μ^2) : ℂ) ≠ 0 := by exact_mod_cast (by linarith : (0:ℝ) < Φ (μ^2)).ne'
       rw [hgH μ hμ0 hΦ0, CylinderUniformExpansion.sum_barLimitCoeff_eq,
-          CylinderLiouvilleGreen.norm_zpow hμ0]
+          CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0]
       set L := CylinderUniformExpansion.truncSeries
           (fun s _ => CylinderUniformExpansion.barLimitCoeff s) M (μ^2) 0
       have heq : 1 / (Φ (μ^2) : ℂ) * (L : ℂ) - 1 = (((L - Φ (μ^2)) / Φ (μ^2) : ℝ) : ℂ) := by
@@ -424,7 +424,7 @@ theorem pcf_positive_parameter_uniform :
       exact_mod_cast (mul_pos (CylinderUniformExpansion.posAmplitude_pos t) (Real.exp_pos _)).ne'
     simp only
     rw [CylinderUniformExpansion.denominator_eq, CylinderUniformExpansion.sum_UBar_eq,
-        CylinderLiouvilleGreen.norm_zpow hμ0, hU]
+        CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0, hU]
     have hF : (((μ * Real.sqrt 2 * CylinderLiouvilleGreen.normalizer μ)⁻¹ : ℝ) : ℂ) / (L : ℂ) *
         ((CylinderUniformExpansion.posAmplitude t * Real.exp (-(μ^2 * pcfXiBar t)) *
             (S + e) : ℝ) : ℂ) /
@@ -511,7 +511,7 @@ theorem pcf_positive_parameter_uniform :
     have h4 : (Ex : ℂ) ≠ 0 := by exact_mod_cast (Real.exp_pos _).ne'
     simp only
     rw [CylinderUniformExpansion.denominator'_eq, CylinderUniformExpansion.sum_VBar_eq,
-        CylinderLiouvilleGreen.norm_zpow hμ0]
+        CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0]
     have hU'' : pcfUDeriv ((μ:ℂ)^2/2) ((μ:ℂ)*t*Real.sqrt 2) = (H:ℂ)/(L:ℂ) *
         ((Ex * ((a1 - μ^2 * a⁻¹) * (Sa + e) + a * (Sd + e')) : ℝ) : ℂ) / ((μ:ℂ)*Real.sqrt 2) := by
       rw [← hU']; field_simp
@@ -685,7 +685,7 @@ lemma CylinderUniformExpansion.neg_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN 
     (fun s _ t ht => CylinderLiouvilleGreen.hasDerivAt_coeff s (hc.trans ht))
     (fun s _ t ht => CylinderLiouvilleGreen.hasDerivAt_coeffDeriv s (hc.trans ht))
     (fun s _ => (CylinderLiouvilleGreen.continuousOn_coeffDeriv2 s).mono fun t ht => hc.trans ht)
-    CylinderLiouvilleGreen.coeff_zero
+    CylinderLiouvilleGreen.coeff_zero_eq_one
     (fun t _ => by simp [CylinderLiouvilleGreen.coeffDeriv, pcfOlverPair])
     (fun s _ t ht => CylinderLiouvilleGreen.recursion s (hc.trans ht))
     (fun c' hc' => CylinderLiouvilleGreen.integrableOn_coeffDeriv N (hc.trans hc'))
@@ -710,7 +710,7 @@ lemma CylinderUniformExpansion.neg_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN 
   have hu1 : 1 ≤ μ^2 := by nlinarith
   have hser := CylinderUniformExpansion.abs_sum_sub_one_le hN
       (f := fun s => CylinderLiouvilleGreen.coeff s t)
-    (CylinderLiouvilleGreen.coeff_zero t) (fun s _ => hKA s t (by linarith)) hu1
+    (CylinderLiouvilleGreen.coeff_zero_eq_one t) (fun s _ => hKA s t (by linarith)) hu1
   refine hser.trans ?_
   rw [div_le_iff₀ (by positivity)]
   have : μ₀^2 ≤ μ^2 := by nlinarith
@@ -783,7 +783,7 @@ lemma CylinderUniformExpansion.neg_truncSeries_B (M : ℕ) (u t : ℝ) (hu : u �
   induction M with
   | zero =>
     simp [CylinderUniformExpansion.truncSeries, CylinderUniformExpansion.negDerivCoeff,
-        CylinderLiouvilleGreen.coeff_zero]
+        CylinderLiouvilleGreen.coeff_zero_eq_one]
   | succ M ih =>
     simp only [CylinderUniformExpansion.truncSeries] at ih ⊢
     rw [Finset.sum_range_succ, ih, Finset.sum_range_succ _ (M+1), Finset.sum_range_succ _ M,
@@ -897,7 +897,7 @@ lemma CylinderUniformExpansion.neg_U_expansion {Φ : ℝ → ℝ}
   have hAe : ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
     exact_mod_cast (mul_pos (CylinderLiouvilleGreen.amplitude_pos ht1) (Real.exp_pos _)).ne'
   rw [CylinderLiouvilleGreen.denominator_eq ht1, CylinderLiouvilleGreen.sum_olverA_eq N μ ht1,
-      CylinderLiouvilleGreen.norm_zpow hμ0]
+      CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0]
   set X := pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) /
     (pcfH μ * ((CylinderLiouvilleGreen.amplitude t *
         Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) with hXdef
@@ -1002,7 +1002,8 @@ lemma CylinderUniformExpansion.neg_UDeriv_expansion {Φ : ℝ → ℝ}
   have hs2 : (Real.sqrt 2 : ℂ) ≠ 0 := by
     exact_mod_cast (Real.sqrt_pos.2 (by norm_num : (0:ℝ) < 2)).ne'
   rw [CylinderUniformExpansion.neg_denominator'_eq μ ht1,
-      CylinderUniformExpansion.neg_sum_olverB_eq _ μ ht1, CylinderLiouvilleGreen.norm_zpow hμ0,
+      CylinderUniformExpansion.neg_sum_olverB_eq _ μ ht1,
+          CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0,
     CylinderLiouvilleGreen.pcfH_eq hμ0]
   rw [CylinderLiouvilleGreen.pcfH_eq hμ0] at hU'
   have hU'' : pcfUDeriv (-(μ:ℂ)^2/2) ((μ:ℂ)*t*Real.sqrt 2) = (H:ℂ)/(L:ℂ) *
@@ -1169,7 +1170,8 @@ theorem pcf_negative_parameter_uniform_U_UDeriv :
     have hh0 : pcfH μ ≠ 0 := by rw [CylinderLiouvilleGreen.pcfH_eq hμ0];
                                 exact_mod_cast (CylinderLiouvilleGreen.normalizer_pos hμ0).ne'
     have hΦ0 : (Φ (μ^2) : ℂ) ≠ 0 := by exact_mod_cast (by linarith : (0:ℝ) < Φ (μ^2)).ne'
-    rw [CylinderLiouvilleGreen.sum_limitCoeff_eq, CylinderLiouvilleGreen.norm_zpow hμ0]
+    rw [CylinderLiouvilleGreen.sum_limitCoeff_eq,
+        CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0]
     have heq : pcfH μ / (Φ (μ^2) : ℂ) / pcfH μ *
         (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) - 1 =
         (((CylinderLiouvilleGreen.limitCoeffSum N (μ^2) - Φ (μ^2)) / Φ (μ^2) : ℝ) : ℂ) := by

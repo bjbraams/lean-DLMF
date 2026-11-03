@@ -24,7 +24,7 @@ integer case:
   the joint holomorphy of the Gauss function), so the identity extends to all regular degrees, real
   ones included, by `eq_zero_of_im_ne_zero` (`SecondKindAddition.coeff_eq`);
 * the cosine expansion `AdditionTheorem.hasSum_cos` of the `C²` function `φ ↦ 𝖰_ν(…)` then gives
-  14.18.3 (`SecondKindAddition.ferrersQ_addition`).
+  14.18.3 (`SecondKindAddition.ferrersQ_addition_of_regular`).
 
 The complex addition theorem 14.28.1 for `Re z₁, Re z₂ > 0`, `z₁, z₂ ∉ (0, 1]`:
 
@@ -38,7 +38,7 @@ The complex addition theorem 14.28.1 for `Re z₁, Re z₂ > 0`, `z₁, z₂ ∉
   of `D` carries 14.18.4 (`AdditionTheorem.hyperbolic_coeff_eq`, at `zᵢ = cosh ξᵢ`) to all of
   `D × D` (`SecondKindAddition.complex_coeff_eq`), with `P^m_ν = (ν-m+1)_{2m} P^{-m}_ν` for every
   degree (`SecondKindAddition.associatedP_nat_eq`);
-* `SecondKindAddition.associatedP_complex_addition`: 14.28.1 for every angle.
+* `associatedP_complex_addition`: 14.28.1 for every angle.
 
 ## Main definitions
 
@@ -51,7 +51,7 @@ The complex addition theorem 14.28.1 for `Re z₁, Re z₂ > 0`, `z₁, z₂ ∉
 
 * `SecondKindAddition.coeff_eq_of_im`, `SecondKindAddition.coeff_eq`: the Fourier coefficients of
   `φ ↦ 𝖰_ν(cos θ₁ cos θ₂ + sin θ₁ sin θ₂ cos φ)` for non-real and for all regular `ν`.
-* `SecondKindAddition.ferrersQ_addition`: the addition theorem for `𝖰_ν` (DLMF 14.18.3).
+* `SecondKindAddition.ferrersQ_addition_of_regular`: the addition theorem for `𝖰_ν` (DLMF 14.18.3).
 * `SecondKindAddition.one_add_mem_slitPlane`, `SecondKindAddition.combinedArg_mem`: the combined
   argument avoids the cut.
 * `SecondKindAddition.extend`: the identity theorem on `D` from the points `cosh ξ`, `ξ > 0`.
@@ -59,7 +59,7 @@ The complex addition theorem 14.28.1 for `Re z₁, Re z₂ > 0`, `z₁, z₂ ∉
   degree.
 * `SecondKindAddition.complex_coeff_eq`: the Fourier coefficients of the complex addition theorem on
   `D × D`.
-* `SecondKindAddition.associatedP_complex_addition`: the addition theorem for `P_ν` in the complex
+* `associatedP_complex_addition`: the addition theorem for `P_ν` in the complex
   plane (DLMF 14.28.1).
 -/
 
@@ -153,7 +153,6 @@ theorem SecondKindAddition.contDiff_ferrersQ (ν : ℂ) {y : ℝ → ℝ} (hy : 
       ((contDiff_const.mul (SecondKindAddition.contDiff_gaussHG_sq _ _ _ hy hy1)).add
     (contDiff_const.mul (hY.mul (SecondKindAddition.contDiff_gaussHG_sq _ _ _ hy hy1))))
 
-
 /-- Quadratic Gauss functions are bounded on `closedBall ν₀ 1 × [a, b]`, `-1 < a`, `b < 1`. -/
 theorem SecondKindAddition.gaussHG_sq_bound {A B : ℂ → ℂ} (hA : Continuous A)
     (hB : Continuous B) (c ν₀ : ℂ)
@@ -244,7 +243,6 @@ theorem SecondKindAddition.continuousAt_coeff {ν₀ : ℂ} (hr : LegendreQRegul
   · refine ae_of_all _ fun t _ => continuousAt_const.mul (continuousAt_ferrersQ_degree hr ?_)
     exact ⟨by linarith [(hab t).1], by linarith [(hab t).2]⟩
 
-
 /-- The argument of the addition theorem lies in `[cos (θ₁ + θ₂), cos (θ₂ - θ₁)] ⊂ (-1, 1)`. -/
 theorem SecondKindAddition.ferrersArg_mem {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ₂)
     (hs : θ₁ + θ₂ < π) (t : ℝ) :
@@ -318,7 +316,6 @@ theorem SecondKindAddition.coeff_eq_of_im {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁)
   linear_combination (-k * u ^ 2 * P1) * hc + (-k * cos (ν * π) * u * P1 * Pm + u * P1 * Q) * hsq +
     (u ^ 3 * P1 * Q) * hk
 
-
 /-- `AdditionTheorem.ferrersArg θ₁ θ₂` is smooth in the angle. -/
 theorem SecondKindAddition.ferrersArg_contDiff (θ₁ θ₂ : ℝ) : ContDiff ℝ 2
     (AdditionTheorem.ferrersArg θ₁ θ₂) := by
@@ -353,7 +350,8 @@ theorem SecondKindAddition.coeff_eq {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 
   exact sub_eq_zero.mp this
 
 /-- **Addition theorem for Ferrers functions of the second kind** (DLMF 14.18.3). -/
-theorem SecondKindAddition.ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ₂)
+theorem SecondKindAddition.ferrersQ_addition_of_regular (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁)
+    (h12 : θ₁ < θ₂)
     (hs : θ₁ + θ₂ < π) (hr : LegendreQRegular ν 0) (phi : ℝ) :
     HasSum (fun j : ℕ => let m := j + 1; 2 * (-1) ^ m * ferrersP ν (-m) (Real.cos θ₁) *
       ferrersQ ν m (Real.cos θ₂) * Real.cos (m * phi))
@@ -475,7 +473,6 @@ theorem SecondKindAddition.one_add_mem_slitPlane {z₁ z₂ s₁ s₂ : ℂ} (hz
   have h3 := mul_pos hpos hXcY
   nlinarith [mul_nonpos_of_nonpos_of_nonneg hr0 hXY.le]
 
-
 /-- The square-root branch `(z²-1)^{1/2} = exp ((log (z-1) + log (z+1))/2)` of DLMF 14.28.1. -/
 def SecondKindAddition.sqrtSqSubOne (z : ℂ) : ℂ := exp ((log (z - 1) + log (z + 1)) / 2)
 
@@ -571,7 +568,6 @@ theorem SecondKindAddition.combinedArg_cosh {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁)
   simp only [SecondKindAddition.combinedArg, AdditionTheorem.hyperbolicArg,
       SecondKindAddition.sqrtSqSubOne_cosh h1, SecondKindAddition.sqrtSqSubOne_cosh h2]
   push_cast; ring
-
 
 /-- The square-root branch `SecondKindAddition.sqrtSqSubOne` is continuous on
 `SecondKindAddition.domain`. -/
@@ -734,7 +730,6 @@ theorem SecondKindAddition.extend {F G : ℂ → ℂ}
   filter_upwards [nhdsWithin_le_nhds (Ioi_mem_nhds zero_lt_one)] with ξ hξ
   exact h ξ hξ
 
-
 /-- `P^m_ν(z) = (ν-m+1)_{2m} P^{-m}_ν(z)` for every complex degree (14.9.13-type relation without
 exceptional degrees, by continuation in `ν`). -/
 theorem SecondKindAddition.associatedP_nat_eq (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane)
@@ -832,7 +827,6 @@ theorem SecondKindAddition.complex_coeff_eq (ν : ℂ) {z₁ z₂ : ℂ}
   rw [hsym]
   exact this
 
-
 /-- `t ↦ P_ν(SecondKindAddition.combinedArg z₁ z₂ t)` is `C²` on `ℝ`. -/
 theorem SecondKindAddition.combinedArg_contDiff (ν : ℂ) {z₁ z₂ : ℂ}
     (hz₁ : z₁ ∈ SecondKindAddition.domain) (hz₂ : z₂ ∈ SecondKindAddition.domain) :
@@ -852,16 +846,17 @@ theorem SecondKindAddition.combinedArg_contDiff (ν : ℂ) {z₁ z₂ : ℂ}
   funext t
   simp only [Function.comp, ExteriorGreen.associatedP_eq]
 
-/-- **Addition theorem for `P_ν` in the complex plane** (DLMF 14.28.1), for `Re z₁, Re z₂ > 0`,
-`z₁, z₂ ∉ (0, 1]`, every complex degree and every angle. -/
-theorem SecondKindAddition.associatedP_complex_addition (ν : ℂ) {z₁ z₂ : ℂ} (h1 : 0 < z₁.re)
-    (h2 : 0 < z₂.re)
-    (hz1 : z₁ - 1 ∈ slitPlane) (hz2 : z₂ - 1 ∈ slitPlane) (phi : ℝ) :
-    HasSum (fun j : ℕ => let m := j + 1; 2 * (-1) ^ m * 1 / poch (ν - m + 1) (2 * m) *
-      associatedP ν m z₁ * associatedP ν m z₂ * Real.cos (m * phi))
-      (associatedP ν 0 (z₁ * z₂ - exp ((log (z₁ - 1) + log (z₁ + 1)) / 2) *
-        exp ((log (z₂ - 1) + log (z₂ + 1)) / 2) * Real.cos phi) -
-        associatedP ν 0 z₁ * associatedP ν 0 z₂) := by
+/-- DLMF 14.28.1: for `Re z₁, Re z₂ > 0` off the cut, real `φ`, and `Z = z₁z₂ -
+(z₁²-1)^{1/2}(z₂²-1)^{1/2} cos φ` (DLMF's condition that `Z` is off the cut is automatic), `P_ν(Z) =
+P_ν(z₁) P_ν(z₂) + 2 Σ_{m≥1} (-1)^m P^m_ν(z₁) P^m_ν(z₂)
+cos(mφ)/(ν-m+1)_{2m}`, as a convergent series. -/
+@[dlmf 14.28.E1]
+theorem associatedP_complex_addition (ν : ℂ) {z₁ z₂ : ℂ} (h1 : 0 < z₁.re) (h2 : 0 < z₂.re)
+    (hz1 : z₁-1 ∈ slitPlane) (hz2 : z₂-1 ∈ slitPlane) (phi : ℝ) :
+    HasSum (fun j : ℕ => let m:=j+1;
+        2*(-1)^m*1/poch (ν-m+1) (2*m)*associatedP ν m z₁*associatedP ν m z₂*Real.cos (m*phi))
+        (associatedP ν 0 (z₁*z₂-exp ((log (z₁-1)+log (z₁+1))/2)*exp
+        ((log (z₂-1)+log (z₂+1))/2)*Real.cos phi)-associatedP ν 0 z₁*associatedP ν 0 z₂) := by
   have hz₁ : z₁ ∈ SecondKindAddition.domain := ⟨h1, hz1⟩
   have hz₂ : z₂ ∈ SecondKindAddition.domain := ⟨h2, hz2⟩
   have hper : Function.Periodic

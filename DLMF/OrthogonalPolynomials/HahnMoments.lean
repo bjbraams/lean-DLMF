@@ -20,13 +20,13 @@ factorial of smaller degree is annihilated.
 ## Main definitions
 
 * `weight`: the four-Gamma Barnes weight, without conjugate-pair constraints.
-* `moment`: the mixed Pochhammer moment of the weight.
+* `fourGammaMoment`: the mixed Pochhammer moment of the weight.
 * `hahnSum`: the unnormalized terminating continuous Hahn sum.
 
 ## Main results
 
 * `integrable_weight`, `integral_weight`: integrability and evaluation of the weight.
-* `mixed_moment`, `moment_factor`: integrability and evaluation of the mixed moments.
+* `mixed_moment`, `fourGammaMoment_factor`: integrability and evaluation of the mixed moments.
 * `hahnSum_orthogonal_lt`, `hahnSum_orthogonal`: orthogonality of the continuous Hahn sums.
 
 ## Implementation notes
@@ -86,7 +86,7 @@ theorem integral_weight {a b c d : ℂ}
   linear_combination h
 
 /-- The mixed Pochhammer moment of a four-Gamma weight. -/
-def moment (a b c d : ℂ) (k j : ℕ) : ℂ :=
+def fourGammaMoment (a b c d : ℂ) (k j : ℕ) : ℂ :=
   2 * Real.pi * (Gamma (a + c + k) * Gamma (a + d + j + k) * Gamma (b + c) *
     Gamma (b + d + j) / Gamma (a + b + c + d + j + k))
 
@@ -106,14 +106,14 @@ theorem mixed_moment {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (k j : ℕ) :
     Integrable (fun x : ℝ => poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) ∧
       (∫ x : ℝ, poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) =
-          moment a b c d k j := by
+          fourGammaMoment a b c d k j := by
   have hak : 0 < (a + k).re := by simp; positivity
   have hdj : 0 < (d + j).re := by simp; positivity
   refine ⟨(integrable_weight hak hb hc hdj).congr
     (Eventually.of_forall (fun x => (poch_mul_weight ha hd k j x).symm)), ?_⟩
   simp_rw [poch_mul_weight ha hd]
   rw [integral_weight hak hb hc hdj]
-  unfold moment
+  unfold fourGammaMoment
   congr 1
   rw [show a + k + c = a + c + k by ring,
     show a + k + (d + j) = a + d + j + k by ring,
@@ -121,11 +121,11 @@ theorem mixed_moment {a b c d : ℂ}
     show a + k + b + c + (d + j) = a + b + c + d + j + k by ring]
 
 /-- Factor the mixed moment into its zeroth moment and two numerator Pochhammer factors. -/
-theorem moment_factor {a b c d : ℂ}
+theorem fourGammaMoment_factor {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (k j : ℕ) :
-    moment a b c d k j = moment a b c d 0 j *
+    fourGammaMoment a b c d k j = fourGammaMoment a b c d 0 j *
       (poch (a + c) k * poch (a + d + j) k / poch (a + b + c + d + j) k) := by
-  unfold moment
+  unfold fourGammaMoment
   simp only [Nat.cast_zero, add_zero]
   rw [Gamma_add_nat_eq_poch_mul_Gamma (by simp; linarith : 0 < (a + c).re),
     Gamma_add_nat_eq_poch_mul_Gamma (by simp; positivity : 0 < (a + d + j).re),
@@ -163,9 +163,9 @@ theorem integral_hahnSum_basis_zero {a b c d : ℂ}
       (∫ x : ℝ, (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k /
         (poch (a + c) k * poch (a + d) k * k.factorial)) *
           (poch (a + I * x) k * poch (d - I * x) j * weight a b c d x)) =
-        moment a b c d 0 j * (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k *
+        fourGammaMoment a b c d 0 j * (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k *
           poch (a + d + j) k / (poch (a + d) k * poch (a + b + c + d + j) k * k.factorial)) := by
-    rw [integral_const_mul, (mixed_moment ha hb hc hd k j).2, moment_factor ha hb hc hd]
+    rw [integral_const_mul, (mixed_moment ha hb hc hd k j).2, fourGammaMoment_factor ha hb hc hd]
     field_simp [hA k]
   have he : (fun x : ℝ => hahnSum a b c d n x * poch (d - I * x) j * weight a b c d x) =
       fun x : ℝ => ∑ k ∈ Finset.range (n + 1),

@@ -420,14 +420,14 @@ declarations:
 - [33.16.E8](https://dlmf.nist.gov/33.16.E8): [`DLMF.Coulomb.coulombf_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L590) (proved) — notation `ν = (-ε)^{-1/2}`, written inline as a `let`
 - [33.16.E9](https://dlmf.nist.gov/33.16.E9): [`DLMF.Coulomb.coulombZeta`](DLMF/Coulomb/Energy/Basic.lean#L162) (definition); [`DLMF.Coulomb.coulombXi`](DLMF/Coulomb/Energy/Basic.lean#L169) (definition)
 - [33.16.E10](https://dlmf.nist.gov/33.16.E10): [`DLMF.Coulomb.coulombf_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L590) (proved)
-- [33.16.E11](https://dlmf.nist.gov/33.16.E11): [`DLMF.Coulomb.coulombh_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L683) (admitted)
-- [33.16.E12](https://dlmf.nist.gov/33.16.E12): [`DLMF.Coulomb.coulombf_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L694) (proved)
-- [33.16.E13](https://dlmf.nist.gov/33.16.E13): [`DLMF.Coulomb.coulombh_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L796) (proved)
+- [33.16.E11](https://dlmf.nist.gov/33.16.E11): [`DLMF.Coulomb.coulombh_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L886) (proved)
+- [33.16.E12](https://dlmf.nist.gov/33.16.E12): [`DLMF.Coulomb.coulombf_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L1015) (proved)
+- [33.16.E13](https://dlmf.nist.gov/33.16.E13): [`DLMF.Coulomb.coulombh_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L1117) (proved)
 - [33.16.E14](https://dlmf.nist.gov/33.16.E14): [`DLMF.Coulomb.coulombs_coulombc_eq_pos`](DLMF/Coulomb/Energy/Connection.lean#L404) (proved)
 - [33.16.E15](https://dlmf.nist.gov/33.16.E15): [`DLMF.Coulomb.coulombs_coulombc_eq_neg`](DLMF/Coulomb/Energy/Connection.lean#L432) (proved) — corrected: DLMF omits the factors `(-1)^{ℓ+1}e^{π/τ}` (for `s`) and `(-1)^ℓ e^{-π/τ}` (for `c`); the corrected form is proved from 33.16.6–33.16.7 and the definitions
 - [33.16.E16](https://dlmf.nist.gov/33.16.E16): [`DLMF.Coulomb.coulombKNorm`](DLMF/Coulomb/Energy/Basic.lean#L179) (definition)
-- [33.16.E17](https://dlmf.nist.gov/33.16.E17): [`DLMF.Coulomb.coulombs_coulombc_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L851) (admitted) — corrected: prefactor `(-1)^ℓ/(2ν)^{1/2}`, not `(-1)^ℓ/(2ν^{1/2})`; hypothesis `A(ε,ℓ) > 0`
-- [33.16.E18](https://dlmf.nist.gov/33.16.E18): [`DLMF.Coulomb.coulombs_coulombc_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L869) (proved) — corrected: `K(ν,ℓ)` and `1/K(ν,ℓ)` interchanged in DLMF; hypothesis `A(ε,ℓ) > 0`
+- [33.16.E17](https://dlmf.nist.gov/33.16.E17): [`DLMF.Coulomb.coulombs_coulombc_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L1172) (proved) — corrected: prefactor `(-1)^ℓ/(2ν)^{1/2}`, not `(-1)^ℓ/(2ν^{1/2})`; hypothesis `A(ε,ℓ) > 0`
+- [33.16.E18](https://dlmf.nist.gov/33.16.E18): [`DLMF.Coulomb.coulombs_coulombc_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L1261) (proved) — corrected: `K(ν,ℓ)` and `1/K(ν,ℓ)` interchanged in DLMF; hypothesis `A(ε,ℓ) > 0`
 - [33.16](https://dlmf.nist.gov/33.16): the prose only introduces the notation `τ`, `ν`; no further statement.
 
 ## [§33.17 Recurrence Relations and Derivatives](https://dlmf.nist.gov/33.17)
@@ -463,8 +463,8 @@ declarations:
 - [33.20.iv](https://dlmf.nist.gov/33.20.iv): no statement (references only: Curtis 1964a, §7).
 
 ## [§33.21 Asymptotic Approximations for Large |r|](https://dlmf.nist.gov/33.21)
-- [33.21.E1](https://dlmf.nist.gov/33.21.E1): [`DLMF.Coulomb.coulombZeta_coulombXi_isEquivalent_atTop`](DLMF/Coulomb/Energy/Asymptotics.lean#L42) (admitted)
-- [33.21.E2](https://dlmf.nist.gov/33.21.E2): [`DLMF.Coulomb.coulombZeta_coulombXi_isEquivalent_atBot`](DLMF/Coulomb/Energy/Asymptotics.lean#L52) (admitted)
+- [33.21.E1](https://dlmf.nist.gov/33.21.E1): [`DLMF.Coulomb.coulombZeta_coulombXi_isEquivalent_atTop`](DLMF/Coulomb/Energy/Asymptotics.lean#L113) (admitted)
+- [33.21.E2](https://dlmf.nist.gov/33.21.E2): [`DLMF.Coulomb.coulombZeta_coulombXi_isEquivalent_atBot`](DLMF/Coulomb/Energy/Asymptotics.lean#L123) (proved)
 - [33.21.i](https://dlmf.nist.gov/33.21.i): methods (combine §33.16 with 33.10.1, 33.21.1–33.21.2 or §§10.7(ii), 10.30(ii)); no separate statement.
 - [33.21.ii](https://dlmf.nist.gov/33.21.ii): no statement (references only: Curtis 1964a, §6).
 

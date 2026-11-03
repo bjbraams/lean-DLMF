@@ -8,6 +8,7 @@ module
 public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.OneSubCosIntegral
+public import TauCeti.Analysis.Fourier.ExpNegAbs
 
 /-!
 # Summability of integrals and of Fourier integrals (DLMF §1.15(iv)–(v))
@@ -506,7 +507,52 @@ theorem fourierAbelMean_eq_poisson {f : ℝ → ℂ} (hf : Integrable f) (x : �
     (hy : 0 < y) :
     fourierAbelMean f x y =
       ((2 * Real.pi : ℝ)⁻¹ : ℂ) * ∫ t, f t * (halfPlanePoissonKernel (x - t) y : ℂ) := by
-  sorry
+  have he : Integrable fun t : ℝ => (Real.exp (-(y * |t|)) : ℂ) :=
+    (TauCeti.integrable_exp_neg_mul_abs hy).ofReal
+  set F : ℝ → ℝ → ℂ := fun t s =>
+    cexp (-(I * x * t)) * cexp (I * t * s) * ((Real.exp (-(y * |t|)) : ℂ) * f s) with hF
+  have hFi : Integrable (Function.uncurry F) (volume.prod volume) := by
+    have hp := he.mul_prod hf
+    refine (hp.bdd_mul (c := 1) (f := fun p : ℝ × ℝ =>
+        cexp (-(I * x * p.1)) * cexp (I * p.1 * p.2)) ?_ ?_).congr
+        (Eventually.of_forall fun p => ?_)
+    · exact (by fun_prop : Continuous fun p : ℝ × ℝ =>
+        cexp (-(I * x * p.1)) * cexp (I * p.1 * p.2)).aestronglyMeasurable
+    · refine Eventually.of_forall fun p => ?_
+      rw [norm_mul, Complex.norm_exp, Complex.norm_exp]
+      simp
+    · simp [hF, Function.uncurry]
+  have hsq : ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) * ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) =
+      ((2 * Real.pi : ℝ)⁻¹ : ℂ) := by
+    rw [← mul_inv, ← ofReal_mul, Real.mul_self_sqrt (by positivity)]
+  unfold fourierAbelMean fourierTransform
+  have hin : ∀ t : ℝ, (Real.exp (-y * |t|) : ℂ) * cexp (-(I * x * t)) *
+      (((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) * ∫ s : ℝ, f s * cexp (I * t * s)) =
+      ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) * ∫ s, F t s := by
+    intro t
+    conv_lhs => rw [← integral_const_mul, ← integral_const_mul]
+    conv_rhs => rw [← integral_const_mul]
+    congr 1; funext s
+    simp only [hF, neg_mul]
+    ring
+  simp_rw [hin]
+  rw [integral_const_mul, ← mul_assoc, hsq, integral_integral_swap hFi]
+  congr 1
+  refine integral_congr_ae (Eventually.of_forall fun s => ?_)
+  simp only [hF]
+  have h := TauCeti.integral_exp_mul_I_mul_exp_neg_mul_abs hy (s - x)
+  calc ∫ t : ℝ, cexp (-(I * x * t)) * cexp (I * t * s) * ((Real.exp (-(y * |t|)) : ℂ) * f s)
+      = (∫ t : ℝ, cexp (((s - x : ℝ) : ℂ) * t * I) * (Real.exp (-(y * |t|)) : ℂ)) * f s := by
+        rw [← integral_mul_const]
+        congr 1; funext t
+        rw [show ((s - x : ℝ) : ℂ) * t * I = -(I * x * t) + I * t * s by push_cast; ring,
+          Complex.exp_add]
+        ring
+    _ = f s * (halfPlanePoissonKernel (x - s) y : ℂ) := by
+        rw [h, halfPlanePoissonKernel, mul_comm]
+        congr 2
+        ring
+
 
 /-- DLMF 1.15.38: for `f` absolutely integrable, `∫ |h(x, y) - f(x)| dx → 0` as `y → 0+`. -/
 @[dlmf 1.15.E38]

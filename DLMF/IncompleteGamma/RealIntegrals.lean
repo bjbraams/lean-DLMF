@@ -26,8 +26,8 @@ remainder bound of DLMF §8.11(i).
   reverse inequality for `a ≥ 1` (DLMF 8.10.1).
 * `IncompleteGammaRealIntegrals.upperIncGamma_re_pos`: positivity of the real upper incomplete Gamma
   function.
-* `IncompleteGammaRealIntegrals.lowerIncGamma_bound_ge`,
-  `IncompleteGammaRealIntegrals.lowerIncGamma_bound_le`: DLMF 8.10.2 for `0 < a ≤ 1` and its reverse
+* `lowerIncGamma_bound_ge`,
+  `lowerIncGamma_bound_le`: DLMF 8.10.2 for `0 < a ≤ 1` and its reverse
   for `a ≥ 1`.
 * `IncompleteGammaRealIntegrals.upperIncGamma_expansion`: `N` integrations by parts,
   `Γ(a,z) = ∑_{k<N} (-1)^k (1-a)_k z^{a-1-k} e^{-z} + (-1)^N (1-a)_N Γ(a-N,z)`.
@@ -166,9 +166,10 @@ theorem IncompleteGammaRealIntegrals.lowerIncGamma_compare {a : ℝ} (ha : 0 < a
       rw [← Real.rpow_add_one hx.ne']; ring_nf
     rw [this]; ring
 
-/-- DLMF 8.10.2 for `0 < a ≤ 1`. -/
-theorem IncompleteGammaRealIntegrals.lowerIncGamma_bound_ge {a x : ℝ} (ha : 0 < a)
-    (ha1 : a ≤ 1) (hx : 0 < x) :
+/-- The stated relation follows from the given hypotheses: `(lowerIncGamma a x).re ≥
+x^(a-1)/a*(1-Real.exp (-x))`. -/
+@[dlmf 8.10.E2]
+theorem lowerIncGamma_bound_ge {a x : ℝ} (ha : 0 < a) (ha1 : a ≤ 1) (hx : 0 < x) :
     (lowerIncGamma a x).re ≥ x^(a-1)/a*(1-Real.exp (-x)) := by
   obtain ⟨h1, h2⟩ := IncompleteGammaRealIntegrals.lowerIncGamma_compare ha hx
   have hm : (∫ t in (0:ℝ)..x, x^(a-1)*(t*Real.exp (-t))) ≤ ∫ t in (0:ℝ)..x, t^a*Real.exp (-t) := by
@@ -187,8 +188,10 @@ theorem IncompleteGammaRealIntegrals.lowerIncGamma_bound_ge {a x : ℝ} (ha : 0 
   rw [ge_iff_le, div_mul_eq_mul_div, div_le_iff₀ ha]
   linarith
 
-/-- DLMF 8.10.2 reversed for `a ≥ 1`. -/
-theorem IncompleteGammaRealIntegrals.lowerIncGamma_bound_le {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
+/-- Estimate under the stated parameter and domain assumptions: `(lowerIncGamma a x).re ≤
+x^(a-1)/a*(1-Real.exp (-x))`. -/
+@[dlmf 8.10.E2]
+theorem lowerIncGamma_bound_le {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
     (lowerIncGamma a x).re ≤ x^(a-1)/a*(1-Real.exp (-x)) := by
   have ha0 : 0 < a := by linarith
   obtain ⟨h1, h2⟩ := IncompleteGammaRealIntegrals.lowerIncGamma_compare ha0 hx

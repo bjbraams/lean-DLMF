@@ -43,7 +43,7 @@ complementary error function (DLMF 7.11.3).
 * `genExpIntE_tail_integral`, `genExpIntE_nat_laplace`, `genExpIntE_mellin_laplace`,
   `genExpIntE_product_integral`, `genExpIntL_hypergeometric`: the integrals
   DLMF 8.19.23–8.19.27.
-* `GeneralizedExpIntegral.expIntE1_digamma_series`: the series DLMF 6.6.3.
+* `expIntE1_digamma_series`: the series DLMF 6.6.3.
 * `erfc_genExpIntEOnLog_square`: the relation DLMF 7.11.3 with its square-argument
   continuation.
 
@@ -318,8 +318,10 @@ theorem GeneralizedExpIntegral.digamma_conv_term {n j : ℕ} (hj : j < n) (z : �
   push_cast
   field_simp
 
-/-- DLMF 6.6.3: `∑ z^k ψ(k+1)/k! = e^z (E₁(z) + ln z)`, by a Cauchy product with 6.6.2. -/
-theorem GeneralizedExpIntegral.expIntE1_digamma_series {z : ℂ} (hz : z ≠ 0) :
+/-- The series with terms `(fun k : ℕ => z^k/(k.factorial : ℂ)*digamma (k+1))` converges to `(exp
+z*(genExpIntE 1 z+log z))`. -/
+@[dlmf 6.6.E3]
+theorem expIntE1_digamma_series {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => z^k/(k.factorial : ℂ)*digamma (k+1)) (exp z*(genExpIntE 1 z+log z)) := by
   set g : ℕ → ℂ := fun k => if k = 0 then -(Real.eulerMascheroniConstant : ℂ)
       else -(-z)^k/((k.factorial : ℂ)*k) with hgdef
@@ -365,7 +367,7 @@ theorem GeneralizedExpIntegral.genExpIntE_succ_digamma (m : ℕ) {z : ℂ} (hz :
     genExpIntE ((m:ℂ)+1) z = (-1:ℂ)^(m+1)*z^m/(m.factorial : ℂ)*log z +
       exp (-z)/(m.factorial : ℂ)*(∑ k ∈ Finset.range m, (-z)^k*((m-(k+1)).factorial : ℂ)) +
       exp (-z)*(-z)^m/(m.factorial : ℂ)*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) := by
-  have hS := (GeneralizedExpIntegral.expIntE1_digamma_series hz).tsum_eq
+  have hS := (expIntE1_digamma_series hz).tsum_eq
   rw [hS]
   induction m with
   | zero =>
@@ -399,8 +401,8 @@ theorem GeneralizedExpIntegral.genExpIntE_succ_digamma (m : ℕ) {z : ℂ} (hz :
 
 /-- The digamma-series representation of the generalized exponential integral at positive integral
 order and nonzero argument. -/
-theorem GeneralizedExpIntegral.genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n)
-    {z : ℂ} (hz : z ≠ 0) :
+@[dlmf 8.19.E9]
+theorem genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) :
     genExpIntE n z=(-1 : ℂ)^n*z^(n-1)/(n-1).factorial*log z+exp
         (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), (-z)^k*Gamma (n-(k+1)))+exp
         (-z)*(-z)^(n-1)/(n-1).factorial*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) := by
@@ -414,15 +416,6 @@ theorem GeneralizedExpIntegral.genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 �
       Complex.Gamma_nat_eq_factorial]
   rw [Finset.sum_congr rfl hG, show ((m+1:ℕ):ℂ) = (m:ℂ)+1 by push_cast; rfl,
     GeneralizedExpIntegral.genExpIntE_succ_digamma m hz]
-
-/-- The digamma-series representation of the generalized exponential integral at positive integral
-order and nonzero argument. -/
-@[dlmf 8.19.E9]
-theorem genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) :
-    genExpIntE n z=(-1 : ℂ)^n*z^(n-1)/(n-1).factorial*log z+exp
-        (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), (-z)^k*Gamma (n-(k+1)))+exp
-        (-z)*(-z)^(n-1)/(n-1).factorial*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) :=
-  GeneralizedExpIntegral.genExpIntE_nat_digamma_series hn hz
 
 /-- Excluding positive integral `p` excludes nonpositive integral `1-p`. -/
 theorem one_sub_ne_neg_nat {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) : ∀ n : ℕ, 1-p ≠ -n :=
@@ -593,8 +586,8 @@ theorem GeneralizedExpIntegral.hasDerivAt_paramIntegral (j : ℕ) (q : ℂ) {z :
 
 /-- Differentiating with respect to the order inserts powers of the logarithm into the Laplace
 integral, with sign `(-1)^j`. -/
-theorem GeneralizedExpIntegral.genExpIntE_parameter_derivatives (j : ℕ) (p : ℂ) {z : ℂ}
-    (hz : 0 < z.re) :
+@[dlmf 8.19.E15]
+theorem genExpIntE_parameter_derivatives (j : ℕ) (p : ℂ) {z : ℂ} (hz : 0 < z.re) :
     iteratedDeriv j (fun q => genExpIntE q z)
         p=(-1 : ℂ)^j*(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^j*(t : ℂ)^(-p)*exp (-z*t)) := by
   have h0 : (fun q => genExpIntE q z) = fun q => ∫ t : ℝ in Ioi 1,
@@ -611,14 +604,6 @@ theorem GeneralizedExpIntegral.genExpIntE_parameter_derivatives (j : ℕ) (p : �
     rw [iteratedDeriv_succ, show iteratedDeriv j _ = _ from funext ih]
     rw [((GeneralizedExpIntegral.hasDerivAt_paramIntegral j p hz).const_mul ((-1:ℂ)^j)).deriv]
     ring
-
-/-- Differentiating with respect to the order inserts powers of the logarithm into the Laplace
-integral, with sign `(-1)^j`. -/
-@[dlmf 8.19.E15]
-theorem genExpIntE_parameter_derivatives (j : ℕ) (p : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    iteratedDeriv j (fun q => genExpIntE q z)
-        p=(-1 : ℂ)^j*(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^j*(t : ℂ)^(-p)*exp (-z*t)) :=
-  GeneralizedExpIntegral.genExpIntE_parameter_derivatives j p hz
 
 /-- Continued-fraction representation of the generalized exponential integral on the principal
 slit plane, with alternating order and argument coefficients. -/
@@ -1193,8 +1178,8 @@ theorem GeneralizedExpIntegral.genExpIntE_laplace_eq {n : ℕ} (hn : 1 ≤ n) {a
 
 /-- Laplace transform of the generalized exponential integral at positive integral order,
 including the removable value at zero. -/
-theorem GeneralizedExpIntegral.genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ}
-    (ha : -1 < a.re) :
+@[dlmf 8.19.E24]
+theorem genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 < a.re) :
     (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE n t)=if a=0 then 1/(n : ℂ) else
         (-1 : ℂ)^(n-1)/a^n*(log (1+a)+∑ k ∈ Finset.range (n-1), (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) := by
   rw [GeneralizedExpIntegral.genExpIntE_laplace_eq hn ha]
@@ -1203,14 +1188,6 @@ theorem GeneralizedExpIntegral.genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {
   split_ifs with ha0
   · subst ha0; rw [GeneralizedExpIntegral.laplaceJ_zero]; push_cast; rfl
   · exact GeneralizedExpIntegral.laplaceJ_closed ha ha0 m
-
-/-- Laplace transform of the generalized exponential integral at positive integral order,
-including the removable value at zero. -/
-@[dlmf 8.19.E24]
-theorem genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE n t)=if a=0 then 1/(n : ℂ) else
-        (-1 : ℂ)^(n-1)/a^n*(log (1+a)+∑ k ∈ Finset.range (n-1), (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) :=
-  GeneralizedExpIntegral.genExpIntE_nat_laplace hn ha
 
 /-- The auxiliary integral L(p) for positive p. -/
 @[dlmf 8.19.E27]

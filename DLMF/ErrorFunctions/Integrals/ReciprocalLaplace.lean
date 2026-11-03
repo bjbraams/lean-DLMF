@@ -547,7 +547,7 @@ theorem ErrorFunctionIntegrals.laplace_plus {a b c : ℂ} (ha : 0 < a.re) (hb : 
   simpa [hF, hR] using this
 
 /-- A crude global bound: `‖erf w‖ ≤ (2/√π) ‖w‖ e^{max(0, -Re w²)}`. -/
-theorem ErrorFunctionIntegrals.norm_erf_le (w : ℂ) :
+theorem ErrorFunctionIntegrals.norm_erf_le_exp_mul_norm (w : ℂ) :
     ‖erf w‖ ≤ 2/Real.sqrt π * Real.exp (max 0 (-(w^2).re)) * ‖w‖ := by
   have hs : Convex ℝ (segment ℝ (0:ℂ) w) := convex_segment _ _
   have h := hs.norm_image_sub_le_of_norm_hasDerivWithin_le (f := erf)
@@ -622,7 +622,7 @@ theorem ErrorFunctionIntegrals.norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (h
         _ = Real.sqrt (‖a‖*M) := by
             rw [Real.sqrt_mul (norm_nonneg _)]; field_simp
     refine max_le (by positivity) (by linarith)
-  have herf := ErrorFunctionIntegrals.norm_erf_le (-u+v)
+  have herf := ErrorFunctionIntegrals.norm_erf_le_exp_mul_norm (-u+v)
   have : erfc (-u+v) = 1 - erf (-u+v) := rfl
   rw [this]
   refine (norm_sub_le _ _).trans ?_

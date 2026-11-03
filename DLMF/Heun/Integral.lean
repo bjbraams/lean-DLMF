@@ -8,6 +8,7 @@ module
 public import DLMF.Heun.Basic
 public import DLMF.Heun.Basic.Equation
 public import DLMF.Heun.IntegralPath
+public import DLMF.Heun.KernelAngles
 public import DLMF.Hypergeometric.Riemann
 public import DLMFMathlib.Analysis.Complex.BivariateCalculus
 public import DLMFMathlib.Analysis.Calculus.Deriv.CompCurve
@@ -26,7 +27,8 @@ public import DLMFMathlib.MeasureTheory.Integral.PathParametric
 * `heun_hermiteDarboux_example₁`, `heun_hermiteDarboux_example₂`: the examples 31.8.4–31.8.5.
 * `heun_integral_typeI`: the Type I integral equation and representation, DLMF 31.10.1–31.10.6.
 * `heun_kernel_typeI_angles`, `heun_kernel_typeI_separable`: the kernel equation in the
-  variables 31.10.7 (31.10.8, sign corrected) and its separable solutions 31.10.9.
+  variables 31.10.7 (31.10.8, sign corrected; from `heun_kernel_typeI_angles'` in
+  `DLMF.Heun.KernelAngles`) and its separable solutions 31.10.9.
 * `heun_kernel_example₁_pde`, `heun_integralEquation_example₁`, `heun_kernel_example₂_pde`:
   the kernels of Examples 1 and 2 (31.10.10, 31.10.11).
 * `heun_integral_typeII`: the Type II double-integral representation, DLMF 31.10.12–31.10.16,
@@ -501,7 +503,7 @@ theorem heun_integral_typeI (_hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (
 + ((2δ-1)cot φ - (2ε-1)tan φ)𝒦_φ = 0`. Stated for analytic `Z, T` of `(θ, φ)` satisfying the
 relations on an open set where the change of variables is valid. -/
 @[dlmf 31.10.E7, dlmf 31.10.E8]
-theorem heun_kernel_typeI_angles (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 0) (ha1 : a ≠ 1)
+theorem heun_kernel_typeI_angles (_hF : α + β + 1 = γ + δ + ε) (_ha0 : a ≠ 0) (_ha1 : a ≠ 1)
     {Ω : Set (ℂ × ℂ)} (hΩ : IsOpen Ω) {Z T : ℂ → ℂ → ℂ} {K : ℂ → ℂ → ℂ}
     (hZT : AnalyticOnNhd ℂ (fun x : ℂ × ℂ => (Z x.1 x.2, T x.1 x.2)) Ω)
     (hrel : ∀ x ∈ Ω, Z x.1 x.2 * T x.1 x.2 = a * Complex.cos x.1 ^ 2 ∧
@@ -521,7 +523,8 @@ theorem heun_kernel_typeI_angles (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 
         deriv (deriv (𝒦 x.1)) x.2 +
         ((2 * δ - 1) * Complex.cot x.2 - (2 * ε - 1) * Complex.tan x.2) * deriv (𝒦 x.1) x.2 =
         0 := by
-  sorry
+  exact heun_kernel_typeI_angles' hΩ hZT (fun x hx => ⟨(hrel x hx).1, (hrel x hx).2.1⟩) hreg hK
+    hKpde
 
 /-- Chain rule for `t ↦ C · u(cos² t)`: first and second derivatives. -/
 private lemma deriv_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) (hu : ContDiffOn ℂ 2 u U)

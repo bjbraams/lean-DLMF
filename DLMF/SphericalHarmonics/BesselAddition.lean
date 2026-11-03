@@ -60,7 +60,7 @@ noncomputable section
 namespace DLMF.Bessel
 
 /-- Iterated derivatives of regularized `₀F₁` raise the parameter. -/
-theorem GegenbauerAddition.iteratedDeriv (c : ℂ) (k : ℕ) :
+theorem GegenbauerAddition.iteratedDeriv_regularizedHGFun (c : ℂ) (k : ℕ) :
     iteratedDeriv k (regularizedHGFun (∅ : Multiset ℂ) {c}) =
       regularizedHGFun (∅ : Multiset ℂ) {c + k} := by
   induction k with
@@ -80,7 +80,8 @@ theorem GegenbauerAddition.hasSum_shift (c s z : ℂ) :
   have hf : Differentiable ℂ (regularizedHGFun (∅ : Multiset ℂ) {c}) :=
     fun w => (analyticAt_regularized0F1 c w).differentiableAt
   have h := Complex.hasSum_taylorSeries_of_entire hf s (s + z)
-  simp only [add_sub_cancel_left, GegenbauerAddition.iteratedDeriv, smul_eq_mul] at h
+  simp only [add_sub_cancel_left, GegenbauerAddition.iteratedDeriv_regularizedHGFun,
+      smul_eq_mul] at h
   convert h using 2 with k
   ring
 

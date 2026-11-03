@@ -152,6 +152,104 @@ theorem gamma_two_thirds_sub_mul_gamma (s : ℕ) {x : ℝ} :
   have h3 : (√3 : ℝ) ≠ 0 := by positivity
   rcases neg_one_pow_eq_or ℝ s with h1 | h1 <;> rw [h1] <;> field_simp
 
+/-- The value `∫₀^∞ t^{-1/3}/(t+x) dt = (2π/√3) x^{-1/3}` (2.6.4 with `α = 2/3`, `β = 1/3`). -/
+private lemma integral_rpow_neg_third_div {x : ℝ} (hx : 0 < x) :
+    ∫ t in Ioi (0 : ℝ), t ^ (-(1 / 3 : ℝ)) / (t + x) = 2 * π / √3 * x ^ (-(1 / 3 : ℝ)) := by
+  have h := integral_rpow_div_add_cpow hx (α := (2 / 3 : ℝ)) (β := (1 / 3 : ℝ))
+    (by norm_num) (by norm_num)
+  have h5 := gamma_two_thirds_sub_mul_gamma 0 (x := x)
+  simp only [CharP.cast_eq_zero, sub_zero, zero_add, neg_zero, zero_sub, pow_zero,
+    mul_one] at h5
+  apply Complex.ofReal_injective
+  rw [← integral_complex_ofReal]
+  have hl : ∫ t in Ioi (0 : ℝ), (((t ^ (-(1 / 3 : ℝ)) / (t + x) : ℝ)) : ℂ) =
+      ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (((2 / 3 : ℝ) : ℂ) - 1) /
+        ((x : ℂ) + t) ^ (((2 / 3 : ℝ) : ℂ) + ((1 / 3 : ℝ) : ℂ)) := by
+    refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
+    rw [show ((2 / 3 : ℝ) : ℂ) + ((1 / 3 : ℝ) : ℂ) = 1 by push_cast; norm_num, Complex.cpow_one,
+      show ((2 / 3 : ℝ) : ℂ) - 1 = ((-(1 / 3) : ℝ) : ℂ) by push_cast; norm_num,
+      ← Complex.ofReal_cpow ht.le]
+    push_cast; ring
+  rw [hl, h, ← Complex.ofReal_cpow hx.le,
+    show ((2 / 3 : ℝ) : ℂ) + ((1 / 3 : ℝ) : ℂ) = ((1 : ℝ) : ℂ) by push_cast; norm_num,
+    Complex.Gamma_ofReal, Complex.Gamma_ofReal, Complex.Gamma_ofReal]
+  have h' : 2 * π / √3 * x ^ (-(1 / 3 : ℝ)) =
+      Real.Gamma (2 / 3) * Real.Gamma (1 / 3) / Real.Gamma 1 / x ^ (1 / 3 : ℝ) := by
+    rw [← h5, Real.rpow_neg hx.le]; ring
+  rw [h']; push_cast; ring
+
+
+/-- The real form of `S(x)`. -/
+private lemma stieltjesCubeRootExample_eq_ofReal (x : ℝ) :
+    stieltjesCubeRootExample x =
+      ((∫ t in Ioi (0 : ℝ), (1 + t) ^ (-(1 / 3 : ℝ)) / (t + x) : ℝ) : ℂ) := by
+  rw [stieltjesCubeRootExample, stieltjesTransform, ← integral_complex_ofReal]
+  push_cast; rfl
+
+/-- `x (P(x) - S(x)) ≥ c/2` for `x ≥ 1`, where `P(x) = ∫ t^{-1/3}/(t+x)` and `c` is the
+integral of `t^{-1/3} - (1+t)^{-1/3}` over `(0, 1)`. -/
+private lemma half_le_mul_sub {x : ℝ} (hx : 1 ≤ x) :
+    (1 / 2) * ∫ t in (0 : ℝ)..1, (t ^ (-(1 / 3 : ℝ)) - (1 + t) ^ (-(1 / 3 : ℝ))) ≤
+      x * ((∫ t in Ioi (0 : ℝ), t ^ (-(1 / 3 : ℝ)) / (t + x)) -
+        ∫ t in Ioi (0 : ℝ), (1 + t) ^ (-(1 / 3 : ℝ)) / (t + x)) := by
+  have hx0 : 0 < x := by linarith
+  have hP := integral_rpow_neg_third_div hx0
+  have hPi : IntegrableOn (fun t : ℝ => t ^ (-(1 / 3 : ℝ)) / (t + x)) (Ioi 0) := by
+    refine Integrable.of_integral_ne_zero ?_
+    rw [hP]; have := Real.rpow_pos_of_pos hx0 (-(1 / 3 : ℝ)); positivity
+  have hle : ∀ t ∈ Ioi (0 : ℝ), (1 + t) ^ (-(1 / 3 : ℝ)) ≤ t ^ (-(1 / 3 : ℝ)) := fun t ht =>
+    Real.rpow_le_rpow_of_nonpos ht (by linarith) (by norm_num)
+  have hSi : IntegrableOn (fun t : ℝ => (1 + t) ^ (-(1 / 3 : ℝ)) / (t + x)) (Ioi 0) := by
+    refine Integrable.mono' hPi ?_ ?_
+    · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+      intro t ht
+      have ht' : (0 : ℝ) < t := ht
+      refine ContinuousAt.continuousWithinAt ?_
+      refine ContinuousAt.div ?_ (by fun_prop) (by linarith)
+      exact (continuousAt_const.add continuousAt_id).rpow_const
+        (Or.inl (by simp only [Pi.add_apply, id]; linarith))
+    · refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
+      have ht' : (0 : ℝ) < t := ht
+      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      exact div_le_div_of_nonneg_right (hle t ht) (by linarith)
+  set h : ℝ → ℝ := fun t => x * (t ^ (-(1 / 3 : ℝ)) / (t + x) - (1 + t) ^ (-(1 / 3 : ℝ)) / (t + x))
+  have hhi : IntegrableOn h (Ioi 0) := (hPi.sub hSi).const_mul x
+  have hh0 : ∀ t ∈ Ioi (0 : ℝ), 0 ≤ h t := by
+    intro t ht
+    have ht' : (0 : ℝ) < t := ht
+    have := hle t ht
+    have : (1 + t) ^ (-(1 / 3 : ℝ)) / (t + x) ≤ t ^ (-(1 / 3 : ℝ)) / (t + x) :=
+      div_le_div_of_nonneg_right this (by linarith)
+    exact mul_nonneg hx0.le (by linarith)
+  have e1 : x * ((∫ t in Ioi (0 : ℝ), t ^ (-(1 / 3 : ℝ)) / (t + x)) -
+        ∫ t in Ioi (0 : ℝ), (1 + t) ^ (-(1 / 3 : ℝ)) / (t + x)) = ∫ t in Ioi (0 : ℝ), h t := by
+    rw [← integral_sub hPi hSi, ← integral_const_mul]
+  rw [e1]
+  have hgi : IntervalIntegrable (fun t : ℝ => t ^ (-(1 / 3 : ℝ)) - (1 + t) ^ (-(1 / 3 : ℝ)))
+      volume 0 1 := by
+    refine (intervalIntegral.intervalIntegrable_rpow' (by norm_num)).sub ?_
+    refine ContinuousOn.intervalIntegrable fun t ht => ?_
+    rw [Set.uIcc_of_le zero_le_one] at ht
+    exact ((continuousAt_const.add continuousAt_id).rpow_const
+      (Or.inl (by simp only [Pi.add_apply, id]; linarith [ht.1]))).continuousWithinAt
+  have hgi' := (intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one).mp hgi
+  calc (1 / 2) * ∫ t in (0 : ℝ)..1, (t ^ (-(1 / 3 : ℝ)) - (1 + t) ^ (-(1 / 3 : ℝ)))
+      = ∫ t in Ioc (0 : ℝ) 1, (1 / 2) * (t ^ (-(1 / 3 : ℝ)) - (1 + t) ^ (-(1 / 3 : ℝ))) := by
+        rw [intervalIntegral.integral_of_le zero_le_one, integral_const_mul]
+    _ ≤ ∫ t in Ioc (0 : ℝ) 1, h t := by
+        refine setIntegral_mono_on (hgi'.const_mul _) (hhi.mono_set Ioc_subset_Ioi_self)
+          measurableSet_Ioc fun t ht => ?_
+        have hle' := hle t ht.1
+        have hpos : 0 < t + x := by linarith [ht.1]
+        simp only [h]
+        rw [← sub_div, mul_div_assoc', le_div_iff₀ hpos]
+        have : 0 ≤ t ^ (-(1 / 3 : ℝ)) - (1 + t) ^ (-(1 / 3 : ℝ)) := by linarith
+        nlinarith [ht.2]
+    _ ≤ ∫ t in Ioi (0 : ℝ), h t :=
+        setIntegral_mono_set hhi ((ae_restrict_iff' measurableSet_Ioi).mpr
+          (Eventually.of_forall hh0)) (Eventually.of_forall Ioc_subset_Ioi_self)
+
+
 /-- DLMF 2.6.7: the correct asymptotic expansion of `S(x)` as `x → +∞`,
 `S(x) ∼ (2π/√3) ∑ (-1)^s (-1/3 choose s) x^{-s-1/3} - ∑_{s≥1} 3^s (s-1)!/(2·5⋯(3s-1)) x^{-s}`,
 in the form: for every `n`, the remainder after the terms with `s < n` in the first sum and
@@ -171,7 +269,59 @@ the remainder is not `O(x^{-4/3})` (the missing term `-(3/2) x^{-1}` of 2.6.7 do
 theorem not_stieltjesCubeRootExample_naive :
     ¬ (fun x : ℝ => stieltjesCubeRootExample x - ((stieltjesCubeRootNaiveSum 2 x : ℝ) : ℂ))
       =O[atTop] (fun x : ℝ => x ^ (-(1 : ℝ) - 1 / 3)) := by
-  sorry
+  intro hO
+  set c : ℝ := ∫ t in (0 : ℝ)..1, (t ^ (-(1 / 3 : ℝ)) - (1 + t) ^ (-(1 / 3 : ℝ)))
+  have hc : 0 < c := by
+    refine intervalIntegral.intervalIntegral_pos_of_pos_on ?_ (fun t ht => ?_) zero_lt_one
+    · refine (intervalIntegral.intervalIntegrable_rpow' (by norm_num)).sub ?_
+      refine ContinuousOn.intervalIntegrable fun t ht => ?_
+      rw [Set.uIcc_of_le zero_le_one] at ht
+      exact ((continuousAt_const.add continuousAt_id).rpow_const
+        (Or.inl (by simp only [Pi.add_apply, id]; linarith [ht.1]))).continuousWithinAt
+    · have := Real.rpow_lt_rpow_of_neg ht.1 (by linarith : t < 1 + t)
+        (by norm_num : (-(1 / 3 : ℝ)) < 0)
+      linarith
+  obtain ⟨C, hC⟩ := hO.bound
+  have hlim : Tendsto (fun x : ℝ => x ^ (-(1 / 3 : ℝ))) atTop (𝓝 0) :=
+    tendsto_rpow_neg_atTop (by norm_num)
+  set K : ℝ := 2 * π / √3 * (1 / 3) + |C|
+  have hev := (hlim.const_mul K).eventually (gt_mem_nhds (show K * 0 < c / 2 by
+    rw [mul_zero]; positivity))
+  obtain ⟨x, hx, hxK, hx1⟩ := (hC.and (hev.and (eventually_ge_atTop 1))).exists
+  have hx0 : 0 < x := by linarith
+  have hkey := half_le_mul_sub hx1
+  rw [integral_rpow_neg_third_div hx0] at hkey
+  set Sr := ∫ t in Ioi (0 : ℝ), (1 + t) ^ (-(1 / 3 : ℝ)) / (t + x)
+  rw [stieltjesCubeRootExample_eq_ofReal, ← Complex.ofReal_sub, Complex.norm_real,
+    Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hx0 _)] at hx
+  have hN : stieltjesCubeRootNaiveSum 2 x =
+      2 * π / √3 * (x ^ (-(1 / 3 : ℝ)) + 1 / 3 * x ^ (-(1 : ℝ) - 1 / 3)) := by
+    simp [stieltjesCubeRootNaiveSum, Finset.sum_range_succ]
+  have hpow : x * x ^ (-(1 : ℝ) - 1 / 3) = x ^ (-(1 / 3 : ℝ)) := by
+    rw [show -(1 : ℝ) - 1 / 3 = -1 + -(1 / 3) by norm_num, Real.rpow_add hx0, Real.rpow_neg_one,
+      ← mul_assoc, mul_inv_cancel₀ hx0.ne', one_mul]
+  rw [hN] at hx
+  have hxp : 0 < x ^ (-(1 / 3 : ℝ)) := Real.rpow_pos_of_pos hx0 _
+  have hb : x * |Sr - 2 * π / √3 * (x ^ (-(1 / 3 : ℝ)) + 1 / 3 * x ^ (-(1 : ℝ) - 1 / 3))| ≤
+      |C| * x ^ (-(1 / 3 : ℝ)) := by
+    have h1 := hx.trans (mul_le_mul_of_nonneg_right (le_abs_self C)
+      (Real.rpow_pos_of_pos hx0 (-(1 : ℝ) - 1 / 3)).le)
+    calc _ ≤ x * (|C| * x ^ (-(1 : ℝ) - 1 / 3)) := mul_le_mul_of_nonneg_left h1 hx0.le
+      _ = |C| * x ^ (-(1 / 3 : ℝ)) := by rw [← hpow]; ring
+  have hab := neg_abs_le (Sr - 2 * π / √3 * (x ^ (-(1 / 3 : ℝ)) + 1 / 3 * x ^ (-(1 : ℝ) - 1 / 3)))
+  have : c / 2 ≤ K * x ^ (-(1 / 3 : ℝ)) := by
+    have e : x * (2 * π / √3 * x ^ (-(1 / 3 : ℝ)) - Sr) =
+        -(2 * π / √3 * (1 / 3) * (x * x ^ (-(1 : ℝ) - 1 / 3))) -
+        x * (Sr - 2 * π / √3 * (x ^ (-(1 / 3 : ℝ)) + 1 / 3 * x ^ (-(1 : ℝ) - 1 / 3))) := by ring
+    rw [hpow] at e
+    have hm := mul_le_mul_of_nonneg_left hab hx0.le
+    have hpi : 0 < 2 * π / √3 * (1 / 3) * x ^ (-(1 / 3 : ℝ)) := by positivity
+    have hK : |C| * x ^ (-(1 / 3 : ℝ)) ≤ K * x ^ (-(1 / 3 : ℝ)) :=
+      mul_le_mul_of_nonneg_right (by
+        have : 0 < 2 * π / √3 * (1 / 3) := by positivity
+        simp only [K]; linarith) hxp.le
+    linarith
+  linarith
 
 /-! ### §2.6(ii) Stieltjes transform -/
 

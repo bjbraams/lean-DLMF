@@ -63,7 +63,7 @@ declarations:
 - [Basic](DLMF/Mathieu/Basic.lean): 3 admissions (the flagged existence theorems). 25 tagged: 20 definitions, 2 proved, 3 admitted.
 - [ContinuedFractions](DLMF/Mathieu/Basic/ContinuedFractions.lean): 0 admissions. 2 untagged definitions.
 - [Properties](DLMF/Mathieu/Properties.lean): 0 admissions. 71 tagged: 35 proved, 36 admitted.
-- [FourierSeries](DLMF/Mathieu/FourierSeries.lean): 9 admissions. 36 tagged: 36 admitted.
+- [FourierSeries](DLMF/Mathieu/FourierSeries.lean): 4 admissions. 36 tagged: 36 admitted.
 - [SecondSolutions](DLMF/Mathieu/SecondSolutions.lean): 1 admissions. 20 tagged: 5 proved, 15 admitted.
 - [SmallQ](DLMF/Mathieu/SmallQ.lean): 4 admissions. 31 tagged: 31 admitted.
 - [Continuation](DLMF/Mathieu/Continuation.lean): 7 admissions. 7 tagged: 7 admitted.
@@ -202,13 +202,13 @@ declarations:
 - [28.4.E18](https://dlmf.nist.gov/28.4.E18): [`DLMF.Mathieu.mathieuFourierB_even_neg_q`](DLMF/Mathieu/FourierSeries.lean#L815) (proved).
 - [28.4.E19](https://dlmf.nist.gov/28.4.E19): [`DLMF.Mathieu.mathieuFourierA_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L835) (proved).
 - [28.4.E20](https://dlmf.nist.gov/28.4.E20): [`DLMF.Mathieu.mathieuFourierB_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L854) (proved).
-- [28.4.E21](https://dlmf.nist.gov/28.4.E21): [`DLMF.Mathieu.mathieuFourierA_zero_small_q`](DLMF/Mathieu/FourierSeries.lean#L875) (admitted).
-- [28.4.E22](https://dlmf.nist.gov/28.4.E22): [`DLMF.Mathieu.mathieuFourierA_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L884) (admitted); [`DLMF.Mathieu.mathieuFourierB_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L894) (admitted).
-- [28.4.E23](https://dlmf.nist.gov/28.4.E23): [`DLMF.Mathieu.mathieuFourierA_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L904) (admitted); [`DLMF.Mathieu.mathieuFourierB_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L914) (admitted).
-- [28.4.E24](https://dlmf.nist.gov/28.4.E24): [`DLMF.Mathieu.mathieuFourierA_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L926) (admitted).
-- [28.4.E25](https://dlmf.nist.gov/28.4.E25): [`DLMF.Mathieu.mathieuFourierA_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L936) (admitted).
-- [28.4.E26](https://dlmf.nist.gov/28.4.E26): [`DLMF.Mathieu.mathieuFourierB_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L947) (admitted).
-- [28.4.E27](https://dlmf.nist.gov/28.4.E27): [`DLMF.Mathieu.mathieuFourierB_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L958) (admitted).
+- [28.4.E21](https://dlmf.nist.gov/28.4.E21): [`DLMF.Mathieu.mathieuFourierA_zero_small_q`](DLMF/Mathieu/SmallQFourierCoefficients.lean#L289) (proved).
+- [28.4.E22](https://dlmf.nist.gov/28.4.E22): [`DLMF.Mathieu.mathieuFourierA_up_small_q`](DLMF/Mathieu/SmallQFourierCoefficients.lean#L327) (admitted); [`DLMF.Mathieu.mathieuFourierB_up_small_q`](DLMF/Mathieu/SmallQFourierCoefficients.lean#L337) (admitted).
+- [28.4.E23](https://dlmf.nist.gov/28.4.E23): [`DLMF.Mathieu.mathieuFourierA_down_small_q`](DLMF/Mathieu/SmallQFourierCoefficients.lean#L347) (admitted); [`DLMF.Mathieu.mathieuFourierB_down_small_q`](DLMF/Mathieu/SmallQFourierCoefficients.lean#L357) (admitted).
+- [28.4.E24](https://dlmf.nist.gov/28.4.E24): [`DLMF.Mathieu.mathieuFourierA_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L875) (admitted).
+- [28.4.E25](https://dlmf.nist.gov/28.4.E25): [`DLMF.Mathieu.mathieuFourierA_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L885) (admitted).
+- [28.4.E26](https://dlmf.nist.gov/28.4.E26): [`DLMF.Mathieu.mathieuFourierB_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L896) (admitted).
+- [28.4.E27](https://dlmf.nist.gov/28.4.E27): [`DLMF.Mathieu.mathieuFourierB_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L907) (admitted).
 
 ## [§28.5 Second Solutions fe_n, ge_n](https://dlmf.nist.gov/28.5)
 
@@ -471,24 +471,24 @@ Source corrections and checks (scripts in the agent's scratch directory `acq28b/
 
 ## [§28.12 Definitions and Basic Properties](https://dlmf.nist.gov/28.12)
 
-- [28.12.i](https://dlmf.nist.gov/28.12.i): [`DLMF.Mathieu.mathieuLambda`](DLMF/Mathieu/Noninteger/Basic.lean#L142) (definition); [`DLMF.Mathieu.isMathieuCharExp_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L616) (proved); [`DLMF.Mathieu.isMathieuCharExp_iff_exists_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L260) (admitted); [`DLMF.Mathieu.mathieuNormalSegment_real`](DLMF/Mathieu/Noninteger/Properties.lean#L1043) (proved); [`DLMF.Mathieu.not_continuousAt_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L269) (admitted). `mathieuLambda` (λ_ν(q)): straight-segment continuation from ν² (design note); characterization by 28.2.16, the set of roots `{λ_{ν+2n}}`, reality/normality for real ν, q, discontinuity at integers.
-- [28.12.ii](https://dlmf.nist.gov/28.12.ii): [`DLMF.Mathieu.mathieuMe`](DLMF/Mathieu/Noninteger/Basic.lean#L153) (definition); [`DLMF.Mathieu.isFloquetSolution_mathieuMe`](DLMF/Mathieu/Noninteger/Properties.lean#L438) (proved). `mathieuMe` (me_ν): Fourier series with the continued coefficients; Floquet property admitted.
-- [28.12.iii](https://dlmf.nist.gov/28.12.iii): [`DLMF.Mathieu.mathieuCeNu_mathieuSeNu_real`](DLMF/Mathieu/Noninteger/Properties.lean#L679) (proved); [`DLMF.Mathieu.mathieu_periodic_of_rational`](DLMF/Mathieu/Noninteger/Properties.lean#L727) (proved). Reality of ce_ν, se_ν for real ν, q, x (proved from 28.12.10); periodicity 2mπ for rational ν = s/m ∉ ℤ (admitted).
-- [28.12.E1](https://dlmf.nist.gov/28.12.E1): [`DLMF.Mathieu.mathieuLambda_zero`](DLMF/Mathieu/Noninteger/Properties.lean#L254) (proved). For ν ∉ ℤ; proved from the definition (the continuation at q = 0 is constant).
-- [28.12.E2](https://dlmf.nist.gov/28.12.E2): [`DLMF.Mathieu.mathieuLambda_neg_q_and_neg_nu`](DLMF/Mathieu/Noninteger/Properties.lean#L360) (proved). For ν ∉ ℤ (false for integer ν with 28.12.3: λ₁(-q) = b₁(q)); proved by transporting continuation paths.
-- [28.12.E3](https://dlmf.nist.gov/28.12.E3): [`DLMF.Mathieu.mathieuLambda_intCast_eq`](DLMF/Mathieu/Noninteger/Properties.lean#L369) (proved). Integer order, real q (definition completion via `mathieuLambdaInt`).
-- [28.12.E4](https://dlmf.nist.gov/28.12.E4): [`DLMF.Mathieu.mathieuMe_zero`](DLMF/Mathieu/Noninteger/Properties.lean#L379) (proved). ν ∉ ℤ.
-- [28.12.E5](https://dlmf.nist.gov/28.12.E5): [`DLMF.Mathieu.integral_mathieuMe_mul_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L388) (proved). ν ∉ ℤ, q normal along the segment.
-- [28.12.E6](https://dlmf.nist.gov/28.12.E6): [`DLMF.Mathieu.mathieuMe_add_pi`](DLMF/Mathieu/Noninteger/Properties.lean#L403) (proved). ν ∉ ℤ, all q.
-- [28.12.E7](https://dlmf.nist.gov/28.12.E7): [`DLMF.Mathieu.integral_mathieuMe_orthogonal`](DLMF/Mathieu/Noninteger/Properties.lean#L416) (admitted). ν ∉ ℤ, q normal for ν + 2m and ν + 2n.
-- [28.12.E8](https://dlmf.nist.gov/28.12.E8): [`DLMF.Mathieu.mathieuMe_neg_nu`](DLMF/Mathieu/Noninteger/Properties.lean#L426) (proved). ν ∉ ℤ; proved (reindexing m ↦ -m).
-- [28.12.E9](https://dlmf.nist.gov/28.12.E9): [`DLMF.Mathieu.mathieuMe_neg_q`](DLMF/Mathieu/Noninteger/Properties.lean#L625) (proved). ν ∉ ℤ; proved from 28.14.8.
-- [28.12.E10](https://dlmf.nist.gov/28.12.E10): [`DLMF.Mathieu.conj_mathieuMe`](DLMF/Mathieu/Noninteger/Properties.lean#L640) (proved). Stronger than DLMF: with the straight-segment continuation valid for every q (DLMF excepts cuts on the real q-axis for special complex ν).
-- [28.12.E11](https://dlmf.nist.gov/28.12.E11): [`DLMF.Mathieu.mathieuMe_natCast`](DLMF/Mathieu/Noninteger/Properties.lean#L657) (proved); [`DLMF.Mathieu.mathieuMe_neg_natCast`](DLMF/Mathieu/Noninteger/Properties.lean#L666) (proved). Integer order, real q (definition completion via `mathieuMeInt`).
+- [28.12.i](https://dlmf.nist.gov/28.12.i): [`DLMF.Mathieu.mathieuLambda`](DLMF/Mathieu/Noninteger/Basic.lean#L142) (definition); [`DLMF.Mathieu.isMathieuCharExp_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L622) (proved); [`DLMF.Mathieu.isMathieuCharExp_iff_exists_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L261) (admitted); [`DLMF.Mathieu.mathieuNormalSegment_real`](DLMF/Mathieu/Noninteger/Properties.lean#L1049) (proved); [`DLMF.Mathieu.not_continuousAt_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L270) (admitted). `mathieuLambda` (λ_ν(q)): straight-segment continuation from ν² (design note); characterization by 28.2.16, the set of roots `{λ_{ν+2n}}`, reality/normality for real ν, q, discontinuity at integers.
+- [28.12.ii](https://dlmf.nist.gov/28.12.ii): [`DLMF.Mathieu.mathieuMe`](DLMF/Mathieu/Noninteger/Basic.lean#L153) (definition); [`DLMF.Mathieu.isFloquetSolution_mathieuMe`](DLMF/Mathieu/Noninteger/Properties.lean#L429) (proved). `mathieuMe` (me_ν): Fourier series with the continued coefficients; Floquet property admitted.
+- [28.12.iii](https://dlmf.nist.gov/28.12.iii): [`DLMF.Mathieu.mathieuCeNu_mathieuSeNu_real`](DLMF/Mathieu/Noninteger/Properties.lean#L685) (proved); [`DLMF.Mathieu.mathieu_periodic_of_rational`](DLMF/Mathieu/Noninteger/Properties.lean#L733) (proved). Reality of ce_ν, se_ν for real ν, q, x (proved from 28.12.10); periodicity 2mπ for rational ν = s/m ∉ ℤ (admitted).
+- [28.12.E1](https://dlmf.nist.gov/28.12.E1): [`DLMF.Mathieu.mathieuLambda_zero`](DLMF/Mathieu/Noninteger/Properties.lean#L255) (proved). For ν ∉ ℤ; proved from the definition (the continuation at q = 0 is constant).
+- [28.12.E2](https://dlmf.nist.gov/28.12.E2): [`DLMF.Mathieu.mathieuLambda_neg_q_and_neg_nu`](DLMF/Mathieu/Noninteger/Properties.lean#L361) (proved). For ν ∉ ℤ (false for integer ν with 28.12.3: λ₁(-q) = b₁(q)); proved by transporting continuation paths.
+- [28.12.E3](https://dlmf.nist.gov/28.12.E3): [`DLMF.Mathieu.mathieuLambda_intCast_eq`](DLMF/Mathieu/Noninteger/Properties.lean#L370) (proved). Integer order, real q (definition completion via `mathieuLambdaInt`).
+- [28.12.E4](https://dlmf.nist.gov/28.12.E4): [`DLMF.Mathieu.mathieuMe_zero`](DLMF/Mathieu/Noninteger/Properties.lean#L380) (proved). ν ∉ ℤ.
+- [28.12.E5](https://dlmf.nist.gov/28.12.E5): [`DLMF.Mathieu.integral_mathieuMe_mul_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L389) (proved). ν ∉ ℤ, q normal along the segment.
+- [28.12.E6](https://dlmf.nist.gov/28.12.E6): [`DLMF.Mathieu.mathieuMe_add_pi`](DLMF/Mathieu/Noninteger/Properties.lean#L404) (proved). ν ∉ ℤ, all q.
+- [28.12.E7](https://dlmf.nist.gov/28.12.E7): [`DLMF.Mathieu.integral_mathieuMe_orthogonal`](DLMF/Mathieu/Noninteger/Properties.lean#L537) (proved). ν ∉ ℤ, q normal for ν + 2m and ν + 2n.
+- [28.12.E8](https://dlmf.nist.gov/28.12.E8): [`DLMF.Mathieu.mathieuMe_neg_nu`](DLMF/Mathieu/Noninteger/Properties.lean#L417) (proved). ν ∉ ℤ; proved (reindexing m ↦ -m).
+- [28.12.E9](https://dlmf.nist.gov/28.12.E9): [`DLMF.Mathieu.mathieuMe_neg_q`](DLMF/Mathieu/Noninteger/Properties.lean#L631) (proved). ν ∉ ℤ; proved from 28.14.8.
+- [28.12.E10](https://dlmf.nist.gov/28.12.E10): [`DLMF.Mathieu.conj_mathieuMe`](DLMF/Mathieu/Noninteger/Properties.lean#L646) (proved). Stronger than DLMF: with the straight-segment continuation valid for every q (DLMF excepts cuts on the real q-axis for special complex ν).
+- [28.12.E11](https://dlmf.nist.gov/28.12.E11): [`DLMF.Mathieu.mathieuMe_natCast`](DLMF/Mathieu/Noninteger/Properties.lean#L663) (proved); [`DLMF.Mathieu.mathieuMe_neg_natCast`](DLMF/Mathieu/Noninteger/Properties.lean#L672) (proved). Integer order, real q (definition completion via `mathieuMeInt`).
 - [28.12.E12](https://dlmf.nist.gov/28.12.E12): [`DLMF.Mathieu.mathieuCeNu`](DLMF/Mathieu/Noninteger/Basic.lean#L174) (definition). Definition for every ν; used for ν ∉ ℤ.
 - [28.12.E13](https://dlmf.nist.gov/28.12.E13): [`DLMF.Mathieu.mathieuSeNu`](DLMF/Mathieu/Noninteger/Basic.lean#L180) (definition). Definition for every ν; used for ν ∉ ℤ.
-- [28.12.E14](https://dlmf.nist.gov/28.12.E14): [`DLMF.Mathieu.mathieuCeNu_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L768) (proved). ν ∉ ℤ.
-- [28.12.E15](https://dlmf.nist.gov/28.12.E15): [`DLMF.Mathieu.mathieuSeNu_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L776) (proved). ν ∉ ℤ.
+- [28.12.E14](https://dlmf.nist.gov/28.12.E14): [`DLMF.Mathieu.mathieuCeNu_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L774) (proved). ν ∉ ℤ.
+- [28.12.E15](https://dlmf.nist.gov/28.12.E15): [`DLMF.Mathieu.mathieuSeNu_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L782) (proved). ν ∉ ℤ.
 
 ## [§28.13 Graphics](https://dlmf.nist.gov/28.13)
 
@@ -509,17 +509,17 @@ Source corrections and checks (scripts in the agent's scratch directory `acq28b/
 
 ## [§28.15 Expansions for Small 𝑞](https://dlmf.nist.gov/28.15)
 
-- [28.15.E1](https://dlmf.nist.gov/28.15.E1): [`DLMF.Mathieu.mathieuLambda_isBigO_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L54) (admitted). Remainder O(q⁸) as q → 0 in ℂ, ν ∉ ℤ. Checked numerically (ν = 0.3, 1.7, 2.5, q = 0.05: error ~ 4·10⁻¹³).
-- [28.15.E2](https://dlmf.nist.gov/28.15.E2): [`DLMF.Mathieu.mathieuLambda_contFrac`](DLMF/Mathieu/Noninteger/Expansions.lean#L66) (admitted). Continued fractions as limits of the approximants `mathieuContFrac`; DLMF's remark "higher coefficients can be found by equating powers" is not a separate statement.
-- [28.15.E3](https://dlmf.nist.gov/28.15.E3): [`DLMF.Mathieu.mathieuMe_isBigO_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L80) (admitted). Remainder O(q³) for fixed z. Coefficients checked numerically.
+- [28.15.E1](https://dlmf.nist.gov/28.15.E1): [`DLMF.Mathieu.mathieuLambda_isBigO_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L56) (admitted). Remainder O(q⁸) as q → 0 in ℂ, ν ∉ ℤ. Checked numerically (ν = 0.3, 1.7, 2.5, q = 0.05: error ~ 4·10⁻¹³).
+- [28.15.E2](https://dlmf.nist.gov/28.15.E2): [`DLMF.Mathieu.mathieuLambda_contFrac`](DLMF/Mathieu/Noninteger/Expansions.lean#L116) (proved). Continued fractions as limits of the approximants `mathieuContFrac`; DLMF's remark "higher coefficients can be found by equating powers" is not a separate statement.
+- [28.15.E3](https://dlmf.nist.gov/28.15.E3): [`DLMF.Mathieu.mathieuMe_isBigO_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L158) (admitted). Remainder O(q³) for fixed z. Coefficients checked numerically.
 
 ## [§28.16 Asymptotic Expansions for Large 𝑞](https://dlmf.nist.gov/28.16)
 
-- [28.16.E1](https://dlmf.nist.gov/28.16.E1): [`DLMF.Mathieu.mathieuLambda_isBigO_atTop`](DLMF/Mathieu/Noninteger/Expansions.lean#L97) (admitted). Remainder after the printed terms O(h⁻⁶), h → +∞, real ν ∈ (m, m+1). Checked numerically.
+- [28.16.E1](https://dlmf.nist.gov/28.16.E1): [`DLMF.Mathieu.mathieuLambda_isBigO_atTop`](DLMF/Mathieu/Noninteger/Expansions.lean#L175) (admitted). Remainder after the printed terms O(h⁻⁶), h → +∞, real ν ∈ (m, m+1). Checked numerically.
 
 ## [§28.17 Stability as 𝑥 → ±∞](https://dlmf.nist.gov/28.17)
 
-- [28.17](https://dlmf.nist.gov/28.17): [`DLMF.Mathieu.IsMathieuStable`](DLMF/Mathieu/Noninteger/Basic.lean#L228) (definition); [`DLMF.Mathieu.isMathieuStable_q_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L115) (proved); [`DLMF.Mathieu.isMathieuStable_mathieuLambda`](DLMF/Mathieu/Noninteger/Expansions.lean#L222) (proved); [`DLMF.Mathieu.not_isMathieuStable_of_im_ne_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L353) (proved); [`DLMF.Mathieu.mathieuMe_tendsto_or`](DLMF/Mathieu/Noninteger/Expansions.lean#L278) (proved); [`DLMF.Mathieu.isOpen_mathieuStable_and_frontier`](DLMF/Mathieu/Noninteger/Expansions.lean#L564) (proved). `IsMathieuStable` (definition, ¶1); stable pairs for q = 0, a > 0 (proved) and for real ν ∉ ℤ (¶2); instability for ℑν ≠ 0 and unboundedness of all nontrivial solutions, behaviour of me_ν(±x) (¶3); openness of the real stability region and its boundary on the characteristic curves (¶4). Figure 28.17.1 excluded: graphics.
+- [28.17](https://dlmf.nist.gov/28.17): [`DLMF.Mathieu.IsMathieuStable`](DLMF/Mathieu/Noninteger/Basic.lean#L228) (definition); [`DLMF.Mathieu.isMathieuStable_q_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L193) (proved); [`DLMF.Mathieu.isMathieuStable_mathieuLambda`](DLMF/Mathieu/Noninteger/Expansions.lean#L300) (proved); [`DLMF.Mathieu.not_isMathieuStable_of_im_ne_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L431) (proved); [`DLMF.Mathieu.mathieuMe_tendsto_or`](DLMF/Mathieu/Noninteger/Expansions.lean#L356) (proved); [`DLMF.Mathieu.isOpen_mathieuStable_and_frontier`](DLMF/Mathieu/Noninteger/Expansions.lean#L642) (proved). `IsMathieuStable` (definition, ¶1); stable pairs for q = 0, a > 0 (proved) and for real ν ∉ ℤ (¶2); instability for ℑν ≠ 0 and unboundedness of all nontrivial solutions, behaviour of me_ν(±x) (¶3); openness of the real stability region and its boundary on the characteristic curves (¶4). Figure 28.17.1 excluded: graphics.
 
 ## [§28.18 Integrals and Integral Equations](https://dlmf.nist.gov/28.18)
 
@@ -527,10 +527,10 @@ Source corrections and checks (scripts in the agent's scratch directory `acq28b/
 
 ## [§28.19 Expansions in Series of me_{ν+2n} Functions](https://dlmf.nist.gov/28.19)
 
-- [28.19.E1](https://dlmf.nist.gov/28.19.E1): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L637) (admitted). Hypotheses: ν ∉ ℤ, q normal for every ν + 2n, f analytic on a strip a < ℑz < b.
-- [28.19.E2](https://dlmf.nist.gov/28.19.E2): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L637) (admitted).
-- [28.19.E3](https://dlmf.nist.gov/28.19.E3): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L637) (admitted).
-- [28.19.E4](https://dlmf.nist.gov/28.19.E4): [`DLMF.Mathieu.hasSum_exp_mathieuMe`](DLMF/Mathieu/Noninteger/Expansions.lean#L657) (admitted).
+- [28.19.E1](https://dlmf.nist.gov/28.19.E1): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L715) (admitted). Hypotheses: ν ∉ ℤ, q normal for every ν + 2n, f analytic on a strip a < ℑz < b.
+- [28.19.E2](https://dlmf.nist.gov/28.19.E2): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L715) (admitted).
+- [28.19.E3](https://dlmf.nist.gov/28.19.E3): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L715) (admitted).
+- [28.19.E4](https://dlmf.nist.gov/28.19.E4): [`DLMF.Mathieu.hasSum_exp_mathieuMe`](DLMF/Mathieu/Noninteger/Expansions.lean#L735) (admitted).
 
 ## [§28.29 Definitions and Basic Properties (Hill's Equation)](https://dlmf.nist.gov/28.29)
 

@@ -17,6 +17,7 @@ public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.Oscillator
 public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.HilbertBasis
 public import Mathlib.Analysis.Complex.RealDeriv
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
+public import DLMFMathlib.Analysis.Fourier.PoissonKernel
 
 /-!
 # Linear second-order differential operators and eigenfunction expansions (DLMF §1.18)
@@ -502,7 +503,57 @@ theorem tendsto_stieltjes_inversion {h : ℝ → ℝ} (hh : Integrable h) {μ : 
     Tendsto (fun ν : ℝ => (1 / (2 * Real.pi * I)) *
       ((∫ t : ℝ, (h t : ℂ) / ((μ : ℂ) - ν * I - t)) -
         ∫ t : ℝ, (h t : ℂ) / ((μ : ℂ) + ν * I - t))) (𝓝[>] 0) (𝓝 (h μ)) := by
-  sorry
+  have hg : Integrable fun t => (h t : ℂ) := hh.ofReal
+  have hcc : Tendsto (fun t => (h t : ℂ)) (𝓝 μ) (𝓝 (h μ)) :=
+    (Complex.continuous_ofReal.tendsto _).comp hc.tendsto
+  have hP := Real.tendsto_integral_poissonKernelLine_mul hg (hcc.mono_left nhdsWithin_le_nhds)
+    (hcc.mono_left nhdsWithin_le_nhds)
+  rw [← two_mul, mul_div_cancel_left₀ _ two_ne_zero] at hP
+  refine hP.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with ν (hν : 0 < ν)
+  have hint : ∀ c : ℂ, c.im ≠ 0 → Integrable fun t : ℝ => (h t : ℂ) / (c - t) := by
+    intro c hc0
+    have hne : ∀ t : ℝ, c - t ≠ 0 := fun t ht => hc0 (by simpa using congrArg Complex.im ht)
+    have hb := hg.bdd_mul (c := 1 / |c.im|)
+      (f := fun t : ℝ => (c - t)⁻¹) (Continuous.inv₀ (by fun_prop) hne).aestronglyMeasurable
+      (Eventually.of_forall fun t => by
+        rw [norm_inv, ← one_div]
+        gcongr
+        simpa using Complex.abs_im_le_norm (c - t))
+    refine hb.congr (Eventually.of_forall fun t => ?_)
+    simp only; rw [div_eq_inv_mul]
+  have h1 : ((μ : ℂ) - ν * I).im ≠ 0 := by simp; exact hν.ne'
+  have h2 : ((μ : ℂ) + ν * I).im ≠ 0 := by simp; exact hν.ne'
+  rw [← MeasureTheory.integral_sub (hint _ h1) (hint _ h2), ← MeasureTheory.integral_const_mul]
+  refine integral_congr_ae (Eventually.of_forall fun t => ?_)
+  have d1 : (μ : ℂ) - ν * I - t ≠ 0 := fun ht => h1 (by simpa using congrArg Complex.im ht)
+  have d2 : (μ : ℂ) + ν * I - t ≠ 0 := fun ht => h2 (by simpa using congrArg Complex.im ht)
+  have hprod : ((μ : ℂ) - ν * I - t) * ((μ : ℂ) + ν * I - t) = ((t - μ) ^ 2 + ν ^ 2 : ℝ) := by
+    push_cast; ring_nf; rw [I_sq]; ring
+  have hpos : (((t - μ) ^ 2 + ν ^ 2 : ℝ) : ℂ) ≠ 0 := by
+    rw [ofReal_ne_zero]; positivity
+  have hpi : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
+  simp only [Real.poissonKernelLine]
+  rw [div_sub_div _ _ d1 d2, hprod]
+  push_cast
+  field_simp
+  ring_nf
+
+
+/-- The integral of an odd function vanishes. -/
+private lemma integral_eq_zero_of_odd {F : ℝ → ℂ} (hF : ∀ u, F (-u) = -F u) :
+    ∫ u, F u = 0 := by
+  have h := integral_neg_eq_self F volume
+  simp only [hF, MeasureTheory.integral_neg] at h
+  linear_combination -h / 2
+
+/-- The integral of an odd function over a symmetric set vanishes. -/
+private lemma integral_indicator_eq_zero_of_odd {T : Set ℝ} (hT : ∀ u, -u ∈ T ↔ u ∈ T)
+    {k : ℝ → ℂ} (hk : ∀ u, k (-u) = -k u) : ∫ u, T.indicator k u = 0 :=
+  integral_eq_zero_of_odd fun u => by
+    by_cases hu : u ∈ T
+    · rw [indicator_of_mem ((hT u).2 hu), indicator_of_mem hu, hk]
+    · rw [indicator_of_notMem (mt (hT u).1 hu), indicator_of_notMem hu, neg_zero]
 
 /-- DLMF 1.18.54 (Sokhotski–Plemelj):
 `lim_{ε→0+} ∫ f(y)/(x ± iε - y) dy = ⨍ f(y)/(x - y) dy ∓ iπ f(x)`.
@@ -518,7 +569,249 @@ theorem tendsto_sokhotski_plemelj {f : ℝ → ℂ} (hf : ContDiff ℝ 1 f) (hcs
         (𝓝 pv) ∧
       Tendsto (fun ε : ℝ => ∫ y : ℝ, f y / ((x : ℂ) + s * ε * I - y)) (𝓝[>] 0)
         (𝓝 (pv - s * Real.pi * I * f x)) := by
-  sorry
+  have hfc : Continuous f := hf.continuous
+  obtain ⟨L, hL⟩ := ContDiff.lipschitzWith_of_hasCompactSupport hcs hf one_ne_zero
+  obtain ⟨R, hR0, hRs⟩ : ∃ R : ℝ, 0 < R ∧ ∀ u : ℝ, R < |u| → f (x - u) = 0 := by
+    obtain ⟨r, hr⟩ := hcs.isCompact.isBounded.subset_closedBall x
+    refine ⟨max r 1, by positivity, fun u hu => ?_⟩
+    by_contra hne
+    have h1 := hr (subset_tsupport f hne)
+    rw [Metric.mem_closedBall, Real.dist_eq, show x - u - x = -u by ring, abs_neg] at h1
+    linarith [le_max_left r 1]
+  set G : ℝ → ℂ := fun u => (f (x - u) - f x) / u with hG
+  have hGb : ∀ u, ‖G u‖ ≤ L := by
+    intro u
+    rcases eq_or_ne u 0 with rfl | hu
+    · simp [hG]
+    have h := hL.dist_le_mul (x - u) x
+    rw [dist_eq_norm, dist_eq_norm, show x - u - x = -u by ring, norm_neg,
+      Real.norm_eq_abs] at h
+    simp only [hG, norm_div, Complex.norm_real, Real.norm_eq_abs]
+    rw [div_le_iff₀ (abs_pos.2 hu)]
+    exact h
+  have hGm : Measurable G := by simp only [hG]; fun_prop
+  set B : Set ℝ := Icc (-R) R with hB
+  have hBm : MeasurableSet B := measurableSet_Icc
+  have hBi : ∀ c : ℝ, Integrable (B.indicator fun _ : ℝ => c) :=
+    fun c => (integrable_indicator_iff hBm).2 (integrableOn_const measure_Icc_lt_top.ne)
+  have hBG : ∀ (S : Set ℝ), MeasurableSet S → ∀ k : ℝ → ℂ, Measurable k → (∀ u, ‖k u‖ ≤ 1) →
+      Integrable ((S ∩ B).indicator fun u => G u * k u) := by
+    intro S hS k hk hk1
+    refine (hBi L).mono' ((hGm.mul hk).indicator (hS.inter hBm)).aestronglyMeasurable ?_
+    · refine Eventually.of_forall fun u => ?_
+      by_cases hu : u ∈ S ∩ B
+      · rw [indicator_of_mem hu, indicator_of_mem hu.2, norm_mul]
+        simpa using mul_le_mul (hGb u) (hk1 u) (norm_nonneg _) (by
+          have := hGb u; exact (norm_nonneg _).trans this)
+      · rw [indicator_of_notMem hu, norm_zero]
+        by_cases hb : u ∈ B
+        · rw [indicator_of_mem hb]
+          exact L.2
+        · rw [indicator_of_notMem hb]
+  set pv : ℂ := ∫ u, B.indicator G u with hpv
+  have hBsymm : ∀ u, -u ∈ B ↔ u ∈ B := fun u => by
+    simp only [hB, mem_Icc]; constructor <;> rintro ⟨h1, h2⟩ <;> constructor <;> linarith
+  have hlimG : ∀ (k : ℝ → ℝ → ℂ), (∀ δ, 0 < δ → Measurable (k δ)) →
+      (∀ δ, 0 < δ → ∀ u, ‖k δ u‖ ≤ 1) →
+      (∀ u, u ≠ 0 → Tendsto (fun δ => k δ u) (𝓝[>] 0) (𝓝 1)) →
+      ∀ (T : ℝ → Set ℝ), (∀ δ, 0 < δ → MeasurableSet (T δ)) →
+      (∀ u, u ≠ 0 → ∀ᶠ δ in 𝓝[>] 0, u ∈ T δ) →
+      Tendsto (fun δ => ∫ u, (T δ ∩ B).indicator (fun u => G u * k δ u) u) (𝓝[>] 0)
+        (𝓝 pv) := by
+    intro k hkm hk1 hk T hTm hT
+    refine tendsto_integral_filter_of_dominated_convergence (B.indicator fun _ => (L : ℝ))
+      ?_ ?_ (hBi L) ?_
+    · filter_upwards [self_mem_nhdsWithin] with δ (hδ : 0 < δ)
+      exact (hBG _ (hTm δ hδ) _ (hkm δ hδ) (hk1 δ hδ)).aestronglyMeasurable
+    · filter_upwards [self_mem_nhdsWithin] with δ (hδ : 0 < δ)
+      refine Eventually.of_forall fun u => ?_
+      by_cases hu : u ∈ T δ ∩ B
+      · rw [indicator_of_mem hu, indicator_of_mem hu.2, norm_mul]
+        calc ‖G u‖ * ‖k δ u‖ ≤ L * 1 :=
+              mul_le_mul (hGb u) (hk1 δ hδ u) (norm_nonneg _) L.2
+          _ = L := mul_one _
+      · rw [indicator_of_notMem hu, norm_zero]
+        by_cases hb : u ∈ B
+        · rw [indicator_of_mem hb]; exact L.2
+        · rw [indicator_of_notMem hb]
+    · filter_upwards [Measure.ae_ne volume 0] with u hu
+      by_cases hb : u ∈ B
+      · have h := (hk u hu).const_mul (G u)
+        rw [mul_one] at h
+        rw [indicator_of_mem hb]
+        refine h.congr' ?_
+        filter_upwards [hT u hu] with δ hδ
+        rw [indicator_of_mem (show u ∈ T δ ∩ B from ⟨hδ, hb⟩)]
+      · rw [indicator_of_notMem hb]
+        exact tendsto_const_nhds.congr fun δ =>
+          (indicator_of_notMem (fun (h : u ∈ T δ ∩ B) => hb h.2) _).symm
+  refine ⟨pv, ?_, ?_⟩
+  · set T : ℝ → Set ℝ := fun δ => {u : ℝ | δ < |u|} with hT
+    have hTm : ∀ δ, MeasurableSet (T δ) := fun δ =>
+      measurableSet_lt measurable_const continuous_abs.measurable
+    have h := hlimG (fun _ _ => 1) (fun _ _ => measurable_const) (fun _ _ _ => by simp)
+      (fun _ _ => tendsto_const_nhds) T (fun δ _ => hTm δ) (fun u hu => by
+        filter_upwards [Ioo_mem_nhdsGT (abs_pos.2 hu)] with δ hδ
+        exact hδ.2)
+    refine h.congr' ?_
+    filter_upwards [Ioo_mem_nhdsGT hR0] with δ hδ
+    have hS : MeasurableSet {y : ℝ | δ < |x - y|} :=
+      measurableSet_lt measurable_const (by fun_prop)
+    rw [← MeasureTheory.integral_indicator hS, ← integral_sub_left_eq_self
+      ({y : ℝ | δ < |x - y|}.indicator fun y => f y / ((x : ℂ) - y)) volume x]
+    have hi2 : Integrable ((T δ ∩ B).indicator fun u => f x / u) := by
+      refine (hBi (‖f x‖ / δ)).mono'
+        ((by fun_prop : Measurable fun u : ℝ => f x / u).indicator
+          ((hTm δ).inter hBm)).aestronglyMeasurable ?_
+      refine Eventually.of_forall fun u => ?_
+      by_cases hu : u ∈ T δ ∩ B
+      · rw [indicator_of_mem hu, indicator_of_mem hu.2, norm_div, Complex.norm_real,
+          Real.norm_eq_abs]
+        have h1 : δ < |u| := hu.1
+        exact div_le_div_of_nonneg_left (norm_nonneg _) hδ.1 h1.le
+      · rw [indicator_of_notMem hu, norm_zero]
+        by_cases hb : u ∈ B
+        · rw [indicator_of_mem hb]; exact div_nonneg (norm_nonneg _) hδ.1.le
+        · rw [indicator_of_notMem hb]
+    have hodd := integral_indicator_eq_zero_of_odd (T := T δ ∩ B)
+      (fun u => by simp only [mem_inter_iff, hT, mem_ofPred_eq, abs_neg, hBsymm])
+      (k := fun u => f x / u) (fun u => by push_cast; ring)
+    rw [← add_zero (∫ u, (T δ ∩ B).indicator (fun u => G u * 1) u), ← hodd,
+      ← MeasureTheory.integral_add (hBG _ (hTm δ) _ measurable_const (fun _ => by simp)) hi2]
+    congr 1; funext u
+    simp only [mul_one]
+    by_cases hu : u ∈ T δ
+    · have hu' : δ < |u| := hu
+      have hu0 : u ≠ 0 := fun h => by rw [h, abs_zero] at hu'; linarith [hδ.1]
+      have hmem : x - u ∈ {y : ℝ | δ < |x - y|} := by simpa using hu'
+      rw [indicator_of_mem hmem]
+      by_cases hb : u ∈ B
+      · rw [indicator_of_mem (show u ∈ T δ ∩ B from ⟨hu, hb⟩),
+          indicator_of_mem (show u ∈ T δ ∩ B from ⟨hu, hb⟩)]
+        have : (u : ℂ) ≠ 0 := ofReal_ne_zero.2 hu0
+        simp only [hG]
+        rw [← add_div, sub_add_cancel]
+        push_cast
+        ring
+      · rw [indicator_of_notMem (fun (h : u ∈ T δ ∩ B) => hb h.2),
+          indicator_of_notMem (fun (h : u ∈ T δ ∩ B) => hb h.2)]
+        have hbu : R < |u| := by
+          simp only [hB, mem_Icc, not_and_or, not_le] at hb
+          rcases hb with hb | hb
+          · rw [abs_of_neg (by linarith)]; linarith
+          · rw [abs_of_pos (by linarith)]; linarith
+        rw [hRs u hbu, zero_div, add_zero]
+    · have hu' : ¬ δ < |u| := hu
+      have hmem : x - u ∉ {y : ℝ | δ < |x - y|} := by simpa using hu'
+      rw [indicator_of_notMem hmem, indicator_of_notMem (fun (h : u ∈ T δ ∩ B) => hu h.1),
+        indicator_of_notMem (fun (h : u ∈ T δ ∩ B) => hu h.1), add_zero]
+  · have hs2 : (s : ℂ) ^ 2 = 1 := by rcases hs with rfl | rfl <;> norm_num
+    set k : ℝ → ℝ → ℂ := fun ε u => ((u ^ 2 / (u ^ 2 + ε ^ 2) : ℝ) : ℂ) with hk
+    have hkm : ∀ ε, 0 < ε → Measurable (k ε) := fun ε _ => by simp only [hk]; fun_prop
+    have hk1 : ∀ ε, 0 < ε → ∀ u, ‖k ε u‖ ≤ 1 := by
+      intro ε hε u
+      simp only [hk, Complex.norm_real, Real.norm_eq_abs]
+      rw [abs_of_nonneg (by positivity), div_le_one (by positivity)]
+      nlinarith [sq_nonneg ε]
+    have hk0 : ∀ u, u ≠ 0 → Tendsto (fun ε => k ε u) (𝓝[>] 0) (𝓝 1) := by
+      intro u hu
+      have hpos : 0 < u ^ 2 := by positivity
+      have hc : ContinuousAt (fun ε : ℝ => ((u ^ 2 / (u ^ 2 + ε ^ 2) : ℝ) : ℂ)) 0 :=
+        (Complex.continuous_ofReal.comp (continuous_const.div (by fun_prop)
+          fun ε => by positivity)).continuousAt
+      have h := hc.tendsto
+      simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, add_zero,
+        div_self hpos.ne', ofReal_one] at h
+      exact h.mono_left nhdsWithin_le_nhds
+    have h1 := hlimG k hkm hk1 hk0 (fun _ => univ) (fun _ _ => MeasurableSet.univ)
+      (fun _ _ => Eventually.of_forall fun _ => mem_univ _)
+    simp only [univ_inter] at h1
+    -- the Poisson part
+    have hfi : Integrable f := hfc.integrable_of_hasCompactSupport hcs
+    have hgi : Integrable fun u => f (x - u) := hfi.comp_sub_left x
+    have hgc : Tendsto (fun u => f (x - u)) (𝓝 0) (𝓝 (f x)) := by
+      have := ((by fun_prop : Continuous fun u : ℝ => f (x - u)).tendsto 0)
+      simpa using this
+    have h3 := Real.tendsto_integral_poissonKernelLine_mul hgi
+      (hgc.mono_left nhdsWithin_le_nhds) (hgc.mono_left nhdsWithin_le_nhds)
+    rw [← two_mul, mul_div_cancel_left₀ _ two_ne_zero] at h3
+    have hlim := h1.sub (h3.const_mul ((s : ℂ) * Real.pi * I))
+    refine hlim.congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
+    -- the odd part
+    have hi2 : Integrable (B.indicator fun u => f x * ((u / (u ^ 2 + ε ^ 2) : ℝ) : ℂ)) := by
+      refine (hBi (‖f x‖ / ε)).mono'
+        ((by fun_prop : Measurable fun u : ℝ => f x * ((u / (u ^ 2 + ε ^ 2) : ℝ) : ℂ)).indicator
+          hBm).aestronglyMeasurable ?_
+      refine Eventually.of_forall fun u => ?_
+      by_cases hb : u ∈ B
+      · rw [indicator_of_mem hb, indicator_of_mem hb, norm_mul, Complex.norm_real,
+          Real.norm_eq_abs, abs_div, abs_of_pos (by positivity : 0 < u ^ 2 + ε ^ 2),
+          div_eq_mul_inv (‖f x‖)]
+        refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+        rw [div_le_iff₀ (by positivity), inv_mul_eq_div, le_div_iff₀ hε]
+        nlinarith [sq_nonneg (|u| - ε), sq_abs u]
+      · rw [indicator_of_notMem hb, indicator_of_notMem hb, norm_zero]
+    have hodd := integral_indicator_eq_zero_of_odd (T := B) hBsymm
+      (k := fun u => f x * ((u / (u ^ 2 + ε ^ 2) : ℝ) : ℂ)) (fun u => by push_cast; ring)
+    have hi3 : Integrable fun u => (Real.poissonKernelLine 0 ε u : ℂ) * f (x - u) :=
+      hgi.bdd_mul (c := 1 / (Real.pi * ε))
+        (Complex.continuous_ofReal.comp
+          (Real.continuous_poissonKernelLine 0 hε)).aestronglyMeasurable
+        (Eventually.of_forall fun t => by
+          rw [Complex.norm_real, Real.norm_eq_abs,
+            abs_of_nonneg (Real.poissonKernelLine_nonneg 0 hε t)]
+          exact Real.poissonKernelLine_le 0 hε t)
+    have hi1 := hBG univ MeasurableSet.univ (k ε) (hkm ε hε) (hk1 ε hε)
+    simp only [univ_inter] at hi1
+    have hi12 : Integrable fun u => B.indicator (fun u => G u * k ε u) u +
+        B.indicator (fun u => f x * ((u / (u ^ 2 + ε ^ 2) : ℝ) : ℂ)) u := hi1.add hi2
+    rw [← add_zero (∫ u, B.indicator (fun u => G u * k ε u) u), ← hodd,
+      ← MeasureTheory.integral_add hi1 hi2, ← MeasureTheory.integral_const_mul,
+      ← MeasureTheory.integral_sub hi12
+        (hi3.const_mul _), ← integral_sub_left_eq_self
+        (fun y => f y / ((x : ℂ) + s * ε * I - y)) volume x]
+    refine MeasureTheory.integral_congr_ae (Eventually.of_forall fun u => ?_)
+    simp only
+    have hD : ((u ^ 2 + ε ^ 2 : ℝ) : ℂ) ≠ 0 := by
+      rw [ofReal_ne_zero]; positivity
+    have hden : (x : ℂ) + s * ε * I - ((x - u : ℝ) : ℂ) ≠ 0 := by
+      intro h
+      have := congrArg Complex.im h
+      simp at this
+      rcases hs with rfl | rfl <;> simp at this <;> linarith
+    have hinv : 1 / ((x : ℂ) + s * ε * I - ((x - u : ℝ) : ℂ)) =
+        (u - s * ε * I) / ((u ^ 2 + ε ^ 2 : ℝ) : ℂ) := by
+      rw [div_eq_div_iff hden hD]
+      push_cast
+      ring_nf
+      rw [I_sq, hs2]
+      ring
+    have hGu : G u * (u : ℂ) ^ 2 = (f (x - u) - f x) * u := by
+      rcases eq_or_ne u 0 with rfl | hu
+      · simp
+      have : (u : ℂ) ≠ 0 := ofReal_ne_zero.2 hu
+      simp only [hG]
+      field_simp
+    have hpi : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
+    rw [div_eq_mul_one_div, hinv]
+    by_cases hb : u ∈ B
+    · rw [indicator_of_mem hb, indicator_of_mem hb]
+      clear_value G
+      generalize G u = g at hGu ⊢
+      simp only [hk, Real.poissonKernelLine, sub_zero]
+      push_cast at hD ⊢
+      field_simp
+      linear_combination hGu
+    · rw [indicator_of_notMem hb, indicator_of_notMem hb]
+      have hbu : R < |u| := by
+        simp only [hB, mem_Icc, not_and_or, not_le] at hb
+        rcases hb with hb | hb
+        · rw [abs_of_neg (by linarith)]; linarith
+        · rw [abs_of_pos (by linarith)]; linarith
+      rw [hRs u hbu]
+      ring
+
 
 /-- DLMF 1.18.55: `√x J_ν(x√λ)` is an eigenfunction of the Bessel operator with eigenvalue
 `λ ≥ 0` on `(0, ∞)` (real `ν`, Mathlib's `Complex.besselJ`, principal powers). -/

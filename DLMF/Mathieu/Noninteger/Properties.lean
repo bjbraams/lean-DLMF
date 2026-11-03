@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Noninteger.Basic
+public import DLMF.Mathieu.Noninteger.CoefficientPaths
 public import DLMF.Mathieu.Noninteger.ExpSeries
 public import DLMF.Mathieu.Noninteger.RealContinuation
 public import DLMF.Mathieu.Properties
@@ -413,16 +414,6 @@ theorem mathieuMe_add_pi {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (z q :
     rw [← Complex.exp_add, ← Complex.exp_add]; congr 1; ring
   rw [h, Complex.exp_int_mul_two_pi_mul_I]; ring
 
-/-- **Orthogonality** (DLMF 28.12.7):
-`∫₀^π me_{ν+2m}(x, q) me_{ν+2n}(-x, q) dx = 0` for `m ≠ n`, `ν ∉ ℤ`, `q` normal along the
-segment with respect to `ν + 2m` and `ν + 2n`. -/
-@[dlmf 28.12.E7]
-theorem integral_mathieuMe_orthogonal {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {m n : ℤ}
-    (hmn : m ≠ n) (hm : MathieuNormalSegment (ν + 2 * m) q)
-    (hn : MathieuNormalSegment (ν + 2 * n) q) :
-    ∫ x in (0 : ℝ)..π, mathieuMe (ν + 2 * m) x q * mathieuMe (ν + 2 * n) (-x) q = 0 := by
-  sorry
-
 /-- **Change of sign of `ν`** (DLMF 28.12.8): `me_{-ν}(z, q) = me_ν(-z, q)` for `ν ∉ ℤ`. -/
 @[dlmf 28.12.E8]
 theorem mathieuMe_neg_nu {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (z q : ℂ) :
@@ -521,8 +512,8 @@ private lemma integral_mul_eq_zero_of_pseudoperiodic {a b q μ : ℂ} {f g : ℂ
   exact (mul_eq_zero.mp hint).resolve_left (sub_ne_zero.mpr hab.symm)
 
 /-- **Orthogonality with distinct eigenvalues** (DLMF 28.12.7 under the extra hypothesis
-`λ_{ν+2m}(q) ≠ λ_{ν+2n}(q)`; Green's identity on `[0, π]`). The statement
-`integral_mathieuMe_orthogonal` without this hypothesis remains admitted. -/
+`λ_{ν+2m}(q) ≠ λ_{ν+2n}(q)`; Green's identity on `[0, π]`). The hypothesis always holds
+(`DLMF.Mathieu.IsMathieuLambdaPath.lambda_ne`). -/
 private lemma integral_mathieuMe_orthogonal_of_mathieuLambda_ne {ν q : ℂ}
     (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
     {m n : ℤ} (hm : MathieuNormalSegment (ν + 2 * m) q)
@@ -542,6 +533,21 @@ private lemma integral_mathieuMe_orthogonal_of_mathieuLambda_ne {ν q : ℂ}
     rw [show (π : ℂ) * I * -(ν + 2 * n) = -(π * I * (ν + 2 * m)) + (m - n : ℤ) * (2 * π * I) by
       push_cast; ring, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
   exact e
+
+/-- **Orthogonality** (DLMF 28.12.7):
+`∫₀^π me_{ν+2m}(x, q) me_{ν+2n}(-x, q) dx = 0` for `m ≠ n`, `ν ∉ ℤ`, `q` normal along the
+segment with respect to `ν + 2m` and `ν + 2n`. -/
+@[dlmf 28.12.E7]
+theorem integral_mathieuMe_orthogonal {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {m n : ℤ}
+    (hmn : m ≠ n) (hm : MathieuNormalSegment (ν + 2 * m) q)
+    (hn : MathieuNormalSegment (ν + 2 * n) q) :
+    ∫ x in (0 : ℝ)..π, mathieuMe (ν + 2 * m) x q * mathieuMe (ν + 2 * n) (-x) q = 0 := by
+  refine integral_mathieuMe_orthogonal_of_mathieuLambda_ne hν hm hn ?_
+  obtain ⟨Λ₁, c₁, hp₁, e₁, -⟩ := exists_isMathieuLambdaPath_mathieuLambdaData hm
+  obtain ⟨Λ₂, c₂, hp₂, e₂, -⟩ := exists_isMathieuLambdaPath_mathieuLambdaData hn
+  rw [mathieuLambda_of_not_int (intCast_ne_add_two_mul_of_not_int hν m),
+    mathieuLambda_of_not_int (intCast_ne_add_two_mul_of_not_int hν n), ← e₁, ← e₂]
+  exact hp₁.lambda_ne hν hmn hp₂ ⟨zero_le_one, le_rfl⟩
 
 /-- A Floquet solution with respect to `ν ∉ ℤ` whose reflection `w(-z)` is a Floquet solution
 with respect to `-ν` does not vanish at `0`, and `cos πν = w_I(π)`. -/

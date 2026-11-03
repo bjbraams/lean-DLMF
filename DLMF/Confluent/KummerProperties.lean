@@ -415,23 +415,23 @@ theorem SaffVarga.params {a c α : ℝ}
       (1 ≤ a ∧ a ≤ c ∧ α = 1) ∨
       (0 < a ∧ a < 1 ∧ a ≤ c ∧ c < 2 * a / (1 - a) ∧
         α = (2 * a - c + c * a) / (a ^ 2 + a))) :
-    0 < a ∧ 0 < c ∧ 0 < α ∧ α ≤ SaffVarga.kummerCoeffRatio a c 1 ∧
-      ∀ k : ℕ, α ≤ SaffVarga.kummerCoeffRatio a c (k + 2) -
-          SaffVarga.kummerCoeffRatio a c (k + 1) := by
-  have hdiff : ∀ k : ℕ, 0 < a → SaffVarga.kummerCoeffRatio a c (k + 2) -
-      SaffVarga.kummerCoeffRatio a c (k + 1) =
+    0 < a ∧ 0 < c ∧ 0 < α ∧ α ≤ SaffVarga.seriesCoeffRatio a c 1 ∧
+      ∀ k : ℕ, α ≤ SaffVarga.seriesCoeffRatio a c (k + 2) -
+          SaffVarga.seriesCoeffRatio a c (k + 1) := by
+  have hdiff : ∀ k : ℕ, 0 < a → SaffVarga.seriesCoeffRatio a c (k + 2) -
+      SaffVarga.seriesCoeffRatio a c (k + 1) =
       (a * c + 2 * a * (k + 1) - c + (k + 1) ^ 2 - (k + 1)) / ((a + (k + 1)) * (a + k)) := by
     intro k ha
     have h1 : 0 < a + k := by positivity
     have h2 : 0 < a + (k + 1) := by positivity
-    simp only [SaffVarga.kummerCoeffRatio]
+    simp only [SaffVarga.seriesCoeffRatio]
     push_cast
     rw [div_sub_div _ _ (by ring_nf; positivity) (by ring_nf; positivity), div_eq_div_iff
       (by ring_nf; positivity) (by positivity)]
     ring
   rcases hparams with ⟨hc, hca, rfl⟩ | ⟨ha, hac, rfl⟩ | ⟨ha, ha1, hac, hc2, rfl⟩
   · have ha : 0 < a := lt_of_lt_of_le hc hca
-    refine ⟨ha, hc, div_pos hc ha, by simp [SaffVarga.kummerCoeffRatio], fun k => ?_⟩
+    refine ⟨ha, hc, div_pos hc ha, by simp [SaffVarga.seriesCoeffRatio], fun k => ?_⟩
     rw [hdiff k ha, div_le_div_iff₀ ha (by positivity)]
     have : (a * c + 2 * a * (k + 1) - c + (k + 1) ^ 2 - (k + 1)) * a -
         c * ((a + (k + 1)) * (a + k)) = (k + 1) * (a - c) * (2 * a + k) := by ring
@@ -442,7 +442,7 @@ theorem SaffVarga.params {a c α : ℝ}
   · have ha0 : 0 < a := by linarith
     have hc : 0 < c := by linarith
     refine ⟨ha0, hc, one_pos, ?_, fun k => ?_⟩
-    · have : SaffVarga.kummerCoeffRatio a c 1 = c / a := by simp [SaffVarga.kummerCoeffRatio]
+    · have : SaffVarga.seriesCoeffRatio a c 1 = c / a := by simp [SaffVarga.seriesCoeffRatio]
       rw [this, le_div_iff₀ ha0]; linarith
     · rw [hdiff k ha0, le_div_iff₀ (by positivity)]
       have : (a * c + 2 * a * (k + 1) - c + (k + 1) ^ 2 - (k + 1)) -
@@ -454,7 +454,7 @@ theorem SaffVarga.params {a c α : ℝ}
       rw [lt_div_iff₀ h1a] at hc2; nlinarith
     have hden : 0 < a ^ 2 + a := by positivity
     refine ⟨ha, hc, div_pos hα hden, ?_, fun k => ?_⟩
-    · simp only [SaffVarga.kummerCoeffRatio]; push_cast
+    · simp only [SaffVarga.seriesCoeffRatio]; push_cast
       rw [div_le_div_iff₀ hden (by linarith)]
       nlinarith [mul_nonneg (show 0 ≤ c - a by linarith) ha.le]
     · rw [hdiff k ha, div_le_div_iff₀ hden (by positivity)]
@@ -480,18 +480,18 @@ theorem kummerM_ne_zero_of_mem_parabolicRegion {a c α : ℝ} {z : ℂ}
   have hck : ∀ k : ℕ, (c : ℂ) ≠ -k := fun k h => by
     have : c = -(k : ℝ) := by exact_mod_cast h
     have := k.cast_nonneg (α := ℝ); linarith
-  have hA : ∀ k, 0 < SaffVarga.kummerCoeff a c k := fun k => by
-    unfold SaffVarga.kummerCoeff
+  have hA : ∀ k, 0 < SaffVarga.seriesCoeff a c k := fun k => by
+    unfold SaffVarga.seriesCoeff
     have := ascPochhammer_pos k a ha
     have := ascPochhammer_pos k c hc
     positivity
-  have hb : ∀ k, 0 < SaffVarga.kummerCoeffRatio a c (k + 1) := fun k => by
-    unfold SaffVarga.kummerCoeffRatio; push_cast
+  have hb : ∀ k, 0 < SaffVarga.seriesCoeffRatio a c (k + 1) := fun k => by
+    unfold SaffVarga.seriesCoeffRatio; push_cast
     have : (0:ℝ) ≤ k := k.cast_nonneg
     apply div_pos (mul_pos (by linarith) (by linarith)) (by linarith)
-  have hbA : ∀ k, SaffVarga.kummerCoeffRatio a c (k + 1) * SaffVarga.kummerCoeff a c (k + 1) =
-      SaffVarga.kummerCoeff a c k := fun k => by
-    unfold SaffVarga.kummerCoeffRatio SaffVarga.kummerCoeff
+  have hbA : ∀ k, SaffVarga.seriesCoeffRatio a c (k + 1) * SaffVarga.seriesCoeff a c (k + 1) =
+      SaffVarga.seriesCoeff a c k := fun k => by
+    unfold SaffVarga.seriesCoeffRatio SaffVarga.seriesCoeff
     rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval, Nat.factorial_succ]
     have h1 : 0 < a + k := by positivity
     have h2 : 0 < c + k := by positivity
@@ -501,13 +501,13 @@ theorem kummerM_ne_zero_of_mem_parabolicRegion {a c α : ℝ} {z : ℂ}
     rw [show a + ((k:ℝ) + 1) - 1 = a + k by ring, show c + ((k:ℝ) + 1) - 1 = c + k by ring,
       div_mul_div_comm, div_eq_div_iff (by positivity) (by positivity)]
     ring
-  have hcoef : ∀ k, kummerMCoeff a c k = (SaffVarga.kummerCoeff a c k : ℂ) := fun k => by
-    simp only [kummerMCoeff, SaffVarga.kummerCoeff, poch_ofReal]
+  have hcoef : ∀ k, kummerMCoeff a c k = (SaffVarga.seriesCoeff a c k : ℂ) := fun k => by
+    simp only [kummerMCoeff, SaffVarga.seriesCoeff, poch_ofReal]
     push_cast; ring
   set p := FormalMultilinearSeries.ofScalars ℂ (kummerMCoeff a c) with hp
   have hps := hasFPowerSeriesOnBall_kummerM (a := (a : ℂ)) hck
   have hsum : ∀ n, (fun y => p.partialSum n y) =
-      fun y => ∑ k ∈ Finset.range n, (SaffVarga.kummerCoeff a c k : ℂ) * y ^ k := fun n => by
+      fun y => ∑ k ∈ Finset.range n, (SaffVarga.seriesCoeff a c k : ℂ) * y ^ k := fun n => by
     funext y
     simp only [FormalMultilinearSeries.partialSum, hp, FormalMultilinearSeries.ofScalars_apply_eq,
       hcoef, smul_eq_mul]

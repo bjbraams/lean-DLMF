@@ -174,7 +174,7 @@ theorem UniformBound.bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤
   have hB0 : 0 ≤ B := by positivity
   have hw1 := FerrersGreen.weight_one_le hx
   have hw0 := FerrersGreen.weight_pos hx
-  rw [FerrersGreen.ferrersP_zero]
+  rw [FerrersGreen.ferrersP_zero_eq_regularizedGaussHG]
   by_cases hx0 : 0 ≤ x
   · have hn : ‖(1-(x:ℂ))/2‖ ≤ 1/2 := by
       rw [show (1-(x:ℂ))/2 = (((1-x)/2:ℝ):ℂ) by push_cast; ring, Complex.norm_real,
@@ -237,7 +237,7 @@ theorem UniformBound.bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤
 /-- `λ ↦ 𝖯_λ(x)` is entire for `x > -1`. -/
 theorem UniformBound.continuous_degree {x : ℝ} (hx : -1 < x) : Continuous fun α : ℂ =>
     ferrersP α 0 x := by
-  simp only [FerrersGreen.ferrersP_zero]
+  simp only [FerrersGreen.ferrersP_zero_eq_regularizedGaussHG]
   exact (differentiable_regularizedGaussHG_comp (A := fun α : ℂ => α+1) (B := fun α : ℂ => -α)
     (C := fun _ => 1) (by fun_prop) (by fun_prop) (by fun_prop)
         (OrthogonalityIntegrals.half_mem_cutPlane hx)).continuous
@@ -473,13 +473,13 @@ theorem UniformBound.bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : 
   have hO : ‖ferrersOdd lam 0 x‖ ≤ MS' * FerrersGreen.weight x := by
     unfold ferrersOdd
     rw [show (1-lam-0)/2 = (1-lam)/2 by ring, show (lam-0+2)/2 = (lam+2)/2 by ring,
-                                                                                neg_zero, zero_div,
-      cpow_zero, one_mul, show (3/2:ℂ) = (1-lam)/2 + (lam+2)/2 by ring, norm_mul]
+      neg_zero, zero_div, cpow_zero, one_mul, show (3/2:ℂ) = (1-lam)/2 + (lam+2)/2 by
+          ring, norm_mul]
     have h := hMS ((1-lam)/2) ((lam+2)/2) ?_ ?_ x hx
     · calc ‖(x:ℂ)‖ * _ ≤ 1 * (MS * FerrersGreen.weight x) :=
              mul_le_mul hxa h (norm_nonneg _) zero_le_one
-        _ ≤ MS' * FerrersGreen.weight x := by rw [one_mul];
-                                 exact mul_le_mul_of_nonneg_right (le_max_left _ _) hw0.le
+        _ ≤ MS' * FerrersGreen.weight x := by
+          rw [one_mul]; exact mul_le_mul_of_nonneg_right (le_max_left _ _) hw0.le
     · calc ‖(1-lam)/2‖ ≤ ‖1-lam‖ := by rw [norm_div]; exact div_le_self (norm_nonneg _) (by simp)
         _ ≤ 1 + ‖lam‖ := by simpa using norm_sub_le (1:ℂ) lam
         _ ≤ _ := by linarith
@@ -657,9 +657,9 @@ theorem ferrers_product_integral_13 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
     rwa [Metric.mem_closedBall, dist_eq_norm] at hl
   have hlimI := UniformBound.tendsto_integral (F := fun lam x => ferrersQ lam 0 x)
       (f := ferrersQ ν 0)
-    (FerrersGreen.continuousOn_of_solution (FerrersGreen.ferrersQ_isFerrersSolution ν))
+    (FerrersGreen.continuousOn_of_solution (ferrersQ_isFerrersSolution ν 0))
     ((hM ν (by simp; linarith)).2)
-    (fun lam => FerrersGreen.continuousOn_of_solution (FerrersGreen.ferrersQ_isFerrersSolution lam))
+    (fun lam => FerrersGreen.continuousOn_of_solution (ferrersQ_isFerrersSolution lam 0))
     (by filter_upwards [hnear] with lam hl using (hM lam hl).2)
     (fun x hx => continuousAt_ferrersQ_degree hr hx)
   set N : ℂ → ℂ := fun lam =>
@@ -749,7 +749,7 @@ theorem ferrers_product_integral_15 (ν : ℂ) (hν : 0 < ν.re) :
   have hlimI := UniformBound.tendsto_integral (F := fun lam x => ferrersQ lam 0 x)
       (f := ferrersP ν 0)
     (FerrersGreen.continuousOn_ferrersP ν) (hMP ν le_rfl)
-    (fun lam => FerrersGreen.continuousOn_of_solution (FerrersGreen.ferrersQ_isFerrersSolution lam))
+    (fun lam => FerrersGreen.continuousOn_of_solution (ferrersQ_isFerrersSolution lam 0))
     (by filter_upwards [hnear] with lam hl using (hM lam hl).2)
     (fun x hx => continuousAt_ferrersQ_degree hr hx)
   set N : ℂ → ℂ := fun lam =>
@@ -978,15 +978,15 @@ theorem FerrersGreen.PQ_nat_pos (l m n : ℕ) (hm : 0 < m) (h : l ≠ n) (hl : m
     ((tendsto_const_nhds (x := (m-l-1:ℂ))).mul q3)).sub
     (((tendsto_const_nhds (x := (l+1:ℂ))).mul hxm).mul q2)
   have hcont : ContinuousOn (fun x => ferrersP l m x * ferrersQ n m x) (Ioo (-1) 1) :=
-    (FerrersGreen.continuousOn_of_solution' (ferrersP_isFerrersSolution _ _)).mul
-      (FerrersGreen.continuousOn_of_solution' (ferrersQ_isFerrersSolution _ _))
+    (FerrersGreen.continuousOn_of_solution' (DLMF.Legendre.ferrersP_isFerrersSolution _ _)).mul
+      (FerrersGreen.continuousOn_of_solution' (DLMF.Legendre.ferrersQ_isFerrersSolution _ _))
   have hint := FerrersGreen.intervalIntegrable_of_tendsto hcont q2 p2
   have hc : (l:ℂ)*(l+1) - n*(n+1) ≠ 0 := by
     rw [show (l:ℂ)*(l+1) - n*(n+1) = ((l:ℂ)-n)*(l+n+1) by ring]
     refine mul_ne_zero (sub_ne_zero.mpr (by exact_mod_cast h)) ?_
     exact_mod_cast (Nat.succ_ne_zero (l+n))
-  rw [FerrersGreen.integral_green_B (ferrersP_isFerrersSolution _ _)
-    (ferrersQ_isFerrersSolution _ _) hBeq hint hq hp hc]
+  rw [FerrersGreen.integral_green_B (DLMF.Legendre.ferrersP_isFerrersSolution _ _)
+    (DLMF.Legendre.ferrersQ_isFerrersSolution _ _) hBeq hint hq hp hc]
   have e1 : ((-1:ℂ))^(l+(n+1)+1) = (-1)^(l+n) := by
     rw [show l+(n+1)+1 = (l+n)+2 by ring, pow_add]; norm_num
   have e2 : (-1:ℂ)^(l+n+1) = -(-1)^(l+n) := by rw [pow_succ]; ring

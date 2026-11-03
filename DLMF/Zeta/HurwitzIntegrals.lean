@@ -579,15 +579,40 @@ theorem tendsto_integral_alternating_hurwitz {s a : ℂ} (hs1 : s ≠ 1)
 
 /-! ### §25.11(xi) Sums -/
 
-/-- **Logarithmic sum** (DLMF 25.11.37) for real `a > 1`, `n = 2, 3, …`, principal logarithms:
-`∑_{k≥1} ((-1)^k/k) ζ(nk, a) = -n ln Γ(a) + ln ∏_{j=0}^{n-1} Γ(a - e^{(2j+1)πi/n})`. -/
-@[dlmf 25.11.E37]
-theorem hasSum_hurwitzZeta_log_gamma {n : ℕ} (hn : 2 ≤ n) {a : ℝ} (ha : 1 < a) :
-    HasSum (fun k : ℕ => (-1) ^ (k + 1) / (k + 1 : ℂ) * hurwitzZetaComplex (n * (k + 1)) a)
-      (-n * Real.log (Real.Gamma a) +
-        Complex.log (∏ j ∈ Finset.range n, Gamma (a - cexp ((2 * j + 1) * π * I / n)))) := by
-  sorry
+open Finset in
+/-- `∏_{j<n} (z - e^{(2j+1)πi/n}) = zⁿ + 1`. -/
+private lemma prod_sub_exp_odd_mul_pi_I_div {n : ℕ} (hn : 0 < n) (z : ℂ) :
+    ∏ j ∈ range n, (z - cexp ((2 * j + 1) * π * I / n)) = z ^ n + 1 := by
+  have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast hn.ne'
+  have hζ := Complex.isPrimitiveRoot_exp n hn.ne'
+  have hα : cexp (π * I / n) ^ n = -1 := by
+    rw [← Complex.exp_nat_mul, show (n : ℂ) * (π * I / n) = π * I by field_simp,
+      Complex.exp_pi_mul_I]
+  have h := congrArg (Polynomial.eval z) (X_pow_sub_C_eq_prod hζ hn hα)
+  simp only [Polynomial.eval_sub, Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_C,
+    Polynomial.eval_prod] at h
+  rw [sub_neg_eq_add] at h
+  rw [h]
+  refine prod_congr rfl fun j _ => ?_
+  rw [← Complex.exp_nat_mul, ← Complex.exp_add]
+  congr 2
+  field_simp
 
+open Finset in
+/-- `∑_{j<n} e^{(2j+1)πi/n} = 0` for `n ≥ 2`. -/
+private lemma sum_exp_odd_mul_pi_I_div {n : ℕ} (hn : 2 ≤ n) :
+    ∑ j ∈ range n, cexp ((2 * j + 1) * π * I / n) = 0 := by
+  have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast (show n ≠ 0 by omega)
+  have hζ := Complex.isPrimitiveRoot_exp n (by omega)
+  have h := hζ.geom_sum_eq_zero (by omega)
+  have : ∀ j : ℕ, cexp ((2 * j + 1) * π * I / n) = cexp (2 * π * I / n) ^ j * cexp (π * I / n) := by
+    intro j
+    rw [← Complex.exp_nat_mul, ← Complex.exp_add]
+    congr 1
+    field_simp
+  simp only [this, ← sum_mul, h, zero_mul]
+
+open Finset in
 /-- **Logarithmic sum, exponentiated** (DLMF 25.11.37) for complex `Re a > 1`, `n = 2, 3, …`:
 `exp(∑_{k≥1} ((-1)^k/k) ζ(nk, a)) = Γ(a)^{-n} ∏_{j=0}^{n-1} Γ(a - e^{(2j+1)πi/n})`
 (branch-free form of the printed identity, whose logarithms must be read as the analytic branch of
@@ -597,7 +622,188 @@ theorem exp_tsum_hurwitzZeta_eq_prod_gamma {n : ℕ} (hn : 2 ≤ n) {a : ℂ} (h
     Summable (fun k : ℕ => (-1) ^ (k + 1) / (k + 1 : ℂ) * hurwitzZetaComplex (n * (k + 1)) a) ∧
     cexp (∑' k : ℕ, (-1) ^ (k + 1) / (k + 1 : ℂ) * hurwitzZetaComplex (n * (k + 1)) a) =
       (∏ j ∈ Finset.range n, Gamma (a - cexp ((2 * j + 1) * π * I / n))) / Gamma a ^ n := by
-  sorry
+  set ω : ℕ → ℂ := fun j => cexp ((2 * j + 1) * π * I / n) with hω
+  set x : ℕ → ℂ := fun m => 1 / ((m : ℂ) + a) ^ n with hx
+  have hre : ∀ m : ℕ, ((m : ℂ) + a).re = m + a.re := fun m => by simp
+  have hnorm : ∀ m : ℕ, (m : ℝ) + a.re ≤ ‖(m : ℂ) + a‖ := fun m =>
+    (hre m) ▸ Complex.re_le_norm _
+  have hpos : ∀ m : ℕ, (1 : ℝ) < m + a.re := fun m => by linarith [m.cast_nonneg (α := ℝ)]
+  have hma0 : ∀ m : ℕ, (m : ℂ) + a ≠ 0 := fun m h => by
+    have := hre m; rw [h] at this; simp at this; linarith [hpos m]
+  have hxle : ∀ m : ℕ, ‖x m‖ ≤ 1 / ((m : ℝ) + a.re) ^ n := by
+    intro m
+    simp only [x, norm_div, norm_one, norm_pow]
+    exact one_div_le_one_div_of_le (pow_pos (by linarith [hpos m]) n)
+      (pow_le_pow_left₀ (by linarith [hpos m]) (hnorm m) n)
+  set r : ℝ := 1 / a.re ^ n with hr_def
+  have hr0 : 0 ≤ r := by positivity
+  have hr1 : r < 1 := by
+    rw [hr_def, div_lt_one (by positivity)]
+    exact one_lt_pow₀ ha (by omega)
+  have hxr : ∀ m : ℕ, ‖x m‖ ≤ r := fun m => (hxle m).trans (by
+    rw [hr_def]; gcongr; linarith [m.cast_nonneg (α := ℝ)])
+  have hxs : Summable fun m => ‖x m‖ := by
+    refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun m => (hxle m).trans ?_)
+      ((summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr (by omega : 1 < n)))
+    push_cast
+    gcongr
+  -- the double series
+  set u : ℕ × ℕ → ℂ := fun p => (-1) ^ (p.2 + 1) / (p.2 + 1 : ℂ) * x p.1 ^ (p.2 + 1) with hu_def
+  have hu_norm : ∀ p, ‖u p‖ ≤ ‖x p.1‖ * r ^ p.2 := by
+    intro ⟨m, k⟩
+    have h1 : ‖(k : ℂ) + 1‖ = k + 1 := by norm_cast
+    have e : ‖u (m, k)‖ = 1 / ((k : ℝ) + 1) * (‖x m‖ ^ k * ‖x m‖) := by
+      simp only [u, norm_mul, norm_div, norm_pow, norm_neg, norm_one, one_pow, h1, pow_succ]
+      ring
+    rw [e]
+    have h2 : ‖x m‖ ^ k ≤ r ^ k := pow_le_pow_left₀ (norm_nonneg _) (hxr m) k
+    have h3 : (1 : ℝ) / (k + 1) ≤ 1 := by
+      rw [div_le_one (by positivity)]; linarith [k.cast_nonneg (α := ℝ)]
+    calc 1 / ((k : ℝ) + 1) * (‖x m‖ ^ k * ‖x m‖) ≤ 1 * (r ^ k * ‖x m‖) := by
+          gcongr
+      _ = ‖x m‖ * r ^ k := by ring
+  have hus : Summable u := Summable.of_norm_bounded
+    (hxs.mul_of_nonneg (summable_geometric_of_lt_one hr0 hr1) (fun _ => norm_nonneg _)
+      (fun _ => by positivity)) hu_norm
+  have hS := hus.hasSum
+  have hzeta : ∀ k : ℕ, HasSum (fun m => u (m, k))
+      ((-1) ^ (k + 1) / (k + 1 : ℂ) * hurwitzZetaComplex (n * (k + 1)) a) := by
+    intro k
+    have hs : 1 < ((n : ℂ) * (k + 1)).re := by
+      simp
+      have : (2 : ℝ) ≤ n := by exact_mod_cast hn
+      nlinarith [k.cast_nonneg (α := ℝ)]
+    refine ((hasSum_hurwitzZetaComplex' hs).mul_left ((-1) ^ (k + 1) / (k + 1 : ℂ))).congr_fun ?_
+    intro m
+    simp only [u, x]
+    rw [show (n : ℂ) * (k + 1) = ((n * (k + 1) : ℕ) : ℂ) by push_cast; ring, cpow_natCast,
+      pow_mul, one_div_pow]
+  have hlog : ∀ m : ℕ, HasSum (fun k => u (m, k)) (-Complex.log (1 + x m)) := by
+    intro m
+    have hx1 : ‖x m‖ < 1 := (hxr m).trans_lt hr1
+    have h := (hasSum_nat_add_iff' 1).mpr (hasSum_taylorSeries_log hx1)
+    simp only [range_one, sum_singleton, pow_zero, Nat.cast_zero, div_zero, sub_zero] at h
+    refine h.neg.congr_fun fun k => ?_
+    simp only [u]
+    push_cast
+    ring
+  have hv : HasSum (u ∘ Equiv.prodComm ℕ ℕ) (∑' p, u p) :=
+    (Equiv.prodComm ℕ ℕ).hasSum_iff.mpr hS
+  have hK := hv.prod_fiberwise fun k => hzeta k
+  have hM := hS.prod_fiberwise hlog
+  refine ⟨hK.summable, ?_⟩
+  rw [hK.tsum_eq]
+  set T := ∑' p, u p
+  -- the exponential of the partial sums
+  have hE := ((continuous_exp.tendsto T).comp hM.tendsto_sum_nat)
+  have h1x : ∀ m : ℕ, 1 + x m ≠ 0 := fun m h => by
+    have := (hxr m).trans_lt hr1
+    rw [show x m = -1 by linear_combination h] at this
+    simp at this
+  have hEq : ∀ N : ℕ, (cexp ∘ fun N => ∑ m ∈ range N, -Complex.log (1 + x m)) N =
+      ∏ m ∈ range N, (1 + x m)⁻¹ := by
+    intro N
+    simp only [Function.comp_apply, Complex.exp_sum, Complex.exp_neg,
+      Complex.exp_log (h1x _)]
+  simp only [funext hEq] at hE
+  -- Euler's limit formula
+  have hΓ : Tendsto (fun N => GammaSeq a N ^ n * ∏ m ∈ range (N + 1), (1 + x m)⁻¹) atTop
+      (𝓝 (Gamma a ^ n * cexp T)) :=
+    ((GammaSeq_tendsto_Gamma a).pow n).mul (hE.comp (tendsto_add_atTop_nat 1))
+  have hΓω : Tendsto (fun N => ∏ j ∈ range n, GammaSeq (a - ω j) N) atTop
+      (𝓝 (∏ j ∈ range n, Gamma (a - ω j))) :=
+    tendsto_finsetProd _ fun j _ => GammaSeq_tendsto_Gamma _
+  have hy1 : ∀ m : ℕ, ((m : ℂ) + a) ^ n + 1 ≠ 0 := by
+    intro m h
+    apply h1x m
+    have h2 := pow_ne_zero n (hma0 m)
+    simp only [x]
+    field_simp
+    linear_combination h
+  have hid : ∀ N : ℕ, 1 ≤ N → ∏ j ∈ range n, GammaSeq (a - ω j) N =
+      GammaSeq a N ^ n * ∏ m ∈ range (N + 1), (1 + x m)⁻¹ := by
+    intro N hN
+    have hN0 : (N : ℂ) ≠ 0 := by exact_mod_cast (by omega : N ≠ 0)
+    have hcp : ∏ j ∈ range n, (N : ℂ) ^ (a - ω j) = ((N : ℂ) ^ a) ^ n := by
+      simp only [cpow_def_of_ne_zero hN0, ← Complex.exp_sum, ← Complex.exp_nat_mul, ← mul_sum,
+        sum_sub_distrib, sum_const, card_range, ω, sum_exp_odd_mul_pi_I_div hn]
+      congr 1
+      simp only [nsmul_eq_mul]
+      ring
+    have hroot : ∏ j ∈ range n, ∏ m ∈ range (N + 1), (a - ω j + m) =
+        ∏ m ∈ range (N + 1), (((m : ℂ) + a) ^ n + 1) := by
+      rw [Finset.prod_comm]
+      refine prod_congr rfl fun m _ => ?_
+      rw [← prod_sub_exp_odd_mul_pi_I_div (by omega)]
+      exact prod_congr rfl fun j _ => by simp only [ω]; ring
+    have hinv : ∀ m : ℕ, (1 + x m)⁻¹ = ((m : ℂ) + a) ^ n / (((m : ℂ) + a) ^ n + 1) := by
+      intro m
+      have h2 := pow_ne_zero n (hma0 m)
+      have h3 := hy1 m
+      simp only [x]
+      field_simp
+    have hcomm : ∏ m ∈ range (N + 1), ((m : ℂ) + a) = ∏ m ∈ range (N + 1), (a + m) :=
+      prod_congr rfl fun _ _ => add_comm _ _
+    have hP : ∏ m ∈ range (N + 1), (a + m) ≠ 0 := by
+      rw [← hcomm]; exact prod_ne_zero_iff.mpr fun m _ => hma0 m
+    have hQ : ∏ m ∈ range (N + 1), (((m : ℂ) + a) ^ n + 1) ≠ 0 :=
+      prod_ne_zero_iff.mpr fun m _ => hy1 m
+    simp only [GammaSeq, hinv, div_pow, mul_pow, prod_div_distrib, prod_mul_distrib, prod_const,
+      card_range, hcp, hroot, Finset.prod_pow, hcomm]
+    field_simp
+  have hlim := tendsto_nhds_unique (hΓω.congr' (by
+    filter_upwards [eventually_ge_atTop 1] with N hN; exact hid N hN)) hΓ
+  have hΓa : Gamma a ^ n ≠ 0 := pow_ne_zero _ (Complex.Gamma_ne_zero fun m h => by
+    have := congrArg Complex.re h; simp at this; linarith [m.cast_nonneg (α := ℝ)])
+  rw [hlim]
+  field_simp
+
+/-- **Logarithmic sum** (DLMF 25.11.37) for real `a > 1`, `n = 2, 3, …`, principal logarithms:
+`∑_{k≥1} ((-1)^k/k) ζ(nk, a) = -n ln Γ(a) + ln ∏_{j=0}^{n-1} Γ(a - e^{(2j+1)πi/n})`. -/
+@[dlmf 25.11.E37]
+theorem hasSum_hurwitzZeta_log_gamma {n : ℕ} (hn : 2 ≤ n) {a : ℝ} (ha : 1 < a) :
+    HasSum (fun k : ℕ => (-1) ^ (k + 1) / (k + 1 : ℂ) * hurwitzZetaComplex (n * (k + 1)) a)
+      (-n * Real.log (Real.Gamma a) +
+        Complex.log (∏ j ∈ Finset.range n, Gamma (a - cexp ((2 * j + 1) * π * I / n)))) := by
+  obtain ⟨hsum, hexp⟩ := exp_tsum_hurwitzZeta_eq_prod_gamma hn (a := a) (by simpa using ha)
+  set T := ∑' k : ℕ, (-1) ^ (k + 1) / (k + 1 : ℂ) * hurwitzZetaComplex (n * (k + 1)) a
+  have hzr : ∀ k : ℕ, (hurwitzZetaComplex (n * (k + 1)) a).im = 0 := by
+    intro k
+    have hs : 1 < ((n : ℂ) * (k + 1)).re := by
+      simp
+      have : (2 : ℝ) ≤ n := by exact_mod_cast hn
+      nlinarith [k.cast_nonneg (α := ℝ)]
+    have h := (hasSum_hurwitzZetaComplex' (a := (a : ℂ)) hs).mapL Complex.imCLM
+    have h0 : HasSum (fun m : ℕ => Complex.imCLM (1 / ((m : ℂ) + a) ^ ((n : ℂ) * (k + 1)))) 0 := by
+      convert hasSum_zero with m
+      simp only [Complex.imCLM_apply]
+      rw [show (n : ℂ) * (k + 1) = ((n * (k + 1) : ℕ) : ℂ) by push_cast; ring, cpow_natCast,
+        show (m : ℂ) + a = ((m + a : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_pow,
+        ← Complex.ofReal_one, ← Complex.ofReal_div, Complex.ofReal_im]
+    simpa using h.unique h0
+  have hTim : T.im = 0 := by
+    have h := hsum.hasSum.mapL Complex.imCLM
+    refine (h.unique ?_)
+    convert hasSum_zero with k
+    simp only [Complex.imCLM_apply]
+    rw [show (-1 : ℂ) ^ (k + 1) / (k + 1 : ℂ) = (((-1) ^ (k + 1) / (k + 1) : ℝ) : ℂ) by
+      push_cast; ring, Complex.im_ofReal_mul, hzr, mul_zero]
+  have hT : T = (T.re : ℂ) := Complex.ext (by simp) (by simp [hTim])
+  have hΓ : Gamma (a : ℂ) = (Real.Gamma a : ℂ) := Complex.Gamma_ofReal a
+  have hΓpos : 0 < Real.Gamma a := Real.Gamma_pos_of_pos (by linarith)
+  have hprod : ∏ j ∈ Finset.range n, Gamma (a - cexp ((2 * j + 1) * π * I / n)) =
+      ((Real.Gamma a ^ n * Real.exp T.re : ℝ) : ℂ) := by
+    have hΓ0 : Gamma (a : ℂ) ^ n ≠ 0 := by rw [hΓ]; exact_mod_cast (pow_pos hΓpos n).ne'
+    rw [eq_div_iff hΓ0] at hexp
+    rw [← hexp, hΓ, show cexp T = ((Real.exp T.re : ℝ) : ℂ) by rw [Complex.ofReal_exp, ← hT]]
+    push_cast
+    ring
+  rw [hprod, ← Complex.ofReal_log (by positivity), Real.log_mul (by positivity) (by positivity),
+    Real.log_exp, Real.log_pow]
+  convert hsum.hasSum using 1
+  push_cast
+  rw [show ((T.re : ℝ) : ℂ) = T from hT.symm]
+  ring
 
 /-- `‖a‖ ≤ ‖a + m‖` for `Re a > 0` and `m ≥ 0`. -/
 private lemma norm_le_norm_add_natCast {a : ℂ} (ha : 0 < a.re) (m : ℕ) : ‖a‖ ≤ ‖a + m‖ := by

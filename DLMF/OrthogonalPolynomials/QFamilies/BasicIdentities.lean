@@ -37,7 +37,8 @@ the Askey–Wilson polynomials and q-Racah duality.
 * `qLaguerre_orthogonal`, `stieltjesWigert_orthogonal`: DLMF 18.27.16 and 18.27.20.
 * `askeyWilson_laurent_representation`: DLMF 18.28.1_5.
 * `askeyWilson_orthogonal`: DLMF 18.28.2.
-* `qGegenbauer_orthogonal`, `continuousQHermite_orthogonality`: DLMF 18.28.15 and 18.28.17.
+* `qGegenbauer_orthogonal`: DLMF 18.28.15; the continuous `q`-Hermite orthogonality 18.28.17 is in
+  `DLMF.OrthogonalPolynomials.QFamilies.ContinuousQHermite`.
 * `qRacah_duality`: DLMF 18.28.23.
 
 ## Implementation notes
@@ -1000,18 +1001,6 @@ theorem qGegenbauer_orthogonal {β q : ℝ} (hq : 0 < q) (hq1 : q < 1) (hβ : |�
     ∫ θ : ℝ in (0 : ℝ)..Real.pi, qGegenbauer β q m (exp (I * θ)) * qGegenbauer β q n (exp (I * θ)) *
       (‖qPochhammerInf (exp (2 * I * θ)) q /
           qPochhammerInf (β * exp (2 * I * θ)) q‖ ^ 2 : ℝ) = 0 := by
-  sorry
-
-/-- Identity under the stated parameter and domain assumptions: `(∫ θ : ℝ in (0 : ℝ)..Real.pi,
-continuousQHermiteLaurent q m (exp (I * θ)) * continuousQHermiteLaurent q n (exp (I * θ)) *
-(‖qPochhammerInf (exp (2 * I * θ)) q‖ ^ 2 : ℝ)) / (2 * Real.pi) = if m = n then
-(qPochhammerInf ((q : ℂ) ^ (n + 1)) q)⁻¹ else 0`. -/
-@[dlmf 18.28.E17]
-theorem continuousQHermite_orthogonality {q : ℝ} (hq : 0 < q) (hq1 : q < 1) (m n : ℕ) :
-    (∫ θ : ℝ in (0 : ℝ)..Real.pi, continuousQHermiteLaurent q m (exp (I * θ)) *
-      continuousQHermiteLaurent q n (exp (I * θ)) *
-      (‖qPochhammerInf (exp (2 * I * θ)) q‖ ^ 2 : ℝ)) / (2 * Real.pi) =
-      if m = n then (qPochhammerInf ((q : ℂ) ^ (n + 1)) q)⁻¹ else 0 := by
   sorry
 
 /-- The factor with index `m` makes `(q⁻ᵐ;q)_k` vanish for `m < k`. -/

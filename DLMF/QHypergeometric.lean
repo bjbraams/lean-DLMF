@@ -17,6 +17,7 @@ public import DLMF.QHypergeometric.Elementary
 public import DLMF.QHypergeometric.HigherSummations
 public import DLMF.QHypergeometric.Integrals
 public import DLMF.QHypergeometric.MathlibCoverage
+public import DLMF.QHypergeometric.SearsTransformation
 public import DLMF.QHypergeometric.Transformations
 public import DLMF.QHypergeometric.VeryWellPoisedSums
 

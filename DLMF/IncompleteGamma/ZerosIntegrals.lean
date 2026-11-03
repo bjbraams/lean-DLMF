@@ -212,20 +212,21 @@ theorem IncompleteGammaZeros.expScaled_zero (a : ℝ) : IncompleteGammaZeros.exp
 
 /-- Identity under the stated parameter and domain assumptions: `scIncGamma a x = exp (-(x : ℂ)) *
 (IncompleteGammaZeros.expScaled a x : ℂ)`. -/
-theorem IncompleteGammaZeros.scIncGamma (a x : ℝ) : scIncGamma a x = exp (-(x : ℂ)) *
+theorem IncompleteGammaZeros.scIncGamma_eq_exp_mul (a x : ℝ) : scIncGamma a x = exp (-(x : ℂ)) *
     (IncompleteGammaZeros.expScaled a x : ℂ) := by
   rw [scIncGamma, (IncompleteGammaZeros.hasSum_real a x).2]
 
 /-- Identity under the stated parameter and domain assumptions:
 `scIncGamma a x = 0 ↔ IncompleteGammaZeros.expScaled a x = 0`. -/
-theorem IncompleteGammaZeros.scIncGamma_eq_zero (a x : ℝ) : scIncGamma a x = 0 ↔
+theorem IncompleteGammaZeros.scIncGamma_eq_zero_iff (a x : ℝ) : scIncGamma a x = 0 ↔
     IncompleteGammaZeros.expScaled a x = 0 := by
-  rw [IncompleteGammaZeros.scIncGamma, mul_eq_zero, ofReal_eq_zero]; simp [exp_ne_zero]
+  rw [IncompleteGammaZeros.scIncGamma_eq_exp_mul, mul_eq_zero, ofReal_eq_zero]; simp [exp_ne_zero]
 
 /-- Identity under the stated parameter and domain assumptions:
 `∃ d : ℝ, HasDerivAt (IncompleteGammaZeros.expScaled a) d x ∧ x * d = (x - a) *
 IncompleteGammaZeros.expScaled a x + (Real.Gamma a)⁻¹`. -/
-theorem IncompleteGammaZeros.deriv {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) (x : ℝ) :
+theorem IncompleteGammaZeros.exists_hasDerivAt_expScaled {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n)
+    (x : ℝ) :
     ∃ d : ℝ, HasDerivAt (IncompleteGammaZeros.expScaled a) d x ∧ x * d = (x - a) *
         IncompleteGammaZeros.expScaled a x + (Real.Gamma a)⁻¹ := by
   refine ⟨(deriv (regularizedHGFun {1} {(a : ℂ) + 1}) x).re,
@@ -237,10 +238,10 @@ theorem IncompleteGammaZeros.deriv {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n
   simpa only [re_ofReal_mul, add_re, ofReal_re] using h
 
 /-- The function `(IncompleteGammaZeros.expScaled a)` is continuous. -/
-theorem IncompleteGammaZeros.continuous {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) : Continuous
+theorem IncompleteGammaZeros.continuous_expScaled {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) : Continuous
     (IncompleteGammaZeros.expScaled a) :=
   continuous_iff_continuousAt.mpr fun x =>
-      (IncompleteGammaZeros.deriv ha x).choose_spec.1.continuousAt
+      (IncompleteGammaZeros.exists_hasDerivAt_expScaled ha x).choose_spec.1.continuousAt
 
 /-- The sign of `Γ` on `(-k-1, -k)`. -/
 theorem IncompleteGammaZeros.Gamma_sign (k : ℕ) {x : ℝ} (h1 : -(k : ℝ) - 1 < x) (h2 : x < -k) :
@@ -325,7 +326,7 @@ theorem IncompleteGammaZeros.hasSum_alternating {a : ℝ} (ha : ∀ n : ℤ, a �
   have ha' := IncompleteGammaZeros.nonInteger ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
   have h := scIncGamma_hasSum_alternating ha' (((-y : ℝ)) : ℂ)
-  rw [IncompleteGammaZeros.scIncGamma] at h
+  rw [IncompleteGammaZeros.scIncGamma_eq_exp_mul] at h
   have hr : HasSum (fun k : ℕ => ((((k ! : ℝ) * (a + k))⁻¹ * y ^ k / Real.Gamma a : ℝ) : ℂ))
       (exp (-((-y : ℝ) : ℂ)) * (IncompleteGammaZeros.expScaled a (-y) : ℂ)) := by
     refine h.congr_fun fun k => ?_
@@ -372,7 +373,7 @@ theorem IncompleteGammaZeros.mono_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
   set g := fun t : ℝ => Real.Gamma a * (t ^ a * Real.exp (-t) * IncompleteGammaZeros.expScaled a t)
   have hd : ∀ t : ℝ, 0 < t → HasDerivAt g (t ^ (a - 1) * Real.exp (-t)) t := by
     intro t ht
-    obtain ⟨d, hdU, hode⟩ := IncompleteGammaZeros.deriv ha' t
+    obtain ⟨d, hdU, hode⟩ := IncompleteGammaZeros.exists_hasDerivAt_expScaled ha' t
     have h1 := Real.hasDerivAt_rpow_const (x := t) (p := a) (Or.inl ht.ne')
     have h2 := (Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)
     have h := ((h1.mul h2).mul hdU).const_mul (Real.Gamma a)
@@ -404,7 +405,7 @@ theorem IncompleteGammaZeros.mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
       ((-t) ^ a * Real.exp (-t) * IncompleteGammaZeros.expScaled a t)
   have hd : ∀ t : ℝ, t < 0 → HasDerivAt g (-((-t) ^ (a - 1) * Real.exp (-t))) t := by
     intro t ht
-    obtain ⟨d, hdU, hode⟩ := IncompleteGammaZeros.deriv ha' t
+    obtain ⟨d, hdU, hode⟩ := IncompleteGammaZeros.exists_hasDerivAt_expScaled ha' t
     have h1 := (Real.hasDerivAt_rpow_const (x := -t) (p := a) (Or.inl (by linarith))).comp t
       (hasDerivAt_neg t)
     have h2 := (Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)
@@ -458,7 +459,7 @@ theorem IncompleteGammaZeros.neg_exists {a : ℝ} (ha : ∀ n : ℤ, a ≠ n)
   have ha' := IncompleteGammaZeros.nonInteger ha
   obtain ⟨X, hX, hX0⟩ :=
       ((IncompleteGammaZeros.expScaled_atBot ha).and (eventually_lt_atBot 0)).exists
-  have hc := (IncompleteGammaZeros.continuous ha').continuousOn (s := Icc X 0)
+  have hc := (IncompleteGammaZeros.continuous_expScaled ha').continuousOn (s := Icc X 0)
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
   rcases lt_or_gt_of_ne hG with hGn | hGp
   · -- `U X < 0 < U 0`
@@ -524,10 +525,10 @@ theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1
     · exact absurd hx (hpos x h)
   have he : Real.scIncGammaNegativeZero a = x0 := by
     have hs := Classical.epsilon_spec (p := fun x : ℝ => x < 0 ∧ scIncGamma a x = 0)
-      ⟨x0, hx0, (IncompleteGammaZeros.scIncGamma_eq_zero a x0).mpr hUx0⟩
-    exact (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero a _).mp hs.2)
+      ⟨x0, hx0, (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x0).mpr hUx0⟩
+    exact (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero_iff a _).mp hs.2)
   rw [he]
-  exact ⟨hx0, fun x => (IncompleteGammaZeros.scIncGamma_eq_zero a x).trans (hzero x)⟩
+  exact ⟨hx0, fun x => (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x).trans (hzero x)⟩
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.scIncGammaNegativeZero a < 0
 ∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ, scIncGamma a x=0 ↔
@@ -554,7 +555,7 @@ theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(
   obtain ⟨x0, hx0, hUx0⟩ := IncompleteGammaZeros.neg_exists ha (fun h => by nlinarith) hU0.ne
   -- the positive zero
   have hc : Continuous (IncompleteGammaZeros.expScaled a) :=
-      IncompleteGammaZeros.continuous (IncompleteGammaZeros.nonInteger ha)
+      IncompleteGammaZeros.continuous_expScaled (IncompleteGammaZeros.nonInteger ha)
   obtain ⟨Y, hY, hY0⟩ :=
       ((IncompleteGammaZeros.expScaled_atTop a).and (eventually_gt_atTop 0)).exists
   obtain ⟨y0, hy0, hUy0⟩ := intermediate_value_Ioo hY0.le hc.continuousOn ⟨hU0, hY⟩
@@ -567,18 +568,18 @@ theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(
     · exact Or.inr (IncompleteGammaZeros.unique_pos ha h hy0.1 hx hUy0)
   have he1 : Real.scIncGammaNegativeZero a = x0 := by
     have hs := Classical.epsilon_spec (p := fun x : ℝ => x < 0 ∧ scIncGamma a x = 0)
-      ⟨x0, hx0, (IncompleteGammaZeros.scIncGamma_eq_zero a x0).mpr hUx0⟩
-    rcases (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero a _).mp hs.2) with h | h
+      ⟨x0, hx0, (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x0).mpr hUx0⟩
+    rcases (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero_iff a _).mp hs.2) with h | h
     · exact h
     · exact absurd hs.1 (not_lt.mpr (h ▸ hy0.1.le))
   have he2 : Real.scIncGammaPositiveZero a = y0 := by
     have hs := Classical.epsilon_spec (p := fun x : ℝ => 0 < x ∧ scIncGamma a x = 0)
-      ⟨y0, hy0.1, (IncompleteGammaZeros.scIncGamma_eq_zero a y0).mpr hUy0⟩
-    rcases (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero a _).mp hs.2) with h | h
+      ⟨y0, hy0.1, (IncompleteGammaZeros.scIncGamma_eq_zero_iff a y0).mpr hUy0⟩
+    rcases (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero_iff a _).mp hs.2) with h | h
     · exact absurd hs.1 (not_lt.mpr (h ▸ hx0.le))
     · exact h
   rw [he1, he2]
-  exact ⟨hx0, hy0.1, fun x => (IncompleteGammaZeros.scIncGamma_eq_zero a x).trans (hzero x)⟩
+  exact ⟨hx0, hy0.1, fun x => (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x).trans (hzero x)⟩
 
 /-- The stated relation follows from the given hypotheses: `StrictAntiOn
 Real.scIncGammaNegativeZero (Ioo (-1) 0)`. -/
@@ -593,7 +594,7 @@ theorem Real.scIncGammaNegativeZero_strictAnti  :
     intro a ha
     obtain ⟨hneg, hiff⟩ := scIncGamma_one_negative_zero (n := 1) le_rfl (a := a)
       (by norm_num; linarith [ha.1]) (by norm_num; linarith [ha.2])
-    exact ⟨hneg, (IncompleteGammaZeros.scIncGamma_eq_zero a _).mp ((hiff _).mpr rfl)⟩
+    exact ⟨hneg, (IncompleteGammaZeros.scIncGamma_eq_zero_iff a _).mp ((hiff _).mpr rfl)⟩
   have hG : ∀ a ∈ Ioo (-1 : ℝ) 0, Real.Gamma a < 0 := by
     intro a ha
     have h := IncompleteGammaZeros.Gamma_sign 0 (x := a) (by norm_num; linarith [ha.1])
@@ -650,7 +651,7 @@ theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0
     (by norm_num; linarith) (by norm_num; linarith)
   set x0 := Real.scIncGammaNegativeZero a
   have hUx0 : IncompleteGammaZeros.expScaled a x0 = 0 :=
-      (IncompleteGammaZeros.scIncGamma_eq_zero a x0).mp ((hiff x0).mpr rfl)
+      (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x0).mp ((hiff x0).mpr rfl)
   have hG : Real.Gamma a < 0 := by
     have h := IncompleteGammaZeros.Gamma_sign 0 (x := a) (by norm_num; linarith)
         (by norm_num; linarith)

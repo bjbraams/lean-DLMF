@@ -17,6 +17,7 @@ public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 * `Gamma_one_half_sub_nat_mul_factorial`: `Γ(1/2 - s) (2s)! = (-4)^s s! √π`.
 * `pi_mul_inv_Gamma_mul_inv_Gamma_one_sub`: `π / (Γ(s) Γ(1-s)) = sin (π s)`
   for every `s`, including the poles.
+* `div_Gamma_add_one`: `s / Γ(s+1) = Γ(s)⁻¹` for every `s`, including the poles.
 * `analyticAt_Gamma`: `Γ` is analytic off the nonpositive integers.
 * `hasSum_regularizedHGFun_empty_singleton`: the everywhere convergent series of the
   regularized `₀F₁`.
@@ -59,6 +60,12 @@ theorem pi_mul_inv_Gamma_mul_inv_Gamma_one_sub (s : ℂ) :
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [← mul_inv, Gamma_mul_Gamma_one_sub, inv_div]
   field_simp
+
+/-- `s / Γ(s+1) = Γ(s)⁻¹` for every complex `s`; at the poles both sides vanish. -/
+theorem div_Gamma_add_one (s : ℂ) : s / Gamma (s + 1) = (Gamma s)⁻¹ := by
+  rcases eq_or_ne s 0 with rfl | hs
+  · simp
+  · rw [Gamma_add_one s hs, div_mul_cancel_left₀ hs]
 
 /-- `Γ` is complex analytic at every point that is not a nonpositive integer. -/
 theorem analyticAt_Gamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) : AnalyticAt ℂ Gamma s := by

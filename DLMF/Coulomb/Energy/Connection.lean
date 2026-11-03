@@ -680,6 +680,209 @@ theorem coulombf_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
   field_simp
   ring
 
+/-- For `ε < 0`, `r > 0`, `A(ε,ℓ) ≠ 0` and away from the poles of `Γ(ℓ+1-κ)`, the real part of
+the formula 33.14.7 is the right-hand side of DLMF 33.16.11. -/
+private lemma coulombhFormula_re_eq_whittaker {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : 0 < r)
+    (hA : coulombAProd ε ℓ ≠ 0) (hp : ∀ m : ℕ, (ℓ : ℂ) + 1 - coulombKappa ε r ≠ -(m : ℂ)) :
+    (coulombhFormula ε ℓ r).re = (-1) ^ ℓ * ((-ε) ^ (-(1 / 2 : ℝ))) ^ (ℓ + 1) *
+      coulombAProd ε ℓ * (Real.sin (π * (-ε) ^ (-(1 / 2 : ℝ))) *
+        (coulombZeta ℓ ((-ε) ^ (-(1 / 2 : ℝ))) r).re / Real.Gamma (ℓ + 1 + (-ε) ^ (-(1 / 2 : ℝ))) +
+        Real.cos (π * (-ε) ^ (-(1 / 2 : ℝ))) * Real.Gamma ((-ε) ^ (-(1 / 2 : ℝ)) - ℓ) *
+          coulombXi ℓ ((-ε) ^ (-(1 / 2 : ℝ))) r / π) := by
+  set ν := (-ε) ^ (-(1 / 2 : ℝ)) with hνdef
+  have hν : 0 < ν := neg_rpow_neg_half_pos hε
+  have hκ : coulombKappa ε r = (ν : ℂ) := coulombKappa_of_neg_of_pos hε hr
+  have hνA : ∀ m : ℕ, (ν : ℂ) - ℓ ≠ -(m : ℂ) := neg_rpow_neg_half_sub_ne_neg_nat hε hA
+  have hx : 0 < 2 * r / ν := by positivity
+  set x := 2 * r / ν with hx_def
+  have hζ := conj_coulombZeta ℓ (ν := ν) (r := r) hx
+  have hxc : (2 * (r : ℂ) / (ν : ℂ)) = (x : ℂ) := by rw [hx_def]; push_cast; ring
+  have hν0 : (ν : ℂ) ≠ 0 := by exact_mod_cast hν.ne'
+  have hS : coulombSFactor ε r = 2 * Real.cos (π * ν) := by
+    simp [coulombSFactor, hε, hr, abs_of_neg hε, hνdef]
+  have hpa : ∀ m : ℕ, (ℓ : ℂ) + 1 - ν ≠ -(m : ℂ) := by rw [← hκ]; exact hp
+  have hGa : Gamma ((ℓ : ℂ) + 1 - ν) ≠ 0 := Complex.Gamma_ne_zero hpa
+  have hGb : Gamma ((ℓ : ℂ) + 1 + ν) ≠ 0 := by
+    refine Complex.Gamma_ne_zero fun m h => ?_
+    have := congrArg Complex.re h
+    simp at this
+    linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m), (Nat.cast_nonneg ℓ : (0 : ℝ) ≤ ℓ)]
+  set W := exp (I * π * (ν : ℂ)) * (exp (-(-(2 * (r : ℂ) / (ν : ℂ))) / 2) *
+          (-(2 * (r : ℂ) / (ν : ℂ))) ^ (ℓ + 1) *
+          kummerU (ℓ + 1 + (ν : ℂ)) (2 * ℓ + 2) (-(2 * (r : ℂ) / (ν : ℂ))))
+    with hW
+  have hE : coulombhFormula ε ℓ r =
+      (Gamma ((ℓ : ℂ) + 1 - ν) * coulombZeta ℓ ν r + (-1) ^ ℓ * (Real.cos (π * ν) : ℂ) *
+        (Gamma ((ℓ : ℂ) + 1 - ν) * exp (-((ℓ : ℂ) + 1 - ν) * π * I) * coulombZeta ℓ ν r +
+          Gamma ((ℓ : ℂ) + 1 + ν) * W)) / (π * (ν : ℂ) ^ ℓ) := by
+    unfold coulombhFormula coulombhKappa
+    rw [hκ, hS]
+    unfold coulombZeta
+    rw [hW, hxc, kummerM_two_mul_add_two_eq_kummerU_connection ℓ _ hx]
+    have he3 : exp ((2 * (ℓ : ℂ) + 2 - (ℓ + 1 - (ν : ℂ))) * π * I) =
+        (-1) ^ (ℓ + 1) * exp (I * π * (ν : ℂ)) := by
+      rw [← exp_nat_mul_pi_mul_I, ← Complex.exp_add]; congr 1; push_cast; ring
+    have he2 : exp (-(x : ℂ) / 2) * exp (x : ℂ) = exp (-(-(x : ℂ)) / 2) := by
+      rw [← Complex.exp_add]; congr 1; ring
+    have hf : ((2 * ℓ + 1)! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+    have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+    rw [he3, show (2 * (ℓ : ℂ) + 2 - (ℓ + 1 - (ν : ℂ))) = ℓ + 1 + ν by ring,
+      neg_pow (x : ℂ), ← he2]
+    push_cast
+    field_simp
+  have hXi : coulombXi ℓ ν r = W.re := rfl
+  set ζ := coulombZeta ℓ ν r with hζdef
+  have hζr : ζ = (ζ.re : ℂ) := (Complex.conj_eq_iff_re.mp hζ).symm
+  have hWr : W = (W.re : ℂ) + (W.im : ℂ) * I := (Complex.re_add_im W).symm
+  set zr := ζ.re
+  set wr := W.re
+  set wi := W.im
+  set c := Real.cos (π * ν)
+  set s := Real.sin (π * ν)
+  have hexp : exp (-((ℓ : ℂ) + 1 - ν) * π * I) = (-1) ^ (ℓ + 1) * ((c : ℂ) + (s : ℂ) * I) := by
+    have h2 : exp (((2 * (ℓ + 1) : ℕ) : ℂ) * π * I) = 1 := by
+      rw [exp_nat_mul_pi_mul_I, pow_mul]; simp
+    have h3 : exp (((π * ν : ℝ) : ℂ) * I) = (c : ℂ) + (s : ℂ) * I := by
+      rw [Complex.exp_mul_I]; simp only [c, s]; push_cast; ring
+    rw [show -((ℓ : ℂ) + 1 - ν) * π * I = ((ℓ + 1 : ℕ) : ℂ) * π * I +
+        ((π * ν : ℝ) : ℂ) * I - ((2 * (ℓ + 1) : ℕ) : ℂ) * π * I by push_cast; ring,
+      Complex.exp_sub, Complex.exp_add, h2, h3, exp_nat_mul_pi_mul_I, div_one]
+  have hG1 : Gamma ((ℓ : ℂ) + 1 - ν) = (Real.Gamma (ℓ + 1 - ν) : ℂ) := by
+    rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
+  have hG2 : Gamma ((ℓ : ℂ) + 1 + ν) = (Real.Gamma (ℓ + 1 + ν) : ℂ) := by
+    rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
+  have hGr : Real.Gamma (ν - ℓ) ≠ 0 := by
+    have := Complex.Gamma_ne_zero hνA
+    rw [show (ν : ℂ) - ℓ = ((ν - ℓ : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal] at this
+    exact_mod_cast this
+  have hinv : (Real.Gamma (ℓ + 1 - ν))⁻¹ = (-1) ^ ℓ * s * Real.Gamma (ν - ℓ) / π := by
+    rw [show (ℓ : ℝ) + 1 - ν = 1 - (ν - ℓ) by ring, inv_Gamma_one_sub_real hGr,
+      sin_pi_mul_sub_nat]
+  set G1 := Real.Gamma (ℓ + 1 - ν)
+  set G2 := Real.Gamma (ℓ + 1 + ν)
+  have hG1ne : G1 ≠ 0 := by rw [hG1] at hGa; exact_mod_cast hGa
+  have hG2ne : G2 ≠ 0 := by rw [hG2] at hGb; exact_mod_cast hGb
+  have hm1 : ((-1 : ℝ) ^ ℓ) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
+  have hE2 : coulombhFormula ε ℓ r =
+      (((G1 * zr * (1 - c ^ 2) + (-1) ^ ℓ * c * G2 * wr) / (π * ν ^ ℓ) : ℝ) : ℂ) +
+      (((-(G1 * zr * c * s) + (-1) ^ ℓ * c * G2 * wi) / (π * ν ^ ℓ) : ℝ) : ℂ) * I := by
+    rw [hE, hexp, hG1, hG2, hζr, hWr]
+    have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+    have hm1c : ((-1 : ℂ) ^ ℓ) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
+    push_cast
+    field_simp
+    linear_combination (-(↑G1 * ↑zr * ↑c * (↑c + ↑s * I))) * hm1c
+  have hP : (coulombhFormula ε ℓ r).re =
+      (G1 * zr * (1 - c ^ 2) + (-1) ^ ℓ * c * G2 * wr) / (π * ν ^ ℓ) := by
+    have := congrArg Complex.re hE2
+    simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im, Complex.I_re,
+      Complex.I_im] at this
+    linarith
+  -- `A = G2 / (Γ(ν-ℓ) ν^{2ℓ+1})`
+  have hκ1 : coulombKappa ε 1 = (ν : ℂ) := coulombKappa_of_neg_of_pos hε one_pos
+  have hAG := coulombAProd_eq_Gamma hε.ne ℓ 1 (by rw [hκ1]; exact hνA)
+  rw [hκ1] at hAG
+  have hAr : coulombAProd ε ℓ * Real.Gamma (ν - ℓ) * ν ^ (2 * ℓ + 1) = G2 := by
+    have hG3 : Gamma ((ν : ℂ) - ℓ) = (Real.Gamma (ν - ℓ) : ℂ) := by
+      rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
+    have hG4 : Gamma (1 + (ℓ : ℂ) + ν) = (G2 : ℂ) := by
+      rw [← hG2]; ring_nf
+    rw [hG3, hG4, zpow_neg, show (2 * (ℓ : ℤ) + 1) = ((2 * ℓ + 1 : ℕ) : ℤ) by push_cast; ring,
+      zpow_natCast] at hAG
+    have hGrc : (Real.Gamma (ν - ℓ) : ℂ) ≠ 0 := by exact_mod_cast hGr
+    have : ((coulombAProd ε ℓ * Real.Gamma (ν - ℓ) * ν ^ (2 * ℓ + 1) : ℝ) : ℂ) = (G2 : ℂ) := by
+      push_cast
+      rw [hAG]
+      field_simp
+    exact_mod_cast this
+  rw [hP, ← hXi]
+  have hs2 : 1 - c ^ 2 = s ^ 2 := by
+    have := Real.sin_sq_add_cos_sq (π * ν); simp only [c, s]; linarith
+  have hπ : π ≠ 0 := Real.pi_ne_zero
+  have hG1s : G1 * s * Real.Gamma (ν - ℓ) = π * (-1) ^ ℓ := by
+    have h1 : G1 * ((-1) ^ ℓ * s * Real.Gamma (ν - ℓ) / π) = 1 := by
+      rw [← hinv]; exact mul_inv_cancel₀ hG1ne
+    rw [mul_div_assoc', div_eq_one_iff_eq hπ] at h1
+    linear_combination (-1) ^ ℓ * h1 - G1 * s * Real.Gamma (ν - ℓ) * hm1
+  rw [hs2, ← hAr]
+  have hνr : ν ≠ 0 := hν.ne'
+  field_simp
+  linear_combination ν ^ (2 * ℓ + 1) * zr * s * hG1s
+
+/-- Tricomi's function at an integer second parameter is jointly continuous in `a` and `x > 0`
+along the negative real axis `z = -x` (principal branch, `ph z = π`). -/
+private lemma continuousAt_kummerU_intCast_neg_ofReal (n : ℤ) (a : ℂ) {x : ℝ} (hx : 0 < x) :
+    ContinuousAt (fun p : ℂ × ℝ => kummerU p.1 n (-(p.2 : ℂ))) (a, x) := by
+  set S : ℂ → ℂ := fun c => sin (π * c) with hS
+  have hz : ∀ t : ℝ, 0 < t → -(t : ℂ) ≠ 0 := fun t ht =>
+    neg_ne_zero.mpr (ofReal_ne_zero.mpr ht.ne')
+  have hev : (fun p : ℂ × ℝ => π * dslope (fun c => tricomiD p.1 c (-(p.2 : ℂ))) n n /
+      dslope S n n) =ᶠ[𝓝 (a, x)] fun p => kummerU p.1 n (-(p.2 : ℂ)) := by
+    filter_upwards [(isOpen_lt continuous_const continuous_snd).mem_nhds
+      (show (a, x) ∈ {p : ℂ × ℝ | 0 < p.2} from hx)] with p hp
+    exact (kummerU_eq_dslope p.1 (hz p.2 hp) n (by simp)).symm
+  refine ContinuousAt.congr ?_ hev
+  have hX : IsOpen (univ ×ˢ Ioi 0 : Set (ℂ × ℝ)) := isOpen_univ.prod isOpen_Ioi
+  have hpow : ∀ q : (ℂ × ℝ) × ℂ, 0 < q.1.2 →
+      ContinuousAt (fun q : (ℂ × ℝ) × ℂ => (-(q.1.2 : ℂ)) ^ (1 - q.2)) q := by
+    intro q hq
+    have e : (fun q : (ℂ × ℝ) × ℂ => (q.1.2 : ℂ) ^ (1 - q.2) * exp (π * I * (1 - q.2))) =ᶠ[𝓝 q]
+        fun q => (-(q.1.2 : ℂ)) ^ (1 - q.2) := by
+      filter_upwards [(isOpen_lt continuous_const (by fun_prop :
+        Continuous fun q : (ℂ × ℝ) × ℂ => q.1.2)).mem_nhds
+        (show q ∈ {q : (ℂ × ℝ) × ℂ | 0 < q.1.2} from hq)] with q' hq'
+      have hq'' : (0 : ℝ) < q'.1.2 := hq'
+      have h := ofReal_cpow_of_nonpos (x := -q'.1.2) (by linarith) (1 - q'.2)
+      push_cast at h
+      rw [h, neg_neg]
+    refine ContinuousAt.congr ?_ e
+    have hs : ((q.1.2 : ℝ) : ℂ) ∈ slitPlane := Complex.ofReal_mem_slitPlane.mpr hq
+    exact (ContinuousAt.cpow (f := fun q : (ℂ × ℝ) × ℂ => ((q.1.2 : ℝ) : ℂ))
+      (g := fun q : (ℂ × ℝ) × ℂ => 1 - q.2) (by fun_prop) (by fun_prop) hs).mul (by fun_prop)
+  have hcont : ContinuousOn (fun q : (ℂ × ℝ) × ℂ => tricomiD q.1.1 q.2 (-(q.1.2 : ℂ)))
+      ((univ ×ˢ Ioi 0) ×ˢ univ) := by
+    rintro q ⟨⟨-, hq⟩, -⟩
+    have hM := continuous_regularizedConfluent
+    have hG := differentiable_one_div_Gamma.continuous
+    have h1 : Continuous fun q : (ℂ × ℝ) × ℂ => regularizedHGFun {q.1.1} {q.2} (-(q.1.2 : ℂ)) :=
+      hM.comp (f := fun q : (ℂ × ℝ) × ℂ => (q.1.1, q.2, -(q.1.2 : ℂ))) (by fun_prop)
+    have h2 : Continuous fun q : (ℂ × ℝ) × ℂ =>
+        regularizedHGFun {q.1.1 - q.2 + 1} {2 - q.2} (-(q.1.2 : ℂ)) :=
+      hM.comp (f := fun q : (ℂ × ℝ) × ℂ => (q.1.1 - q.2 + 1, 2 - q.2, -(q.1.2 : ℂ)))
+        (by fun_prop)
+    have h3 : Continuous fun q : (ℂ × ℝ) × ℂ => (Gamma (q.1.1 - q.2 + 1))⁻¹ :=
+      (hG.comp (by fun_prop : Continuous fun q : (ℂ × ℝ) × ℂ => q.1.1 - q.2 + 1)).congr
+        fun q => by simp
+    have h4 : Continuous fun q : (ℂ × ℝ) × ℂ => (Gamma q.1.1)⁻¹ :=
+      (hG.comp (by fun_prop : Continuous fun q : (ℂ × ℝ) × ℂ => q.1.1)).congr fun q => by simp
+    unfold tricomiD
+    exact ((h1.continuousAt.mul h3.continuousAt).sub
+      (((hpow q hq).mul h2.continuousAt).mul h4.continuousAt)).continuousWithinAt
+  have hnum := continuousOn_dslope_param
+    (f := fun p : ℂ × ℝ => fun c => tricomiD p.1 c (-(p.2 : ℂ))) hX hcont
+    (fun p hp => differentiable_tricomiD p.1 (hz p.2 hp.2)) n
+  have hA : ContinuousAt (fun p : ℂ × ℝ => dslope (fun c => tricomiD p.1 c (-(p.2 : ℂ))) n n)
+      (a, x) := by
+    have := hnum.continuousAt ((hX.prod isOpen_univ).mem_nhds
+      (⟨⟨mem_univ _, hx⟩, mem_univ _⟩ : ((a, x), (n : ℂ)) ∈ (univ ×ˢ Ioi 0) ×ˢ univ))
+    exact ContinuousAt.comp (f := fun p : ℂ × ℝ => (p, (n : ℂ))) this (by fun_prop)
+  have hSn : dslope S n n ≠ 0 := by
+    have hSd' : HasDerivAt S (cos (π * n) * π) n := by
+      have := ((hasDerivAt_id (n : ℂ)).const_mul (π : ℂ)).csin
+      simpa [hS] using this
+    have hS0 : S n = 0 := by
+      simp only [hS]
+      rw [mul_comm]; exact Complex.sin_int_mul_pi n
+    have hcos : cos (π * n) ≠ 0 := by
+      intro h
+      have := Complex.cos_sq_add_sin_sq (π * (n : ℂ))
+      simp only [hS] at hS0
+      rw [h, hS0] at this
+      norm_num at this
+    rw [dslope_same, hSd'.deriv]
+    exact mul_ne_zero hcos (ofReal_ne_zero.mpr Real.pi_ne_zero)
+  exact (continuousAt_const.mul hA).div continuousAt_const hSn
+
 /-- **DLMF 33.16.11**: for `ε < 0`, `r > 0`, `A(ε,ℓ) ≠ 0`,
 `h(ε,ℓ;r) = (-1)^ℓ ν^{ℓ+1} A(ε,ℓ) (sin(πν) ζ_ℓ(ν,r)/Γ(ℓ+1+ν) + cos(πν) Γ(ν-ℓ) ξ_ℓ(ν,r)/π)`. -/
 @[dlmf 33.16.E11]
@@ -689,7 +892,125 @@ theorem coulombh_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
     (coulombh ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
       ((Real.sin (π * ν) : ℂ) * coulombZeta ℓ ν r / (Real.Gamma (ℓ + 1 + ν) : ℂ) +
         (Real.cos (π * ν) * Real.Gamma (ν - ℓ) * coulombXi ℓ ν r / π : ℝ)) := by
-  sorry
+  intro ν
+  set νf : ℝ → ℝ := fun e => (-e) ^ (-(1 / 2 : ℝ)) with hνf
+  set G : ℝ → ℝ := fun e => (-1) ^ ℓ * (νf e) ^ (ℓ + 1) * coulombAProd e ℓ *
+    (Real.sin (π * νf e) * (coulombZeta ℓ (νf e) r).re / Real.Gamma (ℓ + 1 + νf e) +
+      Real.cos (π * νf e) * Real.Gamma (νf e - ℓ) * coulombXi ℓ (νf e) r / π) with hG
+  have hν : 0 < ν := neg_rpow_neg_half_pos hε
+  have hζ := conj_coulombZeta ℓ (ν := ν) (r := r) (by positivity)
+  have hζr : coulombZeta ℓ ν r = ((coulombZeta ℓ ν r).re : ℂ) :=
+    (Complex.conj_eq_iff_re.mp hζ).symm
+  suffices h : coulombh ε ℓ r = G ε by
+    rw [h, hζr]
+    simp only [hG, hνf]
+    push_cast
+    ring
+  have hκ : ∀ e : ℝ, e < 0 → coulombKappa e r = (νf e : ℂ) := fun e he =>
+    coulombKappa_of_neg_of_pos he hr
+  by_cases hpole : ∃ m : ℕ, (ℓ : ℂ) + 1 - coulombKappa ε r = -(m : ℂ)
+  · obtain ⟨m₀, hm₀⟩ := hpole
+    have hpole' : ε = 0 ∨ ∃ m : ℕ, (ℓ : ℂ) + 1 - coulombKappa ε r = -(m : ℂ) := Or.inr ⟨m₀, hm₀⟩
+    unfold coulombh
+    simp only [hpole', ↓reduceIte]
+    have hνc : ContinuousAt νf ε :=
+      continuousAt_neg.rpow_const (Or.inl (neg_ne_zero.mpr hε.ne))
+    have hAc : ContinuousAt (fun e => coulombAProd e ℓ) ε := by
+      unfold coulombAProd
+      fun_prop
+    have hνpos : 0 < νf ε := hν
+    have hνA : ∀ m : ℕ, νf ε - ℓ ≠ -(m : ℝ) := fun m h =>
+      neg_rpow_neg_half_sub_ne_neg_nat hε hA m (by exact_mod_cast h)
+    -- continuity of the pieces
+    have hΓ1 : ContinuousAt (fun e => Real.Gamma (ℓ + 1 + νf e)) ε := by
+      refine ContinuousAt.comp (g := Real.Gamma) ?_ (by fun_prop)
+      refine (Real.differentiableAt_Gamma fun m h => ?_).continuousAt
+      linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m), (Nat.cast_nonneg ℓ : (0 : ℝ) ≤ ℓ)]
+    have hΓ1ne : Real.Gamma (ℓ + 1 + νf ε) ≠ 0 := (Real.Gamma_pos_of_pos (by positivity)).ne'
+    have hΓ2 : ContinuousAt (fun e => Real.Gamma (νf e - ℓ)) ε :=
+      ContinuousAt.comp (g := Real.Gamma) (Real.differentiableAt_Gamma hνA).continuousAt
+        (by fun_prop)
+    have hνc' : ContinuousAt (fun e => ((νf e : ℝ) : ℂ)) ε :=
+      continuous_ofReal.continuousAt.comp hνc
+    have hν0 : ((νf ε : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hν.ne'
+    have hζc : ContinuousAt (fun e => (coulombZeta ℓ (νf e) r).re) ε := by
+      refine continuous_re.continuousAt.comp ?_
+      unfold coulombZeta
+      have hx : ((2 * r / νf ε : ℝ) : ℂ) ∈ slitPlane :=
+        Complex.ofReal_mem_slitPlane.mpr (by positivity)
+      have hz : ContinuousAt (fun e => 2 * (r : ℂ) / (νf e : ℂ)) ε :=
+        continuousAt_const.div hνc' hν0
+      have hU : ContinuousAt (fun e => kummerU ((ℓ : ℂ) + 1 - νf e) (2 * ℓ + 2)
+          (2 * (r : ℂ) / (νf e : ℂ))) ε := by
+        refine ContinuousAt.comp (g := fun q : ℂ × ℂ × ℂ => kummerU q.1 q.2.1 q.2.2)
+          (f := fun e => ((ℓ : ℂ) + 1 - νf e, (2 * ℓ + 2 : ℂ), 2 * (r : ℂ) / (νf e : ℂ))) ?_
+          ((continuousAt_const.sub hνc').prodMk (continuousAt_const.prodMk hz))
+        refine continuousAt_kummerU _ _ ?_
+        convert hx using 1
+        push_cast; ring
+      exact ((hz.neg.div_const 2).cexp.mul (hz.pow _)).mul hU
+    have hξc : ContinuousAt (fun e => coulombXi ℓ (νf e) r) ε := by
+      refine continuous_re.continuousAt.comp ?_
+      have hz : ContinuousAt (fun e => 2 * (r : ℂ) / (νf e : ℂ)) ε :=
+        continuousAt_const.div hνc' hν0
+      have hU : ContinuousAt (fun e => kummerU ((ℓ : ℂ) + 1 + νf e) (2 * ℓ + 2)
+          (-(2 * (r : ℂ) / (νf e : ℂ)))) ε := by
+        have h0 := continuousAt_kummerU_intCast_neg_ofReal (2 * ℓ + 2) ((ℓ : ℂ) + 1 + νf ε)
+          (x := 2 * r / νf ε) (by positivity)
+        have h1 := ContinuousAt.comp (g := fun p : ℂ × ℝ => kummerU p.1 ((2 * ℓ + 2 : ℤ) : ℂ)
+          (-(p.2 : ℂ))) (f := fun e => ((ℓ : ℂ) + 1 + νf e, 2 * r / νf e)) h0
+          ((continuousAt_const.add hνc').prodMk (continuousAt_const.div hνc hν.ne'))
+        refine h1.congr (Eventually.of_forall fun e => ?_)
+        simp only [Function.comp_apply]
+        push_cast
+        ring_nf
+      exact (((continuousAt_const.mul hνc').cexp).mul
+        (((hz.neg.neg.div_const 2).cexp.mul (hz.neg.pow _)).mul hU))
+    have hGc : ContinuousAt G ε := by
+      simp only [hG]
+      refine ((continuousAt_const.mul (hνc.pow _)).mul hAc).mul ?_
+      have hπν : ContinuousAt (fun e => π * νf e) ε := continuousAt_const.mul hνc
+      refine (((Real.continuous_sin.continuousAt.comp hπν).mul hζc).div hΓ1 hΓ1ne).add ?_
+      exact (((Real.continuous_cos.continuousAt.comp hπν).mul hΓ2).mul hξc).div_const _
+    have hm₀' : νf ε = ℓ + 1 + m₀ := by
+      rw [hκ ε hε] at hm₀
+      have := congrArg Complex.re hm₀
+      simp at this
+      linarith
+    have hev : ∀ᶠ e in 𝓝[≠] ε, (coulombhFormula e ℓ r).re = G e := by
+      have h1 : ∀ᶠ e in 𝓝 ε, e < 0 := eventually_lt_nhds hε
+      have h2 : ∀ᶠ e in 𝓝 ε, coulombAProd e ℓ ≠ 0 := hAc.eventually_ne hA
+      have h3 : ∀ᶠ e in 𝓝 ε, |νf e - νf ε| < 1 := by
+        have := hνc.tendsto
+        rw [Metric.tendsto_nhds] at this
+        simpa [Real.dist_eq] using this 1 one_pos
+      filter_upwards [nhdsWithin_le_nhds (h1.and (h2.and h3)), self_mem_nhdsWithin] with e
+        ⟨he, hAe, hνe⟩ hne
+      refine coulombhFormula_re_eq_whittaker he ℓ hr hAe fun m hm => hne ?_
+      rw [hκ e he] at hm
+      have hm' : νf e = ℓ + 1 + m := by
+        have := congrArg Complex.re hm
+        simp at this
+        linarith
+      rw [hm', hm₀', abs_lt] at hνe
+      have hmm : m = m₀ := by
+        have h1 : (m : ℝ) < m₀ + 1 := by linarith
+        have h2 : (m₀ : ℝ) < m + 1 := by linarith
+        have h1' : m < m₀ + 1 := by exact_mod_cast h1
+        have h2' : m₀ < m + 1 := by exact_mod_cast h2
+        omega
+      have hνeq : νf e = νf ε := by rw [hm', hm₀', hmm]
+      rw [eq_neg_one_div_neg_rpow_neg_half_sq he, eq_neg_one_div_neg_rpow_neg_half_sq hε]
+      exact congrArg (fun t => -1 / t ^ 2) hνeq
+    exact ((hGc.tendsto.mono_left nhdsWithin_le_nhds).congr'
+      (hev.mono fun e h => h.symm)).limUnder_eq
+  · have hnp : ¬ (ε = 0 ∨ ∃ m : ℕ, (ℓ : ℂ) + 1 - coulombKappa ε r = -(m : ℂ)) := by
+      rintro (h | h)
+      · exact hε.ne h
+      · exact hpole h
+    unfold coulombh
+    simp only [hnp, ↓reduceIte]
+    exact coulombhFormula_re_eq_whittaker hε ℓ hr hA fun m hm => hpole ⟨m, hm⟩
 
 /-- **DLMF 33.16.12**: for `ε < 0`, `r < 0`, `A(ε,ℓ) ≠ 0`,
 `f(ε,ℓ;r) = (-1)^ℓ ν^{ℓ+1}/π (-π ξ_ℓ(-ν,r)/Γ(ℓ+1+ν) + sin(πν) cos(πν) Γ(ν-ℓ) ζ_ℓ(-ν,r))`. -/
@@ -864,7 +1185,78 @@ theorem coulombs_coulombc_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
       coulombc ε ℓ r = (-1) ^ ℓ / (Real.sqrt (2 * ν) : ℂ) *
         ((Real.cos (π * ν) / (π * K) * coulombXi ℓ ν r : ℝ) +
           (Real.sin (π * ν) * ν ^ 2 * K : ℝ) * coulombZeta ℓ ν r) := by
-  sorry
+  intro ν K
+  have hν : 0 < ν := neg_rpow_neg_half_pos hε
+  have hκ1 : coulombKappa ε 1 = (ν : ℂ) := coulombKappa_of_neg_of_pos hε one_pos
+  have hνA := neg_rpow_neg_half_sub_ne_neg_nat hε hA.ne'
+  have hAG := coulombAProd_eq_Gamma hε.ne ℓ 1 (by rw [hκ1]; exact hνA)
+  rw [hκ1] at hAG
+  have hf : (coulombf ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) *
+      (-(Real.cos (π * ν) : ℂ) * coulombZeta ℓ ν r / (Real.Gamma (ℓ + 1 + ν) : ℂ) +
+        (Real.sin (π * ν) * Real.Gamma (ν - ℓ) * coulombXi ℓ ν r / π : ℝ)) :=
+    coulombf_eq_whittaker_pos hε ℓ hr hA.ne'
+  have hh : (coulombh ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
+      ((Real.sin (π * ν) : ℂ) * coulombZeta ℓ ν r / (Real.Gamma (ℓ + 1 + ν) : ℂ) +
+        (Real.cos (π * ν) * Real.Gamma (ν - ℓ) * coulombXi ℓ ν r / π : ℝ)) :=
+    coulombh_eq_whittaker_pos hε ℓ hr hA.ne'
+  have hB : coulombBFactor ε ℓ = coulombAProd ε ℓ := by simp [coulombBFactor, not_lt.mpr hε.le]
+  have hG1 : Real.Gamma (ℓ + 1 + ν) = Real.Gamma (ν + ℓ + 1) := by ring_nf
+  rw [hG1] at hf hh
+  have hK : K = (ν ^ 2 * Real.Gamma (ν + ℓ + 1) * Real.Gamma (ν - ℓ)) ^ (-(1 / 2 : ℝ)) := rfl
+  set Gp := Real.Gamma (ν + ℓ + 1)
+  set Gm := Real.Gamma (ν - ℓ)
+  set A := coulombAProd ε ℓ
+  have hAr : A = Gp / Gm * (ν ^ (2 * ℓ + 1))⁻¹ := by
+    have e1 : Gamma (1 + ℓ + (ν : ℂ)) = (Gp : ℂ) := by
+      rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
+    have e2 : Gamma ((ν : ℂ) - ℓ) = (Gm : ℂ) := by
+      rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
+    rw [e1, e2, zpow_neg, show (2 * (ℓ : ℤ) + 1) = ((2 * ℓ + 1 : ℕ) : ℤ) by push_cast; ring,
+      zpow_natCast] at hAG
+    exact_mod_cast hAG
+  have hGp : 0 < Gp := Real.Gamma_pos_of_pos (by positivity)
+  have hGm0 : Gm ≠ 0 := by
+    intro h0; rw [h0, div_zero, zero_mul] at hAr; exact hA.ne' hAr
+  have hGm : 0 < Gm := by
+    have : Gm = Gp / (A * ν ^ (2 * ℓ + 1)) := by
+      rw [hAr]; field_simp
+    rw [this]; positivity
+  set t := Real.sqrt ν with ht
+  set g := Real.sqrt Gp with hg
+  set k := Real.sqrt Gm with hk
+  have ht0 : 0 < t := Real.sqrt_pos.mpr hν
+  have hg0 : 0 < g := Real.sqrt_pos.mpr hGp
+  have hk0 : 0 < k := Real.sqrt_pos.mpr hGm
+  have hνt : ν = t ^ 2 := (Real.sq_sqrt hν.le).symm
+  have hGpg : Gp = g ^ 2 := (Real.sq_sqrt hGp.le).symm
+  have hGmk : Gm = k ^ 2 := (Real.sq_sqrt hGm.le).symm
+  have hsA : Real.sqrt A = g / (t ^ (2 * ℓ + 1) * k) := by
+    rw [hAr, hνt, hGpg, hGmk, show g ^ 2 / k ^ 2 * ((t ^ 2) ^ (2 * ℓ + 1))⁻¹ =
+      (g / (t ^ (2 * ℓ + 1) * k)) ^ 2 by field_simp; ring, Real.sqrt_sq (by positivity)]
+  have hK' : K = 1 / (t ^ 2 * g * k) := by
+    rw [hK, Real.rpow_neg (by positivity), ← Real.sqrt_eq_rpow, hνt, hGpg, hGmk,
+      show (t ^ 2) ^ 2 * g ^ 2 * k ^ 2 = (t ^ 2 * g * k) ^ 2 by ring,
+      Real.sqrt_sq (by positivity), one_div]
+  have h2ν : Real.sqrt (2 * ν) = Real.sqrt 2 * t := Real.sqrt_mul (by norm_num) ν
+  have h2 : (0 : ℝ) < Real.sqrt 2 := by positivity
+  have ct : (t : ℂ) ≠ 0 := by exact_mod_cast ht0.ne'
+  have cg : (g : ℂ) ≠ 0 := by exact_mod_cast hg0.ne'
+  have ck : (k : ℂ) ≠ 0 := by exact_mod_cast hk0.ne'
+  have cπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  have c2 : (Real.sqrt 2 : ℂ) ≠ 0 := by exact_mod_cast h2.ne'
+  constructor
+  · rw [coulombs, hB, Carlson.ofReal_cpow_half (by positivity), hf, Real.sqrt_div' _ (by norm_num),
+      hsA, h2ν, hK']
+    rw [hνt, hGmk, hGpg]
+    push_cast
+    field_simp
+    ring
+  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), hh, Real.sqrt_mul
+        (by norm_num), hsA, h2ν, hK', hAr]
+    rw [hνt, hGmk, hGpg]
+    push_cast
+    field_simp
+    ring
 
 /-- **DLMF 33.16.18, corrected**: for `ε < 0`, `r < 0` and `A(ε,ℓ) > 0`,
 `s(ε,ℓ;r) = (-1)^{ℓ+1} 2^{-1/2} (ν^{3/2} K ξ_ℓ(-ν,r) - sin(πν) cos(πν) ζ_ℓ(-ν,r)/(π ν^{1/2} K))`

@@ -496,7 +496,7 @@ theorem LargeDenominator.euler_eq_laplace (a b c z : ℂ) (l : ℝ) :
   exact LargeDenominator.subst a b c z l ht
 
 /-- For `‖z‖ < 1` and `s ∈ [0, 1]`, `1 - z s` lies in the slit plane. -/
-theorem LargeDenominator.one_sub_mul_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ}
+theorem LargeDenominator.one_sub_mul_mem_slitPlane_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ}
     (hs : s ∈ Icc (0 : ℝ) 1) :
     1 - z * s ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
@@ -516,7 +516,8 @@ theorem LargeDenominator.integrableOn (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
   have hβ := betaIntegral_convergent (u := b) (v := c + l - b) hb (by simp at hl ⊢; linarith)
   have hcont : ContinuousOn (fun s : ℝ => (1 - z * s) ^ (-a)) (Icc 0 1) := fun s hs =>
     ((continuous_const.sub (continuous_const.mul continuous_ofReal)).continuousAt.cpow
-      continuousAt_const (LargeDenominator.one_sub_mul_mem_slitPlane hz hs)).continuousWithinAt
+      continuousAt_const (LargeDenominator.one_sub_mul_mem_slitPlane_of_norm_lt_one hz
+          hs)).continuousWithinAt
   have h1 : IntervalIntegrable (fun s : ℝ => (s : ℂ) ^ (b - 1) * (1 - (s : ℂ)) ^ (c + l - b - 1) *
       (1 - z * s) ^ (-a)) volume 0 1 := by
     refine hβ.mul_continuousOn ?_

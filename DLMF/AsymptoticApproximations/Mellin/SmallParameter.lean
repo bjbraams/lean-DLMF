@@ -530,7 +530,8 @@ theorem laplace_remainder_isBigO (σ : ℝ) (G : ℂ → ℂ) :
     _ = C * (ζ ^ σ / ζ) := by ring
 
 /-- DLMF 2.5.43: under the hypotheses of 2.5.41–2.5.42, with `H` the continuation of `𝓜h₂`,
-`P₂` the poles of `Γ(1 - z)H(z)` in `ℜβ₀ ≤ ℜz ≤ 1`, `P` the poles of `Γ(1 - z)𝓜h(z)`
+`P₂` the poles of `Γ(1 - z)H(z)` in `ℜβ₀ ≤ ℜz ≤ 1`, always including `z = 1` (the pole of
+`Γ(1 - z)`, whose residue `H(1)` the formula needs), `P` the poles of `Γ(1 - z)𝓜h(z)`
 (`𝓜h = 𝓜h₁ + H`) in `1 < ℜz < l` (`l ≥ 2` an integer, `0 < δ` small, no poles on
 `ℜz = l - δ`), decay of these products along vertical lines uniformly in strips, and
 integrability of `Γ(1 - z)𝓜h(z)` on the line `ℜz = l - δ` (which DLMF assumes implicitly),
@@ -542,7 +543,8 @@ theorem laplace_expansion_residues {h : ℝ → ℂ} {H : ℂ → ℂ} {c p : �
     (hp : p < 1) (hhc : LocallyIntegrableOn h (Ioi 0)) (h0 : h =O[𝓝[>] 0] fun t => t ^ c)
     (hconv : ∀ z : ℂ, z.re = p → MellinConvergent (mellinTruncHigh h) z)
     (hH : ∀ z : ℂ, z.re ≤ p → H z = mellin (mellinTruncHigh h) z)
-    (hP₂ : ∀ q ∈ P₂, p < q.re ∧ q.re ≤ 1) (hP : ∀ q ∈ P, 1 < q.re ∧ q.re < l - δ)
+    (hP₂ : ∀ q ∈ P₂, p < q.re ∧ q.re ≤ 1) (h1P₂ : (1 : ℂ) ∈ P₂)
+    (hP : ∀ q ∈ P, 1 < q.re ∧ q.re < l - δ)
     (hHd : DifferentiableOn ℂ (fun z => Complex.Gamma (1 - z) *
         (mellin (mellinTruncLow h) z + H z))
       ({z : ℂ | p ≤ z.re ∧ z.re ≤ l - δ} \ ((P₂ : Set ℂ) ∪ P ∪ {1})))

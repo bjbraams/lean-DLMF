@@ -303,7 +303,7 @@ Later proof-review findings carry their own dates below.
   which can diverge for continuous $\phi$ (du Bois-Reymond); a condition such as $\phi\in C^1$
   (or Dini's condition) is needed.
 \item[Lean] \lean{tendsto_dirichletKernel_integral}
-  (\file{DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean}), for $C^1$ $\phi$, admitted.
+  (\file{DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean}), for $C^1$ $\phi$, proved.
 \end{fields}
 
 \entry{\deq{1.18.54}}
@@ -312,7 +312,7 @@ Later proof-review findings carry their own dates below.
 \item[Correct] continuity does not ensure that the principal value exists; a H\"older condition
   is needed.
 \item[Lean] \lean{tendsto_sokhotski_plemelj} (\file{DLMF/AlgebraicAnalytic/Spectral/Theory.lean}),
-  for $C^1$ $f$ of compact support on $\RR$, admitted.
+  for $C^1$ $f$ of compact support on $\RR$, proved.
 \end{fields}
 
 \subsection{Chapter 2 (asymptotic approximations)}
@@ -1706,7 +1706,7 @@ $\Gamma(a)$ and of the product).
 \item[Evidence] off by exactly $2\pi\iu$ at $n=2$, $a=4-9\iu$, and at $n=3$, $a=1+5\iu$.
 \item[Lean] \lean{hasSum_hurwitzZeta_log_gamma} (real $a\ge 1$),
 \lean{exp_tsum_hurwitzZeta_eq_prod_gamma} (exponentiated, $\Re a\ge 1$)
-(\file{DLMF/Zeta/HurwitzIntegrals.lean}), admitted.
+(\file{DLMF/Zeta/HurwitzIntegrals.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -2154,7 +2154,7 @@ $(2\delta-1)\cot\phi-(2\epsilon-1)\tan\phi$:
 \item[Evidence] exact symbolic comparison with $D_z-D_t$ on test polynomials (constant ratio only
 for the corrected coefficient); the kernel \deq{31.10.10} has residual $10^{-31}$, against $1.18$
 as printed.
-\item[Lean] \lean{heun_kernel_typeI_angles} (\file{DLMF/Heun/Integral.lean}), admitted.
+\item[Lean] \lean{heun_kernel_typeI_angles} (\file{DLMF/Heun/Integral.lean}), proved.
 \end{fields}
 
 \entry{\deq{31.10.17}}
@@ -2377,7 +2377,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \item[Evidence] $\epsilon=-0.3$, $\ell=0$, $r=1.7$: $s$ true $0.1706086610$, printed $0.1206385$
   (exactly $1/\sqrt2$ times the true value).
 \item[Lean] \lean{coulombs_coulombc_eq_whittaker_pos} (\file{DLMF/Coulomb/Energy/Connection.lean}),
-  admitted.
+  proved.
 \end{fields}
 
 \entry{\deq{33.16.18}}
@@ -2689,7 +2689,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   $\prod_i(a_i-b_j)$, and likewise in the denominator.
 \item[Fix] Parenthesizing.
 \item[Lean] \lean{genAsymptoticC_limit}, \lean{genAsymptoticC_recurrence}
-  (\file{DLMF/GeneralizedHypergeometric/Asymptotics.lean}), admitted.
+  (\file{DLMF/GeneralizedHypergeometric/Asymptotics.lean}), proved.
 \item[Found] 2026-10-25 (\file{REVIEW.md}, ``Parallel proofs in Chapters 4, 16 and 17
   (2026-10-24, fourth round)'').
 \end{fields}
@@ -2960,7 +2960,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   compatibility of the separate derivative data. No DLMF erratum is asserted.
 \item[Lean] \lean{haar_isLittleO_pow}
   (\file{DLMF/AsymptoticApproximations/Integrals/Watson.lean}); the corrected theorem
-  remains admitted.
+  is proved.
 \item[Found] 2026-10-29 (\file{ProofRound20261029b.json}).
 \end{fields}
 
@@ -3386,9 +3386,10 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 
 \entry{\deq{28.12.7}}
 \begin{fields}
-\item[Note] Proved under the extra hypothesis $\lambda_{\nu+2m}(q)\ne\lambda_{\nu+2n}(q)$ as a
-  separate theorem; the statement as acquired stays admitted.
-\item[Lean] \lean{integral_mathieuMe_orthogonal_of_mathieuLambda_ne}
+\item[Note] Proved as stated: along the segment the continued eigenvalues
+  $\lambda_{\nu+2m}$ and $\lambda_{\nu+2n}$ never meet (\lean{IsMathieuLambdaPath.lambda_ne}), so
+  the case of distinct eigenvalues suffices.
+\item[Lean] \lean{integral_mathieuMe_orthogonal}
   (\file{DLMF/Mathieu/Noninteger/Properties.lean}), proved.
 \end{fields}
 

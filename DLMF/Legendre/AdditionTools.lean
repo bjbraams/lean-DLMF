@@ -31,7 +31,7 @@ carrying the integer case (the polynomial addition theorem) to all degrees. The 
   14.12.7 and from the fractional integral 14.12.5.
 * `AdditionTheorem.coeff_kernel`, `AdditionTheorem.hyperbolic_nat`: Fourier coefficients of the
   finite Legendre angular kernel, giving the integer-degree identity.
-* `AdditionTheorem.hyperbolic_coeff_eq`, `AdditionTheorem.associatedP_addition`: the Fourier
+* `AdditionTheorem.hyperbolic_coeff_eq`, `associatedP_addition`: the Fourier
   coefficients of `φ ↦ P_ν(cosh ξ₁ cosh ξ₂ - sinh ξ₁ sinh ξ₂ cos φ)` for all complex `ν`, and DLMF
   14.18.4.
 * `AdditionTheorem.regularizedGaussHG_one_eq_integral`: the representation
@@ -139,7 +139,6 @@ theorem AdditionTheorem.norm_associatedP_nat_le (ν : ℂ) (m : ℕ) {x : ℝ} (
       ≤ ‖poch (ν + 1) m‖ / π * ((2 * x) ^ |ν.re| * π) := by gcongr
     _ = _ := by field_simp
 
-
 /-- Bound for negative integer order on `(1, ∞)` from the fractional integral 14.12.5. -/
 theorem AdditionTheorem.norm_associatedP_neg_le (ν : ℂ) {m : ℕ} (hm : 1 ≤ m) {x : ℝ} (hx : 1 < x) :
     ‖associatedP ν (-(m:ℂ)) x‖ ≤ ‖((x:ℂ) ^ 2 - 1) ^ (-(m:ℂ) / 2) / Gamma m‖ *
@@ -188,7 +187,6 @@ theorem AdditionTheorem.norm_poch_le (ν : ℂ) (m : ℕ) :
     _ ≤ Real.exp ‖ν‖ * Real.exp m * m ! := h2
     _ = _ := by ring
 
-
 /-- A real number below `1` lies in the cut plane. -/
 theorem AdditionTheorem.ofReal_mem_cutPlane {r : ℝ} (hr : r < 1) : (r : ℂ) ∈ cutPlane := by
   rw [mem_cutPlane]; left; simp; linarith
@@ -232,7 +230,6 @@ theorem AdditionTheorem.hyperbolicArg_contDiff (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h
   funext t
   simp only [Function.comp, ExteriorGreen.associatedP_eq]
   congr 1; push_cast; ring
-
 
 /-- Order-zero values along `AdditionTheorem.hyperbolicArg` are bounded by
 `(2 cosh (ξ₁+ξ₂))^{|Re ν|}`. -/
@@ -316,7 +313,6 @@ theorem AdditionTheorem.hyperbolic_coeff_differentiable {ξ₁ ξ₂ : ℝ} (h1 
   rw [← differentiableOn_univ]
   exact (key.const_mul _).congr fun ν _ => rfl
 
-
 /-- `associatedP ν μ z` is entire in the degree for `(1 - z)/2` in the cut plane. -/
 theorem AdditionTheorem.differentiable_associatedP (μ : ℂ) {z : ℂ} (hz : (1 - z) / 2 ∈ cutPlane) :
     Differentiable ℂ (fun ν : ℂ => associatedP ν μ z) := by
@@ -377,7 +373,6 @@ theorem AdditionTheorem.hyperbolic_rhs_bound {x₁ x₂ : ℝ} (hx₁ : 1 < x₁
       _ ≤ _ := by
           refine mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr ?_) (by positivity)
           nlinarith [abs_nonneg ν.re, abs_nonneg ν.im]
-
 
 /-- `∫_{-π}^{π} e^{ikt} dt = 2π δ_{k0}` for integer `k`. -/
 theorem AdditionTheorem.integral_exp_intCast (k : ℤ) :
@@ -469,25 +464,35 @@ theorem AdditionTheorem.coeff_cos {j : ℕ} (hj : 1 ≤ j) (m : ℕ) :
   · exact ((by fun_prop : Continuous fun t : ℝ =>
       exp (((-((j:ℤ) + m) : ℤ):ℂ) * t * I)).const_mul _).intervalIntegrable _ _
 
-
 open DLMF.OrthogonalPolynomials.LegendreAddition in
 /-- The Fourier coefficients of the finite Legendre angular kernel are its coefficients. -/
 theorem AdditionTheorem.coeff_kernel (n : ℕ) (x y s t : ℂ) (m : ℕ) :
-    AdditionTheorem.coeff (fun u : ℝ => kernel n x y s t u) m = coeff n m x y s t := by
-  have hc : ∀ k : ℕ, Continuous fun u : ℝ => coeff n (k+1) x y s t * cos (((k:ℂ)+1) * u) :=
+    AdditionTheorem.coeff (fun u : ℝ => kernel n x y s t u) m =
+        OrthogonalPolynomials.LegendreAddition.coeff n m x y s t := by
+  have hc : ∀ k : ℕ, Continuous fun u : ℝ =>
+      OrthogonalPolynomials.LegendreAddition.coeff n (k+1) x y s t * cos (((k:ℂ)+1) * u) :=
     fun k => by fun_prop
   have hg : Continuous fun u : ℝ => ∑ k ∈ Finset.range n,
-      coeff n (k+1) x y s t * cos (((k:ℂ)+1) * u) := continuous_finsetSum _ fun k _ => hc k
+      OrthogonalPolynomials.LegendreAddition.coeff n (k+1) x y s t * cos (((k:ℂ)+1) * u) :=
+          continuous_finsetSum _ fun k _ => hc k
   unfold kernel
-  rw [AdditionTheorem.coeff_add (f := fun _ : ℝ => coeff n 0 x y s t) (g := fun u : ℝ => 2 *
-      ∑ k ∈ Finset.range n, coeff n (k+1) x y s t * cos (((k:ℂ)+1) * u)) continuous_const
+  rw [AdditionTheorem.coeff_add
+      (f := fun _ : ℝ => OrthogonalPolynomials.LegendreAddition.coeff n 0 x y s t)
+      (g := fun u : ℝ => 2 *
+      ∑ k ∈ Finset.range n, OrthogonalPolynomials.LegendreAddition.coeff n (k+1) x y s t *
+          cos (((k:ℂ)+1) * u)) continuous_const
       (continuous_const.mul hg), AdditionTheorem.coeff_const,
     AdditionTheorem.coeff_const_mul (f := fun u : ℝ => ∑ k ∈ Finset.range n,
-      coeff n (k+1) x y s t * cos (((k:ℂ)+1) * u)),
-    AdditionTheorem.coeff_sum (F := fun k (u : ℝ) => coeff n (k+1) x y s t * cos (((k:ℂ)+1) * u)) _
+      OrthogonalPolynomials.LegendreAddition.coeff n (k+1) x y s t * cos (((k:ℂ)+1) * u)),
+    AdditionTheorem.coeff_sum
+        (F := fun k (u : ℝ) => OrthogonalPolynomials.LegendreAddition.coeff n (k+1) x y s t *
+        cos (((k:ℂ)+1) * u)) _
       fun k => hc k]
-  have hterm : ∀ k : ℕ, AdditionTheorem.coeff (fun u : ℝ => coeff n (k+1) x y s t *
-      cos (((k:ℂ)+1) * u)) m = if k + 1 = m then coeff n (k+1) x y s t / 2 else 0 := by
+  have hterm : ∀ k : ℕ,
+      AdditionTheorem.coeff
+      (fun u : ℝ => OrthogonalPolynomials.LegendreAddition.coeff n (k+1) x y s t *
+      cos (((k:ℂ)+1) * u)) m = if k + 1 = m then
+          OrthogonalPolynomials.LegendreAddition.coeff n (k+1) x y s t / 2 else 0 := by
     intro k
     rw [AdditionTheorem.coeff_const_mul]
     have := AdditionTheorem.coeff_cos (j := k + 1) (by omega) m
@@ -497,13 +502,13 @@ theorem AdditionTheorem.coeff_kernel (n : ℕ) (x y s t : ℂ) (m : ℕ) :
   simp only [hterm]
   rcases Nat.eq_zero_or_pos m with rfl | hm
   · simp
-  · rw [show (if m = 0 then coeff n 0 x y s t else 0) = 0 by simp; omega, zero_add]
+  · rw [show (if m = 0 then OrthogonalPolynomials.LegendreAddition.coeff n 0 x y s t else 0) = 0 by
+        simp; omega, zero_add]
     obtain ⟨p, rfl⟩ : ∃ p, m = p + 1 := ⟨m - 1, by omega⟩
     simp only [add_left_inj, Finset.sum_ite_eq', Finset.mem_range]
     split_ifs with hp
     · ring
     · rw [coeff_eq_zero (by omega)]; ring
-
 
 open DLMF.OrthogonalPolynomials.LegendreAddition in
 /-- Integer degree and order on `(1, ∞)`: `P^m_n(x) = (x²-1)^{m/2} P_n^{(m)}(x)`. -/
@@ -570,7 +575,7 @@ theorem AdditionTheorem.hyperbolic_nat (n : ℕ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < �
       Gamma_nat_eq_factorial, Gamma_nat_eq_factorial,
       AdditionTheorem.associatedP_nat_nat n m hc1, AdditionTheorem.associatedP_nat_nat n m hc2,
       AdditionTheorem.sqrt_cosh_sq h1.le, AdditionTheorem.sqrt_cosh_sq h2.le]
-    simp only [coeff, weight]
+    simp only [OrthogonalPolynomials.LegendreAddition.coeff, weight]
     rw [show (I * (Real.sinh ξ₁ : ℂ) * (I * Real.sinh ξ₂)) = -((Real.sinh ξ₁ : ℂ) * Real.sinh ξ₂) by
       rw [show (I * (Real.sinh ξ₁ : ℂ)) * (I * Real.sinh ξ₂) = I ^ 2 *
           ((Real.sinh ξ₁ : ℂ) * Real.sinh ξ₂) by ring,
@@ -578,7 +583,6 @@ theorem AdditionTheorem.hyperbolic_nat (n : ℕ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < �
     ring
   · rw [coeff_eq_zero hmn, AdditionTheorem.associatedP_nat_nat n m hc2, jet_eq_zero hmn]
     simp
-
 
 /-- The Fourier coefficients of `φ ↦ P_ν(cosh ξ₁ cosh ξ₂ - sinh ξ₁ sinh ξ₂ cos φ)`, for every
 complex degree (Carlson's theorem from the integer case). -/
@@ -633,13 +637,14 @@ theorem AdditionTheorem.hyperbolic_coeff_eq (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 :
     (fun n => by rw [AdditionTheorem.hyperbolic_nat n h1 h2 m, sub_self]) ν
   exact sub_eq_zero.mp key
 
-/-- **Addition theorem for `P_ν` on `(1, ∞)`** (DLMF 14.18.4), in the form of the project. -/
-theorem AdditionTheorem.associatedP_addition (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁)
-    (h2 : 0 < ξ₂) (phi : ℝ) :
-    HasSum (fun j : ℕ => let m := j + 1; 2 * (-1) ^ m * associatedP ν (-m) (Real.cosh ξ₁) *
-      associatedP ν m (Real.cosh ξ₂) * Real.cos (m * phi))
-      (associatedP ν 0 (Real.cosh ξ₁ * Real.cosh ξ₂ - Real.sinh ξ₁ * Real.sinh ξ₂ * Real.cos phi) -
-        associatedP ν 0 (Real.cosh ξ₁) * associatedP ν 0 (Real.cosh ξ₂)) := by
+/-- At coincident arguments and phi zero, the order-zero P value is understood by its regular
+extension at one. -/
+@[dlmf 14.18.E4]
+theorem associatedP_addition (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (phi : ℝ) :
+    HasSum (fun j : ℕ => let m:=j+1;
+        2*(-1)^m*associatedP ν (-m) (Real.cosh ξ₁)*associatedP ν m (Real.cosh ξ₂)*Real.cos (m*phi))
+        (associatedP ν 0 (Real.cosh ξ₁*Real.cosh ξ₂-Real.sinh ξ₁*Real.sinh ξ₂*Real.cos
+        phi)-associatedP ν 0 (Real.cosh ξ₁)*associatedP ν 0 (Real.cosh ξ₂)) := by
   have hper : Function.Periodic
       (fun t : ℝ => associatedP ν 0 (AdditionTheorem.hyperbolicArg ξ₁ ξ₂ t)) (2 * π) :=
     fun t => by simp only [AdditionTheorem.hyperbolicArg, Real.cos_add_two_pi]
@@ -689,7 +694,6 @@ theorem AdditionTheorem.integral_sin_pow_even (n : ℕ) :
     push_cast
     field_simp
     ring
-
 
 /-- `𝐅(ν+1, -ν; 1; s) = π^{-1/2} ∫₀^π 𝐅(ν+1, -ν; 1/2; s sin² t) dt` for `0 ≤ s < 1`
 (the Mehler–Dirichlet integral in disguise). -/
@@ -746,7 +750,6 @@ theorem AdditionTheorem.regularizedGaussHG_one_eq_integral (ν : ℂ) {s : ℝ} 
   have hπ : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.2 (Real.sqrt_pos.2 Real.pi_pos).ne'
   rw [hs.unique h1]
   field_simp
-
 
 /-- `(1 - cos θ)/2 = sin²(θ/2)`. -/
 theorem AdditionTheorem.one_sub_cos_half (θ : ℝ) : (1 - Real.cos θ) / 2 = Real.sin (θ / 2) ^ 2 := by
@@ -828,7 +831,6 @@ theorem AdditionTheorem.norm_ferrersP_zero_le (ν : ℂ) {θ : ℝ} (h0 : 0 ≤ 
     _ = B * (π / Real.sqrt π ^ 2) := by ring
     _ = B := by rw [hsq, div_self Real.pi_ne_zero, mul_one]
 
-
 /-- The bound `AdditionTheorem.norm_ferrersP_zero_le` on `[cos Θ, 1]`. -/
 theorem AdditionTheorem.norm_ferrersP_zero_le_of_mem (ν : ℂ) {Θ x : ℝ} (h0 : 0 ≤ Θ) (hπ : Θ < π)
     (hx1 : Real.cos Θ ≤ x) (hx2 : x ≤ 1) :
@@ -889,7 +891,7 @@ theorem AdditionTheorem.ferrersArg_contDiff (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 :
         (by linarith [(AdditionTheorem.ferrersArg_mem h1 h2 hs t).1])
   convert this using 1
   funext t
-  simp only [Function.comp, FerrersGreen.ferrersP_zero]
+  simp only [Function.comp, FerrersGreen.ferrersP_zero_eq_regularizedGaussHG]
   congr 1; push_cast; ring
 
 /-- `-1 < cos (θ₁ + θ₂)`. -/
@@ -975,7 +977,6 @@ theorem AdditionTheorem.ferrers_coeff_differentiable {θ₁ θ₂ : ℝ} (h1 : 0
   rw [← differentiableOn_univ]
   exact (key.const_mul _).congr fun ν _ => rfl
 
-
 /-- Ferrers functions of nonzero real order vanish at `x = 1` (where `(1+x)/(1-x)` is totalized
 to `0`). -/
 theorem AdditionTheorem.ferrersP_one {μ : ℂ} (hμ : μ ≠ 0) (ν : ℂ) : ferrersP ν μ 1 = 0 := by
@@ -1045,7 +1046,6 @@ theorem AdditionTheorem.norm_poch_le_exp (a : ℂ) (k : ℕ) {ε : ℝ} (hε : 0
     _ ≤ (Real.exp (ε * (‖a‖ + k)) * k !) / ε ^ k := by gcongr
     _ = _ := by ring
 
-
 /-- `𝖯^m_ν(x) = (-1)^m (ν-m+1)_{2m} 𝖯^{-m}_ν(x)` for every complex `ν` (14.9.3 without the
 exceptional degrees, by continuation in `ν`). -/
 theorem AdditionTheorem.ferrersP_nat_eq (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
@@ -1085,7 +1085,6 @@ theorem AdditionTheorem.ferrersP_nat_eq (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x �
   have := han.eqOn_zero_of_preconnected_of_eventuallyEq_zero isPreconnected_univ (mem_univ _) hev
     (mem_univ ν)
   exact sub_eq_zero.mp this
-
 
 /-- The right-hand side coefficients of the Ferrers addition theorem satisfy a Carlson bound of
 type `θ₁ + θ₂ + ε` on the imaginary axis. -/
@@ -1303,7 +1302,7 @@ theorem AdditionTheorem.ferrers_nat {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 :
       hF m θ₁ h1 hθ1, hF m θ₂ h2 hθ2]
     have h4 : ((-1:ℂ)) ^ m * (-1) ^ m * ((-1) ^ m * (-1) ^ m) = 1 := by
       rw [← mul_pow, ← mul_pow]; norm_num
-    simp only [coeff, weight]
+    simp only [OrthogonalPolynomials.LegendreAddition.coeff, weight]
     linear_combination (-(((n - m).factorial / (n + m).factorial : ℂ) *
         (Real.sin θ₁ * Real.sin θ₂ : ℂ) ^ m *
       jet n m (Real.cos θ₁) * jet n m (Real.cos θ₂))) * h4 + 0 *

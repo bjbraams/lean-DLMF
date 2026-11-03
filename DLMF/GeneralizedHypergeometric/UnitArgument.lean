@@ -14,6 +14,7 @@ public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Hypergeometric.Solutions
 public import DLMF.Hypergeometric.Identities
 public import DLMF.Hypergeometric.Saalschutz
+public import DLMF.Hypergeometric.FiniteConvolution
 public import DLMF.QHypergeometric.HigherSummations
 
 /-!
@@ -52,7 +53,10 @@ evaluation is the `q → 1` limit of the rational terminating `₆φ₅` identit
 `DLMF.QHypergeometric.sum_sixTerm_eq`, with Bailey's polynomial unit factor handling the
 very-well-poised pair without square-root branch restrictions. The finite Dougall `₇F₆` follows from
 Whipple's transformation and Saalschütz's sum, with continuity of finite rational sums retaining the
-removable cancelled-parameter cases.
+removable cancelled-parameter cases. The terminating Watson sums reduce to the terminating Dixon
+sums by Sheppard's transformation, taken from the binomial convolution
+`terminating_3F2_convolution`; the balanced `₄F₃` transformation 16.4.14 is the convolution
+form `balanced_4F3_convolution_of_regular` of Whipple's transformation.
 -/
 
 @[expose] public section
@@ -337,19 +341,15 @@ private lemma dixonEvenT_eq_dixonEvenQ (k : ℕ) (b : ℂ) (hb : ∀ n : ℕ, 1 
     rw [dixonEvenT_neg_add k b hb i, sub_self]
   rw [← hT, ← hQ, sub_eq_zero.mp h0]
 
-/-- Dixon even terminating evaluation with all removable Gamma ratios replaced by finite products.
--/
-@[dlmf 16.4.E5]
-theorem genHG_dixon_terminating_even (k : ℕ) (b c : ℂ)
-    (hb : GenDenRegular {1 - b - 2 * k, 1 - c - 2 * k}) :
+/-- Dixon's even terminating evaluation, assuming only that the finite Pochhammer product of
+the second lower parameter is nonzero. -/
+private lemma genHG_dixon_terminating_even_of_poch (k : ℕ) (b c : ℂ)
+    (hb1 : ∀ n : ℕ, 1 - b - 2 * k ≠ -n) (hpc : poch (1 - c - 2 * k) (2 * k) ≠ 0) :
     genFiniteHG (2 * k) {(-(2 * k) : ℂ), b, c}
       {1 - b - 2 * k, 1 - c - 2 * k} 1 =
       (2 * k).factorial * poch (b + c + k) k /
         (k.factorial * poch (b + k) k * poch (c + k) k) := by
-  have hb1 : ∀ n : ℕ, 1 - b - 2 * k ≠ -n := hb _ (by simp)
-  have hc1 : ∀ n : ℕ, 1 - c - 2 * k ≠ -n := hb _ (by simp)
   have hb2 : ∀ n : ℕ, 1 - 2 * k - b ≠ -n := fun n h => hb1 n (by linear_combination h)
-  have hpc : poch (1 - c - 2 * k) (2 * k) ≠ 0 := poch_ne_zero_of_not_neg_nat hc1 _
   have hrc : poch (1 - c - 2 * k) (2 * k) = poch c k * poch (c + k) k := by
     have := poch_reflect c (2 * k)
     push_cast at this
@@ -372,7 +372,7 @@ theorem genHG_dixon_terminating_even (k : ℕ) (b c : ℂ)
       rw [← show 1 - c - 2 * k + n = 1 - 2 * k + n - c by ring, ← poch_add,
         Nat.add_sub_cancel' hn']
     have h1 := poch_ne_zero_of_not_neg_nat hb1 n
-    have h2 := poch_ne_zero_of_not_neg_nat hc1 n
+    have h2 : poch (1 - c - 2 * k) n ≠ 0 := left_ne_zero_of_mul (hsplit ▸ hpc)
     have h3 : poch (1 - 2 * k - b) n = poch (1 - b - 2 * k) n := by ring_nf
     have hf : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
     simp only [genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
@@ -384,18 +384,28 @@ theorem genHG_dixon_terminating_even (k : ℕ) (b c : ℂ)
   rw [show c + (b + k) = b + c + k by ring]
   field_simp
 
+/-- Dixon even terminating evaluation with all removable Gamma ratios replaced by finite products.
+-/
+@[dlmf 16.4.E5]
+theorem genHG_dixon_terminating_even (k : ℕ) (b c : ℂ)
+    (hb : GenDenRegular {1 - b - 2 * k, 1 - c - 2 * k}) :
+    genFiniteHG (2 * k) {(-(2 * k) : ℂ), b, c}
+      {1 - b - 2 * k, 1 - c - 2 * k} 1 =
+      (2 * k).factorial * poch (b + c + k) k /
+        (k.factorial * poch (b + k) k * poch (c + k) k) :=
+  genHG_dixon_terminating_even_of_poch k b c (hb _ (by simp))
+    (poch_ne_zero_of_not_neg_nat (hb _ (by simp)) _)
+
 end DixonDegenerate
 
-/-- Dixon odd terminating evaluation, retaining every regular lower-parameter case. -/
-@[dlmf 16.4.E5]
-theorem genHG_dixon_terminating_odd (k : ℕ) (b c : ℂ)
-    (hb : GenDenRegular {1 - b - (2 * k + 1), 1 - c - (2 * k + 1)}) :
+/-- Dixon's odd terminating evaluation, assuming only that the finite Pochhammer product of
+the lower parameters is nonzero. -/
+private lemma genHG_dixon_terminating_odd_of_poch (k : ℕ) (b c : ℂ)
+    (hB : genPoch {1 - b - ((2 * k + 1 : ℕ) : ℂ), 1 - c - ((2 * k + 1 : ℕ) : ℂ)}
+      (2 * k + 1) ≠ 0) :
     genFiniteHG (2 * k + 1) {(-(2 * k + 1) : ℂ), b, c}
       {1 - b - (2 * k + 1), 1 - c - (2 * k + 1)} 1 = 0 := by
   let N := 2 * k + 1
-  have hB : genPoch {1 - b - N, 1 - c - N} N ≠ 0 := by
-    simpa only [N, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one] using
-        genPoch_ne_zero hb N
   have hs : (-1 : ℂ) ^ N = -1 := by simp [N, pow_add, pow_mul]
   have hp : genPoch {1 - b - N, 1 - c - N} N = genPoch {b, c} N := by
     simp only [genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
@@ -426,6 +436,70 @@ theorem genHG_dixon_terminating_odd (k : ℕ) (b c : ℂ)
   simpa only [N, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one,
       Multiset.insert_eq_cons] using hzero
 
+/-- Dixon odd terminating evaluation, retaining every regular lower-parameter case. -/
+@[dlmf 16.4.E5]
+theorem genHG_dixon_terminating_odd (k : ℕ) (b c : ℂ)
+    (hb : GenDenRegular {1 - b - (2 * k + 1), 1 - c - (2 * k + 1)}) :
+    genFiniteHG (2 * k + 1) {(-(2 * k + 1) : ℂ), b, c}
+      {1 - b - (2 * k + 1), 1 - c - (2 * k + 1)} 1 = 0 :=
+  genHG_dixon_terminating_odd_of_poch k b c (by
+    simpa only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one] using
+      genPoch_ne_zero hb (2 * k + 1))
+
+/-- Sheppard's terminating `₃F₂(1)` transformation, multiplied out so that only the lower
+parameter `R` needs to avoid the nonpositive integers. -/
+private lemma genFiniteHG_sheppard (n : ℕ) (P Q R D : ℂ) (hR : ∀ k : ℕ, R ≠ -k)
+    (hD : poch D n ≠ 0) (hDP : poch (1 - D + P - n) n ≠ 0) :
+    poch D n * genFiniteHG n {(-n : ℂ), Q, P} {R, D} 1 =
+      poch (D - P) n * genFiniteHG n {(-n : ℂ), P, R - Q} {R, 1 + P - D - n} 1 := by
+  have hconv := terminating_3F2_convolution P Q R D (poch_ne_zero_of_not_neg_nat hR) n
+  have hch (k : ℕ) : (-1 : ℂ) ^ k * n.choose k * k.factorial = poch (-(n : ℂ)) k := by
+    rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
+    push_cast; ring
+  simp only [genFiniteHG, genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
+    Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton, one_pow, mul_one]
+  rw [mul_sum, mul_sum]
+  convert hconv using 1
+  · refine sum_congr rfl fun k hk => ?_
+    have hk' : k ≤ n := by simpa [Nat.lt_succ_iff] using hk
+    have hDn : poch D n = poch D k * poch (D + k) (n - k) := by
+      rw [← poch_add, Nat.add_sub_cancel' hk']
+    have hDk : poch D k ≠ 0 := left_ne_zero_of_mul (hDn ▸ hD)
+    have hRk := poch_ne_zero_of_not_neg_nat hR k
+    have hkf : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
+    rw [← hch, hDn]
+    field_simp
+  · refine sum_congr rfl fun j hj => ?_
+    have hj' : j ≤ n := by simpa [Nat.lt_succ_iff] using hj
+    have hn : n = (n - j) + j := by omega
+    have hsplit : poch (D - P) n =
+        poch (D - P) (n - j) * poch (D - P + ((n - j : ℕ) : ℂ)) j := by
+      rw [← poch_add, ← hn]
+    have hrefl : poch (1 + P - D - n) j = (-1) ^ j * poch (D - P + ((n - j : ℕ) : ℂ)) j := by
+      rw [← poch_reflect]; congr 1; push_cast [Nat.cast_sub hj']; ring
+    have hsplit2 : poch (1 - D + P - n) n = poch (1 - D + P - n) j *
+        poch (1 - D + P - n + j) (n - j) := by
+      rw [← poch_add, Nat.add_sub_cancel' hj']
+    have h1 : poch (1 + P - D - n) j ≠ 0 := by
+      have := left_ne_zero_of_mul (hsplit2 ▸ hDP)
+      rwa [show 1 - D + P - (n : ℂ) = 1 + P - D - n by ring] at this
+    rw [hrefl] at h1
+    have h1' := right_ne_zero_of_mul h1
+    have hRj := poch_ne_zero_of_not_neg_nat hR j
+    have hjf : (j.factorial : ℂ) ≠ 0 := by exact_mod_cast j.factorial_ne_zero
+    rw [← hch, hsplit, hrefl]
+    field_simp
+
+/-- Duplication for Pochhammer symbols: `(x)₂ₙ = 4ⁿ (x/2)ₙ ((x+1)/2)ₙ`. -/
+private lemma poch_two_mul_eq_four_pow_mul_poch (x : ℂ) (n : ℕ) :
+    poch x (2 * n) = 4 ^ n * poch (x / 2) n * poch ((x + 1) / 2) n := by
+  induction n with
+  | zero => simp [poch_zero]
+  | succ n ih =>
+    rw [show 2 * (n + 1) = 2 * n + 1 + 1 by ring, poch_succ, poch_succ, ih, poch_succ, poch_succ]
+    push_cast
+    ring
+
 /-- Watson sum in the full absolute convergence half-space. -/
 @[dlmf 16.4.E6]
 theorem genHG_watson_sum (a b c : ℂ) (hb : GenDenRegular {(a + b + 1) / 2, 2 * c})
@@ -445,7 +519,73 @@ theorem genHG_watson_terminating_even (k : ℕ) (b c : ℂ)
       {(b - 2 * k + 1) / 2, 2 * c} 1 =
       poch (1 / 2) k * poch (c + (1 - b) / 2) k /
         (poch ((1 - b) / 2) k * poch (c + 1 / 2) k) := by
-  sorry
+  set R : ℂ := (b - 2 * k + 1) / 2 with hRdef
+  have hR : ∀ m : ℕ, R ≠ -m := hb _ (by simp)
+  have h2c : ∀ m : ℕ, 2 * c ≠ -m := hb _ (by simp)
+  have hD := poch_ne_zero_of_not_neg_nat h2c (2 * k)
+  have hdup := poch_two_mul_eq_four_pow_mul_poch (2 * c) k
+  rw [show 2 * c / 2 = c by ring, show (2 * c + 1) / 2 = c + 1 / 2 by ring] at hdup
+  have hc2 : poch c (2 * k) = poch c k * poch (c + k) k := by
+    rw [two_mul, poch_add]
+  have hcn : poch c (2 * k) ≠ 0 := by
+    intro h0
+    rw [hc2] at h0
+    rcases mul_eq_zero.mp h0 with h0 | h0
+    · exact hD (by rw [hdup, h0]; ring)
+    · obtain ⟨i, hi, hi'⟩ := (ascPochhammer_eval_eq_zero_iff (R := ℂ) k (c + k)).1 h0
+      exact h2c (2 * (k + i)) (by push_cast; linear_combination 2 * hi')
+  have hrefl : poch (1 - 2 * c + c - ((2 * k : ℕ) : ℂ)) (2 * k) =
+      (-1) ^ (2 * k) * poch c (2 * k) := by
+    rw [← poch_reflect]; congr 1; ring
+  have hDP : poch (1 - 2 * c + c - ((2 * k : ℕ) : ℂ)) (2 * k) ≠ 0 := by
+    rw [hrefl]; exact mul_ne_zero (pow_ne_zero _ (by norm_num)) hcn
+  have hsh := genFiniteHG_sheppard (2 * k) c b R (2 * c) hR hD hDP
+  have hR1 : ∀ m : ℕ, 1 - (R - b) - 2 * k ≠ -m := fun m h => hR m (by
+    rw [← h, hRdef]; ring)
+  have hpc : poch (1 - c - 2 * k) (2 * k) ≠ 0 := by
+    convert hDP using 2; push_cast; ring
+  have hdx := genHG_dixon_terminating_even_of_poch k (R - b) c hR1 hpc
+  have hG : genFiniteHG (2 * k) {(-((2 * k : ℕ) : ℂ)), c, R - b}
+      {R, 1 + c - 2 * c - ((2 * k : ℕ) : ℂ)} 1 =
+      genFiniteHG (2 * k) {(-(2 * k) : ℂ), R - b, c} {1 - (R - b) - 2 * k, 1 - c - 2 * k} 1 := by
+    congr 1
+    · rw [Multiset.pair_comm c (R - b)]
+      push_cast
+      rfl
+    · simp only [Multiset.insert_eq_cons]
+      push_cast
+      congr 1
+      · rw [hRdef]; ring
+      · congr 1; ring
+  have hL : genFiniteHG (2 * k) {(-((2 * k : ℕ) : ℂ)), b, c} {R, 2 * c} 1 =
+      genFiniteHG (2 * k) {(-(2 * k) : ℂ), b, c} {(b - 2 * k + 1) / 2, 2 * c} 1 := by
+    push_cast; rfl
+  rw [← hL]
+  rw [hG, hdx] at hsh
+  have hRb : R - b + k = (1 - b) / 2 := by rw [hRdef]; ring
+  have hRbc : R - b + c + k = c + (1 - b) / 2 := by rw [hRdef]; ring
+  rw [hRb, hRbc] at hsh
+  have hb2 : poch ((1 - b) / 2) k ≠ 0 := by
+    have := poch_reflect R k
+    rw [show 1 - R - k = (1 - b) / 2 by rw [hRdef]; ring] at this
+    rw [this]
+    exact mul_ne_zero (pow_ne_zero _ (by norm_num)) (poch_ne_zero_of_not_neg_nat hR k)
+  have hck : poch (c + k) k ≠ 0 := right_ne_zero_of_mul (hc2 ▸ hcn)
+  have hc0 : poch c k ≠ 0 := left_ne_zero_of_mul (hc2 ▸ hcn)
+  have hch : poch (c + 1 / 2) k ≠ 0 := by
+    intro h0; exact hD (by rw [hdup, h0]; ring)
+  have hfac := poch_two_mul_eq_four_pow_mul_poch 1 k
+  rw [show ((1 : ℂ) + 1) / 2 = 1 by norm_num, poch_nat_one, poch_nat_one] at hfac
+  have hk : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
+  have h4 : (4 : ℂ) ^ k ≠ 0 := pow_ne_zero _ (by norm_num)
+  rw [hdup, show 2 * c - c = c by ring, hc2,
+    show ((2 * k).factorial : ℂ) = 4 ^ k * poch (1 / 2) k * k.factorial by
+      exact_mod_cast hfac] at hsh
+  rw [eq_div_iff (mul_ne_zero hb2 hch)]
+  field_simp at hsh
+  rw [show (c * 2 + 1) / 2 = c + 1 / 2 by ring, show c * 2 = 2 * c by ring,
+    show (2 * c + (1 - b)) / 2 = c + (1 - b) / 2 by ring] at hsh
+  linear_combination hsh
 
 /-- Watson odd terminating evaluation for every regular displayed lower parameter. -/
 @[dlmf 16.4.E6]
@@ -453,7 +593,48 @@ theorem genHG_watson_terminating_odd (k : ℕ) (b c : ℂ)
     (hb : GenDenRegular {(b - (2 * k + 1) + 1) / 2, 2 * c}) :
     genFiniteHG (2 * k + 1) {(-(2 * k + 1) : ℂ), b, c}
       {(b - (2 * k + 1) + 1) / 2, 2 * c} 1 = 0 := by
-  sorry
+  set R : ℂ := (b - (2 * k + 1) + 1) / 2 with hRdef
+  have hR : ∀ m : ℕ, R ≠ -m := hb _ (by simp)
+  have h2c : ∀ m : ℕ, 2 * c ≠ -m := hb _ (by simp)
+  have hD := poch_ne_zero_of_not_neg_nat h2c (2 * k + 1)
+  have hcn : poch c (2 * k + 1) ≠ 0 := by
+    refine poch_ne_zero_of_not_neg_nat (fun m hm => ?_) _
+    exact h2c (2 * m) (by push_cast; linear_combination 2 * hm)
+  have hrefl : poch (1 - 2 * c + c - ((2 * k + 1 : ℕ) : ℂ)) (2 * k + 1) =
+      (-1) ^ (2 * k + 1) * poch c (2 * k + 1) := by
+    rw [← poch_reflect]; congr 1; ring
+  have hDP : poch (1 - 2 * c + c - ((2 * k + 1 : ℕ) : ℂ)) (2 * k + 1) ≠ 0 := by
+    rw [hrefl]; exact mul_ne_zero (pow_ne_zero _ (by norm_num)) hcn
+  have hsh := genFiniteHG_sheppard (2 * k + 1) c b R (2 * c) hR hD hDP
+  have hB : genPoch {1 - (R - b) - ((2 * k + 1 : ℕ) : ℂ), 1 - c - ((2 * k + 1 : ℕ) : ℂ)}
+      (2 * k + 1) ≠ 0 := by
+    simp only [genPoch, Multiset.insert_eq_cons, Multiset.map_cons, Multiset.map_singleton,
+      Multiset.prod_cons, Multiset.prod_singleton]
+    refine mul_ne_zero ?_ ?_
+    · convert poch_ne_zero_of_not_neg_nat hR (2 * k + 1) using 2
+      rw [hRdef]; push_cast; ring
+    · convert hDP using 2; ring
+  have hdx := genHG_dixon_terminating_odd_of_poch k (R - b) c hB
+  have hG : genFiniteHG (2 * k + 1) {(-((2 * k + 1 : ℕ) : ℂ)), c, R - b}
+      {R, 1 + c - 2 * c - ((2 * k + 1 : ℕ) : ℂ)} 1 =
+      genFiniteHG (2 * k + 1) {(-(2 * k + 1) : ℂ), R - b, c}
+        {1 - (R - b) - (2 * k + 1), 1 - c - (2 * k + 1)} 1 := by
+    congr 1
+    · rw [Multiset.pair_comm c (R - b)]
+      push_cast
+      rfl
+    · simp only [Multiset.insert_eq_cons]
+      push_cast
+      congr 1
+      · rw [hRdef]; ring
+      · congr 1; ring
+  rw [hG, hdx, mul_zero] at hsh
+  have hL : genFiniteHG (2 * k + 1) {(-((2 * k + 1 : ℕ) : ℂ)), b, c} {R, 2 * c} 1 =
+      genFiniteHG (2 * k + 1) {(-(2 * k + 1) : ℂ), b, c}
+        {(b - (2 * k + 1) + 1) / 2, 2 * c} 1 := by
+    push_cast; rfl
+  rw [← hL]
+  exact (mul_eq_zero.mp hsh).resolve_left hD
 
 /-- Whipple 3F2 sum, including every terminating integer a. -/
 @[dlmf 16.4.E7]
@@ -1127,7 +1308,52 @@ theorem genHG_balanced_4F3_transformation (n : ℕ) (a b c d e f : ℂ)
       poch (e - a) n * poch (f - a) n / (poch e n * poch f n) *
         genFiniteHG n {(-n : ℂ), a, d - b, d - c}
           {d, a - e - n + 1, a - f - n + 1} 1 := by
-  sorry
+  have hd : ∀ k : ℕ, d ≠ -k := hb d (by simp)
+  have he : ∀ k : ℕ, e ≠ -k := hb e (by simp)
+  have hf : ∀ k : ℕ, f ≠ -k := hb f (by simp)
+  have he' : ∀ k : ℕ, a - e - n + 1 ≠ -k := hb _ (by simp)
+  have hf' : ∀ k : ℕ, a - f - n + 1 ≠ -k := hb _ (by simp)
+  have hconv := balanced_4F3_convolution_of_regular a b c e f d he hf hd n
+    (by linear_combination hbal)
+  simp only [genFiniteHG, genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
+    Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton, one_pow, mul_one]
+  rw [Finset.mul_sum]
+  convert hconv using 1
+  · refine Finset.sum_congr rfl fun k _ => ?_
+    ring
+  · refine Finset.sum_congr rfl fun j hj => ?_
+    have hj' : j ≤ n := by simpa using hj
+    have hn : n = (n - j) + j := by omega
+    have hEa : poch (e - a) n = poch (e - a) (n - j) * poch (e - a + ((n - j : ℕ) : ℂ)) j := by
+      rw [← poch_add, ← hn]
+    have hFa : poch (f - a) n = poch (f - a) (n - j) * poch (f - a + ((n - j : ℕ) : ℂ)) j := by
+      rw [← poch_add, ← hn]
+    have hEn : poch e n = poch e j * poch (e + j) (n - j) := by
+      rw [← poch_add, Nat.add_sub_cancel' hj']
+    have hFn : poch f n = poch f j * poch (f + j) (n - j) := by
+      rw [← poch_add, Nat.add_sub_cancel' hj']
+    have hRe : poch (a - e - n + 1) j = (-1) ^ j * poch (e - a + ((n - j : ℕ) : ℂ)) j := by
+      rw [← poch_reflect]; congr 1; push_cast [Nat.cast_sub hj']; ring
+    have hRf : poch (a - f - n + 1) j = (-1) ^ j * poch (f - a + ((n - j : ℕ) : ℂ)) j := by
+      rw [← poch_reflect]; congr 1; push_cast [Nat.cast_sub hj']; ring
+    have h1 := poch_ne_zero_of_not_neg_nat he j
+    have h2 := poch_ne_zero_of_not_neg_nat hf j
+    have h3 := poch_ne_zero_of_not_neg_nat (not_neg_nat_add_nat he j) (n - j)
+    have h4 := poch_ne_zero_of_not_neg_nat (not_neg_nat_add_nat hf j) (n - j)
+    have h5 := poch_ne_zero_of_not_neg_nat he' j
+    have h6 := poch_ne_zero_of_not_neg_nat hf' j
+    have h7 := poch_ne_zero_of_not_neg_nat hd j
+    rw [hRe] at h5
+    rw [hRf] at h6
+    have h5' := right_ne_zero_of_mul h5
+    have h6' := right_ne_zero_of_mul h6
+    have h9 : (-1 : ℂ) ^ j ≠ 0 := pow_ne_zero _ (by norm_num)
+    have h8 : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
+    rw [hEa, hFa, hEn, hFn, hRe, hRf]
+    have hs : ((-1 : ℂ) ^ j) ^ 2 = 1 := by rw [← pow_mul, pow_mul']; norm_num
+    field_simp
+    rw [hs]
+    ring
 
 /-- Whipple transformation when the right side terminates through the transformed first upper
 parameter and the left converges absolutely. -/

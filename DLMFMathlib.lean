@@ -55,6 +55,7 @@ public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
 public import DLMFMathlib.Analysis.Fourier.DirichletJordan
+public import DLMFMathlib.Analysis.Fourier.PoissonKernel
 public import DLMFMathlib.Analysis.Fourier.GaussianSeries
 public import DLMFMathlib.Analysis.Fourier.L1Inversion
 public import DLMFMathlib.Analysis.Fourier.L2Compatibility
@@ -95,6 +96,7 @@ public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.OneSubCosInteg
 public import DLMFMathlib.Analysis.SpecificLimits.Oscillation
 public import DLMFMathlib.Analysis.SpecificLimits.PowMulPowChoose
 public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
+public import DLMFMathlib.Analysis.SpecificLimits.QuarterRecurrence
 public import DLMFMathlib.MeasureTheory.Function.JacobianSqrt
 public import DLMFMathlib.MeasureTheory.Function.L2Space
 public import DLMFMathlib.MeasureTheory.Integral.HalfLine
@@ -181,6 +183,8 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.SpecificLimits.Pincherle`: divergence of sums with ratio limit outside the
   unit disc, and convergence of a continued fraction from a backward solution with such a ratio
   limit.
+* `DLMFMathlib.Analysis.SpecificLimits.QuarterRecurrence`: geometric decay of sequences with
+  `aₙ₊₁ ≤ (aₙ + aₙ₊₂)/4`.
 * `DLMFMathlib.Analysis.Complex.FactorialSeries`: convergence and entireness of sparse factorial
   series.
 * `DLMFMathlib.Analysis.Complex.TrigSeriesExtension`: uniqueness of power-series coefficients on a
@@ -265,6 +269,8 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
   kernel `sin(η(t-u))/(π(t-u))`.
 * `DLMFMathlib.Analysis.Fourier.DirichletJordan`: the Dirichlet–Jordan theorem for the Fourier
   integral of a function of bounded variation.
+* `DLMFMathlib.Analysis.Fourier.PoissonKernel`: the Poisson kernel of the half-plane and its
+  jump limit `(g₊ + g₋)/2`.
 * `DLMFMathlib.Analysis.Calculus.Deriv.CompCurve`: derivatives of compositions with curves and
   of functions of three complex variables along a curve.
 * `DLMFMathlib.MeasureTheory.Integral.PathParametric`: differentiation under interval integrals

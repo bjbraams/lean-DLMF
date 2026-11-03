@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreen
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 
 /-!
 # Liouville–Green approximation: the exponential and oscillatory cases
@@ -23,7 +24,7 @@ error-control function. Then, for a parameter `u`,
   `|ε| ≤ exp (V/|u|) - 1` and `|ε'| ≤ |u| f^{1/2} (exp (V/|u|) - 1)`.
 
 For `u = 1` these are Olver's Theorems 2.1 (recessive solution) and 2.2; for large `u` they give
-`ε = O(1/u)` uniformly in `x` (`LiouvilleGreen.exp_sub_one_le_mul_exp`). Both are stated
+`ε = O(1/u)` uniformly in `x` (`Real.exp_sub_one_le_mul_exp`). Both are stated
 first in terms of an amplitude `A` with `ξ' = A⁻²` (`f = A⁻⁴`), then with `A = f^{-1/4}`.
 
 ## Main results
@@ -54,13 +55,6 @@ theorem le_of_hasDerivAt_nonneg {a : ℝ} {ξ d : ℝ → ℝ}
     rw [(hξ y hy).deriv]
     exact hd y hy
   exact hmono hx (lt_of_lt_of_le hx hxt) hxt
-
-/-- `exp y - 1 ≤ y exp y`; turns the Liouville–Green bounds into `O(1/u)`. -/
-theorem exp_sub_one_le_mul_exp (y : ℝ) :
-    Real.exp y - 1 ≤ y * Real.exp y := by
-  have h := Real.add_one_le_exp (-y)
-  have h2 : Real.exp (-y) * Real.exp y = 1 := by rw [← Real.exp_add]; simp
-  nlinarith [Real.exp_pos y]
 
 /-- The exponential Liouville–Green kernel: for `ξ' = A⁻²` and `u > 0`, `E = exp (-u ξ)` solves
 `E' = -u A⁻² E`, `|E|` is nonincreasing and `|(1 - E(t)²/E(x)²)/(2u)| ≤ 1/(2u)` for `x < t`. -/
@@ -299,7 +293,7 @@ then for `u > 0` the equation `w'' = (u² f + g) w` has the solution
 
 `|ε x| ≤ exp (V x / (2u)) - 1`,   `|ε' x| ≤ 2u f(x)^{1/2} (exp (V x / (2u)) - 1)`.
 
-In particular `ε = O(1/u)` uniformly in `x` when `V` is bounded (`exp_sub_one_le_mul_exp`). -/
+In particular `ε = O(1/u)` uniformly in `x` when `V` is bounded (`Real.exp_sub_one_le_mul_exp`). -/
 theorem exists_solution_exp_of_pos {a u : ℝ} (hu : 0 < u) {f f' f'' g ξ : ℝ → ℝ}
     (hf : ∀ x, a < x → 0 < f x)
     (hf' : ∀ x, a < x → HasDerivAt f (f' x) x) (hf'' : ∀ x, a < x → HasDerivAt f' (f'' x) x)

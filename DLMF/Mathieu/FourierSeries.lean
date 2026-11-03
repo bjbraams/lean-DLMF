@@ -34,10 +34,10 @@ expansions, recurrences, normalizations, sign convention, values at `q = 0`, cha
   (DLMF 28.4.13–28.4.16).
 * `mathieuFourierA_even_neg_q` and its companions: the change of sign of `q`
   (DLMF 28.4.17–28.4.20).
-* `mathieuFourierA_zero_small_q`, `mathieuFourierA_up_small_q`, `mathieuFourierA_down_small_q`
-  and the `B` versions: small-`q` forms (DLMF 28.4.21–28.4.23).
 * `mathieuFourierA_even_large_m`, `mathieuFourierA_odd_large_m`, `mathieuFourierB_odd_large_m`,
   `mathieuFourierB_even_large_m`: large-`m` forms (DLMF 28.4.24–28.4.27).
+
+The small-`q` forms (DLMF 28.4.21–28.4.23) are in `DLMF.Mathieu.SmallQFourierCoefficients`.
 
 ## Implementation notes
 
@@ -869,57 +869,6 @@ theorem mathieuFourierB_odd_neg_q (n m : ℕ) (q : ℝ) :
     rw [sub_sub_cancel] at e
     rw [mathieuSe_odd_neg_q, e]
     push_cast; ring
-
-/-! ### Behavior for small `q` (§28.4(vi)) -/
-
-/-- **DLMF 28.4.21**: for fixed `s ≥ 1`,
-`A^0_{2s}(q) = ((-1)^s 2/(s!)² (q/4)^s + O(q^{s+2})) A^0_0(q)` as `q → 0`. -/
-@[dlmf 28.4.E21]
-theorem mathieuFourierA_zero_small_q {s : ℕ} (hs : 1 ≤ s) :
-    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 2)) ∧ ∀ q : ℝ,
-      mathieuFourierA 0 (2 * s) q = ((-1) ^ s * 2 / (s.factorial : ℂ) ^ 2 * ((q : ℂ) / 4) ^ s +
-        ε q) * mathieuFourierA 0 0 q := by
-  sorry
-
-/-- **DLMF 28.4.22** (`A`): for fixed `s, m ≥ 1`,
-`A^m_{m+2s}(q) = ((-1)^s m!/(s!(m+s)!) (q/4)^s + O(q^{s+1})) A^m_m(q)` as `q → 0`. -/
-@[dlmf 28.4.E22]
-theorem mathieuFourierA_up_small_q {m s : ℕ} (hm : 1 ≤ m) (hs : 1 ≤ s) :
-    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ q : ℝ,
-      mathieuFourierA m (m + 2 * s) q = ((-1) ^ s * (m.factorial : ℂ) /
-        ((s.factorial : ℂ) * ((m + s).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
-        mathieuFourierA m m q := by
-  sorry
-
-/-- **DLMF 28.4.22** (`B`):
-`B^m_{m+2s}(q) = ((-1)^s m!/(s!(m+s)!) (q/4)^s + O(q^{s+1})) B^m_m(q)`. -/
-@[dlmf 28.4.E22]
-theorem mathieuFourierB_up_small_q {m s : ℕ} (hm : 1 ≤ m) (hs : 1 ≤ s) :
-    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ q : ℝ,
-      mathieuFourierB m (m + 2 * s) q = ((-1) ^ s * (m.factorial : ℂ) /
-        ((s.factorial : ℂ) * ((m + s).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
-        mathieuFourierB m m q := by
-  sorry
-
-/-- **DLMF 28.4.23** (`A`): for `1 ≤ s` and `2s ≤ m`,
-`A^m_{m-2s}(q) = ((m-s-1)!/(s!(m-1)!) (q/4)^s + O(q^{s+1})) A^m_m(q)` as `q → 0`. -/
-@[dlmf 28.4.E23]
-theorem mathieuFourierA_down_small_q {m s : ℕ} (hs : 1 ≤ s) (hsm : 2 * s ≤ m) :
-    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ q : ℝ,
-      mathieuFourierA m (m - 2 * s) q = (((m - s - 1).factorial : ℂ) /
-        ((s.factorial : ℂ) * ((m - 1).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
-        mathieuFourierA m m q := by
-  sorry
-
-/-- **DLMF 28.4.23** (`B`): for `1 ≤ s` and `2s < m`,
-`B^m_{m-2s}(q) = ((m-s-1)!/(s!(m-1)!) (q/4)^s + O(q^{s+1})) B^m_m(q)` as `q → 0`. -/
-@[dlmf 28.4.E23]
-theorem mathieuFourierB_down_small_q {m s : ℕ} (hs : 1 ≤ s) (hsm : 2 * s < m) :
-    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ q : ℝ,
-      mathieuFourierB m (m - 2 * s) q = (((m - s - 1).factorial : ℂ) /
-        ((s.factorial : ℂ) * ((m - 1).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
-        mathieuFourierB m m q := by
-  sorry
 
 /-! ### Asymptotic forms for large `m` (§28.4(vii)) -/
 

@@ -45,8 +45,8 @@ Associated orthogonal polynomials (DLMF §18.30), Freud weights (§18.32), Besse
   `pollaczek_eq_associatedMeixnerPollaczek`: special cases DLMF 18.35.8–18.35.10.
 * `laguerrePolyL_negative_integer_parameter`: Laguerre polynomials with negative integer
   parameter (DLMF 18.36.2).
-* `exceptionalLaguerre_orthogonality`, `exceptionalLaguerre_differential_equation`,
-  `exceptionalHermite_orthonormal`: DLMF 18.36.6, 18.36.7 and 18.36.10.
+* `exceptionalLaguerre_differential_equation`: DLMF 18.36.7; the exceptional orthogonality
+  relations 18.36.6 and 18.36.10 are in `DLMF.OrthogonalPolynomials.ExceptionalOrthogonality`.
 
 ## Implementation notes
 
@@ -967,16 +967,6 @@ theorem laguerrePolyL_deriv_succ_sub {α : ℂ} (hα : -1 < α.re) (m : ℕ) (x 
         laguerrePolyL_raise_parameter hα j]
     ring
 
-/-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in Set.Ioi 0,
-exceptionalLaguerre k m x * exceptionalLaguerre k n x * exceptionalLaguerreWeight k x = if m =
-n then (n + 1 + (k : ℂ)) * Gamma (n + (k : ℂ)) / n.factorial else 0`. -/
-@[dlmf 18.36.E6]
-theorem exceptionalLaguerre_orthogonality {k : ℝ} (hk : 0 < k) (m n : ℕ) :
-    ∫ x : ℝ in Set.Ioi 0, exceptionalLaguerre k m x * exceptionalLaguerre k n x *
-        exceptionalLaguerreWeight k x =
-      if m = n then (n + 1 + (k : ℂ)) * Gamma (n + (k : ℂ)) / n.factorial else 0 := by
-  sorry
-
 /-- Identity under the stated parameter and domain assumptions: `-x * deriv (deriv
 (exceptionalLaguerre k n)) x + (x - k) / (x + k) * ((x + k + 1) * deriv (exceptionalLaguerre k
 n) x - exceptionalLaguerre k n x) = n * exceptionalLaguerre k n x`. -/
@@ -1041,16 +1031,6 @@ theorem exceptionalLaguerre_differential_equation {k : ℝ} (hk : 0 < k) (n : �
     field_simp
     push_cast at E1 E2 ⊢
     linear_combination (x + k) * (x + k + 1) * E1 - (x + k) * E2 - 2 * x * R2
-
-/-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ, exceptionalHermite m x *
-exceptionalHermite n x * (Real.exp (-(x ^ 2)) / (4 * x ^ 2 + 2) ^ 2) = if m = n then 1 else
-0`. -/
-@[dlmf 18.36.E10]
-theorem exceptionalHermite_orthonormal (m n : Option ℕ) :
-    ∫ x : ℝ, exceptionalHermite m x * exceptionalHermite n x *
-      (Real.exp (-(x ^ 2)) / (4 * x ^ 2 + 2) ^ 2) = if m = n then 1 else 0 := by
-  sorry
-
 
 /-- The auxiliary function `τ(θ) = (a cos θ + b)/sin θ` of the Pollaczek weight (DLMF 18.35.3). -/
 @[dlmf 18.35.E3]

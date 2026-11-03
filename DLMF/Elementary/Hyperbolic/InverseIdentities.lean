@@ -22,8 +22,9 @@ hyperbolic values (DLMF §4.38).
   (DLMF 4.38.6).
 * `hasSum_arctanh_transformed`, `arctanh_transformed_region`: the factorial-coefficient
   expansion and its region (DLMF 4.38.7–4.38.8).
-* `hasDerivAt_arcsinh`, `hasDerivAt_arccosh`, `hasDerivAt_arctanh`, `hasDerivAt_arccsch`,
-  `hasDerivAt_arcsech`, `hasDerivAt_arccoth`: derivatives (DLMF 4.38.9–4.38.14).
+* `hasDerivAt_arccosh`, `hasDerivAt_arccsch`, `hasDerivAt_arcsech`, `hasDerivAt_arccoth`:
+  derivatives (DLMF 4.38.10, 4.38.12–4.38.14); 4.38.9 and 4.38.11 are `hasDerivAt_arcsinh` and
+  `hasDerivAt_arctanh` in `DLMF.Elementary.Basic.InverseHyperbolic`.
 * `arcsinh_values_add`, `arcsinh_values_sub`: DLMF 4.38.15 with compatible branches.
 * `arccosh_values_add`, `arccosh_values_sub`, `arctanh_values_add`, `arctanh_values_sub`:
   DLMF 4.38.16–4.38.17.
@@ -244,12 +245,6 @@ theorem hasSum_arctanh_transformed {z : ℂ} (hz : (z^2).re<1/2) : HasSum
 theorem arctanh_transformed_region (z : ℂ) : (z^2).re<1/2 ↔ z.re^2-z.im^2<1/2 := by
   simp [Complex.mul_re,pow_two]
 
-/-- At `z`, the function `arcsinh` has derivative `((Complex.sqrt (1+z^2))⁻¹)`. -/
-@[dlmf 4.38.E9]
-theorem hasDerivAt_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) : HasDerivAt arcsinh
-    ((Complex.sqrt (1+z^2))⁻¹) z := by
-  exact Hyperbolic.hasDerivAt_arcsinh hz
-
 /-- At `z`, the function `arccosh` has derivative `((Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹)`. -/
 @[dlmf 4.38.E10]
 theorem hasDerivAt_arccosh {z : ℂ} (hz : z∈arccoshDomain) : HasDerivAt arccosh
@@ -266,16 +261,11 @@ theorem hasDerivAt_arccosh_signed {z : ℂ} (hz : z∈arccoshDomain) (hre : z.re
   convert h using 1
   split_ifs <;> simp
 
-/-- At `z`, the function `arctanh` has derivative `(1/(1-z^2))`. -/
-@[dlmf 4.38.E11]
-theorem hasDerivAt_arctanh {z : ℂ} (hz : z∈arctanhDomain) : HasDerivAt arctanh (1/(1-z^2)) z := by
-  exact Hyperbolic.hasDerivAt_arctanh hz
-
 /-- At `z`, the function `arccsch` has derivative `(-1/(z^2*Complex.sqrt (1+z⁻¹^2)))`. -/
 @[dlmf 4.38.E12]
 theorem hasDerivAt_arccsch {z : ℂ} (hz : z∈arccschDomain) : HasDerivAt arccsch
     (-1/(z^2*Complex.sqrt (1+z⁻¹^2))) z := by
-  have hd:=(Hyperbolic.hasDerivAt_arcsinh hz.2).comp z ((hasDerivAt_id z).inv hz.1)
+  have hd:=(hasDerivAt_arcsinh hz.2).comp z ((hasDerivAt_id z).inv hz.1)
   convert hd using 1
   · rfl
   · dsimp only [id]
@@ -369,7 +359,7 @@ theorem hasDerivAt_arcsech {z : ℂ} (hz : z∈arcsechDomain) : HasDerivAt arcse
 @[dlmf 4.38.E14]
 theorem hasDerivAt_arccoth {z : ℂ} (hz : z∈arccothDomain) : HasDerivAt arccoth (1/(1-z^2)) z := by
   obtain ⟨hz0,hi⟩:=Hyperbolic.acoth_inv_mem hz
-  have hd:=(Hyperbolic.hasDerivAt_arctanh hi).comp z ((hasDerivAt_id z).inv hz0)
+  have hd:=(hasDerivAt_arctanh hi).comp z ((hasDerivAt_id z).inv hz0)
   have hd':HasDerivAt (fun w:ℂ=>arctanh w⁻¹) (1/(1-z^2)) z := by
     convert hd using 1
     · rfl

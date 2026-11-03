@@ -328,15 +328,6 @@ theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) 
 -- DLMF 14.12.3 `ferrersQ_complex_integral` is in `DLMF.Legendre.FourierTools` (needs the boundary
 -- values).
 
-/-- associatedP cosh integral. The hypothesis `hν` is implied by `hconv` and is not used. -/
-@[dlmf 14.12.E4]
-theorem associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re)
-    {x : ℝ} (hx : 1 < x) :
-    HasIntegralAtTop (fun t : ℝ =>
-        Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh
-        ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) 0 (associatedP ν (-μ) x) :=
-  ExteriorIntegral.associatedP_cosh_integral h hconv hx
-
 /-- DLMF 14.12.6: for `−1/2 < Re μ < Re ν + 1` and `x > 1`, `𝑸^μ_ν(x) = π^{1/2} (x²−1)^{μ/2}/(2^μ
 Γ(μ+1/2) Γ(ν−μ+1)) ∫_0^∞ sinh^{2μ} t/(x + (x²−1)^{1/2} cosh t)^{ν+μ+1} dt`, as an improper integral
 over `(0, ∞)`. -/

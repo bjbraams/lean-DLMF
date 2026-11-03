@@ -19,7 +19,7 @@ The examples of §19.14(i) of the reduction of elliptic integrals to Legendre's 
 
 ## Main definitions
 
-* `ellRedQuadU`: the quantity `U` of DLMF 19.14.6 and 19.29.22.
+* `quadraticPairU`: the quantity `U` of DLMF 19.14.6 and 19.29.22.
 * `QuadraticProductReductionHyp`: the hypotheses of DLMF 19.14.4.
 
 ## Main results
@@ -36,7 +36,7 @@ The examples of §19.14(i) of the reduction of elliptic integrals to Legendre's 
   case `x = ∞`, 19.29.23) without an integrability hypothesis, from Carlson's exercise in
   `lean-codes` by a limit in the endpoints.
 * `tendsto_symEllIntRF_ofReal_of_pos`, `tendsto_symEllIntRF_ofReal`,
-  `tendsto_symEllIntRF_re_atTop`, `symEllIntRF_zero_zero_ofReal`, `ellRedQuadU_args_pos`:
+  `tendsto_symEllIntRF_re_atTop`, `symEllIntRF_zero_zero_ofReal`, `quadraticPairU_args_pos`:
   continuity of `R_F` along real triples and positivity of the arguments in (19.29.19).
 
 ## Implementation notes
@@ -382,7 +382,7 @@ theorem integral_inv_sqrt_one_add_pow_four (x : ℝ) :
 b₂x²)))/(x² - y²)`, that is `(x² - y²) U = x √(Q₁(y) Q₂(y)) + y √(Q₁(x) Q₂(x))` with
 `Q_j(t) = a_j + b_j t²`. -/
 @[dlmf 19.29.E22]
-def ellRedQuadU (a₁ b₁ a₂ b₂ x y : ℝ) : ℝ :=
+def quadraticPairU (a₁ b₁ a₂ b₂ x y : ℝ) : ℝ :=
   (x * Real.sqrt ((a₁ + b₁ * y ^ 2) * (a₂ + b₂ * y ^ 2)) +
     y * Real.sqrt ((a₁ + b₁ * x ^ 2) * (a₂ + b₂ * x ^ 2))) / (x ^ 2 - y ^ 2)
 
@@ -525,32 +525,33 @@ private lemma quadratic_product_sq_identity {a₁ b₁ a₂ b₂ x y p₁ q₁ p
 
 /-- Positivity of the three arguments of `R_F` in (19.29.19) for `0 < y < x` and both
 quadratics positive on `[y, x]`. -/
-theorem ellRedQuadU_args_pos {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 < y) (hxy : y < x)
+theorem quadraticPairU_args_pos {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 < y) (hxy : y < x)
     (hQ : ∀ t ∈ Icc y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2) :
-    0 < ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ ∧
-      0 < ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ ∧ 0 < ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 := by
+    0 < quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ ∧
+      0 < quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ ∧ 0 <
+          quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 := by
   have hx0 : 0 < x := hy.trans hxy
   have hd : 0 < x ^ 2 - y ^ 2 := by nlinarith
   obtain ⟨px1, px2⟩ := hQ x ⟨hxy.le, le_rfl⟩
   obtain ⟨py1, py2⟩ := hQ y ⟨le_rfl, hxy.le⟩
-  have hU : 0 < ellRedQuadU a₁ b₁ a₂ b₂ x y := by
-    unfold ellRedQuadU
+  have hU : 0 < quadraticPairU a₁ b₁ a₂ b₂ x y := by
+    unfold quadraticPairU
     have : 0 < √((a₁ + b₁ * y ^ 2) * (a₂ + b₂ * y ^ 2)) := Real.sqrt_pos.mpr (by positivity)
     positivity
   have hsq : ∀ {c₁ d₁ c₂ d₂ : ℝ}, 0 < c₁ + d₁ * x ^ 2 → 0 < c₂ + d₂ * x ^ 2 →
       0 < c₁ + d₁ * y ^ 2 → 0 < c₂ + d₂ * y ^ 2 →
-      0 < ellRedQuadU c₁ d₁ c₂ d₂ x y ^ 2 + c₂ * d₁ := by
+      0 < quadraticPairU c₁ d₁ c₂ d₂ x y ^ 2 + c₂ * d₁ := by
     intro c₁ d₁ c₂ d₂ g1 g2 g3 g4
-    unfold ellRedQuadU
+    unfold quadraticPairU
     rw [Real.sqrt_mul g3.le, Real.sqrt_mul g1.le, ← quadratic_product_sq_identity hd.ne'
       (Real.sq_sqrt g1.le) (Real.sq_sqrt g2.le) (Real.sq_sqrt g3.le) (Real.sq_sqrt g4.le)]
     have := Real.sqrt_pos.mpr g1; have := Real.sqrt_pos.mpr g4
     positivity
-  have hB : 0 < ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ := hsq px1 px2 py1 py2
-  have hA : 0 < ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ := by
+  have hB : 0 < quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ := hsq px1 px2 py1 py2
+  have hA : 0 < quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ := by
     have := hsq (c₁ := a₂) (d₁ := b₂) (c₂ := a₁) (d₂ := b₁) px2 px1 py2 py1
-    have e : ellRedQuadU a₂ b₂ a₁ b₁ x y = ellRedQuadU a₁ b₁ a₂ b₂ x y := by
-      unfold ellRedQuadU; rw [mul_comm (a₂ + _), mul_comm (a₂ + b₂ * x ^ 2)]
+    have e : quadraticPairU a₂ b₂ a₁ b₁ x y = quadraticPairU a₁ b₁ a₂ b₂ x y := by
+      unfold quadraticPairU; rw [mul_comm (a₂ + _), mul_comm (a₂ + b₂ * x ^ 2)]
     rwa [e] at this
   exact ⟨hA, hB, by positivity⟩
 
@@ -559,14 +560,15 @@ Exercise 9.8-3 (`Carlson.integral_quadratic_mul_quadratic`). -/
 theorem integral_quadratic_product_eq_symEllIntRF_of_pos {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 < y)
     (hxy : y < x) (hQ : ∀ t ∈ Icc y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2) :
     ((∫ t in Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
-      symEllIntRF (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
-        (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) := by
+      symEllIntRF (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+        (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
+            (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) := by
   have H := Carlson.integral_quadratic_mul_quadratic (a := b₁) (c := a₁) (α := b₂) (γ := a₂)
     hy hxy (fun t ht => by obtain ⟨h1, h2⟩ := hQ t ht; exact ⟨by linarith, by linarith⟩)
   have e1 : ∀ t : ℝ, (b₁ * t ^ 2 + a₁) * (b₂ * t ^ 2 + a₂) =
       (a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2) := fun t => by ring
   simp only [e1] at H
-  obtain ⟨hA, hB, hU2⟩ := ellRedQuadU_args_pos hy hxy hQ
+  obtain ⟨hA, hB, hU2⟩ := quadraticPairU_args_pos hy hxy hQ
   have hint : ∀ t ∈ Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) =
       ((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) ^ (-1 / 2 : ℝ) := by
     intro t ht
@@ -577,7 +579,7 @@ theorem integral_quadratic_product_eq_symEllIntRF_of_pos {a₁ b₁ a₂ b₂ x 
   rw [symEllIntRF_comm_left, symEllIntRF_comm_right, symEllIntRF_comm_left,
     symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hU2)
       (ofReal_mem_slitPlane.mpr hB) (ofReal_mem_slitPlane.mpr hA)]
-  unfold ellRedQuadU
+  unfold quadraticPairU
   rw [mul_comm a₂ b₁]
 
 
@@ -662,8 +664,9 @@ and both sides are `0` in Lean's totalization. -/
 theorem integral_quadratic_product_eq_symEllIntRF {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 ≤ y)
     (hxy : y < x) (hQ : ∀ t ∈ Ioo y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2) :
     ((∫ t in Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
-      symEllIntRF (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
-        (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ) (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) := by
+      symEllIntRF (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+        (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
+            (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) := by
   set d := (x - y) / 2 with hd_def
   have hd : 0 < d := by rw [hd_def]; linarith
   set δ : ℕ → ℝ := fun n => d / ((n : ℝ) + 2) with hδ_def
@@ -676,13 +679,13 @@ theorem integral_quadratic_product_eq_symEllIntRF {a₁ b₁ a₂ b₂ x y : ℝ
   have hlt : ∀ n, y + δ n < x - δ n := fun n => by have := hδd n; rw [hd_def] at this; linarith
   have hIcc : ∀ n, Icc (y + δ n) (x - δ n) ⊆ Ioo y x := fun n t ht =>
     ⟨by linarith [ht.1, hδpos n], by linarith [ht.2, hδpos n]⟩
-  set Un : ℕ → ℝ := fun n => ellRedQuadU a₁ b₁ a₂ b₂ (x - δ n) (y + δ n) with hUn
-  have hcU : ContinuousAt (fun s : ℝ => ellRedQuadU a₁ b₁ a₂ b₂ (x - s) (y + s)) 0 := by
-    unfold ellRedQuadU
+  set Un : ℕ → ℝ := fun n => quadraticPairU a₁ b₁ a₂ b₂ (x - δ n) (y + δ n) with hUn
+  have hcU : ContinuousAt (fun s : ℝ => quadraticPairU a₁ b₁ a₂ b₂ (x - s) (y + s)) 0 := by
+    unfold quadraticPairU
     refine ContinuousAt.div (by fun_prop) (by fun_prop) ?_
     simp only [sub_zero, add_zero]
     nlinarith
-  have hU : Tendsto Un atTop (𝓝 (ellRedQuadU a₁ b₁ a₂ b₂ x y)) := by
+  have hU : Tendsto Un atTop (𝓝 (quadraticPairU a₁ b₁ a₂ b₂ x y)) := by
     have := hcU.tendsto.comp hδ0
     simp only [sub_zero, add_zero] at this
     exact this
@@ -698,7 +701,7 @@ theorem integral_quadratic_product_eq_symEllIntRF {a₁ b₁ a₂ b₂ x y : ℝ
     (fun t => div_nonneg zero_le_one (Real.sqrt_nonneg _))
     (fun n => integrableOn_inv_sqrt_quadratic_product hQ (hIcc n))
     ((hU.pow 2).add_const _) ((hU.pow 2).add_const _) (hU.pow 2)
-    (fun n => ellRedQuadU_args_pos (by linarith [hδpos n]) (hlt n) fun t ht => hQ t (hIcc n ht))
+    (fun n => quadraticPairU_args_pos (by linarith [hδpos n]) (hlt n) fun t ht => hQ t (hIcc n ht))
     (fun n => integral_quadratic_product_eq_symEllIntRF_of_pos (by linarith [hδpos n]) (hlt n)
       fun t ht => hQ t (hIcc n ht))
 
@@ -732,7 +735,7 @@ theorem integral_Ioi_quadratic_product_eq_symEllIntRF {a₁ b₁ a₂ b₂ y : �
     simp only [hX_def]; linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
   have hIcc : ∀ n, Icc (y + δ n) (X n) ⊆ Ioi y := fun n t ht => by
     show y < t; linarith [ht.1, hδpos n]
-  set Un : ℕ → ℝ := fun n => ellRedQuadU a₁ b₁ a₂ b₂ (X n) (y + δ n) with hUn
+  set Un : ℕ → ℝ := fun n => quadraticPairU a₁ b₁ a₂ b₂ (X n) (y + δ n) with hUn
   -- the limit of `U`
   set g : ℝ × ℝ → ℝ := fun p => (p.1 * √((a₁ + b₁ * p.2 ^ 2) * (a₂ + b₂ * p.2 ^ 2)) +
       p.2 * √((a₁ * p.1 ^ 2 + b₁) * (a₂ * p.1 ^ 2 + b₂))) / (1 - p.2 ^ 2 * p.1 ^ 2) with hg
@@ -753,7 +756,7 @@ theorem integral_Ioi_quadratic_product_eq_symEllIntRF {a₁ b₁ a₂ b₂ y : �
     have hsq : √((a₁ * (X n)⁻¹ ^ 2 + b₁) * (a₂ * (X n)⁻¹ ^ 2 + b₂)) =
         √((a₁ + b₁ * X n ^ 2) * (a₂ + b₂ * X n ^ 2)) / X n ^ 2 := by
       rw [hdiv, Real.sqrt_div' _ (by positivity), Real.sqrt_sq (by positivity)]
-    simp only [hUn, hg, ellRedQuadU, hsq]
+    simp only [hUn, hg, quadraticPairU, hsq]
     exact quadU_eq_inv_form hXn (by nlinarith [hlt n, hδpos n])
   have hU : Tendsto Un atTop (𝓝 (y * √(b₁ * b₂))) := by
     rw [← hgv]
@@ -775,7 +778,7 @@ theorem integral_Ioi_quadratic_product_eq_symEllIntRF {a₁ b₁ a₂ b₂ y : �
     (fun n => Ioo_subset_Icc_self.trans (hIcc n))
     (fun t => div_nonneg zero_le_one (Real.sqrt_nonneg _))
     (fun n => integrableOn_inv_sqrt_quadratic_product hQ (hIcc n)) hA hB hC
-    (fun n => ellRedQuadU_args_pos (by linarith [hδpos n]) (hlt n) fun t ht => hQ t (hIcc n ht))
+    (fun n => quadraticPairU_args_pos (by linarith [hδpos n]) (hlt n) fun t ht => hQ t (hIcc n ht))
     (fun n => integral_quadratic_product_eq_symEllIntRF_of_pos (by linarith [hδpos n]) (hlt n)
       fun t ht => hQ t (hIcc n ht))
 
@@ -911,14 +914,14 @@ theorem integral_inv_sqrt_two_quadratics {a₁ b₁ a₂ b₂ x y α β γ : ℝ
     (h : QuadraticProductReductionHyp a₁ b₁ a₂ b₂ x y α β γ) :
     ((∫ t in y..x, (Real.sqrt ((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)))⁻¹ : ℝ) : ℂ) =
       ((Real.sqrt (γ - α))⁻¹ : ℝ) *
-        incEllIntFk (Real.arcsin (Real.sqrt ((γ - α) / (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + γ))))
+        incEllIntFk (Real.arcsin (Real.sqrt ((γ - α) / (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + γ))))
           (Real.sqrt ((γ - β) / (γ - α))) := by
   have hxy := h.y_lt_x
   have hy := h.y_nonneg
   rw [intervalIntegral.integral_of_le hxy.le, integral_Ioc_eq_integral_Ioo]
   simp_rw [inv_eq_one_div]
   rw [integral_quadratic_product_eq_symEllIntRF hy hxy h.pos]
-  set U := ellRedQuadU a₁ b₁ a₂ b₂ x y with hU
+  set U := quadraticPairU a₁ b₁ a₂ b₂ x y with hU
   -- nonnegativity of the arguments
   have hc : ∀ {c d : ℝ}, Continuous fun t : ℝ => c + d * t ^ 2 := by intros; fun_prop
   have endpt : ∀ {c d : ℝ}, (∀ t ∈ Ioo y x, 0 < c + d * t ^ 2) →
@@ -933,7 +936,7 @@ theorem integral_inv_sqrt_two_quadratics {a₁ b₁ a₂ b₂ x y α β γ : ℝ
   have hd : x ^ 2 - y ^ 2 ≠ 0 := by nlinarith
   have hUe : U = (x * (√(a₁ + b₁ * y ^ 2) * √(a₂ + b₂ * y ^ 2)) +
       y * (√(a₁ + b₁ * x ^ 2) * √(a₂ + b₂ * x ^ 2))) / (x ^ 2 - y ^ 2) := by
-    rw [hU, ellRedQuadU, Real.sqrt_mul py1, Real.sqrt_mul px1]
+    rw [hU, quadraticPairU, Real.sqrt_mul py1, Real.sqrt_mul px1]
   have hB0 : 0 ≤ U ^ 2 + a₂ * b₁ := by
     rw [hUe, ← quadratic_product_sq_identity hd (Real.sq_sqrt px1) (Real.sq_sqrt px2)
       (Real.sq_sqrt py1) (Real.sq_sqrt py2)]
@@ -983,8 +986,8 @@ theorem integral_inv_sqrt_two_quadratics_zero {a₁ b₁ a₂ b₂ x α β γ : 
   have hx : 0 < x := h.y_lt_x
   have h0 := (quadratic_product_nonneg h).2
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero, add_zero] at h0
-  have hU : ellRedQuadU a₁ b₁ a₂ b₂ x 0 ^ 2 = a₁ * a₂ / x ^ 2 := by
-    unfold ellRedQuadU
+  have hU : quadraticPairU a₁ b₁ a₂ b₂ x 0 ^ 2 = a₁ * a₂ / x ^ 2 := by
+    unfold quadraticPairU
     simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero, add_zero,
       zero_mul, sub_zero]
     rw [div_pow, mul_pow, Real.sq_sqrt h0]
@@ -1055,8 +1058,8 @@ theorem integral_inv_sqrt_two_quadratics_left {a₁ b₁ a₂ b₂ x y α β γ 
   have hxy : 0 < x ^ 2 - y ^ 2 := by
     have := h.y_nonneg; have := h.y_lt_x; nlinarith
   have h0 := (quadratic_product_nonneg h).1
-  have hU : ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 = -a₁ * (a₂ + b₂ * x ^ 2) / (x ^ 2 - y ^ 2) := by
-    unfold ellRedQuadU
+  have hU : quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 = -a₁ * (a₂ + b₂ * x ^ 2) / (x ^ 2 - y ^ 2) := by
+    unfold quadraticPairU
     rw [hy, zero_mul, Real.sqrt_zero, mul_zero, zero_add, div_pow, mul_pow, Real.sq_sqrt h0]
     have hb : b₁ * y ^ 2 = -a₁ := by linarith
     rw [show (a₁ + b₁ * x ^ 2) = b₁ * (x ^ 2 - y ^ 2) by linarith,
@@ -1082,8 +1085,8 @@ theorem integral_inv_sqrt_two_quadratics_right {a₁ b₁ a₂ b₂ x y α β γ
     have := h.y_nonneg; have := h.y_lt_x; nlinarith
   have hx0 : 0 < x := lt_of_le_of_lt h.y_nonneg h.y_lt_x
   have h0 := (quadratic_product_nonneg h).2
-  have hU : ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 = a₁ * (a₂ + b₂ * y ^ 2) / (x ^ 2 - y ^ 2) := by
-    unfold ellRedQuadU
+  have hU : quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 = a₁ * (a₂ + b₂ * y ^ 2) / (x ^ 2 - y ^ 2) := by
+    unfold quadraticPairU
     rw [hx, zero_mul, Real.sqrt_zero, mul_zero, add_zero, div_pow, mul_pow, Real.sq_sqrt h0]
     have hb : b₁ * x ^ 2 = -a₁ := by linarith
     rw [show (a₁ + b₁ * y ^ 2) = -b₁ * (x ^ 2 - y ^ 2) by linarith,

@@ -260,15 +260,6 @@ theorem MellinTransform.half_cpow (ν : ℂ) : (1 / 2 : ℂ) ^ ν = (2 : ℂ) ^ 
   have h : (2 : ℂ).arg = 0 := by simp
   rw [one_div, inv_cpow _ _ (by rw [h]; exact Real.pi_ne_zero.symm), cpow_neg]
 
-/-- `z / Γ(z+1) = 1/Γ(z)` for every complex `z` (with Mathlib's conventions at the poles). -/
-theorem MellinTransform.div_Gamma_add_one (z : ℂ) : z / Gamma (z + 1) = (Gamma z)⁻¹ := by
-  rcases eq_or_ne z 0 with rfl | hz
-  · simp
-  · rw [Complex.Gamma_add_one z hz]
-    rcases eq_or_ne (Gamma z) 0 with h | h
-    · simp [h]
-    · field_simp
-
 /-- The Struve Mellin value `V(μ, ν)` of DLMF 11.7.10–11.7.11. -/
 theorem MellinTransform.value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) (hν : -1 / 2 < ν.re) :
     2 * (1 / 2 : ℂ) ^ ν / (Real.sqrt π * Gamma (ν + 1 / 2)) *
@@ -605,7 +596,7 @@ theorem MellinTransform.value_succ (μ ν : ℂ) :
     rw [cpow_add _ _ two_ne_zero, cpow_one]; ring
   unfold MellinTransform.value
   split_ifs with hμ
-  · have h := MellinTransform.div_Gamma_add_one (ν + 1)
+  · have h := Complex.div_Gamma_add_one (ν + 1)
     rw [show ν + 1 + 1 = (ν + 1) + 1 by ring, h2 (ν + 1)]
     rw [show -(μ - 2 * ν - 2) = 2 * (ν + 1) by rw [hμ]; ring]
     calc π / (2 ^ (ν + 1) * Gamma (ν + 1)) = π / 2 ^ (ν + 1) * (Gamma (ν + 1))⁻¹ := by
@@ -614,7 +605,7 @@ theorem MellinTransform.value_succ (μ ν : ℂ) :
       _ = _ := by
           have h0 : (2 : ℂ) ^ (ν + 1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
           field_simp
-  · have h := MellinTransform.div_Gamma_add_one (ν - μ / 2 + 1)
+  · have h := Complex.div_Gamma_add_one (ν - μ / 2 + 1)
     rw [show ν + 1 - μ / 2 + 1 = (ν - μ / 2 + 1) + 1 by ring,
       show μ - ν - 1 = (μ - (ν + 1) - 1) + 1 by ring, h2 (μ - (ν + 1) - 1),
       show -(μ - 2 * ν - 2) = 2 * (ν - μ / 2 + 1) by ring]

@@ -10364,3 +10364,152 @@ Approved by the user after the fourth proof round.
   uniform convergence bounds `Q - F` on the line and averaging in `t` kills the limit. For 28.12.7
   the bilinear form `∑ c^{(m)}_j c^{(n)}_j` vanishes where the eigenvalues differ and extends by
   continuity along the path.
+
+## Renaming of the abbreviated prefix families (2026-11-02)
+
+Six agents replaced about 120 abbreviated name-prefix families by descriptive sub-namespaces, as
+AGENTS.md now requires; 3,808 declarations (public and private) were renamed, and every rename is
+in `reports/RenameMap20261101.tsv`. Statements, proofs and `@[dlmf]` tags are unchanged, apart from
+`_root_.` qualifiers where a new short name would have shadowed a Mathlib lemma.
+
+- Airy (756): `airyMod_` → `DLMF.Airy.ModulusPhase`, `airyInt_` → `IntegralRepresentation`,
+  `airyDer_` → `DerivativeRemainders`, `airyRot_` → `RotatedExpansions`, `airySt_` →
+  `StieltjesBounds`, `scorerZ_` → `ScorerZeros` and ten more.
+- Legendre, Lamé and spherical harmonics (889): `legInt_` split into `EllipseTransport`,
+  `ExteriorIntegral`, `MehlerDirichlet`, `LaplaceIntegrals`, `OrthogonalityIntegrals` and
+  `ToroidalIntegral`; `legAdd_` → `AdditionTheorem`, `legPI_` → `FerrersGreen`, `lzt_` →
+  `LegendreSturm` and others. Two files were split to stay below 1,500 lines
+  (`Legendre/FourierCoefficients.lean`, `Legendre/FourierEstimates.lean`).
+- Parabolic cylinder and error functions (621): `pcfLG_` → `CylinderLiouvilleGreen`, `pcfLG2_` →
+  `CylinderUniformExpansion`, `pcfCt_` → `CylinderContour`, `fresMB_` → `FresnelMellinBarnes` and
+  others; the parity lemmas became dot-notation lemmas on `HasParityDegreeSupport`.
+- Incomplete gamma, exponential integrals and confluent functions (780): `incG_` split by file
+  (`IncompleteGammaBounds`, `GeneralizedExpIntegral`, `IncompleteGammaUniform`, …), `eiTr_` →
+  `ExpIntegralTransforms`, `kzt_` → `KummerUZeroCount`, `kumCF_` → `KummerContinuedFraction` and
+  others.
+- Struve, Bessel, Gamma, elliptic integrals and elementary functions (448): `struveSc_` →
+  `ScaledAnger`, `struveAs_` → `AngerAsymptotics`, `vb_` → `DLMF.Gamma.VerticalBeta`, `ellRed_` →
+  `SymmetricReduction`, `trig_`/`hyper_` → `DLMF.Elementary.Trigonometric`/`Hyperbolic`.
+- DLMFMathlib, orthogonal polynomials and hypergeometric functions (314): `cfConv_` → Mathlib-style
+  names in `GenContFract`, `barnesRes_` → `Complex.BarnesResidue`, `hcub_` split into
+  `CubicTransformation`, `LargeDenominator` and `DLMF.Confluent.KummerLargeParameter`, `gaussCF_` →
+  `GaussContinuedFraction` and others.
+
+General helpers moved to DLMFMathlib: `injOn_Icc_of_hasDerivAt_ne_zero`, the two `image_Ioo_of_…`
+lemmas and `strictAntiOn_Ioc_of_tendsto_atTop` (`DLMFMathlib/Analysis/Calculus/Deriv/InjOn.lean`),
+`MeasureTheory.integral_image_one_div_sqrt` (`DLMFMathlib/MeasureTheory/Function/JacobianSqrt.lean`)
+and `Complex.eqOn_strip_of_eq_ofReal` (`DLMFMathlib/Analysis/Complex/IdentityTheoremStrip.lean`).
+
+Open naming items: the camelCase notation definitions `ellRedRoot`, `ellRedS`, `ellRedU`, … of
+§19.29; the sub-namespace `DLMF.Confluent.Core` in `ErrorFunctions/ZeroClassification.lean`, easily
+confused with `DLMF.Core`; `reidAiry_*` (named after Reid's functions) was kept; a few helpers
+share their short name with the public theorem they support
+(`genSinInt_complement`); `LiouvilleGreen.exp_sub_one_le_mul_exp`
+duplicates `Real.exp_sub_one_le_mul_exp`.
+
+## Fifth project-wide proof round (2026-11-02)
+
+Ten agents with disjoint directories, after the renaming of the prefix families. Source
+admissions: 1,211 → 1,163. No statement was changed; all new theorems use only the standard
+axioms. Unused hypotheses were removed in primed stronger forms (`haar_isLittleO_pow'`,
+`tendsto_fourierPartialSum_of_oneSidedDeriv'`, `tendsto_gaussian_integral_jump'`,
+`tendsto_stieltjesTransform_jump'`, `fourierSinTransform_exp_neg_div'`,
+`heun_kernel_typeI_angles'`, `genAsymptoticC_limit'`).
+
+- AlgebraicAnalytic 126 → 114: 1.14.28, the one-sided case of 1.8.11, termwise differentiation of
+  Fourier series (§1.8(iii)), 1.17.7, the Dirichlet-kernel limits 1.17.18–21 and §1.17, rows 7–8
+  of Table 1.14.3, 1.14.49, Stieltjes inversion 1.18.53 and Sokhotski–Plemelj 1.18.54, and the Abel
+  means 1.15.37 (new `DLMFMathlib/Analysis/Fourier/PoissonKernel.lean`).
+- QHypergeometric 61 → 53: Sears' balanced `₄φ₃` transformation 17.9.14 and the terminating
+  transformations 17.9.2, 17.9.4, 17.9.5 and 17.9.8–11 (new
+  `QHypergeometric/SearsTransformation.lean`).
+- EllipticIntegrals 120 → 114: the bounds 19.9.6–8 and 19.24.9, 19.20.19, and Gauss's
+  transformation 19.8.18–19 from the Landen transformations of lean-codes.
+- Zeta, Combinatorics and Elementary 94 → 89: 25.11.21, both forms of 25.11.37, the large Schröder
+  count of §26.6(i) and the arccosh path values 4.37.2.
+- AsymptoticApproximations 71 → 67: Haar's method 2.4.9 (believed true in the last round and now
+  proved), 2.6.6, 2.6.51 and 2.11.1–2.
+- GeneralizedHypergeometric 73 → 69: the balanced `₄F₃` transformation 16.4.14, Watson's
+  terminating sum 16.4.6 (both parities, by Sheppard's transformation and Dixon's sum) and the
+  limit 16.11.4–5.
+- Coulomb 38 → 35: 33.16.11, the corrected 33.16.17 and 33.21.2.
+- OrthogonalPolynomials 24 → 21: the exceptional Laguerre and Hermite orthogonality 18.36.6 and
+  18.36.10 (new `OrthogonalPolynomials/ExceptionalOrthogonality.lean`) and the continuous
+  `q`-Hermite orthogonality 18.28.17 (new
+  `OrthogonalPolynomials/QFamilies/ContinuousQHermite.lean`).
+- Mathieu 131 → 129: the orthogonality 28.12.7 as stated, by showing that the continued
+  eigenvalues `λ_{ν+2m}` and `λ_{ν+2n}` never meet along the segment
+  (`IsMathieuLambdaPath.lambda_ne`, new `Mathieu/Noninteger/CoefficientPaths.lean` and
+  `DLMFMathlib/Analysis/SpecificLimits/QuarterRecurrence.lean`), and 28.4.21 (the §28.4(vi) block
+  moved to the new `Mathieu/SmallQFourierCoefficients.lean`).
+- Heun 21 → 20: the type-I kernel equation 31.10.7–8 (new `Heun/KernelAngles.lean`).
+
+Unchanged: Spheroidal, Painlevé, Lamé, WignerSymbols, MatrixArgument, CoalescingSaddles,
+NumberTheory, BernoulliEuler, Theta, JacobiElliptic, Weierstrass, RiemannTheta and the older
+areas apart from OrthogonalPolynomials. The import survey reports no new two-way pair.
+
+Suspected statement defect, corrected with approval on 2026-11-03 (next section): 2.5.43
+`laplace_expansion_residues` still lets `P₂` omit the pole `z = 1` of `Γ(1 - z)H(z)`, since `hHd`
+excludes `{1}` regardless of `P₂`. For `h(t) = e^{-t}`, `H = Γ(z, 1)`, `P₂ = ∅` all hypotheses hold
+and the right side misses the residue `H(1) = e^{-1}` (mpmath, `ζ = 0.5, 0.1`, `l = 2, 3`). Fix:
+require `1 ∈ P₂`, or differentiability of `Γ(1 - z)H(z)` on `{p ≤ ℜz ≤ 1} \ P₂`.
+
+Leads for the next round: 5.6.8 `Gamma_ratio_norm_le` by rotating the Laplace integral of
+`Γ(z+a)/Γ(z+b)` (`integral_cexp_neg_mul_mul_eq_rotate`); 1.15.45 by the Fubini argument of 1.15.37;
+25.11.20 through `hurwitzZetaComplex_eulerMaclaurin_two` (about 250 lines, new file); the Rogers
+constant terms 17.14.2–5 by the Jacobi triple product (500–700 lines); the ascending Landen
+transformation 19.8.16–17 (assignment `(cos φ, Δ, 1)` found); 22.14.16–17 by the theta quotient
+for `sn`; `heun_kernel_example₁/₂_pde` for generic parameters from the identity proved for
+31.10.8; 34.2.6 by three Sheppard steps to Racah's sum. About fifteen elliptic-integral targets
+need a change of variables inside `HasPrincipalValueIoi`.
+
+## Follow-up corrections and renames (2026-11-03)
+
+- 2.5.43 `laplace_expansion_residues` gained the hypothesis `h1P₂ : (1 : ℂ) ∈ P₂`, so the pole
+  `z = 1` of `Γ(1 - z)` and its residue `H(1)` are always counted; the docstring says so. The
+  theorem remains admitted.
+- The notation of §19.29 moved into the namespace `DLMF.EllipticIntegrals.SymmetricReduction`
+  with spelled-out names (`ellRedRoot` → `linearRoot`, `ellRedS` → `quarticProduct`, `ellRedS3`
+  → `cubicProduct`, `ellRedDet` → `factorDet`, `ellRedU` → `pairU`, `ellRedI` →
+  `reductionIntegral`, `ellRedQuadS` → `quadraticS`, …); `ellRedQuadU` became the area-level
+  `quadraticPairU`. `SymmetricReduction.lean` and `Reduction.lean` open the namespace.
+- The sub-namespace `DLMF.Confluent.Core` of `ErrorFunctions/ZeroClassification.lean`, which
+  could be confused with `DLMF.Core`, became `DLMF.Confluent.ZeroClassification` (32
+  declarations).
+- `LiouvilleGreen.exp_sub_one_le_mul_exp` was removed as a duplicate of
+  `Real.exp_sub_one_le_mul_exp` (`DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/Bounds.lean`).
+- All renames are recorded in `reports/RenameMap20261101.tsv`.
+
+Helpers sharing a short name with an area theorem. A scan of the environment found 42 helpers
+in sub-namespaces whose last name component is that of a theorem of the enclosing area.
+- Twenty had the statement of the area theorem. The area theorem, with its name, statement,
+  docstring and `@[dlmf]` tag, now sits where the helper was and carries the helper's proof; the
+  second copy is gone. This concerns `genSinInt_complement`, `genCosInt_complement`,
+  `genSinInt_value_at_infinity`, `genCosInt_value_at_infinity`,
+  `gamma_rotated_oscillatory_integral`, `genExpIntE_nat_digamma_series`, `genExpIntE_nat_laplace`,
+  `genExpIntE_parameter_derivatives`, `gammaUniformC_first`, `gammaUniformEta_derivative`,
+  `gammaUniformEta_normalization` (same file), `expIntE1_digamma_series` (to
+  `IncompleteGamma/ExponentialIntegral.lean`), `lowerIncGamma_bound_ge/le` (to
+  `IncompleteGamma/RealIntegrals.lean`), `associatedP_addition` (to `Legendre/AdditionTools.lean`),
+  `associatedP_complex_addition` (to `Legendre/QAdditionTools.lean`), `associatedP_cosh_integral`
+  (to `Legendre/IntegralRepresentations/Exterior.lean`) and 4.38.9, 4.38.11
+  `hasDerivAt_arcsinh/arctanh` (to the foundational `Elementary/Basic/InverseHyperbolic.lean`).
+  The two copies of `z / Γ(z+1) = Γ(z)⁻¹` in Struve became `Complex.div_Gamma_add_one` in
+  `DLMFMathlib/Analysis/SpecialFunctions/Gamma/Values.lean`.
+- `FerrersGreen.ferrersP_isFerrersSolution` and `FerrersGreen.ferrersQ_isFerrersSolution`, the
+  case `μ = 0` of the area theorems, were removed in favour of `ferrersP_isFerrersSolution ν 0`.
+- Fifteen helpers with other statements were renamed after their content
+  (`FerrersGreen.ferrersP_zero_eq_regularizedGaussHG`, `GeneratingSeries.legendreP_one_left`,
+  `GeneratingSeries.legendreP_nat_recurrence`, `ZeroClassification.norm_erfc_le_one_of_nonneg`,
+  `SaffVarga.seriesCoeff` with `SaffVarga.seriesCoeffRatio`, …); the local definitions
+  `HahnMoments.moment` and `PollaczekMoments.moment` became `fourGammaMoment` and
+  `reversedMoment`, and the Basic-layer
+  `Struve.hasDerivAt_phase`, a derivative of `νt - z sin t` unrelated to `ScaledAnger.phase`,
+  became `Struve.hasDerivAt_mul_sub_mul_sin`.
+- `HalfPeriods.weierstrassZeta` and `HalfPeriods.weierstrassSigma` stay: they are the
+  dot-notation API `ω.weierstrassZeta` on lattice data.
+
+All changes are in `reports/RenameMap20261101.tsv`. The two-way import pair Elementary ↔
+IncompleteGamma (`Elementary.LogExpIntegrals` uses the continued-fraction tools of
+`IncompleteGamma.FractionTools`; `IncompleteGamma.SpecialValues` uses `LogExpIntegrals`) was
+accepted into `scripts/import_baseline.json`.

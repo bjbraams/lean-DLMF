@@ -721,14 +721,96 @@ theorem fourierSinTransform_div_sq_add_sq_sq {a : ℂ} (ha : 0 < a.re) {x : ℝ}
 theorem fourierSinTransform_inv_mul_sq_add_sq {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
     fourierSinTransform (fun t => 1 / (t * (a ^ 2 + t ^ 2))) x =
       (Real.sqrt (Real.pi / 2) : ℂ) * (1 - cexp (-a * x)) / a ^ 2 := by
-  sorry
+  have ha0 : a ≠ 0 := fun h => by simp [h] at ha
+  have hne : ∀ t : ℝ, a ^ 2 + (t : ℂ) ^ 2 ≠ 0 := sq_add_sq_ne_zero ha
+  -- the integrand and its partial fractions
+  set F : ℝ → ℂ := fun t => 1 / ((t : ℂ) * (a ^ 2 + (t : ℂ) ^ 2)) * (Real.sin (x * t) : ℂ)
+    with hFdef
+  set A : ℝ → ℂ := fun t => ((t⁻¹ : ℝ) : ℂ) * (Real.sin (x * t) : ℂ) with hAdef
+  set B : ℝ → ℂ := fun t => (t : ℂ) / (a ^ 2 + (t : ℂ) ^ 2) * (Real.sin (x * t) : ℂ)
+    with hBdef
+  have hpf : ∀ t, F t = (1 / a ^ 2) * (A t - B t) := by
+    intro t
+    simp only [hFdef, hAdef, hBdef]
+    rcases eq_or_ne t 0 with rfl | ht
+    · simp
+    have ht' : (t : ℂ) ≠ 0 := ofReal_ne_zero.2 ht
+    push_cast
+    field_simp [hne t]
+    ring
+  have hAb : ∀ t, ‖A t‖ ≤ x := by
+    intro t
+    simp only [hAdef, norm_mul, norm_inv, Complex.norm_real, Real.norm_eq_abs]
+    rcases eq_or_ne t 0 with rfl | ht
+    · simp; linarith
+    have h := Real.abs_sin_le_abs (x := x * t)
+    rw [abs_mul, abs_of_pos hx] at h
+    calc |t|⁻¹ * |Real.sin (x * t)| ≤ |t|⁻¹ * (x * |t|) :=
+          mul_le_mul_of_nonneg_left h (by positivity)
+      _ = x := by field_simp
+  have hAm : Measurable A := by simp only [hAdef]; fun_prop
+  have hAi : ∀ R, IntervalIntegrable A volume 0 R := fun R =>
+    (intervalIntegrable_const (c := x)).mono_fun' hAm.aestronglyMeasurable
+      (Eventually.of_forall hAb)
+  have hBc : Continuous B := by
+    simp only [hBdef]
+    exact (Continuous.div (by fun_prop) (by fun_prop) hne).mul (by fun_prop)
+  -- integrability of `F`
+  have hFi : IntegrableOn F (Ioi 0) := by
+    have hg : IntegrableOn (fun t : ℝ => (x : ℂ) * ((t : ℂ) ^ 0 / (a ^ 2 + (t : ℂ) ^ 2) ^ 1))
+        (Ioi 0) := (integrableOn_pow_div_sq_add_sq_pow ha 0 1 (by norm_num)).const_mul _
+    refine Integrable.mono' hg.norm ?_ ?_
+    · have hFm : Measurable F := by simp only [hFdef]; fun_prop
+      exact hFm.aestronglyMeasurable
+    · refine Eventually.of_forall fun t => ?_
+      have hFt : F t = (t : ℂ) ^ 0 / (a ^ 2 + (t : ℂ) ^ 2) ^ 1 * A t := by
+        simp only [hFdef, hAdef]
+        rcases eq_or_ne t 0 with rfl | ht
+        · simp
+        have ht' : (t : ℂ) ≠ 0 := ofReal_ne_zero.2 ht
+        push_cast
+        field_simp [hne t]
+      rw [hFt, norm_mul, norm_mul (x : ℂ), Complex.norm_real, Real.norm_eq_abs,
+        abs_of_pos hx, mul_comm x]
+      exact mul_le_mul_of_nonneg_left (hAb t) (norm_nonneg _)
+  -- limits
+  have hlimF : Tendsto (fun R : ℝ => (Real.sqrt (2 / Real.pi) : ℂ) * ∫ t in (0 : ℝ)..R, F t)
+      atTop (𝓝 (fourierSinTransform (fun t => 1 / (t * (a ^ 2 + t ^ 2))) x)) :=
+    (intervalIntegral_tendsto_integral_Ioi 0 hFi tendsto_id).const_mul _
+  have hlimA := tendsto_fourierSinTransform_inv hx
+  have hlimB := tendsto_fourierSinTransform_div_sq_add_sq ha hx
+  have hlim := (hlimA.sub hlimB).const_mul (1 / a ^ 2)
+  refine tendsto_nhds_unique hlimF (hlim.congr' ?_) |>.trans ?_
+  · filter_upwards [eventually_ge_atTop 0] with R hR
+    simp only [intervalIntegral.integral_congr (fun t _ => hpf t)]
+    rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_sub (hAi R)
+      (hBc.intervalIntegrable _ _)]
+    simp only [hAdef, hBdef]
+    ring
+  · ring
+
+
+/-- DLMF Table 1.14.3, row 8: `e^{-at}/t ↦ √(2/π) arctan(x/a)`, `ℜa > 0`, principal branch.
+Stronger than DLMF, which assumes `x > 0`: every real `x` is allowed. -/
+@[dlmf 1.14.T3]
+theorem fourierSinTransform_exp_neg_div' {a : ℂ} (ha : 0 < a.re) (x : ℝ) :
+    fourierSinTransform (fun t => cexp (-a * t) / t) x =
+      (Real.sqrt (2 / Real.pi) : ℂ) * Complex.arctan (x / a) := by
+  have h := laplaceTransform_sin_div (a := (x : ℂ)) (s := a) (by simpa using ha)
+  unfold fourierSinTransform
+  rw [← h]
+  congr 1
+  unfold laplaceTransform
+  refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+  simp only [ofReal_sin, ofReal_mul]
+  ring
 
 /-- DLMF Table 1.14.3, row 8: `e^{-at}/t ↦ √(2/π) arctan(x/a)`, `ℜa > 0`, principal branch. -/
 @[dlmf 1.14.T3]
-theorem fourierSinTransform_exp_neg_div {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
+theorem fourierSinTransform_exp_neg_div {a : ℂ} (ha : 0 < a.re) {x : ℝ} (_hx : 0 < x) :
     fourierSinTransform (fun t => cexp (-a * t) / t) x =
-      (Real.sqrt (2 / Real.pi) : ℂ) * Complex.arctan (x / a) := by
-  sorry
+      (Real.sqrt (2 / Real.pi) : ℂ) * Complex.arctan (x / a) :=
+  fourierSinTransform_exp_neg_div' ha x
 
 /-- DLMF Table 1.14.3, row 11: `t e^{-at²} ↦ (2a)^{-3/2} x e^{-x²/(4a)}`, `|ph a| < ½π`
 (that is, `ℜa > 0`), principal power. -/

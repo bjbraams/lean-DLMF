@@ -496,8 +496,8 @@ theorem GeneralizedTrigIntegrals.integral_rpow_mul_exp_I {a : ℂ} (ha0 : 0 < a.
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (t : ℂ)^(a-1)*exp
 (ε*I*t)) 0 (exp (ε*π*I*a/2)*Gamma a)`. -/
-theorem GeneralizedTrigIntegrals.gamma_rotated_oscillatory_integral {a : ℂ} (ha0 : 0 < a.re)
-    (ha1 : a.re < 1) {ε : ℝ}
+@[dlmf 8.21.E3]
+theorem gamma_rotated_oscillatory_integral {a : ℂ} (ha0 : 0 < a.re) (ha1 : a.re < 1) {ε : ℝ}
     (hε : ε=1 ∨ ε = -1) :
     HasIntegralAtTop (fun t : ℝ => (t : ℂ)^(a-1)*exp (ε*I*t)) 0 (exp (ε*π*I*a/2)*Gamma a) := by
   have hε' : -ε = 1 ∨ -ε = -1 := by rcases hε with rfl | rfl <;> simp
@@ -516,14 +516,6 @@ theorem GeneralizedTrigIntegrals.gamma_rotated_oscillatory_integral {a : ℂ} (h
   rw [GeneralizedTrigIntegrals.integral_rpow_mul_exp_I ha0 hε hR, hc]
   congr 3
   push_cast; ring
-
-/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (t : ℂ)^(a-1)*exp
-(ε*I*t)) 0 (exp (ε*π*I*a/2)*Gamma a)`. -/
-@[dlmf 8.21.E3]
-theorem gamma_rotated_oscillatory_integral {a : ℂ} (ha0 : 0 < a.re) (ha1 : a.re < 1) {ε : ℝ}
-    (hε : ε=1 ∨ ε = -1) :
-    HasIntegralAtTop (fun t : ℝ => (t : ℂ)^(a-1)*exp (ε*I*t)) 0 (exp (ε*π*I*a/2)*Gamma a) :=
-  GeneralizedTrigIntegrals.gamma_rotated_oscillatory_integral ha0 ha1 hε
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (z+t)^(a-1)*sin (z+t))
 0 (genSinIntTail a z)`. -/
@@ -723,8 +715,8 @@ theorem GeneralizedTrigIntegrals.genCosIntTail_continuous (z : ℂ) : Continuous
 
 /-- Identity under the stated parameter and domain assumptions: `genSinInt a
 z=gammaSinHalfPiContinued a-genSinIntTail a z`. -/
-theorem GeneralizedTrigIntegrals.genSinInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1))
-    {z : ℂ} (hz : z ≠ 0) :
+@[dlmf 8.21.E8]
+theorem genSinInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) {z : ℂ} (hz : z ≠ 0) :
     genSinInt a z=gammaSinHalfPiContinued a-genSinIntTail a z := by
   have hcont : ContinuousAt (fun b => genSinInt b z + genSinIntTail b z) a :=
     (genSinInt_parameter_analytic ha (log z)).continuousAt.add
@@ -738,8 +730,8 @@ theorem GeneralizedTrigIntegrals.genSinInt_complement {a : ℂ} (ha : ∀ n : �
 
 /-- Identity under the stated parameter and domain assumptions: `genCosInt a
 z=gammaCosHalfPiContinued a-genCosIntTail a z`. -/
-theorem GeneralizedTrigIntegrals.genCosInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ))
-    {z : ℂ} (hz : z ≠ 0) :
+@[dlmf 8.21.E9]
+theorem genCosInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) {z : ℂ} (hz : z ≠ 0) :
     genCosInt a z=gammaCosHalfPiContinued a-genCosIntTail a z := by
   have hcont : ContinuousAt (fun b => genCosInt b z + genCosIntTail b z) a :=
     (genCosInt_parameter_analytic ha (log z)).continuousAt.add
@@ -751,41 +743,26 @@ theorem GeneralizedTrigIntegrals.genCosInt_complement {a : ℂ} (ha : ∀ n : �
     exact GeneralizedTrigIntegrals.genCos_add_tail hb hz
   rw [gammaCosHalfPiContinued, hlim.limUnder_eq]; ring
 
-/-- The map `(fun x : ℝ => genSinInt a x)` tends to `(𝓝 (gammaSinHalfPiContinued a))` along
-`atTop`. -/
-theorem GeneralizedTrigIntegrals.genSinInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1))
-    (ha1 : a.re < 1) :
+/-- Ordinary infinity limits need Re a<1; other values are interpreted by parameter continuation. -/
+@[dlmf 8.21.E12]
+theorem genSinInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) (ha1 : a.re < 1) :
     Tendsto (fun x : ℝ => genSinInt a x) atTop (𝓝 (gammaSinHalfPiContinued a)) := by
   have h := ((tendsto_genTrigTail_add_ofReal ha1 0).1).const_sub (gammaSinHalfPiContinued a)
   rw [sub_zero] at h
   refine h.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with x hx
-  rw [zero_add, GeneralizedTrigIntegrals.genSinInt_complement ha (ofReal_ne_zero.mpr hx.ne')]
+  rw [zero_add, genSinInt_complement ha (ofReal_ne_zero.mpr hx.ne')]
 
 /-- The map `(fun x : ℝ => genCosInt a x)` tends to `(𝓝 (gammaCosHalfPiContinued a))` along
 `atTop`. -/
-theorem GeneralizedTrigIntegrals.genCosInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ))
-    (ha1 : a.re < 1) :
+@[dlmf 8.21.E13]
+theorem genCosInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) (ha1 : a.re < 1) :
     Tendsto (fun x : ℝ => genCosInt a x) atTop (𝓝 (gammaCosHalfPiContinued a)) := by
   have h := ((tendsto_genTrigTail_add_ofReal ha1 0).2).const_sub (gammaCosHalfPiContinued a)
   rw [sub_zero] at h
   refine h.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with x hx
-  rw [zero_add, GeneralizedTrigIntegrals.genCosInt_complement ha (ofReal_ne_zero.mpr hx.ne')]
-
-/-- Identity under the stated parameter and domain assumptions: `genSinInt a
-z=gammaSinHalfPiContinued a-genSinIntTail a z`. -/
-@[dlmf 8.21.E8]
-theorem genSinInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) {z : ℂ} (hz : z ≠ 0) :
-    genSinInt a z=gammaSinHalfPiContinued a-genSinIntTail a z :=
-  GeneralizedTrigIntegrals.genSinInt_complement ha hz
-
-/-- Identity under the stated parameter and domain assumptions: `genCosInt a
-z=gammaCosHalfPiContinued a-genCosIntTail a z`. -/
-@[dlmf 8.21.E9]
-theorem genCosInt_complement {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) {z : ℂ} (hz : z ≠ 0) :
-    genCosInt a z=gammaCosHalfPiContinued a-genCosIntTail a z :=
-  GeneralizedTrigIntegrals.genCosInt_complement ha hz
+  rw [zero_add, genCosInt_complement ha (ofReal_ne_zero.mpr hx.ne')]
 
 /-- Ein at the negative rotated argument, by the parities of Cin and Si. -/
 theorem expIntEin_neg_mul_I_eq (z : ℂ) : expIntEin (-I*z)=cosIntCin z-I*sinInt z := by
@@ -826,19 +803,6 @@ theorem genSinInt_order_zero {z : ℂ} (hz : z ≠ 0) :
   rw [show (2*k+1:ℂ)*log z=((2*k+1:ℕ):ℂ)*log z by push_cast; ring, Complex.exp_nat_mul,
                                                     Complex.exp_log hz]
   ring
-
-/-- Ordinary infinity limits need Re a<1; other values are interpreted by parameter continuation. -/
-@[dlmf 8.21.E12]
-theorem genSinInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) (ha1 : a.re < 1) :
-    Tendsto (fun x : ℝ => genSinInt a x) atTop (𝓝 (gammaSinHalfPiContinued a)) :=
-  GeneralizedTrigIntegrals.genSinInt_value_at_infinity ha ha1
-
-/-- The map `(fun x : ℝ => genCosInt a x)` tends to `(𝓝 (gammaCosHalfPiContinued a))` along
-`atTop`. -/
-@[dlmf 8.21.E13]
-theorem genCosInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) (ha1 : a.re < 1) :
-    Tendsto (fun x : ℝ => genCosInt a x) atTop (𝓝 (gammaCosHalfPiContinued a)) :=
-  GeneralizedTrigIntegrals.genCosInt_value_at_infinity ha ha1
 
 /-- The logarithmic cosine series is absolutely convergent at every logarithmic argument. -/
 theorem genCosIntOnLog_hasSum (a w : ℂ) :
